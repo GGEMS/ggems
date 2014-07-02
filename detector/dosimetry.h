@@ -15,16 +15,11 @@
 //
 // GGEMS Copyright (C) 2013-2014 Julien Bert
 
-#ifndef PRNG_H
-#define PRNG_H
-
-/////////////////////////////////////////////////////////////////////////////
-// Prng
-/////////////////////////////////////////////////////////////////////////////
+#ifndef DOSIMETRY_H
+#define DOSIMETRY_H
 
 
 __device__ double atomicAddDouble(double* address, double val);
-//__device__ unsigned long brent_int(unsigned int index, unsigned long *device_x_brent, unsigned long seed);
-//__device__ double Brent_real(int index, unsigned long *device_x_brent, unsigned long seed);
+
 
 #endif

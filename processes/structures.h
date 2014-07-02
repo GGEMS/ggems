@@ -18,23 +18,90 @@
 #ifndef STRUCTURES_H
 #define STRUCTURES_H
 
+#ifndef PARTICLESTACK
+#define PARTICLESTACK
+// Stack of particles, format data is defined as SoA
+struct ParticleStack{
+    // property
+    float* E;
+    float* dx;
+    float* dy;
+    float* dz;
+    float* px;
+    float* py;
+    float* pz;
+    float* tof;
+    // PRNG
+    unsigned int* prng_state_1;
+    unsigned int* prng_state_2;
+    unsigned int* prng_state_3;
+    unsigned int* prng_state_4;
+    unsigned int* prng_state_5;
+    // simulation
+    unsigned char* endsimu;
+    unsigned char* level;
+    unsigned char* pname; // particle name (photon, electron, etc)
+    // stack size
+    unsigned int size;
+}; //
+#endif
+
+
+
+#ifndef DOSIMETRY
+#define DOSIMETRY
 /**
- * \author Y. Lemaréchal
- * \brief AtomicAdd function for double precision
- *        From Nvidia web site
+ * \struct Dosimetry
+ * \brief Dosimetry structure
+ *
+ * Structure where dosimetry parameters are store during the simulation (edep and edep squared). The size of the dosimetry volume is the same as the voxelised volume
+ * \param edep Energy deposited inside the volume
+ * \param dose Dose deposited inside the volume
+ * \param edep_Squared_value Energy squared deposited inside the volume
+ * \param uncertainty Uncertainty associated with the Energy deposited inside the volume
+ * \param nb_of_voxels Number of voxels inside the volume, and also the size of the dosimetrics array
+ * \param morton_key Morton key of the voxels. Each byte of the integer contains the index of the seed inside the radius of the voxel.
  */
-__device__ double atomicAddDouble(double* address, double val)
-{
-    unsigned long long int* address_as_ull =
-                              (unsigned long long int*)address;
-    unsigned long long int old = *address_as_ull, assumed;
-    do {
-        assumed = old;
-        old = atomicCAS(address_as_ull, assumed,
-                        __double_as_longlong(val +
-                               __longlong_as_double(assumed)));
-    } while (assumed != old);
-    return __longlong_as_double(old);
-}
+struct Dosimetry
+    {
+
+#ifdef FLOAT_DOSI
+    float * edep;
+    float * dose;
+    float * edep_Squared_value;
+    float * uncertainty;   
+#else
+    double * edep;
+    double * dose;
+    double * edep_Squared_value;
+    double * uncertainty;
+#endif  
+    
+    // For double precision using integers
+    unsigned int *edep_Trigger;
+    unsigned int *edep_Squared_Trigger;
+    unsigned int *edep_Int;
+    unsigned int *edep_Squared_Int;
+    
+    unsigned int nb_of_voxels;
+    
+    // Number of voxels per dimension
+    unsigned short int nx;
+    unsigned short int ny;
+    unsigned short int nz;
+    
+    // voxels size of the dosemap
+    float spacing_x;
+    float spacing_y;
+    float spacing_z;
+    
+    // position of the origin of the dosemap
+    float x0;
+    float y0;
+    float z0;
+
+    };
+#endif
+
 
 #endif
