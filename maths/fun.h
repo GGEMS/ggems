@@ -15,35 +15,29 @@
 //
 // GGEMS Copyright (C) 2013-2014 Julien Bert
 
-#ifndef VECTOR_H
-#define VECTOR_H
+#ifndef FUN_H
+#define FUN_H
 
 /////////////////////////////////////////////////////////////////////////////
-// Maths
+// Prng
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef MATRIX3
-#define MATRIX3
-struct matrix3 {
-    float a, b, c, d, e, f, g, h, i;
-};
-#endif
 
-// r = u - v
-__host__ __device__ float3 f3_sub(float3 u, float3 v);
-// r = u + v
-__host__ __device__ float3 f3_add(float3 u, float3 v);
-// r = u * v
-__host__ __device__ float3 f3_mul(float3 u, float3 v);
-// r = u / v
-__host__ __device__ float3 f3_div(float3 u, float3 v);
-// r = u * s
-__host__ __device__ float3 f3_scale(float3 u, float s);
-// r = u . v
-__host__ __device__ float f3_dot(float3 u, float3 v);
-// r = u x v
-__host__ __device__ float3 f3_cross(float3 u, float3 v);
-// r = m * u
-__host__ __device__ float3 m3f3_mul(matrix3 m, float3 u);
+inline __device__ float3 rotateUz(float3 vector, float3 newUz);
+
+// Loglog interpolation
+inline __device__ float loglog_interpolation(float x, float x0, float y0, float x1, float y1);
+
+// Binary search
+inline __device__ int binary_search(float key, float* tab, int size, int min=0);
+
+// Linear interpolation
+inline __device__ float linear_interpolation(float xa,float ya, float xb,  float yb, float x);
+
+// Poisson distribution from Geant4 using JKISS32 Generator
+inline __device__ int G4Poisson(float mean,ParticleStack &particles, int id);
+
+// Gaussian distribution using JKISS32 Generator
+inline __device__ float Gaussian(float mean,float rms,ParticleStack &particles, int id);
 
 #endif

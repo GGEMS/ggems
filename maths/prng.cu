@@ -1,23 +1,23 @@
 // This file is part of GGEMS
 //
-// FIREwork is free software: you can redistribute it and/or modify
+// GGEMS is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// FIREwork is distributed in the hope that it will be useful,
+// GGEMS is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with FIREwork.  If not, see <http://www.gnu.org/licenses/>.
+// along with GGEMS.  If not, see <http://www.gnu.org/licenses/>.
 //
 // GGEMS Copyright (C) 2013-2014 Julien Bert
 
 #ifndef PRNG_CU
 #define PRNG_CU
-
+#include "prng.h"
 // JKISS 32-bit (period ~2^121=2.6x10^36), passes all of the Dieharder tests and the BigCrunch tests in TestU01
 __device__ float JKISS32(ParticleStack &stack, unsigned int id) {
     int t;
@@ -60,7 +60,7 @@ __device__ float JKISS32(ParticleStack &stack, unsigned int id) {
 /***********************************************************
  * PRNG Brent xor256
  ***********************************************************/
-
+/*
 // Brent PRNG integer version
 __device__ unsigned long weyl;
 __device__ unsigned long brent_int(unsigned int index, unsigned long *device_x_brent, unsigned long seed)
@@ -212,15 +212,6 @@ __device__ double Brent_real(int index, unsigned long *device_x_brent, unsigned 
 #undef ss
     }
 
-// Init Brent seed
-__global__ void kernel_brent_init(GPUParticleStack stackpart) {
-    unsigned int id = __umul24(blockIdx.x, blockDim.x) + threadIdx.x;
-
-    if (id < stackpart.size) {
-        unsigned int seed = stackpart.seed[id];
-        float dummy = brent_int(id, stackpart.table_x_brent, seed);
-        }
-    }
-
+*/
 
 #endif

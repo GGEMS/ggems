@@ -15,35 +15,16 @@
 //
 // GGEMS Copyright (C) 2013-2014 Julien Bert
 
-#ifndef VECTOR_H
-#define VECTOR_H
+#ifndef PRNG_H
+#define PRNG_H
 
 /////////////////////////////////////////////////////////////////////////////
-// Maths
+// Prng
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef MATRIX3
-#define MATRIX3
-struct matrix3 {
-    float a, b, c, d, e, f, g, h, i;
-};
-#endif
 
-// r = u - v
-__host__ __device__ float3 f3_sub(float3 u, float3 v);
-// r = u + v
-__host__ __device__ float3 f3_add(float3 u, float3 v);
-// r = u * v
-__host__ __device__ float3 f3_mul(float3 u, float3 v);
-// r = u / v
-__host__ __device__ float3 f3_div(float3 u, float3 v);
-// r = u * s
-__host__ __device__ float3 f3_scale(float3 u, float s);
-// r = u . v
-__host__ __device__ float f3_dot(float3 u, float3 v);
-// r = u x v
-__host__ __device__ float3 f3_cross(float3 u, float3 v);
-// r = m * u
-__host__ __device__ float3 m3f3_mul(matrix3 m, float3 u);
+__device__ float JKISS32(ParticleStack &stack, unsigned int id);
+//__device__ unsigned long brent_int(unsigned int index, unsigned long *device_x_brent, unsigned long seed);
+//__device__ double Brent_real(int index, unsigned long *device_x_brent, unsigned long seed);
 
 #endif
