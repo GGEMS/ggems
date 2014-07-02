@@ -57,11 +57,11 @@
     username = FIRSTNAME LASTNAME <EMAIL.COM>
 
     [paths]
-    default = http://bitbucket.org/jbert/ggems
-    default-push = http://bitbucket.org/jbert/ggems
+    default = http://USERNAME@kraken-bzh.fr/code/GGEMS
+    default-push = http://USERNAME@kraken-bzh.fr/code/GGEMS
 
     [auth]
-    ggems.prefix = https://bitbucket.org/jbert
+    ggems.prefix = www.kraken-bzh.fr/code/GGEMS
     ggems.username = YOURUSERNAME
     ggems.password = YOURPASSWORD
     ggems.schemes = http https
