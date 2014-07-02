@@ -20,7 +20,7 @@
 #include "prng.cu"
 
 // rotateUz, function from CLHEP
-inline __device__ float3 rotateUz(float3 vector, float3 newUz) {
+inline __host__ __device__ float3 rotateUz(float3 vector, float3 newUz) {
     float u1 = newUz.x;
     float u2 = newUz.y;
     float u3 = newUz.z;
@@ -39,7 +39,7 @@ inline __device__ float3 rotateUz(float3 vector, float3 newUz) {
 }
 
 // Loglog interpolation
-inline __device__ float loglog_interpolation(float x, float x0, float y0, float x1, float y1) {
+inline __host__ __device__ float loglog_interpolation(float x, float x0, float y0, float x1, float y1) {
     if (x < x0) return y0;
     if (x > x1) return y1;
     x0 = 1.0f / x0;
@@ -55,7 +55,7 @@ inline __device__ float loglog_interpolation(float x, float x0, float y0, float 
  * \param[out] index return array index corresponding to key value
  */
 // Binary search
-inline __device__ int binary_search(float key, float* tab, int size, int min=0) {
+inline __host__ __device__ int binary_search(float key, float* tab, int size, int min=0) {
     int max=size, mid;
     while ((min < max)) {
         mid = (min + max) >> 1;
@@ -78,7 +78,7 @@ inline __device__ int binary_search(float key, float* tab, int size, int min=0) 
  * \param[in] x value to interpolate
  * \param[out] return Y interpolated
  */
-inline __device__ float linear_interpolation(float xa,float ya, float xb,  float yb, float x) { // Taylor young 1st order
+inline __host__ __device__ float linear_interpolation(float xa,float ya, float xb,  float yb, float x) { // Taylor young 1st order
     if (xa > x) return ya;
     if (xb < x) return yb;
     return ya + (x-xa) * (yb-ya) / (xb-xa);

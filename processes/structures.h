@@ -18,6 +18,8 @@
 #ifndef STRUCTURES_H
 #define STRUCTURES_H
 
+
+
 #ifndef PARTICLESTACK
 #define PARTICLESTACK
 // Stack of particles, format data is defined as SoA
@@ -103,5 +105,20 @@ struct Dosimetry
     };
 #endif
 
+    
+// Some error "checkers"
+// comes from "cuda by example" book
+static void HandleError( cudaError_t err,
+                         const char *file,
+                         int line );
+
+// comes from "cuda programming" book
+__host__ void cuda_error_check (const char * prefix, const char * postfix);
+
+// Stack device allocation
+void _stack_device_malloc(ParticleStack &stackpart, int stack_size);
+
+// Init particle seeds with the main seed
+void wrap_init_particle_seeds(ParticleStack &d_p, int seed);
 
 #endif
