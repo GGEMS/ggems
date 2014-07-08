@@ -23,11 +23,11 @@
 #include <string>
 
 // Axis-Aligned Bounding Box
-class AABB {
+class Aabb {
     public:
-        AABB(float ox, float oy, float oz,
+        Aabb(float ox, float oy, float oz,
              float halflx, float halfly, float halflz,
-             std::string mat_name);
+             std::string mat_name, std::string obj_name);
 
         //void set_xlength(float);
         //void set_ylength(float);
@@ -45,7 +45,7 @@ class AABB {
 
         float xmin, xmax, ymin, ymax, zmin, zmax;
         std::string material_name;
-        std::string type;
+        std::string object_name;
 
     private:
 };

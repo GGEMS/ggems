@@ -20,9 +20,9 @@
 
 #include "aabb.h"
 
-AABB::AABB (float ox, float oy, float oz,
+Aabb::Aabb (float ox, float oy, float oz,
             float halflx, float halfly, float halflz,
-            std::string mat_name) {
+            std::string mat_name, std::string obj_name) {
 
     xmin = ox-halflx;
     xmax = ox+halflx;
@@ -31,7 +31,7 @@ AABB::AABB (float ox, float oy, float oz,
     zmin = oz-halflz;
     zmax = oz+halflz;
     material_name = mat_name;
-    type = "aabb";
+    object_name = obj_name;
 }
 
 

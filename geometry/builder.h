@@ -19,14 +19,20 @@
 #define BUILDER_H
 
 #include <vector>
+#include <string>
 #include "aabb.h"
 #include "sphere.h"
 
+#define AABB 0
+#define SPHERE 1
 
+// Class to manage the hierarchical structure of the world
 class BVH {
     public:
         BVH();
+        void add_root();
         void add_node(unsigned int mother_id);
+        unsigned int get_current_id();
         void print();
 
     private:
@@ -39,16 +45,32 @@ class BVH {
         unsigned int cur_node_id;
 };
 
+// Class that handle the geometry of the world
+class Geometry {
+    public:
+        BVH tree;                                  // Tree structure of the world
+        std::vector<unsigned int> ptr_objects;     // Address to access to the different objects
+        std::vector<unsigned int> size_of_objects; // Size of each object
+        std::vector<float> data_objects;           // Parameters of each primitive in the world
+                                                   // Type Material_ID Params1 Params2 ...
+        std::vector<std::string> materials_list;   // List of the materials used
+        std::vector<std::string> name_objects;     // Name of each object
+};
 
+// This class is used to build the geometry
 class GeometryBuilder {
     public:
         GeometryBuilder();
-        unsigned int add_aabb(AABB obj, unsigned int mother_id);
-        unsigned int add_sphere(Sphere obj, unsigned int mother_id);
+        unsigned int add_world(Aabb obj);
+        unsigned int add_object(Aabb obj, unsigned int mother_id);
+        unsigned int add_object(Sphere obj, unsigned int mother_id);
+        void print();
 
     private:
-        BVH world_tree;
-        unsigned int cur_id;
+        Geometry World;
+
+        unsigned int get_material_index(std::string material_name);
+
 
 
 };

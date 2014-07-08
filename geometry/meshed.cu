@@ -40,67 +40,63 @@ void MeshedPhantom::load(std::string filename) {
         std::getline(file, line);
 
         if (file) {
-            Triangle tri;
             float val;
             std::string txt;
             int pos;
 
             pos = line.find(" ");
             txt = line.substr(0, pos);
-            std::stringstream(txt) >> val;
-            tri.u.x = val;
+            std::stringstream(txt) >> val;            
+            triangles.push_back(val); // u.x
             line = line.substr(pos+1);
 
             pos = line.find(" ");
             txt = line.substr(0, pos);
             std::stringstream(txt) >> val;
-            tri.u.y = val;
+            triangles.push_back(val); // u.y
             line = line.substr(pos+1);
 
             pos = line.find(" ");
             txt = line.substr(0, pos);
             std::stringstream(txt) >> val;
-            tri.u.z = val;
+            triangles.push_back(val); // u.z
             line = line.substr(pos+1);
 
             pos = line.find(" ");
             txt = line.substr(0, pos);
             std::stringstream(txt) >> val;
-            tri.v.x = val;
+            triangles.push_back(val); // v.x
             line = line.substr(pos+1);
 
             pos = line.find(" ");
             txt = line.substr(0, pos);
             std::stringstream(txt) >> val;
-            tri.v.y = val;
+            triangles.push_back(val); // v.y
             line = line.substr(pos+1);
 
             pos = line.find(" ");
             txt = line.substr(0, pos);
             std::stringstream(txt) >> val;
-            tri.v.z = val;
+            triangles.push_back(val); // v.z
             line = line.substr(pos+1);
 
             pos = line.find(" ");
             txt = line.substr(0, pos);
             std::stringstream(txt) >> val;
-            tri.w.x = val;
+            triangles.push_back(val); // w.x
             line = line.substr(pos+1);
 
             pos = line.find(" ");
             txt = line.substr(0, pos);
             std::stringstream(txt) >> val;
-            tri.w.y = val;
+            triangles.push_back(val); // w.y
             line = line.substr(pos+1);
 
             pos = line.find(" ");
             txt = line.substr(0, pos);
             std::stringstream(txt) >> val;
-            tri.w.z = val;
+            triangles.push_back(val); // w.z
             line = line.substr(pos+1);
-
-            // Add a new triangle
-            triangles.push_back(tri);
 
         }
     }
@@ -112,6 +108,7 @@ void MeshedPhantom::set_material(std::string matname) {
     material_name = matname;
 }
 
+/*
 // Scaling
 void MeshedPhantom::scale(float3 s) {
     // Scale every triangle from the mesh
@@ -124,12 +121,15 @@ void MeshedPhantom::scale(float3 s) {
     }
 }
 
+
 // Scaling
 void MeshedPhantom::scale(float sx, float sy, float sz) {
     float3 s = {sx, sy, sz};
     scale(s);
 }
+*/
 
+/*
 // Rotation
 void MeshedPhantom::rotate(float3 r) {
 
@@ -166,7 +166,9 @@ void MeshedPhantom::rotate(float phi, float theta, float psi) {
     float3 r = {phi, theta, psi};
     rotate(r);
 }
+*/
 
+/*
 // Translation
 void MeshedPhantom::translate(float3 t) {
     // Translate every triangle from the mesh
@@ -184,7 +186,7 @@ void MeshedPhantom::translate(float tx, float ty, float tz) {
     float3 t = {tx, ty, tz};
     translate(t);
 }
-
+*/
 
 
 

@@ -27,12 +27,12 @@
 #include "../maths/vector.h"
 #include "../processes/constants.h"
 
-#ifndef TRIANGLE
-#define TRIANGLE
-struct Triangle {
-    float3 u, v, w;
-};
-#endif
+//#ifndef TRIANGLE
+//#define TRIANGLE
+//struct Triangle {
+//    float3 u, v, w;
+//};
+//#endif
 
 // Raycasting
 //__host__ __device__ float distance_to_triangle(float px, float py, float pz,
@@ -52,7 +52,7 @@ class MeshedPhantom {
         void translate(float3 t);
         void translate(float tx, float ty, float tz);
 
-        std::vector<Triangle> triangles;
+        std::vector<float> vertices;
         std::string material_name;
 
     private:

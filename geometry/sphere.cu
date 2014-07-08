@@ -21,14 +21,14 @@
 #include "sphere.h"
 
 Sphere::Sphere(float ox, float oy, float oz, float rad,
-               std::string mat_name) {
+               std::string mat_name, std::string obj_name) {
 
     cx = ox;
     cy = oy;
     cz = oz;
     radius = rad;
     material_name = mat_name;
-    type = "sphere";
+    object_name = obj_name;
 }
 
 #endif

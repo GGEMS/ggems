@@ -26,11 +26,11 @@
 class Sphere {
     public:
         Sphere(float ox, float oy, float oz, float rad,
-               std::string mat_name);
+               std::string mat_name, std::string obj_name);
 
         float cx, cy, cz, radius;
         std::string material_name;
-        std::string type;
+        std::string object_name;
 
     private:
 };
