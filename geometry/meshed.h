@@ -24,26 +24,21 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <float.h>
 #include "../maths/vector.h"
 #include "../processes/constants.h"
-
-//#ifndef TRIANGLE
-//#define TRIANGLE
-//struct Triangle {
-//    float3 u, v, w;
-//};
-//#endif
 
 // Raycasting
 //__host__ __device__ float distance_to_triangle(float px, float py, float pz,
 //                                               float dx, float dy, float dz);
 
 // Triangular-based meshed phantom
-class MeshedPhantom {
+class Meshed {
     public:
-        MeshedPhantom();
+        Meshed();
         void load(std::string filename);
         void set_material(std::string matname);
+        void set_object_name(std::string objname);
 
         void scale(float3 s);
         void scale(float sx, float sy, float sz);
@@ -54,6 +49,10 @@ class MeshedPhantom {
 
         std::vector<float> vertices;
         std::string material_name;
+        std::string object_name;
+        unsigned int number_of_triangles;
+        unsigned int number_of_vertices;
+        float xmin, xmax, ymin, ymax, zmin, zmax; // AABB
 
     private:
 };

@@ -22,9 +22,13 @@
 #include <string>
 #include "aabb.h"
 #include "sphere.h"
+#include "meshed.h"
+#include "voxelized.h"
 
 #define AABB 0
 #define SPHERE 1
+#define MESHED 2
+#define VOXELIZED 3
 
 // Class to manage the hierarchical structure of the world
 class BVH {
@@ -64,7 +68,10 @@ class GeometryBuilder {
         unsigned int add_world(Aabb obj);
         unsigned int add_object(Aabb obj, unsigned int mother_id);
         unsigned int add_object(Sphere obj, unsigned int mother_id);
+        unsigned int add_object(Meshed obj, unsigned int mother_id);
+        unsigned int add_object(Voxelized obj, unsigned int mother_id);
         void print();
+        void print_raw();
 
     private:
         Geometry World;
