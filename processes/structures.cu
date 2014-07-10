@@ -102,5 +102,50 @@ void wrap_init_particle_seeds(ParticleStack &d_p, int seed) {
     HANDLE_ERROR(cudaMemcpy(d_p.prng_state_5, state5, sizeof(unsigned int)*d_p.size, cudaMemcpyHostToDevice));
 }
 
+// Copy electron cross section table to device
+void  wrap_copy_crosssection_to_device (CrossSectionTableElectrons &h_etables,
+                                        CrossSectionTableElectrons &d_etables,
+                                        char *m_physics_list) {
+
+    unsigned int mem_mat_bins_flt = h_etables.nb_mat*h_etables.nb_bins * sizeof(float);
+
+    d_etables.E_min = h_etables.E_min;
+    d_etables.E_max = h_etables.E_max;
+    d_etables.nb_bins = h_etables.nb_bins;
+    d_etables.nb_mat = h_etables.nb_mat;
+    d_etables.cutEnergyElectron = h_etables.cutEnergyElectron;
+    d_etables.cutEnergyGamma = h_etables.cutEnergyGamma;
+
+    HANDLE_ERROR(cudaMalloc((void**) &d_etables.E, mem_mat_bins_flt));
+    HANDLE_ERROR(cudaMalloc((void**) &d_etables.eRange, mem_mat_bins_flt));
+
+    HANDLE_ERROR(cudaMemcpy(d_etables.E, h_etables.E, mem_mat_bins_flt, cudaMemcpyHostToDevice));
+    HANDLE_ERROR(cudaMemcpy(d_etables.eRange, h_etables.eRange, mem_mat_bins_flt, cudaMemcpyHostToDevice));
+
+    if(m_physics_list[ELECTRON_MSC] == 1) {
+        HANDLE_ERROR(cudaMalloc((void**) &d_etables.eMSC, mem_mat_bins_flt));
+
+        HANDLE_ERROR(cudaMemcpy(d_etables.eMSC, h_etables.eMSC, mem_mat_bins_flt, cudaMemcpyHostToDevice));
+    }
+
+    if(m_physics_list[ELECTRON_BREMSSTRAHLUNG] == 1) {
+        HANDLE_ERROR(cudaMalloc((void**) &d_etables.eBremdedx, mem_mat_bins_flt));
+        HANDLE_ERROR(cudaMalloc((void**) &d_etables.eBremCS, mem_mat_bins_flt));
+
+        HANDLE_ERROR(cudaMemcpy(d_etables.eBremdedx, h_etables.eBremdedx, mem_mat_bins_flt, cudaMemcpyHostToDevice));
+        HANDLE_ERROR(cudaMemcpy(d_etables.eBremCS, h_etables.eBremCS, mem_mat_bins_flt, cudaMemcpyHostToDevice));
+
+    }
+
+    if(m_physics_list[ELECTRON_IONISATION] == 1) {
+        HANDLE_ERROR(cudaMalloc((void**) &d_etables.eIonisationdedx, mem_mat_bins_flt));
+        HANDLE_ERROR(cudaMalloc((void**) &d_etables.eIonisationCS, mem_mat_bins_flt));
+
+        HANDLE_ERROR(cudaMemcpy(d_etables.eIonisationdedx, h_etables.eIonisationdedx, mem_mat_bins_flt, cudaMemcpyHostToDevice));
+        HANDLE_ERROR(cudaMemcpy(d_etables.eIonisationCS, h_etables.eIonisationCS, mem_mat_bins_flt, cudaMemcpyHostToDevice));
+    }
+
+
+}
 
 #endif

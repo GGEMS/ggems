@@ -19,5 +19,6 @@
 #define CONSTANTS_H
 
 #define pi                               3.141592653589793116
+#define two_pi                           2.0*3.141592653589793116
 
 #endif
