@@ -72,4 +72,10 @@ __host__ __device__ float3 m3f3_mul(matrix3 m, float3 u) {
     return r;
 }
 
+// return an unitary vector
+__host__ __device__ float3 f3_unit(float3 u) {
+    float imag = __fdividef(1.0f, sqrtf(u.x*u.x + u.y*u.y + u.z*u.z));
+    return make_float3(u.x*imag, u.y*imag, u.z*imag);
+}
+
 #endif
