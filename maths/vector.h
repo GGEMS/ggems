@@ -47,5 +47,5 @@ __host__ __device__ float3 f3_cross(float3 u, float3 v);
 __host__ __device__ float3 m3f3_mul(matrix3 m, float3 u);
 // return an unitary vector
 __host__ __device__ float3 f3_unit(float3 u);
-}
+
 #endif

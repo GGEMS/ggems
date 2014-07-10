@@ -26,11 +26,13 @@
 #include <vector>
 #include <float.h>
 #include "../maths/vector.h"
+#include "../maths/raytracing.h"
 #include "../processes/constants.h"
 
-// Raycasting
-//__host__ __device__ float distance_to_triangle(float px, float py, float pz,
-//                                               float dx, float dy, float dz);
+#define NO_OCTREE 0
+#define REG_OCTREE 1
+#define ADP_OCTREE 2
+
 
 // Triangular-based meshed phantom
 class Meshed {
@@ -39,6 +41,7 @@ class Meshed {
         void load(std::string filename);
         void set_material(std::string matname);
         void set_object_name(std::string objname);
+        void build_regular_octree(unsigned int nx, unsigned int ny, unsigned int nz);
 
         void scale(float3 s);
         void scale(float sx, float sy, float sz);
@@ -47,12 +50,22 @@ class Meshed {
         void translate(float3 t);
         void translate(float tx, float ty, float tz);
 
+        // Mesh
         std::vector<float> vertices;
         std::string material_name;
         std::string object_name;
         unsigned int number_of_triangles;
         unsigned int number_of_vertices;
+
+        // Bounding box
         float xmin, xmax, ymin, ymax, zmin, zmax; // AABB
+
+        // Octree
+        unsigned int nb_cell_x, nb_cell_y, nb_cell_z;
+        unsigned short int octree_type;
+        std::vector<float> nb_objs_per_cell;
+        std::vector<float> list_objs_per_cell;
+        std::vector<float> addr_to_cell;
 
     private:
 };

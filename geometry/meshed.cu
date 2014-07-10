@@ -24,7 +24,130 @@
 // Meshed Phantom ///////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
 
-Meshed::Meshed() {}
+Meshed::Meshed() {
+    octree_type = NO_OCTREE;
+}
+
+// Build a regular octree to improve navigation within meshed phantom
+void Meshed::build_regular_octree(unsigned int nx, unsigned int ny, unsigned int nz) {
+
+    // First check if there is a mesh loaded
+    if (number_of_triangles == 0) {
+        printf("Before building an octree, you need to load a meshed phantom!!!!\n");
+        return;
+    }
+
+    // Store the size of this octree and the type
+    nb_cell_x = nx;
+    nb_cell_y = ny;
+    nb_cell_z = nz;
+    octree_type = REG_OCTREE;
+
+    // Compute the size of each octree cell
+    float size_x = xmax-xmin;
+    float size_y = ymax-ymin;
+    float size_z = zmax-zmin;
+
+    float spacing_x = size_x / (float)nx;
+    float spacing_y = size_y / (float)ny;
+    float spacing_z = size_z / (float)nz;
+
+    float org_x = xmin;
+    float org_y = ymin;
+    float org_z = zmin;
+
+
+    float cell_ix, cell_iy, cell_iz;         // cell position (in voxel ID)
+    float cell_xmin, cell_ymin, cell_zmin;   // cell position (in 3D space)
+    float cell_xmax, cell_ymax, cell_zmax;
+
+    float3 u, v, w;                          // A triangle
+    unsigned int addr_tri, itri, ct_tri;
+    unsigned int cur_cell_index = 0;
+
+    float progress = 0.0f;
+    printf("\nBuilding BVH\n");
+    printf("progress.... %6.2f %%", progress);
+    fflush(stdout);
+    float inc_progress = 100.0f / float(nz);
+
+    // For each octree cell
+    cell_iz = 0;
+    cell_zmin = org_z;
+    while(cell_iz < nz) {
+        cell_iy = 0;
+        cell_ymin = org_y;
+        while(cell_iy < ny) {
+            cell_ix = 0;
+            cell_xmin = org_x;
+            while(cell_ix < nx) {
+
+                // -----------------------------------------------------------
+
+                // Define a voxel as AABB primitive
+                cell_xmax = cell_xmin + spacing_x;
+                cell_ymax = cell_ymin + spacing_y;
+                cell_zmax = cell_zmin + spacing_z;
+
+                // Search for triangle/AABB collision
+                itri = 0;
+                ct_tri = 0;
+                while (itri < number_of_triangles) {
+
+                    // Define a triangle
+                    addr_tri = itri*9;     // 3 vertices xyz
+                    u = make_float3(vertices[addr_tri],  vertices[addr_tri+1], vertices[addr_tri+2]);
+                    v = make_float3(vertices[addr_tri+3], vertices[addr_tri+4], vertices[addr_tri+5]);
+                    w = make_float3(vertices[addr_tri+6], vertices[addr_tri+7], vertices[addr_tri+8]);
+
+                    // Check if this triangle is overlappin this octree cell
+                    if (overlap_AABB_triangle(cell_xmin, cell_xmax, cell_ymin, cell_ymax, cell_zmin, cell_zmax,
+                                              u, v, w) != -1) {
+
+                        // Save triangle index and count the total number of triangles per cell
+                        list_objs_per_cell.push_back(itri);
+                        ++ct_tri;
+                    }
+                    ++itri;
+                }
+
+                // Save the number of objs per leaf and the address to acces to this cell
+                nb_objs_per_cell.push_back(ct_tri);
+
+                if (ct_tri != 0) {
+                    addr_to_cell.push_back(cur_cell_index);
+                } else {
+                    addr_to_cell.push_back(-1);
+                }
+                cur_cell_index += ct_tri;
+
+                // -----------------------------------------------------------
+
+                cell_xmin += spacing_x;
+                ++cell_ix;
+
+            } // ix
+
+            cell_ymin += spacing_y;
+            ++cell_iy;
+
+        } // iy
+
+        cell_zmin += spacing_z;
+        ++cell_iz;
+
+        // print out
+        progress += inc_progress;
+        printf("\b\b\b\b\b\b\b\b%6.2f %%", progress);
+        fflush(stdout);
+
+    } // iz
+    printf("\n");
+
+
+}
+
+
 
 // Load a mesh from raw data exported by Blender
 void Meshed::load(std::string filename) {
