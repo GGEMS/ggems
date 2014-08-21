@@ -6,6 +6,9 @@ CUDA_FLAGS2 := --generate-code arch=compute_30,code=sm_30 -Xptxas="-v" --relocat
 all: $(patsubst %.cu, lib%.so, $(wildcard *.cu))
 # all:  $(wildcard *.cu)
 
+print:
+	$(patsubst %.cu, lib%.so, $(wildcard *.cu))
+
 lib%.so: %.cu %.cuh
 	nvcc $(CUDA_FLAGS) $(CUDALIBS) -o $@ $< -c
 	

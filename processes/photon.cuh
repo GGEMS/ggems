@@ -24,7 +24,7 @@
 #include "sandia_table.cuh"
 #include "shell_data.cuh"
 
-__device__ float Compton_CSPA(float E, unsigned short int Z);
+__device__ float Compton_CSPA (float E, unsigned short int Z);
 
 // Compute the total Compton cross section for a given material
 __device__ float Compton_CS(GPUPhantomMaterials materials, unsigned short int mat, float E);

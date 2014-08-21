@@ -159,7 +159,7 @@ void GeometryBuilder::print_raw() {
 
     // Print out every object name
     unsigned int i;
-    printf("List of object [%i]: ", World.name_objects.size());
+    printf("List of object [%lu]: ", World.name_objects.size());
     i=0; while (i < World.name_objects.size()) {
         printf("%s ", World.name_objects[i].c_str());
         ++i;
@@ -167,7 +167,7 @@ void GeometryBuilder::print_raw() {
     printf("\n\n");
 
     // Print out every material name
-    printf("List of material [%i]: ", World.materials_list.size());
+    printf("List of material [%lu]: ", World.materials_list.size());
     i=0; while (i < World.materials_list.size()) {
         printf("%s ", World.materials_list[i].c_str());
         ++i;
@@ -175,7 +175,7 @@ void GeometryBuilder::print_raw() {
     printf("\n\n");
 
     // Print out size of objects
-    printf("Size of objects [%i]: ", World.size_of_objects.size());
+    printf("Size of objects [%lu]: ", World.size_of_objects.size());
     i=0; while (i < World.size_of_objects.size()) {
         printf("%i ", World.size_of_objects[i]);
         ++i;
@@ -183,7 +183,7 @@ void GeometryBuilder::print_raw() {
     printf("\n\n");
 
     // Print out object addresses
-    printf("Object addresses [%i]: ", World.ptr_objects.size());
+    printf("Object addresses [%lu]: ", World.ptr_objects.size());
     i=0; while (i < World.ptr_objects.size()) {
         printf("%i ", World.ptr_objects[i]);
         ++i;
@@ -191,7 +191,7 @@ void GeometryBuilder::print_raw() {
     printf("\n\n");
 
     // Print out object data
-    printf("Object data [%i]: ", World.data_objects.size());
+    printf("Object data [%lu]: ", World.data_objects.size());
     i=0; while (i < World.data_objects.size()) {
         printf("%f ", World.data_objects[i]);
         ++i;
