@@ -99,7 +99,8 @@ void stack_copy_device_to_host(ParticleStack &stackpart_d,ParticleStack &stackpa
     HANDLE_ERROR(cudaMemcpy(stackpart_h.endsimu, stackpart_h.tof, mem_stackpart_uchar, cudaMemcpyDeviceToHost));
     HANDLE_ERROR(cudaMemcpy(stackpart_h.level, stackpart_h.tof, mem_stackpart_uchar, cudaMemcpyDeviceToHost));
     HANDLE_ERROR(cudaMemcpy(stackpart_h.pname, stackpart_h.tof, mem_stackpart_uchar, cudaMemcpyDeviceToHost));
-
+    
+PRINTFUNCTION
 }
 
 // Stack host allocation

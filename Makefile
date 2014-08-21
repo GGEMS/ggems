@@ -42,10 +42,12 @@ test : dir
 	cd global; make test
 	cd maths; make test
 	cd navigation; make test
+	cd processes; make test
 	cp detector/*.o $(BUILDDIR)
 	cp global/*.o $(BUILDDIR)
 	cp maths/*.o $(BUILDDIR)
 	cp navigation/*.o $(BUILDDIR)
+	cp processes/*.o $(BUILDDIR)
 	
 clean :
 # 	rm *.so | true

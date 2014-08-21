@@ -46,6 +46,9 @@
 
 #define EKINELIMIT 1*eV
 
+#define DEBUGOK "[\033[32;01mok\033[00m]"
+#define PRINTFUNCTION printf("%s %s\n",DEBUGOK,__FUNCTION__);
+
 
 // Units
 #define GeV                  (1.E3*MeV)           // MeV

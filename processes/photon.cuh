@@ -15,8 +15,8 @@
 //
 // GGEMS Copyright (C) 2013-2014 Julien Bert
 
-#ifndef PHOTON_H
-#define PHOTON_H
+#ifndef PHOTON_CUH
+#define PHOTON_CUH
 #include "structures.cuh"
 #include "../maths/prng.cuh"
 #include "../maths/fun.cuh"
