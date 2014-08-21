@@ -18,7 +18,7 @@
 #ifndef BUILDER_CU
 #define BUILDER_CU
 
-#include "builder.h"
+#include "builder.cuh"
 
 ///////// BVH class ////////////////////////////////////////////////////
 
@@ -291,7 +291,7 @@ unsigned int GeometryBuilder::add_object(Sphere obj, unsigned int mother_id) {
     World.data_objects.push_back(obj.radius);
 
     World.name_objects.push_back(obj.object_name);                       // Name of this object
-
+    
     // Store the size of this object
     World.size_of_objects.push_back(6);
 

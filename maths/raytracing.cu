@@ -18,7 +18,7 @@
 #ifndef RAYTRACING_CU
 #define RAYTRACING_CU
 
-#include "raytracing.h"
+#include "raytracing.cuh"
 
 
 // Overlapping test AABB/Triangle - Akenine-Moller algorithm

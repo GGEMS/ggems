@@ -17,7 +17,7 @@
 
 #ifndef PHOTON_CU
 #define PHOTON_CU
-
+#include "photon.cuh"
 
 ///// Compton /////
 
@@ -204,7 +204,8 @@ __device__ float PhotoElec_ElecCosThetaDistribution(ParticleStack part,
 // PhotoElectric effect
 __device__ float PhotoElec_SampleSecondaries(ParticleStack particles, GPUPhantomMaterials mat,
                                              unsigned short int matindex, unsigned int id,
-                                             unsigned char flag_secondary) {
+                                             unsigned char flag_secondary,
+                                             float cutEnergyElectron) {
 
     float energy = particles.E[id];
     //float cutE = mat.electron_cut_energy[matindex];

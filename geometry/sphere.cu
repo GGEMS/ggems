@@ -18,7 +18,7 @@
 #ifndef SPHERE_CU
 #define SPHERE_CU
 
-#include "sphere.h"
+#include "sphere.cuh"
 
 Sphere::Sphere(float ox, float oy, float oz, float rad,
                std::string mat_name, std::string obj_name) {

@@ -17,10 +17,10 @@
 
 #ifndef FUN_CU
 #define FUN_CU
-#include "prng.cu"
+#include "prng.cuh"
 
 // rotateUz, function from CLHEP
-inline __host__ __device__ float3 rotateUz(float3 vector, float3 newUz) {
+ __host__ __device__ float3 rotateUz(float3 vector, float3 newUz) {
     float u1 = newUz.x;
     float u2 = newUz.y;
     float u3 = newUz.z;

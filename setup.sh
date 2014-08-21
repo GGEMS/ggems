@@ -1,0 +1,3 @@
+export GGEMS=$PWD
+export GGEMSLIB=$GGEMS/lib
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$GGEMS/lib

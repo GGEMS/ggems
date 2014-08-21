@@ -18,7 +18,7 @@
 #ifndef VECTOR_CU
 #define VECTOR_CU
 
-#include "vector.h"
+#include "vector.cuh"
 
 // r = u - v
 __host__ __device__ float3 f3_sub(float3 u, float3 v) {

@@ -18,7 +18,7 @@
 #ifndef VOXELIZED_CU
 #define VOXELIZED_CU
 
-#include "voxelized.h"
+#include "voxelized.cuh"
 
 Voxelized::Voxelized() {}
 
