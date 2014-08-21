@@ -179,10 +179,16 @@ static void HandleError( cudaError_t err,
 __host__ void cuda_error_check (const char * prefix, const char * postfix);
 
 // Stack device allocation
-void _stack_device_malloc(ParticleStack &stackpart, int stack_size);
+void stack_device_malloc(ParticleStack &stackpart, int stack_size);
+void stack_host_malloc(ParticleStack &stackpart, int stack_size);
 
 // Init particle seeds with the main seed
 void wrap_init_particle_seeds(ParticleStack &d_p, int seed);
+
+//copy stack d->h and h->d
+void stack_copy_host_to_device(ParticleStack &stackpart_h,ParticleStack &stackpart_d);
+void stack_copy_device_to_host(ParticleStack &stackpart_h,ParticleStack &stackpart_d);
+
 
 // Copy electron cross section table to device
 void  wrap_copy_crosssection_to_device (CrossSectionTableElectrons &h_etables,

@@ -44,9 +44,96 @@ __host__ void cuda_error_check (const char * prefix, const char * postfix) {
 
 }
 
+//copy host to device
+void stack_copy_host_to_device(ParticleStack &stackpart_h,ParticleStack &stackpart_d){
+    unsigned int stack_size = stackpart_h.size;
+    unsigned int mem_stackpart_float = stack_size * sizeof(float);
+    unsigned int mem_stackpart_uint = stack_size * sizeof(unsigned int);
+    unsigned int mem_stackpart_uchar = stack_size * sizeof(unsigned char);
+    
+    HANDLE_ERROR(cudaMemcpy(stackpart_h.E, stackpart_h.E, mem_stackpart_float, cudaMemcpyHostToDevice));
+    HANDLE_ERROR(cudaMemcpy(stackpart_h.px, stackpart_h.px, mem_stackpart_float, cudaMemcpyHostToDevice));
+    HANDLE_ERROR(cudaMemcpy(stackpart_h.py, stackpart_h.py, mem_stackpart_float, cudaMemcpyHostToDevice));
+    HANDLE_ERROR(cudaMemcpy(stackpart_h.pz, stackpart_h.pz, mem_stackpart_float, cudaMemcpyHostToDevice));
+    HANDLE_ERROR(cudaMemcpy(stackpart_h.dx, stackpart_h.dx, mem_stackpart_float, cudaMemcpyHostToDevice));
+    HANDLE_ERROR(cudaMemcpy(stackpart_h.dy, stackpart_h.dy, mem_stackpart_float, cudaMemcpyHostToDevice));
+    HANDLE_ERROR(cudaMemcpy(stackpart_h.dz, stackpart_h.dz, mem_stackpart_float, cudaMemcpyHostToDevice));
+    
+    HANDLE_ERROR(cudaMemcpy(stackpart_h.tof, stackpart_h.tof, mem_stackpart_float, cudaMemcpyHostToDevice));
+    
+    HANDLE_ERROR(cudaMemcpy(stackpart_h.prng_state_1, stackpart_h.prng_state_1, mem_stackpart_uint, cudaMemcpyHostToDevice));
+    HANDLE_ERROR(cudaMemcpy(stackpart_h.prng_state_2, stackpart_h.prng_state_2, mem_stackpart_uint, cudaMemcpyHostToDevice));
+    HANDLE_ERROR(cudaMemcpy(stackpart_h.prng_state_3, stackpart_h.prng_state_3, mem_stackpart_uint, cudaMemcpyHostToDevice));
+    HANDLE_ERROR(cudaMemcpy(stackpart_h.prng_state_4, stackpart_h.prng_state_4, mem_stackpart_uint, cudaMemcpyHostToDevice));
+    HANDLE_ERROR(cudaMemcpy(stackpart_h.prng_state_5, stackpart_h.prng_state_5, mem_stackpart_uint, cudaMemcpyHostToDevice));
+    
+    HANDLE_ERROR(cudaMemcpy(stackpart_h.endsimu, stackpart_h.tof, mem_stackpart_uchar, cudaMemcpyHostToDevice));
+    HANDLE_ERROR(cudaMemcpy(stackpart_h.level, stackpart_h.tof, mem_stackpart_uchar, cudaMemcpyHostToDevice));
+    HANDLE_ERROR(cudaMemcpy(stackpart_h.pname, stackpart_h.tof, mem_stackpart_uchar, cudaMemcpyHostToDevice));
+
+}
+
+// stack copy device to host
+void stack_copy_device_to_host(ParticleStack &stackpart_d,ParticleStack &stackpart_h){
+    unsigned int stack_size = stackpart_h.size;
+    unsigned int mem_stackpart_float = stack_size * sizeof(float);
+    unsigned int mem_stackpart_uint = stack_size * sizeof(unsigned int);
+    unsigned int mem_stackpart_uchar = stack_size * sizeof(unsigned char);
+    
+    HANDLE_ERROR(cudaMemcpy(stackpart_h.E, stackpart_h.E, mem_stackpart_float, cudaMemcpyDeviceToHost));
+    HANDLE_ERROR(cudaMemcpy(stackpart_h.px, stackpart_h.px, mem_stackpart_float, cudaMemcpyDeviceToHost));
+    HANDLE_ERROR(cudaMemcpy(stackpart_h.py, stackpart_h.py, mem_stackpart_float, cudaMemcpyDeviceToHost));
+    HANDLE_ERROR(cudaMemcpy(stackpart_h.pz, stackpart_h.pz, mem_stackpart_float, cudaMemcpyDeviceToHost));
+    HANDLE_ERROR(cudaMemcpy(stackpart_h.dx, stackpart_h.dx, mem_stackpart_float, cudaMemcpyDeviceToHost));
+    HANDLE_ERROR(cudaMemcpy(stackpart_h.dy, stackpart_h.dy, mem_stackpart_float, cudaMemcpyDeviceToHost));
+    HANDLE_ERROR(cudaMemcpy(stackpart_h.dz, stackpart_h.dz, mem_stackpart_float, cudaMemcpyDeviceToHost));
+    
+    HANDLE_ERROR(cudaMemcpy(stackpart_h.tof, stackpart_h.tof, mem_stackpart_float, cudaMemcpyDeviceToHost));
+    
+    HANDLE_ERROR(cudaMemcpy(stackpart_h.prng_state_1, stackpart_h.prng_state_1, mem_stackpart_uint, cudaMemcpyDeviceToHost));
+    HANDLE_ERROR(cudaMemcpy(stackpart_h.prng_state_2, stackpart_h.prng_state_2, mem_stackpart_uint, cudaMemcpyDeviceToHost));
+    HANDLE_ERROR(cudaMemcpy(stackpart_h.prng_state_3, stackpart_h.prng_state_3, mem_stackpart_uint, cudaMemcpyDeviceToHost));
+    HANDLE_ERROR(cudaMemcpy(stackpart_h.prng_state_4, stackpart_h.prng_state_4, mem_stackpart_uint, cudaMemcpyDeviceToHost));
+    HANDLE_ERROR(cudaMemcpy(stackpart_h.prng_state_5, stackpart_h.prng_state_5, mem_stackpart_uint, cudaMemcpyDeviceToHost));
+    
+    HANDLE_ERROR(cudaMemcpy(stackpart_h.endsimu, stackpart_h.tof, mem_stackpart_uchar, cudaMemcpyDeviceToHost));
+    HANDLE_ERROR(cudaMemcpy(stackpart_h.level, stackpart_h.tof, mem_stackpart_uchar, cudaMemcpyDeviceToHost));
+    HANDLE_ERROR(cudaMemcpy(stackpart_h.pname, stackpart_h.tof, mem_stackpart_uchar, cudaMemcpyDeviceToHost));
+
+}
+
+// Stack host allocation
+void stack_host_malloc(ParticleStack &phasespace, int stack_size)
+    {
+    phasespace.size = stack_size;
+    unsigned int mem_stackpart_float = stack_size * sizeof(float);
+    unsigned int mem_stackpart_uint = stack_size * sizeof(unsigned int);
+    unsigned int mem_stackpart_uchar = stack_size * sizeof(unsigned char);
+
+    phasespace.E = (float*)malloc(mem_stackpart_float);
+    phasespace.dx = (float*)malloc(mem_stackpart_float);
+    phasespace.dy = (float*)malloc(mem_stackpart_float);
+    phasespace.dz = (float*)malloc(mem_stackpart_float);
+    phasespace.px = (float*)malloc(mem_stackpart_float);
+    phasespace.py = (float*)malloc(mem_stackpart_float);
+    phasespace.pz = (float*)malloc(mem_stackpart_float);
+    
+    phasespace.tof = (float*)malloc(mem_stackpart_float);
+    
+    phasespace.prng_state_1 = (unsigned int*)malloc(mem_stackpart_uint);
+    phasespace.prng_state_2 = (unsigned int*)malloc(mem_stackpart_uint);
+    phasespace.prng_state_3 = (unsigned int*)malloc(mem_stackpart_uint);
+    phasespace.prng_state_4 = (unsigned int*)malloc(mem_stackpart_uint);
+    phasespace.prng_state_5 = (unsigned int*)malloc(mem_stackpart_uint);
+    phasespace.endsimu = (unsigned char*)malloc(mem_stackpart_uchar);
+    phasespace.level = (unsigned char*)malloc(mem_stackpart_uchar);
+    phasespace.pname = (unsigned char*)malloc(mem_stackpart_uchar);
+   
+    }
+
 
 // Stack device allocation
-void _stack_device_malloc(ParticleStack &stackpart, int stack_size) {
+void stack_device_malloc(ParticleStack &stackpart, int stack_size) {
     stackpart.size = stack_size;
     unsigned int mem_stackpart_float = stack_size * sizeof(float);
     unsigned int mem_stackpart_uint = stack_size * sizeof(unsigned int);
