@@ -51,25 +51,25 @@ void stack_copy_host_to_device(ParticleStack &stackpart_h,ParticleStack &stackpa
     unsigned int mem_stackpart_uint = stack_size * sizeof(unsigned int);
     unsigned int mem_stackpart_uchar = stack_size * sizeof(unsigned char);
     
-    HANDLE_ERROR(cudaMemcpy(stackpart_h.E, stackpart_h.E, mem_stackpart_float, cudaMemcpyHostToDevice));
-    HANDLE_ERROR(cudaMemcpy(stackpart_h.px, stackpart_h.px, mem_stackpart_float, cudaMemcpyHostToDevice));
-    HANDLE_ERROR(cudaMemcpy(stackpart_h.py, stackpart_h.py, mem_stackpart_float, cudaMemcpyHostToDevice));
-    HANDLE_ERROR(cudaMemcpy(stackpart_h.pz, stackpart_h.pz, mem_stackpart_float, cudaMemcpyHostToDevice));
-    HANDLE_ERROR(cudaMemcpy(stackpart_h.dx, stackpart_h.dx, mem_stackpart_float, cudaMemcpyHostToDevice));
-    HANDLE_ERROR(cudaMemcpy(stackpart_h.dy, stackpart_h.dy, mem_stackpart_float, cudaMemcpyHostToDevice));
-    HANDLE_ERROR(cudaMemcpy(stackpart_h.dz, stackpart_h.dz, mem_stackpart_float, cudaMemcpyHostToDevice));
+    HANDLE_ERROR(cudaMemcpy(stackpart_d.E, stackpart_h.E, mem_stackpart_float, cudaMemcpyHostToDevice));
+    HANDLE_ERROR(cudaMemcpy(stackpart_d.px, stackpart_h.px, mem_stackpart_float, cudaMemcpyHostToDevice));
+    HANDLE_ERROR(cudaMemcpy(stackpart_d.py, stackpart_h.py, mem_stackpart_float, cudaMemcpyHostToDevice));
+    HANDLE_ERROR(cudaMemcpy(stackpart_d.pz, stackpart_h.pz, mem_stackpart_float, cudaMemcpyHostToDevice));
+    HANDLE_ERROR(cudaMemcpy(stackpart_d.dx, stackpart_h.dx, mem_stackpart_float, cudaMemcpyHostToDevice));
+    HANDLE_ERROR(cudaMemcpy(stackpart_d.dy, stackpart_h.dy, mem_stackpart_float, cudaMemcpyHostToDevice));
+    HANDLE_ERROR(cudaMemcpy(stackpart_d.dz, stackpart_h.dz, mem_stackpart_float, cudaMemcpyHostToDevice));
     
-    HANDLE_ERROR(cudaMemcpy(stackpart_h.tof, stackpart_h.tof, mem_stackpart_float, cudaMemcpyHostToDevice));
+    HANDLE_ERROR(cudaMemcpy(stackpart_d.tof, stackpart_h.tof, mem_stackpart_float, cudaMemcpyHostToDevice));
     
-    HANDLE_ERROR(cudaMemcpy(stackpart_h.prng_state_1, stackpart_h.prng_state_1, mem_stackpart_uint, cudaMemcpyHostToDevice));
-    HANDLE_ERROR(cudaMemcpy(stackpart_h.prng_state_2, stackpart_h.prng_state_2, mem_stackpart_uint, cudaMemcpyHostToDevice));
-    HANDLE_ERROR(cudaMemcpy(stackpart_h.prng_state_3, stackpart_h.prng_state_3, mem_stackpart_uint, cudaMemcpyHostToDevice));
-    HANDLE_ERROR(cudaMemcpy(stackpart_h.prng_state_4, stackpart_h.prng_state_4, mem_stackpart_uint, cudaMemcpyHostToDevice));
-    HANDLE_ERROR(cudaMemcpy(stackpart_h.prng_state_5, stackpart_h.prng_state_5, mem_stackpart_uint, cudaMemcpyHostToDevice));
+    HANDLE_ERROR(cudaMemcpy(stackpart_d.prng_state_1, stackpart_h.prng_state_1, mem_stackpart_uint, cudaMemcpyHostToDevice));
+    HANDLE_ERROR(cudaMemcpy(stackpart_d.prng_state_2, stackpart_h.prng_state_2, mem_stackpart_uint, cudaMemcpyHostToDevice));
+    HANDLE_ERROR(cudaMemcpy(stackpart_d.prng_state_3, stackpart_h.prng_state_3, mem_stackpart_uint, cudaMemcpyHostToDevice));
+    HANDLE_ERROR(cudaMemcpy(stackpart_d.prng_state_4, stackpart_h.prng_state_4, mem_stackpart_uint, cudaMemcpyHostToDevice));
+    HANDLE_ERROR(cudaMemcpy(stackpart_d.prng_state_5, stackpart_h.prng_state_5, mem_stackpart_uint, cudaMemcpyHostToDevice));
     
-    HANDLE_ERROR(cudaMemcpy(stackpart_h.endsimu, stackpart_h.tof, mem_stackpart_uchar, cudaMemcpyHostToDevice));
-    HANDLE_ERROR(cudaMemcpy(stackpart_h.level, stackpart_h.tof, mem_stackpart_uchar, cudaMemcpyHostToDevice));
-    HANDLE_ERROR(cudaMemcpy(stackpart_h.pname, stackpart_h.tof, mem_stackpart_uchar, cudaMemcpyHostToDevice));
+    HANDLE_ERROR(cudaMemcpy(stackpart_d.endsimu, stackpart_h.tof, mem_stackpart_uchar, cudaMemcpyHostToDevice));
+    HANDLE_ERROR(cudaMemcpy(stackpart_d.level, stackpart_h.tof, mem_stackpart_uchar, cudaMemcpyHostToDevice));
+    HANDLE_ERROR(cudaMemcpy(stackpart_d.pname, stackpart_h.tof, mem_stackpart_uchar, cudaMemcpyHostToDevice));
 
 }
 
@@ -80,25 +80,25 @@ void stack_copy_device_to_host(ParticleStack &stackpart_d,ParticleStack &stackpa
     unsigned int mem_stackpart_uint = stack_size * sizeof(unsigned int);
     unsigned int mem_stackpart_uchar = stack_size * sizeof(unsigned char);
     
-    HANDLE_ERROR(cudaMemcpy(stackpart_h.E, stackpart_h.E, mem_stackpart_float, cudaMemcpyDeviceToHost));
-    HANDLE_ERROR(cudaMemcpy(stackpart_h.px, stackpart_h.px, mem_stackpart_float, cudaMemcpyDeviceToHost));
-    HANDLE_ERROR(cudaMemcpy(stackpart_h.py, stackpart_h.py, mem_stackpart_float, cudaMemcpyDeviceToHost));
-    HANDLE_ERROR(cudaMemcpy(stackpart_h.pz, stackpart_h.pz, mem_stackpart_float, cudaMemcpyDeviceToHost));
-    HANDLE_ERROR(cudaMemcpy(stackpart_h.dx, stackpart_h.dx, mem_stackpart_float, cudaMemcpyDeviceToHost));
-    HANDLE_ERROR(cudaMemcpy(stackpart_h.dy, stackpart_h.dy, mem_stackpart_float, cudaMemcpyDeviceToHost));
-    HANDLE_ERROR(cudaMemcpy(stackpart_h.dz, stackpart_h.dz, mem_stackpart_float, cudaMemcpyDeviceToHost));
+    HANDLE_ERROR(cudaMemcpy(stackpart_h.E, stackpart_d.E, mem_stackpart_float, cudaMemcpyDeviceToHost));
+    HANDLE_ERROR(cudaMemcpy(stackpart_h.px, stackpart_d.px, mem_stackpart_float, cudaMemcpyDeviceToHost));
+    HANDLE_ERROR(cudaMemcpy(stackpart_h.py, stackpart_d.py, mem_stackpart_float, cudaMemcpyDeviceToHost));
+    HANDLE_ERROR(cudaMemcpy(stackpart_h.pz, stackpart_d.pz, mem_stackpart_float, cudaMemcpyDeviceToHost));
+    HANDLE_ERROR(cudaMemcpy(stackpart_h.dx, stackpart_d.dx, mem_stackpart_float, cudaMemcpyDeviceToHost));
+    HANDLE_ERROR(cudaMemcpy(stackpart_h.dy, stackpart_d.dy, mem_stackpart_float, cudaMemcpyDeviceToHost));
+    HANDLE_ERROR(cudaMemcpy(stackpart_h.dz, stackpart_d.dz, mem_stackpart_float, cudaMemcpyDeviceToHost));
     
-    HANDLE_ERROR(cudaMemcpy(stackpart_h.tof, stackpart_h.tof, mem_stackpart_float, cudaMemcpyDeviceToHost));
+    HANDLE_ERROR(cudaMemcpy(stackpart_h.tof, stackpart_d.tof, mem_stackpart_float, cudaMemcpyDeviceToHost));
     
-    HANDLE_ERROR(cudaMemcpy(stackpart_h.prng_state_1, stackpart_h.prng_state_1, mem_stackpart_uint, cudaMemcpyDeviceToHost));
-    HANDLE_ERROR(cudaMemcpy(stackpart_h.prng_state_2, stackpart_h.prng_state_2, mem_stackpart_uint, cudaMemcpyDeviceToHost));
-    HANDLE_ERROR(cudaMemcpy(stackpart_h.prng_state_3, stackpart_h.prng_state_3, mem_stackpart_uint, cudaMemcpyDeviceToHost));
-    HANDLE_ERROR(cudaMemcpy(stackpart_h.prng_state_4, stackpart_h.prng_state_4, mem_stackpart_uint, cudaMemcpyDeviceToHost));
-    HANDLE_ERROR(cudaMemcpy(stackpart_h.prng_state_5, stackpart_h.prng_state_5, mem_stackpart_uint, cudaMemcpyDeviceToHost));
+    HANDLE_ERROR(cudaMemcpy(stackpart_h.prng_state_1, stackpart_d.prng_state_1, mem_stackpart_uint, cudaMemcpyDeviceToHost));
+    HANDLE_ERROR(cudaMemcpy(stackpart_h.prng_state_2, stackpart_d.prng_state_2, mem_stackpart_uint, cudaMemcpyDeviceToHost));
+    HANDLE_ERROR(cudaMemcpy(stackpart_h.prng_state_3, stackpart_d.prng_state_3, mem_stackpart_uint, cudaMemcpyDeviceToHost));
+    HANDLE_ERROR(cudaMemcpy(stackpart_h.prng_state_4, stackpart_d.prng_state_4, mem_stackpart_uint, cudaMemcpyDeviceToHost));
+    HANDLE_ERROR(cudaMemcpy(stackpart_h.prng_state_5, stackpart_d.prng_state_5, mem_stackpart_uint, cudaMemcpyDeviceToHost));
     
-    HANDLE_ERROR(cudaMemcpy(stackpart_h.endsimu, stackpart_h.tof, mem_stackpart_uchar, cudaMemcpyDeviceToHost));
-    HANDLE_ERROR(cudaMemcpy(stackpart_h.level, stackpart_h.tof, mem_stackpart_uchar, cudaMemcpyDeviceToHost));
-    HANDLE_ERROR(cudaMemcpy(stackpart_h.pname, stackpart_h.tof, mem_stackpart_uchar, cudaMemcpyDeviceToHost));
+    HANDLE_ERROR(cudaMemcpy(stackpart_h.endsimu, stackpart_d.tof, mem_stackpart_uchar, cudaMemcpyDeviceToHost));
+    HANDLE_ERROR(cudaMemcpy(stackpart_h.level, stackpart_d.tof, mem_stackpart_uchar, cudaMemcpyDeviceToHost));
+    HANDLE_ERROR(cudaMemcpy(stackpart_h.pname, stackpart_d.tof, mem_stackpart_uchar, cudaMemcpyDeviceToHost));
     
 PRINTFUNCTION
 }
