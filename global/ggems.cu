@@ -17,6 +17,36 @@
 
 #ifndef GGEMS_CU
 #define GGEMS_CU
+#include "ggems.cuh"
+#include "../processes/structures.cuh"
+// Set a GPU device
+void set_gpu_device(int deviceChoice, float minversion) {
+
+    int deviceCount = 0;
+    cudaGetDeviceCount(&deviceCount);
+
+    if (deviceCount == 0) {
+        printf("[\033[31;03mWARNING\033[00m] There is no device supporting CUDA\n");
+        exit(EXIT_FAILURE);
+    }
+    cudaDeviceProp prop;
+    cudaGetDeviceProperties(&prop, deviceChoice%deviceCount);
+
+    if(prop.major<minversion) {
+        printf("[\033[31;03mWARNING\033[00m] Your device is not compatible with %1.1f version\n",minversion);    
+        exit(EXIT_FAILURE);
+    }
+
+    cudaSetDevice(deviceChoice%deviceCount);
+    printf("[\033[32;01mok\033[00m] \e[1m%s\e[21m found\n",prop.name);
+    
+}
+
+// Reset the GPU
+void reset_gpu_device() {
+    printf("[\033[32;01mok\033[00m] Reset device .. \n");
+    cudaDeviceReset();
+}
 
 
 

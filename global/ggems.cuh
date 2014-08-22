@@ -15,9 +15,12 @@
 //
 // GGEMS Copyright (C) 2013-2014 Julien Bert
 
-#ifndef GGEMS_H
-#define GGEMS_H
+#ifndef GGEMS_CUH
+#define GGEMS_CUH
+#include "../processes/structures.cuh"
 
 
+void set_gpu_device(int deviceChoice,float minversion=3.0);
+void reset_gpu_device();
 
 #endif

@@ -305,8 +305,15 @@ void Voxelized::load_from_mhd(std::string volume_name, std::string range_name) {
     // Read data
     FILE *pfile = fopen(ElementDataFile.c_str(), "rb");
     if (!pfile) {
-        printf("Error when loading mhd file: %s\n", ElementDataFile.c_str());
-        exit(EXIT_FAILURE);
+        std::string nameWithRelativePath = volume_name;
+        int lastindex = nameWithRelativePath.find_last_of("."); 
+        nameWithRelativePath = nameWithRelativePath.substr(0, lastindex);
+        nameWithRelativePath+=".raw";
+        pfile = fopen(nameWithRelativePath.c_str(), "rb");
+        if (!pfile) {
+            printf("Error when loading mhd file: %s\n", ElementDataFile.c_str());
+            exit(EXIT_FAILURE);
+        }
     }
 
     number_of_voxels = nx*ny*nz;

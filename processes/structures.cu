@@ -162,7 +162,8 @@ void stack_device_malloc(ParticleStack &stackpart, int stack_size) {
 }
 
 // Init particle seeds with the main seed
-void wrap_init_particle_seeds(ParticleStack &d_p, int seed) {
+__host__ void wrap_init_particle_seeds(ParticleStack &d_p, int seed) {
+
     unsigned int *state1 = (unsigned int*)malloc(sizeof(unsigned int)*d_p.size);
     unsigned int *state2 = (unsigned int*)malloc(sizeof(unsigned int)*d_p.size);
     unsigned int *state3 = (unsigned int*)malloc(sizeof(unsigned int)*d_p.size);
@@ -180,12 +181,7 @@ void wrap_init_particle_seeds(ParticleStack &d_p, int seed) {
         state5[i] = 0;      // carry
         ++i;
     }
-// printf("%f %f %f %f %");
-    HANDLE_ERROR(cudaMemcpy(d_p.prng_state_1, state1, sizeof(unsigned int)*d_p.size, cudaMemcpyHostToDevice));
-    HANDLE_ERROR(cudaMemcpy(d_p.prng_state_2, state2, sizeof(unsigned int)*d_p.size, cudaMemcpyHostToDevice));
-    HANDLE_ERROR(cudaMemcpy(d_p.prng_state_3, state3, sizeof(unsigned int)*d_p.size, cudaMemcpyHostToDevice));
-    HANDLE_ERROR(cudaMemcpy(d_p.prng_state_4, state4, sizeof(unsigned int)*d_p.size, cudaMemcpyHostToDevice));
-    HANDLE_ERROR(cudaMemcpy(d_p.prng_state_5, state5, sizeof(unsigned int)*d_p.size, cudaMemcpyHostToDevice));
+
 }
 
 // Copy electron cross section table to device
