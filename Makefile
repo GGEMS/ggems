@@ -12,8 +12,6 @@ all: dir $(patsubst %.cu,%.o, $(wildcard */*.cu))
 	make install
 
 dir:
-	rm -rf $(BUILDDIR)
-	rm -rf $(LIBDIR)
 	mkdir -p $(BUILDDIR)
 	mkdir -p $(LIBDIR)
 

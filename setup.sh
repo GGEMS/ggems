@@ -1,4 +1,4 @@
-export GGEMS=$PWD
+export GGEMS="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 export GGEMSLIB=$GGEMS/lib 
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$GGEMS/lib
 
