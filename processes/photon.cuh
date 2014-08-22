@@ -24,28 +24,28 @@
 #include "sandia_table.cuh"
 #include "shell_data.cuh"
 
-__device__ float Compton_CSPA (float E, unsigned short int Z);
+__host__ __device__ float Compton_CSPA (float E, unsigned short int Z);
 
 // Compute the total Compton cross section for a given material
-__device__ float Compton_CS(GPUPhantomMaterials materials, unsigned short int mat, float E);
+__host__ __device__ float Compton_CS(GPUPhantomMaterials materials, unsigned short int mat, float E);
 // Compton Scatter (Standard - Klein-Nishina) with secondary (e-)
-__device__ float Compton_SampleSecondaries(ParticleStack particles, float cutE, unsigned int id,unsigned char flag_secondary);
+__host__ __device__ float Compton_SampleSecondaries(ParticleStack particles, float cutE, unsigned int id,unsigned char flag_secondary);
 
 ///// PhotoElectric /////
 
 // PhotoElectric Cross Section Per Atom (Standard)
-__device__ float PhotoElec_CSPA(float E, unsigned short int Z);
+__host__ __device__ float PhotoElec_CSPA(float E, unsigned short int Z);
 
 // Compute the total Compton cross section for a given material
-__device__ float PhotoElec_CS(GPUPhantomMaterials materials, 
+__host__ __device__ float PhotoElec_CS(GPUPhantomMaterials materials, 
                               unsigned short int mat, float E);
 
 // Compute Theta distribution of the emitted electron, with respect to the incident Gamma
 // The Sauter-Gavrila distribution for the K-shell is used
-__device__ float PhotoElec_ElecCosThetaDistribution(ParticleStack part,unsigned int id, float kineEnergy);
+__host__ __device__ float PhotoElec_ElecCosThetaDistribution(ParticleStack part,unsigned int id, float kineEnergy);
 
 // PhotoElectric effect
-__device__ float PhotoElec_SampleSecondaries(ParticleStack particles, GPUPhantomMaterials mat, unsigned short int matindex, unsigned int id, unsigned char flag_secondary,float cutEnergyElectron=990*eV );
+__host__ __device__ float PhotoElec_SampleSecondaries(ParticleStack particles, GPUPhantomMaterials mat, unsigned short int matindex, unsigned int id, unsigned char flag_secondary,float cutEnergyElectron=990*eV );
 
 
 #endif

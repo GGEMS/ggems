@@ -19,10 +19,11 @@
 #define PHOTON_CU
 #include "photon.cuh"
 
+
 ///// Compton /////
 
 // Compton Cross Section Per Atom (Standard - Klein-Nishina)
-__device__ float Compton_CSPA(float E, unsigned short int Z) {
+__host__ __device__ float Compton_CSPA(float E, unsigned short int Z) {
     float CrossSection = 0.0;
     if (Z<1 || E < 1e-4f) {return CrossSection;}
 
@@ -49,7 +50,7 @@ __device__ float Compton_CSPA(float E, unsigned short int Z) {
 }
 
 // Compute the total Compton cross section for a given material
-__device__ float Compton_CS(GPUPhantomMaterials materials, unsigned short int mat, float E) {
+__host__ __device__ float Compton_CS(GPUPhantomMaterials materials, unsigned short int mat, float E) {
     float CS = 0.0f;
     int i;
     int index = materials.index[mat];
@@ -62,7 +63,7 @@ __device__ float Compton_CS(GPUPhantomMaterials materials, unsigned short int ma
 }
 
 // Compton Scatter (Standard - Klein-Nishina) with secondary (e-)
-__device__ float Compton_SampleSecondaries(ParticleStack particles, float cutE, unsigned int id,
+__host__ __device__ float Compton_SampleSecondaries(ParticleStack particles, float cutE, unsigned int id,
                                            unsigned char flag_secondary) {
     
     float gamE0 = particles.E[id];
@@ -143,7 +144,7 @@ __device__ float Compton_SampleSecondaries(ParticleStack particles, float cutE, 
 ///// PhotoElectric /////
 
 // PhotoElectric Cross Section Per Atom (Standard)
-__device__ float PhotoElec_CSPA(float E, unsigned short int Z) {
+__host__ __device__ float PhotoElec_CSPA(float E, unsigned short int Z) {
     // from Sandia data, the same for all Z
     float Emin = fmax(PhotoElec_std_IonizationPotentials[Z]*1e-6f, 0.01e-3f);
     if (E < Emin) {return 0.0f;}
@@ -163,7 +164,7 @@ __device__ float PhotoElec_CSPA(float E, unsigned short int Z) {
 }
 
 // Compute the total Compton cross section for a given material
-__device__ float PhotoElec_CS(GPUPhantomMaterials materials, 
+__host__ __device__ float PhotoElec_CS(GPUPhantomMaterials materials, 
                               unsigned short int mat, float E) {
     float CS = 0.0f;
     int i;
@@ -178,7 +179,7 @@ __device__ float PhotoElec_CS(GPUPhantomMaterials materials,
 
 // Compute Theta distribution of the emitted electron, with respect to the incident Gamma
 // The Sauter-Gavrila distribution for the K-shell is used
-__device__ float PhotoElec_ElecCosThetaDistribution(ParticleStack part,
+__host__ __device__ float PhotoElec_ElecCosThetaDistribution(ParticleStack part,
                                                     unsigned int id,
                                                     float kineEnergy) {
     float costeta = 1.0f;
@@ -202,7 +203,7 @@ __device__ float PhotoElec_ElecCosThetaDistribution(ParticleStack part,
 }
 
 // PhotoElectric effect
-__device__ float PhotoElec_SampleSecondaries(ParticleStack particles, GPUPhantomMaterials mat,
+__host__ __device__ float PhotoElec_SampleSecondaries(ParticleStack particles, GPUPhantomMaterials mat,
                                              unsigned short int matindex, unsigned int id,
                                              unsigned char flag_secondary,
                                              float cutEnergyElectron) {

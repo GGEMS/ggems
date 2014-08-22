@@ -18,6 +18,11 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
+// GPu functions to cpu
+#ifndef __CUDA_ARCH__
+#define __fdividef(a,b) (a/b)
+#endif
+
 // #define pi                               3.141592653589793116
 #define two_pi                           2.0*pi
 #define gpu_twopi                        2.0*pi
