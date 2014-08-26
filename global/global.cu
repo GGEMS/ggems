@@ -17,7 +17,7 @@
 
 #ifndef GLOBAL_CU
 #define GLOBAL_CU
-#include "ggems.cuh"
+#include "global.cuh"
 #include "../processes/structures.cuh"
 // Set a GPU device
 void set_gpu_device(int deviceChoice, float minversion) {

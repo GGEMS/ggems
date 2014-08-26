@@ -146,6 +146,17 @@ void GeometryBuilder::print() {
                     World.data_objects[address_obj+3], World.data_objects[address_obj+4],
                     World.data_objects[address_obj+5], World.data_objects[address_obj+6],
                     World.data_objects[address_obj+7], World.data_objects[address_obj+8]);
+
+            printf("====> %i\n", World.data_objects[address_obj+9]);
+            if (World.data_objects[address_obj+9] == NO_OCTREE) {
+                printf("Octree: None\n");
+            } else if (World.data_objects[address_obj+9] == REG_OCTREE) {
+                printf("Octree: Regular (%i x %i x %i)\n",
+                       World.data_objects[address_obj+10], World.data_objects[address_obj+11],
+                       World.data_objects[address_obj+12]);
+
+            }
+
             break;
 
         } // switch
@@ -310,6 +321,7 @@ unsigned int GeometryBuilder::add_object(Meshed obj, unsigned int mother_id) {
 
     // Store the information of this object
     World.data_objects.push_back(MESHED);                                // Object Type
+
     World.data_objects.push_back(get_material_index(obj.material_name)); // Material index
     World.data_objects.push_back(obj.number_of_triangles);               // Number of triangles
 
@@ -325,10 +337,36 @@ unsigned int GeometryBuilder::add_object(Meshed obj, unsigned int mother_id) {
     World.data_objects.reserve(World.data_objects.size() + obj.vertices.size());
     World.data_objects.insert(World.data_objects.end(), obj.vertices.begin(), obj.vertices.end());
 
-    World.name_objects.push_back(obj.object_name);                       // Name of this object
+    // Append the octree if defined
+    World.data_objects.push_back(obj.octree_type); // NO_OCTREE, REG_OCTREE, ADP_OCTREE
+    if (obj.octree_type == REG_OCTREE) {
+        World.data_objects.push_back(obj.nb_cell_x); // Octree size in cells
+        World.data_objects.push_back(obj.nb_cell_y);
+        World.data_objects.push_back(obj.nb_cell_z);
+        // Append the number of objects per cell
+        World.data_objects.reserve(World.data_objects.size() + obj.nb_objs_per_cell.size());
+        World.data_objects.insert(World.data_objects.end(), obj.nb_objs_per_cell.begin(),
+                                                            obj.nb_objs_per_cell.end());
+        // Append the addr of each cell
+        World.data_objects.reserve(World.data_objects.size() + obj.addr_to_cell.size());
+        World.data_objects.insert(World.data_objects.end(), obj.addr_to_cell.begin(),
+                                                            obj.addr_to_cell.end());
+        // Append the list of objects per cell
+        World.data_objects.reserve(World.data_objects.size() + obj.list_objs_per_cell.size());
+        World.data_objects.insert(World.data_objects.end(), obj.list_objs_per_cell.begin(),
+                                                            obj.list_objs_per_cell.end());
+    }
+
+    // Name of this object
+    World.name_objects.push_back(obj.object_name);
 
     // Store the size of this object
-    World.size_of_objects.push_back(obj.vertices.size()+9);
+    if (obj.octree_type == REG_OCTREE) {
+        World.size_of_objects.push_back(obj.vertices.size() + obj.nb_objs_per_cell.size() +
+                                        obj.addr_to_cell.size() + obj.list_objs_per_cell.size() + 13);
+    } else { // NO_OCTREE
+        World.size_of_objects.push_back(obj.vertices.size()+10);
+    }
 
     return World.tree.get_current_id();
 
@@ -392,21 +430,5 @@ unsigned int GeometryBuilder::add_object(Voxelized obj, unsigned int mother_id) 
     return World.tree.get_current_id();
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 #endif
