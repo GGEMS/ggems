@@ -15,8 +15,8 @@
 //
 // GGEMS Copyright (C) 2013-2014 Julien Bert
 
-#ifndef GGEMS_CU
-#define GGEMS_CU
+#ifndef GLOBAL_CU
+#define GLOBAL_CU
 #include "ggems.cuh"
 #include "../processes/structures.cuh"
 // Set a GPU device

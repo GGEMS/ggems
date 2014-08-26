@@ -15,8 +15,8 @@
 //
 // GGEMS Copyright (C) 2013-2014 Julien Bert
 
-#ifndef GGEMS_CUH
-#define GGEMS_CUH
+#ifndef GLOBAL_CUH
+#define GLOBAL_CUH
 #include "../processes/structures.cuh"
 
 

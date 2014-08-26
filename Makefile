@@ -21,6 +21,20 @@ copy :
 %.o: %.cu
 	nvcc $(CUDA_FLAGS) $^ -c -o $@
 	
+buildo: */*.cu
+	nvcc $(CUDA_FLAGS) */*.cu -c -o $(BUILDDIR)/ggems.o
+	
+buildso :
+	nvcc -shared -arch=sm_30 -o lib/libggems.so $(BUILDDIR)/ggems.o
+	
+builda : $(BUILDDIR)/*.o
+	ar r -o $(LIBDIR)/libggems.a $(BUILDDIR)/*.o
+	
+shared: $(patsubst $(BUILDDIR)/%.o, $(LIBDIR)/lib%.so, $(wildcard $(BUILDDIR)/*.o))
+	
+lib/lib%.so: $(BUILDDIR)/%.o
+	nvcc -shared -arch=sm_30 -o lib/libtest.so $(BUILDDIR)/*.o
+	
 install: $(patsubst $(BUILDDIR)/%.o, $(LIBDIR)/lib%.a, $(wildcard $(BUILDDIR)/*.o))
 
 sources:
