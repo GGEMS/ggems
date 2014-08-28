@@ -1,5 +1,5 @@
-#ifndef SHELL_DATA_CU
-#define SHELL_DATA_CU
+#ifndef SHELL_DATA_CUH
+#define SHELL_DATA_CUH
 
 
 

@@ -17,7 +17,11 @@ LIBDIR = lib
 SOURCEDIR=sources
 
 
-all: clean dir $(patsubst %.cu,%.o, $(wildcard */*.cu)) 
+# totoall : dir $(patsubst %.cu,%.o, $(wildcard */*.cu)) 
+# 	$(patsubst %.cu,%.o, $(wildcard */*.cu)) 
+# 	make install
+	
+all: dir $(patsubst %.cu,%.o, $(wildcard */*.cu)) 
 	make copy
 	make install
 
@@ -27,9 +31,19 @@ dir:
 
 copy :
 	mv */*.o $(BUILDDIR)
+	
+	
+biggems:
+	nvcc $(CUDA_FLAGS) -c -o ggems.o global/ggems.cu -Llib -laabb -lbuilder -ldosimetry -lelectron -lelectron_navigator -lfun -lglobal -lmain_navigator -lmeshed -lphoton -lphoton_navigator -lprng -lproton -lproton_navigator -lraytracing -lsphere -lstructures -lvector -lvoxelized $(G4INCLUDES) $(G4LIBS)	
 
-%.o: %.cu
-	nvcc $(CUDA_FLAGS) $^ -c -o $@
+%.o: %.cu 
+	nvcc $(CUDA_FLAGS) $^ -c -o $@ 
+	
+processes/photon.o: processes/photon.cu
+	nvcc $(CUDA_FLAGS) $^ -c -o $@ -lsandia_table -lshell_data
+	
+global/ggems.o: global/ggems.cu
+	nvcc $(CUDA_FLAGS) $^ -c -o $@ $(G4INCLUDES) $(G4LIBS)	
 	
 geometry/materials.o: geometry/materials.cu
 	nvcc $(CUDA_FLAGS) $^ -c -o $@ $(G4INCLUDES) $(G4LIBS)

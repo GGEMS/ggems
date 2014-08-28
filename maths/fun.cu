@@ -133,10 +133,9 @@ inline __device__ float Gaussian(float mean,float rms,ParticleStack &particles, 
         U1=2.*JKISS32(particles, id)-1.;
         U2=2.*JKISS32(particles, id)-1.;
         Fx=U1*U1+U2*U2;
-
+   
     } while((Fx>=1.));
     
-    float temps = Fx;
     Fx=sqrtf((-2.*logf(Fx))/Fx);
 
     Disp=U1*Fx;

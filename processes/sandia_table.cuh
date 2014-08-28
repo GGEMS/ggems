@@ -1,5 +1,5 @@
-#ifndef SANDIA_TABLE_CU
-#define SANDIA_TABLE_CU
+#ifndef SANDIA_TABLE_CUH
+#define SANDIA_TABLE_CUH
 
 // ************************************************************************
 // * PE - Standard (Sandia table)
