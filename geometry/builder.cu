@@ -147,7 +147,6 @@ void GeometryBuilder::print() {
                     World.data_objects[address_obj+5], World.data_objects[address_obj+6],
                     World.data_objects[address_obj+7], World.data_objects[address_obj+8]);
 
-            printf("====> %i\n", World.data_objects[address_obj+9]);
             if (World.data_objects[address_obj+9] == NO_OCTREE) {
                 printf("Octree: None\n");
             } else if (World.data_objects[address_obj+9] == REG_OCTREE) {
@@ -208,6 +207,76 @@ void GeometryBuilder::print_raw() {
         ++i;
     }
     printf("\n\n");
+
+}
+
+// Save the world in order to share an use it later
+void GeometryBuilder::save_world(std::string filename) {
+
+    FILE *pfile = fopen(filename.c_str(), "wb");
+    unsigned int i, nb;
+
+    // .: Tree :.  -  First export the tree that structure the world
+
+    // 1. ptr_nodes [N, data]
+    nb = World.tree.ptr_nodes.size();
+    fwrite(&nb, 1, sizeof(unsigned int), pfile);
+    fwrite(World.tree.ptr_nodes.data(), nb, sizeof(unsigned int), pfile);
+
+    // 2. size_of_nodes [N, data]
+    nb = World.tree.size_of_nodes.size();
+    fwrite(&nb, 1, sizeof(unsigned int), pfile);
+    fwrite(World.tree.size_of_nodes.data(), nb, sizeof(unsigned int), pfile);
+
+    // 3. child_nodes [N, data]
+    nb = World.tree.child_nodes.size();
+    fwrite(&nb, 1, sizeof(unsigned int), pfile);
+    fwrite(World.tree.child_nodes.data(), nb, sizeof(unsigned int), pfile);
+
+    // 4. mother_node [N, data]
+    nb = World.tree.mother_node.size();
+    fwrite(&nb, 1, sizeof(unsigned int), pfile);
+    fwrite(World.tree.mother_node.data(), nb, sizeof(unsigned int), pfile);
+
+    // 5. cur_node_id [val]
+    fwrite(&World.tree.cur_node_id, 1, sizeof(unsigned int), pfile);
+
+    // .: World :.  -  Then export the world
+
+    // 6. name_objects [N, data]
+    nb = World.name_objects.size();
+    fwrite(&nb, 1, sizeof(unsigned int), pfile);
+    i=0; while (i < nb) {
+        fwrite(World.name_objects[i].c_str(), World.name_objects[i].size(), sizeof(char), pfile);
+        ++i;
+    }
+
+    // 7. materials_list [N, data]
+    nb = World.materials_list.size();
+    fwrite(&nb, 1, sizeof(unsigned int), pfile);
+    i=0; while (i < nb) {
+        fwrite(World.materials_list[i].c_str(), World.materials_list[i].size(), sizeof(char), pfile);
+        ++i;
+    }
+
+    // 8. ptr_objects [N, data]
+    nb = World.ptr_objects.size();
+    fwrite(&nb, 1, sizeof(unsigned int), pfile);
+    fwrite(World.ptr_objects.data(), nb, sizeof(unsigned int), pfile);
+
+    // 9. size_of_objects [N, data]
+    nb = World.size_of_objects.size();
+    fwrite(&nb, 1, sizeof(unsigned int), pfile);
+    fwrite(World.size_of_objects.data(), nb, sizeof(unsigned int), pfile);
+
+    // 10. data_objects [N, data] (the big one!!!)
+    nb = World.data_objects.size();
+    fwrite(&nb, 1, sizeof(unsigned int), pfile);
+    fwrite(World.data_objects.data(), nb, sizeof(float), pfile);
+
+
+    fclose(pfile);
+
 
 }
 
@@ -333,16 +402,20 @@ unsigned int GeometryBuilder::add_object(Meshed obj, unsigned int mother_id) {
     World.data_objects.push_back(obj.zmin);
     World.data_objects.push_back(obj.zmax);
 
-    // Append every triangle
-    World.data_objects.reserve(World.data_objects.size() + obj.vertices.size());
-    World.data_objects.insert(World.data_objects.end(), obj.vertices.begin(), obj.vertices.end());
-
-    // Append the octree if defined
+    // Append octree information
     World.data_objects.push_back(obj.octree_type); // NO_OCTREE, REG_OCTREE, ADP_OCTREE
     if (obj.octree_type == REG_OCTREE) {
         World.data_objects.push_back(obj.nb_cell_x); // Octree size in cells
         World.data_objects.push_back(obj.nb_cell_y);
         World.data_objects.push_back(obj.nb_cell_z);
+    }
+
+    // Append every triangle
+    World.data_objects.reserve(World.data_objects.size() + obj.vertices.size());
+    World.data_objects.insert(World.data_objects.end(), obj.vertices.begin(), obj.vertices.end());
+
+    // Append the octree if defined
+    if (obj.octree_type == REG_OCTREE) {
         // Append the number of objects per cell
         World.data_objects.reserve(World.data_objects.size() + obj.nb_objs_per_cell.size());
         World.data_objects.insert(World.data_objects.end(), obj.nb_objs_per_cell.begin(),

@@ -63,9 +63,9 @@
 
 #define gramme               1.                             // Gramme
 
-#define mole                     1.                             // Mole
+#define mole                 1.                             // Mole
 
-#define sec                      1.                             // Seconde
+#define sec                  1.                             // Seconde
 
 #define m                1.E3                       // Millimetre
 #define cm             (1.E-2*m)          // Millimetre

@@ -39,14 +39,15 @@ class BVH {
         unsigned int get_current_id();
         void print();
 
-    private:
-        void update_address();
-
         std::vector<unsigned int> ptr_nodes;
         std::vector<unsigned int> size_of_nodes;
         std::vector<unsigned int> child_nodes;
         std::vector<unsigned int> mother_node;
         unsigned int cur_node_id;
+
+    private:
+        void update_address();
+
 };
 
 // Class that handle the geometry of the world
@@ -70,12 +71,15 @@ class GeometryBuilder {
         unsigned int add_object(Sphere obj, unsigned int mother_id);
         unsigned int add_object(Meshed obj, unsigned int mother_id);
         unsigned int add_object(Voxelized obj, unsigned int mother_id);
+
+        void save_world(std::string filename);
+
         void print();
         void print_raw();
 
-    private:
         Geometry World;
 
+    private:        
         unsigned int get_material_index(std::string material_name);
 
 
