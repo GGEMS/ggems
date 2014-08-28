@@ -15,8 +15,8 @@
 //
 // GGEMS Copyright (C) 2013-2014 Julien Bert
 
-#ifndef VECTOR_H
-#define VECTOR_H
+#ifndef VECTOR_CUH
+#define VECTOR_CUH
 
 /////////////////////////////////////////////////////////////////////////////
 // Maths

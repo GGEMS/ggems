@@ -199,41 +199,41 @@ std::string MaterialDataBase::remove_white_space(std::string txt) {
 MaterialBuilder::MaterialBuilder() {} // // This class is used to build the material table
 
 // Load elements database (wrapper to the class MaterialDataBase)
-void MaterialBuilder::load_elements(std::string filename) {
-    MaterialDataBase.load_elements(filename);
+void MaterialBuilder::load_elements_database(std::string filename) {
+    material_db.load_elements(filename);
 }
 
 // Load materials database (wrapper to the class MaterialDataBase)
-void MaterialBuilder::load_materials(std::string filename) {
-    MaterialDataBase.load_materials(filename);
+void MaterialBuilder::load_materials_database(std::string filename) {
+    material_db.load_materials(filename);
 }
 
 // Build the materials table according the object contains in the world
 void MaterialBuilder::get_materials_table_from_world(Geometry World) {
 
     // First allocated data to the structure according the number of materials
-    MaterialsTable.nb_materials = World.materials_list.size();
-    MaterialsTable.nb_elements = (unsigned short int*)malloc(sizeof(unsigned short int)*MaterialsTable.nb_materials);
-    MaterialsTable.index = (unsigned short int*)malloc(sizeof(unsigned short int)*MaterialsTable.nb_materials);
-    MaterialsTable.nb_atoms_per_vol = (float*)malloc(sizeof(float)*MaterialsTable.nb_materials);
-    MaterialsTable.nb_electrons_per_vol = (float*)malloc(sizeof(float)*MaterialsTable.nb_materials);
-    MaterialsTable.electron_mean_excitation_energy = (float*)malloc(sizeof(float)*MaterialsTable.nb_materials);
-    MaterialsTable.rad_length = (float*)malloc(sizeof(float)*MaterialsTable.nb_materials);
-    MaterialsTable.fX0 = (float*)malloc(sizeof(float)*MaterialsTable.nb_materials);
-    MaterialsTable.fX1 = (float*)malloc(sizeof(float)*MaterialsTable.nb_materials);
-    MaterialsTable.fD0 = (float*)malloc(sizeof(float)*MaterialsTable.nb_materials);
-    MaterialsTable.fC = (float*)malloc(sizeof(float)*MaterialsTable.nb_materials);
-    MaterialsTable.fA = (float*)malloc(sizeof(float)*MaterialsTable.nb_materials);
-    MaterialsTable.fM = (float*)malloc(sizeof(float)*MaterialsTable.nb_materials);
-    MaterialsTable.density = (float*)malloc(sizeof(float)*MaterialsTable.nb_materials);
-    MaterialsTable.fF1 = (float*)malloc(sizeof(float)*MaterialsTable.nb_materials);
-    MaterialsTable.fF2 = (float*)malloc(sizeof(float)*MaterialsTable.nb_materials);
-    MaterialsTable.fEnergy0 = (float*)malloc(sizeof(float)*MaterialsTable.nb_materials);
-    MaterialsTable.fEnergy1 = (float*)malloc(sizeof(float)*MaterialsTable.nb_materials);
-    MaterialsTable.fEnergy2 = (float*)malloc(sizeof(float)*MaterialsTable.nb_materials);
-    MaterialsTable.fLogEnergy1 = (float*)malloc(sizeof(float)*MaterialsTable.nb_materials);
-    MaterialsTable.fLogEnergy2 = (float*)malloc(sizeof(float)*MaterialsTable.nb_materials);
-    MaterialsTable.fLogMeanExcitationEnergy = (float*)malloc(sizeof(float)*MaterialsTable.nb_materials);
+    materials_table.nb_materials = World.materials_list.size();
+    materials_table.nb_elements = (unsigned short int*)malloc(sizeof(unsigned short int)*materials_table.nb_materials);
+    materials_table.index = (unsigned short int*)malloc(sizeof(unsigned short int)*materials_table.nb_materials);
+    materials_table.nb_atoms_per_vol = (float*)malloc(sizeof(float)*materials_table.nb_materials);
+    materials_table.nb_electrons_per_vol = (float*)malloc(sizeof(float)*materials_table.nb_materials);
+    materials_table.electron_mean_excitation_energy = (float*)malloc(sizeof(float)*materials_table.nb_materials);
+    materials_table.rad_length = (float*)malloc(sizeof(float)*materials_table.nb_materials);
+    materials_table.fX0 = (float*)malloc(sizeof(float)*materials_table.nb_materials);
+    materials_table.fX1 = (float*)malloc(sizeof(float)*materials_table.nb_materials);
+    materials_table.fD0 = (float*)malloc(sizeof(float)*materials_table.nb_materials);
+    materials_table.fC = (float*)malloc(sizeof(float)*materials_table.nb_materials);
+    materials_table.fA = (float*)malloc(sizeof(float)*materials_table.nb_materials);
+    materials_table.fM = (float*)malloc(sizeof(float)*materials_table.nb_materials);
+    materials_table.density = (float*)malloc(sizeof(float)*materials_table.nb_materials);
+    materials_table.fF1 = (float*)malloc(sizeof(float)*materials_table.nb_materials);
+    materials_table.fF2 = (float*)malloc(sizeof(float)*materials_table.nb_materials);
+    materials_table.fEnergy0 = (float*)malloc(sizeof(float)*materials_table.nb_materials);
+    materials_table.fEnergy1 = (float*)malloc(sizeof(float)*materials_table.nb_materials);
+    materials_table.fEnergy2 = (float*)malloc(sizeof(float)*materials_table.nb_materials);
+    materials_table.fLogEnergy1 = (float*)malloc(sizeof(float)*materials_table.nb_materials);
+    materials_table.fLogEnergy2 = (float*)malloc(sizeof(float)*materials_table.nb_materials);
+    materials_table.fLogMeanExcitationEnergy = (float*)malloc(sizeof(float)*materials_table.nb_materials);
 
     int i, j;
     unsigned int access_index = 0;
@@ -241,7 +241,7 @@ void MaterialBuilder::get_materials_table_from_world(Geometry World) {
     std::string mat_name, elt_name;
     Material cur_mat;
 
-    i=0; while (i < MaterialsTable.nb_materials) {
+    i=0; while (i < materials_table.nb_materials) {
         // get mat name
         mat_name = World.materials_list[i];
 
@@ -252,59 +252,59 @@ void MaterialBuilder::get_materials_table_from_world(Geometry World) {
             exit(EXIT_FAILURE);
         }
         // get nb of elements
-        MaterialsTable.nb_elements[i] = cur_mat.nb_elements;
+        materials_table.nb_elements[i] = cur_mat.nb_elements;
 
         // compute index
-        MaterialsTable.index[i] = access_index;
+        materials_table.index[i] = access_index;
         access_index += cur_mat.nb_elements;
 
         ++i;
     }
 
     // nb of total elements
-    MaterialsTable.nb_elements_total = access_index;
-    MaterialsTable.mixture = (unsigned short int*)malloc(sizeof(unsigned short int)*access_index);
-    MaterialsTable.atom_num_dens = (float*)malloc(sizeof(float)*access_index);
+    materials_table.nb_elements_total = access_index;
+    materials_table.mixture = (unsigned short int*)malloc(sizeof(unsigned short int)*access_index);
+    materials_table.atom_num_dens = (float*)malloc(sizeof(float)*access_index);
 
     // store mixture element and compute atomic density
-    i=0; while (i < MaterialsTable.nb_materials) {
+    i=0; while (i < materials_table.nb_materials) {
 
         // get mat name
-        mat_name = m_list_of_materials[i];
+        mat_name = World.materials_list[i];
 
         // read mat from database
-        cur_mat = db.materials_database[mat_name];
+        cur_mat = material_db.materials[mat_name];
 
         // get density
-        MaterialsTable.density[i] = cur_mat.density / gramme;
+        materials_table.density[i] = cur_mat.density / gramme;
 
         // G4 material
         G4Material *g4mat = new G4Material("tmp", cur_mat.density, cur_mat.nb_elements);
 
-        MaterialsTable.nb_atoms_per_vol[i] = 0.0f;
-        MaterialsTable.nb_electrons_per_vol[i] = 0.0f;
+        materials_table.nb_atoms_per_vol[i] = 0.0f;
+        materials_table.nb_electrons_per_vol[i] = 0.0f;
 
         j=0; while (j < cur_mat.nb_elements) {
             // read element name
             elt_name = cur_mat.mixture_Z[j];
 
             // store Z
-            MaterialsTable.mixture[fill_index] = db.elements_Z[elt_name];
+            materials_table.mixture[fill_index] = material_db.elements_Z[elt_name];
 
             // compute atom num dens (Avo*fraction*dens) / Az
-            MaterialsTable.atom_num_dens[fill_index] = Avogadro/db.elements_A[elt_name] *
-                                                       cur_mat.mixture_f[j]*cur_mat.density;
+            materials_table.atom_num_dens[fill_index] = Avogadro/material_db.elements_A[elt_name] *
+                                                        cur_mat.mixture_f[j]*cur_mat.density;
 
             // compute nb atoms per volume
-            MaterialsTable.nb_atoms_per_vol[i] += MaterialsTable.atom_num_dens[fill_index];
+            materials_table.nb_atoms_per_vol[i] += materials_table.atom_num_dens[fill_index];
 
             // compute nb electrons per volume
-            MaterialsTable.nb_electrons_per_vol[i] += MaterialsTable.atom_num_dens[fill_index] *
-                                                      db.elements_Z[elt_name];
+            materials_table.nb_electrons_per_vol[i] += materials_table.atom_num_dens[fill_index] *
+                                                       material_db.elements_Z[elt_name];
 
             // build G4 material
-            G4Element *elt = new G4Element("element", "ELT", db.elements_Z[elt_name],
-                                                             db.elements_A[elt_name]);
+            G4Element *elt = new G4Element("element", "ELT", material_db.elements_Z[elt_name],
+                                                             material_db.elements_A[elt_name]);
             g4mat->AddElement(elt, cur_mat.mixture_f[j]);
 
             ++j;
@@ -312,26 +312,26 @@ void MaterialBuilder::get_materials_table_from_world(Geometry World) {
         }
 
         // electron data
-        MaterialsTable.electron_mean_excitation_energy[i] = g4mat->GetIonisation()->GetMeanExcitationEnergy();
-        MaterialsTable.rad_length[i] = g4mat->GetRadlen();
+        materials_table.electron_mean_excitation_energy[i] = g4mat->GetIonisation()->GetMeanExcitationEnergy();
+        materials_table.rad_length[i] = g4mat->GetRadlen();
 
         // eIonisation correction
-        MaterialsTable.fX0[i] = g4mat->GetIonisation()->GetX0density();
-        MaterialsTable.fX1[i] = g4mat->GetIonisation()->GetX1density();
-        MaterialsTable.fD0[i] = g4mat->GetIonisation()->GetD0density();
-        MaterialsTable.fC[i] = g4mat->GetIonisation()->GetCdensity();
-        MaterialsTable.fA[i] = g4mat->GetIonisation()->GetAdensity();
-        MaterialsTable.fM[i] = g4mat->GetIonisation()->GetMdensity();
+        materials_table.fX0[i] = g4mat->GetIonisation()->GetX0density();
+        materials_table.fX1[i] = g4mat->GetIonisation()->GetX1density();
+        materials_table.fD0[i] = g4mat->GetIonisation()->GetD0density();
+        materials_table.fC[i] = g4mat->GetIonisation()->GetCdensity();
+        materials_table.fA[i] = g4mat->GetIonisation()->GetAdensity();
+        materials_table.fM[i] = g4mat->GetIonisation()->GetMdensity();
 
         //eFluctuation parameters
-        MaterialsTable.fF1[i] = g4mat->GetIonisation()->GetF1fluct();
-        MaterialsTable.fF2[i] = g4mat->GetIonisation()->GetF2fluct();
-        MaterialsTable.fEnergy0[i] = g4mat->GetIonisation()->GetEnergy0fluct();
-        MaterialsTable.fEnergy1[i] = g4mat->GetIonisation()->GetEnergy1fluct();
-        MaterialsTable.fEnergy2[i] = g4mat->GetIonisation()->GetEnergy2fluct();
-        MaterialsTable.fLogEnergy1[i] = g4mat->GetIonisation()->GetLogEnergy1fluct();
-        MaterialsTable.fLogEnergy2[i] = g4mat->GetIonisation()->GetLogEnergy2fluct();
-        MaterialsTable.fLogMeanExcitationEnergy[i] = g4mat->GetIonisation()->GetLogMeanExcEnergy();
+        materials_table.fF1[i] = g4mat->GetIonisation()->GetF1fluct();
+        materials_table.fF2[i] = g4mat->GetIonisation()->GetF2fluct();
+        materials_table.fEnergy0[i] = g4mat->GetIonisation()->GetEnergy0fluct();
+        materials_table.fEnergy1[i] = g4mat->GetIonisation()->GetEnergy1fluct();
+        materials_table.fEnergy2[i] = g4mat->GetIonisation()->GetEnergy2fluct();
+        materials_table.fLogEnergy1[i] = g4mat->GetIonisation()->GetLogEnergy1fluct();
+        materials_table.fLogEnergy2[i] = g4mat->GetIonisation()->GetLogEnergy2fluct();
+        materials_table.fLogMeanExcitationEnergy[i] = g4mat->GetIonisation()->GetLogMeanExcEnergy();
         ++i;
     }
 
