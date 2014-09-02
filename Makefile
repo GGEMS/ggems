@@ -14,8 +14,6 @@ SOURCES = $(wildcard */*.cu)
 
 BUILDDIR = build
 LIBDIR = lib
-SOURCEDIR=sources
-
 
 # totoall : dir $(patsubst %.cu,%.o, $(wildcard */*.cu)) 
 # 	$(patsubst %.cu,%.o, $(wildcard */*.cu)) 
@@ -75,10 +73,6 @@ lib/libraytracing.so : $(BUILDDIR)/raytracing.o
 	
 install: $(patsubst $(BUILDDIR)/%.o, $(LIBDIR)/lib%.a, $(wildcard $(BUILDDIR)/*.o))
 
-sources:
-	mkdir -p $(SOURCEDIR)
-	cp */*.cuh $(SOURCEDIR)
-	
 lib/lib%.a: $(BUILDDIR)/%.o
 	ar r -o $@ $^
 	
@@ -93,7 +87,6 @@ clean :
 cleanall: 
 	rm -rf $(BUILDDIR) | true
 	rm -rf $(LIBDIR) | true
-	rm -rf $(SOURCEDIR) | true
 	rm *~ | true
 	
 	

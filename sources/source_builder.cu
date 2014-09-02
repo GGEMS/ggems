@@ -22,7 +22,37 @@
 
 ///////// Source builder class ////////////////////////////////////////////////////
 
-SourceBuilder::SourceBuilder() {}
+SourceBuilder::SourceBuilder() {
+    sources.ptr_sources = NULL;
+    sources.data_size_sources = NULL;
+    sources.data_sources = NULL;
+    sources.nb_sources = 0;
+    sources.nb_data_elements = 0;
+}
 
+// Add a point source on the simulation
+void SourceBuilder::add_source(PointSource src) {
+    sources.nb_sources++;
+
+    // Store the address to access to this source
+    sources.ptr_sources = (unsigned int*)realloc(sources.ptr_sources,
+                                                 sources.nb_sources*sizeof(unsigned int));
+    sources.ptr_sources[sources.nb_sources-1] = sources.nb_data_elements;
+
+    // Store the size of the data needs for this source
+    sources.data_size_sources = (unsigned int*)realloc(sources.data_size_sources,
+                                                       sources.nb_sources*sizeof(unsigned int));
+    sources.data_size_sources[sources.nb_sources-1] = 5;
+
+    // Finally store all parameters
+    sources.nb_data_elements += 5;
+    sources.data_sources = (float*)realloc(sources.data_sources, sources.nb_data_elements*sizeof(float));
+
+    sources.data_size_sources[sources.nb_data_elements-5] = POINT_SOURCE;
+    sources.data_size_sources[sources.nb_data_elements-4] = src.px;
+    sources.data_size_sources[sources.nb_data_elements-3] = src.py;
+    sources.data_size_sources[sources.nb_data_elements-2] = src.pz;
+    sources.data_size_sources[sources.nb_data_elements-1] = src.energy;
+}
 
 #endif

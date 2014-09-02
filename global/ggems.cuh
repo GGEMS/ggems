@@ -22,7 +22,7 @@
 #include <string>
 #include <../processes/constants.cuh>
 #include <../processes/particles.cuh>
-#include <../geometry/builder.cuh>
+#include <../geometry/geometry_builder.cuh>
 #include <../geometry/materials.cuh>
 
 

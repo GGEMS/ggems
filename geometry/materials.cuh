@@ -119,10 +119,11 @@ class MaterialBuilder {
 
         void get_materials_table_from_world(Geometry World);
 
+        MaterialsTable materials_table;
 
     private:
         MaterialDataBase material_db;
-        MaterialsTable materials_table;
+
 
 };
 
