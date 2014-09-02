@@ -15,11 +15,19 @@
 //
 // GGEMS Copyright (C) 2013-2014 Julien Bert
 
-#ifndef STRUCTURES_CUH
-#define STRUCTURES_CUH
-#include <constants.cuh>
-#include <stdlib.h>
-#include <stdio.h>
+#ifndef POINT_SOURCE_CU
+#define POINT_SOURCE_CU
 
+#include "point_source.cuh"
+
+PointSource::PointSource(float ox, float oy, float oz, float E,
+                         std::string src_name) {
+
+    px = ox;
+    py = oy;
+    pz = oz;
+    energy = E;
+    source_name = src_name;
+}
 
 #endif

@@ -15,11 +15,22 @@
 //
 // GGEMS Copyright (C) 2013-2014 Julien Bert
 
-#ifndef STRUCTURES_CUH
-#define STRUCTURES_CUH
-#include <constants.cuh>
+#ifndef POINT_SOURCE_CUH
+#define POINT_SOURCE_CUH
+
 #include <stdlib.h>
 #include <stdio.h>
+#include <string>
 
+// Sphere
+class PointSource {
+    public:
+        PointSource(float ox, float oy, float oz, float E, std::string src_name);
+
+        float px, py, pz, energy;
+        std::string source_name;
+
+    private:
+};
 
 #endif

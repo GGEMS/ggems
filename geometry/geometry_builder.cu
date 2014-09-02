@@ -15,10 +15,10 @@
 //
 // GGEMS Copyright (C) 2013-2014 Julien Bert
 
-#ifndef BUILDER_CU
-#define BUILDER_CU
+#ifndef GEOMETRY_BUILDER_CU
+#define GEOMETRY_BUILDER_CU
 
-#include "builder.cuh"
+#include "geometry_builder.cuh"
 
 ///////// BVH class ////////////////////////////////////////////////////
 
@@ -83,7 +83,7 @@ void BVH::print() {
     printf("\n");
 }
 
-///////// BVH class ////////////////////////////////////////////////////
+///////// Geometry Builder class ////////////////////////////////////////////////////
 
 GeometryBuilder::GeometryBuilder() {}
 
@@ -211,10 +211,21 @@ void GeometryBuilder::print_raw() {
 }
 
 // Save the world in order to share an use it later
-void GeometryBuilder::save_world(std::string filename) {
+void GeometryBuilder::save_ggems_geometry(std::string filename) {
+
+    // check extension
+    if (filename.size() < 10) {
+        printf("Error, to export a ggems geometry, the exension must be '.ggems_geom'!\n");
+        return;
+    }
+    std::string ext = filename.substr(filename.size()-10);
+    if (ext!="ggems_geom") {
+        printf("Error, to export a ggems geometry, the exension must be '.ggems_geom'!\n");
+        return;
+    }
 
     FILE *pfile = fopen(filename.c_str(), "wb");
-    unsigned int i, nb;
+    unsigned int i, nb, tmp;
 
     // .: Tree :.  -  First export the tree that structure the world
 
@@ -247,6 +258,8 @@ void GeometryBuilder::save_world(std::string filename) {
     nb = World.name_objects.size();
     fwrite(&nb, 1, sizeof(unsigned int), pfile);
     i=0; while (i < nb) {
+        tmp = World.name_objects[i].size();
+        fwrite(&tmp, 1, sizeof(unsigned int), pfile);
         fwrite(World.name_objects[i].c_str(), World.name_objects[i].size(), sizeof(char), pfile);
         ++i;
     }
@@ -255,6 +268,8 @@ void GeometryBuilder::save_world(std::string filename) {
     nb = World.materials_list.size();
     fwrite(&nb, 1, sizeof(unsigned int), pfile);
     i=0; while (i < nb) {
+        tmp = World.materials_list[i].size();
+        fwrite(&tmp, 1, sizeof(unsigned int), pfile);
         fwrite(World.materials_list[i].c_str(), World.materials_list[i].size(), sizeof(char), pfile);
         ++i;
     }
@@ -390,7 +405,6 @@ unsigned int GeometryBuilder::add_object(Meshed obj, unsigned int mother_id) {
 
     // Store the information of this object
     World.data_objects.push_back(MESHED);                                // Object Type
-
     World.data_objects.push_back(get_material_index(obj.material_name)); // Material index
     World.data_objects.push_back(obj.number_of_triangles);               // Number of triangles
 

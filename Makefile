@@ -21,7 +21,7 @@ SOURCEDIR=sources
 # 	$(patsubst %.cu,%.o, $(wildcard */*.cu)) 
 # 	make install
 	
-all: dir $(patsubst %.cu,%.o, $(wildcard */*.cu)) 
+all: clean dir $(patsubst %.cu,%.o, $(wildcard */*.cu)) 
 	make copy
 	make install
 

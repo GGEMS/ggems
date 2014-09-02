@@ -15,11 +15,46 @@
 //
 // GGEMS Copyright (C) 2013-2014 Julien Bert
 
-#ifndef STRUCTURES_CUH
-#define STRUCTURES_CUH
+#ifndef PARTICLES_CUH
+#define PARTICLES_CUH
 #include <constants.cuh>
 #include <stdlib.h>
 #include <stdio.h>
 
+// Stack of particles, format data is defined as SoA
+struct ParticleStack{
+    // property
+    float* E;
+    float* dx;
+    float* dy;
+    float* dz;
+    float* px;
+    float* py;
+    float* pz;
+    float* tof;
+    // PRNG
+    unsigned int* prng_state_1;
+    unsigned int* prng_state_2;
+    unsigned int* prng_state_3;
+    unsigned int* prng_state_4;
+    unsigned int* prng_state_5;
+    // simulation
+    unsigned char* endsimu;
+    unsigned char* level;
+    unsigned char* pname; // particle name (photon, electron, etc)
+    // stack size
+    unsigned int size;
+}; //
+
+// Particles class
+class ParticleBuilder {
+    public:
+        ParticleBuilder();
+
+    private:
+        int stack_size;
+        ParticleStack stack;
+
+}
 
 #endif

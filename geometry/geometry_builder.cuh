@@ -15,8 +15,8 @@
 //
 // GGEMS Copyright (C) 2013-2014 Julien Bert
 
-#ifndef BUILDER_H
-#define BUILDER_H
+#ifndef GEOMETRY_BUILDER_CUH
+#define GEOMETRY_BUILDER_CUH
 
 #include <vector>
 #include <string>
@@ -72,7 +72,7 @@ class GeometryBuilder {
         unsigned int add_object(Meshed obj, unsigned int mother_id);
         unsigned int add_object(Voxelized obj, unsigned int mother_id);
 
-        void save_world(std::string filename);
+        void save_ggems_geometry(std::string filename);
 
         void print();
         void print_raw();

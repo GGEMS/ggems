@@ -15,11 +15,29 @@
 //
 // GGEMS Copyright (C) 2013-2014 Julien Bert
 
-#ifndef STRUCTURES_CUH
-#define STRUCTURES_CUH
-#include <constants.cuh>
-#include <stdlib.h>
-#include <stdio.h>
+#ifndef SOURCE_BUILDER_CUH
+#define SOURCE_BUILDER_CUH
 
+#include <vector>
+#include <string>
+#include "point_source.cuh"
+
+#define POINT_SOURCE 0
+
+// Class to manage sources on the simulation
+class SourceBuilder {
+    public:
+        SourceBuilder();
+        unsigned int add_source(PointSource src);
+
+        //void save_ggems_geometry(std::string filename);
+
+        //Geometry World;
+
+    private:        
+
+
+
+};
 
 #endif

@@ -18,33 +18,56 @@
 #ifndef GGEMS_CUH
 #define GGEMS_CUH
 
-#include "../geometry/materials.cuh"
+#include <vector>
+#include <string>
+#include <../processes/constants.cuh>
+#include <../processes/particles.cuh>
+#include <../geometry/builder.cuh>
+#include <../geometry/materials.cuh>
 
-#include "../detector/dosimetry.cuh"
 
-#include "../geometry/aabb.cuh"
-#include "../geometry/builder.cuh"
 
-#include "../geometry/meshed.cuh"
-#include "../geometry/sphere.cuh"
-#include "../geometry/voxelized.cuh"
 
-#include "global.cuh"
 
-#include "../maths/fun.cuh"
-#include "../maths/prng.cuh"
-#include "../maths/raytracing.cuh"
-#include "../maths/vector.cuh"
+// Class to manage the hierarchical structure of the world
+class SimulationBuilder {
+    public:
+        SimulationBuilder();
 
-#include "../navigation/electron_navigator.cuh"
-#include "../navigation/main_navigator.cuh"
-#include "../navigation/photon_navigator.cuh"
-#include "../navigation/proton_navigator.cuh"
+        void set_geometry(Geometry obj);
+        void set_materials(MaterialsTable tab);
+        // Sources
 
-#include "../processes/electron.cuh"
-#include "../processes/photon.cuh"
-#include "../processes/proton.cuh"
-#include "../processes/structures.cuh"
+        void set_hardware_target(std::string value);
+        void set_process(std::string process_name);
+
+
+    private:
+        unsigned short int kind_of_device;
+
+        // Main elements of the simulation
+        ParticleStack particles;
+        Geometry geometry;
+        MaterialsTable materials;
+        //Sources
+
+        // Simulation parameters
+        char physics_list[NB_PROCESSES];
+        char secondaries_list[NB_PARTICLES];
+        int nb_of_particles;
+
+        int nb_iterations;
+        float time;
+        int seed;
+
+        // Simulation command
+        //void init_simulation();
+        //void start_simulation();
+        void cancel_simulation();
+
+
+};
+
 
 
 #endif

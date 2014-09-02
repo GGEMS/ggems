@@ -38,7 +38,9 @@
 class Meshed {
     public:
         Meshed();
-        void load(std::string filename);
+        void load_from_raw(std::string filename);
+        void save_ggems_mesh(std::string filename);
+        void load_from_ggems_mesh(std::string filename);
         void set_material(std::string matname);
         void set_object_name(std::string objname);
         void build_regular_octree(unsigned int nx, unsigned int ny, unsigned int nz);

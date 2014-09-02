@@ -15,11 +15,14 @@
 //
 // GGEMS Copyright (C) 2013-2014 Julien Bert
 
-#ifndef STRUCTURES_CUH
-#define STRUCTURES_CUH
-#include <constants.cuh>
-#include <stdlib.h>
-#include <stdio.h>
+#ifndef SOURCE_BUILDER_CU
+#define SOURCE_BUILDER_CU
+
+#include "source_builder.cuh"
+
+///////// Source builder class ////////////////////////////////////////////////////
+
+SourceBuilder::SourceBuilder() {}
 
 
 #endif

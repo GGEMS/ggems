@@ -15,11 +15,12 @@
 //
 // GGEMS Copyright (C) 2013-2014 Julien Bert
 
-#ifndef STRUCTURES_CUH
-#define STRUCTURES_CUH
-#include <constants.cuh>
-#include <stdlib.h>
-#include <stdio.h>
+#ifndef PARTICLES_CU
+#define PARTICLES_CU
+#include "structures.cuh"
+
+
+
 
 
 #endif

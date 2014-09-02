@@ -66,7 +66,7 @@ void Meshed::build_regular_octree(unsigned int nx, unsigned int ny, unsigned int
     unsigned int cur_cell_index = 0;
 
     float progress = 0.0f;
-    printf("\nBuilding BVH\n");
+    printf("\nBuilding regular octree\n");
     printf("progress.... %6.2f %%", progress);
     fflush(stdout);
     float inc_progress = 100.0f / float(nz);
@@ -147,10 +147,8 @@ void Meshed::build_regular_octree(unsigned int nx, unsigned int ny, unsigned int
 
 }
 
-
-
 // Load a mesh from raw data exported by Blender
-void Meshed::load(std::string filename) {
+void Meshed::load_from_raw(std::string filename) {
 
     // In order to define the bounding box of this mesh
     xmin = FLT_MAX; ymin = FLT_MAX; zmin = FLT_MAX;
@@ -250,6 +248,139 @@ void Meshed::load(std::string filename) {
     // Get the number of triangles (3 vertices xyz)
     number_of_triangles = (vertices.size() / 9);
     number_of_vertices = (vertices.size() / 3);
+
+}
+
+// Export the mesh and its associated octree to ggems format
+void Meshed::save_ggems_mesh(std::string filename) {
+
+    // Check extension
+    if (filename.size() < 10) {
+        printf("Error, to export a mesh in ggems format, the exension must be '.ggems_mesh'!\n");
+        return;
+    }
+    std::string ext = filename.substr(filename.size()-10);
+    if (ext!="ggems_mesh") {
+        printf("Error, to export a mesh in ggems format, the exension must be '.ggems_mesh'!\n");
+        return;
+    }
+
+    // Open the file
+    FILE *pfile = fopen(filename.c_str(), "wb");
+
+    // First write the mesh
+    unsigned int tmp;
+    fwrite(&number_of_triangles, 1, sizeof(unsigned int), pfile);
+    fwrite(&number_of_vertices, 1, sizeof(unsigned int), pfile);
+
+    tmp = object_name.size();
+    fwrite(&tmp, 1, sizeof(unsigned int), pfile);
+    fwrite(object_name.c_str(), tmp, sizeof(char), pfile);
+
+    tmp = material_name.size();
+    fwrite(&tmp, 1, sizeof(unsigned int), pfile);
+    fwrite(material_name.c_str(), tmp, sizeof(char), pfile);
+
+    fwrite(&xmin, 1, sizeof(float), pfile);
+    fwrite(&xmax, 1, sizeof(float), pfile);
+    fwrite(&ymin, 1, sizeof(float), pfile);
+    fwrite(&ymax, 1, sizeof(float), pfile);
+    fwrite(&zmin, 1, sizeof(float), pfile);
+    fwrite(&zmax, 1, sizeof(float), pfile);
+
+    fwrite(vertices.data(), number_of_vertices, sizeof(float), pfile);
+
+    // Then if defined export the associated octree
+    fwrite(&octree_type, 1, sizeof(unsigned short int), pfile);
+    if (octree_type == REG_OCTREE) {
+        fwrite(&nb_cell_x, 1, sizeof(unsigned int), pfile);
+        fwrite(&nb_cell_y, 1, sizeof(unsigned int), pfile);
+        fwrite(&nb_cell_z, 1, sizeof(unsigned int), pfile);
+
+        tmp = nb_objs_per_cell.size();
+        fwrite(&tmp, 1, sizeof(unsigned int), pfile);
+        fwrite(nb_objs_per_cell.data(), tmp, sizeof(float), pfile);
+
+        tmp = list_objs_per_cell.size();
+        fwrite(&tmp, 1, sizeof(unsigned int), pfile);
+        fwrite(list_objs_per_cell.data(), tmp, sizeof(float), pfile);
+
+        tmp = addr_to_cell.size();
+        fwrite(&tmp, 1, sizeof(unsigned int), pfile);
+        fwrite(addr_to_cell.data(), tmp, sizeof(float), pfile);
+    }
+
+    // Close the file
+    fclose(pfile);
+
+}
+
+// Load mesh in ggems format
+void Meshed::load_from_ggems_mesh(std::string filename) {
+
+    // Check extension
+    if (filename.size() < 10) {
+        printf("Error, to import a mesh in ggems format, the exension must be '.ggems_mesh'!\n");
+        return;
+    }
+    std::string ext = filename.substr(filename.size()-10);
+    if (ext!="ggems_mesh") {
+        printf("Error, to import a mesh in ggems format, the exension must be '.ggems_mesh'!\n");
+        return;
+    }
+
+    // Open the file
+    FILE *pfile = fopen(filename.c_str(), "rb");
+
+    // First read the mesh
+    unsigned int tmp;
+    fread(&number_of_triangles, sizeof(unsigned int), 1, pfile);
+    fread(&number_of_vertices, sizeof(unsigned int), 1, pfile);
+
+    fread(&tmp, sizeof(unsigned int), 1, pfile);
+    object_name.clear();
+    object_name.resize(tmp);
+    fread(&object_name[0], sizeof(char), tmp, pfile);
+
+    fread(&tmp, sizeof(unsigned int), 1, pfile);
+    material_name.clear();
+    material_name.resize(tmp);
+    fread(&material_name[0], sizeof(char), tmp, pfile);
+
+    fread(&xmin, sizeof(float), 1, pfile);
+    fread(&xmax, sizeof(float), 1, pfile);
+    fread(&ymin, sizeof(float), 1, pfile);
+    fread(&ymax, sizeof(float), 1, pfile);
+    fread(&zmin, sizeof(float), 1, pfile);
+    fread(&zmax, sizeof(float), 1, pfile);
+
+    vertices.clear();
+    vertices.resize(number_of_vertices);
+    fread(vertices.data(), sizeof(float), number_of_vertices, pfile);
+
+    // Then if defined import the associated octree
+    fread(&octree_type, sizeof(unsigned short int), 1, pfile);
+    if (octree_type == REG_OCTREE) {
+        fread(&nb_cell_x, sizeof(unsigned int), 1, pfile);
+        fread(&nb_cell_y, sizeof(unsigned int), 1, pfile);
+        fread(&nb_cell_z, sizeof(unsigned int), 1, pfile);
+
+        fread(&tmp, sizeof(unsigned int), 1, pfile);
+        nb_objs_per_cell.clear();
+        nb_objs_per_cell.reserve(tmp);
+        fread(nb_objs_per_cell.data(), sizeof(float), tmp, pfile);
+
+        fread(&tmp, sizeof(unsigned int), 1, pfile);
+        list_objs_per_cell.clear();
+        list_objs_per_cell.reserve(tmp);
+        fwrite(list_objs_per_cell.data(), sizeof(float), tmp, pfile);
+
+        fread(&tmp, sizeof(unsigned int), 1, pfile);
+        addr_to_cell.clear();
+        addr_to_cell.reserve(tmp);
+        fwrite(addr_to_cell.data(), sizeof(float), tmp, pfile);
+    }
+
 
 }
 
