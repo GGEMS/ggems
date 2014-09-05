@@ -50,10 +50,10 @@ class SimulationBuilder {
     public:
         SimulationBuilder();
 
-        void set_geometry(Geometry obj);
+        void set_geometry(GeometryBuilder obj);
         void set_materials(MaterialsTable tab);
-        void set_sources(Sources src);
-        void set_particles(ParticleStack p);
+        void set_sources(SourceBuilder src);
+        void set_particles(ParticleBuilder p);
 
         void set_hardware_target(std::string value);
         void set_process(std::string process_name);

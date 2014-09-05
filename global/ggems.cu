@@ -39,22 +39,22 @@ SimulationBuilder::SimulationBuilder() {
 }
 
 // Set the geometry of the simulation
-void SimulationBuilder::set_geometry(Geometry obj) {
+void SimulationBuilder::set_geometry(GeometryBuilder obj) {
     geometry = obj;
 }
 
 // Set the materials definition associated to the geometry
-void SimulationBuilder::set_materials(MaterialsTable tab) {
+void SimulationBuilder::set_materials(MaterialBuilder tab) {
     materials = tab;
 }
 
 // Set the particles stack
-void SimulationBuilder::set_particles(ParticleStack p) {
+void SimulationBuilder::set_particles(ParticleBuilder p) {
     particles = p;
 }
 
 // Set the list of sources
-void SimulationBuilder::set_sources(Sources src) {
+void SimulationBuilder::set_sources(SourceBuilder src) {
     sources = src;
 }
 
@@ -97,10 +97,10 @@ void SimulationBuilder::set_secondary(std::string pname)
     {
 
     if (pname == "Photon") {
-        m_secondaries_list[PHOTON] = ENABLED;
+        parameters.secondaries_list[PHOTON] = ENABLED;
         // printf("add Compton\n");
     } else if (particle_name == "Electron") {
-        m_secondaries_list[ELECTRON] = ENABLED;
+        parameters.secondaries_list[ELECTRON] = ENABLED;
         // printf("add photoelectric\n");
     } else {
         print_warning("Secondary particle %s is unknow!!", particle_name.c_str());
@@ -154,7 +154,7 @@ void SimulationBuilder::init_simulation() {
     */
 
     if (target == CPU_DEVICE) {
-        particles.ma
+        //particles.malloc
 
     }
 }
