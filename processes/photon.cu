@@ -20,6 +20,8 @@
 #include "photon.cuh"
 
 
+/*
+
 ///// Compton /////
 
 // Compton Cross Section Per Atom (Standard - Klein-Nishina)
@@ -118,24 +120,24 @@ __host__ __device__ float Compton_SampleSecondaries(ParticleStack particles, flo
    
     float eKinE = gamE0 - gamE1;
 
-    /*
-    //          DBL_MIN             cut production
-    if (eKinE > 1.0e-38f && eKinE > cutE && flag_secondary) {
-        float3 eDir = vec3_sub(vec3_scale(gamDir0, gamE0), vec3_scale(gamDir1, gamE1));
-        eDir = vec3_unit(eDir);
-        electrons.dx[id] = eDir.x;
-        electrons.dy[id] = eDir.y;
-        electrons.dz[id] = eDir.z;
-        electrons.E[id]  = eKinE;
-        electrons.px[id] = photons.px[id];
-        electrons.py[id] = photons.py[id];
-        electrons.pz[id] = photons.pz[id];
-        electrons.endsimu[id] = 0;
-        // Now start to track this electron and freeze the photon tracking
-        photons.active[id] = 0;
-        electrons.active[id] = 1;
-        return 0.0f;
-    } */
+
+//    //          DBL_MIN             cut production
+//    if (eKinE > 1.0e-38f && eKinE > cutE && flag_secondary) {
+//        float3 eDir = vec3_sub(vec3_scale(gamDir0, gamE0), vec3_scale(gamDir1, gamE1));
+//        eDir = vec3_unit(eDir);
+//        electrons.dx[id] = eDir.x;
+//        electrons.dy[id] = eDir.y;
+//        electrons.dz[id] = eDir.z;
+//        electrons.E[id]  = eKinE;
+//        electrons.px[id] = photons.px[id];
+//        electrons.py[id] = photons.py[id];
+//        electrons.pz[id] = photons.pz[id];
+//        electrons.endsimu[id] = 0;
+//        // Now start to track this electron and freeze the photon tracking
+//        photons.active[id] = 0;
+//        electrons.active[id] = 1;
+//        return 0.0f;
+//    }
 
     return eKinE;
 }
@@ -290,5 +292,6 @@ __host__ __device__ float PhotoElec_SampleSecondaries(ParticleStack particles, G
     }
 }
 
+*/
 
 #endif

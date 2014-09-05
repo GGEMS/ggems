@@ -18,7 +18,7 @@
 #ifndef GLOBAL_CU
 #define GLOBAL_CU
 #include "global.cuh"
-#include "../processes/structures.cuh"
+/*
 // Set a GPU device
 void set_gpu_device(int deviceChoice, float minversion) {
 
@@ -47,7 +47,24 @@ void reset_gpu_device() {
     printf("[\033[32;01mok\033[00m] Reset device .. \n");
     cudaDeviceReset();
 }
+*/
 
+// Print out for error
+void print_error(std::string msg) {
+    printf("\033[31;03m[ERROR] - %s\033[00m", msg.c_str());
+}
+
+// Print out for warning
+void print_warning(std::string msg) {
+    printf("\033[33;03m[WARNING] - %s\033[00m", msg.c_str());
+}
+
+// Exit the soft
+// Abort the current simulation
+void exit_simulation() {
+    printf("[\033[31;03mSimulation aborded\033[00m]\n");
+    exit(EXIT_FAILURE);
+}
 
 
 #endif

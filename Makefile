@@ -35,7 +35,7 @@ biggems:
 	nvcc $(CUDA_FLAGS) -c -o ggems.o global/ggems.cu -Llib -laabb -lbuilder -ldosimetry -lelectron -lelectron_navigator -lfun -lglobal -lmain_navigator -lmeshed -lphoton -lphoton_navigator -lprng -lproton -lproton_navigator -lraytracing -lsphere -lstructures -lvector -lvoxelized $(G4INCLUDES) $(G4LIBS)	
 
 %.o: %.cu 
-	nvcc $(CUDA_FLAGS) $^ -c -o $@ 
+	nvcc $(CUDA_FLAGS) $^ -c -o $@ $(G4INCLUDES) 
 	
 processes/photon.o: processes/photon.cu
 	nvcc $(CUDA_FLAGS) $^ -c -o $@ -lsandia_table -lshell_data

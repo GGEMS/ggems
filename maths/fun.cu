@@ -19,7 +19,7 @@
 #define FUN_CU
 #include "prng.cuh"
 
-
+/*
 
 
 // rotateUz, function from CLHEP
@@ -50,14 +50,6 @@ inline __host__ __device__ float loglog_interpolation(float x, float x0, float y
     return powf(10.0f, log10f(y0) + log10f(y1 / y0) * (log10f(x * x0) / log10f(x1 * x0)));
 }
 
-/**
- * \brief Research in array by dicotomy
- * \param[in] key Value to get in array tab
- * \param[in] tab Array to look in
- * \param[in] size Max index in array 
- * \param[in] min Min index in array
- * \param[out] index return array index corresponding to key value
- */
 // Binary search
 inline __host__ __device__ int binary_search(float key, float* tab, int size, int min=0) {
     int max=size, mid;
@@ -72,16 +64,7 @@ inline __host__ __device__ int binary_search(float key, float* tab, int size, in
     return min;
 }
 
-
-/**
- * \brief Linear interpolation
- * \param[in] xa Xa value
- * \param[in] ya Ya value
- * \param[in] xb Xb value
- * \param[in] yb Yb value
- * \param[in] x value to interpolate
- * \param[out] return Y interpolated
- */
+// Linear interpolation
 inline __host__ __device__ float linear_interpolation(float xa,float ya, float xb,  float yb, float x) { // Taylor young 1st order
     if (xa > x) return ya;
     if (xb < x) return yb;
@@ -144,5 +127,6 @@ inline __device__ float Gaussian(float mean,float rms,ParticleStack &particles, 
     return  data;
 }
 
+*/
 
 #endif

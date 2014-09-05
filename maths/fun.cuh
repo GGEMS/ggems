@@ -17,12 +17,8 @@
 
 #ifndef FUN_H
 #define FUN_H
-#include "../processes/structures.cuh"
-/////////////////////////////////////////////////////////////////////////////
-// Prng
-/////////////////////////////////////////////////////////////////////////////
 
-
+/*
 __host__ __device__ float3 rotateUz(float3 vector, float3 newUz);
 
 // Loglog interpolation
@@ -39,5 +35,7 @@ inline __device__ int G4Poisson(float mean,ParticleStack &particles, int id);
 
 // Gaussian distribution using JKISS32 Generator
 inline __device__ float Gaussian(float mean,float rms,ParticleStack &particles, int id);
+
+*/
 
 #endif

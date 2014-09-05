@@ -26,6 +26,7 @@ SourceBuilder::SourceBuilder() {
     sources.ptr_sources = NULL;
     sources.data_size_sources = NULL;
     sources.data_sources = NULL;
+    sources.seeds = NULL;
     sources.nb_sources = 0;
     sources.nb_data_elements = 0;
 }
@@ -53,6 +54,10 @@ void SourceBuilder::add_source(PointSource src) {
     sources.data_size_sources[sources.nb_data_elements-3] = src.py;
     sources.data_size_sources[sources.nb_data_elements-2] = src.pz;
     sources.data_size_sources[sources.nb_data_elements-1] = src.energy;
+
+    // Including the seed
+    sources.seeds = (unsigned int*)realloc(sources.seeds, sources.nb_sources*sizeof(unsigned int));
+    sources.seeds[sources.nb_sources-1] = src.seed;
 }
 
 #endif

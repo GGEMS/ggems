@@ -25,6 +25,7 @@
 #include <string>
 #include <vector>
 #include <float.h>
+#include "G4SystemOfUnits.hh"
 #include "../maths/vector.cuh"
 #include "../maths/raytracing.cuh"
 #include "../processes/constants.cuh"

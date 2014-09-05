@@ -25,9 +25,10 @@
 // Sphere
 class PointSource {
     public:
-        PointSource(float ox, float oy, float oz, float E, std::string src_name);
+        PointSource(float ox, float oy, float oz, float E, unsigned int val_seed, std::string src_name);
 
         float px, py, pz, energy;
+        unsigned int seed;
         std::string source_name;
 
     private:

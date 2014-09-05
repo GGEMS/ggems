@@ -72,6 +72,8 @@
 #define two_pi               2.0*pi
 #define gpu_twopi            2.0*pi
 
+/*
+
 // Units
 #define GeV                  (1.E3*MeV)           // MeV
 #define MeV                  1.                           // MeV
@@ -116,4 +118,6 @@
 #define m_neutron            (939.572*MeV)          // MeV
 #define m_deuton             (1876.0957309*MeV) // MeV
 #define m_alpha              (3728.24*MeV)          // MeV
+*/
+
 #endif

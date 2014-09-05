@@ -18,20 +18,22 @@
 #ifndef PRNG_CU
 #define PRNG_CU
 #include "prng.cuh"
+
+/*
 // JKISS 32-bit (period ~2^121=2.6x10^36), passes all of the Dieharder tests and the BigCrunch tests in TestU01
 __host__ __device__ float JKISS32(ParticleStack &stack, unsigned int id) {
     int t;
 
-    /*
-    y ^= (y<<5);
-    y ^= (y>>7);
-    y ^= (y<<22);
-    t = z+w+c;
-    z = w;
-    c = t < 0;
-    w = t & 2147483647;
-    x += 1411392427;
-    */
+
+//    y ^= (y<<5);
+//    y ^= (y>>7);
+//    y ^= (y<<22);
+//    t = z+w+c;
+//    z = w;
+//    c = t < 0;
+//    w = t & 2147483647;
+//    x += 1411392427;
+
 
     stack.prng_state_2[id] ^= (stack.prng_state_2[id] << 5);
     stack.prng_state_2[id] ^= (stack.prng_state_2[id] >> 7);
@@ -54,7 +56,7 @@ __host__ __device__ float JKISS32(ParticleStack &stack, unsigned int id) {
 
     return temp;
 }
-
+*/
 
 
 /***********************************************************

@@ -17,13 +17,13 @@
 
 #ifndef PRNG_H
 #define PRNG_H
-#include "../processes/structures.cuh"
+
 /////////////////////////////////////////////////////////////////////////////
 // Prng
 /////////////////////////////////////////////////////////////////////////////
 
 
-__host__  __device__ float JKISS32(ParticleStack &stack, unsigned int id);
+//__host__  __device__ float JKISS32(ParticleStack &stack, unsigned int id);
 //__device__ unsigned long brent_int(unsigned int index, unsigned long *device_x_brent, unsigned long seed);
 //__device__ double Brent_real(int index, unsigned long *device_x_brent, unsigned long seed);
 

@@ -28,6 +28,7 @@ struct Sources {
     unsigned int *ptr_sources;
     unsigned int *data_size_sources;
     float *data_sources;
+    unsigned int *seeds;
     unsigned int nb_sources;
     unsigned int nb_data_elements;
 };
@@ -36,7 +37,7 @@ struct Sources {
 class SourceBuilder {
     public:
         SourceBuilder();
-        unsigned int add_source(PointSource src);
+        void add_source(PointSource src);
 
         //void save_ggems_geometry(std::string filename);
 

@@ -276,7 +276,7 @@ void MaterialBuilder::get_materials_table_from_world(Geometry World) {
         cur_mat = material_db.materials[mat_name];
 
         // get density
-        materials_table.density[i] = cur_mat.density / gramme;
+        materials_table.density[i] = cur_mat.density / gram;
 
         // G4 material
         G4Material *g4mat = new G4Material("tmp", cur_mat.density, cur_mat.nb_elements);

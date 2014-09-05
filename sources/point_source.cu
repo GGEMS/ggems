@@ -20,7 +20,7 @@
 
 #include "point_source.cuh"
 
-PointSource::PointSource(float ox, float oy, float oz, float E,
+PointSource::PointSource(float ox, float oy, float oz, float E, unsigned int val_seed,
                          std::string src_name) {
 
     px = ox;
@@ -28,6 +28,7 @@ PointSource::PointSource(float ox, float oy, float oz, float E,
     pz = oz;
     energy = E;
     source_name = src_name;
+    seed = val_seed;
 }
 
 #endif

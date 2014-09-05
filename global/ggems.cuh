@@ -20,13 +20,29 @@
 
 #include <vector>
 #include <string>
-#include <../processes/constants.cuh>
-#include <../processes/particles.cuh>
-#include <../geometry/geometry_builder.cuh>
-#include <../geometry/materials.cuh>
+
+#include "../processes/constants.cuh"
+#include "../processes/particles.cuh"
+#include "../geometry/geometry_builder.cuh"
+#include "../geometry/materials.cuh"
+#include "../sources/source_builder.cuh"
+
+#include "../geometry/aabb.cuh"
+#include "../geometry/sphere.cuh"
+#include "../geometry/meshed.cuh"
+#include "../geometry/voxelized.cuh"
+#include "../sources/point_source.cuh"
 
 
-
+// Simulation parameters
+struct SimulationParameters {
+    char physics_list[NB_PROCESSES];
+    char secondaries_list[NB_PARTICLES];
+    int nb_of_particles;
+    int nb_iterations;
+    float time;
+    int seed;
+};
 
 
 // Class to manage the hierarchical structure of the world
@@ -36,34 +52,33 @@ class SimulationBuilder {
 
         void set_geometry(Geometry obj);
         void set_materials(MaterialsTable tab);
-        // Sources
+        void set_sources(Sources src);
+        void set_particles(ParticleStack p);
 
         void set_hardware_target(std::string value);
         void set_process(std::string process_name);
+        void set_secondary(std::string pname);
+        void set_number_of_particles(unsigned int nb);
+        void set_max_number_of_iterations(unsigned int nb);
 
+        void init_simulation();
+        void start_simulation();
 
     private:
-        unsigned short int kind_of_device;
+        unsigned short int target;
+        unsigned int nb_of_particles;
+        unsigned int nb_of_iterations;
+        unsigned int max_iteration;
 
         // Main elements of the simulation
-        ParticleStack particles;
-        Geometry geometry;
-        MaterialsTable materials;
-        //Sources
+        ParticleBuilder particles;
+        GeometryBuilder geometry;
+        MaterialBuilder materials;
+        SourceBuilder sources;
+        SimulationParameters parameters;
 
-        // Simulation parameters
-        char physics_list[NB_PROCESSES];
-        char secondaries_list[NB_PARTICLES];
-        int nb_of_particles;
 
-        int nb_iterations;
-        float time;
-        int seed;
 
-        // Simulation command
-        //void init_simulation();
-        //void start_simulation();
-        void cancel_simulation();
 
 
 };

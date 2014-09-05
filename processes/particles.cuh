@@ -17,9 +17,11 @@
 
 #ifndef PARTICLES_CUH
 #define PARTICLES_CUH
-#include <constants.cuh>
+
+#include "../global/global.cuh"
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 
 // Stack of particles, format data is defined as SoA
 struct ParticleStack{
@@ -50,11 +52,17 @@ struct ParticleStack{
 class ParticleBuilder {
     public:
         ParticleBuilder();
+        void set_stack_size(unsigned int nb);
+        void set_seed(unsigned int val_seed);
+        void cpu_malloc_stack();
+        void init_stack_seed();
+
+        ParticleStack stack;
+        unsigned int seed;
 
     private:
-        int stack_size;
-        ParticleStack stack;
 
-}
+
+};
 
 #endif

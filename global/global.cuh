@@ -17,10 +17,17 @@
 
 #ifndef GLOBAL_CUH
 #define GLOBAL_CUH
-#include "../processes/structures.cuh"
 
+#include <stdlib.h>
+#include <stdio.h>
+#include <string>
 
-void set_gpu_device(int deviceChoice,float minversion=3.0);
-void reset_gpu_device();
+//void set_gpu_device(int deviceChoice,float minversion=3.0);
+//void reset_gpu_device();
+
+void print_error(std::string msg);
+void print_warning(std::string msg);
+
+void exit_simulation();
 
 #endif

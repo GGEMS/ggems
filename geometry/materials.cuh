@@ -32,8 +32,9 @@
 #include "G4EmCalculator.hh"
 #include "G4ParticleTable.hh"
 #include "G4ParticleDefinition.hh"
+#include "G4SystemOfUnits.hh"
 
-#include "builder.cuh"
+#include "geometry_builder.cuh"
 #include "../processes/constants.cuh"
 
 // To handle one material

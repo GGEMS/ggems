@@ -24,6 +24,7 @@
 #include "sandia_table.cuh"
 #include "shell_data.cuh"
 
+/*
 __host__ __device__ float Compton_CSPA (float E, unsigned short int Z);
 
 // Compute the total Compton cross section for a given material
@@ -47,5 +48,6 @@ __host__ __device__ float PhotoElec_ElecCosThetaDistribution(ParticleStack part,
 // PhotoElectric effect
 __host__ __device__ float PhotoElec_SampleSecondaries(ParticleStack particles, GPUPhantomMaterials mat, unsigned short int matindex, unsigned int id, unsigned char flag_secondary,float cutEnergyElectron=990*eV );
 
+*/
 
 #endif
