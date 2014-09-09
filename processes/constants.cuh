@@ -68,9 +68,8 @@
 #define PRINTFUNCTION printf("%s %s\n",DEBUGOK,__FUNCTION__);
 
 // Pi
-// #define pi                3.141592653589793116
-#define two_pi               2.0*pi
-#define gpu_twopi            2.0*pi
+#define gpu_pi               3.141592653589793116
+#define gpu_twopi            2.0*gpu_pi
 
 /*
 

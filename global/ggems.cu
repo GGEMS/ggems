@@ -1,4 +1,4 @@
-// This file is part of GGEMS
+ // This file is part of GGEMS
 //
 // GGEMS is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -37,6 +37,47 @@ SimulationBuilder::SimulationBuilder() {
         ++i;
     }
 }
+
+////// :: Main functions ::
+
+// Generate particle based on the sources (CPU version)
+void SimulationBuilder::cpu_primaries_generator() {
+
+    // Loop over particle slot
+    unsigned int id = 0;
+    unsigned int is = 0;
+    while (id < particles.stack.size) {
+
+        // TODO - Generic and multi-sources
+        //      Read CDF sources
+        //      Rnd sources
+        is = 0; // first source
+
+        // Read the address source
+        unsigned int adr = sources.sources.ptr_sources[is];
+
+        // Read the kind of sources
+        unsigned int type = (unsigned int)(sources.sources.data_sources[adr]);
+
+        // Point Source
+        if (type == POINT_SOURCE) {
+            float px = sources.sources.data_sources[adr+1];
+            float py = sources.sources.data_sources[adr+2];
+            float pz = sources.sources.data_sources[adr+3];
+            float energy = sources.sources.data_sources[adr+4];
+
+            point_source_primary_generator(particles.stack, id, px, py, pz, energy, PHOTON);
+        }
+
+        // Next particle
+        ++id;
+
+    } // i
+
+}
+
+////// :: Setting ::
+
 
 // Set the geometry of the simulation
 void SimulationBuilder::set_geometry(GeometryBuilder obj) {
@@ -86,24 +127,24 @@ void SimulationBuilder::set_process(std::string process_name) {
         parameters.physics_list[ELECTRON_MSC] = ENABLED;
         // printf("add photoelectric\n");
     } else {
-        print_warning("Process %s is unknow!!", process_name.c_str());
+        print_warning("This process is unknow!!\n");
+        printf("     -> %s\n", process_name.c_str());
         exit_simulation();
     }
-
 }
 
 // Enable the simulation of a particular secondary particle
-void SimulationBuilder::set_secondary(std::string pname)
-    {
+void SimulationBuilder::set_secondary(std::string pname) {
 
     if (pname == "Photon") {
         parameters.secondaries_list[PHOTON] = ENABLED;
         // printf("add Compton\n");
-    } else if (particle_name == "Electron") {
+    } else if (pname == "Electron") {
         parameters.secondaries_list[ELECTRON] = ENABLED;
         // printf("add photoelectric\n");
     } else {
-        print_warning("Secondary particle %s is unknow!!", particle_name.c_str());
+        print_warning("Secondary particle type is unknow!!");
+        printf("     -> %s\n", pname.c_str());
         exit_simulation();
     }
 }
@@ -154,13 +195,46 @@ void SimulationBuilder::init_simulation() {
     */
 
     if (target == CPU_DEVICE) {
-        //particles.malloc
+
+        // Init the particle stack
+        particles.cpu_malloc_stack();
+        particles.init_stack_seed();
 
     }
 }
 
+// Start the simulation
+void SimulationBuilder::start_simulation() {
+
+    // First init the simulation
+    init_simulation();
+
+    unsigned int iter = 0;
+
+    if (target == CPU_DEVICE) {
+
+        // Main loop
+        while (iter < nb_of_iterations) {
+            // Sources
+            cpu_primaries_generator();
+
+            // Navigation
+
+            // iter
+            ++iter;
+            printf(">>> Iter %i / %i\n", iter, nb_of_iterations);
+        } // main loop
 
 
+
+
+
+
+
+
+    }
+
+}
 
 
 

@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <algorithm>
 
 // Stack of particles, format data is defined as SoA
 struct ParticleStack{
@@ -56,6 +57,7 @@ class ParticleBuilder {
         void set_seed(unsigned int val_seed);
         void cpu_malloc_stack();
         void init_stack_seed();
+        void cpu_print_stack(unsigned int nlim);
 
         ParticleStack stack;
         unsigned int seed;

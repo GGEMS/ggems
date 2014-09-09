@@ -19,9 +19,8 @@
 #define PRNG_CU
 #include "prng.cuh"
 
-/*
 // JKISS 32-bit (period ~2^121=2.6x10^36), passes all of the Dieharder tests and the BigCrunch tests in TestU01
-__host__ __device__ float JKISS32(ParticleStack &stack, unsigned int id) {
+__host__ __device__ float JKISS32(ParticleStack &particles, unsigned int id) {
     int t;
 
 
@@ -35,14 +34,14 @@ __host__ __device__ float JKISS32(ParticleStack &stack, unsigned int id) {
 //    x += 1411392427;
 
 
-    stack.prng_state_2[id] ^= (stack.prng_state_2[id] << 5);
-    stack.prng_state_2[id] ^= (stack.prng_state_2[id] >> 7);
-    stack.prng_state_2[id] ^= (stack.prng_state_2[id] << 22);
-    t = stack.prng_state_3[id] + stack.prng_state_4[id] + stack.prng_state_5[id];
-    stack.prng_state_3[id] = stack.prng_state_4[id];
-    stack.prng_state_5[id] = t < 0;
-    stack.prng_state_4[id] = t & 2147483647;
-    stack.prng_state_1[id] += 1411392427;
+    particles.prng_state_2[id] ^= (particles.prng_state_2[id] << 5);
+    particles.prng_state_2[id] ^= (particles.prng_state_2[id] >> 7);
+    particles.prng_state_2[id] ^= (particles.prng_state_2[id] << 22);
+    t = particles.prng_state_3[id] + particles.prng_state_4[id] + particles.prng_state_5[id];
+    particles.prng_state_3[id] = particles.prng_state_4[id];
+    particles.prng_state_5[id] = t < 0;
+    particles.prng_state_4[id] = t & 2147483647;
+    particles.prng_state_1[id] += 1411392427;
 
     // Instead to return value between [0, 1] we return value between [0, 1[
 
@@ -50,13 +49,12 @@ __host__ __device__ float JKISS32(ParticleStack &stack, unsigned int id) {
     // return (double)(x+y+w) / 4294967296.0;  // UINT_MAX+1
 
     // For the float version is more tricky
-    float temp= ((float)(stack.prng_state_1[id]+stack.prng_state_2[id]+stack.prng_state_4[id]) 
-    //        UINT_MAX         1.0  - float32_precision
-            / 4294967295.0) * (1.0f - 1.0f/(1<<23));
+    float temp= ((float)(particles.prng_state_1[id]+particles.prng_state_2[id]+particles.prng_state_4[id])
+    //           UINT_MAX         1.0  - float32_precision
+                 / 4294967295.0) * (1.0f - 1.0f/(1<<23));
 
     return temp;
 }
-*/
 
 
 /***********************************************************

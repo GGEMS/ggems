@@ -51,7 +51,7 @@ class SimulationBuilder {
         SimulationBuilder();
 
         void set_geometry(GeometryBuilder obj);
-        void set_materials(MaterialsTable tab);
+        void set_materials(MaterialBuilder tab);
         void set_sources(SourceBuilder src);
         void set_particles(ParticleBuilder p);
 
@@ -64,7 +64,6 @@ class SimulationBuilder {
         void init_simulation();
         void start_simulation();
 
-    private:
         unsigned short int target;
         unsigned int nb_of_particles;
         unsigned int nb_of_iterations;
@@ -76,6 +75,11 @@ class SimulationBuilder {
         MaterialBuilder materials;
         SourceBuilder sources;
         SimulationParameters parameters;
+
+    private:
+
+        // Main functions
+        void cpu_primaries_generator();
 
 
 

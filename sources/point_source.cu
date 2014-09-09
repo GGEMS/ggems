@@ -20,6 +20,32 @@
 
 #include "point_source.cuh"
 
+// External function
+__host__ __device__ void point_source_primary_generator(ParticleStack particles, unsigned int id,
+                                                        float px, float py, float pz, float energy,
+                                                        unsigned char type) {
+
+    float phi = JKISS32(particles, id);
+    float theta = JKISS32(particles, id);
+
+    phi  *= gpu_twopi;
+    theta = acosf(1.0f - 2.0f*theta);
+
+    // set photons
+    particles.E[id] = energy;
+    particles.dx[id] = cosf(phi)*sinf(theta);
+    particles.dy[id] = sinf(phi)*sinf(theta);
+    particles.dz[id] = cosf(theta);
+    particles.px[id] = px;
+    particles.py[id] = py;
+    particles.pz[id] = pz;
+    particles.tof[id] = 0.0f;
+    particles.endsimu[id] = DISABLED;
+    particles.level[id] = PRIMARY;
+    particles.pname[id] = type;
+}
+
+
 PointSource::PointSource(float ox, float oy, float oz, float E, unsigned int val_seed,
                          std::string src_name) {
 

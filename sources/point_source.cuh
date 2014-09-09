@@ -21,6 +21,14 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string>
+#include "../processes/particles.cuh"
+#include "../maths/prng.cuh"
+#include "../processes/constants.cuh"
+
+// External function
+__host__ __device__ void point_source_primary_generator(ParticleStack particles, unsigned int id,
+                                                        float px, float py, float pz, float energy,
+                                                        unsigned char type);
 
 // Sphere
 class PointSource {

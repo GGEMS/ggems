@@ -82,4 +82,24 @@ void ParticleBuilder::init_stack_seed() {
 
 }
 
+// Print particles on a CPU stack
+void ParticleBuilder::cpu_print_stack(unsigned int nlim) {
+
+    nlim = std::min(nlim, stack.size);
+    unsigned int i = 0;
+    while (i < nlim) {
+        printf("%i - p %f %f %f - d %f %f %f - E %f\n", i, stack.px[i], stack.py[i], stack.pz[i],
+               stack.dx[i], stack.dy[i], stack.dz[i], stack.E[i]);
+        ++i;
+    }
+
+}
+
+
+
+
+
+
+
+
 #endif
