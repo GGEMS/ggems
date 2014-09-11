@@ -29,42 +29,10 @@ unsigned int BVH::get_current_id() {
     return cur_node_id;
 }
 
-// Update the tree address
-void BVH::update_address() {
-    ptr_nodes[0] = 0;
-    unsigned int i=1;
-    while (i < ptr_nodes.size()) {
-        ptr_nodes[i] = ptr_nodes[i-1] + size_of_nodes[i-1];
-        ++i;
-    }
-}
 
-// Add the root
-void BVH::add_root() {
-    ptr_nodes.push_back(0);
-    size_of_nodes.push_back(0);
-    mother_node.push_back(0);
-    cur_node_id = 0;
-}
 
-// Add a node
-void BVH::add_node(unsigned int mother_id) {
-    // New node ID
-    cur_node_id++;
 
-    // Insert this object into the tree
-    child_nodes.insert(child_nodes.begin() + ptr_nodes[mother_id] + size_of_nodes[mother_id],
-                       cur_node_id);
 
-    // Update the tree
-    size_of_nodes[mother_id]++;
-    size_of_nodes.push_back(0);
-    ptr_nodes.push_back(cur_node_id);
-    mother_node.push_back(mother_id);
-
-    // Update tree address
-    update_address();
-}
 
 // Print the BVH
 void BVH::print() {
@@ -85,8 +53,22 @@ void BVH::print() {
 
 ///////// Geometry Builder class ////////////////////////////////////////////////////
 
-GeometryBuilder::GeometryBuilder() {}
+GeometryBuilder::GeometryBuilder() {
 
+    // Init the size of the structure Geometry
+    world.ptr_objects_dim = 0;
+    world.size_of_objects_dim = 0;
+    world.data_objects_dim = 0;
+    world.ptr_nodes_dim = 0;
+    world.size_of_nodes_dim = 0;
+    world.child_nodes_dim = 0;
+    world.mother_node_dim = 0;
+
+    // Init the first node id
+    world.cur_node_id = 0;
+}
+
+/*
 // Print the current world
 void GeometryBuilder::print() {
     // Print out the tree structure
@@ -163,7 +145,9 @@ void GeometryBuilder::print() {
         ++i;
     } // while
 }
+*/
 
+/*
 // Print out the geometry raw data
 void GeometryBuilder::print_raw() {
 
@@ -209,7 +193,9 @@ void GeometryBuilder::print_raw() {
     printf("\n\n");
 
 }
+*/
 
+/*
 // Save the world in order to share an use it later
 void GeometryBuilder::save_ggems_geometry(std::string filename) {
 
@@ -291,10 +277,37 @@ void GeometryBuilder::save_ggems_geometry(std::string filename) {
 
 
     fclose(pfile);
+}
+*/
 
+///// Private ////////////////////////////////////////////////////
 
+void GeometryBuilder::push_back(unsigned int *vector, unsigned int *dim, unsigned int val) {
+
+    vector = (unsigned int*)realloc(vector, (*dim+1) *sizeof(unsigned int));
+    vector[*dim] = val;
+    (*dim)++;
 }
 
+Void GeometryBuilder::insert(unsigned int *vector, unsigned int *dim, unsigned int pos, unsigned int val) {
+    vector = (unsigned int*)realloc(vector, (*dim+1) *sizeof(unsigned int));
+    memmove(pos, pos+1, (dim-pos)*sizeof(unsigned int));
+    vector[pos] = val;
+    (*dim)++;
+}
+
+// Update the tree address
+void GeometryBuilder::update_address() {
+    world.ptr_nodes[0] = 0;
+    unsigned int i=1;
+    while (i < world.ptr_nodes_dim) {
+        world.ptr_nodes[i] = world.ptr_nodes[i-1] + world.size_of_nodes[i-1];
+        ++i;
+    }
+}
+
+
+/*
 // Search and return the material index for a given material name
 unsigned int GeometryBuilder::get_material_index(std::string material_name) {
 
@@ -310,6 +323,38 @@ unsigned int GeometryBuilder::get_material_index(std::string material_name) {
     World.materials_list.push_back(material_name);
 
     return index;
+}
+*/
+
+///// Hierarchical structure of the geometry ////////////////////////
+
+// Add the root
+void GeometryBuilder::add_root() {
+
+    push_back(world.ptr_nodes, &world.ptr_nodes_dim, 0);
+    push_back(world.size_of_nodes, &world.size_of_nodes_dim, 0);
+    push_back(world.mother_node, &world.mother_node_dim, 0);
+    world.cur_node_id = 0;
+
+}
+
+// Add a node
+void GeometryBuilder::add_node(unsigned int mother_id) {
+    // New node ID
+    world.cur_node_id++;
+
+    // Insert this object into the tree
+    insert(world.child_nodes, world.child_nodes_dim,
+           world.ptr_nodes[mother_id]+world.size_of_nodes[mother_id], world.cur_node_id);
+
+    // Update the tree
+    world.size_of_nodes[mother_id]++;
+    push_back(world.size_of_nodes, &world.size_of_nodes_dim, 0);
+    push_back(world.ptr_nodes, &world.ptr_nodes_dim, cur_node_id);
+    push_back(world.mother_node, &world.mother_node_dim, mother_id);
+
+    // Update tree address
+    update_address();
 }
 
 ////
@@ -330,6 +375,7 @@ unsigned int GeometryBuilder::get_material_index(std::string material_name) {
 // World.data_objects.push_back(obj.zmax);
 //
 
+/*
 // Add the world
 unsigned int GeometryBuilder::add_world(Aabb obj) {
 
@@ -550,5 +596,5 @@ unsigned int GeometryBuilder::add_object(Voxelized obj, unsigned int mother_id) 
     return World.tree.get_current_id();
 
 }
-
+*/
 #endif

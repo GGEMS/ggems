@@ -20,6 +20,8 @@
 
 #include <vector>
 #include <string>
+#include <stdio.h>
+#include <string.h>
 #include "aabb.cuh"
 #include "sphere.cuh"
 #include "meshed.cuh"
@@ -33,57 +35,65 @@
 #define ADR_OBJ_TYPE 0
 #define ADR_OBJ_MAT_ID 1
 
-// Class to manage the hierarchical structure of the world
-class BVH {
-    public:
-        BVH();
-        void add_root();
-        void add_node(unsigned int mother_id);
-        unsigned int get_current_id();
-        void print();
+// Class that handle the geometry of the world
+struct Scene {
 
-        std::vector<unsigned int> ptr_nodes;
-        std::vector<unsigned int> size_of_nodes;
-        std::vector<unsigned int> child_nodes;
-        std::vector<unsigned int> mother_node;
-        unsigned int cur_node_id;
+    // Object structure
+    unsigned int* ptr_objects;     // Address to access to the different objects
+    unsigned int* size_of_objects; // Size of each object
+    float* data_objects;           // Parameters of each primitive in the world
 
-    private:
-        void update_address();
+    // Tree structure
+    unsigned int* ptr_nodes;       // Address to access the different nodes
+    unsigned int* size_of_nodes;   // Size of each node (nb of others nodes connected)
+    unsigned int* child_nodes;     // List of child nodes
+    unsigned int* mother_node;     // List of mother nodes
 
-};
+    unsigned int cur_node_id;      // current node id
 
-// Class that handle the geometry of the world // TODO Change
-class Geometry {
-    public:
-        BVH tree;                                  // Tree structure of the world
-        std::vector<unsigned int> ptr_objects;     // Address to access to the different objects
-        std::vector<unsigned int> size_of_objects; // Size of each object
-        std::vector<float> data_objects;           // Parameters of each primitive in the world
-                                                   // Type Material_ID Params1 Params2 ...
-        std::vector<std::string> materials_list;   // List of the materials used
-        std::vector<std::string> name_objects;     // Name of each object
+    // Dimension of each vector
+    unsigned int ptr_objects_dim;
+    unsigned int size_of_objects_dim;
+    unsigned int data_objects_dim;
+    unsigned int ptr_nodes_dim;
+    unsigned int size_of_nodes_dim;
+    unsigned int child_nodes_dim;
+    unsigned int mother_node_dim;
 };
 
 // This class is used to build the geometry
 class GeometryBuilder {
     public:
         GeometryBuilder();
+
+        // Geometry management
         unsigned int add_world(Aabb obj);
         unsigned int add_object(Aabb obj, unsigned int mother_id);
         unsigned int add_object(Sphere obj, unsigned int mother_id);
         unsigned int add_object(Meshed obj, unsigned int mother_id);
         unsigned int add_object(Voxelized obj, unsigned int mother_id);
 
+        // Hierarchical structure of the geometry
+        void add_root();
+        void add_node(unsigned int mother_id);
+        unsigned int get_current_id();
+        void print_tree();
+
+        // Utils
         void save_ggems_geometry(std::string filename);
+        void print_geometry();
+        void print_raw_geometry();
 
-        void print();
-        void print_raw();
-
-        Geometry World;
+        // World geometry description
+        Scene world;
+        std::vector<std::string> materials_list;   // List of the materials used
+        std::vector<std::string> name_objects;     // Name of each object
 
     private:        
         unsigned int get_material_index(std::string material_name);
+        void update_tree_address();
+        void push_back(unsigned int* vector, unsigned int* dim, unsigned int val);
+        void insert(unsigned int* vector, unsigned int* dim, unsigned int pos, unsigned int val);
 
 
 
