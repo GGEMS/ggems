@@ -33,11 +33,13 @@
 #include "../geometry/voxelized.cuh"
 #include "../sources/point_source.cuh"
 
+#include "../navigation/main_navigator.cuh"
 
 // Simulation parameters
 struct SimulationParameters {
     char physics_list[NB_PROCESSES];
     char secondaries_list[NB_PARTICLES];
+    char dose_flag;
     int nb_of_particles;
     int nb_iterations;
     float time;
@@ -80,10 +82,7 @@ class SimulationBuilder {
 
         // Main functions
         void cpu_primaries_generator();
-
-
-
-
+        void cpu_main_navigation();
 
 };
 

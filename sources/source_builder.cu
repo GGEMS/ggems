@@ -43,13 +43,14 @@ void SourceBuilder::add_source(PointSource src) {
     // Store the size of the data needs for this source
     sources.data_size_sources = (unsigned int*)realloc(sources.data_size_sources,
                                                        sources.nb_sources*sizeof(unsigned int));
-    sources.data_size_sources[sources.nb_sources-1] = 5;
+    sources.data_size_sources[sources.nb_sources-1] = 6;
 
     // Finally store all parameters
-    sources.nb_data_elements += 5;
+    sources.nb_data_elements += 6;
     sources.data_sources = (float*)realloc(sources.data_sources, sources.nb_data_elements*sizeof(float));
 
-    sources.data_sources[sources.nb_data_elements-5] = POINT_SOURCE;
+    sources.data_sources[sources.nb_data_elements-6] = POINT_SOURCE;
+    sources.data_sources[sources.nb_data_elements-5] = src.geometry_id;
     sources.data_sources[sources.nb_data_elements-4] = src.px;
     sources.data_sources[sources.nb_data_elements-3] = src.py;
     sources.data_sources[sources.nb_data_elements-2] = src.pz;

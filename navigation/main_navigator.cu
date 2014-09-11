@@ -18,6 +18,25 @@
 #ifndef MAIN_NAVIGATOR_CU
 #define MAIN_NAVIGATOR_CU
 
+#include "main_navigator.cuh"
 
+void cpu_main_navigator(ParticleBuilder particles, GeometryBuilder geometry,
+                        MaterialBuilder materials, SimulationParameters parameters) {
+
+    // For each particle
+    unsigned int id = 0;
+    while (id < particles.stack.size) {
+
+        // Type of particle
+        if (particles.stack.pname[id] == PHOTON) {
+            cpu_photon_navigator(particles, id, geometry, materials, parameters);
+        }
+
+        // next particle
+        ++id;
+
+    } // id
+
+}
 
 #endif

@@ -18,6 +18,14 @@
 #ifndef MAIN_NAVIGATOR_CUH
 #define MAIN_NAVIGATOR_CUH
 
+#include "../processes/constants.cuh"
+#include "../processes/particles.cuh"
+#include "../geometry/materials.cuh"
+#include "../global/ggems.cuh"
+#include "photon_navigator.cuh"
+
+void cpu_main_navigator(ParticleBuilder particles, GeometryBuilder geometry,
+                        MaterialBuilder materials, SimulationParameters parameters);
 
 
 #endif

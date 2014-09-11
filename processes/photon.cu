@@ -20,12 +20,12 @@
 #include "photon.cuh"
 
 
-/*
-
-///// Compton /////
+//////// Compton /////////////////////////////////////////////
+// Model standard G4
+//////////////////////////////////////////////////////////////
 
 // Compton Cross Section Per Atom (Standard - Klein-Nishina)
-__host__ __device__ float Compton_CSPA(float E, unsigned short int Z) {
+__host__ __device__ float Compton_CSPA_standard(float E, unsigned short int Z) {
     float CrossSection = 0.0;
     if (Z<1 || E < 1e-4f) {return CrossSection;}
 
@@ -52,18 +52,19 @@ __host__ __device__ float Compton_CSPA(float E, unsigned short int Z) {
 }
 
 // Compute the total Compton cross section for a given material
-__host__ __device__ float Compton_CS(GPUPhantomMaterials materials, unsigned short int mat, float E) {
+__host__ __device__ float Compton_CS_standard(MaterialsTable materials, unsigned short int mat, float E) {
     float CS = 0.0f;
     int i;
     int index = materials.index[mat];
     // Model standard
     for (i = 0; i < materials.nb_elements[mat]; ++i) {
         CS += (materials.atom_num_dens[index+i] * 
-               Compton_CSPA(E, materials.mixture[index+i]));
+               Compton_CSPA_standard(E, materials.mixture[index+i]));
     }
     return CS;
 }
 
+/*
 // Compton Scatter (Standard - Klein-Nishina) with secondary (e-)
 __host__ __device__ float Compton_SampleSecondaries(ParticleStack particles, float cutE, unsigned int id,
                                            unsigned char flag_secondary) {

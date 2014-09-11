@@ -23,7 +23,7 @@
 // External function
 __host__ __device__ void point_source_primary_generator(ParticleStack particles, unsigned int id,
                                                         float px, float py, float pz, float energy,
-                                                        unsigned char type) {
+                                                        unsigned char type, unsigned int geom_id) {
 
     float phi = JKISS32(particles, id);
     float theta = JKISS32(particles, id);
@@ -43,11 +43,12 @@ __host__ __device__ void point_source_primary_generator(ParticleStack particles,
     particles.endsimu[id] = DISABLED;
     particles.level[id] = PRIMARY;
     particles.pname[id] = type;
+    particles.geometry_id = geom_id;
 }
 
 
 PointSource::PointSource(float ox, float oy, float oz, float E, unsigned int val_seed,
-                         std::string src_name) {
+                         std::string src_name, unsigned int geom_id) {
 
     px = ox;
     py = oy;
@@ -55,6 +56,7 @@ PointSource::PointSource(float ox, float oy, float oz, float E, unsigned int val
     energy = E;
     source_name = src_name;
     seed = val_seed;
+    geometry_id = geom_id;
 }
 
 #endif

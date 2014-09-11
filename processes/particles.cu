@@ -56,6 +56,8 @@ void ParticleBuilder::cpu_malloc_stack() {
     stack.prng_state_4 = (unsigned int*)malloc(stack.size * sizeof(unsigned int));
     stack.prng_state_5 = (unsigned int*)malloc(stack.size * sizeof(unsigned int));
 
+    stack.geometry_id = (unsigned int*)malloc(stack.size * sizeof(unsigned int));
+
     stack.endsimu = (unsigned char*)malloc(stack.size * sizeof(unsigned char));
     stack.level = (unsigned char*)malloc(stack.size * sizeof(unsigned char));
     stack.pname = (unsigned char*)malloc(stack.size * sizeof(unsigned char));

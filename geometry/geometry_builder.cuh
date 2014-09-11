@@ -30,6 +30,9 @@
 #define MESHED 2
 #define VOXELIZED 3
 
+#define ADR_OBJ_TYPE 0
+#define ADR_OBJ_MAT_ID 1
+
 // Class to manage the hierarchical structure of the world
 class BVH {
     public:

@@ -17,12 +17,12 @@
 
 #ifndef PHOTON_CUH
 #define PHOTON_CUH
-#include "structures.cuh"
-#include "../maths/prng.cuh"
-#include "../maths/fun.cuh"
-#include "constants.cuh"
-#include "sandia_table.cuh"
-#include "shell_data.cuh"
+
+#include "../geometry/materials.cuh"
+
+// Compton - model standard G4
+__host__ __device__ float Compton_CSPA_standard(float E, unsigned short int Z);
+__host__ __device__ float Compton_CS_standard(MaterialsTable materials, unsigned short int mat, float E);
 
 /*
 __host__ __device__ float Compton_CSPA (float E, unsigned short int Z);

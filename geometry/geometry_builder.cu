@@ -312,6 +312,24 @@ unsigned int GeometryBuilder::get_material_index(std::string material_name) {
     return index;
 }
 
+////
+////////////////////// Object management ///////////////////////////////////////////////////
+////
+//
+// !!!! Convention of the head of any object written in the world structure !!!!
+//
+// World.data_objects.push_back(SPHERE);                                // Object Type
+// World.data_objects.push_back(get_material_index(obj.material_name)); // Material index
+//
+//
+// World.data_objects.push_back(obj.xmin);                              // Its bounding box
+// World.data_objects.push_back(obj.xmax);
+// World.data_objects.push_back(obj.ymin);
+// World.data_objects.push_back(obj.ymax);
+// World.data_objects.push_back(obj.zmin);
+// World.data_objects.push_back(obj.zmax);
+//
+
 // Add the world
 unsigned int GeometryBuilder::add_world(Aabb obj) {
 
@@ -380,12 +398,23 @@ unsigned int GeometryBuilder::add_object(Sphere obj, unsigned int mother_id) {
     // Store the information of this object
     World.data_objects.push_back(SPHERE);                                // Object Type
     World.data_objects.push_back(get_material_index(obj.material_name)); // Material index
+
+    // TODO
+    //World.data_objects.push_back(obj.xmin);
+    //World.data_objects.push_back(obj.xmax);
+    //World.data_objects.push_back(obj.ymin);
+    //World.data_objects.push_back(obj.ymax);
+    //World.data_objects.push_back(obj.zmin);
+    //World.data_objects.push_back(obj.zmax);
+
+    World.name_objects.push_back(obj.object_name);                       // Name of this object
+
     World.data_objects.push_back(obj.cx);                                // Sphere parameters
     World.data_objects.push_back(obj.cy);
     World.data_objects.push_back(obj.cz);
     World.data_objects.push_back(obj.radius);
 
-    World.name_objects.push_back(obj.object_name);                       // Name of this object
+
     
     // Store the size of this object
     World.size_of_objects.push_back(6);
@@ -406,7 +435,6 @@ unsigned int GeometryBuilder::add_object(Meshed obj, unsigned int mother_id) {
     // Store the information of this object
     World.data_objects.push_back(MESHED);                                // Object Type
     World.data_objects.push_back(get_material_index(obj.material_name)); // Material index
-    World.data_objects.push_back(obj.number_of_triangles);               // Number of triangles
 
     // Add the boudning box of this mesh
     World.data_objects.push_back(obj.xmin);
@@ -415,6 +443,9 @@ unsigned int GeometryBuilder::add_object(Meshed obj, unsigned int mother_id) {
     World.data_objects.push_back(obj.ymax);
     World.data_objects.push_back(obj.zmin);
     World.data_objects.push_back(obj.zmax);
+
+    // Number of triangles
+    World.data_objects.push_back(obj.number_of_triangles);
 
     // Append octree information
     World.data_objects.push_back(obj.octree_type); // NO_OCTREE, REG_OCTREE, ADP_OCTREE
@@ -469,7 +500,17 @@ unsigned int GeometryBuilder::add_object(Voxelized obj, unsigned int mother_id) 
     World.ptr_objects.push_back(World.data_objects.size());
 
     // Store the information of this object
-    World.data_objects.push_back(VOXELIZED);                                // Object Type
+    World.data_objects.push_back(VOXELIZED);              // Object Type
+
+    World.data_objects.push_back(-1.0f);                  // Heterogeneous material
+
+    // Add the bounding box of this phantom
+    World.data_objects.push_back(obj.xmin);
+    World.data_objects.push_back(obj.xmax);
+    World.data_objects.push_back(obj.ymin);
+    World.data_objects.push_back(obj.ymax);
+    World.data_objects.push_back(obj.zmin);
+    World.data_objects.push_back(obj.zmax);
 
     // Store the parameters of this object
     World.data_objects.push_back(obj.number_of_voxels);
@@ -479,14 +520,6 @@ unsigned int GeometryBuilder::add_object(Voxelized obj, unsigned int mother_id) 
     World.data_objects.push_back(obj.spacing_x);
     World.data_objects.push_back(obj.spacing_y);
     World.data_objects.push_back(obj.spacing_z);
-
-    // Add the boudning box of this phantom
-    World.data_objects.push_back(obj.xmin);
-    World.data_objects.push_back(obj.xmax);
-    World.data_objects.push_back(obj.ymin);
-    World.data_objects.push_back(obj.ymax);
-    World.data_objects.push_back(obj.zmin);
-    World.data_objects.push_back(obj.zmax);
 
     // Here we need to merge and update the material ID according the current list of mats
 
@@ -512,7 +545,7 @@ unsigned int GeometryBuilder::add_object(Voxelized obj, unsigned int mother_id) 
     World.name_objects.push_back(obj.object_name);
 
     // Store the size of this object
-    World.size_of_objects.push_back(obj.data.size()+14);
+    World.size_of_objects.push_back(obj.data.size()+15);
 
     return World.tree.get_current_id();
 

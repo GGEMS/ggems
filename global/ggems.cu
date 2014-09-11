@@ -36,6 +36,8 @@ SimulationBuilder::SimulationBuilder() {
         parameters.secondaries_list[i] = DISABLED;
         ++i;
     }
+
+    parameters.dose_flag = DISABLED;
 }
 
 ////// :: Main functions ::
@@ -61,18 +63,26 @@ void SimulationBuilder::cpu_primaries_generator() {
 
         // Point Source
         if (type == POINT_SOURCE) {
-            float px = sources.sources.data_sources[adr+1];
-            float py = sources.sources.data_sources[adr+2];
-            float pz = sources.sources.data_sources[adr+3];
-            float energy = sources.sources.data_sources[adr+4];
+            unsigned int geom_id = (unsigned int)(sources.sources.data_sources[adr+1]);
+            float px = sources.sources.data_sources[adr+2];
+            float py = sources.sources.data_sources[adr+3];
+            float pz = sources.sources.data_sources[adr+4];
+            float energy = sources.sources.data_sources[adr+5];
 
-            point_source_primary_generator(particles.stack, id, px, py, pz, energy, PHOTON);
+            point_source_primary_generator(particles.stack, id, px, py, pz, energy, PHOTON, geom_id);
         }
 
         // Next particle
         ++id;
 
     } // i
+
+}
+
+// Main navigation on CPU
+void SimulationBuilder::cpu_main_navigation() {
+
+    cpu_main_navigator(particles, geometry, materials, parameters);
 
 }
 
@@ -218,7 +228,10 @@ void SimulationBuilder::start_simulation() {
             // Sources
             cpu_primaries_generator();
 
+            // Locate the first particle position within the geometry
+
             // Navigation
+            cpu_main_navigation();
 
             // iter
             ++iter;

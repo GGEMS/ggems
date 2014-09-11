@@ -41,6 +41,8 @@ struct ParticleStack{
     unsigned int* prng_state_3;
     unsigned int* prng_state_4;
     unsigned int* prng_state_5;
+    // Navigation
+    unsigned int* geometry_id; // current geometry crossed by the particle
     // simulation
     unsigned char* endsimu;
     unsigned char* level;

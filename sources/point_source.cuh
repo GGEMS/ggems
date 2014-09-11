@@ -28,15 +28,16 @@
 // External function
 __host__ __device__ void point_source_primary_generator(ParticleStack particles, unsigned int id,
                                                         float px, float py, float pz, float energy,
-                                                        unsigned char type);
+                                                        unsigned char type, unsigned int geom_id);
 
 // Sphere
 class PointSource {
     public:
-        PointSource(float ox, float oy, float oz, float E, unsigned int val_seed, std::string src_name);
+        PointSource(float ox, float oy, float oz, float E, unsigned int val_seed,
+                    std::string src_name, unsigned int geom_id);
 
         float px, py, pz, energy;
-        unsigned int seed;
+        unsigned int seed, geometry_id;
         std::string source_name;
 
     private:
