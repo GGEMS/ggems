@@ -53,7 +53,7 @@ class BVH {
 
 };
 
-// Class that handle the geometry of the world
+// Class that handle the geometry of the world // TODO Change
 class Geometry {
     public:
         BVH tree;                                  // Tree structure of the world
