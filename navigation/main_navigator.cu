@@ -20,17 +20,17 @@
 
 #include "main_navigator.cuh"
 
-/*
-void cpu_main_navigator(ParticleBuilder particles, GeometryBuilder geometry,
-                        MaterialBuilder materials, SimulationParameters parameters) {
+void cpu_main_navigator(ParticleStack particles, Scene geometry,
+                        MaterialsTable materials, GlobalSimulationParameters parameters) {
 
     // For each particle
     unsigned int id = 0;
-    while (id < particles.stack.size) {
+    while (id < particles.size) {
 
         // Type of particle
-        if (particles.stack.pname[id] == PHOTON) {
+        if (particles.pname[id] == PHOTON) {
             cpu_photon_navigator(particles, id, geometry, materials, parameters);
+
         }
 
         // next particle
@@ -39,6 +39,5 @@ void cpu_main_navigator(ParticleBuilder particles, GeometryBuilder geometry,
     } // id
 
 }
-*/
 
 #endif

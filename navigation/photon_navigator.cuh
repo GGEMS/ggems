@@ -21,7 +21,7 @@
 #include "../processes/constants.cuh"
 #include "../processes/particles.cuh"
 #include "../geometry/materials.cuh"
-#include "../global/ggems.cuh"
+#include "../global/global.cuh"
 
 #include "../geometry/geometry_builder.cuh"
 #include "../geometry/aabb.cuh"
@@ -30,14 +30,14 @@
 #include "../geometry/voxelized.cuh"
 
 #include "../maths/vector.cuh"
+#include "../maths/prng.cuh"
 
 #include "../processes/photon.cuh"
 
 
-//void cpu_photon_navigator(ParticleBuilder particles, unsigned int part_id,
-//                          GeometryBuilder geometry, MaterialBuilder materials,
-//                          SimulationParameters parameters);
-
+void cpu_photon_navigator(ParticleStack particles, unsigned int part_id,
+                          Scene geometry, MaterialsTable materials,
+                          GlobalSimulationParameters parameters);
 
 
 #endif

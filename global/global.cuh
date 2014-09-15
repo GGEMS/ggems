@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string>
+#include "../processes/constants.cuh"
 
 //void set_gpu_device(int deviceChoice,float minversion=3.0);
 //void reset_gpu_device();
@@ -36,5 +37,16 @@ void array_push_back(float **vector, unsigned int &dim, float val);
 void array_insert(unsigned int **vector, unsigned int &dim, unsigned int pos, unsigned int val);
 void array_insert(float **vector, unsigned int &dim, unsigned int pos, float val);
 
+
+// Global simulation parameters
+struct GlobalSimulationParameters {
+    char physics_list[NB_PROCESSES];
+    char secondaries_list[NB_PARTICLES];
+    char dose_flag;
+    int nb_of_particles;
+    int nb_iterations;
+    float time;
+    int seed;
+};
 
 #endif

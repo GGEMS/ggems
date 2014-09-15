@@ -20,35 +20,35 @@
 
 #include "photon_navigator.cuh"
 
-/*
-void cpu_photon_navigator(ParticleBuilder particles, unsigned int part_id,
-                          GeometryBuilder geometry, MaterialBuilder materials,
-                          SimulationParameters parameters) {
+void cpu_photon_navigator(ParticleStack particles, unsigned int part_id,
+                          Scene geometry, MaterialsTable materials,
+                          GlobalSimulationParameters parameters) {
 
 
     // Read position
     float3 pos;
-    pos.x = particles.stack.px[part_id];
-    pos.y = particles.stack.py[part_id];
-    pos.z = particles.stack.pz[part_id];
+    pos.x = particles.px[part_id];
+    pos.y = particles.py[part_id];
+    pos.z = particles.pz[part_id];
 
     // Read direction
     float3 dir;
-    dir.x = particles.stack.dx[part_id];
-    dir.y = particles.stack.dy[part_id];
-    dir.z = particles.stack.dz[part_id];
+    dir.x = particles.dx[part_id];
+    dir.y = particles.dy[part_id];
+    dir.z = particles.dz[part_id];
 
     // Get the current volume containing the particle
-    unsigned int id_geom = particles.stack.geometry_id[part_id];
+    unsigned int id_geom = particles.geometry_id[part_id];
 
     // Get the material that compose this volume
-    unsigned int adr_geom = geometry.World.ptr_objects[id_geom];
-    unsigned int obj_type = (unsigned int)geometry.World.data_objects[adr_geom+ADR_OBJ_TYPE];
+    unsigned int adr_geom = geometry.ptr_objects[id_geom];
+    unsigned int obj_type = (unsigned int)geometry.data_objects[adr_geom+ADR_OBJ_TYPE];
+    unsigned int id_mat = 0;
     if (obj_type != VOXELIZED) {
-        unsigned int id_mat = (unsigned int)geometry.World.data_objects[adr_geom+ADR_OBJ_MAT_ID];
+        id_mat = (unsigned int)geometry.data_objects[adr_geom+ADR_OBJ_MAT_ID];
     } else {
         // TODO
-        unsigned int id_mat = 0;
+        id_mat = 0;
     }
 
     //// Find next discrete interaction ///////////////////////////////////////
@@ -71,8 +71,8 @@ void cpu_photon_navigator(ParticleBuilder particles, unsigned int part_id,
 
     // If Compton
     if (parameters.physics_list[PHOTON_COMPTON]) {
-        cross_section = Compton_CS_Standard(materials, mat, photon.E);
-        interaction_distance = -log(prng()) / cross_section;
+        cross_section = Compton_CS_standard(materials, id_mat, particles.E[part_id]);
+        interaction_distance = -log( JKISS32(particles, part_id) ) / cross_section;
         if (interaction_distance < next_interaction_distance) {
             next_interaction_distance = interaction_distance;
             next_discrete_process = PHOTON_COMPTON;
@@ -120,10 +120,6 @@ void cpu_photon_navigator(ParticleBuilder particles, unsigned int part_id,
     //}
 
 }
-
-
-
-*/
 
 
 

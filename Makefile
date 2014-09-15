@@ -1,7 +1,7 @@
 CUDA_FLAGS := --generate-code arch=compute_30,code=sm_30 --relocatable-device-code true -lcudadevrt --compiler-options '-fPIC' -use_fast_math
 #CUDA_FLAGS := --generate-code arch=compute_30,code=sm_30 -Xptxas="-v" --relocatable-device-code true -lcudadevrt --compiler-options '-fPIC' -use_fast_math
 
-FLAGS := -lelectron -lelectron_navigator -lfun -lglobal -lmain_navigator -lmeshed -lphoton -lphoton_navigator -lprng -lproton -lproton_navigator -lraytracing -lsphere -lstructures -lvector -lvoxelized -lggems
+FLAGS := -lggems -lelectron -lelectron_navigator -lfun -lglobal -lmain_navigator -lmeshed -lphoton -lphoton_navigator -lprng -lproton -lproton_navigator -lraytracing -lsphere -lstructures -lvector -lvoxelized -lparticles
 
 
 G4DIRHEADERS = $(G4HOME)/include/Geant4
@@ -32,20 +32,20 @@ copy :
 	mv */*.o $(BUILDDIR)
 	
 	
-biggems:
-	nvcc $(CUDA_FLAGS) -c -o ggems.o global/ggems.cu -Llib -laabb -lbuilder -ldosimetry -lelectron -lelectron_navigator -lfun -lglobal -lmain_navigator -lmeshed -lphoton -lphoton_navigator -lprng -lproton -lproton_navigator -lraytracing -lsphere -lstructures -lvector -lvoxelized $(G4INCLUDES) $(G4LIBS)	
+#biggems:
+#	nvcc $(CUDA_FLAGS) -c -o ggems.o global/ggems.cu -Llib -laabb -lbuilder -ldosimetry -lelectron -lelectron_navigator -lfun -lglobal -lmain_navigator -lmeshed -lphoton -lphoton_navigator -lprng -lproton -lproton_navigator -lraytracing -lsphere -lstructures -lvector -lvoxelized $(G4INCLUDES) $(G4LIBS)	
 
 %.o: %.cu 
-	nvcc $(CUDA_FLAGS) $^ -c -o $@ $(G4INCLUDES) 
+	nvcc $(CUDA_FLAGS) $^ -c -o $@ $(G4INCLUDES) $(G4LIBS)
 	
 processes/photon.o: processes/photon.cu
 	nvcc $(CUDA_FLAGS) $^ -c -o $@ -lsandia_table -lshell_data $(G4INCLUDES) $(G4LIBS)
 	
-global/ggems.o: global/ggems.cu
-	nvcc $(CUDA_FLAGS) $^ -c -o $@ $(G4INCLUDES) $(G4LIBS)	
+#global/ggems.o: global/ggems.cu
+#	nvcc $(CUDA_FLAGS) $^ -c -o $@ $(G4INCLUDES) $(G4LIBS)	
 	
-geometry/materials.o: geometry/materials.cu
-	nvcc $(CUDA_FLAGS) $^ -c -o $@ $(G4INCLUDES) $(G4LIBS)
+#geometry/materials.o: geometry/materials.cu
+#	nvcc $(CUDA_FLAGS) $^ -c -o $@ $(G4INCLUDES) $(G4LIBS)
 	
 buildo: */*.cu
 	nvcc $(CUDA_FLAGS) */*.cu -c -o $(BUILDDIR)/ggems.o

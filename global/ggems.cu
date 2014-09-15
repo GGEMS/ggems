@@ -82,7 +82,7 @@ void SimulationBuilder::cpu_primaries_generator() {
 // Main navigation on CPU
 void SimulationBuilder::cpu_main_navigation() {
 
-    //cpu_main_navigator(particles, geometry, materials, parameters);
+    cpu_main_navigator(particles.stack, geometry.world, materials.materials_table, parameters);
 
 }
 

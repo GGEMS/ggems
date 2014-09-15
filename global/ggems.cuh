@@ -22,6 +22,7 @@
 #include <string>
 
 #include "../processes/constants.cuh"
+#include "../global/global.cuh"
 #include "../processes/particles.cuh"
 #include "../geometry/geometry_builder.cuh"
 #include "../geometry/materials.cuh"
@@ -34,17 +35,6 @@
 #include "../sources/point_source.cuh"
 
 #include "../navigation/main_navigator.cuh"
-
-// Simulation parameters
-struct SimulationParameters {
-    char physics_list[NB_PROCESSES];
-    char secondaries_list[NB_PARTICLES];
-    char dose_flag;
-    int nb_of_particles;
-    int nb_iterations;
-    float time;
-    int seed;
-};
 
 
 // Class to manage the hierarchical structure of the world
@@ -76,7 +66,7 @@ class SimulationBuilder {
         GeometryBuilder geometry;
         MaterialBuilder materials;
         SourceBuilder sources;
-        SimulationParameters parameters;
+        GlobalSimulationParameters parameters;
 
     private:
 
