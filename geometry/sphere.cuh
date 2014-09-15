@@ -29,6 +29,7 @@ class Sphere {
                std::string mat_name, std::string obj_name);
 
         float cx, cy, cz, radius;
+        float xmin, xmax, ymin, ymax, zmin, zmax;
         std::string material_name;
         std::string object_name;
 

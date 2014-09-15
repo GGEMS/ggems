@@ -20,6 +20,7 @@
 
 #include "main_navigator.cuh"
 
+/*
 void cpu_main_navigator(ParticleBuilder particles, GeometryBuilder geometry,
                         MaterialBuilder materials, SimulationParameters parameters) {
 
@@ -38,5 +39,6 @@ void cpu_main_navigator(ParticleBuilder particles, GeometryBuilder geometry,
     } // id
 
 }
+*/
 
 #endif

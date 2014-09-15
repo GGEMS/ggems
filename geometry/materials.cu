@@ -209,7 +209,7 @@ void MaterialBuilder::load_materials_database(std::string filename) {
 }
 
 // Build the materials table according the object contains in the world
-void MaterialBuilder::get_materials_table_from_world(Geometry World) {
+void MaterialBuilder::get_materials_table_from_world(GeometryBuilder World) {
 
     // First allocated data to the structure according the number of materials
     materials_table.nb_materials = World.materials_list.size();

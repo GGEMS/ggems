@@ -20,38 +20,9 @@
 
 #include "geometry_builder.cuh"
 
-///////// BVH class ////////////////////////////////////////////////////
-
-BVH::BVH() {}
-
-// Return the current node id
-unsigned int BVH::get_current_id() {
-    return cur_node_id;
-}
-
-
-
-
-
-
-// Print the BVH
-void BVH::print() {
-    // print each node
-    unsigned int i = 0;
-    unsigned int j = 0;
-    while (i < size_of_nodes.size()) {
-        printf("(%i)--[%i]--(", mother_node[i], i);
-        j=0; while (j < size_of_nodes[i]) {
-            printf("%i,", child_nodes[ptr_nodes[i]+j]);
-            ++j;
-        }
-        printf(")\n");
-        ++i;
-    }
-    printf("\n");
-}
-
+/////////////////////////////////////////////////////////////////////////////////////
 ///////// Geometry Builder class ////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////
 
 GeometryBuilder::GeometryBuilder() {
 
@@ -68,84 +39,141 @@ GeometryBuilder::GeometryBuilder() {
     world.cur_node_id = 0;
 }
 
-/*
+///// Private ////////////////////////////////////////////////////
+
+// Update the tree address
+void GeometryBuilder::update_tree_address() {
+    world.ptr_nodes[0] = 0;
+    unsigned int i=1;
+    while (i < world.ptr_nodes_dim) {
+        world.ptr_nodes[i] = world.ptr_nodes[i-1] + world.size_of_nodes[i-1];
+        ++i;
+    }
+}
+
+// Search and return the material index for a given material name
+unsigned int GeometryBuilder::get_material_index(std::string material_name) {
+
+    // Check if this material is already used, if it is return the corresponding index
+    unsigned int index = 0;
+    while (index < materials_list.size()) {
+        if (materials_list[index] == material_name) return index;
+        ++index;
+    }
+
+    // If it is not, add a new entry into the material table
+    index = materials_list.size();
+    materials_list.push_back(material_name);
+
+    return index;
+}
+
+///// Hierarchical structure of the geometry ////////////////////////
+
+// Add the root
+void GeometryBuilder::add_root() {
+
+    array_push_back(&world.ptr_nodes, world.ptr_nodes_dim, 0);
+    array_push_back(&world.size_of_nodes, world.size_of_nodes_dim, 0);
+    array_push_back(&world.mother_node, world.mother_node_dim, 0);
+    world.cur_node_id = 0;
+
+}
+
+// Add a node
+void GeometryBuilder::add_node(unsigned int mother_id) {
+    // New node ID
+    world.cur_node_id++;
+
+    // Insert this object into the tree
+    array_insert(&world.child_nodes, world.child_nodes_dim,
+                 world.ptr_nodes[mother_id]+world.size_of_nodes[mother_id], world.cur_node_id);
+
+    // Update the tree
+    world.size_of_nodes[mother_id]++;
+    array_push_back(&world.size_of_nodes, world.size_of_nodes_dim, 0);
+    array_push_back(&world.ptr_nodes, world.ptr_nodes_dim, world.cur_node_id);
+    array_push_back(&world.mother_node, world.mother_node_dim, mother_id);
+
+    // Update tree address
+    update_tree_address();
+}
+
+// Print the tree structure of the geometry
+void GeometryBuilder::print_tree() {
+    // print each node
+    unsigned int i = 0;
+    unsigned int j = 0;
+    while (i < world.size_of_nodes_dim) {
+        printf("(mother: %i)--[node: %i]--(childs: ", world.mother_node[i], i);
+        j=0; while (j < world.size_of_nodes[i]) {
+            printf("%i,", world.child_nodes[world.ptr_nodes[i]+j]);
+            ++j;
+        }
+        printf(")\n");
+        ++i;
+    }
+    printf("\n");
+}
+
+///// Utils ////////////////////////////////////////////////////////////////////////////////
+
 // Print the current world
-void GeometryBuilder::print() {
+void GeometryBuilder::print_geometry() {
     // Print out the tree structure
-    World.tree.print();
+    print_tree();
 
     // Print out every object name
     unsigned int i;
     printf("List of object:\n");
-    i=0; while (i < World.name_objects.size()) {
-        printf("%i - %s\n", i, World.name_objects[i].c_str());
+    i=0; while (i < name_objects.size()) {
+        printf("%i - %s\n", i, name_objects[i].c_str());
         ++i;
     }
     printf("\n");
 
     // Print out every material name
     printf("List of material:\n");
-    i=0; while (i < World.materials_list.size()) {
-        printf("%i - %s\n", i, World.materials_list[i].c_str());
+    i=0; while (i < materials_list.size()) {
+        printf("%i - %s\n", i, materials_list[i].c_str());
         ++i;
     }
     printf("\n");
 
     // Print out each object contains on the tree
-    i=0; while (i < World.ptr_objects.size()) {
+    i=0; while (i < world.ptr_objects_dim) {
         // Get obj address
-        unsigned int address_obj = World.ptr_objects[i];
+        unsigned int address_obj = world.ptr_objects[i];
 
         // Object name
-        printf("::: %s :::\n", World.name_objects[i].c_str());
+        printf("::: %s :::\n", name_objects[i].c_str());
 
-        // Object type
-        unsigned int params1 = (unsigned int)(World.data_objects[address_obj]);
-        unsigned int params2 = (unsigned int)(World.data_objects[address_obj+1]);
-        switch (params1) {
+        // Same header for everyone
+        unsigned int type = (unsigned int)(world.data_objects[address_obj+ADR_OBJ_TYPE]);
+        unsigned int mat = (unsigned int)(world.data_objects[address_obj+ADR_OBJ_MAT_ID]);
+        float xmin = world.data_objects[address_obj+ADR_AABB_XMIN];
+        float xmax = world.data_objects[address_obj+ADR_AABB_XMAX];
+        float ymin = world.data_objects[address_obj+ADR_AABB_YMIN];
+        float ymax = world.data_objects[address_obj+ADR_AABB_YMAX];
+        float zmin = world.data_objects[address_obj+ADR_AABB_ZMIN];
+        float zmax = world.data_objects[address_obj+ADR_AABB_ZMAX];
+
+        // Print information0
+        switch (type) {
         case AABB:
-            printf("type: AABB\n");
-            printf("material: %s\n", World.materials_list[params2].c_str());
-            printf("xmin: %f xmax: %f ymin: %f ymax: %f zmin: %f zmax: %f\n\n",
-                    World.data_objects[address_obj+2], World.data_objects[address_obj+3],
-                    World.data_objects[address_obj+4], World.data_objects[address_obj+5],
-                    World.data_objects[address_obj+6], World.data_objects[address_obj+7]);
-            break;
-
+            printf("type: AABB\n"); break;
         case SPHERE:
-            printf("type: SPHERE\n");
-            printf("material: %s\n", World.materials_list[params2].c_str());
-            printf("cx: %f cy: %f cz: %f radius: %f\n\n",
-                    World.data_objects[address_obj+2], World.data_objects[address_obj+3],
-                    World.data_objects[address_obj+4], World.data_objects[address_obj+5]);
-            break;
-
-        case MESHED:
-            printf("type: MESHED\n");
-            printf("material: %s\n", World.materials_list[params2].c_str());
-            printf("Number of triangles: %i\n", (unsigned int)World.data_objects[address_obj+2]);
-            printf("xmin: %f xmax: %f ymin: %f ymax: %f zmin: %f zmax: %f\n\n",
-                    World.data_objects[address_obj+3], World.data_objects[address_obj+4],
-                    World.data_objects[address_obj+5], World.data_objects[address_obj+6],
-                    World.data_objects[address_obj+7], World.data_objects[address_obj+8]);
-
-            if (World.data_objects[address_obj+9] == NO_OCTREE) {
-                printf("Octree: None\n");
-            } else if (World.data_objects[address_obj+9] == REG_OCTREE) {
-                printf("Octree: Regular (%i x %i x %i)\n",
-                       World.data_objects[address_obj+10], World.data_objects[address_obj+11],
-                       World.data_objects[address_obj+12]);
-
-            }
-
-            break;
-
+            printf("type: SPHERE\n"); break;
         } // switch
+
+        printf("material: %s\n", materials_list[mat].c_str());
+        printf("xmin: %f xmax: %f ymin: %f ymax: %f zmin: %f zmax: %f\n\n",
+                xmin, xmax, ymin, ymax, zmin, zmax);
+
 
         ++i;
     } // while
 }
-*/
 
 /*
 // Print out the geometry raw data
@@ -280,82 +308,6 @@ void GeometryBuilder::save_ggems_geometry(std::string filename) {
 }
 */
 
-///// Private ////////////////////////////////////////////////////
-
-void GeometryBuilder::push_back(unsigned int *vector, unsigned int *dim, unsigned int val) {
-
-    vector = (unsigned int*)realloc(vector, (*dim+1) *sizeof(unsigned int));
-    vector[*dim] = val;
-    (*dim)++;
-}
-
-Void GeometryBuilder::insert(unsigned int *vector, unsigned int *dim, unsigned int pos, unsigned int val) {
-    vector = (unsigned int*)realloc(vector, (*dim+1) *sizeof(unsigned int));
-    memmove(pos, pos+1, (dim-pos)*sizeof(unsigned int));
-    vector[pos] = val;
-    (*dim)++;
-}
-
-// Update the tree address
-void GeometryBuilder::update_address() {
-    world.ptr_nodes[0] = 0;
-    unsigned int i=1;
-    while (i < world.ptr_nodes_dim) {
-        world.ptr_nodes[i] = world.ptr_nodes[i-1] + world.size_of_nodes[i-1];
-        ++i;
-    }
-}
-
-
-/*
-// Search and return the material index for a given material name
-unsigned int GeometryBuilder::get_material_index(std::string material_name) {
-
-    // Check if this material is already used, if it is return the corresponding index
-    unsigned int index = 0;
-    while (index < World.materials_list.size()) {
-        if (World.materials_list[index] == material_name) return index;
-        ++index;
-    }
-
-    // If it is not, add a new entry into the material table
-    index = World.materials_list.size();
-    World.materials_list.push_back(material_name);
-
-    return index;
-}
-*/
-
-///// Hierarchical structure of the geometry ////////////////////////
-
-// Add the root
-void GeometryBuilder::add_root() {
-
-    push_back(world.ptr_nodes, &world.ptr_nodes_dim, 0);
-    push_back(world.size_of_nodes, &world.size_of_nodes_dim, 0);
-    push_back(world.mother_node, &world.mother_node_dim, 0);
-    world.cur_node_id = 0;
-
-}
-
-// Add a node
-void GeometryBuilder::add_node(unsigned int mother_id) {
-    // New node ID
-    world.cur_node_id++;
-
-    // Insert this object into the tree
-    insert(world.child_nodes, world.child_nodes_dim,
-           world.ptr_nodes[mother_id]+world.size_of_nodes[mother_id], world.cur_node_id);
-
-    // Update the tree
-    world.size_of_nodes[mother_id]++;
-    push_back(world.size_of_nodes, &world.size_of_nodes_dim, 0);
-    push_back(world.ptr_nodes, &world.ptr_nodes_dim, cur_node_id);
-    push_back(world.mother_node, &world.mother_node_dim, mother_id);
-
-    // Update tree address
-    update_address();
-}
 
 ////
 ////////////////////// Object management ///////////////////////////////////////////////////
@@ -363,44 +315,50 @@ void GeometryBuilder::add_node(unsigned int mother_id) {
 //
 // !!!! Convention of the head of any object written in the world structure !!!!
 //
-// World.data_objects.push_back(SPHERE);                                // Object Type
-// World.data_objects.push_back(get_material_index(obj.material_name)); // Material index
-//
-//
-// World.data_objects.push_back(obj.xmin);                              // Its bounding box
-// World.data_objects.push_back(obj.xmax);
-// World.data_objects.push_back(obj.ymin);
-// World.data_objects.push_back(obj.ymax);
-// World.data_objects.push_back(obj.zmin);
-// World.data_objects.push_back(obj.zmax);
-//
+// Object Type
+//  array_push_back(world.data_objects, world.data_objects_dim, (float)AABB);
+// Material index
+//  array_push_back(world.data_objects, world.data_objects_dim, (float)get_material_index(obj.material_name));
+// AABB parameters
+//  array_push_back(world.data_objects, world.data_objects_dim, obj.xmin);
+//  array_push_back(world.data_objects, world.data_objects_dim, obj.xmax);
+//  array_push_back(world.data_objects, world.data_objects_dim, obj.ymin);
+//  array_push_back(world.data_objects, world.data_objects_dim, obj.ymax);
+//  array_push_back(world.data_objects, world.data_objects_dim, obj.zmin);
+//  array_push_back(world.data_objects, world.data_objects_dim, obj.zmax);
+// Name of this object
+//  name_objects.push_back(obj.object_name);
 
-/*
 // Add the world
 unsigned int GeometryBuilder::add_world(Aabb obj) {
 
     // Add the root tree
-    World.tree.add_root();
+    add_root();
 
     // Store the address to access to this object
-    World.ptr_objects.push_back(World.data_objects.size());
+    array_push_back(&world.ptr_objects, world.ptr_objects_dim, world.data_objects_dim);
 
     // Store the information of this object
-    World.data_objects.push_back(AABB);                                  // Object Type
-    World.data_objects.push_back(get_material_index(obj.material_name)); // Material index
-    World.data_objects.push_back(obj.xmin);                              // AABB parameters
-    World.data_objects.push_back(obj.xmax);
-    World.data_objects.push_back(obj.ymin);
-    World.data_objects.push_back(obj.ymax);
-    World.data_objects.push_back(obj.zmin);
-    World.data_objects.push_back(obj.zmax);
 
-    World.name_objects.push_back(obj.object_name);                       // Name of this object
+    // Object Type
+    array_push_back(&world.data_objects, world.data_objects_dim, (float)AABB);
+    // Material index
+    array_push_back(&world.data_objects, world.data_objects_dim, (float)get_material_index(obj.material_name));
+    // AABB parameters
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.xmin);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.ymin);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.ymax);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.zmin);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.zmax);
 
+
+    // Name of this object
+    name_objects.push_back(obj.object_name);
     // Store the size of this object
-    World.size_of_objects.push_back(8);
+    array_push_back(&world.size_of_objects, world.size_of_objects_dim, SIZE_WORLD_OBJ);
 
-    return World.tree.get_current_id();
+    return world.cur_node_id;
+
 
 }
 
@@ -408,27 +366,30 @@ unsigned int GeometryBuilder::add_world(Aabb obj) {
 unsigned int GeometryBuilder::add_object(Aabb obj, unsigned int mother_id) {
 
     // Add this object to the tree
-    World.tree.add_node(mother_id);
+    add_node(mother_id);
 
     // Store the address to access to this object
-    World.ptr_objects.push_back(World.data_objects.size());
+    array_push_back(&world.ptr_objects, world.ptr_objects_dim, world.data_objects_dim);
 
     // Store the information of this object
-    World.data_objects.push_back(AABB);                                  // Object Type
-    World.data_objects.push_back(get_material_index(obj.material_name)); // Material index
-    World.data_objects.push_back(obj.xmin);                              // AABB parameters
-    World.data_objects.push_back(obj.xmax);
-    World.data_objects.push_back(obj.ymin);
-    World.data_objects.push_back(obj.ymax);
-    World.data_objects.push_back(obj.zmin);
-    World.data_objects.push_back(obj.zmax);
 
-    World.name_objects.push_back(obj.object_name);                       // Name of this object
-
+    // Object Type
+    array_push_back(&world.data_objects, world.data_objects_dim, (float)AABB);
+    // Material index
+    array_push_back(&world.data_objects, world.data_objects_dim, (float)get_material_index(obj.material_name));
+     // AABB parameters
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.xmin);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.xmax);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.ymin);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.ymax);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.zmin);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.zmax);
+    // Name of this object
+    name_objects.push_back(obj.object_name);
     // Store the size of this object
-    World.size_of_objects.push_back(8);
+    array_push_back(&world.size_of_objects, world.size_of_objects_dim, SIZE_AABB_OBJ);
 
-    return World.tree.get_current_id();
+    return world.cur_node_id;
 
 }
 
@@ -436,39 +397,39 @@ unsigned int GeometryBuilder::add_object(Aabb obj, unsigned int mother_id) {
 unsigned int GeometryBuilder::add_object(Sphere obj, unsigned int mother_id) {
 
     // Add this object to the tree
-    World.tree.add_node(mother_id);
+    add_node(mother_id);
 
     // Store the address to access to this object
-    World.ptr_objects.push_back(World.data_objects.size());
+    array_push_back(&world.ptr_objects, world.ptr_objects_dim, world.data_objects_dim);
 
     // Store the information of this object
-    World.data_objects.push_back(SPHERE);                                // Object Type
-    World.data_objects.push_back(get_material_index(obj.material_name)); // Material index
 
-    // TODO
-    //World.data_objects.push_back(obj.xmin);
-    //World.data_objects.push_back(obj.xmax);
-    //World.data_objects.push_back(obj.ymin);
-    //World.data_objects.push_back(obj.ymax);
-    //World.data_objects.push_back(obj.zmin);
-    //World.data_objects.push_back(obj.zmax);
-
-    World.name_objects.push_back(obj.object_name);                       // Name of this object
-
-    World.data_objects.push_back(obj.cx);                                // Sphere parameters
-    World.data_objects.push_back(obj.cy);
-    World.data_objects.push_back(obj.cz);
-    World.data_objects.push_back(obj.radius);
-
-
-    
+    // Object Type
+    array_push_back(&world.data_objects, world.data_objects_dim, (float)SPHERE);
+    // Material index
+    array_push_back(&world.data_objects, world.data_objects_dim, (float)get_material_index(obj.material_name));
+     // AABB parameters
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.xmin);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.xmax);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.ymin);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.ymax);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.zmin);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.zmax);
+    // Name of this object
+    name_objects.push_back(obj.object_name);
+    // Sphere parameters
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.cx);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.cy);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.cz);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.radius);
     // Store the size of this object
-    World.size_of_objects.push_back(6);
+    array_push_back(&world.size_of_objects, world.size_of_objects_dim, SIZE_SPHERE_OBJ);
 
-    return World.tree.get_current_id();
+    return world.cur_node_id;
 
 }
 
+/*
 // Add a Meshed object into the world
 unsigned int GeometryBuilder::add_object(Meshed obj, unsigned int mother_id) {
 

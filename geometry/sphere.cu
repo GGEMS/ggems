@@ -23,12 +23,21 @@
 Sphere::Sphere(float ox, float oy, float oz, float rad,
                std::string mat_name, std::string obj_name) {
 
+    // Sphere parameters
     cx = ox;
     cy = oy;
     cz = oz;
     radius = rad;
     material_name = mat_name;
     object_name = obj_name;
+
+    // define de the bounding box
+    xmin = ox-radius;
+    xmax = ox+radius;
+    ymin = oy-radius;
+    ymax = oy+radius;
+    zmin = oz-radius;
+    zmax = oz+radius;
 }
 
 #endif

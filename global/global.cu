@@ -66,5 +66,126 @@ void exit_simulation() {
     exit(EXIT_FAILURE);
 }
 
+//////// Operation on C-Array //////////////////////////////////////////////////
+
+// Equivalent to std::vector.push_back for malloc array (unsigned int version)
+void array_push_back(unsigned int **vector, unsigned int &dim, unsigned int val) {
+
+    // If first allocation
+    if (dim == 0) {
+        (*vector) = (unsigned int*)malloc(sizeof(unsigned int));
+        if ((*vector) == NULL) {
+            print_error("Memory allocation from array_push_back!!!\n");
+            exit(EXIT_FAILURE);
+        }
+    // else reallocation
+    } else {
+        (*vector) = (unsigned int*)realloc((*vector), (dim+1)*sizeof(unsigned int));
+        if ((*vector) == NULL) {
+            print_error("Memory reallocation from array_push_back!!!\n");
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    (*vector)[dim] = val;
+    (dim)++;
+}
+
+// Equivalent to std::vector.push_back for malloc array (float version)
+void array_push_back(float **vector, unsigned int &dim, float val) {
+
+    // If first allocation
+    if (dim == 0) {
+        (*vector) = (float*)malloc(sizeof(float));
+        if ((*vector) == NULL) {
+            print_error("Memory allocation from array_push_back!!!\n");
+            exit(EXIT_FAILURE);
+        }
+    // else reallocation
+    } else {
+        (*vector) = (float*)realloc((*vector), (dim+1)*sizeof(float));
+        if ((*vector) == NULL) {
+            print_error("Memory reallocation from array_push_back!!!\n");
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    (*vector)[dim] = val;
+    (dim)++;
+
+}
+
+// Equivalent to std::vector.insert for malloc array (unsigned int version)
+void array_insert(unsigned int **vector, unsigned int &dim, unsigned int pos, unsigned int val) {
+
+    // Check the pos value
+    if (pos > dim) {
+        print_error("Position out of range from array_insert!!!\n");
+        exit(EXIT_FAILURE);
+    }
+
+
+    // If first allocation
+    if (dim == 0) {
+        (*vector) = (unsigned int*)malloc(sizeof(unsigned int));
+
+    // else reallocation
+    } else {
+        (*vector) = (unsigned int*)realloc((*vector), (dim+1)*sizeof(unsigned int));
+        if ((*vector) != NULL) {
+            print_error("Memory reallocation from insert_push_back!!!\n");
+            exit(EXIT_FAILURE);
+        }
+        // Move data in memory for the insertion
+        memmove((*vector)+pos, (*vector)+pos+1, (dim-pos)*sizeof(unsigned int));
+    }
+
+    (*vector)[pos] = val;
+    (dim)++;
+
+}
+
+// Equivalent to std::vector.insert for malloc array (unsigned int version)
+void array_insert(float **vector, unsigned int &dim, unsigned int pos, float val) {
+
+    // Check the pos value
+    if (pos > dim) {
+        print_error("Position out of range from array_insert!!!\n");
+        exit(EXIT_FAILURE);
+    }
+
+    // If first allocation
+    if (dim == 0) {
+        (*vector) = (float*)malloc(sizeof(float));
+
+    // else reallocation
+    } else {
+        (*vector) = (float*)realloc((*vector), (dim+1)*sizeof(float));
+        if ((*vector) != NULL) {
+            print_error("Memory reallocation from insert_push_back!!!\n");
+            exit(EXIT_FAILURE);
+        }
+        // Move data in memory for the insertion
+        memmove((*vector)+pos, (*vector)+pos+1, (dim-pos)*sizeof(float));
+    }
+
+    (*vector)[pos] = val;
+    (dim)++;
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #endif

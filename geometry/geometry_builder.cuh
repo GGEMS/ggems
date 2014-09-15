@@ -26,14 +26,26 @@
 #include "sphere.cuh"
 #include "meshed.cuh"
 #include "voxelized.cuh"
+#include "../global/global.cuh"
 
 #define AABB 0
 #define SPHERE 1
 #define MESHED 2
 #define VOXELIZED 3
 
+// Address of the header for the geometry structure
 #define ADR_OBJ_TYPE 0
 #define ADR_OBJ_MAT_ID 1
+#define ADR_AABB_XMIN 2
+#define ADR_AABB_XMAX 3
+#define ADR_AABB_YMIN 4
+#define ADR_AABB_YMAX 5
+#define ADR_AABB_ZMIN 6
+#define ADR_AABB_ZMAX 7
+
+#define SIZE_WORLD_OBJ 8
+#define SIZE_AABB_OBJ 8
+#define SIZE_SPHERE_OBJ 12
 
 // Class that handle the geometry of the world
 struct Scene {
@@ -76,13 +88,12 @@ class GeometryBuilder {
         // Hierarchical structure of the geometry
         void add_root();
         void add_node(unsigned int mother_id);
-        unsigned int get_current_id();
         void print_tree();
 
         // Utils
-        void save_ggems_geometry(std::string filename);
+        //void save_ggems_geometry(std::string filename);
         void print_geometry();
-        void print_raw_geometry();
+        //void print_raw_geometry();
 
         // World geometry description
         Scene world;
@@ -92,8 +103,9 @@ class GeometryBuilder {
     private:        
         unsigned int get_material_index(std::string material_name);
         void update_tree_address();
-        void push_back(unsigned int* vector, unsigned int* dim, unsigned int val);
-        void insert(unsigned int* vector, unsigned int* dim, unsigned int pos, unsigned int val);
+        //void push_back(T1 *vector, unsigned int &dim, T1 val);
+        //void push_back(float* vector, unsigned int &dim, float val);
+        void insert(unsigned int* vector, unsigned int &dim, unsigned int pos, unsigned int val);
 
 
 

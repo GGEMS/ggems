@@ -118,7 +118,7 @@ class MaterialBuilder {
         void load_elements_database(std::string filename);
         void load_materials_database(std::string filename);
 
-        void get_materials_table_from_world(Geometry World);
+        void get_materials_table_from_world(GeometryBuilder World);
 
         MaterialsTable materials_table;
 

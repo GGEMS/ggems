@@ -30,4 +30,11 @@ void print_warning(std::string msg);
 
 void exit_simulation();
 
+// Operation on C-Array
+void array_push_back(unsigned int **vector, unsigned int &dim, unsigned int val);
+void array_push_back(float **vector, unsigned int &dim, float val);
+void array_insert(unsigned int **vector, unsigned int &dim, unsigned int pos, unsigned int val);
+void array_insert(float **vector, unsigned int &dim, unsigned int pos, float val);
+
+
 #endif

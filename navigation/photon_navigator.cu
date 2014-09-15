@@ -20,6 +20,7 @@
 
 #include "photon_navigator.cuh"
 
+/*
 void cpu_photon_navigator(ParticleBuilder particles, unsigned int part_id,
                           GeometryBuilder geometry, MaterialBuilder materials,
                           SimulationParameters parameters) {
@@ -122,7 +123,7 @@ void cpu_photon_navigator(ParticleBuilder particles, unsigned int part_id,
 
 
 
-
+*/
 
 
 
