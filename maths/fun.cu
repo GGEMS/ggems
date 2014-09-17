@@ -19,9 +19,6 @@
 #define FUN_CU
 #include "prng.cuh"
 
-/*
-
-
 // rotateUz, function from CLHEP
  __host__ __device__ float3 rotateUz(float3 vector, float3 newUz) {
     float u1 = newUz.x;
@@ -41,7 +38,7 @@
     return make_float3(vector.x, vector.y, vector.z);
 }
 
-
+/*
 // Loglog interpolation
 inline __host__ __device__ float loglog_interpolation(float x, float x0, float y0, float x1, float y1) {
     if (x < x0) return y0;

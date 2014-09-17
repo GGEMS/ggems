@@ -346,6 +346,7 @@ unsigned int GeometryBuilder::add_world(Aabb obj) {
     array_push_back(&world.data_objects, world.data_objects_dim, (float)get_material_index(obj.material_name));
     // AABB parameters
     array_push_back(&world.data_objects, world.data_objects_dim, obj.xmin);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.xmax);
     array_push_back(&world.data_objects, world.data_objects_dim, obj.ymin);
     array_push_back(&world.data_objects, world.data_objects_dim, obj.ymax);
     array_push_back(&world.data_objects, world.data_objects_dim, obj.zmin);

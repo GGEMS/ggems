@@ -67,6 +67,9 @@
 #define DEBUGOK "[\033[32;01mok\033[00m]"
 #define PRINTFUNCTION printf("%s %s\n",DEBUGOK,__FUNCTION__);
 
+#define EPSILON3 1.0e-03f
+#define EPSILON6 1.0e-06f
+
 // Pi
 #define gpu_pi               3.141592653589793116
 #define gpu_twopi            2.0*gpu_pi

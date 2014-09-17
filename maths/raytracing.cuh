@@ -20,15 +20,14 @@
 
 #include "vector.cuh"
 #include <cfloat>
+#include "../processes/constants.cuh"
 
-
-#define EPSILON 1e-6f
 
 // Overlap test return (short int):
 //       -1 No interection         +1 Intersection
 
 // Hit collision return (float):
-//       -1 No collision            t >= 0 Distance of collision
+//        t >= 0 Distance of collision (if no collision t = FLT_MAX)
 
 
 // Overlapping test AABB/Triangle - Akenine-Moller algorithm

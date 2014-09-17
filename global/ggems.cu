@@ -169,6 +169,16 @@ void SimulationBuilder::set_max_number_of_iterations(unsigned int nb) {
     max_iteration = nb;
 }
 
+////// :: Getting ::
+
+ParticleBuilder SimulationBuilder::get_particles() {
+    return particles;
+}
+
+
+////// :: Command ::
+
+
 // Init simualtion
 void SimulationBuilder::init_simulation() {
 

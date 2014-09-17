@@ -64,11 +64,13 @@ __host__ __device__ float Compton_CS_standard(MaterialsTable materials, unsigned
     return CS;
 }
 
-/*
+
 // Compton Scatter (Standard - Klein-Nishina) with secondary (e-)
-__host__ __device__ float Compton_SampleSecondaries(ParticleStack particles, float cutE, unsigned int id,
-                                           unsigned char flag_secondary) {
-    
+__host__ __device__ SecParticle Compton_SampleSecondaries_standard(ParticleStack particles,
+                                                                   float cutE,
+                                                                   unsigned int id,
+                                                                   GlobalSimulationParameters parameters) {
+
     float gamE0 = particles.E[id];
     float E0 = gamE0 / 0.510998910f;
     float3 gamDir0 = make_float3(particles.dx[id], particles.dy[id], particles.dz[id]);
@@ -112,37 +114,29 @@ __host__ __device__ float Compton_SampleSecondaries(ParticleStack particles, flo
     float gamE1  = gamE0 * eps;
     if (gamE1 > 1.0e-06f) {particles.E[id] = gamE1;}
     else {
-        particles.endsimu[id] = 1; // absorbed this particle
-        particles.E[id] = 0.0f;
-        return gamE1;            // Local energy deposit
+        particles.endsimu[id] = PARTICLE_DEAD;  // absorbed this particle
+        particles.E[id] = gamE1;                // Local energy deposit
     }
 
     // kinematic of the scattered electron
-   
-    float eKinE = gamE0 - gamE1;
 
+    SecParticle electron;
+    electron.pname = ELECTRON;
+    electron.E = gamE0 - gamE1; // eKinE
+    electron.dir = make_float3(0.0, 0.0, 0.0);
+    electron.endsimu = PARTICLE_DEAD;
 
-//    //          DBL_MIN             cut production
-//    if (eKinE > 1.0e-38f && eKinE > cutE && flag_secondary) {
-//        float3 eDir = vec3_sub(vec3_scale(gamDir0, gamE0), vec3_scale(gamDir1, gamE1));
-//        eDir = vec3_unit(eDir);
-//        electrons.dx[id] = eDir.x;
-//        electrons.dy[id] = eDir.y;
-//        electrons.dz[id] = eDir.z;
-//        electrons.E[id]  = eKinE;
-//        electrons.px[id] = photons.px[id];
-//        electrons.py[id] = photons.py[id];
-//        electrons.pz[id] = photons.pz[id];
-//        electrons.endsimu[id] = 0;
-//        // Now start to track this electron and freeze the photon tracking
-//        photons.active[id] = 0;
-//        electrons.active[id] = 1;
-//        return 0.0f;
-//    }
+    //          DBL_MIN             cut production
+    if (electron.E > 1.0e-38f && electron.E > cutE && parameters.secondaries_list[ELECTRON]) {
+        electron.dir = f3_sub(f3_scale(gamDir0, gamE0), f3_scale(gamDir1, gamE1));
+        electron.dir = f3_unit(electron.dir);
+        electron.endsimu = PARTICLE_ALIVE;
+    }
 
-    return eKinE;
+    //return e-
+    return electron;
 }
-
+/*
 
 ///// PhotoElectric /////
 

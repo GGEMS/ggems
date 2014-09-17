@@ -18,8 +18,9 @@
 #ifndef FUN_H
 #define FUN_H
 
-/*
 __host__ __device__ float3 rotateUz(float3 vector, float3 newUz);
+
+/*
 
 // Loglog interpolation
 inline __host__ __device__ float loglog_interpolation(float x, float x0, float y0, float x1, float y1);

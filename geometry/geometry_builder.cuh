@@ -103,9 +103,6 @@ class GeometryBuilder {
     private:        
         unsigned int get_material_index(std::string material_name);
         void update_tree_address();
-        //void push_back(T1 *vector, unsigned int &dim, T1 val);
-        //void push_back(float* vector, unsigned int &dim, float val);
-        void insert(unsigned int* vector, unsigned int &dim, unsigned int pos, unsigned int val);
 
 
 

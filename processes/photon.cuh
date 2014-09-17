@@ -19,10 +19,21 @@
 #define PHOTON_CUH
 
 #include "../geometry/materials.cuh"
+#include "../global/global.cuh"
+#include "particles.cuh"
+#include "../maths/prng.cuh"
+#include "../maths/fun.cuh"
+#include "constants.cuh"
 
 // Compton - model standard G4
 __host__ __device__ float Compton_CSPA_standard(float E, unsigned short int Z);
 __host__ __device__ float Compton_CS_standard(MaterialsTable materials, unsigned short int mat, float E);
+
+__host__ __device__ SecParticle Compton_SampleSecondaries_standard(ParticleStack particles,
+                                                                   float cutE,
+                                                                   unsigned int id,
+                                                                   GlobalSimulationParameters parameters);
+
 
 /*
 __host__ __device__ float Compton_CSPA (float E, unsigned short int Z);

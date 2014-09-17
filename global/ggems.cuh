@@ -47,6 +47,8 @@ class SimulationBuilder {
         void set_sources(SourceBuilder src);
         void set_particles(ParticleBuilder p);
 
+        ParticleBuilder get_particles();
+
         void set_hardware_target(std::string value);
         void set_process(std::string process_name);
         void set_secondary(std::string pname);

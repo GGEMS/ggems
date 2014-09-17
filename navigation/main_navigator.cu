@@ -20,18 +20,27 @@
 
 #include "main_navigator.cuh"
 
-void cpu_main_navigator(ParticleStack particles, Scene geometry,
+void cpu_main_navigator(ParticleStack &particles, Scene geometry,
                         MaterialsTable materials, GlobalSimulationParameters parameters) {
 
     // For each particle
     unsigned int id = 0;
     while (id < particles.size) {
 
-        // Type of particle
-        if (particles.pname[id] == PHOTON) {
-            cpu_photon_navigator(particles, id, geometry, materials, parameters);
+        // Stepping loop, iterate the particle until the end
+        unsigned int istep = 0;
+        while (particles.endsimu[id] == PARTICLE_ALIVE) {
 
-        }
+            // If a photon
+            if (particles.pname[id] == PHOTON) {
+                cpu_photon_navigator(particles, id, geometry, materials, parameters);
+            }
+
+            istep++;
+
+            printf("  istep %i\n", istep);
+
+        } // istep
 
         // next particle
         ++id;

@@ -20,7 +20,7 @@
 
 #include "photon_navigator.cuh"
 
-void cpu_photon_navigator(ParticleStack particles, unsigned int part_id,
+void cpu_photon_navigator(ParticleStack &particles, unsigned int part_id,
                           Scene geometry, MaterialsTable materials,
                           GlobalSimulationParameters parameters) {
 
@@ -37,12 +37,18 @@ void cpu_photon_navigator(ParticleStack particles, unsigned int part_id,
     dir.y = particles.dy[part_id];
     dir.z = particles.dz[part_id];
 
+    printf("%i\n", part_id);
+
+    printf("   p %f %f %f - d %f %f %f\n", part_id, pos.x, pos.y, pos.z, dir.x, dir.y, dir.z);
+
     // Get the current volume containing the particle
     unsigned int id_geom = particles.geometry_id[part_id];
+    printf("   id_geom %i\n", id_geom);
 
     // Get the material that compose this volume
     unsigned int adr_geom = geometry.ptr_objects[id_geom];
     unsigned int obj_type = (unsigned int)geometry.data_objects[adr_geom+ADR_OBJ_TYPE];
+    printf("   obj_type %i\n", obj_type);
     unsigned int id_mat = 0;
     if (obj_type != VOXELIZED) {
         id_mat = (unsigned int)geometry.data_objects[adr_geom+ADR_OBJ_MAT_ID];
@@ -50,11 +56,13 @@ void cpu_photon_navigator(ParticleStack particles, unsigned int part_id,
         // TODO
         id_mat = 0;
     }
+    printf("   id_mat %i\n", id_mat);
 
     //// Find next discrete interaction ///////////////////////////////////////
 
     float next_interaction_distance = FLT_MAX;
     unsigned char next_discrete_process = 0;
+    unsigned int next_geometry_volume = id_geom;
     float interaction_distance;
     float cross_section;
 
@@ -77,6 +85,9 @@ void cpu_photon_navigator(ParticleStack particles, unsigned int part_id,
             next_interaction_distance = interaction_distance;
             next_discrete_process = PHOTON_COMPTON;
         }
+
+        printf("   Compton: CS %f  dist %f\n", cross_section, interaction_distance);
+
     }
 
     // If Rayleigh
@@ -90,14 +101,84 @@ void cpu_photon_navigator(ParticleStack particles, unsigned int part_id,
         //}
     }
 
-    // TODO
-    // Distance to the next voxel boundary (raycasting)
-    //interaction_distance = get_boundary_voxel_by_raycasting(index_phantom, photon.pos,
-    //                                                        photon.dir, voxel_size);
-    //if (interaction_distance < next_interaction_distance) {
-    //    next_interaction_distance = interaction_distance + EPS; // Overshoot
-    //    next_discrete_process = PHOTON_BOUNDARY_VOXEL;
-    //}
+    //// Get the next distance boundary volume /////////////////////////////////
+
+    // First check the boundary of the current volume
+    if (obj_type == AABB) {
+
+        // Read first the bounding box
+        float xmin = geometry.data_objects[adr_geom+ADR_AABB_XMIN];
+        float xmax = geometry.data_objects[adr_geom+ADR_AABB_XMAX];
+        float ymin = geometry.data_objects[adr_geom+ADR_AABB_YMIN];
+        float ymax = geometry.data_objects[adr_geom+ADR_AABB_YMAX];
+        float zmin = geometry.data_objects[adr_geom+ADR_AABB_ZMIN];
+        float zmax = geometry.data_objects[adr_geom+ADR_AABB_ZMAX];
+
+        interaction_distance = hit_ray_AABB(pos, dir, xmin, xmax, ymin, ymax, zmin, zmax);
+
+        printf("   hit Ray/AABB %f dist aabb %f %f %f %f %f %f\n", interaction_distance, xmin, xmax,
+                ymin, ymax, zmin, zmax);
+
+        if (interaction_distance < next_interaction_distance) {
+            next_interaction_distance = interaction_distance + EPSILON3; // overshoot
+            next_discrete_process = GEOMETRY_BOUNDARY;
+            next_geometry_volume = geometry.mother_node[id_geom];
+        }
+
+    } else if (obj_type == SPHERE) {
+        // TODO
+
+    } // else if VOXELIZED   ... etc.
+
+    // Then check every child contains in this node
+    unsigned int adr_node = geometry.ptr_nodes[id_geom];
+    printf("   adr_node %i\n", adr_node);
+
+    unsigned int offset_node = 0;
+    unsigned int id_child_geom;
+    while (offset_node < geometry.size_of_nodes[id_geom]) {
+
+        // Child id
+        id_child_geom = geometry.child_nodes[adr_node + offset_node];
+        printf("   id_child_geom %i\n", id_child_geom);
+
+        // Determine the type of the volume
+        unsigned int adr_child_geom = geometry.ptr_objects[id_child_geom];
+        printf("   adr_child_geom %i\n", adr_child_geom);
+
+        unsigned int obj_child_type = (unsigned int)geometry.data_objects[adr_child_geom+ADR_OBJ_TYPE];
+        printf("   obj_child_type %i\n", obj_child_type);
+
+        // Get raytracing distance accordingly
+        if (obj_child_type == AABB) {
+
+            // Read first the bounding box
+            float xmin = geometry.data_objects[adr_child_geom+ADR_AABB_XMIN];
+            float xmax = geometry.data_objects[adr_child_geom+ADR_AABB_XMAX];
+            float ymin = geometry.data_objects[adr_child_geom+ADR_AABB_YMIN];
+            float ymax = geometry.data_objects[adr_child_geom+ADR_AABB_YMAX];
+            float zmin = geometry.data_objects[adr_child_geom+ADR_AABB_ZMIN];
+            float zmax = geometry.data_objects[adr_child_geom+ADR_AABB_ZMAX];
+
+            // Ray/AABB raytracing
+            interaction_distance = hit_ray_AABB(pos, dir, xmin, xmax, ymin, ymax, zmin, zmax);
+
+            if (interaction_distance < next_interaction_distance) {
+                next_interaction_distance = interaction_distance + EPSILON3; // overshoot
+                next_discrete_process = GEOMETRY_BOUNDARY;
+                next_geometry_volume = id_child_geom;
+            }
+
+        } else if (obj_child_type == SPHERE) {
+            // do
+            printf("Cross SPHERE\n");
+        } // else if VOXELIZED   ... etc.
+
+        ++offset_node;
+
+    }
+
+
 
     //// Move particle //////////////////////////////////////////////////////
 
@@ -109,15 +190,62 @@ void cpu_photon_navigator(ParticleStack particles, unsigned int part_id,
 
     // Move the particle
     pos = f3_add(pos, f3_scale(dir, next_interaction_distance));
+    printf("   int dist %f type %i geom %i\n", next_interaction_distance, next_discrete_process,
+           next_geometry_volume);
 
     // TODO
-    // Stop simulation if out of phantom or no more energy
-    //if (   photon.pos.x <= 0 || photon.pos.x >= (phantom.m_nx * phantom.m_spacing_x)
-    //    || photon.pos.y <= 0 || photon.pos.y >= (phantom.m_ny * phantom.m_spacing_y)
-    //    || photon.pos.z <= 0 || photon.pos.z >= (phantom.m_nz * phantom.m_spacing_z)) {
-    //    photon.endsimu = 1;                     // stop the simulation
-    //    return;
-    //}
+    //particles.tof[id] += gpu_speed_of_light * next_interaction_distance;
+
+    particles.px[part_id] = pos.x;
+    particles.py[part_id] = pos.y;
+    particles.pz[part_id] = pos.z;
+
+    particles.geometry_id[part_id] = next_geometry_volume;
+
+    printf("   new pos %f %f %f\n", pos.x, pos.y, pos.z);
+
+    // Check world boundary
+    float xmin = geometry.data_objects[ADR_AABB_XMIN]; // adr_world_geom = 0
+    float xmax = geometry.data_objects[ADR_AABB_XMAX];
+    float ymin = geometry.data_objects[ADR_AABB_YMIN];
+    float ymax = geometry.data_objects[ADR_AABB_YMAX];
+    float zmin = geometry.data_objects[ADR_AABB_ZMIN];
+    float zmax = geometry.data_objects[ADR_AABB_ZMAX];
+
+    // Stop simulation if out of the world
+    if (   pos.x <= xmin || pos.x >= xmax
+        || pos.y <= ymin || pos.y >= ymax
+        || pos.z <= zmin || pos.z >= zmax) {
+
+        particles.endsimu[part_id] = PARTICLE_DEAD;
+
+        printf("   Out of world [%f %f %f %f %f %f]\n", xmin, xmax, ymin, ymax, zmin, zmax);
+
+        return;
+    }
+
+    //// Apply discrete process //////////////////////////////////////////////////
+
+    //float discrete_loss = 0.0f;
+
+    if (next_discrete_process == PHOTON_COMPTON) {
+
+        printf("   Apply Compton\n");
+
+        //   TODO: cutE = materials.electron_cut_energy[mat]                 cutE
+        SecParticle electron = Compton_SampleSecondaries_standard(particles, 0.0, part_id, parameters);
+
+        // Local deposition if this photon was absorbed
+        //if (particles.endsimu[part_id] == PARTICLE_DEAD) discrete_loss = particles.E[part_id];
+
+        // Generate electron if need
+        if (electron.endsimu == PARTICLE_ALIVE) {
+            // TODO
+        }
+
+
+    }
+
 
 }
 

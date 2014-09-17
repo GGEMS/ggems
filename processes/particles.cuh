@@ -51,6 +51,14 @@ struct ParticleStack{
     unsigned int size;
 }; //
 
+// Helper to handle secondaries particles
+struct SecParticle{
+    float3 dir;
+    float E;
+    unsigned char pname;
+    unsigned char endsimu;
+};
+
 // Particles class
 class ParticleBuilder {
     public:

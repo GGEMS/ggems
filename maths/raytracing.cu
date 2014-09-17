@@ -196,10 +196,10 @@ __host__ __device__ float hit_ray_sphere(float3 ray_p, float3 ray_d,           /
     float  b = f3_dot(m, ray_d);
     float  c = f3_dot(m, m) - sphere_rad*sphere_rad;
 
-    if (c > 0.0f && b > 0.0f) {return -1;}
+    if (c > 0.0f && b > 0.0f) {return FLT_MAX;}
 
     float discr = b*b - c;
-    if (discr < 0.0f) {return -1;}
+    if (discr < 0.0f) {return FLT_MAX;}
 
     float t = -b - sqrt(discr);
     if (t < 0.0f) {t = 0.0f;}
@@ -236,8 +236,8 @@ __host__ __device__ float hit_ray_AABB(float3 ray_p, float3 ray_d,
     tmax = FLT_MAX;
 
     // on x
-    if (fabs(ray_d.x) < EPSILON) {
-        if (ray_p.x < aabb_xmin || ray_p.x > aabb_xmax) {return -1;}
+    if (fabs(ray_d.x) < EPSILON6) {
+        if (ray_p.x < aabb_xmin || ray_p.x > aabb_xmax) {return FLT_MAX;}
     } else {
         idx = 1.0f / ray_d.x;
         tmin = (aabb_xmin - ray_p.x) * idx;
@@ -250,8 +250,8 @@ __host__ __device__ float hit_ray_AABB(float3 ray_p, float3 ray_d,
         if (tmin > tmax) {return -1;}
     }
     // on y
-    if (fabs(ray_d.y) < EPSILON) {
-        if (ray_p.y < aabb_ymin || ray_p.y > aabb_ymax) {return -1;}
+    if (fabs(ray_d.y) < EPSILON6) {
+        if (ray_p.y < aabb_ymin || ray_p.y > aabb_ymax) {return FLT_MAX;}
     } else {
         idy = 1.0f / ray_d.y;
         tymin = (aabb_ymin - ray_p.y) * idy;
@@ -266,8 +266,8 @@ __host__ __device__ float hit_ray_AABB(float3 ray_p, float3 ray_d,
         if (tmin > tmax) {return -1;}
     }
     // on z
-    if (fabs(ray_d.z) < EPSILON) {
-        if (ray_p.z < aabb_zmin || ray_p.z > aabb_zmax) {return -1;}
+    if (fabs(ray_d.z) < EPSILON6) {
+        if (ray_p.z < aabb_zmin || ray_p.z > aabb_zmax) {return FLT_MAX;}
     } else {
         idz = 1.0f / ray_d.z;
         tzmin = (aabb_zmin - ray_p.z) * idz;
@@ -282,9 +282,15 @@ __host__ __device__ float hit_ray_AABB(float3 ray_p, float3 ray_d,
         if (tmin > tmax) {return -1;}
     }
 
-    return tmin;
-}
+    // Return the smaller positive value
+    if (tmin < 0 && tmax < 0) return FLT_MAX;
+    if (tmin < 0) {
+        return tmax;
+    } else {
+        return tmin;
+    }
 
+}
 
 // Ray/triangle intersection - Moller-Trumbore algorithm
 __host__ __device__ float hit_ray_triangle(float3 ray_p, float3 ray_d,
@@ -297,17 +303,17 @@ __host__ __device__ float hit_ray_triangle(float3 ray_p, float3 ray_d,
 
     float3 pp = f3_cross(ray_d, e2);
     float  a  = f3_dot(e1, pp);
-    if (a > -1.0e-05f && a < 1.0e-05f) {return -1;} // no hit
+    if (a > -1.0e-05f && a < 1.0e-05f) {return FLT_MAX;} // no hit
 
     float f = 1.0f / a;
 
     float3 s = f3_sub(ray_p, tri_u);
     float  u = f * f3_dot(s, pp);
-    if (u < 0.0f || u > 1.0f) {return -1;}
+    if (u < 0.0f || u > 1.0f) {return FLT_MAX;}
 
     float3 q = f3_cross(s, e1);
     float  v = f * f3_dot(ray_d, q);
-    if (v < 0.0f || (u+v) > 1.0f) {return -1;}
+    if (v < 0.0f || (u+v) > 1.0f) {return FLT_MAX;}
 
     // Ray hit the triangle
     return f * f3_dot(e2, q);
