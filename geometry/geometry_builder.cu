@@ -175,6 +175,8 @@ void GeometryBuilder::print_geometry() {
     } // while
 }
 
+
+
 /*
 // Print out the geometry raw data
 void GeometryBuilder::print_raw() {
@@ -351,10 +353,12 @@ unsigned int GeometryBuilder::add_world(Aabb obj) {
     array_push_back(&world.data_objects, world.data_objects_dim, obj.ymax);
     array_push_back(&world.data_objects, world.data_objects_dim, obj.zmin);
     array_push_back(&world.data_objects, world.data_objects_dim, obj.zmax);
-
-
     // Name of this object
     name_objects.push_back(obj.object_name);
+    // Color of this object
+    object_colors.push_back(obj.color);
+    // Transparency of this object
+    object_transparency.push_back(obj.transparency);
     // Store the size of this object
     array_push_back(&world.size_of_objects, world.size_of_objects_dim, SIZE_WORLD_OBJ);
 
@@ -387,6 +391,10 @@ unsigned int GeometryBuilder::add_object(Aabb obj, unsigned int mother_id) {
     array_push_back(&world.data_objects, world.data_objects_dim, obj.zmax);
     // Name of this object
     name_objects.push_back(obj.object_name);
+    // Color of this object
+    object_colors.push_back(obj.color);
+    // Transparency of this object
+    object_transparency.push_back(obj.transparency);
     // Store the size of this object
     array_push_back(&world.size_of_objects, world.size_of_objects_dim, SIZE_AABB_OBJ);
 
@@ -418,6 +426,10 @@ unsigned int GeometryBuilder::add_object(Sphere obj, unsigned int mother_id) {
     array_push_back(&world.data_objects, world.data_objects_dim, obj.zmax);
     // Name of this object
     name_objects.push_back(obj.object_name);
+    // Color of this object
+    object_colors.push_back(obj.color);
+    // Transparency of this object
+    object_transparency.push_back(obj.transparency);
     // Sphere parameters
     array_push_back(&world.data_objects, world.data_objects_dim, obj.cx);
     array_push_back(&world.data_objects, world.data_objects_dim, obj.cy);

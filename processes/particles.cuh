@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <algorithm>
+#include <vector>
 
 // Stack of particles, format data is defined as SoA
 struct ParticleStack{
@@ -52,12 +53,42 @@ struct ParticleStack{
 }; //
 
 // Helper to handle secondaries particles
-struct SecParticle{
+struct SecParticle {
     float3 dir;
     float E;
     unsigned char pname;
     unsigned char endsimu;
 };
+
+// Helper to handle history of particles
+struct OneParticleStep {
+    float3 pos;
+    float3 dir;
+    float E;
+};
+
+// History class
+class HistoryBuilder {
+    public:
+        HistoryBuilder();
+
+        void cpu_new_particle_track(unsigned int a_pname);
+        void cpu_record_a_step(ParticleStack particles, unsigned int id_part);
+
+        std::vector<unsigned char> pname;
+        std::vector<unsigned int> nb_steps;
+        std::vector< std::vector<OneParticleStep> > history_data;
+
+        unsigned char record_flag;      // Record or not
+        unsigned int max_nb_particles;  // Max nb of particles keep in the history
+        unsigned int cur_iter;          // Current number of iterations
+        unsigned int stack_size;        // Size fo the particle stack
+
+    private:
+        unsigned int current_particle_id;
+        unsigned char type_of_particles;
+};
+
 
 // Particles class
 class ParticleBuilder {

@@ -37,7 +37,8 @@ SimulationBuilder::SimulationBuilder() {
         ++i;
     }
 
-    parameters.dose_flag = DISABLED;
+    parameters.record_dose_flag = DISABLED;
+    history.record_flag = DISABLED;
 }
 
 ////// :: Main functions ::
@@ -72,6 +73,13 @@ void SimulationBuilder::cpu_primaries_generator() {
             point_source_primary_generator(particles.stack, id, px, py, pz, energy, PHOTON, geom_id);
         }
 
+        // If need record the first position for the tracking history
+        if (history.record_flag == ENABLED) {
+            history.cpu_new_particle_track(PHOTON);
+            history.cpu_record_a_step(particles.stack, id);
+
+        }
+
         // Next particle
         ++id;
 
@@ -82,7 +90,8 @@ void SimulationBuilder::cpu_primaries_generator() {
 // Main navigation on CPU
 void SimulationBuilder::cpu_main_navigation() {
 
-    cpu_main_navigator(particles.stack, geometry.world, materials.materials_table, parameters);
+    cpu_main_navigator(particles.stack, geometry.world,
+                       materials.materials_table, parameters, history);
 
 }
 
@@ -169,12 +178,18 @@ void SimulationBuilder::set_max_number_of_iterations(unsigned int nb) {
     max_iteration = nb;
 }
 
+// Set to record the history of some particles (only for CPU version)
+void SimulationBuilder::set_record_history(unsigned int nb_particles) {
+    history.record_flag = ENABLED;
+    history.max_nb_particles = std::min(nb_particles, nb_of_particles);
+    history.stack_size = particles.stack.size;
+}
+
 ////// :: Getting ::
 
 ParticleBuilder SimulationBuilder::get_particles() {
     return particles;
 }
-
 
 ////// :: Command ::
 
@@ -235,6 +250,9 @@ void SimulationBuilder::start_simulation() {
 
         // Main loop
         while (iter < nb_of_iterations) {
+            // If history is required
+            if (history.record_flag == ENABLED) history.cur_iter = iter;
+
             // Sources
             cpu_primaries_generator();
 
@@ -245,25 +263,14 @@ void SimulationBuilder::start_simulation() {
 
             // iter
             ++iter;
-            printf(">>> Iter %i / %i\n", iter, nb_of_iterations);
+            printf(">> Iter %i / %i\n", iter, nb_of_iterations);
         } // main loop
-
-
-
-
-
-
-
 
     }
 
 }
 
 
-
-
-
-
-
+////// :: Utils ::
 
 #endif

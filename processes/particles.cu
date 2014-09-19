@@ -19,6 +19,55 @@
 #define PARTICLES_CU
 #include "particles.cuh"
 
+//// HistoryBuilder class ////////////////////////////////////////////////////
+
+HistoryBuilder::HistoryBuilder() {
+    current_particle_id = 0;
+}
+
+// Create a new particle track in the history
+void HistoryBuilder::cpu_new_particle_track(unsigned int a_pname) {
+
+    // If need record the first position for the tracking history
+    if (current_particle_id < max_nb_particles) {
+
+        // new particle
+        pname.push_back(a_pname);
+        nb_steps.push_back(0);
+
+        std::vector<OneParticleStep> NewParticleTrack;
+        history_data.push_back(NewParticleTrack);
+
+        current_particle_id++;
+
+    }
+}
+
+// Reacord a step in a history track
+void HistoryBuilder::cpu_record_a_step(ParticleStack particles, unsigned int id_part) {
+
+    // Absolute index is need to store particle history over different iteration
+    unsigned int abs_id_part = cur_iter*stack_size + id_part;
+
+    OneParticleStep astep;
+
+    astep.pos.x = particles.px[id_part];
+    astep.pos.y = particles.py[id_part];
+    astep.pos.z = particles.pz[id_part];
+    astep.dir.x = particles.dx[id_part];
+    astep.dir.y = particles.dy[id_part];
+    astep.dir.z = particles.dz[id_part];
+    astep.E = particles.E[id_part];
+
+    // Add this step
+    history_data[abs_id_part].push_back(astep);
+    nb_steps[abs_id_part]++;
+
+}
+
+
+//// ParticleBuilder class ///////////////////////////////////////////////////
+
 ParticleBuilder::ParticleBuilder() {
     stack.size = 0;
     seed = 0;

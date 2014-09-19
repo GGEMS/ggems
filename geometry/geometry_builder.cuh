@@ -47,7 +47,7 @@
 #define SIZE_AABB_OBJ 8
 #define SIZE_SPHERE_OBJ 12
 
-// Class that handle the geometry of the world
+// Struct that handle the geometry of the world
 struct Scene {
 
     // Object structure
@@ -99,6 +99,8 @@ class GeometryBuilder {
         Scene world;
         std::vector<std::string> materials_list;   // List of the materials used
         std::vector<std::string> name_objects;     // Name of each object
+        std::vector<Color> object_colors;          // Color of each object
+        std::vector<float> object_transparency;    // Transparency of each object
 
     private:        
         unsigned int get_material_index(std::string material_name);

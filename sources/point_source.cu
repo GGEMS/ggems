@@ -40,7 +40,7 @@ __host__ __device__ void point_source_primary_generator(ParticleStack particles,
     particles.py[id] = py;
     particles.pz[id] = pz;
     particles.tof[id] = 0.0f;
-    particles.endsimu[id] = DISABLED;
+    particles.endsimu[id] = PARTICLE_ALIVE;
     particles.level[id] = PRIMARY;
     particles.pname[id] = type;
     particles.geometry_id[id] = geom_id;

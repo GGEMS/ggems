@@ -32,6 +32,24 @@ Aabb::Aabb (float ox, float oy, float oz,
     zmax = oz+halflz;
     material_name = mat_name;
     object_name = obj_name;
+
+    // white by default
+    color.r = 1.0;
+    color.g = 1.0;
+    color.b = 1.0;
+
+    // Transparency by default
+    transparency = 0.0;
+}
+
+void Aabb::set_color(float r, float g, float b) {
+    color.r = r;
+    color.g = g;
+    color.b = b;
+}
+
+void Aabb::set_transparency(float val) {
+    transparency = val;
 }
 
 

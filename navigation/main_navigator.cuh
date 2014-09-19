@@ -26,7 +26,8 @@
 #include "photon_navigator.cuh"
 
 void cpu_main_navigator(ParticleStack &particles, Scene geometry,
-                        MaterialsTable materials, GlobalSimulationParameters parameters);
+                        MaterialsTable materials, GlobalSimulationParameters parameters,
+                        HistoryBuilder &history);
 
 
 

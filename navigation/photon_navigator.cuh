@@ -37,7 +37,8 @@
 
 void cpu_photon_navigator(ParticleStack &particles, unsigned int part_id,
                           Scene geometry, MaterialsTable materials,
-                          GlobalSimulationParameters parameters);
+                          GlobalSimulationParameters parameters,
+                          HistoryBuilder &history);
 
 
 #endif

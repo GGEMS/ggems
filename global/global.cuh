@@ -43,11 +43,20 @@ void array_insert(float **vector, unsigned int &dim, unsigned int pos, float val
 struct GlobalSimulationParameters {
     char physics_list[NB_PROCESSES];
     char secondaries_list[NB_PARTICLES];
-    char dose_flag;
-    int nb_of_particles;
-    int nb_iterations;
+    char record_dose_flag;
+
+    unsigned int nb_of_particles;
+    unsigned int nb_iterations;
+
     float time;
-    int seed;
+    unsigned int seed;
+
 };
+
+// Struct that handle colors
+struct Color {
+    float r, g, b;
+};
+
 
 #endif

@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string>
+#include "../global/global.cuh"
 
 // Axis-Aligned Bounding Box
 class Aabb {
@@ -38,12 +39,17 @@ class Aabb {
 
         //void set_materials(std::string mat_name);
 
+        void set_color(float r, float g, float b);
+        void set_transparency(float val);
+
         //void scale(float3 s);
         //void scale(float sx, float sy, float sz);
         //void translate(float3 t);
         //void translate(float tx, float ty, float tz);
 
         float xmin, xmax, ymin, ymax, zmin, zmax;
+        Color color;
+        float transparency;
         std::string material_name;
         std::string object_name;
 

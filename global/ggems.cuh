@@ -36,6 +36,7 @@
 
 #include "../navigation/main_navigator.cuh"
 
+#include "../geometry/vrml.cuh"
 
 // Class to manage the hierarchical structure of the world
 class SimulationBuilder {
@@ -54,6 +55,7 @@ class SimulationBuilder {
         void set_secondary(std::string pname);
         void set_number_of_particles(unsigned int nb);
         void set_max_number_of_iterations(unsigned int nb);
+        void set_record_history(unsigned int nb_particles);
 
         void init_simulation();
         void start_simulation();
@@ -69,6 +71,9 @@ class SimulationBuilder {
         MaterialBuilder materials;
         SourceBuilder sources;
         GlobalSimulationParameters parameters;
+
+        // Record history for some particles (only CPU version)
+        HistoryBuilder history;
 
     private:
 

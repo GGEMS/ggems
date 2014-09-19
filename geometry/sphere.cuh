@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string>
+#include "../global/global.cuh"
 
 // Sphere
 class Sphere {
@@ -28,10 +29,17 @@ class Sphere {
         Sphere(float ox, float oy, float oz, float rad,
                std::string mat_name, std::string obj_name);
 
+        void set_color(float r, float g, float b);
+        void set_transparency(float val);
+
         float cx, cy, cz, radius;
         float xmin, xmax, ymin, ymax, zmin, zmax;
+        Color color;
+        float transparency;
         std::string material_name;
         std::string object_name;
+
+
 
     private:
 };

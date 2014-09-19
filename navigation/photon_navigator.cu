@@ -22,7 +22,8 @@
 
 void cpu_photon_navigator(ParticleStack &particles, unsigned int part_id,
                           Scene geometry, MaterialsTable materials,
-                          GlobalSimulationParameters parameters) {
+                          GlobalSimulationParameters parameters,
+                          HistoryBuilder &history) {
 
 
     // Read position
@@ -37,18 +38,12 @@ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_id,
     dir.y = particles.dy[part_id];
     dir.z = particles.dz[part_id];
 
-    printf("%i\n", part_id);
-
-    printf("   p %f %f %f - d %f %f %f\n", part_id, pos.x, pos.y, pos.z, dir.x, dir.y, dir.z);
-
     // Get the current volume containing the particle
     unsigned int id_geom = particles.geometry_id[part_id];
-    printf("   id_geom %i\n", id_geom);
 
     // Get the material that compose this volume
     unsigned int adr_geom = geometry.ptr_objects[id_geom];
     unsigned int obj_type = (unsigned int)geometry.data_objects[adr_geom+ADR_OBJ_TYPE];
-    printf("   obj_type %i\n", obj_type);
     unsigned int id_mat = 0;
     if (obj_type != VOXELIZED) {
         id_mat = (unsigned int)geometry.data_objects[adr_geom+ADR_OBJ_MAT_ID];
@@ -56,7 +51,6 @@ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_id,
         // TODO
         id_mat = 0;
     }
-    printf("   id_mat %i\n", id_mat);
 
     //// Find next discrete interaction ///////////////////////////////////////
 
@@ -85,9 +79,6 @@ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_id,
             next_interaction_distance = interaction_distance;
             next_discrete_process = PHOTON_COMPTON;
         }
-
-        printf("   Compton: CS %f  dist %f\n", cross_section, interaction_distance);
-
     }
 
     // If Rayleigh
@@ -116,9 +107,6 @@ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_id,
 
         interaction_distance = hit_ray_AABB(pos, dir, xmin, xmax, ymin, ymax, zmin, zmax);
 
-        printf("   hit Ray/AABB %f dist aabb %f %f %f %f %f %f\n", interaction_distance, xmin, xmax,
-                ymin, ymax, zmin, zmax);
-
         if (interaction_distance < next_interaction_distance) {
             next_interaction_distance = interaction_distance + EPSILON3; // overshoot
             next_discrete_process = GEOMETRY_BOUNDARY;
@@ -132,7 +120,6 @@ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_id,
 
     // Then check every child contains in this node
     unsigned int adr_node = geometry.ptr_nodes[id_geom];
-    printf("   adr_node %i\n", adr_node);
 
     unsigned int offset_node = 0;
     unsigned int id_child_geom;
@@ -140,14 +127,10 @@ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_id,
 
         // Child id
         id_child_geom = geometry.child_nodes[adr_node + offset_node];
-        printf("   id_child_geom %i\n", id_child_geom);
 
         // Determine the type of the volume
         unsigned int adr_child_geom = geometry.ptr_objects[id_child_geom];
-        printf("   adr_child_geom %i\n", adr_child_geom);
-
         unsigned int obj_child_type = (unsigned int)geometry.data_objects[adr_child_geom+ADR_OBJ_TYPE];
-        printf("   obj_child_type %i\n", obj_child_type);
 
         // Get raytracing distance accordingly
         if (obj_child_type == AABB) {
@@ -171,14 +154,11 @@ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_id,
 
         } else if (obj_child_type == SPHERE) {
             // do
-            printf("Cross SPHERE\n");
         } // else if VOXELIZED   ... etc.
 
         ++offset_node;
 
     }
-
-
 
     //// Move particle //////////////////////////////////////////////////////
 
@@ -190,8 +170,6 @@ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_id,
 
     // Move the particle
     pos = f3_add(pos, f3_scale(dir, next_interaction_distance));
-    printf("   int dist %f type %i geom %i\n", next_interaction_distance, next_discrete_process,
-           next_geometry_volume);
 
     // TODO
     //particles.tof[id] += gpu_speed_of_light * next_interaction_distance;
@@ -201,8 +179,6 @@ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_id,
     particles.pz[part_id] = pos.z;
 
     particles.geometry_id[part_id] = next_geometry_volume;
-
-    printf("   new pos %f %f %f\n", pos.x, pos.y, pos.z);
 
     // Check world boundary
     float xmin = geometry.data_objects[ADR_AABB_XMIN]; // adr_world_geom = 0
@@ -219,7 +195,10 @@ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_id,
 
         particles.endsimu[part_id] = PARTICLE_DEAD;
 
-        printf("   Out of world [%f %f %f %f %f %f]\n", xmin, xmax, ymin, ymax, zmin, zmax);
+        // Record this step if required
+        if (history.record_flag == ENABLED) {
+            history.cpu_record_a_step(particles, part_id);
+        }
 
         return;
     }
@@ -229,8 +208,6 @@ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_id,
     //float discrete_loss = 0.0f;
 
     if (next_discrete_process == PHOTON_COMPTON) {
-
-        printf("   Apply Compton\n");
 
         //   TODO: cutE = materials.electron_cut_energy[mat]                 cutE
         SecParticle electron = Compton_SampleSecondaries_standard(particles, 0.0, part_id, parameters);
@@ -243,7 +220,11 @@ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_id,
             // TODO
         }
 
+    }
 
+    // Record this step if required
+    if (history.record_flag == ENABLED) {
+        history.cpu_record_a_step(particles, part_id);
     }
 
 
