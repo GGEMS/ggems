@@ -20,6 +20,8 @@
 
 #include "vector.cuh"
 #include <cfloat>
+#include <stdlib.h>
+#include <stdio.h>
 #include "../processes/constants.cuh"
 
 

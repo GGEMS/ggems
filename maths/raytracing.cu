@@ -232,8 +232,8 @@ __host__ __device__ float hit_ray_AABB(float3 ray_p, float3 ray_d,
     float idx, idy, idz;
     float tmin, tmax, tymin, tymax, tzmin, tzmax, buf;
 
-    tmin = 0.0f;    // First hit on segment (from particle to INF)
-    tmax = FLT_MAX;
+    tmin = -FLT_MAX;
+    tmax =  FLT_MAX;
 
     // on x
     if (fabs(ray_d.x) < EPSILON6) {
@@ -247,7 +247,7 @@ __host__ __device__ float hit_ray_AABB(float3 ray_p, float3 ray_d,
             tmin = tmax;
             tmax = buf;
         }
-        if (tmin > tmax) {return -1;}
+        if (tmin > tmax) {return FLT_MAX;}
     }
     // on y
     if (fabs(ray_d.y) < EPSILON6) {
@@ -263,7 +263,7 @@ __host__ __device__ float hit_ray_AABB(float3 ray_p, float3 ray_d,
         }
         if (tymin > tmin) {tmin = tymin;}
         if (tymax < tmax) {tmax = tymax;}
-        if (tmin > tmax) {return -1;}
+        if (tmin > tmax) {return FLT_MAX;}
     }
     // on z
     if (fabs(ray_d.z) < EPSILON6) {
@@ -279,7 +279,7 @@ __host__ __device__ float hit_ray_AABB(float3 ray_p, float3 ray_d,
         }
         if (tzmin > tmin) {tmin = tzmin;}
         if (tzmax < tmax) {tmax = tzmax;}
-        if (tmin > tmax) {return -1;}
+        if (tmin > tmax) {return FLT_MAX;}
     }
 
     // Return the smaller positive value

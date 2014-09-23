@@ -37,6 +37,7 @@
 #include "../navigation/main_navigator.cuh"
 
 #include "../geometry/vrml.cuh"
+#include "../maths/mathplot.cuh"
 
 // Class to manage the hierarchical structure of the world
 class SimulationBuilder {
