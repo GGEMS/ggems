@@ -47,6 +47,11 @@
 #define SIZE_AABB_OBJ 8
 #define SIZE_SPHERE_OBJ 12
 
+// Host/Device function that handle geometry
+
+unsigned int __host__ __device__ get_geometry_material(Scene geometry, unsigned int id_geom);
+
+
 // Struct that handle the geometry of the world
 struct Scene {
 

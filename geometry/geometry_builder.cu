@@ -21,6 +21,103 @@
 #include "geometry_builder.cuh"
 
 /////////////////////////////////////////////////////////////////////////////////////
+///////// Host/Device functions /////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////
+
+// Function that return the material of a volume
+unsigned int __host__ __device__ get_geometry_material(Scene geometry, unsigned int id_geom) {
+    unsigned int adr_geom = geometry.ptr_objects[id_geom];
+    unsigned int obj_type = (unsigned int)geometry.data_objects[adr_geom+ADR_OBJ_TYPE];
+
+    if (obj_type != VOXELIZED) {
+        return (unsigned int)geometry.data_objects[adr_geom+ADR_OBJ_MAT_ID];
+    } else {
+        // TODO
+        return 0;
+    }
+}
+
+float __host__ __device__ get_next_geometry_boundary(Scene geometry, unsigned int cur_geom,
+                                                     float3 pos, float3 dir) {
+
+
+    float interaction_distance = FLT_MAX;
+    unsigned int next_geometry_volume = cur_geom;
+
+    unsigned int adr_geom = geometry.ptr_objects[cur_geom];
+    unsigned int obj_type = (unsigned int)geometry.data_objects[adr_geom+ADR_OBJ_TYPE];
+
+    // First check the boundary of the current volume
+    if (obj_type == AABB) {
+
+        // Read first the bounding box
+        float xmin = geometry.data_objects[adr_geom+ADR_AABB_XMIN];
+        float xmax = geometry.data_objects[adr_geom+ADR_AABB_XMAX];
+        float ymin = geometry.data_objects[adr_geom+ADR_AABB_YMIN];
+        float ymax = geometry.data_objects[adr_geom+ADR_AABB_YMAX];
+        float zmin = geometry.data_objects[adr_geom+ADR_AABB_ZMIN];
+        float zmax = geometry.data_objects[adr_geom+ADR_AABB_ZMAX];
+
+        interaction_distance = hit_ray_AABB(pos, dir, xmin, xmax, ymin, ymax, zmin, zmax);
+        next_geometry_volume = geometry.mother_node[cur_geom];
+
+        if (interaction_distance <= next_interaction_distance) {
+            next_interaction_distance = interaction_distance + EPSILON3; // overshoot
+            next_discrete_process = GEOMETRY_BOUNDARY;
+            next_geometry_volume = geometry.mother_node[id_geom];
+        }
+
+    } else if (obj_type == SPHERE) {
+        // TODO
+
+    } // else if VOXELIZED   ... etc.
+
+    // Then check every child contains in this node
+    unsigned int adr_node = geometry.ptr_nodes[id_geom];
+
+    unsigned int offset_node = 0;
+    unsigned int id_child_geom;
+    while (offset_node < geometry.size_of_nodes[id_geom]) {
+
+        // Child id
+        id_child_geom = geometry.child_nodes[adr_node + offset_node];
+
+        // Determine the type of the volume
+        unsigned int adr_child_geom = geometry.ptr_objects[id_child_geom];
+        unsigned int obj_child_type = (unsigned int)geometry.data_objects[adr_child_geom+ADR_OBJ_TYPE];
+
+        // Get raytracing distance accordingly
+        if (obj_child_type == AABB) {
+
+            // Read first the bounding box
+            float xmin = geometry.data_objects[adr_child_geom+ADR_AABB_XMIN];
+            float xmax = geometry.data_objects[adr_child_geom+ADR_AABB_XMAX];
+            float ymin = geometry.data_objects[adr_child_geom+ADR_AABB_YMIN];
+            float ymax = geometry.data_objects[adr_child_geom+ADR_AABB_YMAX];
+            float zmin = geometry.data_objects[adr_child_geom+ADR_AABB_ZMIN];
+            float zmax = geometry.data_objects[adr_child_geom+ADR_AABB_ZMAX];
+
+            // Ray/AABB raytracing
+            interaction_distance = hit_ray_AABB(pos, dir, xmin, xmax, ymin, ymax, zmin, zmax);
+            //if (part_id == 59520) printf("  Child Geom dist %e id %i (%f %f %f %f %f %f)\n",
+            //                        interaction_distance, id_child_geom, xmin, xmax, ymin, ymax, zmin, zmax);
+
+            if (interaction_distance <= next_interaction_distance) {
+                next_interaction_distance = interaction_distance + EPSILON3; // overshoot
+                next_discrete_process = GEOMETRY_BOUNDARY;
+                next_geometry_volume = id_child_geom;
+            }
+
+        } else if (obj_child_type == SPHERE) {
+            // do
+        } // else if VOXELIZED   ... etc.
+
+        ++offset_node;
+
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////
 ///////// Geometry Builder class ////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////
 
