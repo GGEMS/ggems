@@ -37,12 +37,15 @@ unsigned int __host__ __device__ get_geometry_material(Scene geometry, unsigned 
     }
 }
 
-float __host__ __device__ get_next_geometry_boundary(Scene geometry, unsigned int cur_geom,
-                                                     float3 pos, float3 dir) {
+void __host__ __device__ get_next_geometry_boundary(Scene geometry, unsigned int cur_geom,
+                                                     float3 pos, float3 dir,
+                                                     float &interaction_distance,
+                                                     unsigned int &geometry_volume) {
 
 
-    float interaction_distance = FLT_MAX;
-    unsigned int next_geometry_volume = cur_geom;
+    interaction_distance = FLT_MAX;
+    geometry_volume = cur_geom;
+    float distance;
 
     unsigned int adr_geom = geometry.ptr_objects[cur_geom];
     unsigned int obj_type = (unsigned int)geometry.data_objects[adr_geom+ADR_OBJ_TYPE];
@@ -58,13 +61,12 @@ float __host__ __device__ get_next_geometry_boundary(Scene geometry, unsigned in
         float zmin = geometry.data_objects[adr_geom+ADR_AABB_ZMIN];
         float zmax = geometry.data_objects[adr_geom+ADR_AABB_ZMAX];
 
-        interaction_distance = hit_ray_AABB(pos, dir, xmin, xmax, ymin, ymax, zmin, zmax);
-        next_geometry_volume = geometry.mother_node[cur_geom];
+        distance = hit_ray_AABB(pos, dir, xmin, xmax, ymin, ymax, zmin, zmax);
+        //geometry_volume = geometry.mother_node[cur_geom];
 
-        if (interaction_distance <= next_interaction_distance) {
-            next_interaction_distance = interaction_distance + EPSILON3; // overshoot
-            next_discrete_process = GEOMETRY_BOUNDARY;
-            next_geometry_volume = geometry.mother_node[id_geom];
+        if (distance <= interaction_distance) {
+            interaction_distance = distance + EPSILON3; // overshoot
+            //geometry_volume = geometry.mother_node[id_geom];
         }
 
     } else if (obj_type == SPHERE) {
@@ -73,11 +75,11 @@ float __host__ __device__ get_next_geometry_boundary(Scene geometry, unsigned in
     } // else if VOXELIZED   ... etc.
 
     // Then check every child contains in this node
-    unsigned int adr_node = geometry.ptr_nodes[id_geom];
+    unsigned int adr_node = geometry.ptr_nodes[cur_geom];
 
     unsigned int offset_node = 0;
     unsigned int id_child_geom;
-    while (offset_node < geometry.size_of_nodes[id_geom]) {
+    while (offset_node < geometry.size_of_nodes[cur_geom]) {
 
         // Child id
         id_child_geom = geometry.child_nodes[adr_node + offset_node];
@@ -98,14 +100,11 @@ float __host__ __device__ get_next_geometry_boundary(Scene geometry, unsigned in
             float zmax = geometry.data_objects[adr_child_geom+ADR_AABB_ZMAX];
 
             // Ray/AABB raytracing
-            interaction_distance = hit_ray_AABB(pos, dir, xmin, xmax, ymin, ymax, zmin, zmax);
-            //if (part_id == 59520) printf("  Child Geom dist %e id %i (%f %f %f %f %f %f)\n",
-            //                        interaction_distance, id_child_geom, xmin, xmax, ymin, ymax, zmin, zmax);
+            distance = hit_ray_AABB(pos, dir, xmin, xmax, ymin, ymax, zmin, zmax);
 
-            if (interaction_distance <= next_interaction_distance) {
-                next_interaction_distance = interaction_distance + EPSILON3; // overshoot
-                next_discrete_process = GEOMETRY_BOUNDARY;
-                next_geometry_volume = id_child_geom;
+            if (distance <= interaction_distance) {
+                interaction_distance = distance + EPSILON3; // overshoot
+                geometry_volume = id_child_geom;
             }
 
         } else if (obj_child_type == SPHERE) {

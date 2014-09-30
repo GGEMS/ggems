@@ -40,16 +40,16 @@ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_id,
     dir.z = particles.dz[part_id];
 
     // Get the current volume containing the particle
-    unsigned int id_geom = particles.geometry_id[part_id];
+    unsigned int cur_id_geom = particles.geometry_id[part_id];
 
     // Get the material that compose this volume
-    unsigned int id_mat = get_geometry_material(geometry, id_geom);
+    unsigned int id_mat = get_geometry_material(geometry, cur_id_geom);
 
     //// Find next discrete interaction ///////////////////////////////////////
 
     float next_interaction_distance = FLT_MAX;
     unsigned char next_discrete_process = 0;
-    unsigned int next_geometry_volume = id_geom;
+    unsigned int next_geometry_volume = cur_id_geom;
     float interaction_distance;
     float cross_section;
 
@@ -87,72 +87,12 @@ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_id,
 
     //// Get the next distance boundary volume /////////////////////////////////
 
-    // First check the boundary of the current volume
-    if (obj_type == AABB) {
-
-        // Read first the bounding box
-        float xmin = geometry.data_objects[adr_geom+ADR_AABB_XMIN];
-        float xmax = geometry.data_objects[adr_geom+ADR_AABB_XMAX];
-        float ymin = geometry.data_objects[adr_geom+ADR_AABB_YMIN];
-        float ymax = geometry.data_objects[adr_geom+ADR_AABB_YMAX];
-        float zmin = geometry.data_objects[adr_geom+ADR_AABB_ZMIN];
-        float zmax = geometry.data_objects[adr_geom+ADR_AABB_ZMAX];
-
-        interaction_distance = hit_ray_AABB(pos, dir, xmin, xmax, ymin, ymax, zmin, zmax);
-
-        if (interaction_distance <= next_interaction_distance) {
-            next_interaction_distance = interaction_distance + EPSILON3; // overshoot
-            next_discrete_process = GEOMETRY_BOUNDARY;
-            next_geometry_volume = geometry.mother_node[id_geom];
-        }
-
-    } else if (obj_type == SPHERE) {
-        // TODO
-
-    } // else if VOXELIZED   ... etc.
-
-    // Then check every child contains in this node
-    unsigned int adr_node = geometry.ptr_nodes[id_geom];
-
-    unsigned int offset_node = 0;
-    unsigned int id_child_geom;
-    while (offset_node < geometry.size_of_nodes[id_geom]) {
-
-        // Child id
-        id_child_geom = geometry.child_nodes[adr_node + offset_node];
-
-        // Determine the type of the volume
-        unsigned int adr_child_geom = geometry.ptr_objects[id_child_geom];
-        unsigned int obj_child_type = (unsigned int)geometry.data_objects[adr_child_geom+ADR_OBJ_TYPE];
-
-        // Get raytracing distance accordingly
-        if (obj_child_type == AABB) {
-
-            // Read first the bounding box
-            float xmin = geometry.data_objects[adr_child_geom+ADR_AABB_XMIN];
-            float xmax = geometry.data_objects[adr_child_geom+ADR_AABB_XMAX];
-            float ymin = geometry.data_objects[adr_child_geom+ADR_AABB_YMIN];
-            float ymax = geometry.data_objects[adr_child_geom+ADR_AABB_YMAX];
-            float zmin = geometry.data_objects[adr_child_geom+ADR_AABB_ZMIN];
-            float zmax = geometry.data_objects[adr_child_geom+ADR_AABB_ZMAX];
-
-            // Ray/AABB raytracing
-            interaction_distance = hit_ray_AABB(pos, dir, xmin, xmax, ymin, ymax, zmin, zmax);
-            //if (part_id == 59520) printf("  Child Geom dist %e id %i (%f %f %f %f %f %f)\n",
-            //                        interaction_distance, id_child_geom, xmin, xmax, ymin, ymax, zmin, zmax);
-
-            if (interaction_distance <= next_interaction_distance) {
-                next_interaction_distance = interaction_distance + EPSILON3; // overshoot
-                next_discrete_process = GEOMETRY_BOUNDARY;
-                next_geometry_volume = id_child_geom;
-            }
-
-        } else if (obj_child_type == SPHERE) {
-            // do
-        } // else if VOXELIZED   ... etc.
-
-        ++offset_node;
-
+    unsigned int hit_id_geom = 0;
+    get_next_geometry_boundary(geometry, cur_id_geom, pos, dir, interaction_distance, hit_id_geom);
+    if (interaction_distance <= next_interaction_distance) {
+        next_interaction_distance = interaction_distance;
+        next_discrete_process = GEOMETRY_BOUNDARY;
+        next_geometry_volume = hit_id_geom;
     }
 
     //// Move particle //////////////////////////////////////////////////////
@@ -165,7 +105,6 @@ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_id,
 
     // Move the particle
     pos = f3_add(pos, f3_scale(dir, next_interaction_distance));
-    //if (part_id == 59520) printf("  => mvt %e\n", next_interaction_distance);
 
     // TODO
     //particles.tof[id] += gpu_speed_of_light * next_interaction_distance;

@@ -47,11 +47,6 @@
 #define SIZE_AABB_OBJ 8
 #define SIZE_SPHERE_OBJ 12
 
-// Host/Device function that handle geometry
-
-unsigned int __host__ __device__ get_geometry_material(Scene geometry, unsigned int id_geom);
-
-
 // Struct that handle the geometry of the world
 struct Scene {
 
@@ -77,6 +72,15 @@ struct Scene {
     unsigned int child_nodes_dim;
     unsigned int mother_node_dim;
 };
+
+
+// Host/Device function that handle geometry
+
+unsigned int __host__ __device__ get_geometry_material(Scene geometry, unsigned int id_geom);
+void __host__ __device__ get_next_geometry_boundary(Scene geometry, unsigned int cur_geom,
+                                                     float3 pos, float3 dir,
+                                                     float &interaction_distance,
+                                                     unsigned int &geometry_volume);
 
 // This class is used to build the geometry
 class GeometryBuilder {
