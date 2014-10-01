@@ -136,40 +136,41 @@ __host__ __device__ SecParticle Compton_SampleSecondaries_standard(ParticleStack
     //return e-
     return electron;
 }
-/*
 
-///// PhotoElectric /////
+//////// Photoelectric ////////////////////////////////////////
+// Model standard G4
+//////////////////////////////////////////////////////////////
 
 // PhotoElectric Cross Section Per Atom (Standard)
-__host__ __device__ float PhotoElec_CSPA(float E, unsigned short int Z) {
+__host__ __device__ float PhotoElec_CSPA_standard(float E, unsigned short int Z) {
     // from Sandia data, the same for all Z
-    float Emin = fmax(PhotoElec_std_IonizationPotentials[Z]*1e-6f, 0.01e-3f);
+    float Emin = fmax(PhotoElec_std_IonizationPotentials(Z)*1e-6f, 0.01e-3f);
     if (E < Emin) {return 0.0f;}
     
-    int start = PhotoElec_std_CumulIntervals[Z-1];
-    int stop = start + PhotoElec_std_NbIntervals[Z];
+    int start = PhotoElec_std_CumulIntervals(Z-1);
+    int stop = start + PhotoElec_std_NbIntervals(Z);
     int pos=stop;
-    while (E < PhotoElec_std_SandiaTable[pos][0]*1.0e-3f){--pos;}
-    float AoverAvo = 0.0103642688246f * ( (float)Z / PhotoElec_std_ZtoAratio[Z] );
+    while (E < PhotoElec_std_SandiaTable(pos, 0)*1.0e-3f){--pos;}
+    float AoverAvo = 0.0103642688246f * ( (float)Z / PhotoElec_std_ZtoAratio(Z) );
     float rE = 1.0f / E;
     float rE2 = rE*rE;
 
-    return rE * PhotoElec_std_SandiaTable[pos][1] * AoverAvo * 0.160217648e-22f
-        + rE2 * PhotoElec_std_SandiaTable[pos][2] * AoverAvo * 0.160217648e-25f
-        + rE * rE2 * PhotoElec_std_SandiaTable[pos][3] * AoverAvo * 0.160217648e-28f
-        + rE2 * rE2 * PhotoElec_std_SandiaTable[pos][4] * AoverAvo * 0.160217648e-31f;
+    return rE * PhotoElec_std_SandiaTable(pos, 1) * AoverAvo * 0.160217648e-22f
+        + rE2 * PhotoElec_std_SandiaTable(pos, 2) * AoverAvo * 0.160217648e-25f
+        + rE * rE2 * PhotoElec_std_SandiaTable(pos, 3) * AoverAvo * 0.160217648e-28f
+        + rE2 * rE2 * PhotoElec_std_SandiaTable(pos, 4) * AoverAvo * 0.160217648e-31f;
 }
 
 // Compute the total Compton cross section for a given material
-__host__ __device__ float PhotoElec_CS(GPUPhantomMaterials materials, 
-                              unsigned short int mat, float E) {
+__host__ __device__ float PhotoElec_CS_standard(MaterialsTable materials,
+                                                unsigned short int mat, float E) {
     float CS = 0.0f;
     int i;
     int index = materials.index[mat];
     // Model standard
     for (i = 0; i < materials.nb_elements[mat]; ++i) {
         CS += (materials.atom_num_dens[index+i] * 
-               PhotoElec_CSPA(E, materials.mixture[index+i]));
+               PhotoElec_CSPA_standard(E, materials.mixture[index+i]));
     }
     return CS;
 }
@@ -177,12 +178,12 @@ __host__ __device__ float PhotoElec_CS(GPUPhantomMaterials materials,
 // Compute Theta distribution of the emitted electron, with respect to the incident Gamma
 // The Sauter-Gavrila distribution for the K-shell is used
 __host__ __device__ float PhotoElec_ElecCosThetaDistribution(ParticleStack part,
-                                                    unsigned int id,
-                                                    float kineEnergy) {
+                                                             unsigned int id,
+                                                             float kineEnergy) {
     float costeta = 1.0f;
     float gamma = kineEnergy * 1.9569513367f + 1.0f;  // 1/electron_mass_c2
     if (gamma > 5.0f) {return costeta;}
-    float beta = __fdividef(sqrtf(gamma*gamma - 1.0f), gamma);
+    float beta = sqrtf(gamma*gamma - 1.0f) / gamma;
     float b    = 0.5f*gamma*(gamma - 1.0f)*(gamma - 2.0f);
 
     float rndm, term, greject, grejsup;
@@ -191,31 +192,42 @@ __host__ __device__ float PhotoElec_ElecCosThetaDistribution(ParticleStack part,
 
     do {
         rndm = 1.0f - 2.0f*JKISS32(part,id);
-        costeta = __fdividef(rndm + beta, rndm*beta + 1.0f);
+        costeta = (rndm + beta) / (rndm*beta + 1.0f);
         term = 1.0f - beta*costeta;
-        greject = __fdividef((1.0f - costeta*costeta)*(1.0f + b*term), term*term);
+        greject = ((1.0f - costeta*costeta)*(1.0f + b*term)) / (term*term);
     } while(greject < JKISS32(part,id)*grejsup);
 
     return costeta;
 }
 
-// PhotoElectric effect
-__host__ __device__ float PhotoElec_SampleSecondaries(ParticleStack particles, GPUPhantomMaterials mat,
-                                             unsigned short int matindex, unsigned int id,
-                                             unsigned char flag_secondary,
-                                             float cutEnergyElectron) {
+// PhotoElectric effect (standard) with secondary (e-)
+__host__ __device__ SecParticle PhotoElec_SampleSecondaries_standard(ParticleStack particles,
+                                                                     MaterialsTable mat,
+                                                                     float cutE,
+                                                                     unsigned short int matindex,
+                                                                     unsigned int id,
+                                                                     GlobalSimulationParameters parameters) {
+
+    // Kill the photon without mercy
+    particles.endsimu[id] = PARTICLE_DEAD;
+
+    // Electron allocation
+    SecParticle electron;
+    electron.pname = ELECTRON;
+    electron.endsimu = PARTICLE_DEAD;
+    electron.E = 0.0f;
+
+    // If no secondary required return a stillborn electron
+    if (parameters.secondaries_list[ELECTRON] == DISABLED) return electron;
+
+    //// Photo electron
 
     float energy = particles.E[id];
-    //float cutE = mat.electron_cut_energy[matindex];
-
-    if (flag_secondary) {
-        particles.E[id] = 0.0f;
-        particles.endsimu[id] = PARTICLE_DEAD;
-        return energy;
-    } else {
-
-    
+    //float cutE = mat.electron_cut_energy[matindex]; // TODO - JB
     float3 PhotonDirection = make_float3(particles.dx[id], particles.dy[id], particles.dz[id]);
+
+    //*******************************************************************************
+    // TODO - build a table of xSection into MaterialTable - JB
 
     // Select randomly one element constituing the material
     unsigned int n = mat.nb_elements[matindex]-1;
@@ -223,70 +235,55 @@ __host__ __device__ float PhotoElec_SampleSecondaries(ParticleStack particles, G
     unsigned int Z = mat.mixture[index+n];
     unsigned int i = 0;
     if (n > 0) {
-        float x = JKISS32(particles,id) * 
-                  PhotoElec_CS(mat, matindex, energy);
+        float x = JKISS32(particles,id) * PhotoElec_CS_standard(mat, matindex, energy);
         float xsec = 0.0f;
-        for (i=0; i<n; ++i) {
-            xsec += mat.atom_num_dens[index+i] * 
-                    PhotoElec_CSPA(energy, mat.mixture[index+i]);
+        while (i < n) {
+            xsec += mat.atom_num_dens[index+i] * PhotoElec_CSPA_standard(energy, mat.mixture[index+i]);
             if (x <= xsec) {
                 Z = mat.mixture[index+i];
                 break;
             }
+            ++i;
         }
-
     }
-
-    //// Photo electron
+    //*******************************************************************************
 
     // Select atomic shell
     unsigned short int nShells = atom_NumberOfShells[Z];
     index = atom_IndexOfShells[Z];
-    float bindingEnergy = atom_BindingEnergies[index]*1.0e-06f; // in eV
-    i=0; while (i < nShells && energy < bindingEnergy) {
+    float bindingEnergy = atom_BindingEnergies[index] * eV; //1.0e-06f; // in eV
+    i=0; while (i < nShells && energy < bindingEnergy) {       
+        bindingEnergy = atom_BindingEnergies[index + i]* eV; //1.0e-06f; // in ev
         ++i;
-        bindingEnergy = atom_BindingEnergies[index + i]*1.0e-06f; // in ev
     }
         
-    // no shell available
-    if (i == nShells) {return 0.0f;}
+    // no shell available return stillborn electron
+    if (i == nShells) {return electron;}
     float ElecKineEnergy = energy - bindingEnergy;
 
     float cosTeta = 0.0f;
     //                   1 eV                         cut production
-    if (ElecKineEnergy > 1.0e-06f && ElecKineEnergy > cutEnergyElectron) {
+    if (ElecKineEnergy > 1.0e-06f && ElecKineEnergy > cutE) {
         // direction of the photo electron
         cosTeta = PhotoElec_ElecCosThetaDistribution(particles, id, ElecKineEnergy);
         float sinTeta = sqrtf(1.0f - cosTeta*cosTeta);
-        float Phi = gpu_twopi * JKISS32(particles,id);
+        float Phi = gpu_twopi * JKISS32(particles, id);
         float3 ElecDirection = make_float3(sinTeta*cos(Phi), sinTeta*sin(Phi), cosTeta);
         ElecDirection = rotateUz(ElecDirection, PhotonDirection);
-        // Create an electron
-        particles.dx[id] = ElecDirection.x;
-        particles.dy[id] = ElecDirection.y;
-        particles.dz[id] = ElecDirection.z;
-        particles.E[id]  = ElecKineEnergy;
-//         particles.px[id] = particles.px[id];
-//         particles.py[id] = particles.py[id];
-//         particles.pz[id] = particles.pz[id];
-        particles.endsimu[id] = 0;
-        particles.pname[id]=ELECTRON;
-        // Start to track this electron 
-//         particles.active[id] = 1;
-        //printf("PE => e-\n");
-        return bindingEnergy;
+        // Configure the new electron
+        electron.dir.x = ElecDirection.x;
+        electron.dir.y = ElecDirection.y;
+        electron.dir.z = ElecDirection.z;
+        electron.E = ElecKineEnergy;
+        electron.endsimu = PARTICLE_ALIVE;
+        // gamma will depose energy given by the binding energy
+        particles.E[id] = bindingEnergy;
     }
     
-    // Absorbed the photon
-//     photons.endsimu[id] = 1; // stop the simulation
-//     photons.active[id]  = 0;
-//     atomicAdd(count_d, 1);   // count simulated primaries
-        
-    // LocalEnergy Deposit
-    return bindingEnergy+ElecKineEnergy;
-    }
+    // Return electron (dead or alive)
+    return electron;
+
 }
 
-*/
 
 #endif

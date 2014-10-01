@@ -55,13 +55,12 @@ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_id,
 
     // If photoelectric
     if (parameters.physics_list[PHOTON_PHOTOELECTRIC]) {
-        // TODO
-        //cross_section = PhotoElec_CS_Standard(materials, mat, photon.E);
-        //interaction_distance = -log(prng()) / cross_section;
-        //if (interaction_distance < next_interaction_distance) {
-        //    next_interaction_distance = interaction_distance;
-        //    next_discrete_process = PHOTON_PHOTOELECTRIC;
-        //}
+        cross_section = PhotoElec_CS_standard(materials, id_mat, particles.E[part_id]);
+        interaction_distance = -log( JKISS32(particles, part_id) ) / cross_section;
+        if (interaction_distance < next_interaction_distance) {
+            next_interaction_distance = interaction_distance;
+            next_discrete_process = PHOTON_PHOTOELECTRIC;
+        }
     }
 
     // If Compton
@@ -147,20 +146,47 @@ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_id,
         //   TODO: cutE = materials.electron_cut_energy[mat]                 cutE
         SecParticle electron = Compton_SampleSecondaries_standard(particles, 0.0, part_id, parameters);
 
-        // Local deposition if this photon was absorbed
-        //if (particles.endsimu[part_id] == PARTICLE_DEAD) discrete_loss = particles.E[part_id];
+        // Debug
+        //printf("id %i - pos %f %f %f - dir %f %f %f - Cmpt - geom cur %i hit %i\n", part_id, pos.x, pos.y, pos.z,
+        //                                                                 dir.x, dir.y, dir.z,
+        //                                                                 cur_id_geom, next_geometry_volume);
+    }
 
-        // Generate electron if need
-        if (electron.endsimu == PARTICLE_ALIVE) {
-            // TODO
-        }
+    if (next_discrete_process == PHOTON_PHOTOELECTRIC) {
+
+        //   TODO: cutE = materials.electron_cut_energy[mat]                              cutE
+        SecParticle electron = PhotoElec_SampleSecondaries_standard(particles, materials, 0.0,
+                                                                    id_mat, part_id, parameters);
+        // Debug
+        //printf("id %i - pos %f %f %f - dir %f %f %f - PE - geom cur %i hit %i\n", part_id, pos.x, pos.y, pos.z,
+        //                                                               dir.x, dir.y, dir.z,
+        //                                                               cur_id_geom, next_geometry_volume);
 
     }
+
+    /*
+    if (next_discrete_process == GEOMETRY_BOUNDARY) {
+        // Debug
+        printf("id %i - pos %f %f %f - dir %f %f %f - Bnd - geom cur %i hit %i\n", part_id, pos.x, pos.y, pos.z,
+                                                                         dir.x, dir.y, dir.z,
+                                                                         cur_id_geom, next_geometry_volume);
+
+    }
+    */
+
+
+    // WARNING: drop energy for every "dead" particle (gamma + e-)
+
+    // Local deposition if this photon was absorbed
+    //if (particles.endsimu[part_id] == PARTICLE_DEAD) discrete_loss = particles.E[part_id];
+
 
     // Record this step if required
     if (history.record_flag == ENABLED) {
         history.cpu_record_a_step(particles, part_id);
     }
+
+
 
 
 }

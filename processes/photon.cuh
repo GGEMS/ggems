@@ -24,6 +24,8 @@
 #include "../maths/prng.cuh"
 #include "../maths/fun.cuh"
 #include "constants.cuh"
+#include "sandia_table.cuh"
+#include "shell_data.cuh"
 
 // Compton - model standard G4
 __host__ __device__ float Compton_CSPA_standard(float E, unsigned short int Z);
@@ -33,6 +35,20 @@ __host__ __device__ SecParticle Compton_SampleSecondaries_standard(ParticleStack
                                                                    float cutE,
                                                                    unsigned int id,
                                                                    GlobalSimulationParameters parameters);
+
+
+// PhotoElectric - model standard G4
+__host__ __device__ float PhotoElec_CSPA_standard(float E, unsigned short int Z);
+__host__ __device__ float PhotoElec_CS_standard(MaterialsTable materials,
+                                                unsigned short int mat, float E);
+__host__ __device__ SecParticle PhotoElec_SampleSecondaries_standard(ParticleStack particles,
+                                                                     MaterialsTable mat,
+                                                                     float cutE,
+                                                                     unsigned short int matindex,
+                                                                     unsigned int id,
+                                                                     GlobalSimulationParameters parameters);
+
+
 
 
 /*

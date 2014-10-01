@@ -66,7 +66,7 @@ void __host__ __device__ get_next_geometry_boundary(Scene geometry, unsigned int
 
         if (distance <= interaction_distance) {
             interaction_distance = distance + EPSILON3; // overshoot
-            //geometry_volume = geometry.mother_node[id_geom];
+            geometry_volume = geometry.mother_node[cur_geom];
         }
 
     } else if (obj_type == SPHERE) {

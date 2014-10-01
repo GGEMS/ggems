@@ -1,11 +1,18 @@
 #ifndef SANDIA_TABLE_CUH
 #define SANDIA_TABLE_CUH
 
+// Function that drive the tables reading between CPU and GPU
+__host__ __device__ unsigned short int PhotoElec_std_NbIntervals(unsigned int pos);
+__host__ __device__ unsigned short int PhotoElec_std_CumulIntervals(unsigned int pos);
+__host__ __device__ float PhotoElec_std_ZtoAratio(unsigned int pos);
+__host__ __device__ float PhotoElec_std_IonizationPotentials(unsigned int pos);
+__host__ __device__ float PhotoElec_std_SandiaTable(unsigned int pos, unsigned int id);
+
 // ************************************************************************
 // * PE - Standard (Sandia table)
 // ************************************************************************
-#ifdef __CUDA_ARCH__
-__constant__ unsigned short int PhotoElec_std_NbIntervals [101] =
+
+__constant__ unsigned short int GPU_PhotoElec_std_NbIntervals [101] =
 {
 
       0,  // nonexisting 'zero' element
@@ -49,7 +56,7 @@ __constant__ unsigned short int PhotoElec_std_NbIntervals [101] =
 };
 
 // Usefull to find E in the table. JB - 2011-02-16 10:28:09
-__constant__ unsigned short int PhotoElec_std_CumulIntervals [101] =
+__constant__ unsigned short int GPU_PhotoElec_std_CumulIntervals [101] =
 {
 
       0,  // nonexisting 'zero' element
@@ -93,7 +100,7 @@ __constant__ unsigned short int PhotoElec_std_CumulIntervals [101] =
 };
 
 // The ration of atomic number to atomic mass for first 100 elements
-__constant__ float PhotoElec_std_ZtoAratio[101] =
+__constant__ float GPU_PhotoElec_std_ZtoAratio[101] =
 {
 
       0,  // nonexisting 'zero' element
@@ -136,7 +143,7 @@ __constant__ float PhotoElec_std_ZtoAratio[101] =
 
 };
 
-__constant__ float PhotoElec_std_IonizationPotentials[101] =
+__constant__ float GPU_PhotoElec_std_IonizationPotentials[101] =
 {
      0,  // nonexisting 'zero' element
 
@@ -178,8 +185,7 @@ __constant__ float PhotoElec_std_IonizationPotentials[101] =
 
 };
 
-// Table only for Z=1 through Z=30
-__constant__ float PhotoElec_std_SandiaTable[981][5] =
+__constant__ float GPU_PhotoElec_std_SandiaTable[981][5] =
 {
 
 
@@ -1489,13 +1495,12 @@ __constant__ float PhotoElec_std_SandiaTable[981][5] =
 
 } ;  // --------------- end of fSandiaTable array -----------------------
 
-#else
 
 // ************************************************************************
 // * PE - Standard (Sandia table)
 // ************************************************************************
 
-const unsigned short int PhotoElec_std_NbIntervals [101] =
+const unsigned short int CPU_PhotoElec_std_NbIntervals [101] =
 {
 
       0,  // nonexisting 'zero' element
@@ -1539,7 +1544,7 @@ const unsigned short int PhotoElec_std_NbIntervals [101] =
 };
 
 // Usefull to find E in the table. JB - 2011-02-16 10:28:09
-const unsigned short int PhotoElec_std_CumulIntervals [101] =
+const unsigned short int CPU_PhotoElec_std_CumulIntervals [101] =
 {
 
       0,  // nonexisting 'zero' element
@@ -1583,7 +1588,7 @@ const unsigned short int PhotoElec_std_CumulIntervals [101] =
 };
 
 // The ration of atomic number to atomic mass for first 100 elements
-const float PhotoElec_std_ZtoAratio[101] =
+const float CPU_PhotoElec_std_ZtoAratio[101] =
 {
 
       0,  // nonexisting 'zero' element
@@ -1626,7 +1631,7 @@ const float PhotoElec_std_ZtoAratio[101] =
 
 };
 
-const float PhotoElec_std_IonizationPotentials[101] =
+const float CPU_PhotoElec_std_IonizationPotentials[101] =
 {
      0,  // nonexisting 'zero' element
 
@@ -1668,8 +1673,7 @@ const float PhotoElec_std_IonizationPotentials[101] =
 
 };
 
-// Table only for Z=1 through Z=30
-const float PhotoElec_std_SandiaTable[981][5] =
+const float CPU_PhotoElec_std_SandiaTable[981][5] =
 {
 
 
@@ -2979,6 +2983,5 @@ const float PhotoElec_std_SandiaTable[981][5] =
 
 } ;  // --------------- end of fSandiaTable array -----------------------
 
-#endif
 
 #endif
