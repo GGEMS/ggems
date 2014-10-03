@@ -249,11 +249,11 @@ __host__ __device__ SecParticle PhotoElec_SampleSecondaries_standard(ParticleSta
     //*******************************************************************************
 
     // Select atomic shell
-    unsigned short int nShells = atom_NumberOfShells[Z];
-    index = atom_IndexOfShells[Z];
-    float bindingEnergy = atom_BindingEnergies[index] * eV; //1.0e-06f; // in eV
+    unsigned short int nShells = atom_NumberOfShells(Z);
+    index = atom_IndexOfShells(Z);
+    float bindingEnergy = atom_BindingEnergies(index) * eV; //1.0e-06f; // in eV
     i=0; while (i < nShells && energy < bindingEnergy) {       
-        bindingEnergy = atom_BindingEnergies[index + i]* eV; //1.0e-06f; // in ev
+        bindingEnergy = atom_BindingEnergies(index + i)* eV; //1.0e-06f; // in ev
         ++i;
     }
         

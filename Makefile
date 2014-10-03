@@ -36,19 +36,26 @@ copy :
 #	nvcc $(CUDA_FLAGS) -c -o ggems.o global/ggems.cu -Llib -laabb -lbuilder -ldosimetry -lelectron -lelectron_navigator -lfun -lglobal -lmain_navigator -lmeshed -lphoton -lphoton_navigator -lprng -lproton -lproton_navigator -lraytracing -lsphere -lstructures -lvector -lvoxelized $(G4INCLUDES) $(G4LIBS)	
 
 %.o: %.cu 
-	nvcc $(CUDA_FLAGS) $^ -c -o $@ $(G4INCLUDES) $(G4LIBS)
+	nvcc $^ -c -o $@ $(G4INCLUDES) $(G4LIBS) $(CUDA_FLAGS)
 	
 #processes/photon.o: processes/photon.cu
 #	nvcc $(CUDA_FLAGS) $^ -c -o $@ -lsandia_table -lshell_data $(G4INCLUDES) $(G4LIBS)
+
+# processes/sandia_table.o: processes/sandia_table.cu
+# 	nvcc $(CUDA_FLAGS) $^ -c -o $@ $(G4INCLUDES) $(G4LIBS)
+# 	mv $@ $(BUILDDIR)
+# 	ar r -o $(LIBDIR)/libsandia_table.a $(BUILDDIR)/*.o
 	
-#global/ggems.o: global/ggems.cu
-#	nvcc $(CUDA_FLAGS) $^ -c -o $@ $(G4INCLUDES) $(G4LIBS) -lsandia_table -lshell_data	
+global/ggems.o: global/ggems.cu
+	nvcc $(CUDA_FLAGS) $^ -c -o $@ $(G4INCLUDES) $(G4LIBS) -L$(LIBDIR) -lsandia_table -lshell_data	
+	
+
 	
 #geometry/materials.o: geometry/materials.cu
 #	nvcc $(CUDA_FLAGS) $^ -c -o $@ $(G4INCLUDES) $(G4LIBS)
 	
 buildo: */*.cu
-	nvcc $(CUDA_FLAGS) */*.cu -c -o $(BUILDDIR)/ggems.o
+	nvcc */*.cu -c -o $(BUILDDIR)/ggems.o $(CUDA_FLAGS)
 	
 buildso :
 	nvcc -shared -arch=sm_30 -o lib/libggems.so $(BUILDDIR)/ggems.o

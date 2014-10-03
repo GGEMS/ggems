@@ -21,7 +21,7 @@
 #include "photon_navigator.cuh"
 
 // CPU photon navigator
-void cpu_photon_navigator(ParticleStack &particles, unsigned int part_id,
+__host__ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_id,
                           Scene geometry, MaterialsTable materials,
                           GlobalSimulationParameters parameters,
                           HistoryBuilder &history) {
