@@ -29,6 +29,8 @@ MathPlotBuilder::MathPlotBuilder(){}
 void MathPlotBuilder::get_histogramm(float* xdata, unsigned int nxdata,
                                     float* bins, float* nbelt, unsigned int nbins) {
     unsigned int i;
+
+    // Find min max values
     float xmin = FLT_MAX;
     float xmax = FLT_MIN;
     float val;
@@ -40,19 +42,32 @@ void MathPlotBuilder::get_histogramm(float* xdata, unsigned int nxdata,
     }
     assert(xmin != FLT_MAX);
     assert(xmax != -FLT_MIN);
+
+    // Init nbelt vector
+    i=0; while (i<nbins) {
+        nbelt[i] = 0;
+        ++i;
+    }
+
     // Build hist
     float di = (xmax-xmin) / float(nbins-1);
     float posi;
     i=0; while (i<nxdata) {
         posi = ((xdata[i]-xmin) / di)+0.5f;
+
+        assert(int(posi) != nbins);
+        assert(int(posi) >= 0);
+
         ++nbelt[int(posi)];
         ++i;
     }
+
     // Build bins
     i=0; while (i<nbins) {
         bins[i] = xmin + i*di;
         ++i;
     }
+
 }
 
 // Build a weigthed histogramm based on 2D data
@@ -71,6 +86,14 @@ void MathPlotBuilder::get_weighted_histogramm(float* xdata, float* ydata, unsign
     }
     assert(xmin != FLT_MAX);
     assert(xmax != -FLT_MIN);
+
+    // Init vectors
+    i=0; while (i<nbins) {
+        nbelt[i] = 0;
+        hist[i] = 0;
+        ++i;
+    }
+
     // Build hist
     float di = (xmax-xmin) / float(nbins-1);
     float posi;
@@ -80,6 +103,7 @@ void MathPlotBuilder::get_weighted_histogramm(float* xdata, float* ydata, unsign
         hist[int(posi)] += ydata[i];
         ++i;
     }
+
     // Build bins
     i=0; while (i<nbins) {
         bins[i] = xmin + i*di;
