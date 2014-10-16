@@ -26,6 +26,8 @@
 #include <cfloat>
 #include <string>
 
+#include "../processes/particles.cuh"
+
 class MathPlotBuilder {
     public:
         MathPlotBuilder();
@@ -33,6 +35,9 @@ class MathPlotBuilder {
         void plot_distribution(float* xdata, unsigned int nxdata,
                                unsigned int n_bins, std::string filename,
                                std::string xlabel, std::string ylabel);
+
+        void plot_energy_distribution(ParticleBuilder particles,
+                                      unsigned int n_bins, std::string filename);
 
     private:
         void get_histogramm(float* xdata, unsigned int nxdata,

@@ -174,6 +174,82 @@ void MathPlotBuilder::plot_distribution(float *xdata, unsigned int nxdata,
 }
 
 
+// Plot energy distribution
+void MathPlotBuilder::plot_energy_distribution(ParticleBuilder particles,
+                                               unsigned int n_bin, std::string filename) {
+
+    // Looking only on particle alive
+    unsigned int nxdata = 0;
+    unsigned int i= 0;
+    while (i < particles.stack.size) {
+        if (particles.stack.endsimu[i] == PARTICLE_ALIVE) ++nxdata;
+        ++i;
+    }
+    float* xdata = (float*)malloc(nxdata * sizeof(float));
+    i=0; while (i < particles.stack.size) {
+        if (particles.stack.endsimu[i] == PARTICLE_ALIVE) {
+            xdata[i] = particles.stack.E[i];
+            printf("%e\n", xdata[i]);
+        }
+        ++i;
+    }
+
+    // Memory allocation
+    float* bins = (float*)malloc(n_bin * sizeof(float));
+    float* nbelt = (float*)malloc(n_bin * sizeof(float));
+
+    // Compute the histogramm
+    get_histogramm(xdata, nxdata, bins, nbelt, n_bin);
+
+    // Export data
+    std::string data_name = filename + ".dat";
+    FILE* pfile = fopen(data_name.c_str(), "wb");
+    float buffer = (float)n_bin;
+    fwrite(&buffer, sizeof(float), 1, pfile);
+    fwrite(bins, sizeof(float), n_bin, pfile);
+    fwrite(nbelt, sizeof(float), n_bin, pfile);
+    fclose(pfile);
+
+    // Export MatPlotLib script
+    std::string script_name = filename + ".py";
+    pfile = fopen(script_name.c_str(), "w");
+
+    // header
+    fprintf(pfile, "#!/usr/bin/env python\n");
+    fprintf(pfile, "from numpy import *\n");
+    fprintf(pfile, "import matplotlib.pyplot as plt\n");
+    fprintf(pfile, "from matplotlib.ticker import ScalarFormatter\n\n");
+
+    // load data
+    fprintf(pfile, "data  = fromfile('%s', 'float32')\n", data_name.c_str());
+    fprintf(pfile, "ndata = int(data[0])\n", data_name.c_str());
+    fprintf(pfile, "bins  = data[1:ndata+1]\n", data_name.c_str());
+    fprintf(pfile, "nelt  = data[ndata+1:2*ndata+1]\n\n", data_name.c_str());
+
+    // set figure
+    fprintf(pfile, "fig = plt.figure()\n");
+    fprintf(pfile, "ax = fig.add_subplot(111)\n\n");
+
+    // plot
+    fprintf(pfile, "plt.plot(bins, nelt, c='0.0', drawstyle='steps')\n\n");
+
+    // axes
+    fprintf(pfile, "mymft = ScalarFormatter(useOffset=True)\n");
+    fprintf(pfile, "mymft.set_scientific(True)\n");
+    fprintf(pfile, "mymft.set_powerlimits((0, 2))\n");
+    fprintf(pfile, "ax.yaxis.set_major_formatter(mymft)\n\n");
+
+    // label
+    //fprintf(pfile, "plt.legend(fancybox=True)\n");
+    fprintf(pfile, "plt.xlabel('Energy [MeV]', fontsize=14)\n");
+    fprintf(pfile, "plt.ylabel('Number of particles', fontsize=14)\n\n");
+
+    // show & close
+    fprintf(pfile, "plt.show()\n");
+    fclose(pfile);
+}
+
+
 
 
 

@@ -50,7 +50,6 @@ __host__ __device__ SecParticle PhotoElec_SampleSecondaries_standard(ParticleSta
 
 
 
-
 /*
 __host__ __device__ float Compton_CSPA (float E, unsigned short int Z);
 

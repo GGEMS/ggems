@@ -7,9 +7,11 @@ FLAGS := -lggems -lelectron -lelectron_navigator -lfun -lglobal -lmain_navigator
 G4DIRHEADERS = $(G4HOME)/include/Geant4
 G4DIRLIBS = $(G4HOME)/lib
 CLHEPHEADERS = $(CLHEPHOME)/include
-G4INCLUDES = -I$(G4DIRHEADERS) -I$(CLHEPHEADERS)
-G4LIBS = -L$(G4DIRLIBS) -lG4materials -lG4global -lG4particles -lG4processes -lG4intercoms
+CLHEPLIBS = $(CLHEPHOME)/lib
 
+G4INCLUDES = -I$(G4DIRHEADERS) -I$(CLHEPHEADERS)
+G4LIBS = -L$(G4DIRLIBS) -lG4materials -lG4global -lG4particles -lG4processes -lG4intercoms 
+#-L$(CLHEPLIBS) -lCLHEP-2.1.1.0
 
 SOURCES = $(wildcard */*.cu)
 
@@ -57,24 +59,24 @@ global/ggems.o: global/ggems.cu
 buildo: */*.cu
 	nvcc */*.cu -c -o $(BUILDDIR)/ggems.o $(CUDA_FLAGS)
 	
-buildso :
-	nvcc -shared -arch=sm_30 -o lib/libggems.so $(BUILDDIR)/ggems.o
+#buildso :
+#	nvcc -shared -arch=sm_30 -o lib/libggems.so $(BUILDDIR)/ggems.o
 	
 builda : $(BUILDDIR)/*.o
 	ar r -o $(LIBDIR)/libggems.a $(BUILDDIR)/*.o
 	
-shared: $(patsubst $(BUILDDIR)/%.o, $(LIBDIR)/lib%.so, $(wildcard $(BUILDDIR)/*.o))
+#shared: $(patsubst $(BUILDDIR)/%.o, $(LIBDIR)/lib%.so, $(wildcard $(BUILDDIR)/*.o))
 	
-lib/lib%.so: $(BUILDDIR)/%.o
-	nvcc -shared -arch=sm_30 -o $@ $^ -L$(LIBDIR) 
+#lib/lib%.so: $(BUILDDIR)/%.o
+#	nvcc -shared -arch=sm_30 -o $@ $^ -L$(LIBDIR) 
 	
-lib/libphoton.so : $(BUILDDIR)/photon.o
-	nvcc -shared -arch=sm_30 -o $@ $^ -L$(LIBDIR) -lfun -lstructures -lprng
+#lib/libphoton.so : $(BUILDDIR)/photon.o
+#	nvcc -shared -arch=sm_30 -o $@ $^ -L$(LIBDIR) -lfun -lstructures -lprng
 	
 # 	$(BUILDDIR)/photon.o $(BUILDDIR)/fun.o $(BUILDDIR)/structures.o $(BUILDDIR)/prng.o
 	
-lib/libraytracing.so : $(BUILDDIR)/raytracing.o 
-	nvcc -shared -arch=sm_30 -o $@ $^ -L$(LIBDIR) -lvector
+#lib/libraytracing.so : $(BUILDDIR)/raytracing.o 
+#	nvcc -shared -arch=sm_30 -o $@ $^ -L$(LIBDIR) -lvector
 
 # lib/libraytracing.so : $(BUILDDIR)/raytracing.o lib/libvector.so
 # 	nvcc -shared -arch=sm_30 -o $@ $^ -L$(LIBDIR) -lvector

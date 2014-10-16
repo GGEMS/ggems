@@ -263,7 +263,7 @@ void SimulationBuilder::start_simulation() {
 
             // iter
             ++iter;
-            printf(">> Iter %i / %i\n", iter, nb_of_iterations);
+            //printf(">> Iter %i / %i\n", iter, nb_of_iterations);
         } // main loop
 
     }

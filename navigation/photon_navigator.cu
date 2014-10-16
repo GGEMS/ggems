@@ -134,6 +134,8 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_i
             history.cpu_record_a_step(particles, part_id);
         }
 
+        //if (particles.E[part_id] == 0.5) printf("No Interaction\n");
+
         return;
     }
 
@@ -187,6 +189,12 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_i
     }
 
 
+    // DEBUGING: phasespace
+    if (next_geometry_volume == 0) {
+        printf("%e %e %e %e %e %e %e\n", particles.E[part_id], pos.x, pos.y, pos.z, dir.x, dir.y, dir.z);
+        particles.endsimu[part_id] = PARTICLE_DEAD;
+        return;
+    }
 
 
 }
