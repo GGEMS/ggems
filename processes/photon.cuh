@@ -35,7 +35,7 @@ __host__ __device__ SecParticle Compton_SampleSecondaries_standard(ParticleStack
                                                                    float cutE,
                                                                    unsigned int id,
                                                                    GlobalSimulationParameters parameters);
-
+//
 
 // PhotoElectric - model standard G4
 __host__ __device__ float PhotoElec_CSPA_standard(float E, unsigned short int Z);
@@ -47,6 +47,20 @@ __host__ __device__ SecParticle PhotoElec_SampleSecondaries_standard(ParticleSta
                                                                      unsigned short int matindex,
                                                                      unsigned int id,
                                                                      GlobalSimulationParameters parameters);
+//
+
+// Rayleigh scattering - model Livermore G4
+__host__ __device__ unsigned short int Rayleigh_LV_CS_CumulIntervals(unsigned int pos);
+__host__ __device__ unsigned short int Rayleigh_LV_CS_NbIntervals(unsigned int pos);
+__host__ __device__ unsigned short int Rayleigh_LV_SF_CumulIntervals(unsigned int pos);
+__host__ __device__ unsigned short int Rayleigh_LV_SF_NbIntervals(unsigned int pos);
+
+float* Rayleigh_CS_Livermore_load_data();
+float* Rayleigh_SF_Livermore_load_data();
+__host__ __device__ float Rayleigh_CSPA_Livermore(float* rayl_cs, float E, unsigned short int Z);
+__host__ __device__ float Rayleigh_CS_Livermore(MaterialsTable materials,
+                                                float* rayl_cs, unsigned short int mat, float E);
+__host__ __device__ float Rayleigh_SF_Livermore(float* rayl_sf, float E, int Z);
 
 
 

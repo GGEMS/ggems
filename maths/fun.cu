@@ -38,7 +38,6 @@
     return make_float3(vector.x, vector.y, vector.z);
 }
 
-/*
 // Loglog interpolation
 inline __host__ __device__ float loglog_interpolation(float x, float x0, float y0, float x1, float y1) {
     if (x < x0) return y0;
@@ -47,6 +46,7 @@ inline __host__ __device__ float loglog_interpolation(float x, float x0, float y
     return powf(10.0f, log10f(y0) + log10f(y1 / y0) * (log10f(x * x0) / log10f(x1 * x0)));
 }
 
+/*
 // Binary search
 inline __host__ __device__ int binary_search(float key, float* tab, int size, int min=0) {
     int max=size, mid;
