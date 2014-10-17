@@ -51,6 +51,11 @@ struct GlobalSimulationParameters {
     float time;
     unsigned int seed;
 
+    // To build cross sections table
+    unsigned int cs_table_nbins;
+    float cs_table_min_E;
+    float cs_table_max_E;
+
 };
 
 // Struct that handle colors

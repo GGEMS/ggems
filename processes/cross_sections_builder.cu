@@ -25,15 +25,13 @@ CrossSectionsBuilder::CrossSectionsBuilder() {
 
 }
 
-// Set information concerning cross section table (bin, min and max energy)
-void CrossSectionsBuilder::set_table_parameters(unsigned int nbinval, float minkinE, float maxkinE) {
-    nbin = nbinval;
-    min_E = minkinE;
-    max_E = maxkinE;
-}
-
 // Build cross sections table according material, physics effects and particles
-voif CrossSectionsBuilder::build_table(MaterialsTable materials, GlobalSimulationParameters parameters) {
+void CrossSectionsBuilder::build_table(MaterialsTable materials, GlobalSimulationParameters parameters) {
+
+    // Read parameters
+    unsigned int nbin = parameters.cs_table_nbins;
+    float min_E = parameters.cs_table_min_E;
+    float max_E = parameters.cs_table_max_E;
 
     // First thing first, sample energy following the number of bins
     float slope = log(max_E / min_E);
@@ -88,9 +86,11 @@ voif CrossSectionsBuilder::build_table(MaterialsTable materials, GlobalSimulatio
     // ...
 
     // If Rayleigh scattering, load information once from G4 EM data library
+    float *g4_ray_cs = NULL;
+    float *g4_ray_sf = NULL;
     if (parameters.physics_list[PHOTON_RAYLEIGH]) {
-        float *g4_ray_cs = Rayleigh_CS_Livermore_load_data();
-        float *g4_ray_sf = Rayleigh_SF_Livermore_load_data();
+        g4_ray_cs = Rayleigh_CS_Livermore_load_data();
+        g4_ray_sf = Rayleigh_SF_Livermore_load_data();
     }
 
     // Get CS for each material, energy bin and phys effect
@@ -110,16 +110,16 @@ voif CrossSectionsBuilder::build_table(MaterialsTable materials, GlobalSimulatio
 
             // for each phys effect
             if (parameters.physics_list[PHOTON_COMPTON]) {
-                Photon_CS_table.Compton_Std_CS[i] = Compton_CS_standard(materials, imat, E_scale[i]);
+                Photon_CS_table.Compton_Std_CS[abs_index] = Compton_CS_standard(materials, imat, E_scale[i]);
             }
             if (parameters.physics_list[PHOTON_PHOTOELECTRIC]) {
-                Photon_CS_table.PhotoElectric_Std_CS[i] = PhotoElec_CS_standard(materials, imat, E_scale[i]);
+                Photon_CS_table.PhotoElectric_Std_CS[abs_index] = PhotoElec_CS_standard(materials, imat, E_scale[i]);
             }
             if (parameters.physics_list[PHOTON_RAYLEIGH]) {
-                Photon_CS_table.Rayleigh_Lv_CS[i] = Rayleigh_CS_Livermore(materials, g4_ray_cs,
-                                                                          imat, E_scale[i]);
-                Photon_CS_table.Rayleigh_Lv_SF[i] = Rayleigh_SF_Livermore(materials, g4_ray_sf,
-                                                                          imat, E_scale[i]);
+                Photon_CS_table.Rayleigh_Lv_CS[abs_index] = Rayleigh_CS_Livermore(materials, g4_ray_cs,
+                                                                                  imat, E_scale[i]);
+                Photon_CS_table.Rayleigh_Lv_SF[abs_index] = Rayleigh_SF_Livermore(g4_ray_sf,
+                                                                                  imat, E_scale[i]);
             }
 
             // TODO
@@ -131,7 +131,8 @@ voif CrossSectionsBuilder::build_table(MaterialsTable materials, GlobalSimulatio
         ++imat;
     } // imat
 
-
+    // Free mem
+    free(E_scale);
 
 
 }

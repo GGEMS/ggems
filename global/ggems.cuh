@@ -27,6 +27,7 @@
 #include "../geometry/geometry_builder.cuh"
 #include "../geometry/materials.cuh"
 #include "../sources/source_builder.cuh"
+#include "../processes/cross_sections_builder.cuh"
 
 #include "../geometry/aabb.cuh"
 #include "../geometry/sphere.cuh"
@@ -57,6 +58,9 @@ class SimulationBuilder {
         void set_number_of_particles(unsigned int nb);
         void set_max_number_of_iterations(unsigned int nb);
         void set_record_history(unsigned int nb_particles);
+        void set_CS_table_nbins(unsigned int valbin);
+        void set_CS_table_E_min(float valE);
+        void set_CS_table_E_max(float valE);
 
         void init_simulation();
         void start_simulation();
@@ -72,6 +76,7 @@ class SimulationBuilder {
         MaterialBuilder materials;
         SourceBuilder sources;
         GlobalSimulationParameters parameters;
+        CrossSectionsBuilder cs_tables;
 
         // Record history for some particles (only CPU version)
         HistoryBuilder history;

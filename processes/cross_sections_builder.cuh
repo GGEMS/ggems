@@ -47,13 +47,9 @@ struct PhotonCrossSectionTable{
 class CrossSectionsBuilder {
     public:
         CrossSectionsBuilder();
-        void set_table_parameters(unsigned int nbinval, float minkinE, float maxkinE);
         void build_table(MaterialsTable materials, GlobalSimulationParameters parameters);
 
     private:
-        unsigned int nbin;
-        float min_E;
-        float max_E;
 
         // Data for photon
         PhotonCrossSectionTable Photon_CS_table;

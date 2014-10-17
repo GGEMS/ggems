@@ -1,7 +1,7 @@
 CUDA_FLAGS := --generate-code arch=compute_30,code=sm_30 --relocatable-device-code true -lcudadevrt --compiler-options '-fPIC' -use_fast_math
 #CUDA_FLAGS := --generate-code arch=compute_30,code=sm_30 -Xptxas="-v" --relocatable-device-code true -lcudadevrt --compiler-options '-fPIC' -use_fast_math
 
-FLAGS := -lggems -lelectron -lelectron_navigator -lfun -lglobal -lmain_navigator -lmeshed -lphoton -lphoton_navigator -lprng -lproton -lproton_navigator -lraytracing -lsphere -lstructures -lvector -lvoxelized -lparticles -lsandia_table -lshell_data
+FLAGS := -lggems -lelectron -lelectron_navigator -lglobal -lmain_navigator -lmeshed -lphoton -lphoton_navigator -lprng -lproton -lproton_navigator -lraytracing -lsphere -lstructures -lvector -lvoxelized -lparticles -lsandia_table -lshell_data -lfun
 
 
 G4DIRHEADERS = $(G4HOME)/include/Geant4

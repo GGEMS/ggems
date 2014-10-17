@@ -296,7 +296,7 @@ __host__ __device__ SecParticle PhotoElec_SampleSecondaries_standard(ParticleSta
 
 // GPU
 
-__constant__ int GPU_Rayleigh_LV_CS_NbIntervals [101] =
+__constant__ int GPU_Rayleigh_LV_CS_CumulIntervals [101] =
 {
         0, // nonexisting 'zero' element
 
@@ -696,8 +696,8 @@ float* Rayleigh_SF_Livermore_load_data() {
 __host__ __device__ float Rayleigh_CSPA_Livermore(float* rayl_cs, float E, unsigned short int Z) {
     if (E < 250e-6f || E > 100e3f) {return 0.0f;} // 250 eV < E < 100 GeV
 
-    int start = Rayleigh_LV_CS_CumulIntervals[Z];
-    int stop  = start + 2 * (Rayleigh_LV_CS_NbIntervals[Z] - 1);
+    int start = Rayleigh_LV_CS_CumulIntervals(Z);
+    int stop  = start + 2 * (Rayleigh_LV_CS_NbIntervals(Z) - 1);
 
     int pos;
     for (pos=start; pos<stop; pos+=2) {
@@ -728,8 +728,8 @@ __host__ __device__ float Rayleigh_CS_Livermore(MaterialsTable materials,
 
 // Rayleigh Scatter Factor (Livermore)
 __host__ __device__ float Rayleigh_SF_Livermore(float* rayl_sf, float E, int Z) {
-    int start = Rayleigh_LV_SF_CumulIntervals[Z];
-    int stop = start + 2 * (Rayleigh_LV_SF_NbIntervals[Z] - 1);
+    int start = Rayleigh_LV_SF_CumulIntervals(Z);
+    int stop = start + 2 * (Rayleigh_LV_SF_NbIntervals(Z) - 1);
 
     // check boundary
     if (E==0.0f) return rayl_sf[start+1];

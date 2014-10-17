@@ -152,6 +152,11 @@ void SimulationBuilder::set_process(std::string process_name) {
     }
 }
 
+// Set parameters to generate cross sections table
+void SimulationBuilder::set_CS_table_nbins(unsigned int valbin) {parameters.cs_table_nbins = valbin;}
+void SimulationBuilder::set_CS_table_E_min(float valE) {parameters.cs_table_min_E = valE;}
+void SimulationBuilder::set_CS_table_E_max(float valE) {parameters.cs_table_max_E = valE;}
+
 // Enable the simulation of a particular secondary particle
 void SimulationBuilder::set_secondary(std::string pname) {
 
@@ -236,13 +241,14 @@ void SimulationBuilder::init_simulation() {
         particles.init_stack_seed();
 
     }
+
+    // Init Cross sections and physics table
+    cs_tables.build_table(materials.materials_table, parameters);
+
 }
 
 // Start the simulation
 void SimulationBuilder::start_simulation() {
-
-    // First init the simulation
-    init_simulation();
 
     unsigned int iter = 0;
 
