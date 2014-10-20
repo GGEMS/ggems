@@ -31,11 +31,13 @@
 
 // Cross section table for photon particle
 struct PhotonCrossSectionTable{
-    float* E;                     // n*k
+    float* E_CS;                  // n*k
     float* Compton_Std_CS;        // n*k
     float* PhotoElectric_Std_CS;  // n*k
     float* Rayleigh_Lv_CS;        // n*k
-    float* Rayleigh_Lv_SF;        // n*k
+
+    float* E_SF;                  // n*101
+    float* Rayleigh_Lv_SF;        // n*101 - Nb of Z
 
     float E_min;
     float E_max;
@@ -48,6 +50,7 @@ class CrossSectionsBuilder {
     public:
         CrossSectionsBuilder();
         void build_table(MaterialsTable materials, GlobalSimulationParameters parameters);
+        void print();
 
     private:
 

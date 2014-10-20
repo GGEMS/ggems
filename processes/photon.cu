@@ -675,9 +675,14 @@ float* Rayleigh_CS_Livermore_load_data() {
     const int ncs = 213816;  // CS file contains 213,816 floats
     unsigned int mem_cs = ncs * sizeof(float);
     float* raylcs = (float*)malloc(mem_cs);
-    FILE * pfile = fopen("../data/rayleigh_cs.bin", "rb");
+
+    std::string filename = std::string(getenv("GGEMSHOME"));
+    filename += "/data/rayleigh_cs.bin";
+
+    FILE * pfile = fopen(filename.c_str(), "rb");
     fread(raylcs, sizeof(float), ncs, pfile);
     fclose(pfile);
+
     return raylcs;
 }
 
@@ -686,9 +691,14 @@ float* Rayleigh_SF_Livermore_load_data() {
     const int nsf = 28824;   // SF file contains  28,824 floats
     unsigned int mem_sf = nsf * sizeof(float);
     float* raylsf = (float*)malloc(mem_sf);
-    FILE * pfile = fopen("../data/rayleigh_sf.bin", "rb");
+
+    std::string filename = std::string(getenv("GGEMSHOME"));
+    filename += "/data/rayleigh_sf.bin";
+
+    FILE * pfile = fopen(filename.c_str(), "rb");
     fread(raylsf, sizeof(float), nsf, pfile);
     fclose(pfile);
+
     return raylsf;
 }
 
@@ -736,11 +746,19 @@ __host__ __device__ float Rayleigh_SF_Livermore(float* rayl_sf, float E, int Z) 
 
     int pos;
     for (pos=start; pos<stop; pos+=2) {
-        if (rayl_sf[pos] >= E) {break;}
+        if (rayl_sf[pos]*eV >= E) break;  // SF data are in eV
     }
 
-    return loglog_interpolation(E, rayl_sf[pos-2], rayl_sf[pos-1],
-                                rayl_sf[pos], rayl_sf[pos+1]);
+    // Return loglog interpolation
+
+    // If the min bin of energy is equal to 0, loglog is not possible (return Inf)
+    if (rayl_sf[pos-2] == 0.0f) {
+        return rayl_sf[pos-1];
+    } else {
+        return loglog_interpolation(E, rayl_sf[pos-2]*eV, rayl_sf[pos-1],
+                                        rayl_sf[pos]*eV, rayl_sf[pos+1]);
+    }
+
 }
 
 /*

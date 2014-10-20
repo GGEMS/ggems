@@ -136,6 +136,9 @@ void SimulationBuilder::set_process(std::string process_name) {
     } else if (process_name == "PhotoElectric") {
         parameters.physics_list[PHOTON_PHOTOELECTRIC] = ENABLED;
         // printf("add photoelectric\n");
+    } else if (process_name == "Rayleigh") {
+        parameters.physics_list[PHOTON_RAYLEIGH] = ENABLED;
+        // printf("add Rayleigh\n");
     } else if (process_name == "eIonisation") {
         parameters.physics_list[ELECTRON_IONISATION] = ENABLED;
         // printf("add photoelectric\n");
@@ -244,6 +247,7 @@ void SimulationBuilder::init_simulation() {
 
     // Init Cross sections and physics table
     cs_tables.build_table(materials.materials_table, parameters);
+    //cs_tables.print();
 
 }
 

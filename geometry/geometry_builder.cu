@@ -37,6 +37,7 @@ unsigned int __host__ __device__ get_geometry_material(Scene geometry, unsigned 
     }
 }
 
+// Find the next geometry along the path of the particle
 void __host__ __device__ get_next_geometry_boundary(Scene geometry, unsigned int cur_geom,
                                                      float3 pos, float3 dir,
                                                      float &interaction_distance,
