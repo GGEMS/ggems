@@ -26,6 +26,7 @@
 #include "constants.cuh"
 #include "sandia_table.cuh"
 #include "shell_data.cuh"
+#include "../processes/cross_sections_builder.cuh"
 
 // Compton - model standard G4
 __host__ __device__ float Compton_CSPA_standard(float E, unsigned short int Z);

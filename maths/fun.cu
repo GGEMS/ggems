@@ -46,7 +46,6 @@ __host__ __device__ float loglog_interpolation(float x, float x0, float y0, floa
     return powf(10.0f, log10f(y0) + log10f(y1 / y0) * (log10f(x * x0) / log10f(x1 * x0)));
 }
 
-/*
 // Binary search
 inline __host__ __device__ int binary_search(float key, float* tab, int size, int min=0) {
     int max=size, mid;
@@ -62,12 +61,14 @@ inline __host__ __device__ int binary_search(float key, float* tab, int size, in
 }
 
 // Linear interpolation
-inline __host__ __device__ float linear_interpolation(float xa,float ya, float xb,  float yb, float x) { // Taylor young 1st order
+inline __host__ __device__ float linear_interpolation(float xa,float ya, float xb, float yb, float x) {
+    // Taylor young 1st order
     if (xa > x) return ya;
     if (xb < x) return yb;
     return ya + (x-xa) * (yb-ya) / (xb-xa);
 }
 
+/*
 // Poisson distribution from Geant4 using JKISS32 Generator
 inline __device__ int G4Poisson(float mean,ParticleStack &particles, int id) {
     float    number=0.;

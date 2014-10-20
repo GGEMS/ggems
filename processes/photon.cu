@@ -64,6 +64,12 @@ __host__ __device__ float Compton_CS_standard(MaterialsTable materials, unsigned
     return CS;
 }
 
+__host__ __device__ float Compton_standard_CS_from_table(PhotonCrossSectionTable photon_CS_table,
+                                                         unsigned short int mat, float E) {
+
+
+
+}
 
 // Compton Scatter (Standard - Klein-Nishina) with secondary (e-)
 __host__ __device__ SecParticle Compton_SampleSecondaries_standard(ParticleStack particles,
@@ -711,7 +717,7 @@ __host__ __device__ float Rayleigh_CSPA_Livermore(float* rayl_cs, float E, unsig
 
     int pos;
     for (pos=start; pos<stop; pos+=2) {
-        if (rayl_cs[pos] >= E) {break;}
+        if (rayl_cs[pos] >= E) break;
     }
 
     if (E < 1e3f) { // 1 Gev

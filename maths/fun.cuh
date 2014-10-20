@@ -23,13 +23,14 @@ __host__ __device__ float3 rotateUz(float3 vector, float3 newUz);
 // Loglog interpolation
 __host__ __device__ float loglog_interpolation(float x, float x0, float y0, float x1, float y1);
 
-/*
+
 // Binary search
 inline __host__ __device__ int binary_search(float key, float* tab, int size, int min=0);
 
 // Linear interpolation
 inline __host__ __device__ float linear_interpolation(float xa,float ya, float xb,  float yb, float x);
 
+/*
 // Poisson distribution from Geant4 using JKISS32 Generator
 inline __device__ int G4Poisson(float mean,ParticleStack &particles, int id);
 

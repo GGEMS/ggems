@@ -20,6 +20,7 @@
 
 #include "../processes/constants.cuh"
 #include "../processes/particles.cuh"
+#include "../processes/cross_sections_builder.cuh"
 #include "../geometry/materials.cuh"
 #include "../global/global.cuh"
 
@@ -34,11 +35,18 @@
 
 #include "../processes/photon.cuh"
 
-
 __host__ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_id,
+                          Scene geometry, MaterialsTable materials,
+                          PhotonCrossSectionTable photon_CS_table,
+                          GlobalSimulationParameters parameters,
+                          HistoryBuilder &history);
+
+
+__host__ void cpu_photon_navigator_onthefly(ParticleStack &particles, unsigned int part_id,
                           Scene geometry, MaterialsTable materials,
                           GlobalSimulationParameters parameters,
                           HistoryBuilder &history);
+
 
 
 #endif

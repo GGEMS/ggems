@@ -21,14 +21,14 @@
 #include "../global/global.cuh"
 #include "../processes/constants.cuh"
 #include "../processes/particles.cuh"
+#include "../processes/cross_sections_builder.cuh"
 #include "../geometry/geometry_builder.cuh"
 #include "../geometry/materials.cuh"
 #include "photon_navigator.cuh"
 
 void cpu_main_navigator(ParticleStack &particles, Scene geometry,
-                        MaterialsTable materials, GlobalSimulationParameters parameters,
+                        MaterialsTable materials, PhotonCrossSectionTable photon_CS_table,
+                        GlobalSimulationParameters parameters,
                         HistoryBuilder &history);
-
-
 
 #endif

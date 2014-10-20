@@ -37,7 +37,8 @@ struct PhotonCrossSectionTable{
     float* Rayleigh_Lv_CS;        // n*k
 
     float* E_SF;                  // n*101
-    float* Rayleigh_Lv_SF;        // n*101 - Nb of Z
+    float* Rayleigh_Lv_SF;        // n*101 (Nb of Z)
+    float* Rayleigh_Lv_xCS;       // n*101 (Nb of Z)
 
     float E_min;
     float E_max;
@@ -52,11 +53,13 @@ class CrossSectionsBuilder {
         void build_table(MaterialsTable materials, GlobalSimulationParameters parameters);
         void print();
 
+        // Data for photon
+        PhotonCrossSectionTable photon_CS_table;
+        //ElectronCrossSectionTable Electron_CS_table;
+
     private:
 
-        // Data for photon
-        PhotonCrossSectionTable Photon_CS_table;
-        //ElectronCrossSectionTable Electron_CS_table;
+
 
 };
 

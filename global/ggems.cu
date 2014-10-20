@@ -91,7 +91,7 @@ void SimulationBuilder::cpu_primaries_generator() {
 void SimulationBuilder::cpu_main_navigation() {
 
     cpu_main_navigator(particles.stack, geometry.world,
-                       materials.materials_table, parameters, history);
+                       materials.materials_table, cs_tables.photon_CS_table, parameters, history);
 
 }
 
@@ -247,7 +247,7 @@ void SimulationBuilder::init_simulation() {
 
     // Init Cross sections and physics table
     cs_tables.build_table(materials.materials_table, parameters);
-    //cs_tables.print();
+    cs_tables.print();
 
 }
 
