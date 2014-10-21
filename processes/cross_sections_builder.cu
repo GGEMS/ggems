@@ -149,7 +149,7 @@ void CrossSectionsBuilder::build_table(MaterialsTable materials, GlobalSimulatio
             iZ=0; while (iZ < materials.nb_elements[imat]) {
                 Z = materials.mixture[materials.index[imat]+iZ];
 
-                // If for this Z nthing was already calculated
+                // If for this Z nothing was already calculated
                 if (!flag_Z[Z]) {
                     flag_Z[Z] = 1;
 
@@ -160,6 +160,10 @@ void CrossSectionsBuilder::build_table(MaterialsTable materials, GlobalSimulatio
                         photon_CS_table.Rayleigh_Lv_SF[abs_index] = Rayleigh_SF_Livermore(g4_ray_sf,
                                                                                           E_scale[i],
                                                                                           Z);
+                        // TODO
+                        // add: mat.atom_num_dens[index+i] * CSPA
+                        // add: CDF (starting from 0) -> xsec +=
+
                         photon_CS_table.Rayleigh_Lv_xCS[abs_index] = Rayleigh_CSPA_Livermore(g4_ray_cs,
                                                                                              E_scale[i],
                                                                                              Z);
