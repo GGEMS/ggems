@@ -247,7 +247,7 @@ void SimulationBuilder::init_simulation() {
 
     // Init Cross sections and physics table
     cs_tables.build_table(materials.materials_table, parameters);
-    cs_tables.print();
+    //cs_tables.print();
 
 }
 

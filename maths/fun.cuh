@@ -25,10 +25,10 @@ __host__ __device__ float loglog_interpolation(float x, float x0, float y0, floa
 
 
 // Binary search
-inline __host__ __device__ int binary_search(float key, float* tab, int size, int min=0);
+__host__ __device__ int binary_search(float key, float* tab, int size, int min=0);
 
 // Linear interpolation
-inline __host__ __device__ float linear_interpolation(float xa,float ya, float xb,  float yb, float x);
+__host__ __device__ float linear_interpolation(float xa,float ya, float xb,  float yb, float x);
 
 /*
 // Poisson distribution from Geant4 using JKISS32 Generator

@@ -47,7 +47,7 @@ __host__ __device__ float loglog_interpolation(float x, float x0, float y0, floa
 }
 
 // Binary search
-inline __host__ __device__ int binary_search(float key, float* tab, int size, int min=0) {
+__host__ __device__ int binary_search(float key, float* tab, int size, int min=0) {
     int max=size, mid;
     while ((min < max)) {
         mid = (min + max) >> 1;
@@ -61,7 +61,7 @@ inline __host__ __device__ int binary_search(float key, float* tab, int size, in
 }
 
 // Linear interpolation
-inline __host__ __device__ float linear_interpolation(float xa,float ya, float xb, float yb, float x) {
+__host__ __device__ float linear_interpolation(float xa,float ya, float xb, float yb, float x) {
     // Taylor young 1st order
     if (xa > x) return ya;
     if (xb < x) return yb;

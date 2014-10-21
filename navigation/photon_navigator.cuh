@@ -18,6 +18,8 @@
 #ifndef PHOTON_NAVIGATOR_CUH
 #define PHOTON_NAVIGATOR_CUH
 
+#include "assert.h"
+
 #include "../processes/constants.cuh"
 #include "../processes/particles.cuh"
 #include "../processes/cross_sections_builder.cuh"
@@ -40,13 +42,6 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_i
                           PhotonCrossSectionTable photon_CS_table,
                           GlobalSimulationParameters parameters,
                           HistoryBuilder &history);
-
-
-__host__ void cpu_photon_navigator_onthefly(ParticleStack &particles, unsigned int part_id,
-                          Scene geometry, MaterialsTable materials,
-                          GlobalSimulationParameters parameters,
-                          HistoryBuilder &history);
-
 
 
 #endif

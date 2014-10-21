@@ -18,15 +18,33 @@
 #ifndef PHOTON_CUH
 #define PHOTON_CUH
 
+#include "particles.cuh"
 #include "../geometry/materials.cuh"
 #include "../global/global.cuh"
-#include "particles.cuh"
 #include "../maths/prng.cuh"
 #include "../maths/fun.cuh"
 #include "constants.cuh"
 #include "sandia_table.cuh"
 #include "shell_data.cuh"
-#include "../processes/cross_sections_builder.cuh"
+
+// Cross section table for photon particle
+struct PhotonCrossSectionTable{
+    float* E_bins;                // n
+
+    float* Compton_Std_CS;        // n*k
+
+    float* Photoelectric_Std_CS;  // n*k
+    float* Photoelectric_Std_xCS; // n*101 (Nb of Z)
+
+    float* Rayleigh_Lv_CS;        // n*k
+    float* Rayleigh_Lv_SF;        // n*101 (Nb of Z)
+    float* Rayleigh_Lv_xCS;       // n*101 (Nb of Z)
+
+    float E_min;
+    float E_max;
+    unsigned int nb_bins;         // n
+    unsigned int nb_mat;          // k
+};
 
 // Compton - model standard G4
 __host__ __device__ float Compton_CSPA_standard(float E, unsigned short int Z);
@@ -39,15 +57,18 @@ __host__ __device__ SecParticle Compton_SampleSecondaries_standard(ParticleStack
 //
 
 // PhotoElectric - model standard G4
-__host__ __device__ float PhotoElec_CSPA_standard(float E, unsigned short int Z);
-__host__ __device__ float PhotoElec_CS_standard(MaterialsTable materials,
+__host__ __device__ float Photoelec_CSPA_standard(float E, unsigned short int Z);
+__host__ __device__ float Photoelec_CS_standard(MaterialsTable materials,
                                                 unsigned short int mat, float E);
-__host__ __device__ SecParticle PhotoElec_SampleSecondaries_standard(ParticleStack particles,
+__host__ __device__ SecParticle Photoelec_SampleSecondaries_standard(ParticleStack particles,
                                                                      MaterialsTable mat,
+                                                                     PhotonCrossSectionTable photon_CS_table,
+                                                                     unsigned int E_index,
                                                                      float cutE,
                                                                      unsigned short int matindex,
                                                                      unsigned int id,
                                                                      GlobalSimulationParameters parameters);
+
 //
 
 // Rayleigh scattering - model Livermore G4
@@ -62,7 +83,12 @@ __host__ __device__ float Rayleigh_CSPA_Livermore(float* rayl_cs, float E, unsig
 __host__ __device__ float Rayleigh_CS_Livermore(MaterialsTable materials,
                                                 float* rayl_cs, unsigned short int mat, float E);
 __host__ __device__ float Rayleigh_SF_Livermore(float* rayl_sf, float E, int Z);
-
+__host__ __device__ void Rayleigh_SampleSecondaries_Livermore(ParticleStack particles,
+                                                              MaterialsTable mat,
+                                                              PhotonCrossSectionTable photon_CS_table,
+                                                              unsigned int E_index,
+                                                              unsigned short int matindex,
+                                                              unsigned int id);
 
 
 /*

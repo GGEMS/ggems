@@ -22,12 +22,12 @@
 #include <string>
 
 #include "../processes/constants.cuh"
-#include "../global/global.cuh"
 #include "../processes/particles.cuh"
+#include "../processes/cross_sections_builder.cuh"
+#include "../global/global.cuh"
 #include "../geometry/geometry_builder.cuh"
 #include "../geometry/materials.cuh"
 #include "../sources/source_builder.cuh"
-#include "../processes/cross_sections_builder.cuh"
 
 #include "../geometry/aabb.cuh"
 #include "../geometry/sphere.cuh"
@@ -39,6 +39,7 @@
 
 #include "../geometry/vrml.cuh"
 #include "../maths/mathplot.cuh"
+#include "../maths/fun.cuh"
 
 // Class to manage the hierarchical structure of the world
 class SimulationBuilder {

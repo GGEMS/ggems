@@ -29,23 +29,6 @@
 #include "../global/global.cuh"
 #include "photon.cuh"
 
-// Cross section table for photon particle
-struct PhotonCrossSectionTable{
-    float* E_CS;                  // n*k
-    float* Compton_Std_CS;        // n*k
-    float* PhotoElectric_Std_CS;  // n*k
-    float* Rayleigh_Lv_CS;        // n*k
-
-    float* E_SF;                  // n*101
-    float* Rayleigh_Lv_SF;        // n*101 (Nb of Z)
-    float* Rayleigh_Lv_xCS;       // n*101 (Nb of Z)
-
-    float E_min;
-    float E_max;
-    unsigned int nb_bins;         // n
-    unsigned int nb_mat;          // k
-};
-
 // CS class
 class CrossSectionsBuilder {
     public:

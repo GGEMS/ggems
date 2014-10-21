@@ -37,9 +37,9 @@ void CrossSectionsBuilder::build_table(MaterialsTable materials, GlobalSimulatio
     // First thing first, sample energy following the number of bins
     float slope = log(max_E / min_E);
     unsigned int i = 0;
-    float *E_scale = (float*)malloc(nbin * sizeof(float));
+    photon_CS_table.E_bins = (float*)malloc(nbin * sizeof(float));
     while (i < nbin) {
-        E_scale[i] = min_E * exp( slope * ((float)i/((float)nbin-1)) ) * MeV;
+        photon_CS_table.E_bins[i] = min_E * exp( slope * ((float)i/((float)nbin-1)) ) * MeV;
         ++i;
     }
 
@@ -57,36 +57,31 @@ void CrossSectionsBuilder::build_table(MaterialsTable materials, GlobalSimulatio
 
     // Photon CS table if need
     if (there_is_photon) {
-
-        photon_CS_table.E_CS = (float*)malloc(tot_elt_mem);
         photon_CS_table.Compton_Std_CS = (float*)malloc(tot_elt_mem);
-        photon_CS_table.PhotoElectric_Std_CS = (float*)malloc(tot_elt_mem);
+        photon_CS_table.Photoelectric_Std_CS = (float*)malloc(tot_elt_mem);
+        photon_CS_table.Photoelectric_Std_xCS = (float*)malloc(nbin * 101 * sizeof(float)); // 100 Z elements,
+                                                                                            // starting from index 1
         photon_CS_table.Rayleigh_Lv_CS = (float*)malloc(tot_elt_mem);
         photon_CS_table.Rayleigh_Lv_SF = (float*)malloc(nbin * 101 * sizeof(float)); // 100 Z elements,
                                                                                      // starting from index 1
         photon_CS_table.Rayleigh_Lv_xCS = (float*)malloc(nbin * 101 * sizeof(float)); // 100 Z elements,
-                                                                                     // starting from index 1
-        photon_CS_table.E_SF = (float*)malloc(nbin * 101 * sizeof(float)); // 100 Z elements,
-                                                                           // starting from index 1
-
+                                                                                     // starting from index 1       
         photon_CS_table.E_min = min_E;
         photon_CS_table.E_max = max_E;
         photon_CS_table.nb_bins = nbin;
         photon_CS_table.nb_mat = materials.nb_materials;
 
         // Init value
-        i=0; while (i < tot_elt) {
-            photon_CS_table.E_CS[i] = 0.0f;
+        i=0; while (i < tot_elt) {            
             photon_CS_table.Compton_Std_CS[i] = 0.0f;
-            photon_CS_table.PhotoElectric_Std_CS[i] = 0.0f;
+            photon_CS_table.Photoelectric_Std_CS[i] = 0.0f;
             photon_CS_table.Rayleigh_Lv_CS[i] = 0.0f;
-
             ++i;
         }
         i=0; while (i < (101*nbin)) { // 100 Z element starting from index 1
             photon_CS_table.Rayleigh_Lv_SF[i] = 0.0f;
             photon_CS_table.Rayleigh_Lv_xCS[i] = 0.0f;
-            photon_CS_table.E_SF[i] = 0.0f;
+            photon_CS_table.Photoelectric_Std_xCS[i] = 0.0f;
             ++i;
         }
 
@@ -120,20 +115,18 @@ void CrossSectionsBuilder::build_table(MaterialsTable materials, GlobalSimulatio
             // absolute index to store data within the table
             abs_index = imat*nbin + i;
 
-            // store energy value
-            if (there_is_photon) photon_CS_table.E_CS[abs_index] = E_scale[i];
-            //if (there_is_electron) Electron_CS_table.E[abs_index] = E_scale[i];
-
             // for each phys effect
             if (parameters.physics_list[PHOTON_COMPTON]) {
-                photon_CS_table.Compton_Std_CS[abs_index] = Compton_CS_standard(materials, imat, E_scale[i]);
+                photon_CS_table.Compton_Std_CS[abs_index] = Compton_CS_standard(materials, imat,
+                                                                                photon_CS_table.E_bins[i]);
             }
             if (parameters.physics_list[PHOTON_PHOTOELECTRIC]) {
-                photon_CS_table.PhotoElectric_Std_CS[abs_index] = PhotoElec_CS_standard(materials, imat, E_scale[i]);
+                photon_CS_table.Photoelectric_Std_CS[abs_index] = Photoelec_CS_standard(materials, imat,
+                                                                                        photon_CS_table.E_bins[i]);
             }
             if (parameters.physics_list[PHOTON_RAYLEIGH]) {
                 photon_CS_table.Rayleigh_Lv_CS[abs_index] = Rayleigh_CS_Livermore(materials, g4_ray_cs,
-                                                                                  imat, E_scale[i]);
+                                                                                  imat, photon_CS_table.E_bins[i]);
             }
 
             // TODO
@@ -142,12 +135,14 @@ void CrossSectionsBuilder::build_table(MaterialsTable materials, GlobalSimulatio
             ++i;
         } // i
 
-        // Special case for Rayleigh where scatter factor and CS are needed for each Z
+        // Special case for Photoelectric and Rayleigh where scatter factor and CS are needed for each Z
         if (parameters.physics_list[PHOTON_RAYLEIGH]) {
             unsigned int iZ, Z;
             // This table compute scatter factor for each Z (only for Z which were not already defined)
             iZ=0; while (iZ < materials.nb_elements[imat]) {
                 Z = materials.mixture[materials.index[imat]+iZ];
+
+                float atom_num_dens = materials.atom_num_dens[materials.index[imat]+iZ];
 
                 // If for this Z nothing was already calculated
                 if (!flag_Z[Z]) {
@@ -158,17 +153,14 @@ void CrossSectionsBuilder::build_table(MaterialsTable materials, GlobalSimulatio
                         // absolute index to store data within the table
                         abs_index = Z*nbin + i;
                         photon_CS_table.Rayleigh_Lv_SF[abs_index] = Rayleigh_SF_Livermore(g4_ray_sf,
-                                                                                          E_scale[i],
+                                                                                          photon_CS_table.E_bins[i],
                                                                                           Z);
-                        // TODO
-                        // add: mat.atom_num_dens[index+i] * CSPA
-                        // add: CDF (starting from 0) -> xsec +=
 
-                        photon_CS_table.Rayleigh_Lv_xCS[abs_index] = Rayleigh_CSPA_Livermore(g4_ray_cs,
-                                                                                             E_scale[i],
-                                                                                             Z);
+                        photon_CS_table.Rayleigh_Lv_xCS[abs_index] = atom_num_dens *
+                                        Rayleigh_CSPA_Livermore(g4_ray_cs, photon_CS_table.E_bins[i], Z);
 
-                        photon_CS_table.E_SF[abs_index] = E_scale[i];
+                        photon_CS_table.Photoelectric_Std_xCS[abs_index] = atom_num_dens *
+                                                   Photoelec_CSPA_standard(photon_CS_table.E_bins[i], Z);
 
                         ++i;
                     } // i
@@ -182,7 +174,6 @@ void CrossSectionsBuilder::build_table(MaterialsTable materials, GlobalSimulatio
     } // imat
 
     // Free mem
-    free(E_scale);
     free(flag_Z);
 }
 
@@ -202,7 +193,7 @@ void CrossSectionsBuilder::print() {
         printf("## Material %i\n", imat);
         iE=0; while (iE < photon_CS_table.nb_bins) {
             abs_index = imat*photon_CS_table.nb_bins + iE;
-            printf("E %e CS %e\n", photon_CS_table.E_CS[abs_index],
+            printf("E %e CS %e\n", photon_CS_table.E_bins[iE],
                                    photon_CS_table.Compton_Std_CS[abs_index]);
             ++iE;
         } // iE
@@ -217,8 +208,21 @@ void CrossSectionsBuilder::print() {
         printf("## Material %i\n", imat);
         iE=0; while (iE < photon_CS_table.nb_bins) {
             abs_index = imat*photon_CS_table.nb_bins + iE;
-            printf("E %e CS %e\n", photon_CS_table.E_CS[abs_index],
-                                   photon_CS_table.PhotoElectric_Std_CS[abs_index]);
+            printf("E %e CS %e\n", photon_CS_table.E_bins[iE],
+                                   photon_CS_table.Photoelectric_Std_CS[abs_index]);
+            ++iE;
+        } // iE
+        printf("\n");
+        ++imat;
+    } // imat
+    printf("\n");
+
+    imat=0; while (imat < 101) {
+        printf("## Z %i\n", imat);
+        iE=0; while (iE < photon_CS_table.nb_bins) {
+            abs_index = imat*photon_CS_table.nb_bins + iE;
+            printf("E %e CS %e\n", photon_CS_table.E_bins[iE],
+                                   photon_CS_table.Photoelectric_Std_xCS[abs_index]);
             ++iE;
         } // iE
         printf("\n");
@@ -232,7 +236,7 @@ void CrossSectionsBuilder::print() {
         printf("## Material %i\n", imat);
         iE=0; while (iE < photon_CS_table.nb_bins) {
             abs_index = imat*photon_CS_table.nb_bins + iE;
-            printf("E %e CS %e\n", photon_CS_table.E_CS[abs_index],
+            printf("E %e CS %e\n", photon_CS_table.E_bins[iE],
                                    photon_CS_table.Rayleigh_Lv_CS[abs_index]);
             ++iE;
         } // iE
@@ -247,7 +251,7 @@ void CrossSectionsBuilder::print() {
         printf("## Z %i\n", imat);
         iE=0; while (iE < photon_CS_table.nb_bins) {
             abs_index = imat*photon_CS_table.nb_bins + iE;
-            printf("E %e SF %e CS %e\n", photon_CS_table.E_SF[abs_index],
+            printf("E %e SF %e CS %e\n", photon_CS_table.E_bins[iE],
                                          photon_CS_table.Rayleigh_Lv_SF[abs_index],
                                          photon_CS_table.Rayleigh_Lv_xCS[abs_index]);
             ++iE;

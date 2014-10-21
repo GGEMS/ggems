@@ -1,7 +1,7 @@
 CUDA_FLAGS := --generate-code arch=compute_30,code=sm_30 --relocatable-device-code true -lcudadevrt --compiler-options '-fPIC' -use_fast_math
 #CUDA_FLAGS := --generate-code arch=compute_30,code=sm_30 -Xptxas="-v" --relocatable-device-code true -lcudadevrt --compiler-options '-fPIC' -use_fast_math
 
-FLAGS := -lggems -lelectron -lelectron_navigator -lglobal -lmain_navigator -lmeshed -lphoton -lphoton_navigator -lprng -lproton -lproton_navigator -lraytracing -lsphere -lstructures -lvector -lvoxelized -lparticles -lsandia_table -lshell_data -lfun
+FLAGS := -lggems -lelectron -lelectron_navigator -lglobal -lmain_navigator -lmeshed -lphoton -lphoton_navigator -lprng -lproton -lproton_navigator -lraytracing -lsphere -lstructures -lvector -lvoxelized -lparticles -lsandia_table -lshell_data -lfun -lcross_sections_builder
 
 
 G4DIRHEADERS = $(G4HOME)/include/Geant4
@@ -48,8 +48,8 @@ copy :
 # 	mv $@ $(BUILDDIR)
 # 	ar r -o $(LIBDIR)/libsandia_table.a $(BUILDDIR)/*.o
 	
-global/ggems.o: global/ggems.cu
-	nvcc $(CUDA_FLAGS) $^ -c -o $@ $(G4INCLUDES) $(G4LIBS) -L$(LIBDIR) -lsandia_table -lshell_data	
+#global/ggems.o: global/ggems.cu
+#	nvcc $(CUDA_FLAGS) $^ -c -o $@ $(G4INCLUDES) $(G4LIBS) -L$(LIBDIR) -lsandia_table -lshell_data -lcross_sections_builder	
 	
 
 	
