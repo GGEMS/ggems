@@ -20,6 +20,19 @@
 #include "photon.cuh"
 
 
+__host__ __device__ float get_CS_from_table(float *E_bins, float *CSTable, float energy,
+                                            unsigned int E_index, unsigned int mat_index,
+                                            unsigned int nb_bins) {
+
+    return linear_interpolation(E_bins[E_index-1],
+                                CSTable[mat_index*nb_bins+E_index-1],
+                                E_bins[E_index],
+                                CSTable[mat_index*nb_bins+E_index],
+                                energy);
+
+
+}
+
 //////// Compton /////////////////////////////////////////////
 // Model standard G4
 //////////////////////////////////////////////////////////////
@@ -231,12 +244,11 @@ __host__ __device__ SecParticle Photoelec_SampleSecondaries_standard(ParticleSta
     unsigned int mixture_index = mat.index[matindex];
     unsigned int Z = mat.mixture[mixture_index];
     unsigned int i = 0;
-    if (n > 0) {
-        float x = JKISS32(particles,id) * linear_interpolation(photon_CS_table.E_bins[E_index-1],
-                                                               photon_CS_table.Photoelectric_Std_CS[E_index-1],
-                                                               photon_CS_table.E_bins[E_index],
-                                                               photon_CS_table.Photoelectric_Std_CS[E_index],
-                                                               particles.E[id]);
+    if (n > 0) {                
+        float x = JKISS32(particles,id) * get_CS_from_table(photon_CS_table.E_bins,
+                                                            photon_CS_table.Photoelectric_Std_CS,
+                                                            particles.E[id], E_index, matindex,
+                                                            photon_CS_table.nb_bins);
         float xsec = 0.0f;
         while (i < n) {
             Z = mat.mixture[mixture_index+i];

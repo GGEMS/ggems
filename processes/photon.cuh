@@ -46,6 +46,10 @@ struct PhotonCrossSectionTable{
     unsigned int nb_mat;          // k
 };
 
+// Utils
+__host__ __device__ float get_CS_from_table(float *E_bins, float *CSTable, float energy,
+                                            unsigned int E_index, unsigned int mat_index, unsigned int nb_bins);
+
 // Compton - model standard G4
 __host__ __device__ float Compton_CSPA_standard(float E, unsigned short int Z);
 __host__ __device__ float Compton_CS_standard(MaterialsTable materials, unsigned short int mat, float E);

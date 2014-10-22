@@ -63,26 +63,21 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_i
     /////////////////////
 
     // If photoelectric
-    if (parameters.physics_list[PHOTON_PHOTOELECTRIC]) {      
-        cross_section = linear_interpolation(photon_CS_table.E_bins[E_index-1],
-                                             photon_CS_table.Photoelectric_Std_CS[E_index-1],
-                                             photon_CS_table.E_bins[E_index],
-                                             photon_CS_table.Photoelectric_Std_CS[E_index],
-                                             particles.E[part_id]);
+    if (parameters.physics_list[PHOTON_PHOTOELECTRIC]) {
+        cross_section = get_CS_from_table(photon_CS_table.E_bins, photon_CS_table.Photoelectric_Std_CS,
+                                          particles.E[part_id], E_index, id_mat, photon_CS_table.nb_bins);
         interaction_distance = -log( JKISS32(particles, part_id) ) / cross_section;
         if (interaction_distance < next_interaction_distance) {
             next_interaction_distance = interaction_distance;
             next_discrete_process = PHOTON_PHOTOELECTRIC;
         }
+        //if (cur_id_geom==1) printf("E %e CS %e\n", particles.E[part_id], cross_section);
     }
 
     // If Compton
     if (parameters.physics_list[PHOTON_COMPTON]) {
-        cross_section = linear_interpolation(photon_CS_table.E_bins[E_index-1],
-                                             photon_CS_table.Compton_Std_CS[E_index-1],
-                                             photon_CS_table.E_bins[E_index],
-                                             photon_CS_table.Compton_Std_CS[E_index],
-                                             particles.E[part_id]);
+        cross_section = get_CS_from_table(photon_CS_table.E_bins, photon_CS_table.Compton_Std_CS,
+                                          particles.E[part_id], E_index, id_mat, photon_CS_table.nb_bins);
         interaction_distance = -log( JKISS32(particles, part_id) ) / cross_section;
         if (interaction_distance < next_interaction_distance) {
             next_interaction_distance = interaction_distance;
@@ -92,11 +87,8 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_i
 
     // If Rayleigh
     if (parameters.physics_list[PHOTON_RAYLEIGH]) {
-        cross_section = linear_interpolation(photon_CS_table.E_bins[E_index-1],
-                                             photon_CS_table.Rayleigh_Lv_CS[E_index-1],
-                                             photon_CS_table.E_bins[E_index],
-                                             photon_CS_table.Rayleigh_Lv_CS[E_index],
-                                             particles.E[part_id]);
+        cross_section = get_CS_from_table(photon_CS_table.E_bins, photon_CS_table.Rayleigh_Lv_CS,
+                                          particles.E[part_id], E_index, id_mat, photon_CS_table.nb_bins);
         interaction_distance = -log( JKISS32(particles, part_id) ) / cross_section;
         if (interaction_distance < next_interaction_distance) {
             next_interaction_distance = interaction_distance;
@@ -180,6 +172,8 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_i
         //   TODO: cutE = materials.electron_cut_energy[mat]                                               cutE
         SecParticle electron = Photoelec_SampleSecondaries_standard(particles, materials, photon_CS_table,
                                                                     E_index, 0.0, id_mat, part_id, parameters);
+
+
         // Debug
         //printf("id %i - pos %f %f %f - dir %f %f %f - PE - geom cur %i hit %i\n", part_id, pos.x, pos.y, pos.z,
         //                                                               dir.x, dir.y, dir.z,
@@ -215,12 +209,15 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_i
     }
 
 
+    /*
     // DEBUGING: phasespace
-    if (next_geometry_volume == 0) {
+    if (next_geometry_volume == 0 && particles.endsimu[part_id] == PARTICLE_ALIVE) {
         printf("%e %e %e %e %e %e %e\n", particles.E[part_id], pos.x, pos.y, pos.z, dir.x, dir.y, dir.z);
         particles.endsimu[part_id] = PARTICLE_DEAD;
         return;
     }
+    */
+
 
 
 }
