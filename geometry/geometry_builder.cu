@@ -434,33 +434,11 @@ unsigned int GeometryBuilder::add_world(Aabb obj) {
     // Add the root tree
     add_root();
 
-    // Store the address to access to this object
-    array_push_back(&world.ptr_objects, world.ptr_objects_dim, world.data_objects_dim);
-
-    // Store the information of this object
-
-    // Object Type
-    array_push_back(&world.data_objects, world.data_objects_dim, (float)AABB);
-    // Material index
-    array_push_back(&world.data_objects, world.data_objects_dim, (float)get_material_index(obj.material_name));
-    // AABB parameters
-    array_push_back(&world.data_objects, world.data_objects_dim, obj.xmin);
-    array_push_back(&world.data_objects, world.data_objects_dim, obj.xmax);
-    array_push_back(&world.data_objects, world.data_objects_dim, obj.ymin);
-    array_push_back(&world.data_objects, world.data_objects_dim, obj.ymax);
-    array_push_back(&world.data_objects, world.data_objects_dim, obj.zmin);
-    array_push_back(&world.data_objects, world.data_objects_dim, obj.zmax);
-    // Name of this object
-    name_objects.push_back(obj.object_name);
-    // Color of this object
-    object_colors.push_back(obj.color);
-    // Transparency of this object
-    object_transparency.push_back(obj.transparency);
-    // Store the size of this object
-    array_push_back(&world.size_of_objects, world.size_of_objects_dim, SIZE_WORLD_OBJ);
+    // Put this object into buffer
+    buffer_aabb[world.cur_node_id] = obj;
+    buffer_obj_type[world.cur_node_id] = AABB;
 
     return world.cur_node_id;
-
 
 }
 
@@ -469,6 +447,31 @@ unsigned int GeometryBuilder::add_object(Aabb obj, unsigned int mother_id) {
 
     // Add this object to the tree
     add_node(mother_id);
+
+    // Put this object into buffer
+    buffer_aabb[world.cur_node_id] = obj;
+    buffer_obj_type[world.cur_node_id] = AABB;
+
+    return world.cur_node_id;
+}
+
+// Add a Sphere object into the world
+unsigned int GeometryBuilder::add_object(Sphere obj, unsigned int mother_id) {
+
+    // Add this object to the tree
+    add_node(mother_id);
+
+    // Put this object into buffer
+    buffer_sphere[world.cur_node_id] = obj;
+    buffer_obj_type[world.cur_node_id] = SPHERE;
+
+    return world.cur_node_id;
+
+}
+
+// Build AABB object into the scene structure
+void GeometryBuilder::build_object(Aabb obj) {
+    printf("Building AABB\n");
 
     // Store the address to access to this object
     array_push_back(&world.ptr_objects, world.ptr_objects_dim, world.data_objects_dim);
@@ -495,16 +498,11 @@ unsigned int GeometryBuilder::add_object(Aabb obj, unsigned int mother_id) {
     // Store the size of this object
     array_push_back(&world.size_of_objects, world.size_of_objects_dim, SIZE_AABB_OBJ);
 
-    return world.cur_node_id;
-
+    printf("    Done\n");
 }
 
-// Add a Sphere object into the world
-unsigned int GeometryBuilder::add_object(Sphere obj, unsigned int mother_id) {
-
-    // Add this object to the tree
-    add_node(mother_id);
-
+// Build sphere object into the scene structure
+void GeometryBuilder::build_object(Sphere obj) {
     // Store the address to access to this object
     array_push_back(&world.ptr_objects, world.ptr_objects_dim, world.data_objects_dim);
 
@@ -534,10 +532,64 @@ unsigned int GeometryBuilder::add_object(Sphere obj, unsigned int mother_id) {
     array_push_back(&world.data_objects, world.data_objects_dim, obj.radius);
     // Store the size of this object
     array_push_back(&world.size_of_objects, world.size_of_objects_dim, SIZE_SPHERE_OBJ);
+}
 
-    return world.cur_node_id;
+// Build the complete scene
+void GeometryBuilder::build_scene() {
+
+    // Scan every object a build it to the scene structure
+
+    unsigned int i = 0;
+    while (i < world.ptr_nodes_dim) {
+        printf("Building object id %i = %i\n", i, buffer_obj_type[i]);
+
+        // AABB
+        if (buffer_obj_type[i] == AABB) {
+            build_object(buffer_aabb[i]);
+        // Sphere
+        } else if (buffer_obj_type[i] == SPHERE) {
+            build_object(buffer_sphere[i]);
+        }
+
+        ++i;
+    }
+
+    printf("Building done\n");
+
+
+    print_tree();
+
+    // Print out every object name
+    printf("List of object:\n");
+    i=0; while (i < name_objects.size()) {
+        printf("%i - %s\n", i, name_objects[i].c_str());
+        ++i;
+    }
+    printf("\n");
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /*
 // Add a Meshed object into the world

@@ -15,23 +15,32 @@
 //
 // GGEMS Copyright (C) 2013-2014 Julien Bert
 
-#ifndef SPHERE_H
-#define SPHERE_H
+#ifndef BASE_OBJECT_CUH
+#define BASE_OBJECT_CUH
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <string>
 #include "../global/global.cuh"
-#include "base_object.cuh"
 
-// Sphere
-class Sphere : public BaseObject {
+// Class that define the base of every object in GGEMS
+class BaseObject {
     public:
-        Sphere();
-        Sphere(float ox, float oy, float oz, float rad,
-               std::string mat_name, std::string obj_name);
+        BaseObject();
 
-        float cx, cy, cz, radius;
+        void set_material(std::string mat_name);
+        void set_name(std::string obj_name);
+        void set_color(float r, float g, float b);
+        void set_transparency(float val);
+
+        // Bounding box
+        float xmin, xmax, ymin, ymax, zmin, zmax;
+        // Viewing
+        Color color;
+        float transparency;
+        // Property
+        std::string material_name;
+        std::string object_name;
 
     private:
 };

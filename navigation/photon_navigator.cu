@@ -62,6 +62,8 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_i
     assert(E_index != 0);
     /////////////////////
 
+    //printf("Before CS\n");
+
     // If photoelectric
     if (parameters.physics_list[PHOTON_PHOTOELECTRIC]) {
         cross_section = get_CS_from_table(photon_CS_table.E_bins, photon_CS_table.Photoelectric_Std_CS,
@@ -99,6 +101,8 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_i
 
     //// Get the next distance boundary volume /////////////////////////////////
 
+    //printf("Before geom\n");
+
     unsigned int hit_id_geom = 0;
     get_next_geometry_boundary(geometry, cur_id_geom, pos, dir, interaction_distance, hit_id_geom);
     if (interaction_distance <= next_interaction_distance) {
@@ -108,6 +112,8 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_i
     }
 
     //// Move particle //////////////////////////////////////////////////////
+
+    //printf("Move particle\n");
 
     // TODO
     // Compute the energy deposit position randomly along the path
@@ -209,14 +215,14 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_i
     }
 
 
-    /*
+
     // DEBUGING: phasespace
     if (next_geometry_volume == 0 && particles.endsimu[part_id] == PARTICLE_ALIVE) {
         printf("%e %e %e %e %e %e %e\n", particles.E[part_id], pos.x, pos.y, pos.z, dir.x, dir.y, dir.z);
         particles.endsimu[part_id] = PARTICLE_DEAD;
         return;
     }
-    */
+
 
 
 

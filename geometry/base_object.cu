@@ -15,25 +15,47 @@
 //
 // GGEMS Copyright (C) 2013-2014 Julien Bert
 
-#ifndef SPHERE_H
-#define SPHERE_H
+#ifndef BASE_OBJECT_CU
+#define BASE_OBJECT_CU
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string>
-#include "../global/global.cuh"
 #include "base_object.cuh"
 
-// Sphere
-class Sphere : public BaseObject {
-    public:
-        Sphere();
-        Sphere(float ox, float oy, float oz, float rad,
-               std::string mat_name, std::string obj_name);
+BaseObject::BaseObject () {
 
-        float cx, cy, cz, radius;
+    xmin = 0.0f;
+    xmax = 0.0f;
+    ymin = 0.0f;
+    ymax = 0.0f;
+    zmin = 0.0f;
+    zmax = 0.0f;
+    material_name = "MatName";
+    object_name = "ObjNBame";
 
-    private:
-};
+    // white by default
+    color.r = 1.0;
+    color.g = 1.0;
+    color.b = 1.0;
+
+    // Transparency by default
+    transparency = 0.0;
+}
+
+void BaseObject::set_color(float r, float g, float b) {
+    color.r = r;
+    color.g = g;
+    color.b = b;
+}
+
+void BaseObject::set_transparency(float val) {
+    transparency = val;
+}
+
+void BaseObject::set_material(std::string mat_name) {
+    material_name = mat_name;
+}
+
+void BaseObject::set_name(std::string obj_name) {
+    object_name = obj_name;
+}
 
 #endif

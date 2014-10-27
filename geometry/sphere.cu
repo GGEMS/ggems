@@ -20,6 +20,8 @@
 
 #include "sphere.cuh"
 
+Sphere::Sphere() {}
+
 Sphere::Sphere(float ox, float oy, float oz, float rad,
                std::string mat_name, std::string obj_name) {
 
@@ -38,24 +40,7 @@ Sphere::Sphere(float ox, float oy, float oz, float rad,
     ymax = oy+radius;
     zmin = oz-radius;
     zmax = oz+radius;
-
-    // Color by default is white
-    color.r = 1.0;
-    color.g = 1.0;
-    color.b = 1.0;
-
-    // Transparency by default
-    transparency = 0.0;
 }
 
-void Sphere::set_color(float r, float g, float b) {
-    color.r = r;
-    color.g = g;
-    color.b = b;
-}
-
-void Sphere::set_transparency(float val) {
-    transparency = val;
-}
 
 #endif

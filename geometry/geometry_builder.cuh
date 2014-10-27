@@ -43,7 +43,6 @@
 #define ADR_AABB_ZMIN 6
 #define ADR_AABB_ZMAX 7
 
-#define SIZE_WORLD_OBJ 8
 #define SIZE_AABB_OBJ 8
 #define SIZE_SPHERE_OBJ 12
 
@@ -99,6 +98,9 @@ class GeometryBuilder {
         void add_node(unsigned int mother_id);
         void print_tree();
 
+        // Build the scene
+        void build_scene();
+
         // Utils
         //void save_ggems_geometry(std::string filename);
         void print_geometry();
@@ -114,6 +116,16 @@ class GeometryBuilder {
     private:        
         unsigned int get_material_index(std::string material_name);
         void update_tree_address();
+
+        // Store object temporally before initializing the complete geometry
+        std::map<unsigned int, char> buffer_obj_type;
+        std::map<unsigned int, Aabb> buffer_aabb;
+        std::map<unsigned int, Sphere> buffer_sphere;
+
+        // Build object into the scene structure
+        void build_object(Aabb obj);
+        void build_object(Sphere obj);
+
 
 
 
