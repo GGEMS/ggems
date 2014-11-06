@@ -25,50 +25,46 @@
 #include <string>
 #include <vector>
 #include <float.h>
-#include "G4SystemOfUnits.hh"
-#include "../maths/vector.cuh"
-#include "../maths/raytracing.cuh"
-#include "../processes/constants.cuh"
 
-#define NO_OCTREE 0
-#define REG_OCTREE 1
-#define ADP_OCTREE 2
+#include "base_object.cuh"
+//#include "G4SystemOfUnits.hh"
+//#include "../maths/vector.cuh"
+//#include "../maths/raytracing.cuh"
+//#include "../processes/constants.cuh"
+
+
+//#define NO_OCTREE 0
+//#define REG_OCTREE 1
+//#define ADP_OCTREE 2
 
 
 // Triangular-based meshed phantom
-class Meshed {
+class Meshed : public BaseObject {
     public:
         Meshed();
         void load_from_raw(std::string filename);
-        void save_ggems_mesh(std::string filename);
-        void load_from_ggems_mesh(std::string filename);
-        void set_material(std::string matname);
-        void set_object_name(std::string objname);
-        void build_regular_octree(unsigned int nx, unsigned int ny, unsigned int nz);
+        //void save_ggems_mesh(std::string filename);
+        //void load_from_ggems_mesh(std::string filename);
+        //void build_regular_octree(unsigned int nx, unsigned int ny, unsigned int nz);
 
-        void scale(float3 s);
-        void scale(float sx, float sy, float sz);
-        void rotate(float3 r);
-        void rotate(float phi, float theta, float psi);
-        void translate(float3 t);
-        void translate(float tx, float ty, float tz);
+        //void scale(float3 s);
+        //void scale(float sx, float sy, float sz);
+        //void rotate(float3 r);
+        //void rotate(float phi, float theta, float psi);
+        //void translate(float3 t);
+        //void translate(float tx, float ty, float tz);
 
-        // Mesh
-        std::vector<float> vertices;
-        std::string material_name;
-        std::string object_name;
+        // Mesh data
+        float *vertices;
         unsigned int number_of_triangles;
         unsigned int number_of_vertices;
 
-        // Bounding box
-        float xmin, xmax, ymin, ymax, zmin, zmax; // AABB
-
         // Octree
-        unsigned int nb_cell_x, nb_cell_y, nb_cell_z;
-        unsigned short int octree_type;
-        std::vector<float> nb_objs_per_cell;
-        std::vector<float> list_objs_per_cell;
-        std::vector<float> addr_to_cell;
+        //unsigned int nb_cell_x, nb_cell_y, nb_cell_z;
+        //unsigned short int octree_type;
+        //std::vector<float> nb_objs_per_cell;
+        //std::vector<float> list_objs_per_cell;
+        //std::vector<float> addr_to_cell;
 
     private:
 };

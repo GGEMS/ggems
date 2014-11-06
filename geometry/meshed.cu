@@ -25,9 +25,10 @@
 /////////////////////////////////////////////////////////////////////////////
 
 Meshed::Meshed() {
-    octree_type = NO_OCTREE;
+    //octree_type = NO_OCTREE;
 }
 
+/*
 // Build a regular octree to improve navigation within meshed phantom
 void Meshed::build_regular_octree(unsigned int nx, unsigned int ny, unsigned int nz) {
 
@@ -146,6 +147,7 @@ void Meshed::build_regular_octree(unsigned int nx, unsigned int ny, unsigned int
 
 
 }
+*/
 
 // Load a mesh from raw data exported by Blender
 void Meshed::load_from_raw(std::string filename) {
@@ -156,12 +158,34 @@ void Meshed::load_from_raw(std::string filename) {
 
     // To read the file
     std::string line;
+
+    // Get the number of triangles - FIXME: This is uggly!!!!
     std::ifstream file(filename.c_str());
+    if(!file) {
+        printf("Error, file %s not found \n", filename.c_str());
+        exit(EXIT_FAILURE);
+    }
+    unsigned int nb_lines = 0;
+    while (file) {
+        std::getline(file, line);
+        if (file) ++nb_lines; // FIXME: Does if(file) is need?
+    }
+    file.close();
 
-    // Clear the list of triangles
-    vertices.clear();
+    // Get the number of triangles (3 vertices xyz)
+    number_of_vertices = nb_lines / 3;
+    number_of_triangles = number_of_vertices / 3;
 
-    if(!file) { printf("Error, file %s not found \n",filename.c_str()); exit(EXIT_FAILURE);}
+    // Allocate data
+    vertices = (float*)malloc(number_of_vertices * 3 * sizeof(float));
+
+    // Read and load data
+    file(filename.c_str());
+    if (!file) {
+        printf("Error, file %s not found \n",filename.c_str());
+        exit(EXIT_FAILURE);
+    }
+    unsigned int i = 0.0f;
     while (file) {
         std::getline(file, line);
 
@@ -173,7 +197,8 @@ void Meshed::load_from_raw(std::string filename) {
             pos = line.find(" ");
             txt = line.substr(0, pos);
             std::stringstream(txt) >> val;            
-            vertices.push_back(val); // u.x
+            vertices[i] = val; // u.x
+            ++i;
             line = line.substr(pos+1);
             if (val < xmin) xmin = val; // Bounding box
             if (val > xmax) xmax = val;
@@ -181,7 +206,8 @@ void Meshed::load_from_raw(std::string filename) {
             pos = line.find(" ");
             txt = line.substr(0, pos);
             std::stringstream(txt) >> val;
-            vertices.push_back(val); // u.y
+            vertices[i] = val; // u.y
+            ++i;
             line = line.substr(pos+1);
             if (val < ymin) ymin = val; // Bounding box
             if (val > ymax) ymax = val;
@@ -189,7 +215,8 @@ void Meshed::load_from_raw(std::string filename) {
             pos = line.find(" ");
             txt = line.substr(0, pos);
             std::stringstream(txt) >> val;
-            vertices.push_back(val); // u.z
+            vertices[i] = val; // u.z
+            ++i;
             line = line.substr(pos+1);
             if (val < zmin) zmin = val; // Bounding box
             if (val > zmax) zmax = val;
@@ -197,7 +224,8 @@ void Meshed::load_from_raw(std::string filename) {
             pos = line.find(" ");
             txt = line.substr(0, pos);
             std::stringstream(txt) >> val;
-            vertices.push_back(val); // v.x
+            vertices[i] = val; // v.x
+            ++i;
             line = line.substr(pos+1);
             if (val < xmin) xmin = val; // Bounding box
             if (val > xmax) xmax = val;
@@ -205,7 +233,8 @@ void Meshed::load_from_raw(std::string filename) {
             pos = line.find(" ");
             txt = line.substr(0, pos);
             std::stringstream(txt) >> val;
-            vertices.push_back(val); // v.y
+            vertices[i] = val; // v.y
+            ++i;
             line = line.substr(pos+1);
             if (val < ymin) ymin = val; // Bounding box
             if (val > ymax) ymax = val;
@@ -213,7 +242,8 @@ void Meshed::load_from_raw(std::string filename) {
             pos = line.find(" ");
             txt = line.substr(0, pos);
             std::stringstream(txt) >> val;
-            vertices.push_back(val); // v.z
+            vertices[i] = val; // v.z
+            ++i;
             line = line.substr(pos+1);
             if (val < zmin) zmin = val; // Bounding box
             if (val > zmax) zmax = val;
@@ -221,7 +251,8 @@ void Meshed::load_from_raw(std::string filename) {
             pos = line.find(" ");
             txt = line.substr(0, pos);
             std::stringstream(txt) >> val;
-            vertices.push_back(val); // w.x
+            vertices[i] = val; // w.x
+            ++i;
             line = line.substr(pos+1);
             if (val < xmin) xmin = val; // Bounding box
             if (val > xmax) xmax = val;
@@ -229,7 +260,8 @@ void Meshed::load_from_raw(std::string filename) {
             pos = line.find(" ");
             txt = line.substr(0, pos);
             std::stringstream(txt) >> val;
-            vertices.push_back(val); // w.y
+            vertices[i] = val; // w.y
+            ++i;
             line = line.substr(pos+1);
             if (val < ymin) ymin = val; // Bounding box
             if (val > ymax) ymax = val;
@@ -237,7 +269,8 @@ void Meshed::load_from_raw(std::string filename) {
             pos = line.find(" ");
             txt = line.substr(0, pos);
             std::stringstream(txt) >> val;
-            vertices.push_back(val); // w.z
+            vertices[i] = val; // w.z
+            ++i;
             line = line.substr(pos+1);
             if (val < zmin) zmin = val; // Bounding box
             if (val > zmax) zmax = val;
@@ -245,12 +278,12 @@ void Meshed::load_from_raw(std::string filename) {
         }
     } // while
 
-    // Get the number of triangles (3 vertices xyz)
-    number_of_triangles = (vertices.size() / 9);
-    number_of_vertices = (vertices.size() / 3);
+    // Close the file
+    file.close();
 
 }
 
+/*
 // Export the mesh and its associated octree to ggems format
 void Meshed::save_ggems_mesh(std::string filename) {
 
@@ -314,7 +347,9 @@ void Meshed::save_ggems_mesh(std::string filename) {
     fclose(pfile);
 
 }
+*/
 
+/*
 // Load mesh in ggems format
 void Meshed::load_from_ggems_mesh(std::string filename) {
 
@@ -380,21 +415,10 @@ void Meshed::load_from_ggems_mesh(std::string filename) {
         addr_to_cell.reserve(tmp);
         fwrite(addr_to_cell.data(), sizeof(float), tmp, pfile);
     }
-
-
 }
+*/
 
-// Set the material
-void Meshed::set_material(std::string matname) {
-    material_name = matname;
-}
-
-// Give a name to this object
-void Meshed::set_object_name(std::string objname) {
-    object_name = objname;
-}
-
-
+/*
 // Scaling
 void Meshed::scale(float3 s) {
     // Scale every vertex from the mesh
@@ -487,9 +511,6 @@ void Meshed::translate(float tx, float ty, float tz) {
     float3 t = {tx, ty, tz};
     translate(t);
 }
-
-
-
-
+*/
 
 #endif

@@ -44,7 +44,7 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_i
     unsigned int cur_id_geom = particles.geometry_id[part_id];
 
     // Get the material that compose this volume
-    unsigned int id_mat = get_geometry_material(geometry, cur_id_geom);
+    unsigned int id_mat = get_geometry_material(geometry, cur_id_geom, pos);
 
     //// Find next discrete interaction ///////////////////////////////////////
 

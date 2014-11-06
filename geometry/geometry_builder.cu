@@ -25,16 +25,26 @@
 /////////////////////////////////////////////////////////////////////////////////////
 
 // Function that return the material of a volume
-unsigned int __host__ __device__ get_geometry_material(Scene geometry, unsigned int id_geom) {
+unsigned int __host__ __device__ get_geometry_material(Scene geometry, unsigned int id_geom, float3 pos) {
     unsigned int adr_geom = geometry.ptr_objects[id_geom];
     unsigned int obj_type = (unsigned int)geometry.data_objects[adr_geom+ADR_OBJ_TYPE];
 
     if (obj_type != VOXELIZED) {
         return (unsigned int)geometry.data_objects[adr_geom+ADR_OBJ_MAT_ID];
-    } else {
-        // If voxelized geometry get the voxel index
-
-        return 0;
+    } else if (obj_type == VOXELIZED) {
+        // Change particle frame (into voxelized volume)
+        pos.x -= geometry.data_objects[adr_geom+ADR_AABB_XMIN]; // -= xmin
+        pos.y -= geometry.data_objects[adr_geom+ADR_AABB_YMIN]; // -= ymin
+        pos.z -= geometry.data_objects[adr_geom+ADR_AABB_ZMIN]; // -= zmin
+        // Get the voxel index
+        int3 ind;
+        ind.x = (unsigned int)(pos.x / geometry.data_objects[adr_geom+ADR_VOXELIZED_SX]); // / sx
+        ind.y = (unsigned int)(pos.y / geometry.data_objects[adr_geom+ADR_VOXELIZED_SY]); // / sy
+        ind.z = (unsigned int)(pos.z / geometry.data_objects[adr_geom+ADR_VOXELIZED_SZ]); // / sz
+        // Return material
+        unsigned int abs_ind = ind.z * (geometry.data_objects[adr_geom+ADR_VOXELIZED_NY]*geometry.data_objects[adr_geom+ADR_VOXELIZED_NX])
+                                        + ind.y*geometry.data_objects[adr_geom+ADR_VOXELIZED_NX] + ind.x;
+        return (unsigned int)geometry.data_objects[adr_geom+ADR_VOXELIZED_DATA+abs_ind];
     }
 }
 
@@ -72,8 +82,11 @@ void __host__ __device__ get_next_geometry_boundary(Scene geometry, unsigned int
 
     } else if (obj_type == SPHERE) {
         // TODO
-
-    } // else if VOXELIZED   ... etc.
+    } else if (obj_type == VOXELIZED) {
+        // TODO
+    } else if (obj_type == MESHED) {
+        // TODO
+    }
 
     // Then check every child contains in this node
     unsigned int adr_node = geometry.ptr_nodes[cur_geom];
@@ -109,8 +122,12 @@ void __host__ __device__ get_next_geometry_boundary(Scene geometry, unsigned int
             }
 
         } else if (obj_child_type == SPHERE) {
-            // do
-        } // else if VOXELIZED   ... etc.
+            // TODO
+        } else if (obj_child_type == VOXELIZED) {
+            // TODO
+        } else if (obj_child_type == MESHED) {
+            // TODO
+        }
 
         ++offset_node;
 
@@ -479,6 +496,19 @@ unsigned int GeometryBuilder::add_object(Voxelized obj, unsigned int mother_id) 
     return world.cur_node_id;
 }
 
+// Add a Meshed object into the world
+unsigned int GeometryBuilder::add_object(Meshed obj, unsigned int mother_id) {
+
+    // Add thid object to the tree
+    add_node(mother_id);
+
+    // Put this object into buffer
+    buffer_meshed[world.cur_node_id] = obj;
+    buffer_obj_type[world.cur_node_id] = MESHED;
+
+    return world.cur_node_id;
+}
+
 ////////////////////////////////////////////////////////////////////////
 
 // Build AABB object into the scene structure
@@ -607,6 +637,43 @@ void GeometryBuilder::build_object(Voxelized obj) {
 }
 
 
+// Build meshed object into the scene structure
+void GeometryBuilder::build_object(Meshed obj) {
+
+    // Store the address to access to this object
+    array_push_back(&world.ptr_objects, world.ptr_objects_dim, world.data_objects_dim);
+
+    // Store the information of this object
+
+    // Object Type
+    array_push_back(&world.data_objects, world.data_objects_dim, (float)MESHED);
+    // Material index
+    array_push_back(&world.data_objects, world.data_objects_dim, (float)get_material_index(obj.material_name));
+    // AABB parameters
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.xmin);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.xmax);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.ymin);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.ymax);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.zmin);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.zmax);
+    // Parameters for this object
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.number_of_vertices);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.number_of_triangles);
+    // Finally append triangles into the world
+    array_append_array(&world.data_objects, world.data_objects_dim, &obj.vertices, obj.number_of_vertices*3); // xyz
+
+    // Name of this object
+    name_objects.push_back(obj.object_name);
+    // Color of this object
+    object_colors.push_back(obj.color);
+    // Transparency of this object
+    object_transparency.push_back(obj.transparency);
+    // Store the size of this object
+    array_push_back(&world.size_of_objects, world.size_of_objects_dim, 3*obj.number_of_vertices+SIZE_MESHED_OBJ);
+
+}
+
+
 // Build the complete scene
 void GeometryBuilder::build_scene() {
 
@@ -621,6 +688,12 @@ void GeometryBuilder::build_scene() {
         // Sphere
         } else if (buffer_obj_type[i] == SPHERE) {
             build_object(buffer_sphere[i]);
+        // Voxelized
+        } else if (buffer_obj_type[i] == VOXELIZED) {
+            build_object(buffer_voxelized[i]);
+        // Meshed
+        } else if (buffer_obj_type[i] == MESHED) {
+            build_object(buffer_meshed[i]);
         }
 
         ++i;

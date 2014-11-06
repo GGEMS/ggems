@@ -43,9 +43,18 @@
 #define ADR_AABB_ZMIN 6
 #define ADR_AABB_ZMAX 7
 
+#define ADR_VOXELIZED_NX 8
+#define ADR_VOXELIZED_NY 9
+#define ADR_VOXELIZED_NZ 10
+#define ADR_VOXELIZED_SX 11
+#define ADR_VOXELIZED_SY 12
+#define ADR_VOXELIZED_SZ 13
+#define ADR_VOXELIZED_DATA 14
+
 #define SIZE_AABB_OBJ 8
 #define SIZE_SPHERE_OBJ 12
 #define SIZE_VOXELIZED_OBJ 14 // + number of voxels
+#define SIZE_MESHED_OBJ 11 // + number of vertices * 3 (xyz)
 
 // Struct that handle the geometry of the world
 struct Scene {
@@ -76,7 +85,7 @@ struct Scene {
 
 // Host/Device function that handle geometry
 
-unsigned int __host__ __device__ get_geometry_material(Scene geometry, unsigned int id_geom);
+unsigned int __host__ __device__ get_geometry_material(Scene geometry, unsigned int id_geom, float3 pos);
 void __host__ __device__ get_next_geometry_boundary(Scene geometry, unsigned int cur_geom,
                                                      float3 pos, float3 dir,
                                                      float &interaction_distance,
@@ -91,7 +100,7 @@ class GeometryBuilder {
         unsigned int add_world(Aabb obj);
         unsigned int add_object(Aabb obj, unsigned int mother_id);
         unsigned int add_object(Sphere obj, unsigned int mother_id);
-        //unsigned int add_object(Meshed obj, unsigned int mother_id);
+        unsigned int add_object(Meshed obj, unsigned int mother_id);
         unsigned int add_object(Voxelized obj, unsigned int mother_id);
 
         // Hierarchical structure of the geometry
@@ -123,11 +132,13 @@ class GeometryBuilder {
         std::map<unsigned int, Aabb> buffer_aabb;
         std::map<unsigned int, Sphere> buffer_sphere;
         std::map<unsigned int, Voxelized> buffer_voxelized;
+        std::map<unsigned int, Meshed> buffer_meshed;
 
         // Build object into the scene structure
         void build_object(Aabb obj);
         void build_object(Sphere obj);
         void build_object(Voxelized obj);
+        void build_object(Meshed obj);
 
 
 
