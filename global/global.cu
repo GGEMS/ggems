@@ -124,16 +124,18 @@ void array_insert(unsigned int **vector, unsigned int &dim, unsigned int pos, un
         exit(EXIT_FAILURE);
     }
 
-
     // If first allocation
     if (dim == 0) {
         (*vector) = (unsigned int*)malloc(sizeof(unsigned int));
-
+        if ((*vector) == NULL) {
+            print_error("Memory allocation from array_insert!!!\n");
+            exit(EXIT_FAILURE);
+        }
     // else reallocation
     } else {
         (*vector) = (unsigned int*)realloc((*vector), (dim+1)*sizeof(unsigned int));
-        if ((*vector) != NULL) {
-            print_error("Memory reallocation from insert_push_back!!!\n");
+        if ((*vector) == NULL) {
+            print_error("Memory reallocation from array_insert!!!\n");
             exit(EXIT_FAILURE);
         }
         // Move data in memory for the insertion
@@ -157,12 +159,15 @@ void array_insert(float **vector, unsigned int &dim, unsigned int pos, float val
     // If first allocation
     if (dim == 0) {
         (*vector) = (float*)malloc(sizeof(float));
-
+        if ((*vector) == NULL) {
+            print_error("Memory allocation from array_insert!!!\n");
+            exit(EXIT_FAILURE);
+        }
     // else reallocation
     } else {
         (*vector) = (float*)realloc((*vector), (dim+1)*sizeof(float));
-        if ((*vector) != NULL) {
-            print_error("Memory reallocation from insert_push_back!!!\n");
+        if ((*vector) == NULL) {
+            print_error("Memory reallocation from array_insert!!!\n");
             exit(EXIT_FAILURE);
         }
         // Move data in memory for the insertion
@@ -174,7 +179,29 @@ void array_insert(float **vector, unsigned int &dim, unsigned int pos, float val
 
 }
 
+// Append an array to another one (float version)
+void array_append_array(float **vector, unsigned int &dim, float **an_array, unsigned int &a_dim) {
 
+    // If first allocation
+    if (dim == 0) {
+        (*vector) = (float*)malloc(sizeof(float));
+        if ((*vector) == NULL) {
+            print_error("Memory allocation from array_append_array!!!\n");
+            exit(EXIT_FAILURE);
+        }
+    // else reallocation
+    } else {
+        (*vector) = (float*)realloc((*vector), (dim+1)*sizeof(float));
+        if ((*vector) == NULL) {
+            print_error("Memory reallocation from array_append_array!!!\n");
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    // Copy data
+    memcpy((*vector)+dim, (*an_array), a_dim*sizeof(float));
+    (dim)+=a_dim;
+}
 
 
 

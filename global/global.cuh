@@ -20,6 +20,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <string>
 #include "../processes/constants.cuh"
 #include "../maths/vector.cuh"
@@ -37,7 +38,7 @@ void array_push_back(unsigned int **vector, unsigned int &dim, unsigned int val)
 void array_push_back(float **vector, unsigned int &dim, float val);
 void array_insert(unsigned int **vector, unsigned int &dim, unsigned int pos, unsigned int val);
 void array_insert(float **vector, unsigned int &dim, unsigned int pos, float val);
-
+void array_append_array(float **vector, unsigned int &dim, float **an_array, unsigned int &a_dim);
 
 // Global simulation parameters
 struct GlobalSimulationParameters {

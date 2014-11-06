@@ -27,9 +27,10 @@
 #include <map>
 #include <algorithm>
 #include <cfloat>
+#include "base_object.cuh"
 
 // Voxelized phantom
-class Voxelized {
+class Voxelized : public BaseObject {
     public:
         Voxelized();
 
@@ -40,18 +41,14 @@ class Voxelized {
 
         void set_object_name(std::string objname);
 
+        float *data;
 
-        std::string object_name;
-
-        std::vector<float> data;
         unsigned short int nb_vox_x, nb_vox_y, nb_vox_z;
         unsigned int number_of_voxels;
-        unsigned int mem_size;
+        unsigned int mem_size; // TODO this can be remove
         float spacing_x, spacing_y, spacing_z;
 
         std::vector<std::string> list_of_materials;
-
-        float xmin, xmax, ymin, ymax, zmin, zmax; // AABB
 
     private:
         void define_materials_from_range(float *raw_data, std::string range_name);

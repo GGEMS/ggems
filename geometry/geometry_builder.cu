@@ -32,7 +32,8 @@ unsigned int __host__ __device__ get_geometry_material(Scene geometry, unsigned 
     if (obj_type != VOXELIZED) {
         return (unsigned int)geometry.data_objects[adr_geom+ADR_OBJ_MAT_ID];
     } else {
-        // TODO
+        // If voxelized geometry get the voxel index
+
         return 0;
     }
 }
@@ -63,7 +64,6 @@ void __host__ __device__ get_next_geometry_boundary(Scene geometry, unsigned int
         float zmax = geometry.data_objects[adr_geom+ADR_AABB_ZMAX];
 
         distance = hit_ray_AABB(pos, dir, xmin, xmax, ymin, ymax, zmin, zmax);
-        //geometry_volume = geometry.mother_node[cur_geom];
 
         if (distance <= interaction_distance) {
             interaction_distance = distance + EPSILON3; // overshoot
@@ -425,8 +425,6 @@ void GeometryBuilder::save_ggems_geometry(std::string filename) {
 //  array_push_back(world.data_objects, world.data_objects_dim, obj.ymax);
 //  array_push_back(world.data_objects, world.data_objects_dim, obj.zmin);
 //  array_push_back(world.data_objects, world.data_objects_dim, obj.zmax);
-// Name of this object
-//  name_objects.push_back(obj.object_name);
 
 // Add the world
 unsigned int GeometryBuilder::add_world(Aabb obj) {
@@ -466,12 +464,25 @@ unsigned int GeometryBuilder::add_object(Sphere obj, unsigned int mother_id) {
     buffer_obj_type[world.cur_node_id] = SPHERE;
 
     return world.cur_node_id;
-
 }
+
+// Add a Voxelized object into the world
+unsigned int GeometryBuilder::add_object(Voxelized obj, unsigned int mother_id) {
+
+    // Add this object to the tree
+    add_node(mother_id);
+
+    // Put this object into buffer
+    buffer_voxelized[world.cur_node_id] = obj;
+    buffer_obj_type[world.cur_node_id] = VOXELIZED;
+
+    return world.cur_node_id;
+}
+
+////////////////////////////////////////////////////////////////////////
 
 // Build AABB object into the scene structure
 void GeometryBuilder::build_object(Aabb obj) {
-    printf("Building AABB\n");
 
     // Store the address to access to this object
     array_push_back(&world.ptr_objects, world.ptr_objects_dim, world.data_objects_dim);
@@ -489,6 +500,7 @@ void GeometryBuilder::build_object(Aabb obj) {
     array_push_back(&world.data_objects, world.data_objects_dim, obj.ymax);
     array_push_back(&world.data_objects, world.data_objects_dim, obj.zmin);
     array_push_back(&world.data_objects, world.data_objects_dim, obj.zmax);
+
     // Name of this object
     name_objects.push_back(obj.object_name);
     // Color of this object
@@ -497,8 +509,6 @@ void GeometryBuilder::build_object(Aabb obj) {
     object_transparency.push_back(obj.transparency);
     // Store the size of this object
     array_push_back(&world.size_of_objects, world.size_of_objects_dim, SIZE_AABB_OBJ);
-
-    printf("    Done\n");
 }
 
 // Build sphere object into the scene structure
@@ -519,20 +529,83 @@ void GeometryBuilder::build_object(Sphere obj) {
     array_push_back(&world.data_objects, world.data_objects_dim, obj.ymax);
     array_push_back(&world.data_objects, world.data_objects_dim, obj.zmin);
     array_push_back(&world.data_objects, world.data_objects_dim, obj.zmax);
+    // Sphere parameters
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.cx);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.cy);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.cz);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.radius);
+
     // Name of this object
     name_objects.push_back(obj.object_name);
     // Color of this object
     object_colors.push_back(obj.color);
     // Transparency of this object
     object_transparency.push_back(obj.transparency);
-    // Sphere parameters
-    array_push_back(&world.data_objects, world.data_objects_dim, obj.cx);
-    array_push_back(&world.data_objects, world.data_objects_dim, obj.cy);
-    array_push_back(&world.data_objects, world.data_objects_dim, obj.cz);
-    array_push_back(&world.data_objects, world.data_objects_dim, obj.radius);
     // Store the size of this object
     array_push_back(&world.size_of_objects, world.size_of_objects_dim, SIZE_SPHERE_OBJ);
 }
+
+// Build voxelized object into the scene structure
+void GeometryBuilder::build_object(Voxelized obj) {
+    // TODO
+    // If optimizer, every object contains within the voxelized volume must be identified
+    // For instance when considering YVAN navigator (BVH must be stored on the world), each
+    // voxel contain ID of the child volume
+
+    ///// First step
+    // We need to merge and update the material ID according the current list of materials
+    // Build a LUT to convert the old IDs in new ones
+    std::vector<unsigned int> new_id;
+    unsigned int i = 0;
+    while (i < obj.list_of_materials.size()) {
+        new_id.push_back(get_material_index(obj.list_of_materials[i]));
+        ++i;
+    }
+
+    // Now convert every material ID contains on the voxelized volume
+    i=0; while (i < obj.number_of_voxels) {
+        obj.data[i] = new_id[obj.data[i]];
+        ++i;
+    }
+    /////
+
+    // Store the address to access to this object
+    array_push_back(&world.ptr_objects, world.ptr_objects_dim, world.data_objects_dim);
+
+    // Store the information of this object
+
+    // Object Type
+    array_push_back(&world.data_objects, world.data_objects_dim, (float)VOXELIZED);
+    // Material index
+    array_push_back(&world.data_objects, world.data_objects_dim, -1.0f); // // Heterogeneous material
+    // AABB parameters
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.xmin);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.xmax);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.ymin);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.ymax);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.zmin);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.zmax);
+    // Parameters for this object
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.nb_vox_x);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.nb_vox_y);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.nb_vox_z);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.spacing_x);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.spacing_y);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.spacing_z);
+    // Finally append voxelized data into the world
+    array_append_array(&world.data_objects, world.data_objects_dim, &obj.data, obj.number_of_voxels);
+
+    // Name of this object
+    name_objects.push_back(obj.object_name);
+    // Color of this object
+    object_colors.push_back(obj.color);
+    // Transparency of this object
+    object_transparency.push_back(obj.transparency);
+    // Store the size of this object
+    array_push_back(&world.size_of_objects, world.size_of_objects_dim, obj.number_of_voxels+SIZE_VOXELIZED_OBJ);
+
+}
+
 
 // Build the complete scene
 void GeometryBuilder::build_scene() {
@@ -541,7 +614,6 @@ void GeometryBuilder::build_scene() {
 
     unsigned int i = 0;
     while (i < world.ptr_nodes_dim) {
-        printf("Building object id %i = %i\n", i, buffer_obj_type[i]);
 
         // AABB
         if (buffer_obj_type[i] == AABB) {
@@ -553,19 +625,6 @@ void GeometryBuilder::build_scene() {
 
         ++i;
     }
-
-    printf("Building done\n");
-
-
-    print_tree();
-
-    // Print out every object name
-    printf("List of object:\n");
-    i=0; while (i < name_objects.size()) {
-        printf("%i - %s\n", i, name_objects[i].c_str());
-        ++i;
-    }
-    printf("\n");
 
 }
 
@@ -659,65 +718,6 @@ unsigned int GeometryBuilder::add_object(Meshed obj, unsigned int mother_id) {
 
 }
 
-// Add a Meshed object into the world
-unsigned int GeometryBuilder::add_object(Voxelized obj, unsigned int mother_id) {
 
-    // Add this object to the tree
-    World.tree.add_node(mother_id);
-
-    // Store the address to access to this object
-    World.ptr_objects.push_back(World.data_objects.size());
-
-    // Store the information of this object
-    World.data_objects.push_back(VOXELIZED);              // Object Type
-
-    World.data_objects.push_back(-1.0f);                  // Heterogeneous material
-
-    // Add the bounding box of this phantom
-    World.data_objects.push_back(obj.xmin);
-    World.data_objects.push_back(obj.xmax);
-    World.data_objects.push_back(obj.ymin);
-    World.data_objects.push_back(obj.ymax);
-    World.data_objects.push_back(obj.zmin);
-    World.data_objects.push_back(obj.zmax);
-
-    // Store the parameters of this object
-    World.data_objects.push_back(obj.number_of_voxels);
-    World.data_objects.push_back(obj.nb_vox_x);
-    World.data_objects.push_back(obj.nb_vox_y);
-    World.data_objects.push_back(obj.nb_vox_z);
-    World.data_objects.push_back(obj.spacing_x);
-    World.data_objects.push_back(obj.spacing_y);
-    World.data_objects.push_back(obj.spacing_z);
-
-    // Here we need to merge and update the material ID according the current list of mats
-
-    // Build a LUT to convert the old id in new one
-    std::vector<unsigned int> new_id;
-    unsigned int i = 0;
-    while (i < obj.list_of_materials.size()) {
-        new_id.push_back(get_material_index(obj.list_of_materials[i]));
-        ++i;
-    }
-
-    // Now convert every material ID contains on the voxelized volume
-    i=0; while (i < obj.number_of_voxels) {
-        obj.data[i] = new_id[obj.data[i]];
-        ++i;
-    }
-
-    // Finally append voxelized data into the world
-    World.data_objects.reserve(World.data_objects.size() + obj.data.size());
-    World.data_objects.insert(World.data_objects.end(), obj.data.begin(), obj.data.end());
-
-    // Name of this object
-    World.name_objects.push_back(obj.object_name);
-
-    // Store the size of this object
-    World.size_of_objects.push_back(obj.data.size()+15);
-
-    return World.tree.get_current_id();
-
-}
 */
 #endif

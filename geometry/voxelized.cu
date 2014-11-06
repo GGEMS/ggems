@@ -20,7 +20,10 @@
 
 #include "voxelized.cuh"
 
-Voxelized::Voxelized() {}
+Voxelized::Voxelized() {
+    // Init pointer
+    data = NULL;
+}
 
 // Skip comment starting with "#"
 void Voxelized::skip_comment(std::istream & is) {
@@ -141,7 +144,7 @@ void Voxelized::define_materials_from_range(float *raw_data, std::string range_n
     unsigned int mat_index = 0;
 
     // Data allocation
-    data.resize(number_of_voxels);
+    data = (float*)malloc(number_of_voxels * sizeof(float));
 
     // Read range file
     std::ifstream file(range_name.c_str());

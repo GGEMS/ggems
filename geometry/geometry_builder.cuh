@@ -45,6 +45,7 @@
 
 #define SIZE_AABB_OBJ 8
 #define SIZE_SPHERE_OBJ 12
+#define SIZE_VOXELIZED_OBJ 14 // + number of voxels
 
 // Struct that handle the geometry of the world
 struct Scene {
@@ -90,7 +91,7 @@ class GeometryBuilder {
         unsigned int add_world(Aabb obj);
         unsigned int add_object(Aabb obj, unsigned int mother_id);
         unsigned int add_object(Sphere obj, unsigned int mother_id);
-        unsigned int add_object(Meshed obj, unsigned int mother_id);
+        //unsigned int add_object(Meshed obj, unsigned int mother_id);
         unsigned int add_object(Voxelized obj, unsigned int mother_id);
 
         // Hierarchical structure of the geometry
@@ -121,10 +122,12 @@ class GeometryBuilder {
         std::map<unsigned int, char> buffer_obj_type;
         std::map<unsigned int, Aabb> buffer_aabb;
         std::map<unsigned int, Sphere> buffer_sphere;
+        std::map<unsigned int, Voxelized> buffer_voxelized;
 
         // Build object into the scene structure
         void build_object(Aabb obj);
         void build_object(Sphere obj);
+        void build_object(Voxelized obj);
 
 
 
