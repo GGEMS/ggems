@@ -180,7 +180,7 @@ void Meshed::load_from_raw(std::string filename) {
     vertices = (float*)malloc(number_of_vertices * 3 * sizeof(float));
 
     // Read and load data
-    file(filename.c_str());
+    file.open(filename.c_str());
     if (!file) {
         printf("Error, file %s not found \n",filename.c_str());
         exit(EXIT_FAILURE);

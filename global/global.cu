@@ -180,7 +180,7 @@ void array_insert(float **vector, unsigned int &dim, unsigned int pos, float val
 }
 
 // Append an array to another one (float version)
-void array_append_array(float **vector, unsigned int &dim, float **an_array, unsigned int &a_dim) {
+void array_append_array(float **vector, unsigned int &dim, float **an_array, unsigned int a_dim) {
 
     // If first allocation
     if (dim == 0) {

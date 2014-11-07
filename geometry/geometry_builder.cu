@@ -45,6 +45,8 @@ unsigned int __host__ __device__ get_geometry_material(Scene geometry, unsigned 
         unsigned int abs_ind = ind.z * (geometry.data_objects[adr_geom+ADR_VOXELIZED_NY]*geometry.data_objects[adr_geom+ADR_VOXELIZED_NX])
                                         + ind.y*geometry.data_objects[adr_geom+ADR_VOXELIZED_NX] + ind.x;
         return (unsigned int)geometry.data_objects[adr_geom+ADR_VOXELIZED_DATA+abs_ind];
+    } else {
+        return 0;
     }
 }
 
@@ -660,7 +662,7 @@ void GeometryBuilder::build_object(Meshed obj) {
     array_push_back(&world.data_objects, world.data_objects_dim, obj.number_of_vertices);
     array_push_back(&world.data_objects, world.data_objects_dim, obj.number_of_triangles);
     // Finally append triangles into the world
-    array_append_array(&world.data_objects, world.data_objects_dim, &obj.vertices, obj.number_of_vertices*3); // xyz
+    array_append_array(&world.data_objects, world.data_objects_dim, &obj.vertices, 3*obj.number_of_vertices); // xyz
 
     // Name of this object
     name_objects.push_back(obj.object_name);

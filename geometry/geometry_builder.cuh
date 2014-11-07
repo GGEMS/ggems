@@ -26,6 +26,7 @@
 #include "sphere.cuh"
 #include "meshed.cuh"
 #include "voxelized.cuh"
+#include "../maths/raytracing.cuh"
 #include "../global/global.cuh"
 
 #define AABB 0
