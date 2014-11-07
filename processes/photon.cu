@@ -14,7 +14,7 @@
 // along with GGEMS.  If not, see <http://www.gnu.org/licenses/>.
 //
 // GGEMS Copyright (C) 2013-2014 Julien Bert
-
+#ifdef __CUACC__ 
 #ifndef PHOTON_CU
 #define PHOTON_CU
 #include "photon.cuh"
@@ -841,4 +841,5 @@ __host__ __device__ void Rayleigh_SampleSecondaries_Livermore(ParticleStack part
 
 
 
+#endif
 #endif
