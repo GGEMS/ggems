@@ -18,7 +18,7 @@
 #ifndef PARTICLES_CUH
 #define PARTICLES_CUH
 
-#include "../global/global.cuh"
+#include "global.cuh"
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>

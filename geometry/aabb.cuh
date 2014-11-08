@@ -21,7 +21,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string>
-#include "../global/global.cuh"
+#include "global.cuh"
 #include "base_object.cuh"
 
 // Axis-Aligned Bounding Box

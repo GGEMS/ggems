@@ -23,11 +23,11 @@
 
 // Overlapping test AABB/Triangle - Akenine-Moller algorithm
 __host__ __device__ short int overlap_AABB_triangle(float xmin, float xmax,        // AABB
-                                                           float ymin, float ymax,
-                                                           float zmin, float zmax,
-                                                           float3 u,  // Triangle
-                                                           float3 v,
-                                                           float3 w) {
+                                                    float ymin, float ymax,
+                                                    float zmin, float zmax,
+                                                    float3 u,  // Triangle
+                                                    float3 v,
+                                                    float3 w) {
 
     // Compute box center
     float3 c;

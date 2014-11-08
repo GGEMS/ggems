@@ -20,22 +20,22 @@
 
 #include "assert.h"
 
-#include "../processes/constants.cuh"
-#include "../processes/particles.cuh"
-#include "../processes/cross_sections_builder.cuh"
-#include "../geometry/materials.cuh"
-#include "../global/global.cuh"
+#include "constants.cuh"
+#include "particles.cuh"
+#include "cross_sections_builder.cuh"
+#include "materials.cuh"
+#include "global.cuh"
 
-#include "../geometry/geometry_builder.cuh"
-#include "../geometry/aabb.cuh"
-#include "../geometry/sphere.cuh"
-#include "../geometry/meshed.cuh"
-#include "../geometry/voxelized.cuh"
+#include "geometry_builder.cuh"
+#include "aabb.cuh"
+#include "sphere.cuh"
+#include "meshed.cuh"
+#include "voxelized.cuh"
 
-#include "../maths/vector.cuh"
-#include "../maths/prng.cuh"
+#include "vector.cuh"
+#include "prng.cuh"
 
-#include "../processes/photon.cuh"
+#include "photon.cuh"
 
 __host__ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_id,
                           Scene geometry, MaterialsTable materials,

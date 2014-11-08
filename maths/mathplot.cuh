@@ -26,7 +26,7 @@
 #include <cfloat>
 #include <string>
 
-#include "../processes/particles.cuh"
+#include "particles.cuh"
 
 class MathPlotBuilder {
     public:

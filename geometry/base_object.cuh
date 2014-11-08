@@ -21,7 +21,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string>
-#include "../global/global.cuh"
+#include "global.cuh"
 
 // Class that define the base of every object in GGEMS
 class BaseObject {

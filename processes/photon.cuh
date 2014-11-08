@@ -19,10 +19,10 @@
 #define PHOTON_CUH
 
 #include "particles.cuh"
-#include "../geometry/materials.cuh"
-#include "../global/global.cuh"
-#include "../maths/prng.cuh"
-#include "../maths/fun.cuh"
+#include "materials.cuh"
+#include "global.cuh"
+#include "prng.cuh"
+#include "fun.cuh"
 #include "constants.cuh"
 #include "sandia_table.cuh"
 #include "shell_data.cuh"

@@ -22,7 +22,7 @@
 #include <cfloat>
 #include <stdlib.h>
 #include <stdio.h>
-#include "../processes/constants.cuh"
+#include "constants.cuh"
 
 
 // Overlap test return (short int):

@@ -18,7 +18,7 @@
 #ifndef PRNG_H
 #define PRNG_H
 
-#include "../processes/particles.cuh"
+#include "particles.cuh"
 
 /////////////////////////////////////////////////////////////////////////////
 // Prng

@@ -27,14 +27,14 @@
 #include <float.h>
 
 #include "base_object.cuh"
-//#include "G4SystemOfUnits.hh"
-//#include "../maths/vector.cuh"
-//#include "../maths/raytracing.cuh"
-//#include "../processes/constants.cuh"
+#include "G4SystemOfUnits.hh"
+#include "vector.cuh"
+#include "raytracing.cuh"
+#include "constants.cuh"
 
 
-//#define NO_OCTREE 0
-//#define REG_OCTREE 1
+#define NO_OCTREE 0
+#define REG_OCTREE 1
 //#define ADP_OCTREE 2
 
 
@@ -45,14 +45,14 @@ class Meshed : public BaseObject {
         void load_from_raw(std::string filename);
         //void save_ggems_mesh(std::string filename);
         //void load_from_ggems_mesh(std::string filename);
-        //void build_regular_octree(unsigned int nx, unsigned int ny, unsigned int nz);
+        void build_regular_octree(unsigned int nx, unsigned int ny, unsigned int nz);
 
-        //void scale(float3 s);
-        //void scale(float sx, float sy, float sz);
-        //void rotate(float3 r);
-        //void rotate(float phi, float theta, float psi);
-        //void translate(float3 t);
-        //void translate(float tx, float ty, float tz);
+        void scale(float3 s);
+        void scale(float sx, float sy, float sz);
+        void rotate(float3 r);
+        void rotate(float phi, float theta, float psi);
+        void translate(float3 t);
+        void translate(float tx, float ty, float tz);
 
         // Mesh data
         float *vertices;
@@ -60,11 +60,11 @@ class Meshed : public BaseObject {
         unsigned int number_of_vertices;
 
         // Octree
-        //unsigned int nb_cell_x, nb_cell_y, nb_cell_z;
-        //unsigned short int octree_type;
-        //std::vector<float> nb_objs_per_cell;
-        //std::vector<float> list_objs_per_cell;
-        //std::vector<float> addr_to_cell;
+        unsigned int nb_cell_x, nb_cell_y, nb_cell_z;
+        unsigned short int octree_type;
+        std::vector<float> nb_objs_per_cell;
+        std::vector<float> list_objs_per_cell;
+        std::vector<float> addr_to_cell;
 
     private:
 };

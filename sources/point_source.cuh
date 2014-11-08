@@ -21,9 +21,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string>
-#include "../processes/particles.cuh"
-#include "../maths/prng.cuh"
-#include "../processes/constants.cuh"
+#include "particles.cuh"
+#include "prng.cuh"
+#include "constants.cuh"
 
 // External function
 __host__ __device__ void point_source_primary_generator(ParticleStack particles, unsigned int id,

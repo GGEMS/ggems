@@ -21,25 +21,25 @@
 #include <vector>
 #include <string>
 
-#include "../processes/constants.cuh"
-#include "../processes/particles.cuh"
-#include "../processes/cross_sections_builder.cuh"
-#include "../global/global.cuh"
-#include "../geometry/geometry_builder.cuh"
-#include "../geometry/materials.cuh"
-#include "../sources/source_builder.cuh"
+#include "constants.cuh"
+#include "particles.cuh"
+#include "cross_sections_builder.cuh"
+#include "global.cuh"
+#include "geometry_builder.cuh"
+#include "materials.cuh"
+#include "source_builder.cuh"
 
-#include "../geometry/aabb.cuh"
-#include "../geometry/sphere.cuh"
-#include "../geometry/meshed.cuh"
-#include "../geometry/voxelized.cuh"
-#include "../sources/point_source.cuh"
+#include "aabb.cuh"
+#include "sphere.cuh"
+#include "meshed.cuh"
+#include "voxelized.cuh"
+#include "point_source.cuh"
 
-#include "../navigation/main_navigator.cuh"
+#include "main_navigator.cuh"
 
-#include "../geometry/vrml.cuh"
-#include "../maths/mathplot.cuh"
-#include "../maths/fun.cuh"
+#include "vrml.cuh"
+#include "mathplot.cuh"
+#include "fun.cuh"
 
 // Class to manage the hierarchical structure of the world
 class SimulationBuilder {

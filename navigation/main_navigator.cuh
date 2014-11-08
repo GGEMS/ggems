@@ -18,12 +18,12 @@
 #ifndef MAIN_NAVIGATOR_CUH
 #define MAIN_NAVIGATOR_CUH
 
-#include "../global/global.cuh"
-#include "../processes/constants.cuh"
-#include "../processes/particles.cuh"
-#include "../processes/cross_sections_builder.cuh"
-#include "../geometry/geometry_builder.cuh"
-#include "../geometry/materials.cuh"
+#include "global.cuh"
+#include "constants.cuh"
+#include "particles.cuh"
+#include "cross_sections_builder.cuh"
+#include "geometry_builder.cuh"
+#include "materials.cuh"
 #include "photon_navigator.cuh"
 
 void cpu_main_navigator(ParticleStack &particles, Scene geometry,

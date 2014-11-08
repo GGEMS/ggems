@@ -23,8 +23,8 @@
 #include <string>
 
 #include "geometry_builder.cuh"
-#include "../sources/source_builder.cuh"
-#include "../processes/particles.cuh"
+#include "source_builder.cuh"
+#include "particles.cuh"
 
 // Axis-Aligned Bounding Box
 class VRML {

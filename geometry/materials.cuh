@@ -35,7 +35,7 @@
 #include "G4SystemOfUnits.hh"
 
 #include "geometry_builder.cuh"
-#include "../processes/constants.cuh"
+#include "constants.cuh"
 
 // To handle one material
 class Material {

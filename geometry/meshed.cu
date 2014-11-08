@@ -25,10 +25,11 @@
 /////////////////////////////////////////////////////////////////////////////
 
 Meshed::Meshed() {
-    //octree_type = NO_OCTREE;
+    octree_type = NO_OCTREE;
+    number_of_triangles = 0;
+    number_of_vertices = 0;
 }
 
-/*
 // Build a regular octree to improve navigation within meshed phantom
 void Meshed::build_regular_octree(unsigned int nx, unsigned int ny, unsigned int nz) {
 
@@ -56,7 +57,6 @@ void Meshed::build_regular_octree(unsigned int nx, unsigned int ny, unsigned int
     float org_x = xmin;
     float org_y = ymin;
     float org_z = zmin;
-
 
     float cell_ix, cell_iy, cell_iz;         // cell position (in voxel ID)
     float cell_xmin, cell_ymin, cell_zmin;   // cell position (in 3D space)
@@ -144,10 +144,8 @@ void Meshed::build_regular_octree(unsigned int nx, unsigned int ny, unsigned int
 
     } // iz
     printf("\n");
-
-
 }
-*/
+
 
 // Load a mesh from raw data exported by Blender
 void Meshed::load_from_raw(std::string filename) {
@@ -168,13 +166,13 @@ void Meshed::load_from_raw(std::string filename) {
     unsigned int nb_lines = 0;
     while (file) {
         std::getline(file, line);
-        if (file) ++nb_lines; // FIXME: Does if(file) is need?
+        if (file) ++nb_lines;
     }
     file.close();
 
     // Get the number of triangles (3 vertices xyz)
-    number_of_vertices = nb_lines / 3;
-    number_of_triangles = number_of_vertices / 3;
+    number_of_triangles = nb_lines;
+    number_of_vertices = number_of_triangles * 3;
 
     // Allocate data
     vertices = (float*)malloc(number_of_vertices * 3 * sizeof(float));
@@ -418,7 +416,6 @@ void Meshed::load_from_ggems_mesh(std::string filename) {
 }
 */
 
-/*
 // Scaling
 void Meshed::scale(float3 s) {
     // Scale every vertex from the mesh
@@ -446,7 +443,7 @@ void Meshed::scale(float sx, float sy, float sz) {
 // Rotation
 void Meshed::rotate(float3 r) {
 
-//     float deg = pi / 180.0f;
+    // float deg = pi / 180.0f;
     float phi = r.x*deg; // deg is defined in processes/constant.cuh
     float theta = r.y*deg;
     float psi = r.z*deg;
@@ -511,6 +508,6 @@ void Meshed::translate(float tx, float ty, float tz) {
     float3 t = {tx, ty, tz};
     translate(t);
 }
-*/
+
 
 #endif

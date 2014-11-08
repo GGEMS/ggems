@@ -22,8 +22,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <string>
-#include "../processes/constants.cuh"
-#include "../maths/vector.cuh"
+#include "constants.cuh"
+#include "vector.cuh"
 
 //void set_gpu_device(int deviceChoice,float minversion=3.0);
 //void reset_gpu_device();

@@ -85,7 +85,7 @@ void __host__ __device__ get_next_geometry_boundary(Scene geometry, unsigned int
     } else if (obj_type == SPHERE) {
         // TODO
     } else if (obj_type == VOXELIZED) {
-        // TODO
+        // TODO a voxel
     } else if (obj_type == MESHED) {
         // TODO
     }

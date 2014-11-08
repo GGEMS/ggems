@@ -20,9 +20,14 @@ find_package(Geant4 REQUIRED)
 include(${Geant4_USE_FILE})
 
 # GGEMS src
-include_directories(${PROJECT_SOURCE_DIR})
-#file(GLOB sourcesGPU ${PROJECT_SOURCE_DIR}/*/*.cu)
-#file(GLOB headersGPU ${PROJECT_SOURCE_DIR}/*/*.cuh)
+include_directories(
+    ${PROJECT_SOURCE_DIR}/detector
+    ${PROJECT_SOURCE_DIR}/geometry
+    ${PROJECT_SOURCE_DIR}/global
+    ${PROJECT_SOURCE_DIR}/maths
+    ${PROJECT_SOURCE_DIR}/navigation
+    ${PROJECT_SOURCE_DIR}/processes
+    ${PROJECT_SOURCE_DIR}/sources)
 file(GLOB_RECURSE sourcesGPU "*.cu")
 file(GLOB_RECURSE headersGPU "*.cuh")
 
@@ -33,7 +38,7 @@ set(LIBSCUDA --generate-code arch=compute_30,code=sm_30 --relocatable-device-cod
 set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} ${LIBSCUDA})
 set(CUDA_SEPARABLE_COMPILATION OFF)
 
-cuda_add_library(${LIB_NAME} STATIC ${sourcesGPU})
+cuda_add_library(${LIB_NAME} STATIC ${sourcesGPU} ${headersGPU})
 
 # Installation
 install(TARGETS ${LIB_NAME} DESTINATION "lib")

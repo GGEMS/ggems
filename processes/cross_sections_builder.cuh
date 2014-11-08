@@ -25,8 +25,8 @@
 //#include <algorithm>
 //#include <vector>
 
-#include "../geometry/materials.cuh"
-#include "../global/global.cuh"
+#include "materials.cuh"
+#include "global.cuh"
 #include "photon.cuh"
 
 // CS class
