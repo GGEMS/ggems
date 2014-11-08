@@ -34,7 +34,7 @@ file(GLOB_RECURSE headersGPU "*.cuh")
 # Compilation
 find_package(CUDA REQUIRED)
 set(LIB_NAME "ggems")
-set(LIBSCUDA --generate-code arch=compute_30,code=sm_30 --relocatable-device-code true -lcudadevrt --compiler-options '-fPIC' -use_fast_math -w )
+set(LIBSCUDA --generate-code arch=compute_30,code=sm_30 --relocatable-device-code true -lcudadevrt --compiler-options -use_fast_math -w )
 set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} ${LIBSCUDA})
 set(CUDA_SEPARABLE_COMPILATION OFF)
 
