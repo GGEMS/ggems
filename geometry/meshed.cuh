@@ -61,7 +61,9 @@ class Meshed : public BaseObject {
 
         // Octree
         unsigned int nb_cell_x, nb_cell_y, nb_cell_z;
+        float cell_size_x, cell_size_y, cell_size_z;
         unsigned short int octree_type;
+        //   Store only non-null value in order to compress the octree
         std::vector<float> nb_objs_per_cell;
         std::vector<float> list_objs_per_cell;
         std::vector<float> addr_to_cell;

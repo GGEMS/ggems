@@ -28,6 +28,12 @@ Meshed::Meshed() {
     octree_type = NO_OCTREE;
     number_of_triangles = 0;
     number_of_vertices = 0;
+    nb_cell_x = 0;
+    nb_cell_y = 0;
+    nb_cell_z = 0;
+    cell_size_x = 0.0f;
+    cell_size_y = 0.0f;
+    cell_size_z = 0.0f;
 }
 
 // Build a regular octree to improve navigation within meshed phantom
@@ -50,9 +56,9 @@ void Meshed::build_regular_octree(unsigned int nx, unsigned int ny, unsigned int
     float size_y = ymax-ymin;
     float size_z = zmax-zmin;
 
-    float spacing_x = size_x / (float)nx;
-    float spacing_y = size_y / (float)ny;
-    float spacing_z = size_z / (float)nz;
+    cell_size_x = size_x / (float)nx;
+    cell_size_y = size_y / (float)ny;
+    cell_size_z = size_z / (float)nz;
 
     float org_x = xmin;
     float org_y = ymin;
@@ -86,9 +92,9 @@ void Meshed::build_regular_octree(unsigned int nx, unsigned int ny, unsigned int
                 // -----------------------------------------------------------
 
                 // Define a voxel as AABB primitive
-                cell_xmax = cell_xmin + spacing_x;
-                cell_ymax = cell_ymin + spacing_y;
-                cell_zmax = cell_zmin + spacing_z;
+                cell_xmax = cell_xmin + cell_size_x;
+                cell_ymax = cell_ymin + cell_size_y;
+                cell_zmax = cell_zmin + cell_size_z;
 
                 // Search for triangle/AABB collision
                 itri = 0;
@@ -124,17 +130,17 @@ void Meshed::build_regular_octree(unsigned int nx, unsigned int ny, unsigned int
 
                 // -----------------------------------------------------------
 
-                cell_xmin += spacing_x;
+                cell_xmin += cell_size_x;
                 ++cell_ix;
 
             } // ix
 
-            cell_ymin += spacing_y;
+            cell_ymin += cell_size_y;
             ++cell_iy;
 
         } // iy
 
-        cell_zmin += spacing_z;
+        cell_zmin += cell_size_z;
         ++cell_iz;
 
         // print out

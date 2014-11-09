@@ -52,10 +52,21 @@
 #define ADR_VOXELIZED_SZ 13
 #define ADR_VOXELIZED_DATA 14
 
+#define ADR_MESHED_NB_VERTICES 8
+#define ADR_MESHED_NB_TRIANGLES 9
+#define ADR_MESHED_OCTREE_TYPE 10
+#define ADR_MESHED_OCTREE_NX 11
+#define ADR_MESHED_OCTREE_NY 12
+#define ADR_MESHED_OCTREE_NZ 13
+#define ADR_MESHED_OCTREE_SX 14
+#define ADR_MESHED_OCTREE_SY 15
+#define ADR_MESHED_OCTREE_SZ 16
+#define ADR_MESHED_DATA 17
+
 #define SIZE_AABB_OBJ 8
 #define SIZE_SPHERE_OBJ 12
 #define SIZE_VOXELIZED_OBJ 14 // + number of voxels
-#define SIZE_MESHED_OBJ 11 // + number of vertices * 3 (xyz)
+#define SIZE_MESHED_OBJ 17 // + number of vertices * 3 (xyz) + octree
 
 // Struct that handle the geometry of the world
 struct Scene {

@@ -638,7 +638,6 @@ void GeometryBuilder::build_object(Voxelized obj) {
 
 }
 
-
 // Build meshed object into the scene structure
 void GeometryBuilder::build_object(Meshed obj) {
 
@@ -661,8 +660,33 @@ void GeometryBuilder::build_object(Meshed obj) {
     // Parameters for this object
     array_push_back(&world.data_objects, world.data_objects_dim, obj.number_of_vertices);
     array_push_back(&world.data_objects, world.data_objects_dim, obj.number_of_triangles);
-    // Finally append triangles into the world
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.octree_type);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.nb_cell_x);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.nb_cell_y);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.nb_cell_z);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.cell_size_x);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.cell_size_y);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.cell_size_z);
+
+    // Append triangles into the world
     array_append_array(&world.data_objects, world.data_objects_dim, &obj.vertices, 3*obj.number_of_vertices); // xyz
+
+    // Finally append the octree if defined
+    if (obj.octree_type == REG_OCTREE) {
+        // Append the number of objects per cell
+        float *tmp = &obj.nb_objs_per_cell[0]; // create a pointer to append into the world
+        array_append_array(&world.data_objects, world.data_objects_dim, &tmp, obj.nb_objs_per_cell.size());
+
+        // Append the addr of each cell
+        tmp = &obj.addr_to_cell[0];
+        array_append_array(&world.data_objects, world.data_objects_dim, &tmp, obj.addr_to_cell.size());
+
+        // Append the list of objects per cell
+        tmp = &obj.list_objs_per_cell[0];
+        array_append_array(&world.data_objects, world.data_objects_dim, &tmp, obj.list_objs_per_cell.size());
+    }
+
+    //////////////
 
     // Name of this object
     name_objects.push_back(obj.object_name);
@@ -671,10 +695,20 @@ void GeometryBuilder::build_object(Meshed obj) {
     // Transparency of this object
     object_transparency.push_back(obj.transparency);
     // Store the size of this object
-    array_push_back(&world.size_of_objects, world.size_of_objects_dim, 3*obj.number_of_vertices+SIZE_MESHED_OBJ);
+    if (obj.octree_type == REG_OCTREE) {
+        array_push_back(&world.size_of_objects, world.size_of_objects_dim, 3*obj.number_of_vertices + obj.nb_objs_per_cell.size() +
+                                                                           obj.addr_to_cell.size() + obj.list_objs_per_cell.size() + SIZE_MESHED_OBJ);
+
+    } else { // NO_OCTREE
+        array_push_back(&world.size_of_objects, world.size_of_objects_dim, 3*obj.number_of_vertices+SIZE_MESHED_OBJ);
+    }
+
+    // Clear data of the octree
+    obj.nb_objs_per_cell.clear();
+    obj.addr_to_cell.clear();
+    obj.list_objs_per_cell.clear();
 
 }
-
 
 // Build the complete scene
 void GeometryBuilder::build_scene() {
