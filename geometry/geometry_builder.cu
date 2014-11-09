@@ -50,21 +50,13 @@ unsigned int __host__ __device__ get_geometry_material(Scene geometry, unsigned 
     }
 }
 
-// Find the next geometry along the path of the particle
-void __host__ __device__ get_next_geometry_boundary(Scene geometry, unsigned int cur_geom,
-                                                     float3 pos, float3 dir,
-                                                     float &interaction_distance,
-                                                     unsigned int &geometry_volume) {
+// Get distance from an object
+float __host__ __device__ get_distance_to_object(Scene geometry, unsigned int adr_geom, float3 pos, float3 dir) {
 
-
-    interaction_distance = FLT_MAX;
-    geometry_volume = cur_geom;
-    float distance;
-
-    unsigned int adr_geom = geometry.ptr_objects[cur_geom];
+    float distance = FLT_MAX;
     unsigned int obj_type = (unsigned int)geometry.data_objects[adr_geom+ADR_OBJ_TYPE];
 
-    // First check the boundary of the current volume
+    // AABB volume
     if (obj_type == AABB) {
 
         // Read first the bounding box
@@ -77,24 +69,51 @@ void __host__ __device__ get_next_geometry_boundary(Scene geometry, unsigned int
 
         distance = hit_ray_AABB(pos, dir, xmin, xmax, ymin, ymax, zmin, zmax);
 
-        if (distance <= interaction_distance) {
-            interaction_distance = distance + EPSILON3; // overshoot
-            geometry_volume = geometry.mother_node[cur_geom];
-        }
-
+    // Sphere volume
     } else if (obj_type == SPHERE) {
-        // TODO
+
+        // Read first sphere parameters
+        float3 c = make_float3(geometry.data_objects[adr_geom+ADR_SPHERE_CX],
+                               geometry.data_objects[adr_geom+ADR_SPHERE_CY],
+                               geometry.data_objects[adr_geom+ADR_SPHERE_CZ]);
+        float r = geometry.data_objects[adr_geom+ADR_SPHERE_RADIUS];
+
+        distance = hit_ray_sphere(pos, dir, c, r);
+
     } else if (obj_type == VOXELIZED) {
         // TODO a voxel
     } else if (obj_type == MESHED) {
         // TODO
     }
 
+    return distance;
+}
+
+// Find the next geometry along the path of the particle
+void __host__ __device__ get_next_geometry_boundary(Scene geometry, unsigned int cur_geom,
+                                                     float3 pos, float3 dir,
+                                                     float &interaction_distance,
+                                                     unsigned int &geometry_volume) {
+
+
+    interaction_distance = FLT_MAX;
+    geometry_volume = cur_geom;
+    float distance;
+
+    // First check the mother volume (particle escaping the volume)
+    unsigned int adr_geom = geometry.ptr_objects[cur_geom];
+
+    distance = get_distance_to_object(geometry, adr_geom, pos, dir);
+    if (distance <= interaction_distance) {
+        interaction_distance = distance + EPSILON3; // overshoot
+        geometry_volume = geometry.mother_node[cur_geom];
+    }
+
     // Then check every child contains in this node
     unsigned int adr_node = geometry.ptr_nodes[cur_geom];
-
     unsigned int offset_node = 0;
     unsigned int id_child_geom;
+
     while (offset_node < geometry.size_of_nodes[cur_geom]) {
 
         // Child id
@@ -102,37 +121,15 @@ void __host__ __device__ get_next_geometry_boundary(Scene geometry, unsigned int
 
         // Determine the type of the volume
         unsigned int adr_child_geom = geometry.ptr_objects[id_child_geom];
-        unsigned int obj_child_type = (unsigned int)geometry.data_objects[adr_child_geom+ADR_OBJ_TYPE];
 
-        // Get raytracing distance accordingly
-        if (obj_child_type == AABB) {
-
-            // Read first the bounding box
-            float xmin = geometry.data_objects[adr_child_geom+ADR_AABB_XMIN];
-            float xmax = geometry.data_objects[adr_child_geom+ADR_AABB_XMAX];
-            float ymin = geometry.data_objects[adr_child_geom+ADR_AABB_YMIN];
-            float ymax = geometry.data_objects[adr_child_geom+ADR_AABB_YMAX];
-            float zmin = geometry.data_objects[adr_child_geom+ADR_AABB_ZMIN];
-            float zmax = geometry.data_objects[adr_child_geom+ADR_AABB_ZMAX];
-
-            // Ray/AABB raytracing
-            distance = hit_ray_AABB(pos, dir, xmin, xmax, ymin, ymax, zmin, zmax);
-
-            if (distance <= interaction_distance) {
-                interaction_distance = distance + EPSILON3; // overshoot
-                geometry_volume = id_child_geom;
-            }
-
-        } else if (obj_child_type == SPHERE) {
-            // TODO
-        } else if (obj_child_type == VOXELIZED) {
-            // TODO
-        } else if (obj_child_type == MESHED) {
-            // TODO
+        distance = get_distance_to_object(geometry, adr_child_geom, pos, dir);
+        if (distance <= interaction_distance) {
+            interaction_distance = distance + EPSILON3; // overshoot
+            geometry_volume = id_child_geom;
         }
 
-        ++offset_node;
 
+        ++offset_node;
     }
 }
 
@@ -737,96 +734,4 @@ void GeometryBuilder::build_scene() {
 
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-// Add a Meshed object into the world
-unsigned int GeometryBuilder::add_object(Meshed obj, unsigned int mother_id) {
-
-    // Add this object to the tree
-    World.tree.add_node(mother_id);
-
-    // Store the address to access to this object
-    World.ptr_objects.push_back(World.data_objects.size());
-
-    // Store the information of this object
-    World.data_objects.push_back(MESHED);                                // Object Type
-    World.data_objects.push_back(get_material_index(obj.material_name)); // Material index
-
-    // Add the boudning box of this mesh
-    World.data_objects.push_back(obj.xmin);
-    World.data_objects.push_back(obj.xmax);
-    World.data_objects.push_back(obj.ymin);
-    World.data_objects.push_back(obj.ymax);
-    World.data_objects.push_back(obj.zmin);
-    World.data_objects.push_back(obj.zmax);
-
-    // Number of triangles
-    World.data_objects.push_back(obj.number_of_triangles);
-
-    // Append octree information
-    World.data_objects.push_back(obj.octree_type); // NO_OCTREE, REG_OCTREE, ADP_OCTREE
-    if (obj.octree_type == REG_OCTREE) {
-        World.data_objects.push_back(obj.nb_cell_x); // Octree size in cells
-        World.data_objects.push_back(obj.nb_cell_y);
-        World.data_objects.push_back(obj.nb_cell_z);
-    }
-
-    // Append every triangle
-    World.data_objects.reserve(World.data_objects.size() + obj.vertices.size());
-    World.data_objects.insert(World.data_objects.end(), obj.vertices.begin(), obj.vertices.end());
-
-    // Append the octree if defined
-    if (obj.octree_type == REG_OCTREE) {
-        // Append the number of objects per cell
-        World.data_objects.reserve(World.data_objects.size() + obj.nb_objs_per_cell.size());
-        World.data_objects.insert(World.data_objects.end(), obj.nb_objs_per_cell.begin(),
-                                                            obj.nb_objs_per_cell.end());
-        // Append the addr of each cell
-        World.data_objects.reserve(World.data_objects.size() + obj.addr_to_cell.size());
-        World.data_objects.insert(World.data_objects.end(), obj.addr_to_cell.begin(),
-                                                            obj.addr_to_cell.end());
-        // Append the list of objects per cell
-        World.data_objects.reserve(World.data_objects.size() + obj.list_objs_per_cell.size());
-        World.data_objects.insert(World.data_objects.end(), obj.list_objs_per_cell.begin(),
-                                                            obj.list_objs_per_cell.end());
-    }
-
-    // Name of this object
-    World.name_objects.push_back(obj.object_name);
-
-    // Store the size of this object
-    if (obj.octree_type == REG_OCTREE) {
-        World.size_of_objects.push_back(obj.vertices.size() + obj.nb_objs_per_cell.size() +
-                                        obj.addr_to_cell.size() + obj.list_objs_per_cell.size() + 13);
-    } else { // NO_OCTREE
-        World.size_of_objects.push_back(obj.vertices.size()+10);
-    }
-
-    return World.tree.get_current_id();
-
-}
-
-
-*/
 #endif

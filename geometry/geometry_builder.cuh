@@ -44,6 +44,11 @@
 #define ADR_AABB_ZMIN 6
 #define ADR_AABB_ZMAX 7
 
+#define ADR_SPHERE_CX 8
+#define ADR_SPHERE_CY 9
+#define ADR_SPHERE_CZ 10
+#define ADR_SPHERE_RADIUS 11
+
 #define ADR_VOXELIZED_NX 8
 #define ADR_VOXELIZED_NY 9
 #define ADR_VOXELIZED_NZ 10
@@ -98,6 +103,7 @@ struct Scene {
 // Host/Device function that handle geometry
 
 unsigned int __host__ __device__ get_geometry_material(Scene geometry, unsigned int id_geom, float3 pos);
+float __host__ __device__ get_distance_to_object(Scene geometry, unsigned int adr_geom, float3 pos, float3 dir);
 void __host__ __device__ get_next_geometry_boundary(Scene geometry, unsigned int cur_geom,
                                                      float3 pos, float3 dir,
                                                      float &interaction_distance,
