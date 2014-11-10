@@ -209,9 +209,9 @@ __host__ __device__ float hit_ray_sphere(float3 ray_p, float3 ray_d,           /
 
 // Ray/AABB intersection - Smits algorithm
 __host__ __device__ float hit_ray_AABB(float3 ray_p, float3 ray_d,
-                                              float aabb_xmin, float aabb_xmax,
-                                              float aabb_ymin, float aabb_ymax,
-                                              float aabb_zmin, float aabb_zmax) {
+                                       float aabb_xmin, float aabb_xmax,
+                                       float aabb_ymin, float aabb_ymax,
+                                       float aabb_zmin, float aabb_zmax) {
     /*
     float xmin, xmax, ymin, ymax, zmin, zmax;
     float3 di = inverse_vector(d);

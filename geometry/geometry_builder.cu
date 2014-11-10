@@ -82,6 +82,26 @@ float __host__ __device__ get_distance_to_object(Scene geometry, unsigned int ad
 
     } else if (obj_type == VOXELIZED) {
         // TODO a voxel
+
+
+
+//        float xmin, xmax, ymin, ymax, zmin, zmax;
+//        float3 di = inverse_vector(d);
+//        float tmin, tmax, tymin, tymax, tzmin, tzmax, buf;
+
+//        // Define the voxel bounding box
+
+//        // From Michaela
+//        xmin = (d.x > 0 && p.x > (vox.x+1) * res.x - EPS) ? (vox.x+1) * res.x : vox.x*res.x;
+//        ymin = (d.y > 0 && p.y > (vox.y+1) * res.y - EPS) ? (vox.y+1) * res.y : vox.y*res.y;
+//        zmin = (d.z > 0 && p.z > (vox.z+1) * res.z - EPS) ? (vox.z+1) * res.z : vox.z*res.z;
+
+//        xmax = (d.x < 0 && p.x < xmin + EPS) ? xmin-res.x : xmin+res.x;
+//        ymax = (d.y < 0 && p.y < ymin + EPS) ? ymin-res.y : ymin+res.y;
+//        zmax = (d.z < 0 && p.z < zmin + EPS) ? zmin-res.z : zmin+res.z;
+
+
+
     } else if (obj_type == MESHED) {
         // TODO
     }
