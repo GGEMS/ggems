@@ -21,16 +21,43 @@
 #include <vector>
 #include <string>
 #include "point_source.cuh"
+#include "cone_beam_source.cuh"
 
 #define POINT_SOURCE 0
+#define CONE_BEAM_SOURCE 1
+
+#define ADR_SRC_TYPE 0
+#define ADR_SRC_GEOM_ID 1
+
+// Point source
+#define ADR_POINT_SRC_PX 2
+#define ADR_POINT_SRC_PY 3
+#define ADR_POINT_SRC_PZ 4
+#define ADR_POINT_SRC_ENERGY 5
+
+// Cone Beam source
+#define ADR_CONE_BEAM_SRC_PX 2
+#define ADR_CONE_BEAM_SRC_PY 3
+#define ADR_CONE_BEAM_SRC_PZ 4
+#define ADR_CONE_BEAM_SRC_PHI 5
+#define ADR_CONE_BEAM_SRC_THETA 6
+#define ADR_CONE_BEAM_SRC_PSI 7
+#define ADR_CONE_BEAM_SRC_APERTURE 8
+#define ADR_CONE_BEAM_SRC_ENERGY 9
 
 struct Sources {
-    unsigned int *ptr_sources;
-    unsigned int *data_size_sources;
-    float *data_sources;
-    unsigned int *seeds;
+    // Source structure
+    unsigned int *ptr_sources;      // Address to access to the different sources
+    //unsigned int *size_of_sources;  // Size of each source FIXME not need?
+    float *data_sources;            // Parameters of each source
+    unsigned int *seeds;            // List of seeds
     unsigned int nb_sources;
-    unsigned int nb_data_elements;
+
+    // Dimension of each vector
+    unsigned int ptr_sources_dim;
+    //unsigned int size_of_sources_dim;
+    unsigned int data_sources_dim;
+    unsigned int seeds_dim;
 };
 
 // Class to manage sources on the simulation
@@ -38,6 +65,7 @@ class SourceBuilder {
     public:
         SourceBuilder();
         void add_source(PointSource src);
+        void add_source(ConeBeamSource src);
 
         //void save_ggems_geometry(std::string filename);
 

@@ -47,16 +47,36 @@ __host__ __device__ void point_source_primary_generator(ParticleStack particles,
 }
 
 
-PointSource::PointSource(float ox, float oy, float oz, float E, unsigned int val_seed,
-                         std::string src_name, unsigned int geom_id) {
+PointSource::PointSource() {
 
-    px = ox;
-    py = oy;
-    pz = oz;
-    energy = E;
-    source_name = src_name;
-    seed = val_seed;
-    geometry_id = geom_id;
+    // Default parameters
+    px = 0.0f; py = 0.0f; pz = 0.0f;
+    energy = 60.0*keV;
+    source_name = "Source01";
+    seed = 10;
+    geometry_id = 0;
+}
+
+// Setting function
+
+void PointSource::set_position(float vpx, float vpy, float vpz) {
+    px=vpx; py=vpy; pz=vpz;
+}
+
+void PointSource::set_energy(float venergy) {
+    energy=venergy;
+}
+
+void PointSource::set_seed(unsigned int vseed) {
+    seed=vseed;
+}
+
+void PointSource::set_in_geometry(unsigned int vgeometry_id) {
+    geometry_id=vgeometry_id;
+}
+
+void PointSource::set_source_name(std::string vsource_name) {
+    source_name=vsource_name;
 }
 
 #endif

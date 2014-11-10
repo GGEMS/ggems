@@ -39,6 +39,10 @@ SimulationBuilder::SimulationBuilder() {
 
     parameters.record_dose_flag = DISABLED;
     history.record_flag = DISABLED;
+
+    // Optional object (FIXME)
+    detector.panel_detector.data = NULL;
+    detector_set = false;
 }
 
 ////// :: Main functions ::
@@ -60,17 +64,30 @@ void SimulationBuilder::cpu_primaries_generator() {
         unsigned int adr = sources.sources.ptr_sources[is];
 
         // Read the kind of sources
-        unsigned int type = (unsigned int)(sources.sources.data_sources[adr]);
+        unsigned int type = (unsigned int)(sources.sources.data_sources[adr+ADR_SRC_TYPE]);
+        unsigned int geom_id = (unsigned int)(sources.sources.data_sources[adr+ADR_SRC_GEOM_ID]);
 
         // Point Source
         if (type == POINT_SOURCE) {
-            unsigned int geom_id = (unsigned int)(sources.sources.data_sources[adr+1]);
-            float px = sources.sources.data_sources[adr+2];
-            float py = sources.sources.data_sources[adr+3];
-            float pz = sources.sources.data_sources[adr+4];
-            float energy = sources.sources.data_sources[adr+5];
+            float px = sources.sources.data_sources[adr+ADR_POINT_SRC_PX];
+            float py = sources.sources.data_sources[adr+ADR_POINT_SRC_PY];
+            float pz = sources.sources.data_sources[adr+ADR_POINT_SRC_PZ];
+            float energy = sources.sources.data_sources[adr+ADR_POINT_SRC_ENERGY];
 
             point_source_primary_generator(particles.stack, id, px, py, pz, energy, PHOTON, geom_id);
+
+        } else if (type == CONE_BEAM_SOURCE) {
+            float px = sources.sources.data_sources[adr+ADR_CONE_BEAM_SRC_PX];
+            float py = sources.sources.data_sources[adr+ADR_CONE_BEAM_SRC_PY];
+            float pz = sources.sources.data_sources[adr+ADR_CONE_BEAM_SRC_PZ];
+            float phi = sources.sources.data_sources[adr+ADR_CONE_BEAM_SRC_PHI];
+            float theta = sources.sources.data_sources[adr+ADR_CONE_BEAM_SRC_THETA];
+            float psi = sources.sources.data_sources[adr+ADR_CONE_BEAM_SRC_PSI];
+            float aperture = sources.sources.data_sources[adr+ADR_CONE_BEAM_SRC_APERTURE];
+            float energy = sources.sources.data_sources[adr+ADR_CONE_BEAM_SRC_ENERGY];
+
+            cone_beam_source_primary_generator(particles.stack, id, px, py, pz,
+                                               phi, theta, psi, aperture, energy, PHOTON, geom_id);
         }
 
         // If need record the first position for the tracking history
@@ -91,7 +108,8 @@ void SimulationBuilder::cpu_primaries_generator() {
 void SimulationBuilder::cpu_main_navigation() {
 
     cpu_main_navigator(particles.stack, geometry.world,
-                       materials.materials_table, cs_tables.photon_CS_table, parameters, history);
+                       materials.materials_table, cs_tables.photon_CS_table, parameters,
+                       detector.panel_detector, history);
 
 }
 
@@ -116,6 +134,12 @@ void SimulationBuilder::set_particles(ParticleBuilder p) {
 // Set the list of sources
 void SimulationBuilder::set_sources(SourceBuilder src) {
     sources = src;
+}
+
+// Set a detector // FIXME
+void SimulationBuilder::set_detector(FlatPanelDetector vdetector) {
+    detector = vdetector;
+    detector_set = true;
 }
 
 // Set the hardware used for the simulation CPU or GPU (CPU by default)
@@ -214,28 +238,28 @@ void SimulationBuilder::init_simulation() {
     particles.stack.size = nb_of_particles / nb_of_iterations;
     nb_of_particles = particles.stack.size * nb_of_iterations;
 
-    /*
-    // Reset and set GPU ID and compute grid size
-    wrap_reset_device();
-    wrap_set_device(m_gpu_id);
-    m_grid_size = (m_stack_size + m_block_size - 1) / m_block_size;
 
-    // copy data to the device
-    wrap_copy_phantom_to_device(h_phantom, d_phantom);
-    wrap_copy_materials_to_device(h_materials, d_materials);
+//    // Reset and set GPU ID and compute grid size
+//    wrap_reset_device();
+//    wrap_set_device(m_gpu_id);
+//    m_grid_size = (m_stack_size + m_block_size - 1) / m_block_size;
 
-    // init particle stack
-    wrap_init_particle_stack(d_particles, m_stack_size);
+//    // copy data to the device
+//    wrap_copy_phantom_to_device(h_phantom, d_phantom);
+//    wrap_copy_materials_to_device(h_materials, d_materials);
 
-    // init particle seeds
-    wrap_init_particle_seeds(d_particles, m_seed);
+//    // init particle stack
+//    wrap_init_particle_stack(d_particles, m_stack_size);
 
-    // copy the physics list to the device
-    wrap_copy_physics_list_to_device(m_physics_list);
+//    // init particle seeds
+//    wrap_init_particle_seeds(d_particles, m_seed);
 
-    // copy the secondaries list to the device
-    wrap_copy_secondaries_list_to_device(m_secondaries_list);
-    */
+//    // copy the physics list to the device
+//    wrap_copy_physics_list_to_device(m_physics_list);
+
+//    // copy the secondaries list to the device
+//    wrap_copy_secondaries_list_to_device(m_secondaries_list);
+
 
     if (target == CPU_DEVICE) {
 
@@ -248,6 +272,24 @@ void SimulationBuilder::init_simulation() {
     // Init Cross sections and physics table
     cs_tables.build_table(materials.materials_table, parameters);
     //cs_tables.print();
+
+    // Init detector if setting up
+    if (detector_set) {
+
+        unsigned int adr_geom = geometry.world.ptr_objects[detector.panel_detector.geometry_id];
+
+        // Read first the bounding box
+        float xmin = geometry.world.data_objects[adr_geom+ADR_AABB_XMIN];
+        float xmax = geometry.world.data_objects[adr_geom+ADR_AABB_XMAX];
+        float ymin = geometry.world.data_objects[adr_geom+ADR_AABB_YMIN];
+        float ymax = geometry.world.data_objects[adr_geom+ADR_AABB_YMAX];
+        float zmin = geometry.world.data_objects[adr_geom+ADR_AABB_ZMIN];
+        float zmax = geometry.world.data_objects[adr_geom+ADR_AABB_ZMAX];
+
+        // Init and allocate the image of the flat panel detector
+        detector.init(xmin, xmax, ymin, ymax, zmin, zmax);
+
+    }
 
 }
 

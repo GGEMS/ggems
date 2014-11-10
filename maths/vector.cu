@@ -78,4 +78,26 @@ __host__ __device__ float3 f3_unit(float3 u) {
     return make_float3(u.x*imag, u.y*imag, u.z*imag);
 }
 
+// rotate a vector u
+__host__ __device__ float3 f3_rotate(float3 u, float3 EulerAngles) {
+
+    float phi = EulerAngles.x*deg; // deg is defined by G4 unit system
+    float theta = EulerAngles.y*deg;
+    float psi = EulerAngles.z*deg;
+
+    float sph = sin(phi);
+    float cph = cos(phi);
+    float sth = sin(theta);
+    float cth = cos(theta);
+    float sps = sin(psi);
+    float cps = cos(psi);
+
+    // Build rotation matrix
+    matrix3 rot = { cph*cps-sph*cth*sps,  cph*sps+sph*cth*cps,  sth*sph,
+                    -sph*cps-cph*cth*sps, -sph*sps+cph*cth*cps,  sth*cph,
+                    sth*sps,             -sth*cps,                  cth};
+
+    return m3f3_mul(rot, u);
+}
+
 #endif

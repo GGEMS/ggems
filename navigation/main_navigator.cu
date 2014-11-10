@@ -22,7 +22,7 @@
 
 void cpu_main_navigator(ParticleStack &particles, Scene geometry,
                         MaterialsTable materials, PhotonCrossSectionTable photon_CS_table,
-                        GlobalSimulationParameters parameters,
+                        GlobalSimulationParameters parameters, ImageDetector &panel_detector,
                         HistoryBuilder &history) {
 
     // For each particle
@@ -38,7 +38,7 @@ void cpu_main_navigator(ParticleStack &particles, Scene geometry,
             // If a photon
             if (particles.pname[id] == PHOTON) {
                 cpu_photon_navigator(particles, id, geometry, materials, photon_CS_table,
-                                     parameters, history);
+                                     parameters, panel_detector, history);
             }
 
             istep++;

@@ -15,8 +15,8 @@
 //
 // GGEMS Copyright (C) 2013-2014 Julien Bert
 
-#ifndef POINT_SOURCE_CUH
-#define POINT_SOURCE_CUH
+#ifndef CONE_BEAM_SOURCE_CUH
+#define CONE_BEAM_SOURCE_CUH
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -26,25 +26,32 @@
 #include "constants.cuh"
 
 // External function
-__host__ __device__ void point_source_primary_generator(ParticleStack particles, unsigned int id,
-                                                        float px, float py, float pz, float energy,
-                                                        unsigned char type, unsigned int geom_id);
+__host__ __device__ void cone_beam_source_primary_generator(ParticleStack particles, unsigned int id,
+                                                        float px, float py, float pz,
+                                                        float rphi, float rtheta, float rpsi,
+                                                        float aperture, float energy,
+                                                        unsigned char pname, unsigned int geom_id);
 
 // Sphere
-class PointSource {
+class ConeBeamSource {
     public:
-        PointSource();
+        ConeBeamSource();
         void set_position(float vpx, float vpy, float vpz);
+        void set_rotation(float vphi, float vtheta, float vpsi);
+        void set_aperture(float vaperture);
         void set_energy(float venergy);
         void set_seed(unsigned int vseed);
         void set_in_geometry(unsigned int vgeometry_id);
         void set_source_name(std::string vsource_name);
 
-        float px, py, pz, energy;
+        float px, py, pz;
+        float phi, theta, psi;
+        float aperture, energy;
         unsigned int seed, geometry_id;
         std::string source_name;
 
     private:
+
 };
 
 #endif

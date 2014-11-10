@@ -24,11 +24,14 @@
 
 SourceBuilder::SourceBuilder() {
     sources.ptr_sources = NULL;
-    sources.data_size_sources = NULL;
+    //sources.size_of_sources = NULL;
     sources.data_sources = NULL;
     sources.seeds = NULL;
     sources.nb_sources = 0;
-    sources.nb_data_elements = 0;
+    sources.ptr_sources_dim = 0;
+    //sources.size_of_sources_dim = 0;
+    sources.data_sources_dim = 0;
+    sources.seeds_dim = 0;
 }
 
 // Add a point source on the simulation
@@ -36,29 +39,59 @@ void SourceBuilder::add_source(PointSource src) {
     sources.nb_sources++;
 
     // Store the address to access to this source
-    sources.ptr_sources = (unsigned int*)realloc(sources.ptr_sources,
-                                                 sources.nb_sources*sizeof(unsigned int));
-    sources.ptr_sources[sources.nb_sources-1] = sources.nb_data_elements;
+    array_push_back(&sources.ptr_sources, sources.ptr_sources_dim, sources.data_sources_dim);
 
-    // Store the size of the data needs for this source
-    sources.data_size_sources = (unsigned int*)realloc(sources.data_size_sources,
-                                                       sources.nb_sources*sizeof(unsigned int));
-    sources.data_size_sources[sources.nb_sources-1] = 6;
+    // Store information of this source
+    array_push_back(&sources.data_sources, sources.data_sources_dim, (float)POINT_SOURCE);
+    array_push_back(&sources.data_sources, sources.data_sources_dim, src.geometry_id);
+    array_push_back(&sources.data_sources, sources.data_sources_dim, src.px);
+    array_push_back(&sources.data_sources, sources.data_sources_dim, src.py);
+    array_push_back(&sources.data_sources, sources.data_sources_dim, src.pz);
+    array_push_back(&sources.data_sources, sources.data_sources_dim, src.energy);
 
-    // Finally store all parameters
-    sources.nb_data_elements += 6;
-    sources.data_sources = (float*)realloc(sources.data_sources, sources.nb_data_elements*sizeof(float));
+    // Save the seed
+    array_push_back(&sources.seeds, sources.seeds_dim, src.seed);
 
-    sources.data_sources[sources.nb_data_elements-6] = POINT_SOURCE;
-    sources.data_sources[sources.nb_data_elements-5] = src.geometry_id;
-    sources.data_sources[sources.nb_data_elements-4] = src.px;
-    sources.data_sources[sources.nb_data_elements-3] = src.py;
-    sources.data_sources[sources.nb_data_elements-2] = src.pz;
-    sources.data_sources[sources.nb_data_elements-1] = src.energy;
+}
 
-    // Including the seed
-    sources.seeds = (unsigned int*)realloc(sources.seeds, sources.nb_sources*sizeof(unsigned int));
-    sources.seeds[sources.nb_sources-1] = src.seed;
+// Add a cone beam source
+void SourceBuilder::add_source(ConeBeamSource src) {
+    sources.nb_sources++;
+
+    // Store the address to access to this source
+    array_push_back(&sources.ptr_sources, sources.ptr_sources_dim, sources.data_sources_dim);
+
+    // Store information of this source
+    array_push_back(&sources.data_sources, sources.data_sources_dim, (float)CONE_BEAM_SOURCE);
+    array_push_back(&sources.data_sources, sources.data_sources_dim, src.geometry_id);
+    array_push_back(&sources.data_sources, sources.data_sources_dim, src.px);
+    array_push_back(&sources.data_sources, sources.data_sources_dim, src.py);
+    array_push_back(&sources.data_sources, sources.data_sources_dim, src.pz);
+    array_push_back(&sources.data_sources, sources.data_sources_dim, src.phi);
+    array_push_back(&sources.data_sources, sources.data_sources_dim, src.theta);
+    array_push_back(&sources.data_sources, sources.data_sources_dim, src.psi);
+    array_push_back(&sources.data_sources, sources.data_sources_dim, src.aperture);
+    array_push_back(&sources.data_sources, sources.data_sources_dim, src.energy);
+
+    // Save the seed
+    array_push_back(&sources.seeds, sources.seeds_dim, src.seed);
+
 }
 
 #endif
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

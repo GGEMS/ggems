@@ -27,7 +27,6 @@
 #include <float.h>
 
 #include "base_object.cuh"
-#include "G4SystemOfUnits.hh"
 #include "vector.cuh"
 #include "raytracing.cuh"
 #include "constants.cuh"

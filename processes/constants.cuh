@@ -18,6 +18,8 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
+#include "G4SystemOfUnits.hh"
+
 // Run on CPU
 #define CPU_DEVICE 0
 // Run on GPU
@@ -73,6 +75,8 @@
 // Pi
 #define gpu_pi               3.141592653589793116
 #define gpu_twopi            2.0*gpu_pi
+
+
 
 /*
 

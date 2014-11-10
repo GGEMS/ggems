@@ -51,10 +51,10 @@ unsigned int __host__ __device__ get_geometry_material(Scene geometry, unsigned 
 }
 
 // Get distance from an object
-float __host__ __device__ get_distance_to_object(Scene geometry, unsigned int adr_geom, float3 pos, float3 dir) {
+float __host__ __device__ get_distance_to_object(Scene geometry, unsigned int adr_geom,
+                                                 unsigned int obj_type, float3 pos, float3 dir) {
 
     float distance = FLT_MAX;
-    unsigned int obj_type = (unsigned int)geometry.data_objects[adr_geom+ADR_OBJ_TYPE];
 
     // AABB volume
     if (obj_type == AABB) {
@@ -81,26 +81,30 @@ float __host__ __device__ get_distance_to_object(Scene geometry, unsigned int ad
         distance = hit_ray_sphere(pos, dir, c, r);
 
     } else if (obj_type == VOXELIZED) {
-        // TODO a voxel
 
+        // Change particle frame (into voxelized volume)
+        pos.x -= geometry.data_objects[adr_geom+ADR_AABB_XMIN]; // -= xmin
+        pos.y -= geometry.data_objects[adr_geom+ADR_AABB_YMIN]; // -= ymin
+        pos.z -= geometry.data_objects[adr_geom+ADR_AABB_ZMIN]; // -= zmin
+        // Get spacing
+        float3 s;
+        s.x = geometry.data_objects[adr_geom+ADR_VOXELIZED_SX];
+        s.y = geometry.data_objects[adr_geom+ADR_VOXELIZED_SY];
+        s.z = geometry.data_objects[adr_geom+ADR_VOXELIZED_SZ];
+        // Get the voxel index
+        int3 ind;
+        ind.x = (unsigned int)(pos.x / s.x);
+        ind.y = (unsigned int)(pos.y / s.y);
+        ind.z = (unsigned int)(pos.z / s.z);
+        // Define the voxel bounding box
+        float xmin = (dir.x > 0 && pos.x > (ind.x+1)*s.x - EPSILON3) ? (ind.x+1)*s.x : ind.x*s.x;
+        float ymin = (dir.y > 0 && pos.y > (ind.y+1)*s.y - EPSILON3) ? (ind.y+1)*s.y : ind.y*s.y;
+        float zmin = (dir.z > 0 && pos.z > (ind.z+1)*s.z - EPSILON3) ? (ind.z+1)*s.z : ind.z*s.z;
+        float xmax = (dir.x < 0 && pos.x < xmin + EPSILON3) ? xmin-s.x : xmin+s.x;
+        float ymax = (dir.y < 0 && pos.y < ymin + EPSILON3) ? ymin-s.y : ymin+s.y;
+        float zmax = (dir.z < 0 && pos.z < zmin + EPSILON3) ? zmin-s.z : zmin+s.z;
 
-
-//        float xmin, xmax, ymin, ymax, zmin, zmax;
-//        float3 di = inverse_vector(d);
-//        float tmin, tmax, tymin, tymax, tzmin, tzmax, buf;
-
-//        // Define the voxel bounding box
-
-//        // From Michaela
-//        xmin = (d.x > 0 && p.x > (vox.x+1) * res.x - EPS) ? (vox.x+1) * res.x : vox.x*res.x;
-//        ymin = (d.y > 0 && p.y > (vox.y+1) * res.y - EPS) ? (vox.y+1) * res.y : vox.y*res.y;
-//        zmin = (d.z > 0 && p.z > (vox.z+1) * res.z - EPS) ? (vox.z+1) * res.z : vox.z*res.z;
-
-//        xmax = (d.x < 0 && p.x < xmin + EPS) ? xmin-res.x : xmin+res.x;
-//        ymax = (d.y < 0 && p.y < ymin + EPS) ? ymin-res.y : ymin+res.y;
-//        zmax = (d.z < 0 && p.z < zmin + EPS) ? zmin-res.z : zmin+res.z;
-
-
+        distance = hit_ray_AABB(pos, dir, xmin, xmax, ymin, ymax, zmin, zmax);
 
     } else if (obj_type == MESHED) {
         // TODO
@@ -115,19 +119,37 @@ void __host__ __device__ get_next_geometry_boundary(Scene geometry, unsigned int
                                                      float &interaction_distance,
                                                      unsigned int &geometry_volume) {
 
-
-    interaction_distance = FLT_MAX;
     geometry_volume = cur_geom;
     float distance;
 
+    ////// Mother
+
     // First check the mother volume (particle escaping the volume)
     unsigned int adr_geom = geometry.ptr_objects[cur_geom];
+    unsigned int obj_type = (unsigned int)geometry.data_objects[adr_geom+ADR_OBJ_TYPE];
 
-    distance = get_distance_to_object(geometry, adr_geom, pos, dir);
-    if (distance <= interaction_distance) {
-        interaction_distance = distance + EPSILON3; // overshoot
+    // Special case of voxelized volume where there are voxel boundary
+    if (obj_type == VOXELIZED) {
+        // Volume bounding box
+        float safety = get_distance_to_object(geometry, adr_geom, AABB, pos, dir);
+        // Voxel boundary
+        distance = get_distance_to_object(geometry, adr_geom, VOXELIZED, pos, dir);
+        // Next voxel but still in the volume
+        if (distance < safety) {
+            geometry_volume = cur_geom;
+        // Or escaping the voxelized volume
+        } else {
+            geometry_volume = geometry.mother_node[cur_geom];
+        }
+    // Any other volumes
+    } else {
+        distance = get_distance_to_object(geometry, adr_geom, obj_type, pos, dir);
         geometry_volume = geometry.mother_node[cur_geom];
     }
+    // First intersection distance given by the current volume
+    interaction_distance = distance + EPSILON3; // overshoot
+
+    ////// Children
 
     // Then check every child contains in this node
     unsigned int adr_node = geometry.ptr_nodes[cur_geom];
@@ -141,13 +163,13 @@ void __host__ __device__ get_next_geometry_boundary(Scene geometry, unsigned int
 
         // Determine the type of the volume
         unsigned int adr_child_geom = geometry.ptr_objects[id_child_geom];
+        obj_type = (unsigned int)geometry.data_objects[adr_child_geom+ADR_OBJ_TYPE];
 
-        distance = get_distance_to_object(geometry, adr_child_geom, pos, dir);
+        distance = get_distance_to_object(geometry, adr_child_geom, obj_type, pos, dir);
         if (distance <= interaction_distance) {
             interaction_distance = distance + EPSILON3; // overshoot
             geometry_volume = id_child_geom;
         }
-
 
         ++offset_node;
     }
@@ -642,7 +664,7 @@ void GeometryBuilder::build_object(Voxelized obj) {
     array_push_back(&world.data_objects, world.data_objects_dim, obj.spacing_y);
     array_push_back(&world.data_objects, world.data_objects_dim, obj.spacing_z);
     // Finally append voxelized data into the world
-    array_append_array(&world.data_objects, world.data_objects_dim, &obj.data, obj.number_of_voxels);
+    array_append_array(&world.data_objects, world.data_objects_dim, &(obj.data), obj.number_of_voxels);
 
     // Name of this object
     name_objects.push_back(obj.object_name);

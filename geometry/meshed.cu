@@ -450,7 +450,7 @@ void Meshed::scale(float sx, float sy, float sz) {
 void Meshed::rotate(float3 r) {
 
     // float deg = pi / 180.0f;
-    float phi = r.x*deg; // deg is defined in processes/constant.cuh
+    float phi = r.x*deg; // deg is defined by G4 unit system
     float theta = r.y*deg;
     float psi = r.z*deg;
 

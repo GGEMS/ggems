@@ -103,7 +103,8 @@ struct Scene {
 // Host/Device function that handle geometry
 
 unsigned int __host__ __device__ get_geometry_material(Scene geometry, unsigned int id_geom, float3 pos);
-float __host__ __device__ get_distance_to_object(Scene geometry, unsigned int adr_geom, float3 pos, float3 dir);
+float __host__ __device__ get_distance_to_object(Scene geometry, unsigned int adr_geom, unsigned int obj_type,
+                                                 float3 pos, float3 dir);
 void __host__ __device__ get_next_geometry_boundary(Scene geometry, unsigned int cur_geom,
                                                      float3 pos, float3 dir,
                                                      float &interaction_distance,

@@ -41,6 +41,8 @@
 #include "mathplot.cuh"
 #include "fun.cuh"
 
+#include "flat_panel_detector.cuh"
+
 // Class to manage the hierarchical structure of the world
 class SimulationBuilder {
     public:
@@ -50,6 +52,8 @@ class SimulationBuilder {
         void set_materials(MaterialBuilder tab);
         void set_sources(SourceBuilder src);
         void set_particles(ParticleBuilder p);
+
+        void set_detector(FlatPanelDetector vdetector); // FIXME should be a builder
 
         ParticleBuilder get_particles();
 
@@ -79,6 +83,8 @@ class SimulationBuilder {
         GlobalSimulationParameters parameters;
         CrossSectionsBuilder cs_tables;
 
+        FlatPanelDetector detector; // FIXME sould be a detector
+
         // Record history for some particles (only CPU version)
         HistoryBuilder history;
 
@@ -87,6 +93,9 @@ class SimulationBuilder {
         // Main functions
         void cpu_primaries_generator();
         void cpu_main_navigation();
+
+        // Checker
+        bool detector_set;
 
 };
 

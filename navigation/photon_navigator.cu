@@ -25,6 +25,7 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_i
                           Scene geometry, MaterialsTable materials,
                           PhotonCrossSectionTable photon_CS_table,
                           GlobalSimulationParameters parameters,
+                          ImageDetector &panel_detector,
                           HistoryBuilder &history) {
 
 
@@ -208,21 +209,52 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_i
     // Local deposition if this photon was absorbed
     //if (particles.endsimu[part_id] == PARTICLE_DEAD) discrete_loss = particles.E[part_id];
 
+    //// Handle detector ////////////////////////////////////////
 
+    // If a detector is defined
+    if (panel_detector.data != NULL) {
+        if (next_geometry_volume == panel_detector.geometry_id) {
+            // Change particle frame (into voxelized volume)
+            pos.x -= panel_detector.xmin;
+            pos.y -= panel_detector.ymin;
+            pos.z -= panel_detector.zmin;
+            // Get the voxel index
+            int3 ind;
+            ind.x = (unsigned int)(pos.x / panel_detector.sx);
+            ind.y = (unsigned int)(pos.y / panel_detector.sy);
+            ind.z = (unsigned int)(pos.z / panel_detector.sz);
+            // Assertion
+            assert(ind.x < panel_detector.nx);
+            assert(ind.y < panel_detector.ny);
+            assert(ind.z < panel_detector.nz);
+            // Count a hit
+            unsigned int abs_ind = ind.z * (panel_detector.nx*panel_detector.ny) +
+                                   ind.y * panel_detector.nx +
+                                   ind.x;
+            panel_detector.data[abs_ind] += 1.0f;
+
+            // FIXME - Kill the particle for a simple simulation
+            //         usually each hit have to be stored within the detector
+            particles.endsimu[part_id] = PARTICLE_DEAD;
+
+        }
+    }
+
+/*
     // Record this step if required
     if (history.record_flag == ENABLED) {
         history.cpu_record_a_step(particles, part_id);
     }
+*/
 
-
-
+/*
     // DEBUGING: phasespace
     if (next_geometry_volume == 0 && particles.endsimu[part_id] == PARTICLE_ALIVE) {
         printf("%e %e %e %e %e %e %e\n", particles.E[part_id], pos.x, pos.y, pos.z, dir.x, dir.y, dir.z);
         particles.endsimu[part_id] = PARTICLE_DEAD;
         return;
     }
-
+*/
 
 
 

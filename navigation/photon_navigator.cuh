@@ -32,6 +32,8 @@
 #include "meshed.cuh"
 #include "voxelized.cuh"
 
+#include "flat_panel_detector.cuh"
+
 #include "vector.cuh"
 #include "prng.cuh"
 
@@ -41,6 +43,7 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_i
                           Scene geometry, MaterialsTable materials,
                           PhotonCrossSectionTable photon_CS_table,
                           GlobalSimulationParameters parameters,
+                          ImageDetector &panel_detector,
                           HistoryBuilder &history);
 
 

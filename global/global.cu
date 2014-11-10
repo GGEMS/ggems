@@ -191,7 +191,7 @@ void array_append_array(float **vector, unsigned int &dim, float **an_array, uns
         }
     // else reallocation
     } else {
-        (*vector) = (float*)realloc((*vector), (dim+1)*sizeof(float));
+        (*vector) = (float*)realloc((*vector), (dim+a_dim)*sizeof(float));
         if ((*vector) == NULL) {
             print_error("Memory reallocation from array_append_array!!!\n");
             exit(EXIT_FAILURE);

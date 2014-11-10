@@ -66,8 +66,8 @@ void VRML::write_geometry(GeometryBuilder geometry) {
             fprintf(pfile, "\n# %s\n", geometry.name_objects[iobj].c_str());
             fprintf(pfile, "Transform {\n");
             fprintf(pfile, "  translation %f %f %f\n", xmin+(xmax-xmin)/2.0,
-                    ymin+(ymax-ymin)/2.0,
-                    zmin+(zmax-zmin)/2.0);
+                                                       ymin+(ymax-ymin)/2.0,
+                                                       zmin+(zmax-zmin)/2.0);
             fprintf(pfile, "  children [\n");
             fprintf(pfile, "    Shape {\n");
             fprintf(pfile, "      appearance Appearance {\n");
@@ -87,6 +87,36 @@ void VRML::write_geometry(GeometryBuilder geometry) {
 
         } else if (type_obj == SPHERE) {
             // do
+        } else if (type_obj == VOXELIZED) {
+
+            float xmin = geometry.world.data_objects[adr_obj + ADR_AABB_XMIN];
+            float xmax = geometry.world.data_objects[adr_obj + ADR_AABB_XMAX];
+            float ymin = geometry.world.data_objects[adr_obj + ADR_AABB_YMIN];
+            float ymax = geometry.world.data_objects[adr_obj + ADR_AABB_YMAX];
+            float zmin = geometry.world.data_objects[adr_obj + ADR_AABB_ZMIN];
+            float zmax = geometry.world.data_objects[adr_obj + ADR_AABB_ZMAX];
+
+            fprintf(pfile, "\n# %s\n", geometry.name_objects[iobj].c_str());
+            fprintf(pfile, "Transform {\n");
+            fprintf(pfile, "  translation %f %f %f\n", xmin+(xmax-xmin)/2.0,
+                                                       ymin+(ymax-ymin)/2.0,
+                                                       zmin+(zmax-zmin)/2.0);
+            fprintf(pfile, "  children [\n");
+            fprintf(pfile, "    Shape {\n");
+            fprintf(pfile, "      appearance Appearance {\n");
+            fprintf(pfile, "        material Material {\n");
+            fprintf(pfile, "          diffuseColor %f %f %f\n", geometry.object_colors[iobj].r,
+                    geometry.object_colors[iobj].g,
+                    geometry.object_colors[iobj].b);
+            fprintf(pfile, "          transparency %f\n", geometry.object_transparency[iobj]);
+            fprintf(pfile, "        }\n");
+            fprintf(pfile, "      }\n");
+            fprintf(pfile, "      geometry Box {\n");
+            fprintf(pfile, "        size %f %f %f\n", xmax-xmin, ymax-ymin, zmax-zmin);
+            fprintf(pfile, "      }\n");
+            fprintf(pfile, "    }\n");
+            fprintf(pfile, "  ]\n");
+            fprintf(pfile, "}\n");
         }
 
         ++iobj;
@@ -103,15 +133,13 @@ void VRML::write_sources(SourceBuilder sources) {
         unsigned int adr_src = sources.sources.ptr_sources[isrc];
 
         // Read the kind of sources
-        unsigned int type_src = (unsigned int)(sources.sources.data_sources[adr_src]);
+        unsigned int type_src = (unsigned int)(sources.sources.data_sources[adr_src + ADR_SRC_TYPE]);
 
         // Point Source
         if (type_src == POINT_SOURCE) {
-            //unsigned int geom_id = (unsigned int)(sources.sources.data_sources[adr+1]);
-            float px = sources.sources.data_sources[adr_src+2];
-            float py = sources.sources.data_sources[adr_src+3];
-            float pz = sources.sources.data_sources[adr_src+4];
-            //float energy = sources.sources.data_sources[adr+5];
+            float px = sources.sources.data_sources[adr_src+ADR_POINT_SRC_PX];
+            float py = sources.sources.data_sources[adr_src+ADR_POINT_SRC_PY];
+            float pz = sources.sources.data_sources[adr_src+ADR_POINT_SRC_PZ];
 
             fprintf(pfile, "\n# Source\n");
             fprintf(pfile, "Shape {\n");
@@ -122,6 +150,54 @@ void VRML::write_sources(SourceBuilder sources) {
             fprintf(pfile, "    color Color {\n");
             fprintf(pfile, "      color [ 1.0 1.0 0.0 ]\n");  // Yellow
             fprintf(pfile, "    }\n");
+            fprintf(pfile, "  }\n");
+            fprintf(pfile, "}\n");
+
+        } else if (type_src == CONE_BEAM_SOURCE) {
+            float px = sources.sources.data_sources[adr_src+ADR_CONE_BEAM_SRC_PX];
+            float py = sources.sources.data_sources[adr_src+ADR_CONE_BEAM_SRC_PY];
+            float pz = sources.sources.data_sources[adr_src+ADR_CONE_BEAM_SRC_PZ];
+
+            fprintf(pfile, "\n# Source\n");
+            fprintf(pfile, "Shape {\n");
+            fprintf(pfile, "  geometry PointSet {\n");
+            fprintf(pfile, "    coord Coordinate {\n");
+            fprintf(pfile, "      point [ %f %f %f ]\n", px, py, pz);
+            fprintf(pfile, "    }\n");
+            fprintf(pfile, "    color Color {\n");
+            fprintf(pfile, "      color [ 1.0 1.0 0.0 ]\n");  // Yellow
+            fprintf(pfile, "    }\n");
+            fprintf(pfile, "  }\n");
+            fprintf(pfile, "}\n\n");
+
+            float phi = sources.sources.data_sources[adr_src+ADR_CONE_BEAM_SRC_PHI];
+            float theta = sources.sources.data_sources[adr_src+ADR_CONE_BEAM_SRC_THETA];
+            float psi = sources.sources.data_sources[adr_src+ADR_CONE_BEAM_SRC_PSI];
+
+            // Draw the direction as a vector
+            //float3 d = f3_rotate(make_float3(0.0f, 0.0f, 1.0f), make_float3(phi, theta, psi));
+            float3 d = make_float3(0.0f, 0.0f, 1.0f);
+            d = f3_scale(d, 50.0f);
+
+            fprintf(pfile, "Shape {\n");
+            fprintf(pfile, "  geometry IndexedLineSet {\n");
+            // Coordinate
+            fprintf(pfile, "    coord Coordinate {\n");
+            fprintf(pfile, "      point [\n");
+            fprintf(pfile, "        %f %f %f,\n", px, py, pz);
+            fprintf(pfile, "        %f %f %f,\n", px+d.x, py+d.y, pz+d.z);
+            fprintf(pfile, "      ]\n");
+            fprintf(pfile, "    }\n");
+            // CoordIndex
+            fprintf(pfile, "    coordIndex [\n");
+            fprintf(pfile, "      %i, %i, -1,\n", 0, 1);
+            fprintf(pfile, "    ]\n");
+            // Color
+            fprintf(pfile, "    color Color {\n");
+            fprintf(pfile, "      color [1.0 1.0 0.0]\n");
+            fprintf(pfile, "    }\n");
+            fprintf(pfile, "    colorIndex [0]\n");
+            fprintf(pfile, "    colorPerVertex FALSE\n");
             fprintf(pfile, "  }\n");
             fprintf(pfile, "}\n");
 

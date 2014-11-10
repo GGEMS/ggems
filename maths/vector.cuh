@@ -22,6 +22,8 @@
 // Maths
 /////////////////////////////////////////////////////////////////////////////
 
+#include "constants.cuh"
+
 #ifndef MATRIX3
 #define MATRIX3
 struct matrix3 {
@@ -47,5 +49,7 @@ __host__ __device__ float3 f3_cross(float3 u, float3 v);
 __host__ __device__ float3 m3f3_mul(matrix3 matrix, float3 u);
 // return an unitary vector
 __host__ __device__ float3 f3_unit(float3 u);
+// rotate a vector u
+__host__ __device__ float3 f3_rotate(float3 u, float3 EulerAngles); // phi, theta, psi
 
 #endif
