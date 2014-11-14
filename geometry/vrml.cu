@@ -117,6 +117,47 @@ void VRML::write_geometry(GeometryBuilder geometry) {
             fprintf(pfile, "    }\n");
             fprintf(pfile, "  ]\n");
             fprintf(pfile, "}\n");
+        } else if (type_obj == MESHED) {
+
+            fprintf(pfile, "\n# %s\n", geometry.name_objects[iobj].c_str());
+            fprintf(pfile, "Shape {\n");
+            fprintf(pfile, "  appearance Appearance {\n");
+            fprintf(pfile, "    material Material {\n");
+            fprintf(pfile, "      diffuseColor %f %f %f\n", geometry.object_colors[iobj].r,
+                    geometry.object_colors[iobj].g,
+                    geometry.object_colors[iobj].b);
+            fprintf(pfile, "      transparency %f\n", geometry.object_transparency[iobj]);
+            fprintf(pfile, "    }\n");
+            fprintf(pfile, "  }\n");
+
+            fprintf(pfile, "  geometry IndexedFaceSet {\n");
+            fprintf(pfile, "    coord Coordinate {\n");
+            fprintf(pfile, "      point [\n");
+            unsigned int nb_vertices = geometry.world.data_objects[adr_obj + ADR_MESHED_NB_VERTICES];
+            unsigned int adr_data = adr_obj + ADR_MESHED_DATA;
+            unsigned int ind;
+            unsigned int i=0; while (i < nb_vertices) {
+                ind = 3*i;
+                fprintf(pfile, "        %f %f %f,\n", geometry.world.data_objects[adr_data+ind],
+                                                      geometry.world.data_objects[adr_data+ind+1],
+                                                      geometry.world.data_objects[adr_data+ind+2]);
+                ++i;
+            }
+            fprintf(pfile, "      ]\n");
+            fprintf(pfile, "    }\n");
+
+            fprintf(pfile, "    coordIndex [\n");
+            unsigned int nb_triangles = nb_vertices / 3;
+            i=0; while (i < nb_triangles) {
+                ind = 3*i;
+                fprintf(pfile, "      %i, %i, %i, -1,\n", ind, ind+1, ind+2);
+                ++i;
+            }
+            fprintf(pfile, "    ]\n");
+
+            fprintf(pfile, "  }\n");
+            fprintf(pfile, "}\n");
+
         }
 
         ++iobj;

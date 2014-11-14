@@ -126,11 +126,10 @@ float __host__ __device__ get_distance_to_object(Scene geometry, unsigned int ad
         float tri_distance;
         if (octree_type == NO_OCTREE) {
             unsigned int nb_tri = geometry.data_objects[adr_geom+ADR_MESHED_NB_TRIANGLES];
-            unsigned int pt_tri;
             unsigned int i=0;
             while (i < nb_tri) {
                 // Fetch a triangle
-                ptr_tri = adr_geom+ADR_MESHED_DATA+ i*9; // 3 vertices of float3
+                unsigned int ptr_tri = adr_geom+ADR_MESHED_DATA+ i*9; // 3 vertices of float3
                 float3 u = make_float3(geometry.data_objects[ptr_tri],
                                        geometry.data_objects[ptr_tri+1],
                                        geometry.data_objects[ptr_tri+2]);
