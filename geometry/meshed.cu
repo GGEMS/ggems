@@ -287,7 +287,6 @@ void Meshed::load_from_raw(std::string filename) {
 
 }
 
-/*
 // Export the mesh and its associated octree to ggems format
 void Meshed::save_ggems_mesh(std::string filename) {
 
@@ -325,7 +324,8 @@ void Meshed::save_ggems_mesh(std::string filename) {
     fwrite(&zmin, 1, sizeof(float), pfile);
     fwrite(&zmax, 1, sizeof(float), pfile);
 
-    fwrite(vertices.data(), number_of_vertices, sizeof(float), pfile);
+    //               xyz
+    fwrite(vertices, 3*number_of_vertices, sizeof(float), pfile);
 
     // Then if defined export the associated octree
     fwrite(&octree_type, 1, sizeof(unsigned short int), pfile);
@@ -333,6 +333,10 @@ void Meshed::save_ggems_mesh(std::string filename) {
         fwrite(&nb_cell_x, 1, sizeof(unsigned int), pfile);
         fwrite(&nb_cell_y, 1, sizeof(unsigned int), pfile);
         fwrite(&nb_cell_z, 1, sizeof(unsigned int), pfile);
+
+        fwrite(&cell_size_x, 1, sizeof(float), pfile);
+        fwrite(&cell_size_y, 1, sizeof(float), pfile);
+        fwrite(&cell_size_z, 1, sizeof(float), pfile);
 
         tmp = nb_objs_per_cell.size();
         fwrite(&tmp, 1, sizeof(unsigned int), pfile);
@@ -351,9 +355,7 @@ void Meshed::save_ggems_mesh(std::string filename) {
     fclose(pfile);
 
 }
-*/
 
-/*
 // Load mesh in ggems format
 void Meshed::load_from_ggems_mesh(std::string filename) {
 
@@ -393,9 +395,9 @@ void Meshed::load_from_ggems_mesh(std::string filename) {
     fread(&zmin, sizeof(float), 1, pfile);
     fread(&zmax, sizeof(float), 1, pfile);
 
-    vertices.clear();
-    vertices.resize(number_of_vertices);
-    fread(vertices.data(), sizeof(float), number_of_vertices, pfile);
+    free(vertices); //                           xyz
+    vertices = (float*)malloc(number_of_vertices*3 * sizeof(float));
+    fread(vertices, sizeof(float), 3*number_of_vertices, pfile);
 
     // Then if defined import the associated octree
     fread(&octree_type, sizeof(unsigned short int), 1, pfile);
@@ -403,6 +405,10 @@ void Meshed::load_from_ggems_mesh(std::string filename) {
         fread(&nb_cell_x, sizeof(unsigned int), 1, pfile);
         fread(&nb_cell_y, sizeof(unsigned int), 1, pfile);
         fread(&nb_cell_z, sizeof(unsigned int), 1, pfile);
+
+        fread(&cell_size_x, sizeof(float), 1, pfile);
+        fread(&cell_size_y, sizeof(float), 1, pfile);
+        fread(&cell_size_z, sizeof(float), 1, pfile);
 
         fread(&tmp, sizeof(unsigned int), 1, pfile);
         nb_objs_per_cell.clear();
@@ -420,7 +426,6 @@ void Meshed::load_from_ggems_mesh(std::string filename) {
         fwrite(addr_to_cell.data(), sizeof(float), tmp, pfile);
     }
 }
-*/
 
 // Scaling
 void Meshed::scale(float3 s) {

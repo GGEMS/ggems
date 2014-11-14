@@ -42,8 +42,8 @@ class Meshed : public BaseObject {
     public:
         Meshed();
         void load_from_raw(std::string filename);
-        //void save_ggems_mesh(std::string filename);
-        //void load_from_ggems_mesh(std::string filename);
+        void save_ggems_mesh(std::string filename);
+        void load_from_ggems_mesh(std::string filename);
         void build_regular_octree(unsigned int nx, unsigned int ny, unsigned int nz);
 
         void scale(float3 s);

@@ -48,6 +48,12 @@ __host__ __device__ float hit_ray_AABB(float3 ray_p, float3 ray_d,
                                        float aabb_ymin, float aabb_ymax,
                                        float aabb_zmin, float aabb_zmax);
 
+// Ray/AABB intersection test - Smits algorithm
+__host__ __device__ bool test_ray_AABB(float3 ray_p, float3 ray_d,
+                                       float aabb_xmin, float aabb_xmax,
+                                       float aabb_ymin, float aabb_ymax,
+                                       float aabb_zmin, float aabb_zmax);
+
 // Ray/triangle intersection - Moller-Trumbore algorithm
 __host__ __device__ float hit_ray_triangle(float3 ray_p, float3 ray_d,
                                            float3 tri_u,              // Triangle

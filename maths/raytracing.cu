@@ -212,22 +212,6 @@ __host__ __device__ float hit_ray_AABB(float3 ray_p, float3 ray_d,
                                        float aabb_xmin, float aabb_xmax,
                                        float aabb_ymin, float aabb_ymax,
                                        float aabb_zmin, float aabb_zmax) {
-    /*
-    float xmin, xmax, ymin, ymax, zmin, zmax;
-    float3 di = inverse_vector(d);
-    float tmin, tmax, tymin, tymax, tzmin, tzmax, buf;
-
-    // Define the voxel bounding box
-
-    // From Michaela
-    xmin = (d.x > 0 && p.x > (vox.x+1) * res.x - EPS) ? (vox.x+1) * res.x : vox.x*res.x;
-    ymin = (d.y > 0 && p.y > (vox.y+1) * res.y - EPS) ? (vox.y+1) * res.y : vox.y*res.y;
-    zmin = (d.z > 0 && p.z > (vox.z+1) * res.z - EPS) ? (vox.z+1) * res.z : vox.z*res.z;
-
-    xmax = (d.x < 0 && p.x < xmin + EPS) ? xmin-res.x : xmin+res.x;
-    ymax = (d.y < 0 && p.y < ymin + EPS) ? ymin-res.y : ymin+res.y;
-    zmax = (d.z < 0 && p.z < zmin + EPS) ? zmin-res.z : zmin+res.z;
-    */
 
     float idx, idy, idz;
     float tmin, tmax, tymin, tymax, tzmin, tzmax, buf;
@@ -290,6 +274,71 @@ __host__ __device__ float hit_ray_AABB(float3 ray_p, float3 ray_d,
         return tmin;
     }
 
+}
+
+// Ray/AABB intersection test - Smits algorithm
+__host__ __device__ bool test_ray_AABB(float3 ray_p, float3 ray_d,
+                                       float aabb_xmin, float aabb_xmax,
+                                       float aabb_ymin, float aabb_ymax,
+                                       float aabb_zmin, float aabb_zmax) {
+
+    float idx, idy, idz;
+    float tmin, tmax, tymin, tymax, tzmin, tzmax, buf;
+
+    tmin = -FLT_MAX;
+    tmax =  FLT_MAX;
+
+    // on x
+    if (fabs(ray_d.x) < EPSILON6) {
+        if (ray_p.x < aabb_xmin || ray_p.x > aabb_xmax) {return false;}
+    } else {
+        idx = 1.0f / ray_d.x;
+        tmin = (aabb_xmin - ray_p.x) * idx;
+        tmax = (aabb_xmax - ray_p.x) * idx;
+        if (tmin > tmax) {
+            buf = tmin;
+            tmin = tmax;
+            tmax = buf;
+        }
+        if (tmin > tmax) {return false;}
+    }
+    // on y
+    if (fabs(ray_d.y) < EPSILON6) {
+        if (ray_p.y < aabb_ymin || ray_p.y > aabb_ymax) {return false;}
+    } else {
+        idy = 1.0f / ray_d.y;
+        tymin = (aabb_ymin - ray_p.y) * idy;
+        tymax = (aabb_ymax - ray_p.y) * idy;
+        if (tymin > tymax) {
+            buf = tymin;
+            tymin = tymax;
+            tymax = buf;
+        }
+        if (tymin > tmin) {tmin = tymin;}
+        if (tymax < tmax) {tmax = tymax;}
+        if (tmin > tmax) {return false;}
+    }
+    // on z
+    if (fabs(ray_d.z) < EPSILON6) {
+        if (ray_p.z < aabb_zmin || ray_p.z > aabb_zmax) {return false;}
+    } else {
+        idz = 1.0f / ray_d.z;
+        tzmin = (aabb_zmin - ray_p.z) * idz;
+        tzmax = (aabb_zmax - ray_p.z) * idz;
+        if (tzmin > tzmax) {
+            buf = tzmin;
+            tzmin = tzmax;
+            tzmax = buf;
+        }
+        if (tzmin > tmin) {tmin = tzmin;}
+        if (tzmax < tmax) {tmax = tzmax;}
+        if (tmin > tmax) {return false;}
+    }
+
+    // Return the smaller positive value
+    if (tmin < 0 && tmax < 0) return false;
+
+    return true;
 }
 
 // Ray/triangle intersection - Moller-Trumbore algorithm

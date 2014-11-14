@@ -107,8 +107,137 @@ float __host__ __device__ get_distance_to_object(Scene geometry, unsigned int ad
         distance = hit_ray_AABB(pos, dir, xmin, xmax, ymin, ymax, zmin, zmax);
 
     } else if (obj_type == MESHED) {
-        // TODO
-    }
+
+        unsigned int octree_type = geometry.data_objects[adr_geom+ADR_MESHED_OCTREE_TYPE];
+
+        // Read first the bounding box
+        float xmin = geometry.data_objects[adr_geom+ADR_AABB_XMIN];
+        float xmax = geometry.data_objects[adr_geom+ADR_AABB_XMAX];
+        float ymin = geometry.data_objects[adr_geom+ADR_AABB_YMIN];
+        float ymax = geometry.data_objects[adr_geom+ADR_AABB_YMAX];
+        float zmin = geometry.data_objects[adr_geom+ADR_AABB_ZMIN];
+        float zmax = geometry.data_objects[adr_geom+ADR_AABB_ZMAX];
+
+        // First check the bounding box that contains the mesh
+        if (!test_ray_AABB(pos, dir, xmin, xmax, ymin, ymax, zmin, zmax)) return FLT_MAX;
+
+        // If no octree first check every triangle
+        distance = FLT_MAX;
+        float tri_distance;
+        if (octree_type == NO_OCTREE) {
+            unsigned int nb_tri = geometry.data_objects[adr_geom+ADR_MESHED_NB_TRIANGLES];
+            unsigned int pt_tri;
+            unsigned int i=0;
+            while (i < nb_tri) {
+                // Fetch a triangle
+                ptr_tri = adr_geom+ADR_MESHED_DATA+ i*9; // 3 vertices of float3
+                float3 u = make_float3(geometry.data_objects[ptr_tri],
+                                       geometry.data_objects[ptr_tri+1],
+                                       geometry.data_objects[ptr_tri+2]);
+                float3 v = make_float3(geometry.data_objects[ptr_tri+3],
+                                       geometry.data_objects[ptr_tri+4],
+                                       geometry.data_objects[ptr_tri+5]);
+                float3 w = make_float3(geometry.data_objects[ptr_tri+6],
+                                       geometry.data_objects[ptr_tri+7],
+                                       geometry.data_objects[ptr_tri+8]);
+                // Get distance to this triangle
+                tri_distance = hit_ray_triangle(pos, dir, u, v, w);
+                if (tri_distance < distance) distance = tri_distance;
+
+                ++i;
+            }
+        // If regular octree
+        } else if (octree_type == REG_OCTREE) {
+
+            //// First get the octree index
+
+            // Change particle frame (into voxelized volume)
+            float3 localpos;
+            localpos.x = pos.x - geometry.data_objects[adr_geom+ADR_AABB_XMIN]; // -= xmin
+            localpos.y = pos.y - geometry.data_objects[adr_geom+ADR_AABB_YMIN]; // -= ymin
+            localpos.z = pos.z - geometry.data_objects[adr_geom+ADR_AABB_ZMIN]; // -= zmin
+            // Get spacing
+            float3 s;
+            s.x = geometry.data_objects[adr_geom+ADR_VOXELIZED_SX];
+            s.y = geometry.data_objects[adr_geom+ADR_VOXELIZED_SY];
+            s.z = geometry.data_objects[adr_geom+ADR_VOXELIZED_SZ];
+            // Get the voxel index
+            int3 ind;
+            ind.x = (unsigned int)(localpos.x / s.x);
+            ind.y = (unsigned int)(localpos.y / s.y);
+            ind.z = (unsigned int)(localpos.z / s.z);
+
+            // DDA algorithm
+
+            float3 finc;
+            finc.x = dir.x*s.x;
+            finc.y = dir.y*s.y;
+            finc.z = dir.z*s.z;
+            float3 fpos;
+            fpos.x = float(ind.x);
+            fpos.y = float(ind.y);
+            fpos.z = float(ind.z);
+
+            unsigned int nb_tri = geometry.data_objects[adr_geom+ADR_MESHED_NB_TRIANGLES];
+            unsigned int nx = geometry.data_objects[adr_geom+ADR_MESHED_OCTREE_NX];
+            unsigned int ny = geometry.data_objects[adr_geom+ADR_MESHED_OCTREE_NY];
+            unsigned int nz = geometry.data_objects[adr_geom+ADR_MESHED_OCTREE_NZ];
+            unsigned int adr_octree = adr_geom+ADR_MESHED_DATA+ 9*nb_tri; // 3 vertices of float3
+
+            unsigned int index = ind.z*nx*ny + ind.y*nx + ind.x;
+
+            // DDA until to find triangles on an octree cell
+            while (geometry.data_objects[adr_octree+index] == 0) {
+                ind.x = (unsigned int)fpos.x;
+                ind.y = (unsigned int)fpos.y;
+                ind.z = (unsigned int)fpos.z;
+
+                // check boundary
+                if (ind.x <0 && ind.x >= nx &&
+                    ind.y <0 && ind.y >= ny &&
+                    ind.z <0 && ind.z >= nz) {
+                    break;
+                }
+
+                // new index
+                index = ind.z*nx*ny + ind.y*nx + ind.x;
+                // iterate DDA line
+                fpos = f3_add(fpos, finc);
+            }
+
+            // if no triangle where found
+            if (geometry.data_objects[adr_octree+index] == 0) {
+                return FLT_MAX;
+            // else check every triangle contain of the octree cell
+            } else {
+                unsigned int tri_per_cell = geometry.data_objects[adr_octree+index];
+                unsigned int adr_to_cell = adr_octree + (nx*ny*nz) + index;
+                unsigned int ptr_list_tri = adr_octree + 2*(nx*ny*nz) + geometry.data_objects[adr_to_cell];
+                unsigned int i=0;
+                while (i < tri_per_cell) {
+                    unsigned int ptr_tri = geometry.data_objects[ptr_list_tri + i*9];
+
+                    float3 u = make_float3(geometry.data_objects[ptr_tri],
+                                           geometry.data_objects[ptr_tri+1],
+                                           geometry.data_objects[ptr_tri+2]);
+                    float3 v = make_float3(geometry.data_objects[ptr_tri+3],
+                                           geometry.data_objects[ptr_tri+4],
+                                           geometry.data_objects[ptr_tri+5]);
+                    float3 w = make_float3(geometry.data_objects[ptr_tri+6],
+                                           geometry.data_objects[ptr_tri+7],
+                                           geometry.data_objects[ptr_tri+8]);
+
+                    // Get distance to this triangle
+                    tri_distance = hit_ray_triangle(pos, dir, u, v, w);
+                    if (tri_distance < distance) distance = tri_distance;
+
+                    ++i;
+                } // while
+            } // if triangle
+
+        } // if regoctree
+
+    } // if meshed
 
     return distance;
 }
