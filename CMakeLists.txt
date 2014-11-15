@@ -30,6 +30,7 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/sources)
 file(GLOB_RECURSE sourcesGPU "*.cu")
 file(GLOB_RECURSE headersGPU "*.cuh")
+file(GLOB ggemssh "ggems.sh")
 
 # Compilation
 find_package(CUDA REQUIRED)
@@ -43,5 +44,15 @@ cuda_add_library(${LIB_NAME} STATIC ${sourcesGPU} ${headersGPU})
 # Installation
 install(TARGETS ${LIB_NAME} DESTINATION "lib")
 install(FILES ${headersGPU} DESTINATION "include")
+install(FILES ${ggemssh} DESTINATION "bin" PERMISSIONS WORLD_EXECUTE WORLD_READ OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE)
 
-
+install(CODE "MESSAGE(\"Installation done ...\")")
+if (UNIX)
+install(CODE "MESSAGE(\"To use GGEMS, copy this line in your .bashrc : \")")
+install(CODE "MESSAGE(\"    source ${CMAKE_INSTALL_PREFIX}/bin/ggems.sh \")")
+endif(UNIX)
+if (APPLE)
+install(CODE "MESSAGE(\" TO BE CHANGED FOR APPLE CONFIGURATIONS \")")
+install(CODE "MESSAGE(\"To use GGEMS, copy this line in your .bashrc : \")")
+install(CODE "MESSAGE(\"    source ${CMAKE_INSTALL_PREFIX}/bin/ggems.sh \")")
+endif(APPLE)
