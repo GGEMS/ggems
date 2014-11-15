@@ -29,7 +29,7 @@ BaseObject::BaseObject () {
     zmin = 0.0f;
     zmax = 0.0f;
     material_name = "MatName";
-    object_name = "ObjNBame";
+    object_name = "ObjName";
 
     // white by default
     color.r = 1.0;
@@ -38,6 +38,9 @@ BaseObject::BaseObject () {
 
     // Transparency by default
     transparency = 0.0;
+
+    // Wireframe option
+    wireframe = false;
 }
 
 void BaseObject::set_color(float r, float g, float b) {
@@ -56,6 +59,10 @@ void BaseObject::set_material(std::string mat_name) {
 
 void BaseObject::set_name(std::string obj_name) {
     object_name = obj_name;
+}
+
+void BaseObject::set_wireframe(bool val) {
+    wireframe = val;
 }
 
 #endif

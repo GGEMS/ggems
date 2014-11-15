@@ -32,12 +32,14 @@ class BaseObject {
         void set_name(std::string obj_name);
         void set_color(float r, float g, float b);
         void set_transparency(float val);
+        void set_wireframe(bool val);
 
         // Bounding box
         float xmin, xmax, ymin, ymax, zmin, zmax;
         // Viewing
         Color color;
         float transparency;
+        bool wireframe;
         // Property
         std::string material_name;
         std::string object_name;

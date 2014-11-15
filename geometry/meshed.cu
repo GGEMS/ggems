@@ -157,8 +157,8 @@ void Meshed::build_regular_octree(unsigned int nx, unsigned int ny, unsigned int
 void Meshed::load_from_raw(std::string filename) {
 
     // In order to define the bounding box of this mesh
-    xmin = FLT_MAX; ymin = FLT_MAX; zmin = FLT_MAX;
-    xmax = FLT_MIN; ymax = FLT_MIN; zmax = FLT_MIN;
+    xmin =  FLT_MAX; ymin =  FLT_MAX; zmin =  FLT_MAX;
+    xmax = -FLT_MAX; ymax = -FLT_MAX; zmax = -FLT_MAX;
 
     // To read the file
     std::string line;
@@ -284,7 +284,6 @@ void Meshed::load_from_raw(std::string filename) {
 
     // Close the file
     file.close();
-
 }
 
 // Export the mesh and its associated octree to ggems format

@@ -63,6 +63,6 @@ struct GlobalSimulationParameters {
 struct Color {
     float r, g, b;
 };
-
+Color make_color(float r, float g, float b);
 
 #endif

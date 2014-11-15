@@ -706,6 +706,8 @@ void GeometryBuilder::build_object(Aabb obj) {
     object_colors.push_back(obj.color);
     // Transparency of this object
     object_transparency.push_back(obj.transparency);
+    // Wireframe option of this object
+    object_wireframe.push_back(obj.wireframe);
     // Store the size of this object
     array_push_back(&world.size_of_objects, world.size_of_objects_dim, SIZE_AABB_OBJ);
 }
@@ -740,6 +742,8 @@ void GeometryBuilder::build_object(Sphere obj) {
     object_colors.push_back(obj.color);
     // Transparency of this object
     object_transparency.push_back(obj.transparency);
+    // Wireframe option of this object
+    object_wireframe.push_back(obj.wireframe);
     // Store the size of this object
     array_push_back(&world.size_of_objects, world.size_of_objects_dim, SIZE_SPHERE_OBJ);
 }
@@ -800,6 +804,8 @@ void GeometryBuilder::build_object(Voxelized obj) {
     object_colors.push_back(obj.color);
     // Transparency of this object
     object_transparency.push_back(obj.transparency);
+    // Wireframe option of this object
+    object_wireframe.push_back(obj.wireframe);
     // Store the size of this object
     array_push_back(&world.size_of_objects, world.size_of_objects_dim, obj.number_of_voxels+SIZE_VOXELIZED_OBJ);
 
@@ -861,6 +867,8 @@ void GeometryBuilder::build_object(Meshed obj) {
     object_colors.push_back(obj.color);
     // Transparency of this object
     object_transparency.push_back(obj.transparency);
+    // Wireframe option of this object
+    object_wireframe.push_back(obj.wireframe);
     // Store the size of this object
     if (obj.octree_type == REG_OCTREE) {
         array_push_back(&world.size_of_objects, world.size_of_objects_dim, 3*obj.number_of_vertices + obj.nb_objs_per_cell.size() +

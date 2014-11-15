@@ -141,6 +141,7 @@ class GeometryBuilder {
         std::vector<std::string> name_objects;     // Name of each object
         std::vector<Color> object_colors;          // Color of each object
         std::vector<float> object_transparency;    // Transparency of each object
+        std::vector<bool> object_wireframe;        // Wireframe option for each object
 
     private:        
         unsigned int get_material_index(std::string material_name);

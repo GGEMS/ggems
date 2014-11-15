@@ -25,6 +25,7 @@
 #include "geometry_builder.cuh"
 #include "source_builder.cuh"
 #include "particles.cuh"
+#include "global.cuh"
 
 // Axis-Aligned Bounding Box
 class VRML {
@@ -37,6 +38,10 @@ class VRML {
         void close();
     private:
         FILE *pfile;
+        void draw_wireframe_aabb(float xmin, float xmax, float ymin, float ymax, float zmin, float zmax,
+                                 Color color, float transparency);
+        void draw_aabb(float xmin, float xmax, float ymin, float ymax, float zmin, float zmax,
+                       Color color, float transparency);
 };
 
 #endif

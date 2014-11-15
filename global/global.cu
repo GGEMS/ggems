@@ -203,6 +203,14 @@ void array_append_array(float **vector, unsigned int &dim, float **an_array, uns
     (dim)+=a_dim;
 }
 
+// Create a color
+Color make_color(float r, float g, float b) {
+    Color c;
+    c.r = r;
+    c.g = g;
+    c.b = b;
+    return c;
+}
 
 
 
