@@ -83,9 +83,10 @@ float __host__ __device__ get_distance_to_object(Scene geometry, unsigned int ad
     } else if (obj_type == VOXELIZED) {
 
         // Change particle frame (into voxelized volume)
-        pos.x -= geometry.data_objects[adr_geom+ADR_AABB_XMIN]; // -= xmin
-        pos.y -= geometry.data_objects[adr_geom+ADR_AABB_YMIN]; // -= ymin
-        pos.z -= geometry.data_objects[adr_geom+ADR_AABB_ZMIN]; // -= zmin
+        float3 posinvox;
+        posinvox.x = pos.x - geometry.data_objects[adr_geom+ADR_AABB_XMIN]; // -= xmin
+        posinvox.y = pos.y - geometry.data_objects[adr_geom+ADR_AABB_YMIN]; // -= ymin
+        posinvox.z = pos.z - geometry.data_objects[adr_geom+ADR_AABB_ZMIN]; // -= zmin
         // Get spacing
         float3 s;
         s.x = geometry.data_objects[adr_geom+ADR_VOXELIZED_SX];
@@ -93,18 +94,47 @@ float __host__ __device__ get_distance_to_object(Scene geometry, unsigned int ad
         s.z = geometry.data_objects[adr_geom+ADR_VOXELIZED_SZ];
         // Get the voxel index
         int3 ind;
-        ind.x = (unsigned int)(pos.x / s.x);
-        ind.y = (unsigned int)(pos.y / s.y);
-        ind.z = (unsigned int)(pos.z / s.z);
-        // Define the voxel bounding box
-        float xmin = (dir.x > 0 && pos.x > (ind.x+1)*s.x - EPSILON3) ? (ind.x+1)*s.x : ind.x*s.x;
-        float ymin = (dir.y > 0 && pos.y > (ind.y+1)*s.y - EPSILON3) ? (ind.y+1)*s.y : ind.y*s.y;
-        float zmin = (dir.z > 0 && pos.z > (ind.z+1)*s.z - EPSILON3) ? (ind.z+1)*s.z : ind.z*s.z;
-        float xmax = (dir.x < 0 && pos.x < xmin + EPSILON3) ? xmin-s.x : xmin+s.x;
-        float ymax = (dir.y < 0 && pos.y < ymin + EPSILON3) ? ymin-s.y : ymin+s.y;
-        float zmax = (dir.z < 0 && pos.z < zmin + EPSILON3) ? zmin-s.z : zmin+s.z;
+        ind.x = (unsigned int)(posinvox.x / s.x);
+        ind.y = (unsigned int)(posinvox.y / s.y);
+        ind.z = (unsigned int)(posinvox.z / s.z);
 
-        distance = hit_ray_AABB(pos, dir, xmin, xmax, ymin, ymax, zmin, zmax);
+        //printf("Ind %i %i %i\n", ind.x, ind.y, ind.z);
+
+        // If inside the volume get the distance to the voxel bounding box
+        float xmin, ymin, xmax, ymax, zmin, zmax;
+        if (ind.x < geometry.data_objects[adr_geom+ADR_VOXELIZED_NX] &&
+            ind.y < geometry.data_objects[adr_geom+ADR_VOXELIZED_NY] &&
+            ind.z < geometry.data_objects[adr_geom+ADR_VOXELIZED_NZ] &&
+            ind.x >= 0 && ind.y >= 0 && ind.z >= 0) {
+
+            xmin = (dir.x > 0 && posinvox.x > (ind.x+1)*s.x - EPSILON3) ? (ind.x+1)*s.x : ind.x*s.x;
+            ymin = (dir.y > 0 && posinvox.y > (ind.y+1)*s.y - EPSILON3) ? (ind.y+1)*s.y : ind.y*s.y;
+            zmin = (dir.z > 0 && posinvox.z > (ind.z+1)*s.z - EPSILON3) ? (ind.z+1)*s.z : ind.z*s.z;
+            xmax = (dir.x < 0 && posinvox.x < xmin + EPSILON3) ? xmin-s.x : xmin+s.x;
+            ymax = (dir.y < 0 && posinvox.y < ymin + EPSILON3) ? ymin-s.y : ymin+s.y;
+            zmax = (dir.z < 0 && posinvox.z < zmin + EPSILON3) ? zmin-s.z : zmin+s.z;
+
+            distance = hit_ray_AABB(posinvox, dir, xmin, xmax, ymin, ymax, zmin, zmax);
+
+            //printf("DistToIn Vox %f %f %f %f %f %f\n", xmin, xmax, ymin, ymax, zmin, zmax);
+
+        // If outside the volume get the distance the main AABB
+        } else {
+
+            xmin = geometry.data_objects[adr_geom+ADR_AABB_XMIN];
+            xmax = geometry.data_objects[adr_geom+ADR_AABB_XMAX];
+            ymin = geometry.data_objects[adr_geom+ADR_AABB_YMIN];
+            ymax = geometry.data_objects[adr_geom+ADR_AABB_YMAX];
+            zmin = geometry.data_objects[adr_geom+ADR_AABB_ZMIN];
+            zmax = geometry.data_objects[adr_geom+ADR_AABB_ZMAX];
+
+            distance = hit_ray_AABB(pos, dir, xmin, xmax, ymin, ymax, zmin, zmax);
+
+            //printf("DistToOut Vox %f %f %f %f %f %f\n", xmin, xmax, ymin, ymax, zmin, zmax);
+
+        }
+
+        //printf("Dist %f\n", distance);
 
     } else if (obj_type == MESHED) {
 

@@ -29,6 +29,8 @@
 #include "raytracing.cuh"
 #include "global.cuh"
 
+#include "assert.h"
+
 #define AABB 0
 #define SPHERE 1
 #define MESHED 2

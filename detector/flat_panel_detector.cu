@@ -30,6 +30,7 @@ FlatPanelDetector::FlatPanelDetector() {
     panel_detector.sy = 0;
     panel_detector.sz = 0;
     panel_detector.geometry_id = 0;
+    panel_detector.countp = 0;
 
 }
 

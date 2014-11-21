@@ -56,6 +56,7 @@ class SimulationBuilder {
         void set_detector(FlatPanelDetector vdetector); // FIXME should be a builder
 
         ParticleBuilder get_particles();
+        FlatPanelDetector get_detector();
 
         void set_hardware_target(std::string value);
         void set_process(std::string process_name);

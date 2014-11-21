@@ -26,6 +26,7 @@ struct ImageDetector {
     unsigned int geometry_id;
     unsigned int nx, ny, nz;
     unsigned int nb_voxels;
+    unsigned int countp;
     float sx, sy, sz;
     float xmin, xmax, ymin, ymax, zmin, zmax;
     float *data;

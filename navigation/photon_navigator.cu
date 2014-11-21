@@ -110,6 +110,8 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_i
         next_interaction_distance = interaction_distance;
         next_discrete_process = GEOMETRY_BOUNDARY;
         next_geometry_volume = hit_id_geom;
+
+
     }
 
     //// Move particle //////////////////////////////////////////////////////
@@ -124,6 +126,7 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_i
 
     // Move the particle
     pos = f3_add(pos, f3_scale(dir, next_interaction_distance));
+    printf("Dist %f Hit %i pos %f %f %f\n", interaction_distance, hit_id_geom, pos.x, pos.y, pos.z);
 
     // TODO
     //particles.tof[id] += gpu_speed_of_light * next_interaction_distance;
@@ -214,6 +217,7 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_i
     // If a detector is defined
     if (panel_detector.data != NULL) {
         if (next_geometry_volume == panel_detector.geometry_id) {
+
             // Change particle frame (into voxelized volume)
             pos.x -= panel_detector.xmin;
             pos.y -= panel_detector.ymin;
@@ -232,6 +236,9 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_i
                                    ind.y * panel_detector.nx +
                                    ind.x;
             panel_detector.data[abs_ind] += 1.0f;
+            panel_detector.countp++;
+
+            //printf("Ct in %i\n", panel_detector.countp);
 
             // FIXME - Kill the particle for a simple simulation
             //         usually each hit have to be stored within the detector

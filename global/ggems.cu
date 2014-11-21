@@ -223,6 +223,10 @@ ParticleBuilder SimulationBuilder::get_particles() {
     return particles;
 }
 
+FlatPanelDetector SimulationBuilder::get_detector() {
+    return detector;
+}
+
 ////// :: Command ::
 
 
@@ -315,7 +319,7 @@ void SimulationBuilder::start_simulation() {
 
             // iter
             ++iter;
-            //printf(">> Iter %i / %i\n", iter, nb_of_iterations);
+            printf(">> Iter %i / %i\n", iter, nb_of_iterations);
         } // main loop
 
     }
