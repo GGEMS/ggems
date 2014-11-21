@@ -15,8 +15,8 @@
 //
 // GGEMS Copyright (C) 2013-2014 Julien Bert
 
-#ifndef VOXELIZED_H
-#define VOXELIZED_H
+#ifndef VOXELIZED_CUH
+#define VOXELIZED_CUH
 
 #include <stdlib.h>
 #include <stdio.h>

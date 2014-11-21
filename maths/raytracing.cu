@@ -341,6 +341,20 @@ __host__ __device__ bool test_ray_AABB(float3 ray_p, float3 ray_d,
     return true;
 }
 
+// AABB/AABB test
+__host__ __device__ bool test_AABB_AABB(float a_xmin, float a_xmax, float a_ymin, float a_ymax,
+                                        float a_zmin, float a_zmax,
+                                        float b_xmin, float b_xmax, float b_ymin, float b_ymax,
+                                        float b_zmin, float b_zmax) {
+
+    if (a_xmax < b_xmin || a_xmin > b_xmax) return false;
+    if (a_ymax < b_ymin || a_ymin > b_ymax) return false;
+    if (a_zmax < b_zmin || a_zmin > b_zmax) return false;
+
+    return true;
+}
+
+
 // Ray/triangle intersection - Moller-Trumbore algorithm
 __host__ __device__ float hit_ray_triangle(float3 ray_p, float3 ray_d,
                                                   float3 tri_u,              // Triangle
