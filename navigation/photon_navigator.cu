@@ -47,6 +47,8 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_i
     // Get the material that compose this volume
     unsigned int id_mat = get_geometry_material(geometry, cur_id_geom, pos);
 
+    //printf("Cur id geom %i mat %i\n", cur_id_geom, id_mat);
+
     //// Find next discrete interaction ///////////////////////////////////////
 
     float next_interaction_distance = FLT_MAX;
@@ -125,8 +127,7 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_i
     //}
 
     // Move the particle
-    pos = f3_add(pos, f3_scale(dir, next_interaction_distance));
-    printf("Dist %f Hit %i pos %f %f %f\n", interaction_distance, hit_id_geom, pos.x, pos.y, pos.z);
+    pos = f3_add(pos, f3_scale(dir, next_interaction_distance));    
 
     // TODO
     //particles.tof[id] += gpu_speed_of_light * next_interaction_distance;
@@ -166,6 +167,8 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_i
 
     //float discrete_loss = 0.0f;
 
+    //printf("Dist %f Hit %i pos %f %f %f ", interaction_distance, hit_id_geom, pos.x, pos.y, pos.z);
+
     if (next_discrete_process == PHOTON_COMPTON) {
 
         //   TODO: cutE = materials.electron_cut_energy[mat]                 cutE
@@ -175,6 +178,7 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_i
         //printf("id %i - pos %f %f %f - dir %f %f %f - Cmpt - geom cur %i hit %i\n", part_id, pos.x, pos.y, pos.z,
         //                                                                 dir.x, dir.y, dir.z,
         //                                                                 cur_id_geom, next_geometry_volume);
+        //printf("Compton\n");
     }
 
     if (next_discrete_process == PHOTON_PHOTOELECTRIC) {
@@ -188,23 +192,24 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_i
         //printf("id %i - pos %f %f %f - dir %f %f %f - PE - geom cur %i hit %i\n", part_id, pos.x, pos.y, pos.z,
         //                                                               dir.x, dir.y, dir.z,
         //                                                               cur_id_geom, next_geometry_volume);
-
+        //printf("PE\n");
     }
 
     if (next_discrete_process == PHOTON_RAYLEIGH) {
         Rayleigh_SampleSecondaries_Livermore(particles, materials, photon_CS_table, E_index, id_mat, part_id);
+        //printf("Rayleigh\n");
     }
 
 
-    /*
+
     if (next_discrete_process == GEOMETRY_BOUNDARY) {
         // Debug
-        printf("id %i - pos %f %f %f - dir %f %f %f - Bnd - geom cur %i hit %i\n", part_id, pos.x, pos.y, pos.z,
-                                                                         dir.x, dir.y, dir.z,
-                                                                         cur_id_geom, next_geometry_volume);
-
+        //printf("id %i - pos %f %f %f - dir %f %f %f - Bnd - geom cur %i hit %i\n", part_id, pos.x, pos.y, pos.z,
+        //                                                                 dir.x, dir.y, dir.z,
+        //                                                                 cur_id_geom, next_geometry_volume);
+        //printf("Geom\n");
     }
-    */
+
 
 
     // WARNING: drop energy for every "dead" particle (gamma + e-)
@@ -247,12 +252,10 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_i
         }
     }
 
-/*
     // Record this step if required
     if (history.record_flag == ENABLED) {
         history.cpu_record_a_step(particles, part_id);
     }
-*/
 
 /*
     // DEBUGING: phasespace

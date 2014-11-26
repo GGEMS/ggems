@@ -29,7 +29,7 @@ void cpu_main_navigator(ParticleStack &particles, Scene geometry,
     unsigned int id = 0;
     while (id < particles.size) {
 
-        printf("\n>>>> Particle %i\n", id);
+        //printf("\n>>>> Particle %i\n", id);
 
         // Stepping loop, iterate the particle until the end
         unsigned int istep = 0;
