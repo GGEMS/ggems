@@ -18,22 +18,6 @@
 #ifndef GLOBAL_CUH
 #define GLOBAL_CUH
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <string>
-#include <vector>
-#include <sstream>
-#include <fstream>
-#include <map>
-#include <algorithm>
-#include <cfloat>
-#include <assert.h>
-#include <math.h>
-
-#include "constants.cuh"
-#include "vector.cuh"
-
 /////// TYPEDEF ////////////////////////////////////////////////
 
 #ifndef SINGLE_PRECISION
@@ -60,17 +44,17 @@
     typedef unsigned short int ui16;
     typedef unsigned char ui8;
 
-    #define make_f32xy make_float2;
-    #define make_f32xyz make_float3;
-    #define make_f32xyzw make_float4;
+//    #define make_f32xy make_float2;
+//    #define make_f32xyz make_float3;
+//    #define make_f32xyzw make_float4;
 
-    #define make_f64xy make_double2;
-    #define make_f64xy make_double3;
-    #define make_f64xy make_double4;
+//    #define make_f64xy make_double2;
+//    #define make_f64xy make_double3;
+//    #define make_f64xy make_double4;
 
-    #define make_i32xy make_int2;
-    #define make_i32xyz make_int3;
-    #define make_i32xyzw make_int4;
+//    #define make_i32xy make_int2;
+//    #define make_i32xyz make_int3;
+//    #define make_i32xyzw make_int4;
 
     #define F32_MAX FLT_MAX;
     #define F64_MAX DBL_MAX;
@@ -99,23 +83,39 @@
     typedef unsigned short int ui16;
     typedef char ui8;
 
-    #define make_f32xy make_float2;
-    #define make_f32xyz make_float3;
-    #define make_f32xyzw make_float4;
+//    #define make_f32xy make_float2;
+//    #define make_f32xyz make_float3;
+//    #define make_f32xyzw make_float4;
 
-    #define make_f64xy make_float2;
-    #define make_f64xy make_float3;
-    #define make_f64xy make_float4;
+//    #define make_f64xy make_float2;
+//    #define make_f64xy make_float3;
+//    #define make_f64xy make_float4;
 
-    #define make_i32xy make_int2;
-    #define make_i32xyz make_int3;
-    #define make_i32xyzw make_int4;
+//    #define make_i32xy make_int2;
+//    #define make_i32xyz make_int3;
+//    #define make_i32xyzw make_int4;
 
     #define F32_MAX FLT_MAX;
     #define F64_MAX FLT_MAX;
 #endif
 
 ////////////////////////////////////////////////////////////////
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <string>
+#include <vector>
+#include <sstream>
+#include <fstream>
+#include <map>
+#include <algorithm>
+#include <cfloat>
+#include <assert.h>
+#include <math.h>
+
+#include "constants.cuh"
+#include "vector.cuh"
 
 //void set_gpu_device(int deviceChoice,float minversion=3.0);
 //void reset_gpu_device();
@@ -156,5 +156,8 @@ struct Color {
     f32 r, g, b;
 };
 Color make_color(f32 r, f32 g, f32 b);
+
+//// Struct that handle nD variable     TODO the other types
+__host__ __device__ f32xyz make_f32xyz(f32 vx, f32 vy, f32 vz) {return {vx, vy, vz};}
 
 #endif
