@@ -1,3 +1,7 @@
 Mac:
 sourceG4
 open -a /Applications/Qt\ Creator.app/
+
+TODO:
+1. Change conventional type to an user type to easly switch between float and double on the GPU
+2. Optimized exe by using a code generator that selects only physics effects used on the simulation

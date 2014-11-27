@@ -47,7 +47,9 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_i
     // Get the material that compose this volume
     unsigned int id_mat = get_geometry_material(geometry, cur_id_geom, pos);
 
-    //printf("Cur id geom %i mat %i\n", cur_id_geom, id_mat);
+    printf("     begin %i\n", part_id);
+    printf("     Cur id geom %i mat %i\n", cur_id_geom, id_mat);
+    printf("     InitPos %f %f %f\n", pos.x, pos.y, pos.z);
 
     //// Find next discrete interaction ///////////////////////////////////////
 
@@ -109,11 +111,9 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_i
     unsigned int hit_id_geom = 0;
     get_next_geometry_boundary(geometry, cur_id_geom, pos, dir, interaction_distance, hit_id_geom);
     if (interaction_distance <= next_interaction_distance) {
-        next_interaction_distance = interaction_distance;
+        next_interaction_distance = interaction_distance + EPSILON3; // Overshoot
         next_discrete_process = GEOMETRY_BOUNDARY;
-        next_geometry_volume = hit_id_geom;
-
-
+        next_geometry_volume = hit_id_geom;        
     }
 
     //// Move particle //////////////////////////////////////////////////////
@@ -167,7 +167,7 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_i
 
     //float discrete_loss = 0.0f;
 
-    //printf("Dist %f Hit %i pos %f %f %f ", interaction_distance, hit_id_geom, pos.x, pos.y, pos.z);
+    printf("     Dist %f NextVol %i pos %f %f %f ", next_interaction_distance, next_geometry_volume, pos.x, pos.y, pos.z);
 
     if (next_discrete_process == PHOTON_COMPTON) {
 
@@ -178,7 +178,7 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_i
         //printf("id %i - pos %f %f %f - dir %f %f %f - Cmpt - geom cur %i hit %i\n", part_id, pos.x, pos.y, pos.z,
         //                                                                 dir.x, dir.y, dir.z,
         //                                                                 cur_id_geom, next_geometry_volume);
-        //printf("Compton\n");
+        printf(" Compton\n");
     }
 
     if (next_discrete_process == PHOTON_PHOTOELECTRIC) {
@@ -192,7 +192,7 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_i
         //printf("id %i - pos %f %f %f - dir %f %f %f - PE - geom cur %i hit %i\n", part_id, pos.x, pos.y, pos.z,
         //                                                               dir.x, dir.y, dir.z,
         //                                                               cur_id_geom, next_geometry_volume);
-        //printf("PE\n");
+        printf(" PE\n");
     }
 
     if (next_discrete_process == PHOTON_RAYLEIGH) {
@@ -201,15 +201,13 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_i
     }
 
 
-
     if (next_discrete_process == GEOMETRY_BOUNDARY) {
         // Debug
         //printf("id %i - pos %f %f %f - dir %f %f %f - Bnd - geom cur %i hit %i\n", part_id, pos.x, pos.y, pos.z,
         //                                                                 dir.x, dir.y, dir.z,
         //                                                                 cur_id_geom, next_geometry_volume);
-        //printf("Geom\n");
+        printf(" Geom\n");
     }
-
 
 
     // WARNING: drop energy for every "dead" particle (gamma + e-)
@@ -218,7 +216,7 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_i
     //if (particles.endsimu[part_id] == PARTICLE_DEAD) discrete_loss = particles.E[part_id];
 
     //// Handle detector ////////////////////////////////////////
-
+/*
     // If a detector is defined
     if (panel_detector.data != NULL) {
         if (next_geometry_volume == panel_detector.geometry_id) {
@@ -251,11 +249,14 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_i
 
         }
     }
+*/
 
+/*
     // Record this step if required
     if (history.record_flag == ENABLED) {
         history.cpu_record_a_step(particles, part_id);
     }
+*/
 
 /*
     // DEBUGING: phasespace

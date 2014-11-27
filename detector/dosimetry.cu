@@ -23,6 +23,8 @@
  * \brief AtomicAdd function for double precision
  *        From Nvidia web site
  */
+
+/*
 __device__ double atomicAddDouble(double* address, double val)
 {
     unsigned long long int* address_as_ull =
@@ -36,5 +38,6 @@ __device__ double atomicAddDouble(double* address, double val)
     } while (assumed != old);
     return __longlong_as_double(old);
 }
+*/
 
 #endif

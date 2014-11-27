@@ -19,7 +19,7 @@
 #define DOSIMETRY_H
 
 
-__device__ double atomicAddDouble(double* address, double val);
+//__device__ double atomicAddDouble(double* address, double val);
 
 
 #endif

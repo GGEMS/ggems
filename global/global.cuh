@@ -25,6 +25,81 @@
 #include "constants.cuh"
 #include "vector.cuh"
 
+/////// TYPEDEF ////////////////////////////////////////////////
+
+#ifndef SINGLE_PRECISION
+    // Double precision
+    typedef float f32;
+    typedef float2 f32xy;
+    typedef float3 f32xyz;
+    typedef float4 f32xyzw;
+
+    typedef double f64;
+    typedef double2 f64xy;
+    typedef double3 f64xyz;
+    typedef double4 f64xyzw;
+
+    typedef int i32;
+    typedef int2 i32xy;
+    typedef int3 i32xyz;
+    typedef int4 i32xyzw;
+
+    typedef short int i16;
+
+    typedef unsigned int ui32;
+    typedef unsigned short int ui16;
+    typedef char ui8;
+
+    #define make_f32xy make_float2;
+    #define make_f32xyz make_float3;
+    #define make_f32xyzw make_float4;
+
+    #define make_f64xy make_double2;
+    #define make_f64xy make_double3;
+    #define make_f64xy make_double4;
+
+    #define make_i32xy make_int2;
+    #define make_i32xyz make_int3;
+    #define make_i32xyzw make_int4;
+
+#else
+    // Single precision
+    typedef float f32;
+    typedef float2 f32xy;
+    typedef float3 f32xyz;
+    typedef float4 f32xyzw;
+
+    typedef float f64;
+    typedef float2 f64xy;
+    typedef float3 f64xyz;
+    typedef float4 f64xyzw;
+
+    typedef int i32;
+    typedef int2 i32xy;
+    typedef int3 i32xyz;
+    typedef int4 i32xyzw;
+
+    typedef short int i16;
+
+    typedef unsigned int ui32;
+    typedef unsigned short int ui16;
+    typedef char ui8;
+
+    #define make_f32xy make_float2;
+    #define make_f32xyz make_float3;
+    #define make_f32xyzw make_float4;
+
+    #define make_f64xy make_float2;
+    #define make_f64xy make_float3;
+    #define make_f64xy make_float4;
+
+    #define make_i32xy make_int2;
+    #define make_i32xyz make_int3;
+    #define make_i32xyzw make_int4;
+#endif
+
+////////////////////////////////////////////////////////////////
+
 //void set_gpu_device(int deviceChoice,float minversion=3.0);
 //void reset_gpu_device();
 

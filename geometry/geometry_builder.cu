@@ -41,16 +41,17 @@ unsigned int __host__ __device__ get_geometry_material(Scene geometry, unsigned 
         ind.x = (unsigned int)(pos.x / geometry.data_objects[adr_geom+ADR_VOXELIZED_SX]); // / sx
         ind.y = (unsigned int)(pos.y / geometry.data_objects[adr_geom+ADR_VOXELIZED_SY]); // / sy
         ind.z = (unsigned int)(pos.z / geometry.data_objects[adr_geom+ADR_VOXELIZED_SZ]); // / sz
-/*        printf("Vos ind %i %i %i aabb %f %f, %f %f, %f %f\n", ind.x, ind.y, ind.z,
-               geometry.data_objects[adr_geom+ADR_AABB_XMIN],
-               geometry.data_objects[adr_geom+ADR_AABB_XMAX],
-               geometry.data_objects[adr_geom+ADR_AABB_YMIN],
-               geometry.data_objects[adr_geom+ADR_AABB_YMAX],
-               geometry.data_objects[adr_geom+ADR_AABB_ZMIN],
-               geometry.data_objects[adr_geom+ADR_AABB_ZMAX]); */
+//        printf("Vos ind %i %i %i aabb %f %f, %f %f, %f %f\n", ind.x, ind.y, ind.z,
+//               geometry.data_objects[adr_geom+ADR_AABB_XMIN],
+//               geometry.data_objects[adr_geom+ADR_AABB_XMAX],
+//               geometry.data_objects[adr_geom+ADR_AABB_YMIN],
+//               geometry.data_objects[adr_geom+ADR_AABB_YMAX],
+//               geometry.data_objects[adr_geom+ADR_AABB_ZMIN],
+//               geometry.data_objects[adr_geom+ADR_AABB_ZMAX]);
         // Return material
         unsigned int abs_ind = ind.z * (geometry.data_objects[adr_geom+ADR_VOXELIZED_NY]*geometry.data_objects[adr_geom+ADR_VOXELIZED_NX])
                                         + ind.y*geometry.data_objects[adr_geom+ADR_VOXELIZED_NX] + ind.x;
+        //printf("Mat: %i\n", (unsigned int)geometry.data_objects[adr_geom+ADR_VOXELIZED_DATA+abs_ind]);
         return (unsigned int)geometry.data_objects[adr_geom+ADR_VOXELIZED_DATA+abs_ind];
     } else {
         return 0;
@@ -107,25 +108,42 @@ float __host__ __device__ get_distance_to_object(Scene geometry, unsigned int ad
 
         //printf("Ind %i %i %i\n", ind.x, ind.y, ind.z);
 
-        // Get the distance to the voxel bounding box
+        // Then get the voxel bounding box
+        float volxmin = geometry.data_objects[adr_geom+ADR_AABB_XMIN];
+        float volymin = geometry.data_objects[adr_geom+ADR_AABB_YMIN];
+        float volzmin = geometry.data_objects[adr_geom+ADR_AABB_ZMIN];
+
         float xmin, ymin, xmax, ymax, zmin, zmax;
-        xmin = ind.x*s.x; xmax = xmin+s.x;
-        ymin = ind.y*s.y; ymax = ymin+s.y;
-        zmin = ind.z*s.z; zmax = zmin+s.z;
+        xmin = ind.x*s.x + volxmin; xmax = xmin+s.x;
+        ymin = ind.y*s.y + volymin; ymax = ymin+s.y;
+        zmin = ind.z*s.z + volzmin; zmax = zmin+s.z;
 
-
-//        xmin = (dir.x > 0 && posinvox.x > (ind.x+1)*s.x - EPSILON3) ? (ind.x+1)*s.x : ind.x*s.x;
-//        ymin = (dir.y > 0 && posinvox.y > (ind.y+1)*s.y - EPSILON3) ? (ind.y+1)*s.y : ind.y*s.y;
-//        zmin = (dir.z > 0 && posinvox.z > (ind.z+1)*s.z - EPSILON3) ? (ind.z+1)*s.z : ind.z*s.z;
+//        xmin = (dir.x > 0 && posinvox.x > (ind.x+1)*s.x-EPSILON3) ? (ind.x+1)*s.x+volxmin : ind.x*s.x+volxmin;
+//        ymin = (dir.y > 0 && posinvox.y > (ind.y+1)*s.y-EPSILON3) ? (ind.y+1)*s.y+volymin : ind.y*s.y+volymin;
+//        zmin = (dir.z > 0 && posinvox.z > (ind.z+1)*s.z-EPSILON3) ? (ind.z+1)*s.z+volzmin : ind.z*s.z+volzmin;
 //        xmax = (dir.x < 0 && posinvox.x < xmin + EPSILON3) ? xmin-s.x : xmin+s.x;
 //        ymax = (dir.y < 0 && posinvox.y < ymin + EPSILON3) ? ymin-s.y : ymin+s.y;
 //        zmax = (dir.z < 0 && posinvox.z < zmin + EPSILON3) ? zmin-s.z : zmin+s.z;
 
-        //printf("Vox %f %f, %f %f, %f %f\n", xmin, xmax, ymin, ymax, zmin, zmax);
+        // Get the distance
+        distance = hit_ray_AABB(pos, dir, xmin, xmax, ymin, ymax, zmin, zmax);
 
-        distance = hit_ray_AABB(posinvox, dir, xmin, xmax, ymin, ymax, zmin, zmax);
+        if ((distance > -EPSILON6 && distance < EPSILON6) || distance > 100000) {
 
-        //printf("Dist %f\n", distance);
+            printf("::::: Pos %f %f %f\n", pos.x, pos.y, pos.z);
+            printf("::::: Org %f %f %f\n", geometry.data_objects[adr_geom+ADR_AABB_XMIN],
+                   geometry.data_objects[adr_geom+ADR_AABB_YMIN],
+                   geometry.data_objects[adr_geom+ADR_AABB_ZMIN]);
+            printf("::::: RefPos %f %f %f\n", posinvox.x, posinvox.y, posinvox.z);
+            printf("::::: Scl %f %f %f\n", s.x, s.y, s.z);
+            printf("::::: Ind %i %i %i\n", ind.x, ind.y, ind.z);
+            printf("::::: Vox %f %f, %f %f, %f %f\n", xmin, xmax, ymin, ymax, zmin, zmax);
+            printf("::::: Dist %f\n", distance);
+            float a = -8.000009;
+            float b = 296.0;
+            float c = a+b;
+            printf("----- test %2.20f\n", c);
+        }
 
     } else if (obj_type == MESHED) {
 
@@ -286,7 +304,7 @@ void __host__ __device__ get_next_geometry_boundary(Scene geometry, unsigned int
 
         // If the safety is equal to distance (numerically very close espilon6) to the voxel
         // boundary it means, that the particle is escaping the volume.
-        //printf("Safety %f vox distance %f\n", safety, distance);
+        printf("         Safety %e vox distance %e pos %f %f %f\n", safety, distance, pos.x, pos.y, pos.z);
         if (fabs(distance-safety) < EPSILON3) {
             geometry_volume = geometry.mother_node[cur_geom];
         } else {
@@ -294,20 +312,14 @@ void __host__ __device__ get_next_geometry_boundary(Scene geometry, unsigned int
             geometry_volume = cur_geom;
         }
 
-//        // Next voxel but still in the volume
-//        if (distance < safety) {
-//            geometry_volume = cur_geom;
-//        // Or escaping the voxelized volume
-//        } else {
-//            geometry_volume = geometry.mother_node[cur_geom];
-//        }
+
     // Any other volumes
     } else {
         distance = get_distance_to_object(geometry, adr_geom, obj_type, pos, dir);
         geometry_volume = geometry.mother_node[cur_geom];
     }
     // First intersection distance given by the current volume
-    interaction_distance = distance + EPSILON3; // overshoot
+    interaction_distance = distance;// + EPSILON3; // overshoot
 
     ////// Children
 
@@ -335,7 +347,7 @@ void __host__ __device__ get_next_geometry_boundary(Scene geometry, unsigned int
         }
 
         if (distance <= interaction_distance) {
-            interaction_distance = distance + EPSILON3; // overshoot
+            interaction_distance = distance;// + EPSILON3; // overshoot
             geometry_volume = id_child_geom;
         }
 
