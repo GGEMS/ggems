@@ -26,7 +26,7 @@
 // #ifdef
 // Number of shells
 
-__constant__ unsigned short int GPU_atom_NumberOfShells[101] = {
+__constant__ ui16 GPU_atom_NumberOfShells[101] = {
  0 ,  // nonexisting zero element
 
  1 ,  1 ,  2 ,  2 ,  3 ,    3 ,  4 ,  4 ,  3 ,  4 ,  //  1 - 10
@@ -53,7 +53,7 @@ __constant__ unsigned short int GPU_atom_NumberOfShells[101] = {
 };
 
 // Index to acces shell data
-__constant__ unsigned short int GPU_atom_IndexOfShells[101] = {
+__constant__ ui16 GPU_atom_IndexOfShells[101] = {
        0,
        1,    2,    3,    5,    7,   10,   13,   17,   21,   24,  
       28,   33,   38,   44,   50,   56,   62,   68,   75,   83,  
@@ -409,7 +409,7 @@ __constant__ f32 GPU_atom_BindingEnergies[1540] = {
 
 
 // Number of shells
-const unsigned short int CPU_atom_NumberOfShells[101] = {
+const ui16 CPU_atom_NumberOfShells[101] = {
  0 ,  // nonexisting zero element
 
  1 ,  1 ,  2 ,  2 ,  3 ,    3 ,  4 ,  4 ,  3 ,  4 ,  //  1 - 10
@@ -436,7 +436,7 @@ const unsigned short int CPU_atom_NumberOfShells[101] = {
 };
 
 // Index to acces shell data
-const unsigned short int CPU_atom_IndexOfShells[101] = {
+const ui16 CPU_atom_IndexOfShells[101] = {
        0,
        1,    2,    3,    5,    7,   10,   13,   17,   21,   24,  
       28,   33,   38,   44,   50,   56,   62,   68,   75,   83,  
@@ -789,7 +789,7 @@ const f32 CPU_atom_BindingEnergies[1540] = {
      29.0 ,     7.0 ,
 };
 
-__host__ __device__ unsigned short int atom_NumberOfShells(unsigned int pos){
+__host__ __device__ ui16 atom_NumberOfShells(ui32 pos){
 #ifdef __CUDA_ARCH__
     return GPU_atom_NumberOfShells[pos];
 #else
@@ -800,7 +800,7 @@ __host__ __device__ unsigned short int atom_NumberOfShells(unsigned int pos){
 
 
 
-__host__ __device__ unsigned short int atom_IndexOfShells(unsigned int pos){
+__host__ __device__ ui16 atom_IndexOfShells(ui32 pos){
 #ifdef __CUDA_ARCH__
     return GPU_atom_IndexOfShells[pos];
 #else
@@ -808,7 +808,7 @@ __host__ __device__ unsigned short int atom_IndexOfShells(unsigned int pos){
 #endif
 
 }
-__host__ __device__ f32 atom_BindingEnergies(unsigned int pos){
+__host__ __device__ f32 atom_BindingEnergies(ui32 pos){
 #ifdef __CUDA_ARCH__
     return GPU_atom_BindingEnergies[pos];
 #else

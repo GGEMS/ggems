@@ -21,11 +21,11 @@
 #include "cone_beam_source.cuh"
 
 // External function
-__host__ __device__ void cone_beam_source_primary_generator(ParticleStack particles, unsigned int id,
+__host__ __device__ void cone_beam_source_primary_generator(ParticleStack particles, ui32 id,
                                                             f32 px, f32 py, f32 pz,
                                                             f32 rphi, f32 rtheta, f32 rpsi,
                                                             f32 aperture, f32 energy,
-                                                            unsigned char pname, unsigned int geom_id) {
+                                                            ui8 pname, ui32 geom_id) {
 
     // Get direction
     f32 phi = JKISS32(particles, id);
@@ -39,7 +39,7 @@ __host__ __device__ void cone_beam_source_primary_generator(ParticleStack partic
     f32 dz = cosf(theta);
 
     // Apply rotation
-    float3 d = f3_rotate(make_float3(dx, dy, dz), make_float3(rphi, rtheta, rpsi));
+    f32xyz d = f3_rotate(make_f32xyz(dx, dy, dz), make_f32xyz(rphi, rtheta, rpsi));
 
     // set photons
     particles.E[id] = energy;
@@ -88,11 +88,11 @@ void ConeBeamSource::set_energy(f32 venergy) {
     energy=venergy;
 }
 
-void ConeBeamSource::set_seed(unsigned int vseed) {
+void ConeBeamSource::set_seed(ui32 vseed) {
     seed=vseed;
 }
 
-void ConeBeamSource::set_in_geometry(unsigned int vgeometry_id) {
+void ConeBeamSource::set_in_geometry(ui32 vgeometry_id) {
     geometry_id=vgeometry_id;
 }
 

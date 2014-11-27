@@ -38,7 +38,7 @@ class Material {
         std::vector<f32> mixture_f;
         std::string name;
         f32 density;
-        unsigned short int nb_elements;
+        ui16 nb_elements;
 };
 
 // Open and load the material database
@@ -49,7 +49,7 @@ class MaterialDataBase {
         void load_elements(std::string);
 
         std::map<std::string, Material> materials;
-        std::map<std::string, unsigned short int>  elements_Z;
+        std::map<std::string, ui16>  elements_Z;
         std::map<std::string, f32> elements_A;
 
     private:
@@ -57,25 +57,25 @@ class MaterialDataBase {
         std::string remove_white_space(std::string txt);
 
         std::string read_element_name(std::string);
-        int read_element_Z(std::string);
+        i32 read_element_Z(std::string);
         f32 read_element_A(std::string);
 
         std::string read_material_name(std::string);
         f32 read_material_density(std::string);
-        unsigned short int read_material_nb_elements(std::string);
+        ui16 read_material_nb_elements(std::string);
         std::string read_material_element(std::string);
         f32 read_material_fraction(std::string);
 };
 
 // Table containing every definition of the materials used in the world
 struct MaterialsTable {
-    unsigned int nb_materials;              // n
-    unsigned int nb_elements_total;         // k
+    ui32 nb_materials;              // n
+    ui32 nb_elements_total;         // k
 
-    unsigned short int *nb_elements;        // n
-    unsigned short int *index;              // n
+    ui16 *nb_elements;        // n
+    ui16 *index;              // n
 
-    unsigned short int *mixture;            // k
+    ui16 *mixture;            // k
     f32 *atom_num_dens;                   // k
 
     f32 *nb_atoms_per_vol;                // n

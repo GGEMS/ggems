@@ -21,43 +21,43 @@
 #include "vector.cuh"
 
 // r = u - v
-__host__ __device__ float3 f3_sub(float3 u, float3 v) {
-    float3 r={u.x-v.x, u.y-v.y, u.z-v.z};
+__host__ __device__ f32xyz f3_sub(f32xyz u, f32xyz v) {
+    f32xyz r={u.x-v.x, u.y-v.y, u.z-v.z};
     return r;
 }
 
 // r = u + v
-__host__ __device__ float3 f3_add(float3 u, float3 v) {
-    float3 r={u.x+v.x, u.y+v.y, u.z+v.z};
+__host__ __device__ f32xyz f3_add(f32xyz u, f32xyz v) {
+    f32xyz r={u.x+v.x, u.y+v.y, u.z+v.z};
     return r;
 }
 
 // r = u * v
-__host__ __device__ float3 f3_mul(float3 u, float3 v) {
-    float3 r={u.x*v.x, u.y*v.y, u.z*v.z};
+__host__ __device__ f32xyz f3_mul(f32xyz u, f32xyz v) {
+    f32xyz r={u.x*v.x, u.y*v.y, u.z*v.z};
     return r;
 }
 
 // r = u / v
-__host__ __device__ float3 f3_div(float3 u, float3 v) {
-    float3 r={u.x/v.x, u.y/v.y, u.z/v.z};
+__host__ __device__ f32xyz f3_div(f32xyz u, f32xyz v) {
+    f32xyz r={u.x/v.x, u.y/v.y, u.z/v.z};
     return r;
 }
 
 // r = u * s
-__host__ __device__ float3 f3_scale(float3 u, f32 s) {
-    float3 r={u.x*s, u.y*s, u.z*s};
+__host__ __device__ f32xyz f3_scale(f32xyz u, f32 s) {
+    f32xyz r={u.x*s, u.y*s, u.z*s};
     return r;
 }
 
 // r = u . v
-__host__ __device__ f32 f3_dot(float3 u, float3 v) {
+__host__ __device__ f32 f3_dot(f32xyz u, f32xyz v) {
     return u.x*v.x + u.y*v.y + u.z*v.z;
 }
 
 // r = u x v
-__host__ __device__ float3 f3_cross(float3 u, float3 v) {
-    float3 r;
+__host__ __device__ f32xyz f3_cross(f32xyz u, f32xyz v) {
+    f32xyz r;
     r.x = u.y*v.z - u.z*v.y;
     r.y = u.z*v.x - u.x*v.z;
     r.z = u.x*v.y - u.y*v.x;
@@ -65,21 +65,21 @@ __host__ __device__ float3 f3_cross(float3 u, float3 v) {
 }
 
 // r = m * u
-__host__ __device__ float3 m3f3_mul(matrix3 m, float3 u) {
-    float3 r = {m.a*u.x + m.b*u.y + m.c*u.z,
+__host__ __device__ f32xyz m3f3_mul(matrix3 m, f32xyz u) {
+    f32xyz r = {m.a*u.x + m.b*u.y + m.c*u.z,
                 m.d*u.x + m.e*u.y + m.f*u.z,
                 m.g*u.x + m.h*u.y + m.i*u.z};
     return r;
 }
 
 // return an unitary vector
-__host__ __device__ float3 f3_unit(float3 u) {
+__host__ __device__ f32xyz f3_unit(f32xyz u) {
     f32 imag = 1.0f / sqrtf(u.x*u.x + u.y*u.y + u.z*u.z);
-    return make_float3(u.x*imag, u.y*imag, u.z*imag);
+    return make_f32xyz(u.x*imag, u.y*imag, u.z*imag);
 }
 
 // rotate a vector u
-__host__ __device__ float3 f3_rotate(float3 u, float3 EulerAngles) {
+__host__ __device__ f32xyz f3_rotate(f32xyz u, f32xyz EulerAngles) {
 
     f32 phi = EulerAngles.x*deg; // deg is defined by G4 unit system
     f32 theta = EulerAngles.y*deg;

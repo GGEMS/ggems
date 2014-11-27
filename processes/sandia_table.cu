@@ -24,7 +24,7 @@
 // * PE - Standard (Sandia table)
 // ************************************************************************
 
-__constant__ unsigned short int GPU_PhotoElec_std_NbIntervals [101] =
+__constant__ ui16 GPU_PhotoElec_std_NbIntervals [101] =
 {
 
       0,  // nonexisting 'zero' element
@@ -68,7 +68,7 @@ __constant__ unsigned short int GPU_PhotoElec_std_NbIntervals [101] =
 };
 
 // Usefull to find E in the table. JB - 2011-02-16 10:28:09
-__constant__ unsigned short int GPU_PhotoElec_std_CumulIntervals [101] =
+__constant__ ui16 GPU_PhotoElec_std_CumulIntervals [101] =
 {
 
       0,  // nonexisting 'zero' element
@@ -1512,7 +1512,7 @@ __constant__ f32 GPU_PhotoElec_std_SandiaTable[981][5] =
 // * PE - Standard (Sandia table)
 // ************************************************************************
 
-const unsigned short int CPU_PhotoElec_std_NbIntervals [101] =
+const ui16 CPU_PhotoElec_std_NbIntervals [101] =
 {
 
       0,  // nonexisting 'zero' element
@@ -1556,7 +1556,7 @@ const unsigned short int CPU_PhotoElec_std_NbIntervals [101] =
 };
 
 // Usefull to find E in the table. JB - 2011-02-16 10:28:09
-const unsigned short int CPU_PhotoElec_std_CumulIntervals [101] =
+const ui16 CPU_PhotoElec_std_CumulIntervals [101] =
 {
 
       0,  // nonexisting 'zero' element
@@ -2997,7 +2997,7 @@ const f32 CPU_PhotoElec_std_SandiaTable[981][5] =
 
 
 
-__host__ __device__ unsigned short int PhotoElec_std_NbIntervals(unsigned int pos) {
+__host__ __device__ ui16 PhotoElec_std_NbIntervals(ui32 pos) {
 
 #ifdef __CUDA_ARCH__
     return GPU_PhotoElec_std_NbIntervals[pos];
@@ -3007,7 +3007,7 @@ __host__ __device__ unsigned short int PhotoElec_std_NbIntervals(unsigned int po
 
 }
 
-__host__ __device__ unsigned short int PhotoElec_std_CumulIntervals(unsigned int pos) {
+__host__ __device__ ui16 PhotoElec_std_CumulIntervals(ui32 pos) {
 
 #ifdef __CUDA_ARCH__
     return GPU_PhotoElec_std_CumulIntervals[pos];
@@ -3017,7 +3017,7 @@ __host__ __device__ unsigned short int PhotoElec_std_CumulIntervals(unsigned int
 
 }
 
-__host__ __device__ f32 PhotoElec_std_ZtoAratio(unsigned int pos) {
+__host__ __device__ f32 PhotoElec_std_ZtoAratio(ui32 pos) {
 
 #ifdef __CUDA_ARCH__
     return GPU_PhotoElec_std_ZtoAratio[pos];
@@ -3027,7 +3027,7 @@ __host__ __device__ f32 PhotoElec_std_ZtoAratio(unsigned int pos) {
 
 }
 
-__host__ __device__ f32 PhotoElec_std_IonizationPotentials(unsigned int pos) {
+__host__ __device__ f32 PhotoElec_std_IonizationPotentials(ui32 pos) {
 
 #ifdef __CUDA_ARCH__
     return GPU_PhotoElec_std_IonizationPotentials[pos];
@@ -3037,7 +3037,7 @@ __host__ __device__ f32 PhotoElec_std_IonizationPotentials(unsigned int pos) {
 
 }
 
-__host__ __device__ f32 PhotoElec_std_SandiaTable(unsigned int pos, unsigned int id) {
+__host__ __device__ f32 PhotoElec_std_SandiaTable(ui32 pos, ui32 id) {
 
 #ifdef __CUDA_ARCH__
     return GPU_PhotoElec_std_SandiaTable[pos][id];

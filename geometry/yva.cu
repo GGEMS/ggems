@@ -23,7 +23,7 @@
 YVA::YVA() {}
 
 // Inlcude a meshed object within the voxelized volume
-void YVA::include(Meshed obj, unsigned int obj_id) {
+void YVA::include(Meshed obj, ui32 obj_id) {
 
     // First store the id of this object
     obj_inc_id = obj_id;
@@ -33,7 +33,7 @@ void YVA::include(Meshed obj, unsigned int obj_id) {
 
     // Some vars
     f32 vox_xmin, vox_xmax, vox_ymin, vox_ymax, vox_zmin, vox_zmax;
-    unsigned int ix, iy, iz, ind;
+    ui32 ix, iy, iz, ind;
 
     // If the mesh has no octree, store overlapping information
     // only for the bounding box
@@ -75,7 +75,7 @@ void YVA::include(Meshed obj, unsigned int obj_id) {
     // If regular octree chech with every non-void cell
     } else if (obj.octree_type == REG_OCTREE) {
 
-        unsigned int cx, cy, cz, cind;
+        ui32 cx, cy, cz, cind;
         f32 cell_xmin, cell_xmax, cell_ymin, cell_ymax, cell_zmin, cell_zmax;
 
         // Check every voxel to determine if the mesh overlap one

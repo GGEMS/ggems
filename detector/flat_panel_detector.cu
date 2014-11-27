@@ -36,7 +36,7 @@ FlatPanelDetector::FlatPanelDetector() {
 
 // Setting function
 
-void FlatPanelDetector::attach_to(unsigned int geometry_id) {
+void FlatPanelDetector::attach_to(ui32 geometry_id) {
     panel_detector.geometry_id = geometry_id;
 }
 
@@ -49,9 +49,9 @@ void FlatPanelDetector::set_resolution(f32 sx, f32 sy, f32 sz) {
 // Init
 void FlatPanelDetector::init(f32 xmin, f32 xmax, f32 ymin, f32 ymax, f32 zmin, f32 zmax) {
 
-    panel_detector.nx = (unsigned int)((xmax-xmin) / panel_detector.sx);
-    panel_detector.ny = (unsigned int)((ymax-ymin) / panel_detector.sy);
-    panel_detector.nz = (unsigned int)((zmax-zmin) / panel_detector.sz);
+    panel_detector.nx = (ui32)((xmax-xmin) / panel_detector.sx);
+    panel_detector.ny = (ui32)((ymax-ymin) / panel_detector.sy);
+    panel_detector.nz = (ui32)((zmax-zmin) / panel_detector.sz);
     panel_detector.nb_voxels = panel_detector.nx*panel_detector.ny*panel_detector.nz;
 
     panel_detector.xmin = xmin;
@@ -63,7 +63,7 @@ void FlatPanelDetector::init(f32 xmin, f32 xmax, f32 ymin, f32 ymax, f32 zmin, f
 
     panel_detector.data = (f32*)malloc(panel_detector.nb_voxels*sizeof(f32));
 
-    unsigned int i=0;
+    ui32 i=0;
     while (i<panel_detector.nb_voxels) {
         panel_detector.data[i] = 0.0f;
         ++i;

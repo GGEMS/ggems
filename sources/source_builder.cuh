@@ -46,17 +46,17 @@
 
 struct Sources {
     // Source structure
-    unsigned int *ptr_sources;      // Address to access to the different sources
-    //unsigned int *size_of_sources;  // Size of each source FIXME not need?
+    ui32 *ptr_sources;      // Address to access to the different sources
+    //ui32 *size_of_sources;  // Size of each source FIXME not need?
     f32 *data_sources;            // Parameters of each source
-    unsigned int *seeds;            // List of seeds
-    unsigned int nb_sources;
+    ui32 *seeds;            // List of seeds
+    ui32 nb_sources;
 
     // Dimension of each vector
-    unsigned int ptr_sources_dim;
-    //unsigned int size_of_sources_dim;
-    unsigned int data_sources_dim;
-    unsigned int seeds_dim;
+    ui32 ptr_sources_dim;
+    //ui32 size_of_sources_dim;
+    ui32 data_sources_dim;
+    ui32 seeds_dim;
 };
 
 // Class to manage sources on the simulation

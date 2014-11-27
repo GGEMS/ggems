@@ -3,9 +3,9 @@
 
 #include "global.cuh"
 
-__host__ __device__ unsigned short int atom_NumberOfShells(unsigned int);
-__host__ __device__ unsigned short int atom_IndexOfShells(unsigned int);
-__host__ __device__ f32 atom_BindingEnergies(unsigned int);
+__host__ __device__ ui16 atom_NumberOfShells(ui32);
+__host__ __device__ ui16 atom_IndexOfShells(ui32);
+__host__ __device__ f32 atom_BindingEnergies(ui32);
 
 
 #endif

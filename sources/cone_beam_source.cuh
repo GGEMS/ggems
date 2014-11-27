@@ -24,11 +24,11 @@
 #include "constants.cuh"
 
 // External function
-__host__ __device__ void cone_beam_source_primary_generator(ParticleStack particles, unsigned int id,
+__host__ __device__ void cone_beam_source_primary_generator(ParticleStack particles, ui32 id,
                                                         f32 px, f32 py, f32 pz,
                                                         f32 rphi, f32 rtheta, f32 rpsi,
                                                         f32 aperture, f32 energy,
-                                                        unsigned char pname, unsigned int geom_id);
+                                                        ui8 pname, ui32 geom_id);
 
 // Sphere
 class ConeBeamSource {
@@ -38,14 +38,14 @@ class ConeBeamSource {
         void set_rotation(f32 vphi, f32 vtheta, f32 vpsi);
         void set_aperture(f32 vaperture);
         void set_energy(f32 venergy);
-        void set_seed(unsigned int vseed);
-        void set_in_geometry(unsigned int vgeometry_id);
+        void set_seed(ui32 vseed);
+        void set_in_geometry(ui32 vgeometry_id);
         void set_source_name(std::string vsource_name);
 
         f32 px, py, pz;
         f32 phi, theta, psi;
         f32 aperture, energy;
-        unsigned int seed, geometry_id;
+        ui32 seed, geometry_id;
         std::string source_name;
 
     private:

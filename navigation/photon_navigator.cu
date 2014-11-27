@@ -21,7 +21,7 @@
 #include "photon_navigator.cuh"
 
 // CPU photon navigator
-__host__ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_id,
+__host__ void cpu_photon_navigator(ParticleStack &particles, ui32 part_id,
                           Scene geometry, MaterialsTable materials,
                           PhotonCrossSectionTable photon_CS_table,
                           GlobalSimulationParameters parameters,
@@ -30,22 +30,22 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_i
 
 
     // Read position
-    float3 pos;
+    f32xyz pos;
     pos.x = particles.px[part_id];
     pos.y = particles.py[part_id];
     pos.z = particles.pz[part_id];
 
     // Read direction
-    float3 dir;
+    f32xyz dir;
     dir.x = particles.dx[part_id];
     dir.y = particles.dy[part_id];
     dir.z = particles.dz[part_id];
 
     // Get the current volume containing the particle
-    unsigned int cur_id_geom = particles.geometry_id[part_id];
+    ui32 cur_id_geom = particles.geometry_id[part_id];
 
     // Get the material that compose this volume
-    unsigned int id_mat = get_geometry_material(geometry, cur_id_geom, pos);
+    ui32 id_mat = get_geometry_material(geometry, cur_id_geom, pos);
 
     printf("     begin %i\n", part_id);
     printf("     Cur id geom %i mat %i\n", cur_id_geom, id_mat);
@@ -55,12 +55,12 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_i
 
     f32 next_interaction_distance = FLT_MAX;
     unsigned char next_discrete_process = 0;
-    unsigned int next_geometry_volume = cur_id_geom;
+    ui32 next_geometry_volume = cur_id_geom;
     f32 interaction_distance;
     f32 cross_section;
 
     // Search the energy index to read CS
-    unsigned int E_index = binary_search(particles.E[part_id], photon_CS_table.E_bins,
+    ui32 E_index = binary_search(particles.E[part_id], photon_CS_table.E_bins,
                                          photon_CS_table.nb_bins);
 
     // TODO if E_index = 0?
@@ -108,7 +108,7 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_i
 
     //printf("Before geom\n");
 
-    unsigned int hit_id_geom = 0;
+    ui32 hit_id_geom = 0;
     get_next_geometry_boundary(geometry, cur_id_geom, pos, dir, interaction_distance, hit_id_geom);
     if (interaction_distance <= next_interaction_distance) {
         next_interaction_distance = interaction_distance + EPSILON3; // Overshoot
@@ -123,7 +123,7 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_i
     // TODO
     // Compute the energy deposit position randomly along the path
     //if (parameters.dose_flag) {
-        //float3 pos_edep = add_vector(photon.pos, scale_vector(photon.dir, next_interaction_distance*prng()));
+        //f32xyz pos_edep = add_vector(photon.pos, scale_vector(photon.dir, next_interaction_distance*prng()));
     //}
 
     // Move the particle
@@ -227,15 +227,15 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_i
             pos.z -= panel_detector.zmin;
             // Get the voxel index
             int3 ind;
-            ind.x = (unsigned int)(pos.x / panel_detector.sx);
-            ind.y = (unsigned int)(pos.y / panel_detector.sy);
-            ind.z = (unsigned int)(pos.z / panel_detector.sz);
+            ind.x = (ui32)(pos.x / panel_detector.sx);
+            ind.y = (ui32)(pos.y / panel_detector.sy);
+            ind.z = (ui32)(pos.z / panel_detector.sz);
             // Assertion
             assert(ind.x < panel_detector.nx);
             assert(ind.y < panel_detector.ny);
             assert(ind.z < panel_detector.nz);
             // Count a hit
-            unsigned int abs_ind = ind.z * (panel_detector.nx*panel_detector.ny) +
+            ui32 abs_ind = ind.z * (panel_detector.nx*panel_detector.ny) +
                                    ind.y * panel_detector.nx +
                                    ind.x;
             panel_detector.data[abs_ind] += 1.0f;

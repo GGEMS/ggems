@@ -60,20 +60,20 @@ class SimulationBuilder {
         void set_hardware_target(std::string value);
         void set_process(std::string process_name);
         void set_secondary(std::string pname);
-        void set_number_of_particles(unsigned int nb);
-        void set_max_number_of_iterations(unsigned int nb);
-        void set_record_history(unsigned int nb_particles);
-        void set_CS_table_nbins(unsigned int valbin);
+        void set_number_of_particles(ui32 nb);
+        void set_max_number_of_iterations(ui32 nb);
+        void set_record_history(ui32 nb_particles);
+        void set_CS_table_nbins(ui32 valbin);
         void set_CS_table_E_min(f32 valE);
         void set_CS_table_E_max(f32 valE);
 
         void init_simulation();
         void start_simulation();
 
-        unsigned short int target;
-        unsigned int nb_of_particles;
-        unsigned int nb_of_iterations;
-        unsigned int max_iteration;
+        ui16 target;
+        ui32 nb_of_particles;
+        ui32 nb_of_iterations;
+        ui32 max_iteration;
 
         // Main elements of the simulation
         ParticleBuilder particles;

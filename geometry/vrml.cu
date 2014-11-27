@@ -137,7 +137,7 @@ void VRML::write_geometry(GeometryBuilder geometry) {
     //printf("Nb obj %i\n", geometry.name_objects.size());
 
     // Read each object contains on the world
-    unsigned int iobj = 0;
+    ui32 iobj = 0;
     while (iobj < geometry.name_objects.size()) {
 
         //printf("name %s\n", geometry.name_objects[iobj].c_str());
@@ -145,8 +145,8 @@ void VRML::write_geometry(GeometryBuilder geometry) {
         fprintf(pfile, "\n# %s\n", geometry.name_objects[iobj].c_str());
 
         // Get the type of the volume
-        unsigned int adr_obj = geometry.world.ptr_objects[iobj];
-        unsigned int type_obj = geometry.world.data_objects[adr_obj + ADR_OBJ_TYPE];
+        ui32 adr_obj = geometry.world.ptr_objects[iobj];
+        ui32 type_obj = geometry.world.data_objects[adr_obj + ADR_OBJ_TYPE];
 
         //printf("obj type %i\n", type_obj);
 
@@ -207,10 +207,10 @@ void VRML::write_geometry(GeometryBuilder geometry) {
             fprintf(pfile, "  geometry IndexedFaceSet {\n");
             fprintf(pfile, "    coord Coordinate {\n");
             fprintf(pfile, "      point [\n");
-            unsigned int nb_vertices = geometry.world.data_objects[adr_obj + ADR_MESHED_NB_VERTICES];
-            unsigned int adr_data = adr_obj + ADR_MESHED_DATA;
-            unsigned int ind;
-            unsigned int i=0; while (i < nb_vertices) {
+            ui32 nb_vertices = geometry.world.data_objects[adr_obj + ADR_MESHED_NB_VERTICES];
+            ui32 adr_data = adr_obj + ADR_MESHED_DATA;
+            ui32 ind;
+            ui32 i=0; while (i < nb_vertices) {
                 ind = 3*i;
                 fprintf(pfile, "        %f %f %f,\n", geometry.world.data_objects[adr_data+ind],
                                                       geometry.world.data_objects[adr_data+ind+1],
@@ -221,7 +221,7 @@ void VRML::write_geometry(GeometryBuilder geometry) {
             fprintf(pfile, "    }\n");
 
             fprintf(pfile, "    coordIndex [\n");
-            unsigned int nb_triangles = nb_vertices / 3;
+            ui32 nb_triangles = nb_vertices / 3;
             i=0; while (i < nb_triangles) {
                 ind = 3*i;
                 fprintf(pfile, "      %i, %i, %i, -1,\n", ind, ind+1, ind+2);
@@ -233,7 +233,7 @@ void VRML::write_geometry(GeometryBuilder geometry) {
             fprintf(pfile, "}\n");
 
             // Octree viewer
-            unsigned int octree_type = geometry.world.data_objects[adr_obj+ADR_MESHED_OCTREE_TYPE];
+            ui32 octree_type = geometry.world.data_objects[adr_obj+ADR_MESHED_OCTREE_TYPE];
 
             if (octree_type == REG_OCTREE) {
 
@@ -249,16 +249,16 @@ void VRML::write_geometry(GeometryBuilder geometry) {
                                     make_color(0.0, 0.0, 1.0),
                                     1.0);
 
-                unsigned int nx = geometry.world.data_objects[adr_obj+ADR_MESHED_OCTREE_NX];
-                unsigned int ny = geometry.world.data_objects[adr_obj+ADR_MESHED_OCTREE_NY];
-                unsigned int nz = geometry.world.data_objects[adr_obj+ADR_MESHED_OCTREE_NZ];
+                ui32 nx = geometry.world.data_objects[adr_obj+ADR_MESHED_OCTREE_NX];
+                ui32 ny = geometry.world.data_objects[adr_obj+ADR_MESHED_OCTREE_NY];
+                ui32 nz = geometry.world.data_objects[adr_obj+ADR_MESHED_OCTREE_NZ];
                 f32 sx = geometry.world.data_objects[adr_obj+ADR_MESHED_OCTREE_SX];
                 f32 sy = geometry.world.data_objects[adr_obj+ADR_MESHED_OCTREE_SY];
                 f32 sz = geometry.world.data_objects[adr_obj+ADR_MESHED_OCTREE_SZ];
 
-                unsigned int adr_octree = adr_data + nb_vertices*3;
+                ui32 adr_octree = adr_data + nb_vertices*3;
 
-                unsigned int ix, iy, iz;
+                ui32 ix, iy, iz;
                 iz=0; while (iz < nz) {
                     iy=0; while (iy < ny) {
                         ix=0; while (ix < nx) {
@@ -295,14 +295,14 @@ void VRML::write_geometry(GeometryBuilder geometry) {
 
 // Export the sources /////////////////////////////////////
 void VRML::write_sources(SourceBuilder sources) {
-    unsigned int isrc = 0;
+    ui32 isrc = 0;
     while (isrc < sources.sources.nb_sources) {
 
         // Read the address source
-        unsigned int adr_src = sources.sources.ptr_sources[isrc];
+        ui32 adr_src = sources.sources.ptr_sources[isrc];
 
         // Read the kind of sources
-        unsigned int type_src = (unsigned int)(sources.sources.data_sources[adr_src + ADR_SRC_TYPE]);
+        ui32 type_src = (ui32)(sources.sources.data_sources[adr_src + ADR_SRC_TYPE]);
 
         // Point Source
         if (type_src == POINT_SOURCE) {
@@ -344,8 +344,8 @@ void VRML::write_sources(SourceBuilder sources) {
             f32 psi = sources.sources.data_sources[adr_src+ADR_CONE_BEAM_SRC_PSI];
 
             // Draw the direction as a vector
-            //float3 d = f3_rotate(make_float3(0.0f, 0.0f, 1.0f), make_float3(phi, theta, psi));
-            float3 d = make_float3(0.0f, 0.0f, 1.0f);
+            //f32xyz d = f3_rotate(make_f32xyz(0.0f, 0.0f, 1.0f), make_f32xyz(phi, theta, psi));
+            f32xyz d = make_f32xyz(0.0f, 0.0f, 1.0f);
             d = f3_scale(d, 5.0f);   // FIXME find a way to automatically adjust this value
 
             fprintf(pfile, "Shape {\n");
@@ -380,8 +380,8 @@ void VRML::write_sources(SourceBuilder sources) {
 // Export particles /////////////////////////////////////
 void VRML::write_particles(HistoryBuilder history) {
 
-    unsigned int istep;
-    unsigned int ip = 0;
+    ui32 istep;
+    ui32 ip = 0;
     while (ip < history.pname.size()) {
 
         // for each particle draw the path

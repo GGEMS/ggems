@@ -24,9 +24,9 @@
 #include "constants.cuh"
 
 // External function
-__host__ __device__ void point_source_primary_generator(ParticleStack particles, unsigned int id,
+__host__ __device__ void point_source_primary_generator(ParticleStack particles, ui32 id,
                                                         f32 px, f32 py, f32 pz, f32 energy,
-                                                        unsigned char type, unsigned int geom_id);
+                                                        ui8 type, ui32 geom_id);
 
 // Sphere
 class PointSource {
@@ -34,12 +34,12 @@ class PointSource {
         PointSource();
         void set_position(f32 vpx, f32 vpy, f32 vpz);
         void set_energy(f32 venergy);
-        void set_seed(unsigned int vseed);
-        void set_in_geometry(unsigned int vgeometry_id);
+        void set_seed(ui32 vseed);
+        void set_in_geometry(ui32 vgeometry_id);
         void set_source_name(std::string vsource_name);
 
         f32 px, py, pz, energy;
-        unsigned int seed, geometry_id;
+        ui32 seed, geometry_id;
         std::string source_name;
 
     private:

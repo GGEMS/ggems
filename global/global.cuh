@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <string>
+#include <vector>
 #include <sstream>
 #include <fstream>
 #include <map>
@@ -53,10 +54,11 @@
     typedef int4 i32xyzw;
 
     typedef short int i16;
+    typedef char i8;
 
     typedef unsigned int ui32;
     typedef unsigned short int ui16;
-    typedef char ui8;
+    typedef unsigned char ui8;
 
     #define make_f32xy make_float2;
     #define make_f32xyz make_float3;
@@ -69,6 +71,9 @@
     #define make_i32xy make_int2;
     #define make_i32xyz make_int3;
     #define make_i32xyzw make_int4;
+
+    #define F32_MAX FLT_MAX;
+    #define F64_MAX DBL_MAX;
 
 #else
     // Single precision
@@ -88,6 +93,7 @@
     typedef int4 i32xyzw;
 
     typedef short int i16;
+    typedef char i8;
 
     typedef unsigned int ui32;
     typedef unsigned short int ui16;
@@ -104,6 +110,9 @@
     #define make_i32xy make_int2;
     #define make_i32xyz make_int3;
     #define make_i32xyzw make_int4;
+
+    #define F32_MAX FLT_MAX;
+    #define F64_MAX FLT_MAX;
 #endif
 
 ////////////////////////////////////////////////////////////////

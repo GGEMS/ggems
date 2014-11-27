@@ -21,8 +21,8 @@
 #include "prng.cuh"
 
 // JKISS 32-bit (period ~2^121=2.6x10^36), passes all of the Dieharder tests and the BigCrunch tests in TestU01
-__host__ __device__ f32 JKISS32(ParticleStack &particles, unsigned int id) {
-    int t;
+__host__ __device__ f32 JKISS32(ParticleStack &particles, ui32 id) {
+    i32 t;
 
 
 //    y ^= (y<<5);
@@ -64,7 +64,7 @@ __host__ __device__ f32 JKISS32(ParticleStack &particles, unsigned int id) {
 /*
 // Brent PRNG integer version
 __device__ unsigned long weyl;
-__device__ unsigned long brent_int(unsigned int index, unsigned long *device_x_brent, unsigned long seed)
+__device__ unsigned long brent_i32(ui32 index, unsigned long *device_x_brent, unsigned long seed)
 
     {
 
@@ -79,7 +79,7 @@ __device__ unsigned long brent_int(unsigned int index, unsigned long *device_x_b
 #define d    (33*UINT64 +  15*UINT32)
 #define ws   (27*UINT64 +  16*UINT32)
 
-    int z, z_w, z_i_brent;
+    i32 z, z_w, z_i_brent;
     if (r==4) {
         z=6;
         z_w=4;
@@ -95,7 +95,7 @@ __device__ unsigned long brent_int(unsigned int index, unsigned long *device_x_b
     unsigned long i_brent = device_x_brent[z*index + z_i_brent];
     unsigned long zero = 0;
     unsigned long t, v;
-    int k;
+    i32 k;
 
     if (seed != zero) { // Initialisation necessary
         // weyl = odd approximation to 2**wlen*(3-sqrt(5))/2.
@@ -158,7 +158,7 @@ __device__ unsigned long brent_int(unsigned int index, unsigned long *device_x_b
     }
 
 // Brent PRNG real version
-__device__ double Brent_real(int index, unsigned long *device_x_brent, unsigned long seed)
+__device__ double Brent_real(i32 index, unsigned long *device_x_brent, unsigned long seed)
 
     {
 
@@ -187,14 +187,14 @@ __device__ double Brent_real(int index, unsigned long *device_x_brent, unsigned 
     res = (double)0;
     while (res == (double)0) { // Loop until nonzero result.
         // Usually only one iteration.
-        res = (double)(brent_int(index, device_x_brent, seed)>>sr);     // Discard sr random bits.
+        res = (double)(brent_i32(index, device_x_brent, seed)>>sr);     // Discard sr random bits.
         seed = (unsigned long)0;                                        // Zero seed for next time.
         if (UINT32 && UREAL64)                                          // Need another call to xor4096i.
-            res += SC32*(double)brent_int(index, device_x_brent, seed); // Add low-order 32 bits.
+            res += SC32*(double)brent_i32(index, device_x_brent, seed); // Add low-order 32 bits.
         }
 
-//     unsigned int SS = ((53*UINT64 + 21*UINT32)*UREAL64 + 24*UREAL32);
-//     unsigned int scale = ((unsigned long)1<<SS);
+//     ui32 SS = ((53*UINT64 + 21*UINT32)*UREAL64 + 24*UREAL32);
+//     ui32 scale = ((unsigned long)1<<SS);
 //      printf("SCALE %u res %u \n",scale, SS);
     double d = (res * SCALE);
     f32 c= (res * SCALE);

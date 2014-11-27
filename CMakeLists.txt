@@ -15,6 +15,14 @@ if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
     message(FATAL_ERROR "in-source build detected")
 endif()
 
+# OPTIONS
+option(WITH_DOUBLE_PRECISION "Float numbers can be computed in double precision" ON)
+if(WITH_DOUBLE_PRECISION)
+  #add_definitions(-DSINGLE_PRECISION=0)
+else()
+  add_definitions(-DSINGLE_PRECISION)
+endif()
+
 # GEANT4
 find_package(Geant4 REQUIRED)
 include(${Geant4_USE_FILE})

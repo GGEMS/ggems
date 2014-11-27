@@ -27,8 +27,8 @@ Voxelized::Voxelized() {
 
 // Skip comment starting with "#"
 void Voxelized::skip_comment(std::istream & is) {
-    char c;
-    char line[1024];
+    i8 c;
+    i8 line[1024];
     if (is.eof()) return;
     is >> c;
     while (is && (c=='#')) {
@@ -81,9 +81,9 @@ std::string Voxelized::read_mhd_string_arg(std::string txt) {
     return remove_white_space(txt);
 }
 
-// Read int mhd arg
-int Voxelized::read_mhd_int(std::string txt) {
-    int res;
+// Read i32 mhd arg
+i32 Voxelized::read_mhd_int(std::string txt) {
+    i32 res;
     txt = txt.substr(txt.find("=")+1);
     txt = remove_white_space(txt);
     std::stringstream(txt) >> res;
@@ -91,8 +91,8 @@ int Voxelized::read_mhd_int(std::string txt) {
 }
 
 // Read int mhd arg
-int Voxelized::read_mhd_int_atpos(std::string txt, int pos) {
-    int res;
+i32 Voxelized::read_mhd_int_atpos(std::string txt, i32 pos) {
+    i32 res;
     txt = txt.substr(txt.find("=")+2);
     if (pos==0) {
         txt = txt.substr(0, txt.find(" "));
@@ -110,7 +110,7 @@ int Voxelized::read_mhd_int_atpos(std::string txt, int pos) {
 }
 
 // Read f32 mhd arg
-f32 Voxelized::read_mhd_f32_atpos(std::string txt, int pos) {
+f32 Voxelized::read_mhd_f32_atpos(std::string txt, i32 pos) {
     f32 res;
     txt = txt.substr(txt.find("=")+2);
     if (pos==0) {
@@ -139,9 +139,9 @@ void Voxelized::define_materials_from_range(f32 *raw_data, std::string range_nam
 
     f32 start, stop;
     std::string mat_name, line;
-    unsigned int i;
+    ui32 i;
     f32 val;
-    unsigned int mat_index = 0;
+    ui32 mat_index = 0;
 
     // Data allocation
     data = (f32*)malloc(number_of_voxels * sizeof(f32));
@@ -178,7 +178,7 @@ void Voxelized::define_materials_from_range(f32 *raw_data, std::string range_nam
 
 // Load phantom from binary data (f32)
 void Voxelized::load_from_raw(std::string volume_name, std::string range_name,
-                              int nx, int ny, int nz, f32 sx, f32 sy, f32 sz) {
+                              i32 nx, i32 ny, i32 nz, f32 sx, f32 sy, f32 sz) {
 
     /////////////// First read the raw data from the phantom ////////////////////////
 
@@ -227,13 +227,13 @@ void Voxelized::load_from_mhd(std::string volume_name, std::string range_name) {
     /////////////// First read the MHD file //////////////////////
 
     std::string line, key;
-    int nx=-1, ny=-1, nz=-1;
+    i32 nx=-1, ny=-1, nz=-1;
     f32 sx=0, sy=0, sz=0;
 
     // Watchdog
     std::string ObjectType="", BinaryData="", BinaryDataByteOrderMSB="", CompressedData="",
                 ElementType="", ElementDataFile="";
-    int NDims=0;
+    i32 NDims=0;
 
     // Read range file
     std::ifstream file(volume_name.c_str());
@@ -309,7 +309,7 @@ void Voxelized::load_from_mhd(std::string volume_name, std::string range_name) {
     FILE *pfile = fopen(ElementDataFile.c_str(), "rb");
     if (!pfile) {
         std::string nameWithRelativePath = volume_name;
-        int lastindex = nameWithRelativePath.find_last_of("."); 
+        i32 lastindex = nameWithRelativePath.find_last_of(".");
         nameWithRelativePath = nameWithRelativePath.substr(0, lastindex);
         nameWithRelativePath+=".raw";
         pfile = fopen(nameWithRelativePath.c_str(), "rb");

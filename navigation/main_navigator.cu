@@ -26,13 +26,13 @@ void cpu_main_navigator(ParticleStack &particles, Scene geometry,
                         HistoryBuilder &history) {
 
     // For each particle
-    unsigned int id = 0;
+    ui32 id = 0;
     while (id < particles.size) {
 
         printf(">>>> Particle %i\n", id);
 
         // Stepping loop, iterate the particle until the end
-        unsigned int istep = 0;
+        ui32 istep = 0;
         while (particles.endsimu[id] == PARTICLE_ALIVE) {
 
             // If a photon

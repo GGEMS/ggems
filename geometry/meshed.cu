@@ -37,7 +37,7 @@ Meshed::Meshed() {
 }
 
 // Build a regular octree to improve navigation within meshed phantom
-void Meshed::build_regular_octree(unsigned int nx, unsigned int ny, unsigned int nz) {
+void Meshed::build_regular_octree(ui32 nx, ui32 ny, ui32 nz) {
 
     // First check if there is a mesh loaded
     if (number_of_triangles == 0) {
@@ -68,9 +68,9 @@ void Meshed::build_regular_octree(unsigned int nx, unsigned int ny, unsigned int
     f32 cell_xmin, cell_ymin, cell_zmin;   // cell position (in 3D space)
     f32 cell_xmax, cell_ymax, cell_zmax;
 
-    float3 u, v, w;                          // A triangle
-    unsigned int addr_tri, itri, ct_tri;
-    unsigned int cur_cell_index = 0;
+    f32xyz u, v, w;                          // A triangle
+    ui32 addr_tri, itri, ct_tri;
+    ui32 cur_cell_index = 0;
 
     f32 progress = 0.0f;
     printf("\nBuilding regular octree\n");
@@ -103,9 +103,9 @@ void Meshed::build_regular_octree(unsigned int nx, unsigned int ny, unsigned int
 
                     // Define a triangle
                     addr_tri = itri*9;     // 3 vertices xyz
-                    u = make_float3(vertices[addr_tri],  vertices[addr_tri+1], vertices[addr_tri+2]);
-                    v = make_float3(vertices[addr_tri+3], vertices[addr_tri+4], vertices[addr_tri+5]);
-                    w = make_float3(vertices[addr_tri+6], vertices[addr_tri+7], vertices[addr_tri+8]);
+                    u = make_f32xyz(vertices[addr_tri],  vertices[addr_tri+1], vertices[addr_tri+2]);
+                    v = make_f32xyz(vertices[addr_tri+3], vertices[addr_tri+4], vertices[addr_tri+5]);
+                    w = make_f32xyz(vertices[addr_tri+6], vertices[addr_tri+7], vertices[addr_tri+8]);
 
                     // Check if this triangle is overlappin this octree cell
                     if (overlap_AABB_triangle(cell_xmin, cell_xmax, cell_ymin, cell_ymax, cell_zmin, cell_zmax,
@@ -169,7 +169,7 @@ void Meshed::load_from_raw(std::string filename) {
         printf("Error, file %s not found \n", filename.c_str());
         exit(EXIT_FAILURE);
     }
-    unsigned int nb_lines = 0;
+    ui32 nb_lines = 0;
     while (file) {
         std::getline(file, line);
         if (file) ++nb_lines;
@@ -189,14 +189,14 @@ void Meshed::load_from_raw(std::string filename) {
         printf("Error, file %s not found \n",filename.c_str());
         exit(EXIT_FAILURE);
     }
-    unsigned int i = 0.0f;
+    ui32 i = 0.0f;
     while (file) {
         std::getline(file, line);
 
         if (file) {
             f32 val;
             std::string txt;
-            int pos;
+            i32 pos;
 
             pos = line.find(" ");
             txt = line.substr(0, pos);
@@ -304,17 +304,17 @@ void Meshed::save_ggems_mesh(std::string filename) {
     FILE *pfile = fopen(filename.c_str(), "wb");
 
     // First write the mesh
-    unsigned int tmp;
-    fwrite(&number_of_triangles, 1, sizeof(unsigned int), pfile);
-    fwrite(&number_of_vertices, 1, sizeof(unsigned int), pfile);
+    ui32 tmp;
+    fwrite(&number_of_triangles, 1, sizeof(ui32), pfile);
+    fwrite(&number_of_vertices, 1, sizeof(ui32), pfile);
 
     tmp = object_name.size();
-    fwrite(&tmp, 1, sizeof(unsigned int), pfile);
-    fwrite(object_name.c_str(), tmp, sizeof(char), pfile);
+    fwrite(&tmp, 1, sizeof(ui32), pfile);
+    fwrite(object_name.c_str(), tmp, sizeof(i8), pfile);
 
     tmp = material_name.size();
-    fwrite(&tmp, 1, sizeof(unsigned int), pfile);
-    fwrite(material_name.c_str(), tmp, sizeof(char), pfile);
+    fwrite(&tmp, 1, sizeof(ui32), pfile);
+    fwrite(material_name.c_str(), tmp, sizeof(i8), pfile);
 
     fwrite(&xmin, 1, sizeof(f32), pfile);
     fwrite(&xmax, 1, sizeof(f32), pfile);
@@ -327,26 +327,26 @@ void Meshed::save_ggems_mesh(std::string filename) {
     fwrite(vertices, 3*number_of_vertices, sizeof(f32), pfile);
 
     // Then if defined export the associated octree
-    fwrite(&octree_type, 1, sizeof(unsigned short int), pfile);
+    fwrite(&octree_type, 1, sizeof(ui16), pfile);
     if (octree_type == REG_OCTREE) {
-        fwrite(&nb_cell_x, 1, sizeof(unsigned int), pfile);
-        fwrite(&nb_cell_y, 1, sizeof(unsigned int), pfile);
-        fwrite(&nb_cell_z, 1, sizeof(unsigned int), pfile);
+        fwrite(&nb_cell_x, 1, sizeof(ui32), pfile);
+        fwrite(&nb_cell_y, 1, sizeof(ui32), pfile);
+        fwrite(&nb_cell_z, 1, sizeof(ui32), pfile);
 
         fwrite(&cell_size_x, 1, sizeof(f32), pfile);
         fwrite(&cell_size_y, 1, sizeof(f32), pfile);
         fwrite(&cell_size_z, 1, sizeof(f32), pfile);
 
         tmp = nb_objs_per_cell.size();
-        fwrite(&tmp, 1, sizeof(unsigned int), pfile);
+        fwrite(&tmp, 1, sizeof(ui32), pfile);
         fwrite(nb_objs_per_cell.data(), tmp, sizeof(f32), pfile);
 
         tmp = list_objs_per_cell.size();
-        fwrite(&tmp, 1, sizeof(unsigned int), pfile);
+        fwrite(&tmp, 1, sizeof(ui32), pfile);
         fwrite(list_objs_per_cell.data(), tmp, sizeof(f32), pfile);
 
         tmp = addr_to_cell.size();
-        fwrite(&tmp, 1, sizeof(unsigned int), pfile);
+        fwrite(&tmp, 1, sizeof(ui32), pfile);
         fwrite(addr_to_cell.data(), tmp, sizeof(f32), pfile);
     }
 
@@ -373,19 +373,19 @@ void Meshed::load_from_ggems_mesh(std::string filename) {
     FILE *pfile = fopen(filename.c_str(), "rb");
 
     // First read the mesh
-    unsigned int tmp;
-    fread(&number_of_triangles, sizeof(unsigned int), 1, pfile);
-    fread(&number_of_vertices, sizeof(unsigned int), 1, pfile);
+    ui32 tmp;
+    fread(&number_of_triangles, sizeof(ui32), 1, pfile);
+    fread(&number_of_vertices, sizeof(ui32), 1, pfile);
 
-    fread(&tmp, sizeof(unsigned int), 1, pfile);
+    fread(&tmp, sizeof(ui32), 1, pfile);
     object_name.clear();
     object_name.resize(tmp);
-    fread(&object_name[0], sizeof(char), tmp, pfile);
+    fread(&object_name[0], sizeof(i8), tmp, pfile);
 
-    fread(&tmp, sizeof(unsigned int), 1, pfile);
+    fread(&tmp, sizeof(ui32), 1, pfile);
     material_name.clear();
     material_name.resize(tmp);
-    fread(&material_name[0], sizeof(char), tmp, pfile);
+    fread(&material_name[0], sizeof(i8), tmp, pfile);
 
     fread(&xmin, sizeof(f32), 1, pfile);
     fread(&xmax, sizeof(f32), 1, pfile);
@@ -399,27 +399,27 @@ void Meshed::load_from_ggems_mesh(std::string filename) {
     fread(vertices, sizeof(f32), 3*number_of_vertices, pfile);
 
     // Then if defined import the associated octree
-    fread(&octree_type, sizeof(unsigned short int), 1, pfile);
+    fread(&octree_type, sizeof(ui16), 1, pfile);
     if (octree_type == REG_OCTREE) {
-        fread(&nb_cell_x, sizeof(unsigned int), 1, pfile);
-        fread(&nb_cell_y, sizeof(unsigned int), 1, pfile);
-        fread(&nb_cell_z, sizeof(unsigned int), 1, pfile);
+        fread(&nb_cell_x, sizeof(ui32), 1, pfile);
+        fread(&nb_cell_y, sizeof(ui32), 1, pfile);
+        fread(&nb_cell_z, sizeof(ui32), 1, pfile);
 
         fread(&cell_size_x, sizeof(f32), 1, pfile);
         fread(&cell_size_y, sizeof(f32), 1, pfile);
         fread(&cell_size_z, sizeof(f32), 1, pfile);
 
-        fread(&tmp, sizeof(unsigned int), 1, pfile);
+        fread(&tmp, sizeof(ui32), 1, pfile);
         nb_objs_per_cell.clear();
         nb_objs_per_cell.reserve(tmp);
         fread(nb_objs_per_cell.data(), sizeof(f32), tmp, pfile);
 
-        fread(&tmp, sizeof(unsigned int), 1, pfile);
+        fread(&tmp, sizeof(ui32), 1, pfile);
         list_objs_per_cell.clear();
         list_objs_per_cell.reserve(tmp);
         fwrite(list_objs_per_cell.data(), sizeof(f32), tmp, pfile);
 
-        fread(&tmp, sizeof(unsigned int), 1, pfile);
+        fread(&tmp, sizeof(ui32), 1, pfile);
         addr_to_cell.clear();
         addr_to_cell.reserve(tmp);
         fwrite(addr_to_cell.data(), sizeof(f32), tmp, pfile);
@@ -427,14 +427,14 @@ void Meshed::load_from_ggems_mesh(std::string filename) {
 }
 
 // Scaling
-void Meshed::scale(float3 s) {
+void Meshed::scale(f32xyz s) {
     // Scale every vertex from the mesh
-    unsigned int i=0;
+    ui32 i=0;
     while (i < number_of_vertices) {
-        unsigned int iv = i*3;
+        ui32 iv = i*3;
 
-        // Create a float3 for the current vertex
-        float3 vertex = make_float3(vertices[iv], vertices[iv+1], vertices[iv+2]);
+        // Create a f32xyz for the current vertex
+        f32xyz vertex = make_f32xyz(vertices[iv], vertices[iv+1], vertices[iv+2]);
         // Scale the vertex
         vertex = f3_mul(vertex, s);
         // Put back the value into the vertex list
@@ -446,12 +446,12 @@ void Meshed::scale(float3 s) {
 
 // Scaling
 void Meshed::scale(f32 sx, f32 sy, f32 sz) {
-    float3 s = {sx, sy, sz};
+    f32xyz s = {sx, sy, sz};
     scale(s);
 }
 
 // Rotation
-void Meshed::rotate(float3 r) {
+void Meshed::rotate(f32xyz r) {
 
     // f32 deg = pi / 180.0f;
     f32 phi = r.x*deg; // deg is defined by G4 unit system
@@ -471,12 +471,12 @@ void Meshed::rotate(float3 r) {
                     sth*sps,             -sth*cps,                  cth};
 
     // Rotate every vertex from the mesh
-    unsigned int i=0;
+    ui32 i=0;
     while (i < number_of_vertices) {
-        unsigned int iv = i*3;
+        ui32 iv = i*3;
 
-        // Create a float3 for the current vertex
-        float3 vertex = make_float3(vertices[iv], vertices[iv+1], vertices[iv+2]);
+        // Create a f32xyz for the current vertex
+        f32xyz vertex = make_f32xyz(vertices[iv], vertices[iv+1], vertices[iv+2]);
         // Rotate the vertex
         vertex = m3f3_mul(rot, vertex);
         // Put back the value into the vertex list
@@ -489,20 +489,20 @@ void Meshed::rotate(float3 r) {
 
 // Rotation
 void Meshed::rotate(f32 phi, f32 theta, f32 psi) {
-    float3 r = {phi, theta, psi};
+    f32xyz r = {phi, theta, psi};
     rotate(r);
 }
 
 // Translation
-void Meshed::translate(float3 t) {
+void Meshed::translate(f32xyz t) {
 
     // Translate every vertex from the mesh
-    unsigned int i=0;
+    ui32 i=0;
     while (i < number_of_vertices) {
-        unsigned int iv = i*3;
+        ui32 iv = i*3;
 
-        // Create a float3 for the current vertex
-        float3 vertex = make_float3(vertices[iv], vertices[iv+1], vertices[iv+2]);
+        // Create a f32xyz for the current vertex
+        f32xyz vertex = make_f32xyz(vertices[iv], vertices[iv+1], vertices[iv+2]);
         // Translate the vertex
         vertex = f3_add(vertex, t);
         // Put back the value into the vertex list
@@ -515,7 +515,7 @@ void Meshed::translate(float3 t) {
 
 // Translation
 void Meshed::translate(f32 tx, f32 ty, f32 tz) {
-    float3 t = {tx, ty, tz};
+    f32xyz t = {tx, ty, tz};
     translate(t);
 }
 

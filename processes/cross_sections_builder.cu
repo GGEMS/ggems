@@ -30,13 +30,13 @@ CrossSectionsBuilder::CrossSectionsBuilder() {
 void CrossSectionsBuilder::build_table(MaterialsTable materials, GlobalSimulationParameters parameters) {
 
     // Read parameters
-    unsigned int nbin = parameters.cs_table_nbins;
+    ui32 nbin = parameters.cs_table_nbins;
     f32 min_E = parameters.cs_table_min_E;
     f32 max_E = parameters.cs_table_max_E;
 
     // First thing first, sample energy following the number of bins
     f32 slope = log(max_E / min_E);
-    unsigned int i = 0;
+    ui32 i = 0;
     photon_CS_table.E_bins = (f32*)malloc(nbin * sizeof(f32));
     while (i < nbin) {
         photon_CS_table.E_bins[i] = min_E * exp( slope * ((f32)i/((f32)nbin-1)) ) * MeV;
@@ -44,16 +44,16 @@ void CrossSectionsBuilder::build_table(MaterialsTable materials, GlobalSimulatio
     }
 
     // Find if there are photon and electron in this simulation;
-    char there_is_photon = parameters.physics_list[PHOTON_COMPTON] ||
+    i8 there_is_photon = parameters.physics_list[PHOTON_COMPTON] ||
                            parameters.physics_list[PHOTON_PHOTOELECTRIC] ||
                            parameters.physics_list[PHOTON_RAYLEIGH];
-    //char there_is_electron = parameters.physics_list[ELECTRON_IONISATION] ||
+    //i8 there_is_electron = parameters.physics_list[ELECTRON_IONISATION] ||
     //                         parameters.physics_list[ELECTRON_BREMSSTRAHLUNG] ||
     //                         parameters.physics_list[ELECTRON_MSC];
 
     // Then init data
-    unsigned int tot_elt = materials.nb_materials*nbin;
-    unsigned int tot_elt_mem = tot_elt * sizeof(f32);
+    ui32 tot_elt = materials.nb_materials*nbin;
+    ui32 tot_elt_mem = tot_elt * sizeof(f32);
 
     // Photon CS table if need
     if (there_is_photon) {
@@ -95,18 +95,18 @@ void CrossSectionsBuilder::build_table(MaterialsTable materials, GlobalSimulatio
     // If Rayleigh scattering, load information once from G4 EM data library
     f32 *g4_ray_cs = NULL;
     f32 *g4_ray_sf = NULL;
-    char *flag_Z = NULL;
+    i8 *flag_Z = NULL;
     if (parameters.physics_list[PHOTON_RAYLEIGH]) {
         g4_ray_cs = Rayleigh_CS_Livermore_load_data();
         g4_ray_sf = Rayleigh_SF_Livermore_load_data();
         // use to flag is scatter factor are already defined for a given Z
-        flag_Z = (char*)malloc(101*sizeof(char));
+        flag_Z = (i8*)malloc(101*sizeof(i8));
         i=0; while(i<101) {flag_Z[i]=0; ++i;}
     }
 
     // Get CS for each material, energy bin and phys effect
-    unsigned int imat=0;
-    unsigned int abs_index;
+    ui32 imat=0;
+    ui32 abs_index;
     while (imat < materials.nb_materials) {
 
         // for each energy bin
@@ -137,7 +137,7 @@ void CrossSectionsBuilder::build_table(MaterialsTable materials, GlobalSimulatio
 
         // Special case for Photoelectric and Rayleigh where scatter factor and CS are needed for each Z
         if (parameters.physics_list[PHOTON_RAYLEIGH]) {
-            unsigned int iZ, Z;
+            ui32 iZ, Z;
             // This table compute scatter factor for each Z (only for Z which were not already defined)
             iZ=0; while (iZ < materials.nb_elements[imat]) {
                 Z = materials.mixture[materials.index[imat]+iZ];
@@ -180,7 +180,7 @@ void CrossSectionsBuilder::build_table(MaterialsTable materials, GlobalSimulatio
 // Print CS talbe (for debugging)
 void CrossSectionsBuilder::print() {
 
-    unsigned int imat, iE, abs_index;
+    ui32 imat, iE, abs_index;
 
 
     printf("::::::::::::::::::::::::::::::::::::::::::::\n");

@@ -21,9 +21,9 @@
 #include "point_source.cuh"
 
 // External function
-__host__ __device__ void point_source_primary_generator(ParticleStack particles, unsigned int id,
+__host__ __device__ void point_source_primary_generator(ParticleStack particles, ui32 id,
                                                         f32 px, f32 py, f32 pz, f32 energy,
-                                                        unsigned char type, unsigned int geom_id) {
+                                                        ui8 type, ui32 geom_id) {
 
     f32 phi = JKISS32(particles, id);
     f32 theta = JKISS32(particles, id);
@@ -67,11 +67,11 @@ void PointSource::set_energy(f32 venergy) {
     energy=venergy;
 }
 
-void PointSource::set_seed(unsigned int vseed) {
+void PointSource::set_seed(ui32 vseed) {
     seed=vseed;
 }
 
-void PointSource::set_in_geometry(unsigned int vgeometry_id) {
+void PointSource::set_in_geometry(ui32 vgeometry_id) {
     geometry_id=vgeometry_id;
 }
 

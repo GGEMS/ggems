@@ -20,23 +20,22 @@
 
 #include "raytracing.cuh"
 
-
 // Overlapping test AABB/Triangle - Akenine-Moller algorithm
-__host__ __device__ short int overlap_AABB_triangle(f32 xmin, f32 xmax,        // AABB
+__host__ __device__ i16 overlap_AABB_triangle(f32 xmin, f32 xmax,        // AABB
                                                     f32 ymin, f32 ymax,
                                                     f32 zmin, f32 zmax,
-                                                    float3 u,  // Triangle
-                                                    float3 v,
-                                                    float3 w) {
+                                                    f32xyz u,  // Triangle
+                                                    f32xyz v,
+                                                    f32xyz w) {
 
     // Compute box center
-    float3 c;
+    f32xyz c;
     c.x = (xmin + xmax) * 0.5f;
     c.y = (ymin + ymax) * 0.5f;
     c.z = (zmin + zmax) * 0.5f;
 
     // Compute halfsize
-    float3 hsize;
+    f32xyz hsize;
     hsize.x = (xmax - xmin) * 0.5f; // TODO improve that by xmax-cx
     hsize.y = (ymax - ymin) * 0.5f;
     hsize.z = (zmax - zmin) * 0.5f;
@@ -47,14 +46,14 @@ __host__ __device__ short int overlap_AABB_triangle(f32 xmin, f32 xmax,        /
     w = f3_sub(w, c);
 
     // Compute triangle edges
-    float3 e0 = f3_sub(v, u);
-    float3 e1 = f3_sub(w, v);
-    float3 e2 = f3_sub(u, w);
+    f32xyz e0 = f3_sub(v, u);
+    f32xyz e1 = f3_sub(w, v);
+    f32xyz e2 = f3_sub(u, w);
 
     //// The first 9 tests ///////////////////////////////////////////////////
     f32 p0, p1, p2, min, max, rad;
 
-    float3 fe;
+    f32xyz fe;
     fe.x = fabs(e0.x);
     fe.y = fabs(e0.y);
     fe.z = fabs(e0.z);
@@ -153,10 +152,10 @@ __host__ __device__ short int overlap_AABB_triangle(f32 xmin, f32 xmax,        /
     //// The last tests ///////////////////////////////////////////////////
 
     // Compute the plane
-    float3 n = f3_cross(e0, e1);
+    f32xyz n = f3_cross(e0, e1);
 
     // AABB/Plane
-    float3 vmin, vmax;
+    f32xyz vmin, vmax;
 
     if (n.x > 0.0f) {
         vmin.x = -hsize.x - u.x;
@@ -188,18 +187,18 @@ __host__ __device__ short int overlap_AABB_triangle(f32 xmin, f32 xmax,        /
 }
 
 // Ray/Sphere intersection
-__host__ __device__ f32 hit_ray_sphere(float3 ray_p, float3 ray_d,           // Ray
-                                                float3 sphere_c, f32 sphere_rad) { // Sphere
+__host__ __device__ f32 hit_ray_sphere(f32xyz ray_p, f32xyz ray_d,           // Ray
+                                                f32xyz sphere_c, f32 sphere_rad) { // Sphere
 
     // Sphere defintion (center, rad)
-    float3 m = f3_sub(ray_p, sphere_c);
+    f32xyz m = f3_sub(ray_p, sphere_c);
     f32  b = f3_dot(m, ray_d);
     f32  c = f3_dot(m, m) - sphere_rad*sphere_rad;
 
-    if (c > 0.0f && b > 0.0f) {return FLT_MAX;}
+    if (c > 0.0f && b > 0.0f) {return F32_MAX;}
 
     f32 discr = b*b - c;
-    if (discr < 0.0f) {return FLT_MAX;}
+    if (discr < 0.0f) {return F32_MAX;}
 
     f32 t = -b - sqrt(discr);
     if (t < 0.0f) {t = 0.0f;}
@@ -208,7 +207,7 @@ __host__ __device__ f32 hit_ray_sphere(float3 ray_p, float3 ray_d,           // 
 }
 
 // Ray/AABB intersection - Smits algorithm
-__host__ __device__ f32 hit_ray_AABB(float3 ray_p, float3 ray_d,
+__host__ __device__ f32 hit_ray_AABB(f32xyz ray_p, f32xyz ray_d,
                                        f32 aabb_xmin, f32 aabb_xmax,
                                        f32 aabb_ymin, f32 aabb_ymax,
                                        f32 aabb_zmin, f32 aabb_zmax) {
@@ -216,12 +215,12 @@ __host__ __device__ f32 hit_ray_AABB(float3 ray_p, float3 ray_d,
     f32 idx, idy, idz;
     f32 tmin, tmax, tymin, tymax, tzmin, tzmax, buf;
 
-    tmin = -FLT_MAX;
-    tmax =  FLT_MAX;
+    tmin = -F32_MAX;
+    tmax =  F32_MAX;
 
     // on x
     if (fabs(ray_d.x) < EPSILON6) {
-        if (ray_p.x < aabb_xmin || ray_p.x > aabb_xmax) {return FLT_MAX;}
+        if (ray_p.x < aabb_xmin || ray_p.x > aabb_xmax) {return F32_MAX;}
     } else {
         idx = 1.0f / ray_d.x;
         tmin = (aabb_xmin - ray_p.x) * idx;
@@ -231,11 +230,11 @@ __host__ __device__ f32 hit_ray_AABB(float3 ray_p, float3 ray_d,
             tmin = tmax;
             tmax = buf;
         }
-        if (tmin > tmax) {return FLT_MAX;}
+        if (tmin > tmax) {return F32_MAX;}
     }
     // on y
     if (fabs(ray_d.y) < EPSILON6) {
-        if (ray_p.y < aabb_ymin || ray_p.y > aabb_ymax) {return FLT_MAX;}
+        if (ray_p.y < aabb_ymin || ray_p.y > aabb_ymax) {return F32_MAX;}
     } else {
         idy = 1.0f / ray_d.y;
         tymin = (aabb_ymin - ray_p.y) * idy;
@@ -247,11 +246,11 @@ __host__ __device__ f32 hit_ray_AABB(float3 ray_p, float3 ray_d,
         }
         if (tymin > tmin) {tmin = tymin;}
         if (tymax < tmax) {tmax = tymax;}
-        if (tmin > tmax) {return FLT_MAX;}
+        if (tmin > tmax) {return F32_MAX;}
     }
     // on z
     if (fabs(ray_d.z) < EPSILON6) {
-        if (ray_p.z < aabb_zmin || ray_p.z > aabb_zmax) {return FLT_MAX;}
+        if (ray_p.z < aabb_zmin || ray_p.z > aabb_zmax) {return F32_MAX;}
     } else {
         idz = 1.0f / ray_d.z;
         tzmin = (aabb_zmin - ray_p.z) * idz;
@@ -263,11 +262,11 @@ __host__ __device__ f32 hit_ray_AABB(float3 ray_p, float3 ray_d,
         }
         if (tzmin > tmin) {tmin = tzmin;}
         if (tzmax < tmax) {tmax = tzmax;}
-        if (tmin > tmax) {return FLT_MAX;}
+        if (tmin > tmax) {return F32_MAX;}
     }
 
     // Return the smaller positive value
-    if (tmin < 0 && tmax < 0) return FLT_MAX;
+    if (tmin < 0 && tmax < 0) return F32_MAX;
     if (tmin < 0) {
         return tmax;
     } else {
@@ -277,7 +276,7 @@ __host__ __device__ f32 hit_ray_AABB(float3 ray_p, float3 ray_d,
 }
 
 // Ray/AABB intersection test - Smits algorithm
-__host__ __device__ bool test_ray_AABB(float3 ray_p, float3 ray_d,
+__host__ __device__ bool test_ray_AABB(f32xyz ray_p, f32xyz ray_d,
                                        f32 aabb_xmin, f32 aabb_xmax,
                                        f32 aabb_ymin, f32 aabb_ymax,
                                        f32 aabb_zmin, f32 aabb_zmax) {
@@ -285,8 +284,8 @@ __host__ __device__ bool test_ray_AABB(float3 ray_p, float3 ray_d,
     f32 idx, idy, idz;
     f32 tmin, tmax, tymin, tymax, tzmin, tzmax, buf;
 
-    tmin = -FLT_MAX;
-    tmax =  FLT_MAX;
+    tmin = -F32_MAX;
+    tmax =  F32_MAX;
 
     // on x
     if (fabs(ray_d.x) < EPSILON6) {
@@ -355,7 +354,7 @@ __host__ __device__ bool test_AABB_AABB(f32 a_xmin, f32 a_xmax, f32 a_ymin, f32 
 }
 
 // Point/AABB test
-__host__ __device__ bool test_point_AABB(float3 p,
+__host__ __device__ bool test_point_AABB(f32xyz p,
                                          f32 aabb_xmin, f32 aabb_xmax,
                                          f32 aabb_ymin, f32 aabb_ymax,
                                          f32 aabb_zmin, f32 aabb_zmax) {
@@ -369,27 +368,27 @@ __host__ __device__ bool test_point_AABB(float3 p,
 
 
 // Ray/triangle intersection - Moller-Trumbore algorithm
-__host__ __device__ f32 hit_ray_triangle(float3 ray_p, float3 ray_d,
-                                                  float3 tri_u,              // Triangle
-                                                  float3 tri_v,
-                                                  float3 tri_w) {
+__host__ __device__ f32 hit_ray_triangle(f32xyz ray_p, f32xyz ray_d,
+                                                  f32xyz tri_u,              // Triangle
+                                                  f32xyz tri_v,
+                                                  f32xyz tri_w) {
 
-    float3 e1 = f3_sub(tri_v, tri_u); // Find vector for 2 edges sharing
-    float3 e2 = f3_sub(tri_w, tri_u);
+    f32xyz e1 = f3_sub(tri_v, tri_u); // Find vector for 2 edges sharing
+    f32xyz e2 = f3_sub(tri_w, tri_u);
 
-    float3 pp = f3_cross(ray_d, e2);
+    f32xyz pp = f3_cross(ray_d, e2);
     f32  a  = f3_dot(e1, pp);
-    if (a > -1.0e-05f && a < 1.0e-05f) {return FLT_MAX;} // no hit
+    if (a > -1.0e-05f && a < 1.0e-05f) {return F32_MAX;} // no hit
 
     f32 f = 1.0f / a;
 
-    float3 s = f3_sub(ray_p, tri_u);
+    f32xyz s = f3_sub(ray_p, tri_u);
     f32  u = f * f3_dot(s, pp);
-    if (u < 0.0f || u > 1.0f) {return FLT_MAX;}
+    if (u < 0.0f || u > 1.0f) {return F32_MAX;}
 
-    float3 q = f3_cross(s, e1);
+    f32xyz q = f3_cross(s, e1);
     f32  v = f * f3_dot(ray_d, q);
-    if (v < 0.0f || (u+v) > 1.0f) {return FLT_MAX;}
+    if (v < 0.0f || (u+v) > 1.0f) {return F32_MAX;}
 
     // Ray hit the triangle
     return f * f3_dot(e2, q);

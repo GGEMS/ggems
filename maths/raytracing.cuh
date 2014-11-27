@@ -23,31 +23,31 @@
 #include "constants.cuh"
 
 
-// Overlap test return (short int):
+// Overlap test return (i16):
 //       -1 No interection         +1 Intersection
 
 // Hit collision return (f32):
 //        t >= 0 Distance of collision (if no collision t = FLT_MAX)
 
 
-// AABB/Triangle test - Akenine-Moller algorithm
-__host__ __device__ short int overlap_AABB_triangle(f32 xmin, f32 xmax,        // AABB
+// AABB/Triangle test - Akenine-Moller algorithm (TODO change i16 into bool)
+__host__ __device__ i16 overlap_AABB_triangle(f32 xmin, f32 xmax,        // AABB
                                                     f32 ymin, f32 ymax,
                                                     f32 zmin, f32 zmax,
-                                                    float3 u, float3 v, float3 w); // Triangle
+                                                    f32xyz u, f32xyz v, f32xyz w); // Triangle
 // Ray/Sphere intersection
-__host__ __device__ f32 hit_ray_sphere(float3 ray_p, float3 ray_d,           // Ray
-                                         float3 sphere_c, f32 sphere_rad);  // Sphere
+__host__ __device__ f32 hit_ray_sphere(f32xyz ray_p, f32xyz ray_d,           // Ray
+                                         f32xyz sphere_c, f32 sphere_rad);  // Sphere
 
 
 // Ray/AABB intersection - Smits algorithm
-__host__ __device__ f32 hit_ray_AABB(float3 ray_p, float3 ray_d,
+__host__ __device__ f32 hit_ray_AABB(f32xyz ray_p, f32xyz ray_d,
                                        f32 aabb_xmin, f32 aabb_xmax,
                                        f32 aabb_ymin, f32 aabb_ymax,
                                        f32 aabb_zmin, f32 aabb_zmax);
 
 // Ray/AABB test - Smits algorithm
-__host__ __device__ bool test_ray_AABB(float3 ray_p, float3 ray_d,
+__host__ __device__ bool test_ray_AABB(f32xyz ray_p, f32xyz ray_d,
                                        f32 aabb_xmin, f32 aabb_xmax,
                                        f32 aabb_ymin, f32 aabb_ymax,
                                        f32 aabb_zmin, f32 aabb_zmax);
@@ -59,15 +59,15 @@ __host__ __device__ bool test_AABB_AABB(f32 a_xmin, f32 a_xmax, f32 a_ymin, f32 
                                         f32 b_zmin, f32 b_zmax);
 
 // Point/AABB test
-__host__ __device__ bool test_point_AABB(float3 p,
+__host__ __device__ bool test_point_AABB(f32xyz p,
                                          f32 aabb_xmin, f32 aabb_xmax,
                                          f32 aabb_ymin, f32 aabb_ymax,
                                          f32 aabb_zmin, f32 aabb_zmax);
 
 // Ray/triangle intersection - Moller-Trumbore algorithm
-__host__ __device__ f32 hit_ray_triangle(float3 ray_p, float3 ray_d,
-                                           float3 tri_u,              // Triangle
-                                           float3 tri_v,
-                                           float3 tri_w);
+__host__ __device__ f32 hit_ray_triangle(f32xyz ray_p, f32xyz ray_d,
+                                           f32xyz tri_u,              // Triangle
+                                           f32xyz tri_v,
+                                           f32xyz tri_w);
 
 #endif

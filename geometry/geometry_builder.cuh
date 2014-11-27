@@ -73,38 +73,38 @@
 struct Scene {
 
     // Object structure
-    unsigned int* ptr_objects;     // Address to access to the different objects
-    unsigned int* size_of_objects; // Size of each object
+    ui32* ptr_objects;     // Address to access to the different objects
+    ui32* size_of_objects; // Size of each object
     f32* data_objects;           // Parameters of each primitive in the world
 
     // Tree structure
-    unsigned int* ptr_nodes;       // Address to access the different nodes
-    unsigned int* size_of_nodes;   // Size of each node (nb of others nodes connected)
-    unsigned int* child_nodes;     // List of child nodes
-    unsigned int* mother_node;     // List of mother nodes
+    ui32* ptr_nodes;       // Address to access the different nodes
+    ui32* size_of_nodes;   // Size of each node (nb of others nodes connected)
+    ui32* child_nodes;     // List of child nodes
+    ui32* mother_node;     // List of mother nodes
 
-    unsigned int cur_node_id;      // current node id
+    ui32 cur_node_id;      // current node id
 
     // Dimension of each vector
-    unsigned int ptr_objects_dim;
-    unsigned int size_of_objects_dim;
-    unsigned int data_objects_dim;
-    unsigned int ptr_nodes_dim;
-    unsigned int size_of_nodes_dim;
-    unsigned int child_nodes_dim;
-    unsigned int mother_node_dim;
+    ui32 ptr_objects_dim;
+    ui32 size_of_objects_dim;
+    ui32 data_objects_dim;
+    ui32 ptr_nodes_dim;
+    ui32 size_of_nodes_dim;
+    ui32 child_nodes_dim;
+    ui32 mother_node_dim;
 };
 
 
 // Host/Device function that handle geometry
 
-unsigned int __host__ __device__ get_geometry_material(Scene geometry, unsigned int id_geom, float3 pos);
-f32 __host__ __device__ get_distance_to_object(Scene geometry, unsigned int adr_geom, unsigned int obj_type,
-                                                 float3 pos, float3 dir);
-void __host__ __device__ get_next_geometry_boundary(Scene geometry, unsigned int cur_geom,
-                                                     float3 pos, float3 dir,
+ui32 __host__ __device__ get_geometry_material(Scene geometry, ui32 id_geom, f32xyz pos);
+f32 __host__ __device__ get_distance_to_object(Scene geometry, ui32 adr_geom, ui32 obj_type,
+                                                 f32xyz pos, f32xyz dir);
+void __host__ __device__ get_next_geometry_boundary(Scene geometry, ui32 cur_geom,
+                                                     f32xyz pos, f32xyz dir,
                                                      f32 &interaction_distance,
-                                                     unsigned int &geometry_volume);
+                                                     ui32 &geometry_volume);
 
 // This class is used to build the geometry
 class GeometryBuilder {
@@ -112,15 +112,15 @@ class GeometryBuilder {
         GeometryBuilder();
 
         // Geometry management
-        unsigned int add_world(Aabb obj);
-        unsigned int add_object(Aabb obj, unsigned int mother_id);
-        unsigned int add_object(Sphere obj, unsigned int mother_id);
-        unsigned int add_object(Meshed obj, unsigned int mother_id);
-        unsigned int add_object(Voxelized obj, unsigned int mother_id);
+        ui32 add_world(Aabb obj);
+        ui32 add_object(Aabb obj, ui32 mother_id);
+        ui32 add_object(Sphere obj, ui32 mother_id);
+        ui32 add_object(Meshed obj, ui32 mother_id);
+        ui32 add_object(Voxelized obj, ui32 mother_id);
 
         // Hierarchical structure of the geometry
         void add_root();
-        void add_node(unsigned int mother_id);
+        void add_node(ui32 mother_id);
         void print_tree();
 
         // Build the scene
@@ -140,15 +140,15 @@ class GeometryBuilder {
         std::vector<bool> object_wireframe;        // Wireframe option for each object
 
     private:        
-        unsigned int get_material_index(std::string material_name);
+        ui32 get_material_index(std::string material_name);
         void update_tree_address();
 
         // Store object temporally before initializing the complete geometry
-        std::map<unsigned int, char> buffer_obj_type;
-        std::map<unsigned int, Aabb> buffer_aabb;
-        std::map<unsigned int, Sphere> buffer_sphere;
-        std::map<unsigned int, Voxelized> buffer_voxelized;
-        std::map<unsigned int, Meshed> buffer_meshed;
+        std::map<ui32, i8> buffer_obj_type;
+        std::map<ui32, Aabb> buffer_aabb;
+        std::map<ui32, Sphere> buffer_sphere;
+        std::map<ui32, Voxelized> buffer_voxelized;
+        std::map<ui32, Meshed> buffer_meshed;
 
         // Build object into the scene structure
         void build_object(Aabb obj);

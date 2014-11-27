@@ -23,10 +23,10 @@
 
 // Struct that handle an image detector
 struct ImageDetector {
-    unsigned int geometry_id;
-    unsigned int nx, ny, nz;
-    unsigned int nb_voxels;
-    unsigned int countp;
+    ui32 geometry_id;
+    ui32 nx, ny, nz;
+    ui32 nb_voxels;
+    ui32 countp;
     f32 sx, sy, sz;
     f32 xmin, xmax, ymin, ymax, zmin, zmax;
     f32 *data;
@@ -37,7 +37,7 @@ struct ImageDetector {
 class FlatPanelDetector {
     public:
         FlatPanelDetector();
-        void attach_to(unsigned int geometry_id);
+        void attach_to(ui32 geometry_id);
         void set_resolution(f32 sx, f32 sy, f32 sz);
         void init(f32 xmin, f32 xmax, f32 ymin, f32 ymax, f32 zmin, f32 zmax);
 

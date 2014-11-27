@@ -56,8 +56,8 @@ f32 MaterialDataBase::read_material_density(std::string txt) {
 }
 
 // Read material number of elements
-unsigned short int MaterialDataBase::read_material_nb_elements(std::string txt) {
-    unsigned short int res;
+ui16 MaterialDataBase::read_material_nb_elements(std::string txt) {
+    ui16 res;
     txt = txt.substr(txt.find("n=")+2);
     txt = txt.substr(0, txt.find(";"));
     txt = remove_white_space(txt);
@@ -89,8 +89,8 @@ void MaterialDataBase::load_materials(std::string filename) {
 
     std::string line, elt_name;
     f32 mat_f;
-    unsigned short int i;
-    unsigned short int ind = 0;
+    ui16 i;
+    ui16 ind = 0;
 
     while (file) {
         skip_comment(file);
@@ -129,8 +129,8 @@ std::string MaterialDataBase::read_element_name(std::string txt) {
 }
 
 // Read element Z
-int MaterialDataBase::read_element_Z(std::string txt) {
-    int res;
+i32 MaterialDataBase::read_element_Z(std::string txt) {
+    i32 res;
     txt = txt.substr(txt.find("Z=")+2);
     txt = txt.substr(0, txt.find("."));
     std::stringstream(txt) >> res;
@@ -152,7 +152,7 @@ void MaterialDataBase::load_elements(std::string filename) {
     std::ifstream file(filename.c_str());
 
     std::string line, elt_name;
-    int elt_Z;
+    i32 elt_Z;
     f32 elt_A;
 
     while (file) {
@@ -173,8 +173,8 @@ void MaterialDataBase::load_elements(std::string filename) {
 
 // Skip comment starting with "#"
 void MaterialDataBase::skip_comment(std::istream & is) {
-    char c;
-    char line[1024];
+    i8 c;
+    i8 line[1024];
     if (is.eof()) return;
     is >> c;
     while (is && (c=='#')) {
@@ -213,8 +213,8 @@ void MaterialBuilder::get_materials_table_from_world(GeometryBuilder World) {
 
     // First allocated data to the structure according the number of materials
     materials_table.nb_materials = World.materials_list.size();
-    materials_table.nb_elements = (unsigned short int*)malloc(sizeof(unsigned short int)*materials_table.nb_materials);
-    materials_table.index = (unsigned short int*)malloc(sizeof(unsigned short int)*materials_table.nb_materials);
+    materials_table.nb_elements = (ui16*)malloc(sizeof(ui16)*materials_table.nb_materials);
+    materials_table.index = (ui16*)malloc(sizeof(ui16)*materials_table.nb_materials);
     materials_table.nb_atoms_per_vol = (f32*)malloc(sizeof(f32)*materials_table.nb_materials);
     materials_table.nb_electrons_per_vol = (f32*)malloc(sizeof(f32)*materials_table.nb_materials);
     materials_table.electron_mean_excitation_energy = (f32*)malloc(sizeof(f32)*materials_table.nb_materials);
@@ -235,9 +235,9 @@ void MaterialBuilder::get_materials_table_from_world(GeometryBuilder World) {
     materials_table.fLogEnergy2 = (f32*)malloc(sizeof(f32)*materials_table.nb_materials);
     materials_table.fLogMeanExcitationEnergy = (f32*)malloc(sizeof(f32)*materials_table.nb_materials);
 
-    int i, j;
-    unsigned int access_index = 0;
-    unsigned int fill_index = 0;
+    i32 i, j;
+    ui32 access_index = 0;
+    ui32 fill_index = 0;
     std::string mat_name, elt_name;
     Material cur_mat;
 
@@ -263,7 +263,7 @@ void MaterialBuilder::get_materials_table_from_world(GeometryBuilder World) {
 
     // nb of total elements
     materials_table.nb_elements_total = access_index;
-    materials_table.mixture = (unsigned short int*)malloc(sizeof(unsigned short int)*access_index);
+    materials_table.mixture = (ui16*)malloc(sizeof(ui16)*access_index);
     materials_table.atom_num_dens = (f32*)malloc(sizeof(f32)*access_index);
 
     // store mixture element and compute atomic density

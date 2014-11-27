@@ -42,82 +42,82 @@ struct PhotonCrossSectionTable{
 
     f32 E_min;
     f32 E_max;
-    unsigned int nb_bins;         // n
-    unsigned int nb_mat;          // k
+    ui32 nb_bins;         // n
+    ui32 nb_mat;          // k
 };
 
 // Utils
 __host__ __device__ f32 get_CS_from_table(f32 *E_bins, f32 *CSTable, f32 energy,
-                                            unsigned int E_index, unsigned int mat_index, unsigned int nb_bins);
+                                            ui32 E_index, ui32 mat_index, ui32 nb_bins);
 
 // Compton - model standard G4
-__host__ __device__ f32 Compton_CSPA_standard(f32 E, unsigned short int Z);
-__host__ __device__ f32 Compton_CS_standard(MaterialsTable materials, unsigned short int mat, f32 E);
+__host__ __device__ f32 Compton_CSPA_standard(f32 E, ui16 Z);
+__host__ __device__ f32 Compton_CS_standard(MaterialsTable materials, ui16 mat, f32 E);
 
 __host__ __device__ SecParticle Compton_SampleSecondaries_standard(ParticleStack particles,
                                                                    f32 cutE,
-                                                                   unsigned int id,
+                                                                   ui32 id,
                                                                    GlobalSimulationParameters parameters);
 //
 
 // PhotoElectric - model standard G4
-__host__ __device__ f32 Photoelec_CSPA_standard(f32 E, unsigned short int Z);
+__host__ __device__ f32 Photoelec_CSPA_standard(f32 E, ui16 Z);
 __host__ __device__ f32 Photoelec_CS_standard(MaterialsTable materials,
-                                                unsigned short int mat, f32 E);
+                                                ui16 mat, f32 E);
 __host__ __device__ SecParticle Photoelec_SampleSecondaries_standard(ParticleStack particles,
                                                                      MaterialsTable mat,
                                                                      PhotonCrossSectionTable photon_CS_table,
-                                                                     unsigned int E_index,
+                                                                     ui32 E_index,
                                                                      f32 cutE,
-                                                                     unsigned short int matindex,
-                                                                     unsigned int id,
+                                                                     ui16 matindex,
+                                                                     ui32 id,
                                                                      GlobalSimulationParameters parameters);
 
 //
 
 // Rayleigh scattering - model Livermore G4
-__host__ __device__ unsigned short int Rayleigh_LV_CS_CumulIntervals(unsigned int pos);
-__host__ __device__ unsigned short int Rayleigh_LV_CS_NbIntervals(unsigned int pos);
-__host__ __device__ unsigned short int Rayleigh_LV_SF_CumulIntervals(unsigned int pos);
-__host__ __device__ unsigned short int Rayleigh_LV_SF_NbIntervals(unsigned int pos);
+__host__ __device__ ui16 Rayleigh_LV_CS_CumulIntervals(ui32 pos);
+__host__ __device__ ui16 Rayleigh_LV_CS_NbIntervals(ui32 pos);
+__host__ __device__ ui16 Rayleigh_LV_SF_CumulIntervals(ui32 pos);
+__host__ __device__ ui16 Rayleigh_LV_SF_NbIntervals(ui32 pos);
 
 f32* Rayleigh_CS_Livermore_load_data();
 f32* Rayleigh_SF_Livermore_load_data();
-__host__ __device__ f32 Rayleigh_CSPA_Livermore(f32* rayl_cs, f32 E, unsigned short int Z);
+__host__ __device__ f32 Rayleigh_CSPA_Livermore(f32* rayl_cs, f32 E, ui16 Z);
 __host__ __device__ f32 Rayleigh_CS_Livermore(MaterialsTable materials,
-                                                f32* rayl_cs, unsigned short int mat, f32 E);
-__host__ __device__ f32 Rayleigh_SF_Livermore(f32* rayl_sf, f32 E, int Z);
+                                                f32* rayl_cs, ui16 mat, f32 E);
+__host__ __device__ f32 Rayleigh_SF_Livermore(f32* rayl_sf, f32 E, i32 Z);
 __host__ __device__ void Rayleigh_SampleSecondaries_Livermore(ParticleStack particles,
                                                               MaterialsTable mat,
                                                               PhotonCrossSectionTable photon_CS_table,
-                                                              unsigned int E_index,
-                                                              unsigned short int matindex,
-                                                              unsigned int id);
+                                                              ui32 E_index,
+                                                              ui16 matindex,
+                                                              ui32 id);
 
 
 /*
-__host__ __device__ f32 Compton_CSPA (f32 E, unsigned short int Z);
+__host__ __device__ f32 Compton_CSPA (f32 E, ui16 Z);
 
 // Compute the total Compton cross section for a given material
-__host__ __device__ f32 Compton_CS(GPUPhantomMaterials materials, unsigned short int mat, f32 E);
+__host__ __device__ f32 Compton_CS(GPUPhantomMaterials materials, ui16 mat, f32 E);
 // Compton Scatter (Standard - Klein-Nishina) with secondary (e-)
-__host__ __device__ f32 Compton_SampleSecondaries(ParticleStack particles, f32 cutE, unsigned int id,unsigned char flag_secondary);
+__host__ __device__ f32 Compton_SampleSecondaries(ParticleStack particles, f32 cutE, ui32 id,ui8 flag_secondary);
 
 ///// PhotoElectric /////
 
 // PhotoElectric Cross Section Per Atom (Standard)
-__host__ __device__ f32 PhotoElec_CSPA(f32 E, unsigned short int Z);
+__host__ __device__ f32 PhotoElec_CSPA(f32 E, ui16 Z);
 
 // Compute the total Compton cross section for a given material
 __host__ __device__ f32 PhotoElec_CS(GPUPhantomMaterials materials,
-                              unsigned short int mat, f32 E);
+                              ui16 mat, f32 E);
 
 // Compute Theta distribution of the emitted electron, with respect to the incident Gamma
 // The Sauter-Gavrila distribution for the K-shell is used
-__host__ __device__ f32 PhotoElec_ElecCosThetaDistribution(ParticleStack part,unsigned int id, f32 kineEnergy);
+__host__ __device__ f32 PhotoElec_ElecCosThetaDistribution(ParticleStack part,ui32 id, f32 kineEnergy);
 
 // PhotoElectric effect
-__host__ __device__ f32 PhotoElec_SampleSecondaries(ParticleStack particles, GPUPhantomMaterials mat, unsigned short int matindex, unsigned int id, unsigned char flag_secondary,f32 cutEnergyElectron=990*eV );
+__host__ __device__ f32 PhotoElec_SampleSecondaries(ParticleStack particles, GPUPhantomMaterials mat, ui16 matindex, ui32 id, ui8 flag_secondary,f32 cutEnergyElectron=990*eV );
 
 */
 

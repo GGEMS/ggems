@@ -26,7 +26,7 @@ SimulationBuilder::SimulationBuilder() {
     target = CPU_DEVICE;
 
     // Init physics list and secondaries list
-    unsigned int i = 0;
+    ui32 i = 0;
     while (i < NB_PROCESSES) {
         parameters.physics_list[i] = DISABLED;
         ++i;
@@ -51,8 +51,8 @@ SimulationBuilder::SimulationBuilder() {
 void SimulationBuilder::cpu_primaries_generator() {
 
     // Loop over particle slot
-    unsigned int id = 0;
-    unsigned int is = 0;
+    ui32 id = 0;
+    ui32 is = 0;
     while (id < particles.stack.size) {
 
         // TODO - Generic and multi-sources
@@ -61,11 +61,11 @@ void SimulationBuilder::cpu_primaries_generator() {
         is = 0; // first source
 
         // Read the address source
-        unsigned int adr = sources.sources.ptr_sources[is];
+        ui32 adr = sources.sources.ptr_sources[is];
 
         // Read the kind of sources
-        unsigned int type = (unsigned int)(sources.sources.data_sources[adr+ADR_SRC_TYPE]);
-        unsigned int geom_id = (unsigned int)(sources.sources.data_sources[adr+ADR_SRC_GEOM_ID]);
+        ui32 type = (ui32)(sources.sources.data_sources[adr+ADR_SRC_TYPE]);
+        ui32 geom_id = (ui32)(sources.sources.data_sources[adr+ADR_SRC_GEOM_ID]);
 
         // Point Source
         if (type == POINT_SOURCE) {
@@ -180,7 +180,7 @@ void SimulationBuilder::set_process(std::string process_name) {
 }
 
 // Set parameters to generate cross sections table
-void SimulationBuilder::set_CS_table_nbins(unsigned int valbin) {parameters.cs_table_nbins = valbin;}
+void SimulationBuilder::set_CS_table_nbins(ui32 valbin) {parameters.cs_table_nbins = valbin;}
 void SimulationBuilder::set_CS_table_E_min(f32 valE) {parameters.cs_table_min_E = valE;}
 void SimulationBuilder::set_CS_table_E_max(f32 valE) {parameters.cs_table_max_E = valE;}
 
@@ -201,17 +201,17 @@ void SimulationBuilder::set_secondary(std::string pname) {
 }
 
 // Set the number of particles required for the simulation
-void SimulationBuilder::set_number_of_particles(unsigned int nb) {
+void SimulationBuilder::set_number_of_particles(ui32 nb) {
     nb_of_particles = nb;
 }
 
 // Set the maximum number of iterations (watchdog)
-void SimulationBuilder::set_max_number_of_iterations(unsigned int nb) {
+void SimulationBuilder::set_max_number_of_iterations(ui32 nb) {
     max_iteration = nb;
 }
 
 // Set to record the history of some particles (only for CPU version)
-void SimulationBuilder::set_record_history(unsigned int nb_particles) {
+void SimulationBuilder::set_record_history(ui32 nb_particles) {
     history.record_flag = ENABLED;
     history.max_nb_particles = std::min(nb_particles, nb_of_particles);
     history.stack_size = particles.stack.size;
@@ -280,7 +280,7 @@ void SimulationBuilder::init_simulation() {
     // Init detector if setting up
     if (detector_set) {
 
-        unsigned int adr_geom = geometry.world.ptr_objects[detector.panel_detector.geometry_id];
+        ui32 adr_geom = geometry.world.ptr_objects[detector.panel_detector.geometry_id];
 
         // Read first the bounding box
         f32 xmin = geometry.world.data_objects[adr_geom+ADR_AABB_XMIN];
@@ -300,7 +300,7 @@ void SimulationBuilder::init_simulation() {
 // Start the simulation
 void SimulationBuilder::start_simulation() {
 
-    unsigned int iter = 0;
+    ui32 iter = 0;
 
     if (target == CPU_DEVICE) {
 

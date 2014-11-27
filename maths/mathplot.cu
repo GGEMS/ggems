@@ -26,9 +26,9 @@ MathPlotBuilder::MathPlotBuilder(){}
 //// Private functions ///////////////////////////////////////////////////////
 
 // Build an histogramm based on 1D data
-void MathPlotBuilder::get_histogramm(f32* xdata, unsigned int nxdata,
-                                    f32* bins, f32* nbelt, unsigned int nbins) {
-    unsigned int i;
+void MathPlotBuilder::get_histogramm(f32* xdata, ui32 nxdata,
+                                    f32* bins, f32* nbelt, ui32 nbins) {
+    ui32 i;
 
     // Find min max values
     f32 xmin = FLT_MAX;
@@ -55,10 +55,10 @@ void MathPlotBuilder::get_histogramm(f32* xdata, unsigned int nxdata,
     i=0; while (i<nxdata) {
         posi = ((xdata[i]-xmin) / di)+0.5f;
 
-        assert(int(posi) != nbins);
-        assert(int(posi) >= 0);
+        assert(i32(posi) != nbins);
+        assert(i32(posi) >= 0);
 
-        ++nbelt[int(posi)];
+        ++nbelt[i32(posi)];
         ++i;
     }
 
@@ -71,10 +71,10 @@ void MathPlotBuilder::get_histogramm(f32* xdata, unsigned int nxdata,
 }
 
 // Build a weigthed histogramm based on 2D data
-void MathPlotBuilder::get_weighted_histogramm(f32* xdata, f32* ydata, unsigned int nxdata,
+void MathPlotBuilder::get_weighted_histogramm(f32* xdata, f32* ydata, ui32 nxdata,
                                               f32* hist, f32* nbelt, f32* bins,
-                                              unsigned int nbins) {
-    int i;
+                                              ui32 nbins) {
+    i32 i;
     f32 xmin = FLT_MAX;
     f32 xmax = FLT_MIN;
     f32 val;
@@ -99,8 +99,8 @@ void MathPlotBuilder::get_weighted_histogramm(f32* xdata, f32* ydata, unsigned i
     f32 posi;
     i=0; while (i<nxdata) {
         posi = ((xdata[i]-xmin) / di)+0.5f;
-        ++nbelt[int(posi)];
-        hist[int(posi)] += ydata[i];
+        ++nbelt[i32(posi)];
+        hist[i32(posi)] += ydata[i];
         ++i;
     }
 
@@ -114,8 +114,8 @@ void MathPlotBuilder::get_weighted_histogramm(f32* xdata, f32* ydata, unsigned i
 //// Pulbic functions /////////////////////////////////////////////////////////
 
 // Plot a 1D histogramm
-void MathPlotBuilder::plot_distribution(f32 *xdata, unsigned int nxdata,
-                                        unsigned int n_bin, std::string filename,
+void MathPlotBuilder::plot_distribution(f32 *xdata, ui32 nxdata,
+                                        ui32 n_bin, std::string filename,
                                         std::string xlabel, std::string ylabel) {
 
     // Memory allocation
@@ -176,11 +176,11 @@ void MathPlotBuilder::plot_distribution(f32 *xdata, unsigned int nxdata,
 
 // Plot energy distribution
 void MathPlotBuilder::plot_energy_distribution(ParticleBuilder particles,
-                                               unsigned int n_bin, std::string filename) {
+                                               ui32 n_bin, std::string filename) {
 
     // Looking only on particle alive
-    unsigned int nxdata = 0;
-    unsigned int i= 0;
+    ui32 nxdata = 0;
+    ui32 i= 0;
     while (i < particles.stack.size) {
         if (particles.stack.endsimu[i] == PARTICLE_ALIVE) ++nxdata;
         ++i;

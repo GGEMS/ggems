@@ -26,10 +26,10 @@
 class YVA : public Voxelized {
     public:
         YVA();
-        void include(Meshed obj, unsigned int obj_id);
+        void include(Meshed obj, ui32 obj_id);
 
     private:
-        unsigned int obj_inc_id;
+        ui32 obj_inc_id;
         bool *overlap_vox;
 
 };

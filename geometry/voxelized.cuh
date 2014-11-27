@@ -27,7 +27,7 @@ class Voxelized : public BaseObject {
         Voxelized();
 
         void load_from_raw(std::string volume_name, std::string range_name,
-                           int nx, int ny, int nz, f32 sx, f32 sy, f32 sz);
+                           i32 nx, i32 ny, i32 nz, f32 sx, f32 sy, f32 sz);
 
         void load_from_mhd(std::string volume_name, std::string range_name);
 
@@ -35,9 +35,9 @@ class Voxelized : public BaseObject {
 
         f32 *data;
 
-        unsigned short int nb_vox_x, nb_vox_y, nb_vox_z;
-        unsigned int number_of_voxels;
-        unsigned int mem_size; // TODO this can be remove
+        ui16 nb_vox_x, nb_vox_y, nb_vox_z;
+        ui32 number_of_voxels;
+        ui32 mem_size; // TODO this can be remove
         f32 spacing_x, spacing_y, spacing_z;
 
         std::vector<std::string> list_of_materials;
@@ -56,9 +56,9 @@ class Voxelized : public BaseObject {
         // for mhd
         std::string read_mhd_key(std::string);
         std::string read_mhd_string_arg(std::string);
-        int read_mhd_int(std::string);
-        int read_mhd_int_atpos(std::string, int);
-        f32 read_mhd_f32_atpos(std::string, int);
+        i32 read_mhd_int(std::string);
+        i32 read_mhd_int_atpos(std::string, i32);
+        f32 read_mhd_f32_atpos(std::string, i32);
 };
 
 

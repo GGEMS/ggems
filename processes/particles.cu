@@ -26,7 +26,7 @@ HistoryBuilder::HistoryBuilder() {
 }
 
 // Create a new particle track in the history
-void HistoryBuilder::cpu_new_particle_track(unsigned int a_pname) {
+void HistoryBuilder::cpu_new_particle_track(ui32 a_pname) {
 
     // If need record the first position for the tracking history
     if (current_particle_id < max_nb_particles) {
@@ -44,10 +44,10 @@ void HistoryBuilder::cpu_new_particle_track(unsigned int a_pname) {
 }
 
 // Reacord a step in a history track
-void HistoryBuilder::cpu_record_a_step(ParticleStack particles, unsigned int id_part) {
+void HistoryBuilder::cpu_record_a_step(ParticleStack particles, ui32 id_part) {
 
     // Absolute index is need to store particle history over different iteration
-    unsigned int abs_id_part = cur_iter*stack_size + id_part;
+    ui32 abs_id_part = cur_iter*stack_size + id_part;
 
     OneParticleStep astep;
 
@@ -74,12 +74,12 @@ ParticleBuilder::ParticleBuilder() {
 }
 
 // Set the size of the stack buffer
-void ParticleBuilder::set_stack_size(unsigned int nb) {
+void ParticleBuilder::set_stack_size(ui32 nb) {
     stack.size = nb;
 }
 
 // Set the seed for this stack
-void ParticleBuilder::set_seed(unsigned int val_seed) {
+void ParticleBuilder::set_seed(ui32 val_seed) {
     seed = val_seed;
 }
 
@@ -99,17 +99,17 @@ void ParticleBuilder::cpu_malloc_stack() {
     stack.pz = (f32*)malloc(stack.size * sizeof(f32));
     stack.tof = (f32*)malloc(stack.size * sizeof(f32));
 
-    stack.prng_state_1 = (unsigned int*)malloc(stack.size * sizeof(unsigned int));
-    stack.prng_state_2 = (unsigned int*)malloc(stack.size * sizeof(unsigned int));
-    stack.prng_state_3 = (unsigned int*)malloc(stack.size * sizeof(unsigned int));
-    stack.prng_state_4 = (unsigned int*)malloc(stack.size * sizeof(unsigned int));
-    stack.prng_state_5 = (unsigned int*)malloc(stack.size * sizeof(unsigned int));
+    stack.prng_state_1 = (ui32*)malloc(stack.size * sizeof(ui32));
+    stack.prng_state_2 = (ui32*)malloc(stack.size * sizeof(ui32));
+    stack.prng_state_3 = (ui32*)malloc(stack.size * sizeof(ui32));
+    stack.prng_state_4 = (ui32*)malloc(stack.size * sizeof(ui32));
+    stack.prng_state_5 = (ui32*)malloc(stack.size * sizeof(ui32));
 
-    stack.geometry_id = (unsigned int*)malloc(stack.size * sizeof(unsigned int));
+    stack.geometry_id = (ui32*)malloc(stack.size * sizeof(ui32));
 
-    stack.endsimu = (unsigned char*)malloc(stack.size * sizeof(unsigned char));
-    stack.level = (unsigned char*)malloc(stack.size * sizeof(unsigned char));
-    stack.pname = (unsigned char*)malloc(stack.size * sizeof(unsigned char));
+    stack.endsimu = (ui8*)malloc(stack.size * sizeof(ui8));
+    stack.level = (ui8*)malloc(stack.size * sizeof(ui8));
+    stack.pname = (ui8*)malloc(stack.size * sizeof(ui8));
 }
 
 // Init particle seeds with the main seed
@@ -120,7 +120,7 @@ void ParticleBuilder::init_stack_seed() {
     }
 
     srand(seed);
-    unsigned int i=0;
+    ui32 i=0;
     while (i<stack.size) {
         // init random seed
         stack.prng_state_1[i] = rand();
@@ -134,10 +134,10 @@ void ParticleBuilder::init_stack_seed() {
 }
 
 // Print particles on a CPU stack
-void ParticleBuilder::cpu_print_stack(unsigned int nlim) {
+void ParticleBuilder::cpu_print_stack(ui32 nlim) {
 
     nlim = std::min(nlim, stack.size);
-    unsigned int i = 0;
+    ui32 i = 0;
     while (i < nlim) {
         printf("%i - p %f %f %f - d %f %f %f - E %f\n", i, stack.px[i], stack.py[i], stack.pz[i],
                stack.dx[i], stack.dy[i], stack.dz[i], stack.E[i]);

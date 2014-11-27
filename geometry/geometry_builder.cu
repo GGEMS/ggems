@@ -25,12 +25,12 @@
 /////////////////////////////////////////////////////////////////////////////////////
 
 // Function that return the material of a volume
-unsigned int __host__ __device__ get_geometry_material(Scene geometry, unsigned int id_geom, float3 pos) {
-    unsigned int adr_geom = geometry.ptr_objects[id_geom];
-    unsigned int obj_type = (unsigned int)geometry.data_objects[adr_geom+ADR_OBJ_TYPE];
+ui32 __host__ __device__ get_geometry_material(Scene geometry, ui32 id_geom, float3 pos) {
+    ui32 adr_geom = geometry.ptr_objects[id_geom];
+    ui32 obj_type = (ui32)geometry.data_objects[adr_geom+ADR_OBJ_TYPE];
 
     if (obj_type != VOXELIZED) {
-        return (unsigned int)geometry.data_objects[adr_geom+ADR_OBJ_MAT_ID];
+        return (ui32)geometry.data_objects[adr_geom+ADR_OBJ_MAT_ID];
     } else if (obj_type == VOXELIZED) {
         // Change particle frame (into voxelized volume)
         pos.x -= geometry.data_objects[adr_geom+ADR_AABB_XMIN]; // -= xmin
@@ -38,9 +38,9 @@ unsigned int __host__ __device__ get_geometry_material(Scene geometry, unsigned 
         pos.z -= geometry.data_objects[adr_geom+ADR_AABB_ZMIN]; // -= zmin
         // Get the voxel index
         int3 ind;
-        ind.x = (unsigned int)(pos.x / geometry.data_objects[adr_geom+ADR_VOXELIZED_SX]); // / sx
-        ind.y = (unsigned int)(pos.y / geometry.data_objects[adr_geom+ADR_VOXELIZED_SY]); // / sy
-        ind.z = (unsigned int)(pos.z / geometry.data_objects[adr_geom+ADR_VOXELIZED_SZ]); // / sz
+        ind.x = (ui32)(pos.x / geometry.data_objects[adr_geom+ADR_VOXELIZED_SX]); // / sx
+        ind.y = (ui32)(pos.y / geometry.data_objects[adr_geom+ADR_VOXELIZED_SY]); // / sy
+        ind.z = (ui32)(pos.z / geometry.data_objects[adr_geom+ADR_VOXELIZED_SZ]); // / sz
 //        printf("Vos ind %i %i %i aabb %f %f, %f %f, %f %f\n", ind.x, ind.y, ind.z,
 //               geometry.data_objects[adr_geom+ADR_AABB_XMIN],
 //               geometry.data_objects[adr_geom+ADR_AABB_XMAX],
@@ -49,18 +49,18 @@ unsigned int __host__ __device__ get_geometry_material(Scene geometry, unsigned 
 //               geometry.data_objects[adr_geom+ADR_AABB_ZMIN],
 //               geometry.data_objects[adr_geom+ADR_AABB_ZMAX]);
         // Return material
-        unsigned int abs_ind = ind.z * (geometry.data_objects[adr_geom+ADR_VOXELIZED_NY]*geometry.data_objects[adr_geom+ADR_VOXELIZED_NX])
+        ui32 abs_ind = ind.z * (geometry.data_objects[adr_geom+ADR_VOXELIZED_NY]*geometry.data_objects[adr_geom+ADR_VOXELIZED_NX])
                                         + ind.y*geometry.data_objects[adr_geom+ADR_VOXELIZED_NX] + ind.x;
-        //printf("Mat: %i\n", (unsigned int)geometry.data_objects[adr_geom+ADR_VOXELIZED_DATA+abs_ind]);
-        return (unsigned int)geometry.data_objects[adr_geom+ADR_VOXELIZED_DATA+abs_ind];
+        //printf("Mat: %i\n", (ui32)geometry.data_objects[adr_geom+ADR_VOXELIZED_DATA+abs_ind]);
+        return (ui32)geometry.data_objects[adr_geom+ADR_VOXELIZED_DATA+abs_ind];
     } else {
         return 0;
     }
 }
 
 // Get distance from an object
-f32 __host__ __device__ get_distance_to_object(Scene geometry, unsigned int adr_geom,
-                                                 unsigned int obj_type, float3 pos, float3 dir) {
+f32 __host__ __device__ get_distance_to_object(Scene geometry, ui32 adr_geom,
+                                               ui32 obj_type, float3 pos, float3 dir) {
 
     f32 distance = FLT_MAX;
 
@@ -102,9 +102,9 @@ f32 __host__ __device__ get_distance_to_object(Scene geometry, unsigned int adr_
         s.z = geometry.data_objects[adr_geom+ADR_VOXELIZED_SZ];
         // Get the voxel index
         int3 ind;
-        ind.x = (unsigned int)(posinvox.x / s.x);
-        ind.y = (unsigned int)(posinvox.y / s.y);
-        ind.z = (unsigned int)(posinvox.z / s.z);
+        ind.x = (ui32)(posinvox.x / s.x);
+        ind.y = (ui32)(posinvox.y / s.y);
+        ind.z = (ui32)(posinvox.z / s.z);
 
         //printf("Ind %i %i %i\n", ind.x, ind.y, ind.z);
 
@@ -147,7 +147,7 @@ f32 __host__ __device__ get_distance_to_object(Scene geometry, unsigned int adr_
 
     } else if (obj_type == MESHED) {
 
-        unsigned int octree_type = geometry.data_objects[adr_geom+ADR_MESHED_OCTREE_TYPE];
+        ui32 octree_type = geometry.data_objects[adr_geom+ADR_MESHED_OCTREE_TYPE];
 
         // Read first the bounding box
         f32 xmin = geometry.data_objects[adr_geom+ADR_AABB_XMIN];
@@ -164,11 +164,11 @@ f32 __host__ __device__ get_distance_to_object(Scene geometry, unsigned int adr_
         distance = FLT_MAX;
         f32 tri_distance;
         if (octree_type == NO_OCTREE) {
-            unsigned int nb_tri = geometry.data_objects[adr_geom+ADR_MESHED_NB_TRIANGLES];
-            unsigned int i=0;
+            ui32 nb_tri = geometry.data_objects[adr_geom+ADR_MESHED_NB_TRIANGLES];
+            ui32 i=0;
             while (i < nb_tri) {
                 // Fetch a triangle
-                unsigned int ptr_tri = adr_geom+ADR_MESHED_DATA+ i*9; // 3 vertices of float3
+                ui32 ptr_tri = adr_geom+ADR_MESHED_DATA+ i*9; // 3 vertices of float3
                 float3 u = make_float3(geometry.data_objects[ptr_tri],
                                        geometry.data_objects[ptr_tri+1],
                                        geometry.data_objects[ptr_tri+2]);
@@ -201,9 +201,9 @@ f32 __host__ __device__ get_distance_to_object(Scene geometry, unsigned int adr_
             s.z = geometry.data_objects[adr_geom+ADR_VOXELIZED_SZ];
             // Get the voxel index
             int3 ind;
-            ind.x = (unsigned int)(localpos.x / s.x);
-            ind.y = (unsigned int)(localpos.y / s.y);
-            ind.z = (unsigned int)(localpos.z / s.z);
+            ind.x = (ui32)(localpos.x / s.x);
+            ind.y = (ui32)(localpos.y / s.y);
+            ind.z = (ui32)(localpos.z / s.z);
 
             // DDA algorithm
 
@@ -216,19 +216,19 @@ f32 __host__ __device__ get_distance_to_object(Scene geometry, unsigned int adr_
             fpos.y = f32(ind.y);
             fpos.z = f32(ind.z);
 
-            unsigned int nb_tri = geometry.data_objects[adr_geom+ADR_MESHED_NB_TRIANGLES];
-            unsigned int nx = geometry.data_objects[adr_geom+ADR_MESHED_OCTREE_NX];
-            unsigned int ny = geometry.data_objects[adr_geom+ADR_MESHED_OCTREE_NY];
-            unsigned int nz = geometry.data_objects[adr_geom+ADR_MESHED_OCTREE_NZ];
-            unsigned int adr_octree = adr_geom+ADR_MESHED_DATA+ 9*nb_tri; // 3 vertices of float3
+            ui32 nb_tri = geometry.data_objects[adr_geom+ADR_MESHED_NB_TRIANGLES];
+            ui32 nx = geometry.data_objects[adr_geom+ADR_MESHED_OCTREE_NX];
+            ui32 ny = geometry.data_objects[adr_geom+ADR_MESHED_OCTREE_NY];
+            ui32 nz = geometry.data_objects[adr_geom+ADR_MESHED_OCTREE_NZ];
+            ui32 adr_octree = adr_geom+ADR_MESHED_DATA+ 9*nb_tri; // 3 vertices of float3
 
-            unsigned int index = ind.z*nx*ny + ind.y*nx + ind.x;
+            ui32 index = ind.z*nx*ny + ind.y*nx + ind.x;
 
             // DDA until to find triangles on an octree cell
             while (geometry.data_objects[adr_octree+index] == 0) {
-                ind.x = (unsigned int)fpos.x;
-                ind.y = (unsigned int)fpos.y;
-                ind.z = (unsigned int)fpos.z;
+                ind.x = (ui32)fpos.x;
+                ind.y = (ui32)fpos.y;
+                ind.z = (ui32)fpos.z;
 
                 // check boundary
                 if (ind.x <0 && ind.x >= nx &&
@@ -248,12 +248,12 @@ f32 __host__ __device__ get_distance_to_object(Scene geometry, unsigned int adr_
                 return FLT_MAX;
             // else check every triangle contain of the octree cell
             } else {
-                unsigned int tri_per_cell = geometry.data_objects[adr_octree+index];
-                unsigned int adr_to_cell = adr_octree + (nx*ny*nz) + index;
-                unsigned int ptr_list_tri = adr_octree + 2*(nx*ny*nz) + geometry.data_objects[adr_to_cell];
-                unsigned int i=0;
+                ui32 tri_per_cell = geometry.data_objects[adr_octree+index];
+                ui32 adr_to_cell = adr_octree + (nx*ny*nz) + index;
+                ui32 ptr_list_tri = adr_octree + 2*(nx*ny*nz) + geometry.data_objects[adr_to_cell];
+                ui32 i=0;
                 while (i < tri_per_cell) {
-                    unsigned int ptr_tri = geometry.data_objects[ptr_list_tri + i*9];
+                    ui32 ptr_tri = geometry.data_objects[ptr_list_tri + i*9];
 
                     float3 u = make_float3(geometry.data_objects[ptr_tri],
                                            geometry.data_objects[ptr_tri+1],
@@ -281,10 +281,10 @@ f32 __host__ __device__ get_distance_to_object(Scene geometry, unsigned int adr_
 }
 
 // Find the next geometry along the path of the particle
-void __host__ __device__ get_next_geometry_boundary(Scene geometry, unsigned int cur_geom,
+void __host__ __device__ get_next_geometry_boundary(Scene geometry, ui32 cur_geom,
                                                      float3 pos, float3 dir,
                                                      f32 &interaction_distance,
-                                                     unsigned int &geometry_volume) {
+                                                     ui32 &geometry_volume) {
 
     geometry_volume = cur_geom;
     f32 distance;
@@ -292,8 +292,8 @@ void __host__ __device__ get_next_geometry_boundary(Scene geometry, unsigned int
     ////// Mother
 
     // First check the mother volume (particle escaping the volume)
-    unsigned int adr_geom = geometry.ptr_objects[cur_geom];
-    unsigned int obj_type = (unsigned int)geometry.data_objects[adr_geom+ADR_OBJ_TYPE];
+    ui32 adr_geom = geometry.ptr_objects[cur_geom];
+    ui32 obj_type = (ui32)geometry.data_objects[adr_geom+ADR_OBJ_TYPE];
 
     // Special case of voxelized volume where there are voxel boundary
     if (obj_type == VOXELIZED) {           
@@ -324,9 +324,9 @@ void __host__ __device__ get_next_geometry_boundary(Scene geometry, unsigned int
     ////// Children
 
     // Then check every child contains in this node
-    unsigned int adr_node = geometry.ptr_nodes[cur_geom];
-    unsigned int offset_node = 0;
-    unsigned int id_child_geom;
+    ui32 adr_node = geometry.ptr_nodes[cur_geom];
+    ui32 offset_node = 0;
+    ui32 id_child_geom;
 
     while (offset_node < geometry.size_of_nodes[cur_geom]) {
 
@@ -334,8 +334,8 @@ void __host__ __device__ get_next_geometry_boundary(Scene geometry, unsigned int
         id_child_geom = geometry.child_nodes[adr_node + offset_node];
 
         // Determine the type of the volume
-        unsigned int adr_child_geom = geometry.ptr_objects[id_child_geom];
-        obj_type = (unsigned int)geometry.data_objects[adr_child_geom+ADR_OBJ_TYPE];
+        ui32 adr_child_geom = geometry.ptr_objects[id_child_geom];
+        obj_type = (ui32)geometry.data_objects[adr_child_geom+ADR_OBJ_TYPE];
 
         // Special case for voxelized volume (check the outter boundary)
         if (obj_type == VOXELIZED) {
@@ -381,7 +381,7 @@ GeometryBuilder::GeometryBuilder() {
 // Update the tree address
 void GeometryBuilder::update_tree_address() {
     world.ptr_nodes[0] = 0;
-    unsigned int i=1;
+    ui32 i=1;
     while (i < world.ptr_nodes_dim) {
         world.ptr_nodes[i] = world.ptr_nodes[i-1] + world.size_of_nodes[i-1];
         ++i;
@@ -389,10 +389,10 @@ void GeometryBuilder::update_tree_address() {
 }
 
 // Search and return the material index for a given material name
-unsigned int GeometryBuilder::get_material_index(std::string material_name) {
+ui32 GeometryBuilder::get_material_index(std::string material_name) {
 
     // Check if this material is already used, if it is return the corresponding index
-    unsigned int index = 0;
+    ui32 index = 0;
     while (index < materials_list.size()) {
         if (materials_list[index] == material_name) return index;
         ++index;
@@ -418,7 +418,7 @@ void GeometryBuilder::add_root() {
 }
 
 // Add a node
-void GeometryBuilder::add_node(unsigned int mother_id) {
+void GeometryBuilder::add_node(ui32 mother_id) {
     // New node ID
     world.cur_node_id++;
 
@@ -439,8 +439,8 @@ void GeometryBuilder::add_node(unsigned int mother_id) {
 // Print the tree structure of the geometry
 void GeometryBuilder::print_tree() {
     // print each node
-    unsigned int i = 0;
-    unsigned int j = 0;
+    ui32 i = 0;
+    ui32 j = 0;
     while (i < world.size_of_nodes_dim) {
         printf("(mother: %i)--[node: %i]--(childs: ", world.mother_node[i], i);
         j=0; while (j < world.size_of_nodes[i]) {
@@ -461,7 +461,7 @@ void GeometryBuilder::print_geometry() {
     print_tree();
 
     // Print out every object name
-    unsigned int i;
+    ui32 i;
     printf("List of object:\n");
     i=0; while (i < name_objects.size()) {
         printf("%i - %s\n", i, name_objects[i].c_str());
@@ -480,14 +480,14 @@ void GeometryBuilder::print_geometry() {
     // Print out each object contains on the tree
     i=0; while (i < world.ptr_objects_dim) {
         // Get obj address
-        unsigned int address_obj = world.ptr_objects[i];
+        ui32 address_obj = world.ptr_objects[i];
 
         // Object name
         printf("::: %s :::\n", name_objects[i].c_str());
 
         // Same header for everyone
-        unsigned int type = (unsigned int)(world.data_objects[address_obj+ADR_OBJ_TYPE]);
-        unsigned int mat = (unsigned int)(world.data_objects[address_obj+ADR_OBJ_MAT_ID]);
+        ui32 type = (ui32)(world.data_objects[address_obj+ADR_OBJ_TYPE]);
+        ui32 mat = (ui32)(world.data_objects[address_obj+ADR_OBJ_MAT_ID]);
         f32 xmin = world.data_objects[address_obj+ADR_AABB_XMIN];
         f32 xmax = world.data_objects[address_obj+ADR_AABB_XMAX];
         f32 ymin = world.data_objects[address_obj+ADR_AABB_YMIN];
@@ -519,7 +519,7 @@ void GeometryBuilder::print_geometry() {
 void GeometryBuilder::print_raw() {
 
     // Print out every object name
-    unsigned int i;
+    ui32 i;
     printf("List of object [%lu]: ", World.name_objects.size());
     i=0; while (i < World.name_objects.size()) {
         printf("%s ", World.name_objects[i].c_str());
@@ -578,68 +578,68 @@ void GeometryBuilder::save_ggems_geometry(std::string filename) {
     }
 
     FILE *pfile = fopen(filename.c_str(), "wb");
-    unsigned int i, nb, tmp;
+    ui32 i, nb, tmp;
 
     // .: Tree :.  -  First export the tree that structure the world
 
     // 1. ptr_nodes [N, data]
     nb = World.tree.ptr_nodes.size();
-    fwrite(&nb, 1, sizeof(unsigned int), pfile);
-    fwrite(World.tree.ptr_nodes.data(), nb, sizeof(unsigned int), pfile);
+    fwrite(&nb, 1, sizeof(ui32), pfile);
+    fwrite(World.tree.ptr_nodes.data(), nb, sizeof(ui32), pfile);
 
     // 2. size_of_nodes [N, data]
     nb = World.tree.size_of_nodes.size();
-    fwrite(&nb, 1, sizeof(unsigned int), pfile);
-    fwrite(World.tree.size_of_nodes.data(), nb, sizeof(unsigned int), pfile);
+    fwrite(&nb, 1, sizeof(ui32), pfile);
+    fwrite(World.tree.size_of_nodes.data(), nb, sizeof(ui32), pfile);
 
     // 3. child_nodes [N, data]
     nb = World.tree.child_nodes.size();
-    fwrite(&nb, 1, sizeof(unsigned int), pfile);
-    fwrite(World.tree.child_nodes.data(), nb, sizeof(unsigned int), pfile);
+    fwrite(&nb, 1, sizeof(ui32), pfile);
+    fwrite(World.tree.child_nodes.data(), nb, sizeof(ui32), pfile);
 
     // 4. mother_node [N, data]
     nb = World.tree.mother_node.size();
-    fwrite(&nb, 1, sizeof(unsigned int), pfile);
-    fwrite(World.tree.mother_node.data(), nb, sizeof(unsigned int), pfile);
+    fwrite(&nb, 1, sizeof(ui32), pfile);
+    fwrite(World.tree.mother_node.data(), nb, sizeof(ui32), pfile);
 
     // 5. cur_node_id [val]
-    fwrite(&World.tree.cur_node_id, 1, sizeof(unsigned int), pfile);
+    fwrite(&World.tree.cur_node_id, 1, sizeof(ui32), pfile);
 
     // .: World :.  -  Then export the world
 
     // 6. name_objects [N, data]
     nb = World.name_objects.size();
-    fwrite(&nb, 1, sizeof(unsigned int), pfile);
+    fwrite(&nb, 1, sizeof(ui32), pfile);
     i=0; while (i < nb) {
         tmp = World.name_objects[i].size();
-        fwrite(&tmp, 1, sizeof(unsigned int), pfile);
-        fwrite(World.name_objects[i].c_str(), World.name_objects[i].size(), sizeof(char), pfile);
+        fwrite(&tmp, 1, sizeof(ui32), pfile);
+        fwrite(World.name_objects[i].c_str(), World.name_objects[i].size(), sizeof(i8), pfile);
         ++i;
     }
 
     // 7. materials_list [N, data]
     nb = World.materials_list.size();
-    fwrite(&nb, 1, sizeof(unsigned int), pfile);
+    fwrite(&nb, 1, sizeof(ui32), pfile);
     i=0; while (i < nb) {
         tmp = World.materials_list[i].size();
-        fwrite(&tmp, 1, sizeof(unsigned int), pfile);
-        fwrite(World.materials_list[i].c_str(), World.materials_list[i].size(), sizeof(char), pfile);
+        fwrite(&tmp, 1, sizeof(ui32), pfile);
+        fwrite(World.materials_list[i].c_str(), World.materials_list[i].size(), sizeof(i8), pfile);
         ++i;
     }
 
     // 8. ptr_objects [N, data]
     nb = World.ptr_objects.size();
-    fwrite(&nb, 1, sizeof(unsigned int), pfile);
-    fwrite(World.ptr_objects.data(), nb, sizeof(unsigned int), pfile);
+    fwrite(&nb, 1, sizeof(ui32), pfile);
+    fwrite(World.ptr_objects.data(), nb, sizeof(ui32), pfile);
 
     // 9. size_of_objects [N, data]
     nb = World.size_of_objects.size();
-    fwrite(&nb, 1, sizeof(unsigned int), pfile);
-    fwrite(World.size_of_objects.data(), nb, sizeof(unsigned int), pfile);
+    fwrite(&nb, 1, sizeof(ui32), pfile);
+    fwrite(World.size_of_objects.data(), nb, sizeof(ui32), pfile);
 
     // 10. data_objects [N, data] (the big one!!!)
     nb = World.data_objects.size();
-    fwrite(&nb, 1, sizeof(unsigned int), pfile);
+    fwrite(&nb, 1, sizeof(ui32), pfile);
     fwrite(World.data_objects.data(), nb, sizeof(f32), pfile);
 
 
@@ -667,7 +667,7 @@ void GeometryBuilder::save_ggems_geometry(std::string filename) {
 //  array_push_back(world.data_objects, world.data_objects_dim, obj.zmax);
 
 // Add the world
-unsigned int GeometryBuilder::add_world(Aabb obj) {
+ui32 GeometryBuilder::add_world(Aabb obj) {
 
     // Add the root tree
     add_root();
@@ -681,7 +681,7 @@ unsigned int GeometryBuilder::add_world(Aabb obj) {
 }
 
 // Add an AABB object into the world
-unsigned int GeometryBuilder::add_object(Aabb obj, unsigned int mother_id) {
+ui32 GeometryBuilder::add_object(Aabb obj, ui32 mother_id) {
 
     // Add this object to the tree
     add_node(mother_id);
@@ -694,7 +694,7 @@ unsigned int GeometryBuilder::add_object(Aabb obj, unsigned int mother_id) {
 }
 
 // Add a Sphere object into the world
-unsigned int GeometryBuilder::add_object(Sphere obj, unsigned int mother_id) {
+ui32 GeometryBuilder::add_object(Sphere obj, ui32 mother_id) {
 
     // Add this object to the tree
     add_node(mother_id);
@@ -707,7 +707,7 @@ unsigned int GeometryBuilder::add_object(Sphere obj, unsigned int mother_id) {
 }
 
 // Add a Voxelized object into the world
-unsigned int GeometryBuilder::add_object(Voxelized obj, unsigned int mother_id) {
+ui32 GeometryBuilder::add_object(Voxelized obj, ui32 mother_id) {
 
     // Add this object to the tree
     add_node(mother_id);
@@ -720,7 +720,7 @@ unsigned int GeometryBuilder::add_object(Voxelized obj, unsigned int mother_id) 
 }
 
 // Add a Meshed object into the world
-unsigned int GeometryBuilder::add_object(Meshed obj, unsigned int mother_id) {
+ui32 GeometryBuilder::add_object(Meshed obj, ui32 mother_id) {
 
     // Add thid object to the tree
     add_node(mother_id);
@@ -812,8 +812,8 @@ void GeometryBuilder::build_object(Voxelized obj) {
     ///// First step
     // We need to merge and update the material ID according the current list of materials
     // Build a LUT to convert the old IDs in new ones
-    std::vector<unsigned int> new_id;
-    unsigned int i = 0;
+    std::vector<ui32> new_id;
+    ui32 i = 0;
     while (i < obj.list_of_materials.size()) {
         new_id.push_back(get_material_index(obj.list_of_materials[i]));
         ++i;
@@ -944,7 +944,7 @@ void GeometryBuilder::build_scene() {
 
     // Scan every object a build it to the scene structure
 
-    unsigned int i = 0;
+    ui32 i = 0;
     while (i < world.ptr_nodes_dim) {
 
         // AABB

@@ -25,19 +25,19 @@ class MathPlotBuilder {
     public:
         MathPlotBuilder();
 
-        void plot_distribution(f32* xdata, unsigned int nxdata,
-                               unsigned int n_bins, std::string filename,
+        void plot_distribution(f32* xdata, ui32 nxdata,
+                               ui32 n_bins, std::string filename,
                                std::string xlabel, std::string ylabel);
 
         void plot_energy_distribution(ParticleBuilder particles,
-                                      unsigned int n_bins, std::string filename);
+                                      ui32 n_bins, std::string filename);
 
     private:
-        void get_histogramm(f32* xdata, unsigned int nxdata,
-                           f32* bins, f32* nbelt, unsigned int nbins);
-        void get_weighted_histogramm(f32* xdata, f32* ydata, unsigned int nxdata,
+        void get_histogramm(f32* xdata, ui32 nxdata,
+                           f32* bins, f32* nbelt, ui32 nbins);
+        void get_weighted_histogramm(f32* xdata, f32* ydata, ui32 nxdata,
                                      f32* hist, f32* nbelt, f32* bins,
-                                     unsigned int nbins);
+                                     ui32 nbins);
 
 
 

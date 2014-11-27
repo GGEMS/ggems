@@ -20,7 +20,7 @@
 #include "prng.cuh"
 
 // rotateUz, function from CLHEP
- __host__ __device__ float3 rotateUz(float3 vector, float3 newUz) {
+ __host__ __device__ f32xyz rotateUz(f32xyz vector, f32xyz newUz) {
     f32 u1 = newUz.x;
     f32 u2 = newUz.y;
     f32 u3 = newUz.z;
@@ -35,7 +35,7 @@
     }
     else if (u3 < 0.) { vector.x = -vector.x; vector.z = -vector.z; } // phi=0  theta=gpu_pi
 
-    return make_float3(vector.x, vector.y, vector.z);
+    return make_f32xyz(vector.x, vector.y, vector.z);
 }
 
 // Loglog interpolation
@@ -47,7 +47,7 @@ __host__ __device__ f32 loglog_interpolation(f32 x, f32 x0, f32 y0, f32 x1, f32 
 }
 
 // Binary search
-__host__ __device__ int binary_search(f32 key, f32* tab, int size, int min=0) {
+__host__ __device__ i32 binary_search(f32 key, f32* tab, int size, int min=0) {
     int max=size, mid;
     while ((min < max)) {
         mid = (min + max) >> 1;
@@ -88,7 +88,7 @@ inline __device__ int G4Poisson(f32 mean,ParticleStack &particles, int id) {
             poissonSum+=poissonValue;
         }
 
-        return  (int)number;
+        return  (i32)number;
     }
     f32 toto = JKISS32(particles, id);
 
@@ -101,12 +101,12 @@ inline __device__ int G4Poisson(f32 mean,ParticleStack &particles, int id) {
     if(value<=0.)
         return  0;
     else if(value>=2.e9) // f32 limit = 2.e9
-        return  (int)2.e9;
-    return  (int)value;
+        return  (i32)2.e9;
+    return  (i32)value;
 }
 
 // Gaussian distribution using JKISS32 Generator
-inline __device__ f32 Gaussian(f32 mean,f32 rms,ParticleStack &particles, int id) {
+inline __device__ f32 Gaussian(f32 mean,f32 rms,ParticleStack &particles, i32 id) {
     f32  data;
     f32  U1,U2,Disp,Fx;
     
