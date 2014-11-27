@@ -18,6 +18,7 @@
 #ifndef ELECTRON_NAVIGATOR_CUH
 #define ELECTRON_NAVIGATOR_CUH
 
+#include "global.cuh"
 
 
 #endif

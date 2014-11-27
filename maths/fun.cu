@@ -21,14 +21,14 @@
 
 // rotateUz, function from CLHEP
  __host__ __device__ float3 rotateUz(float3 vector, float3 newUz) {
-    float u1 = newUz.x;
-    float u2 = newUz.y;
-    float u3 = newUz.z;
-    float up = u1*u1 + u2*u2;
+    f32 u1 = newUz.x;
+    f32 u2 = newUz.y;
+    f32 u3 = newUz.z;
+    f32 up = u1*u1 + u2*u2;
 
     if (up>0) {
         up = sqrtf(up);
-        float px = vector.x,  py = vector.y, pz = vector.z;
+        f32 px = vector.x,  py = vector.y, pz = vector.z;
         vector.x = (u1*u3*px - u2*py)/up + u1*pz;
         vector.y = (u2*u3*px + u1*py)/up + u2*pz;
         vector.z =    -up*px +             u3*pz;
@@ -39,7 +39,7 @@
 }
 
 // Loglog interpolation
-__host__ __device__ float loglog_interpolation(float x, float x0, float y0, float x1, float y1) {
+__host__ __device__ f32 loglog_interpolation(f32 x, f32 x0, f32 y0, f32 x1, f32 y1) {
     if (x < x0) return y0;
     if (x > x1) return y1;
     x0 = 1.0f / x0;
@@ -47,7 +47,7 @@ __host__ __device__ float loglog_interpolation(float x, float x0, float y0, floa
 }
 
 // Binary search
-__host__ __device__ int binary_search(float key, float* tab, int size, int min=0) {
+__host__ __device__ int binary_search(f32 key, f32* tab, int size, int min=0) {
     int max=size, mid;
     while ((min < max)) {
         mid = (min + max) >> 1;
@@ -61,7 +61,7 @@ __host__ __device__ int binary_search(float key, float* tab, int size, int min=0
 }
 
 // Linear interpolation
-__host__ __device__ float linear_interpolation(float xa,float ya, float xb, float yb, float x) {
+__host__ __device__ f32 linear_interpolation(f32 xa,f32 ya, f32 xb, f32 yb, f32 x) {
     // Taylor young 1st order
     if (xa > x) return ya;
     if (xb < x) return yb;
@@ -70,15 +70,15 @@ __host__ __device__ float linear_interpolation(float xa,float ya, float xb, floa
 
 /*
 // Poisson distribution from Geant4 using JKISS32 Generator
-inline __device__ int G4Poisson(float mean,ParticleStack &particles, int id) {
-    float    number=0.;
+inline __device__ int G4Poisson(f32 mean,ParticleStack &particles, int id) {
+    f32    number=0.;
 
-    float  position,poissonValue,poissonSum;
-    float  value,y,t;
+    f32  position,poissonValue,poissonSum;
+    f32  value,y,t;
     if(mean<=16.) { // border == 16
         do{
         position=JKISS32(particles, id);
-        }while((1.-position)<2.e-7); // to avoid 1 due to float approximation
+        }while((1.-position)<2.e-7); // to avoid 1 due to f32 approximation
         poissonValue=expf(-mean);
         poissonSum=poissonValue;
         while((poissonSum<=position)&&(number<40000.)) {
@@ -90,7 +90,7 @@ inline __device__ int G4Poisson(float mean,ParticleStack &particles, int id) {
 
         return  (int)number;
     }
-    float toto = JKISS32(particles, id);
+    f32 toto = JKISS32(particles, id);
 
     t=sqrtf(-2.*logf(toto));
     
@@ -100,15 +100,15 @@ inline __device__ int G4Poisson(float mean,ParticleStack &particles, int id) {
 
     if(value<=0.)
         return  0;
-    else if(value>=2.e9) // float limit = 2.e9
+    else if(value>=2.e9) // f32 limit = 2.e9
         return  (int)2.e9;
     return  (int)value;
 }
 
 // Gaussian distribution using JKISS32 Generator
-inline __device__ float Gaussian(float mean,float rms,ParticleStack &particles, int id) {
-    float  data;
-    float  U1,U2,Disp,Fx;
+inline __device__ f32 Gaussian(f32 mean,f32 rms,ParticleStack &particles, int id) {
+    f32  data;
+    f32  U1,U2,Disp,Fx;
     
     do {
         U1=2.*JKISS32(particles, id)-1.;

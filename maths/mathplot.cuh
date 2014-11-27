@@ -18,21 +18,14 @@
 #ifndef MATHPLOT_CUH
 #define MATHPLOT_CUH
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <assert.h>
-
-#include <vector>
-#include <cfloat>
-#include <string>
-
+#include "global.cuh"
 #include "particles.cuh"
 
 class MathPlotBuilder {
     public:
         MathPlotBuilder();
 
-        void plot_distribution(float* xdata, unsigned int nxdata,
+        void plot_distribution(f32* xdata, unsigned int nxdata,
                                unsigned int n_bins, std::string filename,
                                std::string xlabel, std::string ylabel);
 
@@ -40,10 +33,10 @@ class MathPlotBuilder {
                                       unsigned int n_bins, std::string filename);
 
     private:
-        void get_histogramm(float* xdata, unsigned int nxdata,
-                           float* bins, float* nbelt, unsigned int nbins);
-        void get_weighted_histogramm(float* xdata, float* ydata, unsigned int nxdata,
-                                     float* hist, float* nbelt, float* bins,
+        void get_histogramm(f32* xdata, unsigned int nxdata,
+                           f32* bins, f32* nbelt, unsigned int nbins);
+        void get_weighted_histogramm(f32* xdata, f32* ydata, unsigned int nxdata,
+                                     f32* hist, f32* nbelt, f32* bins,
                                      unsigned int nbins);
 
 

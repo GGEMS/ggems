@@ -18,6 +18,6 @@
 #ifndef ELECTRON_H
 #define ELECTRON_H
 
-
+#include "global.cuh"
 
 #endif

@@ -29,46 +29,46 @@
 
 // Cross section table for photon particle
 struct PhotonCrossSectionTable{
-    float* E_bins;                // n
+    f32* E_bins;                // n
 
-    float* Compton_Std_CS;        // n*k
+    f32* Compton_Std_CS;        // n*k
 
-    float* Photoelectric_Std_CS;  // n*k
-    float* Photoelectric_Std_xCS; // n*101 (Nb of Z)
+    f32* Photoelectric_Std_CS;  // n*k
+    f32* Photoelectric_Std_xCS; // n*101 (Nb of Z)
 
-    float* Rayleigh_Lv_CS;        // n*k
-    float* Rayleigh_Lv_SF;        // n*101 (Nb of Z)
-    float* Rayleigh_Lv_xCS;       // n*101 (Nb of Z)
+    f32* Rayleigh_Lv_CS;        // n*k
+    f32* Rayleigh_Lv_SF;        // n*101 (Nb of Z)
+    f32* Rayleigh_Lv_xCS;       // n*101 (Nb of Z)
 
-    float E_min;
-    float E_max;
+    f32 E_min;
+    f32 E_max;
     unsigned int nb_bins;         // n
     unsigned int nb_mat;          // k
 };
 
 // Utils
-__host__ __device__ float get_CS_from_table(float *E_bins, float *CSTable, float energy,
+__host__ __device__ f32 get_CS_from_table(f32 *E_bins, f32 *CSTable, f32 energy,
                                             unsigned int E_index, unsigned int mat_index, unsigned int nb_bins);
 
 // Compton - model standard G4
-__host__ __device__ float Compton_CSPA_standard(float E, unsigned short int Z);
-__host__ __device__ float Compton_CS_standard(MaterialsTable materials, unsigned short int mat, float E);
+__host__ __device__ f32 Compton_CSPA_standard(f32 E, unsigned short int Z);
+__host__ __device__ f32 Compton_CS_standard(MaterialsTable materials, unsigned short int mat, f32 E);
 
 __host__ __device__ SecParticle Compton_SampleSecondaries_standard(ParticleStack particles,
-                                                                   float cutE,
+                                                                   f32 cutE,
                                                                    unsigned int id,
                                                                    GlobalSimulationParameters parameters);
 //
 
 // PhotoElectric - model standard G4
-__host__ __device__ float Photoelec_CSPA_standard(float E, unsigned short int Z);
-__host__ __device__ float Photoelec_CS_standard(MaterialsTable materials,
-                                                unsigned short int mat, float E);
+__host__ __device__ f32 Photoelec_CSPA_standard(f32 E, unsigned short int Z);
+__host__ __device__ f32 Photoelec_CS_standard(MaterialsTable materials,
+                                                unsigned short int mat, f32 E);
 __host__ __device__ SecParticle Photoelec_SampleSecondaries_standard(ParticleStack particles,
                                                                      MaterialsTable mat,
                                                                      PhotonCrossSectionTable photon_CS_table,
                                                                      unsigned int E_index,
-                                                                     float cutE,
+                                                                     f32 cutE,
                                                                      unsigned short int matindex,
                                                                      unsigned int id,
                                                                      GlobalSimulationParameters parameters);
@@ -81,12 +81,12 @@ __host__ __device__ unsigned short int Rayleigh_LV_CS_NbIntervals(unsigned int p
 __host__ __device__ unsigned short int Rayleigh_LV_SF_CumulIntervals(unsigned int pos);
 __host__ __device__ unsigned short int Rayleigh_LV_SF_NbIntervals(unsigned int pos);
 
-float* Rayleigh_CS_Livermore_load_data();
-float* Rayleigh_SF_Livermore_load_data();
-__host__ __device__ float Rayleigh_CSPA_Livermore(float* rayl_cs, float E, unsigned short int Z);
-__host__ __device__ float Rayleigh_CS_Livermore(MaterialsTable materials,
-                                                float* rayl_cs, unsigned short int mat, float E);
-__host__ __device__ float Rayleigh_SF_Livermore(float* rayl_sf, float E, int Z);
+f32* Rayleigh_CS_Livermore_load_data();
+f32* Rayleigh_SF_Livermore_load_data();
+__host__ __device__ f32 Rayleigh_CSPA_Livermore(f32* rayl_cs, f32 E, unsigned short int Z);
+__host__ __device__ f32 Rayleigh_CS_Livermore(MaterialsTable materials,
+                                                f32* rayl_cs, unsigned short int mat, f32 E);
+__host__ __device__ f32 Rayleigh_SF_Livermore(f32* rayl_sf, f32 E, int Z);
 __host__ __device__ void Rayleigh_SampleSecondaries_Livermore(ParticleStack particles,
                                                               MaterialsTable mat,
                                                               PhotonCrossSectionTable photon_CS_table,
@@ -96,28 +96,28 @@ __host__ __device__ void Rayleigh_SampleSecondaries_Livermore(ParticleStack part
 
 
 /*
-__host__ __device__ float Compton_CSPA (float E, unsigned short int Z);
+__host__ __device__ f32 Compton_CSPA (f32 E, unsigned short int Z);
 
 // Compute the total Compton cross section for a given material
-__host__ __device__ float Compton_CS(GPUPhantomMaterials materials, unsigned short int mat, float E);
+__host__ __device__ f32 Compton_CS(GPUPhantomMaterials materials, unsigned short int mat, f32 E);
 // Compton Scatter (Standard - Klein-Nishina) with secondary (e-)
-__host__ __device__ float Compton_SampleSecondaries(ParticleStack particles, float cutE, unsigned int id,unsigned char flag_secondary);
+__host__ __device__ f32 Compton_SampleSecondaries(ParticleStack particles, f32 cutE, unsigned int id,unsigned char flag_secondary);
 
 ///// PhotoElectric /////
 
 // PhotoElectric Cross Section Per Atom (Standard)
-__host__ __device__ float PhotoElec_CSPA(float E, unsigned short int Z);
+__host__ __device__ f32 PhotoElec_CSPA(f32 E, unsigned short int Z);
 
 // Compute the total Compton cross section for a given material
-__host__ __device__ float PhotoElec_CS(GPUPhantomMaterials materials, 
-                              unsigned short int mat, float E);
+__host__ __device__ f32 PhotoElec_CS(GPUPhantomMaterials materials,
+                              unsigned short int mat, f32 E);
 
 // Compute Theta distribution of the emitted electron, with respect to the incident Gamma
 // The Sauter-Gavrila distribution for the K-shell is used
-__host__ __device__ float PhotoElec_ElecCosThetaDistribution(ParticleStack part,unsigned int id, float kineEnergy);
+__host__ __device__ f32 PhotoElec_ElecCosThetaDistribution(ParticleStack part,unsigned int id, f32 kineEnergy);
 
 // PhotoElectric effect
-__host__ __device__ float PhotoElec_SampleSecondaries(ParticleStack particles, GPUPhantomMaterials mat, unsigned short int matindex, unsigned int id, unsigned char flag_secondary,float cutEnergyElectron=990*eV );
+__host__ __device__ f32 PhotoElec_SampleSecondaries(ParticleStack particles, GPUPhantomMaterials mat, unsigned short int matindex, unsigned int id, unsigned char flag_secondary,f32 cutEnergyElectron=990*eV );
 
 */
 

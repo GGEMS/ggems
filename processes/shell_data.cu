@@ -68,7 +68,7 @@ __constant__ unsigned short int GPU_atom_IndexOfShells[101] = {
 };
 
 // Shell data - Bind Energy - !!! Values are in eV !!!
-__constant__ float GPU_atom_BindingEnergies[1540] = {
+__constant__ f32 GPU_atom_BindingEnergies[1540] = {
   0.0 ,   // Nonexisting zero element
   //  H  ---------------------------------------------------------
   13.60 ,
@@ -451,7 +451,7 @@ const unsigned short int CPU_atom_IndexOfShells[101] = {
 };
 
 // Shell data - Bind Energy - !!! Values are in eV !!!
-const float CPU_atom_BindingEnergies[1540] = {
+const f32 CPU_atom_BindingEnergies[1540] = {
   0.0 ,   // Nonexisting zero element
   //  H  ---------------------------------------------------------
   13.60 ,
@@ -808,7 +808,7 @@ __host__ __device__ unsigned short int atom_IndexOfShells(unsigned int pos){
 #endif
 
 }
-__host__ __device__ float atom_BindingEnergies(unsigned int pos){
+__host__ __device__ f32 atom_BindingEnergies(unsigned int pos){
 #ifdef __CUDA_ARCH__
     return GPU_atom_BindingEnergies[pos];
 #else

@@ -53,11 +53,11 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_i
 
     //// Find next discrete interaction ///////////////////////////////////////
 
-    float next_interaction_distance = FLT_MAX;
+    f32 next_interaction_distance = FLT_MAX;
     unsigned char next_discrete_process = 0;
     unsigned int next_geometry_volume = cur_id_geom;
-    float interaction_distance;
-    float cross_section;
+    f32 interaction_distance;
+    f32 cross_section;
 
     // Search the energy index to read CS
     unsigned int E_index = binary_search(particles.E[part_id], photon_CS_table.E_bins,
@@ -139,12 +139,12 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_i
     particles.geometry_id[part_id] = next_geometry_volume;
 
     // Check world boundary
-    float xmin = geometry.data_objects[ADR_AABB_XMIN]; // adr_world_geom = 0
-    float xmax = geometry.data_objects[ADR_AABB_XMAX];
-    float ymin = geometry.data_objects[ADR_AABB_YMIN];
-    float ymax = geometry.data_objects[ADR_AABB_YMAX];
-    float zmin = geometry.data_objects[ADR_AABB_ZMIN];
-    float zmax = geometry.data_objects[ADR_AABB_ZMAX];
+    f32 xmin = geometry.data_objects[ADR_AABB_XMIN]; // adr_world_geom = 0
+    f32 xmax = geometry.data_objects[ADR_AABB_XMAX];
+    f32 ymin = geometry.data_objects[ADR_AABB_YMIN];
+    f32 ymax = geometry.data_objects[ADR_AABB_YMAX];
+    f32 zmin = geometry.data_objects[ADR_AABB_ZMIN];
+    f32 zmax = geometry.data_objects[ADR_AABB_ZMAX];
 
     // Stop simulation if out of the world
     if (   pos.x <= xmin || pos.x >= xmax
@@ -165,7 +165,7 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, unsigned int part_i
 
     //// Apply discrete process //////////////////////////////////////////////////
 
-    //float discrete_loss = 0.0f;
+    //f32 discrete_loss = 0.0f;
 
     printf("     Dist %f NextVol %i pos %f %f %f ", next_interaction_distance, next_geometry_volume, pos.x, pos.y, pos.z);
 

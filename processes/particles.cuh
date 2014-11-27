@@ -19,23 +19,18 @@
 #define PARTICLES_CUH
 
 #include "global.cuh"
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-#include <algorithm>
-#include <vector>
 
 // Stack of particles, format data is defined as SoA
 struct ParticleStack{
     // property
-    float* E;
-    float* dx;
-    float* dy;
-    float* dz;
-    float* px;
-    float* py;
-    float* pz;
-    float* tof;
+    f32* E;
+    f32* dx;
+    f32* dy;
+    f32* dz;
+    f32* px;
+    f32* py;
+    f32* pz;
+    f32* tof;
     // PRNG
     unsigned int* prng_state_1;
     unsigned int* prng_state_2;
@@ -55,7 +50,7 @@ struct ParticleStack{
 // Helper to handle secondaries particles
 struct SecParticle {
     float3 dir;
-    float E;
+    f32 E;
     unsigned char pname;
     unsigned char endsimu;
 };
@@ -64,7 +59,7 @@ struct SecParticle {
 struct OneParticleStep {
     float3 pos;
     float3 dir;
-    float E;
+    f32 E;
 };
 
 // History class

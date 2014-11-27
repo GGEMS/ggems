@@ -31,15 +31,15 @@ void CrossSectionsBuilder::build_table(MaterialsTable materials, GlobalSimulatio
 
     // Read parameters
     unsigned int nbin = parameters.cs_table_nbins;
-    float min_E = parameters.cs_table_min_E;
-    float max_E = parameters.cs_table_max_E;
+    f32 min_E = parameters.cs_table_min_E;
+    f32 max_E = parameters.cs_table_max_E;
 
     // First thing first, sample energy following the number of bins
-    float slope = log(max_E / min_E);
+    f32 slope = log(max_E / min_E);
     unsigned int i = 0;
-    photon_CS_table.E_bins = (float*)malloc(nbin * sizeof(float));
+    photon_CS_table.E_bins = (f32*)malloc(nbin * sizeof(f32));
     while (i < nbin) {
-        photon_CS_table.E_bins[i] = min_E * exp( slope * ((float)i/((float)nbin-1)) ) * MeV;
+        photon_CS_table.E_bins[i] = min_E * exp( slope * ((f32)i/((f32)nbin-1)) ) * MeV;
         ++i;
     }
 
@@ -53,18 +53,18 @@ void CrossSectionsBuilder::build_table(MaterialsTable materials, GlobalSimulatio
 
     // Then init data
     unsigned int tot_elt = materials.nb_materials*nbin;
-    unsigned int tot_elt_mem = tot_elt * sizeof(float);
+    unsigned int tot_elt_mem = tot_elt * sizeof(f32);
 
     // Photon CS table if need
     if (there_is_photon) {
-        photon_CS_table.Compton_Std_CS = (float*)malloc(tot_elt_mem);
-        photon_CS_table.Photoelectric_Std_CS = (float*)malloc(tot_elt_mem);
-        photon_CS_table.Photoelectric_Std_xCS = (float*)malloc(nbin * 101 * sizeof(float)); // 100 Z elements,
+        photon_CS_table.Compton_Std_CS = (f32*)malloc(tot_elt_mem);
+        photon_CS_table.Photoelectric_Std_CS = (f32*)malloc(tot_elt_mem);
+        photon_CS_table.Photoelectric_Std_xCS = (f32*)malloc(nbin * 101 * sizeof(f32)); // 100 Z elements,
                                                                                             // starting from index 1
-        photon_CS_table.Rayleigh_Lv_CS = (float*)malloc(tot_elt_mem);
-        photon_CS_table.Rayleigh_Lv_SF = (float*)malloc(nbin * 101 * sizeof(float)); // 100 Z elements,
+        photon_CS_table.Rayleigh_Lv_CS = (f32*)malloc(tot_elt_mem);
+        photon_CS_table.Rayleigh_Lv_SF = (f32*)malloc(nbin * 101 * sizeof(f32)); // 100 Z elements,
                                                                                      // starting from index 1
-        photon_CS_table.Rayleigh_Lv_xCS = (float*)malloc(nbin * 101 * sizeof(float)); // 100 Z elements,
+        photon_CS_table.Rayleigh_Lv_xCS = (f32*)malloc(nbin * 101 * sizeof(f32)); // 100 Z elements,
                                                                                      // starting from index 1       
         photon_CS_table.E_min = min_E;
         photon_CS_table.E_max = max_E;
@@ -93,8 +93,8 @@ void CrossSectionsBuilder::build_table(MaterialsTable materials, GlobalSimulatio
     // ...
 
     // If Rayleigh scattering, load information once from G4 EM data library
-    float *g4_ray_cs = NULL;
-    float *g4_ray_sf = NULL;
+    f32 *g4_ray_cs = NULL;
+    f32 *g4_ray_sf = NULL;
     char *flag_Z = NULL;
     if (parameters.physics_list[PHOTON_RAYLEIGH]) {
         g4_ray_cs = Rayleigh_CS_Livermore_load_data();
@@ -142,7 +142,7 @@ void CrossSectionsBuilder::build_table(MaterialsTable materials, GlobalSimulatio
             iZ=0; while (iZ < materials.nb_elements[imat]) {
                 Z = materials.mixture[materials.index[imat]+iZ];
 
-                float atom_num_dens = materials.atom_num_dens[materials.index[imat]+iZ];
+                f32 atom_num_dens = materials.atom_num_dens[materials.index[imat]+iZ];
 
                 // If for this Z nothing was already calculated
                 if (!flag_Z[Z]) {

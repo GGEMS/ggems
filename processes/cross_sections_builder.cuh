@@ -18,13 +18,6 @@
 #ifndef CROSS_SECTIONS_BUILDER_CUH
 #define CROSS_SECTIONS_BUILDER_CUH
 
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-//#include <algorithm>
-//#include <vector>
-
 #include "materials.cuh"
 #include "global.cuh"
 #include "photon.cuh"

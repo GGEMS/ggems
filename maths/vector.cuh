@@ -23,11 +23,12 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #include "constants.cuh"
+#include "global.cuh"
 
 #ifndef MATRIX3
 #define MATRIX3
 struct matrix3 {
-    float a, b, c, d, e, f, g, h, i;
+    f32 a, b, c, d, e, f, g, h, i;
 };
 #endif
 
@@ -40,9 +41,9 @@ __host__ __device__ float3 f3_mul(float3 u, float3 v);
 // r = u / v
 __host__ __device__ float3 f3_div(float3 u, float3 v);
 // r = u * s
-__host__ __device__ float3 f3_scale(float3 u, float s);
+__host__ __device__ float3 f3_scale(float3 u, f32 s);
 // r = u . v
-__host__ __device__ float f3_dot(float3 u, float3 v);
+__host__ __device__ f32 f3_dot(float3 u, float3 v);
 // r = u x v
 __host__ __device__ float3 f3_cross(float3 u, float3 v);
 // r = m * u

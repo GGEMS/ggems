@@ -18,6 +18,6 @@
 #ifndef PROTON_H
 #define PROTON_H
 
-
+#include "global.cuh"
 
 #endif

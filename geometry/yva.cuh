@@ -20,6 +20,7 @@
 
 #include "voxelized.cuh"
 #include "meshed.cuh"
+#include "global.cuh"
 
 // hYbrid Voxelized/Analytical object (YVA)
 class YVA : public Voxelized {

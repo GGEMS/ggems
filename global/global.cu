@@ -20,7 +20,7 @@
 #include "global.cuh"
 /*
 // Set a GPU device
-void set_gpu_device(int deviceChoice, float minversion) {
+void set_gpu_device(int deviceChoice, f32 minversion) {
 
     int deviceCount = 0;
     cudaGetDeviceCount(&deviceCount);
@@ -91,19 +91,19 @@ void array_push_back(unsigned int **vector, unsigned int &dim, unsigned int val)
     (dim)++;
 }
 
-// Equivalent to std::vector.push_back for malloc array (float version)
-void array_push_back(float **vector, unsigned int &dim, float val) {
+// Equivalent to std::vector.push_back for malloc array (f32 version)
+void array_push_back(f32 **vector, unsigned int &dim, f32 val) {
 
     // If first allocation
     if (dim == 0) {
-        (*vector) = (float*)malloc(sizeof(float));
+        (*vector) = (f32*)malloc(sizeof(f32));
         if ((*vector) == NULL) {
             print_error("Memory allocation from array_push_back!!!\n");
             exit(EXIT_FAILURE);
         }
     // else reallocation
     } else {
-        (*vector) = (float*)realloc((*vector), (dim+1)*sizeof(float));
+        (*vector) = (f32*)realloc((*vector), (dim+1)*sizeof(f32));
         if ((*vector) == NULL) {
             print_error("Memory reallocation from array_push_back!!!\n");
             exit(EXIT_FAILURE);
@@ -148,7 +148,7 @@ void array_insert(unsigned int **vector, unsigned int &dim, unsigned int pos, un
 }
 
 // Equivalent to std::vector.insert for malloc array (unsigned int version)
-void array_insert(float **vector, unsigned int &dim, unsigned int pos, float val) {
+void array_insert(f32 **vector, unsigned int &dim, unsigned int pos, f32 val) {
 
     // Check the pos value
     if (pos > dim) {
@@ -158,20 +158,20 @@ void array_insert(float **vector, unsigned int &dim, unsigned int pos, float val
 
     // If first allocation
     if (dim == 0) {
-        (*vector) = (float*)malloc(sizeof(float));
+        (*vector) = (f32*)malloc(sizeof(f32));
         if ((*vector) == NULL) {
             print_error("Memory allocation from array_insert!!!\n");
             exit(EXIT_FAILURE);
         }
     // else reallocation
     } else {
-        (*vector) = (float*)realloc((*vector), (dim+1)*sizeof(float));
+        (*vector) = (f32*)realloc((*vector), (dim+1)*sizeof(f32));
         if ((*vector) == NULL) {
             print_error("Memory reallocation from array_insert!!!\n");
             exit(EXIT_FAILURE);
         }
         // Move data in memory for the insertion
-        memmove((*vector)+pos, (*vector)+pos+1, (dim-pos)*sizeof(float));
+        memmove((*vector)+pos, (*vector)+pos+1, (dim-pos)*sizeof(f32));
     }
 
     (*vector)[pos] = val;
@@ -179,19 +179,19 @@ void array_insert(float **vector, unsigned int &dim, unsigned int pos, float val
 
 }
 
-// Append an array to another one (float version)
-void array_append_array(float **vector, unsigned int &dim, float **an_array, unsigned int a_dim) {
+// Append an array to another one (f32 version)
+void array_append_array(f32 **vector, unsigned int &dim, f32 **an_array, unsigned int a_dim) {
 
     // If first allocation
     if (dim == 0) {
-        (*vector) = (float*)malloc(sizeof(float));
+        (*vector) = (f32*)malloc(sizeof(f32));
         if ((*vector) == NULL) {
             print_error("Memory allocation from array_append_array!!!\n");
             exit(EXIT_FAILURE);
         }
     // else reallocation
     } else {
-        (*vector) = (float*)realloc((*vector), (dim+a_dim)*sizeof(float));
+        (*vector) = (f32*)realloc((*vector), (dim+a_dim)*sizeof(f32));
         if ((*vector) == NULL) {
             print_error("Memory reallocation from array_append_array!!!\n");
             exit(EXIT_FAILURE);
@@ -199,12 +199,12 @@ void array_append_array(float **vector, unsigned int &dim, float **an_array, uns
     }
 
     // Copy data
-    memcpy((*vector)+dim, (*an_array), a_dim*sizeof(float));
+    memcpy((*vector)+dim, (*an_array), a_dim*sizeof(f32));
     (dim)+=a_dim;
 }
 
 // Create a color
-Color make_color(float r, float g, float b) {
+Color make_color(f32 r, f32 g, f32 b) {
     Color c;
     c.r = r;
     c.g = g;

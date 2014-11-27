@@ -18,8 +18,7 @@
 #ifndef GGEMS_CUH
 #define GGEMS_CUH
 
-#include <vector>
-#include <string>
+#include "global.cuh"
 
 #include "constants.cuh"
 #include "particles.cuh"
@@ -65,8 +64,8 @@ class SimulationBuilder {
         void set_max_number_of_iterations(unsigned int nb);
         void set_record_history(unsigned int nb_particles);
         void set_CS_table_nbins(unsigned int valbin);
-        void set_CS_table_E_min(float valE);
-        void set_CS_table_E_max(float valE);
+        void set_CS_table_E_min(f32 valE);
+        void set_CS_table_E_max(f32 valE);
 
         void init_simulation();
         void start_simulation();

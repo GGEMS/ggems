@@ -22,9 +22,9 @@
 
 
 // Overlapping test AABB/Triangle - Akenine-Moller algorithm
-__host__ __device__ short int overlap_AABB_triangle(float xmin, float xmax,        // AABB
-                                                    float ymin, float ymax,
-                                                    float zmin, float zmax,
+__host__ __device__ short int overlap_AABB_triangle(f32 xmin, f32 xmax,        // AABB
+                                                    f32 ymin, f32 ymax,
+                                                    f32 zmin, f32 zmax,
                                                     float3 u,  // Triangle
                                                     float3 v,
                                                     float3 w) {
@@ -52,7 +52,7 @@ __host__ __device__ short int overlap_AABB_triangle(float xmin, float xmax,     
     float3 e2 = f3_sub(u, w);
 
     //// The first 9 tests ///////////////////////////////////////////////////
-    float p0, p1, p2, min, max, rad;
+    f32 p0, p1, p2, min, max, rad;
 
     float3 fe;
     fe.x = fabs(e0.x);
@@ -188,33 +188,33 @@ __host__ __device__ short int overlap_AABB_triangle(float xmin, float xmax,     
 }
 
 // Ray/Sphere intersection
-__host__ __device__ float hit_ray_sphere(float3 ray_p, float3 ray_d,           // Ray
-                                                float3 sphere_c, float sphere_rad) { // Sphere
+__host__ __device__ f32 hit_ray_sphere(float3 ray_p, float3 ray_d,           // Ray
+                                                float3 sphere_c, f32 sphere_rad) { // Sphere
 
     // Sphere defintion (center, rad)
     float3 m = f3_sub(ray_p, sphere_c);
-    float  b = f3_dot(m, ray_d);
-    float  c = f3_dot(m, m) - sphere_rad*sphere_rad;
+    f32  b = f3_dot(m, ray_d);
+    f32  c = f3_dot(m, m) - sphere_rad*sphere_rad;
 
     if (c > 0.0f && b > 0.0f) {return FLT_MAX;}
 
-    float discr = b*b - c;
+    f32 discr = b*b - c;
     if (discr < 0.0f) {return FLT_MAX;}
 
-    float t = -b - sqrt(discr);
+    f32 t = -b - sqrt(discr);
     if (t < 0.0f) {t = 0.0f;}
 
     return t;
 }
 
 // Ray/AABB intersection - Smits algorithm
-__host__ __device__ float hit_ray_AABB(float3 ray_p, float3 ray_d,
-                                       float aabb_xmin, float aabb_xmax,
-                                       float aabb_ymin, float aabb_ymax,
-                                       float aabb_zmin, float aabb_zmax) {
+__host__ __device__ f32 hit_ray_AABB(float3 ray_p, float3 ray_d,
+                                       f32 aabb_xmin, f32 aabb_xmax,
+                                       f32 aabb_ymin, f32 aabb_ymax,
+                                       f32 aabb_zmin, f32 aabb_zmax) {
 
-    float idx, idy, idz;
-    float tmin, tmax, tymin, tymax, tzmin, tzmax, buf;
+    f32 idx, idy, idz;
+    f32 tmin, tmax, tymin, tymax, tzmin, tzmax, buf;
 
     tmin = -FLT_MAX;
     tmax =  FLT_MAX;
@@ -278,12 +278,12 @@ __host__ __device__ float hit_ray_AABB(float3 ray_p, float3 ray_d,
 
 // Ray/AABB intersection test - Smits algorithm
 __host__ __device__ bool test_ray_AABB(float3 ray_p, float3 ray_d,
-                                       float aabb_xmin, float aabb_xmax,
-                                       float aabb_ymin, float aabb_ymax,
-                                       float aabb_zmin, float aabb_zmax) {
+                                       f32 aabb_xmin, f32 aabb_xmax,
+                                       f32 aabb_ymin, f32 aabb_ymax,
+                                       f32 aabb_zmin, f32 aabb_zmax) {
 
-    float idx, idy, idz;
-    float tmin, tmax, tymin, tymax, tzmin, tzmax, buf;
+    f32 idx, idy, idz;
+    f32 tmin, tmax, tymin, tymax, tzmin, tzmax, buf;
 
     tmin = -FLT_MAX;
     tmax =  FLT_MAX;
@@ -342,10 +342,10 @@ __host__ __device__ bool test_ray_AABB(float3 ray_p, float3 ray_d,
 }
 
 // AABB/AABB test
-__host__ __device__ bool test_AABB_AABB(float a_xmin, float a_xmax, float a_ymin, float a_ymax,
-                                        float a_zmin, float a_zmax,
-                                        float b_xmin, float b_xmax, float b_ymin, float b_ymax,
-                                        float b_zmin, float b_zmax) {
+__host__ __device__ bool test_AABB_AABB(f32 a_xmin, f32 a_xmax, f32 a_ymin, f32 a_ymax,
+                                        f32 a_zmin, f32 a_zmax,
+                                        f32 b_xmin, f32 b_xmax, f32 b_ymin, f32 b_ymax,
+                                        f32 b_zmin, f32 b_zmax) {
 
     if (a_xmax < b_xmin || a_xmin > b_xmax) return false;
     if (a_ymax < b_ymin || a_ymin > b_ymax) return false;
@@ -356,9 +356,9 @@ __host__ __device__ bool test_AABB_AABB(float a_xmin, float a_xmax, float a_ymin
 
 // Point/AABB test
 __host__ __device__ bool test_point_AABB(float3 p,
-                                         float aabb_xmin, float aabb_xmax,
-                                         float aabb_ymin, float aabb_ymax,
-                                         float aabb_zmin, float aabb_zmax) {
+                                         f32 aabb_xmin, f32 aabb_xmax,
+                                         f32 aabb_ymin, f32 aabb_ymax,
+                                         f32 aabb_zmin, f32 aabb_zmax) {
 
     if (p.x < aabb_xmin || p.x > aabb_xmax) return false;
     if (p.y < aabb_ymin || p.y > aabb_ymax) return false;
@@ -369,7 +369,7 @@ __host__ __device__ bool test_point_AABB(float3 p,
 
 
 // Ray/triangle intersection - Moller-Trumbore algorithm
-__host__ __device__ float hit_ray_triangle(float3 ray_p, float3 ray_d,
+__host__ __device__ f32 hit_ray_triangle(float3 ray_p, float3 ray_d,
                                                   float3 tri_u,              // Triangle
                                                   float3 tri_v,
                                                   float3 tri_w) {
@@ -378,17 +378,17 @@ __host__ __device__ float hit_ray_triangle(float3 ray_p, float3 ray_d,
     float3 e2 = f3_sub(tri_w, tri_u);
 
     float3 pp = f3_cross(ray_d, e2);
-    float  a  = f3_dot(e1, pp);
+    f32  a  = f3_dot(e1, pp);
     if (a > -1.0e-05f && a < 1.0e-05f) {return FLT_MAX;} // no hit
 
-    float f = 1.0f / a;
+    f32 f = 1.0f / a;
 
     float3 s = f3_sub(ray_p, tri_u);
-    float  u = f * f3_dot(s, pp);
+    f32  u = f * f3_dot(s, pp);
     if (u < 0.0f || u > 1.0f) {return FLT_MAX;}
 
     float3 q = f3_cross(s, e1);
-    float  v = f * f3_dot(ray_d, q);
+    f32  v = f * f3_dot(ray_d, q);
     if (v < 0.0f || (u+v) > 1.0f) {return FLT_MAX;}
 
     // Ray hit the triangle

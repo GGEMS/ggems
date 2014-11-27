@@ -18,6 +18,6 @@
 #ifndef PROTON_NAVIGATOR_CUH
 #define PROTON_NAVIGATOR_CUH
 
-
+#include "global.cuh"
 
 #endif

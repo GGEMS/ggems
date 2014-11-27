@@ -26,14 +26,14 @@ MathPlotBuilder::MathPlotBuilder(){}
 //// Private functions ///////////////////////////////////////////////////////
 
 // Build an histogramm based on 1D data
-void MathPlotBuilder::get_histogramm(float* xdata, unsigned int nxdata,
-                                    float* bins, float* nbelt, unsigned int nbins) {
+void MathPlotBuilder::get_histogramm(f32* xdata, unsigned int nxdata,
+                                    f32* bins, f32* nbelt, unsigned int nbins) {
     unsigned int i;
 
     // Find min max values
-    float xmin = FLT_MAX;
-    float xmax = FLT_MIN;
-    float val;
+    f32 xmin = FLT_MAX;
+    f32 xmax = FLT_MIN;
+    f32 val;
     i=0; while (i<nxdata) {
         val = xdata[i];
         if (val < xmin) {xmin=val;};
@@ -50,8 +50,8 @@ void MathPlotBuilder::get_histogramm(float* xdata, unsigned int nxdata,
     }
 
     // Build hist
-    float di = (xmax-xmin) / float(nbins-1);
-    float posi;
+    f32 di = (xmax-xmin) / f32(nbins-1);
+    f32 posi;
     i=0; while (i<nxdata) {
         posi = ((xdata[i]-xmin) / di)+0.5f;
 
@@ -71,13 +71,13 @@ void MathPlotBuilder::get_histogramm(float* xdata, unsigned int nxdata,
 }
 
 // Build a weigthed histogramm based on 2D data
-void MathPlotBuilder::get_weighted_histogramm(float* xdata, float* ydata, unsigned int nxdata,
-                                              float* hist, float* nbelt, float* bins,
+void MathPlotBuilder::get_weighted_histogramm(f32* xdata, f32* ydata, unsigned int nxdata,
+                                              f32* hist, f32* nbelt, f32* bins,
                                               unsigned int nbins) {
     int i;
-    float xmin = FLT_MAX;
-    float xmax = FLT_MIN;
-    float val;
+    f32 xmin = FLT_MAX;
+    f32 xmax = FLT_MIN;
+    f32 val;
     i=0; while (i<nxdata) {
         val = xdata[i];
         if (val < xmin) {xmin=val;};
@@ -95,8 +95,8 @@ void MathPlotBuilder::get_weighted_histogramm(float* xdata, float* ydata, unsign
     }
 
     // Build hist
-    float di = (xmax-xmin) / float(nbins-1);
-    float posi;
+    f32 di = (xmax-xmin) / f32(nbins-1);
+    f32 posi;
     i=0; while (i<nxdata) {
         posi = ((xdata[i]-xmin) / di)+0.5f;
         ++nbelt[int(posi)];
@@ -114,13 +114,13 @@ void MathPlotBuilder::get_weighted_histogramm(float* xdata, float* ydata, unsign
 //// Pulbic functions /////////////////////////////////////////////////////////
 
 // Plot a 1D histogramm
-void MathPlotBuilder::plot_distribution(float *xdata, unsigned int nxdata,
+void MathPlotBuilder::plot_distribution(f32 *xdata, unsigned int nxdata,
                                         unsigned int n_bin, std::string filename,
                                         std::string xlabel, std::string ylabel) {
 
     // Memory allocation
-    float* bins = (float*)malloc(n_bin * sizeof(float));
-    float* nbelt = (float*)malloc(n_bin * sizeof(float));
+    f32* bins = (f32*)malloc(n_bin * sizeof(f32));
+    f32* nbelt = (f32*)malloc(n_bin * sizeof(f32));
 
     // Compute the histogramm
     get_histogramm(xdata, nxdata, bins, nbelt, n_bin);
@@ -128,10 +128,10 @@ void MathPlotBuilder::plot_distribution(float *xdata, unsigned int nxdata,
     // Export data
     std::string data_name = filename + ".dat";
     FILE* pfile = fopen(data_name.c_str(), "wb");
-    float buffer = (float)n_bin;
-    fwrite(&buffer, sizeof(float), 1, pfile);
-    fwrite(bins, sizeof(float), n_bin, pfile);
-    fwrite(nbelt, sizeof(float), n_bin, pfile);
+    f32 buffer = (f32)n_bin;
+    fwrite(&buffer, sizeof(f32), 1, pfile);
+    fwrite(bins, sizeof(f32), n_bin, pfile);
+    fwrite(nbelt, sizeof(f32), n_bin, pfile);
     fclose(pfile);
 
     // Export MatPlotLib script
@@ -185,7 +185,7 @@ void MathPlotBuilder::plot_energy_distribution(ParticleBuilder particles,
         if (particles.stack.endsimu[i] == PARTICLE_ALIVE) ++nxdata;
         ++i;
     }
-    float* xdata = (float*)malloc(nxdata * sizeof(float));
+    f32* xdata = (f32*)malloc(nxdata * sizeof(f32));
     i=0; while (i < particles.stack.size) {
         if (particles.stack.endsimu[i] == PARTICLE_ALIVE) {
             xdata[i] = particles.stack.E[i];
@@ -195,8 +195,8 @@ void MathPlotBuilder::plot_energy_distribution(ParticleBuilder particles,
     }
 
     // Memory allocation
-    float* bins = (float*)malloc(n_bin * sizeof(float));
-    float* nbelt = (float*)malloc(n_bin * sizeof(float));
+    f32* bins = (f32*)malloc(n_bin * sizeof(f32));
+    f32* nbelt = (f32*)malloc(n_bin * sizeof(f32));
 
     // Compute the histogramm
     get_histogramm(xdata, nxdata, bins, nbelt, n_bin);
@@ -204,10 +204,10 @@ void MathPlotBuilder::plot_energy_distribution(ParticleBuilder particles,
     // Export data
     std::string data_name = filename + ".dat";
     FILE* pfile = fopen(data_name.c_str(), "wb");
-    float buffer = (float)n_bin;
-    fwrite(&buffer, sizeof(float), 1, pfile);
-    fwrite(bins, sizeof(float), n_bin, pfile);
-    fwrite(nbelt, sizeof(float), n_bin, pfile);
+    f32 buffer = (f32)n_bin;
+    fwrite(&buffer, sizeof(f32), 1, pfile);
+    fwrite(bins, sizeof(f32), n_bin, pfile);
+    fwrite(nbelt, sizeof(f32), n_bin, pfile);
     fclose(pfile);
 
     // Export MatPlotLib script

@@ -45,13 +45,13 @@ __host__ __device__ float3 f3_div(float3 u, float3 v) {
 }
 
 // r = u * s
-__host__ __device__ float3 f3_scale(float3 u, float s) {
+__host__ __device__ float3 f3_scale(float3 u, f32 s) {
     float3 r={u.x*s, u.y*s, u.z*s};
     return r;
 }
 
 // r = u . v
-__host__ __device__ float f3_dot(float3 u, float3 v) {
+__host__ __device__ f32 f3_dot(float3 u, float3 v) {
     return u.x*v.x + u.y*v.y + u.z*v.z;
 }
 
@@ -74,23 +74,23 @@ __host__ __device__ float3 m3f3_mul(matrix3 m, float3 u) {
 
 // return an unitary vector
 __host__ __device__ float3 f3_unit(float3 u) {
-    float imag = 1.0f / sqrtf(u.x*u.x + u.y*u.y + u.z*u.z);
+    f32 imag = 1.0f / sqrtf(u.x*u.x + u.y*u.y + u.z*u.z);
     return make_float3(u.x*imag, u.y*imag, u.z*imag);
 }
 
 // rotate a vector u
 __host__ __device__ float3 f3_rotate(float3 u, float3 EulerAngles) {
 
-    float phi = EulerAngles.x*deg; // deg is defined by G4 unit system
-    float theta = EulerAngles.y*deg;
-    float psi = EulerAngles.z*deg;
+    f32 phi = EulerAngles.x*deg; // deg is defined by G4 unit system
+    f32 theta = EulerAngles.y*deg;
+    f32 psi = EulerAngles.z*deg;
 
-    float sph = sin(phi);
-    float cph = cos(phi);
-    float sth = sin(theta);
-    float cth = cos(theta);
-    float sps = sin(psi);
-    float cps = cos(psi);
+    f32 sph = sin(phi);
+    f32 cph = cos(phi);
+    f32 sth = sin(theta);
+    f32 cth = cos(theta);
+    f32 sps = sin(psi);
+    f32 cps = cos(psi);
 
     // Build rotation matrix
     matrix3 rot = { cph*cps-sph*cth*sps,  cph*sps+sph*cth*cps,  sth*sph,

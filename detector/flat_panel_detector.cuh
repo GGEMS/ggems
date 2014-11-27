@@ -27,9 +27,9 @@ struct ImageDetector {
     unsigned int nx, ny, nz;
     unsigned int nb_voxels;
     unsigned int countp;
-    float sx, sy, sz;
-    float xmin, xmax, ymin, ymax, zmin, zmax;
-    float *data;
+    f32 sx, sy, sz;
+    f32 xmin, xmax, ymin, ymax, zmin, zmax;
+    f32 *data;
 };
 
 
@@ -38,8 +38,8 @@ class FlatPanelDetector {
     public:
         FlatPanelDetector();
         void attach_to(unsigned int geometry_id);
-        void set_resolution(float sx, float sy, float sz);
-        void init(float xmin, float xmax, float ymin, float ymax, float zmin, float zmax);
+        void set_resolution(f32 sx, f32 sy, f32 sz);
+        void init(f32 xmin, f32 xmax, f32 ymin, f32 ymax, f32 zmin, f32 zmax);
 
         void save_image(std::string outputname);
 

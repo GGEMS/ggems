@@ -32,7 +32,7 @@ void YVA::include(Meshed obj, unsigned int obj_id) {
     overlap_vox = (bool*)malloc(nb_vox_x*nb_vox_y*nb_vox_z*sizeof(bool));
 
     // Some vars
-    float vox_xmin, vox_xmax, vox_ymin, vox_ymax, vox_zmin, vox_zmax;
+    f32 vox_xmin, vox_xmax, vox_ymin, vox_ymax, vox_zmin, vox_zmax;
     unsigned int ix, iy, iz, ind;
 
     // If the mesh has no octree, store overlapping information
@@ -76,7 +76,7 @@ void YVA::include(Meshed obj, unsigned int obj_id) {
     } else if (obj.octree_type == REG_OCTREE) {
 
         unsigned int cx, cy, cz, cind;
-        float cell_xmin, cell_xmax, cell_ymin, cell_ymax, cell_zmin, cell_zmax;
+        f32 cell_xmin, cell_xmax, cell_ymin, cell_ymax, cell_zmin, cell_zmax;
 
         // Check every voxel to determine if the mesh overlap one
         // of them

@@ -25,8 +25,8 @@ VRML::VRML () {}
 //// Private functions ///////////////////////////////////////
 
 // Draw a wireframe AABB
-void VRML::draw_wireframe_aabb(float xmin, float xmax, float ymin, float ymax, float zmin, float zmax,
-                               Color color, float transparency) {
+void VRML::draw_wireframe_aabb(f32 xmin, f32 xmax, f32 ymin, f32 ymax, f32 zmin, f32 zmax,
+                               Color color, f32 transparency) {
 
     //          xmin        xmax
     //          3+---------2+
@@ -104,8 +104,8 @@ void VRML::open(std::string filename) {
 }
 
 // Draw an AABB
-void VRML::draw_aabb(float xmin, float xmax, float ymin, float ymax, float zmin, float zmax,
-                     Color color, float transparency) {
+void VRML::draw_aabb(f32 xmin, f32 xmax, f32 ymin, f32 ymax, f32 zmin, f32 zmax,
+                     Color color, f32 transparency) {
 
 
     fprintf(pfile, "Transform {\n");
@@ -153,12 +153,12 @@ void VRML::write_geometry(GeometryBuilder geometry) {
         // Draw the volume accordingly
         if (type_obj == AABB) {
 
-            float xmin = geometry.world.data_objects[adr_obj + ADR_AABB_XMIN];
-            float xmax = geometry.world.data_objects[adr_obj + ADR_AABB_XMAX];
-            float ymin = geometry.world.data_objects[adr_obj + ADR_AABB_YMIN];
-            float ymax = geometry.world.data_objects[adr_obj + ADR_AABB_YMAX];
-            float zmin = geometry.world.data_objects[adr_obj + ADR_AABB_ZMIN];
-            float zmax = geometry.world.data_objects[adr_obj + ADR_AABB_ZMAX];
+            f32 xmin = geometry.world.data_objects[adr_obj + ADR_AABB_XMIN];
+            f32 xmax = geometry.world.data_objects[adr_obj + ADR_AABB_XMAX];
+            f32 ymin = geometry.world.data_objects[adr_obj + ADR_AABB_YMIN];
+            f32 ymax = geometry.world.data_objects[adr_obj + ADR_AABB_YMAX];
+            f32 zmin = geometry.world.data_objects[adr_obj + ADR_AABB_ZMIN];
+            f32 zmax = geometry.world.data_objects[adr_obj + ADR_AABB_ZMAX];
 
             if (geometry.object_wireframe[iobj]) {
                 draw_wireframe_aabb(xmin, xmax, ymin, ymax, zmin, zmax,
@@ -174,12 +174,12 @@ void VRML::write_geometry(GeometryBuilder geometry) {
             // do
         } else if (type_obj == VOXELIZED) {
 
-            float xmin = geometry.world.data_objects[adr_obj + ADR_AABB_XMIN];
-            float xmax = geometry.world.data_objects[adr_obj + ADR_AABB_XMAX];
-            float ymin = geometry.world.data_objects[adr_obj + ADR_AABB_YMIN];
-            float ymax = geometry.world.data_objects[adr_obj + ADR_AABB_YMAX];
-            float zmin = geometry.world.data_objects[adr_obj + ADR_AABB_ZMIN];
-            float zmax = geometry.world.data_objects[adr_obj + ADR_AABB_ZMAX];
+            f32 xmin = geometry.world.data_objects[adr_obj + ADR_AABB_XMIN];
+            f32 xmax = geometry.world.data_objects[adr_obj + ADR_AABB_XMAX];
+            f32 ymin = geometry.world.data_objects[adr_obj + ADR_AABB_YMIN];
+            f32 ymax = geometry.world.data_objects[adr_obj + ADR_AABB_YMAX];
+            f32 zmin = geometry.world.data_objects[adr_obj + ADR_AABB_ZMIN];
+            f32 zmax = geometry.world.data_objects[adr_obj + ADR_AABB_ZMAX];
 
             if (geometry.object_wireframe[iobj]) {
                 draw_wireframe_aabb(xmin, xmax, ymin, ymax, zmin, zmax,
@@ -238,12 +238,12 @@ void VRML::write_geometry(GeometryBuilder geometry) {
             if (octree_type == REG_OCTREE) {
 
                 // Read first the bounding box
-                float gxmin = geometry.world.data_objects[adr_obj+ADR_AABB_XMIN];
-                float gxmax = geometry.world.data_objects[adr_obj+ADR_AABB_XMAX];
-                float gymin = geometry.world.data_objects[adr_obj+ADR_AABB_YMIN];
-                float gymax = geometry.world.data_objects[adr_obj+ADR_AABB_YMAX];
-                float gzmin = geometry.world.data_objects[adr_obj+ADR_AABB_ZMIN];
-                float gzmax = geometry.world.data_objects[adr_obj+ADR_AABB_ZMAX];
+                f32 gxmin = geometry.world.data_objects[adr_obj+ADR_AABB_XMIN];
+                f32 gxmax = geometry.world.data_objects[adr_obj+ADR_AABB_XMAX];
+                f32 gymin = geometry.world.data_objects[adr_obj+ADR_AABB_YMIN];
+                f32 gymax = geometry.world.data_objects[adr_obj+ADR_AABB_YMAX];
+                f32 gzmin = geometry.world.data_objects[adr_obj+ADR_AABB_ZMIN];
+                f32 gzmax = geometry.world.data_objects[adr_obj+ADR_AABB_ZMAX];
 
                 draw_wireframe_aabb(gxmin, gxmax, gymin, gymax, gzmin, gzmax,
                                     make_color(0.0, 0.0, 1.0),
@@ -252,9 +252,9 @@ void VRML::write_geometry(GeometryBuilder geometry) {
                 unsigned int nx = geometry.world.data_objects[adr_obj+ADR_MESHED_OCTREE_NX];
                 unsigned int ny = geometry.world.data_objects[adr_obj+ADR_MESHED_OCTREE_NY];
                 unsigned int nz = geometry.world.data_objects[adr_obj+ADR_MESHED_OCTREE_NZ];
-                float sx = geometry.world.data_objects[adr_obj+ADR_MESHED_OCTREE_SX];
-                float sy = geometry.world.data_objects[adr_obj+ADR_MESHED_OCTREE_SY];
-                float sz = geometry.world.data_objects[adr_obj+ADR_MESHED_OCTREE_SZ];
+                f32 sx = geometry.world.data_objects[adr_obj+ADR_MESHED_OCTREE_SX];
+                f32 sy = geometry.world.data_objects[adr_obj+ADR_MESHED_OCTREE_SY];
+                f32 sz = geometry.world.data_objects[adr_obj+ADR_MESHED_OCTREE_SZ];
 
                 unsigned int adr_octree = adr_data + nb_vertices*3;
 
@@ -266,9 +266,9 @@ void VRML::write_geometry(GeometryBuilder geometry) {
                             // If octree cell not empty, draw it
                             ind = iz*ny*nx + iy*nx + ix;
                             if (geometry.world.data_objects[adr_octree+ind] != 0) {
-                                float xmin = ix*sx + gxmin; float xmax = xmin+sx;
-                                float ymin = iy*sy + gymin; float ymax = ymin+sy;
-                                float zmin = iz*sz + gzmin; float zmax = zmin+sz;
+                                f32 xmin = ix*sx + gxmin; f32 xmax = xmin+sx;
+                                f32 ymin = iy*sy + gymin; f32 ymax = ymin+sy;
+                                f32 zmin = iz*sz + gzmin; f32 zmax = zmin+sz;
                                 draw_wireframe_aabb(xmin, xmax, ymin, ymax, zmin, zmax,
                                                     make_color(1.0, 0.0, 0.0),
                                                     1.0);
@@ -306,9 +306,9 @@ void VRML::write_sources(SourceBuilder sources) {
 
         // Point Source
         if (type_src == POINT_SOURCE) {
-            float px = sources.sources.data_sources[adr_src+ADR_POINT_SRC_PX];
-            float py = sources.sources.data_sources[adr_src+ADR_POINT_SRC_PY];
-            float pz = sources.sources.data_sources[adr_src+ADR_POINT_SRC_PZ];
+            f32 px = sources.sources.data_sources[adr_src+ADR_POINT_SRC_PX];
+            f32 py = sources.sources.data_sources[adr_src+ADR_POINT_SRC_PY];
+            f32 pz = sources.sources.data_sources[adr_src+ADR_POINT_SRC_PZ];
 
             fprintf(pfile, "\n# Source\n");
             fprintf(pfile, "Shape {\n");
@@ -323,9 +323,9 @@ void VRML::write_sources(SourceBuilder sources) {
             fprintf(pfile, "}\n");
 
         } else if (type_src == CONE_BEAM_SOURCE) {
-            float px = sources.sources.data_sources[adr_src+ADR_CONE_BEAM_SRC_PX];
-            float py = sources.sources.data_sources[adr_src+ADR_CONE_BEAM_SRC_PY];
-            float pz = sources.sources.data_sources[adr_src+ADR_CONE_BEAM_SRC_PZ];
+            f32 px = sources.sources.data_sources[adr_src+ADR_CONE_BEAM_SRC_PX];
+            f32 py = sources.sources.data_sources[adr_src+ADR_CONE_BEAM_SRC_PY];
+            f32 pz = sources.sources.data_sources[adr_src+ADR_CONE_BEAM_SRC_PZ];
 
             fprintf(pfile, "\n# Source\n");
             fprintf(pfile, "Shape {\n");
@@ -339,9 +339,9 @@ void VRML::write_sources(SourceBuilder sources) {
             fprintf(pfile, "  }\n");
             fprintf(pfile, "}\n\n");
 
-            float phi = sources.sources.data_sources[adr_src+ADR_CONE_BEAM_SRC_PHI];
-            float theta = sources.sources.data_sources[adr_src+ADR_CONE_BEAM_SRC_THETA];
-            float psi = sources.sources.data_sources[adr_src+ADR_CONE_BEAM_SRC_PSI];
+            f32 phi = sources.sources.data_sources[adr_src+ADR_CONE_BEAM_SRC_PHI];
+            f32 theta = sources.sources.data_sources[adr_src+ADR_CONE_BEAM_SRC_THETA];
+            f32 psi = sources.sources.data_sources[adr_src+ADR_CONE_BEAM_SRC_PSI];
 
             // Draw the direction as a vector
             //float3 d = f3_rotate(make_float3(0.0f, 0.0f, 1.0f), make_float3(phi, theta, psi));

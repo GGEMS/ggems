@@ -46,16 +46,16 @@ std::string Voxelized::remove_white_space(std::string txt) {
 }
 
 // Read start range
-float Voxelized::read_start_range(std::string txt) {
-    float res;
+f32 Voxelized::read_start_range(std::string txt) {
+    f32 res;
     txt = txt.substr(0, txt.find(" "));
     std::stringstream(txt) >> res;
     return res;
 }
 
 // Read stop range
-float Voxelized::read_stop_range(std::string txt) {
-    float res;
+f32 Voxelized::read_stop_range(std::string txt) {
+    f32 res;
     txt = txt.substr(txt.find(" ")+1);
     txt = txt.substr(0, txt.find(" "));
     std::stringstream(txt) >> res;
@@ -109,9 +109,9 @@ int Voxelized::read_mhd_int_atpos(std::string txt, int pos) {
     return res;
 }
 
-// Read float mhd arg
-float Voxelized::read_mhd_float_atpos(std::string txt, int pos) {
-    float res;
+// Read f32 mhd arg
+f32 Voxelized::read_mhd_f32_atpos(std::string txt, int pos) {
+    f32 res;
     txt = txt.substr(txt.find("=")+2);
     if (pos==0) {
         txt = txt.substr(0, txt.find(" "));
@@ -135,16 +135,16 @@ void Voxelized::set_object_name(std::string objname) {
 }
 
 // Convert range data into material ID
-void Voxelized::define_materials_from_range(float *raw_data, std::string range_name) {
+void Voxelized::define_materials_from_range(f32 *raw_data, std::string range_name) {
 
-    float start, stop;
+    f32 start, stop;
     std::string mat_name, line;
     unsigned int i;
-    float val;
+    f32 val;
     unsigned int mat_index = 0;
 
     // Data allocation
-    data = (float*)malloc(number_of_voxels * sizeof(float));
+    data = (f32*)malloc(number_of_voxels * sizeof(f32));
 
     // Read range file
     std::ifstream file(range_name.c_str());
@@ -176,9 +176,9 @@ void Voxelized::define_materials_from_range(float *raw_data, std::string range_n
 
 }
 
-// Load phantom from binary data (float)
+// Load phantom from binary data (f32)
 void Voxelized::load_from_raw(std::string volume_name, std::string range_name,
-                              int nx, int ny, int nz, float sx, float sy, float sz) {
+                              int nx, int ny, int nz, f32 sx, f32 sy, f32 sz) {
 
     /////////////// First read the raw data from the phantom ////////////////////////
 
@@ -189,7 +189,7 @@ void Voxelized::load_from_raw(std::string volume_name, std::string range_name,
     spacing_x = sx;
     spacing_y = sy;
     spacing_z = sz;
-    mem_size = sizeof(float) * number_of_voxels;
+    mem_size = sizeof(f32) * number_of_voxels;
 
     FILE *pfile = fopen(volume_name.c_str(), "rb");
     if (!pfile) {
@@ -197,8 +197,8 @@ void Voxelized::load_from_raw(std::string volume_name, std::string range_name,
         exit(EXIT_FAILURE);
     }
 
-    float *raw_data = (float*)malloc(mem_size);
-    fread(raw_data, sizeof(float), number_of_voxels, pfile);
+    f32 *raw_data = (f32*)malloc(mem_size);
+    fread(raw_data, sizeof(f32), number_of_voxels, pfile);
 
     fclose(pfile);
 
@@ -211,9 +211,9 @@ void Voxelized::load_from_raw(std::string volume_name, std::string range_name,
 
     ///////////// Define a bounding box for this phantom //////////////////////////////
 
-    float h_lengthx = nb_vox_x * spacing_x * 0.5f;
-    float h_lengthy = nb_vox_y * spacing_y * 0.5f;
-    float h_lengthz = nb_vox_z * spacing_z * 0.5f;
+    f32 h_lengthx = nb_vox_x * spacing_x * 0.5f;
+    f32 h_lengthy = nb_vox_y * spacing_y * 0.5f;
+    f32 h_lengthz = nb_vox_z * spacing_z * 0.5f;
 
     xmin = -h_lengthx; xmax = h_lengthx;
     ymin = -h_lengthy; ymax = h_lengthy;
@@ -221,14 +221,14 @@ void Voxelized::load_from_raw(std::string volume_name, std::string range_name,
 
 }
 
-// Load phantom from mhd file (only float data)
+// Load phantom from mhd file (only f32 data)
 void Voxelized::load_from_mhd(std::string volume_name, std::string range_name) {
 
     /////////////// First read the MHD file //////////////////////
 
     std::string line, key;
     int nx=-1, ny=-1, nz=-1;
-    float sx=0, sy=0, sz=0;
+    f32 sx=0, sy=0, sz=0;
 
     // Watchdog
     std::string ObjectType="", BinaryData="", BinaryDataByteOrderMSB="", CompressedData="",
@@ -253,9 +253,9 @@ void Voxelized::load_from_mhd(std::string volume_name, std::string range_name) {
             //if (key=="Offset")  printf("Offset\n");
             //if (key=="CenterOfRotation") printf("CoR\n");
             if (key=="ElementSpacing") {
-                                                sx=read_mhd_float_atpos(line, 0);
-                                                sy=read_mhd_float_atpos(line, 1);
-                                                sz=read_mhd_float_atpos(line, 2);
+                                                sx=read_mhd_f32_atpos(line, 0);
+                                                sy=read_mhd_f32_atpos(line, 1);
+                                                sz=read_mhd_f32_atpos(line, 2);
             }
             if (key=="DimSize") {
                                                 nx=read_mhd_int_atpos(line, 0);
@@ -326,10 +326,10 @@ void Voxelized::load_from_mhd(std::string volume_name, std::string range_name) {
     spacing_x = sx;
     spacing_y = sy;
     spacing_z = sz;
-    mem_size = sizeof(float) * number_of_voxels;
+    mem_size = sizeof(f32) * number_of_voxels;
 
-    float *raw_data = (float*)malloc(mem_size);
-    fread(raw_data, sizeof(float), number_of_voxels, pfile);
+    f32 *raw_data = (f32*)malloc(mem_size);
+    fread(raw_data, sizeof(f32), number_of_voxels, pfile);
     fclose(pfile);
 
     //printf("Size of MHD file  %u, nb of voxels %u \n",m_mem_size, m_nb_voxels);
@@ -343,9 +343,9 @@ void Voxelized::load_from_mhd(std::string volume_name, std::string range_name) {
 
     ///////////// Define a bounding box for this phantom //////////////////////////////
 
-    float h_lengthx = nb_vox_x * spacing_x * 0.5f;
-    float h_lengthy = nb_vox_y * spacing_y * 0.5f;
-    float h_lengthz = nb_vox_z * spacing_z * 0.5f;
+    f32 h_lengthx = nb_vox_x * spacing_x * 0.5f;
+    f32 h_lengthy = nb_vox_y * spacing_y * 0.5f;
+    f32 h_lengthz = nb_vox_z * spacing_z * 0.5f;
 
     xmin = -h_lengthx; xmax = h_lengthx;
     ymin = -h_lengthy; ymax = h_lengthy;

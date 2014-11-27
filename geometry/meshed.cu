@@ -52,31 +52,31 @@ void Meshed::build_regular_octree(unsigned int nx, unsigned int ny, unsigned int
     octree_type = REG_OCTREE;
 
     // Compute the size of each octree cell
-    float size_x = xmax-xmin;
-    float size_y = ymax-ymin;
-    float size_z = zmax-zmin;
+    f32 size_x = xmax-xmin;
+    f32 size_y = ymax-ymin;
+    f32 size_z = zmax-zmin;
 
-    cell_size_x = size_x / (float)nx;
-    cell_size_y = size_y / (float)ny;
-    cell_size_z = size_z / (float)nz;
+    cell_size_x = size_x / (f32)nx;
+    cell_size_y = size_y / (f32)ny;
+    cell_size_z = size_z / (f32)nz;
 
-    float org_x = xmin;
-    float org_y = ymin;
-    float org_z = zmin;
+    f32 org_x = xmin;
+    f32 org_y = ymin;
+    f32 org_z = zmin;
 
-    float cell_ix, cell_iy, cell_iz;         // cell position (in voxel ID)
-    float cell_xmin, cell_ymin, cell_zmin;   // cell position (in 3D space)
-    float cell_xmax, cell_ymax, cell_zmax;
+    f32 cell_ix, cell_iy, cell_iz;         // cell position (in voxel ID)
+    f32 cell_xmin, cell_ymin, cell_zmin;   // cell position (in 3D space)
+    f32 cell_xmax, cell_ymax, cell_zmax;
 
     float3 u, v, w;                          // A triangle
     unsigned int addr_tri, itri, ct_tri;
     unsigned int cur_cell_index = 0;
 
-    float progress = 0.0f;
+    f32 progress = 0.0f;
     printf("\nBuilding regular octree\n");
     printf("progress.... %6.2f %%", progress);
     fflush(stdout);
-    float inc_progress = 100.0f / float(nz);
+    f32 inc_progress = 100.0f / f32(nz);
 
     // For each octree cell
     cell_iz = 0;
@@ -181,7 +181,7 @@ void Meshed::load_from_raw(std::string filename) {
     number_of_vertices = number_of_triangles * 3;
 
     // Allocate data
-    vertices = (float*)malloc(number_of_vertices * 3 * sizeof(float));
+    vertices = (f32*)malloc(number_of_vertices * 3 * sizeof(f32));
 
     // Read and load data
     file.open(filename.c_str());
@@ -194,7 +194,7 @@ void Meshed::load_from_raw(std::string filename) {
         std::getline(file, line);
 
         if (file) {
-            float val;
+            f32 val;
             std::string txt;
             int pos;
 
@@ -316,15 +316,15 @@ void Meshed::save_ggems_mesh(std::string filename) {
     fwrite(&tmp, 1, sizeof(unsigned int), pfile);
     fwrite(material_name.c_str(), tmp, sizeof(char), pfile);
 
-    fwrite(&xmin, 1, sizeof(float), pfile);
-    fwrite(&xmax, 1, sizeof(float), pfile);
-    fwrite(&ymin, 1, sizeof(float), pfile);
-    fwrite(&ymax, 1, sizeof(float), pfile);
-    fwrite(&zmin, 1, sizeof(float), pfile);
-    fwrite(&zmax, 1, sizeof(float), pfile);
+    fwrite(&xmin, 1, sizeof(f32), pfile);
+    fwrite(&xmax, 1, sizeof(f32), pfile);
+    fwrite(&ymin, 1, sizeof(f32), pfile);
+    fwrite(&ymax, 1, sizeof(f32), pfile);
+    fwrite(&zmin, 1, sizeof(f32), pfile);
+    fwrite(&zmax, 1, sizeof(f32), pfile);
 
     //               xyz
-    fwrite(vertices, 3*number_of_vertices, sizeof(float), pfile);
+    fwrite(vertices, 3*number_of_vertices, sizeof(f32), pfile);
 
     // Then if defined export the associated octree
     fwrite(&octree_type, 1, sizeof(unsigned short int), pfile);
@@ -333,21 +333,21 @@ void Meshed::save_ggems_mesh(std::string filename) {
         fwrite(&nb_cell_y, 1, sizeof(unsigned int), pfile);
         fwrite(&nb_cell_z, 1, sizeof(unsigned int), pfile);
 
-        fwrite(&cell_size_x, 1, sizeof(float), pfile);
-        fwrite(&cell_size_y, 1, sizeof(float), pfile);
-        fwrite(&cell_size_z, 1, sizeof(float), pfile);
+        fwrite(&cell_size_x, 1, sizeof(f32), pfile);
+        fwrite(&cell_size_y, 1, sizeof(f32), pfile);
+        fwrite(&cell_size_z, 1, sizeof(f32), pfile);
 
         tmp = nb_objs_per_cell.size();
         fwrite(&tmp, 1, sizeof(unsigned int), pfile);
-        fwrite(nb_objs_per_cell.data(), tmp, sizeof(float), pfile);
+        fwrite(nb_objs_per_cell.data(), tmp, sizeof(f32), pfile);
 
         tmp = list_objs_per_cell.size();
         fwrite(&tmp, 1, sizeof(unsigned int), pfile);
-        fwrite(list_objs_per_cell.data(), tmp, sizeof(float), pfile);
+        fwrite(list_objs_per_cell.data(), tmp, sizeof(f32), pfile);
 
         tmp = addr_to_cell.size();
         fwrite(&tmp, 1, sizeof(unsigned int), pfile);
-        fwrite(addr_to_cell.data(), tmp, sizeof(float), pfile);
+        fwrite(addr_to_cell.data(), tmp, sizeof(f32), pfile);
     }
 
     // Close the file
@@ -387,16 +387,16 @@ void Meshed::load_from_ggems_mesh(std::string filename) {
     material_name.resize(tmp);
     fread(&material_name[0], sizeof(char), tmp, pfile);
 
-    fread(&xmin, sizeof(float), 1, pfile);
-    fread(&xmax, sizeof(float), 1, pfile);
-    fread(&ymin, sizeof(float), 1, pfile);
-    fread(&ymax, sizeof(float), 1, pfile);
-    fread(&zmin, sizeof(float), 1, pfile);
-    fread(&zmax, sizeof(float), 1, pfile);
+    fread(&xmin, sizeof(f32), 1, pfile);
+    fread(&xmax, sizeof(f32), 1, pfile);
+    fread(&ymin, sizeof(f32), 1, pfile);
+    fread(&ymax, sizeof(f32), 1, pfile);
+    fread(&zmin, sizeof(f32), 1, pfile);
+    fread(&zmax, sizeof(f32), 1, pfile);
 
     free(vertices); //                           xyz
-    vertices = (float*)malloc(number_of_vertices*3 * sizeof(float));
-    fread(vertices, sizeof(float), 3*number_of_vertices, pfile);
+    vertices = (f32*)malloc(number_of_vertices*3 * sizeof(f32));
+    fread(vertices, sizeof(f32), 3*number_of_vertices, pfile);
 
     // Then if defined import the associated octree
     fread(&octree_type, sizeof(unsigned short int), 1, pfile);
@@ -405,24 +405,24 @@ void Meshed::load_from_ggems_mesh(std::string filename) {
         fread(&nb_cell_y, sizeof(unsigned int), 1, pfile);
         fread(&nb_cell_z, sizeof(unsigned int), 1, pfile);
 
-        fread(&cell_size_x, sizeof(float), 1, pfile);
-        fread(&cell_size_y, sizeof(float), 1, pfile);
-        fread(&cell_size_z, sizeof(float), 1, pfile);
+        fread(&cell_size_x, sizeof(f32), 1, pfile);
+        fread(&cell_size_y, sizeof(f32), 1, pfile);
+        fread(&cell_size_z, sizeof(f32), 1, pfile);
 
         fread(&tmp, sizeof(unsigned int), 1, pfile);
         nb_objs_per_cell.clear();
         nb_objs_per_cell.reserve(tmp);
-        fread(nb_objs_per_cell.data(), sizeof(float), tmp, pfile);
+        fread(nb_objs_per_cell.data(), sizeof(f32), tmp, pfile);
 
         fread(&tmp, sizeof(unsigned int), 1, pfile);
         list_objs_per_cell.clear();
         list_objs_per_cell.reserve(tmp);
-        fwrite(list_objs_per_cell.data(), sizeof(float), tmp, pfile);
+        fwrite(list_objs_per_cell.data(), sizeof(f32), tmp, pfile);
 
         fread(&tmp, sizeof(unsigned int), 1, pfile);
         addr_to_cell.clear();
         addr_to_cell.reserve(tmp);
-        fwrite(addr_to_cell.data(), sizeof(float), tmp, pfile);
+        fwrite(addr_to_cell.data(), sizeof(f32), tmp, pfile);
     }
 }
 
@@ -445,7 +445,7 @@ void Meshed::scale(float3 s) {
 }
 
 // Scaling
-void Meshed::scale(float sx, float sy, float sz) {
+void Meshed::scale(f32 sx, f32 sy, f32 sz) {
     float3 s = {sx, sy, sz};
     scale(s);
 }
@@ -453,17 +453,17 @@ void Meshed::scale(float sx, float sy, float sz) {
 // Rotation
 void Meshed::rotate(float3 r) {
 
-    // float deg = pi / 180.0f;
-    float phi = r.x*deg; // deg is defined by G4 unit system
-    float theta = r.y*deg;
-    float psi = r.z*deg;
+    // f32 deg = pi / 180.0f;
+    f32 phi = r.x*deg; // deg is defined by G4 unit system
+    f32 theta = r.y*deg;
+    f32 psi = r.z*deg;
 
-    float sph = sin(phi);
-    float cph = cos(phi);
-    float sth = sin(theta);
-    float cth = cos(theta);
-    float sps = sin(psi);
-    float cps = cos(psi);
+    f32 sph = sin(phi);
+    f32 cph = cos(phi);
+    f32 sth = sin(theta);
+    f32 cth = cos(theta);
+    f32 sps = sin(psi);
+    f32 cps = cos(psi);
 
     // Build rotation matrix
     matrix3 rot = { cph*cps-sph*cth*sps,  cph*sps+sph*cth*cps,  sth*sph,
@@ -488,7 +488,7 @@ void Meshed::rotate(float3 r) {
 }
 
 // Rotation
-void Meshed::rotate(float phi, float theta, float psi) {
+void Meshed::rotate(f32 phi, f32 theta, f32 psi) {
     float3 r = {phi, theta, psi};
     rotate(r);
 }
@@ -514,7 +514,7 @@ void Meshed::translate(float3 t) {
 }
 
 // Translation
-void Meshed::translate(float tx, float ty, float tz) {
+void Meshed::translate(f32 tx, f32 ty, f32 tz) {
     float3 t = {tx, ty, tz};
     translate(t);
 }

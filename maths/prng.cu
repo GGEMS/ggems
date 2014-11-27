@@ -17,10 +17,11 @@
 
 #ifndef PRNG_CU
 #define PRNG_CU
+
 #include "prng.cuh"
 
 // JKISS 32-bit (period ~2^121=2.6x10^36), passes all of the Dieharder tests and the BigCrunch tests in TestU01
-__host__ __device__ float JKISS32(ParticleStack &particles, unsigned int id) {
+__host__ __device__ f32 JKISS32(ParticleStack &particles, unsigned int id) {
     int t;
 
 
@@ -48,8 +49,8 @@ __host__ __device__ float JKISS32(ParticleStack &particles, unsigned int id) {
     // For the double version use that
     // return (double)(x+y+w) / 4294967296.0;  // UINT_MAX+1
 
-    // For the float version is more tricky
-    float temp= ((float)(particles.prng_state_1[id]+particles.prng_state_2[id]+particles.prng_state_4[id])
+    // For the f32 version is more tricky
+    f32 temp= ((f32)(particles.prng_state_1[id]+particles.prng_state_2[id]+particles.prng_state_4[id])
     //           UINT_MAX         1.0  - float32_precision
                  / 4294967295.0) * (1.0f - 1.0f/(1<<23));
 
@@ -166,11 +167,11 @@ __device__ double Brent_real(int index, unsigned long *device_x_brent, unsigned 
 #define UREAL64 (sizeof(double)>>3)
 #define UREAL32 (1 - UREAL64)
 
-    // sr = number of bits discarded = 11 for double, 40 or 8 for float
+    // sr = number of bits discarded = 11 for double, 40 or 8 for f32
 
 #define sr (11*UREAL64 +(40*UINT64 + 8*UINT32)*UREAL32)
 
-    // ss (used for scaling) is 53 or 21 for double, 24 for float
+    // ss (used for scaling) is 53 or 21 for double, 24 for f32
 
 #define ss ((53*UINT64 + 21*UINT32)*UREAL64 + 24*UREAL32)
 
@@ -196,7 +197,7 @@ __device__ double Brent_real(int index, unsigned long *device_x_brent, unsigned 
 //     unsigned int scale = ((unsigned long)1<<SS);
 //      printf("SCALE %u res %u \n",scale, SS);
     double d = (res * SCALE);
-    float c= (res * SCALE);
+    f32 c= (res * SCALE);
     if (c==1.0f) {
         d -= SCALE;
         }

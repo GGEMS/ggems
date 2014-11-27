@@ -22,11 +22,11 @@
 
 // External function
 __host__ __device__ void point_source_primary_generator(ParticleStack particles, unsigned int id,
-                                                        float px, float py, float pz, float energy,
+                                                        f32 px, f32 py, f32 pz, f32 energy,
                                                         unsigned char type, unsigned int geom_id) {
 
-    float phi = JKISS32(particles, id);
-    float theta = JKISS32(particles, id);
+    f32 phi = JKISS32(particles, id);
+    f32 theta = JKISS32(particles, id);
 
     phi  *= gpu_twopi;
     theta = acosf(1.0f - 2.0f*theta);
@@ -59,11 +59,11 @@ PointSource::PointSource() {
 
 // Setting function
 
-void PointSource::set_position(float vpx, float vpy, float vpz) {
+void PointSource::set_position(f32 vpx, f32 vpy, f32 vpz) {
     px=vpx; py=vpy; pz=vpz;
 }
 
-void PointSource::set_energy(float venergy) {
+void PointSource::set_energy(f32 venergy) {
     energy=venergy;
 }
 

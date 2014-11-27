@@ -42,7 +42,7 @@ void SourceBuilder::add_source(PointSource src) {
     array_push_back(&sources.ptr_sources, sources.ptr_sources_dim, sources.data_sources_dim);
 
     // Store information of this source
-    array_push_back(&sources.data_sources, sources.data_sources_dim, (float)POINT_SOURCE);
+    array_push_back(&sources.data_sources, sources.data_sources_dim, (f32)POINT_SOURCE);
     array_push_back(&sources.data_sources, sources.data_sources_dim, src.geometry_id);
     array_push_back(&sources.data_sources, sources.data_sources_dim, src.px);
     array_push_back(&sources.data_sources, sources.data_sources_dim, src.py);
@@ -62,7 +62,7 @@ void SourceBuilder::add_source(ConeBeamSource src) {
     array_push_back(&sources.ptr_sources, sources.ptr_sources_dim, sources.data_sources_dim);
 
     // Store information of this source
-    array_push_back(&sources.data_sources, sources.data_sources_dim, (float)CONE_BEAM_SOURCE);
+    array_push_back(&sources.data_sources, sources.data_sources_dim, (f32)CONE_BEAM_SOURCE);
     array_push_back(&sources.data_sources, sources.data_sources_dim, src.geometry_id);
     array_push_back(&sources.data_sources, sources.data_sources_dim, src.px);
     array_push_back(&sources.data_sources, sources.data_sources_dim, src.py);

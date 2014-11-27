@@ -18,15 +18,7 @@
 #ifndef VOXELIZED_CUH
 #define VOXELIZED_CUH
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <vector>
-#include <sstream>
-#include <fstream>
-#include <string>
-#include <map>
-#include <algorithm>
-#include <cfloat>
+#include "global.cuh"
 #include "base_object.cuh"
 
 // Voxelized phantom
@@ -35,30 +27,30 @@ class Voxelized : public BaseObject {
         Voxelized();
 
         void load_from_raw(std::string volume_name, std::string range_name,
-                           int nx, int ny, int nz, float sx, float sy, float sz);
+                           int nx, int ny, int nz, f32 sx, f32 sy, f32 sz);
 
         void load_from_mhd(std::string volume_name, std::string range_name);
 
         void set_object_name(std::string objname);
 
-        float *data;
+        f32 *data;
 
         unsigned short int nb_vox_x, nb_vox_y, nb_vox_z;
         unsigned int number_of_voxels;
         unsigned int mem_size; // TODO this can be remove
-        float spacing_x, spacing_y, spacing_z;
+        f32 spacing_x, spacing_y, spacing_z;
 
         std::vector<std::string> list_of_materials;
 
     private:
-        void define_materials_from_range(float *raw_data, std::string range_name);
+        void define_materials_from_range(f32 *raw_data, std::string range_name);
 
         void skip_comment(std::istream &);
         std::string remove_white_space(std::string);
 
         // for range file
-        float read_start_range(std::string);
-        float read_stop_range(std::string);
+        f32 read_start_range(std::string);
+        f32 read_stop_range(std::string);
         std::string read_mat_range(std::string);
 
         // for mhd
@@ -66,7 +58,7 @@ class Voxelized : public BaseObject {
         std::string read_mhd_string_arg(std::string);
         int read_mhd_int(std::string);
         int read_mhd_int_atpos(std::string, int);
-        float read_mhd_float_atpos(std::string, int);
+        f32 read_mhd_f32_atpos(std::string, int);
 };
 
 

@@ -112,7 +112,7 @@ __constant__ unsigned short int GPU_PhotoElec_std_CumulIntervals [101] =
 };
 
 // The ration of atomic number to atomic mass for first 100 elements
-__constant__ float GPU_PhotoElec_std_ZtoAratio[101] =
+__constant__ f32 GPU_PhotoElec_std_ZtoAratio[101] =
 {
 
       0,  // nonexisting 'zero' element
@@ -155,7 +155,7 @@ __constant__ float GPU_PhotoElec_std_ZtoAratio[101] =
 
 };
 
-__constant__ float GPU_PhotoElec_std_IonizationPotentials[101] =
+__constant__ f32 GPU_PhotoElec_std_IonizationPotentials[101] =
 {
      0,  // nonexisting 'zero' element
 
@@ -197,7 +197,7 @@ __constant__ float GPU_PhotoElec_std_IonizationPotentials[101] =
 
 };
 
-__constant__ float GPU_PhotoElec_std_SandiaTable[981][5] =
+__constant__ f32 GPU_PhotoElec_std_SandiaTable[981][5] =
 {
 
 
@@ -1600,7 +1600,7 @@ const unsigned short int CPU_PhotoElec_std_CumulIntervals [101] =
 };
 
 // The ration of atomic number to atomic mass for first 100 elements
-const float CPU_PhotoElec_std_ZtoAratio[101] =
+const f32 CPU_PhotoElec_std_ZtoAratio[101] =
 {
 
       0,  // nonexisting 'zero' element
@@ -1643,7 +1643,7 @@ const float CPU_PhotoElec_std_ZtoAratio[101] =
 
 };
 
-const float CPU_PhotoElec_std_IonizationPotentials[101] =
+const f32 CPU_PhotoElec_std_IonizationPotentials[101] =
 {
      0,  // nonexisting 'zero' element
 
@@ -1685,7 +1685,7 @@ const float CPU_PhotoElec_std_IonizationPotentials[101] =
 
 };
 
-const float CPU_PhotoElec_std_SandiaTable[981][5] =
+const f32 CPU_PhotoElec_std_SandiaTable[981][5] =
 {
 
 
@@ -3017,7 +3017,7 @@ __host__ __device__ unsigned short int PhotoElec_std_CumulIntervals(unsigned int
 
 }
 
-__host__ __device__ float PhotoElec_std_ZtoAratio(unsigned int pos) {
+__host__ __device__ f32 PhotoElec_std_ZtoAratio(unsigned int pos) {
 
 #ifdef __CUDA_ARCH__
     return GPU_PhotoElec_std_ZtoAratio[pos];
@@ -3027,7 +3027,7 @@ __host__ __device__ float PhotoElec_std_ZtoAratio(unsigned int pos) {
 
 }
 
-__host__ __device__ float PhotoElec_std_IonizationPotentials(unsigned int pos) {
+__host__ __device__ f32 PhotoElec_std_IonizationPotentials(unsigned int pos) {
 
 #ifdef __CUDA_ARCH__
     return GPU_PhotoElec_std_IonizationPotentials[pos];
@@ -3037,7 +3037,7 @@ __host__ __device__ float PhotoElec_std_IonizationPotentials(unsigned int pos) {
 
 }
 
-__host__ __device__ float PhotoElec_std_SandiaTable(unsigned int pos, unsigned int id) {
+__host__ __device__ f32 PhotoElec_std_SandiaTable(unsigned int pos, unsigned int id) {
 
 #ifdef __CUDA_ARCH__
     return GPU_PhotoElec_std_SandiaTable[pos][id];

@@ -18,10 +18,6 @@
 #ifndef VRML_CUH
 #define VRML_CUH
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string>
-
 #include "geometry_builder.cuh"
 #include "source_builder.cuh"
 #include "particles.cuh"
@@ -38,10 +34,10 @@ class VRML {
         void close();
     private:
         FILE *pfile;
-        void draw_wireframe_aabb(float xmin, float xmax, float ymin, float ymax, float zmin, float zmax,
-                                 Color color, float transparency);
-        void draw_aabb(float xmin, float xmax, float ymin, float ymax, float zmin, float zmax,
-                       Color color, float transparency);
+        void draw_wireframe_aabb(f32 xmin, f32 xmax, f32 ymin, f32 ymax, f32 zmin, f32 zmax,
+                                 Color color, f32 transparency);
+        void draw_aabb(f32 xmin, f32 xmax, f32 ymin, f32 ymax, f32 zmin, f32 zmax,
+                       Color color, f32 transparency);
 };
 
 #endif

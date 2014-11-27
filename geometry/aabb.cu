@@ -22,8 +22,8 @@
 
 Aabb::Aabb () {}
 
-Aabb::Aabb (float ox, float oy, float oz,
-            float halflx, float halfly, float halflz,
+Aabb::Aabb (f32 ox, f32 oy, f32 oz,
+            f32 halflx, f32 halfly, f32 halflz,
             std::string mat_name, std::string obj_name) {
 
     xmin = ox-halflx;

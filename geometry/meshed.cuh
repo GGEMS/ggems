@@ -18,13 +18,7 @@
 #ifndef MESHED_H
 #define MESHED_H
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <sstream>
-#include <fstream>
-#include <string>
-#include <vector>
-#include <float.h>
+#include "global.cuh"
 
 #include "base_object.cuh"
 #include "vector.cuh"
@@ -47,25 +41,25 @@ class Meshed : public BaseObject {
         void build_regular_octree(unsigned int nx, unsigned int ny, unsigned int nz);
 
         void scale(float3 s);
-        void scale(float sx, float sy, float sz);
+        void scale(f32 sx, f32 sy, f32 sz);
         void rotate(float3 r);
-        void rotate(float phi, float theta, float psi);
+        void rotate(f32 phi, f32 theta, f32 psi);
         void translate(float3 t);
-        void translate(float tx, float ty, float tz);
+        void translate(f32 tx, f32 ty, f32 tz);
 
         // Mesh data
-        float *vertices;
+        f32 *vertices;
         unsigned int number_of_triangles;
         unsigned int number_of_vertices;
 
         // Octree
         unsigned int nb_cell_x, nb_cell_y, nb_cell_z;
-        float cell_size_x, cell_size_y, cell_size_z;
+        f32 cell_size_x, cell_size_y, cell_size_z;
         unsigned short int octree_type;
         //   Store only non-null value in order to compress the octree
-        std::vector<float> nb_objs_per_cell;
-        std::vector<float> list_objs_per_cell;
-        std::vector<float> addr_to_cell;
+        std::vector<f32> nb_objs_per_cell;
+        std::vector<f32> list_objs_per_cell;
+        std::vector<f32> addr_to_cell;
 
     private:
 };

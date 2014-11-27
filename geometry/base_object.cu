@@ -43,13 +43,13 @@ BaseObject::BaseObject () {
     wireframe = false;
 }
 
-void BaseObject::set_color(float r, float g, float b) {
+void BaseObject::set_color(f32 r, f32 g, f32 b) {
     color.r = r;
     color.g = g;
     color.b = b;
 }
 
-void BaseObject::set_transparency(float val) {
+void BaseObject::set_transparency(f32 val) {
     transparency = val;
 }
 

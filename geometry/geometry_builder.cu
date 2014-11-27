@@ -59,21 +59,21 @@ unsigned int __host__ __device__ get_geometry_material(Scene geometry, unsigned 
 }
 
 // Get distance from an object
-float __host__ __device__ get_distance_to_object(Scene geometry, unsigned int adr_geom,
+f32 __host__ __device__ get_distance_to_object(Scene geometry, unsigned int adr_geom,
                                                  unsigned int obj_type, float3 pos, float3 dir) {
 
-    float distance = FLT_MAX;
+    f32 distance = FLT_MAX;
 
     // AABB volume
     if (obj_type == AABB) {
 
         // Read first the bounding box
-        float xmin = geometry.data_objects[adr_geom+ADR_AABB_XMIN];
-        float xmax = geometry.data_objects[adr_geom+ADR_AABB_XMAX];
-        float ymin = geometry.data_objects[adr_geom+ADR_AABB_YMIN];
-        float ymax = geometry.data_objects[adr_geom+ADR_AABB_YMAX];
-        float zmin = geometry.data_objects[adr_geom+ADR_AABB_ZMIN];
-        float zmax = geometry.data_objects[adr_geom+ADR_AABB_ZMAX];
+        f32 xmin = geometry.data_objects[adr_geom+ADR_AABB_XMIN];
+        f32 xmax = geometry.data_objects[adr_geom+ADR_AABB_XMAX];
+        f32 ymin = geometry.data_objects[adr_geom+ADR_AABB_YMIN];
+        f32 ymax = geometry.data_objects[adr_geom+ADR_AABB_YMAX];
+        f32 zmin = geometry.data_objects[adr_geom+ADR_AABB_ZMIN];
+        f32 zmax = geometry.data_objects[adr_geom+ADR_AABB_ZMAX];
 
         distance = hit_ray_AABB(pos, dir, xmin, xmax, ymin, ymax, zmin, zmax);
 
@@ -84,7 +84,7 @@ float __host__ __device__ get_distance_to_object(Scene geometry, unsigned int ad
         float3 c = make_float3(geometry.data_objects[adr_geom+ADR_SPHERE_CX],
                                geometry.data_objects[adr_geom+ADR_SPHERE_CY],
                                geometry.data_objects[adr_geom+ADR_SPHERE_CZ]);
-        float r = geometry.data_objects[adr_geom+ADR_SPHERE_RADIUS];
+        f32 r = geometry.data_objects[adr_geom+ADR_SPHERE_RADIUS];
 
         distance = hit_ray_sphere(pos, dir, c, r);
 
@@ -109,11 +109,11 @@ float __host__ __device__ get_distance_to_object(Scene geometry, unsigned int ad
         //printf("Ind %i %i %i\n", ind.x, ind.y, ind.z);
 
         // Then get the voxel bounding box
-        float volxmin = geometry.data_objects[adr_geom+ADR_AABB_XMIN];
-        float volymin = geometry.data_objects[adr_geom+ADR_AABB_YMIN];
-        float volzmin = geometry.data_objects[adr_geom+ADR_AABB_ZMIN];
+        f32 volxmin = geometry.data_objects[adr_geom+ADR_AABB_XMIN];
+        f32 volymin = geometry.data_objects[adr_geom+ADR_AABB_YMIN];
+        f32 volzmin = geometry.data_objects[adr_geom+ADR_AABB_ZMIN];
 
-        float xmin, ymin, xmax, ymax, zmin, zmax;
+        f32 xmin, ymin, xmax, ymax, zmin, zmax;
         xmin = ind.x*s.x + volxmin; xmax = xmin+s.x;
         ymin = ind.y*s.y + volymin; ymax = ymin+s.y;
         zmin = ind.z*s.z + volzmin; zmax = zmin+s.z;
@@ -139,9 +139,9 @@ float __host__ __device__ get_distance_to_object(Scene geometry, unsigned int ad
             printf("::::: Ind %i %i %i\n", ind.x, ind.y, ind.z);
             printf("::::: Vox %f %f, %f %f, %f %f\n", xmin, xmax, ymin, ymax, zmin, zmax);
             printf("::::: Dist %f\n", distance);
-            float a = -8.000009;
-            float b = 296.0;
-            float c = a+b;
+            f32 a = -8.000009;
+            f32 b = 296.0;
+            f32 c = a+b;
             printf("----- test %2.20f\n", c);
         }
 
@@ -150,19 +150,19 @@ float __host__ __device__ get_distance_to_object(Scene geometry, unsigned int ad
         unsigned int octree_type = geometry.data_objects[adr_geom+ADR_MESHED_OCTREE_TYPE];
 
         // Read first the bounding box
-        float xmin = geometry.data_objects[adr_geom+ADR_AABB_XMIN];
-        float xmax = geometry.data_objects[adr_geom+ADR_AABB_XMAX];
-        float ymin = geometry.data_objects[adr_geom+ADR_AABB_YMIN];
-        float ymax = geometry.data_objects[adr_geom+ADR_AABB_YMAX];
-        float zmin = geometry.data_objects[adr_geom+ADR_AABB_ZMIN];
-        float zmax = geometry.data_objects[adr_geom+ADR_AABB_ZMAX];
+        f32 xmin = geometry.data_objects[adr_geom+ADR_AABB_XMIN];
+        f32 xmax = geometry.data_objects[adr_geom+ADR_AABB_XMAX];
+        f32 ymin = geometry.data_objects[adr_geom+ADR_AABB_YMIN];
+        f32 ymax = geometry.data_objects[adr_geom+ADR_AABB_YMAX];
+        f32 zmin = geometry.data_objects[adr_geom+ADR_AABB_ZMIN];
+        f32 zmax = geometry.data_objects[adr_geom+ADR_AABB_ZMAX];
 
         // First check the bounding box that contains the mesh
         if (!test_ray_AABB(pos, dir, xmin, xmax, ymin, ymax, zmin, zmax)) return FLT_MAX;
 
         // If no octree first check every triangle
         distance = FLT_MAX;
-        float tri_distance;
+        f32 tri_distance;
         if (octree_type == NO_OCTREE) {
             unsigned int nb_tri = geometry.data_objects[adr_geom+ADR_MESHED_NB_TRIANGLES];
             unsigned int i=0;
@@ -212,9 +212,9 @@ float __host__ __device__ get_distance_to_object(Scene geometry, unsigned int ad
             finc.y = dir.y*s.y;
             finc.z = dir.z*s.z;
             float3 fpos;
-            fpos.x = float(ind.x);
-            fpos.y = float(ind.y);
-            fpos.z = float(ind.z);
+            fpos.x = f32(ind.x);
+            fpos.y = f32(ind.y);
+            fpos.z = f32(ind.z);
 
             unsigned int nb_tri = geometry.data_objects[adr_geom+ADR_MESHED_NB_TRIANGLES];
             unsigned int nx = geometry.data_objects[adr_geom+ADR_MESHED_OCTREE_NX];
@@ -283,11 +283,11 @@ float __host__ __device__ get_distance_to_object(Scene geometry, unsigned int ad
 // Find the next geometry along the path of the particle
 void __host__ __device__ get_next_geometry_boundary(Scene geometry, unsigned int cur_geom,
                                                      float3 pos, float3 dir,
-                                                     float &interaction_distance,
+                                                     f32 &interaction_distance,
                                                      unsigned int &geometry_volume) {
 
     geometry_volume = cur_geom;
-    float distance;
+    f32 distance;
 
     ////// Mother
 
@@ -298,7 +298,7 @@ void __host__ __device__ get_next_geometry_boundary(Scene geometry, unsigned int
     // Special case of voxelized volume where there are voxel boundary
     if (obj_type == VOXELIZED) {           
         // Volume bounding box
-        float safety = get_distance_to_object(geometry, adr_geom, AABB, pos, dir);
+        f32 safety = get_distance_to_object(geometry, adr_geom, AABB, pos, dir);
         // Voxel boundary
         distance = get_distance_to_object(geometry, adr_geom, VOXELIZED, pos, dir);
 
@@ -488,12 +488,12 @@ void GeometryBuilder::print_geometry() {
         // Same header for everyone
         unsigned int type = (unsigned int)(world.data_objects[address_obj+ADR_OBJ_TYPE]);
         unsigned int mat = (unsigned int)(world.data_objects[address_obj+ADR_OBJ_MAT_ID]);
-        float xmin = world.data_objects[address_obj+ADR_AABB_XMIN];
-        float xmax = world.data_objects[address_obj+ADR_AABB_XMAX];
-        float ymin = world.data_objects[address_obj+ADR_AABB_YMIN];
-        float ymax = world.data_objects[address_obj+ADR_AABB_YMAX];
-        float zmin = world.data_objects[address_obj+ADR_AABB_ZMIN];
-        float zmax = world.data_objects[address_obj+ADR_AABB_ZMAX];
+        f32 xmin = world.data_objects[address_obj+ADR_AABB_XMIN];
+        f32 xmax = world.data_objects[address_obj+ADR_AABB_XMAX];
+        f32 ymin = world.data_objects[address_obj+ADR_AABB_YMIN];
+        f32 ymax = world.data_objects[address_obj+ADR_AABB_YMAX];
+        f32 zmin = world.data_objects[address_obj+ADR_AABB_ZMIN];
+        f32 zmax = world.data_objects[address_obj+ADR_AABB_ZMAX];
 
         // Print information0
         switch (type) {
@@ -640,7 +640,7 @@ void GeometryBuilder::save_ggems_geometry(std::string filename) {
     // 10. data_objects [N, data] (the big one!!!)
     nb = World.data_objects.size();
     fwrite(&nb, 1, sizeof(unsigned int), pfile);
-    fwrite(World.data_objects.data(), nb, sizeof(float), pfile);
+    fwrite(World.data_objects.data(), nb, sizeof(f32), pfile);
 
 
     fclose(pfile);
@@ -655,9 +655,9 @@ void GeometryBuilder::save_ggems_geometry(std::string filename) {
 // !!!! Convention of the head of any object written in the world structure !!!!
 //
 // Object Type
-//  array_push_back(world.data_objects, world.data_objects_dim, (float)AABB);
+//  array_push_back(world.data_objects, world.data_objects_dim, (f32)AABB);
 // Material index
-//  array_push_back(world.data_objects, world.data_objects_dim, (float)get_material_index(obj.material_name));
+//  array_push_back(world.data_objects, world.data_objects_dim, (f32)get_material_index(obj.material_name));
 // AABB parameters
 //  array_push_back(world.data_objects, world.data_objects_dim, obj.xmin);
 //  array_push_back(world.data_objects, world.data_objects_dim, obj.xmax);
@@ -743,9 +743,9 @@ void GeometryBuilder::build_object(Aabb obj) {
     // Store the information of this object
 
     // Object Type
-    array_push_back(&world.data_objects, world.data_objects_dim, (float)AABB);
+    array_push_back(&world.data_objects, world.data_objects_dim, (f32)AABB);
     // Material index
-    array_push_back(&world.data_objects, world.data_objects_dim, (float)get_material_index(obj.material_name));
+    array_push_back(&world.data_objects, world.data_objects_dim, (f32)get_material_index(obj.material_name));
      // AABB parameters
     array_push_back(&world.data_objects, world.data_objects_dim, obj.xmin);
     array_push_back(&world.data_objects, world.data_objects_dim, obj.xmax);
@@ -774,9 +774,9 @@ void GeometryBuilder::build_object(Sphere obj) {
     // Store the information of this object
 
     // Object Type
-    array_push_back(&world.data_objects, world.data_objects_dim, (float)SPHERE);
+    array_push_back(&world.data_objects, world.data_objects_dim, (f32)SPHERE);
     // Material index
-    array_push_back(&world.data_objects, world.data_objects_dim, (float)get_material_index(obj.material_name));
+    array_push_back(&world.data_objects, world.data_objects_dim, (f32)get_material_index(obj.material_name));
      // AABB parameters
     array_push_back(&world.data_objects, world.data_objects_dim, obj.xmin);
     array_push_back(&world.data_objects, world.data_objects_dim, obj.xmax);
@@ -832,7 +832,7 @@ void GeometryBuilder::build_object(Voxelized obj) {
     // Store the information of this object
 
     // Object Type
-    array_push_back(&world.data_objects, world.data_objects_dim, (float)VOXELIZED);
+    array_push_back(&world.data_objects, world.data_objects_dim, (f32)VOXELIZED);
     // Material index
     array_push_back(&world.data_objects, world.data_objects_dim, -1.0f); // // Heterogeneous material
     // AABB parameters
@@ -874,9 +874,9 @@ void GeometryBuilder::build_object(Meshed obj) {
     // Store the information of this object
 
     // Object Type
-    array_push_back(&world.data_objects, world.data_objects_dim, (float)MESHED);
+    array_push_back(&world.data_objects, world.data_objects_dim, (f32)MESHED);
     // Material index
-    array_push_back(&world.data_objects, world.data_objects_dim, (float)get_material_index(obj.material_name));
+    array_push_back(&world.data_objects, world.data_objects_dim, (f32)get_material_index(obj.material_name));
     // AABB parameters
     array_push_back(&world.data_objects, world.data_objects_dim, obj.xmin);
     array_push_back(&world.data_objects, world.data_objects_dim, obj.xmax);
@@ -901,7 +901,7 @@ void GeometryBuilder::build_object(Meshed obj) {
     // Finally append the octree if defined
     if (obj.octree_type == REG_OCTREE) {
         // Append the number of objects per cell
-        float *tmp = &obj.nb_objs_per_cell[0]; // create a pointer to append into the world
+        f32 *tmp = &obj.nb_objs_per_cell[0]; // create a pointer to append into the world
         array_append_array(&world.data_objects, world.data_objects_dim, &tmp, obj.nb_objs_per_cell.size());
 
         // Append the addr of each cell

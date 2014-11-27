@@ -18,8 +18,6 @@
 #ifndef PHOTON_NAVIGATOR_CUH
 #define PHOTON_NAVIGATOR_CUH
 
-#include "assert.h"
-
 #include "constants.cuh"
 #include "particles.cuh"
 #include "cross_sections_builder.cuh"

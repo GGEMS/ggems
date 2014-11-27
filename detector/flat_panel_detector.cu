@@ -40,14 +40,14 @@ void FlatPanelDetector::attach_to(unsigned int geometry_id) {
     panel_detector.geometry_id = geometry_id;
 }
 
-void FlatPanelDetector::set_resolution(float sx, float sy, float sz) {
+void FlatPanelDetector::set_resolution(f32 sx, f32 sy, f32 sz) {
     panel_detector.sx = sx;
     panel_detector.sy = sy;
     panel_detector.sz = sz;
 }
 
 // Init
-void FlatPanelDetector::init(float xmin, float xmax, float ymin, float ymax, float zmin, float zmax) {
+void FlatPanelDetector::init(f32 xmin, f32 xmax, f32 ymin, f32 ymax, f32 zmin, f32 zmax) {
 
     panel_detector.nx = (unsigned int)((xmax-xmin) / panel_detector.sx);
     panel_detector.ny = (unsigned int)((ymax-ymin) / panel_detector.sy);
@@ -61,7 +61,7 @@ void FlatPanelDetector::init(float xmin, float xmax, float ymin, float ymax, flo
     panel_detector.zmin = zmin;
     panel_detector.zmax = zmax;
 
-    panel_detector.data = (float*)malloc(panel_detector.nb_voxels*sizeof(float));
+    panel_detector.data = (f32*)malloc(panel_detector.nb_voxels*sizeof(f32));
 
     unsigned int i=0;
     while (i<panel_detector.nb_voxels) {
@@ -97,7 +97,7 @@ void FlatPanelDetector::save_image(std::string outputname) {
 
     // then export data
     pfile = fopen(export_name.c_str(), "wb");
-    fwrite(panel_detector.data, panel_detector.nb_voxels, sizeof(float), pfile);
+    fwrite(panel_detector.data, panel_detector.nb_voxels, sizeof(f32), pfile);
     fclose(pfile);
 
 }

@@ -18,8 +18,7 @@
 #ifndef STRUCTURES_CUH
 #define STRUCTURES_CUH
 
-#include <stdlib.h>
-#include <stdio.h>
+#include "global.cuh"
 
 
 #endif

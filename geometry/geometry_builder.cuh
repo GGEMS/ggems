@@ -18,18 +18,12 @@
 #ifndef GEOMETRY_BUILDER_CUH
 #define GEOMETRY_BUILDER_CUH
 
-#include <vector>
-#include <string>
-#include <stdio.h>
-#include <string.h>
 #include "aabb.cuh"
 #include "sphere.cuh"
 #include "meshed.cuh"
 #include "voxelized.cuh"
 #include "raytracing.cuh"
 #include "global.cuh"
-
-#include "assert.h"
 
 #define AABB 0
 #define SPHERE 1
@@ -81,7 +75,7 @@ struct Scene {
     // Object structure
     unsigned int* ptr_objects;     // Address to access to the different objects
     unsigned int* size_of_objects; // Size of each object
-    float* data_objects;           // Parameters of each primitive in the world
+    f32* data_objects;           // Parameters of each primitive in the world
 
     // Tree structure
     unsigned int* ptr_nodes;       // Address to access the different nodes
@@ -105,11 +99,11 @@ struct Scene {
 // Host/Device function that handle geometry
 
 unsigned int __host__ __device__ get_geometry_material(Scene geometry, unsigned int id_geom, float3 pos);
-float __host__ __device__ get_distance_to_object(Scene geometry, unsigned int adr_geom, unsigned int obj_type,
+f32 __host__ __device__ get_distance_to_object(Scene geometry, unsigned int adr_geom, unsigned int obj_type,
                                                  float3 pos, float3 dir);
 void __host__ __device__ get_next_geometry_boundary(Scene geometry, unsigned int cur_geom,
                                                      float3 pos, float3 dir,
-                                                     float &interaction_distance,
+                                                     f32 &interaction_distance,
                                                      unsigned int &geometry_volume);
 
 // This class is used to build the geometry
@@ -142,7 +136,7 @@ class GeometryBuilder {
         std::vector<std::string> materials_list;   // List of the materials used
         std::vector<std::string> name_objects;     // Name of each object
         std::vector<Color> object_colors;          // Color of each object
-        std::vector<float> object_transparency;    // Transparency of each object
+        std::vector<f32> object_transparency;    // Transparency of each object
         std::vector<bool> object_wireframe;        // Wireframe option for each object
 
     private:        

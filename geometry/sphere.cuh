@@ -18,9 +18,6 @@
 #ifndef SPHERE_H
 #define SPHERE_H
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string>
 #include "global.cuh"
 #include "base_object.cuh"
 
@@ -28,10 +25,10 @@
 class Sphere : public BaseObject {
     public:
         Sphere();
-        Sphere(float ox, float oy, float oz, float rad,
+        Sphere(f32 ox, f32 oy, f32 oz, f32 rad,
                std::string mat_name, std::string obj_name);
 
-        float cx, cy, cz, radius;
+        f32 cx, cy, cz, radius;
 
     private:
 };

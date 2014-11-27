@@ -20,7 +20,7 @@
 #include "photon.cuh"
 
 
-__host__ __device__ float get_CS_from_table(float *E_bins, float *CSTable, float energy,
+__host__ __device__ f32 get_CS_from_table(f32 *E_bins, f32 *CSTable, f32 energy,
                                             unsigned int E_index, unsigned int mat_index,
                                             unsigned int nb_bins) {
 
@@ -38,16 +38,16 @@ __host__ __device__ float get_CS_from_table(float *E_bins, float *CSTable, float
 //////////////////////////////////////////////////////////////
 
 // Compton Cross Section Per Atom (Standard - Klein-Nishina)
-__host__ __device__ float Compton_CSPA_standard(float E, unsigned short int Z) {
-    float CrossSection = 0.0;
+__host__ __device__ f32 Compton_CSPA_standard(f32 E, unsigned short int Z) {
+    f32 CrossSection = 0.0;
     if (Z<1 || E < 1e-4f) {return CrossSection;}
 
-    float p1Z = Z*(2.7965e-23f + 1.9756e-27f*Z + -3.9178e-29f*Z*Z);
-    float p2Z = Z*(-1.8300e-23f + -1.0205e-24f*Z + 6.8241e-27f*Z*Z);
-    float p3Z = Z*(6.7527e-22f + -7.3913e-24f*Z + 6.0480e-27f*Z*Z);
-    float p4Z = Z*(-1.9798e-21f + 2.7079e-24f*Z + 3.0274e-26f*Z*Z);
-    float T0 = (Z < 1.5f)? 40.0e-3f : 15.0e-3f;
-    float d1, d2, d3, d4, d5;
+    f32 p1Z = Z*(2.7965e-23f + 1.9756e-27f*Z + -3.9178e-29f*Z*Z);
+    f32 p2Z = Z*(-1.8300e-23f + -1.0205e-24f*Z + 6.8241e-27f*Z*Z);
+    f32 p3Z = Z*(6.7527e-22f + -7.3913e-24f*Z + 6.0480e-27f*Z*Z);
+    f32 p4Z = Z*(-1.9798e-21f + 2.7079e-24f*Z + 3.0274e-26f*Z*Z);
+    f32 T0 = (Z < 1.5f)? 40.0e-3f : 15.0e-3f;
+    f32 d1, d2, d3, d4, d5;
 
     d1 = fmaxf(E, T0) / 0.510998910f; 
     CrossSection = p1Z*logf(1.0f+2.0f*d1)/d1+(p2Z+p3Z*d1+p4Z*d1*d1)/(1.0f+20.0f*d1+230.0f*d1*d1+440.0f*d1*d1*d1);
@@ -65,8 +65,8 @@ __host__ __device__ float Compton_CSPA_standard(float E, unsigned short int Z) {
 }
 
 // Compute the total Compton cross section for a given material
-__host__ __device__ float Compton_CS_standard(MaterialsTable materials, unsigned short int mat, float E) {
-    float CS = 0.0f;
+__host__ __device__ f32 Compton_CS_standard(MaterialsTable materials, unsigned short int mat, f32 E) {
+    f32 CS = 0.0f;
     int i;
     int index = materials.index[mat];
     // Model standard
@@ -79,22 +79,22 @@ __host__ __device__ float Compton_CS_standard(MaterialsTable materials, unsigned
 
 // Compton Scatter (Standard - Klein-Nishina) with secondary (e-)
 __host__ __device__ SecParticle Compton_SampleSecondaries_standard(ParticleStack particles,
-                                                                   float cutE,
+                                                                   f32 cutE,
                                                                    unsigned int id,
                                                                    GlobalSimulationParameters parameters) {
 
-    float gamE0 = particles.E[id];
-    float E0 = gamE0 / 0.510998910f;
+    f32 gamE0 = particles.E[id];
+    f32 E0 = gamE0 / 0.510998910f;
     float3 gamDir0 = make_float3(particles.dx[id], particles.dy[id], particles.dz[id]);
 
     // sample the energy rate pf the scattered gamma
 
-    float epszero = 1.0f / (1.0f + 2.0f * E0);
-    float eps02 = epszero*epszero;
-    float a1 = -logf(epszero);
-    float a2 = a1 / (a1 + 0.5f*(1.0f-eps02));
+    f32 epszero = 1.0f / (1.0f + 2.0f * E0);
+    f32 eps02 = epszero*epszero;
+    f32 a1 = -logf(epszero);
+    f32 a2 = a1 / (a1 + 0.5f*(1.0f-eps02));
 
-    float greject, onecost, eps, eps2, sint2, cosTheta, sinTheta, phi;
+    f32 greject, onecost, eps, eps2, sint2, cosTheta, sinTheta, phi;
     do {
         if (a2 > JKISS32(particles, id)) {
             eps = expf(-a1 * JKISS32(particles, id));
@@ -123,7 +123,7 @@ __host__ __device__ SecParticle Compton_SampleSecondaries_standard(ParticleStack
     particles.dx[id] = gamDir1.x;
     particles.dy[id] = gamDir1.y;
     particles.dz[id] = gamDir1.z;
-    float gamE1  = gamE0 * eps;
+    f32 gamE1  = gamE0 * eps;
     if (gamE1 > 1.0e-06f) {particles.E[id] = gamE1;}
     else {
         particles.endsimu[id] = PARTICLE_DEAD;  // absorbed this particle
@@ -154,18 +154,18 @@ __host__ __device__ SecParticle Compton_SampleSecondaries_standard(ParticleStack
 //////////////////////////////////////////////////////////////
 
 // PhotoElectric Cross Section Per Atom (Standard)
-__host__ __device__ float Photoelec_CSPA_standard(float E, unsigned short int Z) {
+__host__ __device__ f32 Photoelec_CSPA_standard(f32 E, unsigned short int Z) {
     // from Sandia data, the same for all Z
-    float Emin = fmax(PhotoElec_std_IonizationPotentials(Z)*1e-6f, 0.01e-3f);
+    f32 Emin = fmax(PhotoElec_std_IonizationPotentials(Z)*1e-6f, 0.01e-3f);
     if (E < Emin) {return 0.0f;}
     
     int start = PhotoElec_std_CumulIntervals(Z-1);
     int stop = start + PhotoElec_std_NbIntervals(Z);
     int pos=stop;
     while (E < PhotoElec_std_SandiaTable(pos, 0)*1.0e-3f){--pos;}
-    float AoverAvo = 0.0103642688246f * ( (float)Z / PhotoElec_std_ZtoAratio(Z) );
-    float rE = 1.0f / E;
-    float rE2 = rE*rE;
+    f32 AoverAvo = 0.0103642688246f * ( (f32)Z / PhotoElec_std_ZtoAratio(Z) );
+    f32 rE = 1.0f / E;
+    f32 rE2 = rE*rE;
 
     return rE * PhotoElec_std_SandiaTable(pos, 1) * AoverAvo * 0.160217648e-22f
         + rE2 * PhotoElec_std_SandiaTable(pos, 2) * AoverAvo * 0.160217648e-25f
@@ -174,9 +174,9 @@ __host__ __device__ float Photoelec_CSPA_standard(float E, unsigned short int Z)
 }
 
 // Compute the total Compton cross section for a given material
-__host__ __device__ float Photoelec_CS_standard(MaterialsTable materials,
-                                                unsigned short int mat, float E) {
-    float CS = 0.0f;
+__host__ __device__ f32 Photoelec_CS_standard(MaterialsTable materials,
+                                                unsigned short int mat, f32 E) {
+    f32 CS = 0.0f;
     int i;
     int index = materials.index[mat];
     // Model standard
@@ -189,16 +189,16 @@ __host__ __device__ float Photoelec_CS_standard(MaterialsTable materials,
 
 // Compute Theta distribution of the emitted electron, with respect to the incident Gamma
 // The Sauter-Gavrila distribution for the K-shell is used
-__host__ __device__ float Photoelec_ElecCosThetaDistribution(ParticleStack part,
+__host__ __device__ f32 Photoelec_ElecCosThetaDistribution(ParticleStack part,
                                                              unsigned int id,
-                                                             float kineEnergy) {
-    float costeta = 1.0f;
-    float gamma = kineEnergy * 1.9569513367f + 1.0f;  // 1/electron_mass_c2
+                                                             f32 kineEnergy) {
+    f32 costeta = 1.0f;
+    f32 gamma = kineEnergy * 1.9569513367f + 1.0f;  // 1/electron_mass_c2
     if (gamma > 5.0f) {return costeta;}
-    float beta = sqrtf(gamma*gamma - 1.0f) / gamma;
-    float b    = 0.5f*gamma*(gamma - 1.0f)*(gamma - 2.0f);
+    f32 beta = sqrtf(gamma*gamma - 1.0f) / gamma;
+    f32 b    = 0.5f*gamma*(gamma - 1.0f)*(gamma - 2.0f);
 
-    float rndm, term, greject, grejsup;
+    f32 rndm, term, greject, grejsup;
     if (gamma < 2.0f) {grejsup = gamma*gamma*(1.0f + b - beta*b);}
     else              {grejsup = gamma*gamma*(1.0f + b + beta*b);}
 
@@ -217,7 +217,7 @@ __host__ __device__ SecParticle Photoelec_SampleSecondaries_standard(ParticleSta
                                                                      MaterialsTable mat,
                                                                      PhotonCrossSectionTable photon_CS_table,
                                                                      unsigned int E_index,
-                                                                     float cutE,
+                                                                     f32 cutE,
                                                                      unsigned short int matindex,
                                                                      unsigned int id,
                                                                      GlobalSimulationParameters parameters) {
@@ -236,7 +236,7 @@ __host__ __device__ SecParticle Photoelec_SampleSecondaries_standard(ParticleSta
 
     //// Photo electron
 
-    float energy = particles.E[id];
+    f32 energy = particles.E[id];
     float3 PhotonDirection = make_float3(particles.dx[id], particles.dy[id], particles.dz[id]);
 
     // Select randomly one element that composed the material
@@ -245,11 +245,11 @@ __host__ __device__ SecParticle Photoelec_SampleSecondaries_standard(ParticleSta
     unsigned int Z = mat.mixture[mixture_index];
     unsigned int i = 0;
     if (n > 0) {                
-        float x = JKISS32(particles,id) * get_CS_from_table(photon_CS_table.E_bins,
+        f32 x = JKISS32(particles,id) * get_CS_from_table(photon_CS_table.E_bins,
                                                             photon_CS_table.Photoelectric_Std_CS,
                                                             particles.E[id], E_index, matindex,
                                                             photon_CS_table.nb_bins);
-        float xsec = 0.0f;
+        f32 xsec = 0.0f;
         while (i < n) {
             Z = mat.mixture[mixture_index+i];
             xsec += photon_CS_table.Photoelectric_Std_xCS[Z*photon_CS_table.nb_bins + E_index];
@@ -261,7 +261,7 @@ __host__ __device__ SecParticle Photoelec_SampleSecondaries_standard(ParticleSta
     // Select atomic shell
     unsigned short int nShells = atom_NumberOfShells(Z);
     mixture_index = atom_IndexOfShells(Z);
-    float bindingEnergy = atom_BindingEnergies(mixture_index) * eV; //1.0e-06f; // in eV
+    f32 bindingEnergy = atom_BindingEnergies(mixture_index) * eV; //1.0e-06f; // in eV
     i=0; while (i < nShells && energy < bindingEnergy) {       
         bindingEnergy = atom_BindingEnergies(mixture_index + i)* eV; //1.0e-06f; // in ev
         ++i;
@@ -269,15 +269,15 @@ __host__ __device__ SecParticle Photoelec_SampleSecondaries_standard(ParticleSta
         
     // no shell available return stillborn electron
     if (i == nShells) {return electron;}
-    float ElecKineEnergy = energy - bindingEnergy;
+    f32 ElecKineEnergy = energy - bindingEnergy;
 
-    float cosTeta = 0.0f;
+    f32 cosTeta = 0.0f;
     //                   1 eV                         cut production
     if (ElecKineEnergy > 1.0e-06f && ElecKineEnergy > cutE) {
         // direction of the photo electron
         cosTeta = Photoelec_ElecCosThetaDistribution(particles, id, ElecKineEnergy);
-        float sinTeta = sqrtf(1.0f - cosTeta*cosTeta);
-        float Phi = gpu_twopi * JKISS32(particles, id);
+        f32 sinTeta = sqrtf(1.0f - cosTeta*cosTeta);
+        f32 Phi = gpu_twopi * JKISS32(particles, id);
         float3 ElecDirection = make_float3(sinTeta*cos(Phi), sinTeta*sin(Phi), cosTeta);
         ElecDirection = rotateUz(ElecDirection, PhotonDirection);
         // Configure the new electron
@@ -681,39 +681,39 @@ __host__ __device__ unsigned short int Rayleigh_LV_SF_NbIntervals(unsigned int p
 
 
 // Load CS information from G4 Em data
-float* Rayleigh_CS_Livermore_load_data() {
+f32* Rayleigh_CS_Livermore_load_data() {
     const int ncs = 213816;  // CS file contains 213,816 floats
-    unsigned int mem_cs = ncs * sizeof(float);
-    float* raylcs = (float*)malloc(mem_cs);
+    unsigned int mem_cs = ncs * sizeof(f32);
+    f32* raylcs = (f32*)malloc(mem_cs);
 
     std::string filename = std::string(getenv("GGEMSHOME"));
     filename += "/data/rayleigh_cs.bin";
 
     FILE * pfile = fopen(filename.c_str(), "rb");
-    fread(raylcs, sizeof(float), ncs, pfile);
+    fread(raylcs, sizeof(f32), ncs, pfile);
     fclose(pfile);
 
     return raylcs;
 }
 
 // Load SF information from G4 Em data
-float* Rayleigh_SF_Livermore_load_data() {
+f32* Rayleigh_SF_Livermore_load_data() {
     const int nsf = 28824;   // SF file contains  28,824 floats
-    unsigned int mem_sf = nsf * sizeof(float);
-    float* raylsf = (float*)malloc(mem_sf);
+    unsigned int mem_sf = nsf * sizeof(f32);
+    f32* raylsf = (f32*)malloc(mem_sf);
 
     std::string filename = std::string(getenv("GGEMSHOME"));
     filename += "/data/rayleigh_sf.bin";
 
     FILE * pfile = fopen(filename.c_str(), "rb");
-    fread(raylsf, sizeof(float), nsf, pfile);
+    fread(raylsf, sizeof(f32), nsf, pfile);
     fclose(pfile);
 
     return raylsf;
 }
 
 // Rayleigh Cross Section Per Atom (Livermore)
-__host__ __device__ float Rayleigh_CSPA_Livermore(float* rayl_cs, float E, unsigned short int Z) {
+__host__ __device__ f32 Rayleigh_CSPA_Livermore(f32* rayl_cs, f32 E, unsigned short int Z) {
     if (E < 250e-6f || E > 100e3f) {return 0.0f;} // 250 eV < E < 100 GeV
 
     int start = Rayleigh_LV_CS_CumulIntervals(Z);
@@ -732,9 +732,9 @@ __host__ __device__ float Rayleigh_CSPA_Livermore(float* rayl_cs, float E, unsig
 }
 
 // Compute the total Compton cross section for a given material
-__host__ __device__ float Rayleigh_CS_Livermore(MaterialsTable materials,
-                                                float* rayl_cs, unsigned short int mat, float E) {
-    float CS = 0.0f;
+__host__ __device__ f32 Rayleigh_CS_Livermore(MaterialsTable materials,
+                                                f32* rayl_cs, unsigned short int mat, f32 E) {
+    f32 CS = 0.0f;
     int i;
     int index = materials.index[mat];
     // Model Livermore
@@ -747,7 +747,7 @@ __host__ __device__ float Rayleigh_CS_Livermore(MaterialsTable materials,
 
 
 // Rayleigh Scatter Factor (Livermore)
-__host__ __device__ float Rayleigh_SF_Livermore(float* rayl_sf, float E, int Z) {
+__host__ __device__ f32 Rayleigh_SF_Livermore(f32* rayl_sf, f32 E, int Z) {
     int start = Rayleigh_LV_SF_CumulIntervals(Z);
     int stop = start + 2 * (Rayleigh_LV_SF_NbIntervals(Z) - 1);
 
@@ -791,12 +791,12 @@ __host__ __device__ void Rayleigh_SampleSecondaries_Livermore(ParticleStack part
     unsigned int Z = mat.mixture[mixture_index];
     unsigned int i = 0;
     if (n > 0) {
-        float x = JKISS32(particles,id) * linear_interpolation(photon_CS_table.E_bins[E_index-1],
+        f32 x = JKISS32(particles,id) * linear_interpolation(photon_CS_table.E_bins[E_index-1],
                                                                photon_CS_table.Rayleigh_Lv_CS[E_index-1],
                                                                photon_CS_table.E_bins[E_index],
                                                                photon_CS_table.Rayleigh_Lv_CS[E_index],
                                                                particles.E[id]);
-        float xsec = 0.0f;
+        f32 xsec = 0.0f;
         while (i < n) {
             Z = mat.mixture[mixture_index+i];
             xsec += photon_CS_table.Rayleigh_Lv_xCS[Z*photon_CS_table.nb_bins + E_index];
@@ -806,8 +806,8 @@ __host__ __device__ void Rayleigh_SampleSecondaries_Livermore(ParticleStack part
     }
 
     // Scattering
-    float wphot = 1.23984187539e-10f / particles.E[id];
-    float costheta, SF, x, sintheta, phi;
+    f32 wphot = 1.23984187539e-10f / particles.E[id];
+    f32 costheta, SF, x, sintheta, phi;
     do {
         do {costheta = 2.0f * JKISS32(particles, id) - 1.0f;
         } while ((1.0f + costheta*costheta)*0.5f < JKISS32(particles, id));

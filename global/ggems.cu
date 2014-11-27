@@ -69,22 +69,22 @@ void SimulationBuilder::cpu_primaries_generator() {
 
         // Point Source
         if (type == POINT_SOURCE) {
-            float px = sources.sources.data_sources[adr+ADR_POINT_SRC_PX];
-            float py = sources.sources.data_sources[adr+ADR_POINT_SRC_PY];
-            float pz = sources.sources.data_sources[adr+ADR_POINT_SRC_PZ];
-            float energy = sources.sources.data_sources[adr+ADR_POINT_SRC_ENERGY];
+            f32 px = sources.sources.data_sources[adr+ADR_POINT_SRC_PX];
+            f32 py = sources.sources.data_sources[adr+ADR_POINT_SRC_PY];
+            f32 pz = sources.sources.data_sources[adr+ADR_POINT_SRC_PZ];
+            f32 energy = sources.sources.data_sources[adr+ADR_POINT_SRC_ENERGY];
 
             point_source_primary_generator(particles.stack, id, px, py, pz, energy, PHOTON, geom_id);
 
         } else if (type == CONE_BEAM_SOURCE) {
-            float px = sources.sources.data_sources[adr+ADR_CONE_BEAM_SRC_PX];
-            float py = sources.sources.data_sources[adr+ADR_CONE_BEAM_SRC_PY];
-            float pz = sources.sources.data_sources[adr+ADR_CONE_BEAM_SRC_PZ];
-            float phi = sources.sources.data_sources[adr+ADR_CONE_BEAM_SRC_PHI];
-            float theta = sources.sources.data_sources[adr+ADR_CONE_BEAM_SRC_THETA];
-            float psi = sources.sources.data_sources[adr+ADR_CONE_BEAM_SRC_PSI];
-            float aperture = sources.sources.data_sources[adr+ADR_CONE_BEAM_SRC_APERTURE];
-            float energy = sources.sources.data_sources[adr+ADR_CONE_BEAM_SRC_ENERGY];
+            f32 px = sources.sources.data_sources[adr+ADR_CONE_BEAM_SRC_PX];
+            f32 py = sources.sources.data_sources[adr+ADR_CONE_BEAM_SRC_PY];
+            f32 pz = sources.sources.data_sources[adr+ADR_CONE_BEAM_SRC_PZ];
+            f32 phi = sources.sources.data_sources[adr+ADR_CONE_BEAM_SRC_PHI];
+            f32 theta = sources.sources.data_sources[adr+ADR_CONE_BEAM_SRC_THETA];
+            f32 psi = sources.sources.data_sources[adr+ADR_CONE_BEAM_SRC_PSI];
+            f32 aperture = sources.sources.data_sources[adr+ADR_CONE_BEAM_SRC_APERTURE];
+            f32 energy = sources.sources.data_sources[adr+ADR_CONE_BEAM_SRC_ENERGY];
 
             cone_beam_source_primary_generator(particles.stack, id, px, py, pz,
                                                phi, theta, psi, aperture, energy, PHOTON, geom_id);
@@ -181,8 +181,8 @@ void SimulationBuilder::set_process(std::string process_name) {
 
 // Set parameters to generate cross sections table
 void SimulationBuilder::set_CS_table_nbins(unsigned int valbin) {parameters.cs_table_nbins = valbin;}
-void SimulationBuilder::set_CS_table_E_min(float valE) {parameters.cs_table_min_E = valE;}
-void SimulationBuilder::set_CS_table_E_max(float valE) {parameters.cs_table_max_E = valE;}
+void SimulationBuilder::set_CS_table_E_min(f32 valE) {parameters.cs_table_min_E = valE;}
+void SimulationBuilder::set_CS_table_E_max(f32 valE) {parameters.cs_table_max_E = valE;}
 
 // Enable the simulation of a particular secondary particle
 void SimulationBuilder::set_secondary(std::string pname) {
@@ -283,12 +283,12 @@ void SimulationBuilder::init_simulation() {
         unsigned int adr_geom = geometry.world.ptr_objects[detector.panel_detector.geometry_id];
 
         // Read first the bounding box
-        float xmin = geometry.world.data_objects[adr_geom+ADR_AABB_XMIN];
-        float xmax = geometry.world.data_objects[adr_geom+ADR_AABB_XMAX];
-        float ymin = geometry.world.data_objects[adr_geom+ADR_AABB_YMIN];
-        float ymax = geometry.world.data_objects[adr_geom+ADR_AABB_YMAX];
-        float zmin = geometry.world.data_objects[adr_geom+ADR_AABB_ZMIN];
-        float zmax = geometry.world.data_objects[adr_geom+ADR_AABB_ZMAX];
+        f32 xmin = geometry.world.data_objects[adr_geom+ADR_AABB_XMIN];
+        f32 xmax = geometry.world.data_objects[adr_geom+ADR_AABB_XMAX];
+        f32 ymin = geometry.world.data_objects[adr_geom+ADR_AABB_YMIN];
+        f32 ymax = geometry.world.data_objects[adr_geom+ADR_AABB_YMAX];
+        f32 zmin = geometry.world.data_objects[adr_geom+ADR_AABB_ZMIN];
+        f32 zmax = geometry.world.data_objects[adr_geom+ADR_AABB_ZMAX];
 
         // Init and allocate the image of the flat panel detector
         detector.init(xmin, xmax, ymin, ymax, zmin, zmax);

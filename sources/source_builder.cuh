@@ -18,8 +18,7 @@
 #ifndef SOURCE_BUILDER_CUH
 #define SOURCE_BUILDER_CUH
 
-#include <vector>
-#include <string>
+#include "global.cuh"
 #include "point_source.cuh"
 #include "cone_beam_source.cuh"
 
@@ -49,7 +48,7 @@ struct Sources {
     // Source structure
     unsigned int *ptr_sources;      // Address to access to the different sources
     //unsigned int *size_of_sources;  // Size of each source FIXME not need?
-    float *data_sources;            // Parameters of each source
+    f32 *data_sources;            // Parameters of each source
     unsigned int *seeds;            // List of seeds
     unsigned int nb_sources;
 

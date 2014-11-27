@@ -18,9 +18,6 @@
 #ifndef BASE_OBJECT_CUH
 #define BASE_OBJECT_CUH
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string>
 #include "global.cuh"
 
 // Class that define the base of every object in GGEMS
@@ -30,15 +27,15 @@ class BaseObject {
 
         void set_material(std::string mat_name);
         void set_name(std::string obj_name);
-        void set_color(float r, float g, float b);
-        void set_transparency(float val);
+        void set_color(f32 r, f32 g, f32 b);
+        void set_transparency(f32 val);
         void set_wireframe(bool val);
 
         // Bounding box
-        float xmin, xmax, ymin, ymax, zmin, zmax;
+        f32 xmin, xmax, ymin, ymax, zmin, zmax;
         // Viewing
         Color color;
-        float transparency;
+        f32 transparency;
         bool wireframe;
         // Property
         std::string material_name;

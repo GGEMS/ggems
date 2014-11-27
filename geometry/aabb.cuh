@@ -18,9 +18,6 @@
 #ifndef AABB_H
 #define AABB_H
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string>
 #include "global.cuh"
 #include "base_object.cuh"
 
@@ -28,21 +25,21 @@
 class Aabb : public BaseObject {
     public:
         Aabb();
-        Aabb(float ox, float oy, float oz,
-             float halflx, float halfly, float halflz,
+        Aabb(f32 ox, f32 oy, f32 oz,
+             f32 halflx, f32 halfly, f32 halflz,
              std::string mat_name, std::string obj_name);
 
-        //void set_xlength(float);
-        //void set_ylength(float);
-        //void set_zlength(float);
-        //void set_length(float x, float y, float z);
-        //void set_position(float x, float y, float z);
+        //void set_xlength(f32);
+        //void set_ylength(f32);
+        //void set_zlength(f32);
+        //void set_length(f32 x, f32 y, f32 z);
+        //void set_position(f32 x, f32 y, f32 z);
         //void set_length(float3);
 
         //void scale(float3 s);
-        //void scale(float sx, float sy, float sz);
+        //void scale(f32 sx, f32 sy, f32 sz);
         //void translate(float3 t);
-        //void translate(float tx, float ty, float tz);
+        //void translate(f32 tx, f32 ty, f32 tz);
 
     private:
 };

@@ -18,15 +18,6 @@
 #ifndef MATERIALS_H
 #define MATERIALS_H
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <vector>
-#include <sstream>
-#include <fstream>
-#include <string>
-#include <map>
-#include <algorithm>
-#include <cfloat>
 
 #include "G4Material.hh"
 //#include "G4EmCalculator.hh"
@@ -37,15 +28,16 @@
 
 #include "geometry_builder.cuh"
 #include "constants.cuh"
+#include "global.cuh"
 
 // To handle one material
 class Material {
     public:
         Material();
         std::vector<std::string> mixture_Z;
-        std::vector<float> mixture_f;
+        std::vector<f32> mixture_f;
         std::string name;
-        float density;
+        f32 density;
         unsigned short int nb_elements;
 };
 
@@ -58,7 +50,7 @@ class MaterialDataBase {
 
         std::map<std::string, Material> materials;
         std::map<std::string, unsigned short int>  elements_Z;
-        std::map<std::string, float> elements_A;
+        std::map<std::string, f32> elements_A;
 
     private:
         void skip_comment(std::istream &);
@@ -66,13 +58,13 @@ class MaterialDataBase {
 
         std::string read_element_name(std::string);
         int read_element_Z(std::string);
-        float read_element_A(std::string);
+        f32 read_element_A(std::string);
 
         std::string read_material_name(std::string);
-        float read_material_density(std::string);
+        f32 read_material_density(std::string);
         unsigned short int read_material_nb_elements(std::string);
         std::string read_material_element(std::string);
-        float read_material_fraction(std::string);
+        f32 read_material_fraction(std::string);
 };
 
 // Table containing every definition of the materials used in the world
@@ -84,32 +76,32 @@ struct MaterialsTable {
     unsigned short int *index;              // n
 
     unsigned short int *mixture;            // k
-    float *atom_num_dens;                   // k
+    f32 *atom_num_dens;                   // k
 
-    float *nb_atoms_per_vol;                // n
-    float *nb_electrons_per_vol;            // n
-    float *electron_mean_excitation_energy; // n
-    float *rad_length;                      // n
+    f32 *nb_atoms_per_vol;                // n
+    f32 *nb_electrons_per_vol;            // n
+    f32 *electron_mean_excitation_energy; // n
+    f32 *rad_length;                      // n
 
     //parameters of the density correction
-    float *fX0;                             // n
-    float *fX1;
-    float *fD0;
-    float *fC;
-    float *fA;
-    float *fM;
+    f32 *fX0;                             // n
+    f32 *fX1;
+    f32 *fD0;
+    f32 *fC;
+    f32 *fA;
+    f32 *fM;
 
   // parameters of the energy loss fluctuation model:
-    float *fF1;
-    float *fF2;
-    float *fEnergy0;
-    float *fEnergy1;
-    float *fEnergy2;
-    float *fLogEnergy1;
-    float *fLogEnergy2;
-    float *fLogMeanExcitationEnergy;
+    f32 *fF1;
+    f32 *fF2;
+    f32 *fEnergy0;
+    f32 *fEnergy1;
+    f32 *fEnergy2;
+    f32 *fLogEnergy1;
+    f32 *fLogEnergy2;
+    f32 *fLogMeanExcitationEnergy;
 
-    float *density;
+    f32 *density;
 };
 
 // This class is used to build the material table

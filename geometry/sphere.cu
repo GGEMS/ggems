@@ -22,7 +22,7 @@
 
 Sphere::Sphere() {}
 
-Sphere::Sphere(float ox, float oy, float oz, float rad,
+Sphere::Sphere(f32 ox, f32 oy, f32 oz, f32 rad,
                std::string mat_name, std::string obj_name) {
 
     // Sphere parameters

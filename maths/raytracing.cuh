@@ -19,55 +19,53 @@
 #define RAYTRACING_H
 
 #include "vector.cuh"
-#include <cfloat>
-#include <stdlib.h>
-#include <stdio.h>
+#include "global.cuh"
 #include "constants.cuh"
 
 
 // Overlap test return (short int):
 //       -1 No interection         +1 Intersection
 
-// Hit collision return (float):
+// Hit collision return (f32):
 //        t >= 0 Distance of collision (if no collision t = FLT_MAX)
 
 
 // AABB/Triangle test - Akenine-Moller algorithm
-__host__ __device__ short int overlap_AABB_triangle(float xmin, float xmax,        // AABB
-                                                    float ymin, float ymax,
-                                                    float zmin, float zmax,
+__host__ __device__ short int overlap_AABB_triangle(f32 xmin, f32 xmax,        // AABB
+                                                    f32 ymin, f32 ymax,
+                                                    f32 zmin, f32 zmax,
                                                     float3 u, float3 v, float3 w); // Triangle
 // Ray/Sphere intersection
-__host__ __device__ float hit_ray_sphere(float3 ray_p, float3 ray_d,           // Ray
-                                         float3 sphere_c, float sphere_rad);  // Sphere
+__host__ __device__ f32 hit_ray_sphere(float3 ray_p, float3 ray_d,           // Ray
+                                         float3 sphere_c, f32 sphere_rad);  // Sphere
 
 
 // Ray/AABB intersection - Smits algorithm
-__host__ __device__ float hit_ray_AABB(float3 ray_p, float3 ray_d,
-                                       float aabb_xmin, float aabb_xmax,
-                                       float aabb_ymin, float aabb_ymax,
-                                       float aabb_zmin, float aabb_zmax);
+__host__ __device__ f32 hit_ray_AABB(float3 ray_p, float3 ray_d,
+                                       f32 aabb_xmin, f32 aabb_xmax,
+                                       f32 aabb_ymin, f32 aabb_ymax,
+                                       f32 aabb_zmin, f32 aabb_zmax);
 
 // Ray/AABB test - Smits algorithm
 __host__ __device__ bool test_ray_AABB(float3 ray_p, float3 ray_d,
-                                       float aabb_xmin, float aabb_xmax,
-                                       float aabb_ymin, float aabb_ymax,
-                                       float aabb_zmin, float aabb_zmax);
+                                       f32 aabb_xmin, f32 aabb_xmax,
+                                       f32 aabb_ymin, f32 aabb_ymax,
+                                       f32 aabb_zmin, f32 aabb_zmax);
 
 // AABB/AABB test
-__host__ __device__ bool test_AABB_AABB(float a_xmin, float a_xmax, float a_ymin, float a_ymax,
-                                        float a_zmin, float a_zmax,
-                                        float b_xmin, float b_xmax, float b_ymin, float b_ymax,
-                                        float b_zmin, float b_zmax);
+__host__ __device__ bool test_AABB_AABB(f32 a_xmin, f32 a_xmax, f32 a_ymin, f32 a_ymax,
+                                        f32 a_zmin, f32 a_zmax,
+                                        f32 b_xmin, f32 b_xmax, f32 b_ymin, f32 b_ymax,
+                                        f32 b_zmin, f32 b_zmax);
 
 // Point/AABB test
 __host__ __device__ bool test_point_AABB(float3 p,
-                                         float aabb_xmin, float aabb_xmax,
-                                         float aabb_ymin, float aabb_ymax,
-                                         float aabb_zmin, float aabb_zmax);
+                                         f32 aabb_xmin, f32 aabb_xmax,
+                                         f32 aabb_ymin, f32 aabb_ymax,
+                                         f32 aabb_zmin, f32 aabb_zmax);
 
 // Ray/triangle intersection - Moller-Trumbore algorithm
-__host__ __device__ float hit_ray_triangle(float3 ray_p, float3 ray_d,
+__host__ __device__ f32 hit_ray_triangle(float3 ray_p, float3 ray_d,
                                            float3 tri_u,              // Triangle
                                            float3 tri_v,
                                            float3 tri_w);

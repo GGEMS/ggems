@@ -22,21 +22,21 @@
 
 // External function
 __host__ __device__ void cone_beam_source_primary_generator(ParticleStack particles, unsigned int id,
-                                                            float px, float py, float pz,
-                                                            float rphi, float rtheta, float rpsi,
-                                                            float aperture, float energy,
+                                                            f32 px, f32 py, f32 pz,
+                                                            f32 rphi, f32 rtheta, f32 rpsi,
+                                                            f32 aperture, f32 energy,
                                                             unsigned char pname, unsigned int geom_id) {
 
     // Get direction
-    float phi = JKISS32(particles, id);
-    float theta = JKISS32(particles, id);
-    float val_aper = 1.0f - cosf(aperture);
+    f32 phi = JKISS32(particles, id);
+    f32 theta = JKISS32(particles, id);
+    f32 val_aper = 1.0f - cosf(aperture);
     phi  *= gpu_twopi;
     theta = acosf(1.0f - val_aper*theta);
 
-    float dx = cosf(phi)*sinf(theta);
-    float dy = sinf(phi)*sinf(theta);
-    float dz = cosf(theta);
+    f32 dx = cosf(phi)*sinf(theta);
+    f32 dy = sinf(phi)*sinf(theta);
+    f32 dz = cosf(theta);
 
     // Apply rotation
     float3 d = f3_rotate(make_float3(dx, dy, dz), make_float3(rphi, rtheta, rpsi));
@@ -72,19 +72,19 @@ ConeBeamSource::ConeBeamSource() {
 
 // Setting function
 
-void ConeBeamSource::set_position(float vpx, float vpy, float vpz) {
+void ConeBeamSource::set_position(f32 vpx, f32 vpy, f32 vpz) {
     px=vpx; py=vpy; pz=vpz;
 }
 
-void ConeBeamSource::set_rotation(float vphi, float vtheta, float vpsi) {
+void ConeBeamSource::set_rotation(f32 vphi, f32 vtheta, f32 vpsi) {
     phi=vphi; theta=vtheta; psi=vpsi;
 }
 
-void ConeBeamSource::set_aperture(float vaperture) {
+void ConeBeamSource::set_aperture(f32 vaperture) {
     aperture=vaperture;
 }
 
-void ConeBeamSource::set_energy(float venergy) {
+void ConeBeamSource::set_energy(f32 venergy) {
     energy=venergy;
 }
 

@@ -22,6 +22,14 @@
 #include <stdio.h>
 #include <string.h>
 #include <string>
+#include <sstream>
+#include <fstream>
+#include <map>
+#include <algorithm>
+#include <cfloat>
+#include <assert.h>
+#include <math.h>
+
 #include "constants.cuh"
 #include "vector.cuh"
 
@@ -110,10 +118,10 @@ void exit_simulation();
 
 // Operation on C-Array
 void array_push_back(unsigned int **vector, unsigned int &dim, unsigned int val);
-void array_push_back(float **vector, unsigned int &dim, float val);
+void array_push_back(f32 **vector, unsigned int &dim, f32 val);
 void array_insert(unsigned int **vector, unsigned int &dim, unsigned int pos, unsigned int val);
-void array_insert(float **vector, unsigned int &dim, unsigned int pos, float val);
-void array_append_array(float **vector, unsigned int &dim, float **an_array, unsigned int a_dim);
+void array_insert(f32 **vector, unsigned int &dim, unsigned int pos, f32 val);
+void array_append_array(f32 **vector, unsigned int &dim, f32 **an_array, unsigned int a_dim);
 
 // Global simulation parameters
 struct GlobalSimulationParameters {
@@ -124,20 +132,20 @@ struct GlobalSimulationParameters {
     unsigned int nb_of_particles;
     unsigned int nb_iterations;
 
-    float time;
+    f32 time;
     unsigned int seed;
 
     // To build cross sections table
     unsigned int cs_table_nbins;
-    float cs_table_min_E;
-    float cs_table_max_E;
+    f32 cs_table_min_E;
+    f32 cs_table_max_E;
 
 };
 
 // Struct that handle colors
 struct Color {
-    float r, g, b;
+    f32 r, g, b;
 };
-Color make_color(float r, float g, float b);
+Color make_color(f32 r, f32 g, f32 b);
 
 #endif
