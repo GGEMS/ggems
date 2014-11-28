@@ -98,12 +98,12 @@ struct Scene {
 
 // Host/Device function that handle geometry
 
-__host__ __device__ ui32 get_geometry_material(Scene geometry, ui32 id_geom, f32xyz pos);
-__host__ __device__ f32 get_distance_to_object(Scene geometry, ui32 adr_geom, ui32 obj_type,
-                                               f32xyz pos, f32xyz dir);
+__host__ __device__ ui32 get_geometry_material(Scene geometry, ui32 id_geom, f64xyz pos);
+__host__ __device__ f64 get_distance_to_object(Scene geometry, ui32 adr_geom, ui32 obj_type,
+                                               f64xyz pos, f64xyz dir);
 __host__ __device__ void get_next_geometry_boundary(Scene geometry, ui32 cur_geom,
-                                                    f32xyz pos, f32xyz dir,
-                                                    f32 &interaction_distance,
+                                                    f64xyz pos, f64xyz dir,
+                                                    f64 &interaction_distance,
                                                     ui32 &geometry_volume);
 
 // This class is used to build the geometry

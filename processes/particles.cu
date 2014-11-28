@@ -90,14 +90,14 @@ void ParticleBuilder::cpu_malloc_stack() {
         exit_simulation();
     }
 
-    stack.E = (f32*)malloc(stack.size * sizeof(f32));
-    stack.dx = (f32*)malloc(stack.size * sizeof(f32));
-    stack.dy = (f32*)malloc(stack.size * sizeof(f32));
-    stack.dz = (f32*)malloc(stack.size * sizeof(f32));
-    stack.px = (f32*)malloc(stack.size * sizeof(f32));
-    stack.py = (f32*)malloc(stack.size * sizeof(f32));
-    stack.pz = (f32*)malloc(stack.size * sizeof(f32));
-    stack.tof = (f32*)malloc(stack.size * sizeof(f32));
+    stack.E = (f64*)malloc(stack.size * sizeof(f64));
+    stack.dx = (f64*)malloc(stack.size * sizeof(f64));
+    stack.dy = (f64*)malloc(stack.size * sizeof(f64));
+    stack.dz = (f64*)malloc(stack.size * sizeof(f64));
+    stack.px = (f64*)malloc(stack.size * sizeof(f64));
+    stack.py = (f64*)malloc(stack.size * sizeof(f64));
+    stack.pz = (f64*)malloc(stack.size * sizeof(f64));
+    stack.tof = (f64*)malloc(stack.size * sizeof(f64));
 
     stack.prng_state_1 = (ui32*)malloc(stack.size * sizeof(ui32));
     stack.prng_state_2 = (ui32*)malloc(stack.size * sizeof(ui32));

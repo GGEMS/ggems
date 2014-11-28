@@ -436,7 +436,7 @@ void Meshed::scale(f32xyz s) {
         // Create a f32xyz for the current vertex
         f32xyz vertex = make_f32xyz(vertices[iv], vertices[iv+1], vertices[iv+2]);
         // Scale the vertex
-        vertex = f3_mul(vertex, s);
+        vertex = fxyz_mul(vertex, s);
         // Put back the value into the vertex list
         vertices[iv] = vertex.x; vertices[iv+1] = vertex.y; vertices[iv+2] = vertex.z;
 
@@ -466,9 +466,9 @@ void Meshed::rotate(f32xyz r) {
     f32 cps = cos(psi);
 
     // Build rotation matrix
-    matrix3 rot = { cph*cps-sph*cth*sps,  cph*sps+sph*cth*cps,  sth*sph,
-                   -sph*cps-cph*cth*sps, -sph*sps+cph*cth*cps,  sth*cph,
-                    sth*sps,             -sth*cps,                  cth};
+    f32matrix33 rot = { cph*cps-sph*cth*sps,  cph*sps+sph*cth*cps,  sth*sph,
+                       -sph*cps-cph*cth*sps, -sph*sps+cph*cth*cps,  sth*cph,
+                        sth*sps,             -sth*cps,                  cth};
 
     // Rotate every vertex from the mesh
     ui32 i=0;
@@ -478,7 +478,7 @@ void Meshed::rotate(f32xyz r) {
         // Create a f32xyz for the current vertex
         f32xyz vertex = make_f32xyz(vertices[iv], vertices[iv+1], vertices[iv+2]);
         // Rotate the vertex
-        vertex = m3f3_mul(rot, vertex);
+        vertex = fmatrixfxyz_mul(rot, vertex);
         // Put back the value into the vertex list
         vertices[iv] = vertex.x; vertices[iv+1] = vertex.y; vertices[iv+2] = vertex.z;
 
@@ -504,7 +504,7 @@ void Meshed::translate(f32xyz t) {
         // Create a f32xyz for the current vertex
         f32xyz vertex = make_f32xyz(vertices[iv], vertices[iv+1], vertices[iv+2]);
         // Translate the vertex
-        vertex = f3_add(vertex, t);
+        vertex = fxyz_add(vertex, t);
         // Put back the value into the vertex list
         vertices[iv] = vertex.x; vertices[iv+1] = vertex.y; vertices[iv+2] = vertex.z;
 

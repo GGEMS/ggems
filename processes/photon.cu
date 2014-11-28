@@ -140,8 +140,8 @@ __host__ __device__ SecParticle Compton_SampleSecondaries_standard(ParticleStack
 
     //          DBL_MIN             cut production
     if (electron.E > 1.0e-38f && electron.E > cutE && parameters.secondaries_list[ELECTRON]) {
-        electron.dir = f3_sub(f3_scale(gamDir0, gamE0), f3_scale(gamDir1, gamE1));
-        electron.dir = f3_unit(electron.dir);
+        electron.dir = fxyz_sub(fxyz_scale(gamDir0, gamE0), fxyz_scale(gamDir1, gamE1));
+        electron.dir = fxyz_unit(electron.dir);
         electron.endsimu = PARTICLE_ALIVE;
     }
 

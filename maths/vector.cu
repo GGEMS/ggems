@@ -21,43 +21,73 @@
 #include "vector.cuh"
 
 // r = u - v
-__host__ __device__ f32xyz f3_sub(f32xyz u, f32xyz v) {
+__host__ __device__ f32xyz fxyz_sub(f32xyz u, f32xyz v) {
     f32xyz r={u.x-v.x, u.y-v.y, u.z-v.z};
+    return r;
+}
+__host__ __device__ f64xyz fxyz_sub(f64xyz u, f64xyz v) {
+    f64xyz r={u.x-v.x, u.y-v.y, u.z-v.z};
     return r;
 }
 
 // r = u + v
-__host__ __device__ f32xyz f3_add(f32xyz u, f32xyz v) {
+__host__ __device__ f32xyz fxyz_add(f32xyz u, f32xyz v) {
     f32xyz r={u.x+v.x, u.y+v.y, u.z+v.z};
+    return r;
+}
+__host__ __device__ f64xyz fxyz_add(f64xyz u, f64xyz v) {
+    f64xyz r={u.x+v.x, u.y+v.y, u.z+v.z};
     return r;
 }
 
 // r = u * v
-__host__ __device__ f32xyz f3_mul(f32xyz u, f32xyz v) {
+__host__ __device__ f32xyz fxyz_mul(f32xyz u, f32xyz v) {
     f32xyz r={u.x*v.x, u.y*v.y, u.z*v.z};
+    return r;
+}
+__host__ __device__ f64xyz fxyz_mul(f64xyz u, f64xyz v) {
+    f64xyz r={u.x*v.x, u.y*v.y, u.z*v.z};
     return r;
 }
 
 // r = u / v
-__host__ __device__ f32xyz f3_div(f32xyz u, f32xyz v) {
+__host__ __device__ f32xyz fxyz_div(f32xyz u, f32xyz v) {
     f32xyz r={u.x/v.x, u.y/v.y, u.z/v.z};
+    return r;
+}
+__host__ __device__ f64xyz fxyz_div(f64xyz u, f64xyz v) {
+    f64xyz r={u.x/v.x, u.y/v.y, u.z/v.z};
     return r;
 }
 
 // r = u * s
-__host__ __device__ f32xyz f3_scale(f32xyz u, f32 s) {
+__host__ __device__ f32xyz fxyz_scale(f32xyz u, f32 s) {
     f32xyz r={u.x*s, u.y*s, u.z*s};
+    return r;
+}
+__host__ __device__ f64xyz fxyz_scale(f64xyz u, f64 s) {
+    f64xyz r={u.x*s, u.y*s, u.z*s};
     return r;
 }
 
 // r = u . v
-__host__ __device__ f32 f3_dot(f32xyz u, f32xyz v) {
+__host__ __device__ f32 fxyz_dot(f32xyz u, f32xyz v) {
+    return u.x*v.x + u.y*v.y + u.z*v.z;
+}
+__host__ __device__ f64 fxyz_dot(f64xyz u, f64xyz v) {
     return u.x*v.x + u.y*v.y + u.z*v.z;
 }
 
 // r = u x v
-__host__ __device__ f32xyz f3_cross(f32xyz u, f32xyz v) {
+__host__ __device__ f32xyz fxyz_cross(f32xyz u, f32xyz v) {
     f32xyz r;
+    r.x = u.y*v.z - u.z*v.y;
+    r.y = u.z*v.x - u.x*v.z;
+    r.z = u.x*v.y - u.y*v.x;
+    return r;
+}
+__host__ __device__ f64xyz fxyz_cross(f64xyz u, f64xyz v) {
+    f64xyz r;
     r.x = u.y*v.z - u.z*v.y;
     r.y = u.z*v.x - u.x*v.z;
     r.z = u.x*v.y - u.y*v.x;
@@ -65,21 +95,31 @@ __host__ __device__ f32xyz f3_cross(f32xyz u, f32xyz v) {
 }
 
 // r = m * u
-__host__ __device__ f32xyz m3f3_mul(matrix3 m, f32xyz u) {
+__host__ __device__ f32xyz fmatrixfxyz_mul(f32matrix33 m, f32xyz u) {
     f32xyz r = {m.a*u.x + m.b*u.y + m.c*u.z,
+                m.d*u.x + m.e*u.y + m.f*u.z,
+                m.g*u.x + m.h*u.y + m.i*u.z};
+    return r;
+}
+__host__ __device__ f64xyz fmatrixfxyz_mul(f64matrix33 m, f64xyz u) {
+    f64xyz r = {m.a*u.x + m.b*u.y + m.c*u.z,
                 m.d*u.x + m.e*u.y + m.f*u.z,
                 m.g*u.x + m.h*u.y + m.i*u.z};
     return r;
 }
 
 // return an unitary vector
-__host__ __device__ f32xyz f3_unit(f32xyz u) {
+__host__ __device__ f32xyz fxyz_unit(f32xyz u) {
     f32 imag = 1.0f / sqrtf(u.x*u.x + u.y*u.y + u.z*u.z);
     return make_f32xyz(u.x*imag, u.y*imag, u.z*imag);
 }
+__host__ __device__ f64xyz fxyz_unit(f64xyz u) {
+    f64 imag = 1.0f / sqrtf(u.x*u.x + u.y*u.y + u.z*u.z);
+    return make_f64xyz(u.x*imag, u.y*imag, u.z*imag);
+}
 
 // rotate a vector u
-__host__ __device__ f32xyz f3_rotate(f32xyz u, f32xyz EulerAngles) {
+__host__ __device__ f32xyz fxyz_rotate(f32xyz u, f32xyz EulerAngles) {
 
     f32 phi = EulerAngles.x*deg; // deg is defined by G4 unit system
     f32 theta = EulerAngles.y*deg;
@@ -93,11 +133,30 @@ __host__ __device__ f32xyz f3_rotate(f32xyz u, f32xyz EulerAngles) {
     f32 cps = cos(psi);
 
     // Build rotation matrix
-    matrix3 rot = { cph*cps-sph*cth*sps,  cph*sps+sph*cth*cps,  sth*sph,
-                    -sph*cps-cph*cth*sps, -sph*sps+cph*cth*cps,  sth*cph,
-                    sth*sps,             -sth*cps,                  cth};
+    f32matrix33 rot = { cph*cps-sph*cth*sps,  cph*sps+sph*cth*cps,  sth*sph,
+                       -sph*cps-cph*cth*sps, -sph*sps+cph*cth*cps,  sth*cph,
+                        sth*sps,             -sth*cps,                  cth};
 
-    return m3f3_mul(rot, u);
+    return fmatrixfxyz_mul(rot, u);
 }
+__host__ __device__ f64xyz fxyz_rotate(f64xyz u, f64xyz EulerAngles) {
 
+    f64 phi = EulerAngles.x*deg; // deg is defined by G4 unit system
+    f64 theta = EulerAngles.y*deg;
+    f64 psi = EulerAngles.z*deg;
+
+    f64 sph = sin(phi);
+    f64 cph = cos(phi);
+    f64 sth = sin(theta);
+    f64 cth = cos(theta);
+    f64 sps = sin(psi);
+    f64 cps = cos(psi);
+
+    // Build rotation matrix
+    f64matrix33 rot = { cph*cps-sph*cth*sps,  cph*sps+sph*cth*cps,  sth*sph,
+                       -sph*cps-cph*cth*sps, -sph*sps+cph*cth*cps,  sth*cph,
+                        sth*sps,             -sth*cps,                  cth};
+
+    return fmatrixfxyz_mul(rot, u);
+}
 #endif

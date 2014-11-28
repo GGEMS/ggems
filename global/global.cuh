@@ -41,6 +41,10 @@
     typedef char i8;
 
     typedef unsigned int ui32;
+    typedef uint2 ui32xy;
+    typedef uint3 ui32xyz;
+    typedef uint4 ui32xyzw;
+
     typedef unsigned short int ui16;
     typedef unsigned char ui8;
 
@@ -80,6 +84,10 @@
     typedef char i8;
 
     typedef unsigned int ui32;
+    typedef uint2 ui32xy;
+    typedef uint3 ui32xyz;
+    typedef uint4 ui32xyzw;
+
     typedef unsigned short int ui16;
     typedef char ui8;
 

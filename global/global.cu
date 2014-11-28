@@ -212,16 +212,6 @@ Color make_color(f32 r, f32 g, f32 b) {
     return c;
 }
 
-/////// Struct that handle nD variable /////////////////////////////////
-
-//__host__ __device__ f32xyz make_f32xyz(f32 vx, f32 vy, f32 vz) {
-//    //f32xyz tmp = {vx, vy, vz};
-//    //return tmp;
-//    return {vx, vy, vz};
-//}
-
-
-
 
 
 

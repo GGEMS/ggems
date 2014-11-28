@@ -30,13 +30,13 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, ui32 part_id,
 
 
     // Read position
-    f32xyz pos;
+    f64xyz pos;
     pos.x = particles.px[part_id];
     pos.y = particles.py[part_id];
     pos.z = particles.pz[part_id];
 
     // Read direction
-    f32xyz dir;
+    f64xyz dir;
     dir.x = particles.dx[part_id];
     dir.y = particles.dy[part_id];
     dir.z = particles.dz[part_id];
@@ -53,15 +53,15 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, ui32 part_id,
 
     //// Find next discrete interaction ///////////////////////////////////////
 
-    f32 next_interaction_distance = FLT_MAX;
+    f64 next_interaction_distance = F64_MAX;
     ui8 next_discrete_process = 0;
     ui32 next_geometry_volume = cur_id_geom;
-    f32 interaction_distance;
-    f32 cross_section;
+    f64 interaction_distance;
+    f64 cross_section;
 
     // Search the energy index to read CS
     ui32 E_index = binary_search(particles.E[part_id], photon_CS_table.E_bins,
-                                         photon_CS_table.nb_bins);
+                                 photon_CS_table.nb_bins);
 
     // TODO if E_index = 0?
     assert(E_index != 0);
@@ -127,7 +127,7 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, ui32 part_id,
     //}
 
     // Move the particle
-    pos = f3_add(pos, f3_scale(dir, next_interaction_distance));    
+    pos = fxyz_add(pos, fxyz_scale(dir, next_interaction_distance));
 
     // TODO
     //particles.tof[id] += gpu_speed_of_light * next_interaction_distance;
@@ -139,17 +139,15 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, ui32 part_id,
     particles.geometry_id[part_id] = next_geometry_volume;
 
     // Check world boundary
-    f32 xmin = geometry.data_objects[ADR_AABB_XMIN]; // adr_world_geom = 0
-    f32 xmax = geometry.data_objects[ADR_AABB_XMAX];
-    f32 ymin = geometry.data_objects[ADR_AABB_YMIN];
-    f32 ymax = geometry.data_objects[ADR_AABB_YMAX];
-    f32 zmin = geometry.data_objects[ADR_AABB_ZMIN];
-    f32 zmax = geometry.data_objects[ADR_AABB_ZMAX];
+    f64 xmin = geometry.data_objects[ADR_AABB_XMIN]; // adr_world_geom = 0
+    f64 xmax = geometry.data_objects[ADR_AABB_XMAX];
+    f64 ymin = geometry.data_objects[ADR_AABB_YMIN];
+    f64 ymax = geometry.data_objects[ADR_AABB_YMAX];
+    f64 zmin = geometry.data_objects[ADR_AABB_ZMIN];
+    f64 zmax = geometry.data_objects[ADR_AABB_ZMAX];
 
     // Stop simulation if out of the world
-    if (   pos.x <= xmin || pos.x >= xmax
-        || pos.y <= ymin || pos.y >= ymax
-        || pos.z <= zmin || pos.z >= zmax) {
+    if (!test_point_AABB(pos, xmin, xmax, ymin, ymax, zmin, zmax)) {
 
         particles.endsimu[part_id] = PARTICLE_DEAD;
 
@@ -162,6 +160,23 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, ui32 part_id,
 
         return;
     }
+
+//    // Stop simulation if out of the world
+//    if (   pos.x <= xmin || pos.x >= xmax
+//        || pos.y <= ymin || pos.y >= ymax
+//        || pos.z <= zmin || pos.z >= zmax) {
+
+//        particles.endsimu[part_id] = PARTICLE_DEAD;
+
+//        // Record this step if required
+//        if (history.record_flag == ENABLED) {
+//            history.cpu_record_a_step(particles, part_id);
+//        }
+
+//        //if (particles.E[part_id] == 0.5) printf("No Interaction\n");
+
+//        return;
+//    }
 
     //// Apply discrete process //////////////////////////////////////////////////
 
@@ -216,20 +231,20 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, ui32 part_id,
     //if (particles.endsimu[part_id] == PARTICLE_DEAD) discrete_loss = particles.E[part_id];
 
     //// Handle detector ////////////////////////////////////////
-/*
+
     // If a detector is defined
     if (panel_detector.data != NULL) {
         if (next_geometry_volume == panel_detector.geometry_id) {
 
             // Change particle frame (into voxelized volume)
-            pos.x -= panel_detector.xmin;
-            pos.y -= panel_detector.ymin;
-            pos.z -= panel_detector.zmin;
+            pos.x -= (f64)panel_detector.xmin;
+            pos.y -= (f64)panel_detector.ymin;
+            pos.z -= (f64)panel_detector.zmin;
             // Get the voxel index
-            int3 ind;
-            ind.x = (ui32)(pos.x / panel_detector.sx);
-            ind.y = (ui32)(pos.y / panel_detector.sy);
-            ind.z = (ui32)(pos.z / panel_detector.sz);
+            ui32xyz ind;
+            ind.x = (ui32)(pos.x / (f64)panel_detector.sx);
+            ind.y = (ui32)(pos.y / (f64)panel_detector.sy);
+            ind.z = (ui32)(pos.z / (f64)panel_detector.sz);
             // Assertion
             assert(ind.x < panel_detector.nx);
             assert(ind.y < panel_detector.ny);
@@ -249,7 +264,7 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, ui32 part_id,
 
         }
     }
-*/
+
 
 /*
     // Record this step if required

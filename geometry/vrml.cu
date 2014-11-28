@@ -346,7 +346,7 @@ void VRML::write_sources(SourceBuilder sources) {
             // Draw the direction as a vector
             //f32xyz d = f3_rotate(make_f32xyz(0.0f, 0.0f, 1.0f), make_f32xyz(phi, theta, psi));
             f32xyz d = make_f32xyz(0.0f, 0.0f, 1.0f);
-            d = f3_scale(d, 5.0f);   // FIXME find a way to automatically adjust this value
+            d = fxyz_scale(d, 5.0f);   // FIXME find a way to automatically adjust this value
 
             fprintf(pfile, "Shape {\n");
             fprintf(pfile, "  geometry IndexedLineSet {\n");
