@@ -29,7 +29,7 @@ void cpu_main_navigator(ParticleStack &particles, Scene geometry,
     ui32 id = 0;
     while (id < particles.size) {
 
-        //printf(">>>> Particle %i\n", id);
+        printf(">>>> Particle %i\n", id);
 
         // Stepping loop, iterate the particle until the end
         ui32 istep = 0;
@@ -43,7 +43,7 @@ void cpu_main_navigator(ParticleStack &particles, Scene geometry,
 
             istep++;
 
-            //printf(">>>>>> step %i\n", istep);
+            printf(">>>>>> step %i\n", istep);
 
         } // istep
 

@@ -266,12 +266,10 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, ui32 part_id,
     }
 
 
-/*
     // Record this step if required
     if (history.record_flag == ENABLED) {
         history.cpu_record_a_step(particles, part_id);
     }
-*/
 
 /*
     // DEBUGING: phasespace

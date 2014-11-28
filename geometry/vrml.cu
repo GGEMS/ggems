@@ -249,9 +249,9 @@ void VRML::write_geometry(GeometryBuilder geometry) {
                                     make_color(0.0, 0.0, 1.0),
                                     1.0);
 
-                ui32 nx = geometry.world.data_objects[adr_obj+ADR_MESHED_OCTREE_NX];
-                ui32 ny = geometry.world.data_objects[adr_obj+ADR_MESHED_OCTREE_NY];
-                ui32 nz = geometry.world.data_objects[adr_obj+ADR_MESHED_OCTREE_NZ];
+                ui32 nx = (ui32)geometry.world.data_objects[adr_obj+ADR_MESHED_OCTREE_NX];
+                ui32 ny = (ui32)geometry.world.data_objects[adr_obj+ADR_MESHED_OCTREE_NY];
+                ui32 nz = (ui32)geometry.world.data_objects[adr_obj+ADR_MESHED_OCTREE_NZ];
                 f32 sx = geometry.world.data_objects[adr_obj+ADR_MESHED_OCTREE_SX];
                 f32 sy = geometry.world.data_objects[adr_obj+ADR_MESHED_OCTREE_SY];
                 f32 sz = geometry.world.data_objects[adr_obj+ADR_MESHED_OCTREE_SZ];

@@ -107,9 +107,11 @@ void Meshed::build_regular_octree(ui32 nx, ui32 ny, ui32 nz) {
                     v = make_f32xyz(vertices[addr_tri+3], vertices[addr_tri+4], vertices[addr_tri+5]);
                     w = make_f32xyz(vertices[addr_tri+6], vertices[addr_tri+7], vertices[addr_tri+8]);
 
-                    // Check if this triangle is overlappin this octree cell
-                    if (overlap_AABB_triangle(cell_xmin, cell_xmax, cell_ymin, cell_ymax, cell_zmin, cell_zmax,
-                                              u, v, w) != -1) {
+                    // Check if this triangle is overlapping this octree cell
+                    if (overlap_AABB_triangle(cell_xmin, cell_xmax,
+                                              cell_ymin, cell_ymax,
+                                              cell_zmin, cell_zmax,
+                                              u, v, w)) {
 
                         // Save triangle index and count the total number of triangles per cell
                         list_objs_per_cell.push_back(itri);

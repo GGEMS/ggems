@@ -146,47 +146,40 @@ __host__ __device__ f64 get_distance_to_object(Scene geometry, ui32 adr_geom,
 //        }
 
     } else if (obj_type == MESHED) {
-/*
+
         ui32 octree_type = geometry.data_objects[adr_geom+ADR_MESHED_OCTREE_TYPE];
 
-        // Read first the bounding box
-        f32 xmin = geometry.data_objects[adr_geom+ADR_AABB_XMIN];
-        f32 xmax = geometry.data_objects[adr_geom+ADR_AABB_XMAX];
-        f32 ymin = geometry.data_objects[adr_geom+ADR_AABB_YMIN];
-        f32 ymax = geometry.data_objects[adr_geom+ADR_AABB_YMAX];
-        f32 zmin = geometry.data_objects[adr_geom+ADR_AABB_ZMIN];
-        f32 zmax = geometry.data_objects[adr_geom+ADR_AABB_ZMAX];
-
         // First check the bounding box that contains the mesh
-        if (!test_ray_AABB(pos, dir, xmin, xmax, ymin, ymax, zmin, zmax)) return FLT_MAX;
+        if (!test_ray_AABB(pos, dir, aabb_xmin, aabb_xmax,
+                           aabb_ymin, aabb_ymax, aabb_zmin, aabb_zmax)) return F64_MAX;
 
         // If no octree first check every triangle
-        distance = FLT_MAX;
-        f32 tri_distance;
+        distance = F64_MAX;
+        f64 tri_distance;
         if (octree_type == NO_OCTREE) {
             ui32 nb_tri = geometry.data_objects[adr_geom+ADR_MESHED_NB_TRIANGLES];
             ui32 i=0;
             while (i < nb_tri) {
                 // Fetch a triangle
                 ui32 ptr_tri = adr_geom+ADR_MESHED_DATA+ i*9; // 3 vertices of f32xyz
-                f32xyz u = make_f32xyz(geometry.data_objects[ptr_tri],
-                                       geometry.data_objects[ptr_tri+1],
-                                       geometry.data_objects[ptr_tri+2]);
-                f32xyz v = make_f32xyz(geometry.data_objects[ptr_tri+3],
-                                       geometry.data_objects[ptr_tri+4],
-                                       geometry.data_objects[ptr_tri+5]);
-                f32xyz w = make_f32xyz(geometry.data_objects[ptr_tri+6],
-                                       geometry.data_objects[ptr_tri+7],
-                                       geometry.data_objects[ptr_tri+8]);
+                f64xyz u = make_f64xyz((f64)geometry.data_objects[ptr_tri],
+                                       (f64)geometry.data_objects[ptr_tri+1],
+                                       (f64)geometry.data_objects[ptr_tri+2]);
+                f64xyz v = make_f64xyz((f64)geometry.data_objects[ptr_tri+3],
+                                       (f64)geometry.data_objects[ptr_tri+4],
+                                       (f64)geometry.data_objects[ptr_tri+5]);
+                f64xyz w = make_f64xyz((f64)geometry.data_objects[ptr_tri+6],
+                                       (f64)geometry.data_objects[ptr_tri+7],
+                                       (f64)geometry.data_objects[ptr_tri+8]);
                 // Get distance to this triangle
                 tri_distance = hit_ray_triangle(pos, dir, u, v, w);
                 if (tri_distance < distance) distance = tri_distance;
 
                 ++i;
-            }
+            }            
         // If regular octree
         } else if (octree_type == REG_OCTREE) {
-
+/*
             //// First get the octree index
 
             // Change particle frame (into voxelized volume)
@@ -272,9 +265,9 @@ __host__ __device__ f64 get_distance_to_object(Scene geometry, ui32 adr_geom,
                     ++i;
                 } // while
             } // if triangle
-
-        } // if regoctree
 */
+        } // if regoctree
+
     } // if meshed
 
     return distance;
