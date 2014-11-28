@@ -25,7 +25,7 @@
 /////////////////////////////////////////////////////////////////////////////////////
 
 // Function that return the material of a volume
-ui32 __host__ __device__ get_geometry_material(Scene geometry, ui32 id_geom, float3 pos) {
+__host__ __device__ ui32 get_geometry_material(Scene geometry, ui32 id_geom, f32xyz pos) {
     ui32 adr_geom = geometry.ptr_objects[id_geom];
     ui32 obj_type = (ui32)geometry.data_objects[adr_geom+ADR_OBJ_TYPE];
 
@@ -59,8 +59,8 @@ ui32 __host__ __device__ get_geometry_material(Scene geometry, ui32 id_geom, flo
 }
 
 // Get distance from an object
-f32 __host__ __device__ get_distance_to_object(Scene geometry, ui32 adr_geom,
-                                               ui32 obj_type, float3 pos, float3 dir) {
+__host__ __device__ f32 get_distance_to_object(Scene geometry, ui32 adr_geom,
+                                               ui32 obj_type, f32xyz pos, f32xyz dir) {
 
     f32 distance = FLT_MAX;
 
@@ -81,7 +81,7 @@ f32 __host__ __device__ get_distance_to_object(Scene geometry, ui32 adr_geom,
     } else if (obj_type == SPHERE) {
 
         // Read first sphere parameters
-        float3 c = make_float3(geometry.data_objects[adr_geom+ADR_SPHERE_CX],
+        f32xyz c = make_f32xyz(geometry.data_objects[adr_geom+ADR_SPHERE_CX],
                                geometry.data_objects[adr_geom+ADR_SPHERE_CY],
                                geometry.data_objects[adr_geom+ADR_SPHERE_CZ]);
         f32 r = geometry.data_objects[adr_geom+ADR_SPHERE_RADIUS];
@@ -90,16 +90,19 @@ f32 __host__ __device__ get_distance_to_object(Scene geometry, ui32 adr_geom,
 
     } else if (obj_type == VOXELIZED) {
 
+        f64xyz pos64 = make_f64xyz(pos.x, pos.y, pos.z);
+        f64xyz dir64 = make_f64xyz(dir.x, dir.y, dir.z);
+
         // Change particle frame (into voxelized volume)
-        float3 posinvox;
-        posinvox.x = pos.x - geometry.data_objects[adr_geom+ADR_AABB_XMIN]; // -= xmin
-        posinvox.y = pos.y - geometry.data_objects[adr_geom+ADR_AABB_YMIN]; // -= ymin
-        posinvox.z = pos.z - geometry.data_objects[adr_geom+ADR_AABB_ZMIN]; // -= zmin
+        f64xyz posinvox;
+        posinvox.x = pos64.x - (f64)geometry.data_objects[adr_geom+ADR_AABB_XMIN]; // -= xmin
+        posinvox.y = pos64.y - (f64)geometry.data_objects[adr_geom+ADR_AABB_YMIN]; // -= ymin
+        posinvox.z = pos64.z - (f64)geometry.data_objects[adr_geom+ADR_AABB_ZMIN]; // -= zmin
         // Get spacing
-        float3 s;
-        s.x = geometry.data_objects[adr_geom+ADR_VOXELIZED_SX];
-        s.y = geometry.data_objects[adr_geom+ADR_VOXELIZED_SY];
-        s.z = geometry.data_objects[adr_geom+ADR_VOXELIZED_SZ];
+        f64xyz s;
+        s.x = (f64)geometry.data_objects[adr_geom+ADR_VOXELIZED_SX];
+        s.y = (f64)geometry.data_objects[adr_geom+ADR_VOXELIZED_SY];
+        s.z = (f64)geometry.data_objects[adr_geom+ADR_VOXELIZED_SZ];
         // Get the voxel index
         int3 ind;
         ind.x = (ui32)(posinvox.x / s.x);
@@ -109,11 +112,11 @@ f32 __host__ __device__ get_distance_to_object(Scene geometry, ui32 adr_geom,
         //printf("Ind %i %i %i\n", ind.x, ind.y, ind.z);
 
         // Then get the voxel bounding box
-        f32 volxmin = geometry.data_objects[adr_geom+ADR_AABB_XMIN];
-        f32 volymin = geometry.data_objects[adr_geom+ADR_AABB_YMIN];
-        f32 volzmin = geometry.data_objects[adr_geom+ADR_AABB_ZMIN];
+        f64 volxmin = geometry.data_objects[adr_geom+ADR_AABB_XMIN];
+        f64 volymin = geometry.data_objects[adr_geom+ADR_AABB_YMIN];
+        f64 volzmin = geometry.data_objects[adr_geom+ADR_AABB_ZMIN];
 
-        f32 xmin, ymin, xmax, ymax, zmin, zmax;
+        f64 xmin, ymin, xmax, ymax, zmin, zmax;
         xmin = ind.x*s.x + volxmin; xmax = xmin+s.x;
         ymin = ind.y*s.y + volymin; ymax = ymin+s.y;
         zmin = ind.z*s.z + volzmin; zmax = zmin+s.z;
@@ -126,9 +129,10 @@ f32 __host__ __device__ get_distance_to_object(Scene geometry, ui32 adr_geom,
 //        zmax = (dir.z < 0 && posinvox.z < zmin + EPSILON3) ? zmin-s.z : zmin+s.z;
 
         // Get the distance
-        distance = hit_ray_AABB(pos, dir, xmin, xmax, ymin, ymax, zmin, zmax);
+        f64 d64 = hit_ray_AABB(pos64, dir64, xmin, xmax, ymin, ymax, zmin, zmax);
 
-        if ((distance > -EPSILON6 && distance < EPSILON6) || distance > 100000) {
+        if ((d64 > -EPSILON6 && d64 < EPSILON6) || d64 > 100000) {
+        //if (d64 > 100000) {
 
             printf("::::: Pos %f %f %f\n", pos.x, pos.y, pos.z);
             printf("::::: Org %f %f %f\n", geometry.data_objects[adr_geom+ADR_AABB_XMIN],
@@ -138,12 +142,14 @@ f32 __host__ __device__ get_distance_to_object(Scene geometry, ui32 adr_geom,
             printf("::::: Scl %f %f %f\n", s.x, s.y, s.z);
             printf("::::: Ind %i %i %i\n", ind.x, ind.y, ind.z);
             printf("::::: Vox %f %f, %f %f, %f %f\n", xmin, xmax, ymin, ymax, zmin, zmax);
-            printf("::::: Dist %f\n", distance);
-            f32 a = -8.000009;
-            f32 b = 296.0;
-            f32 c = a+b;
+            printf("::::: Dist %f\n", d64);
+            f64 a = -8.000009;
+            f64 b = 296.0;
+            f64 c = a+b;
             printf("----- test %2.20f\n", c);
         }
+
+        distance = (f32)d64;
 
     } else if (obj_type == MESHED) {
 
@@ -168,14 +174,14 @@ f32 __host__ __device__ get_distance_to_object(Scene geometry, ui32 adr_geom,
             ui32 i=0;
             while (i < nb_tri) {
                 // Fetch a triangle
-                ui32 ptr_tri = adr_geom+ADR_MESHED_DATA+ i*9; // 3 vertices of float3
-                float3 u = make_float3(geometry.data_objects[ptr_tri],
+                ui32 ptr_tri = adr_geom+ADR_MESHED_DATA+ i*9; // 3 vertices of f32xyz
+                f32xyz u = make_f32xyz(geometry.data_objects[ptr_tri],
                                        geometry.data_objects[ptr_tri+1],
                                        geometry.data_objects[ptr_tri+2]);
-                float3 v = make_float3(geometry.data_objects[ptr_tri+3],
+                f32xyz v = make_f32xyz(geometry.data_objects[ptr_tri+3],
                                        geometry.data_objects[ptr_tri+4],
                                        geometry.data_objects[ptr_tri+5]);
-                float3 w = make_float3(geometry.data_objects[ptr_tri+6],
+                f32xyz w = make_f32xyz(geometry.data_objects[ptr_tri+6],
                                        geometry.data_objects[ptr_tri+7],
                                        geometry.data_objects[ptr_tri+8]);
                 // Get distance to this triangle
@@ -190,12 +196,12 @@ f32 __host__ __device__ get_distance_to_object(Scene geometry, ui32 adr_geom,
             //// First get the octree index
 
             // Change particle frame (into voxelized volume)
-            float3 localpos;
+            f32xyz localpos;
             localpos.x = pos.x - geometry.data_objects[adr_geom+ADR_AABB_XMIN]; // -= xmin
             localpos.y = pos.y - geometry.data_objects[adr_geom+ADR_AABB_YMIN]; // -= ymin
             localpos.z = pos.z - geometry.data_objects[adr_geom+ADR_AABB_ZMIN]; // -= zmin
             // Get spacing
-            float3 s;
+            f32xyz s;
             s.x = geometry.data_objects[adr_geom+ADR_VOXELIZED_SX];
             s.y = geometry.data_objects[adr_geom+ADR_VOXELIZED_SY];
             s.z = geometry.data_objects[adr_geom+ADR_VOXELIZED_SZ];
@@ -207,11 +213,11 @@ f32 __host__ __device__ get_distance_to_object(Scene geometry, ui32 adr_geom,
 
             // DDA algorithm
 
-            float3 finc;
+            f32xyz finc;
             finc.x = dir.x*s.x;
             finc.y = dir.y*s.y;
             finc.z = dir.z*s.z;
-            float3 fpos;
+            f32xyz fpos;
             fpos.x = f32(ind.x);
             fpos.y = f32(ind.y);
             fpos.z = f32(ind.z);
@@ -220,7 +226,7 @@ f32 __host__ __device__ get_distance_to_object(Scene geometry, ui32 adr_geom,
             ui32 nx = geometry.data_objects[adr_geom+ADR_MESHED_OCTREE_NX];
             ui32 ny = geometry.data_objects[adr_geom+ADR_MESHED_OCTREE_NY];
             ui32 nz = geometry.data_objects[adr_geom+ADR_MESHED_OCTREE_NZ];
-            ui32 adr_octree = adr_geom+ADR_MESHED_DATA+ 9*nb_tri; // 3 vertices of float3
+            ui32 adr_octree = adr_geom+ADR_MESHED_DATA+ 9*nb_tri; // 3 vertices of f32xyz
 
             ui32 index = ind.z*nx*ny + ind.y*nx + ind.x;
 
@@ -255,13 +261,13 @@ f32 __host__ __device__ get_distance_to_object(Scene geometry, ui32 adr_geom,
                 while (i < tri_per_cell) {
                     ui32 ptr_tri = geometry.data_objects[ptr_list_tri + i*9];
 
-                    float3 u = make_float3(geometry.data_objects[ptr_tri],
+                    f32xyz u = make_f32xyz(geometry.data_objects[ptr_tri],
                                            geometry.data_objects[ptr_tri+1],
                                            geometry.data_objects[ptr_tri+2]);
-                    float3 v = make_float3(geometry.data_objects[ptr_tri+3],
+                    f32xyz v = make_f32xyz(geometry.data_objects[ptr_tri+3],
                                            geometry.data_objects[ptr_tri+4],
                                            geometry.data_objects[ptr_tri+5]);
-                    float3 w = make_float3(geometry.data_objects[ptr_tri+6],
+                    f32xyz w = make_f32xyz(geometry.data_objects[ptr_tri+6],
                                            geometry.data_objects[ptr_tri+7],
                                            geometry.data_objects[ptr_tri+8]);
 
@@ -282,7 +288,7 @@ f32 __host__ __device__ get_distance_to_object(Scene geometry, ui32 adr_geom,
 
 // Find the next geometry along the path of the particle
 void __host__ __device__ get_next_geometry_boundary(Scene geometry, ui32 cur_geom,
-                                                     float3 pos, float3 dir,
+                                                     f32xyz pos, f32xyz dir,
                                                      f32 &interaction_distance,
                                                      ui32 &geometry_volume) {
 
@@ -304,7 +310,7 @@ void __host__ __device__ get_next_geometry_boundary(Scene geometry, ui32 cur_geo
 
         // If the safety is equal to distance (numerically very close espilon6) to the voxel
         // boundary it means, that the particle is escaping the volume.
-        printf("         Safety %e vox distance %e pos %f %f %f\n", safety, distance, pos.x, pos.y, pos.z);
+        //printf("         Safety %e vox distance %e pos %f %f %f\n", safety, distance, pos.x, pos.y, pos.z);
         if (fabs(distance-safety) < EPSILON3) {
             geometry_volume = geometry.mother_node[cur_geom];
         } else {

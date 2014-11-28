@@ -42,9 +42,13 @@ __host__ __device__ f32 hit_ray_sphere(f32xyz ray_p, f32xyz ray_d,           // 
 
 // Ray/AABB intersection - Smits algorithm
 __host__ __device__ f32 hit_ray_AABB(f32xyz ray_p, f32xyz ray_d,
-                                       f32 aabb_xmin, f32 aabb_xmax,
-                                       f32 aabb_ymin, f32 aabb_ymax,
-                                       f32 aabb_zmin, f32 aabb_zmax);
+                                     f32 aabb_xmin, f32 aabb_xmax,
+                                     f32 aabb_ymin, f32 aabb_ymax,
+                                     f32 aabb_zmin, f32 aabb_zmax);
+__host__ __device__ f64 hit_ray_AABB(f64xyz ray_p, f64xyz ray_d,
+                                     f64 aabb_xmin, f64 aabb_xmax,
+                                     f64 aabb_ymin, f64 aabb_ymax,
+                                     f64 aabb_zmin, f64 aabb_zmax);
 
 // Ray/AABB test - Smits algorithm
 __host__ __device__ bool test_ray_AABB(f32xyz ray_p, f32xyz ray_d,

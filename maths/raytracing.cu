@@ -206,11 +206,11 @@ __host__ __device__ f32 hit_ray_sphere(f32xyz ray_p, f32xyz ray_d,           // 
     return t;
 }
 
-// Ray/AABB intersection - Smits algorithm
+// Ray/AABB intersection - Smits algorithm (f32 version)
 __host__ __device__ f32 hit_ray_AABB(f32xyz ray_p, f32xyz ray_d,
-                                       f32 aabb_xmin, f32 aabb_xmax,
-                                       f32 aabb_ymin, f32 aabb_ymax,
-                                       f32 aabb_zmin, f32 aabb_zmax) {
+                                     f32 aabb_xmin, f32 aabb_xmax,
+                                     f32 aabb_ymin, f32 aabb_ymax,
+                                     f32 aabb_zmin, f32 aabb_zmax) {
 
     f32 idx, idy, idz;
     f32 tmin, tmax, tymin, tymax, tzmin, tzmax, buf;
@@ -274,6 +274,76 @@ __host__ __device__ f32 hit_ray_AABB(f32xyz ray_p, f32xyz ray_d,
     }
 
 }
+
+// Ray/AABB intersection - Smits algorithm (f64 version)
+__host__ __device__ f64 hit_ray_AABB(f64xyz ray_p, f64xyz ray_d,
+                                     f64 aabb_xmin, f64 aabb_xmax,
+                                     f64 aabb_ymin, f64 aabb_ymax,
+                                     f64 aabb_zmin, f64 aabb_zmax) {
+
+    f64 idx, idy, idz;
+    f64 tmin, tmax, tymin, tymax, tzmin, tzmax, buf;
+
+    tmin = -F64_MAX;
+    tmax =  F64_MAX;
+
+    // on x
+    if (fabs(ray_d.x) < EPSILON6) {
+        if (ray_p.x < aabb_xmin || ray_p.x > aabb_xmax) {return F64_MAX;}
+    } else {
+        idx = 1.0f / ray_d.x;
+        tmin = (aabb_xmin - ray_p.x) * idx;
+        tmax = (aabb_xmax - ray_p.x) * idx;
+        if (tmin > tmax) {
+            buf = tmin;
+            tmin = tmax;
+            tmax = buf;
+        }
+        if (tmin > tmax) {return F64_MAX;}
+    }
+    // on y
+    if (fabs(ray_d.y) < EPSILON6) {
+        if (ray_p.y < aabb_ymin || ray_p.y > aabb_ymax) {return F64_MAX;}
+    } else {
+        idy = 1.0f / ray_d.y;
+        tymin = (aabb_ymin - ray_p.y) * idy;
+        tymax = (aabb_ymax - ray_p.y) * idy;
+        if (tymin > tymax) {
+            buf = tymin;
+            tymin = tymax;
+            tymax = buf;
+        }
+        if (tymin > tmin) {tmin = tymin;}
+        if (tymax < tmax) {tmax = tymax;}
+        if (tmin > tmax) {return F64_MAX;}
+    }
+    // on z
+    if (fabs(ray_d.z) < EPSILON6) {
+        if (ray_p.z < aabb_zmin || ray_p.z > aabb_zmax) {return F64_MAX;}
+    } else {
+        idz = 1.0f / ray_d.z;
+        tzmin = (aabb_zmin - ray_p.z) * idz;
+        tzmax = (aabb_zmax - ray_p.z) * idz;
+        if (tzmin > tzmax) {
+            buf = tzmin;
+            tzmin = tzmax;
+            tzmax = buf;
+        }
+        if (tzmin > tmin) {tmin = tzmin;}
+        if (tzmax < tmax) {tmax = tzmax;}
+        if (tmin > tmax) {return F64_MAX;}
+    }
+
+    // Return the smaller positive value
+    if (tmin < 0 && tmax < 0) return F64_MAX;
+    if (tmin < 0) {
+        return tmax;
+    } else {
+        return tmin;
+    }
+
+}
+
 
 // Ray/AABB intersection test - Smits algorithm
 __host__ __device__ bool test_ray_AABB(f32xyz ray_p, f32xyz ray_d,
