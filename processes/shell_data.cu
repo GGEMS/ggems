@@ -18,6 +18,7 @@
 #ifndef SHELL_DATA_CU
 #define SHELL_DATA_CU
 
+#include "shell_data.cuh"
 
 // **************************************************
 // * Shell Data
