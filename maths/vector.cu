@@ -159,4 +159,31 @@ __host__ __device__ f64xyz fxyz_rotate(f64xyz u, f64xyz EulerAngles) {
 
     return fmatrixfxyz_mul(rot, u);
 }
+
+// Return abs
+__host__ __device__ f32xyz fxyz_abs(f32xyz u) {
+    u.x = fabs(u.x);
+    u.y = fabs(u.y);
+    u.z = fabs(u.z);
+    return u;
+}
+__host__ __device__ f64xyz fxyz_abs(f64xyz u) {
+    u.x = fabs(u.x);
+    u.y = fabs(u.y);
+    u.z = fabs(u.z);
+    return u;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 #endif

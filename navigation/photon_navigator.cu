@@ -47,9 +47,11 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, ui32 part_id,
     // Get the material that compose this volume
     ui32 id_mat = get_geometry_material(geometry, cur_id_geom, pos);
 
-//    printf("     begin %i\n", part_id);
-//    printf("     Cur id geom %i mat %i\n", cur_id_geom, id_mat);
-//    printf("     InitPos %f %f %f\n", pos.x, pos.y, pos.z);
+#ifdef DEBUG
+    printf("  begin %i\n", part_id);
+    printf("     Cur id geom %i mat %i\n", cur_id_geom, id_mat);
+    printf("     InitPos %f %f %f\n", pos.x, pos.y, pos.z);
+#endif
 
     //// Find next discrete interaction ///////////////////////////////////////
 
@@ -182,7 +184,9 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, ui32 part_id,
 
     //f32 discrete_loss = 0.0f;
 
-    //printf("     Dist %f NextVol %i pos %f %f %f ", next_interaction_distance, next_geometry_volume, pos.x, pos.y, pos.z);
+#ifdef DEBUG
+    printf("     Dist %f NextVol %i pos %f %f %f ", next_interaction_distance, next_geometry_volume, pos.x, pos.y, pos.z);
+#endif
 
     if (next_discrete_process == PHOTON_COMPTON) {
 
@@ -193,7 +197,9 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, ui32 part_id,
         //printf("id %i - pos %f %f %f - dir %f %f %f - Cmpt - geom cur %i hit %i\n", part_id, pos.x, pos.y, pos.z,
         //                                                                 dir.x, dir.y, dir.z,
         //                                                                 cur_id_geom, next_geometry_volume);
-        //printf(" Compton\n");
+#ifdef DEBUG
+        printf(" Compton\n");
+#endif
     }
 
     if (next_discrete_process == PHOTON_PHOTOELECTRIC) {
@@ -207,7 +213,9 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, ui32 part_id,
         //printf("id %i - pos %f %f %f - dir %f %f %f - PE - geom cur %i hit %i\n", part_id, pos.x, pos.y, pos.z,
         //                                                               dir.x, dir.y, dir.z,
         //                                                               cur_id_geom, next_geometry_volume);
-        //printf(" PE\n");
+#ifdef DEBUG
+        printf(" PE\n");
+#endif
     }
 
     if (next_discrete_process == PHOTON_RAYLEIGH) {
@@ -221,7 +229,9 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, ui32 part_id,
         //printf("id %i - pos %f %f %f - dir %f %f %f - Bnd - geom cur %i hit %i\n", part_id, pos.x, pos.y, pos.z,
         //                                                                 dir.x, dir.y, dir.z,
         //                                                                 cur_id_geom, next_geometry_volume);
-        //printf(" Geom\n");
+#ifdef DEBUG
+        printf(" Geom\n");
+#endif
     }
 
 

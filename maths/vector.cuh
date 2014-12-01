@@ -69,4 +69,8 @@ __host__ __device__ f64xyz fxyz_unit(f64xyz u);
 // rotate a vector u
 __host__ __device__ f32xyz fxyz_rotate(f32xyz u, f32xyz EulerAngles); // phi, theta, psi
 __host__ __device__ f64xyz fxyz_rotate(f64xyz u, f64xyz EulerAngles); // phi, theta, psi
+// return abs
+__host__ __device__ f32xyz fxyz_abs(f32xyz u);
+__host__ __device__ f64xyz fxyz_abs(f64xyz u);
+
 #endif

@@ -153,9 +153,15 @@ __host__ __device__ f64 get_distance_to_object(Scene geometry, ui32 adr_geom,
         if (!test_ray_AABB(pos, dir, aabb_xmin, aabb_xmax,
                            aabb_ymin, aabb_ymax, aabb_zmin, aabb_zmax)) return F64_MAX;
 
+#ifdef DEBUG_OCTREE
+        printf("     Hit Mesh AABB %f %f | %f %f | %f %f\n", aabb_xmin, aabb_xmax,
+               aabb_ymin, aabb_ymax, aabb_zmin, aabb_zmax);
+#endif
+
         // If no octree first check every triangle
         distance = F64_MAX;
         f64 tri_distance;
+
         if (octree_type == NO_OCTREE) {
             ui32 nb_tri = geometry.data_objects[adr_geom+ADR_MESHED_NB_TRIANGLES];
             ui32 i=0;
@@ -173,99 +179,148 @@ __host__ __device__ f64 get_distance_to_object(Scene geometry, ui32 adr_geom,
                                        (f64)geometry.data_objects[ptr_tri+8]);
                 // Get distance to this triangle
                 tri_distance = hit_ray_triangle(pos, dir, u, v, w);
-                if (tri_distance < distance) distance = tri_distance;
+                // Select the min positive value
+                if (tri_distance >= 0 && tri_distance < distance) distance = tri_distance;
 
                 ++i;
-            }            
+            }
+            //printf("Mesh dist %2.10f\n", distance);
         // If regular octree
         } else if (octree_type == REG_OCTREE) {
-/*
-            //// First get the octree index
 
-            // Change particle frame (into voxelized volume)
-            f32xyz localpos;
-            localpos.x = pos.x - geometry.data_objects[adr_geom+ADR_AABB_XMIN]; // -= xmin
-            localpos.y = pos.y - geometry.data_objects[adr_geom+ADR_AABB_YMIN]; // -= ymin
-            localpos.z = pos.z - geometry.data_objects[adr_geom+ADR_AABB_ZMIN]; // -= zmin
+#ifdef DEBUG_OCTREE
+            printf("     Reg Octree\n");
+#endif
+
+            //// First get entry and exit point within the bouding box
+            f64 distance_to_in = hit_ray_AABB(pos, dir, aabb_xmin, aabb_xmax,
+                                              aabb_ymin, aabb_ymax, aabb_zmin, aabb_zmax);
+            f64xyz entry_pt = fxyz_add(pos, fxyz_scale(dir, distance_to_in + EPSILON3));
+
+            f64 distance_to_out = hit_ray_AABB(entry_pt, dir, aabb_xmin, aabb_xmax,
+                                               aabb_ymin, aabb_ymax, aabb_zmin, aabb_zmax);
+            f64xyz exit_pt = fxyz_add(entry_pt, fxyz_scale(dir, distance_to_out - EPSILON3));
+
+#ifdef DEBUG_OCTREE
+            printf("     entry %f %f %f - exit %f %f %f\n", entry_pt.x, entry_pt.y, entry_pt.z,
+                   exit_pt.x, exit_pt.y, exit_pt.z);
+#endif
+
+            //// Convert point into octree index
+
             // Get spacing
-            f32xyz s;
-            s.x = geometry.data_objects[adr_geom+ADR_VOXELIZED_SX];
-            s.y = geometry.data_objects[adr_geom+ADR_VOXELIZED_SY];
-            s.z = geometry.data_objects[adr_geom+ADR_VOXELIZED_SZ];
-            // Get the voxel index
-            int3 ind;
-            ind.x = (ui32)(localpos.x / s.x);
-            ind.y = (ui32)(localpos.y / s.y);
-            ind.z = (ui32)(localpos.z / s.z);
+            f64xyz s;
+            s.x = (f64)geometry.data_objects[adr_geom+ADR_MESHED_OCTREE_SX];
+            s.y = (f64)geometry.data_objects[adr_geom+ADR_MESHED_OCTREE_SY];
+            s.z = (f64)geometry.data_objects[adr_geom+ADR_MESHED_OCTREE_SZ];
 
-            // DDA algorithm
+            // Change the frame
+            f64xyz entry_ind;
+            entry_ind.x = entry_pt.x - (f64)geometry.data_objects[adr_geom+ADR_AABB_XMIN]; // -= xmin
+            entry_ind.y = entry_pt.y - (f64)geometry.data_objects[adr_geom+ADR_AABB_YMIN]; // -= ymin
+            entry_ind.z = entry_pt.z - (f64)geometry.data_objects[adr_geom+ADR_AABB_ZMIN]; // -= zmin
+            f64xyz exit_ind;
+            exit_ind.x = exit_pt.x - (f64)geometry.data_objects[adr_geom+ADR_AABB_XMIN]; // -= xmin
+            exit_ind.y = exit_pt.y - (f64)geometry.data_objects[adr_geom+ADR_AABB_YMIN]; // -= ymin
+            exit_ind.z = exit_pt.z - (f64)geometry.data_objects[adr_geom+ADR_AABB_ZMIN]; // -= zmin
 
-            f32xyz finc;
-            finc.x = dir.x*s.x;
-            finc.y = dir.y*s.y;
-            finc.z = dir.z*s.z;
-            f32xyz fpos;
-            fpos.x = f32(ind.x);
-            fpos.y = f32(ind.y);
-            fpos.z = f32(ind.z);
+            // Get the octree index
+            entry_ind.x /= s.x;
+            entry_ind.y /= s.y;
+            entry_ind.z /= s.z;
+            exit_ind.x /= s.x;
+            exit_ind.y /= s.y;
+            exit_ind.z /= s.z;
 
-            ui32 nb_tri = geometry.data_objects[adr_geom+ADR_MESHED_NB_TRIANGLES];
+#ifdef DEBUG_OCTREE
+            printf("     Ind entry %f %f %f exit %f %f %f\n", entry_ind.x, entry_ind.y, entry_ind.z,
+                   exit_ind.x, exit_ind.y, exit_ind.z);
+#endif
+
+            //// Cross the octree with a raycast (DDA algorithm)
+
             ui32 nx = geometry.data_objects[adr_geom+ADR_MESHED_OCTREE_NX];
             ui32 ny = geometry.data_objects[adr_geom+ADR_MESHED_OCTREE_NY];
             ui32 nz = geometry.data_objects[adr_geom+ADR_MESHED_OCTREE_NZ];
+            ui32 jump = ny*nx;
+            ui32 bigjump = jump*nz;
+            ui32 nb_tri = geometry.data_objects[adr_geom+ADR_MESHED_NB_TRIANGLES];
             ui32 adr_octree = adr_geom+ADR_MESHED_DATA+ 9*nb_tri; // 3 vertices of f32xyz
 
-            ui32 index = ind.z*nx*ny + ind.y*nx + ind.x;
+            f64xyz diff = fxyz_sub(exit_ind, entry_ind);
+            f64xyz l = fxyz_abs(diff);
+            ui32 length = (ui32)l.y;
+            if (l.x > length) length=(ui32)l.x;
+            if (l.z > length) length=(ui32)l.z;
+            f64 flength = 1.0 / (f64)length;
+            f64xyz finc = fxyz_scale(diff, flength);
+            f64xyz curf = entry_ind;
 
-            // DDA until to find triangles on an octree cell
-            while (geometry.data_objects[adr_octree+index] == 0) {
-                ind.x = (ui32)fpos.x;
-                ind.y = (ui32)fpos.y;
-                ind.z = (ui32)fpos.z;
+#ifdef DEBUG_OCTREE
+            printf("     Finc %f %f %f\n", finc.x, finc.y, finc.z);
+#endif
 
-                // check boundary
-                if (ind.x <0 && ind.x >= nx &&
-                    ind.y <0 && ind.y >= ny &&
-                    ind.z <0 && ind.z >= nz) {
-                    break;
+            ui16xyz curi;
+            ui32 index;
+
+            // Loop over the ray that cross the octree
+            ui16 i=0; while (i < length) {
+
+                // Get current index
+                curi.x=(ui16)curf.x; curi.y=(ui16)curf.y; curi.z=(ui16)curf.z;
+                index = curi.z*jump+curi.y*nx+curi.x;
+
+#ifdef DEBUG_OCTREE
+                printf("     Length %i Cur index %i %i %i Gbl ind %i\n", i, curi.x, curi.y, curi.z, index);
+#endif
+
+                // If any triangle is found inside the current octree cell
+                if (geometry.data_objects[adr_octree+index] != 0) {
+
+                    ui32 tri_per_cell = (ui32)geometry.data_objects[adr_octree+index];
+                    ui32 adr_to_cell = adr_octree + bigjump + index;
+                    ui32 ptr_list_tri = adr_octree + 2*bigjump + (ui32)geometry.data_objects[adr_to_cell];
+
+#ifdef DEBUG_OCTREE
+                    printf("          Find %i triangles\n", tri_per_cell);
+#endif
+
+                    ui32 icell=0; while (icell < tri_per_cell) {
+                        ui32 ptr_tri = (ui32)geometry.data_objects[ptr_list_tri + icell*9];
+                        f64xyz u = make_f64xyz((f64)geometry.data_objects[ptr_tri],
+                                               (f64)geometry.data_objects[ptr_tri+1],
+                                               (f64)geometry.data_objects[ptr_tri+2]);
+                        f64xyz v = make_f64xyz((f64)geometry.data_objects[ptr_tri+3],
+                                               (f64)geometry.data_objects[ptr_tri+4],
+                                               (f64)geometry.data_objects[ptr_tri+5]);
+                        f64xyz w = make_f64xyz((f64)geometry.data_objects[ptr_tri+6],
+                                               (f64)geometry.data_objects[ptr_tri+7],
+                                               (f64)geometry.data_objects[ptr_tri+8]);
+                        // Get distance to this triangle
+                        tri_distance = hit_ray_triangle(pos, dir, u, v, w);
+
+#ifdef DEBUG_OCTREE
+                        printf("               tri %i u %f %f %f v %f %f %f w %f %f %f\n", icell,
+                               u.x, u.y, u.z, v.x, v.y, v.z, w.x, w.y, w.z);
+#endif
+
+                        // Select the min positive value
+                        if (tri_distance >= 0 && tri_distance < distance) distance = tri_distance;
+
+                        ++icell;
+                    } // while triangle
                 }
 
-                // new index
-                index = ind.z*nx*ny + ind.y*nx + ind.x;
-                // iterate DDA line
-                fpos = f3_add(fpos, finc);
-            }
+                // Iterate the ray
+                curf = fxyz_add(curf, finc);
 
-            // if no triangle where found
-            if (geometry.data_objects[adr_octree+index] == 0) {
-                return FLT_MAX;
-            // else check every triangle contain of the octree cell
-            } else {
-                ui32 tri_per_cell = geometry.data_objects[adr_octree+index];
-                ui32 adr_to_cell = adr_octree + (nx*ny*nz) + index;
-                ui32 ptr_list_tri = adr_octree + 2*(nx*ny*nz) + geometry.data_objects[adr_to_cell];
-                ui32 i=0;
-                while (i < tri_per_cell) {
-                    ui32 ptr_tri = geometry.data_objects[ptr_list_tri + i*9];
+#ifdef DEBUG_OCTREE
+                printf("          New curf %f %f %f\n", curf.x, curf.y, curf.z);
+#endif
 
-                    f32xyz u = make_f32xyz(geometry.data_objects[ptr_tri],
-                                           geometry.data_objects[ptr_tri+1],
-                                           geometry.data_objects[ptr_tri+2]);
-                    f32xyz v = make_f32xyz(geometry.data_objects[ptr_tri+3],
-                                           geometry.data_objects[ptr_tri+4],
-                                           geometry.data_objects[ptr_tri+5]);
-                    f32xyz w = make_f32xyz(geometry.data_objects[ptr_tri+6],
-                                           geometry.data_objects[ptr_tri+7],
-                                           geometry.data_objects[ptr_tri+8]);
+                ++i;
+            } // while raycast
 
-                    // Get distance to this triangle
-                    tri_distance = hit_ray_triangle(pos, dir, u, v, w);
-                    if (tri_distance < distance) distance = tri_distance;
-
-                    ++i;
-                } // while
-            } // if triangle
-*/
         } // if regoctree
 
     } // if meshed

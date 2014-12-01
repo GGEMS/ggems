@@ -18,6 +18,10 @@
 #ifndef GLOBAL_CUH
 #define GLOBAL_CUH
 
+/////// DEBUG //////////////////////////////////////////////////
+#define DEBUG
+#define DEBUG_OCTREE
+
 /////// TYPEDEF ////////////////////////////////////////////////
 
 #ifndef SINGLE_PRECISION
@@ -46,6 +50,10 @@
     typedef uint4 ui32xyzw;
 
     typedef unsigned short int ui16;
+    typedef ushort2 ui16xy;
+    typedef ushort3 ui16xyz;
+    typedef ushort4 ui16xyzw;
+
     typedef unsigned char ui8;
 
 //    #define make_f32xy make_float2;
@@ -89,6 +97,10 @@
     typedef uint4 ui32xyzw;
 
     typedef unsigned short int ui16;
+    typedef ushort2 ui16xy;
+    typedef ushort3 ui16xyz;
+    typedef ushort4 ui16xyzw;
+
     typedef char ui8;
 
 //    #define make_f32xy make_float2;
