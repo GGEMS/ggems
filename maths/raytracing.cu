@@ -451,9 +451,9 @@ __host__ __device__ f32 hit_ray_AABB(f32xyz ray_p, f32xyz ray_d,
         if (tmin > tmax) {return F32_MAX;}
     }
 
-    // Return the smaller positive value
-    if (tmin < 0 && tmax < 0) return F32_MAX;
-    if (tmin < 0) {
+    // Return the smaller positive value diff to zero
+    if (tmin < 0 && (tmax < 0 || tmax == 0)) return F32_MAX;
+    if (tmin <= 0) {
         return tmax;
     } else {
         return tmin;
@@ -520,9 +520,9 @@ __host__ __device__ f64 hit_ray_AABB(f64xyz ray_p, f64xyz ray_d,
         if (tmin > tmax) {return F64_MAX;}
     }
 
-    // Return the smaller positive value
-    if (tmin < 0 && tmax < 0) return F64_MAX;
-    if (tmin < 0) {
+    // Return the smaller positive value diff to zero
+    if (tmin < 0 && (tmax < 0 || tmax == 0)) return F64_MAX;
+    if (tmin <= 0) {
         return tmax;
     } else {
         return tmin;

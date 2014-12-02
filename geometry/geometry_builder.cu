@@ -195,15 +195,20 @@ __host__ __device__ f64 get_distance_to_object(Scene geometry, ui32 adr_geom,
             //// First get entry and exit point within the bouding box
             f64 distance_to_in = hit_ray_AABB(pos, dir, aabb_xmin, aabb_xmax,
                                               aabb_ymin, aabb_ymax, aabb_zmin, aabb_zmax);
-            f64xyz entry_pt = fxyz_add(pos, fxyz_scale(dir, distance_to_in + EPSILON3));
+            f64xyz entry_pt = fxyz_add(pos, fxyz_scale(dir, distance_to_in));
 
             f64 distance_to_out = hit_ray_AABB(entry_pt, dir, aabb_xmin, aabb_xmax,
                                                aabb_ymin, aabb_ymax, aabb_zmin, aabb_zmax);
-            f64xyz exit_pt = fxyz_add(entry_pt, fxyz_scale(dir, distance_to_out - EPSILON3));
+            // Exception when the ray hit one of the AABB edge or corner (entry = exit point)
+            //if (distance_to_out == F64_MAX ) return distance; // FIXME
+            if (distance_to_out == DBL_MAX) {printf("EDGE\n"); return distance;}
+
+            f64xyz exit_pt = fxyz_add(entry_pt, fxyz_scale(dir, distance_to_out));
 
 #ifdef DEBUG_OCTREE
-            printf("     entry %f %f %f - exit %f %f %f\n", entry_pt.x, entry_pt.y, entry_pt.z,
-                   exit_pt.x, exit_pt.y, exit_pt.z);
+            printf("     pos %f %f %f - DistToIn %f\n", pos.x, pos.y, pos.z, distance_to_in);
+            printf("     entry %f %f %f - DistToOut %2.40f\n", entry_pt.x, entry_pt.y, entry_pt.z, distance_to_out);
+            printf("     exit %f %f %f\n", exit_pt.x, exit_pt.y, exit_pt.z);
 #endif
 
             //// Convert point into octree index

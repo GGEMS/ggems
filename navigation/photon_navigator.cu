@@ -28,7 +28,6 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, ui32 part_id,
                           ImageDetector &panel_detector,
                           HistoryBuilder &history) {
 
-
     // Read position
     f64xyz pos;
     pos.x = particles.px[part_id];
