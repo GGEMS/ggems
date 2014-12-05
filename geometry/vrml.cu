@@ -116,7 +116,7 @@ void VRML::draw_aabb(f32 xmin, f32 xmax, f32 ymin, f32 ymax, f32 zmin, f32 zmax,
     fprintf(pfile, "    Shape {\n");
     fprintf(pfile, "      appearance Appearance {\n");
     fprintf(pfile, "        material Material {\n");
-    fprintf(pfile, "          diffuseColor %f %f %f\n", color);
+    fprintf(pfile, "          diffuseColor %f %f %f\n", color.r, color.g, color.b);
     fprintf(pfile, "          transparency %f\n", transparency);
     fprintf(pfile, "        }\n");
     fprintf(pfile, "      }\n");
@@ -433,6 +433,63 @@ void VRML::write_particles(HistoryBuilder history) {
     }
 
 }
+
+
+// Export particles /////////////////////////////////////
+void VRML::write_ct(Voxelized vol) {
+
+    fprintf(pfile, "\n# Voxelized Volume with colormap\n");
+
+    // Loop over voxel
+    ui32 z, y, x, imat;
+    f32 xmin, xmax, ymin, ymax, zmin, zmax;
+    f32 id_mat;
+    std::string mat_name;
+
+    //printf("Tot mat to show %i\n", vol.show_mat.size());
+
+    // Loop over voxel
+    z=0; while (z<vol.nb_vox_z) {
+        y=0; while (y<vol.nb_vox_y) {
+            x=0; while (x<vol.nb_vox_x) {
+
+                id_mat = vol.data[z*vol.nb_vox_y*vol.nb_vox_x + y*vol.nb_vox_x + x];
+                mat_name = vol.list_of_materials[id_mat];
+
+                //printf("val %f name %s\n", id_mat, mat_name.c_str());
+
+                // Loop over assigned color
+                imat=0; while (imat < vol.show_mat.size()) {
+
+                    //printf("   -> %s\n", vol.show_mat[imat].c_str());
+
+                    // If in the range
+                    if (mat_name == vol.show_mat[imat]) {
+                        //printf("      ok\n");
+                        // Get voxel position and draw it
+                        xmin = x*vol.spacing_x + vol.xmin;
+                        xmax = xmin + vol.spacing_x;
+                        ymin = y*vol.spacing_y + vol.ymin;
+                        ymax = ymin + vol.spacing_y;
+                        zmin = z*vol.spacing_z + vol.zmin;
+                        zmax = zmin + vol.spacing_z;
+                        draw_aabb(xmin, xmax, ymin, ymax, zmin, zmax, vol.show_colors[imat], vol.show_transparencies[imat]);
+                    }
+
+                    ++imat;
+                } // imap
+
+                ++x;
+            } // x
+
+            ++y;
+        } // y
+
+        ++z;
+    } // z
+}
+
+
 
 
 // Close the VRML file

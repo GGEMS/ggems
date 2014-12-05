@@ -31,6 +31,7 @@ class VRML {
         void write_geometry(GeometryBuilder geometry);
         void write_sources(SourceBuilder sources);
         void write_particles(HistoryBuilder history);
+        void write_ct(Voxelized volume);
         void close();
     private:
         FILE *pfile;

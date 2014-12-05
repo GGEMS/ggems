@@ -873,8 +873,9 @@ void GeometryBuilder::build_object(Voxelized obj) {
     }
 
     // Now convert every material ID contains on the voxelized volume
+    f32 *newdata = (f32*)malloc(sizeof(f32) * obj.number_of_voxels);
     i=0; while (i < obj.number_of_voxels) {
-        obj.data[i] = new_id[obj.data[i]];
+        newdata[i] = new_id[obj.data[i]];
         ++i;
     }
     /////
@@ -903,7 +904,7 @@ void GeometryBuilder::build_object(Voxelized obj) {
     array_push_back(&world.data_objects, world.data_objects_dim, obj.spacing_y);
     array_push_back(&world.data_objects, world.data_objects_dim, obj.spacing_z);
     // Finally append voxelized data into the world
-    array_append_array(&world.data_objects, world.data_objects_dim, &(obj.data), obj.number_of_voxels);
+    array_append_array(&world.data_objects, world.data_objects_dim, &(newdata), obj.number_of_voxels);
 
     // Name of this object
     name_objects.push_back(obj.object_name);
@@ -916,6 +917,8 @@ void GeometryBuilder::build_object(Voxelized obj) {
     // Store the size of this object
     array_push_back(&world.size_of_objects, world.size_of_objects_dim, obj.number_of_voxels+SIZE_VOXELIZED_OBJ);
 
+    // Free memory
+    free(newdata);
 }
 
 // Build meshed object into the scene structure

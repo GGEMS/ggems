@@ -31,7 +31,7 @@ class Voxelized : public BaseObject {
 
         void load_from_mhd(std::string volume_name, std::string range_name);
 
-        void set_object_name(std::string objname);
+        void set_color_map(std::string matname, Color col, f32 alpha);
 
         f32 *data;
 
@@ -41,6 +41,11 @@ class Voxelized : public BaseObject {
         f32 spacing_x, spacing_y, spacing_z;
 
         std::vector<std::string> list_of_materials;
+
+        // Only for display purpose
+        std::vector<std::string> show_mat;
+        std::vector<Color> show_colors;
+        std::vector<f32> show_transparencies;
 
     private:
         void define_materials_from_range(f32 *raw_data, std::string range_name);

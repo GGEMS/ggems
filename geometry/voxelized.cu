@@ -128,11 +128,12 @@ f32 Voxelized::read_mhd_f32_atpos(std::string txt, i32 pos) {
     return res;
 }
 
-
+/* TODO Remove this
 // Give a name to this object
 void Voxelized::set_object_name(std::string objname) {
     object_name = objname;
 }
+*/
 
 // Convert range data into material ID
 void Voxelized::define_materials_from_range(f32 *raw_data, std::string range_name) {
@@ -158,7 +159,7 @@ void Voxelized::define_materials_from_range(f32 *raw_data, std::string range_nam
             stop  = read_stop_range(line);
             mat_name = read_mat_range(line);
             list_of_materials.push_back(mat_name);
-            //printf("MAT %s \n",mat_name.c_str());
+            //printf("IND %i MAT %s \n", mat_index, mat_name.c_str());
 
             // build labeled phantom according range data
             i=0; while (i < number_of_voxels) {
@@ -351,6 +352,13 @@ void Voxelized::load_from_mhd(std::string volume_name, std::string range_name) {
     ymin = -h_lengthy; ymax = h_lengthy;
     zmin = -h_lengthz; zmax = h_lengthz;
 
+}
+
+// Define which material to display in the viewer (VRML) and how
+void Voxelized::set_color_map(std::string matname, Color col, f32 alpha) {
+    show_mat.push_back(matname);
+    show_colors.push_back(col);
+    show_transparencies.push_back(alpha);
 }
 
 #endif
