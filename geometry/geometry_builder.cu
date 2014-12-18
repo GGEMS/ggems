@@ -149,11 +149,15 @@ __host__ __device__ f64 get_distance_to_object(Scene geometry, ui32 adr_geom,
 
         ui32 octree_type = geometry.data_objects[adr_geom+ADR_MESHED_OCTREE_TYPE];
 
+#ifdef DEBUG
+        printf("     Ray not hit the Mesh AABB %f %f | %f %f | %f %f\n", aabb_xmin, aabb_xmax,
+               aabb_ymin, aabb_ymax, aabb_zmin, aabb_zmax);
+#endif
         // First check the bounding box that contains the mesh
         if (!test_ray_AABB(pos, dir, aabb_xmin, aabb_xmax,
                            aabb_ymin, aabb_ymax, aabb_zmin, aabb_zmax)) return F64_MAX;
 
-#ifdef DEBUG_OCTREE
+#ifdef DEBUG
         printf("     Hit Mesh AABB %f %f | %f %f | %f %f\n", aabb_xmin, aabb_xmax,
                aabb_ymin, aabb_ymax, aabb_zmin, aabb_zmax);
 #endif
@@ -192,21 +196,34 @@ __host__ __device__ f64 get_distance_to_object(Scene geometry, ui32 adr_geom,
             printf("     Reg Octree\n");
 #endif
 
-            //// First get entry and exit point within the bouding box
-            f64 distance_to_in = hit_ray_AABB(pos, dir, aabb_xmin, aabb_xmax,
-                                              aabb_ymin, aabb_ymax, aabb_zmin, aabb_zmax);
-            f64xyz entry_pt = fxyz_add(pos, fxyz_scale(dir, distance_to_in));
+            //// Compute the two point use to perform the raycast within the octree
 
+            // If inside the octree, use the current position as entry point
+            // else get the entry point that intersect the bouding box
+            f64xyz entry_pt, exit_pt;
+
+            // Inside
+            if (test_point_AABB(pos, aabb_xmin, aabb_xmax, aabb_ymin, aabb_ymax, aabb_zmin, aabb_zmax)) {
+                entry_pt = pos;
+            // Outside
+            } else {
+                f64 distance_to_in = hit_ray_AABB(pos, dir, aabb_xmin, aabb_xmax,
+                                                  aabb_ymin, aabb_ymax, aabb_zmin, aabb_zmax);
+                entry_pt = fxyz_add(pos, fxyz_scale(dir, distance_to_in));
+            }
+
+            // Get the exit point
             f64 distance_to_out = hit_ray_AABB(entry_pt, dir, aabb_xmin, aabb_xmax,
                                                aabb_ymin, aabb_ymax, aabb_zmin, aabb_zmax);
             // Exception when the ray hit one of the AABB edge or corner (entry = exit point)
             //if (distance_to_out == F64_MAX ) return distance; // FIXME
             if (distance_to_out == DBL_MAX) {printf("EDGE\n"); return distance;}
 
-            f64xyz exit_pt = fxyz_add(entry_pt, fxyz_scale(dir, distance_to_out));
+            exit_pt = fxyz_add(entry_pt, fxyz_scale(dir, distance_to_out));
 
 #ifdef DEBUG_OCTREE
-            printf("     pos %f %f %f - DistToIn %f\n", pos.x, pos.y, pos.z, distance_to_in);
+            printf("     pos %f %f %f\n", pos.x, pos.y, pos.z);
+            printf("     dir %f %f %f\n", dir.x, dir.y, dir.z);
             printf("     entry %f %f %f - DistToOut %2.40f\n", entry_pt.x, entry_pt.y, entry_pt.z, distance_to_out);
             printf("     exit %f %f %f\n", exit_pt.x, exit_pt.y, exit_pt.z);
 #endif
@@ -237,6 +254,19 @@ __host__ __device__ f64 get_distance_to_object(Scene geometry, ui32 adr_geom,
             exit_ind.y /= s.y;
             exit_ind.z /= s.z;
 
+            // Cast index while entry/exit point is on the last slice (must be < nx | ny | nz)
+            ui32 nx = geometry.data_objects[adr_geom+ADR_MESHED_OCTREE_NX];
+            ui32 ny = geometry.data_objects[adr_geom+ADR_MESHED_OCTREE_NY];
+            ui32 nz = geometry.data_objects[adr_geom+ADR_MESHED_OCTREE_NZ];
+
+            if (entry_ind.x >= nx) entry_ind.x = nx-1;
+            if (entry_ind.y >= ny) entry_ind.y = ny-1;
+            if (entry_ind.z >= nz) entry_ind.z = nz-1;
+
+            if (exit_ind.x >= nx) exit_ind.x = nx-1;
+            if (exit_ind.y >= ny) exit_ind.y = ny-1;
+            if (exit_ind.z >= nz) exit_ind.z = nz-1;
+
 #ifdef DEBUG_OCTREE
             printf("     Ind entry %f %f %f exit %f %f %f\n", entry_ind.x, entry_ind.y, entry_ind.z,
                    exit_ind.x, exit_ind.y, exit_ind.z);
@@ -244,9 +274,7 @@ __host__ __device__ f64 get_distance_to_object(Scene geometry, ui32 adr_geom,
 
             //// Cross the octree with a raycast (DDA algorithm)
 
-            ui32 nx = geometry.data_objects[adr_geom+ADR_MESHED_OCTREE_NX];
-            ui32 ny = geometry.data_objects[adr_geom+ADR_MESHED_OCTREE_NY];
-            ui32 nz = geometry.data_objects[adr_geom+ADR_MESHED_OCTREE_NZ];
+
             ui32 jump = ny*nx;
             ui32 bigjump = jump*nz;
             ui32 nb_tri = geometry.data_objects[adr_geom+ADR_MESHED_NB_TRIANGLES];
@@ -277,21 +305,28 @@ __host__ __device__ f64 get_distance_to_object(Scene geometry, ui32 adr_geom,
 
 #ifdef DEBUG_OCTREE
                 printf("     Length %i Cur index %i %i %i Gbl ind %i\n", i, curi.x, curi.y, curi.z, index);
+                printf("     Cell x %f %f y %f %f z %f %f\n", curi.x*s.x+aabb_xmin, curi.x*s.x+aabb_xmin+s.x,
+                       curi.y*s.y+aabb_ymin, curi.y*s.y+aabb_ymin+s.y,
+                       curi.z*s.z+aabb_zmin, curi.z*s.z+aabb_zmin+s.z);
 #endif
 
                 // If any triangle is found inside the current octree cell
                 if (geometry.data_objects[adr_octree+index] != 0) {
 
                     ui32 tri_per_cell = (ui32)geometry.data_objects[adr_octree+index];
+                    // bigjump => skip NbObjsPerCell data
                     ui32 adr_to_cell = adr_octree + bigjump + index;
+                    // 2*bigjump = > skip NbObjsPerCell and AddrToCell data
                     ui32 ptr_list_tri = adr_octree + 2*bigjump + (ui32)geometry.data_objects[adr_to_cell];
 
 #ifdef DEBUG_OCTREE
-                    printf("          Find %i triangles\n", tri_per_cell);
+                    printf("          Find %i triangles @%i\n", tri_per_cell, (ui32)geometry.data_objects[adr_to_cell]);
+                    printf("          @ListObjects %i\n", adr_octree + 2*bigjump);
 #endif
 
                     ui32 icell=0; while (icell < tri_per_cell) {
-                        ui32 ptr_tri = (ui32)geometry.data_objects[ptr_list_tri + icell*9];
+                        //                                       9 vertices x Triangle index
+                        ui32 ptr_tri = adr_geom+ADR_MESHED_DATA+ 9*(ui32)geometry.data_objects[ptr_list_tri + icell];
                         f64xyz u = make_f64xyz((f64)geometry.data_objects[ptr_tri],
                                                (f64)geometry.data_objects[ptr_tri+1],
                                                (f64)geometry.data_objects[ptr_tri+2]);
@@ -305,8 +340,11 @@ __host__ __device__ f64 get_distance_to_object(Scene geometry, ui32 adr_geom,
                         tri_distance = hit_ray_triangle(pos, dir, u, v, w);
 
 #ifdef DEBUG_OCTREE
+                        printf("               Index triangle %i\n", (ui32)geometry.data_objects[ptr_list_tri + icell]);
+                        printf("               @Triangle %i\n", ptr_tri);
                         printf("               tri %i u %f %f %f v %f %f %f w %f %f %f\n", icell,
                                u.x, u.y, u.z, v.x, v.y, v.z, w.x, w.y, w.z);
+                        printf("                  => dist %f\n", tri_distance);
 #endif
 
                         // Select the min positive value
@@ -398,6 +436,10 @@ __host__ __device__ void get_next_geometry_boundary(Scene geometry, ui32 cur_geo
             // Any other volumes
             distance = get_distance_to_object(geometry, adr_child_geom, obj_type, pos, dir);
         }
+
+#ifdef DEBUG
+        printf("      Check children: %i type %i dist %f\n", id_child_geom, obj_type, distance);
+#endif
 
         if (distance <= interaction_distance) {
             interaction_distance = distance;// + EPSILON3; // overshoot
@@ -952,6 +994,8 @@ void GeometryBuilder::build_object(Meshed obj) {
     array_push_back(&world.data_objects, world.data_objects_dim, obj.cell_size_z);
 
     // Append triangles into the world
+    //printf("====> @Vertices %i\n", world.data_objects_dim); // DEBUG
+    //printf("====>  Vertice @200 tri: %f\n", obj.vertices[9*200]);
     array_append_array(&world.data_objects, world.data_objects_dim, &obj.vertices, 3*obj.number_of_vertices); // xyz
 
     // Finally append the octree if defined
@@ -966,6 +1010,9 @@ void GeometryBuilder::build_object(Meshed obj) {
 
         // Append the list of objects per cell
         tmp = &obj.list_objs_per_cell[0];
+        //printf("====> @ListObjs %i cal@40 %f %f %f\n", world.data_objects_dim, obj.list_objs_per_cell[40],
+        //       obj.list_objs_per_cell[41], obj.list_objs_per_cell[42]);
+
         array_append_array(&world.data_objects, world.data_objects_dim, &tmp, obj.list_objs_per_cell.size());
     }
 

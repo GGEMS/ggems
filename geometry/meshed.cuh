@@ -42,8 +42,8 @@ class Meshed : public BaseObject {
 
         void scale(f32xyz s);
         void scale(f32 sx, f32 sy, f32 sz);
-        void rotate(f32xyz r);
-        void rotate(f32 phi, f32 theta, f32 psi);
+        //void rotate(f32xyz r);
+        //void rotate(f32 phi, f32 theta, f32 psi);
         void translate(f32xyz t);
         void translate(f32 tx, f32 ty, f32 tz);
 

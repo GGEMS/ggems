@@ -116,6 +116,16 @@ void Meshed::build_regular_octree(ui32 nx, ui32 ny, ui32 nz) {
                         // Save triangle index and count the total number of triangles per cell
                         list_objs_per_cell.push_back(itri);
                         ++ct_tri;
+
+//                        // DEBUG
+//                        if (cell_ix==10 && cell_iy==7 && cell_iz==0) {
+//                            printf("===============================\n");
+//                            printf("U: %f %f %f\n", u.x, u.y, u.z);
+//                            printf("V: %f %f %f\n", v.x, v.y, v.z);
+//                            printf("W: %f %f %f\n", w.x, w.y, w.z);
+//                            printf("Cur cell adr %i\n", cur_cell_index);
+//                            printf("Index tri %i\n", itri);
+//                        }
                     }
                     ++itri;
                 }
@@ -444,6 +454,14 @@ void Meshed::scale(f32xyz s) {
 
         ++i;
     }
+
+    // The bounding box have to be scale as well
+    xmin *= s.x;
+    xmax *= s.x;
+    ymin *= s.y;
+    ymax *= s.y;
+    zmin *= s.z;
+    zmax *= s.z;
 }
 
 // Scaling
@@ -452,6 +470,7 @@ void Meshed::scale(f32 sx, f32 sy, f32 sz) {
     scale(s);
 }
 
+/*
 // Rotation
 void Meshed::rotate(f32xyz r) {
 
@@ -487,6 +506,9 @@ void Meshed::rotate(f32xyz r) {
         ++i;
     }
 
+    // TODO
+    // The bounding box have to be translate as well
+
 }
 
 // Rotation
@@ -494,6 +516,7 @@ void Meshed::rotate(f32 phi, f32 theta, f32 psi) {
     f32xyz r = {phi, theta, psi};
     rotate(r);
 }
+*/
 
 // Translation
 void Meshed::translate(f32xyz t) {
@@ -512,6 +535,14 @@ void Meshed::translate(f32xyz t) {
 
         ++i;
     }
+
+    // The bounding box have to be translate as well
+    xmin += t.x;
+    xmax += t.x;
+    ymin += t.y;
+    ymax += t.y;
+    zmin += t.z;
+    zmax += t.z;
 
 }
 

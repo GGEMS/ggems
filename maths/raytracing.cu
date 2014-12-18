@@ -753,17 +753,17 @@ __host__ __device__ f64 hit_ray_triangle(f64xyz ray_p, f64xyz ray_d,
 
     f64xyz pp = fxyz_cross(ray_d, e2);
     f64  a  = fxyz_dot(e1, pp);
-    if (a > -1.0e-05f && a < 1.0e-05f) {return F64_MAX;} // no hit
+    if (a > -1.0e-06 && a < 1.0e-06) {return F64_MAX;} // no hit
 
-    f64 f = 1.0f / a;
+    f64 f = 1.0 / a;
 
     f64xyz s = fxyz_sub(ray_p, tri_u);
     f64  u = f * fxyz_dot(s, pp);
-    if (u < 0.0f || u > 1.0f) {return F64_MAX;}
+    if (u < 0.0 || u > 1.0) {return F64_MAX;}
 
     f64xyz q = fxyz_cross(s, e1);
     f64  v = f * fxyz_dot(ray_d, q);
-    if (v < 0.0f || (u+v) > 1.0f) {return F64_MAX;}
+    if (v < 0.0 || (u+v) > 1.0) {return F64_MAX;}
 
     // Ray hit the triangle
     return f * fxyz_dot(e2, q);

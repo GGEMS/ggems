@@ -50,6 +50,7 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, ui32 part_id,
     printf("  begin %i\n", part_id);
     printf("     Cur id geom %i mat %i\n", cur_id_geom, id_mat);
     printf("     InitPos %f %f %f\n", pos.x, pos.y, pos.z);
+    printf("     Energy %f\n", particles.E[part_id]);
 #endif
 
     //// Find next discrete interaction ///////////////////////////////////////
@@ -75,6 +76,9 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, ui32 part_id,
         cross_section = get_CS_from_table(photon_CS_table.E_bins, photon_CS_table.Photoelectric_Std_CS,
                                           particles.E[part_id], E_index, id_mat, photon_CS_table.nb_bins);
         interaction_distance = -log( JKISS32(particles, part_id) ) / cross_section;
+#ifdef DEBUG
+        printf(" Photoelectric: CS %e dist %e\n", cross_section, interaction_distance);
+#endif
         if (interaction_distance < next_interaction_distance) {
             next_interaction_distance = interaction_distance;
             next_discrete_process = PHOTON_PHOTOELECTRIC;
@@ -87,6 +91,9 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, ui32 part_id,
         cross_section = get_CS_from_table(photon_CS_table.E_bins, photon_CS_table.Compton_Std_CS,
                                           particles.E[part_id], E_index, id_mat, photon_CS_table.nb_bins);
         interaction_distance = -log( JKISS32(particles, part_id) ) / cross_section;
+#ifdef DEBUG
+        printf(" Compton: CS %e dist %e\n", cross_section, interaction_distance);
+#endif
         if (interaction_distance < next_interaction_distance) {
             next_interaction_distance = interaction_distance;
             next_discrete_process = PHOTON_COMPTON;
@@ -98,6 +105,9 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, ui32 part_id,
         cross_section = get_CS_from_table(photon_CS_table.E_bins, photon_CS_table.Rayleigh_Lv_CS,
                                           particles.E[part_id], E_index, id_mat, photon_CS_table.nb_bins);
         interaction_distance = -log( JKISS32(particles, part_id) ) / cross_section;
+#ifdef DEBUG
+        printf(" Rayleigh: CS %e dist %e\n", cross_section, interaction_distance);
+#endif
         if (interaction_distance < next_interaction_distance) {
             next_interaction_distance = interaction_distance;
             next_discrete_process = PHOTON_RAYLEIGH;
@@ -111,6 +121,9 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, ui32 part_id,
 
     ui32 hit_id_geom = 0;
     get_next_geometry_boundary(geometry, cur_id_geom, pos, dir, interaction_distance, hit_id_geom);
+#ifdef DEBUG
+        printf(" Geom: dist %e\n", interaction_distance);
+#endif
     if (interaction_distance <= next_interaction_distance) {
         next_interaction_distance = interaction_distance + EPSILON3; // Overshoot
         next_discrete_process = GEOMETRY_BOUNDARY;
@@ -244,7 +257,9 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, ui32 part_id,
     // If a detector is defined
     if (panel_detector.data != NULL) {
         if (next_geometry_volume == panel_detector.geometry_id) {
-
+#ifdef DEBUG
+        printf(" Detector\n");
+#endif
             // Change particle frame (into voxelized volume)
             pos.x -= (f64)panel_detector.xmin;
             pos.y -= (f64)panel_detector.ymin;
