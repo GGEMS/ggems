@@ -47,6 +47,16 @@ __host__ __device__ void point_source_primary_generator(ParticleStack particles,
 }
 
 
+PointSource::PointSource(f32 vpx, f32 vpy, f32 vpz, f32 vE, ui32 vseed, std::string vname, ui32 vgeom_id) {
+
+    // Default parameters
+    px = vpx; py = vpy; pz = vpz;
+    energy = vE;
+    source_name = vname;
+    seed = vseed;
+    geometry_id = vgeom_id;
+}
+
 PointSource::PointSource() {
 
     // Default parameters

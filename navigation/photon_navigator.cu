@@ -25,7 +25,7 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, ui32 part_id,
                           Scene geometry, MaterialsTable materials,
                           PhotonCrossSectionTable photon_CS_table,
                           GlobalSimulationParameters parameters,
-                          ImageDetector &panel_detector,
+                          Singles &singles,
                           HistoryBuilder &history) {
 
     // Read position
@@ -45,6 +45,9 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, ui32 part_id,
 
     // Get the material that compose this volume
     ui32 id_mat = get_geometry_material(geometry, cur_id_geom, pos);
+
+    // TODO
+    // add char sensitive_flag = geometry_is_sensitive() && parameters.sensitive_flag
 
 #ifdef DEBUG
     printf("  begin %i\n", part_id);
@@ -252,42 +255,9 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, ui32 part_id,
     // Local deposition if this photon was absorbed
     //if (particles.endsimu[part_id] == PARTICLE_DEAD) discrete_loss = particles.E[part_id];
 
-    //// Handle detector ////////////////////////////////////////
+    // TODO
+    //// Handle sensitive object ////////////////////////////////////////
 
-    // If a detector is defined
-    if (panel_detector.data != NULL) {
-        if (next_geometry_volume == panel_detector.geometry_id) {
-#ifdef DEBUG
-        printf(" Detector\n");
-#endif
-            // Change particle frame (into voxelized volume)
-            pos.x -= (f64)panel_detector.xmin;
-            pos.y -= (f64)panel_detector.ymin;
-            pos.z -= (f64)panel_detector.zmin;
-            // Get the voxel index
-            ui32xyz ind;
-            ind.x = (ui32)(pos.x / (f64)panel_detector.sx);
-            ind.y = (ui32)(pos.y / (f64)panel_detector.sy);
-            ind.z = (ui32)(pos.z / (f64)panel_detector.sz);
-            // Assertion
-            assert(ind.x < panel_detector.nx);
-            assert(ind.y < panel_detector.ny);
-            assert(ind.z < panel_detector.nz);
-            // Count a hit
-            ui32 abs_ind = ind.z * (panel_detector.nx*panel_detector.ny) +
-                                   ind.y * panel_detector.nx +
-                                   ind.x;
-            panel_detector.data[abs_ind] += 1.0f;
-            panel_detector.countp++;
-
-            //printf("Ct in %i\n", panel_detector.countp);
-
-            // FIXME - Kill the particle for a simple simulation
-            //         usually each hit have to be stored within the detector
-            particles.endsimu[part_id] = PARTICLE_DEAD;
-
-        }
-    }
 
 
     // Record this step if required

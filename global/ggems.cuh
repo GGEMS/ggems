@@ -33,6 +33,7 @@
 #include "meshed.cuh"
 #include "voxelized.cuh"
 #include "point_source.cuh"
+#include "singles.cuh"
 
 #include "main_navigator.cuh"
 
@@ -62,6 +63,7 @@ class SimulationBuilder {
         void set_secondary(std::string pname);
         void set_number_of_particles(ui32 nb);
         void set_max_number_of_iterations(ui32 nb);
+        void set_record_single(bool val);
         void set_record_history(ui32 nb_particles);
         void set_CS_table_nbins(ui32 valbin);
         void set_CS_table_E_min(f32 valE);
@@ -82,8 +84,7 @@ class SimulationBuilder {
         SourceBuilder sources;
         GlobalSimulationParameters parameters;
         CrossSectionsBuilder cs_tables;
-
-        FlatPanelDetector detector; // FIXME sould be a detector
+        Singles singles;
 
         // Record history for some particles (only CPU version)
         HistoryBuilder history;
@@ -93,9 +94,6 @@ class SimulationBuilder {
         // Main functions
         void cpu_primaries_generator();
         void cpu_main_navigation();
-
-        // Checker
-        bool detector_set;
 
 };
 

@@ -23,6 +23,7 @@
 #include "cross_sections_builder.cuh"
 #include "materials.cuh"
 #include "global.cuh"
+#include "singles.cuh"
 
 #include "geometry_builder.cuh"
 #include "aabb.cuh"
@@ -41,7 +42,7 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, ui32 part_id,
                           Scene geometry, MaterialsTable materials,
                           PhotonCrossSectionTable photon_CS_table,
                           GlobalSimulationParameters parameters,
-                          ImageDetector &panel_detector,
+                          Singles &singles,
                           HistoryBuilder &history);
 
 

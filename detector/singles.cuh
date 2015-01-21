@@ -15,36 +15,22 @@
 //
 // GGEMS Copyright (C) 2013-2014 Julien Bert
 
-#ifndef BASE_OBJECT_CUH
-#define BASE_OBJECT_CUH
+#ifndef SINGLES_CUH
+#define SINGLES_CUH
 
+#include "constants.cuh"
 #include "global.cuh"
 
-// Class that define the base of every object in GGEMS
-class BaseObject {
-    public:
-        BaseObject();
-
-        void set_material(std::string mat_name);
-        void set_name(std::string obj_name);
-        void set_color(f32 r, f32 g, f32 b);
-        void set_transparency(f32 val);
-        void set_wireframe(bool val);
-        void set_sensitive(bool val);
-
-        // Bounding box
-        f32 xmin, xmax, ymin, ymax, zmin, zmax;
-        // Viewing
-        Color color;
-        f32 transparency;
-        bool wireframe;
-        // Property
-        std::string material_name;
-        std::string object_name;
-        // Sensitive
-        bool sensitive;
-
-    private:
+// Struct that handle singles
+struct Singles {
+    f32 *px;
+    f32 *py;
+    f32 *pz;
+    f32 *E;
+    f32 *tof;
+    ui32 *geometry_id;
+    ui32 *nb_hits;
+    ui32 size;
 };
 
 #endif

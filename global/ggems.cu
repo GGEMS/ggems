@@ -38,11 +38,9 @@ SimulationBuilder::SimulationBuilder() {
     }
 
     parameters.record_dose_flag = DISABLED;
+    parameters.record_singles_flag = DISABLED;
     history.record_flag = DISABLED;
 
-    // Optional object (FIXME)
-    detector.panel_detector.data = NULL;
-    detector_set = false;
 }
 
 ////// :: Main functions ::
@@ -109,7 +107,7 @@ void SimulationBuilder::cpu_main_navigation() {
 
     cpu_main_navigator(particles.stack, geometry.world,
                        materials.materials_table, cs_tables.photon_CS_table, parameters,
-                       detector.panel_detector, history);
+                       singles, history);
 
 }
 
@@ -134,12 +132,6 @@ void SimulationBuilder::set_particles(ParticleBuilder p) {
 // Set the list of sources
 void SimulationBuilder::set_sources(SourceBuilder src) {
     sources = src;
-}
-
-// Set a detector // FIXME
-void SimulationBuilder::set_detector(FlatPanelDetector vdetector) {
-    detector = vdetector;
-    detector_set = true;
 }
 
 // Set the hardware used for the simulation CPU or GPU (CPU by default)
@@ -217,14 +209,15 @@ void SimulationBuilder::set_record_history(ui32 nb_particles) {
     history.stack_size = particles.stack.size;
 }
 
+// Set to record singles witin sensitive object
+void SimulationBuilder::set_record_single(bool val) {
+    parameters.record_singles_flag = (char)val;
+}
+
 ////// :: Getting ::
 
 ParticleBuilder SimulationBuilder::get_particles() {
     return particles;
-}
-
-FlatPanelDetector SimulationBuilder::get_detector() {
-    return detector;
 }
 
 ////// :: Command ::
@@ -277,22 +270,16 @@ void SimulationBuilder::init_simulation() {
     cs_tables.build_table(materials.materials_table, parameters);
     //cs_tables.print();
 
-    // Init detector if setting up
-    if (detector_set) {
-
-        ui32 adr_geom = geometry.world.ptr_objects[detector.panel_detector.geometry_id];
-
-        // Read first the bounding box
-        f32 xmin = geometry.world.data_objects[adr_geom+ADR_AABB_XMIN];
-        f32 xmax = geometry.world.data_objects[adr_geom+ADR_AABB_XMAX];
-        f32 ymin = geometry.world.data_objects[adr_geom+ADR_AABB_YMIN];
-        f32 ymax = geometry.world.data_objects[adr_geom+ADR_AABB_YMAX];
-        f32 zmin = geometry.world.data_objects[adr_geom+ADR_AABB_ZMIN];
-        f32 zmax = geometry.world.data_objects[adr_geom+ADR_AABB_ZMAX];
-
-        // Init and allocate the image of the flat panel detector
-        detector.init(xmin, xmax, ymin, ymax, zmin, zmax);
-
+    // init Singles list
+    if (parameters.record_singles_flag) {
+        singles.size = particles.stack.size;
+        singles.px = (f32*)malloc(singles.size*sizeof(f32));
+        singles.py = (f32*)malloc(singles.size*sizeof(f32));
+        singles.pz = (f32*)malloc(singles.size*sizeof(f32));
+        singles.E = (f32*)malloc(singles.size*sizeof(f32));
+        singles.tof = (f32*)malloc(singles.size*sizeof(f32));
+        singles.geometry_id = (ui32*)malloc(singles.size*sizeof(ui32));
+        singles.nb_hits = (ui32*)malloc(singles.size*sizeof(ui32));
     }
 
 }

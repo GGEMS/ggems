@@ -65,4 +65,8 @@ void BaseObject::set_wireframe(bool val) {
     wireframe = val;
 }
 
+void BaseObject::set_sensitive(bool val) {
+    sensitive = val;
+}
+
 #endif

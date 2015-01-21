@@ -21,6 +21,7 @@
 #include "global.cuh"
 #include "constants.cuh"
 #include "particles.cuh"
+#include "singles.cuh"
 #include "cross_sections_builder.cuh"
 #include "geometry_builder.cuh"
 #include "flat_panel_detector.cuh" // FIXME
@@ -30,7 +31,7 @@
 void cpu_main_navigator(ParticleStack &particles, Scene geometry,
                         MaterialsTable materials, PhotonCrossSectionTable photon_CS_table,
                         GlobalSimulationParameters parameters,
-                        ImageDetector &panel_detector,
+                        Singles &singles,
                         HistoryBuilder &history);
 
 #endif

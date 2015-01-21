@@ -841,7 +841,9 @@ void GeometryBuilder::build_object(Aabb obj) {
     array_push_back(&world.data_objects, world.data_objects_dim, (f32)AABB);
     // Material index
     array_push_back(&world.data_objects, world.data_objects_dim, (f32)get_material_index(obj.material_name));
-     // AABB parameters
+    // Object sensitive
+    array_push_back(&world.data_objects, world.data_objects_dim, (f32)obj.sensitive);
+    // AABB parameters
     array_push_back(&world.data_objects, world.data_objects_dim, obj.xmin);
     array_push_back(&world.data_objects, world.data_objects_dim, obj.xmax);
     array_push_back(&world.data_objects, world.data_objects_dim, obj.ymin);
@@ -872,7 +874,9 @@ void GeometryBuilder::build_object(Sphere obj) {
     array_push_back(&world.data_objects, world.data_objects_dim, (f32)SPHERE);
     // Material index
     array_push_back(&world.data_objects, world.data_objects_dim, (f32)get_material_index(obj.material_name));
-     // AABB parameters
+    // Object sensitive
+    array_push_back(&world.data_objects, world.data_objects_dim, (f32)obj.sensitive);
+    // AABB parameters
     array_push_back(&world.data_objects, world.data_objects_dim, obj.xmin);
     array_push_back(&world.data_objects, world.data_objects_dim, obj.xmax);
     array_push_back(&world.data_objects, world.data_objects_dim, obj.ymin);
@@ -931,6 +935,8 @@ void GeometryBuilder::build_object(Voxelized obj) {
     array_push_back(&world.data_objects, world.data_objects_dim, (f32)VOXELIZED);
     // Material index
     array_push_back(&world.data_objects, world.data_objects_dim, -1.0f); // // Heterogeneous material
+    // Object sensitive
+    array_push_back(&world.data_objects, world.data_objects_dim, (f32)obj.sensitive);
     // AABB parameters
     array_push_back(&world.data_objects, world.data_objects_dim, obj.xmin);
     array_push_back(&world.data_objects, world.data_objects_dim, obj.xmax);
@@ -975,6 +981,8 @@ void GeometryBuilder::build_object(Meshed obj) {
     array_push_back(&world.data_objects, world.data_objects_dim, (f32)MESHED);
     // Material index
     array_push_back(&world.data_objects, world.data_objects_dim, (f32)get_material_index(obj.material_name));
+    // Object sensitive
+    array_push_back(&world.data_objects, world.data_objects_dim, (f32)obj.sensitive);
     // AABB parameters
     array_push_back(&world.data_objects, world.data_objects_dim, obj.xmin);
     array_push_back(&world.data_objects, world.data_objects_dim, obj.xmax);

@@ -157,6 +157,7 @@ struct GlobalSimulationParameters {
     char physics_list[NB_PROCESSES];
     char secondaries_list[NB_PARTICLES];
     char record_dose_flag;
+    char record_singles_flag;
 
     unsigned int nb_of_particles;
     unsigned int nb_iterations;

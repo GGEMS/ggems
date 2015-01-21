@@ -33,41 +33,42 @@
 // Address of the header for the geometry structure
 #define ADR_OBJ_TYPE 0
 #define ADR_OBJ_MAT_ID 1
-#define ADR_AABB_XMIN 2
-#define ADR_AABB_XMAX 3
-#define ADR_AABB_YMIN 4
-#define ADR_AABB_YMAX 5
-#define ADR_AABB_ZMIN 6
-#define ADR_AABB_ZMAX 7
+#define ADR_OBJ_SENSITIVE 2
+#define ADR_AABB_XMIN 3
+#define ADR_AABB_XMAX 4
+#define ADR_AABB_YMIN 5
+#define ADR_AABB_YMAX 6
+#define ADR_AABB_ZMIN 7
+#define ADR_AABB_ZMAX 8
 
-#define ADR_SPHERE_CX 8
-#define ADR_SPHERE_CY 9
-#define ADR_SPHERE_CZ 10
-#define ADR_SPHERE_RADIUS 11
+#define ADR_SPHERE_CX 9
+#define ADR_SPHERE_CY 10
+#define ADR_SPHERE_CZ 11
+#define ADR_SPHERE_RADIUS 12
 
-#define ADR_VOXELIZED_NX 8
-#define ADR_VOXELIZED_NY 9
-#define ADR_VOXELIZED_NZ 10
-#define ADR_VOXELIZED_SX 11
-#define ADR_VOXELIZED_SY 12
-#define ADR_VOXELIZED_SZ 13
-#define ADR_VOXELIZED_DATA 14
+#define ADR_VOXELIZED_NX 9
+#define ADR_VOXELIZED_NY 10
+#define ADR_VOXELIZED_NZ 11
+#define ADR_VOXELIZED_SX 12
+#define ADR_VOXELIZED_SY 13
+#define ADR_VOXELIZED_SZ 14
+#define ADR_VOXELIZED_DATA 15
 
-#define ADR_MESHED_NB_VERTICES 8
-#define ADR_MESHED_NB_TRIANGLES 9
-#define ADR_MESHED_OCTREE_TYPE 10
-#define ADR_MESHED_OCTREE_NX 11
-#define ADR_MESHED_OCTREE_NY 12
-#define ADR_MESHED_OCTREE_NZ 13
-#define ADR_MESHED_OCTREE_SX 14
-#define ADR_MESHED_OCTREE_SY 15
-#define ADR_MESHED_OCTREE_SZ 16
-#define ADR_MESHED_DATA 17
+#define ADR_MESHED_NB_VERTICES 9
+#define ADR_MESHED_NB_TRIANGLES 10
+#define ADR_MESHED_OCTREE_TYPE 11
+#define ADR_MESHED_OCTREE_NX 12
+#define ADR_MESHED_OCTREE_NY 13
+#define ADR_MESHED_OCTREE_NZ 14
+#define ADR_MESHED_OCTREE_SX 15
+#define ADR_MESHED_OCTREE_SY 16
+#define ADR_MESHED_OCTREE_SZ 17
+#define ADR_MESHED_DATA 18
 
-#define SIZE_AABB_OBJ 8
-#define SIZE_SPHERE_OBJ 12
-#define SIZE_VOXELIZED_OBJ 14 // + number of voxels
-#define SIZE_MESHED_OBJ 17 // + number of vertices * 3 (xyz) + octree
+#define SIZE_AABB_OBJ 9
+#define SIZE_SPHERE_OBJ 13
+#define SIZE_VOXELIZED_OBJ 15 // + number of voxels
+#define SIZE_MESHED_OBJ 18 // + number of vertices * 3 (xyz) + octree
 
 // Struct that handle the geometry of the world
 struct Scene {
