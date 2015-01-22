@@ -78,6 +78,11 @@ void SourceBuilder::add_source(ConeBeamSource src) {
 
 }
 
+// Add a voxelized source
+void SourceBuilder::add_source(VoxelizedSource src) {
+    // TODO
+}
+
 #endif
 
 

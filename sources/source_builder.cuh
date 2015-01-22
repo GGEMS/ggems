@@ -21,6 +21,7 @@
 #include "global.cuh"
 #include "point_source.cuh"
 #include "cone_beam_source.cuh"
+#include "voxelized_source.cuh"
 
 #define POINT_SOURCE 0
 #define CONE_BEAM_SOURCE 1
@@ -65,6 +66,7 @@ class SourceBuilder {
         SourceBuilder();
         void add_source(PointSource src);
         void add_source(ConeBeamSource src);
+        void add_source(VoxelizedSource src);
 
         //void save_ggems_geometry(std::string filename);
 
