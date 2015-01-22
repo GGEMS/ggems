@@ -53,7 +53,7 @@ VoxelizedSource::VoxelizedSource() {
     source_name="VoxSrc01";
     filename="";
     source_type="back2back";
-    posx=0.0; posy=0.0; posz=0.0;
+    px=0.0; py=0.0; pz=0.0;
     energy=511*keV;
 }
 
