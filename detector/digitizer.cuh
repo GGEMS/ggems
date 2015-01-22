@@ -15,8 +15,8 @@
 //
 // GGEMS Copyright (C) 2013-2014 Julien Bert
 
-#ifndef SINGLES_CUH
-#define SINGLES_CUH
+#ifndef DIGITIZER_CUH
+#define DIGITIZER_CUH
 
 #include "constants.cuh"
 #include "global.cuh"
@@ -31,6 +31,24 @@ struct Singles {
     ui32 *id;
     ui32 *nb_hits;
     ui32 size;
+};
+
+// Digitizer
+class Digitizer {
+    public:
+        Digitizer();
+        void init_singles(ui32 nb);
+        void set_output_filename(std::string name);
+        void process_singles(ui32 iter);
+        void export_singles();
+        Singles get_singles();
+
+        Singles singles; // Same size than particles stack
+
+    private:
+        std::string filename;
+        Singles record_singles; // Recorded and processed singles
+
 };
 
 #endif

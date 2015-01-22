@@ -21,7 +21,7 @@
 #include "global.cuh"
 #include "constants.cuh"
 #include "particles.cuh"
-#include "singles.cuh"
+#include "digitizer.cuh"
 #include "cross_sections_builder.cuh"
 #include "geometry_builder.cuh"
 #include "flat_panel_detector.cuh" // FIXME

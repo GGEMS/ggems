@@ -23,7 +23,7 @@
 #include "cross_sections_builder.cuh"
 #include "materials.cuh"
 #include "global.cuh"
-#include "singles.cuh"
+#include "digitizer.cuh"
 
 #include "geometry_builder.cuh"
 #include "aabb.cuh"

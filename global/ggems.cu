@@ -38,7 +38,7 @@ SimulationBuilder::SimulationBuilder() {
     }
 
     parameters.record_dose_flag = DISABLED;
-    parameters.record_singles_flag = DISABLED;
+    parameters.digitizer_flag = DISABLED;
     history.record_flag = DISABLED;
 
 }
@@ -107,12 +107,17 @@ void SimulationBuilder::cpu_main_navigation() {
 
     cpu_main_navigator(particles.stack, geometry.world,
                        materials.materials_table, cs_tables.photon_CS_table, parameters,
-                       singles, history);
+                       digitizer.singles, history);
 
 }
 
 ////// :: Setting ::
 
+// Set the digitizer
+void SimulationBuilder::set_digitizer(Digitizer dig) {
+    digitizer = dig;
+    parameters.digitizer_flag = ENABLED;
+}
 
 // Set the geometry of the simulation
 void SimulationBuilder::set_geometry(GeometryBuilder obj) {
@@ -209,75 +214,10 @@ void SimulationBuilder::set_record_history(ui32 nb_particles) {
     history.stack_size = particles.stack.size;
 }
 
-// Set to record singles witin sensitive object
-void SimulationBuilder::set_record_singles(bool val) {
-    parameters.record_singles_flag = (char)val;
-}
-
 ////// :: Getting ::
 
 ParticleBuilder SimulationBuilder::get_particles() {
     return particles;
-}
-
-// Return the list of singles recorded in sensitive object
-Singles SimulationBuilder::get_singles() {
-    Singles active_singles;
-    active_singles.size = 0;
-
-    if (parameters.record_singles_flag) {
-        ui32 nb_active_singles = 0;
-
-        // Count the number of recorded singles
-        ui32 i=0; while(i<singles.size) {
-            if (singles.nb_hits[i]>0) {
-                nb_active_singles++;
-            }
-            ++i;
-        }
-
-        // Init the list
-        active_singles.size = nb_active_singles;
-        active_singles.px = (f32*)malloc(singles.size*sizeof(f32));
-        active_singles.py = (f32*)malloc(singles.size*sizeof(f32));
-        active_singles.pz = (f32*)malloc(singles.size*sizeof(f32));
-        active_singles.E = (f32*)malloc(singles.size*sizeof(f32));
-        active_singles.tof = (f32*)malloc(singles.size*sizeof(f32));
-        active_singles.geometry_id = (ui32*)malloc(singles.size*sizeof(ui32));
-        active_singles.nb_hits = (ui32*)malloc(singles.size*sizeof(ui32));
-
-        // Get the list
-        nb_active_singles=0;
-        i=0; while(i<singles.size) {
-            if (singles.nb_hits[i]>0) {
-                active_singles.px[nb_active_singles] = singles.px[i]/singles.E[i];
-                active_singles.py[nb_active_singles] = singles.py[i]/singles.E[i];
-                active_singles.pz[nb_active_singles] = singles.pz[i]/singles.E[i];
-                active_singles.E[nb_active_singles] = singles.E[i];
-                active_singles.tof[nb_active_singles] = 0.0;
-                active_singles.geometry_id[nb_active_singles] = 0;
-                active_singles.nb_hits[nb_active_singles] = singles.nb_hits[i];
-                nb_active_singles++;
-            }
-            ++i;
-        }
-    }
-
-    return active_singles;
-}
-
-void SimulationBuilder::print_singles() {
-    if (parameters.record_singles_flag) {
-        ui32 i=0; while(i<singles.size) {
-            if (singles.nb_hits[i]>0) {
-                printf("id %i p %e %e %e Hits %i E %e\n", i, singles.px[i]/singles.E[i],
-                                                    singles.py[i]/singles.E[i], singles.pz[i]/singles.E[i],
-                                                    singles.nb_hits[i],
-                                                    singles.E[i]);
-            }
-            ++i;
-        }
-    }
 }
 
 ////// :: Command ::
@@ -330,22 +270,10 @@ void SimulationBuilder::init_simulation() {
     cs_tables.build_table(materials.materials_table, parameters);
     //cs_tables.print();
 
-    // init Singles list
-    if (parameters.record_singles_flag) {
-        singles.size = particles.stack.size;
-        singles.px = (f32*)malloc(singles.size*sizeof(f32));
-        singles.py = (f32*)malloc(singles.size*sizeof(f32));
-        singles.pz = (f32*)malloc(singles.size*sizeof(f32));
-        singles.E = (f32*)malloc(singles.size*sizeof(f32));
-        singles.tof = (f32*)malloc(singles.size*sizeof(f32));
-        singles.geometry_id = (ui32*)malloc(singles.size*sizeof(ui32));
-        singles.nb_hits = (ui32*)malloc(singles.size*sizeof(ui32));
-        ui32 i=0; while (i<singles.size) {
-            singles.nb_hits[i]=0;
-            ++i;
-        }
+    // init Digitizer
+    if (parameters.digitizer_flag) {
+        digitizer.init_singles(particles.stack.size);
     }
-
 }
 
 // Start the simulation
@@ -368,9 +296,11 @@ void SimulationBuilder::start_simulation() {
             // Navigation
             cpu_main_navigation();
 
-            // Process and store singles TODO
-
-
+            // Process and store singles
+            if (parameters.digitizer_flag) {
+                digitizer.process_singles(iter);
+                digitizer.export_singles();
+            }
 
             // iter
             ++iter;
@@ -380,7 +310,6 @@ void SimulationBuilder::start_simulation() {
     }
 
 }
-
 
 ////// :: Utils ::
 

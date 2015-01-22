@@ -21,7 +21,7 @@
 #include "geometry_builder.cuh"
 #include "source_builder.cuh"
 #include "particles.cuh"
-#include "singles.cuh"
+#include "digitizer.cuh"
 #include "global.cuh"
 
 // Axis-Aligned Bounding Box

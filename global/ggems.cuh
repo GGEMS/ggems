@@ -33,7 +33,7 @@
 #include "meshed.cuh"
 #include "voxelized.cuh"
 #include "point_source.cuh"
-#include "singles.cuh"
+#include "digitizer.cuh"
 
 #include "main_navigator.cuh"
 
@@ -52,19 +52,17 @@ class SimulationBuilder {
         void set_materials(MaterialBuilder tab);
         void set_sources(SourceBuilder src);
         void set_particles(ParticleBuilder p);
+        void set_digitizer(Digitizer dig);
 
         void set_detector(FlatPanelDetector vdetector); // FIXME should be a builder
 
         ParticleBuilder get_particles();
-        Singles get_singles();
-        void print_singles();
 
         void set_hardware_target(std::string value);
         void set_process(std::string process_name);
         void set_secondary(std::string pname);
         void set_number_of_particles(ui32 nb);
         void set_max_number_of_iterations(ui32 nb);
-        void set_record_singles(bool val);
         void set_record_history(ui32 nb_particles);
         void set_CS_table_nbins(ui32 valbin);
         void set_CS_table_E_min(f32 valE);
@@ -85,7 +83,7 @@ class SimulationBuilder {
         SourceBuilder sources;
         GlobalSimulationParameters parameters;
         CrossSectionsBuilder cs_tables;
-        Singles singles;
+        Digitizer digitizer;
 
         // Record history for some particles (only CPU version)
         HistoryBuilder history;

@@ -143,8 +143,8 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, ui32 part_id,
     // Move the particle
     pos = fxyz_add(pos, fxyz_scale(dir, next_interaction_distance));
 
-    // TODO
-    //particles.tof[id] += gpu_speed_of_light * next_interaction_distance;
+    // Update TOF
+    particles.tof[part_id] += c_light * next_interaction_distance;
 
     particles.px[part_id] = pos.x;
     particles.py[part_id] = pos.y;
@@ -262,24 +262,22 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, ui32 part_id,
 
     //// Handle sensitive object and singles detection
 
-
-    if (parameters.record_singles_flag &&
+    if (parameters.digitizer_flag &&
             get_geometry_is_sensitive(geometry, cur_id_geom) && discrete_loss > 0) {
-
-        printf("ID %i Cur id %i flag %i Pos %f %f %f Eloss %f\n", part_id, cur_id_geom,
-               get_geometry_is_sensitive(geometry, cur_id_geom), pos.x, pos.y, pos.z, discrete_loss);
 
         if (singles.nb_hits[part_id] == 0) {
             singles.px[part_id] = pos.x*discrete_loss;
             singles.py[part_id] = pos.y*discrete_loss;
             singles.pz[part_id] = pos.z*discrete_loss;
             singles.E[part_id] = discrete_loss;
+            singles.tof[part_id] = particles.tof[part_id];
             singles.nb_hits[part_id] += 1;
         } else {
             singles.px[part_id] += pos.x*discrete_loss;
             singles.py[part_id] += pos.y*discrete_loss;
             singles.pz[part_id] += pos.z*discrete_loss;
             singles.E[part_id] += discrete_loss;
+            singles.tof[part_id] = particles.tof[part_id];
             singles.nb_hits[part_id] += 1;
         }
 
