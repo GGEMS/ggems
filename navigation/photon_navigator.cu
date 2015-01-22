@@ -46,9 +46,6 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, ui32 part_id,
     // Get the material that compose this volume
     ui32 id_mat = get_geometry_material(geometry, cur_id_geom, pos);
 
-    // TODO
-    // add char sensitive_flag = geometry_is_sensitive() && parameters.sensitive_flag
-
 #ifdef DEBUG
     printf("  begin %i\n", part_id);
     printf("     Cur id geom %i mat %i\n", cur_id_geom, id_mat);
@@ -197,7 +194,9 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, ui32 part_id,
 
     //// Apply discrete process //////////////////////////////////////////////////
 
-    //f32 discrete_loss = 0.0f;
+    f32 discrete_loss = 0.0f;
+    SecParticle electron;
+    electron.E = 0;
 
 #ifdef DEBUG
     printf("     Dist %f NextVol %i pos %f %f %f ", next_interaction_distance, next_geometry_volume, pos.x, pos.y, pos.z);
@@ -206,7 +205,9 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, ui32 part_id,
     if (next_discrete_process == PHOTON_COMPTON) {
 
         //   TODO: cutE = materials.electron_cut_energy[mat]                 cutE
-        SecParticle electron = Compton_SampleSecondaries_standard(particles, 0.0, part_id, parameters);
+        electron = Compton_SampleSecondaries_standard(particles, 0.0, part_id, parameters);
+
+
 
         // Debug
         //printf("id %i - pos %f %f %f - dir %f %f %f - Cmpt - geom cur %i hit %i\n", part_id, pos.x, pos.y, pos.z,
@@ -220,9 +221,8 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, ui32 part_id,
     if (next_discrete_process == PHOTON_PHOTOELECTRIC) {
 
         //   TODO: cutE = materials.electron_cut_energy[mat]                                               cutE
-        SecParticle electron = Photoelec_SampleSecondaries_standard(particles, materials, photon_CS_table,
+        electron = Photoelec_SampleSecondaries_standard(particles, materials, photon_CS_table,
                                                                     E_index, 0.0, id_mat, part_id, parameters);
-
 
         // Debug
         //printf("id %i - pos %f %f %f - dir %f %f %f - PE - geom cur %i hit %i\n", part_id, pos.x, pos.y, pos.z,
@@ -249,16 +249,43 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, ui32 part_id,
 #endif
     }
 
+    //// Get discrete energy lost
 
-    // WARNING: drop energy for every "dead" particle (gamma + e-)
+    // If e- is not tracking drop its energy
+    if (electron.endsimu == PARTICLE_DEAD) {
+        discrete_loss += electron.E;
+    }
+    // If gamma is absorbed drop its energy
+    if (particles.endsimu[part_id] == PARTICLE_DEAD) {
+        discrete_loss += particles.E[part_id];
+    }
 
-    // Local deposition if this photon was absorbed
-    //if (particles.endsimu[part_id] == PARTICLE_DEAD) discrete_loss = particles.E[part_id];
-
-    // TODO
-    //// Handle sensitive object ////////////////////////////////////////
+    //// Handle sensitive object and singles detection
 
 
+    if (parameters.record_singles_flag &&
+            get_geometry_is_sensitive(geometry, cur_id_geom) && discrete_loss > 0) {
+
+        printf("ID %i Cur id %i flag %i Pos %f %f %f Eloss %f\n", part_id, cur_id_geom,
+               get_geometry_is_sensitive(geometry, cur_id_geom), pos.x, pos.y, pos.z, discrete_loss);
+
+        if (singles.nb_hits[part_id] == 0) {
+            singles.px[part_id] = pos.x*discrete_loss;
+            singles.py[part_id] = pos.y*discrete_loss;
+            singles.pz[part_id] = pos.z*discrete_loss;
+            singles.E[part_id] = discrete_loss;
+            singles.nb_hits[part_id] += 1;
+        } else {
+            singles.px[part_id] += pos.x*discrete_loss;
+            singles.py[part_id] += pos.y*discrete_loss;
+            singles.pz[part_id] += pos.z*discrete_loss;
+            singles.E[part_id] += discrete_loss;
+            singles.nb_hits[part_id] += 1;
+        }
+
+    }
+
+    //// This part is for debuging and vrml viewer
 
     // Record this step if required
     if (history.record_flag == ENABLED) {

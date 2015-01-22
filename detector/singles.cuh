@@ -28,7 +28,7 @@ struct Singles {
     f32 *pz;
     f32 *E;
     f32 *tof;
-    ui32 *geometry_id;
+    ui32 *id;
     ui32 *nb_hits;
     ui32 size;
 };

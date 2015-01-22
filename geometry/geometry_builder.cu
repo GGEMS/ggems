@@ -24,6 +24,12 @@
 ///////// Host/Device functions /////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////
 
+// Function that return if an object is sensitive or not
+__host__ __device__ bool get_geometry_is_sensitive(Scene geometry, ui32 cur_geom) {
+    ui32 adr_geom = geometry.ptr_objects[cur_geom];
+    return (bool)geometry.data_objects[adr_geom+ADR_OBJ_SENSITIVE];
+}
+
 // Function that return the material of a volume
 __host__ __device__ ui32 get_geometry_material(Scene geometry, ui32 id_geom, f64xyz pos) {
     ui32 adr_geom = geometry.ptr_objects[id_geom];

@@ -434,8 +434,43 @@ void VRML::write_particles(HistoryBuilder history) {
 
 }
 
+// Export singles /////////////////////////////////////
+void VRML::write_singles(Singles singles) {
 
-// Export particles /////////////////////////////////////
+    ui32 is = 0;
+    f32 r=1.0;
+    f32 g=0.0;
+    f32 b=0.0;
+
+    // for each singles draw a red point
+    fprintf(pfile, "\n# Singles\n");
+    fprintf(pfile, "Shape {\n");
+    fprintf(pfile, "  geometry PointSet {\n");
+    fprintf(pfile, "    coord Coordinate {\n");
+    fprintf(pfile, "      point [\n");
+
+    is=0; while (is < singles.size) {
+        fprintf(pfile, "        %f %f %f,\n", singles.px[is], singles.py[is], singles.pz[is]);
+        ++is;
+    }
+
+    fprintf(pfile, "      ]\n");
+    fprintf(pfile, "    }\n");
+    fprintf(pfile, "    color Color {\n");
+    fprintf(pfile, "      color [\n");
+    is=0; while (is < (singles.size)) {
+        fprintf(pfile, "        %f %f %f,\n", r, g, b);
+        ++is;
+    }
+    fprintf(pfile, "      ]\n");
+    fprintf(pfile, "    }\n");
+
+    fprintf(pfile, "  }\n");
+    fprintf(pfile, "}\n");
+}
+
+
+// Show the CT /////////////////////////////////////
 void VRML::write_ct(Voxelized vol) {
 
     fprintf(pfile, "\n# Voxelized Volume with colormap\n");

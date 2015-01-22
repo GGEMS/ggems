@@ -41,6 +41,9 @@ BaseObject::BaseObject () {
 
     // Wireframe option
     wireframe = false;
+
+    // Sensitive
+    sensitive = false;
 }
 
 void BaseObject::set_color(f32 r, f32 g, f32 b) {

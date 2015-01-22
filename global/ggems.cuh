@@ -56,14 +56,15 @@ class SimulationBuilder {
         void set_detector(FlatPanelDetector vdetector); // FIXME should be a builder
 
         ParticleBuilder get_particles();
-        FlatPanelDetector get_detector();
+        Singles get_singles();
+        void print_singles();
 
         void set_hardware_target(std::string value);
         void set_process(std::string process_name);
         void set_secondary(std::string pname);
         void set_number_of_particles(ui32 nb);
         void set_max_number_of_iterations(ui32 nb);
-        void set_record_single(bool val);
+        void set_record_singles(bool val);
         void set_record_history(ui32 nb_particles);
         void set_CS_table_nbins(ui32 valbin);
         void set_CS_table_E_min(f32 valE);
