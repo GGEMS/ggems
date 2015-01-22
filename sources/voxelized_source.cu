@@ -51,10 +51,14 @@ VoxelizedSource::VoxelizedSource() {
     seed=10;
     geometry_id=0;
     source_name="VoxSrc01";
-    filename="";
     source_type="back2back";
     px=0.0; py=0.0; pz=0.0;
     energy=511*keV;
+
+    // Init pointer
+    activity_volume = NULL;
+    activity_cdf = NULL;
+    activity_index = NULL;
 }
 
 void VoxelizedSource::set_position(f32 vpx, f32 vpy, f32 vpz) {
@@ -81,10 +85,246 @@ void VoxelizedSource::set_source_name(std::string vsource_name) {
     source_name = vsource_name;
 }
 
-void VoxelizedSource::set_filename(std::string vfilename) {
-    filename = vfilename;
+//// MHD //////////////////////////////////////////////////////:
+
+// Skip comment starting with "#"
+void VoxelizedSource::skip_comment(std::istream & is) {
+    i8 c;
+    i8 line[1024];
+    if (is.eof()) return;
+    is >> c;
+    while (is && (c=='#')) {
+        is.getline(line, 1024);
+        is >> c;
+        if (is.eof()) return;
+    }
+    is.unget();
 }
 
+// Remove all white space
+std::string VoxelizedSource::remove_white_space(std::string txt) {
+    txt.erase(remove_if(txt.begin(), txt.end(), isspace), txt.end());
+    return txt;
+}
+
+// Read mhd key
+std::string VoxelizedSource::read_mhd_key(std::string txt) {
+    txt = txt.substr(0, txt.find("="));
+    return remove_white_space(txt);
+}
+
+// Read string mhd arg
+std::string VoxelizedSource::read_mhd_string_arg(std::string txt) {
+    txt = txt.substr(txt.find("=")+1);
+    return remove_white_space(txt);
+}
+
+// Read i32 mhd arg
+i32 VoxelizedSource::read_mhd_int(std::string txt) {
+    i32 res;
+    txt = txt.substr(txt.find("=")+1);
+    txt = remove_white_space(txt);
+    std::stringstream(txt) >> res;
+    return res;
+}
+
+// Read int mhd arg
+i32 VoxelizedSource::read_mhd_int_atpos(std::string txt, i32 pos) {
+    i32 res;
+    txt = txt.substr(txt.find("=")+2);
+    if (pos==0) {
+        txt = txt.substr(0, txt.find(" "));
+    }
+    if (pos==1) {
+        txt = txt.substr(txt.find(" ")+1);
+        txt = txt.substr(0, txt.find(" "));
+    }
+    if (pos==2) {
+        txt = txt.substr(txt.find(" ")+1);
+        txt = txt.substr(txt.find(" ")+1);
+    }
+    std::stringstream(txt) >> res;
+    return res;
+}
+
+// Read f32 mhd arg
+f32 VoxelizedSource::read_mhd_f32_atpos(std::string txt, i32 pos) {
+    f32 res;
+    txt = txt.substr(txt.find("=")+2);
+    if (pos==0) {
+        txt = txt.substr(0, txt.find(" "));
+    }
+    if (pos==1) {
+        txt = txt.substr(txt.find(" ")+1);
+        txt = txt.substr(0, txt.find(" "));
+    }
+    if (pos==2) {
+        txt = txt.substr(txt.find(" ")+1);
+        txt = txt.substr(txt.find(" ")+1);
+    }
+    std::stringstream(txt) >> res;
+    return res;
+}
+
+// Load activities from mhd file (only f32 data)
+void VoxelizedSource::load_from_mhd(std::string filename) {
+
+    /////////////// First read the MHD file //////////////////////
+
+    std::string line, key;
+    nb_vox_x=-1, nb_vox_y=-1, nb_vox_z=-1;
+    spacing_x=0, spacing_y=0, spacing_z=0;
+
+    // Watchdog
+    std::string ObjectType="", BinaryData="", BinaryDataByteOrderMSB="", CompressedData="",
+                ElementType="", ElementDataFile="";
+    i32 NDims=0;
+
+    // Read range file
+    std::ifstream file(filename.c_str());
+    if(!file) { printf("Error, file %s not found \n", filename.c_str()); exit(EXIT_FAILURE);}
+    while (file) {
+        skip_comment(file);
+        std::getline(file, line);
+
+        if (file) {
+            key = read_mhd_key(line);
+            if (key=="ObjectType")              ObjectType = read_mhd_string_arg(line);
+            if (key=="NDims")                   NDims = read_mhd_int(line);
+            if (key=="BinaryData")              BinaryData = read_mhd_string_arg(line);
+            if (key=="BinaryDataByteOrderMSB")  BinaryDataByteOrderMSB=read_mhd_string_arg(line);
+            if (key=="CompressedData")          CompressedData = read_mhd_string_arg(line);
+            //if (key=="TransformMatrix") printf("Matrix\n");
+            //if (key=="Offset")  printf("Offset\n");
+            //if (key=="CenterOfRotation") printf("CoR\n");
+            if (key=="ElementSpacing") {
+                                                spacing_x=read_mhd_f32_atpos(line, 0);
+                                                spacing_y=read_mhd_f32_atpos(line, 1);
+                                                spacing_z=read_mhd_f32_atpos(line, 2);
+            }
+            if (key=="DimSize") {
+                                                nb_vox_x=read_mhd_int_atpos(line, 0);
+                                                nb_vox_y=read_mhd_int_atpos(line, 1);
+                                                nb_vox_z=read_mhd_int_atpos(line, 2);
+            }
+
+            //if (key=="AnatomicalOrientation") printf("Anato\n");
+            if (key=="ElementType")             ElementType = read_mhd_string_arg(line);
+            if (key=="ElementDataFile")         ElementDataFile = read_mhd_string_arg(line);
+        }
+
+    } // read file
+
+    // Check header
+    if (ObjectType != "Image") {
+        printf("Error, mhd header: ObjectType = %s\n", ObjectType.c_str());
+        exit(EXIT_FAILURE);
+    }
+    if (BinaryData != "True") {
+        printf("Error, mhd header: BinaryData = %s\n", BinaryData.c_str());
+        exit(EXIT_FAILURE);
+    }
+    if (BinaryDataByteOrderMSB != "False") {
+        printf("Error, mhd header: BinaryDataByteOrderMSB = %s\n", BinaryDataByteOrderMSB.c_str());
+        exit(EXIT_FAILURE);
+    }
+    if (CompressedData != "False") {
+        printf("Error, mhd header: CompressedData = %s\n", CompressedData.c_str());
+        exit(EXIT_FAILURE);
+    }
+    if (ElementType != "MET_FLOAT") {
+        printf("Error, mhd header: ElementType = %s\n", ElementType.c_str());
+        exit(EXIT_FAILURE);
+    }
+    if (ElementDataFile == "") {
+        printf("Error, mhd header: ElementDataFile = %s\n", ElementDataFile.c_str());
+        exit(EXIT_FAILURE);
+    }
+    if (NDims != 3) {
+        printf("Error, mhd header: NDims = %i\n", NDims);
+        exit(EXIT_FAILURE);
+    }
+
+    if (nb_vox_x == -1 || nb_vox_y == -1 || nb_vox_z == -1 ||
+            spacing_x == 0 || spacing_y == 0 || spacing_z == 0) {
+        printf("Error when loading mhd file (unknown dimension and spacing)\n");
+        printf("   => dim %i %i %i - spacing %f %f %f\n", nb_vox_x, nb_vox_y, nb_vox_z,
+                                                          spacing_x, spacing_y, spacing_z);
+        exit(EXIT_FAILURE);
+    }
+    // Read data
+    FILE *pfile = fopen(ElementDataFile.c_str(), "rb");
+    if (!pfile) {
+        std::string nameWithRelativePath = filename;
+        i32 lastindex = nameWithRelativePath.find_last_of(".");
+        nameWithRelativePath = nameWithRelativePath.substr(0, lastindex);
+        nameWithRelativePath+=".raw";
+        pfile = fopen(nameWithRelativePath.c_str(), "rb");
+        if (!pfile) {
+            printf("Error when loading mhd file: %s\n", ElementDataFile.c_str());
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    number_of_voxels = nb_vox_x*nb_vox_y*nb_vox_z;
+
+    activity_volume = (f32*)malloc(sizeof(f32) * number_of_voxels);
+    fread(activity_volume, sizeof(f32), number_of_voxels, pfile);
+    fclose(pfile);
+
+}
+
+// Compute the CDF of the activities
+void VoxelizedSource::compute_cdf() {
+
+    // count nb of non zeros activities
+    ui32 nb=0;
+    ui32 i=0; while (i<number_of_voxels) {
+        if (activity_volume[i] != 0.0f) ++nb;
+        ++i;
+    }
+    activity_size = nb;
+
+    // mem allocation
+    activity_index = (ui32*)malloc(nb*sizeof(ui32));
+    activity_cdf = (f32*)malloc(nb*sizeof(f32));
+
+    // Buffer
+    f64* cdf = new f64[nb];
+
+    // fill array with non zeros values activity
+    ui32 index = 0;
+    f32 val;
+    f64 sum = 0.0; // for the cdf
+    i=0; while (i<number_of_voxels) {
+        val = activity_volume[i];
+        if (val != 0.0f) {
+            activity_index[index] = i;
+            cdf[index] = val;
+            sum += val;
+            ++index;
+        }
+        ++i;
+    }
+    tot_activity = (f32)sum;
+
+    // compute cummulative density function
+    cdf[0] /= sum;
+    activity_cdf[0] = cdf[0];
+    i = 1; while (i<nb) {
+        cdf[i] = (cdf[i]/sum) + cdf[i-1];
+        activity_cdf[i]= (f32) cdf[i];
+        ++i;
+    }
+
+    // Need to check - JB
+
+    // Watchdog FIXME why the last one is not zeros (float/double error)
+    activity_cdf[nb-1] = 1.0f;
+
+    delete cdf;
+
+}
 
 
 

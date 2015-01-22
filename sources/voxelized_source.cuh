@@ -39,14 +39,38 @@ class VoxelizedSource {
         void set_seed(ui32 vseed);
         void set_in_geometry(ui32 vgeometry_id);
         void set_source_name(std::string vsource_name);
-        void set_filename(std::string vfilename);
+
+        void load_from_mhd(std::string filename);
+        void compute_cdf();
 
         ui32 seed, geometry_id;
-        std::string source_name, filename, source_type;
+        std::string source_name, source_type;
         f32 px, py, pz;
         f32 energy;
 
+        ui16 nb_vox_x, nb_vox_y, nb_vox_z;
+        ui32 number_of_voxels;
+        f32 spacing_x, spacing_y, spacing_z;
+
+        // Activities
+        f32 *activity_volume;
+        f32 tot_activity;
+        // CDF
+        f32 *activity_cdf;
+        ui32 *activity_index;
+        ui32 activity_size;
+
+
     private:
+        // For mhd
+        void skip_comment(std::istream &);
+        std::string remove_white_space(std::string);
+        std::string read_mhd_key(std::string);
+        std::string read_mhd_string_arg(std::string);
+        i32 read_mhd_int(std::string);
+        i32 read_mhd_int_atpos(std::string, i32);
+        f32 read_mhd_f32_atpos(std::string, i32);
+
 };
 
 #endif
