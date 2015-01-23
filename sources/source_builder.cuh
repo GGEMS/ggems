@@ -25,7 +25,9 @@
 
 #define POINT_SOURCE 0
 #define CONE_BEAM_SOURCE 1
+#define VOXELIZED_SOURCE 2
 
+//// Source def
 #define ADR_SRC_TYPE 0
 #define ADR_SRC_GEOM_ID 1
 
@@ -44,6 +46,25 @@
 #define ADR_CONE_BEAM_SRC_PSI 7
 #define ADR_CONE_BEAM_SRC_APERTURE 8
 #define ADR_CONE_BEAM_SRC_ENERGY 9
+
+// Voxelized source
+#define ADR_VOX_SOURCE_PX 2
+#define ADR_VOX_SOURCE_PY 3
+#define ADR_VOX_SOURCE_PZ 4
+#define ADR_VOX_SOURCE_NB_VOX_X 5
+#define ADR_VOX_SOURCE_NB_VOX_Y 6
+#define ADR_VOX_SOURCE_NB_VOX_Z 7
+#define ADR_VOX_SOURCE_SPACING_X 8
+#define ADR_VOX_SOURCE_SPACING_Y 9
+#define ADR_VOX_SOURCE_SPACING_Z 10
+#define ADR_VOX_SOURCE_ENERGY 11
+#define ADR_VOX_SOURCE_TOT_ACTIVITY 12
+#define ADR_VOX_SOURCE_NB_CDF 13
+#define ADR_VOX_SOURCE_EMISSION_TYPE 14
+
+// Emission type
+#define EMISSION_MONO 0
+#define EMISSION_BACK2BACK 1
 
 struct Sources {
     // Source structure

@@ -46,6 +46,103 @@
 //    particles.geometry_id[id] = geom_id;
 //}
 
+//// External function
+__host__ __device__ void voxelized_source_primary_generator(ParticleStack particles, ui32 id,
+                                                            ui32 *cdf_index, f32 *cdf_act, ui32 nb_acts,
+                                                            f32 px, f32 py, f32 pz,
+                                                            ui32 nb_vox_x, ui32 nb_vox_y, ui32 nb_vox_z,
+                                                            f32 sx, f32 sy, f32 sz) {
+
+//    f32 jump = (f32)(nb_vox_x*nb_vox_y);
+//    f32 ind, x, y, z;
+
+//    // use cdf to find the next emission spot
+//    f32 rnd = JKISS32(particles, id);
+//    ui32 pos = binary_search(cdf_act, rnd, nb_acts);
+
+//    // convert position index to emitted position
+//    ind = (f32)cdf_index[pos];
+//    z = floor(ind / jump);
+//    ind -= (z*jump);
+//    y = floor(ind / (f32)nb_vox_x);
+//    x = ind - y*nb_vox_x;
+
+//    // random poisiton within the voxel
+//    x += JKISS32(particles, id);
+//    y += JKISS32(particles, id);
+//    z += JKISS32(particles, id);
+
+//    // convert in mm
+//    x *= sx;
+//    y *= sy;
+//    z *= sz;
+
+    // shift according to center of phantom and translation
+    //x = x - nb_vox_x*sx*0.5 + px;
+
+    //x += phantom_size_in_mm.x/2 - d_act.size_in_mm.x/2;
+    //y += phantom_size_in_mm.y/2 - d_act.size_in_mm.y/2;
+    //z += phantom_size_in_mm.z/2 - d_act.size_in_mm.z/2;
+/*
+    // random orientation
+    float phi = Brent_real(id, d_g1.table_x_brent, 0);
+    float theta = Brent_real(id, d_g1.table_x_brent, 0);
+    phi *= gpu_twopi;
+    theta = acosf(1.0f - 2.0f*theta);
+
+    // compute direction vector
+    float dx = __cosf(phi)*__sinf(theta);
+    float dy = __sinf(phi)*__sinf(theta);
+    float dz = __cosf(theta);
+
+    // set particle stack
+    d_g1.E[id] = 0.511f; // 511KeV
+    d_g1.dx[id] = dx;
+    d_g1.dy[id] = dy;
+    d_g1.dz[id] = dz;
+    d_g1.px[id] = x;
+    d_g1.py[id] = y;
+    d_g1.pz[id] = z;
+    d_g1.tof[id] = 0.0f;
+    d_g1.nCompton[id]=0;
+    d_g1.endsimu[id] = 0;
+    d_g1.active[id] = 1;
+    d_g1.crystalID[id]=-1;
+    d_g1.Edeposit[id]=0;
+
+    d_g2.E[id] = 0.511f;
+    d_g2.dx[id] = -dx; // Back2back
+    d_g2.dy[id] = -dy; //
+    d_g2.dz[id] = -dz; //
+    d_g2.px[id] = x;
+    d_g2.py[id] = y;
+    d_g2.pz[id] = z;
+    d_g2.tof[id] = 0.0f;
+    d_g2.nCompton[id]=0;
+    d_g2.endsimu[id] = 0;
+    d_g2.active[id] = 1;
+    d_g2.crystalID[id]=-1;
+    d_g2.Edeposit[id]=0;
+
+
+
+
+
+
+
+*/
+
+
+
+
+
+
+
+
+}
+
+
+
 VoxelizedSource::VoxelizedSource() {
     // Default values
     seed=10;

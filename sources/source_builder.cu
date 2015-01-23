@@ -80,7 +80,47 @@ void SourceBuilder::add_source(ConeBeamSource src) {
 
 // Add a voxelized source
 void SourceBuilder::add_source(VoxelizedSource src) {
-    // TODO
+    sources.nb_sources++;
+
+    // Store the address to access to this source
+    array_push_back(&sources.ptr_sources, sources.ptr_sources_dim, sources.data_sources_dim);
+
+    // Store information of this source
+    array_push_back(&sources.data_sources, sources.data_sources_dim, (f32)VOXELIZED_SOURCE);
+
+    array_push_back(&sources.data_sources, sources.data_sources_dim, src.geometry_id);
+    array_push_back(&sources.data_sources, sources.data_sources_dim, src.px);
+    array_push_back(&sources.data_sources, sources.data_sources_dim, src.py);
+    array_push_back(&sources.data_sources, sources.data_sources_dim, src.pz);
+
+    array_push_back(&sources.data_sources, sources.data_sources_dim, (f32)src.nb_vox_x);
+    array_push_back(&sources.data_sources, sources.data_sources_dim, (f32)src.nb_vox_y);
+    array_push_back(&sources.data_sources, sources.data_sources_dim, (f32)src.nb_vox_z);
+
+    array_push_back(&sources.data_sources, sources.data_sources_dim, src.spacing_x);
+    array_push_back(&sources.data_sources, sources.data_sources_dim, src.spacing_y);
+    array_push_back(&sources.data_sources, sources.data_sources_dim, src.spacing_z);
+
+    array_push_back(&sources.data_sources, sources.data_sources_dim, src.energy);
+    array_push_back(&sources.data_sources, sources.data_sources_dim, src.tot_activity);
+    array_push_back(&sources.data_sources, sources.data_sources_dim, src.activity_size); // Nb CDF
+
+    // Emission type
+    if (src.source_type == "mono") {
+        array_push_back(&sources.data_sources, sources.data_sources_dim, (f32)EMISSION_MONO);
+    } else if (src.source_type == "back2back") {
+        array_push_back(&sources.data_sources, sources.data_sources_dim, (f32)EMISSION_BACK2BACK);
+    }
+
+    /*
+    // Store index to access to the CDF
+    array_append_array(&sources.data_sources, sources.data_sources_dim, &(src.activity_index), src.number_of_voxels);
+    // Store the CDF of the activities
+    array_append_array(&sources.data_sources, sources.data_sources_dim, &(src.activity_cdf), src.activity_size);
+    */
+
+    // Save the seed
+    array_push_back(&sources.seeds, sources.seeds_dim, src.seed);
 }
 
 #endif

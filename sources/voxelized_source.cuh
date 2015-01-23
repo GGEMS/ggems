@@ -22,6 +22,7 @@
 #include "particles.cuh"
 #include "prng.cuh"
 #include "constants.cuh"
+#include "fun.cuh"
 
 //// External function
 //__host__ __device__ void point_source_primary_generator(ParticleStack particles, ui32 id,
