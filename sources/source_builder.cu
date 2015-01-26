@@ -112,12 +112,12 @@ void SourceBuilder::add_source(VoxelizedSource src) {
         array_push_back(&sources.data_sources, sources.data_sources_dim, (f32)EMISSION_BACK2BACK);
     }
 
-    /*
+
     // Store index to access to the CDF
-    array_append_array(&sources.data_sources, sources.data_sources_dim, &(src.activity_index), src.number_of_voxels);
+    array_append_array(&sources.data_sources, sources.data_sources_dim, &(src.activity_index), src.activity_size);
     // Store the CDF of the activities
     array_append_array(&sources.data_sources, sources.data_sources_dim, &(src.activity_cdf), src.activity_size);
-    */
+
 
     // Save the seed
     array_push_back(&sources.seeds, sources.seeds_dim, src.seed);

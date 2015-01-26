@@ -48,100 +48,81 @@
 
 //// External function
 __host__ __device__ void voxelized_source_primary_generator(ParticleStack particles, ui32 id,
-                                                            ui32 *cdf_index, f32 *cdf_act, ui32 nb_acts,
+                                                            f32 *cdf_index, f32 *cdf_act, ui32 nb_acts,
                                                             f32 px, f32 py, f32 pz,
                                                             ui32 nb_vox_x, ui32 nb_vox_y, ui32 nb_vox_z,
-                                                            f32 sx, f32 sy, f32 sz) {
+                                                            f32 sx, f32 sy, f32 sz,
+                                                            f32 energy, ui8 type, ui32 geom_id) {
 
-//    f32 jump = (f32)(nb_vox_x*nb_vox_y);
-//    f32 ind, x, y, z;
+    f32 jump = (f32)(nb_vox_x*nb_vox_y);
+    f32 ind, x, y, z;
 
-//    // use cdf to find the next emission spot
-//    f32 rnd = JKISS32(particles, id);
-//    ui32 pos = binary_search(cdf_act, rnd, nb_acts);
+    // use cdf to find the next emission spot
+    f32 rnd = JKISS32(particles, id);
+    ui32 pos = binary_search(rnd, cdf_act, nb_acts);
 
-//    // convert position index to emitted position
-//    ind = (f32)cdf_index[pos];
-//    z = floor(ind / jump);
-//    ind -= (z*jump);
-//    y = floor(ind / (f32)nb_vox_x);
-//    x = ind - y*nb_vox_x;
+    // convert position index to emitted position
+    ind = cdf_index[pos];
+    z = floor(ind / jump);
+    ind -= (z*jump);
+    y = floor(ind / (f32)nb_vox_x);
+    x = ind - y*nb_vox_x;
 
-//    // random poisiton within the voxel
-//    x += JKISS32(particles, id);
-//    y += JKISS32(particles, id);
-//    z += JKISS32(particles, id);
+    // random poisiton within the voxel
+    x += JKISS32(particles, id);
+    y += JKISS32(particles, id);
+    z += JKISS32(particles, id);
 
-//    // convert in mm
-//    x *= sx;
-//    y *= sy;
-//    z *= sz;
+    // convert in mm
+    x *= sx;
+    y *= sy;
+    z *= sz;
 
     // shift according to center of phantom and translation
-    //x = x - nb_vox_x*sx*0.5 + px;
+    x = x - nb_vox_x*sx*0.5 + px;
+    y = y - nb_vox_y*sy*0.5 + py;
+    z = z - nb_vox_z*sz*0.5 + pz;
 
-    //x += phantom_size_in_mm.x/2 - d_act.size_in_mm.x/2;
-    //y += phantom_size_in_mm.y/2 - d_act.size_in_mm.y/2;
-    //z += phantom_size_in_mm.z/2 - d_act.size_in_mm.z/2;
-/*
     // random orientation
-    float phi = Brent_real(id, d_g1.table_x_brent, 0);
-    float theta = Brent_real(id, d_g1.table_x_brent, 0);
+    f32 phi = JKISS32(particles, id);
+    f32 theta = JKISS32(particles, id);
     phi *= gpu_twopi;
     theta = acosf(1.0f - 2.0f*theta);
 
     // compute direction vector
-    float dx = __cosf(phi)*__sinf(theta);
-    float dy = __sinf(phi)*__sinf(theta);
-    float dz = __cosf(theta);
+    f32 dx = cos(phi)*sin(theta);
+    f32 dy = sin(phi)*sin(theta);
+    f32 dz = cos(theta);
 
-    // set particle stack
-    d_g1.E[id] = 0.511f; // 511KeV
-    d_g1.dx[id] = dx;
-    d_g1.dy[id] = dy;
-    d_g1.dz[id] = dz;
-    d_g1.px[id] = x;
-    d_g1.py[id] = y;
-    d_g1.pz[id] = z;
-    d_g1.tof[id] = 0.0f;
-    d_g1.nCompton[id]=0;
-    d_g1.endsimu[id] = 0;
-    d_g1.active[id] = 1;
-    d_g1.crystalID[id]=-1;
-    d_g1.Edeposit[id]=0;
+    // set particle stack 1
+    particles.E[id] = energy;
+    particles.dx[id] = dx;
+    particles.dy[id] = dy;
+    particles.dz[id] = dz;
+    particles.px[id] = x;
+    particles.py[id] = y;
+    particles.pz[id] = z;
+    particles.tof[id] = 0.0;
+    particles.endsimu[id] = PARTICLE_ALIVE;
+    particles.level[id] = PRIMARY;
+    particles.pname[id] = type;
+    particles.geometry_id[id] = geom_id;
 
-    d_g2.E[id] = 0.511f;
-    d_g2.dx[id] = -dx; // Back2back
-    d_g2.dy[id] = -dy; //
-    d_g2.dz[id] = -dz; //
-    d_g2.px[id] = x;
-    d_g2.py[id] = y;
-    d_g2.pz[id] = z;
-    d_g2.tof[id] = 0.0f;
-    d_g2.nCompton[id]=0;
-    d_g2.endsimu[id] = 0;
-    d_g2.active[id] = 1;
-    d_g2.crystalID[id]=-1;
-    d_g2.Edeposit[id]=0;
-
-
-
-
-
-
-
-*/
-
-
-
-
-
-
-
-
+    // set particle stack 2
+    ++id;
+    particles.E[id] = energy;
+    particles.dx[id] = -dx;    // back2back
+    particles.dy[id] = -dy;
+    particles.dz[id] = -dz;
+    particles.px[id] = x;
+    particles.py[id] = y;
+    particles.pz[id] = z;
+    particles.tof[id] = 0.0;
+    particles.endsimu[id] = PARTICLE_ALIVE;
+    particles.level[id] = PRIMARY;
+    particles.pname[id] = type;
+    particles.geometry_id[id] = geom_id;
 }
-
-
 
 VoxelizedSource::VoxelizedSource() {
     // Default values
@@ -369,6 +350,9 @@ void VoxelizedSource::load_from_mhd(std::string filename) {
     fread(activity_volume, sizeof(f32), number_of_voxels, pfile);
     fclose(pfile);
 
+    // Compute the associated CDF of the activities
+    compute_cdf();
+
 }
 
 // Compute the CDF of the activities
@@ -383,7 +367,7 @@ void VoxelizedSource::compute_cdf() {
     activity_size = nb;
 
     // mem allocation
-    activity_index = (ui32*)malloc(nb*sizeof(ui32));
+    activity_index = (f32*)malloc(nb*sizeof(f32));
     activity_cdf = (f32*)malloc(nb*sizeof(f32));
 
     // Buffer

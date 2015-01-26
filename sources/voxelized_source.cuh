@@ -25,9 +25,13 @@
 #include "fun.cuh"
 
 //// External function
-//__host__ __device__ void point_source_primary_generator(ParticleStack particles, ui32 id,
-//                                                        f32 px, f32 py, f32 pz, f32 energy,
-//                                                        ui8 type, ui32 geom_id);
+__host__ __device__ void voxelized_source_primary_generator(ParticleStack particles, ui32 id,
+                                                            f32 *cdf_index, f32 *cdf_act, ui32 nb_acts,
+                                                            f32 px, f32 py, f32 pz,
+                                                            ui32 nb_vox_x, ui32 nb_vox_y, ui32 nb_vox_z,
+                                                            f32 sx, f32 sy, f32 sz,
+                                                            f32 energy, ui8 type, ui32 geom_id);
+
 
 // VoxelizedSource
 class VoxelizedSource {
@@ -58,7 +62,7 @@ class VoxelizedSource {
         f32 tot_activity;
         // CDF
         f32 *activity_cdf;
-        ui32 *activity_index;
+        f32 *activity_index;
         ui32 activity_size;
 
 

@@ -86,12 +86,44 @@ void SimulationBuilder::cpu_primaries_generator() {
 
             cone_beam_source_primary_generator(particles.stack, id, px, py, pz,
                                                phi, theta, psi, aperture, energy, PHOTON, geom_id);
-        }
+        } else if (type == VOXELIZED_SOURCE) {
 
-        // If need record the first position for the tracking history
-        if (history.record_flag == ENABLED) {
-            history.cpu_new_particle_track(PHOTON);
-            history.cpu_record_a_step(particles.stack, id);
+            f32 px = sources.sources.data_sources[adr+ADR_VOX_SOURCE_PX];
+            f32 py = sources.sources.data_sources[adr+ADR_VOX_SOURCE_PY];
+            f32 pz = sources.sources.data_sources[adr+ADR_VOX_SOURCE_PZ];
+
+            f32 nb_vox_x = sources.sources.data_sources[adr+ADR_VOX_SOURCE_NB_VOX_X];
+            f32 nb_vox_y = sources.sources.data_sources[adr+ADR_VOX_SOURCE_NB_VOX_Y];
+            f32 nb_vox_z = sources.sources.data_sources[adr+ADR_VOX_SOURCE_NB_VOX_Z];
+
+            f32 sx = sources.sources.data_sources[adr+ADR_VOX_SOURCE_SPACING_X];
+            f32 sy = sources.sources.data_sources[adr+ADR_VOX_SOURCE_SPACING_Y];
+            f32 sz = sources.sources.data_sources[adr+ADR_VOX_SOURCE_SPACING_Z];
+
+            f32 energy = sources.sources.data_sources[adr+ADR_VOX_SOURCE_ENERGY];
+
+            f32 nb_acts = sources.sources.data_sources[adr+ADR_VOX_SOURCE_NB_CDF];
+
+            f32 emission_type = sources.sources.data_sources[adr+ADR_VOX_SOURCE_EMISSION_TYPE];
+
+            f32 *cdf_index = &(sources.sources.data_sources[adr+ADR_VOX_SOURCE_CDF_INDEX]);
+            ui32 adr_cdf_act = adr+nb_acts;
+            f32 *cdf_act = &(sources.sources.data_sources[adr_cdf_act+ADR_VOX_SOURCE_CDF_INDEX]);
+
+            if (emission_type == EMISSION_BACK2BACK) {
+                voxelized_source_primary_generator(particles.stack, id,
+                                                   cdf_index, cdf_act, nb_acts,
+                                                   px, py, pz, nb_vox_x, nb_vox_y, nb_vox_z,
+                                                   sx, sy, sz, energy, PHOTON, geom_id);
+                // Back2back fills the particle' stack with two particles, we need to
+                // adjust the ID to be the ID of event (half size) and not the ID of particles
+                // Consequently ID is incremented to consider the additional particle in the stack
+                ++id;
+
+            } else if (emission_type == EMISSION_MONO) {
+                printf("ERROR: voxelized source, emission 'MONO' is not impleted yet!\n");
+                exit(EXIT_FAILURE);
+            }
 
         }
 
@@ -99,6 +131,16 @@ void SimulationBuilder::cpu_primaries_generator() {
         ++id;
 
     } // i
+
+    // History record (use only for VRML view)
+    if (history.record_flag == ENABLED) {
+        id=0; while (id < particles.stack.size) {
+            // Record the first position for the tracking history
+            history.cpu_new_particle_track(PHOTON);
+            history.cpu_record_a_step(particles.stack, id);
+            ++id;
+        }
+    }
 
 }
 
