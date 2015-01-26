@@ -41,6 +41,9 @@ class VRML {
                                  Color color, f32 transparency);
         void draw_aabb(f32 xmin, f32 xmax, f32 ymin, f32 ymax, f32 zmin, f32 zmax,
                        Color color, f32 transparency);
+        void draw_obb(f32 xmin, f32 xmax, f32 ymin, f32 ymax, f32 zmin, f32 zmax,
+                      f32 cx, f32 cy, f32 cz, f32 angx, f32 angy, f32 angz,
+                      Color color, f32 transparency);
 };
 
 #endif

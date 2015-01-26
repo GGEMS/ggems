@@ -94,4 +94,31 @@ __host__ __device__ f64 hit_ray_triangle(f64xyz ray_p, f64xyz ray_d,
                                          f64xyz tri_u,              // Triangle
                                          f64xyz tri_v,
                                          f64xyz tri_w);
+
+// Ray/OBB intersection - Inspired by POVRAY
+__host__ __device__ f32 hit_ray_OBB(f32xyz ray_p, f32xyz ray_d,
+                                    f32 aabb_xmin, f32 aabb_xmax,
+                                    f32 aabb_ymin, f32 aabb_ymax,
+                                    f32 aabb_zmin, f32 aabb_zmax,
+                                    f32xyz obb_center,
+                                    f32xyz u, f32xyz v, f32xyz w); // OBB frame
+__host__ __device__ f64 hit_ray_OBB(f64xyz ray_p, f64xyz ray_d,
+                                    f64 aabb_xmin, f64 aabb_xmax,
+                                    f64 aabb_ymin, f64 aabb_ymax,
+                                    f64 aabb_zmin, f64 aabb_zmax,
+                                    f64xyz obb_center,
+                                    f64xyz u, f64xyz v, f64xyz w); // OBB frame
+
+
+
+
+
+
+
+
+
+
+
+
+
 #endif

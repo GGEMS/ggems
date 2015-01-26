@@ -15,19 +15,20 @@
 //
 // GGEMS Copyright (C) 2013-2014 Julien Bert
 
-#ifndef AABB_H
-#define AABB_H
+#ifndef OBB_H
+#define OBB_H
 
 #include "global.cuh"
+#include "vector.cuh"
 #include "base_object.cuh"
 
-// Axis-Aligned Bounding Box
-class Aabb : public BaseObject {
+// Oriented Bounding Box
+class Obb : public BaseObject {
     public:
-        Aabb();
-        Aabb(f32 ox, f32 oy, f32 oz,
-             f32 sizex, f32 sizey, f32 sizez,
-             std::string mat_name, std::string obj_name);
+        Obb();
+        Obb(f32 ox, f32 oy, f32 oz,
+            f32 sizex, f32 sizey, f32 sizez,
+            std::string mat_name, std::string obj_name);
 
         //void set_xlength(f32);
         //void set_ylength(f32);
@@ -40,7 +41,15 @@ class Aabb : public BaseObject {
         //void scale(f32 sx, f32 sy, f32 sz);
 
         //void translate(float3 t);
-        //void translate(f32 tx, f32 ty, f32 tz);
+        void translate(f32 tx, f32 ty, f32 tz);
+        void rotate(f32 ax, f32 ay, f32 az);
+
+        // Obb center
+        f32xyz obb_center;
+        // Rotation angle
+        f32xyz angle;
+        // Absolute frame (OBB orthogonal space u, v, w)
+        f32xyz u, v, w;
 
     private:
 };

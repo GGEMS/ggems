@@ -39,7 +39,7 @@ __host__ __device__ void cone_beam_source_primary_generator(ParticleStack partic
     f32 dz = cosf(theta);
 
     // Apply rotation
-    f32xyz d = fxyz_rotate(make_f32xyz(dx, dy, dz), make_f32xyz(rphi, rtheta, rpsi));
+    f32xyz d = fxyz_rotate_euler(make_f32xyz(dx, dy, dz), make_f32xyz(rphi, rtheta, rpsi));
 
     // set photons
     particles.E[id] = energy;

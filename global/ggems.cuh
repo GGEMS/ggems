@@ -29,6 +29,7 @@
 #include "source_builder.cuh"
 
 #include "aabb.cuh"
+#include "obb.cuh"
 #include "sphere.cuh"
 #include "meshed.cuh"
 #include "voxelized.cuh"

@@ -129,6 +129,33 @@ void VRML::draw_aabb(f32 xmin, f32 xmax, f32 ymin, f32 ymax, f32 zmin, f32 zmax,
 
 }
 
+// Draw a OBB
+void VRML::draw_obb(f32 xmin, f32 xmax, f32 ymin, f32 ymax, f32 zmin, f32 zmax,
+                    f32 cx, f32 cy, f32 cz, f32 angx, f32 angy, f32 angz,
+                    Color color, f32 transparency) {
+
+    fprintf(pfile, "Transform {\n");
+    fprintf(pfile, "  translation %f %f %f\n", cx, cy, cz);
+    fprintf(pfile, "  rotation 1.0 0.0 0.0 %f\n", angx*deg);
+    fprintf(pfile, "  rotation 0.0 1.0 0.0 %f\n", angy*deg);
+    fprintf(pfile, "  rotation 0.0 0.0 1.0 %f\n", angz*deg);
+    fprintf(pfile, "  children [\n");
+    fprintf(pfile, "    Shape {\n");
+    fprintf(pfile, "      appearance Appearance {\n");
+    fprintf(pfile, "        material Material {\n");
+    fprintf(pfile, "          diffuseColor %f %f %f\n", color.r, color.g, color.b);
+    fprintf(pfile, "          transparency %f\n", transparency);
+    fprintf(pfile, "        }\n");
+    fprintf(pfile, "      }\n");
+    fprintf(pfile, "      geometry Box {\n");
+    fprintf(pfile, "        size %f %f %f\n", xmax-xmin, ymax-ymin, zmax-zmin);
+    fprintf(pfile, "      }\n");
+    fprintf(pfile, "    }\n");
+    fprintf(pfile, "  ]\n");
+    fprintf(pfile, "}\n");
+
+}
+
 /////////////////////////////////////////////////////////////////////
 
 // Export the geometry /////////////////////////////////////
@@ -170,8 +197,43 @@ void VRML::write_geometry(GeometryBuilder geometry) {
                           geometry.object_transparency[iobj]);
             }
 
+        } else if (type_obj == OBB) {
+
+            f32 xmin = geometry.world.data_objects[adr_obj + ADR_AABB_XMIN];
+            f32 xmax = geometry.world.data_objects[adr_obj + ADR_AABB_XMAX];
+            f32 ymin = geometry.world.data_objects[adr_obj + ADR_AABB_YMIN];
+            f32 ymax = geometry.world.data_objects[adr_obj + ADR_AABB_YMAX];
+            f32 zmin = geometry.world.data_objects[adr_obj + ADR_AABB_ZMIN];
+            f32 zmax = geometry.world.data_objects[adr_obj + ADR_AABB_ZMAX];
+
+            f32 obb_centerx = geometry.world.data_objects[adr_obj+ADR_OBB_CENTER_X];
+            f32 obb_centery = geometry.world.data_objects[adr_obj+ADR_OBB_CENTER_Y];
+            f32 obb_centerz = geometry.world.data_objects[adr_obj+ADR_OBB_CENTER_Z];
+
+//            f32 ux = geometry.world.data_objects[adr_obj+ADR_OBB_FRAME_UX];
+//            f32 uy = geometry.world.data_objects[adr_obj+ADR_OBB_FRAME_UY];
+//            f32 uz = geometry.world.data_objects[adr_obj+ADR_OBB_FRAME_UZ];
+//            f32 vx = geometry.world.data_objects[adr_obj+ADR_OBB_FRAME_VX];
+//            f32 vy = geometry.world.data_objects[adr_obj+ADR_OBB_FRAME_VY];
+//            f32 vz = geometry.world.data_objects[adr_obj+ADR_OBB_FRAME_VZ];
+//            f32 wx = geometry.world.data_objects[adr_obj+ADR_OBB_FRAME_WX];
+//            f32 wy = geometry.world.data_objects[adr_obj+ADR_OBB_FRAME_WY];
+//            f32 wz = geometry.world.data_objects[adr_obj+ADR_OBB_FRAME_WZ];
+
+            f32 angx = geometry.world.data_objects[adr_obj+ADR_OBB_FRAME_ANGX];
+            f32 angy = geometry.world.data_objects[adr_obj+ADR_OBB_FRAME_ANGY];
+            f32 angz = geometry.world.data_objects[adr_obj+ADR_OBB_FRAME_ANGZ];
+
+            if (geometry.object_wireframe[iobj]) {
+                // TODO
+            } else {
+                draw_obb(xmin, xmax, ymin, ymax, zmin, zmax,
+                         obb_centerx, obb_centery, obb_centerz, angx, angy, angz,
+                         geometry.object_colors[iobj], geometry.object_transparency[iobj]);
+            }
+
         } else if (type_obj == SPHERE) {
-            // do
+            // TODO
         } else if (type_obj == VOXELIZED) {
 
             f32 xmin = geometry.world.data_objects[adr_obj + ADR_AABB_XMIN];

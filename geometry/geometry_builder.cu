@@ -85,6 +85,28 @@ __host__ __device__ f64 get_distance_to_object(Scene geometry, ui32 adr_geom,
         distance = hit_ray_AABB(pos, dir, aabb_xmin, aabb_xmax,
                                 aabb_ymin, aabb_ymax, aabb_zmin, aabb_zmax);
 
+    // OBB volume
+    } else if (obj_type == OBB) {
+
+        f64xyz obb_center;
+        obb_center.x = (f64)geometry.data_objects[adr_geom+ADR_OBB_CENTER_X];
+        obb_center.y = (f64)geometry.data_objects[adr_geom+ADR_OBB_CENTER_Y];
+        obb_center.z = (f64)geometry.data_objects[adr_geom+ADR_OBB_CENTER_Z];
+        f64xyz u, v, w;
+        u.x = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_UX];
+        u.y = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_UY];
+        u.z = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_UZ];
+        v.x = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_VX];
+        v.y = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_VY];
+        v.z = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_VZ];
+        w.x = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_WX];
+        w.y = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_WY];
+        w.z = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_WZ];
+
+        distance = hit_ray_OBB(pos, dir, aabb_xmin, aabb_xmax,
+                               aabb_ymin, aabb_ymax, aabb_zmin, aabb_zmax,
+                               obb_center, u, v, w);
+
     // Sphere volume
     } else if (obj_type == SPHERE) {
 
@@ -556,6 +578,7 @@ void GeometryBuilder::print_tree() {
 
 ///// Utils ////////////////////////////////////////////////////////////////////////////////
 
+/*
 // Print the current world
 void GeometryBuilder::print_geometry() {
     // Print out the tree structure
@@ -612,7 +635,7 @@ void GeometryBuilder::print_geometry() {
         ++i;
     } // while
 }
-
+*/
 
 
 /*
@@ -829,6 +852,19 @@ ui32 GeometryBuilder::add_object(Meshed obj, ui32 mother_id) {
     // Put this object into buffer
     buffer_meshed[world.cur_node_id] = obj;
     buffer_obj_type[world.cur_node_id] = MESHED;
+
+    return world.cur_node_id;
+}
+
+// Add a Obb object into the world
+ui32 GeometryBuilder::add_object(Obb obj, ui32 mother_id) {
+
+    // Add thid object to the tree
+    add_node(mother_id);
+
+    // Put this object into buffer
+    buffer_obb[world.cur_node_id] = obj;
+    buffer_obj_type[world.cur_node_id] = OBB;
 
     return world.cur_node_id;
 }
@@ -1056,6 +1092,59 @@ void GeometryBuilder::build_object(Meshed obj) {
 
 }
 
+// Build OBB object into the scene structure
+void GeometryBuilder::build_object(Obb obj) {
+
+    // Store the address to access to this object
+    array_push_back(&world.ptr_objects, world.ptr_objects_dim, world.data_objects_dim);
+
+    // Store the information of this object
+
+    // Object Type
+    array_push_back(&world.data_objects, world.data_objects_dim, (f32)OBB);
+    // Material index
+    array_push_back(&world.data_objects, world.data_objects_dim, (f32)get_material_index(obj.material_name));
+    // Object sensitive
+    array_push_back(&world.data_objects, world.data_objects_dim, (f32)obj.sensitive);
+    // AABB parameters
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.xmin);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.xmax);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.ymin);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.ymax);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.zmin);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.zmax);
+    // OBB center
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.obb_center.x);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.obb_center.y);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.obb_center.z);
+    //printf("Build OBB center %f %f %f\n", obj.obb_center.x, obj.obb_center.y, obj.obb_center.z);
+    // OBB frame
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.u.x);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.u.y);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.u.z);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.v.x);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.v.y);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.v.z);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.w.x);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.w.y);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.w.z);
+    // Rotation angle on each axis (in deg)
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.angle.x);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.angle.y);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.angle.z);
+
+    // Name of this object
+    name_objects.push_back(obj.object_name);
+    // Color of this object
+    object_colors.push_back(obj.color);
+    // Transparency of this object
+    object_transparency.push_back(obj.transparency);
+    // Wireframe option of this object
+    object_wireframe.push_back(obj.wireframe);
+    // Store the size of this object
+    array_push_back(&world.size_of_objects, world.size_of_objects_dim, SIZE_OBB_OBJ);
+}
+
 // Build the complete scene
 void GeometryBuilder::build_scene() {
 
@@ -1076,6 +1165,9 @@ void GeometryBuilder::build_scene() {
         // Meshed
         } else if (buffer_obj_type[i] == MESHED) {
             build_object(buffer_meshed[i]);
+        // OBB
+        } else if (buffer_obj_type[i] == OBB) {
+            build_object(buffer_obb[i]);
         }
 
         ++i;

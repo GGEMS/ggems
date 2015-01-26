@@ -19,6 +19,7 @@
 #define GEOMETRY_BUILDER_CUH
 
 #include "aabb.cuh"
+#include "obb.cuh"
 #include "sphere.cuh"
 #include "meshed.cuh"
 #include "voxelized.cuh"
@@ -29,6 +30,7 @@
 #define SPHERE 1
 #define MESHED 2
 #define VOXELIZED 3
+#define OBB 4
 
 // Address of the header for the geometry structure
 #define ADR_OBJ_TYPE 0
@@ -65,10 +67,27 @@
 #define ADR_MESHED_OCTREE_SZ 17
 #define ADR_MESHED_DATA 18
 
+#define ADR_OBB_CENTER_X 9
+#define ADR_OBB_CENTER_Y 10
+#define ADR_OBB_CENTER_Z 11
+#define ADR_OBB_FRAME_UX 12
+#define ADR_OBB_FRAME_UY 13
+#define ADR_OBB_FRAME_UZ 14
+#define ADR_OBB_FRAME_VX 15
+#define ADR_OBB_FRAME_VY 16
+#define ADR_OBB_FRAME_VZ 17
+#define ADR_OBB_FRAME_WX 18
+#define ADR_OBB_FRAME_WY 19
+#define ADR_OBB_FRAME_WZ 20
+#define ADR_OBB_FRAME_ANGX 21
+#define ADR_OBB_FRAME_ANGY 22
+#define ADR_OBB_FRAME_ANGZ 23
+
 #define SIZE_AABB_OBJ 9
 #define SIZE_SPHERE_OBJ 13
 #define SIZE_VOXELIZED_OBJ 15 // + number of voxels
 #define SIZE_MESHED_OBJ 18 // + number of vertices * 3 (xyz) + octree
+#define SIZE_OBB_OBJ 24
 
 // Struct that handle the geometry of the world
 struct Scene {
@@ -119,6 +138,7 @@ class GeometryBuilder {
         ui32 add_object(Sphere obj, ui32 mother_id);
         ui32 add_object(Meshed obj, ui32 mother_id);
         ui32 add_object(Voxelized obj, ui32 mother_id);
+        ui32 add_object(Obb obj, ui32 mother_id);
 
         // Hierarchical structure of the geometry
         void add_root();
@@ -130,7 +150,7 @@ class GeometryBuilder {
 
         // Utils
         //void save_ggems_geometry(std::string filename);
-        void print_geometry();
+        //void print_geometry();
         //void print_raw_geometry();
 
         // World geometry description
@@ -151,12 +171,14 @@ class GeometryBuilder {
         std::map<ui32, Sphere> buffer_sphere;
         std::map<ui32, Voxelized> buffer_voxelized;
         std::map<ui32, Meshed> buffer_meshed;
+        std::map<ui32, Obb> buffer_obb;
 
         // Build object into the scene structure
         void build_object(Aabb obj);
         void build_object(Sphere obj);
         void build_object(Voxelized obj);
         void build_object(Meshed obj);
+        void build_object(Obb obj);
 
 
 

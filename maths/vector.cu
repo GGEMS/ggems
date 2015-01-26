@@ -118,8 +118,8 @@ __host__ __device__ f64xyz fxyz_unit(f64xyz u) {
     return make_f64xyz(u.x*imag, u.y*imag, u.z*imag);
 }
 
-// rotate a vector u
-__host__ __device__ f32xyz fxyz_rotate(f32xyz u, f32xyz EulerAngles) {
+// rotate a vector u (Euler)
+__host__ __device__ f32xyz fxyz_rotate_euler(f32xyz u, f32xyz EulerAngles) {
 
     f32 phi = EulerAngles.x*deg; // deg is defined by G4 unit system
     f32 theta = EulerAngles.y*deg;
@@ -139,7 +139,7 @@ __host__ __device__ f32xyz fxyz_rotate(f32xyz u, f32xyz EulerAngles) {
 
     return fmatrixfxyz_mul(rot, u);
 }
-__host__ __device__ f64xyz fxyz_rotate(f64xyz u, f64xyz EulerAngles) {
+__host__ __device__ f64xyz fxyz_rotate_euler(f64xyz u, f64xyz EulerAngles) {
 
     f64 phi = EulerAngles.x*deg; // deg is defined by G4 unit system
     f64 theta = EulerAngles.y*deg;
@@ -156,6 +156,78 @@ __host__ __device__ f64xyz fxyz_rotate(f64xyz u, f64xyz EulerAngles) {
     f64matrix33 rot = { cph*cps-sph*cth*sps,  cph*sps+sph*cth*cps,  sth*sph,
                        -sph*cps-cph*cth*sps, -sph*sps+cph*cth*cps,  sth*cph,
                         sth*sps,             -sth*cps,                  cth};
+
+    return fmatrixfxyz_mul(rot, u);
+}
+
+// Rotate a vector u around the x-axis
+__host__ __device__ f32xyz fxyz_rotate_x_axis(f32xyz u, f32 angle) {
+    angle *= deg;
+    f32 cs = cos(angle);
+    f32 sn = sin(angle);
+
+    f32matrix33 rot = {1.0, 0.0, 0.0,
+                       0.0, cs, -sn,
+                       0.0, sn, cs};
+
+    return fmatrixfxyz_mul(rot, u);
+}
+__host__ __device__ f64xyz fxyz_rotate_x_axis(f64xyz u, f64 angle) {
+    angle *= deg;
+    f64 cs = cos(angle);
+    f64 sn = sin(angle);
+
+    f64matrix33 rot = {1.0, 0.0, 0.0,
+                       0.0, cs, -sn,
+                       0.0, sn, cs};
+
+    return fmatrixfxyz_mul(rot, u);
+}
+
+// Rotate a vector u around the y-axis
+__host__ __device__ f32xyz fxyz_rotate_y_axis(f32xyz u, f32 angle) {
+    angle *= deg;
+    f32 cs = cos(angle);
+    f32 sn = sin(angle);
+
+    f32matrix33 rot = {cs, 0.0, sn,
+                       0.0, 1.0, 0.0,
+                       -sn, 0.0, cs};
+
+    return fmatrixfxyz_mul(rot, u);
+}
+__host__ __device__ f64xyz fxyz_rotate_y_axis(f64xyz u, f64 angle) {
+    angle *= deg;
+    f64 cs = cos(angle);
+    f64 sn = sin(angle);
+
+    f64matrix33 rot = {cs, 0.0, sn,
+                       0.0, 1.0, 0.0,
+                       -sn, 0.0, cs};
+
+    return fmatrixfxyz_mul(rot, u);
+}
+
+// Rotate a vector u around the z-axis
+__host__ __device__ f32xyz fxyz_rotate_z_axis(f32xyz u, f32 angle) {
+    angle *= deg;
+    f32 cs = cos(angle);
+    f32 sn = sin(angle);
+
+    f32matrix33 rot = {cs, -sn, 0.0,
+                       sn, cs, 0.0,
+                       0.0, 0.0, 1.0};
+
+    return fmatrixfxyz_mul(rot, u);
+}
+__host__ __device__ f64xyz fxyz_rotate_z_axis(f64xyz u, f64 angle) {
+    angle *= deg;
+    f64 cs = cos(angle);
+    f64 sn = sin(angle);
+
+    f64matrix33 rot = {cs, -sn, 0.0,
+                       sn, cs, 0.0,
+                       0.0, 0.0, 1.0};
 
     return fmatrixfxyz_mul(rot, u);
 }

@@ -23,15 +23,20 @@
 Aabb::Aabb () {}
 
 Aabb::Aabb (f32 ox, f32 oy, f32 oz,
-            f32 halflx, f32 halfly, f32 halflz,
+            f32 sizex, f32 sizey, f32 sizez,
             std::string mat_name, std::string obj_name) {
 
-    xmin = ox-halflx;
-    xmax = ox+halflx;
-    ymin = oy-halfly;
-    ymax = oy+halfly;
-    zmin = oz-halflz;
-    zmax = oz+halflz;
+    // Half size
+    sizex *= 0.5;
+    sizey *= 0.5;
+    sizez *= 0.5;
+
+    xmin = ox-sizex;
+    xmax = ox+sizex;
+    ymin = oy-sizey;
+    ymax = oy+sizey;
+    zmin = oz-sizez;
+    zmax = oz+sizez;
     material_name = mat_name;
     object_name = obj_name;
 
