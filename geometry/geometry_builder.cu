@@ -106,6 +106,8 @@ __host__ __device__ f64 get_distance_to_object(Scene geometry, ui32 adr_geom,
         distance = hit_ray_OBB(pos, dir, aabb_xmin, aabb_xmax,
                                aabb_ymin, aabb_ymax, aabb_zmin, aabb_zmax,
                                obb_center, u, v, w);
+        //printf("Pos %f %f %f dir %f %f %f C %f %f %f OBB distance: %e\n", pos.x, pos.y, pos.z,
+        //       dir.x, dir.y, dir.z, obb_center.x, obb_center.y, obb_center.z, distance); // DEBUG
 
     // Sphere volume
     } else if (obj_type == SPHERE) {

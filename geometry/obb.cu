@@ -56,19 +56,9 @@ Obb::Obb (f32 ox, f32 oy, f32 oz,
 // Translation
 void Obb::translate(f32 tx, f32 ty, f32 tz) {
 
-    // The bounding box have to be translate
-    xmin += tx;
-    xmax += tx;
-    ymin += ty;
-    ymax += ty;
-    zmin += tz;
-    zmax += tz;
-
-    // Idem for the center-of-gravity
+    // The translation is not apply on the bounding box, because its defined on OBB frame
+    // We just need to translate the center-of-gravity
     obb_center = fxyz_add(obb_center, make_f32xyz(tx, ty, tz));
-
-//    printf("OBB center %f %f %f\n", obb_center.x, obb_center.y, obb_center.z);
-
 }
 
 // Rotation
@@ -95,11 +85,6 @@ void Obb::rotate(f32 ax, f32 ay, f32 az) {
     obb_center = fxyz_rotate_x_axis(obb_center, angle.x);
     obb_center = fxyz_rotate_y_axis(obb_center, angle.y);
     obb_center = fxyz_rotate_z_axis(obb_center, angle.z);
-
-//    printf("u %f %f %f\n", u.x, u.y, u.z);
-//    printf("v %f %f %f\n", v.x, v.y, v.z);
-//    printf("w %f %f %f\n", w.x, w.y, w.z);
-//    printf("OBB center rot %f %f %f\n", obb_center.x, obb_center.y, obb_center.z);
 
 }
 
