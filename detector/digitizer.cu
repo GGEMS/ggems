@@ -27,15 +27,29 @@ Digitizer::Digitizer() {
 // Alocate and init the singles list file
 void Digitizer::init_singles(ui32 nb) {
     singles.size = nb;
-    singles.px = (f32*)malloc(singles.size*sizeof(f32));
-    singles.py = (f32*)malloc(singles.size*sizeof(f32));
-    singles.pz = (f32*)malloc(singles.size*sizeof(f32));
-    singles.E = (f32*)malloc(singles.size*sizeof(f32));
-    singles.tof = (f32*)malloc(singles.size*sizeof(f32));
-    singles.id = (ui32*)malloc(singles.size*sizeof(ui32));
-    singles.nb_hits = (ui32*)malloc(singles.size*sizeof(ui32));
+
+    // Block Pulse 1
+    singles.pu1_px = (f32*)malloc(singles.size*sizeof(f32));
+    singles.pu1_py = (f32*)malloc(singles.size*sizeof(f32));
+    singles.pu1_pz = (f32*)malloc(singles.size*sizeof(f32));
+    singles.pu1_E = (f32*)malloc(singles.size*sizeof(f32));
+    singles.pu1_tof = (f32*)malloc(singles.size*sizeof(f32));
+    singles.pu1_id_part = (ui32*)malloc(singles.size*sizeof(ui32));
+    singles.pu1_id_geom = (ui32*)malloc(singles.size*sizeof(ui32));
+    singles.pu1_nb_hits = (ui32*)malloc(singles.size*sizeof(ui32));
+    // Block Pulse 2
+    singles.pu2_px = (f32*)malloc(singles.size*sizeof(f32));
+    singles.pu2_py = (f32*)malloc(singles.size*sizeof(f32));
+    singles.pu2_pz = (f32*)malloc(singles.size*sizeof(f32));
+    singles.pu2_E = (f32*)malloc(singles.size*sizeof(f32));
+    singles.pu2_tof = (f32*)malloc(singles.size*sizeof(f32));
+    singles.pu2_id_part = (ui32*)malloc(singles.size*sizeof(ui32));
+    singles.pu2_id_geom = (ui32*)malloc(singles.size*sizeof(ui32));
+    singles.pu2_nb_hits = (ui32*)malloc(singles.size*sizeof(ui32));
+
     ui32 i=0; while (i<singles.size) {
-        singles.nb_hits[i]=0;
+        singles.pu1_nb_hits[i]=0;
+        singles.pu2_nb_hits[i]=0;
         ++i;
     }
 }
@@ -47,12 +61,13 @@ void Digitizer::set_output_filename(std::string name) {
 
 // Process singles
 void Digitizer::process_singles(ui32 iter) {
+
     record_singles.size=0;
     ui32 nb_record_singles=0;
 
     // Count the number of recorded singles
     ui32 i=0; while(i<singles.size) {
-        if (singles.nb_hits[i]>0) {
+        if (singles.pu1_nb_hits[i]>0) {
             nb_record_singles++;
         }
         ++i;
@@ -60,29 +75,51 @@ void Digitizer::process_singles(ui32 iter) {
 
     // Init the list
     record_singles.size = nb_record_singles;
-    record_singles.px = (f32*)malloc(singles.size*sizeof(f32));
-    record_singles.py = (f32*)malloc(singles.size*sizeof(f32));
-    record_singles.pz = (f32*)malloc(singles.size*sizeof(f32));
-    record_singles.E = (f32*)malloc(singles.size*sizeof(f32));
-    record_singles.tof = (f32*)malloc(singles.size*sizeof(f32));
-    record_singles.id = (ui32*)malloc(singles.size*sizeof(ui32));
-    record_singles.nb_hits = (ui32*)malloc(singles.size*sizeof(ui32));
+    record_singles.pu1_px = (f32*)malloc(singles.size*sizeof(f32));
+    record_singles.pu1_py = (f32*)malloc(singles.size*sizeof(f32));
+    record_singles.pu1_pz = (f32*)malloc(singles.size*sizeof(f32));
+    record_singles.pu1_E = (f32*)malloc(singles.size*sizeof(f32));
+    record_singles.pu1_tof = (f32*)malloc(singles.size*sizeof(f32));
+    record_singles.pu1_id_part = (ui32*)malloc(singles.size*sizeof(ui32));
+    record_singles.pu1_id_geom = (ui32*)malloc(singles.size*sizeof(ui32));
+    record_singles.pu1_nb_hits = (ui32*)malloc(singles.size*sizeof(ui32));
 
-    // Process the list
+    // Process the list of pulses into singles
     ui32 index=0;
     i=0; while(i<singles.size) {
-        if (singles.nb_hits[i]>0) {
-            record_singles.px[index] = singles.px[i]/singles.E[i];
-            record_singles.py[index] = singles.py[i]/singles.E[i];
-            record_singles.pz[index] = singles.pz[i]/singles.E[i];
-            record_singles.E[index] = singles.E[i];
-            record_singles.tof[index] = singles.tof[i];
-            record_singles.id[index] = iter*singles.size + i; // Absolute ID over the complete simulation
-            record_singles.nb_hits[index] = singles.nb_hits[i];
+
+        if (singles.pu1_nb_hits[i] > 0) {
+
+            f32 E1=0.0; f32 E2=0.0;
+            E1=singles.pu1_E[i];
+            if (singles.pu2_nb_hits[i] > 0) E2=singles.pu2_E[i];
+
+            // Keep the first block
+            if (E1 > E2) {
+                record_singles.pu1_px[index] = singles.pu1_px[i]/E1;
+                record_singles.pu1_py[index] = singles.pu1_py[i]/E1;
+                record_singles.pu1_pz[index] = singles.pu1_pz[i]/E1;
+                record_singles.pu1_E[index] = E1;
+                record_singles.pu1_tof[index] = singles.pu1_tof[i];
+                record_singles.pu1_id_part[index] = iter*singles.size + i; // Absolute ID over the complete simulation
+                record_singles.pu1_id_geom[index] = singles.pu1_id_geom[i];
+                record_singles.pu1_nb_hits[index] = singles.pu1_nb_hits[i];
+            // Keep the second block
+            } else {
+                record_singles.pu1_px[index] = singles.pu2_px[i]/E2;
+                record_singles.pu1_py[index] = singles.pu2_py[i]/E2;
+                record_singles.pu1_pz[index] = singles.pu2_pz[i]/E2;
+                record_singles.pu1_E[index] = E2;
+                record_singles.pu1_tof[index] = singles.pu2_tof[i];
+                record_singles.pu1_id_part[index] = iter*singles.size + i; // Absolute ID over the complete simulation
+                record_singles.pu1_id_geom[index] = singles.pu2_id_geom[i];
+                record_singles.pu1_nb_hits[index] = singles.pu2_nb_hits[i];
+            }
             ++index;
         }
         ++i;
-    }
+    } // while
+
 }
 
 // Export singles
@@ -98,9 +135,10 @@ void Digitizer::export_singles() {
     // first write te header
     FILE *pfile = fopen(filename.c_str(), "a");
     ui32 i=0; while (i<record_singles.size) {
-        fprintf(pfile, "ID %i POS %e %e %e E %e TOF %e NB HITS %i\n", record_singles.id[i],
-                record_singles.px[i], record_singles.py[i], record_singles.pz[i],
-                record_singles.E[i], record_singles.tof[i], record_singles.nb_hits[i]);
+        fprintf(pfile, "BLOCK ID %i PART ID %i POS %e %e %e E %e TOF %e NB HITS %i\n",
+                record_singles.pu1_id_geom[i], record_singles.pu1_id_part[i],
+                record_singles.pu1_px[i], record_singles.pu1_py[i], record_singles.pu1_pz[i],
+                record_singles.pu1_E[i], record_singles.pu1_tof[i], record_singles.pu1_nb_hits[i]);
         ++i;
     }
 

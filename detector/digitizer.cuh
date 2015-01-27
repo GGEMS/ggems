@@ -23,13 +23,25 @@
 
 // Struct that handle singles
 struct Singles {
-    f32 *px;
-    f32 *py;
-    f32 *pz;
-    f32 *E;
-    f32 *tof;
-    ui32 *id;
-    ui32 *nb_hits;
+    // first pulse
+    f32 *pu1_px;
+    f32 *pu1_py;
+    f32 *pu1_pz;
+    f32 *pu1_E;
+    f32 *pu1_tof;
+    ui32 *pu1_id_part;
+    ui32 *pu1_id_geom;
+    ui32 *pu1_nb_hits;
+    // second pulse
+    f32 *pu2_px;
+    f32 *pu2_py;
+    f32 *pu2_pz;
+    f32 *pu2_E;
+    f32 *pu2_tof;
+    ui32 *pu2_id_part;
+    ui32 *pu2_id_geom;
+    ui32 *pu2_nb_hits;
+
     ui32 size;
 };
 

@@ -512,7 +512,7 @@ void VRML::write_singles(Singles singles) {
     fprintf(pfile, "      point [\n");
 
     is=0; while (is < singles.size) {
-        fprintf(pfile, "        %f %f %f,\n", singles.px[is], singles.py[is], singles.pz[is]);
+        fprintf(pfile, "        %f %f %f,\n", singles.pu1_px[is], singles.pu1_py[is], singles.pu1_pz[is]);
         ++is;
     }
 

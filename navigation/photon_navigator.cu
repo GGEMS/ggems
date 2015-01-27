@@ -265,23 +265,50 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, ui32 part_id,
     if (parameters.digitizer_flag &&
             get_geometry_is_sensitive(geometry, cur_id_geom) && discrete_loss > 0) {
 
-        if (singles.nb_hits[part_id] == 0) {
-            singles.px[part_id] = pos.x*discrete_loss;
-            singles.py[part_id] = pos.y*discrete_loss;
-            singles.pz[part_id] = pos.z*discrete_loss;
-            singles.E[part_id] = discrete_loss;
-            singles.tof[part_id] = particles.tof[part_id];
-            singles.nb_hits[part_id] += 1;
+        // First hit - first pulse
+        if (singles.pu1_nb_hits[part_id] == 0) {
+            singles.pu1_px[part_id] = pos.x*discrete_loss;
+            singles.pu1_py[part_id] = pos.y*discrete_loss;
+            singles.pu1_pz[part_id] = pos.z*discrete_loss;
+            singles.pu1_E[part_id] = discrete_loss;
+            singles.pu1_tof[part_id] = particles.tof[part_id]; // Time is defined for the first hit
+            singles.pu1_nb_hits[part_id] += 1;
+            singles.pu1_id_geom[part_id] = cur_id_geom;
+
         } else {
-            singles.px[part_id] += pos.x*discrete_loss;
-            singles.py[part_id] += pos.y*discrete_loss;
-            singles.pz[part_id] += pos.z*discrete_loss;
-            singles.E[part_id] += discrete_loss;
-            singles.tof[part_id] = particles.tof[part_id];
-            singles.nb_hits[part_id] += 1;
+
+            // Others hits - first pulse
+            if (cur_id_geom == singles.pu1_id_geom[part_id]) {
+                singles.pu1_px[part_id] += pos.x*discrete_loss;
+                singles.pu1_py[part_id] += pos.y*discrete_loss;
+                singles.pu1_pz[part_id] += pos.z*discrete_loss;
+                singles.pu1_E[part_id] += discrete_loss;
+                singles.pu1_nb_hits[part_id] += 1;
+
+            } else {
+
+                // First hit - second pulse
+                if (singles.pu2_nb_hits[part_id] == 0) {
+                    singles.pu2_px[part_id] = pos.x*discrete_loss;
+                    singles.pu2_py[part_id] = pos.y*discrete_loss;
+                    singles.pu2_pz[part_id] = pos.z*discrete_loss;
+                    singles.pu2_E[part_id] = discrete_loss;
+                    singles.pu2_tof[part_id] = particles.tof[part_id]; // Time is defined for the first hit
+                    singles.pu2_nb_hits[part_id] += 1;
+                    singles.pu2_id_geom[part_id] = cur_id_geom;
+
+                } else {
+                    // Others hist - second pulse
+                    singles.pu2_px[part_id] += pos.x*discrete_loss;
+                    singles.pu2_py[part_id] += pos.y*discrete_loss;
+                    singles.pu2_pz[part_id] += pos.z*discrete_loss;
+                    singles.pu2_E[part_id] += discrete_loss;
+                    singles.pu2_nb_hits[part_id] += 1;
+                }
+            }
         }
 
-    }
+    } // Digitizer
 
     //// This part is for debuging and vrml viewer
 
