@@ -401,9 +401,9 @@ void VRML::write_sources(SourceBuilder sources) {
             fprintf(pfile, "  }\n");
             fprintf(pfile, "}\n\n");
 
-            f32 phi = sources.sources.data_sources[adr_src+ADR_CONE_BEAM_SRC_PHI];
-            f32 theta = sources.sources.data_sources[adr_src+ADR_CONE_BEAM_SRC_THETA];
-            f32 psi = sources.sources.data_sources[adr_src+ADR_CONE_BEAM_SRC_PSI];
+            //f32 phi = sources.sources.data_sources[adr_src+ADR_CONE_BEAM_SRC_PHI];
+            //f32 theta = sources.sources.data_sources[adr_src+ADR_CONE_BEAM_SRC_THETA];
+            //f32 psi = sources.sources.data_sources[adr_src+ADR_CONE_BEAM_SRC_PSI];
 
             // Draw the direction as a vector
             //f32xyz d = f3_rotate(make_f32xyz(0.0f, 0.0f, 1.0f), make_f32xyz(phi, theta, psi));

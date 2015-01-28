@@ -73,6 +73,13 @@ __host__ __device__ void voxelized_source_primary_generator(ParticleStack partic
     y += JKISS32(particles, id);
     z += JKISS32(particles, id);
 
+    // Due to float operation aproximation: 1+(1-Epsilon) = 2
+    // we need to check that x, y, z are not equal to the size of the vox source
+    // x, y, z must be in [0, size[
+    if (x == nb_vox_x) x -= EPSILON3;
+    if (y == nb_vox_y) y -= EPSILON3;
+    if (z == nb_vox_z) z -= EPSILON3;
+
     // convert in mm
     x *= sx;
     y *= sy;
@@ -250,7 +257,7 @@ void VoxelizedSource::load_from_mhd(std::string filename) {
     /////////////// First read the MHD file //////////////////////
 
     std::string line, key;
-    nb_vox_x=-1, nb_vox_y=-1, nb_vox_z=-1;
+    nb_vox_x=0, nb_vox_y=0, nb_vox_z=0;
     spacing_x=0, spacing_y=0, spacing_z=0;
 
     // Watchdog
@@ -323,7 +330,7 @@ void VoxelizedSource::load_from_mhd(std::string filename) {
         exit(EXIT_FAILURE);
     }
 
-    if (nb_vox_x == -1 || nb_vox_y == -1 || nb_vox_z == -1 ||
+    if (nb_vox_x == 0 || nb_vox_y == 0 || nb_vox_z == 0 ||
             spacing_x == 0 || spacing_y == 0 || spacing_z == 0) {
         printf("Error when loading mhd file (unknown dimension and spacing)\n");
         printf("   => dim %i %i %i - spacing %f %f %f\n", nb_vox_x, nb_vox_y, nb_vox_z,
@@ -397,11 +404,6 @@ void VoxelizedSource::compute_cdf() {
         activity_cdf[i]= (f32) cdf[i];
         ++i;
     }
-
-    // Need to check - JB
-
-    // Watchdog FIXME why the last one is not zeros (float/double error)
-    activity_cdf[nb-1] = 1.0f;
 
     delete cdf;
 

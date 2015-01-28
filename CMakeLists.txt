@@ -23,6 +23,14 @@ else()
   add_definitions(-DSINGLE_PRECISION)
 endif()
 
+# OPTIONS
+option(WITH_FAST_MATH "Fast math flag" ON)
+if(WITH_FAST_MATH)
+  set(LIBSCUDA --generate-code arch=compute_30,code=sm_30 --relocatable-device-code true -lcudadevrt --compiler-options -use_fast_math -w )
+else()
+  set(LIBSCUDA --generate-code arch=compute_30,code=sm_30 --relocatable-device-code true -lcudadevrt --compiler-options -w)
+endif()
+
 # GEANT4
 find_package(Geant4 REQUIRED)
 include(${Geant4_USE_FILE})
@@ -43,7 +51,6 @@ file(GLOB ggemssh "ggems.sh")
 # Compilation
 find_package(CUDA REQUIRED)
 set(LIB_NAME "ggems")
-set(LIBSCUDA --generate-code arch=compute_30,code=sm_30 --relocatable-device-code true -lcudadevrt --compiler-options -use_fast_math -w )
 set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} ${LIBSCUDA})
 set(CUDA_SEPARABLE_COMPILATION OFF)
 
