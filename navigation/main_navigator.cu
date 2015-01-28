@@ -56,4 +56,23 @@ void cpu_main_navigator(ParticleStack &particles, Scene geometry,
 
 }
 
+
+void gpu_main_navigator(ParticleStack &particles, Scene geometry,
+                        MaterialsTable materials, PhotonCrossSectionTable photon_CS_table,
+                        GlobalSimulationParameters parameters, Singles &singles, ui32 gpu_block_size) {
+
+    /*
+    // Kernel
+    dim3 threads, grid;
+    threads.x = gpu_block_size;
+    grid.x = (particles.size + gpu_block_size - 1) / gpu_block_size;
+    kernel_photon_navigator<<<grid, threads>>>(particles, geometry, materials, photon_CS_table,
+                                               parameters, singles);
+    cuda_error_check("Error ", " Kernel_photon_navigator");
+    */
+}
+
+
+
+
 #endif

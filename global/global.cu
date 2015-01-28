@@ -18,7 +18,36 @@
 #ifndef GLOBAL_CU
 #define GLOBAL_CU
 #include "global.cuh"
-/*
+
+// Some usefull functions
+
+// Reset the GPU
+void reset_gpu_device() {
+    printf("[\033[32;01mok\033[00m] Reset device .. \n");
+    cudaDeviceReset();
+}
+
+// comes from "cuda by example" book
+static void HandleError( cudaError_t err,
+                         const char *file,
+                         int line ) {
+    if (err != cudaSuccess) {
+        printf( "%s in %s at line %d\n", cudaGetErrorString( err ),
+                file, line );
+        exit( EXIT_FAILURE );
+    }
+}
+
+// comes from "cuda programming" book
+__host__ void cuda_error_check (const char * prefix, const char * postfix) {
+    if(cudaPeekAtLastError() != cudaSuccess ) {
+        printf("\n%s%s%s\n",prefix, cudaGetErrorString(cudaGetLastError()),postfix);
+        cudaDeviceReset();
+        exit(EXIT_FAILURE);
+    }
+
+}
+
 // Set a GPU device
 void set_gpu_device(int deviceChoice, f32 minversion) {
 
@@ -41,13 +70,6 @@ void set_gpu_device(int deviceChoice, f32 minversion) {
     printf("[\033[32;01mok\033[00m] \e[1m%s\e[21m found\n",prop.name);
     
 }
-
-// Reset the GPU
-void reset_gpu_device() {
-    printf("[\033[32;01mok\033[00m] Reset device .. \n");
-    cudaDeviceReset();
-}
-*/
 
 // Print out for error
 void print_error(std::string msg) {

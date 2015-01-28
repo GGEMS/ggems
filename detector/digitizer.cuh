@@ -49,13 +49,17 @@ struct Singles {
 class Digitizer {
     public:
         Digitizer();
-        void init_singles(ui32 nb);
+        void cpu_init_singles(ui32 nb);
+        void gpu_init_singles(ui32 nb);
         void set_output_filename(std::string name);
         void process_singles(ui32 iter);
         void export_singles();
         Singles get_singles();
 
-        Singles singles; // Same size than particles stack
+
+
+        Singles singles;  // CPU - Same size than particles stack
+        Singles dsingles; // GPU
 
     private:
         std::string filename;

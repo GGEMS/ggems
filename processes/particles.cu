@@ -76,6 +76,7 @@ ParticleBuilder::ParticleBuilder() {
 // Set the size of the stack buffer
 void ParticleBuilder::set_stack_size(ui32 nb) {
     stack.size = nb;
+    dstack.size = nb;
 }
 
 // Set the seed for this stack
@@ -112,8 +113,38 @@ void ParticleBuilder::cpu_malloc_stack() {
     stack.pname = (ui8*)malloc(stack.size * sizeof(ui8));
 }
 
+void ParticleBuilder::gpu_malloc_stack() {
+
+    if (dstack.size == 0) {
+        print_warning("Stack allocation, stack size is set to zero?!");
+        exit_simulation();
+    }
+
+    HANDLE_ERROR( cudaMalloc((void**) &dstack.E, dstack.size*sizeof(f64)) );
+    HANDLE_ERROR( cudaMalloc((void**) &dstack.dx, dstack.size*sizeof(f64)) );
+    HANDLE_ERROR( cudaMalloc((void**) &dstack.dy, dstack.size*sizeof(f64)) );
+    HANDLE_ERROR( cudaMalloc((void**) &dstack.dz, dstack.size*sizeof(f64)) );
+    HANDLE_ERROR( cudaMalloc((void**) &dstack.px, dstack.size*sizeof(f64)) );
+    HANDLE_ERROR( cudaMalloc((void**) &dstack.py, dstack.size*sizeof(f64)) );
+    HANDLE_ERROR( cudaMalloc((void**) &dstack.pz, dstack.size*sizeof(f64)) );
+    HANDLE_ERROR( cudaMalloc((void**) &dstack.tof, dstack.size*sizeof(f64)) );
+
+    HANDLE_ERROR( cudaMalloc((void**) &dstack.prng_state_1, dstack.size*sizeof(ui32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &dstack.prng_state_2, dstack.size*sizeof(ui32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &dstack.prng_state_3, dstack.size*sizeof(ui32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &dstack.prng_state_4, dstack.size*sizeof(ui32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &dstack.prng_state_5, dstack.size*sizeof(ui32)) );
+
+    HANDLE_ERROR( cudaMalloc((void**) &dstack.geometry_id, dstack.size*sizeof(ui32)) );
+
+    HANDLE_ERROR( cudaMalloc((void**) &dstack.endsimu, dstack.size*sizeof(ui8)) );
+    HANDLE_ERROR( cudaMalloc((void**) &dstack.level, dstack.size*sizeof(ui8)) );
+    HANDLE_ERROR( cudaMalloc((void**) &dstack.pname, dstack.size*sizeof(ui8)) );
+
+}
+
 // Init particle seeds with the main seed
-void ParticleBuilder::init_stack_seed() {
+void ParticleBuilder::cpu_init_stack_seed() {
 
     if (seed == 0) {
         print_warning("The seed to init the particle stack is equal to zero!!");
@@ -130,6 +161,24 @@ void ParticleBuilder::init_stack_seed() {
         stack.prng_state_5[i] = 0;      // carry
         ++i;
     }
+}
+
+void ParticleBuilder::copy_seed_cpu2gpu() {
+
+    // We consider that the CPU stack was previously initialized with seed
+    // cpu_init_stack_seed();
+
+    // Then copy data to GPU
+    HANDLE_ERROR( cudaMemcpy(dstack.prng_state_1, stack.prng_state_1,
+                             sizeof(ui32)*dstack.size, cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy(dstack.prng_state_2, stack.prng_state_2,
+                             sizeof(ui32)*dstack.size, cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy(dstack.prng_state_3, stack.prng_state_3,
+                             sizeof(ui32)*dstack.size, cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy(dstack.prng_state_4, stack.prng_state_4,
+                             sizeof(ui32)*dstack.size, cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy(dstack.prng_state_5, stack.prng_state_5,
+                             sizeof(ui32)*dstack.size, cudaMemcpyHostToDevice) );
 
 }
 

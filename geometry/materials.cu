@@ -337,6 +337,99 @@ void MaterialBuilder::get_materials_table_from_world(GeometryBuilder World) {
 
 }
 
+// Copy data to the GPU
+void MaterialBuilder::copy_materials_table_cpu2gpu() {
+
+    ui32 n = materials_table.nb_materials;
+    ui32 k = materials_table.nb_elements_total;
+
+    // First allocate the GPU mem for the scene
+    HANDLE_ERROR( cudaMalloc((void**) &dmaterials_table.nb_elements, n*sizeof(ui16)) );
+    HANDLE_ERROR( cudaMalloc((void**) &dmaterials_table.index, n*sizeof(ui16)) );
+
+    HANDLE_ERROR( cudaMalloc((void**) &dmaterials_table.mixture, k*sizeof(ui16)) );
+    HANDLE_ERROR( cudaMalloc((void**) &dmaterials_table.atom_num_dens, k*sizeof(f32)) );
+
+    HANDLE_ERROR( cudaMalloc((void**) &dmaterials_table.nb_atoms_per_vol, n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &dmaterials_table.nb_electrons_per_vol, n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &dmaterials_table.electron_mean_excitation_energy, n*sizeof(ui32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &dmaterials_table.rad_length, n*sizeof(f32)) );
+
+    HANDLE_ERROR( cudaMalloc((void**) &dmaterials_table.fX0, n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &dmaterials_table.fX1, n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &dmaterials_table.fD0, n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &dmaterials_table.fC, n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &dmaterials_table.fA, n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &dmaterials_table.fM, n*sizeof(f32)) );
+
+    HANDLE_ERROR( cudaMalloc((void**) &dmaterials_table.fF1, n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &dmaterials_table.fF2, n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &dmaterials_table.fEnergy0, n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &dmaterials_table.fEnergy1, n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &dmaterials_table.fEnergy2, n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &dmaterials_table.fLogEnergy1, n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &dmaterials_table.fLogEnergy2, n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &dmaterials_table.fLogMeanExcitationEnergy, n*sizeof(f32)) );
+
+    HANDLE_ERROR( cudaMalloc((void**) &dmaterials_table.density, n*sizeof(f32)) );
+
+    // Copy data to the GPU
+    dmaterials_table.nb_materials = materials_table.nb_materials;
+    dmaterials_table.nb_elements_total = materials_table.nb_elements_total;
+
+    HANDLE_ERROR( cudaMemcpy(dmaterials_table.nb_elements, materials_table.nb_elements,
+                             n*sizeof(ui16), cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy(dmaterials_table.index, materials_table.index,
+                             n*sizeof(ui16), cudaMemcpyHostToDevice) );
+
+    HANDLE_ERROR( cudaMemcpy(dmaterials_table.mixture, materials_table.mixture,
+                             k*sizeof(ui16), cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy(dmaterials_table.atom_num_dens, materials_table.atom_num_dens,
+                             k*sizeof(f32), cudaMemcpyHostToDevice) );
+
+    HANDLE_ERROR( cudaMemcpy(dmaterials_table.nb_atoms_per_vol, materials_table.nb_atoms_per_vol,
+                             n*sizeof(f32), cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy(dmaterials_table.nb_electrons_per_vol, materials_table.nb_electrons_per_vol,
+                             n*sizeof(f32), cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy(dmaterials_table.electron_mean_excitation_energy, materials_table.electron_mean_excitation_energy,
+                             n*sizeof(f32), cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy(dmaterials_table.rad_length, materials_table.rad_length,
+                             n*sizeof(f32), cudaMemcpyHostToDevice) );
+
+    HANDLE_ERROR( cudaMemcpy(dmaterials_table.fX0, materials_table.fX0,
+                             n*sizeof(f32), cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy(dmaterials_table.fX1, materials_table.fX1,
+                             n*sizeof(f32), cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy(dmaterials_table.fD0, materials_table.fD0,
+                             n*sizeof(f32), cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy(dmaterials_table.fC, materials_table.fC,
+                             n*sizeof(f32), cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy(dmaterials_table.fA, materials_table.fA,
+                             n*sizeof(f32), cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy(dmaterials_table.fM, materials_table.fM,
+                             n*sizeof(f32), cudaMemcpyHostToDevice) );
+
+    HANDLE_ERROR( cudaMemcpy(dmaterials_table.fF1, materials_table.fF1,
+                             n*sizeof(f32), cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy(dmaterials_table.fF2, materials_table.fF2,
+                             n*sizeof(f32), cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy(dmaterials_table.fEnergy0, materials_table.fEnergy0,
+                             n*sizeof(f32), cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy(dmaterials_table.fEnergy1, materials_table.fEnergy1,
+                             n*sizeof(f32), cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy(dmaterials_table.fEnergy2, materials_table.fEnergy2,
+                             n*sizeof(f32), cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy(dmaterials_table.fLogEnergy1, materials_table.fLogEnergy1,
+                             n*sizeof(f32), cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy(dmaterials_table.fLogEnergy2, materials_table.fLogEnergy2,
+                             n*sizeof(f32), cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy(dmaterials_table.fLogMeanExcitationEnergy, materials_table.fLogMeanExcitationEnergy,
+                             n*sizeof(f32), cudaMemcpyHostToDevice) );
+
+    HANDLE_ERROR( cudaMemcpy(dmaterials_table.density, materials_table.density,
+                             n*sizeof(f32), cudaMemcpyHostToDevice) );
+
+}
 
 
 

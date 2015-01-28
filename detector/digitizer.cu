@@ -24,8 +24,8 @@ Digitizer::Digitizer() {
     singles.size = 0;
 }
 
-// Alocate and init the singles list file
-void Digitizer::init_singles(ui32 nb) {
+// Allocate and init the singles list file (CPU)
+void Digitizer::cpu_init_singles(ui32 nb) {
     singles.size = nb;
 
     // Block Pulse 1
@@ -52,6 +52,80 @@ void Digitizer::init_singles(ui32 nb) {
         singles.pu2_nb_hits[i]=0;
         ++i;
     }
+}
+
+// Allocate and init the singles list file (GPU)
+void Digitizer::gpu_init_singles(ui32 nb) {
+
+    ui32 n = singles.size;
+
+    // First allocate mem on GPU
+    HANDLE_ERROR( cudaMalloc((void**) &dsingles.pu1_px, n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &dsingles.pu1_py, n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &dsingles.pu1_pz, n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &dsingles.pu1_E, n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &dsingles.pu1_tof, n*sizeof(f32)) );
+
+    HANDLE_ERROR( cudaMalloc((void**) &dsingles.pu1_id_part, n*sizeof(ui32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &dsingles.pu1_id_geom, n*sizeof(ui32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &dsingles.pu1_nb_hits, n*sizeof(ui32)) );
+
+    HANDLE_ERROR( cudaMalloc((void**) &dsingles.pu2_px, n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &dsingles.pu2_py, n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &dsingles.pu2_pz, n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &dsingles.pu2_E, n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &dsingles.pu2_tof, n*sizeof(f32)) );
+
+    HANDLE_ERROR( cudaMalloc((void**) &dsingles.pu2_id_part, n*sizeof(ui32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &dsingles.pu2_id_geom, n*sizeof(ui32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &dsingles.pu2_nb_hits, n*sizeof(ui32)) );
+
+    // Init values
+    ui32 *vec = (ui32*)malloc(n*sizeof(ui32));
+    ui32 i=0; while (i<n) {
+        vec[i]=0;
+        ++i;
+    }
+
+    // Copy data to the GPU
+    dsingles.size = singles.size;
+
+//    HANDLE_ERROR( cudaMemcpy(dsingles.pu1_px, singles.pu1_px,
+//                             n*sizeof(f32), cudaMemcpyHostToDevice) );
+//    HANDLE_ERROR( cudaMemcpy(dsingles.pu1_py, singles.pu1_py,
+//                             n*sizeof(f32), cudaMemcpyHostToDevice) );
+//    HANDLE_ERROR( cudaMemcpy(dsingles.pu1_pz, singles.pu1_pz,
+//                             n*sizeof(f32), cudaMemcpyHostToDevice) );
+//    HANDLE_ERROR( cudaMemcpy(dsingles.pu1_E, singles.pu1_E,
+//                             n*sizeof(f32), cudaMemcpyHostToDevice) );
+//    HANDLE_ERROR( cudaMemcpy(dsingles.pu1_tof, singles.pu1_tof,
+//                             n*sizeof(f32), cudaMemcpyHostToDevice) );
+
+//    HANDLE_ERROR( cudaMemcpy(dsingles.pu1_id_part, singles.pu1_id_part,
+//                             n*sizeof(ui32), cudaMemcpyHostToDevice) );
+//    HANDLE_ERROR( cudaMemcpy(dsingles.pu1_id_geom, singles.pu1_id_geom,
+//                             n*sizeof(ui32), cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy(dsingles.pu1_nb_hits, vec,
+                             n*sizeof(ui32), cudaMemcpyHostToDevice) );
+
+//    HANDLE_ERROR( cudaMemcpy(dsingles.pu2_px, singles.pu2_px,
+//                             n*sizeof(f32), cudaMemcpyHostToDevice) );
+//    HANDLE_ERROR( cudaMemcpy(dsingles.pu2_py, singles.pu2_py,
+//                             n*sizeof(f32), cudaMemcpyHostToDevice) );
+//    HANDLE_ERROR( cudaMemcpy(dsingles.pu2_pz, singles.pu2_pz,
+//                             n*sizeof(f32), cudaMemcpyHostToDevice) );
+//    HANDLE_ERROR( cudaMemcpy(dsingles.pu2_E, singles.pu2_E,
+//                             n*sizeof(f32), cudaMemcpyHostToDevice) );
+//    HANDLE_ERROR( cudaMemcpy(dsingles.pu2_tof, singles.pu2_tof,
+//                             n*sizeof(f32), cudaMemcpyHostToDevice) );
+
+//    HANDLE_ERROR( cudaMemcpy(dsingles.pu2_id_part, singles.pu2_id_part,
+//                             n*sizeof(ui32), cudaMemcpyHostToDevice) );
+//    HANDLE_ERROR( cudaMemcpy(dsingles.pu2_id_geom, singles.pu2_id_geom,
+//                             n*sizeof(ui32), cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy(dsingles.pu2_nb_hits, vec,
+                             n*sizeof(ui32), cudaMemcpyHostToDevice) );
+
 }
 
 // Set the output filename

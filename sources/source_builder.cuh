@@ -69,10 +69,10 @@
 
 struct Sources {
     // Source structure
-    ui32 *ptr_sources;      // Address to access to the different sources
+    ui32 *ptr_sources;        // Address to access to the different sources
     //ui32 *size_of_sources;  // Size of each source FIXME not need?
-    f32 *data_sources;            // Parameters of each source
-    ui32 *seeds;            // List of seeds
+    f32 *data_sources;        // Parameters of each source
+    ui32 *seeds;              // List of seeds
     ui32 nb_sources;
 
     // Dimension of each vector
@@ -82,6 +82,10 @@ struct Sources {
     ui32 seeds_dim;
 };
 
+// External functions
+__host__ __device__ void get_primaries(Sources sources, ParticleStack &particles, ui32 id_src, ui32 id_part);
+__global__ void kernel_get_primaries(Sources sources, ParticleStack particles, ui32 isrc);
+
 // Class to manage sources on the simulation
 class SourceBuilder {
     public:
@@ -90,9 +94,12 @@ class SourceBuilder {
         void add_source(ConeBeamSource src);
         void add_source(VoxelizedSource src);
 
+        void copy_source_cpu2gpu();
+
         //void save_ggems_geometry(std::string filename);
 
-        Sources sources;
+        Sources sources;   // CPU
+        Sources dsources;  // GPU
 
     private:        
 

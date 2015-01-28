@@ -1177,4 +1177,74 @@ void GeometryBuilder::build_scene() {
 
 }
 
+// Copy the complete scene to the GPU
+void GeometryBuilder::copy_scene_cpu2gpu() {
+
+    // First allocate the GPU mem for the scene
+    HANDLE_ERROR( cudaMalloc((void**) &dworld.ptr_objects, world.ptr_objects_dim*sizeof(ui32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &dworld.size_of_objects, world.size_of_objects_dim*sizeof(ui32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &dworld.data_objects, world.data_objects_dim*sizeof(f32)) );
+
+    HANDLE_ERROR( cudaMalloc((void**) &dworld.ptr_nodes, world.ptr_nodes_dim*sizeof(ui32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &dworld.size_of_nodes, world.size_of_nodes_dim*sizeof(ui32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &dworld.child_nodes, world.child_nodes_dim*sizeof(ui32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &dworld.mother_node, world.mother_node_dim*sizeof(ui32)) );
+
+    // Copy data to the GPU
+    dworld.cur_node_id = world.cur_node_id;
+    dworld.ptr_objects_dim = world.ptr_objects_dim;
+    dworld.size_of_objects_dim = world.size_of_objects_dim;
+    dworld.data_objects_dim = world.data_objects_dim;
+    dworld.ptr_nodes_dim = world.ptr_nodes_dim;
+    dworld.size_of_nodes_dim = world.size_of_nodes_dim;
+    dworld.child_nodes_dim = world.child_nodes_dim;
+    dworld.mother_node_dim = world.mother_node_dim;
+
+    HANDLE_ERROR( cudaMemcpy(dworld.ptr_objects, world.ptr_objects,
+                             world.ptr_objects_dim*sizeof(ui32), cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy(dworld.size_of_objects, world.size_of_objects,
+                             world.size_of_objects_dim*sizeof(ui32), cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy(dworld.data_objects, world.data_objects,
+                             world.data_objects_dim*sizeof(f32), cudaMemcpyHostToDevice) );
+
+    HANDLE_ERROR( cudaMemcpy(dworld.ptr_nodes, world.ptr_nodes,
+                             world.ptr_nodes_dim*sizeof(ui32), cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy(dworld.size_of_nodes, world.size_of_nodes,
+                             world.size_of_nodes_dim*sizeof(ui32), cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy(dworld.child_nodes, world.child_nodes,
+                             world.child_nodes_dim*sizeof(ui32), cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy(dworld.mother_node, world.mother_node,
+                             world.mother_node_dim*sizeof(ui32), cudaMemcpyHostToDevice) );
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #endif

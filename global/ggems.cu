@@ -26,6 +26,9 @@ SimulationBuilder::SimulationBuilder() {
     target = CPU_DEVICE;
 
     // Init physics list and secondaries list
+    parameters.physics_list = (ui8*)malloc(NB_PROCESSES*sizeof(ui8));
+    parameters.secondaries_list = (ui8*)malloc(NB_PARTICLES*sizeof(ui8));
+
     ui32 i = 0;
     while (i < NB_PROCESSES) {
         parameters.physics_list[i] = DISABLED;
@@ -39,117 +42,115 @@ SimulationBuilder::SimulationBuilder() {
 
     parameters.record_dose_flag = DISABLED;
     parameters.digitizer_flag = DISABLED;
+    parameters.nb_of_particles = 0;
+    parameters.nb_iterations = 0;
+    parameters.time = 0;
+    parameters.seed = 0;
+    parameters.cs_table_nbins = 0;
+    parameters.cs_table_min_E = 0;
+    parameters.cs_table_max_E = 0;
     history.record_flag = DISABLED;
+
+    // Init by default others parameters
+    gpu_id = 0;
+    gpu_block_size = 512;
 
 }
 
 ////// :: Main functions ::
 
 // Generate particle based on the sources (CPU version)
-void SimulationBuilder::cpu_primaries_generator() {
+void SimulationBuilder::primaries_generator() {
 
-    // Loop over particle slot
-    ui32 id = 0;
-    ui32 is = 0;
-    while (id < particles.stack.size) {
+    /// CPU ///////////////////////////////////
+    if (target == CPU_DEVICE) {
+
+        // Loop over particle slot
+        ui32 id = 0;
+        ui32 is = 0;
+        while (id < particles.stack.size) {
+
+            // TODO - Generic and multi-sources
+            //      Read CDF sources
+            //      Rnd sources
+            is = 0; // first source
+
+            // Get a new particle
+            get_primaries(sources.sources, particles.stack, is, id);
+
+            // Next particle
+            ++id;
+
+        } // id
+
+        // History record (use only for VRML view)
+        if (history.record_flag == ENABLED) {
+            id=0; while (id < particles.stack.size) {
+                // Record the first position for the tracking history
+                history.cpu_new_particle_track(PHOTON);
+                history.cpu_record_a_step(particles.stack, id);
+                ++id;
+            }
+        }
+
+    /// GPU /////////////////////////////////////
+    } else {
 
         // TODO - Generic and multi-sources
         //      Read CDF sources
         //      Rnd sources
-        is = 0; // first source
+        ui32 is = 0; // first source
 
-        // Read the address source
-        ui32 adr = sources.sources.ptr_sources[is];
+        // Kernel
+        dim3 threads, grid;
+        threads.x = gpu_block_size;
+        grid.x = (particles.dstack.size + gpu_block_size - 1) / gpu_block_size;
+        kernel_get_primaries<<<grid, threads>>>(sources.dsources, particles.dstack, is);
+        cuda_error_check("Error ", " Kernel_primaries_generator");
 
-        // Read the kind of sources
-        ui32 type = (ui32)(sources.sources.data_sources[adr+ADR_SRC_TYPE]);
-        ui32 geom_id = (ui32)(sources.sources.data_sources[adr+ADR_SRC_GEOM_ID]);
-
-        // Point Source
-        if (type == POINT_SOURCE) {
-            f32 px = sources.sources.data_sources[adr+ADR_POINT_SRC_PX];
-            f32 py = sources.sources.data_sources[adr+ADR_POINT_SRC_PY];
-            f32 pz = sources.sources.data_sources[adr+ADR_POINT_SRC_PZ];
-            f32 energy = sources.sources.data_sources[adr+ADR_POINT_SRC_ENERGY];
-
-            point_source_primary_generator(particles.stack, id, px, py, pz, energy, PHOTON, geom_id);
-
-        } else if (type == CONE_BEAM_SOURCE) {
-            f32 px = sources.sources.data_sources[adr+ADR_CONE_BEAM_SRC_PX];
-            f32 py = sources.sources.data_sources[adr+ADR_CONE_BEAM_SRC_PY];
-            f32 pz = sources.sources.data_sources[adr+ADR_CONE_BEAM_SRC_PZ];
-            f32 phi = sources.sources.data_sources[adr+ADR_CONE_BEAM_SRC_PHI];
-            f32 theta = sources.sources.data_sources[adr+ADR_CONE_BEAM_SRC_THETA];
-            f32 psi = sources.sources.data_sources[adr+ADR_CONE_BEAM_SRC_PSI];
-            f32 aperture = sources.sources.data_sources[adr+ADR_CONE_BEAM_SRC_APERTURE];
-            f32 energy = sources.sources.data_sources[adr+ADR_CONE_BEAM_SRC_ENERGY];
-
-            cone_beam_source_primary_generator(particles.stack, id, px, py, pz,
-                                               phi, theta, psi, aperture, energy, PHOTON, geom_id);
-        } else if (type == VOXELIZED_SOURCE) {
-
-            f32 px = sources.sources.data_sources[adr+ADR_VOX_SOURCE_PX];
-            f32 py = sources.sources.data_sources[adr+ADR_VOX_SOURCE_PY];
-            f32 pz = sources.sources.data_sources[adr+ADR_VOX_SOURCE_PZ];
-
-            f32 nb_vox_x = sources.sources.data_sources[adr+ADR_VOX_SOURCE_NB_VOX_X];
-            f32 nb_vox_y = sources.sources.data_sources[adr+ADR_VOX_SOURCE_NB_VOX_Y];
-            f32 nb_vox_z = sources.sources.data_sources[adr+ADR_VOX_SOURCE_NB_VOX_Z];
-
-            f32 sx = sources.sources.data_sources[adr+ADR_VOX_SOURCE_SPACING_X];
-            f32 sy = sources.sources.data_sources[adr+ADR_VOX_SOURCE_SPACING_Y];
-            f32 sz = sources.sources.data_sources[adr+ADR_VOX_SOURCE_SPACING_Z];
-
-            f32 energy = sources.sources.data_sources[adr+ADR_VOX_SOURCE_ENERGY];
-
-            f32 nb_acts = sources.sources.data_sources[adr+ADR_VOX_SOURCE_NB_CDF];
-
-            f32 emission_type = sources.sources.data_sources[adr+ADR_VOX_SOURCE_EMISSION_TYPE];
-
-            f32 *cdf_index = &(sources.sources.data_sources[adr+ADR_VOX_SOURCE_CDF_INDEX]);
-            ui32 adr_cdf_act = adr+nb_acts;
-            f32 *cdf_act = &(sources.sources.data_sources[adr_cdf_act+ADR_VOX_SOURCE_CDF_INDEX]);
-
-            if (emission_type == EMISSION_BACK2BACK) {
-                voxelized_source_primary_generator(particles.stack, id,
-                                                   cdf_index, cdf_act, nb_acts,
-                                                   px, py, pz, nb_vox_x, nb_vox_y, nb_vox_z,
-                                                   sx, sy, sz, energy, PHOTON, geom_id);
-                // Back2back fills the particle' stack with two particles, we need to
-                // adjust the ID to be the ID of event (half size) and not the ID of particles
-                // Consequently ID is incremented to consider the additional particle in the stack
-                ++id;
-
-            } else if (emission_type == EMISSION_MONO) {
-                printf("ERROR: voxelized source, emission 'MONO' is not impleted yet!\n");
-                exit(EXIT_FAILURE);
-            }
-
-        }
-
-        // Next particle
-        ++id;
-
-    } // i
-
-    // History record (use only for VRML view)
-    if (history.record_flag == ENABLED) {
-        id=0; while (id < particles.stack.size) {
-            // Record the first position for the tracking history
-            history.cpu_new_particle_track(PHOTON);
-            history.cpu_record_a_step(particles.stack, id);
-            ++id;
-        }
     }
 
 }
 
-// Main navigation on CPU
-void SimulationBuilder::cpu_main_navigation() {
+// Main navigation
+void SimulationBuilder::main_navigator() {
 
-    cpu_main_navigator(particles.stack, geometry.world,
-                       materials.materials_table, cs_tables.photon_CS_table, parameters,
-                       digitizer.singles, history);
+    /// CPU ///////////////////////////////
+    if (target == CPU_DEVICE) {
+        cpu_main_navigator(particles.stack, geometry.world,
+                           materials.materials_table, cs_tables.photon_CS_table, parameters,
+                           digitizer.singles, history);
+    /// GPU ///////////////////////////////
+    } else {
+        gpu_main_navigator(particles.dstack, geometry.dworld,
+                           materials.dmaterials_table, cs_tables.dphoton_CS_table, dparameters,
+                           digitizer.dsingles, gpu_block_size);
+    }
+
+}
+
+// Copy the global simulation parameters to the GPU
+void SimulationBuilder::copy_parameters_cpu2gpu() {
+
+    // Mem allocation
+    HANDLE_ERROR( cudaMalloc((void**) &dparameters.physics_list, NB_PROCESSES*sizeof(ui8)) );
+    HANDLE_ERROR( cudaMalloc((void**) &dparameters.secondaries_list, NB_PARTICLES*sizeof(ui8)) );
+
+    // Copy data
+    HANDLE_ERROR( cudaMemcpy(dparameters.physics_list, parameters.physics_list,
+                         sizeof(ui8)*NB_PROCESSES, cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy(dparameters.secondaries_list, parameters.secondaries_list,
+                         sizeof(ui8)*NB_PARTICLES, cudaMemcpyHostToDevice) );
+
+    dparameters.record_dose_flag = parameters.record_dose_flag;
+    dparameters.digitizer_flag = parameters.digitizer_flag;
+    dparameters.nb_of_particles = parameters.nb_of_particles;
+    dparameters.nb_iterations = parameters.nb_iterations;
+    dparameters.time = parameters.time;
+    dparameters.seed = parameters.seed;
+    dparameters.cs_table_nbins = parameters.cs_table_nbins;
+    dparameters.cs_table_min_E = parameters.cs_table_min_E;
+    dparameters.cs_table_max_E = parameters.cs_table_max_E;
 
 }
 
@@ -256,6 +257,11 @@ void SimulationBuilder::set_record_history(ui32 nb_particles) {
     history.stack_size = particles.stack.size;
 }
 
+// Set the GPU id
+void SimulationBuilder::set_GPU_ID(ui32 valid) {
+    gpu_id = valid;
+}
+
 ////// :: Getting ::
 
 ParticleBuilder SimulationBuilder::get_particles() {
@@ -277,44 +283,53 @@ void SimulationBuilder::init_simulation() {
     particles.stack.size = nb_of_particles / nb_of_iterations;
     nb_of_particles = particles.stack.size * nb_of_iterations;
 
+    /// Init the GPU if need
+    if (target == GPU_DEVICE) {
+        // Reset device
+        reset_gpu_device();
 
-//    // Reset and set GPU ID and compute grid size
-//    wrap_reset_device();
-//    wrap_set_device(m_gpu_id);
-//    m_grid_size = (m_stack_size + m_block_size - 1) / m_block_size;
-
-//    // copy data to the device
-//    wrap_copy_phantom_to_device(h_phantom, d_phantom);
-//    wrap_copy_materials_to_device(h_materials, d_materials);
-
-//    // init particle stack
-//    wrap_init_particle_stack(d_particles, m_stack_size);
-
-//    // init particle seeds
-//    wrap_init_particle_seeds(d_particles, m_seed);
-
-//    // copy the physics list to the device
-//    wrap_copy_physics_list_to_device(m_physics_list);
-
-//    // copy the secondaries list to the device
-//    wrap_copy_secondaries_list_to_device(m_secondaries_list);
-
-
-    if (target == CPU_DEVICE) {
-
-        // Init the particle stack
-        particles.cpu_malloc_stack();
-        particles.init_stack_seed();
-
+        // Set the gpu id
+        set_gpu_device(gpu_id);
     }
+
+    /// Stack handling /////////////////////////////
+
+    // Init CPU stack
+    particles.cpu_malloc_stack();
+    particles.cpu_init_stack_seed();
+
+    // If GPU
+    if (target == GPU_DEVICE) {
+        particles.gpu_malloc_stack();
+        particles.copy_seed_cpu2gpu();
+    }
+
+    /// Cross sections /////////////////////////////
 
     // Init Cross sections and physics table
     cs_tables.build_table(materials.materials_table, parameters);
+
+    // If GPU
+    if (target == GPU_DEVICE) {
+        cs_tables.copy_cs_table_cpu2gpu();
+    }
     //cs_tables.print();
+
+    /// Copy every data to the GPU ////////////////
+    copy_parameters_cpu2gpu();
+    geometry.copy_scene_cpu2gpu();
+    materials.copy_materials_table_cpu2gpu();
+    sources.copy_source_cpu2gpu();
+
+    /// Digitizer /////////////////////////////////
 
     // init Digitizer
     if (parameters.digitizer_flag) {
-        digitizer.init_singles(particles.stack.size);
+        digitizer.cpu_init_singles(particles.stack.size);
+
+        if (target == GPU_DEVICE) {
+            digitizer.gpu_init_singles(particles.stack.size);
+        }
     }
 }
 
@@ -323,35 +338,35 @@ void SimulationBuilder::start_simulation() {
 
     ui32 iter = 0;
 
-    if (target == CPU_DEVICE) {
+    // Main loop
+    while (iter < nb_of_iterations) {
 
-        // Main loop
-        while (iter < nb_of_iterations) {
             // If history is required
-            if (history.record_flag == ENABLED) history.cur_iter = iter;
+            if (target==CPU_DEVICE && history.record_flag == ENABLED) history.cur_iter = iter;
 
             // Sources
-            cpu_primaries_generator();
-
-            // Locate the first particle position within the geometry
+            primaries_generator();
 
             // Navigation
-            cpu_main_navigation();
+            main_navigator();
 
-            // Process and store singles
+            // If GPU get back singles
+            // TODO
+
+            // Process and store singles on CPU
             if (parameters.digitizer_flag) {
                 digitizer.process_singles(iter);
                 digitizer.export_singles();
             }
 
-            // iter
-            ++iter;
-            printf(">> Iter %i / %i\n", iter, nb_of_iterations);
-        } // main loop
+        // iter
+        ++iter;
+        printf(">> Iter %i / %i\n", iter, nb_of_iterations);
 
-    }
+    } // main loop
 
-}
+  }
+
 
 ////// :: Utils ::
 
