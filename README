@@ -7,4 +7,33 @@ TODO:
 
 Bugs:
 1. RegOctree for mesh: when an octree cell is tangential to a triangle and the ray coming through is perpendicular, this ray pass through just between the two cells and the corresponding triangles. To resolve that, while the reg octree is build, every cell should slighy swell by Epsilon to consider triangle of the neighbor cell.
-2. Running exeGeometry04 (voxelized source + phantom + PET detector) generates a seg fault when more than 10^6 particles are used. There are still an issue on the navigation while a particle pop-up inside a vox volume...
+
+MERCURIAL:
+
+* See commits
+hg glog | head
+
+* New branch
+hg branch MYBRANCH
+hg ci -m 'my new branch'
+
+* See branches
+hg branches
+
+* Change the branch
+hg update BRANCHNAME
+
+* Merge with default
+hg update default
+hg merge MYBRANCH
+hg ci -m 'merge with MYBRANCH'
+
+* Update branch with default
+hg update toto
+hg merge default
+hg ci -m 'some fresh blood'
+
+* Closing a branch
+hg up MYBRANCH
+hg ci -m 'closing mybranch' --close-branch
+
