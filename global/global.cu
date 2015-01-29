@@ -28,7 +28,7 @@ void reset_gpu_device() {
 }
 
 // comes from "cuda by example" book
-static void HandleError( cudaError_t err,
+void HandleError( cudaError_t err,
                          const char *file,
                          int line ) {
     if (err != cudaSuccess) {
@@ -67,7 +67,7 @@ void set_gpu_device(int deviceChoice, f32 minversion) {
     }
 
     cudaSetDevice(deviceChoice%deviceCount);
-    printf("[\033[32;01mok\033[00m] \e[1m%s\e[21m found\n",prop.name);
+    printf("[\033[32;01mok\033[00m] \e[1m%s\e[21m found\n", prop.name);
     
 }
 
@@ -81,7 +81,43 @@ void print_warning(std::string msg) {
     printf("\033[33;03m[WARNING] - %s\033[00m", msg.c_str());
 }
 
-// Exit the soft
+// Print out run time
+void print_time(std::string txt, f64 t) {
+
+    f64 res;
+    ui32 time_h = (ui32)(t / 3600.0);
+    res = t - (time_h*3600.0);
+    ui32 time_m = (ui32)(res / 60.0);
+    res -= (time_m * 60.0);
+    ui32 time_s = (ui32)(res);
+    res -= time_s;
+    ui32 time_ms = (ui32)(res*1000.0);
+
+    printf("[\033[32;01mRun time\033[00m] %s: ", txt.c_str());
+
+    if (time_h != 0) printf("%i h ", time_h);
+    if (time_m != 0) printf("%i m ", time_m);
+    if (time_s != 0) printf("%i s ", time_s);
+    printf("%i ms\n", time_ms);
+
+}
+
+// Print out memory usage
+void print_memory(std::string txt, ui32 t) {
+
+    std::vector<std::string> pref;
+    pref.push_back("B");
+    pref.push_back("kB");
+    pref.push_back("MB");
+    pref.push_back("GB");
+
+    ui32 iemem = (ui32)(log(t) / log(1000));
+    f32 mem = f32(t) / (pow(1000, iemem));
+
+    printf("[\033[34;01mMemory usage\033[00m] %s: %5.2f %s\n", txt.c_str(), mem, pref[iemem].c_str());
+
+}
+
 // Abort the current simulation
 void exit_simulation() {
     printf("[\033[31;03mSimulation aborded\033[00m]\n");
@@ -234,6 +270,12 @@ Color make_color(f32 r, f32 g, f32 b) {
     return c;
 }
 
+// Get time
+f64 get_time() {
+    timeval tv;
+    gettimeofday(&tv, NULL);
+    return tv.tv_sec + tv.tv_usec / 1000000.0;
+}
 
 
 

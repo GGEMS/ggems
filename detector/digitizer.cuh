@@ -51,6 +51,7 @@ class Digitizer {
         Digitizer();
         void cpu_init_singles(ui32 nb);
         void gpu_init_singles(ui32 nb);
+        void copy_singles_gpu2cpu();
         void set_output_filename(std::string name);
         void process_singles(ui32 iter);
         void export_singles();

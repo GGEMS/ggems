@@ -49,16 +49,14 @@ class SimulationBuilder {
     public:
         SimulationBuilder();
 
+        // Set simulation object
         void set_geometry(GeometryBuilder obj);
         void set_materials(MaterialBuilder tab);
         void set_sources(SourceBuilder src);
         void set_particles(ParticleBuilder p);
         void set_digitizer(Digitizer dig);
 
-        void set_detector(FlatPanelDetector vdetector); // FIXME should be a builder
-
-        ParticleBuilder get_particles();
-
+        // Setting parameters
         void set_hardware_target(std::string value);
         void set_GPU_ID(ui32 valid);
         void set_GPU_block_size(ui32 val);
@@ -71,9 +69,18 @@ class SimulationBuilder {
         void set_CS_table_E_min(f32 valE);
         void set_CS_table_E_max(f32 valE);
 
+        // Utils
+        void set_display_run_time();
+        void set_display_memory_usage();
+
+        // Main functions
         void init_simulation();
         void start_simulation();
 
+        // Get data
+         ParticleBuilder get_particles();
+
+        // Parameters
         ui16 target;
         ui32 nb_of_particles;
         ui32 nb_of_iterations;
@@ -101,6 +108,9 @@ class SimulationBuilder {
         // For GPU
         ui32 gpu_id, gpu_block_size;
         void copy_parameters_cpu2gpu();
+
+        // Parameters
+        bool display_run_time_flag, display_memory_usage_flag;
 
 };
 

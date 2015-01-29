@@ -21,12 +21,11 @@
 #include "photon_navigator.cuh"
 
 // CPU photon navigator
-__host__ void cpu_photon_navigator(ParticleStack &particles, ui32 part_id,
+__host__ __device__ void photon_navigator(ParticleStack &particles, ui32 part_id,
                           Scene geometry, MaterialsTable materials,
                           PhotonCrossSectionTable photon_CS_table,
                           GlobalSimulationParameters parameters,
-                          Singles &singles,
-                          HistoryBuilder &history) {
+                          Singles &singles) {
 
     // Read position
     f64xyz pos;
@@ -162,35 +161,9 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, ui32 part_id,
 
     // Stop simulation if out of the world
     if (!test_point_AABB(pos, xmin, xmax, ymin, ymax, zmin, zmax)) {
-
-        particles.endsimu[part_id] = PARTICLE_DEAD;
-
-        // Record this step if required
-        if (history.record_flag == ENABLED) {
-            history.cpu_record_a_step(particles, part_id);
-        }
-
-        //if (particles.E[part_id] == 0.5) printf("No Interaction\n");
-
+        particles.endsimu[part_id] = PARTICLE_DEAD;       
         return;
     }
-
-//    // Stop simulation if out of the world
-//    if (   pos.x <= xmin || pos.x >= xmax
-//        || pos.y <= ymin || pos.y >= ymax
-//        || pos.z <= zmin || pos.z >= zmax) {
-
-//        particles.endsimu[part_id] = PARTICLE_DEAD;
-
-//        // Record this step if required
-//        if (history.record_flag == ENABLED) {
-//            history.cpu_record_a_step(particles, part_id);
-//        }
-
-//        //if (particles.E[part_id] == 0.5) printf("No Interaction\n");
-
-//        return;
-//    }
 
     //// Apply discrete process //////////////////////////////////////////////////
 
@@ -309,24 +282,6 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, ui32 part_id,
         }
 
     } // Digitizer
-
-    //// This part is for debuging and vrml viewer
-
-    // Record this step if required
-    if (history.record_flag == ENABLED) {
-        history.cpu_record_a_step(particles, part_id);
-    }
-
-/*
-    // DEBUGING: phasespace
-    if (next_geometry_volume == 0 && particles.endsimu[part_id] == PARTICLE_ALIVE) {
-        printf("%e %e %e %e %e %e %e\n", particles.E[part_id], pos.x, pos.y, pos.z, dir.x, dir.y, dir.z);
-        particles.endsimu[part_id] = PARTICLE_DEAD;
-        return;
-    }
-*/
-
-
 
 }
 

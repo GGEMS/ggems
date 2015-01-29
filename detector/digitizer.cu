@@ -128,6 +128,48 @@ void Digitizer::gpu_init_singles(ui32 nb) {
 
 }
 
+// Copy the singles list from the GPU to the CPU
+void Digitizer::copy_singles_gpu2cpu() {
+
+    ui32 n = dsingles.size;
+
+    HANDLE_ERROR( cudaMemcpy(singles.pu1_px, dsingles.pu1_px,
+                             n*sizeof(f32), cudaMemcpyDeviceToHost) );
+    HANDLE_ERROR( cudaMemcpy(singles.pu1_py, dsingles.pu1_py,
+                             n*sizeof(f32), cudaMemcpyDeviceToHost) );
+    HANDLE_ERROR( cudaMemcpy(singles.pu1_pz, dsingles.pu1_pz,
+                             n*sizeof(f32), cudaMemcpyDeviceToHost) );
+    HANDLE_ERROR( cudaMemcpy(singles.pu1_E, dsingles.pu1_E,
+                             n*sizeof(f32), cudaMemcpyDeviceToHost) );
+    HANDLE_ERROR( cudaMemcpy(singles.pu1_tof, dsingles.pu1_tof,
+                             n*sizeof(f32), cudaMemcpyDeviceToHost) );
+
+    HANDLE_ERROR( cudaMemcpy(singles.pu1_id_part, dsingles.pu1_id_part,
+                             n*sizeof(ui32), cudaMemcpyDeviceToHost) );
+    HANDLE_ERROR( cudaMemcpy(singles.pu1_id_geom, dsingles.pu1_id_geom,
+                             n*sizeof(ui32), cudaMemcpyDeviceToHost) );
+    HANDLE_ERROR( cudaMemcpy(singles.pu1_nb_hits, dsingles.pu1_nb_hits,
+                             n*sizeof(ui32), cudaMemcpyDeviceToHost) );
+
+    HANDLE_ERROR( cudaMemcpy(singles.pu2_px, dsingles.pu2_px,
+                             n*sizeof(f32), cudaMemcpyDeviceToHost) );
+    HANDLE_ERROR( cudaMemcpy(singles.pu2_py, dsingles.pu2_py,
+                             n*sizeof(f32), cudaMemcpyDeviceToHost) );
+    HANDLE_ERROR( cudaMemcpy(singles.pu2_pz, dsingles.pu2_pz,
+                             n*sizeof(f32), cudaMemcpyDeviceToHost) );
+    HANDLE_ERROR( cudaMemcpy(singles.pu2_E, dsingles.pu2_E,
+                             n*sizeof(f32), cudaMemcpyDeviceToHost) );
+    HANDLE_ERROR( cudaMemcpy(singles.pu2_tof, dsingles.pu2_tof,
+                             n*sizeof(f32), cudaMemcpyDeviceToHost) );
+
+    HANDLE_ERROR( cudaMemcpy(singles.pu2_id_part, dsingles.pu2_id_part,
+                             n*sizeof(ui32), cudaMemcpyDeviceToHost) );
+    HANDLE_ERROR( cudaMemcpy(singles.pu2_id_geom, dsingles.pu2_id_geom,
+                             n*sizeof(ui32), cudaMemcpyDeviceToHost) );
+    HANDLE_ERROR( cudaMemcpy(singles.pu2_nb_hits, dsingles.pu2_nb_hits,
+                             n*sizeof(ui32), cudaMemcpyDeviceToHost) );
+}
+
 // Set the output filename
 void Digitizer::set_output_filename(std::string name) {
     filename = name;

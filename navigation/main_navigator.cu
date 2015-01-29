@@ -20,6 +20,29 @@
 
 #include "main_navigator.cuh"
 
+// Kernel to track photon particles
+__global__ void kernel_photon_navigator(ParticleStack particles, Scene geometry, MaterialsTable materials,
+                                        PhotonCrossSectionTable photon_CS_table,
+                                        GlobalSimulationParameters parameters, Singles singles) {
+
+    const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
+    if (id >= particles.size) return;
+
+    // Stepping loop, iterate the particle until the end
+    ui32 istep = 0;
+    while (particles.endsimu[id] == PARTICLE_ALIVE) {
+
+        // Track photon
+        photon_navigator(particles, id, geometry, materials, photon_CS_table,
+                         parameters, singles);
+
+    }
+
+    istep++;
+
+}
+
+
 void cpu_main_navigator(ParticleStack &particles, Scene geometry,
                         MaterialsTable materials, PhotonCrossSectionTable photon_CS_table,
                         GlobalSimulationParameters parameters, Singles &singles,
@@ -39,8 +62,14 @@ void cpu_main_navigator(ParticleStack &particles, Scene geometry,
 
             // If a photon
             if (particles.pname[id] == PHOTON) {
-                cpu_photon_navigator(particles, id, geometry, materials, photon_CS_table,
-                                     parameters, singles, history);
+                photon_navigator(particles, id, geometry, materials, photon_CS_table,
+                                 parameters, singles);
+
+                // Record this step if required
+                if (history.record_flag == ENABLED) {
+                    history.cpu_record_a_step(particles, id);
+                }
+
             }
 
             istep++;
@@ -61,7 +90,7 @@ void gpu_main_navigator(ParticleStack &particles, Scene geometry,
                         MaterialsTable materials, PhotonCrossSectionTable photon_CS_table,
                         GlobalSimulationParameters parameters, Singles &singles, ui32 gpu_block_size) {
 
-    /*
+
     // Kernel
     dim3 threads, grid;
     threads.x = gpu_block_size;
@@ -69,7 +98,7 @@ void gpu_main_navigator(ParticleStack &particles, Scene geometry,
     kernel_photon_navigator<<<grid, threads>>>(particles, geometry, materials, photon_CS_table,
                                                parameters, singles);
     cuda_error_check("Error ", " Kernel_photon_navigator");
-    */
+
 }
 
 

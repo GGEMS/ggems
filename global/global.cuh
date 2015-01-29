@@ -133,22 +133,26 @@
 #include <cfloat>
 #include <assert.h>
 #include <math.h>
+#include <sys/time.h>
 
 #include "constants.cuh"
 #include "vector.cuh"
 
 #define HANDLE_ERROR( err ) (HandleError( err, __FILE__, __LINE__ ))
 
+// GPU
 void set_gpu_device(int deviceChoice, float minversion=3.0);
 void reset_gpu_device();
-static void HandleError(cudaError_t err, const char *file, int line );
+void HandleError(cudaError_t err, const char *file, int line );
 void cuda_error_check (const char * prefix, const char * postfix);
 
-
+// Utils
 void print_error(std::string msg);
 void print_warning(std::string msg);
-
+void print_time(std::string txt, f64 t);
+void print_memory(std::string txt, ui32 t);
 void exit_simulation();
+f64 get_time();
 
 // Operation on C-Array
 void array_push_back(unsigned int **vector, unsigned int &dim, unsigned int val);

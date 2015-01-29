@@ -40,6 +40,7 @@ SimulationBuilder::SimulationBuilder() {
         ++i;
     }
 
+    // Parameters
     parameters.record_dose_flag = DISABLED;
     parameters.digitizer_flag = DISABLED;
     parameters.nb_of_particles = 0;
@@ -55,6 +56,10 @@ SimulationBuilder::SimulationBuilder() {
     gpu_id = 0;
     gpu_block_size = 512;
 
+    // Others parameters
+    display_run_time_flag = false;
+    display_memory_usage_flag = false;
+
 }
 
 ////// :: Main functions ::
@@ -64,6 +69,9 @@ void SimulationBuilder::primaries_generator() {
 
     /// CPU ///////////////////////////////////
     if (target == CPU_DEVICE) {
+
+        f64 t_start;
+        if (display_run_time_flag) t_start = get_time();
 
         // Loop over particle slot
         ui32 id = 0;
@@ -93,8 +101,19 @@ void SimulationBuilder::primaries_generator() {
             }
         }
 
+        if (display_run_time_flag) {
+            print_time("Primaries generator", get_time()-t_start);
+        }
+
     /// GPU /////////////////////////////////////
     } else {
+
+        cudaEvent_t t_start, t_stop;
+        if (display_run_time_flag) {
+            cudaEventCreate(&t_start);
+            cudaEventCreate(&t_stop);
+            cudaEventRecord(t_start);
+        }
 
         // TODO - Generic and multi-sources
         //      Read CDF sources
@@ -108,6 +127,14 @@ void SimulationBuilder::primaries_generator() {
         kernel_get_primaries<<<grid, threads>>>(sources.dsources, particles.dstack, is);
         cuda_error_check("Error ", " Kernel_primaries_generator");
 
+        if (display_run_time_flag) {
+            cudaEventRecord(t_stop);
+            cudaEventSynchronize(t_stop);
+            f32 time_ms = 0;
+            cudaEventElapsedTime(&time_ms, t_start, t_stop);
+            print_time("Primaries generator", time_ms/1000.0); // in s
+        }
+
     }
 
 }
@@ -117,14 +144,39 @@ void SimulationBuilder::main_navigator() {
 
     /// CPU ///////////////////////////////
     if (target == CPU_DEVICE) {
+
+        f64 t_start;
+        if (display_run_time_flag) t_start = get_time();
+
         cpu_main_navigator(particles.stack, geometry.world,
                            materials.materials_table, cs_tables.photon_CS_table, parameters,
                            digitizer.singles, history);
+
+        if (display_run_time_flag) {
+            print_time("Main navigation", get_time()-t_start);
+        }
+
     /// GPU ///////////////////////////////
     } else {
+
+        cudaEvent_t t_start, t_stop;
+        if (display_run_time_flag) {
+            cudaEventCreate(&t_start);
+            cudaEventCreate(&t_stop);
+            cudaEventRecord(t_start);
+        }
+
         gpu_main_navigator(particles.dstack, geometry.dworld,
                            materials.dmaterials_table, cs_tables.dphoton_CS_table, dparameters,
                            digitizer.dsingles, gpu_block_size);
+
+        if (display_run_time_flag) {
+            cudaEventRecord(t_stop);
+            cudaEventSynchronize(t_stop);
+            f32 time_ms = 0;
+            cudaEventElapsedTime(&time_ms, t_start, t_stop);
+            print_time("Main navigation", time_ms/1000.0); // in s
+        }
     }
 
 }
@@ -262,6 +314,21 @@ void SimulationBuilder::set_GPU_ID(ui32 valid) {
     gpu_id = valid;
 }
 
+// Set the GPU block size
+void SimulationBuilder::set_GPU_block_size(ui32 val) {
+    gpu_block_size = val;
+}
+
+// Display run time
+void SimulationBuilder::set_display_run_time() {
+    display_run_time_flag = true;
+}
+
+// Display memory usage
+void SimulationBuilder::set_display_memory_usage() {
+    display_memory_usage_flag = true;
+}
+
 ////// :: Getting ::
 
 ParticleBuilder SimulationBuilder::get_particles() {
@@ -273,6 +340,15 @@ ParticleBuilder SimulationBuilder::get_particles() {
 
 // Init simualtion
 void SimulationBuilder::init_simulation() {
+
+    // Run time
+    f64 t_start = 0;
+    if (display_run_time_flag) {
+        t_start = get_time();
+    }
+
+    // Memory usage
+    ui32 mem = 0;
 
     // First compute the number of iterations and the size of a stack // TODO Can be improved - JB
     if (nb_of_particles % particles.stack.size) {
@@ -298,6 +374,13 @@ void SimulationBuilder::init_simulation() {
     particles.cpu_malloc_stack();
     particles.cpu_init_stack_seed();
 
+    // Mem usage
+    if (display_memory_usage_flag) {
+        ui32 mem_part = 91*particles.stack.size + 4;
+        mem += mem_part;
+        print_memory("Particles stack", mem_part);
+    }
+
     // If GPU
     if (target == GPU_DEVICE) {
         particles.gpu_malloc_stack();
@@ -308,6 +391,15 @@ void SimulationBuilder::init_simulation() {
 
     // Init Cross sections and physics table
     cs_tables.build_table(materials.materials_table, parameters);
+
+    // Mem usage
+    if (display_memory_usage_flag) {
+        ui32 n = cs_tables.photon_CS_table.nb_bins;
+        ui32 k = cs_tables.photon_CS_table.nb_mat;
+        ui32 mem_cs = 4*n + 12*n*k + 12*n*101 + 16;
+        mem += mem_cs;
+        print_memory("Cross sections", mem_cs);
+    }
 
     // If GPU
     if (target == GPU_DEVICE) {
@@ -321,6 +413,32 @@ void SimulationBuilder::init_simulation() {
     materials.copy_materials_table_cpu2gpu();
     sources.copy_source_cpu2gpu();
 
+    // Mem usage
+    if (display_memory_usage_flag) {
+        // Parameters
+        ui32 mem_params = NB_PROCESSES+NB_PARTICLES+30;
+        mem += mem_params;
+        print_memory("Parameters", mem_params);
+        // Geometry
+        ui32 mem_geom = 4*geometry.world.ptr_objects_dim + 4*geometry.world.size_of_objects_dim +
+                4*geometry.world.data_objects_dim + 4*geometry.world.ptr_nodes_dim +
+                4*geometry.world.size_of_nodes_dim + 4*geometry.world.child_nodes_dim +
+                4*geometry.world.mother_node_dim + 32;
+        mem += mem_geom;
+        print_memory("Geometry", mem_geom);
+        // Materials
+        ui32 n = materials.materials_table.nb_materials;
+        ui32 k = materials.materials_table.nb_elements_total;
+        ui32 mem_mat = 10*k + 80*n + 8;
+        mem += mem_mat;
+        print_memory("Materials", mem_geom);
+        // Sources
+        ui32 mem_src = 4*sources.sources.ptr_sources_dim + 4*sources.sources.data_sources_dim +
+                4*sources.sources.seeds_dim + 16;
+        mem += mem_src;
+        print_memory("Sources", mem_src);
+    }
+
     /// Digitizer /////////////////////////////////
 
     // init Digitizer
@@ -330,6 +448,23 @@ void SimulationBuilder::init_simulation() {
         if (target == GPU_DEVICE) {
             digitizer.gpu_init_singles(particles.stack.size);
         }
+
+        // Mem usage
+        if (display_memory_usage_flag) {
+            ui32 mem_singles = 64*digitizer.singles.size + 4;
+            mem += mem_singles;
+            print_memory("Singles", mem_singles);
+        }
+    }
+
+    // Run time
+    if (display_run_time_flag) {
+        print_time("Initialization", get_time()-t_start);
+    }
+
+    // Mem usage
+    if (display_memory_usage_flag) {
+        print_memory("Total memory usage", mem);
     }
 }
 
@@ -342,7 +477,7 @@ void SimulationBuilder::start_simulation() {
     while (iter < nb_of_iterations) {
 
             // If history is required
-            if (target==CPU_DEVICE && history.record_flag == ENABLED) history.cur_iter = iter;
+            if (target == CPU_DEVICE && history.record_flag == ENABLED) history.cur_iter = iter;
 
             // Sources
             primaries_generator();
@@ -350,13 +485,21 @@ void SimulationBuilder::start_simulation() {
             // Navigation
             main_navigator();
 
-            // If GPU get back singles
-            // TODO
-
             // Process and store singles on CPU
             if (parameters.digitizer_flag) {
+                f64 t_start = get_time();
+
+                if (target == GPU_DEVICE) {
+                    digitizer.copy_singles_gpu2cpu();
+                }
+
                 digitizer.process_singles(iter);
                 digitizer.export_singles();
+
+                // Run time
+                if (display_run_time_flag) {
+                    print_time("Process singles", get_time()-t_start);
+                }
             }
 
         // iter
