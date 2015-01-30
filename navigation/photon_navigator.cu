@@ -45,13 +45,6 @@ __host__ __device__ void photon_navigator(ParticleStack &particles, ui32 part_id
     // Get the material that compose this volume
     ui32 id_mat = get_geometry_material(geometry, cur_id_geom, pos);
 
-#ifdef DEBUG
-    printf("  begin %i\n", part_id);
-    printf("     Cur id geom %i mat %i\n", cur_id_geom, id_mat);
-    printf("     InitPos %f %f %f\n", pos.x, pos.y, pos.z);
-    printf("     Energy %f\n", particles.E[part_id]);
-#endif
-
     //// Find next discrete interaction ///////////////////////////////////////
 
     f64 next_interaction_distance = F64_MAX;
@@ -75,9 +68,7 @@ __host__ __device__ void photon_navigator(ParticleStack &particles, ui32 part_id
         cross_section = get_CS_from_table(photon_CS_table.E_bins, photon_CS_table.Photoelectric_Std_CS,
                                           particles.E[part_id], E_index, id_mat, photon_CS_table.nb_bins);
         interaction_distance = -log( JKISS32(particles, part_id) ) / cross_section;
-#ifdef DEBUG
-        printf(" Photoelectric: CS %e dist %e\n", cross_section, interaction_distance);
-#endif
+
         if (interaction_distance < next_interaction_distance) {
             next_interaction_distance = interaction_distance;
             next_discrete_process = PHOTON_PHOTOELECTRIC;
@@ -90,9 +81,7 @@ __host__ __device__ void photon_navigator(ParticleStack &particles, ui32 part_id
         cross_section = get_CS_from_table(photon_CS_table.E_bins, photon_CS_table.Compton_Std_CS,
                                           particles.E[part_id], E_index, id_mat, photon_CS_table.nb_bins);
         interaction_distance = -log( JKISS32(particles, part_id) ) / cross_section;
-#ifdef DEBUG
-        printf(" Compton: CS %e dist %e\n", cross_section, interaction_distance);
-#endif
+
         if (interaction_distance < next_interaction_distance) {
             next_interaction_distance = interaction_distance;
             next_discrete_process = PHOTON_COMPTON;
@@ -104,9 +93,7 @@ __host__ __device__ void photon_navigator(ParticleStack &particles, ui32 part_id
         cross_section = get_CS_from_table(photon_CS_table.E_bins, photon_CS_table.Rayleigh_Lv_CS,
                                           particles.E[part_id], E_index, id_mat, photon_CS_table.nb_bins);
         interaction_distance = -log( JKISS32(particles, part_id) ) / cross_section;
-#ifdef DEBUG
-        printf(" Rayleigh: CS %e dist %e\n", cross_section, interaction_distance);
-#endif
+
         if (interaction_distance < next_interaction_distance) {
             next_interaction_distance = interaction_distance;
             next_discrete_process = PHOTON_RAYLEIGH;
@@ -120,9 +107,7 @@ __host__ __device__ void photon_navigator(ParticleStack &particles, ui32 part_id
 
     ui32 hit_id_geom = 0;
     get_next_geometry_boundary(geometry, cur_id_geom, pos, dir, interaction_distance, hit_id_geom);
-#ifdef DEBUG
-        printf(" Geom: dist %e\n", interaction_distance);
-#endif
+
     if (interaction_distance <= next_interaction_distance) {
         next_interaction_distance = interaction_distance + EPSILON3; // Overshoot
         next_discrete_process = GEOMETRY_BOUNDARY;
@@ -171,24 +156,11 @@ __host__ __device__ void photon_navigator(ParticleStack &particles, ui32 part_id
     SecParticle electron;
     electron.E = 0;
 
-#ifdef DEBUG
-    printf("     Dist %f NextVol %i pos %f %f %f ", next_interaction_distance, next_geometry_volume, pos.x, pos.y, pos.z);
-#endif
-
     if (next_discrete_process == PHOTON_COMPTON) {
 
         //   TODO: cutE = materials.electron_cut_energy[mat]                 cutE
         electron = Compton_SampleSecondaries_standard(particles, 0.0, part_id, parameters);
 
-
-
-        // Debug
-        //printf("id %i - pos %f %f %f - dir %f %f %f - Cmpt - geom cur %i hit %i\n", part_id, pos.x, pos.y, pos.z,
-        //                                                                 dir.x, dir.y, dir.z,
-        //                                                                 cur_id_geom, next_geometry_volume);
-#ifdef DEBUG
-        printf(" Compton\n");
-#endif
     }
 
     if (next_discrete_process == PHOTON_PHOTOELECTRIC) {
@@ -197,30 +169,14 @@ __host__ __device__ void photon_navigator(ParticleStack &particles, ui32 part_id
         electron = Photoelec_SampleSecondaries_standard(particles, materials, photon_CS_table,
                                                                     E_index, 0.0, id_mat, part_id, parameters);
 
-        // Debug
-        //printf("id %i - pos %f %f %f - dir %f %f %f - PE - geom cur %i hit %i\n", part_id, pos.x, pos.y, pos.z,
-        //                                                               dir.x, dir.y, dir.z,
-        //                                                               cur_id_geom, next_geometry_volume);
-#ifdef DEBUG
-        printf(" PE\n");
-#endif
     }
 
     if (next_discrete_process == PHOTON_RAYLEIGH) {
         Rayleigh_SampleSecondaries_Livermore(particles, materials, photon_CS_table, E_index, id_mat, part_id);
-        //printf("Rayleigh\n");
     }
 
 
-    if (next_discrete_process == GEOMETRY_BOUNDARY) {
-        // Debug
-        //printf("id %i - pos %f %f %f - dir %f %f %f - Bnd - geom cur %i hit %i\n", part_id, pos.x, pos.y, pos.z,
-        //                                                                 dir.x, dir.y, dir.z,
-        //                                                                 cur_id_geom, next_geometry_volume);
-#ifdef DEBUG
-        printf(" Geom\n");
-#endif
-    }
+    //if (next_discrete_process == GEOMETRY_BOUNDARY) {}
 
     //// Get discrete energy lost
 
@@ -284,17 +240,5 @@ __host__ __device__ void photon_navigator(ParticleStack &particles, ui32 part_id
     } // Digitizer
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
 #endif

@@ -48,13 +48,13 @@ void cpu_main_navigator(ParticleStack &particles, Scene geometry,
                         GlobalSimulationParameters parameters, Singles &singles,
                         HistoryBuilder &history) {
 
+#ifdef DEBUG
+        printf("CPU: photon navigator\n");
+#endif
+
     // For each particle
     ui32 id = 0;
     while (id < particles.size) {
-
-#ifdef DEBUG
-        printf(">>>> Particle %i\n", id);
-#endif
 
         // Stepping loop, iterate the particle until the end
         ui32 istep = 0;
@@ -90,6 +90,10 @@ void gpu_main_navigator(ParticleStack &particles, Scene geometry,
                         MaterialsTable materials, PhotonCrossSectionTable photon_CS_table,
                         GlobalSimulationParameters parameters, Singles &singles, ui32 gpu_block_size) {
 
+
+#ifdef DEBUG
+        printf("GPU: kernel photon navigator\n");
+#endif
 
     // Kernel
     dim3 threads, grid;

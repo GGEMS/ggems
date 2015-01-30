@@ -20,6 +20,8 @@
 
 #include "raytracing.cuh"
 
+/// Function with simple precision /////////////////////////////////////////////////////////
+
 // Overlapping test AABB/Triangle - Akenine-Moller algorithm (f32 version)
 __host__ __device__ bool overlap_AABB_triangle(f32 xmin, f32 xmax,        // AABB
                                                f32 ymin, f32 ymax,
@@ -185,6 +187,246 @@ __host__ __device__ bool overlap_AABB_triangle(f32 xmin, f32 xmax,        // AAB
 
     return false;
 }
+
+// Ray/Sphere intersection (f32 version)
+__host__ __device__ f32 hit_ray_sphere(f32xyz ray_p, f32xyz ray_d,        // Ray
+                                       f32xyz sphere_c, f32 sphere_rad) { // Sphere
+
+    // Sphere defintion (center, rad)
+    f32xyz m = fxyz_sub(ray_p, sphere_c);
+    f32  b = fxyz_dot(m, ray_d);
+    f32  c = fxyz_dot(m, m) - sphere_rad*sphere_rad;
+
+    if (c > 0.0f && b > 0.0f) {return F32_MAX;}
+
+    f32 discr = b*b - c;
+    if (discr < 0.0f) {return F32_MAX;}
+
+    f32 t = -b - sqrt(discr);
+    if (t < 0.0f) {t = 0.0f;}
+
+    return t;
+}
+
+// Ray/AABB intersection - Smits algorithm (f32 version)
+__host__ __device__ f32 hit_ray_AABB(f32xyz ray_p, f32xyz ray_d,
+                                     f32 aabb_xmin, f32 aabb_xmax,
+                                     f32 aabb_ymin, f32 aabb_ymax,
+                                     f32 aabb_zmin, f32 aabb_zmax) {
+
+    f32 idx, idy, idz;
+    f32 tmin, tmax, tymin, tymax, tzmin, tzmax, buf;
+
+    tmin = -F32_MAX;
+    tmax =  F32_MAX;
+
+    // on x
+    if (fabs(ray_d.x) < EPSILON6) {
+        if (ray_p.x < aabb_xmin || ray_p.x > aabb_xmax) {return F32_MAX;}
+    } else {
+        idx = 1.0f / ray_d.x;
+        tmin = (aabb_xmin - ray_p.x) * idx;
+        tmax = (aabb_xmax - ray_p.x) * idx;
+        if (tmin > tmax) {
+            buf = tmin;
+            tmin = tmax;
+            tmax = buf;
+        }
+        if (tmin > tmax) {return F32_MAX;}
+    }
+    // on y
+    if (fabs(ray_d.y) < EPSILON6) {
+        if (ray_p.y < aabb_ymin || ray_p.y > aabb_ymax) {return F32_MAX;}
+    } else {
+        idy = 1.0f / ray_d.y;
+        tymin = (aabb_ymin - ray_p.y) * idy;
+        tymax = (aabb_ymax - ray_p.y) * idy;
+        if (tymin > tymax) {
+            buf = tymin;
+            tymin = tymax;
+            tymax = buf;
+        }
+        if (tymin > tmin) {tmin = tymin;}
+        if (tymax < tmax) {tmax = tymax;}
+        if (tmin > tmax) {return F32_MAX;}
+    }
+    // on z
+    if (fabs(ray_d.z) < EPSILON6) {
+        if (ray_p.z < aabb_zmin || ray_p.z > aabb_zmax) {return F32_MAX;}
+    } else {
+        idz = 1.0f / ray_d.z;
+        tzmin = (aabb_zmin - ray_p.z) * idz;
+        tzmax = (aabb_zmax - ray_p.z) * idz;
+        if (tzmin > tzmax) {
+            buf = tzmin;
+            tzmin = tzmax;
+            tzmax = buf;
+        }
+        if (tzmin > tmin) {tmin = tzmin;}
+        if (tzmax < tmax) {tmax = tzmax;}
+        if (tmin > tmax) {return F32_MAX;}
+    }
+
+    // Return the smaller positive value diff to zero
+    if (tmin < 0 && (tmax < 0 || tmax == 0)) return F32_MAX;
+    if (tmin <= 0) {
+        return tmax;
+    } else {
+        return tmin;
+    }
+
+}
+
+// Ray/AABB intersection test - Smits algorithm (f32 version)
+__host__ __device__ bool test_ray_AABB(f32xyz ray_p, f32xyz ray_d,
+                                       f32 aabb_xmin, f32 aabb_xmax,
+                                       f32 aabb_ymin, f32 aabb_ymax,
+                                       f32 aabb_zmin, f32 aabb_zmax) {
+
+    f32 idx, idy, idz;
+    f32 tmin, tmax, tymin, tymax, tzmin, tzmax, buf;
+
+    tmin = -F32_MAX;
+    tmax =  F32_MAX;
+
+    // on x
+    if (fabs(ray_d.x) < EPSILON6) {
+        if (ray_p.x < aabb_xmin || ray_p.x > aabb_xmax) {return false;}
+    } else {
+        idx = 1.0f / ray_d.x;
+        tmin = (aabb_xmin - ray_p.x) * idx;
+        tmax = (aabb_xmax - ray_p.x) * idx;
+        if (tmin > tmax) {
+            buf = tmin;
+            tmin = tmax;
+            tmax = buf;
+        }
+        if (tmin > tmax) {return false;}
+    }
+    // on y
+    if (fabs(ray_d.y) < EPSILON6) {
+        if (ray_p.y < aabb_ymin || ray_p.y > aabb_ymax) {return false;}
+    } else {
+        idy = 1.0f / ray_d.y;
+        tymin = (aabb_ymin - ray_p.y) * idy;
+        tymax = (aabb_ymax - ray_p.y) * idy;
+        if (tymin > tymax) {
+            buf = tymin;
+            tymin = tymax;
+            tymax = buf;
+        }
+        if (tymin > tmin) {tmin = tymin;}
+        if (tymax < tmax) {tmax = tymax;}
+        if (tmin > tmax) {return false;}
+    }
+    // on z
+    if (fabs(ray_d.z) < EPSILON6) {
+        if (ray_p.z < aabb_zmin || ray_p.z > aabb_zmax) {return false;}
+    } else {
+        idz = 1.0f / ray_d.z;
+        tzmin = (aabb_zmin - ray_p.z) * idz;
+        tzmax = (aabb_zmax - ray_p.z) * idz;
+        if (tzmin > tzmax) {
+            buf = tzmin;
+            tzmin = tzmax;
+            tzmax = buf;
+        }
+        if (tzmin > tmin) {tmin = tzmin;}
+        if (tzmax < tmax) {tmax = tzmax;}
+        if (tmin > tmax) {return false;}
+    }
+
+    // Return the smaller positive value
+    if (tmin < 0 && tmax < 0) return false;
+
+    return true;
+}
+
+// AABB/AABB test (f32 version)
+__host__ __device__ bool test_AABB_AABB(f32 a_xmin, f32 a_xmax, f32 a_ymin, f32 a_ymax,
+                                        f32 a_zmin, f32 a_zmax,
+                                        f32 b_xmin, f32 b_xmax, f32 b_ymin, f32 b_ymax,
+                                        f32 b_zmin, f32 b_zmax) {
+
+    if (a_xmax < b_xmin || a_xmin > b_xmax) return false;
+    if (a_ymax < b_ymin || a_ymin > b_ymax) return false;
+    if (a_zmax < b_zmin || a_zmin > b_zmax) return false;
+
+    return true;
+}
+
+// Point/AABB test (f32 version)
+__host__ __device__ bool test_point_AABB(f32xyz p,
+                                         f32 aabb_xmin, f32 aabb_xmax,
+                                         f32 aabb_ymin, f32 aabb_ymax,
+                                         f32 aabb_zmin, f32 aabb_zmax) {
+
+    if (p.x < aabb_xmin || p.x > aabb_xmax) return false;
+    if (p.y < aabb_ymin || p.y > aabb_ymax) return false;
+    if (p.z < aabb_zmin || p.z > aabb_zmax) return false;
+
+    return true;
+}
+
+// Ray/triangle intersection - Moller-Trumbore algorithm (f32 version)
+__host__ __device__ f32 hit_ray_triangle(f32xyz ray_p, f32xyz ray_d,
+                                         f32xyz tri_u,              // Triangle
+                                         f32xyz tri_v,
+                                         f32xyz tri_w) {
+
+    f32xyz e1 = fxyz_sub(tri_v, tri_u); // Find vector for 2 edges sharing
+    f32xyz e2 = fxyz_sub(tri_w, tri_u);
+
+    f32xyz pp = fxyz_cross(ray_d, e2);
+    f32  a  = fxyz_dot(e1, pp);
+    if (a > -1.0e-05f && a < 1.0e-05f) {return F32_MAX;} // no hit
+
+    f32 f = 1.0f / a;
+
+    f32xyz s = fxyz_sub(ray_p, tri_u);
+    f32  u = f * fxyz_dot(s, pp);
+    if (u < 0.0f || u > 1.0f) {return F32_MAX;}
+
+    f32xyz q = fxyz_cross(s, e1);
+    f32  v = f * fxyz_dot(ray_d, q);
+    if (v < 0.0f || (u+v) > 1.0f) {return F32_MAX;}
+
+    // Ray hit the triangle
+    return f * fxyz_dot(e2, q);
+
+}
+
+// Ray/OBB intersection - Inspired by POVRAY (f32 version)
+__host__ __device__ f32 hit_ray_OBB(f32xyz ray_p, f32xyz ray_d,
+                                    f32 aabb_xmin, f32 aabb_xmax,
+                                    f32 aabb_ymin, f32 aabb_ymax,
+                                    f32 aabb_zmin, f32 aabb_zmax,
+                                    f32xyz obb_center,
+                                    f32xyz u, f32xyz v, f32xyz w) {
+
+    // Transform the ray in OBB' space, then do AABB
+    f32xyz ray_obb = fxyz_sub(ray_p, obb_center);
+    ray_p.x = fxyz_dot(ray_obb, u);
+    ray_p.y = fxyz_dot(ray_obb, v);
+    ray_p.z = fxyz_dot(ray_obb, w);
+    f32xyz dir;
+    dir.x = fxyz_dot(ray_d, u);
+    dir.y = fxyz_dot(ray_d, v);
+    dir.z = fxyz_dot(ray_d, w);
+
+    return hit_ray_AABB(ray_p, dir, aabb_xmin, aabb_xmax, aabb_ymin, aabb_ymax,
+                        aabb_zmin, aabb_zmax);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+/// Function with double precision /////////////////////////////////////////////////////////
+
+
+#ifndef SINGLE_PRECISION
+    // Add function with double precision
 
 // Overlapping test AABB/Triangle - Akenine-Moller algorithm (f64 version)
 __host__ __device__ bool overlap_AABB_triangle(f64 xmin, f64 xmax,        // AABB
@@ -352,26 +594,6 @@ __host__ __device__ bool overlap_AABB_triangle(f64 xmin, f64 xmax,        // AAB
     return false;
 }
 
-// Ray/Sphere intersection (f32 version)
-__host__ __device__ f32 hit_ray_sphere(f32xyz ray_p, f32xyz ray_d,        // Ray
-                                       f32xyz sphere_c, f32 sphere_rad) { // Sphere
-
-    // Sphere defintion (center, rad)
-    f32xyz m = fxyz_sub(ray_p, sphere_c);
-    f32  b = fxyz_dot(m, ray_d);
-    f32  c = fxyz_dot(m, m) - sphere_rad*sphere_rad;
-
-    if (c > 0.0f && b > 0.0f) {return F32_MAX;}
-
-    f32 discr = b*b - c;
-    if (discr < 0.0f) {return F32_MAX;}
-
-    f32 t = -b - sqrt(discr);
-    if (t < 0.0f) {t = 0.0f;}
-
-    return t;
-}
-
 // Ray/Sphere intersection (f64 version)
 __host__ __device__ f64 hit_ray_sphere(f64xyz ray_p, f64xyz ray_d,        // Ray
                                        f64xyz sphere_c, f64 sphere_rad) { // Sphere
@@ -390,75 +612,6 @@ __host__ __device__ f64 hit_ray_sphere(f64xyz ray_p, f64xyz ray_d,        // Ray
     if (t < 0.0f) {t = 0.0f;}
 
     return t;
-}
-
-// Ray/AABB intersection - Smits algorithm (f32 version)
-__host__ __device__ f32 hit_ray_AABB(f32xyz ray_p, f32xyz ray_d,
-                                     f32 aabb_xmin, f32 aabb_xmax,
-                                     f32 aabb_ymin, f32 aabb_ymax,
-                                     f32 aabb_zmin, f32 aabb_zmax) {
-
-    f32 idx, idy, idz;
-    f32 tmin, tmax, tymin, tymax, tzmin, tzmax, buf;
-
-    tmin = -F32_MAX;
-    tmax =  F32_MAX;
-
-    // on x
-    if (fabs(ray_d.x) < EPSILON6) {
-        if (ray_p.x < aabb_xmin || ray_p.x > aabb_xmax) {return F32_MAX;}
-    } else {
-        idx = 1.0f / ray_d.x;
-        tmin = (aabb_xmin - ray_p.x) * idx;
-        tmax = (aabb_xmax - ray_p.x) * idx;
-        if (tmin > tmax) {
-            buf = tmin;
-            tmin = tmax;
-            tmax = buf;
-        }
-        if (tmin > tmax) {return F32_MAX;}
-    }
-    // on y
-    if (fabs(ray_d.y) < EPSILON6) {
-        if (ray_p.y < aabb_ymin || ray_p.y > aabb_ymax) {return F32_MAX;}
-    } else {
-        idy = 1.0f / ray_d.y;
-        tymin = (aabb_ymin - ray_p.y) * idy;
-        tymax = (aabb_ymax - ray_p.y) * idy;
-        if (tymin > tymax) {
-            buf = tymin;
-            tymin = tymax;
-            tymax = buf;
-        }
-        if (tymin > tmin) {tmin = tymin;}
-        if (tymax < tmax) {tmax = tymax;}
-        if (tmin > tmax) {return F32_MAX;}
-    }
-    // on z
-    if (fabs(ray_d.z) < EPSILON6) {
-        if (ray_p.z < aabb_zmin || ray_p.z > aabb_zmax) {return F32_MAX;}
-    } else {
-        idz = 1.0f / ray_d.z;
-        tzmin = (aabb_zmin - ray_p.z) * idz;
-        tzmax = (aabb_zmax - ray_p.z) * idz;
-        if (tzmin > tzmax) {
-            buf = tzmin;
-            tzmin = tzmax;
-            tzmax = buf;
-        }
-        if (tzmin > tmin) {tmin = tzmin;}
-        if (tzmax < tmax) {tmax = tzmax;}
-        if (tmin > tmax) {return F32_MAX;}
-    }
-
-    // Return the smaller positive value diff to zero
-    if (tmin < 0 && (tmax < 0 || tmax == 0)) return F32_MAX;
-    if (tmin <= 0) {
-        return tmax;
-    } else {
-        return tmin;
-    }
-
 }
 
 // Ray/AABB intersection - Smits algorithm (f64 version)
@@ -530,72 +683,6 @@ __host__ __device__ f64 hit_ray_AABB(f64xyz ray_p, f64xyz ray_d,
 
 }
 
-
-// Ray/AABB intersection test - Smits algorithm (f32 version)
-__host__ __device__ bool test_ray_AABB(f32xyz ray_p, f32xyz ray_d,
-                                       f32 aabb_xmin, f32 aabb_xmax,
-                                       f32 aabb_ymin, f32 aabb_ymax,
-                                       f32 aabb_zmin, f32 aabb_zmax) {
-
-    f32 idx, idy, idz;
-    f32 tmin, tmax, tymin, tymax, tzmin, tzmax, buf;
-
-    tmin = -F32_MAX;
-    tmax =  F32_MAX;
-
-    // on x
-    if (fabs(ray_d.x) < EPSILON6) {
-        if (ray_p.x < aabb_xmin || ray_p.x > aabb_xmax) {return false;}
-    } else {
-        idx = 1.0f / ray_d.x;
-        tmin = (aabb_xmin - ray_p.x) * idx;
-        tmax = (aabb_xmax - ray_p.x) * idx;
-        if (tmin > tmax) {
-            buf = tmin;
-            tmin = tmax;
-            tmax = buf;
-        }
-        if (tmin > tmax) {return false;}
-    }
-    // on y
-    if (fabs(ray_d.y) < EPSILON6) {
-        if (ray_p.y < aabb_ymin || ray_p.y > aabb_ymax) {return false;}
-    } else {
-        idy = 1.0f / ray_d.y;
-        tymin = (aabb_ymin - ray_p.y) * idy;
-        tymax = (aabb_ymax - ray_p.y) * idy;
-        if (tymin > tymax) {
-            buf = tymin;
-            tymin = tymax;
-            tymax = buf;
-        }
-        if (tymin > tmin) {tmin = tymin;}
-        if (tymax < tmax) {tmax = tymax;}
-        if (tmin > tmax) {return false;}
-    }
-    // on z
-    if (fabs(ray_d.z) < EPSILON6) {
-        if (ray_p.z < aabb_zmin || ray_p.z > aabb_zmax) {return false;}
-    } else {
-        idz = 1.0f / ray_d.z;
-        tzmin = (aabb_zmin - ray_p.z) * idz;
-        tzmax = (aabb_zmax - ray_p.z) * idz;
-        if (tzmin > tzmax) {
-            buf = tzmin;
-            tzmin = tzmax;
-            tzmax = buf;
-        }
-        if (tzmin > tmin) {tmin = tzmin;}
-        if (tzmax < tmax) {tmax = tzmax;}
-        if (tmin > tmax) {return false;}
-    }
-
-    // Return the smaller positive value
-    if (tmin < 0 && tmax < 0) return false;
-
-    return true;
-}
-
 // Ray/AABB intersection test - Smits algorithm (f64 version)
 __host__ __device__ bool test_ray_AABB(f64xyz ray_p, f64xyz ray_d,
                                        f64 aabb_xmin, f64 aabb_xmax,
@@ -661,20 +748,6 @@ __host__ __device__ bool test_ray_AABB(f64xyz ray_p, f64xyz ray_d,
     return true;
 }
 
-
-// AABB/AABB test (f32 version)
-__host__ __device__ bool test_AABB_AABB(f32 a_xmin, f32 a_xmax, f32 a_ymin, f32 a_ymax,
-                                        f32 a_zmin, f32 a_zmax,
-                                        f32 b_xmin, f32 b_xmax, f32 b_ymin, f32 b_ymax,
-                                        f32 b_zmin, f32 b_zmax) {
-
-    if (a_xmax < b_xmin || a_xmin > b_xmax) return false;
-    if (a_ymax < b_ymin || a_ymin > b_ymax) return false;
-    if (a_zmax < b_zmin || a_zmin > b_zmax) return false;
-
-    return true;
-}
-
 // AABB/AABB test (f64 version)
 __host__ __device__ bool test_AABB_AABB(f64 a_xmin, f64 a_xmax, f64 a_ymin, f64 a_ymax,
                                         f64 a_zmin, f64 a_zmax,
@@ -684,19 +757,6 @@ __host__ __device__ bool test_AABB_AABB(f64 a_xmin, f64 a_xmax, f64 a_ymin, f64 
     if (a_xmax < b_xmin || a_xmin > b_xmax) return false;
     if (a_ymax < b_ymin || a_ymin > b_ymax) return false;
     if (a_zmax < b_zmin || a_zmin > b_zmax) return false;
-
-    return true;
-}
-
-// Point/AABB test (f32 version)
-__host__ __device__ bool test_point_AABB(f32xyz p,
-                                         f32 aabb_xmin, f32 aabb_xmax,
-                                         f32 aabb_ymin, f32 aabb_ymax,
-                                         f32 aabb_zmin, f32 aabb_zmax) {
-
-    if (p.x < aabb_xmin || p.x > aabb_xmax) return false;
-    if (p.y < aabb_ymin || p.y > aabb_ymax) return false;
-    if (p.z < aabb_zmin || p.z > aabb_zmax) return false;
 
     return true;
 }
@@ -712,34 +772,6 @@ __host__ __device__ bool test_point_AABB(f64xyz p,
     if (p.z < aabb_zmin || p.z > aabb_zmax) return false;
 
     return true;
-}
-
-// Ray/triangle intersection - Moller-Trumbore algorithm (f32 version)
-__host__ __device__ f32 hit_ray_triangle(f32xyz ray_p, f32xyz ray_d,
-                                         f32xyz tri_u,              // Triangle
-                                         f32xyz tri_v,
-                                         f32xyz tri_w) {
-
-    f32xyz e1 = fxyz_sub(tri_v, tri_u); // Find vector for 2 edges sharing
-    f32xyz e2 = fxyz_sub(tri_w, tri_u);
-
-    f32xyz pp = fxyz_cross(ray_d, e2);
-    f32  a  = fxyz_dot(e1, pp);
-    if (a > -1.0e-05f && a < 1.0e-05f) {return F32_MAX;} // no hit
-
-    f32 f = 1.0f / a;
-
-    f32xyz s = fxyz_sub(ray_p, tri_u);
-    f32  u = f * fxyz_dot(s, pp);
-    if (u < 0.0f || u > 1.0f) {return F32_MAX;}
-
-    f32xyz q = fxyz_cross(s, e1);
-    f32  v = f * fxyz_dot(ray_d, q);
-    if (v < 0.0f || (u+v) > 1.0f) {return F32_MAX;}
-
-    // Ray hit the triangle
-    return f * fxyz_dot(e2, q);
-
 }
 
 // Ray/triangle intersection - Moller-Trumbore algorithm (f64 version)
@@ -770,28 +802,6 @@ __host__ __device__ f64 hit_ray_triangle(f64xyz ray_p, f64xyz ray_d,
 
 }
 
-// Ray/OBB intersection - Inspired by POVRAY (f32 version)
-__host__ __device__ f32 hit_ray_OBB(f32xyz ray_p, f32xyz ray_d,
-                                    f32 aabb_xmin, f32 aabb_xmax,
-                                    f32 aabb_ymin, f32 aabb_ymax,
-                                    f32 aabb_zmin, f32 aabb_zmax,
-                                    f32xyz obb_center,
-                                    f32xyz u, f32xyz v, f32xyz w) {
-
-    // Transform the ray in OBB' space, then do AABB
-    f32xyz ray_obb = fxyz_sub(ray_p, obb_center);
-    ray_p.x = fxyz_dot(ray_obb, u);
-    ray_p.y = fxyz_dot(ray_obb, v);
-    ray_p.z = fxyz_dot(ray_obb, w);
-    f32xyz dir;
-    dir.x = fxyz_dot(ray_d, u);
-    dir.y = fxyz_dot(ray_d, v);
-    dir.z = fxyz_dot(ray_d, w);
-
-    return hit_ray_AABB(ray_p, dir, aabb_xmin, aabb_xmax, aabb_ymin, aabb_ymax,
-                        aabb_zmin, aabb_zmax);
-}
-
 // Ray/OBB intersection - Inspired by POVRAY (f64 version)
 __host__ __device__ f64 hit_ray_OBB(f64xyz ray_p, f64xyz ray_d,
                                     f64 aabb_xmin, f64 aabb_xmax,
@@ -816,26 +826,7 @@ __host__ __device__ f64 hit_ray_OBB(f64xyz ray_p, f64xyz ray_d,
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#endif
 
 
 

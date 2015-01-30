@@ -69,6 +69,9 @@ void SimulationBuilder::primaries_generator() {
 
     /// CPU ///////////////////////////////////
     if (target == CPU_DEVICE) {
+#ifdef DEBUG
+        printf("CPU: primaries generator\n");
+#endif
 
         f64 t_start;
         if (display_run_time_flag) t_start = get_time();
@@ -108,6 +111,10 @@ void SimulationBuilder::primaries_generator() {
     /// GPU /////////////////////////////////////
     } else {
 
+#ifdef DEBUG
+        printf("GPU: primaries generator\n");
+#endif
+
         cudaEvent_t t_start, t_stop;
         if (display_run_time_flag) {
             cudaEventCreate(&t_start);
@@ -145,6 +152,10 @@ void SimulationBuilder::main_navigator() {
     /// CPU ///////////////////////////////
     if (target == CPU_DEVICE) {
 
+#ifdef DEBUG
+        printf("CPU: main navigator\n");
+#endif
+
         f64 t_start;
         if (display_run_time_flag) t_start = get_time();
 
@@ -158,6 +169,10 @@ void SimulationBuilder::main_navigator() {
 
     /// GPU ///////////////////////////////
     } else {
+
+#ifdef DEBUG
+        printf("GPU: main navigator\n");
+#endif
 
         cudaEvent_t t_start, t_stop;
         if (display_run_time_flag) {
@@ -336,7 +351,6 @@ ParticleBuilder SimulationBuilder::get_particles() {
 }
 
 ////// :: Command ::
-
 
 // Init simualtion
 void SimulationBuilder::init_simulation() {
