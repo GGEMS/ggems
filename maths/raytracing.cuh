@@ -23,7 +23,7 @@
 #include "constants.cuh"
 
 
-/// Fucntion with simple precision /////////////////////////////////////////////////////////
+/// Function with simple precision /////////////////////////////////////////////////////////
 
 // Hit/overlap test return (bool):
 //       0 No interection         1 Intersection
@@ -84,7 +84,7 @@ __host__ __device__ f32 hit_ray_OBB(f32xyz ray_p, f32xyz ray_d,
 
 
 
-/// Fucntion with double precision /////////////////////////////////////////////////////////
+/// Function with double precision /////////////////////////////////////////////////////////
 
 #ifndef SINGLE_PRECISION
     // Add function with double precision
