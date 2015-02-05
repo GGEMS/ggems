@@ -21,8 +21,8 @@
 #include "constants.cuh"
 #include "global.cuh"
 
-// Struct that handle singles
-struct Singles {
+// Struct that handle pulses on CPU and GPU
+struct Pulses {
     // first pulse
     f32 *pu1_px;
     f32 *pu1_py;
@@ -45,26 +45,77 @@ struct Singles {
     ui32 size;
 };
 
+// Struct that handle a single
+struct aSingle {
+    f32 px;
+    f32 py;
+    f32 pz;
+    f32 E;
+    f32 tof;
+    ui32 id_part;
+    ui32 id_geom;
+    f64 time;
+};
+
+// Struct that handles a coincidence
+struct aCoincidence {
+    // first singles
+    f32 s1_px;
+    f32 s1_py;
+    f32 s1_pz;
+    f32 s1_E;
+    f32 s1_tof;
+    ui32 s1_id_part;
+    ui32 s1_id_geom;
+    // second singles
+    f32 s2_px;
+    f32 s2_py;
+    f32 s2_pz;
+    f32 s2_E;
+    f32 s2_tof;
+    ui32 s2_id_part;
+    ui32 s2_id_geom;
+};
+
 // Digitizer
 class Digitizer {
     public:
         Digitizer();
-        void cpu_init_singles(ui32 nb);
-        void gpu_init_singles(ui32 nb);
-        void copy_singles_gpu2cpu();
-        void set_output_filename(std::string name);
-        void process_singles(ui32 iter);
+
+        void set_output_singles(std::string name);
+        void set_output_coincidences(std::string name);
+
+        void set_energy_window(f32 vE_low, f32 vE_high);
+        void set_time_window(f32 vwin_time);
+
+        void process_singles(ui32 iter, f64 tot_activity);
         void export_singles();
-        Singles get_singles();
+        std::vector<aSingle> get_singles();
 
+        void process_coincidences();
 
+        void cpu_init_pulses(ui32 nb);
+        void gpu_init_pulses(ui32 nb);
+        void copy_pulses_gpu2cpu();
 
-        Singles singles;  // CPU - Same size than particles stack
-        Singles dsingles; // GPU
+        Pulses pulses;  // CPU - Same size than particles stack
+        Pulses dpulses; // GPU
 
     private:
-        std::string filename;
-        Singles record_singles; // Recorded and processed singles
+        std::string singles_filename;
+        std::string coincidences_filename;
+        std::vector<aSingle> singles; // Recorded and processed singles
+
+        std::vector<aCoincidence> coincidences;
+
+        // for coincidences
+        f32 E_low, E_high, win_time;
+
+        // keep tracking the time
+        f64 global_time;
+
+        // Compare the time between two singles
+        bool compare_single_time(aSingle s1, aSingle s2);
 
 };
 

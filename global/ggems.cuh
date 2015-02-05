@@ -68,6 +68,7 @@ class SimulationBuilder {
         void set_CS_table_nbins(ui32 valbin);
         void set_CS_table_E_min(f32 valE);
         void set_CS_table_E_max(f32 valE);
+        void set_seed(ui32 vseed);
 
         // Utils
         void set_display_run_time();
@@ -78,7 +79,7 @@ class SimulationBuilder {
         void start_simulation();
 
         // Get data
-         ParticleBuilder get_particles();
+        ParticleBuilder get_particles();
 
         // Parameters
         ui16 target;
@@ -111,6 +112,7 @@ class SimulationBuilder {
 
         // Parameters
         bool display_run_time_flag, display_memory_usage_flag;
+        ui32 seed;
 
 };
 

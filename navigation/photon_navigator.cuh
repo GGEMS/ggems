@@ -42,7 +42,7 @@ __host__ __device__ void photon_navigator(ParticleStack &particles, ui32 part_id
                           Scene geometry, MaterialsTable materials,
                           PhotonCrossSectionTable photon_CS_table,
                           GlobalSimulationParameters parameters,
-                          Singles &singles);
+                          Pulses &pulses);
 
 
 #endif

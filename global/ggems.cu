@@ -161,7 +161,7 @@ void SimulationBuilder::main_navigator() {
 
         cpu_main_navigator(particles.stack, geometry.world,
                            materials.materials_table, cs_tables.photon_CS_table, parameters,
-                           digitizer.singles, history);
+                           digitizer.pulses, history);
 
         if (display_run_time_flag) {
             print_time("Main navigation", get_time()-t_start);
@@ -183,7 +183,7 @@ void SimulationBuilder::main_navigator() {
 
         gpu_main_navigator(particles.dstack, geometry.dworld,
                            materials.dmaterials_table, cs_tables.dphoton_CS_table, dparameters,
-                           digitizer.dsingles, gpu_block_size);
+                           digitizer.dpulses, gpu_block_size);
 
         if (display_run_time_flag) {
             cudaEventRecord(t_stop);
@@ -344,6 +344,11 @@ void SimulationBuilder::set_display_memory_usage() {
     display_memory_usage_flag = true;
 }
 
+// Set the seed number
+void SimulationBuilder::set_seed(ui32 vseed) {
+    seed = vseed;
+}
+
 ////// :: Getting ::
 
 ParticleBuilder SimulationBuilder::get_particles() {
@@ -363,6 +368,9 @@ void SimulationBuilder::init_simulation() {
 
     // Memory usage
     ui32 mem = 0;
+
+    // CPU PRNG
+    srand(seed);
 
     // First compute the number of iterations and the size of a stack // TODO Can be improved - JB
     if (nb_of_particles % particles.stack.size) {
@@ -457,15 +465,15 @@ void SimulationBuilder::init_simulation() {
 
     // init Digitizer
     if (parameters.digitizer_flag) {
-        digitizer.cpu_init_singles(particles.stack.size);
+        digitizer.cpu_init_pulses(particles.stack.size);
 
         if (target == GPU_DEVICE) {
-            digitizer.gpu_init_singles(particles.stack.size);
+            digitizer.gpu_init_pulses(particles.stack.size);
         }
 
         // Mem usage
         if (display_memory_usage_flag) {
-            ui32 mem_singles = 64*digitizer.singles.size + 4;
+            ui32 mem_singles = 64*digitizer.pulses.size + 4;
             mem += mem_singles;
             print_memory("Singles", mem_singles);
         }
@@ -504,11 +512,14 @@ void SimulationBuilder::start_simulation() {
                 f64 t_start = get_time();
 
                 if (target == GPU_DEVICE) {
-                    digitizer.copy_singles_gpu2cpu();
+                    digitizer.copy_pulses_gpu2cpu();
                 }
 
-                digitizer.process_singles(iter);
+                digitizer.process_singles(iter, sources.tot_activity);
                 digitizer.export_singles();
+
+                // TODO
+                // Clear pulses list?!
 
                 // Run time
                 if (display_run_time_flag) {

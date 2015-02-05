@@ -31,12 +31,12 @@
 void cpu_main_navigator(ParticleStack &particles, Scene geometry,
                         MaterialsTable materials, PhotonCrossSectionTable photon_CS_table,
                         GlobalSimulationParameters parameters,
-                        Singles &singles,
+                        Pulses &pulses,
                         HistoryBuilder &history);
 
 void gpu_main_navigator(ParticleStack &particles, Scene geometry,
                         MaterialsTable materials, PhotonCrossSectionTable photon_CS_table,
                         GlobalSimulationParameters parameters,
-                        Singles &singles, ui32 gpu_block_size);
+                        Pulses &pulses, ui32 gpu_block_size);
 
 #endif

@@ -125,6 +125,8 @@ SourceBuilder::SourceBuilder() {
     //sources.size_of_sources_dim = 0;
     sources.data_sources_dim = 0;
     sources.seeds_dim = 0;
+
+    tot_activity = 0;
 }
 
 // Add a point source on the simulation
@@ -211,9 +213,11 @@ void SourceBuilder::add_source(VoxelizedSource src) {
     // Store the CDF of the activities
     array_append_array(&sources.data_sources, sources.data_sources_dim, &(src.activity_cdf), src.activity_size);
 
-
     // Save the seed
     array_push_back(&sources.seeds, sources.seeds_dim, src.seed);
+
+    // Count the activity of this source to the total activity
+    tot_activity += src.tot_activity;
 }
 
 

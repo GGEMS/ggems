@@ -23,7 +23,7 @@
 // Kernel to track photon particles
 __global__ void kernel_photon_navigator(ParticleStack particles, Scene geometry, MaterialsTable materials,
                                         PhotonCrossSectionTable photon_CS_table,
-                                        GlobalSimulationParameters parameters, Singles singles) {
+                                        GlobalSimulationParameters parameters, Pulses pulses) {
 
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
     if (id >= particles.size) return;
@@ -34,7 +34,7 @@ __global__ void kernel_photon_navigator(ParticleStack particles, Scene geometry,
 
         // Track photon
         photon_navigator(particles, id, geometry, materials, photon_CS_table,
-                         parameters, singles);
+                         parameters, pulses);
 
     }
 
@@ -45,7 +45,7 @@ __global__ void kernel_photon_navigator(ParticleStack particles, Scene geometry,
 
 void cpu_main_navigator(ParticleStack &particles, Scene geometry,
                         MaterialsTable materials, PhotonCrossSectionTable photon_CS_table,
-                        GlobalSimulationParameters parameters, Singles &singles,
+                        GlobalSimulationParameters parameters, Pulses &pulses,
                         HistoryBuilder &history) {
 
 #ifdef DEBUG
@@ -63,7 +63,7 @@ void cpu_main_navigator(ParticleStack &particles, Scene geometry,
             // If a photon
             if (particles.pname[id] == PHOTON) {
                 photon_navigator(particles, id, geometry, materials, photon_CS_table,
-                                 parameters, singles);
+                                 parameters, pulses);
 
                 // Record this step if required
                 if (history.record_flag == ENABLED) {
@@ -88,7 +88,7 @@ void cpu_main_navigator(ParticleStack &particles, Scene geometry,
 
 void gpu_main_navigator(ParticleStack &particles, Scene geometry,
                         MaterialsTable materials, PhotonCrossSectionTable photon_CS_table,
-                        GlobalSimulationParameters parameters, Singles &singles, ui32 gpu_block_size) {
+                        GlobalSimulationParameters parameters, Pulses &pulses, ui32 gpu_block_size) {
 
 
 #ifdef DEBUG
@@ -100,7 +100,7 @@ void gpu_main_navigator(ParticleStack &particles, Scene geometry,
     threads.x = gpu_block_size;
     grid.x = (particles.size + gpu_block_size - 1) / gpu_block_size;
     kernel_photon_navigator<<<grid, threads>>>(particles, geometry, materials, photon_CS_table,
-                                               parameters, singles);
+                                               parameters, pulses);
     cuda_error_check("Error ", " Kernel_photon_navigator");
 
 }
