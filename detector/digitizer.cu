@@ -23,6 +23,9 @@
 Digitizer::Digitizer() {
     pulses.size = 0;
     global_time = 0;
+
+    flag_singles = false;
+    flag_coincidences = false;
 }
 
 // Allocate and init the singles list file (CPU)
@@ -174,10 +177,12 @@ void Digitizer::copy_pulses_gpu2cpu() {
 // Set the output filename
 void Digitizer::set_output_singles(std::string name) {
     singles_filename = name;
+    flag_singles = true;
 }
 
 void Digitizer::set_output_coincidences(std::string name) {
     coincidences_filename = name;
+    flag_coincidences = true;
 }
 
 // Set parameters for coincidences
@@ -219,6 +224,9 @@ void Digitizer::process_singles(ui32 iter, f64 tot_activity) {
         f64 rnd = rand()/(f64)(RAND_MAX);
         global_time += -log(rnd)*tot_activity;
 
+        // DEBUG
+        printf("glb time %e\n", global_time);
+
         if (pulses.pu1_nb_hits[i] > 0) {
 
             f32 E1=0.0; f32 E2=0.0;
@@ -234,7 +242,7 @@ void Digitizer::process_singles(ui32 iter, f64 tot_activity) {
                 single.tof = pulses.pu1_tof[i];
                 single.id_part = iter*pulses.size + i; // Absolute ID over the complete simulation
                 single.id_geom = pulses.pu1_id_geom[i];
-                single.time = global_time + tof;
+                single.time = global_time + pulses.pu1_tof[i];
             // Keep the second block
             } else {
                 single.px = pulses.pu2_px[i] / E2;
@@ -244,7 +252,7 @@ void Digitizer::process_singles(ui32 iter, f64 tot_activity) {
                 single.tof = pulses.pu2_tof[i];
                 single.id_part = iter*pulses.size + i; // Absolute ID over the complete simulation
                 single.id_geom = pulses.pu2_id_geom[i];
-                single.time = global_time + tof;
+                single.time = global_time + pulses.pu2_tof[i];
             }
             // Record the single
             singles.push_back(single);
@@ -258,15 +266,15 @@ void Digitizer::process_singles(ui32 iter, f64 tot_activity) {
 void Digitizer::export_singles() {
 
     // check extension
-    std::string ext = filename.substr(filename.size()-3);
+    std::string ext = singles_filename.substr(singles_filename.size()-3);
     if (ext!="txt") {
         printf("Error, to export a Singles file, the exension must be '.txt'!\n");
         return;
     }
 
     // first write te header
-    FILE *pfile = fopen(filename.c_str(), "a");
-    ui32 i=0; while (i<record_singles.size) {
+    FILE *pfile = fopen(singles_filename.c_str(), "a");
+    ui32 i=0; while (i < singles.size()) {
         fprintf(pfile, "BLOCK ID %i PART ID %i POS %e %e %e E %e TOF %e TIME %e\n",
                 singles[i].id_geom, singles[i].id_part,
                 singles[i].px, singles[i].py, singles[i].pz,
@@ -286,14 +294,28 @@ std::vector<aSingle> Digitizer::get_singles() {
 /// Process Coincidences /////////////////////////////////////////
 
 // Compare the time between two singles
-bool Digitizer::compare_single_time(aSingle s1, aSingle s2) {
+bool compare_single_time(aSingle s1, aSingle s2) {
    return (s1.time < s2.time);
 }
 
 void Digitizer::process_coincidences() {
 
+    printf("DEBUG\n");
+    printf("Single 0: %i %e\n", singles[0].id_part, singles[0].time);
+    printf("Single 1: %i %e\n", singles[1].id_part, singles[1].time);
+    printf("Single 2: %i %e\n", singles[2].id_part, singles[2].time);
+    printf("Single 3: %i %e\n", singles[3].id_part, singles[3].time);
+    printf("Single 4: %i %e\n", singles[4].id_part, singles[0].time);
+
     // First sort singles
     std::sort(singles.begin(), singles.end(), compare_single_time);
+    
+    printf("SORT\n");
+    printf("Single 0: %i %e\n", singles[0].id_part, singles[0].time);
+    printf("Single 1: %i %e\n", singles[1].id_part, singles[1].time);
+    printf("Single 2: %i %e\n", singles[2].id_part, singles[2].time);
+    printf("Single 3: %i %e\n", singles[3].id_part, singles[3].time);
+    printf("Single 4: %i %e\n", singles[4].id_part, singles[4].time);
 
     // Loop over singles
     aCoincidence coin;

@@ -33,7 +33,7 @@ class VRML {
         void write_sources(SourceBuilder sources);
         void write_particles(HistoryBuilder history);
         void write_ct(Voxelized volume);
-        void write_singles(Singles singles);
+        void write_singles(std::vector<aSingle> singles);
         void close();
     private:
         FILE *pfile;

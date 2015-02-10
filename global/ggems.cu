@@ -516,10 +516,18 @@ void SimulationBuilder::start_simulation() {
                 }
 
                 digitizer.process_singles(iter, sources.tot_activity);
-                digitizer.export_singles();
-
                 // TODO
                 // Clear pulses list?!
+
+                if (digitizer.flag_singles) {
+                    digitizer.export_singles();
+                }
+
+                if (digitizer.flag_coincidences) {
+                    digitizer.process_coincidences();
+                    // TODO
+                    // Export
+                }
 
                 // Run time
                 if (display_run_time_flag) {

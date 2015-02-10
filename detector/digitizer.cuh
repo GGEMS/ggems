@@ -100,6 +100,10 @@ class Digitizer {
 
         Pulses pulses;  // CPU - Same size than particles stack
         Pulses dpulses; // GPU
+        
+        // Process chain flag
+        bool flag_singles;
+        bool flag_coincidences;
 
     private:
         std::string singles_filename;
@@ -113,10 +117,6 @@ class Digitizer {
 
         // keep tracking the time
         f64 global_time;
-
-        // Compare the time between two singles
-        bool compare_single_time(aSingle s1, aSingle s2);
-
 };
 
 #endif
