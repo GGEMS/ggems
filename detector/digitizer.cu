@@ -185,6 +185,26 @@ void Digitizer::set_output_coincidences(std::string name) {
     flag_coincidences = true;
 }
 
+void Digitizer::set_output_projection(std::string name, ui32 volid,
+                                      f32 xmin, f32 xmax,
+                                      f32 ymin, f32 ymax,
+                                      f32 zmin, f32 zmax,
+                                      f32 sx, f32 sy, f32 sz) {
+    projection_filename = name;
+    projection_idvol = volid;
+    projection_sx = sx;
+    projection_sy = sy;
+    projection_sz = sz;
+    projection_nx = (ui32)((xmax-xmin) / sx);
+    projection_ny = (ui32)((ymax-ymin) / sy);
+    projection_nz = (ui32)((zmax-zmin) / sz);
+    projection_xmin = xmin;
+    projection_ymin = ymin;
+    projection_zmin = zmin;
+
+    flag_projection = true;
+}
+
 // Set parameters for coincidences
 void Digitizer::set_energy_window(f32 vE_low, f32 vE_high) {
     E_low = vE_low;
@@ -225,7 +245,7 @@ void Digitizer::process_singles(ui32 iter, f64 tot_activity) {
         global_time += -log(rnd)*tot_activity;
 
         // DEBUG
-        printf("glb time %e\n", global_time);
+        //printf("glb time %e\n", global_time);
 
         if (pulses.pu1_nb_hits[i] > 0) {
 
@@ -412,12 +432,114 @@ void Digitizer::process_coincidences() {
 }
 
 
+/// Process Projection /////////////////////////////////////////
+
+void Digitizer::init_projection() {
+
+    ui32 n = projection_nx*projection_ny*projection_nz;
+    projection.clear();
+    projection.reserve(n);
+    ui32 i=0; while (i<n) {
+        projection[i] = 0;
+        ++i;
+    }
+
+}
+
+void Digitizer::process_projection() {
+
+    // Loop over singles
+    ui32 i=0;
+    while (i < singles.size()) {
+
+        // If single hit the right detector
+        if (singles[i].id_geom == projection_idvol) {
+
+            // Change single frame to voxel space
+            ui32 ppx = (singles[i].px - projection_xmin) / projection_sx;
+            ui32 ppy = (singles[i].py - projection_ymin) / projection_sy;
+            ui32 ppz = (singles[i].pz - projection_zmin) / projection_sz;
+
+            assert(ppx >= 0);
+            assert(ppy >= 0);
+            assert(ppz >= 0);
+
+            assert(ppx < projection_nx);
+            assert(ppy < projection_ny);
+            assert(ppz < projection_nz);
+
+            // Assign value
+            projection[ppz*projection_ny*projection_nx + ppy*projection_nx + ppx] += 1;
+
+        }
+
+        ++i;
+    }
+}
+
+void Digitizer::export_projection() {
+
+    // check extension
+    std::string ext = projection_filename.substr(projection_filename.size()-3);
+    if (ext!="mhd") {
+        printf("Error, to export an mhd file, the exension must be '.mhd'!\n");
+        return;
+    }
+
+    // first write te header
+    FILE *pfile = fopen(projection_filename.c_str(), "w");
+    fprintf(pfile, "ObjectType = Image \n");
+    fprintf(pfile, "NDims = 3 \n");
+    fprintf(pfile, "BinaryData = True \n");
+    fprintf(pfile, "BinaryDataByteOrderMSB = False \n");
+    fprintf(pfile, "CompressedData = False \n");
+    fprintf(pfile, "ElementSpacing = %f %f %f\n", projection_sx, projection_sy, projection_sz);
+    fprintf(pfile, "DimSize = %i %i %i\n", projection_nx, projection_ny, projection_nz);
+    fprintf(pfile, "ElementType = MET_FLOAT \n");
+
+    std::string export_name = projection_filename.replace(projection_filename.size()-3, 3, "raw");
+    fprintf(pfile, "ElementDataFile = %s \n", export_name.c_str());
+    fclose(pfile);
+
+    // then export data
+    pfile = fopen(export_name.c_str(), "wb");
+    fwrite(projection.data(), projection_nx*projection_ny*projection_nz, sizeof(f32), pfile);
+    fclose(pfile);
+
+}
+
+
+/// Main function /////////////////////////////////////////
+
+void Digitizer::process_chain(ui32 iter, f64 tot_activity) {
+
+
+    process_singles(iter, tot_activity);
+
+    // TODO
+    // Clear pulses list?!
+
+
+    if (flag_singles) {
+        export_singles();
+    }
+
+
+    if (flag_coincidences) {   
+        process_coincidences();  
+        // TODO
+        // Export
+    }
+
+
+    if (flag_projection) {
+        process_projection();
+    }
 
 
 
 
-
-
+}
 
 
 

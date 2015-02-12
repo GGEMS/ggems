@@ -84,15 +84,32 @@ class Digitizer {
 
         void set_output_singles(std::string name);
         void set_output_coincidences(std::string name);
+        void set_output_projection(std::string name, ui32 volid,
+                                   f32 xmin, f32 xmax,
+                                   f32 ymin, f32 ymax,
+                                   f32 zmin, f32 zmax,
+                                   f32 sx, f32 sy, f32 sz);
 
         void set_energy_window(f32 vE_low, f32 vE_high);
         void set_time_window(f32 vwin_time);
 
+        // Main function
+        void process_chain(ui32 iter, f64 tot_activity);
+
+        // Singles
         void process_singles(ui32 iter, f64 tot_activity);
         void export_singles();
         std::vector<aSingle> get_singles();
 
+        // Coincidences
         void process_coincidences();
+        //void export_coincidences(); // TODO
+        // get_coincidences // TODO
+
+        // Projection
+        void init_projection();
+        void process_projection();
+        void export_projection();
 
         void cpu_init_pulses(ui32 nb);
         void gpu_init_pulses(ui32 nb);
@@ -104,13 +121,20 @@ class Digitizer {
         // Process chain flag
         bool flag_singles;
         bool flag_coincidences;
+        bool flag_projection;
 
     private:
         std::string singles_filename;
         std::string coincidences_filename;
-        std::vector<aSingle> singles; // Recorded and processed singles
 
+        std::vector<aSingle> singles; // Recorded and processed singles
         std::vector<aCoincidence> coincidences;
+
+        std::string projection_filename;
+        ui32 projection_idvol, projection_nx, projection_ny, projection_nz;
+        f32 projection_sx, projection_sy, projection_sz;
+        f32 projection_xmin, projection_ymin, projection_zmin;
+        std::vector<ui32> projection;
 
         // for coincidences
         f32 E_low, E_high, win_time;

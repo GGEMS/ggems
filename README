@@ -9,6 +9,8 @@ TODO:
 
 3. Unified Seed setting, onyle one have to set by the SimulationBuilder and broadcast to the others component (digitizer, particles stack), etc.
 
+4. Add a function within the navigatot that find in which volume the particle is.
+
 Bugs:
 1. RegOctree for mesh: when an octree cell is tangential to a triangle and the ray coming through is perpendicular, this ray pass through just between the two cells and the corresponding triangles. To resolve that, while the reg octree is build, every cell should slighy swell by Epsilon to consider triangle of the neighbor cell.
 

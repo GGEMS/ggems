@@ -471,6 +471,11 @@ void SimulationBuilder::init_simulation() {
             digitizer.gpu_init_pulses(particles.stack.size);
         }
 
+        // If projection acquisition
+        if (digitizer.flag_projection) {
+            digitizer.init_projection();
+        }
+
         // Mem usage
         if (display_memory_usage_flag) {
             ui32 mem_singles = 64*digitizer.pulses.size + 4;
@@ -515,19 +520,8 @@ void SimulationBuilder::start_simulation() {
                     digitizer.copy_pulses_gpu2cpu();
                 }
 
-                digitizer.process_singles(iter, sources.tot_activity);
-                // TODO
-                // Clear pulses list?!
-
-                if (digitizer.flag_singles) {
-                    digitizer.export_singles();
-                }
-
-                if (digitizer.flag_coincidences) {
-                    digitizer.process_coincidences();
-                    // TODO
-                    // Export
-                }
+                // The complete chain
+                digitizer.process_chain(iter, sources.tot_activity);
 
                 // Run time
                 if (display_run_time_flag) {
