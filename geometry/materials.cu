@@ -244,6 +244,8 @@ void MaterialBuilder::get_materials_table_from_world(GeometryBuilder World) {
     i=0; while (i < materials_table.nb_materials) {
         // get mat name
         mat_name = World.materials_list[i];
+        
+        printf("Material %s \n", mat_name.c_str());
 
         // read mat from databse
         cur_mat = material_db.materials[mat_name];

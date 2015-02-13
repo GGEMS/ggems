@@ -86,24 +86,32 @@ void CrossSectionsBuilder::build_table(MaterialsTable materials, GlobalSimulatio
         }
 
     }
-
+    
     // idem for e- table - TODO
     // if (there_is_electron) {
     // ...
     // ...
 
+    printf("Rayleigh scattering .... \n");
+    
     // If Rayleigh scattering, load information once from G4 EM data library
     f32 *g4_ray_cs = NULL;
     f32 *g4_ray_sf = NULL;
     i8 *flag_Z = NULL;
     if (parameters.physics_list[PHOTON_RAYLEIGH]) {
+        printf("load_data .... \n");
+      
         g4_ray_cs = Rayleigh_CS_Livermore_load_data();
+        printf("CS Livermore done \n");
         g4_ray_sf = Rayleigh_SF_Livermore_load_data();
+        printf("SF Livermore done \n");
         // use to flag is scatter factor are already defined for a given Z
         flag_Z = (i8*)malloc(101*sizeof(i8));
         i=0; while(i<101) {flag_Z[i]=0; ++i;}
     }
 
+     printf("CS material .... \n");
+    
     // Get CS for each material, energy bin and phys effect
     ui32 imat=0;
     ui32 abs_index;
@@ -134,6 +142,8 @@ void CrossSectionsBuilder::build_table(MaterialsTable materials, GlobalSimulatio
 
             ++i;
         } // i
+        
+      
 
         // Special case for Photoelectric and Rayleigh where scatter factor and CS are needed for each Z
         if (parameters.physics_list[PHOTON_RAYLEIGH]) {

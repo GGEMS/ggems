@@ -277,7 +277,6 @@ void SimulationBuilder::init_simulation() {
     particles.stack.size = nb_of_particles / nb_of_iterations;
     nb_of_particles = particles.stack.size * nb_of_iterations;
 
-
 //    // Reset and set GPU ID and compute grid size
 //    wrap_reset_device();
 //    wrap_set_device(m_gpu_id);
@@ -311,7 +310,7 @@ void SimulationBuilder::init_simulation() {
     // Init Cross sections and physics table
     cs_tables.build_table(materials.materials_table, parameters);
     //cs_tables.print();
-
+            
     // init Digitizer
     if (parameters.digitizer_flag) {
         digitizer.init_singles(particles.stack.size);

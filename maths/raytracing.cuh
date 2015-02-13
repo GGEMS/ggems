@@ -109,8 +109,8 @@ __host__ __device__ f64 hit_ray_OBB(f64xyz ray_p, f64xyz ray_d,
                                     f64xyz obb_center,
                                     f64xyz u, f64xyz v, f64xyz w); // OBB frame
 
-
-
+// Ray/Septa intersection
+__host__ __device__ f64 hit_ray_septa(f64xyz p, f64xyz preel, f64xyz d, f64 half_size_x, f64 radius); // Colli frame
 
 
 

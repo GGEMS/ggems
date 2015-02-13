@@ -196,6 +196,25 @@ void VRML::write_geometry(GeometryBuilder geometry) {
                           geometry.object_colors[iobj],
                           geometry.object_transparency[iobj]);
             }
+            
+        } else if (type_obj == COLLI) {
+
+            f32 xmin = geometry.world.data_objects[adr_obj + ADR_AABB_XMIN];
+            f32 xmax = geometry.world.data_objects[adr_obj + ADR_AABB_XMAX];
+            f32 ymin = geometry.world.data_objects[adr_obj + ADR_AABB_YMIN];
+            f32 ymax = geometry.world.data_objects[adr_obj + ADR_AABB_YMAX];
+            f32 zmin = geometry.world.data_objects[adr_obj + ADR_AABB_ZMIN];
+            f32 zmax = geometry.world.data_objects[adr_obj + ADR_AABB_ZMAX];
+
+            if (geometry.object_wireframe[iobj]) {
+                draw_wireframe_aabb(xmin, xmax, ymin, ymax, zmin, zmax,
+                                    geometry.object_colors[iobj],
+                                    geometry.object_transparency[iobj]);
+            } else {
+                draw_aabb(xmin, xmax, ymin, ymax, zmin, zmax,
+                          geometry.object_colors[iobj],
+                          geometry.object_transparency[iobj]);
+            }
 
         } else if (type_obj == OBB) {
 

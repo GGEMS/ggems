@@ -42,10 +42,22 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, ui32 part_id,
 
     // Get the current volume containing the particle
     ui32 cur_id_geom = particles.geometry_id[part_id];
-
+    
+    ui32 adr_geom = geometry.ptr_objects[cur_id_geom];
+    ui32 obj_type = (ui32)geometry.data_objects[adr_geom+ADR_OBJ_TYPE];
+      
+    // If the particle hits the SPECThead, determine in which layer it is
+    if (obj_type == SPECTHEAD) {    
+        //Check all SPECThead children
+        cur_id_geom = get_current_geometry_volume(geometry, cur_id_geom, pos);
+        // Update the object type
+        adr_geom = geometry.ptr_objects[cur_id_geom];
+        obj_type = (ui32)geometry.data_objects[adr_geom+ADR_OBJ_TYPE];
+    } 
+    
     // Get the material that compose this volume
-    ui32 id_mat = get_geometry_material(geometry, cur_id_geom, pos);
-
+     ui32 id_mat = get_geometry_material(geometry, cur_id_geom, pos);
+      
 #ifdef DEBUG
     printf("  begin %i\n", part_id);
     printf("     Cur id geom %i mat %i\n", cur_id_geom, id_mat);
@@ -127,7 +139,7 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, ui32 part_id,
     if (interaction_distance <= next_interaction_distance) {
         next_interaction_distance = interaction_distance + EPSILON3; // Overshoot
         next_discrete_process = GEOMETRY_BOUNDARY;
-        next_geometry_volume = hit_id_geom;        
+        next_geometry_volume = hit_id_geom;   
     }
 
     //// Move particle //////////////////////////////////////////////////////
@@ -198,6 +210,14 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, ui32 part_id,
     SecParticle electron;
     electron.E = 0;
 
+     if (cur_id_geom == 4 || cur_id_geom == 5 || cur_id_geom == 6)   
+      printf("PROCESS %d = id %i - pos %f %f %f - dir %f %f %f - energy %f %d - Bnd - geom cur %i hit %i\n", next_discrete_process,
+                                                                          part_id, pos.x, pos.y, pos.z,
+                                                                         dir.x, dir.y, dir.z,
+                                                                         particles.E[part_id],
+                                                                         particles.endsimu[part_id],
+                                                                         cur_id_geom, next_geometry_volume);
+    
 #ifdef DEBUG
     printf("     Dist %f NextVol %i pos %f %f %f ", next_interaction_distance, next_geometry_volume, pos.x, pos.y, pos.z);
 #endif
@@ -241,9 +261,7 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, ui32 part_id,
 
     if (next_discrete_process == GEOMETRY_BOUNDARY) {
         // Debug
-        //printf("id %i - pos %f %f %f - dir %f %f %f - Bnd - geom cur %i hit %i\n", part_id, pos.x, pos.y, pos.z,
-        //                                                                 dir.x, dir.y, dir.z,
-        //                                                                 cur_id_geom, next_geometry_volume);
+     
 #ifdef DEBUG
         printf(" Geom\n");
 #endif

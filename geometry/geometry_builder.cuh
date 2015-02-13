@@ -23,6 +23,8 @@
 #include "sphere.cuh"
 #include "meshed.cuh"
 #include "voxelized.cuh"
+#include "colli.cuh"
+#include "spect_head.cuh"
 #include "raytracing.cuh"
 #include "global.cuh"
 
@@ -31,6 +33,8 @@
 #define MESHED 2
 #define VOXELIZED 3
 #define OBB 4
+#define SPECTHEAD 5
+#define COLLI 6
 
 // Address of the header for the geometry structure
 #define ADR_OBJ_TYPE 0
@@ -83,11 +87,31 @@
 #define ADR_OBB_FRAME_ANGY 22
 #define ADR_OBB_FRAME_ANGZ 23
 
+#define ADR_COLLI_CENTER_X 9
+#define ADR_COLLI_CENTER_Y 10
+#define ADR_COLLI_CENTER_Z 11
+#define ADR_COLLI_SEPTA_HEIGHT 12
+#define ADR_COLLI_HOLE_RADIUS 13
+#define ADR_COLLI_CUBARRAY_NX 14
+#define ADR_COLLI_CUBARRAY_NY 15
+#define ADR_COLLI_CUBARRAY_NZ 16
+#define ADR_COLLI_CUBARRAY_VECX 17
+#define ADR_COLLI_CUBARRAY_VECY 18
+#define ADR_COLLI_CUBARRAY_VECZ 19
+#define ADR_COLLI_LINEAR_VECX 20
+#define ADR_COLLI_LINEAR_VECY 21
+#define ADR_COLLI_LINEAR_VECZ 22
+#define ADR_COLLI_HOLE_MAT_ID 23
+#define ADR_COLLI_SEPTA_MAT_ID 24
+#define ADR_COLLI_NB_HEXAGONS 25
+#define ADR_COLLI_CENTEROFHEXAGONS 26
+
 #define SIZE_AABB_OBJ 9
 #define SIZE_SPHERE_OBJ 13
 #define SIZE_VOXELIZED_OBJ 15 // + number of voxels
 #define SIZE_MESHED_OBJ 18 // + number of vertices * 3 (xyz) + octree
 #define SIZE_OBB_OBJ 24
+#define SIZE_COLLI_OBJ 26
 
 // Struct that handle the geometry of the world
 struct Scene {
@@ -117,10 +141,13 @@ struct Scene {
 
 
 // Host/Device function that handle geometry
+__host__ __device__ bool IsInsideHex(f64xyz position, f64 radius, f64 cy, f64 cz);
+__host__ __device__ i32 GetHexIndex(f64xyz position, Scene geometry, ui32 adr_geom);
 __host__ __device__ bool get_geometry_is_sensitive(Scene geometry, ui32 cur_geom);
 __host__ __device__ ui32 get_geometry_material(Scene geometry, ui32 id_geom, f64xyz pos);
 __host__ __device__ f64 get_distance_to_object(Scene geometry, ui32 adr_geom, ui32 obj_type,
                                                f64xyz pos, f64xyz dir);
+__host__ __device__ ui32 get_current_geometry_volume(Scene geometry, ui32 cur_geom, f64xyz pos);
 __host__ __device__ void get_next_geometry_boundary(Scene geometry, ui32 cur_geom,
                                                     f64xyz pos, f64xyz dir,
                                                     f64 &interaction_distance,
@@ -139,6 +166,8 @@ class GeometryBuilder {
         ui32 add_object(Meshed obj, ui32 mother_id);
         ui32 add_object(Voxelized obj, ui32 mother_id);
         ui32 add_object(Obb obj, ui32 mother_id);
+        ui32 add_object(Colli obj, ui32 mother_id);
+        ui32 add_object(SpectHead obj, ui32 mother_id);
 
         // Hierarchical structure of the geometry
         void add_root();
@@ -172,6 +201,8 @@ class GeometryBuilder {
         std::map<ui32, Voxelized> buffer_voxelized;
         std::map<ui32, Meshed> buffer_meshed;
         std::map<ui32, Obb> buffer_obb;
+        std::map<ui32, Colli> buffer_colli;
+        std::map<ui32, SpectHead> buffer_spect_head;
 
         // Build object into the scene structure
         void build_object(Aabb obj);
@@ -179,7 +210,8 @@ class GeometryBuilder {
         void build_object(Voxelized obj);
         void build_object(Meshed obj);
         void build_object(Obb obj);
-
+        void build_object(Colli obj);
+        void build_object(SpectHead obj);
 
 
 

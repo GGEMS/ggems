@@ -815,8 +815,123 @@ __host__ __device__ f64 hit_ray_OBB(f64xyz ray_p, f64xyz ray_d,
 }
 
 
+// Ray/septa intersection
+__host__ __device__ f64 hit_ray_septa(f64xyz p, f64xyz preel, f64xyz d, f64 half_size_x, f64 radius) {
+    
+    f64 xmin, xmax, ymin, ymax, e1min, e1max, e2min, e2max;
+    f64 txmin, txmax, tmin, tmax, tymin, tymax, tzmin, tzmax, te1min, te1max, te2min, te2max, buf;
+        
+        //printf("position %f %f %f \n", p.x, p.y, p.z);
+        //printf("direction %f %f %f \n", d.x, d.y, d.z);
+        
+    xmin = -half_size_x;
+    xmax = half_size_x;
+        
+    ymin = e1min = e2min = -radius;
+    ymax = e1max = e2max = radius;
+        
+    tmin = -F64_MAX;
+    tmax = F64_MAX;
+    
+    int w;
+    
+    f64xyz di;
+        
+        // on x
+    if (fabs(d.x) < EPSILON6) {
+        if (p.x < xmin || p.x > xmax) {return 0.0;}
+    }
+    else {
+        w = 0;
+        di.x = 1.0f / d.x;
+        tmin = txmin = (xmin - p.x) * di.x;
+        tmax = txmax = (xmax - p.x) * di.x;
+       //printf("on x: %f %f - %f %f - %f %f \n", xmin, xmax, p.x, di.x, tmin, tmax);
+        if (tmin > tmax) {
+            buf = tmin;
+            tmin = tmax;
+            tmax = buf;
+        }
+        if (tmin > tmax) {return 0.0;}
+    }
+    
+    // on y
+    if (fabs(d.y) < EPSILON6) {
+        if (p.y < ymin || p.y > ymax) {return 0.0;}
+    }
+    else {
+        di.y = 1.0f / d.y;
+        tymin = (ymin - p.y) * di.y;
+        tymax = (ymax - p.y) * di.y;
+        //printf("on y: %f %f - %f %f - %f %f \n", ymin, ymax, p.y, di.y, tymin, tymax);
+        if (tymin > tymax) {
+            buf = tymin;
+            tymin = tymax;
+            tymax = buf;
+        }
+        if (tymin > tmin) {tmin = tymin;}
+        if (tymax < tmax) {tmax = tymax; w = 1;}
+        if (tmin > tmax) {return 0.0;}
+    }
+    
+    // on e1  (changement de referentiel dans le plan yz, rotation de -60°) 
+    
+    f64 p1y = (p.y * cos( -M_PI / 3.0 )) + (p.z * sin ( -M_PI / 3.0 ));
+    
+    f64 d1y = d.y * cos( -M_PI / 3.0 ) + d.z * sin ( -M_PI / 3.0 );
 
+   // printf("e1 p1y %f d1y %f \n", p1y, d1y);
+    
+    f64 di1y;
+        
+    if (fabs(d1y) < EPSILON6) {
+        if (p1y < e1min || p1y > e1max) {return 0.0;}
+    }
+    else {
+        di1y = 1.0f / d1y;
+        te1min = (e1min - p1y) * di1y;
+        te1max = (e1max - p1y) * di1y;
+       // printf("on e1: %f %f - %f %f - %f %f \n", e1min, e1max, p1y, d1y, te1min, te1max);
+        if (te1min > te1max) {
+            buf = te1min;
+            te1min = te1max;
+            te1max = buf;
+        }
+        if (te1min > tmin) {tmin = te1min;}
+        if (te1max < tmax) {tmax = te1max; w = 2;}
+        if (tmin > tmax) {return 0.0;}
+    }
 
+        // on e2 (changement de referentiel dans le plan yz, rotation de +60°) 
+            
+    f64 p2y = (p.y * cos( M_PI / 3.0 )) + (p.z * sin ( M_PI / 3.0 )); 
+     
+    f64 d2y = d.y * cos( M_PI / 3.0 ) + d.z * sin ( M_PI / 3.0 );
+    
+   // printf("e2 p2y %f d2y %f \n", p2y, d2y);
+
+    f64 di2y;
+        
+    if (fabs(d2y) < EPSILON6) {
+    if (p2y < e2min || p2y > e2max) {return 0.0;}
+    }
+    else {
+        di2y = 1.0f / d2y;
+        te2min = (e2min - p2y) * di2y;
+        te2max = (e2max - p2y) * di2y;
+       // printf("on e2: %f %f - %f %f - %f %f \n", e2min, e2max, p2y, d2y, te2min, te2max);
+        if (te2min > te2max) {
+            buf = te2min;
+            te2min = te2max;
+            te2max = buf;
+        }
+        if (te2min > tmin) {tmin = te2min;}
+        if (te2max < tmax) {tmax = te2max; w = 3;}
+        if (tmin > tmax) {return 0.0;}
+    }
+    
+    return tmax;
+}
 
 
 

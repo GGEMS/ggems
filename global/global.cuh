@@ -78,10 +78,10 @@
     typedef float3 f32xyz;
     typedef float4 f32xyzw;
 
-    typedef float f64;
-    typedef float2 f64xy;
-    typedef float3 f64xyz;
-    typedef float4 f64xyzw;
+    typedef double f64;
+    typedef double2 f64xy;
+    typedef double3 f64xyz;
+    typedef double4 f64xyzw;
 
     typedef int i32;
     typedef int2 i32xy;
@@ -101,7 +101,7 @@
     typedef ushort3 ui16xyz;
     typedef ushort4 ui16xyzw;
 
-    typedef char ui8;
+    typedef unsigned char ui8;
 
 //    #define make_f32xy make_float2;
 //    #define make_f32xyz make_float3;
