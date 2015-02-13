@@ -516,7 +516,7 @@ void VRML::write_particles(HistoryBuilder history) {
 }
 
 // Export singles /////////////////////////////////////
-void VRML::write_singles(Singles singles) {
+void VRML::write_singles(std::vector<aSingle> singles) {
 
     ui32 is = 0;
     f32 r=1.0;
@@ -530,8 +530,8 @@ void VRML::write_singles(Singles singles) {
     fprintf(pfile, "    coord Coordinate {\n");
     fprintf(pfile, "      point [\n");
 
-    is=0; while (is < singles.size) {
-        fprintf(pfile, "        %f %f %f,\n", singles.pu1_px[is], singles.pu1_py[is], singles.pu1_pz[is]);
+    is=0; while (is < singles.size()) {
+        fprintf(pfile, "        %f %f %f,\n", singles[is].px, singles[is].py, singles[is].pz);
         ++is;
     }
 
@@ -539,7 +539,7 @@ void VRML::write_singles(Singles singles) {
     fprintf(pfile, "    }\n");
     fprintf(pfile, "    color Color {\n");
     fprintf(pfile, "      color [\n");
-    is=0; while (is < (singles.size)) {
+    is=0; while (is < singles.size()) {
         fprintf(pfile, "        %f %f %f,\n", r, g, b);
         ++is;
     }

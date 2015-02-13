@@ -21,12 +21,11 @@
 #include "photon_navigator.cuh"
 
 // CPU photon navigator
-__host__ void cpu_photon_navigator(ParticleStack &particles, ui32 part_id,
+__host__ __device__ void photon_navigator(ParticleStack &particles, ui32 part_id,
                           Scene geometry, MaterialsTable materials,
                           PhotonCrossSectionTable photon_CS_table,
                           GlobalSimulationParameters parameters,
-                          Singles &singles,
-                          HistoryBuilder &history) {
+                          Pulses &pulses) {
 
     // Read position
     f64xyz pos;
@@ -42,7 +41,7 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, ui32 part_id,
 
     // Get the current volume containing the particle
     ui32 cur_id_geom = particles.geometry_id[part_id];
-    
+
     ui32 adr_geom = geometry.ptr_objects[cur_id_geom];
     ui32 obj_type = (ui32)geometry.data_objects[adr_geom+ADR_OBJ_TYPE];
       
@@ -56,14 +55,7 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, ui32 part_id,
     } 
     
     // Get the material that compose this volume
-     ui32 id_mat = get_geometry_material(geometry, cur_id_geom, pos);
-      
-#ifdef DEBUG
-    printf("  begin %i\n", part_id);
-    printf("     Cur id geom %i mat %i\n", cur_id_geom, id_mat);
-    printf("     InitPos %f %f %f\n", pos.x, pos.y, pos.z);
-    printf("     Energy %f\n", particles.E[part_id]);
-#endif
+    ui32 id_mat = get_geometry_material(geometry, cur_id_geom, pos);
 
     //// Find next discrete interaction ///////////////////////////////////////
 
@@ -88,9 +80,7 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, ui32 part_id,
         cross_section = get_CS_from_table(photon_CS_table.E_bins, photon_CS_table.Photoelectric_Std_CS,
                                           particles.E[part_id], E_index, id_mat, photon_CS_table.nb_bins);
         interaction_distance = -log( JKISS32(particles, part_id) ) / cross_section;
-#ifdef DEBUG
-        printf(" Photoelectric: CS %e dist %e\n", cross_section, interaction_distance);
-#endif
+
         if (interaction_distance < next_interaction_distance) {
             next_interaction_distance = interaction_distance;
             next_discrete_process = PHOTON_PHOTOELECTRIC;
@@ -103,9 +93,6 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, ui32 part_id,
         cross_section = get_CS_from_table(photon_CS_table.E_bins, photon_CS_table.Compton_Std_CS,
                                           particles.E[part_id], E_index, id_mat, photon_CS_table.nb_bins);
         interaction_distance = -log( JKISS32(particles, part_id) ) / cross_section;
-#ifdef DEBUG
-        printf(" Compton: CS %e dist %e\n", cross_section, interaction_distance);
-#endif
         if (interaction_distance < next_interaction_distance) {
             next_interaction_distance = interaction_distance;
             next_discrete_process = PHOTON_COMPTON;
@@ -117,9 +104,6 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, ui32 part_id,
         cross_section = get_CS_from_table(photon_CS_table.E_bins, photon_CS_table.Rayleigh_Lv_CS,
                                           particles.E[part_id], E_index, id_mat, photon_CS_table.nb_bins);
         interaction_distance = -log( JKISS32(particles, part_id) ) / cross_section;
-#ifdef DEBUG
-        printf(" Rayleigh: CS %e dist %e\n", cross_section, interaction_distance);
-#endif
         if (interaction_distance < next_interaction_distance) {
             next_interaction_distance = interaction_distance;
             next_discrete_process = PHOTON_RAYLEIGH;
@@ -133,9 +117,7 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, ui32 part_id,
 
     ui32 hit_id_geom = 0;
     get_next_geometry_boundary(geometry, cur_id_geom, pos, dir, interaction_distance, hit_id_geom);
-#ifdef DEBUG
-        printf(" Geom: dist %e\n", interaction_distance);
-#endif
+    
     if (interaction_distance <= next_interaction_distance) {
         next_interaction_distance = interaction_distance + EPSILON3; // Overshoot
         next_discrete_process = GEOMETRY_BOUNDARY;
@@ -174,35 +156,9 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, ui32 part_id,
 
     // Stop simulation if out of the world
     if (!test_point_AABB(pos, xmin, xmax, ymin, ymax, zmin, zmax)) {
-
         particles.endsimu[part_id] = PARTICLE_DEAD;
-
-        // Record this step if required
-        if (history.record_flag == ENABLED) {
-            history.cpu_record_a_step(particles, part_id);
-        }
-
-        //if (particles.E[part_id] == 0.5) printf("No Interaction\n");
-
         return;
     }
-
-//    // Stop simulation if out of the world
-//    if (   pos.x <= xmin || pos.x >= xmax
-//        || pos.y <= ymin || pos.y >= ymax
-//        || pos.z <= zmin || pos.z >= zmax) {
-
-//        particles.endsimu[part_id] = PARTICLE_DEAD;
-
-//        // Record this step if required
-//        if (history.record_flag == ENABLED) {
-//            history.cpu_record_a_step(particles, part_id);
-//        }
-
-//        //if (particles.E[part_id] == 0.5) printf("No Interaction\n");
-
-//        return;
-//    }
 
     //// Apply discrete process //////////////////////////////////////////////////
 
@@ -210,32 +166,11 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, ui32 part_id,
     SecParticle electron;
     electron.E = 0;
 
-     if (cur_id_geom == 4 || cur_id_geom == 5 || cur_id_geom == 6)   
-      printf("PROCESS %d = id %i - pos %f %f %f - dir %f %f %f - energy %f %d - Bnd - geom cur %i hit %i\n", next_discrete_process,
-                                                                          part_id, pos.x, pos.y, pos.z,
-                                                                         dir.x, dir.y, dir.z,
-                                                                         particles.E[part_id],
-                                                                         particles.endsimu[part_id],
-                                                                         cur_id_geom, next_geometry_volume);
-    
-#ifdef DEBUG
-    printf("     Dist %f NextVol %i pos %f %f %f ", next_interaction_distance, next_geometry_volume, pos.x, pos.y, pos.z);
-#endif
-
     if (next_discrete_process == PHOTON_COMPTON) {
 
         //   TODO: cutE = materials.electron_cut_energy[mat]                 cutE
         electron = Compton_SampleSecondaries_standard(particles, 0.0, part_id, parameters);
 
-
-
-        // Debug
-        //printf("id %i - pos %f %f %f - dir %f %f %f - Cmpt - geom cur %i hit %i\n", part_id, pos.x, pos.y, pos.z,
-        //                                                                 dir.x, dir.y, dir.z,
-        //                                                                 cur_id_geom, next_geometry_volume);
-#ifdef DEBUG
-        printf(" Compton\n");
-#endif
     }
 
     if (next_discrete_process == PHOTON_PHOTOELECTRIC) {
@@ -244,28 +179,13 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, ui32 part_id,
         electron = Photoelec_SampleSecondaries_standard(particles, materials, photon_CS_table,
                                                                     E_index, 0.0, id_mat, part_id, parameters);
 
-        // Debug
-        //printf("id %i - pos %f %f %f - dir %f %f %f - PE - geom cur %i hit %i\n", part_id, pos.x, pos.y, pos.z,
-        //                                                               dir.x, dir.y, dir.z,
-        //                                                               cur_id_geom, next_geometry_volume);
-#ifdef DEBUG
-        printf(" PE\n");
-#endif
     }
 
     if (next_discrete_process == PHOTON_RAYLEIGH) {
         Rayleigh_SampleSecondaries_Livermore(particles, materials, photon_CS_table, E_index, id_mat, part_id);
-        //printf("Rayleigh\n");
     }
 
 
-    if (next_discrete_process == GEOMETRY_BOUNDARY) {
-        // Debug
-     
-#ifdef DEBUG
-        printf(" Geom\n");
-#endif
-    }
 
     //// Get discrete energy lost
 
@@ -284,80 +204,50 @@ __host__ void cpu_photon_navigator(ParticleStack &particles, ui32 part_id,
             get_geometry_is_sensitive(geometry, cur_id_geom) && discrete_loss > 0) {
 
         // First hit - first pulse
-        if (singles.pu1_nb_hits[part_id] == 0) {
-            singles.pu1_px[part_id] = pos.x*discrete_loss;
-            singles.pu1_py[part_id] = pos.y*discrete_loss;
-            singles.pu1_pz[part_id] = pos.z*discrete_loss;
-            singles.pu1_E[part_id] = discrete_loss;
-            singles.pu1_tof[part_id] = particles.tof[part_id]; // Time is defined for the first hit
-            singles.pu1_nb_hits[part_id] += 1;
-            singles.pu1_id_geom[part_id] = cur_id_geom;
+        if (pulses.pu1_nb_hits[part_id] == 0) {
+            pulses.pu1_px[part_id] = pos.x*discrete_loss;
+            pulses.pu1_py[part_id] = pos.y*discrete_loss;
+            pulses.pu1_pz[part_id] = pos.z*discrete_loss;
+            pulses.pu1_E[part_id] = discrete_loss;
+            pulses.pu1_tof[part_id] = particles.tof[part_id]; // Time is defined for the first hit
+            pulses.pu1_nb_hits[part_id] += 1;
+            pulses.pu1_id_geom[part_id] = cur_id_geom;
 
         } else {
 
             // Others hits - first pulse
-            if (cur_id_geom == singles.pu1_id_geom[part_id]) {
-                singles.pu1_px[part_id] += pos.x*discrete_loss;
-                singles.pu1_py[part_id] += pos.y*discrete_loss;
-                singles.pu1_pz[part_id] += pos.z*discrete_loss;
-                singles.pu1_E[part_id] += discrete_loss;
-                singles.pu1_nb_hits[part_id] += 1;
+            if (cur_id_geom == pulses.pu1_id_geom[part_id]) {
+                pulses.pu1_px[part_id] += pos.x*discrete_loss;
+                pulses.pu1_py[part_id] += pos.y*discrete_loss;
+                pulses.pu1_pz[part_id] += pos.z*discrete_loss;
+                pulses.pu1_E[part_id] += discrete_loss;
+                pulses.pu1_nb_hits[part_id] += 1;
 
             } else {
 
                 // First hit - second pulse
-                if (singles.pu2_nb_hits[part_id] == 0) {
-                    singles.pu2_px[part_id] = pos.x*discrete_loss;
-                    singles.pu2_py[part_id] = pos.y*discrete_loss;
-                    singles.pu2_pz[part_id] = pos.z*discrete_loss;
-                    singles.pu2_E[part_id] = discrete_loss;
-                    singles.pu2_tof[part_id] = particles.tof[part_id]; // Time is defined for the first hit
-                    singles.pu2_nb_hits[part_id] += 1;
-                    singles.pu2_id_geom[part_id] = cur_id_geom;
+                if (pulses.pu2_nb_hits[part_id] == 0) {
+                    pulses.pu2_px[part_id] = pos.x*discrete_loss;
+                    pulses.pu2_py[part_id] = pos.y*discrete_loss;
+                    pulses.pu2_pz[part_id] = pos.z*discrete_loss;
+                    pulses.pu2_E[part_id] = discrete_loss;
+                    pulses.pu2_tof[part_id] = particles.tof[part_id]; // Time is defined for the first hit
+                    pulses.pu2_nb_hits[part_id] += 1;
+                    pulses.pu2_id_geom[part_id] = cur_id_geom;
 
                 } else {
                     // Others hist - second pulse
-                    singles.pu2_px[part_id] += pos.x*discrete_loss;
-                    singles.pu2_py[part_id] += pos.y*discrete_loss;
-                    singles.pu2_pz[part_id] += pos.z*discrete_loss;
-                    singles.pu2_E[part_id] += discrete_loss;
-                    singles.pu2_nb_hits[part_id] += 1;
+                    pulses.pu2_px[part_id] += pos.x*discrete_loss;
+                    pulses.pu2_py[part_id] += pos.y*discrete_loss;
+                    pulses.pu2_pz[part_id] += pos.z*discrete_loss;
+                    pulses.pu2_E[part_id] += discrete_loss;
+                    pulses.pu2_nb_hits[part_id] += 1;
                 }
             }
         }
 
     } // Digitizer
 
-    //// This part is for debuging and vrml viewer
-
-    // Record this step if required
-    if (history.record_flag == ENABLED) {
-        history.cpu_record_a_step(particles, part_id);
-    }
-
-/*
-    // DEBUGING: phasespace
-    if (next_geometry_volume == 0 && particles.endsimu[part_id] == PARTICLE_ALIVE) {
-        printf("%e %e %e %e %e %e %e\n", particles.E[part_id], pos.x, pos.y, pos.z, dir.x, dir.y, dir.z);
-        particles.endsimu[part_id] = PARTICLE_DEAD;
-        return;
-    }
-*/
-
-
-
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
 #endif

@@ -21,32 +21,6 @@
 #include "voxelized_source.cuh"
 
 //// External function
-//__host__ __device__ void point_source_primary_generator(ParticleStack particles, ui32 id,
-//                                                        f32 px, f32 py, f32 pz, f32 energy,
-//                                                        ui8 type, ui32 geom_id) {
-
-//    f32 phi = JKISS32(particles, id);
-//    f32 theta = JKISS32(particles, id);
-
-//    phi  *= gpu_twopi;
-//    theta = acosf(1.0f - 2.0f*theta);
-
-//    // set photons
-//    particles.E[id] = energy;
-//    particles.dx[id] = cosf(phi)*sinf(theta);
-//    particles.dy[id] = sinf(phi)*sinf(theta);
-//    particles.dz[id] = cosf(theta);
-//    particles.px[id] = px;
-//    particles.py[id] = py;
-//    particles.pz[id] = pz;
-//    particles.tof[id] = 0.0f;
-//    particles.endsimu[id] = PARTICLE_ALIVE;
-//    particles.level[id] = PRIMARY;
-//    particles.pname[id] = type;
-//    particles.geometry_id[id] = geom_id;
-//}
-
-//// External function
 __host__ __device__ void voxelized_source_primary_generator(ParticleStack particles, ui32 id,
                                                             f32 *cdf_index, f32 *cdf_act, ui32 nb_acts,
                                                             f32 px, f32 py, f32 pz,

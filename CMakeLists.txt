@@ -26,7 +26,7 @@ endif()
 # OPTIONS
 option(WITH_FAST_MATH "Fast math flag" ON)
 if(WITH_FAST_MATH)
-  set(LIBSCUDA --generate-code arch=compute_30,code=sm_30 --relocatable-device-code true -lcudadevrt --compiler-options -use_fast_math -w )
+  set(LIBSCUDA --generate-code arch=compute_30,code=sm_30 --relocatable-device-code true -lcudadevrt --compiler-options -use_fast_math -w --ptxas-options=-v)
 else()
   set(LIBSCUDA --generate-code arch=compute_30,code=sm_30 --relocatable-device-code true -lcudadevrt --compiler-options -w)
 endif()
@@ -47,7 +47,7 @@ include_directories(
 file(GLOB_RECURSE sourcesGPU "*.cu")
 file(GLOB_RECURSE headersGPU "*.cuh")
 file(GLOB ggemssh "ggems.sh")
-
+file(GLOB datafiles "data/*")
 # Compilation
 find_package(CUDA REQUIRED)
 set(LIB_NAME "ggems")
@@ -60,6 +60,7 @@ cuda_add_library(${LIB_NAME} STATIC ${sourcesGPU} ${headersGPU})
 install(TARGETS ${LIB_NAME} DESTINATION "lib")
 install(FILES ${headersGPU} DESTINATION "include")
 install(FILES ${ggemssh} DESTINATION "bin" PERMISSIONS WORLD_EXECUTE WORLD_READ OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE)
+install(FILES ${datafiles} DESTINATION "data")
 
 install(CODE "MESSAGE(\"Installation done ...\")")
 if (UNIX)

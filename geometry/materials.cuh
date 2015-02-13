@@ -113,7 +113,10 @@ class MaterialBuilder {
 
         void get_materials_table_from_world(GeometryBuilder World);
 
-        MaterialsTable materials_table;
+        void copy_materials_table_cpu2gpu();
+
+        MaterialsTable materials_table;  // CPU
+        MaterialsTable dmaterials_table; // GPU
 
     private:
         MaterialDataBase material_db;

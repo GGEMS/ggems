@@ -466,18 +466,9 @@ __host__ __device__ f64 get_distance_to_object(Scene geometry, ui32 adr_geom,
 
         ui32 octree_type = geometry.data_objects[adr_geom+ADR_MESHED_OCTREE_TYPE];
 
-#ifdef DEBUG
-        printf("     Ray not hit the Mesh AABB %f %f | %f %f | %f %f\n", aabb_xmin, aabb_xmax,
-               aabb_ymin, aabb_ymax, aabb_zmin, aabb_zmax);
-#endif
         // First check the bounding box that contains the mesh
         if (!test_ray_AABB(pos, dir, aabb_xmin, aabb_xmax,
                            aabb_ymin, aabb_ymax, aabb_zmin, aabb_zmax)) return F64_MAX;
-
-#ifdef DEBUG
-        printf("     Hit Mesh AABB %f %f | %f %f | %f %f\n", aabb_xmin, aabb_xmax,
-               aabb_ymin, aabb_ymax, aabb_zmin, aabb_zmax);
-#endif
 
         // If no octree first check every triangle
         distance = F64_MAX;
@@ -509,10 +500,6 @@ __host__ __device__ f64 get_distance_to_object(Scene geometry, ui32 adr_geom,
         // If regular octree
         } else if (octree_type == REG_OCTREE) {
 
-#ifdef DEBUG_OCTREE
-            printf("     Reg Octree\n");
-#endif
-
             //// Compute the two point use to perform the raycast within the octree
 
             // If inside the octree, use the current position as entry point
@@ -537,13 +524,6 @@ __host__ __device__ f64 get_distance_to_object(Scene geometry, ui32 adr_geom,
             if (distance_to_out == DBL_MAX) {printf("EDGE\n"); return distance;}
 
             exit_pt = fxyz_add(entry_pt, fxyz_scale(dir, distance_to_out));
-
-#ifdef DEBUG_OCTREE
-            printf("     pos %f %f %f\n", pos.x, pos.y, pos.z);
-            printf("     dir %f %f %f\n", dir.x, dir.y, dir.z);
-            printf("     entry %f %f %f - DistToOut %2.40f\n", entry_pt.x, entry_pt.y, entry_pt.z, distance_to_out);
-            printf("     exit %f %f %f\n", exit_pt.x, exit_pt.y, exit_pt.z);
-#endif
 
             //// Convert point into octree index
 
@@ -584,13 +564,7 @@ __host__ __device__ f64 get_distance_to_object(Scene geometry, ui32 adr_geom,
             if (exit_ind.y >= ny) exit_ind.y = ny-1;
             if (exit_ind.z >= nz) exit_ind.z = nz-1;
 
-#ifdef DEBUG_OCTREE
-            printf("     Ind entry %f %f %f exit %f %f %f\n", entry_ind.x, entry_ind.y, entry_ind.z,
-                   exit_ind.x, exit_ind.y, exit_ind.z);
-#endif
-
             //// Cross the octree with a raycast (DDA algorithm)
-
 
             ui32 jump = ny*nx;
             ui32 bigjump = jump*nz;
@@ -606,10 +580,6 @@ __host__ __device__ f64 get_distance_to_object(Scene geometry, ui32 adr_geom,
             f64xyz finc = fxyz_scale(diff, flength);
             f64xyz curf = entry_ind;
 
-#ifdef DEBUG_OCTREE
-            printf("     Finc %f %f %f\n", finc.x, finc.y, finc.z);
-#endif
-
             ui16xyz curi;
             ui32 index;
 
@@ -620,13 +590,6 @@ __host__ __device__ f64 get_distance_to_object(Scene geometry, ui32 adr_geom,
                 curi.x=(ui16)curf.x; curi.y=(ui16)curf.y; curi.z=(ui16)curf.z;
                 index = curi.z*jump+curi.y*nx+curi.x;
 
-#ifdef DEBUG_OCTREE
-                printf("     Length %i Cur index %i %i %i Gbl ind %i\n", i, curi.x, curi.y, curi.z, index);
-                printf("     Cell x %f %f y %f %f z %f %f\n", curi.x*s.x+aabb_xmin, curi.x*s.x+aabb_xmin+s.x,
-                       curi.y*s.y+aabb_ymin, curi.y*s.y+aabb_ymin+s.y,
-                       curi.z*s.z+aabb_zmin, curi.z*s.z+aabb_zmin+s.z);
-#endif
-
                 // If any triangle is found inside the current octree cell
                 if (geometry.data_objects[adr_octree+index] != 0) {
 
@@ -635,11 +598,6 @@ __host__ __device__ f64 get_distance_to_object(Scene geometry, ui32 adr_geom,
                     ui32 adr_to_cell = adr_octree + bigjump + index;
                     // 2*bigjump = > skip NbObjsPerCell and AddrToCell data
                     ui32 ptr_list_tri = adr_octree + 2*bigjump + (ui32)geometry.data_objects[adr_to_cell];
-
-#ifdef DEBUG_OCTREE
-                    printf("          Find %i triangles @%i\n", tri_per_cell, (ui32)geometry.data_objects[adr_to_cell]);
-                    printf("          @ListObjects %i\n", adr_octree + 2*bigjump);
-#endif
 
                     ui32 icell=0; while (icell < tri_per_cell) {
                         //                                       9 vertices x Triangle index
@@ -656,14 +614,6 @@ __host__ __device__ f64 get_distance_to_object(Scene geometry, ui32 adr_geom,
                         // Get distance to this triangle
                         tri_distance = hit_ray_triangle(pos, dir, u, v, w);
 
-#ifdef DEBUG_OCTREE
-                        printf("               Index triangle %i\n", (ui32)geometry.data_objects[ptr_list_tri + icell]);
-                        printf("               @Triangle %i\n", ptr_tri);
-                        printf("               tri %i u %f %f %f v %f %f %f w %f %f %f\n", icell,
-                               u.x, u.y, u.z, v.x, v.y, v.z, w.x, w.y, w.z);
-                        printf("                  => dist %f\n", tri_distance);
-#endif
-
                         // Select the min positive value
                         if (tri_distance >= 0 && tri_distance < distance) distance = tri_distance;
 
@@ -673,10 +623,6 @@ __host__ __device__ f64 get_distance_to_object(Scene geometry, ui32 adr_geom,
 
                 // Iterate the ray
                 curf = fxyz_add(curf, finc);
-
-#ifdef DEBUG_OCTREE
-                printf("          New curf %f %f %f\n", curf.x, curf.y, curf.z);
-#endif
 
                 ++i;
             } // while raycast
@@ -844,10 +790,6 @@ __host__ __device__ void get_next_geometry_boundary(Scene geometry, ui32 cur_geo
             // Any other volumes
             distance = get_distance_to_object(geometry, adr_child_geom, obj_type, pos, dir);
         }
-
-#ifdef DEBUG
-        printf("      Check children: %i type %i dist %f\n", id_child_geom, obj_type, distance);
-#endif
 
         if (distance <= interaction_distance) {
             interaction_distance = distance;// + EPSILON3; // overshoot
@@ -1696,5 +1638,75 @@ void GeometryBuilder::build_scene() {
     }
 
 }
+
+// Copy the complete scene to the GPU
+void GeometryBuilder::copy_scene_cpu2gpu() {
+
+    // First allocate the GPU mem for the scene
+    HANDLE_ERROR( cudaMalloc((void**) &dworld.ptr_objects, world.ptr_objects_dim*sizeof(ui32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &dworld.size_of_objects, world.size_of_objects_dim*sizeof(ui32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &dworld.data_objects, world.data_objects_dim*sizeof(f32)) );
+
+    HANDLE_ERROR( cudaMalloc((void**) &dworld.ptr_nodes, world.ptr_nodes_dim*sizeof(ui32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &dworld.size_of_nodes, world.size_of_nodes_dim*sizeof(ui32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &dworld.child_nodes, world.child_nodes_dim*sizeof(ui32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &dworld.mother_node, world.mother_node_dim*sizeof(ui32)) );
+
+    // Copy data to the GPU
+    dworld.cur_node_id = world.cur_node_id;
+    dworld.ptr_objects_dim = world.ptr_objects_dim;
+    dworld.size_of_objects_dim = world.size_of_objects_dim;
+    dworld.data_objects_dim = world.data_objects_dim;
+    dworld.ptr_nodes_dim = world.ptr_nodes_dim;
+    dworld.size_of_nodes_dim = world.size_of_nodes_dim;
+    dworld.child_nodes_dim = world.child_nodes_dim;
+    dworld.mother_node_dim = world.mother_node_dim;
+
+    HANDLE_ERROR( cudaMemcpy(dworld.ptr_objects, world.ptr_objects,
+                             world.ptr_objects_dim*sizeof(ui32), cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy(dworld.size_of_objects, world.size_of_objects,
+                             world.size_of_objects_dim*sizeof(ui32), cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy(dworld.data_objects, world.data_objects,
+                             world.data_objects_dim*sizeof(f32), cudaMemcpyHostToDevice) );
+
+    HANDLE_ERROR( cudaMemcpy(dworld.ptr_nodes, world.ptr_nodes,
+                             world.ptr_nodes_dim*sizeof(ui32), cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy(dworld.size_of_nodes, world.size_of_nodes,
+                             world.size_of_nodes_dim*sizeof(ui32), cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy(dworld.child_nodes, world.child_nodes,
+                             world.child_nodes_dim*sizeof(ui32), cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy(dworld.mother_node, world.mother_node,
+                             world.mother_node_dim*sizeof(ui32), cudaMemcpyHostToDevice) );
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #endif

@@ -20,6 +20,99 @@
 
 #include "source_builder.cuh"
 
+
+///////// Host/Device function ////////////////////////////////////////////////////
+
+__host__ __device__ void get_primaries(Sources sources, ParticleStack &particles, ui32 id_src, ui32 id_part) {
+
+    // Read the address source
+    ui32 adr = sources.ptr_sources[id_src];
+
+    // Read the kind of sources
+    ui32 type = (ui32)(sources.data_sources[adr+ADR_SRC_TYPE]);
+    ui32 geom_id = (ui32)(sources.data_sources[adr+ADR_SRC_GEOM_ID]);
+
+    // Point Source
+    if (type == POINT_SOURCE) {
+        f32 px = sources.data_sources[adr+ADR_POINT_SRC_PX];
+        f32 py = sources.data_sources[adr+ADR_POINT_SRC_PY];
+        f32 pz = sources.data_sources[adr+ADR_POINT_SRC_PZ];
+        f32 energy = sources.data_sources[adr+ADR_POINT_SRC_ENERGY];
+
+        point_source_primary_generator(particles, id_part, px, py, pz, energy, PHOTON, geom_id);
+
+    } else if (type == CONE_BEAM_SOURCE) {
+        f32 px = sources.data_sources[adr+ADR_CONE_BEAM_SRC_PX];
+        f32 py = sources.data_sources[adr+ADR_CONE_BEAM_SRC_PY];
+        f32 pz = sources.data_sources[adr+ADR_CONE_BEAM_SRC_PZ];
+        f32 phi = sources.data_sources[adr+ADR_CONE_BEAM_SRC_PHI];
+        f32 theta = sources.data_sources[adr+ADR_CONE_BEAM_SRC_THETA];
+        f32 psi = sources.data_sources[adr+ADR_CONE_BEAM_SRC_PSI];
+        f32 aperture = sources.data_sources[adr+ADR_CONE_BEAM_SRC_APERTURE];
+        f32 energy = sources.data_sources[adr+ADR_CONE_BEAM_SRC_ENERGY];
+
+        cone_beam_source_primary_generator(particles, id_part, px, py, pz,
+                                           phi, theta, psi, aperture, energy, PHOTON, geom_id);
+    } else if (type == VOXELIZED_SOURCE) {
+        f32 px = sources.data_sources[adr+ADR_VOX_SOURCE_PX];
+        f32 py = sources.data_sources[adr+ADR_VOX_SOURCE_PY];
+        f32 pz = sources.data_sources[adr+ADR_VOX_SOURCE_PZ];
+
+        f32 nb_vox_x = sources.data_sources[adr+ADR_VOX_SOURCE_NB_VOX_X];
+        f32 nb_vox_y = sources.data_sources[adr+ADR_VOX_SOURCE_NB_VOX_Y];
+        f32 nb_vox_z = sources.data_sources[adr+ADR_VOX_SOURCE_NB_VOX_Z];
+
+        f32 sx = sources.data_sources[adr+ADR_VOX_SOURCE_SPACING_X];
+        f32 sy = sources.data_sources[adr+ADR_VOX_SOURCE_SPACING_Y];
+        f32 sz = sources.data_sources[adr+ADR_VOX_SOURCE_SPACING_Z];
+
+        f32 energy = sources.data_sources[adr+ADR_VOX_SOURCE_ENERGY];
+
+        f32 nb_acts = sources.data_sources[adr+ADR_VOX_SOURCE_NB_CDF];
+
+        f32 emission_type = sources.data_sources[adr+ADR_VOX_SOURCE_EMISSION_TYPE];
+
+        f32 *cdf_index = &(sources.data_sources[adr+ADR_VOX_SOURCE_CDF_INDEX]);
+        ui32 adr_cdf_act = adr+nb_acts;
+        f32 *cdf_act = &(sources.data_sources[adr_cdf_act+ADR_VOX_SOURCE_CDF_INDEX]);
+
+        if (emission_type == EMISSION_BACK2BACK) {
+
+            // Back2back fills the particle' stack with two particles, we need to
+            // adjust the ID to be the ID of event (half size) and not the ID of particles
+            // Consequently only even ID generate back2back
+
+            if ((id_part&1)==0) {
+                // Is even
+                voxelized_source_primary_generator(particles, id_part,
+                                                   cdf_index, cdf_act, nb_acts,
+                                                   px, py, pz, nb_vox_x, nb_vox_y, nb_vox_z,
+                                                   sx, sy, sz, energy, PHOTON, geom_id);
+            }
+
+        } else if (emission_type == EMISSION_MONO) {
+            //printf("ERROR: voxelized source, emission 'MONO' is not impleted yet!\n");
+            //exit(EXIT_FAILURE);
+            // TODO
+        }
+
+    }
+
+}
+
+///////// Kernel ////////////////////////////////////////////////////
+
+// Kernel to create new particles (sources manager)
+__global__ void kernel_get_primaries(Sources sources, ParticleStack particles, ui32 isrc) {
+
+    const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
+    if (id >= particles.size) return;
+
+    // Get new particles
+    get_primaries(sources, particles, isrc, id);
+
+}
+
 ///////// Source builder class ////////////////////////////////////////////////////
 
 SourceBuilder::SourceBuilder() {
@@ -32,6 +125,8 @@ SourceBuilder::SourceBuilder() {
     //sources.size_of_sources_dim = 0;
     sources.data_sources_dim = 0;
     sources.seeds_dim = 0;
+
+    tot_activity = 0;
 }
 
 // Add a point source on the simulation
@@ -118,10 +213,51 @@ void SourceBuilder::add_source(VoxelizedSource src) {
     // Store the CDF of the activities
     array_append_array(&sources.data_sources, sources.data_sources_dim, &(src.activity_cdf), src.activity_size);
 
-
     // Save the seed
     array_push_back(&sources.seeds, sources.seeds_dim, src.seed);
+
+    // Count the activity of this source to the total activity
+    tot_activity += src.tot_activity;
 }
+
+
+// Copy source data to the GPU
+void SourceBuilder::copy_source_cpu2gpu() {
+
+    // First allocate the GPU mem for the scene
+    HANDLE_ERROR( cudaMalloc((void**) &dsources.ptr_sources, sources.ptr_sources_dim*sizeof(ui32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &dsources.data_sources, sources.data_sources_dim*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &dsources.seeds, sources.seeds_dim*sizeof(ui32)) );
+
+    // Copy data to the GPU
+    dsources.nb_sources = sources.nb_sources;
+    dsources.ptr_sources_dim = sources.ptr_sources_dim;
+    dsources.data_sources_dim = sources.data_sources_dim;
+    dsources.seeds_dim = sources.seeds_dim;
+
+    HANDLE_ERROR( cudaMemcpy(dsources.ptr_sources, sources.ptr_sources,
+                             sources.ptr_sources_dim*sizeof(ui32), cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy(dsources.data_sources, sources.data_sources,
+                             sources.data_sources_dim*sizeof(f32), cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy(dsources.seeds, sources.seeds,
+                             sources.seeds_dim*sizeof(ui32), cudaMemcpyHostToDevice) );
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #endif
 

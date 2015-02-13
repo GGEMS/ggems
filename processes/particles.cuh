@@ -92,10 +92,12 @@ class ParticleBuilder {
         void set_stack_size(ui32 nb);
         void set_seed(ui32 val_seed);
         void cpu_malloc_stack();
-        void init_stack_seed();
+        void gpu_malloc_stack();
+        void cpu_init_stack_seed();
+        void copy_seed_cpu2gpu();
         void cpu_print_stack(ui32 nlim);
 
-        ParticleStack stack;
+        ParticleStack stack, dstack; // CPU and GPU stack
         ui32 seed;
 
     private:

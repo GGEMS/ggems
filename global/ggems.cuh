@@ -49,17 +49,17 @@ class SimulationBuilder {
     public:
         SimulationBuilder();
 
+        // Set simulation object
         void set_geometry(GeometryBuilder obj);
         void set_materials(MaterialBuilder tab);
         void set_sources(SourceBuilder src);
         void set_particles(ParticleBuilder p);
         void set_digitizer(Digitizer dig);
 
-        void set_detector(FlatPanelDetector vdetector); // FIXME should be a builder
-
-        ParticleBuilder get_particles();
-
+        // Setting parameters
         void set_hardware_target(std::string value);
+        void set_GPU_ID(ui32 valid);
+        void set_GPU_block_size(ui32 val);
         void set_process(std::string process_name);
         void set_secondary(std::string pname);
         void set_number_of_particles(ui32 nb);
@@ -68,23 +68,34 @@ class SimulationBuilder {
         void set_CS_table_nbins(ui32 valbin);
         void set_CS_table_E_min(f32 valE);
         void set_CS_table_E_max(f32 valE);
+        void set_seed(ui32 vseed);
 
+        // Utils
+        void set_display_run_time();
+        void set_display_memory_usage();
+
+        // Main functions
         void init_simulation();
         void start_simulation();
 
+        // Get data
+        ParticleBuilder get_particles();
+
+        // Parameters
         ui16 target;
         ui32 nb_of_particles;
         ui32 nb_of_iterations;
         ui32 max_iteration;
 
         // Main elements of the simulation
-        ParticleBuilder particles;
-        GeometryBuilder geometry;
-        MaterialBuilder materials;
+        ParticleBuilder particles;                  // (CPU & GPU)
+        GeometryBuilder geometry;                   // (CPU & GPU
+        MaterialBuilder materials;                  // (CPU & GPU)
         SourceBuilder sources;
-        GlobalSimulationParameters parameters;
-        CrossSectionsBuilder cs_tables;
-        Digitizer digitizer;
+        GlobalSimulationParameters parameters;      // CPU
+        GlobalSimulationParameters dparameters;     // GPU
+        CrossSectionsBuilder cs_tables;             // (CPU & GPU)
+        Digitizer digitizer;                        // (CPU & GPU)
 
         // Record history for some particles (only CPU version)
         HistoryBuilder history;
@@ -92,8 +103,16 @@ class SimulationBuilder {
     private:
 
         // Main functions
-        void cpu_primaries_generator();
-        void cpu_main_navigation();
+        void primaries_generator();
+        void main_navigator();
+
+        // For GPU
+        ui32 gpu_id, gpu_block_size;
+        void copy_parameters_cpu2gpu();
+
+        // Parameters
+        bool display_run_time_flag, display_memory_usage_flag;
+        ui32 seed;
 
 };
 

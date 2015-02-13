@@ -119,7 +119,7 @@ struct Scene {
     // Object structure
     ui32* ptr_objects;     // Address to access to the different objects
     ui32* size_of_objects; // Size of each object
-    f32* data_objects;           // Parameters of each primitive in the world
+    f32* data_objects;     // Parameters of each primitive in the world
 
     // Tree structure
     ui32* ptr_nodes;       // Address to access the different nodes
@@ -177,13 +177,18 @@ class GeometryBuilder {
         // Build the scene
         void build_scene();
 
+        // Copy to GPU
+        void copy_scene_cpu2gpu();
+
         // Utils
         //void save_ggems_geometry(std::string filename);
         //void print_geometry();
         //void print_raw_geometry();
 
         // World geometry description
-        Scene world;
+        Scene world;   // CPU
+        Scene dworld;  // GPU
+
         std::vector<std::string> materials_list;   // List of the materials used
         std::vector<std::string> name_objects;     // Name of each object
         std::vector<Color> object_colors;          // Color of each object

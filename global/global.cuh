@@ -21,6 +21,7 @@
 /////// DEBUG //////////////////////////////////////////////////
 //#define DEBUG
 //#define DEBUG_OCTREE
+//#define DEBUG_DIGITIZER
 
 /////// TYPEDEF ////////////////////////////////////////////////
 
@@ -133,17 +134,26 @@
 #include <cfloat>
 #include <assert.h>
 #include <math.h>
+#include <sys/time.h>
 
 #include "constants.cuh"
 #include "vector.cuh"
 
-//void set_gpu_device(int deviceChoice,float minversion=3.0);
-//void reset_gpu_device();
+#define HANDLE_ERROR( err ) (HandleError( err, __FILE__, __LINE__ ))
 
+// GPU
+void set_gpu_device(int deviceChoice, float minversion=3.0);
+void reset_gpu_device();
+void HandleError(cudaError_t err, const char *file, int line );
+void cuda_error_check (const char * prefix, const char * postfix);
+
+// Utils
 void print_error(std::string msg);
 void print_warning(std::string msg);
-
+void print_time(std::string txt, f64 t);
+void print_memory(std::string txt, ui32 t);
 void exit_simulation();
+f64 get_time();
 
 // Operation on C-Array
 void array_push_back(unsigned int **vector, unsigned int &dim, unsigned int val);
@@ -154,22 +164,21 @@ void array_append_array(f32 **vector, unsigned int &dim, f32 **an_array, unsigne
 
 // Global simulation parameters
 struct GlobalSimulationParameters {
-    char physics_list[NB_PROCESSES];
-    char secondaries_list[NB_PARTICLES];
-    char record_dose_flag;
-    char digitizer_flag;
+    ui8 *physics_list;
+    ui8 *secondaries_list;
+    ui8 record_dose_flag;
+    ui8 digitizer_flag;
 
-    unsigned int nb_of_particles;
-    unsigned int nb_iterations;
+    ui32 nb_of_particles;
+    ui32 nb_iterations;
 
     f32 time;
-    unsigned int seed;
+    ui32 seed;
 
     // To build cross sections table
-    unsigned int cs_table_nbins;
+    ui32 cs_table_nbins;
     f32 cs_table_min_E;
     f32 cs_table_max_E;
-
 };
 
 // Struct that handle colors

@@ -274,6 +274,61 @@ void CrossSectionsBuilder::print() {
 
 }
 
+// Copy CS table to the device
+void CrossSectionsBuilder::copy_cs_table_cpu2gpu() {
+    if (photon_CS_table.nb_bins == 0) {
+        print_warning("Copy CS table to gpu, table size is set to zero?!");
+        exit_simulation();
+    }
+
+    ui32 n = photon_CS_table.nb_bins;
+    ui32 k = photon_CS_table.nb_mat;
+
+    // Allocate GPU mem
+    HANDLE_ERROR( cudaMalloc((void**) &dphoton_CS_table.E_bins, n*sizeof(f32)) );
+
+    HANDLE_ERROR( cudaMalloc((void**) &dphoton_CS_table.Compton_Std_CS, n*k*sizeof(f32)) );
+
+    HANDLE_ERROR( cudaMalloc((void**) &dphoton_CS_table.Photoelectric_Std_CS, n*k*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &dphoton_CS_table.Photoelectric_Std_xCS, n*101*sizeof(f32)) );
+
+    HANDLE_ERROR( cudaMalloc((void**) &dphoton_CS_table.Rayleigh_Lv_CS, n*k*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &dphoton_CS_table.Rayleigh_Lv_SF, n*101*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &dphoton_CS_table.Rayleigh_Lv_xCS, n*101*sizeof(f32)) );
+
+    // Copy data to GPU
+    dphoton_CS_table.nb_bins = n;
+    dphoton_CS_table.nb_mat = k;
+    dphoton_CS_table.E_min = photon_CS_table.E_min;
+    dphoton_CS_table.E_max = photon_CS_table.E_max;
+
+    HANDLE_ERROR( cudaMemcpy(dphoton_CS_table.E_bins, photon_CS_table.E_bins,
+                             sizeof(f32)*n, cudaMemcpyHostToDevice) );
+
+    HANDLE_ERROR( cudaMemcpy(dphoton_CS_table.Compton_Std_CS, photon_CS_table.Compton_Std_CS,
+                             sizeof(f32)*n*k, cudaMemcpyHostToDevice) );
+
+    HANDLE_ERROR( cudaMemcpy(dphoton_CS_table.Photoelectric_Std_CS, photon_CS_table.Photoelectric_Std_CS,
+                             sizeof(f32)*n*k, cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy(dphoton_CS_table.Photoelectric_Std_xCS, photon_CS_table.Photoelectric_Std_xCS,
+                             sizeof(f32)*n*101, cudaMemcpyHostToDevice) );
+
+    HANDLE_ERROR( cudaMemcpy(dphoton_CS_table.Rayleigh_Lv_CS, photon_CS_table.Rayleigh_Lv_CS,
+                             sizeof(f32)*n*k, cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy(dphoton_CS_table.Rayleigh_Lv_SF, photon_CS_table.Rayleigh_Lv_SF,
+                             sizeof(f32)*n*101, cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy(dphoton_CS_table.Rayleigh_Lv_xCS, photon_CS_table.Rayleigh_Lv_xCS,
+                             sizeof(f32)*n*101, cudaMemcpyHostToDevice) );
+
+}
+
+
+
+
+
+
+
+
 
 
 

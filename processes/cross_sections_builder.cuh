@@ -26,11 +26,13 @@
 class CrossSectionsBuilder {
     public:
         CrossSectionsBuilder();
-        void build_table(MaterialsTable materials, GlobalSimulationParameters parameters);
+        void build_table(MaterialsTable materials, GlobalSimulationParameters parameters);       
+        void copy_cs_table_cpu2gpu();
         void print();
 
         // Data for photon
-        PhotonCrossSectionTable photon_CS_table;
+        PhotonCrossSectionTable photon_CS_table;   // CPU
+        PhotonCrossSectionTable dphoton_CS_table;  // GPU
         //ElectronCrossSectionTable Electron_CS_table;
 
     private:
