@@ -21,6 +21,8 @@
 #include "constants.cuh"
 #include "global.cuh"
 
+#include "Randomize.hh"
+
 // Struct that handle pulses on CPU and GPU
 struct Pulses {
     // first pulse
@@ -90,6 +92,10 @@ class Digitizer {
                                    f32 zmin, f32 zmax,
                                    f32 sx, f32 sy, f32 sz);
 
+        void set_spatial_blurring(f32 SP_res);
+        
+        void set_energy_blurring(std::string law, f32 E_res, f32 E_ref, f32 E_slope);
+        
         void set_energy_window(f32 vE_low, f32 vE_high);
         void set_time_window(f32 vwin_time);
 
@@ -122,6 +128,11 @@ class Digitizer {
         bool flag_singles;
         bool flag_coincidences;
         bool flag_projection;
+        
+        // Projection format
+        bool flag_projXY;
+        bool flag_projYZ;
+        bool flag_projXZ;
 
     private:
         std::string singles_filename;
@@ -136,6 +147,13 @@ class Digitizer {
         f32 projection_xmin, projection_ymin, projection_zmin;
         std::vector<ui32> projection;
 
+        // Spatial blurring parameters
+        f32 SP_res;
+        
+        // Energy blurring parameters
+        std::string law_name;
+        f32 E_res, E_ref, E_slope;
+        
         // for coincidences
         f32 E_low, E_high, win_time;
 

@@ -121,7 +121,7 @@ __host__ __device__ void photon_navigator(ParticleStack &particles, ui32 part_id
     if (interaction_distance <= next_interaction_distance) {
         next_interaction_distance = interaction_distance + EPSILON3; // Overshoot
         next_discrete_process = GEOMETRY_BOUNDARY;
-        next_geometry_volume = hit_id_geom;   
+        next_geometry_volume = hit_id_geom;
     }
 
     //// Move particle //////////////////////////////////////////////////////

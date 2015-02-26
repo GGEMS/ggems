@@ -344,7 +344,7 @@ __host__ __device__ f64 get_distance_to_object(Scene geometry, ui32 adr_geom,
                         
                   f64xyz inv_dir;
               
-                  // Mettre dans le referentiel de l'hexagone
+                  // Mettre dans le referentiel de l'hexagone (first in the colli referentiel with aabb_center)
                   
                   temp.x = pos_test.x - aabb_center.x;
                   temp.y = pos_test.y - aabb_center.y - (f64)geometry.data_objects[ind_y+hex_test];

@@ -26,6 +26,10 @@ Digitizer::Digitizer() {
 
     flag_singles = false;
     flag_coincidences = false;
+    
+    flag_projXY = false;
+    flag_projYZ = false;
+    flag_projXZ = false;
 }
 
 // Allocate and init the singles list file (CPU)
@@ -195,14 +199,35 @@ void Digitizer::set_output_projection(std::string name, ui32 volid,
     projection_sx = sx;
     projection_sy = sy;
     projection_sz = sz;
+    
     projection_nx = (ui32)((xmax-xmin) / sx);
+    if (projection_nx == 0) 
+      flag_projYZ = true;
+    
     projection_ny = (ui32)((ymax-ymin) / sy);
+    if (projection_ny == 0) 
+      flag_projXZ = true;
+    
     projection_nz = (ui32)((zmax-zmin) / sz);
+    if (projection_nz == 0) 
+      flag_projXY = true;
+    
     projection_xmin = xmin;
     projection_ymin = ymin;
     projection_zmin = zmin;
-
+    
     flag_projection = true;
+}
+
+void Digitizer::set_spatial_blurring(f32 vSP_res) {
+    SP_res = vSP_res;
+}
+        
+void Digitizer::set_energy_blurring(std::string law, f32 vE_res, f32 vE_ref, f32 vE_slope) {
+    law_name = law;
+    E_res = vE_res;
+    E_ref = vE_ref;
+    E_slope = vE_slope;
 }
 
 // Set parameters for coincidences
@@ -435,8 +460,22 @@ void Digitizer::process_coincidences() {
 /// Process Projection /////////////////////////////////////////
 
 void Digitizer::init_projection() {
-
-    ui32 n = projection_nx*projection_ny*projection_nz;
+  
+    ui32 n;
+  
+    if (flag_projXY) {
+        n = projection_nx*projection_ny;
+    }
+    else if (flag_projXZ) {
+        n = projection_nx*projection_nz;
+    }
+    else if (flag_projYZ) {
+        n = projection_ny*projection_nz;
+    }
+    else {
+        n = projection_nx*projection_ny*projection_nz;
+    }
+    
     projection.clear();
     projection.reserve(n);
     ui32 i=0; while (i<n) {
@@ -450,29 +489,88 @@ void Digitizer::process_projection() {
 
     // Loop over singles
     ui32 i=0;
+    
+    
     while (i < singles.size()) {
 
         // If single hit the right detector
         if (singles[i].id_geom == projection_idvol) {
+            
+            // Apply energy blurring
+            f32 resolution = E_slope * (singles[i].E - E_ref) + E_res;
+            
+            f32 E_New = G4RandGauss::shoot(singles[i].E, resolution * singles[i].E / 2.35482);
+            
+            if (E_New >= E_low && E_New <= E_high) {
+            
+                // Apply spatial blurring
+                f32 PxNew = G4RandGauss::shoot(singles[i].px,SP_res/2.35);
+                f32 PyNew = G4RandGauss::shoot(singles[i].py,SP_res/2.35);
+                f32 PzNew = G4RandGauss::shoot(singles[i].pz,SP_res/2.35);
+            
+                if (flag_projXY) {
+                    
+                    // Change single frame to voxel space
+                    ui32 ppx = (PxNew - projection_xmin) / projection_sx;
+                    ui32 ppy = (PyNew - projection_ymin) / projection_sy;
+             
+                    assert(ppx >= 0);
+                    assert(ppy >= 0);
 
-            // Change single frame to voxel space
-            ui32 ppx = (singles[i].px - projection_xmin) / projection_sx;
-            ui32 ppy = (singles[i].py - projection_ymin) / projection_sy;
-            ui32 ppz = (singles[i].pz - projection_zmin) / projection_sz;
+                    assert(ppx < projection_nx);
+                    assert(ppy < projection_ny);
 
-            assert(ppx >= 0);
-            assert(ppy >= 0);
-            assert(ppz >= 0);
+                    // Assign value
+                    projection[ppy*projection_nx + ppx] += 1; 
+                 }
+                else if (flag_projYZ) {
+                    
+                    // Change single frame to voxel space
+                    ui32 ppy = (PyNew - projection_ymin) / projection_sy;
+                    ui32 ppz = (PzNew - projection_zmin) / projection_sz;
+             
+                    assert(ppy >= 0);
+                    assert(ppz >= 0);
 
-            assert(ppx < projection_nx);
-            assert(ppy < projection_ny);
-            assert(ppz < projection_nz);
+                    assert(ppy < projection_ny);
+                    assert(ppz < projection_nz);
 
-            // Assign value
-            projection[ppz*projection_ny*projection_nx + ppy*projection_nx + ppx] += 1;
+                    // Assign value
+                    projection[ppz*projection_ny + ppy] += 1; 
+                }
+                else if (flag_projXZ) {
+               
+                    // Change single frame to voxel space
+                    ui32 ppx = (PxNew - projection_xmin) / projection_sx;
+                    ui32 ppz = (PzNew - projection_zmin) / projection_sz;
+             
+                    assert(ppx >= 0);
+                    assert(ppz >= 0);
 
+                    assert(ppx < projection_nx);
+                    assert(ppz < projection_nz);
+
+                    // Assign value
+                    projection[ppz*projection_nx + ppx] += 1; 
+                }
+                else {
+                    // Change single frame to voxel space
+                    ui32 ppx = (PxNew - projection_xmin) / projection_sx;
+                    ui32 ppy = (PyNew - projection_ymin) / projection_sy;
+                    ui32 ppz = (PzNew - projection_zmin) / projection_sz;
+
+                    assert(ppx >= 0);
+                    assert(ppy >= 0);
+                    assert(ppz >= 0);
+
+                    assert(ppx < projection_nx);
+                    assert(ppy < projection_ny);
+                    assert(ppz < projection_nz);
+
+                    projection[ppz*projection_ny*projection_nx + ppy*projection_nx + ppx] += 1;
+                }
+            }
         }
-
         ++i;
     }
 }
@@ -489,21 +587,51 @@ void Digitizer::export_projection() {
     // first write te header
     FILE *pfile = fopen(projection_filename.c_str(), "w");
     fprintf(pfile, "ObjectType = Image \n");
-    fprintf(pfile, "NDims = 3 \n");
     fprintf(pfile, "BinaryData = True \n");
     fprintf(pfile, "BinaryDataByteOrderMSB = False \n");
     fprintf(pfile, "CompressedData = False \n");
-    fprintf(pfile, "ElementSpacing = %f %f %f\n", projection_sx, projection_sy, projection_sz);
-    fprintf(pfile, "DimSize = %i %i %i\n", projection_nx, projection_ny, projection_nz);
-    fprintf(pfile, "ElementType = MET_FLOAT \n");
-
+    fprintf(pfile, "ElementType = MET_UINT \n");
+    if (flag_projXY) {
+        fprintf(pfile, "NDims = 2 \n");
+        fprintf(pfile, "ElementSpacing = %f %f\n", projection_sx, projection_sy);
+        fprintf(pfile, "DimSize = %i %i\n", projection_nx, projection_ny);
+    }
+    else if (flag_projXZ) {
+        fprintf(pfile, "NDims = 2 \n");
+        fprintf(pfile, "ElementSpacing = %f %f\n", projection_sx, projection_sz);
+        fprintf(pfile, "DimSize = %i %i\n", projection_nx, projection_nz);
+    }        
+    else if (flag_projYZ) {
+        fprintf(pfile, "NDims = 2 \n");
+        fprintf(pfile, "ElementSpacing = %f %f\n", projection_sy, projection_sz);
+        fprintf(pfile, "DimSize = %i %i\n", projection_ny, projection_nz);
+    }         
+    else {
+        fprintf(pfile, "NDims = 3 \n");
+        fprintf(pfile, "ElementSpacing = %f %f\n", projection_sx, projection_sy, projection_sz);
+        fprintf(pfile, "DimSize = %i %i\n", projection_nx, projection_ny, projection_nz);
+    }
+    
     std::string export_name = projection_filename.replace(projection_filename.size()-3, 3, "raw");
     fprintf(pfile, "ElementDataFile = %s \n", export_name.c_str());
     fclose(pfile);
 
     // then export data
     pfile = fopen(export_name.c_str(), "wb");
-    fwrite(projection.data(), projection_nx*projection_ny*projection_nz, sizeof(f32), pfile);
+    
+    if (flag_projXY) {
+        fwrite(projection.data(), projection_nx*projection_ny, sizeof(f32), pfile);
+    }
+    else if (flag_projXZ) {
+        fwrite(projection.data(), projection_nx*projection_nz, sizeof(f32), pfile);
+    }
+    else if (flag_projYZ) {
+        fwrite(projection.data(), projection_ny*projection_nz, sizeof(f32), pfile);
+    }
+    else {
+        fwrite(projection.data(), projection_nx*projection_ny*projection_nz, sizeof(f32), pfile);
+    }
+    
     fclose(pfile);
 
 }

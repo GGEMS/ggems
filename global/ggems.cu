@@ -430,10 +430,13 @@ void SimulationBuilder::init_simulation() {
     //cs_tables.print();
 
     /// Copy every data to the GPU ////////////////
-    copy_parameters_cpu2gpu();
-    geometry.copy_scene_cpu2gpu();
-    materials.copy_materials_table_cpu2gpu();
-    sources.copy_source_cpu2gpu();
+    // If GPU
+    if (target == GPU_DEVICE) {
+        copy_parameters_cpu2gpu();
+        geometry.copy_scene_cpu2gpu();
+        materials.copy_materials_table_cpu2gpu();
+        sources.copy_source_cpu2gpu();
+    }
 
     // Mem usage
     if (display_memory_usage_flag) {
