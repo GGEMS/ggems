@@ -129,6 +129,9 @@ class Digitizer {
         bool flag_coincidences;
         bool flag_projection;
         
+        bool flag_sp_blurring;
+        bool flag_energy_blurring;
+        
         // Projection format
         bool flag_projXY;
         bool flag_projYZ;

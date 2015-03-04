@@ -202,7 +202,6 @@ __host__ __device__ void photon_navigator(ParticleStack &particles, ui32 part_id
 
     if (parameters.digitizer_flag &&
             get_geometry_is_sensitive(geometry, cur_id_geom) && discrete_loss > 0) {
-
         // First hit - first pulse
         if (pulses.pu1_nb_hits[part_id] == 0) {
             pulses.pu1_px[part_id] = pos.x*discrete_loss;
@@ -236,7 +235,7 @@ __host__ __device__ void photon_navigator(ParticleStack &particles, ui32 part_id
                     pulses.pu2_id_geom[part_id] = cur_id_geom;
 
                 } else {
-                    // Others hist - second pulse
+                    // Others hits - second pulse
                     pulses.pu2_px[part_id] += pos.x*discrete_loss;
                     pulses.pu2_py[part_id] += pos.y*discrete_loss;
                     pulses.pu2_pz[part_id] += pos.z*discrete_loss;

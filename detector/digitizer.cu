@@ -23,9 +23,14 @@
 Digitizer::Digitizer() {
     pulses.size = 0;
     global_time = 0;
+    E_low = 0.0;
+    E_high = F64_MAX;
 
     flag_singles = false;
     flag_coincidences = false;
+    
+    flag_sp_blurring = false;
+    flag_energy_blurring = false;
     
     flag_projXY = false;
     flag_projYZ = false;
@@ -198,22 +203,19 @@ void Digitizer::set_output_projection(std::string name, ui32 volid,
     projection_idvol = volid;
     projection_sx = sx;
     projection_sy = sy;
-    projection_sz = sz;    
-
+    projection_sz = sz;
+    
     projection_nx = (ui32)((xmax-xmin) / sx);
-    if (projection_nx == 0) {
-        flag_projYZ = true;
-    }
+    if (projection_nx == 0) 
+      flag_projYZ = true;
     
     projection_ny = (ui32)((ymax-ymin) / sy);
-    if (projection_ny == 0) {
-        flag_projXZ = true;
-    }
+    if (projection_ny == 0) 
+      flag_projXZ = true;
     
     projection_nz = (ui32)((zmax-zmin) / sz);
-    if (projection_nz == 0) {
-        flag_projXY = true;
-    }
+    if (projection_nz == 0) 
+      flag_projXY = true;
     
     projection_xmin = xmin;
     projection_ymin = ymin;
@@ -224,6 +226,7 @@ void Digitizer::set_output_projection(std::string name, ui32 volid,
 
 void Digitizer::set_spatial_blurring(f32 vSP_res) {
     SP_res = vSP_res;
+    flag_sp_blurring = true;
 }
         
 void Digitizer::set_energy_blurring(std::string law, f32 vE_res, f32 vE_ref, f32 vE_slope) {
@@ -231,6 +234,7 @@ void Digitizer::set_energy_blurring(std::string law, f32 vE_res, f32 vE_ref, f32
     E_res = vE_res;
     E_ref = vE_ref;
     E_slope = vE_slope;
+    flag_energy_blurring = true;
 }
 
 // Set parameters for coincidences
@@ -321,7 +325,7 @@ void Digitizer::export_singles() {
     }
 
     // first write te header
-    FILE *pfile = fopen(singles_filename.c_str(), "a");
+    FILE *pfile = fopen(singles_filename.c_str(), "w");
     ui32 i=0; while (i < singles.size()) {
         fprintf(pfile, "BLOCK ID %i PART ID %i POS %e %e %e E %e TOF %e TIME %e\n",
                 singles[i].id_geom, singles[i].id_part,
@@ -493,26 +497,34 @@ void Digitizer::process_projection() {
     // Loop over singles
     ui32 i=0;
     
-    
+    FILE *pfile = fopen("Projection.txt", "w");
+    FILE *efile = fopen("Energy.txt", "w");
+
     while (i < singles.size()) {
 
         // If single hit the right detector
         if (singles[i].id_geom == projection_idvol) {
             
+            f32 E_New = singles[i].E;
+            f32 PxNew = singles[i].px;
+            f32 PyNew = singles[i].py;
+            f32 PzNew = singles[i].pz;
+          
             // Apply energy blurring
-            //f32 resolution = E_slope * (singles[i].E - E_ref) + E_res;
+            if (flag_energy_blurring) {
+                f32 resolution = E_slope * (singles[i].E - E_ref) + E_res;
+                E_New = G4RandGauss::shoot(singles[i].E, resolution * singles[i].E / 2.35482);
+                fprintf(efile, "%f\n", E_New);
+            }
             
-            //f32 E_New = G4RandGauss::shoot(singles[i].E, resolution * singles[i].E / 2.35482);
-            
-            //if (E_New >= E_low && E_New <= E_high) {
+            if (E_New >= E_low && E_New <= E_high) {
             
                 // Apply spatial blurring
-                //f32 PxNew = G4RandGauss::shoot(singles[i].px,SP_res/2.35);
-                //f32 PyNew = G4RandGauss::shoot(singles[i].py,SP_res/2.35);
-                //f32 PzNew = G4RandGauss::shoot(singles[i].pz,SP_res/2.35);
-                f32 PxNew = singles[i].px;
-                f32 PyNew = singles[i].py;
-                f32 PzNew = singles[i].pz;
+                if (flag_sp_blurring) {
+                    PxNew = G4RandGauss::shoot(singles[i].px,SP_res/2.35);
+                    PyNew = G4RandGauss::shoot(singles[i].py,SP_res/2.35);
+                    PzNew = G4RandGauss::shoot(singles[i].pz,SP_res/2.35);
+                }
             
                 if (flag_projXY) {
                     
@@ -528,7 +540,9 @@ void Digitizer::process_projection() {
 
                     // Assign value
                     projection[ppy*projection_nx + ppx] += 1; 
-                }
+                    
+                    fprintf(pfile, "%f %f\n", PxNew, PyNew);
+                 }
                 else if (flag_projYZ) {
                     
                     // Change single frame to voxel space
@@ -543,6 +557,8 @@ void Digitizer::process_projection() {
 
                     // Assign value
                     projection[ppz*projection_ny + ppy] += 1; 
+                    
+                    fprintf(pfile, "%f %f\n", PyNew, PzNew);
                 }
                 else if (flag_projXZ) {
                
@@ -558,6 +574,8 @@ void Digitizer::process_projection() {
 
                     // Assign value
                     projection[ppz*projection_nx + ppx] += 1; 
+                    
+                    fprintf(pfile, "%f %f\n", PxNew, PzNew);
                 }
                 else {
                     // Change single frame to voxel space
@@ -575,10 +593,12 @@ void Digitizer::process_projection() {
 
                     projection[ppz*projection_ny*projection_nx + ppy*projection_nx + ppx] += 1;
                 }
-            //}
+            }
         }
         ++i;
     }
+    fclose(pfile);
+    fclose(efile);
 }
 
 void Digitizer::export_projection() {

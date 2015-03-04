@@ -172,7 +172,7 @@ class GeometryBuilder {
         // Hierarchical structure of the geometry
         void add_root();
         void add_node(ui32 mother_id);
-        void print_tree();
+        void print_tree(); 
 
         // Build the scene
         void build_scene();
