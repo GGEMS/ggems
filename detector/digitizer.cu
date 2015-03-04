@@ -198,19 +198,22 @@ void Digitizer::set_output_projection(std::string name, ui32 volid,
     projection_idvol = volid;
     projection_sx = sx;
     projection_sy = sy;
-    projection_sz = sz;
-    
+    projection_sz = sz;    
+
     projection_nx = (ui32)((xmax-xmin) / sx);
-    if (projection_nx == 0) 
-      flag_projYZ = true;
+    if (projection_nx == 0) {
+        flag_projYZ = true;
+    }
     
     projection_ny = (ui32)((ymax-ymin) / sy);
-    if (projection_ny == 0) 
-      flag_projXZ = true;
+    if (projection_ny == 0) {
+        flag_projXZ = true;
+    }
     
     projection_nz = (ui32)((zmax-zmin) / sz);
-    if (projection_nz == 0) 
-      flag_projXY = true;
+    if (projection_nz == 0) {
+        flag_projXY = true;
+    }
     
     projection_xmin = xmin;
     projection_ymin = ymin;
@@ -497,16 +500,19 @@ void Digitizer::process_projection() {
         if (singles[i].id_geom == projection_idvol) {
             
             // Apply energy blurring
-            f32 resolution = E_slope * (singles[i].E - E_ref) + E_res;
+            //f32 resolution = E_slope * (singles[i].E - E_ref) + E_res;
             
-            f32 E_New = G4RandGauss::shoot(singles[i].E, resolution * singles[i].E / 2.35482);
+            //f32 E_New = G4RandGauss::shoot(singles[i].E, resolution * singles[i].E / 2.35482);
             
-            if (E_New >= E_low && E_New <= E_high) {
+            //if (E_New >= E_low && E_New <= E_high) {
             
                 // Apply spatial blurring
-                f32 PxNew = G4RandGauss::shoot(singles[i].px,SP_res/2.35);
-                f32 PyNew = G4RandGauss::shoot(singles[i].py,SP_res/2.35);
-                f32 PzNew = G4RandGauss::shoot(singles[i].pz,SP_res/2.35);
+                //f32 PxNew = G4RandGauss::shoot(singles[i].px,SP_res/2.35);
+                //f32 PyNew = G4RandGauss::shoot(singles[i].py,SP_res/2.35);
+                //f32 PzNew = G4RandGauss::shoot(singles[i].pz,SP_res/2.35);
+                f32 PxNew = singles[i].px;
+                f32 PyNew = singles[i].py;
+                f32 PzNew = singles[i].pz;
             
                 if (flag_projXY) {
                     
@@ -522,7 +528,7 @@ void Digitizer::process_projection() {
 
                     // Assign value
                     projection[ppy*projection_nx + ppx] += 1; 
-                 }
+                }
                 else if (flag_projYZ) {
                     
                     // Change single frame to voxel space
@@ -569,7 +575,7 @@ void Digitizer::process_projection() {
 
                     projection[ppz*projection_ny*projection_nx + ppy*projection_nx + ppx] += 1;
                 }
-            }
+            //}
         }
         ++i;
     }
