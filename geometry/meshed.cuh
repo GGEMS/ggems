@@ -28,7 +28,7 @@
 
 #define NO_OCTREE 0
 #define REG_OCTREE 1
-//#define ADP_OCTREE 2
+#define VOX_OCTREE 2
 
 
 // Triangular-based meshed phantom
@@ -39,6 +39,8 @@ class Meshed : public BaseObject {
         void save_ggems_mesh(std::string filename);
         void load_from_ggems_mesh(std::string filename);
         void build_regular_octree(ui32 nx, ui32 ny, ui32 nz);
+        void build_voxel_octree(f32 vol_xmin, f32 vol_xmax, f32 vol_ymin, f32 vol_ymax,
+                                f32 vol_zmin, f32 vol_zmax, ui32 nx, ui32 ny, ui32 nz);
 
         void scale(f32xyz s);
         void scale(f32 sx, f32 sy, f32 sz);

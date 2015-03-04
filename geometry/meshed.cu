@@ -91,7 +91,7 @@ void Meshed::build_regular_octree(ui32 nx, ui32 ny, ui32 nz) {
 
                 // -----------------------------------------------------------
 
-                // Define a voxel as AABB primitive
+                // Define a cell as AABB primitive
                 cell_xmax = cell_xmin + cell_size_x;
                 cell_ymax = cell_ymin + cell_size_y;
                 cell_zmax = cell_zmin + cell_size_z;
@@ -163,6 +163,138 @@ void Meshed::build_regular_octree(ui32 nx, ui32 ny, ui32 nz) {
     } // iz
     printf("\n");
 }
+
+// Build a "voxel" octree. This is use when a mesh is embeded within a voxelized volume. Each
+// octree cell correspond to a voxel
+void Meshed::build_voxel_octree(f32 vol_xmin, f32 vol_xmax, f32 vol_ymin, f32 vol_ymax,
+                                f32 vol_zmin, f32 vol_zmax, ui32 nx, ui32 ny, ui32 nz) {
+
+    // First check if there is a mesh loaded
+    if (number_of_triangles == 0) {
+        printf("Before building an octree, you need to load a meshed phantom!!!!\n");
+        return;
+    }
+
+    // Store the size of this octree and the type
+    nb_cell_x = nx;
+    nb_cell_y = ny;
+    nb_cell_z = nz;
+    octree_type = VOX_OCTREE;
+
+    // Compute the size of each octree cell
+    f32 size_x = vol_xmax-vol_xmin;
+    f32 size_y = vol_ymax-vol_ymin;
+    f32 size_z = vol_zmax-vol_zmin;
+
+    cell_size_x = size_x / (f32)nx;
+    cell_size_y = size_y / (f32)ny;
+    cell_size_z = size_z / (f32)nz;
+
+    f32 org_x = vol_xmin;
+    f32 org_y = vol_ymin;
+    f32 org_z = vol_zmin;
+
+    f32 cell_ix, cell_iy, cell_iz;         // cell position (in voxel ID)
+    f32 cell_xmin, cell_ymin, cell_zmin;   // cell position (in 3D space)
+    f32 cell_xmax, cell_ymax, cell_zmax;
+
+    f32xyz u, v, w;                        // A triangle
+    ui32 addr_tri, itri, ct_tri;
+    ui32 cur_cell_index = 0;
+
+    f32 progress = 0.0f;
+    printf("\nBuilding voxel octree\n");
+    printf("progress.... %6.2f %%", progress);
+    fflush(stdout);
+    f32 inc_progress = 100.0f / f32(nz);
+
+    // For each octree cell
+    cell_iz = 0;
+    cell_zmin = org_z;
+    while(cell_iz < nz) {
+        cell_iy = 0;
+        cell_ymin = org_y;
+        while(cell_iy < ny) {
+            cell_ix = 0;
+            cell_xmin = org_x;
+            while(cell_ix < nx) {
+
+                // -----------------------------------------------------------
+
+                // Define a voxel as AABB primitive
+                cell_xmax = cell_xmin + cell_size_x;
+                cell_ymax = cell_ymin + cell_size_y;
+                cell_zmax = cell_zmin + cell_size_z;
+
+                // -----------------------------------------------------------
+
+                // First check if the AABB of the mesh cross the cell (optimize the search)
+                if (test_AABB_AABB(cell_xmin, cell_xmax, cell_ymin, cell_ymax, cell_zmin, cell_zmax,
+                                   xmin, xmax, ymin, ymax, zmin, zmax)) {
+
+                    // If yes, search for triangle/AABB collision
+                    itri = 0;
+                    ct_tri = 0;
+                    while (itri < number_of_triangles) {
+
+                        // Define a triangle
+                        addr_tri = itri*9;     // 3 vertices xyz
+                        u = make_f32xyz(vertices[addr_tri],  vertices[addr_tri+1], vertices[addr_tri+2]);
+                        v = make_f32xyz(vertices[addr_tri+3], vertices[addr_tri+4], vertices[addr_tri+5]);
+                        w = make_f32xyz(vertices[addr_tri+6], vertices[addr_tri+7], vertices[addr_tri+8]);
+
+                        // Check if this triangle is overlapping this octree cell
+                        if (overlap_AABB_triangle(cell_xmin, cell_xmax,
+                                                  cell_ymin, cell_ymax,
+                                                  cell_zmin, cell_zmax,
+                                                  u, v, w)) {
+
+                            // Save triangle index and count the total number of triangles per cell
+                            list_objs_per_cell.push_back(itri);
+                            ++ct_tri;
+
+                        }
+                        ++itri;
+                    } // itri
+
+                } // AABB/AABB
+
+                // Save the number of objs per leaf and the address to acces to this cell
+                nb_objs_per_cell.push_back(ct_tri);
+
+                if (ct_tri != 0) {
+                    addr_to_cell.push_back(cur_cell_index);
+                } else {
+                    addr_to_cell.push_back(-1);
+                }
+                cur_cell_index += ct_tri;
+
+                // -----------------------------------------------------------
+
+                cell_xmin += cell_size_x;
+                ++cell_ix;
+
+            } // ix
+
+            cell_ymin += cell_size_y;
+            ++cell_iy;
+
+        } // iy
+
+        cell_zmin += cell_size_z;
+        ++cell_iz;
+
+        // print out
+        progress += inc_progress;
+        printf("\b\b\b\b\b\b\b\b%6.2f %%", progress);
+        fflush(stdout);
+
+    } // iz
+    printf("\n");
+}
+
+
+
 
 
 // Load a mesh from raw data exported by Blender

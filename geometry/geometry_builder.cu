@@ -72,159 +72,159 @@ __host__ __device__ ui32 get_geometry_material(Scene geometry, ui32 id_geom, f64
 // Function that check if the point is located inside an hexagonal hole
 __host__ __device__ bool IsInsideHex(f64xyz position, f64 radius, f64 cy, f64 cz)
 {
-        //printf("posy %f posz %f radius %f cy %f cz %f \n", position.y, position.z, radius, cy, cz);
-  
-        // Check if photon is inside an hexagon
-        f64 dify = fabs(position.y - cy);
-        f64 difz = fabs(position.z - cz);
-        
-        f64 horiz = radius;
-        f64 verti = (radius * (2.0/sqrt(3.0))) / 2.0;
-        
-        if(difz >= 2*verti || dify >= horiz || (2*verti*horiz - verti*dify - horiz*difz) <= 0.0 )
-                return false;
-       
-        return true;
+    //printf("posy %f posz %f radius %f cy %f cz %f \n", position.y, position.z, radius, cy, cz);
+
+    // Check if photon is inside an hexagon
+    f64 dify = fabs(position.y - cy);
+    f64 difz = fabs(position.z - cz);
+
+    f64 horiz = radius;
+    f64 verti = (radius * (2.0/sqrt(3.0))) / 2.0;
+
+    if(difz >= 2*verti || dify >= horiz || (2*verti*horiz - verti*dify - horiz*difz) <= 0.0 )
+        return false;
+
+    return true;
 }
 
 // Function that return the index of the hexagonal hole (negative if in a septa) 
 __host__ __device__ i32 GetHexIndex(f64xyz position, Scene geometry, ui32 adr_geom)
 {
-        //ui32 obj_type = (ui32)geometry.data_objects[adr_geom+ADR_OBJ_TYPE];
-        
-        i32 col, raw, new_raw, min, max, hex, temp;
-        
-        //printf("position %f %f %f \n", position.x, position.y, position.z);
-        
-        // Define hexagon index
-        
+    //ui32 obj_type = (ui32)geometry.data_objects[adr_geom+ADR_OBJ_TYPE];
+
+    i32 col, raw, new_raw, min, max, hex, temp;
+
+    //printf("position %f %f %f \n", position.x, position.y, position.z);
+
+    // Define hexagon index
+
     // Find the column in the array of hexagons
 
-        col = round((((f64)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_VECY] * (((i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY] 
-              - 1 ) / 2.0)) - position.y) / (f64)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_VECY]);
-        
-        //printf("colonne %d \n", col);
-                                
-        // if the photon is too close to external frame, col value is incorrect                 
-        if (col < 0.0)
-                        col = 0.0;
-        else if (col > ((i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY] - 1))
-                col = (i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY] - 1;
-    
-       // printf("colonne finale %d \n", col);
-        
-        // Find the raw in the array of hexagons
-     
-        raw = round(((f64)geometry.data_objects[adr_geom+ADR_COLLI_LINEAR_VECZ] * ((i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NZ]
-              - 1.0) - position.z) / (f64)geometry.data_objects[adr_geom+ADR_COLLI_LINEAR_VECZ]);
+    col = round((((f64)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_VECY] * (((i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY]
+                                                                                   - 1 ) / 2.0)) - position.y) / (f64)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_VECY]);
 
-        //printf("ligne %d \n", raw);
-        
-        // if the photon is too close to external frame, raw value is incorrect
-        if (raw < 0.0)
-                        raw = 0.0;
-        else if (raw > ((i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NZ] - 1.0) * 2.0 )
-                raw = ((i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NZ] - 1.0) * 2.0;
-  
-       // printf("ligne finale %d \n", raw);
-        
-        ui32 nb_hex = (i32)geometry.data_objects[adr_geom + ADR_COLLI_NB_HEXAGONS];
-        ui32 ind_y = adr_geom + ADR_COLLI_CENTEROFHEXAGONS;
-        ui32 ind_z = adr_geom + ADR_COLLI_CENTEROFHEXAGONS + nb_hex;
-        
-        // Find the hexagon index
-  
-        // Even raw 
-        if ( raw % 2 == 0.0 ) {
-                        hex = (raw / 2.0) * ((2.0 * (i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY]) - 1.0) + col;
-                        //printf("hex %d cy %f cz %f \n", hex,  (f64)geometry.data_objects[adr_geom+ADR_COLLI_CENTEROFHEXAGONS_Y+hex], 
-                          //     (f64)geometry.data_objects[adr_geom+ADR_COLLI_CENTEROFHEXAGONS_Z+hex] );
-                        // Test centered hexagon
-                        if (IsInsideHex(position, (f64)geometry.data_objects[adr_geom+ADR_COLLI_HOLE_RADIUS], 
-                            (f64)geometry.data_objects[ind_y+hex], (f64)geometry.data_objects[ind_z+hex]))
-                                return hex;
-                        else {
-                                if (raw - 1 >= 0) {
-                                        new_raw = raw - 1;
-                                        min = new_raw * (i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY] - ((new_raw - 1)/2);
-                                        max = min + (i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY] - 1;
-                                        temp = hex - (i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY] - 1;
-                                        
-                                        if(temp >= min)
-                                                // Test top left hexagon
-                                                if(IsInsideHex(position, (f64)geometry.data_objects[adr_geom+ADR_COLLI_HOLE_RADIUS], 
-                                                  (f64)geometry.data_objects[ind_y+temp], (f64)geometry.data_objects[ind_z+temp]))
-                                                        return temp;
-                        
-                                        temp = hex + (i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY];
-                                
-                                        if(temp < max)
-                                                // Test top right hexagon
-                                                if(IsInsideHex(position, (f64)geometry.data_objects[adr_geom+ADR_COLLI_HOLE_RADIUS],
-                                                   (f64)geometry.data_objects[ind_y+temp], (f64)geometry.data_objects[ind_z+temp]))
-                                                        return temp;
-                                }
-                                
-                                if (raw + 1 < (i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY] * 2 - 1) {
-                                        new_raw = raw + 1;
-                                        min = new_raw * (i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY] - ((new_raw - 1)/2);
-                                        max = min + (i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY] - 1;
-                                        temp = hex + (i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY] - 1;
-                                        
-                                        if(temp >= min)
-                                                // Test bottom left hexagon
-                                                if(IsInsideHex(position, (f64)geometry.data_objects[adr_geom+ADR_COLLI_HOLE_RADIUS],
-                                                   (f64)geometry.data_objects[ind_y+temp], (f64)geometry.data_objects[ind_z+temp]))
-                                                        return temp;
-                                        
-                                        temp = hex + (i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY];
-                                    
-                                        if(temp < max)
-                                                // Test bottom right hexagon
-                                                if(IsInsideHex(position, (f64)geometry.data_objects[adr_geom+ADR_COLLI_HOLE_RADIUS],
-                                                   (f64)geometry.data_objects[ind_y+temp], (f64)geometry.data_objects[ind_z+temp]))
-                                                        return temp;
-                                }
-                        }
-        }
-        // Odd raw
+    //printf("colonne %d \n", col);
+
+    // if the photon is too close to external frame, col value is incorrect
+    if (col < 0.0)
+        col = 0.0;
+    else if (col > ((i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY] - 1))
+        col = (i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY] - 1;
+    
+    // printf("colonne finale %d \n", col);
+
+    // Find the raw in the array of hexagons
+
+    raw = round(((f64)geometry.data_objects[adr_geom+ADR_COLLI_LINEAR_VECZ] * ((i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NZ]
+                                                                               - 1.0) - position.z) / (f64)geometry.data_objects[adr_geom+ADR_COLLI_LINEAR_VECZ]);
+
+    //printf("ligne %d \n", raw);
+
+    // if the photon is too close to external frame, raw value is incorrect
+    if (raw < 0.0)
+        raw = 0.0;
+    else if (raw > ((i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NZ] - 1.0) * 2.0 )
+        raw = ((i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NZ] - 1.0) * 2.0;
+
+    // printf("ligne finale %d \n", raw);
+
+    ui32 nb_hex = (i32)geometry.data_objects[adr_geom + ADR_COLLI_NB_HEXAGONS];
+    ui32 ind_y = adr_geom + ADR_COLLI_CENTEROFHEXAGONS;
+    ui32 ind_z = adr_geom + ADR_COLLI_CENTEROFHEXAGONS + nb_hex;
+
+    // Find the hexagon index
+
+    // Even raw
+    if ( raw % 2 == 0.0 ) {
+        hex = (raw / 2.0) * ((2.0 * (i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY]) - 1.0) + col;
+        //printf("hex %d cy %f cz %f \n", hex,  (f64)geometry.data_objects[adr_geom+ADR_COLLI_CENTEROFHEXAGONS_Y+hex],
+        //     (f64)geometry.data_objects[adr_geom+ADR_COLLI_CENTEROFHEXAGONS_Z+hex] );
+        // Test centered hexagon
+        if (IsInsideHex(position, (f64)geometry.data_objects[adr_geom+ADR_COLLI_HOLE_RADIUS],
+                        (f64)geometry.data_objects[ind_y+hex], (f64)geometry.data_objects[ind_z+hex]))
+            return hex;
         else {
-                        hex = ((raw + 1.0)/ 2.0) * (i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY]
-                              + ((raw - 1.0)/ 2.0) * ((i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY] - 1.0) + col;
-                        
-                        min = raw * (i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY] - ((raw - 1)/2);
-                        max = min + (i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY] - 1;
-                        
-                        if(hex < max)                   
-                                // Test right hexagon
-                                if (IsInsideHex(position, (f64)geometry.data_objects[adr_geom+ADR_COLLI_HOLE_RADIUS],
-                                    (f64)geometry.data_objects[ind_y+hex], (f64)geometry.data_objects[ind_z+hex]))
-                                        return hex;
-                                
-                        temp = hex - 1; 
-                                
-                        if(temp >= min)
-                                // Test left hexagon
-                                if(IsInsideHex(position, (f64)geometry.data_objects[adr_geom+ADR_COLLI_HOLE_RADIUS],
+            if (raw - 1 >= 0) {
+                new_raw = raw - 1;
+                min = new_raw * (i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY] - ((new_raw - 1)/2);
+                max = min + (i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY] - 1;
+                temp = hex - (i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY] - 1;
+
+                if(temp >= min)
+                    // Test top left hexagon
+                    if(IsInsideHex(position, (f64)geometry.data_objects[adr_geom+ADR_COLLI_HOLE_RADIUS],
                                    (f64)geometry.data_objects[ind_y+temp], (f64)geometry.data_objects[ind_z+temp]))
-                                                return temp;
-                                
-                        temp = hex - (i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY];
-                        
-                        // Test top hexagon
-                        if(IsInsideHex(position, (f64)geometry.data_objects[adr_geom+ADR_COLLI_HOLE_RADIUS],
-                           (f64)geometry.data_objects[ind_y+temp], (f64)geometry.data_objects[ind_z+temp]))
-                                return temp;
-                        
-                        temp = hex + (i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY] - 1;
-                        
-                        // Test bottom hexagon
-                        if(IsInsideHex(position, (f64)geometry.data_objects[adr_geom+ADR_COLLI_HOLE_RADIUS],
-                           (f64)geometry.data_objects[ind_y+temp], (f64)geometry.data_objects[ind_z+temp]))
-                                return temp;
+                        return temp;
+
+                temp = hex + (i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY];
+
+                if(temp < max)
+                    // Test top right hexagon
+                    if(IsInsideHex(position, (f64)geometry.data_objects[adr_geom+ADR_COLLI_HOLE_RADIUS],
+                                   (f64)geometry.data_objects[ind_y+temp], (f64)geometry.data_objects[ind_z+temp]))
+                        return temp;
+            }
+
+            if (raw + 1 < (i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY] * 2 - 1) {
+                new_raw = raw + 1;
+                min = new_raw * (i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY] - ((new_raw - 1)/2);
+                max = min + (i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY] - 1;
+                temp = hex + (i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY] - 1;
+
+                if(temp >= min)
+                    // Test bottom left hexagon
+                    if(IsInsideHex(position, (f64)geometry.data_objects[adr_geom+ADR_COLLI_HOLE_RADIUS],
+                                   (f64)geometry.data_objects[ind_y+temp], (f64)geometry.data_objects[ind_z+temp]))
+                        return temp;
+
+                temp = hex + (i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY];
+
+                if(temp < max)
+                    // Test bottom right hexagon
+                    if(IsInsideHex(position, (f64)geometry.data_objects[adr_geom+ADR_COLLI_HOLE_RADIUS],
+                                   (f64)geometry.data_objects[ind_y+temp], (f64)geometry.data_objects[ind_z+temp]))
+                        return temp;
+            }
         }
-                
-        return -1;
+    }
+    // Odd raw
+    else {
+        hex = ((raw + 1.0)/ 2.0) * (i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY]
+                + ((raw - 1.0)/ 2.0) * ((i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY] - 1.0) + col;
+
+        min = raw * (i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY] - ((raw - 1)/2);
+        max = min + (i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY] - 1;
+
+        if(hex < max)
+            // Test right hexagon
+            if (IsInsideHex(position, (f64)geometry.data_objects[adr_geom+ADR_COLLI_HOLE_RADIUS],
+                            (f64)geometry.data_objects[ind_y+hex], (f64)geometry.data_objects[ind_z+hex]))
+                return hex;
+
+        temp = hex - 1;
+
+        if(temp >= min)
+            // Test left hexagon
+            if(IsInsideHex(position, (f64)geometry.data_objects[adr_geom+ADR_COLLI_HOLE_RADIUS],
+                           (f64)geometry.data_objects[ind_y+temp], (f64)geometry.data_objects[ind_z+temp]))
+                return temp;
+
+        temp = hex - (i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY];
+
+        // Test top hexagon
+        if(IsInsideHex(position, (f64)geometry.data_objects[adr_geom+ADR_COLLI_HOLE_RADIUS],
+                       (f64)geometry.data_objects[ind_y+temp], (f64)geometry.data_objects[ind_z+temp]))
+            return temp;
+
+        temp = hex + (i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY] - 1;
+
+        // Test bottom hexagon
+        if(IsInsideHex(position, (f64)geometry.data_objects[adr_geom+ADR_COLLI_HOLE_RADIUS],
+                       (f64)geometry.data_objects[ind_y+temp], (f64)geometry.data_objects[ind_z+temp]))
+            return temp;
+    }
+
+    return -1;
 }
 
 
@@ -1220,7 +1220,6 @@ ui32 GeometryBuilder::add_object(SpectHead obj, ui32 mother_id) {
 // Build AABB object into the scene structure
 void GeometryBuilder::build_object(Aabb obj) {
 
-     printf("entering build_object Aabb .....\n");
     // Store the address to access to this object
     array_push_back(&world.ptr_objects, world.ptr_objects_dim, world.data_objects_dim);
 
@@ -1228,10 +1227,8 @@ void GeometryBuilder::build_object(Aabb obj) {
 
     // Object Type
     array_push_back(&world.data_objects, world.data_objects_dim, (f32)AABB);
-     printf("build_object Aabb: object type ok \n");
     // Material index
     array_push_back(&world.data_objects, world.data_objects_dim, (f32)get_material_index(obj.material_name));
-     printf("build_object Aabb: material index ok \n");
     // Object sensitive
     array_push_back(&world.data_objects, world.data_objects_dim, (f32)obj.sensitive);
     // AABB parameters
@@ -1256,7 +1253,6 @@ void GeometryBuilder::build_object(Aabb obj) {
 
 void GeometryBuilder::build_object(SpectHead obj) {
 
-    printf("entering build_object SpectHead .....\n");
     // Store the address to access to this object
     array_push_back(&world.ptr_objects, world.ptr_objects_dim, world.data_objects_dim);
 
@@ -1531,8 +1527,6 @@ void GeometryBuilder::build_object(Obb obj) {
 
 // Build COLLI object into the scene structure
 void GeometryBuilder::build_object(Colli obj) {
-
-    printf("entering build_object Colli .....\n");
   
     // Store the address to access to this object
     array_push_back(&world.ptr_objects, world.ptr_objects_dim, world.data_objects_dim);
@@ -1541,13 +1535,11 @@ void GeometryBuilder::build_object(Colli obj) {
 
     // Object Type
     array_push_back(&world.data_objects, world.data_objects_dim, (f32)COLLI);
-    printf("build_object Colli : object type ok\n");
     // Material index
     array_push_back(&world.data_objects, world.data_objects_dim, -1.0f); // Heterogeneous material
-    printf("build_object Colli : material index ok\n");
     // Object sensitive
     array_push_back(&world.data_objects, world.data_objects_dim, (f32)obj.sensitive);
-    printf("build_object Colli : object sensitive ok\n");
+
     // AABB parameters
     array_push_back(&world.data_objects, world.data_objects_dim, obj.xmin);
     array_push_back(&world.data_objects, world.data_objects_dim, obj.xmax);
@@ -1596,7 +1588,6 @@ void GeometryBuilder::build_object(Colli obj) {
     // Store the size of this object
     array_push_back(&world.size_of_objects, world.size_of_objects_dim, 2*obj.centerOfHexagons.size + SIZE_COLLI_OBJ);
    
-    printf("leaving build_object Colli .....\n");
 }
 
 // Build the complete scene
@@ -1607,10 +1598,8 @@ void GeometryBuilder::build_scene() {
     ui32 i = 0;
     while (i < world.ptr_nodes_dim) {
 
-      printf("entering build_scene .....\n");
         // AABB
         if (buffer_obj_type[i] == AABB) {
-            printf("build_scene aabb object .....\n");
             build_object(buffer_aabb[i]);
         // Sphere
         } else if (buffer_obj_type[i] == SPHERE) {
@@ -1626,11 +1615,9 @@ void GeometryBuilder::build_scene() {
             build_object(buffer_obb[i]);
         // Colli
         } else if (buffer_obj_type[i] == COLLI) {
-            printf("build_scene colli object .....\n");
             build_object(buffer_colli[i]);
         // Colli
         } else if (buffer_obj_type[i] == SPECTHEAD) {
-            printf("build_scene spect_head object .....\n");
             build_object(buffer_spect_head[i]);
         }
 

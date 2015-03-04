@@ -24,6 +24,29 @@ YVA::YVA() {}
 
 // Inlcude a meshed object within the voxelized volume
 void YVA::include(Meshed obj, ui32 obj_id) {
+    // Inlcude a new mesh
+    mesh = obj;
+    mesh_id = obj_id;
+}
+
+// Build a regular octree on the mesh
+void YVA::build_regular_octree(ui32 nx, ui32 ny, ui32 nz) {
+    mesh.build_regular_octree(nx, ny, nz);
+}
+
+
+// Build an octree on the mesh that fit the voxelized volume
+void YVA::build_voxel_octree() {
+    mesh.build_voxel_octree(xmin, ymin, xmax, ymax, zmin, zmax,
+                            nb_vox_x, nb_vox_y, nb_vox_z);
+}
+
+
+
+
+/*
+
+
 
     // First store the id of this object
     obj_inc_id = obj_id;
@@ -148,6 +171,8 @@ void YVA::include(Meshed obj, ui32 obj_id) {
 
 
 }
+*/
+
 
 #endif
 

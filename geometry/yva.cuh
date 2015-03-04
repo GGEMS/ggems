@@ -27,14 +27,19 @@ class YVA : public Voxelized {
     public:
         YVA();
         void include(Meshed obj, ui32 obj_id);
+        void build_regular_octree(ui32 nx, ui32 ny, ui32 nz);
+        void build_voxel_octree();
 
         // TODO
-        // build_mesh_octree
-        // build_vox_octree
+        // build_voxel_octree
+        // build_regular_octree
 
     private:
-        ui32 obj_inc_id;
-        bool *overlap_vox;
+
+        //bool *overlap_vox;
+        Meshed mesh;
+        ui32 mesh_id;
+
 
 };
 
