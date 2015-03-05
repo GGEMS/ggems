@@ -497,8 +497,10 @@ void Digitizer::process_projection() {
     // Loop over singles
     ui32 i=0;
     
+    #ifdef VALID_GGEMS
     FILE *pfile = fopen("Projection.txt", "w");
     FILE *efile = fopen("Energy.txt", "w");
+    #endif
 
     while (i < singles.size()) {
 
@@ -514,7 +516,10 @@ void Digitizer::process_projection() {
             if (flag_energy_blurring) {
                 f32 resolution = E_slope * (singles[i].E - E_ref) + E_res;
                 E_New = G4RandGauss::shoot(singles[i].E, resolution * singles[i].E / 2.35482);
+                
+                #ifdef VALID_GGEMS
                 fprintf(efile, "%f\n", E_New);
+                #endif
             }
             
             if (E_New >= E_low && E_New <= E_high) {
@@ -541,7 +546,9 @@ void Digitizer::process_projection() {
                     // Assign value
                     projection[ppy*projection_nx + ppx] += 1; 
                     
+                    #ifdef VALID_GGEMS
                     fprintf(pfile, "%f %f\n", PxNew, PyNew);
+                    #endif
                  }
                 else if (flag_projYZ) {
                     
@@ -558,7 +565,9 @@ void Digitizer::process_projection() {
                     // Assign value
                     projection[ppz*projection_ny + ppy] += 1; 
                     
+                    #ifdef VALID_GGEMS
                     fprintf(pfile, "%f %f\n", PyNew, PzNew);
+                    #endif
                 }
                 else if (flag_projXZ) {
                
@@ -575,7 +584,9 @@ void Digitizer::process_projection() {
                     // Assign value
                     projection[ppz*projection_nx + ppx] += 1; 
                     
+                    #ifdef VALID_GGEMS
                     fprintf(pfile, "%f %f\n", PxNew, PzNew);
+                    #endif
                 }
                 else {
                     // Change single frame to voxel space
@@ -597,8 +608,11 @@ void Digitizer::process_projection() {
         }
         ++i;
     }
+    
+    #ifdef VALID_GGEMS
     fclose(pfile);
     fclose(efile);
+    #endif
 }
 
 void Digitizer::export_projection() {

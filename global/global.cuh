@@ -23,6 +23,9 @@
 //#define DEBUG_OCTREE
 //#define DEBUG_DIGITIZER
 
+////// VALIDATION GGEMS ///////////////////////////////////
+#define VALID_GGEMS
+
 /////// TYPEDEF ////////////////////////////////////////////////
 
 #ifndef SINGLE_PRECISION
