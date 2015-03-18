@@ -44,5 +44,10 @@ __host__ __device__ void photon_navigator(ParticleStack &particles, ui32 part_id
                           GlobalSimulationParameters parameters,
                           Pulses &pulses);
 
+__host__ __device__ void photon_navigator_raytracing_colli(ParticleStack &particles, ui32 part_id,
+                          Scene geometry, MaterialsTable materials,
+                          PhotonCrossSectionTable photon_CS_table,
+                          GlobalSimulationParameters parameters,
+                          Pulses &pulses);
 
 #endif

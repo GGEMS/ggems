@@ -28,7 +28,7 @@ Digitizer::Digitizer() {
 
     flag_singles = false;
     flag_coincidences = false;
-    
+      
     flag_sp_blurring = false;
     flag_energy_blurring = false;
     
@@ -145,9 +145,9 @@ void Digitizer::gpu_init_pulses(ui32 nb) {
 void Digitizer::copy_pulses_gpu2cpu() {
 
     ui32 n = dpulses.size;
-
+    
     HANDLE_ERROR( cudaMemcpy(pulses.pu1_px, dpulses.pu1_px,
-                             n*sizeof(f32), cudaMemcpyDeviceToHost) );
+                             n*sizeof(f32), cudaMemcpyDeviceToHost) );  
     HANDLE_ERROR( cudaMemcpy(pulses.pu1_py, dpulses.pu1_py,
                              n*sizeof(f32), cudaMemcpyDeviceToHost) );
     HANDLE_ERROR( cudaMemcpy(pulses.pu1_pz, dpulses.pu1_pz,
@@ -181,6 +181,24 @@ void Digitizer::copy_pulses_gpu2cpu() {
                              n*sizeof(ui32), cudaMemcpyDeviceToHost) );
     HANDLE_ERROR( cudaMemcpy(pulses.pu2_nb_hits, dpulses.pu2_nb_hits,
                              n*sizeof(ui32), cudaMemcpyDeviceToHost) );
+    
+}
+
+void Digitizer::clear_gpu_pulses() {
+  
+    ui32 n = dpulses.size;
+    ui32 *vec = (ui32*)malloc(n*sizeof(ui32));
+    ui32 i=0; while (i<n) {
+            vec[i]=0;
+            ++i;
+    }
+
+    HANDLE_ERROR( cudaMemcpy(dpulses.pu1_nb_hits, vec,
+                            n*sizeof(ui32), cudaMemcpyHostToDevice) );
+                            
+    HANDLE_ERROR( cudaMemcpy(dpulses.pu2_nb_hits, vec,
+                            n*sizeof(ui32), cudaMemcpyHostToDevice) );
+    
 }
 
 // Set the output filename
@@ -254,7 +272,7 @@ void Digitizer::process_singles(ui32 iter, f64 tot_activity) {
 
     singles.clear();
     ui32 nb_record_singles=0;
-
+  
     // Count the number of recorded singles
     ui32 i=0; while(i < pulses.size) {
         if (pulses.pu1_nb_hits[i]>0) {
@@ -498,8 +516,8 @@ void Digitizer::process_projection() {
     ui32 i=0;
     
     #ifdef VALID_GGEMS
-    FILE *pfile = fopen("Projection.txt", "w");
-    FILE *efile = fopen("Energy.txt", "w");
+    FILE *pfile = fopen("Projection.txt", "a");
+    FILE *efile = fopen("Energy.txt", "a");
     #endif
 
     while (i < singles.size()) {
@@ -683,9 +701,6 @@ void Digitizer::process_chain(ui32 iter, f64 tot_activity) {
 
 
     process_singles(iter, tot_activity);
-
-    // TODO
-    // Clear pulses list?!
 
 
     if (flag_singles) {

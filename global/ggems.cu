@@ -180,7 +180,7 @@ void SimulationBuilder::main_navigator() {
             cudaEventCreate(&t_stop);
             cudaEventRecord(t_start);
         }
-
+        
         gpu_main_navigator(particles.dstack, geometry.dworld,
                            materials.dmaterials_table, cs_tables.dphoton_CS_table, dparameters,
                            digitizer.dpulses, gpu_block_size);
@@ -511,10 +511,14 @@ void SimulationBuilder::start_simulation() {
 
             // Sources
             primaries_generator();
-
+            
+            // Clear gpu pulses
+            if (target == GPU_DEVICE)
+                digitizer.clear_gpu_pulses();
+            
             // Navigation
             main_navigator();
-
+            
             // Process and store singles on CPU
             if (parameters.digitizer_flag) {
                 f64 t_start = get_time();
@@ -534,11 +538,12 @@ void SimulationBuilder::start_simulation() {
 
         // iter
         ++iter;
+        
         printf(">> Iter %i / %i\n", iter, nb_of_iterations);
 
     } // main loop
 
-  }
+}
 
 
 ////// :: Utils ::

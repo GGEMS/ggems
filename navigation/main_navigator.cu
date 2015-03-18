@@ -35,6 +35,10 @@ __global__ void kernel_photon_navigator(ParticleStack particles, Scene geometry,
         // Track photon
         photon_navigator(particles, id, geometry, materials, photon_CS_table,
                          parameters, pulses);
+        
+        //// SPECIAL CASE FOR RAYTRACING
+       // photon_navigator_raytracing_colli(particles, id, geometry, materials, photon_CS_table,
+         //                        parameters, pulses);
 
     }
 
@@ -64,6 +68,9 @@ void cpu_main_navigator(ParticleStack &particles, Scene geometry,
             if (particles.pname[id] == PHOTON) {
                 photon_navigator(particles, id, geometry, materials, photon_CS_table,
                                  parameters, pulses);
+              
+                //photon_navigator_raytracing_colli(particles, id, geometry, materials, photon_CS_table,
+                  //               parameters, pulses);
 
                 // Record this step if required
                 if (history.record_flag == ENABLED) {

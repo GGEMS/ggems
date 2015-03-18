@@ -38,7 +38,6 @@ __host__ __device__ void get_primaries(Sources sources, ParticleStack &particles
         f32 py = sources.data_sources[adr+ADR_POINT_SRC_PY];
         f32 pz = sources.data_sources[adr+ADR_POINT_SRC_PZ];
         f32 energy = sources.data_sources[adr+ADR_POINT_SRC_ENERGY];
-
         point_source_primary_generator(particles, id_part, px, py, pz, energy, PHOTON, geom_id);
 
     } else if (type == CONE_BEAM_SOURCE) {

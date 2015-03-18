@@ -762,7 +762,7 @@ __host__ __device__ void get_next_geometry_boundary(Scene geometry, ui32 cur_geo
     interaction_distance = distance;// + EPSILON3; // overshoot
     
 #ifdef DEBUG
-        printf(" Current Volume: type %i dist %f\n", obj_type, distance);
+     //   printf(" Current Volume: type %i dist %f\n", obj_type, distance);
 #endif
 
     ////// Children
