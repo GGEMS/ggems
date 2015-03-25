@@ -519,6 +519,8 @@ void Digitizer::process_projection() {
     FILE *pfile = fopen("Projection.txt", "a");
     FILE *efile = fopen("Energy.txt", "a");
     #endif
+    
+    //printf("dim proj %d %d \n",projection_ny, projection_nz);
 
     while (i < singles.size()) {
 
@@ -573,7 +575,9 @@ void Digitizer::process_projection() {
                     // Change single frame to voxel space
                     ui32 ppy = (PyNew - projection_ymin) / projection_sy;
                     ui32 ppz = (PzNew - projection_zmin) / projection_sz;
-             
+                    
+                    //printf("ppy %d ppz %d \n", ppy, ppz);
+                    
                     assert(ppy >= 0);
                     assert(ppz >= 0);
 

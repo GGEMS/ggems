@@ -27,7 +27,6 @@ __host__ __device__ void get_primaries(Sources sources, ParticleStack &particles
 
     // Read the address source
     ui32 adr = sources.ptr_sources[id_src];
-
     // Read the kind of sources
     ui32 type = (ui32)(sources.data_sources[adr+ADR_SRC_TYPE]);
     ui32 geom_id = (ui32)(sources.data_sources[adr+ADR_SRC_GEOM_ID]);
@@ -40,6 +39,16 @@ __host__ __device__ void get_primaries(Sources sources, ParticleStack &particles
         f32 energy = sources.data_sources[adr+ADR_POINT_SRC_ENERGY];
         point_source_primary_generator(particles, id_part, px, py, pz, energy, PHOTON, geom_id);
 
+    } else if (type == CYLINDER_SOURCE) {
+        f32 px = sources.data_sources[adr+ADR_CYLINDER_SRC_PX];
+        f32 py = sources.data_sources[adr+ADR_CYLINDER_SRC_PY];
+        f32 pz = sources.data_sources[adr+ADR_CYLINDER_SRC_PZ];
+        f32 rad = sources.data_sources[adr+ADR_CYLINDER_SRC_RAD];
+        f32 length = sources.data_sources[adr+ADR_CYLINDER_SRC_LEN];
+        f32 energy = sources.data_sources[adr+ADR_CYLINDER_SRC_ENERGY];
+        cylinder_source_primary_generator(particles, id_part, px, py, pz, rad, length,
+                                           energy, PHOTON, geom_id);
+        
     } else if (type == CONE_BEAM_SOURCE) {
         f32 px = sources.data_sources[adr+ADR_CONE_BEAM_SRC_PX];
         f32 py = sources.data_sources[adr+ADR_CONE_BEAM_SRC_PY];
@@ -141,6 +150,28 @@ void SourceBuilder::add_source(PointSource src) {
     array_push_back(&sources.data_sources, sources.data_sources_dim, src.px);
     array_push_back(&sources.data_sources, sources.data_sources_dim, src.py);
     array_push_back(&sources.data_sources, sources.data_sources_dim, src.pz);
+    array_push_back(&sources.data_sources, sources.data_sources_dim, src.energy);
+
+    // Save the seed
+    array_push_back(&sources.seeds, sources.seeds_dim, src.seed);
+
+}
+
+// Add a cylinder source on the simulation
+void SourceBuilder::add_source(CylinderSource src) {
+    sources.nb_sources++;
+
+    // Store the address to access to this source
+    array_push_back(&sources.ptr_sources, sources.ptr_sources_dim, sources.data_sources_dim);
+
+    // Store information of this source
+    array_push_back(&sources.data_sources, sources.data_sources_dim, (f32)CYLINDER_SOURCE);
+    array_push_back(&sources.data_sources, sources.data_sources_dim, src.geometry_id);
+    array_push_back(&sources.data_sources, sources.data_sources_dim, src.px);
+    array_push_back(&sources.data_sources, sources.data_sources_dim, src.py);
+    array_push_back(&sources.data_sources, sources.data_sources_dim, src.pz);
+    array_push_back(&sources.data_sources, sources.data_sources_dim, src.rad);
+    array_push_back(&sources.data_sources, sources.data_sources_dim, src.length);
     array_push_back(&sources.data_sources, sources.data_sources_dim, src.energy);
 
     // Save the seed
