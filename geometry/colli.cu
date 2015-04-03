@@ -32,23 +32,35 @@ Colli::Colli (f32 ox, f32 oy, f32 oz,
     sizez *= 0.5;
 
     // Init
-    xmin = ox-sizex;
+    /*xmin = ox-sizex;
     xmax = ox+sizex;
     ymin = oy-sizey;
     ymax = oy+sizey;
     zmin = oz-sizez;
-    zmax = oz+sizez;
+    zmax = oz+sizez;*/
+    
+    xmin = -sizex;
+    xmax = sizex;
+    ymin = -sizey;
+    ymax = sizey;
+    zmin = -sizez;
+    zmax = sizez;
     
     hole_material_name = hole_mat_name;
     septa_material_name = septa_mat_name;
     
-    object_name = obj_name;
+    //object_name = obj_name;
     
     // colli gravity center
-    colli_center.x = ox;
-    colli_center.y = oy;
-    colli_center.z = oz;
+    obb_center.x = ox;
+    obb_center.y = oy;
+    obb_center.z = oz;
 
+    // OBB frame
+    u.x=1.0; u.y=0.0; u.z=0.0;
+    v.x=0.0; v.y=1.0; v.z=0.0;
+    w.x=0.0; w.y=0.0; w.z=1.0;
+    
 }
 
 void Colli::set_height(f32 height) {
@@ -121,8 +133,7 @@ void Colli::build_colli(){
         }
        
     }
-    printf("hexagone_y 0 %f 85138 %f \n", centerOfHexagons.y[0], centerOfHexagons.y[85138]);
-    printf("hexagone_z 0 %f 85138 %f \n", centerOfHexagons.z[0], centerOfHexagons.z[85138]);
+
     printf("Leaving build_colli .... \n");
 }
 

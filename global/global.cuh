@@ -24,7 +24,7 @@
 //#define DEBUG_DIGITIZER
 
 ////// VALIDATION GGEMS ///////////////////////////////////
-//#define VALID_GGEMS
+#define VALID_GGEMS
 
 /////// TYPEDEF ////////////////////////////////////////////////
 
@@ -163,6 +163,7 @@ void array_push_back(unsigned int **vector, unsigned int &dim, unsigned int val)
 void array_push_back(f32 **vector, unsigned int &dim, f32 val);
 void array_insert(unsigned int **vector, unsigned int &dim, unsigned int pos, unsigned int val);
 void array_insert(f32 **vector, unsigned int &dim, unsigned int pos, f32 val);
+void array_insert(unsigned int **vector, unsigned int &dim, unsigned int &mother_dim, unsigned int pos, unsigned int val);
 void array_append_array(f32 **vector, unsigned int &dim, f32 **an_array, unsigned int a_dim);
 
 // Global simulation parameters

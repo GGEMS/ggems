@@ -20,7 +20,7 @@
 
 #include "vector.cuh"
 #include "global.cuh"
-#include "base_object.cuh"
+#include "obb.cuh"
 
 // Hexagon center coordinates, format data is defined as SoA
 struct CoordHex2 {
@@ -30,7 +30,7 @@ struct CoordHex2 {
 };
 
 // Hexagonal Hole Collimator
-class Colli : public BaseObject {
+class Colli : public Obb {
     public:
         Colli();
         Colli(f32 ox, f32 oy, f32 oz,
@@ -52,7 +52,7 @@ class Colli : public BaseObject {
         std::string septa_material_name;
         
         // Colli center
-        f32xyz colli_center;
+        //f32xyz colli_center;
         
         // Septa paramters
         f32 septa_height, hole_radius;

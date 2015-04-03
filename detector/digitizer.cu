@@ -35,6 +35,10 @@ Digitizer::Digitizer() {
     flag_projXY = false;
     flag_projYZ = false;
     flag_projXZ = false;
+    
+    flag_spect_proj = false;
+    
+    nb_proj = 1;
 }
 
 // Allocate and init the singles list file (CPU)
@@ -210,6 +214,41 @@ void Digitizer::set_output_singles(std::string name) {
 void Digitizer::set_output_coincidences(std::string name) {
     coincidences_filename = name;
     flag_coincidences = true;
+}
+
+void Digitizer::set_spect_projections(std::string name,
+                                      f32 xmin, f32 xmax,
+                                      f32 ymin, f32 ymax,
+                                      f32 zmin, f32 zmax,
+                                      f32 sx, f32 sy, f32 sz) {
+     
+    projection_filename = name;
+    projection_sx = sx;
+    projection_sy = sy;
+    projection_sz = sz;
+    
+    projection_nx = (ui32)((xmax-xmin) / sx);
+    if (projection_nx == 0) 
+      flag_projYZ = true;
+    
+    projection_ny = (ui32)((ymax-ymin) / sy);
+    if (projection_ny == 0) 
+      flag_projXZ = true;
+    
+    projection_nz = (ui32)((zmax-zmin) / sz);
+    if (projection_nz == 0) 
+      flag_projXY = true;
+    
+    projection_xmin = xmin;
+    projection_ymin = ymin;
+    projection_zmin = zmin;
+    
+    flag_spect_proj = true;
+}
+
+void Digitizer::set_number_of_projections(ui32 nb_head) {
+    
+    nb_proj = nb_head;
 }
 
 void Digitizer::set_output_projection(std::string name, ui32 volid,
@@ -487,7 +526,7 @@ void Digitizer::process_coincidences() {
 void Digitizer::init_projection() {
   
     ui32 n;
-  
+
     if (flag_projXY) {
         n = projection_nx*projection_ny;
     }
@@ -501,13 +540,17 @@ void Digitizer::init_projection() {
         n = projection_nx*projection_ny*projection_nz;
     }
     
-    projection.clear();
-    projection.reserve(n);
-    ui32 i=0; while (i<n) {
-        projection[i] = 0;
-        ++i;
-    }
-
+    projection.resize(nb_proj, single_proj ( n , 0 ));
+    
+  /*  for (ui32 id = 0; id < nb_proj; id++) {
+        for (ui32 i = 0; i < n; i++) {
+        projection[id].clear();
+        projection[id].reserve(n);
+        ui32 i=0; while (i<n) {
+            projection[id][i] = 0;
+            ++i;
+        }
+    }*/
 }
 
 void Digitizer::process_projection() {
@@ -564,7 +607,7 @@ void Digitizer::process_projection() {
                     assert(ppy < projection_ny);
 
                     // Assign value
-                    projection[ppy*projection_nx + ppx] += 1; 
+                    projection[0][ppy*projection_nx + ppx] += 1; 
                     
                     #ifdef VALID_GGEMS
                     fprintf(pfile, "%f %f\n", PxNew, PyNew);
@@ -585,7 +628,7 @@ void Digitizer::process_projection() {
                     assert(ppz < projection_nz);
 
                     // Assign value
-                    projection[ppz*projection_ny + ppy] += 1; 
+                    projection[0][ppz*projection_ny + ppy] += 1; 
                     
                     #ifdef VALID_GGEMS
                     fprintf(pfile, "%f %f\n", PyNew, PzNew);
@@ -604,7 +647,7 @@ void Digitizer::process_projection() {
                     assert(ppz < projection_nz);
 
                     // Assign value
-                    projection[ppz*projection_nx + ppx] += 1; 
+                    projection[0][ppz*projection_nx + ppx] += 1; 
                     
                     #ifdef VALID_GGEMS
                     fprintf(pfile, "%f %f\n", PxNew, PzNew);
@@ -624,7 +667,7 @@ void Digitizer::process_projection() {
                     assert(ppy < projection_ny);
                     assert(ppz < projection_nz);
 
-                    projection[ppz*projection_ny*projection_nx + ppy*projection_nx + ppx] += 1;
+                    projection[0][ppz*projection_ny*projection_nx + ppy*projection_nx + ppx] += 1;
                 }
             }
         }
@@ -637,14 +680,226 @@ void Digitizer::process_projection() {
     #endif
 }
 
+void Digitizer::process_spect_projections(Scene geometry) {
+
+    // Loop over singles
+    ui32 i=0;
+    
+    #ifdef VALID_GGEMS
+    FILE *pfile = fopen("Projection.txt", "a");
+    FILE *efile = fopen("Energy.txt", "a");
+    #endif
+    
+    //printf("dim proj %d %d \n",projection_ny, projection_nz);
+
+    while (i < singles.size()) {
+
+        // If single hit the right detector
+        //if (singles[i].id_geom == projection_idvol) {
+            
+            f32 E_New = singles[i].E;
+            f32 PxNew = singles[i].px;
+            f32 PyNew = singles[i].py;
+            f32 PzNew = singles[i].pz;
+          
+            // Apply energy blurring
+            if (flag_energy_blurring) {
+                f32 resolution = E_slope * (singles[i].E - E_ref) + E_res;
+                E_New = G4RandGauss::shoot(singles[i].E, resolution * singles[i].E / 2.35482);
+                
+                #ifdef VALID_GGEMS
+                fprintf(efile, "%f\n", E_New);
+                #endif
+            }
+            
+            if (E_New >= E_low && E_New <= E_high) {
+              
+                ui32 mother_id = geometry.mother_node[singles[i].id_geom];
+              
+                ui32 id_head = (singles[i].id_geom + 1) / (geometry.size_of_nodes[mother_id] + 1);
+            
+                // Apply spatial blurring
+                if (flag_sp_blurring) {
+                    PxNew = G4RandGauss::shoot(singles[i].px,SP_res/2.35);
+                    PyNew = G4RandGauss::shoot(singles[i].py,SP_res/2.35);
+                    PzNew = G4RandGauss::shoot(singles[i].pz,SP_res/2.35);
+                }
+            
+                if (flag_projXY) {
+                    
+                    // Change single frame to voxel space
+                    ui32 ppx = (PxNew - projection_xmin) / projection_sx;
+                    ui32 ppy = (PyNew - projection_ymin) / projection_sy;
+             
+                    assert(ppx >= 0);
+                    assert(ppy >= 0);
+
+                    assert(ppx < projection_nx);
+                    assert(ppy < projection_ny);
+
+                    // Assign value
+                    projection[id_head-1][ppy*projection_nx + ppx] += 1; 
+                    
+                    #ifdef VALID_GGEMS
+                    fprintf(pfile, "%f %f\n", PxNew, PyNew);
+                    #endif
+                 }
+                else if (flag_projYZ) {
+                    
+                    // Change single frame to voxel space
+                    ui32 ppy = (PyNew - projection_ymin) / projection_sy;
+                    ui32 ppz = (PzNew - projection_zmin) / projection_sz;
+                    
+                    //printf("head %d: ppy %d ppz %d \n", id_head, ppy, ppz);
+                    
+                    assert(ppy >= 0);
+                    assert(ppz >= 0);
+
+                    assert(ppy < projection_ny);
+                    assert(ppz < projection_nz);
+                    
+                    // Assign value
+                    projection[id_head-1][ppz*projection_ny + ppy] += 1; 
+                    
+                    #ifdef VALID_GGEMS
+                    fprintf(pfile, "%f %f\n", PyNew, PzNew);
+                    #endif
+                }
+                else if (flag_projXZ) {
+               
+                    // Change single frame to voxel space
+                    ui32 ppx = (PxNew - projection_xmin) / projection_sx;
+                    ui32 ppz = (PzNew - projection_zmin) / projection_sz;
+             
+                    assert(ppx >= 0);
+                    assert(ppz >= 0);
+
+                    assert(ppx < projection_nx);
+                    assert(ppz < projection_nz);
+
+                    // Assign value
+                    projection[id_head-1][ppz*projection_nx + ppx] += 1; 
+                    
+                    #ifdef VALID_GGEMS
+                    fprintf(pfile, "%f %f\n", PxNew, PzNew);
+                    #endif
+                }
+                else {
+                    // Change single frame to voxel space
+                    ui32 ppx = (PxNew - projection_xmin) / projection_sx;
+                    ui32 ppy = (PyNew - projection_ymin) / projection_sy;
+                    ui32 ppz = (PzNew - projection_zmin) / projection_sz;
+
+                    assert(ppx >= 0);
+                    assert(ppy >= 0);
+                    assert(ppz >= 0);
+
+                    assert(ppx < projection_nx);
+                    assert(ppy < projection_ny);
+                    assert(ppz < projection_nz);
+
+                    projection[id_head-1][ppz*projection_ny*projection_nx + ppy*projection_nx + ppx] += 1;
+                }
+            }
+       // }
+        ++i;
+    }
+    
+    #ifdef VALID_GGEMS
+    fclose(pfile);
+    fclose(efile);
+    #endif
+}
+
+void Digitizer::export_spect_projections(ui32 nb_proj, ui32 id_run) {
+
+    std::string proj_fullname = "";
+  
+   for (ui32 i = 0; i < nb_proj; i++) {
+  
+        ui32 proj = (i+1) * (id_run+1);
+        
+        std::ostringstream oss;
+        
+        oss << proj;
+       
+        proj_fullname.clear();
+        
+        proj_fullname = proj_fullname.append(projection_filename);
+        proj_fullname = proj_fullname.append(oss.str());
+        proj_fullname = proj_fullname.append(".mhd");
+  
+        // check extension
+        /*std::string ext = projection_filename.substr(projection_filename.size()-3);
+        
+        if (ext!="mhd") {
+            printf("Error, to export an mhd file, the exension must be '.mhd'!\n");
+            return;
+        }*/
+
+        // first write te header
+        FILE *pfile = fopen(proj_fullname.c_str(), "w");
+        fprintf(pfile, "ObjectType = Image \n");
+        fprintf(pfile, "BinaryData = True \n");
+        fprintf(pfile, "BinaryDataByteOrderMSB = False \n");
+        fprintf(pfile, "CompressedData = False \n");
+        fprintf(pfile, "ElementType = MET_UINT \n");
+        if (flag_projXY) {
+            fprintf(pfile, "NDims = 2 \n");
+            fprintf(pfile, "ElementSpacing = %f %f\n", projection_sx, projection_sy);
+            fprintf(pfile, "DimSize = %i %i\n", projection_nx, projection_ny);
+        }
+        else if (flag_projXZ) {
+            fprintf(pfile, "NDims = 2 \n");
+            fprintf(pfile, "ElementSpacing = %f %f\n", projection_sx, projection_sz);
+            fprintf(pfile, "DimSize = %i %i\n", projection_nx, projection_nz);
+        }        
+        else if (flag_projYZ) {
+            fprintf(pfile, "NDims = 2 \n");
+            fprintf(pfile, "ElementSpacing = %f %f\n", projection_sy, projection_sz);
+            fprintf(pfile, "DimSize = %i %i\n", projection_ny, projection_nz);
+        }         
+        else {
+            fprintf(pfile, "NDims = 3 \n");
+            fprintf(pfile, "ElementSpacing = %f %f\n", projection_sx, projection_sy, projection_sz);
+            fprintf(pfile, "DimSize = %i %i\n", projection_nx, projection_ny, projection_nz);
+        }
+        
+        std::string export_name = proj_fullname.replace(proj_fullname.size()-3, 3, "raw");
+        fprintf(pfile, "ElementDataFile = %s \n", export_name.c_str());
+        fclose(pfile);
+
+        // then export data
+        pfile = fopen(export_name.c_str(), "wb");
+        
+        if (flag_projXY) {
+            fwrite(projection[i].data(), projection_nx*projection_ny, sizeof(f32), pfile);
+        }
+        else if (flag_projXZ) {
+            fwrite(projection[i].data(), projection_nx*projection_nz, sizeof(f32), pfile);
+        }
+        else if (flag_projYZ) {
+            fwrite(projection[i].data(), projection_ny*projection_nz, sizeof(f32), pfile);
+        }
+        else {
+            fwrite(projection[i].data(), projection_nx*projection_ny*projection_nz, sizeof(f32), pfile);
+        }
+        
+        fclose(pfile);
+   }
+}
+
+
 void Digitizer::export_projection() {
 
+   
     // check extension
-    std::string ext = projection_filename.substr(projection_filename.size()-3);
+    /*std::string ext = projection_filename.substr(projection_filename.size()-3);
+    
     if (ext!="mhd") {
         printf("Error, to export an mhd file, the exension must be '.mhd'!\n");
         return;
-    }
+    }*/
 
     // first write te header
     FILE *pfile = fopen(projection_filename.c_str(), "w");
@@ -682,16 +937,16 @@ void Digitizer::export_projection() {
     pfile = fopen(export_name.c_str(), "wb");
     
     if (flag_projXY) {
-        fwrite(projection.data(), projection_nx*projection_ny, sizeof(f32), pfile);
+        fwrite(projection[0].data(), projection_nx*projection_ny, sizeof(f32), pfile);
     }
     else if (flag_projXZ) {
-        fwrite(projection.data(), projection_nx*projection_nz, sizeof(f32), pfile);
+        fwrite(projection[0].data(), projection_nx*projection_nz, sizeof(f32), pfile);
     }
     else if (flag_projYZ) {
-        fwrite(projection.data(), projection_ny*projection_nz, sizeof(f32), pfile);
+        fwrite(projection[0].data(), projection_ny*projection_nz, sizeof(f32), pfile);
     }
     else {
-        fwrite(projection.data(), projection_nx*projection_ny*projection_nz, sizeof(f32), pfile);
+        fwrite(projection[0].data(), projection_nx*projection_ny*projection_nz, sizeof(f32), pfile);
     }
     
     fclose(pfile);
@@ -701,7 +956,7 @@ void Digitizer::export_projection() {
 
 /// Main function /////////////////////////////////////////
 
-void Digitizer::process_chain(ui32 iter, f64 tot_activity) {
+void Digitizer::process_chain(ui32 iter, f64 tot_activity, Scene geometry) {
 
 
     process_singles(iter, tot_activity);
@@ -723,7 +978,9 @@ void Digitizer::process_chain(ui32 iter, f64 tot_activity) {
         process_projection();
     }
 
-
+    if (flag_spect_proj) {
+        process_spect_projections(geometry);
+    }
 
 
 }

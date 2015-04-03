@@ -205,17 +205,52 @@ void VRML::write_geometry(GeometryBuilder geometry) {
             f32 ymax = geometry.world.data_objects[adr_obj + ADR_AABB_YMAX];
             f32 zmin = geometry.world.data_objects[adr_obj + ADR_AABB_ZMIN];
             f32 zmax = geometry.world.data_objects[adr_obj + ADR_AABB_ZMAX];
+            
+            f32 colli_centerx = geometry.world.data_objects[adr_obj+ADR_OBB_CENTER_X];
+            f32 colli_centery = geometry.world.data_objects[adr_obj+ADR_OBB_CENTER_Y];
+            f32 colli_centerz = geometry.world.data_objects[adr_obj+ADR_OBB_CENTER_Z];
+            
+            f32 angx = geometry.world.data_objects[adr_obj+ADR_OBB_FRAME_ANGX];
+            f32 angy = geometry.world.data_objects[adr_obj+ADR_OBB_FRAME_ANGY];
+            f32 angz = geometry.world.data_objects[adr_obj+ADR_OBB_FRAME_ANGZ];
 
             if (geometry.object_wireframe[iobj]) {
                 draw_wireframe_aabb(xmin, xmax, ymin, ymax, zmin, zmax,
                                     geometry.object_colors[iobj],
                                     geometry.object_transparency[iobj]);
             } else {
-                draw_aabb(xmin, xmax, ymin, ymax, zmin, zmax,
-                          geometry.object_colors[iobj],
-                          geometry.object_transparency[iobj]);
+                draw_obb(xmin, xmax, ymin, ymax, zmin, zmax,
+                         colli_centerx, colli_centery, colli_centerz, angx, angy, angz,
+                         geometry.object_colors[iobj], geometry.object_transparency[iobj]);
             }
+            
+         } else if (type_obj == SPECTHEAD) {
 
+            f32 xmin = geometry.world.data_objects[adr_obj + ADR_AABB_XMIN];
+            f32 xmax = geometry.world.data_objects[adr_obj + ADR_AABB_XMAX];
+            f32 ymin = geometry.world.data_objects[adr_obj + ADR_AABB_YMIN];
+            f32 ymax = geometry.world.data_objects[adr_obj + ADR_AABB_YMAX];
+            f32 zmin = geometry.world.data_objects[adr_obj + ADR_AABB_ZMIN];
+            f32 zmax = geometry.world.data_objects[adr_obj + ADR_AABB_ZMAX];
+            
+            f32 head_centerx = geometry.world.data_objects[adr_obj+ADR_OBB_CENTER_X];
+            f32 head_centery = geometry.world.data_objects[adr_obj+ADR_OBB_CENTER_Y];
+            f32 head_centerz = geometry.world.data_objects[adr_obj+ADR_OBB_CENTER_Z];
+            
+            f32 angx = geometry.world.data_objects[adr_obj+ADR_OBB_FRAME_ANGX];
+            f32 angy = geometry.world.data_objects[adr_obj+ADR_OBB_FRAME_ANGY];
+            f32 angz = geometry.world.data_objects[adr_obj+ADR_OBB_FRAME_ANGZ];
+
+            if (geometry.object_wireframe[iobj]) {
+                draw_wireframe_aabb(xmin, xmax, ymin, ymax, zmin, zmax,
+                                    geometry.object_colors[iobj],
+                                    geometry.object_transparency[iobj]);
+            } else {
+                draw_obb(xmin, xmax, ymin, ymax, zmin, zmax,
+                         head_centerx, head_centery, head_centerz, angx, angy, angz,
+                         geometry.object_colors[iobj], geometry.object_transparency[iobj]);
+            }
+            
         } else if (type_obj == OBB) {
 
             f32 xmin = geometry.world.data_objects[adr_obj + ADR_AABB_XMIN];

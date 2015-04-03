@@ -31,15 +31,34 @@ SpectHead::SpectHead (f32 ox, f32 oy, f32 oz,
     sizey *= 0.5;
     sizez *= 0.5;
 
-    xmin = ox-sizex;
-    xmax = ox+sizex;
-    ymin = oy-sizey;
-    ymax = oy+sizey;
-    zmin = oz-sizez;
-    zmax = oz+sizez;
+    xmin = -sizex;
+    xmax = sizex;
+    ymin = -sizey;
+    ymax = sizey;
+    zmin = -sizez;
+    zmax = sizez;
+    
     material_name = mat_name;
     object_name = obj_name;
+    
+    // head gravity center
+    obb_center.x = ox;
+    obb_center.y = oy;
+    obb_center.z = oz;
+
+    // OBB frame
+    u.x=1.0; u.y=0.0; u.z=0.0;
+    v.x=0.0; v.y=1.0; v.z=0.0;
+    w.x=0.0; w.y=0.0; w.z=1.0;
+    //nb_ring_heads = 1;
 
 }
+
+/*void SpectHead::set_ring_repeater(ui32 nb_head) {
+    nb_ring_heads = nb_head;
+}*/
+
+
+
 
 #endif

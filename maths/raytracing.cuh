@@ -129,6 +129,14 @@ __host__ __device__ bool test_point_AABB(f64xyz p,
                                          f64 aabb_ymin, f64 aabb_ymax,
                                          f64 aabb_zmin, f64 aabb_zmax);
 
+// Point/OBB test
+__host__ __device__ bool test_point_OBB(f64xyz p,
+                                        f64 aabb_xmin, f64 aabb_xmax,
+                                        f64 aabb_ymin, f64 aabb_ymax,
+                                        f64 aabb_zmin, f64 aabb_zmax,
+                                        f64xyz obb_center,
+                                        f64xyz u, f64xyz v, f64xyz w); // OBB frame
+
 // Ray/triangle intersection - Moller-Trumbore algorithm
 __host__ __device__ f64 hit_ray_triangle(f64xyz ray_p, f64xyz ray_d,
                                          f64xyz tri_u,              // Triangle
@@ -144,7 +152,8 @@ __host__ __device__ f64 hit_ray_OBB(f64xyz ray_p, f64xyz ray_d,
                                     f64xyz u, f64xyz v, f64xyz w); // OBB frame
 
 // Ray/Septa intersection
-__host__ __device__ f64 hit_ray_septa(f64xyz p, f64xyz preel, f64xyz d, f64 half_size_x, f64 radius); // Colli frame
+__host__ __device__ f64 hit_ray_septa(f64xyz p, f64xyz dir, f64 half_size_x, f64 radius,
+                                      f64xyz colli_center, f64xyz colli_u, f64xyz colli_v, f64xyz w); // Colli frame
 
 #endif
 

@@ -14,7 +14,6 @@
 // along with FIREwork.  If not, see <http://www.gnu.org/licenses/>.
 //
 // GGEMS Copyright (C) 2013-2014 Julien Bert
-
 #ifndef MATERIALS_CU
 #define MATERIALS_CU
 

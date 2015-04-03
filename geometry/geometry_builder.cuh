@@ -87,31 +87,28 @@
 #define ADR_OBB_FRAME_ANGY 22
 #define ADR_OBB_FRAME_ANGZ 23
 
-#define ADR_COLLI_CENTER_X 9
-#define ADR_COLLI_CENTER_Y 10
-#define ADR_COLLI_CENTER_Z 11
-#define ADR_COLLI_SEPTA_HEIGHT 12
-#define ADR_COLLI_HOLE_RADIUS 13
-#define ADR_COLLI_CUBARRAY_NX 14
-#define ADR_COLLI_CUBARRAY_NY 15
-#define ADR_COLLI_CUBARRAY_NZ 16
-#define ADR_COLLI_CUBARRAY_VECX 17
-#define ADR_COLLI_CUBARRAY_VECY 18
-#define ADR_COLLI_CUBARRAY_VECZ 19
-#define ADR_COLLI_LINEAR_VECX 20
-#define ADR_COLLI_LINEAR_VECY 21
-#define ADR_COLLI_LINEAR_VECZ 22
-#define ADR_COLLI_HOLE_MAT_ID 23
-#define ADR_COLLI_SEPTA_MAT_ID 24
-#define ADR_COLLI_NB_HEXAGONS 25
-#define ADR_COLLI_CENTEROFHEXAGONS 26
+#define ADR_COLLI_SEPTA_HEIGHT 24
+#define ADR_COLLI_HOLE_RADIUS 25
+#define ADR_COLLI_CUBARRAY_NX 26
+#define ADR_COLLI_CUBARRAY_NY 27
+#define ADR_COLLI_CUBARRAY_NZ 28
+#define ADR_COLLI_CUBARRAY_VECX 29
+#define ADR_COLLI_CUBARRAY_VECY 30
+#define ADR_COLLI_CUBARRAY_VECZ 31
+#define ADR_COLLI_LINEAR_VECX 32
+#define ADR_COLLI_LINEAR_VECY 33
+#define ADR_COLLI_LINEAR_VECZ 34
+#define ADR_COLLI_HOLE_MAT_ID 35
+#define ADR_COLLI_SEPTA_MAT_ID 36
+#define ADR_COLLI_NB_HEXAGONS 37
+#define ADR_COLLI_CENTEROFHEXAGONS 38
 
 #define SIZE_AABB_OBJ 9
 #define SIZE_SPHERE_OBJ 13
 #define SIZE_VOXELIZED_OBJ 15 // + number of voxels
 #define SIZE_MESHED_OBJ 18 // + number of vertices * 3 (xyz) + octree
 #define SIZE_OBB_OBJ 24
-#define SIZE_COLLI_OBJ 26
+#define SIZE_COLLI_OBJ 39
 
 // Struct that handle the geometry of the world
 struct Scene {
@@ -137,12 +134,14 @@ struct Scene {
     ui32 size_of_nodes_dim;
     ui32 child_nodes_dim;
     ui32 mother_node_dim;
+    
 };
 
 
 // Host/Device function that handle geometry
 __host__ __device__ bool IsInsideHex(f64xyz position, f64 radius, f64 cy, f64 cz);
-__host__ __device__ i32 GetHexIndex(f64xyz position, Scene geometry, ui32 adr_geom);
+__host__ __device__ i32 GetHexIndex(f64xyz position, Scene geometry, ui32 adr_geom,
+                                    f64xyz center, f64xyz u, f64xyz v, f64xyz w);
 __host__ __device__ bool get_geometry_is_sensitive(Scene geometry, ui32 cur_geom);
 __host__ __device__ ui32 get_geometry_material(Scene geometry, ui32 id_geom, f64xyz pos);
 __host__ __device__ f64 get_distance_to_object(Scene geometry, ui32 adr_geom, ui32 obj_type,

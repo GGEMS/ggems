@@ -20,16 +20,31 @@
 
 #include "vector.cuh"
 #include "global.cuh"
-#include "aabb.cuh"
+#include "obb.cuh"
 
 // SPECT head
-class SpectHead : public Aabb {
+class SpectHead : public Obb {
   public:
         SpectHead();
         SpectHead(f32 ox, f32 oy, f32 oz,
              f32 sizex, f32 sizey, f32 sizez,
              std::string mat_name, std::string obj_name);
 
+        //void set_ring_repeater(ui32);
+        
+        //ui32 nb_ring_heads;
+        
+         // Head center
+        //f32xyz head_center;
+        
+        // Rotation angle
+        //f32xyz angle;
+        
+        // Absolute frame (OBB orthogonal space u, v, w)
+        //f32xyz u, v, w;
+        
+        //f32xyz size;
+        
         //void set_xlength(f32);
         //void set_ylength(f32);
         //void set_zlength(f32);
@@ -42,6 +57,7 @@ class SpectHead : public Aabb {
 
         //void translate(float3 t);
         //void translate(f32 tx, f32 ty, f32 tz);
+        //void rotate(f32 ax, f32 ay, f32 az);
 
     private:
   

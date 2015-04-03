@@ -32,9 +32,10 @@ __host__ __device__ bool get_geometry_is_sensitive(Scene geometry, ui32 cur_geom
 
 // Function that return the material of a volume
 __host__ __device__ ui32 get_geometry_material(Scene geometry, ui32 id_geom, f64xyz pos) {
+  
     ui32 adr_geom = geometry.ptr_objects[id_geom];
     ui32 obj_type = (ui32)geometry.data_objects[adr_geom+ADR_OBJ_TYPE];
-
+    
     if (obj_type != VOXELIZED && obj_type != COLLI) {
         return (ui32)geometry.data_objects[adr_geom+ADR_OBJ_MAT_ID];
     } else if (obj_type == VOXELIZED) {
@@ -60,9 +61,27 @@ __host__ __device__ ui32 get_geometry_material(Scene geometry, ui32 id_geom, f64
         //printf("Mat: %i\n", (ui32)geometry.data_objects[adr_geom+ADR_VOXELIZED_DATA+abs_ind]);
         return (ui32)geometry.data_objects[adr_geom+ADR_VOXELIZED_DATA+abs_ind];
     } else if (obj_type == COLLI) {
-       if (GetHexIndex(pos, geometry, adr_geom) < 0)
+      
+        f64xyz colli_center;
+        colli_center.x = (f64)geometry.data_objects[adr_geom+ADR_OBB_CENTER_X];
+        colli_center.y = (f64)geometry.data_objects[adr_geom+ADR_OBB_CENTER_Y];
+        colli_center.z = (f64)geometry.data_objects[adr_geom+ADR_OBB_CENTER_Z];
+        
+        f64xyz u, v, w;
+        u.x = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_UX];
+        u.y = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_UY];
+        u.z = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_UZ];
+        v.x = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_VX];
+        v.y = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_VY];
+        v.z = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_VZ];
+        w.x = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_WX];
+        w.y = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_WY];
+        w.z = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_WZ];
+        
+      
+       if (GetHexIndex(pos, geometry, adr_geom, colli_center, u, v, w) < 0)
           return (ui32)geometry.data_objects[adr_geom+ADR_COLLI_SEPTA_MAT_ID];
-       else
+       else 
           return (ui32)geometry.data_objects[adr_geom+ADR_COLLI_HOLE_MAT_ID];
     } else {
         return 0;
@@ -88,13 +107,19 @@ __host__ __device__ bool IsInsideHex(f64xyz position, f64 radius, f64 cy, f64 cz
 }
 
 // Function that return the index of the hexagonal hole (negative if in a septa) 
-__host__ __device__ i32 GetHexIndex(f64xyz position, Scene geometry, ui32 adr_geom)
+__host__ __device__ i32 GetHexIndex(f64xyz position, Scene geometry, ui32 adr_geom, f64xyz center, f64xyz u, f64xyz v, f64xyz w)
 {
+    // Transform the ray in OBB' space, then do AABB
+    f64xyz ray_obb = fxyz_sub(position, center);
+    position.x = fxyz_dot(ray_obb, u);
+    position.y = fxyz_dot(ray_obb, v);
+    position.z = fxyz_dot(ray_obb, w);
+  
     //ui32 obj_type = (ui32)geometry.data_objects[adr_geom+ADR_OBJ_TYPE];
 
     i32 col, raw, new_raw, min, max, hex, temp;
 
-    //printf("position %f %f %f \n", position.x, position.y, position.z);
+   // printf("position %f %f %f \n", position.x, position.y, position.z);
 
     // Define hexagon index
 
@@ -126,7 +151,7 @@ __host__ __device__ i32 GetHexIndex(f64xyz position, Scene geometry, ui32 adr_ge
     else if (raw > ((i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NZ] - 1.0) * 2.0 )
         raw = ((i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NZ] - 1.0) * 2.0;
 
-    // printf("ligne finale %d \n", raw);
+    //printf("ligne finale %d \n", raw);
 
     ui32 nb_hex = (i32)geometry.data_objects[adr_geom + ADR_COLLI_NB_HEXAGONS];
     ui32 ind_y = adr_geom + ADR_COLLI_CENTEROFHEXAGONS;
@@ -137,8 +162,8 @@ __host__ __device__ i32 GetHexIndex(f64xyz position, Scene geometry, ui32 adr_ge
     // Even raw
     if ( raw % 2 == 0.0 ) {
         hex = (raw / 2.0) * ((2.0 * (i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY]) - 1.0) + col;
-        //printf("hex %d cy %f cz %f \n", hex,  (f64)geometry.data_objects[adr_geom+ADR_COLLI_CENTEROFHEXAGONS_Y+hex],
-        //     (f64)geometry.data_objects[adr_geom+ADR_COLLI_CENTEROFHEXAGONS_Z+hex] );
+        //printf("hex %d cy %f cz %f \n", hex,  (f64)geometry.data_objects[ind_y+hex],
+          //   (f64)geometry.data_objects[ind_z+hex] );
         // Test centered hexagon
         if (IsInsideHex(position, (f64)geometry.data_objects[adr_geom+ADR_COLLI_HOLE_RADIUS],
                         (f64)geometry.data_objects[ind_y+hex], (f64)geometry.data_objects[ind_z+hex]))
@@ -164,26 +189,28 @@ __host__ __device__ i32 GetHexIndex(f64xyz position, Scene geometry, ui32 adr_ge
                                    (f64)geometry.data_objects[ind_y+temp], (f64)geometry.data_objects[ind_z+temp]))
                         return temp;
             }
-
-            if (raw + 1 < (i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY] * 2 - 1) {
+            
+           // if (raw + 1 < (i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY] * 2 - 1) {
+           if (raw + 1 < ((i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NZ] - 1.0) * 2.0) {
                 new_raw = raw + 1;
                 min = new_raw * (i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY] - ((new_raw - 1)/2);
-                max = min + (i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY] - 1;
-                temp = hex + (i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY] - 1;
-
-                if(temp >= min)
-                    // Test bottom left hexagon
-                    if(IsInsideHex(position, (f64)geometry.data_objects[adr_geom+ADR_COLLI_HOLE_RADIUS],
-                                   (f64)geometry.data_objects[ind_y+temp], (f64)geometry.data_objects[ind_z+temp]))
-                        return temp;
-
-                temp = hex + (i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY];
-
-                if(temp < max)
-                    // Test bottom right hexagon
-                    if(IsInsideHex(position, (f64)geometry.data_objects[adr_geom+ADR_COLLI_HOLE_RADIUS],
-                                   (f64)geometry.data_objects[ind_y+temp], (f64)geometry.data_objects[ind_z+temp]))
-                        return temp;
+                
+                    max = min + (i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY] - 1;
+                    temp = hex + (i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY] - 1;
+                                 
+                    if(temp >= min)
+                        // Test bottom left hexagon
+                        if(IsInsideHex(position, (f64)geometry.data_objects[adr_geom+ADR_COLLI_HOLE_RADIUS],
+                                      (f64)geometry.data_objects[ind_y+temp], (f64)geometry.data_objects[ind_z+temp]))
+                            return temp;
+                                
+                    temp = hex + (i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY];
+                                
+                    if(temp < max)
+                        // Test bottom right hexagon
+                        if(IsInsideHex(position, (f64)geometry.data_objects[adr_geom+ADR_COLLI_HOLE_RADIUS],
+                                      (f64)geometry.data_objects[ind_y+temp], (f64)geometry.data_objects[ind_z+temp]))
+                            return temp;
             }
         }
     }
@@ -233,6 +260,9 @@ __host__ __device__ f64 get_distance_to_object(Scene geometry, ui32 adr_geom,
                                                ui32 obj_type, f64xyz pos, f64xyz dir) {
 
     f64 distance = F64_MAX;
+    f64xyz u, v, w;
+        
+    //pos = fxyz_add(pos, fxyz_scale(dir, EPSILON3));
    
     // The main AABB bounding box volume
 
@@ -248,19 +278,14 @@ __host__ __device__ f64 get_distance_to_object(Scene geometry, ui32 adr_geom,
 
         distance = hit_ray_AABB(pos, dir, aabb_xmin, aabb_xmax,
                                 aabb_ymin, aabb_ymax, aabb_zmin, aabb_zmax);
-    // SPECTHEAD volume
-    } else if (obj_type == SPECTHEAD) {
-
-        distance = hit_ray_AABB(pos, dir, aabb_xmin, aabb_xmax,
-                                aabb_ymin, aabb_ymax, aabb_zmin, aabb_zmax);
     // OBB volume
-    } else if (obj_type == OBB) {
+    } else if (obj_type == OBB || obj_type == SPECTHEAD) {
 
         f64xyz obb_center;
         obb_center.x = (f64)geometry.data_objects[adr_geom+ADR_OBB_CENTER_X];
         obb_center.y = (f64)geometry.data_objects[adr_geom+ADR_OBB_CENTER_Y];
         obb_center.z = (f64)geometry.data_objects[adr_geom+ADR_OBB_CENTER_Z];
-        f64xyz u, v, w;
+       
         u.x = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_UX];
         u.y = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_UY];
         u.z = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_UZ];
@@ -274,68 +299,70 @@ __host__ __device__ f64 get_distance_to_object(Scene geometry, ui32 adr_geom,
         distance = hit_ray_OBB(pos, dir, aabb_xmin, aabb_xmax,
                                aabb_ymin, aabb_ymax, aabb_zmin, aabb_zmax,
                                obb_center, u, v, w);
-        //printf("Pos %f %f %f dir %f %f %f C %f %f %f OBB distance: %e\n", pos.x, pos.y, pos.z,
-        //       dir.x, dir.y, dir.z, obb_center.x, obb_center.y, obb_center.z, distance); // DEBUG
+       // printf("Pos %f %f %f dir %f %f %f C %f %f %f OBB distance: %e\n", pos.x, pos.y, pos.z,
+         //      dir.x, dir.y, dir.z, obb_center.x, obb_center.y, obb_center.z, distance); // DEBUG
 
         // COLLI volume
     } else if (obj_type == COLLI) {
       
-        //printf("get_distance_to_object COLLI .... \n");
-      
-        // The main AABB bounding box volume
-
-        f64 aabb_xmin = (f64)geometry.data_objects[adr_geom+ADR_AABB_XMIN];
-        f64 aabb_xmax = (f64)geometry.data_objects[adr_geom+ADR_AABB_XMAX];
-        f64 aabb_ymin = (f64)geometry.data_objects[adr_geom+ADR_AABB_YMIN];
-        f64 aabb_ymax = (f64)geometry.data_objects[adr_geom+ADR_AABB_YMAX];
-        f64 aabb_zmin = (f64)geometry.data_objects[adr_geom+ADR_AABB_ZMIN];
-        f64 aabb_zmax = (f64)geometry.data_objects[adr_geom+ADR_AABB_ZMAX];
+       // printf("get_distance_to_object COLLI .... \n");
         
-        f64xyz aabb_center;
-        aabb_center.x = (f64)geometry.data_objects[adr_geom+ADR_OBB_CENTER_X];
-        aabb_center.y = (f64)geometry.data_objects[adr_geom+ADR_OBB_CENTER_Y];
-        aabb_center.z = (f64)geometry.data_objects[adr_geom+ADR_OBB_CENTER_Z];
-      
+        f64xyz colli_center;
+        colli_center.x = (f64)geometry.data_objects[adr_geom+ADR_OBB_CENTER_X];
+        colli_center.y = (f64)geometry.data_objects[adr_geom+ADR_OBB_CENTER_Y];
+        colli_center.z = (f64)geometry.data_objects[adr_geom+ADR_OBB_CENTER_Z];
+        
+        
+        u.x = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_UX];
+        u.y = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_UY];
+        u.z = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_UZ];
+        v.x = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_VX];
+        v.y = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_VY];
+        v.z = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_VZ];
+        w.x = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_WX];
+        w.y = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_WY];
+        w.z = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_WZ];
+        
+        
         f64 half_colli_size_x = (aabb_xmax - aabb_xmin) * 0.5;
         f64 half_colli_size_y = (aabb_ymax - aabb_ymin) * 0.5;
         f64 half_colli_size_z = (aabb_zmax - aabb_zmin) * 0.5;
         
         f64 hole_radius = (f64)geometry.data_objects[adr_geom+ADR_COLLI_HOLE_RADIUS];
         
-        f64xyz pos_test;
-        f64xyz temp;
-        
         ui32 nb_hex = (i32)geometry.data_objects[adr_geom + ADR_COLLI_NB_HEXAGONS];
         ui32 ind_y = adr_geom + ADR_COLLI_CENTEROFHEXAGONS;
         ui32 ind_z = adr_geom + ADR_COLLI_CENTEROFHEXAGONS + nb_hex;
           
-        i32 hex = GetHexIndex(pos, geometry, adr_geom);
+        i32 hex = GetHexIndex(pos, geometry, adr_geom, colli_center, u, v, w);
         
         //printf("hexagon index %d pos %f %f %f dir %f %f %f \n", hex, pos.x, pos.y, pos.z, dir.x, dir.y, dir.z);
-        
-        //printf("colli %f %f %f %f %f %f\n", aabb_xmin, aabb_xmax, aabb_ymin, aabb_ymax,
-            //   aabb_zmin, aabb_zmax);
+         
+       // printf("colli %f %f %f %f %f %f\n", aabb_xmin, aabb_xmax, aabb_ymin, aabb_ymax,
+       //        aabb_zmin, aabb_zmax);
         //printf("half size %f %f %f \n", half_colli_size_x, half_colli_size_y, half_colli_size_z);
         
         // If photon is outside an hexagonal hole
         if (hex < 0) {
         
-            pos_test = pos;
+            f64xyz pos_test = pos;
             
-            i32 hex_test = GetHexIndex(pos_test, geometry, adr_geom);
-            bool inside = test_point_AABB(pos_test, aabb_xmin, aabb_xmax, aabb_ymin, aabb_ymax, aabb_zmin, aabb_zmax);
+            i32 hex_test = GetHexIndex(pos_test, geometry, adr_geom, colli_center, u, v, w);
+            bool inside = test_point_OBB(pos_test, aabb_xmin, aabb_xmax, aabb_ymin, aabb_ymax, aabb_zmin, aabb_zmax, colli_center, u, v, w);
                 
             // Search for the next position inside an hexagon
             while(hex_test<0 && inside) {
                         
+                  //pos_test = fxyz_add(pos_test, fxyz_scale(dir, EPSILON3));
+              
                   pos_test.x += dir.x * 0.1;
                   pos_test.y += dir.y * 0.1;
                   pos_test.z += dir.z * 0.1;   
             
-                  hex_test = GetHexIndex(pos_test, geometry, adr_geom);
-                  inside = test_point_AABB(pos_test, aabb_xmin, aabb_xmax, aabb_ymin, aabb_ymax, aabb_zmin, aabb_zmax);
+                  hex_test = GetHexIndex(pos_test, geometry, adr_geom, colli_center, u, v, w);
+                  inside = test_point_OBB(pos_test, aabb_xmin, aabb_xmax, aabb_ymin, aabb_ymax, aabb_zmin, aabb_zmax, colli_center, u, v, w);
                   
-                  //printf("SEARCH hexagon index %d pos %f %f %f \n", hex_test, pos_test.x, pos_test.y, pos_test.z);
+                //  printf("SEARCH hexagon index %d pos %f %f %f \n", hex_test, pos_test.x, pos_test.y, pos_test.z);
             }
                             
            //printf("hexagon index %d pos %f %f %f \n", hex_test, pos_test.x, pos_test.y, pos_test.z);
@@ -346,16 +373,31 @@ __host__ __device__ f64 get_distance_to_object(Scene geometry, ui32 adr_geom,
               
                   // Mettre dans le referentiel de l'hexagone (first in the colli referentiel with aabb_center)
                   
-                  temp.x = pos_test.x - aabb_center.x;
-                  temp.y = pos_test.y - aabb_center.y - (f64)geometry.data_objects[ind_y+hex_test];
-                  temp.z = pos_test.z - aabb_center.z - (f64)geometry.data_objects[ind_z+hex_test] ;
+                  /*temp.x = pos_test.x - colli_center.x;
+                  temp.y = pos_test.y - colli_center.y - (f64)geometry.data_objects[ind_y+hex_test];
+                  temp.z = pos_test.z - colli_center.z - (f64)geometry.data_objects[ind_z+hex_test] ;*/
+                  
+                  f64xyz ray_obb = fxyz_sub(pos_test, colli_center);
+                  f64xyz p;
+                  p.x = fxyz_dot(ray_obb, u);
+                  p.y = fxyz_dot(ray_obb, v);
+                  p.z = fxyz_dot(ray_obb, w);
+                  f64xyz d;
+                  d.x = fxyz_dot(dir, u);
+                  d.y = fxyz_dot(dir, v);
+                  d.z = fxyz_dot(dir, w);
+                  
+                  f64xyz temp;
+                  temp.x = p.x;
+                  temp.y = p.y - (f64)geometry.data_objects[ind_y+hex_test];
+                  temp.z = p.z - (f64)geometry.data_objects[ind_z+hex_test] ;
                 
                   // Inverse the direction to find the septa position entrance
-                  inv_dir.x = -dir.x;
-                  inv_dir.y = -dir.y;
-                  inv_dir.z = -dir.z;
+                  inv_dir.x = -d.x;
+                  inv_dir.y = -d.y;
+                  inv_dir.z = -d.z;
                 
-                  f64 interaction_distance = hit_ray_septa(temp, pos_test, inv_dir, half_colli_size_x, hole_radius);
+                  f64 interaction_distance = hit_ray_septa(temp, inv_dir, half_colli_size_x, hole_radius, colli_center, u, v, w);
                                                                                                                                 
                   // compute the distance from the initial position to deduce the next hole distance                                                                                                      
                   f64 dist = sqrt((pos_test.x - pos.x)*(pos_test.x - pos.x) 
@@ -367,7 +409,7 @@ __host__ __device__ f64 get_distance_to_object(Scene geometry, ui32 adr_geom,
                   if(distance < EPSILON6)
                     distance = 0.0;
                   
-                  //printf("OUTSIDE hole n %d : temp %f %f %f, pos %f %f %f, distance %f \n", hex_test, temp.x, temp.y, temp.z, 
+                //  printf("OUTSIDE hole n %d : temp %f %f %f, pos %f %f %f, distance %f \n", hex_test, temp.x, temp.y, temp.z, 
                   //     pos_test.x, pos_test.y, pos_test.z, interaction_distance);
                   
                  // if (distance < 2000)
@@ -377,22 +419,43 @@ __host__ __device__ f64 get_distance_to_object(Scene geometry, ui32 adr_geom,
                 distance = sqrt((pos_test.x - pos.x)*(pos_test.x - pos.x) 
                                 + (pos_test.y - pos.y)*(pos_test.y - pos.y) 
                                 + (pos_test.z - pos.z)*(pos_test.z - pos.z));
-               // printf("escaping colli box : distance %f \n", distance);
+             //   printf("escaping colli box : distance %f \n", distance);
             }   
         } else {
               
-            temp.x = pos.x - aabb_center.x;
-            temp.y = pos.y - aabb_center.y - (f64)geometry.data_objects[ind_y+hex];
-            temp.z = pos.z - aabb_center.z - (f64)geometry.data_objects[ind_z+hex];
-                  
-           // printf("centerofhex y %f z %f \n", geometry.data_objects[adr_geom+ADR_COLLI_CENTEROFHEXAGONS_Y+hex], 
-                //   geometry.data_objects[adr_geom+ADR_COLLI_CENTEROFHEXAGONS_Z+hex] );
+            f64xyz ray_obb = fxyz_sub(pos, colli_center);
+            
+            //printf("before ray_obb %f %f %f, dir %f %f %f \n", ray_obb.x, ray_obb.y, ray_obb.z, 
+              //      dir.x, dir.y, dir.z);
+            f64xyz p;
+            p.x = fxyz_dot(ray_obb, u);
+            p.y = fxyz_dot(ray_obb, v);
+            p.z = fxyz_dot(ray_obb, w);
+            f64xyz d;
+            d.x = fxyz_dot(dir, u);
+            d.y = fxyz_dot(dir, v);
+            d.z = fxyz_dot(dir, w);
+          
+          //  printf("after p %f %f %f, d %f %f %f \n", p.x, p.y, p.z, 
+           //         d.x, d.y, d.z);
+            
+            f64xyz temp;
+            temp.x = p.x;
+            temp.y = p.y - (f64)geometry.data_objects[ind_y+hex];
+            temp.z = p.z - (f64)geometry.data_objects[ind_z+hex];
+            
+            /*temp.x = pos_test.x;
+            temp.y = pos_test.y - (f64)geometry.data_objects[ind_y+hex];
+            temp.z = pos_test.z - (f64)geometry.data_objects[ind_z+hex];*/
+          
+         //   printf("centerofhex y %f z %f \n", geometry.data_objects[ind_y+hex], 
+           //         geometry.data_objects[ind_z+hex] );
            
-            distance = hit_ray_septa(temp, pos, dir, half_colli_size_x, hole_radius);
+            distance = hit_ray_septa(temp, d, half_colli_size_x, hole_radius, colli_center, u, v, w);
                   
          //   if (distance < 2000)
-            //    printf("INSIDE hole n %d : temp %f %f %f, pos %f %f %f, distance %f \n", hex, temp.x, temp.y, temp.z, 
-              //         pos.x, pos.y, pos.z, distance);
+         //   printf("INSIDE hole n %d : temp %f %f %f, pos %f %f %f, distance %f \n", hex, temp.x, temp.y, temp.z, 
+          //          pos.x, pos.y, pos.z, distance);
         
         }
       
@@ -643,6 +706,8 @@ __host__ __device__ ui32 get_current_geometry_volume(Scene geometry, ui32 cur_ge
     
     bool inside = false;
     
+    
+    
     f64 aabb_xmin = (f64)geometry.data_objects[adr_geom+ADR_AABB_XMIN];
     f64 aabb_xmax = (f64)geometry.data_objects[adr_geom+ADR_AABB_XMAX];
     f64 aabb_ymin = (f64)geometry.data_objects[adr_geom+ADR_AABB_YMIN];
@@ -650,17 +715,34 @@ __host__ __device__ ui32 get_current_geometry_volume(Scene geometry, ui32 cur_ge
     f64 aabb_zmin = (f64)geometry.data_objects[adr_geom+ADR_AABB_ZMIN];
     f64 aabb_zmax = (f64)geometry.data_objects[adr_geom+ADR_AABB_ZMAX];
     
+    f64xyz head_center;
+    head_center.x = (f64)geometry.data_objects[adr_geom+ADR_OBB_CENTER_X];
+    head_center.y = (f64)geometry.data_objects[adr_geom+ADR_OBB_CENTER_Y];
+    head_center.z = (f64)geometry.data_objects[adr_geom+ADR_OBB_CENTER_Z];
+    
+    f64xyz u, v, w;
+    u.x = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_UX];
+    u.y = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_UY];
+    u.z = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_UZ];
+    v.x = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_VX];
+    v.y = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_VY];
+    v.z = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_VZ];
+    w.x = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_WX];
+    w.y = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_WY];
+    w.z = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_WZ];
+       
     //printf("box %f %f %f %f %f %f \n", aabb_xmin, aabb_xmax, aabb_ymin, aabb_ymax, aabb_zmin, aabb_zmax);
     
     // if particle is not inside SPECThead, return its mother id
-    if (!test_point_AABB(pos, aabb_xmin, aabb_xmax, aabb_ymin, aabb_ymax, aabb_zmin, aabb_zmax)) {
+    if (!test_point_OBB(pos, aabb_xmin, aabb_xmax, aabb_ymin, aabb_ymax, aabb_zmin, aabb_zmax, head_center, u, v, w)) {
         return geometry.mother_node[cur_geom];
     }
-    
+//     
+
     ui32 adr_node = geometry.ptr_nodes[cur_geom];
     
     while (!inside && offset_node < geometry.size_of_nodes[cur_geom]) {
-
+      
         // Child id
         child_geom = geometry.child_nodes[adr_node + offset_node];
         adr_child_geom = geometry.ptr_objects[child_geom];
@@ -671,13 +753,29 @@ __host__ __device__ ui32 get_current_geometry_volume(Scene geometry, ui32 cur_ge
         aabb_ymax = (f64)geometry.data_objects[adr_child_geom+ADR_AABB_YMAX];
         aabb_zmin = (f64)geometry.data_objects[adr_child_geom+ADR_AABB_ZMIN];
         aabb_zmax = (f64)geometry.data_objects[adr_child_geom+ADR_AABB_ZMAX];
+       
+        head_center.x = (f64)geometry.data_objects[adr_child_geom+ADR_OBB_CENTER_X];
+        head_center.y = (f64)geometry.data_objects[adr_child_geom+ADR_OBB_CENTER_Y];
+        head_center.z = (f64)geometry.data_objects[adr_child_geom+ADR_OBB_CENTER_Z];
+        
+        u.x = (f64)geometry.data_objects[adr_child_geom+ADR_OBB_FRAME_UX];
+        u.y = (f64)geometry.data_objects[adr_child_geom+ADR_OBB_FRAME_UY];
+        u.z = (f64)geometry.data_objects[adr_child_geom+ADR_OBB_FRAME_UZ];
+        v.x = (f64)geometry.data_objects[adr_child_geom+ADR_OBB_FRAME_VX];
+        v.y = (f64)geometry.data_objects[adr_child_geom+ADR_OBB_FRAME_VY];
+        v.z = (f64)geometry.data_objects[adr_child_geom+ADR_OBB_FRAME_VZ];
+        w.x = (f64)geometry.data_objects[adr_child_geom+ADR_OBB_FRAME_WX];
+        w.y = (f64)geometry.data_objects[adr_child_geom+ADR_OBB_FRAME_WY];
+        w.z = (f64)geometry.data_objects[adr_child_geom+ADR_OBB_FRAME_WZ];
           
+        //printf("box %f %f %f %f %f %f \n", aabb_xmin, aabb_xmax, aabb_ymin, aabb_ymax, aabb_zmin, aabb_zmax);
+        
         // if particle leaves the colli
-        inside = test_point_AABB(pos, aabb_xmin, aabb_xmax, aabb_ymin, aabb_ymax, aabb_zmin, aabb_zmax);
+        inside = test_point_OBB(pos, aabb_xmin, aabb_xmax, aabb_ymin, aabb_ymax, aabb_zmin, aabb_zmax, head_center, u, v, w);
         
         //if (child_geom == 5 || child_geom == 6) {
-        //printf("box %f %f %f %f %f %f \n", aabb_xmin, aabb_xmax, aabb_ymin, aabb_ymax, aabb_zmin, aabb_zmax);
-        //printf("volume %d inside? %d\n", child_geom, inside);
+        // printf("box %f %f %f %f %f %f \n", aabb_xmin, aabb_xmax, aabb_ymin, aabb_ymax, aabb_zmin, aabb_zmax);
+        // printf("volume %d inside? %d\n", child_geom, inside);
         //}
         ++offset_node;
     }
@@ -728,6 +826,9 @@ __host__ __device__ void get_next_geometry_boundary(Scene geometry, ui32 cur_geo
           // hole boundary or colli boundary
           distance = get_distance_to_object(geometry, adr_geom, COLLI, pos, dir);
           
+          //if (distance < 0.0)
+          //  distance = 0.0;
+          
           f64 temp_distance = distance + EPSILON3;
           
           f64xyz next_pos = fxyz_add(pos, fxyz_scale(dir, temp_distance));
@@ -739,12 +840,28 @@ __host__ __device__ void get_next_geometry_boundary(Scene geometry, ui32 cur_geo
           f64 aabb_zmin = (f64)geometry.data_objects[adr_geom+ADR_AABB_ZMIN];
           f64 aabb_zmax = (f64)geometry.data_objects[adr_geom+ADR_AABB_ZMAX];
           
+          f64xyz colli_center;
+          colli_center.x = (f64)geometry.data_objects[adr_geom+ADR_OBB_CENTER_X];
+          colli_center.y = (f64)geometry.data_objects[adr_geom+ADR_OBB_CENTER_Y];
+          colli_center.z = (f64)geometry.data_objects[adr_geom+ADR_OBB_CENTER_Z];
+          
+          f64xyz u, v, w;
+          u.x = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_UX];
+          u.y = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_UY];
+          u.z = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_UZ];
+          v.x = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_VX];
+          v.y = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_VY];
+          v.z = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_VZ];
+          w.x = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_WX];
+          w.y = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_WY];
+          w.z = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_WZ];
+          
           // if particle leaves the colli
-          if (!test_point_AABB(next_pos, aabb_xmin, aabb_xmax, aabb_ymin, aabb_ymax, aabb_zmin, aabb_zmax))
+          if (!test_point_OBB(next_pos, aabb_xmin, aabb_xmax, aabb_ymin, aabb_ymax, aabb_zmin, aabb_zmax, colli_center, u, v, w))
           {
              geometry_volume = geometry.mother_node[cur_geom];
               
-             //printf("Out of Colli %f %f %f next_vol %d \n", next_pos.x, next_pos.y, next_pos.z, geometry_volume);
+            // printf("Out of Colli %f %f %f next_vol %d \n", next_pos.x, next_pos.y, next_pos.z, geometry_volume);
           } else {
               // Still inside the volume
               geometry_volume = cur_geom;
@@ -759,10 +876,10 @@ __host__ __device__ void get_next_geometry_boundary(Scene geometry, ui32 cur_geo
     }
 
     // First intersection distance given by the current volume
-    interaction_distance = distance;// + EPSILON3; // overshoot
+    interaction_distance = distance; // + EPSILON3; // overshoot
     
 #ifdef DEBUG
-     //   printf(" Current Volume: type %i dist %f\n", obj_type, distance);
+      //  printf(" Current Volume: type %i dist %f\n", obj_type, distance);
 #endif
 
     ////// Children
@@ -773,7 +890,7 @@ __host__ __device__ void get_next_geometry_boundary(Scene geometry, ui32 cur_geo
     ui32 id_child_geom;
 
     while (offset_node < geometry.size_of_nodes[cur_geom]) {
-
+        
         // Child id
         id_child_geom = geometry.child_nodes[adr_node + offset_node];
 
@@ -781,22 +898,29 @@ __host__ __device__ void get_next_geometry_boundary(Scene geometry, ui32 cur_geo
         ui32 adr_child_geom = geometry.ptr_objects[id_child_geom];
         obj_type = (ui32)geometry.data_objects[adr_child_geom+ADR_OBJ_TYPE];
 
+        // printf("type child %d \n", obj_type);
+        
         // Special cases for voxelized volume and SPECThead
-        if (obj_type == VOXELIZED || obj_type == COLLI) {
+        if (obj_type == VOXELIZED) {
             // Volume bounding box
             distance = get_distance_to_object(geometry, adr_child_geom, AABB, pos, dir);
-        } 
+        }
+        else if (obj_type == COLLI) {
+            // Volume bounding box
+            distance = get_distance_to_object(geometry, adr_child_geom, OBB, pos, dir);
+        }
         else {
             // Any other volumes
             distance = get_distance_to_object(geometry, adr_child_geom, obj_type, pos, dir);
         }
 
         if (distance <= interaction_distance) {
-            interaction_distance = distance;// + EPSILON3; // overshoot
+            interaction_distance = distance; // + EPSILON3; // overshoot
             geometry_volume = id_child_geom;
+           // printf("Daughter %i dist %f id %i\n", obj_type, distance, id_child_geom);
         }
 
-        //printf("Daughter %i dist %f id %i\n", obj_type, distance, id_child_geom);
+//         //printf("Daughter %i dist %f id %i\n", obj_type, distance, id_child_geom);
 
         ++offset_node;
     }
@@ -819,6 +943,7 @@ GeometryBuilder::GeometryBuilder() {
 
     // Init the first node id
     world.cur_node_id = 0;
+
 }
 
 ///// Private ////////////////////////////////////////////////////
@@ -866,11 +991,11 @@ void GeometryBuilder::add_root() {
 void GeometryBuilder::add_node(ui32 mother_id) {
     // New node ID
     world.cur_node_id++;
-
+    
     // Insert this object into the tree
     array_insert(&world.child_nodes, world.child_nodes_dim,
                  world.ptr_nodes[mother_id]+world.size_of_nodes[mother_id], world.cur_node_id);
-
+   
     // Update the tree
     world.size_of_nodes[mother_id]++;
     array_push_back(&world.size_of_nodes, world.size_of_nodes_dim, 0);
@@ -879,6 +1004,8 @@ void GeometryBuilder::add_node(ui32 mother_id) {
 
     // Update tree address
     update_tree_address();
+    
+    print_tree();
 }
 
 // Print the tree structure of the geometry
@@ -1187,6 +1314,8 @@ ui32 GeometryBuilder::add_object(Obb obj, ui32 mother_id) {
     // Put this object into buffer
     buffer_obb[world.cur_node_id] = obj;
     buffer_obj_type[world.cur_node_id] = OBB;
+    
+    printf("obb nod id %d \n", world.cur_node_id);
 
     return world.cur_node_id;
 }
@@ -1199,15 +1328,18 @@ ui32 GeometryBuilder::add_object(Colli obj, ui32 mother_id) {
     // Put this object into buffer
     buffer_colli[world.cur_node_id] = obj;
     buffer_obj_type[world.cur_node_id] = COLLI;
+    
+    printf("colli nod id %d \n", world.cur_node_id);
 
     return world.cur_node_id;
 }
 
 // Add a spect_head object into the world
 ui32 GeometryBuilder::add_object(SpectHead obj, ui32 mother_id) {
+  
     // Add thid object to the tree
     add_node(mother_id);
-
+    
     // Put this object into buffer
     buffer_spect_head[world.cur_node_id] = obj;
     buffer_obj_type[world.cur_node_id] = SPECTHEAD;
@@ -1252,7 +1384,9 @@ void GeometryBuilder::build_object(Aabb obj) {
 }
 
 void GeometryBuilder::build_object(SpectHead obj) {
-
+      
+    printf("build object SPECTHEAD.... \n");
+  
     // Store the address to access to this object
     array_push_back(&world.ptr_objects, world.ptr_objects_dim, world.data_objects_dim);
 
@@ -1260,7 +1394,7 @@ void GeometryBuilder::build_object(SpectHead obj) {
 
     // Object Type
     array_push_back(&world.data_objects, world.data_objects_dim, (f32)SPECTHEAD);
- 
+
     // Material index
     array_push_back(&world.data_objects, world.data_objects_dim, (f32)get_material_index(obj.material_name));
 
@@ -1273,7 +1407,32 @@ void GeometryBuilder::build_object(SpectHead obj) {
     array_push_back(&world.data_objects, world.data_objects_dim, obj.ymax);
     array_push_back(&world.data_objects, world.data_objects_dim, obj.zmin);
     array_push_back(&world.data_objects, world.data_objects_dim, obj.zmax);
- 
+    
+    // Head center
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.obb_center.x);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.obb_center.y);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.obb_center.z);
+    //printf("Build OBB center %f %f %f\n", obj.obb_center.x, obj.obb_center.y, obj.obb_center.z);
+    
+    // Head frame
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.u.x);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.u.y);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.u.z);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.v.x);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.v.y);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.v.z);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.w.x);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.w.y);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.w.z);
+    
+    // Rotation angle on each axis (in deg)
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.angle.x);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.angle.y);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.angle.z);
+
+    //printf("dim obj %f %f %f %f %f %f \n", obj.xmin, obj.xmax, obj.ymin, obj.ymax, obj.zmin, obj.zmax);
+   // printf("wireframe %d \n", obj.wireframe);
+    
     // Name of this object
     name_objects.push_back(obj.object_name);
     // Color of this object
@@ -1283,7 +1442,7 @@ void GeometryBuilder::build_object(SpectHead obj) {
     // Wireframe option of this object
     object_wireframe.push_back(obj.wireframe);
     // Store the size of this object
-    array_push_back(&world.size_of_objects, world.size_of_objects_dim, SIZE_AABB_OBJ);
+    array_push_back(&world.size_of_objects, world.size_of_objects_dim, SIZE_OBB_OBJ);
 }
 
 // Build sphere object into the scene structure
@@ -1475,6 +1634,8 @@ void GeometryBuilder::build_object(Meshed obj) {
 
 // Build OBB object into the scene structure
 void GeometryBuilder::build_object(Obb obj) {
+  
+    printf("build object OBB.... \n");
 
     // Store the address to access to this object
     array_push_back(&world.ptr_objects, world.ptr_objects_dim, world.data_objects_dim);
@@ -1528,6 +1689,8 @@ void GeometryBuilder::build_object(Obb obj) {
 // Build COLLI object into the scene structure
 void GeometryBuilder::build_object(Colli obj) {
   
+    printf("build object COLLI.... \n");
+  
     // Store the address to access to this object
     array_push_back(&world.ptr_objects, world.ptr_objects_dim, world.data_objects_dim);
 
@@ -1547,10 +1710,25 @@ void GeometryBuilder::build_object(Colli obj) {
     array_push_back(&world.data_objects, world.data_objects_dim, obj.ymax);
     array_push_back(&world.data_objects, world.data_objects_dim, obj.zmin);
     array_push_back(&world.data_objects, world.data_objects_dim, obj.zmax);
-    // Colli center
-    array_push_back(&world.data_objects, world.data_objects_dim, obj.colli_center.x);
-    array_push_back(&world.data_objects, world.data_objects_dim, obj.colli_center.y);
-    array_push_back(&world.data_objects, world.data_objects_dim, obj.colli_center.z);
+    // OBB center
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.obb_center.x);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.obb_center.y);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.obb_center.z);
+    //printf("Build OBB center %f %f %f\n", obj.obb_center.x, obj.obb_center.y, obj.obb_center.z);
+    // OBB frame
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.u.x);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.u.y);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.u.z);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.v.x);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.v.y);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.v.z);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.w.x);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.w.y);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.w.z);
+    // Rotation angle on each axis (in deg)
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.angle.x);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.angle.y);
+    array_push_back(&world.data_objects, world.data_objects_dim, obj.angle.z);
     // Septa parameters
     array_push_back(&world.data_objects, world.data_objects_dim, obj.septa_height);
     array_push_back(&world.data_objects, world.data_objects_dim, obj.hole_radius);
@@ -1618,7 +1796,7 @@ void GeometryBuilder::build_scene() {
             build_object(buffer_colli[i]);
         // Colli
         } else if (buffer_obj_type[i] == SPECTHEAD) {
-            build_object(buffer_spect_head[i]);
+            build_object(buffer_spect_head[i]);                      
         }
 
         ++i;

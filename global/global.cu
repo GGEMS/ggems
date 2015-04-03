@@ -173,6 +173,7 @@ void array_push_back(f32 **vector, ui32 &dim, f32 val) {
 
 }
 
+
 // Equivalent to std::vector.insert for malloc array (ui32 version)
 void array_insert(ui32 **vector, ui32 &dim, ui32 pos, ui32 val) {
 
@@ -197,9 +198,9 @@ void array_insert(ui32 **vector, ui32 &dim, ui32 pos, ui32 val) {
             exit(EXIT_FAILURE);
         }
         // Move data in memory for the insertion
-        memmove((*vector)+pos, (*vector)+pos+1, (dim-pos)*sizeof(ui32));
+        memmove((*vector)+pos+1, (*vector)+pos, (dim-pos)*sizeof(ui32));
     }
-
+    printf("pos %d val %d \n", pos, val);
     (*vector)[pos] = val;
     (dim)++;
 
@@ -229,9 +230,8 @@ void array_insert(f32 **vector, ui32 &dim, ui32 pos, f32 val) {
             exit(EXIT_FAILURE);
         }
         // Move data in memory for the insertion
-        memmove((*vector)+pos, (*vector)+pos+1, (dim-pos)*sizeof(f32));
+        memmove((*vector)+pos+1, (*vector)+pos, (dim-pos)*sizeof(f32));
     }
-
     (*vector)[pos] = val;
     (dim)++;
 

@@ -20,6 +20,7 @@
 
 #include "constants.cuh"
 #include "global.cuh"
+#include "geometry_builder.cuh"
 
 #include "Randomize.hh"
 
@@ -91,6 +92,14 @@ class Digitizer {
                                    f32 ymin, f32 ymax,
                                    f32 zmin, f32 zmax,
                                    f32 sx, f32 sy, f32 sz);
+        
+        void set_spect_projections(std::string name,
+                                   f32 xmin, f32 xmax,
+                                   f32 ymin, f32 ymax,
+                                   f32 zmin, f32 zmax,
+                                   f32 sx, f32 sy, f32 sz);
+        
+        void set_number_of_projections(ui32 nb_head);
 
         void set_spatial_blurring(f32 SP_res);
         
@@ -100,7 +109,7 @@ class Digitizer {
         void set_time_window(f32 vwin_time);
 
         // Main function
-        void process_chain(ui32 iter, f64 tot_activity);
+        void process_chain(ui32 iter, f64 tot_activity, Scene geometry);
 
         // Singles
         void process_singles(ui32 iter, f64 tot_activity);
@@ -115,7 +124,9 @@ class Digitizer {
         // Projection
         void init_projection();
         void process_projection();
+        void process_spect_projections(Scene geometry);
         void export_projection();
+        void export_spect_projections(ui32 nb_proj, ui32 id_run);
 
         void cpu_init_pulses(ui32 nb);
         void gpu_init_pulses(ui32 nb);
@@ -129,6 +140,7 @@ class Digitizer {
         bool flag_singles;
         bool flag_coincidences;
         bool flag_projection;
+        bool flag_spect_proj;
         
         bool flag_sp_blurring;
         bool flag_energy_blurring;
@@ -147,10 +159,14 @@ class Digitizer {
 
         std::string projection_filename;
         ui32 projection_idvol, projection_nx, projection_ny, projection_nz;
+        ui32 projection_run;
         f32 projection_sx, projection_sy, projection_sz;
         f32 projection_xmin, projection_ymin, projection_zmin;
-        std::vector<ui32> projection;
+        typedef std::vector<ui32> single_proj;
+        std::vector<single_proj> projection;
 
+        ui32 nb_proj;
+        
         // Spatial blurring parameters
         f32 SP_res;
         

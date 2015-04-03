@@ -475,7 +475,7 @@ void SimulationBuilder::init_simulation() {
         }
 
         // If projection acquisition
-        if (digitizer.flag_projection) {
+        if (digitizer.flag_projection || digitizer.flag_spect_proj) {
             digitizer.init_projection();
         }
 
@@ -528,7 +528,7 @@ void SimulationBuilder::start_simulation() {
                 }
 
                 // The complete chain
-                digitizer.process_chain(iter, sources.tot_activity);
+                digitizer.process_chain(iter, sources.tot_activity, geometry.world);
 
                 // Run time
                 if (display_run_time_flag) {

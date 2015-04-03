@@ -774,6 +774,27 @@ __host__ __device__ bool test_point_AABB(f64xyz p,
     return true;
 }
 
+__host__ __device__ bool test_point_OBB(f64xyz p,
+                                        f64 aabb_xmin, f64 aabb_xmax,
+                                        f64 aabb_ymin, f64 aabb_ymax,
+                                        f64 aabb_zmin, f64 aabb_zmax,
+                                        f64xyz obb_center,
+                                        f64xyz u, f64xyz v, f64xyz w) {
+  
+  //printf("BEFORE test_point_OBB: pos %f %f %f \n", p.x, p.y, p.z);
+  //printf("OBB center pos %f %f %f \n", obb_center.x, obb_center.y, obb_center.z);
+  
+  // Transform the ray in OBB' space, then do AABB
+  f64xyz ray_obb = fxyz_sub(p, obb_center);
+  p.x = fxyz_dot(ray_obb, u);
+  p.y = fxyz_dot(ray_obb, v);
+  p.z = fxyz_dot(ray_obb, w);
+  
+  //printf("test_point_OBB: pos %f %f %f \n", p.x, p.y, p.z);
+  
+  return test_point_AABB(p, aabb_xmin, aabb_xmax, aabb_ymin, aabb_ymax, aabb_zmin, aabb_zmax);
+}
+
 // Ray/triangle intersection - Moller-Trumbore algorithm (f64 version)
 __host__ __device__ f64 hit_ray_triangle(f64xyz ray_p, f64xyz ray_d,
                                          f64xyz tri_u,              // Triangle
@@ -819,6 +840,8 @@ __host__ __device__ f64 hit_ray_OBB(f64xyz ray_p, f64xyz ray_d,
     dir.x = fxyz_dot(ray_d, u);
     dir.y = fxyz_dot(ray_d, v);
     dir.z = fxyz_dot(ray_d, w);
+    
+   // printf("dir %f %f %f \n", dir.x, dir.y, dir.z);
 
     return hit_ray_AABB(ray_p, dir, aabb_xmin, aabb_xmax, aabb_ymin, aabb_ymax,
                         aabb_zmin, aabb_zmax);
@@ -826,14 +849,27 @@ __host__ __device__ f64 hit_ray_OBB(f64xyz ray_p, f64xyz ray_d,
 
 
 // Ray/septa intersection
-__host__ __device__ f64 hit_ray_septa(f64xyz p, f64xyz preel, f64xyz d, f64 half_size_x, f64 radius) {
+__host__ __device__ f64 hit_ray_septa(f64xyz p, f64xyz dir, f64 half_size_x, f64 radius,
+                                         f64xyz colli_center, f64xyz colli_u, f64xyz colli_v, f64xyz colli_w) {
     
     f64 xmin, xmax, ymin, ymax, e1min, e1max, e2min, e2max;
     f64 txmin, txmax, tmin, tmax, tymin, tymax, tzmin, tzmax, te1min, te1max, te2min, te2max, buf;
         
-        //printf("position %f %f %f \n", p.x, p.y, p.z);
-        //printf("direction %f %f %f \n", d.x, d.y, d.z);
         
+    
+    //////// First, transform the ray in OBB' space
+    //f64xyz ray_obb = fxyz_sub(p, colli_center);
+ /*   p.x = fxyz_dot(ray_obb, colli_u);
+    p.y = fxyz_dot(ray_obb, colli_v);
+    p.z = fxyz_dot(ray_obb, colli_w);
+    f64xyz dir;
+    dir.x = fxyz_dot(d, colli_u);
+    dir.y = fxyz_dot(d, colli_v);
+    dir.z = fxyz_dot(d, colli_w); */
+    //////////////////////////////////////
+    
+    //printf("hit septa: pos %f %f %f dir %f %f %f \n", p.x, p.y, p.z, dir.x, dir.y, dir.z);
+    
     xmin = -half_size_x;
     xmax = half_size_x;
         
@@ -848,12 +884,12 @@ __host__ __device__ f64 hit_ray_septa(f64xyz p, f64xyz preel, f64xyz d, f64 half
     f64xyz di;
         
         // on x
-    if (fabs(d.x) < EPSILON6) {
+    if (fabs(dir.x) < EPSILON6) {
         if (p.x < xmin || p.x > xmax) {return 0.0;}
     }
     else {
         w = 0;
-        di.x = 1.0f / d.x;
+        di.x = 1.0f / dir.x;
         tmin = txmin = (xmin - p.x) * di.x;
         tmax = txmax = (xmax - p.x) * di.x;
        //printf("on x: %f %f - %f %f - %f %f \n", xmin, xmax, p.x, di.x, tmin, tmax);
@@ -866,11 +902,11 @@ __host__ __device__ f64 hit_ray_septa(f64xyz p, f64xyz preel, f64xyz d, f64 half
     }
     
     // on y
-    if (fabs(d.y) < EPSILON6) {
+    if (fabs(dir.y) < EPSILON6) {
         if (p.y < ymin || p.y > ymax) {return 0.0;}
     }
     else {
-        di.y = 1.0f / d.y;
+        di.y = 1.0f / dir.y;
         tymin = (ymin - p.y) * di.y;
         tymax = (ymax - p.y) * di.y;
         //printf("on y: %f %f - %f %f - %f %f \n", ymin, ymax, p.y, di.y, tymin, tymax);
@@ -888,7 +924,7 @@ __host__ __device__ f64 hit_ray_septa(f64xyz p, f64xyz preel, f64xyz d, f64 half
     
     f64 p1y = (p.y * cos( -M_PI / 3.0 )) + (p.z * sin ( -M_PI / 3.0 ));
     
-    f64 d1y = d.y * cos( -M_PI / 3.0 ) + d.z * sin ( -M_PI / 3.0 );
+    f64 d1y = dir.y * cos( -M_PI / 3.0 ) + dir.z * sin ( -M_PI / 3.0 );
 
    // printf("e1 p1y %f d1y %f \n", p1y, d1y);
     
@@ -916,7 +952,7 @@ __host__ __device__ f64 hit_ray_septa(f64xyz p, f64xyz preel, f64xyz d, f64 half
             
     f64 p2y = (p.y * cos( M_PI / 3.0 )) + (p.z * sin ( M_PI / 3.0 )); 
      
-    f64 d2y = d.y * cos( M_PI / 3.0 ) + d.z * sin ( M_PI / 3.0 );
+    f64 d2y = dir.y * cos( M_PI / 3.0 ) + dir.z * sin ( M_PI / 3.0 );
     
    // printf("e2 p2y %f d2y %f \n", p2y, d2y);
 

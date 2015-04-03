@@ -32,12 +32,13 @@ Obb::Obb (f32 ox, f32 oy, f32 oz,
     sizez *= 0.5;
 
     // Init
-    xmin = ox-sizex;
-    xmax = ox+sizex;
-    ymin = oy-sizey;
-    ymax = oy+sizey;
-    zmin = oz-sizez;
-    zmax = oz+sizez;
+    xmin = -sizex;
+    xmax = sizex;
+    ymin = -sizey;
+    ymax = sizey;
+    zmin = -sizez;
+    zmax = sizez;
+    
     material_name = mat_name;
     object_name = obj_name;
 
@@ -59,6 +60,12 @@ void Obb::translate(f32 tx, f32 ty, f32 tz) {
     // The translation is not apply on the bounding box, because its defined on OBB frame
     // We just need to translate the center-of-gravity
     obb_center = fxyz_add(obb_center, make_f32xyz(tx, ty, tz));
+    /*xmin = xmin + tx;
+    xmax = xmax + tx;
+    ymin = ymin + ty;
+    ymax = ymax + ty;
+    zmin = zmin + tz;
+    zmax = zmax + tz;*/
 }
 
 // Rotation
