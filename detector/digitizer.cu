@@ -817,7 +817,7 @@ void Digitizer::export_spect_projections(ui32 nb_proj, ui32 id_run) {
   
    for (ui32 i = 0; i < nb_proj; i++) {
   
-        ui32 proj = (i+1) * (id_run+1);
+        ui32 proj = (id_run * nb_proj) + (i+1);
         
         std::ostringstream oss;
         
@@ -828,6 +828,8 @@ void Digitizer::export_spect_projections(ui32 nb_proj, ui32 id_run) {
         proj_fullname = proj_fullname.append(projection_filename);
         proj_fullname = proj_fullname.append(oss.str());
         proj_fullname = proj_fullname.append(".mhd");
+        
+        printf("projection %s \n", proj_fullname.c_str());
   
         // check extension
         /*std::string ext = projection_filename.substr(projection_filename.size()-3);

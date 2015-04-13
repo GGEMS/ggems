@@ -80,9 +80,11 @@ void cpu_main_navigator(ParticleStack &particles, Scene geometry,
             }
 
             istep++;
-
-            printf("part %d >>>>>> step %i\n", id, istep);
-
+            
+            #ifdef DEBUG
+                printf("part %d >>>>>> step %i\n", id, istep);
+            #endif
+            
         } // istep
 
         // next particle

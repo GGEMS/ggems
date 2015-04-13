@@ -1004,8 +1004,7 @@ void GeometryBuilder::add_node(ui32 mother_id) {
 
     // Update tree address
     update_tree_address();
-    
-    print_tree();
+
 }
 
 // Print the tree structure of the geometry
@@ -1315,7 +1314,7 @@ ui32 GeometryBuilder::add_object(Obb obj, ui32 mother_id) {
     buffer_obb[world.cur_node_id] = obj;
     buffer_obj_type[world.cur_node_id] = OBB;
     
-    printf("obb nod id %d \n", world.cur_node_id);
+   // printf("obb nod id %d \n", world.cur_node_id);
 
     return world.cur_node_id;
 }
@@ -1329,7 +1328,7 @@ ui32 GeometryBuilder::add_object(Colli obj, ui32 mother_id) {
     buffer_colli[world.cur_node_id] = obj;
     buffer_obj_type[world.cur_node_id] = COLLI;
     
-    printf("colli nod id %d \n", world.cur_node_id);
+  //  printf("colli nod id %d \n", world.cur_node_id);
 
     return world.cur_node_id;
 }
@@ -1385,7 +1384,7 @@ void GeometryBuilder::build_object(Aabb obj) {
 
 void GeometryBuilder::build_object(SpectHead obj) {
       
-    printf("build object SPECTHEAD.... \n");
+   // printf("build object SPECTHEAD.... \n");
   
     // Store the address to access to this object
     array_push_back(&world.ptr_objects, world.ptr_objects_dim, world.data_objects_dim);
@@ -1635,7 +1634,7 @@ void GeometryBuilder::build_object(Meshed obj) {
 // Build OBB object into the scene structure
 void GeometryBuilder::build_object(Obb obj) {
   
-    printf("build object OBB.... \n");
+    //printf("build object OBB.... \n");
 
     // Store the address to access to this object
     array_push_back(&world.ptr_objects, world.ptr_objects_dim, world.data_objects_dim);
@@ -1689,7 +1688,7 @@ void GeometryBuilder::build_object(Obb obj) {
 // Build COLLI object into the scene structure
 void GeometryBuilder::build_object(Colli obj) {
   
-    printf("build object COLLI.... \n");
+  //  printf("build object COLLI.... \n");
   
     // Store the address to access to this object
     array_push_back(&world.ptr_objects, world.ptr_objects_dim, world.data_objects_dim);
