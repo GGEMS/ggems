@@ -39,6 +39,7 @@ Digitizer::Digitizer() {
     flag_spect_proj = false;
     
     nb_proj = 1;
+    index_run = 1;
 }
 
 // Allocate and init the singles list file (CPU)
@@ -227,15 +228,15 @@ void Digitizer::set_spect_projections(std::string name,
     projection_sy = sy;
     projection_sz = sz;
     
-    projection_nx = (ui32)((xmax-xmin) / sx);
+    projection_nx = (ui32)round((xmax-xmin) / sx);
     if (projection_nx == 0) 
       flag_projYZ = true;
     
-    projection_ny = (ui32)((ymax-ymin) / sy);
+    projection_ny = (ui32)round((ymax-ymin) / sy);
     if (projection_ny == 0) 
       flag_projXZ = true;
     
-    projection_nz = (ui32)((zmax-zmin) / sz);
+    projection_nz = (ui32)round((zmax-zmin) / sz);
     if (projection_nz == 0) 
       flag_projXY = true;
     
@@ -244,11 +245,18 @@ void Digitizer::set_spect_projections(std::string name,
     projection_zmin = zmin;
     
     flag_spect_proj = true;
+    
+    printf("proj nx %d, ny %d, nz %d \n", projection_nx, projection_ny, projection_nz);
 }
 
 void Digitizer::set_number_of_projections(ui32 nb_head) {
     
     nb_proj = nb_head;
+}
+
+void Digitizer::set_run(ui32 id_run) {
+    
+    index_run = id_run + 1;
 }
 
 void Digitizer::set_output_projection(std::string name, ui32 volid,
@@ -262,15 +270,15 @@ void Digitizer::set_output_projection(std::string name, ui32 volid,
     projection_sy = sy;
     projection_sz = sz;
     
-    projection_nx = (ui32)((xmax-xmin) / sx);
+    projection_nx = (ui32)round((xmax-xmin) / sx);
     if (projection_nx == 0) 
       flag_projYZ = true;
     
-    projection_ny = (ui32)((ymax-ymin) / sy);
+    projection_ny = (ui32)round((ymax-ymin) / sy);
     if (projection_ny == 0) 
       flag_projXZ = true;
     
-    projection_nz = (ui32)((zmax-zmin) / sz);
+    projection_nz = (ui32)round((zmax-zmin) / sz);
     if (projection_nz == 0) 
       flag_projXY = true;
     
@@ -279,6 +287,8 @@ void Digitizer::set_output_projection(std::string name, ui32 volid,
     projection_zmin = zmin;
     
     flag_projection = true;
+    
+    printf("proj nx %d, ny %d, nz %d \n", projection_nx, projection_ny, projection_nz);
 }
 
 void Digitizer::set_spatial_blurring(f32 vSP_res) {
@@ -380,9 +390,21 @@ void Digitizer::export_singles() {
         printf("Error, to export a Singles file, the exension must be '.txt'!\n");
         return;
     }
+    
+    std::string fullname;
+    fullname.clear();
+    
+    std::string prefix = singles_filename.substr(0,singles_filename.size()-4);
+    fullname.append(prefix);
+    
+    std::ostringstream oss;
+    oss << index_run;
+    fullname.append(oss.str());
+    
+    fullname.append(".txt");
 
     // first write te header
-    FILE *pfile = fopen(singles_filename.c_str(), "w");
+    FILE *pfile = fopen(fullname.c_str(), "w");
     ui32 i=0; while (i < singles.size()) {
         fprintf(pfile, "BLOCK ID %i PART ID %i POS %e %e %e E %e TOF %e TIME %e\n",
                 singles[i].id_geom, singles[i].id_part,
@@ -751,6 +773,12 @@ void Digitizer::process_spect_projections(Scene geometry) {
                     ui32 ppz = (PzNew - projection_zmin) / projection_sz;
                     
                     //printf("head %d: ppy %d ppz %d \n", id_head, ppy, ppz);
+                    
+                    if(ppz >= projection_nz) {
+                        printf("ppz %d proj_nz %d\n", ppz, projection_nz);
+                        printf("pos %f %f %f \n", PxNew, PyNew, PzNew);
+                        printf("id geom %d \n", singles[i].id_geom);
+                    }
                     
                     assert(ppy >= 0);
                     assert(ppz >= 0);

@@ -100,6 +100,8 @@ class Digitizer {
                                    f32 sx, f32 sy, f32 sz);
         
         void set_number_of_projections(ui32 nb_head);
+        
+        void set_run(ui32 id_run);
 
         void set_spatial_blurring(f32 SP_res);
         
@@ -166,6 +168,8 @@ class Digitizer {
         std::vector<single_proj> projection;
 
         ui32 nb_proj;
+       
+        ui32 index_run;
         
         // Spatial blurring parameters
         f32 SP_res;
