@@ -23,11 +23,13 @@
 #include "cone_beam_source.cuh"
 #include "voxelized_source.cuh"
 #include "cylinder_source.cuh"
+#include "planar_source.cuh"
 
 #define POINT_SOURCE 0
 #define CONE_BEAM_SOURCE 1
 #define VOXELIZED_SOURCE 2
 #define CYLINDER_SOURCE 3
+#define PLANAR_SOURCE 4
 
 //// Source def
 #define ADR_SRC_TYPE 0
@@ -39,13 +41,21 @@
 #define ADR_POINT_SRC_PZ 4
 #define ADR_POINT_SRC_ENERGY 5
 
-// Point source
+// Cylinder source
 #define ADR_CYLINDER_SRC_PX 2
 #define ADR_CYLINDER_SRC_PY 3
 #define ADR_CYLINDER_SRC_PZ 4
 #define ADR_CYLINDER_SRC_RAD 5
 #define ADR_CYLINDER_SRC_LEN 6
 #define ADR_CYLINDER_SRC_ENERGY 7
+
+// Planar source
+#define ADR_PLANAR_SRC_PX 2
+#define ADR_PLANAR_SRC_PY 3
+#define ADR_PLANAR_SRC_PZ 4
+#define ADR_PLANAR_SRC_WID 5
+#define ADR_PLANAR_SRC_LEN 6
+#define ADR_PLANAR_SRC_ENERGY 7
 
 // Cone Beam source
 #define ADR_CONE_BEAM_SRC_PX 2
@@ -102,6 +112,7 @@ class SourceBuilder {
         SourceBuilder();
         void add_source(PointSource src);
         void add_source(CylinderSource src);
+        void add_source(PlanarSource src);
         void add_source(ConeBeamSource src);
         void add_source(VoxelizedSource src);
 

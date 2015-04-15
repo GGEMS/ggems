@@ -45,8 +45,8 @@ __host__ __device__ void photon_navigator(ParticleStack &particles, ui32 part_id
     ui32 adr_geom = geometry.ptr_objects[cur_id_geom];
     ui32 obj_type = (ui32)geometry.data_objects[adr_geom+ADR_OBJ_TYPE];
     
-    // printf("photon_navigator pos %f %f %f cur_id_geom %d obj_type %d energy %f \n", pos.x, pos.y, pos.z,
-        //    cur_id_geom, obj_type, particles.E[part_id]);
+    // printf("photon_navigator dir %f %f %f cur_id_geom %d obj_type %d energy %f \n", dir.x, dir.y, dir.z,
+      //      cur_id_geom, obj_type, particles.E[part_id]);
       
    // printf(" obj type %d \n", obj_type);
     
@@ -287,15 +287,6 @@ __host__ __device__ void photon_navigator(ParticleStack &particles, ui32 part_id
         }
 
     } // Digitizer
-
-   /* ui32 n = pulses.size;
-               ui32 i=0; while(i < n) {
-                 if(pulses.pu1_nb_hits[i]>0)
-            printf("pulse %d pos %f %f %f \n", i, pulses.pu1_px[i], 
-                            pulses.pu1_py[i], pulses.pu1_pz[i]);
-            ++i;
-            }
-    */
 }
 
 
@@ -379,16 +370,27 @@ __host__ __device__ void photon_navigator_raytracing_colli(ParticleStack &partic
             ui32 nb_hex = (i32)geometry.data_objects[adr_geom + ADR_COLLI_NB_HEXAGONS];
             ui32 ind_y = adr_geom + ADR_COLLI_CENTEROFHEXAGONS;
             ui32 ind_z = adr_geom + ADR_COLLI_CENTEROFHEXAGONS + nb_hex;
+            
+            f64xyz ray_obb = fxyz_sub(pos, colli_center);
+            
+            f64xyz p;
+            p.x = fxyz_dot(ray_obb, u);
+            p.y = fxyz_dot(ray_obb, v);
+            p.z = fxyz_dot(ray_obb, w);
+            f64xyz d;
+            d.x = fxyz_dot(dir, u);
+            d.y = fxyz_dot(dir, v);
+            d.z = fxyz_dot(dir, w);
           
             f64xyz temp;
-            temp.x = pos.x;
-            temp.y = pos.y - (f64)geometry.data_objects[ind_y+hex];
-            temp.z = pos.z - (f64)geometry.data_objects[ind_z+hex];
+            temp.x = p.x;
+            temp.y = p.y - (f64)geometry.data_objects[ind_y+hex];
+            temp.z = p.z - (f64)geometry.data_objects[ind_z+hex];
                   
            // printf("centerofhex y %f z %f \n", geometry.data_objects[adr_geom+ADR_COLLI_CENTEROFHEXAGONS_Y+hex], 
                 //   geometry.data_objects[adr_geom+ADR_COLLI_CENTEROFHEXAGONS_Z+hex] );
            
-            f64 distance = hit_ray_septa(temp, dir, half_colli_size_x, hole_radius, colli_center, u, v, w);
+            f64 distance = hit_ray_septa(temp, d, half_colli_size_x, hole_radius, colli_center, u, v, w);
             
             f64 next_interaction_distance = distance + EPSILON3; // Overshoot
             // Move the particle
@@ -555,23 +557,50 @@ __host__ __device__ void photon_navigator_raytracing_colli(ParticleStack &partic
 
         if (parameters.digitizer_flag &&
                 get_geometry_is_sensitive(geometry, cur_id_geom) && discrete_loss > 0) {
+            
+            ui32 adr_geom = geometry.ptr_objects[cur_id_geom];
+      
+            f64xyz obb_center;
+            obb_center.x = (f64)geometry.data_objects[adr_geom+ADR_OBB_CENTER_X];
+            obb_center.y = (f64)geometry.data_objects[adr_geom+ADR_OBB_CENTER_Y];
+            obb_center.z = (f64)geometry.data_objects[adr_geom+ADR_OBB_CENTER_Z];
+          
+            f64xyz u, v, w;
+            u.x = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_UX];
+            u.y = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_UY];
+            u.z = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_UZ];
+            v.x = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_VX];
+            v.y = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_VY];
+            v.z = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_VZ];
+            w.x = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_WX];
+            w.y = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_WY];
+            w.z = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_WZ];
+          
+            f64xyz pos_obb = fxyz_sub(pos, obb_center);
+            f64xyz pos_aabb;
+            pos_aabb.x = fxyz_dot(pos_obb, u);
+            pos_aabb.y = fxyz_dot(pos_obb, v);
+            pos_aabb.z = fxyz_dot(pos_obb, w);
+          
             // First hit - first pulse
             if (pulses.pu1_nb_hits[part_id] == 0) {
-                pulses.pu1_px[part_id] = pos.x*discrete_loss;
-                pulses.pu1_py[part_id] = pos.y*discrete_loss;
-                pulses.pu1_pz[part_id] = pos.z*discrete_loss;
+                pulses.pu1_px[part_id] = pos_aabb.x*discrete_loss;
+                pulses.pu1_py[part_id] = pos_aabb.y*discrete_loss;
+                pulses.pu1_pz[part_id] = pos_aabb.z*discrete_loss;
                 pulses.pu1_E[part_id] = discrete_loss;
                 pulses.pu1_tof[part_id] = particles.tof[part_id]; // Time is defined for the first hit
                 pulses.pu1_nb_hits[part_id] += 1;
                 pulses.pu1_id_geom[part_id] = cur_id_geom;
+                //printf("pulse %d pos %f %f %f \n", part_id, pulses.pu1_px[part_id], 
+                  //              pulses.pu1_py[part_id], pulses.pu1_pz[part_id]);
 
             } else {
 
                 // Others hits - first pulse
                 if (cur_id_geom == pulses.pu1_id_geom[part_id]) {
-                    pulses.pu1_px[part_id] += pos.x*discrete_loss;
-                    pulses.pu1_py[part_id] += pos.y*discrete_loss;
-                    pulses.pu1_pz[part_id] += pos.z*discrete_loss;
+                    pulses.pu1_px[part_id] += pos_aabb.x*discrete_loss;
+                    pulses.pu1_py[part_id] += pos_aabb.y*discrete_loss;
+                    pulses.pu1_pz[part_id] += pos_aabb.z*discrete_loss;
                     pulses.pu1_E[part_id] += discrete_loss;
                     pulses.pu1_nb_hits[part_id] += 1;
 
@@ -579,9 +608,9 @@ __host__ __device__ void photon_navigator_raytracing_colli(ParticleStack &partic
 
                     // First hit - second pulse
                     if (pulses.pu2_nb_hits[part_id] == 0) {
-                        pulses.pu2_px[part_id] = pos.x*discrete_loss;
-                        pulses.pu2_py[part_id] = pos.y*discrete_loss;
-                        pulses.pu2_pz[part_id] = pos.z*discrete_loss;
+                        pulses.pu2_px[part_id] = pos_aabb.x*discrete_loss;
+                        pulses.pu2_py[part_id] = pos_aabb.y*discrete_loss;
+                        pulses.pu2_pz[part_id] = pos_aabb.z*discrete_loss;
                         pulses.pu2_E[part_id] = discrete_loss;
                         pulses.pu2_tof[part_id] = particles.tof[part_id]; // Time is defined for the first hit
                         pulses.pu2_nb_hits[part_id] += 1;
@@ -589,15 +618,14 @@ __host__ __device__ void photon_navigator_raytracing_colli(ParticleStack &partic
 
                     } else {
                         // Others hits - second pulse
-                        pulses.pu2_px[part_id] += pos.x*discrete_loss;
-                        pulses.pu2_py[part_id] += pos.y*discrete_loss;
-                        pulses.pu2_pz[part_id] += pos.z*discrete_loss;
+                        pulses.pu2_px[part_id] += pos_aabb.x*discrete_loss;
+                        pulses.pu2_py[part_id] += pos_aabb.y*discrete_loss;
+                        pulses.pu2_pz[part_id] += pos_aabb.z*discrete_loss;
                         pulses.pu2_E[part_id] += discrete_loss;
                         pulses.pu2_nb_hits[part_id] += 1;
                     }
                 }
             }
-
         } // Digitizer
     }
 }

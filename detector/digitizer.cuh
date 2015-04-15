@@ -21,6 +21,7 @@
 #include "constants.cuh"
 #include "global.cuh"
 #include "geometry_builder.cuh"
+#include "raytracing.cuh"
 
 #include "Randomize.hh"
 

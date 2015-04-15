@@ -92,7 +92,7 @@ void Colli::set_linear_repeater(f32 vecx, f32 vecy, f32 vecz) {
    
     
 void Colli::build_colli(){    
-    printf("Entering build_colli .... \n");
+    //printf("Entering build_colli .... \n");
     // Memory allocation of centerOfHexagons
     int number_hexagons = (cubarray_repnum.y * cubarray_repnum.z) + ((cubarray_repnum.y - 1) * (cubarray_repnum.z - 1));
        
@@ -134,7 +134,7 @@ void Colli::build_colli(){
        
     }
 
-    printf("Leaving build_colli .... \n");
+   // printf("Leaving build_colli .... \n");
 }
 
 #endif

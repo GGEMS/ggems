@@ -613,7 +613,7 @@ void Digitizer::process_projection() {
                 if (flag_sp_blurring) {
                     PxNew = G4RandGauss::shoot(singles[i].px,SP_res/2.35);
                     PyNew = G4RandGauss::shoot(singles[i].py,SP_res/2.35);
-                    PzNew = G4RandGauss::shoot(singles[i].pz,SP_res/2.35);
+                    PzNew = G4RandGauss::shoot(singles[i].pz,SP_res/2.35);                    
                 }
             
                 if (flag_projXY) {
@@ -720,9 +720,10 @@ void Digitizer::process_spect_projections(Scene geometry) {
         //if (singles[i].id_geom == projection_idvol) {
             
             f32 E_New = singles[i].E;
-            f32 PxNew = singles[i].px;
-            f32 PyNew = singles[i].py;
-            f32 PzNew = singles[i].pz;
+            f32xyz PNew;
+            PNew.x = singles[i].px;
+            PNew.y = singles[i].py;
+            PNew.z = singles[i].pz;
           
             // Apply energy blurring
             if (flag_energy_blurring) {
@@ -737,99 +738,111 @@ void Digitizer::process_spect_projections(Scene geometry) {
             if (E_New >= E_low && E_New <= E_high) {
               
                 ui32 mother_id = geometry.mother_node[singles[i].id_geom];
+                
+                ui32 adr_geom = geometry.ptr_objects[singles[i].id_geom];
+                    
+                f64 aabb_xmin = (f64)geometry.data_objects[adr_geom+ADR_AABB_XMIN];
+                f64 aabb_xmax = (f64)geometry.data_objects[adr_geom+ADR_AABB_XMAX];
+                f64 aabb_ymin = (f64)geometry.data_objects[adr_geom+ADR_AABB_YMIN];
+                f64 aabb_ymax = (f64)geometry.data_objects[adr_geom+ADR_AABB_YMAX];
+                f64 aabb_zmin = (f64)geometry.data_objects[adr_geom+ADR_AABB_ZMIN];
+                f64 aabb_zmax = (f64)geometry.data_objects[adr_geom+ADR_AABB_ZMAX];
               
                 ui32 id_head = (singles[i].id_geom + 1) / (geometry.size_of_nodes[mother_id] + 1);
             
                 // Apply spatial blurring
                 if (flag_sp_blurring) {
-                    PxNew = G4RandGauss::shoot(singles[i].px,SP_res/2.35);
-                    PyNew = G4RandGauss::shoot(singles[i].py,SP_res/2.35);
-                    PzNew = G4RandGauss::shoot(singles[i].pz,SP_res/2.35);
+                    PNew.x = G4RandGauss::shoot(singles[i].px,SP_res/2.35);              
+                    PNew.y = G4RandGauss::shoot(singles[i].py,SP_res/2.35);
+                    PNew.z = G4RandGauss::shoot(singles[i].pz,SP_res/2.35);
                 }
             
-                if (flag_projXY) {
-                    
-                    // Change single frame to voxel space
-                    ui32 ppx = (PxNew - projection_xmin) / projection_sx;
-                    ui32 ppy = (PyNew - projection_ymin) / projection_sy;
-             
-                    assert(ppx >= 0);
-                    assert(ppy >= 0);
+                // If new position still inside the detector 
+                if (test_point_AABB(PNew, aabb_xmin, aabb_xmax, aabb_ymin, aabb_ymax, aabb_zmin, aabb_zmax)) {
+                    if (flag_projXY) {
+                        
+                        // Change single frame to voxel space
+                        ui32 ppx = (PNew.x - projection_xmin) / projection_sx;
+                        ui32 ppy = (PNew.y - projection_ymin) / projection_sy;
+                
+                        assert(ppx >= 0);
+                        assert(ppy >= 0);
 
-                    assert(ppx < projection_nx);
-                    assert(ppy < projection_ny);
+                        assert(ppx < projection_nx);
+                        assert(ppy < projection_ny);
 
-                    // Assign value
-                    projection[id_head-1][ppy*projection_nx + ppx] += 1; 
-                    
-                    #ifdef VALID_GGEMS
-                    fprintf(pfile, "%f %f\n", PxNew, PyNew);
-                    #endif
-                 }
-                else if (flag_projYZ) {
-                    
-                    // Change single frame to voxel space
-                    ui32 ppy = (PyNew - projection_ymin) / projection_sy;
-                    ui32 ppz = (PzNew - projection_zmin) / projection_sz;
-                    
-                    //printf("head %d: ppy %d ppz %d \n", id_head, ppy, ppz);
-                    
-                    if(ppz >= projection_nz) {
-                        printf("ppz %d proj_nz %d\n", ppz, projection_nz);
-                        printf("pos %f %f %f \n", PxNew, PyNew, PzNew);
-                        printf("id geom %d \n", singles[i].id_geom);
+                        // Assign value
+                        projection[id_head-1][ppy*projection_nx + ppx] += 1; 
+                        
+                        #ifdef VALID_GGEMS
+                        fprintf(pfile, "%f %f\n", PNew.x, PNew.y);
+                        #endif
                     }
-                    
-                    assert(ppy >= 0);
-                    assert(ppz >= 0);
+                    else if (flag_projYZ) {
+                        
+                        // Change single frame to voxel space
+                        ui32 ppy = (PNew.y - projection_ymin) / projection_sy;
+                        ui32 ppz = (PNew.z - projection_zmin) / projection_sz;
+                        
+                        //printf("head %d: ppy %d ppz %d \n", id_head, ppy, ppz);
+                        
+                        if(ppz >= projection_nz) {
+                            printf("ppz %d proj_nz %d\n", ppz, projection_nz);
+                            printf("pos before %f %f %f \n", singles[i].px, singles[i].py, singles[i].pz);
+                            printf("pos spblur %f %f %f \n", PNew.x, PNew.y, PNew.z);
+                            printf("id geom %d \n", singles[i].id_geom);
+                        }
+                        
+                        assert(ppy >= 0);
+                        assert(ppz >= 0);
 
-                    assert(ppy < projection_ny);
-                    assert(ppz < projection_nz);
-                    
-                    // Assign value
-                    projection[id_head-1][ppz*projection_ny + ppy] += 1; 
-                    
-                    #ifdef VALID_GGEMS
-                    fprintf(pfile, "%f %f\n", PyNew, PzNew);
-                    #endif
-                }
-                else if (flag_projXZ) {
-               
-                    // Change single frame to voxel space
-                    ui32 ppx = (PxNew - projection_xmin) / projection_sx;
-                    ui32 ppz = (PzNew - projection_zmin) / projection_sz;
-             
-                    assert(ppx >= 0);
-                    assert(ppz >= 0);
+                        assert(ppy < projection_ny);
+                        assert(ppz < projection_nz);
+                        
+                        // Assign value
+                        projection[id_head-1][ppz*projection_ny + ppy] += 1; 
+                        
+                        #ifdef VALID_GGEMS
+                        fprintf(pfile, "%f %f\n", PNew.y, PNew.z);
+                        #endif
+                    }
+                    else if (flag_projXZ) {
+                  
+                        // Change single frame to voxel space
+                        ui32 ppx = (PNew.x - projection_xmin) / projection_sx;
+                        ui32 ppz = (PNew.z - projection_zmin) / projection_sz;
+                
+                        assert(ppx >= 0);
+                        assert(ppz >= 0);
 
-                    assert(ppx < projection_nx);
-                    assert(ppz < projection_nz);
+                        assert(ppx < projection_nx);
+                        assert(ppz < projection_nz);
 
-                    // Assign value
-                    projection[id_head-1][ppz*projection_nx + ppx] += 1; 
-                    
-                    #ifdef VALID_GGEMS
-                    fprintf(pfile, "%f %f\n", PxNew, PzNew);
-                    #endif
-                }
-                else {
-                    // Change single frame to voxel space
-                    ui32 ppx = (PxNew - projection_xmin) / projection_sx;
-                    ui32 ppy = (PyNew - projection_ymin) / projection_sy;
-                    ui32 ppz = (PzNew - projection_zmin) / projection_sz;
+                        // Assign value
+                        projection[id_head-1][ppz*projection_nx + ppx] += 1; 
+                        
+                        #ifdef VALID_GGEMS
+                        fprintf(pfile, "%f %f\n", PNew.x, PNew.z);
+                        #endif
+                    }
+                    else {
+                        // Change single frame to voxel space
+                        ui32 ppx = (PNew.x - projection_xmin) / projection_sx;
+                        ui32 ppy = (PNew.y - projection_ymin) / projection_sy;
+                        ui32 ppz = (PNew.z - projection_zmin) / projection_sz;
 
-                    assert(ppx >= 0);
-                    assert(ppy >= 0);
-                    assert(ppz >= 0);
+                        assert(ppx >= 0);
+                        assert(ppy >= 0);
+                        assert(ppz >= 0);
 
-                    assert(ppx < projection_nx);
-                    assert(ppy < projection_ny);
-                    assert(ppz < projection_nz);
+                        assert(ppx < projection_nx);
+                        assert(ppy < projection_ny);
+                        assert(ppz < projection_nz);
 
-                    projection[id_head-1][ppz*projection_ny*projection_nx + ppy*projection_nx + ppx] += 1;
+                        projection[id_head-1][ppz*projection_ny*projection_nx + ppy*projection_nx + ppx] += 1;
+                    }
                 }
             }
-       // }
         ++i;
     }
     
