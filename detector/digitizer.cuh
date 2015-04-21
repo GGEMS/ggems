@@ -135,6 +135,7 @@ class Digitizer {
         void gpu_init_pulses(ui32 nb);
         void copy_pulses_gpu2cpu();
         void clear_gpu_pulses();
+        void free_cpu_pulses();
         
         Pulses pulses;  // CPU - Same size than particles stack
         Pulses dpulses; // GPU

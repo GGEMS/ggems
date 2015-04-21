@@ -40,6 +40,7 @@ Digitizer::Digitizer() {
     
     nb_proj = 1;
     index_run = 1;
+    
 }
 
 // Allocate and init the singles list file (CPU)
@@ -71,6 +72,31 @@ void Digitizer::cpu_init_pulses(ui32 nb) {
         ++i;
     }
 }
+
+
+// Allocate and init the singles list file (CPU)
+void Digitizer::free_cpu_pulses() {
+
+    // Block Pulse 1
+    free(pulses.pu1_px);
+    free(pulses.pu1_py);
+    free(pulses.pu1_pz);
+    free(pulses.pu1_E);
+    free(pulses.pu1_tof);
+    free(pulses.pu1_id_part);
+    free(pulses.pu1_id_geom);
+    free(pulses.pu1_nb_hits);
+    // Block Pulse 2
+    free(pulses.pu2_px);
+    free(pulses.pu2_py);
+    free(pulses.pu2_pz);
+    free(pulses.pu2_E);
+    free(pulses.pu2_tof);
+    free(pulses.pu2_id_part);
+    free(pulses.pu2_id_geom);
+    free(pulses.pu2_nb_hits);
+}
+
 
 // Allocate and init the pulses list file (GPU)
 void Digitizer::gpu_init_pulses(ui32 nb) {
@@ -228,16 +254,17 @@ void Digitizer::set_spect_projections(std::string name,
     projection_sy = sy;
     projection_sz = sz;
     
-    projection_nx = (ui32)round((xmax-xmin) / sx);
-    if (projection_nx == 0) 
+    projection_nx = (ui32)((xmax-xmin) / sx) + 1;
+    if (projection_nx == 1) 
       flag_projYZ = true;
     
-    projection_ny = (ui32)round((ymax-ymin) / sy);
-    if (projection_ny == 0) 
+    projection_ny = (ui32)((ymax-ymin) / sy) + 1;
+    
+    if (projection_ny == 1) 
       flag_projXZ = true;
     
-    projection_nz = (ui32)round((zmax-zmin) / sz);
-    if (projection_nz == 0) 
+    projection_nz = (ui32)((zmax-zmin) / sz) + 1;
+    if (projection_nz == 1) 
       flag_projXY = true;
     
     projection_xmin = xmin;
@@ -275,6 +302,7 @@ void Digitizer::set_output_projection(std::string name, ui32 volid,
       flag_projYZ = true;
     
     projection_ny = (ui32)round((ymax-ymin) / sy);
+    
     if (projection_ny == 0) 
       flag_projXZ = true;
     
@@ -562,15 +590,17 @@ void Digitizer::init_projection() {
         n = projection_nx*projection_ny*projection_nz;
     }
     
-    projection.resize(nb_proj, single_proj ( n , 0 ));
+   // projection.clear();
+   projection.resize(nb_proj, single_proj ( n , 0 ));
     
-  /*  for (ui32 id = 0; id < nb_proj; id++) {
+   /* for (ui32 id = 0; id < nb_proj; id++) {
         for (ui32 i = 0; i < n; i++) {
-        projection[id].clear();
-        projection[id].reserve(n);
-        ui32 i=0; while (i<n) {
-            projection[id][i] = 0;
-            ++i;
+            projection[id].clear();
+            projection[id].reserve(n);
+            ui32 j=0; while (j<n) {
+                projection[id][j] = 0;
+                ++j;
+            }
         }
     }*/
 }
@@ -712,7 +742,7 @@ void Digitizer::process_spect_projections(Scene geometry) {
     FILE *efile = fopen("Energy.txt", "a");
     #endif
     
-    //printf("dim proj %d %d \n",projection_ny, projection_nz);
+   // printf("dim proj %d %d \n",projection_ny, projection_nz);
 
     while (i < singles.size()) {
 
@@ -784,10 +814,17 @@ void Digitizer::process_spect_projections(Scene geometry) {
                         ui32 ppy = (PNew.y - projection_ymin) / projection_sy;
                         ui32 ppz = (PNew.z - projection_zmin) / projection_sz;
                         
-                        //printf("head %d: ppy %d ppz %d \n", id_head, ppy, ppz);
+                     //   printf("i %d head %d: ppy %d ppz %d \n", i, id_head, ppy, ppz);
                         
                         if(ppz >= projection_nz) {
                             printf("ppz %d proj_nz %d\n", ppz, projection_nz);
+                            printf("pos before %f %f %f \n", singles[i].px, singles[i].py, singles[i].pz);
+                            printf("pos spblur %f %f %f \n", PNew.x, PNew.y, PNew.z);
+                            printf("id geom %d \n", singles[i].id_geom);
+                        }
+                        
+                        if(ppy >= projection_ny) {
+                            printf("ppy %f proj_y %d\n", (PNew.y - projection_ymin) / projection_sy, projection_ny);
                             printf("pos before %f %f %f \n", singles[i].px, singles[i].py, singles[i].pz);
                             printf("pos spblur %f %f %f \n", PNew.x, PNew.y, PNew.z);
                             printf("id geom %d \n", singles[i].id_geom);

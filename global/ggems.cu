@@ -508,7 +508,9 @@ void SimulationBuilder::start_simulation() {
 
             // If history is required
             if (target == CPU_DEVICE && history.record_flag == ENABLED) history.cur_iter = iter;
-
+            
+            printf("primaries_generator \n");
+            
             // Sources
             primaries_generator();
             
@@ -516,6 +518,7 @@ void SimulationBuilder::start_simulation() {
             if (target == GPU_DEVICE)
                 digitizer.clear_gpu_pulses();
             
+            printf("main_navigator \n");
             // Navigation
             main_navigator();
             
@@ -535,13 +538,16 @@ void SimulationBuilder::start_simulation() {
                     print_time("Process singles", get_time()-t_start);
                 }
             }
-
+            
         // iter
         ++iter;
         
         printf(">> Iter %i / %i\n", iter, nb_of_iterations);
 
     } // main loop
+    
+    // Free cpu pulses
+    digitizer.free_cpu_pulses();
 
 }
 
