@@ -113,6 +113,31 @@ void ParticleBuilder::cpu_malloc_stack() {
     stack.pname = (ui8*)malloc(stack.size * sizeof(ui8));
 }
 
+
+void ParticleBuilder::cpu_free_stack() {
+
+    free(stack.E);
+    free(stack.dx);
+    free(stack.dy);
+    free(stack.dz);
+    free(stack.px);
+    free(stack.py);
+    free(stack.pz);
+    free(stack.tof);
+
+    free(stack.prng_state_1);
+    free(stack.prng_state_2);
+    free(stack.prng_state_3);
+    free(stack.prng_state_4);
+    free(stack.prng_state_5);
+
+    free(stack.geometry_id);
+
+    free(stack.endsimu);
+    free(stack.level);
+    free(stack.pname);
+}
+
 void ParticleBuilder::gpu_malloc_stack() {
 
     if (dstack.size == 0) {

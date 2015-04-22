@@ -169,6 +169,8 @@ void Digitizer::gpu_init_pulses(ui32 nb) {
 //                             n*sizeof(ui32), cudaMemcpyHostToDevice) );
     HANDLE_ERROR( cudaMemcpy(dpulses.pu2_nb_hits, vec,
                              n*sizeof(ui32), cudaMemcpyHostToDevice) );
+    
+    free(vec);
 
 }
 
@@ -229,6 +231,8 @@ void Digitizer::clear_gpu_pulses() {
                             
     HANDLE_ERROR( cudaMemcpy(dpulses.pu2_nb_hits, vec,
                             n*sizeof(ui32), cudaMemcpyHostToDevice) );
+    
+    free(vec);
     
 }
 

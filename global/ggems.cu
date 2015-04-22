@@ -548,7 +548,16 @@ void SimulationBuilder::start_simulation() {
     
     // Free cpu pulses
     digitizer.free_cpu_pulses();
+    
+    // Free particles stack
+    particles.cpu_free_stack();
 
+    // Free materials table
+    materials.free_materials_table();
+    
+    free(parameters.physics_list);
+    free(parameters.secondaries_list);
+    
 }
 
 

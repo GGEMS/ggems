@@ -112,7 +112,7 @@ class MaterialBuilder {
         void load_materials_database(std::string filename);
 
         void get_materials_table_from_world(GeometryBuilder World);
-
+        void free_materials_table();
         void copy_materials_table_cpu2gpu();
 
         MaterialsTable materials_table;  // CPU

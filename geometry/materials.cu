@@ -208,6 +208,35 @@ void MaterialBuilder::load_materials_database(std::string filename) {
 }
 
 // Build the materials table according the object contains in the world
+void MaterialBuilder::free_materials_table() {
+
+    free(materials_table.nb_elements);
+    free(materials_table.index);
+    free(materials_table.nb_atoms_per_vol);
+    free(materials_table.nb_electrons_per_vol);
+    free(materials_table.electron_mean_excitation_energy);
+    free(materials_table.rad_length);
+    free(materials_table.fX0);
+    free(materials_table.fX1);
+    free(materials_table.fD0);
+    free(materials_table.fC);
+    free(materials_table.fA);
+    free(materials_table.fM);
+    free(materials_table.density);
+    free(materials_table.fF1);
+    free(materials_table.fF2);
+    free(materials_table.fEnergy0);
+    free(materials_table.fEnergy1);
+    free(materials_table.fEnergy2);
+    free(materials_table.fLogEnergy1);
+    free(materials_table.fLogEnergy2);
+    free(materials_table.fLogMeanExcitationEnergy);
+    free(materials_table.mixture);
+    free(materials_table.atom_num_dens);
+
+}
+
+// Build the materials table according the object contains in the world
 void MaterialBuilder::get_materials_table_from_world(GeometryBuilder World) {
 
     // First allocated data to the structure according the number of materials
