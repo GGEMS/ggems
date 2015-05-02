@@ -365,17 +365,16 @@ __host__ __device__ f64 get_distance_to_object(Scene geometry, ui32 adr_geom,
                 //  printf("SEARCH hexagon index %d pos %f %f %f \n", hex_test, pos_test.x, pos_test.y, pos_test.z);
             }
                             
+            distance = sqrt((pos_test.x - pos.x)*(pos_test.x - pos.x) 
+                                + (pos_test.y - pos.y)*(pos_test.y - pos.y) 
+                                + (pos_test.z - pos.z)*(pos_test.z - pos.z));                
+                            
            //printf("hexagon index %d pos %f %f %f \n", hex_test, pos_test.x, pos_test.y, pos_test.z);
                 
-            if (hex_test>=0) {
+          /*  if (hex_test>=0) {
                         
                   f64xyz inv_dir;
               
-                  // Mettre dans le referentiel de l'hexagone (first in the colli referentiel with aabb_center)
-                  
-                  /*temp.x = pos_test.x - colli_center.x;
-                  temp.y = pos_test.y - colli_center.y - (f64)geometry.data_objects[ind_y+hex_test];
-                  temp.z = pos_test.z - colli_center.z - (f64)geometry.data_objects[ind_z+hex_test] ;*/
                   
                   f64xyz ray_obb = fxyz_sub(pos_test, colli_center);
                   f64xyz p;
@@ -407,7 +406,7 @@ __host__ __device__ f64 get_distance_to_object(Scene geometry, ui32 adr_geom,
                   distance = dist - interaction_distance;// + 1.0e-03f;
                   
                   if(distance < EPSILON6)
-                    distance = 0.0;
+                    distance = dist;
                   
                 //  printf("OUTSIDE hole n %d : temp %f %f %f, pos %f %f %f, distance %f \n", hex_test, temp.x, temp.y, temp.z, 
                   //     pos_test.x, pos_test.y, pos_test.z, interaction_distance);
@@ -420,7 +419,10 @@ __host__ __device__ f64 get_distance_to_object(Scene geometry, ui32 adr_geom,
                                 + (pos_test.y - pos.y)*(pos_test.y - pos.y) 
                                 + (pos_test.z - pos.z)*(pos_test.z - pos.z));
              //   printf("escaping colli box : distance %f \n", distance);
-            }   
+            }   */
+          
+          
+          
         } else {
               
             f64xyz ray_obb = fxyz_sub(pos, colli_center);

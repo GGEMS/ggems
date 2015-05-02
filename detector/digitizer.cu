@@ -73,6 +73,16 @@ void Digitizer::cpu_init_pulses(ui32 nb) {
     }
 }
 
+// Allocate and init the singles list file (CPU)
+void Digitizer::clear_cpu_pulses() {
+ 
+    ui32 i=0; while (i<pulses.size) {
+        pulses.pu1_nb_hits[i]=0;
+        pulses.pu2_nb_hits[i]=0;
+        ++i;
+    }
+}
+
 
 // Allocate and init the singles list file (CPU)
 void Digitizer::free_cpu_pulses() {
@@ -176,7 +186,7 @@ void Digitizer::gpu_init_pulses(ui32 nb) {
 
 // Copy the pulses list from the GPU to the CPU
 void Digitizer::copy_pulses_gpu2cpu() {
-
+   
     ui32 n = dpulses.size;
     
     HANDLE_ERROR( cudaMemcpy(pulses.pu1_px, dpulses.pu1_px,
@@ -746,7 +756,7 @@ void Digitizer::process_spect_projections(Scene geometry) {
     FILE *efile = fopen("Energy.txt", "a");
     #endif
     
-   // printf("dim proj %d %d \n",projection_ny, projection_nz);
+    printf("dim proj %d %d single size %d\n",projection_ny, projection_nz, singles.size());
 
     while (i < singles.size()) {
 
@@ -759,6 +769,8 @@ void Digitizer::process_spect_projections(Scene geometry) {
             PNew.y = singles[i].py;
             PNew.z = singles[i].pz;
           
+            //printf("Energy %f singles[i].id_geom %d \n", E_New, singles[i].id_geom);
+            
             // Apply energy blurring
             if (flag_energy_blurring) {
                 f32 resolution = E_slope * (singles[i].E - E_ref) + E_res;
@@ -774,6 +786,7 @@ void Digitizer::process_spect_projections(Scene geometry) {
                 ui32 mother_id = geometry.mother_node[singles[i].id_geom];
                 
                 ui32 adr_geom = geometry.ptr_objects[singles[i].id_geom];
+                
                     
                 f64 aabb_xmin = (f64)geometry.data_objects[adr_geom+ADR_AABB_XMIN];
                 f64 aabb_xmax = (f64)geometry.data_objects[adr_geom+ADR_AABB_XMAX];
@@ -818,7 +831,7 @@ void Digitizer::process_spect_projections(Scene geometry) {
                         ui32 ppy = (PNew.y - projection_ymin) / projection_sy;
                         ui32 ppz = (PNew.z - projection_zmin) / projection_sz;
                         
-                     //   printf("i %d head %d: ppy %d ppz %d \n", i, id_head, ppy, ppz);
+                        //printf("i %d head %d: ppy %d ppz %d \n", i, id_head, ppy, ppz);
                         
                         if(ppz >= projection_nz) {
                             printf("ppz %d proj_nz %d\n", ppz, projection_nz);
@@ -945,8 +958,8 @@ void Digitizer::export_spect_projections(ui32 nb_proj, ui32 id_run) {
         }         
         else {
             fprintf(pfile, "NDims = 3 \n");
-            fprintf(pfile, "ElementSpacing = %f %f\n", projection_sx, projection_sy, projection_sz);
-            fprintf(pfile, "DimSize = %i %i\n", projection_nx, projection_ny, projection_nz);
+            fprintf(pfile, "ElementSpacing = %f %f %f\n", projection_sx, projection_sy, projection_sz);
+            fprintf(pfile, "DimSize = %i %i %i\n", projection_nx, projection_ny, projection_nz);
         }
         
         std::string export_name = proj_fullname.replace(proj_fullname.size()-3, 3, "raw");
@@ -1009,8 +1022,8 @@ void Digitizer::export_projection() {
     }         
     else {
         fprintf(pfile, "NDims = 3 \n");
-        fprintf(pfile, "ElementSpacing = %f %f\n", projection_sx, projection_sy, projection_sz);
-        fprintf(pfile, "DimSize = %i %i\n", projection_nx, projection_ny, projection_nz);
+        fprintf(pfile, "ElementSpacing = %f %f %f\n", projection_sx, projection_sy, projection_sz);
+        fprintf(pfile, "DimSize = %i %i %i\n", projection_nx, projection_ny, projection_nz);
     }
     
     std::string export_name = projection_filename.replace(projection_filename.size()-3, 3, "raw");
@@ -1041,7 +1054,6 @@ void Digitizer::export_projection() {
 /// Main function /////////////////////////////////////////
 
 void Digitizer::process_chain(ui32 iter, f64 tot_activity, Scene geometry) {
-
 
     process_singles(iter, tot_activity);
 

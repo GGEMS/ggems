@@ -69,9 +69,9 @@ void SimulationBuilder::primaries_generator() {
 
     /// CPU ///////////////////////////////////
     if (target == CPU_DEVICE) {
-#ifdef DEBUG
+//#ifdef DEBUG
         printf("CPU: primaries generator\n");
-#endif
+//#endif
 
         f64 t_start;
         if (display_run_time_flag) t_start = get_time();
@@ -79,6 +79,7 @@ void SimulationBuilder::primaries_generator() {
         // Loop over particle slot
         ui32 id = 0;
         ui32 is = 0;
+        printf("particles stack size %d \n",particles.stack.size);
         while (id < particles.stack.size) {
 
             // TODO - Generic and multi-sources
@@ -131,6 +132,7 @@ void SimulationBuilder::primaries_generator() {
         dim3 threads, grid;
         threads.x = gpu_block_size;
         grid.x = (particles.dstack.size + gpu_block_size - 1) / gpu_block_size;
+        
         kernel_get_primaries<<<grid, threads>>>(sources.dsources, particles.dstack, is);
         cuda_error_check("Error ", " Kernel_primaries_generator");
 
@@ -381,6 +383,8 @@ void SimulationBuilder::init_simulation() {
     particles.stack.size = nb_of_particles / nb_of_iterations;
     nb_of_particles = particles.stack.size * nb_of_iterations;
 
+    //printf("nb of particles %d \n", nb_of_particles);
+    
     /// Init the GPU if need
     if (target == GPU_DEVICE) {
         // Reset device
@@ -517,6 +521,8 @@ void SimulationBuilder::start_simulation() {
             // Clear gpu pulses
             if (target == GPU_DEVICE)
                 digitizer.clear_gpu_pulses();
+                
+            digitizer.clear_cpu_pulses();
             
             printf("main_navigator \n");
             // Navigation

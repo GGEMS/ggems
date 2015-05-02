@@ -486,6 +486,32 @@ void VRML::write_sources(SourceBuilder sources) {
             fprintf(pfile, "  }\n");
             fprintf(pfile, "}\n");
 
+        } else if (type_src == CYLINDER_SOURCE) {
+            f32 px = sources.sources.data_sources[adr_src+ADR_CYLINDER_SRC_PX];
+            f32 py = sources.sources.data_sources[adr_src+ADR_CYLINDER_SRC_PY];
+            f32 pz = sources.sources.data_sources[adr_src+ADR_CYLINDER_SRC_PZ];
+            f32 radius = sources.sources.data_sources[adr_src+ADR_CYLINDER_SRC_RAD];
+            f32 length = sources.sources.data_sources[adr_src+ADR_CYLINDER_SRC_LEN];
+
+            fprintf(pfile, "# Source\n");
+            fprintf(pfile, "Transform {\n");
+            fprintf(pfile, "  translation 0.0 0.0 0.0\n");
+            fprintf(pfile, "  children [\n");
+            fprintf(pfile, "     Shape {\n");
+            fprintf(pfile, "        geometry Cylinder {\n");
+            fprintf(pfile, "          height %f \n", length);
+            fprintf(pfile, "          radius 108.000000 \n", radius);
+            fprintf(pfile, "        }\n");
+            fprintf(pfile, "        appearance Appearance {\n");
+            fprintf(pfile, "           material Material {\n");
+            fprintf(pfile, "              diffuseColor 1.0 1.0 0.0 \n");  // Yellow
+            fprintf(pfile, "              transparency 0.200000\n");
+            fprintf(pfile, "           }\n");
+            fprintf(pfile, "        }\n");
+            fprintf(pfile, "     }\n");
+            fprintf(pfile, "  ]\n");
+            fprintf(pfile, "}\n");
+
         }
 
         ++isrc;
@@ -534,7 +560,7 @@ void VRML::write_particles(HistoryBuilder history) {
         // Color
         fprintf(pfile, "    color Color {\n");
         if (history.pname[ip] == PHOTON) {
-            fprintf(pfile, "      color [1.0 1.0 0.0]\n");
+            fprintf(pfile, "      color [0.0 1.0 0.0]\n");
         } else if (history.pname[ip] == ELECTRON) {
             fprintf(pfile, "      color [1.0 0.0 0.0]\n");
         }
