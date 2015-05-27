@@ -27,6 +27,8 @@ __host__ __device__ void photon_navigator(ParticleStack &particles, ui32 part_id
                           GlobalSimulationParameters parameters,
                           Pulses &pulses) {
 
+  
+  
     // Read position
     f64xyz pos;
     pos.x = particles.px[part_id];
@@ -45,107 +47,47 @@ __host__ __device__ void photon_navigator(ParticleStack &particles, ui32 part_id
     ui32 adr_geom = geometry.ptr_objects[cur_id_geom];
     ui32 obj_type = (ui32)geometry.data_objects[adr_geom+ADR_OBJ_TYPE];
     
-   /* if (part_id == 624455 && obj_type == COLLI) {
+   /* if (part_id == 88 && obj_type == COLLI) {
+      
+              f64xyz colli_center;
+              colli_center.x = (f64)geometry.data_objects[adr_geom+ADR_OBB_CENTER_X];
+              colli_center.y = (f64)geometry.data_objects[adr_geom+ADR_OBB_CENTER_Y];
+              colli_center.z = (f64)geometry.data_objects[adr_geom+ADR_OBB_CENTER_Z];
+              
+              f64xyz u, v, w;
+              u.x = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_UX];
+              u.y = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_UY];
+              u.z = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_UZ];
+              v.x = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_VX];
+              v.y = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_VY];
+              v.z = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_VZ];
+              w.x = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_WX];
+              w.y = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_WY];
+              w.z = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_WZ];
+              
+              i32 hex = GetHexIndex(pos, geometry, adr_geom, colli_center, u, v, w);
+              
+              printf("hex %d \n", hex);
+          
+              ui32 nb_hex = (i32)geometry.data_objects[adr_geom + ADR_COLLI_NB_HEXAGONS];
+              ui32 ind_y = adr_geom + ADR_COLLI_CENTEROFHEXAGONS;
+              ui32 ind_z = adr_geom + ADR_COLLI_CENTEROFHEXAGONS + nb_hex;
+          
+              f64 dify = fabs(pos.y - (f64)geometry.data_objects[ind_y+hex]);
+              f64 difz = fabs(pos.z - (f64)geometry.data_objects[ind_z+hex]);
 
-        f64xyz colli_center;
-        colli_center.x = (f64)geometry.data_objects[adr_geom+ADR_OBB_CENTER_X];
-        colli_center.y = (f64)geometry.data_objects[adr_geom+ADR_OBB_CENTER_Y];
-        colli_center.z = (f64)geometry.data_objects[adr_geom+ADR_OBB_CENTER_Z];
-        
-        f64xyz u, v, w;
-        u.x = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_UX];
-        u.y = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_UY];
-        u.z = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_UZ];
-        v.x = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_VX];
-        v.y = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_VY];
-        v.z = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_VZ];
-        w.x = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_WX];
-        w.y = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_WY];
-        w.z = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_WZ];
-        
-        f64 aabb_xmin = (f64)geometry.data_objects[adr_geom+ADR_AABB_XMIN];
-    f64 aabb_xmax = (f64)geometry.data_objects[adr_geom+ADR_AABB_XMAX];
-    f64 aabb_ymin = (f64)geometry.data_objects[adr_geom+ADR_AABB_YMIN];
-    f64 aabb_ymax = (f64)geometry.data_objects[adr_geom+ADR_AABB_YMAX];
-    f64 aabb_zmin = (f64)geometry.data_objects[adr_geom+ADR_AABB_ZMIN];
-    f64 aabb_zmax = (f64)geometry.data_objects[adr_geom+ADR_AABB_ZMAX];
-    
-    f64 half_colli_size_x = (aabb_xmax - aabb_xmin) * 0.5;
-        f64 half_colli_size_y = (aabb_ymax - aabb_ymin) * 0.5;
-        f64 half_colli_size_z = (aabb_zmax - aabb_zmin) * 0.5;
-        
-        f64 hole_radius = (f64)geometry.data_objects[adr_geom+ADR_COLLI_HOLE_RADIUS];
-        
-        ui32 nb_hex = (i32)geometry.data_objects[adr_geom + ADR_COLLI_NB_HEXAGONS];
-        ui32 ind_y = adr_geom + ADR_COLLI_CENTEROFHEXAGONS;
-        ui32 ind_z = adr_geom + ADR_COLLI_CENTEROFHEXAGONS + nb_hex;
-        
-         f64xyz ray = fxyz_sub(pos, colli_center);
-         printf("new pos %f %f %f \n", fxyz_dot(ray, u), fxyz_dot(ray, v), fxyz_dot(ray, w));
-      
-       printf("hex index %d \n", GetHexIndex(pos, geometry, adr_geom, colli_center, u, v, w));
-        
-       
-       f64xyz pos_test = pos;
-       
-        pos_test = fxyz_add(pos_test, fxyz_scale(dir, 0.1));
-       
-       int hex_test = GetHexIndex(pos_test, geometry, adr_geom, colli_center, u, v, w);
-       
-       while(hex_test < 0) {
-       
-            pos_test = fxyz_add(pos_test, fxyz_scale(dir, 0.1));
-            
-            hex_test = GetHexIndex(pos_test, geometry, adr_geom, colli_center, u, v, w);
-       
-            printf("hex index %d \n", GetHexIndex(pos_test, geometry, adr_geom, colli_center, u, v, w));
-       
-      }       
-       f64xyz inv_dir;
-                  
-       f64xyz ray_obb = fxyz_sub(pos_test, colli_center);
-      f64xyz p;
-      p.x = fxyz_dot(ray_obb, u);
-      p.y = fxyz_dot(ray_obb, v);
-      p.z = fxyz_dot(ray_obb, w);
-      f64xyz d;
-      d.x = fxyz_dot(dir, u);
-      d.y = fxyz_dot(dir, v);
-      d.z = fxyz_dot(dir, w);
-      
-      f64xyz temp;
-      temp.x = p.x;
-      temp.y = p.y - (f64)geometry.data_objects[ind_y+hex_test];
-      temp.z = p.z - (f64)geometry.data_objects[ind_z+hex_test] ;
-      
-      printf("pos inside hole %f %f %f \n", temp.x, temp.y, temp.z);
-    
-      // Inverse the direction to find the septa position entrance
-      inv_dir.x = -d.x;
-      inv_dir.y = -d.y;
-      inv_dir.z = -d.z;
-    
-      f64 interaction_distance = hit_ray_septa(temp, inv_dir, half_colli_size_x, hole_radius, colli_center, u, v, w);
-             
-      printf("interaction distance %f \n", interaction_distance);
-      
-      // compute the distance from the initial position to deduce the next hole distance                                                                                                      
-      f64 dist = sqrt((pos_test.x - pos.x)*(pos_test.x - pos.x) 
-                    + (pos_test.y - pos.y)*(pos_test.y - pos.y) 
-                    + (pos_test.z - pos.z)*(pos_test.z - pos.z));
+              f64 horiz = (f64)geometry.data_objects[adr_geom+ADR_COLLI_HOLE_RADIUS];
+              f64 verti = ((f64)geometry.data_objects[adr_geom+ADR_COLLI_HOLE_RADIUS] * (2.0/sqrt(3.0))) / 2.0;
+              
+              if(difz >= 2*verti || dify >= horiz || (2*verti*horiz - verti*dify - horiz*difz) <= 0.0 )
+                printf("false \n");
 
-      printf("dist %f \n", dist);
+              printf("dify %f difz %f horiz %f verti %f \n", dify, difz, horiz, verti);
       
-      f64 distance = dist - interaction_distance;// + 1.0e-03f;
-      
-      printf("distance %f \n", distance);
-      
-       
-       
     }*/
-    
-    // printf("photon_navigator dir %f %f %f cur_id_geom %d obj_type %d energy %f \n", dir.x, dir.y, dir.z,
-      //      cur_id_geom, obj_type, particles.E[part_id]);
+  
+     printf("photon_navigator dir %f %f %f cur_id_geom %d obj_type %d energy %f \n", dir.x, dir.y, dir.z,
+            cur_id_geom, obj_type, particles.E[part_id]);
       
    // printf(" obj type %d \n", obj_type);
     
@@ -227,13 +169,32 @@ __host__ __device__ void photon_navigator(ParticleStack &particles, ui32 part_id
     ui32 hit_id_geom = 0;
     get_next_geometry_boundary(geometry, cur_id_geom, pos, dir, interaction_distance, hit_id_geom);
    
-      
+     if (cur_id_geom == 4) {
+
+        FILE *cfile = fopen("Sortie.txt", "a"); 
+    
+        fprintf(cfile, "part %d cover colli \n", part_id);
+        
+        fclose(cfile);
+    }  
+    
     if (interaction_distance <= next_interaction_distance) {
         next_interaction_distance = interaction_distance + EPSILON3; // Overshoot
         next_discrete_process = GEOMETRY_BOUNDARY;
         next_geometry_volume = hit_id_geom;
-    }
+        
+       /* if (cur_id_geom == 3) {
 
+        FILE *cfile = fopen("Count.txt", "a"); 
+    
+        fprintf(cfile, "part %d GEOM dist_geom %f dist %f\n", part_id, interaction_distance, next_interaction_distance);
+        
+        fclose(cfile);
+    }  */
+    }
+    
+       
+    
     //// Move particle //////////////////////////////////////////////////////
 
     //printf("Move particle\n");
@@ -280,11 +241,20 @@ __host__ __device__ void photon_navigator(ParticleStack &particles, ui32 part_id
     SecParticle electron;
     electron.E = 0;
 
+  
+    
     if (next_discrete_process == PHOTON_COMPTON) {
 
         //   TODO: cutE = materials.electron_cut_energy[mat]                 cutE
         electron = Compton_SampleSecondaries_standard(particles, 0.0, part_id, parameters);
+      /*  if (cur_id_geom == 3) {
 
+       FILE *cfile = fopen("Count.txt", "a"); 
+    
+        fprintf(cfile, "part %d COMPTON dist_geom %f dist %f\n", part_id, interaction_distance, next_interaction_distance);
+        
+        fclose(cfile);
+    } */ 
     }
 
     if (next_discrete_process == PHOTON_PHOTOELECTRIC) {
@@ -292,11 +262,26 @@ __host__ __device__ void photon_navigator(ParticleStack &particles, ui32 part_id
         //   TODO: cutE = materials.electron_cut_energy[mat]                                               cutE
         electron = Photoelec_SampleSecondaries_standard(particles, materials, photon_CS_table,
                                                                     E_index, 0.0, id_mat, part_id, parameters);
+        /*if (cur_id_geom == 3) {
 
+        FILE *cfile = fopen("Count.txt", "a"); 
+    
+        fprintf(cfile, "part %d PE dist_geom %f dist %f\n", part_id, interaction_distance, next_interaction_distance);
+        
+        fclose(cfile);
+    }  */
     }
 
     if (next_discrete_process == PHOTON_RAYLEIGH) {
         Rayleigh_SampleSecondaries_Livermore(particles, materials, photon_CS_table, E_index, id_mat, part_id);
+     /*  if (cur_id_geom == 3) {
+
+        FILE *cfile = fopen("Count.txt", "a"); 
+    
+        fprintf(cfile, "part %d RAYLEIGH dist_geom %f dist %f\n", part_id, interaction_distance, next_interaction_distance);
+        
+        fclose(cfile);
+    }  */
     }
 
 
@@ -350,9 +335,14 @@ __host__ __device__ void photon_navigator(ParticleStack &particles, ui32 part_id
             pulses.pu1_tof[part_id] = particles.tof[part_id]; // Time is defined for the first hit
             pulses.pu1_nb_hits[part_id] += 1;
             pulses.pu1_id_geom[part_id] = cur_id_geom;
-            //printf("pulse %d pos %f %f %f id_geom %d \n", part_id, pulses.pu1_px[part_id], 
-              //              pulses.pu1_py[part_id], pulses.pu1_pz[part_id], cur_id_geom);
-
+            
+            FILE *cfile = fopen("Pulses.txt", "a"); 
+    
+            fprintf(cfile, "pulse %d pos %f %f %f id_geom %d \n", part_id, pulses.pu1_px[part_id], 
+                            pulses.pu1_py[part_id], pulses.pu1_pz[part_id], cur_id_geom);
+        
+            fclose(cfile);
+            
         } else {
 
             // Others hits - first pulse

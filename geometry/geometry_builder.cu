@@ -91,7 +91,7 @@ __host__ __device__ ui32 get_geometry_material(Scene geometry, ui32 id_geom, f64
 // Function that check if the point is located inside an hexagonal hole
 __host__ __device__ bool IsInsideHex(f64xyz position, f64 radius, f64 cy, f64 cz)
 {
-    //printf("posy %f posz %f radius %f cy %f cz %f \n", position.y, position.z, radius, cy, cz);
+   // printf("posy %f posz %f radius %f cy %f cz %f \n", position.y, position.z, radius, cy, cz);
 
     // Check if photon is inside an hexagon
     f64 dify = fabs(position.y - cy);
@@ -120,7 +120,7 @@ __host__ __device__ i32 GetHexIndex(f64xyz position, Scene geometry, ui32 adr_ge
     i32 col, raw, new_raw, min, max, hex, temp;
 
    // printf("position %f %f %f \n", position.x, position.y, position.z);
-
+    
     // Define hexagon index
 
     // Find the column in the array of hexagons
@@ -136,14 +136,16 @@ __host__ __device__ i32 GetHexIndex(f64xyz position, Scene geometry, ui32 adr_ge
     else if (col > ((i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY] - 1))
         col = (i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY] - 1;
     
-    // printf("colonne finale %d \n", col);
+     //printf("colonne finale %d \n", col);
 
     // Find the raw in the array of hexagons
 
     raw = round(((f64)geometry.data_objects[adr_geom+ADR_COLLI_LINEAR_VECZ] * ((i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NZ]
                                                                                - 1.0) - position.z) / (f64)geometry.data_objects[adr_geom+ADR_COLLI_LINEAR_VECZ]);
-
-    //printf("ligne %d \n", raw);
+    
+  //  printf("not round %f \n",  ((f64)geometry.data_objects[adr_geom+ADR_COLLI_LINEAR_VECZ] * ((i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NZ]
+    //                                                                           - 1.0) - position.z) / (f64)geometry.data_objects[adr_geom+ADR_COLLI_LINEAR_VECZ]);                                                                       
+   // printf("ligne %d \n", raw);
 
     // if the photon is too close to external frame, raw value is incorrect
     if (raw < 0.0)
@@ -164,6 +166,7 @@ __host__ __device__ i32 GetHexIndex(f64xyz position, Scene geometry, ui32 adr_ge
         hex = (raw / 2.0) * ((2.0 * (i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY]) - 1.0) + col;
         //printf("hex %d cy %f cz %f \n", hex,  (f64)geometry.data_objects[ind_y+hex],
           //   (f64)geometry.data_objects[ind_z+hex] );
+        
         // Test centered hexagon
         if (IsInsideHex(position, (f64)geometry.data_objects[adr_geom+ADR_COLLI_HOLE_RADIUS],
                         (f64)geometry.data_objects[ind_y+hex], (f64)geometry.data_objects[ind_z+hex]))
@@ -177,6 +180,7 @@ __host__ __device__ i32 GetHexIndex(f64xyz position, Scene geometry, ui32 adr_ge
 
                 if(temp >= min)
                     // Test top left hexagon
+                    
                     if(IsInsideHex(position, (f64)geometry.data_objects[adr_geom+ADR_COLLI_HOLE_RADIUS],
                                    (f64)geometry.data_objects[ind_y+temp], (f64)geometry.data_objects[ind_z+temp]))
                         return temp;
@@ -185,6 +189,7 @@ __host__ __device__ i32 GetHexIndex(f64xyz position, Scene geometry, ui32 adr_ge
 
                 if(temp < max)
                     // Test top right hexagon
+                    
                     if(IsInsideHex(position, (f64)geometry.data_objects[adr_geom+ADR_COLLI_HOLE_RADIUS],
                                    (f64)geometry.data_objects[ind_y+temp], (f64)geometry.data_objects[ind_z+temp]))
                         return temp;
@@ -200,6 +205,7 @@ __host__ __device__ i32 GetHexIndex(f64xyz position, Scene geometry, ui32 adr_ge
                                  
                     if(temp >= min)
                         // Test bottom left hexagon
+                      
                         if(IsInsideHex(position, (f64)geometry.data_objects[adr_geom+ADR_COLLI_HOLE_RADIUS],
                                       (f64)geometry.data_objects[ind_y+temp], (f64)geometry.data_objects[ind_z+temp]))
                             return temp;
@@ -208,6 +214,7 @@ __host__ __device__ i32 GetHexIndex(f64xyz position, Scene geometry, ui32 adr_ge
                                 
                     if(temp < max)
                         // Test bottom right hexagon
+                        
                         if(IsInsideHex(position, (f64)geometry.data_objects[adr_geom+ADR_COLLI_HOLE_RADIUS],
                                       (f64)geometry.data_objects[ind_y+temp], (f64)geometry.data_objects[ind_z+temp]))
                             return temp;
@@ -224,6 +231,7 @@ __host__ __device__ i32 GetHexIndex(f64xyz position, Scene geometry, ui32 adr_ge
 
         if(hex < max)
             // Test right hexagon
+            
             if (IsInsideHex(position, (f64)geometry.data_objects[adr_geom+ADR_COLLI_HOLE_RADIUS],
                             (f64)geometry.data_objects[ind_y+hex], (f64)geometry.data_objects[ind_z+hex]))
                 return hex;
@@ -232,6 +240,7 @@ __host__ __device__ i32 GetHexIndex(f64xyz position, Scene geometry, ui32 adr_ge
 
         if(temp >= min)
             // Test left hexagon
+           
             if(IsInsideHex(position, (f64)geometry.data_objects[adr_geom+ADR_COLLI_HOLE_RADIUS],
                            (f64)geometry.data_objects[ind_y+temp], (f64)geometry.data_objects[ind_z+temp]))
                 return temp;
@@ -239,6 +248,7 @@ __host__ __device__ i32 GetHexIndex(f64xyz position, Scene geometry, ui32 adr_ge
         temp = hex - (i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY];
 
         // Test top hexagon
+     
         if(IsInsideHex(position, (f64)geometry.data_objects[adr_geom+ADR_COLLI_HOLE_RADIUS],
                        (f64)geometry.data_objects[ind_y+temp], (f64)geometry.data_objects[ind_z+temp]))
             return temp;
@@ -246,6 +256,7 @@ __host__ __device__ i32 GetHexIndex(f64xyz position, Scene geometry, ui32 adr_ge
         temp = hex + (i32)geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY] - 1;
 
         // Test bottom hexagon
+       
         if(IsInsideHex(position, (f64)geometry.data_objects[adr_geom+ADR_COLLI_HOLE_RADIUS],
                        (f64)geometry.data_objects[ind_y+temp], (f64)geometry.data_objects[ind_z+temp]))
             return temp;
@@ -341,87 +352,118 @@ __host__ __device__ f64 get_distance_to_object(Scene geometry, ui32 adr_geom,
        // printf("colli %f %f %f %f %f %f\n", aabb_xmin, aabb_xmax, aabb_ymin, aabb_ymax,
        //        aabb_zmin, aabb_zmax);
         //printf("half size %f %f %f \n", half_colli_size_x, half_colli_size_y, half_colli_size_z);
-        
+
         // If photon is outside an hexagonal hole
         if (hex < 0) {
-        
-            f64xyz pos_test = pos;
+
+            // Check if the particle won't leave the septa
+   
+            distance = hit_ray_OBB(pos, dir, aabb_xmin, aabb_xmax, aabb_ymin, aabb_ymax, aabb_zmin, aabb_zmax,
+                               colli_center, u, v, w);
             
-            i32 hex_test = GetHexIndex(pos_test, geometry, adr_geom, colli_center, u, v, w);
-            bool inside = test_point_OBB(pos_test, aabb_xmin, aabb_xmax, aabb_ymin, aabb_ymax, aabb_zmin, aabb_zmax, colli_center, u, v, w);
-                
-            // Search for the next position inside an hexagon
-            while(hex_test<0 && inside) {
-                        
-                  //pos_test = fxyz_add(pos_test, fxyz_scale(dir, EPSILON3));
-              
-                  pos_test.x += dir.x * 0.1;
-                  pos_test.y += dir.y * 0.1;
-                  pos_test.z += dir.z * 0.1;   
+            f64 distance2 = distance;  
             
-                  hex_test = GetHexIndex(pos_test, geometry, adr_geom, colli_center, u, v, w);
-                  inside = test_point_OBB(pos_test, aabb_xmin, aabb_xmax, aabb_ymin, aabb_ymax, aabb_zmin, aabb_zmax, colli_center, u, v, w);
-                  
-                //  printf("SEARCH hexagon index %d pos %f %f %f \n", hex_test, pos_test.x, pos_test.y, pos_test.z);
-            }
-                            
-            distance = sqrt((pos_test.x - pos.x)*(pos_test.x - pos.x) 
-                                + (pos_test.y - pos.y)*(pos_test.y - pos.y) 
-                                + (pos_test.z - pos.z)*(pos_test.z - pos.z));                
-                            
-           //printf("hexagon index %d pos %f %f %f \n", hex_test, pos_test.x, pos_test.y, pos_test.z);
+            f64xyz pos_temp = fxyz_add(pos, fxyz_scale(dir, distance));
+          
+            i32 hex_temp = GetHexIndex(pos_temp, geometry, adr_geom, colli_center, u, v, w);
+            
+            //printf("hex_temp %d \n", hex_temp);
+            
+            if (hex_temp >= 0) {
+            
+                /*f64xyz pos_test = pos;
                 
-          /*  if (hex_test>=0) {
-                        
-                  f64xyz inv_dir;
+                pos_test.x += dir.x * 0.2;
+                pos_test.y += dir.y * 0.2;
+                pos_test.z += dir.z * 0.2;   
+                
+                i32 hex_test = GetHexIndex(pos_test, geometry, adr_geom, colli_center, u, v, w);
+                //bool inside = test_point_OBB(pos_test, aabb_xmin, aabb_xmax, aabb_ymin, aabb_ymax, aabb_zmin, aabb_zmax, colli_center, u, v, w);
+                    
+                // Search for the next position inside an hexagon
+                while(hex_test<0 && inside) {
+                            
+                      //pos_test = fxyz_add(pos_test, fxyz_scale(dir, EPSILON3));
+                  
+                      pos_test.x += dir.x * 0.2;
+                      pos_test.y += dir.y * 0.2;
+                      pos_test.z += dir.z * 0.2;   
+                
+                      hex_test = GetHexIndex(pos_test, geometry, adr_geom, colli_center, u, v, w);
+                      //inside = test_point_OBB(pos_test, aabb_xmin, aabb_xmax, aabb_ymin, aabb_ymax, aabb_zmin, aabb_zmax, colli_center, u, v, w);
+                      
+                      printf("SEARCH hexagon index %d pos %f %f %f \n", hex_test, pos_test.x, pos_test.y, pos_test.z);
+                }*/
+                
+              //  if (/*inside &&*/ hex_test>=0) {
               
-                  
-                  f64xyz ray_obb = fxyz_sub(pos_test, colli_center);
-                  f64xyz p;
-                  p.x = fxyz_dot(ray_obb, u);
-                  p.y = fxyz_dot(ray_obb, v);
-                  p.z = fxyz_dot(ray_obb, w);
-                  f64xyz d;
-                  d.x = fxyz_dot(dir, u);
-                  d.y = fxyz_dot(dir, v);
-                  d.z = fxyz_dot(dir, w);
-                  
-                  f64xyz temp;
-                  temp.x = p.x;
-                  temp.y = p.y - (f64)geometry.data_objects[ind_y+hex_test];
-                  temp.z = p.z - (f64)geometry.data_objects[ind_z+hex_test] ;
+                // Ensure particle is not stuck on hole/septa intersection
+                f64xyz pos_temp2 = fxyz_add(pos, fxyz_scale(dir, EPSILON3));
+                      
+                f64xyz inv_dir;
+            
+                f64xyz ray_obb = fxyz_sub(pos_temp2, colli_center);
+                f64xyz p;
+                p.x = fxyz_dot(ray_obb, u);
+                p.y = fxyz_dot(ray_obb, v);
+                p.z = fxyz_dot(ray_obb, w);
+                f64xyz d;
+                d.x = fxyz_dot(dir, u);
+                d.y = fxyz_dot(dir, v);
+                d.z = fxyz_dot(dir, w);
                 
-                  // Inverse the direction to find the septa position entrance
-                  inv_dir.x = -d.x;
-                  inv_dir.y = -d.y;
-                  inv_dir.z = -d.z;
+                f64xyz temp;
+                temp.x = p.x;
+                temp.y = p.y - (f64)geometry.data_objects[ind_y+hex_temp];
+                temp.z = p.z - (f64)geometry.data_objects[ind_z+hex_temp];
+              
+                // Inverse the direction to find the septa position entrance
+                inv_dir.x = -d.x;
+                inv_dir.y = -d.y;
+                inv_dir.z = -d.z;
                 
-                  f64 interaction_distance = hit_ray_septa(temp, inv_dir, half_colli_size_x, hole_radius, colli_center, u, v, w);
-                                                                                                                                
-                  // compute the distance from the initial position to deduce the next hole distance                                                                                                      
-                  f64 dist = sqrt((pos_test.x - pos.x)*(pos_test.x - pos.x) 
-                                + (pos_test.y - pos.y)*(pos_test.y - pos.y) 
-                                + (pos_test.z - pos.z)*(pos_test.z - pos.z));
-        
-                  distance = dist - interaction_distance;// + 1.0e-03f;
+                f64 interaction_distance = hit_ray_septa(temp, inv_dir, half_colli_size_x, hole_radius, colli_center, u, v, w);
+                
+                //printf("interaction dist %f \n", interaction_distance);
+
+                // compute the distance from the initial position to deduce the next hole distance                                                                                                      
+                /*f64 dist = sqrt((pos_test.x - pos.x)*(pos_test.x - pos.x) 
+                              + (pos_test.y - pos.y)*(pos_test.y - pos.y) 
+                              + (pos_test.z - pos.z)*(pos_test.z - pos.z));*/
+      
+                distance -= interaction_distance;
+                
+                if(distance < 1.0)
+                //printf("distance avec le trou %f \n", distance);
+                
+                if(distance < EPSILON6) { 
                   
-                  if(distance < EPSILON6)
-                    distance = dist;
+                  printf("OUTSIDE hole n %d : temp %f %f %f, pos %f %f %f, dir %f %f %f \n", hex_temp, temp.x, temp.y, temp.z, 
+                    pos.x, pos.y, pos.z, dir.x, dir.y, dir.z);
                   
-                //  printf("OUTSIDE hole n %d : temp %f %f %f, pos %f %f %f, distance %f \n", hex_test, temp.x, temp.y, temp.z, 
-                  //     pos_test.x, pos_test.y, pos_test.z, interaction_distance);
+                 
                   
+                  printf("interaction_dist %f distance %f \n", interaction_distance, distance2);
+                  
+                  //distance = 0.01;
+                        
+                  //distance = sqrt((pos_test.x - pos.x)*(pos_test.x - pos.x) 
+                    //          + (pos_test.y - pos.y)*(pos_test.y - pos.y) 
+                      //        + (pos_test.z - pos.z)*(pos_test.z - pos.z));
+                }
+                    
                  // if (distance < 2000)
                  // printf("septa : distance %f \n", distance);
-            } else if (!inside) {
+            /*} else if (!inside) {
                 // particle is escaping the colli without entering a hole
                 distance = sqrt((pos_test.x - pos.x)*(pos_test.x - pos.x) 
                                 + (pos_test.y - pos.y)*(pos_test.y - pos.y) 
                                 + (pos_test.z - pos.z)*(pos_test.z - pos.z));
              //   printf("escaping colli box : distance %f \n", distance);
             }   */
-          
-          
+          //  }
+            
+            }
           
         } else {
               
@@ -828,8 +870,54 @@ __host__ __device__ void get_next_geometry_boundary(Scene geometry, ui32 cur_geo
           // hole boundary or colli boundary
           distance = get_distance_to_object(geometry, adr_geom, COLLI, pos, dir);
           
-          //if (distance < 0.0)
-          //  distance = 0.0;
+          /*if (distance == 0.0) {
+            
+              f64 temp_distance2 = distance + 0.05;
+          
+              f64xyz next_pos2 = fxyz_add(pos, fxyz_scale(dir, temp_distance2));  
+            
+              f64xyz colli_center;
+              colli_center.x = (f64)geometry.data_objects[adr_geom+ADR_OBB_CENTER_X];
+              colli_center.y = (f64)geometry.data_objects[adr_geom+ADR_OBB_CENTER_Y];
+              colli_center.z = (f64)geometry.data_objects[adr_geom+ADR_OBB_CENTER_Z];
+              
+              f64xyz u, v, w;
+              u.x = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_UX];
+              u.y = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_UY];
+              u.z = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_UZ];
+              v.x = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_VX];
+              v.y = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_VY];
+              v.z = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_VZ];
+              w.x = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_WX];
+              w.y = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_WY];
+              w.z = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_WZ];
+              
+              
+              i32 hex = GetHexIndex(next_pos2, geometry, adr_geom, colli_center, u, v, w);
+              
+              if (hex >= 0) {
+              
+                  printf("hex %d \n", hex);
+              
+                  ui32 nb_hex = (i32)geometry.data_objects[adr_geom + ADR_COLLI_NB_HEXAGONS];
+                  ui32 ind_y = adr_geom + ADR_COLLI_CENTEROFHEXAGONS;
+                  ui32 ind_z = adr_geom + ADR_COLLI_CENTEROFHEXAGONS + nb_hex;
+              
+                  f64 dify = fabs(pos.y - (f64)geometry.data_objects[ind_y+hex]);
+                  f64 difz = fabs(pos.z - (f64)geometry.data_objects[ind_z+hex]);
+
+                  f64 horiz = (f64)geometry.data_objects[adr_geom+ADR_COLLI_HOLE_RADIUS];
+                  f64 verti = ((f64)geometry.data_objects[adr_geom+ADR_COLLI_HOLE_RADIUS] * (2.0/sqrt(3.0))) / 2.0;
+                  
+                  if(difz >= 2*verti || dify >= horiz || (2*verti*horiz - verti*dify - horiz*difz) <= 0.0 )
+                    printf("false \n");
+
+                  printf("dify %f difz %f horiz %f verti %f \n", dify, difz, horiz, verti);
+                  
+              }
+            
+          }  */
+            //  distance = 0.0;
           
           f64 temp_distance = distance + EPSILON3;
           

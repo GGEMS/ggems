@@ -33,11 +33,11 @@ __global__ void kernel_photon_navigator(ParticleStack particles, Scene geometry,
     // Track photon
     photon_navigator(particles, id, geometry, materials, photon_CS_table,
                          parameters, pulses);
- 
+        
     //// SPECIAL CASE FOR RAYTRACING
-        //photon_navigator_raytracing_colli(particles, id, geometry, materials, photon_CS_table,
-          //                       parameters, pulses);
-         
+    // photon_navigator_raytracing_colli(particles, id, geometry, materials, photon_CS_table,
+    //                        parameters, pulses);
+
     if (particles.endsimu[id])
         atomicAdd(count, 1);
 }
@@ -82,7 +82,8 @@ void cpu_main_navigator(ParticleStack &particles, Scene geometry,
             printf("part %d >>>>>> step %i\n", id, istep);
             #endif
             
-            if (istep > 100) {
+            if (istep > 50) {
+                printf("part %d >>>>>> step %i\n", id, istep);
                 printf("WARNING - CPU reachs max step\n");
                 break;
             }
@@ -125,19 +126,22 @@ void gpu_main_navigator(ParticleStack &particles, Scene geometry,
       
         kernel_photon_navigator<<<grid, threads>>>(particles, geometry, materials, photon_CS_table,
                                                     parameters, pulses, count_d);
+          
+        //kernel_photon_navigator<<<grid, threads>>>(particles, geometry, materials, photon_CS_table,
+          //                                          parameters, pulses);
         cuda_error_check("Error ", " Kernel_photon_navigator");
         
         // get back the number of simulated photons
         cudaMemcpy(&count_h, count_d, sizeof(int), cudaMemcpyDeviceToHost);
         
-        #ifdef DEBUG
-        printf("Sim %d %d / %d tot\n", step, count_h, particles.size);
-        #endif
+        //#ifdef DEBUG
+    //    printf("Sim %d %d / %d tot\n", step, count_h, particles.size);
+        //#endif
         
-        if (step > 100) {
+     /*   if (step > 200) {
             printf("WARNING - GPU reachs max step\n");
             break;
-        }
+        }*/
         
     }
     

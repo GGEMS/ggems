@@ -190,7 +190,7 @@ void Digitizer::copy_pulses_gpu2cpu() {
     ui32 n = dpulses.size;
     
     HANDLE_ERROR( cudaMemcpy(pulses.pu1_px, dpulses.pu1_px,
-                             n*sizeof(f32), cudaMemcpyDeviceToHost) );  
+                             n*sizeof(f32), cudaMemcpyDeviceToHost) ); 
     HANDLE_ERROR( cudaMemcpy(pulses.pu1_py, dpulses.pu1_py,
                              n*sizeof(f32), cudaMemcpyDeviceToHost) );
     HANDLE_ERROR( cudaMemcpy(pulses.pu1_pz, dpulses.pu1_pz,
@@ -387,18 +387,41 @@ void Digitizer::process_singles(ui32 iter, f64 tot_activity) {
 
         // DEBUG
         //printf("glb time %e\n", global_time);
-
+        
         if (pulses.pu1_nb_hits[i] > 0) {
 
             f32 E1=0.0; f32 E2=0.0;
+            f32 resolution;
+            
             E1=pulses.pu1_E[i];
-            if (pulses.pu2_nb_hits[i] > 0) E2=pulses.pu2_E[i];
-
+            
+            if (flag_energy_blurring) {
+                resolution = E_slope * (pulses.pu1_E[i] - E_ref) + E_res;
+                E1 = G4RandGauss::shoot(pulses.pu1_E[i], resolution * pulses.pu1_E[i] / 2.35482);
+            }
+            
+            if (pulses.pu2_nb_hits[i] > 0) {   
+                E2=pulses.pu2_E[i];
+              
+                if (flag_energy_blurring) {
+                    resolution = E_slope * (pulses.pu2_E[i] - E_ref) + E_res;
+                    E2 = G4RandGauss::shoot(pulses.pu2_E[i], resolution * pulses.pu2_E[i] / 2.35482);
+                }
+            }
+           
             // Keep the first block
             if (E1 > E2) {
+              
                 single.px = pulses.pu1_px[i] / E1;
                 single.py = pulses.pu1_py[i] / E1;
                 single.pz = pulses.pu1_pz[i] / E1;
+              
+               /* if (flag_sp_blurring) {
+                    single.px = G4RandGauss::shoot(pulses.pu1_px[i],SP_res/2.35) / E1;              
+                    single.py = G4RandGauss::shoot(pulses.pu1_py[i],SP_res/2.35) / E1;
+                    single.pz = G4RandGauss::shoot(pulses.pu1_pz[i],SP_res/2.35) / E1;
+                }*/
+              
                 single.E = E1;
                 single.tof = pulses.pu1_tof[i];
                 single.id_part = iter*pulses.size + i; // Absolute ID over the complete simulation
@@ -409,6 +432,13 @@ void Digitizer::process_singles(ui32 iter, f64 tot_activity) {
                 single.px = pulses.pu2_px[i] / E2;
                 single.py = pulses.pu2_py[i] / E2;
                 single.pz = pulses.pu2_pz[i] / E2;
+                
+             /*   if (flag_sp_blurring) {
+                    single.px = G4RandGauss::shoot(pulses.pu2_px[i],SP_res/2.35) / E2;              
+                    single.py = G4RandGauss::shoot(pulses.pu2_py[i],SP_res/2.35) / E2;
+                    single.pz = G4RandGauss::shoot(pulses.pu2_pz[i],SP_res/2.35) / E2;
+                }*/
+                
                 single.E = E2;
                 single.tof = pulses.pu2_tof[i];
                 single.id_part = iter*pulses.size + i; // Absolute ID over the complete simulation
@@ -772,14 +802,14 @@ void Digitizer::process_spect_projections(Scene geometry) {
             //printf("Energy %f singles[i].id_geom %d \n", E_New, singles[i].id_geom);
             
             // Apply energy blurring
-            if (flag_energy_blurring) {
+           /* if (flag_energy_blurring) {
                 f32 resolution = E_slope * (singles[i].E - E_ref) + E_res;
                 E_New = G4RandGauss::shoot(singles[i].E, resolution * singles[i].E / 2.35482);
                 
                 #ifdef VALID_GGEMS
                 fprintf(efile, "%f\n", E_New);
                 #endif
-            }
+            }*/
             
             if (E_New >= E_low && E_New <= E_high) {
               
