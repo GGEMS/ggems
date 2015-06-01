@@ -140,8 +140,12 @@ struct Scene {
 
 // Host/Device function that handle geometry
 __host__ __device__ bool IsInsideHex(f64xyz position, f64 radius, f64 cy, f64 cz);
+__host__ __device__ f64 GetDistanceHex(f64xyz position, f64xyz direction, f64 radius, f64 cy, f64 cz);
+__host__ __device__ i32 GetCloserHex(f64xyz position, Scene geometry, ui32 adr_geom);
 __host__ __device__ i32 GetHexIndex(f64xyz position, Scene geometry, ui32 adr_geom,
                                     f64xyz center, f64xyz u, f64xyz v, f64xyz w);
+__host__ __device__ f64 GetNextHex(f64xyz position, f64xyz direction, Scene geometry,
+                                        ui32 adr_geom, f64xyz center, f64xyz u, f64xyz v, f64xyz w);
 __host__ __device__ bool get_geometry_is_sensitive(Scene geometry, ui32 cur_geom);
 __host__ __device__ ui32 get_geometry_material(Scene geometry, ui32 id_geom, f64xyz pos);
 __host__ __device__ f64 get_distance_to_object(Scene geometry, ui32 adr_geom, ui32 obj_type,

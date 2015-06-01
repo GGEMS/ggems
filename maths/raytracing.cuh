@@ -143,6 +143,10 @@ __host__ __device__ f64 hit_ray_triangle(f64xyz ray_p, f64xyz ray_d,
                                          f64xyz tri_v,
                                          f64xyz tri_w);
 
+// Ray/Plane intersection (f64 version)
+__host__ __device__ f64 hit_ray_plane(f64xyz ray_p, f64xyz ray_d,       
+                                      f64xyz plane_p, f64xyz plane_n);
+
 // Ray/OBB intersection - Inspired by POVRAY
 __host__ __device__ f64 hit_ray_OBB(f64xyz ray_p, f64xyz ray_d,
                                     f64 aabb_xmin, f64 aabb_xmax,

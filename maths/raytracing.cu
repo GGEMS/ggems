@@ -614,6 +614,21 @@ __host__ __device__ f64 hit_ray_sphere(f64xyz ray_p, f64xyz ray_d,        // Ray
     return t;
 }
 
+// Ray/Plane intersection (f64 version)
+__host__ __device__ f64 hit_ray_plane(f64xyz ray_p, f64xyz ray_d,        // Ray
+                                      f64xyz plane_p, f64xyz plane_n) { // Plane
+
+    f64xyz m = fxyz_sub(plane_p, ray_p);
+    f64 b = fxyz_dot(plane_n, m);
+    f64 c = fxyz_dot(plane_n, ray_d);
+    
+    f64 t = b/c;
+    
+    if(t <= 0.0f) {return -F64_MAX;}
+
+    return t;
+}
+
 // Ray/AABB intersection - Smits algorithm (f64 version)
 __host__ __device__ f64 hit_ray_AABB(f64xyz ray_p, f64xyz ray_d,
                                      f64 aabb_xmin, f64 aabb_xmax,

@@ -151,6 +151,8 @@ void SimulationBuilder::primaries_generator() {
 // Main navigation
 void SimulationBuilder::main_navigator() {
 
+    printf("target %d \n",target);
+
     /// CPU ///////////////////////////////
     if (target == CPU_DEVICE) {
 
@@ -562,7 +564,7 @@ void SimulationBuilder::start_simulation() {
     materials.free_materials_table();
     
     free(parameters.physics_list);
-    free(parameters.secondaries_list);
+    free(parameters.secondaries_list); 
     
 }
 
