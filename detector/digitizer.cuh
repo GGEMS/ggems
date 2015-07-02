@@ -183,6 +183,8 @@ class Digitizer {
         
         // for coincidences
         f32 E_low, E_high, win_time;
+        
+        std::vector<f32> energy_windows;
 
         // keep tracking the time
         f64 global_time;

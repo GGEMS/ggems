@@ -42,7 +42,7 @@ __host__ __device__ void voxelized_source_primary_generator(ParticleStack partic
     y = floor(ind / (f32)nb_vox_x);
     x = ind - y*nb_vox_x;
 
-    // random poisiton within the voxel
+    // random positon within the voxel
     x += JKISS32(particles, id);
     y += JKISS32(particles, id);
     z += JKISS32(particles, id);

@@ -284,7 +284,7 @@ void SimulationBuilder::set_process(std::string process_name) {
         parameters.physics_list[ELECTRON_MSC] = ENABLED;
         // printf("add photoelectric\n");
     } else {
-        print_warning("This process is unknow!!\n");
+        print_warning("This process is unknown!!\n");
         printf("     -> %s\n", process_name.c_str());
         exit_simulation();
     }

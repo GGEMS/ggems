@@ -31,12 +31,46 @@ __host__ __device__ void get_primaries(Sources sources, ParticleStack &particles
     ui32 type = (ui32)(sources.data_sources[adr+ADR_SRC_TYPE]);
     ui32 geom_id = (ui32)(sources.data_sources[adr+ADR_SRC_GEOM_ID]);
     
+    f32 energy;
+    
     // Point Source
     if (type == POINT_SOURCE) {
         f32 px = sources.data_sources[adr+ADR_POINT_SRC_PX];
         f32 py = sources.data_sources[adr+ADR_POINT_SRC_PY];
         f32 pz = sources.data_sources[adr+ADR_POINT_SRC_PZ];
-        f32 energy = sources.data_sources[adr+ADR_POINT_SRC_ENERGY];
+           
+        f32 nb_peak = sources.data_sources[adr+ADR_POINT_SRC_NB_PEAK];
+        
+        if (nb_peak == 1) {
+            energy = sources.data_sources[adr+ADR_POINT_SRC_ENERGY];
+        }
+        if (nb_peak == 2) {
+          
+            f32 p1, p2;
+            
+            p1 = sources.data_sources[adr+ADR_POINT_SRC_PARTPDEC + 1];
+            p2 = sources.data_sources[adr+ADR_POINT_SRC_PARTPDEC + 2];
+            
+            //printf("p1 %f p2 %f \n", p1, p2);
+           
+            //f32 rnd = (f32) rand()/RAND_MAX;
+            f32 rnd = JKISS32(particles,id_part);
+            
+           // printf("p1 %f p2 %f -- rnd %f \n", p1, p2, rnd);
+            
+            f32 p = p1/ (f32)(p1+p2);
+            
+            //printf("p1 %f p2 %f -- rnd %f p %f \n", p1, p2, rnd, p);
+            
+            if (rnd < p) {
+                energy = sources.data_sources[adr+ADR_POINT_SRC_ENERGY];
+            } else {
+                energy = sources.data_sources[adr+ADR_POINT_SRC_ENERGY + 1];
+            }
+        } 
+        
+       // printf("energy %f \n", energy);
+        
         point_source_primary_generator(particles, id_part, px, py, pz, energy, PHOTON, geom_id);
 
     } else if (type == CYLINDER_SOURCE) {
@@ -129,6 +163,8 @@ __global__ void kernel_get_primaries(Sources sources, ParticleStack particles, u
 
 }
 
+
+
 ///////// Source builder class ////////////////////////////////////////////////////
 
 SourceBuilder::SourceBuilder() {
@@ -148,6 +184,19 @@ SourceBuilder::SourceBuilder() {
 // Add a point source on the simulation
 void SourceBuilder::add_source(PointSource src) {
     sources.nb_sources++;
+    
+    ui32 n = src.energy_hist.size();
+    f32 *newhist = (f32*)malloc(sizeof(f32) * n);
+    ui32 i=0; while (i < n) {
+        newhist[i] = src.energy_hist[i];
+        ++i;
+    }
+    
+    f32 *newpartpdec = (f32*)malloc(sizeof(f32) * n);
+    i=0; while (i < n) {
+        newpartpdec[i] = src.partpdec[i];
+        ++i;
+    }
 
     // Store the address to access to this source
     array_push_back(&sources.ptr_sources, sources.ptr_sources_dim, sources.data_sources_dim);
@@ -155,14 +204,23 @@ void SourceBuilder::add_source(PointSource src) {
     // Store information of this source
     array_push_back(&sources.data_sources, sources.data_sources_dim, (f32)POINT_SOURCE);
     array_push_back(&sources.data_sources, sources.data_sources_dim, src.geometry_id);
+    
     array_push_back(&sources.data_sources, sources.data_sources_dim, src.px);
     array_push_back(&sources.data_sources, sources.data_sources_dim, src.py);
     array_push_back(&sources.data_sources, sources.data_sources_dim, src.pz);
-    array_push_back(&sources.data_sources, sources.data_sources_dim, src.energy);
+   
+    array_push_back(&sources.data_sources, sources.data_sources_dim, n);
 
+    array_append_array(&sources.data_sources, sources.data_sources_dim, &(newhist), n);
+    array_append_array(&sources.data_sources, sources.data_sources_dim, &(newpartpdec), n);
+    
+    array_push_back(&sources.data_sources, sources.data_sources_dim, 2*n + SIZE_POINT_SRC);
+    
     // Save the seed
-    array_push_back(&sources.seeds, sources.seeds_dim, src.seed);
-
+    //array_push_back(&sources.seeds, sources.seeds_dim, src.seed);
+    
+    free(newhist);
+    free(newpartpdec);
 }
 
 // Add a cylinder source on the simulation
@@ -235,7 +293,8 @@ void SourceBuilder::add_source(ConeBeamSource src) {
 // Add a voxelized source
 void SourceBuilder::add_source(VoxelizedSource src) {
     sources.nb_sources++;
-
+  
+    
     // Store the address to access to this source
     array_push_back(&sources.ptr_sources, sources.ptr_sources_dim, sources.data_sources_dim);
 
@@ -266,7 +325,7 @@ void SourceBuilder::add_source(VoxelizedSource src) {
         array_push_back(&sources.data_sources, sources.data_sources_dim, (f32)EMISSION_BACK2BACK);
     }
 
-
+     
     // Store index to access to the CDF
     array_append_array(&sources.data_sources, sources.data_sources_dim, &(src.activity_index), src.activity_size);
     // Store the CDF of the activities

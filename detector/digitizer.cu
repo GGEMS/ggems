@@ -235,7 +235,7 @@ void Digitizer::clear_gpu_pulses() {
             vec[i]=0;
             ++i;
     }
-
+    
     HANDLE_ERROR( cudaMemcpy(dpulses.pu1_nb_hits, vec,
                             n*sizeof(ui32), cudaMemcpyHostToDevice) );
                             
@@ -348,8 +348,10 @@ void Digitizer::set_energy_blurring(std::string law, f32 vE_res, f32 vE_ref, f32
 
 // Set parameters for coincidences
 void Digitizer::set_energy_window(f32 vE_low, f32 vE_high) {
-    E_low = vE_low;
-    E_high = vE_high;
+    energy_windows.push_back(vE_low);
+    energy_windows.push_back(vE_high);
+    //E_low = vE_low;
+    //E_high = vE_high;
 }
 
 void Digitizer::set_time_window(f32 vwin_time) {
@@ -651,6 +653,8 @@ void Digitizer::init_projection() {
 
 void Digitizer::process_projection() {
 
+    f32 elow, ehigh;
+  
     // Loop over singles
     ui32 i=0;
     
@@ -671,101 +675,100 @@ void Digitizer::process_projection() {
             f32 PyNew = singles[i].py;
             f32 PzNew = singles[i].pz;
           
-            // Apply energy blurring
-            if (flag_energy_blurring) {
-                f32 resolution = E_slope * (singles[i].E - E_ref) + E_res;
-                E_New = G4RandGauss::shoot(singles[i].E, resolution * singles[i].E / 2.35482);
+            
+            ui32 nb_win = energy_windows.size();
+            
+            for (ui32 win = 0; win < nb_win*2; win++) {
+            
+              elow = energy_windows[win];
+              ehigh = energy_windows[win + 1];
+              
+              if (E_New >= elow && E_New <= ehigh) {
+              
+                  // Apply spatial blurring
+                  if (flag_sp_blurring) {
+                      PxNew = G4RandGauss::shoot(singles[i].px,SP_res/2.35);
+                      PyNew = G4RandGauss::shoot(singles[i].py,SP_res/2.35);
+                      PzNew = G4RandGauss::shoot(singles[i].pz,SP_res/2.35);                    
+                  }
+              
+                  if (flag_projXY) {
+                      
+                      // Change single frame to voxel space
+                      ui32 ppx = (PxNew - projection_xmin) / projection_sx;
+                      ui32 ppy = (PyNew - projection_ymin) / projection_sy;
+              
+                      assert(ppx >= 0);
+                      assert(ppy >= 0);
+
+                      assert(ppx < projection_nx);
+                      assert(ppy < projection_ny);
+
+                      // Assign value
+                      projection[0][ppy*projection_nx + ppx] += 1; 
+                      
+                      #ifdef VALID_GGEMS
+                      fprintf(pfile, "%f %f\n", PxNew, PyNew);
+                      #endif
+                  }
+                  else if (flag_projYZ) {
+                      
+                      // Change single frame to voxel space
+                      ui32 ppy = (PyNew - projection_ymin) / projection_sy;
+                      ui32 ppz = (PzNew - projection_zmin) / projection_sz;
+                      
+                      //printf("ppy %d ppz %d \n", ppy, ppz);
+                      
+                      assert(ppy >= 0);
+                      assert(ppz >= 0);
+
+                      assert(ppy < projection_ny);
+                      assert(ppz < projection_nz);
+
+                      // Assign value
+                      projection[0][ppz*projection_ny + ppy] += 1; 
+                      
+                      #ifdef VALID_GGEMS
+                      fprintf(pfile, "%f %f\n", PyNew, PzNew);
+                      #endif
+                  }
+                  else if (flag_projXZ) {
                 
-                #ifdef VALID_GGEMS
-                fprintf(efile, "%f\n", E_New);
-                #endif
-            }
-            
-            if (E_New >= E_low && E_New <= E_high) {
-            
-                // Apply spatial blurring
-                if (flag_sp_blurring) {
-                    PxNew = G4RandGauss::shoot(singles[i].px,SP_res/2.35);
-                    PyNew = G4RandGauss::shoot(singles[i].py,SP_res/2.35);
-                    PzNew = G4RandGauss::shoot(singles[i].pz,SP_res/2.35);                    
-                }
-            
-                if (flag_projXY) {
-                    
-                    // Change single frame to voxel space
-                    ui32 ppx = (PxNew - projection_xmin) / projection_sx;
-                    ui32 ppy = (PyNew - projection_ymin) / projection_sy;
-             
-                    assert(ppx >= 0);
-                    assert(ppy >= 0);
+                      // Change single frame to voxel space
+                      ui32 ppx = (PxNew - projection_xmin) / projection_sx;
+                      ui32 ppz = (PzNew - projection_zmin) / projection_sz;
+              
+                      assert(ppx >= 0);
+                      assert(ppz >= 0);
 
-                    assert(ppx < projection_nx);
-                    assert(ppy < projection_ny);
+                      assert(ppx < projection_nx);
+                      assert(ppz < projection_nz);
 
-                    // Assign value
-                    projection[0][ppy*projection_nx + ppx] += 1; 
-                    
-                    #ifdef VALID_GGEMS
-                    fprintf(pfile, "%f %f\n", PxNew, PyNew);
-                    #endif
-                 }
-                else if (flag_projYZ) {
-                    
-                    // Change single frame to voxel space
-                    ui32 ppy = (PyNew - projection_ymin) / projection_sy;
-                    ui32 ppz = (PzNew - projection_zmin) / projection_sz;
-                    
-                    //printf("ppy %d ppz %d \n", ppy, ppz);
-                    
-                    assert(ppy >= 0);
-                    assert(ppz >= 0);
+                      // Assign value
+                      projection[0][ppz*projection_nx + ppx] += 1; 
+                      
+                      #ifdef VALID_GGEMS
+                      fprintf(pfile, "%f %f\n", PxNew, PzNew);
+                      #endif
+                  }
+                  else {
+                      // Change single frame to voxel space
+                      ui32 ppx = (PxNew - projection_xmin) / projection_sx;
+                      ui32 ppy = (PyNew - projection_ymin) / projection_sy;
+                      ui32 ppz = (PzNew - projection_zmin) / projection_sz;
 
-                    assert(ppy < projection_ny);
-                    assert(ppz < projection_nz);
+                      assert(ppx >= 0);
+                      assert(ppy >= 0);
+                      assert(ppz >= 0);
 
-                    // Assign value
-                    projection[0][ppz*projection_ny + ppy] += 1; 
-                    
-                    #ifdef VALID_GGEMS
-                    fprintf(pfile, "%f %f\n", PyNew, PzNew);
-                    #endif
-                }
-                else if (flag_projXZ) {
-               
-                    // Change single frame to voxel space
-                    ui32 ppx = (PxNew - projection_xmin) / projection_sx;
-                    ui32 ppz = (PzNew - projection_zmin) / projection_sz;
-             
-                    assert(ppx >= 0);
-                    assert(ppz >= 0);
+                      assert(ppx < projection_nx);
+                      assert(ppy < projection_ny);
+                      assert(ppz < projection_nz);
 
-                    assert(ppx < projection_nx);
-                    assert(ppz < projection_nz);
-
-                    // Assign value
-                    projection[0][ppz*projection_nx + ppx] += 1; 
-                    
-                    #ifdef VALID_GGEMS
-                    fprintf(pfile, "%f %f\n", PxNew, PzNew);
-                    #endif
-                }
-                else {
-                    // Change single frame to voxel space
-                    ui32 ppx = (PxNew - projection_xmin) / projection_sx;
-                    ui32 ppy = (PyNew - projection_ymin) / projection_sy;
-                    ui32 ppz = (PzNew - projection_zmin) / projection_sz;
-
-                    assert(ppx >= 0);
-                    assert(ppy >= 0);
-                    assert(ppz >= 0);
-
-                    assert(ppx < projection_nx);
-                    assert(ppy < projection_ny);
-                    assert(ppz < projection_nz);
-
-                    projection[0][ppz*projection_ny*projection_nx + ppy*projection_nx + ppx] += 1;
-                }
-            }
+                      projection[0][ppz*projection_ny*projection_nx + ppy*projection_nx + ppx] += 1;
+                  }
+              }
+           }
         }
         ++i;
     }
@@ -780,6 +783,8 @@ void Digitizer::process_spect_projections(Scene geometry) {
 
     // Loop over singles
     ui32 i=0;
+    
+    f32 elow, ehigh;
     
     #ifdef VALID_GGEMS
     FILE *pfile = fopen("Projection.txt", "a");
@@ -798,20 +803,28 @@ void Digitizer::process_spect_projections(Scene geometry) {
             PNew.x = singles[i].px;
             PNew.y = singles[i].py;
             PNew.z = singles[i].pz;
+            
+           
           
             //printf("Energy %f singles[i].id_geom %d \n", E_New, singles[i].id_geom);
             
-            // Apply energy blurring
-           /* if (flag_energy_blurring) {
-                f32 resolution = E_slope * (singles[i].E - E_ref) + E_res;
-                E_New = G4RandGauss::shoot(singles[i].E, resolution * singles[i].E / 2.35482);
-                
-                #ifdef VALID_GGEMS
-                fprintf(efile, "%f\n", E_New);
-                #endif
-            }*/
             
-            if (E_New >= E_low && E_New <= E_high) {
+            ui32 nb_win = energy_windows.size();
+            
+            for (ui32 win = 0; win < (nb_win/2); win++) {
+            
+              elow = energy_windows[2*win];
+              ehigh = energy_windows[2*win + 1];
+              
+              //printf("energy win %f %f \n", elow, ehigh);
+              
+             if (E_New > elow && E_New < ehigh) {
+               
+                //printf("enter\n");
+               
+                #ifdef VALID_GGEMS
+               fprintf(efile, "%f \n", E_New);
+            #endif
               
                 ui32 mother_id = geometry.mother_node[singles[i].id_geom];
                 
@@ -925,8 +938,9 @@ void Digitizer::process_spect_projections(Scene geometry) {
 
                         projection[id_head-1][ppz*projection_ny*projection_nx + ppy*projection_nx + ppx] += 1;
                     }
-                }
-            }
+                }   
+             }
+        }
         ++i;
     }
     

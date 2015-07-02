@@ -39,7 +39,9 @@
 #define ADR_POINT_SRC_PX 2
 #define ADR_POINT_SRC_PY 3
 #define ADR_POINT_SRC_PZ 4
-#define ADR_POINT_SRC_ENERGY 5
+#define ADR_POINT_SRC_NB_PEAK 5
+#define ADR_POINT_SRC_ENERGY 6
+#define ADR_POINT_SRC_PARTPDEC 7
 
 // Cylinder source
 #define ADR_CYLINDER_SRC_PX 2
@@ -83,6 +85,8 @@
 #define ADR_VOX_SOURCE_EMISSION_TYPE 14
 #define ADR_VOX_SOURCE_CDF_INDEX 15
 
+#define SIZE_POINT_SRC 8
+
 // Emission type
 #define EMISSION_MONO 0
 #define EMISSION_BACK2BACK 1
@@ -106,6 +110,7 @@ struct Sources {
 __host__ __device__ void get_primaries(Sources sources, ParticleStack &particles, ui32 id_src, ui32 id_part);
 __global__ void kernel_get_primaries(Sources sources, ParticleStack particles, ui32 isrc);
 
+
 // Class to manage sources on the simulation
 class SourceBuilder {
     public:
@@ -115,6 +120,8 @@ class SourceBuilder {
         void add_source(PlanarSource src);
         void add_source(ConeBeamSource src);
         void add_source(VoxelizedSource src);
+        
+        void set_histpoint(f32 venergy, f32 vpart);
 
         void copy_source_cpu2gpu();
 

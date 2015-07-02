@@ -23,6 +23,7 @@
 #include "prng.cuh"
 #include "constants.cuh"
 
+
 // External function
 __host__ __device__ void point_source_primary_generator(ParticleStack particles, ui32 id,
                                                         f32 px, f32 py, f32 pz, f32 energy,
@@ -31,10 +32,10 @@ __host__ __device__ void point_source_primary_generator(ParticleStack particles,
 // Sphere
 class PointSource {
     public:
-        PointSource(f32 vpx, f32 vpy, f32 vpz, f32 vE, ui32 vseed, std::string vname, ui32 vgeom_id);
+        PointSource(f32 vpx, f32 vpy, f32 vpz, ui32 vseed, std::string vname, ui32 vgeom_id);
         PointSource();
         void set_position(f32 vpx, f32 vpy, f32 vpz);
-        void set_energy(f32 venergy);
+        void set_histpoint(f32 venergy, f32 vpart);
         void set_seed(ui32 vseed);
         void set_in_geometry(ui32 vgeometry_id);
         void set_source_name(std::string vsource_name);
@@ -42,6 +43,8 @@ class PointSource {
         f32 px, py, pz, energy;
         ui32 seed, geometry_id;
         std::string source_name;
+        
+        std::vector<f32> energy_hist, partpdec;
 
     private:
 };
