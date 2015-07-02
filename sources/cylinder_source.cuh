@@ -33,9 +33,10 @@ __host__ __device__ void cylinder_source_primary_generator(ParticleStack particl
 class CylinderSource {
     public:
         CylinderSource(f32 vpx, f32 vpy, f32 vpz, f32 vrad, f32 vlen, 
-                       f32 vE, ui32 vseed, std::string vname, ui32 vgeom_id);
+                       ui32 vseed, std::string vname, ui32 vgeom_id);
         CylinderSource();
         void set_position(f32 vpx, f32 vpy, f32 vpz);
+        void set_histpoint(f32 venergy, f32 vpart);
         void set_radius(f32 vrad);
         void set_length(f32 vlen);
         void set_energy(f32 venergy);
@@ -47,6 +48,8 @@ class CylinderSource {
         ui32 seed, geometry_id;
         std::string source_name;
 
+        std::vector<f32> energy_hist, partpdec;
+        
     private:
 };
 

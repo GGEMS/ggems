@@ -65,13 +65,12 @@ __host__ __device__ void cylinder_source_primary_generator(ParticleStack particl
 
 
 CylinderSource::CylinderSource(f32 vpx, f32 vpy, f32 vpz, f32 vrad, f32 vlen, 
-                               f32 vE, ui32 vseed, std::string vname, ui32 vgeom_id) {
+                               ui32 vseed, std::string vname, ui32 vgeom_id) {
 
     // Default parameters
     px = vpx; py = vpy; pz = vpz;
     rad = vrad;
     length = vlen;
-    energy = vE;
     source_name = vname;
     seed = vseed;
     geometry_id = vgeom_id;
@@ -82,7 +81,6 @@ CylinderSource::CylinderSource() {
     // Default parameters
     px = 0.0f; py = 0.0f; pz = 0.0f;
     rad = 0.0f; length = 0.0f;
-    energy = 60.0*keV;
     source_name = "Source01";
     seed = 10;
     geometry_id = 0;
@@ -102,9 +100,10 @@ void CylinderSource::set_length(f32 vlen) {
     length=vlen;
 }
 
-void CylinderSource::set_energy(f32 venergy) {
-    energy=venergy;
-}
+void CylinderSource::set_histpoint(f32 venergy, f32 vpart) {
+      energy_hist.push_back(venergy);
+      partpdec.push_back(vpart);
+}  
 
 void CylinderSource::set_seed(ui32 vseed) {
     seed=vseed;

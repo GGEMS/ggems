@@ -33,9 +33,10 @@ __host__ __device__ void planar_source_primary_generator(ParticleStack particles
 class PlanarSource {
     public:
         PlanarSource(f32 vpx, f32 vpy, f32 vpz, f32 vwid, f32 vlen, 
-                       f32 vE, ui32 vseed, std::string vname, ui32 vgeom_id);
+                      ui32 vseed, std::string vname, ui32 vgeom_id);
         PlanarSource();
         void set_position(f32 vpx, f32 vpy, f32 vpz);
+        void set_histpoint(f32 venergy, f32 vpart);
         void set_width(f32 vwid);
         void set_length(f32 vlen);
         void set_energy(f32 venergy);
@@ -46,6 +47,8 @@ class PlanarSource {
         f32 px, py, pz, width, length, energy;
         ui32 seed, geometry_id;
         std::string source_name;
+        
+        std::vector<f32> energy_hist, partpdec;
 
     private:
 };
