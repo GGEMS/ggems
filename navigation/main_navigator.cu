@@ -27,13 +27,13 @@ __global__ void kernel_photon_navigator(ParticleStack particles, Scene geometry,
 
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
     if (id >= particles.size) return;
-    //if (particles.endsimu[id]) return;
-    //if (particles.pname[id]) return;
+  //  if (particles.endsimu[id]) return;
+   // if (particles.pname[id]) return;
  
        
     
-    //ui32 istep = 0;
-    while (particles.endsimu[id] == PARTICLE_ALIVE) {
+    ui32 istep = 0;
+    while (particles.endsimu[id] == PARTICLE_ALIVE && istep < 30) {
        
         // Track photon
         photon_navigator(particles, id, geometry, materials, photon_CS_table, parameters, pulses);
@@ -41,10 +41,11 @@ __global__ void kernel_photon_navigator(ParticleStack particles, Scene geometry,
     //// SPECIAL CASE FOR RAYTRACING
     // photon_navigator_raytracing_colli(particles, id, geometry, materials, photon_CS_table,
     //                        parameters, pulses);
-        //++istep;
+        ++istep;
        
     }
-     //printf("id %d step %d \n", id, istep);
+     
+    // printf("id %d step %d \n", id, istep);
    // if (particles.endsimu[id])
      //   atomicAdd(count, 1);
 }
@@ -89,11 +90,11 @@ void cpu_main_navigator(ParticleStack &particles, Scene geometry,
            // printf("part %d >>>>>> step %i\n", id, istep);
            // #endif
             
-          /*  if (istep > 40) {
+            if (istep > 10) {
                 printf("part %d >>>>>> step %i\n", id, istep);
                 printf("WARNING - CPU reachs max step\n");
-                break;
-            }*/
+               // break;
+            }
             
         } // istep
 
@@ -124,15 +125,15 @@ void gpu_main_navigator(ParticleStack &particles, Scene geometry,
     int count_h = 0;
     
     cudaMalloc((void**) &count_d, sizeof(int));
-    cudaMemcpy(count_d, &count_h, sizeof(int), cudaMemcpyHostToDevice);
+    cudaMemcpy(count_d, &count_h, sizeof(int), cudaMemcpyHostToDevice);*/
 
     // Simulation loop
-    int step=0;*/
+   // int step=0;
     
    // while (count_h < particles.size) {
-     //   ++step;
+   //     ++step;
       
-      //  kernel_photon_navigator<<<grid, threads>>>(particles, geometry, materials, photon_CS_table, parameters, pulses, count_d);
+     //   kernel_photon_navigator<<<grid, threads>>>(particles, geometry, materials, photon_CS_table, parameters, pulses, count_d);
       
       
       kernel_photon_navigator<<<grid, threads>>>(particles, geometry, materials, photon_CS_table, parameters, pulses);
@@ -151,7 +152,7 @@ void gpu_main_navigator(ParticleStack &particles, Scene geometry,
             break;
         }*/
         
-   // }
+    //}
     
    // cudaFree(count_d);
 }

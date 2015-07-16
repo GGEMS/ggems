@@ -60,7 +60,7 @@ __host__ __device__ void photon_navigator(ParticleStack &particles, ui32 part_id
         obj_type = (ui32)geometry.data_objects[adr_geom+ADR_OBJ_TYPE];
 
     } 
-   
+       
     // Get the material that compose this volume
     ui32 id_mat = get_geometry_material(geometry, cur_id_geom, pos);
 
@@ -316,6 +316,7 @@ __host__ __device__ void photon_navigator(ParticleStack &particles, ui32 part_id
         if (interaction_distance < next_interaction_distance) {
             next_interaction_distance = interaction_distance;
             next_discrete_process = PHOTON_PHOTOELECTRIC;
+           // printf("PHOTOELEC %f ", next_interaction_distance);
         }
         //if (cur_id_geom==1) printf("E %e CS %e\n", particles.E[part_id], cross_section);
     }
@@ -349,7 +350,7 @@ __host__ __device__ void photon_navigator(ParticleStack &particles, ui32 part_id
 
     ui32 hit_id_geom = 0;
     get_next_geometry_boundary(geometry, cur_id_geom, pos, dir, interaction_distance, hit_id_geom);
-        
+    
     if (interaction_distance <= next_interaction_distance) {
         next_interaction_distance = interaction_distance + EPSILON3; // Overshoot
         next_discrete_process = GEOMETRY_BOUNDARY;
@@ -367,12 +368,14 @@ __host__ __device__ void photon_navigator(ParticleStack &particles, ui32 part_id
         //f32xyz pos_edep = add_vector(photon.pos, scale_vector(photon.dir, next_interaction_distance*prng()));
     //}
 
-    // printf("before %f %f %f process %d dist %f geom %d \n", pos.x, pos.y, pos.z, next_discrete_process, next_interaction_distance, next_geometry_volume);
+    // printf("id %d mat %d process %d dist %f cur_geom %d next_geom %d \n", part_id, id_mat, next_discrete_process, next_interaction_distance, cur_id_geom, next_geometry_volume);
     
+   // printf("move particle %f %f %f dir %f %f %f \n", pos.x, pos.y, pos.z, dir.x, dir.y, dir.z);
+     
     // Move the particle
     pos = fxyz_add(pos, fxyz_scale(dir, next_interaction_distance));
     
-    //printf("move particle %f %f %f \n", pos.x, pos.y, pos.z);
+    
 
     // Update TOF
     particles.tof[part_id] += c_light * next_interaction_distance;

@@ -303,7 +303,7 @@ __host__ __device__ f64 GetDistanceHex(f64xyz position, f64xyz direction, f64 ra
         
         // If intersection, check if inside hexagone and still inside the colli
         if(dist_plane >= 0.0f) {
-            f64xyz pos_temp = fxyz_add(position, fxyz_scale(direction, dist_plane + EPSILON3));
+            f64xyz pos_temp = fxyz_add(position, fxyz_scale(direction, dist_plane)); /// Remove EPSILON3 --> LOOP
             if (IsInsideHex(pos_temp, radius, cy, cz)) {
                 //printf("face %d -- pos_temp %f %f %f; radius %f; cy %f; cz %f INSIDE\n", s, pos_temp.x, pos_temp.y, pos_temp.z, radius, cy, cz);
                 return dist_plane;
@@ -317,6 +317,7 @@ __host__ __device__ f64 GetDistanceHex(f64xyz position, f64xyz direction, f64 ra
 // Function that return the distance to closest hole/septa intersection
 __host__ __device__ f64 GetNextHex(f64xyz position, f64xyz direction, Scene geometry, ui32 adr_geom, f64xyz center, f64xyz u, f64xyz v, f64xyz w)
 {
+    
     // Transform the ray in OBB' space, then do AABB
     f64xyz ray_obb = fxyz_sub(position, center);
     position.x = fxyz_dot(ray_obb, u);
@@ -373,7 +374,7 @@ __host__ __device__ f64 GetNextHex(f64xyz position, f64xyz direction, Scene geom
             if (distance_intersection <= distance_min) {
                 distance_min = distance_intersection;
             }
-          // printf("i %d: %f - dist_min %f \n", temp, distance_intersection, distance_min);
+         //  printf("i %d: %f - dist_min %f \n", temp, distance_intersection, distance_min);
         }
         
         temp = hex - geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY] + 1;
@@ -426,6 +427,8 @@ __host__ __device__ f64 GetNextHex(f64xyz position, f64xyz direction, Scene geom
         
         ///// second ring
         
+       // printf("SECOND RING ");
+        
         temp = hex - geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY] - 1;
         
         if (temp >= 0 && temp < nb_hex) {
@@ -459,7 +462,7 @@ __host__ __device__ f64 GetNextHex(f64xyz position, f64xyz direction, Scene geom
             if (distance_intersection <= distance_min) {
                 distance_min = distance_intersection;
             }
-            //printf("i %d: %f - dist_min %f \n", temp, distance_intersection, distance_min);
+           // printf("i %d: %f - dist_min %f \n", temp, distance_intersection, distance_min);
         }
         
         temp = hex + geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY] - 2;
@@ -512,7 +515,7 @@ __host__ __device__ f64 GetNextHex(f64xyz position, f64xyz direction, Scene geom
     
     distance_intersection = hit_ray_AABB(position, direction, aabb_xmin, aabb_xmax, aabb_ymin, aabb_ymax, aabb_zmin, aabb_zmax);
     
-  //  printf("box: %f - dist_min %f \n", distance_intersection, distance_min);
+    //printf("box: %f - dist_min %f \n", distance_intersection, distance_min);
     
     if (distance_intersection <= distance_min) {
           distance_min = distance_intersection;
@@ -809,6 +812,8 @@ __host__ __device__ f64 get_distance_to_object(Scene geometry, ui32 adr_geom,
           
         i32 hex = GetHexIndex(pos, geometry, adr_geom, colli_center, u, v, w);
         
+        // printf("hexagon index %d \n", hex);
+        
        // printf("hexagon index %d pos %f %f %f dir %f %f %f \n", hex, pos.x, pos.y, pos.z, dir.x, dir.y, dir.z);
         
        // printf("colli %f %f %f %f %f %f\n", aabb_xmin, aabb_xmax, aabb_ymin, aabb_ymax,
@@ -824,11 +829,12 @@ __host__ __device__ f64 get_distance_to_object(Scene geometry, ui32 adr_geom,
            /* f64xyz pos_temp = fxyz_add(pos, fxyz_scale(dir, distance + EPSILON3));
             i32 hex_test = GetHexIndex(pos_temp, geometry, adr_geom, colli_center, u, v, w);
             
-            bool inside = test_point_OBB(pos_temp, aabb_xmin, aabb_xmax, aabb_ymin, aabb_ymax, aabb_zmin, aabb_zmax, colli_center, u, v, w);*/
+            bool inside = test_point_OBB(pos_temp, aabb_xmin, aabb_xmax, aabb_ymin, aabb_ymax, aabb_zmin, aabb_zmax, colli_center, u, v, w);
             
-            //printf("hex_test %d \n", hex_test);
+            printf("hex_test %d pos %f %f %f dir %f %f %f distance %f \n", hex_test, pos.x, pos.y, pos.z,
+                                                                              dir.x, dir.y, dir.z, distance);
             
-            /*if (hex_test <= 0 && inside) {
+            if (hex_test <= 0 && inside) {
                 printf("WARNING - Next position not in an hole \n");
                 
                 f64 dist_test = hit_ray_OBB(pos_temp, dir, aabb_xmin, aabb_xmax,
