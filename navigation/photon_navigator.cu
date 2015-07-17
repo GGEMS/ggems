@@ -316,7 +316,7 @@ __host__ __device__ void photon_navigator(ParticleStack &particles, ui32 part_id
         if (interaction_distance < next_interaction_distance) {
             next_interaction_distance = interaction_distance;
             next_discrete_process = PHOTON_PHOTOELECTRIC;
-           // printf("PHOTOELEC %f ", next_interaction_distance);
+          //  printf("PHOTOELEC %f ", next_interaction_distance);
         }
         //if (cur_id_geom==1) printf("E %e CS %e\n", particles.E[part_id], cross_section);
     }

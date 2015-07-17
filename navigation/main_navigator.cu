@@ -27,13 +27,13 @@ __global__ void kernel_photon_navigator(ParticleStack particles, Scene geometry,
 
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
     if (id >= particles.size) return;
-  //  if (particles.endsimu[id]) return;
-   // if (particles.pname[id]) return;
+    //if (particles.endsimu[id]) return;
+    //if (particles.pname[id]) return;
  
        
     
     ui32 istep = 0;
-    while (particles.endsimu[id] == PARTICLE_ALIVE && istep < 30) {
+    while (particles.endsimu[id] == PARTICLE_ALIVE && istep < 50) {
        
         // Track photon
         photon_navigator(particles, id, geometry, materials, photon_CS_table, parameters, pulses);
@@ -90,11 +90,11 @@ void cpu_main_navigator(ParticleStack &particles, Scene geometry,
            // printf("part %d >>>>>> step %i\n", id, istep);
            // #endif
             
-            if (istep > 10) {
+            /*if (istep > 20) {
                 printf("part %d >>>>>> step %i\n", id, istep);
                 printf("WARNING - CPU reachs max step\n");
                // break;
-            }
+            }*/
             
         } // istep
 
@@ -121,19 +121,19 @@ void gpu_main_navigator(ParticleStack &particles, Scene geometry,
     grid.x = (particles.size + gpu_block_size - 1) / gpu_block_size;
     
     // Count simulated photons
-   /* int* count_d;
+    /*int* count_d;
     int count_h = 0;
     
     cudaMalloc((void**) &count_d, sizeof(int));
-    cudaMemcpy(count_d, &count_h, sizeof(int), cudaMemcpyHostToDevice);*/
+    cudaMemcpy(count_d, &count_h, sizeof(int), cudaMemcpyHostToDevice);
 
     // Simulation loop
-   // int step=0;
+   int step=0;
     
-   // while (count_h < particles.size) {
-   //     ++step;
+    while (count_h < particles.size) {
+        ++step;*/
       
-     //   kernel_photon_navigator<<<grid, threads>>>(particles, geometry, materials, photon_CS_table, parameters, pulses, count_d);
+      //  kernel_photon_navigator<<<grid, threads>>>(particles, geometry, materials, photon_CS_table, parameters, pulses, count_d);
       
       
       kernel_photon_navigator<<<grid, threads>>>(particles, geometry, materials, photon_CS_table, parameters, pulses);
@@ -141,10 +141,10 @@ void gpu_main_navigator(ParticleStack &particles, Scene geometry,
   
         // get back the number of simulated photons
 
-      //  cudaMemcpy(&count_h, count_d, sizeof(int), cudaMemcpyDeviceToHost);
+        //cudaMemcpy(&count_h, count_d, sizeof(int), cudaMemcpyDeviceToHost);
         
         //#ifdef DEBUG
-     //   printf("Sim %d %d / %d tot\n", step, count_h, particles.size);
+        //printf("Sim %d %d / %d tot\n", step, count_h, particles.size);
         //#endif
         
         /*if (step > 100) {
@@ -152,7 +152,7 @@ void gpu_main_navigator(ParticleStack &particles, Scene geometry,
             break;
         }*/
         
-    //}
+  //  }
     
    // cudaFree(count_d);
 }
