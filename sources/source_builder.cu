@@ -42,14 +42,14 @@ __host__ __device__ void get_primaries(Sources sources, ParticleStack &particles
         f32 nb_peak = sources.data_sources[adr+ADR_SRC_NB_PEAK];
         
         if (nb_peak == 1) {
-            energy = sources.data_sources[adr+ADR_SRC_ENERGY];
+            energy = sources.data_sources[adr+ADR_POINT_SRC_ENERGY];
         }
         if (nb_peak == 2) {
           
             f32 p1, p2;
             
-            p1 = sources.data_sources[adr+ADR_SRC_PARTPDEC + 1];
-            p2 = sources.data_sources[adr+ADR_SRC_PARTPDEC + 2];
+            p1 = sources.data_sources[adr+ADR_POINT_SRC_PARTPDEC + 1];
+            p2 = sources.data_sources[adr+ADR_POINT_SRC_PARTPDEC + 2];
             
             //printf("p1 %f p2 %f \n", p1, p2);
            
@@ -63,9 +63,9 @@ __host__ __device__ void get_primaries(Sources sources, ParticleStack &particles
             //printf("p1 %f p2 %f -- rnd %f p %f \n", p1, p2, rnd, p);
             
             if (rnd < p) {
-                energy = sources.data_sources[adr+ADR_SRC_ENERGY];
+                energy = sources.data_sources[adr+ADR_POINT_SRC_ENERGY];
             } else {
-                energy = sources.data_sources[adr+ADR_SRC_ENERGY + 1];
+                energy = sources.data_sources[adr+ADR_POINT_SRC_ENERGY + 1];
             }
         } 
         
@@ -81,17 +81,18 @@ __host__ __device__ void get_primaries(Sources sources, ParticleStack &particles
         f32 length = sources.data_sources[adr+ADR_CYLINDER_SRC_LEN];
         //f32 energy = sources.data_sources[adr+ADR_CYLINDER_SRC_ENERGY];
         
+       
         f32 nb_peak = sources.data_sources[adr+ADR_SRC_NB_PEAK];
         
         if (nb_peak == 1) {
-            energy = sources.data_sources[adr+ADR_SRC_ENERGY];
+            energy = sources.data_sources[adr+ADR_CYLINDER_SRC_ENERGY];
         }
         if (nb_peak == 2) {
           
             f32 p1, p2;
             
-            p1 = sources.data_sources[adr+ADR_SRC_PARTPDEC + 1];
-            p2 = sources.data_sources[adr+ADR_SRC_PARTPDEC + 2];
+            p1 = sources.data_sources[adr+ADR_CYLINDER_SRC_PARTPDEC + 1];
+            p2 = sources.data_sources[adr+ADR_CYLINDER_SRC_PARTPDEC + 2];
             
             //printf("p1 %f p2 %f \n", p1, p2);
            
@@ -105,9 +106,9 @@ __host__ __device__ void get_primaries(Sources sources, ParticleStack &particles
             //printf("p1 %f p2 %f -- rnd %f p %f \n", p1, p2, rnd, p);
             
             if (rnd < p) {
-                energy = sources.data_sources[adr+ADR_SRC_ENERGY];
+                energy = sources.data_sources[adr+ADR_CYLINDER_SRC_ENERGY];
             } else {
-                energy = sources.data_sources[adr+ADR_SRC_ENERGY + 1];
+                energy = sources.data_sources[adr+ADR_CYLINDER_SRC_ENERGY + 1];
             }
         } 
         
@@ -124,14 +125,14 @@ __host__ __device__ void get_primaries(Sources sources, ParticleStack &particles
         f32 nb_peak = sources.data_sources[adr+ADR_SRC_NB_PEAK];
         
         if (nb_peak == 1) {
-            energy = sources.data_sources[adr+ADR_SRC_ENERGY];
+            energy = sources.data_sources[adr+ADR_PLANAR_SRC_ENERGY];
         }
         if (nb_peak == 2) {
           
             f32 p1, p2;
             
-            p1 = sources.data_sources[adr+ADR_SRC_PARTPDEC + 1];
-            p2 = sources.data_sources[adr+ADR_SRC_PARTPDEC + 2];
+            p1 = sources.data_sources[adr+ADR_PLANAR_SRC_PARTPDEC + 1];
+            p2 = sources.data_sources[adr+ADR_PLANAR_SRC_PARTPDEC + 2];
             
             //printf("p1 %f p2 %f \n", p1, p2);
            
@@ -145,9 +146,9 @@ __host__ __device__ void get_primaries(Sources sources, ParticleStack &particles
             //printf("p1 %f p2 %f -- rnd %f p %f \n", p1, p2, rnd, p);
             
             if (rnd < p) {
-                energy = sources.data_sources[adr+ADR_SRC_ENERGY];
+                energy = sources.data_sources[adr+ADR_PLANAR_SRC_ENERGY];
             } else {
-                energy = sources.data_sources[adr+ADR_SRC_ENERGY + 1];
+                energy = sources.data_sources[adr+ADR_PLANAR_SRC_ENERGY + 1];
             }
         } 
         
@@ -288,7 +289,7 @@ void SourceBuilder::add_source(PointSource src) {
 // Add a cylinder source on the simulation
 void SourceBuilder::add_source(CylinderSource src) {
     sources.nb_sources++;
-    
+        
     ui32 n = src.energy_hist.size();
     f32 *newhist = (f32*)malloc(sizeof(f32) * n);
     ui32 i=0; while (i < n) {
@@ -311,17 +312,18 @@ void SourceBuilder::add_source(CylinderSource src) {
     
     array_push_back(&sources.data_sources, sources.data_sources_dim, n);
 
-    array_append_array(&sources.data_sources, sources.data_sources_dim, &(newhist), n);
-    array_append_array(&sources.data_sources, sources.data_sources_dim, &(newpartpdec), n);
-    
     array_push_back(&sources.data_sources, sources.data_sources_dim, src.px);
     array_push_back(&sources.data_sources, sources.data_sources_dim, src.py);
     array_push_back(&sources.data_sources, sources.data_sources_dim, src.pz);
     array_push_back(&sources.data_sources, sources.data_sources_dim, src.rad);
     array_push_back(&sources.data_sources, sources.data_sources_dim, src.length);
+    
+    array_append_array(&sources.data_sources, sources.data_sources_dim, &(newhist), n);
+    array_append_array(&sources.data_sources, sources.data_sources_dim, &(newpartpdec), n);
+    
     //array_push_back(&sources.data_sources, sources.data_sources_dim, src.energy);
 
-    array_push_back(&sources.data_sources, sources.data_sources_dim, 2*n + SIZE_CYLINDER_SRC);
+     array_push_back(&sources.data_sources, sources.data_sources_dim, 2*n + SIZE_CYLINDER_SRC);
     
     // Save the seed
     //array_push_back(&sources.seeds, sources.seeds_dim, src.seed);

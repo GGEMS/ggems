@@ -25,7 +25,7 @@ __host__ __device__ void cylinder_source_primary_generator(ParticleStack particl
                                                         f32 px, f32 py, f32 pz, f32 rad,
                                                         f32 length, f32 energy,
                                                         ui8 type, ui32 geom_id) {
-
+    
     // random position within the cylinder_source
     f32 theta = JKISS32(particles, id);
     theta *= gpu_twopi;
