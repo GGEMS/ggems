@@ -397,18 +397,19 @@ void Digitizer::process_singles(ui32 iter, f64 tot_activity) {
             
             E1=pulses.pu1_E[i];
             
-            if (flag_energy_blurring) {
+           /* if (flag_energy_blurring) {
                 resolution = E_slope * (pulses.pu1_E[i] - E_ref) + E_res;
                 E1 = G4RandGauss::shoot(pulses.pu1_E[i], resolution * pulses.pu1_E[i] / 2.35482);
-            }
+            } */
             
             if (pulses.pu2_nb_hits[i] > 0) {   
                 E2=pulses.pu2_E[i];
+                
               
-                if (flag_energy_blurring) {
+              /*  if (flag_energy_blurring) {
                     resolution = E_slope * (pulses.pu2_E[i] - E_ref) + E_res;
                     E2 = G4RandGauss::shoot(pulses.pu2_E[i], resolution * pulses.pu2_E[i] / 2.35482);
-                }
+                } */
             }
            
             // Keep the first block
@@ -805,6 +806,10 @@ void Digitizer::process_spect_projections(Scene geometry) {
             PNew.z = singles[i].pz;
             
            
+            if (flag_energy_blurring) {
+                f32 resolution = E_slope * (singles[i].E - E_ref) + E_res;
+                E_New = G4RandGauss::shoot(singles[i].E, resolution * singles[i].E / 2.35482);
+            }
           
             //printf("Energy %f singles[i].id_geom %d \n", E_New, singles[i].id_geom);
             
@@ -818,7 +823,7 @@ void Digitizer::process_spect_projections(Scene geometry) {
               
               //printf("energy win %f %f \n", elow, ehigh);
               
-             if (E_New > elow && E_New < ehigh) {
+              if (E_New > elow && E_New < ehigh) {
                
                 //printf("enter\n");
                
@@ -842,11 +847,14 @@ void Digitizer::process_spect_projections(Scene geometry) {
             
                 // Apply spatial blurring
                 if (flag_sp_blurring) {
-                    PNew.x = G4RandGauss::shoot(singles[i].px,SP_res/2.35);              
+                    //PNew.x = G4RandGauss::shoot(singles[i].px,SP_res/2.35);              
                     PNew.y = G4RandGauss::shoot(singles[i].py,SP_res/2.35);
                     PNew.z = G4RandGauss::shoot(singles[i].pz,SP_res/2.35);
                 }
             
+                if (!test_point_AABB(PNew, aabb_xmin, aabb_xmax, aabb_ymin, aabb_ymax, aabb_zmin, aabb_zmax))
+                    printf("point %f %f %f -- crystal %f %f %f %f %f %f \n", PNew.x, PNew.y, PNew.z, aabb_xmin, aabb_xmax, aabb_ymin, aabb_ymax, aabb_zmin, aabb_zmax);
+                  
                 // If new position still inside the detector 
                 if (test_point_AABB(PNew, aabb_xmin, aabb_xmax, aabb_ymin, aabb_ymax, aabb_zmin, aabb_zmax)) {
                     if (flag_projXY) {

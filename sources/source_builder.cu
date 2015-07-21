@@ -270,12 +270,12 @@ void SourceBuilder::add_source(PointSource src) {
    
     array_push_back(&sources.data_sources, sources.data_sources_dim, n);
 
-    array_append_array(&sources.data_sources, sources.data_sources_dim, &(newhist), n);
-    array_append_array(&sources.data_sources, sources.data_sources_dim, &(newpartpdec), n);
-    
     array_push_back(&sources.data_sources, sources.data_sources_dim, src.px);
     array_push_back(&sources.data_sources, sources.data_sources_dim, src.py);
     array_push_back(&sources.data_sources, sources.data_sources_dim, src.pz);
+    
+    array_append_array(&sources.data_sources, sources.data_sources_dim, &(newhist), n);
+    array_append_array(&sources.data_sources, sources.data_sources_dim, &(newpartpdec), n);
    
     array_push_back(&sources.data_sources, sources.data_sources_dim, 2*n + SIZE_POINT_SRC);
     
@@ -355,9 +355,6 @@ void SourceBuilder::add_source(PlanarSource src) {
     array_push_back(&sources.data_sources, sources.data_sources_dim, src.geometry_id);
     
     array_push_back(&sources.data_sources, sources.data_sources_dim, n);
-
-    array_append_array(&sources.data_sources, sources.data_sources_dim, &(newhist), n);
-    array_append_array(&sources.data_sources, sources.data_sources_dim, &(newpartpdec), n);
     
     array_push_back(&sources.data_sources, sources.data_sources_dim, src.px);
     array_push_back(&sources.data_sources, sources.data_sources_dim, src.py);
@@ -365,6 +362,9 @@ void SourceBuilder::add_source(PlanarSource src) {
     array_push_back(&sources.data_sources, sources.data_sources_dim, src.width);
     array_push_back(&sources.data_sources, sources.data_sources_dim, src.length);
     //array_push_back(&sources.data_sources, sources.data_sources_dim, src.energy);
+    
+    array_append_array(&sources.data_sources, sources.data_sources_dim, &(newhist), n);
+    array_append_array(&sources.data_sources, sources.data_sources_dim, &(newpartpdec), n);
 
     array_push_back(&sources.data_sources, sources.data_sources_dim, 2*n + SIZE_PLANAR_SRC);
     
