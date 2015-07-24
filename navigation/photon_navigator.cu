@@ -63,232 +63,7 @@ __host__ __device__ void photon_navigator(ParticleStack &particles, ui32 part_id
        
     // Get the material that compose this volume
     ui32 id_mat = get_geometry_material(geometry, cur_id_geom, pos);
-
-   /* if (part_id == 27226 && cur_id_geom == 3) {
-     printf("photon_navigator dir %f %f %f cur_id_geom %d obj_type %d mat %d energy %f \n", dir.x, dir.y, dir.z,
-            cur_id_geom, obj_type, id_mat, particles.E[part_id]);
-    
-         f64xyz colli_center;
-        colli_center.x = (f64)geometry.data_objects[adr_geom+ADR_OBB_CENTER_X];
-        colli_center.y = (f64)geometry.data_objects[adr_geom+ADR_OBB_CENTER_Y];
-        colli_center.z = (f64)geometry.data_objects[adr_geom+ADR_OBB_CENTER_Z];
-        
-        f64xyz u, v, w;
-        u.x = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_UX];
-        u.y = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_UY];
-        u.z = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_UZ];
-        v.x = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_VX];
-        v.y = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_VY];
-        v.z = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_VZ];
-        w.x = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_WX];
-        w.y = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_WY];
-        w.z = (f64)geometry.data_objects[adr_geom+ADR_OBB_FRAME_WZ];
-        
-        
-        
-        i32 hex = GetHexIndex(pos, geometry, adr_geom, colli_center, u, v, w);
-        
-        if (hex < 0) {
-        
-                
-         f64 distance2 = GetNextHex(pos, dir, geometry, adr_geom, colli_center, u, v, w); 
-        
-         printf("distance2 %f \n", distance2);
-          
-        f64xyz ray_obb = fxyz_sub(pos, colli_center);
-        f64xyz position;
-        position.x = fxyz_dot(ray_obb, u);
-        position.y = fxyz_dot(ray_obb, v);
-        position.z = fxyz_dot(ray_obb, w);
-        f64xyz direction;
-        direction.x = fxyz_dot(dir, u);
-        direction.y = fxyz_dot(dir, v);
-        direction.z = fxyz_dot(dir, w);
-        
-        //ui32 obj_type = (ui32)geometry.data_objects[adr_geom+ADR_OBJ_TYPE];
-
-        ui32 nb_hex = (i32)geometry.data_objects[adr_geom + ADR_COLLI_NB_HEXAGONS];
-        ui32 ind_y = adr_geom + ADR_COLLI_CENTEROFHEXAGONS;
-        ui32 ind_z = adr_geom + ADR_COLLI_CENTEROFHEXAGONS + nb_hex;
-        
-        i32 col, raw, new_raw, min, max, hex, temp;
-        
-        f64 distance_min = F64_MAX;
-        f64 distance_intersection;
-
-        printf("position %f %f %f \n", position.x, position.y, position.z);
-        
-        i32 index = GetCloserHex(position, geometry, adr_geom);
-        
-        printf("index %d \n", index);
-        
-         hex = index;
-
-         
-        // Centered hexagon
-        // Check each hexagon faces 
-        distance_intersection = GetDistanceHex(position, direction, (f64)geometry.data_objects[adr_geom+ADR_COLLI_HOLE_RADIUS],
-                                      (f64)geometry.data_objects[ind_y+hex], (f64)geometry.data_objects[ind_z+hex]);
-        
-        if (distance_intersection <= distance_min) {
-            distance_min = distance_intersection;
-        }
-        
-        //// First ring
-        
-        temp = hex + 1;
-        
-        if (temp >= 0 && temp < nb_hex) {
-            distance_intersection = GetDistanceHex(position, direction, (f64)geometry.data_objects[adr_geom+ADR_COLLI_HOLE_RADIUS],
-                                    (f64)geometry.data_objects[ind_y+temp], (f64)geometry.data_objects[ind_z+temp]);
-        
-            printf("i %d: %f \n",temp, distance_intersection);
-            
-            if (distance_intersection <= distance_min) {
-                distance_min = distance_intersection;
-            }
-        }
-        
-        temp = hex - 1;
-        
-        if (temp >= 0 && temp < nb_hex) {
-            distance_intersection = GetDistanceHex(position, direction, (f64)geometry.data_objects[adr_geom+ADR_COLLI_HOLE_RADIUS],
-                                    (f64)geometry.data_objects[ind_y+temp], (f64)geometry.data_objects[ind_z+temp]);
-         printf("i %d: %f \n",temp, distance_intersection);
-            if (distance_intersection <= distance_min) {
-                distance_min = distance_intersection;
-            }
-        }
-        
-        temp = hex - geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY] + 1;
-        
-        if (temp >= 0 && temp < nb_hex) {
-            distance_intersection = GetDistanceHex(position, direction, (f64)geometry.data_objects[adr_geom+ADR_COLLI_HOLE_RADIUS],
-                                    (f64)geometry.data_objects[ind_y+temp], (f64)geometry.data_objects[ind_z+temp]);
-         printf("i %d: %f \n",temp, distance_intersection);
-            if (distance_intersection <= distance_min) {
-                distance_min = distance_intersection;
-            }
-        }
-        
-        temp = hex - geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY];
-        
-        if (temp >= 0 && temp < nb_hex) {
-            distance_intersection = GetDistanceHex(position, direction, (f64)geometry.data_objects[adr_geom+ADR_COLLI_HOLE_RADIUS],
-                                    (f64)geometry.data_objects[ind_y+temp], (f64)geometry.data_objects[ind_z+temp]);
-         printf("i %d: %f \n",temp, distance_intersection);
-           if (distance_intersection <= distance_min) {
-                distance_min = distance_intersection;
-            }
-        }
-        
-        temp = hex + geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY];
-        
-        if (temp >= 0 && temp < nb_hex) {
-            distance_intersection = GetDistanceHex(position, direction, (f64)geometry.data_objects[adr_geom+ADR_COLLI_HOLE_RADIUS],
-                                    (f64)geometry.data_objects[ind_y+temp], (f64)geometry.data_objects[ind_z+temp]);
-         printf("i %d: %f \n",temp, distance_intersection);
-           if (distance_intersection <= distance_min) {
-                distance_min = distance_intersection;
-            }
-        }
-        
-        temp = hex + geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY] - 1;
-        
-        if (temp >= 0 && temp < nb_hex) {
-            distance_intersection = GetDistanceHex(position, direction, (f64)geometry.data_objects[adr_geom+ADR_COLLI_HOLE_RADIUS],
-                                    (f64)geometry.data_objects[ind_y+temp], (f64)geometry.data_objects[ind_z+temp]);
-         printf("i %d: %f \n",temp, distance_intersection);
-            if (distance_intersection <= distance_min) {
-                distance_min = distance_intersection;
-            }
-        }
-        
-        ///// second ring
-        
-        temp = hex - geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY] - 1;
-        
-        if (temp >= 0 && temp < nb_hex) {
-            distance_intersection = GetDistanceHex(position, direction, (f64)geometry.data_objects[adr_geom+ADR_COLLI_HOLE_RADIUS],
-                                    (f64)geometry.data_objects[ind_y+temp], (f64)geometry.data_objects[ind_z+temp]);
-         printf("i %d: %f \n",temp, distance_intersection);
-            if (distance_intersection <= distance_min) {
-                distance_min = distance_intersection;
-            }
-        }
-        
-        temp = hex - geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY] + 2;
-        
-        if (temp >= 0 && temp < nb_hex) {
-           distance_intersection = GetDistanceHex(position, direction, (f64)geometry.data_objects[adr_geom+ADR_COLLI_HOLE_RADIUS],
-                                    (f64)geometry.data_objects[ind_y+temp], (f64)geometry.data_objects[ind_z+temp]);
-         printf("i %d: %f \n",temp, distance_intersection);
-            if (distance_intersection <= distance_min) {
-                distance_min = distance_intersection;
-            }
-        }
-        
-        temp = hex + geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY] + 1;
-        
-        if (temp >= 0 && temp < nb_hex) {
-            distance_intersection = GetDistanceHex(position, direction, (f64)geometry.data_objects[adr_geom+ADR_COLLI_HOLE_RADIUS],
-                                    (f64)geometry.data_objects[ind_y+temp], (f64)geometry.data_objects[ind_z+temp]);
-         printf("i %d: %f \n",temp, distance_intersection);
-            if (distance_intersection <= distance_min) {
-                distance_min = distance_intersection;
-            }
-        }
-        
-        temp = hex + geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY] - 2;
-        
-        if (temp >= 0 && temp < nb_hex) {
-            distance_intersection = GetDistanceHex(position, direction, (f64)geometry.data_objects[adr_geom+ADR_COLLI_HOLE_RADIUS],
-                                    (f64)geometry.data_objects[ind_y+temp], (f64)geometry.data_objects[ind_z+temp]);
-         printf("i %d: %f \n",temp, distance_intersection);
-           if (distance_intersection <= distance_min) {
-                distance_min = distance_intersection;
-            }
-        }
-        
-        temp = hex - (2*geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY] - 1);
-        
-        if (temp >= 0 && temp < nb_hex) {
-            distance_intersection = GetDistanceHex(position, direction, (f64)geometry.data_objects[adr_geom+ADR_COLLI_HOLE_RADIUS],
-                                    (f64)geometry.data_objects[ind_y+temp], (f64)geometry.data_objects[ind_z+temp]);
-         printf("i %d: %f \n",temp, distance_intersection);
-           if (distance_intersection <= distance_min) {
-                distance_min = distance_intersection;
-            }
-        }
-        
-        temp = hex + 2*geometry.data_objects[adr_geom+ADR_COLLI_CUBARRAY_NY] - 1;
-        
-        if (temp >= 0 && temp < nb_hex) {
-            distance_intersection = GetDistanceHex(position, direction, (f64)geometry.data_objects[adr_geom+ADR_COLLI_HOLE_RADIUS],
-                                    (f64)geometry.data_objects[ind_y+temp], (f64)geometry.data_objects[ind_z+temp]);
-         printf("i %d: %f \n",temp, distance_intersection);
-            if (distance_intersection <= distance_min) {
-                distance_min = distance_intersection;
-            }
-        }
-        
-        f64 aabb_xmin = (f64)geometry.data_objects[adr_geom+ADR_AABB_XMIN];
-    f64 aabb_xmax = (f64)geometry.data_objects[adr_geom+ADR_AABB_XMAX];
-    f64 aabb_ymin = (f64)geometry.data_objects[adr_geom+ADR_AABB_YMIN];
-    f64 aabb_ymax = (f64)geometry.data_objects[adr_geom+ADR_AABB_YMAX];
-    f64 aabb_zmin = (f64)geometry.data_objects[adr_geom+ADR_AABB_ZMIN];
-    f64 aabb_zmax = (f64)geometry.data_objects[adr_geom+ADR_AABB_ZMAX];
-    
-    distance_intersection = hit_ray_AABB(position, direction, aabb_xmin, aabb_xmax, aabb_ymin, aabb_ymax, aabb_zmin, aabb_zmax);
-    printf("box: %f \n", distance_intersection);
-    if (distance_intersection <= distance_min) {
-          distance_min = distance_intersection;
-    }
-        printf("dist_min %f \n", distance_min);
-        }
-    }*/
-    //printf("mat %d \n", id_mat);
-    
+ 
     //// Find next discrete interaction ///////////////////////////////////////
     
     f64 next_interaction_distance = F64_MAX;
@@ -412,14 +187,6 @@ __host__ __device__ void photon_navigator(ParticleStack &particles, ui32 part_id
 
         //   TODO: cutE = materials.electron_cut_energy[mat]                 cutE
         electron = Compton_SampleSecondaries_standard(particles, 0.0, part_id, parameters);
-      /*  if (cur_id_geom == 3) {
-
-       FILE *cfile = fopen("Count.txt", "a"); 
-    
-        fprintf(cfile, "part %d COMPTON dist_geom %f dist %f\n", part_id, interaction_distance, next_interaction_distance);
-        
-        fclose(cfile);
-    } */ 
     }
 
     if (next_discrete_process == PHOTON_PHOTOELECTRIC) {
@@ -427,29 +194,12 @@ __host__ __device__ void photon_navigator(ParticleStack &particles, ui32 part_id
         //   TODO: cutE = materials.electron_cut_energy[mat]                                               cutE
         electron = Photoelec_SampleSecondaries_standard(particles, materials, photon_CS_table,
                                                                     E_index, 0.0, id_mat, part_id, parameters);
-        /*if (cur_id_geom == 3) {
-
-        FILE *cfile = fopen("Count.txt", "a"); 
-    
-        fprintf(cfile, "part %d PE dist_geom %f dist %f\n", part_id, interaction_distance, next_interaction_distance);
-        
-        fclose(cfile);
-    }  */
     }
 
     if (next_discrete_process == PHOTON_RAYLEIGH) {
         Rayleigh_SampleSecondaries_Livermore(particles, materials, photon_CS_table, E_index, id_mat, part_id);
-     /*  if (cur_id_geom == 3) {
 
-        FILE *cfile = fopen("Count.txt", "a"); 
-    
-        fprintf(cfile, "part %d RAYLEIGH dist_geom %f dist %f\n", part_id, interaction_distance, next_interaction_distance);
-        
-        fclose(cfile);
-    }  */
     }
-
-
 
     //// Get discrete energy lost
 
@@ -641,12 +391,27 @@ __host__ __device__ void photon_navigator_raytracing_colli(ParticleStack &partic
            
             f64 distance = hit_ray_septa(temp, d, half_colli_size_x, hole_radius, colli_center, u, v, w);
             
-            f64 next_interaction_distance = distance + EPSILON3; // Overshoot
             // Move the particle
-            f64xyz pos_test = fxyz_add(pos, fxyz_scale(dir, next_interaction_distance));
+            f64xyz pos_temp = fxyz_add(pos, fxyz_scale(dir, distance));
             
+            i32 hex_test = GetHexIndex(pos_temp, geometry, adr_geom, colli_center, u, v, w);
+            
+            if (hex_test == hex) {
+              
+                f64 next_interaction_distance = distance + EPSILON3; // Overshoot
+                f64xyz pos_test = fxyz_add(pos, fxyz_scale(dir, next_interaction_distance));
+                next_geometry_volume = geometry.mother_node[cur_id_geom];
+                // Update TOF
+                particles.tof[part_id] += c_light * next_interaction_distance;
+                particles.px[part_id] = pos_test.x;
+                particles.py[part_id] = pos_test.y;
+                particles.pz[part_id] = pos_test.z;
+              
+            } else {
+                particles.endsimu[part_id] = PARTICLE_DEAD;
+            }
             // if particle is not outside colli box, kill the particle (hit a septa)
-            if (test_point_OBB(pos_test, aabb_xmin, aabb_xmax, aabb_ymin, aabb_ymax, aabb_zmin, aabb_zmax, colli_center, u, v, w)) {
+            /*if (test_point_OBB(pos_test, aabb_xmin, aabb_xmax, aabb_ymin, aabb_ymax, aabb_zmin, aabb_zmax, colli_center, u, v, w)) {
                 particles.endsimu[part_id] = PARTICLE_DEAD;
             }
             else {
@@ -656,7 +421,7 @@ __host__ __device__ void photon_navigator_raytracing_colli(ParticleStack &partic
                 particles.px[part_id] = pos_test.x;
                 particles.py[part_id] = pos_test.y;
                 particles.pz[part_id] = pos_test.z;
-            }
+            }*/
         }
     }
     else {

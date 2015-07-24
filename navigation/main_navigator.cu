@@ -40,7 +40,7 @@ __global__ void kernel_photon_navigator(ParticleStack particles, Scene geometry,
         
     //// SPECIAL CASE FOR RAYTRACING
     // photon_navigator_raytracing_colli(particles, id, geometry, materials, photon_CS_table,
-    //                        parameters, pulses);
+      //                      parameters, pulses);
         ++istep;
        
     }
