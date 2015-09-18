@@ -954,128 +954,6 @@ __host__ __device__ f64 get_distance_to_object(Scene geometry, ui32 adr_geom,
                 printf("pos_temp %f %f %f \n", pos_temp2.x, pos_temp2.y, pos_temp2.z);
                 printf("distance %f \n", distance);
             }
-            
-            /*f64xyz pos_test = pos;
-            
-            i32 hex_test = GetHexIndex(pos_test, geometry, adr_geom, colli_center, u, v, w);
-            bool inside = test_point_OBB(pos_test, aabb_xmin, aabb_xmax, aabb_ymin, aabb_ymax, aabb_zmin, aabb_zmax, colli_center, u, v, w);
-               
-            // Search for the next position inside an hexagon
-            while(hex_test<0 && inside) {
-                        
-                  //pos_test = fxyz_add(pos_test, fxyz_scale(dir, EPSILON3));
-              
-                  pos_test.x += dir.x * 0.1;
-                  pos_test.y += dir.y * 0.1;
-                  pos_test.z += dir.z * 0.1;   
-            
-                  hex_test = GetHexIndex(pos_test, geometry, adr_geom, colli_center, u, v, w);
-                  inside = test_point_OBB(pos_test, aabb_xmin, aabb_xmax, aabb_ymin, aabb_ymax, aabb_zmin, aabb_zmax, colli_center, u, v, w);
-                  
-              //    printf("SEARCH hexagon index %d pos %f %f %f \n", hex_test, pos_test.x, pos_test.y, pos_test.z);
-            }
-                
-           // printf("hexagon index %d pos %f %f %f \n", hex_test, pos_test.x, pos_test.y, pos_test.z);
-              
-            
-            if (inside && hex_test >= 0) {
-                        
-                  f64xyz inv_dir;
-              
-                  // Ensure particle is not stuck on hole/septa intersection
-                  //f64xyz pos_test2 = fxyz_add(pos_test, fxyz_scale(dir, EPSILON3));
-                  
-                  f64xyz ray_obb = fxyz_sub(pos_test, colli_center);
-                  f64xyz p;
-                  p.x = fxyz_dot(ray_obb, u);
-                  p.y = fxyz_dot(ray_obb, v);
-                  p.z = fxyz_dot(ray_obb, w);
-                  f64xyz d;
-                  d.x = fxyz_dot(dir, u);
-                  d.y = fxyz_dot(dir, v);
-                  d.z = fxyz_dot(dir, w);
-                  
-                  f64xyz temp;
-                  temp.x = p.x;
-                  temp.y = p.y - (f64)geometry.data_objects[ind_y+hex_test];
-                  temp.z = p.z - (f64)geometry.data_objects[ind_z+hex_test] ;
-                
-                  // Inverse the direction to find the septa position entrance
-                  inv_dir.x = -d.x;
-                  inv_dir.y = -d.y;
-                  inv_dir.z = -d.z;
-                
-                  f64 interaction_distance = hit_ray_septa(temp, inv_dir, half_colli_size_x, hole_radius, colli_center, u, v, w);
-                                                                                                                                
-                  // compute the distance from the initial position to deduce the next hole distance                                                                                                      
-                  f64 dist = sqrt((pos_test.x - pos.x)*(pos_test.x - pos.x) 
-                                + (pos_test.y - pos.y)*(pos_test.y - pos.y) 
-                                + (pos_test.z - pos.z)*(pos_test.z - pos.z));
-        
-                  distance = dist - interaction_distance;// + 1.0e-03f;
-                  
-             
-                  
-                  if(distance < EPSILON6) {
-                      printf("OUTSIDE hole n %d : temp %f %f %f, pos %f %f %f, dist%f distance %f \n", hex_test, temp.x, temp.y, temp.z, 
-                                              pos_test.x, pos_test.y, pos_test.z, dist, interaction_distance);
-                  }    
-                      
-                 // if (distance < 2000)
-                 // printf("septa : distance %f \n", distance);
-            }
-            
-            if (!inside) {
-                // particle is escaping the colli without entering a hole
-                distance = sqrt((pos_test.x - pos.x)*(pos_test.x - pos.x) 
-                                + (pos_test.y - pos.y)*(pos_test.y - pos.y) 
-                                + (pos_test.z - pos.z)*(pos_test.z - pos.z));
-             //   printf("escaping colli box : distance %f \n", distance);
-            }  */
-
-            
-           /* if (hex_temp >= 0) {
-            
-                // Ensure particle is not stuck on hole/septa intersection
-                f64xyz pos_temp2 = fxyz_add(pos, fxyz_scale(dir, EPSILON3));
-                      
-                f64xyz inv_dir;
-            
-                f64xyz ray_obb = fxyz_sub(pos_temp2, colli_center);
-                f64xyz p;
-                p.x = fxyz_dot(ray_obb, u);
-                p.y = fxyz_dot(ray_obb, v);
-                p.z = fxyz_dot(ray_obb, w);
-                f64xyz d;
-                d.x = fxyz_dot(dir, u);
-                d.y = fxyz_dot(dir, v);
-                d.z = fxyz_dot(dir, w);
-                
-                f64xyz temp;
-                temp.x = p.x;
-                temp.y = p.y - (f64)geometry.data_objects[ind_y+hex_temp];
-                temp.z = p.z - (f64)geometry.data_objects[ind_z+hex_temp];
-              
-                // Inverse the direction to find the septa position entrance
-                inv_dir.x = -d.x;
-                inv_dir.y = -d.y;
-                inv_dir.z = -d.z;
-                
-                f64 interaction_distance = hit_ray_septa(temp, inv_dir, half_colli_size_x, hole_radius, colli_center, u, v, w);
-                
-                //printf("interaction dist %f \n", interaction_distance);
-
-                distance -= interaction_distance;
-
-                if(distance < EPSILON6) { 
-                  
-                  printf("OUTSIDE hole n %d : temp %f %f %f, pos %f %f %f, dir %f %f %f \n", hex_temp, temp.x, temp.y, temp.z, 
-                    pos.x, pos.y, pos.z, dir.x, dir.y, dir.z);
-                  
-                  printf("interaction_dist %f distance %f \n", interaction_distance, distance2);
-          
-                }
-            }*/
           
         } else {
               
@@ -1145,7 +1023,7 @@ __host__ __device__ f64 get_distance_to_object(Scene geometry, ui32 adr_geom,
         ind.z = (ui32)(posinvox.z / s.z);
 
         //printf("Ind %i %i %i\n", ind.x, ind.y, ind.z);
-
+          
         f64 xmin, ymin, xmax, ymax, zmin, zmax;
         xmin = ind.x*s.x + aabb_xmin; xmax = xmin+s.x;
         ymin = ind.y*s.y + aabb_ymin; ymax = ymin+s.y;
@@ -1461,20 +1339,36 @@ __host__ __device__ void get_next_geometry_boundary(Scene geometry, ui32 cur_geo
     // Special case of voxelized volume where there are voxel boundary
     if (obj_type == VOXELIZED) {           
         // Volume bounding box
-        safety = get_distance_to_object(geometry, adr_geom, AABB, pos, dir);
-        // Voxel boundary
-        distance = get_distance_to_object(geometry, adr_geom, VOXELIZED, pos, dir);
+        //safety = get_distance_to_object(geometry, adr_geom, AABB, pos, dir);
 
+        // Voxel boundary
+        distance = get_distance_to_object(geometry, adr_geom, VOXELIZED, pos, dir);  
+
+        f64 temp_distance = distance + EPSILON3;
+          
+        f64xyz next_pos = fxyz_add(pos, fxyz_scale(dir, temp_distance));
+        
+        if (test_point_AABB(next_pos, (f64)geometry.data_objects[adr_geom+ADR_AABB_XMIN], (f64)geometry.data_objects[adr_geom+ADR_AABB_XMAX],
+            (f64)geometry.data_objects[adr_geom+ADR_AABB_YMIN], (f64)geometry.data_objects[adr_geom+ADR_AABB_YMAX], 
+            (f64)geometry.data_objects[adr_geom+ADR_AABB_ZMIN], (f64)geometry.data_objects[adr_geom+ADR_AABB_ZMAX])) {
+    
+              geometry_volume = cur_geom;
+        
+        }  else {
+              geometry_volume = geometry.mother_node[cur_geom]; 
+        }
+        
         // If the safety is equal to distance (numerically very close espilon6) to the voxel
         // boundary it means, that the particle is escaping the volume.
         //printf("         Safety %e vox distance %e pos %f %f %f\n", safety, distance, pos.x, pos.y, pos.z);
-        if (fabs(distance-safety) < EPSILON3) {
+      /* if (fabs(distance-safety) < EPSILON3) {
             geometry_volume = geometry.mother_node[cur_geom];
+            printf("         Safety %e vox distance %e pos %f %f %f\n", safety, distance, pos.x, pos.y, pos.z);
         } else {
             // Distance < safety = Still inside the volume
             geometry_volume = cur_geom;
-        }
-    
+        } */
+      
     } 
     // Special case of the collimator
     else if (obj_type == COLLI) {    

@@ -32,6 +32,13 @@ __host__ __device__ void voxelized_source_primary_generator(ParticleStack partic
                                                             f32 sx, f32 sy, f32 sz,
                                                             f32 energy, ui8 type, ui32 geom_id);
 
+__host__ __device__ void voxelized_source_primary_mono_generator(ParticleStack particles, ui32 id,
+                                                            f32 *cdf_index, f32 *cdf_act, ui32 nb_acts,
+                                                            f32 px, f32 py, f32 pz,
+                                                            ui32 nb_vox_x, ui32 nb_vox_y, ui32 nb_vox_z,
+                                                            f32 sx, f32 sy, f32 sz,
+                                                            f32 energy, ui8 type, ui32 geom_id);
+
 
 // VoxelizedSource
 class VoxelizedSource {
@@ -40,6 +47,7 @@ class VoxelizedSource {
 
         void set_position(f32 vpx, f32 vpy, f32 vpz);
         void set_energy(f32 venergy);
+        void set_histpoint(f32 venergy, f32 vpart);
         void set_source_type(std::string vtype);
         void set_seed(ui32 vseed);
         void set_in_geometry(ui32 vgeometry_id);
@@ -59,12 +67,13 @@ class VoxelizedSource {
 
         // Activities
         f32 *activity_volume;
-        f32 tot_activity;
+        f64 tot_activity;
         // CDF
         f32 *activity_cdf;
         f32 *activity_index;
         ui32 activity_size;
-
+        
+        std::vector<f32> energy_hist, partpdec;
 
     private:
         // For mhd

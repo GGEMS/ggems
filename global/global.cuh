@@ -57,6 +57,8 @@
     typedef ushort2 ui16xy;
     typedef ushort3 ui16xyz;
     typedef ushort4 ui16xyzw;
+    
+    typedef unsigned long int ui64;
 
     typedef unsigned char ui8;
 
@@ -173,7 +175,7 @@ struct GlobalSimulationParameters {
     ui8 record_dose_flag;
     ui8 digitizer_flag;
 
-    ui32 nb_of_particles;
+    ui64 nb_of_particles;
     ui32 nb_iterations;
 
     f32 time;

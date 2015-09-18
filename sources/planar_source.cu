@@ -36,11 +36,13 @@ __host__ __device__ void planar_source_primary_generator(ParticleStack particles
     z += pz;
     
     // random orientation
-    f32 phi = JKISS32(particles, id);
+    f32 a = -0.25; // -pi/2 (+x)
+    f32 b = 0.25; // pi/2 (+x)
+    f32 phi = JKISS32(particles, id) * (b-a) + a;
     f32 theta = JKISS32(particles, id);
     phi  *= gpu_twopi;
     theta = acosf(1.0f - 2.0f*theta);
-
+       
     // set photons
     particles.E[id] = energy;
     particles.dx[id] = cosf(phi)*sinf(theta);

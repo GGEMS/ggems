@@ -49,7 +49,8 @@ class Voxelized : public BaseObject {
 
     private:
         void define_materials_from_range(f32 *raw_data, std::string range_name);
-
+        void define_materials_from_range(ui16 *raw_data, std::string range_name);
+        
         void skip_comment(std::istream &);
         std::string remove_white_space(std::string);
 

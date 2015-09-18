@@ -297,6 +297,8 @@ void VRML::write_geometry(GeometryBuilder geometry) {
             f32 zmin = geometry.world.data_objects[adr_obj + ADR_AABB_ZMIN];
             f32 zmax = geometry.world.data_objects[adr_obj + ADR_AABB_ZMAX];
 
+            printf("dim phantom %f %f %f %f %f %f \n", xmin, xmax, ymin, ymax, zmin, zmax);
+            
             if (geometry.object_wireframe[iobj]) {
                 draw_wireframe_aabb(xmin, xmax, ymin, ymax, zmin, zmax,
                                     geometry.object_colors[iobj],

@@ -188,7 +188,8 @@ void SimulationBuilder::main_navigator() {
         gpu_main_navigator(particles.dstack, geometry.dworld,
                            materials.dmaterials_table, cs_tables.dphoton_CS_table, dparameters,
                            digitizer.dpulses, gpu_block_size);
-
+        
+                           
         if (display_run_time_flag) {
             cudaEventRecord(t_stop);
             cudaEventSynchronize(t_stop);
@@ -196,6 +197,7 @@ void SimulationBuilder::main_navigator() {
             cudaEventElapsedTime(&time_ms, t_start, t_stop);
             print_time("Main navigation", time_ms/1000.0); // in s
         }
+
     }
 
 }
@@ -312,7 +314,7 @@ void SimulationBuilder::set_secondary(std::string pname) {
 }
 
 // Set the number of particles required for the simulation
-void SimulationBuilder::set_number_of_particles(ui32 nb) {
+void SimulationBuilder::set_number_of_particles(ui64 nb) {
     nb_of_particles = nb;
 }
 
@@ -322,7 +324,7 @@ void SimulationBuilder::set_max_number_of_iterations(ui32 nb) {
 }
 
 // Set to record the history of some particles (only for CPU version)
-void SimulationBuilder::set_record_history(ui32 nb_particles) {
+void SimulationBuilder::set_record_history(ui64 nb_particles) {
     history.record_flag = ENABLED;
     history.max_nb_particles = std::min(nb_particles, nb_of_particles);
     history.stack_size = particles.stack.size;
@@ -376,16 +378,30 @@ void SimulationBuilder::init_simulation() {
     // CPU PRNG
     srand(seed);
 
+    ui32 adr = sources.sources.ptr_sources[0];
+    // Read the kind of sources
+    ui32 type = (ui32)(sources.sources.data_sources[adr+ADR_SRC_TYPE]);
+    
+    if (type == VOXELIZED_SOURCE) {
+        nb_of_particles = (ui64)(sources.sources.data_sources[adr+ADR_VOX_SOURCE_TOT_ACTIVITY]);
+    }
+    
+    nb_of_particles = 15000000;
+    printf("nb particules %lu \n", nb_of_particles);
+
+    nb_of_iterations = nb_of_particles / particles.stack.size;    
+        
     // First compute the number of iterations and the size of a stack // TODO Can be improved - JB
-    if (nb_of_particles % particles.stack.size) {
+   /* if (nb_of_particles % particles.stack.size) {
         nb_of_iterations = (nb_of_particles / particles.stack.size) + 1;
+        printf("nb of iterations %d \n", nb_of_iterations);
     } else {
         nb_of_iterations = nb_of_particles / particles.stack.size;
-    }
-    particles.stack.size = nb_of_particles / nb_of_iterations;
-    nb_of_particles = particles.stack.size * nb_of_iterations;
-
-    //printf("nb of particles %d \n", nb_of_particles);
+    } */
+    //particles.stack.size = nb_of_particles / nb_of_iterations;
+    //nb_of_particles = (ui64)(particles.stack.size) * nb_of_iterations;
+ 
+    //printf("nb of particles %lu \n", nb_of_particles);
     
     /// Init the GPU if need
     if (target == GPU_DEVICE) {
@@ -510,6 +526,7 @@ void SimulationBuilder::start_simulation() {
     ui32 iter = 0;
 
     // Main loop
+    printf("nb of iterations %d \n", nb_of_iterations);
     while (iter < nb_of_iterations) {
 
             // If history is required
@@ -533,7 +550,6 @@ void SimulationBuilder::start_simulation() {
             // Process and store singles on CPU
             if (parameters.digitizer_flag) {
                 f64 t_start = get_time();
-
                 if (target == GPU_DEVICE) {
                     digitizer.copy_pulses_gpu2cpu();
                 }
@@ -553,6 +569,48 @@ void SimulationBuilder::start_simulation() {
         printf(">> Iter %i / %i\n", iter, nb_of_iterations);
 
     } // main loop
+    
+    // Test if one more iteration is needed
+    if (nb_of_particles % particles.stack.size) {
+    
+        particles.stack.size = nb_of_particles - (nb_of_iterations * particles.stack.size);
+        particles.dstack.size = particles.stack.size;
+        
+        // If history is required
+        if (target == CPU_DEVICE && history.record_flag == ENABLED) history.cur_iter = iter;
+        
+        printf("primaries_generator \n");
+        
+        // Sources
+        primaries_generator();
+        
+        // Clear gpu pulses
+        if (target == GPU_DEVICE)
+            digitizer.clear_gpu_pulses();
+            
+        digitizer.clear_cpu_pulses();
+        
+        printf("main_navigator \n");
+        // Navigation
+        main_navigator();
+        
+        // Process and store singles on CPU
+        if (parameters.digitizer_flag) {
+            f64 t_start = get_time();
+
+            if (target == GPU_DEVICE) {
+                digitizer.copy_pulses_gpu2cpu();
+            }
+
+            // The complete chain
+            digitizer.process_chain(iter, sources.tot_activity, geometry.world);
+
+            // Run time
+            if (display_run_time_flag) {
+                print_time("Process singles", get_time()-t_start);
+            }
+        }
+    }
     
     // Free cpu pulses
     digitizer.free_cpu_pulses();

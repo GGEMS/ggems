@@ -136,6 +136,48 @@ void Voxelized::set_object_name(std::string objname) {
 */
 
 // Convert range data into material ID
+void Voxelized::define_materials_from_range(ui16 *raw_data, std::string range_name) {
+
+    ui16 start, stop;
+    std::string mat_name, line;
+    ui32 i;
+    ui16 val;
+    ui32 mat_index = 0;
+
+    // Data allocation
+    data = (f32*)malloc(number_of_voxels * sizeof(f32));
+
+    // Read range file
+    std::ifstream file(range_name.c_str());
+    if(!file) { printf("Error, file %s not found \n", range_name.c_str()); exit(EXIT_FAILURE);}
+    while (file) {
+        skip_comment(file);
+        std::getline(file, line);
+
+        if (file) {
+            start = read_start_range(line);
+            stop  = read_stop_range(line);
+            mat_name = read_mat_range(line);
+            list_of_materials.push_back(mat_name);
+            //printf("IND %i MAT %s \n", mat_index, mat_name.c_str());
+
+            // build labeled phantom according range data
+            i=0; while (i < number_of_voxels) {
+                val = raw_data[i];
+                if ((val==start && val==stop) || (val>=start && val<stop)) {
+                    data[i] = mat_index;
+                }
+                ++i;
+            } // over the volume
+
+        } // new material range
+        ++mat_index;
+
+    } // read file
+
+}
+
+// Convert range data into material ID
 void Voxelized::define_materials_from_range(f32 *raw_data, std::string range_name) {
 
     f32 start, stop;
@@ -288,7 +330,7 @@ void Voxelized::load_from_mhd(std::string volume_name, std::string range_name) {
         printf("Error, mhd header: CompressedData = %s\n", CompressedData.c_str());
         exit(EXIT_FAILURE);
     }
-    if (ElementType != "MET_FLOAT") {
+    if (ElementType != "MET_FLOAT" && ElementType != "MET_USHORT") {
         printf("Error, mhd header: ElementType = %s\n", ElementType.c_str());
         exit(EXIT_FAILURE);
     }
@@ -327,20 +369,39 @@ void Voxelized::load_from_mhd(std::string volume_name, std::string range_name) {
     spacing_x = sx;
     spacing_y = sy;
     spacing_z = sz;
-    mem_size = sizeof(f32) * number_of_voxels;
+    
+    if(ElementType != "MET_FLOAT") {
+      mem_size = sizeof(f32) * number_of_voxels;
 
-    f32 *raw_data = (f32*)malloc(mem_size);
-    fread(raw_data, sizeof(f32), number_of_voxels, pfile);
-    fclose(pfile);
+      f32 *raw_data = (f32*)malloc(mem_size);
+      fread(raw_data, sizeof(f32), number_of_voxels, pfile);
+      fclose(pfile);
+      
+      /////////////// Then, convert the raw data into material id //////////////////////
+
+      define_materials_from_range(raw_data, range_name);
+
+      // Free memory
+      free(raw_data);
+    }
+    
+    if(ElementType != "MET_USHORT") {
+      mem_size = sizeof(ui16) * number_of_voxels;
+
+      ui16 *raw_data = (ui16*)malloc(mem_size);
+      fread(raw_data, sizeof(ui16), number_of_voxels, pfile);
+      fclose(pfile);
+      /////////////// Then, convert the raw data into material id //////////////////////
+
+      define_materials_from_range(raw_data, range_name);
+
+      // Free memory
+      free(raw_data);
+    }  
 
     //printf("Size of MHD file  %u, nb of voxels %u \n",m_mem_size, m_nb_voxels);
 
-    /////////////// Then, convert the raw data into material id //////////////////////
-
-    define_materials_from_range(raw_data, range_name);
-
-    // Free memory
-    free(raw_data);
+    
 
     ///////////// Define a bounding box for this phantom //////////////////////////////
 

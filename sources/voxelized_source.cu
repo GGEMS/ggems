@@ -34,7 +34,7 @@ __host__ __device__ void voxelized_source_primary_generator(ParticleStack partic
     // use cdf to find the next emission spot
     f32 rnd = JKISS32(particles, id);
     ui32 pos = binary_search(rnd, cdf_act, nb_acts);
-
+    
     // convert position index to emitted position
     ind = cdf_index[pos];
     z = floor(ind / jump);
@@ -105,6 +105,75 @@ __host__ __device__ void voxelized_source_primary_generator(ParticleStack partic
     particles.geometry_id[id] = geom_id;
 }
 
+__host__ __device__ void voxelized_source_primary_mono_generator(ParticleStack particles, ui32 id,
+                                                            f32 *cdf_index, f32 *cdf_act, ui32 nb_acts,
+                                                            f32 px, f32 py, f32 pz,
+                                                            ui32 nb_vox_x, ui32 nb_vox_y, ui32 nb_vox_z,
+                                                            f32 sx, f32 sy, f32 sz,
+                                                            f32 energy, ui8 type, ui32 geom_id) {
+
+    f32 jump = (f32)(nb_vox_x*nb_vox_y);
+    f32 ind, x, y, z;
+
+    // use cdf to find the next emission spot
+    f32 rnd = JKISS32(particles, id);
+    ui32 pos = binary_search(rnd, cdf_act, nb_acts);
+
+    // convert position index to emitted position
+    ind = cdf_index[pos];
+    z = floor(ind / jump);
+    ind -= (z*jump);
+    y = floor(ind / (f32)nb_vox_x);
+    x = ind - y*nb_vox_x;
+    
+    // random positon within the voxel
+    x += JKISS32(particles, id);
+    y += JKISS32(particles, id);
+    z += JKISS32(particles, id);
+
+    // Due to float operation aproximation: 1+(1-Epsilon) = 2
+    // we need to check that x, y, z are not equal to the size of the vox source
+    // x, y, z must be in [0, size[
+    if (x == nb_vox_x) x -= EPSILON3;
+    if (y == nb_vox_y) y -= EPSILON3;
+    if (z == nb_vox_z) z -= EPSILON3;
+
+    // convert in mm
+    x *= sx;
+    y *= sy;
+    z *= sz;
+
+    // shift according to center of phantom and translation
+    x = x - nb_vox_x*sx*0.5 + px;
+    y = y - nb_vox_y*sy*0.5 + py;
+    z = z - nb_vox_z*sz*0.5 + pz;
+
+    // random orientation
+    f32 phi = JKISS32(particles, id);
+    f32 theta = JKISS32(particles, id);
+    phi *= gpu_twopi;
+    theta = acosf(1.0f - 2.0f*theta);
+
+    // compute direction vector
+    f32 dx = cos(phi)*sin(theta);
+    f32 dy = sin(phi)*sin(theta);
+    f32 dz = cos(theta);
+
+    // set particle stack 1
+    particles.E[id] = energy;
+    particles.dx[id] = dx;
+    particles.dy[id] = dy;
+    particles.dz[id] = dz;
+    particles.px[id] = x;
+    particles.py[id] = y;
+    particles.pz[id] = z;
+    particles.tof[id] = 0.0;
+    particles.endsimu[id] = PARTICLE_ALIVE;
+    particles.level[id] = PRIMARY;
+    particles.pname[id] = type;
+    particles.geometry_id[id] = geom_id;
+}
+
 VoxelizedSource::VoxelizedSource() {
     // Default values
     seed=10;
@@ -127,6 +196,11 @@ void VoxelizedSource::set_position(f32 vpx, f32 vpy, f32 vpz) {
 void VoxelizedSource::set_energy(f32 venergy) {
     energy = venergy;
 }
+
+void VoxelizedSource::set_histpoint(f32 venergy, f32 vpart) {
+      energy_hist.push_back(venergy);
+      partpdec.push_back(vpart);
+}  
 
 void VoxelizedSource::set_source_type(std::string vtype) {
     source_type = vtype;
@@ -356,7 +430,7 @@ void VoxelizedSource::compute_cdf() {
 
     // fill array with non zeros values activity
     ui32 index = 0;
-    f32 val;
+    f64 val;
     f64 sum = 0.0; // for the cdf
     i=0; while (i<number_of_voxels) {
         val = activity_volume[i];
@@ -364,18 +438,23 @@ void VoxelizedSource::compute_cdf() {
             activity_index[index] = i;
             cdf[index] = val;
             sum += val;
+            //printf("cdf i %d val %lf \n", index, cdf[index]);
             ++index;
         }
         ++i;
     }
-    tot_activity = (f32)sum;
-
+    tot_activity = sum;
+    printf("tot_activity %lf \n", sum);
+    
     // compute cummulative density function
     cdf[0] /= sum;
     activity_cdf[0] = cdf[0];
+      
     i = 1; while (i<nb) {
+       // printf("i %d test div %4.12lf \n", i, (cdf[i]/sum));
         cdf[i] = (cdf[i]/sum) + cdf[i-1];
         activity_cdf[i]= (f32) cdf[i];
+       // printf("i %d test div %4.12lf \n", i, cdf[i]);
         ++i;
     }
 

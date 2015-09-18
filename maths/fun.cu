@@ -60,6 +60,7 @@ __host__ __device__ i32 binary_search(f32 key, f32* tab, int size, int min=0) {
     return min;
 }
 
+
 // Linear interpolation
 __host__ __device__ f32 linear_interpolation(f32 xa,f32 ya, f32 xb, f32 yb, f32 x) {
     // Taylor young 1st order

@@ -179,7 +179,7 @@ __host__ __device__ void get_primaries(Sources sources, ParticleStack &particles
         f32 sy = sources.data_sources[adr+ADR_VOX_SOURCE_SPACING_Y];
         f32 sz = sources.data_sources[adr+ADR_VOX_SOURCE_SPACING_Z];
 
-        f32 energy = sources.data_sources[adr+ADR_VOX_SOURCE_ENERGY];
+        //f32 energy = sources.data_sources[adr+ADR_VOX_SOURCE_ENERGY];
 
         f32 nb_acts = sources.data_sources[adr+ADR_VOX_SOURCE_NB_CDF];
 
@@ -187,8 +187,42 @@ __host__ __device__ void get_primaries(Sources sources, ParticleStack &particles
 
         f32 *cdf_index = &(sources.data_sources[adr+ADR_VOX_SOURCE_CDF_INDEX]);
         ui32 adr_cdf_act = adr+nb_acts;
+        //printf("cdf_index first %4.12lf last %4.12lf \n", cdf_index[0], cdf_index[1415125]);
         f32 *cdf_act = &(sources.data_sources[adr_cdf_act+ADR_VOX_SOURCE_CDF_INDEX]);
+        //printf("cdf_act first %4.12lf last %4.12lf \n", cdf_act[0], cdf_act[1415125]);
+        f32 nb_peak = sources.data_sources[adr+ADR_SRC_NB_PEAK];
+        
+        if (nb_peak == 1) {
+            energy = sources.data_sources[adr+ADR_VOX_SOURCE_ENERGY];
+        }
+        if (nb_peak == 2) {
+           
+            f32 p1, p2;
+            
+            ui32 adr_hist = adr + 2*nb_acts - 1;
+            p1 = sources.data_sources[adr_hist+ADR_VOX_SOURCE_PARTPDEC + 1];
+            p2 = sources.data_sources[adr_hist+ADR_VOX_SOURCE_PARTPDEC + 2];
+            
+            //printf("p1 %f p2 %f \n", p1, p2);
+           
+            //f32 rnd = (f32) rand()/RAND_MAX;
+            f32 rnd = JKISS32(particles,id_part);
+            
+            //printf("p1 %f p2 %f -- rnd %f \n", p1, p2, rnd);
+            
+            f32 p = p1/ (f32)(p1+p2);
+            
+            //printf("p1 %f p2 %f -- rnd %f p %f \n", p1, p2, rnd, p);
+            
+            if (rnd < p) {
+                energy = sources.data_sources[adr_hist+ADR_VOX_SOURCE_ENERGY];
+            } else {
+                energy = sources.data_sources[adr_hist+ADR_VOX_SOURCE_ENERGY + 1];
+            }
+            //printf("energy %f \n", energy);
+        } 
 
+        
         if (emission_type == EMISSION_BACK2BACK) {
 
             // Back2back fills the particle' stack with two particles, we need to
@@ -204,9 +238,10 @@ __host__ __device__ void get_primaries(Sources sources, ParticleStack &particles
             }
 
         } else if (emission_type == EMISSION_MONO) {
-            //printf("ERROR: voxelized source, emission 'MONO' is not impleted yet!\n");
-            //exit(EXIT_FAILURE);
-            // TODO
+            voxelized_source_primary_mono_generator(particles, id_part,
+                                                   cdf_index, cdf_act, nb_acts,
+                                                   px, py, pz, nb_vox_x, nb_vox_y, nb_vox_z,
+                                                   sx, sy, sz, energy, PHOTON, geom_id);
         }
 
     }
@@ -401,6 +436,18 @@ void SourceBuilder::add_source(ConeBeamSource src) {
 void SourceBuilder::add_source(VoxelizedSource src) {
     sources.nb_sources++;
   
+    ui32 n = src.energy_hist.size();
+    f32 *newhist = (f32*)malloc(sizeof(f32) * n);
+    ui32 i=0; while (i < n) {
+        newhist[i] = src.energy_hist[i];
+        ++i;
+    }
+    
+    f32 *newpartpdec = (f32*)malloc(sizeof(f32) * n);
+    i=0; while (i < n) {
+        newpartpdec[i] = src.partpdec[i];
+        ++i;
+    }
     
     // Store the address to access to this source
     array_push_back(&sources.ptr_sources, sources.ptr_sources_dim, sources.data_sources_dim);
@@ -409,6 +456,8 @@ void SourceBuilder::add_source(VoxelizedSource src) {
     array_push_back(&sources.data_sources, sources.data_sources_dim, (f32)VOXELIZED_SOURCE);
 
     array_push_back(&sources.data_sources, sources.data_sources_dim, src.geometry_id);
+    array_push_back(&sources.data_sources, sources.data_sources_dim, n);
+
     array_push_back(&sources.data_sources, sources.data_sources_dim, src.px);
     array_push_back(&sources.data_sources, sources.data_sources_dim, src.py);
     array_push_back(&sources.data_sources, sources.data_sources_dim, src.pz);
@@ -421,17 +470,17 @@ void SourceBuilder::add_source(VoxelizedSource src) {
     array_push_back(&sources.data_sources, sources.data_sources_dim, src.spacing_y);
     array_push_back(&sources.data_sources, sources.data_sources_dim, src.spacing_z);
 
-    array_push_back(&sources.data_sources, sources.data_sources_dim, src.energy);
-    array_push_back(&sources.data_sources, sources.data_sources_dim, src.tot_activity);
-    array_push_back(&sources.data_sources, sources.data_sources_dim, src.activity_size); // Nb CDF
-
-    // Emission type
+    //array_push_back(&sources.data_sources, sources.data_sources_dim, src.energy);
+    
+     // Emission type
     if (src.source_type == "mono") {
         array_push_back(&sources.data_sources, sources.data_sources_dim, (f32)EMISSION_MONO);
     } else if (src.source_type == "back2back") {
         array_push_back(&sources.data_sources, sources.data_sources_dim, (f32)EMISSION_BACK2BACK);
     }
-
+    
+    array_push_back(&sources.data_sources, sources.data_sources_dim, src.tot_activity);
+    array_push_back(&sources.data_sources, sources.data_sources_dim, src.activity_size); // Nb CDF
      
     // Store index to access to the CDF
     array_append_array(&sources.data_sources, sources.data_sources_dim, &(src.activity_index), src.activity_size);
@@ -439,7 +488,12 @@ void SourceBuilder::add_source(VoxelizedSource src) {
     array_append_array(&sources.data_sources, sources.data_sources_dim, &(src.activity_cdf), src.activity_size);
 
     // Save the seed
-    array_push_back(&sources.seeds, sources.seeds_dim, src.seed);
+    //array_push_back(&sources.seeds, sources.seeds_dim, src.seed);
+    
+    array_append_array(&sources.data_sources, sources.data_sources_dim, &(newhist), n);
+    array_append_array(&sources.data_sources, sources.data_sources_dim, &(newpartpdec), n);
+
+    array_push_back(&sources.data_sources, sources.data_sources_dim, 2*src.activity_size + 2*n + SIZE_VOX_SRC);
 
     // Count the activity of this source to the total activity
     tot_activity += src.tot_activity;

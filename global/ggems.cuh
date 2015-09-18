@@ -62,9 +62,9 @@ class SimulationBuilder {
         void set_GPU_block_size(ui32 val);
         void set_process(std::string process_name);
         void set_secondary(std::string pname);
-        void set_number_of_particles(ui32 nb);
+        void set_number_of_particles(ui64 nb);
         void set_max_number_of_iterations(ui32 nb);
-        void set_record_history(ui32 nb_particles);
+        void set_record_history(ui64 nb_particles);
         void set_CS_table_nbins(ui32 valbin);
         void set_CS_table_E_min(f32 valE);
         void set_CS_table_E_max(f32 valE);
@@ -83,7 +83,7 @@ class SimulationBuilder {
 
         // Parameters
         ui16 target;
-        ui32 nb_of_particles;
+        ui64 nb_of_particles;
         ui32 nb_of_iterations;
         ui32 max_iteration;
 

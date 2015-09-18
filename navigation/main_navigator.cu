@@ -29,11 +29,10 @@ __global__ void kernel_photon_navigator(ParticleStack particles, Scene geometry,
     if (id >= particles.size) return;
     //if (particles.endsimu[id]) return;
     //if (particles.pname[id]) return;
- 
-       
+        
     
     ui32 istep = 0;
-    while (particles.endsimu[id] == PARTICLE_ALIVE && istep < 50) {
+    while (particles.endsimu[id] == PARTICLE_ALIVE && istep < 1000) {
        
         // Track photon
         photon_navigator(particles, id, geometry, materials, photon_CS_table, parameters, pulses);
@@ -45,9 +44,9 @@ __global__ void kernel_photon_navigator(ParticleStack particles, Scene geometry,
        
     }
      
-    // printf("id %d step %d \n", id, istep);
-   // if (particles.endsimu[id])
-     //   atomicAdd(count, 1);
+   //  printf("id %d step %d \n", id, istep);
+    // if (particles.endsimu[id])
+      //  atomicAdd(count, 1);
 }
 
 
@@ -74,12 +73,12 @@ void cpu_main_navigator(ParticleStack &particles, Scene geometry,
                                  parameters, pulses);
               
                 //// SPECIAL CASE FOR RAYTRACING
-                //photon_navigator_raytracing_colli(particles, id, geometry, materials, photon_CS_table,
-                  //               parameters, pulses);
+               // photon_navigator_raytracing_colli(particles, id, geometry, materials, photon_CS_table,
+                 //                parameters, pulses);
 
                 // Record this step if required
-                //if (history.record_flag == ENABLED)
-                 //   history.cpu_record_a_step(particles, id);
+                if (history.record_flag == ENABLED)
+                    history.cpu_record_a_step(particles, id);
                 
 
             }
@@ -90,11 +89,11 @@ void cpu_main_navigator(ParticleStack &particles, Scene geometry,
            // printf("part %d >>>>>> step %i\n", id, istep);
            // #endif
             
-            /*if (istep > 20) {
+            if (istep > 1000) {
                 printf("part %d >>>>>> step %i\n", id, istep);
                 printf("WARNING - CPU reachs max step\n");
                // break;
-            }*/
+            }
             
         } // istep
 
@@ -121,7 +120,7 @@ void gpu_main_navigator(ParticleStack &particles, Scene geometry,
     grid.x = (particles.size + gpu_block_size - 1) / gpu_block_size;
     
     // Count simulated photons
-    /*int* count_d;
+   /* int* count_d;
     int count_h = 0;
     
     cudaMalloc((void**) &count_d, sizeof(int));
@@ -131,9 +130,9 @@ void gpu_main_navigator(ParticleStack &particles, Scene geometry,
    int step=0;
     
     while (count_h < particles.size) {
-        ++step;*/
+        ++step; */
       
-      //  kernel_photon_navigator<<<grid, threads>>>(particles, geometry, materials, photon_CS_table, parameters, pulses, count_d);
+      //kernel_photon_navigator<<<grid, threads>>>(particles, geometry, materials, photon_CS_table, parameters, pulses, count_d);
       
       
       kernel_photon_navigator<<<grid, threads>>>(particles, geometry, materials, photon_CS_table, parameters, pulses);
@@ -141,13 +140,13 @@ void gpu_main_navigator(ParticleStack &particles, Scene geometry,
   
         // get back the number of simulated photons
 
-        //cudaMemcpy(&count_h, count_d, sizeof(int), cudaMemcpyDeviceToHost);
-        
+       //cudaMemcpy(&count_h, count_d, sizeof(int), cudaMemcpyDeviceToHost);
+      
         //#ifdef DEBUG
-        //printf("Sim %d %d / %d tot\n", step, count_h, particles.size);
+       // printf("Sim %d %d / %d tot\n", step, count_h, particles.size);
         //#endif
         
-        /*if (step > 100) {
+       /* if (step > 200) {
             printf("WARNING - GPU reachs max step\n");
             break;
         }*/

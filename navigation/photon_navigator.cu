@@ -49,6 +49,49 @@ __host__ __device__ void photon_navigator(ParticleStack &particles, ui32 part_id
       
    // printf(" obj type %d \n", obj_type);
     
+    
+  /*  if (part_id == 6614629 ) {
+      
+      
+       if (test_point_AABB(pos, (f64)geometry.data_objects[adr_geom+ADR_AABB_XMIN], (f64)geometry.data_objects[adr_geom+ADR_AABB_XMAX],
+              (f64)geometry.data_objects[adr_geom+ADR_AABB_YMIN], (f64)geometry.data_objects[adr_geom+ADR_AABB_YMAX], 
+              (f64)geometry.data_objects[adr_geom+ADR_AABB_ZMIN], (f64)geometry.data_objects[adr_geom+ADR_AABB_ZMAX])) {
+        
+          printf("INSIDE \n");
+         
+       } else {
+         printf("NOT .... \n");
+       }
+      
+        if (cur_id_geom==7) { 
+    
+          f64xyz posinvox;
+        posinvox.x = pos.x - (f64)geometry.data_objects[adr_geom+ADR_AABB_XMIN]; // -= xmin
+        posinvox.y = pos.y - (f64)geometry.data_objects[adr_geom+ADR_AABB_YMIN]; // -= ymin
+        posinvox.z = pos.z - (f64)geometry.data_objects[adr_geom+ADR_AABB_ZMIN]; // -= zmin
+        printf("posinvox %f %f %f \n", posinvox.x, posinvox.y, posinvox.z);
+        // Get spacing
+        f64xyz s;
+        s.x = (f64)geometry.data_objects[adr_geom+ADR_VOXELIZED_SX];
+        s.y = (f64)geometry.data_objects[adr_geom+ADR_VOXELIZED_SY];
+        s.z = (f64)geometry.data_objects[adr_geom+ADR_VOXELIZED_SZ];
+        // Get the voxel index
+        ui32xyz ind;
+        ind.x = (ui32)(posinvox.x / s.x);
+        ind.y = (ui32)(posinvox.y / s.y);
+        ind.z = (ui32)(posinvox.z / s.z);
+
+        printf("Ind %i %i %i\n", ind.x, ind.y, ind.z);
+          
+        f64 xmin, ymin, xmax, ymax, zmin, zmax;
+        xmin = ind.x*s.x + (f64)geometry.data_objects[adr_geom+ADR_AABB_XMIN]; xmax = xmin+s.x;
+        ymin = ind.y*s.y + (f64)geometry.data_objects[adr_geom+ADR_AABB_YMIN]; ymax = ymin+s.y;
+        zmin = ind.z*s.z + (f64)geometry.data_objects[adr_geom+ADR_AABB_ZMIN]; zmax = zmin+s.z;
+    
+          
+        }
+    }*/
+       
     // If the particle hits the SPECThead, determine in which layer it is
     if (obj_type == SPECTHEAD) {   
         
@@ -60,7 +103,36 @@ __host__ __device__ void photon_navigator(ParticleStack &particles, ui32 part_id
         obj_type = (ui32)geometry.data_objects[adr_geom+ADR_OBJ_TYPE];
 
     } 
-       
+    
+    // Check if particle is really inside the voxelized phantom 
+ /*   if (obj_type == VOXELIZED) {     
+         if (!test_point_AABB(pos, (f64)geometry.data_objects[adr_geom+ADR_AABB_XMIN], (f64)geometry.data_objects[adr_geom+ADR_AABB_XMAX],
+              (f64)geometry.data_objects[adr_geom+ADR_AABB_YMIN], (f64)geometry.data_objects[adr_geom+ADR_AABB_YMAX], 
+              (f64)geometry.data_objects[adr_geom+ADR_AABB_ZMIN], (f64)geometry.data_objects[adr_geom+ADR_AABB_ZMAX])) {
+
+              f64xyz posinvox;
+              posinvox.x = pos.x - (f64)geometry.data_objects[adr_geom+ADR_AABB_XMIN]; // -= xmin
+              posinvox.y = pos.y - (f64)geometry.data_objects[adr_geom+ADR_AABB_YMIN]; // -= ymin
+              posinvox.z = pos.z - (f64)geometry.data_objects[adr_geom+ADR_AABB_ZMIN]; // -= zmin
+              printf("posinvox %f %f %f \n", posinvox.x, posinvox.y, posinvox.z);
+              // Get spacing
+              f64xyz s;
+              s.x = (f64)geometry.data_objects[adr_geom+ADR_VOXELIZED_SX];
+              s.y = (f64)geometry.data_objects[adr_geom+ADR_VOXELIZED_SY];
+              s.z = (f64)geometry.data_objects[adr_geom+ADR_VOXELIZED_SZ];
+              // Get the voxel index
+              ui32xyz ind;
+              ind.x = (ui32)(posinvox.x / s.x);
+              ind.y = (ui32)(posinvox.y / s.y);
+              ind.z = (ui32)(posinvox.z / s.z);
+
+              printf("Ind %i %i %i\n", ind.x, ind.y, ind.z);
+           
+              //cur_id_geom = geometry.mother_node[cur_id_geom]; 
+              printf("WARNING Particle %d outside voxelized phantom id_geom %d \n", part_id, cur_id_geom);
+         }
+    }*/
+    
     // Get the material that compose this volume
     ui32 id_mat = get_geometry_material(geometry, cur_id_geom, pos);
  
@@ -75,7 +147,7 @@ __host__ __device__ void photon_navigator(ParticleStack &particles, ui32 part_id
     // Search the energy index to read CS
     ui32 E_index = binary_search(particles.E[part_id], photon_CS_table.E_bins,
                                  photon_CS_table.nb_bins);
-
+    
     // TODO if E_index = 0?
     assert(E_index != 0);
     /////////////////////
@@ -142,9 +214,14 @@ __host__ __device__ void photon_navigator(ParticleStack &particles, ui32 part_id
     //if (parameters.dose_flag) {
         //f32xyz pos_edep = add_vector(photon.pos, scale_vector(photon.dir, next_interaction_distance*prng()));
     //}
-
-    // printf("id %d mat %d process %d dist %f cur_geom %d next_geom %d \n", part_id, id_mat, next_discrete_process, next_interaction_distance, cur_id_geom, next_geometry_volume);
     
+
+    
+    /*if (part_id == 7050335 || part_id == 8816730 ) {
+      
+        printf("id %d mat %d process %d dist %f cur_geom %d next_geom %d \n", part_id, id_mat, next_discrete_process, next_interaction_distance, cur_id_geom, next_geometry_volume);
+
+    }*/
    // printf("move particle %f %f %f dir %f %f %f \n", pos.x, pos.y, pos.z, dir.x, dir.y, dir.z);
      
     // Move the particle
