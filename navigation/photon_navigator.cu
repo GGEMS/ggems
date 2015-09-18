@@ -105,33 +105,15 @@ __host__ __device__ void photon_navigator(ParticleStack &particles, ui32 part_id
     } 
     
     // Check if particle is really inside the voxelized phantom 
- /*   if (obj_type == VOXELIZED) {     
+    if (obj_type == VOXELIZED) {     
          if (!test_point_AABB(pos, (f64)geometry.data_objects[adr_geom+ADR_AABB_XMIN], (f64)geometry.data_objects[adr_geom+ADR_AABB_XMAX],
               (f64)geometry.data_objects[adr_geom+ADR_AABB_YMIN], (f64)geometry.data_objects[adr_geom+ADR_AABB_YMAX], 
               (f64)geometry.data_objects[adr_geom+ADR_AABB_ZMIN], (f64)geometry.data_objects[adr_geom+ADR_AABB_ZMAX])) {
 
-              f64xyz posinvox;
-              posinvox.x = pos.x - (f64)geometry.data_objects[adr_geom+ADR_AABB_XMIN]; // -= xmin
-              posinvox.y = pos.y - (f64)geometry.data_objects[adr_geom+ADR_AABB_YMIN]; // -= ymin
-              posinvox.z = pos.z - (f64)geometry.data_objects[adr_geom+ADR_AABB_ZMIN]; // -= zmin
-              printf("posinvox %f %f %f \n", posinvox.x, posinvox.y, posinvox.z);
-              // Get spacing
-              f64xyz s;
-              s.x = (f64)geometry.data_objects[adr_geom+ADR_VOXELIZED_SX];
-              s.y = (f64)geometry.data_objects[adr_geom+ADR_VOXELIZED_SY];
-              s.z = (f64)geometry.data_objects[adr_geom+ADR_VOXELIZED_SZ];
-              // Get the voxel index
-              ui32xyz ind;
-              ind.x = (ui32)(posinvox.x / s.x);
-              ind.y = (ui32)(posinvox.y / s.y);
-              ind.z = (ui32)(posinvox.z / s.z);
-
-              printf("Ind %i %i %i\n", ind.x, ind.y, ind.z);
-           
-              //cur_id_geom = geometry.mother_node[cur_id_geom]; 
+              cur_id_geom = geometry.mother_node[cur_id_geom]; 
               printf("WARNING Particle %d outside voxelized phantom id_geom %d \n", part_id, cur_id_geom);
          }
-    }*/
+    }
     
     // Get the material that compose this volume
     ui32 id_mat = get_geometry_material(geometry, cur_id_geom, pos);
