@@ -386,7 +386,6 @@ void SimulationBuilder::init_simulation() {
         nb_of_particles = (ui64)(sources.sources.data_sources[adr+ADR_VOX_SOURCE_TOT_ACTIVITY]);
     }
     
-    nb_of_particles = 15000000;
     printf("nb particules %lu \n", nb_of_particles);
 
     nb_of_iterations = nb_of_particles / particles.stack.size;    
