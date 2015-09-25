@@ -21,8 +21,23 @@
 #include "voxelized.cuh"
 
 Voxelized::Voxelized() {
+    xmin = 0.0f;
+    xmax = 0.0f;
+    ymin = 0.0f;
+    ymax = 0.0f;
+    zmin = 0.0f;
+    zmax = 0.0f;
     // Init pointer
     data = NULL;
+}
+
+Voxelized::Voxelized(f32 ox, f32 oy, f32 oz) {
+    xmin = ox;
+    xmax = ox;
+    ymin = oy;
+    ymax = oy;
+    zmin = oz;
+    zmax = oz;
 }
 
 // Skip comment starting with "#"
@@ -409,9 +424,9 @@ void Voxelized::load_from_mhd(std::string volume_name, std::string range_name) {
     f32 h_lengthy = nb_vox_y * spacing_y * 0.5f;
     f32 h_lengthz = nb_vox_z * spacing_z * 0.5f;
 
-    xmin = -h_lengthx; xmax = h_lengthx;
-    ymin = -h_lengthy; ymax = h_lengthy;
-    zmin = -h_lengthz; zmax = h_lengthz;
+    xmin += -h_lengthx; xmax += h_lengthx;
+    ymin += -h_lengthy; ymax += h_lengthy;
+    zmin += -h_lengthz; zmax += h_lengthz;
 
 }
 

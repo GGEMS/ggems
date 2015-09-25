@@ -25,7 +25,7 @@
 class Voxelized : public BaseObject {
     public:
         Voxelized();
-
+        Voxelized(f32 ox, f32 oy, f32 oz);
         void load_from_raw(std::string volume_name, std::string range_name,
                            i32 nx, i32 ny, i32 nz, f32 sx, f32 sy, f32 sz);
 
