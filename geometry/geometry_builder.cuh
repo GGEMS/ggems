@@ -150,7 +150,7 @@ __host__ __device__ f64 GetNextHex(f64xyz position, f64xyz dir, Scene geometry,
                                         ui32 adr_geom, f64xyz center, f64xyz u, f64xyz v, f64xyz w);
 __host__ __device__ bool get_geometry_is_sensitive(Scene geometry, ui32 cur_geom);
 __host__ __device__ ui32 get_geometry_material(Scene geometry, ui32 id_geom, f64xyz pos);
-__host__ __device__ f64 get_distance_to_object(Scene geometry, ui32 adr_geom, ui32 obj_type,
+__host__ __device__ f64 get_distance_to_object(Scene geometry, ui32 adr_geom, ui32 cur_geom, ui32 obj_type,
                                                f64xyz pos, f64xyz dir);
 __host__ __device__ ui32 get_current_geometry_volume(Scene geometry, ui32 cur_geom, f64xyz pos);
 __host__ __device__ void get_next_geometry_boundary(Scene geometry, ui32 cur_geom,

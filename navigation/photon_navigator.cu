@@ -50,7 +50,7 @@ __host__ __device__ void photon_navigator(ParticleStack &particles, ui32 part_id
    // printf(" obj type %d \n", obj_type);
     
     
-  /*  if (part_id == 6614629 ) {
+   /* if (part_id == 2299 ) {
       
       
        if (test_point_AABB(pos, (f64)geometry.data_objects[adr_geom+ADR_AABB_XMIN], (f64)geometry.data_objects[adr_geom+ADR_AABB_XMAX],
@@ -63,7 +63,7 @@ __host__ __device__ void photon_navigator(ParticleStack &particles, ui32 part_id
          printf("NOT .... \n");
        }
       
-        if (cur_id_geom==7) { 
+        if (cur_id_geom==13) { 
     
           f64xyz posinvox;
         posinvox.x = pos.x - (f64)geometry.data_objects[adr_geom+ADR_AABB_XMIN]; // -= xmin
@@ -111,7 +111,7 @@ __host__ __device__ void photon_navigator(ParticleStack &particles, ui32 part_id
               (f64)geometry.data_objects[adr_geom+ADR_AABB_ZMIN], (f64)geometry.data_objects[adr_geom+ADR_AABB_ZMAX])) {
 
               cur_id_geom = geometry.mother_node[cur_id_geom]; 
-              printf("WARNING Particle %d outside voxelized phantom id_geom %d \n", part_id, cur_id_geom);
+              //printf("WARNING Particle %d outside voxelized phantom id_geom %d \n", part_id, cur_id_geom);
          }
     }
     
@@ -196,14 +196,9 @@ __host__ __device__ void photon_navigator(ParticleStack &particles, ui32 part_id
     //if (parameters.dose_flag) {
         //f32xyz pos_edep = add_vector(photon.pos, scale_vector(photon.dir, next_interaction_distance*prng()));
     //}
-    
+     
+   // printf("id %d mat %d process %d dist %f cur_geom %d next_geom %d \n", part_id, id_mat, next_discrete_process, next_interaction_distance, cur_id_geom, next_geometry_volume);
 
-    
-    /*if (part_id == 7050335 || part_id == 8816730 ) {
-      
-        printf("id %d mat %d process %d dist %f cur_geom %d next_geom %d \n", part_id, id_mat, next_discrete_process, next_interaction_distance, cur_id_geom, next_geometry_volume);
-
-    }*/
    // printf("move particle %f %f %f dir %f %f %f \n", pos.x, pos.y, pos.z, dir.x, dir.y, dir.z);
      
     // Move the particle
