@@ -1062,7 +1062,7 @@ __host__ __device__ f64 get_distance_to_object(Scene geometry, ui32 adr_geom, ui
             if(inside)
                 new_mat = get_geometry_material(geometry, cur_geom, new_pos); 
             
-        }
+        }  
         
         //printf("distance %f \n", distance);
 

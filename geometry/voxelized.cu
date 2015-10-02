@@ -158,7 +158,7 @@ void Voxelized::define_materials_from_range(ui16 *raw_data, std::string range_na
     ui32 i;
     ui16 val;
     ui32 mat_index = 0;
-
+    
     // Data allocation
     data = (f32*)malloc(number_of_voxels * sizeof(f32));
 
@@ -174,7 +174,7 @@ void Voxelized::define_materials_from_range(ui16 *raw_data, std::string range_na
             stop  = read_stop_range(line);
             mat_name = read_mat_range(line);
             list_of_materials.push_back(mat_name);
-            //printf("IND %i MAT %s \n", mat_index, mat_name.c_str());
+            printf("IND %i MAT %s \n", mat_index, mat_name.c_str());
 
             // build labeled phantom according range data
             i=0; while (i < number_of_voxels) {
@@ -385,7 +385,7 @@ void Voxelized::load_from_mhd(std::string volume_name, std::string range_name) {
     spacing_y = sy;
     spacing_z = sz;
     
-    if(ElementType != "MET_FLOAT") {
+    if(ElementType == "MET_FLOAT") {
       mem_size = sizeof(f32) * number_of_voxels;
 
       f32 *raw_data = (f32*)malloc(mem_size);
@@ -400,14 +400,13 @@ void Voxelized::load_from_mhd(std::string volume_name, std::string range_name) {
       free(raw_data);
     }
     
-    if(ElementType != "MET_USHORT") {
+    if(ElementType == "MET_USHORT") {
       mem_size = sizeof(ui16) * number_of_voxels;
 
       ui16 *raw_data = (ui16*)malloc(mem_size);
       fread(raw_data, sizeof(ui16), number_of_voxels, pfile);
       fclose(pfile);
       /////////////// Then, convert the raw data into material id //////////////////////
-
       define_materials_from_range(raw_data, range_name);
 
       // Free memory

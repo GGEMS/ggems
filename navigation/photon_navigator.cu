@@ -196,8 +196,8 @@ __host__ __device__ void photon_navigator(ParticleStack &particles, ui32 part_id
     //if (parameters.dose_flag) {
         //f32xyz pos_edep = add_vector(photon.pos, scale_vector(photon.dir, next_interaction_distance*prng()));
     //}
-     
-   // printf("id %d mat %d process %d dist %f cur_geom %d next_geom %d \n", part_id, id_mat, next_discrete_process, next_interaction_distance, cur_id_geom, next_geometry_volume);
+
+    //printf("id %d mat %d process %d dist %f cur_geom %d next_geom %d \n", part_id, id_mat, next_discrete_process, next_interaction_distance, cur_id_geom, next_geometry_volume);
 
    // printf("move particle %f %f %f dir %f %f %f \n", pos.x, pos.y, pos.z, dir.x, dir.y, dir.z);
      
