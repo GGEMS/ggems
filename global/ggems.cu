@@ -1,33 +1,28 @@
- // This file is part of GGEMS
-//
-// GGEMS is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// GGEMS is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with GGEMS.  If not, see <http://www.gnu.org/licenses/>.
-//
-// GGEMS Copyright (C) 2013-2014 Julien Bert
+// GGEMS Copyright (C) 2015
+
+/*!
+ * \file ggems.cuh
+ * \brief Main header of GGEMS lib
+ * \author J. Bert <bert.jul@gmail.com>
+ * \version 0.1
+ * \date 13 novembre 2015
+ *
+ * Header of the main GGEMS lib
+ *
+ */
 
 #ifndef GGEMS_CU
 #define GGEMS_CU
 
 #include "ggems.cuh"
 
-///////// Simulation Builder class ////////////////////////////////////////////////
+////// :: GGEMS Const/Dest ::
 
-SimulationBuilder::SimulationBuilder() {
-    target = CPU_DEVICE;
+GGEMS::GGEMS() {
 
     // Init physics list and secondaries list
-    parameters.physics_list = (ui8*)malloc(NB_PROCESSES*sizeof(ui8));
-    parameters.secondaries_list = (ui8*)malloc(NB_PARTICLES*sizeof(ui8));
+    parameters.physics_list = (bool*)malloc(NB_PROCESSES*sizeof(bool));
+    parameters.secondaries_list = (bool*)malloc(NB_PARTICLES*sizeof(bool));
     
     ui32 i = 0;
     while (i < NB_PROCESSES) {
@@ -41,26 +36,127 @@ SimulationBuilder::SimulationBuilder() {
     }
 
     // Parameters
-    parameters.record_dose_flag = DISABLED;
-    parameters.digitizer_flag = DISABLED;
     parameters.nb_of_particles = 0;
-    parameters.nb_iterations = 0;
+    parameters.size_of_particles_batch = 0;
+    parameters.nb_of_batches = 0;
     parameters.time = 0;
     parameters.seed = 0;
     parameters.cs_table_nbins = 0;
     parameters.cs_table_min_E = 0;
-    parameters.cs_table_max_E = 0;
-    history.record_flag = DISABLED;
+    parameters.cs_table_max_E = 0;    
 
     // Init by default others parameters
-    gpu_id = 0;
-    gpu_block_size = 512;
+    parameters.device_target = CPU_DEVICE;
+    parameters.gpu_id = 0;
+    parameters.gpu_block_size = 512;
 
     // Others parameters
-    display_run_time_flag = false;
-    display_memory_usage_flag = false;
+    parameters.display_run_time = DISABLED;
+    parameters.display_memory_usage = DISABLED;
 
 }
+
+GGEMS::~GGEMS() {
+    delete parameters;
+}
+
+////// :: Setting ::
+
+// Set the hardware used for the simulation CPU or GPU (CPU by default)
+void GGEMS::set_hardware_target(std::string value) {
+    if (value == "GPU") {
+        parameters.device_target = GPU_DEVICE;
+    } else {
+        parameters.device_target = CPU_DEVICE;
+    }
+}
+
+// Set the GPU id
+void GGEMS::set_GPU_ID(ui32 valid) {
+    parameters.gpu_id = valid;
+}
+
+// Set the GPU block size
+void GGEMS::set_GPU_block_size(ui32 val) {
+    parameters.gpu_block_size = val;
+}
+
+// Add a process to the physics list
+void GGEMS::set_process(std::string process_name) {
+
+    if (process_name == "Compton") {
+        parameters.physics_list[PHOTON_COMPTON] = ENABLED;
+
+    } else if (process_name == "PhotoElectric") {
+        parameters.physics_list[PHOTON_PHOTOELECTRIC] = ENABLED;
+
+    } else if (process_name == "Rayleigh") {
+        parameters.physics_list[PHOTON_RAYLEIGH] = ENABLED;
+
+    } else if (process_name == "eIonisation") {
+        parameters.physics_list[ELECTRON_IONISATION] = ENABLED;
+
+    } else if (process_name == "eBremsstrahlung") {
+        parameters.physics_list[ELECTRON_BREMSSTRAHLUNG] = ENABLED;
+
+    } else if (process_name == "eMultipleScattering") {
+        parameters.physics_list[ELECTRON_MSC] = ENABLED;
+
+    } else {
+        print_warning("This process is unknown!!\n");
+        printf("     -> %s\n", process_name.c_str());
+        exit_simulation();
+    }
+}
+
+// Enable the simulation of a particular secondary particle
+void GGEMS::set_secondary(std::string pname) {
+
+    if (pname == "Photon") {
+        parameters.secondaries_list[PHOTON] = ENABLED;
+    } else if (pname == "Electron") {
+        parameters.secondaries_list[ELECTRON] = ENABLED;
+    } else {
+        print_warning("Secondary particle type is unknow!!");
+        printf("     -> %s\n", pname.c_str());
+        exit_simulation();
+    }
+}
+
+// Set the number of particles required for the simulation
+void GGEMS::set_number_of_particles(ui64 nb) {
+    parameters.nb_of_particles = nb;
+}
+
+// Set the size of particles batch
+void GGEMS::set_size_of_particles_batch(ui64 nb) {
+    parameters.size_of_particles_batch = nb;
+}
+
+// Set parameters to generate cross sections table
+void GGEMS::set_CS_table_nbins(ui32 valbin) {parameters.cs_table_nbins = valbin;}
+void GGEMS::set_CS_table_E_min(f32 valE) {parameters.cs_table_min_E = valE;}
+void GGEMS::set_CS_table_E_max(f32 valE) {parameters.cs_table_max_E = valE;}
+
+// Set the seed number
+void GGEMS::set_seed(ui32 vseed) {
+    seed = vseed;
+}
+
+// Display run time
+void GGEMS::set_display_run_time() {
+    parameters.display_run_time = ENABLED;
+}
+
+// Display memory usage
+void GGEMS::set_display_memory_usage() {
+    parameters.display_memory_usage = ENABLED;
+}
+
+
+
+
+/*
 
 ////// :: Main functions ::
 
@@ -227,134 +323,6 @@ void SimulationBuilder::copy_parameters_cpu2gpu() {
 
 }
 
-////// :: Setting ::
-
-// Set the digitizer
-void SimulationBuilder::set_digitizer(Digitizer dig) {
-    digitizer = dig;
-    parameters.digitizer_flag = ENABLED;
-}
-
-// Set the geometry of the simulation
-void SimulationBuilder::set_geometry(GeometryBuilder obj) {
-    geometry = obj;
-}
-
-// Set the materials definition associated to the geometry
-void SimulationBuilder::set_materials(MaterialBuilder tab) {
-    materials = tab;
-}
-
-// Set the particles stack
-void SimulationBuilder::set_particles(ParticleBuilder p) {
-    particles = p;
-}
-
-// Set the list of sources
-void SimulationBuilder::set_sources(SourceBuilder src) {
-    sources = src;
-}
-
-// Set the hardware used for the simulation CPU or GPU (CPU by default)
-void SimulationBuilder::set_hardware_target(std::string value) {
-    if (value == "GPU") {
-        target = GPU_DEVICE;
-    } else {
-        target = CPU_DEVICE;
-    }
-}
-
-// Add a process to the physics list
-void SimulationBuilder::set_process(std::string process_name) {
-
-    if (process_name == "Compton") {
-        parameters.physics_list[PHOTON_COMPTON] = ENABLED;
-        // printf("add Compton\n");
-    } else if (process_name == "PhotoElectric") {
-        parameters.physics_list[PHOTON_PHOTOELECTRIC] = ENABLED;
-        // printf("add photoelectric\n");
-    } else if (process_name == "Rayleigh") {
-        parameters.physics_list[PHOTON_RAYLEIGH] = ENABLED;
-        // printf("add Rayleigh\n");
-    } else if (process_name == "eIonisation") {
-        parameters.physics_list[ELECTRON_IONISATION] = ENABLED;
-        // printf("add photoelectric\n");
-    } else if (process_name == "eBremsstrahlung") {
-        parameters.physics_list[ELECTRON_BREMSSTRAHLUNG] = ENABLED;
-        // printf("add photoelectric\n");
-    } else if (process_name == "eMultipleScattering") {
-        parameters.physics_list[ELECTRON_MSC] = ENABLED;
-        // printf("add photoelectric\n");
-    } else {
-        print_warning("This process is unknown!!\n");
-        printf("     -> %s\n", process_name.c_str());
-        exit_simulation();
-    }
-}
-
-// Set parameters to generate cross sections table
-void SimulationBuilder::set_CS_table_nbins(ui32 valbin) {parameters.cs_table_nbins = valbin;}
-void SimulationBuilder::set_CS_table_E_min(f32 valE) {parameters.cs_table_min_E = valE;}
-void SimulationBuilder::set_CS_table_E_max(f32 valE) {parameters.cs_table_max_E = valE;}
-
-// Enable the simulation of a particular secondary particle
-void SimulationBuilder::set_secondary(std::string pname) {
-
-    if (pname == "Photon") {
-        parameters.secondaries_list[PHOTON] = ENABLED;
-        // printf("add Compton\n");
-    } else if (pname == "Electron") {
-        parameters.secondaries_list[ELECTRON] = ENABLED;
-        // printf("add photoelectric\n");
-    } else {
-        print_warning("Secondary particle type is unknow!!");
-        printf("     -> %s\n", pname.c_str());
-        exit_simulation();
-    }
-}
-
-// Set the number of particles required for the simulation
-void SimulationBuilder::set_number_of_particles(ui64 nb) {
-    nb_of_particles = nb;
-}
-
-// Set the maximum number of iterations (watchdog)
-void SimulationBuilder::set_max_number_of_iterations(ui32 nb) {
-    max_iteration = nb;
-}
-
-// Set to record the history of some particles (only for CPU version)
-void SimulationBuilder::set_record_history(ui64 nb_particles) {
-    history.record_flag = ENABLED;
-    history.max_nb_particles = std::min(nb_particles, nb_of_particles);
-    history.stack_size = particles.stack.size;
-}
-
-// Set the GPU id
-void SimulationBuilder::set_GPU_ID(ui32 valid) {
-    gpu_id = valid;
-}
-
-// Set the GPU block size
-void SimulationBuilder::set_GPU_block_size(ui32 val) {
-    gpu_block_size = val;
-}
-
-// Display run time
-void SimulationBuilder::set_display_run_time() {
-    display_run_time_flag = true;
-}
-
-// Display memory usage
-void SimulationBuilder::set_display_memory_usage() {
-    display_memory_usage_flag = true;
-}
-
-// Set the seed number
-void SimulationBuilder::set_seed(ui32 vseed) {
-    seed = vseed;
-}
-
 ////// :: Getting ::
 
 ParticleBuilder SimulationBuilder::get_particles() {
@@ -392,12 +360,12 @@ void SimulationBuilder::init_simulation() {
     nb_of_iterations = nb_of_particles / particles.stack.size;    
         
     // First compute the number of iterations and the size of a stack // TODO Can be improved - JB
-   /* if (nb_of_particles % particles.stack.size) {
-        nb_of_iterations = (nb_of_particles / particles.stack.size) + 1;
-        printf("nb of iterations %d \n", nb_of_iterations);
-    } else {
-        nb_of_iterations = nb_of_particles / particles.stack.size;
-    } */
+   // if (nb_of_particles % particles.stack.size) {
+     //   nb_of_iterations = (nb_of_particles / particles.stack.size) + 1;
+     //   printf("nb of iterations %d \n", nb_of_iterations);
+    //} else {
+    //    nb_of_iterations = nb_of_particles / particles.stack.size;
+    //}
     //particles.stack.size = nb_of_particles / nb_of_iterations;
     //nb_of_particles = (ui64)(particles.stack.size) * nb_of_iterations;
  
@@ -628,5 +596,48 @@ void SimulationBuilder::start_simulation() {
 
 
 ////// :: Utils ::
+
+
+
+
+
+// Set the geometry of the simulation
+void SimulationBuilder::set_geometry(GeometryBuilder obj) {
+    geometry = obj;
+}
+
+// Set the materials definition associated to the geometry
+void SimulationBuilder::set_materials(MaterialBuilder tab) {
+    materials = tab;
+}
+
+// Set the particles stack
+void SimulationBuilder::set_particles(ParticleBuilder p) {
+    particles = p;
+}
+
+// Set the list of sources
+void SimulationBuilder::set_sources(SourceBuilder src) {
+    sources = src;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*/
 
 #endif

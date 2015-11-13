@@ -1,19 +1,4 @@
-// This file is part of GGEMS
-//
-// GGEMS is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// GGEMS is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with GGEMS.  If not, see <http://www.gnu.org/licenses/>.
-//
-// GGEMS Copyright (C) 2013-2014 Julien Bert
+// GGEMS Copyright (C) 2015
 
 #ifndef PHOTON_CUH
 #define PHOTON_CUH
@@ -94,31 +79,5 @@ __host__ __device__ void Rayleigh_SampleSecondaries_Livermore(ParticleStack part
                                                               ui16 matindex,
                                                               ui32 id);
 
-
-/*
-__host__ __device__ f32 Compton_CSPA (f32 E, ui16 Z);
-
-// Compute the total Compton cross section for a given material
-__host__ __device__ f32 Compton_CS(GPUPhantomMaterials materials, ui16 mat, f32 E);
-// Compton Scatter (Standard - Klein-Nishina) with secondary (e-)
-__host__ __device__ f32 Compton_SampleSecondaries(ParticleStack particles, f32 cutE, ui32 id,ui8 flag_secondary);
-
-///// PhotoElectric /////
-
-// PhotoElectric Cross Section Per Atom (Standard)
-__host__ __device__ f32 PhotoElec_CSPA(f32 E, ui16 Z);
-
-// Compute the total Compton cross section for a given material
-__host__ __device__ f32 PhotoElec_CS(GPUPhantomMaterials materials,
-                              ui16 mat, f32 E);
-
-// Compute Theta distribution of the emitted electron, with respect to the incident Gamma
-// The Sauter-Gavrila distribution for the K-shell is used
-__host__ __device__ f32 PhotoElec_ElecCosThetaDistribution(ParticleStack part,ui32 id, f32 kineEnergy);
-
-// PhotoElectric effect
-__host__ __device__ f32 PhotoElec_SampleSecondaries(ParticleStack particles, GPUPhantomMaterials mat, ui16 matindex, ui32 id, ui8 flag_secondary,f32 cutEnergyElectron=990*eV );
-
-*/
 
 #endif

@@ -1,19 +1,4 @@
-// This file is part of GGEMS
-//
-// FIREwork is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// FIREwork is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with FIREwork.  If not, see <http://www.gnu.org/licenses/>.
-//
-// GGEMS Copyright (C) 2013-2014 Julien Bert
+// GGEMS Copyright (C) 2015
 
 #ifndef GLOBAL_CU
 #define GLOBAL_CU
@@ -45,7 +30,6 @@ __host__ void cuda_error_check (const char * prefix, const char * postfix) {
         cudaDeviceReset();
         exit(EXIT_FAILURE);
     }
-
 }
 
 // Set a GPU device
@@ -124,143 +108,7 @@ void exit_simulation() {
     exit(EXIT_FAILURE);
 }
 
-//////// Operation on C-Array //////////////////////////////////////////////////
-
-// Equivalent to std::vector.push_back for malloc array (ui32 version)
-void array_push_back(ui32 **vector, ui32 &dim, ui32 val) {
-
-    // If first allocation
-    if (dim == 0) {
-        (*vector) = (ui32*)malloc(sizeof(ui32));
-        if ((*vector) == NULL) {
-            print_error("Memory allocation from array_push_back!!!\n");
-            exit(EXIT_FAILURE);
-        }
-    // else reallocation
-    } else {
-        (*vector) = (ui32*)realloc((*vector), (dim+1)*sizeof(ui32));
-        if ((*vector) == NULL) {
-            print_error("Memory reallocation from array_push_back!!!\n");
-            exit(EXIT_FAILURE);
-        }
-    }
-
-    (*vector)[dim] = val;
-    (dim)++;
-}
-
-// Equivalent to std::vector.push_back for malloc array (f32 version)
-void array_push_back(f32 **vector, ui32 &dim, f32 val) {
-
-    // If first allocation
-    if (dim == 0) {
-        (*vector) = (f32*)malloc(sizeof(f32));
-        if ((*vector) == NULL) {
-            print_error("Memory allocation from array_push_back!!!\n");
-            exit(EXIT_FAILURE);
-        }
-    // else reallocation
-    } else {
-        (*vector) = (f32*)realloc((*vector), (dim+1)*sizeof(f32));
-        if ((*vector) == NULL) {
-            print_error("Memory reallocation from array_push_back!!!\n");
-            exit(EXIT_FAILURE);
-        }
-    }
-
-    (*vector)[dim] = val;
-    (dim)++;
-
-}
-
-
-// Equivalent to std::vector.insert for malloc array (ui32 version)
-void array_insert(ui32 **vector, ui32 &dim, ui32 pos, ui32 val) {
-
-    // Check the pos value
-    if (pos > dim) {
-        print_error("Position out of range from array_insert!!!\n");
-        exit(EXIT_FAILURE);
-    }
-
-    // If first allocation
-    if (dim == 0) {
-        (*vector) = (ui32*)malloc(sizeof(ui32));
-        if ((*vector) == NULL) {
-            print_error("Memory allocation from array_insert!!!\n");
-            exit(EXIT_FAILURE);
-        }
-    // else reallocation
-    } else {
-        (*vector) = (ui32*)realloc((*vector), (dim+1)*sizeof(ui32));
-        if ((*vector) == NULL) {
-            print_error("Memory reallocation from array_insert!!!\n");
-            exit(EXIT_FAILURE);
-        }
-        // Move data in memory for the insertion
-        memmove((*vector)+pos+1, (*vector)+pos, (dim-pos)*sizeof(ui32));
-    }
-    //printf("pos %d val %d \n", pos, val);
-    (*vector)[pos] = val;
-    (dim)++;
-
-}
-
-// Equivalent to std::vector.insert for malloc array (ui32 version)
-void array_insert(f32 **vector, ui32 &dim, ui32 pos, f32 val) {
-
-    // Check the pos value
-    if (pos > dim) {
-        print_error("Position out of range from array_insert!!!\n");
-        exit(EXIT_FAILURE);
-    }
-
-    // If first allocation
-    if (dim == 0) {
-        (*vector) = (f32*)malloc(sizeof(f32));
-        if ((*vector) == NULL) {
-            print_error("Memory allocation from array_insert!!!\n");
-            exit(EXIT_FAILURE);
-        }
-    // else reallocation
-    } else {
-        (*vector) = (f32*)realloc((*vector), (dim+1)*sizeof(f32));
-        if ((*vector) == NULL) {
-            print_error("Memory reallocation from array_insert!!!\n");
-            exit(EXIT_FAILURE);
-        }
-        // Move data in memory for the insertion
-        memmove((*vector)+pos+1, (*vector)+pos, (dim-pos)*sizeof(f32));
-    }
-    (*vector)[pos] = val;
-    (dim)++;
-
-}
-
-// Append an array to another one (f32 version)
-void array_append_array(f32 **vector, ui32 &dim, f32 **an_array, ui32 a_dim) {
-
-    // If first allocation
-    if (dim == 0) {
-        (*vector) = (f32*)malloc(sizeof(f32));
-        if ((*vector) == NULL) {
-            print_error("Memory allocation from array_append_array!!!\n");
-            exit(EXIT_FAILURE);
-        }
-    // else reallocation
-    } else {
-        (*vector) = (f32*)realloc((*vector), (dim+a_dim)*sizeof(f32));
-        if ((*vector) == NULL) {
-            print_error("Memory reallocation from array_append_array!!!\n");
-            exit(EXIT_FAILURE);
-        }
-    }
-
-    // Copy data
-    memcpy((*vector)+dim, (*an_array), a_dim*sizeof(f32));
-    (dim)+=a_dim;
-}
-
+/*
 // Create a color
 Color make_color(f32 r, f32 g, f32 b) {
     Color c;
@@ -269,6 +117,7 @@ Color make_color(f32 r, f32 g, f32 b) {
     c.b = b;
     return c;
 }
+*/
 
 // Get time
 f64 get_time() {

@@ -20,19 +20,6 @@
 
 #include "point_source.cuh"
 
-///////// Kernel ////////////////////////////////////////////////////
-
-// Kernel to create new particles (sources manager)
-__global__ void kernel_get_primaries(Sources sources, ParticleStack particles, ui32 isrc) {
-
-    const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
-    if (id >= particles.size) return;
-
-    // Get new particles
-    get_primaries(sources, particles, isrc, id);
-
-}
-
 // External function
 __host__ __device__ void point_source_primary_generator(ParticleStack particles, ui32 id,
                                                         f32 px, f32 py, f32 pz, f32 energy,
