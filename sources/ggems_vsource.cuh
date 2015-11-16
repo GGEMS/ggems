@@ -14,13 +14,20 @@
 #ifndef GGEMS_VSOURCE_CUH
 #define GGEMS_VSOURCE_CUH
 
+#include "global.cuh"
+#include "particles.cuh"
+#include "prng.cuh"
+
 class GGEMSVSource {
     public:
         GGEMSVSource();
         ~GGEMSVSource();
-        virtual void get_primaries_generator();
+        virtual void get_primaries_generator(ParticleStack particles);
+        virtual void initialize(GlobalSimulationParameters params);
 
     private:
+
+        GlobalSimulationParameters m_params;
 };
 
 #endif

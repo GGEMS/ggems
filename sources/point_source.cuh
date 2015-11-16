@@ -15,29 +15,34 @@
 #define POINT_SOURCE_CUH
 
 #include "ggems_vsource.cuh"
-#include "global.cuh"
 
-// External function
-__host__ __device__ void point_source_primary_generator(ParticleStack particles, ui32 id,
-                                                        f32 px, f32 py, f32 pz, f32 energy,
-                                                        ui8 type, ui32 geom_id);
 // Sphere
 class PointSource : public GGEMSVSource {
-    public:
-        PointSource(f32 vpx, f32 vpy, f32 vpz, ui32 vseed, std::string vname, ui32 vgeom_id);
+    public:        
         PointSource();
+        ~PointSource();
 
         void set_position(f32 vpx, f32 vpy, f32 vpz);
+        void set_particle_type(std::string pname);
+        void set_mono_energy(f32 valE);
+        void set_energy_spectrum(f64 *valE, f64 *hist, ui32 nb);
 
+        // Virtual from GGEMSVSource
+        void get_primaries_generator(ParticleStack &particles);
+        void initialize(GlobalSimulationParameters params);
 
-
-        void get_primaries_generator();
-
-        f32 px, py, pz;
-
-        std::vector<f32> energy_hist, partpdec;
+        bool check_mandatory();
 
     private:
+        GlobalSimulationParameters m_params;
+
+        f32 m_px, m_py, m_pz;
+        ui32 m_nb_of_energy_bins;
+        f64 *m_spectrumE_h;
+        f64 *m_spectrumE_d;
+        f64 *m_spectrumCDF_h;
+        f64 *m_spectrumCDF_d;
+        ui8 m_particle_type;
 };
 
 #endif

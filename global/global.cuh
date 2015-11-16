@@ -43,6 +43,7 @@
 // Type of particle
 #define PHOTON 0
 #define ELECTRON 1
+#define POSITRON 2
 
 // Photon processes
 #define PHOTON_COMPTON 0
@@ -74,14 +75,14 @@
 
 //#define DEBUGOK "[\033[32;01mok\033[00m]"
 //#define PRINTFUNCTION printf("%s %s\n",DEBUGOK,__FUNCTION__);
-//#define HANDLE_ERROR( err ) (HandleError( err, __FILE__, __LINE__ ))
+#define HANDLE_ERROR( err ) (HandleError( err, __FILE__, __LINE__ ))
 
 //#define EPSILON3 1.0e-03f
 //#define EPSILON6 1.0e-06f
 
 // Pi
-//#define gpu_pi               3.141592653589793116
-//#define gpu_twopi            2.0*gpu_pi
+#define gpu_pi               3.141592653589793116
+#define gpu_twopi            2.0*gpu_pi
 
 /////// TYPEDEF ////////////////////////////////////////////////
 
