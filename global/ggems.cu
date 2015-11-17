@@ -21,86 +21,92 @@
 GGEMS::GGEMS() {
 
     // Init physics list and secondaries list
-    parameters.physics_list = (bool*)malloc(NB_PROCESSES*sizeof(bool));
-    parameters.secondaries_list = (bool*)malloc(NB_PARTICLES*sizeof(bool));
+    m_parameters_h.physics_list = (bool*)malloc(NB_PROCESSES*sizeof(bool));
+    m_parameters_h.secondaries_list = (bool*)malloc(NB_PARTICLES*sizeof(bool));
     
     ui32 i = 0;
     while (i < NB_PROCESSES) {
-        parameters.physics_list[i] = DISABLED;
+        m_parameters_h.physics_list[i] = DISABLED;
         ++i;
     }
     i = 0;
     while (i < NB_PARTICLES) {
-        parameters.secondaries_list[i] = DISABLED;
+        m_parameters_h.secondaries_list[i] = DISABLED;
         ++i;
     }
 
     // Parameters
-    parameters.nb_of_particles = 0;
-    parameters.size_of_particles_batch = 0;
-    parameters.nb_of_batches = 0;
-    parameters.time = 0;
-    parameters.seed = 0;
-    parameters.cs_table_nbins = 0;
-    parameters.cs_table_min_E = 0;
-    parameters.cs_table_max_E = 0;    
+    m_parameters_h.nb_of_particles = 0;
+    m_parameters_h.size_of_particles_batch = 0;
+    m_parameters_h.nb_of_batches = 0;
+    m_parameters_h.time = 0;
+    m_parameters_h.seed = 0;
+    m_parameters_h.cs_table_nbins = 0;
+    m_parameters_h.cs_table_min_E = 0;
+    m_parameters_h.cs_table_max_E = 0;
 
     // Init by default others parameters
-    parameters.device_target = CPU_DEVICE;
-    parameters.gpu_id = 0;
-    parameters.gpu_block_size = 512;
+    m_parameters_h.device_target = CPU_DEVICE;
+    m_parameters_h.gpu_id = 0;
+    m_parameters_h.gpu_block_size = 512;
 
     // Others parameters
-    parameters.display_run_time = DISABLED;
-    parameters.display_memory_usage = DISABLED;
+    m_parameters_h.display_run_time = DISABLED;
+    m_parameters_h.display_memory_usage = DISABLED;
+
+    // Simulation objects
+    m_source = NULL;
 
 }
 
 GGEMS::~GGEMS() {
-    delete parameters;
+    delete m_parameters_h;
+    delete m_source;
 }
 
 ////// :: Setting ::
 
+/// Params
+
 // Set the hardware used for the simulation CPU or GPU (CPU by default)
 void GGEMS::set_hardware_target(std::string value) {
     if (value == "GPU") {
-        parameters.device_target = GPU_DEVICE;
+        m_parameters_h.device_target = GPU_DEVICE;
     } else {
-        parameters.device_target = CPU_DEVICE;
+        m_parameters_h.device_target = CPU_DEVICE;
     }
 }
 
 // Set the GPU id
 void GGEMS::set_GPU_ID(ui32 valid) {
-    parameters.gpu_id = valid;
+    m_parameters_h.gpu_id = valid;
 }
 
 // Set the GPU block size
 void GGEMS::set_GPU_block_size(ui32 val) {
-    parameters.gpu_block_size = val;
+    m_parameters_h.gpu_block_size = val;
 }
 
 // Add a process to the physics list
 void GGEMS::set_process(std::string process_name) {
 
     if (process_name == "Compton") {
-        parameters.physics_list[PHOTON_COMPTON] = ENABLED;
+        m_parameters_h.physics_list[PHOTON_COMPTON] = ENABLED;
 
     } else if (process_name == "PhotoElectric") {
-        parameters.physics_list[PHOTON_PHOTOELECTRIC] = ENABLED;
+        m_parameters_h.physics_list[PHOTON_PHOTOELECTRIC] = ENABLED;
 
     } else if (process_name == "Rayleigh") {
-        parameters.physics_list[PHOTON_RAYLEIGH] = ENABLED;
+        m_parameters_h.physics_list[PHOTON_RAYLEIGH] = ENABLED;
 
     } else if (process_name == "eIonisation") {
-        parameters.physics_list[ELECTRON_IONISATION] = ENABLED;
+        m_parameters_h.physics_list[ELECTRON_IONISATION] = ENABLED;
 
     } else if (process_name == "eBremsstrahlung") {
-        parameters.physics_list[ELECTRON_BREMSSTRAHLUNG] = ENABLED;
+        m_parameters_h.physics_list[ELECTRON_BREMSSTRAHLUNG] = ENABLED;
 
     } else if (process_name == "eMultipleScattering") {
-        parameters.physics_list[ELECTRON_MSC] = ENABLED;
+        m_parameters_h.physics_list[ELECTRON_MSC] = ENABLED;
 
     } else {
         print_warning("This process is unknown!!\n");
@@ -113,9 +119,9 @@ void GGEMS::set_process(std::string process_name) {
 void GGEMS::set_secondary(std::string pname) {
 
     if (pname == "Photon") {
-        parameters.secondaries_list[PHOTON] = ENABLED;
+        m_parameters_h.secondaries_list[PHOTON] = ENABLED;
     } else if (pname == "Electron") {
-        parameters.secondaries_list[ELECTRON] = ENABLED;
+        m_parameters_h.secondaries_list[ELECTRON] = ENABLED;
     } else {
         print_warning("Secondary particle type is unknow!!");
         printf("     -> %s\n", pname.c_str());
@@ -125,36 +131,229 @@ void GGEMS::set_secondary(std::string pname) {
 
 // Set the number of particles required for the simulation
 void GGEMS::set_number_of_particles(ui64 nb) {
-    parameters.nb_of_particles = nb;
+    m_parameters_h.nb_of_particles = nb;
 }
 
 // Set the size of particles batch
 void GGEMS::set_size_of_particles_batch(ui64 nb) {
-    parameters.size_of_particles_batch = nb;
+    m_parameters_h.size_of_particles_batch = nb;
 }
 
 // Set parameters to generate cross sections table
-void GGEMS::set_CS_table_nbins(ui32 valbin) {parameters.cs_table_nbins = valbin;}
-void GGEMS::set_CS_table_E_min(f32 valE) {parameters.cs_table_min_E = valE;}
-void GGEMS::set_CS_table_E_max(f32 valE) {parameters.cs_table_max_E = valE;}
+void GGEMS::set_CS_table_nbins(ui32 valbin) {m_parameters_h.cs_table_nbins = valbin;}
+void GGEMS::set_CS_table_E_min(f32 valE) {m_parameters_h.cs_table_min_E = valE;}
+void GGEMS::set_CS_table_E_max(f32 valE) {m_parameters_h.cs_table_max_E = valE;}
 
 // Set the seed number
 void GGEMS::set_seed(ui32 vseed) {
     seed = vseed;
 }
 
+/// Sim objects
+void GGEMS::set_source(GGEMSVSource *NewSource) {
+    m_source = NewSource;
+}
+
+/// Utils
+
 // Display run time
 void GGEMS::set_display_run_time() {
-    parameters.display_run_time = ENABLED;
+    m_parameters_h.display_run_time = ENABLED;
 }
 
 // Display memory usage
 void GGEMS::set_display_memory_usage() {
-    parameters.display_memory_usage = ENABLED;
+    m_parameters_h.display_memory_usage = ENABLED;
 }
 
+////// :: Private functions ::
 
+// Copy the global simulation parameters to the GPU
+void GGEMS::m_copy_parameters_cpu2gpu() {
 
+    // Mem allocation
+    HANDLE_ERROR( cudaMalloc((void**) &m_parameters_d.physics_list, NB_PROCESSES*sizeof(ui8)) );
+    HANDLE_ERROR( cudaMalloc((void**) &m_parameters_d.secondaries_list, NB_PARTICLES*sizeof(ui8)) );
+
+    // Copy data
+    HANDLE_ERROR( cudaMemcpy(m_parameters_d.physics_list, m_parameters_h.physics_list,
+                         sizeof(ui8)*NB_PROCESSES, cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy(m_parameters_d.secondaries_list, m_parameters_h.secondaries_list,
+                         sizeof(ui8)*NB_PARTICLES, cudaMemcpyHostToDevice) );
+
+    m_parameters_d.record_dose_flag = m_parameters_h.record_dose_flag;
+    m_parameters_d.digitizer_flag = m_parameters_h.digitizer_flag;
+    m_parameters_d.nb_of_particles = m_parameters_h.nb_of_particles;
+    m_parameters_d.nb_iterations = m_parameters_h.nb_iterations;
+    m_parameters_d.time = m_parameters_h.time;
+    m_parameters_d.seed = m_parameters_h.seed;
+    m_parameters_d.cs_table_nbins = m_parameters_h.cs_table_nbins;
+    m_parameters_d.cs_table_min_E = m_parameters_h.cs_table_min_E;
+    m_parameters_d.cs_table_max_E = m_parameters_h.cs_table_max_E;
+}
+
+////// :: Main functions ::
+
+// Init simualtion
+void GGEMS::init_simulation() {
+
+    // Run time
+    f64 t_start = 0;
+    if (m_parameters_h.display_run_time) {
+        t_start = get_time();
+    }
+
+    // Memory usage
+    ui32 mem = 0;
+
+    // CPU PRNG
+    srand(m_parameters_h.seed);
+
+    // Get the number of batch required
+    m_parameters_h.nb_of_batches = m_parameters_h.nb_of_particles / m_parameters_h.size_of_particles_batch;
+
+    // Init the GPU if need
+    if (m_parameters_h.device_target == GPU_DEVICE) {
+        // Reset device
+        reset_gpu_device();
+
+        // Set the gpu id
+        set_gpu_device(m_parameters_h.gpu_id);
+    }
+
+    // Copy global params to GPU
+    if (m_parameters_h.device_target == GPU_DEVICE) {
+        m_copy_parameters_cpu2gpu();
+    }
+
+    /// Init object of the simualtions ///////////////
+    m_source->initialize(m_parameters_h);  // Also copy data to GPU
+    // TODO
+
+    /// Material handling ////////////////////////////
+
+    // Load data
+    // TODO
+
+    // Build data based on geometry
+    // TODO
+
+    // Copy data to GPU
+    if (m_parameters_h.device_target == GPU_DEVICE) {
+        m_materials.copy_materials_table_cpu2gpu();
+    }
+
+    /// Stack handling ///////////////////////////////
+
+    // Init stack params
+    m_particles.set_stack_size(m_parameters_h.size_of_particles_batch);
+    m_particles.set_seed(m_parameters_h.seed);
+    // Init stack (CPU)
+    m_particles.cpu_malloc_stack();
+    m_particles.cpu_init_stack_seed();
+    // If GPU, init
+    if (m_parameters_h.device_target == GPU_DEVICE) {
+        m_particles.gpu_malloc_stack();
+        m_particles.copy_seed_cpu2gpu();
+    }
+
+    // Mem usage
+    if (m_parameters_h.display_memory_usage) {
+        ui32 mem_part = 91*m_particles.stack_h.size + 4;
+        mem += mem_part;
+        print_memory("Particles stack", mem_part);
+    }
+
+    /// Cross sections /////////////////////////////
+
+    // Init Cross sections and physics table
+    m_cross_sections.build_table(m_materials.mat_table_h, m_parameters_h);
+
+    // Mem usage
+    if (m_parameters_h.display_memory_usage) {
+        ui32 n = m_cross_sections.photon_CS_table.nb_bins;
+        ui32 k = m_cross_sections.photon_CS_table.nb_mat;
+        ui32 mem_cs = 4*n + 12*n*k + 12*n*101 + 16;
+        mem += mem_cs;
+        print_memory("Cross sections", mem_cs);
+
+        // Add CS from others particles
+    }
+
+    // If GPU
+    if (target == GPU_DEVICE) {
+        m_cross_sections.copy_cs_table_cpu2gpu();
+    }
+    //cs_tables.print();
+
+    // Mem usage
+    if (m_parameters_h.display_memory_usage) {
+        // Parameters
+        ui32 mem_params = NB_PROCESSES+NB_PARTICLES+30;
+        mem += mem_params;
+        print_memory("Parameters", mem_params);
+
+        /*
+        // Geometry
+        ui32 mem_geom = 4*geometry.world.ptr_objects_dim + 4*geometry.world.size_of_objects_dim +
+                4*geometry.world.data_objects_dim + 4*geometry.world.ptr_nodes_dim +
+                4*geometry.world.size_of_nodes_dim + 4*geometry.world.child_nodes_dim +
+                4*geometry.world.mother_node_dim + 32;
+        mem += mem_geom;
+        print_memory("Geometry", mem_geom);
+        */
+
+        // Materials
+        ui32 n = m_materials.mat_table_h.nb_materials;
+        ui32 k = materials.mat_table_h.nb_elements_total;
+        ui32 mem_mat = 10*k + 80*n + 8;
+        mem += mem_mat;
+        print_memory("Materials", mem_mat);
+
+        /*
+        // Sources
+        ui32 mem_src = 4*sources.sources.ptr_sources_dim + 4*sources.sources.data_sources_dim +
+                4*sources.sources.seeds_dim + 16;
+        mem += mem_src;
+        print_memory("Sources", mem_src);
+        */
+    }
+
+    /*
+    /// Digitizer /////////////////////////////////
+
+    // init Digitizer
+    if (parameters.digitizer_flag) {
+        digitizer.cpu_init_pulses(particles.stack.size);
+
+        if (target == GPU_DEVICE) {
+            digitizer.gpu_init_pulses(particles.stack.size);
+        }
+
+        // If projection acquisition
+        if (digitizer.flag_projection || digitizer.flag_spect_proj) {
+            digitizer.init_projection();
+        }
+
+        // Mem usage
+        if (display_memory_usage_flag) {
+            ui32 mem_singles = 64*digitizer.pulses.size + 4;
+            mem += mem_singles;
+            print_memory("Singles", mem_singles);
+        }
+    }
+    */
+
+    // Run time
+    if (m_parameters_h.display_run_time) {
+        print_time("Initialization", get_time()-t_start);
+    }
+
+    // Mem usage
+    if (m_parameters_h.display_memory_usage) {
+        print_memory("Total memory usage", mem);
+    }
+}
 
 /*
 
@@ -298,30 +497,7 @@ void SimulationBuilder::main_navigator() {
 
 }
 
-// Copy the global simulation parameters to the GPU
-void SimulationBuilder::copy_parameters_cpu2gpu() {
 
-    // Mem allocation
-    HANDLE_ERROR( cudaMalloc((void**) &dparameters.physics_list, NB_PROCESSES*sizeof(ui8)) );
-    HANDLE_ERROR( cudaMalloc((void**) &dparameters.secondaries_list, NB_PARTICLES*sizeof(ui8)) );
-
-    // Copy data
-    HANDLE_ERROR( cudaMemcpy(dparameters.physics_list, parameters.physics_list,
-                         sizeof(ui8)*NB_PROCESSES, cudaMemcpyHostToDevice) );
-    HANDLE_ERROR( cudaMemcpy(dparameters.secondaries_list, parameters.secondaries_list,
-                         sizeof(ui8)*NB_PARTICLES, cudaMemcpyHostToDevice) );
-
-    dparameters.record_dose_flag = parameters.record_dose_flag;
-    dparameters.digitizer_flag = parameters.digitizer_flag;
-    dparameters.nb_of_particles = parameters.nb_of_particles;
-    dparameters.nb_iterations = parameters.nb_iterations;
-    dparameters.time = parameters.time;
-    dparameters.seed = parameters.seed;
-    dparameters.cs_table_nbins = parameters.cs_table_nbins;
-    dparameters.cs_table_min_E = parameters.cs_table_min_E;
-    dparameters.cs_table_max_E = parameters.cs_table_max_E;
-
-}
 
 ////// :: Getting ::
 
@@ -331,162 +507,7 @@ ParticleBuilder SimulationBuilder::get_particles() {
 
 ////// :: Command ::
 
-// Init simualtion
-void SimulationBuilder::init_simulation() {
 
-    // Run time
-    f64 t_start = 0;
-    if (display_run_time_flag) {
-        t_start = get_time();
-    }
-
-    // Memory usage
-    ui32 mem = 0;
-
-    // CPU PRNG
-    srand(seed);
-
-    ui32 adr = sources.sources.ptr_sources[0];
-    // Read the kind of sources
-    ui32 type = (ui32)(sources.sources.data_sources[adr+ADR_SRC_TYPE]);
-    
-    if (type == VOXELIZED_SOURCE) {
-        nb_of_particles = (ui64)(sources.sources.data_sources[adr+ADR_VOX_SOURCE_TOT_ACTIVITY]);
-    }
-    
-    //nb_of_particles /= 100;
-    printf("nb particules %lu \n", nb_of_particles);
-
-    nb_of_iterations = nb_of_particles / particles.stack.size;    
-        
-    // First compute the number of iterations and the size of a stack // TODO Can be improved - JB
-   // if (nb_of_particles % particles.stack.size) {
-     //   nb_of_iterations = (nb_of_particles / particles.stack.size) + 1;
-     //   printf("nb of iterations %d \n", nb_of_iterations);
-    //} else {
-    //    nb_of_iterations = nb_of_particles / particles.stack.size;
-    //}
-    //particles.stack.size = nb_of_particles / nb_of_iterations;
-    //nb_of_particles = (ui64)(particles.stack.size) * nb_of_iterations;
- 
-    //printf("nb of particles %lu \n", nb_of_particles);
-    
-    /// Init the GPU if need
-    if (target == GPU_DEVICE) {
-        // Reset device
-        reset_gpu_device();
-
-        // Set the gpu id
-        set_gpu_device(gpu_id);
-    }
-
-    /// Stack handling /////////////////////////////
-
-    // Init CPU stack
-    particles.cpu_malloc_stack();
-    particles.cpu_init_stack_seed();
-
-    // Mem usage
-    if (display_memory_usage_flag) {
-        ui32 mem_part = 91*particles.stack.size + 4;
-        mem += mem_part;
-        print_memory("Particles stack", mem_part);
-    }
-
-    // If GPU
-    if (target == GPU_DEVICE) {
-        particles.gpu_malloc_stack();
-        particles.copy_seed_cpu2gpu();
-    }
-
-    /// Cross sections /////////////////////////////
-
-    // Init Cross sections and physics table
-    cs_tables.build_table(materials.materials_table, parameters);
-
-    // Mem usage
-    if (display_memory_usage_flag) {
-        ui32 n = cs_tables.photon_CS_table.nb_bins;
-        ui32 k = cs_tables.photon_CS_table.nb_mat;
-        ui32 mem_cs = 4*n + 12*n*k + 12*n*101 + 16;
-        mem += mem_cs;
-        print_memory("Cross sections", mem_cs);
-    }
-
-    // If GPU
-    if (target == GPU_DEVICE) {
-        cs_tables.copy_cs_table_cpu2gpu();
-    }
-    //cs_tables.print();
-
-    /// Copy every data to the GPU ////////////////
-    // If GPU
-    if (target == GPU_DEVICE) {
-        copy_parameters_cpu2gpu();
-        geometry.copy_scene_cpu2gpu();
-        materials.copy_materials_table_cpu2gpu();
-        sources.copy_source_cpu2gpu();
-    }
-
-    // Mem usage
-    if (display_memory_usage_flag) {
-        // Parameters
-        ui32 mem_params = NB_PROCESSES+NB_PARTICLES+30;
-        mem += mem_params;
-        print_memory("Parameters", mem_params);
-        // Geometry
-        ui32 mem_geom = 4*geometry.world.ptr_objects_dim + 4*geometry.world.size_of_objects_dim +
-                4*geometry.world.data_objects_dim + 4*geometry.world.ptr_nodes_dim +
-                4*geometry.world.size_of_nodes_dim + 4*geometry.world.child_nodes_dim +
-                4*geometry.world.mother_node_dim + 32;
-        mem += mem_geom;
-        print_memory("Geometry", mem_geom);
-        // Materials
-        ui32 n = materials.materials_table.nb_materials;
-        ui32 k = materials.materials_table.nb_elements_total;
-        ui32 mem_mat = 10*k + 80*n + 8;
-        mem += mem_mat;
-        print_memory("Materials", mem_geom);
-        // Sources
-        ui32 mem_src = 4*sources.sources.ptr_sources_dim + 4*sources.sources.data_sources_dim +
-                4*sources.sources.seeds_dim + 16;
-        mem += mem_src;
-        print_memory("Sources", mem_src);
-    }
-
-    /// Digitizer /////////////////////////////////
-
-    // init Digitizer
-    if (parameters.digitizer_flag) {
-        digitizer.cpu_init_pulses(particles.stack.size);
-
-        if (target == GPU_DEVICE) {
-            digitizer.gpu_init_pulses(particles.stack.size);
-        }
-
-        // If projection acquisition
-        if (digitizer.flag_projection || digitizer.flag_spect_proj) {
-            digitizer.init_projection();
-        }
-
-        // Mem usage
-        if (display_memory_usage_flag) {
-            ui32 mem_singles = 64*digitizer.pulses.size + 4;
-            mem += mem_singles;
-            print_memory("Singles", mem_singles);
-        }
-    }
-
-    // Run time
-    if (display_run_time_flag) {
-        print_time("Initialization", get_time()-t_start);
-    }
-
-    // Mem usage
-    if (display_memory_usage_flag) {
-        print_memory("Total memory usage", mem);
-    }
-}
 
 // Start the simulation
 void SimulationBuilder::start_simulation() {

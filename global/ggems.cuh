@@ -15,6 +15,10 @@
 #define GGEMS_CUH
 
 #include "global.cuh"
+#include "ggems_vsource.cuh"
+#include "particles.cuh"
+#include "cross_sections.cuh"
+#include "materials.cuh"
 
 class GGEMS {
     public:
@@ -29,7 +33,7 @@ class GGEMS {
 //        void set_particles(ParticleBuilder p);
 //        void set_digitizer(Digitizer dig);
 
-//        // Setting parameters
+        // Setting parameters
         void set_hardware_target(std::string value);
         void set_GPU_ID(ui32 valid);
         void set_GPU_block_size(ui32 val);
@@ -41,12 +45,14 @@ class GGEMS {
         void set_CS_table_E_min(f32 valE);
         void set_CS_table_E_max(f32 valE);
         void set_seed(ui32 vseed);
+        // Setting simulation objects
+        void set_source(GGEMSVSource *NewSource);
         // Utils
         void set_display_run_time();
         void set_display_memory_usage();
 
         // Main functions
-//        void init_simulation();
+        void init_simulation();
 //        void start_simulation();
 
         // Get data
@@ -58,8 +64,7 @@ class GGEMS {
 //        GeometryBuilder geometry;                   // (CPU & GPU
 //        MaterialBuilder materials;                  // (CPU & GPU)
 //        SourceBuilder sources;
-        GlobalSimulationParameters parameters;      // CPU
-//        GlobalSimulationParameters dparameters;     // GPU
+
 //        CrossSectionsBuilder cs_tables;             // (CPU & GPU)
 //        Digitizer digitizer;                        // (CPU & GPU)
 
@@ -68,6 +73,22 @@ class GGEMS {
 
 
     private:
+        // Particles handler
+        ParticleBuilder m_particles;
+
+        // Cross section handler
+        CrossSectionsBuilder m_cross_sections;
+
+        // Materials handler
+        MaterialBuilder m_materials;
+
+        // A source of particles
+        GGEMSVSource *m_source;
+
+        // Main parameters
+        GlobalSimulationParameters m_parameters_h;     // CPU
+        GlobalSimulationParameters m_parameters_d;     // GPU
+        void m_copy_parameters_cpu2gpu();
 
         /*
         // Main functions
@@ -76,9 +97,9 @@ class GGEMS {
 
         // For GPU
 
-        void copy_parameters_cpu2gpu();
 
-        // Parameters
+
+
 
         ui32 seed;
         */

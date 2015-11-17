@@ -1,7 +1,7 @@
 // GGEMS Copyright (C) 2015
 
-#ifndef CROSS_SECTIONS_BUILDER_CUH
-#define CROSS_SECTIONS_BUILDER_CUH
+#ifndef CROSS_SECTIONS_CUH
+#define CROSS_SECTIONS_CUH
 
 #include "materials.cuh"
 #include "global.cuh"
@@ -16,8 +16,8 @@ class CrossSectionsBuilder {
         void print();
 
         // Data for photon
-        PhotonCrossSectionTable photon_CS_table;   // CPU
-        PhotonCrossSectionTable dphoton_CS_table;  // GPU
+        PhotonCrossSectionTable photon_CS_table_h;  // CPU
+        PhotonCrossSectionTable photon_CS_table_d;  // GPU
 
         // Data for electron TODO
         //ElectronCrossSectionTable Electron_CS_table;

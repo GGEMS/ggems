@@ -1,29 +1,9 @@
-// This file is part of GGEMS
-//
-// FIREwork is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// FIREwork is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with FIREwork.  If not, see <http://www.gnu.org/licenses/>.
-//
-// GGEMS Copyright (C) 2013-2014 Julien Bert
+// GGEMS Copyright (C) 2015
+
 #ifndef MATERIALS_CU
 #define MATERIALS_CU
 
 #include "materials.cuh"
-
-//////////////////////////////////////////////////////////////////
-//// Material class //////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////
-
-Material::Material() {} // To handle one material
 
 //////////////////////////////////////////////////////////////////
 //// MaterialDataBase class //////////////////////////////////////
@@ -210,6 +190,7 @@ void MaterialBuilder::load_materials_database(std::string filename) {
 // Build the materials table according the object contains in the world
 void MaterialBuilder::free_materials_table() {
 
+    /*
     free(materials_table.nb_elements);
     free(materials_table.index);
     free(materials_table.nb_atoms_per_vol);
@@ -233,9 +214,13 @@ void MaterialBuilder::free_materials_table() {
     free(materials_table.fLogMeanExcitationEnergy);
     free(materials_table.mixture);
     free(materials_table.atom_num_dens);
+    */
+
+    //delete mat_table_h;
 
 }
 
+/*
 // Build the materials table according the object contains in the world
 void MaterialBuilder::get_materials_table_from_world(GeometryBuilder World) {
 
@@ -366,97 +351,98 @@ void MaterialBuilder::get_materials_table_from_world(GeometryBuilder World) {
     }
 
 }
+*/
 
 // Copy data to the GPU
 void MaterialBuilder::copy_materials_table_cpu2gpu() {
 
-    ui32 n = materials_table.nb_materials;
-    ui32 k = materials_table.nb_elements_total;
+    ui32 n = mat_table_h.nb_materials;
+    ui32 k = mat_table_h.nb_elements_total;
 
     // First allocate the GPU mem for the scene
-    HANDLE_ERROR( cudaMalloc((void**) &dmaterials_table.nb_elements, n*sizeof(ui16)) );
-    HANDLE_ERROR( cudaMalloc((void**) &dmaterials_table.index, n*sizeof(ui16)) );
+    HANDLE_ERROR( cudaMalloc((void**) &mat_table_d.nb_elements, n*sizeof(ui16)) );
+    HANDLE_ERROR( cudaMalloc((void**) &mat_table_d.index, n*sizeof(ui16)) );
 
-    HANDLE_ERROR( cudaMalloc((void**) &dmaterials_table.mixture, k*sizeof(ui16)) );
-    HANDLE_ERROR( cudaMalloc((void**) &dmaterials_table.atom_num_dens, k*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &mat_table_d.mixture, k*sizeof(ui16)) );
+    HANDLE_ERROR( cudaMalloc((void**) &mat_table_d.atom_num_dens, k*sizeof(f32)) );
 
-    HANDLE_ERROR( cudaMalloc((void**) &dmaterials_table.nb_atoms_per_vol, n*sizeof(f32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &dmaterials_table.nb_electrons_per_vol, n*sizeof(f32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &dmaterials_table.electron_mean_excitation_energy, n*sizeof(ui32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &dmaterials_table.rad_length, n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &mat_table_d.nb_atoms_per_vol, n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &mat_table_d.nb_electrons_per_vol, n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &mat_table_d.electron_mean_excitation_energy, n*sizeof(ui32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &mat_table_d.rad_length, n*sizeof(f32)) );
 
-    HANDLE_ERROR( cudaMalloc((void**) &dmaterials_table.fX0, n*sizeof(f32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &dmaterials_table.fX1, n*sizeof(f32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &dmaterials_table.fD0, n*sizeof(f32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &dmaterials_table.fC, n*sizeof(f32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &dmaterials_table.fA, n*sizeof(f32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &dmaterials_table.fM, n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &mat_table_d.fX0, n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &mat_table_d.fX1, n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &mat_table_d.fD0, n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &mat_table_d.fC, n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &mat_table_d.fA, n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &mat_table_d.fM, n*sizeof(f32)) );
 
-    HANDLE_ERROR( cudaMalloc((void**) &dmaterials_table.fF1, n*sizeof(f32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &dmaterials_table.fF2, n*sizeof(f32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &dmaterials_table.fEnergy0, n*sizeof(f32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &dmaterials_table.fEnergy1, n*sizeof(f32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &dmaterials_table.fEnergy2, n*sizeof(f32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &dmaterials_table.fLogEnergy1, n*sizeof(f32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &dmaterials_table.fLogEnergy2, n*sizeof(f32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &dmaterials_table.fLogMeanExcitationEnergy, n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &mat_table_d.fF1, n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &mat_table_d.fF2, n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &mat_table_d.fEnergy0, n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &mat_table_d.fEnergy1, n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &mat_table_d.fEnergy2, n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &mat_table_d.fLogEnergy1, n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &mat_table_d.fLogEnergy2, n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &mat_table_d.fLogMeanExcitationEnergy, n*sizeof(f32)) );
 
-    HANDLE_ERROR( cudaMalloc((void**) &dmaterials_table.density, n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &mat_table_d.density, n*sizeof(f32)) );
 
     // Copy data to the GPU
-    dmaterials_table.nb_materials = materials_table.nb_materials;
-    dmaterials_table.nb_elements_total = materials_table.nb_elements_total;
+    mat_table_d.nb_materials = mat_table_h.nb_materials;
+    mat_table_d.nb_elements_total = mat_table_h.nb_elements_total;
 
-    HANDLE_ERROR( cudaMemcpy(dmaterials_table.nb_elements, materials_table.nb_elements,
+    HANDLE_ERROR( cudaMemcpy(mat_table_d.nb_elements, mat_table_h.nb_elements,
                              n*sizeof(ui16), cudaMemcpyHostToDevice) );
-    HANDLE_ERROR( cudaMemcpy(dmaterials_table.index, materials_table.index,
+    HANDLE_ERROR( cudaMemcpy(mat_table_d.index, mat_table_h.index,
                              n*sizeof(ui16), cudaMemcpyHostToDevice) );
 
-    HANDLE_ERROR( cudaMemcpy(dmaterials_table.mixture, materials_table.mixture,
+    HANDLE_ERROR( cudaMemcpy(mat_table_d.mixture, mat_table_h.mixture,
                              k*sizeof(ui16), cudaMemcpyHostToDevice) );
-    HANDLE_ERROR( cudaMemcpy(dmaterials_table.atom_num_dens, materials_table.atom_num_dens,
+    HANDLE_ERROR( cudaMemcpy(mat_table_d.atom_num_dens, mat_table_h.atom_num_dens,
                              k*sizeof(f32), cudaMemcpyHostToDevice) );
 
-    HANDLE_ERROR( cudaMemcpy(dmaterials_table.nb_atoms_per_vol, materials_table.nb_atoms_per_vol,
+    HANDLE_ERROR( cudaMemcpy(mat_table_d.nb_atoms_per_vol, mat_table_h.nb_atoms_per_vol,
                              n*sizeof(f32), cudaMemcpyHostToDevice) );
-    HANDLE_ERROR( cudaMemcpy(dmaterials_table.nb_electrons_per_vol, materials_table.nb_electrons_per_vol,
+    HANDLE_ERROR( cudaMemcpy(mat_table_d.nb_electrons_per_vol, mat_table_h.nb_electrons_per_vol,
                              n*sizeof(f32), cudaMemcpyHostToDevice) );
-    HANDLE_ERROR( cudaMemcpy(dmaterials_table.electron_mean_excitation_energy, materials_table.electron_mean_excitation_energy,
+    HANDLE_ERROR( cudaMemcpy(mat_table_d.electron_mean_excitation_energy, mat_table_h.electron_mean_excitation_energy,
                              n*sizeof(f32), cudaMemcpyHostToDevice) );
-    HANDLE_ERROR( cudaMemcpy(dmaterials_table.rad_length, materials_table.rad_length,
-                             n*sizeof(f32), cudaMemcpyHostToDevice) );
-
-    HANDLE_ERROR( cudaMemcpy(dmaterials_table.fX0, materials_table.fX0,
-                             n*sizeof(f32), cudaMemcpyHostToDevice) );
-    HANDLE_ERROR( cudaMemcpy(dmaterials_table.fX1, materials_table.fX1,
-                             n*sizeof(f32), cudaMemcpyHostToDevice) );
-    HANDLE_ERROR( cudaMemcpy(dmaterials_table.fD0, materials_table.fD0,
-                             n*sizeof(f32), cudaMemcpyHostToDevice) );
-    HANDLE_ERROR( cudaMemcpy(dmaterials_table.fC, materials_table.fC,
-                             n*sizeof(f32), cudaMemcpyHostToDevice) );
-    HANDLE_ERROR( cudaMemcpy(dmaterials_table.fA, materials_table.fA,
-                             n*sizeof(f32), cudaMemcpyHostToDevice) );
-    HANDLE_ERROR( cudaMemcpy(dmaterials_table.fM, materials_table.fM,
+    HANDLE_ERROR( cudaMemcpy(mat_table_d.rad_length, mat_table_h.rad_length,
                              n*sizeof(f32), cudaMemcpyHostToDevice) );
 
-    HANDLE_ERROR( cudaMemcpy(dmaterials_table.fF1, materials_table.fF1,
+    HANDLE_ERROR( cudaMemcpy(mat_table_d.fX0, mat_table_h.fX0,
                              n*sizeof(f32), cudaMemcpyHostToDevice) );
-    HANDLE_ERROR( cudaMemcpy(dmaterials_table.fF2, materials_table.fF2,
+    HANDLE_ERROR( cudaMemcpy(mat_table_d.fX1, mat_table_h.fX1,
                              n*sizeof(f32), cudaMemcpyHostToDevice) );
-    HANDLE_ERROR( cudaMemcpy(dmaterials_table.fEnergy0, materials_table.fEnergy0,
+    HANDLE_ERROR( cudaMemcpy(mat_table_d.fD0, mat_table_h.fD0,
                              n*sizeof(f32), cudaMemcpyHostToDevice) );
-    HANDLE_ERROR( cudaMemcpy(dmaterials_table.fEnergy1, materials_table.fEnergy1,
+    HANDLE_ERROR( cudaMemcpy(mat_table_d.fC, mat_table_h.fC,
                              n*sizeof(f32), cudaMemcpyHostToDevice) );
-    HANDLE_ERROR( cudaMemcpy(dmaterials_table.fEnergy2, materials_table.fEnergy2,
+    HANDLE_ERROR( cudaMemcpy(mat_table_d.fA, mat_table_h.fA,
                              n*sizeof(f32), cudaMemcpyHostToDevice) );
-    HANDLE_ERROR( cudaMemcpy(dmaterials_table.fLogEnergy1, materials_table.fLogEnergy1,
-                             n*sizeof(f32), cudaMemcpyHostToDevice) );
-    HANDLE_ERROR( cudaMemcpy(dmaterials_table.fLogEnergy2, materials_table.fLogEnergy2,
-                             n*sizeof(f32), cudaMemcpyHostToDevice) );
-    HANDLE_ERROR( cudaMemcpy(dmaterials_table.fLogMeanExcitationEnergy, materials_table.fLogMeanExcitationEnergy,
+    HANDLE_ERROR( cudaMemcpy(mat_table_d.fM, mat_table_h.fM,
                              n*sizeof(f32), cudaMemcpyHostToDevice) );
 
-    HANDLE_ERROR( cudaMemcpy(dmaterials_table.density, materials_table.density,
+    HANDLE_ERROR( cudaMemcpy(mat_table_d.fF1, mat_table_h.fF1,
+                             n*sizeof(f32), cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy(mat_table_d.fF2, mat_table_h.fF2,
+                             n*sizeof(f32), cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy(mat_table_d.fEnergy0, mat_table_h.fEnergy0,
+                             n*sizeof(f32), cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy(mat_table_d.fEnergy1, mat_table_h.fEnergy1,
+                             n*sizeof(f32), cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy(mat_table_d.fEnergy2, mat_table_h.fEnergy2,
+                             n*sizeof(f32), cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy(mat_table_d.fLogEnergy1, mat_table_h.fLogEnergy1,
+                             n*sizeof(f32), cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy(mat_table_d.fLogEnergy2, mat_table_h.fLogEnergy2,
+                             n*sizeof(f32), cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy(mat_table_d.fLogMeanExcitationEnergy, mat_table_h.fLogMeanExcitationEnergy,
+                             n*sizeof(f32), cudaMemcpyHostToDevice) );
+
+    HANDLE_ERROR( cudaMemcpy(mat_table_d.density, mat_table_h.density,
                              n*sizeof(f32), cudaMemcpyHostToDevice) );
 
 }

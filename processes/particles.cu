@@ -4,6 +4,7 @@
 #define PARTICLES_CU
 #include "particles.cuh"
 
+/*
 //// HistoryBuilder class ////////////////////////////////////////////////////
 
 HistoryBuilder::HistoryBuilder() {
@@ -49,19 +50,19 @@ void HistoryBuilder::cpu_record_a_step(ParticleStack particles, ui32 id_part) {
     nb_steps[abs_id_part]++;
 
 }
-
+*/
 
 //// ParticleBuilder class ///////////////////////////////////////////////////
 
 ParticleBuilder::ParticleBuilder() {
-    stack.size = 0;
+    stack_h.size = 0;
     seed = 0;
 }
 
 // Set the size of the stack buffer
 void ParticleBuilder::set_stack_size(ui32 nb) {
-    stack.size = nb;
-    dstack.size = nb;
+    stack_h.size = nb;
+    stack_d.size = nb;
 }
 
 // Set the seed for this stack
@@ -71,85 +72,85 @@ void ParticleBuilder::set_seed(ui32 val_seed) {
 
 // Memory allocation for this stack
 void ParticleBuilder::cpu_malloc_stack() {
-    if (stack.size == 0) {
+    if (stack_h.size == 0) {
         print_warning("Stack allocation, stack size is set to zero?!");
         exit_simulation();
     }
 
-    stack.E = (f64*)malloc(stack.size * sizeof(f64));
-    stack.dx = (f64*)malloc(stack.size * sizeof(f64));
-    stack.dy = (f64*)malloc(stack.size * sizeof(f64));
-    stack.dz = (f64*)malloc(stack.size * sizeof(f64));
-    stack.px = (f64*)malloc(stack.size * sizeof(f64));
-    stack.py = (f64*)malloc(stack.size * sizeof(f64));
-    stack.pz = (f64*)malloc(stack.size * sizeof(f64));
-    stack.tof = (f64*)malloc(stack.size * sizeof(f64));
+    stack_h.E = (f64*)malloc(stack_h.size * sizeof(f64));
+    stack_h.dx = (f64*)malloc(stack_h.size * sizeof(f64));
+    stack_h.dy = (f64*)malloc(stack_h.size * sizeof(f64));
+    stack_h.dz = (f64*)malloc(stack_h.size * sizeof(f64));
+    stack_h.px = (f64*)malloc(stack_h.size * sizeof(f64));
+    stack_h.py = (f64*)malloc(stack_h.size * sizeof(f64));
+    stack_h.pz = (f64*)malloc(stack_h.size * sizeof(f64));
+    stack_h.tof = (f64*)malloc(stack_h.size * sizeof(f64));
 
-    stack.prng_state_1 = (ui32*)malloc(stack.size * sizeof(ui32));
-    stack.prng_state_2 = (ui32*)malloc(stack.size * sizeof(ui32));
-    stack.prng_state_3 = (ui32*)malloc(stack.size * sizeof(ui32));
-    stack.prng_state_4 = (ui32*)malloc(stack.size * sizeof(ui32));
-    stack.prng_state_5 = (ui32*)malloc(stack.size * sizeof(ui32));
+    stack_h.prng_state_1 = (ui32*)malloc(stack_h.size * sizeof(ui32));
+    stack_h.prng_state_2 = (ui32*)malloc(stack_h.size * sizeof(ui32));
+    stack_h.prng_state_3 = (ui32*)malloc(stack_h.size * sizeof(ui32));
+    stack_h.prng_state_4 = (ui32*)malloc(stack_h.size * sizeof(ui32));
+    stack_h.prng_state_5 = (ui32*)malloc(stack_h.size * sizeof(ui32));
 
-    stack.geometry_id = (ui32*)malloc(stack.size * sizeof(ui32));
+    stack_h.geometry_id = (ui32*)malloc(stack_h.size * sizeof(ui32));
 
-    stack.endsimu = (ui8*)malloc(stack.size * sizeof(ui8));
-    stack.level = (ui8*)malloc(stack.size * sizeof(ui8));
-    stack.pname = (ui8*)malloc(stack.size * sizeof(ui8));
+    stack_h.endsimu = (ui8*)malloc(stack_h.size * sizeof(ui8));
+    stack_h.level = (ui8*)malloc(stack_h.size * sizeof(ui8));
+    stack_h.pname = (ui8*)malloc(stack_h.size * sizeof(ui8));
 }
 
 
 void ParticleBuilder::cpu_free_stack() {
 
-    free(stack.E);
-    free(stack.dx);
-    free(stack.dy);
-    free(stack.dz);
-    free(stack.px);
-    free(stack.py);
-    free(stack.pz);
-    free(stack.tof);
+    free(stack_h.E);
+    free(stack_h.dx);
+    free(stack_h.dy);
+    free(stack_h.dz);
+    free(stack_h.px);
+    free(stack_h.py);
+    free(stack_h.pz);
+    free(stack_h.tof);
 
-    free(stack.prng_state_1);
-    free(stack.prng_state_2);
-    free(stack.prng_state_3);
-    free(stack.prng_state_4);
-    free(stack.prng_state_5);
+    free(stack_h.prng_state_1);
+    free(stack_h.prng_state_2);
+    free(stack_h.prng_state_3);
+    free(stack_h.prng_state_4);
+    free(stack_h.prng_state_5);
 
-    free(stack.geometry_id);
+    free(stack_h.geometry_id);
 
-    free(stack.endsimu);
-    free(stack.level);
-    free(stack.pname);
+    free(stack_h.endsimu);
+    free(stack_h.level);
+    free(stack_h.pname);
 }
 
 void ParticleBuilder::gpu_malloc_stack() {
 
-    if (dstack.size == 0) {
+    if (stack_d.size == 0) {
         print_warning("Stack allocation, stack size is set to zero?!");
         exit_simulation();
     }
 
-    HANDLE_ERROR( cudaMalloc((void**) &dstack.E, dstack.size*sizeof(f64)) );
-    HANDLE_ERROR( cudaMalloc((void**) &dstack.dx, dstack.size*sizeof(f64)) );
-    HANDLE_ERROR( cudaMalloc((void**) &dstack.dy, dstack.size*sizeof(f64)) );
-    HANDLE_ERROR( cudaMalloc((void**) &dstack.dz, dstack.size*sizeof(f64)) );
-    HANDLE_ERROR( cudaMalloc((void**) &dstack.px, dstack.size*sizeof(f64)) );
-    HANDLE_ERROR( cudaMalloc((void**) &dstack.py, dstack.size*sizeof(f64)) );
-    HANDLE_ERROR( cudaMalloc((void**) &dstack.pz, dstack.size*sizeof(f64)) );
-    HANDLE_ERROR( cudaMalloc((void**) &dstack.tof, dstack.size*sizeof(f64)) );
+    HANDLE_ERROR( cudaMalloc((void**) &stack_d.E, stack_d.size*sizeof(f64)) );
+    HANDLE_ERROR( cudaMalloc((void**) &stack_d.dx, stack_d.size*sizeof(f64)) );
+    HANDLE_ERROR( cudaMalloc((void**) &stack_d.dy, stack_d.size*sizeof(f64)) );
+    HANDLE_ERROR( cudaMalloc((void**) &stack_d.dz, stack_d.size*sizeof(f64)) );
+    HANDLE_ERROR( cudaMalloc((void**) &stack_d.px, stack_d.size*sizeof(f64)) );
+    HANDLE_ERROR( cudaMalloc((void**) &stack_d.py, stack_d.size*sizeof(f64)) );
+    HANDLE_ERROR( cudaMalloc((void**) &stack_d.pz, stack_d.size*sizeof(f64)) );
+    HANDLE_ERROR( cudaMalloc((void**) &stack_d.tof, stack_d.size*sizeof(f64)) );
 
-    HANDLE_ERROR( cudaMalloc((void**) &dstack.prng_state_1, dstack.size*sizeof(ui32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &dstack.prng_state_2, dstack.size*sizeof(ui32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &dstack.prng_state_3, dstack.size*sizeof(ui32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &dstack.prng_state_4, dstack.size*sizeof(ui32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &dstack.prng_state_5, dstack.size*sizeof(ui32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &stack_d.prng_state_1, stack_d.size*sizeof(ui32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &stack_d.prng_state_2, stack_d.size*sizeof(ui32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &stack_d.prng_state_3, stack_d.size*sizeof(ui32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &stack_d.prng_state_4, stack_d.size*sizeof(ui32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &stack_d.prng_state_5, stack_d.size*sizeof(ui32)) );
 
-    HANDLE_ERROR( cudaMalloc((void**) &dstack.geometry_id, dstack.size*sizeof(ui32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &stack_d.geometry_id, stack_d.size*sizeof(ui32)) );
 
-    HANDLE_ERROR( cudaMalloc((void**) &dstack.endsimu, dstack.size*sizeof(ui8)) );
-    HANDLE_ERROR( cudaMalloc((void**) &dstack.level, dstack.size*sizeof(ui8)) );
-    HANDLE_ERROR( cudaMalloc((void**) &dstack.pname, dstack.size*sizeof(ui8)) );
+    HANDLE_ERROR( cudaMalloc((void**) &stack_d.endsimu, stack_d.size*sizeof(ui8)) );
+    HANDLE_ERROR( cudaMalloc((void**) &stack_d.level, stack_d.size*sizeof(ui8)) );
+    HANDLE_ERROR( cudaMalloc((void**) &stack_d.pname, stack_d.size*sizeof(ui8)) );
 
 }
 
@@ -162,13 +163,13 @@ void ParticleBuilder::cpu_init_stack_seed() {
 
     srand(seed);
     ui32 i=0;
-    while (i<stack.size) {
+    while (i<stack_h.size) {
         // init random seed
-        stack.prng_state_1[i] = rand();
-        stack.prng_state_2[i] = rand();
-        stack.prng_state_3[i] = rand();
-        stack.prng_state_4[i] = rand();
-        stack.prng_state_5[i] = 0;      // carry
+        stack_h.prng_state_1[i] = rand();
+        stack_h.prng_state_2[i] = rand();
+        stack_h.prng_state_3[i] = rand();
+        stack_h.prng_state_4[i] = rand();
+        stack_h.prng_state_5[i] = 0;      // carry
         ++i;
     }
 }
@@ -179,27 +180,27 @@ void ParticleBuilder::copy_seed_cpu2gpu() {
     // cpu_init_stack_seed();
 
     // Then copy data to GPU
-    HANDLE_ERROR( cudaMemcpy(dstack.prng_state_1, stack.prng_state_1,
-                             sizeof(ui32)*dstack.size, cudaMemcpyHostToDevice) );
-    HANDLE_ERROR( cudaMemcpy(dstack.prng_state_2, stack.prng_state_2,
-                             sizeof(ui32)*dstack.size, cudaMemcpyHostToDevice) );
-    HANDLE_ERROR( cudaMemcpy(dstack.prng_state_3, stack.prng_state_3,
-                             sizeof(ui32)*dstack.size, cudaMemcpyHostToDevice) );
-    HANDLE_ERROR( cudaMemcpy(dstack.prng_state_4, stack.prng_state_4,
-                             sizeof(ui32)*dstack.size, cudaMemcpyHostToDevice) );
-    HANDLE_ERROR( cudaMemcpy(dstack.prng_state_5, stack.prng_state_5,
-                             sizeof(ui32)*dstack.size, cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy(stack_d.prng_state_1, stack_h.prng_state_1,
+                             sizeof(ui32)*stack_d.size, cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy(stack_d.prng_state_2, stack_h.prng_state_2,
+                             sizeof(ui32)*stack_d.size, cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy(stack_d.prng_state_3, stack_h.prng_state_3,
+                             sizeof(ui32)*stack_d.size, cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy(stack_d.prng_state_4, stack_h.prng_state_4,
+                             sizeof(ui32)*stack_d.size, cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy(stack_d.prng_state_5, stack_h.prng_state_5,
+                             sizeof(ui32)*stack_d.size, cudaMemcpyHostToDevice) );
 
 }
 
 // Print particles on a CPU stack
 void ParticleBuilder::cpu_print_stack(ui32 nlim) {
 
-    nlim = std::min(nlim, stack.size);
+    nlim = std::min(nlim, stack_h.size);
     ui32 i = 0;
     while (i < nlim) {
-        printf("%i - p %f %f %f - d %f %f %f - E %f\n", i, stack.px[i], stack.py[i], stack.pz[i],
-               stack.dx[i], stack.dy[i], stack.dz[i], stack.E[i]);
+        printf("%i - p %f %f %f - d %f %f %f - E %f\n", i, stack_h.px[i], stack_h.py[i], stack_h.pz[i],
+               stack_h.dx[i], stack_h.dy[i], stack_h.dz[i], stack_h.E[i]);
         ++i;
     }
 

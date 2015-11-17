@@ -40,13 +40,16 @@ struct SecParticle {
     ui8 endsimu;
 };
 
+/*
 // Helper to handle history of particles
 struct OneParticleStep {
     f32xyz pos;
     f32xyz dir;
     f32 E;
 };
+*/
 
+/*
 // History class
 class HistoryBuilder {
     public:
@@ -68,6 +71,7 @@ class HistoryBuilder {
         ui32 current_particle_id;
         ui8 type_of_particles;
 };
+*/
 
 
 // Particles class
@@ -83,7 +87,7 @@ class ParticleBuilder {
         void copy_seed_cpu2gpu();
         void cpu_print_stack(ui32 nlim);
 
-        ParticleStack stack, dstack; // CPU and GPU stack
+        ParticleStack stack_h, stack_d; // CPU and GPU stack
         ui32 seed;
 
     private:

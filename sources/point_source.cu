@@ -137,6 +137,11 @@ void PointSource::set_energy_spectrum(f64 *valE, f64 *hist, ui32 nb) {
 }
 
 // Main function
+bool PointSource::m_check_mandatory() {
+    if (m_nb_of_energy_bins == 0) return false;
+    else return true;
+}
+
 void PointSource::initialize(GlobalSimulationParameters params) {
 
     // Check if everything was set properly

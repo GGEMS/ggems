@@ -31,9 +31,9 @@ class PointSource : public GGEMSVSource {
         void get_primaries_generator(ParticleStack &particles);
         void initialize(GlobalSimulationParameters params);
 
+    private:
         bool check_mandatory();
 
-    private:
         GlobalSimulationParameters m_params;
 
         f32 m_px, m_py, m_pz;

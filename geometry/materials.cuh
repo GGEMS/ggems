@@ -1,19 +1,4 @@
-// This file is part of GGEMS
-//
-// FIREwork is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// FIREwork is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with FIREwork.  If not, see <http://www.gnu.org/licenses/>.
-//
-// GGEMS Copyright (C) 2013-2014 Julien Bert
+// GGEMS Copyright (C) 2015
 
 #ifndef MATERIALS_H
 #define MATERIALS_H
@@ -26,14 +11,12 @@
 #include "G4ParticleDefinition.hh"
 #include "G4SystemOfUnits.hh"
 
-#include "geometry_builder.cuh"
-#include "constants.cuh"
 #include "global.cuh"
 
 // To handle one material
 class Material {
     public:
-        Material();
+        Material() {}
         std::vector<std::string> mixture_Z;
         std::vector<f32> mixture_f;
         std::string name;
@@ -111,12 +94,13 @@ class MaterialBuilder {
         void load_elements_database(std::string filename);
         void load_materials_database(std::string filename);
 
-        void get_materials_table_from_world(GeometryBuilder World);
+        //void get_materials_table_from_world(GeometryBuilder World);
+
         void free_materials_table();
         void copy_materials_table_cpu2gpu();
 
-        MaterialsTable materials_table;  // CPU
-        MaterialsTable dmaterials_table; // GPU
+        MaterialsTable mat_table_h;   // CPU
+        MaterialsTable mat_table_d; // GPU
 
     private:
         MaterialDataBase material_db;
