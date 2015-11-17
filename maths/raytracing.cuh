@@ -5,8 +5,6 @@
 
 #include "vector.cuh"
 #include "global.cuh"
-#include "constants.cuh"
-
 
 /// Function with simple precision /////////////////////////////////////////////////////////
 

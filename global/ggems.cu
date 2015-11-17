@@ -60,8 +60,8 @@ GGEMS::GGEMS() {
 }
 
 GGEMS::~GGEMS() {
-    delete m_parameters_h;
-    delete m_source;
+    //delete m_parameters_h;
+    //delete m_source;
 }
 
 ////// :: Setting ::
@@ -146,7 +146,7 @@ void GGEMS::set_CS_table_E_max(f32 valE) {m_parameters_h.cs_table_max_E = valE;}
 
 // Set the seed number
 void GGEMS::set_seed(ui32 vseed) {
-    seed = vseed;
+    m_parameters_h.seed = vseed;
 }
 
 /// Sim objects
@@ -172,21 +172,29 @@ void GGEMS::set_display_memory_usage() {
 void GGEMS::m_copy_parameters_cpu2gpu() {
 
     // Mem allocation
-    HANDLE_ERROR( cudaMalloc((void**) &m_parameters_d.physics_list, NB_PROCESSES*sizeof(ui8)) );
-    HANDLE_ERROR( cudaMalloc((void**) &m_parameters_d.secondaries_list, NB_PARTICLES*sizeof(ui8)) );
+    HANDLE_ERROR( cudaMalloc((void**) &m_parameters_d.physics_list, NB_PROCESSES*sizeof(bool)) );
+    HANDLE_ERROR( cudaMalloc((void**) &m_parameters_d.secondaries_list, NB_PARTICLES*sizeof(bool)) );
 
     // Copy data
     HANDLE_ERROR( cudaMemcpy(m_parameters_d.physics_list, m_parameters_h.physics_list,
-                         sizeof(ui8)*NB_PROCESSES, cudaMemcpyHostToDevice) );
+                         sizeof(bool)*NB_PROCESSES, cudaMemcpyHostToDevice) );
     HANDLE_ERROR( cudaMemcpy(m_parameters_d.secondaries_list, m_parameters_h.secondaries_list,
-                         sizeof(ui8)*NB_PARTICLES, cudaMemcpyHostToDevice) );
+                         sizeof(bool)*NB_PARTICLES, cudaMemcpyHostToDevice) );
 
-    m_parameters_d.record_dose_flag = m_parameters_h.record_dose_flag;
-    m_parameters_d.digitizer_flag = m_parameters_h.digitizer_flag;
     m_parameters_d.nb_of_particles = m_parameters_h.nb_of_particles;
-    m_parameters_d.nb_iterations = m_parameters_h.nb_iterations;
+    m_parameters_d.size_of_particles_batch = m_parameters_h.size_of_particles_batch;
+    m_parameters_d.nb_of_batches = m_parameters_h.nb_of_batches;
+
+    m_parameters_d.device_target = m_parameters_h.device_target;
+    m_parameters_d.gpu_id = m_parameters_h.gpu_id;
+    m_parameters_d.gpu_block_size = m_parameters_h.gpu_block_size;
+
     m_parameters_d.time = m_parameters_h.time;
     m_parameters_d.seed = m_parameters_h.seed;
+
+    m_parameters_d.display_run_time = m_parameters_h.display_run_time;
+    m_parameters_d.display_memory_usage = m_parameters_h.display_memory_usage;
+
     m_parameters_d.cs_table_nbins = m_parameters_h.cs_table_nbins;
     m_parameters_d.cs_table_min_E = m_parameters_h.cs_table_min_E;
     m_parameters_d.cs_table_max_E = m_parameters_h.cs_table_max_E;
@@ -271,8 +279,8 @@ void GGEMS::init_simulation() {
 
     // Mem usage
     if (m_parameters_h.display_memory_usage) {
-        ui32 n = m_cross_sections.photon_CS_table.nb_bins;
-        ui32 k = m_cross_sections.photon_CS_table.nb_mat;
+        ui32 n = m_cross_sections.photon_CS_table_h.nb_bins;
+        ui32 k = m_cross_sections.photon_CS_table_h.nb_mat;
         ui32 mem_cs = 4*n + 12*n*k + 12*n*101 + 16;
         mem += mem_cs;
         print_memory("Cross sections", mem_cs);
@@ -281,7 +289,7 @@ void GGEMS::init_simulation() {
     }
 
     // If GPU
-    if (target == GPU_DEVICE) {
+    if (m_parameters_h.device_target == GPU_DEVICE) {
         m_cross_sections.copy_cs_table_cpu2gpu();
     }
     //cs_tables.print();
@@ -305,7 +313,7 @@ void GGEMS::init_simulation() {
 
         // Materials
         ui32 n = m_materials.mat_table_h.nb_materials;
-        ui32 k = materials.mat_table_h.nb_elements_total;
+        ui32 k = m_materials.mat_table_h.nb_elements_total;
         ui32 mem_mat = 10*k + 80*n + 8;
         mem += mem_mat;
         print_memory("Materials", mem_mat);

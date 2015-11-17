@@ -8,7 +8,6 @@
 #include "global.cuh"
 #include "prng.cuh"
 #include "fun.cuh"
-#include "constants.cuh"
 #include "sandia_table.cuh"
 #include "shell_data.cuh"
 

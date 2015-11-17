@@ -52,15 +52,15 @@
 #define PHOTON_BOUNDARY_VOXEL 3
 
 // Electron processes
-//#define ELECTRON_IONISATION 4
-//#define ELECTRON_MSC 5
-//#define ELECTRON_BREMSSTRAHLUNG 6
+#define ELECTRON_IONISATION 4
+#define ELECTRON_MSC 5
+#define ELECTRON_BREMSSTRAHLUNG 6
 
 // Particle state
-//#define PRIMARY 0
-//#define GEOMETRY_BOUNDARY 99
-//#define PARTICLE_ALIVE 0
-//#define PARTICLE_DEAD 1
+#define PRIMARY 0
+#define GEOMETRY_BOUNDARY 99
+#define PARTICLE_ALIVE 0
+#define PARTICLE_DEAD 1
 
 // Misc
 #define DISABLED 0
@@ -177,8 +177,8 @@ f64 get_time();
 
 // Global simulation parameters
 struct GlobalSimulationParameters {
-    ui8 *physics_list;
-    ui8 *secondaries_list;   
+    bool *physics_list;
+    bool *secondaries_list;
 
     ui64 nb_of_particles;
     ui64 size_of_particles_batch;

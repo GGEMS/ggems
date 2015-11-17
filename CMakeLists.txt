@@ -39,6 +39,7 @@ include(${Geant4_USE_FILE})
 # GGEMS src
 include_directories(
     ${PROJECT_SOURCE_DIR}/detector
+    ${PROJECT_SOURCE_DIR}/data
     ${PROJECT_SOURCE_DIR}/geometry
     ${PROJECT_SOURCE_DIR}/global
     ${PROJECT_SOURCE_DIR}/maths
