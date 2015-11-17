@@ -32,7 +32,7 @@ class PointSource : public GGEMSVSource {
         void initialize(GlobalSimulationParameters params);
 
     private:
-        bool check_mandatory();
+        bool m_check_mandatory();
 
         GlobalSimulationParameters m_params;
 
