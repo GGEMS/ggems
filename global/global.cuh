@@ -77,8 +77,8 @@
 //#define PRINTFUNCTION printf("%s %s\n",DEBUGOK,__FUNCTION__);
 #define HANDLE_ERROR( err ) (HandleError( err, __FILE__, __LINE__ ))
 
-//#define EPSILON3 1.0e-03f
-//#define EPSILON6 1.0e-06f
+#define EPSILON3 1.0e-03f
+#define EPSILON6 1.0e-06f
 
 // Pi
 #define gpu_pi               3.141592653589793116

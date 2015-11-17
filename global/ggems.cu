@@ -54,9 +54,6 @@ GGEMS::GGEMS() {
     m_parameters_h.display_run_time = DISABLED;
     m_parameters_h.display_memory_usage = DISABLED;
 
-    // Simulation objects
-    m_source = NULL;
-
 }
 
 GGEMS::~GGEMS() {
@@ -149,9 +146,9 @@ void GGEMS::set_seed(ui32 vseed) {
     m_parameters_h.seed = vseed;
 }
 
-/// Sim objects
-void GGEMS::set_source(GGEMSVSource *NewSource) {
-    m_source = NewSource;
+/// Sources
+void GGEMS::set_source(PointSource *aSource) {
+    m_sources.set_source(aSource);
 }
 
 /// Utils
@@ -234,9 +231,8 @@ void GGEMS::init_simulation() {
         m_copy_parameters_cpu2gpu();
     }
 
-    /// Init object of the simualtions ///////////////
-    m_source->initialize(m_parameters_h);  // Also copy data to GPU
-    // TODO
+    /// Init Sources ///////////////
+    m_sources.initialize(m_parameters_h);
 
     /// Material handling ////////////////////////////
 

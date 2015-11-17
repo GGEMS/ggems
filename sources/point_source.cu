@@ -20,20 +20,7 @@
 
 #include "point_source.cuh"
 
-///////// Kernel ////////////////////////////////////////////////////
-
-// Kernel to create new particles (sources manager)
-__global__ void kernel_point_source(ParticleStack particles, ui32 id,
-                                 f32 px, f32 py, f32 pz, ui8 type,
-                                 f64 *spectrumE, f64 *spectrumCDF, ui32 nbins) {
-
-    const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
-    if (id >= particles.size) return;
-
-    point_source(particles, id, m_px, m_py, m_pz, m_particle_type,
-                 m_spectrumE_d, m_spectrumCDF_d, m_nb_of_energy_bins);
-
-}
+///////// GPU code ////////////////////////////////////////////////////
 
 // Internal function
 __host__ __device__ void point_source(ParticleStack particles, ui32 id,
@@ -62,6 +49,21 @@ __host__ __device__ void point_source(ParticleStack particles, ui32 id,
     particles.pname[id] = type;
     particles.geometry_id[id] = 0;
 }
+
+// Kernel to create new particles (sources manager)
+__global__ void kernel_point_source(ParticleStack particles,
+                                 f32 px, f32 py, f32 pz, ui8 type,
+                                 f64 *spectrumE, f64 *spectrumCDF, ui32 nbins) {
+
+    const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
+    if (id >= particles.size) return;
+
+    point_source(particles, id, px, py, pz, type,
+                 spectrumE, spectrumCDF, nbins);
+
+}
+
+///////////////////////////////////////////////////////////////////////
 
 // Constructor
 PointSource::PointSource() {
@@ -133,7 +135,7 @@ void PointSource::set_energy_spectrum(f64 *valE, f64 *hist, ui32 nb) {
         ++i;
     }
     // Watchdog
-    m_spectrum_h[nb-1] = 1.0f;
+    m_spectrumCDF_h[nb-1] = 1.0f;
 }
 
 // Main function
@@ -145,7 +147,7 @@ bool PointSource::m_check_mandatory() {
 void PointSource::initialize(GlobalSimulationParameters params) {
 
     // Check if everything was set properly
-    if ( !check_mandatory() ) {
+    if ( !m_check_mandatory() ) {
         print_error("Missing parameters for the point source!");
         exit_simulation();
     }
@@ -174,7 +176,7 @@ void PointSource::get_primaries_generator(ParticleStack particles) {
         ui32 id=0; while (id<particles.size) {
             point_source(particles, id, m_px, m_py, m_pz, m_particle_type,
                          m_spectrumE_d, m_spectrumCDF_d, m_nb_of_energy_bins);
-            ++i;
+            ++id;
         }
 
     } else if (m_params.device_target == GPU_DEVICE) {
@@ -183,7 +185,7 @@ void PointSource::get_primaries_generator(ParticleStack particles) {
         threads.x = m_params.gpu_block_size;
         grid.x = (particles.size + m_params.gpu_block_size - 1) / m_params.gpu_block_size;
 
-        kernel_point_source<<<grid, threads>>>(particles, id, m_px, m_py, m_pz, m_particle_type,
+        kernel_point_source<<<grid, threads>>>(particles, m_px, m_py, m_pz, m_particle_type,
                                                m_spectrumE_d, m_spectrumCDF_d, m_nb_of_energy_bins);
         cuda_error_check("Error ", " Kernel_point_source");
 

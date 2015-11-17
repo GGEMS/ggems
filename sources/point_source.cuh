@@ -28,7 +28,7 @@ class PointSource : public GGEMSVSource {
         void set_energy_spectrum(f64 *valE, f64 *hist, ui32 nb);
 
         // Virtual from GGEMSVSource
-        void get_primaries_generator(ParticleStack &particles);
+        void get_primaries_generator(ParticleStack particles);
         void initialize(GlobalSimulationParameters params);
 
     private:

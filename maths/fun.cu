@@ -31,9 +31,23 @@ __host__ __device__ f32 loglog_interpolation(f32 x, f32 x0, f32 y0, f32 x1, f32 
     return powf(10.0f, log10f(y0) + log10f(y1 / y0) * (log10f(x * x0) / log10f(x1 * x0)));
 }
 
-// Binary search
-__host__ __device__ i32 binary_search(f32 key, f32* tab, int size, int min=0) {
-    int max=size, mid;
+// Binary search f32
+__host__ __device__ ui32 binary_search(f32 key, f32* tab, ui32 size, ui32 min=0) {
+    ui32 max=size, mid;
+    while ((min < max)) {
+        mid = (min + max) >> 1;
+        if (key > tab[mid]) {
+            min = mid + 1;
+        } else {
+            max = mid;
+        }
+    }
+    return min;
+}
+
+// Binary search f64
+__host__ __device__ ui32 binary_search(f64 key, f64* tab, ui32 size, ui32 min=0) {
+    ui32 max=size, mid;
     while ((min < max)) {
         mid = (min + max) >> 1;
         if (key > tab[mid]) {

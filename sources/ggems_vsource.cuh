@@ -17,17 +17,17 @@
 #include "global.cuh"
 #include "particles.cuh"
 #include "prng.cuh"
+#include "fun.cuh"
 
 class GGEMSVSource {
     public:
-        GGEMSVSource();
-        ~GGEMSVSource();
-        virtual void get_primaries_generator(ParticleStack particles);
-        virtual void initialize(GlobalSimulationParameters params);
+        GGEMSVSource() {}
+        ~GGEMSVSource() {}
+        virtual void get_primaries_generator(ParticleStack particles) = 0;
+        virtual void initialize(GlobalSimulationParameters params) = 0;
 
     private:
 
-        GlobalSimulationParameters m_params;
 };
 
 #endif

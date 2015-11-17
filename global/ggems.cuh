@@ -19,6 +19,8 @@
 #include "particles.cuh"
 #include "cross_sections.cuh"
 #include "materials.cuh"
+#include "source_manager.cuh"
+
 
 class GGEMS {
     public:
@@ -45,8 +47,8 @@ class GGEMS {
         void set_CS_table_E_min(f32 valE);
         void set_CS_table_E_max(f32 valE);
         void set_seed(ui32 vseed);
-        // Setting simulation objects
-        void set_source(GGEMSVSource *NewSource);
+        // Setting sources
+        void set_source(PointSource *aSource);
         // Utils
         void set_display_run_time();
         void set_display_memory_usage();
@@ -82,8 +84,8 @@ class GGEMS {
         // Materials handler
         MaterialBuilder m_materials;
 
-        // A source of particles
-        GGEMSVSource *m_source;
+        // Source manager
+        SourcesManager m_sources;
 
         // Main parameters
         GlobalSimulationParameters m_parameters_h;     // CPU

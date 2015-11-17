@@ -46,10 +46,31 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/navigation
     ${PROJECT_SOURCE_DIR}/processes
     ${PROJECT_SOURCE_DIR}/sources)
-file(GLOB_RECURSE sourcesGPU "*.cu")
-file(GLOB_RECURSE headersGPU "*.cuh")
+
+# Locate sources and headers for this project
+file(GLOB sourcesGPU
+    ${PROJECT_SOURCE_DIR}/detector/*.cu
+    ${PROJECT_SOURCE_DIR}/data/*.cu
+    ${PROJECT_SOURCE_DIR}/geometry/*.cu
+    ${PROJECT_SOURCE_DIR}/global/*.cu
+    ${PROJECT_SOURCE_DIR}/maths/*.cu
+    ${PROJECT_SOURCE_DIR}/navigation/*.cu
+    ${PROJECT_SOURCE_DIR}/processes/*.cu
+    ${PROJECT_SOURCE_DIR}/sources/*.cu)
+
+file(GLOB headersGPU
+    ${PROJECT_SOURCE_DIR}/detector/*.cuh
+    ${PROJECT_SOURCE_DIR}/data/*.cuh
+    ${PROJECT_SOURCE_DIR}/geometry/*.cuh
+    ${PROJECT_SOURCE_DIR}/global/*.cuh
+    ${PROJECT_SOURCE_DIR}/maths/*.cuh
+    ${PROJECT_SOURCE_DIR}/navigation/*.cuh
+    ${PROJECT_SOURCE_DIR}/processes/*.cuh
+    ${PROJECT_SOURCE_DIR}/sources/*.cuh)
+
 file(GLOB ggemssh "ggems.sh")
 file(GLOB datafiles "data/*")
+
 # Compilation
 find_package(CUDA REQUIRED)
 set(LIB_NAME "ggems")

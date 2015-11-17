@@ -279,7 +279,7 @@ void CrossSectionsBuilder::copy_cs_table_cpu2gpu() {
     photon_CS_table_d.E_min = photon_CS_table_h.E_min;
     photon_CS_table_d.E_max = photon_CS_table_h.E_max;
 
-    HANDLE_ERROR( cudaMemcpy(photon_CS_table_d.E_bins, photon_CS_table.E_bins,
+    HANDLE_ERROR( cudaMemcpy(photon_CS_table_d.E_bins, photon_CS_table_h.E_bins,
                              sizeof(f32)*n, cudaMemcpyHostToDevice) );
 
     HANDLE_ERROR( cudaMemcpy(photon_CS_table_d.Compton_Std_CS, photon_CS_table_h.Compton_Std_CS,

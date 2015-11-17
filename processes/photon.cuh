@@ -10,6 +10,7 @@
 #include "fun.cuh"
 #include "sandia_table.cuh"
 #include "shell_data.cuh"
+#include "vector.cuh"
 
 // Cross section table for photon particle
 struct PhotonCrossSectionTable{

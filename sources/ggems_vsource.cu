@@ -16,10 +16,6 @@
 
 #include "ggems_vsource.cuh"
 
-GGEMSVSource::GGEMSVSource() {}
-GGEMSVSource::~GGEMSVSource() {}
 
-virtual void GGEMSVSource::get_primaries_generator(ParticleStack particles) {}
-virtual void GGEMSVSource::initialize(GlobalSimulationParameters params) {}
 
 #endif
