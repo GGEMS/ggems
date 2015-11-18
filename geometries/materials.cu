@@ -128,6 +128,7 @@ f32 MaterialDataBase::read_element_A(std::string txt) {
 
 // Load elements from data file
 void MaterialDataBase::load_elements(std::string filename) {
+
     std::ifstream file(filename.c_str());
 
     std::string line, elt_name;
@@ -148,6 +149,7 @@ void MaterialDataBase::load_elements(std::string filename) {
         }
 
     }
+
 }
 
 // Skip comment starting with "#"
@@ -172,25 +174,40 @@ std::string MaterialDataBase::remove_white_space(std::string txt) {
 
 
 //////////////////////////////////////////////////////////////////
-//// MaterialBuilder class //////////////////////////////////////
+//// MaterialManager class //////////////////////////////////////
 //////////////////////////////////////////////////////////////////
 
-MaterialBuilder::MaterialBuilder() {} // // This class is used to build the material table
+MaterialManager::MaterialManager() {} // // This class is used to build the material table
 
-// Load elements database (wrapper to the class MaterialDataBase)
-void MaterialBuilder::load_elements_database(std::string filename) {
-    material_db.load_elements(filename);
+// Load default elements database (wrapper to the class MaterialDataBase)
+void MaterialManager::load_elements_database() {
+    std::string filename = std::string(getenv("GGEMSHOME"));
+    filename += "/data/elts.dat";
+    m_material_db.load_elements(filename);
 }
 
-// Load materials database (wrapper to the class MaterialDataBase)
-void MaterialBuilder::load_materials_database(std::string filename) {
-    material_db.load_materials(filename);
+// Load default materials database (wrapper to the class MaterialDataBase)
+void MaterialManager::load_materials_database() {
+    std::string filename = std::string(getenv("GGEMSHOME"));
+    filename += "/data/mats.dat";
+    m_material_db.load_materials(filename);
 }
 
+// Load elements database from a given file (wrapper to the class MaterialDataBase)
+void MaterialManager::load_elements_database(std::string filename) {
+    m_material_db.load_elements(filename);
+}
+
+// Load materials database from a given file (wrapper to the class MaterialDataBase)
+void MaterialManager::load_materials_database(std::string filename) {
+    m_material_db.load_materials(filename);
+}
+
+/*
 // Build the materials table according the object contains in the world
-void MaterialBuilder::free_materials_table() {
+void MaterialManager::free_materials_table() {
 
-    /*
+
     free(materials_table.nb_elements);
     free(materials_table.index);
     free(materials_table.nb_atoms_per_vol);
@@ -214,15 +231,16 @@ void MaterialBuilder::free_materials_table() {
     free(materials_table.fLogMeanExcitationEnergy);
     free(materials_table.mixture);
     free(materials_table.atom_num_dens);
-    */
+
 
     //delete mat_table_h;
 
 }
+*/
 
 /*
 // Build the materials table according the object contains in the world
-void MaterialBuilder::get_materials_table_from_world(GeometryBuilder World) {
+void MaterialManager::get_materials_table_from_world(GeometryBuilder World) {
 
     // First allocated data to the structure according the number of materials
     materials_table.nb_materials = World.materials_list.size();
@@ -261,7 +279,7 @@ void MaterialBuilder::get_materials_table_from_world(GeometryBuilder World) {
         printf("Material %s \n", mat_name.c_str());
 
         // read mat from databse
-        cur_mat = material_db.materials[mat_name];
+        cur_mat = m_material_db.materials[mat_name];
         if (cur_mat.name == "") {
             printf("[ERROR] Material %s is not on your database (%s function)\n", mat_name.c_str(),__FUNCTION__);
             exit(EXIT_FAILURE);
@@ -288,7 +306,7 @@ void MaterialBuilder::get_materials_table_from_world(GeometryBuilder World) {
         mat_name = World.materials_list[i];
 
         // read mat from database
-        cur_mat = material_db.materials[mat_name];
+        cur_mat = m_material_db.materials[mat_name];
 
         // get density
         materials_table.density[i] = cur_mat.density / gram;
@@ -304,10 +322,10 @@ void MaterialBuilder::get_materials_table_from_world(GeometryBuilder World) {
             elt_name = cur_mat.mixture_Z[j];
 
             // store Z
-            materials_table.mixture[fill_index] = material_db.elements_Z[elt_name];
+            materials_table.mixture[fill_index] = m_material_db.elements_Z[elt_name];
 
             // compute atom num dens (Avo*fraction*dens) / Az
-            materials_table.atom_num_dens[fill_index] = Avogadro/material_db.elements_A[elt_name] *
+            materials_table.atom_num_dens[fill_index] = Avogadro/m_material_db.elements_A[elt_name] *
                                                         cur_mat.mixture_f[j]*cur_mat.density;
 
             // compute nb atoms per volume
@@ -315,11 +333,11 @@ void MaterialBuilder::get_materials_table_from_world(GeometryBuilder World) {
 
             // compute nb electrons per volume
             materials_table.nb_electrons_per_vol[i] += materials_table.atom_num_dens[fill_index] *
-                                                       material_db.elements_Z[elt_name];
+                                                       m_material_db.elements_Z[elt_name];
 
             // build G4 material
-            G4Element *elt = new G4Element("element", "ELT", material_db.elements_Z[elt_name],
-                                                             material_db.elements_A[elt_name]);
+            G4Element *elt = new G4Element("element", "ELT", m_material_db.elements_Z[elt_name],
+                                                             m_material_db.elements_A[elt_name]);
             g4mat->AddElement(elt, cur_mat.mixture_f[j]);
 
             ++j;
@@ -353,8 +371,26 @@ void MaterialBuilder::get_materials_table_from_world(GeometryBuilder World) {
 }
 */
 
+// Init
+void MaterialManager::initialize(GlobalSimulationParameters params) {
+    // Check if everything was set properly
+    if ( !m_check_mandatory() ) {
+        print_error("Missing materials definition!");
+        exit_simulation();
+    }
+
+    // Copy data to the GPU
+    if (params.device_target == GPU_DEVICE) m_copy_materials_table_cpu2gpu();
+}
+
+// Check mandatory
+bool MaterialManager::m_check_mandatory() {
+    if (mat_table_h.nb_materials == 0 || mat_table_h.nb_elements_total == 0) return false;
+    else return true;
+}
+
 // Copy data to the GPU
-void MaterialBuilder::copy_materials_table_cpu2gpu() {
+void MaterialManager::m_copy_materials_table_cpu2gpu() {
 
     ui32 n = mat_table_h.nb_materials;
     ui32 k = mat_table_h.nb_elements_total;

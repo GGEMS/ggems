@@ -88,22 +88,28 @@ struct MaterialsTable {
 };
 
 // This class is used to build the material table
-class MaterialBuilder {
+class MaterialManager {
     public:
-        MaterialBuilder();
+        MaterialManager();
+        // Load default data from GGEMS
+        void load_elements_database();
+        void load_materials_database();
+        // Load data provided by the user
         void load_elements_database(std::string filename);
         void load_materials_database(std::string filename);
 
         //void get_materials_table_from_world(GeometryBuilder World);
 
-        void free_materials_table();
-        void copy_materials_table_cpu2gpu();
+        void initialize(GlobalSimulationParameters params);
 
         MaterialsTable mat_table_h;   // CPU
         MaterialsTable mat_table_d; // GPU
 
     private:
-        MaterialDataBase material_db;
+        bool m_check_mandatory();
+        void m_copy_materials_table_cpu2gpu();
+        //void m_free_materials_table();
+        MaterialDataBase m_material_db;
 
 
 };

@@ -104,7 +104,7 @@ void print_memory(std::string txt, ui32 t) {
 
 // Abort the current simulation
 void exit_simulation() {
-    printf("[\033[31;03mSimulation aborded\033[00m]\n");
+    printf("\n[\033[31;03mSimulation aborded\033[00m]\n");
     exit(EXIT_FAILURE);
 }
 

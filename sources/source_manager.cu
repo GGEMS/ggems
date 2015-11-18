@@ -6,37 +6,36 @@
 #include "source_manager.cuh"
 
 SourcesManager::SourcesManager() {
-    m_point_source == NULL;
     m_source_name = "";
 }
 
-SourcesManager::set_source(PointSource *aSource) {
+void SourcesManager::set_source(PointSource &aSource) {
     m_point_source = aSource;
     m_source_name = "PointSource";
 }
 
-SourcesManager::initialize(GlobalSimulationParameters params) {
+void SourcesManager::initialize(GlobalSimulationParameters params) {
 
     // Init source that including also data copy to GPU
-    switch (m_source_name) {
-        case "PointSource": {
-            m_point_source->initialize(params);
-            break;
-        }
+    if (m_source_name == "PointSource") {
+        m_point_source.initialize(params);
+    }
+
+    // Put others sources here.
+
+}
+
+void SourcesManager::get_primaries_generator(ParticleStack particles) {
+
+    // Fill the buffer of new particles
+    if (m_source_name == "PointSource") {
+        m_point_source.get_primaries_generator(particles);
     }
 
 }
 
-SourcesManager::get_primaries_generator(ParticleStack particles) {
-
-    // Fill the buffer of new particles
-    switch (m_source_name) {
-        case "PointSource": {
-            m_point_source->get_primaries_generator(particles);
-            break;
-        }
-    }
-
+std::string SourcesManager::get_source_name() {
+    return m_source_name;
 }
 
 #endif

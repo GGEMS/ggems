@@ -4,15 +4,37 @@
 #define CROSS_SECTIONS_CU
 #include "cross_sections.cuh"
 
-//// CrossSectionsBuilder class ////////////////////////////////////////////////////
+//// CrossSectionsManager class ////////////////////////////////////////////////////
 
-CrossSectionsBuilder::CrossSectionsBuilder() {
+CrossSectionsManager::CrossSectionsManager() {
     photon_CS_table_h.nb_bins = 0;
     photon_CS_table_h.nb_mat = 0;
 }
 
+// Main function
+bool CrossSectionsManager::m_check_mandatory() {
+    if (photon_CS_table_h.nb_bins == 0 || photon_CS_table_h.nb_mat == 0) return false;
+    else return true;
+}
+
+void CrossSectionsManager::initialize(MaterialsTable materials, GlobalSimulationParameters parameters) {
+
+    // Check if everything was set properly
+    if ( !m_check_mandatory() ) {
+        print_error("CrossSectionsManager paramters error!");
+        exit_simulation();
+    }
+
+    // Build table
+    m_build_table(materials, parameters);
+
+    // Allocation and copy
+    if (parameters.device_target == GPU_DEVICE) m_copy_cs_table_cpu2gpu();
+
+}
+
 // Build cross sections table according material, physics effects and particles
-void CrossSectionsBuilder::build_table(MaterialsTable materials, GlobalSimulationParameters parameters) {
+void CrossSectionsManager::m_build_table(MaterialsTable materials, GlobalSimulationParameters parameters) {
 
     // Read parameters
     ui32 nbin = parameters.cs_table_nbins;
@@ -165,7 +187,7 @@ void CrossSectionsBuilder::build_table(MaterialsTable materials, GlobalSimulatio
 }
 
 // Print CS talbe (for debugging)
-void CrossSectionsBuilder::print() {
+void CrossSectionsManager::print() {
 
     ui32 imat, iE, abs_index;
 
@@ -252,11 +274,7 @@ void CrossSectionsBuilder::print() {
 }
 
 // Copy CS table to the device
-void CrossSectionsBuilder::copy_cs_table_cpu2gpu() {
-    if (photon_CS_table_h.nb_bins == 0) {
-        print_warning("Copy CS table to gpu, table size is set to zero?!");
-        exit_simulation();
-    }
+void CrossSectionsManager::m_copy_cs_table_cpu2gpu() {
 
     ui32 n = photon_CS_table_h.nb_bins;
     ui32 k = photon_CS_table_h.nb_mat;

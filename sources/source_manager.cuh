@@ -11,12 +11,14 @@ class SourcesManager {
         SourcesManager();
         ~SourcesManager() {}
 
-        void set_source(PointSource *aSource);
+        void set_source(PointSource &aSource);
         void initialize(GlobalSimulationParameters params);
+
         void get_primaries_generator(ParticleStack particles);
+        std::string get_source_name();
 
     private:
-        PointSource *m_point_source;
+        PointSource m_point_source;
         std::string m_source_name;
 
 };

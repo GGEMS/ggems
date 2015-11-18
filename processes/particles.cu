@@ -52,30 +52,56 @@ void HistoryBuilder::cpu_record_a_step(ParticleStack particles, ui32 id_part) {
 }
 */
 
-//// ParticleBuilder class ///////////////////////////////////////////////////
+//// ParticleManager class ///////////////////////////////////////////////////
 
-ParticleBuilder::ParticleBuilder() {
+ParticleManager::ParticleManager() {
     stack_h.size = 0;
-    seed = 0;
 }
 
-// Set the size of the stack buffer
-void ParticleBuilder::set_stack_size(ui32 nb) {
-    stack_h.size = nb;
-    stack_d.size = nb;
+// Init stack
+void ParticleManager::initialize(GlobalSimulationParameters params) {
+    stack_h.size = params.size_of_particles_batch;
+
+    // Check if everything was set properly
+    if ( !m_check_mandatory() ) {
+        print_error("Stack allocation, stack size is set to zero?!");
+        exit_simulation();
+    }
+
+    // CPU allocation
+    m_cpu_malloc_stack();
+    // Init seeds
+    //m_cpu_init_stack_seed(params.seed);
+    if (params.device_target == GPU_DEVICE) {
+        // GPU allocation
+        m_gpu_malloc_stack();
+        // Copy data to the GPU
+        m_copy_seed_cpu2gpu();
+    }
+
 }
 
-// Set the seed for this stack
-void ParticleBuilder::set_seed(ui32 val_seed) {
-    seed = val_seed;
+// Print particles on a CPU stack
+void ParticleManager::cpu_print_stack(ui32 nlim) {
+
+    nlim = std::min(nlim, stack_h.size);
+    ui32 i = 0;
+    while (i < nlim) {
+        printf("%i - p %f %f %f - d %f %f %f - E %f\n", i, stack_h.px[i], stack_h.py[i], stack_h.pz[i],
+               stack_h.dx[i], stack_h.dy[i], stack_h.dz[i], stack_h.E[i]);
+        ++i;
+    }
+
+}
+
+// Check mandatory
+bool ParticleManager::m_check_mandatory() {
+    if (stack_h.size == 0) return false;
+    else return true;
 }
 
 // Memory allocation for this stack
-void ParticleBuilder::cpu_malloc_stack() {
-    if (stack_h.size == 0) {
-        print_warning("Stack allocation, stack size is set to zero?!");
-        exit_simulation();
-    }
+void ParticleManager::m_cpu_malloc_stack() {
 
     stack_h.E = (f64*)malloc(stack_h.size * sizeof(f64));
     stack_h.dx = (f64*)malloc(stack_h.size * sizeof(f64));
@@ -99,8 +125,8 @@ void ParticleBuilder::cpu_malloc_stack() {
     stack_h.pname = (ui8*)malloc(stack_h.size * sizeof(ui8));
 }
 
-
-void ParticleBuilder::cpu_free_stack() {
+/*
+void ParticleManager::m_cpu_free_stack() {
 
     free(stack_h.E);
     free(stack_h.dx);
@@ -123,13 +149,9 @@ void ParticleBuilder::cpu_free_stack() {
     free(stack_h.level);
     free(stack_h.pname);
 }
+*/
 
-void ParticleBuilder::gpu_malloc_stack() {
-
-    if (stack_d.size == 0) {
-        print_warning("Stack allocation, stack size is set to zero?!");
-        exit_simulation();
-    }
+void ParticleManager::m_gpu_malloc_stack() {
 
     HANDLE_ERROR( cudaMalloc((void**) &stack_d.E, stack_d.size*sizeof(f64)) );
     HANDLE_ERROR( cudaMalloc((void**) &stack_d.dx, stack_d.size*sizeof(f64)) );
@@ -155,11 +177,7 @@ void ParticleBuilder::gpu_malloc_stack() {
 }
 
 // Init particle seeds with the main seed
-void ParticleBuilder::cpu_init_stack_seed() {
-
-    if (seed == 0) {
-        print_warning("The seed to init the particle stack is equal to zero!!");
-    }
+void ParticleManager::m_cpu_init_stack_seed(ui32 seed) {
 
     srand(seed);
     ui32 i=0;
@@ -174,12 +192,14 @@ void ParticleBuilder::cpu_init_stack_seed() {
     }
 }
 
-void ParticleBuilder::copy_seed_cpu2gpu() {
+void ParticleManager::m_copy_seed_cpu2gpu() {
 
     // We consider that the CPU stack was previously initialized with seed
     // cpu_init_stack_seed();
 
     // Then copy data to GPU
+    stack_d.size = stack_h.size;
+
     HANDLE_ERROR( cudaMemcpy(stack_d.prng_state_1, stack_h.prng_state_1,
                              sizeof(ui32)*stack_d.size, cudaMemcpyHostToDevice) );
     HANDLE_ERROR( cudaMemcpy(stack_d.prng_state_2, stack_h.prng_state_2,
@@ -193,18 +213,7 @@ void ParticleBuilder::copy_seed_cpu2gpu() {
 
 }
 
-// Print particles on a CPU stack
-void ParticleBuilder::cpu_print_stack(ui32 nlim) {
 
-    nlim = std::min(nlim, stack_h.size);
-    ui32 i = 0;
-    while (i < nlim) {
-        printf("%i - p %f %f %f - d %f %f %f - E %f\n", i, stack_h.px[i], stack_h.py[i], stack_h.pz[i],
-               stack_h.dx[i], stack_h.dy[i], stack_h.dz[i], stack_h.E[i]);
-        ++i;
-    }
-
-}
 
 
 

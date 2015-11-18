@@ -7,12 +7,13 @@
 #include "global.cuh"
 #include "photon.cuh"
 
+
 // CS class
-class CrossSectionsBuilder {
+class CrossSectionsManager {
     public:
-        CrossSectionsBuilder();
-        void build_table(MaterialsTable materials, GlobalSimulationParameters parameters);       
-        void copy_cs_table_cpu2gpu();
+        CrossSectionsManager();
+
+        void initialize(MaterialsTable materials, GlobalSimulationParameters parameters);
         void print();
 
         // Data for photon
@@ -22,7 +23,10 @@ class CrossSectionsBuilder {
         // Data for electron TODO
         //ElectronCrossSectionTable Electron_CS_table;
 
-    private:
+    private:        
+        bool m_check_mandatory();
+        void m_build_table(MaterialsTable materials, GlobalSimulationParameters parameters);
+        void m_copy_cs_table_cpu2gpu();
 
 
 

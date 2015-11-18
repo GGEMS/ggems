@@ -31,6 +31,7 @@ struct PhotonCrossSectionTable{
     ui32 nb_mat;          // k
 };
 
+
 // Utils
 __host__ __device__ f32 get_CS_from_table(f32 *E_bins, f32 *CSTable, f32 energy,
                                             ui32 E_index, ui32 mat_index, ui32 nb_bins);

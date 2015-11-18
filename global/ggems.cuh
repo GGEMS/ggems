@@ -48,7 +48,7 @@ class GGEMS {
         void set_CS_table_E_max(f32 valE);
         void set_seed(ui32 vseed);
         // Setting sources
-        void set_source(PointSource *aSource);
+        void set_source(PointSource &aSource);
         // Utils
         void set_display_run_time();
         void set_display_memory_usage();
@@ -76,18 +76,19 @@ class GGEMS {
 
     private:
         // Particles handler
-        ParticleBuilder m_particles;
+        ParticleManager m_particles;
 
         // Cross section handler
-        CrossSectionsBuilder m_cross_sections;
+        CrossSectionsManager m_cross_sections;
 
         // Materials handler
-        MaterialBuilder m_materials;
+        MaterialManager m_materials;
 
         // Source manager
         SourcesManager m_sources;
 
         // Main parameters
+        bool m_check_mandatory();
         GlobalSimulationParameters m_parameters_h;     // CPU
         GlobalSimulationParameters m_parameters_d;     // GPU
         void m_copy_parameters_cpu2gpu();

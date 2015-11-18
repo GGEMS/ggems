@@ -147,7 +147,7 @@ void GGEMS::set_seed(ui32 vseed) {
 }
 
 /// Sources
-void GGEMS::set_source(PointSource *aSource) {
+void GGEMS::set_source(PointSource &aSource) {
     m_sources.set_source(aSource);
 }
 
@@ -164,6 +164,34 @@ void GGEMS::set_display_memory_usage() {
 }
 
 ////// :: Private functions ::
+
+// Check mandatory parameters
+bool GGEMS::m_check_mandatory() {
+    bool flag_error = false;
+
+    if (m_sources.get_source_name() == "") {
+        print_error("No source defined.");
+        flag_error = true;
+    }
+
+    if (m_parameters_h.nb_of_particles == 0) {
+        print_error("Nb_of_particles = 0.");
+        flag_error = true;
+    }
+
+    if (m_parameters_h.size_of_particles_batch == 0) {
+        print_error("Size_of_particles_batch = 0.");
+        flag_error = true;
+    }
+
+    if (m_parameters_h.seed == 0) {
+        print_error("Seed value seet to 0.");
+        flag_error = true;
+    }
+
+    if (flag_error) exit_simulation();
+
+}
 
 // Copy the global simulation parameters to the GPU
 void GGEMS::m_copy_parameters_cpu2gpu() {
@@ -202,6 +230,9 @@ void GGEMS::m_copy_parameters_cpu2gpu() {
 // Init simualtion
 void GGEMS::init_simulation() {
 
+    // Check
+    m_check_mandatory();
+
     // Run time
     f64 t_start = 0;
     if (m_parameters_h.display_run_time) {
@@ -215,7 +246,7 @@ void GGEMS::init_simulation() {
     srand(m_parameters_h.seed);
 
     // Get the number of batch required
-    m_parameters_h.nb_of_batches = m_parameters_h.nb_of_particles / m_parameters_h.size_of_particles_batch;
+    m_parameters_h.nb_of_batches = ui32((f32)m_parameters_h.nb_of_particles / (f32)m_parameters_h.size_of_particles_batch);
 
     // Init the GPU if need
     if (m_parameters_h.device_target == GPU_DEVICE) {
@@ -235,31 +266,22 @@ void GGEMS::init_simulation() {
     m_sources.initialize(m_parameters_h);
 
     /// Material handling ////////////////////////////
-
-    // Load data
-    // TODO
+/*
+    // Load default data from GGEMS
+    //    - TODO add the possiblity to specify a user files
+    //m_materials.load_elements_database();
+    //m_materials.load_materials_database();
 
     // Build data based on geometry
     // TODO
 
-    // Copy data to GPU
-    if (m_parameters_h.device_target == GPU_DEVICE) {
-        m_materials.copy_materials_table_cpu2gpu();
-    }
-
+    // Init
+    m_materials.initialize(m_parameters_h);
+*/
     /// Stack handling ///////////////////////////////
 
     // Init stack params
-    m_particles.set_stack_size(m_parameters_h.size_of_particles_batch);
-    m_particles.set_seed(m_parameters_h.seed);
-    // Init stack (CPU)
-    m_particles.cpu_malloc_stack();
-    m_particles.cpu_init_stack_seed();
-    // If GPU, init
-    if (m_parameters_h.device_target == GPU_DEVICE) {
-        m_particles.gpu_malloc_stack();
-        m_particles.copy_seed_cpu2gpu();
-    }
+    m_particles.initialize(m_parameters_h);
 
     // Mem usage
     if (m_parameters_h.display_memory_usage) {
@@ -271,8 +293,9 @@ void GGEMS::init_simulation() {
     /// Cross sections /////////////////////////////
 
     // Init Cross sections and physics table
-    m_cross_sections.build_table(m_materials.mat_table_h, m_parameters_h);
+    //m_cross_sections.initialize(m_materials.mat_table_h, m_parameters_h);
 
+/*
     // Mem usage
     if (m_parameters_h.display_memory_usage) {
         ui32 n = m_cross_sections.photon_CS_table_h.nb_bins;
@@ -282,46 +305,37 @@ void GGEMS::init_simulation() {
         print_memory("Cross sections", mem_cs);
 
         // Add CS from others particles
-    }
 
-    // If GPU
-    if (m_parameters_h.device_target == GPU_DEVICE) {
-        m_cross_sections.copy_cs_table_cpu2gpu();
-    }
-    //cs_tables.print();
-
-    // Mem usage
-    if (m_parameters_h.display_memory_usage) {
         // Parameters
         ui32 mem_params = NB_PROCESSES+NB_PARTICLES+30;
         mem += mem_params;
         print_memory("Parameters", mem_params);
 
-        /*
+
         // Geometry
-        ui32 mem_geom = 4*geometry.world.ptr_objects_dim + 4*geometry.world.size_of_objects_dim +
-                4*geometry.world.data_objects_dim + 4*geometry.world.ptr_nodes_dim +
-                4*geometry.world.size_of_nodes_dim + 4*geometry.world.child_nodes_dim +
-                4*geometry.world.mother_node_dim + 32;
-        mem += mem_geom;
-        print_memory("Geometry", mem_geom);
-        */
+        //ui32 mem_geom = 4*geometry.world.ptr_objects_dim + 4*geometry.world.size_of_objects_dim +
+        //        4*geometry.world.data_objects_dim + 4*geometry.world.ptr_nodes_dim +
+        //        4*geometry.world.size_of_nodes_dim + 4*geometry.world.child_nodes_dim +
+        //        4*geometry.world.mother_node_dim + 32;
+        //mem += mem_geom;
+        //print_memory("Geometry", mem_geom);
 
         // Materials
-        ui32 n = m_materials.mat_table_h.nb_materials;
-        ui32 k = m_materials.mat_table_h.nb_elements_total;
+        n = m_materials.mat_table_h.nb_materials;
+        k = m_materials.mat_table_h.nb_elements_total;
         ui32 mem_mat = 10*k + 80*n + 8;
         mem += mem_mat;
         print_memory("Materials", mem_mat);
 
-        /*
+
         // Sources
-        ui32 mem_src = 4*sources.sources.ptr_sources_dim + 4*sources.sources.data_sources_dim +
-                4*sources.sources.seeds_dim + 16;
-        mem += mem_src;
-        print_memory("Sources", mem_src);
-        */
+        //ui32 mem_src = 4*sources.sources.ptr_sources_dim + 4*sources.sources.data_sources_dim +
+        //        4*sources.sources.seeds_dim + 16;
+        //mem += mem_src;
+        //print_memory("Sources", mem_src);
+
     }
+*/
 
     /*
     /// Digitizer /////////////////////////////////
@@ -348,6 +362,7 @@ void GGEMS::init_simulation() {
     }
     */
 
+/*
     // Run time
     if (m_parameters_h.display_run_time) {
         print_time("Initialization", get_time()-t_start);
@@ -357,6 +372,7 @@ void GGEMS::init_simulation() {
     if (m_parameters_h.display_memory_usage) {
         print_memory("Total memory usage", mem);
     }
+*/
 }
 
 /*
