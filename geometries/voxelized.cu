@@ -17,121 +17,20 @@
 #include "voxelized.cuh"
 
 Voxelized::Voxelized() {
-    xmin = 0.0f;
-    xmax = 0.0f;
-    ymin = 0.0f;
-    ymax = 0.0f;
-    zmin = 0.0f;
-    zmax = 0.0f;
+    volume.xmin = 0.0f;
+    volume.xmax = 0.0f;
+    volume.ymin = 0.0f;
+    volume.ymax = 0.0f;
+    volume.zmin = 0.0f;
+    volume.zmax = 0.0f;
 
     // Init pointer
-    data = NULL;
+    volume.data = NULL;
 }
 
 ///:: Private
 
-// Skip comment starting with "#"
-void Voxelized::m_skip_comment(std::istream & is) {
-    i8 c;
-    i8 line[1024];
-    if (is.eof()) return;
-    is >> c;
-    while (is && (c=='#')) {
-        is.getline(line, 1024);
-        is >> c;
-        if (is.eof()) return;
-    }
-    is.unget();
-}
 
-// Remove all white space
-std::string Voxelized::m_remove_white_space(std::string txt) {
-    txt.erase(remove_if(txt.begin(), txt.end(), isspace), txt.end());
-    return txt;
-}
-
-// Read start range
-f32 Voxelized::m_read_start_range(std::string txt) {
-    f32 res;
-    txt = txt.substr(0, txt.find(" "));
-    std::stringstream(txt) >> res;
-    return res;
-}
-
-// Read stop range
-f32 Voxelized::m_read_stop_range(std::string txt) {
-    f32 res;
-    txt = txt.substr(txt.find(" ")+1);
-    txt = txt.substr(0, txt.find(" "));
-    std::stringstream(txt) >> res;
-    return res;
-}
-
-// Read material range
-std::string Voxelized::m_read_mat_range(std::string txt) {
-    txt = txt.substr(txt.find(" ")+1);
-    txt = txt.substr(txt.find(" ")+1);
-    return txt.substr(0, txt.find(" "));
-}
-
-// Read mhd key
-std::string Voxelized::m_read_mhd_key(std::string txt) {
-    txt = txt.substr(0, txt.find("="));
-    return remove_white_space(txt);
-}
-
-// Read string mhd arg
-std::string Voxelized::m_read_mhd_string_arg(std::string txt) {
-    txt = txt.substr(txt.find("=")+1);
-    return remove_white_space(txt);
-}
-
-// Read i32 mhd arg
-i32 Voxelized::m_read_mhd_int(std::string txt) {
-    i32 res;
-    txt = txt.substr(txt.find("=")+1);
-    txt = remove_white_space(txt);
-    std::stringstream(txt) >> res;
-    return res;
-}
-
-// Read int mhd arg
-i32 Voxelized::m_read_mhd_int_atpos(std::string txt, i32 pos) {
-    i32 res;
-    txt = txt.substr(txt.find("=")+2);
-    if (pos==0) {
-        txt = txt.substr(0, txt.find(" "));
-    }
-    if (pos==1) {
-        txt = txt.substr(txt.find(" ")+1);
-        txt = txt.substr(0, txt.find(" "));
-    }
-    if (pos==2) {
-        txt = txt.substr(txt.find(" ")+1);
-        txt = txt.substr(txt.find(" ")+1);
-    }
-    std::stringstream(txt) >> res;
-    return res;
-}
-
-// Read f32 mhd arg
-f32 Voxelized::m_read_mhd_f32_atpos(std::string txt, i32 pos) {
-    f32 res;
-    txt = txt.substr(txt.find("=")+2);
-    if (pos==0) {
-        txt = txt.substr(0, txt.find(" "));
-    }
-    if (pos==1) {
-        txt = txt.substr(txt.find(" ")+1);
-        txt = txt.substr(0, txt.find(" "));
-    }
-    if (pos==2) {
-        txt = txt.substr(txt.find(" ")+1);
-        txt = txt.substr(txt.find(" ")+1);
-    }
-    std::stringstream(txt) >> res;
-    return res;
-}
 
 // Convert range data into material ID
 void Voxelized::m_define_materials_from_range(ui16 *raw_data, std::string range_name) {
@@ -140,10 +39,10 @@ void Voxelized::m_define_materials_from_range(ui16 *raw_data, std::string range_
     std::string mat_name, line;
     ui32 i;
     ui16 val;
-    ui32 mat_index = 0;
+    ui16 mat_index = 0;
     
     // Data allocation
-    data = (f32*)malloc(number_of_voxels * sizeof(f32));
+    volume.data = (ui16*)malloc(volume.number_of_voxels * sizeof(ui16));
 
     // Read range file
     std::ifstream file(range_name.c_str());
@@ -152,20 +51,20 @@ void Voxelized::m_define_materials_from_range(ui16 *raw_data, std::string range_
         exit_simulation();
     }
     while (file) {
-        m_skip_comment(file);
+        TxtReader::skip_comment(file);
         std::getline(file, line);
 
         if (file) {
-            start = m_read_start_range(line);
-            stop  = m_read_stop_range(line);
-            mat_name = m_read_mat_range(line);
+            start = TxtReader::read_start_range(line);
+            stop  = TxtReader::read_stop_range(line);
+            mat_name = TxtReader::read_mat_range(line);
             list_of_materials.push_back(mat_name);            
 
             // build labeled phantom according range data
-            i=0; while (i < number_of_voxels) {
+            i=0; while (i < volume.number_of_voxels) {
                 val = raw_data[i];
                 if ((val==start && val==stop) || (val>=start && val<stop)) {
-                    data[i] = mat_index;
+                    volume.data[i] = mat_index;
                 }
                 ++i;
             } // over the volume
@@ -184,10 +83,10 @@ void Voxelized::m_define_materials_from_range(f32 *raw_data, std::string range_n
     std::string mat_name, line;
     ui32 i;
     f32 val;
-    ui32 mat_index = 0;
+    ui16 mat_index = 0;
 
     // Data allocation
-    data = (f32*)malloc(number_of_voxels * sizeof(f32));
+    volume.data = (ui16*)malloc(volume.number_of_voxels * sizeof(ui16));
 
     // Read range file
     std::ifstream file(range_name.c_str());
@@ -196,21 +95,21 @@ void Voxelized::m_define_materials_from_range(f32 *raw_data, std::string range_n
         exit_simulation();
     }
     while (file) {
-        m_skip_comment(file);
+        TxtReader::skip_comment(file);
         std::getline(file, line);
 
         if (file) {
-            start = m_read_start_range(line);
-            stop  = m_read_stop_range(line);
-            mat_name = m_read_mat_range(line);
+            start = TxtReader::read_start_range(line);
+            stop  = TxtReader::read_stop_range(line);
+            mat_name = TxtReader::read_mat_range(line);
             list_of_materials.push_back(mat_name);
             //printf("IND %i MAT %s \n", mat_index, mat_name.c_str());
 
             // build labeled phantom according range data
-            i=0; while (i < number_of_voxels) {
+            i=0; while (i < volume.number_of_voxels) {
                 val = raw_data[i];
                 if ((val==start && val==stop) || (val>=start && val<stop)) {
-                    data[i] = mat_index;
+                    volume.data[i] = mat_index;
                 }
                 ++i;
             } // over the volume
@@ -230,14 +129,14 @@ void Voxelized::load_from_raw(std::string volume_name, std::string range_name,
 
     /////////////// First read the raw data from the phantom ////////////////////////
 
-    number_of_voxels = nx*ny*nz;
-    nb_vox_x = nx;
-    nb_vox_y = ny;
-    nb_vox_z = nz;
-    spacing_x = sx;
-    spacing_y = sy;
-    spacing_z = sz;
-    mem_size = sizeof(f32) * number_of_voxels;
+    volume.number_of_voxels = nx*ny*nz;
+    volume.nb_vox_x = nx;
+    volume.nb_vox_y = ny;
+    volume.nb_vox_z = nz;
+    volume.spacing_x = sx;
+    volume.spacing_y = sy;
+    volume.spacing_z = sz;
+    mem_size = sizeof(f32) * volume.number_of_voxels;
 
     FILE *pfile = fopen(volume_name.c_str(), "rb");
     if (!pfile) {
@@ -246,7 +145,7 @@ void Voxelized::load_from_raw(std::string volume_name, std::string range_name,
     }
 
     f32 *raw_data = (f32*)malloc(mem_size);
-    fread(raw_data, sizeof(f32), number_of_voxels, pfile);
+    fread(raw_data, sizeof(f32), volume.number_of_voxels, pfile);
 
     fclose(pfile);
 
@@ -259,17 +158,17 @@ void Voxelized::load_from_raw(std::string volume_name, std::string range_name,
 
     ///////////// Define a bounding box for this phantom //////////////////////////////
 
-    f32 h_lengthx = nb_vox_x * spacing_x * 0.5f;
-    f32 h_lengthy = nb_vox_y * spacing_y * 0.5f;
-    f32 h_lengthz = nb_vox_z * spacing_z * 0.5f;
+    f32 h_lengthx = volume.nb_vox_x * volume.spacing_x * 0.5f;
+    f32 h_lengthy = volume.nb_vox_y * volume.spacing_y * 0.5f;
+    f32 h_lengthz = volume.nb_vox_z * volume.spacing_z * 0.5f;
 
-    xmin = -h_lengthx; xmax = h_lengthx;
-    ymin = -h_lengthy; ymax = h_lengthy;
-    zmin = -h_lengthz; zmax = h_lengthz;
+    volume.xmin = -h_lengthx; volume.xmax = h_lengthx;
+    volume.ymin = -h_lengthy; volume.ymax = h_lengthy;
+    volume.zmin = -h_lengthz; volume.zmax = h_lengthz;
 
-    offset_x = h_lengthx;
-    offset_y = h_lengthy;
-    offset_z = h_lengthz;
+    volume.org_x = h_lengthx;
+    volume.org_y = h_lengthy;
+    volume.org_z = h_lengthz;
 
 }
 
@@ -295,37 +194,37 @@ void Voxelized::load_from_mhd(std::string volume_name, std::string range_name) {
         exit_simulation();
     }
     while (file) {
-        m_skip_comment(file);
+        TxtReader::skip_comment(file);
         std::getline(file, line);
 
         if (file) {
-            key = m_read_mhd_key(line);
-            if (key=="ObjectType")              ObjectType = m_read_mhd_string_arg(line);
-            if (key=="NDims")                   NDims = m_read_mhd_int(line);
-            if (key=="BinaryData")              BinaryData = m_read_mhd_string_arg(line);
-            if (key=="BinaryDataByteOrderMSB")  BinaryDataByteOrderMSB = m_read_mhd_string_arg(line);
-            if (key=="CompressedData")          CompressedData = m_read_mhd_string_arg(line);
+            key = TxtReader::read_key(line);
+            if (key=="ObjectType")              ObjectType = TxtReader::read_key_string_arg(line);
+            if (key=="NDims")                   NDims = TxtReader::read_key_int_arg(line);
+            if (key=="BinaryData")              BinaryData = TxtReader::read_key_string_arg(line);
+            if (key=="BinaryDataByteOrderMSB")  BinaryDataByteOrderMSB = TxtReader::read_key_string_arg(line);
+            if (key=="CompressedData")          CompressedData = TxtReader::read_key_string_arg(line);
             //if (key=="TransformMatrix") printf("Matrix\n");
             if (key=="Offset")                  {
-                                                ox = m_read_mhd_f32_atpos(line, 0);
-                                                oy = m_read_mhd_f32_atpos(line, 1);
-                                                oz = m_read_mhd_f32_atpos(line, 2);
+                                                ox = TxtReader::read_key_f32_arg_atpos(line, 0);
+                                                oy = TxtReader::read_key_f32_arg_atpos(line, 1);
+                                                oz = TxtReader::read_key_f32_arg_atpos(line, 2);
             }
             //if (key=="CenterOfRotation") printf("CoR\n");
             if (key=="ElementSpacing") {
-                                                sx = m_read_mhd_f32_atpos(line, 0);
-                                                sy = m_read_mhd_f32_atpos(line, 1);
-                                                sz = m_read_mhd_f32_atpos(line, 2);
+                                                sx = TxtReader::read_key_f32_arg_atpos(line, 0);
+                                                sy = TxtReader::read_key_f32_arg_atpos(line, 1);
+                                                sz = TxtReader::read_key_f32_arg_atpos(line, 2);
             }
             if (key=="DimSize") {
-                                                nx = m_read_mhd_int_atpos(line, 0);
-                                                ny = m_read_mhd_int_atpos(line, 1);
-                                                nz = m_read_mhd_int_atpos(line, 2);
+                                                nx = TxtReader::read_key_i32_arg_atpos(line, 0);
+                                                ny = TxtReader::read_key_i32_arg_atpos(line, 1);
+                                                nz = TxtReader::read_key_i32_arg_atpos(line, 2);
             }
 
             //if (key=="AnatomicalOrientation") printf("Anato\n");
-            if (key=="ElementType")             ElementType = m_read_mhd_string_arg(line);
-            if (key=="ElementDataFile")         ElementDataFile = m_read_mhd_string_arg(line);
+            if (key=="ElementType")             ElementType = TxtReader::read_key_string_arg(line);
+            if (key=="ElementDataFile")         ElementDataFile = TxtReader::read_key_string_arg(line);
         }
 
     } // read file
@@ -379,19 +278,19 @@ void Voxelized::load_from_mhd(std::string volume_name, std::string range_name) {
         }
     }
 
-    number_of_voxels = nx*ny*nz;
-    nb_vox_x = nx;
-    nb_vox_y = ny;
-    nb_vox_z = nz;
-    spacing_x = sx;
-    spacing_y = sy;
-    spacing_z = sz;   
+    volume.number_of_voxels = nx*ny*nz;
+    volume.nb_vox_x = nx;
+    volume.nb_vox_y = ny;
+    volume.nb_vox_z = nz;
+    volume.spacing_x = sx;
+    volume.spacing_y = sy;
+    volume.spacing_z = sz;
     
     if(ElementType == "MET_FLOAT") {
-      mem_size = sizeof(f32) * number_of_voxels;
+      mem_size = sizeof(f32) * volume.number_of_voxels;
 
       f32 *raw_data = (f32*)malloc(mem_size);
-      fread(raw_data, sizeof(f32), number_of_voxels, pfile);
+      fread(raw_data, sizeof(f32), volume.number_of_voxels, pfile);
       fclose(pfile);
       
       /////////////// Then, convert the raw data into material id //////////////////////
@@ -403,10 +302,10 @@ void Voxelized::load_from_mhd(std::string volume_name, std::string range_name) {
     }
     
     if(ElementType == "MET_USHORT") {
-      mem_size = sizeof(ui16) * number_of_voxels;
+      mem_size = sizeof(ui16) * volume.number_of_voxels;
 
       ui16 *raw_data = (ui16*)malloc(mem_size);
-      fread(raw_data, sizeof(ui16), number_of_voxels, pfile);
+      fread(raw_data, sizeof(ui16), volume.number_of_voxels, pfile);
       fclose(pfile);
       /////////////// Then, convert the raw data into material id //////////////////////
       m_define_materials_from_range(raw_data, range_name);
@@ -417,30 +316,40 @@ void Voxelized::load_from_mhd(std::string volume_name, std::string range_name) {
 
     ///////////// Define a bounding box for this phantom //////////////////////////////
 
-    f32 h_lengthx = nb_vox_x * spacing_x * 0.5f;
-    f32 h_lengthy = nb_vox_y * spacing_y * 0.5f;
-    f32 h_lengthz = nb_vox_z * spacing_z * 0.5f;
+    f32 h_lengthx = volume.nb_vox_x * volume.spacing_x * 0.5f;
+    f32 h_lengthy = volume.nb_vox_y * volume.spacing_y * 0.5f;
+    f32 h_lengthz = volume.nb_vox_z * volume.spacing_z * 0.5f;
 
     // If the offset is not defined, chose the volume center
     if (ox == -1 || oy == -1 || oz == -1) {
-        offset_x = h_lengthx;
-        offset_y = h_lengthy;
-        offset_z = h_lengthz;
+        volume.org_x = h_lengthx;
+        volume.org_y = h_lengthy;
+        volume.org_z = h_lengthz;
 
-        xmin = -h_lengthx; xmax = h_lengthx;
-        ymin = -h_lengthy; ymax = h_lengthy;
-        zmin = -h_lengthz; zmax = h_lengthz;
+        volume.xmin = -h_lengthx; volume.xmax = h_lengthx;
+        volume.ymin = -h_lengthy; volume.ymax = h_lengthy;
+        volume.zmin = -h_lengthz; volume.zmax = h_lengthz;
 
     } else {
-        offset_x = ox;
-        offset_y = oy;
-        offset_z = oz;
+        volume.org_x = ox;
+        volume.org_y = oy;
+        volume.org_z = oz;
 
-        xmin = -ox; xmax = xmin + (nb_vox_x * spacing_x);
-        ymin = -oy; ymax = ymin + (nb_vox_y * spacing_y);
-        zmin = -oz; zmax = zmin + (nb_vox_z * spacing_z);
+        volume.xmin = -ox; volume.xmax = volume.xmin + (volume.nb_vox_x * volume.spacing_x);
+        volume.ymin = -oy; volume.ymax = volume.ymin + (volume.nb_vox_y * volume.spacing_y);
+        volume.zmin = -oz; volume.zmax = volume.zmin + (volume.nb_vox_z * volume.spacing_z);
     }
 
+}
+
+void Voxelized::set_origin(f32 x, f32 y, f32 z) {
+    volume.org_x = x;
+    volume.org_y = y;
+    volume.org_z = z;
+
+    volume.xmin = -x; volume.xmax = volume.xmin + (volume.nb_vox_x * volume.spacing_x);
+    volume.ymin = -y; volume.ymax = volume.ymin + (volume.nb_vox_y * volume.spacing_y);
+    volume.zmin = -z; volume.zmax = volume.zmin + (volume.nb_vox_z * volume.spacing_z);
 }
 
 /*

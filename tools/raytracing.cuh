@@ -16,10 +16,16 @@
 
 
 // AABB/Triangle test - Akenine-Moller algorithm
-__host__ __device__ bool overlap_AABB_triangle(f32 xmin, f32 xmax,        // AABB
+__host__ __device__ bool overlap_triangle_AABB(f32 xmin, f32 xmax,        // AABB
                                                f32 ymin, f32 ymax,
                                                f32 zmin, f32 zmax,
                                                f32xyz u, f32xyz v, f32xyz w); // Triangle
+
+// Overlapping distance between ray and AABB
+__host__ __device__ f32 dist_overlap_ray_AABB(f32xyz ray_p, f32xyz ray_d,
+                                              f32 aabb_xmin, f32 aabb_xmax,
+                                              f32 aabb_ymin, f32 aabb_ymax,
+                                              f32 aabb_zmin, f32 aabb_zmax);
 
 // Ray/Sphere intersection
 __host__ __device__ f32 hit_ray_sphere(f32xyz ray_p, f32xyz ray_d,        // Ray
@@ -78,10 +84,15 @@ __host__ __device__ f32 hit_ray_OBB(f32xyz ray_p, f32xyz ray_d,
 
 
 // AABB/Triangle test - Akenine-Moller algorithm
-__host__ __device__ bool overlap_AABB_triangle(f64 xmin, f64 xmax,        // AABB
+__host__ __device__ bool overlap_triangle_AABB(f64 xmin, f64 xmax,        // AABB
                                                f64 ymin, f64 ymax,
                                                f64 zmin, f64 zmax,
                                                f64xyz u, f64xyz v, f64xyz w); // Triangle
+// Overlapping distance between ray and AABB
+__host__ __device__ f64 dist_overlap_ray_AABB(f64xyz ray_p, f64xyz ray_d,
+                                              f64 aabb_xmin, f64 aabb_xmax,
+                                              f64 aabb_ymin, f64 aabb_ymax,
+                                              f64 aabb_zmin, f64 aabb_zmax);
 // Ray/Sphere intersection
 __host__ __device__ f64 hit_ray_sphere(f64xyz ray_p, f64xyz ray_d,        // Ray
                                        f64xyz sphere_c, f64 sphere_rad);  // Sphere

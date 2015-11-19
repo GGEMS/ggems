@@ -20,7 +20,7 @@
 #include "cross_sections.cuh"
 #include "materials.cuh"
 #include "source_manager.cuh"
-
+#include "phantom_manager.cuh"
 
 class GGEMS {
     public:
@@ -41,14 +41,16 @@ class GGEMS {
         void set_GPU_block_size(ui32 val);
         void set_process(std::string process_name);
         void set_secondary(std::string pname);
+        void set_particle_cut(std::string pname, f32 E);
         void set_number_of_particles(ui64 nb);
         void set_size_of_particles_batch(ui64 nb);
         void set_CS_table_nbins(ui32 valbin);
         void set_CS_table_E_min(f32 valE);
         void set_CS_table_E_max(f32 valE);
         void set_seed(ui32 vseed);
-        // Setting sources
+        // Setting simulation objects
         void set_source(PointSource &aSource);
+        void set_phantom(VoxPhanImgNav &aPhantom);
         // Utils
         void set_display_run_time();
         void set_display_memory_usage();
@@ -87,11 +89,12 @@ class GGEMS {
         // Source manager
         SourcesManager m_sources;
 
+        // Phantom manager
+        PhantomManager m_phantoms;
+
         // Main parameters
         bool m_check_mandatory();
-        GlobalSimulationParameters m_parameters_h;     // CPU
-        GlobalSimulationParameters m_parameters_d;     // GPU
-        void m_copy_parameters_cpu2gpu();
+        GlobalSimulationParameters m_parameters;
 
         /*
         // Main functions

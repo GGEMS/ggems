@@ -24,9 +24,15 @@ class GGEMSVPhantom {
         GGEMSVPhantom() {}
         ~GGEMSVPhantom() {}
         // Tracking from outside to the phantom broder
-        virtual void track_to_in() = 0;
+        virtual void track_to_in(ParticleStack &particles_h, ParticleStack &particles_d) = 0;
         // Tracking inside the phantom until the phantom border
         virtual void track_to_out() = 0;
+        // Init
+        virtual void initialize(GlobalSimulationParameters params) = 0;
+        // Get list of materials
+        virtual std::vector<std::string> get_materials_list() = 0;
+        // Get data that contains materials index
+        virtual ui16* get_data_materials_indices() = 0;
 
     private:
 

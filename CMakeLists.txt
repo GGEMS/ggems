@@ -40,10 +40,10 @@ include(${Geant4_USE_FILE})
 include_directories(
     ${PROJECT_SOURCE_DIR}/detector
     ${PROJECT_SOURCE_DIR}/data
-    ${PROJECT_SOURCE_DIR}/geometry
+    ${PROJECT_SOURCE_DIR}/geometries
     ${PROJECT_SOURCE_DIR}/global
-    ${PROJECT_SOURCE_DIR}/maths
-    ${PROJECT_SOURCE_DIR}/navigation
+    ${PROJECT_SOURCE_DIR}/tools
+    ${PROJECT_SOURCE_DIR}/navigators
     ${PROJECT_SOURCE_DIR}/processes
     ${PROJECT_SOURCE_DIR}/sources)
 
@@ -51,20 +51,20 @@ include_directories(
 file(GLOB sourcesGPU
     ${PROJECT_SOURCE_DIR}/detector/*.cu
     ${PROJECT_SOURCE_DIR}/data/*.cu
-    ${PROJECT_SOURCE_DIR}/geometry/*.cu
+    ${PROJECT_SOURCE_DIR}/geometries/*.cu
     ${PROJECT_SOURCE_DIR}/global/*.cu
-    ${PROJECT_SOURCE_DIR}/maths/*.cu
-    ${PROJECT_SOURCE_DIR}/navigation/*.cu
+    ${PROJECT_SOURCE_DIR}/tools/*.cu
+    ${PROJECT_SOURCE_DIR}/navigators/*.cu
     ${PROJECT_SOURCE_DIR}/processes/*.cu
     ${PROJECT_SOURCE_DIR}/sources/*.cu)
 
 file(GLOB headersGPU
     ${PROJECT_SOURCE_DIR}/detector/*.cuh
     ${PROJECT_SOURCE_DIR}/data/*.cuh
-    ${PROJECT_SOURCE_DIR}/geometry/*.cuh
+    ${PROJECT_SOURCE_DIR}/geometries/*.cuh
     ${PROJECT_SOURCE_DIR}/global/*.cuh
-    ${PROJECT_SOURCE_DIR}/maths/*.cuh
-    ${PROJECT_SOURCE_DIR}/navigation/*.cuh
+    ${PROJECT_SOURCE_DIR}/tools/*.cuh
+    ${PROJECT_SOURCE_DIR}/navigators/*.cuh
     ${PROJECT_SOURCE_DIR}/processes/*.cuh
     ${PROJECT_SOURCE_DIR}/sources/*.cuh)
 

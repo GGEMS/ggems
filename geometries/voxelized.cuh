@@ -15,7 +15,19 @@
 #define VOXELIZED_CUH
 
 #include "global.cuh"
+#include "txt_reader.cuh"
 #include "base_object.cuh"
+
+// Table containing every definition of the materials used in the world
+struct VoxVolume {
+    ui16 nb_vox_x, nb_vox_y, nb_vox_z;
+    ui32 number_of_voxels;
+    f32 spacing_x, spacing_y, spacing_z;
+    f32 org_x, org_y, org_z;
+    f32 xmin, xmax, ymin, ymax, zmin, zmax;
+
+    ui16 *data;
+};
 
 // Voxelized phantom
 class Voxelized : public BaseObject {
@@ -28,14 +40,11 @@ class Voxelized : public BaseObject {
 
         void load_from_mhd(std::string volume_name, std::string range_name);
 
+        void set_origin(f32 x, f32 y, f32 z);
+
         //void set_color_map(std::string matname, Color col, f32 alpha);
 
-        f32 *data;
-
-        ui16 nb_vox_x, nb_vox_y, nb_vox_z;
-        ui32 number_of_voxels;
-        f32 spacing_x, spacing_y, spacing_z;
-        f32 offset_x, offset_y, offset_z;
+        VoxVolume volume;
 
         std::vector<std::string> list_of_materials;
 
@@ -47,22 +56,7 @@ class Voxelized : public BaseObject {
     private:
         void m_define_materials_from_range(f32 *raw_data, std::string range_name);
         void m_define_materials_from_range(ui16 *raw_data, std::string range_name);
-        
-        // TODO this can be moved to a dedicated class TxtReader
-        void m_skip_comment(std::istream &);
-        std::string m_remove_white_space(std::string);
-
-        // for range file
-        f32 m_read_start_range(std::string);
-        f32 m_read_stop_range(std::string);
-        std::string m_read_mat_range(std::string);
-
-        // for mhd
-        std::string m_read_mhd_key(std::string);
-        std::string m_read_mhd_string_arg(std::string);
-        i32 m_read_mhd_int(std::string);
-        i32 m_read_mhd_int_atpos(std::string, i32);
-        f32 m_read_mhd_f32_atpos(std::string, i32);
+                
 };
 
 

@@ -48,6 +48,8 @@ __host__ __device__ f32xyz fxyz_rotate_y_axis(f32xyz u, f32 angle);
 __host__ __device__ f32xyz fxyz_rotate_z_axis(f32xyz u, f32 angle);
 // return abs
 __host__ __device__ f32xyz fxyz_abs(f32xyz u);
+// return 1/u
+__host__ __device__ f32xyz fxyz_inv(f32xyz u);
 
 /// Double precision functions ///////////////////////////////////////////////
 
@@ -91,6 +93,8 @@ __host__ __device__ f64xyz fxyz_rotate_y_axis(f64xyz u, f64 angle);
 __host__ __device__ f64xyz fxyz_rotate_z_axis(f64xyz u, f64 angle);
 // return abs
 __host__ __device__ f64xyz fxyz_abs(f64xyz u);
+// return 1/u
+__host__ __device__ f64xyz fxyz_inv(f64xyz u);
 
 #endif
 

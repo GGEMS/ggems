@@ -17,6 +17,7 @@
 #include <vector>
 #include <sstream>
 #include <fstream>
+#include <iterator>
 #include <map>
 #include <algorithm>
 #include <cfloat>
@@ -61,6 +62,7 @@
 #define GEOMETRY_BOUNDARY 99
 #define PARTICLE_ALIVE 0
 #define PARTICLE_DEAD 1
+#define PARTICLE_FREEZE 2
 
 // Misc
 #define DISABLED 0
@@ -179,6 +181,8 @@ f64 get_time();
 struct GlobalSimulationParameters {
     bool *physics_list;
     bool *secondaries_list;
+    f32 photon_cut;    // In energy for now, need to change for distance range.
+    f32 electron_cut;
 
     ui64 nb_of_particles;
     ui64 size_of_particles_batch;

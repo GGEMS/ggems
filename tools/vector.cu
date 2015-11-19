@@ -134,6 +134,14 @@ __host__ __device__ f32xyz fxyz_abs(f32xyz u) {
     return u;
 }
 
+// Inverse value of a vector 1/u
+__host__ __device__ f32xyz fxyz_inv(f32xyz u) {
+    u.x = 1.0 / u.x;
+    u.y = 1.0 / u.y;
+    u.z = 1.0 / u.z;
+    return u;
+}
+
 /// Double precision functions ///////////////////////////////////////////////
 
 #ifndef SINGLE_PRECISION
@@ -267,7 +275,13 @@ __host__ __device__ f64xyz fxyz_abs(f64xyz u) {
     return u;
 }
 
-
+// Inverse value of a vector 1/u
+__host__ __device__ f64xyz fxyz_inv(f64xyz u) {
+    u.x = 1.0 / u.x;
+    u.y = 1.0 / u.y;
+    u.z = 1.0 / u.z;
+    return u;
+}
 
 #endif
 

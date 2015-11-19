@@ -12,6 +12,7 @@
 #include "G4SystemOfUnits.hh"
 
 #include "global.cuh"
+#include "txt_reader.cuh"
 
 // To handle one material
 class Material {
@@ -36,18 +37,7 @@ class MaterialDataBase {
         std::map<std::string, f32> elements_A;
 
     private:
-        void skip_comment(std::istream &);
-        std::string remove_white_space(std::string txt);
 
-        std::string read_element_name(std::string);
-        i32 read_element_Z(std::string);
-        f32 read_element_A(std::string);
-
-        std::string read_material_name(std::string);
-        f32 read_material_density(std::string);
-        ui16 read_material_nb_elements(std::string);
-        std::string read_material_element(std::string);
-        f32 read_material_fraction(std::string);
 };
 
 // Table containing every definition of the materials used in the world
@@ -65,6 +55,10 @@ struct MaterialsTable {
     f32 *nb_electrons_per_vol;            // n
     f32 *electron_mean_excitation_energy; // n
     f32 *rad_length;                      // n
+
+    // Cut
+    f32 *photon_energy_cut;               // n
+    f32 *electron_energy_cut;             // n
 
     //parameters of the density correction
     f32 *fX0;                             // n
@@ -98,7 +92,7 @@ class MaterialManager {
         void load_elements_database(std::string filename);
         void load_materials_database(std::string filename);
 
-        //void get_materials_table_from_world(GeometryBuilder World);
+        void add_materials_and_update_indices(std::vector<std::string> mats_list, ui16 *data, ui32 ndata);
 
         void initialize(GlobalSimulationParameters params);
 
@@ -106,11 +100,15 @@ class MaterialManager {
         MaterialsTable mat_table_d; // GPU
 
     private:
+        ui16 m_get_material_index(std::string material_name);
+
         bool m_check_mandatory();
         void m_copy_materials_table_cpu2gpu();
+        void m_build_materials_table(GlobalSimulationParameters params);
         //void m_free_materials_table();
-        MaterialDataBase m_material_db;
 
+        MaterialDataBase m_material_db;
+        std::vector<std::string> m_materials_list;
 
 };
 

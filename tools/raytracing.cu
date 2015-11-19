@@ -173,6 +173,71 @@ __host__ __device__ bool overlap_AABB_triangle(f32 xmin, f32 xmax,        // AAB
     return false;
 }
 
+// Overlapping distance between ray and AABB - Smits algorithm (f32 version)
+__host__ __device__ f32 dist_overlap_ray_AABB(f32xyz ray_p, f32xyz ray_d,
+                                     f32 aabb_xmin, f32 aabb_xmax,
+                                     f32 aabb_ymin, f32 aabb_ymax,
+                                     f32 aabb_zmin, f32 aabb_zmax) {
+
+    f32 idx, idy, idz;
+    f32 tmin, tmax, tymin, tymax, tzmin, tzmax, buf;
+
+    tmin = -F32_MAX;
+    tmax =  F32_MAX;
+
+    // on x
+    if (fabs(ray_d.x) < EPSILON6) {
+        if (ray_p.x < aabb_xmin || ray_p.x > aabb_xmax) {return 0;}
+    } else {
+        idx = 1.0f / ray_d.x;
+        tmin = (aabb_xmin - ray_p.x) * idx;
+        tmax = (aabb_xmax - ray_p.x) * idx;
+        if (tmin > tmax) {
+            buf = tmin;
+            tmin = tmax;
+            tmax = buf;
+        }
+        if (tmin > tmax) {return 0;}
+    }
+    // on y
+    if (fabs(ray_d.y) < EPSILON6) {
+        if (ray_p.y < aabb_ymin || ray_p.y > aabb_ymax) {return 0;}
+    } else {
+        idy = 1.0f / ray_d.y;
+        tymin = (aabb_ymin - ray_p.y) * idy;
+        tymax = (aabb_ymax - ray_p.y) * idy;
+        if (tymin > tymax) {
+            buf = tymin;
+            tymin = tymax;
+            tymax = buf;
+        }
+        if (tymin > tmin) {tmin = tymin;}
+        if (tymax < tmax) {tmax = tymax;}
+        if (tmin > tmax) {return 0;}
+    }
+    // on z
+    if (fabs(ray_d.z) < EPSILON6) {
+        if (ray_p.z < aabb_zmin || ray_p.z > aabb_zmax) {return 0;}
+    } else {
+        idz = 1.0f / ray_d.z;
+        tzmin = (aabb_zmin - ray_p.z) * idz;
+        tzmax = (aabb_zmax - ray_p.z) * idz;
+        if (tzmin > tzmax) {
+            buf = tzmin;
+            tzmin = tzmax;
+            tzmax = buf;
+        }
+        if (tzmin > tmin) {tmin = tzmin;}
+        if (tzmax < tmax) {tmax = tzmax;}
+        if (tmin > tmax) {return 0;}
+    }
+
+    // Return overlap distance
+    return tmax-tmin;
+
+}
+
+
 // Ray/Sphere intersection (f32 version)
 __host__ __device__ f32 hit_ray_sphere(f32xyz ray_p, f32xyz ray_d,        // Ray
                                        f32xyz sphere_c, f32 sphere_rad) { // Sphere
@@ -577,6 +642,70 @@ __host__ __device__ bool overlap_AABB_triangle(f64 xmin, f64 xmax,        // AAB
     if (fxyz_dot(n, vmax) >= 0.0f) {return true;}
 
     return false;
+}
+
+// Overlapping distance between ray and AABB - Smits algorithm (f64 version)
+__host__ __device__ f64 dist_overlap_ray_AABB(f64xyz ray_p, f64xyz ray_d,
+                                     f64 aabb_xmin, f64 aabb_xmax,
+                                     f64 aabb_ymin, f64 aabb_ymax,
+                                     f64 aabb_zmin, f64 aabb_zmax) {
+
+    f64 idx, idy, idz;
+    f64 tmin, tmax, tymin, tymax, tzmin, tzmax, buf;
+
+    tmin = -F64_MAX;
+    tmax =  F64_MAX;
+
+    // on x
+    if (fabs(ray_d.x) < EPSILON6) {
+        if (ray_p.x < aabb_xmin || ray_p.x > aabb_xmax) {return 0;}
+    } else {
+        idx = 1.0f / ray_d.x;
+        tmin = (aabb_xmin - ray_p.x) * idx;
+        tmax = (aabb_xmax - ray_p.x) * idx;
+        if (tmin > tmax) {
+            buf = tmin;
+            tmin = tmax;
+            tmax = buf;
+        }
+        if (tmin > tmax) {return 0;}
+    }
+    // on y
+    if (fabs(ray_d.y) < EPSILON6) {
+        if (ray_p.y < aabb_ymin || ray_p.y > aabb_ymax) {return 0;}
+    } else {
+        idy = 1.0f / ray_d.y;
+        tymin = (aabb_ymin - ray_p.y) * idy;
+        tymax = (aabb_ymax - ray_p.y) * idy;
+        if (tymin > tymax) {
+            buf = tymin;
+            tymin = tymax;
+            tymax = buf;
+        }
+        if (tymin > tmin) {tmin = tymin;}
+        if (tymax < tmax) {tmax = tymax;}
+        if (tmin > tmax) {return 0;}
+    }
+    // on z
+    if (fabs(ray_d.z) < EPSILON6) {
+        if (ray_p.z < aabb_zmin || ray_p.z > aabb_zmax) {return 0;}
+    } else {
+        idz = 1.0f / ray_d.z;
+        tzmin = (aabb_zmin - ray_p.z) * idz;
+        tzmax = (aabb_zmax - ray_p.z) * idz;
+        if (tzmin > tzmax) {
+            buf = tzmin;
+            tzmin = tzmax;
+            tzmax = buf;
+        }
+        if (tzmin > tmin) {tmin = tzmin;}
+        if (tzmax < tmax) {tmax = tzmax;}
+        if (tmin > tmax) {return 0;}
+    }
+
+    // Return overlap distance
+    return tmax-tmin;
+
 }
 
 // Ray/Sphere intersection (f64 version)
