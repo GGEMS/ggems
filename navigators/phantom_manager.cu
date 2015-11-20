@@ -68,11 +68,24 @@ ui32 PhantomManager::get_data_size() {
 
 // Move particle to the phantom boundary
 void PhantomManager::track_to_in(ParticleStack &particles_h, ParticleStack &particles_d) {
+
     if (m_phantom_name == "VoxPhanImgNav") {
         m_vox_phan_img.track_to_in(particles_h, particles_d);
     }
 
     // Put others phantom here.
+}
+
+// Track particle within the phantom
+void PhantomManager::track_to_out(ParticleStack &particles_h, ParticleStack &particles_d,
+                                  MaterialsTable materials_h, MaterialsTable materials_d,
+                                  PhotonCrossSectionTable photon_CS_table_h, PhotonCrossSectionTable photon_CS_table_d) {
+
+    if (m_phantom_name == "VoxPhanImgNav") {
+        m_vox_phan_img.track_to_out(particles_h, particles_d, materials_h, materials_d,
+                                    photon_CS_table_h, photon_CS_table_d);
+    }
+
 }
 
 std::string PhantomManager::get_phantom_name() {

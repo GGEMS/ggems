@@ -8,14 +8,14 @@
 // Stack of particles, format data is defined as SoA
 struct ParticleStack{
     // property
-    f64* E;
-    f64* dx;
-    f64* dy;
-    f64* dz;
-    f64* px;
-    f64* py;
-    f64* pz;
-    f64* tof;
+    f32* E;
+    f32* dx;
+    f32* dy;
+    f32* dz;
+    f32* px;
+    f32* py;
+    f32* pz;
+    f32* tof;
     // PRNG
     ui32* prng_state_1;
     ui32* prng_state_2;
@@ -24,10 +24,16 @@ struct ParticleStack{
     ui32* prng_state_5;
     // Navigation
     ui32* geometry_id; // current geometry crossed by the particle
+    ui32* E_index;     // Energy index within CS and Mat tables
+    // Interactions
+    f32* next_interaction_distance;
+    ui8* next_discrete_process;
     // simulation
     ui8* endsimu;
     ui8* level;
     ui8* pname; // particle name (photon, electron, etc)
+    // Interactions
+
     // stack size
     ui32 size;
 }; //

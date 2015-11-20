@@ -54,6 +54,9 @@
 #define ELECTRON_MSC 5
 #define ELECTRON_BREMSSTRAHLUNG 6
 
+// No processes
+#define NO_PROCESS 99
+
 // Particle state
 #define PRIMARY 0
 #define GEOMETRY_BOUNDARY 99

@@ -18,6 +18,8 @@
 #include "particles.cuh"
 #include "prng.cuh"
 #include "fun.cuh"
+#include "materials.cuh"
+#include "photon.cuh"
 
 class GGEMSVPhantom {
     public:
@@ -25,8 +27,12 @@ class GGEMSVPhantom {
         ~GGEMSVPhantom() {}
         // Tracking from outside to the phantom broder
         virtual void track_to_in(ParticleStack &particles_h, ParticleStack &particles_d) = 0;
-        // Tracking inside the phantom until the phantom border
-        virtual void track_to_out() = 0;
+        // Photons tracking inside the phantom until the phantom border
+        virtual void track_to_out_photon(ParticleStack &particles_h, ParticleStack &particles_d,
+                                         MaterialsTable materials_h, MaterialsTable materials_d,
+                                         PhotonCrossSectionTable photon_CS_table_h, PhotonCrossSectionTable photon_CS_table_d) = 0;
+        // Photons and electrons tracking within the phantom
+        virtual void track_to_out_photon_electron() = 0;
         // Init
         virtual void initialize(GlobalSimulationParameters params) = 0;
         // Get list of materials

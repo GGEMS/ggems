@@ -103,14 +103,14 @@ bool ParticleManager::m_check_mandatory() {
 // Memory allocation for this stack
 void ParticleManager::m_cpu_malloc_stack() {
 
-    stack_h.E = (f64*)malloc(stack_h.size * sizeof(f64));
-    stack_h.dx = (f64*)malloc(stack_h.size * sizeof(f64));
-    stack_h.dy = (f64*)malloc(stack_h.size * sizeof(f64));
-    stack_h.dz = (f64*)malloc(stack_h.size * sizeof(f64));
-    stack_h.px = (f64*)malloc(stack_h.size * sizeof(f64));
-    stack_h.py = (f64*)malloc(stack_h.size * sizeof(f64));
-    stack_h.pz = (f64*)malloc(stack_h.size * sizeof(f64));
-    stack_h.tof = (f64*)malloc(stack_h.size * sizeof(f64));
+    stack_h.E = (f32*)malloc(stack_h.size * sizeof(f32));
+    stack_h.dx = (f32*)malloc(stack_h.size * sizeof(f32));
+    stack_h.dy = (f32*)malloc(stack_h.size * sizeof(f32));
+    stack_h.dz = (f32*)malloc(stack_h.size * sizeof(f32));
+    stack_h.px = (f32*)malloc(stack_h.size * sizeof(f32));
+    stack_h.py = (f32*)malloc(stack_h.size * sizeof(f32));
+    stack_h.pz = (f32*)malloc(stack_h.size * sizeof(f32));
+    stack_h.tof = (f32*)malloc(stack_h.size * sizeof(f32));
 
     stack_h.prng_state_1 = (ui32*)malloc(stack_h.size * sizeof(ui32));
     stack_h.prng_state_2 = (ui32*)malloc(stack_h.size * sizeof(ui32));
@@ -119,6 +119,10 @@ void ParticleManager::m_cpu_malloc_stack() {
     stack_h.prng_state_5 = (ui32*)malloc(stack_h.size * sizeof(ui32));
 
     stack_h.geometry_id = (ui32*)malloc(stack_h.size * sizeof(ui32));
+    stack_h.E_index = (ui32*)malloc(stack_h.size * sizeof(ui32));
+
+    stack_h.next_interaction_distance = (f32*)malloc(stack_h.size * sizeof(f32));
+    stack_h.next_discrete_process = (ui8*)malloc(stack_h.size * sizeof(ui8));
 
     stack_h.endsimu = (ui8*)malloc(stack_h.size * sizeof(ui8));
     stack_h.level = (ui8*)malloc(stack_h.size * sizeof(ui8));
@@ -153,14 +157,14 @@ void ParticleManager::m_cpu_free_stack() {
 
 void ParticleManager::m_gpu_malloc_stack() {
 
-    HANDLE_ERROR( cudaMalloc((void**) &stack_d.E, stack_d.size*sizeof(f64)) );
-    HANDLE_ERROR( cudaMalloc((void**) &stack_d.dx, stack_d.size*sizeof(f64)) );
-    HANDLE_ERROR( cudaMalloc((void**) &stack_d.dy, stack_d.size*sizeof(f64)) );
-    HANDLE_ERROR( cudaMalloc((void**) &stack_d.dz, stack_d.size*sizeof(f64)) );
-    HANDLE_ERROR( cudaMalloc((void**) &stack_d.px, stack_d.size*sizeof(f64)) );
-    HANDLE_ERROR( cudaMalloc((void**) &stack_d.py, stack_d.size*sizeof(f64)) );
-    HANDLE_ERROR( cudaMalloc((void**) &stack_d.pz, stack_d.size*sizeof(f64)) );
-    HANDLE_ERROR( cudaMalloc((void**) &stack_d.tof, stack_d.size*sizeof(f64)) );
+    HANDLE_ERROR( cudaMalloc((void**) &stack_d.E, stack_d.size*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &stack_d.dx, stack_d.size*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &stack_d.dy, stack_d.size*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &stack_d.dz, stack_d.size*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &stack_d.px, stack_d.size*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &stack_d.py, stack_d.size*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &stack_d.pz, stack_d.size*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &stack_d.tof, stack_d.size*sizeof(f32)) );
 
     HANDLE_ERROR( cudaMalloc((void**) &stack_d.prng_state_1, stack_d.size*sizeof(ui32)) );
     HANDLE_ERROR( cudaMalloc((void**) &stack_d.prng_state_2, stack_d.size*sizeof(ui32)) );
@@ -169,6 +173,10 @@ void ParticleManager::m_gpu_malloc_stack() {
     HANDLE_ERROR( cudaMalloc((void**) &stack_d.prng_state_5, stack_d.size*sizeof(ui32)) );
 
     HANDLE_ERROR( cudaMalloc((void**) &stack_d.geometry_id, stack_d.size*sizeof(ui32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &stack_d.E_index, stack_d.size*sizeof(ui32)) );
+
+    HANDLE_ERROR( cudaMalloc((void**) &stack_d.next_interaction_distance, stack_d.size*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &stack_d.next_discrete_process, stack_d.size*sizeof(ui8)) );
 
     HANDLE_ERROR( cudaMalloc((void**) &stack_d.endsimu, stack_d.size*sizeof(ui8)) );
     HANDLE_ERROR( cudaMalloc((void**) &stack_d.level, stack_d.size*sizeof(ui8)) );

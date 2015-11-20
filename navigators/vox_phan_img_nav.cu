@@ -97,52 +97,14 @@ __host__ __device__ void vox_phan_track_to_out(ParticleStack &particles,
                       + index_phantom.x; // linear index
 
     // Get the material that compose this volume
-    ui16 id_mat = vol.data[index_phantom.w];
+    ui16 mat_id = vol.data[index_phantom.w];
 
     //// Find next discrete interaction ///////////////////////////////////////
 
-    f32 next_interaction_distance = F32_MAX;
-    ui8 next_discrete_process = 0;
-    f32 interaction_distance;
-    f32 cross_section;
+    photon_get_next_interaction(particles, parameters, photon_CS_table, mat_id, part_id);
 
-    // Search the energy index to read CS
-    ui32 E_index = binary_search(particles.E[part_id], photon_CS_table.E_bins,
-                                 photon_CS_table.nb_bins);
-
-    // If photoelectric
-    if (parameters.physics_list[PHOTON_PHOTOELECTRIC]) {
-        cross_section = get_CS_from_table(photon_CS_table.E_bins, photon_CS_table.Photoelectric_Std_CS,
-                                          particles.E[part_id], E_index, id_mat, photon_CS_table.nb_bins);
-        interaction_distance = -log( JKISS32(particles, part_id) ) / cross_section;
-
-        if (interaction_distance < next_interaction_distance) {
-            next_interaction_distance = interaction_distance;
-            next_discrete_process = PHOTON_PHOTOELECTRIC;
-        }
-    }
-
-    // If Compton
-    if (parameters.physics_list[PHOTON_COMPTON]) {
-        cross_section = get_CS_from_table(photon_CS_table.E_bins, photon_CS_table.Compton_Std_CS,
-                                          particles.E[part_id], E_index, id_mat, photon_CS_table.nb_bins);
-        interaction_distance = -log( JKISS32(particles, part_id) ) / cross_section;
-        if (interaction_distance < next_interaction_distance) {
-            next_interaction_distance = interaction_distance;
-            next_discrete_process = PHOTON_COMPTON;
-        }
-    }
-
-    // If Rayleigh
-    if (parameters.physics_list[PHOTON_RAYLEIGH]) {
-        cross_section = get_CS_from_table(photon_CS_table.E_bins, photon_CS_table.Rayleigh_Lv_CS,
-                                          particles.E[part_id], E_index, id_mat, photon_CS_table.nb_bins);
-        interaction_distance = -log( JKISS32(particles, part_id) ) / cross_section;
-        if (interaction_distance < next_interaction_distance) {
-            next_interaction_distance = interaction_distance;
-            next_discrete_process = PHOTON_RAYLEIGH;
-        }
-    }
+    f32 next_interaction_distance = particles.next_interaction_distance[part_id];
+    ui8 next_discrete_process = particles.next_discrete_process[part_id];
 
     //// Get the next distance boundary volume /////////////////////////////////
 
@@ -153,11 +115,11 @@ __host__ __device__ void vox_phan_track_to_out(ParticleStack &particles,
     f32 vox_ymax = vox_ymin + vol.spacing_y;
     f32 vox_zmax = vox_zmin + vol.spacing_z;
 
-    interaction_distance = hit_ray_AABB(pos, dir, vox_xmin, vox_xmax,
-                                        vox_ymin, vox_ymax, vox_zmin, vox_zmax);
+    f32 boundary_distance = hit_ray_AABB(pos, dir, vox_xmin, vox_xmax,
+                                         vox_ymin, vox_ymax, vox_zmin, vox_zmax);
 
-    if (interaction_distance <= next_interaction_distance) {
-        next_interaction_distance = interaction_distance + EPSILON3; // Overshoot
+    if (boundary_distance <= next_interaction_distance) {
+        next_interaction_distance = boundary_distance + EPSILON3; // Overshoot
         next_discrete_process = GEOMETRY_BOUNDARY;
     }
 
@@ -180,58 +142,24 @@ __host__ __device__ void vox_phan_track_to_out(ParticleStack &particles,
 
     //// Apply discrete process //////////////////////////////////////////////////
 
-    SecParticle electron;
+    if (next_discrete_process != GEOMETRY_BOUNDARY) {
+        // Resolve discrete process
+        SecParticle electron = photon_resolve_discrete_process(particles, parameters, photon_CS_table,
+                                                               materials, mat_id, part_id);
 
-    if (next_discrete_process == PHOTON_COMPTON) {
-        electron = Compton_SampleSecondaries_standard(particles, materials.electron_energy_cut[id_mat],
-                                                      part_id, parameters);
-    }
-
-    if (next_discrete_process == PHOTON_PHOTOELECTRIC) {
-        electron = Photoelec_SampleSecondaries_standard(particles, materials, photon_CS_table,
-                                                        E_index, materials.electron_energy_cut[id_mat],
-                                                        id_mat, part_id, parameters);
-    }
-
-    if (next_discrete_process == PHOTON_RAYLEIGH) {
-        Rayleigh_SampleSecondaries_Livermore(particles, materials, photon_CS_table, E_index, id_mat, part_id);
+        //// Here e- are not tracked, and lost energy not drop
 
     }
-
-    //// Here e- is not tracking, and lost energy not drop
 
     //// Energy cut
-    if (particles.E[part_id] <= materials.electron_energy_cut[id_mat]) {
+    if (particles.E[part_id] <= materials.electron_energy_cut[mat_id]) {
         particles.endsimu[part_id] = PARTICLE_DEAD;
         return;
     }
 
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// Kernel to move particles to the voxelized volume
+// Kernel that move particles to the voxelized volume boundary
 __global__ void kernel_vox_phan_track_to_in(ParticleStack particles, f32 xmin, f32 xmax,
                                             f32 ymin, f32 ymax, f32 zmin, f32 zmax) {
 
@@ -239,6 +167,20 @@ __global__ void kernel_vox_phan_track_to_in(ParticleStack particles, f32 xmin, f
     if (id >= particles.size) return;
 
     vox_phan_track_to_in(particles, xmin, xmax, ymin, ymax, zmin, zmax, id);
+
+}
+
+// Kernel that track particles within the voxelized volume until boundary
+__global__ void kernel_vox_phan_track_to_out(ParticleStack particles,
+                                             VoxVolume vol,
+                                             MaterialsTable materials,
+                                             PhotonCrossSectionTable photon_CS_table,
+                                             GlobalSimulationParameters parameters) {
+
+    const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
+    if (id >= particles.size) return;
+
+    vox_phan_track_to_out(particles, vol, materials, photon_CS_table, parameters, id);
 
 }
 
@@ -336,10 +278,33 @@ void VoxPhanImgNav::track_to_in(ParticleStack &particles_h, ParticleStack &parti
         kernel_vox_phan_track_to_in<<<grid, threads>>>(particles_d, m_vox_vol_d.xmin, m_vox_vol_d.xmax,
                                                                     m_vox_vol_d.ymin, m_vox_vol_d.ymax,
                                                                     m_vox_vol_d.zmin, m_vox_vol_d.zmax);
-        cuda_error_check("Error ", " Kernel_VoxPhanImgNav");
+        cuda_error_check("Error ", " Kernel_VoxPhanImgNav (track to in)");
 
     }
 
+
+}
+
+void VoxPhanImgNav::track_to_out(ParticleStack &particles_h, ParticleStack &particles_d,
+                                 MaterialsTable materials_h, MaterialsTable materials_d,
+                                 PhotonCrossSectionTable photon_CS_table_h, PhotonCrossSectionTable photon_CS_table_d) {
+
+    if (m_params_h.device_target == CPU_DEVICE) {
+        ui32 id=0; while (id<particles_h.size) {
+            vox_phan_track_to_out(particles_h, phantom.volume, materials_h, photon_CS_table_h, m_params_h, id);
+            ++id;
+        }
+    } else if (m_params_h.device_target == GPU_DEVICE) {
+
+        dim3 threads, grid;
+        threads.x = m_params_h.gpu_block_size;
+        grid.x = (particles_d.size + m_params_h.gpu_block_size - 1) / m_params_h.gpu_block_size;
+
+        kernel_vox_phan_track_to_out<<<grid, threads>>>(particles_d, m_vox_vol_d, materials_d,
+                                                        photon_CS_table_d, m_params_d);
+        cuda_error_check("Error ", " Kernel_VoxPhanImgNav (track to out)");
+
+    }
 
 }
 

@@ -33,7 +33,9 @@ class PhantomManager {
         ui32 get_data_size();
 
         void track_to_in(ParticleStack &particles_h, ParticleStack &particles_d);
-        //void track_to_out();
+        void track_to_out(ParticleStack &particles_h, ParticleStack &particles_d,
+                          MaterialsTable materials_h, MaterialsTable materials_d,
+                          PhotonCrossSectionTable photon_CS_table_h, PhotonCrossSectionTable photon_CS_table_d);
 
         std::string get_phantom_name();
 

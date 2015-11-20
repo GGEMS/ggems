@@ -45,6 +45,8 @@ __host__ __device__ void point_source(ParticleStack particles, ui32 id,
     particles.pz[id] = pz;
     particles.tof[id] = 0.0f;
     particles.endsimu[id] = PARTICLE_ALIVE;
+    particles.next_discrete_process[id] = NO_PROCESS;
+    particles.next_interaction_distance[id] = 0.0;
     particles.level[id] = PRIMARY;
     particles.pname[id] = type;
     particles.geometry_id[id] = 0;

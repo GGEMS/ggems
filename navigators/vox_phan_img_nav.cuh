@@ -21,6 +21,7 @@
 #include "vector.cuh"
 #include "materials.cuh"
 #include "photon.cuh"
+#include "photon_navigator.cuh"
 
 class VoxPhanImgNav : public GGEMSVPhantom {
     public:
@@ -30,7 +31,9 @@ class VoxPhanImgNav : public GGEMSVPhantom {
         // Tracking from outside to the phantom broder
         void track_to_in(ParticleStack &particles_h, ParticleStack &particles_d);
         // Tracking inside the phantom until the phantom border
-        void track_to_out();
+        void track_to_out(ParticleStack &particles_h, ParticleStack &particles_d,
+                          MaterialsTable materials_h, MaterialsTable materials_d,
+                          PhotonCrossSectionTable photon_CS_table_h, PhotonCrossSectionTable photon_CS_table_d);
         // Init
         void initialize(GlobalSimulationParameters params);
         // Get list of materials
