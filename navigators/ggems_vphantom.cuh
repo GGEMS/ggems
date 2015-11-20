@@ -33,6 +33,8 @@ class GGEMSVPhantom {
         virtual std::vector<std::string> get_materials_list() = 0;
         // Get data that contains materials index
         virtual ui16* get_data_materials_indices() = 0;
+        // Get the size of data that compose this phantom (indices)
+        virtual ui32 get_data_size() = 0;
 
     private:
 

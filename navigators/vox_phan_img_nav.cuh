@@ -37,11 +37,13 @@ class VoxPhanImgNav : public GGEMSVPhantom {
         std::vector<std::string> get_materials_list();
         // Get data that contains materials index
         ui16* get_data_materials_indices();
+        // Get the size of data (nb of voxels)
+        ui32 get_data_size();
 
         Voxelized phantom;
 
     private:
-        void m_check_mandatory();
+        bool m_check_mandatory();
         void m_copy_parameters_cpu2gpu();
         void m_copy_phantom_cpu2gpu();
 

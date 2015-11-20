@@ -57,6 +57,15 @@ ui16* PhantomManager::get_data_materials_indices() {
 
 }
 
+// Get the size of data that compose the phantom (ex.: nb of voxels for CT)
+ui32 PhantomManager::get_data_size() {
+
+    if (m_phantom_name == "VoxPhanImgNav") {
+        m_vox_phan_img.get_data_size();
+    }
+
+}
+
 // Move particle to the phantom boundary
 void PhantomManager::track_to_in(ParticleStack &particles_h, ParticleStack &particles_d) {
     if (m_phantom_name == "VoxPhanImgNav") {

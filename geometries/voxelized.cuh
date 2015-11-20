@@ -56,6 +56,7 @@ class Voxelized : public BaseObject {
     private:
         void m_define_materials_from_range(f32 *raw_data, std::string range_name);
         void m_define_materials_from_range(ui16 *raw_data, std::string range_name);
+        TxtReader m_txt_reader;
                 
 };
 

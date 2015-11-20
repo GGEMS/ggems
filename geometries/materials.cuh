@@ -1,12 +1,10 @@
 // GGEMS Copyright (C) 2015
 
-#ifndef MATERIALS_H
-#define MATERIALS_H
+#ifndef MATERIALS_CUH
+#define MATERIALS_CUH
 
 
 #include "G4Material.hh"
-//#include "G4EmCalculator.hh"
-//#include "G4ParticleTable.hh"
 #include "G4PhysicalConstants.hh"
 #include "G4ParticleDefinition.hh"
 #include "G4SystemOfUnits.hh"
@@ -14,10 +12,12 @@
 #include "global.cuh"
 #include "txt_reader.cuh"
 
+
 // To handle one material
 class Material {
     public:
         Material() {}
+        ~Material() {}
         std::vector<std::string> mixture_Z;
         std::vector<f32> mixture_f;
         std::string name;
@@ -37,6 +37,7 @@ class MaterialDataBase {
         std::map<std::string, f32> elements_A;
 
     private:
+        TxtReader m_txt_reader;
 
 };
 

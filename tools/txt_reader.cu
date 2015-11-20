@@ -26,10 +26,21 @@ std::string TxtReader::m_remove_white_space(std::string txt) {
 
 // Read the list of tokens in a txt line
 std::vector< std::string > TxtReader::m_split_txt(std::string line) {
+    /*
     std::istringstream iss(line);
     std::vector< std::string > tokens{std::istream_iterator<std::string>{iss},
                                       std::istream_iterator<std::string>{}};
     return tokens;
+    */
+
+    std::istringstream iss(line);
+    std::vector<std::string> tokens;
+    std::copy(std::istream_iterator<std::string>(iss),
+         std::istream_iterator<std::string>(),
+         std::back_inserter(tokens));
+
+    return tokens;
+
 }
 
 /////:: Main functions

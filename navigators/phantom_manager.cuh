@@ -29,6 +29,8 @@ class PhantomManager {
         std::vector<std::string> get_materials_list();
         // Get data that contains materials index
         ui16* get_data_materials_indices();
+        // Get the size of data
+        ui32 get_data_size();
 
         void track_to_in(ParticleStack &particles_h, ParticleStack &particles_d);
         //void track_to_out();

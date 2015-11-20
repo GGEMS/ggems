@@ -23,20 +23,20 @@ void MaterialDataBase::load_materials(std::string filename) {
     ui16 ind = 0;
 
     while (file) {
-        TxtReader::skip_comment(file);
+        m_txt_reader.skip_comment(file);
         std::getline(file, line);
 
         if (file) {
             Material mat;
-            mat.name = TxtReader::read_material_name(line);
+            mat.name = m_txt_reader.read_material_name(line);
             //printf("mat name ... %s \n",mat.name.c_str());   // Too much verbose - JB
-            mat.density = TxtReader::read_material_density(line);
-            mat.nb_elements = TxtReader::read_material_nb_elements(line);
+            mat.density = m_txt_reader.read_material_density(line);
+            mat.nb_elements = m_txt_reader.read_material_nb_elements(line);
 
             i=0; while (i<mat.nb_elements) {
                 std::getline(file, line);
-                elt_name = TxtReader::read_material_element(line);
-                mat_f = TxtReader::read_material_fraction(line);
+                elt_name = m_txt_reader.read_material_element(line);
+                mat_f = m_txt_reader.read_material_fraction(line);
 
                 mat.mixture_Z.push_back(elt_name);
                 mat.mixture_f.push_back(mat_f);
@@ -64,13 +64,13 @@ void MaterialDataBase::load_elements(std::string filename) {
     f32 elt_A;
 
     while (file) {
-        TxtReader::skip_comment(file);
+        m_txt_reader.skip_comment(file);
         std::getline(file, line);
 
         if (file) {
-            elt_name = TxtReader::read_element_name(line);
-            elt_Z = TxtReader::read_element_Z(line);
-            elt_A = TxtReader::read_element_A(line);
+            elt_name = m_txt_reader.read_element_name(line);
+            elt_Z = m_txt_reader.read_element_Z(line);
+            elt_A = m_txt_reader.read_element_A(line);
 
             elements_Z[elt_name] = elt_Z;
             elements_A[elt_name] = elt_A;
@@ -402,40 +402,41 @@ void MaterialManager::add_materials_and_update_indices(std::vector<std::string> 
 
 }
 
-/*
-// Build the materials table according the object contains in the world
-void MaterialManager::free_materials_table() {
 
 
-    free(materials_table.nb_elements);
-    free(materials_table.index);
-    free(materials_table.nb_atoms_per_vol);
-    free(materials_table.nb_electrons_per_vol);
-    free(materials_table.electron_mean_excitation_energy);
-    free(materials_table.rad_length);
-    free(materials_table.fX0);
-    free(materials_table.fX1);
-    free(materials_table.fD0);
-    free(materials_table.fC);
-    free(materials_table.fA);
-    free(materials_table.fM);
-    free(materials_table.density);
-    free(materials_table.fF1);
-    free(materials_table.fF2);
-    free(materials_table.fEnergy0);
-    free(materials_table.fEnergy1);
-    free(materials_table.fEnergy2);
-    free(materials_table.fLogEnergy1);
-    free(materials_table.fLogEnergy2);
-    free(materials_table.fLogMeanExcitationEnergy);
-    free(materials_table.mixture);
-    free(materials_table.atom_num_dens);
+//// Build the materials table according the object contains in the world
+//void MaterialManager::free_materials_table() {
 
 
-    //delete mat_table_h;
+//    free(materials_table.nb_elements);
+//    free(materials_table.index);
+//    free(materials_table.nb_atoms_per_vol);
+//    free(materials_table.nb_electrons_per_vol);
+//    free(materials_table.electron_mean_excitation_energy);
+//    free(materials_table.rad_length);
+//    free(materials_table.fX0);
+//    free(materials_table.fX1);
+//    free(materials_table.fD0);
+//    free(materials_table.fC);
+//    free(materials_table.fA);
+//    free(materials_table.fM);
+//    free(materials_table.density);
+//    free(materials_table.fF1);
+//    free(materials_table.fF2);
+//    free(materials_table.fEnergy0);
+//    free(materials_table.fEnergy1);
+//    free(materials_table.fEnergy2);
+//    free(materials_table.fLogEnergy1);
+//    free(materials_table.fLogEnergy2);
+//    free(materials_table.fLogMeanExcitationEnergy);
+//    free(materials_table.mixture);
+//    free(materials_table.atom_num_dens);
 
-}
-*/
+
+//    //delete mat_table_h;
+
+//}
+
 
 
 // Init
@@ -452,12 +453,6 @@ void MaterialManager::initialize(GlobalSimulationParameters params) {
     // Copy data to the GPU
     if (params.device_target == GPU_DEVICE) m_copy_materials_table_cpu2gpu();
 }
-
-
-
-
-
-
 
 
 

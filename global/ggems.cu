@@ -242,7 +242,7 @@ void GGEMS::init_simulation() {
     m_sources.initialize(m_parameters);
 
     /// Init Phantoms ////////////////////////////////
-    m_phantoms.initialize(m_paramters);
+    m_phantoms.initialize(m_parameters);
 
     /// Material handling ////////////////////////////
 
@@ -255,7 +255,8 @@ void GGEMS::init_simulation() {
 
     // Build data based on geometry
     m_materials.add_materials_and_update_indices(m_phantoms.get_materials_list(),
-                                                 m_phantoms.get_data_materials_indices());
+                                                 m_phantoms.get_data_materials_indices(),
+                                                 m_phantoms.get_data_size());
 
     // Do the same for any other geometry such the detector
     // m_materials.add_materials_and_update_indices(...)

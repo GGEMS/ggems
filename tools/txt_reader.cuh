@@ -20,8 +20,8 @@
 class TxtReader {
 
     public:
-        TxtReader() {}
-        ~TxtReader() {}
+        TxtReader();
+        ~TxtReader();
 
         void skip_comment(std::istream &);
 
@@ -54,9 +54,9 @@ class TxtReader {
 
     private:
         std::string m_remove_white_space(std::string);
-        // TODO: This function was never test !!!
+        // TODO: Carefull this function was never test !!!
         std::vector< std::string > m_split_txt(std::string);
 
-}
+};
 
 #endif

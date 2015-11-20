@@ -1,6 +1,3 @@
-// This file is part of GGEMS
-//
-// GGEMS is free software: you can redistribute it and/or modify
 // GGEMS Copyright (C) 2015
 
 #ifndef GLOBAL_CUH

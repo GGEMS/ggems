@@ -18,43 +18,6 @@
 
 ////:: GPU Codes
 
-
-
-
-// __device__ GGEMSreal get_boundary_voxel_by_raycasting(int4 vox, GGEMSreal3 p, GGEMSreal3 d, GGEMSreal3 res, int id=0) {
-//
-//     GGEMSreal xmin, xmax, ymin, ymax, zmin, zmax;
-//
-//
-//     // Define the voxel bounding box
-//     xmin = vox.x*res.x;
-//     ymin = vox.y*res.y;
-//     zmin = vox.z*res.z;
-//     xmax = (d.x < 0 && p.x==xmin) ? xmin-res.x : xmin+res.x;
-//     ymax = (d.y < 0 && p.y==ymin) ? ymin-res.y : ymin+res.y;
-//     zmax = (d.z < 0 && p.z==zmin) ? zmin-res.z : zmin+res.z;
-//
-// GGEMSreal dist=hit_ray_AABB(p, d,xmin,xmax,
-//                                  ymin,ymax,
-//                                  zmin,zmax);
-// return dist;
-// }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // Move particles to the voxelized volume
 __host__ __device__ void vox_phan_track_to_in(ParticleStack &particles, f32 xmin, f32 xmax,
                                               f32 ymin, f32 ymax, f32 zmin, f32 zmax,
@@ -75,7 +38,7 @@ __host__ __device__ void vox_phan_track_to_in(ParticleStack &particles, f32 xmin
     f32 dist = hit_ray_AABB(pos, dir, xmin, xmax, ymin, ymax, zmin, zmax);
 
     // the particle not hitting the voxelized volume
-    if (dist == F32_MAX) {
+    if (dist == FLT_MAX) {                            // TODO: Don't know why F32_MAX doesn't work...
         particles.endsimu[id] = PARTICLE_FREEZE;
         return;
     } else {
@@ -210,7 +173,7 @@ __host__ __device__ void vox_phan_track_to_out(ParticleStack &particles,
     particles.pz[part_id] = pos.z;
 
     // Stop simulation if out of the phantom
-    if (!test_point_AABB(pos, xmin, xmax, ymin, ymax, zmin, zmax)) {
+    if (!test_point_AABB(pos, vol.xmin, vol.xmax, vol.ymin, vol.ymax, vol.zmin, vol.zmax)) {
         particles.endsimu[part_id] = PARTICLE_FREEZE;
         return;
     }
@@ -340,11 +303,11 @@ void VoxPhanImgNav::m_copy_phantom_cpu2gpu() {
     m_vox_vol_d.number_of_voxels = phantom.volume.number_of_voxels;
 }
 
-void VoxPhanImgNav::m_check_mandatory() {
+bool VoxPhanImgNav::m_check_mandatory() {
 
     if (phantom.volume.nb_vox_x == 0 || phantom.volume.nb_vox_y == 0 || phantom.volume.nb_vox_z == 0 ||
         phantom.volume.spacing_x == 0 || phantom.volume.spacing_y == 0 || phantom.volume.spacing_z == 0 ||
-        phantom.volume.list_of_materials.size() == 0) {
+        phantom.list_of_materials.size() == 0) {
         return false;
     } else {
         return true;
@@ -357,17 +320,18 @@ void VoxPhanImgNav::m_check_mandatory() {
 void VoxPhanImgNav::track_to_in(ParticleStack &particles_h, ParticleStack &particles_d) {
 
     if (m_params_h.device_target == CPU_DEVICE) {
-        ui32 id=0; while (id<particles.size) {
+        ui32 id=0; while (id<particles_h.size) {
             vox_phan_track_to_in(particles_h, phantom.volume.xmin, phantom.volume.xmax,
                                               phantom.volume.ymin, phantom.volume.ymax,
-                                              phantom.volume.zmin, phantom.volume.zmax);
+                                              phantom.volume.zmin, phantom.volume.zmax,
+                                              id);
             ++id;
         }
     } else if (m_params_h.device_target == GPU_DEVICE) {
 
         dim3 threads, grid;
         threads.x = m_params_h.gpu_block_size;
-        grid.x = (particles.size + m_params_h.gpu_block_size - 1) / m_params_h.gpu_block_size;
+        grid.x = (particles_d.size + m_params_h.gpu_block_size - 1) / m_params_h.gpu_block_size;
 
         kernel_vox_phan_track_to_in<<<grid, threads>>>(particles_d, m_vox_vol_d.xmin, m_vox_vol_d.xmax,
                                                                     m_vox_vol_d.ymin, m_vox_vol_d.ymax,
@@ -410,6 +374,10 @@ ui16* VoxPhanImgNav::get_data_materials_indices() {
     return phantom.volume.data;
 }
 
+// Get the size of data
+ui32 VoxPhanImgNav::get_data_size() {
+    return phantom.volume.number_of_voxels;
+}
 
 
 
