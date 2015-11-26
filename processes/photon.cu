@@ -63,7 +63,7 @@ __host__ __device__ f32 Compton_CS_standard(MaterialsTable materials, ui16 mat, 
 }
 
 // Compton Scatter (Standard - Klein-Nishina) with secondary (e-)
-__host__ __device__ SecParticle Compton_SampleSecondaries_standard(ParticleStack particles,
+__host__ __device__ SecParticle Compton_SampleSecondaries_standard(ParticlesData particles,
                                                                    f32 cutE,
                                                                    ui32 id,
                                                                    GlobalSimulationParameters parameters) {
@@ -174,9 +174,9 @@ __host__ __device__ f32 Photoelec_CS_standard(MaterialsTable materials,
 
 // Compute Theta distribution of the emitted electron, with respect to the incident Gamma
 // The Sauter-Gavrila distribution for the K-shell is used
-__host__ __device__ f32 Photoelec_ElecCosThetaDistribution(ParticleStack part,
-                                                             ui32 id,
-                                                             f32 kineEnergy) {
+__host__ __device__ f32 Photoelec_ElecCosThetaDistribution(ParticlesData part,
+                                                           ui32 id,
+                                                           f32 kineEnergy) {
     f32 costeta = 1.0f;
     f32 gamma = kineEnergy * 1.9569513367f + 1.0f;  // 1/electron_mass_c2
     if (gamma > 5.0f) {return costeta;}
@@ -198,7 +198,7 @@ __host__ __device__ f32 Photoelec_ElecCosThetaDistribution(ParticleStack part,
 }
 
 // PhotoElectric effect (standard) with secondary (e-)
-__host__ __device__ SecParticle Photoelec_SampleSecondaries_standard(ParticleStack particles,
+__host__ __device__ SecParticle Photoelec_SampleSecondaries_standard(ParticlesData particles,
                                                                      MaterialsTable mat,
                                                                      PhotonCrossSectionTable photon_CS_table,
                                                                      ui32 E_index,
@@ -757,7 +757,7 @@ __host__ __device__ f32 Rayleigh_SF_Livermore(f32* rayl_sf, f32 E, i32 Z) {
 }
 
 // Rayleigh Scattering (Livermore)
-__host__ __device__ void Rayleigh_SampleSecondaries_Livermore(ParticleStack particles,
+__host__ __device__ void Rayleigh_SampleSecondaries_Livermore(ParticlesData particles,
                                                               MaterialsTable mat,
                                                               PhotonCrossSectionTable photon_CS_table,
                                                               ui32 E_index,

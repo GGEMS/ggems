@@ -23,44 +23,44 @@
 ///////// GPU code ////////////////////////////////////////////////////
 
 // Internal function
-__host__ __device__ void point_source(ParticleStack particles, ui32 id,
+__host__ __device__ void point_source(ParticlesData particles_data, ui32 id,
                                       f32 px, f32 py, f32 pz, ui8 type,
                                       f64 *spectrumE, f64 *spectrumCDF, ui32 nbins) {
 
-    f32 phi = JKISS32(particles, id);
-    f32 theta = JKISS32(particles, id);
+    f32 phi = JKISS32(particles_data, id);
+    f32 theta = JKISS32(particles_data, id);
 
     phi  *= gpu_twopi;
     theta = acosf(1.0f - 2.0f*theta);
 
-    ui32 pos = binary_search(JKISS32(particles, id), spectrumCDF, nbins);
+    ui32 pos = binary_search(JKISS32(particles_data, id), spectrumCDF, nbins);
 
     // set photons
-    particles.E[id] = spectrumE[pos];
-    particles.dx[id] = cosf(phi)*sinf(theta);
-    particles.dy[id] = sinf(phi)*sinf(theta);
-    particles.dz[id] = cosf(theta);
-    particles.px[id] = px;
-    particles.py[id] = py;
-    particles.pz[id] = pz;
-    particles.tof[id] = 0.0f;
-    particles.endsimu[id] = PARTICLE_ALIVE;
-    particles.next_discrete_process[id] = NO_PROCESS;
-    particles.next_interaction_distance[id] = 0.0;
-    particles.level[id] = PRIMARY;
-    particles.pname[id] = type;
-    particles.geometry_id[id] = 0;
+    particles_data.E[id] = spectrumE[pos];
+    particles_data.dx[id] = cosf(phi)*sinf(theta);
+    particles_data.dy[id] = sinf(phi)*sinf(theta);
+    particles_data.dz[id] = cosf(theta);
+    particles_data.px[id] = px;
+    particles_data.py[id] = py;
+    particles_data.pz[id] = pz;
+    particles_data.tof[id] = 0.0f;
+    particles_data.endsimu[id] = PARTICLE_ALIVE;
+    particles_data.next_discrete_process[id] = NO_PROCESS;
+    particles_data.next_interaction_distance[id] = 0.0;
+    particles_data.level[id] = PRIMARY;
+    particles_data.pname[id] = type;
+    particles_data.geometry_id[id] = 0;
 }
 
 // Kernel to create new particles (sources manager)
-__global__ void kernel_point_source(ParticleStack particles,
-                                 f32 px, f32 py, f32 pz, ui8 type,
-                                 f64 *spectrumE, f64 *spectrumCDF, ui32 nbins) {
+__global__ void kernel_point_source(ParticlesData particles_data,
+                                    f32 px, f32 py, f32 pz, ui8 type,
+                                    f64 *spectrumE, f64 *spectrumCDF, ui32 nbins) {
 
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
-    if (id >= particles.size) return;
+    if (id >= particles_data.size) return;
 
-    point_source(particles, id, px, py, pz, type,
+    point_source(particles_data, id, px, py, pz, type,
                  spectrumE, spectrumCDF, nbins);
 
 }
@@ -158,7 +158,7 @@ void PointSource::initialize(GlobalSimulationParameters params) {
     m_params = params;
 
     // Handle GPU device
-    if (m_params.device_target == GPU_DEVICE && m_nb_of_energy_bins > 1) {
+    if (m_params.data_h.device_target == GPU_DEVICE && m_nb_of_energy_bins > 1) {
         // GPU mem allocation
         HANDLE_ERROR( cudaMalloc((void**) &m_spectrumE_d, m_nb_of_energy_bins*sizeof(f64)) );
         HANDLE_ERROR( cudaMalloc((void**) &m_spectrumCDF_d, m_nb_of_energy_bins*sizeof(f64)) );
@@ -171,23 +171,23 @@ void PointSource::initialize(GlobalSimulationParameters params) {
 
 }
 
-void PointSource::get_primaries_generator(ParticleStack particles) {
+void PointSource::get_primaries_generator(Particles particles) {
 
-    if (m_params.device_target == CPU_DEVICE) {
+    if (m_params.data_h.device_target == CPU_DEVICE) {
 
         ui32 id=0; while (id<particles.size) {
-            point_source(particles, id, m_px, m_py, m_pz, m_particle_type,
+            point_source(particles.data_h, id, m_px, m_py, m_pz, m_particle_type,
                          m_spectrumE_d, m_spectrumCDF_d, m_nb_of_energy_bins);
             ++id;
         }
 
-    } else if (m_params.device_target == GPU_DEVICE) {
+    } else if (m_params.data_h.device_target == GPU_DEVICE) {
 
         dim3 threads, grid;
-        threads.x = m_params.gpu_block_size;
-        grid.x = (particles.size + m_params.gpu_block_size - 1) / m_params.gpu_block_size;
+        threads.x = m_params.data_h.gpu_block_size;
+        grid.x = (particles.size + m_params.data_h.gpu_block_size - 1) / m_params.data_h.gpu_block_size;
 
-        kernel_point_source<<<grid, threads>>>(particles, m_px, m_py, m_pz, m_particle_type,
+        kernel_point_source<<<grid, threads>>>(particles.data_d, m_px, m_py, m_pz, m_particle_type,
                                                m_spectrumE_d, m_spectrumCDF_d, m_nb_of_energy_bins);
         cuda_error_check("Error ", " Kernel_point_source");
 

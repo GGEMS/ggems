@@ -7,17 +7,17 @@
 //// CrossSectionsManager class ////////////////////////////////////////////////////
 
 CrossSectionsManager::CrossSectionsManager() {
-    photon_CS_table_h.nb_bins = 0;
-    photon_CS_table_h.nb_mat = 0;
+    photon_CS.nb_bins = 0;
+    photon_CS.nb_mat = 0;
 }
 
 // Main function
 bool CrossSectionsManager::m_check_mandatory() {
-    if (photon_CS_table_h.nb_bins == 0 || photon_CS_table_h.nb_mat == 0) return false;
+    if (photon_CS.nb_bins == 0 || photon_CS.nb_mat == 0) return false;
     else return true;
 }
 
-void CrossSectionsManager::initialize(MaterialsTable materials, GlobalSimulationParameters parameters) {
+void CrossSectionsManager::initialize(Materials materials, GlobalSimulationParameters parameters) {
 
     // Check if everything was set properly
     if ( !m_check_mandatory() ) {
@@ -25,35 +25,35 @@ void CrossSectionsManager::initialize(MaterialsTable materials, GlobalSimulation
         exit_simulation();
     }
 
-    // Build table
+    // Build table on CPU side
     m_build_table(materials, parameters);
 
     // Allocation and copy
-    if (parameters.device_target == GPU_DEVICE) m_copy_cs_table_cpu2gpu();
+    if (parameters.data_h.device_target == GPU_DEVICE) m_copy_cs_table_cpu2gpu();
 
 }
 
 // Build cross sections table according material, physics effects and particles
-void CrossSectionsManager::m_build_table(MaterialsTable materials, GlobalSimulationParameters parameters) {
+void CrossSectionsManager::m_build_table(Materials materials, GlobalSimulationParameters parameters) {
 
     // Read parameters
-    ui32 nbin = parameters.cs_table_nbins;
-    f32 min_E = parameters.cs_table_min_E;
-    f32 max_E = parameters.cs_table_max_E;
+    ui32 nbin = parameters.data_h.cs_table_nbins;
+    f32 min_E = parameters.data_h.cs_table_min_E;
+    f32 max_E = parameters.data_h.cs_table_max_E;
 
     // First thing first, sample energy following the number of bins
     f32 slope = log(max_E / min_E);
     ui32 i = 0;
-    photon_CS_table_h.E_bins = (f32*)malloc(nbin * sizeof(f32));
+    photon_CS.data_h.E_bins = (f32*)malloc(nbin * sizeof(f32));
     while (i < nbin) {
-        photon_CS_table_h.E_bins[i] = min_E * exp( slope * ((f32)i/((f32)nbin-1)) ) * MeV;
+        photon_CS.data_h.E_bins[i] = min_E * exp( slope * ((f32)i/((f32)nbin-1)) ) * MeV;
         ++i;
     }
 
     // Find if there are photon and electron in this simulation;
-    i8 there_is_photon = parameters.physics_list[PHOTON_COMPTON] ||
-                           parameters.physics_list[PHOTON_PHOTOELECTRIC] ||
-                           parameters.physics_list[PHOTON_RAYLEIGH];
+    i8 there_is_photon = parameters.data_h.physics_list[PHOTON_COMPTON] ||
+                         parameters.data_h.physics_list[PHOTON_PHOTOELECTRIC] ||
+                         parameters.data_h.physics_list[PHOTON_RAYLEIGH];
     //i8 there_is_electron = parameters.physics_list[ELECTRON_IONISATION] ||
     //                         parameters.physics_list[ELECTRON_BREMSSTRAHLUNG] ||
     //                         parameters.physics_list[ELECTRON_MSC];
@@ -64,31 +64,33 @@ void CrossSectionsManager::m_build_table(MaterialsTable materials, GlobalSimulat
 
     // Photon CS table if need
     if (there_is_photon) {
-        photon_CS_table_h.Compton_Std_CS = (f32*)malloc(tot_elt_mem);
-        photon_CS_table_h.Photoelectric_Std_CS = (f32*)malloc(tot_elt_mem);
-        photon_CS_table_h.Photoelectric_Std_xCS = (f32*)malloc(nbin * 101 * sizeof(f32)); // 100 Z elements,
+        photon_CS.data_h.Compton_Std_CS = (f32*)malloc(tot_elt_mem);
+        photon_CS.data_h.Photoelectric_Std_CS = (f32*)malloc(tot_elt_mem);
+        photon_CS.data_h.Photoelectric_Std_xCS = (f32*)malloc(nbin * 101 * sizeof(f32)); // 100 Z elements,
                                                                                             // starting from index 1
-        photon_CS_table_h.Rayleigh_Lv_CS = (f32*)malloc(tot_elt_mem);
-        photon_CS_table_h.Rayleigh_Lv_SF = (f32*)malloc(nbin * 101 * sizeof(f32)); // 100 Z elements,
+        photon_CS.data_h.Rayleigh_Lv_CS = (f32*)malloc(tot_elt_mem);
+        photon_CS.data_h.Rayleigh_Lv_SF = (f32*)malloc(nbin * 101 * sizeof(f32)); // 100 Z elements,
                                                                                      // starting from index 1
-        photon_CS_table_h.Rayleigh_Lv_xCS = (f32*)malloc(nbin * 101 * sizeof(f32)); // 100 Z elements,
+        photon_CS.data_h.Rayleigh_Lv_xCS = (f32*)malloc(nbin * 101 * sizeof(f32)); // 100 Z elements,
                                                                                      // starting from index 1       
-        photon_CS_table_h.E_min = min_E;
-        photon_CS_table_h.E_max = max_E;
-        photon_CS_table_h.nb_bins = nbin;
-        photon_CS_table_h.nb_mat = materials.nb_materials;
+        photon_CS.data_h.E_min = min_E;
+        photon_CS.data_h.E_max = max_E;
+        photon_CS.data_h.nb_bins = nbin;
+        photon_CS.data_h.nb_mat = materials.nb_materials;
+        photon_CS.nb_bins = nbin;
+        photon_CS.nb_mat = materials.nb_materials;
 
         // Init value
         i=0; while (i < tot_elt) {            
-            photon_CS_table_h.Compton_Std_CS[i] = 0.0f;
-            photon_CS_table_h.Photoelectric_Std_CS[i] = 0.0f;
-            photon_CS_table_h.Rayleigh_Lv_CS[i] = 0.0f;
+            photon_CS.data_h.Compton_Std_CS[i] = 0.0f;
+            photon_CS.data_h.Photoelectric_Std_CS[i] = 0.0f;
+            photon_CS.data_h.Rayleigh_Lv_CS[i] = 0.0f;
             ++i;
         }
         i=0; while (i < (101*nbin)) { // 100 Z element starting from index 1
-            photon_CS_table_h.Rayleigh_Lv_SF[i] = 0.0f;
-            photon_CS_table_h.Rayleigh_Lv_xCS[i] = 0.0f;
-            photon_CS_table_h.Photoelectric_Std_xCS[i] = 0.0f;
+            photon_CS.data_h.Rayleigh_Lv_SF[i] = 0.0f;
+            photon_CS.data_h.Rayleigh_Lv_xCS[i] = 0.0f;
+            photon_CS.data_h.Photoelectric_Std_xCS[i] = 0.0f;
             ++i;
         }
 
@@ -103,7 +105,7 @@ void CrossSectionsManager::m_build_table(MaterialsTable materials, GlobalSimulat
     f32 *g4_ray_cs = NULL;
     f32 *g4_ray_sf = NULL;
     i8 *flag_Z = NULL;
-    if (parameters.physics_list[PHOTON_RAYLEIGH]) {
+    if (parameters.data_h.physics_list[PHOTON_RAYLEIGH]) {
 
         g4_ray_cs = Rayleigh_CS_Livermore_load_data();
         g4_ray_sf = Rayleigh_SF_Livermore_load_data();
@@ -126,16 +128,16 @@ void CrossSectionsManager::m_build_table(MaterialsTable materials, GlobalSimulat
 
             // for each phys effect
             if (parameters.physics_list[PHOTON_COMPTON]) {
-                photon_CS_table_h.Compton_Std_CS[abs_index] = Compton_CS_standard(materials, imat,
-                                                                                  photon_CS_table_h.E_bins[i]);
+                photon_CS.data_h.Compton_Std_CS[abs_index] = Compton_CS_standard(materials.data_h, imat,
+                                                                                 photon_CS.data_h.E_bins[i]);
             }
             if (parameters.physics_list[PHOTON_PHOTOELECTRIC]) {
-                photon_CS_table_h.Photoelectric_Std_CS[abs_index] = Photoelec_CS_standard(materials, imat,
-                                                                                          photon_CS_table_h.E_bins[i]);
+                photon_CS.data_h.Photoelectric_Std_CS[abs_index] = Photoelec_CS_standard(materials.data_h, imat,
+                                                                                         photon_CS.data_h.E_bins[i]);
             }
             if (parameters.physics_list[PHOTON_RAYLEIGH]) {
-                photon_CS_table_h.Rayleigh_Lv_CS[abs_index] = Rayleigh_CS_Livermore(materials, g4_ray_cs,
-                                                                                    imat, photon_CS_table_h.E_bins[i]);
+                photon_CS.data_h.Rayleigh_Lv_CS[abs_index] = Rayleigh_CS_Livermore(materials.data_h, g4_ray_cs,
+                                                                                   imat, photon_CS.data_h.E_bins[i]);
             }
 
             // TODO
@@ -145,13 +147,13 @@ void CrossSectionsManager::m_build_table(MaterialsTable materials, GlobalSimulat
         } // i              
 
         // Special case for Photoelectric and Rayleigh where scatter factor and CS are needed for each Z
-        if (parameters.physics_list[PHOTON_RAYLEIGH]) {
+        if (parameters.data_h.physics_list[PHOTON_RAYLEIGH]) {
             ui32 iZ, Z;
             // This table compute scatter factor for each Z (only for Z which were not already defined)
-            iZ=0; while (iZ < materials.nb_elements[imat]) {
-                Z = materials.mixture[materials.index[imat]+iZ];
+            iZ=0; while (iZ < materials.data_h.nb_elements[imat]) {
+                Z = materials.data_h.mixture[materials.data_h.index[imat]+iZ];
 
-                f32 atom_num_dens = materials.atom_num_dens[materials.index[imat]+iZ];
+                f32 atom_num_dens = materials.data_h.atom_num_dens[materials.data_h.index[imat]+iZ];
 
                 // If for this Z nothing was already calculated
                 if (!flag_Z[Z]) {
@@ -161,15 +163,15 @@ void CrossSectionsManager::m_build_table(MaterialsTable materials, GlobalSimulat
                     i=0; while (i < nbin) {
                         // absolute index to store data within the table
                         abs_index = Z*nbin + i;
-                        photon_CS_table_h.Rayleigh_Lv_SF[abs_index] = Rayleigh_SF_Livermore(g4_ray_sf,
-                                                                                            photon_CS_table_h.E_bins[i],
-                                                                                            Z);
+                        photon_CS.data_h.Rayleigh_Lv_SF[abs_index] = Rayleigh_SF_Livermore(g4_ray_sf,
+                                                                                           photon_CS.data_h.E_bins[i],
+                                                                                           Z);
 
-                        photon_CS_table_h.Rayleigh_Lv_xCS[abs_index] = atom_num_dens *
-                                        Rayleigh_CSPA_Livermore(g4_ray_cs, photon_CS_table_h.E_bins[i], Z);
+                        photon_CS.data_h.Rayleigh_Lv_xCS[abs_index] = atom_num_dens *
+                                                                      Rayleigh_CSPA_Livermore(g4_ray_cs, photon_CS.data_h.E_bins[i], Z);
 
-                        photon_CS_table_h.Photoelectric_Std_xCS[abs_index] = atom_num_dens *
-                                                   Photoelec_CSPA_standard(photon_CS_table_h.E_bins[i], Z);
+                        photon_CS.data_h.Photoelectric_Std_xCS[abs_index] = atom_num_dens *
+                                                                            Photoelec_CSPA_standard(photon_CS.data_h.E_bins[i], Z);
 
                         ++i;
                     } // i
@@ -186,6 +188,7 @@ void CrossSectionsManager::m_build_table(MaterialsTable materials, GlobalSimulat
     free(flag_Z);
 }
 
+/*
 // Print CS talbe (for debugging)
 void CrossSectionsManager::print() {
 
@@ -272,47 +275,48 @@ void CrossSectionsManager::print() {
 
 
 }
+*/
 
 // Copy CS table to the device
 void CrossSectionsManager::m_copy_cs_table_cpu2gpu() {
 
-    ui32 n = photon_CS_table_h.nb_bins;
-    ui32 k = photon_CS_table_h.nb_mat;
+    ui32 n = photon_CS.data_h.nb_bins;
+    ui32 k = photon_CS.data_h.nb_mat;
 
     // Allocate GPU mem
-    HANDLE_ERROR( cudaMalloc((void**) &photon_CS_table_d.E_bins, n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &photon_CS.data_d.E_bins, n*sizeof(f32)) );
 
-    HANDLE_ERROR( cudaMalloc((void**) &photon_CS_table_d.Compton_Std_CS, n*k*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &photon_CS.data_d.Compton_Std_CS, n*k*sizeof(f32)) );
 
-    HANDLE_ERROR( cudaMalloc((void**) &photon_CS_table_d.Photoelectric_Std_CS, n*k*sizeof(f32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &photon_CS_table_d.Photoelectric_Std_xCS, n*101*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &photon_CS.data_d.Photoelectric_Std_CS, n*k*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &photon_CS.data_d.Photoelectric_Std_xCS, n*101*sizeof(f32)) );
 
-    HANDLE_ERROR( cudaMalloc((void**) &photon_CS_table_d.Rayleigh_Lv_CS, n*k*sizeof(f32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &photon_CS_table_d.Rayleigh_Lv_SF, n*101*sizeof(f32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &photon_CS_table_d.Rayleigh_Lv_xCS, n*101*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &photon_CS.data_d.Rayleigh_Lv_CS, n*k*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &photon_CS.data_d.Rayleigh_Lv_SF, n*101*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &photon_CS.data_d.Rayleigh_Lv_xCS, n*101*sizeof(f32)) );
 
     // Copy data to GPU
-    photon_CS_table_d.nb_bins = n;
-    photon_CS_table_d.nb_mat = k;
-    photon_CS_table_d.E_min = photon_CS_table_h.E_min;
-    photon_CS_table_d.E_max = photon_CS_table_h.E_max;
+    photon_CS.data_d.nb_bins = n;
+    photon_CS.data_d.nb_mat = k;
+    photon_CS.data_d.E_min = photon_CS.data_h.E_min;
+    photon_CS.data_d.E_max = photon_CS.data_h.E_max;
 
-    HANDLE_ERROR( cudaMemcpy(photon_CS_table_d.E_bins, photon_CS_table_h.E_bins,
+    HANDLE_ERROR( cudaMemcpy(photon_CS.data_d.E_bins, photon_CS.data_h.E_bins,
                              sizeof(f32)*n, cudaMemcpyHostToDevice) );
 
-    HANDLE_ERROR( cudaMemcpy(photon_CS_table_d.Compton_Std_CS, photon_CS_table_h.Compton_Std_CS,
+    HANDLE_ERROR( cudaMemcpy(photon_CS.data_d.Compton_Std_CS, photon_CS.data_h.Compton_Std_CS,
                              sizeof(f32)*n*k, cudaMemcpyHostToDevice) );
 
-    HANDLE_ERROR( cudaMemcpy(photon_CS_table_d.Photoelectric_Std_CS, photon_CS_table_h.Photoelectric_Std_CS,
+    HANDLE_ERROR( cudaMemcpy(photon_CS.data_d.Photoelectric_Std_CS, photon_CS.data_h.Photoelectric_Std_CS,
                              sizeof(f32)*n*k, cudaMemcpyHostToDevice) );
-    HANDLE_ERROR( cudaMemcpy(photon_CS_table_d.Photoelectric_Std_xCS, photon_CS_table_h.Photoelectric_Std_xCS,
+    HANDLE_ERROR( cudaMemcpy(photon_CS.data_d.Photoelectric_Std_xCS, photon_CS.data_h.Photoelectric_Std_xCS,
                              sizeof(f32)*n*101, cudaMemcpyHostToDevice) );
 
-    HANDLE_ERROR( cudaMemcpy(photon_CS_table_d.Rayleigh_Lv_CS, photon_CS_table_h.Rayleigh_Lv_CS,
+    HANDLE_ERROR( cudaMemcpy(photon_CS.data_d.Rayleigh_Lv_CS, photon_CS.data_h.Rayleigh_Lv_CS,
                              sizeof(f32)*n*k, cudaMemcpyHostToDevice) );
-    HANDLE_ERROR( cudaMemcpy(photon_CS_table_d.Rayleigh_Lv_SF, photon_CS_table_h.Rayleigh_Lv_SF,
+    HANDLE_ERROR( cudaMemcpy(photon_CS.data_d.Rayleigh_Lv_SF, photon_CS.data_h.Rayleigh_Lv_SF,
                              sizeof(f32)*n*101, cudaMemcpyHostToDevice) );
-    HANDLE_ERROR( cudaMemcpy(photon_CS_table_d.Rayleigh_Lv_xCS, photon_CS_table_h.Rayleigh_Lv_xCS,
+    HANDLE_ERROR( cudaMemcpy(photon_CS.data_d.Rayleigh_Lv_xCS, photon_CS.data_h.Rayleigh_Lv_xCS,
                              sizeof(f32)*n*101, cudaMemcpyHostToDevice) );
 
 }

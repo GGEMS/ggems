@@ -82,6 +82,16 @@ struct MaterialsTable {
     f32 *density;
 };
 
+// Handle CPU/GPU Material table data
+struct Materials {
+    MaterialsTable data_h;
+    MaterialsTable data_d;
+
+    ui32 nb_materials;              // n
+    ui32 nb_elements_total;         // k
+};
+
+
 // This class is used to build the material table
 class MaterialManager {
     public:
@@ -97,8 +107,7 @@ class MaterialManager {
 
         void initialize(GlobalSimulationParameters params);
 
-        MaterialsTable mat_table_h;   // CPU
-        MaterialsTable mat_table_d; // GPU
+        Materials materials;   // CPU&GPU
 
     private:
         ui16 m_get_material_index(std::string material_name);

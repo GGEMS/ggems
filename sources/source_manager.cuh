@@ -14,7 +14,7 @@ class SourcesManager {
         void set_source(PointSource &aSource);
         void initialize(GlobalSimulationParameters params);
 
-        void get_primaries_generator(ParticleStack particles);
+        void get_primaries_generator(Particles particles);
         std::string get_source_name();
 
     private:

@@ -178,7 +178,7 @@ void exit_simulation();
 f64 get_time();
 
 // Global simulation parameters
-struct GlobalSimulationParameters {
+struct GlobalSimulationParametersData {
     bool *physics_list;
     bool *secondaries_list;
     f32 photon_cut;    // In energy for now, need to change for distance range.
@@ -203,6 +203,14 @@ struct GlobalSimulationParameters {
     f32 cs_table_min_E;
     f32 cs_table_max_E;
 };
+
+// Struct to handle CPU&GPU params
+struct GlobalSimulationParameters {
+    GlobalSimulationParametersData data_h;
+    GlobalSimulationParametersData data_d;
+};
+
+
 
 // Struct that handle colors
 //struct Color {

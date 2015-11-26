@@ -15,6 +15,8 @@
 #define PHANTOMMANAGER_CUH
 
 #include "global.cuh"
+#include "materials.cuh"
+#include "cross_sections.cuh"
 #include "vox_phan_img_nav.cuh"
 
 class PhantomManager {
@@ -25,23 +27,17 @@ class PhantomManager {
         void set_phantom(VoxPhanImgNav &aPhantom);
         void initialize(GlobalSimulationParameters params);
 
-        // Get list of materials
-        std::vector<std::string> get_materials_list();
-        // Get data that contains materials index
-        ui16* get_data_materials_indices();
-        // Get the size of data
-        ui32 get_data_size();
-
-        void track_to_in(ParticleStack &particles_h, ParticleStack &particles_d);
-        void track_to_out(ParticleStack &particles_h, ParticleStack &particles_d,
-                          MaterialsTable materials_h, MaterialsTable materials_d,
-                          PhotonCrossSectionTable photon_CS_table_h, PhotonCrossSectionTable photon_CS_table_d);
+        void track_to_in(Particles particles);
+        void track_to_out(Particles particles);
 
         std::string get_phantom_name();
 
     private:
         VoxPhanImgNav m_vox_phan_img;
-        std::string m_phantom_name;
+        std::string m_phantom_name;      
+
+        MaterialManager m_materials_mng;
+        CrossSectionsManager m_cross_sections_mng;
 
 };
 

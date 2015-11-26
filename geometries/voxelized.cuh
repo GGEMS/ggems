@@ -18,15 +18,21 @@
 #include "txt_reader.cuh"
 #include "base_object.cuh"
 
-// Table containing every definition of the materials used in the world
+// Struct that handle CPU&GPU vox volume
 struct VoxVolume {
+    VoxVolumeData data_h;
+    VoxVolumeData data_d;
+};
+
+// Table containing every definition of the materials used in the world
+struct VoxVolumeData {
     ui16 nb_vox_x, nb_vox_y, nb_vox_z;
     ui32 number_of_voxels;
     f32 spacing_x, spacing_y, spacing_z;
     f32 org_x, org_y, org_z;
     f32 xmin, xmax, ymin, ymax, zmin, zmax;
 
-    ui16 *data;
+    ui16 *values;
 };
 
 // Voxelized phantom

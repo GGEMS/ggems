@@ -6,7 +6,7 @@
 #include "global.cuh"
 
 // Stack of particles, format data is defined as SoA
-struct ParticleStack{
+struct ParticlesData {
     // property
     f32* E;
     f32* dx;
@@ -32,11 +32,18 @@ struct ParticleStack{
     ui8* endsimu;
     ui8* level;
     ui8* pname; // particle name (photon, electron, etc)
-    // Interactions
-
-    // stack size
+    // size
     ui32 size;
+
 }; //
+
+// Struct that handles particles
+struct Particles {
+    ParticlesData data_h;
+    ParticlesData data_d;
+
+    ui32 size;
+};
 
 // Helper to handle secondaries particles
 struct SecParticle {
@@ -86,9 +93,9 @@ class ParticleManager {
         ParticleManager();
 
         void initialize(GlobalSimulationParameters params);
-        void cpu_print_stack(ui32 nlim);
+        //void cpu_print_stack(ui32 nlim);
 
-        ParticleStack stack_h, stack_d; // CPU and GPU stack
+        Particles particles; // CPU and GPU stack
 
     private:
         bool m_check_mandatory();

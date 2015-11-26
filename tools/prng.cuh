@@ -10,6 +10,6 @@
 // Prng
 /////////////////////////////////////////////////////////////////////////////
 
-__host__  __device__ f32 JKISS32(ParticleStack &particles, ui32 id);
+__host__  __device__ f32 JKISS32(ParticlesData &particles, ui32 id);
 
 #endif

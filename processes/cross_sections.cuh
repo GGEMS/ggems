@@ -13,19 +13,18 @@ class CrossSectionsManager {
     public:
         CrossSectionsManager();
 
-        void initialize(MaterialsTable materials, GlobalSimulationParameters parameters);
-        void print();
+        void initialize(Materials materials, GlobalSimulationParameters parameters);
+        //void print();
 
         // Data for photon
-        PhotonCrossSectionTable photon_CS_table_h;  // CPU
-        PhotonCrossSectionTable photon_CS_table_d;  // GPU
+        PhotonCrossSection photon_CS;  // CPU & GPU
 
         // Data for electron TODO
-        //ElectronCrossSectionTable Electron_CS_table;
+        //ElectronCrossSection Electron_CS;
 
     private:        
         bool m_check_mandatory();
-        void m_build_table(MaterialsTable materials, GlobalSimulationParameters parameters);
+        void m_build_table(Materials materials, GlobalSimulationParameters parameters);
         void m_copy_cs_table_cpu2gpu();
 
 

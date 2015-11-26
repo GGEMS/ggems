@@ -25,7 +25,7 @@ void SourcesManager::initialize(GlobalSimulationParameters params) {
 
 }
 
-void SourcesManager::get_primaries_generator(ParticleStack particles) {
+void SourcesManager::get_primaries_generator(Particles particles) {
 
     // Fill the buffer of new particles
     if (m_source_name == "PointSource") {

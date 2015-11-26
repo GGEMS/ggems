@@ -12,6 +12,15 @@
 #include "shell_data.cuh"
 #include "vector.cuh"
 
+// Struct that handle CPU&GPU CS data
+struct PhotonCrossSection {
+    PhotonCrossSectionTable data_h;
+    PhotonCrossSectionTable data_d;
+
+    ui32 nb_bins;         // n
+    ui32 nb_mat;          // k
+};
+
 // Cross section table for photon particle
 struct PhotonCrossSectionTable{
     f32* E_bins;                // n
@@ -34,13 +43,13 @@ struct PhotonCrossSectionTable{
 
 // Utils
 __host__ __device__ f32 get_CS_from_table(f32 *E_bins, f32 *CSTable, f32 energy,
-                                            ui32 E_index, ui32 mat_index, ui32 nb_bins);
+                                          ui32 E_index, ui32 mat_index, ui32 nb_bins);
 
 // Compton - model standard G4
 __host__ __device__ f32 Compton_CSPA_standard(f32 E, ui16 Z);
 __host__ __device__ f32 Compton_CS_standard(MaterialsTable materials, ui16 mat, f32 E);
 
-__host__ __device__ SecParticle Compton_SampleSecondaries_standard(ParticleStack particles,
+__host__ __device__ SecParticle Compton_SampleSecondaries_standard(ParticlesData particles,
                                                                    f32 cutE,
                                                                    ui32 id,
                                                                    GlobalSimulationParameters parameters);
@@ -50,7 +59,7 @@ __host__ __device__ SecParticle Compton_SampleSecondaries_standard(ParticleStack
 __host__ __device__ f32 Photoelec_CSPA_standard(f32 E, ui16 Z);
 __host__ __device__ f32 Photoelec_CS_standard(MaterialsTable materials,
                                                 ui16 mat, f32 E);
-__host__ __device__ SecParticle Photoelec_SampleSecondaries_standard(ParticleStack particles,
+__host__ __device__ SecParticle Photoelec_SampleSecondaries_standard(ParticlesData particles,
                                                                      MaterialsTable mat,
                                                                      PhotonCrossSectionTable photon_CS_table,
                                                                      ui32 E_index,
@@ -73,7 +82,7 @@ __host__ __device__ f32 Rayleigh_CSPA_Livermore(f32* rayl_cs, f32 E, ui16 Z);
 __host__ __device__ f32 Rayleigh_CS_Livermore(MaterialsTable materials,
                                                 f32* rayl_cs, ui16 mat, f32 E);
 __host__ __device__ f32 Rayleigh_SF_Livermore(f32* rayl_sf, f32 E, i32 Z);
-__host__ __device__ void Rayleigh_SampleSecondaries_Livermore(ParticleStack particles,
+__host__ __device__ void Rayleigh_SampleSecondaries_Livermore(ParticlesData particles,
                                                               MaterialsTable mat,
                                                               PhotonCrossSectionTable photon_CS_table,
                                                               ui32 E_index,

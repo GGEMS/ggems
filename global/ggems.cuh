@@ -78,7 +78,7 @@ class GGEMS {
 
     private:
         // Particles handler
-        ParticleManager m_particles;
+        ParticleManager m_particles_manager;
 
         // Cross section handler
         CrossSectionsManager m_cross_sections;
@@ -94,6 +94,7 @@ class GGEMS {
 
         // Main parameters
         bool m_check_mandatory();
+        void m_copy_parameters_cpu2gpu();
         GlobalSimulationParameters m_parameters;
 
         /*

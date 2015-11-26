@@ -16,16 +16,16 @@
 
 #include "voxelized.cuh"
 
-Voxelized::Voxelized() {
-    volume.xmin = 0.0f;
-    volume.xmax = 0.0f;
-    volume.ymin = 0.0f;
-    volume.ymax = 0.0f;
-    volume.zmin = 0.0f;
-    volume.zmax = 0.0f;
+VoxelizedPhantom::VoxelizedPhantom() {
+    volume.data_h.xmin = 0.0f;
+    volume.data_h.xmax = 0.0f;
+    volume.data_h.ymin = 0.0f;
+    volume.data_h.ymax = 0.0f;
+    volume.data_h.zmin = 0.0f;
+    volume.data_h.zmax = 0.0f;
 
     // Init pointer
-    volume.data = NULL;
+    volume.data_h.data = NULL;
 }
 
 ///:: Private
@@ -33,7 +33,7 @@ Voxelized::Voxelized() {
 
 
 // Convert range data into material ID
-void Voxelized::m_define_materials_from_range(ui16 *raw_data, std::string range_name) {
+void VoxelizedPhantom::m_define_materials_from_range(ui16 *raw_data, std::string range_name) {
 
     ui16 start, stop;
     std::string mat_name, line;
@@ -42,7 +42,7 @@ void Voxelized::m_define_materials_from_range(ui16 *raw_data, std::string range_
     ui16 mat_index = 0;
     
     // Data allocation
-    volume.data = (ui16*)malloc(volume.number_of_voxels * sizeof(ui16));
+    volume.data_h.values = (ui16*)malloc(volume.data_h.number_of_voxels * sizeof(ui16));
 
     // Read range file
     std::ifstream file(range_name.c_str());
@@ -61,10 +61,10 @@ void Voxelized::m_define_materials_from_range(ui16 *raw_data, std::string range_
             list_of_materials.push_back(mat_name);            
 
             // build labeled phantom according range data
-            i=0; while (i < volume.number_of_voxels) {
+            i=0; while (i < volume.data_h.number_of_voxels) {
                 val = raw_data[i];
                 if ((val==start && val==stop) || (val>=start && val<stop)) {
-                    volume.data[i] = mat_index;
+                    volume.data_h.values[i] = mat_index;
                 }
                 ++i;
             } // over the volume
@@ -77,7 +77,7 @@ void Voxelized::m_define_materials_from_range(ui16 *raw_data, std::string range_
 }
 
 // Convert range data into material ID
-void Voxelized::m_define_materials_from_range(f32 *raw_data, std::string range_name) {
+void VoxelizedPhantom::m_define_materials_from_range(f32 *raw_data, std::string range_name) {
 
     f32 start, stop;
     std::string mat_name, line;
@@ -86,7 +86,7 @@ void Voxelized::m_define_materials_from_range(f32 *raw_data, std::string range_n
     ui16 mat_index = 0;
 
     // Data allocation
-    volume.data = (ui16*)malloc(volume.number_of_voxels * sizeof(ui16));
+    volume.data_h.values = (ui16*)malloc(volume.data_h.number_of_voxels * sizeof(ui16));
 
     // Read range file
     std::ifstream file(range_name.c_str());
@@ -106,10 +106,10 @@ void Voxelized::m_define_materials_from_range(f32 *raw_data, std::string range_n
             //printf("IND %i MAT %s \n", mat_index, mat_name.c_str());
 
             // build labeled phantom according range data
-            i=0; while (i < volume.number_of_voxels) {
+            i=0; while (i < volume.data_h.number_of_voxels) {
                 val = raw_data[i];
                 if ((val==start && val==stop) || (val>=start && val<stop)) {
-                    volume.data[i] = mat_index;
+                    volume.data_h.values[i] = mat_index;
                 }
                 ++i;
             } // over the volume
@@ -124,19 +124,19 @@ void Voxelized::m_define_materials_from_range(f32 *raw_data, std::string range_n
 ///:: Main functions
 
 // Load phantom from binary data (f32)
-void Voxelized::load_from_raw(std::string volume_name, std::string range_name,
+void VoxelizedPhantom::load_from_raw(std::string volume_name, std::string range_name,
                               i32 nx, i32 ny, i32 nz, f32 sx, f32 sy, f32 sz) {
 
     /////////////// First read the raw data from the phantom ////////////////////////
 
-    volume.number_of_voxels = nx*ny*nz;
-    volume.nb_vox_x = nx;
-    volume.nb_vox_y = ny;
-    volume.nb_vox_z = nz;
-    volume.spacing_x = sx;
-    volume.spacing_y = sy;
-    volume.spacing_z = sz;
-    ui32 mem_size = sizeof(f32) * volume.number_of_voxels;
+    volume.data_h.number_of_voxels = nx*ny*nz;
+    volume.data_h.nb_vox_x = nx;
+    volume.data_h.nb_vox_y = ny;
+    volume.data_h.nb_vox_z = nz;
+    volume.data_h.spacing_x = sx;
+    volume.data_h.spacing_y = sy;
+    volume.data_h.spacing_z = sz;
+    ui32 mem_size = sizeof(f32) * volume.data_h.number_of_voxels;
 
     FILE *pfile = fopen(volume_name.c_str(), "rb");
     if (!pfile) {
@@ -145,7 +145,7 @@ void Voxelized::load_from_raw(std::string volume_name, std::string range_name,
     }
 
     f32 *raw_data = (f32*)malloc(mem_size);
-    fread(raw_data, sizeof(f32), volume.number_of_voxels, pfile);
+    fread(raw_data, sizeof(f32), volume.data_h.number_of_voxels, pfile);
 
     fclose(pfile);
 
@@ -158,22 +158,22 @@ void Voxelized::load_from_raw(std::string volume_name, std::string range_name,
 
     ///////////// Define a bounding box for this phantom //////////////////////////////
 
-    f32 h_lengthx = volume.nb_vox_x * volume.spacing_x * 0.5f;
-    f32 h_lengthy = volume.nb_vox_y * volume.spacing_y * 0.5f;
-    f32 h_lengthz = volume.nb_vox_z * volume.spacing_z * 0.5f;
+    f32 h_lengthx = volume.data_h.nb_vox_x * volume.data_h.spacing_x * 0.5f;
+    f32 h_lengthy = volume.data_h.nb_vox_y * volume.data_h.spacing_y * 0.5f;
+    f32 h_lengthz = volume.data_h.nb_vox_z * volume.data_h.spacing_z * 0.5f;
 
-    volume.xmin = -h_lengthx; volume.xmax = h_lengthx;
-    volume.ymin = -h_lengthy; volume.ymax = h_lengthy;
-    volume.zmin = -h_lengthz; volume.zmax = h_lengthz;
+    volume.data_h.xmin = -h_lengthx; volume.data_h.xmax = h_lengthx;
+    volume.data_h.ymin = -h_lengthy; volume.data_h.ymax = h_lengthy;
+    volume.data_h.zmin = -h_lengthz; volume.data_h.zmax = h_lengthz;
 
-    volume.org_x = h_lengthx;
-    volume.org_y = h_lengthy;
-    volume.org_z = h_lengthz;
+    volume.data_h.org_x = h_lengthx;
+    volume.data_h.org_y = h_lengthy;
+    volume.data_h.org_z = h_lengthz;
 
 }
 
 // Load phantom from mhd file (only f32 data)
-void Voxelized::load_from_mhd(std::string volume_name, std::string range_name) {
+void VoxelizedPhantom::load_from_mhd(std::string volume_name, std::string range_name) {
 
     /////////////// First read the MHD file //////////////////////
 
@@ -278,19 +278,19 @@ void Voxelized::load_from_mhd(std::string volume_name, std::string range_name) {
         }
     }
 
-    volume.number_of_voxels = nx*ny*nz;
-    volume.nb_vox_x = nx;
-    volume.nb_vox_y = ny;
-    volume.nb_vox_z = nz;
-    volume.spacing_x = sx;
-    volume.spacing_y = sy;
-    volume.spacing_z = sz;
+    volume.data_h.number_of_voxels = nx*ny*nz;
+    volume.data_h.nb_vox_x = nx;
+    volume.data_h.nb_vox_y = ny;
+    volume.data_h.nb_vox_z = nz;
+    volume.data_h.spacing_x = sx;
+    volume.data_h.spacing_y = sy;
+    volume.data_h.spacing_z = sz;
     
     if(ElementType == "MET_FLOAT") {
-      ui32 mem_size = sizeof(f32) * volume.number_of_voxels;
+      ui32 mem_size = sizeof(f32) * volume.data_h.number_of_voxels;
 
       f32 *raw_data = (f32*)malloc(mem_size);
-      fread(raw_data, sizeof(f32), volume.number_of_voxels, pfile);
+      fread(raw_data, sizeof(f32), volume.data_h.number_of_voxels, pfile);
       fclose(pfile);
       
       /////////////// Then, convert the raw data into material id //////////////////////
@@ -302,10 +302,10 @@ void Voxelized::load_from_mhd(std::string volume_name, std::string range_name) {
     }
     
     if(ElementType == "MET_USHORT") {
-      ui32 mem_size = sizeof(ui16) * volume.number_of_voxels;
+      ui32 mem_size = sizeof(ui16) * volume.data_h.number_of_voxels;
 
       ui16 *raw_data = (ui16*)malloc(mem_size);
-      fread(raw_data, sizeof(ui16), volume.number_of_voxels, pfile);
+      fread(raw_data, sizeof(ui16), volume.data_h.number_of_voxels, pfile);
       fclose(pfile);
       /////////////// Then, convert the raw data into material id //////////////////////
       m_define_materials_from_range(raw_data, range_name);
@@ -316,40 +316,40 @@ void Voxelized::load_from_mhd(std::string volume_name, std::string range_name) {
 
     ///////////// Define a bounding box for this phantom //////////////////////////////
 
-    f32 h_lengthx = volume.nb_vox_x * volume.spacing_x * 0.5f;
-    f32 h_lengthy = volume.nb_vox_y * volume.spacing_y * 0.5f;
-    f32 h_lengthz = volume.nb_vox_z * volume.spacing_z * 0.5f;
+    f32 h_lengthx = volume.data_h.nb_vox_x * volume.data_h.spacing_x * 0.5f;
+    f32 h_lengthy = volume.data_h.nb_vox_y * volume.data_h.spacing_y * 0.5f;
+    f32 h_lengthz = volume.data_h.nb_vox_z * volume.data_h.spacing_z * 0.5f;
 
     // If the offset is not defined, chose the volume center
     if (ox == -1 || oy == -1 || oz == -1) {
-        volume.org_x = h_lengthx;
-        volume.org_y = h_lengthy;
-        volume.org_z = h_lengthz;
+        volume.data_h.org_x = h_lengthx;
+        volume.data_h.org_y = h_lengthy;
+        volume.data_h.org_z = h_lengthz;
 
-        volume.xmin = -h_lengthx; volume.xmax = h_lengthx;
-        volume.ymin = -h_lengthy; volume.ymax = h_lengthy;
-        volume.zmin = -h_lengthz; volume.zmax = h_lengthz;
+        volume.data_h.xmin = -h_lengthx; volume.data_h.xmax = h_lengthx;
+        volume.data_h.ymin = -h_lengthy; volume.data_h.ymax = h_lengthy;
+        volume.data_h.zmin = -h_lengthz; volume.data_h.zmax = h_lengthz;
 
     } else {
-        volume.org_x = ox;
-        volume.org_y = oy;
-        volume.org_z = oz;
+        volume.data_h.org_x = ox;
+        volume.data_h.org_y = oy;
+        volume.data_h.org_z = oz;
 
-        volume.xmin = -ox; volume.xmax = volume.xmin + (volume.nb_vox_x * volume.spacing_x);
-        volume.ymin = -oy; volume.ymax = volume.ymin + (volume.nb_vox_y * volume.spacing_y);
-        volume.zmin = -oz; volume.zmax = volume.zmin + (volume.nb_vox_z * volume.spacing_z);
+        volume.data_h.xmin = -ox; volume.data_h.xmax = volume.data_h.xmin + (volume.data_h.nb_vox_x * volume.data_h.spacing_x);
+        volume.data_h.ymin = -oy; volume.data_h.ymax = volume.data_h.ymin + (volume.data_h.nb_vox_y * volume.data_h.spacing_y);
+        volume.data_h.zmin = -oz; volume.data_h.zmax = volume.data_h.zmin + (volume.data_h.nb_vox_z * volume.data_h.spacing_z);
     }
 
 }
 
-void Voxelized::set_origin(f32 x, f32 y, f32 z) {
-    volume.org_x = x;
-    volume.org_y = y;
-    volume.org_z = z;
+void VoxelizedPhantom::set_origin(f32 x, f32 y, f32 z) {
+    volume.data_h.org_x = x;
+    volume.data_h.org_y = y;
+    volume.data_h.org_z = z;
 
-    volume.xmin = -x; volume.xmax = volume.xmin + (volume.nb_vox_x * volume.spacing_x);
-    volume.ymin = -y; volume.ymax = volume.ymin + (volume.nb_vox_y * volume.spacing_y);
-    volume.zmin = -z; volume.zmax = volume.zmin + (volume.nb_vox_z * volume.spacing_z);
+    volume.data_h.xmin = -x; volume.data_h.xmax = volume.data_h.xmin + (volume.data_h.nb_vox_x * volume.data_h.spacing_x);
+    volume.data_h.ymin = -y; volume.data_h.ymax = volume.data_h.ymin + (volume.data_h.nb_vox_y * volume.data_h.spacing_y);
+    volume.data_h.zmin = -z; volume.data_h.zmax = volume.data_h.zmin + (volume.data_h.nb_vox_z * volume.data_h.spacing_z);
 }
 
 /*

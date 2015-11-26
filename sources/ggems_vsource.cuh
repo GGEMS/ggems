@@ -23,7 +23,7 @@ class GGEMSVSource {
     public:
         GGEMSVSource() {}
         ~GGEMSVSource() {}
-        virtual void get_primaries_generator(ParticleStack particles) = 0;
+        virtual void get_primaries_generator(ParticlesData particles) = 0;
         virtual void initialize(GlobalSimulationParameters params) = 0;
 
     private:

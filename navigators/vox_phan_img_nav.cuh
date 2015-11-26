@@ -23,19 +23,19 @@
 #include "photon.cuh"
 #include "photon_navigator.cuh"
 
-class VoxPhanImgNav : public GGEMSVPhantom {
+class VoxPhanImgNav {
     public:
         VoxPhanImgNav() {}
         ~VoxPhanImgNav() {}
 
         // Tracking from outside to the phantom broder
-        void track_to_in(ParticleStack &particles_h, ParticleStack &particles_d);
+        void track_to_in(Particles particles);
         // Tracking inside the phantom until the phantom border
-        void track_to_out(ParticleStack &particles_h, ParticleStack &particles_d,
-                          MaterialsTable materials_h, MaterialsTable materials_d,
-                          PhotonCrossSectionTable photon_CS_table_h, PhotonCrossSectionTable photon_CS_table_d);
+        void track_to_out(Particles particles, Materials materials, PhotonCrossSection photon_CS);
+
         // Init
         void initialize(GlobalSimulationParameters params);
+
         // Get list of materials
         std::vector<std::string> get_materials_list();
         // Get data that contains materials index
@@ -43,16 +43,13 @@ class VoxPhanImgNav : public GGEMSVPhantom {
         // Get the size of data (nb of voxels)
         ui32 get_data_size();
 
-        Voxelized phantom;
+        VoxelizedPhantom phantom;
 
     private:
-        bool m_check_mandatory();
-        void m_copy_parameters_cpu2gpu();
+        bool m_check_mandatory();       
         void m_copy_phantom_cpu2gpu();
 
-        VoxVolume m_vox_vol_d;
-        GlobalSimulationParameters m_params_h;
-        GlobalSimulationParameters m_params_d;
+        GlobalSimulationParameters m_params;
 
 };
 

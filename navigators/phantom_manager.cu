@@ -18,6 +18,7 @@
 
 PhantomManager::PhantomManager() {
     m_phantom_name = "";
+
 }
 
 void PhantomManager::set_phantom(VoxPhanImgNav &aPhantom) {
@@ -27,8 +28,27 @@ void PhantomManager::set_phantom(VoxPhanImgNav &aPhantom) {
 
 void PhantomManager::initialize(GlobalSimulationParameters params) {
 
-    // Init source that including also data copy to GPU
+    // Init materials data base
+    m_materials_mng.load_elements_database();
+    m_materials_mng.load_materials_database();
+
+    // Init phantom that including also data copy to GPU
     if (m_phantom_name == "VoxPhanImgNav") {
+
+        /// Material handling ////////////////////////////
+
+        // Build material data based on geometry
+        m_materials_mng.add_materials_and_update_indices(m_vox_phan_img.get_materials_list(),
+                                                         m_vox_phan_img.get_data_materials_indices(),
+                                                         m_vox_phan_img.get_data_size());
+
+        // Init material
+        m_materials_mng.initialize(params);
+
+        // Init CS
+        m_cross_sections_mng.initialize(m_materials_mng.materials, params);
+
+        // Init the phantom
         m_vox_phan_img.initialize(params);
     }
 
@@ -36,54 +56,21 @@ void PhantomManager::initialize(GlobalSimulationParameters params) {
 
 }
 
-// Get list of materials
-std::vector<std::string> PhantomManager::get_materials_list() {
-
-    if (m_phantom_name == "VoxPhanImgNav") {
-        m_vox_phan_img.get_materials_list();
-    }
-
-    // Put others phantom here.
-}
-
-// Get data that contains materials index
-ui16* PhantomManager::get_data_materials_indices() {
-
-    if (m_phantom_name == "VoxPhanImgNav") {
-        m_vox_phan_img.get_data_materials_indices();
-    }
-
-    // Put others phantom here.
-
-}
-
-// Get the size of data that compose the phantom (ex.: nb of voxels for CT)
-ui32 PhantomManager::get_data_size() {
-
-    if (m_phantom_name == "VoxPhanImgNav") {
-        m_vox_phan_img.get_data_size();
-    }
-
-}
-
 // Move particle to the phantom boundary
-void PhantomManager::track_to_in(ParticleStack &particles_h, ParticleStack &particles_d) {
+void PhantomManager::track_to_in(Particles particles) {
 
     if (m_phantom_name == "VoxPhanImgNav") {
-        m_vox_phan_img.track_to_in(particles_h, particles_d);
+        m_vox_phan_img.track_to_in(particles);
     }
 
     // Put others phantom here.
 }
 
 // Track particle within the phantom
-void PhantomManager::track_to_out(ParticleStack &particles_h, ParticleStack &particles_d,
-                                  MaterialsTable materials_h, MaterialsTable materials_d,
-                                  PhotonCrossSectionTable photon_CS_table_h, PhotonCrossSectionTable photon_CS_table_d) {
+void PhantomManager::track_to_out(Particles particles) {
 
     if (m_phantom_name == "VoxPhanImgNav") {
-        m_vox_phan_img.track_to_out(particles_h, particles_d, materials_h, materials_d,
-                                    photon_CS_table_h, photon_CS_table_d);
+        m_vox_phan_img.track_to_out(particles, m_materials_mng.materials, m_cross_sections_mng.photon_CS);
     }
 
 }
