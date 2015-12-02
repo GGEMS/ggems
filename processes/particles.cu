@@ -60,8 +60,8 @@ ParticleManager::ParticleManager() {
 
 // Init stack
 void ParticleManager::initialize(GlobalSimulationParameters params) {
-    particles.size = params.size_of_particles_batch;
-    particles.data_h.size = params.size_of_particles_batch;
+    particles.size = params.data_h.size_of_particles_batch;
+    particles.data_h.size = params.data_h.size_of_particles_batch;
 
     // Check if everything was set properly
     if ( !m_check_mandatory() ) {
@@ -73,7 +73,7 @@ void ParticleManager::initialize(GlobalSimulationParameters params) {
     m_cpu_malloc_stack();
 
     // Init seeds
-    if (params.device_target == GPU_DEVICE) {
+    if (params.data_h.device_target == GPU_DEVICE) {
         // GPU allocation
         m_gpu_malloc_stack();
         // Copy data to the GPU

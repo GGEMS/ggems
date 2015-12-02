@@ -15,7 +15,6 @@
 #define VOX_PHAN_IMG_NAV_CUH
 
 #include "global.cuh"
-#include "ggems_vphantom.cuh"
 #include "voxelized.cuh"
 #include "raytracing.cuh"
 #include "vector.cuh"

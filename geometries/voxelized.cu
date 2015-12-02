@@ -25,7 +25,7 @@ VoxelizedPhantom::VoxelizedPhantom() {
     volume.data_h.zmax = 0.0f;
 
     // Init pointer
-    volume.data_h.data = NULL;
+    volume.data_h.values = NULL;
 }
 
 ///:: Private

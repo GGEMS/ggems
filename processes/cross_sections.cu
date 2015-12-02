@@ -127,15 +127,15 @@ void CrossSectionsManager::m_build_table(Materials materials, GlobalSimulationPa
             abs_index = imat*nbin + i;
 
             // for each phys effect
-            if (parameters.physics_list[PHOTON_COMPTON]) {
+            if (parameters.data_h.physics_list[PHOTON_COMPTON]) {
                 photon_CS.data_h.Compton_Std_CS[abs_index] = Compton_CS_standard(materials.data_h, imat,
                                                                                  photon_CS.data_h.E_bins[i]);
             }
-            if (parameters.physics_list[PHOTON_PHOTOELECTRIC]) {
+            if (parameters.data_h.physics_list[PHOTON_PHOTOELECTRIC]) {
                 photon_CS.data_h.Photoelectric_Std_CS[abs_index] = Photoelec_CS_standard(materials.data_h, imat,
                                                                                          photon_CS.data_h.E_bins[i]);
             }
-            if (parameters.physics_list[PHOTON_RAYLEIGH]) {
+            if (parameters.data_h.physics_list[PHOTON_RAYLEIGH]) {
                 photon_CS.data_h.Rayleigh_Lv_CS[abs_index] = Rayleigh_CS_Livermore(materials.data_h, g4_ray_cs,
                                                                                    imat, photon_CS.data_h.E_bins[i]);
             }

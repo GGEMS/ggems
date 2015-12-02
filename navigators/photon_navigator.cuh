@@ -17,13 +17,13 @@
 #include "photon.cuh"
 
 
-__host__ __device__ void photon_get_next_interaction(ParticleStack &particles,
-                                                     GlobalSimulationParameters parameters,
+__host__ __device__ void photon_get_next_interaction(ParticlesData &particles,
+                                                     GlobalSimulationParametersData parameters,
                                                      PhotonCrossSectionTable photon_CS_table,
                                                      ui16 mat_id, ui32 part_id);
 
-__host__ __device__ SecParticle photon_resolve_discrete_process(ParticleStack &particles,
-                                                                GlobalSimulationParameters parameters,
+__host__ __device__ SecParticle photon_resolve_discrete_process(ParticlesData &particles,
+                                                                GlobalSimulationParametersData parameters,
                                                                 PhotonCrossSectionTable photon_CS_table,
                                                                 MaterialsTable materials,
                                                                 ui16 mat_id, ui32 part_id);

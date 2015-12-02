@@ -12,15 +12,6 @@
 #include "shell_data.cuh"
 #include "vector.cuh"
 
-// Struct that handle CPU&GPU CS data
-struct PhotonCrossSection {
-    PhotonCrossSectionTable data_h;
-    PhotonCrossSectionTable data_d;
-
-    ui32 nb_bins;         // n
-    ui32 nb_mat;          // k
-};
-
 // Cross section table for photon particle
 struct PhotonCrossSectionTable{
     f32* E_bins;                // n
@@ -40,6 +31,14 @@ struct PhotonCrossSectionTable{
     ui32 nb_mat;          // k
 };
 
+// Struct that handle CPU&GPU CS data
+struct PhotonCrossSection {
+    PhotonCrossSectionTable data_h;
+    PhotonCrossSectionTable data_d;
+
+    ui32 nb_bins;         // n
+    ui32 nb_mat;          // k
+};
 
 // Utils
 __host__ __device__ f32 get_CS_from_table(f32 *E_bins, f32 *CSTable, f32 energy,
@@ -52,7 +51,7 @@ __host__ __device__ f32 Compton_CS_standard(MaterialsTable materials, ui16 mat, 
 __host__ __device__ SecParticle Compton_SampleSecondaries_standard(ParticlesData particles,
                                                                    f32 cutE,
                                                                    ui32 id,
-                                                                   GlobalSimulationParameters parameters);
+                                                                   GlobalSimulationParametersData parameters);
 //
 
 // PhotoElectric - model standard G4
@@ -66,7 +65,7 @@ __host__ __device__ SecParticle Photoelec_SampleSecondaries_standard(ParticlesDa
                                                                      f32 cutE,
                                                                      ui16 matindex,
                                                                      ui32 id,
-                                                                     GlobalSimulationParameters parameters);
+                                                                     GlobalSimulationParametersData parameters);
 
 //
 

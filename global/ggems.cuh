@@ -59,21 +59,6 @@ class GGEMS {
         void init_simulation();
 //        void start_simulation();
 
-        // Get data
-//        ParticleBuilder get_particles();
-
-
-        // Main elements of the simulation
-//        ParticleBuilder particles;                  // (CPU & GPU)
-//        GeometryBuilder geometry;                   // (CPU & GPU
-//        MaterialBuilder materials;                  // (CPU & GPU)
-//        SourceBuilder sources;
-
-//        CrossSectionsBuilder cs_tables;             // (CPU & GPU)
-//        Digitizer digitizer;                        // (CPU & GPU)
-
-        // Record history for some particles (only CPU version)
-//        HistoryBuilder history;
 
 
     private:

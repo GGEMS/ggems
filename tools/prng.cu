@@ -6,7 +6,7 @@
 #include "prng.cuh"
 
 // JKISS 32-bit (period ~2^121=2.6x10^36), passes all of the Dieharder tests and the BigCrunch tests in TestU01
-__host__ __device__ f32 JKISS32(ParticleStack &particles, ui32 id) {
+__host__ __device__ f32 JKISS32(ParticlesData &particles, ui32 id) {
     i32 t;
 
 

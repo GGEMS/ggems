@@ -66,7 +66,7 @@ __host__ __device__ f32 Compton_CS_standard(MaterialsTable materials, ui16 mat, 
 __host__ __device__ SecParticle Compton_SampleSecondaries_standard(ParticlesData particles,
                                                                    f32 cutE,
                                                                    ui32 id,
-                                                                   GlobalSimulationParameters parameters) {
+                                                                   GlobalSimulationParametersData parameters) {
 
     f32 gamE0 = particles.E[id];
     f32 E0 = gamE0 / 0.510998910f;
@@ -205,7 +205,7 @@ __host__ __device__ SecParticle Photoelec_SampleSecondaries_standard(ParticlesDa
                                                                      f32 cutE,
                                                                      ui16 matindex,
                                                                      ui32 id,
-                                                                     GlobalSimulationParameters parameters) {
+                                                                     GlobalSimulationParametersData parameters) {
 
     // Kill the photon without mercy
     particles.endsimu[id] = PARTICLE_DEAD;

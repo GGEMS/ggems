@@ -214,28 +214,28 @@ void GGEMS::m_copy_parameters_cpu2gpu() {
     HANDLE_ERROR( cudaMalloc((void**) &m_parameters.data_d.secondaries_list, NB_PARTICLES*sizeof(bool)) );
 
     // Copy data
-    HANDLE_ERROR( cudaMemcpy(m_parameters.data_d.physics_list, parameters.data_h.physics_list,
+    HANDLE_ERROR( cudaMemcpy(m_parameters.data_d.physics_list, m_parameters.data_h.physics_list,
                          sizeof(ui8)*NB_PROCESSES, cudaMemcpyHostToDevice) );
-    HANDLE_ERROR( cudaMemcpy(m_parameters.data_d.secondaries_list, parameters.data_h.secondaries_list,
+    HANDLE_ERROR( cudaMemcpy(m_parameters.data_d.secondaries_list, m_parameters.data_h.secondaries_list,
                          sizeof(ui8)*NB_PARTICLES, cudaMemcpyHostToDevice) );
 
-    m_parameters.data_d.nb_of_particles = parameters.data_h.nb_of_particles;
-    m_parameters.data_d.size_of_particles_batch = parameters.data_h.size_of_particles_batch;
-    m_parameters.data_d.nb_of_batches = parameters.data_h.nb_of_batches;
+    m_parameters.data_d.nb_of_particles = m_parameters.data_h.nb_of_particles;
+    m_parameters.data_d.size_of_particles_batch = m_parameters.data_h.size_of_particles_batch;
+    m_parameters.data_d.nb_of_batches = m_parameters.data_h.nb_of_batches;
 
-    m_parameters.data_d.device_target = parameters.data_h.device_target;
-    m_parameters.data_d.gpu_id = parameters.data_h.gpu_id;
-    m_parameters.data_d.gpu_block_size = parameters.data_h.gpu_block_size;
+    m_parameters.data_d.device_target = m_parameters.data_h.device_target;
+    m_parameters.data_d.gpu_id = m_parameters.data_h.gpu_id;
+    m_parameters.data_d.gpu_block_size = m_parameters.data_h.gpu_block_size;
 
-    m_parameters.data_d.time = parameters.data_h.time;
-    m_parameters.data_d.seed = parameters.data_h.seed;
+    m_parameters.data_d.time = m_parameters.data_h.time;
+    m_parameters.data_d.seed = m_parameters.data_h.seed;
 
-    m_parameters.data_d.display_run_time = parameters.data_h.display_run_time;
-    m_parameters.data_d.display_memory_usage = parameters.data_h.display_memory_usage;
+    m_parameters.data_d.display_run_time = m_parameters.data_h.display_run_time;
+    m_parameters.data_d.display_memory_usage = m_parameters.data_h.display_memory_usage;
 
-    m_parameters.data_d.cs_table_nbins = parameters.data_h.cs_table_nbins;
-    m_parameters.data_d.cs_table_min_E = parameters.data_h.cs_table_min_E;
-    m_parameters.data_d.cs_table_max_E = parameters.data_h.cs_table_max_E;
+    m_parameters.data_d.cs_table_nbins = m_parameters.data_h.cs_table_nbins;
+    m_parameters.data_d.cs_table_min_E = m_parameters.data_h.cs_table_min_E;
+    m_parameters.data_d.cs_table_max_E = m_parameters.data_h.cs_table_max_E;
 
 }
 
@@ -281,15 +281,17 @@ void GGEMS::init_simulation() {
     /// Init Phantoms ////////////////////////////////
     m_phantoms.initialize(m_parameters);
 
-    /// Stack handling ///////////////////////////////
+    /// Init Particles Stack /////////////////////////
     m_particles_manager.initialize(m_parameters);
 
+    /*
     // Mem usage
     if (m_parameters.data_h.display_memory_usage) {
         ui32 mem_part = 91*m_particles.size + 4;
         mem += mem_part;
         print_memory("Particles stack", mem_part);
     }
+    */
 
 /*
     // Mem usage
@@ -333,30 +335,6 @@ void GGEMS::init_simulation() {
     }
 */
 
-    /*
-    /// Digitizer /////////////////////////////////
-
-    // init Digitizer
-    if (parameters.digitizer_flag) {
-        digitizer.cpu_init_pulses(particles.stack.size);
-
-        if (target == GPU_DEVICE) {
-            digitizer.gpu_init_pulses(particles.stack.size);
-        }
-
-        // If projection acquisition
-        if (digitizer.flag_projection || digitizer.flag_spect_proj) {
-            digitizer.init_projection();
-        }
-
-        // Mem usage
-        if (display_memory_usage_flag) {
-            ui32 mem_singles = 64*digitizer.pulses.size + 4;
-            mem += mem_singles;
-            print_memory("Singles", mem_singles);
-        }
-    }
-    */
 
 /*
     // Run time

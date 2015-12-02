@@ -18,13 +18,7 @@
 #include "txt_reader.cuh"
 #include "base_object.cuh"
 
-// Struct that handle CPU&GPU vox volume
-struct VoxVolume {
-    VoxVolumeData data_h;
-    VoxVolumeData data_d;
-};
-
-// Table containing every definition of the materials used in the world
+// Struct that handle Vox Volume data
 struct VoxVolumeData {
     ui16 nb_vox_x, nb_vox_y, nb_vox_z;
     ui32 number_of_voxels;
@@ -35,11 +29,17 @@ struct VoxVolumeData {
     ui16 *values;
 };
 
+// Struct that handle CPU&GPU vox volume
+struct VoxVolume {
+    VoxVolumeData data_h;
+    VoxVolumeData data_d;
+};
+
 // Voxelized phantom
-class Voxelized : public BaseObject {
+class VoxelizedPhantom : public BaseObject {
     public:
-        Voxelized();
-        ~Voxelized() {}
+        VoxelizedPhantom();
+        ~VoxelizedPhantom() {}
 
         void load_from_raw(std::string volume_name, std::string range_name,
                            i32 nx, i32 ny, i32 nz, f32 sx, f32 sy, f32 sz);

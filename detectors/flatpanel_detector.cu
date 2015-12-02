@@ -1,7 +1,7 @@
 // GGEMS Copyright (C) 2015
 
 /*!
- * \file vox_phan_img_nav.cu
+ * \file flatpanel_detector.cu
  * \brief
  * \author J. Bert <bert.jul@gmail.com>
  * \version 0.1
@@ -11,10 +11,10 @@
  *
  */
 
-#ifndef VOX_PHAN_IMG_NAV_CU
-#define VOX_PHAN_IMG_NAV_CU
+#ifndef FLATPANEL_DETECTOR_CU
+#define FLATPANEL_DETECTOR_CU
 
-#include "vox_phan_img_nav.cuh"
+#include "flatpanel_detector.cuh"
 
 ////:: GPU Codes
 
