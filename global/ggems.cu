@@ -284,6 +284,10 @@ void GGEMS::init_simulation() {
     /// Init Particles Stack /////////////////////////
     m_particles_manager.initialize(m_parameters);
 
+
+    // TODO DETECTOR
+
+
     /*
     // Mem usage
     if (m_parameters.data_h.display_memory_usage) {
@@ -348,6 +352,53 @@ void GGEMS::init_simulation() {
     }
 */
 }
+
+
+
+void GGEMS::start_simulation() {
+
+
+    // Main loop
+    ui32 ibatch=0; while(ibatch < m_parameters.data_h.nb_of_batches) {
+
+        // Get primaries
+        m_sources.get_primaries_generator(m_particles_manager.particles);
+
+        // Nav between source to phantom
+        m_phantoms.track_to_in(m_particles_manager.particles);
+        // Nav within the phantom
+        m_phantoms.track_to_out(m_particles_manager.particles);
+
+        // Nav between phantom to detector
+        m_detectors.track_to_in(m_particles_manager.particles);
+        // Nav within the detector
+        m_detectors.track_to_out(m_particles_manager.particles);
+        // Process hit, coincidences, etc.
+        m_detectors.digitizer();
+        // Export data
+        //m_detectors.save_data("toto.dat");
+
+        ++ibatch;
+    }
+
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /*
 

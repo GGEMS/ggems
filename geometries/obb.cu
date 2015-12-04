@@ -32,6 +32,8 @@ Obb::Obb () {
     volume.data_h.v = make_f32xyz(0, 1, 0);
     volume.data_h.w = make_f32xyz(0, 0, 1);
 
+    volume.data_h.size = make_f32xyz(-1, -1, -1);
+
 
 }
 
@@ -40,6 +42,8 @@ void Obb::set_size(f32 lx, f32 ly, f32 lz) {
     f32 hlx = 0.5*lx;
     f32 hly = 0.5*ly;
     f32 hlz = 0.5*lz;
+
+    volume.data_h.size = make_f32xyz(lx, ly, lz);
 
     volume.data_h.xmin = -hlx; volume.data_h.xmax = hlx;
     volume.data_h.ymin = -hly; volume.data_h.ymax = hly;
@@ -58,7 +62,7 @@ void Obb::translate(f32 tx, f32 ty, f32 tz) {
 
     // The translation is not apply on the bounding box, because is defined locally
     // We just need to translate the center-of-gravity
-    t = make_f32xyz(tx, ty, tz);
+    f32xyz t = make_f32xyz(tx, ty, tz);
     volume.data_h.translate = t;
     volume.data_h.center = fxyz_add(volume.data_h.center, t);
 

@@ -21,6 +21,7 @@
 #include "materials.cuh"
 #include "source_manager.cuh"
 #include "phantom_manager.cuh"
+#include "detector_manager.cuh"
 
 class GGEMS {
     public:
@@ -51,13 +52,15 @@ class GGEMS {
         // Setting simulation objects
         void set_source(PointSource &aSource);
         void set_phantom(VoxPhanImgNav &aPhantom);
+        // TODO DETECTOR
+
         // Utils
         void set_display_run_time();
         void set_display_memory_usage();
 
         // Main functions
         void init_simulation();
-//        void start_simulation();
+        void start_simulation();
 
 
 
@@ -76,6 +79,9 @@ class GGEMS {
 
         // Phantom manager
         PhantomManager m_phantoms;
+
+        // TODO Detector manager
+        DetectorManager m_detectors;
 
         // Main parameters
         bool m_check_mandatory();

@@ -38,7 +38,7 @@ include(${Geant4_USE_FILE})
 
 # GGEMS src
 include_directories(
-    ${PROJECT_SOURCE_DIR}/detector
+    ${PROJECT_SOURCE_DIR}/detectors
     ${PROJECT_SOURCE_DIR}/data
     ${PROJECT_SOURCE_DIR}/geometries
     ${PROJECT_SOURCE_DIR}/global
@@ -49,7 +49,7 @@ include_directories(
 
 # Locate sources and headers for this project
 file(GLOB sourcesGPU
-    ${PROJECT_SOURCE_DIR}/detector/*.cu
+    ${PROJECT_SOURCE_DIR}/detectors/*.cu
     ${PROJECT_SOURCE_DIR}/data/*.cu
     ${PROJECT_SOURCE_DIR}/geometries/*.cu
     ${PROJECT_SOURCE_DIR}/global/*.cu
@@ -59,7 +59,7 @@ file(GLOB sourcesGPU
     ${PROJECT_SOURCE_DIR}/sources/*.cu)
 
 file(GLOB headersGPU
-    ${PROJECT_SOURCE_DIR}/detector/*.cuh
+    ${PROJECT_SOURCE_DIR}/detectors/*.cuh
     ${PROJECT_SOURCE_DIR}/data/*.cuh
     ${PROJECT_SOURCE_DIR}/geometries/*.cuh
     ${PROJECT_SOURCE_DIR}/global/*.cuh

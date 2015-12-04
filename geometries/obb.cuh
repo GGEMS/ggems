@@ -25,6 +25,7 @@ struct ObbData {
     f32xyz translate;                        // Translation vector
     f32xyz center;                           // OBB center
     f32xyz u, v, w;                          // Absolute frame (OBB orthogonal space u, v, w)
+    f32xyz size;                             // Size
 };
 
 // Struct that handle CPU&GPU data
