@@ -364,10 +364,14 @@ void GGEMS::start_simulation() {
         // Get primaries
         m_sources.get_primaries_generator(m_particles_manager.particles);
 
+        // TODO If phantom
+
         // Nav between source to phantom
         m_phantoms.track_to_in(m_particles_manager.particles);
         // Nav within the phantom
         m_phantoms.track_to_out(m_particles_manager.particles);
+
+        // TODO If detector
 
         // Nav between phantom to detector
         m_detectors.track_to_in(m_particles_manager.particles);
