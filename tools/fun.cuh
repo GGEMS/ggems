@@ -1,5 +1,16 @@
 // GGEMS Copyright (C) 2015
 
+/*!
+ * \file fun.cuh
+ * \brief
+ * \author J. Bert <bert.jul@gmail.com>
+ * \version 0.1
+ * \date 13 novembre 2015
+ *
+ *
+ *
+ */
+
 #ifndef FUN_H
 #define FUN_H
 

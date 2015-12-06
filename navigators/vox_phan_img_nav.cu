@@ -159,8 +159,8 @@ __host__ __device__ void vox_phan_track_to_out(ParticlesData &particles,
 
 }
 
-// Kernel that move particles to the voxelized volume boundary
-__global__ void kernel_vox_phan_track_to_in(ParticlesData particles, f32 xmin, f32 xmax,
+// Device Kernel that move particles to the voxelized volume boundary
+__global__ void kernel_device_track_to_in(ParticlesData particles, f32 xmin, f32 xmax,
                                             f32 ymin, f32 ymax, f32 zmin, f32 zmax) {
 
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
@@ -170,18 +170,42 @@ __global__ void kernel_vox_phan_track_to_in(ParticlesData particles, f32 xmin, f
 
 }
 
-// Kernel that track particles within the voxelized volume until boundary
-__global__ void kernel_vox_phan_track_to_out(ParticlesData particles,
-                                             VoxVolumeData vol,
-                                             MaterialsTable materials,
-                                             PhotonCrossSectionTable photon_CS_table,
-                                             GlobalSimulationParametersData parameters) {
+// Host Kernel that move particles to the voxelized volume boundary
+void kernel_host_track_to_in(ParticlesData particles, f32 xmin, f32 xmax,
+                             f32 ymin, f32 ymax, f32 zmin, f32 zmax, ui32 id) {
+
+    vox_phan_track_to_in(particles, xmin, xmax, ymin, ymax, zmin, zmax, id);
+
+}
+
+// Device kernel that track particles within the voxelized volume until boundary
+__global__ void kernel_device_track_to_out(ParticlesData particles,
+                                           VoxVolumeData vol,
+                                           MaterialsTable materials,
+                                           PhotonCrossSectionTable photon_CS_table,
+                                           GlobalSimulationParametersData parameters) {
 
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
     if (id >= particles.size) return;
 
-    vox_phan_track_to_out(particles, vol, materials, photon_CS_table, parameters, id);
+    // Stepping loop
+    while (particles.endsimu[id] != PARTICLE_DEAD || particles.endsimu[id] != PARTICLE_FREEZE) {
+        vox_phan_track_to_out(particles, vol, materials, photon_CS_table, parameters, id);
+    }
 
+}
+
+// Host kernel that track particles within the voxelized volume until boundary
+void kernel_host_track_to_out(ParticlesData particles,
+                              VoxVolumeData vol,
+                              MaterialsTable materials,
+                              PhotonCrossSectionTable photon_CS_table,
+                              GlobalSimulationParametersData parameters, ui32 id) {
+
+    // Stepping loop
+    while (particles.endsimu[id] != PARTICLE_DEAD || particles.endsimu[id] != PARTICLE_FREEZE) {
+        vox_phan_track_to_out(particles, vol, materials, photon_CS_table, parameters, id);
+    }
 }
 
 ////:: Privates
@@ -228,7 +252,7 @@ void VoxPhanImgNav::track_to_in(Particles particles) {
 
     if (m_params.data_h.device_target == CPU_DEVICE) {
         ui32 id=0; while (id<particles.size) {
-            vox_phan_track_to_in(particles.data_h, phantom.volume.data_h.xmin, phantom.volume.data_h.xmax,
+            kernel_host_track_to_in(particles.data_h, phantom.volume.data_h.xmin, phantom.volume.data_h.xmax,
                                                    phantom.volume.data_h.ymin, phantom.volume.data_h.ymax,
                                                    phantom.volume.data_h.zmin, phantom.volume.data_h.zmax,
                                                    id);
@@ -240,9 +264,9 @@ void VoxPhanImgNav::track_to_in(Particles particles) {
         threads.x = m_params.data_h.gpu_block_size;
         grid.x = (particles.size + m_params.data_h.gpu_block_size - 1) / m_params.data_h.gpu_block_size;
 
-        kernel_vox_phan_track_to_in<<<grid, threads>>>(particles.data_d, phantom.volume.data_h.xmin, phantom.volume.data_h.xmax,
-                                                       phantom.volume.data_h.ymin, phantom.volume.data_h.ymax,
-                                                       phantom.volume.data_h.zmin, phantom.volume.data_h.zmax);
+        kernel_device_track_to_in<<<grid, threads>>>(particles.data_d, phantom.volume.data_h.xmin, phantom.volume.data_h.xmax,
+                                                     phantom.volume.data_h.ymin, phantom.volume.data_h.ymax,
+                                                     phantom.volume.data_h.zmin, phantom.volume.data_h.zmax);
         cuda_error_check("Error ", " Kernel_VoxPhanImgNav (track to in)");
 
     }
@@ -253,8 +277,10 @@ void VoxPhanImgNav::track_to_in(Particles particles) {
 void VoxPhanImgNav::track_to_out(Particles particles, Materials materials, PhotonCrossSection photon_CS) {
 
     if (m_params.data_h.device_target == CPU_DEVICE) {
+
         ui32 id=0; while (id<particles.size) {
-            vox_phan_track_to_out(particles.data_h, phantom.volume.data_h, materials.data_h, photon_CS.data_h, m_params.data_h, id);
+            kernel_host_track_to_out(particles.data_h, phantom.volume.data_h,
+                                     materials.data_h, photon_CS.data_h, m_params.data_h, id)
             ++id;
         }
     } else if (m_params.data_h.device_target == GPU_DEVICE) {
@@ -263,8 +289,8 @@ void VoxPhanImgNav::track_to_out(Particles particles, Materials materials, Photo
         threads.x = m_params.data_h.gpu_block_size;
         grid.x = (particles.size + m_params.data_h.gpu_block_size - 1) / m_params.data_h.gpu_block_size;
 
-        kernel_vox_phan_track_to_out<<<grid, threads>>>(particles.data_d, phantom.volume.data_d, materials.data_d,
-                                                        photon_CS.data_d, m_params.data_d);
+        kernel_device_track_to_out<<<grid, threads>>>(particles.data_d, phantom.volume.data_d, materials.data_d,
+                                                      photon_CS.data_d, m_params.data_d);
         cuda_error_check("Error ", " Kernel_VoxPhanImgNav (track to out)");
 
     }

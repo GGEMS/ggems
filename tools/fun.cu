@@ -1,5 +1,16 @@
 // GGEMS Copyright (C) 2015
 
+/*!
+ * \file fun.cu
+ * \brief
+ * \author J. Bert <bert.jul@gmail.com>
+ * \version 0.1
+ * \date 13 novembre 2015
+ *
+ *
+ *
+ */
+
 #ifndef FUN_CU
 #define FUN_CU
 #include "prng.cuh"

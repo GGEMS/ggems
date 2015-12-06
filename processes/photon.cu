@@ -1,5 +1,16 @@
 // GGEMS Copyright (C) 2015
 
+/*!
+ * \file photon.cu
+ * \brief
+ * \author J. Bert <bert.jul@gmail.com>
+ * \version 0.1
+ * \date 18 novembre 2015
+ *
+ *
+ *
+ */
+
 #ifndef PHOTON_CU
 #define PHOTON_CU
 #include "photon.cuh"

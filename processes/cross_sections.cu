@@ -1,5 +1,17 @@
 // GGEMS Copyright (C) 2015
 
+/*!
+ * \file cross_sections.cu
+ * \brief
+ * \author J. Bert <bert.jul@gmail.com>
+ * \version 0.1
+ * \date 18 novembre 2015
+ *
+ *
+ *
+ */
+
+
 #ifndef CROSS_SECTIONS_CU
 #define CROSS_SECTIONS_CU
 #include "cross_sections.cuh"
