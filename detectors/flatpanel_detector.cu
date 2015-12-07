@@ -158,6 +158,13 @@ void FlatpanelDetector::set_orbiting_radius(f32 r) {
 
 ////:: Main functions
 
+
+/////////////////////////////////////////////////////////////////////////////
+// TODO: This has to be change in order to have the same code structure that
+//       vox_phan_img_nav i.e. a kernel_host or a kernel_device
+////////////////////////////////////////////////////////////////////////////
+
+
 void FlatpanelDetector::track_to_in(Particles particles) {
 
     if (m_params.data_h.device_target == CPU_DEVICE) {

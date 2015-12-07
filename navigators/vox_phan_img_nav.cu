@@ -280,7 +280,7 @@ void VoxPhanImgNav::track_to_out(Particles particles, Materials materials, Photo
 
         ui32 id=0; while (id<particles.size) {
             kernel_host_track_to_out(particles.data_h, phantom.volume.data_h,
-                                     materials.data_h, photon_CS.data_h, m_params.data_h, id)
+                                     materials.data_h, photon_CS.data_h, m_params.data_h, id);
             ++id;
         }
     } else if (m_params.data_h.device_target == GPU_DEVICE) {
