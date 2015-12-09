@@ -391,10 +391,6 @@ void GGEMS::start_simulation() {
         ++ibatch;
     }
 
-    f32 * data = new f32[5];
-    
-GGEMSutils::record_dose_map("tttesd.mhd",data , make_f32xyz(2.32,4547.2,5.13),make_f32xyz(2.5678,441.33,5.3145),make_i32xyz(2,4,5),true);
-
 
 
 }

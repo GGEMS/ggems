@@ -108,8 +108,6 @@ ui16 MaterialManager::m_get_material_index(std::string material_name) {
 // Check mandatory
 bool MaterialManager::m_check_mandatory() {
 
-    std::cout<< materials.nb_materials << "  " << materials.nb_elements_total << std::endl;
-
     if (materials.nb_materials == 0 || materials.nb_elements_total == 0) return false;
     else return true;
 }

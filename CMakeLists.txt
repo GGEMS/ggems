@@ -26,10 +26,10 @@ endif()
 # OPTIONS
 option(WITH_FAST_MATH "Fast math flag" ON)
 if(WITH_FAST_MATH)
-set(LIBSCUDA --generate-code arch=compute_30,code=sm_30 --relocatable-device-code true -lcudadevrt --compiler-options -use_fast_math -w --ptxas-options=-v)
+set(LIBSCUDA --generate-code arch=compute_30,code=sm_30 --generate-code arch=compute_50,code=sm_50 --generate-code arch=compute_52,code=sm_52 --relocatable-device-code true -lcudadevrt --compiler-options -use_fast_math -w --ptxas-options=-v)
 
 else()
-  set(LIBSCUDA --generate-code arch=compute_30,code=sm_30 --relocatable-device-code true -lcudadevrt --compiler-options -w)
+  set(LIBSCUDA --generate-code arch=compute_30,code=sm_30 --generate-code arch=compute_50,code=sm_50 --generate-code arch=compute_52,code=sm_52 --relocatable-device-code true -lcudadevrt --compiler-options -w)
 endif()
 
 # GEANT4

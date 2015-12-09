@@ -21,6 +21,7 @@
 #include "materials.cuh"
 #include "photon.cuh"
 #include "photon_navigator.cuh"
+#include "save_data.cuh"
 
 class VoxPhanImgNav {
     public:
@@ -32,7 +33,8 @@ class VoxPhanImgNav {
         // Tracking inside the phantom until the phantom border
         void track_to_out(Particles particles, Materials materials, PhotonCrossSection photon_CS);
         
-        void load_phantom_from_mhd(std::string, std::string);  
+        // Check format phantom file
+        void load_phantom(std::string phantomfile, std::string materialfile);  
         
         // Init
         void initialize(GlobalSimulationParameters params);
@@ -47,6 +49,8 @@ class VoxPhanImgNav {
 
     private:
     
+        void load_phantom_from_mhd(std::string, std::string);  
+        
         VoxelizedPhantom phantom;
     
         bool m_check_mandatory();       
