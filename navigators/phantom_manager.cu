@@ -36,7 +36,7 @@ void PhantomManager::initialize(GlobalSimulationParameters params) {
     if (m_phantom_name == "VoxPhanImgNav") {
 
         /// Material handling ////////////////////////////
-
+      
         // Build material data based on geometry
         m_materials_mng.add_materials_and_update_indices(m_vox_phan_img.get_materials_list(),
                                                          m_vox_phan_img.get_data_materials_indices(),

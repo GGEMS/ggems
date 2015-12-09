@@ -22,6 +22,7 @@
 #include "source_manager.cuh"
 #include "phantom_manager.cuh"
 #include "detector_manager.cuh"
+#include "save_data.cuh"
 
 class GGEMS {
     public:

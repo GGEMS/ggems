@@ -15,7 +15,7 @@
 #define POINT_SOURCE_CUH
 
 #include "ggems_vsource.cuh"
-
+#include <iostream>
 // Sphere
 class PointSource : public GGEMSVSource {
     public:        

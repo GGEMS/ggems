@@ -29,7 +29,11 @@ __host__ __device__ void point_source(ParticlesData particles_data, ui32 id,
     phi  *= gpu_twopi;
     theta = acosf(1.0f - 2.0f*theta);
 
+
     ui32 pos = binary_search(JKISS32(particles_data, id), spectrumCDF, nbins);
+
+
+
 
     // set photons
     particles_data.E[id] = spectrumE[pos];
@@ -46,6 +50,7 @@ __host__ __device__ void point_source(ParticlesData particles_data, ui32 id,
     particles_data.level[id] = PRIMARY;
     particles_data.pname[id] = type;
     particles_data.geometry_id[id] = 0;
+
 }
 
 // Kernel to create new particles (sources manager)
@@ -53,7 +58,7 @@ __global__ void kernel_point_source(ParticlesData particles_data,
                                     f32 px, f32 py, f32 pz, ui8 type,
                                     f64 *spectrumE, f64 *spectrumCDF, ui32 nbins) {
 
-    const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
+    const ui32 id = get_id();
     if (id >= particles_data.size) return;
 
     point_source(particles_data, id, px, py, pz, type,
@@ -173,7 +178,7 @@ void PointSource::get_primaries_generator(Particles particles) {
 
         ui32 id=0; while (id<particles.size) {
             point_source(particles.data_h, id, m_px, m_py, m_pz, m_particle_type,
-                         m_spectrumE_d, m_spectrumCDF_d, m_nb_of_energy_bins);
+                         m_spectrumE_h, m_spectrumCDF_h, m_nb_of_energy_bins);
             ++id;
         }
 

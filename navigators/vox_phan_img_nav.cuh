@@ -31,7 +31,9 @@ class VoxPhanImgNav {
         void track_to_in(Particles particles);
         // Tracking inside the phantom until the phantom border
         void track_to_out(Particles particles, Materials materials, PhotonCrossSection photon_CS);
-
+        
+        void load_phantom_from_mhd(std::string, std::string);  
+        
         // Init
         void initialize(GlobalSimulationParameters params);
 
@@ -42,9 +44,11 @@ class VoxPhanImgNav {
         // Get the size of data (nb of voxels)
         ui32 get_data_size();
 
-        VoxelizedPhantom phantom;
 
     private:
+    
+        VoxelizedPhantom phantom;
+    
         bool m_check_mandatory();       
         void m_copy_phantom_cpu2gpu();
 

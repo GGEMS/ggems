@@ -16,6 +16,8 @@
 
 #include "global.cuh"
 
+inline __device__ ui32 get_id(){return blockIdx.x * blockDim.x + threadIdx.x;};
+
 __host__ __device__ f32xyz rotateUz(f32xyz vector, f32xyz newUz);
 
 // Loglog interpolation

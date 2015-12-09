@@ -107,6 +107,9 @@ ui16 MaterialManager::m_get_material_index(std::string material_name) {
 
 // Check mandatory
 bool MaterialManager::m_check_mandatory() {
+
+    std::cout<< materials.nb_materials << "  " << materials.nb_elements_total << std::endl;
+
     if (materials.nb_materials == 0 || materials.nb_elements_total == 0) return false;
     else return true;
 }
@@ -380,6 +383,7 @@ void MaterialManager::load_materials_database(std::string filename) {
 // Add materials to the main list and update the corresponding indices
 void MaterialManager::add_materials_and_update_indices(std::vector<std::string> mats_list, ui16 *data, ui32 ndata) {
 
+
     ui16 local_id_mat=0; while (local_id_mat<mats_list.size()) {
 
         ui16 glb_id_mat = m_get_material_index(mats_list[local_id_mat]);
@@ -443,14 +447,18 @@ void MaterialManager::add_materials_and_update_indices(std::vector<std::string> 
 
 // Init
 void MaterialManager::initialize(GlobalSimulationParameters params) {
+    
+    ///WARNING fonction m_build_materials_table deplacee au dessus de check. Non verifié
+    
+    // Build materials table
+    m_build_materials_table(params);
+ 
     // Check if everything was set properly
     if ( !m_check_mandatory() ) {
         print_error("Missing materials definition!");
         exit_simulation();
     }
 
-    // Build materials table
-    m_build_materials_table(params);
 
     // Copy data to the GPU
     if (params.data_h.device_target == GPU_DEVICE) m_copy_materials_table_cpu2gpu();

@@ -226,4 +226,9 @@ static __inline__ __host__ __device__ f64xyz make_f64xyz(f64 vx, f64 vy, f64 vz)
     f64xyz t; t.x = vx; t.y = vy; t.z = vz; return t;
 }
 
+static __inline__ __host__ __device__ i32xyz make_i32xyz(i32 vx, i32 vy, i32 vz) {
+    i32xyz t; t.x = vx; t.y = vy; t.z = vz; return t;
+}
+
+
 #endif

@@ -73,6 +73,12 @@ void DetectorManager::track_to_out(Particles particles) {
 */
 }
 
+void DetectorManager::digitizer()
+{
+
+
+}
+
 std::string DetectorManager::get_detector_name() {
     return m_detector_name;
 }

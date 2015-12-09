@@ -16,6 +16,7 @@
 
 #include "ggems.cuh"
 
+
 ////// :: GGEMS Const/Dest ::
 
 GGEMS::GGEMS() {
@@ -361,6 +362,7 @@ void GGEMS::start_simulation() {
     // Main loop
     ui32 ibatch=0; while(ibatch < m_parameters.data_h.nb_of_batches) {
 
+            
         // Get primaries
         m_sources.get_primaries_generator(m_particles_manager.particles);
 
@@ -368,24 +370,30 @@ void GGEMS::start_simulation() {
 
         // Nav between source to phantom
         m_phantoms.track_to_in(m_particles_manager.particles);
+        
         // Nav within the phantom
         m_phantoms.track_to_out(m_particles_manager.particles);
-
+        
         // TODO If detector
 
         // Nav between phantom to detector
         m_detectors.track_to_in(m_particles_manager.particles);
+        
         // Nav within the detector
         m_detectors.track_to_out(m_particles_manager.particles);
+        
         // Process hit, coincidences, etc.
         m_detectors.digitizer();
+        
         // Export data
         //m_detectors.save_data("toto.dat");
 
         ++ibatch;
     }
 
-
+    f32 * data = new f32[5];
+    
+GGEMSutils::record_dose_map("tttesd.mhd",data , make_f32xyz(2.32,4547.2,5.13),make_f32xyz(2.5678,441.33,5.3145),make_i32xyz(2,4,5),true);
 
 
 

@@ -20,8 +20,8 @@
 class TxtReader {
 
     public:
-        TxtReader();
-        ~TxtReader();
+        TxtReader(){};
+        ~TxtReader(){};
 
         void skip_comment(std::istream &);
 

@@ -189,7 +189,7 @@ __global__ void kernel_device_track_to_out(ParticlesData particles,
     if (id >= particles.size) return;
 
     // Stepping loop
-    while (particles.endsimu[id] != PARTICLE_DEAD || particles.endsimu[id] != PARTICLE_FREEZE) {
+    while (particles.endsimu[id] != PARTICLE_DEAD && particles.endsimu[id] != PARTICLE_FREEZE) {
         vox_phan_track_to_out(particles, vol, materials, photon_CS_table, parameters, id);
     }
 
@@ -203,7 +203,7 @@ void kernel_host_track_to_out(ParticlesData particles,
                               GlobalSimulationParametersData parameters, ui32 id) {
 
     // Stepping loop
-    while (particles.endsimu[id] != PARTICLE_DEAD || particles.endsimu[id] != PARTICLE_FREEZE) {
+    while (particles.endsimu[id] != PARTICLE_DEAD && particles.endsimu[id] != PARTICLE_FREEZE) {
         vox_phan_track_to_out(particles, vol, materials, photon_CS_table, parameters, id);
     }
 }
@@ -279,6 +279,7 @@ void VoxPhanImgNav::track_to_out(Particles particles, Materials materials, Photo
     if (m_params.data_h.device_target == CPU_DEVICE) {
 
         ui32 id=0; while (id<particles.size) {
+           
             kernel_host_track_to_out(particles.data_h, phantom.volume.data_h,
                                      materials.data_h, photon_CS.data_h, m_params.data_h, id);
             ++id;
@@ -294,6 +295,13 @@ void VoxPhanImgNav::track_to_out(Particles particles, Materials materials, Photo
         cuda_error_check("Error ", " Kernel_VoxPhanImgNav (track to out)");
 
     }
+
+}
+
+void VoxPhanImgNav::load_phantom_from_mhd(std::string mhdfile, std::string matfile)
+{
+
+    phantom.load_from_mhd(mhdfile, matfile);
 
 }
 

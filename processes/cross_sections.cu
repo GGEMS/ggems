@@ -31,14 +31,19 @@ bool CrossSectionsManager::m_check_mandatory() {
 
 void CrossSectionsManager::initialize(Materials materials, GlobalSimulationParameters parameters) {
 
-    // Check if everything was set properly
-    if ( !m_check_mandatory() ) {
-        print_error("CrossSectionsManager paramters error!");
-        exit_simulation();
-    }
+    ///WARNING fonction m_build_table deplacee au dessus de check. Non verifié
+    
 
     // Build table on CPU side
     m_build_table(materials, parameters);
+
+    // Check if everything was set properly
+    if ( !m_check_mandatory() ) {
+        print_error("CrossSectionsManager parameters error!");
+        exit_simulation();
+    }
+
+
 
     // Allocation and copy
     if (parameters.data_h.device_target == GPU_DEVICE) m_copy_cs_table_cpu2gpu();
