@@ -302,7 +302,7 @@ void VoxPhanImgNav::track_to_out(Particles particles, Materials materials, Photo
 void VoxPhanImgNav::load_phantom(std::string file, std::string matfile)
 {
 
-    if (GGEMSutils::get_format(file) == "mhd") 
+    if (ImageReader::get_format(file) == "mhd") 
     {
     
         load_phantom_from_mhd(file, matfile);

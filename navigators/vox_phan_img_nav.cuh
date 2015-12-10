@@ -21,7 +21,7 @@
 #include "materials.cuh"
 #include "photon.cuh"
 #include "photon_navigator.cuh"
-#include "save_data.cuh"
+#include "image_reader.cuh"
 
 class VoxPhanImgNav {
     public:

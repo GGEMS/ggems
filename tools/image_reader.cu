@@ -1,23 +1,13 @@
 #ifndef SAVE_DATA_CU
 #define SAVE_DATA_CU
 
-#include "save_data.cuh"
+#include "image_reader.cuh"
 
 using namespace std;
 
-inline string GGEMSutils::get_format(string filename)
-{
-    return filename.substr(filename.find_last_of(".") + 1);
 
-}
 
-inline string GGEMSutils::get_filename_without_format(string filename)
-{
-    return filename.substr(0,filename.find_last_of(".") );
-
-}
-
-void GGEMSutils::record_dose_map( string histname,  f32 *data, f32xyz offset, f32xyz spacing, i32xyz size, bool sparse_compression )
+void ImageReader::record3Dimage( string histname,  f32 *data, f32xyz offset, f32xyz spacing, i32xyz size, bool sparse_compression )
 {
 
     // Check format
@@ -37,12 +27,8 @@ void GGEMSutils::record_dose_map( string histname,  f32 *data, f32xyz offset, f3
         myfile << "NDims = 3\n";
         myfile << "BinaryData = True\n";
         myfile << "BinaryDataByteOrderMSB = False\n";
-        
-        if ( sparse_compression ) {
-            myfile << "CompressedData = COO\n";
-        } else {
-            myfile << "CompressedData = False\n";
-        }
+
+        myfile << "CompressedData = "<<  ((sparse_compression) ? "COO" : "False")  <<"\n";
         
         myfile << "TransformMatrix = 1 0 0 0 1 0 0 0 1\n";
         myfile << "Offset = "<<offset.x<<" "<<offset.y<<" "<<offset.z<<"\n";

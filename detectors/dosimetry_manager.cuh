@@ -4,20 +4,15 @@
 #include "global.cuh"
 #include "particles.cuh"
 
-class DosimetryManager {
+class DoseCalculator {
     public:
-        DosimetryManager() {};
-        ~DosimetryManager() {}
+        DoseCalculator() {};
+        ~DoseCalculator() {}
+        
+        
 
 
 };
-
-
-
-
-
-
-
 
 
 

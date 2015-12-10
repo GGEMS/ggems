@@ -18,6 +18,7 @@
 
 
 ////// :: GGEMS Const/Dest ::
+GlobalSimulationParameters *GGEMS::theParameters = NULL;
 
 GGEMS::GGEMS() {
 
@@ -57,6 +58,7 @@ GGEMS::GGEMS() {
     m_parameters.data_h.display_run_time = DISABLED;
     m_parameters.data_h.display_memory_usage = DISABLED;
 
+    theParameters = &m_parameters;
 }
 
 GGEMS::~GGEMS() {
@@ -118,7 +120,10 @@ void GGEMS::set_process(std::string process_name) {
 // Add cut on particle tracking
 void GGEMS::set_particle_cut(std::string pname, f32 E) {
     if (pname == "photon") m_parameters.data_h.photon_cut = E;
-    if (pname == "electron") m_parameters.data_h.electron_cut = E;
+    else if (pname == "electron") 
+    {
+        m_parameters.data_h.electron_cut = E;
+    }
 }
 
 // Enable the simulation of a particular secondary particle
@@ -276,6 +281,7 @@ void GGEMS::init_simulation() {
         m_copy_parameters_cpu2gpu();
     }
 
+
     /// Init Sources /////////////////////////////////
     m_sources.initialize(m_parameters);
 
@@ -284,6 +290,7 @@ void GGEMS::init_simulation() {
 
     /// Init Particles Stack /////////////////////////
     m_particles_manager.initialize(m_parameters);
+
 
 
     // TODO DETECTOR
@@ -391,7 +398,7 @@ void GGEMS::start_simulation() {
         ++ibatch;
     }
 
-
+    
 
 }
 

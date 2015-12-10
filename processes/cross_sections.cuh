@@ -17,7 +17,7 @@
 #include "materials.cuh"
 #include "global.cuh"
 #include "photon.cuh"
-
+#include "electron.cuh"
 
 // CS class
 class CrossSectionsManager {
@@ -29,7 +29,7 @@ class CrossSectionsManager {
 
         // Data for photon
         PhotonCrossSection photon_CS;  // CPU & GPU
-
+        
         // Data for electron TODO
         //ElectronCrossSection Electron_CS;
 
@@ -38,7 +38,14 @@ class CrossSectionsManager {
         void m_build_table(Materials materials, GlobalSimulationParameters parameters);
         void m_copy_cs_table_cpu2gpu();
 
-
+        // Electron CS data
+        ElectronCrossSection *electronTable;
+        
+        GlobalSimulationParameters params;
+        GlobalSimulationParameters *parameters;
+        
+        i8 there_is_photon;
+        i8 there_is_electron;
 
 };
 

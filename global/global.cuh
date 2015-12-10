@@ -72,8 +72,7 @@
 #define FALSE   0
 
 //#define EKINELIMIT 1*eV
-//#define elec_radius          (2.8179409421853486E-15*m)      // Metre
-//#define N_avogadro           (6.0221367E+23/mole)
+
 
 //#define DEBUGOK "[\033[32;01mok\033[00m]"
 //#define PRINTFUNCTION printf("%s %s\n",DEBUGOK,__FUNCTION__);
@@ -85,6 +84,10 @@
 // Pi
 #define gpu_pi               3.141592653589793116
 #define gpu_twopi            2.0*gpu_pi
+
+// Constants for electrons
+#define elec_radius          (2.8179409421853486E-15*m)      // Metre
+#define N_avogadro           (6.0221367E+23/mole)
 
 /////// TYPEDEF ////////////////////////////////////////////////
 

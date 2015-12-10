@@ -21,6 +21,8 @@
 CrossSectionsManager::CrossSectionsManager() {
     photon_CS.nb_bins = 0;
     photon_CS.nb_mat = 0;
+    electronTable = new ElectronCrossSection;
+    parameters = new GlobalSimulationParameters();
 }
 
 // Main function
@@ -67,13 +69,15 @@ void CrossSectionsManager::m_build_table(Materials materials, GlobalSimulationPa
         ++i;
     }
 
+    
     // Find if there are photon and electron in this simulation;
-    i8 there_is_photon = parameters.data_h.physics_list[PHOTON_COMPTON] ||
+    there_is_photon = parameters.data_h.physics_list[PHOTON_COMPTON] ||
                          parameters.data_h.physics_list[PHOTON_PHOTOELECTRIC] ||
                          parameters.data_h.physics_list[PHOTON_RAYLEIGH];
-    //i8 there_is_electron = parameters.physics_list[ELECTRON_IONISATION] ||
-    //                         parameters.physics_list[ELECTRON_BREMSSTRAHLUNG] ||
-    //                         parameters.physics_list[ELECTRON_MSC];
+                         
+    there_is_electron = parameters.data_h.physics_list[ELECTRON_IONISATION] ||
+                            parameters.data_h.physics_list[ELECTRON_BREMSSTRAHLUNG] ||
+                            parameters.data_h.physics_list[ELECTRON_MSC];
 
     // Then init data
     ui32 tot_elt = materials.nb_materials*nbin;
@@ -114,10 +118,13 @@ void CrossSectionsManager::m_build_table(Materials materials, GlobalSimulationPa
     }
     
     // idem for e- table - TODO
-    // if (there_is_electron) {
-    // ...
-    // ...
-
+    if (there_is_electron) 
+    {
+        electronTable->initialize(parameters,materials.data_h);
+        electronTable->generateTable();
+        G4cout<<"Init electrons OK "<<G4endl;
+        electronTable->printElectronTables("table/electronTable");
+    }
     // If Rayleigh scattering, load information once from G4 EM data library
     f32 *g4_ray_cs = NULL;
     f32 *g4_ray_sf = NULL;
@@ -297,45 +304,56 @@ void CrossSectionsManager::print() {
 // Copy CS table to the device
 void CrossSectionsManager::m_copy_cs_table_cpu2gpu() {
 
-    ui32 n = photon_CS.data_h.nb_bins;
-    ui32 k = photon_CS.data_h.nb_mat;
+    if(there_is_photon)
+    {
+        ui32 n = photon_CS.data_h.nb_bins;
+        ui32 k = photon_CS.data_h.nb_mat;
 
-    // Allocate GPU mem
-    HANDLE_ERROR( cudaMalloc((void**) &photon_CS.data_d.E_bins, n*sizeof(f32)) );
+        // Allocate GPU mem
+        HANDLE_ERROR( cudaMalloc((void**) &photon_CS.data_d.E_bins, n*sizeof(f32)) );
 
-    HANDLE_ERROR( cudaMalloc((void**) &photon_CS.data_d.Compton_Std_CS, n*k*sizeof(f32)) );
+        HANDLE_ERROR( cudaMalloc((void**) &photon_CS.data_d.Compton_Std_CS, n*k*sizeof(f32)) );
 
-    HANDLE_ERROR( cudaMalloc((void**) &photon_CS.data_d.Photoelectric_Std_CS, n*k*sizeof(f32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &photon_CS.data_d.Photoelectric_Std_xCS, n*101*sizeof(f32)) );
+        HANDLE_ERROR( cudaMalloc((void**) &photon_CS.data_d.Photoelectric_Std_CS, n*k*sizeof(f32)) );
+        HANDLE_ERROR( cudaMalloc((void**) &photon_CS.data_d.Photoelectric_Std_xCS, n*101*sizeof(f32)) );
 
-    HANDLE_ERROR( cudaMalloc((void**) &photon_CS.data_d.Rayleigh_Lv_CS, n*k*sizeof(f32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &photon_CS.data_d.Rayleigh_Lv_SF, n*101*sizeof(f32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &photon_CS.data_d.Rayleigh_Lv_xCS, n*101*sizeof(f32)) );
+        HANDLE_ERROR( cudaMalloc((void**) &photon_CS.data_d.Rayleigh_Lv_CS, n*k*sizeof(f32)) );
+        HANDLE_ERROR( cudaMalloc((void**) &photon_CS.data_d.Rayleigh_Lv_SF, n*101*sizeof(f32)) );
+        HANDLE_ERROR( cudaMalloc((void**) &photon_CS.data_d.Rayleigh_Lv_xCS, n*101*sizeof(f32)) );
 
-    // Copy data to GPU
-    photon_CS.data_d.nb_bins = n;
-    photon_CS.data_d.nb_mat = k;
-    photon_CS.data_d.E_min = photon_CS.data_h.E_min;
-    photon_CS.data_d.E_max = photon_CS.data_h.E_max;
+        // Copy data to GPU
+        photon_CS.data_d.nb_bins = n;
+        photon_CS.data_d.nb_mat = k;
+        photon_CS.data_d.E_min = photon_CS.data_h.E_min;
+        photon_CS.data_d.E_max = photon_CS.data_h.E_max;
 
-    HANDLE_ERROR( cudaMemcpy(photon_CS.data_d.E_bins, photon_CS.data_h.E_bins,
-                             sizeof(f32)*n, cudaMemcpyHostToDevice) );
+        HANDLE_ERROR( cudaMemcpy(photon_CS.data_d.E_bins, photon_CS.data_h.E_bins,
+                                sizeof(f32)*n, cudaMemcpyHostToDevice) );
 
-    HANDLE_ERROR( cudaMemcpy(photon_CS.data_d.Compton_Std_CS, photon_CS.data_h.Compton_Std_CS,
-                             sizeof(f32)*n*k, cudaMemcpyHostToDevice) );
+        HANDLE_ERROR( cudaMemcpy(photon_CS.data_d.Compton_Std_CS, photon_CS.data_h.Compton_Std_CS,
+                                sizeof(f32)*n*k, cudaMemcpyHostToDevice) );
 
-    HANDLE_ERROR( cudaMemcpy(photon_CS.data_d.Photoelectric_Std_CS, photon_CS.data_h.Photoelectric_Std_CS,
-                             sizeof(f32)*n*k, cudaMemcpyHostToDevice) );
-    HANDLE_ERROR( cudaMemcpy(photon_CS.data_d.Photoelectric_Std_xCS, photon_CS.data_h.Photoelectric_Std_xCS,
-                             sizeof(f32)*n*101, cudaMemcpyHostToDevice) );
+        HANDLE_ERROR( cudaMemcpy(photon_CS.data_d.Photoelectric_Std_CS, photon_CS.data_h.Photoelectric_Std_CS,
+                                sizeof(f32)*n*k, cudaMemcpyHostToDevice) );
+        HANDLE_ERROR( cudaMemcpy(photon_CS.data_d.Photoelectric_Std_xCS, photon_CS.data_h.Photoelectric_Std_xCS,
+                                sizeof(f32)*n*101, cudaMemcpyHostToDevice) );
 
-    HANDLE_ERROR( cudaMemcpy(photon_CS.data_d.Rayleigh_Lv_CS, photon_CS.data_h.Rayleigh_Lv_CS,
-                             sizeof(f32)*n*k, cudaMemcpyHostToDevice) );
-    HANDLE_ERROR( cudaMemcpy(photon_CS.data_d.Rayleigh_Lv_SF, photon_CS.data_h.Rayleigh_Lv_SF,
-                             sizeof(f32)*n*101, cudaMemcpyHostToDevice) );
-    HANDLE_ERROR( cudaMemcpy(photon_CS.data_d.Rayleigh_Lv_xCS, photon_CS.data_h.Rayleigh_Lv_xCS,
-                             sizeof(f32)*n*101, cudaMemcpyHostToDevice) );
+        HANDLE_ERROR( cudaMemcpy(photon_CS.data_d.Rayleigh_Lv_CS, photon_CS.data_h.Rayleigh_Lv_CS,
+                                sizeof(f32)*n*k, cudaMemcpyHostToDevice) );
+        HANDLE_ERROR( cudaMemcpy(photon_CS.data_d.Rayleigh_Lv_SF, photon_CS.data_h.Rayleigh_Lv_SF,
+                                sizeof(f32)*n*101, cudaMemcpyHostToDevice) );
+        HANDLE_ERROR( cudaMemcpy(photon_CS.data_d.Rayleigh_Lv_xCS, photon_CS.data_h.Rayleigh_Lv_xCS,
+                                sizeof(f32)*n*101, cudaMemcpyHostToDevice) );
 
+    }
+    
+    if (there_is_electron)
+    {
+    
+    
+    }
+    
+                             
 }
 
 

@@ -22,7 +22,8 @@
 #include "source_manager.cuh"
 #include "phantom_manager.cuh"
 #include "detector_manager.cuh"
-#include "save_data.cuh"
+#include "image_reader.cuh"
+// #include "flatpanel_detector.cuh"
 
 class GGEMS {
     public:
@@ -88,7 +89,10 @@ class GGEMS {
         bool m_check_mandatory();
         void m_copy_parameters_cpu2gpu();
         GlobalSimulationParameters m_parameters;
+        
+       static GlobalSimulationParameters *theParameters;
 
+        
         /*
         // Main functions
         void primaries_generator();
