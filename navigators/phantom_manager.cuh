@@ -18,6 +18,7 @@
 #include "materials.cuh"
 #include "cross_sections.cuh"
 #include "vox_phan_img_nav.cuh"
+#include "vox_phan_dosi.cuh"
 
 class PhantomManager {
     public:
@@ -25,6 +26,8 @@ class PhantomManager {
         ~PhantomManager() {}
 
         void set_phantom(VoxPhanImgNav &aPhantom);
+        void set_phantom(VoxPhanDosi &aPhantom);
+              
         void initialize(GlobalSimulationParameters params);
 
         void track_to_in(Particles particles);
@@ -34,6 +37,7 @@ class PhantomManager {
 
     private:
         VoxPhanImgNav m_vox_phan_img;
+        VoxPhanDosi m_vox_phan_dosi;
         std::string m_phantom_name;      
 
         MaterialManager m_materials_mng;

@@ -170,6 +170,10 @@ void GGEMS::set_phantom(VoxPhanImgNav &aPhantom) {
     m_phantoms.set_phantom(aPhantom);
 }
 
+/// Phantoms
+void GGEMS::set_phantom(VoxPhanDosi &aPhantom) {
+    m_phantoms.set_phantom(aPhantom);
+}
 /// Utils
 
 // Display run time

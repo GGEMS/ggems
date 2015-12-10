@@ -23,7 +23,12 @@ PhantomManager::PhantomManager() {
 
 void PhantomManager::set_phantom(VoxPhanImgNav &aPhantom) {
     m_vox_phan_img = aPhantom;
-    m_phantom_name = "VoxPhanImgNav";
+    m_phantom_name = m_vox_phan_img.get_name();
+}
+
+void PhantomManager::set_phantom(VoxPhanDosi &aPhantom) {
+    m_vox_phan_dosi = aPhantom;
+    m_phantom_name = m_vox_phan_dosi.get_name();
 }
 
 void PhantomManager::initialize(GlobalSimulationParameters params) {
@@ -33,7 +38,7 @@ void PhantomManager::initialize(GlobalSimulationParameters params) {
     m_materials_mng.load_materials_database();
 
     // Init phantom that including also data copy to GPU
-    if (m_phantom_name == "VoxPhanImgNav") {
+    if (m_phantom_name == m_vox_phan_img.get_name()) {
 
         /// Material handling ////////////////////////////
       
@@ -59,17 +64,22 @@ void PhantomManager::initialize(GlobalSimulationParameters params) {
 // Move particle to the phantom boundary
 void PhantomManager::track_to_in(Particles particles) {
 
-    if (m_phantom_name == "VoxPhanImgNav") {
+    if (m_phantom_name == m_vox_phan_img.get_name()) {
         m_vox_phan_img.track_to_in(particles);
     }
-
+    else if (m_phantom_name == m_vox_phan_dosi.get_name()) {
+        m_vox_phan_dosi.track_to_in(particles);
+    }
     // Put others phantom here.
 }
 
 // Track particle within the phantom
 void PhantomManager::track_to_out(Particles particles) {
 
-    if (m_phantom_name == "VoxPhanImgNav") {
+    if (m_phantom_name == m_vox_phan_img.get_name()) {
+        m_vox_phan_img.track_to_out(particles, m_materials_mng.materials, m_cross_sections_mng.photon_CS);
+    }
+    else if (m_phantom_name == m_vox_phan_dosi.get_name()) {
         m_vox_phan_img.track_to_out(particles, m_materials_mng.materials, m_cross_sections_mng.photon_CS);
     }
 

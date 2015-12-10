@@ -46,6 +46,7 @@ class VoxPhanImgNav {
         // Get the size of data (nb of voxels)
         ui32 get_data_size();
 
+        inline std::string get_name(){return "VoxPhanImgNav";};
 
     private:
     

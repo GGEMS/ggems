@@ -53,7 +53,9 @@ class GGEMS {
         void set_seed(ui32 vseed);
         // Setting simulation objects
         void set_source(PointSource &aSource);
+        
         void set_phantom(VoxPhanImgNav &aPhantom);
+        void set_phantom(VoxPhanDosi &aPhantom);
         // TODO DETECTOR
 
         // Utils
