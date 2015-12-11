@@ -107,13 +107,13 @@ float distance = 100000000.0f;
 //for( i = 0; i < nProcessActivated;++i)
 //for( std::list<AbstractProcess>::iterator iter = processListActivated.begin();
     //iter != processListActivated.end(); ++iter)
-{
+//{
     // Compton and Photoelectric activated
-    photon_get_next_interaction( particles, *iter, photon_CS_table[*iter], mat_id, part_id, &distance );
-    distance = distance < distance_next_i ? distance : distance_next_i;
-}
+  //  photon_get_next_interaction( particles, *iter, photon_CS_table[*iter], mat_id, part_id, &distance );
+  //  distance = distance < distance_next_i ? distance : distance_next_i;
+//}
 
-std::cout <<;
+//std::cout <<;
  
     photon_get_next_interaction(particles, parameters, photon_CS_table, mat_id, part_id);
 

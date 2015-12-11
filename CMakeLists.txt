@@ -3,6 +3,13 @@
 #
 cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
 
+SET( CMAKE_BUILD_TYPE Release )
+IF( DEFINED CMAKE_BUILD_TYPE )
+  SET( CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE} CACHE STRING "" )
+ELSE()
+  SET( CMAKE_BUILD_TYPE Debug CACHE STRING "" )
+ENDIF()
+
 project(GGEMS)
 
 if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
@@ -26,7 +33,7 @@ endif()
 # OPTIONS
 option(WITH_FAST_MATH "Fast math flag" ON)
 if(WITH_FAST_MATH)
-set(LIBSCUDA --generate-code arch=compute_30,code=sm_30 --generate-code arch=compute_50,code=sm_50 --generate-code arch=compute_52,code=sm_52 --relocatable-device-code true -lcudadevrt --compiler-options -use_fast_math -w --ptxas-options=-v)
+set(LIBSCUDA --generate-code arch=compute_30,code=sm_30 --generate-code arch=compute_50,code=sm_50 --generate-code arch=compute_52,code=sm_52 --relocatable-device-code true -lcudadevrt --compiler-options -use_fast_math -w)
 
 else()
   set(LIBSCUDA --generate-code arch=compute_30,code=sm_30 --generate-code arch=compute_50,code=sm_50 --generate-code arch=compute_52,code=sm_52 --relocatable-device-code true -lcudadevrt --compiler-options -w)
@@ -75,8 +82,9 @@ file(GLOB datafiles "data/*")
 # Compilation
 find_package(CUDA REQUIRED)
 set(LIB_NAME "ggems")
-set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} ${LIBSCUDA})
-set(CUDA_SEPARABLE_COMPILATION OFF)
+set(CUDA_NVCC_FLAGS ${LIBSCUDA})
+
+SET( CUDA_PROPAGATE_HOST_FLAGS OFF CACHE BOOL "" FORCE )
 
 cuda_add_library(${LIB_NAME} STATIC ${sourcesGPU} ${headersGPU})
 
