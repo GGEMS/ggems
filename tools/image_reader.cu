@@ -10,8 +10,6 @@ using namespace std;
 void ImageReader::record3Dimage( string histname,  f32 *data, f32xyz offset, f32xyz spacing, i32xyz size, bool sparse_compression )
 {
 
-//     cout << 
-
     // Check format
     string format = get_format(histname);
     histname = get_filename_without_format(histname);
@@ -105,16 +103,6 @@ void ImageReader::record3Dimage( string histname,  f32 *data, f32xyz offset, f32
 
         
     } // Fin mhd
-#ifdef ROOT
-    else if (format == "root")
-    {
-        string pathname = histname + ".root";
-    
-        cout<<"Save file : "<<pathname << endl;
-
-    
-    }
-#endif
     else  if ((format == "ASCII") || (format == "txt"))
     {
         string pathname = histname + ".txt";

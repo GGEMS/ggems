@@ -81,8 +81,6 @@ namespace ImageReader
     // Record dose map 
     void record3Dimage( std::string histname,  f32 *data, f32xyz offset, f32xyz spacing, i32xyz size, bool sparce_compression = false);
     
-    
-    
     inline std::string get_format(std::string filename)
     {
     return filename.substr(filename.find_last_of(".") + 1);
@@ -104,6 +102,4 @@ namespace ImageReader
     
     
 };
-    
-    
 #endif

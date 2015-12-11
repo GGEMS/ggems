@@ -101,7 +101,24 @@ __host__ __device__ void vox_phan_track_to_out(ParticlesData &particles,
 
     //// Find next discrete interaction ///////////////////////////////////////
 
+float distance_next_i = 100000000.0;
+float distance = 100000000.0f;
+//for( i = 0; i < processListActivated.size();++i)
+//for( i = 0; i < nProcessActivated;++i)
+//for( std::list<AbstractProcess>::iterator iter = processListActivated.begin();
+    //iter != processListActivated.end(); ++iter)
+{
+    // Compton and Photoelectric activated
+    photon_get_next_interaction( particles, *iter, photon_CS_table[*iter], mat_id, part_id, &distance );
+    distance = distance < distance_next_i ? distance : distance_next_i;
+}
+
+std::cout <<;
+ 
     photon_get_next_interaction(particles, parameters, photon_CS_table, mat_id, part_id);
+
+
+
 
     f32 next_interaction_distance = particles.next_interaction_distance[part_id];
     ui8 next_discrete_process = particles.next_discrete_process[part_id];
