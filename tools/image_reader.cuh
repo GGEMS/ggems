@@ -4,6 +4,7 @@
 #include <iostream>
 #include "global.cuh"
 
+
 namespace ImageReader
 {
     template<typename T>

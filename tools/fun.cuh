@@ -15,6 +15,7 @@
 #define FUN_H
 
 #include "global.cuh"
+#include "vector.cuh"
 
 inline __device__ ui32 get_id(){return blockIdx.x * blockDim.x + threadIdx.x;};
 
@@ -24,8 +25,23 @@ __host__ __device__ f32xyz rotateUz(f32xyz vector, f32xyz newUz);
 __host__ __device__ f32 loglog_interpolation(f32 x, f32 x0, f32 y0, f32 x1, f32 y1);
 
 // Binary search
-__host__ __device__ ui32 binary_search(f32 key, f32* tab, ui32 size, ui32 min=0);
-__host__ __device__ ui32 binary_search(f64 key, f64* tab, ui32 size, ui32 min=0);
+// __host__ __device__ ui32 binary_search(f32 key, f32* tab, ui32 size, ui32 min=0);
+// __host__ __device__ ui32 binary_search(f64 key, f64* tab, ui32 size, ui32 min=0);
+
+template < typename T, typename U >
+inline __host__ __device__ ui32 binary_search(T key, U* tab, ui32 size, ui32 min=0) {
+    ui32 max=size, mid;
+    while ((min < max)) {
+        mid = (min + max) >> 1;
+        if (key > tab[mid]) {
+            min = mid + 1;
+        } else {
+            max = mid;
+        }
+    }
+    return min;
+}
+
 
 // Linear interpolation
 __host__ __device__ f32 linear_interpolation(f32 xa,f32 ya, f32 xb,  f32 yb, f32 x);

@@ -62,6 +62,31 @@ __host__ __device__ f32xyz fxyz_abs(f32xyz u);
 // return 1/u
 __host__ __device__ f32xyz fxyz_inv(f32xyz u);
 
+
+inline __host__ __device__  f32 f32xyz_mul(f32xyz v){ return v.x * v.y * v.z;}
+
+inline __host__ __device__  i32 i32xyz_mul(i32xyz v){ return v.x * v.y * v.z;}
+
+inline __host__ __device__  ui32 ui32xyz_mul(ui32xyz v){ return v.x * v.y * v.z;}
+
+
+//// Struct that handle nD variable     TODO the other types
+static __inline__ __host__ __device__ f32xyz make_f32xyz(f32 vx, f32 vy, f32 vz) {
+    f32xyz t; t.x = vx; t.y = vy; t.z = vz; return t;
+}
+static __inline__ __host__ __device__ f64xyz make_f64xyz(f64 vx, f64 vy, f64 vz) {
+    f64xyz t; t.x = vx; t.y = vy; t.z = vz; return t;
+}
+
+static __inline__ __host__ __device__ i32xyz make_i32xyz(i32 vx, i32 vy, i32 vz) {
+    i32xyz t; t.x = vx; t.y = vy; t.z = vz; return t;
+}
+
+static __inline__ __host__ __device__ ui32xyz make_ui32xyz(ui32 vx, ui32 vy, ui32 vz) {
+    ui32xyz t; t.x = vx; t.y = vy; t.z = vz; return t;
+}
+
+
 /// Double precision functions ///////////////////////////////////////////////
 
 #ifndef SINGLE_PRECISION
@@ -107,6 +132,24 @@ __host__ __device__ f64xyz fxyz_abs(f64xyz u);
 // return 1/u
 __host__ __device__ f64xyz fxyz_inv(f64xyz u);
 
+inline __host__ __device__  f64 f64xyz_mul(f64xyz v){ return v.x * v.y * v.z;}
+
 #endif
+
+template < typename T >
+inline __host__ __device__ void ggems_atomic_add(T* array, ui32 pos, T value)
+{
+#ifdef __CUDA_ARCH__
+
+    atomicAdd(&array[pos], value);
+
+#else
+    
+    array[pos] += value;
+    
+#endif
+}
+
+
 
 #endif

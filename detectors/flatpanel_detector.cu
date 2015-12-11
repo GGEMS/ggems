@@ -74,11 +74,12 @@ __host__ __device__ void flatpanel_track_to_in(ParticlesData &particles, ObbData
     }
 
     // Drop the complete energy
-#ifdef __CUDA_ARCH__
-    atomicAdd(&projection[iy*nb_pixel_x + ix], particles.E[id]);
-#else
-    projection[iy*nb_pixel_x + ix] += particles.E[id];
-#endif
+// #ifdef __CUDA_ARCH__
+//     atomicAdd(&projection[iy*nb_pixel_x + ix], particles.E[id]);
+// #else
+//     projection[iy*nb_pixel_x + ix] += particles.E[id];
+// #endif
+    ggems_atomic_add(projection,iy*nb_pixel_x + ix,particles.E[id]);
 
     particles.endsimu[id] = PARTICLE_DEAD;
 

@@ -214,24 +214,13 @@ struct GlobalSimulationParameters {
 };
 
 
-
 // Struct that handle colors
 //struct Color {
 //    f32 r, g, b;
 //};
 //Color make_color(f32 r, f32 g, f32 b);
 
-//// Struct that handle nD variable     TODO the other types
-static __inline__ __host__ __device__ f32xyz make_f32xyz(f32 vx, f32 vy, f32 vz) {
-    f32xyz t; t.x = vx; t.y = vy; t.z = vz; return t;
-}
-static __inline__ __host__ __device__ f64xyz make_f64xyz(f64 vx, f64 vy, f64 vz) {
-    f64xyz t; t.x = vx; t.y = vy; t.z = vz; return t;
-}
 
-static __inline__ __host__ __device__ i32xyz make_i32xyz(i32 vx, i32 vy, i32 vz) {
-    i32xyz t; t.x = vx; t.y = vy; t.z = vz; return t;
-}
 
 
 #endif

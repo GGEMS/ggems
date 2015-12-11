@@ -297,5 +297,10 @@ __host__ __device__ f64xyz fxyz_inv(f64xyz u) {
 #endif
 
 
+// __host__ __device__ void ggems_atomic_add()
+// {
+//     
+// }
+
 
 #endif
