@@ -101,8 +101,8 @@ __host__ __device__ void vox_phan_track_to_out(ParticlesData &particles,
 
     //// Find next discrete interaction ///////////////////////////////////////
 
-float distance_next_i = 100000000.0;
-float distance = 100000000.0f;
+//float distance_next_i = 100000000.0;
+//float distance = 100000000.0f;
 //for( i = 0; i < processListActivated.size();++i)
 //for( i = 0; i < nProcessActivated;++i)
 //for( std::list<AbstractProcess>::iterator iter = processListActivated.begin();
