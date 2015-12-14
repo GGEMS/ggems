@@ -23,7 +23,7 @@ __host__ __device__ void vox_phan_track_to_in_dosi(ParticlesData &particles, f32
                                               f32 ymin, f32 ymax, f32 zmin, f32 zmax,
                                               ui32 id) {
 // std::cout<<__LINE__<< "   " <<particles.endsimu[id] <<  " F " << PARTICLE_FREEZE  << std::endl;
-std::cout<<particles<<std::endl;
+// std::cout<<particles<<std::endl;
     // Read position
     f64xyz pos;
     pos.x = particles.px[id];
@@ -214,7 +214,7 @@ void kernel_host_track_to_out_dosi(ParticlesData particles,
 //             std::cout<<__LINE__<< "   " <<particles.endsimu[id] <<  " F " << PARTICLE_FREEZE  << std::endl;
     // Stepping loop
     while (particles.endsimu[id] != PARTICLE_DEAD && particles.endsimu[id] != PARTICLE_FREEZE) {
-            std::cout<<__LINE__<<std::endl;
+//             std::cout<<__LINE__<<std::endl;
         vox_phan_dosi_track_to_out(particles, vol, materials, photon_CS_table, parameters, dosi, id);
     }
 }
@@ -262,7 +262,7 @@ bool VoxPhanDosi::m_check_mandatory() {
 ////:: Main functions
 
 void VoxPhanDosi::track_to_in(Particles particles) {
-std::cout<<__LINE__<<std::endl;
+// std::cout<<__LINE__<<std::endl;
     if (m_params.data_h.device_target == CPU_DEVICE) {
         ui32 id=0; while (id<particles.size) {
             kernel_host_track_to_in_dosi(particles.data_h, phantom.volume.data_h.xmin, phantom.volume.data_h.xmax,
