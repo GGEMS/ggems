@@ -28,7 +28,7 @@ struct DosimetryTable
     f32 * edep_squared;
     ui32 *number_of_hits;
     
-    // Not used in GPU
+    // Not used in GPU currently
     f32 * uncertainty;
     
     // Number of voxels per dimension

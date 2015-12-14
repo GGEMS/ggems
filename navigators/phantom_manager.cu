@@ -80,7 +80,7 @@ void PhantomManager::track_to_out(Particles particles) {
         m_vox_phan_img.track_to_out(particles, m_materials_mng.materials, m_cross_sections_mng.photon_CS);
     }
     else if (m_phantom_name == m_vox_phan_dosi.get_name()) {
-        m_vox_phan_img.track_to_out(particles, m_materials_mng.materials, m_cross_sections_mng.photon_CS);
+        m_vox_phan_dosi.track_to_out(particles, m_materials_mng.materials, m_cross_sections_mng.photon_CS);
     }
 
 }

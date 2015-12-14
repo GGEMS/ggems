@@ -21,7 +21,7 @@
 CrossSectionsManager::CrossSectionsManager() {
     photon_CS.nb_bins = 0;
     photon_CS.nb_mat = 0;
-    electronTable = new ElectronCrossSection;
+    electronCSTable = new ElectronCrossSection;
     parameters = new GlobalSimulationParameters();
 }
 
@@ -120,10 +120,10 @@ void CrossSectionsManager::m_build_table(Materials materials, GlobalSimulationPa
     // idem for e- table - TODO
     if (there_is_electron) 
     {
-        electronTable->initialize(parameters,materials.data_h);
-        electronTable->generateTable();
+        electronCSTable->initialize(parameters,materials.data_h);
+        electronCSTable->generateTable();
         G4cout<<"Init electrons OK "<<G4endl;
-        electronTable->printElectronTables("table/electronTable");
+        electronCSTable->printElectronTables("table/electronCSTable");
     }
     // If Rayleigh scattering, load information once from G4 EM data library
     f32 *g4_ray_cs = NULL;

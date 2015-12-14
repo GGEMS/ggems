@@ -50,7 +50,7 @@ class VoxPhanDosi {
         inline std::string get_name(){return "VoxPhanDosi";};
         
         // Dosimetry map functions
-        void add_dosimetry_map(); // Withou arg dosemap = phan size and position
+        void add_dosimetry_map(); // Without arg dosemap = phan size and position
         void add_dosimetry_map(ui32xyz,f32xyz,f32xyz);
         void add_dosimetry_map(ui32,ui32,ui32,f32,f32,f32,f32,f32,f32);
         

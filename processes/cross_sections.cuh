@@ -39,7 +39,7 @@ class CrossSectionsManager {
         void m_copy_cs_table_cpu2gpu();
 
         // Electron CS data
-        ElectronCrossSection *electronTable;
+        ElectronCrossSection *electronCSTable;
         
         GlobalSimulationParameters params;
         GlobalSimulationParameters *parameters;

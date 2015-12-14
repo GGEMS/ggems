@@ -15,6 +15,7 @@
 #define PARTICLES_CUH
 
 #include "global.cuh"
+#include <iomanip>
 
 // Stack of particles, format data is defined as SoA
 struct ParticlesData {
@@ -46,6 +47,48 @@ struct ParticlesData {
     // size
     ui32 size;
 
+    
+    
+        friend std::ostream& operator<<(std::ostream& os, const ParticlesData v)
+        {
+            os  << std::fixed << std::setprecision(2);
+            os  << "Particle state : " << std::endl;
+
+            os  << "\t"  <<  "+"  << std::setfill('-') << std::setw(30) << "+" << std::endl;
+            os  << std::setfill(' ');
+            
+            os  << "\t"   << "|" 
+                << std::left  << std::setw(9) << "" 
+                << std::right << std::setw(5) << "X"
+                << std::right << std::setw(7) << "Y" 
+                << std::right << std::setw(7) << "Z"
+                << std::setw(2)<< "|" << std::endl;
+            
+            os  << "\t"   << "|" 
+                << std::left  << std::setw(9) << "Position" 
+                << std::right << std::setw(5) << *v.px 
+                << std::right << std::setw(7) << *v.py
+                << std::right << std::setw(7) << *v.pz
+                << std::setw(2)<< "|" << std::endl;
+               
+            os  << "\t"   << "|" 
+                << std::left  << std::setw(9) << "Direction" 
+                << std::right << std::setw(5) << v.dx 
+                << std::right << std::setw(7) << v.dy  
+                << std::right << std::setw(7) << v.dz 
+                << std::setw(2)<< "|" << std::endl;
+                
+            os << "\t"   << "|" 
+                << std::left  << std::setw(9) << "Energy" 
+                << std::right << std::setw(5) << *v.E
+                << std::right << std::setw(7) << *v.E
+                << std::right << std::setw(7) << *v.E
+                << std::setw(2)<< "|" << std::endl;
+                
+            os << "\t"   <<  "+"  << std::setfill('-') << std::setw(30) << "+" << std::endl;
+            return os;
+            
+        }
 }; //
 
 // Struct that handles particles

@@ -22,7 +22,8 @@
 __host__ __device__ void vox_phan_track_to_in_dosi(ParticlesData &particles, f32 xmin, f32 xmax,
                                               f32 ymin, f32 ymax, f32 zmin, f32 zmax,
                                               ui32 id) {
-
+// std::cout<<__LINE__<< "   " <<particles.endsimu[id] <<  " F " << PARTICLE_FREEZE  << std::endl;
+std::cout<<particles<<std::endl;
     // Read position
     f64xyz pos;
     pos.x = particles.px[id];
@@ -71,7 +72,7 @@ __host__ __device__ void vox_phan_dosi_track_to_out(ParticlesData &particles,
                                                DosimetryTable dosi,
                                                ui32 part_id) {
 
-
+    printf("E %e \n",particles.E[part_id]);
     // Read position
     f32xyz pos;
     pos.x = particles.px[part_id];
@@ -185,7 +186,7 @@ void kernel_host_track_to_in_dosi(ParticlesData particles, f32 xmin, f32 xmax,
 }
 
 // Device kernel that track particles within the voxelized volume until boundary
-__global__ void kernel_device_track_to_out_dosi(ParticlesData particles,
+__global__ void kernel_device_track_to_out_vpd(ParticlesData particles,
                                            VoxVolumeData vol,
                                            MaterialsTable materials,
                                            PhotonCrossSectionTable photon_CS_table,
@@ -210,9 +211,10 @@ void kernel_host_track_to_out_dosi(ParticlesData particles,
                               GlobalSimulationParametersData parameters,
                               DosimetryTable dosi,
                               ui32 id) {
-
+//             std::cout<<__LINE__<< "   " <<particles.endsimu[id] <<  " F " << PARTICLE_FREEZE  << std::endl;
     // Stepping loop
     while (particles.endsimu[id] != PARTICLE_DEAD && particles.endsimu[id] != PARTICLE_FREEZE) {
+            std::cout<<__LINE__<<std::endl;
         vox_phan_dosi_track_to_out(particles, vol, materials, photon_CS_table, parameters, dosi, id);
     }
 }
@@ -260,7 +262,7 @@ bool VoxPhanDosi::m_check_mandatory() {
 ////:: Main functions
 
 void VoxPhanDosi::track_to_in(Particles particles) {
-
+std::cout<<__LINE__<<std::endl;
     if (m_params.data_h.device_target == CPU_DEVICE) {
         ui32 id=0; while (id<particles.size) {
             kernel_host_track_to_in_dosi(particles.data_h, phantom.volume.data_h.xmin, phantom.volume.data_h.xmax,
@@ -288,7 +290,7 @@ void VoxPhanDosi::track_to_in(Particles particles) {
 void VoxPhanDosi::track_to_out(Particles particles, Materials materials, PhotonCrossSection photon_CS) {
 
     if (m_params.data_h.device_target == CPU_DEVICE) {
-
+        
         ui32 id=0; while (id<particles.size) {
            
             kernel_host_track_to_out_dosi(particles.data_h, phantom.volume.data_h,
@@ -301,7 +303,7 @@ void VoxPhanDosi::track_to_out(Particles particles, Materials materials, PhotonC
         threads.x = m_params.data_h.gpu_block_size;
         grid.x = (particles.size + m_params.data_h.gpu_block_size - 1) / m_params.data_h.gpu_block_size;
 
-        kernel_device_track_to_out_dosi<<<grid, threads>>>(particles.data_d, phantom.volume.data_d, materials.data_d,
+        kernel_device_track_to_out_vpd<<<grid, threads>>>(particles.data_d, phantom.volume.data_d, materials.data_d,
                                                       photon_CS.data_d, m_params.data_d,m_dose_calculator->dose_d);
         cuda_error_check("Error ", " Kernel_VoxPhanDosi (track to out)");
 
