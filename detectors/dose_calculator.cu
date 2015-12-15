@@ -44,56 +44,56 @@ __host__ __device__ void dose_record_standard(DoseData dose, f32 Edep, f32xyz po
 DoseCalculator::DoseCalculator()
 {
 
-    m_dose.data_h.nx = 0;
-    m_dose.data_h.ny = 0;
-    m_dose.data_h.nz = 0;
+    dose.data_h.nx = 0;
+    dose.data_h.ny = 0;
+    dose.data_h.nz = 0;
     
     // Voxel size per dimension
-    m_dose.data_h.spacing_x = 0.0;
-    m_dose.data_h.spacing_y = 0.0;
-    m_dose.data_h.spacing_z = 0.0;
+    dose.data_h.spacing_x = 0.0;
+    dose.data_h.spacing_y = 0.0;
+    dose.data_h.spacing_z = 0.0;
     
     // Offset
-    m_dose.data_h.ox = 0.0;
-    m_dose.data_h.oy = 0.0;
-    m_dose.data_h.oz = 0.0;
+    dose.data_h.ox = 0.0;
+    dose.data_h.oy = 0.0;
+    dose.data_h.oz = 0.0;
         
-    m_dose.data_h.edep = NULL;
-    m_dose.data_h.dose = NULL;
-    m_dose.data_h.edep_squared = NULL;
-    m_dose.data_h.number_of_hits = NULL;
+    dose.data_h.edep = NULL;
+    dose.data_h.dose = NULL;
+    dose.data_h.edep_squared = NULL;
+    dose.data_h.number_of_hits = NULL;
     
-    m_dose.data_h.uncertainty = NULL;
+    dose.data_h.uncertainty = NULL;
 }
 
 DoseCalculator::~DoseCalculator()
 {
 
-    delete [] m_dose.data_h.edep ;
-    delete [] m_dose.data_h.dose ;
-    delete [] m_dose.data_h.edep_squared ;
-    delete [] m_dose.data_h.number_of_hits ;
-    delete [] m_dose.data_h.uncertainty ;
+    delete [] dose.data_h.edep ;
+    delete [] dose.data_h.dose ;
+    delete [] dose.data_h.edep_squared ;
+    delete [] dose.data_h.number_of_hits ;
+    delete [] dose.data_h.uncertainty ;
 
 }
 
 /// Setting
 void DoseCalculator::set_size_in_voxel(ui32 nx, ui32 ny, ui32 nz) {
-    m_dose.data_h.nx = nx;
-    m_dose.data_h.ny = ny;
-    m_dose.data_h.nz = nz;
+    dose.data_h.nx = nx;
+    dose.data_h.ny = ny;
+    dose.data_h.nz = nz;
 }
 
 void DoseCalculator::set_voxel_size(f32 sx, f32 sy, f32 sz) {
-    m_dose.data_h.spacing_x = sx;
-    m_dose.data_h.spacing_y = sy;
-    m_dose.data_h.spacing_z = sz;
+    dose.data_h.spacing_x = sx;
+    dose.data_h.spacing_y = sy;
+    dose.data_h.spacing_z = sz;
 }
 
 void DoseCalculator::set_offset(f32 ox, f32 oy, f32 oz) {
-    m_dose.data_h.ox = ox;
-    m_dose.data_h.oy = oy;
-    m_dose.data_h.oz = oz;
+    dose.data_h.ox = ox;
+    dose.data_h.oy = oy;
+    dose.data_h.oz = oz;
 }
 
 /// Init
@@ -107,20 +107,20 @@ void DoseCalculator::initialize(GlobalSimulationParameters params)
     }
 
     // Initi nb of voxels
-    m_dose.data_h.nb_of_voxels = m_dose.data_h.nx*m_dose.data_h.ny*m_dose.data_h.nz;
+    dose.data_h.nb_of_voxels = dose.data_h.nx*dose.data_h.ny*dose.data_h.nz;
 
     // CPU allocation
     m_cpu_malloc_dose();
 
     // Init values to 0 or 1
-    for(int i = 0; i< m_dose.data_h.nb_of_voxels ; i++)
+    for(int i = 0; i< dose.data_h.nb_of_voxels ; i++)
     {
 
-        m_dose.data_h.edep[i] = 0.0;
-        m_dose.data_h.dose[i] = 0.0;
-        m_dose.data_h.edep_squared[i] = 0.0;
-        m_dose.data_h.number_of_hits[i] = 0.0;
-        m_dose.data_h.uncertainty[i] = 1.0;
+        dose.data_h.edep[i] = 0.0;
+        dose.data_h.dose[i] = 0.0;
+        dose.data_h.edep_squared[i] = 0.0;
+        dose.data_h.number_of_hits[i] = 0.0;
+        dose.data_h.uncertainty[i] = 1.0;
 
     }
 
@@ -167,50 +167,50 @@ false);
 
 /// Private
 bool DoseCalculator::m_check_mandatory() {
-    if (m_dose.data_h.nx == 0 || m_dose.data_h.ny == 0 || m_dose.data_h.nz == 0 ||
-        m_dose.data_h.spacing_x == 0 || m_dose.data_h.spacing_y == 0 || m_dose.data_h.spacing_z == 0) return false;
+    if (dose.data_h.nx == 0 || dose.data_h.ny == 0 || dose.data_h.nz == 0 ||
+        dose.data_h.spacing_x == 0 || dose.data_h.spacing_y == 0 || dose.data_h.spacing_z == 0) return false;
     else return true;
 }
 
 void DoseCalculator::m_cpu_malloc_dose() {
-    m_dose.data_h.edep = new f32[m_dose.data_h.nb_of_voxels];
-    m_dose.data_h.dose = new f32[m_dose.data_h.nb_of_voxels];
-    m_dose.data_h.edep_squared = new f32[m_dose.data_h.nb_of_voxels];
-    m_dose.data_h.number_of_hits = new ui32[m_dose.data_h.nb_of_voxels];
-    m_dose.data_h.uncertainty = new f32[m_dose.data_h.nb_of_voxels];
+    dose.data_h.edep = new f32[dose.data_h.nb_of_voxels];
+    dose.data_h.dose = new f32[dose.data_h.nb_of_voxels];
+    dose.data_h.edep_squared = new f32[dose.data_h.nb_of_voxels];
+    dose.data_h.number_of_hits = new ui32[dose.data_h.nb_of_voxels];
+    dose.data_h.uncertainty = new f32[dose.data_h.nb_of_voxels];
 }
 
 void DoseCalculator::m_gpu_malloc_dose() {
     // GPU allocation
-    HANDLE_ERROR( cudaMalloc((void**) &m_dose.data_d.edep,           m_dose.data_h.nb_of_voxels * sizeof(f32)));
-    HANDLE_ERROR( cudaMalloc((void**) &m_dose.data_d.dose,           m_dose.data_h.nb_of_voxels * sizeof(f32)));
-    HANDLE_ERROR( cudaMalloc((void**) &m_dose.data_d.edep_squared,   m_dose.data_h.nb_of_voxels * sizeof(f32)));
-    HANDLE_ERROR( cudaMalloc((void**) &m_dose.data_d.number_of_hits, m_dose.data_h.nb_of_voxels * sizeof(ui32)));
-    HANDLE_ERROR( cudaMalloc((void**) &m_dose.data_d.uncertainty,    m_dose.data_h.nb_of_voxels * sizeof(f32)));
+    HANDLE_ERROR( cudaMalloc((void**) &dose.data_d.edep,           dose.data_h.nb_of_voxels * sizeof(f32)));
+    HANDLE_ERROR( cudaMalloc((void**) &dose.data_d.dose,           dose.data_h.nb_of_voxels * sizeof(f32)));
+    HANDLE_ERROR( cudaMalloc((void**) &dose.data_d.edep_squared,   dose.data_h.nb_of_voxels * sizeof(f32)));
+    HANDLE_ERROR( cudaMalloc((void**) &dose.data_d.number_of_hits, dose.data_h.nb_of_voxels * sizeof(ui32)));
+    HANDLE_ERROR( cudaMalloc((void**) &dose.data_d.uncertainty,    dose.data_h.nb_of_voxels * sizeof(f32)));
 }
 
 void DoseCalculator::m_copy_dose_cpu2gpu()
 {
-    m_dose.data_d.nx = m_dose.data_h.nx;
-    m_dose.data_d.ny = m_dose.data_h.ny;
-    m_dose.data_d.nz = m_dose.data_h.nz;
+    dose.data_d.nx = dose.data_h.nx;
+    dose.data_d.ny = dose.data_h.ny;
+    dose.data_d.nz = dose.data_h.nz;
 
-    m_dose.data_d.spacing_x = m_dose.data_h.spacing_x;
-    m_dose.data_d.spacing_y = m_dose.data_h.spacing_y;
-    m_dose.data_d.spacing_z = m_dose.data_h.spacing_z;
+    dose.data_d.spacing_x = dose.data_h.spacing_x;
+    dose.data_d.spacing_y = dose.data_h.spacing_y;
+    dose.data_d.spacing_z = dose.data_h.spacing_z;
 
-    m_dose.data_d.ox = m_dose.data_h.ox;
-    m_dose.data_d.oy = m_dose.data_h.oy;
-    m_dose.data_d.oz = m_dose.data_h.oz;
+    dose.data_d.ox = dose.data_h.ox;
+    dose.data_d.oy = dose.data_h.oy;
+    dose.data_d.oz = dose.data_h.oz;
 
-    m_dose.data_d.nb_of_voxels = m_dose.data_h.nb_of_voxels;
+    dose.data_d.nb_of_voxels = dose.data_h.nb_of_voxels;
 
     // Copy values to GPU arrays
-    HANDLE_ERROR( cudaMemcpy(m_dose.data_d.edep,           m_dose.data_h.edep,           sizeof(f32)*m_dose.data_h.nb_of_voxels, cudaMemcpyHostToDevice));
-    HANDLE_ERROR( cudaMemcpy(m_dose.data_d.dose,           m_dose.data_h.dose,           sizeof(f32)*m_dose.data_h.nb_of_voxels, cudaMemcpyHostToDevice));
-    HANDLE_ERROR( cudaMemcpy(m_dose.data_d.edep_squared,   m_dose.data_h.edep_squared,   sizeof(f32)*m_dose.data_h.nb_of_voxels, cudaMemcpyHostToDevice));
-    HANDLE_ERROR( cudaMemcpy(m_dose.data_d.number_of_hits, m_dose.data_h.number_of_hits, sizeof(ui32)*m_dose.data_h.nb_of_voxels, cudaMemcpyHostToDevice));
-    HANDLE_ERROR( cudaMemcpy(m_dose.data_d.uncertainty,    m_dose.data_h.uncertainty,    sizeof(f32)*m_dose.data_h.nb_of_voxels, cudaMemcpyHostToDevice));
+    HANDLE_ERROR( cudaMemcpy(dose.data_d.edep,           dose.data_h.edep,           sizeof(f32)*dose.data_h.nb_of_voxels, cudaMemcpyHostToDevice));
+    HANDLE_ERROR( cudaMemcpy(dose.data_d.dose,           dose.data_h.dose,           sizeof(f32)*dose.data_h.nb_of_voxels, cudaMemcpyHostToDevice));
+    HANDLE_ERROR( cudaMemcpy(dose.data_d.edep_squared,   dose.data_h.edep_squared,   sizeof(f32)*dose.data_h.nb_of_voxels, cudaMemcpyHostToDevice));
+    HANDLE_ERROR( cudaMemcpy(dose.data_d.number_of_hits, dose.data_h.number_of_hits, sizeof(ui32)*dose.data_h.nb_of_voxels, cudaMemcpyHostToDevice));
+    HANDLE_ERROR( cudaMemcpy(dose.data_d.uncertainty,    dose.data_h.uncertainty,    sizeof(f32)*dose.data_h.nb_of_voxels, cudaMemcpyHostToDevice));
 }
 
 

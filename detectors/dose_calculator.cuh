@@ -9,6 +9,7 @@
  * \date 2 december 2015
  *
  * \todo a) Need to add the output function for the dose map while ImageReader will be ready
+ * \todo b) Fix: change ox, oy, oz to off_x, off_y, off_z
  *
  */
 
@@ -82,7 +83,7 @@ class DoseCalculator {
         
         void initialize(GlobalSimulationParameters params);
 
-
+        Dose dose;
 
     private :
         bool m_check_mandatory();
@@ -91,7 +92,7 @@ class DoseCalculator {
         void m_copy_dose_cpu2gpu();
 
 
-       Dose m_dose;
+
         
 };
 

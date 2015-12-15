@@ -69,7 +69,7 @@ __host__ __device__ void vox_phan_dosi_track_to_out(ParticlesData &particles,
                                                MaterialsTable materials,
                                                PhotonCrossSectionTable photon_CS_table,
                                                GlobalSimulationParametersData parameters,
-                                               DosimetryTable dosi,
+                                               DoseData dosi,
                                                ui32 part_id) {
 
     printf("E %e \n",particles.E[part_id]);
@@ -91,9 +91,9 @@ __host__ __device__ void vox_phan_dosi_track_to_out(ParticlesData &particles,
     ivoxsize.y = 1.0 / vol.spacing_y;
     ivoxsize.z = 1.0 / vol.spacing_z;
     ui16xyzw index_phantom;
-    index_phantom.x = ui16( (pos.x+vol.org_x) * ivoxsize.x );
-    index_phantom.y = ui16( (pos.y+vol.org_y) * ivoxsize.y );
-    index_phantom.z = ui16( (pos.z+vol.org_z) * ivoxsize.z );
+    index_phantom.x = ui16( (pos.x+vol.off_x) * ivoxsize.x );
+    index_phantom.y = ui16( (pos.y+vol.off_y) * ivoxsize.y );
+    index_phantom.z = ui16( (pos.z+vol.off_z) * ivoxsize.z );
     index_phantom.w = index_phantom.z*vol.nb_vox_x*vol.nb_vox_y
                       + index_phantom.y*vol.nb_vox_x
                       + index_phantom.x; // linear index
@@ -152,8 +152,8 @@ __host__ __device__ void vox_phan_dosi_track_to_out(ParticlesData &particles,
         //// Here e- are not tracked, and lost energy not drop
         
         /// TODO ADD ELECTRON NAV
-        ggems_atomic_add(dosi.edep,index_phantom.w ,electron.E);
-        ggems_atomic_add(dosi.edep_squared,index_phantom.w ,electron.E*electron.E);
+        ggems_atomic_add(dosi.edep, index_phantom.w, electron.E);
+        ggems_atomic_add(dosi.edep_squared, index_phantom.w, electron.E*electron.E);
         
         
     }
@@ -191,7 +191,7 @@ __global__ void kernel_device_track_to_out_vpd(ParticlesData particles,
                                            MaterialsTable materials,
                                            PhotonCrossSectionTable photon_CS_table,
                                            GlobalSimulationParametersData parameters,
-                                           DosimetryTable dosi) {
+                                           DoseData dosi) {
 
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
     if (id >= particles.size) return;
@@ -209,7 +209,7 @@ void kernel_host_track_to_out_dosi(ParticlesData particles,
                               MaterialsTable materials,
                               PhotonCrossSectionTable photon_CS_table,
                               GlobalSimulationParametersData parameters,
-                              DosimetryTable dosi,
+                              DoseData dosi,
                               ui32 id) {
 //             std::cout<<__LINE__<< "   " <<particles.endsimu[id] <<  " F " << PARTICLE_FREEZE  << std::endl;
     // Stepping loop
@@ -238,9 +238,9 @@ void VoxPhanDosi::m_copy_phantom_cpu2gpu() {
     phantom.volume.data_d.spacing_y = phantom.volume.data_h.spacing_y;
     phantom.volume.data_d.spacing_z = phantom.volume.data_h.spacing_z;
 
-    phantom.volume.data_d.org_x = phantom.volume.data_h.org_x;
-    phantom.volume.data_d.org_y = phantom.volume.data_h.org_y;
-    phantom.volume.data_d.org_z = phantom.volume.data_h.org_z;
+    phantom.volume.data_d.off_x = phantom.volume.data_h.off_x;
+    phantom.volume.data_d.off_y = phantom.volume.data_h.off_y;
+    phantom.volume.data_d.off_z = phantom.volume.data_h.off_z;
 
     phantom.volume.data_d.number_of_voxels = phantom.volume.data_h.number_of_voxels;
     
@@ -294,7 +294,7 @@ void VoxPhanDosi::track_to_out(Particles particles, Materials materials, PhotonC
         ui32 id=0; while (id<particles.size) {
            
             kernel_host_track_to_out_dosi(particles.data_h, phantom.volume.data_h,
-                                     materials.data_h, photon_CS.data_h, m_params.data_h, m_dose_calculator->dose_h, id);
+                                          materials.data_h, photon_CS.data_h, m_params.data_h, m_dose_calculator.dose.data_h, id);
             ++id;
         }
     } else if (m_params.data_h.device_target == GPU_DEVICE) {
@@ -304,7 +304,7 @@ void VoxPhanDosi::track_to_out(Particles particles, Materials materials, PhotonC
         grid.x = (particles.size + m_params.data_h.gpu_block_size - 1) / m_params.data_h.gpu_block_size;
 
         kernel_device_track_to_out_vpd<<<grid, threads>>>(particles.data_d, phantom.volume.data_d, materials.data_d,
-                                                      photon_CS.data_d, m_params.data_d,m_dose_calculator->dose_d);
+                                                          photon_CS.data_d, m_params.data_d, m_dose_calculator.dose.data_d);
         cuda_error_check("Error ", " Kernel_VoxPhanDosi (track to out)");
 
     }
@@ -356,6 +356,18 @@ void VoxPhanDosi::initialize(GlobalSimulationParameters params) {
         m_copy_phantom_cpu2gpu();
     }
 
+    // Init dose map
+    m_dose_calculator.set_size_in_voxel(phantom.volume.data_h.nb_vox_x,
+                                        phantom.volume.data_h.nb_vox_y,
+                                        phantom.volume.data_h.nb_vox_z);
+    m_dose_calculator.set_voxel_size(phantom.volume.data_h.spacing_x,
+                                     phantom.volume.data_h.spacing_y,
+                                     phantom.volume.data_h.spacing_z);
+    m_dose_calculator.set_offset(phantom.volume.data_h.off_x,
+                                 phantom.volume.data_h.off_y,
+                                 phantom.volume.data_h.off_z);
+    m_dose_calculator.initialize(m_params); // CPU&GPU
+
 }
 
 // Get list of materials
@@ -373,48 +385,9 @@ ui32 VoxPhanDosi::get_data_size() {
     return phantom.volume.data_h.number_of_voxels;
 }
 
-
-void VoxPhanDosi::add_dosimetry_map()
-{
-    add_dosimetry_map(
-    phantom.volume.data_h.nb_vox_x,
-    phantom.volume.data_h.nb_vox_y,
-    phantom.volume.data_h.nb_vox_z,
-    
-    phantom.volume.data_h.spacing_x,
-    phantom.volume.data_h.spacing_y,
-    phantom.volume.data_h.spacing_z,
-    
-    phantom.volume.data_h.org_x,
-    phantom.volume.data_h.org_y,
-    phantom.volume.data_h.org_z);
-}
-
-
-
-void VoxPhanDosi::add_dosimetry_map(ui32xyz nvox,f32xyz spacing,f32xyz offset)
-{
-
-//     add_dosimetry_map(nvox.x,nvox.y,nvox.z,spacing.x,spacing.y,spacing.z,offset.x,offset.y,offset.z);
-    m_dose_calculator->initialize(nvox,spacing,offset);
-    
-//     std::cout<<*m_dose_calculator<<std::endl;
-
-}
-
 void VoxPhanDosi::print_dosimetry()
 {
     std::cout<<*m_dose_calculator<<std::endl;
 }
-
-
-void VoxPhanDosi::add_dosimetry_map(ui32 nvox_x,ui32 nvox_y ,ui32 nvox_z ,f32 spacing_x ,f32 spacing_y ,f32 spacing_z ,f32 offset_x,f32 offset_y ,f32 offset_z)
-{
-
-    add_dosimetry_map( make_ui32xyz(nvox_x,nvox_y,nvox_z) , make_f32xyz(spacing_x,spacing_y,spacing_z), make_f32xyz(offset_x,offset_y,offset_z) );
-
-}
-
-
 
 #endif

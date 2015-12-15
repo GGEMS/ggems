@@ -26,7 +26,7 @@
 
 class VoxPhanDosi {
     public:
-        VoxPhanDosi() {m_dose_calculator = new DoseCalculator;}
+        VoxPhanDosi() {}
         ~VoxPhanDosi() {}
 
         // Tracking from outside to the phantom broder
@@ -47,16 +47,13 @@ class VoxPhanDosi {
         // Get the size of data (nb of voxels)
         ui32 get_data_size();
 
-        inline std::string get_name(){return "VoxPhanDosi";};
+        inline std::string get_name(){return "VoxPhanDosi";};                 
         
-        // Dosimetry map functions
-        void add_dosimetry_map(); // Without arg dosemap = phan size and position
-        void add_dosimetry_map(ui32xyz,f32xyz,f32xyz);
-        void add_dosimetry_map(ui32,ui32,ui32,f32,f32,f32,f32,f32,f32);
-        
+        /*
         void write(std::string filename = "dosimetry.mhd"){
             m_dose_calculator->write_dosi(filename);
         }
+        */
         
 
         void print_dosimetry();
@@ -70,7 +67,7 @@ class VoxPhanDosi {
 
         GlobalSimulationParameters m_params;
 
-        DoseCalculator *m_dose_calculator;
+        DoseCalculator m_dose_calculator;
         
         
         friend std::ostream& operator<<(std::ostream& os, VoxPhanDosi& v)
@@ -90,9 +87,9 @@ class VoxPhanDosi {
             
             os  << "\t"   << "|" 
                 << std::left  << std::setw(9) << "Offset" 
-                << std::right << std::setw(5) << v.phantom.volume.data_h.org_x 
-                << std::right << std::setw(7) << v.phantom.volume.data_h.org_y
-                << std::right << std::setw(7) << v.phantom.volume.data_h.org_z
+                << std::right << std::setw(5) << v.phantom.volume.data_h.off_x
+                << std::right << std::setw(7) << v.phantom.volume.data_h.off_y
+                << std::right << std::setw(7) << v.phantom.volume.data_h.off_z
                 << std::setw(2)<< "|" << std::endl;
                
             os  << "\t"   << "|" 
