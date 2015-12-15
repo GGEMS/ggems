@@ -22,7 +22,7 @@
 #include "photon.cuh"
 #include "photon_navigator.cuh"
 #include "image_reader.cuh"
-#include "dosimetry_actor.cuh"
+#include "dose_calculator.cuh"
 
 class VoxPhanDosi {
     public:

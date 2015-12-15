@@ -89,9 +89,9 @@ __host__ __device__ void vox_phan_track_to_out(ParticlesData &particles,
     ivoxsize.y = 1.0 / vol.spacing_y;
     ivoxsize.z = 1.0 / vol.spacing_z;
     ui16xyzw index_phantom;
-    index_phantom.x = ui16( (pos.x+vol.org_x) * ivoxsize.x );
-    index_phantom.y = ui16( (pos.y+vol.org_y) * ivoxsize.y );
-    index_phantom.z = ui16( (pos.z+vol.org_z) * ivoxsize.z );
+    index_phantom.x = ui16( (pos.x+vol.ox) * ivoxsize.x );
+    index_phantom.y = ui16( (pos.y+vol.oy) * ivoxsize.y );
+    index_phantom.z = ui16( (pos.z+vol.oz) * ivoxsize.z );
     index_phantom.w = index_phantom.z*vol.nb_vox_x*vol.nb_vox_y
                       + index_phantom.y*vol.nb_vox_x
                       + index_phantom.x; // linear index

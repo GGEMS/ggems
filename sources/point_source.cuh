@@ -14,8 +14,9 @@
 #ifndef POINT_SOURCE_CUH
 #define POINT_SOURCE_CUH
 
+#include "global.cuh"
 #include "ggems_vsource.cuh"
-#include <iostream>
+
 // Sphere
 class PointSource : public GGEMSVSource {
     public:        
@@ -29,7 +30,7 @@ class PointSource : public GGEMSVSource {
 
         // Virtual from GGEMSVSource
         void get_primaries_generator(Particles particles);
-        void initialize(GlobalSimulationParameters params);
+        void initialize(GlobalSimulationParameters params);       
 
     private:
         bool m_check_mandatory();

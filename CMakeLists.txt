@@ -30,19 +30,21 @@ else()
   add_definitions(-DSINGLE_PRECISION)
 endif()
 
-# OPTIONS
+# CUDA OPTIONS
+if(CUDA_VERSION>=7.0)
+    set(LIBSCUDA --generate-code arch=compute_30,code=sm_30 --generate-code arch=compute_50,code=sm_50 --generate-code arch=compute_52,code=sm_52 --relocatable-device-code true -lcudadevrt --compiler-options -w)
+else()    
+    set(LIBSCUDA --generate-code arch=compute_30,code=sm_30 --generate-code arch=compute_50,code=sm_50 --relocatable-device-code true -lcudadevrt --compiler-options -w)
+endif()
+
 option(WITH_FAST_MATH "Fast math flag" ON)
 if(WITH_FAST_MATH)
-set(LIBSCUDA --generate-code arch=compute_30,code=sm_30 --generate-code arch=compute_50,code=sm_50 --generate-code arch=compute_52,code=sm_52 --relocatable-device-code true -lcudadevrt --compiler-options -use_fast_math -w)
-
-else()
-  set(LIBSCUDA --generate-code arch=compute_30,code=sm_30 --generate-code arch=compute_50,code=sm_50 --generate-code arch=compute_52,code=sm_52 --relocatable-device-code true -lcudadevrt --compiler-options -w)
+    set(LIBSCUDA ${LIBSCUDA} -use_fast_math)
 endif()
 
 # GEANT4
 find_package(Geant4 REQUIRED)
 include(${Geant4_USE_FILE})
-
 
 # GGEMS src
 include_directories(
@@ -83,6 +85,7 @@ file(GLOB datafiles "data/*")
 find_package(CUDA REQUIRED)
 set(LIB_NAME "ggems")
 set(CUDA_NVCC_FLAGS ${LIBSCUDA})
+#message(${CUDA_NVCC_FLAGS})
 
 SET( CUDA_PROPAGATE_HOST_FLAGS OFF CACHE BOOL "" FORCE )
 

@@ -166,9 +166,9 @@ void VoxelizedPhantom::load_from_raw(std::string volume_name, std::string range_
     volume.data_h.ymin = -h_lengthy; volume.data_h.ymax = h_lengthy;
     volume.data_h.zmin = -h_lengthz; volume.data_h.zmax = h_lengthz;
 
-    volume.data_h.org_x = h_lengthx;
-    volume.data_h.org_y = h_lengthy;
-    volume.data_h.org_z = h_lengthz;
+    volume.data_h.off_x = h_lengthx;
+    volume.data_h.off_y = h_lengthy;
+    volume.data_h.off_z = h_lengthz;
 
 }
 
@@ -322,18 +322,18 @@ void VoxelizedPhantom::load_from_mhd(std::string volume_name, std::string range_
 
     // If the offset is not defined, chose the volume center
     if (ox == -1 || oy == -1 || oz == -1) {
-        volume.data_h.org_x = h_lengthx;
-        volume.data_h.org_y = h_lengthy;
-        volume.data_h.org_z = h_lengthz;
+        volume.data_h.off_x = h_lengthx;
+        volume.data_h.off_y = h_lengthy;
+        volume.data_h.off_z = h_lengthz;
 
         volume.data_h.xmin = -h_lengthx; volume.data_h.xmax = h_lengthx;
         volume.data_h.ymin = -h_lengthy; volume.data_h.ymax = h_lengthy;
         volume.data_h.zmin = -h_lengthz; volume.data_h.zmax = h_lengthz;
 
     } else {
-        volume.data_h.org_x = ox;
-        volume.data_h.org_y = oy;
-        volume.data_h.org_z = oz;
+        volume.data_h.off_x = ox;
+        volume.data_h.off_y = oy;
+        volume.data_h.off_z = oz;
 
         volume.data_h.xmin = -ox; volume.data_h.xmax = volume.data_h.xmin + (volume.data_h.nb_vox_x * volume.data_h.spacing_x);
         volume.data_h.ymin = -oy; volume.data_h.ymax = volume.data_h.ymin + (volume.data_h.nb_vox_y * volume.data_h.spacing_y);
@@ -342,10 +342,10 @@ void VoxelizedPhantom::load_from_mhd(std::string volume_name, std::string range_
 
 }
 
-void VoxelizedPhantom::set_origin(f32 x, f32 y, f32 z) {
-    volume.data_h.org_x = x;
-    volume.data_h.org_y = y;
-    volume.data_h.org_z = z;
+void VoxelizedPhantom::set_offset(f32 x, f32 y, f32 z) {
+    volume.data_h.off_x = x;
+    volume.data_h.off_y = y;
+    volume.data_h.off_z = z;
 
     volume.data_h.xmin = -x; volume.data_h.xmax = volume.data_h.xmin + (volume.data_h.nb_vox_x * volume.data_h.spacing_x);
     volume.data_h.ymin = -y; volume.data_h.ymax = volume.data_h.ymin + (volume.data_h.nb_vox_y * volume.data_h.spacing_y);
