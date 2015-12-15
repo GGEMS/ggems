@@ -161,7 +161,7 @@ void GGEMS::set_seed(ui32 vseed) {
 }
 
 /// Sources
-void GGEMS::set_source(PointSource &aSource) {
+void GGEMS::set_source(GGEMSVSource &aSource) {
     m_sources.set_source(aSource);
 }
 

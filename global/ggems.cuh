@@ -52,7 +52,7 @@ class GGEMS {
         void set_CS_table_E_max(f32 valE);
         void set_seed(ui32 vseed);
         // Setting simulation objects
-        void set_source(PointSource &aSource);
+        void set_source(GGEMSVSource &aSource);
         
         void set_phantom(VoxPhanImgNav &aPhantom);
         void set_phantom(VoxPhanDosi &aPhantom);

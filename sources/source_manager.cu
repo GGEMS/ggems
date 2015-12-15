@@ -20,33 +20,21 @@ SourcesManager::SourcesManager() {
     m_source_name = "";
 }
 
-void SourcesManager::set_source(PointSource &aSource) {
-    m_point_source = aSource;
-    m_source_name = "PointSource";
+void SourcesManager::set_source(GGEMSVSource &aSource) {
+    m_source = aSource;
 }
 
 void SourcesManager::initialize(GlobalSimulationParameters params) {
 
-    // Init source that including also data copy to GPU
-    if (m_source_name == "PointSource") {
-        m_point_source.initialize(params);
-    }
-
-    // Put others sources here.
+   m_source.initialize(params);
 
 }
 
 void SourcesManager::get_primaries_generator(Particles particles) {
 
-    // Fill the buffer of new particles
-    if (m_source_name == "PointSource") {
-        m_point_source.get_primaries_generator(particles);
-    }
+    // Fill the buffer of new particles   
+    m_source.get_primaries_generator(particles);
 
-}
-
-std::string SourcesManager::get_source_name() {
-    return m_source_name;
 }
 
 #endif
