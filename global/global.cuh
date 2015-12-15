@@ -20,8 +20,13 @@
 #include <cfloat>
 #include <assert.h>
 #include <math.h>
-#include <sys/time.h>
 
+#ifdef _WIN32
+#include <time.h>
+#include <Windows.h>
+#elif __LINUX__
+#include <sys/time.h>
+#endif
 /////// CONSTANTS //////////////////////////////////////////////
 
 // Run on CPU
