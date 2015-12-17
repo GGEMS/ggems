@@ -16,11 +16,10 @@
 
 #include "global.cuh"
 #include "ggems_source.cuh"
+#include "ggems_phantom.cuh"
 #include "particles.cuh"
 #include "cross_sections.cuh"
 #include "materials.cuh"
-#include "source_manager.cuh"
-#include "phantom_manager.cuh"
 #include "detector_manager.cuh"
 #include "image_reader.cuh"
 // #include "flatpanel_detector.cuh"
@@ -53,9 +52,8 @@ class GGEMS {
         void set_seed(ui32 vseed);
         // Setting simulation objects
         void set_source(GGEMSSource* aSource);
-        
-        void set_phantom(VoxPhanImgNav &aPhantom);
-        void set_phantom(VoxPhanDosi &aPhantom);
+        void set_phantom(GGEMSPhantom* aPhantom);
+
         // TODO DETECTOR
 
         // Utils
@@ -70,19 +68,13 @@ class GGEMS {
 
     private:
         // Particles handler
-        ParticleManager m_particles_manager;
-
-        // Cross section handler
-        CrossSectionsManager m_cross_sections;
-
-        // Materials handler
-        MaterialManager m_materials;
+        ParticleManager m_particles_manager;      
 
         // Source manager
         GGEMSSource* m_source;
 
         // Phantom manager
-        PhantomManager m_phantoms;
+        GGEMSPhantom* m_phantom;
 
         // TODO Detector manager
         DetectorManager m_detectors;

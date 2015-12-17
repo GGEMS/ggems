@@ -16,10 +16,6 @@
 
 #include "ggems.cuh"
 
-
-////// :: GGEMS Const/Dest ::
-GlobalSimulationParameters *GGEMS::theParameters = NULL;
-
 GGEMS::GGEMS() {
 
     // Init physics list and secondaries list
@@ -60,6 +56,7 @@ GGEMS::GGEMS() {
 
     // Element of the simulation
     m_source = NULL;
+    m_phantom = NULL;
 
 }
 
@@ -168,14 +165,10 @@ void GGEMS::set_source(GGEMSSource* aSource) {
 }
 
 /// Phantoms
-void GGEMS::set_phantom(VoxPhanImgNav &aPhantom) {
-    m_phantoms.set_phantom(aPhantom);
+void GGEMS::set_phantom(GGEMSPhantom* aPhantom) {
+    m_phantom = aPhantom;
 }
 
-/// Phantoms
-void GGEMS::set_phantom(VoxPhanDosi &aPhantom) {
-    m_phantoms.set_phantom(aPhantom);
-}
 /// Utils
 
 // Display run time
@@ -196,6 +189,11 @@ bool GGEMS::m_check_mandatory() {
 
     if (m_source == NULL) {
         print_error("No source defined.");
+        flag_error = true;
+    }
+
+    if (m_phantom == NULL) {
+        print_error("No phantom defined.");
         flag_error = true;
     }
 
@@ -292,7 +290,7 @@ void GGEMS::init_simulation() {
     m_source->initialize(m_parameters);
 
     /// Init Phantoms ////////////////////////////////
-    m_phantoms.initialize(m_parameters);
+    m_phantom->initialize(m_parameters);
 
     /// Init Particles Stack /////////////////////////
     m_particles_manager.initialize(m_parameters);
@@ -382,10 +380,10 @@ void GGEMS::start_simulation() {
         // TODO If phantom
 
         // Nav between source to phantom
-        m_phantoms.track_to_in(m_particles_manager.particles);
+        m_phantom->track_to_in(m_particles_manager.particles);
         
         // Nav within the phantom
-        m_phantoms.track_to_out(m_particles_manager.particles);
+        m_phantom->track_to_out(m_particles_manager.particles);
         
         // TODO If detector
 

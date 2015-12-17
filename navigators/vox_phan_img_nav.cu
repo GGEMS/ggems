@@ -101,24 +101,7 @@ __host__ __device__ void vox_phan_track_to_out(ParticlesData &particles,
 
     //// Find next discrete interaction ///////////////////////////////////////
 
-//float distance_next_i = 100000000.0;
-//float distance = 100000000.0f;
-//for( i = 0; i < processListActivated.size();++i)
-//for( i = 0; i < nProcessActivated;++i)
-//for( std::list<AbstractProcess>::iterator iter = processListActivated.begin();
-    //iter != processListActivated.end(); ++iter)
-//{
-    // Compton and Photoelectric activated
-  //  photon_get_next_interaction( particles, *iter, photon_CS_table[*iter], mat_id, part_id, &distance );
-  //  distance = distance < distance_next_i ? distance : distance_next_i;
-//}
-
-//std::cout <<;
- 
     photon_get_next_interaction(particles, parameters, photon_CS_table, mat_id, part_id);
-
-
-
 
     f32 next_interaction_distance = particles.next_interaction_distance[part_id];
     ui8 next_discrete_process = particles.next_discrete_process[part_id];
@@ -227,34 +210,10 @@ void kernel_host_track_to_out(ParticlesData particles,
 
 ////:: Privates
 
-// Copy the phantom to the GPU
-void VoxPhanImgNav::m_copy_phantom_cpu2gpu() {
-
-    // Mem allocation
-    HANDLE_ERROR( cudaMalloc((void**) &phantom.volume.data_d.values, phantom.volume.data_h.number_of_voxels*sizeof(ui16)) );
-    // Copy data
-    HANDLE_ERROR( cudaMemcpy(phantom.volume.data_d.values, phantom.volume.data_h.values,
-                  phantom.volume.data_h.number_of_voxels*sizeof(ui16), cudaMemcpyHostToDevice) );
-
-    phantom.volume.data_d.nb_vox_x = phantom.volume.data_h.nb_vox_x;
-    phantom.volume.data_d.nb_vox_y = phantom.volume.data_h.nb_vox_y;
-    phantom.volume.data_d.nb_vox_z = phantom.volume.data_h.nb_vox_z;
-
-    phantom.volume.data_d.spacing_x = phantom.volume.data_h.spacing_x;
-    phantom.volume.data_d.spacing_y = phantom.volume.data_h.spacing_y;
-    phantom.volume.data_d.spacing_z = phantom.volume.data_h.spacing_z;
-
-    phantom.volume.data_d.off_x = phantom.volume.data_h.off_x;
-    phantom.volume.data_d.off_y = phantom.volume.data_h.off_y;
-    phantom.volume.data_d.off_z = phantom.volume.data_h.off_z;
-
-    phantom.volume.data_d.number_of_voxels = phantom.volume.data_h.number_of_voxels;
-}
-
 bool VoxPhanImgNav::m_check_mandatory() {
 
-    if (phantom.volume.data_h.nb_vox_x == 0 || phantom.volume.data_h.nb_vox_y == 0 || phantom.volume.data_h.nb_vox_z == 0 ||
-        phantom.volume.data_h.spacing_x == 0 || phantom.volume.data_h.spacing_y == 0 || phantom.volume.data_h.spacing_z == 0 ||
+    if (m_phantom.data_h.nb_vox_x == 0 || m_phantom.data_h.nb_vox_y == 0 || m_phantom.data_h.nb_vox_z == 0 ||
+        m_phantom.data_h.spacing_x == 0 || m_phantom.data_h.spacing_y == 0 || m_phantom.data_h.spacing_z == 0 ||
         phantom.list_of_materials.size() == 0) {
         return false;
     } else {
@@ -269,9 +228,9 @@ void VoxPhanImgNav::track_to_in(Particles particles) {
 
     if (m_params.data_h.device_target == CPU_DEVICE) {
         ui32 id=0; while (id<particles.size) {
-            kernel_host_track_to_in(particles.data_h, phantom.volume.data_h.xmin, phantom.volume.data_h.xmax,
-                                                   phantom.volume.data_h.ymin, phantom.volume.data_h.ymax,
-                                                   phantom.volume.data_h.zmin, phantom.volume.data_h.zmax,
+            kernel_host_track_to_in(particles.data_h, m_phantom.data_h.xmin, m_phantom.data_h.xmax,
+                                                   m_phantom.data_h.ymin, m_phantom.data_h.ymax,
+                                                   m_phantom.data_h.zmin, m_phantom.data_h.zmax,
                                                    id);
             ++id;
         }
@@ -281,9 +240,9 @@ void VoxPhanImgNav::track_to_in(Particles particles) {
         threads.x = m_params.data_h.gpu_block_size;
         grid.x = (particles.size + m_params.data_h.gpu_block_size - 1) / m_params.data_h.gpu_block_size;
 
-        kernel_device_track_to_in<<<grid, threads>>>(particles.data_d, phantom.volume.data_h.xmin, phantom.volume.data_h.xmax,
-                                                     phantom.volume.data_h.ymin, phantom.volume.data_h.ymax,
-                                                     phantom.volume.data_h.zmin, phantom.volume.data_h.zmax);
+        kernel_device_track_to_in<<<grid, threads>>>(particles.data_d, m_phantom.data_h.xmin, m_phantom.data_h.xmax,
+                                                     m_phantom.data_h.ymin, m_phantom.data_h.ymax,
+                                                     m_phantom.data_h.zmin, m_phantom.data_h.zmax);
         cuda_error_check("Error ", " Kernel_VoxPhanImgNav (track to in)");
 
     }
@@ -291,14 +250,14 @@ void VoxPhanImgNav::track_to_in(Particles particles) {
 
 }
 
-void VoxPhanImgNav::track_to_out(Particles particles, Materials materials, PhotonCrossSection photon_CS) {
+void VoxPhanImgNav::track_to_out(Particles particles) {
 
     if (m_params.data_h.device_target == CPU_DEVICE) {
 
         ui32 id=0; while (id<particles.size) {
            
-            kernel_host_track_to_out(particles.data_h, phantom.volume.data_h,
-                                     materials.data_h, photon_CS.data_h, m_params.data_h, id);
+            kernel_host_track_to_out(particles.data_h, m_phantom.data_h,
+                                     m_materials.data_h, photon_CS.data_h, m_params.data_h, id);
             ++id;
         }
     } else if (m_params.data_h.device_target == GPU_DEVICE) {
@@ -307,7 +266,7 @@ void VoxPhanImgNav::track_to_out(Particles particles, Materials materials, Photo
         threads.x = m_params.data_h.gpu_block_size;
         grid.x = (particles.size + m_params.data_h.gpu_block_size - 1) / m_params.data_h.gpu_block_size;
 
-        kernel_device_track_to_out<<<grid, threads>>>(particles.data_d, phantom.volume.data_d, materials.data_d,
+        kernel_device_track_to_out<<<grid, threads>>>(particles.data_d, phantom.volume.data_d, m_materials.data_d,
                                                       photon_CS.data_d, m_params.data_d);
         cuda_error_check("Error ", " Kernel_VoxPhanImgNav (track to out)");
 
@@ -315,31 +274,9 @@ void VoxPhanImgNav::track_to_out(Particles particles, Materials materials, Photo
 
 }
 
-
-void VoxPhanImgNav::load_phantom(std::string file, std::string matfile)
+void VoxPhanImgNav::load_phantom_from_mhd(std::string filename, std::string range_mat_name)
 {
-
-    if (ImageReader::get_format(file) == "mhd") 
-    {
-    
-        load_phantom_from_mhd(file, matfile);
-        
-    }
-    else
-    {
-        
-        print_error("Unknown phantom format ... \n");
-        exit_simulation();
-        
-    }
-
-}
-
-void VoxPhanImgNav::load_phantom_from_mhd(std::string mhdfile, std::string matfile)
-{
-
-    phantom.load_from_mhd(mhdfile, matfile);
-
+    m_phantom.load_from_mhd(filename, range_mat_name);
 }
 
 void VoxPhanImgNav::initialize(GlobalSimulationParameters params) {
@@ -352,29 +289,15 @@ void VoxPhanImgNav::initialize(GlobalSimulationParameters params) {
     // Params
     m_params = params;
 
-    // Phantom name
-    phantom.set_name("VoxPhanImgNav");
+    // Phantom
+    m_phantom.set_name("VoxPhanImgNav");
+    m_phantom.initialize(params);
 
-    // Copy data to GPU
-    if (m_params.data_h.device_target == GPU_DEVICE) {
-        m_copy_phantom_cpu2gpu();
-    }
+    // Materials table
+    m_materials.load_elements_database();
+    m_materials.load_materials_database();
+    m_materials.initialize(params, m_phantom.list_of_materials);
 
-}
-
-// Get list of materials
-std::vector<std::string> VoxPhanImgNav::get_materials_list() {
-    return phantom.list_of_materials;
-}
-
-// Get data that contains materials index
-ui16* VoxPhanImgNav::get_data_materials_indices() {
-    return phantom.volume.data_h.values;
-}
-
-// Get the size of data
-ui32 VoxPhanImgNav::get_data_size() {
-    return phantom.volume.data_h.number_of_voxels;
 }
 
 

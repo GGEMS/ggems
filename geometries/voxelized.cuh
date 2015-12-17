@@ -30,12 +30,6 @@ struct VoxVolumeData {
     ui16 *values;
 };
 
-// Struct that handle CPU&GPU vox volume
-struct VoxVolume {
-    VoxVolumeData data_h;
-    VoxVolumeData data_d;
-};
-
 // Voxelized phantom
 class VoxelizedPhantom : public BaseObject {
     public:
@@ -47,25 +41,19 @@ class VoxelizedPhantom : public BaseObject {
 
         void load_from_mhd(std::string volume_name, std::string range_name);
 
+        void initialize(GlobalSimulationParameters parameters);
+
         void set_offset(f32 x, f32 y, f32 z);
 
-        //void set_color_map(std::string matname, Color col, f32 alpha);
-
-        VoxVolume volume;
-        Materials materials;
-
-        std::vector<std::string> list_of_materials;
-
-
-
-        // Only for display purpose
-        //std::vector<std::string> show_mat;
-        //std::vector<Color> show_colors;
-        //std::vector<f32> show_transparencies;
+        VoxVolumeData data_h;
+        VoxVolumeData data_d;
+        std::vector<std::string> list_of_materials;    
 
     private:
         void m_define_materials_from_range(f32 *raw_data, std::string range_name);
         void m_define_materials_from_range(ui16 *raw_data, std::string range_name);
+        void m_copy_phantom_cpu2gpu();
+        bool m_check_mandatory();
         TxtReader m_txt_reader;
                 
 };

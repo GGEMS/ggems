@@ -15,6 +15,7 @@
 #define VOX_PHAN_IMG_NAV_CUH
 
 #include "global.cuh"
+#include "ggems_phantom.cuh"
 #include "voxelized.cuh"
 #include "raytracing.cuh"
 #include "vector.cuh"
@@ -23,39 +24,28 @@
 #include "photon_navigator.cuh"
 #include "image_reader.cuh"
 
-class VoxPhanImgNav {
+class VoxPhanImgNav : public GGEMSPhantom {
     public:
         VoxPhanImgNav() {}
         ~VoxPhanImgNav() {}
 
+        // Init
+        void initialize(GlobalSimulationParameters params);
         // Tracking from outside to the phantom broder
         void track_to_in(Particles particles);
         // Tracking inside the phantom until the phantom border
-        void track_to_out(Particles particles, Materials materials, PhotonCrossSection photon_CS);
-        
-        // Check format phantom file
-        void load_phantom(std::string phantomfile, std::string materialfile);  
-        
-        // Init
-        void initialize(GlobalSimulationParameters params);
+        void track_to_out(Particles particles);
+                
+        void load_phantom_from_mhd(std::string filename, std::string range_mat_name);
 
-        // Get list of materials
-        std::vector<std::string> get_materials_list();
-        // Get data that contains materials index
-        ui16* get_data_materials_indices();
-        // Get the size of data (nb of voxels)
-        ui32 get_data_size();
-
-        inline std::string get_name(){return "VoxPhanImgNav";};
-
-    private:
-    
-        void load_phantom_from_mhd(std::string, std::string);  
+    private:              
         
-        VoxelizedPhantom phantom;
+        VoxelizedPhantom m_phantom;
+        Materials m_materials;
+
+        // Add Cross Section
     
         bool m_check_mandatory();       
-        void m_copy_phantom_cpu2gpu();
 
         GlobalSimulationParameters m_params;
 

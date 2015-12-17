@@ -84,6 +84,7 @@ class DoseCalculator {
         void set_voxel_size(f32 sx, f32 sy, f32 sz);
         void set_offset(f32 ox, f32 oy, f32 oz);
         void set_voxelized_phantom(VoxelizedPhantom aphantom);
+        void set_materials(Materials materials);
         void set_min_density(f32 min); // Min density to consider the dose calculation
 
         // Init
@@ -104,7 +105,9 @@ class DoseCalculator {
         void m_copy_dose_gpu2cpu();
 
         VoxelizedPhantom m_phantom;
+        Materials m_materials;
         bool m_flag_phantom;
+        bool m_flag_materials;
 
         f32 m_dose_min_density;
 

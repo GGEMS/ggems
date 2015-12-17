@@ -107,6 +107,7 @@ DoseCalculator::DoseCalculator()
 
     // No phan tom assigned yet
     m_flag_phantom = false;
+    m_flag_materials = false;
 
     // Min density to compute the dose
     m_dose_min_density = 0.0;
@@ -145,6 +146,11 @@ void DoseCalculator::set_offset(f32 ox, f32 oy, f32 oz) {
 void DoseCalculator::set_voxelized_phantom(VoxelizedPhantom aphantom) {
     m_phantom = aphantom;
     m_flag_phantom = true;
+}
+
+void DoseCalculator::set_materials(Materials materials) {
+    m_materials = materials;
+    m_flag_materials = true;
 }
 
 // In g/cm3 ?
@@ -209,6 +215,13 @@ void DoseCalculator::calculate_dose_to_water() {
 }
 
 void DoseCalculator::calculate_dose_to_phantom() {
+
+    // Check if everything was set properly
+    if ( !m_flag_materials || !m_flag_phantom ) {
+        print_error("Dose calculator, phantom and materials data are required!");
+        exit_simulation();
+    }
+
     // First get back data if stored on GPU
     if (m_params.data_h.device_target == GPU_DEVICE) {
         m_copy_dose_gpu2cpu();
@@ -216,7 +229,7 @@ void DoseCalculator::calculate_dose_to_phantom() {
 
     // Calculate the dose to phantom and the uncertainty
     ui32 id=0; while(id<dose.data_h.nb_of_voxels) {
-        dose_to_phantom_calculation(dose.data_h, m_phantom.volume.data_h, m_phantom.materials.data_h, m_dose_min_density, id);
+        dose_to_phantom_calculation(dose.data_h, m_phantom.data_h, m_materials.data_h, m_dose_min_density, id);
         dose_uncertainty_calculation(dose.data_h, id);
         ++id;
     }

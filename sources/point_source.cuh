@@ -15,6 +15,8 @@
 #define POINT_SOURCE_CUH
 
 #include "global.cuh"
+#include "fun.cuh"
+#include "prng.cuh"
 #include "ggems_source.cuh"
 
 // Sphere

@@ -16,8 +16,6 @@
 
 #include "global.cuh"
 #include "particles.cuh"
-#include "prng.cuh"
-#include "fun.cuh"
 
 class GGEMSSource {
     public:

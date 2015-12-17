@@ -14,10 +14,10 @@
 
 
 // To handle one material
-class Material {
+class aMaterial {
     public:
-        Material() {}
-        ~Material() {}
+        aMaterial() {}
+        ~aMaterial() {}
         std::vector<std::string> mixture_Z;
         std::vector<f32> mixture_f;
         std::string name;
@@ -26,13 +26,13 @@ class Material {
 };
 
 // Open and load the material database
-class MaterialDataBase {
+class MaterialsDataBase {
     public:
-        MaterialDataBase();
+        MaterialsDataBase();
         void load_materials(std::string);
         void load_elements(std::string);
 
-        std::map<std::string, Material> materials;
+        std::map<std::string, aMaterial> materials;
         std::map<std::string, ui16>  elements_Z;
         std::map<std::string, f32> elements_A;
 
@@ -82,20 +82,10 @@ struct MaterialsTable {
     f32 *density;
 };
 
-// Handle CPU/GPU Material table data
-struct Materials {
-    MaterialsTable data_h;
-    MaterialsTable data_d;
-
-    ui32 nb_materials;              // n
-    ui32 nb_elements_total;         // k
-};
-
-
 // This class is used to build the material table
-class MaterialManager {
+class Materials {
     public:
-        MaterialManager();
+        Materials();
         // Load default data from GGEMS
         void load_elements_database();
         void load_materials_database();
@@ -103,22 +93,25 @@ class MaterialManager {
         void load_elements_database(std::string filename);
         void load_materials_database(std::string filename);
 
-        void add_materials_and_update_indices(std::vector<std::string> mats_list, ui16 *data, ui32 ndata);
+        //void add_materials_and_update_indices(std::vector<std::string> mats_list, ui16 *data, ui32 ndata);
 
-        void initialize(GlobalSimulationParameters params);
+        void initialize(GlobalSimulationParameters params, std::vector<std::string> mats_list);
 
-        Materials materials;   // CPU&GPU
+        MaterialsTable data_h;
+        MaterialsTable data_d;
 
     private:
-        ui16 m_get_material_index(std::string material_name);
+        //ui16 m_get_material_index(std::string material_name);
 
         bool m_check_mandatory();
         void m_copy_materials_table_cpu2gpu();
-        void m_build_materials_table(GlobalSimulationParameters params);
+        void m_build_materials_table(GlobalSimulationParameters params, std::vector<std::string> mats_list);
         //void m_free_materials_table();
 
-        MaterialDataBase m_material_db;
-        std::vector<std::string> m_materials_list;
+        ui32 m_nb_materials;              // n
+        ui32 m_nb_elements_total;         // k
+
+        MaterialsDataBase m_material_db;
 
 };
 
