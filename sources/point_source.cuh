@@ -15,10 +15,10 @@
 #define POINT_SOURCE_CUH
 
 #include "global.cuh"
-#include "ggems_vsource.cuh"
+#include "ggems_source.cuh"
 
 // Sphere
-class PointSource : public GGEMSVSource {
+class PointSource : public GGEMSSource {
     public:        
         PointSource();
         ~PointSource();
@@ -28,7 +28,7 @@ class PointSource : public GGEMSVSource {
         void set_mono_energy(f32 valE);
         void set_energy_spectrum(f64 *valE, f64 *hist, ui32 nb);
 
-        // Virtual from GGEMSVSource
+        // Abstract from GGEMSSource
         void get_primaries_generator(Particles particles);
         void initialize(GlobalSimulationParameters params);       
 

@@ -296,11 +296,43 @@ __host__ __device__ f64xyz fxyz_inv(f64xyz u) {
 
 #endif
 
+/// Atomic functions
 
-// __host__ __device__ void ggems_atomic_add()
-// {
-//     
-// }
+template < typename T,typename U >
+__host__ __device__ void ggems_atomic_add(T* array, ui32 pos, U value)
+{
+#ifdef __CUDA_ARCH__
+    atomicAdd(&array[pos], value);
+#else
+    array[pos] += value;
+#endif
+}
 
+#ifndef SINGLE_PRECISION // Double precision
+
+__device__ double atomicAddDouble(f64* address, f64 val)
+{
+    unsigned long long int* address_as_ull =
+                                          (unsigned long long int*)address;
+    unsigned long long int old = *address_as_ull, assumed;
+    do {
+        assumed = old;
+        old = atomicCAS(address_as_ull, assumed,
+                        __double_as_longlong(val +
+                        __longlong_as_double(assumed)));
+    } while (assumed != old);
+    return __longlong_as_double(old);
+}
+
+__host__ __device__ void ggems_atomic_add(f64* array, ui32 pos, f64 value)
+{
+#ifdef __CUDA_ARCH__
+    atomicAddDouble(&array[pos], value);
+#else
+    array[pos] += value;
+#endif
+}
+
+#endif // SINGLE_PRECISION
 
 #endif

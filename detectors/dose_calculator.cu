@@ -18,7 +18,7 @@
 #include "dose_calculator.cuh"
 
 /// CPU&GPU functions
-__host__ __device__ void dose_record_standard(DoseData dose, f32 Edep, f32xyz pos) {
+__host__ __device__ void dose_record_standard(DoseData dose, f64 Edep, f32xyz pos) {
 
     // Defined index phantom
     f32xyz ivoxsize;
@@ -37,6 +37,46 @@ __host__ __device__ void dose_record_standard(DoseData dose, f32 Edep, f32xyz po
     ggems_atomic_add(dose.edep, index_phantom.w, Edep);
     ggems_atomic_add(dose.edep_squared, index_phantom.w, Edep*Edep);
     ggems_atomic_add(dose.number_of_hits, index_phantom.w, ui32(1));
+
+}
+
+__host__ __device__ void dose_uncertainty_calculation(DoseData dose, ui32 id) {
+
+
+    //              /                                    \ ^1/2
+    //              |    N*Sum(Edep^2) - Sum(Edep)^2     |
+    //  relError =  | __________________________________ |
+    //              |                                    |
+    //              \         (N-1)*Sum(Edep)^2          /
+    //
+    //   where Edep represents the energy deposit in one hit and N the number of energy deposits (hits)
+
+    f64 sum2_E = dose.edep[id] * dose.edep[id];
+
+    f64 num = (dose.number_of_hits[id] * dose.edep_squared[id]) - sum2_E;
+    f64 den = (dose.number_of_hits[id]-1) * sum2_E;
+
+    dose.uncertainty[id] = pow(num/den, 0.5);
+
+}
+
+__host__ __device__ void dose_to_water_calculation(DoseData dose, ui32 id) {
+
+    f64 vox_vol = dose.spacing_x*dose.spacing_y*dose.spacing_z;
+    f64 density = 1.0 * gram/cm3;
+    dose.dose[id] = (1.602E-10/vox_vol) * dose.edep[id]/density; // Mev2Joule conversion (1.602E-13) / density scaling (10E-3) from g/mm3 to kg/mm3
+
+}
+
+__host__ __device__ void dose_to_phantom_calculation(DoseData dose, VoxVolumeData volume, MaterialsTable materials, f32 dose_min_density, ui32 id) {
+
+    f64 vox_vol = dose.spacing_x*dose.spacing_y*dose.spacing_z;
+    f64 density = materials.density[volume.values[id]]; // density given by the material id
+    if (density > dose_min_density) {
+        dose.dose[id] = (1.602E-10/vox_vol) * dose.edep[id]/density; // Mev2Joule conversion (1.602E-13) / density scaling (10E-3) from g/mm3 to kg/mm3
+    } else {
+        dose.dose[id] = 0.0f;
+    }
 
 }
 
@@ -64,6 +104,12 @@ DoseCalculator::DoseCalculator()
     dose.data_h.number_of_hits = NULL;
     
     dose.data_h.uncertainty = NULL;
+
+    // No phan tom assigned yet
+    m_flag_phantom = false;
+
+    // Min density to compute the dose
+    m_dose_min_density = 0.0;
 }
 
 DoseCalculator::~DoseCalculator()
@@ -96,6 +142,16 @@ void DoseCalculator::set_offset(f32 ox, f32 oy, f32 oz) {
     dose.data_h.oz = oz;
 }
 
+void DoseCalculator::set_voxelized_phantom(VoxelizedPhantom aphantom) {
+    m_phantom = aphantom;
+    m_flag_phantom = true;
+}
+
+// In g/cm3 ?
+void DoseCalculator::set_min_density(f32 min) {
+    m_dose_min_density = min * gram/mm3;
+}
+
 /// Init
 void DoseCalculator::initialize(GlobalSimulationParameters params)
 {
@@ -108,6 +164,9 @@ void DoseCalculator::initialize(GlobalSimulationParameters params)
 
     // Initi nb of voxels
     dose.data_h.nb_of_voxels = dose.data_h.nx*dose.data_h.ny*dose.data_h.nz;
+
+    // Copy params
+    m_params = params;
 
     // CPU allocation
     m_cpu_malloc_dose();
@@ -134,36 +193,34 @@ void DoseCalculator::initialize(GlobalSimulationParameters params)
 
 }
 
+void DoseCalculator::calculate_dose_to_water() {
 
-// __host__ __device__ void DoseCalculator::store_energy_and_energy2(ui32 voxel, f32 energy)
-// {
-// 
-// #if defined(__CUDA_ARCH__)
-//  ggems_atomic_add(dose_d.edep, voxel, energy);
-//  ggems_atomic_add(dose_d.edep_squared, voxel, energy*energy);
-// #else
-//  ggems_atomic_add(dose_h.edep, voxel, energy);
-//  ggems_atomic_add(dose_h.edep_squared, voxel, energy*energy);
-// #endif
-// 
-// }
+    // First get back data if stored on GPU
+    if (m_params.data_h.device_target == GPU_DEVICE) {
+        m_copy_dose_gpu2cpu();
+    }
 
-
-
-/*
-void DoseCalculator::write_dosi(std::string histname)
-{
-
-
-ImageReader::record3Dimage(  histname,  
-dose_h.edep,
-make_f32xyz(dose_h.x0,dose_h.y0,dose_h.z0), 
-make_f32xyz(dose_h.spacing_x,dose_h.spacing_y,dose_h.spacing_z),
-make_i32xyz(dose_h.nx,dose_h.ny,dose_h.nz) ,
-false);
-
+    // Calculate the dose to water and the uncertainty
+    ui32 id=0; while(id<dose.data_h.nb_of_voxels) {
+        dose_to_water_calculation(dose.data_h, id);
+        dose_uncertainty_calculation(dose.data_h, id);
+        ++id;
+    }
 }
-*/
+
+void DoseCalculator::calculate_dose_to_phantom() {
+    // First get back data if stored on GPU
+    if (m_params.data_h.device_target == GPU_DEVICE) {
+        m_copy_dose_gpu2cpu();
+    }
+
+    // Calculate the dose to phantom and the uncertainty
+    ui32 id=0; while(id<dose.data_h.nb_of_voxels) {
+        dose_to_phantom_calculation(dose.data_h, m_phantom.volume.data_h, m_phantom.materials.data_h, m_dose_min_density, id);
+        dose_uncertainty_calculation(dose.data_h, id);
+        ++id;
+    }
+}
 
 /// Private
 bool DoseCalculator::m_check_mandatory() {
@@ -173,20 +230,20 @@ bool DoseCalculator::m_check_mandatory() {
 }
 
 void DoseCalculator::m_cpu_malloc_dose() {
-    dose.data_h.edep = new f32[dose.data_h.nb_of_voxels];
-    dose.data_h.dose = new f32[dose.data_h.nb_of_voxels];
-    dose.data_h.edep_squared = new f32[dose.data_h.nb_of_voxels];
+    dose.data_h.edep = new f64[dose.data_h.nb_of_voxels];
+    dose.data_h.dose = new f64[dose.data_h.nb_of_voxels];
+    dose.data_h.edep_squared = new f64[dose.data_h.nb_of_voxels];
     dose.data_h.number_of_hits = new ui32[dose.data_h.nb_of_voxels];
-    dose.data_h.uncertainty = new f32[dose.data_h.nb_of_voxels];
+    dose.data_h.uncertainty = new f64[dose.data_h.nb_of_voxels];
 }
 
 void DoseCalculator::m_gpu_malloc_dose() {
     // GPU allocation
-    HANDLE_ERROR( cudaMalloc((void**) &dose.data_d.edep,           dose.data_h.nb_of_voxels * sizeof(f32)));
-    HANDLE_ERROR( cudaMalloc((void**) &dose.data_d.dose,           dose.data_h.nb_of_voxels * sizeof(f32)));
-    HANDLE_ERROR( cudaMalloc((void**) &dose.data_d.edep_squared,   dose.data_h.nb_of_voxels * sizeof(f32)));
+    HANDLE_ERROR( cudaMalloc((void**) &dose.data_d.edep,           dose.data_h.nb_of_voxels * sizeof(f64)));
+    HANDLE_ERROR( cudaMalloc((void**) &dose.data_d.dose,           dose.data_h.nb_of_voxels * sizeof(f64)));
+    HANDLE_ERROR( cudaMalloc((void**) &dose.data_d.edep_squared,   dose.data_h.nb_of_voxels * sizeof(f64)));
     HANDLE_ERROR( cudaMalloc((void**) &dose.data_d.number_of_hits, dose.data_h.nb_of_voxels * sizeof(ui32)));
-    HANDLE_ERROR( cudaMalloc((void**) &dose.data_d.uncertainty,    dose.data_h.nb_of_voxels * sizeof(f32)));
+    HANDLE_ERROR( cudaMalloc((void**) &dose.data_d.uncertainty,    dose.data_h.nb_of_voxels * sizeof(f64)));
 }
 
 void DoseCalculator::m_copy_dose_cpu2gpu()
@@ -206,14 +263,36 @@ void DoseCalculator::m_copy_dose_cpu2gpu()
     dose.data_d.nb_of_voxels = dose.data_h.nb_of_voxels;
 
     // Copy values to GPU arrays
-    HANDLE_ERROR( cudaMemcpy(dose.data_d.edep,           dose.data_h.edep,           sizeof(f32)*dose.data_h.nb_of_voxels, cudaMemcpyHostToDevice));
-    HANDLE_ERROR( cudaMemcpy(dose.data_d.dose,           dose.data_h.dose,           sizeof(f32)*dose.data_h.nb_of_voxels, cudaMemcpyHostToDevice));
-    HANDLE_ERROR( cudaMemcpy(dose.data_d.edep_squared,   dose.data_h.edep_squared,   sizeof(f32)*dose.data_h.nb_of_voxels, cudaMemcpyHostToDevice));
+    HANDLE_ERROR( cudaMemcpy(dose.data_d.edep,           dose.data_h.edep,           sizeof(f32)*dose.data_h.nb_of_voxels,  cudaMemcpyHostToDevice));
+    HANDLE_ERROR( cudaMemcpy(dose.data_d.dose,           dose.data_h.dose,           sizeof(f32)*dose.data_h.nb_of_voxels,  cudaMemcpyHostToDevice));
+    HANDLE_ERROR( cudaMemcpy(dose.data_d.edep_squared,   dose.data_h.edep_squared,   sizeof(f32)*dose.data_h.nb_of_voxels,  cudaMemcpyHostToDevice));
     HANDLE_ERROR( cudaMemcpy(dose.data_d.number_of_hits, dose.data_h.number_of_hits, sizeof(ui32)*dose.data_h.nb_of_voxels, cudaMemcpyHostToDevice));
-    HANDLE_ERROR( cudaMemcpy(dose.data_d.uncertainty,    dose.data_h.uncertainty,    sizeof(f32)*dose.data_h.nb_of_voxels, cudaMemcpyHostToDevice));
+    HANDLE_ERROR( cudaMemcpy(dose.data_d.uncertainty,    dose.data_h.uncertainty,    sizeof(f32)*dose.data_h.nb_of_voxels,  cudaMemcpyHostToDevice));
 }
 
+void DoseCalculator::m_copy_dose_gpu2cpu()
+{
+    dose.data_h.nx = dose.data_d.nx;
+    dose.data_h.ny = dose.data_d.ny;
+    dose.data_h.nz = dose.data_d.nz;
 
+    dose.data_h.spacing_x = dose.data_d.spacing_x;
+    dose.data_h.spacing_y = dose.data_d.spacing_y;
+    dose.data_h.spacing_z = dose.data_d.spacing_z;
+
+    dose.data_h.ox = dose.data_d.ox;
+    dose.data_h.oy = dose.data_d.oy;
+    dose.data_h.oz = dose.data_d.oz;
+
+    dose.data_h.nb_of_voxels = dose.data_d.nb_of_voxels;
+
+    // Copy values to GPU arrays
+    HANDLE_ERROR( cudaMemcpy(dose.data_h.edep,           dose.data_d.edep,           sizeof(f32)*dose.data_h.nb_of_voxels,  cudaMemcpyDeviceToHost));
+    HANDLE_ERROR( cudaMemcpy(dose.data_h.dose,           dose.data_d.dose,           sizeof(f32)*dose.data_h.nb_of_voxels,  cudaMemcpyDeviceToHost));
+    HANDLE_ERROR( cudaMemcpy(dose.data_h.edep_squared,   dose.data_d.edep_squared,   sizeof(f32)*dose.data_h.nb_of_voxels,  cudaMemcpyDeviceToHost));
+    HANDLE_ERROR( cudaMemcpy(dose.data_h.number_of_hits, dose.data_d.number_of_hits, sizeof(ui32)*dose.data_h.nb_of_voxels, cudaMemcpyDeviceToHost));
+    HANDLE_ERROR( cudaMemcpy(dose.data_h.uncertainty,    dose.data_d.uncertainty,    sizeof(f32)*dose.data_h.nb_of_voxels,  cudaMemcpyDeviceToHost));
+}
 
 
 

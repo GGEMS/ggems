@@ -17,6 +17,7 @@
 #include "global.cuh"
 #include "txt_reader.cuh"
 #include "base_object.cuh"
+#include "materials.cuh"
 
 // Struct that handle Vox Volume data
 struct VoxVolumeData {
@@ -51,8 +52,11 @@ class VoxelizedPhantom : public BaseObject {
         //void set_color_map(std::string matname, Color col, f32 alpha);
 
         VoxVolume volume;
+        Materials materials;
 
         std::vector<std::string> list_of_materials;
+
+
 
         // Only for display purpose
         //std::vector<std::string> show_mat;

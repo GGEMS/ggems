@@ -15,7 +15,7 @@
 #define GGEMS_CUH
 
 #include "global.cuh"
-#include "ggems_vsource.cuh"
+#include "ggems_source.cuh"
 #include "particles.cuh"
 #include "cross_sections.cuh"
 #include "materials.cuh"
@@ -52,7 +52,7 @@ class GGEMS {
         void set_CS_table_E_max(f32 valE);
         void set_seed(ui32 vseed);
         // Setting simulation objects
-        void set_source(GGEMSVSource &aSource);
+        void set_source(GGEMSSource* aSource);
         
         void set_phantom(VoxPhanImgNav &aPhantom);
         void set_phantom(VoxPhanDosi &aPhantom);
@@ -79,7 +79,7 @@ class GGEMS {
         MaterialManager m_materials;
 
         // Source manager
-        SourcesManager m_sources;
+        GGEMSSource* m_source;
 
         // Phantom manager
         PhantomManager m_phantoms;
@@ -92,7 +92,7 @@ class GGEMS {
         void m_copy_parameters_cpu2gpu();
         GlobalSimulationParameters m_parameters;
         
-       static GlobalSimulationParameters *theParameters;
+
 
         
         /*

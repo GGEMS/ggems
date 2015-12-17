@@ -78,6 +78,8 @@ PointSource::PointSource() {
     m_spectrumCDF_h = NULL;
     m_spectrumCDF_d = NULL;
     m_particle_type = PHOTON;
+
+    set_name("point_source");
 }
 
 // Destructor

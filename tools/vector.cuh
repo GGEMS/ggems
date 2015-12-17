@@ -7,7 +7,7 @@
  * \version 0.1
  * \date 13 novembre 2015
  *
- *
+ * \todo a) Use template here
  *
  */
 
@@ -136,20 +136,13 @@ inline __host__ __device__  f64 f64xyz_mul(f64xyz v){ return v.x * v.y * v.z;}
 
 #endif
 
-template < typename T >
-inline __host__ __device__ void ggems_atomic_add(T* array, ui32 pos, T value)
-{
-#ifdef __CUDA_ARCH__
+template < typename T,typename U >
+__host__ __device__ void ggems_atomic_add(T* array, ui32 pos, U value);
 
-    atomicAdd(&array[pos], value);
-
-#else
-    
-    array[pos] += value;
-    
+// Special case: GPU is not able to do atomic add with double yet!
+#ifndef SINGLE_PRECISION
+__host__ __device__ void ggems_atomic_add(f64* array, ui32 pos, f64 value);
 #endif
-}
-
 
 
 #endif

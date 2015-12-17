@@ -10,7 +10,8 @@
  *
  * \todo a) Need to add the output function for the dose map while ImageReader will be ready
  * \todo b) Fix: change ox, oy, oz to off_x, off_y, off_z
- *
+ * \todo c) Dose uncertainty calculation, this part can also be implemented on the device side (GPU)
+ * \todo d) Check if density in really in g/mm3
  */
 
 #ifndef DOSE_CALCULATOR_CUH
@@ -20,6 +21,8 @@
 #include "particles.cuh"
 #include "vector.cuh"
 #include "image_reader.cuh"
+#include "voxelized.cuh"
+#include "materials.cuh"
 
 /**
  * \struct Dosimetry
@@ -35,11 +38,11 @@
 struct DoseData
 {
     // Data
-    f32 * edep;
-    f32 * dose;
-    f32 * edep_squared;
+    f64 * edep;
+    f64 * dose;
+    f64 * edep_squared;
     ui32 * number_of_hits;        
-    f32 * uncertainty;
+    f64 * uncertainty;
     
     // Number of voxels per dimension
     ui32 nx;
@@ -80,8 +83,15 @@ class DoseCalculator {
         void set_size_in_voxel(ui32 x, ui32 y, ui32 z);
         void set_voxel_size(f32 sx, f32 sy, f32 sz);
         void set_offset(f32 ox, f32 oy, f32 oz);
-        
+        void set_voxelized_phantom(VoxelizedPhantom aphantom);
+        void set_min_density(f32 min); // Min density to consider the dose calculation
+
+        // Init
         void initialize(GlobalSimulationParameters params);
+
+        // Dose calculation
+        void calculate_dose_to_water();
+        void calculate_dose_to_phantom();
 
         Dose dose;
 
@@ -89,7 +99,16 @@ class DoseCalculator {
         bool m_check_mandatory();
         void m_cpu_malloc_dose();
         void m_gpu_malloc_dose();
+
         void m_copy_dose_cpu2gpu();
+        void m_copy_dose_gpu2cpu();
+
+        VoxelizedPhantom m_phantom;
+        bool m_flag_phantom;
+
+        f32 m_dose_min_density;
+
+        GlobalSimulationParameters m_params;
 
 
 

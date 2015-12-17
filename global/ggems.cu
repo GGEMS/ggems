@@ -58,7 +58,9 @@ GGEMS::GGEMS() {
     m_parameters.data_h.display_run_time = DISABLED;
     m_parameters.data_h.display_memory_usage = DISABLED;
 
-    theParameters = &m_parameters;
+    // Element of the simulation
+    m_source = NULL;
+
 }
 
 GGEMS::~GGEMS() {
@@ -161,8 +163,8 @@ void GGEMS::set_seed(ui32 vseed) {
 }
 
 /// Sources
-void GGEMS::set_source(GGEMSVSource &aSource) {
-    m_sources.set_source(aSource);
+void GGEMS::set_source(GGEMSSource* aSource) {
+    m_source = aSource;
 }
 
 /// Phantoms
@@ -192,7 +194,7 @@ void GGEMS::set_display_memory_usage() {
 bool GGEMS::m_check_mandatory() {
     bool flag_error = false;
 
-    if (m_sources.get_source_name() == "") {
+    if (m_source == NULL) {
         print_error("No source defined.");
         flag_error = true;
     }
@@ -287,7 +289,7 @@ void GGEMS::init_simulation() {
 
 
     /// Init Sources /////////////////////////////////
-    m_sources.initialize(m_parameters);
+    m_source->initialize(m_parameters);
 
     /// Init Phantoms ////////////////////////////////
     m_phantoms.initialize(m_parameters);
@@ -375,7 +377,7 @@ void GGEMS::start_simulation() {
 
             
         // Get primaries
-        m_sources.get_primaries_generator(m_particles_manager.particles);
+        m_source->get_primaries_generator(m_particles_manager.particles);
 
         // TODO If phantom
 
