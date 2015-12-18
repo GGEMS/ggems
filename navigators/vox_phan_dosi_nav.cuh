@@ -39,7 +39,7 @@ namespace VPDN {
                                                    PhotonCrossSectionTable photon_CS_table,
                                                    ElectronsCrossSectionTable electron_CS_table,
                                                    GlobalSimulationParametersData parameters,
-                                                   DoseData dosi,
+                                                   DoseData &dosi,
                                                    f32 &randomnumbereIoni,
                                                    f32 &randomnumbereBrem,
                                                    f32 freeLength,
