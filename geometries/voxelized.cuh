@@ -23,7 +23,7 @@ struct VoxVolumeData {
     ui16 nb_vox_x, nb_vox_y, nb_vox_z;
     ui32 number_of_voxels;
     f32 spacing_x, spacing_y, spacing_z;
-    f32 org_x, org_y, org_z;
+    f32 off_x, off_y, off_z;
     f32 xmin, xmax, ymin, ymax, zmin, zmax;
 
     ui16 *values;

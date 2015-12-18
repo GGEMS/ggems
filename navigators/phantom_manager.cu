@@ -56,7 +56,26 @@ void PhantomManager::initialize(GlobalSimulationParameters params) {
         // Init the phantom
         m_vox_phan_img.initialize(params);
     }
+    else if (m_phantom_name == m_vox_phan_dosi.get_name()) {
 
+        /// Material handling ////////////////////////////
+      
+        // Build material data based on geometry
+        m_materials_mng.add_materials_and_update_indices(m_vox_phan_dosi.get_materials_list(),
+                                                         m_vox_phan_dosi.get_data_materials_indices(),
+                                                         m_vox_phan_dosi.get_data_size());
+
+        // Init material
+        m_materials_mng.initialize(params);
+
+        // Init CS
+        m_cross_sections_mng.initialize(m_materials_mng.materials, params);
+
+        // Init the phantom
+        m_vox_phan_dosi.initialize(params);
+    }
+    
+    
     // Put others phantom here.
 
 }
@@ -80,7 +99,7 @@ void PhantomManager::track_to_out(Particles particles) {
         m_vox_phan_img.track_to_out(particles, m_materials_mng.materials, m_cross_sections_mng.photon_CS);
     }
     else if (m_phantom_name == m_vox_phan_dosi.get_name()) {
-        m_vox_phan_dosi.track_to_out(particles, m_materials_mng.materials, m_cross_sections_mng.photon_CS);
+        m_vox_phan_dosi.track_to_out(particles, m_materials_mng.materials, m_cross_sections_mng);
     }
 
 }

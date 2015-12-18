@@ -16,6 +16,8 @@
 #include "fun.cuh"
 #include "prng.cuh"
 
+
+
 // rotateUz, function from CLHEP
  __host__ __device__ f32xyz rotateUz(f32xyz vector, f32xyz newUz) {
     f32 u1 = newUz.x;
@@ -79,4 +81,71 @@ __host__ __device__ f32 linear_interpolation(f32 xa,f32 ya, f32 xb, f32 yb, f32 
     return ya + (x-xa) * (yb-ya) / (xb-xa);
 }
 
+
+__host__ __device__ int G4Poisson(f32 mean,ParticlesData &particles, int id)
+    {
+    f32    number=0.;
+
+    f32  position,poissonValue,poissonSum;
+    f32  value,y,t;
+    if(mean<=16.)   // border == 16
+        {
+        do
+            {
+            position=JKISS32(particles, id);
+            }
+        while((1.-position)<2.e-7);  // to avoid 1 due to f32 approximation
+        poissonValue=expf(-mean);
+        poissonSum=poissonValue;
+        while((poissonSum<=position)&&(number<40000.))
+            {
+            number++;
+            poissonValue*=mean/number;
+            if((poissonSum+poissonValue)==poissonSum) break;
+            poissonSum+=poissonValue;
+            }
+
+        return  (int)number;
+        }
+    f32 toto = JKISS32(particles, id);
+
+    t=sqrtf(-2.*logf(toto));
+
+    y=2.*gpu_pi*JKISS32(particles, id);
+    t*=cosf(y);
+    value=mean+t*sqrtf(mean)+.5;
+
+    if(value<=0.)
+        return  0;
+    else if(value>=2.e9) // f32 limit = 2.e9
+        return  (int)2.e9;
+    return  (int)value;
+    }
+
+__host__ __device__ f32 Gaussian(f32 mean,f32 rms,ParticlesData &particles, int id)
+    {
+    f32  data;
+    f32  U1,U2,Disp,Fx;
+
+    do
+        {
+        U1=2.*JKISS32(particles, id)-1.;
+        U2=2.*JKISS32(particles, id)-1.;
+        Fx=U1*U1+U2*U2;
+
+        }
+    while((Fx>=1.));
+
+
+    Fx=sqrtf((-2.*logf(Fx))/Fx);
+//     if(isfinite(Fx)){ printf("%d\t%f\t%f\n",id,Fx,temps); Fx = 0.5; }
+
+    Disp=U1*Fx;
+    data=mean+Disp*rms;
+//     data =
+//      data = Disp*rms;
+//      if(isnan(data)|| isinf(data)) data =0.;
+    return  data;
+    }
+    
 #endif

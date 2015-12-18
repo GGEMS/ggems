@@ -89,9 +89,9 @@ __host__ __device__ void vox_phan_track_to_out(ParticlesData &particles,
     ivoxsize.y = 1.0 / vol.spacing_y;
     ivoxsize.z = 1.0 / vol.spacing_z;
     ui16xyzw index_phantom;
-    index_phantom.x = ui16( (pos.x+vol.org_x) * ivoxsize.x );
-    index_phantom.y = ui16( (pos.y+vol.org_y) * ivoxsize.y );
-    index_phantom.z = ui16( (pos.z+vol.org_z) * ivoxsize.z );
+    index_phantom.x = ui16( (pos.x+vol.off_x) * ivoxsize.x );
+    index_phantom.y = ui16( (pos.y+vol.off_y) * ivoxsize.y );
+    index_phantom.z = ui16( (pos.z+vol.off_z) * ivoxsize.z );
     index_phantom.w = index_phantom.z*vol.nb_vox_x*vol.nb_vox_y
                       + index_phantom.y*vol.nb_vox_x
                       + index_phantom.x; // linear index
@@ -244,9 +244,9 @@ void VoxPhanImgNav::m_copy_phantom_cpu2gpu() {
     phantom.volume.data_d.spacing_y = phantom.volume.data_h.spacing_y;
     phantom.volume.data_d.spacing_z = phantom.volume.data_h.spacing_z;
 
-    phantom.volume.data_d.org_x = phantom.volume.data_h.org_x;
-    phantom.volume.data_d.org_y = phantom.volume.data_h.org_y;
-    phantom.volume.data_d.org_z = phantom.volume.data_h.org_z;
+    phantom.volume.data_d.off_x = phantom.volume.data_h.off_x;
+    phantom.volume.data_d.off_y = phantom.volume.data_h.off_y;
+    phantom.volume.data_d.off_z = phantom.volume.data_h.off_z;
 
     phantom.volume.data_d.number_of_voxels = phantom.volume.data_h.number_of_voxels;
 }

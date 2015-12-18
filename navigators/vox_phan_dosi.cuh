@@ -22,17 +22,19 @@
 #include "photon.cuh"
 #include "photon_navigator.cuh"
 #include "image_reader.cuh"
-#include "dosimetry_actor.cuh"
+#include "dose_calculator.cuh"
+#include "electron.cuh"
+#include "cross_sections.cuh"
 
 class VoxPhanDosi {
     public:
-        VoxPhanDosi() {m_dose_calculator = new DoseCalculator;}
+        VoxPhanDosi() {}
         ~VoxPhanDosi() {}
 
         // Tracking from outside to the phantom broder
         void track_to_in(Particles particles);
         // Tracking inside the phantom until the phantom border
-        void track_to_out(Particles particles, Materials materials, PhotonCrossSection photon_CS);
+        void track_to_out(Particles particles, Materials materials, CrossSectionsManager cross_sections_mng);
         
         // Check format phantom file
         void load_phantom(std::string phantomfile, std::string materialfile);  
@@ -49,14 +51,11 @@ class VoxPhanDosi {
 
         inline std::string get_name(){return "VoxPhanDosi";};
         
-        // Dosimetry map functions
-        void add_dosimetry_map(); // Without arg dosemap = phan size and position
-        void add_dosimetry_map(ui32xyz,f32xyz,f32xyz);
-        void add_dosimetry_map(ui32,ui32,ui32,f32,f32,f32,f32,f32,f32);
-        
+        /*
         void write(std::string filename = "dosimetry.mhd"){
             m_dose_calculator->write_dosi(filename);
         }
+        */
         
 
         void print_dosimetry();
@@ -70,7 +69,7 @@ class VoxPhanDosi {
 
         GlobalSimulationParameters m_params;
 
-        DoseCalculator *m_dose_calculator;
+        DoseCalculator m_dose_calculator;
         
         
         friend std::ostream& operator<<(std::ostream& os, VoxPhanDosi& v)
@@ -90,9 +89,9 @@ class VoxPhanDosi {
             
             os  << "\t"   << "|" 
                 << std::left  << std::setw(9) << "Offset" 
-                << std::right << std::setw(5) << v.phantom.volume.data_h.org_x 
-                << std::right << std::setw(7) << v.phantom.volume.data_h.org_y
-                << std::right << std::setw(7) << v.phantom.volume.data_h.org_z
+                << std::right << std::setw(5) << v.phantom.volume.data_h.off_x
+                << std::right << std::setw(7) << v.phantom.volume.data_h.off_y
+                << std::right << std::setw(7) << v.phantom.volume.data_h.off_z
                 << std::setw(2)<< "|" << std::endl;
                
             os  << "\t"   << "|" 

@@ -20,8 +20,13 @@
 #include <cfloat>
 #include <assert.h>
 #include <math.h>
-#include <sys/time.h>
 
+#ifdef _WIN32
+#include <time.h>
+#include <Windows.h>
+#else 
+#include <sys/time.h>
+#endif
 /////// CONSTANTS //////////////////////////////////////////////
 
 // Run on CPU
@@ -71,7 +76,7 @@
 #define TRUE    1
 #define FALSE   0
 
-//#define EKINELIMIT 1*eV
+#define EKINELIMIT 1*eV
 
 
 //#define DEBUGOK "[\033[32;01mok\033[00m]"
@@ -80,6 +85,9 @@
 
 #define EPSILON3 1.0e-03f
 #define EPSILON6 1.0e-06f
+
+#define GGcout std::cout
+#define GGendl std::endl
 
 // Pi
 #define gpu_pi               3.141592653589793116
@@ -187,6 +195,8 @@ struct GlobalSimulationParametersData {
     f32 photon_cut;    // In energy for now, need to change for distance range.
     f32 electron_cut;
 
+    ui32 nb_of_secondaries;
+    
     ui64 nb_of_particles;
     ui64 size_of_particles_batch;
     ui32 nb_of_batches;
