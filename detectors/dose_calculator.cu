@@ -18,7 +18,7 @@
 #include "dose_calculator.cuh"
 
 /// CPU&GPU functions
-__host__ __device__ void dose_record_standard(DoseData &dose, f64 Edep, f32 px, f32 py, f32 pz) {
+__host__ __device__ void dose_record_standard(DoseData &dose, f32 Edep, f32 px, f32 py, f32 pz) {
 
     // Defined index phantom
     f32xyz ivoxsize;
