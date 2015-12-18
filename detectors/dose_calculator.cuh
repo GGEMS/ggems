@@ -70,7 +70,7 @@ struct Dose
 };
 
 // Dose functions
-__host__ __device__ void dose_record_standard(DoseData dose, f32 Edep, f32xyz pos);
+__host__ __device__ void dose_record_standard(DoseData dose, f32 Edep, f32 px, f32 py, f32 pz);
 
 // Class
 class DoseCalculator {

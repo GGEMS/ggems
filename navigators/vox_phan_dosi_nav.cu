@@ -214,8 +214,7 @@ __host__ __device__ void VPDN::track_electron_to_out(ParticlesData &particles,
                 {
                     GlobalMscScattering( trueStepLength, cutstep, erange, energy, lambda,   dedxeIoni,  dedxeBrem,  electron_CS_table,  mat_id, particles,  part_id, par1, par2, materials, dosi, index_phantom,vol,parameters);
                 
-                /// TODO WARNING ACTIVER DOSIMETRIE
-//                 dose_record(dosi, edep, particles.px[id],particles.py[id],particles.pz[id],id);
+                    dose_record_standard(dosi, edep, particles.px[part_id], particles.py[part_id], particles.pz[part_id]);
                     alongStepLength+=trueStepLength;
                     totalLength+=trueStepLength;
                     lastStepisaPhysicEffect=FALSE;
@@ -224,10 +223,9 @@ __host__ __device__ void VPDN::track_electron_to_out(ParticlesData &particles,
                 }
             else     
                 {
-                    GlobalMscScattering( trueStepLength, lengthtoVertex, erange, energy, lambda,   dedxeIoni,  dedxeBrem,   electron_CS_table,  mat_id, particles,  part_id, par1, par2, materials, dosi, index_phantom,vol,parameters);
-                    
-                /// TODO WARNING ACTIVER DOSIMETRIE
-//                 dose_record(dosi, edep, particles.px[id],particles.py[id],particles.pz[id],id);
+                    GlobalMscScattering( trueStepLength, lengthtoVertex, erange, energy, lambda,   dedxeIoni,  dedxeBrem,   electron_CS_table,  mat_id, particles,  part_id, par1, par2, materials, dosi, index_phantom,vol,parameters);                    
+
+                    dose_record_standard(dosi, edep, particles.px[part_id], particles.py[part_id], particles.pz[part_id]);
 
                 if(next_discrete_process == ELECTRON_IONISATION)
                     {

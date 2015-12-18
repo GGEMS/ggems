@@ -18,7 +18,7 @@
 #include "dose_calculator.cuh"
 
 /// CPU&GPU functions
-__host__ __device__ void dose_record_standard(DoseData dose, f64 Edep, f32xyz pos) {
+__host__ __device__ void dose_record_standard(DoseData dose, f64 Edep, f32 px, f32 py, f32 pz) {
 
     // Defined index phantom
     f32xyz ivoxsize;
@@ -26,9 +26,9 @@ __host__ __device__ void dose_record_standard(DoseData dose, f64 Edep, f32xyz po
     ivoxsize.y = 1.0 / dose.spacing_y;
     ivoxsize.z = 1.0 / dose.spacing_z;
     ui32xyzw index_phantom;
-    index_phantom.x = ui32( (pos.x+dose.ox) * ivoxsize.x );
-    index_phantom.y = ui32( (pos.y+dose.oy) * ivoxsize.y );
-    index_phantom.z = ui32( (pos.z+dose.oz) * ivoxsize.z );
+    index_phantom.x = ui32( (px+dose.ox) * ivoxsize.x );
+    index_phantom.y = ui32( (py+dose.oy) * ivoxsize.y );
+    index_phantom.z = ui32( (pz+dose.oz) * ivoxsize.z );
     index_phantom.w = index_phantom.z*dose.nx*dose.ny
                       + index_phantom.y*dose.nx
                       + index_phantom.x; // linear index
