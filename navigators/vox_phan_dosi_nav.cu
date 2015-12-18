@@ -11,15 +11,15 @@
  *
  */
 
-#ifndef VOX_PHAN_DOSI_CU
-#define VOX_PHAN_DOSI_CU
+#ifndef VOX_PHAN_DOSI_NAV_CU
+#define VOX_PHAN_DOSI_NAV_CU
 
-#include "vox_phan_dosi.cuh"
+#include "vox_phan_dosi_nav.cuh"
 
 ////:: GPU Codes
 
 // Move particles to the voxelized volume
-__host__ __device__ void vox_phan_track_to_in_dosi(ParticlesData &particles, f32 xmin, f32 xmax,
+__host__ __device__ void VPDN::track_to_in(ParticlesData &particles, f32 xmin, f32 xmax,
                                               f32 ymin, f32 ymax, f32 zmin, f32 zmax,
                                               ui32 id) {
 // std::cout<<__LINE__<< "   " <<particles.endsimu[id] <<  " F " << PARTICLE_FREEZE  << std::endl;
@@ -63,7 +63,7 @@ __host__ __device__ void vox_phan_track_to_in_dosi(ParticlesData &particles, f32
 
 }
 
-__host__ __device__ void vpd_track_electron_to_out(ParticlesData &particles,
+__host__ __device__ void VPDN::track_electron_to_out(ParticlesData &particles,
                                                VoxVolumeData vol,
                                                MaterialsTable materials,
                                                PhotonCrossSectionTable photon_CS_table,
@@ -106,7 +106,7 @@ __host__ __device__ void vpd_track_electron_to_out(ParticlesData &particles,
             f32 lambda = 0;
             bool significant_loss;
 
-            f32 edep;
+            f32 edep;  // Not used ?? - JB
 
             f32 trueGeomLength;
             
@@ -356,7 +356,7 @@ __host__ __device__ void vpd_track_electron_to_out(ParticlesData &particles,
 }
 
 
-__host__ __device__ void vpd_track_photon_to_out(ParticlesData &particles,
+__host__ __device__ void VPDN::track_photon_to_out(ParticlesData &particles,
                                                VoxVolumeData vol,
                                                MaterialsTable materials,
                                                PhotonCrossSectionTable photon_CS_table,
@@ -459,26 +459,26 @@ __host__ __device__ void vpd_track_photon_to_out(ParticlesData &particles,
 }
 
 // Device Kernel that move particles to the voxelized volume boundary
-__global__ void kernel_device_track_to_in_dosi(ParticlesData particles, f32 xmin, f32 xmax,
+__global__ void VPDN::kernel_device_track_to_in(ParticlesData particles, f32 xmin, f32 xmax,
                                             f32 ymin, f32 ymax, f32 zmin, f32 zmax) {
 
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
     if (id >= particles.size) return;
 
-    vox_phan_track_to_in_dosi(particles, xmin, xmax, ymin, ymax, zmin, zmax, id);
+    VPDN::track_to_in(particles, xmin, xmax, ymin, ymax, zmin, zmax, id);
 
 }
 
 // Host Kernel that move particles to the voxelized volume boundary
-void kernel_host_track_to_in_dosi(ParticlesData particles, f32 xmin, f32 xmax,
+void VPDN::kernel_host_track_to_in(ParticlesData particles, f32 xmin, f32 xmax,
                              f32 ymin, f32 ymax, f32 zmin, f32 zmax, ui32 part_id) {
 
-    vox_phan_track_to_in_dosi(particles, xmin, xmax, ymin, ymax, zmin, zmax, part_id);
+    VPDN::track_to_in(particles, xmin, xmax, ymin, ymax, zmin, zmax, part_id);
 
 }
 
 // Device kernel that track particles within the voxelized volume until boundary
-__global__ void kernel_device_track_to_out_vpd(ParticlesData particles,
+__global__ void VPDN::kernel_device_track_to_out(ParticlesData particles,
                                            VoxVolumeData vol,
                                            MaterialsTable materials,
                                            PhotonCrossSectionTable photon_CS_table,
@@ -496,25 +496,22 @@ __global__ void kernel_device_track_to_out_vpd(ParticlesData particles,
     
     // Stepping loop
     while (particles.endsimu[id] != PARTICLE_DEAD && particles.endsimu[id] != PARTICLE_FREEZE) {
-    
-    
+        
         if(particles.pname[id] == PHOTON)
         {
-            vpd_track_photon_to_out(particles, vol, materials, photon_CS_table,electron_CS_table, parameters, dosi, id);
+            VPDN::track_photon_to_out(particles, vol, materials, photon_CS_table,electron_CS_table, parameters, dosi, id);
         }
         else if(particles.pname[id] == ELECTRON)
         {
-            vpd_track_electron_to_out(particles, vol, materials, photon_CS_table,electron_CS_table, parameters, dosi,randomnumbereIoni, randomnumbereBrem, freeLength, id);
-        }
-    
- 
+            VPDN::track_electron_to_out(particles, vol, materials, photon_CS_table,electron_CS_table, parameters, dosi,randomnumbereIoni, randomnumbereBrem, freeLength, id);
+        }    
     
     }
 
 }
 
 // Host kernel that track particles within the voxelized volume until boundary
-void kernel_host_track_to_out_dosi(ParticlesData particles,
+void VPDN::kernel_host_track_to_out(ParticlesData particles,
                               VoxVolumeData vol,
                               MaterialsTable materials,
                               PhotonCrossSectionTable photon_CS_table,
@@ -533,11 +530,11 @@ void kernel_host_track_to_out_dosi(ParticlesData particles,
 
         if(particles.pname[id] == PHOTON)
         {
-            vpd_track_photon_to_out(particles, vol, materials, photon_CS_table,electron_CS_table, parameters, dosi, id);
+            VPDN::track_photon_to_out(particles, vol, materials, photon_CS_table,electron_CS_table, parameters, dosi, id);
         }
         else if(particles.pname[id] == ELECTRON)
         {
-            vpd_track_electron_to_out(particles, vol, materials, photon_CS_table,electron_CS_table, parameters, dosi, randomnumbereIoni, randomnumbereBrem, freeLength, id);
+            VPDN::track_electron_to_out(particles, vol, materials, photon_CS_table,electron_CS_table, parameters, dosi, randomnumbereIoni, randomnumbereBrem, freeLength, id);
         }
 //         break;
         
@@ -546,37 +543,11 @@ void kernel_host_track_to_out_dosi(ParticlesData particles,
 
 ////:: Privates
 
-// Copy the phantom to the GPU
-void VoxPhanDosi::m_copy_phantom_cpu2gpu() {
+bool VoxPhanDosiNav::m_check_mandatory() {
 
-    // Mem allocation
-    HANDLE_ERROR( cudaMalloc((void**) &phantom.volume.data_d.values, phantom.volume.data_h.number_of_voxels*sizeof(ui16)) );
-    // Copy data
-    HANDLE_ERROR( cudaMemcpy(phantom.volume.data_d.values, phantom.volume.data_h.values,
-                  phantom.volume.data_h.number_of_voxels*sizeof(ui16), cudaMemcpyHostToDevice) );
-
-    phantom.volume.data_d.nb_vox_x = phantom.volume.data_h.nb_vox_x;
-    phantom.volume.data_d.nb_vox_y = phantom.volume.data_h.nb_vox_y;
-    phantom.volume.data_d.nb_vox_z = phantom.volume.data_h.nb_vox_z;
-
-    phantom.volume.data_d.spacing_x = phantom.volume.data_h.spacing_x;
-    phantom.volume.data_d.spacing_y = phantom.volume.data_h.spacing_y;
-    phantom.volume.data_d.spacing_z = phantom.volume.data_h.spacing_z;
-
-    phantom.volume.data_d.off_x = phantom.volume.data_h.off_x;
-    phantom.volume.data_d.off_y = phantom.volume.data_h.off_y;
-    phantom.volume.data_d.off_z = phantom.volume.data_h.off_z;
-
-    phantom.volume.data_d.number_of_voxels = phantom.volume.data_h.number_of_voxels;
-    
-//     m_dose_calculator.m_copy_dosi_cpu2gpu();
-}
-
-bool VoxPhanDosi::m_check_mandatory() {
-
-    if (phantom.volume.data_h.nb_vox_x == 0 || phantom.volume.data_h.nb_vox_y == 0 || phantom.volume.data_h.nb_vox_z == 0 ||
-        phantom.volume.data_h.spacing_x == 0 || phantom.volume.data_h.spacing_y == 0 || phantom.volume.data_h.spacing_z == 0 ||
-        phantom.list_of_materials.size() == 0) {
+    if (m_phantom.data_h.nb_vox_x == 0 || m_phantom.data_h.nb_vox_y == 0 || m_phantom.data_h.nb_vox_z == 0 ||
+        m_phantom.data_h.spacing_x == 0 || m_phantom.data_h.spacing_y == 0 || m_phantom.data_h.spacing_z == 0 ||
+        m_phantom.list_of_materials.size() == 0) {
         return false;
     } else {
         return true;
@@ -586,13 +557,13 @@ bool VoxPhanDosi::m_check_mandatory() {
 
 ////:: Main functions
 
-void VoxPhanDosi::track_to_in(Particles particles) {
+void VoxPhanDosiNav::track_to_in(Particles particles) {
 // std::cout<<__LINE__<<std::endl;
     if (m_params.data_h.device_target == CPU_DEVICE) {
         ui32 id=0; while (id<particles.size) {
-            kernel_host_track_to_in_dosi(particles.data_h, phantom.volume.data_h.xmin, phantom.volume.data_h.xmax,
-                                                   phantom.volume.data_h.ymin, phantom.volume.data_h.ymax,
-                                                   phantom.volume.data_h.zmin, phantom.volume.data_h.zmax,
+            VPDN::kernel_host_track_to_in(particles.data_h, m_phantom.data_h.xmin, m_phantom.data_h.xmax,
+                                                   m_phantom.data_h.ymin, m_phantom.data_h.ymax,
+                                                   m_phantom.data_h.zmin, m_phantom.data_h.zmax,
                                                    id);
             ++id;
         }
@@ -602,9 +573,9 @@ void VoxPhanDosi::track_to_in(Particles particles) {
         threads.x = m_params.data_h.gpu_block_size;
         grid.x = (particles.size + m_params.data_h.gpu_block_size - 1) / m_params.data_h.gpu_block_size;
 
-        kernel_device_track_to_in_dosi<<<grid, threads>>>(particles.data_d, phantom.volume.data_h.xmin, phantom.volume.data_h.xmax,
-                                                     phantom.volume.data_h.ymin, phantom.volume.data_h.ymax,
-                                                     phantom.volume.data_h.zmin, phantom.volume.data_h.zmax);
+        VPDN::kernel_device_track_to_in<<<grid, threads>>>(particles.data_d, m_phantom.data_d.xmin, m_phantom.data_d.xmax,
+                                                     m_phantom.data_d.ymin, m_phantom.data_d.ymax,
+                                                     m_phantom.data_d.zmin, m_phantom.data_d.zmax);
         cuda_error_check("Error ", " Kernel_VoxPhanDosi (track to in)");
 
     }
@@ -612,68 +583,39 @@ void VoxPhanDosi::track_to_in(Particles particles) {
 
 }
 
-void VoxPhanDosi::track_to_out(Particles particles, Materials materials, CrossSectionsManager m_cross_sections) {
-
-    PhotonCrossSection photon_CS = m_cross_sections.photon_CS;
-
+void VoxPhanDosiNav::track_to_out(Particles particles) {
     
     if (m_params.data_h.device_target == CPU_DEVICE) {
-        
-        ElectronsCrossSectionTable electron_CS = m_cross_sections.get_electron_data_h();
-
-        
-        
+                        
         ui32 id=0; while (id<particles.size) {
            
-                  kernel_host_track_to_out_dosi(particles.data_h, phantom.volume.data_h,
-                                     materials.data_h, photon_CS.data_h,electron_CS, m_params.data_h, m_dose_calculator.dose.data_h, id);
+                  VPDN::kernel_host_track_to_out(particles.data_h, m_phantom.data_h,
+                                                 m_materials.data_h, m_cross_sections.photon_CS.data_h, m_cross_sections.electron_CS.data_h,
+                                                 m_params.data_h, m_dose_calculator.dose.data_h, id);
             ++id;
         }
     } else if (m_params.data_h.device_target == GPU_DEVICE) {
 
-        ElectronsCrossSectionTable electron_CS = m_cross_sections.get_electron_data_d();
         dim3 threads, grid;
         threads.x = m_params.data_h.gpu_block_size;
         grid.x = (particles.size + m_params.data_h.gpu_block_size - 1) / m_params.data_h.gpu_block_size;
 
-        kernel_device_track_to_out_vpd<<<grid, threads>>>(particles.data_d, phantom.volume.data_d, materials.data_d,
-                                                      photon_CS.data_d,
-                                                      electron_CS,
-                                                      m_params.data_d,m_dose_calculator.dose.data_d);
+        VPDN::kernel_device_track_to_out<<<grid, threads>>>(particles.data_d, m_phantom.data_d, m_materials.data_d,
+                                                      m_cross_sections.photon_CS.data_d,
+                                                      m_cross_sections.electron_CS.data_d,
+                                                      m_params.data_d, m_dose_calculator.dose.data_d);
         cuda_error_check("Error ", " Kernel_VoxPhanDosi (track to out)");
 
     }
 
 }
 
-
-void VoxPhanDosi::load_phantom(std::string file, std::string matfile)
+void VoxPhanDosiNav::load_phantom_from_mhd(std::string filename, std::string range_mat_name)
 {
-
-    if (ImageReader::get_format(file) == "mhd") 
-    {
-    
-        load_phantom_from_mhd(file, matfile);
-        
-    }
-    else
-    {
-        
-        print_error("Unknown phantom format ... \n");
-        exit_simulation();
-        
-    }
-
+    m_phantom.load_from_mhd(filename, range_mat_name);
 }
 
-void VoxPhanDosi::load_phantom_from_mhd(std::string mhdfile, std::string matfile)
-{
-
-    phantom.load_from_mhd(mhdfile, matfile);
-
-}
-
-void VoxPhanDosi::initialize(GlobalSimulationParameters params) {
+void VoxPhanDosiNav::initialize(GlobalSimulationParameters params) {
     // Check params
     if (!m_check_mandatory()) {
         print_error("VoxPhanDosi: missing parameters.");
@@ -683,46 +625,31 @@ void VoxPhanDosi::initialize(GlobalSimulationParameters params) {
     // Params
     m_params = params;
 
-    // Phantom name
-    phantom.set_name("VoxPhanDosi");
+    // Phantom
+    m_phantom.set_name("VoxPhanDosiNav");
+    m_phantom.initialize(params);
 
-    // Copy data to GPU
-    if (m_params.data_h.device_target == GPU_DEVICE) {
-        m_copy_phantom_cpu2gpu();
-    }
+    // Materials table
+    m_materials.load_elements_database();
+    m_materials.load_materials_database();
+    m_materials.initialize(m_phantom.list_of_materials, params);
 
-    // Init dose map
-    m_dose_calculator.set_size_in_voxel(phantom.volume.data_h.nb_vox_x,
-                                        phantom.volume.data_h.nb_vox_y,
-                                        phantom.volume.data_h.nb_vox_z);
-    m_dose_calculator.set_voxel_size(phantom.volume.data_h.spacing_x,
-                                     phantom.volume.data_h.spacing_y,
-                                     phantom.volume.data_h.spacing_z);
-    m_dose_calculator.set_offset(phantom.volume.data_h.off_x,
-                                 phantom.volume.data_h.off_y,
-                                 phantom.volume.data_h.off_z);
+    // Cross Sections
+    m_cross_sections.initialize(m_materials, params);
+
+
+    // Init dose map    
+    m_dose_calculator.set_size_in_voxel(m_phantom.data_h.nb_vox_x,
+                                        m_phantom.data_h.nb_vox_y,
+                                        m_phantom.data_h.nb_vox_z);
+    m_dose_calculator.set_voxel_size(m_phantom.data_h.spacing_x,
+                                     m_phantom.data_h.spacing_y,
+                                     m_phantom.data_h.spacing_z);
+    m_dose_calculator.set_offset(m_phantom.data_h.off_x,
+                                 m_phantom.data_h.off_y,
+                                 m_phantom.data_h.off_z);
     m_dose_calculator.initialize(m_params); // CPU&GPU
 
-}
-
-// Get list of materials
-std::vector<std::string> VoxPhanDosi::get_materials_list() {
-    return phantom.list_of_materials;
-}
-
-// Get data that contains materials index
-ui16* VoxPhanDosi::get_data_materials_indices() {
-    return phantom.volume.data_h.values;
-}
-
-// Get the size of data
-ui32 VoxPhanDosi::get_data_size() {
-    return phantom.volume.data_h.number_of_voxels;
-}
-
-void VoxPhanDosi::print_dosimetry()
-{
-//     std::cout<<*m_dose_calculator<<std::endl;
 }
 
 #endif
