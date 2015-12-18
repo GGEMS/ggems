@@ -447,7 +447,7 @@ void MaterialManager::add_materials_and_update_indices(std::vector<std::string> 
 
 
 // Init
-void Materials::initialize(GlobalSimulationParameters params, std::vector<std::string> mats_list) {
+void Materials::initialize(std::vector<std::string> mats_list, GlobalSimulationParameters params) {
 
     m_nb_materials = mats_list.size();
 

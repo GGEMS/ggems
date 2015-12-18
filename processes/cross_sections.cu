@@ -18,7 +18,7 @@
 
 //// CrossSectionsManager class ////////////////////////////////////////////////////
 
-CrossSectionsManager::CrossSectionsManager() {
+CrossSections::CrossSections() {
     photon_CS.nb_bins = 0;
     photon_CS.nb_mat = 0;
     electronCSTable = new ElectronCrossSection;
@@ -26,12 +26,12 @@ CrossSectionsManager::CrossSectionsManager() {
 }
 
 // Main function
-bool CrossSectionsManager::m_check_mandatory() {
+bool CrossSections::m_check_mandatory() {
     if (photon_CS.nb_bins == 0 || photon_CS.nb_mat == 0) return false;
     else return true;
 }
 
-void CrossSectionsManager::initialize(Materials materials, GlobalSimulationParameters parameters) {
+void CrossSections::initialize(Materials materials, GlobalSimulationParameters parameters) {
 
     ///WARNING fonction m_build_table deplacee au dessus de check. Non verifié
     
@@ -53,7 +53,7 @@ void CrossSectionsManager::initialize(Materials materials, GlobalSimulationParam
 }
 
 // Build cross sections table according material, physics effects and particles
-void CrossSectionsManager::m_build_table(Materials materials, GlobalSimulationParameters parameters) {
+void CrossSections::m_build_table(Materials materials, GlobalSimulationParameters parameters) {
 
     // Read parameters
     ui32 nbin = parameters.data_h.cs_table_nbins;
@@ -302,7 +302,7 @@ void CrossSectionsManager::print() {
 */
 
 // Copy CS table to the device
-void CrossSectionsManager::m_copy_cs_table_cpu2gpu() {
+void CrossSections::m_copy_cs_table_cpu2gpu() {
 
     if(there_is_photon)
     {

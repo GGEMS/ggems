@@ -95,7 +95,7 @@ class Materials {
 
         //void add_materials_and_update_indices(std::vector<std::string> mats_list, ui16 *data, ui32 ndata);
 
-        void initialize(GlobalSimulationParameters params, std::vector<std::string> mats_list);
+        void initialize(std::vector<std::string> mats_list, GlobalSimulationParameters params);
 
         MaterialsTable data_h;
         MaterialsTable data_d;

@@ -51,7 +51,7 @@ struct ElectronsCrossSection
     ElectronsCrossSectionTable data_h;
     ElectronsCrossSectionTable data_d;
 
-}
+};
 
 #endif
 

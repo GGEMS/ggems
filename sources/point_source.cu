@@ -16,8 +16,8 @@
 
 #include "point_source.cuh"
 
-#define POINT_SOURCE_ISOTROPIC_DIRECTION 0
-#define POINT_SOURCE_BEAM_DIRECTION 1
+#define POINT_SOURCE_ISOTROPIC 0
+#define POINT_SOURCE_BEAM 1
 
 ///////// GPU code ////////////////////////////////////////////////////
 
@@ -28,26 +28,23 @@ __host__ __device__ void point_source(ParticlesData particles_data, ui32 id,
                                       ui8 type,
                                       f64 *spectrumE, f64 *spectrumCDF, ui32 nbins) {
 
-
     // Direction option. Add a new preprocessing option for new direction option.
-    if (direction_option == POINT_SOURCE_ISOTROPIC_DIRECTION)
+    if (direction_option == POINT_SOURCE_ISOTROPIC)
     {
-    f32 phi = JKISS32(particles_data, id);
-    f32 theta = JKISS32(particles_data, id);
+        f32 phi = JKISS32(particles_data, id);
+        f32 theta = JKISS32(particles_data, id);
 
-    phi  *= gpu_twopi;
-    theta = acosf(1.0f - 2.0f*theta);
-    particles_data.dx[id] = cosf(phi)*sinf(theta);
-    particles_data.dy[id] = sinf(phi)*sinf(theta);
-    particles_data.dz[id] = cosf(theta);
+        phi  *= gpu_twopi;
+        theta = acosf(1.0f - 2.0f*theta);
+        particles_data.dx[id] = cosf(phi)*sinf(theta);
+        particles_data.dy[id] = sinf(phi)*sinf(theta);
+        particles_data.dz[id] = cosf(theta);
     }
-    else if (direction_option == POINT_SOURCE_BEAM_DIRECTION)
+    else if (direction_option == POINT_SOURCE_BEAM)
     {
-    
-    particles_data.dx[id] = dx;
-    particles_data.dy[id] = dy;
-    particles_data.dz[id] = dz;
-    
+        particles_data.dx[id] = dx;
+        particles_data.dy[id] = dy;
+        particles_data.dz[id] = dz;
     }
 
     ui32 pos = binary_search(JKISS32(particles_data, id), spectrumCDF, nbins);
@@ -88,12 +85,14 @@ __global__ void kernel_point_source(ParticlesData particles_data,
 PointSource::PointSource() {
     // Default parameters
     m_px = 0.0f; m_py = 0.0f; m_pz = 0.0f;
+    m_dx = 0.0f; m_dy = 0.0f; m_dz = 0.0f;
     m_nb_of_energy_bins = 0;
     m_spectrumE_h = NULL;
     m_spectrumE_d = NULL;
     m_spectrumCDF_h = NULL;
     m_spectrumCDF_d = NULL;
     m_particle_type = PHOTON;
+    m_direction_option = POINT_SOURCE_ISOTROPIC;
 
     set_name("point_source");
 }
@@ -111,32 +110,27 @@ void PointSource::set_position(f32 vpx, f32 vpy, f32 vpz) {
     m_px=vpx; m_py=vpy; m_pz=vpz;
 }
 
-void PointSource::set_direction(std::string option,f32 vdx, f32 vdy, f32 vdz)
+void PointSource::set_direction(std::string option, f32 vdx, f32 vdy, f32 vdz)
 {
-/*
-    if(option == "Isotropic")
+
+    if (option == "isotropic")
     {
-    m_direction_option = POINT_SOURCE_ISOTROPIC_DIRECTION;
+        m_direction_option = POINT_SOURCE_ISOTROPIC;
     }
-    else if (option == "Beam")
+    else if (option == "beam")
     {
-    m_direction_option = POINT_SOURCE_BEAM_DIRECTION;
-    m_dx = vdx;
-    m_dy = vdy;
-    m_dz = vdz;
+        m_direction_option = POINT_SOURCE_BEAM;
+        m_dx = vdx;
+        m_dy = vdy;
+        m_dz = vdz;
     }
 
-    if(vdx*vdx + vdy*vdy + vdz*vdz != 1.)
+    if (vdx*vdx + vdy*vdy + vdz*vdz != 1.)
     {
-        print_error("Point Source definition \n");
-        print_error("Squared sum of unitary vector. Squared sum of " + ImageReader::to_string(vdx) + "² + "
-                                                                     + ImageReader::to_string(vdy) + "² + "
-                                                                     + ImageReader::to_string(vdz) + "² != 1. \n");
+        print_error("Point Source definition: Beam direction is not a unitary vector!\n");
         exit_simulation();
     }
-    */
 }
-
 
 void PointSource::set_particle_type(std::string pname) {
     if (pname == "photon") {
@@ -223,9 +217,7 @@ void PointSource::get_primaries_generator(Particles particles) {
 
         ui32 id=0; while (id<particles.size) {
             point_source(particles.data_h, id, m_px, m_py, m_pz, m_direction_option, m_dx, m_dy, m_dz, m_particle_type,
-                         m_spectrumE_h, m_spectrumCDF_h, m_nb_of_energy_bins);
-                         
-                printf("Part %e %f %f %f %f %f %f\n", particles.data_h.E[id],particles.data_h.px[id],particles.data_h.py[id],particles.data_h.pz[id],particles.data_h.dx[id],particles.data_h.dy[id],particles.data_h.dz[id]);
+                         m_spectrumE_h, m_spectrumCDF_h, m_nb_of_energy_bins);                                         
             ++id;
         }
 
@@ -243,8 +235,8 @@ void PointSource::get_primaries_generator(Particles particles) {
 
 }
 
-#undef POINT_SOURCE_ISOTROPIC_DIRECTION 0
-#undef POINT_SOURCE_BEAM_DIRECTION 1
+#undef POINT_SOURCE_ISOTROPIC 0
+#undef POINT_SOURCE_BEAM 1
 
 #endif
 
