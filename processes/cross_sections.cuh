@@ -19,14 +19,23 @@
 #include "photon.cuh"
 #include "electron.cuh"
 
+struct CrossSections
+{
+    PhotonCrossSection photon_CS; 
+    ElectronsCrossSection electron_CS;
+};
+
+
 // CS class
-class CrossSectionsManager {
+class CrossSectionsCalculator {
     public:
-        CrossSectionsManager();
+        CrossSectionsCalculator();
 
         void initialize(Materials materials, GlobalSimulationParameters parameters);
         //void print();
 
+        CrossSections cross_sections;
+        
         // Data for photon
         PhotonCrossSection photon_CS;  // CPU & GPU
         

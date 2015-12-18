@@ -46,6 +46,13 @@ struct ElectronsCrossSectionTable
     
 };
 
+struct ElectronsCrossSection
+{
+    ElectronsCrossSectionTable data_h;
+    ElectronsCrossSectionTable data_d;
+
+}
+
 #endif
 
 __host__ __device__ void e_read_CS_table(
