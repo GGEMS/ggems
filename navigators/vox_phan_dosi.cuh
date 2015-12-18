@@ -23,6 +23,8 @@
 #include "photon_navigator.cuh"
 #include "image_reader.cuh"
 #include "dose_calculator.cuh"
+#include "electron.cuh"
+#include "cross_sections.cuh"
 
 class VoxPhanDosi {
     public:
@@ -32,7 +34,7 @@ class VoxPhanDosi {
         // Tracking from outside to the phantom broder
         void track_to_in(Particles particles);
         // Tracking inside the phantom until the phantom border
-        void track_to_out(Particles particles, Materials materials, PhotonCrossSection photon_CS);
+        void track_to_out(Particles particles, Materials materials, CrossSectionsManager cross_sections_mng);
         
         // Check format phantom file
         void load_phantom(std::string phantomfile, std::string materialfile);  
@@ -47,7 +49,7 @@ class VoxPhanDosi {
         // Get the size of data (nb of voxels)
         ui32 get_data_size();
 
-        inline std::string get_name(){return "VoxPhanDosi";};                 
+        inline std::string get_name(){return "VoxPhanDosi";};
         
         /*
         void write(std::string filename = "dosimetry.mhd"){

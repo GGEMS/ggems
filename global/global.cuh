@@ -24,7 +24,7 @@
 #ifdef _WIN32
 #include <time.h>
 #include <Windows.h>
-#elif __LINUX__
+#else 
 #include <sys/time.h>
 #endif
 /////// CONSTANTS //////////////////////////////////////////////
@@ -76,7 +76,7 @@
 #define TRUE    1
 #define FALSE   0
 
-//#define EKINELIMIT 1*eV
+#define EKINELIMIT 1*eV
 
 
 //#define DEBUGOK "[\033[32;01mok\033[00m]"
@@ -195,6 +195,8 @@ struct GlobalSimulationParametersData {
     f32 photon_cut;    // In energy for now, need to change for distance range.
     f32 electron_cut;
 
+    ui32 nb_of_secondaries;
+    
     ui64 nb_of_particles;
     ui64 size_of_particles_batch;
     ui32 nb_of_batches;
