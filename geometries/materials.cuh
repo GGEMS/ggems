@@ -100,6 +100,9 @@ class Materials {
         MaterialsTable data_h;
         MaterialsTable data_d;
 
+        ui32 get_nb_materials(){ return m_nb_materials;}
+        ui32 get_nb_elements_total(){ return m_nb_elements_total;}
+        
     private:
         //ui16 m_get_material_index(std::string material_name);
 

@@ -80,7 +80,7 @@ void CrossSections::m_build_table(Materials materials, GlobalSimulationParameter
                             parameters.data_h.physics_list[ELECTRON_MSC];
 
     // Then init data
-    ui32 tot_elt = materials.nb_materials*nbin;
+    ui32 tot_elt = materials.data_h.nb_materials*nbin;
     ui32 tot_elt_mem = tot_elt * sizeof(f32);
 
     // Photon CS table if need
@@ -97,9 +97,9 @@ void CrossSections::m_build_table(Materials materials, GlobalSimulationParameter
         photon_CS.data_h.E_min = min_E;
         photon_CS.data_h.E_max = max_E;
         photon_CS.data_h.nb_bins = nbin;
-        photon_CS.data_h.nb_mat = materials.nb_materials;
+        photon_CS.data_h.nb_mat = materials.data_h.nb_materials;
         photon_CS.nb_bins = nbin;
-        photon_CS.nb_mat = materials.nb_materials;
+        photon_CS.nb_mat = materials.data_h.nb_materials;
 
         // Init value
         i=0; while (i < tot_elt) {            
@@ -123,6 +123,7 @@ void CrossSections::m_build_table(Materials materials, GlobalSimulationParameter
         electronCSTable->initialize(parameters,materials.data_h);
         electronCSTable->generateTable();
         G4cout<<"Init electrons OK "<<G4endl;
+        // \DEBUG A ENLEVER 
         electronCSTable->printElectronTables("table/electronCSTable");
     }
     // If Rayleigh scattering, load information once from G4 EM data library
@@ -142,7 +143,7 @@ void CrossSections::m_build_table(Materials materials, GlobalSimulationParameter
     // Get CS for each material, energy bin and phys effect
     ui32 imat=0;
     ui32 abs_index;
-    while (imat < materials.nb_materials) {
+    while (imat < materials.data_h.nb_materials) {
 
         // for each energy bin
         i=0; while (i < nbin) {

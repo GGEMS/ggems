@@ -22,6 +22,8 @@
 #include "materials.cuh"
 #include "detector_manager.cuh"
 #include "image_reader.cuh"
+
+#include <point_source.cuh>
 // #include "flatpanel_detector.cuh"
 
 class GGEMS {
