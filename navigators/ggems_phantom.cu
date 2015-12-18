@@ -11,21 +11,21 @@
  *
  */
 
-#ifndef GGEMS_SOURCE_CU
-#define GGEMS_SOURCE_CU
+#ifndef GGEMS_PHANTOM_CU
+#define GGEMS_PHANTOM_CU
 
-#include "ggems_source.cuh"
+#include "ggems_phantom.cuh"
 
-GGEMSSource::GGEMSSource() {
-    m_source_name = "no_source";
+GGEMSPhantom::GGEMSPhantom() {
+    m_phantom_name = "no_source";
 }
 
-void GGEMSSource::set_name(std::string name) {
-    m_source_name = name;
+void GGEMSPhantom::set_name(std::string name) {
+    m_phantom_name = name;
 }
 
-std::string GGEMSSource::get_name() {
-    return m_source_name;
+std::string GGEMSPhantom::get_name() {
+    return m_phantom_name;
 }
 
 

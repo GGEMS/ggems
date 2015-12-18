@@ -136,13 +136,41 @@ inline __host__ __device__  f64 f64xyz_mul(f64xyz v){ return v.x * v.y * v.z;}
 
 #endif
 
-template < typename T,typename U >
-__host__ __device__ void ggems_atomic_add(T* array, ui32 pos, U value);
+// template < typename T,typename U >
+// __host__ __device__ void ggems_atomic_add(T* array, ui32 pos, U value);
+// 
+// // Special case: GPU is not able to do atomic add with double yet!
+// #ifndef SINGLE_PRECISION
+// __host__ __device__ void ggems_atomic_add(f64* array, ui32 pos, f64 value);
+// #endif
 
-// Special case: GPU is not able to do atomic add with double yet!
-#ifndef SINGLE_PRECISION
-__host__ __device__ void ggems_atomic_add(f64* array, ui32 pos, f64 value);
+
+template < typename T,typename U >
+__host__ __device__ void ggems_atomic_add(T* array, ui32 pos, U value)
+{
+#ifdef __CUDA_ARCH__
+    atomicAdd(&array[pos], value);
+#else
+    array[pos] += value;
 #endif
+}
+
+// #ifndef SINGLE_PRECISION // Double precision
+
+__device__ double atomicAddDouble(double* address, f64 val);
+
+template < typename T>
+__host__ __device__ void ggems_atomic_add(double* array, ui32 pos, T value)
+{
+#ifdef __CUDA_ARCH__
+    atomicAddDouble(&array[pos], value);
+#else
+    array[pos] += value;
+#endif
+}
+
+// #endif // SINGLE_PRECISION
+
 
 
 #endif

@@ -3,7 +3,7 @@
 /*!
  * \file dose_calculator.cuh
  * \brief
- * \author Y. Lemaréchal
+ * \author Y. Lemaréchal <yannick.lemarechal@univ-brest.fr>
  * \author J. Bert <bert.jul@gmail.com>
  * \version 0.1
  * \date 2 december 2015
@@ -70,7 +70,7 @@ struct Dose
 };
 
 // Dose functions
-__host__ __device__ void dose_record_standard(DoseData dose, f32 Edep, f32 px, f32 py, f32 pz);
+__host__ __device__ void dose_record_standard(DoseData &dose, f32 Edep, f32 px, f32 py, f32 pz);
 
 // Class
 class DoseCalculator {

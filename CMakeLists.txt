@@ -32,9 +32,9 @@ endif()
 
 # CUDA OPTIONS
 if(CUDA_VERSION>=7.0)
-    set(LIBSCUDA --generate-code arch=compute_30,code=sm_30 --generate-code arch=compute_50,code=sm_50 --generate-code arch=compute_52,code=sm_52 --relocatable-device-code true -lcudadevrt --compiler-options -w)
+    set(LIBSCUDA  --generate-code arch=compute_35,code=sm_35 --generate-code arch=compute_50,code=sm_50 --generate-code arch=compute_52,code=sm_52 --relocatable-device-code true -lcudadevrt --compiler-options -w)
 else()    
-    set(LIBSCUDA --generate-code arch=compute_30,code=sm_30 --generate-code arch=compute_50,code=sm_50 --relocatable-device-code true -lcudadevrt --compiler-options -w)
+    set(LIBSCUDA  --generate-code arch=compute_50,code=sm_50 --relocatable-device-code true -lcudadevrt --compiler-options -w)
 endif()
 
 option(WITH_FAST_MATH "Fast math flag" ON)

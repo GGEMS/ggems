@@ -18,7 +18,7 @@
 #include "dose_calculator.cuh"
 
 /// CPU&GPU functions
-__host__ __device__ void dose_record_standard(DoseData dose, f64 Edep, f32 px, f32 py, f32 pz) {
+__host__ __device__ void dose_record_standard(DoseData &dose, f64 Edep, f32 px, f32 py, f32 pz) {
 
     // Defined index phantom
     f32xyz ivoxsize;
@@ -37,7 +37,7 @@ __host__ __device__ void dose_record_standard(DoseData dose, f64 Edep, f32 px, f
     ggems_atomic_add(dose.edep, index_phantom.w, Edep);
     ggems_atomic_add(dose.edep_squared, index_phantom.w, Edep*Edep);
     ggems_atomic_add(dose.number_of_hits, index_phantom.w, ui32(1));
-
+ 
 }
 
 __host__ __device__ void dose_uncertainty_calculation(DoseData dose, ui32 id) {
