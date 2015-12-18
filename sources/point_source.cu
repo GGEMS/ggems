@@ -113,7 +113,7 @@ void PointSource::set_position(f32 vpx, f32 vpy, f32 vpz) {
 
 void PointSource::set_direction(std::string option,f32 vdx, f32 vdy, f32 vdz)
 {
-
+/*
     if(option == "Isotropic")
     {
     m_direction_option = POINT_SOURCE_ISOTROPIC_DIRECTION;
@@ -134,7 +134,7 @@ void PointSource::set_direction(std::string option,f32 vdx, f32 vdy, f32 vdz)
                                                                      + ImageReader::to_string(vdz) + "² != 1. \n");
         exit_simulation();
     }
-    
+    */
 }
 
 
