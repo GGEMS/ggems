@@ -18,7 +18,8 @@
 #include <iomanip>
 
 // Stack of particles, format data is defined as SoA
-struct ParticlesData {
+struct ParticlesData
+{
     // property
     f32* E;
     f32* dx;
@@ -46,11 +47,11 @@ struct ParticlesData {
     ui8* pname; // particle name (photon, electron, etc)
     // size
     ui32 size;
-    
+
     ui8 nb_of_secondaries;
-    // Secondaries stack 
+    // Secondaries stack
     // Acces to level : Part_ID * size + hierarchy level
-    f32* sec_E; // size * hierarchy level 
+    f32* sec_E; // size * hierarchy level
     f32* sec_dx;
     f32* sec_dy;
     f32* sec_dz;
@@ -59,51 +60,52 @@ struct ParticlesData {
     f32* sec_pz;
     f32* sec_tof;
     ui8* sec_pname; // particle name (photon, electron, etc)
-    
-    friend std::ostream& operator<<(std::ostream& os, const ParticlesData v)
+
+    friend std::ostream& operator<< ( std::ostream& os, const ParticlesData v )
     {
-        os  << std::fixed << std::setprecision(2);
+        os  << std::fixed << std::setprecision ( 2 );
         os  << "Particle state : " << std::endl;
 
-        os  << "\t"  <<  "+"  << std::setfill('-') << std::setw(30) << "+" << std::endl;
-        os  << std::setfill(' ');
+        os  << "\t"  <<  "+"  << std::setfill ( '-' ) << std::setw ( 30 ) << "+" << std::endl;
+        os  << std::setfill ( ' ' );
 
         os  << "\t"   << "|"
-            << std::left  << std::setw(9) << ""
-            << std::right << std::setw(5) << "X"
-            << std::right << std::setw(7) << "Y"
-            << std::right << std::setw(7) << "Z"
-            << std::setw(2)<< "|" << std::endl;
+            << std::left  << std::setw ( 9 ) << ""
+            << std::right << std::setw ( 5 ) << "X"
+            << std::right << std::setw ( 7 ) << "Y"
+            << std::right << std::setw ( 7 ) << "Z"
+            << std::setw ( 2 ) << "|" << std::endl;
 
         os  << "\t"   << "|"
-            << std::left  << std::setw(9) << "Position"
-            << std::right << std::setw(5) << *v.px
-            << std::right << std::setw(7) << *v.py
-            << std::right << std::setw(7) << *v.pz
-            << std::setw(2)<< "|" << std::endl;
+            << std::left  << std::setw ( 9 ) << "Position"
+            << std::right << std::setw ( 5 ) << *v.px
+            << std::right << std::setw ( 7 ) << *v.py
+            << std::right << std::setw ( 7 ) << *v.pz
+            << std::setw ( 2 ) << "|" << std::endl;
 
         os  << "\t"   << "|"
-            << std::left  << std::setw(9) << "Direction"
-            << std::right << std::setw(5) << v.dx
-            << std::right << std::setw(7) << v.dy
-            << std::right << std::setw(7) << v.dz
-            << std::setw(2)<< "|" << std::endl;
+            << std::left  << std::setw ( 9 ) << "Direction"
+            << std::right << std::setw ( 5 ) << v.dx
+            << std::right << std::setw ( 7 ) << v.dy
+            << std::right << std::setw ( 7 ) << v.dz
+            << std::setw ( 2 ) << "|" << std::endl;
 
         os << "\t"   << "|"
-           << std::left  << std::setw(9) << "Energy"
-           << std::right << std::setw(5) << *v.E
-           << std::right << std::setw(7) << *v.E
-           << std::right << std::setw(7) << *v.E
-           << std::setw(2)<< "|" << std::endl;
+           << std::left  << std::setw ( 9 ) << "Energy"
+           << std::right << std::setw ( 5 ) << *v.E
+           << std::right << std::setw ( 7 ) << *v.E
+           << std::right << std::setw ( 7 ) << *v.E
+           << std::setw ( 2 ) << "|" << std::endl;
 
-        os << "\t"   <<  "+"  << std::setfill('-') << std::setw(30) << "+" << std::endl;
+        os << "\t"   <<  "+"  << std::setfill ( '-' ) << std::setw ( 30 ) << "+" << std::endl;
         return os;
 
     }
 }; //
 
 // Struct that handles particles
-struct Particles {
+struct Particles
+{
     ParticlesData data_h;
     ParticlesData data_d;
 
@@ -111,7 +113,8 @@ struct Particles {
 };
 
 // Helper to handle secondaries particles
-struct SecParticle {
+struct SecParticle
+{
     f32xyz dir;
     f32 E;
     ui8 pname;
@@ -153,23 +156,24 @@ class HistoryBuilder {
 
 
 // Particles class
-class ParticleManager {
-    public:
-        ParticleManager();
+class ParticleManager
+{
+public:
+    ParticleManager();
 
-        void initialize(GlobalSimulationParameters params);
-        //void cpu_print_stack(ui32 nlim);
+    void initialize ( GlobalSimulationParameters params );
+    //void cpu_print_stack(ui32 nlim);
 
-        Particles particles; // CPU and GPU stack
+    Particles particles; // CPU and GPU stack
 
-    private:
-        bool m_check_mandatory();
+private:
+    bool m_check_mandatory();
 
-        void m_cpu_malloc_stack();
-        //void m_cpu_free_stack();
-        void m_gpu_malloc_stack();
-        void m_cpu_init_stack_seed(ui32 seed);
-        void m_copy_seed_cpu2gpu();
+    void m_cpu_malloc_stack();
+    //void m_cpu_free_stack();
+    void m_gpu_malloc_stack();
+    void m_cpu_init_stack_seed ( ui32 seed );
+    void m_copy_seed_cpu2gpu();
 
 };
 

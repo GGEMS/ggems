@@ -16,10 +16,11 @@
 
 #include "photon_navigator.cuh"
 
-__host__ __device__ void photon_get_next_interaction(ParticlesData &particles,
-                                                     GlobalSimulationParametersData parameters,
-                                                     PhotonCrossSectionTable photon_CS_table,
-                                                     ui16 mat_id, ui32 part_id) {
+__host__ __device__ void photon_get_next_interaction ( ParticlesData &particles,
+        GlobalSimulationParametersData parameters,
+        PhotonCrossSectionTable photon_CS_table,
+        ui16 mat_id, ui32 part_id )
+{
 
     f32 next_interaction_distance = F32_MAX;
     ui8 next_discrete_process = 0;
@@ -28,38 +29,44 @@ __host__ __device__ void photon_get_next_interaction(ParticlesData &particles,
 
     // Search the energy index to read CS
     f32 energy = particles.E[part_id];
-    ui32 E_index = binary_search(energy, photon_CS_table.E_bins,
-                                 photon_CS_table.nb_bins);
+    ui32 E_index = binary_search ( energy, photon_CS_table.E_bins,
+                                   photon_CS_table.nb_bins );
 
     // If photoelectric
-    if (parameters.physics_list[PHOTON_PHOTOELECTRIC]) {
-        cross_section = get_CS_from_table(photon_CS_table.E_bins, photon_CS_table.Photoelectric_Std_CS,
-                                          energy, E_index, mat_id, photon_CS_table.nb_bins);
-        interaction_distance = -log( JKISS32(particles, part_id) ) / cross_section;
+    if ( parameters.physics_list[PHOTON_PHOTOELECTRIC] )
+    {
+        cross_section = get_CS_from_table ( photon_CS_table.E_bins, photon_CS_table.Photoelectric_Std_CS,
+                                            energy, E_index, mat_id, photon_CS_table.nb_bins );
+        interaction_distance = -log ( JKISS32 ( particles, part_id ) ) / cross_section;
 
-        if (interaction_distance < next_interaction_distance) {
+        if ( interaction_distance < next_interaction_distance )
+        {
             next_interaction_distance = interaction_distance;
             next_discrete_process = PHOTON_PHOTOELECTRIC;
         }
     }
 
     // If Compton
-    if (parameters.physics_list[PHOTON_COMPTON]) {
-        cross_section = get_CS_from_table(photon_CS_table.E_bins, photon_CS_table.Compton_Std_CS,
-                                          energy, E_index, mat_id, photon_CS_table.nb_bins);
-        interaction_distance = -log( JKISS32(particles, part_id) ) / cross_section;
-        if (interaction_distance < next_interaction_distance) {
+    if ( parameters.physics_list[PHOTON_COMPTON] )
+    {
+        cross_section = get_CS_from_table ( photon_CS_table.E_bins, photon_CS_table.Compton_Std_CS,
+                                            energy, E_index, mat_id, photon_CS_table.nb_bins );
+        interaction_distance = -log ( JKISS32 ( particles, part_id ) ) / cross_section;
+        if ( interaction_distance < next_interaction_distance )
+        {
             next_interaction_distance = interaction_distance;
             next_discrete_process = PHOTON_COMPTON;
         }
     }
 
     // If Rayleigh
-    if (parameters.physics_list[PHOTON_RAYLEIGH]) {
-        cross_section = get_CS_from_table(photon_CS_table.E_bins, photon_CS_table.Rayleigh_Lv_CS,
-                                          energy, E_index, mat_id, photon_CS_table.nb_bins);
-        interaction_distance = -log( JKISS32(particles, part_id) ) / cross_section;
-        if (interaction_distance < next_interaction_distance) {
+    if ( parameters.physics_list[PHOTON_RAYLEIGH] )
+    {
+        cross_section = get_CS_from_table ( photon_CS_table.E_bins, photon_CS_table.Rayleigh_Lv_CS,
+                                            energy, E_index, mat_id, photon_CS_table.nb_bins );
+        interaction_distance = -log ( JKISS32 ( particles, part_id ) ) / cross_section;
+        if ( interaction_distance < next_interaction_distance )
+        {
             next_interaction_distance = interaction_distance;
             next_discrete_process = PHOTON_RAYLEIGH;
         }
@@ -74,29 +81,33 @@ __host__ __device__ void photon_get_next_interaction(ParticlesData &particles,
 
 
 
-__host__ __device__ SecParticle photon_resolve_discrete_process(ParticlesData &particles,
-                                                                GlobalSimulationParametersData parameters,
-                                                                PhotonCrossSectionTable photon_CS_table,
-                                                                MaterialsTable materials,
-                                                                ui16 mat_id, ui32 part_id) {
+__host__ __device__ SecParticle photon_resolve_discrete_process ( ParticlesData &particles,
+        GlobalSimulationParametersData parameters,
+        PhotonCrossSectionTable photon_CS_table,
+        MaterialsTable materials,
+        ui16 mat_id, ui32 part_id )
+{
 
     SecParticle electron;
     electron.endsimu = PARTICLE_DEAD;
     ui8 next_discrete_process = particles.next_discrete_process[part_id];
 
-    if (next_discrete_process == PHOTON_COMPTON) {
-        electron = Compton_SampleSecondaries_standard(particles, materials.electron_energy_cut[mat_id],
-                                                      part_id, parameters);
+    if ( next_discrete_process == PHOTON_COMPTON )
+    {
+        electron = Compton_SampleSecondaries_standard ( particles, materials.electron_energy_cut[mat_id],
+                   part_id, parameters );
     }
 
-    if (next_discrete_process == PHOTON_PHOTOELECTRIC) {
-        electron = Photoelec_SampleSecondaries_standard(particles, materials, photon_CS_table,
-                                                        particles.E_index[part_id], materials.electron_energy_cut[mat_id],
-                                                        mat_id, part_id, parameters);
+    if ( next_discrete_process == PHOTON_PHOTOELECTRIC )
+    {
+        electron = Photoelec_SampleSecondaries_standard ( particles, materials, photon_CS_table,
+                   particles.E_index[part_id], materials.electron_energy_cut[mat_id],
+                   mat_id, part_id, parameters );
     }
 
-    if (next_discrete_process == PHOTON_RAYLEIGH) {
-        Rayleigh_SampleSecondaries_Livermore(particles, materials, photon_CS_table, particles.E_index[part_id], mat_id, part_id);
+    if ( next_discrete_process == PHOTON_RAYLEIGH )
+    {
+        Rayleigh_SampleSecondaries_Livermore ( particles, materials, photon_CS_table, particles.E_index[part_id], mat_id, part_id );
 
     }
 

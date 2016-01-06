@@ -65,27 +65,31 @@ void HistoryBuilder::cpu_record_a_step(ParticleStack particles, ui32 id_part) {
 
 //// ParticleManager class ///////////////////////////////////////////////////
 
-ParticleManager::ParticleManager() {
+ParticleManager::ParticleManager()
+{
     particles.size = 0;
 }
 
 // Init stack
-void ParticleManager::initialize(GlobalSimulationParameters params) {
+void ParticleManager::initialize ( GlobalSimulationParameters params )
+{
     particles.size = params.data_h.size_of_particles_batch;
     particles.data_h.size = params.data_h.size_of_particles_batch;
     particles.data_h.nb_of_secondaries = params.data_h.nb_of_secondaries;
 
     // Check if everything was set properly
-    if ( !m_check_mandatory() ) {
-        print_error("Stack allocation, is stack size set to zero?!");
+    if ( !m_check_mandatory() )
+    {
+        print_error ( "Stack allocation, is stack size set to zero?!" );
         exit_simulation();
     }
 
     // CPU allocation
     m_cpu_malloc_stack();
-    m_cpu_init_stack_seed(params.data_h.seed);
+    m_cpu_init_stack_seed ( params.data_h.seed );
     // Init seeds
-    if (params.data_h.device_target == GPU_DEVICE) {
+    if ( params.data_h.device_target == GPU_DEVICE )
+    {
         // GPU allocation
         m_gpu_malloc_stack();
         // Copy data to the GPU
@@ -110,51 +114,53 @@ void ParticleManager::cpu_print_stack(ui32 nlim) {
 */
 
 // Check mandatory
-bool ParticleManager::m_check_mandatory() {
-    if (particles.size == 0) return false;
+bool ParticleManager::m_check_mandatory()
+{
+    if ( particles.size == 0 ) return false;
     else return true;
 }
 
 // Memory allocation for this stack
-void ParticleManager::m_cpu_malloc_stack() {    
+void ParticleManager::m_cpu_malloc_stack()
+{
 
-    particles.data_h.E = (f32*)malloc(particles.size * sizeof(f32));
-    particles.data_h.dx = (f32*)malloc(particles.size * sizeof(f32));
-    particles.data_h.dy = (f32*)malloc(particles.size * sizeof(f32));
-    particles.data_h.dz = (f32*)malloc(particles.size * sizeof(f32));
-    particles.data_h.px = (f32*)malloc(particles.size * sizeof(f32));
-    particles.data_h.py = (f32*)malloc(particles.size * sizeof(f32));
-    particles.data_h.pz = (f32*)malloc(particles.size * sizeof(f32));
-    particles.data_h.tof = (f32*)malloc(particles.size * sizeof(f32));
+    particles.data_h.E = ( f32* ) malloc ( particles.size * sizeof ( f32 ) );
+    particles.data_h.dx = ( f32* ) malloc ( particles.size * sizeof ( f32 ) );
+    particles.data_h.dy = ( f32* ) malloc ( particles.size * sizeof ( f32 ) );
+    particles.data_h.dz = ( f32* ) malloc ( particles.size * sizeof ( f32 ) );
+    particles.data_h.px = ( f32* ) malloc ( particles.size * sizeof ( f32 ) );
+    particles.data_h.py = ( f32* ) malloc ( particles.size * sizeof ( f32 ) );
+    particles.data_h.pz = ( f32* ) malloc ( particles.size * sizeof ( f32 ) );
+    particles.data_h.tof = ( f32* ) malloc ( particles.size * sizeof ( f32 ) );
 
-    particles.data_h.prng_state_1 = (ui32*)malloc(particles.size * sizeof(ui32));
-    particles.data_h.prng_state_2 = (ui32*)malloc(particles.size * sizeof(ui32));
-    particles.data_h.prng_state_3 = (ui32*)malloc(particles.size * sizeof(ui32));
-    particles.data_h.prng_state_4 = (ui32*)malloc(particles.size * sizeof(ui32));
-    particles.data_h.prng_state_5 = (ui32*)malloc(particles.size * sizeof(ui32));
+    particles.data_h.prng_state_1 = ( ui32* ) malloc ( particles.size * sizeof ( ui32 ) );
+    particles.data_h.prng_state_2 = ( ui32* ) malloc ( particles.size * sizeof ( ui32 ) );
+    particles.data_h.prng_state_3 = ( ui32* ) malloc ( particles.size * sizeof ( ui32 ) );
+    particles.data_h.prng_state_4 = ( ui32* ) malloc ( particles.size * sizeof ( ui32 ) );
+    particles.data_h.prng_state_5 = ( ui32* ) malloc ( particles.size * sizeof ( ui32 ) );
 
-    particles.data_h.geometry_id = (ui32*)malloc(particles.size * sizeof(ui32));
-    particles.data_h.E_index = (ui32*)malloc(particles.size * sizeof(ui32));
+    particles.data_h.geometry_id = ( ui32* ) malloc ( particles.size * sizeof ( ui32 ) );
+    particles.data_h.E_index = ( ui32* ) malloc ( particles.size * sizeof ( ui32 ) );
 
-    particles.data_h.next_interaction_distance = (f32*)malloc(particles.size * sizeof(f32));
-    particles.data_h.next_discrete_process = (ui8*)malloc(particles.size * sizeof(ui8));
+    particles.data_h.next_interaction_distance = ( f32* ) malloc ( particles.size * sizeof ( f32 ) );
+    particles.data_h.next_discrete_process = ( ui8* ) malloc ( particles.size * sizeof ( ui8 ) );
 
-    particles.data_h.endsimu = (ui8*)malloc(particles.size * sizeof(ui8));
-    particles.data_h.level = (ui8*)malloc(particles.size * sizeof(ui8));
-    particles.data_h.pname = (ui8*)malloc(particles.size * sizeof(ui8));
-    
-    
-    particles.data_h.sec_E =     (f32*)malloc(particles.size * particles.data_h.nb_of_secondaries * sizeof(f32));
-    particles.data_h.sec_dx =    (f32*)malloc(particles.size * particles.data_h.nb_of_secondaries * sizeof(f32));
-    particles.data_h.sec_dy =    (f32*)malloc(particles.size * particles.data_h.nb_of_secondaries * sizeof(f32));
-    particles.data_h.sec_dz =    (f32*)malloc(particles.size * particles.data_h.nb_of_secondaries * sizeof(f32));
-    particles.data_h.sec_px =    (f32*)malloc(particles.size * particles.data_h.nb_of_secondaries * sizeof(f32));
-    particles.data_h.sec_py =    (f32*)malloc(particles.size * particles.data_h.nb_of_secondaries * sizeof(f32));
-    particles.data_h.sec_pz =    (f32*)malloc(particles.size * particles.data_h.nb_of_secondaries * sizeof(f32));
-    particles.data_h.sec_tof =   (f32*)malloc(particles.size * particles.data_h.nb_of_secondaries * sizeof(f32));
-    particles.data_h.sec_pname = (ui8*)malloc(particles.size * particles.data_h.nb_of_secondaries * sizeof(ui8));
-    
-    
+    particles.data_h.endsimu = ( ui8* ) malloc ( particles.size * sizeof ( ui8 ) );
+    particles.data_h.level = ( ui8* ) malloc ( particles.size * sizeof ( ui8 ) );
+    particles.data_h.pname = ( ui8* ) malloc ( particles.size * sizeof ( ui8 ) );
+
+
+    particles.data_h.sec_E =     ( f32* ) malloc ( particles.size * particles.data_h.nb_of_secondaries * sizeof ( f32 ) );
+    particles.data_h.sec_dx =    ( f32* ) malloc ( particles.size * particles.data_h.nb_of_secondaries * sizeof ( f32 ) );
+    particles.data_h.sec_dy =    ( f32* ) malloc ( particles.size * particles.data_h.nb_of_secondaries * sizeof ( f32 ) );
+    particles.data_h.sec_dz =    ( f32* ) malloc ( particles.size * particles.data_h.nb_of_secondaries * sizeof ( f32 ) );
+    particles.data_h.sec_px =    ( f32* ) malloc ( particles.size * particles.data_h.nb_of_secondaries * sizeof ( f32 ) );
+    particles.data_h.sec_py =    ( f32* ) malloc ( particles.size * particles.data_h.nb_of_secondaries * sizeof ( f32 ) );
+    particles.data_h.sec_pz =    ( f32* ) malloc ( particles.size * particles.data_h.nb_of_secondaries * sizeof ( f32 ) );
+    particles.data_h.sec_tof =   ( f32* ) malloc ( particles.size * particles.data_h.nb_of_secondaries * sizeof ( f32 ) );
+    particles.data_h.sec_pname = ( ui8* ) malloc ( particles.size * particles.data_h.nb_of_secondaries * sizeof ( ui8 ) );
+
+
 }
 
 /*
@@ -183,79 +189,83 @@ void ParticleManager::m_cpu_free_stack() {
 }
 */
 
-void ParticleManager::m_gpu_malloc_stack() {
+void ParticleManager::m_gpu_malloc_stack()
+{
 
-    HANDLE_ERROR( cudaMalloc((void**) &particles.data_d.E, particles.size*sizeof(f32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &particles.data_d.dx, particles.size*sizeof(f32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &particles.data_d.dy, particles.size*sizeof(f32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &particles.data_d.dz, particles.size*sizeof(f32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &particles.data_d.px, particles.size*sizeof(f32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &particles.data_d.py, particles.size*sizeof(f32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &particles.data_d.pz, particles.size*sizeof(f32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &particles.data_d.tof, particles.size*sizeof(f32)) );
+    HANDLE_ERROR ( cudaMalloc ( ( void** ) &particles.data_d.E, particles.size*sizeof ( f32 ) ) );
+    HANDLE_ERROR ( cudaMalloc ( ( void** ) &particles.data_d.dx, particles.size*sizeof ( f32 ) ) );
+    HANDLE_ERROR ( cudaMalloc ( ( void** ) &particles.data_d.dy, particles.size*sizeof ( f32 ) ) );
+    HANDLE_ERROR ( cudaMalloc ( ( void** ) &particles.data_d.dz, particles.size*sizeof ( f32 ) ) );
+    HANDLE_ERROR ( cudaMalloc ( ( void** ) &particles.data_d.px, particles.size*sizeof ( f32 ) ) );
+    HANDLE_ERROR ( cudaMalloc ( ( void** ) &particles.data_d.py, particles.size*sizeof ( f32 ) ) );
+    HANDLE_ERROR ( cudaMalloc ( ( void** ) &particles.data_d.pz, particles.size*sizeof ( f32 ) ) );
+    HANDLE_ERROR ( cudaMalloc ( ( void** ) &particles.data_d.tof, particles.size*sizeof ( f32 ) ) );
 
-    HANDLE_ERROR( cudaMalloc((void**) &particles.data_d.prng_state_1, particles.size*sizeof(ui32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &particles.data_d.prng_state_2, particles.size*sizeof(ui32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &particles.data_d.prng_state_3, particles.size*sizeof(ui32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &particles.data_d.prng_state_4, particles.size*sizeof(ui32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &particles.data_d.prng_state_5, particles.size*sizeof(ui32)) );
+    HANDLE_ERROR ( cudaMalloc ( ( void** ) &particles.data_d.prng_state_1, particles.size*sizeof ( ui32 ) ) );
+    HANDLE_ERROR ( cudaMalloc ( ( void** ) &particles.data_d.prng_state_2, particles.size*sizeof ( ui32 ) ) );
+    HANDLE_ERROR ( cudaMalloc ( ( void** ) &particles.data_d.prng_state_3, particles.size*sizeof ( ui32 ) ) );
+    HANDLE_ERROR ( cudaMalloc ( ( void** ) &particles.data_d.prng_state_4, particles.size*sizeof ( ui32 ) ) );
+    HANDLE_ERROR ( cudaMalloc ( ( void** ) &particles.data_d.prng_state_5, particles.size*sizeof ( ui32 ) ) );
 
-    HANDLE_ERROR( cudaMalloc((void**) &particles.data_d.geometry_id, particles.size*sizeof(ui32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &particles.data_d.E_index, particles.size*sizeof(ui32)) );
+    HANDLE_ERROR ( cudaMalloc ( ( void** ) &particles.data_d.geometry_id, particles.size*sizeof ( ui32 ) ) );
+    HANDLE_ERROR ( cudaMalloc ( ( void** ) &particles.data_d.E_index, particles.size*sizeof ( ui32 ) ) );
 
-    HANDLE_ERROR( cudaMalloc((void**) &particles.data_d.next_interaction_distance, particles.size*sizeof(f32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &particles.data_d.next_discrete_process, particles.size*sizeof(ui8)) );
+    HANDLE_ERROR ( cudaMalloc ( ( void** ) &particles.data_d.next_interaction_distance, particles.size*sizeof ( f32 ) ) );
+    HANDLE_ERROR ( cudaMalloc ( ( void** ) &particles.data_d.next_discrete_process, particles.size*sizeof ( ui8 ) ) );
 
-    HANDLE_ERROR( cudaMalloc((void**) &particles.data_d.endsimu, particles.size*sizeof(ui8)) );
-    HANDLE_ERROR( cudaMalloc((void**) &particles.data_d.level, particles.size*sizeof(ui8)) );
-    HANDLE_ERROR( cudaMalloc((void**) &particles.data_d.pname, particles.size*sizeof(ui8)) );
+    HANDLE_ERROR ( cudaMalloc ( ( void** ) &particles.data_d.endsimu, particles.size*sizeof ( ui8 ) ) );
+    HANDLE_ERROR ( cudaMalloc ( ( void** ) &particles.data_d.level, particles.size*sizeof ( ui8 ) ) );
+    HANDLE_ERROR ( cudaMalloc ( ( void** ) &particles.data_d.pname, particles.size*sizeof ( ui8 ) ) );
 
     particles.data_d.size = particles.data_h.size;
 
-    HANDLE_ERROR( cudaMalloc((void**) &particles.data_d.sec_E,     particles.size * particles.data_h.nb_of_secondaries *sizeof(f32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &particles.data_d.sec_dx,    particles.size * particles.data_h.nb_of_secondaries *sizeof(f32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &particles.data_d.sec_dy,    particles.size * particles.data_h.nb_of_secondaries *sizeof(f32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &particles.data_d.sec_dz,    particles.size * particles.data_h.nb_of_secondaries *sizeof(f32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &particles.data_d.sec_px,    particles.size * particles.data_h.nb_of_secondaries *sizeof(f32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &particles.data_d.sec_py,    particles.size * particles.data_h.nb_of_secondaries *sizeof(f32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &particles.data_d.sec_pz,    particles.size * particles.data_h.nb_of_secondaries *sizeof(f32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &particles.data_d.sec_tof,   particles.size * particles.data_h.nb_of_secondaries *sizeof(f32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &particles.data_d.sec_pname, particles.size * particles.data_h.nb_of_secondaries *sizeof(ui8)) );
-    
+    HANDLE_ERROR ( cudaMalloc ( ( void** ) &particles.data_d.sec_E,     particles.size * particles.data_h.nb_of_secondaries *sizeof ( f32 ) ) );
+    HANDLE_ERROR ( cudaMalloc ( ( void** ) &particles.data_d.sec_dx,    particles.size * particles.data_h.nb_of_secondaries *sizeof ( f32 ) ) );
+    HANDLE_ERROR ( cudaMalloc ( ( void** ) &particles.data_d.sec_dy,    particles.size * particles.data_h.nb_of_secondaries *sizeof ( f32 ) ) );
+    HANDLE_ERROR ( cudaMalloc ( ( void** ) &particles.data_d.sec_dz,    particles.size * particles.data_h.nb_of_secondaries *sizeof ( f32 ) ) );
+    HANDLE_ERROR ( cudaMalloc ( ( void** ) &particles.data_d.sec_px,    particles.size * particles.data_h.nb_of_secondaries *sizeof ( f32 ) ) );
+    HANDLE_ERROR ( cudaMalloc ( ( void** ) &particles.data_d.sec_py,    particles.size * particles.data_h.nb_of_secondaries *sizeof ( f32 ) ) );
+    HANDLE_ERROR ( cudaMalloc ( ( void** ) &particles.data_d.sec_pz,    particles.size * particles.data_h.nb_of_secondaries *sizeof ( f32 ) ) );
+    HANDLE_ERROR ( cudaMalloc ( ( void** ) &particles.data_d.sec_tof,   particles.size * particles.data_h.nb_of_secondaries *sizeof ( f32 ) ) );
+    HANDLE_ERROR ( cudaMalloc ( ( void** ) &particles.data_d.sec_pname, particles.size * particles.data_h.nb_of_secondaries *sizeof ( ui8 ) ) );
+
 }
 
 // Init particle seeds with the main seed
-void ParticleManager::m_cpu_init_stack_seed(ui32 seed) {
+void ParticleManager::m_cpu_init_stack_seed ( ui32 seed )
+{
 
-    srand(seed);
+    srand ( seed );
     ui32 i=0;
-    while (i<particles.size) {
+    while ( i<particles.size )
+    {
         // init random seed
         particles.data_h.prng_state_1[i] = rand();
         particles.data_h.prng_state_2[i] = rand();
         particles.data_h.prng_state_3[i] = rand();
         particles.data_h.prng_state_4[i] = rand();
         particles.data_h.prng_state_5[i] = 0;      // carry
-        
+
 //         printf("%d %d %d %d %d \n",particles.data_h.prng_state_1[i],particles.data_h.prng_state_2[i],particles.data_h.prng_state_3[i],particles.data_h.prng_state_4[i],particles.data_h.prng_state_5[i]);
-        
+
         ++i;
-    } 
+    }
 }
 
-void ParticleManager::m_copy_seed_cpu2gpu() {
+void ParticleManager::m_copy_seed_cpu2gpu()
+{
 
-    // We consider that the CPU stack was previously initialized with seed   
-    HANDLE_ERROR( cudaMemcpy(particles.data_d.prng_state_1, particles.data_h.prng_state_1,
-                             sizeof(ui32)*particles.size, cudaMemcpyHostToDevice) );
-    HANDLE_ERROR( cudaMemcpy(particles.data_d.prng_state_2, particles.data_h.prng_state_2,
-                             sizeof(ui32)*particles.size, cudaMemcpyHostToDevice) );
-    HANDLE_ERROR( cudaMemcpy(particles.data_d.prng_state_3, particles.data_h.prng_state_3,
-                             sizeof(ui32)*particles.size, cudaMemcpyHostToDevice) );
-    HANDLE_ERROR( cudaMemcpy(particles.data_d.prng_state_4, particles.data_h.prng_state_4,
-                             sizeof(ui32)*particles.size, cudaMemcpyHostToDevice) );
-    HANDLE_ERROR( cudaMemcpy(particles.data_d.prng_state_5, particles.data_h.prng_state_5,
-                             sizeof(ui32)*particles.size, cudaMemcpyHostToDevice) );
+    // We consider that the CPU stack was previously initialized with seed
+    HANDLE_ERROR ( cudaMemcpy ( particles.data_d.prng_state_1, particles.data_h.prng_state_1,
+                                sizeof ( ui32 ) *particles.size, cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR ( cudaMemcpy ( particles.data_d.prng_state_2, particles.data_h.prng_state_2,
+                                sizeof ( ui32 ) *particles.size, cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR ( cudaMemcpy ( particles.data_d.prng_state_3, particles.data_h.prng_state_3,
+                                sizeof ( ui32 ) *particles.size, cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR ( cudaMemcpy ( particles.data_d.prng_state_4, particles.data_h.prng_state_4,
+                                sizeof ( ui32 ) *particles.size, cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR ( cudaMemcpy ( particles.data_d.prng_state_5, particles.data_h.prng_state_5,
+                                sizeof ( ui32 ) *particles.size, cudaMemcpyHostToDevice ) );
 
 }
 

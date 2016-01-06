@@ -17,19 +17,20 @@
 #include "global.cuh"
 #include "particles.cuh"
 
-class GGEMSPhantom {
-    public:
-        GGEMSPhantom();
-        virtual ~GGEMSPhantom() {}
-        virtual void initialize(GlobalSimulationParameters params) = 0;
-        virtual void track_to_in(Particles particles) = 0;
-        virtual void track_to_out(Particles particles) = 0;
+class GGEMSPhantom
+{
+public:
+    GGEMSPhantom();
+    virtual ~GGEMSPhantom() {}
+    virtual void initialize ( GlobalSimulationParameters params ) = 0;
+    virtual void track_to_in ( Particles particles ) = 0;
+    virtual void track_to_out ( Particles particles ) = 0;
 
-        void set_name(std::string name);
-        std::string get_name();
+    void set_name ( std::string name );
+    std::string get_name();
 
-    private:
-        std::string m_phantom_name;
+private:
+    std::string m_phantom_name;
 
 };
 

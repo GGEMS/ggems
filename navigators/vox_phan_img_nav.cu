@@ -19,9 +19,10 @@
 ////:: GPU Codes
 
 // Move particles to the voxelized volume
-__host__ __device__ void VPIN::track_to_in(ParticlesData &particles, f32 xmin, f32 xmax,
-                                                    f32 ymin, f32 ymax, f32 zmin, f32 zmax,
-                                                    ui32 id) {
+__host__ __device__ void VPIN::track_to_in ( ParticlesData &particles, f32 xmin, f32 xmax,
+        f32 ymin, f32 ymax, f32 zmin, f32 zmax,
+        ui32 id )
+{
 
     // Read position
     f64xyz pos;
@@ -35,21 +36,25 @@ __host__ __device__ void VPIN::track_to_in(ParticlesData &particles, f32 xmin, f
     dir.y = particles.dy[id];
     dir.z = particles.dz[id];
 
-    f32 dist = hit_ray_AABB(pos, dir, xmin, xmax, ymin, ymax, zmin, zmax);
+    f32 dist = hit_ray_AABB ( pos, dir, xmin, xmax, ymin, ymax, zmin, zmax );
 
     // the particle not hitting the voxelized volume
-    if (dist == FLT_MAX) {                            // TODO: Don't know why F32_MAX doesn't work...
+    if ( dist == FLT_MAX )                            // TODO: Don't know why F32_MAX doesn't work...
+    {
         particles.endsimu[id] = PARTICLE_FREEZE;
         return;
-    } else {
+    }
+    else
+    {
         // Check if the path of the particle cross the volume sufficiently
-        f32 cross = dist_overlap_ray_AABB(pos, dir, xmin, xmax, ymin, ymax, zmin, zmax);
-        if (cross < EPSILON3) {
+        f32 cross = dist_overlap_ray_AABB ( pos, dir, xmin, xmax, ymin, ymax, zmin, zmax );
+        if ( cross < EPSILON3 )
+        {
             particles.endsimu[id] = PARTICLE_FREEZE;
             return;
         }
         // move the particle slightly inside the volume
-        pos = fxyz_add(pos, fxyz_scale(pos, dist+EPSILON6));
+        pos = fxyz_add ( pos, fxyz_scale ( pos, dist+EPSILON6 ) );
 
         // TODO update tof
         // ...
@@ -63,12 +68,13 @@ __host__ __device__ void VPIN::track_to_in(ParticlesData &particles, f32 xmin, f
 }
 
 
-__host__ __device__ void VPIN::track_to_out(ParticlesData &particles,
-                                                     VoxVolumeData vol,
-                                                     MaterialsTable materials,
-                                                     PhotonCrossSectionTable photon_CS_table,
-                                                     GlobalSimulationParametersData parameters,
-                                                     ui32 part_id) {
+__host__ __device__ void VPIN::track_to_out ( ParticlesData &particles,
+        VoxVolumeData vol,
+        MaterialsTable materials,
+        PhotonCrossSectionTable photon_CS_table,
+        GlobalSimulationParametersData parameters,
+        ui32 part_id )
+{
 
 
     // Read position
@@ -89,9 +95,9 @@ __host__ __device__ void VPIN::track_to_out(ParticlesData &particles,
     ivoxsize.y = 1.0 / vol.spacing_y;
     ivoxsize.z = 1.0 / vol.spacing_z;
     ui16xyzw index_phantom;
-    index_phantom.x = ui16( (pos.x+vol.off_x) * ivoxsize.x );
-    index_phantom.y = ui16( (pos.y+vol.off_y) * ivoxsize.y );
-    index_phantom.z = ui16( (pos.z+vol.off_z) * ivoxsize.z );
+    index_phantom.x = ui16 ( ( pos.x+vol.off_x ) * ivoxsize.x );
+    index_phantom.y = ui16 ( ( pos.y+vol.off_y ) * ivoxsize.y );
+    index_phantom.z = ui16 ( ( pos.z+vol.off_z ) * ivoxsize.z );
     index_phantom.w = index_phantom.z*vol.nb_vox_x*vol.nb_vox_y
                       + index_phantom.y*vol.nb_vox_x
                       + index_phantom.x; // linear index
@@ -101,7 +107,7 @@ __host__ __device__ void VPIN::track_to_out(ParticlesData &particles,
 
     //// Find next discrete interaction ///////////////////////////////////////
 
-    photon_get_next_interaction(particles, parameters, photon_CS_table, mat_id, part_id);
+    photon_get_next_interaction ( particles, parameters, photon_CS_table, mat_id, part_id );
 
     f32 next_interaction_distance = particles.next_interaction_distance[part_id];
     ui8 next_discrete_process = particles.next_discrete_process[part_id];
@@ -115,17 +121,18 @@ __host__ __device__ void VPIN::track_to_out(ParticlesData &particles,
     f32 vox_ymax = vox_ymin + vol.spacing_y;
     f32 vox_zmax = vox_zmin + vol.spacing_z;
 
-    f32 boundary_distance = hit_ray_AABB(pos, dir, vox_xmin, vox_xmax,
-                                         vox_ymin, vox_ymax, vox_zmin, vox_zmax);
+    f32 boundary_distance = hit_ray_AABB ( pos, dir, vox_xmin, vox_xmax,
+                                           vox_ymin, vox_ymax, vox_zmin, vox_zmax );
 
-    if (boundary_distance <= next_interaction_distance) {
+    if ( boundary_distance <= next_interaction_distance )
+    {
         next_interaction_distance = boundary_distance + EPSILON3; // Overshoot
         next_discrete_process = GEOMETRY_BOUNDARY;
     }
 
     //// Move particle //////////////////////////////////////////////////////
 
-    pos = fxyz_add(pos, fxyz_scale(dir, next_interaction_distance));
+    pos = fxyz_add ( pos, fxyz_scale ( dir, next_interaction_distance ) );
 
     // Update TOF - TODO
     //particles.tof[part_id] += c_light * next_interaction_distance;
@@ -135,24 +142,27 @@ __host__ __device__ void VPIN::track_to_out(ParticlesData &particles,
     particles.pz[part_id] = pos.z;
 
     // Stop simulation if out of the phantom
-    if (!test_point_AABB(pos, vol.xmin, vol.xmax, vol.ymin, vol.ymax, vol.zmin, vol.zmax)) {
+    if ( !test_point_AABB ( pos, vol.xmin, vol.xmax, vol.ymin, vol.ymax, vol.zmin, vol.zmax ) )
+    {
         particles.endsimu[part_id] = PARTICLE_FREEZE;
         return;
     }
 
     //// Apply discrete process //////////////////////////////////////////////////
 
-    if (next_discrete_process != GEOMETRY_BOUNDARY) {
+    if ( next_discrete_process != GEOMETRY_BOUNDARY )
+    {
         // Resolve discrete process
-        SecParticle electron = photon_resolve_discrete_process(particles, parameters, photon_CS_table,
-                                                               materials, mat_id, part_id);
+        SecParticle electron = photon_resolve_discrete_process ( particles, parameters, photon_CS_table,
+                               materials, mat_id, part_id );
 
         //// Here e- are not tracked, and lost energy not drop
 
     }
 
     //// Energy cut
-    if (particles.E[part_id] <= materials.electron_energy_cut[mat_id]) {
+    if ( particles.E[part_id] <= materials.electron_energy_cut[mat_id] )
+    {
         particles.endsimu[part_id] = PARTICLE_DEAD;
         return;
     }
@@ -160,63 +170,73 @@ __host__ __device__ void VPIN::track_to_out(ParticlesData &particles,
 }
 
 // Device Kernel that move particles to the voxelized volume boundary
-__global__ void VPIN::kernel_device_track_to_in(ParticlesData particles, f32 xmin, f32 xmax,
-                                            f32 ymin, f32 ymax, f32 zmin, f32 zmax) {
+__global__ void VPIN::kernel_device_track_to_in ( ParticlesData particles, f32 xmin, f32 xmax,
+        f32 ymin, f32 ymax, f32 zmin, f32 zmax )
+{
 
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
-    if (id >= particles.size) return;
+    if ( id >= particles.size ) return;
 
-    VPIN::track_to_in(particles, xmin, xmax, ymin, ymax, zmin, zmax, id);
+    VPIN::track_to_in ( particles, xmin, xmax, ymin, ymax, zmin, zmax, id );
 
 }
 
 // Host Kernel that move particles to the voxelized volume boundary
-void VPIN::kernel_host_track_to_in(ParticlesData particles, f32 xmin, f32 xmax,
-                             f32 ymin, f32 ymax, f32 zmin, f32 zmax, ui32 id) {
+void VPIN::kernel_host_track_to_in ( ParticlesData particles, f32 xmin, f32 xmax,
+                                     f32 ymin, f32 ymax, f32 zmin, f32 zmax, ui32 id )
+{
 
-    VPIN::track_to_in(particles, xmin, xmax, ymin, ymax, zmin, zmax, id);
+    VPIN::track_to_in ( particles, xmin, xmax, ymin, ymax, zmin, zmax, id );
 
 }
 
 // Device kernel that track particles within the voxelized volume until boundary
-__global__ void VPIN::kernel_device_track_to_out(ParticlesData particles,
-                                           VoxVolumeData vol,
-                                           MaterialsTable materials,
-                                           PhotonCrossSectionTable photon_CS_table,
-                                           GlobalSimulationParametersData parameters) {
+__global__ void VPIN::kernel_device_track_to_out ( ParticlesData particles,
+        VoxVolumeData vol,
+        MaterialsTable materials,
+        PhotonCrossSectionTable photon_CS_table,
+        GlobalSimulationParametersData parameters )
+{
 
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
-    if (id >= particles.size) return;
+    if ( id >= particles.size ) return;
 
     // Stepping loop
-    while (particles.endsimu[id] != PARTICLE_DEAD && particles.endsimu[id] != PARTICLE_FREEZE) {
-        VPIN::track_to_out(particles, vol, materials, photon_CS_table, parameters, id);
+    while ( particles.endsimu[id] != PARTICLE_DEAD && particles.endsimu[id] != PARTICLE_FREEZE )
+    {
+        VPIN::track_to_out ( particles, vol, materials, photon_CS_table, parameters, id );
     }
 
 }
 
 // Host kernel that track particles within the voxelized volume until boundary
-void VPIN::kernel_host_track_to_out(ParticlesData particles,
-                              VoxVolumeData vol,
-                              MaterialsTable materials,
-                              PhotonCrossSectionTable photon_CS_table,
-                              GlobalSimulationParametersData parameters, ui32 id) {
+void VPIN::kernel_host_track_to_out ( ParticlesData particles,
+                                      VoxVolumeData vol,
+                                      MaterialsTable materials,
+                                      PhotonCrossSectionTable photon_CS_table,
+                                      GlobalSimulationParametersData parameters, ui32 id )
+{
 
     // Stepping loop
-    while (particles.endsimu[id] != PARTICLE_DEAD && particles.endsimu[id] != PARTICLE_FREEZE) {
-        VPIN::track_to_out(particles, vol, materials, photon_CS_table, parameters, id);
+    while ( particles.endsimu[id] != PARTICLE_DEAD && particles.endsimu[id] != PARTICLE_FREEZE )
+    {
+        VPIN::track_to_out ( particles, vol, materials, photon_CS_table, parameters, id );
     }
 }
 
 ////:: Privates
 
-bool VoxPhanImgNav::m_check_mandatory() {
+bool VoxPhanImgNav::m_check_mandatory()
+{
 
-    if (m_phantom.data_h.nb_vox_x == 0 || m_phantom.data_h.nb_vox_y == 0 || m_phantom.data_h.nb_vox_z == 0 ||
-        m_phantom.data_h.spacing_x == 0 || m_phantom.data_h.spacing_y == 0 || m_phantom.data_h.spacing_z == 0 ||
-        m_phantom.list_of_materials.size() == 0) {
+    if ( m_phantom.data_h.nb_vox_x == 0 || m_phantom.data_h.nb_vox_y == 0 || m_phantom.data_h.nb_vox_z == 0 ||
+            m_phantom.data_h.spacing_x == 0 || m_phantom.data_h.spacing_y == 0 || m_phantom.data_h.spacing_z == 0 ||
+            m_phantom.list_of_materials.size() == 0 )
+    {
         return false;
-    } else {
+    }
+    else
+    {
         return true;
     }
 
@@ -224,65 +244,79 @@ bool VoxPhanImgNav::m_check_mandatory() {
 
 ////:: Main functions
 
-void VoxPhanImgNav::track_to_in(Particles particles) {
-
-    if (m_params.data_h.device_target == CPU_DEVICE) {
-        ui32 id=0; while (id<particles.size) {
-            VPIN::kernel_host_track_to_in(particles.data_h, m_phantom.data_h.xmin, m_phantom.data_h.xmax,
-                                                   m_phantom.data_h.ymin, m_phantom.data_h.ymax,
-                                                   m_phantom.data_h.zmin, m_phantom.data_h.zmax,
-                                                   id);
-            ++id;
-        }
-    } else if (m_params.data_h.device_target == GPU_DEVICE) {
-
-        dim3 threads, grid;
-        threads.x = m_params.data_h.gpu_block_size;
-        grid.x = (particles.size + m_params.data_h.gpu_block_size - 1) / m_params.data_h.gpu_block_size;
-
-        VPIN::kernel_device_track_to_in<<<grid, threads>>>(particles.data_d, m_phantom.data_h.xmin, m_phantom.data_h.xmax,
-                                                     m_phantom.data_h.ymin, m_phantom.data_h.ymax,
-                                                     m_phantom.data_h.zmin, m_phantom.data_h.zmax);
-        cuda_error_check("Error ", " Kernel_VoxPhanImgNav (track to in)");
-
-    }
-
-
-}
-
-void VoxPhanImgNav::track_to_out(Particles particles) {
-
-    if (m_params.data_h.device_target == CPU_DEVICE) {
-
-        ui32 id=0; while (id<particles.size) {
-           
-            VPIN::kernel_host_track_to_out(particles.data_h, m_phantom.data_h,
-                                     m_materials.data_h, m_cross_sections.photon_CS.data_h, m_params.data_h, id);
-            ++id;
-        }
-    } else if (m_params.data_h.device_target == GPU_DEVICE) {
-
-        dim3 threads, grid;
-        threads.x = m_params.data_h.gpu_block_size;
-        grid.x = (particles.size + m_params.data_h.gpu_block_size - 1) / m_params.data_h.gpu_block_size;
-
-        VPIN::kernel_device_track_to_out<<<grid, threads>>>(particles.data_d, m_phantom.data_d, m_materials.data_d,
-                                                      m_cross_sections.photon_CS.data_d, m_params.data_d);
-        cuda_error_check("Error ", " Kernel_VoxPhanImgNav (track to out)");
-
-    }
-
-}
-
-void VoxPhanImgNav::load_phantom_from_mhd(std::string filename, std::string range_mat_name)
+void VoxPhanImgNav::track_to_in ( Particles particles )
 {
-    m_phantom.load_from_mhd(filename, range_mat_name);
+
+    if ( m_params.data_h.device_target == CPU_DEVICE )
+    {
+        ui32 id=0;
+        while ( id<particles.size )
+        {
+            VPIN::kernel_host_track_to_in ( particles.data_h, m_phantom.data_h.xmin, m_phantom.data_h.xmax,
+                                            m_phantom.data_h.ymin, m_phantom.data_h.ymax,
+                                            m_phantom.data_h.zmin, m_phantom.data_h.zmax,
+                                            id );
+            ++id;
+        }
+    }
+    else if ( m_params.data_h.device_target == GPU_DEVICE )
+    {
+
+        dim3 threads, grid;
+        threads.x = m_params.data_h.gpu_block_size;
+        grid.x = ( particles.size + m_params.data_h.gpu_block_size - 1 ) / m_params.data_h.gpu_block_size;
+
+        VPIN::kernel_device_track_to_in<<<grid, threads>>> ( particles.data_d, m_phantom.data_h.xmin, m_phantom.data_h.xmax,
+                m_phantom.data_h.ymin, m_phantom.data_h.ymax,
+                m_phantom.data_h.zmin, m_phantom.data_h.zmax );
+        cuda_error_check ( "Error ", " Kernel_VoxPhanImgNav (track to in)" );
+
+    }
+
+
 }
 
-void VoxPhanImgNav::initialize(GlobalSimulationParameters params) {
+void VoxPhanImgNav::track_to_out ( Particles particles )
+{
+
+    if ( m_params.data_h.device_target == CPU_DEVICE )
+    {
+
+        ui32 id=0;
+        while ( id<particles.size )
+        {
+
+            VPIN::kernel_host_track_to_out ( particles.data_h, m_phantom.data_h,
+                                             m_materials.data_h, m_cross_sections.photon_CS.data_h, m_params.data_h, id );
+            ++id;
+        }
+    }
+    else if ( m_params.data_h.device_target == GPU_DEVICE )
+    {
+
+        dim3 threads, grid;
+        threads.x = m_params.data_h.gpu_block_size;
+        grid.x = ( particles.size + m_params.data_h.gpu_block_size - 1 ) / m_params.data_h.gpu_block_size;
+
+        VPIN::kernel_device_track_to_out<<<grid, threads>>> ( particles.data_d, m_phantom.data_d, m_materials.data_d,
+                m_cross_sections.photon_CS.data_d, m_params.data_d );
+        cuda_error_check ( "Error ", " Kernel_VoxPhanImgNav (track to out)" );
+
+    }
+
+}
+
+void VoxPhanImgNav::load_phantom_from_mhd ( std::string filename, std::string range_mat_name )
+{
+    m_phantom.load_from_mhd ( filename, range_mat_name );
+}
+
+void VoxPhanImgNav::initialize ( GlobalSimulationParameters params )
+{
     // Check params
-    if (!m_check_mandatory()) {
-        print_error("VoxPhanImgNav: missing parameters.");
+    if ( !m_check_mandatory() )
+    {
+        print_error ( "VoxPhanImgNav: missing parameters." );
         exit_simulation();
     }
 
@@ -290,16 +324,16 @@ void VoxPhanImgNav::initialize(GlobalSimulationParameters params) {
     m_params = params;
 
     // Phantom
-    m_phantom.set_name("VoxPhanImgNav");
-    m_phantom.initialize(params);
+    m_phantom.set_name ( "VoxPhanImgNav" );
+    m_phantom.initialize ( params );
 
     // Materials table
     m_materials.load_elements_database();
     m_materials.load_materials_database();
-    m_materials.initialize(m_phantom.list_of_materials, params);
+    m_materials.initialize ( m_phantom.list_of_materials, params );
 
     // Cross Sections
-    m_cross_sections.initialize(m_materials, params);
+    m_cross_sections.initialize ( m_materials, params );
 
 }
 

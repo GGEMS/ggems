@@ -16,15 +16,18 @@
 
 #include "ggems_phantom.cuh"
 
-GGEMSPhantom::GGEMSPhantom() {
+GGEMSPhantom::GGEMSPhantom()
+{
     m_phantom_name = "no_source";
 }
 
-void GGEMSPhantom::set_name(std::string name) {
+void GGEMSPhantom::set_name ( std::string name )
+{
     m_phantom_name = name;
 }
 
-std::string GGEMSPhantom::get_name() {
+std::string GGEMSPhantom::get_name()
+{
     return m_phantom_name;
 }
 
