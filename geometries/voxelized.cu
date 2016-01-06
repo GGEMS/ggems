@@ -131,7 +131,7 @@ void VoxelizedPhantom::m_define_materials_from_range(f32 *raw_data, std::string 
             stop  = m_txt_reader.read_stop_range(line);
             mat_name = m_txt_reader.read_mat_range(line);
             list_of_materials.push_back(mat_name);
-            //printf("IND %i MAT %s \n", mat_index, mat_name.c_str());
+            printf("IND %i MAT %s \n", mat_index, mat_name.c_str());
 
             // build labeled phantom according range data
             i=0; while (i < data_h.number_of_voxels) {
@@ -146,7 +146,12 @@ void VoxelizedPhantom::m_define_materials_from_range(f32 *raw_data, std::string 
         ++mat_index;
 
     } // read file
-
+    
+// for(int i = 0;i<data_h.number_of_voxels;i++){
+//     if(data_h.values[i]!=0)printf("%d\n",data_h.values[i]);
+// 
+// }
+// exit(0);
 }
 
 ///:: Main functions

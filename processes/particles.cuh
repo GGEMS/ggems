@@ -46,8 +46,19 @@ struct ParticlesData {
     ui8* pname; // particle name (photon, electron, etc)
     // size
     ui32 size;
-
     
+    ui8 nb_of_secondaries;
+    // Secondaries stack 
+    // Acces to level : Part_ID * size + hierarchy level
+    f32* sec_E; // size * hierarchy level 
+    f32* sec_dx;
+    f32* sec_dy;
+    f32* sec_dz;
+    f32* sec_px;
+    f32* sec_py;
+    f32* sec_pz;
+    f32* sec_tof;
+    ui8* sec_pname; // particle name (photon, electron, etc)
     
     friend std::ostream& operator<<(std::ostream& os, const ParticlesData v)
     {

@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include "global.cuh"
-
+#include "fun.cuh"
 
 namespace ImageReader
 {
@@ -79,7 +79,9 @@ namespace ImageReader
     void record2DImage();
 
     // Record dose map 
-    void record3Dimage( std::string histname,  f32 *data, f32xyz offset, f32xyz spacing, i32xyz size, bool sparce_compression = false);
+//     void record3Dimage( std::string histname,  f32 *data, f32xyz offset, f32xyz spacing, i32xyz size, bool sparce_compression = false);
+    
+    void record3Dimage( std::string histname,  f64 *data, f32xyz offset, f32xyz spacing, i32xyz size, bool sparce_compression = false);
     
     inline std::string get_format(std::string filename)
     {
@@ -91,12 +93,9 @@ namespace ImageReader
     return filename.substr(0,filename.find_last_of(separator.c_str()) );
     }
     
-    
-    template < typename T > std::string to_string( const T& n )
+    inline std::string remove_path(std::string filename, std::string separator= "/")
     {
-        std::ostringstream stm ;
-        stm << n ;
-        return stm.str() ;
+    return filename.substr(filename.find_last_of(separator.c_str()) +1 );
     }
     
     

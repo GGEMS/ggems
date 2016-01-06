@@ -148,4 +148,13 @@ __host__ __device__ f32 Gaussian(f32 mean,f32 rms,ParticlesData &particles, int 
     return  data;
     }
     
+__host__ __device__ i32xyz get_bin_xyz(i32 bin, i32xyz size){
+
+    int dx = bin%size.x;
+    int dy = ( (bin - dx) / size.x  )%size.y;
+    int dz = (bin - dx - dy*size.x) / (size.x * size.y);
+    
+    return make_i32xyz(dx,dy,dz);
+}
+    
 #endif

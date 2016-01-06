@@ -26,6 +26,7 @@
 #include "dose_calculator.cuh"
 #include "electron.cuh"
 #include "cross_sections.cuh"
+#include "electron_navigator.cuh"
 
 // VoxPhanDosiNav -> VPDN
 namespace VPDN {
@@ -91,6 +92,8 @@ class VoxPhanDosiNav : public GGEMSPhantom {
         void track_to_out(Particles particles);
                 
         void load_phantom_from_mhd(std::string filename, std::string range_mat_name);
+        
+        void write(std::string filename = "dosimetry.mhd");
         
     private:        
         

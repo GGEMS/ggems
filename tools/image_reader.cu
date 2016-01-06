@@ -7,7 +7,7 @@ using namespace std;
 
 
 
-void ImageReader::record3Dimage( string histname,  f32 *data, f32xyz offset, f32xyz spacing, i32xyz size, bool sparse_compression )
+void ImageReader::record3Dimage( string histname,  f64 *data, f32xyz offset, f32xyz spacing, i32xyz size, bool sparse_compression )
 {
 
     // Check format
@@ -18,6 +18,7 @@ void ImageReader::record3Dimage( string histname,  f32 *data, f32xyz offset, f32
     {
         string pathnamemhd = histname + ".mhd";
         string pathnameraw = histname + ".raw";
+        
         cout<<"Save file : "<<pathnamemhd << endl;
 
         // MHD file 
@@ -37,7 +38,7 @@ void ImageReader::record3Dimage( string histname,  f32 *data, f32xyz offset, f32
         myfile << "DimSize = "<<size.x<<" "<<size.y<<" "<<size.z<<"\n";
         myfile << "AnatomicalOrientation = ???\n";
         myfile << "ElementType = MET_FLOAT\n";
-        myfile << "ElementDataFile = "<<pathnameraw.c_str()<<"\n";
+        myfile << "ElementDataFile = "<<remove_path(pathnameraw).c_str()<<"\n";
 
         myfile.close();
 
@@ -94,6 +95,17 @@ void ImageReader::record3Dimage( string histname,  f32 *data, f32xyz offset, f32
                 // Export uncompressed raw data
                 int i=0; while (i<size.x*size.y*size.z) {
                     float val = data[i]; 
+                    if(val!=0)
+                    {
+                        int dx = i%size.x;
+                        int dy = ( (i - dx) / size.x  )%size.y;
+                        int dz = (i - dx - dy*size.x) / (size.x * size.y);
+                        int value = dx + dy*size.x + dz * size.x * size.y;
+                        i32xyz dxyz = get_bin_xyz(i,size);
+//                         printf("%d %d %d %d %d %d %d %d value %g \n",i,value,dx,dy,dz,dxyz.x,dxyz.y,dxyz.z,val);
+                        
+                    }
+                    
                     fwrite(&val, sizeof(float), 1, pFile_mhd);
                     ++i;
                 }
@@ -135,5 +147,9 @@ void ImageReader::record3Dimage( string histname,  f32 *data, f32xyz offset, f32
 
 }
 
-
+// void ImageReader::record3Dimage( string histname,  f32 *data, f32xyz offset, f32xyz spacing, i32xyz size, bool sparse_compression )
+// {
+//     ImageReader::record3Dimage( histname,  (f64*)data, offset, spacing, size, sparse_compression );
+// 
+// }
 #endif 

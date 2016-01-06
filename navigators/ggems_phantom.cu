@@ -1,7 +1,7 @@
 // GGEMS Copyright (C) 2015
 
 /*!
- * \file ggems_source.cu
+ * \file ggems_phantom.cu
  * \brief Abstract source class
  * \author J. Bert <bert.jul@gmail.com>
  * \version 0.1

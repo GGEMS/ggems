@@ -52,4 +52,16 @@ __host__ __device__ int G4Poisson(f32 mean,ParticlesData &particles, int id);
 
 __host__ __device__ f32 Gaussian(f32 mean,f32 rms,ParticlesData &particles, int id);
 
+    
+template < typename T > std::string to_string( const T& n )
+{
+    std::ostringstream stm ;
+    stm << n ;
+    return stm.str() ;
+}
+
+__host__ __device__ i32xyz get_bin_xyz(i32 bin, i32xyz size);
+
+
+
 #endif

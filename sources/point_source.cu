@@ -26,7 +26,7 @@ __host__ __device__ void point_source(ParticlesData particles_data, ui32 id,
                                       f32 px, f32 py, f32 pz, 
                                       ui8 direction_option, f32 dx, f32 dy, f32 dz,
                                       ui8 type,
-                                      f64 *spectrumE, f64 *spectrumCDF, ui32 nbins) {
+                                      f64 *spectrumE, f64 *spectrumCDF, ui32 nbins, f32 m_aperture_angle) {
 
     // Direction option. Add a new preprocessing option for new direction option.
     if (direction_option == POINT_SOURCE_ISOTROPIC)
@@ -42,9 +42,33 @@ __host__ __device__ void point_source(ParticlesData particles_data, ui32 id,
     }
     else if (direction_option == POINT_SOURCE_BEAM)
     {
-        particles_data.dx[id] = dx;
-        particles_data.dy[id] = dy;
-        particles_data.dz[id] = dz;
+
+        
+        // Get direction
+        f32 phi = JKISS32(particles_data, id);
+        f32 theta = JKISS32(particles_data, id);
+        f32 val_aper = 1.0f - cosf(m_aperture_angle);
+        phi  *= gpu_twopi;
+        theta = acosf(1.0f - val_aper*theta);
+
+        f32 rdx = cosf(phi)*sinf(theta);
+        f32 rdy = sinf(phi)*sinf(theta);
+        f32 rdz = cosf(theta);
+        
+//         printf("DIRECTION %g %g %g\n",dx,dy,dz);
+//         printf("DIRECTION %g %g %g\n",rdx,rdy,rdz);
+//         printf("alea %f \n",JKISS32(particles_data, id));
+//         printf("alea %f \n",JKISS32(particles_data, id));
+//         printf("alea %f \n",JKISS32(particles_data, id));
+        // Apply rotation
+//         f32xyz d = fxyz_rotate_euler(make_f32xyz(rdx, rdy, rdz), make_f32xyz(dx, dy, dz));
+        f32xyz d = rotateUz(make_f32xyz(rdx, rdy, rdz), make_f32xyz(dx, dy, dz));
+    
+//         printf("DIRECTION %g %g %g\n",d.x,d.y,d.z);
+        particles_data.dx[id] = d.x;
+        particles_data.dy[id] = d.y;
+        particles_data.dz[id] = d.z;
+        
     }
 
     ui32 pos = binary_search(JKISS32(particles_data, id), spectrumCDF, nbins);
@@ -69,13 +93,14 @@ __global__ void kernel_point_source(ParticlesData particles_data,
                                     f32 px, f32 py, f32 pz,
                                     ui8 direction_option, f32 dx, f32 dy, f32 dz,
                                     ui8 type,
-                                    f64 *spectrumE, f64 *spectrumCDF, ui32 nbins) {
+                                    f64 *spectrumE, f64 *spectrumCDF, ui32 nbins,
+                                    f32 m_aperture_angle) {
 
     const ui32 id = get_id();
     if (id >= particles_data.size) return;
 
     point_source(particles_data, id, px, py, pz, direction_option, dx, dy, dz, type,
-                 spectrumE, spectrumCDF, nbins);
+                 spectrumE, spectrumCDF, nbins,m_aperture_angle);
 
 }
 
@@ -113,11 +138,11 @@ void PointSource::set_position(f32 vpx, f32 vpy, f32 vpz) {
 void PointSource::set_direction(std::string option, f32 vdx, f32 vdy, f32 vdz)
 {
 
-    if (option == "isotropic")
+    if (option == "Isotropic")
     {
         m_direction_option = POINT_SOURCE_ISOTROPIC;
     }
-    else if (option == "beam")
+    else if (option == "Beam")
     {
         m_direction_option = POINT_SOURCE_BEAM;
         m_dx = vdx;
@@ -217,7 +242,7 @@ void PointSource::get_primaries_generator(Particles particles) {
 
         ui32 id=0; while (id<particles.size) {
             point_source(particles.data_h, id, m_px, m_py, m_pz, m_direction_option, m_dx, m_dy, m_dz, m_particle_type,
-                         m_spectrumE_h, m_spectrumCDF_h, m_nb_of_energy_bins);                                         
+                         m_spectrumE_h, m_spectrumCDF_h, m_nb_of_energy_bins, m_aperture_angle);                                         
             ++id;
         }
 
@@ -228,10 +253,16 @@ void PointSource::get_primaries_generator(Particles particles) {
         grid.x = (particles.size + m_params.data_h.gpu_block_size - 1) / m_params.data_h.gpu_block_size;
 
         kernel_point_source<<<grid, threads>>>(particles.data_d, m_px, m_py, m_pz,m_direction_option, m_dx, m_dy, m_dz, m_particle_type,
-                                               m_spectrumE_d, m_spectrumCDF_d, m_nb_of_energy_bins);
+                                               m_spectrumE_d, m_spectrumCDF_d, m_nb_of_energy_bins,m_aperture_angle);
         cuda_error_check("Error ", " Kernel_point_source");
 
     }
+
+}
+
+void PointSource::set_beam_aperture(  f32 angle ){
+
+    m_aperture_angle = angle;
 
 }
 

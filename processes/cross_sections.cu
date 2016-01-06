@@ -125,6 +125,15 @@ void CrossSections::m_build_table(Materials materials, GlobalSimulationParameter
         G4cout<<"Init electrons OK "<<G4endl;
         // \DEBUG A ENLEVER 
         electronCSTable->printElectronTables("table/electronCSTable");
+        
+//         electron_CS
+//         electron_CS.data_h = electronCSTable.get_data_h();
+//         electron_CS.initialize(parameters,materials.data_h);
+//         electron_CS.generateTable();
+//         G4cout<<"Init electrons OK "<<G4endl;
+//         // \DEBUG A ENLEVER 
+//         electron_CS.printElectronTables("table2/electronCSTable");
+        
     }
     // If Rayleigh scattering, load information once from G4 EM data library
     f32 *g4_ray_cs = NULL;

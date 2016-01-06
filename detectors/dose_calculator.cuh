@@ -41,24 +41,24 @@ struct DoseData
     f64 * edep;
     f64 * dose;
     f64 * edep_squared;
-    ui32 * number_of_hits;        
+    ui32 * number_of_hits;
     f64 * uncertainty;
-    
+
     // Number of voxels per dimension
     ui32 nx;
     ui32 ny;
     ui32 nz;
-    
+
     // Voxel size per dimension
     f32 spacing_x;
     f32 spacing_y;
     f32 spacing_z;
-    
+
     // Offset
     f32 ox;
     f32 oy;
     f32 oz;
-    
+
     ui32 nb_of_voxels;
 };
 
@@ -70,52 +70,55 @@ struct Dose
 };
 
 // Dose functions
-__host__ __device__ void dose_record_standard(DoseData &dose, f32 Edep, f32 px, f32 py, f32 pz);
+__host__ __device__ void dose_record_standard ( DoseData &dose, f32 Edep, f32 px, f32 py, f32 pz );
 
 // Class
-class DoseCalculator {
+class DoseCalculator
+{
 
-    public:
-        DoseCalculator();
-        ~DoseCalculator();
+public:
+    DoseCalculator();
+    ~DoseCalculator();
 
-        // Setting
-        void set_size_in_voxel(ui32 x, ui32 y, ui32 z);
-        void set_voxel_size(f32 sx, f32 sy, f32 sz);
-        void set_offset(f32 ox, f32 oy, f32 oz);
-        void set_voxelized_phantom(VoxelizedPhantom aphantom);
-        void set_materials(Materials materials);
-        void set_min_density(f32 min); // Min density to consider the dose calculation
+    // Setting
+    void set_size_in_voxel ( ui32 x, ui32 y, ui32 z );
+    void set_voxel_size ( f32 sx, f32 sy, f32 sz );
+    void set_offset ( f32 ox, f32 oy, f32 oz );
+    void set_voxelized_phantom ( VoxelizedPhantom aphantom );
+    void set_materials ( Materials materials );
+    void set_min_density ( f32 min ); // Min density to consider the dose calculation
 
-        // Init
-        void initialize(GlobalSimulationParameters params);
+    // Init
+    void initialize ( GlobalSimulationParameters params );
 
-        // Dose calculation
-        void calculate_dose_to_water();
-        void calculate_dose_to_phantom();
+    // Dose calculation
+    void calculate_dose_to_water();
+    void calculate_dose_to_phantom();
 
-        Dose dose;
+    void write ( std::string filename = "dosimetry.mhd" );
 
-    private :
-        bool m_check_mandatory();
-        void m_cpu_malloc_dose();
-        void m_gpu_malloc_dose();
+    Dose dose;
 
-        void m_copy_dose_cpu2gpu();
-        void m_copy_dose_gpu2cpu();
+private :
+    bool m_check_mandatory();
+    void m_cpu_malloc_dose();
+    void m_gpu_malloc_dose();
 
-        VoxelizedPhantom m_phantom;
-        Materials m_materials;
-        bool m_flag_phantom;
-        bool m_flag_materials;
+    void m_copy_dose_cpu2gpu();
+    void m_copy_dose_gpu2cpu();
 
-        f32 m_dose_min_density;
+    VoxelizedPhantom m_phantom;
+    Materials m_materials;
+    bool m_flag_phantom;
+    bool m_flag_materials;
 
-        GlobalSimulationParameters m_params;
+    f32 m_dose_min_density;
+
+    GlobalSimulationParameters m_params;
 
 
 
-        
+
 };
 
 
