@@ -318,7 +318,6 @@ License::~License()
 
 /// Private /////////////////////////////////////////////////////
 
-/*
 void License::m_print_word ( std::string txt, ui8 *aword, ui32 nbytes )
 {
     //for (int ai : aword) std::cout << ai;
@@ -342,7 +341,6 @@ void License::m_print_word ( std::string txt, ui8 *aword, ui32 nbytes )
     //std::cout << "\n";
     printf("\n");
 }
-*/
 
 void License::m_aes_init_key()
 {
@@ -354,7 +352,7 @@ void License::m_aes_init_key()
         0x21, 0x20, 0x5f, 0x5f, 0x7c, 0x5e, 0x7c, 0x5f,
     };
 
-    std::memcpy ( m_aes_key, key, 32 );
+    m_aes_set_key(&m_aes_ctx, key, 128);
 }
 
 int License::m_aes_set_key ( aes_context *ctx, ui8 *key, ui32 nbits )
@@ -759,8 +757,8 @@ void License::read_license ( std::string inputname )
     FILE *pfile = fopen ( inputname.c_str(), "rb" );
 
     // 1. Read the tag
-    fread ( m_aes_buf, sizeof(ui8), 16, pfile );
-    m_aes_decrypt ( &m_aes_ctx, m_aes_buf, m_aes_buf );
+    fread ( m_aes_buf, sizeof(ui8), 16, pfile );  
+    m_aes_decrypt ( &m_aes_ctx, m_aes_buf, m_aes_buf );    
     std::string str ( (char*)m_aes_buf );
 
     if ( str != "GGEMS License" )
@@ -798,7 +796,6 @@ void License::read_license ( std::string inputname )
     fclose ( pfile );
     info.read = true;
 
-    /*
     // Print out
     if (false) {
         printf("GGEMS Licence\n");
@@ -808,7 +805,7 @@ void License::read_license ( std::string inputname )
         printf("Img feature: %i\n", info.img_feature);
         printf("Dosi feature: %i\n", info.dose_feature);
     }
-    */
+
 }
 
 void License::check_license()
