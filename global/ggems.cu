@@ -74,6 +74,12 @@ GGEMS::~GGEMS()
 
 /// Params
 
+// Set the GGEMS license
+void GGEMS::set_license(std::string license_path) {
+    m_license.read_license ( license_path );
+    m_license.check_license();
+}
+
 // Set the hardware used for the simulation CPU or GPU (CPU by default)
 void GGEMS::set_hardware_target ( std::string value )
 {
@@ -327,6 +333,14 @@ void GGEMS::m_copy_parameters_cpu2gpu()
 void GGEMS::init_simulation()
 {
 
+    // License and banner
+    if (!m_license.info.clearence)
+    {
+        print_error("Your license has expired or is invalid!\n");
+        exit_simulation();
+    }
+    print_banner(m_license.info.institution, m_license.info.expired_day, m_license.info.expired_month, m_license.info.expired_year, "V1.0");
+
     // Check
     m_check_mandatory();
 
@@ -444,12 +458,10 @@ void GGEMS::init_simulation()
 void GGEMS::start_simulation()
 {
 
-
     // Main loop
     ui32 ibatch=0;
     while ( ibatch < m_parameters.data_h.nb_of_batches )
     {
-
 
         // Get primaries
         m_source->get_primaries_generator ( m_particles_manager.particles );

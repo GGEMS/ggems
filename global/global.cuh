@@ -20,6 +20,9 @@
 #include <cfloat>
 #include <assert.h>
 #include <math.h>
+#include <cstring>
+#include <iostream>
+#include <ctime>
 
 #ifdef _WIN32
 #include <time.h>
@@ -185,6 +188,7 @@ void print_error ( std::string msg );
 void print_warning ( std::string msg );
 void print_time ( std::string txt, f64 t );
 void print_memory ( std::string txt, ui32 t );
+void print_banner ( std::string institution, std::string exp_day, std::string exp_month, std::string exp_year, std::string version );
 void exit_simulation();
 f64 get_time();
 
