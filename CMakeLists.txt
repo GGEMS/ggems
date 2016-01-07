@@ -36,7 +36,7 @@ else()
 endif()
 
 # OPTIONS
-option(WITH_ROOT_CERN "Use ROOT library from CERN" ON)
+option(WITH_ROOT_CERN "Use ROOT library from CERN" OFF)
 if(WITH_ROOT_CERN)
     include(FindROOT.cmake)
     EXECUTE_PROCESS(COMMAND root-config --libs OUTPUT_VARIABLE ROOT_LD_FLAGS OUTPUT_STRIP_TRAILING_WHITESPACE)
