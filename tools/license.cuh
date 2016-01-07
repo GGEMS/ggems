@@ -48,9 +48,6 @@ public:
     License();
     ~License();
 
-    /* void write_license ( std::string outputname, std::string institution,
-                         std::string start_day, std::string start_month, std::string start_year,
-                         std::string end_day, std::string end_month, std::string end_year ); */
     void read_license ( std::string inputname );
     void check_license();
 
@@ -58,8 +55,6 @@ public:
     LicenseData info;
 
 private:
-
-    void m_print_word ( std::string txt, ui8 *aword, ui32 nbytes );
 
     // AES
     aes_context m_aes_ctx;
@@ -74,8 +69,7 @@ private:
 
     /* Functions */
     void m_aes_init_key();
-    int m_aes_set_key ( aes_context *ctx, ui8 *key, ui32 nbits );
-    void m_aes_encrypt ( aes_context *ctx, ui8 input[16], ui8 output[16] );
+    int m_aes_set_key ( aes_context *ctx, ui8 *key, ui32 nbits );    
     void m_aes_decrypt ( aes_context *ctx, ui8 input[16], ui8 output[16] );
 
 };

@@ -318,30 +318,6 @@ License::~License()
 
 /// Private /////////////////////////////////////////////////////
 
-void License::m_print_word ( std::string txt, ui8 *aword, ui32 nbytes )
-{
-    //for (int ai : aword) std::cout << ai;
-    //std::cout << "\n";
-
-    printf("%s: str ", txt.c_str());
-    ui32 i=0; while (i< nbytes) {
-        //std::cout << aword[i];
-        printf("%c", aword[i]);
-        ++i;
-    }
-    printf("\n");
-    printf("%s: hex ", txt.c_str());
-
-    i=0; while (i< nbytes) {
-        //std::cout << aword[i];
-        printf("%02x|", aword[i]);
-        ++i;
-    }
-
-    //std::cout << "\n";
-    printf("\n");
-}
-
 void License::m_aes_init_key()
 {
 
@@ -495,98 +471,6 @@ int License::m_aes_set_key ( aes_context *ctx, ui8 *key, ui32 nbits )
     return 0;
 }
 
-#define AES_FROUND(X0,X1,X2,X3,Y0,Y1,Y2,Y3)     \
-{                                               \
-    RK += 4;                                    \
-                                                \
-    X0 = RK[0] ^ FT0[ (ui8) ( Y0 >> 24 ) ] ^  \
-                 FT1[ (ui8) ( Y1 >> 16 ) ] ^  \
-                 FT2[ (ui8) ( Y2 >>  8 ) ] ^  \
-                 FT3[ (ui8) ( Y3       ) ];   \
-                                               \
-    X1 = RK[1] ^ FT0[ (ui8) ( Y1 >> 24 ) ] ^  \
-                 FT1[ (ui8) ( Y2 >> 16 ) ] ^  \
-                 FT2[ (ui8) ( Y3 >>  8 ) ] ^  \
-                 FT3[ (ui8) ( Y0       ) ];   \
-                                                \
-    X2 = RK[2] ^ FT0[ (ui8) ( Y2 >> 24 ) ] ^  \
-                 FT1[ (ui8) ( Y3 >> 16 ) ] ^  \
-                 FT2[ (ui8) ( Y0 >>  8 ) ] ^  \
-                 FT3[ (ui8) ( Y1       ) ];   \
-                                                \
-    X3 = RK[3] ^ FT0[ (ui8) ( Y3 >> 24 ) ] ^  \
-                 FT1[ (ui8) ( Y0 >> 16 ) ] ^  \
-                 FT2[ (ui8) ( Y1 >>  8 ) ] ^  \
-                 FT3[ (ui8) ( Y2       ) ];   \
-}
-
-
-void License::m_aes_encrypt ( aes_context *ctx, ui8 input[16], ui8 output[16] )
-{
-
-    ui32 *RK, X0, X1, X2, X3, Y0, Y1, Y2, Y3;
-
-    RK = ctx->erk;
-
-    GET_UINT32( X0, input,  0 ); X0 ^= RK[0];
-    GET_UINT32( X1, input,  4 ); X1 ^= RK[1];
-    GET_UINT32( X2, input,  8 ); X2 ^= RK[2];
-    GET_UINT32( X3, input, 12 ); X3 ^= RK[3];
-
-    AES_FROUND( Y0, Y1, Y2, Y3, X0, X1, X2, X3 );       /* round 1 */
-    AES_FROUND( X0, X1, X2, X3, Y0, Y1, Y2, Y3 );       /* round 2 */
-    AES_FROUND( Y0, Y1, Y2, Y3, X0, X1, X2, X3 );       /* round 3 */
-    AES_FROUND( X0, X1, X2, X3, Y0, Y1, Y2, Y3 );       /* round 4 */
-    AES_FROUND( Y0, Y1, Y2, Y3, X0, X1, X2, X3 );       /* round 5 */
-    AES_FROUND( X0, X1, X2, X3, Y0, Y1, Y2, Y3 );       /* round 6 */
-    AES_FROUND( Y0, Y1, Y2, Y3, X0, X1, X2, X3 );       /* round 7 */
-    AES_FROUND( X0, X1, X2, X3, Y0, Y1, Y2, Y3 );       /* round 8 */
-    AES_FROUND( Y0, Y1, Y2, Y3, X0, X1, X2, X3 );       /* round 9 */
-
-    if ( ctx->nr > 10 )
-    {
-        AES_FROUND( X0, X1, X2, X3, Y0, Y1, Y2, Y3 );   /* round 10 */
-        AES_FROUND( Y0, Y1, Y2, Y3, X0, X1, X2, X3 );   /* round 11 */
-    }
-
-    if ( ctx->nr > 12 )
-    {
-        AES_FROUND( X0, X1, X2, X3, Y0, Y1, Y2, Y3 );   /* round 12 */
-        AES_FROUND( Y0, Y1, Y2, Y3, X0, X1, X2, X3 );   /* round 13 */
-    }
-
-    /* last round */
-
-    RK += 4;
-
-    X0 = RK[0] ^ ( FSb[ (ui8) ( Y0 >> 24 ) ] << 24 ) ^
-                 ( FSb[ (ui8) ( Y1 >> 16 ) ] << 16 ) ^
-                 ( FSb[ (ui8) ( Y2 >>  8 ) ] <<  8 ) ^
-                 ( FSb[ (ui8) ( Y3       ) ]       );
-
-    X1 = RK[1] ^ ( FSb[ (ui8) ( Y1 >> 24 ) ] << 24 ) ^
-                 ( FSb[ (ui8) ( Y2 >> 16 ) ] << 16 ) ^
-                 ( FSb[ (ui8) ( Y3 >>  8 ) ] <<  8 ) ^
-                 ( FSb[ (ui8) ( Y0       ) ]       );
-
-    X2 = RK[2] ^ ( FSb[ (ui8) ( Y2 >> 24 ) ] << 24 ) ^
-                 ( FSb[ (ui8) ( Y3 >> 16 ) ] << 16 ) ^
-                 ( FSb[ (ui8) ( Y0 >>  8 ) ] <<  8 ) ^
-                 ( FSb[ (ui8) ( Y1       ) ]       );
-
-    X3 = RK[3] ^ ( FSb[ (ui8) ( Y3 >> 24 ) ] << 24 ) ^
-                 ( FSb[ (ui8) ( Y0 >> 16 ) ] << 16 ) ^
-                 ( FSb[ (ui8) ( Y1 >>  8 ) ] <<  8 ) ^
-                 ( FSb[ (ui8) ( Y2       ) ]       );
-
-    PUT_UINT32( X0, output,  0 );
-    PUT_UINT32( X1, output,  4 );
-    PUT_UINT32( X2, output,  8 );
-    PUT_UINT32( X3, output, 12 );
-
-}
-#undef AES_FROUND
-
 #define AES_RROUND(X0,X1,X2,X3,Y0,Y1,Y2,Y3)     \
 {                                               \
     RK += 4;                                    \
@@ -680,72 +564,6 @@ void License::m_aes_decrypt ( aes_context *ctx, ui8 input[16], ui8 output[16] )
 
 
 /// Public ////////////////////////////////////////////////////////////////////////
-
-/*
-void License::write_license(std::string outputname, std::string institution,
-                            std::string start_day, std::string start_month, std::string start_year,
-                            std::string end_day, std::string end_month, std::string end_year) {
-
-    // Check data
-    if (start_day.length() != 2 || start_month.length() != 2 || start_year.length() != 4 ||
-        end_day.length() != 2 || end_month.length() != 2 || end_year.length() != 4) {
-        printf("Month and day should be written using 2 digits and Year with 4 digits\n");
-        return;
-    }
-
-    // Init the key
-    m_aes_init_key();
-
-    // Open file
-    FILE *pfile = fopen(outputname.c_str(), "wb");
-
-    // 1. Add a tag
-    std::memset(m_aes_buf, 0, 16);
-    std::string str("GGEMS License");
-    str.copy((char*)m_aes_buf, str.length(), 0);
-
-    m_aes_encrypt(&m_aes_ctx, m_aes_buf, m_aes_buf);
-    fwrite(m_aes_buf, sizeof(ui8), 16, pfile);
-
-    // 2. Add institution information
-    std::memset(m_aes_buf, 0, 16);
-    institution.copy((char*)m_aes_buf, institution.length(), 0);
-    m_aes_encrypt(&m_aes_ctx, m_aes_buf, m_aes_buf);
-    fwrite(m_aes_buf, sizeof(ui8), 16, pfile);
-
-    // 3. Add start and expired date
-    std::memset(m_aes_buf, 0, 16);
-    m_aes_buf[0] = start_day.at(0); m_aes_buf[1] = start_day.at(1);      // Start
-    m_aes_buf[2] = start_month.at(0); m_aes_buf[3] = start_month.at(1);
-    m_aes_buf[4] = start_year.at(0); m_aes_buf[5] = start_year.at(1);
-    m_aes_buf[6] = start_year.at(2); m_aes_buf[7] = start_year.at(3);
-
-    m_aes_buf[8] = end_day.at(0); m_aes_buf[9] = end_day.at(1);          // End
-    m_aes_buf[10] = end_month.at(0); m_aes_buf[11] = end_month.at(1);
-    m_aes_buf[12] = end_year.at(0); m_aes_buf[13] = end_year.at(1);
-    m_aes_buf[14] = end_year.at(2); m_aes_buf[15] = end_year.at(3);
-
-    m_aes_encrypt(&m_aes_ctx, m_aes_buf, m_aes_buf);
-    fwrite(m_aes_buf, sizeof(ui8), 16, pfile);        
-
-    // 4. Some feature flag
-    std::memset(m_aes_buf, 0, 16);
-
-    bool flag_image = true; // TODO add that as parameters
-    bool flag_dosi = true;
-
-    if (flag_image) m_aes_buf[0] = 1;
-    if (flag_dosi)  m_aes_buf[1] = 1;
-
-    m_aes_encrypt(&m_aes_ctx, m_aes_buf, m_aes_buf);
-    fwrite(m_aes_buf, sizeof(ui8), 16, pfile);
-
-    fclose(pfile);
-
-    printf("Making license: done!\n");
-
-}
-*/
 
 void License::read_license ( std::string inputname )
 {
