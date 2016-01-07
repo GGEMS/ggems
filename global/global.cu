@@ -114,6 +114,20 @@ void print_memory ( std::string txt, ui32 t )
 
 }
 
+// Print GGEMS banner
+void print_banner(std::string institution, std::string exp_day, std::string exp_month, std::string exp_year, std::string version) {
+
+    printf("      ____                  \n");
+    printf(".--. /\__/\ .--.            \n");
+    printf("`O  / /  \ \  .`  GGEMS %s  \n", version.c_str());
+    printf("  `-| |  | |O`              \n");
+    printf("   -|`|..|`|-     License:  \n");
+    printf(" .` \.\__/./ `.    %s       \n", institution.c_str());
+    printf("'.-` \/__\/ `-.'   %s-%s-%s \n", exp_day.c_str(), exp_month.c_str(), exp_year.c_str());
+    printf("\n");
+
+}
+
 // Abort the current simulation
 void exit_simulation()
 {

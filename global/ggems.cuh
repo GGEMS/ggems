@@ -22,6 +22,7 @@
 #include "materials.cuh"
 #include "detector_manager.cuh"
 #include "image_reader.cuh"
+#include "license.cuh"
 
 #include <point_source.cuh>
 #include <vox_phan_dosi_nav.cuh>
@@ -42,6 +43,7 @@ public:
 //        void set_digitizer(Digitizer dig);
 
     // Setting parameters
+    void set_license ( std::string license_path );
     void set_hardware_target ( std::string value );
     void set_GPU_ID ( ui32 valid );
     void set_GPU_block_size ( ui32 val );
@@ -92,7 +94,8 @@ private:
     void m_copy_parameters_cpu2gpu();
     GlobalSimulationParameters m_parameters;
 
-
+    // License
+    License m_license;
 
 
     /*

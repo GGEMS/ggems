@@ -3,6 +3,9 @@
 #
 cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
 
+## Not working!!
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
 SET( CMAKE_BUILD_TYPE Release )
 IF( DEFINED CMAKE_BUILD_TYPE )
   SET( CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE} CACHE STRING "" )
@@ -21,6 +24,8 @@ if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
     message(STATUS "and run CMake from there")
     message(FATAL_ERROR "in-source build detected")
 endif()
+
+find_package(CUDA REQUIRED)
 
 # OPTIONS
 option(WITH_DOUBLE_PRECISION "Float numbers can be computed in double precision" ON)
@@ -45,10 +50,13 @@ endif()
 
 
 # CUDA OPTIONS
-if(CUDA_VERSION>=7.0)
+if(CUDA_VERSION_MAJOR GREATER 6)
     set(LIBSCUDA  --generate-code arch=compute_35,code=sm_35 --generate-code arch=compute_50,code=sm_50 --generate-code arch=compute_52,code=sm_52 --relocatable-device-code true -lcudadevrt --compiler-options -w)
+    message(STATUS "Cuda version >=7.0")
 else()    
     set(LIBSCUDA  --generate-code arch=compute_50,code=sm_50 --relocatable-device-code true -lcudadevrt --compiler-options -w)
+    message(STATUS "Cuda version <7.0")
+    message(STATUS ${CUDA_VERSION_MAJOR})
 endif()
 
 option(WITH_FAST_MATH "Fast math flag" ON)
@@ -96,11 +104,9 @@ file(GLOB ggemssh "ggems.sh")
 file(GLOB datafiles "data/*")
 
 # Compilation
-find_package(CUDA REQUIRED)
 set(LIB_NAME "ggems")
 set(CUDA_NVCC_FLAGS ${LIBSCUDA})
 #message(${CUDA_NVCC_FLAGS})
-
 SET( CUDA_PROPAGATE_HOST_FLAGS OFF CACHE BOOL "" FORCE )
 
 cuda_add_library(${LIB_NAME} STATIC ${sourcesGPU} ${headersGPU})
