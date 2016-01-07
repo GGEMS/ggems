@@ -55,6 +55,12 @@ __host__ __device__ void dose_record_standard ( DoseData &dose, f32 Edep, f32 px
 // //     Score dosemap
 // GGcout  << "   " << index_phantom.w << "   " << Edep << GGendl;
 //
+if(Edep<0.)
+{
+//     GGcout << "WTF Dose < 0? " << Edep << GGendl; 
+    return;
+}
+
     ggems_atomic_add ( dose.edep, index_phantom.w, Edep );
     ggems_atomic_add ( dose.edep_squared, index_phantom.w, Edep*Edep );
     ggems_atomic_add ( dose.number_of_hits, index_phantom.w, ui32 ( 1 ) );

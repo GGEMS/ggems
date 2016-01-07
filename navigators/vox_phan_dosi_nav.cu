@@ -121,13 +121,19 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
         if(vol.values[i]!=0){ printf("%d %d %d %d\n",__LINE__,part_id,i,vol.values[i]);}
     }   */
 
-    if ( check_if_particle_is_in_phantom ( particles,vol,part_id ) == FALSE )
+//     if ( check_if_particle_is_in_phantom ( particles,vol,part_id ) == FALSE )
+//     {
+// //         particles.E[id]==0.f;
+//         particles.endsimu[part_id]=PARTICLE_FREEZE;
+//         return;
+//     }
+
+    // Stop simulation if out of the phantom
+    if ( !test_point_AABB ( make_f32xyz(particles.px[part_id],particles.py[part_id],particles.pz[part_id]) , vol.xmin, vol.xmax, vol.ymin, vol.ymax, vol.zmin, vol.zmax ) )
     {
-//         particles.E[id]==0.f;
-        particles.endsimu[part_id]=PARTICLE_FREEZE;
+        particles.endsimu[part_id] = PARTICLE_FREEZE;
         return;
     }
-
 
     // parameters values needed to be stored in many steps
     f32 alongStepLength=0.; // Distance from the last physics interaction.
@@ -311,6 +317,7 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
 //               GGcout<< __FUNCTION__ << "  " << __LINE__ << GGendl;
                     secondary_part = eSampleSecondarieElectron ( parameters.electron_cut, particles,  part_id, dosi,parameters );
                     lastStepisaPhysicEffect=TRUE;
+                    
 
                 }
                 else if ( next_discrete_process == ELECTRON_BREMSSTRAHLUNG )
@@ -318,7 +325,7 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
 //                GGcout<< __FUNCTION__ << "  " << __LINE__ << GGendl;
                     eSampleSecondarieGamma ( parameters.photon_cut, particles, part_id, materials, mat_id,parameters );
                     lastStepisaPhysicEffect=TRUE;
-//
+//                  GGcout<< __FUNCTION__ << "  " << __LINE__ << GGendl;
                 }
 
 
@@ -328,7 +335,7 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
 
                     int level = ( int ) ( particles.level[part_id] );
                     level = part_id * particles.nb_of_secondaries + level;
-                    printf ( "%d LEVEL %d id %d level %d \n",__LINE__,level,part_id, ( int ) ( particles.level[part_id] ) );
+//                     printf ( "%d LEVEL %d id %d level %d \n",__LINE__,level,part_id, ( int ) ( particles.level[part_id] ) );
                     particles.sec_E[level] =  particles.E[part_id];
                     particles.sec_px[level] = particles.px[part_id];
                     particles.sec_py[level] = particles.py[part_id];
@@ -565,9 +572,39 @@ __host__ __device__ void VPDN::track_photon_to_out ( ParticlesData &particles,
         SecParticle electron = photon_resolve_discrete_process ( particles, parameters, photon_CS_table,
                                materials, mat_id, part_id );
 
-        //// Here e- are not tracked, and lost energy not drop
+       
 
+                // Add primary to buffer an track secondary
+                if ( ( ( int ) ( particles.level[part_id] ) <particles.nb_of_secondaries ) && electron.E > 0. )
+                {
 
+                    int level = ( int ) ( particles.level[part_id] );
+                    level = part_id * particles.nb_of_secondaries + level;
+//                     printf ( "%d LEVEL %d id %d level %d \n",__LINE__,level,part_id, ( int ) ( particles.level[part_id] ) );
+                    particles.sec_E[level] =  particles.E[part_id];
+                    particles.sec_px[level] = particles.px[part_id];
+                    particles.sec_py[level] = particles.py[part_id];
+                    particles.sec_pz[level] = particles.pz[part_id];
+                    particles.sec_dx[level] = particles.dx[part_id];
+                    particles.sec_dy[level] = particles.dy[part_id];
+                    particles.sec_dz[level] = particles.dz[part_id];
+                    particles.sec_pname[level] = particles.pname[part_id];
+
+                    particles.E[part_id]  = electron.E;
+                    particles.dx[part_id] = electron.dir.x;
+                    particles.dy[part_id] = electron.dir.y;
+                    particles.dz[part_id] = electron.dir.z;
+                    particles.pname[part_id] = electron.pname;
+
+                    particles.level[part_id]+=1;
+
+                }
+                else //// Here e- are not tracked, and lost energy not drop
+                {
+                    /// WARNING TODO ACTIVER DOSIMETRY ICI
+                    GGcout << __FUNCTION__ << "  " << __LINE__ << GGendl;
+                    dose_record_standard ( dosi, electron.E, particles.px[part_id],particles.py[part_id],particles.pz[part_id] );
+                }
 
 
     }
@@ -597,9 +634,9 @@ __global__ void VPDN::kernel_device_track_to_in ( ParticlesData particles, f32 x
 void VPDN::kernel_host_track_to_in ( ParticlesData particles, f32 xmin, f32 xmax,
                                      f32 ymin, f32 ymax, f32 zmin, f32 zmax, ui32 part_id )
 {
-    printf ( "%s %d Part Pos  : %e %e %e -- %e %e %e -- %e \n",__FUNCTION__, __LINE__,particles.px[part_id], particles.py[part_id],particles.pz[part_id],particles.dx[part_id], particles.dy[part_id],particles.dz[part_id], particles.E[part_id] );
+//     printf ( "%s %d Part Pos  : %e %e %e -- %e %e %e -- %e \n",__FUNCTION__, __LINE__,particles.px[part_id], particles.py[part_id],particles.pz[part_id],particles.dx[part_id], particles.dy[part_id],particles.dz[part_id], particles.E[part_id] );
     VPDN::track_to_in ( particles, xmin, xmax, ymin, ymax, zmin, zmax, part_id );
-    printf ( "%s %d Part Pos  : %e %e %e -- %e %e %e -- %e \n",__FUNCTION__, __LINE__,particles.px[part_id], particles.py[part_id],particles.pz[part_id],particles.dx[part_id], particles.dy[part_id],particles.dz[part_id], particles.E[part_id] );
+//     printf ( "%s %d Part Pos  : %e %e %e -- %e %e %e -- %e \n",__FUNCTION__, __LINE__,particles.px[part_id], particles.py[part_id],particles.pz[part_id],particles.dx[part_id], particles.dy[part_id],particles.dz[part_id], particles.E[part_id] );
 }
 
 // Device kernel that track particles within the voxelized volume until boundary
@@ -685,16 +722,16 @@ void VPDN::kernel_host_track_to_out ( ParticlesData particles,
             randomnumbereIoni= -std::log ( JKISS32 ( particles, id ) ); // -log(RN)
             randomnumbereBrem= -std::log ( JKISS32 ( particles, id ) ); // -log(RN)
 
-            printf ( "%d LEVEL %d id %d level %d \n",__LINE__,level,id, ( int ) ( particles.level[id] ) );
+//             printf ( "%d LEVEL %d id %d level %d \n",__LINE__,level,id, ( int ) ( particles.level[id] ) );
             //update particle state
-//             particles.E[id]     = particles.sec_E[id]    ;
-//             particles.px[id]    = particles.sec_px[id]   ;
-//             particles.py[id]    = particles.sec_py[id]   ;
-//             particles.pz[id]    = particles.sec_pz[id]   ;
-//             particles.dx[id]    = particles.sec_dx[id]   ;
-//             particles.dy[id]    = particles.sec_dy[id]   ;
-//             particles.dz[id]    = particles.sec_dz[id]   ;
-//             particles.pname[id] = particles.sec_pname[id];
+            particles.E[id]     = particles.sec_E[level]    ;
+            particles.px[id]    = particles.sec_px[level]   ;
+            particles.py[id]    = particles.sec_py[level]   ;
+            particles.pz[id]    = particles.sec_pz[level]   ;
+            particles.dx[id]    = particles.sec_dx[level]   ;
+            particles.dy[id]    = particles.sec_dy[level]   ;
+            particles.dz[id]    = particles.sec_dz[level]   ;
+            particles.pname[id] = particles.sec_pname[level];
         }
 
         // Get out of loop if particle is dead and it was the primary
@@ -767,7 +804,7 @@ void VoxPhanDosiNav::track_to_out ( Particles particles )
         ui32 id=0;
         while ( id<particles.size )
         {
-            if ( id%10000==0 ) printf ( "Part : %d\n",id );
+            if ( id%1000==0 ) printf ( "Part : %d\n",id );
 //            printf("\n\n\n");
 //     GGcout<< __FUNCTION__ << "  " << __LINE__ << GGendl;
             VPDN::kernel_host_track_to_out ( particles.data_h, m_phantom.data_h,

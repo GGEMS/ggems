@@ -30,6 +30,20 @@ else()
   add_definitions(-DSINGLE_PRECISION)
 endif()
 
+# OPTIONS
+option(WITH_ROOT_CERN "Use ROOT library from CERN" ON)
+if(WITH_ROOT_CERN)
+    include(FindROOT.cmake)
+    EXECUTE_PROCESS(COMMAND root-config --libs OUTPUT_VARIABLE ROOT_LD_FLAGS OUTPUT_STRIP_TRAILING_WHITESPACE)
+    set(CMAKE_EXE_LINKER_FLAGS ${ROOT_LD_FLAGS})
+    #add_definitions(-DSINGLE_PRECISION=0)
+    add_definitions(-DROOT_CERN)
+    include_directories(${ROOT_INCLUDE_DIR})
+    include_directories(${ROOT_LIBRARY_DIR})
+    set(ROOT_LIBRARIES -L${ROOT_LIBRARY_DIR} -lCore -lCint -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lMatrix -lPhysics -lMathCore -lThread -lm -ldl -rdynamic)
+endif()
+
+
 # CUDA OPTIONS
 if(CUDA_VERSION>=7.0)
     set(LIBSCUDA  --generate-code arch=compute_35,code=sm_35 --generate-code arch=compute_50,code=sm_50 --generate-code arch=compute_52,code=sm_52 --relocatable-device-code true -lcudadevrt --compiler-options -w)
@@ -90,6 +104,11 @@ set(CUDA_NVCC_FLAGS ${LIBSCUDA})
 SET( CUDA_PROPAGATE_HOST_FLAGS OFF CACHE BOOL "" FORCE )
 
 cuda_add_library(${LIB_NAME} STATIC ${sourcesGPU} ${headersGPU})
+
+# ROOT OPTION
+if(WITH_ROOT_CERN)
+    target_link_libraries(${LIB_NAME} ${ROOT_LIBRARIES})
+endif()
 
 # Installation
 install(TARGETS ${LIB_NAME} DESTINATION "lib")
