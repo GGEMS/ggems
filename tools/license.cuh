@@ -59,12 +59,11 @@ public:
 
 private:
 
-     /* void m_print_word ( std::string txt, ui8 *aword, ui32 nbytes ); */
+    void m_print_word ( std::string txt, ui8 *aword, ui32 nbytes );
 
     // AES
     aes_context m_aes_ctx;
     ui8 m_aes_buf[16];
-    ui8 m_aes_key[32];
 
     /* decryption key schedule tables */
     int KT_init = 1;
