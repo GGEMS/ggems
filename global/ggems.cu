@@ -337,7 +337,7 @@ void GGEMS::init_simulation()
     if (!m_license.info.clearence)
     {
         print_error("Your license has expired or is invalid!\n");
-        exit_simulation();
+    //    exit_simulation();
     }
     print_banner(m_license.info.institution, m_license.info.expired_day, m_license.info.expired_month, m_license.info.expired_year, "V1.0");
 

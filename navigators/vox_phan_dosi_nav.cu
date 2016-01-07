@@ -602,7 +602,7 @@ __host__ __device__ void VPDN::track_photon_to_out ( ParticlesData &particles,
                 else //// Here e- are not tracked, and lost energy not drop
                 {
                     /// WARNING TODO ACTIVER DOSIMETRY ICI
-                    GGcout << __FUNCTION__ << "  " << __LINE__ << GGendl;
+//                     GGcout << __FUNCTION__ << "  " << __LINE__ << GGendl;
                     dose_record_standard ( dosi, electron.E, particles.px[part_id],particles.py[part_id],particles.pz[part_id] );
                 }
 
@@ -804,7 +804,7 @@ void VoxPhanDosiNav::track_to_out ( Particles particles )
         ui32 id=0;
         while ( id<particles.size )
         {
-            if ( id%1000==0 ) printf ( "Part : %d\n",id );
+            if ( id%10000==0 ) printf ( "Part : %d\n",id );
 //            printf("\n\n\n");
 //     GGcout<< __FUNCTION__ << "  " << __LINE__ << GGendl;
             VPDN::kernel_host_track_to_out ( particles.data_h, m_phantom.data_h,
