@@ -52,7 +52,7 @@ GGEMS::GGEMS()
     // Init by default others parameters
     m_parameters.data_h.device_target = CPU_DEVICE;
     m_parameters.data_h.gpu_id = 0;
-    m_parameters.data_h.gpu_block_size = 512;
+    m_parameters.data_h.gpu_block_size = 192;
 
     // Others parameters
     m_parameters.data_h.display_run_time = DISABLED;

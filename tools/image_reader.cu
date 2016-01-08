@@ -64,7 +64,7 @@ void ImageReader::record3Dimage ( string histname,  f64 *data, f32xyz offset, f3
         myfile << "TransformMatrix = 1 0 0 0 1 0 0 0 1\n";
         myfile << "Offset = "<<offset.x<<" "<<offset.y<<" "<<offset.z<<"\n";
         myfile << "CenterOfRotation = 0 0 0\n";
-        myfile << "ElementSpacing = "<<size.x<<" "<<spacing.y<<" "<<spacing.z<<"\n";
+        myfile << "ElementSpacing = "<<spacing.x<<" "<<spacing.y<<" "<<spacing.z<<"\n";
         myfile << "DimSize = "<<size.x<<" "<<size.y<<" "<<size.z<<"\n";
         myfile << "AnatomicalOrientation = ???\n";
         myfile << "ElementType = MET_FLOAT\n";

@@ -383,9 +383,9 @@ void VoxelizedPhantom::load_from_mhd(std::string volume_name, std::string range_
         data_h.off_y = oy;
         data_h.off_z = oz;
 
-        data_h.xmin = -ox; data_h.xmax = data_h.xmin + (data_h.nb_vox_x * data_h.spacing_x);
-        data_h.ymin = -oy; data_h.ymax = data_h.ymin + (data_h.nb_vox_y * data_h.spacing_y);
-        data_h.zmin = -oz; data_h.zmax = data_h.zmin + (data_h.nb_vox_z * data_h.spacing_z);
+        data_h.xmin = ox; data_h.xmax = data_h.xmin + (data_h.nb_vox_x * data_h.spacing_x);
+        data_h.ymin = oy; data_h.ymax = data_h.ymin + (data_h.nb_vox_y * data_h.spacing_y);
+        data_h.zmin = oz; data_h.zmax = data_h.zmin + (data_h.nb_vox_z * data_h.spacing_z);
     }
 
 }

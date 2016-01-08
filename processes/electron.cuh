@@ -120,6 +120,8 @@ public :
     void generateTable();
 
     void printElectronTables ( std::string );
+    
+    void m_copy_cs_table_cpu2gpu();
 
     inline ElectronsCrossSectionTable get_data_h()
     {

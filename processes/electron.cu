@@ -708,5 +708,53 @@ f32 ElectronCrossSection::eMscCrossSectionPerAtom ( f32 Ekine,  unsigned short i
 }
 
 
+void ElectronCrossSection::m_copy_cs_table_cpu2gpu()
+{
+
+        ui32 n = data_h.nb_bins;
+        ui32 k = data_h.nb_mat;
+// 
+//         // Allocate GPU mem
+        HANDLE_ERROR( cudaMalloc((void**) &data_d.E              , k*n*sizeof(f32)) );
+        HANDLE_ERROR( cudaMalloc((void**) &data_d.eIonisationdedx, k*n*sizeof(f32)) );
+        HANDLE_ERROR( cudaMalloc((void**) &data_d.eIonisationCS  , k*n*sizeof(f32)) );
+        HANDLE_ERROR( cudaMalloc((void**) &data_d.eBremdedx      , k*n*sizeof(f32)) );
+        HANDLE_ERROR( cudaMalloc((void**) &data_d.eBremCS        , k*n*sizeof(f32)) );
+        HANDLE_ERROR( cudaMalloc((void**) &data_d.eMSC           , k*n*sizeof(f32)) );
+        HANDLE_ERROR( cudaMalloc((void**) &data_d.eRange         , k*n*sizeof(f32)) );
+//         HANDLE_ERROR( cudaMalloc((void**) &data_d.pIonisationdedx, k*n*sizeof(f32)) );
+//         HANDLE_ERROR( cudaMalloc((void**) &data_d.pIonisationCS  , k*n*sizeof(f32)) );
+//         HANDLE_ERROR( cudaMalloc((void**) &data_d.pBremdedx      , k*n*sizeof(f32)) );
+//         HANDLE_ERROR( cudaMalloc((void**) &data_d.pBremCS        , k*n*sizeof(f32)) );
+//         HANDLE_ERROR( cudaMalloc((void**) &data_d.pMSC           , k*n*sizeof(f32)) );
+//         HANDLE_ERROR( cudaMalloc((void**) &data_d.pRange         , k*n*sizeof(f32)) );
+//         HANDLE_ERROR( cudaMalloc((void**) &data_d.pAnni_CS_tab   , k*n*sizeof(f32)) );
+
+// 
+//         // Copy data to GPU
+        data_d.nb_bins = n;
+        data_d.nb_mat = k;
+        data_d.E_min = data_h.E_min;
+        data_d.E_max = data_h.E_max;
+        data_d.cutEnergyElectron = data_h.cutEnergyElectron;
+        data_d.cutEnergyGamma    = data_h.cutEnergyGamma;
+        
+        
+        HANDLE_ERROR( cudaMemcpy(data_d.E              , data_h.E               , sizeof(f32)*n*k, cudaMemcpyHostToDevice) );
+        HANDLE_ERROR( cudaMemcpy(data_d.eIonisationdedx, data_h.eIonisationdedx , sizeof(f32)*n*k, cudaMemcpyHostToDevice) );
+        HANDLE_ERROR( cudaMemcpy(data_d.eIonisationCS  , data_h.eIonisationCS   , sizeof(f32)*n*k, cudaMemcpyHostToDevice) );
+        HANDLE_ERROR( cudaMemcpy(data_d.eBremdedx      , data_h.eBremdedx       , sizeof(f32)*n*k, cudaMemcpyHostToDevice) );
+        HANDLE_ERROR( cudaMemcpy(data_d.eBremCS        , data_h.eBremCS         , sizeof(f32)*n*k, cudaMemcpyHostToDevice) );
+        HANDLE_ERROR( cudaMemcpy(data_d.eMSC           , data_h.eMSC            , sizeof(f32)*n*k, cudaMemcpyHostToDevice) );
+        HANDLE_ERROR( cudaMemcpy(data_d.eRange         , data_h.eRange          , sizeof(f32)*n*k, cudaMemcpyHostToDevice) );
+//         HANDLE_ERROR( cudaMemcpy(data_d.pIonisationdedx, data_h.pIonisationdedx , sizeof(f32)*n*k, cudaMemcpyHostToDevice) );
+//         HANDLE_ERROR( cudaMemcpy(data_d.pIonisationCS  , data_h.pIonisationCS   , sizeof(f32)*n*k, cudaMemcpyHostToDevice) );
+//         HANDLE_ERROR( cudaMemcpy(data_d.pBremdedx      , data_h.pBremdedx       , sizeof(f32)*n*k, cudaMemcpyHostToDevice) );
+//         HANDLE_ERROR( cudaMemcpy(data_d.pBremCS        , data_h.pBremCS         , sizeof(f32)*n*k, cudaMemcpyHostToDevice) );
+//         HANDLE_ERROR( cudaMemcpy(data_d.pMSC           , data_h.pMSC            , sizeof(f32)*n*k, cudaMemcpyHostToDevice) );
+//         HANDLE_ERROR( cudaMemcpy(data_d.pRange         , data_h.pRange          , sizeof(f32)*n*k, cudaMemcpyHostToDevice) );
+//         HANDLE_ERROR( cudaMemcpy(data_d.pAnni_CS_tab   , data_h.pAnni_CS_tab    , sizeof(f32)*n*k, cudaMemcpyHostToDevice) );
+}
+
 
 #endif

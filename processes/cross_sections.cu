@@ -360,7 +360,7 @@ void CrossSections::m_copy_cs_table_cpu2gpu() {
     if (there_is_electron)
     {
     
-    
+    electronCSTable->m_copy_cs_table_cpu2gpu();
     }
     
                              
