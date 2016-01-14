@@ -24,8 +24,9 @@
 #include "image_reader.cuh"
 #include "license.cuh"
 
-#include <point_source.cuh>
-#include <vox_phan_dosi_nav.cuh>
+#include "point_source.cuh"
+#include "cone_beam_CT_source.cuh"
+#include "vox_phan_dosi_nav.cuh"
 // #include "flatpanel_detector.cuh"
 
 class GGEMS

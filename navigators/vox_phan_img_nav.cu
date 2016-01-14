@@ -328,17 +328,39 @@ void VoxPhanImgNav::initialize ( GlobalSimulationParameters params )
     m_phantom.initialize ( params );
 
     // Materials table
-    m_materials.load_elements_database();
-    m_materials.load_materials_database();
+    if( !m_elements_filename.empty() )
+    {
+      m_materials.load_elements_database( m_elements_filename );
+    }
+    else
+    {
+      m_materials.load_elements_database();
+    }
+
+    if( !m_materials_filename.empty() )
+    {
+      m_materials.load_materials_database( m_materials_filename );
+    }
+    else
+    {
+      m_materials.load_materials_database();
+    }
+
     m_materials.initialize ( m_phantom.list_of_materials, params );
 
     // Cross Sections
     m_cross_sections.initialize ( m_materials, params );
-
 }
 
+void VoxPhanImgNav::set_elements( std::string filename )
+{
+  m_elements_filename = filename;
+}
 
-
+void VoxPhanImgNav::set_materials( std::string filename )
+{
+  m_materials_filename = filename;
+}
 
 
 

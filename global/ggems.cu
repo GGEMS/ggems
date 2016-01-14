@@ -14,6 +14,15 @@
 #ifndef GGEMS_CU
 #define GGEMS_CU
 
+#include <fcntl.h>
+
+#ifdef _WIN32
+#include <windows.h>
+#include <wincrypt.h>
+#else
+#include <unistd.h>
+#endif
+
 #include "ggems.cuh"
 
 GGEMS::GGEMS()
@@ -108,33 +117,36 @@ void GGEMS::set_GPU_block_size ( ui32 val )
 // Add a process to the physics list
 void GGEMS::set_process ( std::string process_name )
 {
+    // Transform the name of the process in small letter
+    std::transform( process_name.begin(), process_name.end(),
+      process_name.begin(), ::tolower );
 
-    if ( process_name == "Compton" )
+    if ( process_name == "compton" )
     {
         m_parameters.data_h.physics_list[PHOTON_COMPTON] = ENABLED;
 
     }
-    else if ( process_name == "PhotoElectric" )
+    else if ( process_name == "photoelectric" )
     {
         m_parameters.data_h.physics_list[PHOTON_PHOTOELECTRIC] = ENABLED;
 
     }
-    else if ( process_name == "Rayleigh" )
+    else if ( process_name == "rayleigh" )
     {
         m_parameters.data_h.physics_list[PHOTON_RAYLEIGH] = ENABLED;
 
     }
-    else if ( process_name == "eIonisation" )
+    else if ( process_name == "eionisation" )
     {
         m_parameters.data_h.physics_list[ELECTRON_IONISATION] = ENABLED;
 
     }
-    else if ( process_name == "eBremsstrahlung" )
+    else if ( process_name == "ebremsstrahlung" )
     {
         m_parameters.data_h.physics_list[ELECTRON_BREMSSTRAHLUNG] = ENABLED;
 
     }
-    else if ( process_name == "eMultipleScattering" )
+    else if ( process_name == "emultiplescattering" )
     {
         m_parameters.data_h.physics_list[ELECTRON_MSC] = ENABLED;
 
@@ -150,6 +162,9 @@ void GGEMS::set_process ( std::string process_name )
 // Add cut on particle tracking
 void GGEMS::set_particle_cut ( std::string pname, f32 E )
 {
+    // Transform the name of the particle in small letter
+    std::transform( pname.begin(), pname.end(), pname.begin(), ::tolower );
+
     if ( pname == "photon" ) m_parameters.data_h.photon_cut = E;
     else if ( pname == "electron" )
     {
@@ -160,12 +175,14 @@ void GGEMS::set_particle_cut ( std::string pname, f32 E )
 // Enable the simulation of a particular secondary particle
 void GGEMS::set_secondary ( std::string pname )
 {
+    // Transform the name of the particle in small letter
+    std::transform( pname.begin(), pname.end(), pname.begin(), ::tolower );
 
-    if ( pname == "Photon" )
+    if ( pname == "photon" )
     {
         m_parameters.data_h.secondaries_list[PHOTON] = ENABLED;
     }
-    else if ( pname == "Electron" )
+    else if ( pname == "electron" )
     {
         m_parameters.data_h.secondaries_list[ELECTRON] = ENABLED;
     }
@@ -214,7 +231,47 @@ void GGEMS::set_photon_cut ( f32 valE )
 // Set the seed number
 void GGEMS::set_seed ( ui32 vseed )
 {
-    m_parameters.data_h.seed = vseed;
+  if( vseed == 0 ) // Compute a seed
+  {
+    #ifdef _WIN32
+    HCRYPTPROV seedWin32;
+    if( CryptAcquireContext(
+      &seedWin32,
+      NULL,
+      NULL,
+      PROV_RSA_FULL,
+      CRYPT_VERIFYCONTEXT ) == FALSE )
+    {
+      std::ostringstream oss( std::ostringstream::out );
+      char buffer_error[ 256 ];
+      oss << "Error finding a seed: " <<
+        strerror_s( buffer_error, 256, errno ) << std::endl;
+      std::string error_msg = oss.str();
+      throw std::runtime_error( error_msg );
+    }
+    vseed = static_cast<ui32>( seedWin32 );
+    #else
+    // Open a system random file
+    int fd = ::open( "/dev/urandom", O_RDONLY | O_NONBLOCK );
+    if( fd < 0 )
+    {
+      std::ostringstream oss( std::ostringstream::out );
+      oss << "Error opening the file '/dev/urandom': " << strerror( errno )
+        << std::endl;
+      std::string error_msg = oss.str();
+      throw std::runtime_error( error_msg );
+    }
+
+    // Buffer storing 4 characters
+    char seedArray[ sizeof( ui32 ) ];
+    ::read( fd, (void*)seedArray, sizeof( ui32 ) );
+    ::close( fd );
+    ui32 *seedUInt32 = reinterpret_cast<ui32*>( seedArray );
+    vseed = *seedUInt32;
+    #endif
+  }
+
+  m_parameters.data_h.seed = vseed;
 }
 
 /// Sources
@@ -386,7 +443,6 @@ void GGEMS::init_simulation()
     m_particles_manager.initialize ( m_parameters );
 
 
-
     // TODO DETECTOR
 
 
@@ -469,7 +525,7 @@ void GGEMS::start_simulation()
         m_source->get_primaries_generator ( m_particles_manager.particles );
 
         // TODO If phantom
-        GGcout<< "ok " << GGendl;
+      /*  GGcout<< "ok " << GGendl;
         // Nav between source to phantom
         m_phantom->track_to_in ( m_particles_manager.particles );
 
@@ -487,7 +543,7 @@ void GGEMS::start_simulation()
         m_detectors.track_to_out ( m_particles_manager.particles );
 
         // Process hit, coincidences, etc.
-        m_detectors.digitizer();
+        m_detectors.digitizer();*/
 
         // Export data
         //m_detectors.save_data("toto.dat");

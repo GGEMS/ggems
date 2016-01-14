@@ -56,7 +56,7 @@ void kernel_host_track_to_out ( ParticlesData particles,
 class VoxPhanImgNav : public GGEMSPhantom
 {
 public:
-    VoxPhanImgNav() {}
+    VoxPhanImgNav() : m_elements_filename( "" ), m_materials_filename( "" ) {}
     ~VoxPhanImgNav() {}
 
     // Init
@@ -67,8 +67,12 @@ public:
     void track_to_out ( Particles particles );
 
     void load_phantom_from_mhd ( std::string filename, std::string range_mat_name );
+    void set_elements( std::string filename );
+    void set_materials( std::string filename );
 
 private:
+    std::string m_elements_filename;
+    std::string m_materials_filename;
 
     VoxelizedPhantom m_phantom;
     Materials m_materials;
@@ -77,7 +81,6 @@ private:
     bool m_check_mandatory();
 
     GlobalSimulationParameters m_params;
-
 };
 
 #endif

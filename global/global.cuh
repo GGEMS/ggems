@@ -89,8 +89,10 @@
 #define EPSILON3 1.0e-03f
 #define EPSILON6 1.0e-06f
 
-#define GGcout std::cout
+#define GGcout std::cout << "[GGEMS] "
 #define GGendl std::endl
+#define GGcerr std::cerr << "[GGEMS error] "
+#define GGcin std::cin << "[GGEMS input] "
 
 // Pi
 #define gpu_pi               3.141592653589793116
