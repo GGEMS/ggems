@@ -308,7 +308,7 @@ void GGEMS::set_secondaries_level ( ui32 level )
 ////// :: Private functions ::
 
 // Check mandatory parameters
-bool GGEMS::m_check_mandatory()
+void GGEMS::m_check_mandatory()
 {
     bool flag_error = false;
 
@@ -343,7 +343,6 @@ bool GGEMS::m_check_mandatory()
     }
 
     if ( flag_error ) exit_simulation();
-
 }
 
 // Copy the global simulation parameters to the GPU

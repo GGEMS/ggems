@@ -91,7 +91,7 @@ private:
     DetectorManager m_detectors;
 
     // Main parameters
-    bool m_check_mandatory();
+    void m_check_mandatory();
     void m_copy_parameters_cpu2gpu();
     GlobalSimulationParameters m_parameters;
 

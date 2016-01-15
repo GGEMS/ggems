@@ -354,11 +354,23 @@ void VoxPhanImgNav::initialize ( GlobalSimulationParameters params )
 
 void VoxPhanImgNav::set_elements( std::string filename )
 {
+  if( filename.empty() )
+  {
+    std::ostringstream oss( std::ostringstream::out );
+    throw std::runtime_error( "Element filename is empty!!!" );
+  }
+
   m_elements_filename = filename;
 }
 
 void VoxPhanImgNav::set_materials( std::string filename )
 {
+  if( filename.empty() )
+  {
+    std::ostringstream oss( std::ostringstream::out );
+    throw std::runtime_error( "Material filename is empty!!!" );
+  }
+
   m_materials_filename = filename;
 }
 
