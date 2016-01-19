@@ -81,6 +81,8 @@ __host__ __device__ void cone_beam_ct_source( ParticlesData particles_data,
   particles_data.level[ id ] = PRIMARY;
   particles_data.pname[ id ] = type;
   particles_data.geometry_id[ id ] = 0;
+  
+//   if(id<10)printf("%g %g %g %g %g %g %g \n",spectrumE[ pos ],px,py,pz,particles_data.dx[ id ],particles_data.dy[ id ],particles_data.dz[ id ]);
 }
 
 __global__ void kernel_cone_beam_ct_source( ParticlesData particles_data,
@@ -380,8 +382,11 @@ void ConeBeamCTSource::initialize( GlobalSimulationParameters params )
 
 void ConeBeamCTSource::get_primaries_generator( Particles particles )
 {
+
+    GGcout<<__LINE__ << GGendl;
   if( m_params.data_h.device_target == CPU_DEVICE )
   {
+    GGcout<<__LINE__ << GGendl;
     ui32 id = 0;
     while( id < particles.size )
     {
@@ -393,6 +398,8 @@ void ConeBeamCTSource::get_primaries_generator( Particles particles )
   }
   else if( m_params.data_h.device_target == GPU_DEVICE )
   {
+    GGcout<<__LINE__ << GGendl;
+    GGcout<<__LINE__ << GGendl;
     dim3 threads, grid;
     threads.x = m_params.data_h.gpu_block_size;
     grid.x = ( particles.size + m_params.data_h.gpu_block_size - 1 )
@@ -403,6 +410,7 @@ void ConeBeamCTSource::get_primaries_generator( Particles particles )
       m_spectrumE_d, m_spectrumCDF_d, m_nb_of_energy_bins,m_aperture );
     cuda_error_check( "Error ", " kernel_cone_beam_ct_source" );
   }
+    GGcout<<__LINE__ << GGendl;
 }
 
 #undef POINT_SOURCE_ISOTROPIC

@@ -718,6 +718,8 @@ __host__ __device__ f32 GlobalMscScattering ( f32 GeomPath,f32 cutstep,f32 Curre
             edep = eLoss ( GeomPath, particles.E[id], dedxeIoni, dedxeBrem, CurrentRange, d_table, mat, materials, particles,parameters, id );
 
             /// TODO WARNING  ACTIVER LA FONCTION DE DOSIMETRIE
+//             // printf("%s %d\n",__FUNCTION__,__LINE__);
+            // printf("%s %d\n",__FUNCTION__,__LINE__);
             dose_record_standard ( dosi, edep, particles.px[id],particles.py[id],particles.pz[id] );
 
         }
@@ -745,6 +747,7 @@ __host__ __device__ f32 GlobalMscScattering ( f32 GeomPath,f32 cutstep,f32 Curre
         edep = eLoss ( TruePath, particles.E[id], dedxeIoni, dedxeBrem, CurrentRange, d_table, mat, materials, particles, parameters, id );
 
         /// TODO WARNING  ACTIVER LA FONCTION DE DOSIMETRIE
+        // printf("%s %d\n",__FUNCTION__,__LINE__);
         dose_record_standard ( dosi, edep, particles.px[id],particles.py[id],particles.pz[id] );
 
     }

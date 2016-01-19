@@ -338,6 +338,9 @@ void DoseCalculator::m_copy_dose_cpu2gpu()
     HANDLE_ERROR ( cudaMemcpy ( dose.data_d.edep_squared,   dose.data_h.edep_squared,   sizeof ( f32 ) *dose.data_h.nb_of_voxels,  cudaMemcpyHostToDevice ) );
     HANDLE_ERROR ( cudaMemcpy ( dose.data_d.number_of_hits, dose.data_h.number_of_hits, sizeof ( ui32 ) *dose.data_h.nb_of_voxels, cudaMemcpyHostToDevice ) );
     HANDLE_ERROR ( cudaMemcpy ( dose.data_d.uncertainty,    dose.data_h.uncertainty,    sizeof ( f32 ) *dose.data_h.nb_of_voxels,  cudaMemcpyHostToDevice ) );
+    
+     GGcout << " Copy dose calculator to GPU " << GGendl;
+    
 }
 
 void DoseCalculator::m_copy_dose_gpu2cpu()
@@ -362,6 +365,9 @@ void DoseCalculator::m_copy_dose_gpu2cpu()
     HANDLE_ERROR ( cudaMemcpy ( dose.data_h.edep_squared,   dose.data_d.edep_squared,   sizeof ( f32  ) *dose.data_h.nb_of_voxels,  cudaMemcpyDeviceToHost ) );
     HANDLE_ERROR ( cudaMemcpy ( dose.data_h.number_of_hits, dose.data_d.number_of_hits, sizeof ( ui32 ) *dose.data_h.nb_of_voxels,  cudaMemcpyDeviceToHost ) );
     HANDLE_ERROR ( cudaMemcpy ( dose.data_h.uncertainty,    dose.data_d.uncertainty,    sizeof ( f32  ) *dose.data_h.nb_of_voxels,  cudaMemcpyDeviceToHost ) );
+    
+    GGcout << " Copy dose calculator to CPU " << GGendl;
+    
 }
 
 
@@ -369,9 +375,9 @@ void DoseCalculator::m_copy_dose_gpu2cpu()
 void DoseCalculator::write ( std::string filename )
 {
 
-//     GGcout << "Write image " << filename << GGendl;
+    GGcout << "Write image " << filename << GGendl;
 
-//     m_copy_dose_gpu2cpu();
+    m_copy_dose_gpu2cpu();
 
     ImageReader::record3Dimage (
         filename,

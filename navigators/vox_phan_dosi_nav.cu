@@ -69,8 +69,11 @@ __host__ __device__ void VPDN::track_to_in ( ParticlesData &particles, f32 xmin,
     dir.z = particles.dz[id];
 
     f32 dist = hit_ray_AABB ( pos, dir, xmin, xmax, ymin, ymax, zmin, zmax );
-printf("%s %d Part Pos  : %e %e %e -- %e %e %e -- %e  -- dist %e\n",__FUNCTION__, __LINE__,particles.px[id], particles.py[id],particles.pz[id],particles.dx[id], particles.dy[id],particles.dz[id], particles.E[id],dist);
+// printf("%s %d Part Pos  : %e %e %e -- %e %e %e -- %e  -- dist %e\n",__FUNCTION__, __LINE__,particles.px[id], particles.py[id],particles.pz[id],particles.dx[id], particles.dy[id],particles.dz[id], particles.E[id],dist);
     // the particle not hitting the voxelized volume
+    
+//     if(id==0)printf("PHANTOM %g %g %g %g %g %g\n",xmin, xmax, ymin, ymax, zmin, zmax);
+    
     if ( dist == FLT_MAX )                            // TODO: Don't know why F32_MAX doesn't work...
     {
         particles.endsimu[id] = PARTICLE_FREEZE;
@@ -92,7 +95,7 @@ printf("%s %d Part Pos  : %e %e %e -- %e %e %e -- %e  -- dist %e\n",__FUNCTION__
 
         // TODO update tof
         // ...
-printf("Dist %g cross %g\n",dist/mm,cross/mm);
+// printf("Dist %g cross %g\n",dist/mm,cross/mm);
     }
 
 // printf("%s %d Part Pos  : %e %e %e -- %e %e %e -- %e \n",__FUNCTION__, __LINE__,particles.px[id], particles.py[id],particles.pz[id],particles.dx[id], particles.dy[id],particles.dz[id], particles.E[id]);
@@ -196,7 +199,7 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
         f32 energy = particles.E[part_id];
 
 
-// GGcout<< __FUNCTION__ << "  " << __LINE__ << GGendl;
+// // printf("%s %d\n",__FUNCTION__,__LINE__);
         // Defined index phantom
         f32xyz ivoxsize;
         ivoxsize.x = 1.0 / vol.spacing_x;
@@ -212,7 +215,7 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
 
         ui16 mat_id = vol.values[index_phantom.w];
 //             printf("mat %d index_phantom.w %d vol.values %d\n",mat_id,index_phantom.w,vol.values[index_phantom.w]);
-//             GGcout<< __FUNCTION__ << "  " << __LINE__ << GGendl;
+//             // printf("%s %d\n",__FUNCTION__,__LINE__);
 //             printf("%d d_table.nb_bins %u mat %d\n",__LINE__,electron_CS_table.nb_bins, mat_id);
 //
 //             for(int i = 0;i<vol.number_of_voxels;i++){
@@ -220,7 +223,7 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
 //             }
 
         e_read_CS_table ( part_id,mat_id, energy, electron_CS_table,next_discrete_process,table_index, next_interaction_distance,dedxeIoni,dedxeBrem,erange, lambda, randomnumbereBrem, randomnumbereIoni,parameters );
-//         GGcout<< __FUNCTION__ << "  " << __LINE__ << GGendl;
+//         // printf("%s %d\n",__FUNCTION__,__LINE__);
 //             printf("%d d_table.nb_bins %u\n",__LINE__,electron_CS_table.nb_bins);
 
         lengthtoVertex = VertexLength ( next_interaction_distance,alongStepLength );
@@ -240,7 +243,7 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
             trueStepLength=lengthtoVertex;
         }
 
-//         GGcout<< __FUNCTION__ << "  " << __LINE__ << GGendl;
+//         // printf("%s %d\n",__FUNCTION__,__LINE__);
         //// Get the next distance boundary volume /////////////////////////////////
 
         f32 vox_xmin = index_phantom.x*vol.spacing_x;
@@ -250,7 +253,7 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
         f32 vox_ymax = vox_ymin + vol.spacing_y;
         f32 vox_zmax = vox_zmin + vol.spacing_z;
 
-//         GGcout<< __FUNCTION__ << "  " << __LINE__ << GGendl;
+//         // printf("%s %d\n",__FUNCTION__,__LINE__);
 //             printf("%g %g %g %g\n",pos.z,vol.off_z, ivoxsize.z,vol.spacing_z);
 //             printf("%d %d %d \n",index_phantom.x,index_phantom.y,index_phantom.z);
 
@@ -263,7 +266,7 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
                                                vox_ymin, vox_ymax, vox_zmin, vox_zmax );
 
 //             printf("%g %g\n",boundary_distance,trueStepLength);
-//         GGcout<< __FUNCTION__ << "  " << __LINE__ << GGendl;
+//         // printf("%s %d\n",__FUNCTION__,__LINE__);
         if ( boundary_distance<trueStepLength )
         {
             if ( parameters.physics_list[ELECTRON_MSC] == ENABLED )
@@ -282,7 +285,7 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
         }
 
 
-// GGcout<< __FUNCTION__ << "  " << __LINE__ << GGendl;
+// // printf("%s %d\n",__FUNCTION__,__LINE__);
         if ( bool_loop==true )
         {
 
@@ -292,29 +295,29 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
             if ( significant_loss == true )
             {
                 GlobalMscScattering ( trueStepLength, cutstep, erange, energy, lambda,   dedxeIoni,  dedxeBrem,  electron_CS_table,  mat_id, particles,  part_id, par1, par2, materials, dosi, index_phantom,vol,parameters );
-
+                // printf("%s %d\n",__FUNCTION__,__LINE__);
                 dose_record_standard ( dosi, edep, particles.px[part_id], particles.py[part_id], particles.pz[part_id] );
                 alongStepLength+=trueStepLength;
                 totalLength+=trueStepLength;
                 lastStepisaPhysicEffect=FALSE;
 //                  Troncature(particles, id);
-// GGcout<< __FUNCTION__ << "  " << __LINE__ << GGendl;
+// // printf("%s %d\n",__FUNCTION__,__LINE__);
 
             }
             else
             {
-//                 GGcout<< __FUNCTION__ << "  " << __LINE__ << GGendl;
+//                 // printf("%s %d\n",__FUNCTION__,__LINE__);
                 SecParticle secondary_part;
 
 
                 GlobalMscScattering ( trueStepLength, lengthtoVertex, erange, energy, lambda,   dedxeIoni,  dedxeBrem,   electron_CS_table,  mat_id, particles,  part_id, par1, par2, materials, dosi, index_phantom,vol,parameters );
-// GGcout<< __FUNCTION__ << "  " << __LINE__ << GGendl;
+// printf("%s %d\n",__FUNCTION__,__LINE__);
                 dose_record_standard ( dosi, edep, particles.px[part_id], particles.py[part_id], particles.pz[part_id] );
-// GGcout<< __FUNCTION__ << "  " << __LINE__ << GGendl;
+// // printf("%s %d\n",__FUNCTION__,__LINE__);
 
                 if ( next_discrete_process == ELECTRON_IONISATION )
                 {
-//               GGcout<< __FUNCTION__ << "  " << __LINE__ << GGendl;
+//               // printf("%s %d\n",__FUNCTION__,__LINE__);
                     secondary_part = eSampleSecondarieElectron ( parameters.electron_cut, particles,  part_id, dosi,parameters );
                     lastStepisaPhysicEffect=TRUE;
                     
@@ -322,10 +325,10 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
                 }
                 else if ( next_discrete_process == ELECTRON_BREMSSTRAHLUNG )
                 {
-//                GGcout<< __FUNCTION__ << "  " << __LINE__ << GGendl;
+//                // printf("%s %d\n",__FUNCTION__,__LINE__);
                     eSampleSecondarieGamma ( parameters.photon_cut, particles, part_id, materials, mat_id,parameters );
                     lastStepisaPhysicEffect=TRUE;
-//                  GGcout<< __FUNCTION__ << "  " << __LINE__ << GGendl;
+//                  // printf("%s %d\n",__FUNCTION__,__LINE__);
                 }
 
 
@@ -358,6 +361,7 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
                 else
                 {
                     /// WARNING TODO ACTIVER DOSIMETRY ICI
+                    // printf("%s %d\n",__FUNCTION__,__LINE__);
                     dose_record_standard ( dosi, secondary_part.E, particles.px[part_id],particles.py[part_id],particles.pz[part_id] );
                 }
 
@@ -378,7 +382,7 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
     }
     while ( ( particles.E[part_id]>EKINELIMIT ) && ( bool_loop==true ) && ( dummystep<10000 ) );
 
-// GGcout<< __FUNCTION__ << "  " << __LINE__ << GGendl;
+// // printf("%s %d\n",__FUNCTION__,__LINE__);
     /*for(int i = 0;i<vol.number_of_voxels;i++){
         if(vol.values[i]!=0){ printf("%d %d %d %d\n",__LINE__,part_id,i,vol.values[i]); }
     }  */
@@ -565,7 +569,7 @@ __host__ __device__ void VPDN::track_photon_to_out ( ParticlesData &particles,
     }
 
     //// Apply discrete process //////////////////////////////////////////////////
-
+// printf("    --->   Process : %d (GEO %d (%g) CPT %d PE %d R %d)\n" ,next_discrete_process,GEOMETRY_BOUNDARY,boundary_distance,PHOTON_COMPTON,PHOTON_PHOTOELECTRIC,PHOTON_RAYLEIGH);
     if ( next_discrete_process != GEOMETRY_BOUNDARY )
     {
         // Resolve discrete process
@@ -573,7 +577,8 @@ __host__ __device__ void VPDN::track_photon_to_out ( ParticlesData &particles,
                                materials, mat_id, part_id );
 
        
-
+        if ( next_discrete_process != PHOTON_RAYLEIGH )
+        {
                 // Add primary to buffer an track secondary
                 if ( ( ( int ) ( particles.level[part_id] ) <particles.nb_of_secondaries ) && electron.E > 0. )
                 {
@@ -602,10 +607,10 @@ __host__ __device__ void VPDN::track_photon_to_out ( ParticlesData &particles,
                 else //// Here e- are not tracked, and lost energy not drop
                 {
                     /// WARNING TODO ACTIVER DOSIMETRY ICI
-//                     GGcout << __FUNCTION__ << "  " << __LINE__ << GGendl;
+                    // printf("%s %d\n",__FUNCTION__,__LINE__);
                     dose_record_standard ( dosi, electron.E, particles.px[part_id],particles.py[part_id],particles.pz[part_id] );
                 }
-
+        }
 
     }
 
@@ -624,34 +629,37 @@ __global__ void VPDN::kernel_device_track_to_in ( ParticlesData particles, f32 x
 {
 
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
-    
-    printf("OK I %d\n",particles.size);
     if ( id >= particles.size ) return;
-
+//     printf ( "%d %s %d Part Pos  : %e %e %e -- %e %e %e -- %e \n",id,__FUNCTION__, __LINE__,particles.px[id], particles.py[id],particles.pz[id],particles.dx[id], particles.dy[id],particles.dz[id], particles.E[id] );
+    
     VPDN::track_to_in ( particles, xmin, xmax, ymin, ymax, zmin, zmax, id );
-
+    
+//     printf ( "%d %s %d Part Pos  : %e %e %e -- %e %e %e -- %e \n",id,__FUNCTION__, __LINE__,particles.px[id], particles.py[id],particles.pz[id],particles.dx[id], particles.dy[id],particles.dz[id], particles.E[id] );
 }
 
 __global__ void FuckOff(){
 
-    printf("FUCK OFF \n");
+    const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
+//     if ( id >= particles.size ) return;
+    printf("FuckOff\n");
+
 }
 
 // Host Kernel that move particles to the voxelized volume boundary
 void VPDN::kernel_host_track_to_in ( ParticlesData particles, f32 xmin, f32 xmax,
                                      f32 ymin, f32 ymax, f32 zmin, f32 zmax, ui32 part_id )
 {
-    printf ( "%s %d Part Pos  : %e %e %e -- %e %e %e -- %e \n",__FUNCTION__, __LINE__,particles.px[part_id], particles.py[part_id],particles.pz[part_id],particles.dx[part_id], particles.dy[part_id],particles.dz[part_id], particles.E[part_id] );
+//     printf ( "%s %d Part Pos  : %e %e %e -- %e %e %e -- %e \n",__FUNCTION__, __LINE__,particles.px[part_id], particles.py[part_id],particles.pz[part_id],particles.dx[part_id], particles.dy[part_id],particles.dz[part_id], particles.E[part_id] );
     
-    printf("X %g %g Y %g %g Z %g %g\n",xmin, xmax, ymin, ymax, zmin, zmax);
+//     printf("X %g %g Y %g %g Z %g %g\n",xmin, xmax, ymin, ymax, zmin, zmax);
     
     VPDN::track_to_in ( particles, xmin, xmax, ymin, ymax, zmin, zmax, part_id );
     
-    printf ( "%s %d Part Pos  : %e %e %e -- %e %e %e -- %e \n",__FUNCTION__, __LINE__,particles.px[part_id], particles.py[part_id],particles.pz[part_id],particles.dx[part_id], particles.dy[part_id],particles.dz[part_id], particles.E[part_id] );
+//     printf ( "%s %d %d Part Pos  : %e %e %e -- %e %e %e -- %e %d\n",__FUNCTION__, __LINE__,part_id,particles.px[part_id], particles.py[part_id],particles.pz[part_id],particles.dx[part_id], particles.dy[part_id],particles.dz[part_id], particles.E[part_id] , particles.endsimu[part_id]);
 }
 
 // Device kernel that track particles within the voxelized volume until boundary
-__global__ void kernel_device_track_to_out_Electron ( ParticlesData particles,
+__global__ void VPDN::kernel_device_track_to_out ( ParticlesData particles,
         VoxVolumeData vol,
         MaterialsTable materials,
         PhotonCrossSectionTable photon_CS_table,
@@ -659,11 +667,11 @@ __global__ void kernel_device_track_to_out_Electron ( ParticlesData particles,
         GlobalSimulationParametersData parameters,
         DoseData dosi )
 {
-    printf("OK K %d\n",particles.size);
+
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
     if ( id >= particles.size ) return;
-    if(id==0) printf("OK K %d\n",particles.size);
-   return; 
+//     if(id==0) printf("OK K %d\n",particles.size);
+    
 // 
 //     // For multivoxels navigation
 //     f32 randomnumbereIoni= -std::log ( JKISS32 ( particles, id ) ); // -log(RN)
@@ -689,7 +697,7 @@ __global__ void kernel_device_track_to_out_Electron ( ParticlesData particles,
     f32 randomnumbereIoni= -std::log ( JKISS32 ( particles, id ) ); // -log(RN)
     f32 randomnumbereBrem= -std::log ( JKISS32 ( particles, id ) ); // -log(RN)
     f32 freeLength = 0.0*mm;
-// // GGcout<< __FUNCTION__ << "  " << __LINE__ << GGendl;
+// // // printf("%s %d\n",__FUNCTION__,__LINE__);
 // GGcout << vol.off_x << "   ";
 // GGcout << vol.off_x + vol.spacing_x * vol.nb_vox_x << "   ";
 // GGcout << vol.off_y << "   ";
@@ -700,7 +708,7 @@ __global__ void kernel_device_track_to_out_Electron ( ParticlesData particles,
 // Stepping loop
     while ( particles.endsimu[id] != PARTICLE_DEAD && particles.endsimu[id] != PARTICLE_FREEZE )
     {
-if(id<10)printf("%s %d Part %d l %d Pos  : %e %e %e -- %e %e %e -- %e \n",__FUNCTION__, __LINE__,particles.pname[id],particles.level[id],particles.px[id], particles.py[id],particles.pz[id],particles.dx[id], particles.dy[id],particles.dz[id], particles.E[id]);
+// if(id<10)printf("%s %d Part %d l %d Pos  : %e %e %e -- %e %e %e -- %e \n",__FUNCTION__, __LINE__,particles.pname[id],particles.level[id],particles.px[id], particles.py[id],particles.pz[id],particles.dx[id], particles.dy[id],particles.dz[id], particles.E[id]);
         if ( particles.pname[id] == PHOTON )
         {
 
@@ -746,7 +754,7 @@ if(id<10)printf("%s %d Part %d l %d Pos  : %e %e %e -- %e %e %e -- %e \n",__FUNC
 
 
 //         break;
-//         GGcout<< __FUNCTION__ << "  " << __LINE__ << GGendl;
+//         // printf("%s %d\n",__FUNCTION__,__LINE__);
     }
 
 }
@@ -766,7 +774,7 @@ void VPDN::kernel_host_track_to_out ( ParticlesData particles,
     f32 randomnumbereIoni= -std::log ( JKISS32 ( particles, id ) ); // -log(RN)
     f32 randomnumbereBrem= -std::log ( JKISS32 ( particles, id ) ); // -log(RN)
     f32 freeLength = 0.0*mm;
-// // GGcout<< __FUNCTION__ << "  " << __LINE__ << GGendl;
+// // // printf("%s %d\n",__FUNCTION__,__LINE__);
 // GGcout << vol.off_x << "   ";
 // GGcout << vol.off_x + vol.spacing_x * vol.nb_vox_x << "   ";
 // GGcout << vol.off_y << "   ";
@@ -777,7 +785,7 @@ void VPDN::kernel_host_track_to_out ( ParticlesData particles,
 // Stepping loop
     while ( particles.endsimu[id] != PARTICLE_DEAD && particles.endsimu[id] != PARTICLE_FREEZE )
     {
-// printf("%s %d Part %d l %d Pos  : %e %e %e -- %e %e %e -- %e \n",__FUNCTION__, __LINE__,particles.pname[id],particles.level[id],particles.px[id], particles.py[id],particles.pz[id],particles.dx[id], particles.dy[id],particles.dz[id], particles.E[id]);
+// printf("--->  %s %d Part %d %d l %d Pos  : %e %e %e -- %e %e %e -- %e \n",__FUNCTION__, __LINE__,id,particles.pname[id],particles.level[id],particles.px[id], particles.py[id],particles.pz[id],particles.dx[id], particles.dy[id],particles.dz[id], particles.E[id]);
         if ( particles.pname[id] == PHOTON )
         {
 
@@ -823,7 +831,7 @@ void VPDN::kernel_host_track_to_out ( ParticlesData particles,
 
 
 //         break;
-//         GGcout<< __FUNCTION__ << "  " << __LINE__ << GGendl;
+//         // printf("%s %d\n",__FUNCTION__,__LINE__);
     }
 }
 
@@ -864,16 +872,17 @@ void VoxPhanDosiNav::track_to_in ( Particles particles )
     }
     else if ( m_params.data_h.device_target == GPU_DEVICE )
     {
+//         GGcout << " Before FuckOff " << GGendl;
         dim3 threads, grid;
         threads.x = m_params.data_h.gpu_block_size;
         grid.x = ( particles.size + m_params.data_h.gpu_block_size - 1 ) / m_params.data_h.gpu_block_size;
-        GGcout << "Track to in " << GGendl;
-        cudaSetDevice ( 0 );
-        FuckOff<<<grid, threads>>> ();
+        GGcout << grid.x << "  " << threads.x << GGendl;
+//         FuckOff<<<grid, threads>>> ();
         VPDN::kernel_device_track_to_in<<<grid, threads>>> ( particles.data_d, m_phantom.data_d.xmin, m_phantom.data_d.xmax,
                 m_phantom.data_d.ymin, m_phantom.data_d.ymax,
                 m_phantom.data_d.zmin, m_phantom.data_d.zmax );
         cuda_error_check ( "Error ", " Kernel_VoxPhanDosi (track to in)" );
+//         GGcout << " After FuckOff " << GGendl;
 
     }
 
@@ -882,16 +891,16 @@ void VoxPhanDosiNav::track_to_in ( Particles particles )
 
 void VoxPhanDosiNav::track_to_out ( Particles particles )
 {
-//     GGcout<< __FUNCTION__ << "  " << __LINE__ << GGendl;
+//     // printf("%s %d\n",__FUNCTION__,__LINE__);
     if ( m_params.data_h.device_target == CPU_DEVICE )
     {
 
         ui32 id=0;
         while ( id<particles.size )
         {
-            if ( id%100==0 ) printf ( "Part : %d\n",id );
+            /*if ( id%100==0 )*/ printf ( "Part : %d/%d\n",id,particles.size );
 //            printf("\n\n\n");
-//     GGcout<< __FUNCTION__ << "  " << __LINE__ << GGendl;
+//     // printf("%s %d\n",__FUNCTION__,__LINE__);
             VPDN::kernel_host_track_to_out ( particles.data_h, m_phantom.data_h,
                                              m_materials.data_h, m_cross_sections.photon_CS.data_h, m_cross_sections.electronCSTable->get_data_h(),
                                              m_params.data_h, m_dose_calculator.dose.data_h, id );
@@ -902,18 +911,19 @@ void VoxPhanDosiNav::track_to_out ( Particles particles )
     else if ( m_params.data_h.device_target == GPU_DEVICE )
     {
 
+//         printf ( "Part : %d/%d\n",id,particles.size );
         dim3 threads, grid;
-        threads.x = m_params.data_h.gpu_block_size;// GGcout<< __FUNCTION__ << "  " << __LINE__ << GGendl;
+        threads.x = m_params.data_h.gpu_block_size;// // printf("%s %d\n",__FUNCTION__,__LINE__);
         grid.x = ( particles.size + m_params.data_h.gpu_block_size - 1 ) / m_params.data_h.gpu_block_size;
         printf("grid %d block %d  \n",grid.x, threads.x);
-        kernel_device_track_to_out_Electron<<<grid, threads>>> ( particles.data_d, m_phantom.data_d, m_materials.data_d,
+        VPDN::kernel_device_track_to_out<<<grid, threads>>> ( particles.data_d, m_phantom.data_d, m_materials.data_d,
                 m_cross_sections.photon_CS.data_d,
                 m_cross_sections.electron_CS.data_d,
                 m_params.data_d, m_dose_calculator.dose.data_d );
         cuda_error_check ( "Error ", " Kernel_VoxPhanDosi (track to out)" );
-
+        printf("End GPU tracking \n");
     }
-    GGcout<< __FUNCTION__ << "  " << __LINE__ << GGendl;
+    // printf("%s %d\n",__FUNCTION__,__LINE__);
     
 }
 
@@ -924,6 +934,8 @@ void VoxPhanDosiNav::load_phantom_from_mhd ( std::string filename, std::string r
 
 void VoxPhanDosiNav::write ( std::string filename )
 {
+//     m_dose_calculator.m_copy_dose_gpu2cpu();
+
     m_dose_calculator.write ( filename );
 }
 

@@ -222,9 +222,9 @@ void CrossSections::m_build_table(Materials materials, GlobalSimulationParameter
     free(flag_Z);
 }
 
-/*
+
 // Print CS talbe (for debugging)
-void CrossSectionsManager::print() {
+void CrossSections::print() {
 
     ui32 imat, iE, abs_index;
 
@@ -235,12 +235,12 @@ void CrossSectionsManager::print() {
 
     printf("==== Compton Standard CS ====\n\n");
 
-    imat=0; while (imat < photon_CS_table_h.nb_mat) {
+    imat=0; while (imat < photon_CS.data_h.nb_mat) {
         printf("## Material %i\n", imat);
-        iE=0; while (iE < photon_CS_table_h.nb_bins) {
-            abs_index = imat*photon_CS_table_h.nb_bins + iE;
-            printf("E %e CS %e\n", photon_CS_table_h.E_bins[iE],
-                                   photon_CS_table_h.Compton_Std_CS[abs_index]);
+        iE=0; while (iE < photon_CS.data_h.nb_bins) {
+            abs_index = imat*photon_CS.data_h.nb_bins + iE;
+            printf("E %e CS %e\n", photon_CS.data_h.E_bins[iE],
+                                   photon_CS.data_h.Compton_Std_CS[abs_index]);
             ++iE;
         } // iE
         printf("\n");
@@ -250,12 +250,12 @@ void CrossSectionsManager::print() {
 
     printf("==== Photoelectric Standard CS ====\n");
 
-    imat=0; while (imat < photon_CS_table_h.nb_mat) {
+    imat=0; while (imat < photon_CS.data_h.nb_mat) {
         printf("## Material %i\n", imat);
-        iE=0; while (iE < photon_CS_table_h.nb_bins) {
-            abs_index = imat*photon_CS_table_h.nb_bins + iE;
-            printf("E %e CS %e\n", photon_CS_table_h.E_bins[iE],
-                                   photon_CS_table_h.Photoelectric_Std_CS[abs_index]);
+        iE=0; while (iE < photon_CS.data_h.nb_bins) {
+            abs_index = imat*photon_CS.data_h.nb_bins + iE;
+            printf("E %e CS %e\n", photon_CS.data_h.E_bins[iE],
+                                   photon_CS.data_h.Photoelectric_Std_CS[abs_index]);
             ++iE;
         } // iE
         printf("\n");
@@ -265,10 +265,10 @@ void CrossSectionsManager::print() {
 
     imat=0; while (imat < 101) {
         printf("## Z %i\n", imat);
-        iE=0; while (iE < photon_CS_table_h.nb_bins) {
-            abs_index = imat*photon_CS_table_h.nb_bins + iE;
-            printf("E %e CS %e\n", photon_CS_table_h.E_bins[iE],
-                                   photon_CS_table_h.Photoelectric_Std_xCS[abs_index]);
+        iE=0; while (iE < photon_CS.data_h.nb_bins) {
+            abs_index = imat*photon_CS.data_h.nb_bins + iE;
+            printf("E %e CS %e\n", photon_CS.data_h.E_bins[iE],
+                                   photon_CS.data_h.Photoelectric_Std_xCS[abs_index]);
             ++iE;
         } // iE
         printf("\n");
@@ -278,12 +278,12 @@ void CrossSectionsManager::print() {
 
     printf("==== Rayleigh Livermore CS ====\n");
 
-    imat=0; while (imat < photon_CS_table_h.nb_mat) {
+    imat=0; while (imat < photon_CS.data_h.nb_mat) {
         printf("## Material %i\n", imat);
-        iE=0; while (iE < photon_CS_table_h.nb_bins) {
-            abs_index = imat*photon_CS_table_h.nb_bins + iE;
-            printf("E %e CS %e\n", photon_CS_table_h.E_bins[iE],
-                                   photon_CS_table_h.Rayleigh_Lv_CS[abs_index]);
+        iE=0; while (iE < photon_CS.data_h.nb_bins) {
+            abs_index = imat*photon_CS.data_h.nb_bins + iE;
+            printf("E %e CS %e\n", photon_CS.data_h.E_bins[iE],
+                                   photon_CS.data_h.Rayleigh_Lv_CS[abs_index]);
             ++iE;
         } // iE
         printf("\n");
@@ -295,11 +295,11 @@ void CrossSectionsManager::print() {
 
     imat=0; while (imat < 101) {
         printf("## Z %i\n", imat);
-        iE=0; while (iE < photon_CS_table_h.nb_bins) {
-            abs_index = imat*photon_CS_table_h.nb_bins + iE;
-            printf("E %e SF %e CS %e\n", photon_CS_table_h.E_bins[iE],
-                                         photon_CS_table_h.Rayleigh_Lv_SF[abs_index],
-                                         photon_CS_table_h.Rayleigh_Lv_xCS[abs_index]);
+        iE=0; while (iE < photon_CS.data_h.nb_bins) {
+            abs_index = imat*photon_CS.data_h.nb_bins + iE;
+            printf("E %e SF %e CS %e\n", photon_CS.data_h.E_bins[iE],
+                                         photon_CS.data_h.Rayleigh_Lv_SF[abs_index],
+                                         photon_CS.data_h.Rayleigh_Lv_xCS[abs_index]);
             ++iE;
         } // iE
         printf("\n");
@@ -309,7 +309,7 @@ void CrossSectionsManager::print() {
 
 
 }
-*/
+
 
 // Copy CS table to the device
 void CrossSections::m_copy_cs_table_cpu2gpu() {

@@ -27,6 +27,7 @@
 #include "point_source.cuh"
 #include "cone_beam_CT_source.cuh"
 #include "vox_phan_dosi_nav.cuh"
+#include <vox_phan_img_nav.cuh>
 // #include "flatpanel_detector.cuh"
 
 class GGEMS

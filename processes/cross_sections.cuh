@@ -25,7 +25,7 @@ class CrossSections {
         CrossSections();
 
         void initialize(Materials materials, GlobalSimulationParameters parameters);
-        //void print();       
+        void print();       
         
         // Data for photon
         PhotonCrossSection photon_CS;       // CPU & GPU

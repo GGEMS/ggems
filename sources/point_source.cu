@@ -250,7 +250,7 @@ void PointSource::initialize ( GlobalSimulationParameters params )
     m_params = params;
 
     // Handle GPU device
-    if ( m_params.data_h.device_target == GPU_DEVICE && m_nb_of_energy_bins > 1 )
+    if ( m_params.data_h.device_target == GPU_DEVICE && m_nb_of_energy_bins > 0 )
     {
         // GPU mem allocation
         HANDLE_ERROR ( cudaMalloc ( ( void** ) &m_spectrumE_d, m_nb_of_energy_bins*sizeof ( f64 ) ) );

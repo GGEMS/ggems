@@ -59,9 +59,11 @@ void set_gpu_device ( int deviceChoice, f32 minversion )
     }
 
     cudaSetDevice ( deviceChoice%deviceCount );
-    printf ( "[\033[32;01mok\033[00m] \e[1m%s\e[21m found\n", prop.name );
+    printf ( "[\033[32;01mok\033[00m] \033[32;01m%s\033[00m found\n", prop.name );
 
 }
+
+
 
 // Print out for error
 void print_error ( std::string msg )

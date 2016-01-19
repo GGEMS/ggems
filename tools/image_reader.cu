@@ -38,6 +38,11 @@ void ImageReader::create_directory_tree(std::string dirname)
 void ImageReader::record3Dimage ( string histname,  f64 *data, f32xyz offset, f32xyz spacing, i32xyz size, bool sparse_compression )
 {
 
+        printf("Image Parameters : %d %g %g %d %g %g %d %g %g \n",size.x,  offset.x, offset.x+size.x*spacing.x,
+                                  size.y,  offset.y, offset.y+size.y*spacing.y,
+                                  size.z,  offset.z, offset.z+size.z*spacing.z );
+
+
     // Check format
     string format = get_format ( histname );
     histname = get_filename_without_format ( histname );
@@ -139,16 +144,16 @@ void ImageReader::record3Dimage ( string histname,  f64 *data, f32xyz offset, f3
             while ( i<size.x*size.y*size.z )
             {
                 float val = data[i];
-//                 if ( val!=0 )
-//                 {
-//                     int dx = i%size.x;
-//                     int dy = ( ( i - dx ) / size.x  ) %size.y;
-//                     int dz = ( i - dx - dy*size.x ) / ( size.x * size.y );
-//                     int value = dx + dy*size.x + dz * size.x * size.y;
-//                     i32xyz dxyz = get_bin_xyz ( i,size );
-// //                         printf("%d %d %d %d %d %d %d %d value %g \n",i,value,dx,dy,dz,dxyz.x,dxyz.y,dxyz.z,val);
-// 
-//                 }
+                if ( val!=0 )
+                {
+                    int dx = i%size.x;
+                    int dy = ( ( i - dx ) / size.x  ) %size.y;
+                    int dz = ( i - dx - dy*size.x ) / ( size.x * size.y );
+                    int value = dx + dy*size.x + dz * size.x * size.y;
+                    i32xyz dxyz = get_bin_xyz ( i,size );
+//                         printf("%d %d %d %d %d %d %d %d value %g \n",i,value,dx,dy,dz,dxyz.x,dxyz.y,dxyz.z,val);
+
+                }
 
                 fwrite ( &val, sizeof ( float ), 1, pFile_mhd );
                 ++i;
@@ -187,6 +192,9 @@ void ImageReader::record3Dimage ( string histname,  f64 *data, f32xyz offset, f3
 #if defined(__cplusplus)
     else if(format == "root")
         {
+        
+
+        
         std::string pathnameroot = histname;
         pathnameroot+=".root";
         

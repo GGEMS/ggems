@@ -22,7 +22,8 @@
 #else
 #include <unistd.h>
 #endif
-
+#include <cerrno>
+#include <stdexcept>
 #include "ggems.cuh"
 
 GGEMS::GGEMS()
@@ -391,14 +392,14 @@ void GGEMS::m_copy_parameters_cpu2gpu()
 // Init simualtion
 void GGEMS::init_simulation()
 {
-
+    GGcout << "ok "<< GGendl;
     // License and banner
     if (!m_license.info.clearence)
     {
         print_error("Your license has expired or is invalid!\n");
-        exit_simulation();
+//         exit_simulation();
     }
-    print_banner(m_license.info.institution, m_license.info.expired_day, m_license.info.expired_month, m_license.info.expired_year, "V1.0");
+//     print_banner(m_license.info.institution, m_license.info.expired_day, m_license.info.expired_month, m_license.info.expired_year, "V1.0");
 
     // Check
     m_check_mandatory();
@@ -516,6 +517,8 @@ void GGEMS::init_simulation()
 void GGEMS::start_simulation()
 {
 
+    GGcout << m_parameters.data_h.nb_of_batches << " batches of " << m_parameters.data_h.nb_of_particles << GGendl;
+
     // Main loop
     ui32 ibatch=0;
     while ( ibatch < m_parameters.data_h.nb_of_batches )
@@ -525,14 +528,15 @@ void GGEMS::start_simulation()
         m_source->get_primaries_generator ( m_particles_manager.particles );
 
         // TODO If phantom
-      /*  GGcout<< "ok " << GGendl;
+        GGcout<< "ok " << GGendl;
         // Nav between source to phantom
         m_phantom->track_to_in ( m_particles_manager.particles );
 
-        GGcout<< "ok " << GGendl;
+        GGcout<< "Track to In ... ok " << GGendl;
         // Nav within the phantom
         m_phantom->track_to_out ( m_particles_manager.particles );
-        GGcout<< "ok " << GGendl;
+        GGcout<< "Track to Out ... ok " << GGendl;
+//         GGcout<< "ok " << GGendl;
 
         // TODO If detector
 
@@ -543,7 +547,7 @@ void GGEMS::start_simulation()
         m_detectors.track_to_out ( m_particles_manager.particles );
 
         // Process hit, coincidences, etc.
-        m_detectors.digitizer();*/
+        m_detectors.digitizer();
 
         // Export data
         //m_detectors.save_data("toto.dat");
