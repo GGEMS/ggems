@@ -116,7 +116,7 @@ private :
 
     GlobalSimulationParameters m_params;
 
-
+    bool m_flag_dose_calculated;
 
 
 };

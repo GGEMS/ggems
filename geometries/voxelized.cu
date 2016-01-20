@@ -157,10 +157,12 @@ void VoxelizedPhantom::m_define_materials_from_range(f32 *raw_data, std::string 
 
     } // read file
     
-// for(int i = 0;i<data_h.number_of_voxels;i++){
-//     if(data_h.values[i]!=0)printf("%d\n",data_h.values[i]);
-// 
-// }
+    
+GGcout << data_h.number_of_voxels << " voxels " << GGendl;
+for(int i = 0;i<data_h.number_of_voxels;i++){
+    if(data_h.values[i]!=0)printf("%d %d\n",i, data_h.values[i]);
+
+}
 // exit(0);
 }
 

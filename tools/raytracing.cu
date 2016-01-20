@@ -480,33 +480,8 @@ __host__ __device__ f32 hit_ray_OBB(f32xyz ray_p, f32xyz ray_d,
 }
 
 
-// __host__ __device__ f32 GetSafety(f32xyz Place, f32xyz direction,
-//                                ui16xyzw index_phantom,
-//                                f32xyz voxel_size)
-// {
-// //     const unsigned int id = blockIdx.x * blockDim.x + threadIdx.x;
-//     Place.x-=((f32)(index_phantom.x)) * voxel_size.x;
-//     Place.y-=((f32)(index_phantom.y)) * voxel_size.y;
-//     Place.z-=((f32)(index_phantom.z)) * voxel_size.z;
-// 
-//     f32  Safety=Place.x,safY=Place.y,safZ=Place.z;
-// 
-//     Safety = fmin(fabsf(voxel_size.x-Place.x),fabsf(voxel_size.x+Place.x));
-//     safY=fmin(fabsf(voxel_size.y-Place.y),fabsf(voxel_size.y+Place.y));
-//     safZ=fmin(fabsf(voxel_size.z-Place.z),fabsf(voxel_size.z+Place.z));
-// 
-//     if(Safety>safY)
-//         Safety=safY;
-// 
-//     if(Safety>safZ)
-//         Safety=safZ;
-// 
-//     return  Safety;
-// 
-// }
-
 __host__ __device__ f32 GetSafety(f32xyz Place, f32xyz direction,
-                               ui32xyzw index_phantom,
+                               ui16xyzw index_phantom,
                                f32xyz voxel_size)
 {
 //     const unsigned int id = blockIdx.x * blockDim.x + threadIdx.x;
@@ -529,6 +504,7 @@ __host__ __device__ f32 GetSafety(f32xyz Place, f32xyz direction,
     return  Safety;
 
 }
+
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 

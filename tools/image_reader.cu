@@ -38,7 +38,8 @@ void ImageReader::create_directory_tree(std::string dirname)
 void ImageReader::record3Dimage ( string histname,  f64 *data, f32xyz offset, f32xyz spacing, i32xyz size, bool sparse_compression )
 {
 
-        printf("Image Parameters : %d %g %g %d %g %g %d %g %g \n",size.x,  offset.x, offset.x+size.x*spacing.x,
+        printf("Image Parameters : %d %g %g %d %g %g %d %g %g \n",
+                                  size.x,  offset.x, offset.x+size.x*spacing.x,
                                   size.y,  offset.y, offset.y+size.y*spacing.y,
                                   size.z,  offset.z, offset.z+size.z*spacing.z );
 

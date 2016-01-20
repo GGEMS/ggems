@@ -97,6 +97,9 @@ public:
 
     void load_phantom_from_mhd ( std::string filename, std::string range_mat_name );
 
+    void calculate_dose_to_phantom();
+    void calculate_dose_to_water();
+    
     void write ( std::string filename = "dosimetry.mhd" );
 
 private:

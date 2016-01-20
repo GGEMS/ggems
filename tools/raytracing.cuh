@@ -81,12 +81,8 @@ __host__ __device__ f32 hit_ray_OBB(f32xyz ray_p, f32xyz ray_d,
                                     f32xyz u, f32xyz v, f32xyz w); // OBB frame
 
                                     
-// __host__ __device__ f32 GetSafety(f32xyz Place, f32xyz direction,
-//                                ui16xyzw index_phantom,
-//                                f32xyz voxel_size);
-                               
 __host__ __device__ f32 GetSafety(f32xyz Place, f32xyz direction,
-                               ui32xyzw index_phantom,
+                               ui16xyzw index_phantom,
                                f32xyz voxel_size);
 ////////////////////////////////////////////////////////////////////////////////////////
 

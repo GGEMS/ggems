@@ -93,7 +93,12 @@ void GGEMS::set_license(std::string license_path) {
 // Set the hardware used for the simulation CPU or GPU (CPU by default)
 void GGEMS::set_hardware_target ( std::string value )
 {
-    if ( value == "GPU" )
+
+    // Transform the name of the process in small letter
+    std::transform( value.begin(), value.end(),
+      value.begin(), ::tolower );
+
+    if ( value == "gpu" )
     {
         m_parameters.data_h.device_target = GPU_DEVICE;
     }
