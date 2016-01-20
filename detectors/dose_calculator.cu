@@ -27,9 +27,9 @@ __host__ __device__ void dose_record_standard ( DoseData &dose, f32 Edep, f32 px
     ivoxsize.y = 1.0 / dose.spacing_y;
     ivoxsize.z = 1.0 / dose.spacing_z;
     ui32xyzw index_phantom;
-    index_phantom.x = ui32 ( ( px+dose.ox ) * ivoxsize.x );
-    index_phantom.y = ui32 ( ( py+dose.oy ) * ivoxsize.y );
-    index_phantom.z = ui32 ( ( pz+dose.oz ) * ivoxsize.z );
+    index_phantom.x = ui32 ( ( px-dose.ox ) * ivoxsize.x );
+    index_phantom.y = ui32 ( ( py-dose.oy ) * ivoxsize.y );
+    index_phantom.z = ui32 ( ( pz-dose.oz ) * ivoxsize.z );
     index_phantom.w = index_phantom.z*dose.nx*dose.ny
                       + index_phantom.y*dose.nx
                       + index_phantom.x; // linear index
@@ -43,8 +43,15 @@ __host__ __device__ void dose_record_standard ( DoseData &dose, f32 Edep, f32 px
 // GGcout << pz << "   " << dose.oz << "   " << ivoxsize.z << GGendl;
 // GGcout <<  dose.nx << "  " <<  dose.ny << "  " <<  dose.nz << GGendl;
 // GGcout <<  px << "  " <<  py << "  " <<  pz << GGendl;
+printf("Error out of dosemap \n");
         return;
     }
+    
+//     if((index_phantom.x < 20 ) &&
+//       (index_phantom.y < 20 ) &&
+//       (index_phantom.z < 20 ))
+//       printf("Edep : %g, Index : %d %d %d \n",Edep, index_phantom.x,index_phantom.y,index_phantom.z);
+    
 // GGcout <<  px << "  " <<  py << "  " <<  pz << GGendl;
 // GGcout <<  index_phantom.x << "  " <<  index_phantom.y << "  " <<  index_phantom.z << GGendl;
 
@@ -345,19 +352,19 @@ void DoseCalculator::m_copy_dose_cpu2gpu()
 
 void DoseCalculator::m_copy_dose_gpu2cpu()
 {
-    dose.data_h.nx = dose.data_d.nx;
-    dose.data_h.ny = dose.data_d.ny;
-    dose.data_h.nz = dose.data_d.nz;
-
-    dose.data_h.spacing_x = dose.data_d.spacing_x;
-    dose.data_h.spacing_y = dose.data_d.spacing_y;
-    dose.data_h.spacing_z = dose.data_d.spacing_z;
-
-    dose.data_h.ox = dose.data_d.ox;
-    dose.data_h.oy = dose.data_d.oy;
-    dose.data_h.oz = dose.data_d.oz;
-
-    dose.data_h.nb_of_voxels = dose.data_d.nb_of_voxels;
+//     dose.data_h.nx = dose.data_d.nx;
+//     dose.data_h.ny = dose.data_d.ny;
+//     dose.data_h.nz = dose.data_d.nz;
+// 
+//     dose.data_h.spacing_x = dose.data_d.spacing_x;
+//     dose.data_h.spacing_y = dose.data_d.spacing_y;
+//     dose.data_h.spacing_z = dose.data_d.spacing_z;
+// 
+//     dose.data_h.ox = dose.data_d.ox;
+//     dose.data_h.oy = dose.data_d.oy;
+//     dose.data_h.oz = dose.data_d.oz;
+// 
+//     dose.data_h.nb_of_voxels = dose.data_d.nb_of_voxels;
 
     // Copy values to GPU arrays
     HANDLE_ERROR ( cudaMemcpy ( dose.data_h.edep,           dose.data_d.edep,           sizeof ( f32  ) *dose.data_h.nb_of_voxels,  cudaMemcpyDeviceToHost ) );
@@ -367,7 +374,7 @@ void DoseCalculator::m_copy_dose_gpu2cpu()
     HANDLE_ERROR ( cudaMemcpy ( dose.data_h.uncertainty,    dose.data_d.uncertainty,    sizeof ( f32  ) *dose.data_h.nb_of_voxels,  cudaMemcpyDeviceToHost ) );
     
     GGcout << " Copy dose calculator to CPU " << GGendl;
-    
+    GGcout << " GPU size : " << dose.data_h.nb_of_voxels << GGendl;
 }
 
 
@@ -376,8 +383,9 @@ void DoseCalculator::write ( std::string filename )
 {
 
     GGcout << "Write image " << filename << GGendl;
-
-    m_copy_dose_gpu2cpu();
+    GGcout << "Size : " << dose.data_h.nx * dose.data_h.ny * dose.data_h.nz << GGendl;
+    if ( m_params.data_h.device_target == GPU_DEVICE )
+        m_copy_dose_gpu2cpu();
 
     ImageReader::record3Dimage (
         filename,

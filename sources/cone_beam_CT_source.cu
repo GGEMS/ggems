@@ -26,8 +26,7 @@
 
 __host__ __device__ void cone_beam_ct_source( ParticlesData particles_data,
   ui32 id, f32 px, f32 py, f32 pz, ui8 direction_option, f32 dx, f32 dy, f32 dz,
-  ui8 type, f64 *spectrumE, f64 *spectrumCDF, ui32 nbins, f32 aperture,
-  f32 hfoc, f32 vfoc )
+  ui8 type, f64 *spectrumE, f64 *spectrumCDF, ui32 nbins, f32 aperture )
 {
   if ( direction_option == POINT_SOURCE_ISOTROPIC )
   {
@@ -53,47 +52,28 @@ __host__ __device__ void cone_beam_ct_source( ParticlesData particles_data,
     f32 rdy = sinf( phi ) * sinf( theta );
     f32 rdz = cosf( theta );
 
+//         printf("DIRECTION %g %g %g\n",dx,dy,dz);
+//         printf("DIRECTION %g %g %g\n",rdx,rdy,rdz);
+//         printf("alea %f \n",JKISS32(particles_data, id));
+//         printf("alea %f \n",JKISS32(particles_data, id));
+//         printf("alea %f \n",JKISS32(particles_data, id));
+    // Apply rotation
+//         f32xyz d = fxyz_rotate_euler(make_f32xyz(rdx, rdy, rdz), make_f32xyz(dx, dy, dz));
     f32xyz d = rotateUz( make_f32xyz( rdx, rdy, rdz ), make_f32xyz ( dx, dy, dz ) );
 
+//         printf("DIRECTION %g %g %g\n",d.x,d.y,d.z);
     particles_data.dx[ id ] = d.x;
     particles_data.dy[ id ] = d.y;
     particles_data.dz[ id ] = d.z;
   }
 
-  // If the source is monochromatic the energy is stored immediately
-  if( nbins == 1 )
-  {
-    particles_data.E[ id ] = spectrumE[ 0 ];
-  }
-  else
-  {
-    // Get the position in spectrum
-    // Store rndm
-    f32 rndm = JKISS32( particles_data, id );
-    ui32 pos = binary_search( rndm, spectrumCDF, nbins );
-
-    // Compute an interpolated energy
-    f32 cdf0 = spectrumCDF[ pos ];
-    f32 cdf1 = spectrumCDF[ pos + 1 ];
-    f32 diff_cdf = cdf1 - cdf0;
-    f32 ene0 = spectrumE[ pos ];
-    f32 ene1 = spectrumE[ pos + 1 ];
-    f32 diff_ene = ene1 - ene0;
-    particles_data.E[ id ] = ( rndm - cdf0 ) / diff_cdf * diff_ene + ene0;
-  }
-
-  // Get 2 randoms for each focal distance
-  f32 rndmPosV = JKISS32( particles_data, id );
-  f32 rndmPosH = JKISS32( particles_data, id );
-  rndmPosV *= vfoc;
-  rndmPosH *= hfoc;
-  rndmPosV -= vfoc / 2.0;
-  rndmPosH -= hfoc / 2.0;
+  ui32 pos = binary_search( JKISS32( particles_data, id ), spectrumCDF, nbins );
 
   // set particles
+  particles_data.E[ id ] = spectrumE[ pos ];
   particles_data.px[ id ] = px;
-  particles_data.py[ id ] = py + rndmPosH;
-  particles_data.pz[ id ] = pz + rndmPosV;
+  particles_data.py[ id ] = py;
+  particles_data.pz[ id ] = pz;
   particles_data.tof[ id ] = 0.0f;
   particles_data.endsimu[ id ] = PARTICLE_ALIVE;
   particles_data.next_discrete_process[ id ] = NO_PROCESS;
@@ -107,14 +87,13 @@ __host__ __device__ void cone_beam_ct_source( ParticlesData particles_data,
 
 __global__ void kernel_cone_beam_ct_source( ParticlesData particles_data,
   f32 px, f32 py, f32 pz, ui8 direction_option, f32 dx, f32 dy, f32 dz,
-  ui8 type, f64 *spectrumE, f64 *spectrumCDF, ui32 nbins, f32 aperture,
-  f32 hfoc, f32 vfoc )
+  ui8 type, f64 *spectrumE, f64 *spectrumCDF, ui32 nbins, f32 aperture )
 {
   const ui32 id = get_id();
   if( id >= particles_data.size ) return;
 
   cone_beam_ct_source( particles_data, id, px, py, pz, direction_option, dx,
-    dy, dz, type, spectrumE, spectrumCDF, nbins, aperture, hfoc, vfoc );
+    dy, dz, type, spectrumE, spectrumCDF, nbins, aperture );
 }
 
 ConeBeamCTSource::ConeBeamCTSource()
@@ -385,7 +364,7 @@ void ConeBeamCTSource::initialize( GlobalSimulationParameters params )
   m_params = params;
 
   // Handle GPU device
-  if( m_params.data_h.device_target == GPU_DEVICE && m_nb_of_energy_bins > 1 )
+  if( m_params.data_h.device_target == GPU_DEVICE && m_nb_of_energy_bins > 0 )
   {
     // GPU mem allocation
     HANDLE_ERROR( cudaMalloc( (void**)&m_spectrumE_d,
@@ -413,7 +392,7 @@ void ConeBeamCTSource::get_primaries_generator( Particles particles )
     {
       cone_beam_ct_source( particles.data_h, id, m_px, m_py, m_pz,
         m_direction_option, m_dx, m_dy, m_dz, m_particle_type, m_spectrumE_h,
-        m_spectrumCDF_h, m_nb_of_energy_bins, m_aperture, m_hfoc, m_vfoc );
+        m_spectrumCDF_h, m_nb_of_energy_bins, m_aperture );
       ++id;
     }
   }
@@ -428,8 +407,7 @@ void ConeBeamCTSource::get_primaries_generator( Particles particles )
 
     kernel_cone_beam_ct_source<<<grid, threads>>>( particles.data_d, m_px, m_py,
       m_pz, m_direction_option, m_dx, m_dy, m_dz, m_particle_type,
-      m_spectrumE_d, m_spectrumCDF_d, m_nb_of_energy_bins, m_aperture, m_hfoc,
-      m_vfoc );
+      m_spectrumE_d, m_spectrumCDF_d, m_nb_of_energy_bins,m_aperture );
     cuda_error_check( "Error ", " kernel_cone_beam_ct_source" );
   }
     GGcout<<__LINE__ << GGendl;

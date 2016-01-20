@@ -205,10 +205,10 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
         ivoxsize.x = 1.0 / vol.spacing_x;
         ivoxsize.y = 1.0 / vol.spacing_y;
         ivoxsize.z = 1.0 / vol.spacing_z;
-        ui16xyzw index_phantom;
-        index_phantom.x = ui16 ( ( pos.x+vol.off_x ) * ivoxsize.x );
-        index_phantom.y = ui16 ( ( pos.y+vol.off_y ) * ivoxsize.y );
-        index_phantom.z = ui16 ( ( pos.z+vol.off_z ) * ivoxsize.z );
+        ui32xyzw index_phantom;
+        index_phantom.x = ui16 ( ( pos.x - vol.off_x ) * ivoxsize.x );
+        index_phantom.y = ui16 ( ( pos.y - vol.off_y ) * ivoxsize.y );
+        index_phantom.z = ui16 ( ( pos.z - vol.off_z ) * ivoxsize.z );
         index_phantom.w = index_phantom.z*vol.nb_vox_x*vol.nb_vox_y
                           + index_phantom.y*vol.nb_vox_x
                           + index_phantom.x; // linear index
@@ -422,10 +422,10 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
         ivoxsize.x = 1.0 / vol.spacing_x;
         ivoxsize.y = 1.0 / vol.spacing_y;
         ivoxsize.z = 1.0 / vol.spacing_z;
-        ui16xyzw index_phantom;
-        index_phantom.x = ui16 ( ( pos.x+vol.off_x ) * ivoxsize.x );
-        index_phantom.y = ui16 ( ( pos.y+vol.off_y ) * ivoxsize.y );
-        index_phantom.z = ui16 ( ( pos.z+vol.off_z ) * ivoxsize.z );
+        ui32xyzw index_phantom;
+        index_phantom.x = ui16 ( ( pos.x-vol.off_x ) * ivoxsize.x );
+        index_phantom.y = ui16 ( ( pos.y-vol.off_y ) * ivoxsize.y );
+        index_phantom.z = ui16 ( ( pos.z-vol.off_z ) * ivoxsize.z );
         index_phantom.w = index_phantom.z*vol.nb_vox_x*vol.nb_vox_y
                           + index_phantom.y*vol.nb_vox_x
                           + index_phantom.x; // linear index
@@ -508,23 +508,23 @@ __host__ __device__ void VPDN::track_photon_to_out ( ParticlesData &particles,
     dir.x = particles.dx[part_id];
     dir.y = particles.dy[part_id];
     dir.z = particles.dz[part_id];
-
+        printf("%s %d\n",__FUNCTION__,__LINE__);
     // Defined index phantom
     f32xyz ivoxsize;
     ivoxsize.x = 1.0 / vol.spacing_x;
     ivoxsize.y = 1.0 / vol.spacing_y;
     ivoxsize.z = 1.0 / vol.spacing_z;
-    ui16xyzw index_phantom;
-    index_phantom.x = ui16 ( ( pos.x+vol.off_x ) * ivoxsize.x );
-    index_phantom.y = ui16 ( ( pos.y+vol.off_y ) * ivoxsize.y );
-    index_phantom.z = ui16 ( ( pos.z+vol.off_z ) * ivoxsize.z );
+    ui32xyzw index_phantom;
+    index_phantom.x = ui16 ( ( pos.x-vol.off_x ) * ivoxsize.x );
+    index_phantom.y = ui16 ( ( pos.y-vol.off_y ) * ivoxsize.y );
+    index_phantom.z = ui16 ( ( pos.z-vol.off_z ) * ivoxsize.z );
     index_phantom.w = index_phantom.z*vol.nb_vox_x*vol.nb_vox_y
                       + index_phantom.y*vol.nb_vox_x
                       + index_phantom.x; // linear index
 
     // Get the material that compose this volume
     ui16 mat_id = vol.values[index_phantom.w];
-
+        printf("%s %d\n",__FUNCTION__,__LINE__);
     //// Find next discrete interaction ///////////////////////////////////////
 
     photon_get_next_interaction ( particles, parameters, photon_CS_table, mat_id, part_id );
@@ -533,14 +533,14 @@ __host__ __device__ void VPDN::track_photon_to_out ( ParticlesData &particles,
     ui8 next_discrete_process = particles.next_discrete_process[part_id];
 
     //// Get the next distance boundary volume /////////////////////////////////
-
+printf("%s %d\n",__FUNCTION__,__LINE__);
     f32 vox_xmin = index_phantom.x*vol.spacing_x;
     f32 vox_ymin = index_phantom.y*vol.spacing_y;
     f32 vox_zmin = index_phantom.z*vol.spacing_z;
     f32 vox_xmax = vox_xmin + vol.spacing_x;
     f32 vox_ymax = vox_ymin + vol.spacing_y;
     f32 vox_zmax = vox_zmin + vol.spacing_z;
-
+printf("%s %d\n",__FUNCTION__,__LINE__);
     f32 boundary_distance = hit_ray_AABB ( pos, dir, vox_xmin, vox_xmax,
                                            vox_ymin, vox_ymax, vox_zmin, vox_zmax );
 
@@ -549,7 +549,7 @@ __host__ __device__ void VPDN::track_photon_to_out ( ParticlesData &particles,
         next_interaction_distance = boundary_distance + EPSILON3; // Overshoot
         next_discrete_process = GEOMETRY_BOUNDARY;
     }
-
+printf("%s %d\n",__FUNCTION__,__LINE__);
     //// Move particle //////////////////////////////////////////////////////
 
     pos = fxyz_add ( pos, fxyz_scale ( dir, next_interaction_distance ) );
@@ -569,7 +569,7 @@ __host__ __device__ void VPDN::track_photon_to_out ( ParticlesData &particles,
     }
 
     //// Apply discrete process //////////////////////////////////////////////////
-// printf("    --->   Process : %d (GEO %d (%g) CPT %d PE %d R %d)\n" ,next_discrete_process,GEOMETRY_BOUNDARY,boundary_distance,PHOTON_COMPTON,PHOTON_PHOTOELECTRIC,PHOTON_RAYLEIGH);
+printf("    --->   Process : %d (GEO %d (%g) CPT %d PE %d R %d)\n" ,next_discrete_process,GEOMETRY_BOUNDARY,boundary_distance,PHOTON_COMPTON,PHOTON_PHOTOELECTRIC,PHOTON_RAYLEIGH);
     if ( next_discrete_process != GEOMETRY_BOUNDARY )
     {
         // Resolve discrete process
@@ -630,11 +630,11 @@ __global__ void VPDN::kernel_device_track_to_in ( ParticlesData particles, f32 x
 
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
     if ( id >= particles.size ) return;
-//     printf ( "%d %s %d Part Pos  : %e %e %e -- %e %e %e -- %e \n",id,__FUNCTION__, __LINE__,particles.px[id], particles.py[id],particles.pz[id],particles.dx[id], particles.dy[id],particles.dz[id], particles.E[id] );
+    if(id==0)printf ( "%d %s %d Part Pos  : %e %e %e -- %e %e %e -- %e \n",id,__FUNCTION__, __LINE__,particles.px[id], particles.py[id],particles.pz[id],particles.dx[id], particles.dy[id],particles.dz[id], particles.E[id] );
     
     VPDN::track_to_in ( particles, xmin, xmax, ymin, ymax, zmin, zmax, id );
     
-//     printf ( "%d %s %d Part Pos  : %e %e %e -- %e %e %e -- %e \n",id,__FUNCTION__, __LINE__,particles.px[id], particles.py[id],particles.pz[id],particles.dx[id], particles.dy[id],particles.dz[id], particles.E[id] );
+    if(id==0)printf ( "%d %s %d Part Pos  : %e %e %e -- %e %e %e -- %e \n",id,__FUNCTION__, __LINE__,particles.px[id], particles.py[id],particles.pz[id],particles.dx[id], particles.dy[id],particles.dz[id], particles.E[id] );
 }
 
 __global__ void FuckOff(){
@@ -672,43 +672,16 @@ __global__ void VPDN::kernel_device_track_to_out ( ParticlesData particles,
     if ( id >= particles.size ) return;
 //     if(id==0) printf("OK K %d\n",particles.size);
     
-// 
-//     // For multivoxels navigation
-//     f32 randomnumbereIoni= -std::log ( JKISS32 ( particles, id ) ); // -log(RN)
-//     f32 randomnumbereBrem= -std::log ( JKISS32 ( particles, id ) ); // -log(RN)
-//     f32 freeLength = 0.0*mm;
-// 
-//     // Stepping loop
-//     while ( particles.endsimu[id] != PARTICLE_DEAD && particles.endsimu[id] != PARTICLE_FREEZE )
-//     {
-// 
-//         if ( particles.pname[id] == PHOTON )
-//         {
-//             VPDN::track_photon_to_out ( particles, vol, materials, photon_CS_table,electron_CS_table, parameters, dosi, id );
-//         }
-//         else if ( particles.pname[id] == ELECTRON )
-//         {
-//             VPDN::track_electron_to_out ( particles, vol, materials, photon_CS_table,electron_CS_table, parameters, dosi,randomnumbereIoni, randomnumbereBrem, freeLength, id );
-//         }
-// 
-//     }
 
     // For multivoxels navigation
     f32 randomnumbereIoni= -std::log ( JKISS32 ( particles, id ) ); // -log(RN)
     f32 randomnumbereBrem= -std::log ( JKISS32 ( particles, id ) ); // -log(RN)
     f32 freeLength = 0.0*mm;
-// // // printf("%s %d\n",__FUNCTION__,__LINE__);
-// GGcout << vol.off_x << "   ";
-// GGcout << vol.off_x + vol.spacing_x * vol.nb_vox_x << "   ";
-// GGcout << vol.off_y << "   ";
-// GGcout << vol.off_y + vol.spacing_y * vol.nb_vox_y << "   ";
-// GGcout << vol.off_z << "   ";
-// GGcout << vol.off_z + vol.spacing_z * vol.nb_vox_z << "   ";
 
 // Stepping loop
     while ( particles.endsimu[id] != PARTICLE_DEAD && particles.endsimu[id] != PARTICLE_FREEZE )
     {
-// if(id<10)printf("%s %d Part %d l %d Pos  : %e %e %e -- %e %e %e -- %e \n",__FUNCTION__, __LINE__,particles.pname[id],particles.level[id],particles.px[id], particles.py[id],particles.pz[id],particles.dx[id], particles.dy[id],particles.dz[id], particles.E[id]);
+if(id==0)printf("%s %d Part %d l %d Pos  : %e %e %e -- %e %e %e -- %e \n",__FUNCTION__, __LINE__,particles.pname[id],particles.level[id],particles.px[id], particles.py[id],particles.pz[id],particles.dx[id], particles.dy[id],particles.dz[id], particles.E[id]);
         if ( particles.pname[id] == PHOTON )
         {
 
@@ -723,7 +696,7 @@ __global__ void VPDN::kernel_device_track_to_out ( ParticlesData particles,
         // Condition if particle is dead and if it was a secondary
         if ( ( particles.endsimu[id]==PARTICLE_DEAD ) && ( particles.level[id]>PRIMARY ) )
         {
-
+        printf("%s %d\n",__FUNCTION__,__LINE__);
             particles.endsimu[id]=PARTICLE_ALIVE;
             particles.level[id]-=1;
 
@@ -754,7 +727,7 @@ __global__ void VPDN::kernel_device_track_to_out ( ParticlesData particles,
 
 
 //         break;
-//         // printf("%s %d\n",__FUNCTION__,__LINE__);
+        printf("%s %d\n",__FUNCTION__,__LINE__);
     }
 
 }
@@ -785,7 +758,7 @@ void VPDN::kernel_host_track_to_out ( ParticlesData particles,
 // Stepping loop
     while ( particles.endsimu[id] != PARTICLE_DEAD && particles.endsimu[id] != PARTICLE_FREEZE )
     {
-// printf("--->  %s %d Part %d %d l %d Pos  : %e %e %e -- %e %e %e -- %e \n",__FUNCTION__, __LINE__,id,particles.pname[id],particles.level[id],particles.px[id], particles.py[id],particles.pz[id],particles.dx[id], particles.dy[id],particles.dz[id], particles.E[id]);
+printf("--->  %s %d Part %d %d l %d Pos  : %e %e %e -- %e %e %e -- %e \n",__FUNCTION__, __LINE__,id,particles.pname[id],particles.level[id],particles.px[id], particles.py[id],particles.pz[id],particles.dx[id], particles.dy[id],particles.dz[id], particles.E[id]);
         if ( particles.pname[id] == PHOTON )
         {
 
@@ -898,7 +871,7 @@ void VoxPhanDosiNav::track_to_out ( Particles particles )
         ui32 id=0;
         while ( id<particles.size )
         {
-            /*if ( id%100==0 )*/ printf ( "Part : %d/%d\n",id,particles.size );
+            /*if ( id%1000==0 ) */printf ( "Part : %d/%d\n",id,particles.size );
 //            printf("\n\n\n");
 //     // printf("%s %d\n",__FUNCTION__,__LINE__);
             VPDN::kernel_host_track_to_out ( particles.data_h, m_phantom.data_h,

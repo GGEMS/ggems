@@ -623,7 +623,7 @@ __host__ __device__ void gLatCorrection ( f32xyz currentDir,f32 tPath,f32 zPath,
 
 
 
-__host__ __device__ void eMscScattering ( f32 tPath,f32 zPath,f32 currentRange,f32 currentLambda,f32 currentEnergy,f32 par1,f32 par2, ParticlesData &particles, int id, MaterialsTable materials, int mat, VoxVolumeData phantom,ui16xyzw index_phantom )
+__host__ __device__ void eMscScattering ( f32 tPath,f32 zPath,f32 currentRange,f32 currentLambda,f32 currentEnergy,f32 par1,f32 par2, ParticlesData &particles, int id, MaterialsTable materials, int mat, VoxVolumeData phantom,ui32xyzw index_phantom )
 {
 
 
@@ -703,7 +703,7 @@ __host__ __device__ void eMscScattering ( f32 tPath,f32 zPath,f32 currentRange,f
 
 
 // From Eric's code
-__host__ __device__ f32 GlobalMscScattering ( f32 GeomPath,f32 cutstep,f32 CurrentRange,f32 CurrentEnergy, f32 CurrentLambda, f32 dedxeIoni, f32 dedxeBrem, ElectronsCrossSectionTable d_table, int mat, ParticlesData &particles, int id,f32 par1,f32 par2, MaterialsTable materials,DoseData &dosi, ui16xyzw index_phantom, VoxVolumeData phantom,GlobalSimulationParametersData parameters )
+__host__ __device__ f32 GlobalMscScattering ( f32 GeomPath,f32 cutstep,f32 CurrentRange,f32 CurrentEnergy, f32 CurrentLambda, f32 dedxeIoni, f32 dedxeBrem, ElectronsCrossSectionTable d_table, int mat, ParticlesData &particles, int id,f32 par1,f32 par2, MaterialsTable materials,DoseData &dosi, ui32xyzw index_phantom, VoxVolumeData phantom,GlobalSimulationParametersData parameters )
 {
 // GGcout<< __FUNCTION__ << "  " << __LINE__ << GGendl;
 // for(int i = 0;i<phantom.number_of_voxels;i++){
