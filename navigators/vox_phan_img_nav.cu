@@ -109,14 +109,6 @@ __host__ __device__ void VPIN::track_to_out ( ParticlesData &particles,
                       + index_phantom.y*vol.nb_vox_x
                       + index_phantom.x; // linear index
 
-    if( index_phantom.x >= vol.nb_vox_x ||
-        index_phantom.y >= vol.nb_vox_y ||
-        index_phantom.z >= vol.nb_vox_z )
-    {
-        particles.endsimu[part_id] = PARTICLE_FREEZE;
-        return;
-    }
-
     // Get the material that compose this volume
     ui16 mat_id = vol.values[index_phantom.w];
 
