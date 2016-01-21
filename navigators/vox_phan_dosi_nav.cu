@@ -576,6 +576,8 @@ __host__ __device__ void VPDN::track_photon_to_out ( ParticlesData &particles,
 
 if (part_id>89220) printf("--->  %s %d %d Part %d l %d Pos  : %e %e %e -- %e %e %e -- %e \n",__FUNCTION__, __LINE__,part_id,particles.pname[part_id],particles.level[part_id],particles.px[part_id], particles.py[part_id],particles.pz[part_id],particles.dx[part_id], particles.dy[part_id],particles.dz[part_id], particles.E[part_id]);
 
+
+
     // Read position
     f32xyz pos;
     pos.x = particles.px[part_id];
@@ -608,6 +610,15 @@ if (part_id>89220) printf("--->  %s %d %d Part %d l %d Pos  : %e %e %e -- %e %e 
     index_phantom.w = index_phantom.z*vol.nb_vox_x*vol.nb_vox_y
                       + index_phantom.y*vol.nb_vox_x
                       + index_phantom.x; // linear index
+                      
+                      
+    if( (index_phantom.x == 41) ||
+        (index_phantom.y == 41) ||
+        (index_phantom.z == 41) )
+    {
+        particles.endsimu[part_id] = PARTICLE_FREEZE;
+        return;
+    }
                       
 //     printf("%s %d Part Pos  : %9.9f %9.9f %9.9f -- %e %e %e -- %e \n",__FUNCTION__, __LINE__,particles.px[part_id], particles.py[part_id],particles.pz[part_id],particles.dx[part_id], particles.dy[part_id],particles.dz[part_id], particles.E[part_id]);
     
