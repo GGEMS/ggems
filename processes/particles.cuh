@@ -166,6 +166,9 @@ public:
 
     Particles particles; // CPU and GPU stack
 
+    void m_copy_gpu2cpu();
+    void dump();
+
 private:
     bool m_check_mandatory();
 
@@ -174,6 +177,7 @@ private:
     void m_gpu_malloc_stack();
     void m_cpu_init_stack_seed ( ui32 seed );
     void m_copy_seed_cpu2gpu();
+
 
 };
 

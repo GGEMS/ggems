@@ -21,7 +21,6 @@ __host__ __device__ void photon_get_next_interaction ( ParticlesData &particles,
         PhotonCrossSectionTable photon_CS_table,
         ui16 mat_id, ui32 part_id )
 {
-//     printf("    ---> Distances : ");
     f32 next_interaction_distance = F32_MAX;
     ui8 next_discrete_process = 0;
     f32 interaction_distance;
@@ -31,15 +30,15 @@ __host__ __device__ void photon_get_next_interaction ( ParticlesData &particles,
     f32 energy = particles.E[part_id];
     ui32 E_index = binary_search ( energy, photon_CS_table.E_bins,
                                    photon_CS_table.nb_bins );
-
     // If photoelectric
     if ( parameters.physics_list[PHOTON_PHOTOELECTRIC] )
     {
         cross_section = get_CS_from_table ( photon_CS_table.E_bins, photon_CS_table.Photoelectric_Std_CS,
                                             energy, E_index, mat_id, photon_CS_table.nb_bins );
-        f32 alea = JKISS32 ( particles, part_id );
-        interaction_distance = -log ( alea ) / cross_section;
-//         printf("Energy : %g, PE %g %g %g ",energy,interaction_distance, alea, cross_section);
+        interaction_distance = -log ( JKISS32 ( particles, part_id ) ) / cross_section;
+
+        //printf( "pe: %4.7f, %4.7f, %4.7f, %4.7f %u\n", cross_section, energy, JKISS32 ( particles, part_id ), interaction_distance, mat_id );
+
         if ( interaction_distance < next_interaction_distance )
         {
             next_interaction_distance = interaction_distance;
@@ -53,7 +52,9 @@ __host__ __device__ void photon_get_next_interaction ( ParticlesData &particles,
         cross_section = get_CS_from_table ( photon_CS_table.E_bins, photon_CS_table.Compton_Std_CS,
                                             energy, E_index, mat_id, photon_CS_table.nb_bins );
         interaction_distance = -log ( JKISS32 ( particles, part_id ) ) / cross_section;
-//         printf("CPT %g ",interaction_distance);
+
+        //printf( "c: %4.7f, %4.7f, %4.7f, %4.7f %u\n", cross_section, energy, JKISS32 ( particles, part_id ), interaction_distance, mat_id );
+
         if ( interaction_distance < next_interaction_distance )
         {
             next_interaction_distance = interaction_distance;
@@ -67,14 +68,15 @@ __host__ __device__ void photon_get_next_interaction ( ParticlesData &particles,
         cross_section = get_CS_from_table ( photon_CS_table.E_bins, photon_CS_table.Rayleigh_Lv_CS,
                                             energy, E_index, mat_id, photon_CS_table.nb_bins );
         interaction_distance = -log ( JKISS32 ( particles, part_id ) ) / cross_section;
-//         printf("R %g ",interaction_distance);
+
+        //printf( "r: %4.7f, %4.7f, %4.7f, %4.7f %u\n", cross_section, energy, JKISS32 ( particles, part_id ), interaction_distance, mat_id );
+
         if ( interaction_distance < next_interaction_distance )
         {
             next_interaction_distance = interaction_distance;
             next_discrete_process = PHOTON_RAYLEIGH;
         }
     }
-//     printf("\n");
     // Store results
     particles.next_interaction_distance[part_id] = next_interaction_distance;
     particles.next_discrete_process[part_id] = next_discrete_process;

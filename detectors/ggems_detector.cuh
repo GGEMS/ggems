@@ -1,7 +1,7 @@
 // GGEMS Copyright (C) 2015
 
 /*!
- * \file detector_manager.cuh
+ * \file ggems_detector.cuh
  * \brief
  * \author J. Bert <bert.jul@gmail.com>
  * \version 0.1
@@ -11,32 +11,31 @@
  *
  */
 
-#ifndef DETECTORMANAGER_CUH
-#define DETECTORMANAGER_CUH
+#ifndef GGEMSDETECTOR_CUH
+#define GGEMSDETECTOR_CUH
 
 #include "global.cuh"
 #include "particles.cuh"
 
-class DetectorManager {
+class GGEMSDetector {
     public:
-        DetectorManager();
-        ~DetectorManager() {}
+        GGEMSDetector();
+        virtual ~GGEMSDetector() {}
 
         //void set_detector(VoxPhanImgNav &aPhantom);
-        void initialize(GlobalSimulationParameters params);
+        virtual void initialize(GlobalSimulationParameters params) = 0;
 
-        void track_to_in(Particles particles);
-        void track_to_out(Particles particles);
+        virtual void track_to_in(Particles particles) = 0;
+        virtual void track_to_out(Particles particles) = 0;
 
         void digitizer();
         void save_data(std::string filename);
 
         std::string get_detector_name();
 
-    private:
+    protected:
         //VoxPhanImgNav m_vox_phan_img;
         std::string m_detector_name;
-
 };
 
 #endif

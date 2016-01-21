@@ -20,7 +20,8 @@
 #include "particles.cuh"
 #include "cross_sections.cuh"
 #include "materials.cuh"
-#include "detector_manager.cuh"
+#include "ggems_detector.cuh"
+#include "ct_detector.cuh"
 #include "image_reader.cuh"
 #include "license.cuh"
 
@@ -89,7 +90,7 @@ private:
     GGEMSPhantom* m_phantom;
 
     // TODO Detector manager
-    DetectorManager m_detectors;
+    GGEMSDetector* m_detectors;
 
     // Main parameters
     void m_check_mandatory();

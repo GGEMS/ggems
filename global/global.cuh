@@ -138,7 +138,7 @@ typedef unsigned long int ui64;
 
 typedef unsigned char ui8;
 
-#define F32_MAX FLT_MAX;
+#define F32_MAX (FLT_MAX);
 #define F64_MAX DBL_MAX;
 
 #else
