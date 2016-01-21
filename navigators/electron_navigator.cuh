@@ -55,9 +55,9 @@ __host__ __device__ f32 eLoss ( f32 LossLength, f32 &Ekine, f32 dedxeIoni, f32 d
 
 __host__ __device__ f32 eFluctuation ( f32 meanLoss,f32 cutEnergy, MaterialsTable materials, ParticlesData &particles, int id, int id_mat );
 
-__host__ __device__ f32 GlobalMscScattering ( f32 GeomPath,f32 cutstep,f32 CurrentRange,f32 CurrentEnergy, f32 CurrentLambda, f32 dedxeIoni, f32 dedxeBrem, ElectronsCrossSectionTable d_table, int mat, ParticlesData &particles, int id,f32 par1,f32 par2, MaterialsTable materials,DoseData &dosi, ui16xyzw index_phantom, VoxVolumeData phantom,GlobalSimulationParametersData parameters );
+__host__ __device__ f32 GlobalMscScattering ( f32 GeomPath,f32 cutstep,f32 CurrentRange,f32 CurrentEnergy, f32 CurrentLambda, f32 dedxeIoni, f32 dedxeBrem, ElectronsCrossSectionTable d_table, int mat, ParticlesData &particles, int id,f32 par1,f32 par2, MaterialsTable materials,DoseData &dosi, ui32xyzw index_phantom, VoxVolumeData phantom,GlobalSimulationParametersData parameters );
 
-__host__ __device__ void eMscScattering ( f32 tPath,f32 zPath,f32 currentRange,f32 currentLambda,f32 currentEnergy,f32 par1,f32 par2, ParticlesData &particles, int id, MaterialsTable materials, int mat, VoxVolumeData phantom,ui16xyzw index_phantom );
+__host__ __device__ void eMscScattering ( f32 tPath,f32 zPath,f32 currentRange,f32 currentLambda,f32 currentEnergy,f32 par1,f32 par2, ParticlesData &particles, int id, MaterialsTable materials, int mat, VoxVolumeData phantom,ui32xyzw index_phantom );
 
 __host__ __device__ void gLatCorrection ( f32xyz currentDir,f32 tPath,f32 zPath,f32 currentTau,f32 phi,f32 sinth, ParticlesData &particles, int id, f32 safety );
 

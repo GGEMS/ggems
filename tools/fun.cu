@@ -84,8 +84,13 @@ __host__ __device__ f32 loglog_interpolation ( f32 x, f32 x0, f32 y0, f32 x1, f3
 __host__ __device__ f32 linear_interpolation ( f32 xa,f32 ya, f32 xb, f32 yb, f32 x )
 {
     // Taylor young 1st order
-    if ( xa > x ) return ya;
-    if ( xb < x ) return yb;
+//     if ( xa > x ) return ya;
+//     if ( xb < x ) return yb;
+    
+    if (xa > xb) return yb;
+    if (xa >= x) return ya;
+    if (xb <= x) return yb;
+    
     return ya + ( x-xa ) * ( yb-ya ) / ( xb-xa );
 }
 

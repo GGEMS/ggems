@@ -101,11 +101,18 @@ __host__ __device__ void e_read_CS_table (
     f32 randomnumbereIoni,
     GlobalSimulationParametersData parameters )
 {
+
+    if(parameters.cs_table_min_E > energy) energy = parameters.cs_table_min_E+ 1.*eV;
+
 // GGcout<< __FUNCTION__ << "  " << __LINE__ << GGendl;
 //     printf("energy %e mat %d id %d  mat %d d_table.nb_bins %u \n",energy,mat,id,mat,d_table.nb_bins);
 //     printf("energy %e mat %d id %d  mat %d d_table.nb_bins %u \n",energy,mat,id,mat,d_table.nb_bins);
 //     table_index = binary_search(energy,d_table.E,d_table.nb_bins) + mat*d_table.nb_bins;
     table_index = binary_search ( energy,d_table.E, ( mat+1 ) *d_table.nb_bins,mat*d_table.nb_bins );
+    
+    // Correction when E < min E in the table
+//     if(table_index>0) if(energy > d_table.E[table_index-1] ) { energy = d_table.E[table_index]; table_index ++;}
+    
 // GGcout<< __FUNCTION__ << "  " << __LINE__ << GGendl;
     if ( parameters.physics_list[ELECTRON_IONISATION] == ENABLED )
     {
@@ -141,7 +148,7 @@ __host__ __device__ void e_read_CS_table (
 
     erange = linear_interpolation ( d_table.E[table_index-1],d_table.eRange[table_index-1], d_table.E[table_index], d_table.eRange[table_index], energy );
 
-
+// printf("d_table.E[table_index-1] %g ,d_table.eRange[table_index-1] %g , d_table.E[table_index] %g, d_table.eRange[table_index] %g , energy %g erange %g table_index %d\n",d_table.E[table_index-1],d_table.eRange[table_index-1], d_table.E[table_index], d_table.eRange[table_index], energy, erange,table_index);
 //         printf("d_table.E[table_index-1] %e ,d_table.eRange[table_index-1] %e , d_table.E[table_index] %e, d_table.eRange[table_index] %e table_index %d\n",d_table.E[table_index-1],d_table.eRange[table_index-1], d_table.E[table_index], d_table.eRange[table_index],table_index);
 
 
@@ -173,6 +180,9 @@ __host__ __device__ f32 LossApproximation ( f32 StepLength, f32 Ekine, f32 erang
     f32  range,perteApp = 0;
     range=erange;
     range-=StepLength;
+    
+//     printf("StepLength %g erange %g Ekine %g\n",StepLength, erange, Ekine);
+    
     if ( range >1.*nm )
         perteApp=GetEnergy ( range, d_table, mat );
     else
@@ -336,20 +346,29 @@ __host__ __device__ f32 eLoss ( f32 LossLength, f32 &Ekine, f32 dedxeIoni, f32 d
 {
     f32  perteTot=0.;//,perteBrem=0.,perteIoni=0.;
     perteTot=LossLength* ( dedxeIoni + dedxeBrem );
-
+    
+//     printf("perteTot %g  ",perteTot);
+    
     if ( perteTot>Ekine*0.01 ) // 0.01 is xi
         perteTot=LossApproximation ( LossLength, Ekine, erange, d_table, mat, id );
+    
+//     printf("perteTot %g  ",perteTot);
 
 /// \warning ADD for eFluctuation
     if ( dedxeIoni>0. )
         perteTot=eFluctuation ( perteTot,parameters.electron_cut,materials,particles,id,mat );
 
+//     printf("perteTot %g  ",perteTot);
+    
+    
     if ( ( Ekine-perteTot ) <= ( 1.*eV ) )
     {
         perteTot=Ekine;
 
     }
 
+//     printf("perteTot %g, LossLength %g,  ( dedxeIoni %g  dedxeBrem %g) Ekine %g \n" ,perteTot, LossLength, dedxeIoni,  dedxeBrem, Ekine );
+    
     Ekine-=perteTot;
 
     return  perteTot;
@@ -623,7 +642,7 @@ __host__ __device__ void gLatCorrection ( f32xyz currentDir,f32 tPath,f32 zPath,
 
 
 
-__host__ __device__ void eMscScattering ( f32 tPath,f32 zPath,f32 currentRange,f32 currentLambda,f32 currentEnergy,f32 par1,f32 par2, ParticlesData &particles, int id, MaterialsTable materials, int mat, VoxVolumeData phantom,ui16xyzw index_phantom )
+__host__ __device__ void eMscScattering ( f32 tPath,f32 zPath,f32 currentRange,f32 currentLambda,f32 currentEnergy,f32 par1,f32 par2, ParticlesData &particles, int id, MaterialsTable materials, int mat, VoxVolumeData phantom,ui32xyzw index_phantom )
 {
 
 
@@ -694,7 +713,9 @@ __host__ __device__ void eMscScattering ( f32 tPath,f32 zPath,f32 currentRange,f
 //                           + index_phantom.y*phantom.size_in_vox.x
 //                           + index_phantom.x; // linear index
 
-    f32 safety = GetSafety ( position, direction,index_phantom,make_f32xyz ( phantom.spacing_x,phantom.spacing_y,phantom.spacing_z ) ) ;
+    f32 safety = GetSafety ( position, direction,index_phantom,
+    make_f32xyz ( phantom.spacing_x,phantom.spacing_y,phantom.spacing_z ),
+    make_f32xyz (phantom.off_x,phantom.off_y,phantom.off_z) ) ;
 
 //     Comment next line to disable lateral correction
     gLatCorrection ( currentDir,tPath,zPath,currentTau,phi,sinth,particles,id,safety );
@@ -703,7 +724,7 @@ __host__ __device__ void eMscScattering ( f32 tPath,f32 zPath,f32 currentRange,f
 
 
 // From Eric's code
-__host__ __device__ f32 GlobalMscScattering ( f32 GeomPath,f32 cutstep,f32 CurrentRange,f32 CurrentEnergy, f32 CurrentLambda, f32 dedxeIoni, f32 dedxeBrem, ElectronsCrossSectionTable d_table, int mat, ParticlesData &particles, int id,f32 par1,f32 par2, MaterialsTable materials,DoseData &dosi, ui16xyzw index_phantom, VoxVolumeData phantom,GlobalSimulationParametersData parameters )
+__host__ __device__ f32 GlobalMscScattering ( f32 GeomPath,f32 cutstep,f32 CurrentRange,f32 CurrentEnergy, f32 CurrentLambda, f32 dedxeIoni, f32 dedxeBrem, ElectronsCrossSectionTable d_table, int mat, ParticlesData &particles, int id,f32 par1,f32 par2, MaterialsTable materials,DoseData &dosi, ui32xyzw index_phantom, VoxVolumeData phantom,GlobalSimulationParametersData parameters )
 {
 // GGcout<< __FUNCTION__ << "  " << __LINE__ << GGendl;
 // for(int i = 0;i<phantom.number_of_voxels;i++){
@@ -833,6 +854,7 @@ __host__ __device__ SecParticle eSampleSecondarieElectron ( f32 CutEnergy, Parti
     ElecDir=rotateUz ( ElecDir,currentDir );
 
 //     deltaEnergy = __int2f32_rn(__f322int_rn(deltaEnergy));
+// if(deltaEnergy > 10.* MeV) printf("deltaEnergy %g cut %g E %g electron_mass_c2 %g x %g\n",deltaEnergy,CutEnergy,particles.E[id],electron_mass_c2,x);
     particles.E[id]-=deltaEnergy;
 //     if(id==7949384) printf(" delta %f ",deltaEnergy);
     if ( particles.E[id]>0.0 )
@@ -957,8 +979,9 @@ __host__ __device__ f32 gTransformToGeom ( f32 TPath,f32 currentRange,f32 curren
 
 __host__ __device__ f32 GetEnergy ( f32 Range, ElectronsCrossSectionTable d_table, int mat )
 {
-
     int index = binary_search ( Range, d_table.eRange, d_table.nb_bins*mat+d_table.nb_bins, d_table.nb_bins*mat );
+    
+//     printf("Range %g, d_table.nb_bins*mat+d_table.nb_bins %d, d_table.nb_bins*mat %d index %d\n",Range, d_table.nb_bins*mat+d_table.nb_bins, d_table.nb_bins*mat,index);
 
     f32 newRange = linear_interpolation ( d_table.eRange[index-1], d_table.E[index-1], d_table.eRange[index], d_table.E[index], Range );
 
@@ -1235,7 +1258,7 @@ void eSampleSecondarieGamma ( f32 cutEnergy, ParticlesData &particles, int id, M
     particles.dx[id]=currentDir.x;
     particles.dy[id]=currentDir.y;
     particles.dz[id]=currentDir.z;
-
+//    /* if(particles.E[id] > 10.* MeV) */printf("gammaEnergy %g cut %g E %g\n",gammaEnergy,cutEnergy,particles.E[id]);
     particles.E[id]=particles.E[id]-gammaEnergy;
 
 }

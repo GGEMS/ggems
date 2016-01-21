@@ -82,8 +82,9 @@ __host__ __device__ f32 hit_ray_OBB(f32xyz ray_p, f32xyz ray_d,
 
                                     
 __host__ __device__ f32 GetSafety(f32xyz Place, f32xyz direction,
-                               ui16xyzw index_phantom,
-                               f32xyz voxel_size);
+                               ui32xyzw index_phantom,
+                               f32xyz voxel_size,
+                               f32xyz offset);
 ////////////////////////////////////////////////////////////////////////////////////////
 
 /// Function with double precision /////////////////////////////////////////////////////////
