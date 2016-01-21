@@ -1,7 +1,7 @@
 // GGEMS Copyright (C) 2015
 
 /*!
- * \file detector_manager.cu
+ * \file ggems_detector.cu
  * \brief
  * \author J. Bert <bert.jul@gmail.com>
  * \version 0.1
@@ -11,12 +11,12 @@
  *
  */
 
-#ifndef DETECTORMANAGER_CU
-#define DETECTORMANAGER_CU
+#ifndef GGEMSDETECTOR_CU
+#define GGEMSDETECTOR_CU
 
-#include "detector_manager.cuh"
+#include "ggems_detector.cuh"
 
-DetectorManager::DetectorManager() {
+GGEMSDetector::GGEMSDetector() {
     m_detector_name = "";
 }
 
@@ -27,7 +27,7 @@ void DetectorManager::set_detector(VoxPhanImgNav &aPhantom) {
 }
 */
 
-void DetectorManager::initialize(GlobalSimulationParameters params) {
+void GGEMSDetector::initialize(GlobalSimulationParameters params) {
 
     /*
     // Init phantom that including also data copy to GPU
@@ -55,7 +55,7 @@ void DetectorManager::initialize(GlobalSimulationParameters params) {
 }
 
 // Move particle to the phantom boundary
-void DetectorManager::track_to_in(Particles particles) {
+void GGEMSDetector::track_to_in(Particles particles) {
 /*
     if (m_phantom_name == "VoxPhanImgNav") {
         m_vox_phan_img.track_to_in(particles);
@@ -65,7 +65,7 @@ void DetectorManager::track_to_in(Particles particles) {
 }
 
 // Track particle within the phantom
-void DetectorManager::track_to_out(Particles particles) {
+void GGEMSDetector::track_to_out(Particles particles) {
 /*
     if (m_phantom_name == "VoxPhanImgNav") {
         m_vox_phan_img.track_to_out(particles, m_materials_mng.materials, m_cross_sections_mng.photon_CS);
@@ -73,13 +73,13 @@ void DetectorManager::track_to_out(Particles particles) {
 */
 }
 
-void DetectorManager::digitizer()
+void GGEMSDetector::digitizer()
 {
 
 
 }
 
-std::string DetectorManager::get_detector_name() {
+std::string GGEMSDetector::get_detector_name() {
     return m_detector_name;
 }
 

@@ -39,9 +39,6 @@ bool VoxelizedPhantom::m_check_mandatory() {
 // Copy the phantom to the GPU
 void VoxelizedPhantom::m_copy_phantom_cpu2gpu() {
 
-    GGcout << "Phantom allocation " << GGendl; 
-    GGcout << " --> " << data_h.number_of_voxels << GGendl;
-//     GGcout << " --> " << 
     // Mem allocation
     HANDLE_ERROR( cudaMalloc((void**) &data_d.values, data_h.number_of_voxels*sizeof(ui16)) );
     // Copy data
@@ -59,7 +56,7 @@ void VoxelizedPhantom::m_copy_phantom_cpu2gpu() {
     data_d.off_x = data_h.off_x;
     data_d.off_y = data_h.off_y;
     data_d.off_z = data_h.off_z;
-    
+
     data_d.xmin = data_h.xmin;
     data_d.xmax = data_h.xmax;
     data_d.ymin = data_h.ymin;
@@ -236,7 +233,6 @@ void VoxelizedPhantom::load_from_raw(std::string volume_name, std::string range_
 void VoxelizedPhantom::load_from_mhd(std::string volume_name, std::string range_name) {
 
     /////////////// First read the MHD file //////////////////////
-
     std::string line, key;
     i32 nx=-1, ny=-1, nz=-1;
     f32 sx=0, sy=0, sz=0;

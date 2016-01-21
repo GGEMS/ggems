@@ -299,7 +299,7 @@ static const ui32 RCON[10] =
 
 License::License()
 {
-    // Init licence info
+    // Init license info
     info.clearence = false;
     info.read = false;
     info.expired_day = "00";
@@ -616,7 +616,7 @@ void License::read_license ( std::string inputname )
 
     // Print out
     if (false) {
-        printf("GGEMS Licence\n");
+        printf("GGEMS License\n");
         printf("Institution: %s\n", info.institution.c_str());
         printf("Start date: %s %s %s\n", info.start_day.c_str(), info.start_month.c_str(), info.start_year.c_str());
         printf("Expired date: %s %s %s\n", info.expired_day.c_str(), info.expired_month.c_str(), info.expired_year.c_str());

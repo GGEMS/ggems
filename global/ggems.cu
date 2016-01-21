@@ -292,6 +292,12 @@ void GGEMS::set_phantom ( GGEMSPhantom* aPhantom )
     m_phantom = aPhantom;
 }
 
+/// Detector
+void GGEMS::set_detector( GGEMSDetector* aDetector )
+{
+  m_detector = aDetector;
+}
+
 /// Utils
 
 // Display run time
@@ -397,14 +403,15 @@ void GGEMS::m_copy_parameters_cpu2gpu()
 // Init simualtion
 void GGEMS::init_simulation()
 {
-    GGcout << "ok "<< GGendl;
+
     // License and banner
     if (!m_license.info.clearence)
     {
         print_error("Your license has expired or is invalid!\n");
-//         exit_simulation();
+        exit_simulation();
     }
-//     print_banner(m_license.info.institution, m_license.info.expired_day, m_license.info.expired_month, m_license.info.expired_year, "V1.0");
+    print_banner(m_license.info.institution, m_license.info.expired_day, m_license.info.expired_month, m_license.info.expired_year, "V1.0");
+
 
     // Check
     m_check_mandatory();
@@ -422,8 +429,12 @@ void GGEMS::init_simulation()
     // CPU PRNG
     srand ( m_parameters.data_h.seed );
 
-    // Get the number of batch required
     m_parameters.data_h.nb_of_batches = ui32 ( ( f32 ) m_parameters.data_h.nb_of_particles / ( f32 ) m_parameters.data_h.size_of_particles_batch );
+
+    if( m_parameters.data_h.nb_of_particles % m_parameters.data_h.size_of_particles_batch )
+    {
+      m_parameters.data_h.nb_of_batches++;
+    }
 
     // Init the GPU if need
     if ( m_parameters.data_h.device_target == GPU_DEVICE )
@@ -446,10 +457,10 @@ void GGEMS::init_simulation()
     m_phantom->initialize ( m_parameters );
 
     /// Init Particles Stack /////////////////////////
+//     m_detector->initialize ( m_parameters );
+
+    /// Init Particles Stack /////////////////////////
     m_particles_manager.initialize ( m_parameters );
-
-
-    // TODO DETECTOR
 
 
     /*
@@ -522,37 +533,42 @@ void GGEMS::init_simulation()
 void GGEMS::start_simulation()
 {
 
-    GGcout << m_parameters.data_h.nb_of_batches << " batches of " << m_parameters.data_h.nb_of_particles << GGendl;
-
     // Main loop
     ui32 ibatch=0;
     while ( ibatch < m_parameters.data_h.nb_of_batches )
     {
 
+        GGcout << "----> Launching batch " << ibatch << " ..." << GGendl;
         // Get primaries
-        m_source->get_primaries_generator ( m_particles_manager.particles );
+        GGcout << "      Generating the particles ..." << GGendl;
+        m_source->get_primaries_generator( m_particles_manager.particles );
 
         // TODO If phantom
-        GGcout<< "ok " << GGendl;
         // Nav between source to phantom
-        m_phantom->track_to_in ( m_particles_manager.particles );
+        GGcout << "      Navigation between the source and the phantom ..."
+          << GGendl;
+        m_phantom->track_to_in( m_particles_manager.particles );
 
-        GGcout<< "Track to In ... ok " << GGendl;
         // Nav within the phantom
-        m_phantom->track_to_out ( m_particles_manager.particles );
-        GGcout<< "Track to Out ... ok " << GGendl;
-//         GGcout<< "ok " << GGendl;
+        GGcout << "      Navigation within the phantom ..."
+          << GGendl;
+        m_phantom->track_to_out( m_particles_manager.particles );
 
         // TODO If detector
 
+        if ( m_parameters.data_h.device_target == GPU_DEVICE )
+        {
+          ;//m_particles_manager.m_copy_gpu2cpu();
+        }
+        //m_particles_manager.dump();
         // Nav between phantom to detector
-        m_detectors.track_to_in ( m_particles_manager.particles );
+        /*m_detectors.track_to_in ( m_particles_manager.particles );
 
         // Nav within the detector
         m_detectors.track_to_out ( m_particles_manager.particles );
 
         // Process hit, coincidences, etc.
-        m_detectors.digitizer();
+        m_detectors.digitizer();*/
 
         // Export data
         //m_detectors.save_data("toto.dat");

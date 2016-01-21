@@ -54,8 +54,8 @@ __host__ __device__ void VPIN::track_to_in ( ParticlesData &particles, f32 xmin,
             return;
         }
         // move the particle slightly inside the volume
-        pos = fxyz_add ( pos, fxyz_scale ( pos, dist+EPSILON6 ) );
-
+        pos = fxyz_add ( pos, fxyz_scale ( dir, dist+EPSILON3 ) );
+    /*printf( "%4.7f %4.7f %4.7f\n", pos.x, pos.y, pos.z );*/
         // TODO update tof
         // ...
     }
@@ -64,7 +64,7 @@ __host__ __device__ void VPIN::track_to_in ( ParticlesData &particles, f32 xmin,
     particles.px[id] = pos.x;
     particles.py[id] = pos.y;
     particles.pz[id] = pos.z;
-
+    /*printf( "%4.7f %4.7f %4.7f\n", pos.x, pos.y, pos.z );*/
 }
 
 
@@ -75,8 +75,6 @@ __host__ __device__ void VPIN::track_to_out ( ParticlesData &particles,
         GlobalSimulationParametersData parameters,
         ui32 part_id )
 {
-
-
     // Read position
     f32xyz pos;
     pos.x = particles.px[part_id];
@@ -94,16 +92,40 @@ __host__ __device__ void VPIN::track_to_out ( ParticlesData &particles,
     ivoxsize.x = 1.0 / vol.spacing_x;
     ivoxsize.y = 1.0 / vol.spacing_y;
     ivoxsize.z = 1.0 / vol.spacing_z;
-    ui16xyzw index_phantom;
-    index_phantom.x = ui16 ( ( pos.x+vol.off_x ) * ivoxsize.x );
-    index_phantom.y = ui16 ( ( pos.y+vol.off_y ) * ivoxsize.y );
-    index_phantom.z = ui16 ( ( pos.z+vol.off_z ) * ivoxsize.z );
+    ui32xyzw index_phantom;
+    index_phantom.x = ui32 ( ( pos.x-vol.off_x ) * ivoxsize.x );
+    index_phantom.y = ui32 ( ( pos.y-vol.off_y ) * ivoxsize.y );
+    index_phantom.z = ui32 ( ( pos.z-vol.off_z ) * ivoxsize.z );
+
+    //if( part_id == 7071 )
+    //{
+      //printf( "index: %hu %hu %hu\n", index_phantom.x, index_phantom.y, index_phantom.z );
+      //printf( "position: %4.7f %4.7f %4.7f\n", pos.x, pos.y, pos.z );
+      //printf( "offset: %4.7f %4.7f %4.7f\n", vol.off_x, vol.off_y, vol.off_z );
+      //printf( "ivoxsize: %4.7f %4.7f %4.7f\n", ivoxsize.x, ivoxsize.y, ivoxsize.z );
+    //}
+
     index_phantom.w = index_phantom.z*vol.nb_vox_x*vol.nb_vox_y
                       + index_phantom.y*vol.nb_vox_x
                       + index_phantom.x; // linear index
 
+    if( index_phantom.x >= vol.nb_vox_x ||
+        index_phantom.y >= vol.nb_vox_y ||
+        index_phantom.z >= vol.nb_vox_z )
+    {
+        particles.endsimu[part_id] = PARTICLE_FREEZE;
+        return;
+    }
+
     // Get the material that compose this volume
     ui16 mat_id = vol.values[index_phantom.w];
+
+    /*printf( "index total: %u\n", index_phantom.w );
+    printf( "id: %d\n", part_id );
+    printf( "position: %4.7f %4.7f %4.7f\n", pos.x, pos.y, pos.z );
+    printf( "energy: %4.7f\n", particles.E[part_id]/keV );*/
+
+    /*printf( "size: %hu %hu\n", vol.nb_vox_x, vol.nb_vox_y );*/
 
     //// Find next discrete interaction ///////////////////////////////////////
 
@@ -114,9 +136,9 @@ __host__ __device__ void VPIN::track_to_out ( ParticlesData &particles,
 
     //// Get the next distance boundary volume /////////////////////////////////
 
-    f32 vox_xmin = index_phantom.x*vol.spacing_x;
-    f32 vox_ymin = index_phantom.y*vol.spacing_y;
-    f32 vox_zmin = index_phantom.z*vol.spacing_z;
+    f32 vox_xmin = index_phantom.x*vol.spacing_x + vol.off_x;
+    f32 vox_ymin = index_phantom.y*vol.spacing_y + vol.off_y;
+    f32 vox_zmin = index_phantom.z*vol.spacing_z + vol.off_z;
     f32 vox_xmax = vox_xmin + vol.spacing_x;
     f32 vox_ymax = vox_ymin + vol.spacing_y;
     f32 vox_zmax = vox_zmin + vol.spacing_z;
@@ -124,18 +146,44 @@ __host__ __device__ void VPIN::track_to_out ( ParticlesData &particles,
     f32 boundary_distance = hit_ray_AABB ( pos, dir, vox_xmin, vox_xmax,
                                            vox_ymin, vox_ymax, vox_zmin, vox_zmax );
 
+    /*printf( "boundary_distance: %4.7f %4.7f %4.7f %4.7f %4.7f %4.7f %4.7f\n", vox_xmin, vox_xmax, vox_ymin, vox_ymax, vox_zmin, vox_zmax, boundary_distance );*/
+
     if ( boundary_distance <= next_interaction_distance )
     {
+        //if( part_id == 4011 )
+         //printf( "in %4.7f\n", next_interaction_distance );
         next_interaction_distance = boundary_distance + EPSILON3; // Overshoot
         next_discrete_process = GEOMETRY_BOUNDARY;
     }
+    else if( boundary_distance == FLT_MAX )
+    {
+      next_interaction_distance = EPSILON3;
+      next_discrete_process = GEOMETRY_BOUNDARY;
+    }
+
+   /* if( part_id == 4011 )
+    {
+      printf( "position: %4.7f %4.7f %4.7f\n", pos.x, pos.y, pos.z );
+      printf( "boundary_distance: %4.7f\n", boundary_distance );
+      printf( "next %4.7f\n", next_interaction_distance );
+    }*/
 
     //// Move particle //////////////////////////////////////////////////////
-
     pos = fxyz_add ( pos, fxyz_scale ( dir, next_interaction_distance ) );
 
     // Update TOF - TODO
     //particles.tof[part_id] += c_light * next_interaction_distance;
+
+    /*if( pos.x < -1000.0 || pos.y < -1000.0 || pos.z < -1000.0 )
+    {
+      printf( "id: %d\n", part_id );
+      printf( "position: %4.7f %4.7f %4.7f\n", pos.x, pos.y, pos.z );
+      printf( "direction: %4.7f %4.7f %4.7f\n", dir.x, dir.y, dir.z );
+      printf( "energy: %4.7f\n", particles.E[part_id]/keV );
+      printf( "boundary_distance: %4.7f\n", boundary_distance );
+      printf( "voxel: %4.7f %4.7f %4.7f %4.7f %4.7f %4.7f\n", vox_xmin, vox_xmax, vox_ymin, vox_ymax, vox_zmin, vox_zmax );
+      printf( "index: %hu %hu %hu\n", index_phantom.x, index_phantom.y, index_phantom.z );
+    }*/
 
     particles.px[part_id] = pos.x;
     particles.py[part_id] = pos.y;
@@ -144,7 +192,9 @@ __host__ __device__ void VPIN::track_to_out ( ParticlesData &particles,
     // Stop simulation if out of the phantom
     if ( !test_point_AABB ( pos, vol.xmin, vol.xmax, vol.ymin, vol.ymax, vol.zmin, vol.zmax ) )
     {
+        /*printf( "%4.7f %4.7f %4.7f %4.7f %4.7f %4.7f %4.7f %4.7f %4.7f\n", pos.x, pos.y, pos.z, vol.xmin, vol.xmax, vol.ymin, vol.ymax, vol.zmin, vol.zmax );*/
         particles.endsimu[part_id] = PARTICLE_FREEZE;
+        /*printf( "FREEZE\n" );*/
         return;
     }
 
@@ -164,9 +214,9 @@ __host__ __device__ void VPIN::track_to_out ( ParticlesData &particles,
     if ( particles.E[part_id] <= materials.electron_energy_cut[mat_id] )
     {
         particles.endsimu[part_id] = PARTICLE_DEAD;
+        /*printf( "DEAD\n" );*/
         return;
     }
-
 }
 
 // Device Kernel that move particles to the voxelized volume boundary
@@ -197,7 +247,6 @@ __global__ void VPIN::kernel_device_track_to_out ( ParticlesData particles,
         PhotonCrossSectionTable photon_CS_table,
         GlobalSimulationParametersData parameters )
 {
-
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
     if ( id >= particles.size ) return;
 
@@ -206,7 +255,6 @@ __global__ void VPIN::kernel_device_track_to_out ( ParticlesData particles,
     {
         VPIN::track_to_out ( particles, vol, materials, photon_CS_table, parameters, id );
     }
-
 }
 
 // Host kernel that track particles within the voxelized volume until boundary
@@ -301,6 +349,11 @@ void VoxPhanImgNav::track_to_out ( Particles particles )
         VPIN::kernel_device_track_to_out<<<grid, threads>>> ( particles.data_d, m_phantom.data_d, m_materials.data_d,
                 m_cross_sections.photon_CS.data_d, m_params.data_d );
         cuda_error_check ( "Error ", " Kernel_VoxPhanImgNav (track to out)" );
+
+        //f32* toto = (f32*)malloc( sizeof( f32 ) * particles.size );
+        //HANDLE_ERROR( cudaMemcpy( toto, particles.data_d.E, sizeof( f32 ) * particles.size, cudaMemcpyDeviceToHost ) );
+        //HANDLE_ERROR( cudaMemcpy( particles.data_d.E, toto, sizeof( f32 ) * particles.size, cudaMemcpyHostToDevice ) );
+        //free( toto );
 
     }
 

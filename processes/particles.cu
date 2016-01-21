@@ -191,8 +191,8 @@ void ParticleManager::m_cpu_free_stack() {
 
 void ParticleManager::m_gpu_malloc_stack()
 {
-    GGcout << " Particle GPU allocation " << GGendl;
-    GGcout << "Size : " << particles.size << GGendl;
+    GGcout << "Particle GPU allocation " << GGendl;
+    GGcout << "Number of the particle(s) by batch : " << particles.size << GGendl;
     
     HANDLE_ERROR ( cudaMalloc ( ( void** ) &particles.data_d.E, particles.size*sizeof ( f32 ) ) );
     HANDLE_ERROR ( cudaMalloc ( ( void** ) &particles.data_d.dx, particles.size*sizeof ( f32 ) ) );
@@ -272,7 +272,28 @@ void ParticleManager::m_copy_seed_cpu2gpu()
 }
 
 
+void ParticleManager::m_copy_gpu2cpu()
+{
+  HANDLE_ERROR( cudaMemcpy( particles.data_h.E, particles.data_d.E, sizeof( f32 ) * particles.size, cudaMemcpyDeviceToHost ) );
+  HANDLE_ERROR( cudaMemcpy( particles.data_h.dx, particles.data_d.dx, sizeof( f32 ) * particles.size, cudaMemcpyDeviceToHost ) );
+  HANDLE_ERROR( cudaMemcpy( particles.data_h.dy, particles.data_d.dy, sizeof( f32 ) * particles.size, cudaMemcpyDeviceToHost ) );
+  HANDLE_ERROR( cudaMemcpy( particles.data_h.dz, particles.data_d.dz, sizeof( f32 ) * particles.size, cudaMemcpyDeviceToHost ) );
+  HANDLE_ERROR( cudaMemcpy( particles.data_h.px, particles.data_d.px, sizeof( f32 ) * particles.size, cudaMemcpyDeviceToHost ) );
+  HANDLE_ERROR( cudaMemcpy( particles.data_h.py, particles.data_d.py, sizeof( f32 ) * particles.size, cudaMemcpyDeviceToHost ) );
+  HANDLE_ERROR( cudaMemcpy( particles.data_h.pz, particles.data_d.pz, sizeof( f32 ) * particles.size, cudaMemcpyDeviceToHost ) );
+  HANDLE_ERROR( cudaMemcpy( particles.data_h.endsimu, particles.data_d.endsimu, sizeof( ui8 ) * particles.size, cudaMemcpyDeviceToHost ) );
+}
 
+void ParticleManager::dump()
+{
+  for( ui32 i = 0; i < particles.size; ++i )
+  {
+      if( particles.data_h.endsimu[ i ] == PARTICLE_FREEZE )
+        GGcout << particles.data_h.E[ i ] << " " << particles.data_h.px[ i ]
+               << " " << particles.data_h.py[ i ]
+               << " " << particles.data_h.pz[ i ] << GGendl;
+  }
+}
 
 
 

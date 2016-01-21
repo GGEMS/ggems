@@ -824,7 +824,7 @@ __global__ void VPDN::kernel_device_track_to_out ( ParticlesData particles,
 // Stepping loop
     while ( particles.endsimu[id] != PARTICLE_DEAD && particles.endsimu[id] != PARTICLE_FREEZE )
     {
-if(id==0)printf("--->  %s %d Part %d l %d Pos  : %e %e %e -- %e %e %e -- %e \n",__FUNCTION__, __LINE__,particles.pname[id],particles.level[id],particles.px[id], particles.py[id],particles.pz[id],particles.dx[id], particles.dy[id],particles.dz[id], particles.E[id]);
+// if(id==0)printf("--->  %s %d Part %d l %d Pos  : %e %e %e -- %e %e %e -- %e \n",__FUNCTION__, __LINE__,particles.pname[id],particles.level[id],particles.px[id], particles.py[id],particles.pz[id],particles.dx[id], particles.dy[id],particles.dz[id], particles.E[id]);
         if ( particles.pname[id] == PHOTON )
         {
 
