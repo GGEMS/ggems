@@ -753,13 +753,6 @@ __global__ void VPDN::kernel_device_track_to_in ( ParticlesData particles, f32 x
 //     printf ( "%d %s %d Part Pos  : %e %e %e -- %e %e %e -- %e \n",id,__FUNCTION__, __LINE__,particles.px[id], particles.py[id],particles.pz[id],particles.dx[id], particles.dy[id],particles.dz[id], particles.E[id] );
 }
 
-__global__ void FuckOff(){
-
-    const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
-//     if ( id >= particles.size ) return;
-    printf("FuckOff\n");
-
-}
 
 // Host Kernel that move particles to the voxelized volume boundary
 void VPDN::kernel_host_track_to_in ( ParticlesData particles, f32 xmin, f32 xmax,
@@ -1004,7 +997,7 @@ void VoxPhanDosiNav::track_to_in ( Particles particles )
         dim3 threads, grid;
         threads.x = m_params.data_h.gpu_block_size;
         grid.x = ( particles.size + m_params.data_h.gpu_block_size - 1 ) / m_params.data_h.gpu_block_size;
-        GGcout << grid.x << "  " << threads.x << GGendl;
+//         GGcout << grid.x << "  " << threads.x << GGendl;
 //         FuckOff<<<grid, threads>>> ();
         VPDN::kernel_device_track_to_in<<<grid, threads>>> ( particles.data_d, m_phantom.data_d.xmin, m_phantom.data_d.xmax,
                 m_phantom.data_d.ymin, m_phantom.data_d.ymax,
@@ -1047,13 +1040,13 @@ void VoxPhanDosiNav::track_to_out ( Particles particles )
         dim3 threads, grid;
         threads.x = m_params.data_h.gpu_block_size;// // printf("%s %d\n",__FUNCTION__,__LINE__);
         grid.x = ( particles.size + m_params.data_h.gpu_block_size - 1 ) / m_params.data_h.gpu_block_size;
-        printf("grid %d block %d  \n",grid.x, threads.x);
+//         printf("grid %d block %d  \n",grid.x, threads.x);
         VPDN::kernel_device_track_to_out<<<grid, threads>>> ( particles.data_d, m_phantom.data_d, m_materials.data_d,
                 m_cross_sections.photon_CS.data_d,
                 m_cross_sections.electron_CS.data_d,
                 m_params.data_d, m_dose_calculator.dose.data_d );
         cuda_error_check ( "Error ", " Kernel_VoxPhanDosi (track to out)" );
-        printf("End GPU tracking \n");
+//         printf("End GPU tracking \n");
     }
     // printf("%s %d\n",__FUNCTION__,__LINE__);
     

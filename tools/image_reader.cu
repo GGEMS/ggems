@@ -102,8 +102,8 @@ void ImageReader::record3Dimage ( string histname,  f64 *data, f32xyz offset, f3
 
             // Some vars
             unsigned short int ix, iy, iz;
-            unsigned int jump;
-            jump = size.x*size.y;
+//             unsigned int jump;
+//             jump = size.x*size.y;
             index = 0;
 
             // Loop over every element
@@ -145,16 +145,16 @@ void ImageReader::record3Dimage ( string histname,  f64 *data, f32xyz offset, f3
             while ( i<size.x*size.y*size.z )
             {
                 float val = data[i];
-                if ( val!=0 )
-                {
-                    int dx = i%size.x;
-                    int dy = ( ( i - dx ) / size.x  ) %size.y;
-                    int dz = ( i - dx - dy*size.x ) / ( size.x * size.y );
-                    int value = dx + dy*size.x + dz * size.x * size.y;
-                    i32xyz dxyz = get_bin_xyz ( i,size );
-//                         printf("%d %d %d %d %d %d %d %d value %g \n",i,value,dx,dy,dz,dxyz.x,dxyz.y,dxyz.z,val);
-
-                }
+//                 if ( val!=0 )
+//                 {
+//                     int dx = i%size.x;
+//                     int dy = ( ( i - dx ) / size.x  ) %size.y;
+//                     int dz = ( i - dx - dy*size.x ) / ( size.x * size.y );
+// //                     int value = dx + dy*size.x + dz * size.x * size.y;
+//                     i32xyz dxyz = get_bin_xyz ( i,size );
+// //                         printf("%d %d %d %d %d %d %d %d value %g \n",i,value,dx,dy,dz,dxyz.x,dxyz.y,dxyz.z,val);
+// 
+//                 }
 
                 fwrite ( &val, sizeof ( float ), 1, pFile_mhd );
                 ++i;
@@ -207,7 +207,7 @@ void ImageReader::record3Dimage ( string histname,  f64 *data, f32xyz offset, f3
                                   size.z,  offset.z, offset.z+size.z*spacing.z );
         
 
-        double total = 0.;
+        
         int xdim = size.x;
         int ydim = size.y;
         int zdim = size.z;

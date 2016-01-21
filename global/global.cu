@@ -9,7 +9,8 @@
 // Reset the GPU
 void reset_gpu_device()
 {
-    printf ( "[\033[32;01mok\033[00m] Reset device .. \n" );
+//     printf ( "[\033[32;01mok\033[00m] Reset device .. \n" );
+    GGcout << "Reset GPU device ... " << GGendl;
     cudaDeviceReset();
 }
 
@@ -59,7 +60,8 @@ void set_gpu_device ( int deviceChoice, f32 minversion )
     }
 
     cudaSetDevice ( deviceChoice%deviceCount );
-    printf ( "[\033[32;01mok\033[00m] \033[32;01m%s\033[00m found\n", prop.name );
+//     printf ( "[\033[32;01mok\033[00m] \033[32;01m%s\033[00m found\n", prop.name );
+    GGcout << "GPU found: " << prop.name << " (id: " << deviceChoice%deviceCount << ") " << GGendl;
 
 }
 

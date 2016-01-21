@@ -122,9 +122,9 @@ void CrossSections::m_build_table(Materials materials, GlobalSimulationParameter
     {
         electronCSTable->initialize(parameters,materials.data_h);
         electronCSTable->generateTable();
-        GGcout<<"Init electrons OK "<<GGendl;
+
         // \DEBUG A ENLEVER 
-        electronCSTable->printElectronTables("table/electronCSTable");
+//         electronCSTable->printElectronTables("table/electronCSTable");
         
 //         electron_CS
 //         electron_CS.data_h = electronCSTable.get_data_h();

@@ -202,7 +202,7 @@ void DoseCalculator::set_min_density ( f32 min )
 /// Init
 void DoseCalculator::initialize ( GlobalSimulationParameters params )
 {
-    GGcout << " DoseCalculator initialize " << GGendl;
+//     GGcout << " DoseCalculator initialize " << GGendl;
     
     // Check if everything was set properly
     if ( !m_check_mandatory() )
@@ -317,7 +317,7 @@ void DoseCalculator::m_gpu_malloc_dose()
     HANDLE_ERROR ( cudaMalloc ( ( void** ) &dose.data_d.number_of_hits, dose.data_h.nb_of_voxels * sizeof ( ui32 ) ) );
     HANDLE_ERROR ( cudaMalloc ( ( void** ) &dose.data_d.uncertainty,    dose.data_h.nb_of_voxels * sizeof ( f64 ) ) );
     
-    GGcout << " DoseCalculator GPU allocation " << GGendl;
+    GGcout << "DoseCalculator GPU allocation " << dose.data_h.nb_of_voxels << GGendl;
     
 }
 
@@ -344,7 +344,7 @@ void DoseCalculator::m_copy_dose_cpu2gpu()
     HANDLE_ERROR ( cudaMemcpy ( dose.data_d.number_of_hits, dose.data_h.number_of_hits, sizeof ( ui32 ) *dose.data_h.nb_of_voxels, cudaMemcpyHostToDevice ) );
     HANDLE_ERROR ( cudaMemcpy ( dose.data_d.uncertainty,    dose.data_h.uncertainty,    sizeof ( f64 ) *dose.data_h.nb_of_voxels,  cudaMemcpyHostToDevice ) );
     
-     GGcout << " Copy dose calculator to GPU " <<dose.data_h.nb_of_voxels << GGendl;
+//      GGcout << "Copy dose calculator to GPU " <<dose.data_h.nb_of_voxels << GGendl;
     
 }
 
@@ -364,6 +364,7 @@ void DoseCalculator::m_copy_dose_gpu2cpu()
 
     dose.data_h.nb_of_voxels = dose.data_d.nb_of_voxels;
 
+    GGcout << "Copy dose calculator to CPU " << dose.data_h.nb_of_voxels << GGendl;
     // Copy values to GPU arrays
     HANDLE_ERROR ( cudaMemcpy ( dose.data_h.edep,           dose.data_d.edep,           sizeof ( f64  ) *dose.data_h.nb_of_voxels,  cudaMemcpyDeviceToHost ) );
     HANDLE_ERROR ( cudaMemcpy ( dose.data_h.dose,           dose.data_d.dose,           sizeof ( f64  ) *dose.data_h.nb_of_voxels,  cudaMemcpyDeviceToHost ) );
@@ -371,7 +372,6 @@ void DoseCalculator::m_copy_dose_gpu2cpu()
     HANDLE_ERROR ( cudaMemcpy ( dose.data_h.number_of_hits, dose.data_d.number_of_hits, sizeof ( ui32 ) *dose.data_h.nb_of_voxels,  cudaMemcpyDeviceToHost ) );
     HANDLE_ERROR ( cudaMemcpy ( dose.data_h.uncertainty,    dose.data_d.uncertainty,    sizeof ( f64  ) *dose.data_h.nb_of_voxels,  cudaMemcpyDeviceToHost ) );
     
-    GGcout << " Copy dose calculator to CPU " << GGendl;
     
 }
 

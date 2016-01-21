@@ -76,7 +76,11 @@ void Obb::rotate(f32 ax, f32 ay, f32 az) {
     volume.data_h.angle.z = az;
 
     f32xyz ut, vt, wt; // temp vars
-
+    
+    ut.x = 0.; ut.y = 0.; ut.z = 0.; // ut = make_f32xyz{0.,0.,0.};
+    vt.x = 0.; vt.y = 0.; vt.z = 0.; // vt = make_f32xyz{0.,0.,0.};
+    wt.x = 0.; wt.y = 0.; wt.z = 0.; // wt = make_f32xyz{0.,0.,0.};
+    
     // First around x
     ut = fxyz_rotate_x_axis(ut, ax);
     vt = fxyz_rotate_x_axis(vt, ax);

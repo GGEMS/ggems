@@ -191,8 +191,8 @@ void ParticleManager::m_cpu_free_stack() {
 
 void ParticleManager::m_gpu_malloc_stack()
 {
-    GGcout << "Particle GPU allocation " << GGendl;
-    GGcout << "Number of the particle(s) by batch : " << particles.size << GGendl;
+//     GGcout << "Particle GPU allocation " << GGendl;
+    GGcout << "Number of the particle"<<(particles.size > 1 ? "s" : "") << " by batch : " << particles.size << GGendl;
     
     HANDLE_ERROR ( cudaMalloc ( ( void** ) &particles.data_d.E, particles.size*sizeof ( f32 ) ) );
     HANDLE_ERROR ( cudaMalloc ( ( void** ) &particles.data_d.dx, particles.size*sizeof ( f32 ) ) );

@@ -125,6 +125,9 @@ static const ui32 FSb[256] =
     V(82,41,41,C3), V(29,99,99,B0), V(5A,2D,2D,77), V(1E,0F,0F,11), \
     V(7B,B0,B0,CB), V(A8,54,54,FC), V(6D,BB,BB,D6), V(2C,16,16,3A)
 
+
+// Unused in the code. Useless ?
+    
 #define V(a,b,c,d) 0x##a##b##c##d
 static const ui32 FT0[256] = { FT };
 #undef V

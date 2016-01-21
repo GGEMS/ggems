@@ -28,7 +28,6 @@
 #include "cross_sections.cuh"
 #include "electron_navigator.cuh"
 
-__global__ void FuckOff();
 
 // VoxPhanDosiNav -> VPDN
 namespace VPDN

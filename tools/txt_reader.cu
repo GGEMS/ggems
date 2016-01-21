@@ -235,6 +235,7 @@ i32 TxtReader::read_i32_atpos(std::string txt, i32 pos) {
         print_warning("TxtReader: arg position out of range!");
         exit_simulation();
     }
+    return res;
 }
 
 // Read f32 in txt file
@@ -249,6 +250,7 @@ f32 TxtReader::read_f32_atpos(std::string txt, i32 pos) {
         print_warning("TxtReader: arg position out of range!");
         exit_simulation();
     }
+    return res;
 }
 
 

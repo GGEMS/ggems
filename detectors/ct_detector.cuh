@@ -45,7 +45,7 @@ class CTDetector : public GGEMSDetector
         void save_data( std::string filename ){}
 
     private:
-        bool m_check_mandatory(){}
+        bool m_check_mandatory(){return true;}
         void m_copy_detector_cpu2gpu(){}
 
         Obb m_phantom;

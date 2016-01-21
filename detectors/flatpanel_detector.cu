@@ -34,10 +34,10 @@ __host__ __device__ void flatpanel_track_to_in(ParticlesData &particles, ObbData
     pos.z = particles.pz[id];
 
     // Read direction
-    f64xyz dir;
-    dir.x = particles.dx[id];
-    dir.y = particles.dy[id];
-    dir.z = particles.dz[id];
+//     f64xyz dir;
+//     dir.x = particles.dx[id];
+//     dir.y = particles.dy[id];
+//     dir.z = particles.dz[id];
 
     // TODO TODO TODO
 

@@ -355,7 +355,8 @@ bool GGEMS::m_check_mandatory()
     }
 
     if ( flag_error ) exit_simulation();
-
+    
+    return flag_error;
 }
 
 // Copy the global simulation parameters to the GPU
@@ -417,14 +418,16 @@ void GGEMS::init_simulation()
     m_check_mandatory();
 
     // Run time
-    f64 t_start = 0;
-    if ( m_parameters.data_h.display_run_time )
-    {
-        t_start = get_time();
-    }
+    
+    //Not used currently
+//     f64 t_start = 0;
+//     if ( m_parameters.data_h.display_run_time )
+//     {
+//         t_start = get_time();
+//     }
 
     // Memory usage
-    ui32 mem = 0;
+//     ui32 mem = 0;
 
     // CPU PRNG
     srand ( m_parameters.data_h.seed );

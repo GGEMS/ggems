@@ -106,7 +106,7 @@ void ElectronCrossSection::Range_table ( int id_mat )
 {
 
     int i,j,n;
-    f32  energy,de,hsum,esum,eDXDE=0.,hDXDE=0.;
+    f32  energy,de,/*hsum,*/esum,eDXDE=0./*,hDXDE=0.*/;
 
     i=0;
     n=100;
@@ -180,7 +180,7 @@ void ElectronCrossSection::Energy_table() // Create energy table between emin an
 {
 //     int id_mat = myMaterials.nb_materials;
     int i;
-    f32  constant,slope,x,energy;
+    f32  constant,slope,x;//,energy;
 
     constant=parameters.data_h.cs_table_min_E;
     slope=log ( parameters.data_h.cs_table_max_E/parameters.data_h.cs_table_min_E );
@@ -215,7 +215,7 @@ f32 ElectronCrossSection::eIoniDEDX ( f32 Ekine,int id_mat )
     f32  th=.25*sqrt ( myMaterials.nb_electrons_per_vol[id_mat]/myMaterials.nb_atoms_per_vol[id_mat] ) *keV;
     f32  lowLimit=.2*keV;
     f32  tmax,tkin;
-    f32  eexc,eexc2,d,x,y;
+    f32  eexc,eexc2,d,x;//,y;
     f32  tau,gamma,gamma2,beta2,bg2;
 
     tkin=Ekine;
@@ -342,10 +342,10 @@ f32 ElectronCrossSection::eBremDEDX ( f32 Ekine,int id_mat ) //id_mat = index ma
     f32  vmin,vmax,u,fac,c,v,dv;
     f32  thigh=100.*GeV;
     f32  cut=std::min ( cutEnergyGamma,Ekine );
-    f32  rate,loss;
-    f32  factorHigh=36./ ( 1450.*GeV );
-    f32  coef1=-.5;
-    f32  coef2=2./9.;
+    f32  /*rate,*/loss;
+//     f32  factorHigh=36./ ( 1450.*GeV );
+//     f32  coef1=-.5;
+//     f32  coef2=2./9.;
     f32  lowKinEnergy=0.*eV;
     f32  highKinEnergy=1.*GeV;
     f32  probsup=1.;
