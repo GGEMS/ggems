@@ -53,5 +53,10 @@ void CTDetector::set_orbiting_radius( f32 r )
   m_orbiting_radius = r;
 }
 
+void CTDetector::initialize( GlobalSimulationParameters params )
+{
+  ;
+}
+
 #endif
 

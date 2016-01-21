@@ -287,6 +287,12 @@ void GGEMS::set_phantom ( GGEMSPhantom* aPhantom )
     m_phantom = aPhantom;
 }
 
+/// Detector
+void GGEMS::set_detector( GGEMSDetector* aDetector )
+{
+  m_detector = aDetector;
+}
+
 /// Utils
 
 // Display run time
@@ -442,13 +448,12 @@ void GGEMS::init_simulation()
 
     /// Init Phantoms ////////////////////////////////
     m_phantom->initialize ( m_parameters );
-    
+
+    /// Init Particles Stack /////////////////////////
+    m_detector->initialize ( m_parameters );
 
     /// Init Particles Stack /////////////////////////
     m_particles_manager.initialize ( m_parameters );
-
-
-    // TODO DETECTOR
 
 
     /*

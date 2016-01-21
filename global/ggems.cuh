@@ -28,7 +28,8 @@
 #include "point_source.cuh"
 #include "cone_beam_CT_source.cuh"
 #include "vox_phan_dosi_nav.cuh"
-#include <vox_phan_img_nav.cuh>
+#include "vox_phan_img_nav.cuh"
+
 // #include "flatpanel_detector.cuh"
 
 class GGEMS
@@ -66,8 +67,7 @@ public:
     // Setting simulation objects
     void set_source ( GGEMSSource* aSource );
     void set_phantom ( GGEMSPhantom* aPhantom );
-
-    // TODO DETECTOR
+    void set_detector( GGEMSDetector* aDetector );
 
     // Utils
     void set_display_run_time();
@@ -90,7 +90,7 @@ private:
     GGEMSPhantom* m_phantom;
 
     // TODO Detector manager
-    GGEMSDetector* m_detectors;
+    GGEMSDetector* m_detector;
 
     // Main parameters
     void m_check_mandatory();

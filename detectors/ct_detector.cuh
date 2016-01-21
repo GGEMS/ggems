@@ -39,7 +39,7 @@ class CTDetector : public GGEMSDetector
         void track_to_out( Particles particles ){}
 
         // Init
-        void initialize( GlobalSimulationParameters params ){}
+        void initialize( GlobalSimulationParameters params );
 
         void digitizer(){}
         void save_data( std::string filename ){}
