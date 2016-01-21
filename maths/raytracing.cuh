@@ -66,11 +66,21 @@ __host__ __device__ bool test_point_AABB(f32xyz p,
                                          f32 aabb_ymin, f32 aabb_ymax,
                                          f32 aabb_zmin, f32 aabb_zmax);
 
+__host__ __device__ bool test_point_OBB(f32xyz p,
+                                        f32 aabb_xmin, f32 aabb_xmax,
+                                        f32 aabb_ymin, f32 aabb_ymax,
+                                        f32 aabb_zmin, f32 aabb_zmax,
+                                        f32xyz obb_center,
+                                        f32xyz u, f32xyz v, f32xyz w); // OBB frame
+
 // Ray/triangle intersection - Moller-Trumbore algorithm
 __host__ __device__ f32 hit_ray_triangle(f32xyz ray_p, f32xyz ray_d,
                                          f32xyz tri_u,              // Triangle
                                          f32xyz tri_v,
                                          f32xyz tri_w);
+// Ray/Plane intersection
+__host__ __device__ f32 hit_ray_plane(f32xyz ray_p, f32xyz ray_d,       
+                                      f32xyz plane_p, f32xyz plane_n);
 
 // Ray/OBB intersection - Inspired by POVRAY
 __host__ __device__ f32 hit_ray_OBB(f32xyz ray_p, f32xyz ray_d,
@@ -79,6 +89,11 @@ __host__ __device__ f32 hit_ray_OBB(f32xyz ray_p, f32xyz ray_d,
                                     f32 aabb_zmin, f32 aabb_zmax,
                                     f32xyz obb_center,
                                     f32xyz u, f32xyz v, f32xyz w); // OBB frame
+
+// Ray/Septa intersection
+__host__ __device__ f32 hit_ray_septa(f32xyz p, f32xyz dir, f32 half_size_x, f32 radius,
+                                      f32xyz colli_center, f32xyz colli_u, f32xyz colli_v, f32xyz w); // Colli frame
+
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
@@ -160,10 +175,5 @@ __host__ __device__ f64 hit_ray_septa(f64xyz p, f64xyz dir, f64 half_size_x, f64
                                       f64xyz colli_center, f64xyz colli_u, f64xyz colli_v, f64xyz w); // Colli frame
 
 #endif
-
-
-
-
-
 
 #endif

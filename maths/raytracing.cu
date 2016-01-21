@@ -368,6 +368,27 @@ __host__ __device__ bool test_point_AABB(f32xyz p,
     return true;
 }
 
+__host__ __device__ bool test_point_OBB(f32xyz p,
+                                        f32 aabb_xmin, f32 aabb_xmax,
+                                        f32 aabb_ymin, f32 aabb_ymax,
+                                        f32 aabb_zmin, f32 aabb_zmax,
+                                        f32xyz obb_center,
+                                        f32xyz u, f32xyz v, f32xyz w) {
+  
+  //printf("BEFORE test_point_OBB: pos %f %f %f \n", p.x, p.y, p.z);
+  //printf("OBB center pos %f %f %f \n", obb_center.x, obb_center.y, obb_center.z);
+  
+  // Transform the ray in OBB' space, then do AABB
+  f32xyz ray_obb = fxyz_sub(p, obb_center);
+  p.x = fxyz_dot(ray_obb, u);
+  p.y = fxyz_dot(ray_obb, v);
+  p.z = fxyz_dot(ray_obb, w);
+  
+  //printf("test_point_OBB: pos %f %f %f \n", p.x, p.y, p.z);
+  
+  return test_point_AABB(p, aabb_xmin, aabb_xmax, aabb_ymin, aabb_ymax, aabb_zmin, aabb_zmax);
+}
+
 // Ray/triangle intersection - Moller-Trumbore algorithm (f32 version)
 __host__ __device__ f32 hit_ray_triangle(f32xyz ray_p, f32xyz ray_d,
                                          f32xyz tri_u,              // Triangle
@@ -394,6 +415,152 @@ __host__ __device__ f32 hit_ray_triangle(f32xyz ray_p, f32xyz ray_d,
     // Ray hit the triangle
     return f * fxyz_dot(e2, q);
 
+}
+
+// Ray/Plane intersection 
+__host__ __device__ f32 hit_ray_plane(f32xyz ray_p, f32xyz ray_d,        // Ray
+                                      f32xyz plane_p, f32xyz plane_n) { // Plane
+
+    f32xyz m = fxyz_sub(plane_p, ray_p);
+    f32 b = fxyz_dot(plane_n, m);
+    f32 c = fxyz_dot(plane_n, ray_d);
+    
+    f32 t = b/c;
+    
+    if(t <= 0.0f) {return -F32_MAX;}
+
+    return t;
+}
+
+// Ray/septa intersection
+__host__ __device__ f32 hit_ray_septa(f32xyz p, f32xyz dir, f32 half_size_x, f32 radius,
+                                      f32xyz colli_center, f32xyz colli_u, f32xyz colli_v, f32xyz colli_w) {
+    
+    f32 xmin, xmax, ymin, ymax, e1min, e1max, e2min, e2max;
+    f32 txmin, txmax, tmin, tmax, tymin, tymax, tzmin, tzmax, te1min, te1max, te2min, te2max, buf;
+        
+        
+    
+    //////// First, transform the ray in OBB' space
+    //f64xyz ray_obb = fxyz_sub(p, colli_center);
+ /*   p.x = fxyz_dot(ray_obb, colli_u);
+    p.y = fxyz_dot(ray_obb, colli_v);
+    p.z = fxyz_dot(ray_obb, colli_w);
+    f64xyz dir;
+    dir.x = fxyz_dot(d, colli_u);
+    dir.y = fxyz_dot(d, colli_v);
+    dir.z = fxyz_dot(d, colli_w); */
+    //////////////////////////////////////
+    
+    //printf("hit septa: pos %f %f %f dir %f %f %f \n", p.x, p.y, p.z, dir.x, dir.y, dir.z);
+    
+    xmin = -half_size_x;
+    xmax = half_size_x;
+        
+    ymin = e1min = e2min = -radius;
+    ymax = e1max = e2max = radius;
+        
+    tmin = -F32_MAX;
+    tmax = F32_MAX;
+    
+    int w;
+    
+    f32xyz di;
+        
+        // on x
+    if (fabs(dir.x) < EPSILON6) {
+        if (p.x < xmin || p.x > xmax) {return 0.0;}
+    }
+    else {
+        w = 0;
+        di.x = 1.0f / dir.x;
+        tmin = txmin = (xmin - p.x) * di.x;
+        tmax = txmax = (xmax - p.x) * di.x;
+       //printf("on x: %f %f - %f %f - %f %f \n", xmin, xmax, p.x, di.x, tmin, tmax);
+        if (tmin > tmax) {
+            buf = tmin;
+            tmin = tmax;
+            tmax = buf;
+        }
+        if (tmin > tmax) {return 0.0;}
+    }
+    
+    // on y
+    if (fabs(dir.y) < EPSILON6) {
+        if (p.y < ymin || p.y > ymax) {return 0.0;}
+    }
+    else {
+        di.y = 1.0f / dir.y;
+        tymin = (ymin - p.y) * di.y;
+        tymax = (ymax - p.y) * di.y;
+        //printf("on y: %f %f - %f %f - %f %f \n", ymin, ymax, p.y, di.y, tymin, tymax);
+        if (tymin > tymax) {
+            buf = tymin;
+            tymin = tymax;
+            tymax = buf;
+        }
+        if (tymin > tmin) {tmin = tymin;}
+        if (tymax < tmax) {tmax = tymax; w = 1;}
+        if (tmin > tmax) {return 0.0;}
+    }
+    
+    // on e1  (changement de referentiel dans le plan yz, rotation de -60°) 
+    
+    f32 p1y = (p.y * cos( -M_PI / 3.0 )) + (p.z * sin ( -M_PI / 3.0 ));
+    
+    f32 d1y = dir.y * cos( -M_PI / 3.0 ) + dir.z * sin ( -M_PI / 3.0 );
+
+   // printf("e1 p1y %f d1y %f \n", p1y, d1y);
+    
+    f32 di1y;
+        
+    if (fabs(d1y) < EPSILON6) {
+        if (p1y < e1min || p1y > e1max) {return 0.0;}
+    }
+    else {
+        di1y = 1.0f / d1y;
+        te1min = (e1min - p1y) * di1y;
+        te1max = (e1max - p1y) * di1y;
+       // printf("on e1: %f %f - %f %f - %f %f \n", e1min, e1max, p1y, d1y, te1min, te1max);
+        if (te1min > te1max) {
+            buf = te1min;
+            te1min = te1max;
+            te1max = buf;
+        }
+        if (te1min > tmin) {tmin = te1min;}
+        if (te1max < tmax) {tmax = te1max; w = 2;}
+        if (tmin > tmax) {return 0.0;}
+    }
+
+        // on e2 (changement de referentiel dans le plan yz, rotation de +60°) 
+            
+    f32 p2y = (p.y * cos( M_PI / 3.0 )) + (p.z * sin ( M_PI / 3.0 )); 
+     
+    f32 d2y = dir.y * cos( M_PI / 3.0 ) + dir.z * sin ( M_PI / 3.0 );
+    
+   // printf("e2 p2y %f d2y %f \n", p2y, d2y);
+
+    f32 di2y;
+        
+    if (fabs(d2y) < EPSILON6) {
+    if (p2y < e2min || p2y > e2max) {return 0.0;}
+    }
+    else {
+        di2y = 1.0f / d2y;
+        te2min = (e2min - p2y) * di2y;
+        te2max = (e2max - p2y) * di2y;
+       // printf("on e2: %f %f - %f %f - %f %f \n", e2min, e2max, p2y, d2y, te2min, te2max);
+        if (te2min > te2max) {
+            buf = te2min;
+            te2min = te2max;
+            te2max = buf;
+        }
+        if (te2min > tmin) {tmin = te2min;}
+        if (te2max < tmax) {tmax = te2max; w = 3;}
+        if (tmin > tmax) {return 0.0;}
+    }
+    
+    return tmax;
 }
 
 // Ray/OBB intersection - Inspired by POVRAY (f32 version)

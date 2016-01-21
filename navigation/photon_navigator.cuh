@@ -38,7 +38,16 @@
 
 #include "photon.cuh"
 
-__host__ __device__ void photon_navigator(ParticleStack &particles, ui32 part_id,
+
+__host__ __device__ void photon_navigator_simple(ParticleStack &particles, ui32 part_id,
+                          Scene geometry, MaterialsTable materials,
+                          PhotonCrossSectionTable photon_CS_table,
+                          GlobalSimulationParameters parameters,
+                          Pulses &pulses);
+
+#ifndef SINGLE_PRECISION
+    // Add function with double precision
+__host__ __device__ void photon_navigator_double(ParticleStack &particles, ui32 part_id,
                           Scene geometry, MaterialsTable materials,
                           PhotonCrossSectionTable photon_CS_table,
                           GlobalSimulationParameters parameters,
@@ -49,5 +58,6 @@ __host__ __device__ void photon_navigator_raytracing_colli(ParticleStack &partic
                           PhotonCrossSectionTable photon_CS_table,
                           GlobalSimulationParameters parameters,
                           Pulses &pulses);
+#endif
 
 #endif

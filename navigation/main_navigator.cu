@@ -35,11 +35,17 @@ __global__ void kernel_photon_navigator(ParticleStack particles, Scene geometry,
     while (particles.endsimu[id] == PARTICLE_ALIVE && istep < 1000) {
        
         // Track photon
-        photon_navigator(particles, id, geometry, materials, photon_CS_table, parameters, pulses);
+        #ifdef SINGLE_PRECISION
+        photon_navigator_simple(particles, id, geometry, materials, photon_CS_table,
+                                 parameters, pulses);
+        #else
+        photon_navigator_double(particles, id, geometry, materials, photon_CS_table,
+                                 parameters, pulses);
+        #endif  
         
     //// SPECIAL CASE FOR RAYTRACING
-    // photon_navigator_raytracing_colli(particles, id, geometry, materials, photon_CS_table,
-      //                      parameters, pulses);
+     //photon_navigator_raytracing_colli(particles, id, geometry, materials, photon_CS_table,
+       //                     parameters, pulses);
         ++istep;
        
     }
@@ -69,12 +75,17 @@ void cpu_main_navigator(ParticleStack &particles, Scene geometry,
 
             // If a photon
             if (particles.pname[id] == PHOTON) {
-                photon_navigator(particles, id, geometry, materials, photon_CS_table,
+              #ifdef SINGLE_PRECISION
+              photon_navigator_simple(particles, id, geometry, materials, photon_CS_table,
                                  parameters, pulses);
+              #else
+              photon_navigator_double(particles, id, geometry, materials, photon_CS_table,
+                                 parameters, pulses);
+              #endif  
               
                 //// SPECIAL CASE FOR RAYTRACING
-               // photon_navigator_raytracing_colli(particles, id, geometry, materials, photon_CS_table,
-                 //                parameters, pulses);
+              //  photon_navigator_raytracing_colli(particles, id, geometry, materials, photon_CS_table,
+                //                 parameters, pulses);
 
                 // Record this step if required
                 if (history.record_flag == ENABLED)

@@ -137,6 +137,30 @@ struct Scene {
     
 };
 
+/// Function with simple precision /////////////////////////////////////////////////////////
+
+// Host/Device function that handle geometry
+__host__ __device__ bool IsInsideHex(f32xyz position, f32 radius, f32 cy, f32 cz);
+__host__ __device__ f32 GetDistanceHex(f32xyz position, f32xyz direction, f32 radius, f32 cy, f32 cz);
+__host__ __device__ i32 GetCloserHex(f32xyz position, Scene geometry, ui32 adr_geom);
+__host__ __device__ i32 GetHexIndex(f32xyz position, Scene geometry, ui32 adr_geom,
+                                    f32xyz center, f32xyz u, f32xyz v, f32xyz w);
+__host__ __device__ f32 GetNextHex(f32xyz position, f32xyz dir, Scene geometry,
+                                        ui32 adr_geom, f32xyz center, f32xyz u, f32xyz v, f32xyz w);
+__host__ __device__ bool get_geometry_is_sensitive(Scene geometry, ui32 cur_geom);
+__host__ __device__ ui32 get_geometry_material(Scene geometry, ui32 id_geom, f32xyz pos);
+__host__ __device__ f32 get_distance_to_object(Scene geometry, ui32 adr_geom, ui32 cur_geom, ui32 obj_type,
+                                               f32xyz pos, f32xyz dir);
+__host__ __device__ ui32 get_current_geometry_volume(Scene geometry, ui32 cur_geom, f32xyz pos);
+__host__ __device__ void get_next_geometry_boundary(Scene geometry, ui32 cur_geom,
+                                                    f32xyz pos, f32xyz dir,
+                                                    f32 &interaction_distance,
+                                                    ui32 &geometry_volume);
+
+/// Function with double precision /////////////////////////////////////////////////////////
+
+#ifndef SINGLE_PRECISION
+    // Add function with double precision
 
 // Host/Device function that handle geometry
 __host__ __device__ bool IsInsideHex(f64xyz position, f64 radius, f64 cy, f64 cz);
@@ -144,11 +168,8 @@ __host__ __device__ f64 GetDistanceHex(f64xyz position, f64xyz direction, f64 ra
 __host__ __device__ i32 GetCloserHex(f64xyz position, Scene geometry, ui32 adr_geom);
 __host__ __device__ i32 GetHexIndex(f64xyz position, Scene geometry, ui32 adr_geom,
                                     f64xyz center, f64xyz u, f64xyz v, f64xyz w);
-__host__ __device__ i32 GetHexIndex2(f64xyz position, Scene geometry, ui32 adr_geom,
-                                    f64xyz center, f64xyz u, f64xyz v, f64xyz w);
 __host__ __device__ f64 GetNextHex(f64xyz position, f64xyz dir, Scene geometry,
                                         ui32 adr_geom, f64xyz center, f64xyz u, f64xyz v, f64xyz w);
-__host__ __device__ bool get_geometry_is_sensitive(Scene geometry, ui32 cur_geom);
 __host__ __device__ ui32 get_geometry_material(Scene geometry, ui32 id_geom, f64xyz pos);
 __host__ __device__ f64 get_distance_to_object(Scene geometry, ui32 adr_geom, ui32 cur_geom, ui32 obj_type,
                                                f64xyz pos, f64xyz dir);
@@ -157,7 +178,7 @@ __host__ __device__ void get_next_geometry_boundary(Scene geometry, ui32 cur_geo
                                                     f64xyz pos, f64xyz dir,
                                                     f64 &interaction_distance,
                                                     ui32 &geometry_volume);
-
+#endif
 
 // This class is used to build the geometry
 class GeometryBuilder {

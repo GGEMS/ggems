@@ -16,7 +16,7 @@ if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
 endif()
 
 # OPTIONS
-option(WITH_DOUBLE_PRECISION "Float numbers can be computed in double precision" ON)
+option(WITH_DOUBLE_PRECISION "Float numbers can be computed in double precision" OFF)
 if(WITH_DOUBLE_PRECISION)
   #add_definitions(-DSINGLE_PRECISION=0)
 else()

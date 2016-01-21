@@ -67,7 +67,7 @@ __host__ __device__ f32xyz fxyz_abs(f32xyz u);
 
 /// Double precision functions ///////////////////////////////////////////////
 
-#ifndef SINGLE_PRECISION
+//#ifndef SINGLE_PRECISION
     // Add function with double precision
 
 #ifndef F64MATRIX33
@@ -108,6 +108,6 @@ __host__ __device__ f64xyz fxyz_rotate_z_axis(f64xyz u, f64 angle);
 // return abs
 __host__ __device__ f64xyz fxyz_abs(f64xyz u);
 
-#endif
+//#endif
 
 #endif
