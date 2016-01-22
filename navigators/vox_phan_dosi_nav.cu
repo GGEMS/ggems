@@ -362,9 +362,7 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
 
                 }
                 else
-                {
-                    /// WARNING TODO ACTIVER DOSIMETRY ICI
-                    
+                {                    
                     dose_record_standard ( dosi, secondary_part.E, particles.px[part_id],particles.py[part_id],particles.pz[part_id] );
                 }
 
@@ -383,7 +381,7 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
         dummystep ++ ;
 
     }
-    while ( ( particles.E[part_id]>EKINELIMIT ) && ( bool_loop==true ) && ( dummystep<10000 ) );
+    while ( ( particles.E[part_id]>EKINELIMIT ) && ( bool_loop==true ) && ( dummystep<1000 ) );
 
 
 
@@ -467,7 +465,7 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
 
         // Get distance to edge of voxel
 //         f32 fragment = get_boundary_voxel_by_raycasting(index_phantom, pos, direction, vol.voxel_size, part_id);
-        fragment+=1.E-3*mm;
+        fragment+=1.E-2*mm;
 //         printf("d_table.nb_bins %u\n",electron_CS_table.nb_bins);
         // Read Cross section table to get dedx, erange, lambda
         e_read_CS_table ( part_id,mat_id, energy, electron_CS_table,next_discrete_process,table_index, next_interaction_distance,dedxeIoni,dedxeBrem,erange, lambda, randomnumbereBrem, randomnumbereIoni,parameters );
@@ -602,7 +600,11 @@ __host__ __device__ void VPDN::track_photon_to_out ( ParticlesData &particles,
         next_interaction_distance = boundary_distance + EPSILON3; // Overshoot
         next_discrete_process = GEOMETRY_BOUNDARY;
     }
-
+    else if( boundary_distance == FLT_MAX )
+    {
+      next_interaction_distance = 1E-2*mm;
+      next_discrete_process = GEOMETRY_BOUNDARY;
+    }
     //// Move particle //////////////////////////////////////////////////////
 
     pos = fxyz_add ( pos, fxyz_scale ( dir, next_interaction_distance ) );
@@ -903,7 +905,7 @@ void VoxPhanDosiNav::track_to_out ( Particles particles )
         ui32 id=0;
         while ( id<particles.size )
         {
-            if ( id%10000 == 0 ) printf ( "Part : %d/%d\n",id,particles.size );
+            if ( id%100 == 0 ) printf ( "Part : %d/%d\n",id,particles.size );
 
             VPDN::kernel_host_track_to_out ( particles.data_h, m_phantom.data_h,
                                              m_materials.data_h, m_cross_sections.photon_CS.data_h, m_cross_sections.electronCSTable->get_data_h(),

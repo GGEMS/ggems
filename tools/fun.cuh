@@ -19,9 +19,13 @@
 #include "particles.cuh"
 #include "prng.cuh"
 
-inline __device__ ui32 get_id()
+inline __host__ __device__ ui32 get_id()
 {
+#ifdef __CUDA_ARCH__
     return blockIdx.x * blockDim.x + threadIdx.x;
+#else
+    return 0;
+#endif
 };
 
 __host__ __device__ f32xyz rotateUz ( f32xyz vector, f32xyz newUz );

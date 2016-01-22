@@ -57,6 +57,19 @@ __host__ __device__ void dose_record_standard ( DoseData &dose, f32 Edep, f32 px
 // GGcout <<  px << "  " <<  py << "  " <<  pz << GGendl;
         return;
     }
+    
+/*    
+    if(index_phantom.z > 150)
+    {
+        
+        
+        printf("ID %d  Positions : %g %g %g Index %d %d %d E %g\n ",get_id(),px,py,pz, index_phantom.x, index_phantom.y, index_phantom.z, Edep);
+//         printf("Index %");
+//         GGcout <<  px << "  " <<  py << "  " <<  pz << GGendl; 
+//         GGcout <<  index_phantom.x << "  " <<  index_phantom.y << "  " <<  index_phantom.z << GGendl;
+    
+    }*/
+    
 // GGcout <<  px << "  " <<  py << "  " <<  pz << GGendl;
 // GGcout <<  index_phantom.x << "  " <<  index_phantom.y << "  " <<  index_phantom.z << GGendl;
 

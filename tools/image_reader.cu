@@ -220,8 +220,8 @@ void ImageReader::record3Dimage ( string histname,  f64 *data, f32xyz offset, f3
                 for(int k=0; k<zdim; ++k)
                     {
 
-                        edep.SetBinContent(i+1, j+1,k+1, data[i + j*xdim + k*xdim*ydim] );
-//                         edep.SetBinContent(i+1, (ydim-j),k+1, data[i + j*xdim + k*xdim*ydim] );
+//                         edep.SetBinContent(i+1, j+1,k+1, data[i + j*xdim + k*xdim*ydim] );
+                        edep.SetBinContent(i+1, (ydim-j),k+1, data[i + j*xdim + k*xdim*ydim] );
 
                     }
                 }

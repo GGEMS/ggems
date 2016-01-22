@@ -511,9 +511,9 @@ __host__ __device__ f32 GetSafety(f32xyz Place, f32xyz direction,
                                f32xyz offset)
 {
 //     const unsigned int id = blockIdx.x * blockDim.x + threadIdx.x;
-    Place.x-=((f32)(index_phantom.x)) * voxel_size.x - offset.x;
-    Place.y-=((f32)(index_phantom.y)) * voxel_size.y - offset.y;
-    Place.z-=((f32)(index_phantom.z)) * voxel_size.z - offset.z;
+    Place.x-=((f32)(index_phantom.x)) * voxel_size.x;// - offset.x;
+    Place.y-=((f32)(index_phantom.y)) * voxel_size.y;// - offset.y;
+    Place.z-=((f32)(index_phantom.z)) * voxel_size.z;// - offset.z;
 
 //     printf("Place %g %g %g\n",Place.x,Place.y,Place.z);
 //     printf("%d %d %d %d \n",index_phantom.x,index_phantom.y,index_phantom.z,index_phantom.w);
