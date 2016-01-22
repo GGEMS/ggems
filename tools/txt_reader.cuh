@@ -61,4 +61,12 @@ class TxtReader {
 
 std::vector<std::string> split_vector(std::string str, std::string split);
 
+template < typename T > std::string to_string ( const T& n )
+{
+    std::ostringstream stm ;
+    stm << n ;
+    return stm.str() ;
+}
+
+
 #endif

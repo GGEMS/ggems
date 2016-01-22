@@ -171,4 +171,22 @@ __host__ __device__ i32xyz get_bin_xyz ( i32 bin, i32xyz size )
     return make_i32xyz ( dx,dy,dz );
 }
 
+__host__ __device__ ui32xyzw get_phantom_index( f32xyz pos, f32xyz offset, f32xyz size, ui32xyz nvoxels )
+{
+
+    f32xyz ivoxsize;
+    ivoxsize.x = 1.0 / size.x;
+    ivoxsize.y = 1.0 / size.y;
+    ivoxsize.z = 1.0 / size.z;
+    ui32xyzw index_phantom;
+    index_phantom.x = ui32 ( ( pos.x-offset.x ) * ivoxsize.x );
+    index_phantom.y = ui32 ( ( pos.y-offset.y ) * ivoxsize.y );
+    index_phantom.z = ui32 ( ( pos.z-offset.z ) * ivoxsize.z );
+    index_phantom.w = index_phantom.z*nvoxels.x*nvoxels.y
+                      + index_phantom.y*nvoxels.x
+                      + index_phantom.x; // linear index
+
+    return index_phantom;
+}
+
 #endif

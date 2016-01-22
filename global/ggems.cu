@@ -76,7 +76,13 @@ GGEMS::GGEMS()
 
 GGEMS::~GGEMS()
 {
-    //delete m_parameters;
+   
+    if ( m_parameters.data_h.device_target == GPU_DEVICE )
+    {
+        // Reset device
+        reset_gpu_device();
+    }
+   //delete m_parameters;
     //delete m_source;
 }
 
@@ -216,8 +222,7 @@ void GGEMS::set_number_of_particles ( std::string str )
     std::vector<std::string> tokens;
     std::stringstream stream;
 
-    //RESOLUTION
-    tokens=split_vector(str," "); //utilslib.cpp
+    tokens=split_vector(str," ");
     if(tokens.size()!=2 )
     {
         GGcerr << "There must be only 2 values : The number of particles and the unit (thousand, million, billion)" << GGendl;
@@ -236,12 +241,7 @@ void GGEMS::set_number_of_particles ( std::string str )
         id *= 1000;
     }
     else if(unit=="million")
-    {
-//         if(id > 2000)
-//         {
-//             id 
-//         }
-        
+    {       
         id *= 1000000;
     }
     else if(unit=="billion")
@@ -252,7 +252,6 @@ void GGEMS::set_number_of_particles ( std::string str )
     else
     {
         GGcerr << "Multiple " << unit.c_str() << " unknown (only thousand, million, billion accepted)" << GGendl;
-//         printf("[\033[31;03mWARNING\033[00m] Multiple %s unknown (only thousand, million, billion accepted) ",unit.c_str());
         exit_simulation();
     }
 
@@ -261,8 +260,6 @@ void GGEMS::set_number_of_particles ( std::string str )
         printf("The number of particles must be a positive value \n");
         exit_simulation();
     }
-
-//     print_information("START "+to_string(batch)+" batch of "+to_string(id)+" iterations");
 
     set_number_of_particles(id);
     set_size_of_particles_batch(batch);
@@ -595,28 +592,49 @@ void GGEMS::init_simulation()
 }
 
 
+void progress_bar(float progress, int etape, int nbatch )
+{
+
+//         while (progress < 1.0) {
+        int barWidth = 70;
+
+        std::cout << "[";
+        int pos = barWidth * progress;
+        for (int i = 0; i < barWidth; ++i) {
+            if (i < pos) std::cout << "=";
+            else if (i == pos) std::cout << ">";
+            else std::cout << " ";
+        }
+        std::cout << "] " << int(progress * 100.0) << " % (Batch : " << etape << "/"<< nbatch<< ")\r";
+        std::cout.flush();
+            
+
+}
+
 
 void GGEMS::start_simulation()
 {
-
+ float progress = 0.0;
     // Main loop
     ui32 ibatch=0;
     while ( ibatch < m_parameters.data_h.nb_of_batches )
     {
 
-        GGcout << "----> Launching batch " << ibatch+1 << "/" << m_parameters.data_h.nb_of_batches << " ..." << GGendl;
+//         GGcout << "----> Launching batch " << ibatch+1 << "/" << m_parameters.data_h.nb_of_batches << " ..." << GGendl;
         // Get primaries
-        GGcout << "      Generating the particles ..." << GGendl;
+//         GGcout << "      Generating the particles ..." << GGendl;
+//         progress_bar(progress,"generate primaries");
         m_source->get_primaries_generator( m_particles_manager.particles );
 
         // TODO If phantom
         // Nav between source to phantom
-        GGcout << "      Navigation between the source and the phantom ..." << GGendl;
+//         GGcout << "      Navigation between the source and the phantom ..." << GGendl;
+//         progress_bar(progress,"track to phantom");
         m_phantom->track_to_in( m_particles_manager.particles );
 
         // Nav within the phantom
-        GGcout << "      Navigation within the phantom ..." << GGendl;
-        
+//         GGcout << "      Navigation within the phantom ..." << GGendl;
+//         progress_bar(progress,"batch");
         m_phantom->track_to_out( m_particles_manager.particles );
 
         // TODO If detector
@@ -637,10 +655,23 @@ void GGEMS::start_simulation()
 
         // Export data
         //m_detectors.save_data("toto.dat");
+//         GGcout << "----> Batch finished ..." << GGendl << GGendl;
+        
+        
+       progress_bar(progress, ibatch , m_parameters.data_h.nb_of_batches);
 
+            progress += 1./ (float)(m_parameters.data_h.nb_of_batches);
+            
+//             progress += 0.16; // for demonstration only
+//         }
+        
+        
         ++ibatch;
     }
 
+        progress_bar(progress, m_parameters.data_h.nb_of_batches , m_parameters.data_h.nb_of_batches);
+    
+        std::cout << std::endl;
 
 
 }

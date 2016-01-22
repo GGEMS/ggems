@@ -425,12 +425,13 @@ void ConeBeamCTSource::get_primaries_generator( Particles particles )
     threads.x = m_params.data_h.gpu_block_size;
     grid.x = ( particles.size + m_params.data_h.gpu_block_size - 1 )
       / m_params.data_h.gpu_block_size;
-
+    cudaThreadSynchronize();
     kernel_cone_beam_ct_source<<<grid, threads>>>( particles.data_d, m_px, m_py,
       m_pz, m_direction_option, m_dx, m_dy, m_dz, m_particle_type,
       m_spectrumE_d, m_spectrumCDF_d, m_nb_of_energy_bins, m_aperture, m_hfoc,
       m_vfoc );
     cuda_error_check( "Error ", " kernel_cone_beam_ct_source" );
+    cudaThreadSynchronize();
   }
 }
 

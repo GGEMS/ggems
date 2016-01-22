@@ -291,7 +291,7 @@ void Materials::m_build_materials_table(GlobalSimulationParameters params, std::
         data_h.density[i] = cur_mat.density / gram;
 
         // G4 material
-        G4Material *g4mat = new G4Material("tmp", cur_mat.density, cur_mat.nb_elements);
+        G4Material *g4mat = new G4Material("tmp"+to_string(i), cur_mat.density, cur_mat.nb_elements);
 
         data_h.nb_atoms_per_vol[i] = 0.0f;
         data_h.nb_electrons_per_vol[i] = 0.0f;
