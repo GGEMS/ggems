@@ -59,4 +59,6 @@ class TxtReader {
 
 };
 
+std::vector<std::string> split_vector(std::string str, std::string split);
+
 #endif

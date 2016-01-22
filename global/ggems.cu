@@ -206,6 +206,69 @@ void GGEMS::set_number_of_particles ( ui64 nb )
     m_parameters.data_h.nb_of_particles = nb;
 }
 
+// Set the number of particles required for the simulation
+void GGEMS::set_number_of_particles ( std::string str )
+{
+    int id = 0;
+    int batch = 1;
+
+    std::string unit;
+    std::vector<std::string> tokens;
+    std::stringstream stream;
+
+    //RESOLUTION
+    tokens=split_vector(str," "); //utilslib.cpp
+    if(tokens.size()!=2 )
+    {
+        GGcerr << "There must be only 2 values : The number of particles and the unit (thousand, million, billion)" << GGendl;
+        exit_simulation();
+    }
+
+    stream << tokens[0];
+    stream >> id;
+    stream.clear(); //clear the sstream
+    stream << tokens[1];
+    stream >> unit;
+    stream.clear(); //clear the sstream
+
+    if(unit=="thousand")
+    {
+        id *= 1000;
+    }
+    else if(unit=="million")
+    {
+//         if(id > 2000)
+//         {
+//             id 
+//         }
+        
+        id *= 1000000;
+    }
+    else if(unit=="billion")
+    {
+        batch = id;
+        id = 1000000000;
+    }
+    else
+    {
+        GGcerr << "Multiple " << unit.c_str() << " unknown (only thousand, million, billion accepted)" << GGendl;
+//         printf("[\033[31;03mWARNING\033[00m] Multiple %s unknown (only thousand, million, billion accepted) ",unit.c_str());
+        exit_simulation();
+    }
+
+    if(id<0)
+    {
+        printf("The number of particles must be a positive value \n");
+        exit_simulation();
+    }
+
+//     print_information("START "+to_string(batch)+" batch of "+to_string(id)+" iterations");
+
+    set_number_of_particles(id);
+    set_size_of_particles_batch(batch);
+
+}
+
 // Set the size of particles batch
 void GGEMS::set_size_of_particles_batch ( ui64 nb )
 {
@@ -541,20 +604,19 @@ void GGEMS::start_simulation()
     while ( ibatch < m_parameters.data_h.nb_of_batches )
     {
 
-        GGcout << "----> Launching batch " << ibatch << " ..." << GGendl;
+        GGcout << "----> Launching batch " << ibatch+1 << "/" << m_parameters.data_h.nb_of_batches << " ..." << GGendl;
         // Get primaries
         GGcout << "      Generating the particles ..." << GGendl;
         m_source->get_primaries_generator( m_particles_manager.particles );
 
         // TODO If phantom
         // Nav between source to phantom
-        GGcout << "      Navigation between the source and the phantom ..."
-          << GGendl;
+        GGcout << "      Navigation between the source and the phantom ..." << GGendl;
         m_phantom->track_to_in( m_particles_manager.particles );
 
         // Nav within the phantom
-        GGcout << "      Navigation within the phantom ..."
-          << GGendl;
+        GGcout << "      Navigation within the phantom ..." << GGendl;
+        
         m_phantom->track_to_out( m_particles_manager.particles );
 
         // TODO If detector

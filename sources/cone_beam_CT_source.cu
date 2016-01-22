@@ -29,6 +29,7 @@ __host__ __device__ void cone_beam_ct_source( ParticlesData particles_data,
   ui8 type, f64 *spectrumE, f64 *spectrumCDF, ui32 nbins, f32 aperture,
   f32 hfoc, f32 vfoc )
 {
+
   if ( direction_option == POINT_SOURCE_ISOTROPIC )
   {
     f32 phi = JKISS32( particles_data, id );
@@ -42,7 +43,8 @@ __host__ __device__ void cone_beam_ct_source( ParticlesData particles_data,
   }
   else if ( direction_option == POINT_SOURCE_BEAM )
   {
-    // Get direction
+   
+   // Get direction
     f32 phi = JKISS32( particles_data, id );
     f32 theta = JKISS32( particles_data, id );
     f32 val_aper = 1.0f - cosf( aperture );
@@ -58,12 +60,15 @@ __host__ __device__ void cone_beam_ct_source( ParticlesData particles_data,
     particles_data.dx[ id ] = d.x;
     particles_data.dy[ id ] = d.y;
     particles_data.dz[ id ] = d.z;
+    
   }
 
   // If the source is monochromatic the energy is stored immediately
   if( nbins == 1 )
   {
+    
     particles_data.E[ id ] = spectrumE[ 0 ];
+    
   }
   else
   {
@@ -112,10 +117,12 @@ __global__ void kernel_cone_beam_ct_source( ParticlesData particles_data,
   ui8 type, f64 *spectrumE, f64 *spectrumCDF, ui32 nbins, f32 aperture,
   f32 hfoc, f32 vfoc )
 {
-  const ui32 id = get_id();
-  if( id >= particles_data.size ) return;
-
-  cone_beam_ct_source( particles_data, id, px, py, pz, direction_option, dx,
+    const ui32 id = get_id();
+    if( id >= particles_data.size ) return;
+  
+    
+    
+    cone_beam_ct_source( particles_data, id, px, py, pz, direction_option, dx,
     dy, dz, type, spectrumE, spectrumCDF, nbins, aperture, hfoc, vfoc );
 }
 
@@ -387,19 +394,15 @@ void ConeBeamCTSource::initialize( GlobalSimulationParameters params )
   m_params = params;
 
   // Handle GPU device
-  if( m_params.data_h.device_target == GPU_DEVICE && m_nb_of_energy_bins > 1 )
+  if( m_params.data_h.device_target == GPU_DEVICE && m_nb_of_energy_bins > 0 )
   {
     // GPU mem allocation
-    HANDLE_ERROR( cudaMalloc( (void**)&m_spectrumE_d,
-      m_nb_of_energy_bins * sizeof( f64 ) ) );
-    HANDLE_ERROR( cudaMalloc( (void**)&m_spectrumCDF_d,
-      m_nb_of_energy_bins * sizeof ( f64 ) ) );
+    HANDLE_ERROR( cudaMalloc( (void**)&m_spectrumE_d,   m_nb_of_energy_bins * sizeof( f64 ) ) );
+    HANDLE_ERROR( cudaMalloc( (void**)&m_spectrumCDF_d, m_nb_of_energy_bins * sizeof ( f64 ) ) );
 
     // GPU mem copy
-    HANDLE_ERROR ( cudaMemcpy( m_spectrumE_d, m_spectrumE_h,
-      sizeof( f64 ) * m_nb_of_energy_bins, cudaMemcpyHostToDevice ) );
-    HANDLE_ERROR ( cudaMemcpy( m_spectrumCDF_d, m_spectrumCDF_h,
-      sizeof( f64 ) * m_nb_of_energy_bins, cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR ( cudaMemcpy( m_spectrumE_d,   m_spectrumE_h,      sizeof( f64 ) * m_nb_of_energy_bins, cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR ( cudaMemcpy( m_spectrumCDF_d, m_spectrumCDF_h,    sizeof( f64 ) * m_nb_of_energy_bins, cudaMemcpyHostToDevice ) );
   }
 }
 

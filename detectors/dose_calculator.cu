@@ -317,7 +317,7 @@ void DoseCalculator::m_gpu_malloc_dose()
     HANDLE_ERROR ( cudaMalloc ( ( void** ) &dose.data_d.number_of_hits, dose.data_h.nb_of_voxels * sizeof ( ui32 ) ) );
     HANDLE_ERROR ( cudaMalloc ( ( void** ) &dose.data_d.uncertainty,    dose.data_h.nb_of_voxels * sizeof ( f64 ) ) );
     
-    GGcout << "DoseCalculator GPU allocation " << dose.data_h.nb_of_voxels << GGendl;
+    GGcout << "DoseCalculator : GPU allocation " << dose.data_h.nb_of_voxels << GGendl;
     
 }
 
@@ -350,21 +350,21 @@ void DoseCalculator::m_copy_dose_cpu2gpu()
 
 void DoseCalculator::m_copy_dose_gpu2cpu()
 {
-    dose.data_h.nx = dose.data_d.nx;
-    dose.data_h.ny = dose.data_d.ny;
-    dose.data_h.nz = dose.data_d.nz;
+//     dose.data_h.nx = dose.data_d.nx;
+//     dose.data_h.ny = dose.data_d.ny;
+//     dose.data_h.nz = dose.data_d.nz;
+// 
+//     dose.data_h.spacing_x = dose.data_d.spacing_x;
+//     dose.data_h.spacing_y = dose.data_d.spacing_y;
+//     dose.data_h.spacing_z = dose.data_d.spacing_z;
+// 
+//     dose.data_h.ox = dose.data_d.ox;
+//     dose.data_h.oy = dose.data_d.oy;
+//     dose.data_h.oz = dose.data_d.oz;
 
-    dose.data_h.spacing_x = dose.data_d.spacing_x;
-    dose.data_h.spacing_y = dose.data_d.spacing_y;
-    dose.data_h.spacing_z = dose.data_d.spacing_z;
+//     dose.data_h.nb_of_voxels = dose.data_d.nb_of_voxels;
 
-    dose.data_h.ox = dose.data_d.ox;
-    dose.data_h.oy = dose.data_d.oy;
-    dose.data_h.oz = dose.data_d.oz;
-
-    dose.data_h.nb_of_voxels = dose.data_d.nb_of_voxels;
-
-    GGcout << "Copy dose calculator to CPU " << dose.data_h.nb_of_voxels << GGendl;
+    GGcout << "DoseCalculator : Copy to GPU " << dose.data_h.nb_of_voxels << GGendl;
     // Copy values to GPU arrays
     HANDLE_ERROR ( cudaMemcpy ( dose.data_h.edep,           dose.data_d.edep,           sizeof ( f64  ) *dose.data_h.nb_of_voxels,  cudaMemcpyDeviceToHost ) );
     HANDLE_ERROR ( cudaMemcpy ( dose.data_h.dose,           dose.data_d.dose,           sizeof ( f64  ) *dose.data_h.nb_of_voxels,  cudaMemcpyDeviceToHost ) );
