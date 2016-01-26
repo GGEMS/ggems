@@ -78,7 +78,7 @@ public:
     void init_simulation();
     void start_simulation();
 
-
+    void version();
 
 private:
     // Particles handler

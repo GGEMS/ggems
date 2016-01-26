@@ -27,6 +27,7 @@ endif()
 
 find_package(CUDA REQUIRED)
 
+
 # OPTIONS
 option(WITH_DOUBLE_PRECISION "Float numbers can be computed in double precision" ON)
 if(WITH_DOUBLE_PRECISION)
@@ -108,6 +109,9 @@ set(LIB_NAME "ggems")
 set(CUDA_NVCC_FLAGS ${LIBSCUDA})
 #message(${CUDA_NVCC_FLAGS})
 SET( CUDA_PROPAGATE_HOST_FLAGS OFF CACHE BOOL "" FORCE )
+
+set(CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE} "--std=c++11")
+set(CUDA_NVCC_FLAGS_RELEASE ${CUDA_NVCC_FLAGS_RELEASE} "--std=c++11")
 
 cuda_add_library(${LIB_NAME} STATIC ${sourcesGPU} ${headersGPU})
 

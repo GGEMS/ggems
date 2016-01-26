@@ -38,16 +38,16 @@ void ImageReader::create_directory_tree(std::string dirname)
 void ImageReader::record3Dimage ( string histname,  f64 *data, f32xyz offset, f32xyz spacing, i32xyz size, bool sparse_compression )
 {
 
-        printf("Image Parameters : %d %g %g %d %g %g %d %g %g \n",
-                                  size.x,  offset.x, offset.x+size.x*spacing.x,
-                                  size.y,  offset.y, offset.y+size.y*spacing.y,
-                                  size.z,  offset.z, offset.z+size.z*spacing.z );
+//         printf("Image Parameters : %d %g %g %d %g %g %d %g %g \n",
+//                                   size.x,  offset.x, offset.x+size.x*spacing.x,
+//                                   size.y,  offset.y, offset.y+size.y*spacing.y,
+//                                   size.z,  offset.z, offset.z+size.z*spacing.z );
 
-
+   GGcout << "Write image " << histname << " ... " << GGendl;
     // Check format
     string format = get_format ( histname );
     histname = get_filename_without_format ( histname );
-
+ 
     create_directory_tree(histname);
     
     if ( format == "mhd" )
@@ -55,7 +55,7 @@ void ImageReader::record3Dimage ( string histname,  f64 *data, f32xyz offset, f3
         string pathnamemhd = histname + ".mhd";
         string pathnameraw = histname + ".raw";
 
-        cout<<"Save file : "<<pathnamemhd << endl;
+//         cout<<"Save file : "<<pathnamemhd << endl;
 
         // MHD file
         std::ofstream myfile;
@@ -169,7 +169,7 @@ void ImageReader::record3Dimage ( string histname,  f64 *data, f32xyz offset, f3
     {
         string pathname = histname + ".txt";
 
-        std::cout<<"saving "<<pathname.c_str() <<std::endl;
+//         std::cout<<"saving "<<pathname.c_str() <<std::endl;
         std::ofstream ofs ( pathname.c_str(),  std::ofstream::out );
 
         int xdim = size.x;
@@ -199,10 +199,10 @@ void ImageReader::record3Dimage ( string histname,  f64 *data, f32xyz offset, f3
         std::string pathnameroot = histname;
         pathnameroot+=".root";
         
-        printf("saving %s \n",pathnameroot.c_str());
+//         printf("saving %s \n",pathnameroot.c_str());
         TFile f(pathnameroot.c_str(),"recreate");
 
-        TH3D edep("Edep", "Edep", size.x,  offset.x, offset.x+size.x*spacing.x,
+        TH3D edep("histo", "histo", size.x,  offset.x, offset.x+size.x*spacing.x,
                                   size.y,  offset.y, offset.y+size.y*spacing.y,
                                   size.z,  offset.z, offset.z+size.z*spacing.z );
         
@@ -220,16 +220,16 @@ void ImageReader::record3Dimage ( string histname,  f64 *data, f32xyz offset, f3
                 for(int k=0; k<zdim; ++k)
                     {
 
-//                         edep.SetBinContent(i+1, j+1,k+1, data[i + j*xdim + k*xdim*ydim] );
-                        edep.SetBinContent(i+1, (ydim-j),k+1, data[i + j*xdim + k*xdim*ydim] );
+                        edep.SetBinContent(i+1, j+1,k+1, data[i + j*xdim + k*xdim*ydim] );
+//                         edep.SetBinContent(i+1, (ydim-j),k+1, data[i + j*xdim + k*xdim*ydim] );
 
                     }
                 }
             }
-
-        TH1D* projectionx = edep.ProjectionX("EdepX");
-        TH1D* projectiony = edep.ProjectionY("EdepY");
-        TH1D* projectionz = edep.ProjectionZ("EdepZ");
+// 
+        TH1D* projectionx = edep.ProjectionX("ProjX");
+        TH1D* projectiony = edep.ProjectionY("ProjY");
+        TH1D* projectionz = edep.ProjectionZ("ProjZ");
 // 
 //         TH1D* projectiondosex = dose.ProjectionX("DoseX");
 // //         TH1D* projectiondosexmilieu = dose.ProjectionX("DoseXMilieu",ydim/2,ydim/2);

@@ -63,6 +63,28 @@ void set_gpu_device ( int deviceChoice, f32 minversion )
 //     printf ( "[\033[32;01mok\033[00m] \033[32;01m%s\033[00m found\n", prop.name );
     GGcout << "GPU found: " << prop.name << " (id: " << deviceChoice%deviceCount << ") " << GGendl;
 
+    
+/*    // Debug, pour calculer automatiquement le nbre de threads  et blocks en fonction du GPU
+    int numBlocks;        // Occupancy in terms of active blocks
+    int blockSize = 32;
+
+    // These variables are used to convert occupancy to warps
+
+    int activeWarps;
+    int maxWarps;
+
+    
+    cudaOccupancyMaxActiveBlocksPerMultiprocessor(
+        &numBlocks,
+        MyKernel,
+        blockSize,
+        0);
+
+    activeWarps = numBlocks * blockSize / prop.warpSize;
+    maxWarps = prop.maxThreadsPerMultiProcessor / prop.warpSize;
+    
+    std::cout << "Occupancy: " << (double)activeWarps / maxWarps * 100 << "%" << std::endl;*/
+    
 }
 
 

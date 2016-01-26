@@ -276,7 +276,16 @@ std::vector<std::string> split_vector(std::string str, std::string split)
 
     }
 
+std::string insert_string_before_format(std::string filename, std::string insert)
+{
 
+    std::string format = ImageReader::get_format ( filename );
+    filename = ImageReader::get_filename_without_format ( filename );
+    
+    return filename + insert + format ;
+    
+    
+}
 
 #endif
 

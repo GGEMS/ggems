@@ -381,7 +381,7 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
         dummystep ++ ;
 
     }
-    while ( ( particles.E[part_id]>EKINELIMIT ) && ( bool_loop==true ) && ( dummystep<1000 ) );
+    while ( ( particles.E[part_id]>EKINELIMIT ) && ( bool_loop==true ) && ( dummystep<10000 ) );
 
 
 
@@ -881,7 +881,7 @@ void VoxPhanDosiNav::track_to_in ( Particles particles )
         dim3 threads, grid;
         threads.x = m_params.data_h.gpu_block_size;
         grid.x = ( particles.size + m_params.data_h.gpu_block_size - 1 ) / m_params.data_h.gpu_block_size;
-//         GGcout << grid.x << "  " << threads.x << GGendl;
+// //         GGcout << grid.x << "  " << threads.x << GGendl;
 //         FuckOff<<<grid, threads>>> ();
         cudaThreadSynchronize();
         VPDN::kernel_device_track_to_in<<<grid, threads>>> ( particles.data_d, m_phantom.data_d.xmin, m_phantom.data_d.xmax,
@@ -905,7 +905,7 @@ void VoxPhanDosiNav::track_to_out ( Particles particles )
         ui32 id=0;
         while ( id<particles.size )
         {
-            if ( id%100 == 0 ) printf ( "Part : %d/%d\n",id,particles.size );
+            if ( id%10000 == 0 ) printf ( "Part : %d/%d\n",id,particles.size );
 
             VPDN::kernel_host_track_to_out ( particles.data_h, m_phantom.data_h,
                                              m_materials.data_h, m_cross_sections.photon_CS.data_h, m_cross_sections.electronCSTable->get_data_h(),
@@ -963,8 +963,28 @@ void VoxPhanDosiNav::initialize ( GlobalSimulationParameters params )
     m_phantom.initialize ( params );
 
     // Materials table
-    m_materials.load_elements_database();
-    m_materials.load_materials_database();
+    if( !m_elements_filename.empty() )
+    {
+      m_materials.load_elements_database( m_elements_filename );
+    }
+    else
+    {
+      m_materials.load_elements_database();
+    }
+
+    if( !m_materials_filename.empty() )
+    {
+      m_materials.load_materials_database( m_materials_filename );
+    }
+    else
+    {
+      m_materials.load_materials_database();
+    }
+    
+    
+    // Materials table
+//     m_materials.load_elements_database();
+//     m_materials.load_materials_database();
     m_materials.initialize ( m_phantom.list_of_materials, params );
 
     // Cross Sections
@@ -999,6 +1019,17 @@ void VoxPhanDosiNav::calculate_dose_to_phantom(){
     m_dose_calculator.calculate_dose_to_phantom();
 
 }
+
+void VoxPhanDosiNav::set_elements( std::string filename )
+{
+  m_elements_filename = filename;
+}
+
+void VoxPhanDosiNav::set_materials( std::string filename )
+{
+  m_materials_filename = filename;
+}
+
 
 
 

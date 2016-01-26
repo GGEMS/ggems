@@ -28,6 +28,11 @@
 
 GGEMS::GGEMS()
 {
+    if(std::string(getenv("GGEMSHOME")) == "")
+    {
+        print_error("GGEMSHOME not found... Please source /path/to/bin/ggems.sh");
+        exit_simulation();
+    }
 
     // Init physics list and secondaries list
     m_parameters.data_h.physics_list = ( bool* ) malloc ( NB_PROCESSES*sizeof ( bool ) );
@@ -465,6 +470,8 @@ void GGEMS::m_copy_parameters_cpu2gpu()
 void GGEMS::init_simulation()
 {
 
+
+
     // License and banner
     if (!m_license.info.clearence)
     {
@@ -492,13 +499,39 @@ void GGEMS::init_simulation()
     // CPU PRNG
     srand ( m_parameters.data_h.seed );
 
-    m_parameters.data_h.nb_of_batches = ui32 ( ( f32 ) m_parameters.data_h.nb_of_particles / ( f32 ) m_parameters.data_h.size_of_particles_batch );
+//     m_parameters.data_h.nb_of_batches = ui32 ( ( f32 ) m_parameters.data_h.nb_of_particles / ( f32 ) m_parameters.data_h.size_of_particles_batch );
+// 
+//     if( m_parameters.data_h.nb_of_particles % m_parameters.data_h.size_of_particles_batch )
+//     {
+//       m_parameters.data_h.nb_of_batches++;
+//     }
 
-    if( m_parameters.data_h.nb_of_particles % m_parameters.data_h.size_of_particles_batch )
-    {
-      m_parameters.data_h.nb_of_batches++;
-    }
+    
+    if (m_parameters.data_h.nb_of_particles % m_parameters.data_h.size_of_particles_batch)
+        {
+        m_parameters.data_h.nb_of_batches = (m_parameters.data_h.nb_of_particles / m_parameters.data_h.size_of_particles_batch) + 1;
+        }
+    else
+        {
+        m_parameters.data_h.nb_of_batches = m_parameters.data_h.nb_of_particles / m_parameters.data_h.size_of_particles_batch;
+        }
+    m_parameters.data_h.size_of_particles_batch = m_parameters.data_h.nb_of_particles / m_parameters.data_h.nb_of_batches;
+    m_parameters.data_h.nb_of_particles = m_parameters.data_h.size_of_particles_batch * m_parameters.data_h.nb_of_batches;
+    
+//     GGcout << ""
+    
+    
+    m_parameters.data_h.gpu_grid_size = (m_parameters.data_h.size_of_particles_batch + m_parameters.data_h.gpu_block_size - 1) / m_parameters.data_h.gpu_block_size;
+    
+    m_parameters.data_h.size_of_particles_batch = m_parameters.data_h.gpu_block_size * m_parameters.data_h.gpu_grid_size;
+    
 
+//     printf("Particle Stack size : %d \n",m_stack_size);
+    m_parameters.data_h.nb_of_particles = m_parameters.data_h.size_of_particles_batch * m_parameters.data_h.nb_of_batches;
+//     m_parameters.data_h.nb_of_batches *= m_parameters.data_h.size_of_particles_batch;
+    
+    
+    
     // Init the GPU if need
     if ( m_parameters.data_h.device_target == GPU_DEVICE )
     {
@@ -679,7 +712,20 @@ void GGEMS::start_simulation()
 
 
 
+void GGEMS::version()
+{
 
+// TODO faire printer les versions de g++, nvcc, Geant4 et architectures gpu utilisées pour la compilation
+
+   #ifdef __cplusplus
+   std::cout << "C++ compiler in use and version is " << __cplusplus << std::endl;
+//    std::cout <<"Version is " << __STDC_VERSION__ << std::endl;
+   #endif
+//    std::cout << "Hi" << __FILE__ << __LINE__ << std::endl;
+
+    
+
+}
 
 
 

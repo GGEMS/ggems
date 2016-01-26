@@ -100,7 +100,8 @@ public:
     void calculate_dose_to_water();
     
     void write ( std::string filename = "dosimetry.mhd" );
-
+    void set_elements( std::string filename );
+    void set_materials( std::string filename );
 private:
 
     VoxelizedPhantom m_phantom;
@@ -112,6 +113,8 @@ private:
 
     GlobalSimulationParameters m_params;
 
+    std::string m_elements_filename;
+    std::string m_materials_filename;
 
 //
 };

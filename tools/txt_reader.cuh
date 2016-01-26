@@ -15,6 +15,7 @@
 #define TXT_READER_CUH
 
 #include "global.cuh"
+#include "image_reader.cuh"
 
 // Voxelized phantom
 class TxtReader {
@@ -67,6 +68,8 @@ template < typename T > std::string to_string ( const T& n )
     stm << n ;
     return stm.str() ;
 }
+
+std::string insert_string_before_format(std::string filename, std::string insert);
 
 
 #endif

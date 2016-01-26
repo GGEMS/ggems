@@ -211,7 +211,7 @@ struct GlobalSimulationParametersData
     ui8 device_target;
     ui32 gpu_id;
     ui32 gpu_block_size;
-
+    ui32 gpu_grid_size;
     f32 time;
     ui32 seed;
 
