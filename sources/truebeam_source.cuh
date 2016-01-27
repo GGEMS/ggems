@@ -25,7 +25,7 @@ struct TrueBeamSourceData
     i32 max_ind_rhotp_511;
     i32 max_ind_position;
     i32 max_ind_position_511;
-    bool mFlatteningFilter;
+//     bool mFlatteningFilter;
     
 
 
@@ -95,17 +95,24 @@ class TruebeamSource : public GGEMSSource
         
         void set_energy(i32 E);
         void set_flattening_filter(bool b);
+        void set_path_to_data(std::string path);
+        
         void get_primaries_generator(Particles particles) ;
         void initialize(GlobalSimulationParameters params) ;
-
-
+        
         
     private:
     
-    TrueBeamSourceData data_h;
-    TrueBeamSourceData data_d;
-    GlobalSimulationParameters m_params; /*!< Simulation parameters */
-    i32 mSourceEnergy;
+        TrueBeamSourceData data_h;
+        TrueBeamSourceData data_d;
+        GlobalSimulationParameters m_params; /*!< Simulation parameters */
+    
+        void get_source_parameters();
+    
+        //Truebeam parameters
+        i32 m_source_energy;
+        std::string m_path_to_data;
+        bool m_flattening_filter;
 };
 
 #endif
