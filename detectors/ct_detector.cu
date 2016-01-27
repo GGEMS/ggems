@@ -27,7 +27,7 @@ __host__ __device__ void ct_detector_track_to_in( ParticlesData &particles,
   ObbData detector_volume, ui32* projection, ui32* scatter_order,
   f32 pixel_size_x, f32 pixel_size_y, f32 pixel_size_z, ui32 nb_pixel_x,
   ui32 nb_pixel_y, ui32 nb_pixel_z, f32 pos_x, f32 pos_y, f32 pos_z,
-  f32 threshold, ui32 id )
+  f32 threshold, f32 orbiting_angle, ui32 id )
 {
   // If freeze (not dead), re-activate the current particle
   if( particles.endsimu[ id ] == PARTICLE_FREEZE )
@@ -89,8 +89,10 @@ __host__ __device__ void ct_detector_track_to_in( ParticlesData &particles,
     pos = fxyz_add( pos, fxyz_scale( dir, dist + EPSILON3 ) );
   }
 
+  f32 rot_posy = -pos.x * sinf( orbiting_angle ) + pos.y * cosf( orbiting_angle );
+
   // Calculate pixel id
-  ui32 idx_xr = (ui32)( ( pos.y - detector_volume.ymin ) / pixel_size_y );
+  ui32 idx_xr = (ui32)( ( rot_posy - detector_volume.ymin ) / pixel_size_y );
   ui32 idx_yr = nb_pixel_z - 1 - (ui32)( ( pos.z - detector_volume.zmin ) / pixel_size_z );
 
   if( idx_xr >= nb_pixel_y || idx_yr >= nb_pixel_z )
@@ -128,7 +130,7 @@ __global__ void kernel_ct_detector_track_to_in( ParticlesData particles,
   ObbData detector_volume, ui32* projection, ui32* scatter_order,
   f32 pixel_size_x, f32 pixel_size_y, f32 pixel_size_z, ui32 nb_pixel_x,
   ui32 nb_pixel_y, ui32 nb_pixel_z, f32 pos_x, f32 pos_y, f32 pos_z,
-  f32 threshold )
+  f32 threshold, f32 orbiting_angle )
 {
 
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
@@ -136,7 +138,8 @@ __global__ void kernel_ct_detector_track_to_in( ParticlesData particles,
 
     ct_detector_track_to_in( particles, detector_volume, projection,
       scatter_order, pixel_size_x, pixel_size_y, pixel_size_z, nb_pixel_x,
-      nb_pixel_y, nb_pixel_z, pos_x, pos_y, pos_z, threshold, id);
+      nb_pixel_y, nb_pixel_z, pos_x, pos_y, pos_z, threshold, orbiting_angle,
+      id);
 }
 
 void CTDetector::track_to_in( Particles particles )
@@ -152,7 +155,7 @@ void CTDetector::track_to_in( Particles particles )
         m_pixel_size_x, m_pixel_size_y, m_pixel_size_z,
         m_nb_pixel_x, m_nb_pixel_y, m_nb_pixel_z,
         m_posx, m_posy, m_posz,
-        m_threshold,
+        m_threshold, m_orbiting_angle,
         id
       );
       ++id;
@@ -171,7 +174,7 @@ void CTDetector::track_to_in( Particles particles )
       m_pixel_size_x, m_pixel_size_y, m_pixel_size_z,
       m_nb_pixel_x, m_nb_pixel_y, m_nb_pixel_z,
       m_posx, m_posy, m_posz,
-      m_threshold
+      m_threshold, m_orbiting_angle
     );
     cuda_error_check("Error ", " Kernel_ct_detector (track to in)");
     cudaThreadSynchronize();
@@ -190,6 +193,7 @@ CTDetector::CTDetector()
   m_posy( 0.0f ),
   m_posz( 0.0f ),
   m_threshold( 0.0f ),
+  m_orbiting_angle( 0.0 ),
   m_projection_h( nullptr ),
   m_projection_d( nullptr ),
   m_scatter_order_h( nullptr ),
@@ -250,6 +254,11 @@ void CTDetector::set_position( f32 x, f32 y, f32 z )
 void CTDetector::set_threshold( f32 threshold )
 {
   m_threshold = threshold;
+}
+
+void CTDetector::set_orbiting( f32 orbiting_angle )
+{
+  m_orbiting_angle = orbiting_angle;
 }
 
 bool CTDetector::m_check_mandatory()
@@ -426,6 +435,7 @@ void CTDetector::initialize( GlobalSimulationParameters params )
 
   m_detector_volume.set_center_position( 0.0f, 0.0f, 0.0f );
   m_detector_volume.translate( m_posx, m_posy, m_posz );
+  m_detector_volume.rotate( 0.0, 0.0, m_orbiting_angle );
 
   // Allocate
   m_projection_h = new ui32[ m_nb_pixel_x * m_nb_pixel_y * m_nb_pixel_z ];

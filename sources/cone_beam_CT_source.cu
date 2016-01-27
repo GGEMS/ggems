@@ -27,7 +27,7 @@
 __host__ __device__ void cone_beam_ct_source( ParticlesData particles_data,
   ui32 id, f32 px, f32 py, f32 pz, ui8 direction_option, f32 dx, f32 dy, f32 dz,
   ui8 type, f64 *spectrumE, f64 *spectrumCDF, ui32 nbins, f32 aperture,
-  f32 hfoc, f32 vfoc )
+  f32 orbiting_angle, f32 hfoc, f32 vfoc )
 {
 
   if ( direction_option == POINT_SOURCE_ISOTROPIC )
@@ -43,7 +43,6 @@ __host__ __device__ void cone_beam_ct_source( ParticlesData particles_data,
   }
   else if ( direction_option == POINT_SOURCE_BEAM )
   {
-   
    // Get direction
     f32 phi = JKISS32( particles_data, id );
     f32 theta = JKISS32( particles_data, id );
@@ -57,10 +56,12 @@ __host__ __device__ void cone_beam_ct_source( ParticlesData particles_data,
 
     f32xyz d = rotateUz( make_f32xyz( rdx, rdy, rdz ), make_f32xyz ( dx, dy, dz ) );
 
-    particles_data.dx[ id ] = d.x;
-    particles_data.dy[ id ] = d.y;
+    f32 rot_dx = d.x * cosf( orbiting_angle ) - d.y * sinf( orbiting_angle );
+    f32 rot_dy = d.x * sinf( orbiting_angle ) + d.y * cosf( orbiting_angle );
+
+    particles_data.dx[ id ] = rot_dx;
+    particles_data.dy[ id ] = rot_dy;
     particles_data.dz[ id ] = d.z;
-    
   }
 
   // If the source is monochromatic the energy is stored immediately
@@ -98,9 +99,16 @@ __host__ __device__ void cone_beam_ct_source( ParticlesData particles_data,
   rndmPosH -= hfoc / 2.0;
 
   // set particles
-  particles_data.px[ id ] = px;
-  particles_data.py[ id ] = py + rndmPosH;
+
+  // Rotate the particle around Z axis
+  f32 rot_px = px * cosf( orbiting_angle )
+    - ( py + rndmPosH ) * sinf( orbiting_angle );
+  f32 rot_py = px * sinf( orbiting_angle )
+    + ( py + rndmPosH ) * cosf( orbiting_angle );
+  particles_data.px[ id ] = rot_px;
+  particles_data.py[ id ] = rot_py;
   particles_data.pz[ id ] = pz + rndmPosV;
+
   particles_data.tof[ id ] = 0.0f;
   particles_data.endsimu[ id ] = PARTICLE_ALIVE;
   particles_data.next_discrete_process[ id ] = NO_PROCESS;
@@ -114,7 +122,7 @@ __host__ __device__ void cone_beam_ct_source( ParticlesData particles_data,
 __global__ void kernel_cone_beam_ct_source( ParticlesData particles_data,
   f32 px, f32 py, f32 pz, ui8 direction_option, f32 dx, f32 dy, f32 dz,
   ui8 type, f64 *spectrumE, f64 *spectrumCDF, ui32 nbins, f32 aperture,
-  f32 hfoc, f32 vfoc )
+  f32 orbiting_angle, f32 hfoc, f32 vfoc )
 {
     const ui32 id = get_id();
     if( id >= particles_data.size ) return;
@@ -122,7 +130,8 @@ __global__ void kernel_cone_beam_ct_source( ParticlesData particles_data,
     
     
     cone_beam_ct_source( particles_data, id, px, py, pz, direction_option, dx,
-    dy, dz, type, spectrumE, spectrumCDF, nbins, aperture, hfoc, vfoc );
+    dy, dz, type, spectrumE, spectrumCDF, nbins, aperture, orbiting_angle,
+    hfoc, vfoc );
 }
 
 ConeBeamCTSource::ConeBeamCTSource()
@@ -134,8 +143,8 @@ ConeBeamCTSource::ConeBeamCTSource()
   m_vfoc( 0.0 ),
   m_aperture( 360.0 ),
   m_particle_type( PHOTON ),
-  m_model_source( "poisson" ),
   m_direction_option( POINT_SOURCE_BEAM ),
+  m_orbiting_angle( 0.0 ),
   m_dx( 0.0 ),
   m_dy( 0.0 ),
   m_dz( 0.0 ),
@@ -194,6 +203,11 @@ void ConeBeamCTSource::set_beam_aperture( f32 aperture )
   m_aperture = aperture;
 }
 
+void ConeBeamCTSource::set_orbiting( f32 orbiting_angle )
+{
+  m_orbiting_angle = orbiting_angle;
+}
+
 void ConeBeamCTSource::set_particle_type( std::string pname )
 {
   // Transform the name of the particle in small letter
@@ -217,14 +231,6 @@ void ConeBeamCTSource::set_particle_type( std::string pname )
     oss << "Particle '" << pname << "' not recognized!!!";
     throw std::runtime_error( oss.str() );
   }
-}
-
-void ConeBeamCTSource::set_model( std::string model )
-{
-  // Transform the name of the model in small letter
-  std::transform( model.begin(), model.end(), model.begin(), ::tolower );
-
-  m_model_source = model;
 }
 
 void ConeBeamCTSource::set_direction( std::string type, f32 vdx, f32 vdy,
@@ -332,7 +338,6 @@ std::ostream& operator<<( std::ostream& os, ConeBeamCTSource const& cbct )
      << ( cbct.m_particle_type == ELECTRON ? "electron" :
        ( cbct.m_particle_type == PHOTON ? "photon" : "positron" ) )
      << GGendl;
-  os << "+ Model:         " << cbct.m_model_source << GGendl;
   os << "+ Aperture:      " << cbct.m_aperture << " [deg]" << GGendl;
 
   os << GGendl;
@@ -414,7 +419,8 @@ void ConeBeamCTSource::get_primaries_generator( Particles particles )
     {
       cone_beam_ct_source( particles.data_h, id, m_px, m_py, m_pz,
         m_direction_option, m_dx, m_dy, m_dz, m_particle_type, m_spectrumE_h,
-        m_spectrumCDF_h, m_nb_of_energy_bins, m_aperture, m_hfoc, m_vfoc );
+        m_spectrumCDF_h, m_nb_of_energy_bins, m_aperture, m_orbiting_angle,
+        m_hfoc, m_vfoc );
       ++id;
     }
   }
@@ -427,8 +433,8 @@ void ConeBeamCTSource::get_primaries_generator( Particles particles )
     cudaThreadSynchronize();
     kernel_cone_beam_ct_source<<<grid, threads>>>( particles.data_d, m_px, m_py,
       m_pz, m_direction_option, m_dx, m_dy, m_dz, m_particle_type,
-      m_spectrumE_d, m_spectrumCDF_d, m_nb_of_energy_bins, m_aperture, m_hfoc,
-      m_vfoc );
+      m_spectrumE_d, m_spectrumCDF_d, m_nb_of_energy_bins, m_aperture,
+      m_orbiting_angle, m_hfoc, m_vfoc );
     cuda_error_check( "Error ", " kernel_cone_beam_ct_source" );
     cudaThreadSynchronize();
   }

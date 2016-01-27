@@ -100,7 +100,7 @@ __host__ __device__ f32xyz fxyz_rotate_euler(f32xyz u, f32xyz EulerAngles) {
 
 // Rotate a vector u around the x-axis
 __host__ __device__ f32xyz fxyz_rotate_x_axis(f32xyz u, f32 angle) {
-    angle *= deg;
+    //angle *= deg;
     f32 cs = cos(angle);
     f32 sn = sin(angle);
 
@@ -113,7 +113,7 @@ __host__ __device__ f32xyz fxyz_rotate_x_axis(f32xyz u, f32 angle) {
 
 // Rotate a vector u around the y-axis
 __host__ __device__ f32xyz fxyz_rotate_y_axis(f32xyz u, f32 angle) {
-    angle *= deg;
+    //angle *= deg;
 
     f32 cs = cos(angle);
     f32 sn = sin(angle);
@@ -127,7 +127,7 @@ __host__ __device__ f32xyz fxyz_rotate_y_axis(f32xyz u, f32 angle) {
 
 // Rotate a vector u around the z-axis
 __host__ __device__ f32xyz fxyz_rotate_z_axis(f32xyz u, f32 angle) {
-    angle *= deg;
+    //angle *= deg;
     f32 cs = cos(angle);
     f32 sn = sin(angle);
 

@@ -33,6 +33,7 @@ class CTDetector : public GGEMSDetector
         void set_pixel_size( f32 sx, f32 sy, f32 sz );
         void set_position( f32 x, f32 y, f32 z );
         void set_threshold( f32 threshold );
+        void set_orbiting( f32 orbiting_angle );
 
         // Tracking from outside to the detector
         void track_to_in( Particles particles );
@@ -61,6 +62,7 @@ class CTDetector : public GGEMSDetector
         ui32 m_nb_pixel_x, m_nb_pixel_y, m_nb_pixel_z;
         f32 m_posx, m_posy, m_posz;
         f32 m_threshold;
+        f32 m_orbiting_angle;
 
         ui32 *m_projection_h;
         ui32 *m_projection_d;

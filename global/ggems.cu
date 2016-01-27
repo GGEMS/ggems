@@ -650,11 +650,13 @@ void GGEMS::start_simulation()
     //float progress = 0.0;
     // Main loop
     ui32 ibatch=0;
+    GGcout << "Total number of particles to generate: " << m_parameters.data_h.nb_of_particles << GGendl;
     while ( ibatch < m_parameters.data_h.nb_of_batches )
     {
 
          GGcout << "----> Launching batch " << ibatch+1 << "/" << m_parameters.data_h.nb_of_batches << " ..." << GGendl;
         // Get primaries
+         GGcout << "      Number of particles to generate: " << m_parameters.data_h.size_of_particles_batch << GGendl;
          GGcout << "      Generating the particles ..." << GGendl;
 //         progress_bar(progress,"generate primaries");
         m_source->get_primaries_generator( m_particles_manager.particles );

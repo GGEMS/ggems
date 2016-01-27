@@ -67,13 +67,6 @@ class ConeBeamCTSource : public GGEMSSource
     void set_particle_type( std::string pname );
 
     /*!
-      \fn void set_model( std::string model )
-      \param model name of the source model
-      \brief Set the source model
-    */
-    void set_model( std::string model );
-
-    /*!
       \fn void set_direction ( std::string type, f32 vdx, f32 vdy, f32 vdz )
       \param type Type of the source
       \param vdx Direction of the X-ray beam in X
@@ -96,6 +89,13 @@ class ConeBeamCTSource : public GGEMSSource
       \brief set the histogram file of the source
     */
     void set_energy_spectrum( std::string filename );
+
+    /*!
+      \fn void set_orbiting( f32 orbiting_angle )
+      \param orbiting_angle orbiting angle around the center of the system
+      \brief Rotate the source around the center of the system
+    */
+    void set_orbiting( f32 orbiting_angle );
 
     /*!
       \fn std::ostream& operator<<( std::ostream& os, ConeBeamCTSource const& cbct )
@@ -141,8 +141,8 @@ class ConeBeamCTSource : public GGEMSSource
     f32 m_vfoc; /*!< Vertical focal position */
     f32 m_aperture; /*!< Aperture of the source */
     ui8 m_particle_type; /*!< Type of the particle */
-    std::string m_model_source; /*!< Model of the source */
     ui8 m_direction_option; /*!< Direction option for the beam */
+    f32 m_orbiting_angle; /*!< Orbiting angle of the source */
     f32 m_dx; /*!< Direction in X for the beam */
     f32 m_dy; /*!< Direction in Y for the beam */
     f32 m_dz; /*!< Direction in Z for the beam */

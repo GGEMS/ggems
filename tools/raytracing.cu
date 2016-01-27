@@ -490,6 +490,7 @@ __host__ __device__ f32 hit_ray_OBB(f32xyz ray_p, f32xyz ray_d,
 
     // Transform the ray in OBB' space, then do AABB
     f32xyz ray_obb = fxyz_sub(ray_p, obb_center);
+
     ray_p.x = fxyz_dot(ray_obb, u);
     ray_p.y = fxyz_dot(ray_obb, v);
     ray_p.z = fxyz_dot(ray_obb, w);
