@@ -29,9 +29,12 @@ class GGEMSDetector {
         virtual void track_to_out(Particles particles) = 0;
 
         void digitizer();
-        void save_data(std::string filename);
+        //virtual void save_data(std::string filename) = 0;
 
         std::string get_detector_name();
+
+    protected:
+      void set_name(std::string name);
 
     protected:
         //VoxPhanImgNav m_vox_phan_img;

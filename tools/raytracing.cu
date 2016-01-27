@@ -184,6 +184,29 @@ __host__ __device__ bool overlap_AABB_triangle(f32 xmin, f32 xmax,        // AAB
     return false;
 }
 
+// Ray/OBB intersection - Inspired by POVRAY (f32 version)
+__host__ __device__ f32 dist_overlap_ray_OBB(f32xyz ray_p, f32xyz ray_d,
+                                    f32 aabb_xmin, f32 aabb_xmax,
+                                    f32 aabb_ymin, f32 aabb_ymax,
+                                    f32 aabb_zmin, f32 aabb_zmax,
+                                    f32xyz obb_center,
+                                    f32xyz u, f32xyz v, f32xyz w) {
+
+    // Transform the ray in OBB' space, then do AABB
+    f32xyz ray_obb = fxyz_sub(ray_p, obb_center);
+    ray_p.x = fxyz_dot(ray_obb, u);
+    ray_p.y = fxyz_dot(ray_obb, v);
+    ray_p.z = fxyz_dot(ray_obb, w);
+
+    f32xyz dir;
+    dir.x = fxyz_dot(ray_d, u);
+    dir.y = fxyz_dot(ray_d, v);
+    dir.z = fxyz_dot(ray_d, w);
+
+    return dist_overlap_ray_AABB(ray_p, dir, aabb_xmin, aabb_xmax, aabb_ymin,
+      aabb_ymax, aabb_zmin, aabb_zmax);
+}
+
 // Overlapping distance between ray and AABB - Smits algorithm (f32 version)
 __host__ __device__ f32 dist_overlap_ray_AABB(f32xyz ray_p, f32xyz ray_d,
                                      f32 aabb_xmin, f32 aabb_xmax,
@@ -470,6 +493,7 @@ __host__ __device__ f32 hit_ray_OBB(f32xyz ray_p, f32xyz ray_d,
     ray_p.x = fxyz_dot(ray_obb, u);
     ray_p.y = fxyz_dot(ray_obb, v);
     ray_p.z = fxyz_dot(ray_obb, w);
+
     f32xyz dir;
     dir.x = fxyz_dot(ray_d, u);
     dir.y = fxyz_dot(ray_d, v);

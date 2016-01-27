@@ -114,6 +114,7 @@ __host__ __device__ f32xyz fxyz_rotate_x_axis(f32xyz u, f32 angle) {
 // Rotate a vector u around the y-axis
 __host__ __device__ f32xyz fxyz_rotate_y_axis(f32xyz u, f32 angle) {
     angle *= deg;
+
     f32 cs = cos(angle);
     f32 sn = sin(angle);
 

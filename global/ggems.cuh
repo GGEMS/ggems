@@ -54,9 +54,11 @@ public:
     void set_process ( std::string process_name );
     void set_secondary ( std::string pname );
     void set_particle_cut ( std::string pname, f32 E );
+
     void set_number_of_particles ( ui64 nb );
     void set_number_of_particles ( std::string nb );
     void set_size_of_particles_batch ( ui64 nb );
+
     void set_CS_table_nbins ( ui32 valbin );
     void set_CS_table_E_min ( f32 valE );
     void set_CS_table_E_max ( f32 valE );

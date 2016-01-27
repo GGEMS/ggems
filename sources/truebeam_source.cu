@@ -4,7 +4,6 @@
 #include <cstdlib>
 #include <iostream>
 
-
 using namespace std;
 
 // GGEMS Copyright (C) 2015

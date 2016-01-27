@@ -74,8 +74,9 @@ GGEMS::GGEMS()
     m_parameters.data_h.display_memory_usage = DISABLED;
 
     // Element of the simulation
-    m_source = NULL;
-    m_phantom = NULL;
+    m_source = nullptr;
+    m_phantom = nullptr;
+    m_detector = nullptr;
 
 }
 
@@ -545,7 +546,6 @@ void GGEMS::init_simulation()
         m_copy_parameters_cpu2gpu();
     }
 
-
     /// Init Sources /////////////////////////////////
     m_source->initialize ( m_parameters );
 
@@ -553,11 +553,11 @@ void GGEMS::init_simulation()
     m_phantom->initialize ( m_parameters );
 
     /// Init Particles Stack /////////////////////////
-//     m_detector->initialize ( m_parameters );
+    // The detector is not mandatory
+    if( m_detector ) m_detector->initialize ( m_parameters );
 
     /// Init Particles Stack /////////////////////////
     m_particles_manager.initialize ( m_parameters );
-
 
     /*
     // Mem usage
@@ -645,38 +645,42 @@ void progress_bar(float progress, int etape, int nbatch )
 
 }
 
-
 void GGEMS::start_simulation()
 {
- float progress = 0.0;
+    //float progress = 0.0;
     // Main loop
     ui32 ibatch=0;
     while ( ibatch < m_parameters.data_h.nb_of_batches )
     {
 
-//         GGcout << "----> Launching batch " << ibatch+1 << "/" << m_parameters.data_h.nb_of_batches << " ..." << GGendl;
+         GGcout << "----> Launching batch " << ibatch+1 << "/" << m_parameters.data_h.nb_of_batches << " ..." << GGendl;
         // Get primaries
-//         GGcout << "      Generating the particles ..." << GGendl;
+         GGcout << "      Generating the particles ..." << GGendl;
 //         progress_bar(progress,"generate primaries");
         m_source->get_primaries_generator( m_particles_manager.particles );
 
         // TODO If phantom
         // Nav between source to phantom
-//         GGcout << "      Navigation between the source and the phantom ..." << GGendl;
+         GGcout << "      Navigation between the source and the phantom ..." << GGendl;
 //         progress_bar(progress,"track to phantom");
         m_phantom->track_to_in( m_particles_manager.particles );
 
         // Nav within the phantom
-//         GGcout << "      Navigation within the phantom ..." << GGendl;
+         GGcout << "      Navigation within the phantom ..." << GGendl;
 //         progress_bar(progress,"batch");
         m_phantom->track_to_out( m_particles_manager.particles );
 
-        // TODO If detector
-
-        if ( m_parameters.data_h.device_target == GPU_DEVICE )
+        // Nav between phantom and detector
+        if( m_detector )
         {
-          ;//m_particles_manager.m_copy_gpu2cpu();
+          GGcout << "      Navigation between the phantom and the detector ..." << GGendl;
+          m_detector->track_to_in( m_particles_manager.particles );
         }
+
+        /*if ( m_parameters.data_h.device_target == GPU_DEVICE )
+        {
+          m_particles_manager.m_copy_gpu2cpu();
+        }*/
         //m_particles_manager.dump();
         // Nav between phantom to detector
         /*m_detectors.track_to_in ( m_particles_manager.particles );
@@ -688,26 +692,18 @@ void GGEMS::start_simulation()
         m_detectors.digitizer();*/
 
         // Export data
-        //m_detectors.save_data("toto.dat");
-//         GGcout << "----> Batch finished ..." << GGendl << GGendl;
         
-        
-       progress_bar(progress, ibatch , m_parameters.data_h.nb_of_batches);
+        GGcout << "----> Batch finished ..." << GGendl << GGendl;
+        //progress_bar(progress, ibatch , m_parameters.data_h.nb_of_batches);
 
-            progress += 1./ (float)(m_parameters.data_h.nb_of_batches);
+        //progress += 1./ (float)(m_parameters.data_h.nb_of_batches);
             
 //             progress += 0.16; // for demonstration only
 //         }
-        
-        
         ++ibatch;
     }
-
-        progress_bar(progress, m_parameters.data_h.nb_of_batches , m_parameters.data_h.nb_of_batches);
-    
+//        progress_bar(progress, m_parameters.data_h.nb_of_batches , m_parameters.data_h.nb_of_batches);
         std::cout << std::endl;
-
-
 }
 
 

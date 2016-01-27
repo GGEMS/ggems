@@ -66,9 +66,7 @@ __host__ __device__ void cone_beam_ct_source( ParticlesData particles_data,
   // If the source is monochromatic the energy is stored immediately
   if( nbins == 1 )
   {
-    
     particles_data.E[ id ] = spectrumE[ 0 ];
-    
   }
   else
   {
@@ -110,6 +108,7 @@ __host__ __device__ void cone_beam_ct_source( ParticlesData particles_data,
   particles_data.level[ id ] = PRIMARY;
   particles_data.pname[ id ] = type;
   particles_data.geometry_id[ id ] = 0;
+  particles_data.scatter_order[ id ] = 0;
 }
 
 __global__ void kernel_cone_beam_ct_source( ParticlesData particles_data,

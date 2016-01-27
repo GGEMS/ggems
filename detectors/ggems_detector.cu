@@ -16,8 +16,14 @@
 
 #include "ggems_detector.cuh"
 
-GGEMSDetector::GGEMSDetector() {
-    m_detector_name = "";
+GGEMSDetector::GGEMSDetector()
+: m_detector_name( "no_source" )
+{
+  ;
+}
+
+void GGEMSDetector::set_name(std::string name) {
+    m_detector_name = name;
 }
 
 /*

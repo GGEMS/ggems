@@ -103,7 +103,6 @@ void Obb::rotate(f32 ax, f32 ay, f32 az) {
     volume.data_h.center = fxyz_rotate_x_axis(volume.data_h.center, ax);
     volume.data_h.center = fxyz_rotate_y_axis(volume.data_h.center, ay);
     volume.data_h.center = fxyz_rotate_z_axis(volume.data_h.center, az);
-
 }
 
 #endif
