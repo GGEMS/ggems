@@ -109,7 +109,7 @@ __host__ __device__ void VPIN::track_to_out ( ParticlesData &particles,
     }
 
     // Get the material that compose this volume
-    ui16 mat_id = vol.values[index_phantom.w];
+    ui16 mat_id = vol.values[ index_phantom.w ];
 
     //// Find next discrete interaction ///////////////////////////////////////
 
@@ -132,8 +132,6 @@ __host__ __device__ void VPIN::track_to_out ( ParticlesData &particles,
 
     if ( boundary_distance <= next_interaction_distance )
     {
-        //if( part_id == 4011 )
-         //printf( "in %4.7f\n", next_interaction_distance );
         next_interaction_distance = boundary_distance + EPSILON3; // Overshoot
         next_discrete_process = GEOMETRY_BOUNDARY;
     }
@@ -181,12 +179,12 @@ __host__ __device__ void VPIN::track_to_out ( ParticlesData &particles,
     }
 
     //// Energy cut
-    if ( particles.E[part_id] <= materials.electron_energy_cut[mat_id] )
+   /* if ( particles.E[part_id] <= materials.electron_energy_cut[mat_id] )
     {
         particles.endsimu[part_id] = PARTICLE_DEAD;
         particles.E[ part_id ] = 0.0f;
         return;
-    }
+    }*/
 }
 
 // Device Kernel that move particles to the voxelized volume boundary

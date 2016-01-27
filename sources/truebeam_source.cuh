@@ -97,7 +97,7 @@ class TruebeamSource : public GGEMSSource
         void set_flattening_filter(bool b);
         void set_path_to_data(std::string path);
         
-        void get_primaries_generator(Particles particles) ;
+        void get_primaries_generator(Particles particles) {}
         void initialize(GlobalSimulationParameters params) ;
         
         
