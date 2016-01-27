@@ -1,13 +1,13 @@
-Mac:
-sourceG4
-open -a /Applications/Qt\ Creator.app/
+== TODO ==
+* Fix image reader (according the global frame)
+* Fix particle geometry navigation (still error with float uncertainty)
 
-TODO:
-1. Manager must be singleton class - JB
+== Misc ==
+* Mark Podesta get the version r232 for testing
 
-Bugs:
+== Help ==
 
-MERCURIAL:
+=== MERCURIAL ===
 
 * See commits
 hg glog | head
@@ -35,4 +35,8 @@ hg ci -m 'some fresh blood'
 * Closing a branch
 hg up MYBRANCH
 hg ci -m 'closing mybranch' --close-branch
+
+
+
+
 
