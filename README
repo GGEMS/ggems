@@ -1,13 +1,23 @@
-== TODO ==
+====
+TODO
+====
+
 * Fix image reader (according the global frame)
 * Fix particle geometry navigation (still error with float uncertainty)
 
-== Misc ==
+====
+Misc
+====
+
 * Mark Podesta get the version r232 for testing
 
-== Help ==
+====
+Help
+====
 
-=== MERCURIAL ===
+---------
+MERCURIAL
+---------
 
 * See commits
 hg glog | head
