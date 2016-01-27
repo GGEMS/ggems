@@ -37,8 +37,6 @@ __host__ __device__ void photon_get_next_interaction ( ParticlesData &particles,
                                             energy, E_index, mat_id, photon_CS_table.nb_bins );
         interaction_distance = -log ( JKISS32 ( particles, part_id ) ) / cross_section;
 
-        //printf( "pe: %4.7f, %4.7f, %4.7f, %4.7f %u\n", cross_section, energy, JKISS32 ( particles, part_id ), interaction_distance, mat_id );
-
         if ( interaction_distance < next_interaction_distance )
         {
             next_interaction_distance = interaction_distance;
@@ -53,8 +51,6 @@ __host__ __device__ void photon_get_next_interaction ( ParticlesData &particles,
                                             energy, E_index, mat_id, photon_CS_table.nb_bins );
         interaction_distance = -log ( JKISS32 ( particles, part_id ) ) / cross_section;
 
-        //printf( "c: %4.7f, %4.7f, %4.7f, %4.7f %u\n", cross_section, energy, JKISS32 ( particles, part_id ), interaction_distance, mat_id );
-
         if ( interaction_distance < next_interaction_distance )
         {
             next_interaction_distance = interaction_distance;
@@ -68,8 +64,6 @@ __host__ __device__ void photon_get_next_interaction ( ParticlesData &particles,
         cross_section = get_CS_from_table ( photon_CS_table.E_bins, photon_CS_table.Rayleigh_Lv_CS,
                                             energy, E_index, mat_id, photon_CS_table.nb_bins );
         interaction_distance = -log ( JKISS32 ( particles, part_id ) ) / cross_section;
-
-        //printf( "r: %4.7f, %4.7f, %4.7f, %4.7f %u\n", cross_section, energy, JKISS32 ( particles, part_id ), interaction_distance, mat_id );
 
         if ( interaction_distance < next_interaction_distance )
         {

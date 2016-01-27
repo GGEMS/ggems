@@ -55,7 +55,7 @@ __host__ __device__ void VPIN::track_to_in ( ParticlesData &particles, f32 xmin,
         }
         // move the particle slightly inside the volume
         pos = fxyz_add ( pos, fxyz_scale ( dir, dist+EPSILON3 ) );
-    /*printf( "%4.7f %4.7f %4.7f\n", pos.x, pos.y, pos.z );*/
+
         // TODO update tof
         // ...
     }
@@ -64,7 +64,6 @@ __host__ __device__ void VPIN::track_to_in ( ParticlesData &particles, f32 xmin,
     particles.px[id] = pos.x;
     particles.py[id] = pos.y;
     particles.pz[id] = pos.z;
-    /*printf( "%4.7f %4.7f %4.7f\n", pos.x, pos.y, pos.z );*/
 }
 
 
@@ -97,14 +96,6 @@ __host__ __device__ void VPIN::track_to_out ( ParticlesData &particles,
     index_phantom.y = ui32 ( ( pos.y-vol.off_y ) * ivoxsize.y );
     index_phantom.z = ui32 ( ( pos.z-vol.off_z ) * ivoxsize.z );
 
-    //if( part_id == 7071 )
-    //{
-      //printf( "index: %hu %hu %hu\n", index_phantom.x, index_phantom.y, index_phantom.z );
-      //printf( "position: %4.7f %4.7f %4.7f\n", pos.x, pos.y, pos.z );
-      //printf( "offset: %4.7f %4.7f %4.7f\n", vol.off_x, vol.off_y, vol.off_z );
-      //printf( "ivoxsize: %4.7f %4.7f %4.7f\n", ivoxsize.x, ivoxsize.y, ivoxsize.z );
-    //}
-
     index_phantom.w = index_phantom.z*vol.nb_vox_x*vol.nb_vox_y
                       + index_phantom.y*vol.nb_vox_x
                       + index_phantom.x; // linear index
@@ -117,17 +108,8 @@ __host__ __device__ void VPIN::track_to_out ( ParticlesData &particles,
       return;
     }
 
-    //printf( "index: %hu %hu %hu %hu\n", index_phantom.x, index_phantom.y, index_phantom.z, index_phantom.w );
-
     // Get the material that compose this volume
     ui16 mat_id = vol.values[index_phantom.w];
-
-    /*printf( "index total: %u\n", index_phantom.w );
-    printf( "id: %d\n", part_id );
-    printf( "position: %4.7f %4.7f %4.7f\n", pos.x, pos.y, pos.z );
-    printf( "energy: %4.7f\n", particles.E[part_id]/keV );*/
-
-    /*printf( "size: %hu %hu\n", vol.nb_vox_x, vol.nb_vox_y );*/
 
     //// Find next discrete interaction ///////////////////////////////////////
 
@@ -148,8 +130,6 @@ __host__ __device__ void VPIN::track_to_out ( ParticlesData &particles,
     f32 boundary_distance = hit_ray_AABB ( pos, dir, vox_xmin, vox_xmax,
                                            vox_ymin, vox_ymax, vox_zmin, vox_zmax );
 
-    /*printf( "boundary_distance: %4.7f %4.7f %4.7f %4.7f %4.7f %4.7f %4.7f\n", vox_xmin, vox_xmax, vox_ymin, vox_ymax, vox_zmin, vox_zmax, boundary_distance );*/
-
     if ( boundary_distance <= next_interaction_distance )
     {
         //if( part_id == 4011 )
@@ -162,39 +142,12 @@ __host__ __device__ void VPIN::track_to_out ( ParticlesData &particles,
       next_interaction_distance = EPSILON3;
       next_discrete_process = GEOMETRY_BOUNDARY;
     }
-    /*else
-    { 
-      // If the process is PHOTON_COMPTON (0) or PHOTON_RAYLEIGH (1) the scatter
-      // order is incremented
-      if( next_discrete_process == 0 || next_discrete_process == 2 )
-      {
-        particles.scatter_order[ part_id ] += 1;
-      }
-    }*/
-
-   /* if( part_id == 4011 )
-    {
-      printf( "position: %4.7f %4.7f %4.7f\n", pos.x, pos.y, pos.z );
-      printf( "boundary_distance: %4.7f\n", boundary_distance );
-      printf( "next %4.7f\n", next_interaction_distance );
-    }*/
 
     //// Move particle //////////////////////////////////////////////////////
     pos = fxyz_add ( pos, fxyz_scale ( dir, next_interaction_distance ) );
 
     // Update TOF - TODO
     //particles.tof[part_id] += c_light * next_interaction_distance;
-
-    /*if( pos.x < -1000.0 || pos.y < -1000.0 || pos.z < -1000.0 )
-    {
-      printf( "id: %d\n", part_id );
-      printf( "position: %4.7f %4.7f %4.7f\n", pos.x, pos.y, pos.z );
-      printf( "direction: %4.7f %4.7f %4.7f\n", dir.x, dir.y, dir.z );
-      printf( "energy: %4.7f\n", particles.E[part_id]/keV );
-      printf( "boundary_distance: %4.7f\n", boundary_distance );
-      printf( "voxel: %4.7f %4.7f %4.7f %4.7f %4.7f %4.7f\n", vox_xmin, vox_xmax, vox_ymin, vox_ymax, vox_zmin, vox_zmax );
-      printf( "index: %hu %hu %hu\n", index_phantom.x, index_phantom.y, index_phantom.z );
-    }*/
 
     particles.px[part_id] = pos.x;
     particles.py[part_id] = pos.y;
@@ -203,9 +156,7 @@ __host__ __device__ void VPIN::track_to_out ( ParticlesData &particles,
     // Stop simulation if out of the phantom
     if ( !test_point_AABB ( pos, vol.xmin, vol.xmax, vol.ymin, vol.ymax, vol.zmin, vol.zmax ) )
     {
-        /*printf( "%4.7f %4.7f %4.7f %4.7f %4.7f %4.7f %4.7f %4.7f %4.7f\n", pos.x, pos.y, pos.z, vol.xmin, vol.xmax, vol.ymin, vol.ymax, vol.zmin, vol.zmax );*/
         particles.endsimu[part_id] = PARTICLE_FREEZE;
-        /*printf( "FREEZE\n" );*/
         return;
     }
 

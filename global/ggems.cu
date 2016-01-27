@@ -677,22 +677,6 @@ void GGEMS::start_simulation()
           m_detector->track_to_in( m_particles_manager.particles );
         }
 
-        /*if ( m_parameters.data_h.device_target == GPU_DEVICE )
-        {
-          m_particles_manager.m_copy_gpu2cpu();
-        }*/
-        //m_particles_manager.dump();
-        // Nav between phantom to detector
-        /*m_detectors.track_to_in ( m_particles_manager.particles );
-
-        // Nav within the detector
-        m_detectors.track_to_out ( m_particles_manager.particles );
-
-        // Process hit, coincidences, etc.
-        m_detectors.digitizer();*/
-
-        // Export data
-        
         GGcout << "----> Batch finished ..." << GGendl << GGendl;
         //progress_bar(progress, ibatch , m_parameters.data_h.nb_of_batches);
 
