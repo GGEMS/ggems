@@ -89,8 +89,8 @@ void ImageReader::record3Dimage ( string histname,  f64 *data, f32xyz offset, f3
         {
 
             // First get the number of non-zero
-            unsigned int index = 0;
-            unsigned int ct_nz = 0;
+            ui32 index = 0;
+            ui32 ct_nz = 0;
             while ( index < size.x*size.y*size.z )
             {
                 if ( data[index] != 0.0 ) ++ct_nz;
@@ -98,10 +98,10 @@ void ImageReader::record3Dimage ( string histname,  f64 *data, f32xyz offset, f3
             }
 
             // Write the previous value as the first binary element
-            fwrite ( &ct_nz, sizeof ( unsigned int ), 1, pFile_mhd );
+            fwrite ( &ct_nz, sizeof ( ui32 ), 1, pFile_mhd );
 
             // Some vars
-            unsigned short int ix, iy, iz;
+            ui16 ix, iy, iz;
 //             unsigned int jump;
 //             jump = size.x*size.y;
             index = 0;
@@ -121,12 +121,12 @@ void ImageReader::record3Dimage ( string histname,  f64 *data, f32xyz offset, f3
                         if ( data[index] != 0.0 )
                         {
                             // xyz coordinate
-                            fwrite ( &ix, sizeof ( unsigned short int ), 1, pFile_mhd );
-                            fwrite ( &iy, sizeof ( unsigned short int ), 1, pFile_mhd );
-                            fwrite ( &iz, sizeof ( unsigned short int ), 1, pFile_mhd );
+                            fwrite ( &ix, sizeof ( ui16 ), 1, pFile_mhd );
+                            fwrite ( &iy, sizeof ( ui16 ), 1, pFile_mhd );
+                            fwrite ( &iz, sizeof ( ui16 ), 1, pFile_mhd );
                             // Then the corresponding value
                             float val = data[index];
-                            fwrite ( &val, sizeof ( float ), 1, pFile_mhd );
+                            fwrite ( &val, sizeof ( f32 ), 1, pFile_mhd );
                         }
 
                         ++ix;
@@ -141,22 +141,11 @@ void ImageReader::record3Dimage ( string histname,  f64 *data, f32xyz offset, f3
         else
         {
             // Export uncompressed raw data
-            int i=0;
+            ui32 i=0;
             while ( i<size.x*size.y*size.z )
             {
-                float val = data[i];
-//                 if ( val!=0 )
-//                 {
-//                     int dx = i%size.x;
-//                     int dy = ( ( i - dx ) / size.x  ) %size.y;
-//                     int dz = ( i - dx - dy*size.x ) / ( size.x * size.y );
-// //                     int value = dx + dy*size.x + dz * size.x * size.y;
-//                     i32xyz dxyz = get_bin_xyz ( i,size );
-// //                         printf("%d %d %d %d %d %d %d %d value %g \n",i,value,dx,dy,dz,dxyz.x,dxyz.y,dxyz.z,val);
-// 
-//                 }
-
-                fwrite ( &val, sizeof ( float ), 1, pFile_mhd );
+                f32 val = data[i];
+                fwrite ( &val, sizeof ( f32 ), 1, pFile_mhd );
                 ++i;
             }
         }
@@ -247,7 +236,7 @@ void ImageReader::record3Dimage ( string histname,  f64 *data, f32xyz offset, f3
     else
     {
 
-        cout << " Unknown format ... "<<endl;
+        GGcout << " Unknown format ... " << GGendl;
 
     }
 
@@ -273,7 +262,7 @@ void ImageReader::record3Dimage ( string histname,  ui32 *data, f32xyz offset, f
         string pathnamemhd = histname + ".mhd";
         string pathnameraw = histname + ".raw";
 
-        cout<<"Save file : "<<pathnamemhd << endl;
+        GGcout << "Write image " << histname << " ... " << GGendl;
 
         // MHD file
         std::ofstream myfile;
@@ -291,12 +280,10 @@ void ImageReader::record3Dimage ( string histname,  ui32 *data, f32xyz offset, f
         myfile << "ElementSpacing = "<<spacing.x<<" "<<spacing.y<<" "<<spacing.z<<"\n";
         myfile << "DimSize = "<<size.x<<" "<<size.y<<" "<<size.z<<"\n";
         myfile << "AnatomicalOrientation = ???\n";
-        myfile << "ElementType = MET_FLOAT\n";
+        myfile << "ElementType = MET_UINT\n";
         myfile << "ElementDataFile = "<<remove_path ( pathnameraw ).c_str() <<"\n";
 
         myfile.close();
-
-
 
         // RAW File
         FILE *pFile_mhd;
@@ -307,8 +294,8 @@ void ImageReader::record3Dimage ( string histname,  ui32 *data, f32xyz offset, f
         {
 
             // First get the number of non-zero
-            unsigned int index = 0;
-            unsigned int ct_nz = 0;
+            ui32 index = 0;
+            ui32 ct_nz = 0;
             while ( index < size.x*size.y*size.z )
             {
                 if ( data[index] != 0.0 ) ++ct_nz;
@@ -316,10 +303,10 @@ void ImageReader::record3Dimage ( string histname,  ui32 *data, f32xyz offset, f
             }
 
             // Write the previous value as the first binary element
-            fwrite ( &ct_nz, sizeof ( unsigned int ), 1, pFile_mhd );
+            fwrite ( &ct_nz, sizeof ( ui32 ), 1, pFile_mhd );
 
             // Some vars
-            unsigned short int ix, iy, iz;
+            ui16 ix, iy, iz;
 //             unsigned int jump;
 //             jump = size.x*size.y;
             index = 0;
@@ -339,12 +326,12 @@ void ImageReader::record3Dimage ( string histname,  ui32 *data, f32xyz offset, f
                         if ( data[index] != 0.0 )
                         {
                             // xyz coordinate
-                            fwrite ( &ix, sizeof ( unsigned short int ), 1, pFile_mhd );
-                            fwrite ( &iy, sizeof ( unsigned short int ), 1, pFile_mhd );
-                            fwrite ( &iz, sizeof ( unsigned short int ), 1, pFile_mhd );
+                            fwrite ( &ix, sizeof ( ui16 ), 1, pFile_mhd );
+                            fwrite ( &iy, sizeof ( ui16 ), 1, pFile_mhd );
+                            fwrite ( &iz, sizeof ( ui16 ), 1, pFile_mhd );
                             // Then the corresponding value
                             float val = data[index];
-                            fwrite ( &val, sizeof ( float ), 1, pFile_mhd );
+                            fwrite ( &val, sizeof ( f32 ), 1, pFile_mhd );
                         }
 
                         ++ix;
@@ -362,17 +349,7 @@ void ImageReader::record3Dimage ( string histname,  ui32 *data, f32xyz offset, f
             int i=0;
             while ( i<size.x*size.y*size.z )
             {
-                ui32 val = data[i];
-             /*    if ( val!=0 )
-                 {
-                     int dx = i%size.x;
-                     int dy = ( ( i - dx ) / size.x  ) %size.y;
-                     int dz = ( i - dx - dy*size.x ) / ( size.x * size.y );
-                     int value = dx + dy*size.x + dz * size.x * size.y;
-                     i32xyz dxyz = get_bin_xyz ( i,size );
-                     printf("%d %d %d %d %d %d %d %d value %d \n",i,value,dx,dy,dz,dxyz.x,dxyz.y,dxyz.z,val);
-                 }*/
-
+                ui32 val = data[i];            
                 fwrite ( &val, sizeof ( ui32 ), 1, pFile_mhd );
                 ++i;
             }

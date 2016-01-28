@@ -100,12 +100,20 @@ __host__ __device__ void dose_uncertainty_calculation ( DoseData dose, ui32 id )
     //
     //   where Edep represents the energy deposit in one hit and N the number of energy deposits (hits)
 
-    f64 sum2_E = dose.edep[id] * dose.edep[id];
+    if (dose.number_of_hits[id] > 1)
+    {
 
-    f64 num = ( dose.number_of_hits[id] * dose.edep_squared[id] ) - sum2_E;
-    f64 den = ( dose.number_of_hits[id]-1 ) * sum2_E;
+        f64 sum2_E = dose.edep[id] * dose.edep[id];
 
-    dose.uncertainty[id] = pow ( num/den, 0.5 );
+        f64 num = ( dose.number_of_hits[id] * dose.edep_squared[id] ) - sum2_E;
+        f64 den = ( dose.number_of_hits[id]-1 ) * sum2_E;
+
+        dose.uncertainty[id] = pow ( num/den, 0.5 );
+    }
+    else
+    {
+        dose.uncertainty[id] = 1.0;
+    }
 
 }
 
@@ -418,18 +426,25 @@ void DoseCalculator::write ( std::string filename )
 
     if(m_flag_dose_calculated)
     {
-    
-    ImageReader::record3Dimage (
-        filename + "-Dose."+format,
-        dose.data_h.dose,
-        make_f32xyz ( dose.data_h.ox,dose.data_h.oy,dose.data_h.oz ),
-        make_f32xyz ( dose.data_h.spacing_x,dose.data_h.spacing_y,dose.data_h.spacing_z ),
-        make_i32xyz ( dose.data_h.nx,dose.data_h.ny,dose.data_h.nz ) );
+
+        ImageReader::record3Dimage (
+                    filename + "-Dose."+format,
+                    dose.data_h.dose,
+                    make_f32xyz ( dose.data_h.ox,dose.data_h.oy,dose.data_h.oz ),
+                    make_f32xyz ( dose.data_h.spacing_x,dose.data_h.spacing_y,dose.data_h.spacing_z ),
+                    make_i32xyz ( dose.data_h.nx,dose.data_h.ny,dose.data_h.nz ) );
+
+        ImageReader::record3Dimage (
+                    filename + "-Uncertainty."+format,
+                    dose.data_h.uncertainty,
+                    make_f32xyz ( dose.data_h.ox,dose.data_h.oy,dose.data_h.oz ),
+                    make_f32xyz ( dose.data_h.spacing_x,dose.data_h.spacing_y,dose.data_h.spacing_z ),
+                    make_i32xyz ( dose.data_h.nx,dose.data_h.ny,dose.data_h.nz ) );
         
         
     }
-        
-        
+
+
 }
 
 
