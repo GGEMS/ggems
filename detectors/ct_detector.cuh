@@ -47,7 +47,7 @@ class CTDetector : public GGEMSDetector
 
         void save_scatter( std::string basename );
 
-        void printInfoDetection();
+        void printInfoScatter();
 
     private:
         ui32 getDetectedParticles();
