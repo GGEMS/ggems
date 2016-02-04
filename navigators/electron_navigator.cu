@@ -85,13 +85,11 @@ f32  coefsig[8][11]= {{.4638,.37748,.32249,-.060362,-.065004,-.033457,-.004583,.
 #endif
 
 __host__ __device__ void e_read_CS_table (
-//                             ParticlesData particles,
-    int id,
-    int mat, //material
+    ui16 mat, //material
     f32 energy, //energy of particle
     ElectronsCrossSectionTable &d_table,
-    unsigned char &next_discrete_process, //next discrete process id
-    int &table_index,
+    ui8 &next_discrete_process, //next discrete process id
+    ui32 &table_index,
     f32 & next_interaction_distance,
     f32 & dedxeIoni,
     f32 & dedxeBrem,
@@ -102,37 +100,51 @@ __host__ __device__ void e_read_CS_table (
     GlobalSimulationParametersData parameters )
 {
 
-    if(parameters.cs_table_min_E > energy) energy = parameters.cs_table_min_E+ 1.*eV;
+    printf("     READ CS TABLE\n");
 
-// GGcout<< __FUNCTION__ << "  " << __LINE__ << GGendl;
-//     printf("energy %e mat %d id %d  mat %d d_table.nb_bins %u \n",energy,mat,id,mat,d_table.nb_bins);
-//     printf("energy %e mat %d id %d  mat %d d_table.nb_bins %u \n",energy,mat,id,mat,d_table.nb_bins);
-//     table_index = binary_search(energy,d_table.E,d_table.nb_bins) + mat*d_table.nb_bins;
-    table_index = binary_search ( energy,d_table.E, ( mat+1 ) *d_table.nb_bins,mat*d_table.nb_bins );
-    
-    // Correction when E < min E in the table
-//     if(table_index>0) if(energy > d_table.E[table_index-1] ) { energy = d_table.E[table_index]; table_index ++;}
-    
-// GGcout<< __FUNCTION__ << "  " << __LINE__ << GGendl;
+    printf(" table min E %e energy %e\n", parameters.cs_table_min_E, energy);
+
+    if ( parameters.cs_table_min_E > energy ) energy = parameters.cs_table_min_E + 1.*eV;  // FIX ME
+
+    printf(" mat %i\n", mat);
+    printf(" d_table %e\n", d_table.E[0] / eV);
+    //printf(" mat %i\n", mat);
+    printf(" nb bins %i\n", d_table.nb_bins);
+
+
+    printf("       energy %e - d_tableE[0] %e - mat id %i\n - nb bins %i\n", energy, d_table.E[0], mat, d_table.nb_bins);
+
+    table_index = binary_search ( energy, d_table.E, ( mat+1 ) * d_table.nb_bins,mat * d_table.nb_bins );
+
+    printf("       table index %i\n", table_index);
+
+
+    // Electron ionisation
     if ( parameters.physics_list[ELECTRON_IONISATION] == ENABLED )
     {
-// GGcout<< __FUNCTION__ << "  " << __LINE__ << GGendl;
-        f32 distanceeIoni = randomnumbereIoni / linear_interpolation ( d_table.E[table_index-1], d_table.eIonisationCS[table_index-1], d_table.E[table_index], d_table.eIonisationCS[table_index], energy );
-// GGcout<< __FUNCTION__ << "  " << __LINE__ << GGendl;
-        if ( distanceeIoni<next_interaction_distance )
+
+        f32 distanceeIoni = randomnumbereIoni / linear_interpolation ( d_table.E[table_index-1], d_table.eIonisationCS[table_index-1],
+                d_table.E[table_index], d_table.eIonisationCS[table_index], energy );
+
+        if ( distanceeIoni < next_interaction_distance )
         {
             next_interaction_distance = distanceeIoni;
             next_discrete_process = ELECTRON_IONISATION;
         }
-// GGcout<< __FUNCTION__ << "  " << __LINE__ << GGendl;
-        dedxeIoni = linear_interpolation ( d_table.E[table_index-1],d_table.eIonisationdedx[table_index-1], d_table.E[table_index], d_table.eIonisationdedx[table_index], energy );
-// GGcout<< __FUNCTION__ << "  " << __LINE__ << GGendl;
+
+        dedxeIoni = linear_interpolation ( d_table.E[table_index-1],d_table.eIonisationdedx[table_index-1],
+                d_table.E[table_index], d_table.eIonisationdedx[table_index], energy );
+
+        printf("       Eion\n");
+
     }
-// GGcout<< __FUNCTION__ << "  " << __LINE__ << GGendl;
+
+    // Bremsstrahlung
     if ( parameters.physics_list[ELECTRON_BREMSSTRAHLUNG] == ENABLED )
     {
 
-        f32 distanceeBrem = randomnumbereBrem /  linear_interpolation ( d_table.E[table_index-1], d_table.eBremCS[table_index-1], d_table.E[table_index], d_table.eBremCS[table_index], energy ) ;
+        f32 distanceeBrem = randomnumbereBrem /  linear_interpolation ( d_table.E[table_index-1], d_table.eBremCS[table_index-1],
+                d_table.E[table_index], d_table.eBremCS[table_index], energy ) ;
 
         if ( distanceeBrem<next_interaction_distance )
         {
@@ -140,24 +152,25 @@ __host__ __device__ void e_read_CS_table (
             next_discrete_process = ELECTRON_BREMSSTRAHLUNG;
         }
 
-        dedxeBrem =  linear_interpolation ( d_table.E[table_index-1],d_table.eBremdedx[table_index-1], d_table.E[table_index], d_table.eBremdedx[table_index], energy );
+        dedxeBrem =  linear_interpolation ( d_table.E[table_index-1],d_table.eBremdedx[table_index-1], d_table.E[table_index],
+                d_table.eBremdedx[table_index], energy );
+
+        printf("       Brem\n");
     }
 
-// GGcout<< __FUNCTION__ << "  " << __LINE__ << GGendl;
-
-
-    erange = linear_interpolation ( d_table.E[table_index-1],d_table.eRange[table_index-1], d_table.E[table_index], d_table.eRange[table_index], energy );
-
-// printf("d_table.E[table_index-1] %g ,d_table.eRange[table_index-1] %g , d_table.E[table_index] %g, d_table.eRange[table_index] %g , energy %g erange %g table_index %d\n",d_table.E[table_index-1],d_table.eRange[table_index-1], d_table.E[table_index], d_table.eRange[table_index], energy, erange,table_index);
-//         printf("d_table.E[table_index-1] %e ,d_table.eRange[table_index-1] %e , d_table.E[table_index] %e, d_table.eRange[table_index] %e table_index %d\n",d_table.E[table_index-1],d_table.eRange[table_index-1], d_table.E[table_index], d_table.eRange[table_index],table_index);
-
-
+    // Multiple scattering
     if ( parameters.physics_list[ELECTRON_MSC] == ENABLED )
     {
-        lambda = linear_interpolation ( d_table.E[table_index-1],d_table.eMSC[table_index-1], d_table.E[table_index], d_table.eMSC[table_index], energy );
-        lambda=1./lambda;
+        lambda = linear_interpolation ( d_table.E[table_index-1],d_table.eMSC[table_index-1], d_table.E[table_index],
+                d_table.eMSC[table_index], energy );
+        lambda = 1. / lambda;
+
+        printf("       MSC\n");
     }
-//     printf("energy %e mat %d id %d  mat %d d_table.nb_bins %u \n",energy,mat,id,mat,d_table.nb_bins);
+
+    // Electron range
+    erange = linear_interpolation ( d_table.E[table_index-1], d_table.eRange[table_index-1], d_table.E[table_index],
+            d_table.eRange[table_index], energy );
 
 }
 

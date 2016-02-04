@@ -17,15 +17,26 @@
 
 
 __host__ __device__ f32 get_CS_from_table(f32 *E_bins, f32 *CSTable, f32 energy,
-                                            ui32 E_index, ui32 mat_index,
-                                            ui32 nb_bins) {
+                                          ui32 E_index, ui32 CS_index) {
 
-    return linear_interpolation(E_bins[E_index-1],
-                                CSTable[mat_index*nb_bins+E_index-1],
-                                E_bins[E_index],
-                                CSTable[mat_index*nb_bins+E_index],
-                                energy);
 
+    // xa, ya, xb, yb
+    // xa = E_bins[E_index-1]
+    // ya = CS[CS_index-1]
+    // xb = E_bins[E_index]
+    // yb = CS[CS_index]
+    // x = energy
+
+    if ( E_index == 0 )
+    {
+        return CSTable[CS_index];
+    }
+    else
+    {
+        return linear_interpolation(E_bins[E_index-1],  CSTable[CS_index-1],
+                                    E_bins[E_index],    CSTable[CS_index],
+                                    energy);
+    }
 
 }
 
@@ -230,6 +241,9 @@ __host__ __device__ SecParticle Photoelec_SampleSecondaries_standard(ParticlesDa
     // If no secondary required return a stillborn electron
     if (parameters.secondaries_list[ELECTRON] == DISABLED) return electron;
 
+    // Get index CS table (considering mat id)
+    ui32 CS_index = matindex*photon_CS_table.nb_bins + E_index;
+
     //// Photo electron
 
     f32 energy = particles.E[id];
@@ -243,8 +257,7 @@ __host__ __device__ SecParticle Photoelec_SampleSecondaries_standard(ParticlesDa
     if (n > 0) {                
         f32 x = JKISS32(particles,id) * get_CS_from_table(photon_CS_table.E_bins,
                                                             photon_CS_table.Photoelectric_Std_CS,
-                                                            particles.E[id], E_index, matindex,
-                                                            photon_CS_table.nb_bins);
+                                                            particles.E[id], E_index, CS_index);
         f32 xsec = 0.0f;
         while (i < n) {
             Z = mat.mixture[mixture_index+i];
@@ -779,7 +792,7 @@ __host__ __device__ void Rayleigh_SampleSecondaries_Livermore(ParticlesData part
         // Kill the photon without mercy
         particles.endsimu[id] = PARTICLE_DEAD;
         return;
-    }
+    }   
 
     // Select randomly one element that composed the material
     ui32 n = mat.nb_elements[matindex]-1;

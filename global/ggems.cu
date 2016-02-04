@@ -218,6 +218,7 @@ void GGEMS::set_number_of_particles ( ui64 nb )
     m_parameters.data_h.nb_of_particles = nb;
 }
 
+/*   TO BE REMOVED - JB
 // Set the number of particles required for the simulation
 void GGEMS::set_number_of_particles ( std::string str )
 {
@@ -271,6 +272,7 @@ void GGEMS::set_number_of_particles ( std::string str )
     set_size_of_particles_batch(batch);
 
 }
+*/
 
 // Set the size of particles batch
 void GGEMS::set_size_of_particles_batch ( ui64 nb )
@@ -487,7 +489,7 @@ void GGEMS::init_simulation()
 
     // Run time
     
-    //Not used currently
+    //// Not used currently
 //     f64 t_start = 0;
 //     if ( m_parameters.data_h.display_run_time )
 //     {
@@ -500,26 +502,28 @@ void GGEMS::init_simulation()
     // CPU PRNG
     srand ( m_parameters.data_h.seed );
 
-//     m_parameters.data_h.nb_of_batches = ui32 ( ( f32 ) m_parameters.data_h.nb_of_particles / ( f32 ) m_parameters.data_h.size_of_particles_batch );
-// 
-//     if( m_parameters.data_h.nb_of_particles % m_parameters.data_h.size_of_particles_batch )
-//     {
-//       m_parameters.data_h.nb_of_batches++;
-//     }
+    // Get Nb of batch
 
-    
+     m_parameters.data_h.nb_of_batches = ui32 ( ( f32 ) m_parameters.data_h.nb_of_particles / ( f32 ) m_parameters.data_h.size_of_particles_batch );
+
+     if( m_parameters.data_h.nb_of_particles % m_parameters.data_h.size_of_particles_batch )
+     {
+       m_parameters.data_h.nb_of_batches++;
+     }
+
+    //// Need to clean this bunch of crap - JB
+
+    /*
     if (m_parameters.data_h.nb_of_particles % m_parameters.data_h.size_of_particles_batch)
-        {
+    {
         m_parameters.data_h.nb_of_batches = (m_parameters.data_h.nb_of_particles / m_parameters.data_h.size_of_particles_batch) + 1;
-        }
+    }
     else
-        {
+    {
         m_parameters.data_h.nb_of_batches = m_parameters.data_h.nb_of_particles / m_parameters.data_h.size_of_particles_batch;
-        }
+    }
     m_parameters.data_h.size_of_particles_batch = m_parameters.data_h.nb_of_particles / m_parameters.data_h.nb_of_batches;
     m_parameters.data_h.nb_of_particles = m_parameters.data_h.size_of_particles_batch * m_parameters.data_h.nb_of_batches;
-    
-//     GGcout << ""
     
     
     m_parameters.data_h.gpu_grid_size = (m_parameters.data_h.size_of_particles_batch + m_parameters.data_h.gpu_block_size - 1) / m_parameters.data_h.gpu_block_size;
@@ -527,10 +531,11 @@ void GGEMS::init_simulation()
     m_parameters.data_h.size_of_particles_batch = m_parameters.data_h.gpu_block_size * m_parameters.data_h.gpu_grid_size;
     
 
-//     printf("Particle Stack size : %d \n",m_stack_size);
+    //     printf("Particle Stack size : %d \n",m_stack_size);
     m_parameters.data_h.nb_of_particles = m_parameters.data_h.size_of_particles_batch * m_parameters.data_h.nb_of_batches;
-//     m_parameters.data_h.nb_of_batches *= m_parameters.data_h.size_of_particles_batch;
+    //     m_parameters.data_h.nb_of_batches *= m_parameters.data_h.size_of_particles_batch;
     
+    */
     
     
     // Init the GPU if need
@@ -661,16 +666,19 @@ void GGEMS::start_simulation()
 //         progress_bar(progress,"generate primaries");
         m_source->get_primaries_generator( m_particles_manager.particles );
 
-        // TODO If phantom
-        // Nav between source to phantom
-         GGcout << "      Navigation between the source and the phantom ..." << GGendl;
-//         progress_bar(progress,"track to phantom");
-        m_phantom->track_to_in( m_particles_manager.particles );
+        // Nav between source and phantom
+        if ( m_phantom )
+        {
+            // Nav between source to phantom
+            GGcout << "      Navigation between the source and the phantom ..." << GGendl;
+            //         progress_bar(progress,"track to phantom");
+            m_phantom->track_to_in( m_particles_manager.particles );
 
-        // Nav within the phantom
-         GGcout << "      Navigation within the phantom ..." << GGendl;
-//         progress_bar(progress,"batch");
-        m_phantom->track_to_out( m_particles_manager.particles );
+            // Nav within the phantom
+            GGcout << "      Navigation within the phantom ..." << GGendl;
+            //         progress_bar(progress,"batch");
+            m_phantom->track_to_out( m_particles_manager.particles );
+        }
 
         // Nav between phantom and detector
         if( m_detector )

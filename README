@@ -2,8 +2,9 @@
 TODO
 ====
 
-* Fix image reader (according the global frame)
-* Fix particle geometry navigation (still error with float uncertainty)
+* FIX image reader (according the global frame)
+* FIX particle geometry navigation (still error with float uncertainty)
+* ADD energy cut based on range value
 
 ====
 Misc

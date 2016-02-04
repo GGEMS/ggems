@@ -24,31 +24,30 @@ class CrossSections {
     public:
         CrossSections();
 
-        void initialize(Materials materials, GlobalSimulationParameters parameters);
-        void print();       
+        void initialize(Materials materials, GlobalSimulationParameters parameters);       
         
-        // Data for photon
+        // CS data
         PhotonCrossSection photon_CS;       // CPU & GPU
-        ElectronsCrossSection electron_CS;  // CPU & GPU
-        
-        // Data for electron TODO
-        //ElectronCrossSection Electron_CS;
-        //ElectronsCrossSectionTable get_electron_data_h(){return electronCSTable->data_h;}
-        //ElectronsCrossSectionTable get_electron_data_d(){return electronCSTable->data_d;}
-        ElectronCrossSection *electronCSTable;
+        ElectronsCrossSection electron_CS;  // CPU & GPU                
+
     private:        
         bool m_check_mandatory();
-        void m_build_table(Materials materials, GlobalSimulationParameters parameters);
-        void m_copy_cs_table_cpu2gpu();
 
-        // Electron CS data
-        
-        GlobalSimulationParameters params;
-        GlobalSimulationParameters *parameters;
-        
-        i8 there_is_photon;
-        i8 there_is_electron;
+        // For gamma
+        void m_build_photon_table();
+        void m_copy_photon_cs_table_cpu2gpu();
+        void m_dump_photon_tables( std::string dirname );
 
+        // For e-
+        void m_build_electron_table();
+        f32 m_get_electron_dedx( f32 energy, ui8 mat_id );
+        void m_copy_electron_cs_table_cpu2gpu();
+        void m_dump_electron_tables( std::string dirname );
+
+        ui32 m_nb_bins, m_nb_mat;
+
+        GlobalSimulationParameters m_parameters;
+        MaterialsTable m_materials;
 };
 
 #endif

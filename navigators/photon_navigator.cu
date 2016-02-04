@@ -30,11 +30,15 @@ __host__ __device__ void photon_get_next_interaction ( ParticlesData &particles,
     f32 energy = particles.E[part_id];
     ui32 E_index = binary_search ( energy, photon_CS_table.E_bins,
                                    photon_CS_table.nb_bins );
+
+    // Get index CS table (considering mat id)
+    ui32 CS_index = mat_id*photon_CS_table.nb_bins + E_index;
+
     // If photoelectric
     if ( parameters.physics_list[PHOTON_PHOTOELECTRIC] )
     {
         cross_section = get_CS_from_table ( photon_CS_table.E_bins, photon_CS_table.Photoelectric_Std_CS,
-                                            energy, E_index, mat_id, photon_CS_table.nb_bins );
+                                            energy, E_index, CS_index );
         interaction_distance = -log ( JKISS32 ( particles, part_id ) ) / cross_section;
 
         if ( interaction_distance < next_interaction_distance )
@@ -48,7 +52,7 @@ __host__ __device__ void photon_get_next_interaction ( ParticlesData &particles,
     if ( parameters.physics_list[PHOTON_COMPTON] )
     {
         cross_section = get_CS_from_table ( photon_CS_table.E_bins, photon_CS_table.Compton_Std_CS,
-                                            energy, E_index, mat_id, photon_CS_table.nb_bins );
+                                            energy, E_index, CS_index );
         interaction_distance = -log ( JKISS32 ( particles, part_id ) ) / cross_section;
 
         if ( interaction_distance < next_interaction_distance )
@@ -62,7 +66,7 @@ __host__ __device__ void photon_get_next_interaction ( ParticlesData &particles,
     if ( parameters.physics_list[PHOTON_RAYLEIGH] )
     {
         cross_section = get_CS_from_table ( photon_CS_table.E_bins, photon_CS_table.Rayleigh_Lv_CS,
-                                            energy, E_index, mat_id, photon_CS_table.nb_bins );
+                                            energy, E_index, CS_index );
         interaction_distance = -log ( JKISS32 ( particles, part_id ) ) / cross_section;
 
         if ( interaction_distance < next_interaction_distance )
