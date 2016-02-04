@@ -67,7 +67,7 @@ class VoxelizedSource {
 
         // Activities
         f32 *activity_volume;
-        f64 tot_activity;
+        f32 tot_activity;
         // CDF
         f32 *activity_cdf;
         f32 *activity_index;

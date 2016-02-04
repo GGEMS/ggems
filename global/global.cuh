@@ -19,7 +19,7 @@
 #define GLOBAL_CUH
 
 /////// DEBUG //////////////////////////////////////////////////
-//#define DEBUG
+#define DEBUG
 //#define DEBUG_OCTREE
 //#define DEBUG_DIGITIZER
 

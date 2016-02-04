@@ -112,10 +112,10 @@ class Digitizer {
         void set_time_window(f32 vwin_time);
 
         // Main function
-        void process_chain(ui32 iter, f64 tot_activity, Scene geometry);
+        void process_chain(ui32 iter, f32 tot_activity, Scene geometry);
 
         // Singles
-        void process_singles(ui32 iter, f64 tot_activity);
+        void process_singles(ui32 iter, f32 tot_activity);
         void export_singles();
         std::vector<aSingle> get_singles();
 

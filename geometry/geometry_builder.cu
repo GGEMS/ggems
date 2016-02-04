@@ -131,6 +131,8 @@ __host__ __device__ i32 GetHexIndex(f32xyz position, Scene geometry, ui32 adr_ge
 // Function that return the material of a volume
 __host__ __device__ ui32 get_geometry_material(Scene geometry, ui32 id_geom, f32xyz pos) {
   
+    //printf("enter get geo mat \n");
+  
     ui32 adr_geom = geometry.ptr_objects[id_geom];
     ui32 obj_type = (ui32)geometry.data_objects[adr_geom+ADR_OBJ_TYPE];
     
@@ -146,16 +148,27 @@ __host__ __device__ ui32 get_geometry_material(Scene geometry, ui32 id_geom, f32
         ind.x = (ui32)(pos.x / (f32)geometry.data_objects[adr_geom+ADR_VOXELIZED_SX]); // / sx
         ind.y = (ui32)(pos.y / (f32)geometry.data_objects[adr_geom+ADR_VOXELIZED_SY]); // / sy
         ind.z = (ui32)(pos.z / (f32)geometry.data_objects[adr_geom+ADR_VOXELIZED_SZ]); // / sz
-//        printf("Vos ind %i %i %i aabb %f %f, %f %f, %f %f\n", ind.x, ind.y, ind.z,
-//               geometry.data_objects[adr_geom+ADR_AABB_XMIN],
-//               geometry.data_objects[adr_geom+ADR_AABB_XMAX],
-//               geometry.data_objects[adr_geom+ADR_AABB_YMIN],
-//               geometry.data_objects[adr_geom+ADR_AABB_YMAX],
-//               geometry.data_objects[adr_geom+ADR_AABB_ZMIN],
-//               geometry.data_objects[adr_geom+ADR_AABB_ZMAX]);
+  //      printf("Vos ind %i %i %i aabb %f %f, %f %f, %f %f\n", ind.x, ind.y, ind.z,
+   //            geometry.data_objects[adr_geom+ADR_AABB_XMIN],
+   //            geometry.data_objects[adr_geom+ADR_AABB_XMAX],
+   //            geometry.data_objects[adr_geom+ADR_AABB_YMIN],
+   //            geometry.data_objects[adr_geom+ADR_AABB_YMAX],
+   //            geometry.data_objects[adr_geom+ADR_AABB_ZMIN],
+   //            geometry.data_objects[adr_geom+ADR_AABB_ZMAX]);
+        
+        if(ind.x == geometry.data_objects[adr_geom+ADR_VOXELIZED_NX])
+            ind.x--;
+          
+        if(ind.y == geometry.data_objects[adr_geom+ADR_VOXELIZED_NY])
+            ind.y--;
+            
+        if(ind.z == geometry.data_objects[adr_geom+ADR_VOXELIZED_NZ])
+            ind.z--;
+        
         // Return material
         ui32 abs_ind = ind.z * (geometry.data_objects[adr_geom+ADR_VOXELIZED_NY]*geometry.data_objects[adr_geom+ADR_VOXELIZED_NX])
                                  + ind.y*geometry.data_objects[adr_geom+ADR_VOXELIZED_NX] + ind.x;
+        //printf("abs_ind %i \n", abs_ind);                         
         //printf("Mat: %i\n", (ui32)geometry.data_objects[adr_geom+ADR_VOXELIZED_DATA+abs_ind]);
         return (ui32)geometry.data_objects[adr_geom+ADR_VOXELIZED_DATA+abs_ind];
     } else if (obj_type == COLLI) {
@@ -677,7 +690,8 @@ __host__ __device__ f32 get_distance_to_object(Scene geometry, ui32 adr_geom, ui
 
     f32 distance = F32_MAX;
     f32xyz u, v, w;
-        
+       
+    
     //pos = fxyz_add(pos, fxyz_scale(dir, EPSILON3));
    
     // The main AABB bounding box volume
@@ -848,9 +862,9 @@ __host__ __device__ f32 get_distance_to_object(Scene geometry, ui32 adr_geom, ui
         distance = hit_ray_sphere(pos, dir, c, r);
 
     } else if (obj_type == VOXELIZED) {
-
+      
         f32xyz posinvox, s;
-        ui32xyz ind;
+        ui32xyz ind, ind_prev;
         f32 xmin, ymin, xmax, ymax, zmin, zmax;
         f32 new_distance;
       
@@ -858,9 +872,10 @@ __host__ __device__ f32 get_distance_to_object(Scene geometry, ui32 adr_geom, ui
         ui32 new_mat = cur_mat;
         distance = 0.0;
         f32xyz new_pos = pos;
-        bool inside = 1;
+        bool inside_phantom = 1;
+        bool inside_voxel = 0;
         
-        while (cur_mat == new_mat && inside) {
+        while (cur_mat == new_mat && inside_phantom) {
       
             // Change particle frame (into voxelized volume)
             
@@ -878,36 +893,48 @@ __host__ __device__ f32 get_distance_to_object(Scene geometry, ui32 adr_geom, ui
             ind.y = (ui32)(posinvox.y / s.y);
             ind.z = (ui32)(posinvox.z / s.z);
 
-            //printf("Ind %i %i %i\n", ind.x, ind.y, ind.z);
+          //  printf("Ind %i %i %i\n", ind.x, ind.y, ind.z);
+          
               
             xmin = ind.x*s.x + aabb_xmin; xmax = xmin+s.x;
             ymin = ind.y*s.y + aabb_ymin; ymax = ymin+s.y;
             zmin = ind.z*s.z + aabb_zmin; zmax = zmin+s.z;
 
-//        xmin = (dir.x > 0 && posinvox.x > (ind.x+1)*s.x-EPSILON3) ? (ind.x+1)*s.x+volxmin : ind.x*s.x+volxmin;
-//        ymin = (dir.y > 0 && posinvox.y > (ind.y+1)*s.y-EPSILON3) ? (ind.y+1)*s.y+volymin : ind.y*s.y+volymin;
-//        zmin = (dir.z > 0 && posinvox.z > (ind.z+1)*s.z-EPSILON3) ? (ind.z+1)*s.z+volzmin : ind.z*s.z+volzmin;
-//        xmax = (dir.x < 0 && posinvox.x < xmin + EPSILON3) ? xmin-s.x : xmin+s.x;
-//        ymax = (dir.y < 0 && posinvox.y < ymin + EPSILON3) ? ymin-s.y : ymin+s.y;
-//        zmax = (dir.z < 0 && posinvox.z < zmin + EPSILON3) ? zmin-s.z : zmin+s.z;
-
+       //   printf("new pos %f %f %f dir %f %f %f limit %f %f %f %f %f %f \n", new_pos.x, new_pos.y, new_pos.z, dir.x, dir.y, dir.z, xmin, xmax, ymin, ymax, zmin, zmax); 
+               
             // Get the distance
             new_distance = hit_ray_AABB(new_pos, dir, xmin, xmax, ymin, ymax, zmin, zmax);
-        
-            new_pos = fxyz_add(new_pos, fxyz_scale(dir, new_distance + EPSILON6));
             
-            inside = test_point_AABB(new_pos, (f32)geometry.data_objects[adr_geom+ADR_AABB_XMIN], (f32)geometry.data_objects[adr_geom+ADR_AABB_XMAX],
+        //    printf("new_distance %f \n", new_distance);
+            
+            
+           
+    
+        
+         //   if(new_distance > 100000)
+         //     printf("new_distance %f \n", new_distance);
+        
+           // new_pos = fxyz_add(new_pos, fxyz_scale(dir, new_distance + EPSILON3));
+           new_pos = fxyz_add(new_pos, fxyz_scale(dir, new_distance + 0.01));
+            
+            inside_phantom = test_point_AABB(new_pos, (f32)geometry.data_objects[adr_geom+ADR_AABB_XMIN], (f32)geometry.data_objects[adr_geom+ADR_AABB_XMAX],
             (f32)geometry.data_objects[adr_geom+ADR_AABB_YMIN], (f32)geometry.data_objects[adr_geom+ADR_AABB_YMAX], 
             (f32)geometry.data_objects[adr_geom+ADR_AABB_ZMIN], (f32)geometry.data_objects[adr_geom+ADR_AABB_ZMAX]);
         
             distance += new_distance;
+
             
-            if(inside)
+            if(inside_phantom){
+         //     printf("inside_phantom\n");
                 new_mat = get_geometry_material(geometry, cur_geom, new_pos); 
+            }
+            
+            
+            
+            ind_prev = ind;
             
         }  
         
-        //printf("distance %f \n", distance);
 
 //        if ((distance > -EPSILON6 && distance < EPSILON6) || distance > 100000) {
 //        //if (d64 > 100000) {
@@ -1195,13 +1222,13 @@ __host__ __device__ void get_next_geometry_boundary(Scene geometry, ui32 cur_geo
                                                     f32xyz pos, f32xyz dir,
                                                     f32 &interaction_distance,
                                                     ui32 &geometry_volume) {
-
+  
     geometry_volume = cur_geom;
     ui32 mother_geom, mother_adr_geom, mother_obj_type;
     f32 distance, safety;
 
     ////// Mother
-
+    
     // First check the mother volume (particle escaping the volume)
     ui32 adr_geom = geometry.ptr_objects[cur_geom];
     ui32 obj_type = (ui32)geometry.data_objects[adr_geom+ADR_OBJ_TYPE];
@@ -1213,9 +1240,11 @@ __host__ __device__ void get_next_geometry_boundary(Scene geometry, ui32 cur_geo
 
         // Voxel boundary
         distance = get_distance_to_object(geometry, adr_geom, cur_geom, VOXELIZED, pos, dir);  
-
+        
+        //printf("distance %f\n", distance);
+        
         f32 temp_distance = distance + EPSILON3;
-          
+        
         f32xyz next_pos = fxyz_add(pos, fxyz_scale(dir, temp_distance));
         
         if (test_point_AABB(next_pos, (f32)geometry.data_objects[adr_geom+ADR_AABB_XMIN], (f32)geometry.data_objects[adr_geom+ADR_AABB_XMAX],
@@ -1860,7 +1889,7 @@ __host__ __device__ f64 get_distance_to_object(Scene geometry, ui32 adr_geom, ui
     } else if (obj_type == VOXELIZED) {
 
         f64xyz posinvox, s;
-        ui32xyz ind;
+        ui32xyz ind, ind_prev;
         f64 xmin, ymin, xmax, ymax, zmin, zmax;
         f64 new_distance;
       
@@ -1868,9 +1897,10 @@ __host__ __device__ f64 get_distance_to_object(Scene geometry, ui32 adr_geom, ui
         ui32 new_mat = cur_mat;
         distance = 0.0;
         f64xyz new_pos = pos;
-        bool inside = 1;
+        bool inside_phantom = 1;
+        bool inside_voxel = 0;
         
-        while (cur_mat == new_mat && inside) {
+        while (cur_mat == new_mat && inside_phantom) {
       
             // Change particle frame (into voxelized volume)
             
@@ -1888,7 +1918,7 @@ __host__ __device__ f64 get_distance_to_object(Scene geometry, ui32 adr_geom, ui
             ind.y = (ui32)(posinvox.y / s.y);
             ind.z = (ui32)(posinvox.z / s.z);
 
-            //printf("Ind %i %i %i\n", ind.x, ind.y, ind.z);
+           // printf("Ind %i %i %i\n", ind.x, ind.y, ind.z);
               
             xmin = ind.x*s.x + aabb_xmin; xmax = xmin+s.x;
             ymin = ind.y*s.y + aabb_ymin; ymax = ymin+s.y;
@@ -1901,20 +1931,32 @@ __host__ __device__ f64 get_distance_to_object(Scene geometry, ui32 adr_geom, ui
 //        ymax = (dir.y < 0 && posinvox.y < ymin + EPSILON3) ? ymin-s.y : ymin+s.y;
 //        zmax = (dir.z < 0 && posinvox.z < zmin + EPSILON3) ? zmin-s.z : zmin+s.z;
 
-            // Get the distance
-            new_distance = hit_ray_AABB(new_pos, dir, xmin, xmax, ymin, ymax, zmin, zmax);
-        
-            new_pos = fxyz_add(new_pos, fxyz_scale(dir, new_distance + EPSILON6));
+        //    printf("new pos %f %f %f dir %f %f %f limit %f %f %f %f %f %f \n", new_pos.x, new_pos.y, new_pos.z, dir.x, dir.y, dir.z, xmin, xmax, ymin, ymax, zmin, zmax); 
+           
+            // Check if the new position is inside the voxel
             
-            inside = test_point_AABB(new_pos, (f64)geometry.data_objects[adr_geom+ADR_AABB_XMIN], (f64)geometry.data_objects[adr_geom+ADR_AABB_XMAX],
+           // Get the distance
+            new_distance = hit_ray_AABB(new_pos, dir, xmin, xmax, ymin, ymax, zmin, zmax);
+
+                        
+        //    printf("new_distance %f \n", new_distance);
+            
+            
+            new_pos = fxyz_add(new_pos, fxyz_scale(dir, new_distance + EPSILON6));
+            //new_pos = fxyz_add(new_pos, fxyz_scale(dir, new_distance + 0.01));
+            
+            inside_phantom = test_point_AABB(new_pos, (f64)geometry.data_objects[adr_geom+ADR_AABB_XMIN], (f64)geometry.data_objects[adr_geom+ADR_AABB_XMAX],
             (f64)geometry.data_objects[adr_geom+ADR_AABB_YMIN], (f64)geometry.data_objects[adr_geom+ADR_AABB_YMAX], 
             (f64)geometry.data_objects[adr_geom+ADR_AABB_ZMIN], (f64)geometry.data_objects[adr_geom+ADR_AABB_ZMAX]);
         
             distance += new_distance;
             
-            if(inside)
-                new_mat = get_geometry_material(geometry, cur_geom, new_pos); 
+            if(inside_phantom){
+              
+                new_mat = get_geometry_material(geometry, cur_geom, new_pos);
+            }
             
+            ind_prev = ind;
         }  
         
         //printf("distance %f \n", distance);
@@ -2607,6 +2649,16 @@ __host__ __device__ ui32 get_geometry_material(Scene geometry, ui32 id_geom, f64
         ind.x = (ui32)(pos.x / (f64)geometry.data_objects[adr_geom+ADR_VOXELIZED_SX]); // / sx
         ind.y = (ui32)(pos.y / (f64)geometry.data_objects[adr_geom+ADR_VOXELIZED_SY]); // / sy
         ind.z = (ui32)(pos.z / (f64)geometry.data_objects[adr_geom+ADR_VOXELIZED_SZ]); // / sz
+        
+        if(ind.x == geometry.data_objects[adr_geom+ADR_VOXELIZED_NX])
+            ind.x--;
+          
+        if(ind.y == geometry.data_objects[adr_geom+ADR_VOXELIZED_NY])
+            ind.y--;
+            
+        if(ind.z == geometry.data_objects[adr_geom+ADR_VOXELIZED_NZ])
+            ind.z--;
+        
 //        printf("Vos ind %i %i %i aabb %f %f, %f %f, %f %f\n", ind.x, ind.y, ind.z,
 //               geometry.data_objects[adr_geom+ADR_AABB_XMIN],
 //               geometry.data_objects[adr_geom+ADR_AABB_XMAX],
@@ -3225,6 +3277,7 @@ void GeometryBuilder::build_object(Voxelized obj) {
 
     // Now convert every material ID contains on the voxelized volume
     f32 *newdata = (f32*)malloc(sizeof(f32) * obj.number_of_voxels);
+    printf("number of voxels %d \n", obj.number_of_voxels);
     i=0; while (i < obj.number_of_voxels) {
         newdata[i] = new_id[obj.data[i]];
         ++i;

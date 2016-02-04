@@ -426,12 +426,12 @@ void VoxelizedSource::compute_cdf() {
     activity_cdf = (f32*)malloc(nb*sizeof(f32));
 
     // Buffer
-    f64* cdf = new f64[nb];
+    f32* cdf = new f32[nb];
 
     // fill array with non zeros values activity
     ui32 index = 0;
-    f64 val;
-    f64 sum = 0.0; // for the cdf
+    f32 val;
+    f32 sum = 0.0; // for the cdf
     i=0; while (i<number_of_voxels) {
         val = activity_volume[i];
         if (val != 0.0f) {

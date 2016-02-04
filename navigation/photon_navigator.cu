@@ -47,6 +47,8 @@ __host__ __device__ void photon_navigator_simple(ParticleStack &particles, ui32 
     dir.x = particles.dx[part_id];
     dir.y = particles.dy[part_id];
     dir.z = particles.dz[part_id];
+    
+  //  printf("part_id %d posx %f posy %f posz %f\n", part_id, pos.x, pos.y, pos.z);
 
     // Get the current volume containing the particle
     ui32 cur_id_geom = particles.geometry_id[part_id];
@@ -54,7 +56,7 @@ __host__ __device__ void photon_navigator_simple(ParticleStack &particles, ui32 
     ui32 adr_geom = geometry.ptr_objects[cur_id_geom];
     ui32 obj_type = (ui32)geometry.data_objects[adr_geom+ADR_OBJ_TYPE];
       
-   // printf(" obj type %d \n", obj_type);
+  //  printf(" obj type %d \n", obj_type);
          
     // If the particle hits the SPECThead, determine in which layer it is
     if (obj_type == SPECTHEAD) {   
@@ -136,10 +138,12 @@ __host__ __device__ void photon_navigator_simple(ParticleStack &particles, ui32 
 
     //// Get the next distance boundary volume /////////////////////////////////
 
-    // printf("Before geom\n");
-
+   //  printf("Before geom\n");
+     
     ui32 hit_id_geom = 0;
-    get_next_geometry_boundary(geometry, cur_id_geom, pos, dir, interaction_distance, hit_id_geom);
+    get_next_geometry_boundary(geometry, cur_id_geom, pos, dir, interaction_distance, hit_id_geom);   
+    
+    //printf("interaction_distance %f\n", interaction_distance);
     
     if (interaction_distance <= next_interaction_distance) {
         next_interaction_distance = interaction_distance + EPSILON3; // Overshoot
@@ -157,8 +161,9 @@ __host__ __device__ void photon_navigator_simple(ParticleStack &particles, ui32 
     //if (parameters.dose_flag) {
         //f32xyz pos_edep = add_vector(photon.pos, scale_vector(photon.dir, next_interaction_distance*prng()));
     //}
-
-    //printf("id %d mat %d process %d dist %f cur_geom %d next_geom %d \n", part_id, id_mat, next_discrete_process, next_interaction_distance, cur_id_geom, next_geometry_volume);
+  
+   // if(part_id < 411800 && part_id > 411750)
+   // printf("id %d mat %d process %d dist %f cur_geom %d next_geom %d \n", part_id, id_mat, next_discrete_process, next_interaction_distance, cur_id_geom, next_geometry_volume);
 
    // printf("move particle %f %f %f dir %f %f %f \n", pos.x, pos.y, pos.z, dir.x, dir.y, dir.z);
      
@@ -421,6 +426,8 @@ __host__ __device__ void photon_navigator_double(ParticleStack &particles, ui32 
     ui32 hit_id_geom = 0;
     get_next_geometry_boundary(geometry, cur_id_geom, pos, dir, interaction_distance, hit_id_geom);
     
+    //printf("interaction_distance %f \n", interaction_distance);
+    
     if (interaction_distance <= next_interaction_distance) {
         next_interaction_distance = interaction_distance + EPSILON3; // Overshoot
         next_discrete_process = GEOMETRY_BOUNDARY;
@@ -438,14 +445,12 @@ __host__ __device__ void photon_navigator_double(ParticleStack &particles, ui32 
         //f32xyz pos_edep = add_vector(photon.pos, scale_vector(photon.dir, next_interaction_distance*prng()));
     //}
 
-    //printf("id %d mat %d process %d dist %f cur_geom %d next_geom %d \n", part_id, id_mat, next_discrete_process, next_interaction_distance, cur_id_geom, next_geometry_volume);
+   //printf("id %d mat %d process %d dist %f cur_geom %d next_geom %d \n", part_id, id_mat, next_discrete_process, next_interaction_distance, cur_id_geom, next_geometry_volume);
 
    // printf("move particle %f %f %f dir %f %f %f \n", pos.x, pos.y, pos.z, dir.x, dir.y, dir.z);
      
     // Move the particle
     pos = fxyz_add(pos, fxyz_scale(dir, next_interaction_distance));
-    
-    
 
     // Update TOF
     particles.tof[part_id] += c_light * next_interaction_distance;

@@ -361,7 +361,7 @@ void Digitizer::set_time_window(f32 vwin_time) {
 /// Process Singles /////////////////////////////////////////
 
 // Process singles
-void Digitizer::process_singles(ui32 iter, f64 tot_activity) {
+void Digitizer::process_singles(ui32 iter, f32 tot_activity) {
 
     singles.clear();
     ui32 nb_record_singles=0;
@@ -1105,7 +1105,7 @@ void Digitizer::export_projection() {
 
 /// Main function /////////////////////////////////////////
 
-void Digitizer::process_chain(ui32 iter, f64 tot_activity, Scene geometry) {
+void Digitizer::process_chain(ui32 iter, f32 tot_activity, Scene geometry) {
 
     process_singles(iter, tot_activity);
 

@@ -138,7 +138,7 @@ class SourceBuilder {
         Sources dsources;  // GPU
 
         // Total activity of the source
-        f64 tot_activity;
+        f32 tot_activity;
 
     private:        
 
