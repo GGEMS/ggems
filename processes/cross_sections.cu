@@ -75,9 +75,6 @@ void CrossSections::m_build_electron_table()
         ++i;
     }
 
-    // For range table
-    f32 eDXDE;
-
     // For each material
     f32 energy;
     ui32 index;
@@ -123,34 +120,36 @@ void CrossSections::m_build_electron_table()
                 electron_CS.data_h.eMSC[index] = 0.;
             }
 
-            /// Compute the range table
-
-            // init first element
-            if ( i == 0 )
-            {
-                eDXDE = electron_CS.data_h.eIonisationdedx[index] + electron_CS.data_h.eBremdedx[index];
-                if ( eDXDE > 0.) eDXDE = 2. * electron_CS.data_h.E[index] / eDXDE;
-                electron_CS.data_h.eRange[index] = eDXDE;
-            }
-            else
-            {
-                // fill data
-                ui32 n = 100;
-                f32 dE = energy - electron_CS.data_h.E[index-1] / n;
-                f32 tmp_E = energy + dE*0.5;
-                f32 esum = 0.0;
-                ui32 j=0; while (j < n)   // 100 ? - JB
-                {
-                    tmp_E -= dE;
-                    eDXDE = m_get_electron_dedx( tmp_E, id_mat );
-                    if ( eDXDE > 0.0 ) esum += ( dE / eDXDE );
-                    ++j;
-                }
-
-                electron_CS.data_h.eRange[index] = electron_CS.data_h.eRange[index-1] + esum;
-            }
 
         } // bins
+
+        /// Compute the range table (after computing all dE/dx)
+        index = id_mat*m_nb_bins;
+        f32 eDXDE = electron_CS.data_h.eIonisationdedx[index] + electron_CS.data_h.eBremdedx[index];
+        if ( eDXDE > 0.) eDXDE = 2. * electron_CS.data_h.E[0] / eDXDE;
+        electron_CS.data_h.eRange[index] = eDXDE;
+
+        // For each bin
+        ui32 n = 100;
+        for ( ui32 i=1; i< m_nb_bins; i++ )
+        {
+            f32 dE = (electron_CS.data_h.E[i] - electron_CS.data_h.E[i-1]) / n;
+            energy = electron_CS.data_h.E[i] + dE*0.5;
+
+            f32 esum = 0.0;
+            ui32 j=0; while (j < n)   // 100 ? - JB
+            {
+                energy -= dE;
+                eDXDE = m_get_electron_dedx( energy, id_mat );
+                if ( eDXDE > 0.0 ) esum += ( dE / eDXDE );
+                ++j;
+            }
+
+            electron_CS.data_h.eRange[index+i] = electron_CS.data_h.eRange[index+i-1] + esum;
+
+        }
+
+
 
     } // mat
 
