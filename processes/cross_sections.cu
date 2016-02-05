@@ -402,10 +402,6 @@ void CrossSections::initialize(Materials materials, GlobalSimulationParameters p
         if ( there_is_electron ) m_copy_electron_cs_table_cpu2gpu();
     }
 
-    //m_dump_electron_tables("debug_");
-
-    // DEBUG
-    exit_simulation();
 
 }
 

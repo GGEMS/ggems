@@ -100,23 +100,15 @@ __host__ __device__ void e_read_CS_table (
     GlobalSimulationParametersData parameters )
 {
 
-    printf("     READ CS TABLE\n");
 
-    printf(" table min E %e energy %e\n", parameters.cs_table_min_E, energy);
 
     if ( parameters.cs_table_min_E > energy ) energy = parameters.cs_table_min_E + 1.*eV;  // FIX ME
 
-    printf(" mat %i\n", mat);
-    printf(" d_table %e\n", d_table.E[0] / eV);
-    //printf(" mat %i\n", mat);
-    printf(" nb bins %i\n", d_table.nb_bins);
 
-
-    printf("       energy %e - d_tableE[0] %e - mat id %i\n - nb bins %i\n", energy, d_table.E[0], mat, d_table.nb_bins);
 
     table_index = binary_search ( energy, d_table.E, ( mat+1 ) * d_table.nb_bins,mat * d_table.nb_bins );
 
-    printf("       table index %i\n", table_index);
+
 
 
     // Electron ionisation
@@ -135,7 +127,7 @@ __host__ __device__ void e_read_CS_table (
         dedxeIoni = linear_interpolation ( d_table.E[table_index-1],d_table.eIonisationdedx[table_index-1],
                 d_table.E[table_index], d_table.eIonisationdedx[table_index], energy );
 
-        printf("       Eion\n");
+
 
     }
 
@@ -155,7 +147,7 @@ __host__ __device__ void e_read_CS_table (
         dedxeBrem =  linear_interpolation ( d_table.E[table_index-1],d_table.eBremdedx[table_index-1], d_table.E[table_index],
                 d_table.eBremdedx[table_index], energy );
 
-        printf("       Brem\n");
+
     }
 
     // Multiple scattering
@@ -165,7 +157,7 @@ __host__ __device__ void e_read_CS_table (
                 d_table.eMSC[table_index], energy );
         lambda = 1. / lambda;
 
-        printf("       MSC\n");
+
     }
 
     // Electron range

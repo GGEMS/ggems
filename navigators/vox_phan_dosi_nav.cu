@@ -161,8 +161,7 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
     f32 totalLength = 0.;
     f32 par1, par2;
 
-    printf("     before do loop \n");
-    
+
     do
     {
 
@@ -174,7 +173,6 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
             return;
         }
 
-        printf("       Inside\n");
 
         // Values initialisation
         f32 lengthtoVertex; // Value to store the distance from the last physics interaction.
@@ -222,7 +220,6 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
 
         ui16 mat_id = (ui16)(vol.values[index_phantom.w]);
         
-        printf("      index phantom %i - mat id %i\n", index_phantom.w, mat_id);
 
         // FIXME - JB
         if( (index_phantom.x >= vol.nb_vox_x) ||
@@ -233,12 +230,10 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
             return;
         }
 
-        printf("  E_table %e\n", electron_CS_table.E[0]);
 
         e_read_CS_table ( mat_id, energy, electron_CS_table, next_discrete_process, table_index,
                           next_interaction_distance, dedxeIoni,dedxeBrem, erange, lambda, randomnumbereBrem, randomnumbereIoni, parameters );
 
-        printf("      next_interaction_distance %e - next_discrete_process %i\n", next_interaction_distance, next_discrete_process);
 
         lengthtoVertex = VertexLength ( next_interaction_distance, alongStepLength );
 
@@ -379,9 +374,7 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
     }
     while ( ( particles.E[part_id]>EKINELIMIT ) && ( bool_loop==true ) && ( dummystep<10000 ) );
 
-    printf("     after do loop \n");
 
-    printf("     before if \n");
 
     if ( ( particles.E[part_id]>EKINELIMIT ) /*&&(secondaryParticleCreated == FALSE)*/ ) //>1eV
     {
@@ -492,14 +485,6 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
     {
         particles.endsimu[part_id]=PARTICLE_DEAD;
     }
-
-    printf("     after if \n");
-
-
-    /*printf("%s %d Part Pos  : %e %e %e -- %e %e %e -- %e %d\n",__FUNCTION__, __LINE__,particles.px[part_id], particles.py[part_id],particles.pz[part_id],particles.dx[part_id], particles.dy[part_id],particles.dz[part_id], particles.E[part_id],part_id);
-    for(int i = 0;i<vol.number_of_voxels;i++){
-        if(vol.values[i]!=0){ printf("%d %d %d %d\n",__LINE__,part_id,i,vol.values[i]); }
-    }          */
 }
 
 
@@ -686,28 +671,17 @@ __host__ __device__ void VPDN::track_photon_to_out ( ParticlesData &particles,
 __global__ void VPDN::kernel_device_track_to_in ( ParticlesData particles, f32 xmin, f32 xmax,
         f32 ymin, f32 ymax, f32 zmin, f32 zmax )
 {  
-
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
-    if ( id >= particles.size ) return;
-//     printf ( "%d %s %d Part Pos  : %e %e %e -- %e %e %e -- %e \n",id,__FUNCTION__, __LINE__,particles.px[id], particles.py[id],particles.pz[id],particles.dx[id], particles.dy[id],particles.dz[id], particles.E[id] );
-    
-    VPDN::track_to_in ( particles, xmin, xmax, ymin, ymax, zmin, zmax, id );
-    
-//     printf ( "%d %s %d Part Pos  : %e %e %e -- %e %e %e -- %e \n",id,__FUNCTION__, __LINE__,particles.px[id], particles.py[id],particles.pz[id],particles.dx[id], particles.dy[id],particles.dz[id], particles.E[id] );
+    if ( id >= particles.size ) return;    
+    transport_track_to_in_AABB( particles, xmin, xmax, ymin, ymax, zmin, zmax, id);
 }
 
 
 // Host Kernel that move particles to the voxelized volume boundary
 void VPDN::kernel_host_track_to_in ( ParticlesData particles, f32 xmin, f32 xmax,
                                      f32 ymin, f32 ymax, f32 zmin, f32 zmax, ui32 part_id )
-{
-//     printf ( "%s %d Part Pos  : %e %e %e -- %e %e %e -- %e \n",__FUNCTION__, __LINE__,particles.px[part_id], particles.py[part_id],particles.pz[part_id],particles.dx[part_id], particles.dy[part_id],particles.dz[part_id], particles.E[part_id] );
-    
-//     printf("X %g %g Y %g %g Z %g %g\n",xmin, xmax, ymin, ymax, zmin, zmax);
-    
-    VPDN::track_to_in ( particles, xmin, xmax, ymin, ymax, zmin, zmax, part_id );
-    
-//     printf ( "%s %d %d Part Pos  : %e %e %e -- %e %e %e -- %e %d\n",__FUNCTION__, __LINE__,part_id,particles.px[part_id], particles.py[part_id],particles.pz[part_id],particles.dx[part_id], particles.dy[part_id],particles.dz[part_id], particles.E[part_id] , particles.endsimu[part_id]);
+{       
+    transport_track_to_in_AABB( particles, xmin, xmax, ymin, ymax, zmin, zmax, part_id);
 }
 
 // Device kernel that track particles within the voxelized volume until boundary
@@ -719,9 +693,6 @@ __global__ void VPDN::kernel_device_track_to_out ( ParticlesData particles,
         GlobalSimulationParametersData parameters,
         DoseData dosi )
 {
-
-
-
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
     if ( id >= particles.size ) return;
 
@@ -732,33 +703,20 @@ __global__ void VPDN::kernel_device_track_to_out ( ParticlesData particles,
 
     ui32 istep = 0;
 
-    printf("Track to out - state %i - type %i - pos %e %e %e - dir %e %e %e - E %e\n", particles.endsimu[id], particles.pname[id],
-           particles.px[id], particles.py[id], particles.pz[id], particles.dx[id], particles.dy[id], particles.dz[id], particles.E[id]);
-
-    printf("Check E_table %e\n", electron_CS_table.E[0]);
-
     // Stepping loop
     while ( particles.endsimu[id] != PARTICLE_DEAD && particles.endsimu[id] != PARTICLE_FREEZE )
     {
 
-        printf("   Inside stepping loop\n");
-
         if ( particles.pname[id] == PHOTON )
         {
-
-            printf("    Photon step\n");
             VPDN::track_photon_to_out ( particles, vol, materials, photon_CS_table, parameters, dosi, id );
 
         }
         else if ( particles.pname[id] == ELECTRON )
         {
-            printf("    Electron step\n");
             VPDN::track_electron_to_out ( particles, vol, materials, electron_CS_table, parameters, dosi,
                                           randomnumbereIoni, randomnumbereBrem, freeLength, id );
-
         }
-
-        printf("   End step\n");
 
         // Condition if particle is dead and if it was a secondary
         if ( ( ( particles.endsimu[id]==PARTICLE_DEAD ) || ( particles.endsimu[id]==PARTICLE_FREEZE ) ) && ( particles.level[id]>PRIMARY ) )
@@ -790,9 +748,7 @@ __global__ void VPDN::kernel_device_track_to_out ( ParticlesData particles,
         }
 
 
-        if (id==0) {
-            printf("Id %i - iter %i - Type %i - Level %i \n", id, istep, particles.pname[id], particles.level[id]);
-        }
+
 
         ++istep;
 
@@ -886,7 +842,7 @@ bool VoxPhanDosiNav::m_check_mandatory()
 
 void VoxPhanDosiNav::track_to_in ( Particles particles )
 {
-// std::cout<<__LINE__<<std::endl;
+
     if ( m_params.data_h.device_target == CPU_DEVICE )
     {
         ui32 id=0;
@@ -901,20 +857,15 @@ void VoxPhanDosiNav::track_to_in ( Particles particles )
     }
     else if ( m_params.data_h.device_target == GPU_DEVICE )
     {
-//         GGcout << " Before FuckOff " << GGendl;
         dim3 threads, grid;
         threads.x = m_params.data_h.gpu_block_size;
         grid.x = ( particles.size + m_params.data_h.gpu_block_size - 1 ) / m_params.data_h.gpu_block_size;
-// //         GGcout << grid.x << "  " << threads.x << GGendl;
-//         FuckOff<<<grid, threads>>> ();
-        cudaThreadSynchronize();
+
         VPDN::kernel_device_track_to_in<<<grid, threads>>> ( particles.data_d, m_phantom.data_d.xmin, m_phantom.data_d.xmax,
-                m_phantom.data_d.ymin, m_phantom.data_d.ymax,
-                m_phantom.data_d.zmin, m_phantom.data_d.zmax );
+                                                                               m_phantom.data_d.ymin, m_phantom.data_d.ymax,
+                                                                               m_phantom.data_d.zmin, m_phantom.data_d.zmax );
         cuda_error_check ( "Error ", " Kernel_VoxPhanDosi (track to in)" );
         cudaThreadSynchronize();
-//         GGcout << " After FuckOff " << GGendl;
-
     }
 
 
@@ -929,7 +880,6 @@ void VoxPhanDosiNav::track_to_out ( Particles particles )
         ui32 id=0;
         while ( id<particles.size )
         {
-            if ( id%10000 == 0 ) printf ( "Part : %d/%d\n",id,particles.size );
 
             VPDN::kernel_host_track_to_out ( particles.data_h, m_phantom.data_h,
                                              m_materials.data_h, m_cross_sections.photon_CS.data_h, m_cross_sections.electron_CS.data_h,
@@ -940,13 +890,6 @@ void VoxPhanDosiNav::track_to_out ( Particles particles )
     }
     else if ( m_params.data_h.device_target == GPU_DEVICE )
     {
-
-        printf("Jump jump!! %i\n", m_cross_sections.electron_CS.data_h.nb_bins);
-        ui32 i=0; while(i<m_cross_sections.electron_CS.data_h.nb_bins) {
-            printf("CPU CS table %e\n", m_cross_sections.electron_CS.data_h.E[i]);
-            ++i;
-        }
-
         dim3 threads, grid;
         threads.x = m_params.data_h.gpu_block_size;// 
         grid.x = ( particles.size + m_params.data_h.gpu_block_size - 1 ) / m_params.data_h.gpu_block_size;
@@ -995,26 +938,26 @@ void VoxPhanDosiNav::initialize ( GlobalSimulationParameters params )
     // Materials table
     if( !m_elements_filename.empty() )
     {
-      m_materials.load_elements_database( m_elements_filename );
+        m_materials.load_elements_database( m_elements_filename );
     }
     else
     {
-      m_materials.load_elements_database();
+        m_materials.load_elements_database();
     }
 
     if( !m_materials_filename.empty() )
     {
-      m_materials.load_materials_database( m_materials_filename );
+        m_materials.load_materials_database( m_materials_filename );
     }
     else
     {
-      m_materials.load_materials_database();
+        m_materials.load_materials_database();
     }
     
     
     // Materials table
-//     m_materials.load_elements_database();
-//     m_materials.load_materials_database();
+    //     m_materials.load_elements_database();
+    //     m_materials.load_materials_database();
     m_materials.initialize ( m_phantom.list_of_materials, params );
 
     // Cross Sections
@@ -1051,12 +994,12 @@ void VoxPhanDosiNav::calculate_dose_to_phantom(){
 
 void VoxPhanDosiNav::set_elements( std::string filename )
 {
-  m_elements_filename = filename;
+    m_elements_filename = filename;
 }
 
 void VoxPhanDosiNav::set_materials( std::string filename )
 {
-  m_materials_filename = filename;
+    m_materials_filename = filename;
 }
 
 

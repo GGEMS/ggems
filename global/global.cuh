@@ -6,6 +6,7 @@
 /////// INCLUDES ///////////////////////////////////////////////
 
 #include "G4SystemOfUnits.hh"
+#include "G4PhysicalConstants.hh"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -30,6 +31,7 @@
 #else
 #include <sys/time.h>
 #endif
+
 /////// CONSTANTS //////////////////////////////////////////////
 
 // Run on CPU
@@ -101,6 +103,8 @@
 // Constants for electrons
 #define elec_radius          (2.8179409421853486E-15*m)      // Metre
 #define N_avogadro           (6.0221367E+23/mole)
+//#define c_light              (2.99792458E+8*m/sec)  // Already defined in G4PhysicalConstants.hh - JB
+//#define barn                 (1.E-28*m2)
 
 /////// TYPEDEF ////////////////////////////////////////////////
 

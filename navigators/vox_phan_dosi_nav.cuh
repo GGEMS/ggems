@@ -27,7 +27,7 @@
 #include "electron.cuh"
 #include "cross_sections.cuh"
 #include "electron_navigator.cuh"
-
+#include "transport_navigator.cuh"
 
 // VoxPhanDosiNav -> VPDN
 namespace VPDN
