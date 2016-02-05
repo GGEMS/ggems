@@ -452,6 +452,20 @@ __host__ __device__ bool test_point_AABB(f32xyz p,
     return true;
 }
 
+// Point/AABB test with tolerance (f32 version)
+__host__ __device__ bool test_point_AABB_with_tolerance(f32xyz p,
+                                                        f32 aabb_xmin, f32 aabb_xmax,
+                                                        f32 aabb_ymin, f32 aabb_ymax,
+                                                        f32 aabb_zmin, f32 aabb_zmax,
+                                                        f32 tol)
+{
+    if (p.x < aabb_xmin+tol || p.x > aabb_xmax-tol) return false;
+    if (p.y < aabb_ymin+tol || p.y > aabb_ymax-tol) return false;
+    if (p.z < aabb_zmin+tol || p.z > aabb_zmax-tol) return false;
+
+    return true;
+}
+
 // Ray/triangle intersection - Moller-Trumbore algorithm (f32 version)
 __host__ __device__ f32 hit_ray_triangle(f32xyz ray_p, f32xyz ray_d,
                                          f32xyz tri_u,              // Triangle

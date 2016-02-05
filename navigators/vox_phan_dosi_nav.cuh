@@ -32,9 +32,6 @@
 // VoxPhanDosiNav -> VPDN
 namespace VPDN
 {
-__host__ __device__ void track_to_in ( ParticlesData &particles, f32 xmin, f32 xmax,
-                                       f32 ymin, f32 ymax, f32 zmin, f32 zmax,
-                                       ui32 id );
 
 __host__ __device__ void track_electron_to_out ( ParticlesData &particles,
         VoxVolumeData vol,

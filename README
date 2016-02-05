@@ -6,6 +6,9 @@ TODO
 * FIX particle geometry navigation (still error with float uncertainty)
 * ADD energy cut based on range value
 
+* ERROR No set_model in class of ConeBeamCTSource
+* ERROR No printInfoDetection in class of ConeBeamCTSource
+
 ====
 Misc
 ====

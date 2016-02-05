@@ -18,55 +18,6 @@
 
 ////:: GPU Codes
 
-// Move particles to the voxelized volume
-__host__ __device__ void VPIN::track_to_in ( ParticlesData &particles, f32 xmin, f32 xmax,
-        f32 ymin, f32 ymax, f32 zmin, f32 zmax,
-        ui32 id )
-{
-
-    // Read position
-    f64xyz pos;
-    pos.x = particles.px[id];
-    pos.y = particles.py[id];
-    pos.z = particles.pz[id];
-
-    // Read direction
-    f64xyz dir;
-    dir.x = particles.dx[id];
-    dir.y = particles.dy[id];
-    dir.z = particles.dz[id];
-
-    f32 dist = hit_ray_AABB ( pos, dir, xmin, xmax, ymin, ymax, zmin, zmax );
-
-    // the particle not hitting the voxelized volume
-    if ( dist == FLT_MAX )                            // TODO: Don't know why F32_MAX doesn't work...
-    {
-        particles.endsimu[id] = PARTICLE_FREEZE;
-        return;
-    }
-    else
-    {
-        // Check if the path of the particle cross the volume sufficiently
-        f32 cross = dist_overlap_ray_AABB ( pos, dir, xmin, xmax, ymin, ymax, zmin, zmax );
-        if ( cross < EPSILON3 )
-        {
-            particles.endsimu[id] = PARTICLE_FREEZE;
-            return;
-        }
-        // move the particle slightly inside the volume
-        pos = fxyz_add ( pos, fxyz_scale ( dir, dist+EPSILON3 ) );
-
-        // TODO update tof
-        // ...
-    }
-
-    // set photons
-    particles.px[id] = pos.x;
-    particles.py[id] = pos.y;
-    particles.pz[id] = pos.z;
-}
-
-
 __host__ __device__ void VPIN::track_to_out ( ParticlesData &particles,
         VoxVolumeData vol,
         MaterialsTable materials,
@@ -104,8 +55,18 @@ __host__ __device__ void VPIN::track_to_out ( ParticlesData &particles,
         index_phantom.y >= vol.nb_vox_y ||
         index_phantom.z >= vol.nb_vox_z )
     {
-      particles.endsimu[part_id] = PARTICLE_DEAD;
-      return;
+
+        f32xyz safety = transport_compute_safety_AABB( pos, vol.xmin, vol.xmax, vol.ymin, vol.ymax, vol.zmin, vol.zmax );
+
+        if ( safety.x < 0.5*EPSILON3 ) printf("ID %i Safety x %f %f %f EPS3 %f\n", part_id, safety.x, safety.y, safety.z, EPSILON3);
+        if ( safety.y < 0.5*EPSILON3 ) printf("ID %i Safety y %f %f %f EPS3 %f\n", part_id, safety.x, safety.y, safety.z, EPSILON3);
+        if ( safety.z < 0.5*EPSILON3 ) printf("ID %i Safety z %f %f %f EPS3 %f\n", part_id, safety.x, safety.y, safety.z, EPSILON3);
+
+
+        //f32xyz safety = transport_get_safety_AABB( pos, vol.xmin, vol.xmax, vol.ymin, vol.ymax, vol.zmin, vol.zmax );
+        printf("ID %i outbound index\n", part_id);
+        particles.endsimu[part_id] = PARTICLE_DEAD;
+        return;
     }
 
     // Get the material that compose this volume
@@ -136,8 +97,8 @@ __host__ __device__ void VPIN::track_to_out ( ParticlesData &particles,
     }
     else if( boundary_distance == FLT_MAX )
     {
-      next_interaction_distance = EPSILON2;
-      next_discrete_process = GEOMETRY_BOUNDARY;
+        next_interaction_distance = EPSILON2;
+        next_discrete_process = GEOMETRY_BOUNDARY;             /// FIXME - TODO - JB
     }
 
     //// Move particle //////////////////////////////////////////////////////
@@ -151,7 +112,8 @@ __host__ __device__ void VPIN::track_to_out ( ParticlesData &particles,
     particles.pz[part_id] = pos.z;
 
     // Stop simulation if out of the phantom
-    if ( !test_point_AABB ( pos, vol.xmin, vol.xmax, vol.ymin, vol.ymax, vol.zmin, vol.zmax ) )
+    //if ( !test_point_AABB ( pos, vol.xmin, vol.xmax, vol.ymin, vol.ymax, vol.zmin, vol.zmax ) )
+    if ( !test_point_AABB_with_tolerance (pos, vol.xmin, vol.xmax, vol.ymin, vol.ymax, vol.zmin, vol.zmax, EPSILON3 ) )
     {
         particles.endsimu[part_id] = PARTICLE_FREEZE;
         return;
@@ -163,18 +125,18 @@ __host__ __device__ void VPIN::track_to_out ( ParticlesData &particles,
     {
         // Resolve discrete process
         SecParticle electron = photon_resolve_discrete_process ( particles, parameters, photon_CS_table,
-                               materials, mat_id, part_id );
+                                                                 materials, mat_id, part_id );
 
 
         //// Here e- are not tracked, and lost energy not drop
 
-      // If the process is PHOTON_COMPTON or PHOTON_RAYLEIGH the scatter
-      // order is incremented
-      if( next_discrete_process == PHOTON_COMPTON
-        || next_discrete_process == PHOTON_RAYLEIGH )
-      {
-        particles.scatter_order[ part_id ] += 1;
-      }
+        // If the process is PHOTON_COMPTON or PHOTON_RAYLEIGH the scatter
+        // order is incremented
+        if( next_discrete_process == PHOTON_COMPTON
+                || next_discrete_process == PHOTON_RAYLEIGH )
+        {
+            particles.scatter_order[ part_id ] += 1;
+        }
     }
 
     //// Energy cut
@@ -194,7 +156,7 @@ __global__ void VPIN::kernel_device_track_to_in ( ParticlesData particles, f32 x
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
     if ( id >= particles.size ) return;
 
-    VPIN::track_to_in ( particles, xmin, xmax, ymin, ymax, zmin, zmax, id );
+    transport_track_to_in_AABB( particles, xmin, xmax, ymin, ymax, zmin, zmax, id);
 
 }
 
@@ -203,7 +165,7 @@ void VPIN::kernel_host_track_to_in ( ParticlesData particles, f32 xmin, f32 xmax
                                      f32 ymin, f32 ymax, f32 zmin, f32 zmax, ui32 id )
 {
 
-    VPIN::track_to_in ( particles, xmin, xmax, ymin, ymax, zmin, zmax, id );
+    transport_track_to_in_AABB( particles, xmin, xmax, ymin, ymax, zmin, zmax, id);
 
 }
 
