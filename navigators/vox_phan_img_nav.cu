@@ -104,7 +104,7 @@ __host__ __device__ void VPIN::track_to_out ( ParticlesData &particles,
         index_phantom.y >= vol.nb_vox_y ||
         index_phantom.z >= vol.nb_vox_z )
     {
-      particles.endsimu[part_id] = PARTICLE_FREEZE;
+      particles.endsimu[part_id] = PARTICLE_DEAD;
       return;
     }
 
@@ -112,7 +112,6 @@ __host__ __device__ void VPIN::track_to_out ( ParticlesData &particles,
     ui16 mat_id = vol.values[ index_phantom.w ];
 
     //// Find next discrete interaction ///////////////////////////////////////
-
     photon_get_next_interaction ( particles, parameters, photon_CS_table, mat_id, part_id );
 
     f32 next_interaction_distance = particles.next_interaction_distance[part_id];
@@ -137,7 +136,7 @@ __host__ __device__ void VPIN::track_to_out ( ParticlesData &particles,
     }
     else if( boundary_distance == FLT_MAX )
     {
-      next_interaction_distance = EPSILON3;
+      next_interaction_distance = EPSILON2;
       next_discrete_process = GEOMETRY_BOUNDARY;
     }
 

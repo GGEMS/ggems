@@ -88,6 +88,7 @@
 //#define PRINTFUNCTION printf("%s %s\n",DEBUGOK,__FUNCTION__);
 #define HANDLE_ERROR( err ) (HandleError( err, __FILE__, __LINE__ ))
 
+#define EPSILON2 1.0e-02f
 #define EPSILON3 1.0e-03f
 #define EPSILON6 1.0e-06f
 

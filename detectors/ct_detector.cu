@@ -34,6 +34,10 @@ __host__ __device__ void ct_detector_track_to_in( ParticlesData &particles,
   {
     particles.endsimu[ id ] = PARTICLE_ALIVE;
   }
+  else if ( particles.endsimu[ id ] == PARTICLE_DEAD )
+  {
+    return;
+  }
 
   // Read position
   f32xyz pos;
@@ -54,15 +58,6 @@ __host__ __device__ void ct_detector_track_to_in( ParticlesData &particles,
     detector_volume.zmin, detector_volume.zmax,
     detector_volume.center,
     detector_volume.u, detector_volume.v, detector_volume.w );
-
-  /*printf( "x: %4.7f %4.7f\n", detector_volume.xmin, detector_volume.xmax );
-  printf( "y: %4.7f %4.7f\n", detector_volume.ymin, detector_volume.ymax );
-  printf( "z: %4.7f %4.7f\n", detector_volume.zmin, detector_volume.zmax );
-  printf( "centerx: %4.7f %4.7f %4.7f\n", detector_volume.center.x, detector_volume.center.y, detector_volume.center.z );
-  printf( "u: %4.7f %4.7f %4.7f\n", detector_volume.u.x, detector_volume.u.y, detector_volume.u.z );
-  printf( "v: %4.7f %4.7f %4.7f\n", detector_volume.v.x, detector_volume.v.y, detector_volume.v.z );
-  printf( "w: %4.7f %4.7f %4.7f\n", detector_volume.w.x, detector_volume.w.y, detector_volume.w.z );
-  printf( "angle: %4.7f %4.7f %4.7f\n", detector_volume.angle.x, detector_volume.angle.y, detector_volume.angle.z );*/
 
   if( dist == FLT_MAX )
   {
@@ -89,20 +84,14 @@ __host__ __device__ void ct_detector_track_to_in( ParticlesData &particles,
     pos = fxyz_add( pos, fxyz_scale( dir, dist + EPSILON3 ) );
   }
 
+  f32 rot_posx = pos.x * cosf( orbiting_angle ) + pos.y * sinf( orbiting_angle );
   f32 rot_posy = -pos.x * sinf( orbiting_angle ) + pos.y * cosf( orbiting_angle );
 
   // Calculate pixel id
   ui32 idx_xr = (ui32)( ( rot_posy - detector_volume.ymin ) / pixel_size_y );
   ui32 idx_yr = nb_pixel_z - 1 - (ui32)( ( pos.z - detector_volume.zmin ) / pixel_size_z );
 
-  if( idx_xr >= nb_pixel_y || idx_yr >= nb_pixel_z )
-  {
-    particles.endsimu[id] = PARTICLE_DEAD;
-    particles.E[ id ] = 0.0f;
-    return;
-  }
-
-  if( particles.E[ id ] < threshold )
+  if( idx_xr >= nb_pixel_y || idx_yr >= nb_pixel_z || particles.E[ id ] < threshold )
   {
     particles.endsimu[id] = PARTICLE_DEAD;
     particles.E[ id ] = 0.0f;
@@ -354,7 +343,7 @@ ui32 CTDetector::getScatterNumber( ui32 scatter_order )
   return count;
 }
 
-void CTDetector::printInfoDetection()
+void CTDetector::printInfoScatter()
 {
   // Get the number of detected particles
   ui32 detected_particles = getDetectedParticles();
