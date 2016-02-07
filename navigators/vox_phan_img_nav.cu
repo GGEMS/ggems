@@ -102,11 +102,18 @@ __host__ __device__ void VPIN::track_to_out ( ParticlesData &particles,
     }
 
     //// Move particle //////////////////////////////////////////////////////
+
+    // get the new position
     pos = fxyz_add ( pos, fxyz_scale ( dir, next_interaction_distance ) );
 
-    // Update TOF - TODO
-    //particles.tof[part_id] += c_light * next_interaction_distance;
+    // get safety position
+    pos = transport_get_safety_outside_AABB( pos, vox_xmin, vox_xmax,
+                                             vox_ymin, vox_ymax, vox_zmin, vox_zmax );
 
+    // update tof
+    particles.tof[part_id] += c_light * next_interaction_distance;
+
+    // store new position
     particles.px[part_id] = pos.x;
     particles.py[part_id] = pos.y;
     particles.pz[part_id] = pos.z;
@@ -127,8 +134,16 @@ __host__ __device__ void VPIN::track_to_out ( ParticlesData &particles,
         SecParticle electron = photon_resolve_discrete_process ( particles, parameters, photon_CS_table,
                                                                  materials, mat_id, part_id );
 
-
         //// Here e- are not tracked, and lost energy not drop
+
+        //// Energy cut
+
+        if ( Particles.E[ part_id ] <= materials.photon_energy_cut[ mat_id ] )
+        {
+            // kill without mercy (energy not drop)
+            particles.endsimu[part_id] = PARTICLE_DEAD;
+            return;
+        }
 
         // If the process is PHOTON_COMPTON or PHOTON_RAYLEIGH the scatter
         // order is incremented
@@ -139,13 +154,6 @@ __host__ __device__ void VPIN::track_to_out ( ParticlesData &particles,
         }
     }
 
-    //// Energy cut
-   /* if ( particles.E[part_id] <= materials.electron_energy_cut[mat_id] )
-    {
-        particles.endsimu[part_id] = PARTICLE_DEAD;
-        particles.E[ part_id ] = 0.0f;
-        return;
-    }*/
 }
 
 // Device Kernel that move particles to the voxelized volume boundary
