@@ -98,21 +98,6 @@ void ParticleManager::initialize ( GlobalSimulationParameters params )
 
 }
 
-/*
-// Print particles on a CPU stack
-void ParticleManager::cpu_print_stack(ui32 nlim) {
-
-    nlim = std::min(nlim, particles.size);
-    ui32 i = 0;
-    while (i < nlim) {
-        printf("%i - p %f %f %f - d %f %f %f - E %f\n", i, stack_h.px[i], stack_h.py[i], stack_h.pz[i],
-               stack_h.dx[i], stack_h.dy[i], stack_h.dz[i], stack_h.E[i]);
-        ++i;
-    }
-
-}
-*/
-
 // Check mandatory
 bool ParticleManager::m_check_mandatory()
 {
@@ -276,6 +261,52 @@ void ParticleManager::m_copy_seed_cpu2gpu()
                                 sizeof ( ui32 ) *particles.size, cudaMemcpyHostToDevice ) );
 
 }
+
+void ParticleManager::copy_gpu2cpu( Particles part )
+{
+    HANDLE_ERROR ( cudaMemcpy ( part.data_h.E, part.data_d.E, sizeof ( f32 ) *part.size, cudaMemcpyDeviceToHost ) );
+
+    HANDLE_ERROR ( cudaMemcpy ( part.data_h.px, part.data_d.px, sizeof ( f32 ) *part.size, cudaMemcpyDeviceToHost ) );
+    HANDLE_ERROR ( cudaMemcpy ( part.data_h.py, part.data_d.py, sizeof ( f32 ) *part.size, cudaMemcpyDeviceToHost ) );
+    HANDLE_ERROR ( cudaMemcpy ( part.data_h.pz, part.data_d.pz, sizeof ( f32 ) *part.size, cudaMemcpyDeviceToHost ) );
+
+    HANDLE_ERROR ( cudaMemcpy ( part.data_h.dx, part.data_d.dx, sizeof ( f32 ) *part.size, cudaMemcpyDeviceToHost ) );
+    HANDLE_ERROR ( cudaMemcpy ( part.data_h.dy, part.data_d.dy, sizeof ( f32 ) *part.size, cudaMemcpyDeviceToHost ) );
+    HANDLE_ERROR ( cudaMemcpy ( part.data_h.dz, part.data_d.dz, sizeof ( f32 ) *part.size, cudaMemcpyDeviceToHost ) );
+
+    HANDLE_ERROR ( cudaMemcpy ( part.data_h.tof, part.data_d.tof, sizeof ( f32 ) *part.size, cudaMemcpyDeviceToHost ) );
+
+    HANDLE_ERROR ( cudaMemcpy ( part.data_h.endsimu, part.data_d.endsimu, sizeof ( ui8 ) *part.size, cudaMemcpyDeviceToHost ) );
+}
+
+void ParticleManager::print_stack( Particles part )
+{
+    std::vector< std::string > status;
+    status.push_back("Alive");
+    status.push_back("Dead");
+    status.push_back("Freeze");
+
+    ui32 i = 0; while ( i < part.size ) {
+        printf("%i - E %f - p %f %f %f - d %f %f %f - tof %f - Status %s\n", i, part.data_h.E[i], part.data_h.px[i],
+               part.data_h.py[i], part.data_h.pz[i], part.data_h.dx[i], part.data_h.dy[i], part.data_h.dz[i], part.data_h.tof[i],
+               status[ part.data_h.endsimu[ i ] ].c_str() );
+        ++i;
+    }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

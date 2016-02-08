@@ -165,13 +165,13 @@ class ParticleManager
 public:
     ParticleManager();
 
-    void initialize ( GlobalSimulationParameters params );
-    //void cpu_print_stack(ui32 nlim);
+    void initialize ( GlobalSimulationParameters params );    
 
     Particles particles; // CPU and GPU stack
 
-    void m_copy_gpu2cpu();
-    void dump();
+    void copy_gpu2cpu(Particles part);
+    void print_stack(Particles part);
+
 
 private:
     bool m_check_mandatory();

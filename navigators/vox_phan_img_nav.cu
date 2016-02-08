@@ -51,35 +51,18 @@ __host__ __device__ void VPIN::track_to_out ( ParticlesData &particles,
                       + index_phantom.y*vol.nb_vox_x
                       + index_phantom.x; // linear index
 
-    if( index_phantom.x >= vol.nb_vox_x ||
-        index_phantom.y >= vol.nb_vox_y ||
-        index_phantom.z >= vol.nb_vox_z )
-    {
-
-        f32xyz safety = transport_compute_safety_AABB( pos, vol.xmin, vol.xmax, vol.ymin, vol.ymax, vol.zmin, vol.zmax );
-
-        if ( safety.x < 0.5*EPSILON3 ) printf("ID %i Safety x %f %f %f EPS3 %f\n", part_id, safety.x, safety.y, safety.z, EPSILON3);
-        if ( safety.y < 0.5*EPSILON3 ) printf("ID %i Safety y %f %f %f EPS3 %f\n", part_id, safety.x, safety.y, safety.z, EPSILON3);
-        if ( safety.z < 0.5*EPSILON3 ) printf("ID %i Safety z %f %f %f EPS3 %f\n", part_id, safety.x, safety.y, safety.z, EPSILON3);
-
-
-        //f32xyz safety = transport_get_safety_AABB( pos, vol.xmin, vol.xmax, vol.ymin, vol.ymax, vol.zmin, vol.zmax );
-        printf("ID %i outbound index\n", part_id);
-        particles.endsimu[part_id] = PARTICLE_DEAD;
-        return;
-    }
-
     // Get the material that compose this volume
     ui16 mat_id = vol.values[ index_phantom.w ];
 
     //// Find next discrete interaction ///////////////////////////////////////
-    photon_get_next_interaction ( particles, parameters, photon_CS_table, mat_id, part_id );
 
+    photon_get_next_interaction ( particles, parameters, photon_CS_table, mat_id, part_id );
     f32 next_interaction_distance = particles.next_interaction_distance[part_id];
     ui8 next_discrete_process = particles.next_discrete_process[part_id];
 
     //// Get the next distance boundary volume /////////////////////////////////
 
+    // get voxel params
     f32 vox_xmin = index_phantom.x*vol.spacing_x + vol.off_x;
     f32 vox_ymin = index_phantom.y*vol.spacing_y + vol.off_y;
     f32 vox_zmin = index_phantom.z*vol.spacing_z + vol.off_z;
@@ -87,6 +70,14 @@ __host__ __device__ void VPIN::track_to_out ( ParticlesData &particles,
     f32 vox_ymax = vox_ymin + vol.spacing_y;
     f32 vox_zmax = vox_zmin + vol.spacing_z;
 
+    // get a safety position for the particle within this voxel (sometime a particle can be right between two voxels)
+    // TODO: In theory this have to be applied just at the entry of the particle within the volume
+    //       in order to avoid particle entry between voxels. Then, computing improvement can be made
+    //       by calling this function only once, just for the particle step=0.    - JB
+    pos = transport_get_safety_inside_AABB( pos, vox_xmin, vox_xmax,
+                                            vox_ymin, vox_ymax, vox_zmin, vox_zmax );
+
+    // compute the next distance boundary
     f32 boundary_distance = hit_ray_AABB ( pos, dir, vox_xmin, vox_xmax,
                                            vox_ymin, vox_ymax, vox_zmin, vox_zmax );
 
@@ -95,18 +86,13 @@ __host__ __device__ void VPIN::track_to_out ( ParticlesData &particles,
         next_interaction_distance = boundary_distance + EPSILON3; // Overshoot
         next_discrete_process = GEOMETRY_BOUNDARY;
     }
-    else if( boundary_distance == FLT_MAX )
-    {
-        next_interaction_distance = EPSILON2;
-        next_discrete_process = GEOMETRY_BOUNDARY;             /// FIXME - TODO - JB
-    }
 
     //// Move particle //////////////////////////////////////////////////////
 
     // get the new position
     pos = fxyz_add ( pos, fxyz_scale ( dir, next_interaction_distance ) );
 
-    // get safety position
+    // get safety position (outside the current voxel)
     pos = transport_get_safety_outside_AABB( pos, vox_xmin, vox_xmax,
                                              vox_ymin, vox_ymax, vox_zmin, vox_zmax );
 
@@ -119,7 +105,6 @@ __host__ __device__ void VPIN::track_to_out ( ParticlesData &particles,
     particles.pz[part_id] = pos.z;
 
     // Stop simulation if out of the phantom
-    //if ( !test_point_AABB ( pos, vol.xmin, vol.xmax, vol.ymin, vol.ymax, vol.zmin, vol.zmax ) )
     if ( !test_point_AABB_with_tolerance (pos, vol.xmin, vol.xmax, vol.ymin, vol.ymax, vol.zmin, vol.zmax, EPSILON3 ) )
     {
         particles.endsimu[part_id] = PARTICLE_FREEZE;
@@ -130,6 +115,7 @@ __host__ __device__ void VPIN::track_to_out ( ParticlesData &particles,
 
     if ( next_discrete_process != GEOMETRY_BOUNDARY )
     {
+
         // Resolve discrete process
         SecParticle electron = photon_resolve_discrete_process ( particles, parameters, photon_CS_table,
                                                                  materials, mat_id, part_id );
@@ -138,7 +124,7 @@ __host__ __device__ void VPIN::track_to_out ( ParticlesData &particles,
 
         //// Energy cut
 
-        if ( Particles.E[ part_id ] <= materials.photon_energy_cut[ mat_id ] )
+        if ( particles.E[ part_id ] <= materials.photon_energy_cut[ mat_id ])
         {
             // kill without mercy (energy not drop)
             particles.endsimu[part_id] = PARTICLE_DEAD;
@@ -154,6 +140,7 @@ __host__ __device__ void VPIN::track_to_out ( ParticlesData &particles,
         }
     }
 
+
 }
 
 // Device Kernel that move particles to the voxelized volume boundary
@@ -164,7 +151,7 @@ __global__ void VPIN::kernel_device_track_to_in ( ParticlesData particles, f32 x
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
     if ( id >= particles.size ) return;
 
-    transport_track_to_in_AABB( particles, xmin, xmax, ymin, ymax, zmin, zmax, id);
+    transport_track_to_in_AABB( particles, xmin, xmax, ymin, ymax, zmin, zmax, id );
 
 }
 
@@ -173,7 +160,7 @@ void VPIN::kernel_host_track_to_in ( ParticlesData particles, f32 xmin, f32 xmax
                                      f32 ymin, f32 ymax, f32 zmin, f32 zmax, ui32 id )
 {
 
-    transport_track_to_in_AABB( particles, xmin, xmax, ymin, ymax, zmin, zmax, id);
+    transport_track_to_in_AABB( particles, xmin, xmax, ymin, ymax, zmin, zmax, id );
 
 }
 
@@ -187,11 +174,11 @@ __global__ void VPIN::kernel_device_track_to_out ( ParticlesData particles,
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
     if ( id >= particles.size ) return;
 
-    // Stepping loop
     while ( particles.endsimu[id] != PARTICLE_DEAD && particles.endsimu[id] != PARTICLE_FREEZE )
-    {
+    {        
         VPIN::track_to_out ( particles, vol, materials, photon_CS_table, parameters, id );
     }
+
 }
 
 // Host kernel that track particles within the voxelized volume until boundary
@@ -283,10 +270,12 @@ void VoxPhanImgNav::track_to_out ( Particles particles )
         threads.x = m_params.data_h.gpu_block_size;
         grid.x = ( particles.size + m_params.data_h.gpu_block_size - 1 ) / m_params.data_h.gpu_block_size;
 
+        // DEBUG
         VPIN::kernel_device_track_to_out<<<grid, threads>>> ( particles.data_d, m_phantom.data_d, m_materials.data_d,
-                m_cross_sections.photon_CS.data_d, m_params.data_d );
+                                                              m_cross_sections.photon_CS.data_d, m_params.data_d );
         cuda_error_check ( "Error ", " Kernel_VoxPhanImgNav (track to out)" );
         cudaThreadSynchronize();
+
     }
 }
 

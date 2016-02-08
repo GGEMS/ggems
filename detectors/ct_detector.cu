@@ -29,6 +29,9 @@ __host__ __device__ void ct_detector_track_to_in( ParticlesData &particles,
   ui32 nb_pixel_y, ui32 nb_pixel_z, f32 pos_x, f32 pos_y, f32 pos_z,
   f32 threshold, f32 orbiting_angle, ui32 id )
 {
+
+
+
   // If freeze (not dead), re-activate the current particle
   if( particles.endsimu[ id ] == PARTICLE_FREEZE )
   {
@@ -50,6 +53,7 @@ __host__ __device__ void ct_detector_track_to_in( ParticlesData &particles,
   dir.x = particles.dx[ id ];
   dir.y = particles.dy[ id ];
   dir.z = particles.dz[ id ];
+
 
   // Project particle to detector
   f32 dist = hit_ray_OBB( pos, dir,
@@ -84,6 +88,8 @@ __host__ __device__ void ct_detector_track_to_in( ParticlesData &particles,
     pos = fxyz_add( pos, fxyz_scale( dir, dist + EPSILON3 ) );
   }
 
+  /// TODO: This part should move to "digitizer" function - JB
+
   f32 rot_posx = pos.x * cosf( orbiting_angle ) + pos.y * sinf( orbiting_angle );
   f32 rot_posy = -pos.x * sinf( orbiting_angle ) + pos.y * cosf( orbiting_angle );
 
@@ -112,6 +118,9 @@ __host__ __device__ void ct_detector_track_to_in( ParticlesData &particles,
     ggems_atomic_add( scatter_order,
       idx_xr + idx_yr * nb_pixel_y + scatter_idx, 1 );
   }
+
+
+
 }
 
 // Kernel that move particles to the voxelized volume boundary

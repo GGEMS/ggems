@@ -99,7 +99,8 @@ void __host__ __device__ transport_track_to_in_AABB( ParticlesData &particles, f
     dir.y = particles.dy[id];
     dir.z = particles.dz[id];
 
-    f32 dist = hit_ray_AABB ( pos, dir, xmin, xmax, ymin, ymax, zmin, zmax );
+    // get distance to AABB
+    f32 dist = hit_ray_AABB ( pos, dir, xmin, xmax, ymin, ymax, zmin, zmax );    
 
     // the particle not hitting the voxelized volume
     if ( dist == FLT_MAX )                            // TODO: Don't know why F32_MAX doesn't work...
@@ -132,6 +133,86 @@ void __host__ __device__ transport_track_to_in_AABB( ParticlesData &particles, f
     }
 
 }
+
+/*
+// Transport the current particle to an OBB geometry
+void __host__ __device__ transport_track_to_in_OBB( ParticlesData &particles, ObbData obb, ui32 id)
+                                                    //f32 xmin, f32 xmax,
+                                                    // f32 ymin, f32 ymax, f32 zmin, f32 zmax, ui32 id)
+{
+
+    // Read position
+    f32xyz pos;
+    pos.x = particles.px[id];
+    pos.y = particles.py[id];
+    pos.z = particles.pz[id];
+
+    // Read direction
+    f32xyz dir;
+    dir.x = particles.dx[id];
+    dir.y = particles.dy[id];
+    dir.z = particles.dz[id];
+
+    // Transform the ray in OBB' space, then do AABB
+    f32xyz tmp_pos = fxyz_sub(pos, obb.center);
+    pos.x = fxyz_dot(tmp_pos, obb.u);
+    pos.y = fxyz_dot(tmp_pos, obb.v);
+    pos.z = fxyz_dot(tmp_pos, obb.w);
+    f32xyz tmp_dir = dir;
+    dir.x = fxyz_dot(tmp_dir, obb.u);
+    dir.y = fxyz_dot(tmp_dir, obb.v);
+    dir.z = fxyz_dot(tmp_dir, obb.w);
+
+    // get distance to AABB
+    f32 dist = hit_ray_AABB ( pos, dir, obb.xmin, obb.xmax, obb.ymin, obb.ymax, obb.zmin, obb.zmax );
+
+    // the particle not hitting the voxelized volume
+    if ( dist == FLT_MAX )                            // TODO: Don't know why F32_MAX doesn't work...
+    {
+        particles.endsimu[id] = PARTICLE_FREEZE;
+        return;
+    }
+    else
+    {
+        // Check if the path of the particle cross the volume sufficiently
+        f32 cross = dist_overlap_ray_AABB ( pos, dir, obb.xmin, obb.xmax, obb.ymin, obb.ymax, obb.zmin, obb.zmax );
+        if ( cross < ( 2*TOLERANCE ) )
+        {
+            particles.endsimu[id] = PARTICLE_FREEZE;
+            return;
+        }
+        // move the particle slightly inside the volume
+        pos = fxyz_add ( pos, fxyz_scale ( dir, dist+TOLERANCE ) );
+
+        // correct the particle position if not totally inside due to float tolerance
+        pos = transport_get_safety_inside_AABB( pos, obb.xmin, obb.xmax, obb.ymin, obb.ymax, obb.zmin, obb.zmax );
+
+        // update tof
+        particles.tof[id] += c_light * dist;
+
+    }
+
+    // Transform back the ray to world space
+    f32xyz u, v, w;
+    u.x = 1.0f; u.y = 0.0f; u.z = 0.0f;
+    v.x = 0.0f; v.y = 1.0f; v.z = 0.0f;
+    w.x = 0.0f; w.y = 0.0f; w.z = 1.0f;
+
+    f32xyz new_pos;
+    new_pos.x = fxyz_dot(pos, u);
+    new_pos.y = fxyz_dot(pos, v);
+    new_pos.z = fxyz_dot(pos, w);
+
+    new_pos = fxyz_add(new_pos, obb.center);
+
+    // set the new position
+    particles.px[id] = new_pos.x;
+    particles.py[id] = new_pos.y;
+    particles.pz[id] = new_pos.z;
+
+}
+*/
+
 
 /*
 void __host__ __device__ transport_move_inside_AABB( ParticlesData &particles, f32xyz pos, f32xyz dir,

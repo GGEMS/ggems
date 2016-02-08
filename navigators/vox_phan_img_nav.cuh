@@ -26,6 +26,9 @@
 #include "image_reader.cuh"
 #include "transport_navigator.cuh"
 
+// debug
+#include "particles.cuh"
+
 // VoxPhanImgNav -> VPIN
 namespace VPIN
 {

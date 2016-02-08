@@ -25,98 +25,96 @@
 #define POINT_SOURCE_BEAM 1
 
 __host__ __device__ void cone_beam_ct_source( ParticlesData particles_data,
-  ui32 id, f32 px, f32 py, f32 pz, ui8 direction_option, f32 dx, f32 dy, f32 dz,
-  ui8 type, f64 *spectrumE, f64 *spectrumCDF, ui32 nbins, f32 aperture,
-  f32 orbiting_angle, f32 hfoc, f32 vfoc )
+                                              ui32 id, f32 px, f32 py, f32 pz, ui8 direction_option, f32 dx, f32 dy, f32 dz,
+                                              ui8 type, f64 *spectrumE, f64 *spectrumCDF, ui32 nbins, f32 aperture,
+                                              f32 orbiting_angle, f32 hfoc, f32 vfoc )
 {
 
-  if ( direction_option == POINT_SOURCE_ISOTROPIC )
-  {
-    f32 phi = JKISS32( particles_data, id );
-    f32 theta = JKISS32( particles_data, id );
+    if ( direction_option == POINT_SOURCE_ISOTROPIC )
+    {
+        f32 phi = JKISS32( particles_data, id );
+        f32 theta = JKISS32( particles_data, id );
 
-    phi  *= gpu_twopi;
-    theta = acosf ( 1.0f - 2.0f * theta );
-    particles_data.dx[ id ] = cosf ( phi ) *sinf ( theta );
-    particles_data.dy[ id ] = sinf ( phi ) *sinf ( theta );
-    particles_data.dz[ id ] = cosf ( theta );
-  }
-  else if ( direction_option == POINT_SOURCE_BEAM )
-  {
-   // Get direction
-    f32 phi = JKISS32( particles_data, id );
-    f32 theta = JKISS32( particles_data, id );
-    f32 val_aper = 1.0f - cosf( aperture );
-    phi  *= gpu_twopi;
-    theta = acosf( 1.0f - val_aper * theta );
+        phi  *= gpu_twopi;
+        theta = acosf ( 1.0f - 2.0f * theta );
+        particles_data.dx[ id ] = cosf ( phi ) *sinf ( theta );
+        particles_data.dy[ id ] = sinf ( phi ) *sinf ( theta );
+        particles_data.dz[ id ] = cosf ( theta );
+    }
+    else if ( direction_option == POINT_SOURCE_BEAM )
+    {
+        // Get direction
+        f32 phi = JKISS32( particles_data, id );
+        f32 theta = JKISS32( particles_data, id );
+        f32 val_aper = 1.0f - cosf( aperture );
+        phi  *= gpu_twopi;
+        theta = acosf( 1.0f - val_aper * theta );
 
-    f32 rdx = cosf( phi ) * sinf( theta );
-    f32 rdy = sinf( phi ) * sinf( theta );
-    f32 rdz = cosf( theta );
+        f32 rdx = cosf( phi ) * sinf( theta );
+        f32 rdy = sinf( phi ) * sinf( theta );
+        f32 rdz = cosf( theta );
 
-    f32xyz d = rotateUz( make_f32xyz( rdx, rdy, rdz ), make_f32xyz ( dx, dy, dz ) );
+        f32xyz d = rotateUz( make_f32xyz( rdx, rdy, rdz ), make_f32xyz ( dx, dy, dz ) );
 
-    f32 rot_dx = d.x * cosf( orbiting_angle ) - d.y * sinf( orbiting_angle );
-    f32 rot_dy = d.x * sinf( orbiting_angle ) + d.y * cosf( orbiting_angle );
+        f32 rot_dx = d.x * cosf( orbiting_angle ) - d.y * sinf( orbiting_angle );
+        f32 rot_dy = d.x * sinf( orbiting_angle ) + d.y * cosf( orbiting_angle );
 
-    particles_data.dx[ id ] = rot_dx;
-    particles_data.dy[ id ] = rot_dy;
-    particles_data.dz[ id ] = d.z;
-  }
+        particles_data.dx[ id ] = rot_dx;
+        particles_data.dy[ id ] = rot_dy;
+        particles_data.dz[ id ] = d.z;
+    }
 
-  // If the source is monochromatic the energy is stored immediately
-  if( nbins == 1 )
-  {
-    particles_data.E[ id ] = spectrumE[ 0 ];
-  }
-  else
-  {
-    // Get the position in spectrum
-    // Store rndm
-    f32 rndm = JKISS32( particles_data, id );
-    ui32 pos = binary_search( rndm, spectrumCDF, nbins );
-
-    // Compute an interpolated energy
-    f32 cdf0 = spectrumCDF[ pos ];
-    f32 cdf1 = spectrumCDF[ pos + 1 ];
-    f32 diff_cdf = cdf1 - cdf0;
-    f32 ene0 = spectrumE[ pos ];
-    f32 ene1 = spectrumE[ pos + 1 ];
-    f32 diff_ene = ene1 - ene0;
-
-    if( diff_cdf != 0.0 )
-      particles_data.E[ id ] = ( rndm - cdf0 ) / diff_cdf * diff_ene + ene0;
+    // If the source is monochromatic the energy is stored immediately
+    if( nbins == 1 )
+    {
+        particles_data.E[ id ] = spectrumE[ 0 ];
+    }
     else
-      particles_data.E[ id ] = ene0;
-  }
+    {
+        // Get the position in spectrum
+        // Store rndm
+        f32 rndm = JKISS32( particles_data, id );
+        ui32 pos = binary_search( rndm, spectrumCDF, nbins );
 
-  // Get 2 randoms for each focal distance
-  f32 rndmPosV = JKISS32( particles_data, id );
-  f32 rndmPosH = JKISS32( particles_data, id );
-  rndmPosV *= vfoc;
-  rndmPosH *= hfoc;
-  rndmPosV -= vfoc / 2.0;
-  rndmPosH -= hfoc / 2.0;
+        if ( pos == ( nbins - 1 ) )
+        {
+            particles_data.E[ id ] = spectrumE[ pos ];
+        }
+        else
+        {
+            particles_data.E[ id ] = linear_interpolation ( spectrumCDF[ pos ],     spectrumE[ pos ],
+                                                            spectrumCDF[ pos + 1 ], spectrumE[ pos + 1 ], rndm );
+        }
 
-  // set particles
+    }
 
-  // Rotate the particle around Z axis
-  f32 rot_px = px * cosf( orbiting_angle )
-    - ( py + rndmPosH ) * sinf( orbiting_angle );
-  f32 rot_py = px * sinf( orbiting_angle )
-    + ( py + rndmPosH ) * cosf( orbiting_angle );
-  particles_data.px[ id ] = rot_px;
-  particles_data.py[ id ] = rot_py;
-  particles_data.pz[ id ] = pz + rndmPosV;
+    // Get 2 randoms for each focal distance
+    f32 rndmPosV = JKISS32( particles_data, id );
+    f32 rndmPosH = JKISS32( particles_data, id );
+    rndmPosV *= vfoc;
+    rndmPosH *= hfoc;
+    rndmPosV -= vfoc / 2.0;
+    rndmPosH -= hfoc / 2.0;
 
-  particles_data.tof[ id ] = 0.0f;
-  particles_data.endsimu[ id ] = PARTICLE_ALIVE;
-  particles_data.next_discrete_process[ id ] = NO_PROCESS;
-  particles_data.next_interaction_distance[id] = 0.0;
-  particles_data.level[ id ] = PRIMARY;
-  particles_data.pname[ id ] = type;
-  particles_data.geometry_id[ id ] = 0;
-  particles_data.scatter_order[ id ] = 0;
+    // set particles
+
+    // Rotate the particle around Z axis
+    f32 rot_px = px * cosf( orbiting_angle )
+            - ( py + rndmPosH ) * sinf( orbiting_angle );
+    f32 rot_py = px * sinf( orbiting_angle )
+            + ( py + rndmPosH ) * cosf( orbiting_angle );
+    particles_data.px[ id ] = rot_px;
+    particles_data.py[ id ] = rot_py;
+    particles_data.pz[ id ] = pz + rndmPosV;
+
+    particles_data.tof[ id ] = 0.0f;
+    particles_data.endsimu[ id ] = PARTICLE_ALIVE;
+    particles_data.next_discrete_process[ id ] = NO_PROCESS;
+    particles_data.next_interaction_distance[id] = 0.0;
+    particles_data.level[ id ] = PRIMARY;
+    particles_data.pname[ id ] = type;
+    particles_data.geometry_id[ id ] = 0;
+    particles_data.scatter_order[ id ] = 0;
 }
 
 __global__ void kernel_cone_beam_ct_source( ParticlesData particles_data,

@@ -130,6 +130,7 @@ __host__ __device__ SecParticle Compton_SampleSecondaries_standard(ParticlesData
     particles.dx[id] = gamDir1.x;
     particles.dy[id] = gamDir1.y;
     particles.dz[id] = gamDir1.z;
+
     f32 gamE1  = gamE0 * eps;
     if (gamE1 > 1.0e-06f) {particles.E[id] = gamE1;}
     else {
@@ -145,7 +146,7 @@ __host__ __device__ SecParticle Compton_SampleSecondaries_standard(ParticlesData
     electron.dir = make_f32xyz(0.0, 0.0, 0.0);
     electron.endsimu = PARTICLE_DEAD;
 
-    //          DBL_MIN             cut production
+    //               DBL_MIN                  cut production
     if (electron.E > 1.0e-38f && electron.E > cutE && parameters.secondaries_list[ELECTRON]) {
         electron.dir = fxyz_sub(fxyz_scale(gamDir0, gamE0), fxyz_scale(gamDir1, gamE1));
         electron.dir = fxyz_unit(electron.dir);

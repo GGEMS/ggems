@@ -2,12 +2,17 @@
 TODO
 ====
 
-* FIX image reader (according the global frame)
-* FIX particle geometry navigation (still error with float uncertainty)
-* ADD energy cut based on range value
+GGEMS Enhancement Proposals (GEP)
 
-* ERROR No set_model in class of ConeBeamCTSource
-* ERROR No printInfoDetection in class of ConeBeamCTSource
+* GEP001 - Fix image reader (according the global frame)
+* GEP002 - Fix particle geometry navigation (still error with float uncertainty)
+* GEP003 - Add energy cut based on range value
+* GEP004 - In ct_detector trak_to_in, pixel id calculation and particle counting should move to the digitizer part
+
+GGEMS Bug Reporting (GBR) 
+
+* GBR001 - No set_model in class of ConeBeamCTSource
+* GBR002 - No printInfoDetection in class of ConeBeamCTSource
 
 ====
 Misc
