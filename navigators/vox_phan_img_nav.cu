@@ -115,21 +115,10 @@ __host__ __device__ void VPIN::track_to_out ( ParticlesData &particles,
 
     if ( next_discrete_process != GEOMETRY_BOUNDARY )
     {
-
         // Resolve discrete process
         SecParticle electron = photon_resolve_discrete_process ( particles, parameters, photon_CS_table,
                                                                  materials, mat_id, part_id );
 
-        //// Here e- are not tracked, and lost energy not drop
-
-        //// Energy cut
-
-        if ( particles.E[ part_id ] <= materials.photon_energy_cut[ mat_id ])
-        {
-            // kill without mercy (energy not drop)
-            particles.endsimu[part_id] = PARTICLE_DEAD;
-            return;
-        }
 
         // If the process is PHOTON_COMPTON or PHOTON_RAYLEIGH the scatter
         // order is incremented
@@ -138,9 +127,16 @@ __host__ __device__ void VPIN::track_to_out ( ParticlesData &particles,
         {
             particles.scatter_order[ part_id ] += 1;
         }
+
+        //// Here e- are not tracked, and lost energy not drop
+        //// Energy cut
+        if ( particles.E[ part_id ] <= materials.photon_energy_cut[ mat_id ])
+        {
+            // kill without mercy (energy not drop)
+            particles.endsimu[part_id] = PARTICLE_DEAD;
+            return;
+        }
     }
-
-
 }
 
 // Device Kernel that move particles to the voxelized volume boundary
