@@ -19,11 +19,11 @@
 ////:: GPU Codes
 
 __host__ __device__ void VPIN::track_to_out ( ParticlesData &particles,
-        VoxVolumeData vol,
-        MaterialsTable materials,
-        PhotonCrossSectionTable photon_CS_table,
-        GlobalSimulationParametersData parameters,
-        ui32 part_id )
+                                              VoxVolumeData vol,
+                                              MaterialsTable materials,
+                                              PhotonCrossSectionTable photon_CS_table,
+                                              GlobalSimulationParametersData parameters,
+                                              ui32 part_id )
 {
     // Read position
     f32xyz pos;
@@ -75,7 +75,7 @@ __host__ __device__ void VPIN::track_to_out ( ParticlesData &particles,
     //       in order to avoid particle entry between voxels. Then, computing improvement can be made
     //       by calling this function only once, just for the particle step=0.    - JB
     pos = transport_get_safety_inside_AABB( pos, vox_xmin, vox_xmax,
-                                            vox_ymin, vox_ymax, vox_zmin, vox_zmax );
+                                            vox_ymin, vox_ymax, vox_zmin, vox_zmax, parameters.geom_tolerance );
 
     // compute the next distance boundary
     f32 boundary_distance = hit_ray_AABB ( pos, dir, vox_xmin, vox_xmax,
@@ -83,7 +83,7 @@ __host__ __device__ void VPIN::track_to_out ( ParticlesData &particles,
 
     if ( boundary_distance <= next_interaction_distance )
     {
-        next_interaction_distance = boundary_distance + EPSILON3; // Overshoot
+        next_interaction_distance = boundary_distance + parameters.geom_tolerance; // Overshoot
         next_discrete_process = GEOMETRY_BOUNDARY;
     }
 
@@ -94,7 +94,7 @@ __host__ __device__ void VPIN::track_to_out ( ParticlesData &particles,
 
     // get safety position (outside the current voxel)
     pos = transport_get_safety_outside_AABB( pos, vox_xmin, vox_xmax,
-                                             vox_ymin, vox_ymax, vox_zmin, vox_zmax );
+                                             vox_ymin, vox_ymax, vox_zmin, vox_zmax, parameters.geom_tolerance );
 
     // update tof
     particles.tof[part_id] += c_light * next_interaction_distance;
@@ -105,7 +105,8 @@ __host__ __device__ void VPIN::track_to_out ( ParticlesData &particles,
     particles.pz[part_id] = pos.z;
 
     // Stop simulation if out of the phantom
-    if ( !test_point_AABB_with_tolerance (pos, vol.xmin, vol.xmax, vol.ymin, vol.ymax, vol.zmin, vol.zmax, EPSILON3 ) )
+    if ( !test_point_AABB_with_tolerance (pos, vol.xmin, vol.xmax, vol.ymin, vol.ymax,
+                                          vol.zmin, vol.zmax, parameters.geom_tolerance ) )
     {
         particles.endsimu[part_id] = PARTICLE_FREEZE;
         return;
@@ -145,22 +146,22 @@ __host__ __device__ void VPIN::track_to_out ( ParticlesData &particles,
 
 // Device Kernel that move particles to the voxelized volume boundary
 __global__ void VPIN::kernel_device_track_to_in ( ParticlesData particles, f32 xmin, f32 xmax,
-        f32 ymin, f32 ymax, f32 zmin, f32 zmax )
+                                                  f32 ymin, f32 ymax, f32 zmin, f32 zmax, f32 geom_tolerance )
 {
 
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
     if ( id >= particles.size ) return;
 
-    transport_track_to_in_AABB( particles, xmin, xmax, ymin, ymax, zmin, zmax, id );
+    transport_track_to_in_AABB( particles, xmin, xmax, ymin, ymax, zmin, zmax, geom_tolerance, id );
 
 }
 
 // Host Kernel that move particles to the voxelized volume boundary
 void VPIN::kernel_host_track_to_in ( ParticlesData particles, f32 xmin, f32 xmax,
-                                     f32 ymin, f32 ymax, f32 zmin, f32 zmax, ui32 id )
+                                     f32 ymin, f32 ymax, f32 zmin, f32 zmax, f32 geom_tolerance, ui32 id )
 {
 
-    transport_track_to_in_AABB( particles, xmin, xmax, ymin, ymax, zmin, zmax, id );
+    transport_track_to_in_AABB( particles, xmin, xmax, ymin, ymax, zmin, zmax, geom_tolerance, id );
 
 }
 
@@ -227,6 +228,7 @@ void VoxPhanImgNav::track_to_in ( Particles particles )
             VPIN::kernel_host_track_to_in ( particles.data_h, m_phantom.data_h.xmin, m_phantom.data_h.xmax,
                                             m_phantom.data_h.ymin, m_phantom.data_h.ymax,
                                             m_phantom.data_h.zmin, m_phantom.data_h.zmax,
+                                            m_params.data_h.geom_tolerance,
                                             id );
             ++id;
         }
@@ -240,7 +242,8 @@ void VoxPhanImgNav::track_to_in ( Particles particles )
 
         VPIN::kernel_device_track_to_in<<<grid, threads>>> ( particles.data_d, m_phantom.data_d.xmin, m_phantom.data_d.xmax,
                                                              m_phantom.data_d.ymin, m_phantom.data_d.ymax,
-                                                             m_phantom.data_d.zmin, m_phantom.data_d.zmax );
+                                                             m_phantom.data_d.zmin, m_phantom.data_d.zmax,
+                                                             m_params.data_d.geom_tolerance );
         cuda_error_check ( "Error ", " Kernel_VoxPhanImgNav (track to in)" );
 
     }

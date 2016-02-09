@@ -81,7 +81,7 @@ __host__ __device__ f32 loglog_interpolation ( f32 x, f32 x0, f32 y0, f32 x1, f3
 // }
 
 // Linear interpolation
-__host__ __device__ f32 linear_interpolation ( f32 xa,f32 ya, f32 xb, f32 yb, f32 x )
+__host__ __device__ f32 linear_interpolation ( f32 xa, f32 ya, f32 xb, f32 yb, f32 x )
 {
     // Taylor young 1st order
 //     if ( xa > x ) return ya;
@@ -95,69 +95,66 @@ __host__ __device__ f32 linear_interpolation ( f32 xa,f32 ya, f32 xb, f32 yb, f3
 }
 
 
-__host__ __device__ int G4Poisson ( f32 mean,ParticlesData &particles, int id )
+__host__ __device__ i32 G4Poisson ( f32 mean, ParticlesData &particles, ui32 id )
 {
-    f32    number=0.;
+    f32 number = 0.;
 
-    f32  position,poissonValue,poissonSum;
-    f32  value,y,t;
-    if ( mean<=16. ) // border == 16
+    f32 position, poissonValue, poissonSum;
+    f32 value, y, t;
+    if ( mean <= 16. ) // border == 16
     {
+        // to avoid 1 due to f32 approximation
         do
         {
-            position=JKISS32 ( particles, id );
+            position = JKISS32 ( particles, id );
         }
-        while ( ( 1.-position ) <2.e-7 ); // to avoid 1 due to f32 approximation
-        poissonValue=expf ( -mean );
-        poissonSum=poissonValue;
-        while ( ( poissonSum<=position ) && ( number<40000. ) )
+        while ( ( 1. - position ) < 2.e-7 );
+
+        poissonValue = expf ( -mean );
+        poissonSum = poissonValue;
+        //                                                 v---- Why ? It's not in G4Poisson - JB
+        while ( ( poissonSum <= position ) && ( number < 40000. ) )
         {
             number++;
-            poissonValue*=mean/number;
-            if ( ( poissonSum+poissonValue ) ==poissonSum ) break;
-            poissonSum+=poissonValue;
+            poissonValue *= mean/number;
+            if ( ( poissonSum + poissonValue ) == poissonSum ) break;   // Not in G4, is it to manage f32 ?  - JB
+            poissonSum += poissonValue;
         }
 
-        return  ( int ) number;
-    }
-    f32 toto = JKISS32 ( particles, id );
+        return  ( i32 ) number;
+    }   
 
-    t=sqrtf ( -2.*logf ( toto ) );
+    t = sqrtf ( -2.*logf ( JKISS32 ( particles, id ) ) );
+    y = 2.*gpu_pi* JKISS32 ( particles, id );
+    t *= cosf ( y );
+    value = mean + t*sqrtf ( mean ) + 0.5;
 
-    y=2.*gpu_pi*JKISS32 ( particles, id );
-    t*=cosf ( y );
-    value=mean+t*sqrtf ( mean ) +.5;
-
-    if ( value<=0. )
+    if ( value <= 0. )
+    {
         return  0;
-    else if ( value>=2.e9 ) // f32 limit = 2.e9
-        return  ( int ) 2.e9;
-    return  ( int ) value;
+    }
+
+    return ( value >= 2.e9 ) ? ( i32 ) 2.e9 : ( i32 ) value;
 }
 
-__host__ __device__ f32 Gaussian ( f32 mean,f32 rms,ParticlesData &particles, int id )
+__host__ __device__ f32 Gaussian (f32 mean, f32 rms, ParticlesData &particles, ui32 id )
 {
     f32  data;
     f32  U1,U2,Disp,Fx;
 
     do
     {
-        U1=2.*JKISS32 ( particles, id )-1.;
-        U2=2.*JKISS32 ( particles, id )-1.;
-        Fx=U1*U1+U2*U2;
+        U1 = 2.*JKISS32 ( particles, id )-1.;
+        U2 = 2.*JKISS32 ( particles, id )-1.;
+        Fx = U1*U1 + U2*U2;
 
     }
-    while ( ( Fx>=1. ) );
+    while ( ( Fx >= 1. ) );
 
+    Fx = sqrtf ( ( -2.*logf ( Fx ) ) /Fx );
+    Disp = U1*Fx;
+    data = mean + Disp*rms;
 
-    Fx=sqrtf ( ( -2.*logf ( Fx ) ) /Fx );
-//     if(isfinite(Fx)){ printf("%d\t%f\t%f\n",id,Fx,temps); Fx = 0.5; }
-
-    Disp=U1*Fx;
-    data=mean+Disp*rms;
-//     data =
-//      data = Disp*rms;
-//      if(isnan(data)|| isinf(data)) data =0.;
     return  data;
 }
 
@@ -169,24 +166,6 @@ __host__ __device__ i32xyz get_bin_xyz ( i32 bin, i32xyz size )
     int dz = ( bin - dx - dy*size.x ) / ( size.x * size.y );
 
     return make_i32xyz ( dx,dy,dz );
-}
-
-__host__ __device__ ui32xyzw get_phantom_index( f32xyz pos, f32xyz offset, f32xyz size, ui32xyz nvoxels )
-{
-
-    f32xyz ivoxsize;
-    ivoxsize.x = 1.0 / size.x;
-    ivoxsize.y = 1.0 / size.y;
-    ivoxsize.z = 1.0 / size.z;
-    ui32xyzw index_phantom;
-    index_phantom.x = ui32 ( ( pos.x-offset.x ) * ivoxsize.x );
-    index_phantom.y = ui32 ( ( pos.y-offset.y ) * ivoxsize.y );
-    index_phantom.z = ui32 ( ( pos.z-offset.z ) * ivoxsize.z );
-    index_phantom.w = index_phantom.z*nvoxels.x*nvoxels.y
-                      + index_phantom.y*nvoxels.x
-                      + index_phantom.x; // linear index
-
-    return index_phantom;
 }
 
 #endif

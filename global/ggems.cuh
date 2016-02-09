@@ -65,8 +65,10 @@ public:
     void set_electron_cut ( f32 valE );
     void set_photon_cut ( f32 valE );
     void set_secondaries_level ( ui32 level );
+    void set_geometry_tolerance ( f32 tolerance );
 
     void set_seed ( ui32 vseed );
+
     // Setting simulation objects
     void set_source ( GGEMSSource* aSource );
     void set_phantom ( GGEMSPhantom* aPhantom );

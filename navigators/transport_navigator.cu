@@ -16,58 +16,58 @@
 
 #include "transport_navigator.cuh"
 
-#define TOLERANCE EPSILON3
-
 // Get a safety position inside an AABB geometry
-f32xyz __host__ __device__ transport_get_safety_inside_AABB( f32xyz pos, f32 xmin, f32 xmax, f32 ymin, f32 ymax, f32 zmin, f32 zmax )
+f32xyz __host__ __device__ transport_get_safety_inside_AABB( f32xyz pos, f32 xmin, f32 xmax, f32 ymin, f32 ymax,
+                                                             f32 zmin, f32 zmax, f32 tolerance )
 {
     // on x
     f32 SafXmin = fabs( pos.x-xmin );
     f32 SafXmax = fabs( pos.x-xmax );
 
-    pos.x = ( SafXmin < TOLERANCE ) ?  xmin+TOLERANCE : pos.x;
-    pos.x = ( SafXmax < TOLERANCE ) ?  xmax-TOLERANCE : pos.x;
+    pos.x = ( SafXmin < tolerance ) ?  xmin+tolerance : pos.x;
+    pos.x = ( SafXmax < tolerance ) ?  xmax-tolerance : pos.x;
 
     // on y
     f32 SafYmin = fabs( pos.y-ymin );
     f32 SafYmax = fabs( pos.y-ymax );
 
-    pos.y = ( SafYmin < TOLERANCE ) ?  ymin+TOLERANCE : pos.y;
-    pos.y = ( SafYmax < TOLERANCE ) ?  ymax-TOLERANCE : pos.y;
+    pos.y = ( SafYmin < tolerance ) ?  ymin+tolerance : pos.y;
+    pos.y = ( SafYmax < tolerance ) ?  ymax-tolerance : pos.y;
 
     // on z
     f32 SafZmin = fabs( pos.z-zmin );
     f32 SafZmax = fabs( pos.z-zmax );
 
-    pos.z = ( SafZmin < TOLERANCE ) ?  zmin+TOLERANCE : pos.z;
-    pos.z = ( SafZmax < TOLERANCE ) ?  zmax-TOLERANCE : pos.z;
+    pos.z = ( SafZmin < tolerance ) ?  zmin+tolerance : pos.z;
+    pos.z = ( SafZmax < tolerance ) ?  zmax-tolerance : pos.z;
 
     return pos;
 }
 
 // Get a safety position outside an AABB geometry
-f32xyz __host__ __device__ transport_get_safety_outside_AABB( f32xyz pos, f32 xmin, f32 xmax, f32 ymin, f32 ymax, f32 zmin, f32 zmax )
+f32xyz __host__ __device__ transport_get_safety_outside_AABB( f32xyz pos, f32 xmin, f32 xmax, f32 ymin, f32 ymax,
+                                                              f32 zmin, f32 zmax, f32 tolerance )
 {
     // on x
     f32 SafXmin = fabs( pos.x-xmin );
     f32 SafXmax = fabs( pos.x-xmax );
 
-    pos.x = ( SafXmin < TOLERANCE ) ?  xmin-TOLERANCE : pos.x;
-    pos.x = ( SafXmax < TOLERANCE ) ?  xmax+TOLERANCE : pos.x;
+    pos.x = ( SafXmin < tolerance ) ?  xmin-tolerance : pos.x;
+    pos.x = ( SafXmax < tolerance ) ?  xmax+tolerance : pos.x;
 
     // on y
     f32 SafYmin = fabs( pos.y-ymin );
     f32 SafYmax = fabs( pos.y-ymax );
 
-    pos.y = ( SafYmin < TOLERANCE ) ?  ymin-TOLERANCE : pos.y;
-    pos.y = ( SafYmax < TOLERANCE ) ?  ymax+TOLERANCE : pos.y;
+    pos.y = ( SafYmin < tolerance ) ?  ymin-tolerance : pos.y;
+    pos.y = ( SafYmax < tolerance ) ?  ymax+tolerance : pos.y;
 
     // on z
     f32 SafZmin = fabs( pos.z-zmin );
     f32 SafZmax = fabs( pos.z-zmax );
 
-    pos.z = ( SafZmin < TOLERANCE ) ?  zmin-TOLERANCE : pos.z;
-    pos.z = ( SafZmax < TOLERANCE ) ?  zmax+TOLERANCE : pos.z;
+    pos.z = ( SafZmin < tolerance ) ?  zmin-tolerance : pos.z;
+    pos.z = ( SafZmax < tolerance ) ?  zmax+tolerance : pos.z;
 
     return pos;
 }
@@ -84,7 +84,7 @@ f32xyz __host__ __device__ transport_compute_safety_AABB( f32xyz pos, f32 xmin, 
 
 // Transport the current particle to an AABB geometry
 void __host__ __device__ transport_track_to_in_AABB( ParticlesData &particles, f32 xmin, f32 xmax,
-                                                     f32 ymin, f32 ymax, f32 zmin, f32 zmax, ui32 id)
+                                                     f32 ymin, f32 ymax, f32 zmin, f32 zmax, f32 tolerance, ui32 id)
 {
 
     // Read position
@@ -112,16 +112,16 @@ void __host__ __device__ transport_track_to_in_AABB( ParticlesData &particles, f
     {
         // Check if the path of the particle cross the volume sufficiently
         f32 cross = dist_overlap_ray_AABB ( pos, dir, xmin, xmax, ymin, ymax, zmin, zmax );
-        if ( cross < ( 2*TOLERANCE ) )
+        if ( cross < ( 2*tolerance ) )
         {
             particles.endsimu[id] = PARTICLE_FREEZE;
             return;
         }
         // move the particle slightly inside the volume
-        pos = fxyz_add ( pos, fxyz_scale ( dir, dist+TOLERANCE ) );
+        pos = fxyz_add ( pos, fxyz_scale ( dir, dist+tolerance ) );
 
         // correct the particle position if not totally inside due to float tolerance
-        pos = transport_get_safety_inside_AABB( pos, xmin, xmax, ymin, ymax, zmin, zmax );
+        pos = transport_get_safety_inside_AABB( pos, xmin, xmax, ymin, ymax, zmin, zmax, tolerance );
 
         // update tof
         particles.tof[id] += c_light * dist;
@@ -243,7 +243,5 @@ void __host__ __device__ transport_move_inside_AABB( ParticlesData &particles, f
 
 }
 */
-
-#undef TOLERANCE
 
 #endif

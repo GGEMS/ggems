@@ -30,17 +30,28 @@ CrossSections::CrossSections()
 
 f32 CrossSections::m_get_electron_dedx(f32 energy, ui8 mat_id)
 {
-    ui32 index = binary_search( energy, electron_CS.data_h.E, mat_id*m_nb_bins + m_nb_bins, mat_id*m_nb_bins);
+    ui32 E_index = binary_search ( energy, electron_CS.data_h.E, m_nb_bins );
+    ui32 index = mat_id*m_nb_bins + E_index;
 
-    f32 DeDxeIoni = linear_interpolation ( electron_CS.data_h.E[index]  , electron_CS.data_h.eIonisationdedx[index],
+    f32 DeDxeIoni, DeDxeBrem;
+
+    if ( E_index == m_nb_bins - 1 )
+    {
+        DeDxeIoni = electron_CS.data_h.eIonisationdedx[ index ];
+        DeDxeBrem = electron_CS.data_h.eBremdedx[ index ];
+    }
+    else
+    {
+        DeDxeIoni = linear_interpolation ( electron_CS.data_h.E[index]  , electron_CS.data_h.eIonisationdedx[index],
                                            electron_CS.data_h.E[index+1], electron_CS.data_h.eIonisationdedx[index+1],
                                            energy
                                          );
 
-    f32 DeDxeBrem = linear_interpolation ( electron_CS.data_h.E[index]  , electron_CS.data_h.eBremdedx[index],
+        DeDxeBrem = linear_interpolation ( electron_CS.data_h.E[index]  , electron_CS.data_h.eBremdedx[index],
                                            electron_CS.data_h.E[index+1], electron_CS.data_h.eBremdedx[index+1],
                                            energy
                                          );
+    }
 
     return DeDxeIoni + DeDxeBrem;
 }

@@ -27,24 +27,18 @@ __host__ __device__ void dose_record_standard ( DoseData &dose, f32 Edep, f32 px
         return;
     }
 
-//     // Defined index phantom
-//     f32xyz ivoxsize;
-//     ivoxsize.x = 1.0 / dose.spacing_x;
-//     ivoxsize.y = 1.0 / dose.spacing_y;
-//     ivoxsize.z = 1.0 / dose.spacing_z;
-//     ui32xyzw index_phantom;
-//     index_phantom.x = ui32 ( ( px-dose.ox ) * ivoxsize.x );
-//     index_phantom.y = ui32 ( ( py-dose.oy ) * ivoxsize.y );
-//     index_phantom.z = ui32 ( ( pz-dose.oz ) * ivoxsize.z );
-//     index_phantom.w = index_phantom.z*dose.nx*dose.ny
-//                       + index_phantom.y*dose.nx
-//                       + index_phantom.x; // linear index
-
-    ui32xyzw index_phantom = get_phantom_index( make_f32xyz(px,py,pz),
-                                                make_f32xyz(dose.ox,dose.oy,dose.oz),
-                                                make_f32xyz(dose.spacing_x,dose.spacing_y,dose.spacing_z),
-                                                make_ui32xyz(dose.nx,dose.ny,dose.nz)
-                                                );
+    // Defined index phantom
+    f32xyz ivoxsize;
+    ivoxsize.x = 1.0 / dose.spacing_x;
+    ivoxsize.y = 1.0 / dose.spacing_y;
+    ivoxsize.z = 1.0 / dose.spacing_z;
+    ui32xyzw index_phantom;
+    index_phantom.x = ui32 ( ( px-dose.ox ) * ivoxsize.x );
+    index_phantom.y = ui32 ( ( py-dose.oy ) * ivoxsize.y );
+    index_phantom.z = ui32 ( ( pz-dose.oz ) * ivoxsize.z );
+    index_phantom.w = index_phantom.z*dose.nx*dose.ny
+            + index_phantom.y*dose.nx
+            + index_phantom.x; // linear index
 
     if ( ( index_phantom.x >= dose.nx ) ||
             ( index_phantom.y >= dose.ny ) ||

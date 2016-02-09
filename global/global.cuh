@@ -226,6 +226,9 @@ struct GlobalSimulationParametersData
     bool display_run_time;
     bool display_memory_usage;
 
+    // Transport navigation tolerance
+    f32 geom_tolerance;
+
     // To build cross sections table
     ui32 cs_table_nbins;
     f32 cs_table_min_E;

@@ -63,6 +63,7 @@ GGEMS::GGEMS()
     m_parameters.data_h.photon_cut = 0;
     m_parameters.data_h.electron_cut = 0;
     m_parameters.data_h.nb_of_secondaries = 0;
+    m_parameters.data_h.geom_tolerance = 1.0 *nm;
 
     // Init by default others parameters
     m_parameters.data_h.device_target = CPU_DEVICE;
@@ -218,6 +219,15 @@ void GGEMS::set_number_of_particles ( ui64 nb )
     m_parameters.data_h.nb_of_particles = nb;
 }
 
+// Set the geometry tolerance
+void GGEMS::set_geometry_tolerance( f32 tolerance )
+{
+    tolerance = min ( 1.0 *mm, tolerance );
+    tolerance = max ( 1.0 *nm, tolerance );
+
+    m_parameters.data_h.geom_tolerance = tolerance;
+}
+
 /*   TO BE REMOVED - JB
 // Set the number of particles required for the simulation
 void GGEMS::set_number_of_particles ( std::string str )
@@ -285,18 +295,22 @@ void GGEMS::set_CS_table_nbins ( ui32 valbin )
 {
     m_parameters.data_h.cs_table_nbins = valbin;
 }
+
 void GGEMS::set_CS_table_E_min ( f32 valE )
 {
     m_parameters.data_h.cs_table_min_E = valE;
 }
+
 void GGEMS::set_CS_table_E_max ( f32 valE )
 {
     m_parameters.data_h.cs_table_max_E = valE;
 }
+
 void GGEMS::set_electron_cut ( f32 valE )
 {
     m_parameters.data_h.electron_cut = valE;
 }
+
 void GGEMS::set_photon_cut ( f32 valE )
 {
     m_parameters.data_h.photon_cut = valE;
@@ -461,7 +475,7 @@ void GGEMS::m_copy_parameters_cpu2gpu()
     m_parameters.data_d.photon_cut = m_parameters.data_h.photon_cut;
     m_parameters.data_d.electron_cut = m_parameters.data_h.electron_cut;
     m_parameters.data_d.nb_of_secondaries = m_parameters.data_h.nb_of_secondaries;
-
+    m_parameters.data_d.geom_tolerance = m_parameters.data_h.geom_tolerance;
 }
 
 
