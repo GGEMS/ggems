@@ -238,9 +238,9 @@ void VoxPhanImgNav::track_to_in ( Particles particles )
         threads.x = m_params.data_h.gpu_block_size;
         grid.x = ( particles.size + m_params.data_h.gpu_block_size - 1 ) / m_params.data_h.gpu_block_size;
 
-        VPIN::kernel_device_track_to_in<<<grid, threads>>> ( particles.data_d, m_phantom.data_h.xmin, m_phantom.data_h.xmax,
-                m_phantom.data_h.ymin, m_phantom.data_h.ymax,
-                m_phantom.data_h.zmin, m_phantom.data_h.zmax );
+        VPIN::kernel_device_track_to_in<<<grid, threads>>> ( particles.data_d, m_phantom.data_d.xmin, m_phantom.data_d.xmax,
+                                                             m_phantom.data_d.ymin, m_phantom.data_d.ymax,
+                                                             m_phantom.data_d.zmin, m_phantom.data_d.zmax );
         cuda_error_check ( "Error ", " Kernel_VoxPhanImgNav (track to in)" );
 
     }
