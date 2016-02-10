@@ -576,6 +576,11 @@ void License::read_license ( std::string inputname )
 
     // Open file
     FILE *pfile = fopen ( inputname.c_str(), "rb" );
+    if ( pfile == NULL )
+    {
+        GGcerr << "Impossible to read your license file: " << inputname << GGendl;
+        exit_simulation();
+    }
 
     // 1. Read the tag
     fread ( m_aes_buf, sizeof(ui8), 16, pfile );  
@@ -584,7 +589,7 @@ void License::read_license ( std::string inputname )
 
     if ( str != "GGEMS License" )
     {
-        printf("Invalid GGEMS license!\n");
+        GGcerr << "Invalid GGEMS license!" << GGendl;
         return;
     }
 
