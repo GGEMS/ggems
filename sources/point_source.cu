@@ -98,7 +98,7 @@ __global__ void kernel_point_source ( ParticlesData particles_data,
                                       f32 m_aperture_angle )
 {
 
-    const ui32 id = get_id();
+    const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
     if ( id >= particles_data.size ) return;
 
     point_source ( particles_data, id, px, py, pz, direction_option, dx, dy, dz, type,

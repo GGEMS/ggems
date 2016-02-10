@@ -187,21 +187,6 @@ typedef unsigned char ui8;
 
 ////////////////////////////////////////////////////////////////
 
-// GPU
-void set_gpu_device ( int deviceChoice, float minversion=3.0 );
-void reset_gpu_device();
-void HandleError ( cudaError_t err, const char *file, int line );
-void cuda_error_check ( const char * prefix, const char * postfix );
-
-// Utils
-void print_error ( std::string msg );
-void print_warning ( std::string msg );
-void print_time ( std::string txt, f64 t );
-void print_memory ( std::string txt, ui32 t );
-void print_banner ( std::string institution, std::string exp_day, std::string exp_month, std::string exp_year, std::string version );
-void exit_simulation();
-f64 get_time();
-
 // Global simulation parameters
 struct GlobalSimulationParametersData
 {
@@ -241,6 +226,28 @@ struct GlobalSimulationParameters
     GlobalSimulationParametersData data_h;
     GlobalSimulationParametersData data_d;
 };
+
+
+// GPU
+void set_gpu_device ( int deviceChoice, float minversion=3.0 );
+void reset_gpu_device();
+void HandleError ( cudaError_t err, const char *file, int line );
+void cuda_error_check ( const char * prefix, const char * postfix );
+
+// Utils
+void print_error ( std::string msg );
+void print_warning ( std::string msg );
+void print_memory ( std::string txt, ui32 t );
+
+void print_banner ( std::string institution, std::string exp_day, std::string exp_month, std::string exp_year, std::string version );
+void exit_simulation();
+
+void GGcout_time ( std::string txt, f64 t );
+void GGcout_params ( GlobalSimulationParametersData params );
+void GGnewline( );
+
+f64 get_time();
+
 
 
 // Struct that handle colors

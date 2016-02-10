@@ -8,6 +8,8 @@ GGEMS Enhancement Proposals (GEP)
 * GEP002 - Fix particle geometry navigation (still error with float uncertainty)
 * GEP003 - Add energy cut based on range value
 * GEP004 - In ct_detector trak_to_in, pixel id calculation and particle counting should move to the digitizer part
+* GEP005 - In Bremsstrahlung, xsection can be pre-calculated improving the RandomAtomSelection
+* GEP006 - In Bremsstrahlung, track secondary photons
 
 GGEMS Bug Reporting (GBR) 
 

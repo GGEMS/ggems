@@ -71,7 +71,7 @@ GGEMS::GGEMS()
     m_parameters.data_h.gpu_block_size = 192;
 
     // Others parameters
-    m_parameters.data_h.display_run_time = DISABLED;
+    m_parameters.data_h.display_run_time = ENABLED;
     m_parameters.data_h.display_memory_usage = DISABLED;
 
     // Element of the simulation
@@ -486,9 +486,6 @@ void GGEMS::m_copy_parameters_cpu2gpu()
 // Init simualtion
 void GGEMS::init_simulation()
 {
-
-
-
     // License and banner
     if (!m_license.info.clearence)
     {
@@ -497,33 +494,33 @@ void GGEMS::init_simulation()
     }
     print_banner(m_license.info.institution, m_license.info.expired_day, m_license.info.expired_month, m_license.info.expired_year, "V1.0");
 
-
     // Check
     m_check_mandatory();
 
+    // Print params
+    GGcout_params( m_parameters.data_h );
+
     // Run time
-    
-    //// Not used currently
-//     f64 t_start = 0;
-//     if ( m_parameters.data_h.display_run_time )
-//     {
-//         t_start = get_time();
-//     }
+    f64 t_start = 0;
+    if ( m_parameters.data_h.display_run_time )
+    {
+        t_start = get_time();
+    }
 
     // Memory usage
-//     ui32 mem = 0;
+    //     ui32 mem = 0;
 
     // CPU PRNG
     srand ( m_parameters.data_h.seed );
 
     // Get Nb of batch
 
-     m_parameters.data_h.nb_of_batches = ui32 ( ( f32 ) m_parameters.data_h.nb_of_particles / ( f32 ) m_parameters.data_h.size_of_particles_batch );
+    m_parameters.data_h.nb_of_batches = ui32 ( ( f32 ) m_parameters.data_h.nb_of_particles / ( f32 ) m_parameters.data_h.size_of_particles_batch );
 
-     if( m_parameters.data_h.nb_of_particles % m_parameters.data_h.size_of_particles_batch )
-     {
-       m_parameters.data_h.nb_of_batches++;
-     }
+    if( m_parameters.data_h.nb_of_particles % m_parameters.data_h.size_of_particles_batch )
+    {
+        m_parameters.data_h.nb_of_batches++;
+    }
 
     //// Need to clean this bunch of crap - JB
 
@@ -630,12 +627,13 @@ void GGEMS::init_simulation()
     */
 
 
-    /*
-        // Run time
-        if (m_parameters.display_run_time) {
-            print_time("Initialization", get_time()-t_start);
-        }
 
+    // Run time
+    if ( m_parameters.data_h.display_run_time ) {
+        GGcout_time ( "Initialization", get_time()-t_start );
+        GGnewline();
+    }
+    /*
         // Mem usage
         if (m_parameters.display_memory_usage) {
             print_memory("Total memory usage", mem);
@@ -666,18 +664,26 @@ void progress_bar(float progress, int etape, int nbatch )
 
 void GGEMS::start_simulation()
 {
+
+    // Run time
+    f64 t_start = 0;
+    if ( m_parameters.data_h.display_run_time )
+    {
+        t_start = get_time();
+    }
+
     //float progress = 0.0;
     // Main loop
     ui32 ibatch=0;
-    GGcout << "Total number of particles to generate: " << m_parameters.data_h.nb_of_particles << GGendl;
+    //GGcout << "Total number of particles to generate: " << m_parameters.data_h.nb_of_particles << GGendl;
     while ( ibatch < m_parameters.data_h.nb_of_batches )
     {
 
-         GGcout << "----> Launching batch " << ibatch+1 << "/" << m_parameters.data_h.nb_of_batches << " ..." << GGendl;
+        GGcout << "----> Launching batch " << ibatch+1 << "/" << m_parameters.data_h.nb_of_batches << " ..." << GGendl;
         // Get primaries
-         GGcout << "      Number of particles to generate: " << m_parameters.data_h.size_of_particles_batch << GGendl;
-         GGcout << "      Generating the particles ..." << GGendl;
-//         progress_bar(progress,"generate primaries");
+        GGcout << "      Number of particles to generate: " << m_parameters.data_h.size_of_particles_batch << GGendl;
+        GGcout << "      Generating the particles ..." << GGendl;
+        //         progress_bar(progress,"generate primaries");
         m_source->get_primaries_generator( m_particles_manager.particles );
 
         // Nav between source and phantom
@@ -697,21 +703,27 @@ void GGEMS::start_simulation()
         // Nav between phantom and detector
         if( m_detector )
         {
-          GGcout << "      Navigation between the phantom and the detector ..." << GGendl;
-          m_detector->track_to_in( m_particles_manager.particles );
+            GGcout << "      Navigation between the phantom and the detector ..." << GGendl;
+            m_detector->track_to_in( m_particles_manager.particles );
         }
 
         GGcout << "----> Batch finished ..." << GGendl << GGendl;
         //progress_bar(progress, ibatch , m_parameters.data_h.nb_of_batches);
 
         //progress += 1./ (float)(m_parameters.data_h.nb_of_batches);
-            
-//             progress += 0.16; // for demonstration only
-//         }
+
+        //             progress += 0.16; // for demonstration only
+        //         }
         ++ibatch;
     }
-//        progress_bar(progress, m_parameters.data_h.nb_of_batches , m_parameters.data_h.nb_of_batches);
-        std::cout << std::endl;
+    //        progress_bar(progress, m_parameters.data_h.nb_of_batches , m_parameters.data_h.nb_of_batches);
+    std::cout << std::endl;
+
+    // Run time
+    if ( m_parameters.data_h.display_run_time ) {
+        GGcout_time ( "Simulation run time", get_time()-t_start );
+        GGnewline();
+    }
 }
 
 

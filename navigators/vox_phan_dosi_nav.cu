@@ -138,7 +138,7 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
         //       in order to avoid particle entry between voxels. Then, computing improvement can be made
         //       by calling this function only once, just for the particle step=0.    - JB
         pos = transport_get_safety_inside_AABB( pos, vox_xmin, vox_xmax,
-                                                vox_ymin, vox_ymax, vox_zmin, vox_zmax, EPSILON3 );
+                                                vox_ymin, vox_ymax, vox_zmin, vox_zmax, parameters.geom_tolerance );
 
         // compute the next distance boundary
         f32 boundary_distance = hit_ray_AABB ( pos, dir, vox_xmin, vox_xmax,
@@ -216,7 +216,7 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
                 /// If there is a secondary particle, push the primary into buffer and track this new particle
 
                 if ( secondary_part.endsimu == PARTICLE_ALIVE && secondary_part.E > materials.electron_energy_cut[ mat_id ] &&
-                     particles.level[ part_id ] < particles.nb_of_secondaries )
+                     particles.level[ part_id ] < particles.nb_of_secondaries && parameters.secondaries_list[ELECTRON] )
                 {
 
                     // Get the absolute index into secondary buffer
@@ -263,6 +263,17 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
 
         if ( secondaryParticleCreated == TRUE ) return;
         //         break;
+
+
+        /// Need to check, I add energy cut here - JB /////////////////////////////
+        if ( particles.E[ part_id ] <= materials.electron_energy_cut[ mat_id ] )
+        {
+            particles.endsimu[ part_id ] = PARTICLE_DEAD;
+            dose_record_standard( dosi, particles.E[ part_id ], particles.px[ part_id ],
+                                  particles.py[ part_id ], particles.pz[ part_id ] );
+            return;
+        }
+        ///////////////////////////////////////////////////////////////////////////
 
     }
     while ( ( particles.E[ part_id ] > EKINELIMIT ) && ( bool_loop ) );
@@ -333,13 +344,13 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
         //       in order to avoid particle entry between voxels. Then, computing improvement can be made
         //       by calling this function only once, just for the particle step=0.    - JB
         pos = transport_get_safety_inside_AABB( pos, vox_xmin, vox_xmax,
-                                                vox_ymin, vox_ymax, vox_zmin, vox_zmax, EPSILON3 );
+                                                vox_ymin, vox_ymax, vox_zmin, vox_zmax, parameters.geom_tolerance );
                 
         // Get distance to edge of voxel
         f32 fragment = hit_ray_AABB ( pos, dir, vox_xmin, vox_xmax,
                                       vox_ymin, vox_ymax, vox_zmin, vox_zmax );
         // fragment += 1.E-2*mm;  ?? - JB
-        fragment += EPSILON3;
+        fragment += parameters.geom_tolerance;
 
         // Read Cross section table to get dedx, erange, lambda
         e_read_CS_table ( mat_id, energy, electron_CS_table, next_discrete_process, table_index, next_interaction_distance,
@@ -353,18 +364,36 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
 
         freeLength = alongStepLength + trueStepLength;
         totalLength += trueStepLength;
+
+        /// Need to check, I add energy cut here - JB /////////////////////////////
+        if ( particles.E[ part_id ] <= materials.electron_energy_cut[ mat_id ] )
+        {
+            particles.endsimu[ part_id ] = PARTICLE_DEAD;
+            dose_record_standard( dosi, particles.E[ part_id ], particles.px[ part_id ],
+                                  particles.py[ part_id ], particles.pz[ part_id ] );
+            return;
+        }
+        ///////////////////////////////////////////////////////////////////////////
+
     }
     else
     {
         particles.endsimu[ part_id ] = PARTICLE_DEAD;
+
+        /// HERE, energy is not droppping ?   - JB   // TO BE CHECKED ////////////
+        dose_record_standard( dosi, particles.E[ part_id ], particles.px[ part_id ],
+                              particles.py[ part_id ], particles.pz[ part_id ] );
+        //////////////////////////////////////////////////////////////////////////
         return;
     }
 
     // Stop simulation if out of the phantom
-    if ( !test_point_AABB_with_tolerance (pos, vol.xmin, vol.xmax, vol.ymin, vol.ymax, vol.zmin, vol.zmax, EPSILON3 ) )
+    if ( !test_point_AABB_with_tolerance (pos, vol.xmin, vol.xmax, vol.ymin, vol.ymax, vol.zmin, vol.zmax, parameters.geom_tolerance ) )
     {
         particles.endsimu[ part_id ] = PARTICLE_FREEZE;
     }
+
+
 
 }
 
@@ -427,14 +456,14 @@ __host__ __device__ void VPDN::track_photon_to_out ( ParticlesData &particles,
     //       in order to avoid particle entry between voxels. Then, computing improvement can be made
     //       by calling this function only once, just for the particle step=0.    - JB
     pos = transport_get_safety_inside_AABB( pos, vox_xmin, vox_xmax,
-                                            vox_ymin, vox_ymax, vox_zmin, vox_zmax, EPSILON6 );
+                                            vox_ymin, vox_ymax, vox_zmin, vox_zmax, parameters.geom_tolerance );
 
     f32 boundary_distance = hit_ray_AABB ( pos, dir, vox_xmin, vox_xmax,
                                            vox_ymin, vox_ymax, vox_zmin, vox_zmax );
 
     if ( boundary_distance <= next_interaction_distance )
     {
-        next_interaction_distance = boundary_distance + EPSILON3; // Overshoot
+        next_interaction_distance = boundary_distance + parameters.geom_tolerance; // Overshoot
         next_discrete_process = GEOMETRY_BOUNDARY;
     }
 
@@ -445,7 +474,7 @@ __host__ __device__ void VPDN::track_photon_to_out ( ParticlesData &particles,
 
     // get safety position (outside the current voxel)
     pos = transport_get_safety_outside_AABB( pos, vox_xmin, vox_xmax,
-                                             vox_ymin, vox_ymax, vox_zmin, vox_zmax, EPSILON6 );
+                                             vox_ymin, vox_ymax, vox_zmin, vox_zmax, parameters.geom_tolerance );
 
     // store new position
     particles.px[part_id] = pos.x;
@@ -453,7 +482,7 @@ __host__ __device__ void VPDN::track_photon_to_out ( ParticlesData &particles,
     particles.pz[part_id] = pos.z;
 
     // Stop simulation if out of the phantom
-    if ( !test_point_AABB_with_tolerance (pos, vol.xmin, vol.xmax, vol.ymin, vol.ymax, vol.zmin, vol.zmax, EPSILON3 ) )
+    if ( !test_point_AABB_with_tolerance (pos, vol.xmin, vol.xmax, vol.ymin, vol.ymax, vol.zmin, vol.zmax, parameters.geom_tolerance ) )
     {
         particles.endsimu[part_id] = PARTICLE_FREEZE;
         return;
@@ -470,7 +499,7 @@ __host__ __device__ void VPDN::track_photon_to_out ( ParticlesData &particles,
         /// If there is a secondary particle, push the primary into buffer and track this new particle
 
         if ( electron.endsimu == PARTICLE_ALIVE && electron.E > materials.electron_energy_cut[ mat_id ] &&
-             particles.level[ part_id ] < particles.nb_of_secondaries )
+             particles.level[ part_id ] < particles.nb_of_secondaries && parameters.secondaries_list[ELECTRON] )
         {
 
             // Get the absolute index into secondary buffer
@@ -523,19 +552,19 @@ __host__ __device__ void VPDN::track_photon_to_out ( ParticlesData &particles,
 
 // Device Kernel that move particles to the voxelized volume boundary
 __global__ void VPDN::kernel_device_track_to_in ( ParticlesData particles, f32 xmin, f32 xmax,
-        f32 ymin, f32 ymax, f32 zmin, f32 zmax )
+                                                  f32 ymin, f32 ymax, f32 zmin, f32 zmax, f32 tolerance )
 {  
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
     if ( id >= particles.size ) return;    
-    transport_track_to_in_AABB( particles, xmin, xmax, ymin, ymax, zmin, zmax, EPSILON6, id);
+    transport_track_to_in_AABB( particles, xmin, xmax, ymin, ymax, zmin, zmax, tolerance, id);
 }
 
 
 // Host Kernel that move particles to the voxelized volume boundary
 void VPDN::kernel_host_track_to_in ( ParticlesData particles, f32 xmin, f32 xmax,
-                                     f32 ymin, f32 ymax, f32 zmin, f32 zmax, ui32 part_id )
+                                     f32 ymin, f32 ymax, f32 zmin, f32 zmax, f32 tolerance, ui32 part_id )
 {       
-    transport_track_to_in_AABB( particles, xmin, xmax, ymin, ymax, zmin, zmax, EPSILON6, part_id);
+    transport_track_to_in_AABB( particles, xmin, xmax, ymin, ymax, zmin, zmax, tolerance, part_id);
 }
 
 // Device kernel that track particles within the voxelized volume until boundary
@@ -574,7 +603,7 @@ __global__ void VPDN::kernel_device_track_to_out ( ParticlesData particles,
         if ( ( ( particles.endsimu[id]==PARTICLE_DEAD ) || ( particles.endsimu[id]==PARTICLE_FREEZE ) ) && ( particles.level[id]>PRIMARY ) )
         {
 
-            /// Pull back the particle stored in the secondary buffer
+            /// Pull back the particle stored in the secondary buffer to the main one
 
             // Wake up the particle
             particles.endsimu[id] = PARTICLE_ALIVE;
@@ -636,7 +665,7 @@ void VPDN::kernel_host_track_to_out ( ParticlesData particles,
         if ( ( ( particles.endsimu[id]==PARTICLE_DEAD ) || ( particles.endsimu[id]==PARTICLE_FREEZE ) ) && ( particles.level[id]>PRIMARY ) )
         {
 
-            /// Pull back the particle stored in the secondary buffer
+            /// Pull back the particle stored in the secondary buffer to the main one
 
             // Wake up the particle
             particles.endsimu[id] = PARTICLE_ALIVE;
@@ -694,6 +723,7 @@ void VoxPhanDosiNav::track_to_in ( Particles particles )
             VPDN::kernel_host_track_to_in ( particles.data_h, m_phantom.data_h.xmin, m_phantom.data_h.xmax,
                                             m_phantom.data_h.ymin, m_phantom.data_h.ymax,
                                             m_phantom.data_h.zmin, m_phantom.data_h.zmax,
+                                            m_params.data_h.geom_tolerance,
                                             id );
             ++id;
         }
@@ -706,7 +736,8 @@ void VoxPhanDosiNav::track_to_in ( Particles particles )
 
         VPDN::kernel_device_track_to_in<<<grid, threads>>> ( particles.data_d, m_phantom.data_d.xmin, m_phantom.data_d.xmax,
                                                                                m_phantom.data_d.ymin, m_phantom.data_d.ymax,
-                                                                               m_phantom.data_d.zmin, m_phantom.data_d.zmax );
+                                                                               m_phantom.data_d.zmin, m_phantom.data_d.zmax,
+                                                                               m_params.data_d.geom_tolerance );
         cuda_error_check ( "Error ", " Kernel_VoxPhanDosi (track to in)" );
         cudaThreadSynchronize();
     }

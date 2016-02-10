@@ -19,15 +19,6 @@
 #include "particles.cuh"
 #include "prng.cuh"
 
-inline __host__ __device__ ui32 get_id()
-{
-#ifdef __CUDA_ARCH__
-    return blockIdx.x * blockDim.x + threadIdx.x;
-#else
-    return 0;
-#endif
-};
-
 __host__ __device__ f32xyz rotateUz ( f32xyz vector, f32xyz newUz );
 
 // Loglog interpolation
@@ -63,9 +54,5 @@ __host__ __device__ f32 linear_interpolation ( f32 xa,f32 ya, f32 xb,  f32 yb, f
 __host__ __device__ i32 G4Poisson(f32 mean, ParticlesData &particles, ui32 id );
 
 __host__ __device__ f32 Gaussian ( f32 mean,f32 rms,ParticlesData &particles, ui32 id );
-
-
-
-__host__ __device__ i32xyz get_bin_xyz ( i32 bin, i32xyz size );
 
 #endif

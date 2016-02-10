@@ -1235,7 +1235,7 @@ void eSampleSecondarieGamma ( f32 minEnergy, f32 maxEnergy, ParticlesData &parti
     f32  lnZ, FZ, Z3, ZZ, F1, F2, theta, sint, phi;
     f32  Ekine = particles.E[ id ];
     f32  tmin = materials.photon_energy_cut[ id_mat ];
-    f32  tmax = fmin ( maxEnergy, Ekine ); // MaxKinEnergy = 250* MeV
+    f32  tmax = fminf ( maxEnergy, Ekine ); // MaxKinEnergy = 250* MeV
     f32  MigdalFactor, MigdalConstant = elec_radius*hbarc*hbarc*4.*pi/ ( electron_mass_c2*electron_mass_c2 );
     f32  x, xm, epsil, greject, migdal, grejmax, q, U, U2;
     f32  ah, bh, screenvar, screenmin, screenfac = 0.;
@@ -1285,8 +1285,8 @@ void eSampleSecondarieGamma ( f32 minEnergy, f32 maxEnergy, ParticlesData &parti
         bh = .75 + ( bh1*U2 + bh2*U + bh3 ) / ( U2*U );
         screenfac = 136.*electron_mass_c2/ ( Z3*totalEnergy );
         screenmin = screenfac*epsilmin/ ( 1. - epsilmin );
-        F1 = fmax ( ScreenFunction1 ( screenmin ) - FZ, 0. );
-        F2 = fmax ( ScreenFunction2 ( screenmin ) - FZ, 0. );
+        F1 = fmaxf ( ScreenFunction1 ( screenmin ) - FZ, 0. );
+        F2 = fmaxf ( ScreenFunction2 ( screenmin ) - FZ, 0. );
         grejmax = ( F1 - epsilmin * ( F1*ah - bh*epsilmin*F2 ) ) / ( 42.392 - FZ );
     }
     else
@@ -1299,9 +1299,9 @@ void eSampleSecondarieGamma ( f32 minEnergy, f32 maxEnergy, ParticlesData &parti
         bl2 = bl20 + ZZ* ( bl21 + ZZ*bl22 );
         ah = al0 + al1*U + al2*U2;
         bh = bl0 + bl1*U + bl2*U2;
-        grejmax = fmax ( 1. + xmin* ( ah + bh*xmin ), 1. + ah + bh );
+        grejmax = fmaxf ( 1. + xmin* ( ah + bh*xmin ), 1. + ah + bh );
         xm = -ah/ ( 2.*bh );
-        if ( xmin < xm && xm < xmax ) grejmax = fmax ( grejmax, 1. + xm * ( ah + bh*xm ) );
+        if ( xmin < xm && xm < xmax ) grejmax = fmaxf ( grejmax, 1. + xm * ( ah + bh*xm ) );
     }
 
     if ( Ekine > tlow )
@@ -1312,8 +1312,8 @@ void eSampleSecondarieGamma ( f32 minEnergy, f32 maxEnergy, ParticlesData &parti
             x = powf ( xmin, q + kappa * ( 1. - q ) );
             epsil = x*Ekine / totalEnergy;
             screenvar = screenfac*epsil / ( 1. - epsil );
-            F1 = fmax ( ScreenFunction1 ( screenvar ) - FZ,0. );
-            F2 = fmax ( ScreenFunction2 ( screenvar ) - FZ,0. );
+            F1 = fmaxf ( ScreenFunction1 ( screenvar ) - FZ,0. );
+            F2 = fmaxf ( ScreenFunction2 ( screenvar ) - FZ,0. );
             migdal = ( 1. + MigdalFactor ) / ( 1. + MigdalFactor / ( x*x ) );
             greject = migdal* ( F1 - epsil* ( ah*F1 - bh*epsil*F2 ) ) / ( 42.392 - FZ );
         }

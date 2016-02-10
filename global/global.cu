@@ -60,8 +60,8 @@ void set_gpu_device ( int deviceChoice, f32 minversion )
     }
 
     cudaSetDevice ( deviceChoice%deviceCount );
-//     printf ( "[\033[32;01mok\033[00m] \033[32;01m%s\033[00m found\n", prop.name );
     GGcout << "GPU found: " << prop.name << " (id: " << deviceChoice%deviceCount << ") " << GGendl;
+    GGnewline();
 
     
 /*    // Debug, pour calculer automatiquement le nbre de threads  et blocks en fonction du GPU
@@ -102,7 +102,7 @@ void print_warning ( std::string msg )
 }
 
 // Print out run time
-void print_time ( std::string txt, f64 t )
+void GGcout_time ( std::string txt, f64 t )
 {
 
     f64 res;
@@ -114,7 +114,7 @@ void print_time ( std::string txt, f64 t )
     res -= time_s;
     ui32 time_ms = ( ui32 ) ( res*1000.0 );
 
-    printf ( "[\033[32;01mRun time\033[00m] %s: ", txt.c_str() );
+    printf ( "[GGEMS] %s: ", txt.c_str() );
 
     if ( time_h != 0 ) printf ( "%i h ", time_h );
     if ( time_m != 0 ) printf ( "%i m ", time_m );
@@ -122,6 +122,109 @@ void print_time ( std::string txt, f64 t )
     printf ( "%i ms\n", time_ms );
 
 }
+
+std::string Green_str( std::string txt )
+{
+    return "\033[32;01m" + txt + "\033[00m";
+}
+
+std::string Red_str( std::string txt )
+{
+    return "\033[31;03m" + txt + "\033[00m";
+}
+
+std::string Energy_str( f32 E )
+{
+    E /= eV;
+
+    std::vector<std::string> pref;
+    pref.push_back ( "eV" );
+    pref.push_back ( "keV" );
+    pref.push_back ( "MeV" );
+    pref.push_back ( "GeV" );
+
+    ui32 exp = ( ui32 ) ( log ( E ) / log ( 1000 ) );
+    f32 val = f32 ( E ) / ( pow ( 1000, exp ) );
+
+    char tmp[ 100 ];
+    sprintf( tmp, "%5.2f %s", val, pref[ exp ].c_str());
+
+    return std::string( tmp );
+}
+
+std::string Range_str( f32 range )
+{
+    range /= nm;
+
+    std::vector<std::string> pref;
+    pref.push_back ( "nm" );
+    pref.push_back ( "um" );
+    pref.push_back ( "mm" );
+    pref.push_back ( "m" );
+
+    ui32 exp = ( ui32 ) ( log ( range ) / log ( 1000 ) );
+    f32 val = f32 ( range ) / ( pow ( 1000, exp ) );
+
+    char tmp[ 100 ];
+    sprintf( tmp, "%5.2f %s", val, pref[ exp ].c_str());
+
+    return std::string( tmp );
+}
+
+// Print params
+void GGcout_params( GlobalSimulationParametersData params )
+{
+    printf("\n");
+    printf("[GGEMS] Physics list:\n");
+    printf("[GGEMS]    Gamma: %s   %s   %s\n", ( params.physics_list[ PHOTON_COMPTON ] ) ? Green_str("Compton").c_str() : Red_str("Compton").c_str(),
+                         ( params.physics_list[ PHOTON_PHOTOELECTRIC ] ) ? Green_str("Photoelectric").c_str() : Red_str("Photoelectric").c_str(),
+                                        ( params.physics_list[ PHOTON_RAYLEIGH ] ) ? Green_str("Rayleigh").c_str() : Red_str("Rayleigh").c_str() );
+
+    printf("[GGEMS]    Electron: %s   %s   %s\n", ( params.physics_list[ ELECTRON_IONISATION ] ) ? Green_str("Ionisation").c_str() : Red_str("Ionisation").c_str(),
+                                  ( params.physics_list[ ELECTRON_BREMSSTRAHLUNG ] ) ? Green_str("Bremsstrahlung").c_str() : Red_str("Bremsstrahlung").c_str(),
+                                   ( params.physics_list[ ELECTRON_MSC ] ) ? Green_str("Multiple scattering").c_str() : Red_str("Multiple scattering").c_str() );
+
+    printf("[GGEMS]    Tables: MinE %s   MaxE %s   Nb of energy bin %i\n", Energy_str( params.cs_table_min_E ).c_str(),
+                                                                       Energy_str( params.cs_table_max_E ).c_str(),
+                                                                       params.cs_table_nbins );
+    printf("[GGEMS]    Energy cuts: Gamma %s   Electron %s\n", Energy_str( params.photon_cut ).c_str(),
+                                                             Energy_str( params.electron_cut ).c_str() );
+
+    printf("[GGEMS] Secondary particles:\n");
+    printf("[GGEMS]    Particles: %s   %s\n", ( params.secondaries_list[ PHOTON ] ) ? Green_str("Gamma").c_str() : Red_str("Gamma").c_str(),
+                                            ( params.secondaries_list[ ELECTRON ] ) ? Green_str("Electron").c_str() : Red_str("Electron").c_str() );
+
+    printf("[GGEMS]    Levels: %i\n", params.nb_of_secondaries);
+
+    printf("[GGEMS] Geometry tolerance:\n");
+    printf("[GGEMS]    Range: %s\n", Range_str( params.geom_tolerance ).c_str() );
+    printf("[GGEMS] Simulation:\n");
+    printf("[GGEMS]    Device target: %s\n", ( params.device_target == CPU_DEVICE ) ? "CPU" : "GPU" );
+    printf("[GGEMS]    Total Nb of particles: %i\n", params.nb_of_particles);
+    printf("[GGEMS]    Size of batch: %i\n", params.size_of_particles_batch);
+    printf("[GGEMS]    Nb of batches: %i\n", params.nb_of_batches);
+    printf("[GGEMS]    Seed value %i\n", params.seed);
+
+    printf("\n");
+}
+
+// Empty line
+void GGnewline( )
+{
+    printf("\n");
+}
+
+//ui64 nb_of_particles;
+//ui64 size_of_particles_batch;
+//ui32 nb_of_batches;
+
+//ui8 device_target;
+//ui32 gpu_id;
+//ui32 gpu_block_size;
+//ui32 gpu_grid_size;
+//f32 time;
+//ui32 seed;
+
 
 // Print out memory usage
 void print_memory ( std::string txt, ui32 t )

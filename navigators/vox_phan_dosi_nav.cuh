@@ -33,38 +33,38 @@
 namespace VPDN
 {
 
-__host__ __device__ void track_electron_to_out ( ParticlesData &particles,
-        VoxVolumeData vol,
-        MaterialsTable materials,        
-        ElectronsCrossSectionTable electron_CS_table,
-        GlobalSimulationParametersData parameters,
-        DoseData &dosi,
-        f32 &randomnumbereIoni,
-        f32 &randomnumbereBrem,
-        f32 freeLength,
-        ui32 part_id );
+__host__ __device__ void track_electron_to_out (ParticlesData &particles,
+                                                 VoxVolumeData vol,
+                                                 MaterialsTable materials,
+                                                 ElectronsCrossSectionTable electron_CS_table,
+                                                 GlobalSimulationParametersData parameters,
+                                                 DoseData &dosi,
+                                                 f32 &randomnumbereIoni,
+                                                 f32 &randomnumbereBrem,
+                                                 f32 freeLength,
+                                                 ui32 part_id );
 
-__host__ __device__ void track_photon_to_out ( ParticlesData &particles,
-        VoxVolumeData vol,
-        MaterialsTable materials,
-        PhotonCrossSectionTable photon_CS_table,        
-        GlobalSimulationParametersData parameters,
-        DoseData dosi,
-        ui32 part_id );
+__host__ __device__ void track_photon_to_out (ParticlesData &particles,
+                                               VoxVolumeData vol,
+                                               MaterialsTable materials,
+                                               PhotonCrossSectionTable photon_CS_table,
+                                               GlobalSimulationParametersData parameters,
+                                               DoseData dosi,
+                                               ui32 part_id );
 
-__global__ void kernel_device_track_to_in ( ParticlesData particles, f32 xmin, f32 xmax,
-        f32 ymin, f32 ymax, f32 zmin, f32 zmax );
+__global__ void kernel_device_track_to_in (ParticlesData particles, f32 xmin, f32 xmax,
+                                            f32 ymin, f32 ymax, f32 zmin, f32 zmax , f32 tolerance);
 
 __global__ void kernel_device_track_to_out ( ParticlesData particles,
-        VoxVolumeData vol,
-        MaterialsTable materials,
-        PhotonCrossSectionTable photon_CS_table,
-        ElectronsCrossSectionTable electron_CS_table,
-        GlobalSimulationParametersData parameters,
-        DoseData dosi );
+                                             VoxVolumeData vol,
+                                             MaterialsTable materials,
+                                             PhotonCrossSectionTable photon_CS_table,
+                                             ElectronsCrossSectionTable electron_CS_table,
+                                             GlobalSimulationParametersData parameters,
+                                             DoseData dosi );
 
-void kernel_host_track_to_in ( ParticlesData particles, f32 xmin, f32 xmax,
-                               f32 ymin, f32 ymax, f32 zmin, f32 zmax, ui32 part_id );
+void kernel_host_track_to_in (ParticlesData particles, f32 xmin, f32 xmax,
+                               f32 ymin, f32 ymax, f32 zmin, f32 zmax, f32 tolerance, ui32 part_id );
 
 void kernel_host_track_to_out ( ParticlesData particles,
                                 VoxVolumeData vol,
