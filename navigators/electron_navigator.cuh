@@ -18,6 +18,7 @@
 #include "dose_calculator.cuh"
 #include "voxelized.cuh"
 #include "raytracing.cuh"
+#include "transport_navigator.cuh"
 
 
 __host__ __device__ void e_read_CS_table (
@@ -63,18 +64,20 @@ __host__ __device__ void eMscScattering (f32 tPath, f32 zPath, f32 currentRange,
                                          ParticlesData &particles, ui32 id, MaterialsTable materials, ui8 mat,
                                          VoxVolumeData phantom, ui32xyzw index_phantom );
 
-__host__ __device__ void gLatCorrection ( f32xyz currentDir,f32 tPath,f32 zPath,f32 currentTau,f32 phi,f32 sinth, ParticlesData &particles, int id, f32 safety );
+__host__ __device__ void gLatCorrection (f32xyz currentDir, f32 tPath, f32 zPath, f32 currentTau, f32 phi, f32 sinth,
+                                         ParticlesData &particles, ui32 id, f32 safety );
 
-__host__ __device__ f32 eCosineTheta ( f32 trueStep,f32 currentRange,f32 currentLambda,f32 currentEnergy,f32 *currentTau,f32 par1,f32 par2, MaterialsTable materials, int id_mat, int id, ParticlesData &particles );
+__host__ __device__ f32 eCosineTheta ( f32 trueStep,f32 currentRange,f32 currentLambda,f32 currentEnergy,f32 *currentTau,
+                                       f32 par1,f32 par2, MaterialsTable materials, ui8 id_mat, ui32 id, ParticlesData &particles );
 
-__host__ __device__ f32 eSimpleScattering ( f32 xmeanth,f32 x2meanth, int id, ParticlesData &particles );
+__host__ __device__ f32 eSimpleScattering (f32 xmeanth, f32 x2meanth, ui32 id, ParticlesData &particles );
 
 __host__ __device__ f32 gGeomLengthLimit ( f32 gPath, f32 currentLambda, f32 currentRange, f32 par1, f32 par3 );
 
-__host__ __device__ SecParticle eSampleSecondarieElectron ( f32 CutEnergy, ParticlesData &particles, int id, DoseData &dosi,GlobalSimulationParametersData parameters );
+__host__ __device__ SecParticle eSampleSecondarieElectron (f32 CutEnergy, ParticlesData &particles, ui32 id);
 
 __host__ __device__
-void eSampleSecondarieGamma ( f32 cutEnergy, ParticlesData &particles, int id, MaterialsTable materials, int id_mat,GlobalSimulationParametersData parameters );
+void eSampleSecondarieGamma ( f32 minEnergy, f32 maxEnergy, ParticlesData &particles, ui32 id, MaterialsTable materials, ui8 id_mat );
 
 __host__ __device__ f32xyz CorrUnit ( f32xyz u, f32xyz v,f32 uMom, f32 vMom );
 

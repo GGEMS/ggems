@@ -73,12 +73,12 @@ f32xyz __host__ __device__ transport_get_safety_outside_AABB( f32xyz pos, f32 xm
 }
 
 // Get safety position considering AABB geometry
-f32xyz __host__ __device__ transport_compute_safety_AABB( f32xyz pos, f32 xmin, f32 xmax, f32 ymin, f32 ymax, f32 zmin, f32 zmax )
+f32 __host__ __device__ transport_compute_safety_AABB( f32xyz pos, f32 xmin, f32 xmax, f32 ymin, f32 ymax, f32 zmin, f32 zmax )
 {
-    f32xyz safety;
-    safety.x = fmin( fabs( pos.x-xmin ), fabs( pos.x-xmax ) );
-    safety.y = fmin( fabs( pos.y-ymin ), fabs( pos.y-ymax ) );
-    safety.z = fmin( fabs( pos.z-zmin ), fabs( pos.z-zmax ) );
+    f32 safety;
+    safety = fmin( fabs( pos.x-xmin ), fabs( pos.x-xmax ) );
+    safety = fmin( safety, fmin( fabs( pos.y-ymin ), fabs( pos.y-ymax ) ) );
+    safety = fmin( safety, fmin( fabs( pos.z-zmin ), fabs( pos.z-zmax ) ) );
     return safety;
 }
 
