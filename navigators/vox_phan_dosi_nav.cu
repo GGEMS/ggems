@@ -60,6 +60,9 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
     f32 trueGeomLength;
 
 
+    /// DEBUG
+    ui32 istep = 0;
+
     do
     {
 
@@ -275,11 +278,19 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
         }
         ///////////////////////////////////////////////////////////////////////////
 
+
+        /// DEBUG
+        ++istep;
+
     }
     while ( ( particles.E[ part_id ] > EKINELIMIT ) && ( bool_loop ) );
 
 
+    /// DEBUG
+    printf(":: Istep %i\n", istep);
+
     ////////////////////////////////////
+
 
 
     if ( ( particles.E[part_id] > EKINELIMIT ) /*&&(secondaryParticleCreated == FALSE)*/ ) //>1eV
@@ -584,6 +595,9 @@ __global__ void VPDN::kernel_device_track_to_out ( ParticlesData particles,
     f32 randomnumbereBrem= -logf ( JKISS32 ( particles, id ) ); // -log(RN)
     f32 freeLength = 0.0*mm;
 
+    /// DEBUG
+    ui32 step = 0;
+
     // Stepping loop - Get out of loop only if the particle was dead and it was a primary
     while ( particles.endsimu[id] != PARTICLE_DEAD && particles.endsimu[id] != PARTICLE_FREEZE )
     {
@@ -627,7 +641,13 @@ __global__ void VPDN::kernel_device_track_to_out ( ParticlesData particles,
             particles.dz[ id ]    = particles.sec_dz[ index_level ]   ;
             particles.pname[ id ] = particles.sec_pname[ index_level ];
         }
+
+        /// DEBUG
+        ++step;
     }
+
+    /// DEBUG
+    printf("Step %i\n", step);
 
 }
 
@@ -809,16 +829,6 @@ void VoxPhanDosiNav::initialize ( GlobalSimulationParameters params )
     m_phantom.set_name ( "VoxPhanDosiNav" );
     m_phantom.initialize ( params );
 
-    // Materials table
-    if( !m_elements_filename.empty() )
-    {
-        m_materials.load_elements_database( m_elements_filename );
-    }
-    else
-    {
-        m_materials.load_elements_database();
-    }
-
     if( !m_materials_filename.empty() )
     {
         m_materials.load_materials_database( m_materials_filename );
@@ -827,12 +837,15 @@ void VoxPhanDosiNav::initialize ( GlobalSimulationParameters params )
     {
         m_materials.load_materials_database();
     }
-    
+
     
     // Materials table
     //     m_materials.load_elements_database();
     //     m_materials.load_materials_database();
     m_materials.initialize ( m_phantom.list_of_materials, params );
+
+    /// DEBUG
+    m_materials.print();
 
     // Cross Sections
     m_cross_sections.initialize ( m_materials, params );

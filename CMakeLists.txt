@@ -3,9 +3,6 @@
 #
 cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
 
-## Not working!!
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-
 SET( CMAKE_BUILD_TYPE Release )
 IF( DEFINED CMAKE_BUILD_TYPE )
   SET( CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE} CACHE STRING "" )
@@ -36,20 +33,6 @@ else()
   add_definitions(-DSINGLE_PRECISION)
 endif()
 
-# OPTIONS
-option(WITH_ROOT_CERN "Use ROOT library from CERN" OFF)
-if(WITH_ROOT_CERN)
-    include(FindROOT.cmake)
-    EXECUTE_PROCESS(COMMAND root-config --libs OUTPUT_VARIABLE ROOT_LD_FLAGS OUTPUT_STRIP_TRAILING_WHITESPACE)
-    set(CMAKE_EXE_LINKER_FLAGS ${ROOT_LD_FLAGS})
-    #add_definitions(-DSINGLE_PRECISION=0)
-    add_definitions(-DROOT_CERN)
-    include_directories(${ROOT_INCLUDE_DIR})
-    include_directories(${ROOT_LIBRARY_DIR})
-    set(ROOT_LIBRARIES -L${ROOT_LIBRARY_DIR} -lCore -lCint -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lMatrix -lPhysics -lMathCore -lThread -lm -ldl -rdynamic)
-endif()
-
-
 # CUDA OPTIONS
 if(CUDA_VERSION_MAJOR GREATER 6)
     set(LIBSCUDA  --generate-code arch=compute_30,code=sm_30 --generate-code arch=compute_35,code=sm_35 --generate-code arch=compute_50,code=sm_50 --generate-code arch=compute_52,code=sm_52 --relocatable-device-code true -lcudadevrt --compiler-options -w)
@@ -64,10 +47,6 @@ option(WITH_FAST_MATH "Fast math flag" ON)
 if(WITH_FAST_MATH)
     set(LIBSCUDA ${LIBSCUDA} -use_fast_math)
 endif()
-
-# GEANT4
-find_package(Geant4 REQUIRED)
-include(${Geant4_USE_FILE})
 
 # GGEMS src
 include_directories(
@@ -114,11 +93,6 @@ set(CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE} "--std=c++11")
 set(CUDA_NVCC_FLAGS_RELEASE ${CUDA_NVCC_FLAGS_RELEASE} "--std=c++11")
 
 cuda_add_library(${LIB_NAME} STATIC ${sourcesGPU} ${headersGPU})
-
-# ROOT OPTION
-if(WITH_ROOT_CERN)
-    target_link_libraries(${LIB_NAME} ${ROOT_LIBRARIES})
-endif()
 
 # Installation
 install(TARGETS ${LIB_NAME} DESTINATION "lib")

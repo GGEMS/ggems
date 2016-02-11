@@ -5,8 +5,11 @@
 
 /////// INCLUDES ///////////////////////////////////////////////
 
-#include "G4SystemOfUnits.hh"
-#include "G4PhysicalConstants.hh"
+//#include "G4SystemOfUnits.hh"
+//#include "G4PhysicalConstants.hh"
+//#include "G4Material.hh"
+//#include "G4ParticleDefinition.hh"
+
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -78,6 +81,9 @@
 #define DISABLED 0
 #define ENABLED 1
 
+#define STATE_SOLID 0
+#define STATE_GAS 1
+
 #define TRUE    1
 #define FALSE   0
 
@@ -97,6 +103,8 @@
 #define GGcerr std::cerr << "[GGEMS error] "
 #define GGcin std::cin << "[GGEMS input] "
 
+/// TODO clean this part by moving constant to physical_constants.cuh   - JB
+
 // Pi
 #define gpu_pi               3.141592653589793116
 #define gpu_twopi            2.0*gpu_pi
@@ -104,8 +112,7 @@
 // Constants for electrons
 #define elec_radius          (2.8179409421853486E-15*m)      // Metre
 #define N_avogadro           (6.0221367E+23/mole)
-//#define c_light              (2.99792458E+8*m/sec)  // Already defined in G4PhysicalConstants.hh - JB
-//#define barn                 (1.E-28*m2)
+
 
 /////// TYPEDEF ////////////////////////////////////////////////
 
@@ -184,6 +191,15 @@ typedef unsigned char ui8;
 #define F32_MAX FLT_MAX;
 #define F64_MAX FLT_MAX;
 #endif
+
+////////////////////////////////////////////////////////////////
+
+
+//// Constants /////////////////////////////////////////////////
+
+// Typedef must defined before including this file
+#include "system_of_units.cuh"
+#include "physical_constants.cuh"
 
 ////////////////////////////////////////////////////////////////
 

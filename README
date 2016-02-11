@@ -57,7 +57,8 @@ hg ci -m 'some fresh blood'
 hg up MYBRANCH
 hg ci -m 'closing mybranch' --close-branch
 
-
+* Get fresh files (if removed accidentaly)
+hg update --clean
 
 
 

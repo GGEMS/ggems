@@ -63,7 +63,7 @@ GGEMS::GGEMS()
     m_parameters.data_h.photon_cut = 0;
     m_parameters.data_h.electron_cut = 0;
     m_parameters.data_h.nb_of_secondaries = 0;
-    m_parameters.data_h.geom_tolerance = 1.0 *nm;
+    m_parameters.data_h.geom_tolerance = 100.0 *nm;
 
     // Init by default others parameters
     m_parameters.data_h.device_target = CPU_DEVICE;
