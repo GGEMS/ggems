@@ -128,9 +128,19 @@ std::string Green_str( std::string txt )
     return "\033[32;01m" + txt + "\033[00m";
 }
 
+std::string Check_str( std::string txt )
+{
+    return "[X] " + txt;
+}
+
 std::string Red_str( std::string txt )
 {
     return "\033[31;03m" + txt + "\033[00m";
+}
+
+std::string NoCheck_str( std::string txt )
+{
+    return "[ ] " + txt;
 }
 
 std::string Energy_str( f32 E )
@@ -174,38 +184,80 @@ std::string Range_str( f32 range )
 // Print params
 void GGcout_params( GlobalSimulationParametersData params )
 {
-    printf("\n");
-    printf("[GGEMS] Physics list:\n");
-    printf("[GGEMS]    Gamma: %s   %s   %s\n", ( params.physics_list[ PHOTON_COMPTON ] ) ? Green_str("Compton").c_str() : Red_str("Compton").c_str(),
-                         ( params.physics_list[ PHOTON_PHOTOELECTRIC ] ) ? Green_str("Photoelectric").c_str() : Red_str("Photoelectric").c_str(),
-                                        ( params.physics_list[ PHOTON_RAYLEIGH ] ) ? Green_str("Rayleigh").c_str() : Red_str("Rayleigh").c_str() );
 
-    printf("[GGEMS]    Electron: %s   %s   %s\n", ( params.physics_list[ ELECTRON_IONISATION ] ) ? Green_str("Ionisation").c_str() : Red_str("Ionisation").c_str(),
-                                  ( params.physics_list[ ELECTRON_BREMSSTRAHLUNG ] ) ? Green_str("Bremsstrahlung").c_str() : Red_str("Bremsstrahlung").c_str(),
-                                   ( params.physics_list[ ELECTRON_MSC ] ) ? Green_str("Multiple scattering").c_str() : Red_str("Multiple scattering").c_str() );
+    if ( params.display_in_color )
+    {
+        printf("\n");
+        printf("[GGEMS] Physics list:\n");
+        printf("[GGEMS]    Gamma: %s   %s   %s\n", ( params.physics_list[ PHOTON_COMPTON ] ) ? Green_str("Compton").c_str() : Red_str("Compton").c_str(),
+                             ( params.physics_list[ PHOTON_PHOTOELECTRIC ] ) ? Green_str("Photoelectric").c_str() : Red_str("Photoelectric").c_str(),
+                                            ( params.physics_list[ PHOTON_RAYLEIGH ] ) ? Green_str("Rayleigh").c_str() : Red_str("Rayleigh").c_str() );
 
-    printf("[GGEMS]    Tables: MinE %s   MaxE %s   Nb of energy bin %i\n", Energy_str( params.cs_table_min_E ).c_str(),
-                                                                       Energy_str( params.cs_table_max_E ).c_str(),
-                                                                       params.cs_table_nbins );
-    printf("[GGEMS]    Energy cuts: Gamma %s   Electron %s\n", Energy_str( params.photon_cut ).c_str(),
-                                                             Energy_str( params.electron_cut ).c_str() );
+        printf("[GGEMS]    Electron: %s   %s   %s\n", ( params.physics_list[ ELECTRON_IONISATION ] ) ? Green_str("Ionisation").c_str() : Red_str("Ionisation").c_str(),
+                                      ( params.physics_list[ ELECTRON_BREMSSTRAHLUNG ] ) ? Green_str("Bremsstrahlung").c_str() : Red_str("Bremsstrahlung").c_str(),
+                                       ( params.physics_list[ ELECTRON_MSC ] ) ? Green_str("Multiple scattering").c_str() : Red_str("Multiple scattering").c_str() );
 
-    printf("[GGEMS] Secondary particles:\n");
-    printf("[GGEMS]    Particles: %s   %s\n", ( params.secondaries_list[ PHOTON ] ) ? Green_str("Gamma").c_str() : Red_str("Gamma").c_str(),
-                                            ( params.secondaries_list[ ELECTRON ] ) ? Green_str("Electron").c_str() : Red_str("Electron").c_str() );
+        printf("[GGEMS]    Tables: MinE %s   MaxE %s   Nb of energy bin %i\n", Energy_str( params.cs_table_min_E ).c_str(),
+                                                                           Energy_str( params.cs_table_max_E ).c_str(),
+                                                                           params.cs_table_nbins );
+        printf("[GGEMS]    Energy cuts: Gamma %s   Electron %s\n", Energy_str( params.photon_cut ).c_str(),
+                                                                 Energy_str( params.electron_cut ).c_str() );
 
-    printf("[GGEMS]    Levels: %i\n", params.nb_of_secondaries);
+        printf("[GGEMS] Secondary particles:\n");
+        printf("[GGEMS]    Particles: %s   %s\n", ( params.secondaries_list[ PHOTON ] ) ? Green_str("Gamma").c_str() : Red_str("Gamma").c_str(),
+                                                ( params.secondaries_list[ ELECTRON ] ) ? Green_str("Electron").c_str() : Red_str("Electron").c_str() );
 
-    printf("[GGEMS] Geometry tolerance:\n");
-    printf("[GGEMS]    Range: %s\n", Range_str( params.geom_tolerance ).c_str() );
-    printf("[GGEMS] Simulation:\n");
-    printf("[GGEMS]    Device target: %s\n", ( params.device_target == CPU_DEVICE ) ? "CPU" : "GPU" );
-    printf("[GGEMS]    Total Nb of particles: %i\n", params.nb_of_particles);
-    printf("[GGEMS]    Size of batch: %i\n", params.size_of_particles_batch);
-    printf("[GGEMS]    Nb of batches: %i\n", params.nb_of_batches);
-    printf("[GGEMS]    Seed value %i\n", params.seed);
+        printf("[GGEMS]    Levels: %i\n", params.nb_of_secondaries);
 
-    printf("\n");
+        printf("[GGEMS] Geometry tolerance:\n");
+        printf("[GGEMS]    Range: %s\n", Range_str( params.geom_tolerance ).c_str() );
+        printf("[GGEMS] Simulation:\n");
+        printf("[GGEMS]    Device target: %s\n", ( params.device_target == CPU_DEVICE ) ? "CPU" : "GPU" );
+        printf("[GGEMS]    Total Nb of particles: %i\n", params.nb_of_particles);
+        printf("[GGEMS]    Size of batch: %i\n", params.size_of_particles_batch);
+        printf("[GGEMS]    Nb of batches: %i\n", params.nb_of_batches);
+        printf("[GGEMS]    Seed value %i\n", params.seed);
+
+        printf("\n");
+    }
+    else
+    {
+        printf("\n");
+        printf("[GGEMS] Physics list:\n");
+        printf("[GGEMS]    Gamma: %s   %s   %s\n", ( params.physics_list[ PHOTON_COMPTON ] ) ? Check_str("Compton").c_str() : NoCheck_str("Compton").c_str(),
+                             ( params.physics_list[ PHOTON_PHOTOELECTRIC ] ) ? Check_str("Photoelectric").c_str() : NoCheck_str("Photoelectric").c_str(),
+                                            ( params.physics_list[ PHOTON_RAYLEIGH ] ) ? Check_str("Rayleigh").c_str() : NoCheck_str("Rayleigh").c_str() );
+
+        printf("[GGEMS]    Electron: %s   %s   %s\n", ( params.physics_list[ ELECTRON_IONISATION ] ) ? Check_str("Ionisation").c_str() : NoCheck_str("Ionisation").c_str(),
+                                      ( params.physics_list[ ELECTRON_BREMSSTRAHLUNG ] ) ? Check_str("Bremsstrahlung").c_str() : NoCheck_str("Bremsstrahlung").c_str(),
+                                       ( params.physics_list[ ELECTRON_MSC ] ) ? Check_str("Multiple scattering").c_str() : NoCheck_str("Multiple scattering").c_str() );
+
+        printf("[GGEMS]    Tables: MinE %s   MaxE %s   Nb of energy bin %i\n", Energy_str( params.cs_table_min_E ).c_str(),
+                                                                           Energy_str( params.cs_table_max_E ).c_str(),
+                                                                           params.cs_table_nbins );
+        printf("[GGEMS]    Energy cuts: Gamma %s   Electron %s\n", Energy_str( params.photon_cut ).c_str(),
+                                                                 Energy_str( params.electron_cut ).c_str() );
+
+        printf("[GGEMS] Secondary particles:\n");
+        printf("[GGEMS]    Particles: %s   %s\n", ( params.secondaries_list[ PHOTON ] ) ? Check_str("Gamma").c_str() : NoCheck_str("Gamma").c_str(),
+                                                ( params.secondaries_list[ ELECTRON ] ) ? Check_str("Electron").c_str() : NoCheck_str("Electron").c_str() );
+
+        printf("[GGEMS]    Levels: %i\n", params.nb_of_secondaries);
+
+        printf("[GGEMS] Geometry tolerance:\n");
+        printf("[GGEMS]    Range: %s\n", Range_str( params.geom_tolerance ).c_str() );
+        printf("[GGEMS] Simulation:\n");
+        printf("[GGEMS]    Device target: %s\n", ( params.device_target == CPU_DEVICE ) ? "CPU" : "GPU" );
+        printf("[GGEMS]    Total Nb of particles: %i\n", params.nb_of_particles);
+        printf("[GGEMS]    Size of batch: %i\n", params.size_of_particles_batch);
+        printf("[GGEMS]    Nb of batches: %i\n", params.nb_of_batches);
+        printf("[GGEMS]    Seed value %i\n", params.seed);
+
+        printf("\n");
+    }
+
+
+
 }
 
 // Empty line
@@ -244,17 +296,31 @@ void print_memory ( std::string txt, ui32 t )
 }
 
 // Print GGEMS banner
-void print_banner(std::string institution, std::string exp_day, std::string exp_month, std::string exp_year, std::string version) {
-
-    printf("      \033[32;01m____\033[00m                  \n");
-    printf(".--. \033[32;01m/\\__/\\\033[00m .--.            \n");
-    printf("`\033[33;01mO\033[00m  \033[32;01m/ /  \\ \\\033[00m  .`     GGEMS %s  \n", version.c_str());
-    printf("  `-\033[32;01m| |  | |\033[00m\033[33;01mO\033[00m`              \n");
-    printf("   -\033[32;01m|\033[00m`\033[32;01m|\033[00m..\033[32;01m|\033[00m`\033[32;01m|\033[00m-        License:  \n");
-    printf(" .` \033[32;01m\\\033[00m.\033[32;01m\\__/\033[00m.\033[32;01m/\033[00m `.        %s       \n", institution.c_str());
-    printf("'.-` \033[32;01m\\/__\\/\033[00m `-.'       %s-%s-%s \n", exp_day.c_str(), exp_month.c_str(), exp_year.c_str());
-    printf("\n");
-
+void print_banner( std::string institution, std::string exp_day, std::string exp_month, std::string exp_year,
+                   std::string version, GlobalSimulationParametersData params )
+{
+    if ( params.display_in_color )
+    {
+        printf("      \033[32;01m____\033[00m                  \n");
+        printf(".--. \033[32;01m/\\__/\\\033[00m .--.            \n");
+        printf("`\033[33;01mO\033[00m  \033[32;01m/ /  \\ \\\033[00m  .`     GGEMS %s  \n", version.c_str());
+        printf("  `-\033[32;01m| |  | |\033[00m\033[33;01mO\033[00m`              \n");
+        printf("   -\033[32;01m|\033[00m`\033[32;01m|\033[00m..\033[32;01m|\033[00m`\033[32;01m|\033[00m-        License:  \n");
+        printf(" .` \033[32;01m\\\033[00m.\033[32;01m\\__/\033[00m.\033[32;01m/\033[00m `.        %s       \n", institution.c_str());
+        printf("'.-` \033[32;01m\\/__\\/\033[00m `-.'       %s-%s-%s \n", exp_day.c_str(), exp_month.c_str(), exp_year.c_str());
+        printf("\n");
+    }
+    else
+    {
+        printf("      ____                  \n");
+        printf(".--. /\\__/\\ .--.            \n");
+        printf("`O  / /  \\ \\  .`     GGEMS %s  \n", version.c_str());
+        printf("  `-| |  | |O`              \n");
+        printf("   -|`|..|`|-        License:  \n");
+        printf(" .` \\.\\__/./ `.        %s       \n", institution.c_str());
+        printf("'.-` \\/__\\/ `-.'       %s-%s-%s \n", exp_day.c_str(), exp_month.c_str(), exp_year.c_str());
+        printf("\n");
+    }
 }
 
 // Abort the current simulation

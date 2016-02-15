@@ -77,7 +77,9 @@ void CrossSections::m_build_electron_table()
     // Fill the energy table
     f32 min_E = m_parameters.data_h.cs_table_min_E;
     f32 max_E = m_parameters.data_h.cs_table_max_E;
-    f32 slope = log(max_E / min_E);
+    f32 slope = log(max_E / min_E);    
+    electron_CS.data_h.E_min = min_E;
+    electron_CS.data_h.E_max = max_E;
 
     ui32 i = 0; while (i < m_nb_bins)
     {
@@ -244,15 +246,17 @@ void CrossSections::m_build_photon_table()
     // If Rayleigh scattering, load information once from G4 EM data library
     f32 *g4_ray_cs = NULL;
     f32 *g4_ray_sf = NULL;
-    i8 *flag_Z = NULL;
+    ui8 *flag_Z = NULL;
     if (m_parameters.data_h.physics_list[PHOTON_RAYLEIGH]) {
-
         g4_ray_cs = Rayleigh_CS_Livermore_load_data();
-        g4_ray_sf = Rayleigh_SF_Livermore_load_data();
+        g4_ray_sf = Rayleigh_SF_Livermore_load_data();        
+    }
 
+    if ( m_parameters.data_h.physics_list[PHOTON_RAYLEIGH] || m_parameters.data_h.physics_list[PHOTON_PHOTOELECTRIC] )
+    {
         // use to flag is scatter factor are already defined for a given Z
-        flag_Z = (i8*)malloc(101*sizeof(i8));
-        i=0; while(i<101) {flag_Z[i]=0; ++i;}
+        flag_Z = ( ui8* )malloc( 101*sizeof( ui8 ) );
+        i=0; while( i<101 ) { flag_Z[ i ] = 0; ++i; }
     }
 
     // Get CS for each material, energy bin and phys effect
@@ -282,7 +286,7 @@ void CrossSections::m_build_photon_table()
             }
             else
             {
-                photon_CS.data_h.Photoelectric_Std_CS[abs_index] = 0.0;
+                photon_CS.data_h.Photoelectric_Std_CS[abs_index] = 0.0f;
             }
 
             if (m_parameters.data_h.physics_list[PHOTON_RAYLEIGH]) {
@@ -291,7 +295,7 @@ void CrossSections::m_build_photon_table()
             }
             else
             {
-                photon_CS.data_h.Rayleigh_Lv_CS[abs_index] = 0.0;
+                photon_CS.data_h.Rayleigh_Lv_CS[abs_index] = 0.0f;
             }
 
             ++i;
@@ -301,35 +305,34 @@ void CrossSections::m_build_photon_table()
         if ( m_parameters.data_h.physics_list[PHOTON_RAYLEIGH] || m_parameters.data_h.physics_list[PHOTON_PHOTOELECTRIC] ) {
             ui32 iZ, Z;
             // This table compute scatter factor for each Z (only for Z which were not already defined)
-            iZ=0; while (iZ < m_materials.nb_elements[imat]) {
-                Z = m_materials.mixture[m_materials.index[imat]+iZ];
+            iZ=0; while (iZ < m_materials.nb_elements[ imat ]) {
 
-                f32 atom_num_dens = m_materials.atom_num_dens[m_materials.index[imat]+iZ];
+                Z = m_materials.mixture[ m_materials.index[ imat ] + iZ ];
+
+                f32 atom_num_dens = m_materials.atom_num_dens[ m_materials.index[ imat ] + iZ ];
 
                 // If for this Z nothing was already calculated
-                if (!flag_Z[Z]) {
-                    flag_Z[Z] = 1;
+                if ( !flag_Z[ Z ] ) {
+                    flag_Z[ Z ] = 1;
 
                     // for each energy bin
                     i=0; while (i < m_nb_bins) {
                         // absolute index to store data within the table
                         abs_index = Z*m_nb_bins + i;
 
-
                         if ( m_parameters.data_h.physics_list[PHOTON_RAYLEIGH] )
                         {
-                            photon_CS.data_h.Rayleigh_Lv_SF[abs_index] = Rayleigh_SF_Livermore(g4_ray_sf,
-                                                                                               photon_CS.data_h.E_bins[i],
-                                                                                               Z);
-                        }
+                            photon_CS.data_h.Rayleigh_Lv_SF[ abs_index ] = Rayleigh_SF_Livermore(g4_ray_sf,
+                                                                                                 photon_CS.data_h.E_bins[i],
+                                                                                                 Z);
+                            photon_CS.data_h.Rayleigh_Lv_xCS[ abs_index ] = atom_num_dens *
+                                                                            Rayleigh_CSPA_Livermore(g4_ray_cs, photon_CS.data_h.E_bins[i], Z);
+                        }                        
 
                         if ( m_parameters.data_h.physics_list[PHOTON_PHOTOELECTRIC] )
-                        {
-                            photon_CS.data_h.Rayleigh_Lv_xCS[abs_index] = atom_num_dens *
-                                    Rayleigh_CSPA_Livermore(g4_ray_cs, photon_CS.data_h.E_bins[i], Z);
-
-                            photon_CS.data_h.Photoelectric_Std_xCS[abs_index] = atom_num_dens *
-                                    Photoelec_CSPA_standard(photon_CS.data_h.E_bins[i], Z);
+                        {                                                       
+                            photon_CS.data_h.Photoelectric_Std_xCS[ abs_index ] = atom_num_dens *
+                                                                                  Photoelec_CSPA_standard(photon_CS.data_h.E_bins[i], Z);
                         }
 
                         ++i;
@@ -339,6 +342,7 @@ void CrossSections::m_build_photon_table()
 
             } // iZ
         } // if
+
 
         ++imat;
     } // imat
@@ -472,7 +476,7 @@ void CrossSections::m_copy_electron_cs_table_cpu2gpu()
     HANDLE_ERROR( cudaMalloc((void**) &electron_CS.data_d.eBremdedx      , k*n*sizeof(f32)) );
     HANDLE_ERROR( cudaMalloc((void**) &electron_CS.data_d.eBremCS        , k*n*sizeof(f32)) );
     HANDLE_ERROR( cudaMalloc((void**) &electron_CS.data_d.eMSC           , k*n*sizeof(f32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &electron_CS.data_d.eRange         , k*n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &electron_CS.data_d.eRange         , k*n*sizeof(f32)) );   
 
     // Copy data to GPU
     electron_CS.data_d.nb_bins = n;
@@ -480,7 +484,7 @@ void CrossSections::m_copy_electron_cs_table_cpu2gpu()
     electron_CS.data_d.E_min = electron_CS.data_h.E_min;
     electron_CS.data_d.E_max = electron_CS.data_h.E_max;
     electron_CS.data_d.cutEnergyElectron = electron_CS.data_h.cutEnergyElectron;
-    electron_CS.data_d.cutEnergyGamma    = electron_CS.data_h.cutEnergyGamma;
+    electron_CS.data_d.cutEnergyGamma    = electron_CS.data_h.cutEnergyGamma;       
 
     HANDLE_ERROR( cudaMemcpy(electron_CS.data_d.E              , electron_CS.data_h.E               , sizeof(f32)*n*k, cudaMemcpyHostToDevice) );
     HANDLE_ERROR( cudaMemcpy(electron_CS.data_d.eIonisationdedx, electron_CS.data_h.eIonisationdedx , sizeof(f32)*n*k, cudaMemcpyHostToDevice) );
@@ -489,7 +493,6 @@ void CrossSections::m_copy_electron_cs_table_cpu2gpu()
     HANDLE_ERROR( cudaMemcpy(electron_CS.data_d.eBremCS        , electron_CS.data_h.eBremCS         , sizeof(f32)*n*k, cudaMemcpyHostToDevice) );
     HANDLE_ERROR( cudaMemcpy(electron_CS.data_d.eMSC           , electron_CS.data_h.eMSC            , sizeof(f32)*n*k, cudaMemcpyHostToDevice) );
     HANDLE_ERROR( cudaMemcpy(electron_CS.data_d.eRange         , electron_CS.data_h.eRange          , sizeof(f32)*n*k, cudaMemcpyHostToDevice) );
-
 }
 
 #endif

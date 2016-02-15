@@ -74,6 +74,12 @@ GGEMS::GGEMS()
     m_parameters.data_h.display_run_time = ENABLED;
     m_parameters.data_h.display_memory_usage = DISABLED;
 
+#ifdef _WIN32
+    m_parameters.data_h.display_in_color = DISABLED;
+#else
+    m_parameters.data_h.display_in_color = ENABLED;
+#endif
+
     // Element of the simulation
     m_source = nullptr;
     m_phantom = nullptr;
@@ -383,15 +389,47 @@ void GGEMS::set_detector( GGEMSDetector* aDetector )
 /// Utils
 
 // Display run time
-void GGEMS::set_display_run_time()
+void GGEMS::set_display_run_time( bool flag )
 {
-    m_parameters.data_h.display_run_time = ENABLED;
+    if ( flag )
+    {
+        m_parameters.data_h.display_run_time = ENABLED;
+    }
+    else
+    {
+        m_parameters.data_h.display_run_time = DISABLED;
+    }
 }
 
 // Display memory usage
-void GGEMS::set_display_memory_usage()
+void GGEMS::set_display_memory_usage( bool flag )
 {
-    m_parameters.data_h.display_memory_usage = ENABLED;
+    if ( flag )
+    {
+        m_parameters.data_h.display_memory_usage = ENABLED;
+    }
+    else
+    {
+        m_parameters.data_h.display_memory_usage = DISABLED;
+    }
+}
+
+// Display in color
+void GGEMS::set_display_in_color( bool flag )
+{
+    if ( flag )
+    {
+        #ifdef _WIN32
+            GGcerr << "Display in color is not supported by Windows terminal: option set to FALSE" << GGendl;
+            m_parameters.data_h.display_in_color = DISABLED;
+        #else
+            m_parameters.data_h.display_in_color = ENABLED;
+        #endif
+    }
+    else
+    {
+        m_parameters.data_h.display_in_color = DISABLED;
+    }
 }
 
 void GGEMS::set_secondaries_level ( ui32 level )
@@ -479,8 +517,6 @@ void GGEMS::m_copy_parameters_cpu2gpu()
 }
 
 
-
-
 ////// :: Main functions ::
 
 // Init simualtion
@@ -492,13 +528,11 @@ void GGEMS::init_simulation()
         print_error("Your license has expired or is invalid!\n");
         exit_simulation();
     }
-    print_banner(m_license.info.institution, m_license.info.expired_day, m_license.info.expired_month, m_license.info.expired_year, "V1.0");
+    print_banner(m_license.info.institution, m_license.info.expired_day, m_license.info.expired_month,
+                 m_license.info.expired_year, "V1.0", m_parameters.data_h );
 
     // Check
     m_check_mandatory();
-
-    // Print params
-    GGcout_params( m_parameters.data_h );
 
     // Run time
     f64 t_start = 0;
@@ -521,6 +555,9 @@ void GGEMS::init_simulation()
     {
         m_parameters.data_h.nb_of_batches++;
     }
+
+    // Print params
+    GGcout_params( m_parameters.data_h );
 
     //// Need to clean this bunch of crap - JB
 
@@ -721,6 +758,9 @@ void GGEMS::start_simulation()
 
     // Run time
     if ( m_parameters.data_h.display_run_time ) {
+        // Sync all kernel to get the GPU run time
+        if ( m_parameters.data_h.device_target == GPU_DEVICE ) cudaDeviceSynchronize();
+
         GGcout_time ( "Simulation run time", get_time()-t_start );
         GGnewline();
     }

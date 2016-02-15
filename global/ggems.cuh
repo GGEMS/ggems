@@ -75,8 +75,9 @@ public:
     void set_detector( GGEMSDetector* aDetector );
 
     // Utils
-    void set_display_run_time();
-    void set_display_memory_usage();
+    void set_display_run_time( bool flag );
+    void set_display_memory_usage( bool flag );
+    void set_display_in_color( bool flag );
 
     // Main functions
     void init_simulation();

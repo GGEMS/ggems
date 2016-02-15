@@ -21,12 +21,11 @@
 #include "transport_navigator.cuh"
 
 
-__host__ __device__ void e_read_CS_table (
-//                             ParticleStack particles,
+__host__ __device__ void e_read_CS_table (//                             ParticleStack particles,
     //ui32 id,
     ui16 mat, //material
     f32 energy, //energy of particle
-    ElectronsCrossSectionTable &electron_CS_table,
+    ElectronsCrossSectionTable electron_CS_table,
     ui8 &next_discrete_process, //next discrete process id
     ui32 &table_index,
     f32 & next_interaction_distance,

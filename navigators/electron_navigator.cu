@@ -87,7 +87,7 @@ f32  coefsig[8][11]= {{.4638,.37748,.32249,-.060362,-.065004,-.033457,-.004583,.
 __host__ __device__ void e_read_CS_table (
                                             ui16 mat, //material
                                             f32 energy, //energy of particle
-                                            ElectronsCrossSectionTable &d_table,
+                                            ElectronsCrossSectionTable d_table,
                                             ui8 &next_discrete_process, //next discrete process id
                                             ui32 &table_index,
                                             f32 & next_interaction_distance,
@@ -103,19 +103,19 @@ __host__ __device__ void e_read_CS_table (
     ui32 energy_index;
     if ( energy <= d_table.E_min )
     {
-        energy_index = 0;
+        energy_index = 0;       
     }
     else if ( energy >= d_table.E_max )
     {
-        energy_index = d_table.nb_bins-1;
+        energy_index = d_table.nb_bins-1;       
     }
     else
     {
-        energy_index = binary_search ( energy, d_table.E, d_table.nb_bins );
+        energy_index = binary_search ( energy, d_table.E, d_table.nb_bins );        
     }
 
     // Get absolute index table (considering mat id)
-    table_index = mat*d_table.nb_bins + energy_index;
+    table_index = mat*d_table.nb_bins + energy_index;   
 
     // Vars
     f32 CS, interaction_distance;
@@ -222,8 +222,7 @@ __host__ __device__ void e_read_CS_table (
     {
         erange = linear_interpolation ( d_table.E[ energy_index-1 ], d_table.eRange[ table_index-1 ],
                                         d_table.E[ energy_index ], d_table.eRange[ table_index ], energy );
-
-    }
+    }    
 
 }
 
@@ -415,8 +414,8 @@ __host__ __device__ f32 eLoss ( f32 LossLength, f32 Ekine, f32 dedxeIoni, f32 de
                                 ElectronsCrossSectionTable d_table, ui8 mat, MaterialsTable materials,
                                 ParticlesData &particles, GlobalSimulationParametersData parameters, ui32 id )
 {    
-    f32 perteTot = LossLength * ( dedxeIoni + dedxeBrem );
-        
+    f32 perteTot = LossLength * ( dedxeIoni + dedxeBrem );        
+
     // 0.01 is xi
     if ( perteTot > Ekine * 0.01 )
     {
@@ -1229,6 +1228,9 @@ __host__ __device__
 void eSampleSecondarieGamma ( f32 minEnergy, f32 maxEnergy, ParticlesData &particles, ui32 id, MaterialsTable materials, ui8 id_mat )
 {
 
+    // DEBUG
+    //printf("eBrem sample second\n");
+
     ui32 ind;
     f32  gammaEnergy, totalEnergy;
     f32  xmin, xmax, kappa, epsilmin, epsilmax;
@@ -1355,6 +1357,7 @@ void eSampleSecondarieGamma ( f32 minEnergy, f32 maxEnergy, ParticlesData &parti
     particles.E[ id ] = Ekine - gammaEnergy;
 
     // Photon not produced
+    //printf("Gamme energy %e\n", gammaEnergy);
 
 }
 #endif

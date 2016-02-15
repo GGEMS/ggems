@@ -23,15 +23,7 @@ class MaterialsDataBase {
     public:
         MaterialsDataBase();
         void load_materials(std::string);
-
-#define NEW_MATERIALS
-
-#ifdef NEW_MATERIALS
         void load_elements();
-#else
-        void load_elements(std::string);
-#endif
-
         f32 get_density( std::string mat_name );
         ui16 get_nb_elements( std::string mat_name );
         std::string get_element_name( std::string mat_name, ui16 index);

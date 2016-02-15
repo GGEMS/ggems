@@ -15,6 +15,7 @@ GGEMS Bug Reporting (GBR)
 
 * GBR001 - No set_model in class of ConeBeamCTSource
 * GBR002 - No printInfoDetection in class of ConeBeamCTSource
+* GBR003 - Dose to patient not working while using a voxel size different to the doxel size
 
 ====
 Misc

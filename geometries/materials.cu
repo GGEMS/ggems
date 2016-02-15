@@ -150,9 +150,7 @@ void MaterialsDataBase::m_add_elements( std::string elt_name, ui16 elt_Z, f32 el
 {
     elements_Z[ elt_name ] = elt_Z;
     elements_A[ elt_name ] = elt_A *gram/mole;
-    elements_pot[ elt_name ] = elt_pot *eV;
-
-    printf("Name %s   Z %i   A %e   pot %e\n", elt_name.c_str(), elt_Z, elt_A, elt_pot);
+    elements_pot[ elt_name ] = elt_pot *eV;   
 }
 
 //// Public ///////////////
@@ -601,9 +599,6 @@ ui8 MaterialsDataBase::get_element_state( ui16 Z )
     return element_state[ Z ];
 }
 
-#define NEW_MATERIALS
-
-#ifdef NEW_MATERIALS
 // Load elements from internal data
 void MaterialsDataBase::load_elements()
 {
@@ -662,36 +657,6 @@ void MaterialsDataBase::load_elements()
     m_add_elements( "Uranium"    , 92, 238.03  , 890.0 );
 }
 
-#else
-// Load elements from data file
-void MaterialsDataBase::load_elements(std::string filename) {
-
-    std::ifstream file(filename.c_str());
-
-    std::string line, elt_name;
-    i32 elt_Z;
-    f32 elt_A;
-
-    while (file) {
-        m_txt_reader.skip_comment(file);
-        std::getline(file, line);
-
-        if (file) {
-            elt_name = m_txt_reader.read_element_name(line);
-            elt_Z = m_txt_reader.read_element_Z(line);
-            elt_A = m_txt_reader.read_element_A(line);
-
-            elements_Z[elt_name] = elt_Z;
-            elements_A[elt_name] = elt_A;
-
-            printf(" Elt name %s  Z %i   A %e\n", elt_name.c_str(), elt_Z, elt_A );
-        }
-
-    }
-
-}
-#endif
-
 //////////////////////////////////////////////////////////////////
 //// Materials class /////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////
@@ -699,25 +664,6 @@ void MaterialsDataBase::load_elements(std::string filename) {
 Materials::Materials() {} // // This class is used to build the material table
 
 ///:: Privates
-
-/*
-// Search and return the material index for a given material name
-ui16 MaterialManager::m_get_material_index(std::string material_name) {
-
-    // Check if this material is already used, if it is return the corresponding index
-    ui16 index = 0;
-    while (index < m_materials_list.size()) {
-        if (m_materials_list[index] == material_name) return index;
-        ++index;
-    }
-
-    // If it is not, add a new entry into the material table
-    index = m_materials_list.size();
-    m_materials_list.push_back(material_name);
-
-    return index;
-}
-*/
 
 // Check mandatory
 bool Materials::m_check_mandatory() {
@@ -921,10 +867,7 @@ void Materials::m_build_materials_table(GlobalSimulationParameters params, std::
 
             // compute nb electrons per volume
             data_h.nb_electrons_per_vol[i] += data_h.atom_num_dens[fill_index] *
-                                              m_material_db.get_element_Z( elt_name );
-
-            printf("Elt %s   Z %i     A  %e   frac %e\n", elt_name.c_str(), m_material_db.get_element_Z( elt_name ),
-                   m_material_db.get_element_A( elt_name ), cur_mat.mixture_f[j]);
+                                              m_material_db.get_element_Z( elt_name );            
 
             ++j;
             ++fill_index;

@@ -79,7 +79,7 @@ void kernel_host_track_to_out ( ParticlesData particles,
 class VoxPhanDosiNav : public GGEMSPhantom
 {
 public:
-    VoxPhanDosiNav() {}
+    VoxPhanDosiNav();
     ~VoxPhanDosiNav() {}
 
     // Init
@@ -97,6 +97,7 @@ public:
     void write ( std::string filename = "dosimetry.mhd" );
     void set_elements( std::string filename );
     void set_materials( std::string filename );
+    void set_doxel_size( f32 sizex, f32 sizey, f32 sizez );
 private:
 
     VoxelizedPhantom m_phantom;
@@ -105,6 +106,7 @@ private:
     DoseCalculator m_dose_calculator;
 
     bool m_check_mandatory();
+    f32 m_doxel_size_x, m_doxel_size_y, m_doxel_size_z;
 
     GlobalSimulationParameters m_params;
 
