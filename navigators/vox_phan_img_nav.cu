@@ -314,11 +314,6 @@ void VoxPhanImgNav::initialize ( GlobalSimulationParameters params )
     m_cross_sections.initialize ( m_materials, params );
 }
 
-void VoxPhanImgNav::set_elements( std::string filename )
-{
-    m_elements_filename = filename;
-}
-
 void VoxPhanImgNav::set_materials( std::string filename )
 {
     m_materials_filename = filename;
