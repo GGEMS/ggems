@@ -86,6 +86,7 @@ namespace ImageReader
 
     void record3Dimage ( std::string histname,  f64 *data, f32xyz offset, f32xyz spacing, i32xyz size, bool sparce_compression = false );
     void record3Dimage ( std::string histname,  ui32 *data, f32xyz offset, f32xyz spacing, i32xyz size, bool sparce_compression = false );
+    void record3Dimage ( std::string histname,  ui16 *data, f32xyz offset, f32xyz spacing, i32xyz size, bool sparce_compression = false );
 
     inline std::string get_format ( std::string filename )
     {

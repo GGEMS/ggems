@@ -91,7 +91,7 @@ __host__ __device__ void ct_detector_track_to_in( ParticlesData &particles,
 
   // Calculate pixel id
   ui32 idx_xr = (ui32)( ( rot_posy - detector_volume.ymin ) / pixel_size_y );
-  ui32 idx_yr = nb_pixel_z - 1 - (ui32)( ( pos.z - detector_volume.zmin ) / pixel_size_z );
+  ui32 idx_yr = (ui32)( ( pos.z - detector_volume.zmin ) / pixel_size_z );
 
   if( idx_xr >= nb_pixel_y || idx_yr >= nb_pixel_z || particles.E[ id ] < threshold )
   {
@@ -280,16 +280,23 @@ void CTDetector::save_projection( std::string filename )
       cudaMemcpyDeviceToHost ) );
   }
 
+  ui16 *projection16 = new ui16[ m_nb_pixel_x * m_nb_pixel_y * m_nb_pixel_z ];
+  for( ui32 i = 0; i < m_nb_pixel_x * m_nb_pixel_y * m_nb_pixel_z; ++i )
+  {
+    projection16[ i ] = m_projection_h[ i ];
+  }
+
   // Global sinogram
   ImageReader::record3Dimage(
     filename,
-    m_projection_h,
+    projection16,
     make_f32xyz( 0.0f, 0.0f, 0.0f ),
     make_f32xyz( m_pixel_size_x, m_pixel_size_y, m_pixel_size_z ),
     make_i32xyz( m_nb_pixel_x, m_nb_pixel_y, m_nb_pixel_z ),
     false
   );
 
+  delete[] projection16;
 }
 
 void CTDetector::save_scatter( std::string basename )
@@ -302,6 +309,8 @@ void CTDetector::save_scatter( std::string basename )
       * MAX_SCATTER_ORDER, cudaMemcpyDeviceToHost ) );
   }
 
+  ui16 *scatter16 = new ui16[ MAX_SCATTER_ORDER * m_nb_pixel_x * m_nb_pixel_y * m_nb_pixel_z ];
+
   // Loop over the scatter order
   for( ui32 i = 0; i < MAX_SCATTER_ORDER; ++i )
   {
@@ -310,16 +319,23 @@ void CTDetector::save_scatter( std::string basename )
     out << basename << "_" << std::setfill( '0' ) << std::setw( 3 ) << i
       << ".mhd";
 
+    for( ui32 j = 0; j < m_nb_pixel_x * m_nb_pixel_y * m_nb_pixel_z; ++j )
+    {
+      scatter16[ j + i * m_nb_pixel_x * m_nb_pixel_y ] = m_scatter_order_h[ j + i * m_nb_pixel_x * m_nb_pixel_y ];
+    }
+
     // Save the scatter image for each order
     ImageReader::record3Dimage(
       out.str(),
-      &m_scatter_order_h[ i * m_nb_pixel_x * m_nb_pixel_y ],
+      &scatter16[ i * m_nb_pixel_x * m_nb_pixel_y ],
       make_f32xyz( 0.0f, 0.0f, 0.0f ),
       make_f32xyz( m_pixel_size_x, m_pixel_size_y, m_pixel_size_z ),
       make_i32xyz( m_nb_pixel_x, m_nb_pixel_y, m_nb_pixel_z ),
       false
     );
+
   }
+  delete[] scatter16;
 }
 
 ui32 CTDetector::getDetectedParticles()

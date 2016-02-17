@@ -482,6 +482,7 @@ __constant__ ui16 GPU_Rayleigh_LV_SF_NbIntervals [101] =
 
 // CPU
 
+#ifndef __CUDA_ARCH__
 const i32 CPU_Rayleigh_LV_CS_CumulIntervals [101] =
 {
         0, // nonexisting 'zero' element
@@ -645,7 +646,7 @@ const ui16 CPU_Rayleigh_LV_SF_NbIntervals [101] =
 //    Am,   Cm,   Bk,   Cf,   Es,   Fm                                  (100)
      134,  134,  133,  135,  135,  133
 };
-
+#endif
 
 // Functions allowing to fetch value according if GPU or CPU code is used.
 

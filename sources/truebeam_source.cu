@@ -3,6 +3,7 @@
 #include <cstring>
 #include <cstdlib>
 #include <iostream>
+#include <stdexcept>
 
 using namespace std;
 
