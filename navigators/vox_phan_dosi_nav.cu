@@ -579,6 +579,13 @@ __host__ __device__ void VPDN::track_photon_to_out ( ParticlesData &particles,
         SecParticle electron = photon_resolve_discrete_process ( particles, parameters, photon_CS_table,
                                                                  materials, mat_id, part_id );
 
+        // If gamma particle was dead (PE or Compton) drop its energy
+        if ( particles.endsimu[ part_id ] == PARTICLE_DEAD && particles.E[ part_id ] != 0.0f )
+        {
+            dose_record_standard( dosi, particles.E[ part_id ], particles.px[ part_id ],
+                                  particles.py[ part_id ], particles.pz[ part_id ] );
+        }
+
         /// If there is a secondary particle, push the primary into buffer and track this new particle
 
         if ( electron.endsimu == PARTICLE_ALIVE && electron.E > materials.electron_energy_cut[ mat_id ] &&
