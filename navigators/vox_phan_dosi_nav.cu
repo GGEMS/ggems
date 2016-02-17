@@ -622,7 +622,7 @@ __host__ __device__ void VPDN::track_photon_to_out ( ParticlesData &particles,
     } // discrete process
 
     //// Photon energy cut
-    if ( particles.E[ part_id ] <= materials.electron_energy_cut[ mat_id ] )
+    if ( particles.E[ part_id ] <= materials.photon_energy_cut[ mat_id ] )
     {
         // Kill without mercy
         particles.endsimu[ part_id ] = PARTICLE_DEAD;
