@@ -547,7 +547,8 @@ void GGEMS::init_simulation()
     // CPU PRNG
     srand ( m_parameters.data_h.seed );
 
-    // Get Nb of batch
+    // Get Nb of batch            
+    m_parameters.data_h.size_of_particles_batch = fminf( m_parameters.data_h.nb_of_particles, m_parameters.data_h.size_of_particles_batch );
 
     m_parameters.data_h.nb_of_batches = ui32 ( ( f32 ) m_parameters.data_h.nb_of_particles / ( f32 ) m_parameters.data_h.size_of_particles_batch );
 
@@ -723,6 +724,10 @@ void GGEMS::start_simulation()
         //         progress_bar(progress,"generate primaries");
         m_source->get_primaries_generator( m_particles_manager.particles );
 
+        //m_particles_manager.copy_gpu2cpu( m_particles_manager.particles );
+        //m_particles_manager.print_stack( m_particles_manager.particles );
+
+
         // Nav between source and phantom
         if ( m_phantom )
         {
@@ -751,6 +756,7 @@ void GGEMS::start_simulation()
 
         //             progress += 0.16; // for demonstration only
         //         }
+
         ++ibatch;
     }
     //        progress_bar(progress, m_parameters.data_h.nb_of_batches , m_parameters.data_h.nb_of_batches);

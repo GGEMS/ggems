@@ -64,17 +64,7 @@ class ConeBeamCTSource : public GGEMSSource
       \param pname name of the particle
       \brief set the type of the particle
     */
-    void set_particle_type( std::string pname );
-
-    /*!
-      \fn void set_direction ( std::string type, f32 vdx, f32 vdy, f32 vdz )
-      \param type Type of the source
-      \param vdx Direction of the X-ray beam in X
-      \param vdy Direction of the X-ray beam in Y
-      \param vdz Direction of the X-ray beam in Z
-      \brief Set the direction of the X-ray beam
-    */
-    void set_direction( std::string type, f32 vdx, f32 vdy, f32 vdz );
+    void set_particle_type( std::string pname );  
 
     /*!
       \fn void set_mono_energy( f32 energy )
@@ -140,12 +130,8 @@ class ConeBeamCTSource : public GGEMSSource
     f32 m_hfoc; /*!< Horizontal focal position */
     f32 m_vfoc; /*!< Vertical focal position */
     f32 m_aperture; /*!< Aperture of the source */
-    ui8 m_particle_type; /*!< Type of the particle */
-    ui8 m_direction_option; /*!< Direction option for the beam */
-    f32 m_orbiting_angle; /*!< Orbiting angle of the source */
-    f32 m_dx; /*!< Direction in X for the beam */
-    f32 m_dy; /*!< Direction in Y for the beam */
-    f32 m_dz; /*!< Direction in Z for the beam */
+    ui8 m_particle_type; /*!< Type of the particle */    
+    f32 m_orbiting_angle; /*!< Orbiting angle of the source */    
     f64 *m_spectrumE_h; /*!< Energy spectrum of the source on the host (CPU) */
     f64 *m_spectrumE_d; /*!< Energy spectrum of the source on the device (GPU) */
     f64 *m_spectrumCDF_h; /*!< CDF of the source on the host (CPU) */

@@ -57,7 +57,7 @@ void kernel_host_track_to_out ( ParticlesData particles,
 class VoxPhanImgNav : public GGEMSPhantom
 {
 public:
-    VoxPhanImgNav() : m_elements_filename( "" ), m_materials_filename( "" ) {}
+    VoxPhanImgNav() : m_materials_filename( "" ) {}
     ~VoxPhanImgNav() {}
 
     // Init
@@ -67,12 +67,10 @@ public:
     // Tracking inside the phantom until the phantom border
     void track_to_out ( Particles particles );
 
-    void load_phantom_from_mhd ( std::string filename, std::string range_mat_name );
-    void set_elements( std::string filename );
+    void load_phantom_from_mhd ( std::string filename, std::string range_mat_name );    
     void set_materials( std::string filename );
 
-private:
-    std::string m_elements_filename;
+private:   
     std::string m_materials_filename;
 
     VoxelizedPhantom m_phantom;

@@ -3,6 +3,17 @@
 Phantoms
 ========
 
+Two main phantoms are used in GGEMS. Each one handle different particle navigation dedicated to a specific application. For instance a phantom *VoxPhanImgNav* is used for CT imaging while a phantom *VoxPhanDosiNav* is used in radiotherapy application. 
+
++----------------+---------------------+---------------------+---------------------+-----------------+
+| Phantom name   | Type of volume      | Particle navigator  | Specificity         | Applications    |
++================+=====================+=====================+=====================+=================+
+| VoxPhanImgNav  | Voxelized           | Photon              | Record scattering   | Imaging         |
++----------------+---------------------+---------------------+---------------------+-----------------+
+| VoxPhanDosiNav | Voxelized           | Photon and electron | Record dose         | Dosimetry       |
++----------------+---------------------+---------------------+---------------------+-----------------+
+
+
 VoxPhanImgNav
 -------------
 

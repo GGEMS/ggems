@@ -67,16 +67,6 @@ characterize the source. In this source, the user can define a focal, an apertur
 
 ------------
 
-.. c:function:: void set_direction( std::string type, f32 vdx, f32 vdy, f32 vdz )
-
-    Set the direction of the X-ray beam.
-
-.. warning::
-    
-    Obsolete ? Remove this function if need.
-
-------------
-
 .. c:function:: void set_mono_energy( f32 energy )
 
     Set the energy value of the particles. All particles will get the same energy.

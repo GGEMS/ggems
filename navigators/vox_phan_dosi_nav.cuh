@@ -94,8 +94,7 @@ public:
     void calculate_dose_to_phantom();
     void calculate_dose_to_water();
     
-    void write ( std::string filename = "dosimetry.mhd" );
-    void set_elements( std::string filename );
+    void write ( std::string filename = "dosimetry.mhd" );    
     void set_materials( std::string filename );
     void set_doxel_size( f32 sizex, f32 sizey, f32 sizez );
 private:
@@ -110,7 +109,6 @@ private:
 
     GlobalSimulationParameters m_params;
 
-    std::string m_elements_filename;
     std::string m_materials_filename;
 
 //

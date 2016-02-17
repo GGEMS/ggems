@@ -200,7 +200,7 @@ bool VoxPhanImgNav::m_check_mandatory()
 
     if ( m_phantom.data_h.nb_vox_x == 0 || m_phantom.data_h.nb_vox_y == 0 || m_phantom.data_h.nb_vox_z == 0 ||
             m_phantom.data_h.spacing_x == 0 || m_phantom.data_h.spacing_y == 0 || m_phantom.data_h.spacing_z == 0 ||
-            m_phantom.list_of_materials.size() == 0 )
+            m_phantom.list_of_materials.size() == 0 || m_materials_filename.empty() )
     {
         return false;
     }
@@ -299,15 +299,8 @@ void VoxPhanImgNav::initialize ( GlobalSimulationParameters params )
     m_phantom.set_name ( "VoxPhanImgNav" );
     m_phantom.initialize ( params );    
 
-    if( !m_materials_filename.empty() )
-    {
-        m_materials.load_materials_database( m_materials_filename );
-    }
-    else
-    {
-        m_materials.load_materials_database();
-    }
-
+    // Material
+    m_materials.load_materials_database( m_materials_filename );
     m_materials.initialize ( m_phantom.list_of_materials, params );
 
     // Cross Sections
