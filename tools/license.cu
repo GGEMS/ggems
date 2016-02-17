@@ -129,19 +129,19 @@ static const ui32 FSb[256] =
 // Unused in the code. Useless ?
     
 #define V(a,b,c,d) 0x##a##b##c##d
-static const ui32 FT0[256] = { FT };
+//static const ui32 FT0[256] = { FT };
 #undef V
 
 #define V(a,b,c,d) 0x##d##a##b##c
-static const ui32 FT1[256] = { FT };
+//static const ui32 FT1[256] = { FT };
 #undef V
 
 #define V(a,b,c,d) 0x##c##d##a##b
-static const ui32 FT2[256] = { FT };
+//static const ui32 FT2[256] = { FT };
 #undef V
 
 #define V(a,b,c,d) 0x##b##c##d##a
-static const ui32 FT3[256] = { FT };
+//static const ui32 FT3[256] = { FT };
 #undef V
 
 #undef FT

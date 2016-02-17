@@ -392,8 +392,7 @@ __constant__ f32 GPU_atom_BindingEnergies[1540] = {
      29.0 ,     7.0 ,
 };
 
-
-
+#ifndef __CUDA_ARCH__
 // Number of shells
 const ui16 CPU_atom_NumberOfShells[101] = {
  0 ,  // nonexisting zero element
@@ -774,6 +773,7 @@ const f32 CPU_atom_BindingEnergies[1540] = {
     453.0 ,   375.0 ,   275.0 ,   160.0 ,  145.0 ,   15.0 ,   69.0 ,   45.0 ,
      29.0 ,     7.0 ,
 };
+#endif
 
 __host__ __device__ ui16 atom_NumberOfShells(ui32 pos){
 #ifdef __CUDA_ARCH__

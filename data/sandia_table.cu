@@ -1496,7 +1496,7 @@ __constant__ f32 GPU_PhotoElec_std_SandiaTable[981][5] =
 // ************************************************************************
 // * PE - Standard (Sandia table)
 // ************************************************************************
-
+#ifndef __CUDA_ARCH__
 const ui16 CPU_PhotoElec_std_NbIntervals [101] =
 {
 
@@ -2979,7 +2979,7 @@ const f32 CPU_PhotoElec_std_SandiaTable[981][5] =
 { 500.0,        0.8135E+01,  0.1726E+05,  0.1171E+08, -0.1346E+10 }
 
 } ;  // --------------- end of fSandiaTable array -----------------------
-
+#endif
 
 
 __host__ __device__ ui16 PhotoElec_std_NbIntervals(ui32 pos) {
