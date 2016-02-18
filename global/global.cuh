@@ -227,6 +227,7 @@ struct GlobalSimulationParametersData
     bool display_run_time;
     bool display_memory_usage;
     bool display_in_color;
+    bool display_energy_cuts;
 
     // Transport navigation tolerance
     f32 geom_tolerance;
@@ -254,13 +255,13 @@ void cuda_error_check ( const char * prefix, const char * postfix );
 // Utils
 void print_error ( std::string msg );
 void print_warning ( std::string msg );
-void print_memory ( std::string txt, ui32 t );
 
 void print_banner ( std::string institution, std::string exp_day, std::string exp_month, std::string exp_year,
                     std::string version, GlobalSimulationParametersData params );
 void exit_simulation();
 
 void GGcout_time ( std::string txt, f64 t );
+void GGcout_mem ( std::string txt, ui64 valmem );
 void GGcout_params ( GlobalSimulationParametersData params );
 void GGnewline( );
 

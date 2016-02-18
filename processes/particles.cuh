@@ -52,7 +52,6 @@ struct ParticlesData
     // size
     ui32 size;
 
-    ui8 nb_of_secondaries;
     // Secondaries stack
     // Acces to level : Part_ID * size + hierarchy level
     f32* sec_E; // size * hierarchy level
@@ -181,6 +180,8 @@ private:
     void m_gpu_malloc_stack();
     void m_cpu_init_stack_seed ( ui32 seed );
     void m_copy_seed_cpu2gpu();
+
+    GlobalSimulationParameters m_params;
 
 
 };

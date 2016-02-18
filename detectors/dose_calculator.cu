@@ -434,6 +434,13 @@ void DoseCalculator::write ( std::string filename )
                     make_f32xyz ( dose.data_h.ox,dose.data_h.oy,dose.data_h.oz ),
                     make_f32xyz ( dose.data_h.spacing_x,dose.data_h.spacing_y,dose.data_h.spacing_z ),
                     make_i32xyz ( dose.data_h.nx,dose.data_h.ny,dose.data_h.nz ) );
+
+        ImageReader::record3Dimage (
+                    filename + "-Hit."+format,
+                    dose.data_h.number_of_hits,
+                    make_f32xyz ( dose.data_h.ox,dose.data_h.oy,dose.data_h.oz ),
+                    make_f32xyz ( dose.data_h.spacing_x,dose.data_h.spacing_y,dose.data_h.spacing_z ),
+                    make_i32xyz ( dose.data_h.nx,dose.data_h.ny,dose.data_h.nz ) );
         
         
     }

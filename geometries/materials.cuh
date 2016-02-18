@@ -3,8 +3,10 @@
 #ifndef MATERIALS_CUH
 #define MATERIALS_CUH
 
+
 #include "global.cuh"
 #include "txt_reader.cuh"
+#include "range_cut.cuh"
 
 // To handle one material
 class aMaterial {
@@ -102,7 +104,7 @@ struct MaterialsTable {
     f32 *fA;
     f32 *fM;
 
-  // parameters of the energy loss fluctuation model:
+    // parameters of the energy loss fluctuation model:
     f32 *fF1;
     f32 *fF2;
     f32 *fEnergy0;
@@ -114,6 +116,7 @@ struct MaterialsTable {
 
     f32 *density;
 };
+
 
 // This class is used to build the material table
 class Materials {
@@ -148,6 +151,7 @@ class Materials {
 
         MaterialsDataBase m_material_db;
         std::vector<std::string> m_materials_list_name;
+        RangeCut m_rangecut;
 
 };
 

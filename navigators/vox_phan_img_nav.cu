@@ -213,6 +213,11 @@ bool VoxPhanImgNav::m_check_mandatory()
 
 ////:: Main functions
 
+ui64 VoxPhanImgNav::get_memory_usage()
+{
+    return 0;   // TODO - JB
+}
+
 void VoxPhanImgNav::track_to_in ( Particles particles )
 {
 

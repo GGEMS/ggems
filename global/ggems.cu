@@ -73,6 +73,7 @@ GGEMS::GGEMS()
     // Others parameters
     m_parameters.data_h.display_run_time = ENABLED;
     m_parameters.data_h.display_memory_usage = DISABLED;
+    m_parameters.data_h.display_energy_cuts = DISABLED;
 
 #ifdef _WIN32
     m_parameters.data_h.display_in_color = DISABLED;
@@ -414,6 +415,19 @@ void GGEMS::set_display_memory_usage( bool flag )
     }
 }
 
+// Display energy cut
+void GGEMS::set_display_energy_cuts( bool flag )
+{
+    if ( flag )
+    {
+        m_parameters.data_h.display_energy_cuts = ENABLED;
+    }
+    else
+    {
+        m_parameters.data_h.display_energy_cuts = DISABLED;
+    }
+}
+
 // Display in color
 void GGEMS::set_display_in_color( bool flag )
 {
@@ -604,79 +618,52 @@ void GGEMS::init_simulation()
     m_source->initialize ( m_parameters );
 
     /// Init Phantoms ////////////////////////////////
-    m_phantom->initialize ( m_parameters );
+    if ( m_phantom ) m_phantom->initialize ( m_parameters );
 
     /// Init Particles Stack /////////////////////////
     // The detector is not mandatory
-    if( m_detector ) m_detector->initialize ( m_parameters );
+    if ( m_detector ) m_detector->initialize ( m_parameters );
 
     /// Init Particles Stack /////////////////////////
     m_particles_manager.initialize ( m_parameters );
 
-    /*
-    // Mem usage
+
+    /// Verbose information //////////////////////////
+
+    // Display memory usage
     if (m_parameters.data_h.display_memory_usage) {
-        ui32 mem_part = 91*m_particles.size + 4;
-        mem += mem_part;
-        print_memory("Particles stack", mem_part);
-    }
-    */
 
-    /*
-        // Mem usage
-        if (m_parameters.display_memory_usage) {
-            ui32 n = m_cross_sections.photon_CS_table_h.nb_bins;
-            ui32 k = m_cross_sections.photon_CS_table_h.nb_mat;
-            ui32 mem_cs = 4*n + 12*n*k + 12*n*101 + 16;
-            mem += mem_cs;
-            print_memory("Cross sections", mem_cs);
+        ui64 totmem = 0;
+        ui64 mem;
 
-            // Add CS from others particles
-
-            // Parameters
-            ui32 mem_params = NB_PROCESSES+NB_PARTICLES+30;
-            mem += mem_params;
-            print_memory("Parameters", mem_params);
-
-
-            // Geometry
-            //ui32 mem_geom = 4*geometry.world.ptr_objects_dim + 4*geometry.world.size_of_objects_dim +
-            //        4*geometry.world.data_objects_dim + 4*geometry.world.ptr_nodes_dim +
-            //        4*geometry.world.size_of_nodes_dim + 4*geometry.world.child_nodes_dim +
-            //        4*geometry.world.mother_node_dim + 32;
-            //mem += mem_geom;
-            //print_memory("Geometry", mem_geom);
-
-            // Materials
-            n = m_materials.mat_table_h.nb_materials;
-            k = m_materials.mat_table_h.nb_elements_total;
-            ui32 mem_mat = 10*k + 80*n + 8;
-            mem += mem_mat;
-            print_memory("Materials", mem_mat);
-
-
-            // Sources
-            //ui32 mem_src = 4*sources.sources.ptr_sources_dim + 4*sources.sources.data_sources_dim +
-            //        4*sources.sources.seeds_dim + 16;
-            //mem += mem_src;
-            //print_memory("Sources", mem_src);
-
+        // Phantom
+        if ( m_phantom )
+        {
+            mem = m_phantom->get_memory_usage();
+            GGcout_mem("Phantom", mem);
+            totmem += mem;
         }
-    */
 
+        // Particle stack
+        ui64 n = m_particles_manager.particles.size;
+        ui64 l = m_parameters.data_h.nb_of_secondaries;
 
+        mem = n * ( 17 * sizeof( f32 ) + 4 * sizeof( ui8 ) ) +
+              n*l * ( 8 * sizeof ( f32 ) + sizeof( ui8 ) );
+
+        GGcout_mem("Particle stacks", mem);
+        totmem += mem;
+
+        GGcout_mem("Total memory usage", totmem);
+        GGnewline();
+    }
 
     // Run time
     if ( m_parameters.data_h.display_run_time ) {
         GGcout_time ( "Initialization", get_time()-t_start );
         GGnewline();
     }
-    /*
-        // Mem usage
-        if (m_parameters.display_memory_usage) {
-            print_memory("Total memory usage", mem);
-        }
-    */
+
 }
 
 

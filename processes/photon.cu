@@ -151,6 +151,7 @@ __host__ __device__ SecParticle Compton_SampleSecondaries_standard(ParticlesData
         electron.dir = fxyz_sub(fxyz_scale(gamDir0, gamE0), fxyz_scale(gamDir1, gamE1));
         electron.dir = fxyz_unit(electron.dir);
         electron.endsimu = PARTICLE_ALIVE;
+        //printf("Compton: new e-\n");
     }
 
     //return e-
@@ -297,7 +298,7 @@ __host__ __device__ SecParticle Photoelec_SampleSecondaries_standard(ParticlesDa
         electron.E = ElecKineEnergy;
         electron.endsimu = PARTICLE_ALIVE;
         // gamma will depose energy given by the binding energy
-        particles.E[id] = bindingEnergy;
+        particles.E[id] = bindingEnergy;        
     }
     
     // Return electron (dead or alive)

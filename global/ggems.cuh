@@ -78,6 +78,7 @@ public:
     void set_display_run_time( bool flag );
     void set_display_memory_usage( bool flag );
     void set_display_in_color( bool flag );
+    void set_display_energy_cuts( bool flag );
 
     // Main functions
     void init_simulation();

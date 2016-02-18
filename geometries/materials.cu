@@ -903,6 +903,19 @@ void Materials::m_build_materials_table(GlobalSimulationParameters params, std::
         data_h.electron_energy_cut[i] = params.data_h.electron_cut;
         data_h.rad_length[i] = m_material_db.get_rad_len( mat_name );
 
+        /// HERE compute and print range cut - DEBUGING - ALPHA
+        //f32 Ecut = m_rangecut.convert_gamma(80*um, &data_h, i);
+        f32 gEcut = m_rangecut.convert_gamma(100*um, data_h.mixture, data_h.nb_elements[i], data_h.atom_num_dens, data_h.index[i]);
+        f32 eEcut = m_rangecut.convert_electron(100.0*um, data_h.mixture, data_h.nb_elements[i], data_h.atom_num_dens, data_h.density[i], data_h.index[i]);
+
+
+        if ( params.data_h.display_energy_cuts )
+        {
+            printf("[GGEMS] Range cut    material: %s       gamma: %f keV\n", mat_name.c_str(), gEcut/keV);
+            printf("[GGEMS] Range cut    material: %s    electron: %f keV\n", mat_name.c_str(), eEcut/keV);
+            printf("\n");
+        }
+
         ++i;
     }
 
@@ -1109,7 +1122,6 @@ void Materials::initialize(std::vector<std::string> mats_list, GlobalSimulationP
     // Load elements data base
     m_material_db.load_elements();
     //load_elements_database( "data/materials/elts.dat" );
-
 
     // Build materials table
     m_build_materials_table(params, mats_list);

@@ -74,8 +74,9 @@ ParticleManager::ParticleManager()
 void ParticleManager::initialize ( GlobalSimulationParameters params )
 {
     particles.size = params.data_h.size_of_particles_batch;
-    particles.data_h.size = params.data_h.size_of_particles_batch;
-    particles.data_h.nb_of_secondaries = params.data_h.nb_of_secondaries;
+    particles.data_h.size = params.data_h.size_of_particles_batch;    
+
+    m_params = params;
 
     // Check if everything was set properly
     if ( !m_check_mandatory() )
@@ -138,16 +139,15 @@ void ParticleManager::m_cpu_malloc_stack()
     particles.data_h.pname = ( ui8* ) malloc ( particles.size * sizeof ( ui8 ) );
 
 
-    particles.data_h.sec_E =     ( f32* ) malloc ( particles.size * particles.data_h.nb_of_secondaries * sizeof ( f32 ) );
-    particles.data_h.sec_dx =    ( f32* ) malloc ( particles.size * particles.data_h.nb_of_secondaries * sizeof ( f32 ) );
-    particles.data_h.sec_dy =    ( f32* ) malloc ( particles.size * particles.data_h.nb_of_secondaries * sizeof ( f32 ) );
-    particles.data_h.sec_dz =    ( f32* ) malloc ( particles.size * particles.data_h.nb_of_secondaries * sizeof ( f32 ) );
-    particles.data_h.sec_px =    ( f32* ) malloc ( particles.size * particles.data_h.nb_of_secondaries * sizeof ( f32 ) );
-    particles.data_h.sec_py =    ( f32* ) malloc ( particles.size * particles.data_h.nb_of_secondaries * sizeof ( f32 ) );
-    particles.data_h.sec_pz =    ( f32* ) malloc ( particles.size * particles.data_h.nb_of_secondaries * sizeof ( f32 ) );
-    particles.data_h.sec_tof =   ( f32* ) malloc ( particles.size * particles.data_h.nb_of_secondaries * sizeof ( f32 ) );
-    particles.data_h.sec_pname = ( ui8* ) malloc ( particles.size * particles.data_h.nb_of_secondaries * sizeof ( ui8 ) );
-
+    particles.data_h.sec_E =     ( f32* ) malloc ( particles.size * m_params.data_h.nb_of_secondaries * sizeof ( f32 ) );
+    particles.data_h.sec_dx =    ( f32* ) malloc ( particles.size * m_params.data_h.nb_of_secondaries * sizeof ( f32 ) );
+    particles.data_h.sec_dy =    ( f32* ) malloc ( particles.size * m_params.data_h.nb_of_secondaries * sizeof ( f32 ) );
+    particles.data_h.sec_dz =    ( f32* ) malloc ( particles.size * m_params.data_h.nb_of_secondaries * sizeof ( f32 ) );
+    particles.data_h.sec_px =    ( f32* ) malloc ( particles.size * m_params.data_h.nb_of_secondaries * sizeof ( f32 ) );
+    particles.data_h.sec_py =    ( f32* ) malloc ( particles.size * m_params.data_h.nb_of_secondaries * sizeof ( f32 ) );
+    particles.data_h.sec_pz =    ( f32* ) malloc ( particles.size * m_params.data_h.nb_of_secondaries * sizeof ( f32 ) );
+    particles.data_h.sec_tof =   ( f32* ) malloc ( particles.size * m_params.data_h.nb_of_secondaries * sizeof ( f32 ) );
+    particles.data_h.sec_pname = ( ui8* ) malloc ( particles.size * m_params.data_h.nb_of_secondaries * sizeof ( ui8 ) );
 
 }
 
@@ -209,15 +209,15 @@ void ParticleManager::m_gpu_malloc_stack()
 
     particles.data_d.size = particles.data_h.size;
 
-    HANDLE_ERROR ( cudaMalloc ( ( void** ) &particles.data_d.sec_E,     particles.size * particles.data_h.nb_of_secondaries *sizeof ( f32 ) ) );
-    HANDLE_ERROR ( cudaMalloc ( ( void** ) &particles.data_d.sec_dx,    particles.size * particles.data_h.nb_of_secondaries *sizeof ( f32 ) ) );
-    HANDLE_ERROR ( cudaMalloc ( ( void** ) &particles.data_d.sec_dy,    particles.size * particles.data_h.nb_of_secondaries *sizeof ( f32 ) ) );
-    HANDLE_ERROR ( cudaMalloc ( ( void** ) &particles.data_d.sec_dz,    particles.size * particles.data_h.nb_of_secondaries *sizeof ( f32 ) ) );
-    HANDLE_ERROR ( cudaMalloc ( ( void** ) &particles.data_d.sec_px,    particles.size * particles.data_h.nb_of_secondaries *sizeof ( f32 ) ) );
-    HANDLE_ERROR ( cudaMalloc ( ( void** ) &particles.data_d.sec_py,    particles.size * particles.data_h.nb_of_secondaries *sizeof ( f32 ) ) );
-    HANDLE_ERROR ( cudaMalloc ( ( void** ) &particles.data_d.sec_pz,    particles.size * particles.data_h.nb_of_secondaries *sizeof ( f32 ) ) );
-    HANDLE_ERROR ( cudaMalloc ( ( void** ) &particles.data_d.sec_tof,   particles.size * particles.data_h.nb_of_secondaries *sizeof ( f32 ) ) );
-    HANDLE_ERROR ( cudaMalloc ( ( void** ) &particles.data_d.sec_pname, particles.size * particles.data_h.nb_of_secondaries *sizeof ( ui8 ) ) );
+    HANDLE_ERROR ( cudaMalloc ( ( void** ) &particles.data_d.sec_E,     particles.size * m_params.data_h.nb_of_secondaries *sizeof ( f32 ) ) );
+    HANDLE_ERROR ( cudaMalloc ( ( void** ) &particles.data_d.sec_dx,    particles.size * m_params.data_h.nb_of_secondaries *sizeof ( f32 ) ) );
+    HANDLE_ERROR ( cudaMalloc ( ( void** ) &particles.data_d.sec_dy,    particles.size * m_params.data_h.nb_of_secondaries *sizeof ( f32 ) ) );
+    HANDLE_ERROR ( cudaMalloc ( ( void** ) &particles.data_d.sec_dz,    particles.size * m_params.data_h.nb_of_secondaries *sizeof ( f32 ) ) );
+    HANDLE_ERROR ( cudaMalloc ( ( void** ) &particles.data_d.sec_px,    particles.size * m_params.data_h.nb_of_secondaries *sizeof ( f32 ) ) );
+    HANDLE_ERROR ( cudaMalloc ( ( void** ) &particles.data_d.sec_py,    particles.size * m_params.data_h.nb_of_secondaries *sizeof ( f32 ) ) );
+    HANDLE_ERROR ( cudaMalloc ( ( void** ) &particles.data_d.sec_pz,    particles.size * m_params.data_h.nb_of_secondaries *sizeof ( f32 ) ) );
+    HANDLE_ERROR ( cudaMalloc ( ( void** ) &particles.data_d.sec_tof,   particles.size * m_params.data_h.nb_of_secondaries *sizeof ( f32 ) ) );
+    HANDLE_ERROR ( cudaMalloc ( ( void** ) &particles.data_d.sec_pname, particles.size * m_params.data_h.nb_of_secondaries *sizeof ( ui8 ) ) );
 
 }
 

@@ -123,6 +123,23 @@ void GGcout_time ( std::string txt, f64 t )
 
 }
 
+// Print out memory usage
+void GGcout_mem ( std::string txt, ui64 valmem )
+{
+
+    std::vector<std::string> pref;
+    pref.push_back ( "B" );
+    pref.push_back ( "kB" );
+    pref.push_back ( "MB" );
+    pref.push_back ( "GB" );
+
+    ui32 iemem = ( ui32 ) ( log ( valmem ) / log ( 1000 ) );
+    f32 mem = f32 ( f64 ( valmem ) / ( pow ( 1000, iemem ) ) );
+
+    printf ( "[GGEMS] %s: %5.2f %s\n", txt.c_str(), mem, pref[iemem].c_str() );
+}
+
+
 std::string Green_str( std::string txt )
 {
     return "\033[32;01m" + txt + "\033[00m";
@@ -278,22 +295,7 @@ void GGnewline( )
 //ui32 seed;
 
 
-// Print out memory usage
-void print_memory ( std::string txt, ui32 t )
-{
 
-    std::vector<std::string> pref;
-    pref.push_back ( "B" );
-    pref.push_back ( "kB" );
-    pref.push_back ( "MB" );
-    pref.push_back ( "GB" );
-
-    ui32 iemem = ( ui32 ) ( log ( t ) / log ( 1000 ) );
-    f32 mem = f32 ( t ) / ( pow ( 1000, iemem ) );
-
-    printf ( "[\033[34;01mMemory usage\033[00m] %s: %5.2f %s\n", txt.c_str(), mem, pref[iemem].c_str() );
-
-}
 
 // Print GGEMS banner
 void print_banner( std::string institution, std::string exp_day, std::string exp_month, std::string exp_year,

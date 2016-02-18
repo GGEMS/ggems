@@ -25,6 +25,7 @@ public:
     virtual void initialize ( GlobalSimulationParameters params ) = 0;
     virtual void track_to_in ( Particles particles ) = 0;
     virtual void track_to_out ( Particles particles ) = 0;
+    virtual ui64 get_memory_usage ( ) = 0;
 
     void set_name ( std::string name );
     std::string get_name();
