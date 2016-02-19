@@ -154,6 +154,8 @@ DoseCalculator::DoseCalculator()
     dose.data_h.oy = 0.0;
     dose.data_h.oz = 0.0;
 
+    dose.data_h.nb_of_voxels = 0;
+
     dose.data_h.edep = NULL;
     dose.data_h.dose = NULL;
     dose.data_h.edep_squared = NULL;
@@ -186,6 +188,7 @@ void DoseCalculator::set_size_in_voxel ( ui32 nx, ui32 ny, ui32 nz )
     dose.data_h.nx = nx;
     dose.data_h.ny = ny;
     dose.data_h.nz = nz;
+    dose.data_h.nb_of_voxels = nx*ny*nz;
 }
 
 void DoseCalculator::set_voxel_size ( f32 sx, f32 sy, f32 sz )

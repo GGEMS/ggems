@@ -53,15 +53,15 @@ GGEMS::GGEMS()
 
     // Parameters
     m_parameters.data_h.nb_of_particles = 0;
-    m_parameters.data_h.size_of_particles_batch = 0;
+    m_parameters.data_h.size_of_particles_batch = 1000000;
     m_parameters.data_h.nb_of_batches = 0;
     m_parameters.data_h.time = 0;
     m_parameters.data_h.seed = 0;
-    m_parameters.data_h.cs_table_nbins = 0;
-    m_parameters.data_h.cs_table_min_E = 0;
-    m_parameters.data_h.cs_table_max_E = 0;
-    m_parameters.data_h.photon_cut = 0;
-    m_parameters.data_h.electron_cut = 0;
+    m_parameters.data_h.cs_table_nbins = 220;
+    m_parameters.data_h.cs_table_min_E = 990*eV;
+    m_parameters.data_h.cs_table_max_E = 250*MeV;
+    m_parameters.data_h.photon_cut = 250*MeV;
+    m_parameters.data_h.electron_cut = 250*MeV;
     m_parameters.data_h.nb_of_secondaries = 0;
     m_parameters.data_h.geom_tolerance = 100.0 *nm;
 
@@ -627,34 +627,19 @@ void GGEMS::init_simulation()
     /// Init Particles Stack /////////////////////////
     m_particles_manager.initialize ( m_parameters );
 
-
     /// Verbose information //////////////////////////
 
     // Display memory usage
     if (m_parameters.data_h.display_memory_usage) {
-
-        ui64 totmem = 0;
-        ui64 mem;
-
-        // Phantom
-        if ( m_phantom )
-        {
-            mem = m_phantom->get_memory_usage();
-            GGcout_mem("Phantom", mem);
-            totmem += mem;
-        }
-
         // Particle stack
         ui64 n = m_particles_manager.particles.size;
         ui64 l = m_parameters.data_h.nb_of_secondaries;
 
-        mem = n * ( 17 * sizeof( f32 ) + 4 * sizeof( ui8 ) ) +
-              n*l * ( 8 * sizeof ( f32 ) + sizeof( ui8 ) );
+        ui64 mem = n * ( 17 * sizeof( f32 ) + 4 * sizeof( ui8 ) ) +
+                   n*l * ( 8 * sizeof ( f32 ) + sizeof( ui8 ) );
 
         GGcout_mem("Particle stacks", mem);
-        totmem += mem;
 
-        GGcout_mem("Total memory usage", totmem);
         GGnewline();
     }
 

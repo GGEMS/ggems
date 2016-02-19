@@ -211,12 +211,12 @@ bool VoxPhanImgNav::m_check_mandatory()
 
 }
 
-////:: Main functions
-
-ui64 VoxPhanImgNav::get_memory_usage()
+ui64 VoxPhanImgNav::m_get_memory_usage()
 {
     return 0;   // TODO - JB
 }
+
+////:: Main functions
 
 void VoxPhanImgNav::track_to_in ( Particles particles )
 {
@@ -310,6 +310,14 @@ void VoxPhanImgNav::initialize ( GlobalSimulationParameters params )
 
     // Cross Sections
     m_cross_sections.initialize ( m_materials, params );
+
+    // Some verbose if required
+    if ( params.data_h.display_memory_usage )
+    {
+        ui64 mem = m_get_memory_usage();
+        GGcout_mem("VoxPhanImgNav", mem);
+    }
+
 }
 
 void VoxPhanImgNav::set_materials( std::string filename )

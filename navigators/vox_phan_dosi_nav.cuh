@@ -87,9 +87,7 @@ public:
     // Tracking from outside to the phantom broder
     void track_to_in ( Particles particles );
     // Tracking inside the phantom until the phantom border
-    void track_to_out ( Particles particles );
-    // Get the memeory usage
-    ui64 get_memory_usage();
+    void track_to_out ( Particles particles );    
 
     void load_phantom_from_mhd ( std::string filename, std::string range_mat_name );
 
@@ -107,6 +105,10 @@ private:
     DoseCalculator m_dose_calculator;
 
     bool m_check_mandatory();
+
+    // Get the memeory usage
+    ui64 m_get_memory_usage();
+
     f32 m_doxel_size_x, m_doxel_size_y, m_doxel_size_z;
 
     GlobalSimulationParameters m_params;

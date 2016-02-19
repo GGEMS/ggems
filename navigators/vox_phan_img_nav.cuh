@@ -66,8 +66,6 @@ public:
     void track_to_in ( Particles particles );
     // Tracking inside the phantom until the phantom border
     void track_to_out ( Particles particles );
-    // Return the memory usage
-    ui64 get_memory_usage();
 
     void load_phantom_from_mhd ( std::string filename, std::string range_mat_name );    
     void set_materials( std::string filename );
@@ -80,6 +78,9 @@ private:
     CrossSections m_cross_sections;
 
     bool m_check_mandatory();
+
+    // Return the memory usage
+    ui64 m_get_memory_usage();
 
     GlobalSimulationParameters m_params;
 };

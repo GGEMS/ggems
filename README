@@ -62,5 +62,9 @@ hg ci -m 'closing mybranch' --close-branch
 * Get fresh files (if removed accidentaly)
 hg update --clean
 
+* Forget a file
+hg forget
 
+* After removing a file manually, remove it from hg tree
+hg remove --after
 
