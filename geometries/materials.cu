@@ -924,13 +924,6 @@ void Materials::m_build_materials_table(GlobalSimulationParameters params, std::
 
 ///:: Mains
 
-// Load default materials database (wrapper to the class MaterialDataBase)
-void Materials::load_materials_database() {
-    std::string filename = std::string(getenv("GGEMSHOME"));
-    filename += "/data/mats.dat";
-    m_material_db.load_materials(filename);
-}
-
 // Load materials database from a given file (wrapper to the class MaterialDataBase)
 void Materials::load_materials_database(std::string filename) {
     m_material_db.load_materials(filename);

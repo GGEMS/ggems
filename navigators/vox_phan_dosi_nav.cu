@@ -79,12 +79,10 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
     f32 edep;
     f32 trueGeomLength;
 
-#ifdef DEBUG
-    ui32 istep = 0;
-#endif
+    f32 electronEcut;
 
     // DEBUG
-    //ui32 istep = 0;
+    ui32 istep = 0;
 
     //if ( part_id == 794983 ) printf(":: Istep 0 - pos %e %e %e\n", particles.px[part_id], particles.py[part_id], particles.pz[part_id]);
 
@@ -97,6 +95,8 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
         {
             particles.endsimu[ part_id ] = PARTICLE_FREEZE;
             //printf("  ID %i  e- out\n", part_id);
+            //printf("   ID %i - istep %i - Electron out\n", part_id, istep );
+
             return;
         }
 
@@ -151,15 +151,8 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
 
         // Get the material that compose this volume
         ui16 mat_id = vol.values[ index_phantom.w ];
-        
-        //        if ( part_id == 794983 ) {
-
-        //            printf("--> BeforeReadCD\n");
-
-        //            printf("    E %e pos %e %e %e matid %i\n", particles.E[part_id], particles.px[part_id],
-        //                   particles.py[part_id], particles.pz[part_id], mat_id );
-
-        //        }
+        electronEcut = materials.electron_energy_cut[ mat_id ];
+              
 
         // Read the different CS, dE/dx tables
         e_read_CS_table ( mat_id, energy, electron_CS_table, next_discrete_process, table_index,
@@ -256,17 +249,7 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
 #endif
 
 
-            //if ( part_id == 794983 ) printf("--> eLoss\n");
-
-            // DEBUG
-            //printf("      trueStepLength %e dedxeIoni %e dedxeBrem %e erange %e mat_id %i \n", trueStepLength,
-            //       dedxeIoni, dedxeBrem, erange, mat_id);
-            //printf("      energy %e  eloss %e  new energy %e\n",  particles.E[ part_id ], edep, particles.E[ part_id ] -= edep);
-
-            // Update energy
             particles.E[ part_id ] -= edep;
-
-
 
 
             
@@ -301,9 +284,9 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
                 if ( next_discrete_process == ELECTRON_IONISATION )
                 {
 
-                    secondary_part = eSampleSecondarieElectron ( materials.electron_energy_cut[ mat_id ], particles,  part_id );
+                    secondary_part = eSampleSecondarieElectron ( electronEcut, particles,  part_id );
                     lastStepisaPhysicEffect = TRUE;
-                    secondaryParticleCreated = TRUE;
+                    //secondaryParticleCreated = TRUE;
 
                 }
                 else if ( next_discrete_process == ELECTRON_BREMSSTRAHLUNG )
@@ -319,94 +302,65 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
 
                 /// If there is a secondary particle, push the primary into buffer and track this new particle
 
-                /// Energy cut ////////////////////////////
-
-                if ( particles.E[ part_id ] <= materials.electron_energy_cut[ mat_id ] )
-                {
-                    particles.endsimu[ part_id ] = PARTICLE_DEAD;
-                    //printf("  ID %i  Sec e- cutE\n", part_id);
-                }
-
-                if ( secondary_part.E <= materials.electron_energy_cut[ mat_id ] )
-                {
-                    secondary_part.endsimu = PARTICLE_DEAD;
-                }
-
-                /// Drop energy //////////////////////////
-
-                if ( particles.endsimu[ part_id ] == PARTICLE_DEAD && particles.E[ part_id ] != 0.0f )
-                {
-                    dose_record_standard( dosi, particles.E[ part_id ], particles.px[ part_id ],
-                                          particles.py[ part_id ], particles.pz[ part_id ] );
-                }
-
-                if ( secondary_part.endsimu == PARTICLE_DEAD && secondary_part.E != 0.0f )
-                {
-                    dose_record_standard( dosi, secondary_part.E, particles.px[ part_id ],
-                                          particles.py[ part_id ], particles.pz[ part_id ] );
-                }
-
                 /// Handle secondary //////////////////////
 
-                if ( secondary_part.endsimu == PARTICLE_ALIVE )
+                if ( secondary_part.endsimu == PARTICLE_ALIVE &&
+                     particles.level[ part_id ] < parameters.nb_of_secondaries && parameters.secondaries_list[ELECTRON] )
                 {
 
-                    // If secondary enabled and enough level
-                    if ( particles.level[ part_id ] < parameters.nb_of_secondaries && parameters.secondaries_list[ELECTRON] )
+                    //if ( part_id == 794983 ) printf("--> Push\n");
+
+                    // Get the absolute index into secondary buffer
+                    ui32 index_level = part_id * parameters.nb_of_secondaries + ( ui32 ) particles.level[ part_id ];
+
+                    //printf("   ID %i - istep %i - Electron - level %i - E %f keV\n", part_id, istep, particles.level[part_id], particles.E[ part_id ]/keV);
+
+                    // If primary is still alive
+                    if ( particles.endsimu[ part_id ] == PARTICLE_ALIVE )
                     {
-
-                        //if ( part_id == 794983 ) printf("--> Push\n");
-
-                        // Get the absolute index into secondary buffer
-                        ui32 index_level = part_id * parameters.nb_of_secondaries + ( ui32 ) particles.level[ part_id ];
-
-                        // If primary is still alive
-                        if ( particles.endsimu[ part_id ] == PARTICLE_ALIVE )
-                        {
-                            // Store the current particle
-                            particles.sec_E[ index_level ]  =  particles.E[ part_id ];
-                            particles.sec_px[ index_level ] = particles.px[ part_id ];
-                            particles.sec_py[ index_level ] = particles.py[ part_id ];
-                            particles.sec_pz[ index_level ] = particles.pz[ part_id ];
-                            particles.sec_dx[ index_level ] = particles.dx[ part_id ];
-                            particles.sec_dy[ index_level ] = particles.dy[ part_id ];
-                            particles.sec_dz[ index_level ] = particles.dz[ part_id ];
-                            particles.sec_pname[ index_level ] = particles.pname[ part_id ];
-                            // Lose a level in the hierarchy
-                            particles.level[ part_id ] += 1;
-                        }
-
-                        // Fill the main buffer with the new secondary particle
-                        particles.E[ part_id ]  = secondary_part.E;
-                        particles.dx[ part_id ] = secondary_part.dir.x;
-                        particles.dy[ part_id ] = secondary_part.dir.y;
-                        particles.dz[ part_id ] = secondary_part.dir.z;
-                        particles.pname[ part_id ] = secondary_part.pname;
-                        particles.endsimu[ part_id ] = secondary_part.endsimu;
-
-                        //                        printf("ID %i - Sec level %i (push etrack) pos %e %e %e dir %e %e %e\n", part_id, particles.level[ part_id ], particles.px[ part_id ],
-                        //                               particles.py[ part_id ],particles.pz[ part_id ],particles.dx[ part_id ],
-                        //                               particles.dy[ part_id ],particles.dz[ part_id ]);
-
+                        // Store the current particle
+                        particles.sec_E[ index_level ]  =  particles.E[ part_id ];
+                        particles.sec_px[ index_level ] = particles.px[ part_id ];
+                        particles.sec_py[ index_level ] = particles.py[ part_id ];
+                        particles.sec_pz[ index_level ] = particles.pz[ part_id ];
+                        particles.sec_dx[ index_level ] = particles.dx[ part_id ];
+                        particles.sec_dy[ index_level ] = particles.dy[ part_id ];
+                        particles.sec_dz[ index_level ] = particles.dz[ part_id ];
+                        particles.sec_pname[ index_level ] = particles.pname[ part_id ];
+                        // Lose a level in the hierarchy
+                        particles.level[ part_id ] += 1;
                     }
-                    else
-                    {
-                        // This secondary particle is not used, so drop its energy
-                        if ( secondary_part.E != 0.0f )
-                        {
-                            dose_record_standard( dosi, secondary_part.E, particles.px[ part_id ],
-                                                  particles.py[ part_id ], particles.pz[ part_id ] );
-                        }
 
-                        //                        printf("ID %i - Sec level %i (Not etrack) pos %e %e %e dir %e %e %e\n", part_id, particles.level[ part_id ], particles.px[ part_id ],
-                        //                               particles.py[ part_id ],particles.pz[ part_id ],particles.dx[ part_id ],
-                        //                               particles.dy[ part_id ],particles.dz[ part_id ]);
-                        // DEBUG
-                        printf("ID %i - Reach max secondary level\n", part_id);
+                    // Fill the main buffer with the new secondary particle
+                    particles.E[ part_id ]  = secondary_part.E;
+                    particles.dx[ part_id ] = secondary_part.dir.x;
+                    particles.dy[ part_id ] = secondary_part.dir.y;
+                    particles.dz[ part_id ] = secondary_part.dir.z;
+                    particles.pname[ part_id ] = secondary_part.pname;
+                    particles.endsimu[ part_id ] = secondary_part.endsimu;
 
-                    }
+                    return;
 
                 }
+                else
+                {
+                    // This secondary particle is not used, so drop its energy
+                    if ( secondary_part.E != 0.0f )
+                    {
+                        dose_record_standard( dosi, secondary_part.E, particles.px[ part_id ],
+                                              particles.py[ part_id ], particles.pz[ part_id ] );
+                    }
+
+
+#ifdef DEBUG
+                    if ( particles.level[ part_id ] == parameters.nb_of_secondaries )
+                    {
+                        printf( "[ERROR] track_electron_to_out: reach max secondary level\n");
+                    }
+#endif
+                }
+
+
 
 
                 alongStepLength = 0;
@@ -417,24 +371,11 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
 
         } // bool_loop == true
 
-        if ( secondaryParticleCreated == TRUE )
-        {
-            //printf("  ID %i  Sec e- created\n", part_id);
-            return;
-        }
-
-        if ( particles.endsimu[ part_id ] == PARTICLE_DEAD )
-        {
-            //printf("  ID %i  e- dead\n", part_id);
-            return;
-        }
-
-
-
 #ifdef DEBUG
-        if ( istep > 100000 )
+        if ( istep > 1000 )
         {
-            printf( "[ERROR] track_electron_to_out: e- reach 100 000 steps\n" );
+            printf( "[ERROR] track_electron_to_out: e- reach 1000 steps\n" );
+            printf("         E %e keV - level %i\n", particles.E[part_id]/keV, particles.level[part_id]);
             particles.endsimu[part_id] = PARTICLE_DEAD;
             return;
         }
@@ -443,8 +384,11 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
 #endif
 
 
+        //printf("   ID %i - istep %i - Electron - level %i - E %f keV\n", part_id, istep, particles.level[part_id], particles.E[part_id]/keV);
+
     }
-    while ( ( particles.E[ part_id ] > EKINELIMIT ) && ( bool_loop ) );
+    while ( ( particles.E[ part_id ] > electronEcut ) && ( bool_loop ) );
+    //while ( ( particles.E[ part_id ] > EKINELIMIT ) && ( bool_loop ) );
 
 
     // Stop simulation if out of the phantom
@@ -453,17 +397,20 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
     {
         particles.endsimu[ part_id ] = PARTICLE_FREEZE;
         //printf("  ID %i  e- out\n", part_id);
+        //printf("   ID %i - istep %i - Electron out\n", part_id, istep );
         return;
     }
 
 
+
+
     //if ( part_id == 794983 ) printf(":: Istep %i\n", istep);
 
-    //printf("  ID %i  Sec out loop\n", part_id);
+    //printf("   ID %i - Electron istep %i - E %f kev\n", part_id, istep, particles.E[part_id]/keV);
 
     ////////////////////////////////////
-
-    if ( ( particles.E[part_id] > EKINELIMIT ) /*&&(secondaryParticleCreated == FALSE)*/ ) //>1eV
+    //                            EKINELIMIT
+    if ( ( particles.E[part_id] > electronEcut ) /*&&(secondaryParticleCreated == FALSE)*/ ) //>1eV
     {
 
         ui8 next_discrete_process ;
@@ -567,6 +514,7 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
         freeLength = alongStepLength + trueStepLength;
         totalLength += trueStepLength;
 
+/*
         /// Need to check, I add energy cut here - JB /////////////////////////////
         if ( particles.E[ part_id ] <= materials.electron_energy_cut[ mat_id ] )
         {
@@ -578,6 +526,7 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
 
             return;
         }
+*/
         ///////////////////////////////////////////////////////////////////////////
 
     }
@@ -591,7 +540,8 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
                               particles.py[ part_id ], particles.pz[ part_id ] );
         //////////////////////////////////////////////////////////////////////////
 
-        //printf("  ID %i  Sec kill\n", part_id);
+
+        //printf("   ID %i - Electron kill - E %f kev\n", part_id, particles.E[part_id]/keV);
 
         return;
     }
@@ -604,6 +554,7 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
         particles.endsimu[ part_id ] = PARTICLE_FREEZE;
 
         //printf("  ID %i  Sec outbound\n", part_id);
+        //printf("   ID %i - istep %i - Electron out\n", part_id, istep );
     }
 
 
@@ -835,8 +786,9 @@ __global__ void VPDN::kernel_device_track_to_out ( ParticlesData particles,
     f32 randomnumbereBrem= -logf ( JKISS32 ( particles, id ) ); // -log(RN)
     f32 freeLength = 0.0*mm;
 
-    /// DEBUG
-    //ui32 step = 0;
+
+
+
 
     // Stepping loop - Get out of loop only if the particle was dead and it was a primary
     while ( particles.endsimu[id] != PARTICLE_DEAD && particles.endsimu[id] != PARTICLE_FREEZE )
@@ -851,10 +803,13 @@ __global__ void VPDN::kernel_device_track_to_out ( ParticlesData particles,
         }
         else if ( particles.pname[id] == ELECTRON )
         {
+
             /// DEBUG
             //printf("GPU tracking electron\n");
             VPDN::track_electron_to_out ( particles, vol, materials, electron_CS_table, parameters, dosi,
                                           randomnumbereIoni, randomnumbereBrem, freeLength, id );
+
+
         }
 
         // Condition if particle is dead and if it was a secondary
@@ -895,7 +850,7 @@ __global__ void VPDN::kernel_device_track_to_out ( ParticlesData particles,
         }
 
         /// DEBUG
-        //++step;
+
     }
 
     /// DEBUG
@@ -918,6 +873,8 @@ void VPDN::kernel_host_track_to_out ( ParticlesData particles,
     f32 randomnumbereBrem= -logf ( JKISS32 ( particles, id ) ); // -log(RN)
     f32 freeLength = 0.0*mm;
 
+    ui32 step = 0;
+
     // Stepping loop - Get out of loop only if the particle was dead and it was a primary
     while ( particles.endsimu[id] != PARTICLE_DEAD && particles.endsimu[id] != PARTICLE_FREEZE )
     {
@@ -927,6 +884,7 @@ void VPDN::kernel_host_track_to_out ( ParticlesData particles,
             //if ( id == 794983 ) printf("Photon tracking - Level %i\n", particles.level[ id ]);
             /// DEBUG
             //printf("CPU tracking photon\n");
+            printf("ID %i - Gamma - track %i - level %i - E %f keV\n", id, step, particles.level[id], particles.E[id]/keV);
             VPDN::track_photon_to_out ( particles, vol, materials, photon_CS_table, parameters, dosi, id );
 
         }
@@ -935,6 +893,10 @@ void VPDN::kernel_host_track_to_out ( ParticlesData particles,
             //if ( id == 794983 ) printf("Electron tracking - Level %i\n", particles.level[ id ]);
             /// DEBUG
             //printf("CPU tracking electron\n");
+            if ( particles.level[id] == 1)
+            {
+                printf("ID %i - Electron - track %i - level %i - E %f keV\n", id, step, particles.level[id], particles.E[id]/keV);
+            }
             VPDN::track_electron_to_out ( particles, vol, materials, electron_CS_table, parameters, dosi,
                                           randomnumbereIoni, randomnumbereBrem, freeLength, id );
         }
@@ -972,7 +934,13 @@ void VPDN::kernel_host_track_to_out ( ParticlesData particles,
 
 
         }
+
+        ++step;
+
+
     }
+
+
 }
 
 ////:: Privates
@@ -1129,7 +1097,7 @@ void VoxPhanDosiNav::initialize ( GlobalSimulationParameters params )
     m_phantom.initialize ( params );
 
     // Materials table
-    m_materials.load_materials_database();
+    m_materials.load_materials_database( m_materials_filename );
     m_materials.initialize ( m_phantom.list_of_materials, params );
 
     // Cross Sections

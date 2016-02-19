@@ -122,8 +122,6 @@ struct MaterialsTable {
 class Materials {
     public:
         Materials();
-        // Load default data from GGEMS       
-        void load_materials_database();
         // Load data provided by the user        
         void load_materials_database(std::string filename);
 
