@@ -247,7 +247,7 @@ void VoxelizedPhantom::load_from_mhd(std::string volume_name, std::string range_
                 ElementType="", ElementDataFile="";
     i32 NDims=0;
 
-    // Read range file
+    // Read file
     std::ifstream file(volume_name.c_str());
     if(!file) {
         printf("Error, file %s not found \n", volume_name.c_str());
@@ -326,11 +326,14 @@ void VoxelizedPhantom::load_from_mhd(std::string volume_name, std::string range_
     }
     // Read data
     FILE *pfile = fopen(ElementDataFile.c_str(), "rb");
+
+    // Reative path?
     if (!pfile) {
-        std::string nameWithRelativePath = volume_name;
-        i32 lastindex = nameWithRelativePath.find_last_of(".");
-        nameWithRelativePath = nameWithRelativePath.substr(0, lastindex);
-        nameWithRelativePath+=".raw";
+        std::string nameWithRelativePath = volume_name;        
+        i32 lastindex = nameWithRelativePath.find_last_of("/");
+        nameWithRelativePath = nameWithRelativePath.substr(0, lastindex);       
+        nameWithRelativePath += ( "/" + ElementDataFile );
+
         pfile = fopen(nameWithRelativePath.c_str(), "rb");
         if (!pfile) {
             printf("Error when loading mhd file: %s\n", ElementDataFile.c_str());
