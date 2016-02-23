@@ -9,13 +9,15 @@
 // Cross section table for electron and positrons
 struct ElectronsCrossSectionTable
 {
-    f32* E;                   // n*k
-    f32* eIonisationdedx;     // n*k
-    f32* eIonisationCS;       // n*k
-    f32* eBremdedx;           // n*k
-    f32* eBremCS;             // n*k
-    f32* eMSC;                // n*k
-    f32* eRange;              // n*k    
+    f32* E;                    // n*k
+    f32* eIonisationdedx;      // n*k
+    f32* eIonisationCS;        // n*k
+    f32* eBremdedx;            // n*k
+    f32* eBremCS;              // n*k
+    f32* eMSC;                 // n*k
+    f32* eRange;               // n*k
+    f32* eIonisation_E_CS_max; // k  |_ For CS from eIoni
+    f32* eIonisation_CS_max;   // k  |
     f32 E_min;
     f32 E_max;
     ui32 nb_bins;       // n

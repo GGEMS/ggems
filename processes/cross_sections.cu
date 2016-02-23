@@ -74,6 +74,9 @@ void CrossSections::m_build_electron_table()
 
     electron_CS.data_h.eMSC = new f32[nb_tot];
 
+    electron_CS.data_h.eIonisation_E_CS_max = new f32[m_nb_mat];
+    electron_CS.data_h.eIonisation_CS_max = new f32[m_nb_mat];
+
     // Fill the energy table
     f32 min_E = m_parameters.data_h.cs_table_min_E;
     f32 max_E = m_parameters.data_h.cs_table_max_E;
@@ -93,6 +96,10 @@ void CrossSections::m_build_electron_table()
     ui32 index;
     for ( ui32 id_mat = 0; id_mat < m_nb_mat; ++id_mat )
     {
+        // Prepare vars
+        electron_CS.data_h.eIonisation_E_CS_max[ id_mat ] = 0;
+        electron_CS.data_h.eIonisation_CS_max[ id_mat ] = 0;
+
         // For each bin
         for ( ui32 i=0; i< m_nb_bins; i++ )
         {
@@ -106,6 +113,15 @@ void CrossSections::m_build_electron_table()
             {
                 electron_CS.data_h.eIonisationdedx[index] = ElectronIonisation_DEDX( m_materials, energy, id_mat );
                 electron_CS.data_h.eIonisationCS[index] = ElectronIonisation_CS( m_materials, energy, id_mat );
+
+                // Search for the max CS value
+                if ( electron_CS.data_h.eIonisationCS[ index ] >  electron_CS.data_h.eIonisation_CS_max[ id_mat ] )
+                {
+                    electron_CS.data_h.eIonisation_CS_max[ id_mat ] = electron_CS.data_h.eIonisationCS[ index ];
+                    electron_CS.data_h.eIonisation_E_CS_max[ id_mat ] = energy;
+                }
+
+                //printf(" E %e eIoni dedx %e\n", energy, electron_CS.data_h.eIonisationdedx[index]);
             }
             else
             {
@@ -117,6 +133,8 @@ void CrossSections::m_build_electron_table()
             {
                 electron_CS.data_h.eBremdedx[index] = ElectronBremsstrahlung_DEDX( m_materials, energy, id_mat );
                 electron_CS.data_h.eBremCS[index] = ElectronBremmsstrahlung_CS ( m_materials, energy, max_E, id_mat );
+
+                //printf("     eBrem dedx %e\n", electron_CS.data_h.eBremdedx[index]);
             }
             else
             {
@@ -142,6 +160,8 @@ void CrossSections::m_build_electron_table()
         if ( eDXDE > 0.) eDXDE = 2. * electron_CS.data_h.E[0] / eDXDE;
         electron_CS.data_h.eRange[index] = eDXDE;
 
+        //printf(" E %e eRange %e\n", energy, eDXDE);
+
         // For each bin
         ui32 n = 100;
         for ( ui32 i=1; i< m_nb_bins; i++ )
@@ -159,6 +179,8 @@ void CrossSections::m_build_electron_table()
             }
 
             electron_CS.data_h.eRange[index+i] = electron_CS.data_h.eRange[index+i-1] + esum;
+
+            //printf(" E %e eRange %e\n", electron_CS.data_h.E[i], electron_CS.data_h.eRange[index+i]);
 
         }
 
@@ -470,13 +492,15 @@ void CrossSections::m_copy_electron_cs_table_cpu2gpu()
     ui32 k = electron_CS.data_h.nb_mat;
 
     // Allocate GPU mem
-    HANDLE_ERROR( cudaMalloc((void**) &electron_CS.data_d.E              , k*n*sizeof(f32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &electron_CS.data_d.eIonisationdedx, k*n*sizeof(f32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &electron_CS.data_d.eIonisationCS  , k*n*sizeof(f32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &electron_CS.data_d.eBremdedx      , k*n*sizeof(f32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &electron_CS.data_d.eBremCS        , k*n*sizeof(f32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &electron_CS.data_d.eMSC           , k*n*sizeof(f32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &electron_CS.data_d.eRange         , k*n*sizeof(f32)) );   
+    HANDLE_ERROR( cudaMalloc((void**) &electron_CS.data_d.E                     , k*n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &electron_CS.data_d.eIonisationdedx       , k*n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &electron_CS.data_d.eIonisationCS         , k*n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &electron_CS.data_d.eBremdedx             , k*n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &electron_CS.data_d.eBremCS               , k*n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &electron_CS.data_d.eMSC                  , k*n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &electron_CS.data_d.eRange                , k*n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &electron_CS.data_d.eIonisation_E_CS_max  , k*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &electron_CS.data_d.eIonisation_CS_max    , k*sizeof(f32)) );
 
     // Copy data to GPU
     electron_CS.data_d.nb_bins = n;
@@ -486,13 +510,36 @@ void CrossSections::m_copy_electron_cs_table_cpu2gpu()
     electron_CS.data_d.cutEnergyElectron = electron_CS.data_h.cutEnergyElectron;
     electron_CS.data_d.cutEnergyGamma    = electron_CS.data_h.cutEnergyGamma;       
 
-    HANDLE_ERROR( cudaMemcpy(electron_CS.data_d.E              , electron_CS.data_h.E               , sizeof(f32)*n*k, cudaMemcpyHostToDevice) );
-    HANDLE_ERROR( cudaMemcpy(electron_CS.data_d.eIonisationdedx, electron_CS.data_h.eIonisationdedx , sizeof(f32)*n*k, cudaMemcpyHostToDevice) );
-    HANDLE_ERROR( cudaMemcpy(electron_CS.data_d.eIonisationCS  , electron_CS.data_h.eIonisationCS   , sizeof(f32)*n*k, cudaMemcpyHostToDevice) );
-    HANDLE_ERROR( cudaMemcpy(electron_CS.data_d.eBremdedx      , electron_CS.data_h.eBremdedx       , sizeof(f32)*n*k, cudaMemcpyHostToDevice) );
-    HANDLE_ERROR( cudaMemcpy(electron_CS.data_d.eBremCS        , electron_CS.data_h.eBremCS         , sizeof(f32)*n*k, cudaMemcpyHostToDevice) );
-    HANDLE_ERROR( cudaMemcpy(electron_CS.data_d.eMSC           , electron_CS.data_h.eMSC            , sizeof(f32)*n*k, cudaMemcpyHostToDevice) );
-    HANDLE_ERROR( cudaMemcpy(electron_CS.data_d.eRange         , electron_CS.data_h.eRange          , sizeof(f32)*n*k, cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy(electron_CS.data_d.E                   , electron_CS.data_h.E                   , sizeof(f32)*n*k, cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy(electron_CS.data_d.eIonisationdedx     , electron_CS.data_h.eIonisationdedx     , sizeof(f32)*n*k, cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy(electron_CS.data_d.eIonisationCS       , electron_CS.data_h.eIonisationCS       , sizeof(f32)*n*k, cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy(electron_CS.data_d.eBremdedx           , electron_CS.data_h.eBremdedx           , sizeof(f32)*n*k, cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy(electron_CS.data_d.eBremCS             , electron_CS.data_h.eBremCS             , sizeof(f32)*n*k, cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy(electron_CS.data_d.eMSC                , electron_CS.data_h.eMSC                , sizeof(f32)*n*k, cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy(electron_CS.data_d.eRange              , electron_CS.data_h.eRange              , sizeof(f32)*n*k, cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy(electron_CS.data_d.eIonisation_E_CS_max, electron_CS.data_h.eIonisation_E_CS_max, sizeof(f32)*k, cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy(electron_CS.data_d.eIonisation_CS_max  , electron_CS.data_h.eIonisation_CS_max  , sizeof(f32)*k, cudaMemcpyHostToDevice) );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #endif

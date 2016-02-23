@@ -63,11 +63,11 @@ __host__ __device__ f32xyz fxyz_abs(f32xyz u);
 __host__ __device__ f32xyz fxyz_inv(f32xyz u);
 
 
-inline __host__ __device__  f32 f32xyz_mul(f32xyz v){ return v.x * v.y * v.z;}
+//inline __host__ __device__  f32 fxyz_mul(f32xyz v){ return v.x * v.y * v.z;}
 
-inline __host__ __device__  i32 i32xyz_mul(i32xyz v){ return v.x * v.y * v.z;}
+//inline __host__ __device__  i32 i32xyz_mul(i32xyz v){ return v.x * v.y * v.z;}
 
-inline __host__ __device__  ui32 ui32xyz_mul(ui32xyz v){ return v.x * v.y * v.z;}
+//inline __host__ __device__  ui32 ui32xyz_mul(ui32xyz v){ return v.x * v.y * v.z;}
 
 
 //// Struct that handle nD variable     TODO the other types

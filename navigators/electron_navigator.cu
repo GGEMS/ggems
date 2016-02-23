@@ -84,6 +84,75 @@ f32  coefsig[8][11]= {{.4638,.37748,.32249,-.060362,-.065004,-.033457,-.004583,.
 };
 #endif
 
+__host__ __device__ f32 compute_lambda_for_scaled_energy( f32 CS, f32 e, ElectronsCrossSectionTable table, ui16 mat_id )
+{
+
+    f32 E_CS_max = table.eIonisation_E_CS_max[ mat_id ];
+
+
+
+    if (e <= E_CS_max)
+    {
+        return CS;
+
+    }
+    else
+    {
+        f32 e1 = e*0.8f;  // lambdaFactor = 0.8
+
+        if ( e1 > E_CS_max )
+        {
+
+            /// Get Lambda for scale Energy e1 ////////////////
+
+            // Find energy index
+            ui32 energy_index;
+            if ( e1 <= table.E_min )
+            {
+                energy_index = 0;
+            }
+            else if ( e1 >= table.E_max )
+            {
+                energy_index = table.nb_bins-1;
+            }
+            else
+            {
+                energy_index = binary_search ( e1, table.E, table.nb_bins );
+            }
+
+            // Get absolute index table (considering mat id)
+            ui32 table_index = mat_id*table.nb_bins + energy_index;
+
+            f32 preStepLambda1;
+
+            // Get CS for e1
+            if ( energy_index == 0 )
+            {
+                preStepLambda1 = table.eIonisationCS[ table_index ];
+            }
+            else
+            {
+                preStepLambda1 = linear_interpolation ( table.E[ energy_index-1 ], table.eIonisationCS[ table_index-1 ],
+                                                        table.E[ energy_index ], table.eIonisationCS[ table_index ], e1 );
+            }
+
+            /////////////////////////////////////////////////////
+
+            if ( preStepLambda1 > CS )
+            {
+                CS = preStepLambda1;
+            }
+        }
+        else
+        {
+            CS = table.eIonisation_CS_max[ mat_id ];  // fFactor = 1.0  - JB
+        }
+    }
+
+    return CS;
+
+}
+
 __host__ __device__ void e_read_CS_table (
                                             ui16 mat, //material
                                             f32 energy, //energy of particle
@@ -134,13 +203,18 @@ __host__ __device__ void e_read_CS_table (
             CS = linear_interpolation ( d_table.E[ energy_index-1 ], d_table.eIonisationCS[ table_index-1 ],
                                         d_table.E[ energy_index ], d_table.eIonisationCS[ table_index ], energy );
 
+            CS = compute_lambda_for_scaled_energy( CS, energy, d_table, mat );
+
             dedxeIoni = linear_interpolation ( d_table.E[ energy_index-1 ], d_table.eIonisationdedx[ table_index-1 ],
                                                d_table.E[ energy_index ], d_table.eIonisationdedx[ table_index ], energy );
+
+            //printf("E %e  CS %e  dE/dx  %e\n", energy, CS, dedxeIoni);
         }
 
         // Get interaction distance
         if ( CS != 0.0 )
         {
+            CS = 12.345;
             interaction_distance = randomnumbereIoni / CS;
         }
         else
@@ -153,6 +227,9 @@ __host__ __device__ void e_read_CS_table (
             next_interaction_distance = interaction_distance;
             next_discrete_process = ELECTRON_IONISATION;
         }
+
+        printf("    IntDist eIoni %e - CS %e - Ekin %e - rnd %e\n", interaction_distance, CS, energy, randomnumbereIoni);
+
     } // eIoni
 
     // Bremsstrahlung
@@ -414,34 +491,41 @@ __host__ __device__ f32 eLoss ( f32 LossLength, f32 Ekine, f32 dedxeIoni, f32 de
                                 ElectronsCrossSectionTable d_table, ui8 mat, MaterialsTable materials,
                                 ParticlesData &particles, GlobalSimulationParametersData parameters, ui32 id )
 {    
-    f32 perteTot = LossLength * ( dedxeIoni + dedxeBrem );        
+    // DEBUG
+    LossLength = 0.09;
 
-    // 0.01 is xi
-    if ( perteTot > Ekine * 0.01 )
+    f32 perteTot = LossLength * ( dedxeIoni + dedxeBrem );
+
+    //printf(" dedx= %e  Ekin= %e  erange= %e  ::: eLoss %e\n", dedxeIoni + dedxeBrem, Ekine, erange, perteTot);
+
+    // Long step
+    if ( perteTot > Ekine * 0.01 ) // linLossLimit = 0.01
     {
         // Here, I directly insert the LossApproximation function into the code - JB
         perteTot = 0.0;
-        f32 range = erange - LossLength;
-
-        if ( range > 1.0 *nm )
-        {
-            perteTot = GetEnergy( range, d_table, mat);
-        }
-        else
-        {
-            perteTot = 0.0f;
-        }
-
+        erange -= LossLength; // / reduceFactor (reduceFactor=1);
+        perteTot = GetEnergy( erange, d_table, mat);
         perteTot = Ekine - perteTot;
+
+        //printf("   long step: EkinforLoss= %e  ::: eLoss= %e\n", GetEnergy( erange, d_table, mat), perteTot);
     }
 
     /// Warning ADD for eFluctuation
-    if ( dedxeIoni > 0. ) perteTot = eFluctuation ( perteTot, Ekine, materials, particles, id, mat );
-    
+    if ( dedxeIoni > 0. ) {
+        perteTot = eFluctuation ( perteTot, Ekine, materials, particles, id, mat );
+        //printf("   Fluc ::: eloss= %e\n", perteTot);
+    }
+/*
     if ( ( Ekine-perteTot ) <= ( 1.*eV ) )
     {
         perteTot = Ekine;
     }
+*/
+    perteTot = fminf( Ekine, perteTot );
+
+    particles.E[ id ] -= perteTot;
+
+    //printf("eloss= %e  Ekin= %e\n", perteTot, particles.E[ id ]);
 
     return  perteTot;
 }

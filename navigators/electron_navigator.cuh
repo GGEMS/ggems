@@ -37,6 +37,8 @@ __host__ __device__ void e_read_CS_table (//                             Particl
     f32 randomnumbereIoni,
     GlobalSimulationParametersData parameters );
 
+__host__ __device__ f32 compute_lambda_for_scaled_energy(f32 CS, f32 e, ElectronsCrossSectionTable table, ui16 mat_id);
+
 __host__ __device__ f32 StepFunction ( f32 Range );
 
 __host__ __device__ f32 gTransformToGeom ( f32 TPath,f32 currentRange,f32 currentLambda,f32 currentEnergy,

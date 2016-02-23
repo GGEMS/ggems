@@ -156,7 +156,7 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
 
         // Read the different CS, dE/dx tables
         e_read_CS_table ( mat_id, energy, electron_CS_table, next_discrete_process, table_index,
-                          next_interaction_distance, dedxeIoni,dedxeBrem, erange, lambda, randomnumbereBrem, randomnumbereIoni, parameters );
+                          next_interaction_distance, dedxeIoni, dedxeBrem, erange, lambda, randomnumbereBrem, randomnumbereIoni, parameters );
 
         //if ( part_id == 794983 ) printf("--> ReadCS\n");
 
@@ -176,6 +176,9 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
             significant_loss = false;
             trueStepLength = lengthtoVertex;
         }
+
+        //printf("trueStepLength %e   lengthtoVertex %e   cutstep %e - alongStepLength %e   next_interaction_distance %e\n",
+        //       trueStepLength, lengthtoVertex, cutstep, alongStepLength, next_interaction_distance);
 
         //// Get the next distance boundary volume /////////////////////////////////
 
@@ -233,28 +236,24 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
 
         if ( bool_loop==true )
         {
-
-            // Energy loss (call eFluctuation)
-            edep = eLoss ( trueStepLength, particles.E[ part_id ], dedxeIoni, dedxeBrem, erange,
-                           electron_CS_table, mat_id, materials, particles, parameters, part_id );
-
-
-#ifdef DEBUG
-            if ( edep > particles.E[ part_id ] )
-            {
-                printf( "[ERROR] track_electron_to_out: edep > particle energy\n" );
-                particles.endsimu[part_id] = PARTICLE_DEAD;
-                return;
-            }
-#endif
-
-
-            particles.E[ part_id ] -= edep;
-
-
             
             if ( significant_loss == true )
             {
+                // Energy loss (call eFluctuation)
+                edep = eLoss ( trueStepLength, particles.E[ part_id ], dedxeIoni, dedxeBrem, erange,
+                               electron_CS_table, mat_id, materials, particles, parameters, part_id );
+
+                //printf("eLoss %e   stepl %e   E %e   dedxIoni %e   dedxeBrem %e   erange %e\n", edep,
+                //       trueStepLength, particles.E[ part_id ], dedxeIoni, dedxeBrem, erange);
+
+    #ifdef DEBUG
+                if ( edep > particles.E[ part_id ] )
+                {
+                    printf( "[ERROR] track_electron_to_out: edep > particle energy\n" );
+                    particles.endsimu[part_id] = PARTICLE_DEAD;
+                    return;
+                }
+    #endif
                 GlobalMscScattering ( trueStepLength, cutstep, erange, energy, lambda, dedxeIoni,
                                       dedxeBrem,  electron_CS_table,  mat_id, particles, part_id, par1, par2,    // HERE particle move
                                       materials, dosi, index_phantom, vol, parameters );
@@ -270,16 +269,33 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
             }
             else
             {
-                SecParticle secondary_part;
-                secondary_part.E = 0.;
-                secondary_part.endsimu = PARTICLE_DEAD;
 
+                // Energy loss (call eFluctuation)
+                edep = eLoss ( trueStepLength, particles.E[ part_id ], dedxeIoni, dedxeBrem, erange,
+                               electron_CS_table, mat_id, materials, particles, parameters, part_id );
+
+                //printf("eloss %e   Ekin %e\n", edep, particles.E[ part_id ]);
+
+                //printf("eLoss %e   stepl %e   E %e   dedxIoni %e   dedxeBrem %e   erange %e\n", edep,
+                //       trueStepLength, particles.E[ part_id ], dedxeIoni, dedxeBrem, erange);
+
+    #ifdef DEBUG
+                if ( edep > particles.E[ part_id ] )
+                {
+                    printf( "[ERROR] track_electron_to_out: edep > particle energy\n" );
+                    particles.endsimu[part_id] = PARTICLE_DEAD;
+                    return;
+                }
+    #endif
                 GlobalMscScattering ( trueStepLength, lengthtoVertex, erange, energy, lambda,   dedxeIoni,
                                       dedxeBrem,   electron_CS_table,  mat_id, particles,  part_id, par1, par2,     // HERE particle move
                                       materials, dosi, index_phantom, vol, parameters );
 
                 dose_record_standard ( dosi, edep, particles.px[part_id], particles.py[part_id], particles.pz[part_id] );
 
+                SecParticle secondary_part;
+                secondary_part.E = 0.;
+                secondary_part.endsimu = PARTICLE_DEAD;
 
                 if ( next_discrete_process == ELECTRON_IONISATION )
                 {
@@ -360,9 +376,6 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
 #endif
                 }
 
-
-
-
                 alongStepLength = 0;
                 freeLength = 0.;
                 totalLength += trueStepLength;
@@ -383,6 +396,14 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
         ++istep;
 #endif
 
+        // PostStep - DEBUG //////////////////////////////////////////////////////////
+        f32xyz poststep;
+        poststep = make_f32xyz(particles.px[part_id], particles.py[part_id], particles.pz[part_id]);
+        f32xyz deltapos = fxyz_sub( poststep, pos );
+        f32 stepl = sqrtf( fxyz_dot( deltapos, deltapos ) );
+        //printf("ID %i   dE %e    StepL %e   eloss %e   erange %e\n", part_id, energy-particles.E[part_id], stepl, edep, erange);
+        particles.endsimu[ part_id ] = PARTICLE_DEAD;
+        return;
 
         //printf("   ID %i - istep %i - Electron - level %i - E %f keV\n", part_id, istep, particles.level[part_id], particles.E[part_id]/keV);
 
@@ -1110,9 +1131,9 @@ void VoxPhanDosiNav::initialize ( GlobalSimulationParameters params )
         f32 sizey = m_phantom.data_h.nb_vox_y*m_phantom.data_h.spacing_y;
         f32 sizez = m_phantom.data_h.nb_vox_z*m_phantom.data_h.spacing_z;
 
-        m_dose_calculator.set_size_in_voxel ( ( ui32 )sizex / m_doxel_size_x,
-                                              ( ui32 )sizey / m_doxel_size_y,
-                                              ( ui32 )sizez / m_doxel_size_z );
+        m_dose_calculator.set_size_in_voxel ( ( ui32 ) ( sizex / m_doxel_size_x ),
+                                              ( ui32 ) ( sizey / m_doxel_size_y ),
+                                              ( ui32 ) ( sizez / m_doxel_size_z ) );
         m_dose_calculator.set_voxel_size ( m_doxel_size_x,
                                            m_doxel_size_y,
                                            m_doxel_size_z );
