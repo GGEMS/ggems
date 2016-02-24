@@ -22,7 +22,7 @@
     #define QUALIFIER __host__
 #endif
 
-//#define DEBUG 1
+#define DEBUG 1
 
 #define CURAND_2POW32_INV (2.3283064e-10f)
 

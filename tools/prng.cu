@@ -85,14 +85,27 @@ QUALIFIER f32 prng_uniform(prng_states *state)
     #endif
 
 #else
-
     // CPU code - FIXME - seed not used!!!  - JB
     std::mt19937 generator;
-    std::uniform_real_distribution<float> distribution(0.0, 1.0);
+    std::uniform_real_distribution<float> distribution(0.0, 1.0-CURAND_2POW32_INV);
+
+    #ifdef DEBUG
+    f32 x = distribution(generator);
+    if ( x <= 0.0f )
+    {
+        printf("[GGEMS error] PRNG NUMBER <= 0.0\n");
+        x = CURAND_2POW32_INV;
+    }
+    if ( x > 1.0f )
+    {
+        printf("[GGEMS error] PRNG NUMBER > 1.0\n");
+        x = 1.0f;
+    }
+    return x;
+    #else
     return distribution(generator);
-
+    #endif
 #endif
-
 }
 
 
