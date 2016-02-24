@@ -106,7 +106,7 @@ __host__ __device__ i32 G4Poisson ( f32 mean, ParticlesData &particles, ui32 id 
         // to avoid 1 due to f32 approximation
         do
         {
-            position = JKISS32 ( particles, id );
+            position = prng_uniform( &(particles.prng[id]) );
         }
         while ( ( 1. - position ) < 2.e-7 );
 
@@ -124,8 +124,8 @@ __host__ __device__ i32 G4Poisson ( f32 mean, ParticlesData &particles, ui32 id 
         return  ( i32 ) number;
     }   
 
-    t = sqrtf ( -2.*logf ( JKISS32 ( particles, id ) ) );
-    y = 2.*gpu_pi* JKISS32 ( particles, id );
+    t = sqrtf ( -2.*logf ( prng_uniform( &(particles.prng[id]) ) ) );
+    y = 2.*gpu_pi* prng_uniform( &(particles.prng[id]) );
     t *= cosf ( y );
     value = mean + t*sqrtf ( mean ) + 0.5;
 
@@ -144,8 +144,8 @@ __host__ __device__ f32 Gaussian (f32 mean, f32 rms, ParticlesData &particles, u
 
     do
     {
-        U1 = 2.*JKISS32 ( particles, id )-1.;
-        U2 = 2.*JKISS32 ( particles, id )-1.;
+        U1 = 2.*prng_uniform( &(particles.prng[id]) )-1.;
+        U2 = 2.*prng_uniform( &(particles.prng[id]) )-1.;
         Fx = U1*U1 + U2*U2;
 
     }

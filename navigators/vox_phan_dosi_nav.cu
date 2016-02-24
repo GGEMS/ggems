@@ -106,8 +106,8 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
         // Get Random number stored until a physic interaction
         if ( lastStepisaPhysicEffect == TRUE )
         {
-            randomnumbereBrem = -logf ( JKISS32 ( particles, part_id ) );
-            randomnumbereIoni = -logf ( JKISS32 ( particles, part_id ) );
+            randomnumbereBrem = -logf ( prng_uniform( &(particles.prng[part_id]) ) );
+            randomnumbereIoni = -logf ( prng_uniform( &(particles.prng[part_id]) ) );
             alongStepLength = 0.f;
             lastStepisaPhysicEffect = FALSE;
         }
@@ -803,8 +803,8 @@ __global__ void VPDN::kernel_device_track_to_out ( ParticlesData particles,
     if ( id >= particles.size ) return;    
 
     // For multivoxels navigation
-    f32 randomnumbereIoni= -logf ( JKISS32 ( particles, id ) ); // -log(RN)
-    f32 randomnumbereBrem= -logf ( JKISS32 ( particles, id ) ); // -log(RN)
+    f32 randomnumbereIoni= -logf ( prng_uniform( &(particles.prng[id]) ) ); // -log(RN)
+    f32 randomnumbereBrem= -logf ( prng_uniform( &(particles.prng[id]) ) ); // -log(RN)
     f32 freeLength = 0.0*mm;
 
     // Stepping loop - Get out of loop only if the particle was dead and it was a primary
@@ -848,8 +848,8 @@ __global__ void VPDN::kernel_device_track_to_out ( ParticlesData particles,
 
             // FreeLength must be reinitialized due to voxels navigation (diff mats)
             freeLength = 0.0*mm;
-            randomnumbereIoni= -logf ( JKISS32 ( particles, id ) ); // -log(RN)
-            randomnumbereBrem= -logf ( JKISS32 ( particles, id ) ); // -log(RN)
+            randomnumbereIoni= -logf ( prng_uniform( &(particles.prng[id]) ) ); // -log(RN)
+            randomnumbereBrem= -logf ( prng_uniform( &(particles.prng[id]) ) ); // -log(RN)
 
             // Get back the stored particle into the primary buffer
             particles.E[ id ]     = particles.sec_E[ index_level ]    ;
@@ -886,8 +886,8 @@ void VPDN::kernel_host_track_to_out ( ParticlesData particles,
                                       ui32 id )
 {
     // For multivoxels navigation
-    f32 randomnumbereIoni= -logf ( JKISS32 ( particles, id ) ); // -log(RN)
-    f32 randomnumbereBrem= -logf ( JKISS32 ( particles, id ) ); // -log(RN)
+    f32 randomnumbereIoni= -logf ( prng_uniform( &(particles.prng[id]) ) ); // -log(RN)
+    f32 randomnumbereBrem= -logf ( prng_uniform( &(particles.prng[id]) ) ); // -log(RN)
     f32 freeLength = 0.0*mm;
 
     ui32 step = 0;
@@ -933,8 +933,8 @@ void VPDN::kernel_host_track_to_out ( ParticlesData particles,
 
             // FreeLength must be reinitialized due to voxels navigation (diff mats)
             freeLength = 0.0*mm;
-            randomnumbereIoni= -logf ( JKISS32 ( particles, id ) ); // -log(RN)
-            randomnumbereBrem= -logf ( JKISS32 ( particles, id ) ); // -log(RN)
+            randomnumbereIoni= -logf ( prng_uniform( &(particles.prng[id]) ) ); // -log(RN)
+            randomnumbereBrem= -logf ( prng_uniform( &(particles.prng[id]) ) ); // -log(RN)
 
             // Get back the stored particle into the primary buffer
             particles.E[ id ]     = particles.sec_E[ index_level ]    ;

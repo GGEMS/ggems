@@ -394,7 +394,7 @@ __host__ __device__ f32 eFluctuation (f32 meanLoss, f32 Ekine, MaterialsTable ma
             if ( a1 < nmaxCont )
             {
                 sa1 = sqrtf ( a1 );
-                if ( JKISS32 ( particles, id ) < expf ( -sa1 ) )
+                if ( prng_uniform ( &(particles.prng[id]) ) < expf ( -sa1 ) )
                 {
                     e1 = esmall;
                     a1 = meanLoss * ( 1.-rate ) /e1;
@@ -429,7 +429,7 @@ __host__ __device__ f32 eFluctuation (f32 meanLoss, f32 Ekine, MaterialsTable ma
     {
         p1 = ( f32 ) G4Poisson ( a1, particles, id );
         LossFluct += p1*e1;
-        if ( p1 > 0. ) LossFluct += ( 1. - 2.*JKISS32 ( particles, id ) ) *e1;
+        if ( p1 > 0. ) LossFluct += ( 1. - 2.* prng_uniform( &(particles.prng[id]) ) ) *e1;
     }
 
     if ( a2 > nmaxCont )
@@ -441,7 +441,7 @@ __host__ __device__ f32 eFluctuation (f32 meanLoss, f32 Ekine, MaterialsTable ma
     {
         p2 = ( f32 ) G4Poisson ( a2, particles, id );
         LossFluct += ( p2*e2 );
-        if ( p2 > 0. ) LossFluct += ( 1. - 2.*JKISS32 ( particles, id ) ) *e2;
+        if ( p2 > 0. ) LossFluct += ( 1. - 2.*prng_uniform( &(particles.prng[id]) ) ) *e2;
     }
 
     if ( a3 > 0. )
@@ -466,7 +466,7 @@ __host__ __device__ f32 eFluctuation (f32 meanLoss, f32 Ekine, MaterialsTable ma
         {
             for ( k=0; k<nb; k++ )
             {
-                lossc += w2/ ( 1.-w*JKISS32 ( particles, id ) );
+                lossc += w2/ ( 1.-w*prng_uniform( &(particles.prng[id]) ) );
             }
         }
     }
@@ -571,13 +571,13 @@ __host__ __device__ f32 eSimpleScattering ( f32 xmeanth, f32 x2meanth, ui32 id, 
     f32 a = ( 2.*xmeanth + 9.*x2meanth - 3. ) / ( 2.*xmeanth - 3.*x2meanth + 1. );
     f32 prob = ( a + 2. ) * xmeanth/a;
 
-    if ( JKISS32 ( particles, id ) < prob )
+    if ( prng_uniform( &(particles.prng[id]) ) < prob )
     {
-        return -1. + 2.*expf ( logf ( JKISS32 ( particles, id ) ) / ( a + 1. ) );
+        return -1. + 2.*expf ( logf ( prng_uniform( &(particles.prng[id]) ) ) / ( a + 1. ) );
     }
     else
     {
-        return -1. + 2.*JKISS32 ( particles, id );
+        return -1. + 2.*prng_uniform( &(particles.prng[id]) );
     }
 
 }
@@ -619,7 +619,7 @@ __host__ __device__ f32 eCosineTheta (f32 trueStep, f32 currentRange, f32 curren
 
     if ( tau >= taubig )
     {
-        costh = -1. + 2. * JKISS32 ( particles, id );
+        costh = -1. + 2. * prng_uniform( &(particles.prng[id]) );
     }
     else if ( tau >= tausmall )
     {
@@ -691,15 +691,15 @@ __host__ __device__ f32 eCosineTheta (f32 trueStep, f32 currentRange, f32 curren
         prob = f2x0 / ( f1x0 + f2x0 );
         qprob = xmeanth/ ( prob*xmean1 + ( 1. - prob ) * xmean2 );
 
-        if ( JKISS32 ( particles, id ) < qprob )
+        if ( prng_uniform( &(particles.prng[id]) ) < qprob )
         {
-            if ( JKISS32 ( particles, id ) < prob )
-                costh = 1. + logf ( ea + JKISS32 ( particles, id ) * eaa ) / a;
+            if ( prng_uniform( &(particles.prng[id]) ) < prob )
+                costh = 1. + logf ( ea + prng_uniform( &(particles.prng[id]) ) * eaa ) / a;
             else
-                costh = b - b1*bx / expf ( logf ( ebx + ( eb1 - ebx ) * JKISS32 ( particles, id ) ) /c1 );
+                costh = b - b1*bx / expf ( logf ( ebx + ( eb1 - ebx ) * prng_uniform( &(particles.prng[id]) ) ) /c1 );
         }
         else
-            costh = -1. + 2.*JKISS32 ( particles, id );
+            costh = -1. + 2.*prng_uniform( &(particles.prng[id]) );
     }
 
     return  costh;
@@ -792,12 +792,12 @@ __host__ __device__ void gLatCorrection ( f32xyz currentDir, f32 tPath, f32 zPat
             Phi = 0.;
             if ( fabsf ( rmean*sinth ) <= latcorr )
             {
-                Phi = gpu_twopi * JKISS32 ( particles, id );
+                Phi = gpu_twopi * prng_uniform( &(particles.prng[id]) );
             }
             else
             {
                 psi = acosf ( latcorr/ ( rmean*sinth ) );
-                if ( JKISS32 ( particles, id ) < .5 )
+                if ( prng_uniform( &(particles.prng[id]) ) < .5 )
                 {
                     Phi = phi + psi;
                 }
@@ -848,13 +848,13 @@ __host__ __device__ void eMscScattering ( f32 tPath, f32 zPath, f32 currentRange
     {
         do
         {
-            costh = 1. + 2.*logf ( JKISS32 ( particles, id ) ) * tPath/currentLambda;
+            costh = 1. + 2.*logf ( prng_uniform( &(particles.prng[id]) ) ) * tPath/currentLambda;
         }
         while ( ( costh < -1. ) );
     }
 
     sinth = sqrtf ( ( 1. - costh ) * ( 1. + costh ) );
-    phi = gpu_twopi * JKISS32 ( particles, id );
+    phi = gpu_twopi * prng_uniform( &(particles.prng[id]) );
 
     Dir = make_f32xyz ( sinth*cosf ( phi ), sinth*sinf ( phi ), costh );
 
@@ -995,19 +995,19 @@ __host__ __device__ SecParticle eSampleSecondarieElectron ( f32 CutEnergy, Parti
 
     do
     {
-        q = JKISS32 ( particles,id );
+        q = prng_uniform( &(particles.prng[id]) );
         x = xmin*xmax/ ( xmin* ( 1. - q ) + xmax*q );
         y = 1. - x;
         z = 1. - g*x + x*x* ( 1. - g + ( 1. - g*y ) / ( y*y ) );
     }
-    while ( ( grej*JKISS32 ( particles,id ) > z ) );
+    while ( ( grej*prng_uniform( &(particles.prng[id]) ) > z ) );
 
     deltaEnergy = x*Ekine;
     deltaMom = sqrtf ( deltaEnergy * ( deltaEnergy + 2.*electron_mass_c2 ) );
     cost = deltaEnergy * ( totalEnergy + electron_mass_c2 ) / ( deltaMom*totMom );
     sint = 1. - cost*cost;
     if ( sint > 0. ) sint = sqrtf ( sint );
-    phi = gpu_twopi * JKISS32 ( particles,id );
+    phi = gpu_twopi * prng_uniform( &(particles.prng[id]) );
 
     ElecDir.x = sint*cosf ( phi );
     ElecDir.y = sint*sinf ( phi );
@@ -1219,7 +1219,7 @@ __host__ __device__ ui16 RandomAtom ( f32 CutEnergyGamma, f32 min_E, ParticlesDa
     ui16 cur_Z = materials.mixture[ index + n ];
     f32 Ekine = particles.E[ id ];
 
-    f32 x = JKISS32 ( particles, id ) * ElectronBremmsstrahlung_CS( materials, Ekine, min_E, mat_id );
+    f32 x = prng_uniform( &(particles.prng[id]) ) * ElectronBremmsstrahlung_CS( materials, Ekine, min_E, mat_id );
 
     f32 xsec = 0.0;
     for ( ui16 i = 0; i < n; ++i )
@@ -1295,10 +1295,10 @@ __host__ __device__ f32 AngleDistribution ( f32 initial_energy, f32 final_energy
 
     do
     {
-        rand = JKISS32 ( particles, id );
+        rand = prng_uniform( &(particles.prng[id]) );
         rand /= ( 1. - rand + 1./gMaxEnergy );
         gfunctionTest = RejectionFunction ( rand, rejection_argument1, rejection_argument2, rejection_argument3, EnergyRatio, z );
-        randTest = JKISS32 ( particles, id );
+        randTest = prng_uniform( &(particles.prng[id]) );
     }
     while ( randTest*gMaximum > gfunctionTest );
 
@@ -1394,7 +1394,7 @@ void eSampleSecondarieGamma ( f32 minEnergy, f32 maxEnergy, ParticlesData &parti
     {
         do
         {
-            q = JKISS32 ( particles, id );
+            q = prng_uniform( &(particles.prng[id]) );
             x = powf ( xmin, q + kappa * ( 1. - q ) );
             epsil = x*Ekine / totalEnergy;
             screenvar = screenfac*epsil / ( 1. - epsil );
@@ -1403,24 +1403,24 @@ void eSampleSecondarieGamma ( f32 minEnergy, f32 maxEnergy, ParticlesData &parti
             migdal = ( 1. + MigdalFactor ) / ( 1. + MigdalFactor / ( x*x ) );
             greject = migdal* ( F1 - epsil* ( ah*F1 - bh*epsil*F2 ) ) / ( 42.392 - FZ );
         }
-        while ( greject < JKISS32 ( particles, id ) * grejmax );
+        while ( greject < prng_uniform( &(particles.prng[id]) ) * grejmax );
     }
     else
     {
         do
         {
-            q = JKISS32 ( particles, id );
+            q = prng_uniform( &(particles.prng[id]) );
             x = powf ( xmin, q + kappa* ( 1. - q ) );
             migdal = ( 1. + MigdalFactor ) / ( 1. + MigdalFactor / ( x*x ) );
             greject = migdal * ( 1. + x* ( ah + bh*x ) );
         }
-        while ( greject < JKISS32 ( particles, id ) * grejmax );
+        while ( greject < prng_uniform( &(particles.prng[id]) ) * grejmax );
     }
     gammaEnergy = x*Ekine;
 
     theta = AngleDistribution ( totalEnergy, totalEnergy-gammaEnergy, materials.mixture[ind], particles, id );
     sint = sin ( theta );
-    phi = gpu_twopi * JKISS32 ( particles, id );
+    phi = gpu_twopi * prng_uniform( &(particles.prng[id]) );
 
     f32xyz GamDir;
     GamDir.x = sint * cos ( phi );

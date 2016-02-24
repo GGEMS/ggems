@@ -32,8 +32,8 @@ __host__ __device__ void point_source ( ParticlesData particles_data, ui32 id,
     // Direction option. Add a new preprocessing option for new direction option.
     if ( direction_option == POINT_SOURCE_ISOTROPIC )
     {
-        f32 phi = JKISS32 ( particles_data, id );
-        f32 theta = JKISS32 ( particles_data, id );
+        f32 phi = prng_uniform( &(particles_data.prng[id]) );
+        f32 theta = prng_uniform( &(particles_data.prng[id]) );
 
         phi  *= gpu_twopi;
         theta = acosf ( 1.0f - 2.0f*theta );
@@ -46,8 +46,8 @@ __host__ __device__ void point_source ( ParticlesData particles_data, ui32 id,
 
 
         // Get direction
-        f32 phi = JKISS32 ( particles_data, id );
-        f32 theta = JKISS32 ( particles_data, id );
+        f32 phi = prng_uniform( &(particles_data.prng[id]) );
+        f32 theta = prng_uniform( &(particles_data.prng[id]) );
         f32 val_aper = 1.0f - cosf ( m_aperture_angle );
         phi  *= gpu_twopi;
         theta = acosf ( 1.0f - val_aper*theta );
@@ -72,7 +72,7 @@ __host__ __device__ void point_source ( ParticlesData particles_data, ui32 id,
 
     }
 
-    ui32 pos = binary_search ( JKISS32 ( particles_data, id ), spectrumCDF, nbins );
+    ui32 pos = binary_search ( prng_uniform( &(particles_data.prng[id]) ), spectrumCDF, nbins );
 
     // set photons
     particles_data.E[id] = spectrumE[pos];

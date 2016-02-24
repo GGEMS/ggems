@@ -33,8 +33,8 @@ __host__ __device__ void cone_beam_ct_source( ParticlesData particles_data,
     f32xyz dir = fxyz_unit( make_f32xyz( 0.0f-px, 0.0f-py, 0.0f-pz ) );
 
     // Random direction within the cone beam
-    f32 phi = JKISS32( particles_data, id );
-    f32 theta = JKISS32( particles_data, id );
+    f32 phi = prng_uniform( &(particles_data.prng[id]) );
+    f32 theta = prng_uniform( &(particles_data.prng[id]) );
     f32 val_aper = 1.0f - cosf( aperture );
     phi  *= gpu_twopi;
     theta = acosf( 1.0f - val_aper * theta );
@@ -62,7 +62,7 @@ __host__ __device__ void cone_beam_ct_source( ParticlesData particles_data,
     {
         // Get the position in spectrum
         // Store rndm
-        f32 rndm = JKISS32( particles_data, id );
+        f32 rndm = prng_uniform( &(particles_data.prng[id]) );
         ui32 pos = binary_search( rndm, spectrumCDF, nbins );
 
         if ( pos == ( nbins - 1 ) )
@@ -78,8 +78,8 @@ __host__ __device__ void cone_beam_ct_source( ParticlesData particles_data,
     }
 
     // Get 2 randoms for each focal distance
-    f32 rndmPosV = JKISS32( particles_data, id );
-    f32 rndmPosH = JKISS32( particles_data, id );
+    f32 rndmPosV = prng_uniform( &(particles_data.prng[id]) );
+    f32 rndmPosH = prng_uniform( &(particles_data.prng[id]) );
     rndmPosV *= vfoc;
     rndmPosH *= hfoc;
     rndmPosV -= vfoc / 2.0;

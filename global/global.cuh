@@ -27,6 +27,11 @@
 #include <cstring>
 #include <iostream>
 #include <ctime>
+#include <random>
+#include <iomanip>
+
+#include <cuda.h>
+#include <curand_kernel.h>
 
 #ifdef _WIN32
 #include <time.h>

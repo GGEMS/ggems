@@ -15,7 +15,7 @@
 #define PARTICLES_CUH
 
 #include "global.cuh"
-#include <iomanip>
+#include "prng.cuh"
 
 // Stack of particles, format data is defined as SoA
 struct ParticlesData
@@ -30,11 +30,7 @@ struct ParticlesData
     f32* pz;
     f32* tof;
     // PRNG
-    ui32* prng_state_1;
-    ui32* prng_state_2;
-    ui32* prng_state_3;
-    ui32* prng_state_4;
-    ui32* prng_state_5;
+    prng_states* prng;
 
     // Scatter for imaging
     ui32* scatter_order;
@@ -63,7 +59,7 @@ struct ParticlesData
     f32* sec_pz;
     f32* sec_tof;
     ui8* sec_pname; // particle name (photon, electron, etc)
-
+/*
     friend std::ostream& operator<< ( std::ostream& os, const ParticlesData v )
     {
         os  << std::fixed << std::setprecision ( 2 );
@@ -104,6 +100,7 @@ struct ParticlesData
         return os;
 
     }
+*/
 }; //
 
 // Struct that handles particles
@@ -178,8 +175,9 @@ private:
     void m_cpu_malloc_stack();
     //void m_cpu_free_stack();
     void m_gpu_malloc_stack();
-    void m_cpu_init_stack_seed ( ui32 seed );
-    void m_copy_seed_cpu2gpu();
+    //void m_cpu_init_stack_seed ( ui32 seed );
+    void m_gpu_init_stack_seed ( ui32 seed );
+    //void m_copy_seed_cpu2gpu();
 
     GlobalSimulationParameters m_params;
 
