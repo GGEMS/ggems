@@ -214,7 +214,6 @@ __host__ __device__ void e_read_CS_table (
         // Get interaction distance
         if ( CS != 0.0 )
         {
-            CS = 12.345;
             interaction_distance = randomnumbereIoni / CS;
         }
         else
@@ -228,7 +227,7 @@ __host__ __device__ void e_read_CS_table (
             next_discrete_process = ELECTRON_IONISATION;
         }
 
-        printf("    IntDist eIoni %e - CS %e - Ekin %e - rnd %e\n", interaction_distance, CS, energy, randomnumbereIoni);
+        //printf("    IntDist eIoni %e - CS %e - Ekin %e - rnd %e\n", interaction_distance, CS, energy, randomnumbereIoni);
 
     } // eIoni
 
