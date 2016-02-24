@@ -284,7 +284,7 @@ void VoxPhanImgNav::track_to_out ( Particles particles )
 }
 
 void VoxPhanImgNav::load_phantom_from_mhd ( std::string filename, std::string range_mat_name )
-{
+{   
     m_phantom.load_from_mhd ( filename, range_mat_name );
 }
 
