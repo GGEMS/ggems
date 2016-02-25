@@ -22,6 +22,7 @@
 #include <map>
 #include <algorithm>
 #include <cfloat>
+#include <climits>
 #include <assert.h>
 #include <math.h>
 #include <cstring>

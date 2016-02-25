@@ -53,11 +53,26 @@ __device__ f32 JKISS32(prng_states *state) {
 }
 */
 
-__global__ void gpu_prng_init(prng_states *states, ui32 seed)
-{
+__global__ void gpu_prng_init( prng_states *states, ui32 seed )
+{    
+    #ifdef __CUDA_ARCH__
     int id = threadIdx.x + blockIdx.x * blockDim.x;
     /* Each thread gets same seed, a different sequence number, no offset */
     curand_init(seed, id, 0, &states[id]);
+    #endif
+}
+
+__host__ void cpu_prng_init(prng_states *states, ui32 size, ui32 seed )
+{
+    srand(seed);
+    #ifndef __CUDA_ARCH__
+    prng_states aState;
+    for ( ui32 i=0; i<size; i++)
+    {
+        aState.seed = rand();
+        states[i] = aState;
+    }
+    #endif
 }
 
 QUALIFIER f32 prng_uniform(prng_states *state)
@@ -85,12 +100,26 @@ QUALIFIER f32 prng_uniform(prng_states *state)
     #endif
 
 #else
-    // CPU code - FIXME - seed not used!!!  - JB
-    std::mt19937 generator;
+    // CPU code - FIXME - the use of suh prng requried a class - JB
+    ui32 seed = state->seed;
+    std::mt19937 generator(seed);
     std::uniform_real_distribution<float> distribution(0.0, 1.0-CURAND_2POW32_INV);
+    seed += 10;
+    if (seed >= ULONG_MAX) {
+        seed = seed / LONG_MAX;
+
+        #ifdef DEBUG
+        printf("[GGEMS error] PRNG NUMBER reach MAX\n");
+        #endif
+
+    }
+    state->seed = seed;
 
     #ifdef DEBUG
     f32 x = distribution(generator);
+
+    //f32 x = rand() / (f32)RAND_MAX;
+
     if ( x <= 0.0f )
     {
         printf("[GGEMS error] PRNG NUMBER <= 0.0\n");
@@ -101,9 +130,13 @@ QUALIFIER f32 prng_uniform(prng_states *state)
         printf("[GGEMS error] PRNG NUMBER > 1.0\n");
         x = 1.0f;
     }
+
+    //printf("x %e   seed %i\n", x, seed);
+
     return x;
     #else
     return distribution(generator);
+    //return rand() / (f32)RAND_MAX;
     #endif
 #endif
 }

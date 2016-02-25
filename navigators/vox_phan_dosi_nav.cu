@@ -177,6 +177,8 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
             trueStepLength = lengthtoVertex;
         }
 
+        //printf("trueStepLength %e\n", trueStepLength);
+
         //printf("trueStepLength %e   lengthtoVertex %e   cutstep %e - alongStepLength %e   next_interaction_distance %e\n",
         //       trueStepLength, lengthtoVertex, cutstep, alongStepLength, next_interaction_distance);
 
@@ -260,6 +262,11 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
                 
                 dose_record_standard ( dosi, edep, particles.px[ part_id ], particles.py[ part_id ], particles.pz[ part_id ] );
 
+
+//                printf("Edep %e  - pos %e %e %e - step %e cutstep %e - LossProc Sig\n", edep,
+//                       particles.px[part_id], particles.py[part_id], particles.pz[part_id],
+//                       trueStepLength, lengthtoVertex);
+
                 alongStepLength += trueStepLength;
                 totalLength += trueStepLength;
                 lastStepisaPhysicEffect = FALSE;
@@ -270,6 +277,8 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
             else
             {
 
+                //// InvokeAlongStepDoItProcs ////////////////////////////////////////////////////////////////////////
+
                 // Energy loss (call eFluctuation)
                 edep = eLoss ( trueStepLength, particles.E[ part_id ], dedxeIoni, dedxeBrem, erange,
                                electron_CS_table, mat_id, materials, particles, parameters, part_id );
@@ -278,6 +287,8 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
 
                 //printf("eLoss %e   stepl %e   E %e   dedxIoni %e   dedxeBrem %e   erange %e\n", edep,
                 //       trueStepLength, particles.E[ part_id ], dedxeIoni, dedxeBrem, erange);
+
+                //printf("eloss %e   newE %e\n", edep, particles.E[part_id]);
 
     #ifdef DEBUG
                 if ( edep > particles.E[ part_id ] )
@@ -292,6 +303,14 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
                                       materials, dosi, index_phantom, vol, parameters );
 
                 dose_record_standard ( dosi, edep, particles.px[part_id], particles.py[part_id], particles.pz[part_id] );
+
+
+//                printf("Edep %e  - pos %e %e %e - step %e cutstep %e - LossProc Not Sig\n", edep,
+//                       particles.px[part_id], particles.py[part_id], particles.pz[part_id],
+//                       trueStepLength, lengthtoVertex);
+
+                //// InvokePostStepDoItProcs ////////////////////////////////////////////////////////////////////////
+
 
                 SecParticle secondary_part;
                 secondary_part.E = 0.;
@@ -363,8 +382,9 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
                     // This secondary particle is not used, so drop its energy
                     if ( secondary_part.E != 0.0f )
                     {
-                        dose_record_standard( dosi, secondary_part.E, particles.px[ part_id ],
-                                              particles.py[ part_id ], particles.pz[ part_id ] );
+                        //dose_record_standard( dosi, secondary_part.E, particles.px[ part_id ],
+                        //                      particles.py[ part_id ], particles.pz[ part_id ] );
+
                     }
 
 
@@ -380,6 +400,11 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
                 freeLength = 0.;
                 totalLength += trueStepLength;
                 //                 Troncature(particles, id);
+
+                //printf("Newpos= %e %e %e  newE %e\n", particles.px[ part_id ], particles.py[ part_id ], particles.pz[ part_id ], particles.E[part_id]);
+
+
+
             } // significant_loss == false
 
         } // bool_loop == true
@@ -402,8 +427,16 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
         f32xyz deltapos = fxyz_sub( poststep, pos );
         f32 stepl = sqrtf( fxyz_dot( deltapos, deltapos ) );
         //printf("ID %i   dE %e    StepL %e   eloss %e   erange %e\n", part_id, energy-particles.E[part_id], stepl, edep, erange);
+
+
+
+        //dose_record_standard( dosi, particles.E[part_id], particles.px[ part_id ],
+        //                      particles.py[ part_id ], particles.pz[ part_id ] );
+
         particles.endsimu[ part_id ] = PARTICLE_DEAD;
         return;
+
+
 
         //printf("   ID %i - istep %i - Electron - level %i - E %f keV\n", part_id, istep, particles.level[part_id], particles.E[part_id]/keV);
 

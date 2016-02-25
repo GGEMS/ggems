@@ -99,6 +99,12 @@ void __host__ __device__ transport_track_to_in_AABB( ParticlesData &particles, f
     dir.y = particles.dy[id];
     dir.z = particles.dz[id];
 
+    // Skip if already inside the phantom
+    if ( test_point_AABB_with_tolerance (pos, xmin, xmax, ymin, ymax, zmin, zmax, tolerance ) )
+    {
+        return;
+    }
+
     // get distance to AABB
     f32 dist = hit_ray_AABB ( pos, dir, xmin, xmax, ymin, ymax, zmin, zmax );    
 

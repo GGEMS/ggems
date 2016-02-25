@@ -20,22 +20,26 @@
 /// CPU&GPU functions
 __host__ __device__ void dose_record_standard ( DoseData &dose, f32 Edep, f32 px, f32 py, f32 pz )
 {
-
+/*
     if(Edep<=0.)
     {
     //     GGcout << "WTF Dose < 0? " << Edep << GGendl; 
         return;
     }
-
+*/
     // Defined index phantom
     f32xyz ivoxsize;
     ivoxsize.x = 1.0 / dose.spacing_x;
     ivoxsize.y = 1.0 / dose.spacing_y;
     ivoxsize.z = 1.0 / dose.spacing_z;
+    f32xyz hvoxsize;
+    hvoxsize.x = dose.spacing_x * 0.5f;
+    hvoxsize.y = dose.spacing_y * 0.5f;
+    hvoxsize.z = dose.spacing_z * 0.5f;
     ui32xyzw index_phantom;
-    index_phantom.x = ui32 ( ( px-dose.ox ) * ivoxsize.x );
-    index_phantom.y = ui32 ( ( py-dose.oy ) * ivoxsize.y );
-    index_phantom.z = ui32 ( ( pz-dose.oz ) * ivoxsize.z );
+    index_phantom.x = ui32 ( ( px-dose.ox - hvoxsize.x ) * ivoxsize.x );
+    index_phantom.y = ui32 ( ( py-dose.oy - hvoxsize.y ) * ivoxsize.y );
+    index_phantom.z = ui32 ( ( pz-dose.oz - hvoxsize.z ) * ivoxsize.z );
     index_phantom.w = index_phantom.z*dose.nx*dose.ny
             + index_phantom.y*dose.nx
             + index_phantom.x; // linear index
@@ -45,6 +49,8 @@ __host__ __device__ void dose_record_standard ( DoseData &dose, f32 Edep, f32 px
             ( index_phantom.z >= dose.nz ) )
     {
 
+        printf("Doxel index out of bound!!\n");
+
 // GGcout <<  index_phantom.x << "  " <<  index_phantom.y << "  " <<  index_phantom.z << GGendl;
 // GGcout << pz << "   " << dose.oz << "   " << ivoxsize.z << GGendl;
 // GGcout <<  dose.nx << "  " <<  dose.ny << "  " <<  dose.nz << GGendl;
@@ -52,6 +58,9 @@ __host__ __device__ void dose_record_standard ( DoseData &dose, f32 Edep, f32 px
         return;
     }
     
+
+    printf("Edep %e  pos %e %e %e  index %i\n", Edep, px, py, pz, index_phantom.w);
+
 /*    
     if(index_phantom.z > 150)
     {
@@ -76,7 +85,14 @@ __host__ __device__ void dose_record_standard ( DoseData &dose, f32 Edep, f32 px
 //
 
 
-    ggems_atomic_add ( dose.edep, index_phantom.w, Edep );
+    #ifdef __CUDA_ARCH__
+        ggems_atomic_add ( dose.edep, index_phantom.w, Edep );
+    #else
+        dose.edep[index_phantom.w] += (f64)Edep;
+    #endif
+
+
+
     ggems_atomic_add ( dose.edep_squared, index_phantom.w, Edep*Edep );
     ggems_atomic_add ( dose.number_of_hits, index_phantom.w, ui32 ( 1 ) );
 //  GGcout<< __FUNCTION__ << "  " << __LINE__ << GGendl;

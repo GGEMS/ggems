@@ -88,7 +88,9 @@ void ParticleManager::initialize ( GlobalSimulationParameters params )
     // CPU allocation
     m_cpu_malloc_stack();
 
-    // FIXME - seed on CPU side is not used - JB
+    // Init seed
+    cpu_prng_init( particles.data_h.prng, particles.size, params.data_h.seed );
+
     //m_cpu_init_stack_seed ( params.data_h.seed );
 
     // Init seeds

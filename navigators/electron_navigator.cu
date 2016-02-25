@@ -491,7 +491,7 @@ __host__ __device__ f32 eLoss ( f32 LossLength, f32 Ekine, f32 dedxeIoni, f32 de
                                 ParticlesData &particles, GlobalSimulationParametersData parameters, ui32 id )
 {    
     // DEBUG
-    LossLength = 0.09;
+    //LossLength = 0.09;
 
     f32 perteTot = LossLength * ( dedxeIoni + dedxeBrem );
 
@@ -905,21 +905,21 @@ __host__ __device__ f32 GlobalMscScattering ( f32 GeomPath,f32 cutstep,f32 Curre
 
     if ( parameters.physics_list[ELECTRON_MSC] != ENABLED )
     {
+
+        particles.px[id] += particles.dx[id] * GeomPath;
+        particles.py[id] += particles.dy[id] * GeomPath;
+        particles.pz[id] += particles.dz[id] * GeomPath;
+
         if ( GeomPath < cutstep )
         {
             edep = eLoss ( GeomPath, particles.E[ id ], dedxeIoni, dedxeBrem, CurrentRange, d_table,
                            mat, materials, particles, parameters, id );
 
-            // Update energy
-            particles.E[ id ] -= edep;
-
             // Drop dose
             dose_record_standard ( dosi, edep, particles.px[id], particles.py[id], particles.pz[id] );
+            printf("Edep %e  - pos %e %e %e - MscProc\n", edep, particles.px[id], particles.py[id], particles.pz[id]);
 
         }
-        particles.px[id] += particles.dx[id] * GeomPath;
-        particles.py[id] += particles.dy[id] * GeomPath;
-        particles.pz[id] += particles.dz[id] * GeomPath;
 
         return  GeomPath;
     }
@@ -937,9 +937,6 @@ __host__ __device__ f32 GlobalMscScattering ( f32 GeomPath,f32 cutstep,f32 Curre
 
         edep = eLoss ( TruePath, particles.E[ id ], dedxeIoni, dedxeBrem, CurrentRange,
                        d_table, mat, materials, particles, parameters, id );
-
-        // Update energy
-        particles.E[ id ] -= edep;
 
         dose_record_standard ( dosi, edep, particles.px[id], particles.py[id], particles.pz[id] );
     }

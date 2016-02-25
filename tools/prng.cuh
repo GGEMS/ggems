@@ -35,11 +35,19 @@ struct randStateJKISS
     ui32 state_5;
 };
 
-//typedef curandStateXORWOW_t prng_states;         // 48 B per state  - slower but equivalant to G4
-typedef curandStateMRG32k3a prng_states;           // 72 B per state  - slow and different to G4
-//typedef curandStatePhilox4_32_10_t prng_states;  // 64 B per state  - fast and the closer to G4 - Default uses this one - JB
-//typedef randStateJKISS prng_states;              // 20 B per state  - equivalent to Philox
+struct randStateCPU
+{
+    ui32 seed;
+};
 
+#ifdef __CUDA_ARCH__
+    //typedef curandStateXORWOW_t prng_states;         // 48 B per state  - slower but equivalant to G4
+    //typedef curandStateMRG32k3a prng_states;         // 72 B per state  - slow and different to G4
+    typedef curandStatePhilox4_32_10_t prng_states;  // 64 B per state  - fast and the closer to G4 - Default uses this one - JB
+    //typedef randStateJKISS prng_states;              // 20 B per state  - equivalent to Philox
+#else
+    typedef randStateCPU prng_states;
+#endif
 
 /////////////////////////////////////////////////////////////////////////////
 // Prng
@@ -49,5 +57,6 @@ typedef curandStateMRG32k3a prng_states;           // 72 B per state  - slow and
 
 QUALIFIER f32 prng_uniform(prng_states *state);
 __global__ void gpu_prng_init(prng_states *states, ui32 seed);
+__host__ void cpu_prng_init( prng_states *states, ui32 size, ui32 seed );
 
 #endif
