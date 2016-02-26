@@ -8,10 +8,6 @@
  * \version 0.1
  * \date 2 december 2015
  *
- * \todo a) Need to add the output function for the dose map while ImageReader will be ready
- * \todo b) Fix: change ox, oy, oz to off_x, off_y, off_z
- * \todo c) Dose uncertainty calculation, this part can also be implemented on the device side (GPU)
- * \todo d) Check if density in really in g/mm3
  */
 
 #ifndef DOSE_CALCULATOR_CUH
@@ -24,42 +20,31 @@
 #include "voxelized.cuh"
 #include "materials.cuh"
 
-/**
- * \struct Dosimetry
- * \brief Dosimetry structure
- *
- * Structure where dosimetry parameters are store during the simulation (edep and edep squared). The size of the dosimetry volume is the same as the voxelised volume
- * \param edep Energy deposited inside the volume
- * \param dose Dose deposited inside the volume
- * \param edep_Squared_value Energy squared deposited inside the volume
- * \param uncertainty Uncertainty associated with the Energy deposited inside the volume
- * \param nb_of_voxels Number of voxels inside the volume, and also the size of the dosimetrics array
- **/
+
 struct DoseData
 {
     // Data
-    f64 * edep;
-    f64 * dose;
-    f64 * edep_squared;
-    ui32 * number_of_hits;
-    f64 * uncertainty;
+    f64 *edep;
+    f64 *dose;
+    f64 *edep_squared;
+    ui32 *number_of_hits;
+    f64 *uncertainty;
 
     // Number of voxels per dimension
-    ui32 nx;
-    ui32 ny;
-    ui32 nz;
+    ui32xyz nb_doxels;
 
     // Voxel size per dimension
-    f32 spacing_x;
-    f32 spacing_y;
-    f32 spacing_z;
+    f32xyz doxel_size;
 
     // Offset
-    f32 ox;
-    f32 oy;
-    f32 oz;
+    f32xyz offset;
 
-    ui32 nb_of_voxels;
+    // Volume Of Interest
+    f32 xmin, xmax;
+    f32 ymin, ymax;
+    f32 zmin, zmax;
+
+    ui32 tot_nb_doxels;
 };
 
 // Struct that handle CPU&GPU data
@@ -81,9 +66,10 @@ public:
     ~DoseCalculator();
 
     // Setting
-    void set_size_in_voxel ( ui32 x, ui32 y, ui32 z );
-    void set_voxel_size ( f32 sx, f32 sy, f32 sz );
-    void set_offset ( f32 ox, f32 oy, f32 oz );
+    //void set_size_in_voxel ( ui32 x, ui32 y, ui32 z );
+    void set_doxel_size ( f32 sx, f32 sy, f32 sz );
+    void set_voi ( f32 xmin, f32 xmax, f32 ymin, f32 ymax, f32 zmin, f32 zmax);
+    //void set_offset ( f32 ox, f32 oy, f32 oz );
     void set_voxelized_phantom ( VoxelizedPhantom aphantom );
     void set_materials ( Materials materials );
     void set_min_density ( f32 min ); // Min density to consider the dose calculation
@@ -109,8 +95,11 @@ private :
 
     VoxelizedPhantom m_phantom;
     Materials m_materials;
-    bool m_flag_phantom;
-    bool m_flag_materials;
+
+    ui32xyz m_doxel_size;
+    f32xyz m_offset;
+    ui32xyz m_nb_of_doxels;
+    f32 m_xmin, m_xmax, m_ymin, m_ymax, m_zmin, m_zmax;
 
     f32 m_dose_min_density;
 

@@ -155,33 +155,21 @@ __host__ __device__ void dose_to_phantom_calculation ( DoseData dose, VoxVolumeD
 /// Class
 DoseCalculator::DoseCalculator()
 {
+    m_doxel_size.x = 0;
+    m_doxel_size.y = 0;
+    m_doxel_size.z = 0;
 
-    dose.data_h.nx = 0;
-    dose.data_h.ny = 0;
-    dose.data_h.nz = 0;
+    m_offset.x = FLT_MAX;
+    m_offset.y = FLT_MAX;
+    m_offset.z = FLT_MAX;
 
-    // Voxel size per dimension
-    dose.data_h.spacing_x = 0.0;
-    dose.data_h.spacing_y = 0.0;
-    dose.data_h.spacing_z = 0.0;
+    m_nb_of_doxels.x = 0;
+    m_nb_of_doxels.y = 0;
+    m_nb_of_doxels.z = 0;
 
-    // Offset
-    dose.data_h.ox = 0.0;
-    dose.data_h.oy = 0.0;
-    dose.data_h.oz = 0.0;
-
-    dose.data_h.nb_of_voxels = 0;
-
-    dose.data_h.edep = NULL;
-    dose.data_h.dose = NULL;
-    dose.data_h.edep_squared = NULL;
-    dose.data_h.number_of_hits = NULL;
-
-    dose.data_h.uncertainty = NULL;
-
-    // No phan tom assigned yet
-    m_flag_phantom = false;
-    m_flag_materials = false;
+    m_xmin = 0; m_xmax = 0;
+    m_ymin = 0; m_ymax = 0;
+    m_zmin = 0; m_zmax = 0;
 
     // Min density to compute the dose
     m_dose_min_density = 0.0;
@@ -199,6 +187,8 @@ DoseCalculator::~DoseCalculator()
 }
 
 /// Setting
+
+/*
 void DoseCalculator::set_size_in_voxel ( ui32 nx, ui32 ny, ui32 nz )
 {
     dose.data_h.nx = nx;
@@ -206,34 +196,40 @@ void DoseCalculator::set_size_in_voxel ( ui32 nx, ui32 ny, ui32 nz )
     dose.data_h.nz = nz;
     dose.data_h.nb_of_voxels = nx*ny*nz;
 }
+*/
 
-void DoseCalculator::set_voxel_size ( f32 sx, f32 sy, f32 sz )
+void DoseCalculator::set_doxel_size ( f32 sx, f32 sy, f32 sz )
 {
-    dose.data_h.spacing_x = sx;
-    dose.data_h.spacing_y = sy;
-    dose.data_h.spacing_z = sz;
+    m_doxel_size = make_f32xyz( sx, sy, sz );
 }
 
+void DoseCalculator::set_voi( f32 xmin, f32 xmax, f32 ymin, f32 ymax, f32 zmin, f32 zmax )
+{
+    m_xmin = xmin; m_xmax = xmax;
+    m_ymin = ymin; m_ymax = ymax;
+    m_zmin = zmin; m_zmax = zmax;
+}
+
+/*
 void DoseCalculator::set_offset ( f32 ox, f32 oy, f32 oz )
 {
     dose.data_h.ox = ox;
     dose.data_h.oy = oy;
     dose.data_h.oz = oz;
 }
+*/
 
 void DoseCalculator::set_voxelized_phantom ( VoxelizedPhantom aphantom )
 {
     m_phantom = aphantom;
-    m_flag_phantom = true;
 }
 
 void DoseCalculator::set_materials ( Materials materials )
 {
     m_materials = materials;
-    m_flag_materials = true;
 }
 
-// In g/cm3 ?
+// In g/cm3 ? TODO - JB
 void DoseCalculator::set_min_density ( f32 min )
 {
     m_dose_min_density = min * gram/mm3;
@@ -247,15 +243,88 @@ void DoseCalculator::initialize ( GlobalSimulationParameters params )
     // Check if everything was set properly
     if ( !m_check_mandatory() )
     {
-        print_error ( "Dose calculator, size or spacing are set to zero?!" );
+        print_error ( "Dose calculator, phantom and materials are not set?!" );
         exit_simulation();
     }
 
-    // Initi nb of voxels
-    dose.data_h.nb_of_voxels = dose.data_h.nx*dose.data_h.ny*dose.data_h.nz;
-
     // Copy params
     m_params = params;
+
+    /// Compute dosemap parameters /////////////////////////////
+
+    // Select a doxel size
+    if ( m_doxel_size.x > 0.0 && m_doxel_size.y > 0.0 && m_doxel_size.z > 0.0 )
+    {
+        dose.data_h.doxel_size = m_doxel_size;
+    }
+    else
+    {
+        dose.data_h.doxel_size = make_f32xyz( m_phantom.data_h.spacing_x,
+                                              m_phantom.data_h.spacing_y,
+                                              m_phantom.data_h.spacing_z );
+    }
+
+    // Compute min-max volume of interest
+    f32xyz phan_size = make_f32xyz( m_phantom.data_h.nb_vox_x * m_phantom.data_h.spacing_x,
+                                    m_phantom.data_h.nb_vox_y * m_phantom.data_h.spacing_y,
+                                    m_phantom.data_h.nb_vox_z * m_phantom.data_h.spacing_z );
+    f32xyz half_phan_size = fxyz_scale( phan_size, 0.5f );
+    f32 phan_xmin = -half_phan_size.x; f32 phan_xmax = half_phan_size.x;
+    f32 phan_ymin = -half_phan_size.y; f32 phan_ymax = half_phan_size.y;
+    f32 phan_zmin = -half_phan_size.z; f32 phan_zmax = half_phan_size.z;
+
+    // Select a min-max VOI
+    if ( !m_xmin && !m_xmax && !m_ymin && !m_ymax && !m_zmin && !m_zmax )
+    {
+        dose.data_h.xmin = phan_xmin;
+        dose.data_h.xmax = phan_xmax;
+        dose.data_h.ymin = phan_ymin;
+        dose.data_h.ymax = phan_ymax;
+        dose.data_h.zmin = phan_zmin;
+        dose.data_h.zmax = phan_zmax;
+    }
+
+    // Get the current dimension of the dose map
+    f32xyz cur_dose_size = make_f32xyz( dose.data_h.xmax - dose.data_h.xmin,
+                                        dose.data_h.ymax - dose.data_h.ymin,
+                                        dose.data_h.zmax - dose.data_h.zmin );
+
+    // New nb of voxels
+    dose.data_h.nb_doxels.x = floor( cur_dose_size.x / dose.data_h.doxel_size.x );
+    dose.data_h.nb_doxels.y = floor( cur_dose_size.y / dose.data_h.doxel_size.y );
+    dose.data_h.nb_doxels.z = floor( cur_dose_size.z / dose.data_h.doxel_size.z );
+    dose.data_h.tot_nb_doxels = dose.data_h.nb_doxels.x * dose.data_h.nb_doxels.y * dose.data_h.nb_doxels.z;
+
+    // Compute the new size (due to integer nb of doxels)
+    f32xyz new_dose_size = fxyz_mul( dose.data_h.doxel_size, dose.data_h.nb_doxels );
+
+    if ( new_dose_size.x <= 0.0 || new_dose_size.y <= 0.0 || new_dose_size.z <= 0.0 )
+    {
+        GGcerr << "Dosemap dimension: "
+               << new_dose_size.x << " "
+               << new_dose_size.y << " "
+               << new_dose_size.z << GGendl;
+        exit_simulation();
+    }
+
+    // Compute new min and max after voxel alignment
+    f32xyz half_delta_size = fxyz_scale( fxyz_sub( cur_dose_size, new_dose_size ), 0.5f );
+
+    dose.data_h.xmin += half_delta_size.x;
+    dose.data_h.xmax -= half_delta_size.x;
+
+    dose.data_h.ymin += half_delta_size.y;
+    dose.data_h.ymax -= half_delta_size.y;
+
+    dose.data_h.zmin += half_delta_size.z;
+    dose.data_h.zmax -= half_delta_size.z;
+
+    // Get the new offset
+    dose.data_h.offset.x = m_phantom.data_h.off_x - ( dose.data_h.xmin - phan_xmin );
+    dose.data_h.offset.y = m_phantom.data_h.off_y - ( dose.data_h.ymin - phan_ymin );
+    dose.data_h.offset.z = m_phantom.data_h.off_z - ( dose.data_h.zmin - phan_zmin );
+
+    //////////////////////////////////////////////////////////
 
     // CPU allocation
     m_cpu_malloc_dose();
@@ -305,7 +374,6 @@ void DoseCalculator::calculate_dose_to_water()
 
 void DoseCalculator::calculate_dose_to_phantom()
 {
-
     // Check if everything was set properly
     if ( !m_flag_materials || !m_flag_phantom )
     {
@@ -334,8 +402,7 @@ void DoseCalculator::calculate_dose_to_phantom()
 /// Private
 bool DoseCalculator::m_check_mandatory()
 {
-    if ( dose.data_h.nx == 0 || dose.data_h.ny == 0 || dose.data_h.nz == 0 ||
-            dose.data_h.spacing_x == 0 || dose.data_h.spacing_y == 0 || dose.data_h.spacing_z == 0 ) return false;
+    if ( m_phantom == NULL || m_materials == NULL ) return false;
     else return true;
 }
 
