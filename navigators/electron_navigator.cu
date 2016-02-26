@@ -181,7 +181,11 @@ __host__ __device__ void e_read_CS_table (
     else
     {
         energy_index = binary_search ( energy, d_table.E, d_table.nb_bins );        
-    }
+    }    
+
+#ifdef DEBUG
+    assert( energy_index < d_table.nb_bins );
+#endif
 
     // Get absolute index table (considering mat id)
     table_index = mat*d_table.nb_bins + energy_index;   
@@ -203,12 +207,13 @@ __host__ __device__ void e_read_CS_table (
             CS = linear_interpolation ( d_table.E[ energy_index-1 ], d_table.eIonisationCS[ table_index-1 ],
                                         d_table.E[ energy_index ], d_table.eIonisationCS[ table_index ], energy );
 
-            CS = compute_lambda_for_scaled_energy( CS, energy, d_table, mat );
+            // TODO, adding this correction create some looping on some particles (too small CS for small E) - JB
+            //CS = compute_lambda_for_scaled_energy( CS, energy, d_table, mat );
 
             dedxeIoni = linear_interpolation ( d_table.E[ energy_index-1 ], d_table.eIonisationdedx[ table_index-1 ],
                                                d_table.E[ energy_index ], d_table.eIonisationdedx[ table_index ], energy );
 
-            //printf("E %e  CS %e  dE/dx  %e\n", energy, CS, dedxeIoni);
+
         }
 
         // Get interaction distance
@@ -227,7 +232,6 @@ __host__ __device__ void e_read_CS_table (
             next_discrete_process = ELECTRON_IONISATION;
         }
 
-        //printf("    IntDist eIoni %e - CS %e - Ekin %e - rnd %e\n", interaction_distance, CS, energy, randomnumbereIoni);
 
     } // eIoni
 
@@ -917,7 +921,7 @@ __host__ __device__ f32 GlobalMscScattering ( f32 GeomPath,f32 cutstep,f32 Curre
 
             // Drop dose
             dose_record_standard ( dosi, edep, particles.px[id], particles.py[id], particles.pz[id] );
-            printf("Edep %e  - pos %e %e %e - MscProc\n", edep, particles.px[id], particles.py[id], particles.pz[id]);
+            //printf("Edep %e  - pos %e %e %e - MscProc\n", edep, particles.px[id], particles.py[id], particles.pz[id]);
 
         }
 
@@ -1014,6 +1018,8 @@ __host__ __device__ SecParticle eSampleSecondarieElectron ( f32 CutEnergy, Parti
     ElecDir = rotateUz ( ElecDir, currentDir );
 
     particles.E[id]= Ekine - deltaEnergy;
+
+    //printf("Ekin= %e   deltaEnergy= %e\n", Ekine, deltaEnergy);
 
     if ( particles.E[id] > 0.0 ) currentDir = CorrUnit ( currentDir, ElecDir, totMom, deltaMom );
 

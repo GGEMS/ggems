@@ -55,4 +55,45 @@ __host__ __device__ i32 G4Poisson(f32 mean, ParticlesData &particles, ui32 id );
 
 __host__ __device__ f32 Gaussian ( f32 mean,f32 rms,ParticlesData &particles, ui32 id );
 
+
+// Atomic add
+
+template < typename T,typename U >
+__host__ __device__ void ggems_atomic_add(T* array, ui32 pos, U value)
+{
+#ifdef __CUDA_ARCH__
+    atomicAdd(&array[pos], value);
+#else
+    array[pos] += value;
+#endif
+}
+
+// Atomic add double
+
+__host__ __device__ void ggems_atomic_add_f64(f64* array, ui32 pos, f64 val);
+
+
+/*
+template < typename T>
+__host__ __device__ void ggems_atomic_add(double* array, ui32 pos, T value)
+{
+#ifdef __CUDA_ARCH__
+    atomicAddDouble(&array[pos], value);
+#else
+    array[pos] += value;
+#endif
+}
+*/
+
+
+
+
+
+
+
+
+
+
+
+
 #endif

@@ -86,6 +86,11 @@ static __inline__ __host__ __device__ ui32xyz make_ui32xyz(ui32 vx, ui32 vy, ui3
     ui32xyz t; t.x = vx; t.y = vy; t.z = vz; return t;
 }
 
+static __inline__ __host__ __device__ f32xyz cast_ui32xyz_to_f32xyz(ui32xyz u)
+{
+    return make_f32xyz( f32( u.x ), f32( u.y), f32( u.z) );
+}
+
 
 /// Double precision functions ///////////////////////////////////////////////
 
@@ -136,40 +141,7 @@ inline __host__ __device__  f64 f64xyz_mul(f64xyz v){ return v.x * v.y * v.z;}
 
 #endif
 
-// template < typename T,typename U >
-// __host__ __device__ void ggems_atomic_add(T* array, ui32 pos, U value);
-// 
-// // Special case: GPU is not able to do atomic add with double yet!
-// #ifndef SINGLE_PRECISION
-// __host__ __device__ void ggems_atomic_add(f64* array, ui32 pos, f64 value);
-// #endif
 
-
-template < typename T,typename U >
-__host__ __device__ void ggems_atomic_add(T* array, ui32 pos, U value)
-{
-#ifdef __CUDA_ARCH__
-    atomicAdd(&array[pos], value);
-#else
-    array[pos] += value;
-#endif
-}
-
-// #ifndef SINGLE_PRECISION // Double precision
-
-__device__ double atomicAddDouble(double* address, f64 val);
-
-template < typename T>
-__host__ __device__ void ggems_atomic_add(double* array, ui32 pos, T value)
-{
-#ifdef __CUDA_ARCH__
-    atomicAddDouble(&array[pos], value);
-#else
-    array[pos] += value;
-#endif
-}
-
-// #endif // SINGLE_PRECISION
 
 
 

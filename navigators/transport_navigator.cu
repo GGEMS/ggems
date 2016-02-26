@@ -97,7 +97,7 @@ void __host__ __device__ transport_track_to_in_AABB( ParticlesData &particles, f
     f32xyz dir;
     dir.x = particles.dx[id];
     dir.y = particles.dy[id];
-    dir.z = particles.dz[id];
+    dir.z = particles.dz[id];    
 
     // Skip if already inside the phantom
     if ( test_point_AABB_with_tolerance (pos, xmin, xmax, ymin, ymax, zmin, zmax, tolerance ) )

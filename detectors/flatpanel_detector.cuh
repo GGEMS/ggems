@@ -18,6 +18,7 @@
 #include "raytracing.cuh"
 #include "particles.cuh"
 #include "obb.cuh"
+#include "fun.cuh"
 
 class FlatpanelDetector {
     public:

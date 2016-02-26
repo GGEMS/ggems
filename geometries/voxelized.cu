@@ -240,7 +240,9 @@ void VoxelizedPhantom::load_from_mhd(std::string volume_name, std::string range_
     std::string line, key;
     i32 nx=-1, ny=-1, nz=-1;
     f32 sx=0, sy=0, sz=0;
-    f32 ox=-1, oy=-1, oz=-1;
+    f32 ox=0, oy=0, oz=0;
+
+    bool flag_offset = false;
 
     // Watchdog
     std::string ObjectType="", BinaryData="", BinaryDataByteOrderMSB="", CompressedData="",
@@ -269,6 +271,7 @@ void VoxelizedPhantom::load_from_mhd(std::string volume_name, std::string range_
                                                 ox = m_txt_reader.read_key_f32_arg_atpos(line, 0);
                                                 oy = m_txt_reader.read_key_f32_arg_atpos(line, 1);
                                                 oz = m_txt_reader.read_key_f32_arg_atpos(line, 2);
+                                                flag_offset = true;
             }
             //if (key=="CenterOfRotation") printf("CoR\n");
             if (key=="ElementSpacing") {
@@ -385,7 +388,7 @@ void VoxelizedPhantom::load_from_mhd(std::string volume_name, std::string range_
     f32 h_lengthz = data_h.nb_vox_z * data_h.spacing_z * 0.5f;
 
     // If the offset is not defined, chose the volume center
-    if (ox == -1 || oy == -1 || oz == -1) {
+    if ( !flag_offset ) {
         data_h.off_x = h_lengthx;
         data_h.off_y = h_lengthy;
         data_h.off_z = h_lengthz;
@@ -399,9 +402,9 @@ void VoxelizedPhantom::load_from_mhd(std::string volume_name, std::string range_
         data_h.off_y = oy;
         data_h.off_z = oz;
 
-        data_h.xmin = ox; data_h.xmax = data_h.xmin + (data_h.nb_vox_x * data_h.spacing_x);
-        data_h.ymin = oy; data_h.ymax = data_h.ymin + (data_h.nb_vox_y * data_h.spacing_y);
-        data_h.zmin = oz; data_h.zmax = data_h.zmin + (data_h.nb_vox_z * data_h.spacing_z);
+        data_h.xmin = -ox; data_h.xmax = data_h.xmin + (data_h.nb_vox_x * data_h.spacing_x);
+        data_h.ymin = -oy; data_h.ymax = data_h.ymin + (data_h.nb_vox_y * data_h.spacing_y);
+        data_h.zmin = -oz; data_h.zmax = data_h.zmin + (data_h.nb_vox_z * data_h.spacing_z);
     }
 
 }

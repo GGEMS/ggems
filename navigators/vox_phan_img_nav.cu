@@ -43,9 +43,9 @@ __host__ __device__ void VPIN::track_to_out ( ParticlesData &particles,
     ivoxsize.y = 1.0 / vol.spacing_y;
     ivoxsize.z = 1.0 / vol.spacing_z;
     ui32xyzw index_phantom;
-    index_phantom.x = ui32 ( ( pos.x-vol.off_x ) * ivoxsize.x );
-    index_phantom.y = ui32 ( ( pos.y-vol.off_y ) * ivoxsize.y );
-    index_phantom.z = ui32 ( ( pos.z-vol.off_z ) * ivoxsize.z );
+    index_phantom.x = ui32 ( ( pos.x+vol.off_x ) * ivoxsize.x );
+    index_phantom.y = ui32 ( ( pos.y+vol.off_y ) * ivoxsize.y );
+    index_phantom.z = ui32 ( ( pos.z+vol.off_z ) * ivoxsize.z );
 
     index_phantom.w = index_phantom.z*vol.nb_vox_x*vol.nb_vox_y
                       + index_phantom.y*vol.nb_vox_x
@@ -63,9 +63,9 @@ __host__ __device__ void VPIN::track_to_out ( ParticlesData &particles,
     //// Get the next distance boundary volume /////////////////////////////////
 
     // get voxel params
-    f32 vox_xmin = index_phantom.x*vol.spacing_x + vol.off_x;
-    f32 vox_ymin = index_phantom.y*vol.spacing_y + vol.off_y;
-    f32 vox_zmin = index_phantom.z*vol.spacing_z + vol.off_z;
+    f32 vox_xmin = index_phantom.x*vol.spacing_x - vol.off_x;
+    f32 vox_ymin = index_phantom.y*vol.spacing_y - vol.off_y;
+    f32 vox_zmin = index_phantom.z*vol.spacing_z - vol.off_z;
     f32 vox_xmax = vox_xmin + vol.spacing_x;
     f32 vox_ymax = vox_ymin + vol.spacing_y;
     f32 vox_zmax = vox_zmin + vol.spacing_z;

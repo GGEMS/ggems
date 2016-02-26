@@ -81,25 +81,27 @@ QUALIFIER f32 prng_uniform(prng_states *state)
 #ifdef __CUDA_ARCH__
 
     #ifdef DEBUG
-    f32 x = curand(state) * CURAND_2POW32_INV + (CURAND_2POW32_INV / 2.0f) - CURAND_2POW32_INV;
-    if ( x <= 0.0f )
+    f32 x = curand(state) * CURAND_2POW32_INV + (CURAND_2POW32_INV / 2.0f);
+    if ( x < 0.0f )
     {
-        printf("[GGEMS error] PRNG NUMBER <= 0.0\n");
-        x = CURAND_2POW32_INV;
+        printf("[GGEMS error] PRNG NUMBER < 0.0\n");
+        x = 0;
     }
-    if ( x > 1.0f )
+    if ( x >= 1.0f )
     {
-        printf("[GGEMS error] PRNG NUMBER > 1.0\n");
-        x = 1.0f;
+        printf("[GGEMS error] PRNG NUMBER >= 1.0\n");
+        x = 1.0f - CURAND_2POW32_INV;
     }
     return x;
     #else
     // Return float between 0 to 1 (0 include, 1 exclude)
-    return curand(state) * CURAND_2POW32_INV + (CURAND_2POW32_INV / 2.0f) - CURAND_2POW32_INV;
+    return curand(state) * CURAND_2POW32_INV + (CURAND_2POW32_INV / 2.0f);
     //return JKISS32(state);
     #endif
 
 #else
+
+    /*
     // CPU code - FIXME - the use of suh prng requried a class - JB
     ui32 seed = state->seed;
     std::mt19937 generator(seed);
@@ -114,29 +116,30 @@ QUALIFIER f32 prng_uniform(prng_states *state)
 
     }
     state->seed = seed;
+    */
 
     #ifdef DEBUG
-    f32 x = distribution(generator);
+        //f32 x = distribution(generator);
 
-    //f32 x = rand() / (f32)RAND_MAX;
+        f32 x = rand() / (f32)RAND_MAX;
 
-    if ( x <= 0.0f )
-    {
-        printf("[GGEMS error] PRNG NUMBER <= 0.0\n");
-        x = CURAND_2POW32_INV;
-    }
-    if ( x > 1.0f )
-    {
-        printf("[GGEMS error] PRNG NUMBER > 1.0\n");
-        x = 1.0f;
-    }
+        if ( x < 0.0f )
+        {
+            printf("[GGEMS error] PRNG NUMBER < 0.0\n");
+            x = 0.0f;
+        }
+        if ( x >= 1.0f )
+        {
+            printf("[GGEMS error] PRNG NUMBER >= 1.0\n");
+            x = 1.0f-CURAND_2POW32_INV;
+        }
 
-    //printf("x %e   seed %i\n", x, seed);
+        //printf("x %e   seed %i\n", x, seed);
 
-    return x;
+        return x;
     #else
-    return distribution(generator);
-    //return rand() / (f32)RAND_MAX;
+        //return distribution(generator);
+        return rand() / (f32)RAND_MAX;
     #endif
 #endif
 }

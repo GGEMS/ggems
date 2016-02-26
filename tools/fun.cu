@@ -160,4 +160,54 @@ __host__ __device__ f32 Gaussian (f32 mean, f32 rms, ParticlesData &particles, u
 
 
 
+/// Atomic functions
+
+/*   OLD VERSION
+        __device__ double ggems_atomic_add_f64(f64* array, ui32 pos, f64 val)
+        {
+            f64 *address = &array[pos];
+            unsigned long long int* address_as_ull = (unsigned long long int*)address;
+            unsigned long long int old = *address_as_ull, assumed;
+            do {
+                assumed = old;
+                old = atomicCAS(address_as_ull, assumed,
+                                __double_as_longlong(val +
+                                __longlong_as_double(assumed)));
+            } while (assumed != old);
+            return __longlong_as_double(old);
+        }
+*/
+
+__host__ __device__ void ggems_atomic_add_f64(f64* array, ui32 pos, f64 val)
+{
+
+    #ifdef __CUDA_ARCH__
+
+        // Single precision f64 is in fact a f32
+        #ifdef SINGLE_PRECISION
+
+            ggems_atomic_add(array, pos, val);
+
+        // Double precision
+        #else
+
+            f64 *address = &array[pos];
+            unsigned long long oldval, newval, readback;
+
+            oldval = __double_as_longlong(*address);
+            newval = __double_as_longlong(__longlong_as_double(oldval) + val);
+            while ((readback=atomicCAS((unsigned long long *)address, oldval, newval)) != oldval)
+            {
+                oldval = readback;
+                newval = __double_as_longlong(__longlong_as_double(oldval) + val);
+            }
+
+        #endif
+
+    #else
+        array[pos] += val;
+    #endif
+
+}
+
 #endif

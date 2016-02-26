@@ -35,7 +35,7 @@ void ImageReader::create_directory_tree(std::string dirname)
     }
 }       
 
-void ImageReader::record3Dimage ( string histname,  f64 *data, f32xyz offset, f32xyz spacing, i32xyz size, bool sparse_compression )
+void ImageReader::record3Dimage ( string histname,  f64 *data, f32xyz offset, f32xyz spacing, ui32xyz size, bool sparse_compression )
 {
 
 //         printf("Image Parameters : %d %g %g %d %g %g %d %g %g \n",
@@ -242,7 +242,7 @@ void ImageReader::record3Dimage ( string histname,  f64 *data, f32xyz offset, f3
 
 }
 
-void ImageReader::record3Dimage ( string histname,  ui32 *data, f32xyz offset, f32xyz spacing, i32xyz size, bool sparse_compression )
+void ImageReader::record3Dimage ( string histname,  ui32 *data, f32xyz offset, f32xyz spacing, ui32xyz size, bool sparse_compression )
 {
 
         /*printf("Image Parameters : %d %g %g %d %g %g %d %g %g \n",
@@ -447,7 +447,7 @@ void ImageReader::record3Dimage ( string histname,  ui32 *data, f32xyz offset, f
 
 }
 
-void ImageReader::record3Dimage ( string histname,  ui16 *data, f32xyz offset, f32xyz spacing, i32xyz size, bool sparse_compression )
+void ImageReader::record3Dimage (string histname,  ui16 *data, f32xyz offset, f32xyz spacing, ui32xyz size, bool sparse_compression )
 {
 
         /*printf("Image Parameters : %d %g %g %d %g %g %d %g %g \n",

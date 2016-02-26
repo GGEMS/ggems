@@ -5,8 +5,10 @@
  * \brief
  * \author Y. Lemaréchal <yannick.lemarechal@univ-brest.fr>
  * \author J. Bert <bert.jul@gmail.com>
- * \version 0.1
- * \date 2 december 2015
+ * \version 0.2
+ * \date 02/12/2015
+ * \date 26/02/2016, add volume of interest, change offset handling and fix many bugs - JB
+ *
  *
  */
 
@@ -19,7 +21,7 @@
 #include "image_reader.cuh"
 #include "voxelized.cuh"
 #include "materials.cuh"
-
+#include "raytracing.cuh"
 
 struct DoseData
 {
@@ -30,11 +32,14 @@ struct DoseData
     ui32 *number_of_hits;
     f64 *uncertainty;
 
-    // Number of voxels per dimension
+    // Number of doxels per dimension
     ui32xyz nb_doxels;
 
-    // Voxel size per dimension
+    // Doxel size per dimension
     f32xyz doxel_size;
+
+    // Inverse of doxel size (for calculation latter)
+    f32xyz inv_doxel_size;
 
     // Offset
     f32xyz offset;
@@ -44,7 +49,10 @@ struct DoseData
     f32 ymin, ymax;
     f32 zmin, zmax;
 
+    // Tot number of doxels
     ui32 tot_nb_doxels;
+    // Number of voxels per slice
+    ui32 slice_nb_doxels;
 };
 
 // Struct that handle CPU&GPU data
@@ -96,7 +104,7 @@ private :
     VoxelizedPhantom m_phantom;
     Materials m_materials;
 
-    ui32xyz m_doxel_size;
+    f32xyz m_doxel_size;
     f32xyz m_offset;
     ui32xyz m_nb_of_doxels;
     f32 m_xmin, m_xmax, m_ymin, m_ymax, m_zmin, m_zmax;
@@ -106,6 +114,8 @@ private :
     GlobalSimulationParameters m_params;
 
     bool m_flag_dose_calculated;
+    bool m_flag_phantom;
+    bool m_flag_materials;
 
 
 };

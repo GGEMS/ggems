@@ -119,6 +119,10 @@
 #define elec_radius          (2.8179409421853486E-15*m)      // Metre
 #define N_avogadro           (6.0221367E+23/mole)
 
+////// DEBUG ///////////////////////////////////////////////////
+
+#define DEBUG 1
+//#define DEBUG_TRACK_ID 0
 
 /////// TYPEDEF ////////////////////////////////////////////////
 
