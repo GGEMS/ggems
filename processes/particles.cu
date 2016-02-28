@@ -88,10 +88,10 @@ void ParticleManager::initialize ( GlobalSimulationParameters params )
     // CPU allocation
     m_cpu_malloc_stack();
 
-    // Init seed
-    cpu_prng_init( particles.data_h.prng, particles.size, params.data_h.seed );
+//    // Init seed
+//    cpu_prng_init( particles.data_h.prng, particles.size, params.data_h.seed );
 
-    //m_cpu_init_stack_seed ( params.data_h.seed );
+    m_cpu_init_stack_seed ( params.data_h.seed );
 
     // Init seeds
     if ( params.data_h.device_target == GPU_DEVICE )
@@ -99,9 +99,9 @@ void ParticleManager::initialize ( GlobalSimulationParameters params )
         // GPU allocation
         m_gpu_malloc_stack();
 
-        // Init seed on GPU side
-        gpu_prng_init( particles.data_d.prng, particles.size,
-                       params.data_h.seed, params.data_h.gpu_block_size );
+//        // Init seed on GPU side
+//        gpu_prng_init( particles.data_d.prng, particles.size,
+//                       params.data_h.seed, params.data_h.gpu_block_size );
 /*
         srand(m_params.data_h.seed);
         prng_states *hostStates;
@@ -120,7 +120,7 @@ void ParticleManager::initialize ( GlobalSimulationParameters params )
         cudaMemcpy(particles.data_d.prng, hostStates, particles.size * sizeof(prng_states), cudaMemcpyHostToDevice);
 */
         // Copy data to the GPU    - FIXME - seed on CPU side is not used - JB
-        //m_copy_seed_cpu2gpu();
+        m_copy_seed_cpu2gpu();
     }
 
 }
@@ -148,7 +148,13 @@ void ParticleManager::m_cpu_malloc_stack()
     // scatter_order
     particles.data_h.scatter_order = (ui32*)malloc( particles.size * sizeof( ui32 ) );
 
-    particles.data_h.prng = ( prng_states* ) malloc ( particles.size * sizeof ( prng_states ) );
+    particles.data_h.prng_state_1 = ( ui32* ) malloc ( particles.size * sizeof ( ui32 ) );
+    particles.data_h.prng_state_2 = ( ui32* ) malloc ( particles.size * sizeof ( ui32 ) );
+    particles.data_h.prng_state_3 = ( ui32* ) malloc ( particles.size * sizeof ( ui32 ) );
+    particles.data_h.prng_state_4 = ( ui32* ) malloc ( particles.size * sizeof ( ui32 ) );
+    particles.data_h.prng_state_5 = ( ui32* ) malloc ( particles.size * sizeof ( ui32 ) );
+
+    //particles.data_h.prng = ( prng_states* ) malloc ( particles.size * sizeof ( prng_states ) );
 
     particles.data_h.geometry_id = ( ui32* ) malloc ( particles.size * sizeof ( ui32 ) );
     particles.data_h.E_index = ( ui32* ) malloc ( particles.size * sizeof ( ui32 ) );
@@ -213,7 +219,14 @@ void ParticleManager::m_gpu_malloc_stack()
     // scatter_order
     HANDLE_ERROR ( cudaMalloc ( ( void** ) &particles.data_d.scatter_order, particles.size*sizeof ( ui32 ) ) );
 
-    HANDLE_ERROR ( cudaMalloc ( ( void** ) &particles.data_d.prng, particles.size*sizeof ( prng_states ) ) );
+    HANDLE_ERROR ( cudaMalloc ( ( void** ) &particles.data_d.prng_state_1, particles.size*sizeof ( ui32 ) ) );
+    HANDLE_ERROR ( cudaMalloc ( ( void** ) &particles.data_d.prng_state_2, particles.size*sizeof ( ui32 ) ) );
+    HANDLE_ERROR ( cudaMalloc ( ( void** ) &particles.data_d.prng_state_3, particles.size*sizeof ( ui32 ) ) );
+    HANDLE_ERROR ( cudaMalloc ( ( void** ) &particles.data_d.prng_state_4, particles.size*sizeof ( ui32 ) ) );
+    HANDLE_ERROR ( cudaMalloc ( ( void** ) &particles.data_d.prng_state_5, particles.size*sizeof ( ui32 ) ) );
+
+
+    //HANDLE_ERROR ( cudaMalloc ( ( void** ) &particles.data_d.prng, particles.size*sizeof ( prng_states ) ) );
 
     HANDLE_ERROR ( cudaMalloc ( ( void** ) &particles.data_d.geometry_id, particles.size*sizeof ( ui32 ) ) );
     HANDLE_ERROR ( cudaMalloc ( ( void** ) &particles.data_d.E_index, particles.size*sizeof ( ui32 ) ) );
@@ -239,7 +252,7 @@ void ParticleManager::m_gpu_malloc_stack()
 
 }
 
-/*
+
 // Init particle seeds with the main seed
 void ParticleManager::m_cpu_init_stack_seed ( ui32 seed )
 {
@@ -260,9 +273,9 @@ void ParticleManager::m_cpu_init_stack_seed ( ui32 seed )
         ++i;
     }
 }
-*/
 
-/*
+
+
 void ParticleManager::m_copy_seed_cpu2gpu()
 {
 
@@ -279,7 +292,7 @@ void ParticleManager::m_copy_seed_cpu2gpu()
                                 sizeof ( ui32 ) *particles.size, cudaMemcpyHostToDevice ) );
 
 }
-*/
+
 
 void ParticleManager::copy_gpu2cpu( Particles part )
 {

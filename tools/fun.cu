@@ -104,8 +104,8 @@ __host__ __device__ f32 Gaussian (f32 mean, f32 rms, ParticlesData &particles, u
 
     do
     {
-        U1 = 2.*prng_uniform( &(particles.prng[id]) )-1.;
-        U2 = 2.*prng_uniform( &(particles.prng[id]) )-1.;
+        U1 = 2.*prng_uniform( particles, id )-1.;
+        U2 = 2.*prng_uniform( particles, id )-1.;
         Fx = U1*U1 + U2*U2;
 
     }

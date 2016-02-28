@@ -103,24 +103,24 @@ __host__ __device__ SecParticle Compton_SampleSecondaries_standard(ParticlesData
 
     f32 greject, onecost, eps, eps2, sint2, cosTheta, sinTheta, phi;
     do {
-        if (a2 > prng_uniform( &(particles.prng[id]) )) {
-            eps = expf(-a1 * prng_uniform( &(particles.prng[id]) ));
+        if (a2 > prng_uniform( particles, id )) {
+            eps = expf(-a1 * prng_uniform( particles, id ));
             eps2 = eps*eps;
         } else {
-            eps2 = eps02 + (1.0f - eps02) * prng_uniform( &(particles.prng[id]) );
+            eps2 = eps02 + (1.0f - eps02) * prng_uniform( particles, id );
             eps = sqrt(eps2);
         }
         onecost = (1.0f - eps) / (eps * E0);
         sint2 = onecost * (2.0f - onecost);
         greject = 1.0f - eps * sint2 / (1.0f + eps2);
-    } while (greject < prng_uniform( &(particles.prng[id]) ));
+    } while (greject < prng_uniform( particles, id ));
 
     // scattered gamma angles
 
     if (sint2 < 0.0f) {sint2 = 0.0f;}
     cosTheta = 1.0f - onecost;
     sinTheta = sqrt(sint2);
-    phi = prng_uniform( &(particles.prng[id]) ) * gpu_twopi;
+    phi = prng_uniform( particles, id ) * gpu_twopi;
 
     // update the scattered gamma
 
@@ -198,7 +198,7 @@ __host__ __device__ f32 Photoelec_CS_standard(MaterialsTable materials,
 
 // Compute Theta distribution of the emitted electron, with respect to the incident Gamma
 // The Sauter-Gavrila distribution for the K-shell is used
-__host__ __device__ f32 Photoelec_ElecCosThetaDistribution(ParticlesData part,
+__host__ __device__ f32 Photoelec_ElecCosThetaDistribution(ParticlesData particles,
                                                            ui32 id,
                                                            f32 kineEnergy) {
     f32 costeta = 1.0f;
@@ -212,11 +212,11 @@ __host__ __device__ f32 Photoelec_ElecCosThetaDistribution(ParticlesData part,
     else              {grejsup = gamma*gamma*(1.0f + b + beta*b);}
 
     do {
-        rndm = 1.0f - 2.0f*prng_uniform( &(part.prng[id]) );
+        rndm = 1.0f - 2.0f*prng_uniform( particles, id );
         costeta = (rndm + beta) / (rndm*beta + 1.0f);
         term = 1.0f - beta*costeta;
         greject = ((1.0f - costeta*costeta)*(1.0f + b*term)) / (term*term);
-    } while(greject < prng_uniform( &(part.prng[id]) )*grejsup);
+    } while(greject < prng_uniform( particles, id )*grejsup);
 
     return costeta;
 }
@@ -257,7 +257,7 @@ __host__ __device__ SecParticle Photoelec_SampleSecondaries_standard(ParticlesDa
     ui32 Z = mat.mixture[mixture_index];
     ui32 i = 0;
     if (n > 0) {                
-        f32 x = prng_uniform( &(particles.prng[id]) ) * get_CS_from_table(photon_CS_table.E_bins,
+        f32 x = prng_uniform( particles, id ) * get_CS_from_table(photon_CS_table.E_bins,
                                                             photon_CS_table.Photoelectric_Std_CS,
                                                             particles.E[id], E_index, CS_index);
         f32 xsec = 0.0f;
@@ -288,7 +288,7 @@ __host__ __device__ SecParticle Photoelec_SampleSecondaries_standard(ParticlesDa
         // direction of the photo electron
         cosTeta = Photoelec_ElecCosThetaDistribution(particles, id, ElecKineEnergy);
         f32 sinTeta = sqrtf(1.0f - cosTeta*cosTeta);
-        f32 Phi = gpu_twopi * prng_uniform( &(particles.prng[id]) );
+        f32 Phi = gpu_twopi * prng_uniform( particles, id );
         f32xyz ElecDirection = make_f32xyz(sinTeta*cos(Phi), sinTeta*sin(Phi), cosTeta);
         ElecDirection = rotateUz(ElecDirection, PhotonDirection);
         // Configure the new electron
@@ -803,7 +803,7 @@ __host__ __device__ void Rayleigh_SampleSecondaries_Livermore(ParticlesData part
     ui32 Z = mat.mixture[mixture_index];
     ui32 i = 0;
     if (n > 0) {
-        f32 x = prng_uniform( &(particles.prng[id]) ) * linear_interpolation(photon_CS_table.E_bins[E_index-1],
+        f32 x = prng_uniform( particles, id ) * linear_interpolation(photon_CS_table.E_bins[E_index-1],
                                                                photon_CS_table.Rayleigh_Lv_CS[E_index-1],
                                                                photon_CS_table.E_bins[E_index],
                                                                photon_CS_table.Rayleigh_Lv_CS[E_index],
@@ -821,8 +821,8 @@ __host__ __device__ void Rayleigh_SampleSecondaries_Livermore(ParticlesData part
     f32 wphot = 1.23984187539e-10f / particles.E[id];
     f32 costheta, SF, x, sintheta, phi;
     do {
-        do {costheta = 2.0f * prng_uniform( &(particles.prng[id]) ) - 1.0f;
-        } while ((1.0f + costheta*costheta)*0.5f < prng_uniform( &(particles.prng[id]) ));
+        do {costheta = 2.0f * prng_uniform( particles, id ) - 1.0f;
+        } while ((1.0f + costheta*costheta)*0.5f < prng_uniform( particles, id ));
         if (particles.E[id] > 5.0f) {costheta = 1.0f;}
         x = sqrt((1.0f - costheta) * 0.5f) / wphot;
 
@@ -836,10 +836,10 @@ __host__ __device__ void Rayleigh_SampleSecondaries_Livermore(ParticlesData part
             SF = photon_CS_table.Rayleigh_Lv_SF[Z*photon_CS_table.nb_bins]; // for energy E=0.0f
         }
 
-    } while (SF*SF < prng_uniform( &(particles.prng[id]) ) * Z*Z);
+    } while (SF*SF < prng_uniform( particles, id ) * Z*Z);
 
     sintheta = sqrt(1.0f - costheta*costheta);
-    phi = prng_uniform( &(particles.prng[id]) ) * gpu_twopi;
+    phi = prng_uniform( particles, id ) * gpu_twopi;
 
     // Apply deflection
     f32xyz gamDir0 = make_f32xyz(particles.dx[id], particles.dy[id], particles.dz[id]);

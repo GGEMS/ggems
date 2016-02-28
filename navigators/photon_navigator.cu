@@ -39,7 +39,7 @@ __host__ __device__ void photon_get_next_interaction ( ParticlesData &particles,
     {
         cross_section = get_CS_from_table ( photon_CS_table.E_bins, photon_CS_table.Photoelectric_Std_CS,
                                             energy, E_index, CS_index );
-        interaction_distance = -log ( prng_uniform( &(particles.prng[part_id]) ) ) / cross_section;
+        interaction_distance = -log ( prng_uniform( particles, part_id ) ) / cross_section;
 
         if ( interaction_distance < next_interaction_distance )
         {
@@ -53,7 +53,7 @@ __host__ __device__ void photon_get_next_interaction ( ParticlesData &particles,
     {
         cross_section = get_CS_from_table ( photon_CS_table.E_bins, photon_CS_table.Compton_Std_CS,
                                             energy, E_index, CS_index );
-        interaction_distance = -log ( prng_uniform( &(particles.prng[part_id]) ) ) / cross_section;
+        interaction_distance = -log ( prng_uniform( particles, part_id ) ) / cross_section;
 
         if ( interaction_distance < next_interaction_distance )
         {
@@ -67,7 +67,7 @@ __host__ __device__ void photon_get_next_interaction ( ParticlesData &particles,
     {
         cross_section = get_CS_from_table ( photon_CS_table.E_bins, photon_CS_table.Rayleigh_Lv_CS,
                                             energy, E_index, CS_index );
-        interaction_distance = -log ( prng_uniform( &(particles.prng[part_id]) ) ) / cross_section;
+        interaction_distance = -log ( prng_uniform( particles, part_id ) ) / cross_section;
 
         if ( interaction_distance < next_interaction_distance )
         {

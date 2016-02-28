@@ -635,7 +635,7 @@ void GGEMS::init_simulation()
         ui64 n = m_particles_manager.particles.size;
         ui64 l = m_parameters.data_h.nb_of_secondaries;
 
-        ui64 mem = n * ( 12 * sizeof( f32 ) + sizeof( prng_states )  + 4 * sizeof( ui8 ) ) +
+        ui64 mem = n * ( 12 * sizeof( f32 ) + 5 * sizeof( ui32 )  + 4 * sizeof( ui8 ) ) +
                    n*l * ( 8 * sizeof ( f32 ) + sizeof( ui8 ) );
 
         GGcout_mem("Particle stacks", mem);
