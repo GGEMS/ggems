@@ -51,8 +51,7 @@ __host__ __device__ f32 GetLambda ( f32 Range, ElectronsCrossSectionTable d_tabl
 //__host__ __device__ f32 gTransformToGeom ( f32 TPath,f32 currentRange,f32 currentLambda,f32 currentEnergy,f32 *par1,f32 *par2, ElectronsCrossSectionTable electron_CS_table, int mat );
 
 __host__ __device__ f32 eLoss (f32 LossLength, f32 Ekine, f32 dedxeIoni, f32 dedxeBrem, f32 erange,
-                               ElectronsCrossSectionTable d_table, ui8 mat, MaterialsTable materials, ParticlesData &particles,
-                               GlobalSimulationParametersData parameters, ui32 id );
+                               ElectronsCrossSectionTable d_table, ui8 mat, MaterialsTable materials, ParticlesData &particles, ui32 id );
 
 __host__ __device__ f32 eFluctuation (f32 meanLoss, f32 Ekine, MaterialsTable materials, ParticlesData &particles, ui32 id, ui8 id_mat );
 

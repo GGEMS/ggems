@@ -100,7 +100,8 @@ void ParticleManager::initialize ( GlobalSimulationParameters params )
         m_gpu_malloc_stack();
 
         // Init seed on GPU side
-        m_gpu_init_stack_seed( params.data_h.seed );
+        gpu_prng_init( particles.data_d.prng, particles.size,
+                       params.data_h.seed, params.data_h.gpu_block_size );
 /*
         srand(m_params.data_h.seed);
         prng_states *hostStates;
@@ -260,17 +261,6 @@ void ParticleManager::m_cpu_init_stack_seed ( ui32 seed )
     }
 }
 */
-
-// Init particle seeds with the main seed
-void ParticleManager::m_gpu_init_stack_seed ( ui32 seed )
-{
-    dim3 threads, grid;
-    threads.x = m_params.data_h.gpu_block_size;
-    grid.x = ( particles.size + m_params.data_h.gpu_block_size - 1 ) / m_params.data_h.gpu_block_size;
-
-    gpu_prng_init<<<grid, threads>>>(particles.data_d.prng, seed);
-    cuda_error_check ( "Error ", " Kernel_gpu_prng_init" );
-}
 
 /*
 void ParticleManager::m_copy_seed_cpu2gpu()

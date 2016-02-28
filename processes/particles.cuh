@@ -176,7 +176,7 @@ private:
     //void m_cpu_free_stack();
     void m_gpu_malloc_stack();
     //void m_cpu_init_stack_seed ( ui32 seed );
-    void m_gpu_init_stack_seed ( ui32 seed );
+    //void m_gpu_init_stack_seed ( ui32 seed );
     //void m_copy_seed_cpu2gpu();
 
     GlobalSimulationParameters m_params;

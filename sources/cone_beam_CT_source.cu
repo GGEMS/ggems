@@ -113,7 +113,7 @@ __global__ void kernel_cone_beam_ct_source( ParticlesData particles_data,
 {
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;;
     if( id >= particles_data.size ) return;
-    
+
     cone_beam_ct_source( particles_data, id, px, py, pz, type, spectrumE, spectrumCDF, nbins, aperture, orbiting_angle,
                          hfoc, vfoc );
 }

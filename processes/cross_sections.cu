@@ -157,14 +157,12 @@ void CrossSections::m_build_electron_table()
         /// Compute the range table (after computing all dE/dx)
         index = id_mat*m_nb_bins;
         f32 eDXDE = electron_CS.data_h.eIonisationdedx[index] + electron_CS.data_h.eBremdedx[index];
-        if ( eDXDE > 0.) eDXDE = 2. * electron_CS.data_h.E[0] / eDXDE;
-        electron_CS.data_h.eRange[index] = eDXDE;
-
-        //printf(" E %e eRange %e\n", energy, eDXDE);
+        if ( eDXDE > 0. ) eDXDE = 2. * electron_CS.data_h.E[0] / eDXDE;
+        electron_CS.data_h.eRange[index] = eDXDE;        
 
         // For each bin
         ui32 n = 100;
-        for ( ui32 i=1; i< m_nb_bins; i++ )
+        for ( ui32 i=1; i < m_nb_bins; i++ )
         {
             f32 dE = (electron_CS.data_h.E[i] - electron_CS.data_h.E[i-1]) / n;
             energy = electron_CS.data_h.E[i] + dE*0.5;

@@ -95,47 +95,7 @@ __host__ __device__ f32 linear_interpolation ( f32 xa, f32 ya, f32 xb, f32 yb, f
 }
 
 
-__host__ __device__ i32 G4Poisson ( f32 mean, ParticlesData &particles, ui32 id )
-{
-    f32 number = 0.;
 
-    f32 position, poissonValue, poissonSum;
-    f32 value, y, t;
-    if ( mean <= 16. ) // border == 16
-    {
-        // to avoid 1 due to f32 approximation
-        do
-        {
-            position = prng_uniform( &(particles.prng[id]) );
-        }
-        while ( ( 1. - position ) < 2.e-7 );
-
-        poissonValue = expf ( -mean );
-        poissonSum = poissonValue;
-        //                                                 v---- Why ? It's not in G4Poisson - JB
-        while ( ( poissonSum <= position ) && ( number < 40000. ) )
-        {
-            number++;
-            poissonValue *= mean/number;
-            if ( ( poissonSum + poissonValue ) == poissonSum ) break;   // Not in G4, is it to manage f32 ?  - JB
-            poissonSum += poissonValue;
-        }
-
-        return  ( i32 ) number;
-    }   
-
-    t = sqrtf ( -2.*logf ( prng_uniform( &(particles.prng[id]) ) ) );
-    y = 2.*gpu_pi* prng_uniform( &(particles.prng[id]) );
-    t *= cosf ( y );
-    value = mean + t*sqrtf ( mean ) + 0.5;
-
-    if ( value <= 0. )
-    {
-        return  0;
-    }
-
-    return ( value >= 2.e9 ) ? ( i32 ) 2.e9 : ( i32 ) value;
-}
 
 __host__ __device__ f32 Gaussian (f32 mean, f32 rms, ParticlesData &particles, ui32 id )
 {

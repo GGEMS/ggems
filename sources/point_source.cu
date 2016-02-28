@@ -29,6 +29,8 @@ __host__ __device__ void point_source ( ParticlesData particles_data, ui32 id,
                                         f64 *spectrumE, f64 *spectrumCDF, ui32 nbins, f32 m_aperture_angle )
 {
 
+
+
     // Direction option. Add a new preprocessing option for new direction option.
     if ( direction_option == POINT_SOURCE_ISOTROPIC )
     {

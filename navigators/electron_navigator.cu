@@ -380,6 +380,9 @@ __host__ __device__ f32 eFluctuation (f32 meanLoss, f32 Ekine, MaterialsTable ma
     ILog = logf ( I ); //materials.fLogMeanExcitationEnergy[id_mat];
     esmall = .5*sqrtf ( E0*I );
 
+
+
+
     if ( tmax <= E0 )
     {
         return meanLoss;
@@ -430,10 +433,24 @@ __host__ __device__ f32 eFluctuation (f32 meanLoss, f32 Ekine, MaterialsTable ma
     }
     else if ( a1 > 0. )
     {
-        p1 = ( f32 ) G4Poisson ( a1, particles, id );
+        p1 = ( f32 ) prng_poisson( &(particles.prng[id]), a1 );  /// HERE
         LossFluct += p1*e1;
         if ( p1 > 0. ) LossFluct += ( 1. - 2.* prng_uniform( &(particles.prng[id]) ) ) *e1;
     }
+
+//#ifdef DEBUG_TRACK_ID
+//        if ( id == DEBUG_TRACK_ID )
+//        {
+////            printf("Ekin=%e tmax= %e E0= %e I=%e\n  lossc %e a1 %e a2 %e a3 %e LossFluct %e\n \
+////                      emean %e sige %e p1 %e e1 %e\n", meanLoss, tmax, E0, I,
+////                   lossc, a1, a2, a3, LossFluct, emean, sige, p1, e1);
+
+//            printf("a1 %e a2 %e a3 %e LossFluct %e rndpois %i rnduni %f\n", a1, a2, a3, LossFluct,
+//                   prng_poisson( &(particles.prng[id]), 1 ),
+//                   prng_uniform( &(particles.prng[id]) ));
+//        }
+//#endif
+
 
     if ( a2 > nmaxCont )
     {
@@ -442,10 +459,13 @@ __host__ __device__ f32 eFluctuation (f32 meanLoss, f32 Ekine, MaterialsTable ma
     }
     else if ( a2 > 0. )
     {
-        p2 = ( f32 ) G4Poisson ( a2, particles, id );
+        p2 = ( f32 ) prng_poisson( &(particles.prng[id]), a2 );
         LossFluct += ( p2*e2 );
         if ( p2 > 0. ) LossFluct += ( 1. - 2.*prng_uniform( &(particles.prng[id]) ) ) *e2;
     }
+
+
+
 
     if ( a3 > 0. )
     {
@@ -463,7 +483,7 @@ __host__ __device__ f32 eFluctuation (f32 meanLoss, f32 Ekine, MaterialsTable ma
         }
         w2 = alfa*E0;
         w = ( tmax-w2 ) /tmax;
-        nb = G4Poisson ( p3, particles, id );
+        nb = prng_poisson( &(particles.prng[id]), p3 );
 
         if ( nb>0 )
         {
@@ -480,6 +500,8 @@ __host__ __device__ f32 eFluctuation (f32 meanLoss, f32 Ekine, MaterialsTable ma
         LossFluct += max ( 0., Gaussian ( emean, sige, particles, id ) );
     }
 
+
+
     LossFluct += lossc;
 
     return  LossFluct;
@@ -492,14 +514,21 @@ __host__ __device__ f32 eFluctuation (f32 meanLoss, f32 Ekine, MaterialsTable ma
 
 __host__ __device__ f32 eLoss ( f32 LossLength, f32 Ekine, f32 dedxeIoni, f32 dedxeBrem, f32 erange,
                                 ElectronsCrossSectionTable d_table, ui8 mat, MaterialsTable materials,
-                                ParticlesData &particles, GlobalSimulationParametersData parameters, ui32 id )
+                                ParticlesData &particles, ui32 id )
 {    
     // DEBUG
     //LossLength = 0.09;
 
-    f32 perteTot = LossLength * ( dedxeIoni + dedxeBrem );
+    f32 perteTot = LossLength * ( dedxeIoni + dedxeBrem );   
 
-    //printf(" dedx= %e  Ekin= %e  erange= %e  ::: eLoss %e\n", dedxeIoni + dedxeBrem, Ekine, erange, perteTot);
+//#ifdef DEBUG_TRACK_ID
+//        if ( id == DEBUG_TRACK_ID )
+//        {
+//            printf("ID %i dedx= %e  Ekin= %e  erange= %e  eLoss= %e length= %e\n",
+//                   id, dedxeIoni + dedxeBrem, Ekine, erange, perteTot, LossLength);
+//        }
+//#endif
+
 
     // Long step
     if ( perteTot > Ekine * 0.01 ) // linLossLimit = 0.01
@@ -507,8 +536,24 @@ __host__ __device__ f32 eLoss ( f32 LossLength, f32 Ekine, f32 dedxeIoni, f32 de
         // Here, I directly insert the LossApproximation function into the code - JB
         perteTot = 0.0;
         erange -= LossLength; // / reduceFactor (reduceFactor=1);
+
+#ifdef DEBUG
+    assert( erange >= 0.0f );
+#endif
+
         perteTot = GetEnergy( erange, d_table, mat);
         perteTot = Ekine - perteTot;
+
+//#ifdef DEBUG_TRACK_ID
+//        if ( id == DEBUG_TRACK_ID )
+//        {
+
+
+//            printf("ID %i Ekin= %e  erange= %e  GetE= %e Pertot=%e eFluc=%e\n",
+//                   id, Ekine, erange, GetEnergy( erange, d_table, mat), perteTot,
+//                   eFluctuation ( perteTot, Ekine, materials, particles, id, mat ));
+//        }
+//#endif
 
         //printf("   long step: EkinforLoss= %e  ::: eLoss= %e\n", GetEnergy( erange, d_table, mat), perteTot);
     }
@@ -516,6 +561,22 @@ __host__ __device__ f32 eLoss ( f32 LossLength, f32 Ekine, f32 dedxeIoni, f32 de
     /// Warning ADD for eFluctuation
     if ( dedxeIoni > 0. ) {
         perteTot = eFluctuation ( perteTot, Ekine, materials, particles, id, mat );
+
+
+//        #ifdef DEBUG_TRACK_ID
+//                if ( id == DEBUG_TRACK_ID )
+//                {
+
+
+//                    printf("rndpois %i rnduni %f\n",
+//                           prng_poisson( &(particles.prng[id]), 1 ),
+//                           prng_uniform( &(particles.prng[id]) ));
+//                }
+//        #endif
+
+
+
+
         //printf("   Fluc ::: eloss= %e\n", perteTot);
     }
 /*
@@ -917,7 +978,7 @@ __host__ __device__ f32 GlobalMscScattering ( f32 GeomPath,f32 cutstep,f32 Curre
         if ( GeomPath < cutstep )
         {
             edep = eLoss ( GeomPath, particles.E[ id ], dedxeIoni, dedxeBrem, CurrentRange, d_table,
-                           mat, materials, particles, parameters, id );
+                           mat, materials, particles, id );
 
             // Drop dose
             dose_record_standard ( dosi, edep, particles.px[id], particles.py[id], particles.pz[id] );
@@ -940,7 +1001,7 @@ __host__ __device__ f32 GlobalMscScattering ( f32 GeomPath,f32 cutstep,f32 Curre
         GeomPath = TruePath;
 
         edep = eLoss ( TruePath, particles.E[ id ], dedxeIoni, dedxeBrem, CurrentRange,
-                       d_table, mat, materials, particles, parameters, id );
+                       d_table, mat, materials, particles, id );
 
         dose_record_standard ( dosi, edep, particles.px[id], particles.py[id], particles.pz[id] );
     }

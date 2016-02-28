@@ -205,7 +205,14 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
 
                 // Energy loss (call eFluctuation)
                 edep = eLoss ( trueStepLength, particles.E[ part_id ], dedxeIoni, dedxeBrem, erange,
-                               electron_CS_table, mat_id, materials, particles, parameters, part_id );
+                               electron_CS_table, mat_id, materials, particles, part_id );
+
+
+
+
+
+
+                //printf("   SignLoss eloss %e steplength %e\n", edep, trueStepLength);
 
                 GlobalMscScattering ( trueStepLength, cutstep, erange, energy, lambda, dedxeIoni,
                                       dedxeBrem,  electron_CS_table,  mat_id, particles, part_id, par1, par2,    // HERE particle move
@@ -223,9 +230,11 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
 
                 //// InvokeAlongStepDoItProcs ////////////////////////////////////////////////////////////////////////
 
+                //printf("   NoSignLoss eloss %e steplength %e\n", edep, trueStepLength);
+
                 // Energy loss (call eFluctuation)
                 edep = eLoss ( trueStepLength, particles.E[ part_id ], dedxeIoni, dedxeBrem, erange,
-                               electron_CS_table, mat_id, materials, particles, parameters, part_id );
+                               electron_CS_table, mat_id, materials, particles, part_id );
 
                 GlobalMscScattering ( trueStepLength, lengthtoVertex, erange, energy, lambda,   dedxeIoni,
                                       dedxeBrem,   electron_CS_table,  mat_id, particles,  part_id, par1, par2,     // HERE particle move
@@ -320,8 +329,20 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
 
         } // bool_loop == true
 
+
+//#ifdef DEBUG_TRACK_ID
+//        if ( part_id == DEBUG_TRACK_ID )
+//        {
+//            printf("rndpois %i rnduni %f\n",
+//                   prng_poisson( &(particles.prng[part_id]), 1 ),
+//                   prng_uniform( &(particles.prng[part_id]) ));
+//        }
+//#endif
+
+
+
 #ifdef DEBUG
-        if ( istep > 1000 )
+        if ( istep > 100 )
         {
             printf( "[ERROR] track_electron_to_out: e- reach 1000 steps\n" );
             printf("         ID %i E %e keV - level %i - pos %f %f %f\n", part_id, particles.E[part_id]/keV, particles.level[part_id],
@@ -342,9 +363,10 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
 
         if ( part_id == DEBUG_TRACK_ID )
         {
-           printf("  ID %i - istep %i - Electron - level %i - E %f keV - pos %f %f %f\n",
-                  part_id, istep, particles.level[part_id], particles.E[part_id]/keV,
-                  particles.px[ part_id ], particles.py[ part_id ], particles.pz[ part_id ] );
+//           printf("  ID %i - istep %i - Electron - level %i - E %f keV - pos %f %f %f\n     SignLoss %i - eloss %e - truesteplength %e\n",
+//                  part_id, istep, particles.level[part_id], particles.E[part_id]/keV,
+//                  particles.px[ part_id ], particles.py[ part_id ], particles.pz[ part_id ],
+//                  significant_loss, edep, trueStepLength);
         }
 
 #endif
@@ -752,9 +774,19 @@ __global__ void VPDN::kernel_device_track_to_out ( ParticlesData particles,
 #ifdef DEBUG_TRACK_ID
         if ( id == DEBUG_TRACK_ID )
         {
-            printf("Tracking an electron\n");
+            printf("ID %i Tracking an electron - level %i - prng %e\n", id, particles.level[id],
+                   prng_uniform( &(particles.prng[id]) ));
         }
 #endif
+//            printf("Tracking an electron  prng %e prng %i\n",
+//                   prng_uniform( &(particles.prng[id]) ),
+//                   prng_poisson( &(particles.prng[id]), 1.0 ));
+
+        printf("ID %i Tracking an electron - level %i - prng %e %e %e\n", id, particles.level[id],
+               prng_uniform( &(particles.prng[id]) ),
+               prng_uniform( &(particles.prng[id]) ),
+               prng_uniform( &(particles.prng[id]) ));
+
             VPDN::track_electron_to_out ( particles, vol, materials, electron_CS_table, parameters, dosi,
                                           randomnumbereIoni, randomnumbereBrem, freeLength, id );
 
