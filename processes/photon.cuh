@@ -17,6 +17,7 @@
 #include "particles.cuh"
 #include "materials.cuh"
 #include "global.cuh"
+#include "physical_constants.cuh"
 #include "prng.cuh"
 #include "fun.cuh"
 #include "sandia_table.cuh"

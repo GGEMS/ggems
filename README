@@ -4,19 +4,20 @@ TODO
 
 GGEMS Enhancement Proposals (GEP)
 
-* GEP001 - Fix image reader (according the global frame)
-* GEP002 - Fix particle geometry navigation (still error with float uncertainty)
-* GEP003 - Add energy cut based on range value
-* GEP004 - In ct_detector trak_to_in, pixel id calculation and particle counting should move to the digitizer part
-* GEP005 - In Bremsstrahlung, xsection can be pre-calculated improving the RandomAtomSelection
-* GEP006 - In Bremsstrahlung, track secondary photons
-* GEP007 - In ConeBeamCTSource, spectrum data from file is allocated using f64 buffer, need to change for f32
+* **GEP001 - Fix image reader (according the global frame)**
+* **GEP002 - Fix particle geometry navigation (still error with float uncertainty)**
+* **GEP003 - Add energy cut based on range value**
+* **GEP004 - In ct_detector trak_to_in, pixel id calculation and particle counting should move to the digitizer part**
+* **GEP005 - In Bremsstrahlung, xsection can be pre-calculated improving the RandomAtomSelection**
+* **GEP006 - In Bremsstrahlung, track secondary photons**
+* **GEP007 - In ConeBeamCTSource, spectrum data from file is allocated using f64 buffer, need to change for f32**
+* **GEP008 - Improve PRNG by using others or cuRand, XORWOW is closer to MT from G4**
 
 GGEMS Bug Reporting (GBR) 
 
-* GBR001 - No set_model in class of ConeBeamCTSource
-* GBR002 - No printInfoDetection in class of ConeBeamCTSource
-* GBR003 - Dose to patient not working while using a voxel size different to the doxel size
+* *GBR001 - No set_model in class of ConeBeamCTSource*
+* *GBR002 - No printInfoDetection in class of ConeBeamCTSource*
+* *GBR003 - Dose to patient not working while using a voxel size different to the doxel size*
 
 ====
 Misc

@@ -33,8 +33,7 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
     // Parameters values need to be stored for every e-step
     f32 alongStepLength = 0.;               // Distance from the last physics interaction.
     bool lastStepisaPhysicEffect = TRUE;    // To store last random number
-    bool bool_loop = true;                  // If it is not the last step in the same voxel
-    //bool secondaryParticleCreated = FALSE;  // If a secondary particle is created
+    bool bool_loop = true;                  // If it is not the last step in the same voxel    
 
     alongStepLength = freeLength;
     if ( freeLength>0.0 ) lastStepisaPhysicEffect = FALSE; // Changement de voxel sans effet physique
@@ -207,13 +206,6 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
                 edep = eLoss ( trueStepLength, particles.E[ part_id ], dedxeIoni, dedxeBrem, erange,
                                electron_CS_table, mat_id, materials, particles, part_id );
 
-
-
-
-
-
-                //printf("   SignLoss eloss %e steplength %e\n", edep, trueStepLength);
-
                 GlobalMscScattering ( trueStepLength, cutstep, erange, energy, lambda, dedxeIoni,
                                       dedxeBrem,  electron_CS_table,  mat_id, particles, part_id, par1, par2,    // HERE particle move
                                       materials, dosi, index_phantom, vol, parameters );
@@ -229,8 +221,6 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
             {
 
                 //// InvokeAlongStepDoItProcs ////////////////////////////////////////////////////////////////////////
-
-                //printf("   NoSignLoss eloss %e steplength %e\n", edep, trueStepLength);
 
                 // Energy loss (call eFluctuation)
                 edep = eLoss ( trueStepLength, particles.E[ part_id ], dedxeIoni, dedxeBrem, erange,
@@ -312,7 +302,6 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
 
                     }
 
-
 #ifdef DEBUG
                     if ( particles.level[ part_id ] == parameters.nb_of_secondaries )
                     {
@@ -328,18 +317,6 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
             } // significant_loss == false
 
         } // bool_loop == true
-
-
-//#ifdef DEBUG_TRACK_ID
-//        if ( part_id == DEBUG_TRACK_ID )
-//        {
-//            printf("rndpois %i rnduni %f\n",
-//                   prng_poisson( &(particles.prng[part_id]), 1 ),
-//                   prng_uniform( &(particles.prng[part_id]) ));
-//        }
-//#endif
-
-
 
 #ifdef DEBUG
         if ( istep > 100 )
@@ -375,8 +352,6 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
     }
     while ( ( particles.E[ part_id ] > electronEcut ) && ( bool_loop ) );
 
-
-    //printf("Tracklength %e    step %i\n", totalLength, istep);
 
     // Stop simulation if out of the phantom
     if ( !test_point_AABB_with_tolerance ( make_f32xyz( particles.px[ part_id ], particles.py[ part_id ], particles.pz[ part_id ] ),

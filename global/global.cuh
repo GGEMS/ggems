@@ -95,7 +95,6 @@
 
 #define EKINELIMIT 1*eV
 
-
 //#define DEBUGOK "[\033[32;01mok\033[00m]"
 //#define PRINTFUNCTION printf("%s %s\n",DEBUGOK,__FUNCTION__);
 #define HANDLE_ERROR( err ) (HandleError( err, __FILE__, __LINE__ ))
@@ -109,15 +108,8 @@
 #define GGcerr std::cerr << "[GGEMS error] "
 #define GGcin std::cin << "[GGEMS input] "
 
-/// TODO clean this part by moving constant to physical_constants.cuh   - JB
-
-// Pi
-#define gpu_pi               3.141592653589793116
-#define gpu_twopi            2.0*gpu_pi
 
 // Constants for electrons
-#define elec_radius          (2.8179409421853486E-15*m)      // Metre
-#define N_avogadro           (6.0221367E+23/mole)
 
 ////// DEBUG ///////////////////////////////////////////////////
 
@@ -273,6 +265,7 @@ void exit_simulation();
 void GGcout_time ( std::string txt, f64 t );
 void GGcout_mem ( std::string txt, ui64 valmem );
 void GGcout_params ( GlobalSimulationParametersData params );
+void GGcout_timestamp ();
 void GGnewline( );
 
 f64 get_time();

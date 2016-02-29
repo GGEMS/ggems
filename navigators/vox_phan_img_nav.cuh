@@ -68,7 +68,7 @@ public:
     void track_to_out ( Particles particles );
 
     void load_phantom_from_mhd ( std::string filename, std::string range_mat_name );    
-    void set_materials( std::string filename );
+    void set_materials( std::string filename );    
 
 private:   
     std::string m_materials_filename;

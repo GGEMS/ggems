@@ -207,8 +207,8 @@ __host__ __device__ void e_read_CS_table (
             CS = linear_interpolation ( d_table.E[ energy_index-1 ], d_table.eIonisationCS[ table_index-1 ],
                                         d_table.E[ energy_index ], d_table.eIonisationCS[ table_index ], energy );
 
-            // TODO, adding this correction create some looping on some particles (too small CS for small E) - JB
-            //CS = compute_lambda_for_scaled_energy( CS, energy, d_table, mat );
+            // This correction increases the simulation run time, and is not really mandatory - JB
+            CS = compute_lambda_for_scaled_energy( CS, energy, d_table, mat );
 
             dedxeIoni = linear_interpolation ( d_table.E[ energy_index-1 ], d_table.eIonisationdedx[ table_index-1 ],
                                                d_table.E[ energy_index ], d_table.eIonisationdedx[ table_index ], energy );

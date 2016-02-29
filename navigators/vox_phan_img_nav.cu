@@ -211,9 +211,21 @@ bool VoxPhanImgNav::m_check_mandatory()
 
 }
 
+// return memory usage
 ui64 VoxPhanImgNav::m_get_memory_usage()
 {
-    return 0;   // TODO - JB
+    ui64 mem = 0;
+
+    // First the voxelized phantom
+    mem += ( m_phantom.data_h.number_of_voxels * sizeof( ui16 ) );
+    // Then material data
+    mem += ( ( 2 * m_materials.data_h.nb_elements_total + 23 * m_materials.data_h.nb_materials ) * sizeof( f32 ) );
+    // Then cross sections (gamma)
+    ui64 n = m_cross_sections.photon_CS.data_h.nb_bins;
+    ui64 k = m_cross_sections.photon_CS.data_h.nb_mat;
+    mem += ( ( n + 3*n*k + 3*101*n ) * sizeof( f32 ) );
+
+    return mem;
 }
 
 ////:: Main functions
@@ -324,8 +336,6 @@ void VoxPhanImgNav::set_materials( std::string filename )
 {
     m_materials_filename = filename;
 }
-
-
 
 
 

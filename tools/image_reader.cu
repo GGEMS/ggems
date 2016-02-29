@@ -3,14 +3,6 @@
 
 #include "image_reader.cuh"
 
-#ifdef ROOT_CERN
-#include "TH3D.h"
-#include "TH2D.h"
-#include "TFile.h"
-#include "TBranch.h"
-#include "TTree.h"
-#endif
-
 using namespace std;
 
 
@@ -177,62 +169,7 @@ void ImageReader::record3Dimage ( string histname,  f64 *data, f32xyz offset, f3
             }
         }
     }
-#ifdef ROOT_CERN
-// #ifndef __CUDA_ARCH__
-#if defined(__cplusplus)
-    else if(format == "root")
-        {
-        
 
-        
-        std::string pathnameroot = histname;
-        pathnameroot+=".root";
-        
-//         printf("saving %s \n",pathnameroot.c_str());
-        TFile f(pathnameroot.c_str(),"recreate");
-
-        TH3D edep("histo", "histo", size.x,  offset.x, offset.x+size.x*spacing.x,
-                                  size.y,  offset.y, offset.y+size.y*spacing.y,
-                                  size.z,  offset.z, offset.z+size.z*spacing.z );
-        
-
-        
-        int xdim = size.x;
-        int ydim = size.y;
-        int zdim = size.z;
-
-
-        for(int i=0; i<xdim; ++i)
-            {
-            for(int j=0; j<ydim; ++j)
-                {
-                for(int k=0; k<zdim; ++k)
-                    {
-
-                        edep.SetBinContent(i+1, j+1,k+1, data[i + j*xdim + k*xdim*ydim] );
-//                         edep.SetBinContent(i+1, (ydim-j),k+1, data[i + j*xdim + k*xdim*ydim] );
-
-                    }
-                }
-            }
-// 
-        TH1D* projectionx = edep.ProjectionX("ProjX");
-        TH1D* projectiony = edep.ProjectionY("ProjY");
-        TH1D* projectionz = edep.ProjectionZ("ProjZ");
-// 
-//         TH1D* projectiondosex = dose.ProjectionX("DoseX");
-// //         TH1D* projectiondosexmilieu = dose.ProjectionX("DoseXMilieu",ydim/2,ydim/2);
-//         TH1D* projectiondosey = dose.ProjectionY("DoseY");
-//         TH1D* projectiondosez = dose.ProjectionZ("DoseZ");
-// // //         TH1D* projectiondosezmilieu = dose.ProjectionZ("DoseZMilieu");
-
-        f.Write();
-        f.Close();
-
-
-        }
-#endif
-#endif
     else
     {
 
@@ -382,62 +319,7 @@ void ImageReader::record3Dimage ( string histname,  ui32 *data, f32xyz offset, f
             }
         }
     }
-#ifdef ROOT_CERN
-// #ifndef __CUDA_ARCH__
-#if defined(__cplusplus)
-    else if(format == "root")
-        {
-        
 
-        
-        std::string pathnameroot = histname;
-        pathnameroot+=".root";
-        
-        printf("saving %s \n",pathnameroot.c_str());
-        TFile f(pathnameroot.c_str(),"recreate");
-
-        TH3D edep("Edep", "Edep", size.x,  offset.x, offset.x+size.x*spacing.x,
-                                  size.y,  offset.y, offset.y+size.y*spacing.y,
-                                  size.z,  offset.z, offset.z+size.z*spacing.z );
-        
-
-        
-        int xdim = size.x;
-        int ydim = size.y;
-        int zdim = size.z;
-
-
-        for(int i=0; i<xdim; ++i)
-            {
-            for(int j=0; j<ydim; ++j)
-                {
-                for(int k=0; k<zdim; ++k)
-                    {
-
-//                         edep.SetBinContent(i+1, j+1,k+1, data[i + j*xdim + k*xdim*ydim] );
-                        edep.SetBinContent(i+1, (ydim-j),k+1, data[i + j*xdim + k*xdim*ydim] );
-
-                    }
-                }
-            }
-
-        TH1D* projectionx = edep.ProjectionX("EdepX");
-        TH1D* projectiony = edep.ProjectionY("EdepY");
-        TH1D* projectionz = edep.ProjectionZ("EdepZ");
-// 
-//         TH1D* projectiondosex = dose.ProjectionX("DoseX");
-// //         TH1D* projectiondosexmilieu = dose.ProjectionX("DoseXMilieu",ydim/2,ydim/2);
-//         TH1D* projectiondosey = dose.ProjectionY("DoseY");
-//         TH1D* projectiondosez = dose.ProjectionZ("DoseZ");
-// // //         TH1D* projectiondosezmilieu = dose.ProjectionZ("DoseZMilieu");
-
-        f.Write();
-        f.Close();
-
-
-        }
-#endif
-#endif
     else
     {
 
@@ -587,62 +469,7 @@ void ImageReader::record3Dimage (string histname,  ui16 *data, f32xyz offset, f3
             }
         }
     }
-#ifdef ROOT_CERN
-// #ifndef __CUDA_ARCH__
-#if defined(__cplusplus)
-    else if(format == "root")
-        {
-        
 
-        
-        std::string pathnameroot = histname;
-        pathnameroot+=".root";
-        
-        printf("saving %s \n",pathnameroot.c_str());
-        TFile f(pathnameroot.c_str(),"recreate");
-
-        TH3D edep("Edep", "Edep", size.x,  offset.x, offset.x+size.x*spacing.x,
-                                  size.y,  offset.y, offset.y+size.y*spacing.y,
-                                  size.z,  offset.z, offset.z+size.z*spacing.z );
-        
-
-        
-        int xdim = size.x;
-        int ydim = size.y;
-        int zdim = size.z;
-
-
-        for(int i=0; i<xdim; ++i)
-            {
-            for(int j=0; j<ydim; ++j)
-                {
-                for(int k=0; k<zdim; ++k)
-                    {
-
-//                         edep.SetBinContent(i+1, j+1,k+1, data[i + j*xdim + k*xdim*ydim] );
-                        edep.SetBinContent(i+1, (ydim-j),k+1, data[i + j*xdim + k*xdim*ydim] );
-
-                    }
-                }
-            }
-
-        TH1D* projectionx = edep.ProjectionX("EdepX");
-        TH1D* projectiony = edep.ProjectionY("EdepY");
-        TH1D* projectionz = edep.ProjectionZ("EdepZ");
-// 
-//         TH1D* projectiondosex = dose.ProjectionX("DoseX");
-// //         TH1D* projectiondosexmilieu = dose.ProjectionX("DoseXMilieu",ydim/2,ydim/2);
-//         TH1D* projectiondosey = dose.ProjectionY("DoseY");
-//         TH1D* projectiondosez = dose.ProjectionZ("DoseZ");
-// // //         TH1D* projectiondosezmilieu = dose.ProjectionZ("DoseZMilieu");
-
-        f.Write();
-        f.Close();
-
-
-        }
-#endif
-#endif
     else
     {
 

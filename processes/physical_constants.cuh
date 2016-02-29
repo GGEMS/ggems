@@ -16,6 +16,16 @@
 
 #include "global.cuh"
 
+/// TODO clean this part - JB
+
+// Pi
+#define gpu_pi               3.141592653589793116
+#define gpu_twopi            2.0*gpu_pi
+
+// For electrons phys
+#define elec_radius          (2.8179409421853486E-15*m)      // Metre
+#define N_avogadro           (6.0221367E+23/mole)
+
 //
 //
 //

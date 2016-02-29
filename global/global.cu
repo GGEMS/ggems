@@ -123,6 +123,15 @@ void GGcout_time ( std::string txt, f64 t )
 
 }
 
+// Print date and time
+void GGcout_timestamp ()
+{
+    time_t t = time(NULL);
+    struct tm tm = *localtime(&t);
+
+    printf("[GGEMS] %d-%d-%d %02d:%02d:%02d\n", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
+}
+
 // Print out memory usage
 void GGcout_mem ( std::string txt, ui64 valmem )
 {

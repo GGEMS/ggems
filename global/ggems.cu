@@ -571,6 +571,10 @@ void GGEMS::init_simulation()
         m_parameters.data_h.nb_of_batches++;
     }
 
+    // Print timestamp
+    GGnewline();
+    GGcout_timestamp();
+
     // Print params
     GGcout_params( m_parameters.data_h );
 
