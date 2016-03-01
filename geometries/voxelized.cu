@@ -71,12 +71,13 @@ void VoxelizedPhantom::m_copy_phantom_cpu2gpu() {
 }
 
 // Convert range data into material ID
-void VoxelizedPhantom::m_define_materials_from_range(ui16 *raw_data, std::string range_name) {
+template<typename Type>
+void VoxelizedPhantom::m_define_materials_from_range(Type *raw_data, std::string range_name) {
 
-    ui16 start, stop;
+    f32 start, stop;
     std::string mat_name, line;
     ui32 i;
-    ui16 val;
+    f32 val;
     ui16 mat_index = 0;
     
     // Data allocation
@@ -100,7 +101,7 @@ void VoxelizedPhantom::m_define_materials_from_range(ui16 *raw_data, std::string
 
             // build labeled phantom according range data
             i=0; while (i < data_h.number_of_voxels) {
-                val = raw_data[i];
+                val = (f32) raw_data[i];
                 if ((val==start && val==stop) || (val>=start && val<stop)) {
                     data_h.values[i] = mat_index;
                 }
@@ -114,6 +115,7 @@ void VoxelizedPhantom::m_define_materials_from_range(ui16 *raw_data, std::string
 
 }
 
+/*
 // Convert range data into material ID
 void VoxelizedPhantom::m_define_materials_from_range(f32 *raw_data, std::string range_name) {
 
@@ -165,7 +167,7 @@ void VoxelizedPhantom::m_define_materials_from_range(f32 *raw_data, std::string 
 // }
 // exit(0);
 }
-
+*/
 ///:: Main functions
 
 // Init
@@ -309,7 +311,8 @@ void VoxelizedPhantom::load_from_mhd(std::string volume_name, std::string range_
         printf("Error, mhd header: CompressedData = %s\n", CompressedData.c_str());
         exit_simulation();
     }
-    if (ElementType != "MET_FLOAT" && ElementType != "MET_USHORT") {
+    if (ElementType != "MET_FLOAT" && ElementType != "MET_USHORT" &&
+        ElementType != "MET_UCHAR" && ElementType != "MET_UINT") {
         printf("Error, mhd header: ElementType = %s\n", ElementType.c_str());
         exit_simulation();
     }
@@ -380,6 +383,32 @@ void VoxelizedPhantom::load_from_mhd(std::string volume_name, std::string range_
       // Free memory
       free(raw_data);
     }  
+
+    if(ElementType == "MET_UCHAR") {
+      ui32 mem_size = sizeof(ui8) * data_h.number_of_voxels;
+
+      ui8 *raw_data = (ui8*)malloc(mem_size);
+      fread(raw_data, sizeof(ui8), data_h.number_of_voxels, pfile);
+      fclose(pfile);
+      /////////////// Then, convert the raw data into material id //////////////////////
+      m_define_materials_from_range(raw_data, range_name);
+
+      // Free memory
+      free(raw_data);
+    }
+
+    if(ElementType == "MET_UINT") {
+      ui32 mem_size = sizeof(ui32) * data_h.number_of_voxels;
+
+      ui32 *raw_data = (ui32*)malloc(mem_size);
+      fread(raw_data, sizeof(ui32), data_h.number_of_voxels, pfile);
+      fclose(pfile);
+      /////////////// Then, convert the raw data into material id //////////////////////
+      m_define_materials_from_range(raw_data, range_name);
+
+      // Free memory
+      free(raw_data);
+    }
 
     ///////////// Define a bounding box for this phantom //////////////////////////////
 

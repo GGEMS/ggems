@@ -50,8 +50,8 @@ class VoxelizedPhantom : public BaseObject {
         std::vector<std::string> list_of_materials;    
 
     private:
-        void m_define_materials_from_range(f32 *raw_data, std::string range_name);
-        void m_define_materials_from_range(ui16 *raw_data, std::string range_name);
+        template<typename Type> void m_define_materials_from_range(Type *raw_data, std::string range_name);
+        //void m_define_materials_from_range(ui16 *raw_data, std::string range_name);
         void m_copy_phantom_cpu2gpu();
         bool m_check_mandatory();
         TxtReader m_txt_reader;
