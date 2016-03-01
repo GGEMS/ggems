@@ -107,7 +107,7 @@
 #define GGendl std::endl
 #define GGcerr std::cerr << "[GGEMS error] "
 #define GGcin std::cin << "[GGEMS input] "
-
+#define GGwarn std::cout << "[GGEMS warning] "
 
 // Constants for electrons
 

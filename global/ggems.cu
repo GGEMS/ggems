@@ -206,7 +206,9 @@ void GGEMS::set_secondary ( std::string pname )
 
     if ( pname == "photon" )
     {
-        m_parameters.data_h.secondaries_list[PHOTON] = ENABLED;
+        //m_parameters.data_h.secondaries_list[PHOTON] = ENABLED;
+        GGwarn << "Photon particle as secondary (ex Bremsstrhalung) is not available yet!" << GGendl;
+        m_parameters.data_h.secondaries_list[PHOTON] = DISABLED;
     }
     else if ( pname == "electron" )
     {

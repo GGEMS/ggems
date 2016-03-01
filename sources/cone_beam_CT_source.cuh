@@ -132,10 +132,10 @@ class ConeBeamCTSource : public GGEMSSource
     f32 m_aperture; /*!< Aperture of the source */
     ui8 m_particle_type; /*!< Type of the particle */    
     f32 m_orbiting_angle; /*!< Orbiting angle of the source */    
-    f64 *m_spectrumE_h; /*!< Energy spectrum of the source on the host (CPU) */
-    f64 *m_spectrumE_d; /*!< Energy spectrum of the source on the device (GPU) */
-    f64 *m_spectrumCDF_h; /*!< CDF of the source on the host (CPU) */
-    f64 *m_spectrumCDF_d; /*!< CDF of the source on the device (GPU) */
+    f32 *m_spectrumE_h; /*!< Energy spectrum of the source on the host (CPU) */
+    f32 *m_spectrumE_d; /*!< Energy spectrum of the source on the device (GPU) */
+    f32 *m_spectrumCDF_h; /*!< CDF of the source on the host (CPU) */
+    f32 *m_spectrumCDF_d; /*!< CDF of the source on the device (GPU) */
     ui32 m_nb_of_energy_bins; /*!< Number of the bins in the energy spectrum */
     GlobalSimulationParameters m_params; /*!< Simulation parameters */
 };

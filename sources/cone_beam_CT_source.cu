@@ -23,7 +23,7 @@
 
 __host__ __device__ void cone_beam_ct_source( ParticlesData particles_data,
                                               ui32 id, f32 px, f32 py, f32 pz,
-                                              ui8 type, f64 *spectrumE, f64 *spectrumCDF, ui32 nbins, f32 aperture,
+                                              ui8 type, f32 *spectrumE, f32 *spectrumCDF, ui32 nbins, f32 aperture,
                                               f32 orbiting_angle, f32 hfoc, f32 vfoc )
 {
 
@@ -108,7 +108,7 @@ __host__ __device__ void cone_beam_ct_source( ParticlesData particles_data,
 
 __global__ void kernel_cone_beam_ct_source( ParticlesData particles_data,
                                             f32 px, f32 py, f32 pz,
-                                            ui8 type, f64 *spectrumE, f64 *spectrumCDF, ui32 nbins, f32 aperture,
+                                            ui8 type, f32 *spectrumE, f32 *spectrumCDF, ui32 nbins, f32 aperture,
                                             f32 orbiting_angle, f32 hfoc, f32 vfoc )
 {
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;;
@@ -211,9 +211,9 @@ void ConeBeamCTSource::set_particle_type( std::string pname )
 
 void ConeBeamCTSource::set_mono_energy( f32 energy )
 {
-    m_spectrumE_h = new f64[ 1 ];
+    m_spectrumE_h = new f32[ 1 ];
     m_spectrumE_h[ 0 ] = energy;
-    m_spectrumCDF_h = new f64[ 1 ];
+    m_spectrumCDF_h = new f32[ 1 ];
     m_spectrumCDF_h[ 0 ] = 1.0;
     m_nb_of_energy_bins = 1;
 }
@@ -246,8 +246,8 @@ void ConeBeamCTSource::set_energy_spectrum( std::string filename )
     input.seekg( 0, std::ios::beg );
 
     // Allocating buffers to store data
-    m_spectrumE_h = new f64[ m_nb_of_energy_bins ];
-    m_spectrumCDF_h = new f64[ m_nb_of_energy_bins ];
+    m_spectrumE_h = new f32[ m_nb_of_energy_bins ];
+    m_spectrumCDF_h = new f32[ m_nb_of_energy_bins ];
 
     // Store data from file
     size_t idx = 0;
@@ -344,12 +344,12 @@ void ConeBeamCTSource::initialize( GlobalSimulationParameters params )
     if( m_params.data_h.device_target == GPU_DEVICE && m_nb_of_energy_bins > 0 )
     {
         // GPU mem allocation
-        HANDLE_ERROR( cudaMalloc( (void**)&m_spectrumE_d,   m_nb_of_energy_bins * sizeof( f64 ) ) );
-        HANDLE_ERROR( cudaMalloc( (void**)&m_spectrumCDF_d, m_nb_of_energy_bins * sizeof ( f64 ) ) );
+        HANDLE_ERROR( cudaMalloc( (void**)&m_spectrumE_d,   m_nb_of_energy_bins * sizeof( f32 ) ) );
+        HANDLE_ERROR( cudaMalloc( (void**)&m_spectrumCDF_d, m_nb_of_energy_bins * sizeof ( f32 ) ) );
 
         // GPU mem copy
-        HANDLE_ERROR ( cudaMemcpy( m_spectrumE_d,   m_spectrumE_h,      sizeof( f64 ) * m_nb_of_energy_bins, cudaMemcpyHostToDevice ) );
-        HANDLE_ERROR ( cudaMemcpy( m_spectrumCDF_d, m_spectrumCDF_h,    sizeof( f64 ) * m_nb_of_energy_bins, cudaMemcpyHostToDevice ) );
+        HANDLE_ERROR ( cudaMemcpy( m_spectrumE_d,   m_spectrumE_h,      sizeof( f32 ) * m_nb_of_energy_bins, cudaMemcpyHostToDevice ) );
+        HANDLE_ERROR ( cudaMemcpy( m_spectrumCDF_d, m_spectrumCDF_h,    sizeof( f32 ) * m_nb_of_energy_bins, cudaMemcpyHostToDevice ) );
     }
 }
 
