@@ -80,11 +80,11 @@ __host__ __device__ void dose_uncertainty_calculation ( DoseData dose, ui32 doxe
         f64 num = ( dose.number_of_hits[index] * dose.edep_squared[index] ) - sum2_E;
         f64 den = ( dose.number_of_hits[index] - 1 ) * sum2_E;
 
-        dose.uncertainty[index] = pow ( num/den, 0.5 );
+        dose.uncertainty[index] = pow ( num/den, 0.5 ) * 100.0;
     }
     else
     {
-        dose.uncertainty[index] = 1.0;
+        dose.uncertainty[index] = 100.0;
     }
 
 }

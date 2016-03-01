@@ -39,24 +39,34 @@ __host__ void cuda_error_check ( const char * prefix, const char * postfix )
 }
 
 // Set a GPU device
-void set_gpu_device ( int deviceChoice, f32 minversion )
+void set_gpu_device ( int deviceChoice )
 {
 
-    int deviceCount = 0;
-    cudaGetDeviceCount ( &deviceCount );
+    f32 minversion = 3.0;
+
+    i32 deviceCount = 0;
+    cudaError_t error_id = cudaGetDeviceCount( &deviceCount );
+
+    if (error_id != cudaSuccess)
+    {
+        GGcerr << "cudaGetDeviceCount returned " << ( i32 ) error_id
+               << " " << cudaGetErrorString(error_id) << GGendl;
+        exit_simulation();
+    }
 
     if ( deviceCount == 0 )
     {
-        printf ( "[\033[31;03mWARNING\033[00m] There is no device supporting CUDA\n" );
-        exit ( EXIT_FAILURE );
+        GGcerr << "There are no available device(s) that support CUDA" << GGendl;
+        exit_simulation();
     }
+
     cudaDeviceProp prop;
     cudaGetDeviceProperties ( &prop, deviceChoice%deviceCount );
 
-    if ( prop.major<minversion )
+    if ( prop.major < minversion )
     {
-        printf ( "[\033[31;03mWARNING\033[00m] Your device is not compatible with %1.1f version\n",minversion );
-        exit ( EXIT_FAILURE );
+        GGcerr << "Your device is not compatible with " << minversion << " version" << GGendl;
+        exit_simulation();
     }
 
     cudaSetDevice ( deviceChoice%deviceCount );

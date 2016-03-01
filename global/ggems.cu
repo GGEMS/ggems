@@ -609,12 +609,12 @@ void GGEMS::init_simulation()
     
     // Init the GPU if need
     if ( m_parameters.data_h.device_target == GPU_DEVICE )
-    {
-        // Reset device
-        reset_gpu_device();
-
+    {       
         // Set the gpu id
         set_gpu_device ( m_parameters.data_h.gpu_id );
+
+        // Reset device
+        reset_gpu_device();
 
         // Copy params to the GPU
         m_copy_parameters_cpu2gpu();
