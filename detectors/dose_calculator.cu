@@ -118,9 +118,9 @@ __host__ __device__ void dose_to_phantom_calculation ( DoseData dose, VoxVolumeD
     ivoxsize.y = 1.0 / phan.spacing_y;
     ivoxsize.z = 1.0 / phan.spacing_z;
     ui32xyzw index_phantom;
-    index_phantom.x = ui32 ( ( pos_x-phan.off_x ) * ivoxsize.x );
-    index_phantom.y = ui32 ( ( pos_y-phan.off_y ) * ivoxsize.y );
-    index_phantom.z = ui32 ( ( pos_z-phan.off_z ) * ivoxsize.z );
+    index_phantom.x = ui32 ( ( pos_x + phan.off_x ) * ivoxsize.x );
+    index_phantom.y = ui32 ( ( pos_y + phan.off_y ) * ivoxsize.y );
+    index_phantom.z = ui32 ( ( pos_z + phan.off_z ) * ivoxsize.z );
     index_phantom.w = index_phantom.z*phan.nb_vox_x*phan.nb_vox_y
                          + index_phantom.y*phan.nb_vox_x
                          + index_phantom.x; // linear index
