@@ -6,8 +6,8 @@ GGEMS Enhancement Proposals (GEP)
 
 * **GEP001 - Fix image reader (according the global frame)**
 * *GEP002 - Fix particle geometry navigation (still error with float uncertainty) - JB*
-* **GEP003 - Add energy cut based on range value**
-* **GEP004 - In ct_detector trak_to_in, pixel id calculation and particle counting should move to the digitizer part**
+* *GEP003 - Add energy cut based on range value - JB*
+* *GEP004 - In ct_detector trak_to_in, pixel id calculation and particle counting should move to the digitizer part - JB*
 * **GEP005 - In Bremsstrahlung, xsection can be pre-calculated improving the RandomAtomSelection**
 * **GEP006 - In Bremsstrahlung, track secondary photons**
 * *GEP007 - In ConeBeamCTSource, spectrum data from file is allocated using f64 buffer, need to change for f32 - JB*
@@ -18,6 +18,7 @@ GGEMS Bug Reporting (GBR)
 * *GBR001 - No set_model in class of ConeBeamCTSource - JB*
 * *GBR002 - No printInfoDetection in class of ConeBeamCTSource - JB*
 * *GBR003 - Dose to patient not working while using a voxel size different to the doxel size - JB*
+* **GBR004 - Open 01/03/15 JB - Dose to phantom in 03_exePhotonBeam has small artefact between boundary material. Indexes of density voxel are not calculated properly.**
 
 ====
 Misc

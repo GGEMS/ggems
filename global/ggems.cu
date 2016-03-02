@@ -738,6 +738,12 @@ void GGEMS::start_simulation()
         {
             GGcout << "      Navigation between the phantom and the detector ..." << GGendl;
             m_detector->track_to_in( m_particles_manager.particles );
+
+            GGcout << "      Navigation within the detector ..." << GGendl;
+            m_detector->track_to_out( m_particles_manager.particles );
+
+            GGcout << "      Digitizer ..." << GGendl;
+            m_detector->digitizer( m_particles_manager.particles );
         }
 
         GGcout << "----> Batch finished ..." << GGendl << GGendl;

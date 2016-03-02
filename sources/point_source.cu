@@ -16,295 +16,182 @@
 
 #include "point_source.cuh"
 
-#define POINT_SOURCE_ISOTROPIC 0
-#define POINT_SOURCE_BEAM 1
-
 ///////// GPU code ////////////////////////////////////////////////////
 
-// Internal function
-__host__ __device__ void point_source ( ParticlesData particles_data, ui32 id,
-                                        f32 px, f32 py, f32 pz,
-                                        ui8 direction_option, f32 dx, f32 dy, f32 dz,
-                                        ui8 type,
-                                        f64 *spectrumE, f64 *spectrumCDF, ui32 nbins, f32 m_aperture_angle )
+// Internal function that create a new particle to the buffer at the slot id
+__host__ __device__ void point_source ( ParticlesData particles_data,
+                                        f32 px, f32 py, f32 pz, f32 energy, ui8 ptype, ui32 id)
 {
+    // First get an isotropic particle direction
+    f32 phi = prng_uniform( particles_data, id );
+    f32 theta = prng_uniform( particles_data, id );
+    phi  *= gpu_twopi;
+    theta = acosf ( 1.0f - 2.0f*theta );
+    f32 dx = cosf( phi ) * sinf( theta );
+    f32 dy = sinf( phi ) * sinf( theta );
+    f32 dz = cosf( theta );
 
+    // Then set the mandatory field to create a new particle
+    particles_data.E[id] = energy;                             // Energy in MeV
 
+    particles_data.px[id] = px;                                // Position in mm
+    particles_data.py[id] = py;                                //
+    particles_data.pz[id] = pz;                                //
 
-    // Direction option. Add a new preprocessing option for new direction option.
-    if ( direction_option == POINT_SOURCE_ISOTROPIC )
-    {
-        f32 phi = prng_uniform( particles_data, id );
-        f32 theta = prng_uniform( particles_data, id );
+    particles_data.dx[id] = dx;                                // Direction (unit vector)
+    particles_data.dy[id] = dy;                                //
+    particles_data.dz[id] = dz;                                //
 
-        phi  *= gpu_twopi;
-        theta = acosf ( 1.0f - 2.0f*theta );
-        particles_data.dx[id] = cosf ( phi ) *sinf ( theta );
-        particles_data.dy[id] = sinf ( phi ) *sinf ( theta );
-        particles_data.dz[id] = cosf ( theta );
-    }
-    else if ( direction_option == POINT_SOURCE_BEAM )
-    {
+    particles_data.tof[id] = 0.0f;                             // Time of flight
+    particles_data.endsimu[id] = PARTICLE_ALIVE;               // Status of the particle
 
+    particles_data.level[id] = PRIMARY;                        // It is a primary particle
+    particles_data.pname[id] = ptype;                          // a photon or an electron
 
-        // Get direction
-        f32 phi = prng_uniform( particles_data, id );
-        f32 theta = prng_uniform( particles_data, id );
-        f32 val_aper = 1.0f - cosf ( m_aperture_angle );
-        phi  *= gpu_twopi;
-        theta = acosf ( 1.0f - val_aper*theta );
-
-        f32 rdx = cosf ( phi ) *sinf ( theta );
-        f32 rdy = sinf ( phi ) *sinf ( theta );
-        f32 rdz = cosf ( theta );
-
-//         printf("DIRECTION %g %g %g\n",dx,dy,dz);
-//         printf("DIRECTION %g %g %g\n",rdx,rdy,rdz);
-//         printf("alea %f \n",JKISS32(particles_data, id));
-//         printf("alea %f \n",JKISS32(particles_data, id));
-//         printf("alea %f \n",JKISS32(particles_data, id));
-        // Apply rotation
-//         f32xyz d = fxyz_rotate_euler(make_f32xyz(rdx, rdy, rdz), make_f32xyz(dx, dy, dz));
-        f32xyz d = rotateUz ( make_f32xyz ( rdx, rdy, rdz ), make_f32xyz ( dx, dy, dz ) );
-
-//         printf("DIRECTION %g %g %g\n",d.x,d.y,d.z);
-        particles_data.dx[id] = d.x;
-        particles_data.dy[id] = d.y;
-        particles_data.dz[id] = d.z;
-
-    }
-
-    ui32 pos = binary_search ( prng_uniform( particles_data, id ), spectrumCDF, nbins );
-
-    // set photons
-    particles_data.E[id] = spectrumE[pos];
-    particles_data.px[id] = px;
-    particles_data.py[id] = py;
-    particles_data.pz[id] = pz;
-    particles_data.tof[id] = 0.0f;
-    particles_data.endsimu[id] = PARTICLE_ALIVE;
-    particles_data.next_discrete_process[id] = NO_PROCESS;
-    particles_data.next_interaction_distance[id] = 0.0;
-    particles_data.level[id] = PRIMARY;
-    particles_data.pname[id] = type;
-    particles_data.geometry_id[id] = 0;
-
+    particles_data.geometry_id[id] = 0;                        // Some internal variables
+    particles_data.next_discrete_process[id] = NO_PROCESS;     //
+    particles_data.next_interaction_distance[id] = 0.0;        //
 }
 
-// Kernel to create new particles (sources manager)
+// Kernel to create new particles. This kernel will only call the host/device function
+// point source in order to get one new particle.
 __global__ void kernel_point_source ( ParticlesData particles_data,
-                                      f32 px, f32 py, f32 pz,
-                                      ui8 direction_option, f32 dx, f32 dy, f32 dz,
-                                      ui8 type,
-                                      f64 *spectrumE, f64 *spectrumCDF, ui32 nbins,
-                                      f32 m_aperture_angle )
+                                      f32 px, f32 py, f32 pz, f32 energy, ui8 ptype )
 {
-
+    // Get thread id
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
     if ( id >= particles_data.size ) return;
 
-    point_source ( particles_data, id, px, py, pz, direction_option, dx, dy, dz, type,
-                   spectrumE, spectrumCDF, nbins,m_aperture_angle );
-
+    // Get a new particle
+    point_source( particles_data, px, py, pz, energy, ptype, id );
 }
 
 //////// Class //////////////////////////////////////////////////////////
 
 // Constructor
 PointSource::PointSource()
+    : GGEMSSource(),
+      m_px( 0.0 ),
+      m_py( 0.0 ),
+      m_pz( 0.0 ),
+      m_energy( 0.0 ),
+      m_particle_type( PHOTON )
 {
-    // Default parameters
-    m_px = 0.0f;
-    m_py = 0.0f;
-    m_pz = 0.0f;
-    m_dx = 0.0f;
-    m_dy = 0.0f;
-    m_dz = 0.0f;
-    m_nb_of_energy_bins = 0;
-    m_spectrumE_h = NULL;
-    m_spectrumE_d = NULL;
-    m_spectrumCDF_h = NULL;
-    m_spectrumCDF_d = NULL;
-    m_particle_type = PHOTON;
-    m_direction_option = POINT_SOURCE_ISOTROPIC;
-
-    set_name ( "point_source" );
+    // Set the name of the source
+    set_name( "point_source" );
 }
 
 // Destructor
-PointSource::~PointSource()
+PointSource::~PointSource() {}
+
+// Setting position of the source
+void PointSource::set_position( f32 posx, f32 posy, f32 posz )
 {
-    free ( m_spectrumE_h );
-    free ( m_spectrumCDF_h );
-    cudaFree ( m_spectrumE_d );
-    cudaFree ( m_spectrumCDF_d );
+    m_px = posx;
+    m_py = posy;
+    m_pz = posz;
 }
 
-// Setting function
-void PointSource::set_position ( f32 vpx, f32 vpy, f32 vpz )
+//========== Setting ===============================================
+
+// Setting particle type (photon or electron)
+void PointSource::set_particle_type( std::string pname )
 {
-    m_px=vpx;
-    m_py=vpy;
-    m_pz=vpz;
-}
+    // Transform the name of the particle in small letter
+    std::transform( pname.begin(), pname.end(), pname.begin(), ::tolower );
 
-void PointSource::set_direction ( std::string option, f32 vdx, f32 vdy, f32 vdz )
-{
-
-    if ( option == "Isotropic" )
-    {
-        m_direction_option = POINT_SOURCE_ISOTROPIC;
-    }
-    else if ( option == "Beam" )
-    {
-        m_direction_option = POINT_SOURCE_BEAM;
-        m_dx = vdx;
-        m_dy = vdy;
-        m_dz = vdz;
-    }
-
-    if ( vdx*vdx + vdy*vdy + vdz*vdz != 1. )
-    {
-        print_error ( "Point Source definition: Beam direction is not a unitary vector!\n" );
-        exit_simulation();
-    }
-}
-
-void PointSource::set_particle_type ( std::string pname )
-{
-    if ( pname == "photon" )
+    if( pname == "photon" )
     {
         m_particle_type = PHOTON;
     }
-    else if ( pname == "electron" )
+    else if( pname == "electron" )
     {
         m_particle_type = ELECTRON;
     }
-    else if ( pname == "positron" )
+    else
     {
-        m_particle_type = POSITRON;
+        GGcerr << "Particle '" << pname << "' not recognized!!!" << GGendl;
+        exit_simulation();
     }
 }
 
-void PointSource::set_mono_energy ( f32 valE )
+// Setting energy
+void PointSource::set_energy( f32 energy )
 {
-    m_spectrumE_h = ( f64* ) malloc ( sizeof ( f64 ) );
-    m_spectrumE_h[0] = valE;
-    m_spectrumCDF_h = ( f64* ) malloc ( sizeof ( f64 ) );
-    m_spectrumCDF_h[0] = 1.0;
-    m_nb_of_energy_bins = 1;
+    m_energy = energy;
 }
 
-void PointSource::set_energy_spectrum ( f64 *valE, f64 *hist, ui32 nb )
-{
+//========= Main function ============================================
 
-    // Allocation
-    m_spectrumE_h = ( f64* ) malloc ( nb*sizeof ( f64 ) );
-    m_spectrumCDF_h = ( f64* ) malloc ( nb*sizeof ( f64 ) );
-    m_nb_of_energy_bins = nb;
-
-    // Get the sum
-    f64 sum = 0;
-    ui32 i = 0;
-    while ( i<nb )
-    {
-        sum += hist[i];
-        ++i;
-    }
-    // Normalize
-    i=0;
-    while ( i<nb )
-    {
-        m_spectrumCDF_h[i] = hist[i] / sum;
-        // In the mean time copy energy value
-        m_spectrumE_h[i] = valE[i];
-        ++i;
-    }
-    // Get the final CDF
-    i=1;
-    while ( i<nb )
-    {
-        m_spectrumCDF_h[i] += m_spectrumCDF_h[i-1];
-        ++i;
-    }
-    // Watchdog
-    m_spectrumCDF_h[nb-1] = 1.0f;
-}
-
-// Main function
+// Check if everything is ok to initialize this source
 bool PointSource::m_check_mandatory()
 {
-    if ( m_nb_of_energy_bins == 0 ) return false;
+    if ( m_energy == 0.0 ) return false;
     else return true;
 }
 
+// Mandatory function, abstract from GGEMSSource. This function is called
+// by GGEMS to initialize and load all necessary data into the graphic card
 void PointSource::initialize ( GlobalSimulationParameters params )
 {
-
     // Check if everything was set properly
     if ( !m_check_mandatory() )
     {
-        print_error ( "Missing parameters for the point source!" );
+        GGcerr << "Point source was not set properly!" << GGendl;
         exit_simulation();
     }
 
-    // Store global parameters
+    // Store global parameters: params are provided by GGEMS and are used to
+    // know different information about the simulation. For example if the targeted
+    // device is a CPU or a GPU.
     m_params = params;
 
-    // Handle GPU device
-    if ( m_params.data_h.device_target == GPU_DEVICE && m_nb_of_energy_bins > 0 )
+    // Handle GPU device if needed. Here nothing is load to the GPU (simple source). But
+    // in case of the use of a spectrum data should be allocated and transfered here.
+    if ( m_params.data_h.device_target == GPU_DEVICE )
     {
         // GPU mem allocation
-        HANDLE_ERROR ( cudaMalloc ( ( void** ) &m_spectrumE_d, m_nb_of_energy_bins*sizeof ( f64 ) ) );
-        HANDLE_ERROR ( cudaMalloc ( ( void** ) &m_spectrumCDF_d, m_nb_of_energy_bins*sizeof ( f64 ) ) );
+
         // GPU mem copy
-        HANDLE_ERROR ( cudaMemcpy ( m_spectrumE_d, m_spectrumE_h,
-                                    sizeof ( f64 ) *m_nb_of_energy_bins, cudaMemcpyHostToDevice ) );
-        HANDLE_ERROR ( cudaMemcpy ( m_spectrumCDF_d, m_spectrumCDF_h,
-                                    sizeof ( f64 ) *m_nb_of_energy_bins, cudaMemcpyHostToDevice ) );
     }
 
 }
 
+// Mandatory function, abstract from GGEMSSource. This function is called
+// by GGEMS to fill particle buffer of new fresh particles, which is the role
+// of any source.
 void PointSource::get_primaries_generator ( Particles particles )
 {
 
+    // If CPU running, do it on CPU
     if ( m_params.data_h.device_target == CPU_DEVICE )
     {
-
+        // Loop over the particle buffer
         ui32 id=0;
-        while ( id<particles.size )
+        while( id < particles.size )
         {
-            point_source ( particles.data_h, id, m_px, m_py, m_pz, m_direction_option, m_dx, m_dy, m_dz, m_particle_type,
-                           m_spectrumE_h, m_spectrumCDF_h, m_nb_of_energy_bins, m_aperture_angle );
+            // Call a point source that get a new particle at a time. In this case data from host (CPU)
+            // is passed to the function (particles.data_h).
+            point_source( particles.data_h, m_px, m_py, m_pz, m_energy, m_particle_type, id );
             ++id;
         }
 
     }
+    // If GPU running, do it on GPU
     else if ( m_params.data_h.device_target == GPU_DEVICE )
     {
-
+        // Defined threads and grid
         dim3 threads, grid;
         threads.x = m_params.data_h.gpu_block_size;
         grid.x = ( particles.size + m_params.data_h.gpu_block_size - 1 ) / m_params.data_h.gpu_block_size;
 
-        kernel_point_source<<<grid, threads>>> ( particles.data_d, m_px, m_py, m_pz,m_direction_option, m_dx, m_dy, m_dz, m_particle_type,
-                m_spectrumE_d, m_spectrumCDF_d, m_nb_of_energy_bins,m_aperture_angle );
-        cuda_error_check ( "Error ", " Kernel_point_source" );
-
+        // Call GPU kernel of a point source that get fill the complete particle buffer. In this case data
+        // from device (GPU) is passed to the kernel (particles.data_d).
+        kernel_point_source<<<grid, threads>>>( particles.data_d, m_px, m_py, m_pz, m_energy, m_particle_type );
+        cuda_error_check( "Error ", " Kernel_point_source" );
     }
 
 }
-
-void PointSource::set_beam_aperture (  f32 angle )
-{
-
-    m_aperture_angle = angle;
-
-}
-
-#undef POINT_SOURCE_ISOTROPIC 0
-#undef POINT_SOURCE_BEAM 1
 
 #endif
 

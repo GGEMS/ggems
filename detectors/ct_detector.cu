@@ -95,6 +95,12 @@ __host__ __device__ void ct_detector_digitizer( ParticlesData particles, f32 orb
                                                 ui32* projection, ui32* scatter_order,
                                                 ui32 id )
 {
+    // If freeze or dead, quit
+    if( particles.endsimu[ id ] == PARTICLE_FREEZE || particles.endsimu[ id ] == PARTICLE_DEAD )
+    {
+        return;
+    }
+
     // Read position
     f32xyz pos;
     pos.x = particles.px[ id ];
