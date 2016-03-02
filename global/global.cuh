@@ -266,6 +266,7 @@ void GGcout_time ( std::string txt, f64 t );
 void GGcout_mem ( std::string txt, ui64 valmem );
 void GGcout_params ( GlobalSimulationParametersData params );
 void GGcout_timestamp ();
+void GGcout_version ();
 void GGnewline( );
 
 f64 get_time();

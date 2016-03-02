@@ -9,8 +9,6 @@
 // Reset the GPU
 void reset_gpu_device()
 {
-//     printf ( "[\033[32;01mok\033[00m] Reset device .. \n" );
-    GGcout << "Reset GPU device ... " << GGendl;
     cudaDeviceReset();
 }
 
@@ -140,6 +138,23 @@ void GGcout_timestamp ()
     struct tm tm = *localtime(&t);
 
     printf("[GGEMS] %d-%d-%d %02d:%02d:%02d\n", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
+}
+
+// Print some version information
+void GGcout_version ()
+{
+    i32 Version = 0;
+    //i32 DrvVersion = 0;
+
+    cudaRuntimeGetVersion( &Version );
+    //cudaRuntimeGetVersion( &DrvVersion );
+
+    std::string VerTxt = (Version) ? std::to_string( Version/1000.0 ) : "Unknown";
+    //std::string DrvTxt = (DrvVersion) ? std::to_string( DrvVersion ) : "Unknown";
+
+    GGcout << "GCC: " << __GNUC__ << "." << __GNUC_MINOR__
+           << " NVCC: " << VerTxt
+           << GGendl;
 }
 
 // Print out memory usage

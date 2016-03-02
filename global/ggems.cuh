@@ -30,21 +30,11 @@
 #include "vox_phan_dosi_nav.cuh"
 #include "vox_phan_img_nav.cuh"
 
-// #include "flatpanel_detector.cuh"
-
 class GGEMS
 {
 public:
     GGEMS();
     ~GGEMS();
-
-
-    // Set simulation object
-//        void set_geometry(GeometryBuilder obj);
-//        void set_materials(MaterialBuilder tab);
-//        void set_sources(SourceBuilder src);
-//        void set_particles(ParticleBuilder p);
-//        void set_digitizer(Digitizer dig);
 
     // Setting parameters
     void set_license ( std::string license_path );
@@ -56,7 +46,6 @@ public:
     void set_particle_cut ( std::string pname, f32 E );
 
     void set_number_of_particles ( ui64 nb );
-    void set_number_of_particles ( std::string nb );
     void set_size_of_particles_batch ( ui64 nb );
 
     void set_CS_table_nbins ( ui32 valbin );
@@ -84,8 +73,6 @@ public:
     void init_simulation();
     void start_simulation();
 
-    void version();
-
 private:
     // Particles handler
     ParticleManager m_particles_manager;
@@ -100,27 +87,13 @@ private:
     GGEMSDetector* m_detector;
 
     // Main parameters
-    bool m_check_mandatory();
+    bool m_check_mandatory();    
     void m_copy_parameters_cpu2gpu();
     GlobalSimulationParameters m_parameters;
+    bool m_flag_init;
 
     // License
     License m_license;
-
-
-    /*
-    // Main functions
-    void primaries_generator();
-    void main_navigator();
-
-    // For GPU
-
-
-
-
-
-    ui32 seed;
-    */
 
 };
 

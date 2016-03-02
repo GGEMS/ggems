@@ -1,5 +1,10 @@
 .. GGEMS documentation: Phantoms
 
+.. _phantoms-label:
+
+.. sectionauthor:: Julien Bert
+.. codeauthor:: Julien Bert
+
 Phantoms
 ========
 
@@ -17,16 +22,13 @@ Two main phantoms are used in GGEMS. Each one handle different particle navigati
 VoxPhanImgNav
 -------------
 
-.. sectionauthor:: Julien Bert
-.. codeauthor:: Julien Bert
-
 This class handle particle navigation within a voxelized volume. This phantom consider only photon particle and the dose within the volume is not recorded. This phantom and the associated particle navigator is mainly used for imaging application such CT.
 
 ------------
 
 .. c:function:: void load_phantom_from_mhd ( std::string filename, std::string range_mat_name )
     
-    Load a voxelized phantom from a MHD format image ( :ref:`mhd-label` ). This file can content Hounsfield units (HU) or simple material ID. To convert material ID or HU into material a range material file is required. This file contains for each range of value (ID or HU) the material to be associated. Material name must be defined into the material database (``TODO: see GGEMS``).
+    Load a voxelized phantom from a MHD format image ( :ref:`mhd-label` ). This file can content Hounsfield units (HU) or simple material ID. To convert material ID or HU into material a range material file is required. This file contains for each range of value (ID or HU) the material to be associated. Material name must be defined into the material database.
 
     .. c:var:: filename  
         
@@ -85,7 +87,7 @@ This class handle particle navigation within a voxelized volume. This phantom co
 
 .. c:function:: void load_phantom_from_mhd ( std::string filename, std::string range_mat_name )
     
-    Load a voxelized phantom from a MHD format image ( :ref:`mhd-label` ). This file can content Hounsfield units (HU) or simple material ID. To convert material ID or HU into material a range material file is required. This file contains for each range of value (ID or HU) the material to be associated. Material name must be defined into the material database (``TODO: see GGEMS``).
+    Load a voxelized phantom from a MHD format image ( :ref:`mhd-label` ). This file can content Hounsfield units (HU) or simple material ID. To convert material ID or HU into material a range material file is required. This file contains for each range of value (ID or HU) the material to be associated. Material name must be defined into the material database.
 
     .. c:var:: filename  
         

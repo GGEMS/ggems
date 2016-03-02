@@ -362,7 +362,7 @@ ui32 CTDetector::getScatterNumber( ui32 scatter_order )
     return count;
 }
 
-void CTDetector::printInfoScatter()
+void CTDetector::print_info_scatter()
 {
     // Get the number of detected particles
     ui32 detected_particles = getDetectedParticles();

@@ -1,5 +1,7 @@
 .. GGEMS documentation: Sources
 
+.. _sources-label:
+
 Sources
 =======
 
@@ -9,8 +11,7 @@ ConeBeamCTSource
 .. sectionauthor:: Julien Bert
 .. codeauthor:: Didier Benoit
 
-Class cone-beam source for composed by different methods to 
-characterize the source. In this source, the user can define a focal, an aperture, an orbiting angle, etc. This source mainly used in CT application. 
+Class cone-beam source. The user can define a focal, an aperture, an orbiting angle, etc. This source mainly used in CT application.
 
 ------------
 

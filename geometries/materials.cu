@@ -836,6 +836,14 @@ void Materials::m_build_materials_table(GlobalSimulationParameters params, std::
     data_h.mixture = (ui16*)malloc(sizeof(ui16)*access_index);
     data_h.atom_num_dens = (f32*)malloc(sizeof(f32)*access_index);
 
+    // Display energy cuts
+    if ( params.data_h.display_energy_cuts )
+    {
+        GGcout << GGendl;
+        GGcout << "Energy cuts:" << GGendl;
+        printf("[GGEMS]    gamma: %e mm  electron: %e mm\n", params.data_h.photon_cut/mm, params.data_h.electron_cut/mm);
+    }
+
     // store mixture element and compute atomic density
     i=0; while (i < m_nb_materials) {
 
@@ -898,25 +906,30 @@ void Materials::m_build_materials_table(GlobalSimulationParameters params, std::
 
         /// others stuffs
 
-        // cut (in energy for now, but should be change for range cut) TODO
-        data_h.photon_energy_cut[i] = params.data_h.photon_cut;
-        data_h.electron_energy_cut[i] = params.data_h.electron_cut;
         data_h.rad_length[i] = m_material_db.get_rad_len( mat_name );
 
-        /// HERE compute and print range cut - DEBUGING - ALPHA
-        //f32 Ecut = m_rangecut.convert_gamma(80*um, &data_h, i);
-        f32 gEcut = m_rangecut.convert_gamma(100*um, data_h.mixture, data_h.nb_elements[i], data_h.atom_num_dens, data_h.index[i]);
-        f32 eEcut = m_rangecut.convert_electron(100.0*um, data_h.mixture, data_h.nb_elements[i], data_h.atom_num_dens, data_h.density[i], data_h.index[i]);
+        /// Compute energy cut
+        f32 gEcut = m_rangecut.convert_gamma(params.data_h.photon_cut, data_h.mixture, data_h.nb_elements[i],
+                                             data_h.atom_num_dens, data_h.index[i]);
 
+        f32 eEcut = m_rangecut.convert_electron(params.data_h.electron_cut, data_h.mixture, data_h.nb_elements[i],
+                                                data_h.atom_num_dens, data_h.density[i], data_h.index[i]);
+
+        data_h.photon_energy_cut[i] = gEcut;
+        data_h.electron_energy_cut[i] = eEcut;
 
         if ( params.data_h.display_energy_cuts )
         {
-            printf("[GGEMS] Range cut    material: %s       gamma: %f keV\n", mat_name.c_str(), gEcut/keV);
-            printf("[GGEMS] Range cut    material: %s    electron: %f keV\n", mat_name.c_str(), eEcut/keV);
-            printf("\n");
+            printf("[GGEMS]    material: %s\t\tgamma: %f keV  electron: %f keV\n", mat_name.c_str(), gEcut/keV, eEcut/keV);
         }
 
         ++i;
+    }
+
+    // Display energy cuts
+    if ( params.data_h.display_energy_cuts )
+    {
+        GGcout << GGendl;
     }
 
 }
@@ -937,47 +950,6 @@ void Materials::load_elements_database(std::string filename) {
 */
 
 
-
-//// Table containing every definition of the materials used in the world
-//struct MaterialsTable {
-//    ui32 nb_materials;              // n
-//    ui32 nb_elements_total;         // k
-
-//    ui16 *nb_elements;        // n
-//    ui16 *index;              // n
-
-//    ui16 *mixture;            // k
-//    f32 *atom_num_dens;                   // k
-
-//    f32 *nb_atoms_per_vol;                // n
-//    f32 *nb_electrons_per_vol;            // n
-//    f32 *electron_mean_excitation_energy; // n
-//    f32 *rad_length;                      // n
-
-//    // Cut
-//    f32 *photon_energy_cut;               // n
-//    f32 *electron_energy_cut;             // n
-
-//    //parameters of the density correction
-//    f32 *fX0;                             // n
-//    f32 *fX1;
-//    f32 *fD0;
-//    f32 *fC;
-//    f32 *fA;
-//    f32 *fM;
-
-//  // parameters of the energy loss fluctuation model:
-//    f32 *fF1;
-//    f32 *fF2;
-//    f32 *fEnergy0;
-//    f32 *fEnergy1;
-//    f32 *fEnergy2;
-//    f32 *fLogEnergy1;
-//    f32 *fLogEnergy2;
-//    f32 *fLogMeanExcitationEnergy;
-
-//    f32 *density;
-//};
 
 
 // Print Material table
@@ -1064,42 +1036,6 @@ void MaterialManager::add_materials_and_update_indices(std::vector<std::string> 
 }
 */
 
-
-//// Build the materials table according the object contains in the world
-//void MaterialManager::free_materials_table() {
-
-
-//    free(materials_table.nb_elements);
-//    free(materials_table.index);
-//    free(materials_table.nb_atoms_per_vol);
-//    free(materials_table.nb_electrons_per_vol);
-//    free(materials_table.electron_mean_excitation_energy);
-//    free(materials_table.rad_length);
-//    free(materials_table.fX0);
-//    free(materials_table.fX1);
-//    free(materials_table.fD0);
-//    free(materials_table.fC);
-//    free(materials_table.fA);
-//    free(materials_table.fM);
-//    free(materials_table.density);
-//    free(materials_table.fF1);
-//    free(materials_table.fF2);
-//    free(materials_table.fEnergy0);
-//    free(materials_table.fEnergy1);
-//    free(materials_table.fEnergy2);
-//    free(materials_table.fLogEnergy1);
-//    free(materials_table.fLogEnergy2);
-//    free(materials_table.fLogMeanExcitationEnergy);
-//    free(materials_table.mixture);
-//    free(materials_table.atom_num_dens);
-
-
-//    //delete mat_table_h;
-
-//}
-
-
-
 // Init
 void Materials::initialize(std::vector<std::string> mats_list, GlobalSimulationParameters params) {
 
@@ -1115,6 +1051,9 @@ void Materials::initialize(std::vector<std::string> mats_list, GlobalSimulationP
     // Load elements data base
     m_material_db.load_elements();
     //load_elements_database( "data/materials/elts.dat" );
+
+    // Setting energy range for cut
+    m_rangecut.set_energy_range(params.data_h.cs_table_min_E, params.data_h.cs_table_max_E);
 
     // Build materials table
     m_build_materials_table(params, mats_list);

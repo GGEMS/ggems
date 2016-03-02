@@ -142,9 +142,9 @@ RangeCut::RangeCut()
 {
     // Global
     TotBin = 300;
-    LowestEnergy = 0.99e-3*MeV;
-    HighestEnergy = 100.0e6*MeV;
-    MaxEnergyCut = 10.0*GeV;
+    LowestEnergy = 250 *eV;
+    HighestEnergy = 100.0e6 *MeV;
+    MaxEnergyCut = 10.0 *GeV;
 
     // For gamma
     gZ = -1;
@@ -273,115 +273,70 @@ f32 RangeCut::compute_electron_loss( f32 AtomicNumber, f32 KineticEnergy)
 }
 
 // Build CS table for gamma
-void RangeCut::build_gamma_cross_sections_table()
+void RangeCut::build_gamma_cross_sections_table(const ui16* mixture, ui16 NumberOfElements, ui32 abs_index)
 {
     //  Build CS tables for elements
-    f32 NumberOfElements = NB_ELEMENTS;
-    gamma_CS_table.reserve( NumberOfElements+1 );
+    gamma_CS_table.reserve( NumberOfElements );
 
     // fill the CS table
-    for ( size_t j=0; j<size_t( NumberOfElements+1 ); j++)
-    {
-        f32 Value;    
-        LogEnergyTable* aVector = 0;
-        aVector = new LogEnergyTable ( LowestEnergy, MaxEnergyCut, TotBin );
-
-        // Z=0 Not exist
-        if ( j == 0)
-        {
-            gamma_CS_table.push_back( aVector );
-        }
-        else
-        {
-            for ( size_t i = 0; i <= size_t( TotBin ); i++)
-            {
-                Value = compute_gamma_cross_sections( j, aVector->get_energy( i ) );
-                aVector->put_value( i, Value );
-            }
-            gamma_CS_table.push_back( aVector );
-        }
-    } // for
-
-}
-
-// Build eLoss table for e-
-void RangeCut::build_electron_loss_table()
-{
-    //  Build CS tables for elements
-    f32 NumberOfElements = NB_ELEMENTS;
-    e_loss_table.reserve( NumberOfElements+1 );
-
-    // fill the CS table
-    for ( size_t j=0; j<size_t( NumberOfElements+1 ); j++)
+    for ( size_t j=0; j<size_t( NumberOfElements ); j++)
     {
         f32 Value;
         LogEnergyTable* aVector = 0;
         aVector = new LogEnergyTable ( LowestEnergy, MaxEnergyCut, TotBin );
 
-        // Z=0 Not exist
-        if ( j == 0)
+        for ( size_t i = 0; i <= size_t( TotBin ); i++)
         {
-            e_loss_table.push_back( aVector );
+            //                                       Z
+            Value = compute_gamma_cross_sections( mixture[ abs_index+j ], aVector->get_energy( i ) );
+            aVector->put_value( i, Value );
+
         }
-        else
+        gamma_CS_table.push_back( aVector );
+
+    } // for
+
+}
+
+// Build eLoss table for e-
+void RangeCut::build_electron_loss_table(const ui16* mixture, ui16 NumberOfElements, ui32 abs_index)
+{
+    //  Build CS tables for elements
+    e_loss_table.reserve( NumberOfElements );
+
+    // fill the CS table
+    for ( size_t j=0; j<size_t( NumberOfElements ); j++)
+    {
+        f32 Value;
+        LogEnergyTable* aVector = 0;
+        aVector = new LogEnergyTable ( LowestEnergy, MaxEnergyCut, TotBin );
+
+        for ( size_t i = 0; i <= size_t( TotBin ); i++)
         {
-            for ( size_t i = 0; i <= size_t( TotBin ); i++)
-            {
-                Value = compute_electron_loss( j, aVector->get_energy( i ) );
-                aVector->put_value( i, Value );
-            }
-            e_loss_table.push_back( aVector );
+            //                                       Z
+            Value = compute_electron_loss( mixture[ abs_index+j ], aVector->get_energy( i ) );
+            aVector->put_value( i, Value );
         }
+        e_loss_table.push_back( aVector );
+
     } // for
 }
 
 //  create range table for a material (gamma)
 void RangeCut::gamma_build_range_table( const ui16* mixture, ui16 nb_elts, const f32 *atom_num_dens, ui32 abs_index,
                                         LogEnergyTable *range_table )
-{
-    // calculate parameters of the low energy part first
-    size_t i;
-    std::vector< f32 > lossV;
-
+{              
     for ( size_t ib=0; ib<=size_t( TotBin ); ib++)
     {
-        f32 loss = 0.;
-        for ( i=0; i<size_t( nb_elts ); i++)
-        {            
-            ui16 Z = mixture[ abs_index+i ];
-            //loss += material->atom_num_dens[index+i] *
-            //        ( *( gamma_CS_table[ index ] ) )[ ib ];
-            loss += atom_num_dens[ abs_index+i ] * ( gamma_CS_table[ Z ] )->get_value( ib );
-        }
-        lossV.push_back( loss );
-    }
-
-    // Integrate with Simpson formula with logarithmic binning
-    f32 dltau = 1.0;
-    if ( LowestEnergy > 0. )
-    {
-        f32 ltt = std::log( MaxEnergyCut / LowestEnergy );
-        dltau = ltt / TotBin;
-    }
-
-    f32 s0 = 0.;
-    f32 Value;
-    for ( i=0; i<=size_t( TotBin ); i++ ) {
-        f32 t = range_table->get_low_edge_energy( i );
-        f32 q = t / lossV[ i ];
-        if ( i==0 ) s0 += 0.5*q;
-        else s0 += q;
-
-        if ( i==0 )
+        f32 sigma = 0.;
+        for (size_t i=0; i<size_t( nb_elts ); i++)
         {
-            Value = ( s0 + 0.5*q ) * dltau;
+            sigma += atom_num_dens[ abs_index+i ] * ( gamma_CS_table[ i ] )->get_value( ib );
         }
-        else
-        {
-            Value = ( s0 - 0.5*q ) * dltau;
-        }
-        range_table->put_value( i, Value );
+
+        range_table->put_value( ib, 5.0f / sigma );
     }
+
 }
 
 //  create range table for a material (e-)
@@ -396,11 +351,8 @@ void RangeCut::electron_build_range_table( const ui16* mixture, ui16 nb_elts, co
     {
         f32 loss = 0.;
         for ( i=0; i<size_t( nb_elts ); i++)
-        {            
-            ui16 Z = mixture[ abs_index+i ];
-            //loss += material->atom_num_dens[index+i] *
-            //        ( *( e_loss_table[ index ] ) ) [ ib ];
-            loss += atom_num_dens[ abs_index+i ] * ( e_loss_table[ Z ] )->get_value( ib );
+        {                        
+            loss += atom_num_dens[ abs_index+i ] * ( e_loss_table[ i ] )->get_value( ib );
         }
         lossV.push_back( loss );
     }
@@ -468,6 +420,7 @@ f32 RangeCut::convert_cut_to_energy( LogEnergyTable *rangeVector, f32 theCutInLe
             T2 = T;
             break;
         }
+
     }
 
     // check cut in length is smaller than range max
@@ -494,6 +447,12 @@ f32 RangeCut::convert_cut_to_energy( LogEnergyTable *rangeVector, f32 theCutInLe
 
 /// Public ///
 
+void RangeCut::set_energy_range(f32 lowE, f32 highE)
+{
+    LowestEnergy = lowE;
+    HighestEnergy = highE;
+}
+
 f32 RangeCut::convert_gamma( f32 rangeCut, const ui16* mixture, ui16 nb_elts, const f32 *atom_num_dens, ui32 abs_index )
 {
 
@@ -501,7 +460,7 @@ f32 RangeCut::convert_gamma( f32 rangeCut, const ui16* mixture, ui16 nb_elts, co
     f32 theKineticEnergyCuts = 0.;
 
     // Build the energy CS table
-    build_gamma_cross_sections_table();
+    build_gamma_cross_sections_table(mixture, nb_elts, abs_index);
 
     // Clear and init range table
     gamma_range_table = new LogEnergyTable( LowestEnergy, MaxEnergyCut, TotBin );
@@ -513,7 +472,8 @@ f32 RangeCut::convert_gamma( f32 rangeCut, const ui16* mixture, ui16 nb_elts, co
     if ( theKineticEnergyCuts < LowestEnergy )
     {
       theKineticEnergyCuts = LowestEnergy ;
-    } else if ( theKineticEnergyCuts > MaxEnergyCut )
+    }
+    else if ( theKineticEnergyCuts > MaxEnergyCut )
     {
       theKineticEnergyCuts = MaxEnergyCut;
     }
@@ -528,7 +488,7 @@ f32 RangeCut::convert_electron( f32 rangeCut, const ui16* mixture, ui16 nb_elts,
     f32 theKineticEnergyCuts = 0.;
 
     // Build the energy CS table   
-    build_electron_loss_table();
+    build_electron_loss_table(mixture, nb_elts, abs_index);
 
     // Clear and init range table
     electron_range_table = new LogEnergyTable( LowestEnergy, MaxEnergyCut, TotBin );
@@ -548,7 +508,8 @@ f32 RangeCut::convert_electron( f32 rangeCut, const ui16* mixture, ui16 nb_elts,
     if ( theKineticEnergyCuts < LowestEnergy )
     {
       theKineticEnergyCuts = LowestEnergy ;
-    } else if ( theKineticEnergyCuts > MaxEnergyCut )
+    }
+    else if ( theKineticEnergyCuts > MaxEnergyCut )
     {
       theKineticEnergyCuts = MaxEnergyCut;
     }

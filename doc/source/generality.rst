@@ -47,54 +47,6 @@ For example to center your voxelized volume to the center of the world frame, th
 
 -----
 
-Simulation structure
---------------------
-
-The structure of the Monte Carlo simulation is based on three main components: a source, a phantom and a detector. According the application targeted a composition of these components will be used (see figure below). For instance to compute a blank image in CT imaging only a source and a detector will be used (no phantom). In PET and CT imaging a source, a phantom and a detecvtor will be defined. In particle therapy application only a source and a phantom are used. In GGEMS simulation only the source component is mandatory, phantom and detector are optionals.
-
-.. image:: images/simu_struct.png
-    :scale: 40%
-    :align: center
-
-The main code of GGEMS application start by defining the different components by instancing their associated c++ classes and setting the different parameters required. Then the Monte Carlo GGEMS engine is instancing as well. Parameters of the simulation (number of particles, physics list, etc.) is selected. Every components are passed to GGEMS. Subsequently GGEMS engine is initialyzed and started. Finally, if a detector was defined results data have to be exported.
-
-Example:
-^^^^^^^^
-.. code-block:: cpp
-    :linenos:
-
-    // Defined a source
-    ConeBeamCTSource *aSource = new ConeBeamCTSource;
-    // Set all parameters...
-
-    // Defined a phantom
-    VoxPhanImgNav *aPhantom = new VoxPhanImgNav;
-    // Set all parameters...
-
-    // Defined a detector
-    CTDetector *aDetector = new CTDetector;
-    // Set all parameters...
-
-    // Defined a GGEMS simulation
-    GGEMS *simu = new GGEMS;
-    // Set simulations parameters...
-
-    // Passed every component
-    simu->set_source( aSource );
-    simu->set_phantom( aPhantom );
-    simu->set_detector( aDetector );
-
-    // Init the simulation
-    simu->init_simulation();
-
-    // Start the simulation
-    simu->start_simulation();
-
-    // Get back the results
-    aDetector->save_projection( outputFilename );
-
------
-
 System of units
 ---------------
 
@@ -266,32 +218,32 @@ GGEMS used specific data type:
 * **f32xy** vector (x, y) of f32
 * **f32xyz** vector (x, y, z) of f32
 * **f32xyzw** vector (x, y, z, w) of f32
-|
+*
 * **f64** real number with double precision
 * **f64xy** vector (x, y) of f64
 * **f64xyz** vector (x, y, z) of f64
 * **f64xyzw** vector (x, y, z, w) of f64
-|
+*
 * **i32** signed integer number (32 bits)
 * **i32xy** vector (x, y) of i32
 * **i32xyz** vector (x, y, z) of i32
 * **i32xyzw** vector (x, y, z, w) of i32
-|
+*
 * **ui32** unsigned integer number (32 bits)
 * **ui32xy** vector (x, y) of ui32
 * **ui32xyz** vector (x, y, z) of ui32
 * **ui32xyzw** vector (x, y, z, w) of ui32
-|
+*
 * **ui16** unsigned integer number (16 bits)
 * **ui16xy** vector (x, y) of ui16
 * **ui16xyz** vector (x, y, z) of ui16
 * **ui16xyzw** vector (x, y, z, w) of ui16
-|
+*
 * **i8** signed integer number (8 bits)
 * **i16** signed integer number (16 bits)
 * **ui8** unsigned integer number (8 bits)
 * **ui64** unsigned integer number (64 bits)
-|
+*
 * **f32matrix33** matrix (a, b, c, d, e, f, g, h, i) of f32
 * **f64matrix33** matrix (a, b, c, d, e, f, g, h, i) of f64
 

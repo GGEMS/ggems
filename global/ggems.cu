@@ -60,13 +60,13 @@ GGEMS::GGEMS()
     m_parameters.data_h.cs_table_nbins = 220;
     m_parameters.data_h.cs_table_min_E = 990*eV;
     m_parameters.data_h.cs_table_max_E = 250*MeV;
-    m_parameters.data_h.photon_cut = 250*MeV;
-    m_parameters.data_h.electron_cut = 250*MeV;
+    m_parameters.data_h.photon_cut = 100 *um;
+    m_parameters.data_h.electron_cut = 100 *um;
     m_parameters.data_h.nb_of_secondaries = 0;
     m_parameters.data_h.geom_tolerance = 100.0 *nm;
 
     // Init by default others parameters
-    m_parameters.data_h.device_target = CPU_DEVICE;
+    m_parameters.data_h.device_target = GPU_DEVICE;
     m_parameters.data_h.gpu_id = 0;
     m_parameters.data_h.gpu_block_size = 192;
 
@@ -74,6 +74,9 @@ GGEMS::GGEMS()
     m_parameters.data_h.display_run_time = ENABLED;
     m_parameters.data_h.display_memory_usage = DISABLED;
     m_parameters.data_h.display_energy_cuts = DISABLED;
+
+    // To know if initialisation was performed
+    m_flag_init = false;
 
 #ifdef _WIN32
     m_parameters.data_h.display_in_color = DISABLED;
@@ -545,7 +548,7 @@ void GGEMS::init_simulation()
         exit_simulation();
     }
     print_banner(m_license.info.institution, m_license.info.expired_day, m_license.info.expired_month,
-                 m_license.info.expired_year, "V1.0", m_parameters.data_h );
+                 m_license.info.expired_year, "V1.2", m_parameters.data_h );
 
     // Check
     m_check_mandatory();
@@ -576,6 +579,7 @@ void GGEMS::init_simulation()
     // Print timestamp
     GGnewline();
     GGcout_timestamp();
+    GGcout_version();
 
     // Print params
     GGcout_params( m_parameters.data_h );
@@ -655,6 +659,9 @@ void GGEMS::init_simulation()
         GGnewline();
     }
 
+    // Succesfull init
+    m_flag_init = true;
+
 }
 
 
@@ -680,6 +687,12 @@ void progress_bar(float progress, int etape, int nbatch )
 
 void GGEMS::start_simulation()
 {
+
+    if ( !m_flag_init )
+    {
+        GGcerr << "GGEMS simulation not initialized!!" << GGendl;
+        exit_simulation();
+    }
 
     // Run time
     f64 t_start = 0;
@@ -752,334 +765,9 @@ void GGEMS::start_simulation()
 
 
 
-void GGEMS::version()
-{
 
-// TODO faire printer les versions de g++, nvcc, Geant4 et architectures gpu utilisées pour la compilation
 
-   #ifdef __cplusplus
-   std::cout << "C++ compiler in use and version is " << __cplusplus << std::endl;
-//    std::cout <<"Version is " << __STDC_VERSION__ << std::endl;
-   #endif
-//    std::cout << "Hi" << __FILE__ << __LINE__ << std::endl;
 
-    
 
-}
-
-
-
-
-
-
-
-
-
-
-/*
-
-////// :: Main functions ::
-
-// Generate particle based on the sources (CPU version)
-void SimulationBuilder::primaries_generator() {
-
-    /// CPU ///////////////////////////////////
-    if (target == CPU_DEVICE) {
-//#ifdef DEBUG
-        printf("CPU: primaries generator\n");
-//#endif
-
-        f64 t_start;
-        if (display_run_time_flag) t_start = get_time();
-
-        // Loop over particle slot
-        ui32 id = 0;
-        ui32 is = 0;
-        printf("particles stack size %d \n",particles.stack.size);
-        while (id < particles.stack.size) {
-
-            // TODO - Generic and multi-sources
-            //      Read CDF sources
-            //      Rnd sources
-            is = 0; // first source
-
-            // Get a new particle
-            get_primaries(sources.sources, particles.stack, is, id);
-
-            // Next particle
-            ++id;
-
-        } // id
-
-        // History record (use only for VRML view)
-        if (history.record_flag == ENABLED) {
-            id=0; while (id < particles.stack.size) {
-                // Record the first position for the tracking history
-                history.cpu_new_particle_track(PHOTON);
-                history.cpu_record_a_step(particles.stack, id);
-                ++id;
-            }
-        }
-
-        if (display_run_time_flag) {
-            print_time("Primaries generator", get_time()-t_start);
-        }
-
-    /// GPU /////////////////////////////////////
-    } else {
-
-#ifdef DEBUG
-        printf("GPU: primaries generator\n");
-#endif
-
-        cudaEvent_t t_start, t_stop;
-        if (display_run_time_flag) {
-            cudaEventCreate(&t_start);
-            cudaEventCreate(&t_stop);
-            cudaEventRecord(t_start);
-        }
-
-        // TODO - Generic and multi-sources
-        //      Read CDF sources
-        //      Rnd sources
-        ui32 is = 0; // first source
-
-        // Kernel
-        dim3 threads, grid;
-        threads.x = gpu_block_size;
-        grid.x = (particles.dstack.size + gpu_block_size - 1) / gpu_block_size;
-
-        kernel_get_primaries<<<grid, threads>>>(sources.dsources, particles.dstack, is);
-        cuda_error_check("Error ", " Kernel_primaries_generator");
-
-        if (display_run_time_flag) {
-            cudaEventRecord(t_stop);
-            cudaEventSynchronize(t_stop);
-            f32 time_ms = 0;
-            cudaEventElapsedTime(&time_ms, t_start, t_stop);
-            print_time("Primaries generator", time_ms/1000.0); // in s
-        }
-
-    }
-
-}
-
-// Main navigation
-void SimulationBuilder::main_navigator() {
-
-    printf("target %d \n",target);
-
-    /// CPU ///////////////////////////////
-    if (target == CPU_DEVICE) {
-
-#ifdef DEBUG
-        printf("CPU: main navigator\n");
-#endif
-
-        f64 t_start;
-        if (display_run_time_flag) t_start = get_time();
-
-        cpu_main_navigator(particles.stack, geometry.world,
-                           materials.materials_table, cs_tables.photon_CS_table, parameters,
-                           digitizer.pulses, history);
-
-        if (display_run_time_flag) {
-            print_time("Main navigation", get_time()-t_start);
-        }
-
-    /// GPU ///////////////////////////////
-    } else {
-
-#ifdef DEBUG
-        printf("GPU: main navigator\n");
-#endif
-
-        cudaEvent_t t_start, t_stop;
-        if (display_run_time_flag) {
-            cudaEventCreate(&t_start);
-            cudaEventCreate(&t_stop);
-            cudaEventRecord(t_start);
-        }
-
-        gpu_main_navigator(particles.dstack, geometry.dworld,
-                           materials.dmaterials_table, cs_tables.dphoton_CS_table, dparameters,
-                           digitizer.dpulses, gpu_block_size);
-
-
-        if (display_run_time_flag) {
-            cudaEventRecord(t_stop);
-            cudaEventSynchronize(t_stop);
-            f32 time_ms = 0;
-            cudaEventElapsedTime(&time_ms, t_start, t_stop);
-            print_time("Main navigation", time_ms/1000.0); // in s
-        }
-
-    }
-
-}
-
-
-
-////// :: Getting ::
-
-ParticleBuilder SimulationBuilder::get_particles() {
-    return particles;
-}
-
-////// :: Command ::
-
-
-
-// Start the simulation
-void SimulationBuilder::start_simulation() {
-
-    ui32 iter = 0;
-
-    // Main loop
-    printf("nb of iterations %d \n", nb_of_iterations);
-    while (iter < nb_of_iterations) {
-
-            // If history is required
-            if (target == CPU_DEVICE && history.record_flag == ENABLED) history.cur_iter = iter;
-
-            printf("primaries_generator \n");
-
-            // Sources
-            primaries_generator();
-
-            // Clear gpu pulses
-            if (target == GPU_DEVICE)
-                digitizer.clear_gpu_pulses();
-
-            digitizer.clear_cpu_pulses();
-
-            printf("main_navigator \n");
-            // Navigation
-            main_navigator();
-
-            // Process and store singles on CPU
-            if (parameters.digitizer_flag) {
-                f64 t_start = get_time();
-                if (target == GPU_DEVICE) {
-                    digitizer.copy_pulses_gpu2cpu();
-                }
-
-                // The complete chain
-                digitizer.process_chain(iter, sources.tot_activity, geometry.world);
-
-                // Run time
-                if (display_run_time_flag) {
-                    print_time("Process singles", get_time()-t_start);
-                }
-            }
-
-        // iter
-        ++iter;
-
-        printf(">> Iter %i / %i\n", iter, nb_of_iterations);
-
-    } // main loop
-
-    // Test if one more iteration is needed
-    if (nb_of_particles % particles.stack.size) {
-
-        particles.stack.size = nb_of_particles - (nb_of_iterations * particles.stack.size);
-        particles.dstack.size = particles.stack.size;
-
-        // If history is required
-        if (target == CPU_DEVICE && history.record_flag == ENABLED) history.cur_iter = iter;
-
-        printf("primaries_generator \n");
-
-        // Sources
-        primaries_generator();
-
-        // Clear gpu pulses
-        if (target == GPU_DEVICE)
-            digitizer.clear_gpu_pulses();
-
-        digitizer.clear_cpu_pulses();
-
-        printf("main_navigator \n");
-        // Navigation
-        main_navigator();
-
-        // Process and store singles on CPU
-        if (parameters.digitizer_flag) {
-            f64 t_start = get_time();
-
-            if (target == GPU_DEVICE) {
-                digitizer.copy_pulses_gpu2cpu();
-            }
-
-            // The complete chain
-            digitizer.process_chain(iter, sources.tot_activity, geometry.world);
-
-            // Run time
-            if (display_run_time_flag) {
-                print_time("Process singles", get_time()-t_start);
-            }
-        }
-    }
-
-    // Free cpu pulses
-    digitizer.free_cpu_pulses();
-
-    // Free particles stack
-    particles.cpu_free_stack();
-
-    // Free materials table
-    materials.free_materials_table();
-
-    free(parameters.physics_list);
-    free(parameters.secondaries_list);
-
-}
-
-
-////// :: Utils ::
-
-
-
-
-
-// Set the geometry of the simulation
-void SimulationBuilder::set_geometry(GeometryBuilder obj) {
-    geometry = obj;
-}
-
-// Set the materials definition associated to the geometry
-void SimulationBuilder::set_materials(MaterialBuilder tab) {
-    materials = tab;
-}
-
-// Set the particles stack
-void SimulationBuilder::set_particles(ParticleBuilder p) {
-    particles = p;
-}
-
-// Set the list of sources
-void SimulationBuilder::set_sources(SourceBuilder src) {
-    sources = src;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-*/
 
 #endif

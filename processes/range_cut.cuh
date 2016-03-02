@@ -17,8 +17,6 @@
 
 #include "global.cuh"
 
-#define NB_ELEMENTS 47
-
 // Helper that handle log table
 class LogEnergyTable
 {
@@ -52,8 +50,9 @@ class RangeCut
         RangeCut();
         ~RangeCut() {}
 
-        // calculate energy cut from given range cut for the material
-        //f32 convert_gamma(f32 rangeCut, const MaterialsTable* material, ui32 mat_id);
+        void set_energy_range(f32 lowE, f32 highE);
+
+        // calculate energy cut from given range cut for the material        
         f32 convert_gamma(f32 rangeCut, const ui16* mixture, ui16 nb_elts,
                           const f32 *atom_num_dens, ui32 abs_index);
 
@@ -70,7 +69,7 @@ class RangeCut
         // For gamma
         LogEnergyTable* gamma_range_table;
         f32 compute_gamma_cross_sections( f32 AtomicNumber, f32 KineticEnergy );
-        void build_gamma_cross_sections_table();
+        void build_gamma_cross_sections_table(const ui16 *mixture, ui16 NumberOfElements, ui32 abs_index);
         void gamma_build_range_table( const ui16* mixture, ui16 nb_elts, const f32 *atom_num_dens, ui32 abs_index,
                                       LogEnergyTable *range_table );
 
@@ -84,7 +83,7 @@ class RangeCut
         // For e-
         LogEnergyTable* electron_range_table;
         f32 compute_electron_loss( f32 AtomicNumber, f32 KineticEnergy );
-        void build_electron_loss_table();
+        void build_electron_loss_table(const ui16 *mixture, ui16 NumberOfElements, ui32 abs_index);
         void electron_build_range_table(const ui16* mixture, ui16 nb_elts, const f32 *atom_num_dens, ui32 abs_index,
                                         LogEnergyTable* range_table );
 

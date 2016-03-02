@@ -13,15 +13,22 @@
 Contents:
 
 .. toctree::
-   :titlesonly:
+   :maxdepth: 2
 
    installation
 
-   generality
+   ggems
 
    sources
 
    phantoms
+
+   detectors
+
+   generality
+
+   examples
+
 
 
 
