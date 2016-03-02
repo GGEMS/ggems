@@ -466,11 +466,11 @@ bool GGEMS::m_check_mandatory()
         flag_error = true;
     }
 
-    if ( m_phantom == NULL )
+    /*if ( m_phantom == NULL )
     {
         print_error ( "No phantom defined." );
         flag_error = true;
-    }
+    }*/
 
     if ( m_parameters.data_h.nb_of_particles == 0 )
     {
