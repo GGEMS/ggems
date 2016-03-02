@@ -42,7 +42,7 @@ class CTDetector : public GGEMSDetector
         // Init
         void initialize( GlobalSimulationParameters params );
 
-        void digitizer(){}
+        void digitizer( Particles particles );
         void save_projection( std::string filename );
 
         void save_scatter( std::string basename );
