@@ -41,7 +41,7 @@ __host__ __device__ void track_electron_to_out (ParticlesData &particles,
                                                  DoseData &dosi,
                                                  f32 &randomnumbereIoni,
                                                  f32 &randomnumbereBrem,
-                                                 f32 freeLength,
+                                                 f32 &freeLength,
                                                  ui32 part_id );
 
 __host__ __device__ void track_photon_to_out (ParticlesData &particles,

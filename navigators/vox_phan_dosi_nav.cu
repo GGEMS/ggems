@@ -26,21 +26,21 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
                                                        DoseData &dosi,
                                                        f32 &randomnumbereIoni,
                                                        f32 &randomnumbereBrem,
-                                                       f32 freeLength,
+                                                       f32 &freeLength,
                                                        ui32 part_id )
 {
 
     // Parameters values need to be stored for every e-step
     f32 alongStepLength = 0.;               // Distance from the last physics interaction.
     bool lastStepisaPhysicEffect = TRUE;    // To store last random number
-    bool bool_loop = true;                  // If it is not the last step in the same voxel    
+    //bool bool_loop = true;                  // If it is not the last step in the same voxel
 
     alongStepLength = freeLength;
-    if ( freeLength>0.0 ) lastStepisaPhysicEffect = FALSE; // Changement de voxel sans effet physique
+    if ( freeLength > 0.0 ) lastStepisaPhysicEffect = FALSE; // Changement de voxel sans effet physique
 
     // Parameters
     f32 trueStepLength = FLT_MAX;
-    f32 totalLength = 0.;
+    //f32 totalLength = 0.;
     f32 par1, par2;
     f32xyz pos, dir;    // particle state
     f32 energy;
@@ -129,7 +129,9 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
 
 #ifdef DEBUG
         assert( mat_id < 65536 );
-//        if (istep == 0) old_mat_id = mat_id;
+        if (istep == 0) old_mat_id = mat_id;
+        //assert( old_mat_id == mat_id );
+
 //        else
 //        {
 //            if ( old_mat_id != mat_id )
@@ -191,24 +193,15 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
 
 #ifdef DEBUG
 
-        if (istep == 0) old_mat_id = mat_id;
-//        else
+//        if (part_id == 3255)
 //        {
-//            if ( old_mat_id != mat_id )
-//                printf("ID %i step %i oldmat %i mat %i pos %e %e %e \n", part_id, istep, old_mat_id, mat_id,
-//                       pos.x, pos.y, pos.z);
-//        }
-
-//        if (part_id == 6819)
-//        {
-//            printf("ID %i step %i mat %i pos %f %f %f - bound %f trueS %f trueG %f\n", part_id, istep, mat_id, pos.x, pos.y, pos.z,
+//            printf("ID %i step %i oldmat %i mat %i pos %f %f %f - bound %f trueS %f trueG %f\n", part_id, istep, old_mat_id, mat_id, pos.x, pos.y, pos.z,
 //                   boundary_distance, trueStepLength, gTransformToGeom ( trueStepLength, erange, lambda, energy, par1, par2, electron_CS_table, mat_id ));
 //        }
+        //assert( old_mat_id == mat_id );
+        //if (old_mat_id != mat_id) printf("ID %i\n", part_id);
 
 #endif
-
-
-
 
 
 
@@ -221,142 +214,154 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
             if ( parameters.physics_list[ELECTRON_MSC] == ENABLED )
             {
                 trueGeomLength = gTransformToGeom ( trueStepLength, erange, lambda, energy,
-                                                    par1, par2, electron_CS_table, mat_id );                
+                                                    par1, par2, electron_CS_table, mat_id );
 
                 if ( trueGeomLength > boundary_distance )
                 {
-                    bool_loop=false;
+                    trueStepLength = GlobalMscScattering ( boundary_distance + parameters.geom_tolerance, cutstep, erange, energy, lambda,   dedxeIoni,
+                                                           dedxeBrem,  electron_CS_table,  mat_id, particles,  part_id,     // HERE the particle move
+                                                           par1, par2, materials, dosi, index_phantom, vol, parameters );
+
+                    freeLength = alongStepLength + trueStepLength;
+//                    totalLength += trueStepLength;
+
+                    return;
                 }
             }
             else
             {
-                bool_loop = false;               // TODO: Instead of bool_loop = false, a simple break is engouh - JB
+                trueStepLength = GlobalMscScattering ( boundary_distance + parameters.geom_tolerance, cutstep, erange, energy, lambda,   dedxeIoni,
+                                                       dedxeBrem,  electron_CS_table,  mat_id, particles,  part_id,     // HERE the particle move
+                                                       par1, par2, materials, dosi, index_phantom, vol, parameters );
+
+                freeLength = alongStepLength + trueStepLength;
+//                totalLength += trueStepLength;
+
+                return;
             }
 
 
         }
 
-        if ( bool_loop==true )
+
+        if ( significant_loss == true )
         {
-            
-            if ( significant_loss == true )
+
+            // Energy loss (call eFluctuation)
+            edep = eLoss ( trueStepLength, particles.E[ part_id ], dedxeIoni, dedxeBrem, erange,
+                           electron_CS_table, mat_id, materials, particles, part_id );
+
+            GlobalMscScattering ( trueStepLength, cutstep, erange, energy, lambda, dedxeIoni,
+                                  dedxeBrem,  electron_CS_table,  mat_id, particles, part_id, par1, par2,    // HERE particle move
+                                  materials, dosi, index_phantom, vol, parameters );
+
+            dose_record_standard ( dosi, edep, particles.px[ part_id ], particles.py[ part_id ], particles.pz[ part_id ] );
+
+            alongStepLength += trueStepLength;
+            //totalLength += trueStepLength;
+            lastStepisaPhysicEffect = FALSE;
+
+        }
+        else
+        {
+
+            //// InvokeAlongStepDoItProcs ////////////////////////////////////////////////////////////////////////
+
+            // Energy loss (call eFluctuation)
+            edep = eLoss ( trueStepLength, particles.E[ part_id ], dedxeIoni, dedxeBrem, erange,
+                           electron_CS_table, mat_id, materials, particles, part_id );
+
+            GlobalMscScattering ( trueStepLength, lengthtoVertex, erange, energy, lambda,   dedxeIoni,
+                                  dedxeBrem,   electron_CS_table,  mat_id, particles,  part_id, par1, par2,     // HERE particle move
+                                  materials, dosi, index_phantom, vol, parameters );
+
+            dose_record_standard ( dosi, edep, particles.px[part_id], particles.py[part_id], particles.pz[part_id] );
+
+            //// InvokePostStepDoItProcs ////////////////////////////////////////////////////////////////////////
+
+
+            SecParticle secondary_part;
+            secondary_part.E = 0.;
+            secondary_part.endsimu = PARTICLE_DEAD;
+
+            if ( next_discrete_process == ELECTRON_IONISATION )
             {
 
-                // Energy loss (call eFluctuation)
-                edep = eLoss ( trueStepLength, particles.E[ part_id ], dedxeIoni, dedxeBrem, erange,
-                               electron_CS_table, mat_id, materials, particles, part_id );
+                secondary_part = eSampleSecondarieElectron ( electronEcut, particles,  part_id );
+                lastStepisaPhysicEffect = TRUE;
 
-                GlobalMscScattering ( trueStepLength, cutstep, erange, energy, lambda, dedxeIoni,
-                                      dedxeBrem,  electron_CS_table,  mat_id, particles, part_id, par1, par2,    // HERE particle move
-                                      materials, dosi, index_phantom, vol, parameters );
-                
-                dose_record_standard ( dosi, edep, particles.px[ part_id ], particles.py[ part_id ], particles.pz[ part_id ] );
+            }
+            else if ( next_discrete_process == ELECTRON_BREMSSTRAHLUNG )
+            {
+                /// TODO return a photon - JB
+                eSampleSecondarieGamma ( parameters.cs_table_min_E, parameters.cs_table_max_E, particles, part_id, materials, mat_id );
+                lastStepisaPhysicEffect = TRUE;
+            }
 
-                alongStepLength += trueStepLength;
-                totalLength += trueStepLength;
-                lastStepisaPhysicEffect = FALSE;
+            /// If there is a secondary particle, push the primary into buffer and track this new particle
+
+            /// Handle secondary //////////////////////
+
+            if ( secondary_part.endsimu == PARTICLE_ALIVE &&
+                 particles.level[ part_id ] < parameters.nb_of_secondaries && parameters.secondaries_list[ELECTRON] )
+            {
+
+                // Get the absolute index into secondary buffer
+                ui32 index_level = part_id * parameters.nb_of_secondaries + ( ui32 ) particles.level[ part_id ];
+
+                // If primary is still alive
+                if ( particles.endsimu[ part_id ] == PARTICLE_ALIVE )
+                {
+                    // Store the current particle
+                    particles.sec_E[ index_level ]  =  particles.E[ part_id ];
+                    particles.sec_px[ index_level ] = particles.px[ part_id ];
+                    particles.sec_py[ index_level ] = particles.py[ part_id ];
+                    particles.sec_pz[ index_level ] = particles.pz[ part_id ];
+                    particles.sec_dx[ index_level ] = particles.dx[ part_id ];
+                    particles.sec_dy[ index_level ] = particles.dy[ part_id ];
+                    particles.sec_dz[ index_level ] = particles.dz[ part_id ];
+                    particles.sec_pname[ index_level ] = particles.pname[ part_id ];
+                    // Lose a level in the hierarchy
+                    particles.level[ part_id ] += 1;
+                }
+
+                // Fill the main buffer with the new secondary particle
+                particles.E[ part_id ]  = secondary_part.E;
+                particles.dx[ part_id ] = secondary_part.dir.x;
+                particles.dy[ part_id ] = secondary_part.dir.y;
+                particles.dz[ part_id ] = secondary_part.dir.z;
+                particles.pname[ part_id ] = secondary_part.pname;
+                particles.endsimu[ part_id ] = secondary_part.endsimu;
+
+                return;
 
             }
             else
             {
 
-                //// InvokeAlongStepDoItProcs ////////////////////////////////////////////////////////////////////////
-
-                // Energy loss (call eFluctuation)
-                edep = eLoss ( trueStepLength, particles.E[ part_id ], dedxeIoni, dedxeBrem, erange,
-                               electron_CS_table, mat_id, materials, particles, part_id );
-
-                GlobalMscScattering ( trueStepLength, lengthtoVertex, erange, energy, lambda,   dedxeIoni,
-                                      dedxeBrem,   electron_CS_table,  mat_id, particles,  part_id, par1, par2,     // HERE particle move
-                                      materials, dosi, index_phantom, vol, parameters );
-
-                dose_record_standard ( dosi, edep, particles.px[part_id], particles.py[part_id], particles.pz[part_id] );
-
-                //// InvokePostStepDoItProcs ////////////////////////////////////////////////////////////////////////
-
-
-                SecParticle secondary_part;
-                secondary_part.E = 0.;
-                secondary_part.endsimu = PARTICLE_DEAD;
-
-                if ( next_discrete_process == ELECTRON_IONISATION )
+                // This secondary particle is not used, so drop its energy
+                if ( secondary_part.E != 0.0f )
                 {
-
-                    secondary_part = eSampleSecondarieElectron ( electronEcut, particles,  part_id );
-                    lastStepisaPhysicEffect = TRUE;
+                    dose_record_standard( dosi, secondary_part.E, particles.px[ part_id ],
+                                          particles.py[ part_id ], particles.pz[ part_id ] );
 
                 }
-                else if ( next_discrete_process == ELECTRON_BREMSSTRAHLUNG )
-                {
-                    /// TODO return a photon - JB
-                    eSampleSecondarieGamma ( parameters.cs_table_min_E, parameters.cs_table_max_E, particles, part_id, materials, mat_id );
-                    lastStepisaPhysicEffect = TRUE;
-                }
-
-                /// If there is a secondary particle, push the primary into buffer and track this new particle
-
-                /// Handle secondary //////////////////////
-
-                if ( secondary_part.endsimu == PARTICLE_ALIVE &&
-                     particles.level[ part_id ] < parameters.nb_of_secondaries && parameters.secondaries_list[ELECTRON] )
-                {
-
-                    // Get the absolute index into secondary buffer
-                    ui32 index_level = part_id * parameters.nb_of_secondaries + ( ui32 ) particles.level[ part_id ];
-
-                    // If primary is still alive
-                    if ( particles.endsimu[ part_id ] == PARTICLE_ALIVE )
-                    {
-                        // Store the current particle
-                        particles.sec_E[ index_level ]  =  particles.E[ part_id ];
-                        particles.sec_px[ index_level ] = particles.px[ part_id ];
-                        particles.sec_py[ index_level ] = particles.py[ part_id ];
-                        particles.sec_pz[ index_level ] = particles.pz[ part_id ];
-                        particles.sec_dx[ index_level ] = particles.dx[ part_id ];
-                        particles.sec_dy[ index_level ] = particles.dy[ part_id ];
-                        particles.sec_dz[ index_level ] = particles.dz[ part_id ];
-                        particles.sec_pname[ index_level ] = particles.pname[ part_id ];
-                        // Lose a level in the hierarchy
-                        particles.level[ part_id ] += 1;
-                    }
-
-                    // Fill the main buffer with the new secondary particle
-                    particles.E[ part_id ]  = secondary_part.E;
-                    particles.dx[ part_id ] = secondary_part.dir.x;
-                    particles.dy[ part_id ] = secondary_part.dir.y;
-                    particles.dz[ part_id ] = secondary_part.dir.z;
-                    particles.pname[ part_id ] = secondary_part.pname;
-                    particles.endsimu[ part_id ] = secondary_part.endsimu;
-
-                    return;
-
-                }
-                else
-                {
-
-                    // This secondary particle is not used, so drop its energy
-                    if ( secondary_part.E != 0.0f )
-                    {
-                        dose_record_standard( dosi, secondary_part.E, particles.px[ part_id ],
-                                              particles.py[ part_id ], particles.pz[ part_id ] );
-
-                    }
 
 #ifdef DEBUG
-                    if ( particles.level[ part_id ] == parameters.nb_of_secondaries )
-                    {
-                        printf( "[ERROR] track_electron_to_out: reach max secondary level\n");
-                    }
-#endif
+                if ( particles.level[ part_id ] == parameters.nb_of_secondaries )
+                {
+                    printf( "[ERROR] track_electron_to_out: reach max secondary level\n");
                 }
+#endif
+            }
 
-                alongStepLength = 0;
-                freeLength = 0.;
-                totalLength += trueStepLength;
+            alongStepLength = 0;
+            freeLength = 0.;
+            //totalLength += trueStepLength;
 
-            } // significant_loss == false
+        } // significant_loss == false
 
-        } // bool_loop == true
+
 
 #ifdef DEBUG
         if ( istep > 100 )
@@ -380,45 +385,49 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
 
         if ( part_id == DEBUG_TRACK_ID )
         {
-//           printf("  ID %i - istep %i - Electron - level %i - E %f keV - pos %f %f %f\n     SignLoss %i - eloss %e - truesteplength %e\n",
-//                  part_id, istep, particles.level[part_id], particles.E[part_id]/keV,
-//                  particles.px[ part_id ], particles.py[ part_id ], particles.pz[ part_id ],
-//                  significant_loss, edep, trueStepLength);
+            //           printf("  ID %i - istep %i - Electron - level %i - E %f keV - pos %f %f %f\n     SignLoss %i - eloss %e - truesteplength %e\n",
+            //                  part_id, istep, particles.level[part_id], particles.E[part_id]/keV,
+            //                  particles.px[ part_id ], particles.py[ part_id ], particles.pz[ part_id ],
+            //                  significant_loss, edep, trueStepLength);
         }
 
 #endif
 
-//        /// Need to check, I add energy cut here - JB /////////////////////////////
-//        if ( particles.E[ part_id ] <= electronEcut )
-//        {
-//            particles.endsimu[ part_id ] = PARTICLE_DEAD;
-//            dose_record_standard( dosi, particles.E[ part_id ], particles.px[ part_id ],
-//                                  particles.py[ part_id ], particles.pz[ part_id ] );
+        //        /// Need to check, I add energy cut here - JB /////////////////////////////
+        //        if ( particles.E[ part_id ] <= electronEcut )
+        //        {
+        //            particles.endsimu[ part_id ] = PARTICLE_DEAD;
+        //            dose_record_standard( dosi, particles.E[ part_id ], particles.px[ part_id ],
+        //                                  particles.py[ part_id ], particles.pz[ part_id ] );
 
-//            //printf("  ID %i  Sec last cutE\n", part_id);
+        //            //printf("  ID %i  Sec last cutE\n", part_id);
 
-//            return;
-//        }
+        //            return;
+        //        }
 
 
 
 
 
     }
-    while ( ( particles.E[ part_id ] > electronEcut ) && ( bool_loop ) );
+    while ( particles.E[ part_id ] > electronEcut );
 
 
-    // Stop simulation if out of the phantom
-    if ( !test_point_AABB_with_tolerance ( make_f32xyz( particles.px[ part_id ], particles.py[ part_id ], particles.pz[ part_id ] ),
-                                           vol.xmin, vol.xmax, vol.ymin, vol.ymax, vol.zmin, vol.zmax, parameters.geom_tolerance ) )
-    {
-        particles.endsimu[ part_id ] = PARTICLE_FREEZE;
-        return;
-    }
+    // Kill the particle
+    particles.endsimu[ part_id ] = PARTICLE_DEAD;
+
+    /// HERE, energy is not droppping ?   - JB   // TO BE CHECKED ////////////
+    dose_record_standard( dosi, particles.E[ part_id ], particles.px[ part_id ],
+                          particles.py[ part_id ], particles.pz[ part_id ] );
+    //////////////////////////////////////////////////////////////////////////
+
+
+
+/*
 
     ////////////////////////////////////
     //                            EKINELIMIT electronEcut
-    if ( ( particles.E[part_id] > electronEcut ) /*&&(secondaryParticleCreated == FALSE)*/ ) //>1eV
+    if ( ( particles.E[part_id] > electronEcut ) ) //>1eV  // &&(secondaryParticleCreated == FALSE)
     {
 
         ui8 next_discrete_process ;
@@ -552,6 +561,9 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
         particles.endsimu[ part_id ] = PARTICLE_FREEZE;
 
     }
+
+
+*/
 
 
 }
