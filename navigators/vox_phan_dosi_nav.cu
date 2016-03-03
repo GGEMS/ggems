@@ -63,6 +63,7 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
 #ifdef DEBUG
     // DEBUG
     ui32 istep = 0;
+    ui16 old_mat_id;
 #endif
 
     do
@@ -128,6 +129,19 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
 
 #ifdef DEBUG
         assert( mat_id < 65536 );
+//        if (istep == 0) old_mat_id = mat_id;
+//        else
+//        {
+//            if ( old_mat_id != mat_id )
+//                printf("ID %i step %i oldmat %i mat %i pos %e %e %e \n", part_id, istep, old_mat_id, mat_id,
+//                       pos.x, pos.y, pos.z);
+//        }
+
+//        if (part_id == 6819)
+//        {
+//            printf("ID %i step %i mat %i pos %f %f %f\n", part_id, istep, mat_id, pos.x, pos.y, pos.z);
+//        }
+
 #endif
 
         // Read the different CS, dE/dx tables
@@ -174,6 +188,30 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
         f32 boundary_distance = hit_ray_AABB ( pos, dir, vox_xmin, vox_xmax,
                                                vox_ymin, vox_ymax, vox_zmin, vox_zmax );
 
+
+#ifdef DEBUG
+
+        if (istep == 0) old_mat_id = mat_id;
+//        else
+//        {
+//            if ( old_mat_id != mat_id )
+//                printf("ID %i step %i oldmat %i mat %i pos %e %e %e \n", part_id, istep, old_mat_id, mat_id,
+//                       pos.x, pos.y, pos.z);
+//        }
+
+//        if (part_id == 6819)
+//        {
+//            printf("ID %i step %i mat %i pos %f %f %f - bound %f trueS %f trueG %f\n", part_id, istep, mat_id, pos.x, pos.y, pos.z,
+//                   boundary_distance, trueStepLength, gTransformToGeom ( trueStepLength, erange, lambda, energy, par1, par2, electron_CS_table, mat_id ));
+//        }
+
+#endif
+
+
+
+
+
+
 #ifdef DEBUG
         assert( boundary_distance != FLT_MAX );
 #endif
@@ -183,7 +221,7 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
             if ( parameters.physics_list[ELECTRON_MSC] == ENABLED )
             {
                 trueGeomLength = gTransformToGeom ( trueStepLength, erange, lambda, energy,
-                                                    par1, par2, electron_CS_table, mat_id );
+                                                    par1, par2, electron_CS_table, mat_id );                
 
                 if ( trueGeomLength > boundary_distance )
                 {
@@ -192,8 +230,10 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
             }
             else
             {
-                bool_loop = false;
+                bool_loop = false;               // TODO: Instead of bool_loop = false, a simple break is engouh - JB
             }
+
+
         }
 
         if ( bool_loop==true )
@@ -348,6 +388,21 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
 
 #endif
 
+//        /// Need to check, I add energy cut here - JB /////////////////////////////
+//        if ( particles.E[ part_id ] <= electronEcut )
+//        {
+//            particles.endsimu[ part_id ] = PARTICLE_DEAD;
+//            dose_record_standard( dosi, particles.E[ part_id ], particles.px[ part_id ],
+//                                  particles.py[ part_id ], particles.pz[ part_id ] );
+
+//            //printf("  ID %i  Sec last cutE\n", part_id);
+
+//            return;
+//        }
+
+
+
+
 
     }
     while ( ( particles.E[ part_id ] > electronEcut ) && ( bool_loop ) );
@@ -362,7 +417,7 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
     }
 
     ////////////////////////////////////
-    //                            EKINELIMIT
+    //                            EKINELIMIT electronEcut
     if ( ( particles.E[part_id] > electronEcut ) /*&&(secondaryParticleCreated == FALSE)*/ ) //>1eV
     {
 
@@ -414,7 +469,8 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
         ui16 mat_id = vol.values[index_phantom.w];
 
 #ifdef DEBUG
-        assert( mat_id < 65536 );
+        assert( mat_id < 65536 );        
+        //assert( old_mat_id == mat_id );
 #endif
 
         //// Get the next distance boundary volume /////////////////////////////////
@@ -443,7 +499,7 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
 #endif
 
         // fragment += 1.E-2*mm;  ?? - JB
-        fragment += parameters.geom_tolerance;
+        //fragment += parameters.geom_tolerance;
 
         // Read Cross section table to get dedx, erange, lambda
         e_read_CS_table ( mat_id, energy, electron_CS_table, next_discrete_process, table_index, next_interaction_distance,
@@ -458,19 +514,19 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
         freeLength = alongStepLength + trueStepLength;
         totalLength += trueStepLength;
 
-/*
-        /// Need to check, I add energy cut here - JB /////////////////////////////
-        if ( particles.E[ part_id ] <= materials.electron_energy_cut[ mat_id ] )
-        {
-            particles.endsimu[ part_id ] = PARTICLE_DEAD;
-            dose_record_standard( dosi, particles.E[ part_id ], particles.px[ part_id ],
-                                  particles.py[ part_id ], particles.pz[ part_id ] );
 
-            //printf("  ID %i  Sec last cutE\n", part_id);
+//        /// Need to check, I add energy cut here - JB /////////////////////////////
+//        if ( particles.E[ part_id ] <= materials.electron_energy_cut[ mat_id ] )
+//        {
+//            particles.endsimu[ part_id ] = PARTICLE_DEAD;
+//            dose_record_standard( dosi, particles.E[ part_id ], particles.px[ part_id ],
+//                                  particles.py[ part_id ], particles.pz[ part_id ] );
 
-            return;
-        }
-*/
+//            //printf("  ID %i  Sec last cutE\n", part_id);
+
+//            return;
+//        }
+
         ///////////////////////////////////////////////////////////////////////////
 
     }

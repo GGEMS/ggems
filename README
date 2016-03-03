@@ -18,7 +18,8 @@ GGEMS Bug Reporting (GBR)
 * *GBR001 - No set_model in class of ConeBeamCTSource - JB*
 * *GBR002 - No printInfoDetection in class of ConeBeamCTSource - JB*
 * *GBR003 - Dose to patient not working while using a voxel size different to the doxel size - JB*
-* **GBR004 - Open 01/03/15 JB - Dose to phantom in 03_exePhotonBeam has small artefact between boundary material. Indexes of density voxel are not calculated properly.**
+* **GBR004 - Open 01/03/16 JB - Dose to phantom in 03_exePhotonBeam has small artefact between boundary material. Indexes of density voxel are not calculated properly.**
+* **GBR005 - Open 03/03/16 JB - With lare range cut edep are not deposed properly between two different boundary material. Management of step length with boundary distance seem not working properly while material change in the next voxel.**
 
 ====
 Misc
