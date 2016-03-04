@@ -251,7 +251,7 @@ void GGcout_params( GlobalSimulationParametersData params )
         printf("[GGEMS]    Tables: MinE %s   MaxE %s   Nb of energy bin %i\n", Energy_str( params.cs_table_min_E ).c_str(),
                                                                            Energy_str( params.cs_table_max_E ).c_str(),
                                                                            params.cs_table_nbins );
-        printf("[GGEMS]    Energy cuts: Gamma %s   Electron %s\n", Range_str( params.photon_cut ).c_str(),
+        printf("[GGEMS]    Range cuts: Gamma %s   Electron %s\n", Range_str( params.photon_cut ).c_str(),
                                                                  Range_str( params.electron_cut ).c_str() );
 
         printf("[GGEMS] Secondary particles:\n");
@@ -286,7 +286,7 @@ void GGcout_params( GlobalSimulationParametersData params )
         printf("[GGEMS]    Tables: MinE %s   MaxE %s   Nb of energy bin %i\n", Energy_str( params.cs_table_min_E ).c_str(),
                                                                            Energy_str( params.cs_table_max_E ).c_str(),
                                                                            params.cs_table_nbins );
-        printf("[GGEMS]    Energy cuts: Gamma %s   Electron %s\n", Range_str( params.photon_cut ).c_str(),
+        printf("[GGEMS]    Range cuts: Gamma %s   Electron %s\n", Range_str( params.photon_cut ).c_str(),
                                                                  Range_str( params.electron_cut ).c_str() );
 
         printf("[GGEMS] Secondary particles:\n");

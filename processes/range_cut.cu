@@ -421,7 +421,11 @@ f32 RangeCut::convert_cut_to_energy( LogEnergyTable *rangeVector, f32 theCutInLe
             break;
         }
 
+        //printf("T %e r %e\n", T, r);
+
     }
+
+    //printf("T1 %e T2 %e r1 %e\n", T1, T2, r1);
 
     // check cut in length is smaller than range max
     if ( theCutInLength >= rmax )
@@ -432,6 +436,9 @@ f32 RangeCut::convert_cut_to_energy( LogEnergyTable *rangeVector, f32 theCutInLe
     // convert range to energy
     f32 T3 = std::sqrt( T1*T2 );
     f32 r3 = rangeVector->value( T3 );    // HERE
+
+    //printf("T3 %e r3 %e\n", T3, r3);
+
     while ( std::fabs(1.-r3/theCutInLength)>epsilon ) {
         if ( theCutInLength <= r3 ) {
             T2 = T3;
@@ -441,6 +448,8 @@ f32 RangeCut::convert_cut_to_energy( LogEnergyTable *rangeVector, f32 theCutInLe
         T3 = std::sqrt( T1*T2 );
         r3 = rangeVector->value( T3 );
     }
+
+    //printf("\nT3 %e\n", T3);
 
     return T3;
 }

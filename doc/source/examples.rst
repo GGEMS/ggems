@@ -299,9 +299,6 @@ Listing of the code
         simu->set_CS_table_E_min( 990.*eV );
         simu->set_CS_table_E_max( 250.*MeV );
 
-        simu->set_particle_cut( "photon", 100 *um ); 
-        simu->set_particle_cut( "electron", 100 *um );
-
         // Random and particles
         simu->set_seed( 123456789 );
         simu->set_number_of_particles( 1000000 );
@@ -355,7 +352,7 @@ Listing of the code
 Results
 ^^^^^^^
 
-Example of result (projection along y-axis of the energy deposited) for :math:`10^8` particles (2 min with GTX690):
+Example of result (projection along y-axis of the energy deposited) for :math:`10^8` particles and a range cut of 100 :math:`\mu m` (2 min with GTX690):
 
 .. image:: images/res_02_exePhotonBeam_WaterBox.png
     :scale: 100%
@@ -483,9 +480,6 @@ Listing of the code
         simu->set_CS_table_E_min( 990.*eV );
         simu->set_CS_table_E_max( 250.*MeV );
 
-        simu->set_particle_cut( "photon", 100 *um );   
-        simu->set_particle_cut( "electron", 100 *um ); 
-
         // Random and particles
         simu->set_seed( 123456789 );
         simu->set_number_of_particles( 10000000 );
@@ -541,7 +535,7 @@ Listing of the code
 Results
 ^^^^^^^
 
-Example of result (projection along y-axis of the energy deposited) for :math:`150\times10^6` particles (42 min with GTX690):
+Example of result (projection along y-axis of the energy deposited) for :math:`150\times10^6` particles:
 
 .. image:: images/res_03_exePhotonBeam_Phantom.png
     :scale: 100%

@@ -269,6 +269,9 @@ void GGcout_timestamp ();
 void GGcout_version ();
 void GGnewline( );
 
+std::string Energy_str( f32 E );
+std::string Range_str( f32 E );
+
 f64 get_time();
 
 

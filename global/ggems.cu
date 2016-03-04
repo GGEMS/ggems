@@ -60,8 +60,8 @@ GGEMS::GGEMS()
     m_parameters.data_h.cs_table_nbins = 220;
     m_parameters.data_h.cs_table_min_E = 990*eV;
     m_parameters.data_h.cs_table_max_E = 250*MeV;
-    m_parameters.data_h.photon_cut = 100 *um;
-    m_parameters.data_h.electron_cut = 100 *um;
+    m_parameters.data_h.photon_cut = 1 *um;
+    m_parameters.data_h.electron_cut = 1 *um;
     m_parameters.data_h.nb_of_secondaries = 0;
     m_parameters.data_h.geom_tolerance = 100.0 *nm;
 

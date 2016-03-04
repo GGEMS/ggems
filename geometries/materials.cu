@@ -853,7 +853,7 @@ void Materials::m_build_materials_table(GlobalSimulationParameters params, std::
         cur_mat = m_material_db.materials[mat_name];
 
         // get density
-        data_h.density[i] = m_material_db.get_density( mat_name ) / gram;  // Why /gram ??  - JB
+        data_h.density[i] = m_material_db.get_density( mat_name );     // in g/cm3
 
         data_h.nb_atoms_per_vol[i] = 0.0f;
         data_h.nb_electrons_per_vol[i] = 0.0f;
@@ -919,7 +919,8 @@ void Materials::m_build_materials_table(GlobalSimulationParameters params, std::
 
         if ( params.data_h.display_energy_cuts )
         {
-            printf("[GGEMS]    material: %s\t\tgamma: %f keV  electron: %f keV\n", mat_name.c_str(), gEcut/keV, eEcut/keV);
+            printf( "[GGEMS]    material: %s\t\tgamma: %s electron: %s\n", mat_name.c_str(),
+                   Energy_str( gEcut ).c_str(), Energy_str( eEcut ).c_str() );
         }
 
         ++i;

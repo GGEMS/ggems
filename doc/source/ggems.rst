@@ -187,7 +187,10 @@ Physics processes from GGEMS were originally extracted from the well validated p
 
     .. c:var:: range
 
-        Range cut in mm.
+        Range cut in mm. Default value is 1 um.
+
+.. warning::
+    This is a new feature which was not completely validated yet. Using default cut at 1 um is ok.
 
 -----
 
@@ -370,9 +373,6 @@ Example
     simu->set_CS_table_nbins( 220 );
     simu->set_CS_table_E_min( 990.*eV );
     simu->set_CS_table_E_max( 250.*MeV );
-
-    simu->set_particle_cut( "photon", 100 *um );   
-    simu->set_particle_cut( "electron", 100 *um ); 
 
     // Random and particles
     simu->set_seed( 123456789 );

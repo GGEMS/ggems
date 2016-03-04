@@ -166,7 +166,6 @@ f32 TxtReader::read_material_density(std::string txt) {
     txt = m_remove_white_space(txt);
     if (txt=="g/cm3")  return res *gram/cm3;
     if (txt=="mg/cm3") return res *mg/cm3;
-        printf("read densité %f\n",res);
     return res;
 
 }
