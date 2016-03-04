@@ -775,7 +775,9 @@ __host__ __device__ void gLatCorrection ( f32xyz currentDir, f32 tPath, f32 zPat
                                           ParticlesData &particles, ui32 id, f32 safety )
 {
     f32 latcorr, etau, rmean, rmax, Phi, psi, lambdaeff;
-    const f32 kappa = 2.5, tlimitminfix = 1.E-6*mm, taulim = 1.E-6, tausmall = 1.E-16, taubig = 8., geomMin = 1.E-6*mm;
+    const f32 kappa = 2.5, taulim = 1.E-6, tausmall = 1.E-16, taubig = 8., geomMin = 1.E-6*mm;
+
+    const f32 tlimitminfix = 100*nm;
 
     // struct  Vector  latDir;
     f32xyz latDir;
@@ -891,7 +893,7 @@ __host__ __device__ void gLatCorrection ( f32xyz currentDir, f32 tPath, f32 zPat
 
 __host__ __device__ void eMscScattering ( f32 tPath, f32 zPath, f32 currentRange, f32 currentLambda,
                                           f32 currentEnergy, f32 par1, f32 par2, ParticlesData &particles,
-                                          ui32 id, MaterialsTable materials, ui8 mat, VoxVolumeData phantom, ui32xyzw index_phantom )
+                                          ui32 id, MaterialsTable materials, ui8 mat, VoxVolumeData phantom/*, ui32xyzw index_phantom */)
 {
     f32  costh, sinth, phi, currentTau;
     const f32 tlimitminfix = 1.E-10*mm, tausmall = 1.E-16; //,taulim=1.E-6
@@ -940,17 +942,39 @@ __host__ __device__ void eMscScattering ( f32 tPath, f32 zPath, f32 currentRange
     position.y = particles.py[id];
     position.z = particles.pz[id];
 
-    // get voxel params
-    f32 vox_xmin = index_phantom.x*phantom.spacing_x + phantom.off_x;
-    f32 vox_ymin = index_phantom.y*phantom.spacing_y + phantom.off_y;
-    f32 vox_zmin = index_phantom.z*phantom.spacing_z + phantom.off_z;
-    f32 vox_xmax = vox_xmin + phantom.spacing_x;
-    f32 vox_ymax = vox_ymin + phantom.spacing_y;
-    f32 vox_zmax = vox_zmin + phantom.spacing_z;
+//    // Defined index phantom
+//    f32xyz ivoxsize;
+//    ivoxsize.x = 1.0 / phantom.spacing_x;
+//    ivoxsize.y = 1.0 / phantom.spacing_y;
+//    ivoxsize.z = 1.0 / phantom.spacing_z;
+//    ui32xyzw index_phantom;
+//    index_phantom.x = ui32 ( ( position.x + phantom.off_x ) * ivoxsize.x );
+//    index_phantom.y = ui32 ( ( position.y + phantom.off_y ) * ivoxsize.y );
+//    index_phantom.z = ui32 ( ( position.z + phantom.off_z ) * ivoxsize.z );
+
+//    index_phantom.w = index_phantom.z*phantom.nb_vox_x*phantom.nb_vox_y
+//            + index_phantom.y*phantom.nb_vox_x
+//            + index_phantom.x; // linear index
+
+//    // get voxel params
+//    f32 vox_xmin = index_phantom.x*phantom.spacing_x - phantom.off_x;
+//    f32 vox_ymin = index_phantom.y*phantom.spacing_y - phantom.off_y;
+//    f32 vox_zmin = index_phantom.z*phantom.spacing_z - phantom.off_z;
+//    f32 vox_xmax = vox_xmin + phantom.spacing_x;
+//    f32 vox_ymax = vox_ymin + phantom.spacing_y;
+//    f32 vox_zmax = vox_zmin + phantom.spacing_z;
+
+//    // Get safety within the voxel
+//    f32 safety = transport_compute_safety_AABB( position, vox_xmin, vox_xmax, vox_ymin, vox_ymax,
+//                                                vox_zmin, vox_zmax );
+
+
+    // TODO: safety of voxel or of the volume ?? - JB
 
     // Get safety within the voxel
-    f32 safety = transport_compute_safety_AABB( position, vox_xmin, vox_xmax, vox_ymin, vox_ymax,
-                                                vox_zmin, vox_zmax );
+    f32 safety = transport_compute_safety_AABB( position, phantom.xmin, phantom.xmax, phantom.ymin, phantom.ymax,
+                                                phantom.zmin, phantom.zmax );
+
 
     // Lateral correction
     gLatCorrection ( currentDir, tPath, zPath, currentTau, phi, sinth, particles, id, safety );
@@ -1010,7 +1034,7 @@ __host__ __device__ f32 GlobalMscScattering ( f32 GeomPath,f32 cutstep,f32 Curre
     if ( particles.E[id] > 0.0 ) // if not laststep
     {
         eMscScattering ( GeomPath, zPath, CurrentRange, CurrentLambda, CurrentEnergy, par1, par2, particles,
-                         id, materials, mat, phantom, index_phantom );
+                         id, materials, mat, phantom /*, index_phantom*/ );
     }
     else
     {

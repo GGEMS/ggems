@@ -251,8 +251,8 @@ void GGcout_params( GlobalSimulationParametersData params )
         printf("[GGEMS]    Tables: MinE %s   MaxE %s   Nb of energy bin %i\n", Energy_str( params.cs_table_min_E ).c_str(),
                                                                            Energy_str( params.cs_table_max_E ).c_str(),
                                                                            params.cs_table_nbins );
-        printf("[GGEMS]    Energy cuts: Gamma %s   Electron %s\n", Energy_str( params.photon_cut ).c_str(),
-                                                                 Energy_str( params.electron_cut ).c_str() );
+        printf("[GGEMS]    Energy cuts: Gamma %s   Electron %s\n", Range_str( params.photon_cut ).c_str(),
+                                                                 Range_str( params.electron_cut ).c_str() );
 
         printf("[GGEMS] Secondary particles:\n");
         printf("[GGEMS]    Particles: %s   %s\n", ( params.secondaries_list[ PHOTON ] ) ? Green_str("Gamma").c_str() : Red_str("Gamma").c_str(),
@@ -286,8 +286,8 @@ void GGcout_params( GlobalSimulationParametersData params )
         printf("[GGEMS]    Tables: MinE %s   MaxE %s   Nb of energy bin %i\n", Energy_str( params.cs_table_min_E ).c_str(),
                                                                            Energy_str( params.cs_table_max_E ).c_str(),
                                                                            params.cs_table_nbins );
-        printf("[GGEMS]    Energy cuts: Gamma %s   Electron %s\n", Energy_str( params.photon_cut ).c_str(),
-                                                                 Energy_str( params.electron_cut ).c_str() );
+        printf("[GGEMS]    Energy cuts: Gamma %s   Electron %s\n", Range_str( params.photon_cut ).c_str(),
+                                                                 Range_str( params.electron_cut ).c_str() );
 
         printf("[GGEMS] Secondary particles:\n");
         printf("[GGEMS]    Particles: %s   %s\n", ( params.secondaries_list[ PHOTON ] ) ? Check_str("Gamma").c_str() : NoCheck_str("Gamma").c_str(),

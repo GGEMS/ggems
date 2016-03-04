@@ -223,6 +223,38 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
                                                            par1, par2, materials, dosi, index_phantom, vol, parameters );
 
                     freeLength = alongStepLength + trueStepLength;
+
+                    // Stop simulation if out of the phantom
+                    if ( !test_point_AABB_with_tolerance ( make_f32xyz( particles.px[ part_id ], particles.py[ part_id ], particles.pz[ part_id ] ),
+                                                           vol.xmin, vol.xmax, vol.ymin, vol.ymax, vol.zmin, vol.zmax, parameters.geom_tolerance ) )
+                    {
+                        particles.endsimu[ part_id ] = PARTICLE_FREEZE;
+                    }
+
+//                    index_phantom.x = ui32 ( ( particles.px[part_id] + vol.off_x ) * ivoxsize.x );
+//                    index_phantom.y = ui32 ( ( particles.py[part_id] + vol.off_y ) * ivoxsize.y );
+//                    index_phantom.z = ui32 ( ( particles.pz[part_id] + vol.off_z ) * ivoxsize.z );
+
+//                    index_phantom.w = index_phantom.z*vol.nb_vox_x*vol.nb_vox_y
+//                                      + index_phantom.y*vol.nb_vox_x
+//                                      + index_phantom.x; // linear index
+
+//            #ifdef DEBUG
+//                    assert( index_phantom.w < vol.number_of_voxels );
+//            #endif
+//                    // Get the material that compose this volume
+//                    ui16 new_mat_id = vol.values[ index_phantom.w ];
+
+//                    if (new_mat_id != mat_id)
+//                    {
+//                        freeLength = 0;
+//                        alongStepLength = 0;
+//                    }
+//                    else
+//                    {
+//                        freeLength = alongStepLength + trueStepLength;
+//                    }
+
 //                    totalLength += trueStepLength;
 
                     return;
@@ -236,6 +268,13 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
 
                 freeLength = alongStepLength + trueStepLength;
 //                totalLength += trueStepLength;
+
+                // Stop simulation if out of the phantom
+                if ( !test_point_AABB_with_tolerance ( make_f32xyz( particles.px[ part_id ], particles.py[ part_id ], particles.pz[ part_id ] ),
+                                                       vol.xmin, vol.xmax, vol.ymin, vol.ymax, vol.zmin, vol.zmax, parameters.geom_tolerance ) )
+                {
+                    particles.endsimu[ part_id ] = PARTICLE_FREEZE;
+                }
 
                 return;
             }

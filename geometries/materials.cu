@@ -840,8 +840,7 @@ void Materials::m_build_materials_table(GlobalSimulationParameters params, std::
     if ( params.data_h.display_energy_cuts )
     {
         GGcout << GGendl;
-        GGcout << "Energy cuts:" << GGendl;
-        printf("[GGEMS]    gamma: %e mm  electron: %e mm\n", params.data_h.photon_cut/mm, params.data_h.electron_cut/mm);
+        GGcout << "Energy cuts:" << GGendl;        
     }
 
     // store mixture element and compute atomic density
