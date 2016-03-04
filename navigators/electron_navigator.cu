@@ -969,7 +969,7 @@ __host__ __device__ void eMscScattering ( f32 tPath, f32 zPath, f32 currentRange
 //                                                vox_zmin, vox_zmax );
 
 
-    // TODO: safety of voxel or of the volume ?? - JB
+    /// TODO: safety of voxel or of the volume ?? - JB
 
     // Get safety within the voxel
     f32 safety = transport_compute_safety_AABB( position, phantom.xmin, phantom.xmax, phantom.ymin, phantom.ymax,

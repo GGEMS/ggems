@@ -548,7 +548,7 @@ void GGEMS::init_simulation()
         exit_simulation();
     }
     print_banner(m_license.info.institution, m_license.info.expired_day, m_license.info.expired_month,
-                 m_license.info.expired_year, "V1.2", m_parameters.data_h );
+                 m_license.info.expired_year, "V1.3", m_parameters.data_h );
 
     // Check
     m_check_mandatory();

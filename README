@@ -12,6 +12,7 @@ GGEMS Enhancement Proposals (GEP)
 * **GEP006 - In Bremsstrahlung, track secondary photons**
 * *GEP007 - In ConeBeamCTSource, spectrum data from file is allocated using f64 buffer, need to change for f32 - JB*
 * **GEP008 - Improve PRNG by using others or cuRand, XORWOW is closer to MT from G4**
+* **GEP009 - tlimitminfix in eMscScattering and gLatCorrection should be used the defined geometry tolerance** 
 
 GGEMS Bug Reporting (GBR) 
 
