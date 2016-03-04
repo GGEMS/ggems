@@ -62,6 +62,11 @@ hg ci -m 'some fresh blood'
 hg up MYBRANCH
 hg ci -m 'closing mybranch' --close-branch
 
+* Closing a head
+hg update -r NUMBER_OF_REVISION
+hg ci -m 'closing head' --close-branch
+
+
 * Get fresh files (if removed accidentaly)
 hg update --clean
 
