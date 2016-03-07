@@ -311,7 +311,7 @@ void VoxelizedPhantom::load_from_mhd(std::string volume_name, std::string range_
         printf("Error, mhd header: CompressedData = %s\n", CompressedData.c_str());
         exit_simulation();
     }
-    if (ElementType != "MET_FLOAT" && ElementType != "MET_USHORT" &&
+    if (ElementType != "MET_FLOAT" && ElementType != "MET_SHORT" && ElementType != "MET_USHORT" &&
         ElementType != "MET_UCHAR" && ElementType != "MET_UINT") {
         printf("Error, mhd header: ElementType = %s\n", ElementType.c_str());
         exit_simulation();
@@ -383,6 +383,19 @@ void VoxelizedPhantom::load_from_mhd(std::string volume_name, std::string range_
       // Free memory
       free(raw_data);
     }  
+
+    if(ElementType == "MET_SHORT") {
+      ui32 mem_size = sizeof(i16) * data_h.number_of_voxels;
+
+      i16 *raw_data = (i16*)malloc(mem_size);
+      fread(raw_data, sizeof(i16), data_h.number_of_voxels, pfile);
+      fclose(pfile);
+      /////////////// Then, convert the raw data into material id //////////////////////
+      m_define_materials_from_range(raw_data, range_name);
+
+      // Free memory
+      free(raw_data);
+    }
 
     if(ElementType == "MET_UCHAR") {
       ui32 mem_size = sizeof(ui8) * data_h.number_of_voxels;

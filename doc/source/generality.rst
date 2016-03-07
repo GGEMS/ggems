@@ -33,7 +33,7 @@ GGEMS uses MHD file format to load phantom and CT image. This file format is com
     ElementType = MET_FLOAT
     ElementDataFile = phantom_pet_hu.raw
 
-GGEMS is able to import data with ElementType defined as: ``MET_FLOAT, MET_UINT, MET_USHORT, MET_UCHAR``. The offset value is the point position that defined the center of the frame. This offset, is then used to translate the phantom accordingly, as shown to the figure:
+GGEMS is able to import data with ElementType defined as: ``MET_FLOAT, MET_UINT, MET_SHORT, MET_USHORT, MET_UCHAR``. The offset value is the point position that defined the center of the frame. This offset, is then used to translate the phantom accordingly, as shown to the figure:
 
 .. image:: images/image_offset.png
     :scale: 75%
