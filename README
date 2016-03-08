@@ -24,6 +24,7 @@ GGEMS Bug Reporting (GBR)
 * **GBR005 - Open 03/03/16 JB - With lare range cut edep are not deposed properly between two different boundary material. Management of step length with boundary distance seem not working properly while material change in the next voxel. This issue seem related to GBR004. First investigation leed to a problem of safety calculation in eMscScattering and gLatCorrection. This have to be investigated. Bug can be observed using 03_exePhotonBeam_Phantom with range cut of 100um**
 * *GBR006 - Open 06/03/16 JB - Fix typo exit_simulation (Aborted) - close 08/03/16 - JB*
 * *GBR007 - Open 07/03/16 JB - Fix dose (no output) and uncertainty calculation (some nan) - close 08/03/16 - JB*
+* **GBR008 - Open 08/03/16 JB - Still strange values on Dose map...**
 
 ====
 Misc

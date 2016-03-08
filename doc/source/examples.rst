@@ -727,13 +727,13 @@ Listing of the code
 Results
 ^^^^^^^
 
-Example of result (overlay between CT and Edep for the central transaxial slice) for :math:`30\times10^6` particles and range cut to 100 :math:`\mu m`:
+Example of result (overlay between CT and Edep for the central transaxial slice) for :math:`200\times10^6` particles and range cut to 100 :math:`\mu m`:
 
 .. image:: images/res_04_patient.png
     :scale: 100%
     :align: center  
 
-Results were compared against Gate (Geant4 10.01). Total run time for GATE simulation (one core CPU Intel i7-2600) and GGEMS simualtion (one GPU NVIDIA GTX690) was 545 min and 7 min respectively. Dispersion can be reduced by simulated more particles. However by using only :math:`30\times10^6` particles the dispersion is already under 2%.
+Results were compared against Gate (Geant4 10.01). Total run time for GATE simulation (one core CPU Intel i7-2600) and GGEMS simulation (one GPU NVIDIA GTX980 Ti) was 70h (4222 min) and 27 min respectively, which was 156 times faster than Gate (Geant4 10.01). Dispersion of the relative error between GGEMS and Gate (Geant4 10.01) was below 1%.
 
 .. image:: images/res_04_PhotonBeam_Patient_proj_yz.png
     :scale: 60%
