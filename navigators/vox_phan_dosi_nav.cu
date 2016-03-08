@@ -885,6 +885,34 @@ void VoxPhanDosiNav::write ( std::string filename )
     m_dose_calculator.write ( filename );
 }
 
+// Export density values of the phantom
+void VoxPhanDosiNav::export_density_map( std::string filename )
+{
+    ui32 N = m_phantom.data_h.number_of_voxels;
+    f32 *density = new f32[ N ];
+    ui32 i = 0;
+    while (i < N)
+    {
+        density[ i ] = m_materials.data_h.density[ m_phantom.data_h.values[ i ] ];
+        ++i;
+    }
+
+    f32xyz offset = make_f32xyz( m_phantom.data_h.off_x, m_phantom.data_h.off_y, m_phantom.data_h.off_z );
+    f32xyz voxsize = make_f32xyz( m_phantom.data_h.spacing_x, m_phantom.data_h.spacing_y, m_phantom.data_h.spacing_z );
+    ui32xyz nbvox = make_ui32xyz( m_phantom.data_h.nb_vox_x, m_phantom.data_h.nb_vox_y, m_phantom.data_h.nb_vox_z );
+
+    ImageReader::record3Dimage (filename, density, offset, voxsize, nbvox );
+}
+
+// Export materials index of the phantom
+void VoxPhanDosiNav::export_materials_map( std::string filename )
+{
+    f32xyz offset = make_f32xyz( m_phantom.data_h.off_x, m_phantom.data_h.off_y, m_phantom.data_h.off_z );
+    f32xyz voxsize = make_f32xyz( m_phantom.data_h.spacing_x, m_phantom.data_h.spacing_y, m_phantom.data_h.spacing_z );
+    ui32xyz nbvox = make_ui32xyz( m_phantom.data_h.nb_vox_x, m_phantom.data_h.nb_vox_y, m_phantom.data_h.nb_vox_z );
+
+    ImageReader::record3Dimage (filename, m_phantom.data_h.values, offset, voxsize, nbvox );
+}
 
 void VoxPhanDosiNav::initialize ( GlobalSimulationParameters params )
 {
@@ -949,6 +977,12 @@ void VoxPhanDosiNav::set_doxel_size( f32 sizex, f32 sizey, f32 sizez )
     m_doxel_size_z = sizez;
 }
 
+void VoxPhanDosiNav::set_volume_of_interest( f32 xmin, f32 xmax, f32 ymin, f32 ymax, f32 zmin, f32 zmax )
+{
+    m_xmin = xmin; m_xmax = xmax;
+    m_ymin = ymin; m_ymax = ymax;
+    m_zmin = zmin; m_zmax = zmax;
+}
 
 #undef DEBUG
 

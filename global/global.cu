@@ -362,7 +362,7 @@ void print_banner( std::string institution, std::string exp_day, std::string exp
 // Abort the current simulation
 void exit_simulation()
 {
-    printf ( "\n[\033[31;03mSimulation aborded\033[00m]\n" );
+    printf ( "\n[\033[31;03mSimulation aborted\033[00m]\n" );
     exit ( EXIT_FAILURE );
 }
 

@@ -174,6 +174,26 @@ Example of material database contains ::
 
 -----
 
+.. c:function:: void export_density_map( std::string filename )
+
+    Export phantom density values to a MHD file.
+
+    .. c:var:: filename
+
+        Filename of the MHD file. 
+
+-----
+
+.. c:function:: void export_materials_map( std::string filename )
+
+    Export phantom materials values after labelling to a MHD file.
+
+    .. c:var:: filename
+
+        Filename of the MHD file. 
+
+-----
+
 .. c:function:: void calculate_dose_to_water()
 
     After the simulation, energies deposited within the volume are converted in dose using this function. The dose is caculated using water density.

@@ -52,8 +52,8 @@ __host__ __device__ void dose_record_standard ( DoseData &dose, f32 Edep, f32 px
 
 
 
-    ggems_atomic_add_f64( dose.edep, index_phantom.w, Edep );
-    ggems_atomic_add_f64( dose.edep_squared, index_phantom.w, Edep*Edep );
+    ggems_atomic_add_f64( dose.edep, index_phantom.w, f64( Edep ) );
+    ggems_atomic_add_f64( dose.edep_squared, index_phantom.w, f64( Edep) * f64( Edep ) );
     ggems_atomic_add( dose.number_of_hits, index_phantom.w, ui32 ( 1 ) );
 
 }
@@ -77,15 +77,25 @@ __host__ __device__ void dose_uncertainty_calculation ( DoseData dose, ui32 doxe
 
         f64 sum2_E = dose.edep[index] * dose.edep[index];
 
-        f64 num = ( dose.number_of_hits[index] * dose.edep_squared[index] ) - sum2_E;
-        f64 den = ( dose.number_of_hits[index] - 1 ) * sum2_E;
+        if ( sum2_E != 0.0 )
+        {
+            f64 num = ( dose.number_of_hits[index] * dose.edep_squared[index] ) - sum2_E;
+            f64 den = ( dose.number_of_hits[index] - 1 ) * sum2_E;
 
-        dose.uncertainty[index] = pow ( num/den, 0.5 ) * 100.0;
+#ifdef DEBUG
+        assert(den >= 0.0);
+        assert(num >= 0.0);
+#endif
+
+            dose.uncertainty[index] = pow ( num/den, 0.5 ) * 100.0;
+            return;
+        }
+
+
     }
-    else
-    {
-        dose.uncertainty[index] = 100.0;
-    }
+
+    // Else
+    dose.uncertainty[index] = 100.0;
 
 }
 
@@ -94,9 +104,9 @@ __host__ __device__ void dose_to_water_calculation ( DoseData dose, ui32 doxel_i
 
     f64 vox_vol = dose.doxel_size.x * dose.doxel_size.y * dose.doxel_size.z;
     f64 density = 1.0 * gram/cm3;
-    ui32 index = doxel_id_z * dose.slice_nb_doxels + doxel_id_y * dose.nb_doxels.x + doxel_id_x;
-    dose.dose[index] = ( 1.602E-10/vox_vol ) * dose.edep[index]/density;
-    // Mev2Joule conversion (1.602E-13) / density scaling (10E-3) from g/mm3 to kg/mm3
+    ui32 index = doxel_id_z * dose.slice_nb_doxels + doxel_id_y * dose.nb_doxels.x + doxel_id_x;  
+
+    dose.dose[ index ] = dose.edep[ index ] / density / vox_vol / gray;
 
 }
 
@@ -126,9 +136,9 @@ __host__ __device__ void dose_to_phantom_calculation ( DoseData dose, VoxVolumeD
                          + index_phantom.x; // linear index
 
 #ifdef DEBUG
-    assert( index_phantom.x < dose.nb_doxels.x );
-    assert( index_phantom.y < dose.nb_doxels.y );
-    assert( index_phantom.z < dose.nb_doxels.z );
+    assert( index_phantom.x < phan.nb_vox_x );
+    assert( index_phantom.y < phan.nb_vox_y );
+    assert( index_phantom.z < phan.nb_vox_z );
 #endif
 
     // Get density for this voxel
@@ -138,8 +148,7 @@ __host__ __device__ void dose_to_phantom_calculation ( DoseData dose, VoxVolumeD
     ui32 index = doxel_id_z * dose.slice_nb_doxels + doxel_id_y * dose.nb_doxels.x + doxel_id_x;
     if ( density > dose_min_density )
     {
-        dose.dose[index] = ( 1.602E-10/vox_vol ) * dose.edep[index]/density;
-        // Mev2Joule conversion (1.602E-13) / density scaling (10E-3) from g/mm3 to kg/mm3
+        dose.dose[index] = dose.edep[ index ] / density / vox_vol / gray;
     }
     else
     {
@@ -286,6 +295,15 @@ void DoseCalculator::initialize ( GlobalSimulationParameters params )
         dose.data_h.zmin = phan_zmin;
         dose.data_h.zmax = phan_zmax;
     }
+    else
+    {
+        dose.data_h.xmin = m_xmin;
+        dose.data_h.xmax = m_xmax;
+        dose.data_h.ymin = m_ymin;
+        dose.data_h.ymax = m_ymax;
+        dose.data_h.zmin = m_zmin;
+        dose.data_h.zmax = m_zmax;
+    }
 
     // Get the current dimension of the dose map
     f32xyz cur_dose_size = make_f32xyz( dose.data_h.xmax - dose.data_h.xmin,
@@ -330,7 +348,8 @@ void DoseCalculator::initialize ( GlobalSimulationParameters params )
 
 //    printf("Nb doxels %i %i %i   Dose size %f %f %f\n", dose.data_h.nb_doxels.x, dose.data_h.nb_doxels.y, dose.data_h.nb_doxels.z,
 //                                                        new_dose_size.x, new_dose_size.y, new_dose_size.z);
-//    printf("Offset %f %f %f\n", dose.data_h.offset.x, dose.data_h.offset.y, dose.data_h.offset.z);
+//    printf("Offset %f %f %f   Doxel size %f %f %f\n", dose.data_h.offset.x, dose.data_h.offset.y, dose.data_h.offset.z,
+//           dose.data_h.doxel_size.x, dose.data_h.doxel_size.y, dose.data_h.doxel_size.z);
 
 
     //////////////////////////////////////////////////////////
@@ -364,6 +383,9 @@ void DoseCalculator::initialize ( GlobalSimulationParameters params )
 void DoseCalculator::calculate_dose_to_water()
 {
 
+    GGcout << "Compute dose to water" << GGendl;
+    GGcout << GGendl;
+
     // First get back data if stored on GPU
     if ( m_params.data_h.device_target == GPU_DEVICE )
     {
@@ -394,6 +416,9 @@ void DoseCalculator::calculate_dose_to_phantom()
         GGcerr << "Dose calculator, phantom and materials data are required!" << GGendl;
         exit_simulation();
     }
+
+    GGcout << "Compute dose to phantom" << GGendl;
+    GGcout << GGendl;
 
     // First get back data if stored on GPU
     if ( m_params.data_h.device_target == GPU_DEVICE )

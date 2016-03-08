@@ -98,6 +98,10 @@ public:
     void set_materials( std::string filename );
     void set_doxel_size( f32 sizex, f32 sizey, f32 sizez );
     void set_volume_of_interest( f32 xmin, f32 xmax, f32 ymin, f32 ymax, f32 zmin, f32 zmax );
+
+    void export_density_map( std::string filename );
+    void export_materials_map( std::string filename );
+
 private:
 
     VoxelizedPhantom m_phantom;
