@@ -54,7 +54,7 @@ __host__ __device__ void dose_record_standard ( DoseData &dose, f32 Edep, f32 px
 
     ggems_atomic_add_f64( dose.edep, index_phantom.w, f64( Edep ) );
     ggems_atomic_add_f64( dose.edep_squared, index_phantom.w, f64( Edep) * f64( Edep ) );
-    ggems_atomic_add( dose.number_of_hits, index_phantom.w, ui32 ( 1 ) );
+    ggems_atomic_add( dose.number_of_hits, index_phantom.w, ui32 ( 1 ) );                  // ui32, limited to 4.29e9 - JB
 
 }
 
