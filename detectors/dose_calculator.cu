@@ -61,7 +61,7 @@ __host__ __device__ void dose_record_standard ( DoseData &dose, f32 Edep, f32 px
 __host__ __device__ void dose_uncertainty_calculation ( DoseData dose, ui32 doxel_id_x, ui32 doxel_id_y, ui32 doxel_id_z )
 {
 
-
+    // Relative statistical uncertainty (from Ma et al. PMB 47 2002 p1671) - JB
     //              /                                    \ ^1/2
     //              |    N*Sum(Edep^2) - Sum(Edep)^2     |
     //  relError =  | __________________________________ |
@@ -70,32 +70,38 @@ __host__ __device__ void dose_uncertainty_calculation ( DoseData dose, ui32 doxe
     //
     //   where Edep represents the energy deposit in one hit and N the number of energy deposits (hits)
 
+    // The same without developing - JB (from Walters, Kawrakow and Rogers Med. Phys. 29 2002)
+    //                  /                                   \
+    //             1    | Sum(Edep^2)      / Sum(Edep) \^2  |
+    //  var(x) = _____  | ___________  --  |___________|    |
+    //                  |                  |           |    |
+    //            N-1   \     N            \    N      /    /
+    //
+    //  s(x) = ( var )^1/2
+    //
+    //  relError = s(x) / Sum(Edep)/N
+    //
+
     ui32 index = doxel_id_z * dose.slice_nb_doxels + doxel_id_y * dose.nb_doxels.x + doxel_id_x;
 
-    if (dose.number_of_hits[index] > 1)
+    f64 N = dose.number_of_hits[index];
+    f64 sum_E = dose.edep[index];
+
+    if ( N > 1 && sum_E != 0.0 )
     {
-
-        f64 sum2_E = dose.edep[index] * dose.edep[index];
-
-        if ( sum2_E != 0.0 )
-        {
-            f64 num = ( dose.number_of_hits[index] * dose.edep_squared[index] ) - sum2_E;
-            f64 den = ( dose.number_of_hits[index] - 1 ) * sum2_E;
+        f64 sum_E2 = dose.edep_squared[index];
+        f64 sum2_E = sum_E * sum_E;
+        f64 s = ( (N*sum_E2) - sum2_E ) / ( (N-1) * sum2_E );
 
 #ifdef DEBUG
-        assert(den >= 0.0);
-        assert(num >= 0.0);
+        assert(s >= 0.0);
 #endif
-
-            dose.uncertainty[index] = pow ( num/den, 0.5 ) * 100.0;
-            return;
-        }
-
-
+        dose.uncertainty[ index ] = pow( s, 0.5 );
     }
-
-    // Else
-    dose.uncertainty[index] = 100.0;
+    else
+    {
+        dose.uncertainty[ index ] = 1.0;
+    }
 
 }
 

@@ -14,6 +14,8 @@ GGEMS Enhancement Proposals (GEP)
 * **GEP008 - Improve PRNG by using others or cuRand, XORWOW is closer to MT from G4**
 * **GEP009 - tlimitminfix in eMscScattering and gLatCorrection should be used the defined geometry tolerance**
 * **GEP010 - Improve edep deposition while volume and doxel size are different to the phantom. Some aliasing appears in this case.**
+* **GEP011 - Change the name dose_to_phantom by dose_to_medium**
+* **GEP012 - Change name doxel into dosel**
 
 GGEMS Bug Reporting (GBR) 
 
