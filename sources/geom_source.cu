@@ -113,12 +113,25 @@ GeomSource::GeomSource(): GGEMSSource()
     m_radius = 0.0f;
     m_particle_type = PHOTON;
     m_spectrum = NULL;
+    m_source = NULL;
 }
 
 // Destructor
-GeomSource::~GeomSource() {}
+GeomSource::~GeomSource() {
+    // ensure all memory is deallocated
+    cudaDeviceSynchronize();
+    cudaFree(m_spectrum->energies);
+    cudaFree(m_spectrum->cdf);
+    delete m_spectrum;
+}
 
 //========== Setting ===============================================
+
+// Setting shape
+void GeomSource::set_shape( std::string shape_name )
+{
+    set_shape( shape_name, "volume" );
+}
 
 // Setting shape
 void GeomSource::set_shape( std::string shape_name, std::string shape_mode )
@@ -217,13 +230,12 @@ void GeomSource::set_mono_energy( f32 energy )
 {
     m_spectrum = new Spectrum;
 
-    m_spectrum->energy_h = new f32[ 1 ];
-    m_spectrum->energy_h[ 0 ] = energy;
-
-    m_spectrum->cdf_h = new f32[ 1 ];
-    m_spectrum->cdf_h[ 0 ] = 1.0f;
-
     m_spectrum->nb_of_energy_bins = 1;
+    HANDLE_ERROR( cudaMallocManaged( &(m_spectrum->energies), m_spectrum->nb_of_energy_bins * sizeof( f32 ) ) );
+    HANDLE_ERROR( cudaMallocManaged( &(m_spectrum->cdf), m_spectrum->nb_of_energy_bins * sizeof( f32 ) ) );
+
+    m_spectrum->energies[ 0 ] = energy;
+    m_spectrum->cdf[ 0 ] = 1.0f;
 }
 
 // Setting spectrum
@@ -257,11 +269,9 @@ void GeomSource::set_energy_spectrum( std::string filename )
 
     // Allocating buffers to store data
     m_spectrum = new Spectrum;
-
-    m_spectrum->energy_h = new f32[ nb_of_energy_bins ];
-    m_spectrum->cdf_h = new f32[ nb_of_energy_bins ];
-
     m_spectrum->nb_of_energy_bins = nb_of_energy_bins;
+    HANDLE_ERROR( cudaMallocManaged( &(m_spectrum->energies), m_spectrum->nb_of_energy_bins * sizeof( f32 ) ) );
+    HANDLE_ERROR( cudaMallocManaged( &(m_spectrum->cdf), m_spectrum->nb_of_energy_bins * sizeof( f32 ) ) );
 
     // Store data from file
     size_t idx = 0;
@@ -269,20 +279,20 @@ void GeomSource::set_energy_spectrum( std::string filename )
     while( std::getline( input, line ) )
     {
         std::istringstream iss( line );
-        iss >> m_spectrum->energy_h[ idx ] >> m_spectrum->cdf_h[ idx ];
-        sum += m_spectrum->cdf_h[ idx ];
+        iss >> m_spectrum->energies[ idx ] >> m_spectrum->cdf[ idx ];
+        sum += m_spectrum->cdf[ idx ];
         ++idx;
     }
 
     // Compute CDF and normalized in same time by security
-    m_spectrum->cdf_h[ 0 ] /= sum;
+    m_spectrum->cdf[ 0 ] /= sum;
     for( ui32 i = 1; i < nb_of_energy_bins; ++i )
     {
-        m_spectrum->cdf_h[ i ] = m_spectrum->cdf_h[ i ] / sum + m_spectrum->cdf_h[ i - 1 ];
+        m_spectrum->cdf[ i ] = m_spectrum->cdf[ i ] / sum + m_spectrum->cdf[ i - 1 ];
     }
 
     // Watch dog
-    m_spectrum->cdf_h[ nb_of_energy_bins - 1 ] = 1.0;
+    m_spectrum->cdf[ nb_of_energy_bins - 1 ] = 1.0;
 
     // Close the file
     input.close();
@@ -309,31 +319,8 @@ void GeomSource::initialize ( GlobalSimulationParameters params )
         exit_simulation();
     }
 
-    // Store global parameters: params are provided by GGEMS and are used to
-    // know different information about the simulation. For example if the targeted
-    // device is a CPU or a GPU.
-    m_params = params;
-
-    // Handle GPU device if needed. Here nothing is load to the GPU (simple source). But
-    // in case of the use of a spectrum data should be allocated and transfered here.
-    if ( m_params.data_h.device_target == GPU_DEVICE )
-    {
-        // GPU mem allocation
-        HANDLE_ERROR( cudaMalloc( &(m_spectrum->energy_d), m_spectrum->nb_of_energy_bins * sizeof( f32 ) ) );
-        HANDLE_ERROR( cudaMalloc( &(m_spectrum->cdf_d), m_spectrum->nb_of_energy_bins * sizeof ( f32 ) ) );
-
-        // GPU mem copy
-        HANDLE_ERROR ( cudaMemcpy( m_spectrum->energy_d,   m_spectrum->energy_h,
-                                   sizeof( f32 ) * m_spectrum->nb_of_energy_bins, cudaMemcpyHostToDevice ) );
-        HANDLE_ERROR ( cudaMemcpy( m_spectrum->cdf_d, m_spectrum->cdf_h,
-                                   sizeof( f32 ) * m_spectrum->nb_of_energy_bins, cudaMemcpyHostToDevice ) );
-
-        aSource *sources = new aSource;
-        HANDLE_ERROR( cudaMalloc( &(sources), 10 * sizeof( aSource ) ) );
-
-
-
-    }
+    // Store global parameters
+    m_params = params;   
 
 }
 
@@ -353,7 +340,7 @@ void GeomSource::get_primaries_generator ( Particles particles )
             // Loop over the particle buffer
             while( id < particles.size )
             {
-                GEOMSRC::point_source( particles.data_h, m_pos, m_spectrum->energy_h, m_spectrum->cdf_h,
+                GEOMSRC::point_source( particles.data_h, m_pos, m_spectrum->energies, m_spectrum->cdf,
                                        m_spectrum->nb_of_energy_bins, m_particle_type, id );
                 ++id;
             }
@@ -373,7 +360,7 @@ void GeomSource::get_primaries_generator ( Particles particles )
 
         if ( m_shape == "point" )
         {
-            GEOMSRC::kernel_point_source<<<grid, threads>>>( particles.data_d, m_pos, m_spectrum->energy_d, m_spectrum->cdf_d,
+            GEOMSRC::kernel_point_source<<<grid, threads>>>( particles.data_d, m_pos, m_spectrum->energies, m_spectrum->cdf,
                                                              m_spectrum->nb_of_energy_bins, m_particle_type );
             cuda_error_check( "Error ", " Kernel_geom_source (point)" );
         }

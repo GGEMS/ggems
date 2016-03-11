@@ -9,6 +9,8 @@
  *
  * Geom source class
  *
+ * UNDER CONSTRUCTION
+ *
  */
 
 #ifndef GEOM_SOURCE_CUH
@@ -23,18 +25,16 @@
 
 struct Spectrum
 {
-    f32 *energy_h;          // Energy spectrum of the source on the host (CPU)
-    f32 *energy_d;          // Energy spectrum of the source on the device (GPU)
-    f32 *cdf_h;             // CDF of the source on the host (CPU)
-    f32 *cdf_d;             // CDF of the source on the device (GPU)
+    f32 *energies;          // Energy spectrum of the source
+    f32 *cdf;               // CDF of the source
     ui32 nb_of_energy_bins; // Number of the bins in the energy spectrum
 };
 
-struct aSource
+struct SourceType
 {
-    f32xyz pos;
-    f32xyz rot;
-    f32xyz length;
+    f32 pos_x, pos_y, pos_z;
+    f32 rot_x, rot_y, rot_z;
+    f32 length_x, length_y, length_z;
     f32 radius;
 };
 
@@ -57,6 +57,7 @@ public:
     ~GeomSource();
 
     // Setting
+    void set_shape( std::string shape_name );
     void set_shape( std::string shape_name, std::string shape_mode );
     void set_position( f32 posx, f32 posy, f32 posz );
     void set_rotation( f32 aroundx, f32 aroundy, f32 aroundz );
@@ -83,6 +84,7 @@ private:
     f32xyz m_length;
     f32 m_radius;
     Spectrum *m_spectrum;
+    SourceType *m_source;
     ui8 m_particle_type;
 
 };
