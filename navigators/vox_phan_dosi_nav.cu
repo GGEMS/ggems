@@ -850,7 +850,8 @@ void VoxPhanDosiNav::track_to_out ( Particles particles )
 
             VPDN::kernel_host_track_to_out ( particles.data_h, m_phantom.data_h,
                                              m_materials.data_h, m_cross_sections.photon_CS.data_h, m_cross_sections.electron_CS.data_h,
-                                             m_params.data_h, m_dose_calculator.dose.data_h, id );
+                                             m_params.data_h, m_dose_calculator.dose.data_h,
+                                             id );
 
             ++id;
         }
@@ -942,8 +943,8 @@ void VoxPhanDosiNav::initialize ( GlobalSimulationParameters params )
     m_dose_calculator.set_materials( m_materials );
     m_dose_calculator.set_doxel_size( m_doxel_size_x, m_doxel_size_y, m_doxel_size_z );
     m_dose_calculator.set_voi( m_xmin, m_xmax, m_ymin, m_ymax, m_zmin, m_zmax );
-    m_dose_calculator.initialize ( m_params ); // CPU&GPU
-    
+    m_dose_calculator.initialize ( m_params ); // CPU&GPU        
+
     // Some verbose if required
     if ( params.data_h.display_memory_usage )
     {

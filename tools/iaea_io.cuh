@@ -47,6 +47,11 @@ struct IaeaType
     f32 *dir_z;
 
     ui8 *ptype;
+
+    ui32 tot_particles;
+    ui32 nb_photons;
+    ui32 nb_electrons;
+    ui32 nb_positrons;
 };
 
 // Read IAEA file
@@ -57,6 +62,7 @@ class IAEAIO {
         ~IAEAIO(){}
 
         void read_header( std::string filename );
+        IaeaType read_data();
 
 
     private:
