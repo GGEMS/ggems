@@ -201,6 +201,13 @@ void PhaseSpaceSource::initialize ( GlobalSimulationParameters params )
         exit_simulation();
     }
 
+    // Some verbose if required
+    if ( params.data_h.display_memory_usage )
+    {
+        ui32 mem = 29 * m_phasespace.tot_particles;
+        GGcout_mem("PhaseSpace source", mem);
+    }
+
 }
 
 // Mandatory function, abstract from GGEMSSource. This function is called
