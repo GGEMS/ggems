@@ -21,12 +21,17 @@
 #include "ggems_source.cuh"
 #include "prng.cuh"
 #include "iaea_io.cuh"
+#include "fun.cuh"
 
 struct PhSpTransform
 {
-    f32 tx, ty, tz;
-    f32 rx, ry, rz;
-    f32 sx, sy, sz;
+    f32 *tx, *ty, *tz;
+    f32 *rx, *ry, *rz;
+    f32 *sx, *sy, *sz;
+
+    f32 *cdf;
+
+    ui32 nb_sources;
 };
 
 class GGEMSource;
@@ -49,7 +54,7 @@ public:
     // Setting    
     void set_translation( f32 tx, f32 ty, f32 tz );
     void set_rotation( f32 aroundx, f32 aroundy, f32 aroundz );
-    void set_scaling( f32 sx, f32 sy, f32 sz );
+    //void set_scaling( f32 sx, f32 sy, f32 sz );
 
     // Main
     void load_phasespace_file( std::string filename );
@@ -60,6 +65,7 @@ public:
 
 private:
     bool m_check_mandatory();
+    void m_transform_allocation( ui32 nb_sources );
 
     GlobalSimulationParameters m_params;
     PhSpTransform m_transform;

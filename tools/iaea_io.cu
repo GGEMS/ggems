@@ -265,8 +265,6 @@ IaeaType IAEAIO::read_data()
     std::string filename = m_filename + m_file_ext;
     FILE *pfile = fopen(filename.c_str(), "rb");
 
-    GGcout << "Open: " << filename << GGendl;
-
     if( !pfile ) {
         GGcout << "Error, IAEA file '" << filename << "' not found!!" << GGendl;
         exit_simulation();

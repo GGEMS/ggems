@@ -25,7 +25,18 @@ __host__ __device__ void PHSPSRC::phsp_source ( ParticlesData particles_data,
 
 
 {
-    // Get a random particle
+    // Get a random sources (i.e. virtual sources that use the same phasespace)
+    ui32 source_id = 0;
+    if ( transform.nb_sources > 1 )
+    {
+        source_id = binary_search( prng_uniform( particles_data, id ), transform.cdf, transform.nb_sources );
+    }
+
+#ifdef DEBUG
+    assert( source_id < transform.nb_sources );
+#endif
+
+    // Get a random particle from the phasespace
     ui32 phsp_id = (ui32) ( f32(phasespace.tot_particles) * prng_uniform( particles_data, id ) );
 
 #ifdef DEBUG
@@ -36,9 +47,9 @@ __host__ __device__ void PHSPSRC::phsp_source ( ParticlesData particles_data,
     particles_data.E[id] = phasespace.energy[ phsp_id ];     // Energy in MeV
 
     // TODO, add scaling and rotation - JB
-    particles_data.px[id] = phasespace.pos_x[ phsp_id ] + transform.tx;     // Position in mm
-    particles_data.py[id] = phasespace.pos_y[ phsp_id ] + transform.ty;     //
-    particles_data.pz[id] = phasespace.pos_z[ phsp_id ] + transform.tz;     //
+    particles_data.px[id] = phasespace.pos_x[ phsp_id ] + transform.tx[ source_id ];     // Position in mm
+    particles_data.py[id] = phasespace.pos_y[ phsp_id ] + transform.ty[ source_id ];     //
+    particles_data.pz[id] = phasespace.pos_z[ phsp_id ] + transform.tz[ source_id ];     //
 
     particles_data.dx[id] = phasespace.dir_x[ phsp_id ];                    // Direction (unit vector)
     particles_data.dy[id] = phasespace.dir_y[ phsp_id ];                    //
@@ -82,15 +93,7 @@ PhaseSpaceSource::PhaseSpaceSource(): GGEMSSource()
     m_phasespace.tot_particles = 0;
 
     // Default transformation
-    m_transform.tx = 0.0;
-    m_transform.ty = 0.0;
-    m_transform.tz = 0.0;
-    m_transform.rx = 0.0;
-    m_transform.ry = 0.0;
-    m_transform.rz = 0.0;
-    m_transform.sx = 1.0;
-    m_transform.sy = 1.0;
-    m_transform.sz = 1.0;
+    m_transform.nb_sources = 0;
 
 }
 
@@ -110,19 +113,32 @@ PhaseSpaceSource::~PhaseSpaceSource() {
 // Setting position of the source
 void PhaseSpaceSource::set_translation( f32 tx, f32 ty, f32 tz )
 {
-    m_transform.tx = tx;
-    m_transform.ty = ty;
-    m_transform.tz = tz;
+    if( m_transform.nb_sources == 0)
+    {
+        // Allocation of one transformation
+        m_transform_allocation( 1 );
+    }
+
+    m_transform.tx[ 0 ] = tx;
+    m_transform.ty[ 0 ] = ty;
+    m_transform.tz[ 0 ] = tz;
 }
 
 // Setting rotation of the source
 void PhaseSpaceSource::set_rotation( f32 aroundx, f32 aroundy, f32 aroundz )
 {
-    m_transform.rx = aroundx;
-    m_transform.ry = aroundy;
-    m_transform.rz = aroundz;
+    if( m_transform.nb_sources == 0)
+    {
+        // Allocation of one transformation
+        m_transform_allocation( 1 );
+    }
+
+    m_transform.rx[ 0 ] = aroundx;
+    m_transform.ry[ 0 ] = aroundy;
+    m_transform.rz[ 0 ] = aroundz;
 }
 
+/*
 // Setting scaling of the source
 void PhaseSpaceSource::set_scaling( f32 sx, f32 sy, f32 sz )
 {
@@ -130,8 +146,9 @@ void PhaseSpaceSource::set_scaling( f32 sx, f32 sy, f32 sz )
     m_transform.sy = sy;
     m_transform.sz = sz;
 }
+*/
 
-//========= Main function ============================================
+//========= Private ============================================
 
 // Check if everything is ok to initialize this source
 bool PhaseSpaceSource::m_check_mandatory()
@@ -139,6 +156,29 @@ bool PhaseSpaceSource::m_check_mandatory()
     if ( m_phasespace.tot_particles == 0 ) return false;
     else return true;
 }
+
+// Transform data allocation
+void PhaseSpaceSource::m_transform_allocation( ui32 nb_sources )
+{
+    // Allocation
+    HANDLE_ERROR( cudaMallocManaged( &(m_transform.tx), nb_sources*sizeof( f32 ) ) );
+    HANDLE_ERROR( cudaMallocManaged( &(m_transform.ty), nb_sources*sizeof( f32 ) ) );
+    HANDLE_ERROR( cudaMallocManaged( &(m_transform.tz), nb_sources*sizeof( f32 ) ) );
+
+    HANDLE_ERROR( cudaMallocManaged( &(m_transform.rx), nb_sources*sizeof( f32 ) ) );
+    HANDLE_ERROR( cudaMallocManaged( &(m_transform.ry), nb_sources*sizeof( f32 ) ) );
+    HANDLE_ERROR( cudaMallocManaged( &(m_transform.rz), nb_sources*sizeof( f32 ) ) );
+
+    HANDLE_ERROR( cudaMallocManaged( &(m_transform.sx), nb_sources*sizeof( f32 ) ) );
+    HANDLE_ERROR( cudaMallocManaged( &(m_transform.sy), nb_sources*sizeof( f32 ) ) );
+    HANDLE_ERROR( cudaMallocManaged( &(m_transform.sz), nb_sources*sizeof( f32 ) ) );
+
+    HANDLE_ERROR( cudaMallocManaged( &(m_transform.cdf), nb_sources*sizeof( f32 ) ) );
+
+    m_transform.nb_sources = nb_sources;
+}
+
+//========= Main function ============================================
 
 // Load phasespace file
 void PhaseSpaceSource::load_phasespace_file( std::string filename )
@@ -199,6 +239,28 @@ void PhaseSpaceSource::initialize ( GlobalSimulationParameters params )
                << " positrons and there are no positron physics effects enabled!"
                << GGendl;
         exit_simulation();
+    }
+
+    // Check transformation
+    if ( m_transform.nb_sources == 0 )
+    {
+        // Allocation of one transformation
+        m_transform_allocation( 1 );
+
+        m_transform.tx[ 0 ] = 0;
+        m_transform.ty[ 0 ] = 0;
+        m_transform.tz[ 0 ] = 0;
+
+        m_transform.rx[ 0 ] = 0;
+        m_transform.ry[ 0 ] = 0;
+        m_transform.rz[ 0 ] = 0;
+
+        m_transform.sx[ 0 ] = 1;
+        m_transform.sy[ 0 ] = 1;
+        m_transform.sz[ 0 ] = 1;
+
+        m_transform.cdf[ 0 ] = 1;
+        m_transform.nb_sources = 1;
     }
 
     // Some verbose if required
