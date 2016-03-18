@@ -166,6 +166,21 @@ void PhaseSpaceSource::set_scaling( f32 sx, f32 sy, f32 sz )
 
 //========= Private ============================================
 
+// Skip comment starting with "#"
+void PhaseSpaceSource::m_skip_comment(std::istream & is) {
+    i8 c;
+    i8 line[1024];
+    if (is.eof()) return;
+    is >> c;
+    while (is && (c=='#')) {
+        is.getline(line, 1024);
+        is >> c;
+        if (is.eof()) return;
+    }
+    is.unget();
+}
+
+
 // Check if everything is ok to initialize this source
 bool PhaseSpaceSource::m_check_mandatory()
 {
@@ -208,6 +223,83 @@ void PhaseSpaceSource::load_phasespace_file( std::string filename )
 
     m_iaea->read_header( filename );
     m_phasespace = m_iaea->read_data();
+}
+
+// Load transformation file
+void PhaseSpaceSource::load_transformation_file( std::string filename )
+{
+    // Open the file
+    std::ifstream input( filename.c_str(), std::ios::in );
+    if( !input )
+    {
+        GGcerr << "Error to open the file'" << filename << "'!" << GGendl;
+        exit_simulation();
+    }
+
+    // Get the number of sources
+    std::string line;
+    m_transform.nb_sources = 0;
+
+    while( input )
+    {
+        m_skip_comment( input );
+        std::getline( input, line );
+
+        if ( input ) ++m_transform.nb_sources;
+    }
+
+    // Returning to beginning of the file to read it again
+    input.clear();
+    input.seekg( 0, std::ios::beg );
+
+    // Allocating buffers to store data
+    m_transform_allocation( m_transform.nb_sources );
+
+    // Store data from file
+    size_t idx = 0;
+    f32 sum_act = 0;
+    while( input )
+    {
+        m_skip_comment( input );
+        std::getline( input, line );
+
+        if ( input )
+        {
+            // Format
+            // tx ty tz rx ry rz sx sy sz activity(prob emission)
+            std::istringstream iss( line );
+            iss >> m_transform.tx[ idx ] >> m_transform.ty[ idx ] >> m_transform.tz[ idx ]
+                >> m_transform.rx[ idx ] >> m_transform.ry[ idx ] >> m_transform.rz[ idx ]
+                >> m_transform.sx[ idx ] >> m_transform.sy[ idx ] >> m_transform.sz[ idx ]
+                >> m_transform.cdf[ idx ];
+            sum_act += m_transform.cdf[ idx ];
+
+            // Units
+            m_transform.tx[ idx ] *= mm;
+            m_transform.ty[ idx ] *= mm;
+            m_transform.tz[ idx ] *= mm;
+
+            m_transform.rx[ idx ] *= deg;
+            m_transform.ry[ idx ] *= deg;
+            m_transform.rz[ idx ] *= deg;
+
+            ++idx;
+        }
+    }
+
+    // Compute CDF and normalized in same time by security
+    m_transform.cdf[ 0 ] /= sum_act;
+    for( ui32 i = 1; i < m_transform.nb_sources; ++i )
+    {
+        m_transform.cdf[ i ] = m_transform.cdf[ i ] / sum_act + m_transform.cdf[ i - 1 ];
+    }
+
+    // Watch dog
+    m_transform.cdf[ m_transform.nb_sources - 1 ] = 1.0;
+
+    // Close the file
+    input.close();
+
 }
 
 // Mandatory function, abstract from GGEMSSource. This function is called

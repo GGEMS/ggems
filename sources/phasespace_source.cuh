@@ -59,6 +59,7 @@ public:
 
     // Main
     void load_phasespace_file( std::string filename );
+    void load_transformation_file( std::string filename );
 
     // Abstract from GGEMSSource (Mandatory funtions)
     void get_primaries_generator( Particles particles );
@@ -67,6 +68,7 @@ public:
 private:
     bool m_check_mandatory();
     void m_transform_allocation( ui32 nb_sources );
+    void m_skip_comment(std::istream & is);
 
     GlobalSimulationParameters m_params;
     PhSpTransform m_transform;
