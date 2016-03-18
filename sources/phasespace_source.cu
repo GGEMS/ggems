@@ -46,14 +46,30 @@ __host__ __device__ void PHSPSRC::phsp_source ( ParticlesData particles_data,
     // Then set the mandatory field to create a new particle
     particles_data.E[id] = phasespace.energy[ phsp_id ];     // Energy in MeV
 
-    // TODO, add scaling and rotation - JB
-    particles_data.px[id] = phasespace.pos_x[ phsp_id ] + transform.tx[ source_id ];     // Position in mm
-    particles_data.py[id] = phasespace.pos_y[ phsp_id ] + transform.ty[ source_id ];     //
-    particles_data.pz[id] = phasespace.pos_z[ phsp_id ] + transform.tz[ source_id ];     //
+    // Aplly trsnformation
+    f32xyz pos = make_f32xyz( phasespace.pos_x[ phsp_id ], phasespace.pos_y[ phsp_id ], phasespace.pos_z[ phsp_id ] );
+    f32xyz dir = make_f32xyz( phasespace.dir_x[ phsp_id ], phasespace.dir_y[ phsp_id ], phasespace.dir_z[ phsp_id ] );
+    f32xyz t = make_f32xyz( transform.tx[ source_id ], transform.ty[ source_id ], transform.tz[ source_id ] );
 
-    particles_data.dx[id] = phasespace.dir_x[ phsp_id ];                    // Direction (unit vector)
-    particles_data.dy[id] = phasespace.dir_y[ phsp_id ];                    //
-    particles_data.dz[id] = phasespace.dir_z[ phsp_id ];                    //
+    //printf("ID %i rot %f %f %f\n", id, transform.rx, transform.ry, transform.rz);
+
+    pos = fxyz_add( pos, t );                                        // translate
+    pos = fxyz_rotate_z_axis( pos, transform.rz[ source_id ] );      // Rotate: yaw, pitch, and roll convetion (RzRyRx)
+    pos = fxyz_rotate_y_axis( pos, transform.ry[ source_id ] );      //         for Euler convention RzRyRz
+    pos = fxyz_rotate_x_axis( pos, transform.rx[ source_id ] );      //         Here is a right-hand rule
+    //                TODO add scaling - JB
+    dir = fxyz_rotate_z_axis( dir, transform.rz[ source_id ] );
+    dir = fxyz_rotate_y_axis( dir, transform.ry[ source_id ] );
+    dir = fxyz_rotate_x_axis( dir, transform.rx[ source_id ] );
+    dir = fxyz_unit( dir );
+
+    particles_data.px[id] = pos.x;     // Position in mm
+    particles_data.py[id] = pos.y;     //
+    particles_data.pz[id] = pos.z;     //
+
+    particles_data.dx[id] = dir.x;     // Direction (unit vector)
+    particles_data.dy[id] = dir.y;     //
+    particles_data.dz[id] = dir.z;     //
 
     particles_data.tof[id] = 0.0f;                             // Time of flight
     particles_data.endsimu[id] = PARTICLE_ALIVE;               // Status of the particle
@@ -133,7 +149,7 @@ void PhaseSpaceSource::set_rotation( f32 aroundx, f32 aroundy, f32 aroundz )
         m_transform_allocation( 1 );
     }
 
-    m_transform.rx[ 0 ] = aroundx;
+    m_transform.rx[ 0 ] = aroundx;  // right hand rule - JB
     m_transform.ry[ 0 ] = aroundy;
     m_transform.rz[ 0 ] = aroundz;
 }

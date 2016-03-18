@@ -22,6 +22,7 @@
 #include "prng.cuh"
 #include "iaea_io.cuh"
 #include "fun.cuh"
+#include "vector.cuh"
 
 struct PhSpTransform
 {

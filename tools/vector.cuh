@@ -51,8 +51,6 @@ __host__ __device__ f32xyz fxyz_unit(f32xyz u);
 __host__ __device__ f32xyz fxyz_rotate_euler(f32xyz u, f32xyz EulerAngles); // phi, theta, psi
 // rotate a vector u around the x-axis
 __host__ __device__ f32xyz fxyz_rotate_x_axis(f32xyz u, f32 angle);
-// rotate a vector u around the x-axis
-__host__ __device__ f32xyz fxyz_rotate_x_axis(f32xyz u, f32 angle);
 // rotate a vector u around the y-axis
 __host__ __device__ f32xyz fxyz_rotate_y_axis(f32xyz u, f32 angle);
 // rotate a vector u around the z-axis
@@ -124,8 +122,6 @@ __host__ __device__ f64xyz fmatrixfxyz_mul(f64matrix33 matrix, f64xyz u);
 __host__ __device__ f64xyz fxyz_unit(f64xyz u);
 // rotate a vector u
 __host__ __device__ f64xyz fxyz_rotate_euler(f64xyz u, f64xyz EulerAngles); // phi, theta, psi
-// rotate a vector u around the x-axis
-__host__ __device__ f64xyz fxyz_rotate_x_axis(f64xyz u, f64 angle);
 // rotate a vector u around the x-axis
 __host__ __device__ f64xyz fxyz_rotate_x_axis(f64xyz u, f64 angle);
 // rotate a vector u around the y-axis
