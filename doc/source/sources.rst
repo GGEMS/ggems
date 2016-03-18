@@ -116,8 +116,99 @@ Example
     aSource->set_energy_spectrum( "data/spectrum_120kVp_2mmAl.dat" );
 
 
+PhaseSpaceSource
+----------------
 
+.. sectionauthor:: Julien Bert
+.. codeauthor:: Didier Benoit
 
+Class phase-space source. This source allow to use IAEA phase-space file. Phase-space can be
+duplicated and transform for multiple virtual sources.
 
+------------
+
+.. c:function:: void set_translation( f32 tx, f32 ty, f32 tz)
+    
+    If only one source is required the position of the phase-space can be translate using
+    this function.
+
+    .. c:var:: tx  
+        
+        Translation along the x-axis (in mm).
+
+    .. c:var:: ty 
+    
+        Translation along the y-axis (in mm).
+        
+    .. c:var:: tz 
+    
+        Translation along the z-axis (in mm).
+
+-----
+
+.. c:function:: void set_rotation( f32 rx, f32 ry, f32 rz)
+    
+    If only one source is required the phase-space can be rotate using
+    this function. Yaw, pitch, and roll convention is used with the right-hand rule.
+
+    .. c:var:: rx  
+        
+        Rotation around the x-axis (in rad).
+
+    .. c:var:: ry 
+    
+        Rotation around the y-axis (in rad).
+        
+    .. c:var:: rz 
+    
+        Rotation around the z-axis (in rad).
+
+-----
+
+.. c:function:: void load_phasespace_file( std::string filename )
+    
+    Load a phase-space file in IAEA format. Before load, please check if you have enough memory
+    on your graphics card.
+
+    .. c:var:: filename  
+        
+        Header name of the IAEA phase-space file.
+
+-----
+
+.. c:function:: void load_transformation_file( std::string filename )
+    
+    In case of multiple virtual sources, a file containing every source transformation can be used.
+    For each virtual source, translation, rotation, scaling and activity (i.e. emission probability) has
+    to be specified.
+
+    .. c:var:: filename  
+        
+        Text file with every transformation.
+
+Transformation file must absolutely follows this format::
+
+    # File that duplicate and transform the phasespace
+    # Translations are in mm and rotation in degrees
+    # (mm)      (degree)  (0.0 to 1.0)  (Arbitrary Unit i.e. probabilty of emission)
+    # tx ty tz  rx ry rz  sx sy sz      activity
+    # example with two sources
+    -20.0 0.0 0.0  0.0 0.0 0.0 1.0 1.0 1.0 0.5
+     20.0 0.0 0.0 30.0 0.0 0.0 1.0 1.0 1.0 1.0
+
+------------
+
+.. note::
+    Version: beta - work for authors.
+
+Example
+^^^^^^^
+
+.. code-block:: cpp
+    :linenos:
+
+    PhaseSpaceSource *aSource = new PhaseSpaceSource;    
+    aSource->load_phasespace_file( "data/output.IAEAheader" );
+    aSource->load_transformation_file( "data/transformation.dat" );
 
 Last update: |today|  -  Release: |release|.
