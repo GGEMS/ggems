@@ -40,6 +40,7 @@ if(CUDA_VERSION_MAJOR GREATER 6)
 else()    
     set(LIBSCUDA --generate-code arch=compute_30,code=sm_30 --generate-code arch=compute_32,code=sm_32 --generate-code arch=compute_35,code=sm_35 --generate-code arch=compute_37,code=sm_37 --generate-code arch=compute_50,code=sm_50 --relocatable-device-code true -lcudadevrt --compiler-options -w)
     message(STATUS "Cuda version <7.0")
+
     message(STATUS ${CUDA_VERSION_MAJOR})
 endif()
 

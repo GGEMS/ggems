@@ -224,17 +224,8 @@ void ConeBeamCTSource::set_energy_spectrum( std::string filename )
     std::ifstream input( filename.c_str(), std::ios::in );
     if( !input )
     {
-        std::ostringstream oss( std::ostringstream::out );
-#ifdef _WIN32
-        char buffer_error[ 256 ];
-        oss << "Error opening file '" << filename << "': "
-            << strerror_s( buffer_error, 256, errno );
-#else
-        oss << "Error opening file '" << filename << "': "
-            << strerror( errno );
-#endif
-        std::string error_msg = oss.str();
-        throw std::runtime_error( error_msg );
+        GGcerr << "Error to open the file'" << filename << "'!" << GGendl;
+        exit_simulation();
     }
 
     // Compute number of energy bins

@@ -8,7 +8,7 @@
  * \date 9 mars 2016
  *
  * phasespace source class
- *
+ * 
  */
 
 #ifndef PHASESPACE_SOURCE_CU
