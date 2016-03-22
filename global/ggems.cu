@@ -489,7 +489,7 @@ bool GGEMS::m_check_mandatory()
 
     if ( m_parameters.data_h.seed == 0 )
     {
-        print_error ( "Seed value seet to 0." );
+        print_error ( "Seed value set to 0." );
         flag_error = true;
     }
 
