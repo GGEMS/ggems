@@ -1,7 +1,7 @@
 #----------------------------------------------------------------------------
 # Setup the project
 #
-cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
 
 SET( CMAKE_BUILD_TYPE Release )
 IF( DEFINED CMAKE_BUILD_TYPE )
@@ -33,18 +33,43 @@ else()
   add_definitions(-DSINGLE_PRECISION)
 endif()
 
-# CUDA OPTIONS
+# CUDA VERSION
 message(STATUS "Your CUDA version is ${CUDA_VERSION_MAJOR}.")
-if(CUDA_VERSION_MAJOR GREATER 6)
-    set(LIBSCUDA --generate-code arch=compute_30,code=sm_30 \
-                 --generate-code arch=compute_32,code=sm_32 \
-                 --generate-code arch=compute_35,code=sm_35 \
-                 --generate-code arch=compute_37,code=sm_37 \
-                 --generate-code arch=compute_50,code=sm_50 \
-                 --generate-code arch=compute_52,code=sm_52 \
-                 --relocatable-device-code true -lcudadevrt --compiler-options -w)    
-else()    
+if(CUDA_VERSION_MAJOR LESS 7)
     message(FATAL_ERROR "Cuda version should be >= 7.0")
+endif()
+    
+# CUDA OPTIONS    
+set(LIBSCUDA --relocatable-device-code true -lcudadevrt --compiler-options -w)   
+
+option(WITH_ARCH_30 "With arch and sm 3.0" ON)
+if(WITH_ARCH_30)
+    set(LIBSCUDA ${LIBSCUDA} --generate-code arch=compute_30,code=sm_30)
+endif()
+
+option(WITH_ARCH_32 "With arch and sm 3.2" ON)
+if(WITH_ARCH_32)
+    set(LIBSCUDA ${LIBSCUDA} --generate-code arch=compute_32,code=sm_32)
+endif()
+
+option(WITH_ARCH_35 "With arch and sm 3.5" ON)
+if(WITH_ARCH_35)
+    set(LIBSCUDA ${LIBSCUDA} --generate-code arch=compute_35,code=sm_35)
+endif()
+
+option(WITH_ARCH_37 "With arch and sm 3.7" ON)
+if(WITH_ARCH_37)
+    set(LIBSCUDA ${LIBSCUDA} --generate-code arch=compute_37,code=sm_37)
+endif()
+
+option(WITH_ARCH_50 "With arch and sm 5.0" ON)
+if(WITH_ARCH_50)
+    set(LIBSCUDA ${LIBSCUDA} --generate-code arch=compute_50,code=sm_50)
+endif()
+
+option(WITH_ARCH_52 "With arch and sm 5.2" ON)
+if(WITH_ARCH_52)
+    set(LIBSCUDA ${LIBSCUDA} --generate-code arch=compute_52,code=sm_52)
 endif()
 
 # OPTIONS FAST MATH
@@ -54,9 +79,9 @@ if(WITH_FAST_MATH)
 endif()
 
 # OPTIONS VERBOSE
-option(WITH_VERBOSE "Compilation verbose flag" OFF)
-if(WITH_FAST_MATH)
-    set(LIBSCUDA ${LIBSCUDA} -Xptxas="-v")
+option(WITH_KERNEL_VERBOSE "Compilation kernel verbose flag" OFF)
+if(WITH_KERNEL_VERBOSE)
+    set(LIBSCUDA ${LIBSCUDA} --ptxas-options=-v)
 endif()
 
 # GGEMS src
