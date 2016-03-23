@@ -24,6 +24,9 @@ CrossSections::CrossSections()
     photon_CS.data_h.nb_mat = 0;
     electron_CS.data_h.nb_bins = 0;
     electron_CS.data_h.nb_mat = 0;
+
+    m_nb_bins = 0;
+    m_nb_mat = 0;
 }
 
 //// Private - Electron ////////////////////////////////////////////////////////////
@@ -436,7 +439,6 @@ void CrossSections::initialize(Materials materials, GlobalSimulationParameters p
         if ( there_is_photon )   m_copy_photon_cs_table_cpu2gpu();
         if ( there_is_electron ) m_copy_electron_cs_table_cpu2gpu();
     }
-
 
 }
 

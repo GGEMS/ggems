@@ -702,6 +702,13 @@ f32* Rayleigh_CS_Livermore_load_data() {
     filename += "/data/rayleigh_cs.bin";
 
     FILE * pfile = fopen(filename.c_str(), "rb");
+
+    if( !pfile )
+    {
+        GGcerr << "Error to open the file '" << filename << "'!" << GGendl;
+        exit_simulation();
+    }
+
     fread(raylcs, sizeof(f32), ncs, pfile);
     fclose(pfile);
 
@@ -718,6 +725,13 @@ f32* Rayleigh_SF_Livermore_load_data() {
     filename += "/data/rayleigh_sf.bin";
 
     FILE * pfile = fopen(filename.c_str(), "rb");
+
+    if( !pfile )
+    {
+           GGcerr << "Error to open the file '" << filename << "'!" << GGendl;
+           exit_simulation();
+    }
+
     fread(raylsf, sizeof(f32), nsf, pfile);
     fclose(pfile);
 
