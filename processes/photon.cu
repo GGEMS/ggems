@@ -126,6 +126,7 @@ __host__ __device__ SecParticle Compton_SampleSecondaries_standard(ParticlesData
 
     f32xyz gamDir1 = make_f32xyz(sinTheta*cosf(phi), sinTheta*sinf(phi), cosTheta);
     gamDir1 = rotateUz(gamDir1, gamDir0);
+    gamDir1 = fxyz_unit( gamDir1 );
 
     particles.dx[id] = gamDir1.x;
     particles.dy[id] = gamDir1.y;
@@ -859,6 +860,7 @@ __host__ __device__ void Rayleigh_SampleSecondaries_Livermore(ParticlesData part
     f32xyz gamDir0 = make_f32xyz(particles.dx[id], particles.dy[id], particles.dz[id]);
     f32xyz gamDir1 = make_f32xyz(sintheta*cosf(phi), sintheta*sinf(phi), costheta);
     gamDir1 = rotateUz(gamDir1, gamDir0);
+    gamDir1 = fxyz_unit( gamDir1 );
     particles.dx[id] = gamDir1.x;
     particles.dy[id] = gamDir1.y;
     particles.dz[id] = gamDir1.z;

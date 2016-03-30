@@ -157,6 +157,17 @@ void GGcout_version ()
            << GGendl;
 }
 
+void GGcout_def()
+{
+#ifdef DEBUG
+    GGcout << "DEBUG 1" << GGendl;
+#endif
+
+#ifdef SINGLE_PRECISION
+    GGcout << "SINGLE PRECISION 1" << GGendl;
+#endif
+}
+
 // Print out memory usage
 void GGcout_mem ( std::string txt, ui64 valmem )
 {
