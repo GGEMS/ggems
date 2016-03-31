@@ -215,6 +215,40 @@ bool VoxPhanIORTNav::m_check_mandatory()
 
 }
 
+// Init mu and mu_en table
+void VoxPhanIORTNav::m_init_mu_table()
+{
+    //HANDLE_ERROR( cudaMallocManaged( &(m_transform.tx), nb_sources*sizeof( f32 ) ) );
+
+    // Load mu data
+    f32 *energies  = new f32[mu_nb_energies];
+    f32 *mu        = new f32[mu_nb_energies];
+    f32 *mu_en     = new f32[mu_nb_energies];
+    ui32 *mu_index = new ui32[mu_nb_elements];
+
+    ui32 index_table = 0;
+    ui32 index_data = 0;
+
+    for (ui32 i= 0; i < mu_nb_elements; i++)
+    {
+        ui32 nb_energies = mu_nb_energy_bin[ i ];
+        mu_index[ i ] = index_table;
+
+        for (ui32 j = 0; j < nb_energies; j++)
+        {
+            energies[ index_table ] = mu_data[ index_data++ ];
+            mu[ index_table ]       = mu_data[ index_data++ ];
+            mu_en[ index_table ]    = mu_data[ index_data++ ];
+            index_table++;
+        }
+    }
+
+    // Build mu and mu_en according material
+
+
+
+}
+
 // return memory usage
 ui64 VoxPhanIORTNav::m_get_memory_usage()
 {
@@ -223,7 +257,7 @@ ui64 VoxPhanIORTNav::m_get_memory_usage()
     // First the voxelized phantom
     mem += ( m_phantom.data_h.number_of_voxels * sizeof( ui16 ) );
     // Then material data
-    mem += ( ( 2 * m_materials.data_h.nb_elements_total + 23 * m_materials.data_h.nb_materials ) * sizeof( f32 ) );
+    mem += ( ( 3 * m_materials.data_h.nb_elements_total + 23 * m_materials.data_h.nb_materials ) * sizeof( f32 ) );
     // Then cross sections (gamma)
     ui64 n = m_cross_sections.photon_CS.data_h.nb_bins;
     ui64 k = m_cross_sections.photon_CS.data_h.nb_mat;
@@ -250,6 +284,8 @@ VoxPhanIORTNav::VoxPhanIORTNav ()
     m_xmin = 0.0; m_xmax = 0.0;
     m_ymin = 0.0; m_ymax = 0.0;
     m_zmin = 0.0; m_zmax = 0.0;
+
+    m_flag_TLE = false;
 
     m_materials_filename = "";
 }
@@ -390,6 +426,12 @@ void VoxPhanIORTNav::initialize ( GlobalSimulationParameters params )
     m_dose_calculator.set_voi( m_xmin, m_xmax, m_ymin, m_ymax, m_zmin, m_zmax );
     m_dose_calculator.initialize( m_params ); // CPU&GPU
 
+    // If TLE init mu and mu_en table
+    if ( m_flag_TLE )
+    {
+        m_init_mu_table();
+    }
+
     // Some verbose if required
     if ( params.data_h.display_memory_usage )
     {
@@ -428,6 +470,11 @@ void VoxPhanIORTNav::set_volume_of_interest( f32 xmin, f32 xmax, f32 ymin, f32 y
     m_xmin = xmin; m_xmax = xmax;
     m_ymin = ymin; m_ymax = ymax;
     m_zmin = zmin; m_zmax = zmax;
+}
+
+void VoxPhanIORTNav::set_track_length_estimator( bool flag )
+{
+    m_flag_TLE = flag;
 }
 
 #undef DEBUG

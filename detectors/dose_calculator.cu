@@ -50,11 +50,19 @@ __host__ __device__ void dose_record_standard ( DoseData &dose, f32 Edep, f32 px
     assert( index_phantom.z < dose.nb_doxels.z );
 #endif
 
+#ifdef __CUDA_ARCH__
+    atomicAdd(&dose.edep[index_phantom.w], Edep);
+    atomicAdd(&dose.edep_squared[index_phantom.w], Edep*Edep);
+    atomicAdd(&dose.number_of_hits[index_phantom.w], ui32(1));
+#else
+    dose.edep[index_phantom.w] += Edep;
+    dose.edep_squared[index_phantom.w] += (Edep*Edep);
+    dose.number_of_hits[index_phantom.w] += 1;
+#endif
 
-
-    ggems_atomic_add_f64( dose.edep, index_phantom.w, f64( Edep ) );
-    ggems_atomic_add_f64( dose.edep_squared, index_phantom.w, f64( Edep) * f64( Edep ) );
-    ggems_atomic_add( dose.number_of_hits, index_phantom.w, ui32 ( 1 ) );                  // ui32, limited to 4.29e9 - JB
+    //ggems_atomic_add_f64( dose.edep, index_phantom.w, f64( Edep ) );
+    //ggems_atomic_add_f64( dose.edep_squared, index_phantom.w, f64( Edep) * f64( Edep ) );
+    //ggems_atomic_add( dose.number_of_hits, index_phantom.w, ui32 ( 1 ) );                  // ui32, limited to 4.29e9 - JB
 
 }
 
@@ -96,7 +104,7 @@ __host__ __device__ void dose_uncertainty_calculation ( DoseData dose, ui32 doxe
 #ifdef DEBUG
         assert(s >= 0.0);
 #endif
-        dose.uncertainty[ index ] = pow( s, 0.5 );
+        dose.uncertainty[ index ] = powf( s, 0.5 );
     }
     else
     {

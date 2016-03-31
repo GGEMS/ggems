@@ -222,6 +222,12 @@ f32 MaterialsDataBase::get_atom_num_dens( std::string mat_name, ui16 index )
             materials[ mat_name ].mixture_f[ index ] * get_density( mat_name );
 }
 
+// Get mass fraction
+f32 MaterialsDataBase::get_mass_fraction( std::string mat_name, ui16 index)
+{
+    return materials[ mat_name ].mixture_f[ index ];
+}
+
 // Get Z
 ui16 MaterialsDataBase::get_element_Z( std::string elt_name )
 {
@@ -607,7 +613,7 @@ void MaterialsDataBase::load_elements()
     elements_A.clear();
     elements_pot.clear();
 
-    //            Elt name,      Z,  A (g/mole), mean ioni potential (eV)
+    //               Elt name,      Z,   A (g/mole), mean ioni potential (eV)
     m_add_elements( "Hydrogen"   ,  1,   1.01  ,  19.2 );
     m_add_elements( "Helium"     ,  2,   4.003 ,  41.8 );
     m_add_elements( "Lithium"    ,  3,   6.941 ,  40.0 );
@@ -684,6 +690,7 @@ void Materials::m_copy_materials_table_cpu2gpu() {
 
     HANDLE_ERROR( cudaMalloc((void**) &data_d.mixture, k*sizeof(ui16)) );
     HANDLE_ERROR( cudaMalloc((void**) &data_d.atom_num_dens, k*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &data_d.mass_fraction, k*sizeof(f32)) );
 
     HANDLE_ERROR( cudaMalloc((void**) &data_d.nb_atoms_per_vol, n*sizeof(f32)) );
     HANDLE_ERROR( cudaMalloc((void**) &data_d.nb_electrons_per_vol, n*sizeof(f32)) );
@@ -723,6 +730,8 @@ void Materials::m_copy_materials_table_cpu2gpu() {
     HANDLE_ERROR( cudaMemcpy( data_d.mixture, data_h.mixture,
                              k*sizeof(ui16), cudaMemcpyHostToDevice) );
     HANDLE_ERROR( cudaMemcpy( data_d.atom_num_dens, data_h.atom_num_dens,
+                             k*sizeof(f32), cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy( data_d.mass_fraction, data_h.mass_fraction,
                              k*sizeof(f32), cudaMemcpyHostToDevice) );
 
     HANDLE_ERROR( cudaMemcpy( data_d.nb_atoms_per_vol, data_h.nb_atoms_per_vol,
@@ -835,6 +844,7 @@ void Materials::m_build_materials_table(GlobalSimulationParameters params, std::
     data_h.nb_elements_total = access_index;
     data_h.mixture = (ui16*)malloc(sizeof(ui16)*access_index);
     data_h.atom_num_dens = (f32*)malloc(sizeof(f32)*access_index);
+    data_h.mass_fraction = (f32*)malloc(sizeof(f32)*access_index);
 
     // Display energy cuts
     if ( params.data_h.display_energy_cuts )
@@ -868,6 +878,9 @@ void Materials::m_build_materials_table(GlobalSimulationParameters params, std::
 
             // compute atom num dens (Avo*fraction*dens) / Az
             data_h.atom_num_dens[fill_index] = m_material_db.get_atom_num_dens( mat_name, j );
+
+            // get mass fraction
+            data_h.mass_fraction[fill_index] = m_material_db.get_mass_fraction( mat_name, j );
 
             // compute nb atoms per volume
             data_h.nb_atoms_per_vol[i] += data_h.atom_num_dens[fill_index];

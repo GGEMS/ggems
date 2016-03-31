@@ -30,6 +30,7 @@ class MaterialsDataBase {
         ui16 get_nb_elements( std::string mat_name );
         std::string get_element_name( std::string mat_name, ui16 index);
         f32 get_atom_num_dens(std::string mat_name, ui16 index );
+        f32 get_mass_fraction( std::string mat_name, ui16 index);
         ui16 get_element_Z(std::string elt_name);
         f32 get_element_A(std::string elt_name);
         f32 get_element_pot( std::string elt_name );
@@ -85,7 +86,8 @@ struct MaterialsTable {
     ui16 *index;              // n
 
     ui16 *mixture;            // k
-    f32 *atom_num_dens;                   // k
+    f32 *atom_num_dens;       // k
+    f32 *mass_fraction;       // k
 
     f32 *nb_atoms_per_vol;                // n
     f32 *nb_electrons_per_vol;            // n

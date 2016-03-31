@@ -29,6 +29,7 @@
 #include "cross_sections.cuh"
 #include "electron_navigator.cuh"
 #include "transport_navigator.cuh"
+#include "mu_data.cuh"
 
 // VoxPhanIORTNav -> VPIN
 namespace VPIORTN
@@ -61,6 +62,19 @@ void kernel_host_track_to_out ( ParticlesData particles,
                                 ui32 id );
 }
 
+// Mu and Mu_en table use by TLE
+struct Mu_MuEn_Table{
+    ui32 nb_mat;      // k
+    ui32 nb_bins;     // n
+
+    f32 E_min;
+    f32 E_max;
+
+    f32* E_bins;      // n
+    f32* mu;          // n*k
+    f32* mu_en;       // n*k
+};
+
 class VoxPhanIORTNav : public GGEMSPhantom
 {
 public:
@@ -84,6 +98,8 @@ public:
     void set_doxel_size( f32 sizex, f32 sizey, f32 sizez );
     void set_volume_of_interest( f32 xmin, f32 xmax, f32 ymin, f32 ymax, f32 zmin, f32 zmax );
 
+    void set_track_length_estimator( bool flag );
+
     void export_density_map( std::string filename );
     void export_materials_map( std::string filename );
 
@@ -93,14 +109,18 @@ private:
     Materials m_materials;
     CrossSections m_cross_sections;
     DoseCalculator m_dose_calculator;
+    Mu_MuEn_Table m_mu_table;
 
     bool m_check_mandatory();
+    void m_init_mu_table();
 
     // Get the memory usage
     ui64 m_get_memory_usage();
 
     f32 m_doxel_size_x, m_doxel_size_y, m_doxel_size_z;
     f32 m_xmin, m_xmax, m_ymin, m_ymax, m_zmin, m_zmax;
+
+    bool m_flag_TLE;
 
     GlobalSimulationParameters m_params;
 

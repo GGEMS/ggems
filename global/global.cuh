@@ -118,81 +118,80 @@
 
 /////// TYPEDEF ////////////////////////////////////////////////
 
-#ifndef SINGLE_PRECISION
-// Double precision
-typedef float f32;
-typedef float2 f32xy;
-typedef float3 f32xyz;
-typedef float4 f32xyzw;
+#ifdef SINGLE_PRECISION
+    // Single precision
+    typedef float f32;
+    typedef float2 f32xy;
+    typedef float3 f32xyz;
+    typedef float4 f32xyzw;
 
-typedef double f64;
-typedef double2 f64xy;
-typedef double3 f64xyz;
-typedef double4 f64xyzw;
+    typedef float f64;
+    typedef float2 f64xy;
+    typedef float3 f64xyz;
+    typedef float4 f64xyzw;
 
-typedef int i32;
-typedef int2 i32xy;
-typedef int3 i32xyz;
-typedef int4 i32xyzw;
+    typedef int i32;
+    typedef int2 i32xy;
+    typedef int3 i32xyz;
+    typedef int4 i32xyzw;
 
-typedef short int i16;
-typedef char i8;
+    typedef short int i16;
+    typedef char i8;
 
-typedef unsigned int ui32;
-typedef uint2 ui32xy;
-typedef uint3 ui32xyz;
-typedef uint4 ui32xyzw;
+    typedef unsigned int ui32;
+    typedef uint2 ui32xy;
+    typedef uint3 ui32xyz;
+    typedef uint4 ui32xyzw;
 
-typedef unsigned short int ui16;
-typedef ushort2 ui16xy;
-typedef ushort3 ui16xyz;
-typedef ushort4 ui16xyzw;
+    typedef unsigned long ui64;
 
-typedef unsigned long int ui64;
+    typedef unsigned short int ui16;
+    typedef ushort2 ui16xy;
+    typedef ushort3 ui16xyz;
+    typedef ushort4 ui16xyzw;
 
-typedef unsigned char ui8;
+    typedef unsigned char ui8;
 
-#define F32_MAX FLT_MAX;
-#define F64_MAX DBL_MAX;
-
+    #define F32_MAX FLT_MAX;
+    #define F64_MAX FLT_MAX;
 #else
+    // Double precision
+    typedef float f32;
+    typedef float2 f32xy;
+    typedef float3 f32xyz;
+    typedef float4 f32xyzw;
 
-// Single precision
-typedef float f32;
-typedef float2 f32xy;
-typedef float3 f32xyz;
-typedef float4 f32xyzw;
+    typedef double f64;
+    typedef double2 f64xy;
+    typedef double3 f64xyz;
+    typedef double4 f64xyzw;
 
-typedef float f64;
-typedef float2 f64xy;
-typedef float3 f64xyz;
-typedef float4 f64xyzw;
+    typedef int i32;
+    typedef int2 i32xy;
+    typedef int3 i32xyz;
+    typedef int4 i32xyzw;
 
-typedef int i32;
-typedef int2 i32xy;
-typedef int3 i32xyz;
-typedef int4 i32xyzw;
+    typedef short int i16;
+    typedef char i8;
 
-typedef short int i16;
-typedef char i8;
+    typedef unsigned int ui32;
+    typedef uint2 ui32xy;
+    typedef uint3 ui32xyz;
+    typedef uint4 ui32xyzw;
 
-typedef unsigned int ui32;
-typedef uint2 ui32xy;
-typedef uint3 ui32xyz;
-typedef uint4 ui32xyzw;
+    typedef unsigned short int ui16;
+    typedef ushort2 ui16xy;
+    typedef ushort3 ui16xyz;
+    typedef ushort4 ui16xyzw;
 
-typedef unsigned long ui64;
+    typedef unsigned long int ui64;
 
-typedef unsigned short int ui16;
-typedef ushort2 ui16xy;
-typedef ushort3 ui16xyz;
-typedef ushort4 ui16xyzw;
+    typedef unsigned char ui8;
 
-typedef unsigned char ui8;
-
-#define F32_MAX FLT_MAX;
-#define F64_MAX FLT_MAX;
+    #define F32_MAX FLT_MAX;
+    #define F64_MAX DBL_MAX;
 #endif
+
 
 ////////////////////////////////////////////////////////////////
 

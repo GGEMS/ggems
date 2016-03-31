@@ -775,7 +775,7 @@ ui64 VoxPhanDosiNav::m_get_memory_usage()
     // First the voxelized phantom
     mem += ( m_phantom.data_h.number_of_voxels * sizeof( ui16 ) );
     // Then material data
-    mem += ( ( 2 * m_materials.data_h.nb_elements_total + 23 * m_materials.data_h.nb_materials ) * sizeof( f32 ) );
+    mem += ( ( 3 * m_materials.data_h.nb_elements_total + 23 * m_materials.data_h.nb_materials ) * sizeof( f32 ) );
     // Then cross sections (gamma)
     ui64 n = m_cross_sections.photon_CS.data_h.nb_bins;
     ui64 k = m_cross_sections.photon_CS.data_h.nb_mat;

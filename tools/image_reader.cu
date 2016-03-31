@@ -179,6 +179,7 @@ void ImageReader::record3Dimage ( string histname,  f32 *data, f32xyz offset, f3
 
 }
 
+#ifndef SINGLE_PRECISION
 void ImageReader::record3Dimage ( string histname,  f64 *data, f32xyz offset, f32xyz spacing, ui32xyz size, bool sparse_compression )
 {
 
@@ -330,6 +331,7 @@ void ImageReader::record3Dimage ( string histname,  f64 *data, f32xyz offset, f3
     }
 
 }
+#endif
 
 void ImageReader::record3Dimage ( string histname,  ui32 *data, f32xyz offset, f32xyz spacing, ui32xyz size, bool sparse_compression )
 {
