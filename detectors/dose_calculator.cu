@@ -19,6 +19,8 @@
 #include "dose_calculator.cuh"
 
 /// CPU&GPU functions
+
+// Analog deposition
 __host__ __device__ void dose_record_standard ( DoseData &dose, f32 Edep, f32 px, f32 py, f32 pz )
 {
 
@@ -50,6 +52,7 @@ __host__ __device__ void dose_record_standard ( DoseData &dose, f32 Edep, f32 px
     assert( index_phantom.z < dose.nb_doxels.z );
 #endif
 
+/*
 #ifdef __CUDA_ARCH__
     atomicAdd(&dose.edep[index_phantom.w], Edep);
     atomicAdd(&dose.edep_squared[index_phantom.w], Edep*Edep);
@@ -59,10 +62,61 @@ __host__ __device__ void dose_record_standard ( DoseData &dose, f32 Edep, f32 px
     dose.edep_squared[index_phantom.w] += (Edep*Edep);
     dose.number_of_hits[index_phantom.w] += 1;
 #endif
+*/
+    ggems_atomic_add_f64( dose.edep, index_phantom.w, f64( Edep ) );
+    ggems_atomic_add_f64( dose.edep_squared, index_phantom.w, f64( Edep) * f64( Edep ) );
+    ggems_atomic_add( dose.number_of_hits, index_phantom.w, ui32 ( 1 ) );                  // ui32, limited to 4.29e9 - JB
 
-    //ggems_atomic_add_f64( dose.edep, index_phantom.w, f64( Edep ) );
-    //ggems_atomic_add_f64( dose.edep_squared, index_phantom.w, f64( Edep) * f64( Edep ) );
-    //ggems_atomic_add( dose.number_of_hits, index_phantom.w, ui32 ( 1 ) );                  // ui32, limited to 4.29e9 - JB
+}
+
+// TLE deposition
+__host__ __device__ void dose_record_TLE ( DoseData &dose, f32 Edep, f32 px, f32 py, f32 pz,
+                                           f32 length, f32 mu_en)
+{
+
+    if (px < dose.xmin + EPSILON3 || px > dose.xmax - EPSILON3) return;
+    if (py < dose.ymin + EPSILON3 || py > dose.ymax - EPSILON3) return;
+    if (pz < dose.zmin + EPSILON3 || pz > dose.zmax - EPSILON3) return;
+
+    // Defined index phantom
+    ui32xyzw index_phantom;
+    index_phantom.x = ui32 ( ( px + dose.offset.x ) * dose.inv_doxel_size.x );
+    index_phantom.y = ui32 ( ( py + dose.offset.y ) * dose.inv_doxel_size.y );
+    index_phantom.z = ui32 ( ( pz + dose.offset.z ) * dose.inv_doxel_size.z );
+    index_phantom.w = index_phantom.z * dose.slice_nb_doxels + index_phantom.y * dose.nb_doxels.x + index_phantom.x;
+
+#ifdef DEBUG
+
+    if ( index_phantom.x >= dose.nb_doxels.x || index_phantom.y >= dose.nb_doxels.y || index_phantom.z >= dose.nb_doxels.z)
+    {
+        printf(" IndexX %i  NbDox %i  px %f  Off %f invDox %f\n", index_phantom.x, dose.nb_doxels.x, px, dose.offset.x, dose.inv_doxel_size.x);
+        printf(" IndexY %i  NbDox %i  py %f  Off %f invDox %f\n", index_phantom.y, dose.nb_doxels.y, py, dose.offset.y, dose.inv_doxel_size.y);
+        printf(" IndexZ %i  NbDox %i  pz %f  Off %f invDox %f\n", index_phantom.z, dose.nb_doxels.z, pz, dose.offset.z, dose.inv_doxel_size.z);
+        //index_phantom.z = 0;
+    }
+
+    assert( index_phantom.x < dose.nb_doxels.x );
+    assert( index_phantom.y < dose.nb_doxels.y );
+    assert( index_phantom.z < dose.nb_doxels.z );
+#endif
+
+/*
+#ifdef __CUDA_ARCH__
+    atomicAdd(&dose.edep[index_phantom.w], Edep);
+    atomicAdd(&dose.edep_squared[index_phantom.w], Edep*Edep);
+    atomicAdd(&dose.number_of_hits[index_phantom.w], ui32(1));
+#else
+    dose.edep[index_phantom.w] += Edep;
+    dose.edep_squared[index_phantom.w] += (Edep*Edep);
+    dose.number_of_hits[index_phantom.w] += 1;
+#endif
+*/
+    // TLE
+    f64 energy_dropped = Edep * mu_en * length;
+
+    ggems_atomic_add_f64( dose.edep, index_phantom.w, energy_dropped );
+    ggems_atomic_add_f64( dose.edep_squared, index_phantom.w, energy_dropped * energy_dropped );
+    ggems_atomic_add( dose.number_of_hits, index_phantom.w, ui32 ( 1 ) );                  // ui32, limited to 4.29e9 - JB
 
 }
 

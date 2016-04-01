@@ -24,6 +24,7 @@ __host__ __device__ void VPIORTN::track_to_out( ParticlesData &particles,
                                                 PhotonCrossSectionTable photon_CS_table,
                                                 GlobalSimulationParametersData parameters,
                                                 DoseData dosi,
+                                                Mu_MuEn_Table mu_table,
                                                 ui32 part_id )
 {        
     // Read position
@@ -96,10 +97,7 @@ __host__ __device__ void VPIORTN::track_to_out( ParticlesData &particles,
     pos = transport_get_safety_outside_AABB( pos, vox_xmin, vox_xmax,
                                              vox_ymin, vox_ymax, vox_zmin, vox_zmax, parameters.geom_tolerance );
 
-    // store new position
-    particles.px[part_id] = pos.x;
-    particles.py[part_id] = pos.y;
-    particles.pz[part_id] = pos.z;
+
 
     // Stop simulation if out of the phantom
     if ( !test_point_AABB_with_tolerance (pos, vol.xmin, vol.xmax, vol.ymin, vol.ymax, vol.zmin, vol.zmax, parameters.geom_tolerance ) )
@@ -110,11 +108,40 @@ __host__ __device__ void VPIORTN::track_to_out( ParticlesData &particles,
 
     //// Apply discrete process //////////////////////////////////////////////////
 
-    if ( next_discrete_process != GEOMETRY_BOUNDARY )
-    {
-        // Resolve discrete process
-        SecParticle electron = photon_resolve_discrete_process ( particles, parameters, photon_CS_table,
-                                                                 materials, mat_id, part_id );
+    f32 energy = particles.E[ part_id ];
+
+    // If TLE
+    if ( mu_table.flag ) {
+
+        if ( next_discrete_process != GEOMETRY_BOUNDARY )
+        {
+            // Resolve discrete process
+            SecParticle electron = photon_resolve_discrete_process ( particles, parameters, photon_CS_table,
+                                                                     materials, mat_id, part_id );
+        } // discrete process
+
+        /// Drop energy ////////////
+
+        // Get the mu_en for the current E
+        ui32 E_index = binary_search ( energy, mu_table.E_bins, mu_table.nb_bins );
+        f32 mu_en;
+
+        if ( E_index == 0 )
+        {
+            mu_en = mu_table.mu_en[ mat_id*mu_table.nb_bins ];
+        }
+        else
+        {
+            E_index += mat_id*mu_table.nb_bins;
+
+            mu_en = linear_interpolation( mu_table.E_bins[E_index-1],  mu_table.mu_en[E_index-1],
+                                          mu_table.E_bins[E_index],    mu_table.mu_en[E_index],
+                                          energy );
+        }
+
+        //                             record to the old position (current voxel)
+        dose_record_TLE( dosi, energy, particles.px[ part_id ], particles.py[ part_id ],
+                         particles.pz[ part_id ], next_interaction_distance,  mu_en );
 
         /// Energy cut /////////////
 
@@ -125,24 +152,51 @@ __host__ __device__ void VPIORTN::track_to_out( ParticlesData &particles,
             particles.endsimu[ part_id ] = PARTICLE_DEAD;
         }
 
-        /// Drop energy ////////////
+    }
+    else // Else Analog
+    {
 
-        // If gamma particle is dead (PE, Compton or energy cut)
-        if ( particles.endsimu[ part_id ] == PARTICLE_DEAD &&  particles.E[ part_id ] != 0.0f )
+
+        if ( next_discrete_process != GEOMETRY_BOUNDARY )
         {
-            dose_record_standard( dosi, particles.E[ part_id ], particles.px[ part_id ],
-                                  particles.py[ part_id ], particles.pz[ part_id ] );
-        }
+            // Resolve discrete process
+            SecParticle electron = photon_resolve_discrete_process ( particles, parameters, photon_CS_table,
+                                                                     materials, mat_id, part_id );
 
-        // If electron particle has energy
-        if ( electron.E != 0.0f )
-        {
-            dose_record_standard( dosi, electron.E, particles.px[ part_id ],
-                                  particles.py[ part_id ], particles.pz[ part_id ] );
-        }
+            /// Energy cut /////////////
 
-    } // discrete process
+            // If gamma particle not enough energy (Energy cut)
+            if ( particles.E[ part_id ] <= materials.photon_energy_cut[ mat_id ] )
+            {
+                // Kill without mercy
+                particles.endsimu[ part_id ] = PARTICLE_DEAD;
+            }
 
+            /// Drop energy ////////////
+
+            // If gamma particle is dead (PE, Compton or energy cut)
+            if ( particles.endsimu[ part_id ] == PARTICLE_DEAD &&  particles.E[ part_id ] != 0.0f )
+            {
+                dose_record_standard( dosi, particles.E[ part_id ], pos.x,
+                                      pos.y, pos.z );
+            }
+
+            // If electron particle has energy
+            if ( electron.E != 0.0f )
+            {
+                dose_record_standard( dosi, electron.E, pos.x,
+                                      pos.y, pos.z );
+            }
+
+        } // discrete process
+
+
+    }
+
+    // store the new position
+    particles.px[part_id] = pos.x;
+    particles.py[part_id] = pos.y;
+    particles.pz[part_id] = pos.z;
 }
 
 // Device Kernel that move particles to the voxelized volume boundary
@@ -164,11 +218,12 @@ void VPIORTN::kernel_host_track_to_in( ParticlesData particles, f32 xmin, f32 xm
 
 // Device kernel that track particles within the voxelized volume until boundary
 __global__ void VPIORTN::kernel_device_track_to_out( ParticlesData particles,
-                                                   VoxVolumeData vol,
-                                                   MaterialsTable materials,
-                                                   PhotonCrossSectionTable photon_CS_table,
-                                                   GlobalSimulationParametersData parameters,
-                                                   DoseData dosi )
+                                                     VoxVolumeData vol,
+                                                     MaterialsTable materials,
+                                                     PhotonCrossSectionTable photon_CS_table,
+                                                     GlobalSimulationParametersData parameters,
+                                                     DoseData dosi,
+                                                     Mu_MuEn_Table mu_table )
 {   
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
     if ( id >= particles.size ) return;    
@@ -176,7 +231,7 @@ __global__ void VPIORTN::kernel_device_track_to_out( ParticlesData particles,
     // Stepping loop - Get out of loop only if the particle was dead and it was a primary
     while ( particles.endsimu[id] != PARTICLE_DEAD && particles.endsimu[id] != PARTICLE_FREEZE )
     {
-        VPIORTN::track_to_out( particles, vol, materials, photon_CS_table, parameters, dosi, id );
+        VPIORTN::track_to_out( particles, vol, materials, photon_CS_table, parameters, dosi, mu_table, id );
     }
 
 }
@@ -188,12 +243,13 @@ void VPIORTN::kernel_host_track_to_out( ParticlesData particles,
                                       PhotonCrossSectionTable photon_CS_table,
                                       GlobalSimulationParametersData parameters,
                                       DoseData dosi,
+                                      Mu_MuEn_Table mu_table,
                                       ui32 id )
 {
     // Stepping loop - Get out of loop only if the particle was dead and it was a primary
     while ( particles.endsimu[id] != PARTICLE_DEAD && particles.endsimu[id] != PARTICLE_FREEZE )
     {
-        VPIORTN::track_to_out( particles, vol, materials, photon_CS_table, parameters, dosi, id );
+        VPIORTN::track_to_out( particles, vol, materials, photon_CS_table, parameters, dosi, mu_table, id );
     }
 }
 
@@ -244,8 +300,87 @@ void VoxPhanIORTNav::m_init_mu_table()
     }
 
     // Build mu and mu_en according material
+    m_mu_table.nb_mat = m_materials.data_h.nb_materials;
+    m_mu_table.E_max = m_params.data_h.cs_table_max_E;
+    m_mu_table.E_min = m_params.data_h.cs_table_min_E;
+    m_mu_table.nb_bins = m_params.data_h.cs_table_nbins;
+
+    HANDLE_ERROR( cudaMallocManaged( &(m_mu_table.E_bins), m_mu_table.nb_bins*sizeof( f32 ) ) );
+    HANDLE_ERROR( cudaMallocManaged( &(m_mu_table.mu), m_mu_table.nb_mat*m_mu_table.nb_bins*sizeof( f32 ) ) );
+    HANDLE_ERROR( cudaMallocManaged( &(m_mu_table.mu_en), m_mu_table.nb_mat*m_mu_table.nb_bins*sizeof( f32 ) ) );
+
+    // Fill energy table with log scale
+    f32 slope = log(m_mu_table.E_max / m_mu_table.E_min);
+    ui32 i = 0;
+    while (i < m_mu_table.nb_bins) {
+        m_mu_table.E_bins[ i ] = m_mu_table.E_min * exp( slope * ( (f32)i / ( (f32)m_mu_table.nb_bins-1 ) ) ) * MeV;
+        ++i;
+    }
+
+    // For each material and energy bin compute mu and muen
+    ui32 imat = 0;
+    ui32 abs_index, E_index, mu_index_E;
+    ui32 iZ, Z;
+    f32 energy, mu_over_rho, mu_en_over_rho, frac;
+    while (imat < m_mu_table.nb_mat) {
+
+        // for each energy bin
+        i=0; while (i < m_mu_table.nb_bins) {
+
+            // absolute index to store data within the table
+            abs_index = imat*m_mu_table.nb_bins + i;
+
+            // Energy value
+            energy = m_mu_table.E_bins[ i ];
+
+            // For each element of the material
+            mu_over_rho = 0.0f; mu_en_over_rho = 0.0f;
+            iZ=0; while (iZ < m_materials.data_h.nb_elements[ imat ]) {
+
+                // Get Z and mass fraction
+                Z = m_materials.data_h.mixture[ m_materials.data_h.index[ imat ] + iZ ];
+                frac = m_materials.data_h.mass_fraction[ m_materials.data_h.index[ imat ] + iZ ];
+
+                // Get energy index
+                mu_index_E = mu_index_energy[ Z ];
+                E_index = binary_search ( energy, energies, mu_index_E+mu_nb_energy_bin[ Z ], mu_index_E );
+
+                // Get mu an mu_en from interpolation
+                if ( E_index == mu_index_E )
+                {
+                    mu_over_rho += mu[ E_index ];
+                    mu_en_over_rho += mu_en[ E_index ];
+                }
+                else
+                {
+                    mu_over_rho += frac * linear_interpolation(energies[E_index-1],  mu[E_index-1],
+                                                               energies[E_index],    mu[E_index],
+                                                               energy);
+                    mu_en_over_rho += frac * linear_interpolation(energies[E_index-1],  mu_en[E_index-1],
+                                                                  energies[E_index],    mu_en[E_index],
+                                                                  energy);
+                }
+
+                ++iZ;
+            }
+
+            // Store values
+            m_mu_table.mu[ abs_index ] = mu_over_rho * m_materials.data_h.density[ imat ] / (g/cm3);
+            m_mu_table.mu_en[ abs_index ] = mu_en_over_rho * m_materials.data_h.density[ imat ] / (g/cm3);
+
+            ++i;
 
 
+
+        } // E bin
+
+        // DEBUG
+        printf("Mat %i Mu_en %f\n", imat, m_mu_table.mu_en[ imat*m_mu_table.nb_bins ]);
+
+        ++imat;
+
+
+    } // Mat
 
 }
 
@@ -269,6 +404,14 @@ ui64 VoxPhanIORTNav::m_get_memory_usage()
     mem += ( 4*n*sizeof( f64 ) + n*sizeof( ui32 ) );
     mem += ( 20 * sizeof(f32) );
 
+    // If TLE
+    if (m_flag_TLE)
+    {
+        n = m_mu_table.nb_bins;
+        mem += ( n*k*2 * sizeof( f32 ) ); // mu and mu_en
+        mem += ( n*sizeof( f32 ) );       // energies
+    }
+
     return mem;
 }
 
@@ -288,6 +431,18 @@ VoxPhanIORTNav::VoxPhanIORTNav ()
     m_flag_TLE = false;
 
     m_materials_filename = "";
+
+    // Mu table
+    m_mu_table.nb_mat = 0;
+    m_mu_table.nb_bins = 0;
+    m_mu_table.E_max = 0;
+    m_mu_table.E_min = 0;
+
+    m_mu_table.E_bins = NULL;
+    m_mu_table.mu = NULL;
+    m_mu_table.mu_en = NULL;
+
+    m_mu_table.flag = 0; // Not used
 }
 
 void VoxPhanIORTNav::track_to_in ( Particles particles )
@@ -334,6 +489,7 @@ void VoxPhanIORTNav::track_to_out ( Particles particles )
             VPIORTN::kernel_host_track_to_out( particles.data_h, m_phantom.data_h,
                                             m_materials.data_h, m_cross_sections.photon_CS.data_h,
                                             m_params.data_h, m_dose_calculator.dose.data_h,
+                                            m_mu_table,
                                             id );
             ++id;
         }
@@ -346,7 +502,8 @@ void VoxPhanIORTNav::track_to_out ( Particles particles )
         cudaThreadSynchronize();
         VPIORTN::kernel_device_track_to_out<<<grid, threads>>> ( particles.data_d, m_phantom.data_d, m_materials.data_d,
                                                               m_cross_sections.photon_CS.data_d,
-                                                              m_params.data_d, m_dose_calculator.dose.data_d );
+                                                              m_params.data_d, m_dose_calculator.dose.data_d,
+                                                              m_mu_table );
         cuda_error_check ( "Error ", " Kernel_VoxPhanDosi (track to out)" );
         
         cudaThreadSynchronize();
@@ -414,7 +571,7 @@ void VoxPhanIORTNav::initialize ( GlobalSimulationParameters params )
 
     // Materials table
     m_materials.load_materials_database( m_materials_filename );
-    m_materials.initialize( m_phantom.list_of_materials, params );
+    m_materials.initialize( m_phantom.list_of_materials, params );    
 
     // Cross Sections
     m_cross_sections.initialize( m_materials, params );
@@ -458,23 +615,28 @@ void VoxPhanIORTNav::set_materials( std::string filename )
     m_materials_filename = filename;
 }
 
+/*
 void VoxPhanIORTNav::set_doxel_size( f32 sizex, f32 sizey, f32 sizez )
 {
     m_doxel_size_x = sizex;
     m_doxel_size_y = sizey;
     m_doxel_size_z = sizez;
 }
+*/
 
+/*
 void VoxPhanIORTNav::set_volume_of_interest( f32 xmin, f32 xmax, f32 ymin, f32 ymax, f32 zmin, f32 zmax )
 {
     m_xmin = xmin; m_xmax = xmax;
     m_ymin = ymin; m_ymax = ymax;
     m_zmin = zmin; m_zmax = zmax;
 }
+*/
 
 void VoxPhanIORTNav::set_track_length_estimator( bool flag )
 {
     m_flag_TLE = flag;
+    m_mu_table.flag = 1; // Use TLE
 }
 
 #undef DEBUG

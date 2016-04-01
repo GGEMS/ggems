@@ -31,37 +31,6 @@
 #include "transport_navigator.cuh"
 #include "mu_data.cuh"
 
-// VoxPhanIORTNav -> VPIN
-namespace VPIORTN
-{
-
-__host__ __device__ void track_to_out(ParticlesData &particles,
-                                      VoxVolumeData vol, MaterialsTable materials,
-                                      PhotonCrossSectionTable photon_CS_table,
-                                      GlobalSimulationParametersData parameters, DoseData dosi, ui32 part_id);
-
-__global__ void kernel_device_track_to_in (ParticlesData particles, f32 xmin, f32 xmax,
-                                            f32 ymin, f32 ymax, f32 zmin, f32 zmax , f32 tolerance);
-
-__global__ void kernel_device_track_to_out ( ParticlesData particles,
-                                             VoxVolumeData vol,
-                                             MaterialsTable materials,
-                                             PhotonCrossSectionTable photon_CS_table,
-                                             GlobalSimulationParametersData parameters,
-                                             DoseData dosi );
-
-void kernel_host_track_to_in (ParticlesData particles, f32 xmin, f32 xmax,
-                               f32 ymin, f32 ymax, f32 zmin, f32 zmax, f32 tolerance, ui32 part_id );
-
-void kernel_host_track_to_out ( ParticlesData particles,
-                                VoxVolumeData vol,
-                                MaterialsTable materials,
-                                PhotonCrossSectionTable photon_CS_table,
-                                GlobalSimulationParametersData parameters,
-                                DoseData dosi,
-                                ui32 id );
-}
-
 // Mu and Mu_en table use by TLE
 struct Mu_MuEn_Table{
     ui32 nb_mat;      // k
@@ -73,7 +42,40 @@ struct Mu_MuEn_Table{
     f32* E_bins;      // n
     f32* mu;          // n*k
     f32* mu_en;       // n*k
+
+    ui8 flag;        // type of TLE? 0- Not used, 1- TLE, 2- seTLE
 };
+
+// VoxPhanIORTNav -> VPIN
+namespace VPIORTN
+{
+
+__host__ __device__ void track_to_out(ParticlesData &particles,
+                                      VoxVolumeData vol, MaterialsTable materials,
+                                      PhotonCrossSectionTable photon_CS_table,
+                                      GlobalSimulationParametersData parameters, DoseData dosi, Mu_MuEn_Table mu_table, ui32 part_id);
+
+__global__ void kernel_device_track_to_in (ParticlesData particles, f32 xmin, f32 xmax,
+                                            f32 ymin, f32 ymax, f32 zmin, f32 zmax , f32 tolerance);
+
+__global__ void kernel_device_track_to_out (ParticlesData particles,
+                                             VoxVolumeData vol,
+                                             MaterialsTable materials,
+                                             PhotonCrossSectionTable photon_CS_table,
+                                             GlobalSimulationParametersData parameters,
+                                             DoseData dosi , Mu_MuEn_Table mu_table);
+
+void kernel_host_track_to_in (ParticlesData particles, f32 xmin, f32 xmax,
+                               f32 ymin, f32 ymax, f32 zmin, f32 zmax, f32 tolerance, ui32 part_id );
+
+void kernel_host_track_to_out (ParticlesData particles,
+                                VoxVolumeData vol,
+                                MaterialsTable materials,
+                                PhotonCrossSectionTable photon_CS_table,
+                                GlobalSimulationParametersData parameters,
+                                DoseData dosi, Mu_MuEn_Table mu_table,
+                                ui32 id );
+}
 
 class VoxPhanIORTNav : public GGEMSPhantom
 {
@@ -95,8 +97,10 @@ public:
     
     void write( std::string filename = "dosimetry.mhd" );
     void set_materials( std::string filename );
-    void set_doxel_size( f32 sizex, f32 sizey, f32 sizez );
-    void set_volume_of_interest( f32 xmin, f32 xmax, f32 ymin, f32 ymax, f32 zmin, f32 zmax );
+
+    // TODO: TLE work only if the dosemap if the same than the phantom - JB
+    //void set_doxel_size( f32 sizex, f32 sizey, f32 sizez );
+    //void set_volume_of_interest( f32 xmin, f32 xmax, f32 ymin, f32 ymax, f32 zmin, f32 zmax );
 
     void set_track_length_estimator( bool flag );
 
