@@ -4,6 +4,7 @@
 #include <iostream>
 #include "global.cuh"
 #include "fun.cuh"
+#include "txt_reader.cuh"
 
 namespace ImageReader
 {
@@ -110,6 +111,9 @@ namespace ImageReader
     void create_directory(std::string dirname);
 
     void create_directory_tree(std::string dirname);
+
+    f32* load_mhd_image( std::string filename, f32xyz &offset, f32xyz &voxsize, ui32xyz &nbvox );
+
 //         
-};
+}
 #endif

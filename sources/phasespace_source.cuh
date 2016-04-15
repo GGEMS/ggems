@@ -56,6 +56,7 @@ public:
     void set_translation( f32 tx, f32 ty, f32 tz );
     void set_rotation( f32 aroundx, f32 aroundy, f32 aroundz );
     //void set_scaling( f32 sx, f32 sy, f32 sz );
+    void set_max_number_of_particles( ui32 nb_part_max );
 
     // Main
     void load_phasespace_file( std::string filename );
@@ -74,6 +75,7 @@ private:
     PhSpTransform m_transform;
     IAEAIO *m_iaea;
     IaeaType m_phasespace;
+    i32 m_nb_part_max;
 
 };
 

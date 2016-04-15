@@ -111,6 +111,9 @@ PhaseSpaceSource::PhaseSpaceSource(): GGEMSSource()
     // Default transformation
     m_transform.nb_sources = 0;
 
+    // Max number of particles used from the phase-space file
+    m_nb_part_max = -1;  // -1 mean take all particles
+
 }
 
 // Destructor
@@ -164,6 +167,12 @@ void PhaseSpaceSource::set_scaling( f32 sx, f32 sy, f32 sz )
 }
 */
 
+// Setting the maximum number of particles used from the phase-space file
+void PhaseSpaceSource::set_max_number_of_particles( ui32 nb_part_max )
+{
+    m_nb_part_max = nb_part_max;
+}
+
 //========= Private ============================================
 
 // Skip comment starting with "#"
@@ -179,7 +188,6 @@ void PhaseSpaceSource::m_skip_comment(std::istream & is) {
     }
     is.unget();
 }
-
 
 // Check if everything is ok to initialize this source
 bool PhaseSpaceSource::m_check_mandatory()
@@ -369,6 +377,15 @@ void PhaseSpaceSource::initialize ( GlobalSimulationParameters params )
 
         m_transform.cdf[ 0 ] = 1;
         m_transform.nb_sources = 1;
+    }
+
+    // Cut off the number of particles according the user parameter
+    if ( m_nb_part_max != -1 )
+    {
+        if ( m_nb_part_max < m_phasespace.tot_particles )
+        {
+            m_phasespace.tot_particles = m_nb_part_max;
+        }
     }
 
     // Some verbose if required

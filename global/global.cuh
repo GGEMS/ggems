@@ -109,7 +109,10 @@
 #define GGcin std::cin << "[GGEMS input] "
 #define GGwarn std::cout << "[GGEMS warning] "
 
-// Constants for electrons
+// For variance reduction (use in IORT for instance)
+#define noTLE 0
+#define TLE   1
+#define seTLE 2
 
 ////// DEBUG ///////////////////////////////////////////////////
 

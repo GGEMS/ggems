@@ -31,7 +31,9 @@
 #include "transport_navigator.cuh"
 #include "mu_data.cuh"
 
-// Mu and Mu_en table use by TLE
+//#define SKIP_VOXEL
+
+// Mu and Mu_en table used by TLE
 struct Mu_MuEn_Table{
     ui32 nb_mat;      // k
     ui32 nb_bins;     // n
@@ -46,6 +48,37 @@ struct Mu_MuEn_Table{
     ui8 flag;        // type of TLE? 0- Not used, 1- TLE, 2- seTLE
 };
 
+// History map used by seTLE
+struct HistoryMap {
+    ui32 *interaction;
+    f32 *energy;
+};
+
+// COO compression history map used by seTLE
+struct COOHistoryMap {
+    ui16 *x;
+    ui16 *y;
+    ui16 *z;
+    f32 *energy;
+    ui32 *interaction;
+
+    ui32 nb_data;
+};
+
+/*
+// Cylinder structure for brachy seeds
+struct CylinderTransform
+{
+    f32 *tx, *ty, *tz;
+    f32 *rx, *ry, *rz;
+    f32 *sx, *sy, *sz;
+
+    f32 *cdf;
+
+    ui32 nb_sources;
+};
+*/
+
 // VoxPhanIORTNav -> VPIN
 namespace VPIORTN
 {
@@ -53,7 +86,11 @@ namespace VPIORTN
 __host__ __device__ void track_to_out(ParticlesData &particles,
                                       VoxVolumeData vol, MaterialsTable materials,
                                       PhotonCrossSectionTable photon_CS_table,
-                                      GlobalSimulationParametersData parameters, DoseData dosi, Mu_MuEn_Table mu_table, ui32 part_id);
+                                      GlobalSimulationParametersData parameters, DoseData dosi, Mu_MuEn_Table mu_table,
+                                      HistoryMap hist_map, ui32 part_id);
+
+__host__ __device__ void track_seTLE(ParticlesData &particles, VoxVolumeData vol, COOHistoryMap coo_hist_map,
+                                      DoseData dose, Mu_MuEn_Table mu_table, ui32 nb_of_rays, f32 edep_th, ui32 id );
 
 __global__ void kernel_device_track_to_in (ParticlesData particles, f32 xmin, f32 xmax,
                                             f32 ymin, f32 ymax, f32 zmin, f32 zmax , f32 tolerance);
@@ -63,7 +100,12 @@ __global__ void kernel_device_track_to_out (ParticlesData particles,
                                              MaterialsTable materials,
                                              PhotonCrossSectionTable photon_CS_table,
                                              GlobalSimulationParametersData parameters,
-                                             DoseData dosi , Mu_MuEn_Table mu_table);
+                                             DoseData dosi , Mu_MuEn_Table mu_table, HistoryMap hist_map);
+
+__global__ void kernel_device_seTLE( ParticlesData particles, VoxVolumeData vol,
+                                     COOHistoryMap coo_hist_map,
+                                     DoseData dosi,
+                                     Mu_MuEn_Table mu_table, ui32 nb_of_rays, f32 edep_th );
 
 void kernel_host_track_to_in (ParticlesData particles, f32 xmin, f32 xmax,
                                f32 ymin, f32 ymax, f32 zmin, f32 zmax, f32 tolerance, ui32 part_id );
@@ -73,8 +115,13 @@ void kernel_host_track_to_out (ParticlesData particles,
                                 MaterialsTable materials,
                                 PhotonCrossSectionTable photon_CS_table,
                                 GlobalSimulationParametersData parameters,
-                                DoseData dosi, Mu_MuEn_Table mu_table,
-                                ui32 id );
+                                DoseData dosi, Mu_MuEn_Table mu_table, HistoryMap hist_map);
+
+void kernel_host_seTLE( ParticlesData particles, VoxVolumeData vol,
+                        COOHistoryMap coo_hist_map,
+                        DoseData dosi,
+                        Mu_MuEn_Table mu_table, ui32 nb_of_rays, f32 edep_th );
+
 }
 
 class VoxPhanIORTNav : public GGEMSPhantom
@@ -102,10 +149,13 @@ public:
     //void set_doxel_size( f32 sizex, f32 sizey, f32 sizez );
     //void set_volume_of_interest( f32 xmin, f32 xmax, f32 ymin, f32 ymax, f32 zmin, f32 zmax );
 
-    void set_track_length_estimator( bool flag );
+    void set_track_length_estimator( std::string kind );
+
+    //void add_cylinder_objects( std::string filename, std::string mat_name );
 
     void export_density_map( std::string filename );
     void export_materials_map( std::string filename );
+    void export_history_map( std::string filename );
 
 private:
 
@@ -114,9 +164,12 @@ private:
     CrossSections m_cross_sections;
     DoseCalculator m_dose_calculator;
     Mu_MuEn_Table m_mu_table;
+    HistoryMap m_hist_map;
+    COOHistoryMap m_coo_hist_map;
 
     bool m_check_mandatory();
     void m_init_mu_table();
+    void m_compress_history_map();
 
     // Get the memory usage
     ui64 m_get_memory_usage();
@@ -124,7 +177,7 @@ private:
     f32 m_doxel_size_x, m_doxel_size_y, m_doxel_size_z;
     f32 m_xmin, m_xmax, m_ymin, m_ymax, m_zmin, m_zmax;
 
-    bool m_flag_TLE;
+    ui8 m_flag_TLE;
 
     GlobalSimulationParameters m_params;
 

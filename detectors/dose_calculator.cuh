@@ -26,7 +26,7 @@
 struct DoseData
 {
     // Data
-    f64 *edep;
+    f64 *edep;    
     f64 *dose;
     f64 *edep_squared;
     ui32 *number_of_hits;

@@ -63,9 +63,11 @@ __host__ __device__ void dose_record_standard ( DoseData &dose, f32 Edep, f32 px
     dose.number_of_hits[index_phantom.w] += 1;
 #endif
 */
+
     ggems_atomic_add_f64( dose.edep, index_phantom.w, f64( Edep ) );
     ggems_atomic_add_f64( dose.edep_squared, index_phantom.w, f64( Edep) * f64( Edep ) );
     ggems_atomic_add( dose.number_of_hits, index_phantom.w, ui32 ( 1 ) );                  // ui32, limited to 4.29e9 - JB
+
 
 }
 
@@ -100,19 +102,20 @@ __host__ __device__ void dose_record_TLE ( DoseData &dose, f32 Edep, f32 px, f32
     assert( index_phantom.z < dose.nb_doxels.z );
 #endif
 
+    // TLE
+    f64 energy_dropped = Edep * mu_en * length * 0.1; // arbitrary factor (see in GATE)
+
 /*
 #ifdef __CUDA_ARCH__
-    atomicAdd(&dose.edep[index_phantom.w], Edep);
-    atomicAdd(&dose.edep_squared[index_phantom.w], Edep*Edep);
+    atomicAdd(&dose.edep[index_phantom.w], energy_dropped);
+    atomicAdd(&dose.edep_squared[index_phantom.w], energy_dropped*energy_dropped);
     atomicAdd(&dose.number_of_hits[index_phantom.w], ui32(1));
 #else
-    dose.edep[index_phantom.w] += Edep;
-    dose.edep_squared[index_phantom.w] += (Edep*Edep);
+    dose.edep[index_phantom.w] += energy_dropped;
+    dose.edep_squared[index_phantom.w] += (energy_dropped*energy_dropped);
     dose.number_of_hits[index_phantom.w] += 1;
 #endif
 */
-    // TLE
-    f64 energy_dropped = Edep * mu_en * length;
 
     ggems_atomic_add_f64( dose.edep, index_phantom.w, energy_dropped );
     ggems_atomic_add_f64( dose.edep_squared, index_phantom.w, energy_dropped * energy_dropped );
@@ -156,7 +159,8 @@ __host__ __device__ void dose_uncertainty_calculation ( DoseData dose, ui32 doxe
         f64 s = ( (N*sum_E2) - sum2_E ) / ( (N-1) * sum2_E );
 
 #ifdef DEBUG
-        assert(s >= 0.0);
+        //assert(s >= 0.0);
+        if ( s < 0.0 ) s = 1.0;
 #endif
         dose.uncertainty[ index ] = powf( s, 0.5 );
     }

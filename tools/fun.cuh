@@ -56,6 +56,15 @@ __host__ __device__ i32 G4Poisson(f32 mean, ParticlesData &particles, ui32 id );
 __host__ __device__ f32 Gaussian ( f32 mean,f32 rms,ParticlesData &particles, ui32 id );
 
 
+// Filtering
+namespace Filter
+{
+    f32 *mean( f32* input,  ui32 nx, ui32 ny, ui32 nz, ui32 w_size );
+    f32 *median( f32* input,  ui32 nx, ui32 ny, ui32 nz, ui32 w_size );
+    f32 *adaptive_median(f32* input, ui32 nx, ui32 ny, ui32 nz, ui32 w_size, ui32 w_size_max );
+}
+
+
 // Atomic add
 
 template < typename T,typename U >
