@@ -471,13 +471,13 @@ __global__ void VPIORTN::kernel_device_track_to_out( ParticlesData particles,
 
 // Host kernel that track particles within the voxelized volume until boundary
 void VPIORTN::kernel_host_track_to_out( ParticlesData particles,
-                                      VoxVolumeData vol,
-                                      MaterialsTable materials,
-                                      PhotonCrossSectionTable photon_CS_table,
-                                      GlobalSimulationParametersData parameters,
-                                      DoseData dosi,
-                                      Mu_MuEn_Table mu_table,
-                                      HistoryMap hist_map )
+                                       VoxVolumeData vol,
+                                       MaterialsTable materials,
+                                       PhotonCrossSectionTable photon_CS_table,
+                                       GlobalSimulationParametersData parameters,
+                                       DoseData dosi,
+                                       Mu_MuEn_Table mu_table,
+                                       HistoryMap hist_map )
 {
 
     ui32 id=0;
@@ -716,8 +716,8 @@ ui64 VoxPhanIORTNav::m_get_memory_usage()
     // Cross section (electron)
     mem += ( n*k*7*sizeof( f32 ) );
     // Finally the dose map
-    n = m_dose_calculator.dose.data_h.tot_nb_doxels;
-    mem += ( 4*n*sizeof( f64 ) + n*sizeof( ui32 ) );
+    n = m_dose_calculator.dose.tot_nb_dosels;
+    mem += ( 2*n*sizeof( f64 ) + n*sizeof( ui32 ) );
     mem += ( 20 * sizeof( f32 ) );
 
     // If TLE
@@ -742,9 +742,9 @@ ui64 VoxPhanIORTNav::m_get_memory_usage()
 VoxPhanIORTNav::VoxPhanIORTNav ()
 {
     // Default doxel size (if 0 = same size to the phantom)
-    m_doxel_size_x = 0;
-    m_doxel_size_y = 0;
-    m_doxel_size_z = 0;
+    m_dosel_size_x = 0;
+    m_dosel_size_y = 0;
+    m_dosel_size_z = 0;
 
     m_xmin = 0.0; m_xmax = 0.0;
     m_ymin = 0.0; m_ymax = 0.0;
@@ -816,7 +816,7 @@ void VoxPhanIORTNav::track_to_out ( Particles particles )
     {
         VPIORTN::kernel_host_track_to_out( particles.data_h, m_phantom.data_h,
                                            m_materials.data_h, m_cross_sections.photon_CS.data_h,
-                                           m_params.data_h, m_dose_calculator.dose.data_h,
+                                           m_params.data_h, m_dose_calculator.dose,
                                            m_mu_table, m_hist_map );
 
         // Apply seTLE: splitting and determinstic raycasting
@@ -828,7 +828,7 @@ void VoxPhanIORTNav::track_to_out ( Particles particles )
 
             t_start = get_time();
             VPIORTN::kernel_host_seTLE( particles.data_h, m_phantom.data_h,
-                                        m_coo_hist_map, m_dose_calculator.dose.data_h,
+                                        m_coo_hist_map, m_dose_calculator.dose,
                                         m_mu_table, 100, 0.0 *eV );
             GGcout_time ( "Raycast", get_time()-t_start );
             GGnewline();
@@ -843,7 +843,7 @@ void VoxPhanIORTNav::track_to_out ( Particles particles )
         grid.x = ( particles.size + m_params.data_h.gpu_block_size - 1 ) / m_params.data_h.gpu_block_size;
         VPIORTN::kernel_device_track_to_out<<<grid, threads>>> ( particles.data_d, m_phantom.data_d, m_materials.data_d,
                                                               m_cross_sections.photon_CS.data_d,
-                                                              m_params.data_d, m_dose_calculator.dose.data_d,
+                                                              m_params.data_d, m_dose_calculator.dose,
                                                               m_mu_table, m_hist_map );
         cuda_error_check ( "Error ", " Kernel_VoxPhanDosi (track to out)" );             
         cudaThreadSynchronize();
@@ -860,7 +860,7 @@ void VoxPhanIORTNav::track_to_out ( Particles particles )
 
             t_start = get_time();
             VPIORTN::kernel_device_seTLE<<<grid, threads>>> ( particles.data_d, m_phantom.data_d,
-                                                              m_coo_hist_map, m_dose_calculator.dose.data_d,
+                                                              m_coo_hist_map, m_dose_calculator.dose,
                                                               m_mu_table, 1000, 0.0 *eV );
             cuda_error_check ( "Error ", " Kernel_device_seTLE" );
 
@@ -961,7 +961,7 @@ void VoxPhanIORTNav::initialize ( GlobalSimulationParameters params )
     // Init dose map
     m_dose_calculator.set_voxelized_phantom( m_phantom );
     m_dose_calculator.set_materials( m_materials );
-    m_dose_calculator.set_doxel_size( m_doxel_size_x, m_doxel_size_y, m_doxel_size_z );
+    m_dose_calculator.set_dosel_size( m_dosel_size_x, m_dosel_size_y, m_dosel_size_z );
     m_dose_calculator.set_voi( m_xmin, m_xmax, m_ymin, m_ymax, m_zmin, m_zmax );
     m_dose_calculator.initialize( m_params ); // CPU&GPU
 

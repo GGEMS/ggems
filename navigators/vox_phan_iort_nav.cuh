@@ -179,7 +179,7 @@ private:
     // Get the memory usage
     ui64 m_get_memory_usage();
 
-    f32 m_doxel_size_x, m_doxel_size_y, m_doxel_size_z;
+    f32 m_dosel_size_x, m_dosel_size_y, m_dosel_size_z;
     f32 m_xmin, m_xmax, m_ymin, m_ymax, m_zmin, m_zmax;
 
     ui8 m_flag_TLE;

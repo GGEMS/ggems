@@ -607,6 +607,8 @@ How to compile and run this example:
 This example will produce these files:
 
 * results-Edep.mhd and .raw: Deposited energy within the phantom
+* results-Hit.mhd and .raw: Number of hits within the phantom
+* results-Uncertainty.mhd and .raw: Edep uncertainty
 
 Listing of the code
 ^^^^^^^^^^^^^^^^^^^
@@ -803,13 +805,15 @@ How to compile and run this example:
 This example will produce these files:
 
 * results-Edep.mhd and .raw: Deposited energy within the phantom
+* results-Hit.mhd and .raw: Number of hits within the phantom
+* results-Uncertainty.mhd and .raw: Edep uncertainty
 
 Listing of the code
 ^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: cpp
     :linenos:
-    :caption: 04_exePhotonBeam_Patient
+    :caption: 05_exeBrachytherapy
 
     #include <stdexcept>
     #include <ggems.cuh>
@@ -818,22 +822,19 @@ Listing of the code
     {
       try
       {
-         
         ////////////////////////////////////////////////////////////////       
 
         // Creating a cone-beam source
-        ConeBeamCTSource *aSource = new ConeBeamCTSource;    
-        aSource->set_particle_type( "photon" );
-        aSource->set_focal_size( 0.0f, 0.0f );
-        aSource->set_beam_aperture( 1.0f *deg );    
-        aSource->set_position( -1.0f *m, 0.0f *m, 0.0f *m );
-        aSource->set_mono_energy( 1.0f *MeV );
+        PhaseSpaceSource *aSource = new PhaseSpaceSource;    
+        aSource->load_phasespace_file( "data/STM1251small.IAEAheader" );
+        aSource->load_transformation_file( "data/seeds_config.dat" );
 
         // Creating a voxelized phantom with a dosemap   
-        VoxPhanDosiNav* aPhantom = new VoxPhanDosiNav();
-        aPhantom->load_phantom_from_mhd("data/Patient.mhd", 
-                                        "data/HU2mat.dat" );       
-        aPhantom->set_materials( "data/materials.dat" );      
+        VoxPhanIORTNav* aPhantom = new VoxPhanIORTNav();
+        aPhantom->load_phantom_from_mhd("data/Patient.mhd",
+                                        "data/HU2prostate.dat" );
+        aPhantom->set_materials( "data/materials.dat" );
+        aPhantom->set_kerma_estimator( "TLE" );
         
         ////////////////////////////////////////////////////////////////
 
@@ -851,42 +852,31 @@ Listing of the code
         // Physics parameters
         simu->set_process( "Compton" );
         simu->set_process( "PhotoElectric" );
-        simu->set_process( "Rayleigh" );
-        
-        simu->set_process( "eIonisation" );
-        simu->set_process( "eBremsstrahlung" );
-        simu->set_process( "eMultipleScattering" );
-
-        simu->set_secondaries_level( 6 );
-        simu->set_secondary( "Electron" );
+        simu->set_process( "Rayleigh" );       
 
         // Energy table range
         simu->set_CS_table_nbins( 220 );
         simu->set_CS_table_E_min( 990.*eV );
-        simu->set_CS_table_E_max( 250.*MeV );
-
-        // Add cut
-        simu->set_particle_cut("electron", 100 *um);
-        simu->set_particle_cut("photon", 100 *um);
+        simu->set_CS_table_E_max( 1.*MeV );
 
         // Random and particles
         simu->set_seed( 123456789 );
         simu->set_number_of_particles( 1000000 );
-        simu->set_size_of_particles_batch( 100000 ); // Depending of the memory size available on the GPU card
+        simu->set_size_of_particles_batch( 1000000 ); // Depending of the memory size available on the GPU card
         
         // Source and phantom
         simu->set_source( aSource );
         simu->set_phantom( aPhantom );
 
         // Verbose
-        simu->set_display_in_color( true );    
+        simu->set_display_in_color( true );
         simu->set_display_memory_usage( true );
 
         // Initialization of the simulation
         simu->init_simulation();
 
         // Start the simulation
-        simu->start_simulation();    
+        simu->start_simulation();        
         
         // Store the final dosemap
         aPhantom->write( "results.mhd" );
@@ -919,25 +909,16 @@ Listing of the code
     }
 
 
-
 Results
 ^^^^^^^
 
-Example of a result (overlay between CT and Edep for the central transaxial slice) for :math:`200\times10^6` particles and a range cut of 100 :math:`\mu m`:
+Example of a result (overlay between CT and Edep for the central transaxial slice) for :math:`1.4\times10^6` particles and the use of the TLE:
 
-.. image:: images/res_04_patient.png
+.. image:: images/res_05_brachytherapy.png
     :scale: 100%
     :align: center  
 
-Results were compared against Gate (Geant4 10.01). Total run time for GATE simulation (one core CPU Intel i7-2600) and GGEMS simulation (one GPU NVIDIA GTX980 Ti) was 70h (4222 min) and 27 min respectively, which was 156 times faster than Gate (Geant4 10.01). Dispersion of the relative error between GGEMS and Gate (Geant4 10.01) was below 1%.
-
-.. image:: images/res_04_PhotonBeam_Patient_proj_yz.png
-    :scale: 60%
-    :align: center  
-
-.. image:: images/res_04_PhotonBeam_Patient_proj_yx.png
-    :scale: 60%
-    :align: center  
+Total run time for a GGEMS simulation using TLE kerma (one GPU NVIDIA GTX690) was 6.8 s to recover a maximum dose uncertainty of 2 % within the porstate. For a same calculation uncertainty an analog kerma simulation using GGEMS needs 6 min 30 s.
 
 
 Last update: |today|  -  Release: |release|.

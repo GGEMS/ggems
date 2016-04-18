@@ -196,6 +196,16 @@ Transformation file must absolutely follows this format::
     -20.0 0.0 0.0  0.0 0.0 0.0 1.0 1.0 1.0 0.5
      20.0 0.0 0.0 30.0 0.0 0.0 1.0 1.0 1.0 1.0
 
+----
+
+.. c:function:: void set_max_number_of_particles( ui32 nb_of_particles )
+
+    Select the maximum number of particles used within the phase-space. This allow to virtually resize the phase-space by truncating the number of particles contained.
+
+    .. c:var:: nb_of_particles
+
+        Number of particles, default value is -1, meaning that all particles contain within the phase-space will be used.
+
 ------------
 
 .. note::

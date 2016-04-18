@@ -783,8 +783,8 @@ ui64 VoxPhanDosiNav::m_get_memory_usage()
     // Cross section (electron)
     mem += ( n*k*7*sizeof( f32 ) );
     // Finally the dose map
-    n = m_dose_calculator.dose.data_h.tot_nb_doxels;
-    mem += ( 4*n*sizeof( f64 ) + n*sizeof( ui32 ) );
+    n = m_dose_calculator.dose.tot_nb_dosels;
+    mem += ( 2*n*sizeof( f64 ) + n*sizeof( ui32 ) );
     mem += ( 20 * sizeof(f32) );
 
     return mem;
@@ -794,10 +794,10 @@ ui64 VoxPhanDosiNav::m_get_memory_usage()
 
 VoxPhanDosiNav::VoxPhanDosiNav ()
 {
-    // Default doxel size (if 0 = same size to the phantom)
-    m_doxel_size_x = 0;
-    m_doxel_size_y = 0;
-    m_doxel_size_z = 0;
+    // Default dosel size (if 0 = same size to the phantom)
+    m_dosel_size_x = 0;
+    m_dosel_size_y = 0;
+    m_dosel_size_z = 0;
 
     m_xmin = 0.0; m_xmax = 0.0;
     m_ymin = 0.0; m_ymax = 0.0;
@@ -850,7 +850,7 @@ void VoxPhanDosiNav::track_to_out ( Particles particles )
 
             VPDN::kernel_host_track_to_out ( particles.data_h, m_phantom.data_h,
                                              m_materials.data_h, m_cross_sections.photon_CS.data_h, m_cross_sections.electron_CS.data_h,
-                                             m_params.data_h, m_dose_calculator.dose.data_h,
+                                             m_params.data_h, m_dose_calculator.dose,
                                              id );
 
             ++id;
@@ -865,7 +865,7 @@ void VoxPhanDosiNav::track_to_out ( Particles particles )
         VPDN::kernel_device_track_to_out<<<grid, threads>>> ( particles.data_d, m_phantom.data_d, m_materials.data_d,
                                                               m_cross_sections.photon_CS.data_d,
                                                               m_cross_sections.electron_CS.data_d,
-                                                              m_params.data_d, m_dose_calculator.dose.data_d );
+                                                              m_params.data_d, m_dose_calculator.dose );
         cuda_error_check ( "Error ", " Kernel_VoxPhanDosi (track to out)" );
         
         cudaThreadSynchronize();
@@ -941,7 +941,7 @@ void VoxPhanDosiNav::initialize ( GlobalSimulationParameters params )
     // Init dose map
     m_dose_calculator.set_voxelized_phantom( m_phantom );
     m_dose_calculator.set_materials( m_materials );
-    m_dose_calculator.set_doxel_size( m_doxel_size_x, m_doxel_size_y, m_doxel_size_z );
+    m_dose_calculator.set_dosel_size( m_dosel_size_x, m_dosel_size_y, m_dosel_size_z );
     m_dose_calculator.set_voi( m_xmin, m_xmax, m_ymin, m_ymax, m_zmin, m_zmax );
     m_dose_calculator.initialize ( m_params ); // CPU&GPU        
 
@@ -971,11 +971,11 @@ void VoxPhanDosiNav::set_materials( std::string filename )
     m_materials_filename = filename;
 }
 
-void VoxPhanDosiNav::set_doxel_size( f32 sizex, f32 sizey, f32 sizez )
+void VoxPhanDosiNav::set_dosel_size( f32 sizex, f32 sizey, f32 sizez )
 {
-    m_doxel_size_x = sizex;
-    m_doxel_size_y = sizey;
-    m_doxel_size_z = sizez;
+    m_dosel_size_x = sizex;
+    m_dosel_size_y = sizey;
+    m_dosel_size_z = sizez;
 }
 
 void VoxPhanDosiNav::set_volume_of_interest( f32 xmin, f32 xmax, f32 ymin, f32 ymax, f32 zmin, f32 zmax )
