@@ -11,13 +11,13 @@ CTDetector
 .. sectionauthor:: Julien Bert
 .. codeauthor:: Didier Benoit
 
-This detector in mainly use in CT application. Flatpanel can orbiting around the patient and count the number of particles reaching the detctor using energy threshold. Particles are not navigated within the detector.
+This detector in mainly used in CT applications. Flatpanel can orbit around the patient and count the number of particles reaching the detector using an energy threshold. Particles are not navigated within the detector.
 
 ------------
 
 .. c:function:: void set_dimension( f32 width, f32 height, f32 depth )
     
-    Set dimension of the detctor.
+    Set dimension of the detector.
 
     .. c:var:: width  
         
@@ -35,7 +35,7 @@ This detector in mainly use in CT application. Flatpanel can orbiting around the
 
 .. c:function:: void set_pixel_size( f32 sx, f32 sy, f32 sz )
     
-    Set pixel size of the detector.
+    Set the pixel size of the detector.
 
     .. c:var:: sx  
         
@@ -53,7 +53,7 @@ This detector in mainly use in CT application. Flatpanel can orbiting around the
 
 .. c:function:: void set_position( f32 px, f32 py, f32 pz )
     
-    Set the detector position in world space.
+    Set the detector's position in world space.
 
     .. c:var:: px  
         
@@ -72,11 +72,11 @@ This detector in mainly use in CT application. Flatpanel can orbiting around the
 
 .. c:function:: void set_threshold( f32 threshold )
     
-    Define an energy threshold to detect particle.
+    Define an energy threshold to detect particles.
 
     .. c:var:: threshold  
         
-        Energy threshold in MeV. Below this value particles are not detected.
+        Energy threshold in MeV. Below this value, particles are not detected.
 
 ------------
 
@@ -86,13 +86,13 @@ This detector in mainly use in CT application. Flatpanel can orbiting around the
 
     .. c:var:: orbiting_angle  
         
-        Angle in degree.
+        Angle in degrees.
 
 -----
 
 .. c:function:: void save_projection( std::string filename )
     
-    Save projection recover by the detector to MetaImage file.
+    Save projection recovered by the detector to a MetaImage file.
 
     .. c:var:: filename  
         
@@ -102,7 +102,7 @@ This detector in mainly use in CT application. Flatpanel can orbiting around the
 
 .. c:function:: void save_scatter( std::string filename )
     
-    Save scatter projection recover by the detector to MetaImage file.
+    Save scatter projection recovered by the detector to a MetaImage file.
 
     .. c:var:: filename  
         

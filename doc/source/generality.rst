@@ -8,7 +8,7 @@ Generality
 Reference frame
 ---------------
 
-In GGEMS the reference frame of the simulation is defined by the isocenter. Every element of the simulations (sources, phantoms and detectors) have to be placed regarding to the isocenter.
+In GGEMS the reference frame of the simulation is defined by the isocenter. Every element of the simulation (sources, phantoms and detectors) has to be positioned with respect to the isocenter.
 
 .. image:: images/world_frame.png
     :scale: 75%
@@ -21,7 +21,7 @@ In GGEMS the reference frame of the simulation is defined by the isocenter. Ever
 MHD file format
 ---------------
 
-GGEMS uses MHD file format to load phantom and CT image. This file format is composed of two files. One is containing the raw data of the image in binary format (.raw), and the second one containing information about the image in text format (.mhd). In the .mhd file only these keywords are used by GGEMS::
+GGEMS uses MHD file format to load phantom and CT image. This file format is composed of two files. One contains the raw data of the image in binary format (.raw), and the second one contains information about the image in text format (.mhd). In the .mhd file only these keywords are used by GGEMS::
 
     ObjectType = Image
     NDims = 3
@@ -33,13 +33,13 @@ GGEMS uses MHD file format to load phantom and CT image. This file format is com
     ElementType = MET_FLOAT
     ElementDataFile = phantom_pet_hu.raw
 
-GGEMS is able to import data with ElementType defined as: ``MET_FLOAT, MET_UINT, MET_SHORT, MET_USHORT, MET_UCHAR``. The offset value is the point position that defined the center of the frame. This offset, is then used to translate the phantom accordingly, as shown to the figure:
+GGEMS is able to import data with ElementType defined as: ``MET_FLOAT, MET_UINT, MET_SHORT, MET_USHORT, MET_UCHAR``. The offset are the point coordinates that define the center of the frame. This offset, is then used to translate the phantom accordingly, as shown to the figure:
 
 .. image:: images/image_offset.png
     :scale: 75%
     :align: center  
 
-For example to center your voxelized volume to the center of the world frame, the offset will be::
+For example, to center your voxelized volume in the center of the world frame, the offset will be::
 
     ox = volume_size_x / 2.0
     oy = volume_size_y / 2.0
@@ -212,7 +212,7 @@ Units recognized and used by GGEMS:
 Data type
 ---------
 
-GGEMS used specific data type:
+GGEMS uses specific data type:
 
 * **f32** real number with simple precision
 * **f32xy** vector (x, y) of f32

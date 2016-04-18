@@ -33,6 +33,11 @@
 
 //#define SKIP_VOXEL
 
+// For variance reduction (use in IORT for instance)
+#define analog 0
+#define TLE    1
+#define seTLE  2
+
 // Mu and Mu_en table used by TLE
 struct Mu_MuEn_Table{
     ui32 nb_mat;      // k
@@ -149,7 +154,7 @@ public:
     //void set_doxel_size( f32 sizex, f32 sizey, f32 sizez );
     //void set_volume_of_interest( f32 xmin, f32 xmax, f32 ymin, f32 ymax, f32 zmin, f32 zmax );
 
-    void set_track_length_estimator( std::string kind );
+    void set_kerma_estimator( std::string kind );
 
     //void add_cylinder_objects( std::string filename, std::string mat_name );
 

@@ -10,7 +10,7 @@ Compilation
 Requirement
 -----------
 
-Software using GGEMS library requires minimum version of gcc and nvcc to be compiled:
+Software using GGEMS library requires a minimum version of gcc and nvcc to be compiled:
 
 GCC
 ^^^
@@ -27,12 +27,12 @@ Compute capability
 
 Your NVIDIA GPU device must have a compute capability **>= 3.0**.
 
-Only Kepler and newest NVIDIA architecture are compatible with GGEMS. Check your architecture to `Wikipedia <http://en.wikipedia.org.wiki/CUDA>`_.
+Only Kepler and newest NVIDIA architecture are compatible with GGEMS. Check your architecture in `Wikipedia <http://en.wikipedia.org.wiki/CUDA>`_.
 
 Installation
 ------------
 
-Since GGEMS is a static library, installation procedure is not really required. The main directory that contains GGEMS has to be placed somewhere in your home directory in order to have the right to access.
+Since GGEMS is a static library, an installation procedure is not really required. The main directory that contains GGEMS has to be placed somewhere in your home directory in order to have the right to access.
 
 Compilation
 -----------
@@ -44,7 +44,7 @@ Your source code must include the main GGEMS file:
 
     #include <ggems.cuh>
 
-Then in a linux terminal, you need to source GGEMS path in order to tell your compilation where is GGEMS files::
+Then in a linux terminal, you need to source GGEMS path in order to tell your compilation where the GGEMS files are::
 
     source [MyGGEMSInstallDirectoryPath]/bin/ggems.sh
 
@@ -55,7 +55,7 @@ Finally, you can compile::
 Execution
 ^^^^^^^^^
 
-Software that uses GGEMS library requires a license to be executed. License file can be freely distributed for academic institution.
+Software that uses GGEMS library requires a license to be executed. License file can be freely distributed for academic institutions.
 
 
 Last update: |today|  -  Release: |release|.

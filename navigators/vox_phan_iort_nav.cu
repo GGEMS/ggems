@@ -750,7 +750,7 @@ VoxPhanIORTNav::VoxPhanIORTNav ()
     m_ymin = 0.0; m_ymax = 0.0;
     m_zmin = 0.0; m_zmax = 0.0;
 
-    m_flag_TLE = noTLE;
+    m_flag_TLE = analog;
 
     m_materials_filename = "";
 
@@ -774,7 +774,7 @@ VoxPhanIORTNav::VoxPhanIORTNav ()
     m_coo_hist_map.interaction = NULL;
     m_coo_hist_map.nb_data = 0;
 
-    m_mu_table.flag = 0; // Not used
+    m_mu_table.flag = analog; // Not used
 }
 
 void VoxPhanIORTNav::track_to_in ( Particles particles )
@@ -1029,7 +1029,7 @@ void VoxPhanIORTNav::set_volume_of_interest( f32 xmin, f32 xmax, f32 ymin, f32 y
 }
 */
 
-void VoxPhanIORTNav::set_track_length_estimator(std::string kind )
+void VoxPhanIORTNav::set_kerma_estimator( std::string kind )
 {
     // Transform the name of the process in small letter
     std::transform( kind.begin(), kind.end(), kind.begin(), ::tolower );
@@ -1043,6 +1043,11 @@ void VoxPhanIORTNav::set_track_length_estimator(std::string kind )
     {
         m_flag_TLE = seTLE;
         m_mu_table.flag = seTLE; // Use seTLE
+    }
+    else if ( kind == "analog" )
+    {
+        m_flag_TLE = analog;
+        m_mu_table.flag = analog; // Use analog
     }
     else
     {

@@ -631,11 +631,6 @@ void DoseCalculator::write ( std::string filename )
                     dose.data_h.number_of_hits, dose.data_h.offset, dose.data_h.doxel_size, dose.data_h.nb_doxels );
                 
     }
-    else
-    {
-        GGcout << "Dose calculation was not request, there is no dose map to export" << GGendl;
-    }
-
 
 }
 

@@ -11,7 +11,7 @@ ConeBeamCTSource
 .. sectionauthor:: Julien Bert
 .. codeauthor:: Didier Benoit
 
-Class cone-beam source. The user can define a focal, an aperture, an orbiting angle, etc. This source mainly used in CT application.
+Class cone-beam source. The user can define a focal, an aperture, an orbiting angle, etc. This source is mainly used in CT applications.
 
 ------------
 
@@ -21,15 +21,15 @@ Class cone-beam source. The user can define a focal, an aperture, an orbiting an
 
     .. c:var:: posx  
         
-        Position of the source in along the x-axis (in mm).
+        Position of the source along the x-axis (in mm).
 
     .. c:var:: posy 
     
-        Position of the source in along the y-axis (in mm).
+        Position of the source along the y-axis (in mm).
         
     .. c:var:: posz 
     
-        Position of the source in along the z-axis (in mm).
+        Position of the source along the z-axis (in mm).
 
 
 ------------
@@ -54,7 +54,7 @@ Class cone-beam source. The user can define a focal, an aperture, an orbiting an
 
     .. c:var:: aperture  
         
-        Aperture in radian of the X-ray CT source.
+        Aperture of the X-ray CT source in radians.
 
 ------------
 
@@ -81,7 +81,7 @@ Class cone-beam source. The user can define a focal, an aperture, an orbiting an
 .. c:function:: void set_energy_spectrum( std::string filename )
 
     Set the spectrum of the source based on a histogram file. This file in text format
-    must have two colums. A first one that list energy and a second one that list probability of the spectrum.
+    must have two columns. A first one listing the energy and a second one the probability of the spectrum.
 
     .. c:var:: filename
 
@@ -91,11 +91,11 @@ Class cone-beam source. The user can define a focal, an aperture, an orbiting an
 
 .. c:function:: void set_orbiting( f32 orbiting_angle )
 
-    Rotate the source around the z-axis and based on the center of the system.
+    Rotate the source around the z-axis with respect to the center of the system.
 
     .. c:var:: orbiting_angle
 
-        Orbiting angle around the center of the system in radian.
+        Orbiting angle around the center of the system in radians.
 
 
 .. note::
@@ -122,8 +122,8 @@ PhaseSpaceSource
 .. sectionauthor:: Julien Bert
 .. codeauthor:: Didier Benoit
 
-Class phase-space source. This source allow to use IAEA phase-space file. Phase-space can be
-duplicated and transform for multiple virtual sources.
+Class phase-space source. This source allows the use of IAEA phase-space file. Phase-space can be
+duplicated and transformed to simulate multiple virtual sources.
 
 ------------
 
