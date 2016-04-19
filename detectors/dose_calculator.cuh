@@ -87,7 +87,7 @@ public:
     void set_min_density( f32 min ); // Min density to consider the dose calculation
 
     // Getting
-
+    VoxVolumeData<f32> * get_dose_map();
 
     // Init
     void initialize( GlobalSimulationParameters params );

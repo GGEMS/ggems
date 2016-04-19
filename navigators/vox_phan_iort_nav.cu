@@ -1056,6 +1056,11 @@ void VoxPhanIORTNav::set_kerma_estimator( std::string kind )
     }
 }
 
+VoxVolumeData<f32> * VoxPhanIORTNav::get_dose_map()
+{
+    return m_dose_calculator.get_dose_map();
+}
+
 #undef DEBUG
 
 #endif

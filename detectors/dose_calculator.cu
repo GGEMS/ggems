@@ -360,6 +360,40 @@ void DoseCalculator::set_min_density ( f32 min )
     m_dose_min_density = min * gram/mm3;
 }
 
+VoxVolumeData<f32> * DoseCalculator::get_dose_map()
+{
+    if ( !m_flag_dose_calculated )
+    {
+        calculate_dose_to_water();
+    }
+
+    VoxVolumeData<f32> *dosemap = new VoxVolumeData<f32>;
+    dosemap->nb_vox_x = m_nb_of_dosels.x;
+    dosemap->nb_vox_y = m_nb_of_dosels.y;
+    dosemap->nb_vox_z = m_nb_of_dosels.z;
+
+    dosemap->off_x = m_offset.x;
+    dosemap->off_y = m_offset.y;
+    dosemap->off_z = m_offset.z;
+
+    dosemap->spacing_x = m_dosel_size.x;
+    dosemap->spacing_y = m_dosel_size.y;
+    dosemap->spacing_z = m_dosel_size.z;
+
+    dosemap->number_of_voxels = m_nb_of_dosels.x + m_nb_of_dosels.y + m_nb_of_dosels.z;
+
+    dosemap->xmin = m_xmin;
+    dosemap->xmax = m_xmax;
+    dosemap->ymin = m_ymin;
+    dosemap->ymax = m_ymax;
+    dosemap->zmin = m_zmin;
+    dosemap->zmax = m_zmax;
+
+    dosemap->values = m_dose_values;
+
+    return dosemap;
+}
+
 /// Init
 void DoseCalculator::initialize ( GlobalSimulationParameters params )
 {

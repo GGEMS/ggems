@@ -162,6 +162,8 @@ public:
     void export_materials_map( std::string filename );
     void export_history_map( std::string filename );
 
+    VoxVolumeData<f32> * get_dose_map();
+
 private:
 
     VoxelizedPhantom m_phantom;
