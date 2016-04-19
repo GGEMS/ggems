@@ -86,6 +86,9 @@ public:
     void set_materials( Materials materials );
     void set_min_density( f32 min ); // Min density to consider the dose calculation
 
+    // Getting
+
+
     // Init
     void initialize( GlobalSimulationParameters params );
 

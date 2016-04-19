@@ -893,7 +893,7 @@ __host__ __device__ void gLatCorrection ( f32xyz currentDir, f32 tPath, f32 zPat
 
 __host__ __device__ void eMscScattering ( f32 tPath, f32 zPath, f32 currentRange, f32 currentLambda,
                                           f32 currentEnergy, f32 par1, f32 par2, ParticlesData &particles,
-                                          ui32 id, MaterialsTable materials, ui8 mat, VoxVolumeData phantom/*, ui32xyzw index_phantom */)
+                                          ui32 id, MaterialsTable materials, ui8 mat, VoxVolumeData<ui16> phantom/*, ui32xyzw index_phantom */)
 {
     f32  costh, sinth, phi, currentTau;
     const f32 tlimitminfix = 1.E-10*mm, tausmall = 1.E-16; //,taulim=1.E-6
@@ -986,7 +986,7 @@ __host__ __device__ void eMscScattering ( f32 tPath, f32 zPath, f32 currentRange
 __host__ __device__ f32 GlobalMscScattering ( f32 GeomPath,f32 cutstep,f32 CurrentRange,f32 CurrentEnergy, f32 CurrentLambda,
                                               f32 dedxeIoni, f32 dedxeBrem, ElectronsCrossSectionTable d_table, ui8 mat,
                                               ParticlesData &particles, ui32 id,f32 par1,f32 par2, MaterialsTable materials,
-                                              DoseData &dosi, ui32xyzw index_phantom, VoxVolumeData phantom,
+                                              DoseData &dosi, ui32xyzw index_phantom, VoxVolumeData<ui16> phantom,
                                               GlobalSimulationParametersData parameters )
 {
 

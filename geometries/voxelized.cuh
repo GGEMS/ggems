@@ -20,6 +20,7 @@
 #include "materials.cuh"
 
 // Struct that handle Vox Volume data
+template <typename aType>
 struct VoxVolumeData {
     ui16 nb_vox_x, nb_vox_y, nb_vox_z;
     ui32 number_of_voxels;
@@ -27,7 +28,7 @@ struct VoxVolumeData {
     f32 off_x, off_y, off_z;
     f32 xmin, xmax, ymin, ymax, zmin, zmax;
 
-    ui16 *values;
+    aType *values;
 };
 
 // Voxelized phantom
@@ -45,8 +46,8 @@ class VoxelizedPhantom : public BaseObject {
 
         void set_offset(f32 x, f32 y, f32 z);
 
-        VoxVolumeData data_h;
-        VoxVolumeData data_d;
+        VoxVolumeData<ui16> data_h;
+        VoxVolumeData<ui16> data_d;
         std::vector<std::string> list_of_materials;    
 
     private:

@@ -19,7 +19,7 @@
 ////// HOST-DEVICE GPU Codes ////////////////////////////////////////////
 
 __host__ __device__ void VPIORTN::track_to_out( ParticlesData &particles,
-                                                VoxVolumeData vol,
+                                                VoxVolumeData<ui16> vol,
                                                 MaterialsTable materials,
                                                 PhotonCrossSectionTable photon_CS_table,
                                                 GlobalSimulationParametersData parameters,
@@ -264,7 +264,7 @@ __host__ __device__ void VPIORTN::track_to_out( ParticlesData &particles,
 
 
 // Se TLE function
-__host__ __device__ void VPIORTN::track_seTLE( ParticlesData &particles, VoxVolumeData vol, COOHistoryMap coo_hist_map,
+__host__ __device__ void VPIORTN::track_seTLE( ParticlesData &particles, VoxVolumeData<ui16> vol, COOHistoryMap coo_hist_map,
                                                DoseData dose, Mu_MuEn_Table mu_table,
                                                ui32 nb_of_rays, f32 edep_th, ui32 id )
 {
@@ -429,7 +429,7 @@ __host__ __device__ void VPIORTN::track_seTLE( ParticlesData &particles, VoxVolu
 
 // Device Kernel that move particles to the voxelized volume boundary
 __global__ void VPIORTN::kernel_device_track_to_in( ParticlesData particles, f32 xmin, f32 xmax,
-                                                  f32 ymin, f32 ymax, f32 zmin, f32 zmax, f32 tolerance )
+                                                    f32 ymin, f32 ymax, f32 zmin, f32 zmax, f32 tolerance )
 {  
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
     if ( id >= particles.size ) return;    
@@ -446,7 +446,7 @@ void VPIORTN::kernel_host_track_to_in( ParticlesData particles, f32 xmin, f32 xm
 
 // Device kernel that track particles within the voxelized volume until boundary
 __global__ void VPIORTN::kernel_device_track_to_out( ParticlesData particles,
-                                                     VoxVolumeData vol,
+                                                     VoxVolumeData<ui16> vol,
                                                      MaterialsTable materials,
                                                      PhotonCrossSectionTable photon_CS_table,
                                                      GlobalSimulationParametersData parameters,
@@ -471,7 +471,7 @@ __global__ void VPIORTN::kernel_device_track_to_out( ParticlesData particles,
 
 // Host kernel that track particles within the voxelized volume until boundary
 void VPIORTN::kernel_host_track_to_out( ParticlesData particles,
-                                       VoxVolumeData vol,
+                                       VoxVolumeData<ui16> vol,
                                        MaterialsTable materials,
                                        PhotonCrossSectionTable photon_CS_table,
                                        GlobalSimulationParametersData parameters,
@@ -498,7 +498,7 @@ void VPIORTN::kernel_host_track_to_out( ParticlesData particles,
 
 
 // Device kernel that perform seTLE
-__global__ void VPIORTN::kernel_device_seTLE( ParticlesData particles, VoxVolumeData vol,
+__global__ void VPIORTN::kernel_device_seTLE( ParticlesData particles, VoxVolumeData<ui16> vol,
                                               COOHistoryMap coo_hist_map,
                                               DoseData dosi,
                                               Mu_MuEn_Table mu_table , ui32 nb_of_rays , f32 edep_th )
@@ -510,7 +510,7 @@ __global__ void VPIORTN::kernel_device_seTLE( ParticlesData particles, VoxVolume
 }
 
 // Host kernel that perform seTLE
-void VPIORTN::kernel_host_seTLE( ParticlesData particles, VoxVolumeData vol,
+void VPIORTN::kernel_host_seTLE( ParticlesData particles, VoxVolumeData<ui16> vol,
                                  COOHistoryMap coo_hist_map,
                                  DoseData dosi,
                                  Mu_MuEn_Table mu_table , ui32 nb_of_rays , f32 edep_th )
