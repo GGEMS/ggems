@@ -665,14 +665,29 @@ void DoseCalculator::m_copy_dose_gpu2cpu()
 
 void DoseCalculator::write ( std::string filename )
 {
-    
-    std::string format = ImageReader::get_format ( filename );
-    filename = ImageReader::get_filename_without_format ( filename );
+    // Create an IO object
+    ImageIO *im_io = new ImageIO;
+
+    std::string format = im_io->get_format( filename );
+    filename = im_io->get_filename_without_format( filename );
+
+    // Convert Edep from f64 to f32
+    ui32 tot = dose.nb_dosels.x*dose.nb_dosels.y*dose.nb_dosels.z;
+    f32 *f32edep = new f32[ tot ];
+    ui32 i=0; while ( i < tot )
+    {
+        f32edep[ i ] = (f32)dose.edep[ i ];
+        ++i;
+    }
+
+    // Get output name
+    std::string edep_out( filename + "-Edep." + format );
+    std::string uncer_out( filename + "-Uncertainty." + format );
+    std::string hit_out( filename + "-Hit." + format );
+    std::string dose_out( filename + "-Dose." + format );
 
     // Export Edep
-    ImageReader::record3Dimage (
-        filename + "-Edep."+format ,
-        dose.edep, dose.offset, dose.dosel_size, dose.nb_dosels );
+    im_io->write_3D( edep_out, f32edep, dose.nb_dosels, dose.offset, dose.dosel_size );
 
     // Export uncertainty
     if ( !m_flag_uncertainty_calculated )
@@ -689,22 +704,18 @@ void DoseCalculator::write ( std::string filename )
             }
         }
     }
-    ImageReader::record3Dimage (
-                filename + "-Uncertainty."+format,
-                m_uncertainty_values, dose.offset, dose.dosel_size, dose.nb_dosels );
 
-    // Export Hits
-    ImageReader::record3Dimage (
-                filename + "-Hit."+format,
-                dose.number_of_hits, dose.offset, dose.dosel_size, dose.nb_dosels );
+    // Export uncertainty and hits
+    im_io->write_3D( uncer_out, m_uncertainty_values, dose.nb_dosels, dose.offset, dose.dosel_size );
+    im_io->write_3D( hit_out, dose.number_of_hits, dose.nb_dosels, dose.offset, dose.dosel_size );
 
     // Export dose
     if ( m_flag_dose_calculated )
     {
-        ImageReader::record3Dimage (
-                    filename + "-Dose."+format,
-                    m_dose_values, dose.offset, dose.dosel_size, dose.nb_dosels );
+        im_io->write_3D( dose_out, m_dose_values, dose.nb_dosels, dose.offset, dose.dosel_size );
     }
+
+    delete im_io;
 
 }
 

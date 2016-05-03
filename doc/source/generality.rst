@@ -21,7 +21,12 @@ In GGEMS the reference frame of the simulation is defined by the isocenter. Ever
 MHD file format
 ---------------
 
-GGEMS uses MHD file format to load phantom and CT image. This file format is composed of two files. One contains the raw data of the image in binary format (.raw), and the second one contains information about the image in text format (.mhd). In the .mhd file only these keywords are used by GGEMS::
+GGEMS uses Meta Header Data (MHD) file format to load phantom, CT image or phase-space file. This file format is composed of two files. One contains the raw data in a binary format (.raw), and the second one contains information about the data in text format (.mhd). 
+
+MHD file for Image data
+^^^^^^^^^^^^^^^^^^^^^^^
+
+In the .mhd file only these keywords are used by GGEMS to describe image::
 
     ObjectType = Image
     NDims = 3
@@ -44,6 +49,31 @@ For example, to center your voxelized volume in the center of the world frame, t
     ox = volume_size_x / 2.0
     oy = volume_size_y / 2.0
     oz = volume_size_z / 2.0
+
+MHD file for Phase-Space data
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+In the .mhd file these keywords have to be provided::
+
+    ObjectType = PhaseSpace
+    NPhotons = 1000000
+    NElectrons = 0
+    NPositrons = 0
+    CompressedData = False    
+    ElementDataFile = phasespace.raw    
+
+Particles are stored one by one in the raw data. An uncompressed phase-space file must have a format by particle as follows::
+
+    Particle type (ui8) - photon:1 electron:2 positron:3 neutron:4 proton:5
+    Energy (f32)
+    Position along x (f32)
+    Position along y (f32)
+    Position along z (f32)
+    Direction along x (f32)
+    Direction along y (f32)
+    Direction along z (f32)
+    
+One particle needs 29 Bytes to be stored.    
 
 -----
 

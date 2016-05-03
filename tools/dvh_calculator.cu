@@ -64,7 +64,7 @@ void DVHCalculator::compute_dvh_from_mask(VoxVolumeData<f32> dosemap, std::strin
 
     // Get min, max, total dose and nb of voxels under the mask
     f32 val = 0.0;
-    ui32 i = 0;
+    i32 i = 0;
     while( i < dosemap.number_of_voxels )
     {
         if ( mask[ i ] == id_mask )

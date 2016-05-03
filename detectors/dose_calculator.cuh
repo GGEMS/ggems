@@ -18,7 +18,7 @@
 #include "global.cuh"
 #include "particles.cuh"
 #include "vector.cuh"
-#include "image_reader.cuh"
+#include "image_io.cuh"
 #include "voxelized.cuh"
 #include "materials.cuh"
 #include "raytracing.cuh"

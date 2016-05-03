@@ -131,10 +131,17 @@ set(CUDA_NVCC_FLAGS_RELEASE ${CUDA_NVCC_FLAGS_RELEASE} "--std=c++11")
 cuda_add_library(${LIB_NAME} STATIC ${sourcesGPU} ${headersGPU})
 
 # Installation
+set(TEMPLATE 
+    ${PROJECT_SOURCE_DIR}/sources/point_source.cu
+    ${PROJECT_SOURCE_DIR}/sources/point_source.cuh
+    ${PROJECT_SOURCE_DIR}/detectors/template_detector.cu
+    ${PROJECT_SOURCE_DIR}/detectors/template_detector.cuh)
+
 install(TARGETS ${LIB_NAME} DESTINATION "lib")
 install(FILES ${headersGPU} DESTINATION "include")
 install(FILES ${ggemssh} DESTINATION "bin" PERMISSIONS WORLD_EXECUTE WORLD_READ OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE)
 install(FILES ${datafiles} DESTINATION "data")
+install(FILES ${TEMPLATE} DESTINATION "dev-template")
 
 install(CODE "MESSAGE(\"Installation done ...\")")
 if (UNIX)

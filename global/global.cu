@@ -153,7 +153,7 @@ void GGcout_version ()
     //std::string DrvTxt = (DrvVersion) ? std::to_string( DrvVersion ) : "Unknown";
 
     GGcout << "GCC: " << __GNUC__ << "." << __GNUC_MINOR__
-           << " NVCC: " << VerTxt
+           << " NVCC: " << VerTxt << " (" << Version << ")"
            << GGendl;
 }
 
@@ -275,7 +275,7 @@ void GGcout_params( GlobalSimulationParametersData params )
         printf("[GGEMS]    Range: %s\n", Range_str( params.geom_tolerance ).c_str() );
         printf("[GGEMS] Simulation:\n");
         printf("[GGEMS]    Device target: %s\n", ( params.device_target == CPU_DEVICE ) ? "CPU" : "GPU" );
-        printf("[GGEMS]    Total Nb of particles: %i\n", params.nb_of_particles);
+        printf("[GGEMS]    Total Nb of particles: %lld\n", params.nb_of_particles);
         printf("[GGEMS]    Size of batch: %i\n", params.size_of_particles_batch);
         printf("[GGEMS]    Nb of batches: %i\n", params.nb_of_batches);
         printf("[GGEMS]    Seed value %i\n", params.seed);
@@ -310,7 +310,7 @@ void GGcout_params( GlobalSimulationParametersData params )
         printf("[GGEMS]    Range: %s\n", Range_str( params.geom_tolerance ).c_str() );
         printf("[GGEMS] Simulation:\n");
         printf("[GGEMS]    Device target: %s\n", ( params.device_target == CPU_DEVICE ) ? "CPU" : "GPU" );
-        printf("[GGEMS]    Total Nb of particles: %i\n", params.nb_of_particles);
+        printf("[GGEMS]    Total Nb of particles: %lld\n", params.nb_of_particles);
         printf("[GGEMS]    Size of batch: %i\n", params.size_of_particles_batch);
         printf("[GGEMS]    Nb of batches: %i\n", params.nb_of_batches);
         printf("[GGEMS]    Seed value %i\n", params.seed);

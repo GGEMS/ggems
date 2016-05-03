@@ -22,7 +22,6 @@
 #include "materials.cuh"
 #include "ggems_detector.cuh"
 #include "ct_detector.cuh"
-#include "image_reader.cuh"
 #include "license.cuh"
 
 #include "point_source.cuh"

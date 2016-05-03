@@ -20,6 +20,7 @@ GGEMS Enhancement Proposals (GEP)
 * **GEP014 - Use unified memory for phantom data**
 * **GEP015 - Use unified memory for cross section data**
 * **GEP016 - Use unified memory for material data**
+* **GRP017 - Use ImageIO to open MHD in voxelized.cu**
 
 GGEMS Bug Reporting (GBR) 
 

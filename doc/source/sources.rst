@@ -122,8 +122,7 @@ PhaseSpaceSource
 .. sectionauthor:: Julien Bert
 .. codeauthor:: Didier Benoit
 
-Class phase-space source. This source allows the use of IAEA phase-space file. Phase-space can be
-duplicated and transformed to simulate multiple virtual sources.
+Class phase-space source. This source allows the use of IAEA phase-space file or MHD phase-space file ( :ref:`mhd-label` ). Phase-space can be duplicated and transformed to simulate multiple virtual sources.
 
 ------------
 
@@ -167,12 +166,12 @@ duplicated and transformed to simulate multiple virtual sources.
 
 .. c:function:: void load_phasespace_file( std::string filename )
     
-    Load a phase-space file in IAEA format. Before load, please check if you have enough memory
+    Load a phase-space file in IAEA format or MHD format ( :ref:`mhd-label` ). Before load, please check if you have enough memory
     on your graphics card.
 
     .. c:var:: filename  
         
-        Header name of the IAEA phase-space file.
+        Header name of the IAEA phase-space file or mhd phase-space file.
 
 -----
 

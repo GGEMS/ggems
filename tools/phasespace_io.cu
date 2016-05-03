@@ -1,26 +1,26 @@
 // GGEMS Copyright (C) 2015
 
 /*!
- * \file iaea_io.cu
+ * \file phasespace_io.cu
  * \brief
  * \author J. Bert <bert.jul@gmail.com>
  * \version 0.1
  * \date 11/03/2016
- *
+ * \date 27/04/2016 - Add binary data reader - JB
  *
  *
  */
 
-#ifndef IAEA_IO_CU
-#define IAEA_IO_CU
+#ifndef PHASESPACE_IO_CU
+#define PHASESPACE_IO_CU
 
 
-#include "iaea_io.cuh"
+#include "phasespace_io.cuh"
 
 /////:: Private
 
 // Skip comment starting with "#"
-void IAEAIO::m_skip_comment(std::istream & is) {
+void PhaseSpaceIO::m_skip_comment(std::istream & is) {
     i8 c;
     i8 line[1024];
     if (is.eof()) return;
@@ -34,12 +34,12 @@ void IAEAIO::m_skip_comment(std::istream & is) {
 }
 
 // Read mhd key
-std::string IAEAIO::m_read_key(std::string txt) {
+std::string PhaseSpaceIO::m_read_key(std::string txt) {
     return txt.substr(0, txt.find(":"));
 }
 
 // Read the list of tokens in a txt line
-std::vector< std::string > IAEAIO::m_split_txt(std::string line) {
+std::vector< std::string > PhaseSpaceIO::m_split_txt(std::string line) {
     std::istringstream iss(line);
     std::vector<std::string> tokens;
     std::copy(std::istream_iterator<std::string>(iss),
@@ -51,11 +51,12 @@ std::vector< std::string > IAEAIO::m_split_txt(std::string line) {
 
 /////:: Main functions
 
-IAEAIO::IAEAIO()
+PhaseSpaceIO::PhaseSpaceIO()
 {
-    m_header_ext = ".IAEAheader";
-    m_file_ext   = ".IAEAphsp";
+
     m_filename   = "";
+
+    m_header_loaded = "";
 
     m_check_sum = 0;
     m_record_length = 0;
@@ -75,13 +76,43 @@ IAEAIO::IAEAIO()
     m_genint_flag = false;
 }
 
-void IAEAIO::read_header( std::string filename )
+// Read a phasespace file
+PhaseSpaceData PhaseSpaceIO::read_phasespace_file( std::string filename )
+{
+    PhaseSpaceData phsp;
+
+    std::string ext = filename.substr( filename.find_last_of( "." ) + 1 );
+    if ( ext == "IAEAheader" )
+    {
+        m_read_IAEA_header( filename );
+        phsp = m_read_IAEA_data();
+    }
+    else if ( ext == "mhd" )
+    {
+        m_read_MHD_header( filename );
+        phsp = m_read_MHD_data();
+    }
+    else
+    {
+        GGcerr << "Phasespace source can only read data in IAEA format (.IAEAheader) or Meta Header Data (.mhd)!" << GGendl;
+        exit_simulation();
+    }
+
+    return phsp;
+}
+
+/////:: Private functions
+
+// Read IAEA header data
+void PhaseSpaceIO::m_read_IAEA_header( std::string filename )
 {
     // Get filename without extension
     std::string file_wo_ext = filename.substr( 0, filename.find_last_of( "." ) );
     m_filename = file_wo_ext;
 
     // Read file
+    std::string m_header_ext = ".IAEAheader";
+
     std::ifstream file( file_wo_ext + m_header_ext );
     if( !file ) {
         GGcout << "Error, IAEA file '" << file_wo_ext + m_header_ext << "' not found!!" << GGendl;
@@ -213,6 +244,9 @@ void IAEAIO::read_header( std::string filename )
         exit_simulation();
     }
 
+    // Header loaded
+    m_header_loaded = "iaea";
+
 /*
     GGcout << "Checksum: " << m_check_sum << GGendl;
     GGcout << "Record length: " << m_record_length << GGendl;
@@ -234,7 +268,8 @@ void IAEAIO::read_header( std::string filename )
 }
 
 
-// FORMAT IAEA
+
+// IAEA Format
 // X real 4
 // Y real 4
 // Z real 4
@@ -252,16 +287,18 @@ void IAEAIO::read_header( std::string filename )
 // or
 // Longs extra Int 1
 
-// Read data
-IaeaType IAEAIO::read_data()
+// Read data from IAEA data
+PhaseSpaceData PhaseSpaceIO::m_read_IAEA_data()
 {
-    if ( m_filename == "" )
+    if ( m_header_loaded != "iaea" )
     {
         GGcerr << "You need first to read the IAEA phasespace header!" << GGendl;
         exit_simulation();
     }
 
     // Read file
+    std::string m_file_ext   = ".IAEAphsp";
+
     std::string filename = m_filename + m_file_ext;
     FILE *pfile = fopen(filename.c_str(), "rb");
 
@@ -282,7 +319,7 @@ IaeaType IAEAIO::read_data()
     i32 extra_l;
 
     // Mem allocation
-    IaeaType phasespace;
+    PhaseSpaceData phasespace;
     HANDLE_ERROR( cudaMallocManaged( &(phasespace.energy), N * sizeof( f32 ) ) );
     HANDLE_ERROR( cudaMallocManaged( &(phasespace.pos_x), N * sizeof( f32 ) ) );
     HANDLE_ERROR( cudaMallocManaged( &(phasespace.pos_y), N * sizeof( f32 ) ) );
@@ -367,6 +404,182 @@ IaeaType IAEAIO::read_data()
 
     return phasespace;
 
+}
+
+// Reader header from MHD data
+void PhaseSpaceIO::m_read_MHD_header( std::string filename )
+{
+    // Get a txt reader
+    TxtReader *txt_reader = new TxtReader;    
+
+    /////////////// First read the MHD file //////////////////////
+
+    std::string line, key;   
+
+    // Watchdog
+    std::string ObjectType = "", ElementDataFile = "", CompressedData = "False";
+    ui32 NPhotons = 0, NElectrons = 0, NPositrons = 0;
+
+    // Read file
+    std::ifstream file( filename.c_str() );
+    if ( !file ) {
+        GGcerr << "Error, file '" << filename << "' not found!" << GGendl;
+        exit_simulation();
+    }
+
+    while ( file ) {
+        txt_reader->skip_comment( file );
+        std::getline( file, line );
+
+        if ( file ) {
+            key = txt_reader->read_key(line);
+            if ( key == "ObjectType" )              ObjectType = txt_reader->read_key_string_arg( line );
+            if ( key == "NPhotons" )                NPhotons = txt_reader->read_key_i32_arg( line );
+            if ( key == "NElectrons" )              NElectrons = txt_reader->read_key_i32_arg( line );
+            if ( key == "NPositrons" )              NPositrons = txt_reader->read_key_i32_arg( line );
+            if ( key == "ElementDataFile" )         ElementDataFile = txt_reader->read_key_string_arg( line );
+            if ( key == "CompressedData" )          CompressedData = txt_reader->read_key_string_arg( line );
+        }
+
+    } // read file
+
+    // Check header
+    if ( ObjectType != "PhaseSpace" ) {
+        GGcerr << "Read phasespace header: ObjectType = " << ObjectType << " !" << GGendl;
+        exit_simulation();
+    }
+
+    if ( ElementDataFile == "" ) {
+        GGcerr << "Read phasespace header: ObjectType = " << ElementDataFile << " !" << GGendl;
+        exit_simulation();
+    }
+
+    ui32 tot_nb_particles = NPhotons + NElectrons + NPositrons;
+    if ( tot_nb_particles == 0 ) {
+        GGcerr << "Read phasespace header: contains 0 particles!" << GGendl;
+        exit_simulation();
+    }
+
+    // Test if relative path
+    FILE *pfile = fopen(ElementDataFile.c_str(), "rb");
+
+    // Reative path?
+    if ( !pfile ) {
+        std::string nameWithRelativePath = filename;
+        i32 lastindex = nameWithRelativePath.find_last_of("/");
+        nameWithRelativePath = nameWithRelativePath.substr(0, lastindex);
+        nameWithRelativePath += ( "/" + ElementDataFile );
+
+        m_filename = nameWithRelativePath;
+    }
+    else
+    {
+        m_filename = ElementDataFile;
+        fclose( pfile );
+    }
+
+    // Store values
+    m_nb_photons = NPhotons;
+    m_nb_electrons = NElectrons;
+    m_nb_positrons = NPositrons;
+    m_compression_type = CompressedData;
+
+    // Header loaded
+    m_header_loaded = "mhd";
+
+}
+
+
+//  MHD format (not compressed)
+//  type - photon:1 electron:2 positron:3 neutron:4 proton:5
+//  E
+//  px
+//  py
+//  pz
+//  u
+//  v
+//  w
+
+// Read data from MHD format
+PhaseSpaceData PhaseSpaceIO::m_read_MHD_data()
+{
+
+    if ( m_header_loaded != "mhd" )
+    {
+        GGcerr << "You need first to read the MHD phasespace header!" << GGendl;
+        exit_simulation();
+    }
+
+    // Read data
+    FILE *pfile = fopen(m_filename.c_str(), "rb");
+
+    // Reative path?
+    if ( !pfile ) {
+        GGcerr << "Error when loading mhd file: " << m_filename << GGendl;
+        exit_simulation();
+    }
+
+    // Total number of particles
+    ui32 N = m_nb_electrons + m_nb_photons + m_nb_positrons;
+
+    // Vars to read
+    ui8 pType;
+    f32 E;
+    f32 px, py, pz;
+    f32 u, v, w;
+
+    // Mem allocation
+    PhaseSpaceData phasespace;
+    HANDLE_ERROR( cudaMallocManaged( &(phasespace.energy), N * sizeof( f32 ) ) );
+    HANDLE_ERROR( cudaMallocManaged( &(phasespace.pos_x), N * sizeof( f32 ) ) );
+    HANDLE_ERROR( cudaMallocManaged( &(phasespace.pos_y), N * sizeof( f32 ) ) );
+    HANDLE_ERROR( cudaMallocManaged( &(phasespace.pos_z), N * sizeof( f32 ) ) );
+    HANDLE_ERROR( cudaMallocManaged( &(phasespace.dir_x), N * sizeof( f32 ) ) );
+    HANDLE_ERROR( cudaMallocManaged( &(phasespace.dir_y), N * sizeof( f32 ) ) );
+    HANDLE_ERROR( cudaMallocManaged( &(phasespace.dir_z), N * sizeof( f32 ) ) );
+    HANDLE_ERROR( cudaMallocManaged( &(phasespace.ptype), N * sizeof( ui8 ) ) );
+    phasespace.tot_particles = N;
+    phasespace.nb_photons = m_nb_photons;
+    phasespace.nb_electrons = m_nb_electrons;
+    phasespace.nb_positrons = m_nb_positrons;
+
+    // If not compressed
+    if ( m_compression_type == "False" )
+    {
+        ui32 i = 0;
+        while( i < N )
+        {
+            // Read a particle
+            fread(&pType, sizeof(ui8), 1, pfile);
+            fread(&E, sizeof(f32), 1, pfile);
+            fread(&px, sizeof(f32), 1, pfile);
+            fread(&py, sizeof(f32), 1, pfile);
+            fread(&pz, sizeof(f32), 1, pfile);
+            fread(&u, sizeof(f32), 1, pfile);
+            fread(&v, sizeof(f32), 1, pfile);
+            fread(&w, sizeof(f32), 1, pfile);
+
+            // Store a particle
+            if ( pType == 1 ) phasespace.ptype[ i ] = PHOTON;
+            if ( pType == 2 ) phasespace.ptype[ i ] = ELECTRON;
+            if ( pType == 3 ) phasespace.ptype[ i ] = POSITRON;
+            phasespace.energy[ i ] = E;
+            phasespace.pos_x[ i ] = px;
+            phasespace.pos_y[ i ] = py;
+            phasespace.pos_z[ i ] = pz;
+            phasespace.dir_x[ i ] = u;
+            phasespace.dir_y[ i ] = v;
+            phasespace.dir_z[ i ] = w;
+            ++i;
+        }
+    }
+    else
+    {
+        GGcerr << "Phasespace MHD, compression method unknow: " << m_compression_type << GGendl;
+        exit_simulation();
+    }
+
+    return phasespace;
 }
 
 

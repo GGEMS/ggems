@@ -20,7 +20,7 @@
 #include "particles.cuh"
 #include "ggems_source.cuh"
 #include "prng.cuh"
-#include "iaea_io.cuh"
+#include "phasespace_io.cuh"
 #include "fun.cuh"
 #include "vector.cuh"
 
@@ -39,10 +39,10 @@ class GGEMSource;
 
 namespace PHSPSRC
 {
-__host__ __device__ void phsp_source( ParticlesData particles_data,
-                                      IaeaType phasespace, PhSpTransform transform, ui32 id );
+__host__ __device__ void phsp_source(ParticlesData particles_data,
+                                     PhaseSpaceData phasespace, PhSpTransform transform, ui32 id );
 __global__ void phsp_point_source( ParticlesData particles_data,
-                                   IaeaType phasespace, PhSpTransform transform );
+                                   PhaseSpaceData phasespace, PhSpTransform transform );
 }
 
 // PhaseSpace source
@@ -72,9 +72,8 @@ private:
     void m_skip_comment(std::istream & is);
 
     GlobalSimulationParameters m_params;
-    PhSpTransform m_transform;
-    IAEAIO *m_iaea;
-    IaeaType m_phasespace;
+    PhSpTransform m_transform;    
+    PhaseSpaceData m_phasespace;    
     i32 m_nb_part_max;
 
 };

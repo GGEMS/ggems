@@ -1,20 +1,21 @@
 // GGEMS Copyright (C) 2015
 
 /*!
- * \file iaea_io.cuh
+ * \file phasespace_io.cuh
  * \brief
  * \author J. Bert <bert.jul@gmail.com>
  * \version 0.1
  * \date 11/03/2016
- *
+ * \date 27/04/2016 - Add binary data reader - JB
  *
  *
  */
 
-#ifndef IAEA_IO_CUH
-#define IAEA_IO_CUH
+#ifndef PHASESPACE_IO_CUH
+#define PHASESPACE_IO_CUH
 
 #include "global.cuh"
+#include "txt_reader.cuh"
 
 // FORMAT IAEA
 // X real 4
@@ -34,7 +35,7 @@
 // or
 // Longs extra Int 1
 
-struct IaeaType
+struct PhaseSpaceData
 {
     f32 *energy;
 
@@ -54,21 +55,25 @@ struct IaeaType
     ui32 nb_positrons;
 };
 
-// Read IAEA file
-class IAEAIO {
+// Read PhaseSpace file
+class PhaseSpaceIO {
 
     public:
-        IAEAIO();
-        ~IAEAIO(){}
+        PhaseSpaceIO();
+        ~PhaseSpaceIO(){}
 
-        void read_header( std::string filename );
-        IaeaType read_data();
+        PhaseSpaceData read_phasespace_file( std::string filename );
 
+    private:
+        // IAEA format
+        void m_read_IAEA_header( std::string filename );
+        PhaseSpaceData m_read_IAEA_data();
+        // MHD format
+        void m_read_MHD_header( std::string filename );
+        PhaseSpaceData m_read_MHD_data();
 
     private:
         std::string m_filename;
-        std::string m_header_ext;
-        std::string m_file_ext;
 
         ui64 m_check_sum;
         ui32 m_record_length;
@@ -86,6 +91,9 @@ class IAEAIO {
         bool m_exfloat_flag;
         bool m_exlongs_flag;
         bool m_genint_flag;
+
+        std::string m_header_loaded;     // Specify which header format was loaded
+        std::string m_compression_type;  // If comprsesed data which method
 
         void m_skip_comment(std::istream & is);
         std::string m_read_key(std::string txt);

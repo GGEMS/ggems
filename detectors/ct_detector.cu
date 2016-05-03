@@ -17,12 +17,7 @@
 
 #define MAX_SCATTER_ORDER 3
 
-#include <iomanip>
-#include <sstream>
-
-#include "ggems_detector.cuh"
 #include "ct_detector.cuh"
-#include "image_reader.cuh"
 
 __host__ __device__ void ct_detector_track_to_in( ParticlesData &particles, ObbData detector_volume,  ui32 id )
 {
@@ -323,8 +318,19 @@ bool CTDetector::m_check_mandatory()
     }
 }
 
-void CTDetector::save_projection( std::string filename )
+void CTDetector::save_projection( std::string filename, std::string format )
 {
+    // Check format in bit: 16 or 32
+    if ( format != "16" && format != "32" )
+    {
+        GGcerr << "Image projection must have a format of 16 bits or 32 bits: " << format << " required!" << GGendl;
+        GGwarn << "Projection in 32 bits will be then exported." << GGendl;
+        format = "32";
+    }
+
+    // Create IO object
+    ImageIO *im_io = new ImageIO;
+
     // Check if CPU or GPU
     if( m_params.data_h.device_target == GPU_DEVICE )
     {
@@ -334,27 +340,101 @@ void CTDetector::save_projection( std::string filename )
                                   cudaMemcpyDeviceToHost ) );
     }
 
-    ui16 *projection16 = new ui16[ m_nb_pixel_x * m_nb_pixel_y * m_nb_pixel_z ];
-    for( ui32 i = 0; i < m_nb_pixel_x * m_nb_pixel_y * m_nb_pixel_z; ++i )
+    // If 16bits format, need to convert the data
+    ui16 *projection16;
+    if ( format == "16" )
     {
-        projection16[ i ] = m_projection_h[ i ];
+        projection16 = new ui16[ m_nb_pixel_x * m_nb_pixel_y * m_nb_pixel_z ];
+        for( ui32 i = 0; i < m_nb_pixel_x * m_nb_pixel_y * m_nb_pixel_z; ++i )
+        {
+            projection16[ i ] = m_projection_h[ i ];
+        }
     }
 
-    // Global sinogram
-    ImageReader::record3Dimage(
-                filename,
-                projection16,
-                make_f32xyz( 0.0f, 0.0f, 0.0f ),
-                make_f32xyz( m_pixel_size_x, m_pixel_size_y, m_pixel_size_z ),
-                make_ui32xyz( m_nb_pixel_x, m_nb_pixel_y, m_nb_pixel_z ),
-                false
-                );
+    f32xy offset, spacing;
+    ui32xy nb_pix;
 
-    delete[] projection16;
+    // Proj YZ
+    if ( m_nb_pixel_x == 1 )
+    {
+        offset = make_f32xy( 0.5*m_pixel_size_y*m_nb_pixel_y, 0.5*m_pixel_size_z*m_nb_pixel_z );
+        spacing = make_f32xy( m_pixel_size_y, m_pixel_size_z );
+        nb_pix = make_ui32xy( m_nb_pixel_y, m_nb_pixel_z );
+    }
+    // Proj XZ
+    else if ( m_nb_pixel_y == 1 )
+    {
+        offset = make_f32xy( 0.5*m_pixel_size_x*m_nb_pixel_x, 0.5*m_pixel_size_z*m_nb_pixel_z );
+        spacing = make_f32xy( m_pixel_size_x, m_pixel_size_z );
+        nb_pix = make_ui32xy( m_nb_pixel_x, m_nb_pixel_z );
+    }
+    // Proj XY
+    else if ( m_nb_pixel_z == 1 )
+    {
+        offset = make_f32xy( 0.5*m_pixel_size_x*m_nb_pixel_x, 0.5*m_pixel_size_y*m_nb_pixel_y );
+        spacing = make_f32xy( m_pixel_size_x, m_pixel_size_y );
+        nb_pix = make_ui32xy( m_nb_pixel_x, m_nb_pixel_y );
+    }
+    // ERROR: If not a 2D projection, export in 3D
+    else
+    {
+        GGcerr << "For exporting 2D projection Image must have one of its dimension equal to 1, current dimension: "
+               << m_nb_pixel_x << "x" <<  m_nb_pixel_y << "x" << m_nb_pixel_z
+               << GGendl;
+        return;
+        /*
+        f32xyz offset3D = make_f32xyz( 0.5*m_pixel_size_x*m_nb_pixel_x, 0.5*m_pixel_size_y*m_nb_pixel_y, 0.5*m_pixel_size_z*m_nb_pixel_z );
+        f32xyz spacing3D = make_f32xyz( m_pixel_size_x, m_pixel_size_y, m_pixel_size_z );
+        ui32xyz nb_pix3D = make_ui32xyz( m_nb_pixel_x, m_nb_pixel_y, m_nb_pixel_z );
+
+        if ( format == "16" )
+        {
+            im_io->write_3D( filename, projection16, nb_pix3D, offset3D, spacing3D );
+            delete[] projection16;
+        }
+        else if ( format == "32" )
+        {
+            im_io->write_3D( filename, m_projection_h, nb_pix3D, offset3D, spacing3D );
+        }
+
+        delete im_io;
+        return;
+        */
+    }
+
+    // Export the projection
+    if ( format == "16" )
+    {
+        im_io->write_2D( filename, projection16, nb_pix, offset, spacing );
+        delete[] projection16;
+    }
+    else if ( format == "32" )
+    {
+        im_io->write_2D( filename, m_projection_h, nb_pix, offset, spacing );
+    }
+
+    delete im_io;
 }
 
-void CTDetector::save_scatter( std::string basename )
+//            // Global sinogram
+//            ImageReader::record3Dimage(
+//                        filename,
+//                        projection16,
+//                        make_f32xyz( 0.0f, 0.0f, 0.0f ),
+//                        make_f32xyz( m_pixel_size_x, m_pixel_size_y, m_pixel_size_z ),
+//                        make_ui32xyz( m_nb_pixel_x, m_nb_pixel_y, m_nb_pixel_z ),
+//                        false
+//                        );
+
+void CTDetector::save_scatter( std::string filename )
 {
+    // Create io object
+    ImageIO *im_io = new ImageIO;
+
+    // Check format
+    std::string basename = im_io->get_filename_without_format( filename );
+
+    // GPU
     if( m_params.data_h.device_target == GPU_DEVICE )
     {
         HANDLE_ERROR( cudaMemcpy( m_scatter_order_h,
@@ -364,6 +444,40 @@ void CTDetector::save_scatter( std::string basename )
     }
 
     ui16 *scatter16 = new ui16[ MAX_SCATTER_ORDER * m_nb_pixel_x * m_nb_pixel_y * m_nb_pixel_z ];
+
+    // Determine the orientation of the projection
+    f32xy offset, spacing;
+    ui32xy nb_pix;
+
+    // Proj YZ
+    if ( m_nb_pixel_x == 1 )
+    {
+        offset = make_f32xy( 0.5*m_pixel_size_y*m_nb_pixel_y, 0.5*m_pixel_size_z*m_nb_pixel_z );
+        spacing = make_f32xy( m_pixel_size_y, m_pixel_size_z );
+        nb_pix = make_ui32xy( m_nb_pixel_y, m_nb_pixel_z );
+    }
+    // Proj XZ
+    else if ( m_nb_pixel_y == 1 )
+    {
+        offset = make_f32xy( 0.5*m_pixel_size_x*m_nb_pixel_x, 0.5*m_pixel_size_z*m_nb_pixel_z );
+        spacing = make_f32xy( m_pixel_size_x, m_pixel_size_z );
+        nb_pix = make_ui32xy( m_nb_pixel_x, m_nb_pixel_z );
+    }
+    // Proj XY
+    else if ( m_nb_pixel_z == 1 )
+    {
+        offset = make_f32xy( 0.5*m_pixel_size_x*m_nb_pixel_x, 0.5*m_pixel_size_y*m_nb_pixel_y );
+        spacing = make_f32xy( m_pixel_size_x, m_pixel_size_y );
+        nb_pix = make_ui32xy( m_nb_pixel_x, m_nb_pixel_y );
+    }
+    // ERROR: If not a 2D projection, export in 3D
+    else
+    {
+        GGcerr << "For exporting 2D scatter projection Image must have one of its dimension equal to 1, current dimension: "
+               << m_nb_pixel_x << "x" <<  m_nb_pixel_y << "x" << m_nb_pixel_z
+               << GGendl;
+        return;
+    }
 
     // Loop over the scatter order
     for( ui32 i = 0; i < MAX_SCATTER_ORDER; ++i )
@@ -378,18 +492,24 @@ void CTDetector::save_scatter( std::string basename )
             scatter16[ j + i * m_nb_pixel_x * m_nb_pixel_y ] = m_scatter_order_h[ j + i * m_nb_pixel_x * m_nb_pixel_y ];
         }
 
-        // Save the scatter image for each order
-        ImageReader::record3Dimage(
-                    out.str(),
-                    &scatter16[ i * m_nb_pixel_x * m_nb_pixel_y ],
-                make_f32xyz( 0.0f, 0.0f, 0.0f ),
-                make_f32xyz( m_pixel_size_x, m_pixel_size_y, m_pixel_size_z ),
-                make_ui32xyz( m_nb_pixel_x, m_nb_pixel_y, m_nb_pixel_z ),
-                false
-                );
+        // Record 2D projection (XY)
+        im_io->write_2D( out.str(), &scatter16[ i * m_nb_pixel_x * m_nb_pixel_y ],
+                         nb_pix, offset, spacing );
+
+//        // Save the scatter image for each order
+//        ImageReader::record3Dimage(
+//                    out.str(),
+//                    &scatter16[ i * m_nb_pixel_x * m_nb_pixel_y ],
+//                make_f32xyz( 0.0f, 0.0f, 0.0f ),
+//                make_f32xyz( m_pixel_size_x, m_pixel_size_y, m_pixel_size_z ),
+//                make_ui32xyz( m_nb_pixel_x, m_nb_pixel_y, m_nb_pixel_z ),
+//                false
+//                );
 
     }
     delete[] scatter16;
+
+    delete im_io;
 }
 
 ui32 CTDetector::getDetectedParticles()

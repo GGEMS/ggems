@@ -18,6 +18,9 @@
 #include "raytracing.cuh"
 #include "particles.cuh"
 #include "obb.cuh"
+#include "fun.cuh"
+#include "image_io.cuh"
+#include "ggems_detector.cuh"
 
 class GGEMSDetector;
 
@@ -41,11 +44,10 @@ class CTDetector : public GGEMSDetector
 
         // Init
         void initialize( GlobalSimulationParameters params );
-
         void digitizer( Particles particles );
-        void save_projection( std::string filename );
 
-        void save_scatter( std::string basename );
+        void save_projection( std::string filename , std::string format = "16" );
+        void save_scatter(std::string filename );
 
         void print_info_scatter();
 

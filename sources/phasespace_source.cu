@@ -20,7 +20,7 @@
 
 // Internal function that create a new particle to the buffer at the slot id
 __host__ __device__ void PHSPSRC::phsp_source ( ParticlesData particles_data,
-                                                IaeaType phasespace, PhSpTransform transform, ui32 id )
+                                                PhaseSpaceData phasespace, PhSpTransform transform, ui32 id )
 
 
 
@@ -85,8 +85,8 @@ __host__ __device__ void PHSPSRC::phsp_source ( ParticlesData particles_data,
 //           particles_data.px[id], particles_data.py[id], particles_data.pz[id], particles_data.pname[id]);
 }
 
-__global__ void PHSPSRC::phsp_point_source ( ParticlesData particles_data,
-                                             IaeaType phasespace, PhSpTransform transform )
+__global__ void PHSPSRC::phsp_point_source (ParticlesData particles_data,
+                                            PhaseSpaceData phasespace, PhSpTransform transform )
 {
     // Get thread id
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
@@ -104,8 +104,7 @@ PhaseSpaceSource::PhaseSpaceSource(): GGEMSSource()
     // Set the name of the source
     set_name( "phasespace_source" );
 
-    // Init
-    m_iaea = new IAEAIO();
+    // Init    
     m_phasespace.tot_particles = 0;
 
     // Default transformation
@@ -222,15 +221,9 @@ void PhaseSpaceSource::m_transform_allocation( ui32 nb_sources )
 // Load phasespace file
 void PhaseSpaceSource::load_phasespace_file( std::string filename )
 {
-    std::string ext = filename.substr( filename.find_last_of( "." ) + 1 );
-    if ( ext != "IAEAheader" )
-    {
-        GGcerr << "Phasespace source can only read data in IAEA format (.IAEAheader)!" << GGendl;
-        exit_simulation();
-    }
-
-    m_iaea->read_header( filename );
-    m_phasespace = m_iaea->read_data();
+    PhaseSpaceIO *reader = new PhaseSpaceIO;
+    m_phasespace = reader->read_phasespace_file( filename );
+    delete reader;
 }
 
 // Load transformation file

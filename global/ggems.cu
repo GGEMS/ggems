@@ -626,17 +626,26 @@ void GGEMS::init_simulation()
     }
 
     /// Init Sources /////////////////////////////////
+    //GGcout << "Init source... ";
     m_source->initialize ( m_parameters );
+    //GGcout << "ok" << GGendl;
 
     /// Init Phantoms ////////////////////////////////
-    if ( m_phantom ) m_phantom->initialize ( m_parameters );
-
-    /// Init Particles Stack /////////////////////////
     // The detector is not mandatory
+    //GGcout << "Init phantom... ";
+    if ( m_phantom ) m_phantom->initialize ( m_parameters );
+    //GGcout << "ok" << GGendl;
+
+    /// Init Detectors /////////////////////////
+    // The detector is not mandatory
+    //GGcout << "Init detector... ";
     if ( m_detector ) m_detector->initialize ( m_parameters );
+    //GGcout << "ok" << GGendl;
 
     /// Init Particles Stack /////////////////////////
+    //GGcout << "Init particle stack... ";
     m_particles_manager.initialize ( m_parameters );
+    //GGcout << "ok" << GGendl;
 
     /// Verbose information //////////////////////////
 
