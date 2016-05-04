@@ -432,7 +432,7 @@ void CTDetector::save_scatter( std::string filename )
     ImageIO *im_io = new ImageIO;
 
     // Check format
-    std::string basename = im_io->get_filename_without_format( filename );
+    std::string basename = im_io->get_filename_without_extension( filename );
 
     // GPU
     if( m_params.data_h.device_target == GPU_DEVICE )

@@ -668,8 +668,8 @@ void DoseCalculator::write ( std::string filename )
     // Create an IO object
     ImageIO *im_io = new ImageIO;
 
-    std::string format = im_io->get_format( filename );
-    filename = im_io->get_filename_without_format( filename );
+    std::string format = im_io->get_extension( filename );
+    filename = im_io->get_filename_without_extension( filename );
 
     // Convert Edep from f64 to f32
     ui32 tot = dose.nb_dosels.x*dose.nb_dosels.y*dose.nb_dosels.z;

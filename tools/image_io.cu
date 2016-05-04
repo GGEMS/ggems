@@ -15,6 +15,29 @@
 
 #include "image_io.cuh"
 
+/// Classe ///////////////////////////////////////////////////////
+
+ImageIO::ImageIO()
+{
+    // Init params
+    m_dim = 2;     // 2D
+    m_type = "";
+    m_offset = make_f32xyz(0.0, 0.0, 0.0);
+    m_spacing = make_f32xyz(1.0, 1.0, 1.0);
+    m_size = make_ui32xyz(0, 0, 0);
+    m_nb_data = 0;
+
+    m_f32_data = NULL;
+    m_i32_data = NULL;
+    m_ui32_data = NULL;
+    m_i16_data = NULL;
+    m_ui16_data = NULL;
+    m_i8_data = NULL;
+    m_ui8_data = NULL;
+
+    m_image_loaded = false;
+}
+
 /// Private functions ////////////////////////////////////////////
 
 std::string ImageIO::m_remove_path( std::string filename, std::string separator )
@@ -49,8 +72,8 @@ void ImageIO::m_write_2D( std::string filename, Type2D *data, ui32xy size, f32xy
     GGcout << "Write image " << filename << " ... " << GGendl;
 
     // Check format
-    std::string format = get_format ( filename );
-    filename = get_filename_without_format ( filename );
+    std::string format = get_extension( filename );
+    filename = get_filename_without_extension( filename );
 
     if ( format != "mhd" )
     {
@@ -191,14 +214,11 @@ template<typename Type3D>
 void ImageIO::m_write_3D( std::string filename, Type3D *data, ui32xyz size, f32xyz offset, f32xyz spacing, bool sparse_compression )
 {
 
-    // std::is_same
-
-
     GGcout << "Write image " << filename << " ... " << GGendl;
 
     // Check format
-    std::string format = get_format ( filename );
-    filename = get_filename_without_format ( filename );
+    std::string format = get_extension( filename );
+    filename = get_filename_without_extension( filename );
 
     if ( format != "mhd" )
     {
@@ -264,7 +284,6 @@ void ImageIO::m_write_3D( std::string filename, Type3D *data, ui32xyz size, f32x
         GGcerr << "Image data type not recongnized!" << GGendl;
         exit_simulation();
     }
-
 
     myfile << "ElementDataFile = " << m_remove_path( pathnameraw ).c_str() <<"\n";
     myfile.close();
@@ -343,17 +362,68 @@ void ImageIO::m_write_3D( std::string filename, Type3D *data, ui32xyz size, f32x
 
 /// Publics functions ////////////////////////////////////////////
 
-std::string ImageIO::get_format( std::string filename )
+std::string ImageIO::get_extension( std::string filename )
 {
-    return filename.substr( filename.find_last_of( "." ) + 1 );
+    // Get ext
+    std::string ext = filename.substr( filename.find_last_of( "." ) + 1 );
+
+    // Get lower case
+    std::transform( ext.begin(), ext.end(), ext.begin(), ::tolower );
+
+    return ext;
 }
 
-std::string ImageIO::get_filename_without_format( std::string filename, std::string separator )
+std::string ImageIO::get_filename_without_extension( std::string filename, std::string separator )
 {
     return filename.substr( 0, filename.find_last_of ( separator.c_str() ) );
 }
 
-/// 2D
+ui8 ImageIO::get_dim()
+{
+    return m_dim;
+}
+
+std::string ImageIO::get_type()
+{
+    return m_type;
+}
+
+f32xyz ImageIO::get_offset()
+{
+    return m_offset;
+}
+
+f32xyz ImageIO::get_spacing()
+{
+    return m_spacing;
+}
+
+ui32xyz ImageIO::get_size()
+{
+    return m_size;
+}
+
+template<typename Type>
+Type ImageIO::get_image_in( std::string type )
+{
+//    if ( type == "f32" )
+//    {
+//        if ( type == m_type )
+//        {
+//            return m_f32_data;
+//        } else {
+//            f32 *tmp = new f32[ m_nb_data ];
+//            ui32 i=0; while (i < m_nb_data )
+//            {
+//                tmp[ i ] = (f32) m_
+//            }
+//        }
+//    }
+}
+
+/// Publics functions - IO ////////////////////////////////////////////
+
+// 2D //////////////////////////////
 
 void ImageIO::write_2D( std::string filename, f32 *data, ui32xy size, f32xy offset, f32xy spacing, bool sparse_compression )
 {
@@ -390,7 +460,7 @@ void ImageIO::write_2D( std::string filename, ui8 *data, ui32xy size, f32xy offs
     m_write_2D( filename, data, size, offset, spacing, sparse_compression );
 }
 
-/// 3D
+// 3D ///////////////////////////////
 
 void ImageIO::write_3D( std::string filename, f32 *data, ui32xyz size, f32xyz offset, f32xyz spacing, bool sparse_compression )
 {
@@ -426,6 +496,269 @@ void ImageIO::write_3D( std::string filename, ui8 *data, ui32xyz size, f32xyz of
 {
     m_write_3D( filename, data, size, offset, spacing, sparse_compression );
 }
+
+// Open
+
+void ImageIO::open( std::string filename )
+{
+    // Check if MHD file
+    std::string ext = get_extension( filename );
+    if ( ext != "mhd" )
+    {
+        GGcerr << "GGEMS can only open MHD image file format!" << GGendl;
+        exit_simulation();;
+    }
+
+    TxtReader txt_reader;
+
+    std::string line, key;
+    i32 nx=-1, ny=-1, nz=-1;
+    f32 sx=0, sy=0, sz=0;
+    f32 ox=0, oy=0, oz=0;
+
+    bool flag_offset = false;
+
+    // Watchdog
+    std::string ObjectType="", BinaryData="", BinaryDataByteOrderMSB="", CompressedData="",
+                ElementType="", ElementDataFile="";
+    i32 NDims = 0;
+
+    // Read file
+    std::ifstream file( filename.c_str() );
+
+    if ( !file )
+    {
+        GGcerr << "Error, file " << filename << " not found " << GGendl;
+        exit_simulation();
+    }
+
+    // First reading
+    while (file) {
+        txt_reader.skip_comment(file);
+        std::getline(file, line);
+
+        if (file) {
+            key = txt_reader.read_key(line);
+            if ( key == "ObjectType" )              ObjectType = txt_reader.read_key_string_arg(line);
+            if ( key == "NDims" )                   NDims = txt_reader.read_key_i32_arg(line);
+            if ( key == "BinaryData" )              BinaryData = txt_reader.read_key_string_arg(line);
+            if ( key == "BinaryDataByteOrderMSB" )  BinaryDataByteOrderMSB = txt_reader.read_key_string_arg(line);
+            if ( key == "CompressedData" )          CompressedData = txt_reader.read_key_string_arg(line);
+            if ( key == "ElementType" )             ElementType = txt_reader.read_key_string_arg(line);
+            if ( key == "ElementDataFile" )         ElementDataFile = txt_reader.read_key_string_arg(line);
+        }
+
+    } // read file
+
+    // Check Header
+    if ( ObjectType == "" ) {
+        GGcerr << "Open MHD image: ObjectType was not specified!" << GGendl;
+        exit_simulation();
+    }
+    if ( ObjectType != "Image" ) {
+        GGcerr << "Open MHD image: Not an image, ObjectType = " << ObjectType << GGendl;
+        exit_simulation();
+    }
+
+    if ( NDims == 0 ) {
+        GGcerr << "Open MHD image: NDims was not specified!" << GGendl;
+        exit_simulation();
+    }
+    if ( NDims == 0 ) {
+        GGcerr << "Open MHD image: NDims was not specified!" << GGendl;
+        exit_simulation();
+    }
+
+    if ( BinaryData != "True" ) {
+        GGcerr << "Open MHD image: should binary data, BinaryData = " << BinaryData << GGendl;
+        exit_simulation();
+    }
+
+    if ( BinaryDataByteOrderMSB != "False" ) {
+        GGcerr << "Open MHD image: byte order should be not in MSB, BinaryDataByteOrderMSB = " << BinaryDataByteOrderMSB << GGendl;
+        exit_simulation();
+    }
+
+    if ( CompressedData != "False" ) {
+        GGcerr << "Open MHD image: cannot open compressed data yet, CompressedData = " << CompressedData << GGendl;
+        exit_simulation();
+    }
+
+    if ( ElementType == "" ) {
+        GGcerr << "Open MHD image: ElementType was not specified!" << GGendl;
+        exit_simulation();
+    }
+    if (ElementType != "MET_FLOAT" &&
+        ElementType != "MET_INT"   && ElementType != "MET_UINT" &&
+        ElementType != "MET_SHORT" && ElementType != "MET_USHORT" &&
+        ElementType != "MET_CHAR"  && ElementType != "MET_UCHAR" ) {
+        GGcerr << "Open MHD image: Data Type not recognized, ElementType = " << ElementType << GGendl;
+        exit_simulation();
+    }
+
+    if ( ElementDataFile == "" ) {
+        GGcerr << "Open MHD image: ElementDataFile was not specified!" << GGendl;
+        exit_simulation();
+    }
+
+    // Second reading
+    file.seekg( 0 );
+    while (file) {
+        txt_reader.skip_comment(file);
+        std::getline(file, line);
+
+        if (file) {
+            key = txt_reader.read_key(line);
+
+            if (key == "Offset") {
+                if ( NDims >= 1 ) ox = txt_reader.read_key_f32_arg_atpos(line, 0);
+                if ( NDims >= 2 ) oy = txt_reader.read_key_f32_arg_atpos(line, 1);
+                if ( NDims >= 3 ) oz = txt_reader.read_key_f32_arg_atpos(line, 2);
+                flag_offset = true;
+            }
+
+            if (key=="ElementSpacing") {
+                if ( NDims >= 1 ) sx = txt_reader.read_key_f32_arg_atpos(line, 0);
+                if ( NDims >= 2 ) sy = txt_reader.read_key_f32_arg_atpos(line, 1);
+                if ( NDims >= 3 ) sz = txt_reader.read_key_f32_arg_atpos(line, 2);
+            }
+
+            if (key=="DimSize") {
+                if ( NDims >= 1 ) nx = txt_reader.read_key_i32_arg_atpos(line, 0);
+                if ( NDims >= 2 ) ny = txt_reader.read_key_i32_arg_atpos(line, 1);
+                if ( NDims >= 3 ) nz = txt_reader.read_key_i32_arg_atpos(line, 2);
+            }
+        }
+
+    } // read file
+
+    // Check data
+    if ( NDims >= 1 )
+    {
+        if ( nx == -1  || sx == 0)
+        {
+            GGcerr << "Open MHD image: unknown dimension and spacing along x-axis!" << GGendl;
+            exit_simulation();
+        }
+    }
+
+    if ( NDims >= 2 )
+    {
+        if ( ny == -1  || sy == 0)
+        {
+            GGcerr << "Open MHD image: unknown dimension and spacing along y-axis!" << GGendl;
+            exit_simulation();
+        }
+    }
+
+    if ( NDims >= 3 )
+    {
+        if ( nz == -1  || sz == 0)
+        {
+            GGcerr << "Open MHD image: unknown dimension and spacing along z-axis!" << GGendl;
+            exit_simulation();
+        }
+    }
+
+    // Read data
+    FILE *pfile = fopen(ElementDataFile.c_str(), "rb");
+
+    // Relative path?
+    if (!pfile) {
+        std::string nameWithRelativePath = filename;
+        i32 lastindex = nameWithRelativePath.find_last_of("/");
+        nameWithRelativePath = nameWithRelativePath.substr(0, lastindex);
+        nameWithRelativePath += ( "/" + ElementDataFile );
+
+        pfile = fopen(nameWithRelativePath.c_str(), "rb");
+        if ( !pfile )
+        {
+            GGcerr << "Error, file " << ElementDataFile << " not found " << GGendl;
+            exit_simulation();
+        }
+    }
+
+    // Store the current information
+    if ( NDims >= 1 )
+    {
+        if ( !flag_offset ) m_offset.x = nx * sx * 0.5;
+        else                m_offset.x = ox;
+        m_size.x = nx;
+        m_spacing.x = sx;
+        m_nb_data = nx;
+    }
+    if ( NDims >= 2 )
+    {
+        if ( !flag_offset ) m_offset.y = ny * sy * 0.5;
+        else                m_offset.y = oy;
+        m_size.y = ny;
+        m_spacing.y = sy;
+        m_nb_data *= ny;
+    }
+    if ( NDims >= 3 )
+    {
+        if ( !flag_offset ) m_offset.z = nz * sz * 0.5;
+        else                m_offset.z = oz;
+        m_size.z = nz;
+        m_spacing.z = sz;
+        m_nb_data *= nz;
+    }
+    m_dim = NDims;
+
+    // Allocation and reading
+    if ( ElementType == "MET_FLOAT" )
+    {
+        m_f32_data = new f32( m_nb_data );
+        fread( m_f32_data, sizeof( f32 ), m_nb_data, pfile );
+        m_type = "f32";
+
+    } else if ( ElementType == "MET_INT" )
+    {
+        m_i32_data = new i32( m_nb_data );
+        fread( m_i32_data, sizeof( i32 ), m_nb_data, pfile );
+        m_type = "i32";
+
+    } else if ( ElementType == "MET_UINT" )
+    {
+        m_ui32_data = new ui32( m_nb_data );
+        fread( m_ui32_data, sizeof( ui32 ), m_nb_data, pfile );
+        m_type = "ui32";
+
+    } else if ( ElementType == "MET_SHORT" )
+    {
+        m_i16_data = new i16( m_nb_data );
+        fread( m_i16_data, sizeof( i16 ), m_nb_data, pfile );
+        m_type = "i16";
+
+    } else if ( ElementType == "MET_USHORT" )
+    {
+        m_ui16_data = new ui16( m_nb_data );
+        fread( m_ui16_data, sizeof( ui16 ), m_nb_data, pfile );
+        m_type = "ui16";
+
+    } else if ( ElementType == "MET_CHAR" )
+    {
+        m_i8_data = new i8( m_nb_data );
+        fread( m_i8_data, sizeof( i8 ), m_nb_data, pfile );
+        m_type = "i8";
+
+    } else if ( ElementType == "MET_UCHAR" )
+    {
+        m_ui8_data = new ui8( m_nb_data );
+        fread( m_ui8_data, sizeof( ui8 ), m_nb_data, pfile );
+        m_type = "ui8";
+    }
+
+    // Close the file
+    fclose(pfile);
+
+    // flag it
+    m_image_loaded = true;
+
+}
+
+
+
 
 #endif
 
