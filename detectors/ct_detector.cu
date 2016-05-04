@@ -321,11 +321,11 @@ bool CTDetector::m_check_mandatory()
 void CTDetector::save_projection( std::string filename, std::string format )
 {
     // Check format in bit: 16 or 32
-    if ( format != "16" && format != "32" )
+    if ( format != "ui16" && format != "ui32" )
     {
-        GGcerr << "Image projection must have a format of 16 bits or 32 bits: " << format << " required!" << GGendl;
-        GGwarn << "Projection in 32 bits will be then exported." << GGendl;
-        format = "32";
+        GGcerr << "Image projection must have a format of 16 bits ('ui16') or 32 bits ('ui32'): " << format << " required!" << GGendl;
+        GGwarn << "Projection will be then exported in ui32." << GGendl;
+        format = "ui32";
     }
 
     // Create IO object
@@ -342,7 +342,7 @@ void CTDetector::save_projection( std::string filename, std::string format )
 
     // If 16bits format, need to convert the data
     ui16 *projection16;
-    if ( format == "16" )
+    if ( format == "ui16" )
     {
         projection16 = new ui16[ m_nb_pixel_x * m_nb_pixel_y * m_nb_pixel_z ];
         for( ui32 i = 0; i < m_nb_pixel_x * m_nb_pixel_y * m_nb_pixel_z; ++i )
@@ -403,12 +403,12 @@ void CTDetector::save_projection( std::string filename, std::string format )
     }
 
     // Export the projection
-    if ( format == "16" )
+    if ( format == "ui16" )
     {
         im_io->write_2D( filename, projection16, nb_pix, offset, spacing );
         delete[] projection16;
     }
-    else if ( format == "32" )
+    else if ( format == "ui32" )
     {
         im_io->write_2D( filename, m_projection_h, nb_pix, offset, spacing );
     }
