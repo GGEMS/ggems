@@ -902,7 +902,9 @@ void VoxPhanDosiNav::export_density_map( std::string filename )
     f32xyz voxsize = make_f32xyz( m_phantom.data_h.spacing_x, m_phantom.data_h.spacing_y, m_phantom.data_h.spacing_z );
     ui32xyz nbvox = make_ui32xyz( m_phantom.data_h.nb_vox_x, m_phantom.data_h.nb_vox_y, m_phantom.data_h.nb_vox_z );
 
-    ImageReader::record3Dimage (filename, density, offset, voxsize, nbvox );
+    ImageIO *im_io = new ImageIO;
+    im_io->write_3D( filename, density, nbvox, offset, voxsize );
+    delete im_io;
 }
 
 // Export materials index of the phantom
@@ -912,7 +914,10 @@ void VoxPhanDosiNav::export_materials_map( std::string filename )
     f32xyz voxsize = make_f32xyz( m_phantom.data_h.spacing_x, m_phantom.data_h.spacing_y, m_phantom.data_h.spacing_z );
     ui32xyz nbvox = make_ui32xyz( m_phantom.data_h.nb_vox_x, m_phantom.data_h.nb_vox_y, m_phantom.data_h.nb_vox_z );
 
-    ImageReader::record3Dimage (filename, m_phantom.data_h.values, offset, voxsize, nbvox );
+    ImageIO *im_io = new ImageIO;
+    im_io->write_3D( filename, m_phantom.data_h.values, nbvox, offset, voxsize );
+    delete im_io;
+
 }
 
 void VoxPhanDosiNav::initialize ( GlobalSimulationParameters params )

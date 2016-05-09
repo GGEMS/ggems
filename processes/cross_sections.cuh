@@ -36,7 +36,7 @@ class CrossSections {
         // For gamma
         void m_build_photon_table();
         void m_copy_photon_cs_table_cpu2gpu();
-        void m_dump_photon_tables( std::string dirname );
+        //void m_dump_photon_tables( std::string dirname );
 
         // For e-
         void m_build_electron_table();

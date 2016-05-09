@@ -22,6 +22,7 @@
 #include "voxelized.cuh"
 #include "materials.cuh"
 #include "raytracing.cuh"
+#include "fun.cuh"
 
 struct DoseData
 {

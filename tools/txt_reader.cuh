@@ -69,7 +69,7 @@ template < typename T > std::string to_string ( const T& n )
     return stm.str() ;
 }
 
-std::string insert_string_before_format(std::string filename, std::string insert);
+//std::string insert_string_before_format(std::string filename, std::string insert);
 
 
 #endif

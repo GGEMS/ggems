@@ -901,7 +901,9 @@ void VoxPhanIORTNav::export_density_map( std::string filename )
     f32xyz voxsize = make_f32xyz( m_phantom.data_h.spacing_x, m_phantom.data_h.spacing_y, m_phantom.data_h.spacing_z );
     ui32xyz nbvox = make_ui32xyz( m_phantom.data_h.nb_vox_x, m_phantom.data_h.nb_vox_y, m_phantom.data_h.nb_vox_z );
 
-    ImageReader::record3Dimage ( filename, density, offset, voxsize, nbvox );
+    ImageIO *im_io = new ImageIO;
+    im_io->write_3D( filename, density, nbvox, offset, voxsize );
+    delete im_io;
 }
 
 // Export materials index of the phantom
@@ -911,7 +913,9 @@ void VoxPhanIORTNav::export_materials_map( std::string filename )
     f32xyz voxsize = make_f32xyz( m_phantom.data_h.spacing_x, m_phantom.data_h.spacing_y, m_phantom.data_h.spacing_z );
     ui32xyz nbvox = make_ui32xyz( m_phantom.data_h.nb_vox_x, m_phantom.data_h.nb_vox_y, m_phantom.data_h.nb_vox_z );
 
-    ImageReader::record3Dimage ( filename, m_phantom.data_h.values, offset, voxsize, nbvox );
+    ImageIO *im_io = new ImageIO;
+    im_io->write_3D( filename, m_phantom.data_h.values, nbvox, offset, voxsize );
+    delete im_io;
 }
 
 // Export history map from seTLE
@@ -923,11 +927,29 @@ void VoxPhanIORTNav::export_history_map( std::string filename )
         f32xyz voxsize = make_f32xyz( m_phantom.data_h.spacing_x, m_phantom.data_h.spacing_y, m_phantom.data_h.spacing_z );
         ui32xyz nbvox = make_ui32xyz( m_phantom.data_h.nb_vox_x, m_phantom.data_h.nb_vox_y, m_phantom.data_h.nb_vox_z );
 
-        std::string format = ImageReader::get_format( filename );
-        filename = ImageReader::get_filename_without_format( filename );
 
-        ImageReader::record3Dimage( filename + "-Interaction." + format , m_hist_map.interaction, offset, voxsize, nbvox );
-        ImageReader::record3Dimage( filename + "-Energies." + format , m_hist_map.energy, offset, voxsize, nbvox );
+        // Create an IO object
+        ImageIO *im_io = new ImageIO;
+
+        std::string format = im_io->get_extension( filename );
+        filename = im_io->get_filename_without_extension( filename );
+
+        // Convert Edep from f64 to f32
+        ui32 tot = m_dose_calculator.dose.nb_dosels.x * m_dose_calculator.dose.nb_dosels.y * m_dose_calculator.dose.nb_dosels.z;
+        f32 *f32edep = new f32[ tot ];
+        ui32 i=0; while ( i < tot )
+        {
+            f32edep[ i ] = (f32)m_dose_calculator.dose.edep[ i ];
+            ++i;
+        }
+
+        // Get output name
+        std::string int_out( filename + "-Interaction." + format );
+        std::string energy_out( filename + "-Energies." + format );
+
+        // Export
+        im_io->write_3D( int_out, m_hist_map.interaction, nbvox, offset, voxsize );
+        im_io->write_3D( energy_out, m_hist_map.energy, nbvox, offset, voxsize );
     }
     else
     {

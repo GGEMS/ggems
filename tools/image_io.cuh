@@ -52,16 +52,13 @@ class ImageIO {
         f32xyz get_spacing();
         ui32xyz get_size();
 
-        template<typename Type>
-        Type get_image_in(std::string type);
-
-//        f32* get_image_in_f32();
-//        i32* get_image_in_i32();
-//        f32* get_image_in_ui32();
-//        f32* get_image_in_i16();
-//        f32* get_image_in_ui16();
-//        f32* get_image_in_i8();
-//        f32* get_image_in_ui8();
+        f32*  get_image_in_f32();
+        i32*  get_image_in_i32();
+        ui32* get_image_in_ui32();
+        i16*  get_image_in_i16();
+        ui16* get_image_in_ui16();
+        i8*   get_image_in_i8();
+        ui8*  get_image_in_ui8();
 
     private:
         template<typename Type2D>

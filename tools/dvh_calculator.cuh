@@ -15,7 +15,8 @@
 
 #include "global.cuh"
 #include "voxelized.cuh"
-#include "image_reader.cuh"
+#include "image_io.cuh"
+#include "fun.cuh"
 
 // Class
 class DVHCalculator

@@ -22,7 +22,7 @@
 #include "materials.cuh"
 #include "photon.cuh"
 #include "photon_navigator.cuh"
-#include "image_reader.cuh"
+#include "image_io.cuh"
 #include "dose_calculator.cuh"
 #include "electron.cuh"
 #include "cross_sections.cuh"

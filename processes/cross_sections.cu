@@ -375,6 +375,7 @@ void CrossSections::m_build_photon_table()
 
 }
 
+/*
 void CrossSections::m_dump_photon_tables( std::string dirname )
 {
 
@@ -392,6 +393,7 @@ void CrossSections::m_dump_photon_tables( std::string dirname )
     }
 
 }
+*/
 
 /////////////////////////////////////////////////////////////////////////////
 

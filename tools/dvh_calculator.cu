@@ -46,9 +46,17 @@ DVHCalculator::~DVHCalculator()
 void DVHCalculator::compute_dvh_from_mask(VoxVolumeData<f32> dosemap, std::string mask_name, ui32 id_mask, ui32 nb_of_bins)
 {
     // First open the mask
-    f32xyz offset, voxsize;
-    ui32xyz nbvox;
-    f32* mask = ImageReader::load_mhd_image( mask_name, offset, voxsize, nbvox );
+//    f32xyz offset, voxsize;
+//    ui32xyz nbvox;
+//    f32* mask = ImageReader::load_mhd_image( mask_name, offset, voxsize, nbvox );
+
+    ImageIO *image_io = new ImageIO;
+    image_io->open( mask_name );
+    f32 *mask = image_io->get_image_in_f32();
+    f32xyz offset = image_io->get_offset();
+    f32xyz voxsize = image_io->get_spacing();
+    ui32xyz nbvox = image_io->get_size();
+    delete image_io;
 
     // Check if mask and dosemap have the same size
     if ( nbvox.x != dosemap.nb_vox_x || nbvox.y != dosemap.nb_vox_y || nbvox.z != dosemap.nb_vox_z )

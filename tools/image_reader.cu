@@ -3,6 +3,8 @@
 
 #include "image_reader.cuh"
 
+/*
+
 using namespace std;
 
 
@@ -336,10 +338,7 @@ void ImageReader::record3Dimage ( string histname,  f64 *data, f32xyz offset, f3
 void ImageReader::record3Dimage ( string histname,  ui32 *data, f32xyz offset, f32xyz spacing, ui32xyz size, bool sparse_compression )
 {
 
-        /*printf("Image Parameters : %d %g %g %d %g %g %d %g %g \n",
-                                  size.x,  offset.x, offset.x+size.x*spacing.x,
-                                  size.y,  offset.y, offset.y+size.y*spacing.y,
-                                  size.z,  offset.z, offset.z+size.z*spacing.z );*/
+
 
 
     // Check format
@@ -486,10 +485,6 @@ void ImageReader::record3Dimage ( string histname,  ui32 *data, f32xyz offset, f
 void ImageReader::record3Dimage (string histname,  ui16 *data, f32xyz offset, f32xyz spacing, ui32xyz size, bool sparse_compression )
 {
 
-        /*printf("Image Parameters : %d %g %g %d %g %g %d %g %g \n",
-                                  size.x,  offset.x, offset.x+size.x*spacing.x,
-                                  size.y,  offset.y, offset.y+size.y*spacing.y,
-                                  size.z,  offset.z, offset.z+size.z*spacing.z );*/
 
 
     // Check format
@@ -858,5 +853,7 @@ f32* ImageReader::load_mhd_image( string filename, f32xyz &offset, f32xyz &voxsi
 
     return data;
 }
+
+*/
 
 #endif

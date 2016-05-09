@@ -1,6 +1,8 @@
 #ifndef IMAGE_READER_CUH
 #define IMAGE_READER_CUH
 
+/*
+
 #include <iostream>
 #include "global.cuh"
 #include "fun.cuh"
@@ -117,4 +119,6 @@ namespace ImageReader
 
 //         
 }
+*/
 #endif
+

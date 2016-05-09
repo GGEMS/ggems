@@ -403,22 +403,193 @@ ui32xyz ImageIO::get_size()
     return m_size;
 }
 
-template<typename Type>
-Type ImageIO::get_image_in( std::string type )
+f32* ImageIO::get_image_in_f32()
 {
-//    if ( type == "f32" )
-//    {
-//        if ( type == m_type )
-//        {
-//            return m_f32_data;
-//        } else {
-//            f32 *tmp = new f32[ m_nb_data ];
-//            ui32 i=0; while (i < m_nb_data )
-//            {
-//                tmp[ i ] = (f32) m_
-//            }
-//        }
-//    }
+    // Same type that the one required
+    if ( m_type == "f32" )
+    {
+        return m_f32_data;
+    }
+    else
+    {
+        f32 *tmp = new f32[ m_nb_data ];
+        ui32 i;
+
+        i=0; while (i < m_nb_data )
+        {
+            if ( m_type == "i32" )  tmp[ i ] = (f32) m_i32_data[ i ];
+            if ( m_type == "ui32" ) tmp[ i ] = (f32) m_ui32_data[ i ];
+            if ( m_type == "i16" )  tmp[ i ] = (f32) m_i16_data[ i ];
+            if ( m_type == "ui16" ) tmp[ i ] = (f32) m_ui16_data[ i ];
+            if ( m_type == "i8" )   tmp[ i ] = (f32) m_i8_data[ i ];
+            if ( m_type == "ui8" )  tmp[ i ] = (f32) m_ui8_data[ i ];
+
+            ++i;
+        }
+        return tmp;
+    }
+}
+
+i32* ImageIO::get_image_in_i32()
+{
+    // Same type that the one required
+    if ( m_type == "i32" )
+    {
+        return m_i32_data;
+    }
+    else
+    {
+        i32 *tmp = new i32[ m_nb_data ];
+        ui32 i;
+
+        i=0; while (i < m_nb_data )
+        {
+            if ( m_type == "f32" )  tmp[ i ] = (i32) m_f32_data[ i ];
+            if ( m_type == "ui32" ) tmp[ i ] = (i32) m_ui32_data[ i ];
+            if ( m_type == "i16" )  tmp[ i ] = (i32) m_i16_data[ i ];
+            if ( m_type == "ui16" ) tmp[ i ] = (i32) m_ui16_data[ i ];
+            if ( m_type == "i8" )   tmp[ i ] = (i32) m_i8_data[ i ];
+            if ( m_type == "ui8" )  tmp[ i ] = (i32) m_ui8_data[ i ];
+
+            ++i;
+        }
+        return tmp;
+    }
+}
+
+ui32* ImageIO::get_image_in_ui32()
+{
+    // Same type that the one required
+    if ( m_type == "ui32" )
+    {
+        return m_ui32_data;
+    }
+    else
+    {
+        ui32 *tmp = new ui32[ m_nb_data ];
+        ui32 i;
+
+        i=0; while (i < m_nb_data )
+        {
+            if ( m_type == "f32" )  tmp[ i ] = (ui32) m_f32_data[ i ];
+            if ( m_type == "i32" )  tmp[ i ] = (ui32) m_i32_data[ i ];
+            if ( m_type == "i16" )  tmp[ i ] = (ui32) m_i16_data[ i ];
+            if ( m_type == "ui16" ) tmp[ i ] = (ui32) m_ui16_data[ i ];
+            if ( m_type == "i8" )   tmp[ i ] = (ui32) m_i8_data[ i ];
+            if ( m_type == "ui8" )  tmp[ i ] = (ui32) m_ui8_data[ i ];
+
+            ++i;
+        }
+        return tmp;
+    }
+}
+
+i16* ImageIO::get_image_in_i16()
+{
+    // Same type that the one required
+    if ( m_type == "i16" )
+    {
+        return m_i16_data;
+    }
+    else
+    {
+        i16 *tmp = new i16[ m_nb_data ];
+        ui32 i;
+
+        i=0; while (i < m_nb_data )
+        {
+            if ( m_type == "f32" )  tmp[ i ] = (i16) m_f32_data[ i ];
+            if ( m_type == "i32" )  tmp[ i ] = (i16) m_i32_data[ i ];
+            if ( m_type == "ui32" ) tmp[ i ] = (i16) m_ui32_data[ i ];
+            if ( m_type == "ui16" ) tmp[ i ] = (i16) m_ui16_data[ i ];
+            if ( m_type == "i8" )   tmp[ i ] = (i16) m_i8_data[ i ];
+            if ( m_type == "ui8" )  tmp[ i ] = (i16) m_ui8_data[ i ];
+
+            ++i;
+        }
+        return tmp;
+    }
+}
+
+ui16* ImageIO::get_image_in_ui16()
+{
+    // Same type that the one required
+    if ( m_type == "ui16" )
+    {
+        return m_ui16_data;
+    }
+    else
+    {
+        ui16 *tmp = new ui16[ m_nb_data ];
+        ui32 i;
+
+        i=0; while (i < m_nb_data )
+        {
+            if ( m_type == "f32" )  tmp[ i ] = (ui16) m_f32_data[ i ];
+            if ( m_type == "i32" )  tmp[ i ] = (ui16) m_i32_data[ i ];
+            if ( m_type == "ui32" ) tmp[ i ] = (ui16) m_ui32_data[ i ];
+            if ( m_type == "i16" )  tmp[ i ] = (ui16) m_i16_data[ i ];
+            if ( m_type == "i8" )   tmp[ i ] = (ui16) m_i8_data[ i ];
+            if ( m_type == "ui8" )  tmp[ i ] = (ui16) m_ui8_data[ i ];
+
+            ++i;
+        }
+        return tmp;
+    }
+}
+
+i8* ImageIO::get_image_in_i8()
+{
+    // Same type that the one required
+    if ( m_type == "i8" )
+    {
+        return m_i8_data;
+    }
+    else
+    {
+        i8 *tmp = new i8[ m_nb_data ];
+        ui32 i;
+
+        i=0; while (i < m_nb_data )
+        {
+            if ( m_type == "f32" )  tmp[ i ] = (i8) m_f32_data[ i ];
+            if ( m_type == "i32" )  tmp[ i ] = (i8) m_i32_data[ i ];
+            if ( m_type == "ui32" ) tmp[ i ] = (i8) m_ui32_data[ i ];
+            if ( m_type == "i16" )  tmp[ i ] = (i8) m_i16_data[ i ];
+            if ( m_type == "ui16" ) tmp[ i ] = (i8) m_ui16_data[ i ];
+            if ( m_type == "ui8" )  tmp[ i ] = (i8) m_ui8_data[ i ];
+
+            ++i;
+        }
+        return tmp;
+    }
+}
+
+ui8* ImageIO::get_image_in_ui8()
+{
+    // Same type that the one required
+    if ( m_type == "ui8" )
+    {
+        return m_ui8_data;
+    }
+    else
+    {
+        ui8 *tmp = new ui8[ m_nb_data ];
+        ui32 i;
+
+        i=0; while (i < m_nb_data )
+        {
+            if ( m_type == "f32" )  tmp[ i ] = (ui8) m_f32_data[ i ];
+            if ( m_type == "i32" )  tmp[ i ] = (ui8) m_i32_data[ i ];
+            if ( m_type == "ui32" ) tmp[ i ] = (ui8) m_ui32_data[ i ];
+            if ( m_type == "i16" )  tmp[ i ] = (ui8) m_i16_data[ i ];
+            if ( m_type == "ui16" ) tmp[ i ] = (ui8) m_ui16_data[ i ];
+            if ( m_type == "i8" )   tmp[ i ] = (ui8) m_i8_data[ i ];
+
+            ++i;
+        }
+        return tmp;
+    }
 }
 
 /// Publics functions - IO ////////////////////////////////////////////
