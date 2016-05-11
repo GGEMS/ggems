@@ -368,26 +368,26 @@ VoxVolumeData<f32> * DoseCalculator::get_dose_map()
     }
 
     VoxVolumeData<f32> *dosemap = new VoxVolumeData<f32>;
-    dosemap->nb_vox_x = m_nb_of_dosels.x;
-    dosemap->nb_vox_y = m_nb_of_dosels.y;
-    dosemap->nb_vox_z = m_nb_of_dosels.z;
+    dosemap->nb_vox_x = dose.nb_dosels.x;
+    dosemap->nb_vox_y = dose.nb_dosels.y;
+    dosemap->nb_vox_z = dose.nb_dosels.z;
 
-    dosemap->off_x = m_offset.x;
-    dosemap->off_y = m_offset.y;
-    dosemap->off_z = m_offset.z;
+    dosemap->off_x = dose.offset.x;
+    dosemap->off_y = dose.offset.y;
+    dosemap->off_z = dose.offset.z;
 
-    dosemap->spacing_x = m_dosel_size.x;
-    dosemap->spacing_y = m_dosel_size.y;
-    dosemap->spacing_z = m_dosel_size.z;
+    dosemap->spacing_x = dose.dosel_size.x;
+    dosemap->spacing_y = dose.dosel_size.y;
+    dosemap->spacing_z = dose.dosel_size.z;
 
-    dosemap->number_of_voxels = m_nb_of_dosels.x + m_nb_of_dosels.y + m_nb_of_dosels.z;
+    dosemap->number_of_voxels = dose.tot_nb_dosels;
 
-    dosemap->xmin = m_xmin;
-    dosemap->xmax = m_xmax;
-    dosemap->ymin = m_ymin;
-    dosemap->ymax = m_ymax;
-    dosemap->zmin = m_zmin;
-    dosemap->zmax = m_zmax;
+    dosemap->xmin = dose.xmin;
+    dosemap->xmax = dose.xmax;
+    dosemap->ymin = dose.ymin;
+    dosemap->ymax = dose.ymax;
+    dosemap->zmin = dose.zmin;
+    dosemap->zmax = dose.zmax;
 
     dosemap->values = m_dose_values;
 

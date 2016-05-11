@@ -773,7 +773,8 @@ void ImageIO::open( std::string filename )
     }
 
     // Second reading
-    file.seekg( 0 );
+    file.clear();
+    file.seekg( 0, std::ios::beg);
     while (file) {
         txt_reader.skip_comment(file);
         std::getline(file, line);
@@ -788,13 +789,13 @@ void ImageIO::open( std::string filename )
                 flag_offset = true;
             }
 
-            if (key=="ElementSpacing") {
+            if (key == "ElementSpacing") {
                 if ( NDims >= 1 ) sx = txt_reader.read_key_f32_arg_atpos(line, 0);
                 if ( NDims >= 2 ) sy = txt_reader.read_key_f32_arg_atpos(line, 1);
                 if ( NDims >= 3 ) sz = txt_reader.read_key_f32_arg_atpos(line, 2);
             }
 
-            if (key=="DimSize") {
+            if (key == "DimSize") {
                 if ( NDims >= 1 ) nx = txt_reader.read_key_i32_arg_atpos(line, 0);
                 if ( NDims >= 2 ) ny = txt_reader.read_key_i32_arg_atpos(line, 1);
                 if ( NDims >= 3 ) nz = txt_reader.read_key_i32_arg_atpos(line, 2);
@@ -808,7 +809,7 @@ void ImageIO::open( std::string filename )
     {
         if ( nx == -1  || sx == 0)
         {
-            GGcerr << "Open MHD image: unknown dimension and spacing along x-axis!" << GGendl;
+            GGcerr << "Open MHD image: unknown dimension and spacing along x-axis!" << GGendl;           
             exit_simulation();
         }
     }
@@ -839,7 +840,7 @@ void ImageIO::open( std::string filename )
         std::string nameWithRelativePath = filename;
         i32 lastindex = nameWithRelativePath.find_last_of("/");
         nameWithRelativePath = nameWithRelativePath.substr(0, lastindex);
-        nameWithRelativePath += ( "/" + ElementDataFile );
+        nameWithRelativePath += ( "/" + ElementDataFile );        
 
         pfile = fopen(nameWithRelativePath.c_str(), "rb");
         if ( !pfile )
@@ -878,44 +879,41 @@ void ImageIO::open( std::string filename )
 
     // Allocation and reading
     if ( ElementType == "MET_FLOAT" )
-    {
-        m_f32_data = new f32( m_nb_data );
+    {        
+        m_f32_data = ( f32* )malloc( sizeof(f32) * m_nb_data );
         fread( m_f32_data, sizeof( f32 ), m_nb_data, pfile );
         m_type = "f32";
-
     } else if ( ElementType == "MET_INT" )
-    {
-        m_i32_data = new i32( m_nb_data );
+    {        
+        m_i32_data = ( i32* )malloc( sizeof(i32) * m_nb_data );
         fread( m_i32_data, sizeof( i32 ), m_nb_data, pfile );
         m_type = "i32";
 
     } else if ( ElementType == "MET_UINT" )
-    {
-        m_ui32_data = new ui32( m_nb_data );
+    {        
+        m_ui32_data = ( ui32* )malloc( sizeof(ui32) * m_nb_data );
         fread( m_ui32_data, sizeof( ui32 ), m_nb_data, pfile );
         m_type = "ui32";
 
     } else if ( ElementType == "MET_SHORT" )
     {
-        m_i16_data = new i16( m_nb_data );
+        m_i16_data = ( i16* )malloc( sizeof(i16) * m_nb_data );
         fread( m_i16_data, sizeof( i16 ), m_nb_data, pfile );
         m_type = "i16";
-
     } else if ( ElementType == "MET_USHORT" )
-    {
-        m_ui16_data = new ui16( m_nb_data );
-        fread( m_ui16_data, sizeof( ui16 ), m_nb_data, pfile );
+    {        
+        m_ui16_data = ( ui16* )malloc( sizeof(ui16) * m_nb_data );
+        fread( m_ui16_data, sizeof( ui16 ), m_nb_data, pfile );        
         m_type = "ui16";
-
     } else if ( ElementType == "MET_CHAR" )
-    {
-        m_i8_data = new i8( m_nb_data );
+    {        
+        m_i8_data = ( i8* )malloc( sizeof(i8) * m_nb_data );
         fread( m_i8_data, sizeof( i8 ), m_nb_data, pfile );
         m_type = "i8";
 
     } else if ( ElementType == "MET_UCHAR" )
-    {
-        m_ui8_data = new ui8( m_nb_data );
+    {        
+        m_ui8_data = ( ui8* )malloc( sizeof(ui8) * m_nb_data );
         fread( m_ui8_data, sizeof( ui8 ), m_nb_data, pfile );
         m_type = "ui8";
     }

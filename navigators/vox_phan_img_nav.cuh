@@ -23,7 +23,6 @@
 #include "photon.cuh"
 #include "photon_navigator.cuh"
 #include "cross_sections.cuh"
-#include "image_reader.cuh"
 #include "transport_navigator.cuh"
 
 // debug

@@ -15,7 +15,6 @@
 #define TXT_READER_CUH
 
 #include "global.cuh"
-#include "image_reader.cuh"
 
 // Voxelized phantom
 class TxtReader {
