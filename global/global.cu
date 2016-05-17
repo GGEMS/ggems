@@ -149,11 +149,12 @@ void GGcout_version ()
     cudaRuntimeGetVersion( &Version );
     //cudaRuntimeGetVersion( &DrvVersion );
 
-    std::string VerTxt = (Version) ? std::to_string( Version/1000.0 ) : "Unknown";
+    std::string MajVerTxt = (Version) ? std::to_string( ui16(Version / 1000.0) ) : "Unknown";
+    std::string MinVerTxt = (Version) ? std::to_string( ui16( ( Version - 1000 * ui16(Version / 1000.0) ) / 10.0 ) ) : "Unknown";
     //std::string DrvTxt = (DrvVersion) ? std::to_string( DrvVersion ) : "Unknown";
 
     GGcout << "GCC: " << __GNUC__ << "." << __GNUC_MINOR__
-           << " NVCC: " << VerTxt << " (" << Version << ")"
+           << " NVCC: " << MajVerTxt << "." << MinVerTxt << " (" << Version << ")"
            << GGendl;
 }
 

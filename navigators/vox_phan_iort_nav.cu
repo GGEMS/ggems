@@ -869,8 +869,7 @@ void VoxPhanIORTNav::track_to_out ( Particles particles )
             GGnewline();
         }
     }
-    
-    
+        
 }
 
 void VoxPhanIORTNav::load_phantom_from_mhd ( std::string filename, std::string range_mat_name )

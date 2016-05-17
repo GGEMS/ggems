@@ -34,6 +34,10 @@ __host__ __device__ void PHSPSRC::phsp_source ( ParticlesData particles_data,
 
 #ifdef DEBUG
     assert( source_id < transform.nb_sources );
+    if ( source_id >= transform.nb_sources )
+    {
+        printf("   source id %i    nb sources %i\n", source_id, transform.nb_sources);
+    }
 #endif
 
     // Get a random particle from the phasespace
