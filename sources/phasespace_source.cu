@@ -117,6 +117,9 @@ PhaseSpaceSource::PhaseSpaceSource(): GGEMSSource()
     // Max number of particles used from the phase-space file
     m_nb_part_max = -1;  // -1 mean take all particles
 
+    // Vars
+    m_phasespace_file = "";
+    m_transformation_file = "";
 }
 
 // Destructor
@@ -176,6 +179,16 @@ void PhaseSpaceSource::set_max_number_of_particles( ui32 nb_part_max )
     m_nb_part_max = nb_part_max;
 }
 
+void PhaseSpaceSource::set_phasespace_file( std::string filename )
+{
+    m_phasespace_file = filename;
+}
+
+void PhaseSpaceSource::set_transformation_file( std::string filename )
+{
+    m_transformation_file = filename;
+}
+
 //========= Private ============================================
 
 // Skip comment starting with "#"
@@ -220,24 +233,22 @@ void PhaseSpaceSource::m_transform_allocation( ui32 nb_sources )
     m_transform.nb_sources = nb_sources;
 }
 
-//========= Main function ============================================
-
 // Load phasespace file
-void PhaseSpaceSource::load_phasespace_file( std::string filename )
+void PhaseSpaceSource::m_load_phasespace_file()
 {
     PhaseSpaceIO *reader = new PhaseSpaceIO;
-    m_phasespace = reader->read_phasespace_file( filename );
+    m_phasespace = reader->read_phasespace_file( m_phasespace_file );
     delete reader;
 }
 
 // Load transformation file
-void PhaseSpaceSource::load_transformation_file( std::string filename )
+void PhaseSpaceSource::m_load_transformation_file()
 {
     // Open the file
-    std::ifstream input( filename.c_str(), std::ios::in );
+    std::ifstream input( m_transformation_file.c_str(), std::ios::in );
     if( !input )
     {
-        GGcerr << "Error to open the file'" << filename << "'!" << GGendl;
+        GGcerr << "Error to open the file'" << m_transformation_file << "'!" << GGendl;
         exit_simulation();
     }
 
@@ -307,10 +318,24 @@ void PhaseSpaceSource::load_transformation_file( std::string filename )
 
 }
 
+//========= Main function ============================================
+
 // Mandatory function, abstract from GGEMSSource. This function is called
 // by GGEMS to initialize and load all necessary data into the graphic card
 void PhaseSpaceSource::initialize ( GlobalSimulationParameters params )
-{
+{    
+    // Load the phasespace file (CPU & GPU)
+    if ( m_phasespace_file != "" )
+    {
+        m_load_phasespace_file();
+    }
+
+    // Load transformation file (CPU & GPU)
+    if ( m_transformation_file != "" )
+    {
+        m_load_transformation_file();
+    }
+
     // Check if everything was set properly
     if ( !m_check_mandatory() )
     {

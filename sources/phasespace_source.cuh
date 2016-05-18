@@ -59,14 +59,19 @@ public:
     void set_max_number_of_particles( ui32 nb_part_max );
 
     // Main
-    void load_phasespace_file( std::string filename );
-    void load_transformation_file( std::string filename );
+    void set_phasespace_file( std::string filename );
+    void set_transformation_file( std::string filename );
 
     // Abstract from GGEMSSource (Mandatory funtions)
     void get_primaries_generator( Particles particles );
     void initialize( GlobalSimulationParameters params );
 
 private:
+    std::string m_phasespace_file;
+    std::string m_transformation_file;
+    void m_load_phasespace_file();
+    void m_load_transformation_file();
+
     bool m_check_mandatory();
     void m_transform_allocation( ui32 nb_sources );
     void m_skip_comment(std::istream & is);
