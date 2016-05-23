@@ -5,7 +5,7 @@
  * \brief Beamlet source
  * \author J. Bert <bert.jul@gmail.com>
  * \version 0.1
- * \date Thursday November 19, 2015
+ * \date Thursday May 19, 2016
  *
  */
 
@@ -39,13 +39,19 @@ public:
     ~BeamletSource();
 
     /*!
-     * \fn void set_position( f32 posx, f32 posy, f32 posz )
-     * \brief Set the position of the beamlet
+     * \fn void set_position_in_beamlet_plane( f32 posx, f32 posy )
+     * \brief Set the position of the beamlet (local x-y plane, isocenter is the ref)
      * \param posx Position of the source in X
      * \param posy Position of the source in Y
-     * \param posz Position of the source in Z
      */
-    void set_position( f32 posx, f32 posy, f32 posz );
+    void set_position_in_beamlet_plane( f32 posx, f32 posy );
+
+    /*!
+     * \fn void set_distance_to_isocenter( f32 dis )
+     * \brief Set the distance of the beamlet x-y plane to the isocenter
+     * \param dis Distance
+     */
+    void set_distance_to_isocenter( f32 dis );
 
     /*!
      * \fn void set_rotation( f32 agx, f32 agy, f32 agz )
@@ -78,21 +84,21 @@ public:
     void set_energy_spectrum( std::string filename );
 
     /*!
-     * \fn void set_beamlet_focal_point( f32 posx, f32 posy, f32 posz );
+     * \fn void set_focal_point( f32 posx, f32 posy, f32 posz );
      * \brief Set the focal point of the emission LINAC source
      * \param posx Position of the source in X
      * \param posy Position of the source in Y
      * \param posz Position of the source in Z
      */
-    void set_beamlet_focal_point( f32 posx, f32 posy, f32 posz );
+    void set_focal_point( f32 posx, f32 posy, f32 posz );
 
     /*!
-     * \fn void set_beamlet_size( f32 sizex, f32 sizey )
+     * \fn void set_size( f32 sizex, f32 sizey )
      * \brief Set the size of the beamlet
      * \param sizex Beamlet size along x-axis
      * \param sizey Beamlet size along y-axis
      */
-    void set_beamlet_size( f32 sizex, f32 sizey );
+    void set_size( f32 sizex, f32 sizey );
 
 public: // Abstract from GGEMSSource (Mandatory funtions)
 
@@ -127,16 +133,18 @@ private: // Make BeamletSource class non-copyable
     void m_load_spectrum();
 
 private:    
-    f32xyz m_pos;                         /*!< Position of the beamlet in 3D (x, y, z) */
+    f32xy m_pos;                          /*!< Position of the beamlet in 2D (x, y, z) */
+    f32 m_dist;                           /*!< Distance to the isocenter */
     f32xyz m_foc_pos;                     /*!< Position of the beamelt focal in 3D (x, y, z) */
     f32xyz m_angle;                       /*!< Orientation of the beamlet */
-    f32xy m_beamlet_size;                 /*!< Beamlet size in 2D (x, y) */
+    f32xy m_size;                         /*!< Beamlet size in 2D (x, y) */
     ui8 m_particle_type;                  /*!< Type of the particle */
     std::string m_spectrum_filename;      /*!< Name of the file that contains the spectrum */
     f32 *m_spectrum_E;                    /*!< Energy spectrum of the source on the host (CPU) */
     f32 *m_spectrum_CDF;                  /*!< CDF of the source on the host (CPU) */
     f32 m_energy;                         /*!< In case of mono energy, the energy value */
     ui32 m_nb_of_energy_bins;             /*!< Number of the bins in the energy spectrum */
+    f32matrix44 m_transform;              /*!< Trsnformation matrix */
     GlobalSimulationParameters m_params;  /*!< Simulation parameters */
 };
 

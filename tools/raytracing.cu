@@ -520,6 +520,8 @@ __host__ __device__ f32 hit_ray_OBB(f32xyz ray_p, f32xyz ray_d,
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+/*
+
 /// Function with double precision /////////////////////////////////////////////////////////
 
 
@@ -1030,19 +1032,19 @@ __host__ __device__ f64 hit_ray_septa(f64xyz p, f64xyz dir, f64 half_size_x, f64
                                          f64xyz colli_center, f64xyz colli_u, f64xyz colli_v, f64xyz colli_w) {
     
     f64 xmin, xmax, ymin, ymax, e1min, e1max, e2min, e2max;
-    f64 /*txmin, txmax,*/ tmin, tmax, tymin, tymax, /*tzmin, tzmax,*/ te1min, te1max, te2min, te2max, buf;
+    f64 tmin, tmax, tymin, tymax,  te1min, te1max, te2min, te2max, buf;
         
         
     
     //////// First, transform the ray in OBB' space
-    //f64xyz ray_obb = fxyz_sub(p, colli_center);
- /*   p.x = fxyz_dot(ray_obb, colli_u);
-    p.y = fxyz_dot(ray_obb, colli_v);
-    p.z = fxyz_dot(ray_obb, colli_w);
-    f64xyz dir;
-    dir.x = fxyz_dot(d, colli_u);
-    dir.y = fxyz_dot(d, colli_v);
-    dir.z = fxyz_dot(d, colli_w); */
+//    //f64xyz ray_obb = fxyz_sub(p, colli_center);
+//    p.x = fxyz_dot(ray_obb, colli_u);
+//    p.y = fxyz_dot(ray_obb, colli_v);
+//    p.z = fxyz_dot(ray_obb, colli_w);
+//    f64xyz dir;
+//    dir.x = fxyz_dot(d, colli_u);
+//    dir.y = fxyz_dot(d, colli_v);
+//    dir.z = fxyz_dot(d, colli_w);
     //////////////////////////////////////
     
     //printf("hit septa: pos %f %f %f dir %f %f %f \n", p.x, p.y, p.z, dir.x, dir.y, dir.z);
@@ -1067,8 +1069,8 @@ __host__ __device__ f64 hit_ray_septa(f64xyz p, f64xyz dir, f64 half_size_x, f64
     else {
 //         w = 0;
         di.x = 1.0f / dir.x;
-        tmin = /*txmin =*/ (xmin - p.x) * di.x;
-        tmax = /*txmax = */(xmax - p.x) * di.x;
+        tmin =  (xmin - p.x) * di.x;
+        tmax = (xmax - p.x) * di.x;
        //printf("on x: %f %f - %f %f - %f %f \n", xmin, xmax, p.x, di.x, tmin, tmax);
         if (tmin > tmax) {
             buf = tmin;
@@ -1093,7 +1095,7 @@ __host__ __device__ f64 hit_ray_septa(f64xyz p, f64xyz dir, f64 half_size_x, f64
             tymax = buf;
         }
         if (tymin > tmin) {tmin = tymin;}
-        if (tymax < tmax) {tmax = tymax; /*w = 1;*/}
+        if (tymax < tmax) {tmax = tymax; }
         if (tmin > tmax) {return 0.0;}
     }
     
@@ -1121,7 +1123,7 @@ __host__ __device__ f64 hit_ray_septa(f64xyz p, f64xyz dir, f64 half_size_x, f64
             te1max = buf;
         }
         if (te1min > tmin) {tmin = te1min;}
-        if (te1max < tmax) {tmax = te1max;/* w = 2;*/}
+        if (te1max < tmax) {tmax = te1max;}
         if (tmin > tmax) {return 0.0;}
     }
 
@@ -1149,7 +1151,7 @@ __host__ __device__ f64 hit_ray_septa(f64xyz p, f64xyz dir, f64 half_size_x, f64
             te2max = buf;
         }
         if (te2min > tmin) {tmin = te2min;}
-        if (te2max < tmax) {tmax = te2max; /*w = 3;*/}
+        if (te2max < tmax) {tmax = te2max; }
         if (tmin > tmax) {return 0.0;}
     }
     
@@ -1158,25 +1160,9 @@ __host__ __device__ f64 hit_ray_septa(f64xyz p, f64xyz dir, f64 half_size_x, f64
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #endif
 
-
+*/
 
 
 #endif

@@ -97,6 +97,8 @@ __host__ __device__ f32 hit_ray_OBB(f32xyz ray_p, f32xyz ray_d,
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
+/*
+
 /// Function with double precision /////////////////////////////////////////////////////////
 
 #ifndef SINGLE_PRECISION
@@ -179,7 +181,7 @@ __host__ __device__ f64 hit_ray_septa(f64xyz p, f64xyz dir, f64 half_size_x, f64
 
 #endif
 
-
+*/
 
 
 

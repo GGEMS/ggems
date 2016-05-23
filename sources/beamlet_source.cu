@@ -5,7 +5,7 @@
  * \brief Beamlet source
  * \author Julien Bert <bert.jul@gmail.com>
  * \version 0.1
- * \date Thursday November 19, 2015
+ * \date Thursday May 19, 2016
 */
 
 #ifndef BEAMLET_SOURCE_CU
@@ -16,33 +16,31 @@
 ///////// GPU code ////////////////////////////////////////////////////
 
 // Internal function that create a new particle to the buffer at the slot id
-__host__ __device__ void beamlet_source ( ParticlesData particles, f32xyz pos, f32xyz foc_pos, f32xy size, f32xyz angle,
+__host__ __device__ void beamlet_source ( ParticlesData particles, f32xy pos, f32xyz foc_pos, f32xy size, f32matrix44 trans,
                                           f32 *spectrum_E, f32 *spectrum_CDF,
                                           ui32 nb_of_energy_bins, ui8 ptype, ui32 id)
 {
+    printf("beamlet get part th %i\n", id);
+
     // 1. First chose a position within the beamlet
     f32xyz part_pos;
     part_pos.x = size.x*prng_uniform( particles, id ) - 0.5*size.x;
     part_pos.y = size.y*prng_uniform( particles, id ) - 0.5*size.y;
     part_pos.x = pos.x + part_pos.x;
     part_pos.y = pos.y + part_pos.y;
+    part_pos.z = 0;
 
-    // 3. Then compute direction
-    f32xyz part_dir = fxyz_sub( foc_pos, part_pos );
+    // 3. Then transform the local position to global
+    foc_pos = fxyz_local_to_global_frame( trans, foc_pos );
+    part_pos = fxyz_local_to_global_frame( trans, part_pos );
+
+    // 4. Get direction
+    f32xyz part_dir = fxyz_sub( part_pos, foc_pos );
     part_dir = fxyz_unit( part_dir );
 
-    // 4. First rotation (Carousel)
-    part_pos = fxyz_rotate_y_axis(part_pos, angle.y);  // angle
-    part_dir = fxyz_rotate_y_axis(part_dir, angle.y);  // angle
-
-    // 5. Then, beam rotation (z-axis = granty angle, x-axis = non-coplanar beam)
-    part_pos = fxyz_rotate_z_axis(part_pos, angle.z);  // angle
-    part_dir = fxyz_rotate_z_axis(part_dir, angle.z);  // angle
-
-    part_pos = fxyz_rotate_x_axis(part_pos, angle.x);  // angle
-    part_dir = fxyz_rotate_x_axis(part_dir, angle.x);  // angle
-
-    part_dir = fxyz_unit( part_dir ); // to be sure
+    printf("Part %i:\n", id);
+    printf("   pos %f %f %f   -   dir %f %f %f\n", part_pos.x, part_pos.y, part_pos.z,
+                                                   part_dir.x, part_dir.y, part_dir.z);
 
     // 6. Get energy
     if( nb_of_energy_bins == 1 ) // mono energy
@@ -84,11 +82,15 @@ __host__ __device__ void beamlet_source ( ParticlesData particles, f32xyz pos, f
     particles.next_discrete_process[id] = NO_PROCESS;     //
     particles.next_interaction_distance[id] = 0.0;        //
 
+    printf("Part %i:\n", id);
+    printf("   pos %f %f %f   -   dir %f %f %f   -   E %f\n", part_pos.x, part_pos.y, part_pos.z,
+           part_dir.x, part_dir.y, part_dir.z, particles.E[ id ]);
+
 }
 
 // Kernel to create new particles. This kernel will only call the host/device function
 // beamlet source in order to get one new particle.
-__global__ void kernel_beamlet_source ( ParticlesData particles, f32xyz pos, f32xyz foc_pos, f32xy size, f32xyz angle,
+__global__ void kernel_beamlet_source ( ParticlesData particles, f32xy pos, f32xyz foc_pos, f32xy size, f32matrix44 trans,
                                         f32 *spectrum_E, f32 *spectrum_CDF,
                                         ui32 nb_of_energy_bins, ui8 particle_type )
 {
@@ -96,8 +98,10 @@ __global__ void kernel_beamlet_source ( ParticlesData particles, f32xyz pos, f32
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
     if ( id >= particles.size ) return;
 
+    printf("Kernel run th %i\n", id);
+
     // Get a new particle
-    beamlet_source( particles, pos, foc_pos, size, angle, spectrum_E, spectrum_CDF, nb_of_energy_bins,
+    beamlet_source( particles, pos, foc_pos, size, trans, spectrum_E, spectrum_CDF, nb_of_energy_bins,
                     particle_type, id );
 }
 
@@ -110,10 +114,11 @@ BeamletSource::BeamletSource() : GGEMSSource()
     set_name( "point_source" );
 
     // Init vars
-    m_pos = make_f32xyz( 0.0, 0.0, 0.0 );
+    m_pos = make_f32xy( 0.0, 0.0 );
+    m_dist = 0.0;
     m_foc_pos = make_f32xyz( 0.0, 0.0, 0.0 );
     m_angle = make_f32xyz( 0.0, 0.0, 0.0 );
-    m_beamlet_size = make_f32xy( 0.0, 0.0 );
+    m_size = make_f32xy( 0.0, 0.0 );
     m_particle_type = PHOTON;
     m_spectrum_E = NULL;
     m_spectrum_CDF = NULL;
@@ -178,15 +183,28 @@ void BeamletSource::m_load_spectrum()
 //========== Setting ===============================================
 
 // Setting position of the beamlet
-void BeamletSource::set_position( f32 posx, f32 posy, f32 posz )
+void BeamletSource::set_position_in_beamlet_plane( f32 posx, f32 posy )
 {
-    m_pos = make_f32xyz( posx, posy, posz );
+    m_pos.x = posx;
+    m_pos.y = posy;
+}
+
+// Setting the distance between the beamlet plane and the isocenter
+void BeamletSource::set_distance_to_isocenter( f32 dis )
+{
+    m_dist = dis;
 }
 
 // Setting position of the focal beamlet
-void BeamletSource::set_beamlet_focal_point( f32 posx, f32 posy, f32 posz )
+void BeamletSource::set_focal_point( f32 posx, f32 posy, f32 posz )
 {
     m_foc_pos = make_f32xyz( posx, posy, posz );
+}
+
+// Setting beamlet size
+void BeamletSource::set_size( f32 sizex, f32 sizey )
+{
+    m_size = make_f32xy( sizex, sizey );
 }
 
 // Setting orientation of the beamlet
@@ -242,7 +260,7 @@ void BeamletSource::initialize ( GlobalSimulationParameters params )
         GGcerr << "No energy or spectrum file specified!" << GGendl;
         exit_simulation();
     }
-    if ( m_beamlet_size.x == 0 || m_beamlet_size.y == 0 )
+    if ( m_size.x == 0 || m_size.y == 0 )
     {
         GGcerr << "Size of the beamlet was not defined!" << GGendl;
         exit_simulation();
@@ -265,7 +283,24 @@ void BeamletSource::initialize ( GlobalSimulationParameters params )
     // Store global parameters: params are provided by GGEMS and are used to
     // know different information about the simulation. For example if the targeted
     // device is a CPU or a GPU.
-    m_params = params;   
+    m_params = params;
+
+    // Compute the transformation matrix (Beamlet plane is set along the x-axis (angle 0))
+    TransformCalculator *trans = new TransformCalculator;
+    trans->set_translation( m_dist, 0.0f, 0.0f );
+    trans->set_rotation( m_angle );
+    f32matrix33 axis = { 0.0, 1.0,  0.0,     // x -> y and y -> -z
+                         0.0, 0.0, -1.0,
+                         0.0, 0.0,  0.0 };
+    trans->set_axis_transformation( axis );
+    m_transform = trans->get_transformation_matrix();
+
+    // Some verbose if required
+    if ( params.data_h.display_memory_usage )
+    {
+        ui32 mem = 8 * m_nb_of_energy_bins;
+        GGcout_mem("Beamlet source", mem);
+    }
 
 }
 
@@ -276,15 +311,17 @@ void BeamletSource::get_primaries_generator ( Particles particles )
 {
 
     // If CPU running, do it on CPU
-    if ( m_params.data_h.device_target == CPU_DEVICE )
+    if ( m_params.data_h.device_target == CPU_DEVICE )        
     {
+        printf("Launch CPU kernel\n");
+
         // Loop over the particle buffer
         ui32 id=0;
         while( id < particles.size )
         {
             // Call a point source that get a new particle at a time. In this case data from host (CPU)
             // is passed to the function (particles.data_h).
-            beamlet_source( particles.data_h, m_pos, m_foc_pos, m_beamlet_size, m_angle,
+            beamlet_source( particles.data_h, m_pos, m_foc_pos, m_size, m_transform,
                             m_spectrum_E, m_spectrum_CDF, m_nb_of_energy_bins,
                             m_particle_type, id );
             ++id;
@@ -294,6 +331,8 @@ void BeamletSource::get_primaries_generator ( Particles particles )
     // If GPU running, do it on GPU
     else if ( m_params.data_h.device_target == GPU_DEVICE )
     {
+        printf("Launch GPU kernel\n");
+
         // Defined threads and grid
         dim3 threads, grid;
         threads.x = m_params.data_h.gpu_block_size;
@@ -301,7 +340,7 @@ void BeamletSource::get_primaries_generator ( Particles particles )
 
         // Call GPU kernel of a point source that get fill the complete particle buffer. In this case data
         // from device (GPU) is passed to the kernel (particles.data_d).
-        kernel_beamlet_source<<<grid, threads>>>( particles.data_h, m_pos, m_foc_pos, m_beamlet_size, m_angle,
+        kernel_beamlet_source<<<grid, threads>>>( particles.data_h, m_pos, m_foc_pos, m_size, m_transform,
                                                   m_spectrum_E, m_spectrum_CDF, m_nb_of_energy_bins,
                                                   m_particle_type );
         cuda_error_check( "Error ", " Kernel_beamlet_source" );
