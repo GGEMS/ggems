@@ -123,10 +123,27 @@ __host__ __device__ f32matrix44 fmatrix_trans( f32matrix44 m )
     return m;
 }
 
+__host__ __device__ f32matrix33 fmatrix_trans( f32matrix33 m )
+{
+    f32 tmp;
+
+    tmp = m.m01; m.m01 = m.m10; m.m10 = tmp;
+    tmp = m.m02; m.m02 = m.m20; m.m20 = tmp;
+    tmp = m.m12; m.m12 = m.m21; m.m21 = tmp;
+
+    return m;
+}
+
 // return an unitary vector
 __host__ __device__ f32xyz fxyz_unit(f32xyz u) {
     f32 imag = 1.0f / sqrtf(u.x*u.x + u.y*u.y + u.z*u.z);
     return make_f32xyz(u.x*imag, u.y*imag, u.z*imag);
+}
+
+// return the magnitude
+__host__ __device__ f32 fxyz_mag( f32xyz u )
+{
+    return sqrtf( fxyz_dot( u, u ) );
 }
 
 // rotate a vector u (Euler)
@@ -219,8 +236,18 @@ __host__ __device__ f32xyz fxyz_local_to_global_frame( f32matrix44 G, f32xyz u )
 // Convert a point from global to local frame
 __host__ __device__ f32xyz fxyz_global_to_local_frame( f32matrix44 G, f32xyz u)
 {
-    // first transpose the transformation matrix to apply an inverse transform
-    return fmatrix_mul_fxyz( fmatrix_trans( G ), u );
+    // first, extract the translation
+    f32xyz T = { G.m03, G.m13, G.m23 };
+    // Then the sub matrix (R and P)
+    f32matrix33 g = { G.m00, G.m01, G.m02,
+                      G.m10, G.m11, G.m12,
+                      G.m20, G.m21, G.m22 };
+    // Inverse transform
+    f32matrix33 ginv = fmatrix_trans( g );
+    u = fxyz_sub( u, T );
+    u = fmatrix_mul_fxyz( ginv, u );
+
+    return u;
 }
 
 TransformCalculator::TransformCalculator()
@@ -249,6 +276,11 @@ void TransformCalculator::set_translation( f32 tx, f32 ty, f32 tz )
                             0, 1, 0, ty,
                             0, 0, 1, tz,
                             0, 0, 0,  1 );
+}
+
+void TransformCalculator::set_translation( f32xyz t )
+{
+    set_translation( t.x, t.y, t.z );
 }
 
 void TransformCalculator::set_rotation( f32 rx, f32 ry, f32 rz )
@@ -299,6 +331,14 @@ void TransformCalculator::set_axis_transformation( f32matrix33 P )
                              P.m10, P.m11, P.m12, 0.0,
                              P.m20, P.m21, P.m22, 0.0,
                                0.0,   0.0,   0.0, 1.0 );
+}
+
+void TransformCalculator::set_axis_transformation( f32 m00, f32 m01, f32 m02,
+                                                   f32 m10, f32 m11, f32 m12,
+                                                   f32 m20, f32 m21, f32 m22 )
+{
+    f32matrix33 P = { m00, m01, m02, m10, m11, m12, m20, m21, m22 };
+    set_axis_transformation( P );
 }
 
 f32matrix44 TransformCalculator::get_translation_matrix()

@@ -39,6 +39,21 @@ struct f32matrix44
     f32 m10, m11, m12, m13;
     f32 m20, m21, m22, m23;
     f32 m30, m31, m32, m33;
+
+    friend std::ostream& operator<< ( std::ostream& os, const f32matrix44 m )
+    {
+        os  << std::fixed << std::setprecision ( 2 );
+        //os  << "Particle state : " << std::endl;
+
+        os << "| " << m.m00 << " " << m.m01 << " " << m.m02 << " " << m.m03 << " |" << std::endl;
+        os << "| " << m.m10 << " " << m.m11 << " " << m.m12 << " " << m.m13 << " |" << std::endl;
+        os << "| " << m.m20 << " " << m.m21 << " " << m.m22 << " " << m.m23 << " |" << std::endl;
+        os << "| " << m.m30 << " " << m.m31 << " " << m.m32 << " " << m.m33 << " |" << std::endl;
+
+        return os;
+
+    }
+
 };
 #endif
 
@@ -63,8 +78,11 @@ __host__ __device__ f32xyz fmatrix_mul_fxyz(f32matrix44 matrix, f32xyz u);
 __host__ __device__ f32matrix44 fmatrix_mul( f32matrix44 m, f32matrix44 n );
 // r= m^T
 __host__ __device__ f32matrix44 fmatrix_trans( f32matrix44 m );
+__host__ __device__ f32matrix33 fmatrix_trans( f32matrix33 m );
 // return an unitary vector
 __host__ __device__ f32xyz fxyz_unit(f32xyz u);
+// return the magnitude of the vector
+__host__ __device__ f32 fxyz_mag( f32xyz u );
 // rotate a vector u
 __host__ __device__ f32xyz fxyz_rotate_euler(f32xyz u, f32xyz EulerAngles); // phi, theta, psi
 // rotate a vector u around the x-axis
@@ -179,6 +197,13 @@ public:
     void set_translation( f32 tx, f32 ty, f32 tz );
 
     /*!
+     * \fn void set_translation( f32xyz t )
+     * \brief Set the translation part of the transformation
+     * \param t Translation vector
+     */
+    void set_translation( f32xyz t );
+
+    /*!
      * \fn void set_rotation( f32 rx, f32 ry, f32 rz )
      * \brief Set the rotation part of the transformation
      * \param rx Rotation angle around the x-axis
@@ -200,6 +225,23 @@ public:
      * \param P Matrix (3x3) that contains the mapping of the coordinates (ex. x becomes y and vice-versa). Values are 0, 1 or -1.
      */
     void set_axis_transformation( f32matrix33 P );
+
+    /*!
+     * \fn void set_axis_transformation( f32 m00, f32 m01, f32 m02, f32 m10, f32 m11, f32 m12, f32 m20, f32 m21, f32 m22 )
+     * \brief Set the transformation of the frame, usefull for mirroring or convert 3D to 2D
+     * \param m00 Element of the matrix that map the coordinates. Values are 0, 1 or -1.
+     * \param m01 Element of the matrix that map the coordinates. Values are 0, 1 or -1.
+     * \param m02 Element of the matrix that map the coordinates. Values are 0, 1 or -1.
+     * \param m10 Element of the matrix that map the coordinates. Values are 0, 1 or -1.
+     * \param m11 Element of the matrix that map the coordinates. Values are 0, 1 or -1.
+     * \param m12 Element of the matrix that map the coordinates. Values are 0, 1 or -1.
+     * \param m20 Element of the matrix that map the coordinates. Values are 0, 1 or -1.
+     * \param m21 Element of the matrix that map the coordinates. Values are 0, 1 or -1.
+     * \param m22 Element of the matrix that map the coordinates. Values are 0, 1 or -1.
+     */
+    void set_axis_transformation( f32 m00, f32 m01, f32 m02,
+                                  f32 m10, f32 m11, f32 m12,
+                                  f32 m20, f32 m21, f32 m22 );
 
     /*!
      * \fn f32matrix44 get_translation_matrix()
