@@ -98,17 +98,17 @@ public:
     void set_particle_type( std::string pname );
 
     /*!
-      \fn void set_mono_energy( f32 energy )
-      \param energy Monoenergy value
-      \brief Set the energy value
-    */
+     * \fn void set_mono_energy( f32 energy )
+     * \param energy Monoenergy value
+     * \brief Set the energy value
+     */
     void set_mono_energy( f32 energy );
 
     /*!
-      \fn void set_energy_spectrum( std::string filename )
-      \param filename Filename of the polychromatic source file
-      \brief Set the spectrum file of the beamlet
-    */
+     * \fn void set_energy_spectrum( std::string filename )
+     * \param filename Filename of the polychromatic source file
+     * \brief Set the spectrum file of the beamlet
+     */
     void set_energy_spectrum( std::string filename );
 
     /*!
@@ -118,6 +118,10 @@ public:
      * \param sizey Beamlet size along y-axis
      */
     void set_size( f32 sizex, f32 sizey );
+
+public:
+    f32xyz get_source_origin();
+    f32xyz get_beamlet_position();
 
 public: // Abstract from GGEMSSource (Mandatory funtions)
 

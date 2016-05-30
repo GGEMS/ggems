@@ -990,6 +990,24 @@ void VoxPhanDosiNav::set_volume_of_interest( f32 xmin, f32 xmax, f32 ymin, f32 y
     m_zmin = zmin; m_zmax = zmax;
 }
 
+ObbData VoxPhanDosiNav::get_bounding_box()
+{
+    ObbData box;
+    box.xmin = m_phantom.data_h.xmin;
+    box.xmax = m_phantom.data_h.xmax;
+    box.ymin = m_phantom.data_h.ymin;
+    box.ymax = m_phantom.data_h.ymax;
+    box.zmin = m_phantom.data_h.zmin;
+    box.zmax = m_phantom.data_h.zmax;
+
+    box.translate = make_f32xyz( m_phantom.data_h.off_x, m_phantom.data_h.off_y, m_phantom.data_h.off_z );
+    box.center = make_f32xyz( 0.0, 0.0, 0.0 );
+    box.angle = make_f32xyz( 0.0, 0.0, 0.0 );
+
+    return box;
+}
+
+
 #undef DEBUG
 
 #endif

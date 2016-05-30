@@ -28,6 +28,7 @@
 #include "cross_sections.cuh"
 #include "electron_navigator.cuh"
 #include "transport_navigator.cuh"
+#include "obb.cuh"
 
 // VoxPhanDosiNav -> VPDN
 namespace VPDN
@@ -101,6 +102,8 @@ public:
 
     void export_density_map( std::string filename );
     void export_materials_map( std::string filename );
+
+    ObbData get_bounding_box();
 
 private:
 

@@ -103,7 +103,7 @@ __global__ void kernel_beamlet_source ( ParticlesData particles, f32xy pos, f32x
 BeamletSource::BeamletSource() : GGEMSSource()
 {
     // Set the name of the source
-    set_name( "point_source" );
+    set_name( "beamlet_source" );
 
     // Init vars
     m_pos = make_f32xy( 0.0, 0.0 );
@@ -257,6 +257,22 @@ void BeamletSource::set_particle_type( std::string pname )
         GGcerr << "Particle '" << pname << "' not recognized!!!" << GGendl;
         exit_simulation();
     }
+}
+
+//========== Getting ===============================================
+
+f32xyz BeamletSource::get_source_origin()
+{
+    return fxyz_local_to_global_frame( m_transform, m_src );
+}
+
+f32xyz BeamletSource::get_beamlet_position()
+{
+    f32xyz pos;
+    pos.x = m_pos.x;
+    pos.y = m_pos.y;
+    pos.z = 0;
+    return fxyz_local_to_global_frame( m_transform, pos );
 }
 
 //========= Main function ============================================

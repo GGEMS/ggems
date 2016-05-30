@@ -18,13 +18,13 @@ class GGEMSSource;
 
 /*!
   \class ConeBeamCTSource
-  \brief Class cone-beam source for composed by different methods to 
+  \brief Class cone-beam source for composed by different methods to
   characterize the source. In this source, the user can define a focal, non
   only a point source.
 */
 class ConeBeamCTSource : public GGEMSSource
 {
-  public:
+public:
     /*!
       \brief ConeBeamCTSource constructor
     */
@@ -64,7 +64,7 @@ class ConeBeamCTSource : public GGEMSSource
       \param pname name of the particle
       \brief set the type of the particle
     */
-    void set_particle_type( std::string pname );  
+    void set_particle_type( std::string pname );
 
     /*!
       \fn void set_mono_energy( f32 energy )
@@ -94,9 +94,9 @@ class ConeBeamCTSource : public GGEMSSource
       \brief stream extraction
     */
     friend std::ostream& operator<<( std::ostream& os,
-      ConeBeamCTSource const& cbct );
+                                     ConeBeamCTSource const& cbct );
 
-  public: // Mandatory method from GGEMSSource abstract class
+public: // Mandatory method from GGEMSSource abstract class
 
     /*!
       \fn void get_primaries_generator( Particles particles )
@@ -112,7 +112,7 @@ class ConeBeamCTSource : public GGEMSSource
     */
     void initialize( GlobalSimulationParameters params );
 
-  private: // Make ConeBeamCTSource class non-copyable
+private: // Make ConeBeamCTSource class non-copyable
     /*!
       \brief Copy constructor not implement and impossible to use for the user by security
     */
@@ -123,15 +123,15 @@ class ConeBeamCTSource : public GGEMSSource
     */
     ConeBeamCTSource& operator=( ConeBeamCTSource const& );
 
-  private:
+private:
     f32 m_px; /*!< Position of the source in X */
     f32 m_py; /*!< Position of the source in Y */
     f32 m_pz; /*!< Position of the source in Z */
     f32 m_hfoc; /*!< Horizontal focal position */
     f32 m_vfoc; /*!< Vertical focal position */
     f32 m_aperture; /*!< Aperture of the source */
-    ui8 m_particle_type; /*!< Type of the particle */    
-    f32 m_orbiting_angle; /*!< Orbiting angle of the source */    
+    ui8 m_particle_type; /*!< Type of the particle */
+    f32 m_orbiting_angle; /*!< Orbiting angle of the source */
     f32 *m_spectrumE_h; /*!< Energy spectrum of the source on the host (CPU) */
     f32 *m_spectrumE_d; /*!< Energy spectrum of the source on the device (GPU) */
     f32 *m_spectrumCDF_h; /*!< CDF of the source on the host (CPU) */
