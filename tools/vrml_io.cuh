@@ -14,7 +14,7 @@
 
 #include "global.cuh"
 
-#include "aabb.cuh"
+#include "primitives.cuh"
 
 // Sources
 #include "beamlet_source.cuh"
@@ -47,27 +47,94 @@ public:
      */
     void open( std::string filename );
 
+    /*!
+     * \fn void close()
+     * \brief Close the VRML file
+     */
     void close();
 
+    /*!
+     * \fn void draw_source( BeamletSource* aSource )
+     * \brief Draw a Beamlet GGEMS source into the VRML file
+     * \param aSource A beamlet source
+     */
     void draw_source( BeamletSource* aSource );
-    void draw_source( ConeBeamCTSource* aSource );
 
+//    /*!
+//     * \fn void draw_source( ConeBeamCTSource* aSource )
+//     * \brief Draw a ConeBeamCT GGEMS source into the VRML file
+//     * \param aSource The source
+//     */
+//    void draw_source( ConeBeamCTSource* aSource );
+
+    /*!
+     * \fn void draw_phantom( VoxPhanDosiNav* aPhantom )
+     * \brief Draw in 3D a VoxPhanDosiNav into the VRML file
+     * \param aPhantom The phantom
+     */
     void draw_phantom( VoxPhanDosiNav* aPhantom );
 
 private:
-    FILE *m_pfile;                        /*!< File to export the 3D VRML scene */
+    FILE *m_pfile;                          /*!< File to export the 3D VRML scene */
 
 private:
-    f32xyz m_yellow = {1.0, 1.0, 0.0};
-    f32xyz m_red = {1.0, 0.0, 0.0};
-    f32xyz m_blue = {0.0, 0.0, 1.0};
-    f32xyz m_green = {0.0, 1.0, 0.0};
+    f32xyz m_yellow = {1.0, 1.0, 0.0};      /*!< Pre-defined color: yellow */
+    f32xyz m_red = {1.0, 0.0, 0.0};         /*!< Pre-defined color: red */
+    f32xyz m_blue = {0.0, 0.0, 1.0};        /*!< Pre-defined color: blue */
+    f32xyz m_green = {0.0, 1.0, 0.0};       /*!< Pre-defined color: green */
 
+    /*!
+     * \fn void m_draw_point( f32xyz pos, f32xyz color )
+     * \brief Private function that draw a point in VRML
+     * \param pos 3D position of the point
+     * \param color Point color in (r, g, b)
+     */
     void m_draw_point( f32xyz pos, f32xyz color );
+
+    /*!
+     * \fn void m_draw_sphere( f32xyz pos, f32 radius, f32xyz color, f32 transparency = 0.0 )
+     * \brief Private function that draw a sphere in VRML
+     * \param pos 3D position of the sphere center
+     * \param radius Radius of the sphere
+     * \param color Color in (r, g, b) of the sphere
+     * \param transparency Transparency of the sphere
+     */
     void m_draw_sphere( f32xyz pos, f32 radius, f32xyz color, f32 transparency = 0.0 );
+
+    /*!
+     * \fn void m_draw_obb( ObbData obb, f32xyz color, f32 transparency = 0.0 )
+     * \brief Private function that draw an OBB in VRML
+     * \param obb OBB data object
+     * \param color Color in (r, g, b) of the OBB
+     * \param transparency Transparency of the OBB
+     */
     void m_draw_obb( ObbData obb, f32xyz color, f32 transparency = 0.0 );
+
+    /*!
+     * \fn void m_draw_aabb( AabbData aabb, f32xyz color, f32 transparency = 0.0 )
+     * \brief Private function that draw an AABB in VRML
+     * \param aabb AABB data object
+     * \param color Color in (r, g, b) of the AABB
+     * \param transparency Transparency of the AABB
+     */
     void m_draw_aabb( AabbData aabb, f32xyz color, f32 transparency = 0.0 );
+
+    /*!
+     * \fn void m_draw_wireframe_aabb( AabbData aabb, f32xyz color )
+     * \brief Private function that draw in wireframe an AABB in VRML
+     * \param aabb AABB data object
+     * \param color Color in (r, g, b) of the AABB
+     */
     void m_draw_wireframe_aabb( AabbData aabb, f32xyz color );
+
+    /*!
+     * \fn void m_draw_axis( f32xyz org, f32xyz ax, f32xyz ay, f32xyz az )
+     * \brief Private function that draw axis in VRML
+     * \param org Position of the origin
+     * \param ax Vector of the x-axis
+     * \param ay Vector of the y-axis
+     * \param az Vector of the z-axis
+     */
     void m_draw_axis( f32xyz org, f32xyz ax, f32xyz ay, f32xyz az );
 
 };

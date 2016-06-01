@@ -16,7 +16,7 @@
 
 #include "particles.cuh"
 #include "raytracing.cuh"
-#include "obb.cuh"
+#include "primitives.cuh"
 #include "voxelized.cuh"
 
 // Get a safety position inside an AABB geometry

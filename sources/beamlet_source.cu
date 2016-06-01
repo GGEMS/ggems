@@ -318,6 +318,7 @@ void BeamletSource::initialize ( GlobalSimulationParameters params )
     trans->set_rotation( m_angle );
     trans->set_axis_transformation( m_axis_trans );
     m_transform = trans->get_transformation_matrix();
+    delete trans;
 
     // Get distance between the isocenter and the source
     f32 dist_src = fxyz_mag( m_src );

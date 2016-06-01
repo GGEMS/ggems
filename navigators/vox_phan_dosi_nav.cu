@@ -993,6 +993,8 @@ void VoxPhanDosiNav::set_volume_of_interest( f32 xmin, f32 xmax, f32 ymin, f32 y
 ObbData VoxPhanDosiNav::get_bounding_box()
 {
     ObbData box;
+    /* TODO: to review according the new obb format
+
     box.xmin = m_phantom.data_h.xmin;
     box.xmax = m_phantom.data_h.xmax;
     box.ymin = m_phantom.data_h.ymin;
@@ -1004,6 +1006,8 @@ ObbData VoxPhanDosiNav::get_bounding_box()
     box.center = make_f32xyz( 0.0, 0.0, 0.0 );
     box.angle = make_f32xyz( 0.0, 0.0, 0.0 );
 
+
+    */
     return box;
 }
 

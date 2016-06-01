@@ -81,6 +81,7 @@ void VrmlIO::draw_source( BeamletSource *aSource )
 
 void VrmlIO::draw_phantom( VoxPhanDosiNav *aPhantom )
 {
+    /* TODO: rewrite this code
     // Get back some information from the phantom
     ObbData aabb = aPhantom->get_bounding_box();
 
@@ -95,6 +96,7 @@ void VrmlIO::draw_phantom( VoxPhanDosiNav *aPhantom )
     aabb.translate.z = hzsize - aabb.translate.z;
 
     m_draw_obb( aabb, m_blue, 0.5 );
+    */
 }
 
 // =========== Private functions ==========================================
@@ -137,6 +139,7 @@ void VrmlIO::m_draw_sphere( f32xyz pos, f32 radius, f32xyz color, f32 transparen
 
 void VrmlIO::m_draw_obb( ObbData obb, f32xyz color, f32 transparency )
 {
+    /* TODO: to review according to the new obb format
     fprintf( m_pfile, "\n# OBB\n" );
     fprintf( m_pfile, "Transform {\n");
     fprintf( m_pfile, "  translation %f %f %f\n", obb.translate.x, obb.translate.y, obb.translate.z );
@@ -157,6 +160,7 @@ void VrmlIO::m_draw_obb( ObbData obb, f32xyz color, f32 transparency )
     fprintf( m_pfile, "    }\n");
     fprintf( m_pfile, "  ]\n");
     fprintf( m_pfile, "}\n");
+    */
 }
 
 void VrmlIO::m_draw_aabb( AabbData aabb, f32xyz color, f32 transparency )
