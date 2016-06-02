@@ -7,11 +7,16 @@
  * \file cone_beam_CT_source.cuh
  * \brief Cone beam source for CT
  * \author Didier Benoit <didier.benoit13@gmail.com>
- * \version 0.1
+ * \author Julien Bert <bert.jul@gmail.com>
+ * \version 0.2
  * \date Friday January 8, 2015
+ *
+ * v0.2 - JB: Add local and global frame and unified memory
+ * v0.1 - DB: First code
 */
 
 #include "global.cuh"
+#include "vector.cuh"
 #include "particles.cuh"
 
 class GGEMSSource;
@@ -45,12 +50,23 @@ public:
     void set_position( f32 px, f32 py, f32 pz );
 
     /*!
+      \fn void set_orbiting( f32 orbiting_angle )
+      \param orbiting_angle orbiting angle around the center of the system
+      \brief Rotate the source around the center of the system
+    */
+    void set_rotation( f32 rx, f32 ry, f32 rz );
+
+    void set_local_axis( f32 m00, f32 m01, f32 m02,
+                         f32 m10, f32 m11, f32 m12,
+                         f32 m20, f32 m21, f32 m22 );
+
+    /*!
       \fn void set_focal_size( f32 hfoc, f32 vfoc )
       \param hfoc horizontal focal of the source
       \param vfoc vertical focal of the source
       \brief Set the focal size of the cone-beam source
     */
-    void set_focal_size( f32 hfoc, f32 vfoc );
+    void set_focal_size( f32 xfoc, f32 yfoc, f32 zfoc );
 
     /*!
       \fn void set_beam_aperture ( f32 aperture )
@@ -80,12 +96,11 @@ public:
     */
     void set_energy_spectrum( std::string filename );
 
-    /*!
-      \fn void set_orbiting( f32 orbiting_angle )
-      \param orbiting_angle orbiting angle around the center of the system
-      \brief Rotate the source around the center of the system
-    */
-    void set_orbiting( f32 orbiting_angle );
+    f32xyz get_position();
+
+    f32xyz get_orbiting_angles();
+
+    f32 get_aperture();
 
     /*!
       \fn std::ostream& operator<<( std::ostream& os, ConeBeamCTSource const& cbct )
@@ -123,19 +138,42 @@ private: // Make ConeBeamCTSource class non-copyable
     */
     ConeBeamCTSource& operator=( ConeBeamCTSource const& );
 
+    /*!
+     * \fn void m_load_spectrum()
+     * \brief Function that reads and loads a spectrum in memory
+     */
+    void m_load_spectrum();
+
 private:
-    f32 m_px; /*!< Position of the source in X */
-    f32 m_py; /*!< Position of the source in Y */
-    f32 m_pz; /*!< Position of the source in Z */
-    f32 m_hfoc; /*!< Horizontal focal position */
-    f32 m_vfoc; /*!< Vertical focal position */
+//    f32 m_px; /*!< Position of the source in X */
+//    f32 m_py; /*!< Position of the source in Y */
+//    f32 m_pz; /*!< Position of the source in Z */
+
+    f32xyz m_pos;
+
+    f32xyz m_foc;
+
+    f32matrix33 m_local_axis;
+
+    f32matrix44 m_transform;
+
+//    f32 m_hfoc; /*!< Horizontal focal position */
+//    f32 m_vfoc; /*!< Vertical focal position */
+
     f32 m_aperture; /*!< Aperture of the source */
     ui8 m_particle_type; /*!< Type of the particle */
-    f32 m_orbiting_angle; /*!< Orbiting angle of the source */
-    f32 *m_spectrumE_h; /*!< Energy spectrum of the source on the host (CPU) */
-    f32 *m_spectrumE_d; /*!< Energy spectrum of the source on the device (GPU) */
-    f32 *m_spectrumCDF_h; /*!< CDF of the source on the host (CPU) */
-    f32 *m_spectrumCDF_d; /*!< CDF of the source on the device (GPU) */
+    f32xyz m_angles; /*!< Orbiting angle of the source */
+//    f32 *m_spectrumE_h; /*!< Energy spectrum of the source on the host (CPU) */
+//    f32 *m_spectrumE_d; /*!< Energy spectrum of the source on the device (GPU) */
+//    f32 *m_spectrumCDF_h; /*!< CDF of the source on the host (CPU) */
+//    f32 *m_spectrumCDF_d; /*!< CDF of the source on the device (GPU) */
+
+    f32 *m_spectrum_E;
+    f32 *m_spectrum_CDF;
+    f32 m_energy;
+
+    std::string m_spectrum_filename;      /*!< Name of the file that contains the spectrum */
+
     ui32 m_nb_of_energy_bins; /*!< Number of the bins in the energy spectrum */
     GlobalSimulationParameters m_params; /*!< Simulation parameters */
 };

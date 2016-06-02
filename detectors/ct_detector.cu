@@ -47,12 +47,23 @@ __host__ __device__ void ct_detector_track_to_in( ParticlesData &particles, ObbD
     dir.z = particles.dz[ id ];
 
     // Project particle to detector
-    f32 dist = hit_ray_OBB( pos, dir,
-                            detector_volume.xmin, detector_volume.xmax,
-                            detector_volume.ymin, detector_volume.ymax,
-                            detector_volume.zmin, detector_volume.zmax,
-                            detector_volume.center,
-                            detector_volume.u, detector_volume.v, detector_volume.w );
+//    f32 dist = hit_ray_OBB( pos, dir,
+//                            detector_volume.xmin, detector_volume.xmax,
+//                            detector_volume.ymin, detector_volume.ymax,
+//                            detector_volume.zmin, detector_volume.zmax,
+//                            detector_volume.center,
+//                            detector_volume.u, detector_volume.v, detector_volume.w );
+
+    //printf(" pos %f %f %f   -   dir %f %f %f\n", pos.x, pos.y, pos.z, dir.x, dir.y, dir.z );
+
+    f32 dist = hit_ray_OBB( pos, dir, detector_volume );
+
+//    printf(" xmin %f xmax %f\n", detector_volume.xmin, detector_volume.xmax );
+//    printf(" ymin %f ymax %f\n", detector_volume.ymin, detector_volume.ymax );
+//    printf(" zmin %f zmax %f\n", detector_volume.zmin, detector_volume.zmax );
+//    printf(" center %f %f %f\n", detector_volume.center.x, detector_volume.center.y, detector_volume.center.z );
+
+    //printf("dist %f\n", dist);
 
     if( dist == FLT_MAX )
     {
@@ -63,10 +74,14 @@ __host__ __device__ void ct_detector_track_to_in( ParticlesData &particles, ObbD
     else
     {
         // Check if the path of the particle cross the volume sufficiently
-        f32 cross = dist_overlap_ray_OBB( pos, dir, detector_volume.xmin,
-                                          detector_volume.xmax, detector_volume.ymin, detector_volume.ymax,
-                                          detector_volume.zmin, detector_volume.zmax, detector_volume.center,
-                                          detector_volume.u, detector_volume.v, detector_volume.w );
+//        f32 cross = dist_overlap_ray_OBB( pos, dir, detector_volume.xmin,
+//                                          detector_volume.xmax, detector_volume.ymin, detector_volume.ymax,
+//                                          detector_volume.zmin, detector_volume.zmax, detector_volume.center,
+//                                          detector_volume.u, detector_volume.v, detector_volume.w );
+
+        f32 cross = dist_overlap_ray_OBB( pos, dir, detector_volume );
+
+//        printf(" Cross %f\n", cross);
 
         if( cross < EPSILON3 )
         {
@@ -77,6 +92,9 @@ __host__ __device__ void ct_detector_track_to_in( ParticlesData &particles, ObbD
 
         // move the particle slightly inside the volume
         pos = fxyz_add( pos, fxyz_scale( dir, dist + EPSILON3 ) );
+
+//        printf(" pos in %f %f %f\n", pos.x, pos.y, pos.z);
+
     }
 
     // Save particle position
@@ -105,17 +123,20 @@ __host__ __device__ void ct_detector_digitizer( ParticlesData particles, ObbData
     pos.y = particles.py[ id ];
     pos.z = particles.pz[ id ];
 
+    pos.x = 321;
+    pos.y = 0;
+    pos.z = 0;
+
     // Convert global position into local position
     pos = fxyz_global_to_local_frame( transform, pos );
 
-    // Get pixel index
-    pos.x -= detector_volume.xmin;
-    pos.y -= detector_volume.ymin;
-    pos.z -= detector_volume.zmin;
+    printf(" pos %f %f %f\n", pos.x, pos.y, pos.z);
 
     ui32xyz index = { ui32( pos.x / pixel_size.x ),
                       ui32( pos.y / pixel_size.y ),
                       ui32( pos.z / pixel_size.z ) };
+
+    printf(" ind %i %i %i\n", index.x, index.y, index.z);
 
     // Check and threshold
     if ( index.x >= nb_pixel.x || index.y >= nb_pixel.y || index.z >= nb_pixel.z || particles.E[ id ] < threshold )
@@ -577,9 +598,14 @@ void CTDetector::save_scatter( std::string filename )
 
 //// Setting ////////////////////////////////////////////////////////////
 
-void CTDetector::set_dimension( f32 sizex, f32 sizey, f32 sizez )
+//void CTDetector::set_dimension( f32 sizex, f32 sizey, f32 sizez )
+//{
+//    m_dim = make_f32xyz( sizex, sizey, sizez );
+//}
+
+void CTDetector::set_pixel_size( f32 sx, f32 sy, f32 sz )
 {
-    m_dim = make_f32xyz( sizex, sizey, sizez );
+    m_pixel_size = make_f32xyz( sx, sy, sz );
 }
 
 void CTDetector::set_number_of_pixels(ui32 nx, ui32 ny , ui32 nz )
@@ -663,6 +689,18 @@ bool CTDetector::m_check_mandatory()
     }
 }
 */
+
+//// Getting functions ///////////////////////////////////////////////
+
+f32matrix44 CTDetector::get_transformation()
+{
+    return m_transform;
+}
+
+ObbData CTDetector::get_bounding_box()
+{
+    return m_detector_volume;
+}
 
 //// Private functions ///////////////////////////////////////////////
 
@@ -765,48 +803,48 @@ void CTDetector::m_copy_detector_cpu2gpu()
 void CTDetector::initialize( GlobalSimulationParameters params )
 {
     // Check the parameters
-    if ( m_dim.x == 0.0 || m_dim.y == 0.0 || m_dim.z == 0.0 ||
+    if ( m_pixel_size.x == 0.0 || m_pixel_size.y == 0.0 || m_pixel_size.z == 0.0 ||
          m_nb_pixel.x == 0 || m_nb_pixel.y == 0 || m_nb_pixel.z == 0 )
     {
-        GGcerr << "CTDetector: one of the dimension sizes or nb of pixel parameters is missing!" << GGendl;
+        GGcerr << "CTDetector: one of the pixel sizes or nb of pixel parameters is missing!" << GGendl;
         exit_simulation();
     }
 
     // Params
     m_params = params;
 
-    // Get pixel size
-    m_pixel_size.x = m_dim.x / (f32) m_nb_pixel.x;
-    m_pixel_size.y = m_dim.y / (f32) m_nb_pixel.y;
-    m_pixel_size.z = m_dim.z / (f32) m_nb_pixel.z;
-
-    // Compute the transformation matrix of the detector
+    // Compute the transformation matrix of the detector that map local frame to glboal frame
     TransformCalculator *trans = new TransformCalculator;
-    trans->set_translation( m_pos );
+    trans->set_translation( m_pos.x, m_pos.y, m_pos.z );
     trans->set_rotation( m_angle );
     trans->set_axis_transformation( m_proj_axis );
     m_transform = trans->get_transformation_matrix();
     delete trans;
 
-    // Fill the OBB detector volume parameters (global frame)
-    m_detector_volume.center = fxyz_local_to_global_frame( m_transform, make_f32xyz( 0.0, 0.0, 0.0 ) );
+    /// Defining an OBB for the flat panel (local frame)
 
-    // Get AABB of the detector (at the isocenter)
-    f32xyz half_size = fxyz_mul( m_dim, make_f32xyz( 0.5f, 0.5f, 0.5f ) );
-    m_detector_volume.xmin = -half_size.x;
-    m_detector_volume.xmax =  half_size.x;
-    m_detector_volume.ymin = -half_size.y;
-    m_detector_volume.ymax =  half_size.y;
-    m_detector_volume.zmin = -half_size.z;
-    m_detector_volume.zmax =  half_size.z;
+    // Get dimension of the flatpanel in local coordinate
+    m_dim.x = m_pixel_size.x * m_nb_pixel.x;
+    m_dim.y = m_pixel_size.y * m_nb_pixel.y;
+    m_dim.z = m_pixel_size.z * m_nb_pixel.z;
 
-    // Convert local axis into the global frame
-    f32xyz uloc = { 1.0, 0.0, 0.0 }; // x
-    f32xyz vloc = { 0.0, 1.0, 0.0 }; // y
-    f32xyz wloc = { 0.0, 0.0, 1.0 }; // z
-    m_detector_volume.u = fxyz_local_to_global_frame( m_transform, uloc );
-    m_detector_volume.v = fxyz_local_to_global_frame( m_transform, vloc );
-    m_detector_volume.w = fxyz_local_to_global_frame( m_transform, wloc );
+    m_detector_volume.xmin = 0;
+    m_detector_volume.xmax = m_dim.x;
+    m_detector_volume.ymin = 0;
+    m_detector_volume.ymax = m_dim.y;
+    m_detector_volume.zmin = 0;
+    m_detector_volume.zmax = m_dim.z;
+
+    // Store the matrix
+    m_detector_volume.transformation = m_transform;
+
+//    // Compute the OBB axis (global frame)
+//    f32xyz uloc = { 1.0, 0.0, 0.0 }; // x
+//    f32xyz vloc = { 0.0, 1.0, 0.0 }; // y
+//    f32xyz wloc = { 0.0, 0.0, 1.0 }; // z
+//    m_detector_volume.u = fxyz_local_to_global_frame( m_transform, uloc );
+//    m_detector_volume.v = fxyz_local_to_global_frame( m_transform, vloc );
+//    m_detector_volume.w = fxyz_local_to_global_frame( m_transform, wloc );
 
     // Allocation
     HANDLE_ERROR( cudaMallocManaged( &m_projection,  m_nb_pixel.x*m_nb_pixel.y*m_nb_pixel.z * sizeof( f32 ) ) );

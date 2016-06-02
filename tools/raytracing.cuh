@@ -15,6 +15,7 @@
 #define RAYTRACING_H
 
 #include "vector.cuh"
+#include "primitives.cuh"
 #include "global.cuh"
 
 /// Function with simple precision /////////////////////////////////////////////////////////
@@ -38,13 +39,22 @@ __host__ __device__ f32 dist_overlap_ray_AABB(f32xyz ray_p, f32xyz ray_d,
                                               f32 aabb_ymin, f32 aabb_ymax,
                                               f32 aabb_zmin, f32 aabb_zmax);
 
-// Ray/OBB intersection - Inspired by POVRAY
-__host__ __device__ f32 dist_overlap_ray_OBB(f32xyz ray_p, f32xyz ray_d,
-                                    f32 aabb_xmin, f32 aabb_xmax,
-                                    f32 aabb_ymin, f32 aabb_ymax,
-                                    f32 aabb_zmin, f32 aabb_zmax,
-                                    f32xyz obb_center,
-                                    f32xyz u, f32xyz v, f32xyz w); // OBB frame
+// Overlapping distance between ray and AABB
+__host__ __device__ f32 dist_overlap_ray_AABB(f32xyz ray_p, f32xyz ray_d,
+                                              f32 aabb_xmin, f32 aabb_xmax,
+                                              f32 aabb_ymin, f32 aabb_ymax,
+                                              f32 aabb_zmin, f32 aabb_zmax);
+
+//// Ray/OBB intersection - Inspired by POVRAY
+//__host__ __device__ f32 dist_overlap_ray_OBB(f32xyz ray_p, f32xyz ray_d,
+//                                    f32 aabb_xmin, f32 aabb_xmax,
+//                                    f32 aabb_ymin, f32 aabb_ymax,
+//                                    f32 aabb_zmin, f32 aabb_zmax,
+//                                    f32xyz obb_center,
+//                                    f32xyz u, f32xyz v, f32xyz w); // OBB frame
+
+// Ray/OBB intersection - Using transformation matrix
+__host__ __device__ f32 dist_overlap_ray_OBB(f32xyz ray_p, f32xyz ray_d, ObbData obb );
 
 // Ray/Sphere intersection
 __host__ __device__ f32 hit_ray_sphere(f32xyz ray_p, f32xyz ray_d,        // Ray
@@ -87,13 +97,16 @@ __host__ __device__ f32 hit_ray_triangle(f32xyz ray_p, f32xyz ray_d,
                                          f32xyz tri_v,
                                          f32xyz tri_w);
 
-// Ray/OBB intersection - Inspired by POVRAY
-__host__ __device__ f32 hit_ray_OBB(f32xyz ray_p, f32xyz ray_d,
-                                    f32 aabb_xmin, f32 aabb_xmax,
-                                    f32 aabb_ymin, f32 aabb_ymax,
-                                    f32 aabb_zmin, f32 aabb_zmax,
-                                    f32xyz obb_center,
-                                    f32xyz u, f32xyz v, f32xyz w); // OBB frame
+//// Ray/OBB intersection - Inspired by POVRAY
+//__host__ __device__ f32 hit_ray_OBB( f32xyz ray_p, f32xyz ray_d,
+//                                     f32 aabb_xmin, f32 aabb_xmax,
+//                                     f32 aabb_ymin, f32 aabb_ymax,
+//                                     f32 aabb_zmin, f32 aabb_zmax,
+//                                     f32xyz obb_center,
+//                                     f32xyz u, f32xyz v, f32xyz w ); // OBB frame
+
+// Ray/OBB intersection - Using transformation matrix
+__host__ __device__ f32 hit_ray_OBB( f32xyz ray_p, f32xyz ray_d, ObbData obb );
 
 ////////////////////////////////////////////////////////////////////////////////////////
 

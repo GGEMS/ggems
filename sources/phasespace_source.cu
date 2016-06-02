@@ -84,6 +84,8 @@ __host__ __device__ void PHSPSRC::phsp_source ( ParticlesData particles_data,
     particles_data.geometry_id[id] = 0;                        // Some internal variables
     particles_data.next_discrete_process[id] = NO_PROCESS;     //
     particles_data.next_interaction_distance[id] = 0.0;        //
+    particles_data.scatter_order[ id ] = 0;                    //
+
 
 //    printf(" ID %i E %e pos %e %e %e ptype %i\n", id, particles_data.E[id],
 //           particles_data.px[id], particles_data.py[id], particles_data.pz[id], particles_data.pname[id]);

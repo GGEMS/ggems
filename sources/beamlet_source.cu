@@ -76,6 +76,8 @@ __host__ __device__ void beamlet_source ( ParticlesData particles, f32xy pos, f3
     particles.geometry_id[id] = 0;                        // Some internal variables
     particles.next_discrete_process[id] = NO_PROCESS;     //
     particles.next_interaction_distance[id] = 0.0;        //
+    particles.scatter_order[ id ] = 0;                    //
+
 
 //    printf("src id %i p %f %f %f d %f %f %f E %f\n", id, part_pos.x, part_pos.y, part_pos.z,
 //                                                         part_dir.x, part_dir.y, part_dir.z, particles.E[ id ]);

@@ -22,6 +22,10 @@
 
 // Phantoms
 #include "vox_phan_dosi_nav.cuh"
+#include "vox_phan_img_nav.cuh"
+
+// Detectors
+#include "ct_detector.cuh"
 
 /*!
   \class VRML IO
@@ -60,12 +64,12 @@ public:
      */
     void draw_source( BeamletSource* aSource );
 
-//    /*!
-//     * \fn void draw_source( ConeBeamCTSource* aSource )
-//     * \brief Draw a ConeBeamCT GGEMS source into the VRML file
-//     * \param aSource The source
-//     */
-//    void draw_source( ConeBeamCTSource* aSource );
+    /*!
+     * \fn void draw_source( ConeBeamCTSource* aSource )
+     * \brief Draw a ConeBeamCT GGEMS source into the VRML file
+     * \param aSource The source
+     */
+    void draw_source( ConeBeamCTSource* aSource );
 
     /*!
      * \fn void draw_phantom( VoxPhanDosiNav* aPhantom )
@@ -73,6 +77,11 @@ public:
      * \param aPhantom The phantom
      */
     void draw_phantom( VoxPhanDosiNav* aPhantom );
+
+    void draw_phantom( VoxPhanImgNav* aPhantom );
+
+
+    void draw_detector( CTDetector* aDetector );
 
 private:
     FILE *m_pfile;                          /*!< File to export the 3D VRML scene */
@@ -101,14 +110,16 @@ private:
      */
     void m_draw_sphere( f32xyz pos, f32 radius, f32xyz color, f32 transparency = 0.0 );
 
-    /*!
-     * \fn void m_draw_obb( ObbData obb, f32xyz color, f32 transparency = 0.0 )
-     * \brief Private function that draw an OBB in VRML
-     * \param obb OBB data object
-     * \param color Color in (r, g, b) of the OBB
-     * \param transparency Transparency of the OBB
-     */
-    void m_draw_obb( ObbData obb, f32xyz color, f32 transparency = 0.0 );
+    void m_draw_cone(f32xyz pos, f32xyz angles, f32 height, f32 bottom_radius, f32xyz color, f32 transparency = 0.0 );
+
+//    /*!
+//     * \fn void m_draw_obb( ObbData obb, f32xyz color, f32 transparency = 0.0 )
+//     * \brief Private function that draw an OBB in VRML
+//     * \param obb OBB data object
+//     * \param color Color in (r, g, b) of the OBB
+//     * \param transparency Transparency of the OBB
+//     */
+//    void m_draw_obb( ObbData obb, f32xyz color, f32 transparency = 0.0 );
 
     /*!
      * \fn void m_draw_aabb( AabbData aabb, f32xyz color, f32 transparency = 0.0 )
@@ -126,6 +137,10 @@ private:
      * \param color Color in (r, g, b) of the AABB
      */
     void m_draw_wireframe_aabb( AabbData aabb, f32xyz color );
+
+    void m_draw_wireframe_obb( ObbData obb, f32matrix44 trans, f32xyz color );
+
+    void m_draw_wireframe_cone( f32xyz pos, f32 aperture, f32matrix44 trans, f32xyz color );
 
     /*!
      * \fn void m_draw_axis( f32xyz org, f32xyz ax, f32xyz ay, f32xyz az )

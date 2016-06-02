@@ -103,7 +103,7 @@ public:
     void export_density_map( std::string filename );
     void export_materials_map( std::string filename );
 
-    ObbData get_bounding_box();
+    AabbData get_bounding_box();
 
 private:
 

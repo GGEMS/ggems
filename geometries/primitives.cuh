@@ -28,8 +28,9 @@ struct AabbData {
 // Struct that handle Obb data
 struct ObbData {
     f32 xmin, xmax, ymin, ymax, zmin, zmax;  // AABB size
-    f32xyz center;                           // OBB center
-    f32xyz u, v, w;                          // Absolute frame (OBB orthogonal space u, v, w)
+    f32matrix44 transformation;              // Transformation matrix
+    //f32xyz center;                           // OBB center
+    //f32xyz u, v, w;                          // Absolute frame (OBB orthogonal space u, v, w)
 };
 
 // Struct that handle a meshed (not in SoA)

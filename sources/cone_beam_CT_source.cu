@@ -21,6 +21,86 @@
 #include "prng.cuh"
 #include "cone_beam_CT_source.cuh"
 
+
+__host__ __device__ void cone_beam_ct_source( ParticlesData particles, ui8 ptype,
+                                              f32 *spectrum_E, f32 *spectrum_CDF, ui32 nb_of_energy_bins, f32 aperture,
+                                              f32xyz foc, f32matrix44 transform, ui32 id )
+{
+    // Get deflection (local)
+    f32 phi = prng_uniform( particles, id );
+    f32 theta = prng_uniform( particles, id );
+    f32 val_aper = 1.0f - cosf( aperture );
+    phi  *= gpu_twopi;
+    theta = acosf( 1.0f - val_aper * theta );
+
+    f32xyz rd = { cosf( phi ) * sinf( theta ),
+                  sinf( phi ) * sinf( theta ),
+                  cosf( theta ) };
+
+    // Get direction of the cone beam. The beam is targeted to the isocenter, then
+    // the direction is directly related to the position of the source.
+    f32xyz gbl_pos = fxyz_local_to_global_frame( transform, make_f32xyz( 0.0, 0.0, 0.0 ) );
+    f32xyz dir = fxyz_unit( fxyz_sub( make_f32xyz( 0.0, 0.0, 0.0 ), gbl_pos ) );  // 0x0x0 is the isocenter position
+
+    // Apply deflection (global)
+    dir = rotateUz( rd, dir );
+    dir = fxyz_unit( dir );
+
+    // Postition with focal (local)
+    gbl_pos.x = foc.x * ( prng_uniform( particles, id ) - 0.5f );
+    gbl_pos.y = foc.y * ( prng_uniform( particles, id ) - 0.5f );
+    gbl_pos.z = foc.z * ( prng_uniform( particles, id ) - 0.5f );
+
+    // Apply transformation (local to global frame)
+    gbl_pos = fxyz_local_to_global_frame( transform, gbl_pos );
+
+//    printf( "pos %f %f %f\n", gbl_pos.x, gbl_pos.y, gbl_pos.z );
+//    printf( "rd  %f %f %f\n", dir.x, dir.y, dir.z );
+
+    // Get energy
+    if( nb_of_energy_bins == 1 ) // mono energy
+    {
+        particles.E[ id ] = spectrum_E[ 0 ];
+    }
+    else // poly
+    {
+        f32 rndm = prng_uniform( particles, id );
+        ui32 pos = binary_search( rndm, spectrum_CDF, nb_of_energy_bins );
+        if ( pos == ( nb_of_energy_bins - 1 ) )
+        {
+            particles.E[ id ] = spectrum_E[ pos ];
+        }
+        else
+        {
+            particles.E[ id ] = linear_interpolation ( spectrum_CDF[ pos ],     spectrum_E[ pos ],
+                                                       spectrum_CDF[ pos + 1 ], spectrum_E[ pos + 1 ], rndm );
+        }
+
+    }
+
+    // Then set the mandatory field to create a new particle
+    particles.px[id] = gbl_pos.x;                        // Position in mm
+    particles.py[id] = gbl_pos.y;                        //
+    particles.pz[id] = gbl_pos.z;                        //
+
+    particles.dx[id] = dir.x;                        // Direction (unit vector)
+    particles.dy[id] = dir.y;                        //
+    particles.dz[id] = dir.z;                        //
+
+    particles.tof[id] = 0.0f;                             // Time of flight
+    particles.endsimu[id] = PARTICLE_ALIVE;               // Status of the particle
+
+    particles.level[id] = PRIMARY;                        // It is a primary particle
+    particles.pname[id] = ptype;                          // a photon or an electron
+
+    particles.geometry_id[id] = 0;                        // Some internal variables
+    particles.next_discrete_process[id] = NO_PROCESS;     //
+    particles.next_interaction_distance[id] = 0.0;        //
+    particles.scatter_order[ id ] = 0;                    //
+
+}
+
+/*
 __host__ __device__ void cone_beam_ct_source( ParticlesData particles_data,
                                               ui32 id, f32 px, f32 py, f32 pz,
                                               ui8 type, f32 *spectrumE, f32 *spectrumCDF, ui32 nbins, f32 aperture,
@@ -105,77 +185,58 @@ __host__ __device__ void cone_beam_ct_source( ParticlesData particles_data,
     particles_data.geometry_id[ id ] = 0;
     particles_data.scatter_order[ id ] = 0;
 }
+*/
 
-__global__ void kernel_cone_beam_ct_source( ParticlesData particles_data,
-                                            f32 px, f32 py, f32 pz,
-                                            ui8 type, f32 *spectrumE, f32 *spectrumCDF, ui32 nbins, f32 aperture,
-                                            f32 orbiting_angle, f32 hfoc, f32 vfoc )
+__global__ void kernel_cone_beam_ct_source( ParticlesData particles, ui8 ptype,
+                                            f32 *spectrum_E, f32 *spectrum_CDF, ui32 nb_of_energy_bins, f32 aperture,
+                                            f32xyz foc, f32matrix44 transform )
 {
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;;
-    if( id >= particles_data.size ) return;
+    if( id >= particles.size ) return;
 
-    cone_beam_ct_source( particles_data, id, px, py, pz, type, spectrumE, spectrumCDF, nbins, aperture, orbiting_angle,
-                         hfoc, vfoc );
+    cone_beam_ct_source( particles, ptype, spectrum_E, spectrum_CDF, nb_of_energy_bins, aperture,
+                         foc, transform, id );
 }
 
 ConeBeamCTSource::ConeBeamCTSource()
-    : GGEMSSource(),
-      m_px( 0.0 ),
-      m_py( 0.0 ),
-      m_pz( 0.0 ),
-      m_hfoc( 0.0 ),
-      m_vfoc( 0.0 ),
+    : GGEMSSource(),     
       m_aperture( 360.0 ),
-      m_particle_type( PHOTON ),
-      m_orbiting_angle( 0.0 ),
-      m_spectrumE_h( nullptr ),
-      m_spectrumE_d( nullptr ),
-      m_spectrumCDF_h( nullptr ),
-      m_spectrumCDF_d( nullptr ),
+      m_particle_type( PHOTON ),     
+      m_spectrum_E( nullptr ),
+      m_spectrum_CDF( nullptr ),
+      m_energy( 0.0 ),
       m_nb_of_energy_bins( 0 )
 {
     // Set the name of the source
     set_name( "cone_beam_CT_source" );
+
+    m_pos = make_f32xyz( 0.0, 0.0, 0.0 );
+    m_angles = make_f32xyz( 0.0, 0.0, 0.0 );
+    m_foc = make_f32xyz( 0.0, 0.0, 0.0 );
 }
 
 ConeBeamCTSource::~ConeBeamCTSource()
 {
-    if( m_spectrumE_h )
+
+    if( m_spectrum_E )
     {
-        delete[] m_spectrumE_h;
-        m_spectrumE_h = nullptr;
+        cudaFree( m_spectrum_E );
     }
 
-    if( m_spectrumCDF_h )
+    if( m_spectrum_CDF )
     {
-        delete[] m_spectrumCDF_h;
-        m_spectrumCDF_h = nullptr;
-    }
-
-    if( m_spectrumE_d )
-    {
-        cudaFree( m_spectrumE_d );
-        m_spectrumE_d = nullptr;
-    }
-
-    if( m_spectrumCDF_d )
-    {
-        cudaFree( m_spectrumCDF_d );
-        m_spectrumCDF_d = nullptr;
+        cudaFree( m_spectrum_CDF );
     }
 }
 
 void ConeBeamCTSource::set_position( f32 px, f32 py, f32 pz )
 {
-    m_px = px;
-    m_py = py;
-    m_pz = pz;
+    m_pos = make_f32xyz( px, py, pz );
 }
 
-void ConeBeamCTSource::set_focal_size( f32 hfoc, f32 vfoc )
+void ConeBeamCTSource::set_focal_size(f32 xfoc, f32 yfoc , f32 zfoc)
 {
-    m_hfoc = hfoc;
-    m_vfoc = vfoc;
+    m_foc = make_f32xyz( xfoc, yfoc, zfoc );
 }
 
 void ConeBeamCTSource::set_beam_aperture( f32 aperture )
@@ -183,10 +244,27 @@ void ConeBeamCTSource::set_beam_aperture( f32 aperture )
     m_aperture = aperture;
 }
 
-void ConeBeamCTSource::set_orbiting( f32 orbiting_angle )
+void ConeBeamCTSource::set_rotation( f32 rx, f32 ry, f32 rz )
 {
-    m_orbiting_angle = orbiting_angle;
+    m_angles = make_f32xyz( rx, ry, rz );
 }
+
+// Setting the axis transformation matrix
+void ConeBeamCTSource::set_local_axis( f32 m00, f32 m01, f32 m02,
+                                       f32 m10, f32 m11, f32 m12,
+                                       f32 m20, f32 m21, f32 m22 )
+{
+    m_local_axis.m00 = m00;
+    m_local_axis.m01 = m01;
+    m_local_axis.m02 = m02;
+    m_local_axis.m10 = m10;
+    m_local_axis.m11 = m11;
+    m_local_axis.m12 = m12;
+    m_local_axis.m20 = m20;
+    m_local_axis.m21 = m21;
+    m_local_axis.m22 = m22;
+}
+
 
 void ConeBeamCTSource::set_particle_type( std::string pname )
 {
@@ -211,20 +289,70 @@ void ConeBeamCTSource::set_particle_type( std::string pname )
 
 void ConeBeamCTSource::set_mono_energy( f32 energy )
 {
-    m_spectrumE_h = new f32[ 1 ];
-    m_spectrumE_h[ 0 ] = energy;
-    m_spectrumCDF_h = new f32[ 1 ];
-    m_spectrumCDF_h[ 0 ] = 1.0;
-    m_nb_of_energy_bins = 1;
+    m_energy = energy;
 }
 
 void ConeBeamCTSource::set_energy_spectrum( std::string filename )
 {
+
+    m_spectrum_filename = filename;
+    // Watchdog (avoid to set the two option mono energy and spectrum)
+    m_energy = 0;
+
+
+//    // Open the histogram file
+//    std::ifstream input( filename.c_str(), std::ios::in );
+//    if( !input )
+//    {
+//        GGcerr << "Error to open the file'" << filename << "'!" << GGendl;
+//        exit_simulation();
+//    }
+
+//    // Compute number of energy bins
+//    std::string line;
+//    while( std::getline( input, line ) ) ++m_nb_of_energy_bins;
+
+//    // Returning to beginning of the file to read it again
+//    input.clear();
+//    input.seekg( 0, std::ios::beg );
+
+//    // Allocating buffers to store data
+//    m_spectrumE_h = new f32[ m_nb_of_energy_bins ];
+//    m_spectrumCDF_h = new f32[ m_nb_of_energy_bins ];
+
+//    // Store data from file
+//    size_t idx = 0;
+//    f64 sum = 0.0;
+//    while( std::getline( input, line ) )
+//    {
+//        std::istringstream iss( line );
+//        iss >> m_spectrumE_h[ idx ] >> m_spectrumCDF_h[ idx ];
+//        sum += m_spectrumCDF_h[ idx ];
+//        ++idx;
+//    }
+
+//    // Compute CDF and normalized in same time by security
+//    m_spectrumCDF_h[ 0 ] /= sum;
+//    for( ui32 i = 1; i < m_nb_of_energy_bins; ++i )
+//    {
+//        m_spectrumCDF_h[ i ] = m_spectrumCDF_h[ i ] / sum
+//                + m_spectrumCDF_h[ i - 1 ];
+//    }
+
+//    // Watch dog
+//    m_spectrumCDF_h[ m_nb_of_energy_bins - 1 ] = 1.0;
+
+//    // Close the file
+//    input.close();
+}
+
+void ConeBeamCTSource::m_load_spectrum()
+{
     // Open the histogram file
-    std::ifstream input( filename.c_str(), std::ios::in );
+    std::ifstream input( m_spectrum_filename.c_str(), std::ios::in );
     if( !input )
     {
-        GGcerr << "Error to open the file'" << filename << "'!" << GGendl;
+        GGcerr << "Error to open the file'" << m_spectrum_filename << "'!" << GGendl;
         exit_simulation();
     }
 
@@ -237,8 +365,8 @@ void ConeBeamCTSource::set_energy_spectrum( std::string filename )
     input.seekg( 0, std::ios::beg );
 
     // Allocating buffers to store data
-    m_spectrumE_h = new f32[ m_nb_of_energy_bins ];
-    m_spectrumCDF_h = new f32[ m_nb_of_energy_bins ];
+    HANDLE_ERROR( cudaMallocManaged( &m_spectrum_E, m_nb_of_energy_bins * sizeof( f32 ) ) );
+    HANDLE_ERROR( cudaMallocManaged( &m_spectrum_CDF, m_nb_of_energy_bins * sizeof( f32 ) ) );
 
     // Store data from file
     size_t idx = 0;
@@ -246,24 +374,40 @@ void ConeBeamCTSource::set_energy_spectrum( std::string filename )
     while( std::getline( input, line ) )
     {
         std::istringstream iss( line );
-        iss >> m_spectrumE_h[ idx ] >> m_spectrumCDF_h[ idx ];
-        sum += m_spectrumCDF_h[ idx ];
+        iss >> m_spectrum_E[ idx ] >> m_spectrum_CDF[ idx ];
+        sum += m_spectrum_CDF[ idx ];
         ++idx;
     }
 
     // Compute CDF and normalized in same time by security
-    m_spectrumCDF_h[ 0 ] /= sum;
+    m_spectrum_CDF[ 0 ] /= sum;
     for( ui32 i = 1; i < m_nb_of_energy_bins; ++i )
     {
-        m_spectrumCDF_h[ i ] = m_spectrumCDF_h[ i ] / sum
-                + m_spectrumCDF_h[ i - 1 ];
+        m_spectrum_CDF[ i ] = m_spectrum_CDF[ i ] / sum
+                              + m_spectrum_CDF[ i - 1 ];
     }
 
     // Watch dog
-    m_spectrumCDF_h[ m_nb_of_energy_bins - 1 ] = 1.0;
+    m_spectrum_CDF[ m_nb_of_energy_bins - 1 ] = 1.0;
 
     // Close the file
     input.close();
+}
+
+f32xyz ConeBeamCTSource::get_position()
+{
+    // Compute position
+    return m_pos;
+}
+
+f32xyz ConeBeamCTSource::get_orbiting_angles()
+{
+    return m_angles;
+}
+
+f32 ConeBeamCTSource::get_aperture()
+{
+    return m_aperture;
 }
 
 std::ostream& operator<<( std::ostream& os, ConeBeamCTSource const& cbct )
@@ -286,16 +430,16 @@ std::ostream& operator<<( std::ostream& os, ConeBeamCTSource const& cbct )
        << "Z" << GGendl;
     os << "+ Position:      " << std::fixed << std::setprecision( 3 )
        << std::setfill( ' ' )
-       << std::setw( 15 ) << cbct.m_px/mm << " [mm]"
-       << std::setw( 15 ) << cbct.m_py/mm << " [mm]"
-       << std::setw( 15 ) << cbct.m_pz/mm << " [mm]" << GGendl;
+       << std::setw( 15 ) << cbct.m_pos.x/mm << " [mm]"
+       << std::setw( 15 ) << cbct.m_pos.y/mm << " [mm]"
+       << std::setw( 15 ) << cbct.m_pos.z/mm << " [mm]" << GGendl;
     os << GGendl;
 
     os << "+ Energy:        ";
 
     if( cbct.m_nb_of_energy_bins == 1 )
     {
-        os << cbct.m_spectrumE_h[ 0 ]/keV << " [keV] (monoenergy)" << GGendl;
+        os << cbct.m_spectrum_E[ 0 ]/keV << " [keV] (monoenergy)" << GGendl;
     }
     else if( cbct.m_nb_of_energy_bins == 0 )
     {
@@ -310,9 +454,9 @@ std::ostream& operator<<( std::ostream& os, ConeBeamCTSource const& cbct )
         for( ui32 i = 0; i < cbct.m_nb_of_energy_bins; ++i )
         {
             os << std::fixed << std::setprecision( 3 ) << std::setfill( ' ' )
-               << std::setw( 12 ) << cbct.m_spectrumE_h[ i ]/keV
+               << std::setw( 12 ) << cbct.m_spectrum_E[ i ]/keV
                << std::setw( 18 )
-               << cbct.m_spectrumCDF_h[ i ] << GGendl;
+               << cbct.m_spectrum_CDF[ i ] << GGendl;
         }
     }
 
@@ -323,25 +467,51 @@ std::ostream& operator<<( std::ostream& os, ConeBeamCTSource const& cbct )
 void ConeBeamCTSource::initialize( GlobalSimulationParameters params )
 {
     // Check if everything was set properly
-    if( !m_spectrumCDF_h && !m_spectrumE_h )
+    if ( m_energy == 0 && m_spectrum_filename == "" )
     {
-        throw std::runtime_error( "Missing parameters for the point source!!!" );
+        GGcerr << "No energy or spectrum file specified!" << GGendl;
+        exit_simulation();
     }
 
     // Store global parameters
     m_params = params;
 
-    // Handle GPU device
-    if( m_params.data_h.device_target == GPU_DEVICE && m_nb_of_energy_bins > 0 )
-    {
-        // GPU mem allocation
-        HANDLE_ERROR( cudaMalloc( (void**)&m_spectrumE_d,   m_nb_of_energy_bins * sizeof( f32 ) ) );
-        HANDLE_ERROR( cudaMalloc( (void**)&m_spectrumCDF_d, m_nb_of_energy_bins * sizeof ( f32 ) ) );
+    // Compute the transformation matrix of the source that map local frame to global frame
+    TransformCalculator *trans = new TransformCalculator;
+    trans->set_translation( m_pos.x, m_pos.y, m_pos.z );
+    trans->set_rotation( m_angles );
+    trans->set_axis_transformation( m_local_axis );
+    m_transform = trans->get_transformation_matrix();
+    delete trans;
 
-        // GPU mem copy
-        HANDLE_ERROR ( cudaMemcpy( m_spectrumE_d,   m_spectrumE_h,      sizeof( f32 ) * m_nb_of_energy_bins, cudaMemcpyHostToDevice ) );
-        HANDLE_ERROR ( cudaMemcpy( m_spectrumCDF_d, m_spectrumCDF_h,    sizeof( f32 ) * m_nb_of_energy_bins, cudaMemcpyHostToDevice ) );
+    // Read and allocate data
+
+    // If mono energy
+    if ( m_energy != 0 )
+    {
+        HANDLE_ERROR( cudaMallocManaged( &m_spectrum_E, sizeof( f32 ) ) );
+        HANDLE_ERROR( cudaMallocManaged( &m_spectrum_CDF, sizeof( f32 ) ) );
+        m_spectrum_E[ 0 ] = m_energy;
+        m_spectrum_CDF[ 0 ] = 1.0;
+        m_nb_of_energy_bins = 1;
     }
+    else // else load a spectrum
+    {
+        m_load_spectrum();
+    }
+
+
+//    // Handle GPU device
+//    if( m_params.data_h.device_target == GPU_DEVICE && m_nb_of_energy_bins > 0 )
+//    {
+//        // GPU mem allocation
+//        HANDLE_ERROR( cudaMalloc( (void**)&m_spectrumE_d,   m_nb_of_energy_bins * sizeof( f32 ) ) );
+//        HANDLE_ERROR( cudaMalloc( (void**)&m_spectrumCDF_d, m_nb_of_energy_bins * sizeof ( f32 ) ) );
+
+//        // GPU mem copy
+//        HANDLE_ERROR ( cudaMemcpy( m_spectrumE_d,   m_spectrumE_h,      sizeof( f32 ) * m_nb_of_energy_bins, cudaMemcpyHostToDevice ) );
+//        HANDLE_ERROR ( cudaMemcpy( m_spectrumCDF_d, m_spectrumCDF_h,    sizeof( f32 ) * m_nb_of_energy_bins, cudaMemcpyHostToDevice ) );
+//    }
 }
 
 void ConeBeamCTSource::get_primaries_generator( Particles particles )
@@ -351,9 +521,8 @@ void ConeBeamCTSource::get_primaries_generator( Particles particles )
         ui32 id = 0;
         while( id < particles.size )
         {
-            cone_beam_ct_source( particles.data_h, id, m_px, m_py, m_pz,
-                                 m_particle_type, m_spectrumE_h, m_spectrumCDF_h, m_nb_of_energy_bins, m_aperture, m_orbiting_angle,
-                                 m_hfoc, m_vfoc );
+            cone_beam_ct_source( particles.data_h, m_particle_type, m_spectrum_E, m_spectrum_CDF,
+                                 m_nb_of_energy_bins, m_aperture, m_foc, m_transform, id );
             ++id;
         }
     }
@@ -364,10 +533,8 @@ void ConeBeamCTSource::get_primaries_generator( Particles particles )
         grid.x = ( particles.size + m_params.data_h.gpu_block_size - 1 )
                 / m_params.data_h.gpu_block_size;
 
-        kernel_cone_beam_ct_source<<<grid, threads>>>( particles.data_d, m_px, m_py,
-                                                       m_pz, m_particle_type,
-                                                       m_spectrumE_d, m_spectrumCDF_d, m_nb_of_energy_bins, m_aperture,
-                                                       m_orbiting_angle, m_hfoc, m_vfoc );
+        kernel_cone_beam_ct_source<<<grid, threads>>>( particles.data_d, m_particle_type, m_spectrum_E, m_spectrum_CDF,
+                                                       m_nb_of_energy_bins, m_aperture, m_foc, m_transform );
         cuda_error_check( "Error ", " kernel_cone_beam_ct_source" );
         cudaThreadSynchronize();
     }

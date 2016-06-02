@@ -37,8 +37,9 @@ class CTDetector : public GGEMSDetector
         ~CTDetector();
 
         // Setting
-        void set_dimension(f32 sizex, f32 sizey , f32 sizez );
+        //void set_dimension(f32 sizex, f32 sizey , f32 sizez );
         void set_number_of_pixels( ui32 nx, ui32 ny, ui32 nz );
+        void set_pixel_size( f32 sx, f32 sy, f32 sz );
         void set_position( f32 x, f32 y, f32 z );
         void set_rotation( f32 rx, f32 ry, f32 rz );
         void set_projection_axis( f32 m00, f32 m01, f32 m02,
@@ -47,8 +48,10 @@ class CTDetector : public GGEMSDetector
         void set_record_option( std::string opt );
         void set_record_scatter( bool flag );
 
-
         void set_threshold( f32 threshold );
+
+        f32matrix44 get_transformation();
+        ObbData get_bounding_box();
 
         //void set_orbiting( f32 orbiting_angle );  // TODO remove
 
