@@ -212,8 +212,8 @@ __host__ __device__ f32 dist_overlap_ray_OBB(f32xyz ray_p, f32xyz ray_d,
 __host__ __device__ f32 dist_overlap_ray_OBB( f32xyz ray_p, f32xyz ray_d, ObbData obb )
 {
     // Get pos and dir in local OBB frame
-    ray_p = fxyz_global_to_local_frame( obb.transformation, ray_p );
-    ray_d = fxyz_global_to_local_frame( obb.transformation, ray_d );
+    ray_p = fxyz_global_to_local_position( obb.transformation, ray_p );
+    ray_d = fxyz_global_to_local_direction( obb.transformation, ray_d );
 
     // Then AABB test
     return dist_overlap_ray_AABB( ray_p, ray_d, obb.xmin, obb.xmax, obb.ymin, obb.ymax,
@@ -512,14 +512,21 @@ __host__ __device__ f32 hit_ray_triangle(f32xyz ray_p, f32xyz ray_d,
 __host__ __device__ f32 hit_ray_OBB( f32xyz ray_p, f32xyz ray_d, ObbData obb )
 {
 
-    printf(" before pos: %f %f %f     dir %f %f %f\n", ray_p.x, ray_p.y, ray_p.z, ray_d.x, ray_d.y, ray_d.z);
+    //ray_d.x = 1.0; ray_d.y = 0.0; ray_d.z = 0.0;
+
+//    printf(" before pos: %f %f %f     dir %f %f %f\n", ray_p.x, ray_p.y, ray_p.z, ray_d.x, ray_d.y, ray_d.z);
+
+//    printf("\n\n");
+//    printf(" | %f %f %f %f\n", obb.transformation.m00, obb.transformation.m01, obb.transformation.m02, obb.transformation.m03 );
+//    printf(" | %f %f %f %f\n", obb.transformation.m10, obb.transformation.m11, obb.transformation.m12, obb.transformation.m13 );
+//    printf(" | %f %f %f %f\n", obb.transformation.m20, obb.transformation.m21, obb.transformation.m22, obb.transformation.m23 );
+//    printf(" | %f %f %f %f\n", obb.transformation.m30, obb.transformation.m31, obb.transformation.m32, obb.transformation.m33 );
 
     // Get pos and dir in local OBB frame
-    ray_p = fxyz_global_to_local_frame( obb.transformation, ray_p );
-    ray_d = fxyz_global_to_local_frame( obb.transformation, ray_d );
-    ray_d = fxyz_unit( ray_d );
+    ray_p = fxyz_global_to_local_position( obb.transformation, ray_p );
+    ray_d = fxyz_global_to_local_direction( obb.transformation, ray_d );
 
-    printf(" after pos: %f %f %f     dir %f %f %f\n", ray_p.x, ray_p.y, ray_p.z, ray_d.x, ray_d.y, ray_d.z);
+//    printf(" after pos: %f %f %f     dir %f %f %f\n", ray_p.x, ray_p.y, ray_p.z, ray_d.x, ray_d.y, ray_d.z);
 
     // Then AABB test
     return hit_ray_AABB( ray_p, ray_d, obb.xmin, obb.xmax, obb.ymin, obb.ymax,

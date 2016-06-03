@@ -39,12 +39,13 @@ public:
     ~BeamletSource();
 
     /*!
-     * \fn void set_beamlet_relative_position( f32 posx, f32 posy )
-     * \brief Set the position of the beamlet (local position x-y beamlet plane)
+     * \fn void set_beamlet_relative_position( f32 posx, f32 posy, f32 posz )
+     * \brief Set the position of the beamlet (local position within the beamlet plane)
      * \param posx Position of the source in X
      * \param posy Position of the source in Y
+     * \param posz Position of the source in Z
      */
-    void set_beamlet_relative_position( f32 posx, f32 posy );
+    void set_local_beamlet_position( f32 posx, f32 posy, f32 posz );
 
     /*!
      * \fn void set_beamlet_origin( f32 posx, f32 posy, f32 posz )
@@ -53,16 +54,16 @@ public:
      * \param posy Position of the origin in Y
      * \param posz Position of the origin in Z
      */
-    void set_beamlet_origin( f32 posx, f32 posy, f32 posz );
+    void set_frame_position( f32 posx, f32 posy, f32 posz );
 
     /*!
-     * \fn void set_source_origin( f32 posx, f32 posy, f32 posz )
+     * \fn void set_source_local_position( f32 posx, f32 posy, f32 posz )
      * \brief Set the origin of the LINAC source
      * \param posx Position of the origin in X
      * \param posy Position of the origin in Y
      * \param posz Position of the origin in Z
      */
-    void set_source_origin( f32 posx, f32 posy, f32 posz );
+    void set_local_source_position( f32 posx, f32 posy, f32 posz );
 
     /*!
      * \fn void set_beamlet_plane_axis( f32 m00, f32 m01, f32 m02, f32 m10, f32 m11, f32 m12, f32 m20, f32 m21, f32 m22 )
@@ -77,9 +78,9 @@ public:
      * \param m21 Element of the matrix
      * \param m22 Element of the matrix
      */
-    void set_beamlet_plane_axis( f32 m00, f32 m01, f32 m02,
-                                 f32 m10, f32 m11, f32 m12,
-                                 f32 m20, f32 m21, f32 m22 );
+    void set_frame_axis( f32 m00, f32 m01, f32 m02,
+                         f32 m10, f32 m11, f32 m12,
+                         f32 m20, f32 m21, f32 m22 );
 
     /*!
      * \fn void set_rotation( f32 agx, f32 agy, f32 agz )
@@ -117,11 +118,13 @@ public:
      * \param sizex Beamlet size along x-axis
      * \param sizey Beamlet size along y-axis
      */
-    void set_size( f32 sizex, f32 sizey );
+    void set_local_size( f32 sizex, f32 sizey, f32 sizez );
 
 public:
-    f32xyz get_source_origin();
-    f32xyz get_beamlet_position();
+    f32xyz get_local_beamlet_position();
+    f32xyz get_local_source_position();
+    f32xyz get_local_size();
+    f32matrix44 get_transformation_matrix();
 
 public: // Abstract from GGEMSSource (Mandatory funtions)
 
@@ -156,12 +159,12 @@ private: // Make BeamletSource class non-copyable
     void m_load_spectrum();
 
 private:    
-    f32xy m_pos;                          /*!< Position of the beamlet in 2D (x, y) */
+    f32xyz m_pos;                         /*!< Position of the beamlet in 3D (x, y, z) */
     f32xyz m_org;                         /*!< Origin of the beamlet plane in 3D (x, y, z) */
     f32xyz m_src;                         /*!< Origin of the LINAC source */
     f32matrix33 m_axis_trans;             /*!< Axis transformation matrix */
     f32xyz m_angle;                       /*!< Orientation of the beamlet */
-    f32xy m_size;                         /*!< Beamlet size in 2D (x, y) */
+    f32xyz m_size;                        /*!< Beamlet size in 3D (x, y, z) */
     ui8 m_particle_type;                  /*!< Type of the particle */
     std::string m_spectrum_filename;      /*!< Name of the file that contains the spectrum */
     f32 *m_spectrum_E;                    /*!< Energy spectrum of the source on the host (CPU) */

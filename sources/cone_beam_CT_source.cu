@@ -39,7 +39,7 @@ __host__ __device__ void cone_beam_ct_source( ParticlesData particles, ui8 ptype
 
     // Get direction of the cone beam. The beam is targeted to the isocenter, then
     // the direction is directly related to the position of the source.
-    f32xyz gbl_pos = fxyz_local_to_global_frame( transform, make_f32xyz( 0.0, 0.0, 0.0 ) );
+    f32xyz gbl_pos = fxyz_local_to_global_position( transform, make_f32xyz( 0.0, 0.0, 0.0 ) );
     f32xyz dir = fxyz_unit( fxyz_sub( make_f32xyz( 0.0, 0.0, 0.0 ), gbl_pos ) );  // 0x0x0 is the isocenter position
 
     // Apply deflection (global)
@@ -52,10 +52,7 @@ __host__ __device__ void cone_beam_ct_source( ParticlesData particles, ui8 ptype
     gbl_pos.z = foc.z * ( prng_uniform( particles, id ) - 0.5f );
 
     // Apply transformation (local to global frame)
-    gbl_pos = fxyz_local_to_global_frame( transform, gbl_pos );
-
-//    printf( "pos %f %f %f\n", gbl_pos.x, gbl_pos.y, gbl_pos.z );
-//    printf( "rd  %f %f %f\n", dir.x, dir.y, dir.z );
+    gbl_pos = fxyz_local_to_global_position( transform, gbl_pos );
 
     // Get energy
     if( nb_of_energy_bins == 1 ) // mono energy
@@ -99,93 +96,6 @@ __host__ __device__ void cone_beam_ct_source( ParticlesData particles, ui8 ptype
     particles.scatter_order[ id ] = 0;                    //
 
 }
-
-/*
-__host__ __device__ void cone_beam_ct_source( ParticlesData particles_data,
-                                              ui32 id, f32 px, f32 py, f32 pz,
-                                              ui8 type, f32 *spectrumE, f32 *spectrumCDF, ui32 nbins, f32 aperture,
-                                              f32 orbiting_angle, f32 hfoc, f32 vfoc )
-{
-
-
-    // Get direction of the cone beam. The beam is targeted to the isocenter, then
-    // the direction is directly related to the position of the soruce.
-    f32xyz dir = fxyz_unit( make_f32xyz( 0.0f-px, 0.0f-py, 0.0f-pz ) );
-
-    // Random direction within the cone beam
-    f32 phi = prng_uniform( particles_data, id );
-    f32 theta = prng_uniform( particles_data, id );
-    f32 val_aper = 1.0f - cosf( aperture );
-    phi  *= gpu_twopi;
-    theta = acosf( 1.0f - val_aper * theta );
-
-    f32 rdx = cosf( phi ) * sinf( theta );
-    f32 rdy = sinf( phi ) * sinf( theta );
-    f32 rdz = cosf( theta );
-
-    f32xyz d = rotateUz( make_f32xyz( rdx, rdy, rdz ), dir );
-
-    f32 rot_dx = d.x * cosf( orbiting_angle ) - d.y * sinf( orbiting_angle );
-    f32 rot_dy = d.x * sinf( orbiting_angle ) + d.y * cosf( orbiting_angle );
-
-    particles_data.dx[ id ] = rot_dx;
-    particles_data.dy[ id ] = rot_dy;
-    particles_data.dz[ id ] = d.z;
-
-
-    // If the source is monochromatic the energy is stored immediately
-    if( nbins == 1 )
-    {
-        particles_data.E[ id ] = spectrumE[ 0 ];
-    }
-    else
-    {
-        // Get the position in spectrum
-        // Store rndm
-        f32 rndm = prng_uniform( particles_data, id );
-        ui32 pos = binary_search( rndm, spectrumCDF, nbins );
-
-        if ( pos == ( nbins - 1 ) )
-        {
-            particles_data.E[ id ] = spectrumE[ pos ];
-        }
-        else
-        {
-            particles_data.E[ id ] = linear_interpolation ( spectrumCDF[ pos ],     spectrumE[ pos ],
-                                                            spectrumCDF[ pos + 1 ], spectrumE[ pos + 1 ], rndm );
-        }
-
-    }
-
-    // Get 2 randoms for each focal distance
-    f32 rndmPosV = prng_uniform( particles_data, id );
-    f32 rndmPosH = prng_uniform( particles_data, id );
-    rndmPosV *= vfoc;
-    rndmPosH *= hfoc;
-    rndmPosV -= vfoc / 2.0;
-    rndmPosH -= hfoc / 2.0;
-
-    // set particles
-
-    // Rotate the particle around Z axis
-    f32 rot_px = px * cosf( orbiting_angle )
-            - ( py + rndmPosH ) * sinf( orbiting_angle );
-    f32 rot_py = px * sinf( orbiting_angle )
-            + ( py + rndmPosH ) * cosf( orbiting_angle );
-    particles_data.px[ id ] = rot_px;
-    particles_data.py[ id ] = rot_py;
-    particles_data.pz[ id ] = pz + rndmPosV;
-
-    particles_data.tof[ id ] = 0.0f;
-    particles_data.endsimu[ id ] = PARTICLE_ALIVE;
-    particles_data.next_discrete_process[ id ] = NO_PROCESS;
-    particles_data.next_interaction_distance[id] = 0.0;
-    particles_data.level[ id ] = PRIMARY;
-    particles_data.pname[ id ] = type;
-    particles_data.geometry_id[ id ] = 0;
-    particles_data.scatter_order[ id ] = 0;
-}
-*/
 
 __global__ void kernel_cone_beam_ct_source( ParticlesData particles, ui8 ptype,
                                             f32 *spectrum_E, f32 *spectrum_CDF, ui32 nb_of_energy_bins, f32 aperture,
@@ -294,56 +204,9 @@ void ConeBeamCTSource::set_mono_energy( f32 energy )
 
 void ConeBeamCTSource::set_energy_spectrum( std::string filename )
 {
-
     m_spectrum_filename = filename;
     // Watchdog (avoid to set the two option mono energy and spectrum)
     m_energy = 0;
-
-
-//    // Open the histogram file
-//    std::ifstream input( filename.c_str(), std::ios::in );
-//    if( !input )
-//    {
-//        GGcerr << "Error to open the file'" << filename << "'!" << GGendl;
-//        exit_simulation();
-//    }
-
-//    // Compute number of energy bins
-//    std::string line;
-//    while( std::getline( input, line ) ) ++m_nb_of_energy_bins;
-
-//    // Returning to beginning of the file to read it again
-//    input.clear();
-//    input.seekg( 0, std::ios::beg );
-
-//    // Allocating buffers to store data
-//    m_spectrumE_h = new f32[ m_nb_of_energy_bins ];
-//    m_spectrumCDF_h = new f32[ m_nb_of_energy_bins ];
-
-//    // Store data from file
-//    size_t idx = 0;
-//    f64 sum = 0.0;
-//    while( std::getline( input, line ) )
-//    {
-//        std::istringstream iss( line );
-//        iss >> m_spectrumE_h[ idx ] >> m_spectrumCDF_h[ idx ];
-//        sum += m_spectrumCDF_h[ idx ];
-//        ++idx;
-//    }
-
-//    // Compute CDF and normalized in same time by security
-//    m_spectrumCDF_h[ 0 ] /= sum;
-//    for( ui32 i = 1; i < m_nb_of_energy_bins; ++i )
-//    {
-//        m_spectrumCDF_h[ i ] = m_spectrumCDF_h[ i ] / sum
-//                + m_spectrumCDF_h[ i - 1 ];
-//    }
-
-//    // Watch dog
-//    m_spectrumCDF_h[ m_nb_of_energy_bins - 1 ] = 1.0;
-
-//    // Close the file
-//    input.close();
 }
 
 void ConeBeamCTSource::m_load_spectrum()
@@ -408,6 +271,11 @@ f32xyz ConeBeamCTSource::get_orbiting_angles()
 f32 ConeBeamCTSource::get_aperture()
 {
     return m_aperture;
+}
+
+f32matrix44 ConeBeamCTSource::get_transformation_matrix()
+{
+    return m_transform;
 }
 
 std::ostream& operator<<( std::ostream& os, ConeBeamCTSource const& cbct )
@@ -500,18 +368,6 @@ void ConeBeamCTSource::initialize( GlobalSimulationParameters params )
         m_load_spectrum();
     }
 
-
-//    // Handle GPU device
-//    if( m_params.data_h.device_target == GPU_DEVICE && m_nb_of_energy_bins > 0 )
-//    {
-//        // GPU mem allocation
-//        HANDLE_ERROR( cudaMalloc( (void**)&m_spectrumE_d,   m_nb_of_energy_bins * sizeof( f32 ) ) );
-//        HANDLE_ERROR( cudaMalloc( (void**)&m_spectrumCDF_d, m_nb_of_energy_bins * sizeof ( f32 ) ) );
-
-//        // GPU mem copy
-//        HANDLE_ERROR ( cudaMemcpy( m_spectrumE_d,   m_spectrumE_h,      sizeof( f32 ) * m_nb_of_energy_bins, cudaMemcpyHostToDevice ) );
-//        HANDLE_ERROR ( cudaMemcpy( m_spectrumCDF_d, m_spectrumCDF_h,    sizeof( f32 ) * m_nb_of_energy_bins, cudaMemcpyHostToDevice ) );
-//    }
 }
 
 void ConeBeamCTSource::get_primaries_generator( Particles particles )

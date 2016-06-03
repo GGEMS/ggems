@@ -228,13 +228,13 @@ __host__ __device__ f32xyz fxyz_inv(f32xyz u) {
 /// Transform calculator ////////////////////////////////////////////////////
 
 // Convert a point from local to global frame
-__host__ __device__ f32xyz fxyz_local_to_global_frame( f32matrix44 G, f32xyz u )
+__host__ __device__ f32xyz fxyz_local_to_global_position( f32matrix44 G, f32xyz u )
 {
     return fmatrix_mul_fxyz( G, u );
 }
 
 // Convert a point from global to local frame
-__host__ __device__ f32xyz fxyz_global_to_local_frame( f32matrix44 G, f32xyz u)
+__host__ __device__ f32xyz fxyz_global_to_local_position( f32matrix44 G, f32xyz u)
 {
     // first, extract the translation
     f32xyz T = { G.m03, G.m13, G.m23 };
@@ -248,6 +248,31 @@ __host__ __device__ f32xyz fxyz_global_to_local_frame( f32matrix44 G, f32xyz u)
     u = fmatrix_mul_fxyz( ginv, u );
 
     return u;
+}
+
+__host__ __device__ f32xyz fxyz_local_to_global_direction( f32matrix44 G, f32xyz u )
+{
+    // Get the sub matrix (R and P)
+    f32matrix33 g = { G.m00, G.m01, G.m02,
+                      G.m10, G.m11, G.m12,
+                      G.m20, G.m21, G.m22 };
+
+    u = fmatrix_mul_fxyz( g, u );
+
+    return fxyz_unit( u );
+}
+
+__host__ __device__ f32xyz fxyz_global_to_local_direction( f32matrix44 G, f32xyz u )
+{
+    // Get the sub matrix (R and P)
+    f32matrix33 g = { G.m00, G.m01, G.m02,
+                      G.m10, G.m11, G.m12,
+                      G.m20, G.m21, G.m22 };
+
+    f32matrix33 ginv = fmatrix_trans( g );
+    u = fmatrix_mul_fxyz( ginv, u );
+
+    return fxyz_unit( u );
 }
 
 TransformCalculator::TransformCalculator()

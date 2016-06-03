@@ -153,22 +153,27 @@ static __inline__ __host__ __device__ f32xyz cast_ui32xyz_to_f32xyz(ui32xyz u)
 /// Tranformation class //////////////////////////////////////////////////////
 
 /*!
- * \fn __host__ __device__ f32xyz fxyz_local_to_global_frame( f32matrix44 G, f32xyz u )
+ * \fn __host__ __device__ f32xyz fxyz_local_to_global_position( f32matrix44 G, f32xyz u )
  * \brief Transform a 3D point from local to global frame
  * \param G Global transformation matrix (4x4)
  * \param u Point in 3D (x, y, z)
  * \return The point expresses in the global frame
  */
-__host__ __device__ f32xyz fxyz_local_to_global_frame( f32matrix44 G, f32xyz u );
+__host__ __device__ f32xyz fxyz_local_to_global_position( f32matrix44 G, f32xyz u );
 
 /*!
- * \fn __host__ __device__ f32xyz fxyz_global_to_local_frame( f32matrix44 G, f32xyz u )
+ * \fn __host__ __device__ f32xyz fxyz_global_to_local_position( f32matrix44 G, f32xyz u )
  * \brief Transform a 3D point from global to local frame
  * \param G Global transformation matrix (4x4)
  * \param u Point in 3D (x, y, z)
  * \return The point expresses in the local frame
  */
-__host__ __device__ f32xyz fxyz_global_to_local_frame( f32matrix44 G, f32xyz u );
+__host__ __device__ f32xyz fxyz_global_to_local_position( f32matrix44 G, f32xyz u );
+
+
+__host__ __device__ f32xyz fxyz_local_to_global_direction( f32matrix44 G, f32xyz u );
+
+__host__ __device__ f32xyz fxyz_global_to_local_direction( f32matrix44 G, f32xyz u );
 
 /*!
   \class TransformCalculator

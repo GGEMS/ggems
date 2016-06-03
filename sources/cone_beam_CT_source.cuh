@@ -102,6 +102,8 @@ public:
 
     f32 get_aperture();
 
+    f32matrix44 get_transformation_matrix();
+
     /*!
       \fn std::ostream& operator<<( std::ostream& os, ConeBeamCTSource const& cbct )
       \param os output stream
@@ -145,9 +147,6 @@ private: // Make ConeBeamCTSource class non-copyable
     void m_load_spectrum();
 
 private:
-//    f32 m_px; /*!< Position of the source in X */
-//    f32 m_py; /*!< Position of the source in Y */
-//    f32 m_pz; /*!< Position of the source in Z */
 
     f32xyz m_pos;
 
@@ -157,16 +156,9 @@ private:
 
     f32matrix44 m_transform;
 
-//    f32 m_hfoc; /*!< Horizontal focal position */
-//    f32 m_vfoc; /*!< Vertical focal position */
-
     f32 m_aperture; /*!< Aperture of the source */
     ui8 m_particle_type; /*!< Type of the particle */
     f32xyz m_angles; /*!< Orbiting angle of the source */
-//    f32 *m_spectrumE_h; /*!< Energy spectrum of the source on the host (CPU) */
-//    f32 *m_spectrumE_d; /*!< Energy spectrum of the source on the device (GPU) */
-//    f32 *m_spectrumCDF_h; /*!< CDF of the source on the host (CPU) */
-//    f32 *m_spectrumCDF_d; /*!< CDF of the source on the device (GPU) */
 
     f32 *m_spectrum_E;
     f32 *m_spectrum_CDF;

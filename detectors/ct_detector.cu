@@ -47,23 +47,7 @@ __host__ __device__ void ct_detector_track_to_in( ParticlesData &particles, ObbD
     dir.z = particles.dz[ id ];
 
     // Project particle to detector
-//    f32 dist = hit_ray_OBB( pos, dir,
-//                            detector_volume.xmin, detector_volume.xmax,
-//                            detector_volume.ymin, detector_volume.ymax,
-//                            detector_volume.zmin, detector_volume.zmax,
-//                            detector_volume.center,
-//                            detector_volume.u, detector_volume.v, detector_volume.w );
-
-    //printf(" pos %f %f %f   -   dir %f %f %f\n", pos.x, pos.y, pos.z, dir.x, dir.y, dir.z );
-
     f32 dist = hit_ray_OBB( pos, dir, detector_volume );
-
-//    printf(" xmin %f xmax %f\n", detector_volume.xmin, detector_volume.xmax );
-//    printf(" ymin %f ymax %f\n", detector_volume.ymin, detector_volume.ymax );
-//    printf(" zmin %f zmax %f\n", detector_volume.zmin, detector_volume.zmax );
-//    printf(" center %f %f %f\n", detector_volume.center.x, detector_volume.center.y, detector_volume.center.z );
-
-    //printf("dist %f\n", dist);
 
     if( dist == FLT_MAX )
     {
@@ -74,14 +58,7 @@ __host__ __device__ void ct_detector_track_to_in( ParticlesData &particles, ObbD
     else
     {
         // Check if the path of the particle cross the volume sufficiently
-//        f32 cross = dist_overlap_ray_OBB( pos, dir, detector_volume.xmin,
-//                                          detector_volume.xmax, detector_volume.ymin, detector_volume.ymax,
-//                                          detector_volume.zmin, detector_volume.zmax, detector_volume.center,
-//                                          detector_volume.u, detector_volume.v, detector_volume.w );
-
         f32 cross = dist_overlap_ray_OBB( pos, dir, detector_volume );
-
-//        printf(" Cross %f\n", cross);
 
         if( cross < EPSILON3 )
         {
@@ -92,8 +69,6 @@ __host__ __device__ void ct_detector_track_to_in( ParticlesData &particles, ObbD
 
         // move the particle slightly inside the volume
         pos = fxyz_add( pos, fxyz_scale( dir, dist + EPSILON3 ) );
-
-//        printf(" pos in %f %f %f\n", pos.x, pos.y, pos.z);
 
     }
 
@@ -123,20 +98,12 @@ __host__ __device__ void ct_detector_digitizer( ParticlesData particles, ObbData
     pos.y = particles.py[ id ];
     pos.z = particles.pz[ id ];
 
-    pos.x = 321;
-    pos.y = 0;
-    pos.z = 0;
-
     // Convert global position into local position
-    pos = fxyz_global_to_local_frame( transform, pos );
-
-    printf(" pos %f %f %f\n", pos.x, pos.y, pos.z);
+    pos = fxyz_global_to_local_position( transform, pos );
 
     ui32xyz index = { ui32( pos.x / pixel_size.x ),
                       ui32( pos.y / pixel_size.y ),
                       ui32( pos.z / pixel_size.z ) };
-
-    printf(" ind %i %i %i\n", index.x, index.y, index.z);
 
     // Check and threshold
     if ( index.x >= nb_pixel.x || index.y >= nb_pixel.y || index.z >= nb_pixel.z || particles.E[ id ] < threshold )
@@ -145,23 +112,6 @@ __host__ __device__ void ct_detector_digitizer( ParticlesData particles, ObbData
         particles.E[ id ] = 0.0f;
         return;
     }
-
-
-    /*
-    //f32 rot_posx = pos.x * cosf( orbiting_angle ) + pos.y * sinf( orbiting_angle );  - This var is not used - JB
-    f32 rot_posy = -pos.x * sinf( orbiting_angle ) + pos.y * cosf( orbiting_angle );
-
-    // Calculate pixel id
-    ui32 idx_xr = (ui32)( ( rot_posy - detector_volume.ymin ) / pixel_size_y );
-    ui32 idx_yr = (ui32)( ( pos.z - detector_volume.zmin ) / pixel_size_z );
-
-    if( idx_xr >= nb_pixel_y || idx_yr >= nb_pixel_z || particles.E[ id ] < threshold )
-    {
-        particles.endsimu[id] = PARTICLE_DEAD;
-        particles.E[ id ] = 0.0f;
-        return;
-    }
-    */
 
     if ( record_option == GET_HIT )
     {
@@ -233,10 +183,6 @@ CTDetector::CTDetector(): GGEMSDetector(),
                           m_record_scatter( false ),
                           m_projection( nullptr ),
                           m_scatter( nullptr )
-      //m_projection_h( nullptr ),    // TODO remove
-      //m_projection_d( nullptr ),    // TODO remove
-      //m_scatter_order_h( nullptr ), // TODO remove
-      //m_scatter_order_d( nullptr )  // TODO remove
 {
     set_name( "ct_detector" );
 
@@ -268,33 +214,6 @@ CTDetector::~CTDetector()
     {
         cudaFree( m_scatter );
     }
-
-    /*  TODO: remove
-    if( m_projection_h )
-    {
-        delete[] m_projection_h;
-        m_projection_h = nullptr;
-    }
-
-    if( m_scatter_order_h )
-    {
-        delete[] m_scatter_order_h;
-        m_scatter_order_h = nullptr;
-    }
-
-    if( m_params.data_h.device_target == GPU_DEVICE )
-    {
-        if( m_projection_d )
-        {
-            cudaFree( m_projection_d );
-        }
-
-        if( m_scatter_order_d )
-        {
-            cudaFree( m_scatter_order_d );
-        }
-    }
-    */
 }
 
 void CTDetector::track_to_in( Particles particles )
@@ -374,17 +293,6 @@ void CTDetector::save_projection( std::string filename, std::string format )
     // Create IO object
     ImageIO *im_io = new ImageIO;
 
-    /*
-    // Check if CPU or GPU
-    if( m_params.data_h.device_target == GPU_DEVICE )
-    {
-        HANDLE_ERROR( cudaMemcpy( m_projection_h,
-                                  m_projection_d,
-                                  sizeof( ui32 ) * m_nb_pixel_x * m_nb_pixel_y * m_nb_pixel_z,
-                                  cudaMemcpyDeviceToHost ) );
-    }
-    */
-
     // If ui16 format, need to convert the data
     if ( format == "ui16" )
     {
@@ -415,81 +323,8 @@ void CTDetector::save_projection( std::string filename, std::string format )
         im_io->write_3D( filename, m_projection, m_nb_pixel, offset, m_pixel_size );
     }
 
-
-//    f32xy offset, spacing;
-//    ui32xy nb_pix;
-
-//    // Proj YZ
-//    if ( m_nb_pixel_x == 1 )
-//    {
-//        offset = make_f32xy( 0.5*m_pixel_size_y*m_nb_pixel_y, 0.5*m_pixel_size_z*m_nb_pixel_z );
-//        spacing = make_f32xy( m_pixel_size_y, m_pixel_size_z );
-//        nb_pix = make_ui32xy( m_nb_pixel_y, m_nb_pixel_z );
-//    }
-//    // Proj XZ
-//    else if ( m_nb_pixel_y == 1 )
-//    {
-//        offset = make_f32xy( 0.5*m_pixel_size_x*m_nb_pixel_x, 0.5*m_pixel_size_z*m_nb_pixel_z );
-//        spacing = make_f32xy( m_pixel_size_x, m_pixel_size_z );
-//        nb_pix = make_ui32xy( m_nb_pixel_x, m_nb_pixel_z );
-//    }
-//    // Proj XY
-//    else if ( m_nb_pixel_z == 1 )
-//    {
-//        offset = make_f32xy( 0.5*m_pixel_size_x*m_nb_pixel_x, 0.5*m_pixel_size_y*m_nb_pixel_y );
-//        spacing = make_f32xy( m_pixel_size_x, m_pixel_size_y );
-//        nb_pix = make_ui32xy( m_nb_pixel_x, m_nb_pixel_y );
-//    }
-//    // ERROR: If not a 2D projection, export in 3D
-//    else
-//    {
-//        GGcerr << "For exporting 2D projection Image must have one of its dimension equal to 1, current dimension: "
-//               << m_nb_pixel_x << "x" <<  m_nb_pixel_y << "x" << m_nb_pixel_z
-//               << GGendl;
-//        return;
-//        /*
-//        f32xyz offset3D = make_f32xyz( 0.5*m_pixel_size_x*m_nb_pixel_x, 0.5*m_pixel_size_y*m_nb_pixel_y, 0.5*m_pixel_size_z*m_nb_pixel_z );
-//        f32xyz spacing3D = make_f32xyz( m_pixel_size_x, m_pixel_size_y, m_pixel_size_z );
-//        ui32xyz nb_pix3D = make_ui32xyz( m_nb_pixel_x, m_nb_pixel_y, m_nb_pixel_z );
-
-//        if ( format == "16" )
-//        {
-//            im_io->write_3D( filename, projection16, nb_pix3D, offset3D, spacing3D );
-//            delete[] projection16;
-//        }
-//        else if ( format == "32" )
-//        {
-//            im_io->write_3D( filename, m_projection_h, nb_pix3D, offset3D, spacing3D );
-//        }
-
-//        delete im_io;
-//        return;
-//        */
-//    }
-
-//    // Export the projection
-//    if ( format == "ui16" )
-//    {
-//        im_io->write_2D( filename, projection16, nb_pix, offset, spacing );
-//        delete[] projection16;
-//    }
-//    else if ( format == "ui32" )
-//    {
-//        im_io->write_2D( filename, m_projection_h, nb_pix, offset, spacing );
-//    }
-
     delete im_io;
 }
-
-//            // Global sinogram
-//            ImageReader::record3Dimage(
-//                        filename,
-//                        projection16,
-//                        make_f32xyz( 0.0f, 0.0f, 0.0f ),
-//                        make_f32xyz( m_pixel_size_x, m_pixel_size_y, m_pixel_size_z ),
-//                        make_ui32xyz( m_nb_pixel_x, m_nb_pixel_y, m_nb_pixel_z ),
-//                        false
-//                        );
 
 void CTDetector::save_scatter( std::string filename )
 {
@@ -506,17 +341,6 @@ void CTDetector::save_scatter( std::string filename )
     // Check format
     std::string basename = im_io->get_filename_without_extension( filename );
 
-    /*
-    // GPU
-    if( m_params.data_h.device_target == GPU_DEVICE )
-    {
-        HANDLE_ERROR( cudaMemcpy( m_scatter_order_h,
-                                  m_scatter_order_d,
-                                  sizeof( ui32 ) * m_nb_pixel_x * m_nb_pixel_y * m_nb_pixel_z
-                                  * MAX_SCATTER_ORDER, cudaMemcpyDeviceToHost ) );
-    }
-    */
-
     // First compute some parameters of the projection
     f32xyz offset = make_f32xyz( 0.5 * m_pixel_size.x * m_nb_pixel.x,
                                  0.5 * m_pixel_size.y * m_nb_pixel.y,
@@ -525,40 +349,6 @@ void CTDetector::save_scatter( std::string filename )
     // Allocation
     ui32 tot_pix = m_nb_pixel.x * m_nb_pixel.y * m_nb_pixel.z;
     ui16 *scatter16 = new ui16[ tot_pix ];
-
-//    // Determine the orientation of the projection
-//    f32xy offset, spacing;
-//    ui32xy nb_pix;
-
-//    // Proj YZ
-//    if ( m_nb_pixel_x == 1 )
-//    {
-//        offset = make_f32xy( 0.5*m_pixel_size_y*m_nb_pixel_y, 0.5*m_pixel_size_z*m_nb_pixel_z );
-//        spacing = make_f32xy( m_pixel_size_y, m_pixel_size_z );
-//        nb_pix = make_ui32xy( m_nb_pixel_y, m_nb_pixel_z );
-//    }
-//    // Proj XZ
-//    else if ( m_nb_pixel_y == 1 )
-//    {
-//        offset = make_f32xy( 0.5*m_pixel_size_x*m_nb_pixel_x, 0.5*m_pixel_size_z*m_nb_pixel_z );
-//        spacing = make_f32xy( m_pixel_size_x, m_pixel_size_z );
-//        nb_pix = make_ui32xy( m_nb_pixel_x, m_nb_pixel_z );
-//    }
-//    // Proj XY
-//    else if ( m_nb_pixel_z == 1 )
-//    {
-//        offset = make_f32xy( 0.5*m_pixel_size_x*m_nb_pixel_x, 0.5*m_pixel_size_y*m_nb_pixel_y );
-//        spacing = make_f32xy( m_pixel_size_x, m_pixel_size_y );
-//        nb_pix = make_ui32xy( m_nb_pixel_x, m_nb_pixel_y );
-//    }
-//    // ERROR: If not a 2D projection, export in 3D
-//    else
-//    {
-//        GGcerr << "For exporting 2D scatter projection Image must have one of its dimension equal to 1, current dimension: "
-//               << m_nb_pixel_x << "x" <<  m_nb_pixel_y << "x" << m_nb_pixel_z
-//               << GGendl;
-//        return;
-//    }
 
     // Loop over the scatter order
     for( ui32 i = 0; i < MAX_SCATTER_ORDER; ++i )
@@ -577,31 +367,13 @@ void CTDetector::save_scatter( std::string filename )
         // Record the projection
         im_io->write_3D( out.str(), scatter16, m_nb_pixel, offset, m_pixel_size );
 
-//        // Save the scatter image for each order
-//        ImageReader::record3Dimage(
-//                    out.str(),
-//                    &scatter16[ i * m_nb_pixel_x * m_nb_pixel_y ],
-//                make_f32xyz( 0.0f, 0.0f, 0.0f ),
-//                make_f32xyz( m_pixel_size_x, m_pixel_size_y, m_pixel_size_z ),
-//                make_ui32xyz( m_nb_pixel_x, m_nb_pixel_y, m_nb_pixel_z ),
-//                false
-//                );
-
     }
     delete[] scatter16;
 
     delete im_io;
 }
 
-
-
-
 //// Setting ////////////////////////////////////////////////////////////
-
-//void CTDetector::set_dimension( f32 sizex, f32 sizey, f32 sizez )
-//{
-//    m_dim = make_f32xyz( sizex, sizey, sizez );
-//}
 
 void CTDetector::set_pixel_size( f32 sx, f32 sy, f32 sz )
 {
@@ -671,25 +443,6 @@ void CTDetector::set_record_scatter( bool flag )
     m_record_scatter = flag;
 }
 
-/*
-bool CTDetector::m_check_mandatory()
-{
-    if( m_pixel_size_x == 0.0f ||
-            m_pixel_size_y == 0.0f ||
-            m_pixel_size_z == 0.0f ||
-            m_nb_pixel_x == 0 ||
-            m_nb_pixel_y == 0 ||
-            m_nb_pixel_z == 0 )
-    {
-        return false;
-    }
-    else
-    {
-        return true;
-    }
-}
-*/
-
 //// Getting functions ///////////////////////////////////////////////
 
 f32matrix44 CTDetector::get_transformation()
@@ -736,18 +489,17 @@ ui32 CTDetector::get_scatter_number( ui32 scatter_order )
 
 }
 
-/* TOD: to review
 void CTDetector::print_info_scatter()
 {
     // Get the number of detected particles
-    ui32 detected_particles = getDetectedParticles();
+    ui32 detected_particles = get_detected_particles();
 
     // Get the number of scatter by order and the total scatter
     ui32 count_scatter[ MAX_SCATTER_ORDER ];
     ui32 total_scatter = 0;
     for( ui32 i = 0; i < MAX_SCATTER_ORDER; ++i )
     {
-        count_scatter[ i ] = getScatterNumber( i );
+        count_scatter[ i ] = get_scatter_number( i );
         total_scatter += count_scatter[ i ];
     }
 
@@ -774,31 +526,7 @@ void CTDetector::print_info_scatter()
     std::cout << std::endl;
 
 }
-*/
 
-/* TODO: remove
-void CTDetector::m_copy_detector_cpu2gpu()
-{
-    m_detector_volume.volume.data_d.xmin = m_detector_volume.volume.data_h.xmin;
-    m_detector_volume.volume.data_d.xmax = m_detector_volume.volume.data_h.xmax;
-
-    m_detector_volume.volume.data_d.ymin = m_detector_volume.volume.data_h.ymin;
-    m_detector_volume.volume.data_d.ymax = m_detector_volume.volume.data_h.ymax;
-
-    m_detector_volume.volume.data_d.zmin = m_detector_volume.volume.data_h.zmin;
-    m_detector_volume.volume.data_d.zmax = m_detector_volume.volume.data_h.zmax;
-
-    m_detector_volume.volume.data_d.angle = m_detector_volume.volume.data_h.angle;
-    m_detector_volume.volume.data_d.translate = m_detector_volume.volume.data_h.translate;
-    m_detector_volume.volume.data_d.center = m_detector_volume.volume.data_h.center;
-
-    m_detector_volume.volume.data_d.u = m_detector_volume.volume.data_h.u;
-    m_detector_volume.volume.data_d.v = m_detector_volume.volume.data_h.v;
-    m_detector_volume.volume.data_d.w = m_detector_volume.volume.data_h.w;
-
-    m_detector_volume.volume.data_d.size = m_detector_volume.volume.data_h.size;
-}
-*/
 
 void CTDetector::initialize( GlobalSimulationParameters params )
 {
@@ -838,47 +566,24 @@ void CTDetector::initialize( GlobalSimulationParameters params )
     // Store the matrix
     m_detector_volume.transformation = m_transform;
 
-//    // Compute the OBB axis (global frame)
-//    f32xyz uloc = { 1.0, 0.0, 0.0 }; // x
-//    f32xyz vloc = { 0.0, 1.0, 0.0 }; // y
-//    f32xyz wloc = { 0.0, 0.0, 1.0 }; // z
-//    m_detector_volume.u = fxyz_local_to_global_frame( m_transform, uloc );
-//    m_detector_volume.v = fxyz_local_to_global_frame( m_transform, vloc );
-//    m_detector_volume.w = fxyz_local_to_global_frame( m_transform, wloc );
-
-    // Allocation
+    // Allocation & init
     HANDLE_ERROR( cudaMallocManaged( &m_projection,  m_nb_pixel.x*m_nb_pixel.y*m_nb_pixel.z * sizeof( f32 ) ) );
+    ui32 i = 0; while (i < m_nb_pixel.x*m_nb_pixel.y*m_nb_pixel.z )
+    {
+        m_projection[i++] = 0.0;
+    }
+
     if ( m_record_scatter )
     {
         HANDLE_ERROR( cudaMallocManaged( &m_scatter,  MAX_SCATTER_ORDER *
                                          m_nb_pixel.x*m_nb_pixel.y*m_nb_pixel.z * sizeof( ui32 ) ) );
+
+        ui32 j = 0; while (j < MAX_SCATTER_ORDER * m_nb_pixel.x*m_nb_pixel.y*m_nb_pixel.z )
+        {
+            m_scatter[j++] = 0.0;
+        }
     }
 
-// TODO: remove
-//    // Copy projection data to GPU
-//    if( m_params.data_h.device_target == GPU_DEVICE )
-//    {
-//        m_copy_detector_cpu2gpu();
-
-//        // GPU mem allocation
-//        HANDLE_ERROR( cudaMalloc( (void**)&m_projection_d,
-//                                  m_nb_pixel_x * m_nb_pixel_y * m_nb_pixel_z * sizeof( ui32 ) ) );
-//        // GPU mem copy
-//        HANDLE_ERROR( cudaMemcpy( m_projection_d,
-//                                  m_projection_h,
-//                                  sizeof( ui32 ) * m_nb_pixel_x * m_nb_pixel_y * m_nb_pixel_z,
-//                                  cudaMemcpyHostToDevice ) );
-
-//        // GPU mem allocation
-//        HANDLE_ERROR( cudaMalloc( (void**)&m_scatter_order_d,
-//                                  MAX_SCATTER_ORDER * m_nb_pixel_x * m_nb_pixel_y * m_nb_pixel_z
-//                                  * sizeof( ui32 ) ) );
-//        // GPU mem copy
-//        HANDLE_ERROR( cudaMemcpy( m_scatter_order_d,
-//                                  m_scatter_order_h,
-//                                  MAX_SCATTER_ORDER * sizeof( ui32 ) * m_nb_pixel_x * m_nb_pixel_y
-//                                  * m_nb_pixel_z, cudaMemcpyHostToDevice ) );
-//    }
 }
 
 #endif

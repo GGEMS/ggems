@@ -71,11 +71,98 @@ void VrmlIO::close()
 void VrmlIO::draw_source( BeamletSource *aSource )
 {
     // Get back information from this source
-    f32xyz src = aSource->get_source_origin();
-    f32xyz pos = aSource->get_beamlet_position();
+    f32xyz loc_pos = aSource->get_local_beamlet_position();
+    f32xyz loc_src = aSource->get_local_source_position();
+    f32xyz loc_size = aSource->get_local_size();
+    f32matrix44 trans = aSource->get_transformation_matrix();
 
-    m_draw_sphere( src, 10, m_yellow );
-    m_draw_sphere( pos, 10, m_red );
+    // Src
+    f32xyz gbl_src = fxyz_local_to_global_position( trans, loc_src );
+    m_draw_sphere( gbl_src, 5, m_yellow );
+
+    // local Axis
+    f32xyz org = { 0.0,  0.0,  0.0 }; // Small shift of the axis for a better visibility (overlap with obb)
+    f32xyz ax = { 20.0,  0.0,  0.0 };
+    f32xyz ay = {  0.0, 20.0,  0.0 };
+    f32xyz az = {  0.0,  0.0, 20.0 };
+    org = fxyz_local_to_global_position( trans, org );
+    ax = fxyz_local_to_global_position( trans, ax );
+    ay = fxyz_local_to_global_position( trans, ay );
+    az = fxyz_local_to_global_position( trans, az );
+    m_draw_axis( org, ax, ay, az );
+
+    // draw beamlet
+    //
+    //          + Src
+    //
+    //
+    //     a+-----+b      In a generic way (meanning any direction of the beamlet is considered for drawing),
+    //     /     /|       the 2D beamlet is a 3D oriented cube that one dimension is equal to zero.
+    //   d+-----+c|
+    //    |e+   | +f
+    //    |     |/
+    //   h+-----+g
+    //
+
+    f32xyz hsize = fxyz_scale( loc_size, 0.5f );
+
+    f32xyz a = { loc_pos.x-hsize.x, loc_pos.y-hsize.y, loc_pos.z-hsize.z };
+    f32xyz b = { loc_pos.x+hsize.x, loc_pos.y-hsize.y, loc_pos.z-hsize.z };
+    f32xyz c = { loc_pos.x+hsize.x, loc_pos.y+hsize.y, loc_pos.z-hsize.z };
+    f32xyz d = { loc_pos.x-hsize.x, loc_pos.y+hsize.y, loc_pos.z-hsize.z };
+
+    f32xyz e = { loc_pos.x-hsize.x, loc_pos.y-hsize.y, loc_pos.z+hsize.z };
+    f32xyz f = { loc_pos.x+hsize.x, loc_pos.y-hsize.y, loc_pos.z+hsize.z };
+    f32xyz g = { loc_pos.x+hsize.x, loc_pos.y+hsize.y, loc_pos.z+hsize.z };
+    f32xyz h = { loc_pos.x-hsize.x, loc_pos.y+hsize.y, loc_pos.z+hsize.z };
+
+    a = fxyz_local_to_global_position( trans, a );
+    b = fxyz_local_to_global_position( trans, b );
+    c = fxyz_local_to_global_position( trans, c );
+    d = fxyz_local_to_global_position( trans, d );
+    e = fxyz_local_to_global_position( trans, e );
+    f = fxyz_local_to_global_position( trans, f );
+    g = fxyz_local_to_global_position( trans, g );
+    h = fxyz_local_to_global_position( trans, h );
+
+    fprintf( m_pfile, "\n# Beamlet\n" );
+    fprintf( m_pfile, "Shape {\n");
+
+    fprintf( m_pfile, "  geometry IndexedLineSet {\n");
+    // Coordinate
+    fprintf( m_pfile, "    coord Coordinate {\n");
+    fprintf( m_pfile, "      point [\n");
+    fprintf( m_pfile, "        %f %f %f,\n", a.x, a.y, a.z); // a 0
+    fprintf( m_pfile, "        %f %f %f,\n", b.x, b.y, b.z); // b 1
+    fprintf( m_pfile, "        %f %f %f,\n", c.x, c.y, c.z); // c 2
+    fprintf( m_pfile, "        %f %f %f,\n", d.x, d.y, d.z); // d 3
+    fprintf( m_pfile, "        %f %f %f,\n", e.x, e.y, e.z); // e 4
+    fprintf( m_pfile, "        %f %f %f,\n", f.x, f.y, f.z); // f 5
+    fprintf( m_pfile, "        %f %f %f,\n", g.x, g.y, g.z); // g 6
+    fprintf( m_pfile, "        %f %f %f,\n", h.x, h.y, h.z); // h 7
+    fprintf( m_pfile, "      ]\n");
+    fprintf( m_pfile, "    }\n");
+    // CoordIndex
+    fprintf( m_pfile, "    coordIndex [\n");
+    fprintf( m_pfile, "      %i, %i, %i, %i, %i, -1,\n", 0, 1, 2, 3, 0); // top
+    fprintf( m_pfile, "      %i, %i, %i, %i, %i, -1,\n", 4, 5, 6, 7, 4); // bottom
+    fprintf( m_pfile, "      %i, %i, -1,\n", 0, 4);
+    fprintf( m_pfile, "      %i, %i, -1,\n", 1, 5);
+    fprintf( m_pfile, "      %i, %i, -1,\n", 2, 6);
+    fprintf( m_pfile, "      %i, %i, -1,\n", 3, 7);
+    fprintf( m_pfile, "    ]\n");
+
+    // Color
+    fprintf( m_pfile, "    color Color {\n");
+    fprintf( m_pfile, "      color [%f %f %f]\n", m_yellow.x, m_yellow.y, m_yellow.z);
+    fprintf( m_pfile, "    }\n");
+    fprintf( m_pfile, "    colorIndex [0, 0, 0, 0, 0, 0]\n");
+    fprintf( m_pfile, "    colorPerVertex FALSE\n");
+
+    fprintf( m_pfile, "  }\n");
+    fprintf( m_pfile, "}\n");
+
+
 
 }
 
@@ -83,17 +170,22 @@ void VrmlIO::draw_source( ConeBeamCTSource *aSource )
 {
     // Get back information from this source
     f32xyz pos = aSource->get_position();
-    f32xyz angles = aSource->get_orbiting_angles();
     f32 aperture = aSource->get_aperture();
-
-    // TODO: when transformation will be handled in the source this section muste be removed
-    TransformCalculator *T = new TransformCalculator;
-    T->set_translation( pos );
-    T->set_rotation( angles );
-    f32matrix44 trans = T->get_transformation_matrix();
-    delete T;
+    f32matrix44 trans = aSource->get_transformation_matrix();
 
     m_draw_wireframe_cone( pos, aperture, trans, m_yellow );
+
+    // local Axis
+    f32xyz org = { 1.0, 1.0, 1.0 }; // Small shift of the axis for a better visibility (overlap with obb)
+    f32xyz ax = { 20.0, 1.0, 1.0 };
+    f32xyz ay = { 1.0, 20.0, 1.0 };
+    f32xyz az = { 1.0, 1.0, 20.0 };
+    org = fxyz_local_to_global_position( trans, org );
+    ax = fxyz_local_to_global_position( trans, ax );
+    ay = fxyz_local_to_global_position( trans, ay );
+    az = fxyz_local_to_global_position( trans, az );
+    m_draw_axis( org, ax, ay, az );
+
 }
 
 void VrmlIO::draw_phantom( VoxPhanDosiNav *aPhantom )
@@ -125,10 +217,10 @@ void VrmlIO::draw_detector( CTDetector *aDetector )
     f32xyz ax = { 20.0, 1.0, 1.0 };
     f32xyz ay = { 1.0, 20.0, 1.0 };
     f32xyz az = { 1.0, 1.0, 20.0 };
-    org = fxyz_local_to_global_frame( trans, org );
-    ax = fxyz_local_to_global_frame( trans, ax );
-    ay = fxyz_local_to_global_frame( trans, ay );
-    az = fxyz_local_to_global_frame( trans, az );
+    org = fxyz_local_to_global_position( trans, org );
+    ax = fxyz_local_to_global_position( trans, ax );
+    ay = fxyz_local_to_global_position( trans, ay );
+    az = fxyz_local_to_global_position( trans, az );
     m_draw_axis( org, ax, ay, az );
 
 }
@@ -318,14 +410,14 @@ void VrmlIO::m_draw_wireframe_obb( ObbData obb, f32matrix44 trans, f32xyz color 
     //        |          |/
     // ymax  4+---------5+   zmin
 
-    f32xyz p0 = fxyz_local_to_global_frame( trans, make_f32xyz( obb.xmin, obb.ymin, obb.zmin ) );
-    f32xyz p1 = fxyz_local_to_global_frame( trans, make_f32xyz( obb.xmax, obb.ymin, obb.zmin ) );
-    f32xyz p2 = fxyz_local_to_global_frame( trans, make_f32xyz( obb.xmax, obb.ymin, obb.zmax ) );
-    f32xyz p3 = fxyz_local_to_global_frame( trans, make_f32xyz( obb.xmin, obb.ymin, obb.zmax ) );
-    f32xyz p4 = fxyz_local_to_global_frame( trans, make_f32xyz( obb.xmin, obb.ymax, obb.zmin ) );
-    f32xyz p5 = fxyz_local_to_global_frame( trans, make_f32xyz( obb.xmax, obb.ymax, obb.zmin ) );
-    f32xyz p6 = fxyz_local_to_global_frame( trans, make_f32xyz( obb.xmax, obb.ymax, obb.zmax ) );
-    f32xyz p7 = fxyz_local_to_global_frame( trans, make_f32xyz( obb.xmin, obb.ymax, obb.zmax ) );
+    f32xyz p0 = fxyz_local_to_global_position( trans, make_f32xyz( obb.xmin, obb.ymin, obb.zmin ) );
+    f32xyz p1 = fxyz_local_to_global_position( trans, make_f32xyz( obb.xmax, obb.ymin, obb.zmin ) );
+    f32xyz p2 = fxyz_local_to_global_position( trans, make_f32xyz( obb.xmax, obb.ymin, obb.zmax ) );
+    f32xyz p3 = fxyz_local_to_global_position( trans, make_f32xyz( obb.xmin, obb.ymin, obb.zmax ) );
+    f32xyz p4 = fxyz_local_to_global_position( trans, make_f32xyz( obb.xmin, obb.ymax, obb.zmin ) );
+    f32xyz p5 = fxyz_local_to_global_position( trans, make_f32xyz( obb.xmax, obb.ymax, obb.zmin ) );
+    f32xyz p6 = fxyz_local_to_global_position( trans, make_f32xyz( obb.xmax, obb.ymax, obb.zmax ) );
+    f32xyz p7 = fxyz_local_to_global_position( trans, make_f32xyz( obb.xmin, obb.ymax, obb.zmax ) );
 
     fprintf( m_pfile, "\n# OBB Wireframe\n" );
     fprintf( m_pfile, "Shape {\n");
@@ -369,55 +461,88 @@ void VrmlIO::m_draw_wireframe_cone( f32xyz pos, f32 aperture, f32matrix44 trans,
 {
     // Compute the vertice
     //
-    //                         b0 + bottom radius
-    //  pos                       |
+    //                         b0 + + c0  bottom radius
+    //  pos                       |/
     //   +------------------------o isocenter
-    //          height            |
-    //                         b1 +
+    //          height           /|
+    //                       c1 + + b1
     //
 
-    // Determined the major axis
-    ui8 axis = 0;
-    f32 max = fabs( pos.x );
-    if ( fabs( pos.y ) > max )
-    {
-        max = fabs( pos.y );
-        axis = 1;
-    }
-    if ( fabs( pos.z ) > max )
-    {
-        axis = 2;
-    }
+//    // Determined the major axis
+//    ui8 axis = 0;
+//    f32 max = fabs( pos.x );
+//    if ( fabs( pos.y ) > max )
+//    {
+//        max = fabs( pos.y );
+//        axis = 1;
+//    }
+//    if ( fabs( pos.z ) > max )
+//    {
+//        axis = 2;
+//    }
 
     // Get pos and height
     f32xyz zero = make_f32xyz( 0.0, 0.0, 0.0 );
-    pos = fxyz_local_to_global_frame( trans, zero );
-    f32 height = fxyz_mag( fxyz_sub( zero, pos ) );
+    pos = fxyz_local_to_global_position( trans, zero );
+
+    f32xyz vec = fxyz_sub( zero, pos );
+    f32 height = fxyz_mag( vec );
 
     // Compute bottom radius
     f32 rad = height * tan( aperture );
 
-    // Get b0 and b1 point
-    f32xyz b0, b1;
-    if ( axis == 0)
-    {
-        // Along z-axis
-        b0 = make_f32xyz( 0.0, 0.0, -rad );
-        b1 = make_f32xyz( 0.0, 0.0,  rad );
-    }
-    else if ( axis == 1)
-    {
-        // Along x-axis
-        b0 = make_f32xyz( -rad, 0.0, 0.0 );
-        b1 = make_f32xyz(  rad, 0.0, 0.0 );
-    }
-    else
-    {
-        // Along y-axis
-        b0 = make_f32xyz( 0.0, -rad, 0.0 );
-        b1 = make_f32xyz( 0.0,  rad, 0.0 );
-    }
+    f32xyz a0 = make_f32xyz( 0.0, 0.0, -rad );
+    f32xyz a1 = make_f32xyz( 0.0, 0.0,  rad );
+    f32xyz b0 = make_f32xyz( 0.0, -rad, 0.0 );
+    f32xyz b1 = make_f32xyz( 0.0,  rad, 0.0 );
+    f32xyz c0 = make_f32xyz( -rad, 0.0, 0.0 );
+    f32xyz c1 = make_f32xyz( rad, 0.0, 0.0 );
 
+    a0 = fxyz_local_to_global_direction( trans, a0 );
+    a1 = fxyz_local_to_global_direction( trans, a1 );
+    b0 = fxyz_local_to_global_direction( trans, b0 );
+    b1 = fxyz_local_to_global_direction( trans, b1 );
+    c0 = fxyz_local_to_global_direction( trans, c0 );
+    c1 = fxyz_local_to_global_direction( trans, c1 );
+
+    a0 = fxyz_scale( a0, rad );
+    a1 = fxyz_scale( a1, rad );
+    b0 = fxyz_scale( b0, rad );
+    b1 = fxyz_scale( b1, rad );
+    c0 = fxyz_scale( c0, rad );
+    c1 = fxyz_scale( c1, rad );
+
+//    // Get b0 and b1 point
+//    f32xyz b0, b1, c0, c1;
+//    if ( axis == 0 )
+//    {
+//        // Along zy-axis
+//        b0 = make_f32xyz( 0.0, 0.0, -rad );
+//        b1 = make_f32xyz( 0.0, 0.0,  rad );
+//        c0 = make_f32xyz( 0.0, -rad, 0.0 );
+//        c1 = make_f32xyz( 0.0,  rad, 0.0 );
+//    }
+//    else if ( axis == 1 )
+//    {
+//        // Along x-axis
+//        b0 = make_f32xyz( -rad, 0.0, 0.0 );
+//        b1 = make_f32xyz(  rad, 0.0, 0.0 );
+//        c0 = make_f32xyz( 0.0, 0.0, -rad );
+//        c1 = make_f32xyz( 0.0, 0.0,  rad );
+//    }
+//    else
+//    {
+//        // Along y-axis
+//        b0 = make_f32xyz( 0.0, -rad, 0.0 );
+//        b1 = make_f32xyz( 0.0,  rad, 0.0 );
+//        c0 = make_f32xyz( -rad, 0.0, 0.0 );
+//        c1 = make_f32xyz( rad,  0.0, 0.0 );
+//    }
+
+//    b0 = fxyz_local_to_global_position( trans, b0 );
+//    b1 = fxyz_local_to_global_position( trans, b1 );
+//    c0 = fxyz_local_to_global_position( trans, c0 );
+//    c1 = fxyz_local_to_global_position( trans, c1 );
 
     fprintf( m_pfile, "\n# Cone Wireframe\n" );
     fprintf( m_pfile, "Shape {\n");
@@ -430,6 +555,8 @@ void VrmlIO::m_draw_wireframe_cone( f32xyz pos, f32 aperture, f32matrix44 trans,
     fprintf( m_pfile, "        %f %f %f,\n", 0.0, 0.0, 0.0 );       // isocenter  1
     fprintf( m_pfile, "        %f %f %f,\n", b0.x, b0.y, b0.z );    // b0         2
     fprintf( m_pfile, "        %f %f %f,\n", b1.x, b1.y, b1.z );    // b1         3
+    fprintf( m_pfile, "        %f %f %f,\n", c0.x, c0.y, c0.z );    // c0         4
+    fprintf( m_pfile, "        %f %f %f,\n", c1.x, c1.y, c1.z );    // c1         5
     fprintf( m_pfile, "      ]\n");
     fprintf( m_pfile, "    }\n");
     // CoordIndex
@@ -438,13 +565,16 @@ void VrmlIO::m_draw_wireframe_cone( f32xyz pos, f32 aperture, f32matrix44 trans,
     fprintf( m_pfile, "      %i, %i, -1,\n", 2, 3);
     fprintf( m_pfile, "      %i, %i, -1,\n", 0, 2);
     fprintf( m_pfile, "      %i, %i, -1,\n", 0, 3);
+    fprintf( m_pfile, "      %i, %i, -1,\n", 0, 4);
+    fprintf( m_pfile, "      %i, %i, -1,\n", 0, 5);
+    fprintf( m_pfile, "      %i, %i, -1,\n", 4, 5);
     fprintf( m_pfile, "    ]\n");
 
     // Color
     fprintf( m_pfile, "    color Color {\n");
     fprintf( m_pfile, "      color [%f %f %f]\n", color.x, color.y, color.z);
     fprintf( m_pfile, "    }\n");
-    fprintf( m_pfile, "    colorIndex [0, 0, 0, 0]\n");
+    fprintf( m_pfile, "    colorIndex [0, 0, 0, 0, 0, 0, 0]\n");
     fprintf( m_pfile, "    colorPerVertex FALSE\n");
 
     fprintf( m_pfile, "  }\n");

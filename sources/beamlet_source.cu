@@ -16,22 +16,32 @@
 ///////// GPU code ////////////////////////////////////////////////////
 
 // Internal function that create a new particle to the buffer at the slot id
-__host__ __device__ void beamlet_source ( ParticlesData particles, f32xy pos, f32xyz src, f32xy size, f32matrix44 trans,
+__host__ __device__ void beamlet_source ( ParticlesData particles, f32xyz pos, f32xyz src, f32xyz size, f32matrix44 trans,
                                           f32 *spectrum_E, f32 *spectrum_CDF,
                                           ui32 nb_of_energy_bins, ui8 ptype, ui32 id )
 {
 
-    // 1. First chose a local position within the beamlet
-    f32xyz part_pos;    
-    part_pos.x = size.x*prng_uniform( particles, id ) - 0.5f*size.x;
-    part_pos.y = size.y*prng_uniform( particles, id ) - 0.5f*size.y;
-    part_pos.x = pos.x + part_pos.x;
-    part_pos.y = pos.y + part_pos.y;
-    part_pos.z = 0;
+    // 1. First choose a local position within the 2D beamlet (one of the corrdinate should be 0)
+    f32xyz part_pos = { 0.0, 0.0, 0.0 };
+    if ( size.x != 0.0 )
+    {
+        part_pos.x = size.x*prng_uniform( particles, id ) - 0.5f*size.x;
+        part_pos.x = pos.x + part_pos.x;
+    }
+    if ( size.y != 0.0 )
+    {
+        part_pos.y = size.y*prng_uniform( particles, id ) - 0.5f*size.y;
+        part_pos.y = pos.y + part_pos.y;
+    }
+    if ( size.z != 0.0 )
+    {
+        part_pos.z = size.z*prng_uniform( particles, id ) - 0.5f*size.z;
+        part_pos.z = pos.z + part_pos.z;
+    }
 
     // 2. Transform the beamlet and the source position from local to the global frame
-    part_pos = fxyz_local_to_global_frame( trans, part_pos );
-    src = fxyz_local_to_global_frame( trans, src );
+    part_pos = fxyz_local_to_global_position( trans, part_pos );
+    src = fxyz_local_to_global_position( trans, src );
 
     // 3. Get the direction
     f32xyz part_dir = fxyz_sub( part_pos, src );
@@ -86,7 +96,7 @@ __host__ __device__ void beamlet_source ( ParticlesData particles, f32xy pos, f3
 
 // Kernel to create new particles. This kernel will only call the host/device function
 // beamlet source in order to get one new particle.
-__global__ void kernel_beamlet_source ( ParticlesData particles, f32xy pos, f32xyz src, f32xy size, f32matrix44 trans,
+__global__ void kernel_beamlet_source ( ParticlesData particles, f32xyz pos, f32xyz src, f32xyz size, f32matrix44 trans,
                                         f32 *spectrum_E, f32 *spectrum_CDF,
                                         ui32 nb_of_energy_bins, ui8 particle_type )
 {
@@ -108,14 +118,14 @@ BeamletSource::BeamletSource() : GGEMSSource()
     set_name( "beamlet_source" );
 
     // Init vars
-    m_pos = make_f32xy( 0.0, 0.0 );
+    m_pos = make_f32xyz( 0.0, 0.0, 0.0 );
     m_org = make_f32xyz( 0.0, 0.0, 0.0 );
     m_src = make_f32xyz( 0.0, 0.0, 0.0 );
     m_axis_trans = make_f32matrix33( 1, 0, 0,
                                      0, 1, 0,
                                      0, 0, 1 );
     m_angle = make_f32xyz( 0.0, 0.0, 0.0 );
-    m_size = make_f32xy( 0.0, 0.0 );
+    m_size = make_f32xyz( 0.0, 0.0, 0.0 );
     m_particle_type = PHOTON;
     m_spectrum_E = NULL;
     m_spectrum_CDF = NULL;
@@ -180,22 +190,21 @@ void BeamletSource::m_load_spectrum()
 //========== Setting ===============================================
 
 // Setting position of the beamlet
-void BeamletSource::set_beamlet_relative_position( f32 posx, f32 posy )
+void BeamletSource::set_local_beamlet_position( f32 posx, f32 posy, f32 posz )
 {
-    m_pos.x = posx;
-    m_pos.y = posy;
+    m_pos = make_f32xyz( posx, posy, posz );
 }
 
 // Setting the distance between the beamlet plane and the isocenter
-void BeamletSource::set_beamlet_origin( f32 posx, f32 posy, f32 posz )
+void BeamletSource::set_frame_position( f32 posx, f32 posy, f32 posz )
 {
     m_org = make_f32xyz( posx, posy, posz );
 }
 
 // Setting the axis transformation matrix
-void BeamletSource::set_beamlet_plane_axis( f32 m00, f32 m01, f32 m02,
-                                            f32 m10, f32 m11, f32 m12,
-                                            f32 m20, f32 m21, f32 m22 )
+void BeamletSource::set_frame_axis( f32 m00, f32 m01, f32 m02,
+                                    f32 m10, f32 m11, f32 m12,
+                                    f32 m20, f32 m21, f32 m22 )
 {
     m_axis_trans.m00 = m00;
     m_axis_trans.m01 = m01;
@@ -209,15 +218,15 @@ void BeamletSource::set_beamlet_plane_axis( f32 m00, f32 m01, f32 m02,
 }
 
 // Setting position of the focal beamlet
-void BeamletSource::set_source_origin( f32 posx, f32 posy, f32 posz )
+void BeamletSource::set_local_source_position( f32 posx, f32 posy, f32 posz )
 {
     m_src = make_f32xyz( posx, posy, posz );
 }
 
 // Setting beamlet size
-void BeamletSource::set_size( f32 sizex, f32 sizey )
+void BeamletSource::set_local_size( f32 sizex, f32 sizey, f32 sizez )
 {
-    m_size = make_f32xy( sizex, sizey );
+    m_size = make_f32xyz( sizex, sizey, sizez );
 }
 
 // Setting orientation of the beamlet
@@ -263,18 +272,24 @@ void BeamletSource::set_particle_type( std::string pname )
 
 //========== Getting ===============================================
 
-f32xyz BeamletSource::get_source_origin()
+f32xyz BeamletSource::get_local_source_position()
 {
-    return fxyz_local_to_global_frame( m_transform, m_src );
+    return m_src;
 }
 
-f32xyz BeamletSource::get_beamlet_position()
+f32xyz BeamletSource::get_local_beamlet_position()
 {
-    f32xyz pos;
-    pos.x = m_pos.x;
-    pos.y = m_pos.y;
-    pos.z = 0;
-    return fxyz_local_to_global_frame( m_transform, pos );
+    return m_pos;
+}
+
+f32xyz BeamletSource::get_local_size()
+{
+    return m_size;
+}
+
+f32matrix44 BeamletSource::get_transformation_matrix()
+{
+    return m_transform;
 }
 
 //========= Main function ============================================
@@ -289,7 +304,7 @@ void BeamletSource::initialize ( GlobalSimulationParameters params )
         GGcerr << "No energy or spectrum file specified!" << GGendl;
         exit_simulation();
     }
-    if ( m_size.x == 0 || m_size.y == 0 )
+    if ( m_size.x == 0 && m_size.y == 0 && m_size.z == 0 )
     {
         GGcerr << "Size of the beamlet was not defined!" << GGendl;
         exit_simulation();
@@ -323,10 +338,10 @@ void BeamletSource::initialize ( GlobalSimulationParameters params )
     delete trans;
 
     // Get distance between the isocenter and the source
-    f32 dist_src = fxyz_mag( m_src );
+    f32 dist_src = fxyz_mag( fxyz_local_to_global_position( m_transform, m_src ) );
 
     // Convert the global source position to a relative position
-    m_src = fxyz_global_to_local_frame( m_transform, m_src);
+    //m_src = fxyz_global_to_local_position( m_transform, m_src );
 
     // Get the distance between the beamlet origin and the source
     f32 dist_src_beamlet = fxyz_mag( m_src );
@@ -335,6 +350,7 @@ void BeamletSource::initialize ( GlobalSimulationParameters params )
     f32 ratio = dist_src_beamlet / dist_src;
     m_size.x *= ratio;
     m_size.y *= ratio;
+    m_size.z *= ratio;
 
     // Some verbose if required
     if ( params.data_h.display_memory_usage )

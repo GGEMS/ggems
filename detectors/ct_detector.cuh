@@ -53,8 +53,6 @@ class CTDetector : public GGEMSDetector
         f32matrix44 get_transformation();
         ObbData get_bounding_box();
 
-        //void set_orbiting( f32 orbiting_angle );  // TODO remove
-
         // Tracking from outside to the detector
         void track_to_in( Particles particles );
         void track_to_out( Particles particles ){}
@@ -73,17 +71,10 @@ class CTDetector : public GGEMSDetector
         ui32 get_scatter_number( ui32 scatter_order );
 
     private:
-        //void m_copy_detector_cpu2gpu();  // TODO: remove
 
         // Image Projection
         f32xyz m_pixel_size;
         ui32xyz m_nb_pixel;
-
-        // TODO remove
-        //ui32 *m_projection_h;
-        //ui32 *m_projection_d;
-        //ui32 *m_scatter_order_h;
-        //ui32 *m_scatter_order_d;
 
         f32 *m_projection;
         ui32 *m_scatter;
