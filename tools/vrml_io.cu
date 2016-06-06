@@ -81,7 +81,7 @@ void VrmlIO::draw_source( BeamletSource *aSource )
     m_draw_sphere( gbl_src, 5, m_yellow );
 
     // local Axis
-    f32xyz org = { 0.0,  0.0,  0.0 }; // Small shift of the axis for a better visibility (overlap with obb)
+    f32xyz org = { 0.0,  0.0,  0.0 };
     f32xyz ax = { 20.0,  0.0,  0.0 };
     f32xyz ay = {  0.0, 20.0,  0.0 };
     f32xyz az = {  0.0,  0.0, 20.0 };
@@ -90,6 +90,28 @@ void VrmlIO::draw_source( BeamletSource *aSource )
     ay = fxyz_local_to_global_position( trans, ay );
     az = fxyz_local_to_global_position( trans, az );
     m_draw_axis( org, ax, ay, az );
+
+    // Get distance to draw the line that connect the gbl source and phantom
+    //
+    //                  + gbl src
+    //                 /|
+    //            E   / |   A
+    //               /  |
+    //      loc pos +   + org
+    //             /    |
+    //         F  /     |   B     C=A+B   G=E+F
+    //           /      |
+    //    ? --> +       + isocenter
+    //
+    f32 dist_A = fxyz_mag( fxyz_sub( org, gbl_src ) );
+    f32 dist_C = fxyz_mag( gbl_src );
+    f32xyz delta_E = fxyz_sub( fxyz_local_to_global_position( trans, loc_pos ) , gbl_src );
+    f32 dist_E = fxyz_mag( delta_E );
+    f32 dist_G = dist_E * dist_C / dist_A; // Thales
+
+    // Compute the position (first get a direction)
+    f32xyz dir = fxyz_unit( delta_E );
+    f32xyz end_pos = fxyz_add( gbl_src, fxyz_scale( dir, dist_G ) );
 
     // draw beamlet
     //
@@ -140,6 +162,8 @@ void VrmlIO::draw_source( BeamletSource *aSource )
     fprintf( m_pfile, "        %f %f %f,\n", f.x, f.y, f.z); // f 5
     fprintf( m_pfile, "        %f %f %f,\n", g.x, g.y, g.z); // g 6
     fprintf( m_pfile, "        %f %f %f,\n", h.x, h.y, h.z); // h 7
+    fprintf( m_pfile, "        %f %f %f,\n", gbl_src.x, gbl_src.y, gbl_src.z); // gbl_src 8
+    fprintf( m_pfile, "        %f %f %f,\n", end_pos.x, end_pos.y, end_pos.z); // end_pos 9
     fprintf( m_pfile, "      ]\n");
     fprintf( m_pfile, "    }\n");
     // CoordIndex
@@ -150,13 +174,14 @@ void VrmlIO::draw_source( BeamletSource *aSource )
     fprintf( m_pfile, "      %i, %i, -1,\n", 1, 5);
     fprintf( m_pfile, "      %i, %i, -1,\n", 2, 6);
     fprintf( m_pfile, "      %i, %i, -1,\n", 3, 7);
+    fprintf( m_pfile, "      %i, %i, -1,\n", 8, 9);
     fprintf( m_pfile, "    ]\n");
 
     // Color
     fprintf( m_pfile, "    color Color {\n");
     fprintf( m_pfile, "      color [%f %f %f]\n", m_yellow.x, m_yellow.y, m_yellow.z);
     fprintf( m_pfile, "    }\n");
-    fprintf( m_pfile, "    colorIndex [0, 0, 0, 0, 0, 0]\n");
+    fprintf( m_pfile, "    colorIndex [0, 0, 0, 0, 0, 0, 0]\n");
     fprintf( m_pfile, "    colorPerVertex FALSE\n");
 
     fprintf( m_pfile, "  }\n");
