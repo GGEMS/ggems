@@ -33,12 +33,12 @@ struct ObbData {
     //f32xyz u, v, w;                          // Absolute frame (OBB orthogonal space u, v, w)
 };
 
-// Struct that handle a meshed (not in SoA)
-struct MeshedData {
-    f32triangle *triangles;
-    AabbData aabb;
-    ui32 nb_of_triangles;
-};
+//// Struct that handle a meshed (not in SoA)
+//struct MeshedData {
+//    f32triangle *triangles;
+//    AabbData aabb;
+//    ui32 nb_of_triangles;
+//};
 
 /* TODO: to remove
 // Struct that handle CPU&GPU data
