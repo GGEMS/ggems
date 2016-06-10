@@ -27,6 +27,7 @@ struct MeshData
     ui32 *mesh_index;   // In case of multiple meshes
     ui32 *nb_triangles; // Nb of triangles within each mesh
     AabbData *aabb;     // Bounding box of each mesh
+    std::vector< std::string > mesh_names;     // List of the mesh names
 };
 
 //// Helper to handle wavefront data
@@ -54,9 +55,11 @@ class MeshIO {
         void m_skip_comment( std::istream & is );
         std::vector< std::string > m_split_txt(std::string line);
         std::vector< std::string > m_split_slash_txt(std::string line);
+        std::vector< std::string > m_split_txt_with( std::string line, i8 delimiter );
+
 
     private:
-        std::string m_filename;       
+        std::string m_filename;
 
 
 

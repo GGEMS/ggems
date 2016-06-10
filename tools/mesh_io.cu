@@ -20,7 +20,7 @@
 
 MeshIO::MeshIO()
 {
-    m_filename   = "";   
+    m_filename   = "";
 }
 
 // Read a phasespace file
@@ -37,6 +37,7 @@ MeshData MeshIO::read_mesh_file( std::string filename )
     }
     else if ( ext == "obj" )
     {
+        GGcout << "MeshIO: read obj mesh" << GGendl;
         meshes = m_read_obj_data();
     }
     else
@@ -94,7 +95,21 @@ std::vector< std::string > MeshIO::m_split_slash_txt( std::string line ) {
 
 }
 
+// Read the list of tokens in a txt line
+std::vector< std::string > MeshIO::m_split_txt_with( std::string line, i8 delimiter ) {
 
+    std::stringstream ss(line);
+    std::string tok;
+    std::vector<std::string> tokens;
+
+    while ( std::getline( ss, tok, delimiter) )
+    {
+        tokens.push_back( tok );
+    }
+
+    return tokens;
+
+}
 
 // Raw Format
 // v1x v1y v1z v2x v2y v2z v3x v3y v3z
@@ -130,6 +145,8 @@ MeshData MeshIO::m_read_raw_data()
     HANDLE_ERROR( cudaMallocManaged( &(mesh.nb_triangles), sizeof( ui32 ) ) );
 
     HANDLE_ERROR( cudaMallocManaged( &(mesh.aabb), sizeof( AabbData ) ) );
+
+    mesh.mesh_names.push_back( "NoName" );
 
     // Store data from file
     size_t idx = 0;
@@ -202,7 +219,7 @@ MeshData MeshIO::m_read_raw_data()
 
 // Read data from MHD format
 MeshData MeshIO::m_read_obj_data()
-{
+{   
 
     // Open the mesh file
     std::ifstream file( m_filename.c_str(), std::ios::in );
@@ -212,20 +229,26 @@ MeshData MeshIO::m_read_obj_data()
         exit_simulation();
     }
 
+    MeshData meshes;
+
     std::string line;
     std::vector< std::string > keys;
     std::vector< std::string > elts;
 
     // Obj data
-    std::map< ui32, std::vector< f32xyz > >  vertices;
-    std::map< ui32, std::vector< ui32xyz > >  faces;
+    std::map< std::string, std::vector< f32xyz > >  vertices;
+    std::map< std::string, std::vector< ui32xyz > >  faces;
 
     std::vector< f32xyz > buf_vertices;
     std::vector< ui32xyz > buf_faces;
 
-    ui32 solid_index;
     f32 x, y, z;
     ui32 i, j, k;
+    std::string solid_name;
+
+    // Empty the key for the beginning
+    keys.clear();
+    keys.push_back("");
 
     // Loop that read the complete file
     while ( file )
@@ -233,9 +256,6 @@ MeshData MeshIO::m_read_obj_data()
         m_skip_comment( file );
 
         /// Search object //////////////////////////////////
-
-        keys.clear();
-        keys.push_back("");
         while ( keys[ 0 ] != "o" && file )
         {
             // Read a line
@@ -247,8 +267,10 @@ MeshData MeshIO::m_read_obj_data()
             }
         }
 
-        // Get the solid index
-        std::stringstream( keys[ 1 ] ) >> solid_index;
+        // Get the solid index ( xxx_Mesh )
+        elts = m_split_txt_with( keys[ 1 ], '_' );
+        solid_name = elts[ 0 ];
+        meshes.mesh_names.push_back( solid_name );
 
         /// Then read all vertices ///////////////////////
 
@@ -260,6 +282,8 @@ MeshData MeshIO::m_read_obj_data()
         {
             keys = m_split_txt( line );
         }
+
+        //GGcout << "Find vertices: " << keys[ 0 ] << GGendl;
 
         // watch dog
         if ( keys[ 0 ] != "v" )
@@ -278,6 +302,8 @@ MeshData MeshIO::m_read_obj_data()
             // Store data
             buf_vertices.push_back( make_f32xyz( x, y, z ) );
 
+            //GGcout << "Find vertices: " << x << " " << y << " " << z << GGendl;
+
             // Read new line
             std::getline( file, line );
             if ( file )
@@ -285,6 +311,8 @@ MeshData MeshIO::m_read_obj_data()
                 keys = m_split_txt( line );
             }
         }
+
+        //GGcout << "Cur line: " << line << GGendl;
 
         /// Searching for faces /////////////////////////
 
@@ -298,6 +326,8 @@ MeshData MeshIO::m_read_obj_data()
                 keys = m_split_txt( line );
             }
         }
+
+        //GGcout << "Find face: " << line << GGendl;
 
         /// Read all faces //////////////////////////////
 
@@ -325,6 +355,8 @@ MeshData MeshIO::m_read_obj_data()
             // Store data
             buf_faces.push_back( make_ui32xyz( i, j, k ) );
 
+            //GGcout << "Find face: " << i << " " << j << " " << k << GGendl;
+
             // Read new line
             std::getline( file, line );
             if ( file )
@@ -335,15 +367,18 @@ MeshData MeshIO::m_read_obj_data()
         }
 
         // Store the complete object
-        vertices[ solid_index ] = buf_vertices;
-        faces[ solid_index ] = buf_faces;
+        vertices[ solid_name ] = buf_vertices;
+        faces[ solid_name ] = buf_faces;
+
+        GGcout << "Find solid name: " << solid_name << " with " << buf_vertices.size()
+               << " vertices and " << buf_faces.size() << " faces" << GGendl;
 
     } // complete file
 
 
     // Convert data into mesh
 
-
+    return meshes;
 
 }
 
