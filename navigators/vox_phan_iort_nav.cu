@@ -775,6 +775,8 @@ VoxPhanIORTNav::VoxPhanIORTNav ()
     m_coo_hist_map.nb_data = 0;
 
     m_mu_table.flag = analog; // Not used
+
+    set_name( "VoxPhanIORTNav" );
 }
 
 void VoxPhanIORTNav::track_to_in ( Particles particles )

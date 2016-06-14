@@ -30,6 +30,7 @@
 #include "phasespace_source.cuh"
 #include "beamlet_source.cuh"
 
+#include "mesh_phan_linac_nav.cuh"
 #include "vox_phan_dosi_nav.cuh"
 #include "vox_phan_img_nav.cuh"
 #include "vox_phan_iort_nav.cuh"

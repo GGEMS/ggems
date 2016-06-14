@@ -230,6 +230,12 @@ ui64 VoxPhanImgNav::m_get_memory_usage()
 
 ////:: Main functions
 
+VoxPhanImgNav::VoxPhanImgNav()
+{
+    m_materials_filename = "";
+    set_name( "VoxPhanImgNav" );
+}
+
 void VoxPhanImgNav::track_to_in ( Particles particles )
 {
 

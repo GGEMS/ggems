@@ -236,10 +236,11 @@ MeshData MeshIO::m_read_obj_data()
     std::vector< std::string > elts;
 
     // Obj data
-    std::map< std::string, std::vector< f32xyz > >  vertices;
+    //std::map< std::string, std::vector< f32xyz > >  vertices;
+    std::vector< f32xyz > vertices;
     std::map< std::string, std::vector< ui32xyz > >  faces;
 
-    std::vector< f32xyz > buf_vertices;
+    //std::vector< f32xyz > buf_vertices;
     std::vector< ui32xyz > buf_faces;
 
     f32 x, y, z;
@@ -274,7 +275,7 @@ MeshData MeshIO::m_read_obj_data()
 
         /// Then read all vertices ///////////////////////
 
-        buf_vertices.clear();
+        //buf_vertices.clear();
 
         // Read next line
         std::getline( file, line );
@@ -300,7 +301,7 @@ MeshData MeshIO::m_read_obj_data()
             std::stringstream( keys[ 3 ] ) >> z;
 
             // Store data
-            buf_vertices.push_back( make_f32xyz( x, y, z ) );
+            vertices.push_back( make_f32xyz( x, y, z ) );
 
             //GGcout << "Find vertices: " << x << " " << y << " " << z << GGendl;
 
@@ -367,20 +368,145 @@ MeshData MeshIO::m_read_obj_data()
         }
 
         // Store the complete object
-        vertices[ solid_name ] = buf_vertices;
+        //vertices[ solid_name ] = buf_vertices;
         faces[ solid_name ] = buf_faces;
 
-        GGcout << "Find solid name: " << solid_name << " with " << buf_vertices.size()
-               << " vertices and " << buf_faces.size() << " faces" << GGendl;
+//        GGcout << "Find solid name: " << solid_name << " with " << buf_vertices.size()
+//               << " vertices and " << buf_faces.size() << " faces" << GGendl;
 
     } // complete file
 
 
-    // Convert data into mesh
+    /// Convert faces data into triangular mesh
+
+    // First, get nb of meshes
+    ui32 nb_mesh = meshes.mesh_names.size();
+
+    // Tot nb of tri
+    ui32 tot_tri = 0;
+    ui32 imesh = 0;
+
+    while ( imesh < nb_mesh )
+    {
+        tot_tri += faces[ meshes.mesh_names[ imesh++ ] ].size();
+    }
+
+    // Some allocations
+    meshes.v1 = new f32xyz[ tot_tri ];
+    meshes.v2 = new f32xyz[ tot_tri ];
+    meshes.v3 = new f32xyz[ tot_tri ];
+    meshes.mesh_index = new ui32[ nb_mesh ];
+    meshes.nb_triangles = new ui32[ nb_mesh ];
+    meshes.aabb = new AabbData[ nb_mesh ];
+
+    // For each mesh do the convertion
+    ui32 ifaces = 0;
+    ui32xyz index_faces;
+    ui32 nb_tri;
+    ui32 gbl_offset = 0;
+    ui32 gbl_index = 0;
+    f32xyz v1, v2, v3;
+
+    imesh = 0; while ( imesh < nb_mesh )
+    {
+        // read the name
+        solid_name = meshes.mesh_names[ imesh ];
+
+        // get the number of tri
+        nb_tri = faces[ solid_name ].size();
+        meshes.nb_triangles[ imesh ] = nb_tri;
+
+        // calculate the gbl index        
+        meshes.mesh_index[ imesh ] = gbl_offset;
+        gbl_offset += nb_tri;
+
+//        GGcout << "name " << solid_name << " nb tri " << nb_tri << " offset " << gbl_offset << GGendl;
+
+        // Init AABB
+        f32 xmin = FLT_MAX; f32 xmax = -FLT_MAX;
+        f32 ymin = FLT_MAX; f32 ymax = -FLT_MAX;
+        f32 zmin = FLT_MAX; f32 zmax = -FLT_MAX;
+
+        // Loop over faces
+        ifaces = 0; while ( ifaces < nb_tri )
+        {
+            // get face index
+            index_faces = faces[ solid_name ][ ifaces++ ];
+
+//            printf("        index faces %i %i %i\n ", index_faces.x, index_faces.y, index_faces.z );
+
+            // Read vertices according faces index
+            v1 = vertices[ index_faces.x - 1 ];
+            v2 = vertices[ index_faces.y - 1 ];  // -1 because face index start by 1 to N and not 0 to N-1
+            v3 = vertices[ index_faces.z - 1 ];
+
+//            if ( solid_name == "B10" && imesh == 0 )
+//            {
+
+//                printf("        index faces %i %i %i   v %f %f %f - %f %f %f - %f %f %f\n ",
+//                       index_faces.x, index_faces.y, index_faces.z,
+//                       v1.x, v1.y, v1.z, v2.x, v2.y, v2.z, v3.x, v3.y, v3.z );
+//            }
+
+            // Determine AABB
+            if ( v1.x > xmax ) xmax = v1.x;
+            if ( v2.x > xmax ) xmax = v2.x;
+            if ( v3.x > xmax ) xmax = v3.x;
+
+            if ( v1.y > ymax ) ymax = v1.y;
+            if ( v2.y > ymax ) ymax = v2.y;
+            if ( v3.y > ymax ) ymax = v3.y;
+
+            if ( v1.z > zmax ) zmax = v1.z;
+            if ( v2.z > zmax ) zmax = v2.z;
+            if ( v3.z > zmax ) zmax = v3.z;
+
+            if ( v1.x < xmin ) xmin = v1.x;
+            if ( v2.x < xmin ) xmin = v2.x;
+            if ( v3.x < xmin ) xmin = v3.x;
+
+            if ( v1.y < ymin ) ymin = v1.y;
+            if ( v2.y < ymin ) ymin = v2.y;
+            if ( v3.y < ymin ) ymin = v3.y;
+
+            if ( v1.z < zmin ) zmin = v1.z;
+            if ( v2.z < zmin ) zmin = v2.z;
+            if ( v3.z < zmin ) zmin = v3.z;
+
+            // Store the triangle
+            meshes.v1[ gbl_index ] = v1;
+            meshes.v2[ gbl_index ] = v2;
+            meshes.v3[ gbl_index ] = v3;
+
+            ++gbl_index;
+
+        }
+
+        // Store the AABB of the corresponding mesh
+        meshes.aabb[ imesh ].xmin = xmin;
+        meshes.aabb[ imesh ].xmax = xmax;
+        meshes.aabb[ imesh ].ymin = ymin;
+        meshes.aabb[ imesh ].ymax = ymax;
+        meshes.aabb[ imesh ].zmin = zmin;
+        meshes.aabb[ imesh ].zmax = zmax;
+
+        ++imesh;
+    } // imesh
 
     return meshes;
 
 }
+
+
+//f32xyz *v1;   // Vertex 1
+//f32xyz *v2;   // Vertex 2
+//f32xyz *v3;   // Vertex 3
+
+//ui32 *mesh_index;   // In case of multiple meshes
+//ui32 *nb_triangles; // Nb of triangles within each mesh
+//AabbData *aabb;     // Bounding box of each mesh
+
+
 
 
 #endif

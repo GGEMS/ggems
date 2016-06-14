@@ -804,6 +804,8 @@ VoxPhanDosiNav::VoxPhanDosiNav ()
     m_zmin = 0.0; m_zmax = 0.0;
 
     m_materials_filename = "";
+
+    set_name( "VoxPhanDosiNav" );
 }
 
 void VoxPhanDosiNav::track_to_in ( Particles particles )

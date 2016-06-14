@@ -16,7 +16,6 @@
 
 #include "global.cuh"
 #include "primitives.cuh"
-#include "txt_reader.cuh"
 
 struct MeshData
 {
@@ -29,13 +28,6 @@ struct MeshData
     AabbData *aabb;     // Bounding box of each mesh
     std::vector< std::string > mesh_names;     // List of the mesh names
 };
-
-//// Helper to handle wavefront data
-//struct ObjData
-//{
-//    std::vector< f32 > *vertices;
-//    std::vector< ui32 > *faces;
-//};
 
 // Read Mesh file
 class MeshIO {

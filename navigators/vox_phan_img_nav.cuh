@@ -56,7 +56,7 @@ void kernel_host_track_to_out ( ParticlesData particles,
 class VoxPhanImgNav : public GGEMSPhantom
 {
 public:
-    VoxPhanImgNav() : m_materials_filename( "" ) {}
+    VoxPhanImgNav();
     ~VoxPhanImgNav() {}
 
     // Init

@@ -229,6 +229,65 @@ void VrmlIO::draw_phantom( VoxPhanImgNav *aPhantom )
     m_draw_wireframe_aabb( aabb, m_blue );
 }
 
+void VrmlIO::draw_phantom( MeshPhanLINACNav *aPhantom )
+{
+    // Get the geometry
+    LinacData linac = aPhantom->get_linac_geometry();
+
+//    m_draw_wireframe_aabb( linac.A_bank_aabb, m_blue );
+//    m_draw_wireframe_aabb( linac.B_bank_aabb, m_red );
+
+
+//    // Draw AABB - bank A
+//    ui32 i = 0; while ( i < linac.A_nb_leaves )
+//    {
+//        m_draw_wireframe_aabb( linac.A_leaf_aabb[ i++ ], m_blue );
+//    }
+
+//    // Draw AABB - bank B
+//    i = 0; while ( i < linac.B_nb_leaves )
+//    {
+//        m_draw_wireframe_aabb( linac.B_leaf_aabb[ i++ ], m_red );
+//    }
+
+    // Draw leaves from bank A
+    ui32 ileaf = 0; while ( ileaf < linac.A_nb_leaves )    // linac.A_nb_leaves
+    {
+        ui32 offset = linac.A_leaf_index[ ileaf ];
+        ui32 nbtri = linac.A_leaf_nb_triangles[ ileaf ];
+
+        m_draw_mesh( &(linac.A_leaf_v1[ offset ]), &(linac.A_leaf_v2[ offset ]), &(linac.A_leaf_v3[ offset ]),
+                     nbtri, m_blue );
+
+        ++ileaf;
+    }
+
+    // Draw leaves from bank B
+    ileaf = 0; while ( ileaf < linac.B_nb_leaves )    // linac.A_nb_leaves
+    {
+        ui32 offset = linac.B_leaf_index[ ileaf ];
+        ui32 nbtri = linac.B_leaf_nb_triangles[ ileaf ];
+
+        m_draw_mesh( &(linac.B_leaf_v1[ offset ]), &(linac.B_leaf_v2[ offset ]), &(linac.B_leaf_v3[ offset ]),
+                     nbtri, m_red );
+
+        ++ileaf;
+    }
+
+//    m_draw_wireframe_aabb( linac.A_leaf_aabb[0], m_blue );
+
+//    ui32 ileaf = 9;
+//    ui32 offset = linac.B_leaf_index[ ileaf ];
+//    ui32 nbtri = linac.B_leaf_nb_triangles[ ileaf ];
+
+//    GGcout << "Offset: " << offset << GGendl;
+
+//    m_draw_mesh( &(linac.B_leaf_v1[ offset ]), &(linac.B_leaf_v2[ offset ]), &(linac.B_leaf_v3[ offset ]),
+//                 1, m_red );
+
+
+}
+
 void VrmlIO::draw_detector( CTDetector *aDetector )
 {
     // Get back info
@@ -366,6 +425,39 @@ void VrmlIO::m_draw_aabb( AabbData aabb, f32xyz color, f32 transparency )
     fprintf( m_pfile, "    }\n");
     fprintf( m_pfile, "  ]\n");
     fprintf( m_pfile, "}\n");
+}
+
+void VrmlIO::m_draw_mesh( f32xyz *v1, f32xyz *v2, f32xyz *v3, ui32 nb_tri, f32xyz color, f32 transparency )
+{
+    fprintf( m_pfile, "\n# MESH\n" );
+    fprintf( m_pfile, "Shape {\n" );
+    fprintf( m_pfile, "  appearance Appearance {\n" );
+    fprintf( m_pfile, "    material Material {\n" );
+    fprintf( m_pfile, "      diffuseColor %f %f %f\n", color.x, color.y, color.z );
+    fprintf( m_pfile, "      transparency %f\n", transparency );
+    fprintf( m_pfile, "    }\n" );
+    fprintf( m_pfile, "  }\n" );
+
+    fprintf( m_pfile, "  geometry IndexedFaceSet {\n" );
+    fprintf( m_pfile, "    coord Coordinate {\n" );
+    fprintf( m_pfile, "      point [\n" );
+    ui32 i=0; while (i < nb_tri) {
+        fprintf( m_pfile, "        %f %f %f,\n", v1[ i ].x, v1[ i ].y, v1[ i ].z );
+        fprintf( m_pfile, "        %f %f %f,\n", v2[ i ].x, v2[ i ].y, v2[ i ].z );
+        fprintf( m_pfile, "        %f %f %f,\n", v3[ i ].x, v3[ i ].y, v3[ i ].z );
+        ++i;
+    }
+    fprintf( m_pfile, "      ]\n" );
+    fprintf( m_pfile, "    }\n" );
+    fprintf( m_pfile, "    coordIndex [\n" );
+    i=0; while ( i < nb_tri ) {
+        ui32 ind = 3*i;
+        fprintf( m_pfile, "      %i, %i, %i, -1,\n", ind, ind+1, ind+2 );
+        ++i;
+    }
+    fprintf( m_pfile, "    ]\n" );
+    fprintf( m_pfile, "  }\n" );
+    fprintf( m_pfile, "}\n" );
 }
 
 void VrmlIO::m_draw_wireframe_aabb(AabbData aabb, f32xyz color )
@@ -582,6 +674,8 @@ void VrmlIO::m_draw_wireframe_cone( f32xyz pos, f32 aperture, f32matrix44 trans,
     fprintf( m_pfile, "        %f %f %f,\n", b1.x, b1.y, b1.z );    // b1         3
     fprintf( m_pfile, "        %f %f %f,\n", c0.x, c0.y, c0.z );    // c0         4
     fprintf( m_pfile, "        %f %f %f,\n", c1.x, c1.y, c1.z );    // c1         5
+    fprintf( m_pfile, "        %f %f %f,\n", a0.x, a0.y, a0.z );    // a0         6
+    fprintf( m_pfile, "        %f %f %f,\n", a1.x, a1.y, a1.z );    // a1         7
     fprintf( m_pfile, "      ]\n");
     fprintf( m_pfile, "    }\n");
     // CoordIndex
@@ -593,13 +687,16 @@ void VrmlIO::m_draw_wireframe_cone( f32xyz pos, f32 aperture, f32matrix44 trans,
     fprintf( m_pfile, "      %i, %i, -1,\n", 0, 4);
     fprintf( m_pfile, "      %i, %i, -1,\n", 0, 5);
     fprintf( m_pfile, "      %i, %i, -1,\n", 4, 5);
+    fprintf( m_pfile, "      %i, %i, -1,\n", 0, 6);
+    fprintf( m_pfile, "      %i, %i, -1,\n", 0, 7);
+    fprintf( m_pfile, "      %i, %i, -1,\n", 6, 7);
     fprintf( m_pfile, "    ]\n");
 
     // Color
     fprintf( m_pfile, "    color Color {\n");
     fprintf( m_pfile, "      color [%f %f %f]\n", color.x, color.y, color.z);
     fprintf( m_pfile, "    }\n");
-    fprintf( m_pfile, "    colorIndex [0, 0, 0, 0, 0, 0, 0]\n");
+    fprintf( m_pfile, "    colorIndex [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]\n");
     fprintf( m_pfile, "    colorPerVertex FALSE\n");
 
     fprintf( m_pfile, "  }\n");

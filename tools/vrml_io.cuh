@@ -23,6 +23,7 @@
 // Phantoms
 #include "vox_phan_dosi_nav.cuh"
 #include "vox_phan_img_nav.cuh"
+#include "mesh_phan_linac_nav.cuh"
 
 // Detectors
 #include "ct_detector.cuh"
@@ -80,6 +81,7 @@ public:
 
     void draw_phantom( VoxPhanImgNav* aPhantom );
 
+    void draw_phantom( MeshPhanLINACNav* aPhantom );
 
     void draw_detector( CTDetector* aDetector );
 
@@ -110,7 +112,9 @@ private:
      */
     void m_draw_sphere( f32xyz pos, f32 radius, f32xyz color, f32 transparency = 0.0 );
 
-    void m_draw_cone(f32xyz pos, f32xyz angles, f32 height, f32 bottom_radius, f32xyz color, f32 transparency = 0.0 );
+    void m_draw_cone( f32xyz pos, f32xyz angles, f32 height, f32 bottom_radius, f32xyz color, f32 transparency = 0.0 );
+
+    void m_draw_mesh( f32xyz *v1, f32xyz *v2, f32xyz *v3, ui32 nb_tri, f32xyz color, f32 transparency = 0.0 );
 
 //    /*!
 //     * \fn void m_draw_obb( ObbData obb, f32xyz color, f32 transparency = 0.0 )
