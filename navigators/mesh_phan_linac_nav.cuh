@@ -43,12 +43,23 @@ struct LinacData
     AabbData  B_bank_aabb;         // Bounding box of the bank B
     ui32      B_nb_leaves;         // Number of leaves in the bank B
 
-    // Backup X
-    // TODO
+    // Jaws X
+    f32xyz   *X_jaw_v1;           // Vertex 1  - Triangular meshes
+    f32xyz   *X_jaw_v2;           // Vertex 2
+    f32xyz   *X_jaw_v3;           // Vertex 3
+    ui32     *X_jaw_index;        // Index to acces to a jaw
+    ui32     *X_jaw_nb_triangles; // Nb of triangles within each jaw
+    AabbData *X_jaw_aabb;         // Bounding box of each jaw
+    ui32      X_nb_jaw;           // Number of jaws
 
-    // Backup Y
-    // TODO
-
+    // Jaws Y
+    f32xyz   *Y_jaw_v1;           // Vertex 1  - Triangular meshes
+    f32xyz   *Y_jaw_v2;           // Vertex 2
+    f32xyz   *Y_jaw_v3;           // Vertex 3
+    ui32     *Y_jaw_index;        // Index to acces to a jaw
+    ui32     *Y_jaw_nb_triangles; // Nb of triangles within each jaw
+    AabbData *Y_jaw_aabb;         // Bounding box of each jaw
+    ui32      Y_nb_jaw;           // Number of jaws
 };
 
 
@@ -73,7 +84,35 @@ public:
     void track_to_out( Particles particles );
 
     void set_mlc_meshes( std::string filename );
+    void set_jaw_x_meshes( std::string filename );
+    void set_jaw_y_meshes( std::string filename );
+    void set_beam_configuration( std::string filename, ui32 beam_index, ui32 field_index );
+
     void set_number_of_leaves( ui32 nb_bank_A, ui32 nb_bank_B );
+
+    void set_mlc_position( f32 px, f32 py, f32 pz );
+
+//    void set_linac_rotation( f32 rx, f32 ry, f32 rz );
+
+    void set_linac_local_axis( f32 m00, f32 m01, f32 m02,
+                               f32 m10, f32 m11, f32 m12,
+                               f32 m20, f32 m21, f32 m22 );
+
+    void set_local_jaw_x_position( f32 px, f32 py, f32 pz );
+
+    //void set_jaw_x_rotation( f32 rx, f32 ry, f32 rz );
+
+//    void set_jaw_x_local_axis( f32 m00, f32 m01, f32 m02,
+//                             f32 m10, f32 m11, f32 m12,
+//                             f32 m20, f32 m21, f32 m22 );
+
+    void set_local_jaw_y_position( f32 px, f32 py, f32 pz );
+
+//    void set_jaw_y_rotation( f32 rx, f32 ry, f32 rz );
+
+//    void set_jaw_y_local_axis( f32 m00, f32 m01, f32 m02,
+//                               f32 m10, f32 m11, f32 m12,
+//                               f32 m20, f32 m21, f32 m22 );
 
     LinacData get_linac_geometry();
 
@@ -81,6 +120,17 @@ public:
 
 private:
     void m_init_mlc();
+    void m_init_jaw_x();
+    void m_init_jaw_y();
+
+    void m_translate_jaw_x( ui32 index, f32xyz T );
+    void m_translate_jaw_y( ui32 index, f32xyz T );
+    void m_translate_leaf_A( ui32 index, f32xyz T );
+    void m_translate_leaf_B( ui32 index, f32xyz T );
+
+    void m_configure_linac();
+
+    std::vector< std::string > m_split_txt(std::string line);
 
 private:
 
@@ -95,8 +145,20 @@ private:
 
     GlobalSimulationParameters m_params;
     std::string m_materials_filename;
+    std::string m_beam_config_filename;
     std::string m_mlc_filename;
+    std::string m_jaw_x_filename;
+    std::string m_jaw_y_filename;
 
+    f32xyz m_pos_mlc;
+    f32xyz m_loc_pos_jaw_x;
+    f32xyz m_loc_pos_jaw_y;
+    f32xyz m_rot_linac;
+    f32matrix33 m_axis_linac;
+    f32matrix44 m_transform_linac;
+
+    ui32 m_beam_index;
+    ui32 m_field_index;
 //
 };
 

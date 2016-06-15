@@ -234,57 +234,42 @@ void VrmlIO::draw_phantom( MeshPhanLINACNav *aPhantom )
     // Get the geometry
     LinacData linac = aPhantom->get_linac_geometry();
 
-//    m_draw_wireframe_aabb( linac.A_bank_aabb, m_blue );
-//    m_draw_wireframe_aabb( linac.B_bank_aabb, m_red );
-
-
-//    // Draw AABB - bank A
-//    ui32 i = 0; while ( i < linac.A_nb_leaves )
+//    // Draw leaves from bank A
+//    ui32 ileaf = 0; while ( ileaf < linac.A_nb_leaves )    // linac.A_nb_leaves
 //    {
-//        m_draw_wireframe_aabb( linac.A_leaf_aabb[ i++ ], m_blue );
+//        ui32 offset = linac.A_leaf_index[ ileaf ];
+//        ui32 nbtri = linac.A_leaf_nb_triangles[ ileaf ];
+
+//        m_draw_mesh( &(linac.A_leaf_v1[ offset ]), &(linac.A_leaf_v2[ offset ]), &(linac.A_leaf_v3[ offset ]),
+//                     nbtri, m_blue );
+
+//        ++ileaf;
 //    }
 
-//    // Draw AABB - bank B
-//    i = 0; while ( i < linac.B_nb_leaves )
+//    // Draw leaves from bank B
+//    ileaf = 0; while ( ileaf < linac.B_nb_leaves )    // linac.A_nb_leaves
 //    {
-//        m_draw_wireframe_aabb( linac.B_leaf_aabb[ i++ ], m_red );
+//        ui32 offset = linac.B_leaf_index[ ileaf ];
+//        ui32 nbtri = linac.B_leaf_nb_triangles[ ileaf ];
+
+//        m_draw_mesh( &(linac.B_leaf_v1[ offset ]), &(linac.B_leaf_v2[ offset ]), &(linac.B_leaf_v3[ offset ]),
+//                     nbtri, m_red );
+
+//        ++ileaf;
 //    }
 
-    // Draw leaves from bank A
-    ui32 ileaf = 0; while ( ileaf < linac.A_nb_leaves )    // linac.A_nb_leaves
+    // Draw jaws
+    if ( linac.X_nb_jaw != 0 )
     {
-        ui32 offset = linac.A_leaf_index[ ileaf ];
-        ui32 nbtri = linac.A_leaf_nb_triangles[ ileaf ];
-
-        m_draw_mesh( &(linac.A_leaf_v1[ offset ]), &(linac.A_leaf_v2[ offset ]), &(linac.A_leaf_v3[ offset ]),
-                     nbtri, m_blue );
-
-        ++ileaf;
+        m_draw_mesh( &(linac.X_jaw_v1[ linac.X_jaw_index[ 0 ] ]),
+                     &(linac.X_jaw_v2[ linac.X_jaw_index[ 0 ] ]),
+                     &(linac.X_jaw_v3[ linac.X_jaw_index[ 0 ] ]),
+                     linac.X_jaw_nb_triangles[ 0 ], m_blue, 0.0, true );
+        m_draw_mesh( &(linac.X_jaw_v1[ linac.X_jaw_index[ 1 ] ]),
+                     &(linac.X_jaw_v2[ linac.X_jaw_index[ 1 ] ]),
+                     &(linac.X_jaw_v3[ linac.X_jaw_index[ 1 ] ]),
+                     linac.X_jaw_nb_triangles[ 1 ], m_red, 0.0 );
     }
-
-    // Draw leaves from bank B
-    ileaf = 0; while ( ileaf < linac.B_nb_leaves )    // linac.A_nb_leaves
-    {
-        ui32 offset = linac.B_leaf_index[ ileaf ];
-        ui32 nbtri = linac.B_leaf_nb_triangles[ ileaf ];
-
-        m_draw_mesh( &(linac.B_leaf_v1[ offset ]), &(linac.B_leaf_v2[ offset ]), &(linac.B_leaf_v3[ offset ]),
-                     nbtri, m_red );
-
-        ++ileaf;
-    }
-
-//    m_draw_wireframe_aabb( linac.A_leaf_aabb[0], m_blue );
-
-//    ui32 ileaf = 9;
-//    ui32 offset = linac.B_leaf_index[ ileaf ];
-//    ui32 nbtri = linac.B_leaf_nb_triangles[ ileaf ];
-
-//    GGcout << "Offset: " << offset << GGendl;
-
-//    m_draw_mesh( &(linac.B_leaf_v1[ offset ]), &(linac.B_leaf_v2[ offset ]), &(linac.B_leaf_v3[ offset ]),
-//                 1, m_red );
-
 
 }
 
@@ -427,7 +412,7 @@ void VrmlIO::m_draw_aabb( AabbData aabb, f32xyz color, f32 transparency )
     fprintf( m_pfile, "}\n");
 }
 
-void VrmlIO::m_draw_mesh( f32xyz *v1, f32xyz *v2, f32xyz *v3, ui32 nb_tri, f32xyz color, f32 transparency )
+void VrmlIO::m_draw_mesh(f32xyz *v1, f32xyz *v2, f32xyz *v3, ui32 nb_tri, f32xyz color, f32 transparency , bool inv_normal)
 {
     fprintf( m_pfile, "\n# MESH\n" );
     fprintf( m_pfile, "Shape {\n" );
@@ -450,11 +435,24 @@ void VrmlIO::m_draw_mesh( f32xyz *v1, f32xyz *v2, f32xyz *v3, ui32 nb_tri, f32xy
     fprintf( m_pfile, "      ]\n" );
     fprintf( m_pfile, "    }\n" );
     fprintf( m_pfile, "    coordIndex [\n" );
-    i=0; while ( i < nb_tri ) {
-        ui32 ind = 3*i;
-        fprintf( m_pfile, "      %i, %i, %i, -1,\n", ind, ind+1, ind+2 );
-        ++i;
+
+    if ( inv_normal )
+    {
+        i=0; while ( i < nb_tri ) {
+            ui32 ind = 3*i;
+            fprintf( m_pfile, "      %i, %i, %i, -1,\n", ind+2, ind+1, ind );
+            ++i;
+        }
     }
+    else
+    {
+        i=0; while ( i < nb_tri ) {
+            ui32 ind = 3*i;
+            fprintf( m_pfile, "      %i, %i, %i, -1,\n", ind, ind+1, ind+2 );
+            ++i;
+        }
+    }
+
     fprintf( m_pfile, "    ]\n" );
     fprintf( m_pfile, "  }\n" );
     fprintf( m_pfile, "}\n" );

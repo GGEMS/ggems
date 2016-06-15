@@ -21,6 +21,20 @@
 
 ////// Privates
 
+// Read the list of tokens in a txt line
+std::vector< std::string > MeshPhanLINACNav::m_split_txt( std::string line ) {
+
+    std::istringstream iss(line);
+    std::vector<std::string> tokens;
+    std::copy(std::istream_iterator<std::string>(iss),
+         std::istream_iterator<std::string>(),
+         std::back_inserter(tokens));
+
+    return tokens;
+
+}
+
+
 void MeshPhanLINACNav::m_init_mlc()
 {
     // First check the file
@@ -97,7 +111,7 @@ void MeshPhanLINACNav::m_init_mlc()
         // Check
         if ( bank_name != "A" && bank_name != "B" )
         {
-            GGcerr << "MeshPhanLINACNav: name of each leaf must start by the bank 'A'' or 'B', " << bank_name << " given!" << GGendl;
+            GGcerr << "MeshPhanLINACNav: name of each leaf must start by the bank 'A' or 'B', " << bank_name << " given!" << GGendl;
             exit_simulation();
         }
 
@@ -110,7 +124,7 @@ void MeshPhanLINACNav::m_init_mlc()
             // Check
             if ( index_leaf_bank == 0 || index_leaf_bank > m_linac.A_nb_leaves )
             {
-                GGcerr << "MeshPhanLINACNav: name of leaves must index starting from 1 to N leaves!" << GGendl;
+                GGcerr << "MeshPhanLINACNav: name of leaves must have index starting from 1 to N leaves!" << GGendl;
                 exit_simulation();
             }
 
@@ -129,7 +143,7 @@ void MeshPhanLINACNav::m_init_mlc()
             // Check
             if ( index_leaf_bank == 0 || index_leaf_bank > m_linac.B_nb_leaves )
             {
-                GGcerr << "MeshPhanLINACNav: name of leaves must index starting from 1 to N leaves!" << GGendl;
+                GGcerr << "MeshPhanLINACNav: name of leaves must have index starting from 1 to N leaves!" << GGendl;
                 exit_simulation();
             }
 
@@ -150,7 +164,7 @@ void MeshPhanLINACNav::m_init_mlc()
     m_linac.A_leaf_index[ 0 ] = 0;
     i_leaf = 1; while ( i_leaf < m_linac.A_nb_leaves )
     {
-        m_linac.A_leaf_index[ i_leaf ] = m_linac.A_leaf_index[ i_leaf-1 ] + m_linac.A_leaf_nb_triangles[ i_leaf ];
+        m_linac.A_leaf_index[ i_leaf ] = m_linac.A_leaf_index[ i_leaf-1 ] + m_linac.A_leaf_nb_triangles[ i_leaf-1 ];
 
 //        GGcout << " A offset " << m_linac.A_leaf_index[ i_leaf ]
 //                  << " ileaf " << i_leaf << " nb tri: " << m_linac.A_leaf_nb_triangles[ i_leaf ] << GGendl;
@@ -163,7 +177,7 @@ void MeshPhanLINACNav::m_init_mlc()
     m_linac.B_leaf_index[ 0 ] = 0;
     i_leaf = 1; while ( i_leaf < m_linac.B_nb_leaves )
     {
-        m_linac.B_leaf_index[ i_leaf ] = m_linac.B_leaf_index[ i_leaf-1 ] + m_linac.B_leaf_nb_triangles[ i_leaf ];
+        m_linac.B_leaf_index[ i_leaf ] = m_linac.B_leaf_index[ i_leaf-1 ] + m_linac.B_leaf_nb_triangles[ i_leaf-1 ];
 //        GGcout << " B offset " << m_linac.B_leaf_index[ i_leaf ]
 //                  << " ileaf " << i_leaf << " nb tri: " << m_linac.B_leaf_nb_triangles[ i_leaf ] << GGendl;
 
@@ -394,6 +408,549 @@ void MeshPhanLINACNav::m_init_mlc()
 
 }
 
+
+void MeshPhanLINACNav::m_init_jaw_x()
+{
+    // First check the file
+    std::string ext = m_jaw_x_filename.substr( m_jaw_x_filename.find_last_of( "." ) + 1 );
+    if ( ext != "obj" )
+    {
+        GGcerr << "MeshPhanLINACNav can only read mesh data in Wavefront format (.obj)!" << GGendl;
+        exit_simulation();
+    }
+
+    // Then get data
+    MeshIO *meshio = new MeshIO;
+    MeshData jaw = meshio->read_mesh_file( m_jaw_x_filename );
+
+    // Check if there are at least one jaw
+    if ( jaw.mesh_names.size() == 0 )
+    {
+        GGcerr << "MeshPhanLINACNav, no jaw in the x-jaw file were found!" << GGendl;
+        exit_simulation();
+    }
+
+    m_linac.X_nb_jaw = jaw.mesh_names.size();
+
+    // Some allocation
+    HANDLE_ERROR( cudaMallocManaged( &(m_linac.X_jaw_index), m_linac.X_nb_jaw * sizeof( ui32 ) ) );
+    HANDLE_ERROR( cudaMallocManaged( &(m_linac.X_jaw_nb_triangles), m_linac.X_nb_jaw * sizeof( ui32 ) ) );
+    HANDLE_ERROR( cudaMallocManaged( &(m_linac.X_jaw_aabb), m_linac.X_nb_jaw * sizeof( AabbData ) ) );
+
+    // Pre-calculation and checking of the data
+    ui32 i_jaw = 0;
+    std::string jaw_name, axis_name;
+    ui32 index_jaw;
+    ui32 tot_tri_jaw = 0;
+
+    while ( i_jaw < m_linac.X_nb_jaw )
+    {
+        // Get name of the jaw
+        jaw_name = jaw.mesh_names[ i_jaw ];
+
+        // Name axis
+        axis_name = jaw_name[ 0 ];
+
+        // Check
+        if ( axis_name != "X" )
+        {
+            GGcerr << "MeshPhanLINACNav: name of each jaw (in X) must start by 'X', " << axis_name << " given!" << GGendl;
+            exit_simulation();
+        }
+
+        // Get leaf index
+        index_jaw = std::stoi( jaw_name.substr( 1, jaw_name.size()-1 ) );
+
+        // Check
+        if ( index_jaw == 0 || index_jaw > 2 )
+        {
+            GGcerr << "MeshPhanLINACNav: name of jaws must have index starting from 1 to 2!" << GGendl;
+            exit_simulation();
+        }
+
+        // Store the number of triangles for each jaw
+        // index-1 because jaw start from 1 to 2
+        m_linac.X_jaw_nb_triangles[ index_jaw-1 ] = jaw.nb_triangles[ i_jaw ];
+        tot_tri_jaw += jaw.nb_triangles[ i_jaw ];
+
+        ++i_jaw;
+    } // i_leaf
+
+    // Compute the offset for each jaw
+    m_linac.X_jaw_index[ 0 ] = 0;
+    m_linac.X_jaw_index[ 1 ] = m_linac.X_jaw_nb_triangles[ 0 ];
+
+    // Some others allocations
+    HANDLE_ERROR( cudaMallocManaged( &(m_linac.X_jaw_v1), tot_tri_jaw * sizeof( f32xyz ) ) );
+    HANDLE_ERROR( cudaMallocManaged( &(m_linac.X_jaw_v2), tot_tri_jaw * sizeof( f32xyz ) ) );
+    HANDLE_ERROR( cudaMallocManaged( &(m_linac.X_jaw_v3), tot_tri_jaw * sizeof( f32xyz ) ) );
+
+    // Loop over leaf. Organize mesh data into the linac data.
+    ui32 i_tri, offset_mesh, offset_linac;
+    f32xyz v1, v2, v3;
+    f32 xmin, xmax, ymin, ymax, zmin, zmax;
+    i_jaw = 0; while ( i_jaw < m_linac.X_nb_jaw )
+    {
+        // Get name of the leaf
+        jaw_name = jaw.mesh_names[ i_jaw ];
+
+        // Get leaf index within the bank
+        index_jaw = std::stoi( jaw_name.substr( 1, jaw_name.size()-1 ) ) - 1; // -1 because jaw start from 1 to 2
+
+        // index within the mlc (all meshes)
+        offset_mesh = jaw.mesh_index[ i_jaw ];
+
+        // Init AABB
+        xmin = FLT_MAX; xmax = -FLT_MAX;
+        ymin = FLT_MAX; ymax = -FLT_MAX;
+        zmin = FLT_MAX; zmax = -FLT_MAX;
+
+        // index within the bank
+        offset_linac = m_linac.X_jaw_index[ index_jaw ];
+
+        // loop over triangles
+        i_tri = 0; while ( i_tri < m_linac.X_jaw_nb_triangles[ index_jaw ] )
+        {
+            // Store on the right place
+            v1 = jaw.v1[ offset_mesh + i_tri ];
+            v2 = jaw.v2[ offset_mesh + i_tri ];
+            v3 = jaw.v3[ offset_mesh + i_tri ];
+
+            m_linac.X_jaw_v1[ offset_linac + i_tri ] = v1;
+            m_linac.X_jaw_v2[ offset_linac + i_tri ] = v2;
+            m_linac.X_jaw_v3[ offset_linac + i_tri ] = v3;
+
+            // Determine AABB
+            if ( v1.x > xmax ) xmax = v1.x;
+            if ( v2.x > xmax ) xmax = v2.x;
+            if ( v3.x > xmax ) xmax = v3.x;
+
+            if ( v1.y > ymax ) ymax = v1.y;
+            if ( v2.y > ymax ) ymax = v2.y;
+            if ( v3.y > ymax ) ymax = v3.y;
+
+            if ( v1.z > zmax ) zmax = v1.z;
+            if ( v2.z > zmax ) zmax = v2.z;
+            if ( v3.z > zmax ) zmax = v3.z;
+
+            if ( v1.x < xmin ) xmin = v1.x;
+            if ( v2.x < xmin ) xmin = v2.x;
+            if ( v3.x < xmin ) xmin = v3.x;
+
+            if ( v1.y < ymin ) ymin = v1.y;
+            if ( v2.y < ymin ) ymin = v2.y;
+            if ( v3.y < ymin ) ymin = v3.y;
+
+            if ( v1.z < zmin ) zmin = v1.z;
+            if ( v2.z < zmin ) zmin = v2.z;
+            if ( v3.z < zmin ) zmin = v3.z;
+
+            ++i_tri;
+        }
+
+        // Store the bounding box of the current jaw
+        m_linac.X_jaw_aabb[ index_jaw ].xmin = xmin;
+        m_linac.X_jaw_aabb[ index_jaw ].xmax = xmax;
+        m_linac.X_jaw_aabb[ index_jaw ].ymin = ymin;
+        m_linac.X_jaw_aabb[ index_jaw ].ymax = ymax;
+        m_linac.X_jaw_aabb[ index_jaw ].zmin = zmin;
+        m_linac.X_jaw_aabb[ index_jaw ].zmax = zmax;
+
+        ++i_jaw;
+    } // i_jaw
+
+}
+
+void MeshPhanLINACNav::m_init_jaw_y()
+{
+    // First check the file
+    std::string ext = m_jaw_y_filename.substr( m_jaw_y_filename.find_last_of( "." ) + 1 );
+    if ( ext != "obj" )
+    {
+        GGcerr << "MeshPhanLINACNav can only read mesh data in Wavefront format (.obj)!" << GGendl;
+        exit_simulation();
+    }
+
+    // Then get data
+    MeshIO *meshio = new MeshIO;
+    MeshData jaw = meshio->read_mesh_file( m_jaw_y_filename );
+
+    // Check if there are at least one jaw
+    if ( jaw.mesh_names.size() == 0 )
+    {
+        GGcerr << "MeshPhanLINACNav, no jaw in the y-jaw file were found!" << GGendl;
+        exit_simulation();
+    }
+
+    m_linac.Y_nb_jaw = jaw.mesh_names.size();
+
+    // Some allocation
+    HANDLE_ERROR( cudaMallocManaged( &(m_linac.Y_jaw_index), m_linac.Y_nb_jaw * sizeof( ui32 ) ) );
+    HANDLE_ERROR( cudaMallocManaged( &(m_linac.Y_jaw_nb_triangles), m_linac.Y_nb_jaw * sizeof( ui32 ) ) );
+    HANDLE_ERROR( cudaMallocManaged( &(m_linac.Y_jaw_aabb), m_linac.Y_nb_jaw * sizeof( AabbData ) ) );
+
+    // Pre-calculation and checking of the data
+    ui32 i_jaw = 0;
+    std::string jaw_name, axis_name;
+    ui32 index_jaw;
+    ui32 tot_tri_jaw = 0;
+
+    while ( i_jaw < m_linac.Y_nb_jaw )
+    {
+        // Get name of the jaw
+        jaw_name = jaw.mesh_names[ i_jaw ];
+
+        // Name axis
+        axis_name = jaw_name[ 0 ];
+
+        // Check
+        if ( axis_name != "Y" )
+        {
+            GGcerr << "MeshPhanLINACNav: name of each jaw (in Y) must start by 'Y', " << axis_name << " given!" << GGendl;
+            exit_simulation();
+        }
+
+        // Get leaf index
+        index_jaw = std::stoi( jaw_name.substr( 1, jaw_name.size()-1 ) );
+
+        // Check
+        if ( index_jaw == 0 || index_jaw > 2 )
+        {
+            GGcerr << "MeshPhanLINACNav: name of jaws must have index starting from 1 to 2!" << GGendl;
+            exit_simulation();
+        }
+
+        // Store the number of triangles for each jaw
+        // index-1 because jaw start from 1 to 2
+        m_linac.Y_jaw_nb_triangles[ index_jaw-1 ] = jaw.nb_triangles[ i_jaw ];
+        tot_tri_jaw += jaw.nb_triangles[ i_jaw ];
+
+        ++i_jaw;
+    } // i_leaf
+
+    // Compute the offset for each jaw
+    m_linac.Y_jaw_index[ 0 ] = 0;
+    m_linac.Y_jaw_index[ 1 ] = m_linac.Y_jaw_nb_triangles[ 0 ];
+
+    // Some others allocations
+    HANDLE_ERROR( cudaMallocManaged( &(m_linac.Y_jaw_v1), tot_tri_jaw * sizeof( f32xyz ) ) );
+    HANDLE_ERROR( cudaMallocManaged( &(m_linac.Y_jaw_v2), tot_tri_jaw * sizeof( f32xyz ) ) );
+    HANDLE_ERROR( cudaMallocManaged( &(m_linac.Y_jaw_v3), tot_tri_jaw * sizeof( f32xyz ) ) );
+
+    // Loop over leaf. Organize mesh data into the linac data.
+    ui32 i_tri, offset_mesh, offset_linac;
+    f32xyz v1, v2, v3;
+    f32 xmin, xmax, ymin, ymax, zmin, zmax;
+    i_jaw = 0; while ( i_jaw < m_linac.Y_nb_jaw )
+    {
+        // Get name of the leaf
+        jaw_name = jaw.mesh_names[ i_jaw ];
+
+        // Get leaf index within the bank
+        index_jaw = std::stoi( jaw_name.substr( 1, jaw_name.size()-1 ) ) - 1; // -1 because jaw start from 1 to 2
+
+        // index within the mlc (all meshes)
+        offset_mesh = jaw.mesh_index[ i_jaw ];
+
+        // Init AABB
+        xmin = FLT_MAX; xmax = -FLT_MAX;
+        ymin = FLT_MAX; ymax = -FLT_MAX;
+        zmin = FLT_MAX; zmax = -FLT_MAX;
+
+        // index within the bank
+        offset_linac = m_linac.Y_jaw_index[ index_jaw ];
+
+        // loop over triangles
+        i_tri = 0; while ( i_tri < m_linac.Y_jaw_nb_triangles[ index_jaw ] )
+        {
+            // Store on the right place
+            v1 = jaw.v1[ offset_mesh + i_tri ];
+            v2 = jaw.v2[ offset_mesh + i_tri ];
+            v3 = jaw.v3[ offset_mesh + i_tri ];
+
+            m_linac.Y_jaw_v1[ offset_linac + i_tri ] = v1;
+            m_linac.Y_jaw_v2[ offset_linac + i_tri ] = v2;
+            m_linac.Y_jaw_v3[ offset_linac + i_tri ] = v3;
+
+            // Determine AABB
+            if ( v1.x > xmax ) xmax = v1.x;
+            if ( v2.x > xmax ) xmax = v2.x;
+            if ( v3.x > xmax ) xmax = v3.x;
+
+            if ( v1.y > ymax ) ymax = v1.y;
+            if ( v2.y > ymax ) ymax = v2.y;
+            if ( v3.y > ymax ) ymax = v3.y;
+
+            if ( v1.z > zmax ) zmax = v1.z;
+            if ( v2.z > zmax ) zmax = v2.z;
+            if ( v3.z > zmax ) zmax = v3.z;
+
+            if ( v1.x < xmin ) xmin = v1.x;
+            if ( v2.x < xmin ) xmin = v2.x;
+            if ( v3.x < xmin ) xmin = v3.x;
+
+            if ( v1.y < ymin ) ymin = v1.y;
+            if ( v2.y < ymin ) ymin = v2.y;
+            if ( v3.y < ymin ) ymin = v3.y;
+
+            if ( v1.z < zmin ) zmin = v1.z;
+            if ( v2.z < zmin ) zmin = v2.z;
+            if ( v3.z < zmin ) zmin = v3.z;
+
+            ++i_tri;
+        }
+
+        // Store the bounding box of the current jaw
+        m_linac.Y_jaw_aabb[ index_jaw ].xmin = xmin;
+        m_linac.Y_jaw_aabb[ index_jaw ].xmax = xmax;
+        m_linac.Y_jaw_aabb[ index_jaw ].ymin = ymin;
+        m_linac.Y_jaw_aabb[ index_jaw ].ymax = ymax;
+        m_linac.Y_jaw_aabb[ index_jaw ].zmin = zmin;
+        m_linac.Y_jaw_aabb[ index_jaw ].zmax = zmax;
+
+        ++i_jaw;
+    } // i_jaw
+
+}
+
+void MeshPhanLINACNav::m_translate_jaw_x( ui32 index, f32xyz T )
+{
+    ui32 offset = m_linac.X_jaw_index[ index ];
+    ui32 nb_tri = m_linac.X_jaw_nb_triangles[ index ];
+
+    ui32 i_tri = 0; while ( i_tri < nb_tri )
+    {
+        m_linac.X_jaw_v1[ offset + i_tri ] = fxyz_add( m_linac.X_jaw_v1[ offset + i_tri ], T );
+        m_linac.X_jaw_v2[ offset + i_tri ] = fxyz_add( m_linac.X_jaw_v2[ offset + i_tri ], T );
+        m_linac.X_jaw_v3[ offset + i_tri ] = fxyz_add( m_linac.X_jaw_v3[ offset + i_tri ], T );
+        ++i_tri;
+    }
+
+    // Move as well the AABB
+    m_linac.X_jaw_aabb[ index ].xmin += T.x;
+    m_linac.X_jaw_aabb[ index ].xmax += T.x;
+    m_linac.X_jaw_aabb[ index ].ymin += T.y;
+    m_linac.X_jaw_aabb[ index ].ymax += T.y;
+    m_linac.X_jaw_aabb[ index ].zmin += T.z;
+    m_linac.X_jaw_aabb[ index ].zmax += T.z;
+}
+
+void MeshPhanLINACNav::m_translate_jaw_y( ui32 index, f32xyz T )
+{
+    ui32 offset = m_linac.Y_jaw_index[ index ];
+    ui32 nb_tri = m_linac.Y_jaw_nb_triangles[ index ];
+
+    ui32 i_tri = 0; while ( i_tri < nb_tri )
+    {
+        m_linac.Y_jaw_v1[ offset + i_tri ] = fxyz_add( m_linac.Y_jaw_v1[ offset + i_tri ], T );
+        m_linac.Y_jaw_v2[ offset + i_tri ] = fxyz_add( m_linac.Y_jaw_v2[ offset + i_tri ], T );
+        m_linac.Y_jaw_v3[ offset + i_tri ] = fxyz_add( m_linac.Y_jaw_v3[ offset + i_tri ], T );
+        ++i_tri;
+    }
+
+    // Move as well the AABB
+    m_linac.Y_jaw_aabb[ index ].xmin += T.x;
+    m_linac.Y_jaw_aabb[ index ].xmax += T.x;
+    m_linac.Y_jaw_aabb[ index ].ymin += T.y;
+    m_linac.Y_jaw_aabb[ index ].ymax += T.y;
+    m_linac.Y_jaw_aabb[ index ].zmin += T.z;
+    m_linac.Y_jaw_aabb[ index ].zmax += T.z;
+}
+
+void MeshPhanLINACNav::m_translate_leaf_A( ui32 index, f32xyz T )
+{
+    ui32 offset = m_linac.A_leaf_index[ index ];
+    ui32 nb_tri = m_linac.A_leaf_nb_triangles[ index ];
+
+    ui32 i_tri = 0; while ( i_tri < nb_tri )
+    {
+        m_linac.A_leaf_v1[ offset + i_tri ] = fxyz_add( m_linac.A_leaf_v1[ offset + i_tri ], T );
+        m_linac.A_leaf_v2[ offset + i_tri ] = fxyz_add( m_linac.A_leaf_v2[ offset + i_tri ], T );
+        m_linac.A_leaf_v3[ offset + i_tri ] = fxyz_add( m_linac.A_leaf_v3[ offset + i_tri ], T );
+        ++i_tri;
+    }
+
+    // Move as well the AABB
+    m_linac.A_leaf_aabb[ index ].xmin += T.x;
+    m_linac.A_leaf_aabb[ index ].xmax += T.x;
+    m_linac.A_leaf_aabb[ index ].ymin += T.y;
+    m_linac.A_leaf_aabb[ index ].ymax += T.y;
+    m_linac.A_leaf_aabb[ index ].zmin += T.z;
+    m_linac.A_leaf_aabb[ index ].zmax += T.z;
+
+    // Update the bank AABB
+    if ( m_linac.A_leaf_aabb[ index ].xmin < m_linac.A_bank_aabb.xmin )
+    {
+        m_linac.A_bank_aabb.xmin = m_linac.A_leaf_aabb[ index ].xmin;
+    }
+
+    if ( m_linac.A_leaf_aabb[ index ].ymin < m_linac.A_bank_aabb.ymin )
+    {
+        m_linac.A_bank_aabb.ymin = m_linac.A_leaf_aabb[ index ].ymin;
+    }
+
+    if ( m_linac.A_leaf_aabb[ index ].zmin < m_linac.A_bank_aabb.zmin )
+    {
+        m_linac.A_bank_aabb.zmin = m_linac.A_leaf_aabb[ index ].zmin;
+    }
+
+    if ( m_linac.A_leaf_aabb[ index ].xmax > m_linac.A_bank_aabb.xmax )
+    {
+        m_linac.A_bank_aabb.xmax = m_linac.A_leaf_aabb[ index ].xmax;
+    }
+
+    if ( m_linac.A_leaf_aabb[ index ].ymax > m_linac.A_bank_aabb.ymax )
+    {
+        m_linac.A_bank_aabb.ymax = m_linac.A_leaf_aabb[ index ].ymax;
+    }
+
+    if ( m_linac.A_leaf_aabb[ index ].zmax > m_linac.A_bank_aabb.zmax )
+    {
+        m_linac.A_bank_aabb.zmax = m_linac.A_leaf_aabb[ index ].zmax;
+    }
+
+}
+
+void MeshPhanLINACNav::m_configure_linac()
+{
+
+    // Open the beam file
+    std::ifstream file( m_beam_config_filename.c_str(), std::ios::in );
+    if( !file )
+    {
+        GGcerr << "Error to open the Beam file'" << m_beam_config_filename << "'!" << GGendl;
+        exit_simulation();
+    }
+
+    std::string line;
+    std::vector< std::string > keys;
+    std::vector< std::string > elts;
+
+    // Empty the key for the beginning
+    keys.clear();
+    keys.push_back("");
+
+    // Search the beam
+    while ( keys[ 0 ] != "Beam" && std::stoi(keys[ 2 ]) != m_beam_index && file )
+    {
+        // Read a line
+        std::getline( file, line );
+
+        if ( file )
+        {
+            keys = m_split_txt( line );
+        }
+    }
+
+    // Then look for the number of fields
+    while ( keys[ 0 ] != "Number" && keys[ 2 ] != "Fields" && file )
+    {
+        // Read a line
+        std::getline( file, line );
+
+        if ( file )
+        {
+            keys = m_split_txt( line );
+        }
+    }
+
+    ui32 nb_fields = std::stoi( keys[ 4 ] );
+    if ( m_field_index >= nb_fields )
+    {
+        GGcerr << "Out of index for the field number, asked: " << m_field_index
+               << " but a total of field of " << nb_fields << GGendl;
+        exit_simulation();
+    }
+
+    // Look for the number of leaves
+    while ( keys[ 0 ] != "Number" && keys[ 2 ] != "Leaves" && file )
+    {
+        // Read a line
+        std::getline( file, line );
+
+        if ( file )
+        {
+            keys = m_split_txt( line );
+        }
+    }
+    ui32 nb_leaves = std::stoi( keys[ 4 ] );
+    if ( m_linac.A_nb_leaves + m_linac.B_nb_leaves != nb_leaves )
+    {
+        GGcerr << "Beam configuration error, " << nb_leaves
+               << " found but LINAC model have " << m_linac.A_nb_leaves + m_linac.B_nb_leaves
+               << " leaves!" << GGendl;
+        exit_simulation();
+    }
+
+    // Search for the field to simulate
+    while ( keys[ 0 ] != "Control" && std::stoi(keys[ 2 ]) != m_field_index && file )
+    {
+        // Read a line
+        std::getline( file, line );
+
+        if ( file )
+        {
+            keys = m_split_txt( line );
+        }
+    }
+
+    // Then read the index CDF (not use at the time, so skip the line)
+    std::getline( file, line );
+
+    // Get the gantry angle
+    std::getline( file, line );
+    keys = m_split_txt( line );
+    if ( keys[ 0 ] != "Gantry" && keys[ 1 ] != "Angle" )
+    {
+        GGcerr << "Beam configuration error, no gantry angle was found!" << GGendl;
+        exit_simulation();
+    }
+
+    // if only one angle, rotate around the z-axis
+    if ( keys.size() == 4 )
+    {
+        m_rot_linac = make_f32xyz( 0.0, 0.0, std::stof( keys[ 3 ] ) *deg );
+    }
+    else if ( keys.size() == 6 ) // non-coplanar beam, or rotation on the carousel
+    {
+        m_rot_linac = make_f32xyz( std::stof( keys[ 3 ] ) *deg,
+                                   std::stof( keys[ 4 ] ) *deg,
+                                   std::stof( keys[ 5 ] ) *deg );
+    }
+    else // otherwise, it seems that there is an error somewhere
+    {
+        GGcerr << "Beam configuration error, gantry angle must have one angle or the three rotation angles: "
+               << keys.size() - 3 << " angles found!" << GGendl;
+        exit_simulation();
+    }
+
+    // Get the transformation matrix to map local to global coordinate
+    TransformCalculator *trans = new TransformCalculator;
+    trans->set_translation( m_pos_mlc );
+    trans->set_rotation( m_rot_linac );
+    trans->set_axis_transformation( m_axis_linac );
+    m_transform_linac = trans->get_transformation_matrix();
+    delete trans;
+
+    // Next line should be a jaw
+    std::getline( file, line );
+    keys = m_split_txt( line );
+    if ( keys[ 0 ] != "Jaw" )
+    {
+        GGwarn << "Beam configuration warning, no jaw was found!" << GGendl;
+    }
+    else
+    {
+        if ( keys[ 1 ] == "X" )
+        {
+
+        }
+    }
+
+
+
+}
+
 // return memory usage
 ui64 MeshPhanLINACNav::m_get_memory_usage()
 {
@@ -440,11 +997,73 @@ void MeshPhanLINACNav::set_mlc_meshes( std::string filename )
     m_mlc_filename = filename;
 }
 
+void MeshPhanLINACNav::set_jaw_x_meshes( std::string filename )
+{
+    m_jaw_x_filename = filename;
+}
+
+void MeshPhanLINACNav::set_jaw_y_meshes( std::string filename )
+{
+    m_jaw_y_filename = filename;
+}
+
+void MeshPhanLINACNav::set_beam_configuration( std::string filename )
+{
+    m_beam_config_filename = filename;
+}
+
 void MeshPhanLINACNav::set_number_of_leaves( ui32 nb_bank_A, ui32 nb_bank_B )
 {
     m_linac.A_nb_leaves = nb_bank_A;
     m_linac.B_nb_leaves = nb_bank_B;
 }
+
+void MeshPhanLINACNav::set_mlc_position( f32 px, f32 py, f32 pz )
+{
+    m_pos_mlc = make_f32xyz( px, py, pz );
+}
+
+void MeshPhanLINACNav::set_local_jaw_x_position( f32 px, f32 py, f32 pz )
+{
+    m_loc_pos_jaw_x = make_f32xyz( px, py, pz );
+}
+
+void MeshPhanLINACNav::set_local_jaw_y_position( f32 px, f32 py, f32 pz )
+{
+    m_loc_pos_jaw_y = make_f32xyz( px, py, pz );
+}
+
+//void MeshPhanLINACNav::set_linac_rotation( f32 rx, f32 ry, f32 rz )
+//{
+//    m_rot_linac = make_f32xyz( rx, ry, rz );
+//}
+
+void MeshPhanLINACNav::set_linac_local_axis( f32 m00, f32 m01, f32 m02,
+                                             f32 m10, f32 m11, f32 m12,
+                                             f32 m20, f32 m21, f32 m22 )
+{
+    m_axis_linac = make_f32matrix33( m00, m01, m02,
+                                     m10, m11, m12,
+                                     m20, m21, m22 );
+}
+
+//void MeshPhanLINACNav::set_jaw_x_local_axis( f32 m00, f32 m01, f32 m02,
+//                                             f32 m10, f32 m11, f32 m12,
+//                                             f32 m20, f32 m21, f32 m22 )
+//{
+//    m_axis_jaw_x = make_f32matrix33( m00, m01, m02,
+//                                     m10, m11, m12,
+//                                     m20, m21, m22 );
+//}
+
+//void MeshPhanLINACNav::set_jaw_y_local_axis( f32 m00, f32 m01, f32 m02,
+//                                             f32 m10, f32 m11, f32 m12,
+//                                             f32 m20, f32 m21, f32 m22 )
+//{
+//    m_axis_jaw_y = make_f32matrix33( m00, m01, m02,
+//                                     m10, m11, m12,
+//                                     m20, m21, m22 );
+//}
 
 LinacData MeshPhanLINACNav::get_linac_geometry()
 {
@@ -494,45 +1113,40 @@ MeshPhanLINACNav::MeshPhanLINACNav ()
 
     m_linac.B_nb_leaves = 0;            // Number of leaves in the bank B
 
+    // Jaws X
+    m_linac.X_jaw_v1 = NULL;           // Vertex 1  - Triangular meshes
+    m_linac.X_jaw_v2 = NULL;           // Vertex 2
+    m_linac.X_jaw_v3 = NULL;           // Vertex 3
+    m_linac.X_jaw_index = NULL;        // Index to acces to a jaw
+    m_linac.X_jaw_nb_triangles = NULL; // Nb of triangles within each jaw
+    m_linac.X_jaw_aabb = NULL;         // Bounding box of each jaw
+    m_linac.X_nb_jaw = 0;              // Number of jaws
+
+    // Jaws Y
+    m_linac.Y_jaw_v1 = NULL;           // Vertex 1  - Triangular meshes
+    m_linac.Y_jaw_v2 = NULL;           // Vertex 2
+    m_linac.Y_jaw_v3 = NULL;           // Vertex 3
+    m_linac.Y_jaw_index = NULL;        // Index to acces to a jaw
+    m_linac.Y_jaw_nb_triangles = NULL; // Nb of triangles within each jaw
+    m_linac.Y_jaw_aabb = NULL;         // Bounding box of each jaw
+    m_linac.Y_nb_jaw = 0;              // Number of jaws
+
     set_name( "MeshPhanLINACNav" );
     m_mlc_filename = "";
+    m_jaw_x_filename = "";
+    m_jaw_y_filename = "";
+    m_beam_config_filename = "";
 
-    /*
-    // Default doxel size (if 0 = same size to the phantom)
-    m_dosel_size_x = 0;
-    m_dosel_size_y = 0;
-    m_dosel_size_z = 0;
+    m_pos_mlc = make_f32xyz_zeros();
+    m_loc_pos_jaw_x = make_f32xyz_zeros();
+    m_loc_pos_jaw_y = make_f32xyz_zeros();
+    m_rot_linac = make_f32xyz_zeros();
+    m_axis_linac = make_f32matrix33_zeros();
+    m_transform_linac = make_f32matrix44_zeros();
 
-    m_xmin = 0.0; m_xmax = 0.0;
-    m_ymin = 0.0; m_ymax = 0.0;
-    m_zmin = 0.0; m_zmax = 0.0;
+    m_beam_index = 0;
+    m_field_index = 0;
 
-    m_flag_TLE = analog;
-
-    m_materials_filename = "";
-
-    // Mu table
-    m_mu_table.nb_mat = 0;
-    m_mu_table.nb_bins = 0;
-    m_mu_table.E_max = 0;
-    m_mu_table.E_min = 0;
-
-    m_mu_table.E_bins = NULL;
-    m_mu_table.mu = NULL;
-    m_mu_table.mu_en = NULL;
-
-    m_hist_map.interaction = NULL;
-    m_hist_map.energy = NULL;
-
-    m_coo_hist_map.x = NULL;
-    m_coo_hist_map.y = NULL;
-    m_coo_hist_map.z = NULL;
-    m_coo_hist_map.energy = NULL;
-    m_coo_hist_map.interaction = NULL;
-    m_coo_hist_map.nb_data = 0;
-
-    m_mu_table.flag = analog; // Not used
-    */
 }
 
 //// Mandatory functions
@@ -653,6 +1267,31 @@ void MeshPhanLINACNav::initialize( GlobalSimulationParameters params )
 
     // Init MLC
     m_init_mlc();
+
+
+    // If jaw x is defined, init
+    if ( m_jaw_x_filename != "" )
+    {
+        m_init_jaw_x();
+
+        // move the jaw relatively to the mlc (local frame)
+        m_translate_jaw_x( 0, m_loc_pos_jaw_x );
+        m_translate_jaw_x( 1, m_loc_pos_jaw_x );
+
+    }
+
+    // If jaw y is defined, init
+    if ( m_jaw_y_filename != "" )
+    {
+        m_init_jaw_y();
+
+        // move the jaw relatively to the mlc (local frame)
+        m_translate_jaw_x( 0, m_loc_pos_jaw_y );
+        m_translate_jaw_x( 1, m_loc_pos_jaw_y );
+    }
+
+
+
 
     /*
     // Check params

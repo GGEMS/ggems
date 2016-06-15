@@ -105,6 +105,10 @@ static __inline__ __host__ __device__ f32xyz make_f32xyz(f32 vx, f32 vy, f32 vz)
     f32xyz t; t.x = vx; t.y = vy; t.z = vz; return t;
 }
 
+static __inline__ __host__ __device__ f32xyz make_f32xyz_zeros() {
+    f32xyz t; t.x = 0.0; t.y = 0.0; t.z = 0.0; return t;
+}
+
 static __inline__ __host__ __device__ f64xyz make_f64xyz(f64 vx, f64 vy, f64 vz) {
     f64xyz t; t.x = vx; t.y = vy; t.z = vz; return t;
 }
@@ -132,6 +136,15 @@ static __inline__ __host__ __device__ f32matrix33 make_f32matrix33( f32 m00, f32
     return M;
 }
 
+static __inline__ __host__ __device__ f32matrix33 make_f32matrix33_zeros()
+{
+    f32matrix33 M;
+    M.m00 = 0.0; M.m01 = 0.0; M.m02 = 0.0;
+    M.m10 = 0.0; M.m11 = 0.0; M.m12 = 0.0;
+    M.m20 = 0.0; M.m21 = 0.0; M.m22 = 0.0;
+    return M;
+}
+
 static __inline__ __host__ __device__ f32matrix44 make_f32matrix44( f32 m00, f32 m01, f32 m02, f32 m03,
                                                                     f32 m10, f32 m11, f32 m12, f32 m13,
                                                                     f32 m20, f32 m21, f32 m22, f32 m23,
@@ -142,6 +155,16 @@ static __inline__ __host__ __device__ f32matrix44 make_f32matrix44( f32 m00, f32
     M.m10 = m10; M.m11 = m11; M.m12 = m12; M.m13 = m13;
     M.m20 = m20; M.m21 = m21; M.m22 = m22; M.m23 = m23;
     M.m30 = m30; M.m31 = m31; M.m32 = m32; M.m33 = m33;
+    return M;
+}
+
+static __inline__ __host__ __device__ f32matrix44 make_f32matrix44_zeros()
+{
+    f32matrix44 M;
+    M.m00 = 0.0; M.m01 = 0.0; M.m02 = 0.0; M.m03 = 0.0;
+    M.m10 = 0.0; M.m11 = 0.0; M.m12 = 0.0; M.m13 = 0.0;
+    M.m20 = 0.0; M.m21 = 0.0; M.m22 = 0.0; M.m23 = 0.0;
+    M.m30 = 0.0; M.m31 = 0.0; M.m32 = 0.0; M.m33 = 0.0;
     return M;
 }
 

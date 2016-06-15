@@ -114,7 +114,7 @@ private:
 
     void m_draw_cone( f32xyz pos, f32xyz angles, f32 height, f32 bottom_radius, f32xyz color, f32 transparency = 0.0 );
 
-    void m_draw_mesh( f32xyz *v1, f32xyz *v2, f32xyz *v3, ui32 nb_tri, f32xyz color, f32 transparency = 0.0 );
+    void m_draw_mesh( f32xyz *v1, f32xyz *v2, f32xyz *v3, ui32 nb_tri, f32xyz color, f32 transparency = 0.0, bool inv_normal = false );
 
 //    /*!
 //     * \fn void m_draw_obb( ObbData obb, f32xyz color, f32 transparency = 0.0 )
