@@ -115,6 +115,7 @@ public:
 //                               f32 m20, f32 m21, f32 m22 );
 
     LinacData get_linac_geometry();
+    f32matrix44 get_linac_transformation();
 
 //    void set_materials( std::string filename );
 

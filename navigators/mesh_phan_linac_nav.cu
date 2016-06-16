@@ -811,6 +811,60 @@ void MeshPhanLINACNav::m_translate_leaf_A( ui32 index, f32xyz T )
 
 }
 
+void MeshPhanLINACNav::m_translate_leaf_B( ui32 index, f32xyz T )
+{
+    ui32 offset = m_linac.B_leaf_index[ index ];
+    ui32 nb_tri = m_linac.B_leaf_nb_triangles[ index ];
+
+    ui32 i_tri = 0; while ( i_tri < nb_tri )
+    {
+        m_linac.B_leaf_v1[ offset + i_tri ] = fxyz_add( m_linac.B_leaf_v1[ offset + i_tri ], T );
+        m_linac.B_leaf_v2[ offset + i_tri ] = fxyz_add( m_linac.B_leaf_v2[ offset + i_tri ], T );
+        m_linac.B_leaf_v3[ offset + i_tri ] = fxyz_add( m_linac.B_leaf_v3[ offset + i_tri ], T );
+        ++i_tri;
+    }
+
+    // Move as well the AABB
+    m_linac.B_leaf_aabb[ index ].xmin += T.x;
+    m_linac.B_leaf_aabb[ index ].xmax += T.x;
+    m_linac.B_leaf_aabb[ index ].ymin += T.y;
+    m_linac.B_leaf_aabb[ index ].ymax += T.y;
+    m_linac.B_leaf_aabb[ index ].zmin += T.z;
+    m_linac.B_leaf_aabb[ index ].zmax += T.z;
+
+    // Update the bank AABB
+    if ( m_linac.B_leaf_aabb[ index ].xmin < m_linac.B_bank_aabb.xmin )
+    {
+        m_linac.B_bank_aabb.xmin = m_linac.B_leaf_aabb[ index ].xmin;
+    }
+
+    if ( m_linac.B_leaf_aabb[ index ].ymin < m_linac.B_bank_aabb.ymin )
+    {
+        m_linac.B_bank_aabb.ymin = m_linac.B_leaf_aabb[ index ].ymin;
+    }
+
+    if ( m_linac.B_leaf_aabb[ index ].zmin < m_linac.B_bank_aabb.zmin )
+    {
+        m_linac.B_bank_aabb.zmin = m_linac.B_leaf_aabb[ index ].zmin;
+    }
+
+    if ( m_linac.B_leaf_aabb[ index ].xmax > m_linac.B_bank_aabb.xmax )
+    {
+        m_linac.B_bank_aabb.xmax = m_linac.B_leaf_aabb[ index ].xmax;
+    }
+
+    if ( m_linac.B_leaf_aabb[ index ].ymax > m_linac.B_bank_aabb.ymax )
+    {
+        m_linac.B_bank_aabb.ymax = m_linac.B_leaf_aabb[ index ].ymax;
+    }
+
+    if ( m_linac.B_leaf_aabb[ index ].zmax > m_linac.B_bank_aabb.zmax )
+    {
+        m_linac.B_bank_aabb.zmax = m_linac.B_leaf_aabb[ index ].zmax;
+    }
+
+}
+
 void MeshPhanLINACNav::m_configure_linac()
 {
 
@@ -824,87 +878,106 @@ void MeshPhanLINACNav::m_configure_linac()
 
     std::string line;
     std::vector< std::string > keys;
-    std::vector< std::string > elts;
 
-    // Empty the key for the beginning
-    keys.clear();
-    keys.push_back("");
-
-    // Search the beam
-    while ( keys[ 0 ] != "Beam" && std::stoi(keys[ 2 ]) != m_beam_index && file )
+    // Look for the beam number
+    while ( file )
     {
         // Read a line
         std::getline( file, line );
+        keys = m_split_txt( line );
 
-        if ( file )
+        if ( keys.size() >= 3 )
         {
-            keys = m_split_txt( line );
+            if ( keys[ 0 ] == "Beam" && std::stoi( keys[ 2 ] ) == m_beam_index )
+            {
+                break;
+            }
         }
     }
+
+    GGcout << "Find beam: " << line << GGendl;
 
     // Then look for the number of fields
-    while ( keys[ 0 ] != "Number" && keys[ 2 ] != "Fields" && file )
+    while ( file )
     {
         // Read a line
         std::getline( file, line );
 
-        if ( file )
+        if ( line.find("Number of Fields") != std::string::npos )
         {
-            keys = m_split_txt( line );
+            break;
         }
     }
 
+    GGcout << "Find nb field: " << line << GGendl;
+
+    keys = m_split_txt( line );
     ui32 nb_fields = std::stoi( keys[ 4 ] );
+
     if ( m_field_index >= nb_fields )
     {
         GGcerr << "Out of index for the field number, asked: " << m_field_index
                << " but a total of field of " << nb_fields << GGendl;
         exit_simulation();
-    }
+    }    
 
     // Look for the number of leaves
-    while ( keys[ 0 ] != "Number" && keys[ 2 ] != "Leaves" && file )
+    while ( file )
     {
         // Read a line
         std::getline( file, line );
 
-        if ( file )
+        if ( line.find("Number of Leaves") != std::string::npos )
         {
-            keys = m_split_txt( line );
+            break;
         }
     }
+
+    GGcout << "Find nb leaves: " << line << GGendl;
+
+    keys = m_split_txt( line );
     ui32 nb_leaves = std::stoi( keys[ 4 ] );
     if ( m_linac.A_nb_leaves + m_linac.B_nb_leaves != nb_leaves )
     {
         GGcerr << "Beam configuration error, " << nb_leaves
-               << " found but LINAC model have " << m_linac.A_nb_leaves + m_linac.B_nb_leaves
+               << " leaves were found but LINAC model have " << m_linac.A_nb_leaves + m_linac.B_nb_leaves
                << " leaves!" << GGendl;
         exit_simulation();
     }
 
-    // Search for the field to simulate
-    while ( keys[ 0 ] != "Control" && std::stoi(keys[ 2 ]) != m_field_index && file )
+    // Search the required field
+    while ( file )
     {
         // Read a line
         std::getline( file, line );
+        keys = m_split_txt( line );
 
-        if ( file )
+        if ( keys.size() >= 3 )
         {
-            keys = m_split_txt( line );
+            if ( keys[ 0 ] == "Control" && std::stoi( keys[ 2 ] ) == m_field_index )
+            {
+                break;
+            }
         }
     }
+
+    GGcout << "Find field: " << line << GGendl;
 
     // Then read the index CDF (not use at the time, so skip the line)
     std::getline( file, line );
 
     // Get the gantry angle
     std::getline( file, line );
-    keys = m_split_txt( line );
-    if ( keys[ 0 ] != "Gantry" && keys[ 1 ] != "Angle" )
+
+    // Check
+    if ( line.find( "Gantry Angle" ) == std::string::npos )
     {
         GGcerr << "Beam configuration error, no gantry angle was found!" << GGendl;
         exit_simulation();
     }
+
+    // Read gantry angle values
+    keys = m_split_txt( line );
 
     // if only one angle, rotate around the z-axis
     if ( keys.size() == 4 )
@@ -932,21 +1005,178 @@ void MeshPhanLINACNav::m_configure_linac()
     m_transform_linac = trans->get_transformation_matrix();
     delete trans;
 
-    // Next line should be a jaw
-    std::getline( file, line );
-    keys = m_split_txt( line );
-    if ( keys[ 0 ] != "Jaw" )
-    {
-        GGwarn << "Beam configuration warning, no jaw was found!" << GGendl;
-    }
-    else
-    {
-        if ( keys[ 1 ] == "X" )
-        {
+    //// JAWS //////////////////////////////////////////
 
+    // Next four lines should the jaw config
+    f32 jaw_x_min = 0.0; bool jaw_x = false;
+    f32 jaw_x_max = 0.0;
+    f32 jaw_y_min = 0.0; bool jaw_y = false;
+    f32 jaw_y_max = 0.0;
+
+    while ( file )
+    {
+        // Read a line
+        std::getline( file, line );
+
+        if ( line.find( "Jaw" ) != std::string::npos )
+        {
+            keys = m_split_txt( line );
+            if ( keys[ 1 ] == "X" && keys[ 2 ] == "min" )
+            {
+                jaw_x_min = std::stof( keys[ 4 ] );
+                jaw_x = true;
+            }
+            if ( keys[ 1 ] == "X" && keys[ 2 ] == "max" )
+            {
+                jaw_x_max = std::stof( keys[ 4 ] );
+                jaw_x = true;
+            }
+            if ( keys[ 1 ] == "Y" && keys[ 2 ] == "min" )
+            {
+                jaw_y_min = std::stof( keys[ 4 ] );
+                jaw_y = true;
+            }
+            if ( keys[ 1 ] == "Y" && keys[ 2 ] == "max" )
+            {
+                jaw_y_max = std::stof( keys[ 4 ] );
+                jaw_y = true;
+            }
+        }
+        else
+        {
+            break;
         }
     }
 
+    // Check
+    if ( !jaw_x && m_linac.X_nb_jaw != 0 )
+    {
+        GGcerr << "Beam configuration error, geometry of the jaw-X was defined but the position values were not found!" << GGendl;
+        exit_simulation();
+    }
+    if ( !jaw_y && m_linac.Y_nb_jaw != 0 )
+    {
+        GGcerr << "Beam configuration error, geometry of the jaw-Y was defined but the position values were not found!" << GGendl;
+        exit_simulation();
+    }
+
+    // Configure the jaws
+    if ( m_linac.X_nb_jaw != 0 )
+    {
+        m_translate_jaw_x( 0, make_f32xyz( jaw_x_max, 0.0, 0.0 ) );   // X1 ( x > 0 )
+        m_translate_jaw_x( 1, make_f32xyz( jaw_x_min, 0.0, 0.0 ) );   // X2 ( x < 0 )
+    }
+
+    if ( m_linac.Y_nb_jaw != 0 )
+    {
+        m_translate_jaw_y( 0, make_f32xyz( 0.0, jaw_y_max, 0.0 ) );   // Y1 ( y > 0 )
+        m_translate_jaw_y( 1, make_f32xyz( 0.0, jaw_y_min, 0.0 ) );   // Y2 ( y < 0 )
+    }
+
+    //// LEAVES BANK A ///////////////////////////////////////////////
+
+    ui32 ileaf = 0;
+    bool wd_leaf = false; // watchdog
+    while ( file )
+    {
+        if ( line.find( "Leaf" ) != std::string::npos && line.find( "A" ) != std::string::npos )
+        {
+            // If first leaf of the bank A, check
+            if ( ileaf == 0 )
+            {
+                keys = m_split_txt( line );
+                if ( keys[ 1 ] != "1A" )
+                {
+                    GGcerr << "Beam configuration error, first leaf of the bank A must start by index '1A': " << keys[ 1 ]
+                           << " found." << GGendl;
+                    exit_simulation();
+                }
+            }
+
+            // watchdog
+            if ( ileaf >= m_linac.A_nb_leaves )
+            {
+                GGcerr << "Beam configuration error, find more leaves in the configuration "
+                       << "file for the bank A than leaves in the LINAC model!" << GGendl;
+                exit_simulation();
+            }
+
+            // find at least one leaf
+            if ( !wd_leaf ) wd_leaf = true;
+
+            // read data and move the leaf
+            keys = m_split_txt( line );
+            m_translate_leaf_A( ileaf++, make_f32xyz( std::stof( keys[ 3 ] ), 0.0, 0.0 ) );
+
+        }
+        else
+        {
+            break;
+        }
+
+        // Read a line
+        std::getline( file, line );
+    }
+
+    // No leaves were found
+    if ( !wd_leaf )
+    {
+        GGcerr << "Beam configuration error, no leaves from the bank A were found!" << GGendl;
+        exit_simulation();
+    }
+
+    //// LEAVES BANK B ///////////////////////////////////////////////
+
+    ileaf = 0;
+    wd_leaf = false; // watchdog
+    while ( file )
+    {
+
+        if ( line.find( "Leaf" ) != std::string::npos && line.find( "B" ) != std::string::npos )
+        {
+            // If first leaf of the bank A, check
+            if ( ileaf == 0 )
+            {
+                keys = m_split_txt( line );
+                if ( keys[ 1 ] != "1B" )
+                {
+                    GGcerr << "Beam configuration error, first leaf of the bank B must start by index '1B': " << keys[ 1 ]
+                           << " found." << GGendl;
+                    exit_simulation();
+                }
+            }
+
+            // watchdog
+            if ( ileaf >= m_linac.B_nb_leaves )
+            {
+                GGcerr << "Beam configuration error, find more leaves in the configuration "
+                       << "file for the bank B than leaves in the LINAC model!" << GGendl;
+                exit_simulation();
+            }
+
+            // find at least one leaf
+            if ( !wd_leaf ) wd_leaf = true;
+
+            // read data and move the leaf
+            keys = m_split_txt( line );
+            m_translate_leaf_B( ileaf++, make_f32xyz( std::stof( keys[ 3 ] ), 0.0, 0.0 ) );
+
+        }
+        else
+        {
+            break;
+        }
+
+        // Read a line
+        std::getline( file, line );
+    }
+
+    // No leaves were found
+    if ( !wd_leaf )
+    {
+        GGcerr << "Beam configuration error, no leaves from the bank B were found!" << GGendl;
+        exit_simulation();
+    }
 
 
 }
@@ -1007,9 +1237,11 @@ void MeshPhanLINACNav::set_jaw_y_meshes( std::string filename )
     m_jaw_y_filename = filename;
 }
 
-void MeshPhanLINACNav::set_beam_configuration( std::string filename )
+void MeshPhanLINACNav::set_beam_configuration( std::string filename, ui32 beam_index, ui32 field_index )
 {
     m_beam_config_filename = filename;
+    m_beam_index = beam_index;
+    m_field_index = field_index;
 }
 
 void MeshPhanLINACNav::set_number_of_leaves( ui32 nb_bank_A, ui32 nb_bank_B )
@@ -1033,10 +1265,6 @@ void MeshPhanLINACNav::set_local_jaw_y_position( f32 px, f32 py, f32 pz )
     m_loc_pos_jaw_y = make_f32xyz( px, py, pz );
 }
 
-//void MeshPhanLINACNav::set_linac_rotation( f32 rx, f32 ry, f32 rz )
-//{
-//    m_rot_linac = make_f32xyz( rx, ry, rz );
-//}
 
 void MeshPhanLINACNav::set_linac_local_axis( f32 m00, f32 m01, f32 m02,
                                              f32 m10, f32 m11, f32 m12,
@@ -1047,27 +1275,16 @@ void MeshPhanLINACNav::set_linac_local_axis( f32 m00, f32 m01, f32 m02,
                                      m20, m21, m22 );
 }
 
-//void MeshPhanLINACNav::set_jaw_x_local_axis( f32 m00, f32 m01, f32 m02,
-//                                             f32 m10, f32 m11, f32 m12,
-//                                             f32 m20, f32 m21, f32 m22 )
-//{
-//    m_axis_jaw_x = make_f32matrix33( m00, m01, m02,
-//                                     m10, m11, m12,
-//                                     m20, m21, m22 );
-//}
 
-//void MeshPhanLINACNav::set_jaw_y_local_axis( f32 m00, f32 m01, f32 m02,
-//                                             f32 m10, f32 m11, f32 m12,
-//                                             f32 m20, f32 m21, f32 m22 )
-//{
-//    m_axis_jaw_y = make_f32matrix33( m00, m01, m02,
-//                                     m10, m11, m12,
-//                                     m20, m21, m22 );
-//}
 
 LinacData MeshPhanLINACNav::get_linac_geometry()
 {
     return m_linac;
+}
+
+f32matrix44 MeshPhanLINACNav::get_linac_transformation()
+{
+    return m_transform_linac;
 }
 
 //void MeshPhanLINACNav::set_materials(std::string filename )
@@ -1290,7 +1507,8 @@ void MeshPhanLINACNav::initialize( GlobalSimulationParameters params )
         m_translate_jaw_x( 1, m_loc_pos_jaw_y );
     }
 
-
+    // Configure the linac
+    m_configure_linac();
 
 
     /*

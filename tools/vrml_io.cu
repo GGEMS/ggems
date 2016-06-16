@@ -233,43 +233,152 @@ void VrmlIO::draw_phantom( MeshPhanLINACNav *aPhantom )
 {
     // Get the geometry
     LinacData linac = aPhantom->get_linac_geometry();
+    f32matrix44 trans = aPhantom->get_linac_transformation();
 
-//    // Draw leaves from bank A
-//    ui32 ileaf = 0; while ( ileaf < linac.A_nb_leaves )    // linac.A_nb_leaves
+    GGcout << "Matrix: " << GGendl;
+    printf("%f %f %f %f\n", trans.m00, trans.m01, trans.m02, trans.m03);
+    printf("%f %f %f %f\n", trans.m10, trans.m11, trans.m12, trans.m13);
+    printf("%f %f %f %f\n", trans.m20, trans.m21, trans.m22, trans.m23);
+    printf("%f %f %f %f\n", trans.m30, trans.m31, trans.m32, trans.m33);
+
+    // local Axis
+    f32xyz org = { 0.0,  0.0,  0.0 };
+    f32xyz ax = { 20.0,  0.0,  0.0 };
+    f32xyz ay = {  0.0, 20.0,  0.0 };
+    f32xyz az = {  0.0,  0.0, 20.0 };
+    org = fxyz_local_to_global_position( trans, org );
+    ax = fxyz_local_to_global_position( trans, ax );
+    ay = fxyz_local_to_global_position( trans, ay );
+    az = fxyz_local_to_global_position( trans, az );
+    m_draw_axis( org, ax, ay, az );
+
+    ui32 ileaf;
+
+    /// Tranform all leaves ///////////////////////////////////////////////
+//    ui32 ileaf = 0; while ( ileaf < linac.A_nb_leaves ) // linac.A_nb_leaves
 //    {
 //        ui32 offset = linac.A_leaf_index[ ileaf ];
 //        ui32 nbtri = linac.A_leaf_nb_triangles[ ileaf ];
 
-//        m_draw_mesh( &(linac.A_leaf_v1[ offset ]), &(linac.A_leaf_v2[ offset ]), &(linac.A_leaf_v3[ offset ]),
-//                     nbtri, m_blue );
-
+//        ui32 itri = 0; while ( itri < nbtri )
+//        {
+//            linac.A_leaf_v1[ offset + itri ] = fxyz_local_to_global_position( trans, linac.A_leaf_v1[ offset + itri ] );
+//            linac.A_leaf_v2[ offset + itri ] = fxyz_local_to_global_position( trans, linac.A_leaf_v2[ offset + itri ] );
+//            linac.A_leaf_v3[ offset + itri ] = fxyz_local_to_global_position( trans, linac.A_leaf_v3[ offset + itri ] );
+//            ++itri;
+//        }
 //        ++ileaf;
 //    }
 
-//    // Draw leaves from bank B
-//    ileaf = 0; while ( ileaf < linac.B_nb_leaves )    // linac.A_nb_leaves
+//    ileaf = 0; while ( ileaf < linac.B_nb_leaves )
 //    {
 //        ui32 offset = linac.B_leaf_index[ ileaf ];
 //        ui32 nbtri = linac.B_leaf_nb_triangles[ ileaf ];
 
-//        m_draw_mesh( &(linac.B_leaf_v1[ offset ]), &(linac.B_leaf_v2[ offset ]), &(linac.B_leaf_v3[ offset ]),
-//                     nbtri, m_red );
-
+//        ui32 itri = 0; while ( itri < nbtri )
+//        {
+//            linac.B_leaf_v1[ offset + itri ] = fxyz_local_to_global_position( trans, linac.B_leaf_v1[ offset + itri ] );
+//            linac.B_leaf_v2[ offset + itri ] = fxyz_local_to_global_position( trans, linac.B_leaf_v2[ offset + itri ] );
+//            linac.B_leaf_v3[ offset + itri ] = fxyz_local_to_global_position( trans, linac.B_leaf_v3[ offset + itri ] );
+//            ++itri;
+//        }
 //        ++ileaf;
 //    }
 
-    // Draw jaws
-    if ( linac.X_nb_jaw != 0 )
+    /// Transform backup ///////////////////////////////////////////////////
+
+//    ui32 offset = linac.X_jaw_index[ 0 ];
+//    ui32 nbtri = linac.X_jaw_nb_triangles[ 0 ];
+//    ui32 itri = 0; while ( itri < nbtri )
+//    {
+//        linac.X_jaw_v1[ offset + itri ] = fxyz_local_to_global_position( trans, linac.X_jaw_v1[ offset + itri ] );
+//        linac.X_jaw_v2[ offset + itri ] = fxyz_local_to_global_position( trans, linac.X_jaw_v2[ offset + itri ] );
+//        linac.X_jaw_v3[ offset + itri ] = fxyz_local_to_global_position( trans, linac.X_jaw_v3[ offset + itri ] );
+//        ++itri;
+//    }
+
+//    offset = linac.X_jaw_index[ 1 ];
+//    nbtri = linac.X_jaw_nb_triangles[ 1 ];
+//    itri = 0; while ( itri < nbtri )
+//    {
+//        linac.X_jaw_v1[ offset + itri ] = fxyz_local_to_global_position( trans, linac.X_jaw_v1[ offset + itri ] );
+//        linac.X_jaw_v2[ offset + itri ] = fxyz_local_to_global_position( trans, linac.X_jaw_v2[ offset + itri ] );
+//        linac.X_jaw_v3[ offset + itri ] = fxyz_local_to_global_position( trans, linac.X_jaw_v3[ offset + itri ] );
+//        ++itri;
+//    }
+
+//    offset = linac.Y_jaw_index[ 0 ];
+//    nbtri = linac.Y_jaw_nb_triangles[ 0 ];
+//    itri = 0; while ( itri < nbtri )
+//    {
+//        linac.Y_jaw_v1[ offset + itri ] = fxyz_local_to_global_position( trans, linac.Y_jaw_v1[ offset + itri ] );
+//        linac.Y_jaw_v2[ offset + itri ] = fxyz_local_to_global_position( trans, linac.Y_jaw_v2[ offset + itri ] );
+//        linac.Y_jaw_v3[ offset + itri ] = fxyz_local_to_global_position( trans, linac.Y_jaw_v3[ offset + itri ] );
+//        ++itri;
+//    }
+
+//    offset = linac.Y_jaw_index[ 1 ];
+//    nbtri = linac.Y_jaw_nb_triangles[ 1 ];
+//    itri = 0; while ( itri < nbtri )
+//    {
+//        linac.Y_jaw_v1[ offset + itri ] = fxyz_local_to_global_position( trans, linac.Y_jaw_v1[ offset + itri ] );
+//        linac.Y_jaw_v2[ offset + itri ] = fxyz_local_to_global_position( trans, linac.Y_jaw_v2[ offset + itri ] );
+//        linac.Y_jaw_v3[ offset + itri ] = fxyz_local_to_global_position( trans, linac.Y_jaw_v3[ offset + itri ] );
+//        ++itri;
+//    }
+
+    /// Drawing //////////////////////////////////////////////////////////////
+
+    // Draw leaves from bank A
+    ileaf = 0; while ( ileaf < linac.A_nb_leaves )    // linac.A_nb_leaves
     {
-        m_draw_mesh( &(linac.X_jaw_v1[ linac.X_jaw_index[ 0 ] ]),
-                     &(linac.X_jaw_v2[ linac.X_jaw_index[ 0 ] ]),
-                     &(linac.X_jaw_v3[ linac.X_jaw_index[ 0 ] ]),
-                     linac.X_jaw_nb_triangles[ 0 ], m_blue, 0.0, true );
-        m_draw_mesh( &(linac.X_jaw_v1[ linac.X_jaw_index[ 1 ] ]),
-                     &(linac.X_jaw_v2[ linac.X_jaw_index[ 1 ] ]),
-                     &(linac.X_jaw_v3[ linac.X_jaw_index[ 1 ] ]),
-                     linac.X_jaw_nb_triangles[ 1 ], m_red, 0.0 );
+        ui32 offset = linac.A_leaf_index[ ileaf ];
+        ui32 nbtri = linac.A_leaf_nb_triangles[ ileaf ];
+
+        m_draw_mesh( &(linac.A_leaf_v1[ offset ]), &(linac.A_leaf_v2[ offset ]), &(linac.A_leaf_v3[ offset ]),
+                     nbtri, m_blue );
+
+        ++ileaf;
     }
+
+    // Draw leaves from bank B
+    ileaf = 0; while ( ileaf < linac.B_nb_leaves )    // linac.A_nb_leaves
+    {
+        ui32 offset = linac.B_leaf_index[ ileaf ];
+        ui32 nbtri = linac.B_leaf_nb_triangles[ ileaf ];
+
+        m_draw_mesh( &(linac.B_leaf_v1[ offset ]), &(linac.B_leaf_v2[ offset ]), &(linac.B_leaf_v3[ offset ]),
+                     nbtri, m_red, 0.0, true );
+
+        ++ileaf;
+    }
+
+//    // Draw jaws
+//    if ( linac.X_nb_jaw != 0 )
+//    {
+//        m_draw_mesh( &(linac.X_jaw_v1[ linac.X_jaw_index[ 0 ] ]),
+//                     &(linac.X_jaw_v2[ linac.X_jaw_index[ 0 ] ]),
+//                     &(linac.X_jaw_v3[ linac.X_jaw_index[ 0 ] ]),
+//                     linac.X_jaw_nb_triangles[ 0 ], m_blue, 0.0, true );
+
+//        m_draw_mesh( &(linac.X_jaw_v1[ linac.X_jaw_index[ 1 ] ]),
+//                     &(linac.X_jaw_v2[ linac.X_jaw_index[ 1 ] ]),
+//                     &(linac.X_jaw_v3[ linac.X_jaw_index[ 1 ] ]),
+//                     linac.X_jaw_nb_triangles[ 1 ], m_red, 0.0 );
+//    }
+
+//    if ( linac.Y_nb_jaw != 0 )
+//    {
+//        m_draw_mesh( &(linac.Y_jaw_v1[ linac.Y_jaw_index[ 0 ] ]),
+//                     &(linac.Y_jaw_v2[ linac.Y_jaw_index[ 0 ] ]),
+//                     &(linac.Y_jaw_v3[ linac.Y_jaw_index[ 0 ] ]),
+//                     linac.Y_jaw_nb_triangles[ 0 ], m_blue, 0.0, true );
+
+//        m_draw_mesh( &(linac.Y_jaw_v1[ linac.Y_jaw_index[ 1 ] ]),
+//                     &(linac.Y_jaw_v2[ linac.Y_jaw_index[ 1 ] ]),
+//                     &(linac.Y_jaw_v3[ linac.Y_jaw_index[ 1 ] ]),
+//                     linac.Y_jaw_nb_triangles[ 1 ], m_red, 0.0 );
+//    }
 
 }
 
