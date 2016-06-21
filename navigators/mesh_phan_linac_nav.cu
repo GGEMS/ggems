@@ -242,7 +242,10 @@ void MeshPhanLINACNav::m_init_mlc()
                 v2 = mlc.v2[ offset_mlc + i_tri ];
                 v3 = mlc.v3[ offset_mlc + i_tri ];
 
-//                printf("  v1 %f %f %f # v2 %f %f %f # v3 %f %f %f\n", v1.x, v1.y, v1.z, v2.x, v2.y, v2.z, v3.x, v3.y, v3.z);
+//                if ( index_leaf_bank == 0 )
+//                {
+//                    printf("  v1 %f %f %f # v2 %f %f %f # v3 %f %f %f\n", v1.x, v1.y, v1.z, v2.x, v2.y, v2.z, v3.x, v3.y, v3.z);
+//                }
 
                 m_linac.A_leaf_v1[ offset_bank + i_tri ] = v1;
                 m_linac.A_leaf_v2[ offset_bank + i_tri ] = v2;
@@ -880,6 +883,7 @@ void MeshPhanLINACNav::m_configure_linac()
     std::vector< std::string > keys;
 
     // Look for the beam number
+    bool find_beam = false;
     while ( file )
     {
         // Read a line
@@ -890,9 +894,16 @@ void MeshPhanLINACNav::m_configure_linac()
         {
             if ( keys[ 0 ] == "Beam" && std::stoi( keys[ 2 ] ) == m_beam_index )
             {
+                find_beam = true;
                 break;
             }
         }
+    }
+
+    if ( !find_beam )
+    {
+        GGcerr << "Beam configuration error: beam " << m_beam_index << " was not found!" << GGendl;
+        exit_simulation();
     }
 
     GGcout << "Find beam: " << line << GGendl;
@@ -922,6 +933,7 @@ void MeshPhanLINACNav::m_configure_linac()
     }    
 
     // Look for the number of leaves
+    bool find_field = false;
     while ( file )
     {
         // Read a line
@@ -929,8 +941,15 @@ void MeshPhanLINACNav::m_configure_linac()
 
         if ( line.find("Number of Leaves") != std::string::npos )
         {
+            find_field = true;
             break;
         }
+    }
+
+    if ( !find_field )
+    {
+        GGcerr << "Beam configuration error: field " << m_field_index << " was not found!" << GGendl;
+        exit_simulation();
     }
 
     GGcout << "Find nb leaves: " << line << GGendl;
@@ -1178,6 +1197,66 @@ void MeshPhanLINACNav::m_configure_linac()
         exit_simulation();
     }
 
+    // Finally compute the global bounding box of the LINAC
+    f32 xmin = FLT_MAX; f32 xmax = -FLT_MAX;
+    f32 ymin = FLT_MAX; f32 ymax = -FLT_MAX;
+    f32 zmin = FLT_MAX; f32 zmax = -FLT_MAX;
+
+    if ( m_linac.A_bank_aabb.xmin < xmin ) xmin = m_linac.A_bank_aabb.xmin;
+    if ( m_linac.B_bank_aabb.xmin < xmin ) xmin = m_linac.B_bank_aabb.xmin;
+    if ( m_linac.A_bank_aabb.ymin < ymin ) ymin = m_linac.A_bank_aabb.ymin;
+    if ( m_linac.B_bank_aabb.ymin < ymin ) ymin = m_linac.B_bank_aabb.ymin;
+    if ( m_linac.A_bank_aabb.zmin < zmin ) zmin = m_linac.A_bank_aabb.zmin;
+    if ( m_linac.B_bank_aabb.zmin < zmin ) zmin = m_linac.B_bank_aabb.zmin;
+
+    if ( m_linac.A_bank_aabb.xmax > xmax ) xmax = m_linac.A_bank_aabb.xmax;
+    if ( m_linac.B_bank_aabb.xmax > xmax ) xmax = m_linac.B_bank_aabb.xmax;
+    if ( m_linac.A_bank_aabb.ymax > ymax ) ymax = m_linac.A_bank_aabb.ymax;
+    if ( m_linac.B_bank_aabb.ymax > ymax ) ymax = m_linac.B_bank_aabb.ymax;
+    if ( m_linac.A_bank_aabb.zmax > zmax ) zmax = m_linac.A_bank_aabb.zmax;
+    if ( m_linac.B_bank_aabb.zmax > zmax ) zmax = m_linac.B_bank_aabb.zmax;
+
+    if ( m_linac.X_nb_jaw != 0 )
+    {
+        if ( m_linac.X_jaw_aabb[ 0 ].xmin < xmin ) xmin = m_linac.X_jaw_aabb[ 0 ].xmin;
+        if ( m_linac.X_jaw_aabb[ 1 ].xmin < xmin ) xmin = m_linac.X_jaw_aabb[ 1 ].xmin;
+        if ( m_linac.X_jaw_aabb[ 0 ].ymin < ymin ) ymin = m_linac.X_jaw_aabb[ 0 ].ymin;
+        if ( m_linac.X_jaw_aabb[ 1 ].ymin < ymin ) ymin = m_linac.X_jaw_aabb[ 1 ].ymin;
+        if ( m_linac.X_jaw_aabb[ 0 ].zmin < zmin ) zmin = m_linac.X_jaw_aabb[ 0 ].zmin;
+        if ( m_linac.X_jaw_aabb[ 1 ].zmin < zmin ) zmin = m_linac.X_jaw_aabb[ 1 ].zmin;
+
+        if ( m_linac.X_jaw_aabb[ 0 ].xmax > xmax ) xmax = m_linac.X_jaw_aabb[ 0 ].xmax;
+        if ( m_linac.X_jaw_aabb[ 1 ].xmax > xmax ) xmax = m_linac.X_jaw_aabb[ 1 ].xmax;
+        if ( m_linac.X_jaw_aabb[ 0 ].ymax > ymax ) ymax = m_linac.X_jaw_aabb[ 0 ].ymax;
+        if ( m_linac.X_jaw_aabb[ 1 ].ymax > ymax ) ymax = m_linac.X_jaw_aabb[ 1 ].ymax;
+        if ( m_linac.X_jaw_aabb[ 0 ].zmax > zmax ) zmax = m_linac.X_jaw_aabb[ 0 ].zmax;
+        if ( m_linac.X_jaw_aabb[ 1 ].zmax > zmax ) zmax = m_linac.X_jaw_aabb[ 1 ].zmax;
+    }
+
+    if ( m_linac.Y_nb_jaw != 0 )
+    {
+        if ( m_linac.Y_jaw_aabb[ 0 ].xmin < xmin ) xmin = m_linac.Y_jaw_aabb[ 0 ].xmin;
+        if ( m_linac.Y_jaw_aabb[ 1 ].xmin < xmin ) xmin = m_linac.Y_jaw_aabb[ 1 ].xmin;
+        if ( m_linac.Y_jaw_aabb[ 0 ].ymin < ymin ) ymin = m_linac.Y_jaw_aabb[ 0 ].ymin;
+        if ( m_linac.Y_jaw_aabb[ 1 ].ymin < ymin ) ymin = m_linac.Y_jaw_aabb[ 1 ].ymin;
+        if ( m_linac.Y_jaw_aabb[ 0 ].zmin < zmin ) zmin = m_linac.Y_jaw_aabb[ 0 ].zmin;
+        if ( m_linac.Y_jaw_aabb[ 1 ].zmin < zmin ) zmin = m_linac.Y_jaw_aabb[ 1 ].zmin;
+
+        if ( m_linac.Y_jaw_aabb[ 0 ].xmax > xmax ) xmax = m_linac.Y_jaw_aabb[ 0 ].xmax;
+        if ( m_linac.Y_jaw_aabb[ 1 ].xmax > xmax ) xmax = m_linac.Y_jaw_aabb[ 1 ].xmax;
+        if ( m_linac.Y_jaw_aabb[ 0 ].ymax > ymax ) ymax = m_linac.Y_jaw_aabb[ 0 ].ymax;
+        if ( m_linac.Y_jaw_aabb[ 1 ].ymax > ymax ) ymax = m_linac.Y_jaw_aabb[ 1 ].ymax;
+        if ( m_linac.Y_jaw_aabb[ 0 ].zmax > zmax ) zmax = m_linac.Y_jaw_aabb[ 0 ].zmax;
+        if ( m_linac.Y_jaw_aabb[ 1 ].zmax > zmax ) zmax = m_linac.Y_jaw_aabb[ 1 ].zmax;
+    }
+
+    // Store the data
+    m_linac.aabb.xmin = xmin;
+    m_linac.aabb.xmax = xmax;
+    m_linac.aabb.ymin = ymin;
+    m_linac.aabb.ymax = ymax;
+    m_linac.aabb.zmin = zmin;
+    m_linac.aabb.zmax = zmax;
 
 }
 
@@ -1348,6 +1427,13 @@ MeshPhanLINACNav::MeshPhanLINACNav ()
     m_linac.Y_jaw_aabb = NULL;         // Bounding box of each jaw
     m_linac.Y_nb_jaw = 0;              // Number of jaws
 
+    m_linac.aabb.xmin = 0.0;           // Bounding box of the LINAC
+    m_linac.aabb.xmax = 0.0;
+    m_linac.aabb.ymin = 0.0;
+    m_linac.aabb.ymax = 0.0;
+    m_linac.aabb.zmin = 0.0;
+    m_linac.aabb.zmax = 0.0;
+
     set_name( "MeshPhanLINACNav" );
     m_mlc_filename = "";
     m_jaw_x_filename = "";
@@ -1503,8 +1589,8 @@ void MeshPhanLINACNav::initialize( GlobalSimulationParameters params )
         m_init_jaw_y();
 
         // move the jaw relatively to the mlc (local frame)
-        m_translate_jaw_x( 0, m_loc_pos_jaw_y );
-        m_translate_jaw_x( 1, m_loc_pos_jaw_y );
+        m_translate_jaw_y( 0, m_loc_pos_jaw_y );
+        m_translate_jaw_y( 1, m_loc_pos_jaw_y );
     }
 
     // Configure the linac

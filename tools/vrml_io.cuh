@@ -93,6 +93,7 @@ private:
     f32xyz m_red = {1.0, 0.0, 0.0};         /*!< Pre-defined color: red */
     f32xyz m_blue = {0.0, 0.0, 1.0};        /*!< Pre-defined color: blue */
     f32xyz m_green = {0.0, 1.0, 0.0};       /*!< Pre-defined color: green */
+    f32xyz m_cyan = {0.0, 1.0, 1.0};        /*!< Pre-defined color: cyan */
 
     /*!
      * \fn void m_draw_point( f32xyz pos, f32xyz color )

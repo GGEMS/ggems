@@ -60,6 +60,9 @@ struct LinacData
     ui32     *Y_jaw_nb_triangles; // Nb of triangles within each jaw
     AabbData *Y_jaw_aabb;         // Bounding box of each jaw
     ui32      Y_nb_jaw;           // Number of jaws
+
+    // Global AABB
+    AabbData aabb;                // Global bounding box
 };
 
 

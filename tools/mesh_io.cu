@@ -303,7 +303,11 @@ MeshData MeshIO::m_read_obj_data()
             // Store data
             vertices.push_back( make_f32xyz( x, y, z ) );
 
-            //GGcout << "Find vertices: " << x << " " << y << " " << z << GGendl;
+//            if ( solid_name == "A01" )
+//            {
+//                GGcout << "Name: " << solid_name << " line " << line
+//                       << " Find vertices: " << x << " " << y << " " << z << GGendl;
+//            }
 
             // Read new line
             std::getline( file, line );
