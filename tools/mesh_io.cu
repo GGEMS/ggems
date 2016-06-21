@@ -37,7 +37,7 @@ MeshData MeshIO::read_mesh_file( std::string filename )
     }
     else if ( ext == "obj" )
     {
-        GGcout << "MeshIO: read obj mesh" << GGendl;
+//        GGcout << "MeshIO: read obj mesh" << GGendl;
         meshes = m_read_obj_data();
     }
     else

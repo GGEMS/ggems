@@ -140,6 +140,11 @@ void __host__ __device__ transport_track_to_in_AABB( ParticlesData &particles, f
 
 }
 
+void __host__ __device__ transport_track_to_in_AABB( ParticlesData &particles, AabbData aabb, f32 tolerance, ui32 id)
+{
+    transport_track_to_in_AABB( particles, aabb.xmin, aabb.xmax, aabb.ymin, aabb.ymax, aabb.zmin, aabb.zmax, tolerance, id);
+}
+
 /*
 // Transport the current particle to an OBB geometry
 void __host__ __device__ transport_track_to_in_OBB( ParticlesData &particles, ObbData obb, ui32 id)

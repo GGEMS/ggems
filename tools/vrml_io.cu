@@ -210,7 +210,6 @@ void VrmlIO::draw_source( ConeBeamCTSource *aSource )
     ay = fxyz_local_to_global_position( trans, ay );
     az = fxyz_local_to_global_position( trans, az );
     m_draw_axis( org, ax, ay, az );
-
 }
 
 void VrmlIO::draw_phantom( VoxPhanDosiNav *aPhantom )
@@ -235,11 +234,11 @@ void VrmlIO::draw_phantom( MeshPhanLINACNav *aPhantom )
     LinacData linac = aPhantom->get_linac_geometry();
     f32matrix44 trans = aPhantom->get_linac_transformation();
 
-    GGcout << "Matrix: " << GGendl;
-    printf("%f %f %f %f\n", trans.m00, trans.m01, trans.m02, trans.m03);
-    printf("%f %f %f %f\n", trans.m10, trans.m11, trans.m12, trans.m13);
-    printf("%f %f %f %f\n", trans.m20, trans.m21, trans.m22, trans.m23);
-    printf("%f %f %f %f\n", trans.m30, trans.m31, trans.m32, trans.m33);
+//    GGcout << "Matrix: " << GGendl;
+//    printf("%f %f %f %f\n", trans.m00, trans.m01, trans.m02, trans.m03);
+//    printf("%f %f %f %f\n", trans.m10, trans.m11, trans.m12, trans.m13);
+//    printf("%f %f %f %f\n", trans.m20, trans.m21, trans.m22, trans.m23);
+//    printf("%f %f %f %f\n", trans.m30, trans.m31, trans.m32, trans.m33);
 
     // local Axis
     f32xyz org = { 0.0,  0.0,  0.0 };
@@ -253,7 +252,7 @@ void VrmlIO::draw_phantom( MeshPhanLINACNav *aPhantom )
     m_draw_axis( org, ax, ay, az );
 
     ui32 ileaf;
-/*
+
     /// Tranform all leaves ///////////////////////////////////////////////
     ileaf = 0; while ( ileaf < linac.A_nb_leaves ) // linac.A_nb_leaves
     {
@@ -326,7 +325,7 @@ void VrmlIO::draw_phantom( MeshPhanLINACNav *aPhantom )
         linac.Y_jaw_v3[ offset + itri ] = fxyz_local_to_global_position( trans, linac.Y_jaw_v3[ offset + itri ] );
         ++itri;
     }
-*/
+
     /// Drawing //////////////////////////////////////////////////////////////
 
     // Draw leaves from bank A
@@ -390,7 +389,7 @@ void VrmlIO::draw_phantom( MeshPhanLINACNav *aPhantom )
                      linac.Y_jaw_nb_triangles[ 1 ], m_red, 0.0, true );
     }
 
-
+/*
     // Draw bounding box
     m_draw_wireframe_aabb( linac.aabb, m_cyan );
     m_draw_wireframe_aabb( linac.A_bank_aabb, m_cyan );
@@ -399,6 +398,7 @@ void VrmlIO::draw_phantom( MeshPhanLINACNav *aPhantom )
     m_draw_wireframe_aabb( linac.X_jaw_aabb[ 1 ], m_cyan );
     m_draw_wireframe_aabb( linac.Y_jaw_aabb[ 0 ], m_cyan );
     m_draw_wireframe_aabb( linac.Y_jaw_aabb[ 1 ], m_cyan );
+*/
 
 }
 

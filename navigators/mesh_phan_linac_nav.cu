@@ -16,10 +16,308 @@
 
 #include "mesh_phan_linac_nav.cuh"
 
-////// HOST-DEVICE GPU Codes ////////////////////////////////////////////
+////// HOST-DEVICE GPU Codes //////////////////////////////////////////////////////////////
 
+// == Track to in ===================================================================================
 
-////// Privates
+// Device Kernel that move particles to the voxelized volume boundary
+__global__ void MPLINACN::kernel_device_track_to_in( ParticlesData particles, LinacData linac, f32 geom_tolerance )
+{
+    const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
+    if ( id >= particles.size ) return;
+
+    // read position and direction
+    f32xyz pos = make_f32xyz( particles.px[ id ], particles.py[ id ], particles.pz[ id ] );
+    f32xyz dir = make_f32xyz( particles.dx[ id ], particles.dy[ id ], particles.dz[ id ] );
+
+    // Change the frame to the particle (global to linac)
+    pos = fxyz_global_to_local_position( linac.transform, pos );
+    dir = fxyz_global_to_local_direction( linac.transform, dir );
+
+    // Store data
+    particles.px[ id ] = pos.x;
+    particles.py[ id ] = pos.y;
+    particles.pz[ id ] = pos.z;
+    particles.dx[ id ] = dir.x;
+    particles.dy[ id ] = dir.y;
+    particles.dz[ id ] = dir.z;
+
+    transport_track_to_in_AABB( particles, linac.aabb, geom_tolerance, id );
+}
+
+// Host Kernel that move particles to the voxelized volume boundary
+void MPLINACN::kernel_host_track_to_in( ParticlesData particles, LinacData linac, f32 geom_tolerance, ui32 id )
+{
+    // read position and direction
+    f32xyz pos = make_f32xyz( particles.px[ id ], particles.py[ id ], particles.pz[ id ] );
+    f32xyz dir = make_f32xyz( particles.dx[ id ], particles.dy[ id ], particles.dz[ id ] );
+
+    // Change the frame to the particle (global to linac)
+    pos = fxyz_global_to_local_position( linac.transform, pos );
+    dir = fxyz_global_to_local_direction( linac.transform, dir );
+
+    // Store data
+    particles.px[ id ] = pos.x;
+    particles.py[ id ] = pos.y;
+    particles.pz[ id ] = pos.z;
+    particles.dx[ id ] = dir.x;
+    particles.dy[ id ] = dir.y;
+    particles.dz[ id ] = dir.z;
+
+    transport_track_to_in_AABB( particles, linac.aabb, geom_tolerance, id );
+}
+
+// == Track to out ===================================================================================
+
+__host__ __device__ void MPLINACN::track_to_out ( ParticlesData &particles, LinacData linac,
+                                                  GlobalSimulationParametersData parameters,
+                                                  ui32 part_id )
+{
+    // Read position
+    f32xyz pos;
+    pos.x = particles.px[part_id];
+    pos.y = particles.py[part_id];
+    pos.z = particles.pz[part_id];
+
+    // Read direction
+    f32xyz dir;
+    dir.x = particles.dx[part_id];
+    dir.y = particles.dy[part_id];
+    dir.z = particles.dz[part_id];
+
+    /// Get the hit distance of the closest geometry //////////////////////////////////
+
+    ui16 in_obj = HIT_NOTHING;
+    ui32 itri, offset;
+    f32 geom_distance;
+    f32 min_distance = FLT_MAX;
+
+    // Jaw X ----------------------------------------------------------------------
+    if ( linac.X_nb_jaw != 0 && test_ray_AABB( pos, dir, linac.X_jaw_aabb[ 0 ] ) )
+    {
+        // Loop over triangles
+        itri = 0; while ( itri < linac.X_jaw_nb_triangles[ 0 ] )
+        {
+            offset = linac.X_jaw_index[ 0 ];
+            geom_distance = hit_ray_triangle( pos, dir,
+                                              linac.X_jaw_v1[ offset+itri ],
+                                              linac.X_jaw_v2[ offset+itri ],
+                                              linac.X_jaw_v3[ offset+itri ] );
+            if ( geom_distance < min_distance )
+            {
+                geom_distance = min_distance;
+                in_obj = HIT_JAW_X1;
+            }
+            ++itri;
+        }
+    }
+
+    if ( linac.X_nb_jaw != 0 && test_ray_AABB( pos, dir, linac.X_jaw_aabb[ 1 ] ) )
+    {
+        // Loop over triangles
+        itri = 0; while ( itri < linac.X_jaw_nb_triangles[ 1 ] )
+        {
+            offset = linac.X_jaw_index[ 1 ];
+            geom_distance = hit_ray_triangle( pos, dir,
+                                              linac.X_jaw_v1[ offset+itri ],
+                                              linac.X_jaw_v2[ offset+itri ],
+                                              linac.X_jaw_v3[ offset+itri ] );
+            if ( geom_distance < min_distance )
+            {
+                geom_distance = min_distance;
+                in_obj = HIT_JAW_X2;
+            }
+            ++itri;
+        }
+    }
+
+    // Jaw Y ----------------------------------------------------------------------
+    if ( linac.Y_nb_jaw != 0 && test_ray_AABB( pos, dir, linac.Y_jaw_aabb[ 0 ] ) )
+    {
+        // Loop over triangles
+        itri = 0; while ( itri < linac.Y_jaw_nb_triangles[ 0 ] )
+        {
+            offset = linac.Y_jaw_index[ 0 ];
+            geom_distance = hit_ray_triangle( pos, dir,
+                                              linac.Y_jaw_v1[ offset+itri ],
+                                              linac.Y_jaw_v2[ offset+itri ],
+                                              linac.Y_jaw_v3[ offset+itri ] );
+            if ( geom_distance < min_distance )
+            {
+                geom_distance = min_distance;
+                in_obj = HIT_JAW_Y1;
+            }
+            ++itri;
+        }
+    }
+
+    if ( linac.Y_nb_jaw != 0 && test_ray_AABB( pos, dir, linac.Y_jaw_aabb[ 1 ] ) )
+    {
+        // Loop over triangles
+        itri = 0; while ( itri < linac.Y_jaw_nb_triangles[ 1 ] )
+        {
+            offset = linac.Y_jaw_index[ 1 ];
+            geom_distance = hit_ray_triangle( pos, dir,
+                                              linac.Y_jaw_v1[ offset+itri ],
+                                              linac.Y_jaw_v2[ offset+itri ],
+                                              linac.Y_jaw_v3[ offset+itri ] );
+            if ( geom_distance < min_distance )
+            {
+                geom_distance = min_distance;
+                in_obj = HIT_JAW_Y2;
+            }
+            ++itri;
+        }
+    }
+
+    // Leaves from bank A ---------------------------------------------------------
+
+    ui16 ileaf;
+    //i16 in_leaf = -1;
+
+    // If hit the bank A
+    if ( test_ray_AABB( pos, dir, linac.A_bank_aabb ) )
+    {
+        // Loop ovber leaf
+        ileaf = 0; while( ileaf < linac.A_nb_leaves )
+        {
+            // If hit a leaf
+            if ( test_ray_AABB( pos, dir, linac.A_leaf_aabb[ ileaf ] ) )
+            {
+                // Loop over triangles
+                itri = 0; while ( itri < linac.A_leaf_nb_triangles[ ileaf ] )
+                {
+                    offset = linac.A_leaf_index[ ileaf ];
+                    geom_distance = hit_ray_triangle( pos, dir,
+                                                      linac.A_leaf_v1[ offset+itri ],
+                                                      linac.A_leaf_v2[ offset+itri ],
+                                                      linac.A_leaf_v3[ offset+itri ] );
+                    if ( geom_distance < min_distance )
+                    {
+                        geom_distance = min_distance;
+                        in_obj = HIT_BANK_A;
+                        //in_leaf = ileaf;
+                    }
+                    ++itri;
+                }
+            } // in a leaf bounding box
+
+            ++ileaf;
+
+        } // each leaf
+
+    } // in bank A
+
+    // Leaves from bank B ---------------------------------------------------------
+
+    // If hit the bank B
+    if ( test_ray_AABB( pos, dir, linac.B_bank_aabb ) )
+    {
+        // Loop ovber leaf
+        ileaf = 0; while( ileaf < linac.B_nb_leaves )
+        {
+            // If hit a leaf
+            if ( test_ray_AABB( pos, dir, linac.B_leaf_aabb[ ileaf ] ) )
+            {
+                // Loop over triangles
+                itri = 0; while ( itri < linac.B_leaf_nb_triangles[ ileaf ] )
+                {
+                    offset = linac.B_leaf_index[ ileaf ];
+                    geom_distance = hit_ray_triangle( pos, dir,
+                                                      linac.B_leaf_v1[ offset+itri ],
+                                                      linac.B_leaf_v2[ offset+itri ],
+                                                      linac.B_leaf_v3[ offset+itri ] );
+                    if ( geom_distance < min_distance )
+                    {
+                        geom_distance = min_distance;
+                        in_obj = HIT_BANK_B;
+                        //in_leaf = ileaf;
+                    }
+                    ++itri;
+                }
+            } // in a leaf bounding box
+
+            ++ileaf;
+
+        } // each leaf
+
+    } // in bank B
+
+    /// TODO - Navigation within element - Kill the particle without mercy
+
+    if ( in_obj != HIT_NOTHING )
+    {
+        particles.endsimu[part_id] = PARTICLE_DEAD;
+    }
+    else
+    {
+        particles.endsimu[part_id] = PARTICLE_FREEZE;
+    }
+
+}
+
+// Device kernel that track particles within the voxelized volume until boundary
+__global__ void MPLINACN::kernel_device_track_to_out( ParticlesData particles, LinacData linac,
+                                                      GlobalSimulationParametersData parameters )
+{
+    const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
+    if ( id >= particles.size ) return;
+
+    while ( particles.endsimu[ id ] != PARTICLE_DEAD && particles.endsimu[ id ] != PARTICLE_FREEZE )
+    {
+        MPLINACN::track_to_out( particles, linac, parameters, id );
+    }
+
+    /// Move the particle back to the global frame ///
+
+    // read position and direction
+    f32xyz pos = make_f32xyz( particles.px[ id ], particles.py[ id ], particles.pz[ id ] );
+    f32xyz dir = make_f32xyz( particles.dx[ id ], particles.dy[ id ], particles.dz[ id ] );
+
+    // Change the frame to the particle (global to linac)
+    pos = fxyz_local_to_global_position( linac.transform, pos );
+    dir = fxyz_local_to_global_direction( linac.transform, dir );
+
+    // Store data
+    particles.px[ id ] = pos.x;
+    particles.py[ id ] = pos.y;
+    particles.pz[ id ] = pos.z;
+    particles.dx[ id ] = dir.x;
+    particles.dy[ id ] = dir.y;
+    particles.dz[ id ] = dir.z;
+
+}
+
+// Host kernel that track particles within the voxelized volume until boundary
+void MPLINACN::kernel_host_track_to_out( ParticlesData particles, LinacData linac,
+                                         GlobalSimulationParametersData parameters, ui32 id )
+{
+    // Stepping loop
+    while ( particles.endsimu[ id ] != PARTICLE_DEAD && particles.endsimu[ id ] != PARTICLE_FREEZE )
+    {
+        MPLINACN::track_to_out( particles, linac, parameters, id );
+    }
+
+    /// Move the particle back to the global frame ///
+
+    // read position and direction
+    f32xyz pos = make_f32xyz( particles.px[ id ], particles.py[ id ], particles.pz[ id ] );
+    f32xyz dir = make_f32xyz( particles.dx[ id ], particles.dy[ id ], particles.dz[ id ] );
+
+    // Change the frame to the particle (global to linac)
+    pos = fxyz_local_to_global_position( linac.transform, pos );
+    dir = fxyz_local_to_global_direction( linac.transform, dir );
+
+    // Store data
+    particles.px[ id ] = pos.x;
+    particles.py[ id ] = pos.y;
+    particles.pz[ id ] = pos.z;
+    particles.dx[ id ] = dir.x;
+    particles.dy[ id ] = dir.y;
+    particles.dz[ id ] = dir.z;
+}
+
+////// Privates /////////////////////////////////////////////////////////////////////////////
 
 // Read the list of tokens in a txt line
 std::vector< std::string > MeshPhanLINACNav::m_split_txt( std::string line ) {
@@ -33,7 +331,6 @@ std::vector< std::string > MeshPhanLINACNav::m_split_txt( std::string line ) {
     return tokens;
 
 }
-
 
 void MeshPhanLINACNav::m_init_mlc()
 {
@@ -66,7 +363,7 @@ void MeshPhanLINACNav::m_init_mlc()
 //        ++i;
 //    }
 
-    GGcout << "Meshes read" << GGendl;
+//    GGcout << "Meshes read" << GGendl;
 
     // Check if there are at least one leaf
     if ( mlc.mesh_names.size() == 0 )
@@ -906,7 +1203,7 @@ void MeshPhanLINACNav::m_configure_linac()
         exit_simulation();
     }
 
-    GGcout << "Find beam: " << line << GGendl;
+//    GGcout << "Find beam: " << line << GGendl;
 
     // Then look for the number of fields
     while ( file )
@@ -920,7 +1217,7 @@ void MeshPhanLINACNav::m_configure_linac()
         }
     }
 
-    GGcout << "Find nb field: " << line << GGendl;
+//    GGcout << "Find nb field: " << line << GGendl;
 
     keys = m_split_txt( line );
     ui32 nb_fields = std::stoi( keys[ 4 ] );
@@ -952,7 +1249,7 @@ void MeshPhanLINACNav::m_configure_linac()
         exit_simulation();
     }
 
-    GGcout << "Find nb leaves: " << line << GGendl;
+//    GGcout << "Find nb leaves: " << line << GGendl;
 
     keys = m_split_txt( line );
     ui32 nb_leaves = std::stoi( keys[ 4 ] );
@@ -980,7 +1277,7 @@ void MeshPhanLINACNav::m_configure_linac()
         }
     }
 
-    GGcout << "Find field: " << line << GGendl;
+//    GGcout << "Find field: " << line << GGendl;
 
     // Then read the index CDF (not use at the time, so skip the line)
     std::getline( file, line );
@@ -1021,7 +1318,7 @@ void MeshPhanLINACNav::m_configure_linac()
     trans->set_translation( m_pos_mlc );
     trans->set_rotation( m_rot_linac );
     trans->set_axis_transformation( m_axis_linac );
-    m_transform_linac = trans->get_transformation_matrix();
+    m_linac.transform = trans->get_transformation_matrix();
     delete trans;
 
     //// JAWS //////////////////////////////////////////
@@ -1263,40 +1560,58 @@ void MeshPhanLINACNav::m_configure_linac()
 // return memory usage
 ui64 MeshPhanLINACNav::m_get_memory_usage()
 {
-    /*
     ui64 mem = 0;
 
-    // First the voxelized phantom
-    mem += ( m_phantom.data_h.number_of_voxels * sizeof( ui16 ) );
-    // Then material data
-    mem += ( ( 3 * m_materials.data_h.nb_elements_total + 23 * m_materials.data_h.nb_materials ) * sizeof( f32 ) );
-    // Then cross sections (gamma)
-    ui64 n = m_cross_sections.photon_CS.data_h.nb_bins;
-    ui64 k = m_cross_sections.photon_CS.data_h.nb_mat;
-    mem += ( ( n + 3*n*k + 3*101*n ) * sizeof( f32 ) );
-    // Cross section (electron)
-    mem += ( n*k*7*sizeof( f32 ) );
-    // Finally the dose map
-    n = m_dose_calculator.dose.tot_nb_dosels;
-    mem += ( 2*n*sizeof( f64 ) + n*sizeof( ui32 ) );
-    mem += ( 20 * sizeof( f32 ) );
+    // Get tot nb triangles
+    ui32 tot_tri = 0;
 
-    // If TLE
-    if ( m_flag_TLE )
+    ui32 ileaf = 0; while ( ileaf < m_linac.A_nb_leaves )
     {
-        n = m_mu_table.nb_bins;
-        mem += ( n*k*2 * sizeof( f32 ) ); // mu and mu_en
-        mem += ( n*sizeof( f32 ) );       // energies
+        tot_tri += m_linac.A_leaf_nb_triangles[ ileaf++ ];
     }
 
-    // If seTLE
-    if ( m_flag_TLE == seTLE )
+    ileaf = 0; while ( ileaf < m_linac.B_nb_leaves )
     {
-        mem += ( m_phantom.data_h.number_of_voxels * ( sizeof( ui32 ) + sizeof( f32 ) ) );
+        tot_tri += m_linac.B_leaf_nb_triangles[ ileaf++ ];
     }
+
+    if ( m_linac.X_nb_jaw != 0 )
+    {
+        tot_tri += m_linac.X_jaw_nb_triangles[ 0 ];
+        tot_tri += m_linac.X_jaw_nb_triangles[ 1 ];
+    }
+
+    if ( m_linac.Y_nb_jaw != 0 )
+    {
+        tot_tri += m_linac.Y_jaw_nb_triangles[ 0 ];
+        tot_tri += m_linac.Y_jaw_nb_triangles[ 1 ];
+    }
+
+    // All tri
+    mem = 3 * tot_tri * sizeof( f32xyz );
+
+    // Bank A
+    mem += m_linac.A_nb_leaves * 2 * sizeof( ui32 ); // index, nb tri
+    mem += m_linac.A_nb_leaves * 6 * sizeof( f32 );  // aabb
+    mem += 6 * sizeof( f32 ) + sizeof( ui32 );       // main aabb, nb leaves
+
+    // Bank B
+    mem += m_linac.B_nb_leaves * 2 * sizeof( ui32 ); // index, nb tri
+    mem += m_linac.B_nb_leaves * 6 * sizeof( f32 );  // aabb
+    mem += 6 * sizeof( f32 ) + sizeof( ui32 );       // main aabb, nb leaves
+
+    // Jaws X
+    mem += m_linac.X_nb_jaw * 2 * sizeof( ui32 );    // inedx, nb tri
+    mem += 6 * sizeof( f32 ) + sizeof( ui32 );       // main aabb, nb jaws
+
+    // Jaws Y
+    mem += m_linac.Y_nb_jaw * 2 * sizeof( ui32 );    // inedx, nb tri
+    mem += 6 * sizeof( f32 ) + sizeof( ui32 );       // main aabb, nb jaws
+
+    // Global aabb
+    mem += 6 * sizeof( f32 );
 
     return mem;
-    */
 }
 
 //// Setting/Getting functions
@@ -1344,7 +1659,6 @@ void MeshPhanLINACNav::set_local_jaw_y_position( f32 px, f32 py, f32 pz )
     m_loc_pos_jaw_y = make_f32xyz( px, py, pz );
 }
 
-
 void MeshPhanLINACNav::set_linac_local_axis( f32 m00, f32 m01, f32 m02,
                                              f32 m10, f32 m11, f32 m12,
                                              f32 m20, f32 m21, f32 m22 )
@@ -1354,8 +1668,6 @@ void MeshPhanLINACNav::set_linac_local_axis( f32 m00, f32 m01, f32 m02,
                                      m20, m21, m22 );
 }
 
-
-
 LinacData MeshPhanLINACNav::get_linac_geometry()
 {
     return m_linac;
@@ -1363,7 +1675,7 @@ LinacData MeshPhanLINACNav::get_linac_geometry()
 
 f32matrix44 MeshPhanLINACNav::get_linac_transformation()
 {
-    return m_transform_linac;
+    return m_linac.transform;
 }
 
 //void MeshPhanLINACNav::set_materials(std::string filename )
@@ -1434,6 +1746,8 @@ MeshPhanLINACNav::MeshPhanLINACNav ()
     m_linac.aabb.zmin = 0.0;
     m_linac.aabb.zmax = 0.0;
 
+    m_linac.transform = make_f32matrix44_zeros();
+
     set_name( "MeshPhanLINACNav" );
     m_mlc_filename = "";
     m_jaw_x_filename = "";
@@ -1445,7 +1759,6 @@ MeshPhanLINACNav::MeshPhanLINACNav ()
     m_loc_pos_jaw_y = make_f32xyz_zeros();
     m_rot_linac = make_f32xyz_zeros();
     m_axis_linac = make_f32matrix33_zeros();
-    m_transform_linac = make_f32matrix44_zeros();
 
     m_beam_index = 0;
     m_field_index = 0;
@@ -1456,17 +1769,14 @@ MeshPhanLINACNav::MeshPhanLINACNav ()
 
 void MeshPhanLINACNav::track_to_in( Particles particles )
 {
-/*
     if ( m_params.data_h.device_target == CPU_DEVICE )
     {
         ui32 id=0;
         while ( id<particles.size )
         {
-            VPDN::kernel_host_track_to_in ( particles.data_h, m_phantom.data_h.xmin, m_phantom.data_h.xmax,
-                                            m_phantom.data_h.ymin, m_phantom.data_h.ymax,
-                                            m_phantom.data_h.zmin, m_phantom.data_h.zmax,
-                                            m_params.data_h.geom_tolerance,
-                                            id );
+            MPLINACN::kernel_host_track_to_in ( particles.data_h, m_linac,
+                                                m_params.data_h.geom_tolerance,
+                                                id );
             ++id;
         }
     }
@@ -1476,14 +1786,11 @@ void MeshPhanLINACNav::track_to_in( Particles particles )
         threads.x = m_params.data_h.gpu_block_size;
         grid.x = ( particles.size + m_params.data_h.gpu_block_size - 1 ) / m_params.data_h.gpu_block_size;
 
-        VPIORTN::kernel_device_track_to_in<<<grid, threads>>> ( particles.data_d, m_phantom.data_d.xmin, m_phantom.data_d.xmax,
-                                                                               m_phantom.data_d.ymin, m_phantom.data_d.ymax,
-                                                                               m_phantom.data_d.zmin, m_phantom.data_d.zmax,
-                                                                               m_params.data_d.geom_tolerance );
-        cuda_error_check ( "Error ", " Kernel_VoxPhanIORT (track to in)" );
+        MPLINACN::kernel_device_track_to_in<<<grid, threads>>> ( particles.data_d, m_linac,
+                                                                 m_params.data_d.geom_tolerance );
+        cuda_error_check ( "Error ", " Kernel_MeshPhanLINACNav (track to in)" );
         cudaThreadSynchronize();
     }
-*/
 }
 
 void MeshPhanLINACNav::track_to_out( Particles particles )
@@ -1596,62 +1903,23 @@ void MeshPhanLINACNav::initialize( GlobalSimulationParameters params )
     // Configure the linac
     m_configure_linac();
 
-
-    /*
-    // Check params
-    if ( !m_check_mandatory() )
+    // Some verbose if required
+    if ( params.data_h.display_memory_usage )
     {
-        print_error ( "VoxPhanIORT: missing parameters." );
-        exit_simulation();
+        ui64 mem = m_get_memory_usage();
+        GGcout_mem( "MeshPhanLINACNav", mem );
     }
 
-    // Params
-    m_params = params;
-
-    // Phantom
-    m_phantom.set_name( "VoxPhanIORTNav" );
-    m_phantom.initialize( params );
+    /*
 
     // Materials table
     m_materials.load_materials_database( m_materials_filename );
     m_materials.initialize( m_phantom.list_of_materials, params );    
 
     // Cross Sections
-    m_cross_sections.initialize( m_materials, params );
+    m_cross_sections.initialize( m_materials, params );   
 
-    // Init dose map
-    m_dose_calculator.set_voxelized_phantom( m_phantom );
-    m_dose_calculator.set_materials( m_materials );
-    m_dose_calculator.set_dosel_size( m_dosel_size_x, m_dosel_size_y, m_dosel_size_z );
-    m_dose_calculator.set_voi( m_xmin, m_xmax, m_ymin, m_ymax, m_zmin, m_zmax );
-    m_dose_calculator.initialize( m_params ); // CPU&GPU
 
-    // If TLE init mu and mu_en table
-    if ( m_flag_TLE )
-    {
-        m_init_mu_table();
-    }
-
-    // if seTLE init history map
-    if ( m_flag_TLE == seTLE )
-    {
-        HANDLE_ERROR( cudaMallocManaged( &(m_hist_map.interaction), m_phantom.data_h.number_of_voxels * sizeof( ui32 ) ) );
-        HANDLE_ERROR( cudaMallocManaged( &(m_hist_map.energy), m_phantom.data_h.number_of_voxels * sizeof( f32 ) ) );
-
-        ui32 i=0; while (i < m_phantom.data_h.number_of_voxels )
-        {
-            m_hist_map.interaction[ i ] = 0;
-            m_hist_map.energy[ i ] = 0.0;
-            ++i;
-        }
-    }
-
-    // Some verbose if required
-    if ( params.data_h.display_memory_usage )
-    {
-        ui64 mem = m_get_memory_usage();
-        GGcout_mem("VoxPhanIORTNav", mem);
-    }
     */
 }
 

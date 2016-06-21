@@ -375,11 +375,19 @@ __host__ __device__ f32 hit_ray_AABB(f32xyz ray_p, f32xyz ray_d,
 
 }
 
+__host__ __device__ f32 hit_ray_AABB( f32xyz ray_p, f32xyz ray_d,
+                                      AabbData aabb )
+{
+    return hit_ray_AABB( ray_p, ray_d,
+                         aabb.xmin, aabb.xmax, aabb.ymin, aabb.ymax,
+                         aabb.zmin, aabb.zmax );
+}
+
 // Ray/AABB intersection test - Smits algorithm (f32 version)
-__host__ __device__ bool test_ray_AABB(f32xyz ray_p, f32xyz ray_d,
-                                       f32 aabb_xmin, f32 aabb_xmax,
-                                       f32 aabb_ymin, f32 aabb_ymax,
-                                       f32 aabb_zmin, f32 aabb_zmax) {
+__host__ __device__ bool test_ray_AABB( f32xyz ray_p, f32xyz ray_d,
+                                        f32 aabb_xmin, f32 aabb_xmax,
+                                        f32 aabb_ymin, f32 aabb_ymax,
+                                        f32 aabb_zmin, f32 aabb_zmax ) {
 
     f32 idx, idy, idz;
     f32 tmin, tmax, tymin, tymax, tzmin, tzmax, buf;
@@ -440,6 +448,12 @@ __host__ __device__ bool test_ray_AABB(f32xyz ray_p, f32xyz ray_d,
     return true;
 }
 
+__host__ __device__ bool test_ray_AABB( f32xyz ray_p, f32xyz ray_d,
+                                        AabbData aabb )
+{
+    return test_ray_AABB( ray_p, ray_d, aabb );
+}
+
 // AABB/AABB test (f32 version)
 __host__ __device__ bool test_AABB_AABB(f32 a_xmin, f32 a_xmax, f32 a_ymin, f32 a_ymax,
                                         f32 a_zmin, f32 a_zmax,
@@ -464,6 +478,13 @@ __host__ __device__ bool test_point_AABB(f32xyz p,
     if (p.z < aabb_zmin || p.z > aabb_zmax) return false;
 
     return true;
+}
+
+__host__ __device__ bool test_point_AABB( f32xyz p,
+                                          AabbData aabb )
+
+{
+    return test_point_AABB( p, aabb.xmin, aabb.xmax, aabb.ymin, aabb.ymax, aabb.zmin, aabb.zmax );
 }
 
 // Point/AABB test with tolerance (f32 version)

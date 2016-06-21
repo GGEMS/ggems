@@ -19,6 +19,15 @@
 #include "particles.cuh"
 #include "primitives.cuh"
 #include "mesh_io.cuh"
+#include "transport_navigator.cuh"
+
+#define HIT_JAW_X1 0
+#define HIT_JAW_X2 1
+#define HIT_JAW_Y1 2
+#define HIT_JAW_Y2 3
+#define HIT_BANK_A 4
+#define HIT_BANK_B 5
+#define HIT_NOTHING 6
 
 // LINAC data (GPU' proof but not a complete SoA support)
 struct LinacData
@@ -63,14 +72,31 @@ struct LinacData
 
     // Global AABB
     AabbData aabb;                // Global bounding box
+
+    // Transformation matrix
+    f32matrix44 transform;
 };
 
 
 // MeshPhanLINACNav -> MPLINACN
 namespace MPLINACN
 {
+    // Device Kernel that move particles to the linac volume boundary
+    __global__ void kernel_device_track_to_in( ParticlesData particles, LinacData linac, f32 geom_tolerance );
+
+    // Host Kernel that move particles to the linac volume boundary
+    void kernel_host_track_to_in( ParticlesData particles, LinacData linac, f32 geom_tolerance, ui32 id );
 
 
+    __global__ void kernel_device_track_to_out( ParticlesData particles, LinacData linac,
+                                                GlobalSimulationParametersData parameters );
+
+    void kernel_host_track_to_out( ParticlesData particles, LinacData linac,
+                                   GlobalSimulationParametersData parameters, ui32 id );
+
+    __host__ __device__ void track_to_out ( ParticlesData &particles, LinacData linac,
+                                            GlobalSimulationParametersData parameters,
+                                            ui32 part_id );
 }
 
 class MeshPhanLINACNav : public GGEMSPhantom
@@ -142,10 +168,8 @@ private:
     //Materials m_materials;
     //CrossSections m_cross_sections;
 
-
     // Get the memory usage
     ui64 m_get_memory_usage();
-
 
     GlobalSimulationParameters m_params;
     std::string m_materials_filename;
@@ -159,7 +183,6 @@ private:
     f32xyz m_loc_pos_jaw_y;
     f32xyz m_rot_linac;
     f32matrix33 m_axis_linac;
-    f32matrix44 m_transform_linac;
 
     ui32 m_beam_index;
     ui32 m_field_index;
