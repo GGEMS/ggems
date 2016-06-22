@@ -88,15 +88,11 @@ namespace MPLINACN
     void kernel_host_track_to_in( ParticlesData particles, LinacData linac, f32 geom_tolerance, ui32 id );
 
 
-    __global__ void kernel_device_track_to_out( ParticlesData particles, LinacData linac,
-                                                GlobalSimulationParametersData parameters );
+    __global__ void kernel_device_track_to_out( ParticlesData particles, LinacData linac );
 
-    void kernel_host_track_to_out( ParticlesData particles, LinacData linac,
-                                   GlobalSimulationParametersData parameters, ui32 id );
+    void kernel_host_track_to_out( ParticlesData particles, LinacData linac, ui32 id );
 
-    __host__ __device__ void track_to_out ( ParticlesData &particles, LinacData linac,
-                                            GlobalSimulationParametersData parameters,
-                                            ui32 part_id );
+    __host__ __device__ void track_to_out( ParticlesData &particles, LinacData linac, ui32 id );
 }
 
 class MeshPhanLINACNav : public GGEMSPhantom

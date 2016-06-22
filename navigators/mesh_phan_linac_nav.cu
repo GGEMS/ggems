@@ -52,6 +52,8 @@ void MPLINACN::kernel_host_track_to_in( ParticlesData particles, LinacData linac
     f32xyz pos = make_f32xyz( particles.px[ id ], particles.py[ id ], particles.pz[ id ] );
     f32xyz dir = make_f32xyz( particles.dx[ id ], particles.dy[ id ], particles.dz[ id ] );
 
+//    printf("%i Track2in: pos %f %f %f\n", id, pos.x, pos.y, pos.z);
+
     // Change the frame to the particle (global to linac)
     pos = fxyz_global_to_local_position( linac.transform, pos );
     dir = fxyz_global_to_local_direction( linac.transform, dir );
@@ -65,25 +67,28 @@ void MPLINACN::kernel_host_track_to_in( ParticlesData particles, LinacData linac
     particles.dz[ id ] = dir.z;
 
     transport_track_to_in_AABB( particles, linac.aabb, geom_tolerance, id );
+
+//    printf("%i transport: pos %f %f %f  status %i\n", id, pos.x, pos.y, pos.z, particles.endsimu[ id ]);
 }
 
 // == Track to out ===================================================================================
 
 __host__ __device__ void MPLINACN::track_to_out ( ParticlesData &particles, LinacData linac,
-                                                  GlobalSimulationParametersData parameters,
-                                                  ui32 part_id )
+                                                  ui32 id )
 {
     // Read position
     f32xyz pos;
-    pos.x = particles.px[part_id];
-    pos.y = particles.py[part_id];
-    pos.z = particles.pz[part_id];
+    pos.x = particles.px[ id ];
+    pos.y = particles.py[ id ];
+    pos.z = particles.pz[ id ];
 
     // Read direction
     f32xyz dir;
-    dir.x = particles.dx[part_id];
-    dir.y = particles.dy[part_id];
-    dir.z = particles.dz[part_id];
+    dir.x = particles.dx[ id ];
+    dir.y = particles.dy[ id ];
+    dir.z = particles.dz[ id ];
+
+//    printf("%i - pos %f %f %f  status %i\n", id, pos.x, pos.y, pos.z, particles.endsimu[ id ]);
 
     /// Get the hit distance of the closest geometry //////////////////////////////////
 
@@ -93,24 +98,35 @@ __host__ __device__ void MPLINACN::track_to_out ( ParticlesData &particles, Lina
     f32 min_distance = FLT_MAX;
 
     // Jaw X ----------------------------------------------------------------------
-    if ( linac.X_nb_jaw != 0 && test_ray_AABB( pos, dir, linac.X_jaw_aabb[ 0 ] ) )
+    if ( linac.X_nb_jaw != 0  )
     {
-        // Loop over triangles
-        itri = 0; while ( itri < linac.X_jaw_nb_triangles[ 0 ] )
+//        printf(" There is Jaw X\n");
+
+//        printf(" Read Jaw X\n");
+
+        if ( test_ray_AABB( pos, dir, linac.X_jaw_aabb[ 0 ] ) )
         {
-            offset = linac.X_jaw_index[ 0 ];
-            geom_distance = hit_ray_triangle( pos, dir,
-                                              linac.X_jaw_v1[ offset+itri ],
-                                              linac.X_jaw_v2[ offset+itri ],
-                                              linac.X_jaw_v3[ offset+itri ] );
-            if ( geom_distance < min_distance )
+//            printf(" Test in Jaw X ok\n");
+
+            // Loop over triangles
+            itri = 0; while ( itri < linac.X_jaw_nb_triangles[ 0 ] )
             {
-                geom_distance = min_distance;
-                in_obj = HIT_JAW_X1;
+                offset = linac.X_jaw_index[ 0 ];
+                geom_distance = hit_ray_triangle( pos, dir,
+                                                  linac.X_jaw_v1[ offset+itri ],
+                        linac.X_jaw_v2[ offset+itri ],
+                        linac.X_jaw_v3[ offset+itri ] );
+                if ( geom_distance < min_distance )
+                {
+                    geom_distance = min_distance;
+                    in_obj = HIT_JAW_X1;
+                }
+                ++itri;
             }
-            ++itri;
         }
     }
+
+//    printf( "%i - test Jaw X1\n", id );
 
     if ( linac.X_nb_jaw != 0 && test_ray_AABB( pos, dir, linac.X_jaw_aabb[ 1 ] ) )
     {
@@ -130,6 +146,8 @@ __host__ __device__ void MPLINACN::track_to_out ( ParticlesData &particles, Lina
             ++itri;
         }
     }
+
+//    printf( "%i - test Jaw X2\n", id );
 
     // Jaw Y ----------------------------------------------------------------------
     if ( linac.Y_nb_jaw != 0 && test_ray_AABB( pos, dir, linac.Y_jaw_aabb[ 0 ] ) )
@@ -151,6 +169,8 @@ __host__ __device__ void MPLINACN::track_to_out ( ParticlesData &particles, Lina
         }
     }
 
+//    printf( "%i - test Jaw Y1\n", id );
+
     if ( linac.Y_nb_jaw != 0 && test_ray_AABB( pos, dir, linac.Y_jaw_aabb[ 1 ] ) )
     {
         // Loop over triangles
@@ -169,6 +189,8 @@ __host__ __device__ void MPLINACN::track_to_out ( ParticlesData &particles, Lina
             ++itri;
         }
     }
+
+//    printf( "%i - test Jaw Y2\n", id );
 
     // Leaves from bank A ---------------------------------------------------------
 
@@ -247,25 +269,26 @@ __host__ __device__ void MPLINACN::track_to_out ( ParticlesData &particles, Lina
 
     if ( in_obj != HIT_NOTHING )
     {
-        particles.endsimu[part_id] = PARTICLE_DEAD;
+        particles.endsimu[ id ] = PARTICLE_DEAD;
+//        printf("%i kill touch %i\n", id, in_obj);
     }
     else
     {
-        particles.endsimu[part_id] = PARTICLE_FREEZE;
+        particles.endsimu[ id ] = PARTICLE_FREEZE;
+//        printf("%i freeze touch %i\n", id, in_obj);
     }
 
 }
 
 // Device kernel that track particles within the voxelized volume until boundary
-__global__ void MPLINACN::kernel_device_track_to_out( ParticlesData particles, LinacData linac,
-                                                      GlobalSimulationParametersData parameters )
+__global__ void MPLINACN::kernel_device_track_to_out( ParticlesData particles, LinacData linac )
 {
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
     if ( id >= particles.size ) return;
 
     while ( particles.endsimu[ id ] != PARTICLE_DEAD && particles.endsimu[ id ] != PARTICLE_FREEZE )
     {
-        MPLINACN::track_to_out( particles, linac, parameters, id );
+        MPLINACN::track_to_out( particles, linac, id );
     }
 
     /// Move the particle back to the global frame ///
@@ -289,13 +312,12 @@ __global__ void MPLINACN::kernel_device_track_to_out( ParticlesData particles, L
 }
 
 // Host kernel that track particles within the voxelized volume until boundary
-void MPLINACN::kernel_host_track_to_out( ParticlesData particles, LinacData linac,
-                                         GlobalSimulationParametersData parameters, ui32 id )
+void MPLINACN::kernel_host_track_to_out(ParticlesData particles, LinacData linac, ui32 id )
 {
     // Stepping loop
     while ( particles.endsimu[ id ] != PARTICLE_DEAD && particles.endsimu[ id ] != PARTICLE_FREEZE )
     {
-        MPLINACN::track_to_out( particles, linac, parameters, id );
+        MPLINACN::track_to_out( particles, linac, id );
     }
 
     /// Move the particle back to the global frame ///
@@ -1774,9 +1796,9 @@ void MeshPhanLINACNav::track_to_in( Particles particles )
         ui32 id=0;
         while ( id<particles.size )
         {
-            MPLINACN::kernel_host_track_to_in ( particles.data_h, m_linac,
-                                                m_params.data_h.geom_tolerance,
-                                                id );
+            MPLINACN::kernel_host_track_to_in( particles.data_h, m_linac,
+                                               m_params.data_h.geom_tolerance,
+                                               id );
             ++id;
         }
     }
@@ -1795,66 +1817,28 @@ void MeshPhanLINACNav::track_to_in( Particles particles )
 
 void MeshPhanLINACNav::track_to_out( Particles particles )
 {
-/*
-    //
+
+
     if ( m_params.data_h.device_target == CPU_DEVICE )
     {
-        VPIORTN::kernel_host_track_to_out( particles.data_h, m_phantom.data_h,
-                                           m_materials.data_h, m_cross_sections.photon_CS.data_h,
-                                           m_params.data_h, m_dose_calculator.dose,
-                                           m_mu_table, m_hist_map );
-
-        // Apply seTLE: splitting and determinstic raycasting
-        if( m_flag_TLE == seTLE )
+        ui32 id=0;
+        while ( id<particles.size )
         {
-            f64 t_start = get_time();
-            m_compress_history_map();
-            GGcout_time ( "Compress history map", get_time()-t_start );
-
-            t_start = get_time();
-            VPIORTN::kernel_host_seTLE( particles.data_h, m_phantom.data_h,
-                                        m_coo_hist_map, m_dose_calculator.dose,
-                                        m_mu_table, 100, 0.0 *eV );
-            GGcout_time ( "Raycast", get_time()-t_start );
-            GGnewline();
-
+            MPLINACN::kernel_host_track_to_out( particles.data_h, m_linac, id );
+            ++id;
         }
-
     }
     else if ( m_params.data_h.device_target == GPU_DEVICE )
-    {       
+    {
         dim3 threads, grid;
         threads.x = m_params.data_h.gpu_block_size;
         grid.x = ( particles.size + m_params.data_h.gpu_block_size - 1 ) / m_params.data_h.gpu_block_size;
-        VPIORTN::kernel_device_track_to_out<<<grid, threads>>> ( particles.data_d, m_phantom.data_d, m_materials.data_d,
-                                                              m_cross_sections.photon_CS.data_d,
-                                                              m_params.data_d, m_dose_calculator.dose,
-                                                              m_mu_table, m_hist_map );
-        cuda_error_check ( "Error ", " Kernel_VoxPhanDosi (track to out)" );             
+
+        MPLINACN::kernel_device_track_to_out<<<grid, threads>>> ( particles.data_d, m_linac );
+        cuda_error_check ( "Error ", " Kernel_MeshPhanLINACNav (track to in)" );
         cudaThreadSynchronize();
-
-        // Apply seTLE: splitting and determinstic raycasting
-        if( m_flag_TLE == seTLE )
-        {
-            f64 t_start = get_time();
-            m_compress_history_map();
-            GGcout_time ( "Compress history map", get_time()-t_start );
-
-            threads.x = m_params.data_h.gpu_block_size;//
-            grid.x = ( m_coo_hist_map.nb_data + m_params.data_h.gpu_block_size - 1 ) / m_params.data_h.gpu_block_size;
-
-            t_start = get_time();
-            VPIORTN::kernel_device_seTLE<<<grid, threads>>> ( particles.data_d, m_phantom.data_d,
-                                                              m_coo_hist_map, m_dose_calculator.dose,
-                                                              m_mu_table, 1000, 0.0 *eV );
-            cuda_error_check ( "Error ", " Kernel_device_seTLE" );
-
-            cudaThreadSynchronize();
-            GGcout_time ( "Raycast", get_time()-t_start );
-            GGnewline();
-        }
     }
-*/
+
 }
 
 void MeshPhanLINACNav::initialize( GlobalSimulationParameters params )
