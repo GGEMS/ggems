@@ -26,4 +26,9 @@ void GGEMSSource::set_name(std::string name) {
     m_source_name = name;
 }
 
+std::string GGEMSSource::get_name()
+{
+    return m_source_name;
+}
+
 #endif

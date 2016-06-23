@@ -86,7 +86,8 @@ GGEMS::GGEMS()
 
     // Element of the simulation
     m_source = nullptr;
-    m_phantom = nullptr;
+    //m_phantom = nullptr;
+    m_phantoms.clear();
     m_detector = nullptr;
 
 }
@@ -383,7 +384,8 @@ void GGEMS::set_source ( GGEMSSource* aSource )
 /// Phantoms
 void GGEMS::set_phantom ( GGEMSPhantom* aPhantom )
 {
-    m_phantom = aPhantom;
+    //m_phantom = aPhantom;
+    m_phantoms.push_back( aPhantom );
 }
 
 /// Detector
@@ -631,20 +633,26 @@ void GGEMS::init_simulation()
     //GGcout << "ok" << GGendl;
 
     /// Init Phantoms ////////////////////////////////
-    // The detector is not mandatory
-    //GGcout << "Init phantom... ";
-    if ( m_phantom ) m_phantom->initialize ( m_parameters );
-    //GGcout << "ok" << GGendl;
+    if ( m_phantoms.size() != 0 )
+    {
+        ui16 i = 0; while ( i < m_phantoms.size() )
+        {
+            m_phantoms[ i++ ]->initialize( m_parameters );
+        }
+    }
+
+//    if ( m_phantom ) m_phantom->initialize ( m_parameters );
+
 
     /// Init Detectors /////////////////////////
     // The detector is not mandatory
     //GGcout << "Init detector... ";
-    if ( m_detector ) m_detector->initialize ( m_parameters );
+    if ( m_detector ) m_detector->initialize( m_parameters );
     //GGcout << "ok" << GGendl;
 
     /// Init Particles Stack /////////////////////////
     //GGcout << "Init particle stack... ";
-    m_particles_manager.initialize ( m_parameters );
+    m_particles_manager.initialize( m_parameters );
     //GGcout << "ok" << GGendl;
 
     /// Verbose information //////////////////////////
@@ -718,10 +726,11 @@ void GGEMS::start_simulation()
     while ( ibatch < m_parameters.data_h.nb_of_batches )
     {
 
-        GGcout << "----> Launching batch " << ibatch+1 << "/" << m_parameters.data_h.nb_of_batches << " ..." << GGendl;
+        GGcout << "----> Launching batch " << ibatch+1 << "/" << m_parameters.data_h.nb_of_batches << GGendl;
         // Get primaries
-        GGcout << "      Number of particles to generate: " << m_parameters.data_h.size_of_particles_batch << GGendl;
-        GGcout << "      Generating the particles ..." << GGendl;
+        //GGcout << "      Number of particles to generate: " << m_parameters.data_h.size_of_particles_batch << GGendl;
+        GGcout << "      + Generating " << m_parameters.data_h.size_of_particles_batch << " particles from "
+               << m_source->get_name() << GGendl;
         //         progress_bar(progress,"generate primaries");
         m_source->get_primaries_generator( m_particles_manager.particles );
 
@@ -730,33 +739,49 @@ void GGEMS::start_simulation()
 
 
         // Nav between source and phantom
-        if ( m_phantom )
+        if ( m_phantoms.size() != 0 )
         {
-            // Nav between source to phantom
-            GGcout << "      Navigation between the source and the phantom ..." << GGendl;
-            //         progress_bar(progress,"track to phantom");
-            m_phantom->track_to_in( m_particles_manager.particles );
+            ui16 i = 0; while ( i < m_phantoms.size() )
+            {
+                // Nav between source to phantom
+                GGcout << "      + Navigation to the phantom " << m_phantoms[ i ]->get_name()
+                       << " (" << i << ")" << GGendl;
+                m_phantoms[ i ]->track_to_in( m_particles_manager.particles );
 
-            // Nav within the phantom
-            GGcout << "      Navigation within the phantom ..." << GGendl;
-            //         progress_bar(progress,"batch");
-            m_phantom->track_to_out( m_particles_manager.particles );
+                // Nav within the phantom
+                GGcout << "      + Navigation within the phantom " << m_phantoms[ i ]->get_name()
+                       << " (" << i << ")" << GGendl;
+                m_phantoms[ i ]->track_to_out( m_particles_manager.particles );
+
+                ++i;
+            }
         }
+
+//        if ( m_phantom )
+//        {
+//            // Nav between source to phantom
+//            GGcout << "      Navigation between the source and the phantom ..." << GGendl;
+//            m_phantom->track_to_in( m_particles_manager.particles );
+
+//            // Nav within the phantom
+//            GGcout << "      Navigation within the phantom ..." << GGendl;
+//            m_phantom->track_to_out( m_particles_manager.particles );
+//        }
 
         // Nav between phantom and detector
         if( m_detector )
         {
-            GGcout << "      Navigation between the phantom and the detector ..." << GGendl;
+            GGcout << "      + Navigation to the detector " << m_detector->get_name() << GGendl;
             m_detector->track_to_in( m_particles_manager.particles );
 
-            GGcout << "      Navigation within the detector ..." << GGendl;
+            GGcout << "      + Navigation within the detector " << m_detector->get_name() << GGendl;
             m_detector->track_to_out( m_particles_manager.particles );
 
-            GGcout << "      Digitizer ..." << GGendl;
+            GGcout << "      + Digitizer from " << m_detector->get_name() << GGendl;
             m_detector->digitizer( m_particles_manager.particles );
         }
 
-        GGcout << "----> Batch finished ..." << GGendl << GGendl;
+        GGcout << "----> Batch finished" << GGendl << GGendl;
         //progress_bar(progress, ibatch , m_parameters.data_h.nb_of_batches);
 
         //progress += 1./ (float)(m_parameters.data_h.nb_of_batches);

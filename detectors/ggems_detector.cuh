@@ -27,7 +27,7 @@ class GGEMSDetector {
         virtual void track_to_out(Particles particles) = 0;
         virtual void digitizer(Particles particles) = 0;
 
-        std::string get_detector_name();
+        std::string get_name();
 
     protected:
       void set_name(std::string name);

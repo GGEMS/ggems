@@ -93,44 +93,87 @@ __host__ __device__ void MPLINACN::track_to_out ( ParticlesData &particles, Lina
     /// Get the hit distance of the closest geometry //////////////////////////////////
 
     ui16 in_obj = HIT_NOTHING;
-    ui32 itri, offset;
+    ui32 itri, offset, ileaf;
     f32 geom_distance;
     f32 min_distance = FLT_MAX;
 
-    // Jaw X ----------------------------------------------------------------------
-    if ( linac.X_nb_jaw != 0  )
+    // First get the distance to the bounding box
+
+    if ( linac.X_nb_jaw != 0 )
     {
-//        printf(" There is Jaw X\n");
-
-//        printf(" Read Jaw X\n");
-
-        if ( test_ray_AABB( pos, dir, linac.X_jaw_aabb[ 0 ] ) )
+        geom_distance = hit_ray_AABB( pos, dir, linac.X_jaw_aabb[ 0 ] );
+        if ( geom_distance < min_distance )
         {
-//            printf(" Test in Jaw X ok\n");
+            min_distance = geom_distance;
+            in_obj = HIT_JAW_X1;
+        }
 
-            // Loop over triangles
-            itri = 0; while ( itri < linac.X_jaw_nb_triangles[ 0 ] )
-            {
-                offset = linac.X_jaw_index[ 0 ];
-                geom_distance = hit_ray_triangle( pos, dir,
-                                                  linac.X_jaw_v1[ offset+itri ],
-                        linac.X_jaw_v2[ offset+itri ],
-                        linac.X_jaw_v3[ offset+itri ] );
-                if ( geom_distance < min_distance )
-                {
-                    geom_distance = min_distance;
-                    in_obj = HIT_JAW_X1;
-                }
-                ++itri;
-            }
+        geom_distance = hit_ray_AABB( pos, dir, linac.X_jaw_aabb[ 1 ] );
+        if ( geom_distance < min_distance )
+        {
+            min_distance = geom_distance;
+            in_obj = HIT_JAW_X2;
         }
     }
 
-//    printf( "%i - test Jaw X1\n", id );
-
-    if ( linac.X_nb_jaw != 0 && test_ray_AABB( pos, dir, linac.X_jaw_aabb[ 1 ] ) )
+    if ( linac.Y_nb_jaw != 0 )
     {
-        // Loop over triangles
+        geom_distance = hit_ray_AABB( pos, dir, linac.Y_jaw_aabb[ 0 ] );
+        if ( geom_distance < min_distance )
+        {
+            min_distance = geom_distance;
+            in_obj = HIT_JAW_Y1;
+        }
+
+        geom_distance = hit_ray_AABB( pos, dir, linac.Y_jaw_aabb[ 1 ] );
+        if ( geom_distance < min_distance )
+        {
+            min_distance = geom_distance;
+            in_obj = HIT_JAW_Y2;
+        }
+    }
+
+    geom_distance = hit_ray_AABB( pos, dir, linac.A_bank_aabb );
+    if ( geom_distance < min_distance )
+    {
+        min_distance = geom_distance;
+        in_obj = HIT_BANK_A;
+    }
+
+    geom_distance = hit_ray_AABB( pos, dir, linac.B_bank_aabb );
+    if ( geom_distance < min_distance )
+    {
+        min_distance = geom_distance;
+        in_obj = HIT_BANK_B;
+    }
+
+    // Then check the distance by looking the complete mesh
+
+    if ( in_obj == HIT_JAW_X1 )
+    {
+        in_obj = HIT_NOTHING;
+        min_distance = FLT_MAX;
+
+        itri = 0; while ( itri < linac.X_jaw_nb_triangles[ 0 ] )
+        {
+            offset = linac.X_jaw_index[ 0 ];
+            geom_distance = hit_ray_triangle( pos, dir,
+                                              linac.X_jaw_v1[ offset+itri ],
+                    linac.X_jaw_v2[ offset+itri ],
+                    linac.X_jaw_v3[ offset+itri ] );
+            if ( geom_distance < min_distance )
+            {
+                geom_distance = min_distance;
+                in_obj = HIT_JAW_X1;
+            }
+            ++itri;
+        }
+    }
+    else if ( in_obj == HIT_JAW_X2 )
+    {
+        in_obj = HIT_NOTHING;
+        min_distance = FLT_MAX;
+
         itri = 0; while ( itri < linac.X_jaw_nb_triangles[ 1 ] )
         {
             offset = linac.X_jaw_index[ 1 ];
@@ -146,12 +189,11 @@ __host__ __device__ void MPLINACN::track_to_out ( ParticlesData &particles, Lina
             ++itri;
         }
     }
-
-//    printf( "%i - test Jaw X2\n", id );
-
-    // Jaw Y ----------------------------------------------------------------------
-    if ( linac.Y_nb_jaw != 0 && test_ray_AABB( pos, dir, linac.Y_jaw_aabb[ 0 ] ) )
+    else if ( in_obj == HIT_JAW_Y1 )
     {
+        in_obj = HIT_NOTHING;
+        min_distance = FLT_MAX;
+
         // Loop over triangles
         itri = 0; while ( itri < linac.Y_jaw_nb_triangles[ 0 ] )
         {
@@ -168,12 +210,11 @@ __host__ __device__ void MPLINACN::track_to_out ( ParticlesData &particles, Lina
             ++itri;
         }
     }
-
-//    printf( "%i - test Jaw Y1\n", id );
-
-    if ( linac.Y_nb_jaw != 0 && test_ray_AABB( pos, dir, linac.Y_jaw_aabb[ 1 ] ) )
+    else if ( in_obj == HIT_JAW_Y2 )
     {
-        // Loop over triangles
+        in_obj = HIT_NOTHING;
+        min_distance = FLT_MAX;
+
         itri = 0; while ( itri < linac.Y_jaw_nb_triangles[ 1 ] )
         {
             offset = linac.Y_jaw_index[ 1 ];
@@ -189,18 +230,11 @@ __host__ __device__ void MPLINACN::track_to_out ( ParticlesData &particles, Lina
             ++itri;
         }
     }
-
-//    printf( "%i - test Jaw Y2\n", id );
-
-    // Leaves from bank A ---------------------------------------------------------
-
-    ui16 ileaf;
-    //i16 in_leaf = -1;
-
-    // If hit the bank A
-    if ( test_ray_AABB( pos, dir, linac.A_bank_aabb ) )
+    else if ( in_obj == HIT_BANK_A )
     {
-        // Loop ovber leaf
+        in_obj = HIT_NOTHING;
+        min_distance = FLT_MAX;
+
         ileaf = 0; while( ileaf < linac.A_nb_leaves )
         {
             // If hit a leaf
@@ -227,15 +261,12 @@ __host__ __device__ void MPLINACN::track_to_out ( ParticlesData &particles, Lina
             ++ileaf;
 
         } // each leaf
-
-    } // in bank A
-
-    // Leaves from bank B ---------------------------------------------------------
-
-    // If hit the bank B
-    if ( test_ray_AABB( pos, dir, linac.B_bank_aabb ) )
+    }
+    else if ( in_obj == HIT_BANK_B )
     {
-        // Loop ovber leaf
+        in_obj = HIT_NOTHING;
+        min_distance = FLT_MAX;
+
         ileaf = 0; while( ileaf < linac.B_nb_leaves )
         {
             // If hit a leaf
@@ -260,10 +291,8 @@ __host__ __device__ void MPLINACN::track_to_out ( ParticlesData &particles, Lina
             } // in a leaf bounding box
 
             ++ileaf;
-
-        } // each leaf
-
-    } // in bank B
+        }
+    }
 
     /// TODO - Navigation within element - Kill the particle without mercy
 

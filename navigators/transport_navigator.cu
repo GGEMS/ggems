@@ -87,17 +87,27 @@ void __host__ __device__ transport_track_to_in_AABB( ParticlesData &particles, f
                                                      f32 ymin, f32 ymax, f32 zmin, f32 zmax, f32 tolerance, ui32 id)
 {
 
+    // If freeze (not dead), re-activate the current particle
+    if( particles.endsimu[ id ] == PARTICLE_FREEZE )
+    {
+        particles.endsimu[ id ] = PARTICLE_ALIVE;
+    }
+    else if ( particles.endsimu[ id ] == PARTICLE_DEAD )
+    {
+        return;
+    }
+
     // Read position
     f32xyz pos;
-    pos.x = particles.px[id];
-    pos.y = particles.py[id];
-    pos.z = particles.pz[id];
+    pos.x = particles.px[ id ];
+    pos.y = particles.py[ id ];
+    pos.z = particles.pz[ id ];
 
     // Read direction
     f32xyz dir;
-    dir.x = particles.dx[id];
-    dir.y = particles.dy[id];
-    dir.z = particles.dz[id];    
+    dir.x = particles.dx[ id ];
+    dir.y = particles.dy[ id ];
+    dir.z = particles.dz[ id ];
 
     // Skip if already inside the phantom
     if ( test_point_AABB_with_tolerance (pos, xmin, xmax, ymin, ymax, zmin, zmax, tolerance ) )

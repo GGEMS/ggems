@@ -78,7 +78,7 @@ PointSource::PointSource()
       m_particle_type( PHOTON )
 {
     // Set the name of the source
-    set_name( "point_source" );
+    set_name( "PointSource" );
 }
 
 // Destructor

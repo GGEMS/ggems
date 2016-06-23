@@ -118,7 +118,7 @@ ConeBeamCTSource::ConeBeamCTSource()
       m_nb_of_energy_bins( 0 )
 {
     // Set the name of the source
-    set_name( "cone_beam_CT_source" );
+    set_name( "ConeBeamCTSource" );
 
     m_pos = make_f32xyz( 0.0, 0.0, 0.0 );
     m_angles = make_f32xyz( 0.0, 0.0, 0.0 );
@@ -284,7 +284,7 @@ std::ostream& operator<<( std::ostream& os, ConeBeamCTSource const& cbct )
     os << "--> Cone-Beam CT source infos:" << GGendl;
     os << "    --------------------------" << GGendl;
     os << GGendl;
-    os << "+ Source name:   " << cbct.get_name() << GGendl;
+    //os << "+ Source name:   " << cbct.get_name() << GGendl;  // Compilation error - JB
     os << "+ Particle type: "
        << ( cbct.m_particle_type == ELECTRON ? "electron" :
                                                ( cbct.m_particle_type == PHOTON ? "photon" : "positron" ) )

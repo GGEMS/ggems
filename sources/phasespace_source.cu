@@ -108,7 +108,7 @@ __global__ void PHSPSRC::phsp_point_source (ParticlesData particles_data,
 PhaseSpaceSource::PhaseSpaceSource(): GGEMSSource()
 {
     // Set the name of the source
-    set_name( "phasespace_source" );
+    set_name( "PhaseSpaceSource" );
 
     // Init    
     m_phasespace.tot_particles = 0;

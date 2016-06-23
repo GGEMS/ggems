@@ -17,7 +17,7 @@
 #include "ggems_detector.cuh"
 
 GGEMSDetector::GGEMSDetector()
-: m_detector_name( "no_source" )
+: m_detector_name( "no_detector" )
 {
   ;
 }
@@ -36,7 +36,7 @@ void GGEMSDetector::track_to_out(Particles particles) {}
 
 void GGEMSDetector::digitizer(Particles particles) {}
 
-std::string GGEMSDetector::get_detector_name() {
+std::string GGEMSDetector::get_name() {
     return m_detector_name;
 }
 

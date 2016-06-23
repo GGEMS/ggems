@@ -184,7 +184,7 @@ CTDetector::CTDetector(): GGEMSDetector(),
                           m_projection( nullptr ),
                           m_scatter( nullptr )
 {
-    set_name( "ct_detector" );
+    set_name( "CTDetector" );
 
     m_pixel_size = make_f32xyz( 0.0, 0.0, 0.0 );
     m_nb_pixel = make_ui32xyz( 0, 0, 0 );

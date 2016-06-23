@@ -24,7 +24,7 @@ class GGEMSSource {
         virtual void get_primaries_generator(Particles particles) = 0;
         virtual void initialize(GlobalSimulationParameters params) = 0;
 
-        inline std::string get_name() const { return m_source_name; };
+        std::string get_name();
 
     protected:
       void set_name(std::string name);

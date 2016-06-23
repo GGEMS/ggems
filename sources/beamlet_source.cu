@@ -115,7 +115,7 @@ __global__ void kernel_beamlet_source ( ParticlesData particles, f32xyz pos, f32
 BeamletSource::BeamletSource() : GGEMSSource()
 {
     // Set the name of the source
-    set_name( "beamlet_source" );
+    set_name( "BeamletSource" );
 
     // Init vars
     m_pos = make_f32xyz( 0.0, 0.0, 0.0 );
