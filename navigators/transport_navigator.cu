@@ -121,7 +121,7 @@ void __host__ __device__ transport_track_to_in_AABB( ParticlesData &particles, f
     // the particle not hitting the voxelized volume
     if ( dist == FLT_MAX )                            // TODO: Don't know why F32_MAX doesn't work...
     {
-        particles.endsimu[id] = PARTICLE_FREEZE;
+        particles.endsimu[ id ] = PARTICLE_FREEZE;
         return;
     }
     else
@@ -130,7 +130,7 @@ void __host__ __device__ transport_track_to_in_AABB( ParticlesData &particles, f
         f32 cross = dist_overlap_ray_AABB ( pos, dir, xmin, xmax, ymin, ymax, zmin, zmax );
         if ( cross < ( 2*tolerance ) )
         {
-            particles.endsimu[id] = PARTICLE_FREEZE;
+            particles.endsimu[ id ] = PARTICLE_FREEZE;
             return;
         }
         // move the particle slightly inside the volume
@@ -140,12 +140,15 @@ void __host__ __device__ transport_track_to_in_AABB( ParticlesData &particles, f
         pos = transport_get_safety_inside_AABB( pos, xmin, xmax, ymin, ymax, zmin, zmax, tolerance );
 
         // update tof
-        particles.tof[id] += c_light * dist;
+        particles.tof[ id ] += c_light * dist;
 
         // set the new position
-        particles.px[id] = pos.x;
-        particles.py[id] = pos.y;
-        particles.pz[id] = pos.z;
+        particles.px[ id ] = pos.x;
+        particles.py[ id ] = pos.y;
+        particles.pz[ id ] = pos.z;
+
+        // reset geom id
+        particles.geometry_id[ id ] = 0;
     }
 
 }

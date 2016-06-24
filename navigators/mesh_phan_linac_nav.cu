@@ -43,6 +43,9 @@ __global__ void MPLINACN::kernel_device_track_to_in( ParticlesData particles, Li
     particles.dz[ id ] = dir.z;
 
     transport_track_to_in_AABB( particles, linac.aabb, geom_tolerance, id );
+
+    // Start outside a mesh
+    particles.geometry_id[ id ] = 0;  // first Byte set to zeros (outside a mesh)
 }
 
 // Host Kernel that move particles to the voxelized volume boundary
@@ -68,13 +71,680 @@ void MPLINACN::kernel_host_track_to_in( ParticlesData particles, LinacData linac
 
     transport_track_to_in_AABB( particles, linac.aabb, geom_tolerance, id );
 
+    // Start outside a mesh
+    particles.geometry_id[ id ] = 0;  // first Byte set to zeros (outside a mesh)
+
 //    printf("%i transport: pos %f %f %f  status %i\n", id, pos.x, pos.y, pos.z, particles.endsimu[ id ]);
 }
 
 // == Track to out ===================================================================================
 
-__host__ __device__ void MPLINACN::track_to_out ( ParticlesData &particles, LinacData linac,
-                                                  ui32 id )
+//            32   28   24   20   16   12   8    4
+// geometry:  0000 0000 0000 0000 0000 0000 0000 0000
+//            \__/ \____________/ \_________________/
+//             |         |                 |
+//            nav mesh  type of geometry  geometry index
+
+__host__ __device__ ui16 m_read_geom_type( ui32 geometry )
+{
+    return ui16( ( geometry & 0x0FFF0000 ) >> 16 );
+}
+
+__host__ __device__ ui16 m_read_geom_index( ui32 geometry )
+{
+    return ui16( geometry & 0x0000FFFF );
+}
+
+__host__ __device__ ui8 m_read_geom_nav( ui32 geometry )
+{
+    return ui8( ( geometry & 0xF0000000 ) >> 28 );
+}
+
+__host__ __device__ ui32 m_write_geom_type( ui32 geometry, ui16 type )
+{
+    //              mask           write   shift
+    return ( geometry & 0xF000FFFF ) | ( type << 16 ) ;
+}
+
+__host__ __device__ ui32 m_write_geom_index( ui32 geometry, ui16 index )
+{
+    //              mask           write   shift
+    return ( geometry & 0xFFFF0000 ) | index ;
+}
+
+__host__ __device__ ui32 m_write_geom_nav( ui32 geometry, ui8 nav )
+{
+    //              mask           write   shift
+    return ( geometry & 0x0FFFFFFF ) | ( nav << 28 ) ;
+}
+
+__host__ __device__ void m_mlc_nav_out_mesh( f32xyz pos, f32xyz dir, LinacData linac, ui32 *geometry_id, f32 *geometry_distance )
+{
+
+
+
+    // First check where is the particle /////////////////////////////////////////////////////
+
+    ui16 in_obj = IN_NOTHING;
+
+    if ( linac.X_nb_jaw != 0 )
+    {
+        if ( test_point_AABB( pos, linac.X_jaw_aabb[ 0 ] ) )
+        {
+            in_obj = IN_JAW_X1;
+        }
+        if ( test_point_AABB( pos, linac.X_jaw_aabb[ 1 ] ) )
+        {
+            in_obj = IN_JAW_X2;
+        }
+    }
+
+    if ( linac.Y_nb_jaw != 0 )
+    {
+        if ( test_point_AABB( pos, linac.Y_jaw_aabb[ 0 ] ) )
+        {
+            in_obj = IN_JAW_Y1;
+        }
+        if ( test_point_AABB( pos, linac.Y_jaw_aabb[ 1 ] ) )
+        {
+            in_obj = IN_JAW_Y2;
+        }
+    }
+
+    if ( test_point_AABB( pos, linac.A_bank_aabb ) )
+    {
+        in_obj = IN_BANK_A;
+    }
+
+    if ( test_point_AABB( pos, linac.B_bank_aabb ) )
+    {
+        in_obj = IN_BANK_B;
+    }
+
+    printf( " ---# In aabb %i\n", in_obj );
+
+    // If the particle is outside the MLC element, then get the clostest bounding box //////////
+
+    *geometry_distance = FLT_MAX;
+    *geometry_id = 0;
+    ui8 navigation;
+    ui16 geom_index = 0;
+    f32 distance;
+
+    if ( in_obj == IN_NOTHING )
+    {
+        // Mother volume (AABB of the LINAC)
+        *geometry_distance = hit_ray_AABB( pos, dir, linac.aabb );
+
+        printf("  dist to linac aabb %f\n", *geometry_distance );
+
+        if ( linac.X_nb_jaw != 0 )
+        {
+            distance = hit_ray_AABB( pos, dir, linac.X_jaw_aabb[ 0 ] );
+            if ( distance < *geometry_distance )
+            {
+                *geometry_distance = distance;
+            }
+
+            distance = hit_ray_AABB( pos, dir, linac.X_jaw_aabb[ 1 ] );
+            if ( distance < *geometry_distance )
+            {
+                *geometry_distance = distance;
+            }
+        }
+
+        if ( linac.Y_nb_jaw != 0 )
+        {
+            distance = hit_ray_AABB( pos, dir, linac.Y_jaw_aabb[ 0 ] );
+            if ( distance < *geometry_distance )
+            {
+                *geometry_distance = distance;
+            }
+
+            distance = hit_ray_AABB( pos, dir, linac.Y_jaw_aabb[ 1 ] );
+            if ( distance < *geometry_distance )
+            {
+                *geometry_distance = distance;
+            }
+        }
+
+        distance = hit_ray_AABB( pos, dir, linac.A_bank_aabb );
+        if ( distance < *geometry_distance )
+        {
+            *geometry_distance = distance;
+        }
+
+        distance = hit_ray_AABB( pos, dir, linac.B_bank_aabb );
+        if ( distance < *geometry_distance )
+        {
+            *geometry_distance = distance;
+        }
+
+        // Store data and return
+        *geometry_id = m_write_geom_nav( *geometry_id, OUTSIDE_MESH );
+
+        return;
+    }
+
+    // Else, particle within a bounding box, need to get the closest distance to the mesh
+
+    else
+    {
+        ui32 itri, offset, ileaf;
+
+        if ( in_obj == IN_JAW_X1 )
+        {
+            // Mother volume (bounding box)
+            in_obj = IN_NOTHING;
+            navigation = OUTSIDE_MESH;
+            *geometry_distance = hit_ray_AABB( pos, dir, linac.X_jaw_aabb[ 0 ] );
+
+            itri = 0; while ( itri < linac.X_jaw_nb_triangles[ 0 ] )
+            {
+                offset = linac.X_jaw_index[ 0 ];
+                distance = hit_ray_triangle( pos, dir, linac.X_jaw_v1[ offset+itri ],
+                                                       linac.X_jaw_v2[ offset+itri ],
+                                                       linac.X_jaw_v3[ offset+itri ] );
+                if ( distance < *geometry_distance )
+                {
+                    *geometry_distance = distance;
+                    in_obj = IN_JAW_X1;
+                    navigation = INSIDE_MESH;
+                }
+                ++itri;
+            }
+
+            // store data and return
+            *geometry_id = m_write_geom_nav( *geometry_id, navigation );
+            *geometry_id = m_write_geom_type( *geometry_id, in_obj );
+
+            return;
+        }
+
+        if ( in_obj == IN_JAW_X2 )
+        {
+            // Mother volume (bounding box)
+            in_obj = IN_NOTHING;
+            navigation = OUTSIDE_MESH;
+            *geometry_distance = hit_ray_AABB( pos, dir, linac.X_jaw_aabb[ 1 ] );
+
+            itri = 0; while ( itri < linac.X_jaw_nb_triangles[ 1 ] )
+            {
+                offset = linac.X_jaw_index[ 1 ];
+                distance = hit_ray_triangle( pos, dir, linac.X_jaw_v1[ offset+itri ],
+                                                       linac.X_jaw_v2[ offset+itri ],
+                                                       linac.X_jaw_v3[ offset+itri ] );
+                if ( distance < *geometry_distance )
+                {
+                    *geometry_distance = distance;
+                    in_obj = IN_JAW_X2;
+                    navigation = INSIDE_MESH;
+                }
+                ++itri;
+            }
+
+            // store data and return
+            *geometry_id = m_write_geom_nav( *geometry_id, navigation );
+            *geometry_id = m_write_geom_type( *geometry_id, in_obj );
+
+            return;
+        }
+
+        if ( in_obj == IN_JAW_Y1 )
+        {
+            // Mother volume (bounding box)
+            in_obj = IN_NOTHING;
+            navigation = OUTSIDE_MESH;
+            *geometry_distance = hit_ray_AABB( pos, dir, linac.Y_jaw_aabb[ 0 ] );
+
+            itri = 0; while ( itri < linac.Y_jaw_nb_triangles[ 0 ] )
+            {
+                offset = linac.Y_jaw_index[ 0 ];
+                distance = hit_ray_triangle( pos, dir, linac.Y_jaw_v1[ offset+itri ],
+                                                       linac.Y_jaw_v2[ offset+itri ],
+                                                       linac.Y_jaw_v3[ offset+itri ] );
+                if ( distance < *geometry_distance )
+                {
+                    *geometry_distance = distance;
+                    in_obj = IN_JAW_Y1;
+                    navigation = INSIDE_MESH;
+                }
+                ++itri;
+            }
+
+            // store data and return
+            *geometry_id = m_write_geom_nav( *geometry_id, navigation );
+            *geometry_id = m_write_geom_type( *geometry_id, in_obj );
+
+            return;
+        }
+
+        if ( in_obj == IN_JAW_Y2 )
+        {
+            // Mother volume (bounding box)
+            in_obj = IN_NOTHING;
+            navigation = OUTSIDE_MESH;
+            *geometry_distance = hit_ray_AABB( pos, dir, linac.Y_jaw_aabb[ 1 ] );
+
+            itri = 0; while ( itri < linac.Y_jaw_nb_triangles[ 1 ] )
+            {
+                offset = linac.Y_jaw_index[ 1 ];
+                distance = hit_ray_triangle( pos, dir, linac.Y_jaw_v1[ offset+itri ],
+                                                       linac.Y_jaw_v2[ offset+itri ],
+                                                       linac.Y_jaw_v3[ offset+itri ] );
+                if ( distance < *geometry_distance )
+                {
+                    *geometry_distance = distance;
+                    in_obj = IN_JAW_Y2;
+                    navigation = INSIDE_MESH;
+                }
+                ++itri;
+            }
+
+            // store data and return
+            *geometry_id = m_write_geom_nav( *geometry_id, navigation );
+            *geometry_id = m_write_geom_type( *geometry_id, in_obj );
+
+            return;
+        }
+
+        if ( in_obj == IN_BANK_A )
+        {
+            // Mother volume (bounding box)
+            in_obj = IN_NOTHING;
+            navigation = OUTSIDE_MESH;
+            *geometry_distance = hit_ray_AABB( pos, dir, linac.A_bank_aabb );
+
+            ileaf = 0; while( ileaf < linac.A_nb_leaves )
+            {
+                // If hit a leaf bounding box
+                if ( test_ray_AABB( pos, dir, linac.A_leaf_aabb[ ileaf ] ) )
+                {
+                    // Loop over triangles
+                    itri = 0; while ( itri < linac.A_leaf_nb_triangles[ ileaf ] )
+                    {
+                        offset = linac.A_leaf_index[ ileaf ];
+                        distance = hit_ray_triangle( pos, dir,
+                                                     linac.A_leaf_v1[ offset+itri ],
+                                                     linac.A_leaf_v2[ offset+itri ],
+                                                     linac.A_leaf_v3[ offset+itri ] );
+                        if ( distance < *geometry_distance )
+                        {
+                            *geometry_distance = distance;
+                            in_obj = IN_BANK_A;
+                            geom_index = ileaf;
+                            navigation = INSIDE_MESH;
+                        }
+                        ++itri;
+                    }
+                } // in a leaf bounding box
+
+                ++ileaf;
+
+            } // each leaf
+
+            printf( "  Inside bank A: ileaf %i nav %i\n", geom_index, navigation );
+
+            // store data and return
+            *geometry_id = m_write_geom_nav( *geometry_id, navigation );
+            *geometry_id = m_write_geom_type( *geometry_id, in_obj );
+            *geometry_id = m_write_geom_index( *geometry_id, geom_index );
+
+            return;
+        }
+
+        if ( in_obj == IN_BANK_B )
+        {
+            // Mother volume (bounding box)
+            in_obj = IN_NOTHING;
+            navigation = OUTSIDE_MESH;
+            *geometry_distance = hit_ray_AABB( pos, dir, linac.B_bank_aabb );
+
+            ileaf = 0; while( ileaf < linac.B_nb_leaves )
+            {
+                // If hit a leaf bounding box
+                if ( test_ray_AABB( pos, dir, linac.B_leaf_aabb[ ileaf ] ) )
+                {
+                    // Loop over triangles
+                    itri = 0; while ( itri < linac.B_leaf_nb_triangles[ ileaf ] )
+                    {
+                        offset = linac.B_leaf_index[ ileaf ];
+                        distance = hit_ray_triangle( pos, dir,
+                                                     linac.B_leaf_v1[ offset+itri ],
+                                                     linac.B_leaf_v2[ offset+itri ],
+                                                     linac.B_leaf_v3[ offset+itri ] );
+                        if ( distance < *geometry_distance )
+                        {
+                            *geometry_distance = distance;
+                            in_obj = IN_BANK_B;
+                            geom_index = ileaf;
+                            navigation = INSIDE_MESH;
+                        }
+                        ++itri;
+                    }
+                } // in a leaf bounding box
+
+                ++ileaf;
+
+            } // each leaf
+
+            printf( "  Inside bank A: ileaf %i nav %i\n", geom_index, navigation );
+
+            // store data and return
+            *geometry_id = m_write_geom_nav( *geometry_id, navigation );
+            *geometry_id = m_write_geom_type( *geometry_id, in_obj );
+            *geometry_id = m_write_geom_index( *geometry_id, geom_index );
+
+            return;
+        }
+
+    }
+
+
+    // Should never reach here
+
+#ifdef DEBUG
+    printf("MLC navigation error: out of geometry\n");
+#endif
+
+}
+
+__host__ __device__ void m_mlc_nav_in_mesh( f32xyz pos, f32xyz dir, LinacData linac, ui32 *geometry_id, f32 *geometry_distance )
+{
+
+    *geometry_distance = FLT_MAX;
+    *geometry_id = 0;
+    ui8 navigation = OUTSIDE_MESH;
+    f32 distance;
+
+    ui32 itri, offset;
+
+    // Read the geometry
+    ui16 in_obj = m_read_geom_type( *geometry_id );
+
+    printf(" ::: Nav Inside in obj %i\n", in_obj);
+
+    if ( in_obj == IN_JAW_X1 )
+    {
+        itri = 0; while ( itri < linac.X_jaw_nb_triangles[ 0 ] )
+        {
+            offset = linac.X_jaw_index[ 0 ];
+            distance = hit_ray_triangle( pos, dir, linac.X_jaw_v1[ offset+itri ],
+                                                   linac.X_jaw_v2[ offset+itri ],
+                                                   linac.X_jaw_v3[ offset+itri ] );
+            if ( distance < *geometry_distance )
+            {
+                *geometry_distance = distance;
+                in_obj = IN_NOTHING;
+                navigation = OUTSIDE_MESH;
+            }
+            ++itri;
+        }
+
+        // store data and return
+        *geometry_id = m_write_geom_nav( *geometry_id, navigation );
+        *geometry_id = m_write_geom_type( *geometry_id, in_obj );
+
+        return;
+    }
+
+    if ( in_obj == IN_JAW_X2 )
+    {
+        itri = 0; while ( itri < linac.X_jaw_nb_triangles[ 1 ] )
+        {
+            offset = linac.X_jaw_index[ 1 ];
+            distance = hit_ray_triangle( pos, dir, linac.X_jaw_v1[ offset+itri ],
+                                                   linac.X_jaw_v2[ offset+itri ],
+                                                   linac.X_jaw_v3[ offset+itri ] );
+            if ( distance < *geometry_distance )
+            {
+                *geometry_distance = distance;
+                in_obj = IN_NOTHING;
+                navigation = OUTSIDE_MESH;
+            }
+            ++itri;
+        }
+
+        // store data and return
+        *geometry_id = m_write_geom_nav( *geometry_id, navigation );
+        *geometry_id = m_write_geom_type( *geometry_id, in_obj );
+
+        return;
+    }
+
+    if ( in_obj == IN_JAW_Y1 )
+    {
+        itri = 0; while ( itri < linac.Y_jaw_nb_triangles[ 0 ] )
+        {
+            offset = linac.Y_jaw_index[ 0 ];
+            distance = hit_ray_triangle( pos, dir, linac.Y_jaw_v1[ offset+itri ],
+                                                   linac.Y_jaw_v2[ offset+itri ],
+                                                   linac.Y_jaw_v3[ offset+itri ] );
+            if ( distance < *geometry_distance )
+            {
+                *geometry_distance = distance;
+                in_obj = IN_NOTHING;
+                navigation = OUTSIDE_MESH;
+            }
+            ++itri;
+        }
+
+        // store data and return
+        *geometry_id = m_write_geom_nav( *geometry_id, navigation );
+        *geometry_id = m_write_geom_type( *geometry_id, in_obj );
+
+        return;
+    }
+
+    if ( in_obj == IN_JAW_Y2 )
+    {
+        itri = 0; while ( itri < linac.Y_jaw_nb_triangles[ 1 ] )
+        {
+            offset = linac.Y_jaw_index[ 1 ];
+            distance = hit_ray_triangle( pos, dir, linac.Y_jaw_v1[ offset+itri ],
+                                                   linac.Y_jaw_v2[ offset+itri ],
+                                                   linac.Y_jaw_v3[ offset+itri ] );
+            if ( distance < *geometry_distance )
+            {
+                *geometry_distance = distance;
+                in_obj = IN_NOTHING;
+                navigation = OUTSIDE_MESH;
+            }
+            ++itri;
+        }
+
+        // store data and return
+        *geometry_id = m_write_geom_nav( *geometry_id, navigation );
+        *geometry_id = m_write_geom_type( *geometry_id, in_obj );
+
+        return;
+    }
+
+    if ( in_obj == IN_BANK_A )
+    {
+        ui16 ileaf = m_read_geom_index( *geometry_id );
+
+        // Loop over triangles
+        itri = 0; while ( itri < linac.A_leaf_nb_triangles[ ileaf ] )
+        {
+            offset = linac.A_leaf_index[ ileaf ];
+            distance = hit_ray_triangle( pos, dir,
+                                         linac.A_leaf_v1[ offset+itri ],
+                                         linac.A_leaf_v2[ offset+itri ],
+                                         linac.A_leaf_v3[ offset+itri ] );
+            if ( distance < *geometry_distance )
+            {
+                *geometry_distance = distance;
+                in_obj = IN_NOTHING;
+                navigation = OUTSIDE_MESH;
+            }
+            ++itri;
+        }
+
+        // store data and return
+        *geometry_id = m_write_geom_nav( *geometry_id, navigation );
+        *geometry_id = m_write_geom_type( *geometry_id, in_obj );
+        *geometry_id = m_write_geom_index( *geometry_id, 0 );
+
+        return;
+    }
+
+    if ( in_obj == IN_BANK_B )
+    {
+        ui16 ileaf = m_read_geom_index( *geometry_id );
+
+        // Loop over triangles
+        itri = 0; while ( itri < linac.B_leaf_nb_triangles[ ileaf ] )
+        {
+            offset = linac.B_leaf_index[ ileaf ];
+            distance = hit_ray_triangle( pos, dir,
+                                         linac.B_leaf_v1[ offset+itri ],
+                                         linac.B_leaf_v2[ offset+itri ],
+                                         linac.B_leaf_v3[ offset+itri ] );
+            if ( distance < *geometry_distance )
+            {
+                *geometry_distance = distance;
+                in_obj = IN_NOTHING;
+                navigation = OUTSIDE_MESH;
+            }
+            ++itri;
+        }
+
+        // store data and return
+        *geometry_id = m_write_geom_nav( *geometry_id, navigation );
+        *geometry_id = m_write_geom_type( *geometry_id, in_obj );
+        *geometry_id = m_write_geom_index( *geometry_id, 0 );
+
+        printf(" ::: Nav Inside in Bank B dist %f\n", *geometry_distance);
+
+        return;
+    }
+
+    // Should never reach here
+
+#ifdef DEBUG
+    printf("MLC navigation error: out of geometry\n");
+#endif
+
+
+}
+
+
+__host__ __device__ void MPLINACN::track_to_out( ParticlesData &particles, LinacData linac,
+                                                 MaterialsTable materials,
+                                                 PhotonCrossSectionTable photon_CS_table,
+                                                 GlobalSimulationParametersData parameters,
+                                                 ui32 id )
+{
+    // Read position
+    f32xyz pos;
+    pos.x = particles.px[ id ];
+    pos.y = particles.py[ id ];
+    pos.z = particles.pz[ id ];
+
+    // Read direction
+    f32xyz dir;
+    dir.x = particles.dx[ id ];
+    dir.y = particles.dy[ id ];
+    dir.z = particles.dz[ id ];
+
+    // In a mesh?
+    ui8 navigation = m_read_geom_nav( particles.geometry_id[ id ] );
+
+    //// Get material //////////////////////////////////////////////////////////////////
+
+    i16 mat_id = ( navigation == INSIDE_MESH ) ? 0 : -1;   // 0 MLC mat, -1 not mat around the LINAC (vacuum)
+
+    printf("id %i  - mat id %i - navigation %i\n", id, mat_id, navigation);
+
+    //// Find next discrete interaction ///////////////////////////////////////
+
+    f32 next_interaction_distance = F32_MAX;
+    ui8 next_discrete_process = 0;
+
+    // If inside a mesh do physics else only tranportation (vacuum around the LINAC)
+    if ( mat_id != - 1 )
+    {
+        photon_get_next_interaction ( particles, parameters, photon_CS_table, mat_id, id );
+        next_interaction_distance = particles.next_interaction_distance[ id ];
+        next_discrete_process = particles.next_discrete_process[ id ];
+    }
+
+    /// Get the hit distance of the closest geometry //////////////////////////////////
+
+    f32 boundary_distance;
+    ui32 next_geometry_id;
+
+    if ( navigation == INSIDE_MESH )
+    {
+        m_mlc_nav_in_mesh( pos, dir, linac, &next_geometry_id, &boundary_distance );
+        printf("id %i - inside mesh dist %f\n", id, boundary_distance);
+    }
+    else
+    {
+        m_mlc_nav_out_mesh( pos, dir, linac, &next_geometry_id, &boundary_distance );
+        printf("id %i - outside mesh dist %f\n", id, boundary_distance);
+    }
+
+    if ( boundary_distance <= next_interaction_distance )
+    {
+        next_interaction_distance = boundary_distance + parameters.geom_tolerance; // Overshoot
+        next_discrete_process = GEOMETRY_BOUNDARY;
+    }
+
+    //// Move particle //////////////////////////////////////////////////////
+
+    printf( "id %i cur pos %f %f %f\n", id, pos.x, pos.y, pos.z );
+
+    // get the new position
+    pos = fxyz_add ( pos, fxyz_scale ( dir, next_interaction_distance ) );
+
+    // update tof
+    //particles.tof[part_id] += c_light * next_interaction_distance;
+
+    // store new position
+    particles.px[ id ] = pos.x;
+    particles.py[ id ] = pos.y;
+    particles.pz[ id ] = pos.z;
+
+    printf( "id %i pos %f %f %f - aabb %f %f %f %f %f %f\n", id, pos.x, pos.y, pos.z,
+            linac.aabb.xmin, linac.aabb.xmax, linac.aabb.ymin, linac.aabb.ymax,
+            linac.aabb.zmin, linac.aabb.zmax );
+
+    // Stop simulation if out of the phantom
+    if ( !test_point_AABB_with_tolerance ( pos, linac.aabb, parameters.geom_tolerance ) )
+    {
+        particles.endsimu[ id ] = PARTICLE_FREEZE;
+        return;
+    }
+
+    //// Apply discrete process //////////////////////////////////////////////////
+
+    if ( next_discrete_process != GEOMETRY_BOUNDARY )
+    {
+        // Resolve discrete process
+        SecParticle electron = photon_resolve_discrete_process ( particles, parameters, photon_CS_table,
+                                                                 materials, mat_id, id );
+
+        //// Here e- are not tracked, and lost energy not drop
+        //// Energy cut
+        if ( particles.E[ id ] <= materials.photon_energy_cut[ mat_id ])
+        {
+            // kill without mercy (energy not drop)
+            particles.endsimu[ id ] = PARTICLE_DEAD;
+            return;
+        }
+    }
+    else
+    {
+        // Update geometry id
+        particles.geometry_id[ id ] = next_geometry_id;
+    }
+
+}
+
+__host__ __device__ void MPLINACN::track_to_out_nonav( ParticlesData &particles, LinacData linac,
+                                                       ui32 id )
 {
     // Read position
     f32xyz pos;
@@ -309,15 +979,33 @@ __host__ __device__ void MPLINACN::track_to_out ( ParticlesData &particles, Lina
 
 }
 
+
 // Device kernel that track particles within the voxelized volume until boundary
-__global__ void MPLINACN::kernel_device_track_to_out( ParticlesData particles, LinacData linac )
+__global__ void MPLINACN::kernel_device_track_to_out( ParticlesData particles, LinacData linac,
+                                                      MaterialsTable materials, PhotonCrossSectionTable photon_CS,
+                                                      GlobalSimulationParametersData parameters,
+                                                      bool nav_within_mlc )
 {
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
     if ( id >= particles.size ) return;
 
-    while ( particles.endsimu[ id ] != PARTICLE_DEAD && particles.endsimu[ id ] != PARTICLE_FREEZE )
+
+
+    // Stepping loop
+    if ( nav_within_mlc )
     {
-        MPLINACN::track_to_out( particles, linac, id );
+        while ( particles.endsimu[ id ] != PARTICLE_DEAD && particles.endsimu[ id ] != PARTICLE_FREEZE )
+        {
+            printf("Step\n");
+            MPLINACN::track_to_out( particles, linac, materials, photon_CS, parameters, id );
+        }
+    }
+    else
+    {
+        while ( particles.endsimu[ id ] != PARTICLE_DEAD && particles.endsimu[ id ] != PARTICLE_FREEZE )
+        {
+            MPLINACN::track_to_out_nonav( particles, linac, id );
+        }
     }
 
     /// Move the particle back to the global frame ///
@@ -341,14 +1029,26 @@ __global__ void MPLINACN::kernel_device_track_to_out( ParticlesData particles, L
 }
 
 // Host kernel that track particles within the voxelized volume until boundary
-void MPLINACN::kernel_host_track_to_out(ParticlesData particles, LinacData linac, ui32 id )
+void MPLINACN::kernel_host_track_to_out( ParticlesData particles, LinacData linac,
+                                         MaterialsTable materials, PhotonCrossSectionTable photon_CS,
+                                         GlobalSimulationParametersData parameters,
+                                         bool nav_within_mlc, ui32 id )
 {
     // Stepping loop
-    while ( particles.endsimu[ id ] != PARTICLE_DEAD && particles.endsimu[ id ] != PARTICLE_FREEZE )
+    if ( nav_within_mlc )
     {
-        MPLINACN::track_to_out( particles, linac, id );
+        while ( particles.endsimu[ id ] != PARTICLE_DEAD && particles.endsimu[ id ] != PARTICLE_FREEZE )
+        {
+            MPLINACN::track_to_out( particles, linac, materials, photon_CS, parameters, id );
+        }
     }
-
+    else
+    {
+        while ( particles.endsimu[ id ] != PARTICLE_DEAD && particles.endsimu[ id ] != PARTICLE_FREEZE )
+        {
+            MPLINACN::track_to_out_nonav( particles, linac, id );
+        }
+    }
     /// Move the particle back to the global frame ///
 
     // read position and direction
@@ -1719,6 +2419,16 @@ void MeshPhanLINACNav::set_linac_local_axis( f32 m00, f32 m01, f32 m02,
                                      m20, m21, m22 );
 }
 
+void MeshPhanLINACNav::set_navigation_within_mlc( bool flag )
+{
+    m_nav_within_mlc = flag;
+}
+
+void MeshPhanLINACNav::set_linac_material( std::string mat_name )
+{
+    m_linac_material[ 0 ] = mat_name;
+}
+
 LinacData MeshPhanLINACNav::get_linac_geometry()
 {
     return m_linac;
@@ -1729,10 +2439,10 @@ f32matrix44 MeshPhanLINACNav::get_linac_transformation()
     return m_linac.transform;
 }
 
-//void MeshPhanLINACNav::set_materials(std::string filename )
-//{
-//    m_materials_filename = filename;
-//}
+void MeshPhanLINACNav::set_materials(std::string filename )
+{
+    m_materials_filename = filename;
+}
 
 ////// Main functions
 
@@ -1814,6 +2524,10 @@ MeshPhanLINACNav::MeshPhanLINACNav ()
     m_beam_index = 0;
     m_field_index = 0;
 
+    m_nav_within_mlc = true;
+    m_materials_filename = "";
+    m_linac_material.push_back("");
+
 }
 
 //// Mandatory functions
@@ -1853,7 +2567,11 @@ void MeshPhanLINACNav::track_to_out( Particles particles )
         ui32 id=0;
         while ( id<particles.size )
         {
-            MPLINACN::kernel_host_track_to_out( particles.data_h, m_linac, id );
+            MPLINACN::kernel_host_track_to_out( particles.data_h, m_linac,
+                                                m_materials.data_h, m_cross_sections.photon_CS.data_h,
+                                                m_params.data_h,
+                                                m_nav_within_mlc,
+                                                id );
             ++id;
         }
     }
@@ -1863,7 +2581,9 @@ void MeshPhanLINACNav::track_to_out( Particles particles )
         threads.x = m_params.data_h.gpu_block_size;
         grid.x = ( particles.size + m_params.data_h.gpu_block_size - 1 ) / m_params.data_h.gpu_block_size;
 
-        MPLINACN::kernel_device_track_to_out<<<grid, threads>>> ( particles.data_d, m_linac );
+        MPLINACN::kernel_device_track_to_out<<<grid, threads>>> ( particles.data_d, m_linac,
+                                                                  m_materials.data_d, m_cross_sections.photon_CS.data_d,
+                                                                  m_params.data_d, m_nav_within_mlc );
         cuda_error_check ( "Error ", " Kernel_MeshPhanLINACNav (track to in)" );
         cudaThreadSynchronize();
     }
@@ -1885,12 +2605,17 @@ void MeshPhanLINACNav::initialize( GlobalSimulationParameters params )
         exit_simulation();
     }
 
+    if ( m_nav_within_mlc && ( m_materials_filename == "" || m_linac_material[ 0 ] == "" ) )
+    {
+        GGcerr << "MeshPhanLINACNav: navigation required but material information was not provided!" << GGendl;
+        exit_simulation();
+    }
+
     // Params
     m_params = params;
 
     // Init MLC
-    m_init_mlc();
-
+    m_init_mlc();    
 
     // If jaw x is defined, init
     if ( m_jaw_x_filename != "" )
@@ -1915,6 +2640,13 @@ void MeshPhanLINACNav::initialize( GlobalSimulationParameters params )
 
     // Configure the linac
     m_configure_linac();
+
+    // Init materials
+    m_materials.load_materials_database( m_materials_filename );
+    m_materials.initialize( m_linac_material, params );
+
+    // Cross Sections
+    m_cross_sections.initialize( m_materials, params );
 
     // Some verbose if required
     if ( params.data_h.display_memory_usage )

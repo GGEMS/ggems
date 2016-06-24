@@ -20,6 +20,8 @@
 #include "primitives.cuh"
 #include "mesh_io.cuh"
 #include "transport_navigator.cuh"
+#include "photon_navigator.cuh"
+#include "cross_sections.cuh"
 
 #define HIT_JAW_X1 0
 #define HIT_JAW_X2 1
@@ -28,6 +30,17 @@
 #define HIT_BANK_A 4
 #define HIT_BANK_B 5
 #define HIT_NOTHING 6
+
+#define IN_JAW_X1 7
+#define IN_JAW_X2 8
+#define IN_JAW_Y1 9
+#define IN_JAW_Y2 10
+#define IN_BANK_A 11
+#define IN_BANK_B 12
+#define IN_NOTHING 13
+
+#define OUTSIDE_MESH 0
+#define INSIDE_MESH 1
 
 // LINAC data (GPU' proof but not a complete SoA support)
 struct LinacData
@@ -88,11 +101,21 @@ namespace MPLINACN
     void kernel_host_track_to_in( ParticlesData particles, LinacData linac, f32 geom_tolerance, ui32 id );
 
 
-    __global__ void kernel_device_track_to_out( ParticlesData particles, LinacData linac );
+    __global__ void kernel_device_track_to_out( ParticlesData particles, LinacData linac,
+                                                MaterialsTable materials, PhotonCrossSectionTable photon_CS,
+                                                GlobalSimulationParametersData parameters,
+                                                bool nav_within_mlc );
 
-    void kernel_host_track_to_out( ParticlesData particles, LinacData linac, ui32 id );
+    void kernel_host_track_to_out( ParticlesData particles, LinacData linac,
+                                   MaterialsTable materials, PhotonCrossSectionTable photon_CS,
+                                   GlobalSimulationParametersData parameters,
+                                   bool nav_within_mlc, ui32 id );
 
-    __host__ __device__ void track_to_out( ParticlesData &particles, LinacData linac, ui32 id );
+    __host__ __device__ void track_to_out( ParticlesData &particles, LinacData linac,
+                                           MaterialsTable materials, PhotonCrossSectionTable photon_CS_table,
+                                           GlobalSimulationParametersData parameters, ui32 id );
+
+    __host__ __device__ void track_to_out_nonav( ParticlesData &particles, LinacData linac, ui32 id );
 }
 
 class MeshPhanLINACNav : public GGEMSPhantom
@@ -139,6 +162,11 @@ public:
 //                               f32 m10, f32 m11, f32 m12,
 //                               f32 m20, f32 m21, f32 m22 );
 
+    void set_navigation_within_mlc( bool flag );
+
+    void set_materials( std::string filename );
+    void set_linac_material( std::string mat_name );
+
     LinacData get_linac_geometry();
     f32matrix44 get_linac_transformation();
 
@@ -161,14 +189,15 @@ private:
 private:
 
     LinacData m_linac;
-    //Materials m_materials;
-    //CrossSections m_cross_sections;
+    Materials m_materials;
+    CrossSections m_cross_sections;
 
     // Get the memory usage
     ui64 m_get_memory_usage();
 
     GlobalSimulationParameters m_params;
     std::string m_materials_filename;
+    std::vector< std::string > m_linac_material;
     std::string m_beam_config_filename;
     std::string m_mlc_filename;
     std::string m_jaw_x_filename;
@@ -182,6 +211,8 @@ private:
 
     ui32 m_beam_index;
     ui32 m_field_index;
+
+    bool m_nav_within_mlc;
 //
 };
 

@@ -98,6 +98,10 @@ __host__ __device__ bool test_point_AABB_with_tolerance(f32xyz p,
                                                         f32 aabb_zmin, f32 aabb_zmax,
                                                         f32 tol);
 
+__host__ __device__ bool test_point_AABB_with_tolerance(f32xyz p,
+                                                        AabbData aabb,
+                                                        f32 tol);
+
 // Ray/triangle intersection - Moller-Trumbore algorithm
 __host__ __device__ f32 hit_ray_triangle(f32xyz ray_p, f32xyz ray_d,
                                          f32xyz tri_u,              // Triangle
