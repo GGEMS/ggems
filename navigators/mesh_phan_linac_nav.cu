@@ -196,7 +196,9 @@ __host__ __device__ void m_transport_mesh( f32xyz pos, f32xyz dir,
 
 }
 
-__host__ __device__ void m_mlc_nav_out_mesh( f32xyz pos, f32xyz dir, LinacData linac, ui32 *geometry_id, f32 *geometry_distance )
+__host__ __device__ void m_mlc_nav_out_mesh( f32xyz pos, f32xyz dir, LinacData linac,
+                                             f32 geom_tol,
+                                             ui32 *geometry_id, f32 *geometry_distance )
 {
 
 
@@ -245,9 +247,9 @@ __host__ __device__ void m_mlc_nav_out_mesh( f32xyz pos, f32xyz dir, LinacData l
 
     *geometry_distance = FLT_MAX;
     //*geometry_id = 0;
-    ui8 navigation;
-    ui16 geom_index = 0;
-    f32 distance;
+    //ui8 navigation;
+
+    f32 distance = FLT_MAX;
 
     if ( in_obj == IN_NOTHING )
     {
@@ -313,228 +315,240 @@ __host__ __device__ void m_mlc_nav_out_mesh( f32xyz pos, f32xyz dir, LinacData l
 
     else
     {
-        ui32 itri, offset, ileaf;
+        ui32 ileaf;
+        bool inside_mesh = false;
+        bool hit_mesh = false;
+        i16 geom_index = -1;
+        *geometry_distance = FLT_MAX;
 
         if ( in_obj == IN_JAW_X1 )
         {
-            // Mother volume (bounding box)
-            in_obj = IN_NOTHING;
-            navigation = OUTSIDE_MESH;
-            *geometry_distance = hit_ray_AABB( pos, dir, linac.X_jaw_aabb[ 0 ] );
+            m_transport_mesh( pos, dir, linac.X_jaw_v1, linac.X_jaw_v2, linac.X_jaw_v3,
+                              linac.X_jaw_index[ 0 ], linac.X_jaw_nb_triangles[ 0 ], geom_tol,
+                              &inside_mesh, &hit_mesh, &distance );
 
-            itri = 0; while ( itri < linac.X_jaw_nb_triangles[ 0 ] )
+            // If already inside the mesh
+            if ( inside_mesh )
             {
-                offset = linac.X_jaw_index[ 0 ];
-                distance = hit_ray_triangle( pos, dir, linac.X_jaw_v1[ offset+itri ],
-                                                       linac.X_jaw_v2[ offset+itri ],
-                                                       linac.X_jaw_v3[ offset+itri ] );
-                if ( distance < *geometry_distance )
-                {
-                    *geometry_distance = distance;
-                    in_obj = IN_JAW_X1;
-                    navigation = INSIDE_MESH;
-                }
-                ++itri;
+                *geometry_id = m_write_geom_nav( *geometry_id, INSIDE_MESH );
+                *geometry_id = m_write_geom_type( *geometry_id, IN_JAW_X1 );
+                *geometry_distance = 0.0;
+                return;
             }
-
-            // A neg value, means that the particle is already within the mesh (same boundary that the AABB)
-            if ( *geometry_distance < 0 ) *geometry_distance = 0;
-
-            // store data and return
-            *geometry_id = m_write_geom_nav( *geometry_id, navigation );
-            *geometry_id = m_write_geom_type( *geometry_id, in_obj );
-
-            return;
+            else if ( hit_mesh ) // Outside and hit the mesh
+            {
+                *geometry_id = m_write_geom_nav( *geometry_id, INSIDE_MESH );
+                *geometry_id = m_write_geom_type( *geometry_id, IN_JAW_X1 );
+                *geometry_distance = distance;
+                return;
+            }
+            else // Not inside not hitting (then get the AABB distance)
+            {
+                *geometry_id = m_write_geom_nav( *geometry_id, OUTSIDE_MESH );
+                *geometry_id = m_write_geom_type( *geometry_id, IN_NOTHING );
+                *geometry_distance = hit_ray_AABB( pos, dir, linac.X_jaw_aabb[ 0 ] );
+                return;
+            }
         }
 
         if ( in_obj == IN_JAW_X2 )
         {
-            // Mother volume (bounding box)
-            in_obj = IN_NOTHING;
-            navigation = OUTSIDE_MESH;
-            *geometry_distance = hit_ray_AABB( pos, dir, linac.X_jaw_aabb[ 1 ] );
+            m_transport_mesh( pos, dir, linac.X_jaw_v1, linac.X_jaw_v2, linac.X_jaw_v3,
+                              linac.X_jaw_index[ 1 ], linac.X_jaw_nb_triangles[ 1 ], geom_tol,
+                              &inside_mesh, &hit_mesh, &distance );
 
-            itri = 0; while ( itri < linac.X_jaw_nb_triangles[ 1 ] )
+            // If already inside the mesh
+            if ( inside_mesh )
             {
-                offset = linac.X_jaw_index[ 1 ];
-                distance = hit_ray_triangle( pos, dir, linac.X_jaw_v1[ offset+itri ],
-                                                       linac.X_jaw_v2[ offset+itri ],
-                                                       linac.X_jaw_v3[ offset+itri ] );
-                if ( distance < *geometry_distance )
-                {
-                    *geometry_distance = distance;
-                    in_obj = IN_JAW_X2;
-                    navigation = INSIDE_MESH;
-                }
-                ++itri;
+                *geometry_id = m_write_geom_nav( *geometry_id, INSIDE_MESH );
+                *geometry_id = m_write_geom_type( *geometry_id, IN_JAW_X2 );
+                *geometry_distance = 0.0;
+                return;
             }
-
-            // A neg value, means that the particle is already within the mesh (same boundary that the AABB)
-            if ( *geometry_distance < 0 ) *geometry_distance = 0;
-
-            // store data and return
-            *geometry_id = m_write_geom_nav( *geometry_id, navigation );
-            *geometry_id = m_write_geom_type( *geometry_id, in_obj );
-
-            return;
+            else if ( hit_mesh ) // Outside and hit the mesh
+            {
+                *geometry_id = m_write_geom_nav( *geometry_id, INSIDE_MESH );
+                *geometry_id = m_write_geom_type( *geometry_id, IN_JAW_X2 );
+                *geometry_distance = distance;
+                return;
+            }
+            else // Not inside not hitting (then get the AABB distance)
+            {
+                *geometry_id = m_write_geom_nav( *geometry_id, OUTSIDE_MESH );
+                *geometry_id = m_write_geom_type( *geometry_id, IN_NOTHING );
+                *geometry_distance = hit_ray_AABB( pos, dir, linac.X_jaw_aabb[ 1 ] );
+                return;
+            }
         }
 
         if ( in_obj == IN_JAW_Y1 )
         {
-            // Mother volume (bounding box)
-            in_obj = IN_NOTHING;
-            navigation = OUTSIDE_MESH;
-            *geometry_distance = hit_ray_AABB( pos, dir, linac.Y_jaw_aabb[ 0 ] );
+            m_transport_mesh( pos, dir, linac.Y_jaw_v1, linac.Y_jaw_v2, linac.Y_jaw_v3,
+                              linac.Y_jaw_index[ 0 ], linac.Y_jaw_nb_triangles[ 0 ], geom_tol,
+                              &inside_mesh, &hit_mesh, &distance );
 
-            itri = 0; while ( itri < linac.Y_jaw_nb_triangles[ 0 ] )
+            // If already inside the mesh
+            if ( inside_mesh )
             {
-                offset = linac.Y_jaw_index[ 0 ];
-                distance = hit_ray_triangle( pos, dir, linac.Y_jaw_v1[ offset+itri ],
-                                                       linac.Y_jaw_v2[ offset+itri ],
-                                                       linac.Y_jaw_v3[ offset+itri ] );
-                if ( distance < *geometry_distance )
-                {
-                    *geometry_distance = distance;
-                    in_obj = IN_JAW_Y1;
-                    navigation = INSIDE_MESH;
-                }
-                ++itri;
+                *geometry_id = m_write_geom_nav( *geometry_id, INSIDE_MESH );
+                *geometry_id = m_write_geom_type( *geometry_id, IN_JAW_Y1 );
+                *geometry_distance = 0.0;
+                return;
             }
-
-            // A neg value, means that the particle is already within the mesh (same boundary that the AABB)
-            if ( *geometry_distance < 0 ) *geometry_distance = 0;
-
-            // store data and return
-            *geometry_id = m_write_geom_nav( *geometry_id, navigation );
-            *geometry_id = m_write_geom_type( *geometry_id, in_obj );
-
-            return;
+            else if ( hit_mesh ) // Outside and hit the mesh
+            {
+                *geometry_id = m_write_geom_nav( *geometry_id, INSIDE_MESH );
+                *geometry_id = m_write_geom_type( *geometry_id, IN_JAW_Y1 );
+                *geometry_distance = distance;
+                return;
+            }
+            else // Not inside not hitting (then get the AABB distance)
+            {
+                *geometry_id = m_write_geom_nav( *geometry_id, OUTSIDE_MESH );
+                *geometry_id = m_write_geom_type( *geometry_id, IN_NOTHING );
+                *geometry_distance = hit_ray_AABB( pos, dir, linac.Y_jaw_aabb[ 0 ] );
+                return;
+            }
         }
 
         if ( in_obj == IN_JAW_Y2 )
         {
-            // Mother volume (bounding box)
-            in_obj = IN_NOTHING;
-            navigation = OUTSIDE_MESH;
-            *geometry_distance = hit_ray_AABB( pos, dir, linac.Y_jaw_aabb[ 1 ] );
+            m_transport_mesh( pos, dir, linac.Y_jaw_v1, linac.Y_jaw_v2, linac.Y_jaw_v3,
+                              linac.Y_jaw_index[ 1 ], linac.Y_jaw_nb_triangles[ 1 ], geom_tol,
+                              &inside_mesh, &hit_mesh, &distance );
 
-            itri = 0; while ( itri < linac.Y_jaw_nb_triangles[ 1 ] )
+            // If already inside the mesh
+            if ( inside_mesh )
             {
-                offset = linac.Y_jaw_index[ 1 ];
-                distance = hit_ray_triangle( pos, dir, linac.Y_jaw_v1[ offset+itri ],
-                                                       linac.Y_jaw_v2[ offset+itri ],
-                                                       linac.Y_jaw_v3[ offset+itri ] );
-                if ( distance < *geometry_distance )
-                {
-                    *geometry_distance = distance;
-                    in_obj = IN_JAW_Y2;
-                    navigation = INSIDE_MESH;
-                }
-                ++itri;
+                *geometry_id = m_write_geom_nav( *geometry_id, INSIDE_MESH );
+                *geometry_id = m_write_geom_type( *geometry_id, IN_JAW_Y2 );
+                *geometry_distance = 0.0;
+                return;
             }
-
-            // A neg value, means that the particle is already within the mesh (same boundary that the AABB)
-            if ( *geometry_distance < 0 ) *geometry_distance = 0;
-
-            // store data and return
-            *geometry_id = m_write_geom_nav( *geometry_id, navigation );
-            *geometry_id = m_write_geom_type( *geometry_id, in_obj );
-
-            return;
+            else if ( hit_mesh ) // Outside and hit the mesh
+            {
+                *geometry_id = m_write_geom_nav( *geometry_id, INSIDE_MESH );
+                *geometry_id = m_write_geom_type( *geometry_id, IN_JAW_Y2 );
+                *geometry_distance = distance;
+                return;
+            }
+            else // Not inside not hitting (then get the AABB distance)
+            {
+                *geometry_id = m_write_geom_nav( *geometry_id, OUTSIDE_MESH );
+                *geometry_id = m_write_geom_type( *geometry_id, IN_NOTHING );
+                *geometry_distance = hit_ray_AABB( pos, dir, linac.Y_jaw_aabb[ 1 ] );
+                return;
+            }
         }
 
         if ( in_obj == IN_BANK_A )
         {
-            // Mother volume (bounding box)
-            in_obj = IN_NOTHING;
-            navigation = OUTSIDE_MESH;
-            *geometry_distance = hit_ray_AABB( pos, dir, linac.A_bank_aabb );
-
+            // Loop over leaves
             ileaf = 0; while( ileaf < linac.A_nb_leaves )
             {
                 // If hit a leaf bounding box
                 if ( test_ray_AABB( pos, dir, linac.A_leaf_aabb[ ileaf ] ) )
                 {
-                    // Loop over triangles
-                    itri = 0; while ( itri < linac.A_leaf_nb_triangles[ ileaf ] )
+
+                    m_transport_mesh( pos, dir, linac.A_leaf_v1, linac.A_leaf_v2, linac.A_leaf_v3,
+                                      linac.A_leaf_index[ ileaf ], linac.A_leaf_nb_triangles[ ileaf ], geom_tol,
+                                      &inside_mesh, &hit_mesh, &distance );
+
+                    // If already inside of one of them
+                    if ( inside_mesh )
                     {
-                        offset = linac.A_leaf_index[ ileaf ];
-                        distance = hit_ray_triangle( pos, dir,
-                                                     linac.A_leaf_v1[ offset+itri ],
-                                                     linac.A_leaf_v2[ offset+itri ],
-                                                     linac.A_leaf_v3[ offset+itri ] );
+                        *geometry_id = m_write_geom_nav( *geometry_id, INSIDE_MESH );
+                        *geometry_id = m_write_geom_type( *geometry_id, IN_BANK_A );
+                        *geometry_id = m_write_geom_index( *geometry_id, ileaf );
+                        *geometry_distance = 0.0;
+                        return;
+                    }
+                    else if ( hit_mesh )
+                    {
+                        // Select the closest
                         if ( distance < *geometry_distance )
                         {
                             *geometry_distance = distance;
-                            in_obj = IN_BANK_A;
                             geom_index = ileaf;
-                            navigation = INSIDE_MESH;
                         }
-                        ++itri;
                     }
+
                 } // in a leaf bounding box
 
                 ++ileaf;
 
             } // each leaf
 
-//            printf( "  Inside bank A: ileaf %i nav %i\n", geom_index, navigation );
-
-            // A neg value, means that the particle is already within the mesh (same boundary that the AABB)
-            if ( *geometry_distance < 0 ) *geometry_distance = 0;
-
-            // store data and return
-            *geometry_id = m_write_geom_nav( *geometry_id, navigation );
-            *geometry_id = m_write_geom_type( *geometry_id, in_obj );
-            *geometry_id = m_write_geom_index( *geometry_id, geom_index );
+            // No leaves were hit
+            if ( geom_index < 0 )
+            {
+                *geometry_id = m_write_geom_nav( *geometry_id, OUTSIDE_MESH );
+                *geometry_id = m_write_geom_type( *geometry_id, IN_NOTHING );
+                *geometry_id = m_write_geom_index( *geometry_id, 0 );
+                *geometry_distance = hit_ray_AABB( pos, dir, linac.A_bank_aabb ); // Bounding box
+            }
+            else
+            {
+                *geometry_id = m_write_geom_nav( *geometry_id, INSIDE_MESH );
+                *geometry_id = m_write_geom_type( *geometry_id, IN_BANK_A );
+                *geometry_id = m_write_geom_index( *geometry_id, ui16( geom_index ) );
+            }
 
             return;
         }
 
         if ( in_obj == IN_BANK_B )
         {
-            // Mother volume (bounding box)
-            in_obj = IN_NOTHING;
-            navigation = OUTSIDE_MESH;
-            *geometry_distance = hit_ray_AABB( pos, dir, linac.B_bank_aabb );
-
+            // Loop over leaves
             ileaf = 0; while( ileaf < linac.B_nb_leaves )
             {
                 // If hit a leaf bounding box
                 if ( test_ray_AABB( pos, dir, linac.B_leaf_aabb[ ileaf ] ) )
                 {
-                    // Loop over triangles
-                    itri = 0; while ( itri < linac.B_leaf_nb_triangles[ ileaf ] )
+
+                    m_transport_mesh( pos, dir, linac.B_leaf_v1, linac.B_leaf_v2, linac.B_leaf_v3,
+                                      linac.B_leaf_index[ ileaf ], linac.B_leaf_nb_triangles[ ileaf ], geom_tol,
+                                      &inside_mesh, &hit_mesh, &distance );
+
+                    // If already inside of one of them
+                    if ( inside_mesh )
                     {
-                        offset = linac.B_leaf_index[ ileaf ];
-                        distance = hit_ray_triangle( pos, dir,
-                                                     linac.B_leaf_v1[ offset+itri ],
-                                                     linac.B_leaf_v2[ offset+itri ],
-                                                     linac.B_leaf_v3[ offset+itri ] );
+                        *geometry_id = m_write_geom_nav( *geometry_id, INSIDE_MESH );
+                        *geometry_id = m_write_geom_type( *geometry_id, IN_BANK_B );
+                        *geometry_id = m_write_geom_index( *geometry_id, ileaf );
+                        *geometry_distance = 0.0;
+                        return;
+                    }
+                    else if ( hit_mesh )
+                    {
+                        // Select the closest
                         if ( distance < *geometry_distance )
                         {
                             *geometry_distance = distance;
-                            in_obj = IN_BANK_B;
                             geom_index = ileaf;
-                            navigation = INSIDE_MESH;
                         }
-                        ++itri;
                     }
+
                 } // in a leaf bounding box
 
                 ++ileaf;
 
             } // each leaf
 
-//            printf( "  Inside bank B: ileaf %i nav %i\n", geom_index, navigation );
-
-            // A neg value, means that the particle is already within the mesh (same boundary that the AABB)
-            if ( *geometry_distance < 0 ) *geometry_distance = 0;
-
-            // store data and return
-            *geometry_id = m_write_geom_nav( *geometry_id, navigation );
-            *geometry_id = m_write_geom_type( *geometry_id, in_obj );
-            *geometry_id = m_write_geom_index( *geometry_id, geom_index );
+            // No leaves were hit
+            if ( geom_index < 0 )
+            {
+                *geometry_id = m_write_geom_nav( *geometry_id, OUTSIDE_MESH );
+                *geometry_id = m_write_geom_type( *geometry_id, IN_NOTHING );
+                *geometry_id = m_write_geom_index( *geometry_id, 0 );
+                *geometry_distance = hit_ray_AABB( pos, dir, linac.B_bank_aabb ); // Bounding box
+            }
+            else
+            {
+                *geometry_id = m_write_geom_nav( *geometry_id, INSIDE_MESH );
+                *geometry_id = m_write_geom_type( *geometry_id, IN_BANK_B );
+                *geometry_id = m_write_geom_index( *geometry_id, ui16( geom_index ) );
+            }
 
             return;
         }
@@ -543,182 +557,94 @@ __host__ __device__ void m_mlc_nav_out_mesh( f32xyz pos, f32xyz dir, LinacData l
 
 
     // Should never reach here
-
 #ifdef DEBUG
     printf("MLC navigation error: out of geometry\n");
 #endif
 
 }
 
-__host__ __device__ void m_mlc_nav_in_mesh( f32xyz pos, f32xyz dir, LinacData linac, ui32 *geometry_id, f32 *geometry_distance )
+__host__ __device__ void m_mlc_nav_in_mesh( f32xyz pos, f32xyz dir, LinacData linac,
+                                            f32 geom_tol,
+                                            ui32 *geometry_id, f32 *geometry_distance )
 {
 
-    *geometry_distance = FLT_MAX;
+    //*geometry_distance = FLT_MAX;
     //*geometry_id = 0;
     //i8 navigation = OUTSIDE_MESH;
-    f32 distance;
 
-    ui32 itri, offset;
+
 
     // Read the geometry
     ui16 in_obj = m_read_geom_type( *geometry_id );
+
+    bool inside_mesh = false;
+    bool hit_mesh = false;
+    f32 distance;
 
 //    printf(" ::: Nav Inside in obj %i\n", in_obj);
 
     if ( in_obj == IN_JAW_X1 )
     {
-        itri = 0; while ( itri < linac.X_jaw_nb_triangles[ 0 ] )
-        {
-            offset = linac.X_jaw_index[ 0 ];
-            distance = hit_ray_triangle( pos, dir, linac.X_jaw_v1[ offset+itri ],
-                                                   linac.X_jaw_v2[ offset+itri ],
-                                                   linac.X_jaw_v3[ offset+itri ] );
-            if ( distance < *geometry_distance && distance >= 0 )
-            {
-                *geometry_distance = distance;
-//                in_obj = IN_NOTHING;
-//                navigation = OUTSIDE_MESH;
-            }
-            ++itri;
-        }
+        m_transport_mesh( pos, dir, linac.X_jaw_v1, linac.X_jaw_v2, linac.X_jaw_v3,
+                          linac.X_jaw_index[ 0 ], linac.X_jaw_nb_triangles[ 0 ], geom_tol,
+                          &inside_mesh, &hit_mesh, &distance );
 
-//        // store data and return
-//        *geometry_id = m_write_geom_nav( *geometry_id, navigation );
-//        *geometry_id = m_write_geom_type( *geometry_id, in_obj );
-
-//        return;
+        // If not inside (in case of crossing a tiny piece of matter get the AABB distance)
+        *geometry_distance = ( inside_mesh ) ? distance : hit_ray_AABB( pos, dir, linac.X_jaw_aabb[ 0 ] );
     }
 
     else if ( in_obj == IN_JAW_X2 )
     {
-        itri = 0; while ( itri < linac.X_jaw_nb_triangles[ 1 ] )
-        {
-            offset = linac.X_jaw_index[ 1 ];
-            distance = hit_ray_triangle( pos, dir, linac.X_jaw_v1[ offset+itri ],
-                                                   linac.X_jaw_v2[ offset+itri ],
-                                                   linac.X_jaw_v3[ offset+itri ] );
-            if ( distance < *geometry_distance && distance >= 0 )
-            {
-                *geometry_distance = distance;
-//                in_obj = IN_NOTHING;
-//                navigation = OUTSIDE_MESH;
-            }
-            ++itri;
-        }
+        m_transport_mesh( pos, dir, linac.X_jaw_v1, linac.X_jaw_v2, linac.X_jaw_v3,
+                          linac.X_jaw_index[ 1 ], linac.X_jaw_nb_triangles[ 1 ], geom_tol,
+                          &inside_mesh, &hit_mesh, &distance );
 
-//        // store data and return
-//        *geometry_id = m_write_geom_nav( *geometry_id, navigation );
-//        *geometry_id = m_write_geom_type( *geometry_id, in_obj );
-
-//        return;
+        // If not inside (in case of crossing a tiny piece of matter get the AABB distance)
+        *geometry_distance = ( inside_mesh ) ? distance : hit_ray_AABB( pos, dir, linac.X_jaw_aabb[ 1 ] );
     }
 
     else if ( in_obj == IN_JAW_Y1 )
     {
-        itri = 0; while ( itri < linac.Y_jaw_nb_triangles[ 0 ] )
-        {
-            offset = linac.Y_jaw_index[ 0 ];
-            distance = hit_ray_triangle( pos, dir, linac.Y_jaw_v1[ offset+itri ],
-                                                   linac.Y_jaw_v2[ offset+itri ],
-                                                   linac.Y_jaw_v3[ offset+itri ] );
-            if ( distance < *geometry_distance && distance >= 0 )
-            {
-                *geometry_distance = distance;
-//                in_obj = IN_NOTHING;
-//                navigation = OUTSIDE_MESH;
-            }
-            ++itri;
-        }
+        m_transport_mesh( pos, dir, linac.Y_jaw_v1, linac.Y_jaw_v2, linac.Y_jaw_v3,
+                          linac.Y_jaw_index[ 0 ], linac.Y_jaw_nb_triangles[ 0 ], geom_tol,
+                          &inside_mesh, &hit_mesh, &distance );
 
-//        // store data and return
-//        *geometry_id = m_write_geom_nav( *geometry_id, navigation );
-//        *geometry_id = m_write_geom_type( *geometry_id, in_obj );
-
-//        return;
+        // If not inside (in case of crossing a tiny piece of matter get the AABB distance)
+        *geometry_distance = ( inside_mesh ) ? distance : hit_ray_AABB( pos, dir, linac.Y_jaw_aabb[ 0 ] );
     }
 
     else if ( in_obj == IN_JAW_Y2 )
     {
-        itri = 0; while ( itri < linac.Y_jaw_nb_triangles[ 1 ] )
-        {
-            offset = linac.Y_jaw_index[ 1 ];
-            distance = hit_ray_triangle( pos, dir, linac.Y_jaw_v1[ offset+itri ],
-                                                   linac.Y_jaw_v2[ offset+itri ],
-                                                   linac.Y_jaw_v3[ offset+itri ] );
-            if ( distance < *geometry_distance && distance >= 0 )
-            {
-                *geometry_distance = distance;
-//                in_obj = IN_NOTHING;
-//                navigation = OUTSIDE_MESH;
-            }
-            ++itri;
-        }
+        m_transport_mesh( pos, dir, linac.Y_jaw_v1, linac.Y_jaw_v2, linac.Y_jaw_v3,
+                          linac.Y_jaw_index[ 1 ], linac.Y_jaw_nb_triangles[ 1 ], geom_tol,
+                          &inside_mesh, &hit_mesh, &distance );
 
-//        // store data and return
-//        *geometry_id = m_write_geom_nav( *geometry_id, navigation );
-//        *geometry_id = m_write_geom_type( *geometry_id, in_obj );
-
-//        return;
+        // If not inside (in case of crossing a tiny piece of matter get the AABB distance)
+        *geometry_distance = ( inside_mesh ) ? distance : hit_ray_AABB( pos, dir, linac.Y_jaw_aabb[ 1 ] );
     }
 
     else if ( in_obj == IN_BANK_A )
     {
         ui16 ileaf = m_read_geom_index( *geometry_id );
 
-        // Loop over triangles
-        itri = 0; while ( itri < linac.A_leaf_nb_triangles[ ileaf ] )
-        {
-            offset = linac.A_leaf_index[ ileaf ];
-            distance = hit_ray_triangle( pos, dir,
-                                         linac.A_leaf_v1[ offset+itri ],
-                                         linac.A_leaf_v2[ offset+itri ],
-                                         linac.A_leaf_v3[ offset+itri ] );
-            if ( distance < *geometry_distance && distance >= 0 )
-            {
-                *geometry_distance = distance;
-//                in_obj = IN_NOTHING;
-//                navigation = OUTSIDE_MESH;
-            }
-            ++itri;
-        }
+        m_transport_mesh( pos, dir, linac.A_leaf_v1, linac.A_leaf_v2, linac.A_leaf_v3,
+                          linac.A_leaf_index[ ileaf ], linac.A_leaf_nb_triangles[ ileaf ], geom_tol,
+                          &inside_mesh, &hit_mesh, &distance );
 
-//        // store data and return
-//        *geometry_id = m_write_geom_nav( *geometry_id, navigation );
-//        *geometry_id = m_write_geom_type( *geometry_id, in_obj );
-//        *geometry_id = m_write_geom_index( *geometry_id, 0 );
-
-//        return;
+        // If not inside (in case of crossing a tiny piece of matter get the AABB distance)
+        *geometry_distance = ( inside_mesh ) ? distance : hit_ray_AABB( pos, dir, linac.A_leaf_aabb[ ileaf ] );
     }
 
     else if ( in_obj == IN_BANK_B )
     {
         ui16 ileaf = m_read_geom_index( *geometry_id );
 
-        // Loop over triangles
-        itri = 0; while ( itri < linac.B_leaf_nb_triangles[ ileaf ] )
-        {
-            offset = linac.B_leaf_index[ ileaf ];
-            distance = hit_ray_triangle( pos, dir,
-                                         linac.B_leaf_v1[ offset+itri ],
-                                         linac.B_leaf_v2[ offset+itri ],
-                                         linac.B_leaf_v3[ offset+itri ] );
-            if ( distance < *geometry_distance && distance >= 0 )
-            {
-                *geometry_distance = distance;
-//                in_obj = IN_NOTHING;
-//                navigation = OUTSIDE_MESH;
-            }
-            ++itri;
-        }
+        m_transport_mesh( pos, dir, linac.B_leaf_v1, linac.B_leaf_v2, linac.B_leaf_v3,
+                          linac.B_leaf_index[ ileaf ], linac.B_leaf_nb_triangles[ ileaf ], geom_tol,
+                          &inside_mesh, &hit_mesh, &distance );
 
-//        // store data and return
-//        *geometry_id = m_write_geom_nav( *geometry_id, navigation );
-//        *geometry_id = m_write_geom_type( *geometry_id, in_obj );
-//        *geometry_id = m_write_geom_index( *geometry_id, 0 );
-
-//        printf(" ::: Nav Inside in Bank B dist %f\n", *geometry_distance);
-
-//        return;
+        // If not inside (in case of crossing a tiny piece of matter get the AABB distance)
+        *geometry_distance = ( inside_mesh ) ? distance : hit_ray_AABB( pos, dir, linac.B_leaf_aabb[ ileaf ] );
     }
 
     else
@@ -729,13 +655,9 @@ __host__ __device__ void m_mlc_nav_in_mesh( f32xyz pos, f32xyz dir, LinacData li
         #endif
     }
 
-    // If dist is equal to FLT_MAX, this means that the particle is already outside (ex. very thin mesh corner)
-    if ( *geometry_distance == FLT_MAX ) *geometry_distance = 0.0;
-
-    // store data and return
     *geometry_id = m_write_geom_nav( *geometry_id, OUTSIDE_MESH );
     *geometry_id = m_write_geom_type( *geometry_id, IN_NOTHING );
-    *geometry_id = m_write_geom_index( *geometry_id, 0 );
+    return;
 
 }
 
@@ -765,7 +687,7 @@ __host__ __device__ void MPLINACN::track_to_out( ParticlesData &particles, Linac
 
     i16 mat_id = ( navigation == INSIDE_MESH ) ? 0 : -1;   // 0 MLC mat, -1 not mat around the LINAC (vacuum)
 
-    if (id==92) printf("id %i  - mat id %i - navigation %i\n", id, mat_id, navigation);
+//    if (id==92) printf("id %i  - mat id %i - navigation %i\n", id, mat_id, navigation);
 
     //// Find next discrete interaction ///////////////////////////////////////
 
@@ -787,15 +709,15 @@ __host__ __device__ void MPLINACN::track_to_out( ParticlesData &particles, Linac
 
     if ( navigation == INSIDE_MESH )
     {
-        if (id==92) printf("id %i - inside mesh - in obj %i\n", id, m_read_geom_type( next_geometry_id ));
-        m_mlc_nav_in_mesh( pos, dir, linac, &next_geometry_id, &boundary_distance );
-        if (id==92) printf("id %i - inside mesh - dist %f\n", id, boundary_distance );
+//        if (id==92) printf("id %i - inside mesh - in obj %i\n", id, m_read_geom_type( next_geometry_id ));
+        m_mlc_nav_in_mesh( pos, dir, linac, parameters.geom_tolerance, &next_geometry_id, &boundary_distance );
+//        if (id==92) printf("id %i - inside mesh - dist %f\n", id, boundary_distance );
 
     }
     else
     {
-        m_mlc_nav_out_mesh( pos, dir, linac, &next_geometry_id, &boundary_distance );
-        if (id==92) printf("id %i - outside mesh dist %f - hit obj %i\n", id, boundary_distance, m_read_geom_type( next_geometry_id ) );
+        m_mlc_nav_out_mesh( pos, dir, linac, parameters.geom_tolerance, &next_geometry_id, &boundary_distance );
+//        if (id==92) printf("id %i - outside mesh dist %f - hit obj %i\n", id, boundary_distance, m_read_geom_type( next_geometry_id ) );
     }
 
     if ( boundary_distance <= next_interaction_distance )
@@ -806,7 +728,7 @@ __host__ __device__ void MPLINACN::track_to_out( ParticlesData &particles, Linac
 
     //// Move particle //////////////////////////////////////////////////////
 
-    if (id==92) printf( "id %i cur pos %f %f %f next dist %f\n", id, pos.x, pos.y, pos.z, next_interaction_distance );
+//    if (id==92) printf( "id %i cur pos %f %f %f next dist %f\n", id, pos.x, pos.y, pos.z, next_interaction_distance );
 
     // get the new position
     pos = fxyz_add ( pos, fxyz_scale ( dir, next_interaction_distance ) );
@@ -836,7 +758,7 @@ __host__ __device__ void MPLINACN::track_to_out( ParticlesData &particles, Linac
     {
 //        printf(" ---# phys effect\n");
 
-        if (id==92) printf("id %i phys effect\n", id);
+//        if (id==92) printf("id %i phys effect\n", id);
 
         // Resolve discrete process
         SecParticle electron = photon_resolve_discrete_process ( particles, parameters, photon_CS_table,
@@ -855,7 +777,7 @@ __host__ __device__ void MPLINACN::track_to_out( ParticlesData &particles, Linac
     {
 //        printf(" ---# geom effect\n");
 
-        if (id==92) printf("id %i geom effect\n", id);
+//        if (id==92) printf("id %i geom effect\n", id);
 
         // Update geometry id
         particles.geometry_id[ id ] = next_geometry_id;

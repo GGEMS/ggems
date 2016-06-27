@@ -25,7 +25,11 @@
 __host__ __device__ void cone_beam_ct_source( ParticlesData particles, ui8 ptype,
                                               f32 *spectrum_E, f32 *spectrum_CDF, ui32 nb_of_energy_bins, f32 aperture,
                                               f32xyz foc, f32matrix44 transform, ui32 id )
-{
+{        
+    // Apply rotation
+    //f32xyz d = fxyz_rotate_euler(make_f32xyz(dx, dy, dz), make_f32xyz(rphi, rtheta, rpsi));
+
+
     // Get deflection (local)
     f32 phi = prng_uniform( particles, id );
     f32 theta = prng_uniform( particles, id );
@@ -45,6 +49,9 @@ __host__ __device__ void cone_beam_ct_source( ParticlesData particles, ui8 ptype
     // Apply deflection (global)
     dir = rotateUz( rd, dir );
     dir = fxyz_unit( dir );
+
+//    // Apply rotation transformation (local to global)
+//    f32xyz dir = fxyz_local_to_global_direction( transform, rd );
 
     // Postition with focal (local)
     gbl_pos.x = foc.x * ( prng_uniform( particles, id ) - 0.5f );
