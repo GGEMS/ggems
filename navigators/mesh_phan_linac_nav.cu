@@ -118,6 +118,84 @@ __host__ __device__ ui32 m_write_geom_nav( ui32 geometry, ui8 nav )
     return ( geometry & 0x0FFFFFFF ) | ( nav << 28 ) ;
 }
 
+__host__ __device__ void m_transport_mesh( f32xyz pos, f32xyz dir,
+                                           f32xyz *v1, f32xyz *v2, f32xyz *v3, ui32 offset, ui32 nb_tri,
+                                           f32 geom_tol,
+                                           bool *inside, bool *hit, f32 *distance )
+{
+    f32 cur_distance, tmin, tmax;
+
+    tmin =  FLT_MAX;
+    tmax = -FLT_MAX;
+
+    // Loop over triangles
+    ui32 itri = 0; while ( itri < nb_tri )
+    {
+        cur_distance = hit_ray_triangle( pos, dir, v1[ offset+itri ], v2[ offset+itri ], v3[ offset+itri ] );
+        tmin = ( cur_distance < tmin ) ? cur_distance : tmin;
+        tmax = ( cur_distance > tmax ) ? cur_distance : tmax;
+        ++itri;
+    }
+
+    // Analyse tmin and tmax
+
+    //   tmin = tmax = 0
+    // -------(+)------>
+    //       (   )
+    if ( tmin < 0.0 && tmin > -geom_tol && tmax > 0.0 && tmax < geom_tol  )
+    {
+        *inside = false;
+        *hit = false;
+        *distance = FLT_MAX;
+        return;
+    }
+
+    //
+    //  tmin +inf   tmax -inf
+    //
+    // ---+----->
+    //
+    //  (     )
+    if ( tmin > 0.0 && tmax < 0.0 )
+    {
+        *inside = false;
+        *hit = false;
+        *distance = FLT_MAX;
+        return;
+    }
+
+    //    tmin       tmax
+    //  ----(----+----)--->
+    if ( tmin < 0.0 && tmax > 0.0 )
+    {
+        *inside = true;
+        *hit = true;
+        *distance = tmax;
+        return;
+    }
+
+    //      tmin   tmax
+    // --+---(------)--->
+    if ( tmin > 0.0 && tmax > 0.0 )
+    {
+        *inside = false;
+        *hit = true;
+        *distance = tmin;
+        return;
+    }
+
+    //     tmin   tmax
+    // -----(-------)--+--->
+    if ( tmin < 0.0 && tmax < 0.0 )
+    {
+        *inside = false;
+        *hit = false;
+        *distance = FLT_MAX;
+        return;
+    }
+
+}
+
 __host__ __device__ void m_mlc_nav_out_mesh( f32xyz pos, f32xyz dir, LinacData linac, ui32 *geometry_id, f32 *geometry_distance )
 {
 
@@ -161,12 +239,12 @@ __host__ __device__ void m_mlc_nav_out_mesh( f32xyz pos, f32xyz dir, LinacData l
         in_obj = IN_BANK_B;
     }
 
-    printf( " ---# In aabb %i\n", in_obj );
+//    printf( " ---# In aabb %i\n", in_obj );
 
     // If the particle is outside the MLC element, then get the clostest bounding box //////////
 
     *geometry_distance = FLT_MAX;
-    *geometry_id = 0;
+    //*geometry_id = 0;
     ui8 navigation;
     ui16 geom_index = 0;
     f32 distance;
@@ -176,7 +254,9 @@ __host__ __device__ void m_mlc_nav_out_mesh( f32xyz pos, f32xyz dir, LinacData l
         // Mother volume (AABB of the LINAC)
         *geometry_distance = hit_ray_AABB( pos, dir, linac.aabb );
 
-        printf("  dist to linac aabb %f\n", *geometry_distance );
+//        if (*geometry_distance < 0.0) printf(" LINAC WARNING %f\n", *geometry_distance);
+
+//        printf("  dist to linac aabb %f\n", *geometry_distance );
 
         if ( linac.X_nb_jaw != 0 )
         {
@@ -185,6 +265,8 @@ __host__ __device__ void m_mlc_nav_out_mesh( f32xyz pos, f32xyz dir, LinacData l
             {
                 *geometry_distance = distance;
             }
+
+//            if (*geometry_distance < 0.0) printf(" JAW X1 WARNING %f\n", *geometry_distance);
 
             distance = hit_ray_AABB( pos, dir, linac.X_jaw_aabb[ 1 ] );
             if ( distance < *geometry_distance )
@@ -222,6 +304,7 @@ __host__ __device__ void m_mlc_nav_out_mesh( f32xyz pos, f32xyz dir, LinacData l
 
         // Store data and return
         *geometry_id = m_write_geom_nav( *geometry_id, OUTSIDE_MESH );
+        *geometry_id = m_write_geom_type( *geometry_id, in_obj );
 
         return;
     }
@@ -254,6 +337,9 @@ __host__ __device__ void m_mlc_nav_out_mesh( f32xyz pos, f32xyz dir, LinacData l
                 ++itri;
             }
 
+            // A neg value, means that the particle is already within the mesh (same boundary that the AABB)
+            if ( *geometry_distance < 0 ) *geometry_distance = 0;
+
             // store data and return
             *geometry_id = m_write_geom_nav( *geometry_id, navigation );
             *geometry_id = m_write_geom_type( *geometry_id, in_obj );
@@ -282,6 +368,9 @@ __host__ __device__ void m_mlc_nav_out_mesh( f32xyz pos, f32xyz dir, LinacData l
                 }
                 ++itri;
             }
+
+            // A neg value, means that the particle is already within the mesh (same boundary that the AABB)
+            if ( *geometry_distance < 0 ) *geometry_distance = 0;
 
             // store data and return
             *geometry_id = m_write_geom_nav( *geometry_id, navigation );
@@ -312,6 +401,9 @@ __host__ __device__ void m_mlc_nav_out_mesh( f32xyz pos, f32xyz dir, LinacData l
                 ++itri;
             }
 
+            // A neg value, means that the particle is already within the mesh (same boundary that the AABB)
+            if ( *geometry_distance < 0 ) *geometry_distance = 0;
+
             // store data and return
             *geometry_id = m_write_geom_nav( *geometry_id, navigation );
             *geometry_id = m_write_geom_type( *geometry_id, in_obj );
@@ -340,6 +432,9 @@ __host__ __device__ void m_mlc_nav_out_mesh( f32xyz pos, f32xyz dir, LinacData l
                 }
                 ++itri;
             }
+
+            // A neg value, means that the particle is already within the mesh (same boundary that the AABB)
+            if ( *geometry_distance < 0 ) *geometry_distance = 0;
 
             // store data and return
             *geometry_id = m_write_geom_nav( *geometry_id, navigation );
@@ -383,7 +478,10 @@ __host__ __device__ void m_mlc_nav_out_mesh( f32xyz pos, f32xyz dir, LinacData l
 
             } // each leaf
 
-            printf( "  Inside bank A: ileaf %i nav %i\n", geom_index, navigation );
+//            printf( "  Inside bank A: ileaf %i nav %i\n", geom_index, navigation );
+
+            // A neg value, means that the particle is already within the mesh (same boundary that the AABB)
+            if ( *geometry_distance < 0 ) *geometry_distance = 0;
 
             // store data and return
             *geometry_id = m_write_geom_nav( *geometry_id, navigation );
@@ -428,7 +526,10 @@ __host__ __device__ void m_mlc_nav_out_mesh( f32xyz pos, f32xyz dir, LinacData l
 
             } // each leaf
 
-            printf( "  Inside bank A: ileaf %i nav %i\n", geom_index, navigation );
+//            printf( "  Inside bank B: ileaf %i nav %i\n", geom_index, navigation );
+
+            // A neg value, means that the particle is already within the mesh (same boundary that the AABB)
+            if ( *geometry_distance < 0 ) *geometry_distance = 0;
 
             // store data and return
             *geometry_id = m_write_geom_nav( *geometry_id, navigation );
@@ -453,8 +554,8 @@ __host__ __device__ void m_mlc_nav_in_mesh( f32xyz pos, f32xyz dir, LinacData li
 {
 
     *geometry_distance = FLT_MAX;
-    *geometry_id = 0;
-    ui8 navigation = OUTSIDE_MESH;
+    //*geometry_id = 0;
+    //i8 navigation = OUTSIDE_MESH;
     f32 distance;
 
     ui32 itri, offset;
@@ -462,7 +563,7 @@ __host__ __device__ void m_mlc_nav_in_mesh( f32xyz pos, f32xyz dir, LinacData li
     // Read the geometry
     ui16 in_obj = m_read_geom_type( *geometry_id );
 
-    printf(" ::: Nav Inside in obj %i\n", in_obj);
+//    printf(" ::: Nav Inside in obj %i\n", in_obj);
 
     if ( in_obj == IN_JAW_X1 )
     {
@@ -472,23 +573,23 @@ __host__ __device__ void m_mlc_nav_in_mesh( f32xyz pos, f32xyz dir, LinacData li
             distance = hit_ray_triangle( pos, dir, linac.X_jaw_v1[ offset+itri ],
                                                    linac.X_jaw_v2[ offset+itri ],
                                                    linac.X_jaw_v3[ offset+itri ] );
-            if ( distance < *geometry_distance )
+            if ( distance < *geometry_distance && distance >= 0 )
             {
                 *geometry_distance = distance;
-                in_obj = IN_NOTHING;
-                navigation = OUTSIDE_MESH;
+//                in_obj = IN_NOTHING;
+//                navigation = OUTSIDE_MESH;
             }
             ++itri;
         }
 
-        // store data and return
-        *geometry_id = m_write_geom_nav( *geometry_id, navigation );
-        *geometry_id = m_write_geom_type( *geometry_id, in_obj );
+//        // store data and return
+//        *geometry_id = m_write_geom_nav( *geometry_id, navigation );
+//        *geometry_id = m_write_geom_type( *geometry_id, in_obj );
 
-        return;
+//        return;
     }
 
-    if ( in_obj == IN_JAW_X2 )
+    else if ( in_obj == IN_JAW_X2 )
     {
         itri = 0; while ( itri < linac.X_jaw_nb_triangles[ 1 ] )
         {
@@ -496,23 +597,23 @@ __host__ __device__ void m_mlc_nav_in_mesh( f32xyz pos, f32xyz dir, LinacData li
             distance = hit_ray_triangle( pos, dir, linac.X_jaw_v1[ offset+itri ],
                                                    linac.X_jaw_v2[ offset+itri ],
                                                    linac.X_jaw_v3[ offset+itri ] );
-            if ( distance < *geometry_distance )
+            if ( distance < *geometry_distance && distance >= 0 )
             {
                 *geometry_distance = distance;
-                in_obj = IN_NOTHING;
-                navigation = OUTSIDE_MESH;
+//                in_obj = IN_NOTHING;
+//                navigation = OUTSIDE_MESH;
             }
             ++itri;
         }
 
-        // store data and return
-        *geometry_id = m_write_geom_nav( *geometry_id, navigation );
-        *geometry_id = m_write_geom_type( *geometry_id, in_obj );
+//        // store data and return
+//        *geometry_id = m_write_geom_nav( *geometry_id, navigation );
+//        *geometry_id = m_write_geom_type( *geometry_id, in_obj );
 
-        return;
+//        return;
     }
 
-    if ( in_obj == IN_JAW_Y1 )
+    else if ( in_obj == IN_JAW_Y1 )
     {
         itri = 0; while ( itri < linac.Y_jaw_nb_triangles[ 0 ] )
         {
@@ -520,23 +621,23 @@ __host__ __device__ void m_mlc_nav_in_mesh( f32xyz pos, f32xyz dir, LinacData li
             distance = hit_ray_triangle( pos, dir, linac.Y_jaw_v1[ offset+itri ],
                                                    linac.Y_jaw_v2[ offset+itri ],
                                                    linac.Y_jaw_v3[ offset+itri ] );
-            if ( distance < *geometry_distance )
+            if ( distance < *geometry_distance && distance >= 0 )
             {
                 *geometry_distance = distance;
-                in_obj = IN_NOTHING;
-                navigation = OUTSIDE_MESH;
+//                in_obj = IN_NOTHING;
+//                navigation = OUTSIDE_MESH;
             }
             ++itri;
         }
 
-        // store data and return
-        *geometry_id = m_write_geom_nav( *geometry_id, navigation );
-        *geometry_id = m_write_geom_type( *geometry_id, in_obj );
+//        // store data and return
+//        *geometry_id = m_write_geom_nav( *geometry_id, navigation );
+//        *geometry_id = m_write_geom_type( *geometry_id, in_obj );
 
-        return;
+//        return;
     }
 
-    if ( in_obj == IN_JAW_Y2 )
+    else if ( in_obj == IN_JAW_Y2 )
     {
         itri = 0; while ( itri < linac.Y_jaw_nb_triangles[ 1 ] )
         {
@@ -544,23 +645,23 @@ __host__ __device__ void m_mlc_nav_in_mesh( f32xyz pos, f32xyz dir, LinacData li
             distance = hit_ray_triangle( pos, dir, linac.Y_jaw_v1[ offset+itri ],
                                                    linac.Y_jaw_v2[ offset+itri ],
                                                    linac.Y_jaw_v3[ offset+itri ] );
-            if ( distance < *geometry_distance )
+            if ( distance < *geometry_distance && distance >= 0 )
             {
                 *geometry_distance = distance;
-                in_obj = IN_NOTHING;
-                navigation = OUTSIDE_MESH;
+//                in_obj = IN_NOTHING;
+//                navigation = OUTSIDE_MESH;
             }
             ++itri;
         }
 
-        // store data and return
-        *geometry_id = m_write_geom_nav( *geometry_id, navigation );
-        *geometry_id = m_write_geom_type( *geometry_id, in_obj );
+//        // store data and return
+//        *geometry_id = m_write_geom_nav( *geometry_id, navigation );
+//        *geometry_id = m_write_geom_type( *geometry_id, in_obj );
 
-        return;
+//        return;
     }
 
-    if ( in_obj == IN_BANK_A )
+    else if ( in_obj == IN_BANK_A )
     {
         ui16 ileaf = m_read_geom_index( *geometry_id );
 
@@ -572,24 +673,24 @@ __host__ __device__ void m_mlc_nav_in_mesh( f32xyz pos, f32xyz dir, LinacData li
                                          linac.A_leaf_v1[ offset+itri ],
                                          linac.A_leaf_v2[ offset+itri ],
                                          linac.A_leaf_v3[ offset+itri ] );
-            if ( distance < *geometry_distance )
+            if ( distance < *geometry_distance && distance >= 0 )
             {
                 *geometry_distance = distance;
-                in_obj = IN_NOTHING;
-                navigation = OUTSIDE_MESH;
+//                in_obj = IN_NOTHING;
+//                navigation = OUTSIDE_MESH;
             }
             ++itri;
         }
 
-        // store data and return
-        *geometry_id = m_write_geom_nav( *geometry_id, navigation );
-        *geometry_id = m_write_geom_type( *geometry_id, in_obj );
-        *geometry_id = m_write_geom_index( *geometry_id, 0 );
+//        // store data and return
+//        *geometry_id = m_write_geom_nav( *geometry_id, navigation );
+//        *geometry_id = m_write_geom_type( *geometry_id, in_obj );
+//        *geometry_id = m_write_geom_index( *geometry_id, 0 );
 
-        return;
+//        return;
     }
 
-    if ( in_obj == IN_BANK_B )
+    else if ( in_obj == IN_BANK_B )
     {
         ui16 ileaf = m_read_geom_index( *geometry_id );
 
@@ -601,31 +702,40 @@ __host__ __device__ void m_mlc_nav_in_mesh( f32xyz pos, f32xyz dir, LinacData li
                                          linac.B_leaf_v1[ offset+itri ],
                                          linac.B_leaf_v2[ offset+itri ],
                                          linac.B_leaf_v3[ offset+itri ] );
-            if ( distance < *geometry_distance )
+            if ( distance < *geometry_distance && distance >= 0 )
             {
                 *geometry_distance = distance;
-                in_obj = IN_NOTHING;
-                navigation = OUTSIDE_MESH;
+//                in_obj = IN_NOTHING;
+//                navigation = OUTSIDE_MESH;
             }
             ++itri;
         }
 
-        // store data and return
-        *geometry_id = m_write_geom_nav( *geometry_id, navigation );
-        *geometry_id = m_write_geom_type( *geometry_id, in_obj );
-        *geometry_id = m_write_geom_index( *geometry_id, 0 );
+//        // store data and return
+//        *geometry_id = m_write_geom_nav( *geometry_id, navigation );
+//        *geometry_id = m_write_geom_type( *geometry_id, in_obj );
+//        *geometry_id = m_write_geom_index( *geometry_id, 0 );
 
-        printf(" ::: Nav Inside in Bank B dist %f\n", *geometry_distance);
+//        printf(" ::: Nav Inside in Bank B dist %f\n", *geometry_distance);
 
-        return;
+//        return;
     }
 
-    // Should never reach here
+    else
+    {
+        // Should never reach here
+        #ifdef DEBUG
+            printf("MLC navigation error: out of geometry\n");
+        #endif
+    }
 
-#ifdef DEBUG
-    printf("MLC navigation error: out of geometry\n");
-#endif
+    // If dist is equal to FLT_MAX, this means that the particle is already outside (ex. very thin mesh corner)
+    if ( *geometry_distance == FLT_MAX ) *geometry_distance = 0.0;
 
+    // store data and return
+    *geometry_id = m_write_geom_nav( *geometry_id, OUTSIDE_MESH );
+    *geometry_id = m_write_geom_type( *geometry_id, IN_NOTHING );
+    *geometry_id = m_write_geom_index( *geometry_id, 0 );
 
 }
 
@@ -655,7 +765,7 @@ __host__ __device__ void MPLINACN::track_to_out( ParticlesData &particles, Linac
 
     i16 mat_id = ( navigation == INSIDE_MESH ) ? 0 : -1;   // 0 MLC mat, -1 not mat around the LINAC (vacuum)
 
-    printf("id %i  - mat id %i - navigation %i\n", id, mat_id, navigation);
+    if (id==92) printf("id %i  - mat id %i - navigation %i\n", id, mat_id, navigation);
 
     //// Find next discrete interaction ///////////////////////////////////////
 
@@ -673,17 +783,19 @@ __host__ __device__ void MPLINACN::track_to_out( ParticlesData &particles, Linac
     /// Get the hit distance of the closest geometry //////////////////////////////////
 
     f32 boundary_distance;
-    ui32 next_geometry_id;
+    ui32 next_geometry_id = particles.geometry_id[ id ];
 
     if ( navigation == INSIDE_MESH )
     {
+        if (id==92) printf("id %i - inside mesh - in obj %i\n", id, m_read_geom_type( next_geometry_id ));
         m_mlc_nav_in_mesh( pos, dir, linac, &next_geometry_id, &boundary_distance );
-        printf("id %i - inside mesh dist %f\n", id, boundary_distance);
+        if (id==92) printf("id %i - inside mesh - dist %f\n", id, boundary_distance );
+
     }
     else
     {
         m_mlc_nav_out_mesh( pos, dir, linac, &next_geometry_id, &boundary_distance );
-        printf("id %i - outside mesh dist %f\n", id, boundary_distance);
+        if (id==92) printf("id %i - outside mesh dist %f - hit obj %i\n", id, boundary_distance, m_read_geom_type( next_geometry_id ) );
     }
 
     if ( boundary_distance <= next_interaction_distance )
@@ -694,7 +806,7 @@ __host__ __device__ void MPLINACN::track_to_out( ParticlesData &particles, Linac
 
     //// Move particle //////////////////////////////////////////////////////
 
-    printf( "id %i cur pos %f %f %f\n", id, pos.x, pos.y, pos.z );
+    if (id==92) printf( "id %i cur pos %f %f %f next dist %f\n", id, pos.x, pos.y, pos.z, next_interaction_distance );
 
     // get the new position
     pos = fxyz_add ( pos, fxyz_scale ( dir, next_interaction_distance ) );
@@ -707,9 +819,9 @@ __host__ __device__ void MPLINACN::track_to_out( ParticlesData &particles, Linac
     particles.py[ id ] = pos.y;
     particles.pz[ id ] = pos.z;
 
-    printf( "id %i pos %f %f %f - aabb %f %f %f %f %f %f\n", id, pos.x, pos.y, pos.z,
-            linac.aabb.xmin, linac.aabb.xmax, linac.aabb.ymin, linac.aabb.ymax,
-            linac.aabb.zmin, linac.aabb.zmax );
+//    printf( "id %i pos %f %f %f - aabb %f %f %f %f %f %f\n", id, pos.x, pos.y, pos.z,
+//            linac.aabb.xmin, linac.aabb.xmax, linac.aabb.ymin, linac.aabb.ymax,
+//            linac.aabb.zmin, linac.aabb.zmax );
 
     // Stop simulation if out of the phantom
     if ( !test_point_AABB_with_tolerance ( pos, linac.aabb, parameters.geom_tolerance ) )
@@ -722,6 +834,10 @@ __host__ __device__ void MPLINACN::track_to_out( ParticlesData &particles, Linac
 
     if ( next_discrete_process != GEOMETRY_BOUNDARY )
     {
+//        printf(" ---# phys effect\n");
+
+        if (id==92) printf("id %i phys effect\n", id);
+
         // Resolve discrete process
         SecParticle electron = photon_resolve_discrete_process ( particles, parameters, photon_CS_table,
                                                                  materials, mat_id, id );
@@ -737,9 +853,16 @@ __host__ __device__ void MPLINACN::track_to_out( ParticlesData &particles, Linac
     }
     else
     {
+//        printf(" ---# geom effect\n");
+
+        if (id==92) printf("id %i geom effect\n", id);
+
         // Update geometry id
         particles.geometry_id[ id ] = next_geometry_id;
     }
+
+    // DEBUG
+    //particles.endsimu[ id ] = PARTICLE_DEAD;
 
 }
 
@@ -989,15 +1112,27 @@ __global__ void MPLINACN::kernel_device_track_to_out( ParticlesData particles, L
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
     if ( id >= particles.size ) return;
 
-
+    // Init geometry ID for navigation
+    particles.geometry_id[ id ] = 0;
 
     // Stepping loop
     if ( nav_within_mlc )
     {
+        // DEBUG
+        ui32 i = 0;
+
         while ( particles.endsimu[ id ] != PARTICLE_DEAD && particles.endsimu[ id ] != PARTICLE_FREEZE )
         {
-            printf("Step\n");
+            //printf("Step\n");
             MPLINACN::track_to_out( particles, linac, materials, photon_CS, parameters, id );
+
+            if ( i > 100 )
+            {
+                printf(" ID %i break loop\n", id );
+                break;
+            }
+
+            ++i;
         }
     }
     else
@@ -1034,6 +1169,9 @@ void MPLINACN::kernel_host_track_to_out( ParticlesData particles, LinacData lina
                                          GlobalSimulationParametersData parameters,
                                          bool nav_within_mlc, ui32 id )
 {
+    // Init geometry ID for navigation
+    particles.geometry_id[ id ] = 0;
+
     // Stepping loop
     if ( nav_within_mlc )
     {
@@ -1066,6 +1204,7 @@ void MPLINACN::kernel_host_track_to_out( ParticlesData particles, LinacData lina
     particles.dx[ id ] = dir.x;
     particles.dy[ id ] = dir.y;
     particles.dz[ id ] = dir.z;
+
 }
 
 ////// Privates /////////////////////////////////////////////////////////////////////////////
