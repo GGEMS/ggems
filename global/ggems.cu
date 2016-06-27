@@ -74,6 +74,7 @@ GGEMS::GGEMS()
     m_parameters.data_h.display_run_time = ENABLED;
     m_parameters.data_h.display_memory_usage = DISABLED;
     m_parameters.data_h.display_energy_cuts = DISABLED;
+    m_parameters.data_h.verbose = ENABLED;
 
     // To know if initialisation was performed
     m_flag_init = false;
@@ -453,6 +454,19 @@ void GGEMS::set_display_in_color( bool flag )
     }
 }
 
+// Main verbose
+void GGEMS::set_verbose( bool flag )
+{
+    if ( flag )
+    {
+        m_parameters.data_h.verbose = ENABLED;
+    }
+    else
+    {
+        m_parameters.data_h.verbose = DISABLED;
+    }
+}
+
 void GGEMS::set_secondaries_level ( ui32 level )
 {
     m_parameters.data_h.nb_of_secondaries = level;
@@ -543,14 +557,27 @@ void GGEMS::m_copy_parameters_cpu2gpu()
 // Init simualtion
 void GGEMS::init_simulation()
 {
+    // Verbose
+    if ( !m_parameters.data_h.verbose )
+    {
+        m_parameters.data_h.display_energy_cuts = DISABLED;
+        m_parameters.data_h.display_in_color = DISABLED;
+        m_parameters.data_h.display_memory_usage = DISABLED;
+        m_parameters.data_h.display_run_time = DISABLED;
+    }
+
     // License and banner
     if (!m_license.info.clearence)
     {
         print_error("Your license has expired or is invalid!\n");
         exit_simulation();
     }
-    print_banner(m_license.info.institution, m_license.info.expired_day, m_license.info.expired_month,
-                 m_license.info.expired_year, "V1.3", m_parameters.data_h );
+
+    if ( m_parameters.data_h.verbose )
+    {
+        print_banner(m_license.info.institution, m_license.info.expired_day, m_license.info.expired_month,
+                     m_license.info.expired_year, "V1.3", m_parameters.data_h );
+    }
 
     // Check
     m_check_mandatory();
@@ -566,7 +593,7 @@ void GGEMS::init_simulation()
     //     ui32 mem = 0;
 
     // CPU PRNG
-    srand ( m_parameters.data_h.seed );
+    srand( m_parameters.data_h.seed );
 
     // Get Nb of batch            
     m_parameters.data_h.size_of_particles_batch = fminf( m_parameters.data_h.nb_of_particles, m_parameters.data_h.size_of_particles_batch );
@@ -579,13 +606,14 @@ void GGEMS::init_simulation()
     }
 
     // Print some information
-    GGnewline();
-    GGcout_timestamp();
-    GGcout_version();
-    GGcout_def();
-
-    // Print params
-    GGcout_params( m_parameters.data_h );
+    if ( m_parameters.data_h.verbose )
+    {
+        GGnewline();
+        GGcout_timestamp();
+        GGcout_version();
+        GGcout_def();
+        GGcout_params( m_parameters.data_h );
+    }
 
     //// Need to clean this bunch of crap - JB
 
@@ -726,17 +754,13 @@ void GGEMS::start_simulation()
     while ( ibatch < m_parameters.data_h.nb_of_batches )
     {
 
-        GGcout << "----> Launching batch " << ibatch+1 << "/" << m_parameters.data_h.nb_of_batches << GGendl;
-        // Get primaries
-        //GGcout << "      Number of particles to generate: " << m_parameters.data_h.size_of_particles_batch << GGendl;
-        GGcout << "      + Generating " << m_parameters.data_h.size_of_particles_batch << " particles from "
-               << m_source->get_name() << GGendl;
-        //         progress_bar(progress,"generate primaries");
+        if ( m_parameters.data_h.verbose )
+        {
+            GGcout << "----> Launching batch " << ibatch+1 << "/" << m_parameters.data_h.nb_of_batches << GGendl;
+            GGcout << "      + Generating " << m_parameters.data_h.size_of_particles_batch << " particles from "
+                   << m_source->get_name() << GGendl;
+        }
         m_source->get_primaries_generator( m_particles_manager.particles );
-
-        //m_particles_manager.copy_gpu2cpu( m_particles_manager.particles );
-        //m_particles_manager.print_stack( m_particles_manager.particles );
-
 
         // Nav between source and phantom
         if ( m_phantoms.size() != 0 )
@@ -744,50 +768,51 @@ void GGEMS::start_simulation()
             ui16 i = 0; while ( i < m_phantoms.size() )
             {
                 // Nav between source to phantom
-                GGcout << "      + Navigation to the phantom " << m_phantoms[ i ]->get_name()
-                       << " (" << i << ")" << GGendl;
+                if ( m_parameters.data_h.verbose )
+                {
+                    GGcout << "      + Navigation to the phantom " << m_phantoms[ i ]->get_name()
+                           << " (" << i << ")" << GGendl;
+                }
                 m_phantoms[ i ]->track_to_in( m_particles_manager.particles );
 
                 // Nav within the phantom
-                GGcout << "      + Navigation within the phantom " << m_phantoms[ i ]->get_name()
-                       << " (" << i << ")" << GGendl;
+                if ( m_parameters.data_h.verbose )
+                {
+                    GGcout << "      + Navigation within the phantom " << m_phantoms[ i ]->get_name()
+                           << " (" << i << ")" << GGendl;
+                }
                 m_phantoms[ i ]->track_to_out( m_particles_manager.particles );
 
                 ++i;
             }
         }
 
-//        if ( m_phantom )
-//        {
-//            // Nav between source to phantom
-//            GGcout << "      Navigation between the source and the phantom ..." << GGendl;
-//            m_phantom->track_to_in( m_particles_manager.particles );
-
-//            // Nav within the phantom
-//            GGcout << "      Navigation within the phantom ..." << GGendl;
-//            m_phantom->track_to_out( m_particles_manager.particles );
-//        }
-
         // Nav between phantom and detector
         if( m_detector )
         {
-            GGcout << "      + Navigation to the detector " << m_detector->get_name() << GGendl;
+            if ( m_parameters.data_h.verbose )
+            {
+                GGcout << "      + Navigation to the detector " << m_detector->get_name() << GGendl;
+            }
             m_detector->track_to_in( m_particles_manager.particles );
 
-            GGcout << "      + Navigation within the detector " << m_detector->get_name() << GGendl;
+            if ( m_parameters.data_h.verbose )
+            {
+                GGcout << "      + Navigation within the detector " << m_detector->get_name() << GGendl;
+            }
             m_detector->track_to_out( m_particles_manager.particles );
 
-            GGcout << "      + Digitizer from " << m_detector->get_name() << GGendl;
+            if ( m_parameters.data_h.verbose )
+            {
+                GGcout << "      + Digitizer from " << m_detector->get_name() << GGendl;
+            }
             m_detector->digitizer( m_particles_manager.particles );
         }
 
-        GGcout << "----> Batch finished" << GGendl << GGendl;
-        //progress_bar(progress, ibatch , m_parameters.data_h.nb_of_batches);
-
-        //progress += 1./ (float)(m_parameters.data_h.nb_of_batches);
-
-        //             progress += 0.16; // for demonstration only
-        //         }
+        if ( m_parameters.data_h.verbose )
+        {
+            GGcout << "----> Batch finished" << GGendl << GGendl;
+        }
 
         ++ibatch;
     }

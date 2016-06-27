@@ -221,6 +221,7 @@ struct GlobalSimulationParametersData
     bool display_memory_usage;
     bool display_in_color;
     bool display_energy_cuts;
+    bool verbose;
 
     // Transport navigation tolerance
     f32 geom_tolerance;

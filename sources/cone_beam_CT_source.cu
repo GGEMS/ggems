@@ -37,6 +37,8 @@ __host__ __device__ void cone_beam_ct_source( ParticlesData particles, ui8 ptype
     phi  *= gpu_twopi;
     theta = acosf( 1.0f - val_aper * theta );
 
+    //printf("costheta %f\n", cosf(theta));
+
     f32xyz rd = { cosf( phi ) * sinf( theta ),
                   sinf( phi ) * sinf( theta ),
                   cosf( theta ) };
@@ -49,6 +51,8 @@ __host__ __device__ void cone_beam_ct_source( ParticlesData particles, ui8 ptype
     // Apply deflection (global)
     dir = rotateUz( rd, dir );
     dir = fxyz_unit( dir );
+
+    //printf("dir.y %f\n", dir.y);
 
 //    // Apply rotation transformation (local to global)
 //    f32xyz dir = fxyz_local_to_global_direction( transform, rd );
@@ -151,7 +155,7 @@ void ConeBeamCTSource::set_position( f32 px, f32 py, f32 pz )
     m_pos = make_f32xyz( px, py, pz );
 }
 
-void ConeBeamCTSource::set_focal_size(f32 xfoc, f32 yfoc , f32 zfoc)
+void ConeBeamCTSource::set_focal_size(f32 xfoc, f32 yfoc, f32 zfoc)
 {
     m_foc = make_f32xyz( xfoc, yfoc, zfoc );
 }
