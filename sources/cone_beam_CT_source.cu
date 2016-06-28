@@ -25,23 +25,21 @@
 __host__ __device__ void cone_beam_ct_source( ParticlesData particles, ui8 ptype,
                                               f32 *spectrum_E, f32 *spectrum_CDF, ui32 nb_of_energy_bins, f32 aperture,
                                               f32xyz foc, f32matrix44 transform, ui32 id )
-{        
-    // Apply rotation
-    //f32xyz d = fxyz_rotate_euler(make_f32xyz(dx, dy, dz), make_f32xyz(rphi, rtheta, rpsi));
-
+{            
+    // This part is in double precision due to aliasing issue - JB 06/2016
 
     // Get deflection (local)
-    f32 phi = prng_uniform( particles, id );
-    f32 theta = prng_uniform( particles, id );
-    f32 val_aper = 1.0f - cosf( aperture );
-    phi  *= gpu_twopi;
-    theta = acosf( 1.0f - val_aper * theta );
+    f64 phi = prng_uniform( particles, id );
+    f64 theta = prng_uniform( particles, id );
+    f64 val_aper = 1.0f - cos( f64( aperture ) );
+    phi  *= f64( gpu_twopi );
+    theta = acos( f64( 1.0 ) - val_aper * theta );   // Aliasing issue, ( 1 - small number )
 
-    //printf("costheta %f\n", cosf(theta));
+    // From here, simple precision can be used - JB 06/2016
 
     f32xyz rd = { cosf( phi ) * sinf( theta ),
                   sinf( phi ) * sinf( theta ),
-                  cosf( theta ) };
+                  cosf( theta ) };    
 
     // Get direction of the cone beam. The beam is targeted to the isocenter, then
     // the direction is directly related to the position of the source.
@@ -51,11 +49,6 @@ __host__ __device__ void cone_beam_ct_source( ParticlesData particles, ui8 ptype
     // Apply deflection (global)
     dir = rotateUz( rd, dir );
     dir = fxyz_unit( dir );
-
-    //printf("dir.y %f\n", dir.y);
-
-//    // Apply rotation transformation (local to global)
-//    f32xyz dir = fxyz_local_to_global_direction( transform, rd );
 
     // Postition with focal (local)
     gbl_pos.x = foc.x * ( prng_uniform( particles, id ) - 0.5f );
