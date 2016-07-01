@@ -2191,14 +2191,14 @@ void MeshPhanLINACNav::m_configure_linac()
     // Configure the jaws
     if ( m_linac.X_nb_jaw != 0 )
     {
-        m_translate_jaw_x( 0, make_f32xyz( jaw_x_max, 0.0, 0.0 ) );   // X1 ( x > 0 )
-        m_translate_jaw_x( 1, make_f32xyz( jaw_x_min, 0.0, 0.0 ) );   // X2 ( x < 0 )
+        m_translate_jaw_x( 0, make_f32xyz( jaw_x_max * m_linac.scale_ratio, 0.0, 0.0 ) );   // X1 ( x > 0 )
+        m_translate_jaw_x( 1, make_f32xyz( jaw_x_min * m_linac.scale_ratio, 0.0, 0.0 ) );   // X2 ( x < 0 )
     }
 
     if ( m_linac.Y_nb_jaw != 0 )
     {
-        m_translate_jaw_y( 0, make_f32xyz( 0.0, jaw_y_max, 0.0 ) );   // Y1 ( y > 0 )
-        m_translate_jaw_y( 1, make_f32xyz( 0.0, jaw_y_min, 0.0 ) );   // Y2 ( y < 0 )
+        m_translate_jaw_y( 0, make_f32xyz( 0.0, jaw_y_max * m_linac.scale_ratio, 0.0 ) );   // Y1 ( y > 0 )
+        m_translate_jaw_y( 1, make_f32xyz( 0.0, jaw_y_min * m_linac.scale_ratio, 0.0 ) );   // Y2 ( y < 0 )
     }
 
     //// LEAVES BANK A ///////////////////////////////////////////////
@@ -2234,7 +2234,7 @@ void MeshPhanLINACNav::m_configure_linac()
 
             // read data and move the leaf
             keys = m_split_txt( line );
-            m_translate_leaf_A( ileaf++, make_f32xyz( std::stof( keys[ 3 ] ), 0.0, 0.0 ) );
+            m_translate_leaf_A( ileaf++, make_f32xyz( std::stof( keys[ 3 ] ) * m_linac.scale_ratio, 0.0, 0.0 ) );
 
         }
         else
@@ -2287,7 +2287,7 @@ void MeshPhanLINACNav::m_configure_linac()
 
             // read data and move the leaf
             keys = m_split_txt( line );
-            m_translate_leaf_B( ileaf++, make_f32xyz( std::stof( keys[ 3 ] ), 0.0, 0.0 ) );
+            m_translate_leaf_B( ileaf++, make_f32xyz( std::stof( keys[ 3 ] ) * m_linac.scale_ratio, 0.0, 0.0 ) );
 
         }
         else
@@ -2490,6 +2490,11 @@ void MeshPhanLINACNav::set_linac_material( std::string mat_name )
     m_linac_material[ 0 ] = mat_name;
 }
 
+void MeshPhanLINACNav::set_source_to_isodose_distance( f32 dist )
+{
+    m_sid = dist;
+}
+
 LinacData MeshPhanLINACNav::get_linac_geometry()
 {
     return m_linac;
@@ -2570,6 +2575,8 @@ MeshPhanLINACNav::MeshPhanLINACNav ()
 
     m_linac.transform = make_f32matrix44_zeros();
 
+    m_linac.scale_ratio = 1.0;
+
     set_name( "MeshPhanLINACNav" );
     m_mlc_filename = "";
     m_jaw_x_filename = "";
@@ -2581,6 +2588,7 @@ MeshPhanLINACNav::MeshPhanLINACNav ()
     m_loc_pos_jaw_y = make_f32xyz_zeros();
     m_rot_linac = make_f32xyz_zeros();
     m_axis_linac = make_f32matrix33_zeros();
+    m_sid = 0.0f;
 
     m_beam_index = 0;
     m_field_index = 0;
@@ -2698,6 +2706,15 @@ void MeshPhanLINACNav::initialize( GlobalSimulationParameters params )
         m_translate_jaw_y( 0, m_loc_pos_jaw_y );
         m_translate_jaw_y( 1, m_loc_pos_jaw_y );
     }
+
+    // Get scale ratio between MLC frame and isocenter
+    if ( m_sid == 0.0 )
+    {
+        GGcerr << "MeshPanLINACNav: source to isocenter distance must be defined!" << GGendl;
+        exit_simulation();
+    }
+    f32 mlc_dist = fxyz_mag( m_pos_mlc );
+    m_linac.scale_ratio = mlc_dist / m_sid;
 
     // Configure the linac
     m_configure_linac();

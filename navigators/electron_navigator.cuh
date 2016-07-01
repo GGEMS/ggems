@@ -74,10 +74,11 @@ __host__ __device__ f32 eSimpleScattering (f32 xmeanth, f32 x2meanth, ui32 id, P
 
 __host__ __device__ f32 gGeomLengthLimit ( f32 gPath, f32 currentLambda, f32 currentRange, f32 par1, f32 par3 );
 
-__host__ __device__ SecParticle eSampleSecondarieElectron (f32 CutEnergy, ParticlesData &particles, ui32 id);
+__host__ __device__ SecParticle eSampleSecondarieElectron (f32 CutEnergy, ParticlesData &particles, ui32 id );
 
 __host__ __device__
-void eSampleSecondarieGamma ( f32 minEnergy, f32 maxEnergy, ParticlesData &particles, ui32 id, MaterialsTable materials, ui8 id_mat );
+void eSampleSecondarieGamma( f32 minEnergy, f32 maxEnergy, ParticlesData &particles, ui32 id,
+                             MaterialsTable materials, ui8 id_mat );
 
 __host__ __device__ f32xyz CorrUnit ( f32xyz u, f32xyz v,f32 uMom, f32 vMom );
 

@@ -130,8 +130,8 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
 #endif
 
         // Read the different CS, dE/dx tables
-        e_read_CS_table ( mat_id, energy, electron_CS_table, next_discrete_process, table_index,
-                          next_interaction_distance, dedxeIoni, dedxeBrem, erange, lambda, randomnumbereBrem, randomnumbereIoni, parameters );
+        e_read_CS_table( mat_id, energy, electron_CS_table, next_discrete_process, table_index,
+                         next_interaction_distance, dedxeIoni, dedxeBrem, erange, lambda, randomnumbereBrem, randomnumbereIoni, parameters );
 
         // Vertex length
         lengthtoVertex = ( alongStepLength > next_interaction_distance ) ? 0. : next_interaction_distance - alongStepLength;
@@ -195,9 +195,9 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
                                                            vol.xmin, vol.xmax, vol.ymin, vol.ymax, vol.zmin, vol.zmax, parameters.geom_tolerance ) )
                     {
                         particles.endsimu[ part_id ] = PARTICLE_FREEZE;
-                    }
 
-                    return;
+                    }
+                    return;                                                                                                    
                 }
             }
             else
@@ -213,11 +213,17 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
                                                        vol.xmin, vol.xmax, vol.ymin, vol.ymax, vol.zmin, vol.zmax, parameters.geom_tolerance ) )
                 {
                     particles.endsimu[ part_id ] = PARTICLE_FREEZE;
+
+#ifdef DEBUG_TRACK_ID
+                        if ( part_id == DEBUG_TRACK_ID )
+                        {
+                            printf("  ID %i Tracking an electron OUT OF PHANTOM\n", part_id );
+                        }
+#endif
                 }
 
                 return;
             }
-
 
         }
 
@@ -238,7 +244,6 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
             alongStepLength += trueStepLength;
             //totalLength += trueStepLength;
             lastStepisaPhysicEffect = FALSE;
-
         }
         else
         {
@@ -272,7 +277,8 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
             else if ( next_discrete_process == ELECTRON_BREMSSTRAHLUNG )
             {
                 /// TODO return a photon - JB
-                eSampleSecondarieGamma ( parameters.cs_table_min_E, parameters.cs_table_max_E, particles, part_id, materials, mat_id );
+                eSampleSecondarieGamma ( parameters.cs_table_min_E, parameters.cs_table_max_E, particles,
+                                         part_id, materials, mat_id );
                 lastStepisaPhysicEffect = TRUE;
             }
 
@@ -283,7 +289,6 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
             if ( secondary_part.endsimu == PARTICLE_ALIVE &&
                  particles.level[ part_id ] < parameters.nb_of_secondaries && parameters.secondaries_list[ELECTRON] )
             {
-
                 // Get the absolute index into secondary buffer
                 ui32 index_level = part_id * parameters.nb_of_secondaries + ( ui32 ) particles.level[ part_id ];
 
@@ -324,7 +329,6 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
                 {
                     dose_record_standard( dosi, secondary_part.E, particles.px[ part_id ],
                                           particles.py[ part_id ], particles.pz[ part_id ] );
-
                 }
 
 #ifdef DEBUG
@@ -339,8 +343,6 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
 
         } // significant_loss == false
 
-
-
 #ifdef DEBUG
         if ( istep > 100 )
         {
@@ -354,23 +356,8 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
         ++istep;
 #endif
 
-
-#ifdef DEBUG_TRACK_ID
-
-        if ( part_id == DEBUG_TRACK_ID )
-        {
-            //           printf("  ID %i - istep %i - Electron - level %i - E %f keV - pos %f %f %f\n     SignLoss %i - eloss %e - truesteplength %e\n",
-            //                  part_id, istep, particles.level[part_id], particles.E[part_id]/keV,
-            //                  particles.px[ part_id ], particles.py[ part_id ], particles.pz[ part_id ],
-            //                  significant_loss, edep, trueStepLength);
-        }
-
-#endif
-
-
     }
     while ( particles.E[ part_id ] > electronEcut );
-
 
     // Kill the particle
     particles.endsimu[ part_id ] = PARTICLE_DEAD;
@@ -518,7 +505,6 @@ __host__ __device__ void VPDN::track_photon_to_out ( ParticlesData &particles,
 
         if ( electron.endsimu == PARTICLE_ALIVE )
         {
-
             // If secondary enable and enough level space
             if ( particles.level[ part_id ] < parameters.nb_of_secondaries && parameters.secondaries_list[ELECTRON] )
             {
@@ -554,7 +540,6 @@ __host__ __device__ void VPDN::track_photon_to_out ( ParticlesData &particles,
                 // This secondary is not used, then drop its energy
                 dose_record_standard( dosi, electron.E, particles.px[ part_id ],
                                       particles.py[ part_id ], particles.pz[ part_id ] );
-
             }
         }
 
@@ -569,7 +554,8 @@ __global__ void VPDN::kernel_device_track_to_in ( ParticlesData particles, f32 x
                                                   f32 ymin, f32 ymax, f32 zmin, f32 zmax, f32 tolerance )
 {  
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
-    if ( id >= particles.size ) return;    
+    if ( id >= particles.size ) return;
+
     transport_track_to_in_AABB( particles, xmin, xmax, ymin, ymax, zmin, zmax, tolerance, id);
 }
 
@@ -590,6 +576,7 @@ __global__ void VPDN::kernel_device_track_to_out ( ParticlesData particles,
                                                    GlobalSimulationParametersData parameters,
                                                    DoseData dosi )
 {   
+
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
     if ( id >= particles.size ) return;    
 
@@ -598,49 +585,36 @@ __global__ void VPDN::kernel_device_track_to_out ( ParticlesData particles,
     f32 randomnumbereBrem= -logf ( prng_uniform( particles, id ) ); // -log(RN)
     f32 freeLength = 0.0*mm;
 
+#ifdef DEBUG
+    ui32 iter = 0;
+#endif
+
     // Stepping loop - Get out of loop only if the particle was dead and it was a primary
     while ( particles.endsimu[id] != PARTICLE_DEAD && particles.endsimu[id] != PARTICLE_FREEZE )
     {
 
         if ( particles.pname[id] == PHOTON )
         {
-
-#ifdef DEBUG_TRACK_ID
-        if ( id == DEBUG_TRACK_ID )
-        {
-            printf("Tracking a photon\n");
-        }
-#endif
-
             VPDN::track_photon_to_out ( particles, vol, materials, photon_CS_table, parameters, dosi, id );
-
         }
+
         else if ( particles.pname[id] == ELECTRON )
         {
-
-#ifdef DEBUG_TRACK_ID
-        if ( id == DEBUG_TRACK_ID )
-        {
-            printf("ID %i Tracking an electron - level %i - prng %e\n", id, particles.level[id],
-                   prng_uniform( &(particles.prng[id]) ));
-        }
-#endif
             VPDN::track_electron_to_out ( particles, vol, materials, electron_CS_table, parameters, dosi,
                                           randomnumbereIoni, randomnumbereBrem, freeLength, id );
-
-
         }
 
         // Condition if particle is dead and if it was a secondary
         if ( ( ( particles.endsimu[id]==PARTICLE_DEAD ) || ( particles.endsimu[id]==PARTICLE_FREEZE ) ) && ( particles.level[id]>PRIMARY ) )
         {
-
             /// Pull back the particle stored in the secondary buffer to the main one
 
             // Wake up the particle
             particles.endsimu[id] = PARTICLE_ALIVE;
+
             // Earn a higher level
             particles.level[id]  -= 1;
+
             // Get the absolute index into secondary buffer
             ui32 index_level = id * parameters.nb_of_secondaries + ( ui32 ) particles.level[id];
 
@@ -658,11 +632,20 @@ __global__ void VPDN::kernel_device_track_to_out ( ParticlesData particles,
             particles.dy[ id ]    = particles.sec_dy[ index_level ]   ;
             particles.dz[ id ]    = particles.sec_dz[ index_level ]   ;
             particles.pname[ id ] = particles.sec_pname[ index_level ];
-
         }
 
-    }
 
+#ifdef DEBUG
+        ++iter;
+
+        if ( iter > 1000 )
+        {
+            printf("DEBUG MODE ID %i: inf loop in particle (photon and electron) stepping\n", id);
+            return;
+        }
+#endif
+
+    }
 
 }
 
@@ -681,7 +664,9 @@ void VPDN::kernel_host_track_to_out ( ParticlesData particles,
     f32 randomnumbereBrem= -logf ( prng_uniform( particles, id ) ); // -log(RN)
     f32 freeLength = 0.0*mm;
 
-    ui32 step = 0;
+#ifdef DEBUG
+    ui32 iter = 0;
+#endif
 
     // Stepping loop - Get out of loop only if the particle was dead and it was a primary
     while ( particles.endsimu[id] != PARTICLE_DEAD && particles.endsimu[id] != PARTICLE_FREEZE )
@@ -689,24 +674,10 @@ void VPDN::kernel_host_track_to_out ( ParticlesData particles,
 
         if ( particles.pname[id] == PHOTON )
         { 
-#ifdef DEBUG_TRACK_ID
-        if ( id == DEBUG_TRACK_ID )
-        {
-            printf("Tracking a photon\n");
-        }
-#endif
-
             VPDN::track_photon_to_out ( particles, vol, materials, photon_CS_table, parameters, dosi, id );
-
         }
         else if ( particles.pname[id] == ELECTRON )
         {
-#ifdef DEBUG_TRACK_ID
-        if ( id == DEBUG_TRACK_ID )
-        {
-            printf("Tracking an electron\n");
-        }
-#endif
             VPDN::track_electron_to_out ( particles, vol, materials, electron_CS_table, parameters, dosi,
                                           randomnumbereIoni, randomnumbereBrem, freeLength, id );
         }
@@ -741,11 +712,17 @@ void VPDN::kernel_host_track_to_out ( ParticlesData particles,
 
         }
 
-        ++step;
+#ifdef DEBUG
+        ++iter;
 
+        if ( iter > 1000 )
+        {
+            printf("DEBUG MODE ID %i: inf loop in particle (photon and electron) stepping\n", id);
+            return;
+        }
+#endif
 
     }
-
 
 }
 
@@ -862,8 +839,8 @@ void VoxPhanDosiNav::track_to_out ( Particles particles )
     {       
         dim3 threads, grid;
         threads.x = m_params.data_h.gpu_block_size;//
-        grid.x = ( particles.size + m_params.data_h.gpu_block_size - 1 ) / m_params.data_h.gpu_block_size;
-        cudaThreadSynchronize();
+        grid.x = ( particles.size + m_params.data_h.gpu_block_size - 1 ) / m_params.data_h.gpu_block_size;        
+
         VPDN::kernel_device_track_to_out<<<grid, threads>>> ( particles.data_d, m_phantom.data_d, m_materials.data_d,
                                                               m_cross_sections.photon_CS.data_d,
                                                               m_cross_sections.electron_CS.data_d,
@@ -1005,8 +982,5 @@ AabbData VoxPhanDosiNav::get_bounding_box()
 
     return box;
 }
-
-
-#undef DEBUG
 
 #endif

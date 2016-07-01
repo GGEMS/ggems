@@ -406,6 +406,166 @@ f32* Filter::adaptive_median(f32* input,  ui32 nx, ui32 ny, ui32 nz,
 }
 
 
+
+// 3D Resampling by Lanczos3 (uses backwarp mapping)
+#define pi 3.141592653589793238462643383279
+#define SINC(x) ((x)==(0)?1:sin(pi*(x))/(pi*(x)))
+f32* Filter::resampling_lanczos3(f32* input, ui32 nx, ui32 ny, ui32 nz, ui32 new_nx, ui32 new_ny, ui32 new_nz) {
+
+    // init output
+    f32 *output = new f32[ new_nx*new_ny*new_nz ];
+    ui32 i=0; while ( i < new_nx*new_ny*new_nz )
+    {
+        output[ i++ ] = 0.0f;
+    }
+
+    // scale factor
+    f32 scalez = nz / ( f32 )new_nz;
+    f32 scaley = ny / ( f32 )new_ny;
+    f32 scalex = nx / ( f32 )new_nx;
+    i32 stepo = nx*ny;
+    i32 stept = new_nx*new_ny;
+
+    // backward mapping, thus scan from the target
+    i32 x, y, z;
+    i32 xi, yi, zi;
+    f32 xt, yt, zt;
+    i32 u, v, w;
+    i32 wz, wy, wx;
+    f32 p, q, r;
+    f32 dx, dy, dz;
+
+    for ( z = 0; z < new_nz; ++z )
+    {
+        GGcout << "Resmapling: slice " << z+1 << "/" << new_nz << GGendl;
+        zt = ( z + 0.5f ) * scalez - 0.5f;
+        zi = ( i32 )zt;
+
+        for ( y = 0; y < new_ny; ++y )
+        {
+            yt = ( y + 0.5f) * scaley - 0.5f;
+            yi = ( i32 )yt;
+
+            for ( x = 0; x < new_nx; ++x )
+            {
+                xt = ( x + 0.5f ) * scalex - 0.5f;
+                xi = ( i32 )xt;
+
+                // window loop
+                r = 0;
+                for (wz = -2; wz < 4; ++wz)
+                {
+                    w = zi + wz;
+                    if ( w >= nz ) continue;
+                    if ( w < 0 ) continue;
+                    dz = zt - w;
+                    if ( abs( dz ) > 3.0f ) dz = 3.0f;
+                    q = 0;
+
+                    for ( wy = -2; wy < 4; ++wy )
+                    {
+                        v = yi + wy;
+                        if ( v >= ny ) continue;
+                        if ( v < 0 ) continue;
+                        dy = yt - v;
+                        if ( abs( dy ) > 3.0f) dy = 3.0f;
+                        p = 0;
+
+                        for ( wx = -2; wx < 4; ++wx )
+                        {
+                            u = xi + wx;
+                            if ( u >= nx ) continue;
+                            if ( u < 0 ) continue;
+                            dx = xt - u;
+                            if ( abs( dx ) > 3.0f ) dx = 3.0f;
+
+                            p = p + input[ w*stepo + v*nx + u ] * SINC( dx ) * SINC( dx * 0.333333f );
+                        } // wx
+
+                        q = q + p * SINC( dy ) * SINC( dy * 0.333333f );
+
+                    } // wy
+
+                    r = r + q * SINC( dz ) * SINC( dz * 0.333333f );
+
+                } // wz
+
+                // assign the new value
+                output[ z*stept + y*new_nx + x ] = r;
+
+            } // x
+        } // y
+    } // z
+
+    return output;
+
+}
+#undef pi
+#undef SINC
+
+f32* Filter::cropping_vox_around_center( f32* input, ui32 nx, ui32 ny, ui32 nz,
+                                         i32 xmin, i32 xmax, i32 ymin, i32 ymax, i32 zmin, i32 zmax )
+{
+    // get center
+    ui32 cx = nx / 2;
+    ui32 cy = ny / 2;
+    ui32 cz = nz / 2;
+
+    // get params
+    ui32 ojump = nx*ny;
+    ui32 onx = nx;
+
+    // get new dimension
+    nx = xmax-xmin;
+    ny = ymax-ymin;
+    nz = zmax-zmin;
+
+    // init output
+    f32 *output = new f32[ nx*ny*nz ];
+    ui32 i=0; while ( i < nx*ny*nz )
+    {
+        output[ i++ ] = 0.0f;
+    }
+
+    // get abs crop value
+    xmin = cx+xmin; xmax = cx+xmax;
+    ymin = cy+ymin; ymax = cy+ymax;
+    zmin = cz+zmin; zmax = cz+zmax;
+
+    // Cropping
+    ui32 ix, iy, iz, index;
+
+    index = 0;
+    iz = zmin; while ( iz < zmax )
+    {
+        iy = ymin; while ( iy < ymax )
+        {
+            ix = xmin; while ( ix < xmax )
+            {
+                output[ index++ ] = input[ iz*ojump + iy*onx + ix ];
+                ++ix;
+            } // ix
+
+            ++iy;
+        } // iy
+
+        ++iz;
+    } // iz
+
+    return output;
+}
+
+void Filter::capping_values( f32* input, ui32 nx, ui32 ny, ui32 nz, f32 val_min, f32 val_max )
+{
+    ui32 index = nx*ny*nz;
+    ui32 i=0; while ( i < index )
+    {
+        if ( input[ i ] > val_max ) input[ i ] = val_max;
+        if ( input[ i ] < val_min ) input[ i ] = val_min;
+        ++i;
+    }
+}
+
 /// Atomic functions
 
 /*   OLD VERSION

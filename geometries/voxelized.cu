@@ -89,6 +89,8 @@ void VoxelizedPhantom::m_define_materials_from_range(Type *raw_data, std::string
         printf("Error, file %s not found \n", range_name.c_str());
         exit_simulation();
     }
+    f32 min_val =  FLT_MAX;
+    f32 max_val = -FLT_MAX;
     while (file) {
         m_txt_reader.skip_comment(file);
         std::getline(file, line);
@@ -98,6 +100,10 @@ void VoxelizedPhantom::m_define_materials_from_range(Type *raw_data, std::string
             stop  = m_txt_reader.read_stop_range(line);
             mat_name = m_txt_reader.read_mat_range(line);
             list_of_materials.push_back(mat_name);            
+
+            // Store min and max values
+            if ( start < min_val ) min_val = start;
+            if ( stop  > max_val ) max_val = stop;
 
             // build labeled phantom according range data
             i=0; while (i < data_h.number_of_voxels) {
@@ -112,6 +118,27 @@ void VoxelizedPhantom::m_define_materials_from_range(Type *raw_data, std::string
         ++mat_index;
 
     } // read file
+
+    // Check if everything was converted
+    i=0; while (i < data_h.number_of_voxels) {
+        val = (f32) raw_data[i];
+
+        if ( val < min_val )
+        {
+            GGcerr << "A phantom raw value is out of the material range, phantom: "
+                   << val << " min range " << min_val << GGendl;
+            exit_simulation();
+        }
+
+        if ( val > max_val )
+        {
+            GGcerr << "A phantom raw value is out of the material range, phantom: "
+                   << val << " max range " << max_val << GGendl;
+            exit_simulation();
+        }
+
+        ++i;
+    } // over the volume
 
 }
 

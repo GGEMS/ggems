@@ -1396,13 +1396,10 @@ __host__ __device__ f32 AngleDistribution ( f32 initial_energy, f32 final_energy
 
 
 __host__ __device__
-void eSampleSecondarieGamma ( f32 minEnergy, f32 maxEnergy, ParticlesData &particles, ui32 id, MaterialsTable materials, ui8 id_mat )
+void eSampleSecondarieGamma ( f32 minEnergy, f32 maxEnergy, ParticlesData &particles, ui32 id,
+                              MaterialsTable materials, ui8 id_mat )
 {
-
-    // DEBUG
-    //printf("eBrem sample second\n");
-
-    ui32 ind;
+    ui32 Z;
     f32  gammaEnergy, totalEnergy;
     f32  xmin, xmax, kappa, epsilmin, epsilmax;
     f32  lnZ, FZ, Z3, ZZ, F1, F2, theta, sint, phi;
@@ -1419,12 +1416,12 @@ void eSampleSecondarieGamma ( f32 minEnergy, f32 maxEnergy, ParticlesData &parti
 
     if ( tmin >= tmax ) return;
 
-    ind = materials.index[ id_mat ] + RandomAtom ( tmin, minEnergy, particles, id, materials, id_mat );
+    Z = RandomAtom( tmin, minEnergy, particles, id, materials, id_mat );
 
-    Z3 = powf ( materials.mixture[ ind ], 1./3. );
+    Z3 = powf ( Z, 1./3. );
     lnZ = 3.*logf ( Z3 );
     FZ = lnZ* ( 4. - .55*lnZ );
-    ZZ = powf ( materials.mixture[ ind ] * ( materials.mixture[ ind ] + 1. ),1./3. );
+    ZZ = powf ( Z * ( Z + 1. ),1./3. );
 
     totalEnergy = Ekine + electron_mass_c2;
     xmin = tmin / Ekine;
@@ -1505,7 +1502,7 @@ void eSampleSecondarieGamma ( f32 minEnergy, f32 maxEnergy, ParticlesData &parti
     }
     gammaEnergy = x*Ekine;
 
-    theta = AngleDistribution ( totalEnergy, totalEnergy-gammaEnergy, materials.mixture[ind], particles, id );
+    theta = AngleDistribution ( totalEnergy, totalEnergy-gammaEnergy, Z, particles, id );
     sint = sin ( theta );
     phi = gpu_twopi * prng_uniform( particles, id );
 

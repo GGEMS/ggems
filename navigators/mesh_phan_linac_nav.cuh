@@ -88,6 +88,9 @@ struct LinacData
 
     // Transformation matrix
     f32matrix44 transform;
+
+    // Scale ratio between MLC and isocenter
+    f32 scale_ratio;
 };
 
 
@@ -139,6 +142,8 @@ public:
     void set_number_of_leaves( ui32 nb_bank_A, ui32 nb_bank_B );
 
     void set_mlc_position( f32 px, f32 py, f32 pz );
+
+    void set_source_to_isodose_distance( f32 dist );
 
 //    void set_linac_rotation( f32 rx, f32 ry, f32 rz );
 
@@ -208,6 +213,7 @@ private:
     f32xyz m_loc_pos_jaw_y;
     f32xyz m_rot_linac;
     f32matrix33 m_axis_linac;
+    f32 m_sid; // Source to Isodose distance
 
     ui32 m_beam_index;
     ui32 m_field_index;

@@ -109,35 +109,95 @@ void __host__ __device__ transport_track_to_in_AABB( ParticlesData &particles, f
     dir.y = particles.dy[ id ];
     dir.z = particles.dz[ id ];
 
+#ifdef DEBUG_TRACK_ID
+        if ( id == DEBUG_TRACK_ID )
+        {
+            printf("  ID %i in track2in pos %f %f %f\n", id, pos.x, pos.y, pos.z );
+        }
+#endif
+
     // Skip if already inside the phantom
     if ( test_point_AABB_with_tolerance (pos, xmin, xmax, ymin, ymax, zmin, zmax, tolerance ) )
     {
+
+#ifdef DEBUG_TRACK_ID
+        if ( id == DEBUG_TRACK_ID )
+        {
+            printf("  ID %i in track2in already inside the phantom\n", id );
+        }
+#endif
+
         return;
     }
 
     // get distance to AABB
     f32 dist = hit_ray_AABB ( pos, dir, xmin, xmax, ymin, ymax, zmin, zmax );    
 
+#ifdef DEBUG_TRACK_ID
+        if ( id == DEBUG_TRACK_ID )
+        {
+            printf("  ID %i in track2in dist to AABB %f\n", id, dist );
+        }
+#endif
+
     // the particle not hitting the voxelized volume
     if ( dist == FLT_MAX )                            // TODO: Don't know why F32_MAX doesn't work...
     {
         particles.endsimu[ id ] = PARTICLE_FREEZE;
+
+#ifdef DEBUG_TRACK_ID
+        if ( id == DEBUG_TRACK_ID )
+        {
+            printf("  ID %i in track2in not hitting: FREEZE\n", id );
+        }
+#endif
+
         return;
     }
     else
     {
         // Check if the path of the particle cross the volume sufficiently
         f32 cross = dist_overlap_ray_AABB ( pos, dir, xmin, xmax, ymin, ymax, zmin, zmax );
+
+#ifdef DEBUG_TRACK_ID
+        if ( id == DEBUG_TRACK_ID )
+        {
+            printf("  ID %i in track2in crossing value: %f\n", id, cross );
+        }
+#endif
+
+
         if ( cross < ( 2*tolerance ) )
         {
             particles.endsimu[ id ] = PARTICLE_FREEZE;
+
+#ifdef DEBUG_TRACK_ID
+        if ( id == DEBUG_TRACK_ID )
+        {
+            printf("  ID %i in track2in crossing to small: FREEZE\n", id );
+        }
+#endif
             return;
         }
         // move the particle slightly inside the volume
         pos = fxyz_add ( pos, fxyz_scale ( dir, dist+tolerance ) );
 
+#ifdef DEBUG_TRACK_ID
+        if ( id == DEBUG_TRACK_ID )
+        {
+            printf("  ID %i in track2in move to pos %f %f %f\n", id, pos.x, pos.y, pos.z );
+        }
+#endif
+
         // correct the particle position if not totally inside due to float tolerance
         pos = transport_get_safety_inside_AABB( pos, xmin, xmax, ymin, ymax, zmin, zmax, tolerance );
+
+#ifdef DEBUG_TRACK_ID
+        if ( id == DEBUG_TRACK_ID )
+        {
+            printf("  ID %i in track2in safety to pos %f %f %f\n", id, pos.x, pos.y, pos.z );
+        }
+#endif
 
         // update tof
         particles.tof[ id ] += c_light * dist;
@@ -147,8 +207,24 @@ void __host__ __device__ transport_track_to_in_AABB( ParticlesData &particles, f
         particles.py[ id ] = pos.y;
         particles.pz[ id ] = pos.z;
 
+#ifdef DEBUG_TRACK_ID
+        if ( id == DEBUG_TRACK_ID )
+        {
+            printf("  ID %i in track2in values assigned\n", id );
+        }
+#endif
+
         // reset geom id
         particles.geometry_id[ id ] = 0;
+
+#ifdef DEBUG_TRACK_ID
+        if ( id == DEBUG_TRACK_ID )
+        {
+            printf("  ID %i in track2in geom index to 0\n", id );
+        }
+#endif
+
+
     }
 
 }
