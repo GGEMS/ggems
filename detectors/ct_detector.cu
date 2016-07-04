@@ -432,7 +432,7 @@ void CTDetector::set_record_option( std::string opt )
     }
     else
     {
-        GGcerr << "CTDetector, record option unknow: " << opt << GGendl;
+        GGcerr << "CTDetector, record option unknow: " << opt <<  " (hits or energies)." << GGendl;
         exit_simulation();
     }
 }

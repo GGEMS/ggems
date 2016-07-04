@@ -164,6 +164,8 @@ public:
 
     VoxVolumeData<f32> * get_dose_map();
 
+    AabbData get_bounding_box();
+
 private:
 
     VoxelizedPhantom m_phantom;

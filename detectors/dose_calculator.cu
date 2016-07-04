@@ -357,7 +357,7 @@ void DoseCalculator::set_materials ( Materials materials )
 // In g/cm3 ? TODO - JB
 void DoseCalculator::set_min_density ( f32 min )
 {
-    m_dose_min_density = min * gram/mm3;
+    m_dose_min_density = min;
 }
 
 VoxVolumeData<f32> * DoseCalculator::get_dose_map()
@@ -425,6 +425,7 @@ void DoseCalculator::initialize ( GlobalSimulationParameters params )
         dose.inv_dosel_size = fxyz_inv( dose.dosel_size );
     }
 
+/*
     // Compute min-max volume of interest
     f32xyz phan_size = make_f32xyz( m_phantom.data_h.nb_vox_x * m_phantom.data_h.spacing_x,
                                     m_phantom.data_h.nb_vox_y * m_phantom.data_h.spacing_y,
@@ -433,16 +434,17 @@ void DoseCalculator::initialize ( GlobalSimulationParameters params )
     f32 phan_xmin = -half_phan_size.x; f32 phan_xmax = half_phan_size.x;
     f32 phan_ymin = -half_phan_size.y; f32 phan_ymax = half_phan_size.y;
     f32 phan_zmin = -half_phan_size.z; f32 phan_zmax = half_phan_size.z;
+    */
 
     // Select a min-max VOI
     if ( !m_xmin && !m_xmax && !m_ymin && !m_ymax && !m_zmin && !m_zmax )
     {
-        dose.xmin = phan_xmin;
-        dose.xmax = phan_xmax;
-        dose.ymin = phan_ymin;
-        dose.ymax = phan_ymax;
-        dose.zmin = phan_zmin;
-        dose.zmax = phan_zmax;
+        dose.xmin = m_phantom.data_h.xmin;
+        dose.xmax = m_phantom.data_h.xmax;
+        dose.ymin = m_phantom.data_h.ymin;
+        dose.ymax = m_phantom.data_h.ymax;
+        dose.zmin = m_phantom.data_h.zmin;
+        dose.zmax = m_phantom.data_h.zmax;
     }
     else
     {
@@ -478,7 +480,7 @@ void DoseCalculator::initialize ( GlobalSimulationParameters params )
         exit_simulation();
     }
 
-    // Compute new min and max after voxel alignment
+    // Compute new min and max after voxel alignment // TODO: Check here, offset is not considered? - JB
     f32xyz half_delta_size = fxyz_scale( fxyz_sub( cur_dose_size, new_dose_size ), 0.5f );
 
     dose.xmin += half_delta_size.x;
@@ -491,9 +493,9 @@ void DoseCalculator::initialize ( GlobalSimulationParameters params )
     dose.zmax -= half_delta_size.z;
 
     // Get the new offset
-    dose.offset.x = m_phantom.data_h.off_x - ( dose.xmin - phan_xmin );
-    dose.offset.y = m_phantom.data_h.off_y - ( dose.ymin - phan_ymin );
-    dose.offset.z = m_phantom.data_h.off_z - ( dose.zmin - phan_zmin );
+    dose.offset.x = m_phantom.data_h.off_x - ( dose.xmin - m_phantom.data_h.xmin );
+    dose.offset.y = m_phantom.data_h.off_y - ( dose.ymin - m_phantom.data_h.ymin );
+    dose.offset.z = m_phantom.data_h.off_z - ( dose.zmin - m_phantom.data_h.zmin );
 
     //////////////////////////////////////////////////////////
 

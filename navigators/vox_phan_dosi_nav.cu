@@ -782,6 +782,8 @@ VoxPhanDosiNav::VoxPhanDosiNav ()
 
     m_materials_filename = "";
 
+    m_dose_min_density = 0.0;
+
     set_name( "VoxPhanDosiNav" );
 }
 
@@ -926,6 +928,7 @@ void VoxPhanDosiNav::initialize ( GlobalSimulationParameters params )
     m_dose_calculator.set_voxelized_phantom( m_phantom );
     m_dose_calculator.set_materials( m_materials );
     m_dose_calculator.set_dosel_size( m_dosel_size_x, m_dosel_size_y, m_dosel_size_z );
+    m_dose_calculator.set_min_density( m_dose_min_density );
     m_dose_calculator.set_voi( m_xmin, m_xmax, m_ymin, m_ymax, m_zmin, m_zmax );
     m_dose_calculator.initialize ( m_params ); // CPU&GPU        
 
@@ -960,6 +963,11 @@ void VoxPhanDosiNav::set_dosel_size( f32 sizex, f32 sizey, f32 sizez )
     m_dosel_size_x = sizex;
     m_dosel_size_y = sizey;
     m_dosel_size_z = sizez;
+}
+
+void VoxPhanDosiNav::set_dose_min_density( f32 min )
+{
+    m_dose_min_density = min;
 }
 
 void VoxPhanDosiNav::set_volume_of_interest( f32 xmin, f32 xmax, f32 ymin, f32 ymax, f32 zmin, f32 zmax )

@@ -220,6 +220,14 @@ void VrmlIO::draw_phantom( VoxPhanDosiNav *aPhantom )
     m_draw_wireframe_aabb( aabb, m_blue );
 }
 
+void VrmlIO::draw_phantom( VoxPhanIORTNav *aPhantom )
+{
+    // Get back some info
+    AabbData aabb = aPhantom->get_bounding_box();
+
+    m_draw_wireframe_aabb( aabb, m_blue );
+}
+
 void VrmlIO::draw_phantom( VoxPhanImgNav *aPhantom )
 {
     // Get back some info

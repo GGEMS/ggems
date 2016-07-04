@@ -98,6 +98,7 @@ public:
     void write ( std::string filename = "dosimetry.mhd" );    
     void set_materials( std::string filename );
     void set_dosel_size( f32 sizex, f32 sizey, f32 sizez );
+    void set_dose_min_density( f32 min );
     void set_volume_of_interest( f32 xmin, f32 xmax, f32 ymin, f32 ymax, f32 zmin, f32 zmax );
 
     void export_density_map( std::string filename );
@@ -118,6 +119,7 @@ private:
     ui64 m_get_memory_usage();
 
     f32 m_dosel_size_x, m_dosel_size_y, m_dosel_size_z;
+    f32 m_dose_min_density;
     f32 m_xmin, m_xmax, m_ymin, m_ymax, m_zmin, m_zmax;
 
     GlobalSimulationParameters m_params;

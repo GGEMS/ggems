@@ -1084,6 +1084,21 @@ VoxVolumeData<f32> * VoxPhanIORTNav::get_dose_map()
     return m_dose_calculator.get_dose_map();
 }
 
+AabbData VoxPhanIORTNav::get_bounding_box()
+{
+    AabbData box;
+
+    box.xmin = m_phantom.data_h.xmin;
+    box.xmax = m_phantom.data_h.xmax;
+    box.ymin = m_phantom.data_h.ymin;
+    box.ymax = m_phantom.data_h.ymax;
+    box.zmin = m_phantom.data_h.zmin;
+    box.zmax = m_phantom.data_h.zmax;
+
+    return box;
+}
+
+
 #undef DEBUG
 
 #endif
