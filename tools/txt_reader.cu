@@ -108,6 +108,15 @@ i32 TxtReader::read_key_i32_arg(std::string txt) {
     return res;
 }
 
+// Read i32 mhd arg
+f32 TxtReader::read_key_f32_arg(std::string txt) {
+    f32 res;
+    txt = txt.substr(txt.find("=")+1);
+    txt = m_remove_white_space(txt);
+    std::stringstream(txt) >> res;
+    return res;
+}
+
 // Read int mhd arg
 i32 TxtReader::read_key_i32_arg_atpos(std::string txt, i32 pos) {
     i32 res;

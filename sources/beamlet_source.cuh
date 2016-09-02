@@ -57,7 +57,7 @@ public:
     void set_frame_position( f32 posx, f32 posy, f32 posz );
 
     /*!
-     * \fn void set_source_local_position( f32 posx, f32 posy, f32 posz )
+     * \fn void set_local_source_position( f32 posx, f32 posy, f32 posz )
      * \brief Set the origin of the LINAC source
      * \param posx Position of the origin in X
      * \param posy Position of the origin in Y
@@ -66,7 +66,7 @@ public:
     void set_local_source_position( f32 posx, f32 posy, f32 posz );
 
     /*!
-     * \fn void set_beamlet_plane_axis( f32 m00, f32 m01, f32 m02, f32 m10, f32 m11, f32 m12, f32 m20, f32 m21, f32 m22 )
+     * \fn void set_frame_axis( f32 m00, f32 m01, f32 m02, f32 m10, f32 m11, f32 m12, f32 m20, f32 m21, f32 m22 )
      * \brief Set the axis transformation of the beamlet plane compare to the global frame
      * \param m00 Element of the matrix
      * \param m01 Element of the matrix

@@ -34,6 +34,7 @@ class TxtReader {
         std::string read_key(std::string);
         std::string read_key_string_arg(std::string);
         i32 read_key_i32_arg(std::string);
+        f32 read_key_f32_arg(std::string);
         i32 read_key_i32_arg_atpos(std::string, i32);
         f32 read_key_f32_arg_atpos(std::string, i32);
 

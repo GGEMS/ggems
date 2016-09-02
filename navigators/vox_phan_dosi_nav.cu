@@ -638,7 +638,7 @@ __global__ void VPDN::kernel_device_track_to_out ( ParticlesData particles,
 #ifdef DEBUG
         ++iter;
 
-        if ( iter > 1000 )
+        if ( iter > 10000 )
         {
             printf("DEBUG MODE ID %i: inf loop in particle (photon and electron) stepping\n", id);
             return;

@@ -579,6 +579,8 @@ PhaseSpaceData PhaseSpaceIO::m_read_MHD_data()
         exit_simulation();
     }
 
+    fclose( pfile );
+
     return phasespace;
 }
 
