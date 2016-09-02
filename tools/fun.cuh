@@ -37,7 +37,7 @@ inline __host__ __device__ ui32 binary_search ( T key, U* tab, ui32 size, ui32 m
         mid = ( min + max ) >> 1;
         if ( key > tab[mid] )
         {
-            min = mid + 1;
+            min = mid+1;
         }
         else
         {

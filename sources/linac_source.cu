@@ -27,17 +27,18 @@ __host__ __device__ void linac_source ( ParticlesData particles, LinacSourceData
 
     rnd = prng_uniform( particles, id );
     ind = binary_search( rnd, linac.cdf_rho, linac.rho_nb_bins );
-    if ( ind == (linac.rho_nb_bins-1) )
+
+    if ( ind == 0 )
     {
         f_ind = ind;
     }
     else
     {
-        f_ind = linear_interpolation( linac.cdf_rho[ ind ],     ind,
-                                      linac.cdf_rho[ ind + 1 ], ind + 1, rnd );
+        f_ind = linear_interpolation( linac.cdf_rho[ ind - 1 ],     f32(ind - 1),
+                                      linac.cdf_rho[ ind],          f32(ind), rnd );
     }
 
-    f32 rho = f_ind * linac.rho_bin_size * cm;    // in cm
+    f32 rho = f_ind * linac.rho_bin_size;    // in mm
     f32 psi = prng_uniform( particles, id ) * twopi;
 
     f32xyz pos = { 0.0, 0.0, 0.0 };
@@ -46,9 +47,9 @@ __host__ __device__ void linac_source ( ParticlesData particles, LinacSourceData
 
     pos = fxyz_local_to_global_position( trans, pos );
 
-    particles.px[id] = pos.x;                        // Position in mm
-    particles.py[id] = pos.y;                        //
-    particles.pz[id] = pos.z;                        //
+    particles.px[ id ] = pos.x;                        // Position in mm
+    particles.py[ id ] = pos.y;                        //
+    particles.pz[ id ] = pos.z;                        //
 
     // 2. Get energy
 
@@ -56,7 +57,7 @@ __host__ __device__ void linac_source ( ParticlesData particles, LinacSourceData
     gbl_ind = rho_ind * linac.E_nb_bins;                                 // 2D array, get the right E row
 
     rnd = prng_uniform( particles, id );
-    ind = binary_search( rnd, linac.cdf_rho_E, linac.E_nb_bins, gbl_ind );
+    ind = binary_search( rnd, linac.cdf_rho_E, gbl_ind+linac.E_nb_bins, gbl_ind );
 
     if ( ind == (gbl_ind + linac.E_nb_bins - 1) )
     {
@@ -64,10 +65,10 @@ __host__ __device__ void linac_source ( ParticlesData particles, LinacSourceData
     }
     else
     {
-        f_ind = linear_interpolation( linac.cdf_rho_E[ ind ],     ind,
-                                      linac.cdf_rho_E[ ind + 1 ], ind + 1, rnd );
+        f_ind = linear_interpolation( linac.cdf_rho_E[ ind - 1 ],     f32(ind - 1),
+                                      linac.cdf_rho_E[ ind ],         f32(ind), rnd );
     }
-    f32 E = f_ind * linac.E_bin_size;
+    f32 E = (f_ind - gbl_ind) * linac.E_bin_size;
 
     particles.E[ id ] = E;
 
@@ -80,7 +81,7 @@ __host__ __device__ void linac_source ( ParticlesData particles, LinacSourceData
     gbl_ind = rho_ind * linac.theta_nb_bins * linac.theta_nb_bins + E_ind * linac.theta_nb_bins;
 
     rnd = prng_uniform( particles, id );
-    ind = binary_search( rnd, linac.cdf_rho_E_theta, linac.theta_nb_bins, gbl_ind );
+    ind = binary_search( rnd, linac.cdf_rho_E_theta, gbl_ind+linac.theta_nb_bins, gbl_ind );
 
     if ( ind == (gbl_ind + linac.theta_nb_bins - 1) )
     {
@@ -88,10 +89,10 @@ __host__ __device__ void linac_source ( ParticlesData particles, LinacSourceData
     }
     else
     {
-        f_ind = linear_interpolation( linac.cdf_rho_E_theta[ ind ],     ind,
-                                      linac.cdf_rho_E_theta[ ind + 1 ], ind + 1, rnd );
+        f_ind = linear_interpolation( linac.cdf_rho_E_theta[ ind -1 ],  f32(ind - 1),
+                                      linac.cdf_rho_E_theta[ ind ],     f32(ind), rnd );
     }
-    f32 theta = f_ind * linac.theta_bin_size;
+    f32 theta = (f_ind - gbl_ind) * linac.theta_bin_size;
 
     // 3.2 Get phi
 
@@ -100,7 +101,7 @@ __host__ __device__ void linac_source ( ParticlesData particles, LinacSourceData
     gbl_ind = rho_ind * linac.phi_nb_bins * linac.phi_nb_bins + theta_ind * linac.phi_nb_bins;
 
     rnd = prng_uniform( particles, id );
-    ind = binary_search( rnd, linac.cdf_rho_theta_phi, linac.phi_nb_bins, gbl_ind );
+    ind = binary_search( rnd, linac.cdf_rho_theta_phi, gbl_ind+linac.phi_nb_bins, gbl_ind );
 
     if ( ind == (gbl_ind + linac.phi_nb_bins - 1) )
     {
@@ -111,7 +112,7 @@ __host__ __device__ void linac_source ( ParticlesData particles, LinacSourceData
         f_ind = linear_interpolation( linac.cdf_rho_theta_phi[ ind ],     ind,
                                       linac.cdf_rho_theta_phi[ ind + 1 ], ind + 1, rnd );
     }
-    f32 phi = f_ind * linac.phi_bin_size;
+    f32 phi = (f_ind-gbl_ind) * linac.phi_bin_size;
 
     // 3.3 Get vector
 
@@ -119,6 +120,8 @@ __host__ __device__ void linac_source ( ParticlesData particles, LinacSourceData
     dir.x = sin( theta ) * cos( psi+phi );
     dir.y = sin( theta ) * sin( psi+phi );
     dir.z = cos (theta );
+
+    dir = fxyz_local_to_global_direction( trans, dir );
 
     particles.dx[id] = dir.x;                        // Direction (unit vector)
     particles.dy[id] = dir.y;                        //
@@ -137,8 +140,8 @@ __host__ __device__ void linac_source ( ParticlesData particles, LinacSourceData
     particles.scatter_order[ id ] = 0;                    //
 
 
-//    printf("src id %i p %f %f %f d %f %f %f E %f\n", id, part_pos.x, part_pos.y, part_pos.z,
-//                                                         part_dir.x, part_dir.y, part_dir.z, particles.E[ id ]);
+    printf("src id %i p %f %f %f d %f %f %f E %f\n", id, pos.x, pos.y, pos.z,
+                                                         dir.x, dir.y, dir.z, E);
 
 }
 
@@ -196,7 +199,7 @@ void LinacSource::m_load_linac_model()
     ui32 E_nb_bins = 0;
     ui32 theta_nb_bins = 0;
     ui32 phi_nb_bins = 0;
-    std::string ElementDataFile = "";
+    std::string ElementDataFile = ""; std::string ObjectType = "";
 
     // Read file
     std::ifstream file( m_model_filename.c_str() );
@@ -220,11 +223,17 @@ void LinacSource::m_load_linac_model()
             if ( key == "NThetaBins" )           theta_nb_bins = txt_reader->read_key_i32_arg( line );
             if ( key == "NPhiBins" )             phi_nb_bins = txt_reader->read_key_i32_arg( line );
             if ( key == "ElementDataFile" )      ElementDataFile = txt_reader->read_key_string_arg( line );
+            if ( key == "ObjectType" )           ObjectType = txt_reader->read_key_string_arg( line );
         }
 
     } // read file
 
     // Check the header
+    if ( ObjectType != "VirtualLinacSource" ) {
+        GGcerr << "Linac source model header: not a virtual source model, ObjectType = " << ObjectType << " !" << GGendl;
+        exit_simulation();
+    }
+
     if ( ElementDataFile == "" ) {
         GGcerr << "Linac source model header: ElementDataFile was not specified!" << GGendl;
         exit_simulation();
