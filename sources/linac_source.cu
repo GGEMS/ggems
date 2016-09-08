@@ -23,10 +23,12 @@ __host__ __device__ void linac_source ( ParticlesData particles, LinacSourceData
     ui32 gbl_ind, ind;
     f32 f_ind, rnd;
 
-    // 1. Get position
+    // 1. Get position (rho)
 
     rnd = prng_uniform( particles, id );
-    ind = binary_search( rnd, linac.cdf_rho, linac.rho_nb_bins );
+
+    /*
+    ind = binary_search_left( rnd, linac.cdf_rho, linac.n_rho );
 
     if ( ind == 0 )
     {
@@ -38,10 +40,13 @@ __host__ __device__ void linac_source ( ParticlesData particles, LinacSourceData
                                       linac.cdf_rho[ ind],          f32(ind), rnd );
     }
 
-    f32 rho = f_ind * linac.rho_bin_size;    // in mm
+    f32 rho = f_ind * linac.s_rho;    // in mm
+    */
+    f32 rho = rnd * linac.rho_max;
     f32 psi = prng_uniform( particles, id ) * twopi;
 
     f32xyz pos = { 0.0, 0.0, 0.0 };
+
     pos.x = rho * cos( psi );
     pos.y = rho * sin( psi );
 
@@ -51,15 +56,15 @@ __host__ __device__ void linac_source ( ParticlesData particles, LinacSourceData
     particles.py[ id ] = pos.y;                        //
     particles.pz[ id ] = pos.z;                        //
 
-    // 2. Get energy
-
-    ui32 rho_ind = f32(linac.E_nb_bins) * rho / linac.rho_max;  // rho / spacing:   spacing = rho_max / Nbins
-    gbl_ind = rho_ind * linac.E_nb_bins;                                 // 2D array, get the right E row
+    // 2. Get energy (rho E)
+/*
+    ui32 rho_ind = rho / linac.s_rho_E.x;
+    gbl_ind = rho_ind * linac.n_rho_E.y;            // 2D array, get the right E row
 
     rnd = prng_uniform( particles, id );
-    ind = binary_search( rnd, linac.cdf_rho_E, gbl_ind+linac.E_nb_bins, gbl_ind );
+    ind = binary_search_left( rnd, linac.cdf_rho_E, gbl_ind+linac.n_rho_E.y, gbl_ind );
 
-    if ( ind == (gbl_ind + linac.E_nb_bins - 1) )
+    if ( ind == (gbl_ind + linac.n_rho_E.y - 1) )
     {
         f_ind = ind;
     }
@@ -68,40 +73,65 @@ __host__ __device__ void linac_source ( ParticlesData particles, LinacSourceData
         f_ind = linear_interpolation( linac.cdf_rho_E[ ind - 1 ],     f32(ind - 1),
                                       linac.cdf_rho_E[ ind ],         f32(ind), rnd );
     }
-    f32 E = (f_ind - gbl_ind) * linac.E_bin_size;
+    f32 E = (f_ind - gbl_ind) * linac.s_rho_E.y;
 
-    particles.E[ id ] = E;
+    //printf( "id%i E %f\n", id, E );
+
+    //particles.E[ id ] = E;
+*/
+
+    particles.E[ id ] = 1.0;
 
     // 3. Get direction
 
-    // 3.1 Get theta
+/*
+    // 3.1 Get theta (rho E Theta)
 
-    ui32 E_ind = f32(linac.theta_nb_bins) * E / linac.E_max;  // E / spacing:   spacing = E_max / Nbins
-    rho_ind = f32(linac.theta_nb_bins) * rho / linac.rho_max;
-    gbl_ind = rho_ind * linac.theta_nb_bins * linac.theta_nb_bins + E_ind * linac.theta_nb_bins;
+    rho_ind = rho / linac.s_rho_E_theta.x;
+    ui32 E_ind = E / linac.s_rho_E_theta.y;
+    gbl_ind = rho_ind * linac.n_rho_E_theta.y * linac.n_rho_E_theta.z + E_ind * linac.n_rho_E_theta.z;
 
     rnd = prng_uniform( particles, id );
-    ind = binary_search( rnd, linac.cdf_rho_E_theta, gbl_ind+linac.theta_nb_bins, gbl_ind );
+    ind = binary_search_left( rnd, linac.cdf_rho_E_theta, gbl_ind+linac.n_rho_E_theta.z, gbl_ind );
 
-    if ( ind == (gbl_ind + linac.theta_nb_bins - 1) )
+    if ( ind == (gbl_ind + linac.n_rho_E_theta.z - 1) )
     {
         f_ind = ind;
     }
     else
     {
-        f_ind = linear_interpolation( linac.cdf_rho_E_theta[ ind -1 ],  f32(ind - 1),
-                                      linac.cdf_rho_E_theta[ ind ],     f32(ind), rnd );
+        f_ind = linear_interpolation( linac.cdf_rho_E_theta[ ind ],       f32( ind ),
+                                      linac.cdf_rho_E_theta[ ind + 1 ],   f32( ind + 1 ), rnd );
     }
-    f32 theta = (f_ind - gbl_ind) * linac.theta_bin_size;
+
+    f32 cos_theta = ( (f_ind - gbl_ind) * linac.s_rho_E_theta.z ) + cos(linac.theta_max);
+
+#ifdef DEBUG
+    assert(cos_theta <= 1.0f);
+#endif
+
+    f32 theta = acos(cos_theta);
+*/
+
+    /*
+    printf("rho %f E %f  -  rho_ind %i E_ind %i\n", rho, E, rho_ind, E_ind);
+    ui32 i=gbl_ind; while (i<gbl_ind+linac.theta_nb_bins)
+    {
+        printf("i %i p %e\n", i, linac.cdf_rho_E_theta[i]);
+        ++i;
+    }
+    */
+
+    //printf( "id%i theta %f\n", id, theta );
 
     // 3.2 Get phi
-
+/*
     ui32 theta_ind = f32(linac.phi_nb_bins) * theta / linac.theta_max;
     rho_ind = f32(linac.phi_nb_bins) * rho / linac.rho_max;
     gbl_ind = rho_ind * linac.phi_nb_bins * linac.phi_nb_bins + theta_ind * linac.phi_nb_bins;
 
     rnd = prng_uniform( particles, id );
-    ind = binary_search( rnd, linac.cdf_rho_theta_phi, gbl_ind+linac.phi_nb_bins, gbl_ind );
+    ind = binary_search_left( rnd, linac.cdf_rho_theta_phi, gbl_ind+linac.phi_nb_bins, gbl_ind );
 
     if ( ind == (gbl_ind + linac.phi_nb_bins - 1) )
     {
@@ -113,19 +143,35 @@ __host__ __device__ void linac_source ( ParticlesData particles, LinacSourceData
                                       linac.cdf_rho_theta_phi[ ind + 1 ], ind + 1, rnd );
     }
     f32 phi = (f_ind-gbl_ind) * linac.phi_bin_size;
-
+*/
     // 3.3 Get vector
 
     f32xyz dir = { 0.0, 0.0, 0.0 };
-    dir.x = sin( theta ) * cos( psi+phi );
-    dir.y = sin( theta ) * sin( psi+phi );
-    dir.z = cos (theta );
+//    dir.x = sin( theta ) * cos( psi+phi );
+//    dir.y = sin( theta ) * sin( psi+phi );
+//    dir.z = cos( theta );
+
+//    dir.x = sin( theta ) * cos( psi );
+//    dir.y = sin( theta ) * sin( psi );
+//    dir.z = cos( theta );
+
+
+
+    //dir = fxyz_unit( dir );
+
+
+
 
     dir = fxyz_local_to_global_direction( trans, dir );
+
+    dir.x = 0.0f;
+    dir.y = 1.0f;
+    dir.z = 0.0f;
 
     particles.dx[id] = dir.x;                        // Direction (unit vector)
     particles.dy[id] = dir.y;                        //
     particles.dz[id] = dir.z;                        //
+
 
     // 4. Then set the mandatory field to create a new particle
     particles.tof[id] = 0.0f;                             // Time of flight
@@ -140,8 +186,8 @@ __host__ __device__ void linac_source ( ParticlesData particles, LinacSourceData
     particles.scatter_order[ id ] = 0;                    //
 
 
-    printf("src id %i p %f %f %f d %f %f %f E %f\n", id, pos.x, pos.y, pos.z,
-                                                         dir.x, dir.y, dir.z, E);
+//    printf("src id %i p %f %f %f d %f %f %f E %f\n", id, pos.x, pos.y, pos.z,
+//                                                         dir.x, dir.y, dir.z, E);
 
 }
 
@@ -174,6 +220,16 @@ LinacSource::LinacSource() : GGEMSSource()
     m_angle = make_f32xyz( 0.0, 0.0, 0.0 );
     m_org = make_f32xyz( 0.0, 0.0, 0.0 );
     m_model_filename = "";
+
+    m_linac_source_data.s_rho = 0.0;
+    m_linac_source_data.s_rho_E = make_f32xy( 0.0, 0.0 );
+    m_linac_source_data.s_rho_E_theta = make_f32xyz( 0.0, 0.0, 0.0 );
+    m_linac_source_data.s_rho_theta_phi = make_f32xyz( 0.0, 0.0, 0.0 );
+
+    m_linac_source_data.n_rho = 0;
+    m_linac_source_data.n_rho_E = make_ui32xy( 0, 0 );
+    m_linac_source_data.n_rho_E_theta = make_ui32xyz( 0, 0, 0 );
+    m_linac_source_data.n_rho_theta_phi = make_ui32xyz( 0, 0, 0 );
 }
 
 // Destructor
@@ -195,10 +251,7 @@ void LinacSource::m_load_linac_model()
     f32 E_max = 0;
     f32 theta_max = 0;
     f32 phi_max = 0;
-    ui32 rho_nb_bins = 0;
-    ui32 E_nb_bins = 0;
-    ui32 theta_nb_bins = 0;
-    ui32 phi_nb_bins = 0;
+
     std::string ElementDataFile = ""; std::string ObjectType = "";
 
     // Read file
@@ -218,12 +271,27 @@ void LinacSource::m_load_linac_model()
             if ( key == "EMax" )                 E_max = txt_reader->read_key_f32_arg( line );
             if ( key == "ThetaMax" )             theta_max = txt_reader->read_key_f32_arg( line );
             if ( key == "PhiMax" )               phi_max = txt_reader->read_key_f32_arg( line );
-            if ( key == "NRhoBins" )             rho_nb_bins = txt_reader->read_key_i32_arg( line );
-            if ( key == "NEBins" )               E_nb_bins = txt_reader->read_key_i32_arg( line );
-            if ( key == "NThetaBins" )           theta_nb_bins = txt_reader->read_key_i32_arg( line );
-            if ( key == "NPhiBins" )             phi_nb_bins = txt_reader->read_key_i32_arg( line );
             if ( key == "ElementDataFile" )      ElementDataFile = txt_reader->read_key_string_arg( line );
             if ( key == "ObjectType" )           ObjectType = txt_reader->read_key_string_arg( line );
+
+            if ( key == "NRho" )                 m_linac_source_data.n_rho = txt_reader->read_key_i32_arg( line );
+            if ( key == "NRhoE" )
+            {
+                m_linac_source_data.n_rho_E = make_ui32xy( txt_reader->read_key_i32_arg_atpos( line, 0 ),
+                                                           txt_reader->read_key_i32_arg_atpos( line, 1 ) );
+            }
+            if ( key == "NRhoETheta" )
+            {
+                m_linac_source_data.n_rho_E_theta = make_ui32xyz( txt_reader->read_key_i32_arg_atpos( line, 0 ),
+                                                                  txt_reader->read_key_i32_arg_atpos( line, 1 ),
+                                                                  txt_reader->read_key_i32_arg_atpos( line, 2 ) );
+            }
+            if ( key == "NRhoThetaPhi" )
+            {
+                m_linac_source_data.n_rho_theta_phi = make_ui32xyz( txt_reader->read_key_i32_arg_atpos( line, 0 ),
+                                                                    txt_reader->read_key_i32_arg_atpos( line, 1 ),
+                                                                    txt_reader->read_key_i32_arg_atpos( line, 2 ) );
+            }
         }
 
     } // read file
@@ -239,8 +307,11 @@ void LinacSource::m_load_linac_model()
         exit_simulation();
     }
 
-    if ( rho_max == 0 || E_max == 0 || theta_max == 0 || phi_max == 0 || rho_nb_bins == 0 ||
-         E_nb_bins == 0 || theta_nb_bins == 0 || phi_nb_bins == 0 )
+    if ( rho_max == 0 || E_max == 0 || theta_max == 0 || phi_max == 0 ||
+         m_linac_source_data.n_rho == 0 ||
+         m_linac_source_data.n_rho_E.x == 0 || m_linac_source_data.n_rho_E.y == 0 ||
+         m_linac_source_data.n_rho_E_theta.x == 0 || m_linac_source_data.n_rho_E_theta.y == 0 || m_linac_source_data.n_rho_E_theta.z == 0 ||
+         m_linac_source_data.n_rho_theta_phi.x == 0 || m_linac_source_data.n_rho_theta_phi.y == 0 || m_linac_source_data.n_rho_theta_phi.z == 0 )
     {
         GGcerr << "Missing parameter(s) in the header of Linac source model file!" << GGendl;
         exit_simulation();
@@ -252,22 +323,31 @@ void LinacSource::m_load_linac_model()
     m_linac_source_data.theta_max = theta_max;
     m_linac_source_data.phi_max = phi_max;
 
-    m_linac_source_data.rho_nb_bins = rho_nb_bins;
-    m_linac_source_data.E_nb_bins = E_nb_bins;
-    m_linac_source_data.theta_nb_bins = theta_nb_bins;
-    m_linac_source_data.phi_nb_bins = phi_nb_bins;
+    m_linac_source_data.s_rho = rho_max / f32( m_linac_source_data.n_rho - 1 );
 
-    m_linac_source_data.rho_bin_size = rho_max / (f32)rho_nb_bins;
-    m_linac_source_data.E_bin_size = E_max / (f32)E_nb_bins;
-    m_linac_source_data.theta_bin_size = theta_max / (f32)theta_nb_bins;
-    m_linac_source_data.phi_bin_size = phi_max / (f32)phi_nb_bins;
+    m_linac_source_data.s_rho_E = make_f32xy( rho_max / f32( m_linac_source_data.n_rho_E.x - 1 ),
+                                              E_max / f32( m_linac_source_data.n_rho_E.y - 1 ));
 
-    HANDLE_ERROR( cudaMallocManaged( &(m_linac_source_data.cdf_rho), rho_nb_bins * sizeof( f32 ) ) );
-    HANDLE_ERROR( cudaMallocManaged( &(m_linac_source_data.cdf_rho_E), E_nb_bins * E_nb_bins * sizeof( f32 ) ) );
+    m_linac_source_data.s_rho_E_theta = make_f32xyz( rho_max / f32( m_linac_source_data.n_rho_E_theta.x - 1 ),
+                                                     E_max / f32( m_linac_source_data.n_rho_E_theta.y - 1),
+                                                     ( 1 - cos( theta_max ) ) / f32( m_linac_source_data.n_rho_E_theta.z - 1 ) );
+
+    m_linac_source_data.s_rho_theta_phi = make_f32xyz( rho_max / f32( m_linac_source_data.n_rho_theta_phi.x - 1 ),
+                                                       theta_max / f32( m_linac_source_data.n_rho_theta_phi.y - 1 ),
+                                                       phi_max / f32( m_linac_source_data.n_rho_theta_phi.z - 1 ) );
+
+    HANDLE_ERROR( cudaMallocManaged( &(m_linac_source_data.cdf_rho), m_linac_source_data.n_rho * sizeof( f32 ) ) );
+
+    HANDLE_ERROR( cudaMallocManaged( &(m_linac_source_data.cdf_rho_E), m_linac_source_data.n_rho_E.x
+                                     * m_linac_source_data.n_rho_E.y * sizeof( f32 ) ) );
+
     HANDLE_ERROR( cudaMallocManaged( &(m_linac_source_data.cdf_rho_E_theta),
-                                     theta_nb_bins * theta_nb_bins * theta_nb_bins * sizeof( f32 ) ) );
+                                     m_linac_source_data.n_rho_E_theta.x * m_linac_source_data.n_rho_E_theta.y *
+                                     m_linac_source_data.n_rho_E_theta.z * sizeof( f32 ) ) );
+
     HANDLE_ERROR( cudaMallocManaged( &(m_linac_source_data.cdf_rho_theta_phi),
-                                     phi_nb_bins * phi_nb_bins * phi_nb_bins * sizeof( f32 ) ) );
+                                     m_linac_source_data.n_rho_theta_phi.x * m_linac_source_data.n_rho_theta_phi.y *
+                                     m_linac_source_data.n_rho_theta_phi.z * sizeof( f32 ) ) );
 
     // Read data
     FILE *pfile = fopen(ElementDataFile.c_str(), "rb");
@@ -287,10 +367,15 @@ void LinacSource::m_load_linac_model()
         }
     }
 
-    fread( m_linac_source_data.cdf_rho, sizeof(f32), rho_nb_bins, pfile );
-    fread( m_linac_source_data.cdf_rho_E, sizeof(f32), E_nb_bins * E_nb_bins, pfile );
-    fread( m_linac_source_data.cdf_rho_E_theta, sizeof(f32), theta_nb_bins * theta_nb_bins * theta_nb_bins, pfile );
-    fread( m_linac_source_data.cdf_rho_theta_phi, sizeof(f32), phi_nb_bins * phi_nb_bins * phi_nb_bins, pfile );
+    fread( m_linac_source_data.cdf_rho, sizeof(f32), m_linac_source_data.n_rho, pfile );
+    fread( m_linac_source_data.cdf_rho_E, sizeof(f32), m_linac_source_data.n_rho_E.x
+                                                        * m_linac_source_data.n_rho_E.y, pfile );
+    fread( m_linac_source_data.cdf_rho_E_theta, sizeof(f32), m_linac_source_data.n_rho_E_theta.x *
+                                                             m_linac_source_data.n_rho_E_theta.y *
+                                                             m_linac_source_data.n_rho_E_theta.z, pfile );
+    fread( m_linac_source_data.cdf_rho_theta_phi, sizeof(f32), m_linac_source_data.n_rho_theta_phi.x *
+                                                               m_linac_source_data.n_rho_theta_phi.y *
+                                                               m_linac_source_data.n_rho_theta_phi.z, pfile );
 
     fclose( pfile );
 }
@@ -377,10 +462,10 @@ void LinacSource::initialize ( GlobalSimulationParameters params )
     // Some verbose if required
     if ( params.data_h.display_memory_usage )
     {
-        ui32 mem = 4 * ( m_linac_source_data.rho_nb_bins +
-                         m_linac_source_data.E_nb_bins*m_linac_source_data.E_nb_bins +
-                         m_linac_source_data.theta_nb_bins*m_linac_source_data.theta_nb_bins*m_linac_source_data.theta_nb_bins +
-                         m_linac_source_data.phi_nb_bins*m_linac_source_data.phi_nb_bins*m_linac_source_data.phi_nb_bins );
+        ui32 mem = 4 * ( m_linac_source_data.n_rho +
+                         m_linac_source_data.n_rho_E.x + m_linac_source_data.n_rho_E.y +
+                         m_linac_source_data.n_rho_E_theta.x + m_linac_source_data.n_rho_E_theta.y + m_linac_source_data.n_rho_E_theta.z +
+                         m_linac_source_data.n_rho_theta_phi.x + m_linac_source_data.n_rho_theta_phi.y + m_linac_source_data.n_rho_theta_phi.z );
         GGcout_mem("Linac source", mem);
     }
 

@@ -32,6 +32,7 @@ GGEMS Bug Reporting (GBR)
 * *GBR006 - Open 06/03/16 JB - Fix typo exit_simulation (Aborted) - close 08/03/16 - JB*
 * *GBR007 - Open 07/03/16 JB - Fix dose (no output) and uncertainty calculation (some nan) - close 08/03/16 - JB*
 * **GBR008 - Open 08/03/16 JB - Still strange values on Dose map...**
+* **GBR009 - Open 08/09/16 JB - Standard binary search to be not working properly, however if we use the binary_search_left, which is more right, electron tracking does not work... Meaning, that electron navigation was designed to work with the uncorrect binary_search. Both, binary_search code have to be fused and electron navigation adapt**
 
 ====
 Misc

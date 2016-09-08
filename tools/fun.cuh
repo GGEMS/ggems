@@ -47,6 +47,36 @@ inline __host__ __device__ ui32 binary_search ( T key, U* tab, ui32 size, ui32 m
     return min;
 }
 
+template < typename T, typename U >
+inline __host__ __device__ ui32 binary_search_left ( T key, U* tab, ui32 size, ui32 min=0 )
+{
+    ui32 max=size-1, mid;
+    ui32 minmin = min;
+
+    while ( ( min < max ) )
+    {
+        mid = ( min + max ) >> 1;
+        if ( key == tab[ mid ] )
+        {
+            return mid;
+        }
+        else if ( key > tab[mid] )
+        {
+            min = mid+1;
+        }
+        else
+        {
+            max = mid;
+        }
+    }
+
+    if ( min > minmin )
+    {
+        min--;
+    }
+
+    return min;
+}
 
 // Linear interpolation
 __host__ __device__ f32 linear_interpolation ( f32 xa,f32 ya, f32 xb,  f32 yb, f32 x );

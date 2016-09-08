@@ -344,7 +344,7 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
         } // significant_loss == false
 
 #ifdef DEBUG
-        if ( istep > 100 )
+        if ( istep > 1000 )
         {
             printf( "[ERROR] track_electron_to_out: e- reach 1000 steps\n" );
             printf("         ID %i E %e keV - level %i - pos %f %f %f\n", part_id, particles.E[part_id]/keV, particles.level[part_id],
@@ -715,7 +715,7 @@ void VPDN::kernel_host_track_to_out ( ParticlesData particles,
 #ifdef DEBUG
         ++iter;
 
-        if ( iter > 1000 )
+        if ( iter > 10000 )
         {
             printf("DEBUG MODE ID %i: inf loop in particle (photon and electron) stepping\n", id);
             return;

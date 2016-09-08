@@ -55,7 +55,7 @@ __host__ __device__ void beamlet_source ( ParticlesData particles, f32xyz pos, f
     else // poly
     {
         f32 rndm = prng_uniform( particles, id );
-        ui32 pos = binary_search( rndm, spectrum_CDF, nb_of_energy_bins );
+        ui32 pos = binary_search_left( rndm, spectrum_CDF, nb_of_energy_bins );
         if ( pos == ( nb_of_energy_bins - 1 ) )
         {
             particles.E[ id ] = spectrum_E[ pos ];

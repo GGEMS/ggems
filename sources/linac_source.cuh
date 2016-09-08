@@ -32,15 +32,15 @@ struct LinacSourceData
     f32 theta_max;
     f32 phi_max;
 
-    f32 rho_bin_size;
-    f32 E_bin_size;
-    f32 theta_bin_size;
-    f32 phi_bin_size;
+    f32 s_rho;
+    f32xy s_rho_E;
+    f32xyz s_rho_E_theta;
+    f32xyz s_rho_theta_phi;
 
-    ui32 rho_nb_bins;
-    ui32 E_nb_bins;
-    ui32 theta_nb_bins;
-    ui32 phi_nb_bins;
+    ui32 n_rho;
+    ui32xy n_rho_E;
+    ui32xyz n_rho_E_theta;
+    ui32xyz n_rho_theta_phi;
 };
 
 

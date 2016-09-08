@@ -29,7 +29,7 @@ __host__ __device__ void PHSPSRC::phsp_source ( ParticlesData particles_data,
     ui32 source_id = 0;
     if ( transform.nb_sources > 1 )
     {
-        source_id = binary_search( prng_uniform( particles_data, id ), transform.cdf, transform.nb_sources );
+        source_id = binary_search_left( prng_uniform( particles_data, id ), transform.cdf, transform.nb_sources );
     }
 
 #ifdef DEBUG

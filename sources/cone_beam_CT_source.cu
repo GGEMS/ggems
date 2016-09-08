@@ -66,7 +66,7 @@ __host__ __device__ void cone_beam_ct_source( ParticlesData particles, ui8 ptype
     else // poly
     {
         f32 rndm = prng_uniform( particles, id );
-        ui32 pos = binary_search( rndm, spectrum_CDF, nb_of_energy_bins );
+        ui32 pos = binary_search_left( rndm, spectrum_CDF, nb_of_energy_bins );
         if ( pos == ( nb_of_energy_bins - 1 ) )
         {
             particles.E[ id ] = spectrum_E[ pos ];
@@ -75,8 +75,7 @@ __host__ __device__ void cone_beam_ct_source( ParticlesData particles, ui8 ptype
         {
             particles.E[ id ] = linear_interpolation ( spectrum_CDF[ pos ],     spectrum_E[ pos ],
                                                        spectrum_CDF[ pos + 1 ], spectrum_E[ pos + 1 ], rndm );
-        }
-
+        }       
     }
 
     // Then set the mandatory field to create a new particle

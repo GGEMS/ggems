@@ -29,7 +29,7 @@ __host__ __device__ f32 GEOMSRC::get_energy( ParticlesData particles_data, f32 *
     {
         // Get the position in spectrum
         f32 rndm = prng_uniform( particles_data, id );
-        ui32 pos = binary_search( rndm, cdf, nb_bins );
+        ui32 pos = binary_search_left( rndm, cdf, nb_bins );
 
         if ( pos == ( nb_bins - 1 ) )
         {
