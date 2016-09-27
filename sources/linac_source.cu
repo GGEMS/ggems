@@ -27,7 +27,7 @@ __host__ __device__ void linac_source ( ParticlesData particles, LinacSourceData
 
     rnd = prng_uniform( particles, id );
 
-    /*
+
     ind = binary_search_left( rnd, linac.cdf_rho, linac.n_rho );
 
     if ( ind == 0 )
@@ -41,14 +41,22 @@ __host__ __device__ void linac_source ( ParticlesData particles, LinacSourceData
     }
 
     f32 rho = f_ind * linac.s_rho;    // in mm
-    */
-    f32 rho = rnd * linac.rho_max;
+
+    //f32 rho = rnd * linac.rho_max;
     f32 psi = prng_uniform( particles, id ) * twopi;
 
     f32xyz pos = { 0.0, 0.0, 0.0 };
 
+    //f32 val_cos = 1.0f - 2.0f * prng_uniform( particles, id );
+    //f32 val_sin = sqrt( 1.0 - val_cos*val_cos );
+    //f32 sgn_sin = 1.0f - 2.0f * prng_uniform( particles, id );
+    //if ( sgn_sin < 0.0 ) val_sin = -val_sin;
+
     pos.x = rho * cos( psi );
     pos.y = rho * sin( psi );
+
+//    pos.x = rho * val_cos;
+//    pos.y = rho * val_sin;
 
     pos = fxyz_local_to_global_position( trans, pos );
 
@@ -57,7 +65,7 @@ __host__ __device__ void linac_source ( ParticlesData particles, LinacSourceData
     particles.pz[ id ] = pos.z;                        //
 
     // 2. Get energy (rho E)
-/*
+
     ui32 rho_ind = rho / linac.s_rho_E.x;
     gbl_ind = rho_ind * linac.n_rho_E.y;            // 2D array, get the right E row
 
@@ -77,14 +85,14 @@ __host__ __device__ void linac_source ( ParticlesData particles, LinacSourceData
 
     //printf( "id%i E %f\n", id, E );
 
-    //particles.E[ id ] = E;
-*/
+    particles.E[ id ] = E;
 
-    particles.E[ id ] = 1.0;
+
+    //particles.E[ id ] = 1.0;
 
     // 3. Get direction
 
-/*
+
     // 3.1 Get theta (rho E Theta)
 
     rho_ind = rho / linac.s_rho_E_theta.x;
@@ -111,7 +119,7 @@ __host__ __device__ void linac_source ( ParticlesData particles, LinacSourceData
 #endif
 
     f32 theta = acos(cos_theta);
-*/
+
 
     /*
     printf("rho %f E %f  -  rho_ind %i E_ind %i\n", rho, E, rho_ind, E_ind);
@@ -125,31 +133,30 @@ __host__ __device__ void linac_source ( ParticlesData particles, LinacSourceData
     //printf( "id%i theta %f\n", id, theta );
 
     // 3.2 Get phi
-/*
-    ui32 theta_ind = f32(linac.phi_nb_bins) * theta / linac.theta_max;
-    rho_ind = f32(linac.phi_nb_bins) * rho / linac.rho_max;
-    gbl_ind = rho_ind * linac.phi_nb_bins * linac.phi_nb_bins + theta_ind * linac.phi_nb_bins;
+    rho_ind = rho / linac.s_rho_theta_phi.x;
+    ui32 theta_ind = theta / linac.s_rho_theta_phi.y;
+    gbl_ind = rho_ind * linac.n_rho_theta_phi.y * linac.n_rho_theta_phi.z + theta_ind * linac.n_rho_theta_phi.z;
 
     rnd = prng_uniform( particles, id );
-    ind = binary_search_left( rnd, linac.cdf_rho_theta_phi, gbl_ind+linac.phi_nb_bins, gbl_ind );
+    ind = binary_search_left( rnd, linac.cdf_rho_theta_phi, gbl_ind+linac.n_rho_theta_phi.z, gbl_ind );
 
-    if ( ind == (gbl_ind + linac.phi_nb_bins - 1) )
+    if ( ind == (gbl_ind + linac.n_rho_theta_phi.z - 1) )
     {
         f_ind = ind;
     }
     else
     {
-        f_ind = linear_interpolation( linac.cdf_rho_theta_phi[ ind ],     ind,
-                                      linac.cdf_rho_theta_phi[ ind + 1 ], ind + 1, rnd );
+        f_ind = linear_interpolation( linac.cdf_rho_theta_phi[ ind ],     f32( ind ),
+                                      linac.cdf_rho_theta_phi[ ind + 1 ], f32( ind + 1 ), rnd );
     }
-    f32 phi = (f_ind-gbl_ind) * linac.phi_bin_size;
-*/
+    f32 phi = (f_ind-gbl_ind) * linac.s_rho_theta_phi.z;
+
     // 3.3 Get vector
 
     f32xyz dir = { 0.0, 0.0, 0.0 };
-//    dir.x = sin( theta ) * cos( psi+phi );
-//    dir.y = sin( theta ) * sin( psi+phi );
-//    dir.z = cos( theta );
+    dir.x = sin( theta ) * cos( psi+phi );
+    dir.y = sin( theta ) * sin( psi+phi );
+    dir.z = cos( theta );
 
 //    dir.x = sin( theta ) * cos( psi );
 //    dir.y = sin( theta ) * sin( psi );
@@ -163,11 +170,11 @@ __host__ __device__ void linac_source ( ParticlesData particles, LinacSourceData
 
 
     dir = fxyz_local_to_global_direction( trans, dir );
-
+/*
     dir.x = 0.0f;
     dir.y = 1.0f;
     dir.z = 0.0f;
-
+*/
     particles.dx[id] = dir.x;                        // Direction (unit vector)
     particles.dy[id] = dir.y;                        //
     particles.dz[id] = dir.z;                        //

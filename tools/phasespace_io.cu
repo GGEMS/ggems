@@ -315,8 +315,8 @@ PhaseSpaceData PhaseSpaceIO::m_read_IAEA_data()
     i8 pType;
     i8 sign_W;
     //i8 new_history; // not used.
-    f32 extra_f;
-    i32 extra_l;
+    //f32 extra_f;
+    //i32 extra_l;
 
     // Mem allocation
     PhaseSpaceData phasespace;
@@ -335,8 +335,12 @@ PhaseSpaceData PhaseSpaceIO::m_read_IAEA_data()
 
     // For reading data
     ui32 rec_to_read = 6;                     // energy, pos and dir are always read
-    if ( m_weight_flag ) rec_to_read++;
+    //if ( m_weight_flag ) rec_to_read++;
     f32 *float_array = new f32[ rec_to_read ];
+
+    // Compute extra float
+    ui32 extra_read = m_record_length - 25; // 25 = Type + E + pos + dir
+    i8 *garbage_array = new i8[ extra_read ];
 
     ui32 i=0; while ( i < N )
     {
@@ -389,8 +393,10 @@ PhaseSpaceData PhaseSpaceIO::m_read_IAEA_data()
         phasespace.dir_z[ i ] = W;
 
         // Extra data
-        if( m_exfloat_flag ) fread(&extra_f, sizeof(f32), 1, pfile);
-        if( m_exlongs_flag ) fread(&extra_l, sizeof(i32), 1, pfile);
+        if ( extra_read > 0 ) fread(&garbage_array, sizeof(i8), extra_read, pfile);
+
+        //if( m_exfloat_flag ) fread(&extra_f, sizeof(f32), 1, pfile);
+        //if( m_exlongs_flag ) fread(&extra_l, sizeof(i32), 1, pfile);
 
 
 //        printf("E %e Pos %e %e %e Dir %e %e %e Type %i\n", phasespace.energy[ i ],
