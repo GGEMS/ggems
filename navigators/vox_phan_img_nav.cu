@@ -264,6 +264,7 @@ void VoxPhanImgNav::track_to_in ( Particles particles )
                                                              m_phantom.data_d.zmin, m_phantom.data_d.zmax,
                                                              m_params.data_d.geom_tolerance );
         cuda_error_check ( "Error ", " Kernel_VoxPhanImgNav (track to in)" );
+        cudaDeviceSynchronize();
 
     }
 
@@ -296,7 +297,7 @@ void VoxPhanImgNav::track_to_out ( Particles particles )
         VPIN::kernel_device_track_to_out<<<grid, threads>>> ( particles.data_d, m_phantom.data_d, m_materials.data_d,
                                                               m_cross_sections.photon_CS.data_d, m_params.data_d );
         cuda_error_check ( "Error ", " Kernel_VoxPhanImgNav (track to out)" );
-        cudaThreadSynchronize();
+        cudaDeviceSynchronize();
 
     }
 }

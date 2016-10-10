@@ -515,6 +515,7 @@ void LinacSource::get_primaries_generator ( Particles particles )
         kernel_linac_source<<<grid, threads>>>( particles.data_d, m_linac_source_data,
                                                 m_transform );
         cuda_error_check( "Error ", " Kernel_beamlet_source" );
+        cudaDeviceSynchronize();
     }
 
 }

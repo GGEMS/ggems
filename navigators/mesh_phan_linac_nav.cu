@@ -2623,7 +2623,7 @@ void MeshPhanLINACNav::track_to_in( Particles particles )
         MPLINACN::kernel_device_track_to_in<<<grid, threads>>> ( particles.data_d, m_linac,
                                                                  m_params.data_d.geom_tolerance );
         cuda_error_check ( "Error ", " Kernel_MeshPhanLINACNav (track to in)" );
-        cudaThreadSynchronize();
+        cudaDeviceSynchronize();
     }
 }
 
@@ -2654,7 +2654,7 @@ void MeshPhanLINACNav::track_to_out( Particles particles )
                                                                   m_materials.data_d, m_cross_sections.photon_CS.data_d,
                                                                   m_params.data_d, m_nav_within_mlc );
         cuda_error_check ( "Error ", " Kernel_MeshPhanLINACNav (track to in)" );
-        cudaThreadSynchronize();
+        cudaDeviceSynchronize();
     }
 
 }

@@ -189,6 +189,7 @@ void PointSource::get_primaries_generator ( Particles particles )
         // from device (GPU) is passed to the kernel (particles.data_d).
         kernel_point_source<<<grid, threads>>>( particles.data_d, m_px, m_py, m_pz, m_energy, m_particle_type );
         cuda_error_check( "Error ", " Kernel_point_source" );
+        cudaDeviceSynchronize();
     }
 
 }

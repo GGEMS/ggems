@@ -779,7 +779,7 @@ VoxPhanIORTNav::VoxPhanIORTNav ()
     set_name( "VoxPhanIORTNav" );
 }
 
-void VoxPhanIORTNav::track_to_in ( Particles particles )
+void VoxPhanIORTNav::track_to_in( Particles particles )
 {
 
     if ( m_params.data_h.device_target == CPU_DEVICE )
@@ -806,7 +806,7 @@ void VoxPhanIORTNav::track_to_in ( Particles particles )
                                                                                m_phantom.data_d.zmin, m_phantom.data_d.zmax,
                                                                                m_params.data_d.geom_tolerance );
         cuda_error_check ( "Error ", " Kernel_VoxPhanIORT (track to in)" );
-        cudaThreadSynchronize();
+        cudaDeviceSynchronize();
     }
 
 }
@@ -848,7 +848,7 @@ void VoxPhanIORTNav::track_to_out ( Particles particles )
                                                               m_params.data_d, m_dose_calculator.dose,
                                                               m_mu_table, m_hist_map );
         cuda_error_check ( "Error ", " Kernel_VoxPhanDosi (track to out)" );             
-        cudaThreadSynchronize();
+        cudaDeviceSynchronize();
 
         // Apply seTLE: splitting and determinstic raycasting
         if( m_flag_TLE == seTLE )
@@ -865,8 +865,7 @@ void VoxPhanIORTNav::track_to_out ( Particles particles )
                                                               m_coo_hist_map, m_dose_calculator.dose,
                                                               m_mu_table, 1000, 0.0 *eV );
             cuda_error_check ( "Error ", " Kernel_device_seTLE" );
-
-            cudaThreadSynchronize();
+            cudaDeviceSynchronize();
             GGcout_time ( "Raycast", get_time()-t_start );
             GGnewline();
         }

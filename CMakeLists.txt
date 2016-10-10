@@ -22,8 +22,10 @@ if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
     message(FATAL_ERROR "in-source build detected")
 endif()
 
+# Configuration
 find_package(CUDA REQUIRED)
-
+set(BUILD_SHARED_LIBS OFF)
+set(CUDA_SEPARABLE_COMPILATION ON)
 
 # OPTIONS SINGLE PRECISION
 option(WITH_DOUBLE_PRECISION "Float numbers can be computed in double precision" ON)

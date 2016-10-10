@@ -399,6 +399,7 @@ void BeamletSource::get_primaries_generator ( Particles particles )
                                                   m_spectrum_E, m_spectrum_CDF, m_nb_of_energy_bins,
                                                   m_particle_type );
         cuda_error_check( "Error ", " Kernel_beamlet_source" );
+        cudaDeviceSynchronize();
     }
 
 }

@@ -449,6 +449,7 @@ void PhaseSpaceSource::get_primaries_generator ( Particles particles )
 
         PHSPSRC::phsp_point_source<<<grid, threads>>>( particles.data_d, m_phasespace, m_transform );
         cuda_error_check( "Error ", " Kernel_phasespace_source" );
+        cudaDeviceSynchronize();
 
     }
 

@@ -395,7 +395,7 @@ void ConeBeamCTSource::get_primaries_generator( Particles particles )
         kernel_cone_beam_ct_source<<<grid, threads>>>( particles.data_d, m_particle_type, m_spectrum_E, m_spectrum_CDF,
                                                        m_nb_of_energy_bins, m_aperture, m_foc, m_transform );
         cuda_error_check( "Error ", " kernel_cone_beam_ct_source" );
-        cudaThreadSynchronize();
+        cudaDeviceSynchronize();
     }
 }
 

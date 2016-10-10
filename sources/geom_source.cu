@@ -354,6 +354,7 @@ void GeomSource::get_primaries_generator ( Particles particles )
             GEOMSRC::kernel_point_source<<<grid, threads>>>( particles.data_d, m_pos, m_spectrum->energies, m_spectrum->cdf,
                                                              m_spectrum->nb_of_energy_bins, m_particle_type );
             cuda_error_check( "Error ", " Kernel_geom_source (point)" );
+            cudaDeviceSynchronize();
         }
     }
 
