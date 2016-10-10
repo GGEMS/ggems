@@ -109,12 +109,6 @@ GGEMS::~GGEMS()
 
 /// Params
 
-// Set the GGEMS license
-void GGEMS::set_license(std::string license_path) {
-    m_license.read_license ( license_path );
-    m_license.check_license();
-}
-
 // Set the hardware used for the simulation CPU or GPU (CPU by default)
 void GGEMS::set_hardware_target ( std::string value )
 {
@@ -241,62 +235,6 @@ void GGEMS::set_geometry_tolerance( f32 tolerance )
 
     m_parameters.data_h.geom_tolerance = tolerance;
 }
-
-/*   TO BE REMOVED - JB
-// Set the number of particles required for the simulation
-void GGEMS::set_number_of_particles ( std::string str )
-{
-    int id = 0;
-    int batch = 1;
-
-    std::string unit;
-    std::vector<std::string> tokens;
-    std::stringstream stream;
-
-    tokens=split_vector(str," ");
-    if(tokens.size()!=2 )
-    {
-        GGcerr << "There must be only 2 values : The number of particles and the unit (thousand, million, billion)" << GGendl;
-        exit_simulation();
-    }
-
-    stream << tokens[0];
-    stream >> id;
-    stream.clear(); //clear the sstream
-    stream << tokens[1];
-    stream >> unit;
-    stream.clear(); //clear the sstream
-
-    if(unit=="thousand")
-    {
-        id *= 1000;
-    }
-    else if(unit=="million")
-    {       
-        id *= 1000000;
-    }
-    else if(unit=="billion")
-    {
-        batch = id;
-        id = 1000000000;
-    }
-    else
-    {
-        GGcerr << "Multiple " << unit.c_str() << " unknown (only thousand, million, billion accepted)" << GGendl;
-        exit_simulation();
-    }
-
-    if(id<0)
-    {
-        printf("The number of particles must be a positive value \n");
-        exit_simulation();
-    }
-
-    set_number_of_particles(id);
-    set_size_of_particles_batch(batch);
-
-}
-*/
 
 // Set the size of particles batch
 void GGEMS::set_size_of_particles_batch ( ui64 nb )
@@ -566,17 +504,10 @@ void GGEMS::init_simulation()
         m_parameters.data_h.display_run_time = DISABLED;
     }
 
-    // License and banner
-    if (!m_license.info.clearence)
-    {
-        print_error("Your license has expired or is invalid!\n");
-        exit_simulation();
-    }
-
+    // Banner
     if ( m_parameters.data_h.verbose )
     {
-        print_banner(m_license.info.institution, m_license.info.expired_day, m_license.info.expired_month,
-                     m_license.info.expired_year, "V1.3", m_parameters.data_h );
+        print_banner("V1.3", m_parameters.data_h );
     }
 
     // Check

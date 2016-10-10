@@ -340,12 +340,8 @@ void GGnewline( )
 //f32 time;
 //ui32 seed;
 
-
-
-
 // Print GGEMS banner
-void print_banner( std::string institution, std::string exp_day, std::string exp_month, std::string exp_year,
-                   std::string version, GlobalSimulationParametersData params )
+void print_banner( std::string version, GlobalSimulationParametersData params )
 {
     if ( params.display_in_color )
     {
@@ -353,9 +349,9 @@ void print_banner( std::string institution, std::string exp_day, std::string exp
         printf(".--. \033[32;01m/\\__/\\\033[00m .--.            \n");
         printf("`\033[33;01mO\033[00m  \033[32;01m/ /  \\ \\\033[00m  .`     GGEMS %s  \n", version.c_str());
         printf("  `-\033[32;01m| |  | |\033[00m\033[33;01mO\033[00m`              \n");
-        printf("   -\033[32;01m|\033[00m`\033[32;01m|\033[00m..\033[32;01m|\033[00m`\033[32;01m|\033[00m-        License:  \n");
-        printf(" .` \033[32;01m\\\033[00m.\033[32;01m\\__/\033[00m.\033[32;01m/\033[00m `.        %s       \n", institution.c_str());
-        printf("'.-` \033[32;01m\\/__\\/\033[00m `-.'       %s-%s-%s \n", exp_day.c_str(), exp_month.c_str(), exp_year.c_str());
+        printf("   -\033[32;01m|\033[00m`\033[32;01m|\033[00m..\033[32;01m|\033[00m`\033[32;01m|\033[00m-        \n");
+        printf(" .` \033[32;01m\\\033[00m.\033[32;01m\\__/\033[00m.\033[32;01m/\033[00m `.        \n");
+        printf("'.-` \033[32;01m\\/__\\/\033[00m `-.' \n");
         printf("\n");
     }
     else
@@ -364,9 +360,9 @@ void print_banner( std::string institution, std::string exp_day, std::string exp
         printf(".--. /\\__/\\ .--.            \n");
         printf("`O  / /  \\ \\  .`     GGEMS %s  \n", version.c_str());
         printf("  `-| |  | |O`              \n");
-        printf("   -|`|..|`|-        License:  \n");
-        printf(" .` \\.\\__/./ `.        %s       \n", institution.c_str());
-        printf("'.-` \\/__\\/ `-.'       %s-%s-%s \n", exp_day.c_str(), exp_month.c_str(), exp_year.c_str());
+        printf("   -|`|..|`|-        \n");
+        printf(" .` \\.\\__/./ `.    \n");
+        printf("'.-` \\/__\\/ `-.'   \n");
         printf("\n");
     }
 }

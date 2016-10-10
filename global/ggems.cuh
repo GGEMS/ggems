@@ -22,7 +22,6 @@
 #include "materials.cuh"
 #include "ggems_detector.cuh"
 #include "ct_detector.cuh"
-#include "license.cuh"
 
 #include "point_source.cuh"
 #include "cone_beam_CT_source.cuh"
@@ -42,8 +41,7 @@ public:
     GGEMS();
     ~GGEMS();
 
-    // Setting parameters
-    void set_license ( std::string license_path );
+    // Setting parameters    
     void set_hardware_target ( std::string value );
     void set_GPU_ID ( ui32 valid );
     void set_GPU_block_size ( ui32 val );
@@ -98,10 +96,7 @@ private:
     bool m_check_mandatory();    
     void m_copy_parameters_cpu2gpu();
     GlobalSimulationParameters m_parameters;
-    bool m_flag_init;
-
-    // License
-    License m_license;
+    bool m_flag_init;    
 
 };
 
