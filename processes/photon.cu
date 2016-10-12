@@ -72,7 +72,7 @@ __host__ __device__ f32 Compton_CSPA_standard(f32 E, ui16 Z) {
 }
 
 // Compute the total Compton cross section for a given material
-__host__ __device__ f32 Compton_CS_standard(MaterialsTable materials, ui16 mat, f32 E) {
+__host__ __device__ f32 Compton_CS_standard(const MaterialsTable &materials, ui16 mat, f32 E) {
     f32 CS = 0.0f;
     i32 i;
     i32 index = materials.index[mat];
@@ -85,10 +85,10 @@ __host__ __device__ f32 Compton_CS_standard(MaterialsTable materials, ui16 mat, 
 }
 
 // Compton Scatter (Standard - Klein-Nishina) with secondary (e-)
-__host__ __device__ SecParticle Compton_SampleSecondaries_standard(ParticlesData particles,
+__host__ __device__ SecParticle Compton_SampleSecondaries_standard(ParticlesData &particles,
                                                                    f32 cutE,
                                                                    ui32 id,
-                                                                   GlobalSimulationParametersData parameters) {
+                                                                   const GlobalSimulationParametersData &parameters) {
 
     f32 gamE0 = particles.E[id];
     f32 E0 = gamE0 / 0.510998910f;
@@ -147,6 +147,7 @@ __host__ __device__ SecParticle Compton_SampleSecondaries_standard(ParticlesData
     electron.dir = make_f32xyz(0.0, 0.0, 0.0);
     electron.endsimu = PARTICLE_DEAD;
 
+
     //               DBL_MIN                  cut production
     if (electron.E > 1.0e-38f && electron.E > cutE && parameters.secondaries_list[ELECTRON]) {
         electron.dir = fxyz_sub(fxyz_scale(gamDir0, gamE0), fxyz_scale(gamDir1, gamE1));
@@ -157,6 +158,64 @@ __host__ __device__ SecParticle Compton_SampleSecondaries_standard(ParticlesData
 
     //return e-
     return electron;
+
+}
+
+// Compton Scatter (Standard - Klein-Nishina) without secondary (e-)
+__host__ __device__ void Compton_standard(ParticlesData &particles,
+                                          f32 cutE,
+                                          ui32 id,
+                                          const GlobalSimulationParametersData &parameters) {
+
+    f32 gamE0 = particles.E[id];
+    f32 E0 = gamE0 / 0.510998910f;
+    f32xyz gamDir0 = make_f32xyz(particles.dx[id], particles.dy[id], particles.dz[id]);
+
+    // sample the energy rate pf the scattered gamma
+
+    f32 epszero = 1.0f / (1.0f + 2.0f * E0);
+    f32 eps02 = epszero*epszero;
+    f32 a1 = -logf(epszero);
+    f32 a2 = a1 / (a1 + 0.5f*(1.0f-eps02));
+
+    f32 greject, onecost, eps, eps2, sint2, cosTheta, sinTheta, phi;
+    do {
+        if (a2 > prng_uniform( particles, id )) {
+            eps = expf(-a1 * prng_uniform( particles, id ));
+            eps2 = eps*eps;
+        } else {
+            eps2 = eps02 + (1.0f - eps02) * prng_uniform( particles, id );
+            eps = sqrt(eps2);
+        }
+        onecost = (1.0f - eps) / (eps * E0);
+        sint2 = onecost * (2.0f - onecost);
+        greject = 1.0f - eps * sint2 / (1.0f + eps2);
+    } while (greject < prng_uniform( particles, id ));
+
+    // scattered gamma angles
+
+    if (sint2 < 0.0f) {sint2 = 0.0f;}
+    cosTheta = 1.0f - onecost;
+    sinTheta = sqrt(sint2);
+    phi = prng_uniform( particles, id ) * gpu_twopi;
+
+    // update the scattered gamma
+
+    f32xyz gamDir1 = make_f32xyz(sinTheta*cosf(phi), sinTheta*sinf(phi), cosTheta);
+    gamDir1 = rotateUz(gamDir1, gamDir0);
+    gamDir1 = fxyz_unit( gamDir1 );
+
+    particles.dx[id] = gamDir1.x;
+    particles.dy[id] = gamDir1.y;
+    particles.dz[id] = gamDir1.z;
+
+    f32 gamE1  = gamE0 * eps;
+    if (gamE1 > 1.0e-06f) {particles.E[id] = gamE1;}
+    else {
+        particles.endsimu[id] = PARTICLE_DEAD;  // absorbed this particle
+        particles.E[id] = gamE1;                // Local energy deposit
+    }
+
 }
 
 //////// Photoelectric ////////////////////////////////////////
@@ -184,8 +243,8 @@ __host__ __device__ f32 Photoelec_CSPA_standard(f32 E, ui16 Z) {
 }
 
 // Compute the total Compton cross section for a given material
-__host__ __device__ f32 Photoelec_CS_standard(MaterialsTable materials,
-                                                ui16 mat, f32 E) {
+__host__ __device__ f32 Photoelec_CS_standard(const MaterialsTable &materials,
+                                              ui16 mat, f32 E) {
     f32 CS = 0.0f;
     i32 i;
     i32 index = materials.index[mat];
@@ -199,7 +258,7 @@ __host__ __device__ f32 Photoelec_CS_standard(MaterialsTable materials,
 
 // Compute Theta distribution of the emitted electron, with respect to the incident Gamma
 // The Sauter-Gavrila distribution for the K-shell is used
-__host__ __device__ f32 Photoelec_ElecCosThetaDistribution(ParticlesData particles,
+__host__ __device__ f32 Photoelec_ElecCosThetaDistribution(ParticlesData &particles,
                                                            ui32 id,
                                                            f32 kineEnergy) {
     f32 costeta = 1.0f;
@@ -223,14 +282,14 @@ __host__ __device__ f32 Photoelec_ElecCosThetaDistribution(ParticlesData particl
 }
 
 // PhotoElectric effect (standard) with secondary (e-)
-__host__ __device__ SecParticle Photoelec_SampleSecondaries_standard(ParticlesData particles,
-                                                                     MaterialsTable mat,
-                                                                     PhotonCrossSectionTable photon_CS_table,
+__host__ __device__ SecParticle Photoelec_SampleSecondaries_standard(ParticlesData &particles,
+                                                                     const MaterialsTable &mat,
+                                                                     const PhotonCrossSectionTable &photon_CS_table,
                                                                      ui32 E_index,
                                                                      f32 cutE,
                                                                      ui16 matindex,
                                                                      ui32 id,
-                                                                     GlobalSimulationParametersData parameters) {
+                                                                     const GlobalSimulationParametersData &parameters) {
 
     // Kill the photon without mercy
     particles.endsimu[id] = PARTICLE_DEAD;
@@ -759,8 +818,8 @@ __host__ __device__ f32 Rayleigh_CSPA_Livermore(f32* rayl_cs, f32 E, ui16 Z) {
 }
 
 // Compute the total Compton cross section for a given material
-__host__ __device__ f32 Rayleigh_CS_Livermore(MaterialsTable materials,
-                                                f32* rayl_cs, ui16 mat, f32 E) {
+__host__ __device__ f32 Rayleigh_CS_Livermore(const MaterialsTable &materials,
+                                              f32* rayl_cs, ui16 mat, f32 E) {
     f32 CS = 0.0f;
     i32 i;
     i32 index = materials.index[mat];
@@ -799,9 +858,9 @@ __host__ __device__ f32 Rayleigh_SF_Livermore(f32* rayl_sf, f32 E, i32 Z) {
 }
 
 // Rayleigh Scattering (Livermore)
-__host__ __device__ void Rayleigh_SampleSecondaries_Livermore(ParticlesData particles,
-                                                              MaterialsTable mat,
-                                                              PhotonCrossSectionTable photon_CS_table,
+__host__ __device__ void Rayleigh_SampleSecondaries_Livermore(ParticlesData &particles,
+                                                              const MaterialsTable &mat,
+                                                              const PhotonCrossSectionTable &photon_CS_table,
                                                               ui32 E_index,
                                                               ui16 matindex,
                                                               ui32 id) {

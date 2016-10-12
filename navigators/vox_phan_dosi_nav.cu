@@ -19,10 +19,10 @@
 ////:: GPU Codes
 
 __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
-                                                       VoxVolumeData<ui16> vol,
-                                                       MaterialsTable materials,
-                                                       ElectronsCrossSectionTable electron_CS_table,
-                                                       GlobalSimulationParametersData parameters,
+                                                       const VoxVolumeData<ui16> &vol,
+                                                       const MaterialsTable &materials,
+                                                       const ElectronsCrossSectionTable &electron_CS_table,
+                                                       const GlobalSimulationParametersData &parameters,
                                                        DoseData &dosi,
                                                        f32 &randomnumbereIoni,
                                                        f32 &randomnumbereBrem,
@@ -33,7 +33,7 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
     // Parameters values need to be stored for every e-step
     f32 alongStepLength = 0.;               // Distance from the last physics interaction.
     bool lastStepisaPhysicEffect = TRUE;    // To store last random number
-    //bool bool_loop = true;                  // If it is not the last step in the same voxel
+    //bool bool_loop = true;                // If it is not the last step in the same voxel
 
     alongStepLength = freeLength;
     if ( freeLength > 0.0 ) lastStepisaPhysicEffect = FALSE; // Changement de voxel sans effet physique
@@ -371,11 +371,11 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
 
 
 __host__ __device__ void VPDN::track_photon_to_out ( ParticlesData &particles,
-                                                     VoxVolumeData<ui16> vol,
-                                                     MaterialsTable materials,
-                                                     PhotonCrossSectionTable photon_CS_table,
-                                                     GlobalSimulationParametersData parameters,
-                                                     DoseData dosi,
+                                                     const VoxVolumeData<ui16> &vol,
+                                                     const MaterialsTable &materials,
+                                                     const PhotonCrossSectionTable &photon_CS_table,
+                                                     const GlobalSimulationParametersData &parameters,
+                                                     DoseData &dosi,
                                                      ui32 part_id )
 {        
     // Read position
@@ -550,7 +550,7 @@ __host__ __device__ void VPDN::track_photon_to_out ( ParticlesData &particles,
 }
 
 // Device Kernel that move particles to the voxelized volume boundary
-__global__ void VPDN::kernel_device_track_to_in ( ParticlesData particles, f32 xmin, f32 xmax,
+__global__ void VPDN::kernel_device_track_to_in ( ParticlesData &particles, f32 xmin, f32 xmax,
                                                   f32 ymin, f32 ymax, f32 zmin, f32 zmax, f32 tolerance )
 {  
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
@@ -561,20 +561,20 @@ __global__ void VPDN::kernel_device_track_to_in ( ParticlesData particles, f32 x
 
 
 // Host Kernel that move particles to the voxelized volume boundary
-void VPDN::kernel_host_track_to_in ( ParticlesData particles, f32 xmin, f32 xmax,
+void VPDN::kernel_host_track_to_in ( ParticlesData &particles, f32 xmin, f32 xmax,
                                      f32 ymin, f32 ymax, f32 zmin, f32 zmax, f32 tolerance, ui32 part_id )
 {       
     transport_track_to_in_AABB( particles, xmin, xmax, ymin, ymax, zmin, zmax, tolerance, part_id);
 }
 
 // Device kernel that track particles within the voxelized volume until boundary
-__global__ void VPDN::kernel_device_track_to_out ( ParticlesData particles,
-                                                   VoxVolumeData<ui16> vol,
-                                                   MaterialsTable materials,
-                                                   PhotonCrossSectionTable photon_CS_table,
-                                                   ElectronsCrossSectionTable electron_CS_table,
-                                                   GlobalSimulationParametersData parameters,
-                                                   DoseData dosi )
+__global__ void VPDN::kernel_device_track_to_out ( ParticlesData &particles,
+                                                   const VoxVolumeData<ui16> &vol,
+                                                   const MaterialsTable &materials,
+                                                   const PhotonCrossSectionTable &photon_CS_table,
+                                                   const ElectronsCrossSectionTable &electron_CS_table,
+                                                   const GlobalSimulationParametersData &parameters,
+                                                   DoseData &dosi )
 {   
 
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
@@ -650,13 +650,13 @@ __global__ void VPDN::kernel_device_track_to_out ( ParticlesData particles,
 }
 
 // Host kernel that track particles within the voxelized volume until boundary
-void VPDN::kernel_host_track_to_out ( ParticlesData particles,
-                                      VoxVolumeData<ui16> vol,
-                                      MaterialsTable materials,
-                                      PhotonCrossSectionTable photon_CS_table,
-                                      ElectronsCrossSectionTable electron_CS_table,
-                                      GlobalSimulationParametersData parameters,
-                                      DoseData dosi,
+void VPDN::kernel_host_track_to_out ( ParticlesData &particles,
+                                      const VoxVolumeData<ui16> &vol,
+                                      const MaterialsTable &materials,
+                                      const PhotonCrossSectionTable &photon_CS_table,
+                                      const ElectronsCrossSectionTable &electron_CS_table,
+                                      const GlobalSimulationParametersData &parameters,
+                                      DoseData &dosi,
                                       ui32 id )
 {
     // For multivoxels navigation
@@ -787,7 +787,7 @@ VoxPhanDosiNav::VoxPhanDosiNav ()
     set_name( "VoxPhanDosiNav" );
 }
 
-void VoxPhanDosiNav::track_to_in ( Particles particles )
+void VoxPhanDosiNav::track_to_in (Particles particles )
 {
 
     if ( m_params.data_h.device_target == CPU_DEVICE )

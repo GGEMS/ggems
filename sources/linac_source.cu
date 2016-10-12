@@ -16,8 +16,9 @@
 ///////// GPU code ////////////////////////////////////////////////////
 
 // Internal function that create a new particle to the buffer at the slot id
-__host__ __device__ void linac_source ( ParticlesData particles, LinacSourceData linac,
-                                        f32matrix44 trans, ui32 id )
+__host__ __device__ void linac_source ( ParticlesData &particles,
+                                        const LinacSourceData &linac,
+                                        const f32matrix44 &trans, ui32 id )
 {
     // Main vars
     ui32 gbl_ind, ind;
@@ -201,8 +202,9 @@ __host__ __device__ void linac_source ( ParticlesData particles, LinacSourceData
 
 // Kernel to create new particles. This kernel will only call the host/device function
 // beamlet source in order to get one new particle.
-__global__ void kernel_linac_source ( ParticlesData particles, LinacSourceData linac,
-                                      f32matrix44 trans )
+__global__ void kernel_linac_source ( ParticlesData &particles,
+                                      const LinacSourceData &linac,
+                                      const f32matrix44 &trans )
 {
     // Get thread id
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
@@ -391,8 +393,8 @@ void LinacSource::m_load_linac_model()
 
 // Setting the axis transformation matrix
 void LinacSource::set_frame_axis( f32 m00, f32 m01, f32 m02,
-                                    f32 m10, f32 m11, f32 m12,
-                                    f32 m20, f32 m21, f32 m22 )
+                                  f32 m10, f32 m11, f32 m12,
+                                  f32 m20, f32 m21, f32 m22 )
 {
     m_axis_trans.m00 = m00;
     m_axis_trans.m01 = m01;

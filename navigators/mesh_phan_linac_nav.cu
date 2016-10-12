@@ -21,7 +21,7 @@
 // == Track to in ===================================================================================
 
 // Device Kernel that move particles to the voxelized volume boundary
-__global__ void MPLINACN::kernel_device_track_to_in( ParticlesData particles, LinacData linac, f32 geom_tolerance )
+__global__ void MPLINACN::kernel_device_track_to_in( ParticlesData &particles, const LinacData &linac, f32 geom_tolerance )
 {
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
     if ( id >= particles.size ) return;
@@ -49,7 +49,7 @@ __global__ void MPLINACN::kernel_device_track_to_in( ParticlesData particles, Li
 }
 
 // Host Kernel that move particles to the voxelized volume boundary
-void MPLINACN::kernel_host_track_to_in( ParticlesData particles, LinacData linac, f32 geom_tolerance, ui32 id )
+void MPLINACN::kernel_host_track_to_in( ParticlesData &particles, const LinacData &linac, f32 geom_tolerance, ui32 id )
 {
     // read position and direction
     f32xyz pos = make_f32xyz( particles.px[ id ], particles.py[ id ], particles.pz[ id ] );
@@ -196,7 +196,7 @@ __host__ __device__ void m_transport_mesh( f32xyz pos, f32xyz dir,
 
 }
 
-__host__ __device__ void m_mlc_nav_out_mesh( f32xyz pos, f32xyz dir, LinacData linac,
+__host__ __device__ void m_mlc_nav_out_mesh( f32xyz pos, f32xyz dir, const LinacData &linac,
                                              f32 geom_tol,
                                              ui32 *geometry_id, f32 *geometry_distance )
 {
@@ -563,7 +563,7 @@ __host__ __device__ void m_mlc_nav_out_mesh( f32xyz pos, f32xyz dir, LinacData l
 
 }
 
-__host__ __device__ void m_mlc_nav_in_mesh( f32xyz pos, f32xyz dir, LinacData linac,
+__host__ __device__ void m_mlc_nav_in_mesh( f32xyz pos, f32xyz dir, const LinacData &linac,
                                             f32 geom_tol,
                                             ui32 *geometry_id, f32 *geometry_distance )
 {
@@ -662,10 +662,11 @@ __host__ __device__ void m_mlc_nav_in_mesh( f32xyz pos, f32xyz dir, LinacData li
 }
 
 
-__host__ __device__ void MPLINACN::track_to_out( ParticlesData &particles, LinacData linac,
-                                                 MaterialsTable materials,
-                                                 PhotonCrossSectionTable photon_CS_table,
-                                                 GlobalSimulationParametersData parameters,
+__host__ __device__ void MPLINACN::track_to_out( ParticlesData &particles,
+                                                 const LinacData &linac,
+                                                 const MaterialsTable &materials,
+                                                 const PhotonCrossSectionTable &photon_CS_table,
+                                                 const GlobalSimulationParametersData &parameters,
                                                  ui32 id )
 {
     // Read position
@@ -788,7 +789,7 @@ __host__ __device__ void MPLINACN::track_to_out( ParticlesData &particles, Linac
 
 }
 
-__host__ __device__ void MPLINACN::track_to_out_nonav( ParticlesData &particles, LinacData linac,
+__host__ __device__ void MPLINACN::track_to_out_nonav( ParticlesData &particles, const LinacData &linac,
                                                        ui32 id )
 {
     // Read position
@@ -1026,9 +1027,11 @@ __host__ __device__ void MPLINACN::track_to_out_nonav( ParticlesData &particles,
 
 
 // Device kernel that track particles within the voxelized volume until boundary
-__global__ void MPLINACN::kernel_device_track_to_out( ParticlesData particles, LinacData linac,
-                                                      MaterialsTable materials, PhotonCrossSectionTable photon_CS,
-                                                      GlobalSimulationParametersData parameters,
+__global__ void MPLINACN::kernel_device_track_to_out( ParticlesData &particles,
+                                                      const LinacData &linac,
+                                                      const MaterialsTable &materials,
+                                                      const PhotonCrossSectionTable &photon_CS,
+                                                      const GlobalSimulationParametersData &parameters,
                                                       bool nav_within_mlc )
 {
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
@@ -1086,9 +1089,11 @@ __global__ void MPLINACN::kernel_device_track_to_out( ParticlesData particles, L
 }
 
 // Host kernel that track particles within the voxelized volume until boundary
-void MPLINACN::kernel_host_track_to_out( ParticlesData particles, LinacData linac,
-                                         MaterialsTable materials, PhotonCrossSectionTable photon_CS,
-                                         GlobalSimulationParametersData parameters,
+void MPLINACN::kernel_host_track_to_out( ParticlesData &particles,
+                                         const LinacData &linac,
+                                         const MaterialsTable &materials,
+                                         const PhotonCrossSectionTable &photon_CS,
+                                         const GlobalSimulationParametersData &parameters,
                                          bool nav_within_mlc, ui32 id )
 {
     // Init geometry ID for navigation

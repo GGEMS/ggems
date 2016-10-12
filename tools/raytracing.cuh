@@ -54,7 +54,7 @@ __host__ __device__ f32 dist_overlap_ray_AABB(f32xyz ray_p, f32xyz ray_d,
 //                                    f32xyz u, f32xyz v, f32xyz w); // OBB frame
 
 // Ray/OBB intersection - Using transformation matrix
-__host__ __device__ f32 dist_overlap_ray_OBB(f32xyz ray_p, f32xyz ray_d, ObbData obb );
+__host__ __device__ f32 dist_overlap_ray_OBB(f32xyz ray_p, f32xyz ray_d, const ObbData &obb );
 
 // Ray/Sphere intersection
 __host__ __device__ f32 hit_ray_sphere(f32xyz ray_p, f32xyz ray_d,        // Ray
@@ -66,7 +66,7 @@ __host__ __device__ f32 hit_ray_AABB( f32xyz ray_p, f32xyz ray_d,
                                       f32 aabb_ymin, f32 aabb_ymax,
                                       f32 aabb_zmin, f32 aabb_zmax );
 __host__ __device__ f32 hit_ray_AABB( f32xyz ray_p, f32xyz ray_d,
-                                      AabbData aabb );
+                                      const AabbData &aabb );
 
 // Ray/AABB test - Smits algorithm
 __host__ __device__ bool test_ray_AABB( f32xyz ray_p, f32xyz ray_d,
@@ -74,7 +74,7 @@ __host__ __device__ bool test_ray_AABB( f32xyz ray_p, f32xyz ray_d,
                                         f32 aabb_ymin, f32 aabb_ymax,
                                         f32 aabb_zmin, f32 aabb_zmax );
 __host__ __device__ bool test_ray_AABB( f32xyz ray_p, f32xyz ray_d,
-                                        AabbData aabb );
+                                        const AabbData &aabb );
 
 // AABB/AABB test
 __host__ __device__ bool test_AABB_AABB(f32 a_xmin, f32 a_xmax, f32 a_ymin, f32 a_ymax,
@@ -89,7 +89,7 @@ __host__ __device__ bool test_point_AABB(f32xyz p,
                                          f32 aabb_zmin, f32 aabb_zmax);
 
 __host__ __device__ bool test_point_AABB( f32xyz p,
-                                          AabbData aabb );
+                                          const AabbData &aabb );
 
 // Point/AABB test with tolerance
 __host__ __device__ bool test_point_AABB_with_tolerance(f32xyz p,
@@ -99,7 +99,7 @@ __host__ __device__ bool test_point_AABB_with_tolerance(f32xyz p,
                                                         f32 tol);
 
 __host__ __device__ bool test_point_AABB_with_tolerance(f32xyz p,
-                                                        AabbData aabb,
+                                                        const AabbData &aabb,
                                                         f32 tol);
 
 // Ray/triangle intersection - Moller-Trumbore algorithm
@@ -117,7 +117,7 @@ __host__ __device__ f32 hit_ray_triangle(f32xyz ray_p, f32xyz ray_d,
 //                                     f32xyz u, f32xyz v, f32xyz w ); // OBB frame
 
 // Ray/OBB intersection - Using transformation matrix
-__host__ __device__ f32 hit_ray_OBB( f32xyz ray_p, f32xyz ray_d, ObbData obb );
+__host__ __device__ f32 hit_ray_OBB( f32xyz ray_p, f32xyz ray_d, const ObbData &obb );
 
 ////////////////////////////////////////////////////////////////////////////////////////
 

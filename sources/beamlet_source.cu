@@ -16,7 +16,8 @@
 ///////// GPU code ////////////////////////////////////////////////////
 
 // Internal function that create a new particle to the buffer at the slot id
-__host__ __device__ void beamlet_source ( ParticlesData particles, f32xyz pos, f32xyz src, f32xyz size, f32matrix44 trans,
+__host__ __device__ void beamlet_source ( ParticlesData &particles, f32xyz pos, f32xyz src, f32xyz size,
+                                          const f32matrix44 &trans,
                                           f32 *spectrum_E, f32 *spectrum_CDF,
                                           ui32 nb_of_energy_bins, ui8 ptype, ui32 id )
 {
@@ -96,7 +97,8 @@ __host__ __device__ void beamlet_source ( ParticlesData particles, f32xyz pos, f
 
 // Kernel to create new particles. This kernel will only call the host/device function
 // beamlet source in order to get one new particle.
-__global__ void kernel_beamlet_source ( ParticlesData particles, f32xyz pos, f32xyz src, f32xyz size, f32matrix44 trans,
+__global__ void kernel_beamlet_source ( ParticlesData &particles, f32xyz pos, f32xyz src, f32xyz size,
+                                        const f32matrix44 &trans,
                                         f32 *spectrum_E, f32 *spectrum_CDF,
                                         ui32 nb_of_energy_bins, ui8 particle_type )
 {

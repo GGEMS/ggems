@@ -65,7 +65,7 @@ __host__ __device__ void template_detector_track_to_in( ParticlesData &particles
 
 // Digitizer record and process data into the detector. For example in CT imaging the digitizer will compute
 // the number of particle per pixel.
-__host__ __device__ void template_detector_digitizer( ParticlesData particles, ui32 id )
+__host__ __device__ void template_detector_digitizer( const ParticlesData &particles, ui32 id )
 {
     // If freeze or dead, quit
     if( particles.endsimu[ id ] == PARTICLE_FREEZE || particles.endsimu[ id ] == PARTICLE_DEAD )
@@ -86,7 +86,7 @@ __host__ __device__ void template_detector_digitizer( ParticlesData particles, u
 }
 
 // Kernel that launch the function track_to_in on GPU
-__global__ void kernel_template_detector_track_to_in( ParticlesData particles )
+__global__ void kernel_template_detector_track_to_in( ParticlesData &particles )
 {
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
     if (id >= particles.size) return;
@@ -105,7 +105,7 @@ __global__ void kernel_template_detector_track_to_in( ParticlesData particles )
 //}
 
 // Kernel that launch digitizer on GPU
-__global__ void kernel_template_detector_digitizer( ParticlesData particles )
+__global__ void kernel_template_detector_digitizer( ParticlesData &particles )
 {
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
     if (id >= particles.size) return;

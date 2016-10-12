@@ -209,7 +209,7 @@ __host__ __device__ f32 dist_overlap_ray_OBB(f32xyz ray_p, f32xyz ray_d,
 }
 */
 
-__host__ __device__ f32 dist_overlap_ray_OBB( f32xyz ray_p, f32xyz ray_d, ObbData obb )
+__host__ __device__ f32 dist_overlap_ray_OBB( f32xyz ray_p, f32xyz ray_d, const ObbData &obb )
 {
     // Get pos and dir in local OBB frame
     ray_p = fxyz_global_to_local_position( obb.transformation, ray_p );
@@ -223,9 +223,9 @@ __host__ __device__ f32 dist_overlap_ray_OBB( f32xyz ray_p, f32xyz ray_d, ObbDat
 
 // Overlapping distance between ray and AABB - Smits algorithm (f32 version)
 __host__ __device__ f32 dist_overlap_ray_AABB(f32xyz ray_p, f32xyz ray_d,
-                                     f32 aabb_xmin, f32 aabb_xmax,
-                                     f32 aabb_ymin, f32 aabb_ymax,
-                                     f32 aabb_zmin, f32 aabb_zmax) {
+                                              f32 aabb_xmin, f32 aabb_xmax,
+                                              f32 aabb_ymin, f32 aabb_ymax,
+                                              f32 aabb_zmin, f32 aabb_zmax) {
 
     f32 idx, idy, idz;
     f32 tmin, tmax, tymin, tymax, tzmin, tzmax, buf;
@@ -376,7 +376,7 @@ __host__ __device__ f32 hit_ray_AABB(f32xyz ray_p, f32xyz ray_d,
 }
 
 __host__ __device__ f32 hit_ray_AABB( f32xyz ray_p, f32xyz ray_d,
-                                      AabbData aabb )
+                                      const AabbData &aabb )
 {
     return hit_ray_AABB( ray_p, ray_d,
                          aabb.xmin, aabb.xmax, aabb.ymin, aabb.ymax,
@@ -449,7 +449,7 @@ __host__ __device__ bool test_ray_AABB( f32xyz ray_p, f32xyz ray_d,
 }
 
 __host__ __device__ bool test_ray_AABB( f32xyz ray_p, f32xyz ray_d,
-                                        AabbData aabb )
+                                        const AabbData &aabb )
 {
     return test_ray_AABB( ray_p, ray_d, aabb.xmin, aabb.xmax, aabb.ymin, aabb.ymax, aabb.zmin, aabb.zmax );
 }
@@ -481,7 +481,7 @@ __host__ __device__ bool test_point_AABB(f32xyz p,
 }
 
 __host__ __device__ bool test_point_AABB( f32xyz p,
-                                          AabbData aabb )
+                                          const AabbData &aabb )
 
 {
     return test_point_AABB( p, aabb.xmin, aabb.xmax, aabb.ymin, aabb.ymax, aabb.zmin, aabb.zmax );
@@ -502,7 +502,7 @@ __host__ __device__ bool test_point_AABB_with_tolerance(f32xyz p,
 }
 
 __host__ __device__ bool test_point_AABB_with_tolerance(f32xyz p,
-                                                        AabbData aabb,
+                                                        const AabbData &aabb,
                                                         f32 tol)
 {
     if (p.x < aabb.xmin+tol || p.x > aabb.xmax-tol) return false;
@@ -541,7 +541,7 @@ __host__ __device__ f32 hit_ray_triangle(f32xyz ray_p, f32xyz ray_d,
 }
 
 // Ray/OBB intersection - Using transformation matrix
-__host__ __device__ f32 hit_ray_OBB( f32xyz ray_p, f32xyz ray_d, ObbData obb )
+__host__ __device__ f32 hit_ray_OBB( f32xyz ray_p, f32xyz ray_d, const ObbData &obb )
 {
 
     //ray_d.x = 1.0; ray_d.y = 0.0; ray_d.z = 0.0;

@@ -89,43 +89,53 @@ namespace VPIORTN
 {
 
 __host__ __device__ void track_to_out(ParticlesData &particles,
-                                      VoxVolumeData<ui16> vol, MaterialsTable materials,
-                                      PhotonCrossSectionTable photon_CS_table,
-                                      GlobalSimulationParametersData parameters, DoseData dosi, Mu_MuEn_Table mu_table,
-                                      HistoryMap hist_map, ui32 part_id);
+                                      const VoxVolumeData<ui16> &vol,
+                                      const MaterialsTable &materials,
+                                      const PhotonCrossSectionTable &photon_CS_table,
+                                      const GlobalSimulationParametersData &parameters,
+                                      DoseData &dosi,
+                                      const Mu_MuEn_Table &mu_table,
+                                      HistoryMap &hist_map, ui32 part_id);
 
-__host__ __device__ void track_seTLE( ParticlesData &particles, VoxVolumeData<ui16> vol, COOHistoryMap coo_hist_map,
-                                      DoseData dose, Mu_MuEn_Table mu_table, ui32 nb_of_rays, f32 edep_th, ui32 id );
+__host__ __device__ void track_seTLE(ParticlesData &particles,
+                                     const VoxVolumeData<ui16> &vol,
+                                     COOHistoryMap &coo_hist_map,
+                                     DoseData &dose,
+                                     const Mu_MuEn_Table &mu_table, ui32 nb_of_rays, f32 edep_th, ui32 id );
 
-__global__ void kernel_device_track_to_in ( ParticlesData particles, f32 xmin, f32 xmax,
+__global__ void kernel_device_track_to_in ( ParticlesData &particles, f32 xmin, f32 xmax,
                                             f32 ymin, f32 ymax, f32 zmin, f32 zmax , f32 tolerance);
 
-__global__ void kernel_device_track_to_out ( ParticlesData particles,
-                                             VoxVolumeData<ui16> vol,
-                                             MaterialsTable materials,
-                                             PhotonCrossSectionTable photon_CS_table,
-                                             GlobalSimulationParametersData parameters,
-                                             DoseData dosi , Mu_MuEn_Table mu_table, HistoryMap hist_map);
+__global__ void kernel_device_track_to_out (ParticlesData &particles,
+                                            const VoxVolumeData<ui16> &vol,
+                                            const MaterialsTable &materials,
+                                            const PhotonCrossSectionTable &photon_CS_table,
+                                            const GlobalSimulationParametersData &parameters,
+                                            DoseData &dosi ,
+                                            const Mu_MuEn_Table &mu_table,
+                                            HistoryMap &hist_map);
 
-__global__ void kernel_device_seTLE( ParticlesData particles, VoxVolumeData<ui16> vol,
-                                     COOHistoryMap coo_hist_map,
-                                     DoseData dosi,
-                                     Mu_MuEn_Table mu_table, ui32 nb_of_rays, f32 edep_th );
+__global__ void kernel_device_seTLE(ParticlesData &particles,
+                                    const VoxVolumeData<ui16> &vol,
+                                    COOHistoryMap &coo_hist_map,
+                                    DoseData &dosi,
+                                    const Mu_MuEn_Table &mu_table, ui32 nb_of_rays, f32 edep_th );
 
-void kernel_host_track_to_in ( ParticlesData particles, f32 xmin, f32 xmax,
+void kernel_host_track_to_in( ParticlesData &particles, f32 xmin, f32 xmax,
                                f32 ymin, f32 ymax, f32 zmin, f32 zmax, f32 tolerance, ui32 part_id );
 
-void kernel_host_track_to_out ( ParticlesData particles,
-                                VoxVolumeData<ui16> vol,
-                                MaterialsTable materials,
-                                PhotonCrossSectionTable photon_CS_table,
-                                GlobalSimulationParametersData parameters,
-                                DoseData dosi, Mu_MuEn_Table mu_table, HistoryMap hist_map);
+void kernel_host_track_to_out( ParticlesData &particles,
+                               const VoxVolumeData<ui16> &vol,
+                               const MaterialsTable &materials,
+                               const PhotonCrossSectionTable &photon_CS_table,
+                               const GlobalSimulationParametersData &parameters,
+                               DoseData &dosi, const Mu_MuEn_Table &mu_table, HistoryMap &hist_map);
 
-void kernel_host_seTLE( ParticlesData particles, VoxVolumeData<ui16> vol,
-                        COOHistoryMap coo_hist_map,
-                        DoseData dosi,
-                        Mu_MuEn_Table mu_table, ui32 nb_of_rays, f32 edep_th );
+void kernel_host_seTLE( ParticlesData &particles,
+                        const VoxVolumeData<ui16> &vol,
+                        COOHistoryMap &coo_hist_map,
+                        DoseData &dosi,
+                        const Mu_MuEn_Table &mu_table, ui32 nb_of_rays, f32 edep_th );
 
 }
 

@@ -84,7 +84,8 @@ f32  coefsig[8][11]= {{.4638,.37748,.32249,-.060362,-.065004,-.033457,-.004583,.
 };
 #endif
 
-__host__ __device__ f32 compute_lambda_for_scaled_energy( f32 CS, f32 e, ElectronsCrossSectionTable table, ui16 mat_id )
+__host__ __device__ f32 compute_lambda_for_scaled_energy( f32 CS, f32 e,
+                                                          const ElectronsCrossSectionTable &table, ui16 mat_id )
 {
 
     f32 E_CS_max = table.eIonisation_E_CS_max[ mat_id ];
@@ -156,17 +157,17 @@ __host__ __device__ f32 compute_lambda_for_scaled_energy( f32 CS, f32 e, Electro
 __host__ __device__ void e_read_CS_table (
                                             ui16 mat, //material
                                             f32 energy, //energy of particle
-                                            ElectronsCrossSectionTable d_table,
+                                            const ElectronsCrossSectionTable &d_table,
                                             ui8 &next_discrete_process, //next discrete process id
                                             ui32 &table_index,
-                                            f32 & next_interaction_distance,
-                                            f32 & dedxeIoni,
-                                            f32 & dedxeBrem,
-                                            f32 & erange,
-                                            f32 & lambda,
+                                            f32 &next_interaction_distance,
+                                            f32 &dedxeIoni,
+                                            f32 &dedxeBrem,
+                                            f32 &erange,
+                                            f32 &lambda,
                                             f32 randomnumbereBrem,
                                             f32 randomnumbereIoni,
-                                            GlobalSimulationParametersData parameters )
+                                            const GlobalSimulationParametersData &parameters )
 {
     // Find energy index
     ui32 energy_index;
@@ -347,7 +348,9 @@ __host__ __device__ f32 LossApproximation ( f32 StepLength, f32 Ekine, f32 erang
 #define fw 4.
 #define nmaxCont 16
 #define minLoss 10.*eV
-__host__ __device__ f32 eFluctuation (f32 meanLoss, f32 Ekine, MaterialsTable materials, ParticlesData &particles, ui32 id, ui8 id_mat )
+__host__ __device__ f32 eFluctuation (f32 meanLoss, f32 Ekine,
+                                      const MaterialsTable &materials,
+                                      ParticlesData &particles, ui32 id, ui8 id_mat )
 {
 
     f32 cutEnergy = materials.electron_energy_cut[ id_mat ];
@@ -512,9 +515,10 @@ __host__ __device__ f32 eFluctuation (f32 meanLoss, f32 Ekine, MaterialsTable ma
 #undef minLoss
 
 
-__host__ __device__ f32 eLoss ( f32 LossLength, f32 Ekine, f32 dedxeIoni, f32 dedxeBrem, f32 erange,
-                                ElectronsCrossSectionTable d_table, ui8 mat, MaterialsTable materials,
-                                ParticlesData &particles, ui32 id )
+__host__ __device__ f32 eLoss( f32 LossLength, f32 Ekine, f32 dedxeIoni, f32 dedxeBrem, f32 erange,
+                               const ElectronsCrossSectionTable &d_table, ui8 mat,
+                               const MaterialsTable &materials,
+                               ParticlesData &particles, ui32 id )
 {    
     // DEBUG
     //LossLength = 0.09;
@@ -649,7 +653,7 @@ __host__ __device__ f32 eSimpleScattering ( f32 xmeanth, f32 x2meanth, ui32 id, 
 
 
 __host__ __device__ f32 eCosineTheta (f32 trueStep, f32 currentRange, f32 currentLambda, f32 currentEnergy, f32 *currentTau,
-                                       f32 par1, f32 par2, MaterialsTable materials, ui8 id_mat, ui32 id, ParticlesData &particles )
+                                       f32 par1, f32 par2, const MaterialsTable &materials, ui8 id_mat, ui32 id, ParticlesData &particles )
 {
     f32 particleEnergy = particles.E[id];
     f32  costh,sinth;
@@ -893,7 +897,8 @@ __host__ __device__ void gLatCorrection ( f32xyz currentDir, f32 tPath, f32 zPat
 
 __host__ __device__ void eMscScattering ( f32 tPath, f32 zPath, f32 currentRange, f32 currentLambda,
                                           f32 currentEnergy, f32 par1, f32 par2, ParticlesData &particles,
-                                          ui32 id, MaterialsTable materials, ui8 mat, VoxVolumeData<ui16> phantom/*, ui32xyzw index_phantom */)
+                                          ui32 id, const MaterialsTable &materials, ui8 mat,
+                                          const VoxVolumeData<ui16> &phantom/*, ui32xyzw index_phantom */)
 {
     f32  costh, sinth, phi, currentTau;
     const f32 tlimitminfix = 1.E-10*mm, tausmall = 1.E-16; //,taulim=1.E-6
@@ -984,10 +989,10 @@ __host__ __device__ void eMscScattering ( f32 tPath, f32 zPath, f32 currentRange
 
 // From Eric's code
 __host__ __device__ f32 GlobalMscScattering ( f32 GeomPath,f32 cutstep,f32 CurrentRange,f32 CurrentEnergy, f32 CurrentLambda,
-                                              f32 dedxeIoni, f32 dedxeBrem, ElectronsCrossSectionTable d_table, ui8 mat,
-                                              ParticlesData &particles, ui32 id,f32 par1,f32 par2, MaterialsTable materials,
-                                              DoseData &dosi, ui32xyzw index_phantom, VoxVolumeData<ui16> phantom,
-                                              GlobalSimulationParametersData parameters )
+                                              f32 dedxeIoni, f32 dedxeBrem, const ElectronsCrossSectionTable &d_table, ui8 mat,
+                                              ParticlesData &particles, ui32 id,f32 par1,f32 par2, const MaterialsTable &materials,
+                                              DoseData &dosi, ui32xyzw index_phantom, const VoxVolumeData<ui16> &phantom,
+                                              const GlobalSimulationParametersData &parameters )
 {
 
     f32  edep, TruePath, zPath;//,tausmall=1.E-16;
@@ -1148,7 +1153,7 @@ __host__ __device__ f32xyz CorrUnit ( f32xyz u, f32xyz v, f32 uMom, f32 vMom )
 #define tlimitminfix 1.E-6*mm
 #define dtrl 5./100
 __host__ __device__ f32 gTransformToGeom (f32 TPath, f32 currentRange, f32 currentLambda, f32 currentEnergy,
-                                          f32 &par1, f32 &par2, ElectronsCrossSectionTable electron_CS_table, ui8 mat )
+                                          f32 &par1, f32 &par2, const ElectronsCrossSectionTable &electron_CS_table, ui8 mat )
 {
     f32  ZPath, zmean;
 //     f32  tausmall=1.E-20,taulim=1.E-6,tlimitminfix=1.E-6*mm;
@@ -1220,7 +1225,7 @@ __host__ __device__ f32 gTransformToGeom (f32 TPath, f32 currentRange, f32 curre
 #undef tlimitminfix
 #undef dtrl
 
-__host__ __device__ f32 GetEnergy ( f32 Range, ElectronsCrossSectionTable d_table, ui8 mat )
+__host__ __device__ f32 GetEnergy ( f32 Range, const ElectronsCrossSectionTable &d_table, ui8 mat )
 {
     ui32 index = binary_search ( Range, d_table.eRange, d_table.nb_bins*mat+d_table.nb_bins, d_table.nb_bins*mat );
     ui32 E_index = index - d_table.nb_bins*mat;
@@ -1237,7 +1242,7 @@ __host__ __device__ f32 GetEnergy ( f32 Range, ElectronsCrossSectionTable d_tabl
 }
 
 // Get Lambda with flag 1, in the code only flag 1 is used, so I fixed the function to flag 1 - JB
-__host__ __device__ f32 GetLambda ( f32 energy, ElectronsCrossSectionTable d_table, ui8 mat )
+__host__ __device__ f32 GetLambda ( f32 energy, const ElectronsCrossSectionTable &d_table, ui8 mat )
 {
     ui32 E_index = binary_search ( energy, d_table.E, d_table.nb_bins );
     ui32 index = d_table.nb_bins*mat + E_index;
@@ -1298,7 +1303,7 @@ __host__ __device__ int RandomAtom ( f32 CutEnergyGamma, ParticlesData &particle
 
 // The old function from GGEMS V1 was wrong, I extracted this one from G4.10  - JB
 __host__ __device__ ui16 RandomAtom ( f32 CutEnergyGamma, f32 min_E, ParticlesData &particles, ui32 id,
-                                      MaterialsTable materials, ui8 mat_id )
+                                      const MaterialsTable &materials, ui8 mat_id )
 {
 
     ui32 n = materials.nb_elements[ mat_id ] - 1;
@@ -1397,7 +1402,7 @@ __host__ __device__ f32 AngleDistribution ( f32 initial_energy, f32 final_energy
 
 __host__ __device__
 void eSampleSecondarieGamma ( f32 minEnergy, f32 maxEnergy, ParticlesData &particles, ui32 id,
-                              MaterialsTable materials, ui8 id_mat )
+                              const MaterialsTable &materials, ui8 id_mat )
 {
     ui32 Z;
     f32  gammaEnergy, totalEnergy;

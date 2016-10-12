@@ -72,13 +72,13 @@ __host__ __device__ f32 fxyz_dot(f32xyz u, f32xyz v);
 // r = u x v
 __host__ __device__ f32xyz fxyz_cross(f32xyz u, f32xyz v);
 // r = m * u
-__host__ __device__ f32xyz fmatrix_mul_fxyz(f32matrix33 matrix, f32xyz u);
-__host__ __device__ f32xyz fmatrix_mul_fxyz(f32matrix44 matrix, f32xyz u);
+__host__ __device__ f32xyz fmatrix_mul_fxyz(const f32matrix33 &matrix, f32xyz u);
+__host__ __device__ f32xyz fmatrix_mul_fxyz(const f32matrix44 &matrix, f32xyz u);
 // r = m * n
-__host__ __device__ f32matrix44 fmatrix_mul( f32matrix44 m, f32matrix44 n );
+__host__ __device__ f32matrix44 fmatrix_mul(const f32matrix44 &m, const f32matrix44 &n);
 // r= m^T
-__host__ __device__ f32matrix44 fmatrix_trans( f32matrix44 m );
-__host__ __device__ f32matrix33 fmatrix_trans( f32matrix33 m );
+__host__ __device__ f32matrix44 fmatrix_trans( f32matrix44 &m );
+__host__ __device__ f32matrix33 fmatrix_trans( f32matrix33 &m );
 // return an unitary vector
 __host__ __device__ f32xyz fxyz_unit(f32xyz u);
 // return the magnitude of the vector
@@ -182,7 +182,7 @@ static __inline__ __host__ __device__ f32xyz cast_ui32xyz_to_f32xyz(ui32xyz u)
  * \param u Point in 3D (x, y, z)
  * \return The point expresses in the global frame
  */
-__host__ __device__ f32xyz fxyz_local_to_global_position( f32matrix44 G, f32xyz u );
+__host__ __device__ f32xyz fxyz_local_to_global_position( const f32matrix44 &G, f32xyz u );
 
 /*!
  * \fn __host__ __device__ f32xyz fxyz_global_to_local_position( f32matrix44 G, f32xyz u )
@@ -191,12 +191,12 @@ __host__ __device__ f32xyz fxyz_local_to_global_position( f32matrix44 G, f32xyz 
  * \param u Point in 3D (x, y, z)
  * \return The point expresses in the local frame
  */
-__host__ __device__ f32xyz fxyz_global_to_local_position( f32matrix44 G, f32xyz u );
+__host__ __device__ f32xyz fxyz_global_to_local_position( const f32matrix44 &G, f32xyz u );
 
 
-__host__ __device__ f32xyz fxyz_local_to_global_direction( f32matrix44 G, f32xyz u );
+__host__ __device__ f32xyz fxyz_local_to_global_direction( const f32matrix44 &G, f32xyz u );
 
-__host__ __device__ f32xyz fxyz_global_to_local_direction( f32matrix44 G, f32xyz u );
+__host__ __device__ f32xyz fxyz_global_to_local_direction( const f32matrix44 &G, f32xyz u );
 
 /*!
   \class TransformCalculator
@@ -252,7 +252,7 @@ public:
      * \brief Set the transformation of the frame, usefull for mirroring or convert 3D to 2D
      * \param P Matrix (3x3) that contains the mapping of the coordinates (ex. x becomes y and vice-versa). Values are 0, 1 or -1.
      */
-    void set_axis_transformation( f32matrix33 P );
+    void set_axis_transformation( const f32matrix33 &P );
 
     /*!
      * \fn void set_axis_transformation( f32 m00, f32 m01, f32 m02, f32 m10, f32 m11, f32 m12, f32 m20, f32 m21, f32 m22 )

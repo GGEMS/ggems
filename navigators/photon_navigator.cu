@@ -17,9 +17,9 @@
 #include "photon_navigator.cuh"
 
 __host__ __device__ void photon_get_next_interaction ( ParticlesData &particles,
-        GlobalSimulationParametersData parameters,
-        PhotonCrossSectionTable photon_CS_table,
-        ui16 mat_id, ui32 part_id )
+                                                       const GlobalSimulationParametersData &parameters,
+                                                       const PhotonCrossSectionTable &photon_CS_table,
+                                                       ui16 mat_id, ui32 part_id )
 {
     f32 next_interaction_distance = F32_MAX;
     ui8 next_discrete_process = 0;
@@ -85,10 +85,10 @@ __host__ __device__ void photon_get_next_interaction ( ParticlesData &particles,
 
 
 __host__ __device__ SecParticle photon_resolve_discrete_process ( ParticlesData &particles,
-        GlobalSimulationParametersData parameters,
-        PhotonCrossSectionTable photon_CS_table,
-        MaterialsTable materials,
-        ui16 mat_id, ui32 part_id )
+                                                                  const GlobalSimulationParametersData &parameters,
+                                                                  const PhotonCrossSectionTable &photon_CS_table,
+                                                                  const MaterialsTable &materials,
+                                                                  ui16 mat_id, ui32 part_id )
 {
 
     SecParticle electron;
@@ -97,25 +97,24 @@ __host__ __device__ SecParticle photon_resolve_discrete_process ( ParticlesData 
     electron.dir.y = 0.;
     electron.dir.z = 1.;
     electron.E = 0.;
-    ui8 next_discrete_process = particles.next_discrete_process[part_id];
+    ui8 next_discrete_process = particles.next_discrete_process[part_id];    
 
     if ( next_discrete_process == PHOTON_COMPTON )
-    {
+    {        
         electron = Compton_SampleSecondaries_standard ( particles, materials.electron_energy_cut[mat_id],
                    part_id, parameters );
     }
 
     if ( next_discrete_process == PHOTON_PHOTOELECTRIC )
-    {
+    {        
         electron = Photoelec_SampleSecondaries_standard ( particles, materials, photon_CS_table,
                    particles.E_index[part_id], materials.electron_energy_cut[mat_id],
                    mat_id, part_id, parameters );
     }
 
     if ( next_discrete_process == PHOTON_RAYLEIGH )
-    {
+    {        
         Rayleigh_SampleSecondaries_Livermore ( particles, materials, photon_CS_table, particles.E_index[part_id], mat_id, part_id );
-
     }
 
     return electron;

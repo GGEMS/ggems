@@ -20,6 +20,9 @@
 #include "particles.cuh"
 #include "cross_sections.cuh"
 #include "materials.cuh"
+
+#include "testing.cuh"
+
 #include "ggems_detector.cuh"
 #include "ct_detector.cuh"
 

@@ -18,7 +18,7 @@
 
 GGEMSPhantom::GGEMSPhantom()
 {
-    m_phantom_name = "no_source";
+    m_phantom_name = "no_phantom";
 }
 
 void GGEMSPhantom::set_name ( std::string name )

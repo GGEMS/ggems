@@ -19,7 +19,7 @@
 ///////// GPU code ////////////////////////////////////////////////////
 
 // Internal function that create a new particle to the buffer at the slot id
-__host__ __device__ void point_source ( ParticlesData particles_data,
+__host__ __device__ void point_source ( ParticlesData &particles_data,
                                         f32 px, f32 py, f32 pz, f32 energy, ui8 ptype, ui32 id)
 {
     // First get an isotropic particle direction
@@ -55,7 +55,7 @@ __host__ __device__ void point_source ( ParticlesData particles_data,
 
 // Kernel to create new particles. This kernel will only call the host/device function
 // point source in order to get one new particle.
-__global__ void kernel_point_source ( ParticlesData particles_data,
+__global__ void kernel_point_source ( ParticlesData &particles_data,
                                       f32 px, f32 py, f32 pz, f32 energy, ui8 ptype )
 {
     // Get thread id

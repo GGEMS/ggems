@@ -63,13 +63,13 @@ __host__ __device__ f32xyz fxyz_cross(f32xyz u, f32xyz v) {
 }
 
 // r = m * u
-__host__ __device__ f32xyz fmatrix_mul_fxyz(f32matrix33 m, f32xyz u) {
+__host__ __device__ f32xyz fmatrix_mul_fxyz(const f32matrix33 &m, f32xyz u) {
     f32xyz r = {m.m00*u.x + m.m01*u.y + m.m02*u.z,
                 m.m10*u.x + m.m11*u.y + m.m12*u.z,
                 m.m20*u.x + m.m21*u.y + m.m22*u.z};
     return r;
 }
-__host__ __device__ f32xyz fmatrix_mul_fxyz(f32matrix44 m, f32xyz u) {
+__host__ __device__ f32xyz fmatrix_mul_fxyz(const f32matrix44 &m, f32xyz u) {
     f32xyz r = { m.m00*u.x + m.m01*u.y + m.m02*u.z + m.m03*1.0f,
                  m.m10*u.x + m.m11*u.y + m.m12*u.z + m.m13*1.0f,
                  m.m20*u.x + m.m21*u.y + m.m22*u.z + m.m23*1.0f };
@@ -77,7 +77,7 @@ __host__ __device__ f32xyz fmatrix_mul_fxyz(f32matrix44 m, f32xyz u) {
 }
 
 // r = m * n
-__host__ __device__ f32matrix44 fmatrix_mul( f32matrix44 m, f32matrix44 n )
+__host__ __device__ f32matrix44 fmatrix_mul( const f32matrix44 &m, const f32matrix44 &n )
 {
     f32matrix44 res;
 
@@ -109,7 +109,7 @@ __host__ __device__ f32matrix44 fmatrix_mul( f32matrix44 m, f32matrix44 n )
 }
 
 // r = m^T
-__host__ __device__ f32matrix44 fmatrix_trans( f32matrix44 m )
+__host__ __device__ f32matrix44 fmatrix_trans( f32matrix44 &m )
 {
     f32 tmp;
 
@@ -123,7 +123,7 @@ __host__ __device__ f32matrix44 fmatrix_trans( f32matrix44 m )
     return m;
 }
 
-__host__ __device__ f32matrix33 fmatrix_trans( f32matrix33 m )
+__host__ __device__ f32matrix33 fmatrix_trans( f32matrix33 &m )
 {
     f32 tmp;
 
@@ -228,13 +228,13 @@ __host__ __device__ f32xyz fxyz_inv(f32xyz u) {
 /// Transform calculator ////////////////////////////////////////////////////
 
 // Convert a point from local to global frame
-__host__ __device__ f32xyz fxyz_local_to_global_position( f32matrix44 G, f32xyz u )
+__host__ __device__ f32xyz fxyz_local_to_global_position( const f32matrix44 &G, f32xyz u )
 {
     return fmatrix_mul_fxyz( G, u );
 }
 
 // Convert a point from global to local frame
-__host__ __device__ f32xyz fxyz_global_to_local_position( f32matrix44 G, f32xyz u)
+__host__ __device__ f32xyz fxyz_global_to_local_position( const f32matrix44 &G, f32xyz u)
 {
     // first, extract the translation
     f32xyz T = { G.m03, G.m13, G.m23 };
@@ -250,7 +250,7 @@ __host__ __device__ f32xyz fxyz_global_to_local_position( f32matrix44 G, f32xyz 
     return u;
 }
 
-__host__ __device__ f32xyz fxyz_local_to_global_direction( f32matrix44 G, f32xyz u )
+__host__ __device__ f32xyz fxyz_local_to_global_direction( const f32matrix44 &G, f32xyz u )
 {
     // Get the sub matrix (R and P)
     f32matrix33 g = { G.m00, G.m01, G.m02,
@@ -262,7 +262,7 @@ __host__ __device__ f32xyz fxyz_local_to_global_direction( f32matrix44 G, f32xyz
     return fxyz_unit( u );
 }
 
-__host__ __device__ f32xyz fxyz_global_to_local_direction( f32matrix44 G, f32xyz u )
+__host__ __device__ f32xyz fxyz_global_to_local_direction( const f32matrix44 &G, f32xyz u )
 {
     // Get the sub matrix (R and P)
     f32matrix33 g = { G.m00, G.m01, G.m02,
@@ -350,7 +350,7 @@ void TransformCalculator::set_rotation( f32xyz angles )
     set_rotation( angles.x, angles.y, angles.z );
 }
 
-void TransformCalculator::set_axis_transformation( f32matrix33 P )
+void TransformCalculator::set_axis_transformation( const f32matrix33 &P )
 {
     m_P0 = make_f32matrix44( P.m00, P.m01, P.m02, 0.0,
                              P.m10, P.m11, P.m12, 0.0,
