@@ -17,8 +17,8 @@
 
 // Internal function that create a new particle to the buffer at the slot id
 __host__ __device__ void linac_source ( ParticlesData &particles,
-                                        const LinacSourceData &linac,
-                                        const f32matrix44 &trans, ui32 id )
+                                        const LinacSourceData linac,
+                                        const f32matrix44 trans, ui32 id )
 {
     // Main vars
     ui32 gbl_ind, ind;

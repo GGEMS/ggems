@@ -18,14 +18,14 @@
 
 
 __host__ __device__ void photon_get_next_interaction ( ParticlesData &particles,
-                                                       const GlobalSimulationParametersData &parameters,
-                                                       const PhotonCrossSectionTable &photon_CS_table,
-                                                        ui16 mat_id, ui32 part_id );
+                                                       const GlobalSimulationParametersData parameters,
+                                                       const PhotonCrossSectionTable photon_CS_table,
+                                                       ui16 mat_id, ui32 part_id );
 
 __host__ __device__ SecParticle photon_resolve_discrete_process (ParticlesData &particles,
-                                                                 const GlobalSimulationParametersData &parameters,
-                                                                 const PhotonCrossSectionTable &photon_CS_table,
-                                                                 const MaterialsTable &materials,
+                                                                 const GlobalSimulationParametersData parameters,
+                                                                 const PhotonCrossSectionTable photon_CS_table,
+                                                                 const MaterialsTable materials,
                                                                  ui16 mat_id, ui32 part_id );
 
 #endif

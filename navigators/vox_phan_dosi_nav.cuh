@@ -35,10 +35,10 @@ namespace VPDN
 {
 
 __host__ __device__ void track_electron_to_out (ParticlesData &particles,
-                                                const VoxVolumeData<ui16> &vol,
-                                                const MaterialsTable &materials,
-                                                const ElectronsCrossSectionTable &electron_CS_table,
-                                                const GlobalSimulationParametersData &parameters,
+                                                const VoxVolumeData<ui16> vol,
+                                                const MaterialsTable materials,
+                                                const ElectronsCrossSectionTable electron_CS_table,
+                                                const GlobalSimulationParametersData parameters,
                                                 DoseData &dosi,
                                                 f32 &randomnumbereIoni,
                                                 f32 &randomnumbereBrem,
@@ -46,10 +46,10 @@ __host__ __device__ void track_electron_to_out (ParticlesData &particles,
                                                 ui32 part_id );
 
 __host__ __device__ void track_photon_to_out (ParticlesData &particles,
-                                              const VoxVolumeData<ui16> &vol,
-                                              const MaterialsTable &materials,
-                                              const PhotonCrossSectionTable &photon_CS_table,
-                                              const GlobalSimulationParametersData &parameters,
+                                              const VoxVolumeData<ui16> vol,
+                                              const MaterialsTable materials,
+                                              const PhotonCrossSectionTable photon_CS_table,
+                                              const GlobalSimulationParametersData parameters,
                                               DoseData &dosi,
                                               ui32 part_id );
 
@@ -64,16 +64,16 @@ __global__ void kernel_device_track_to_out (ParticlesData particles,
                                             const GlobalSimulationParametersData parameters,
                                             DoseData dosi );
 
-void kernel_host_track_to_in ( ParticlesData &particles, f32 xmin, f32 xmax,
+void kernel_host_track_to_in ( ParticlesData particles, f32 xmin, f32 xmax,
                                f32 ymin, f32 ymax, f32 zmin, f32 zmax, f32 tolerance, ui32 part_id );
 
-void kernel_host_track_to_out (ParticlesData &particles,
-                               const VoxVolumeData<ui16> &vol,
-                               const MaterialsTable &materials,
-                               const PhotonCrossSectionTable &photon_CS_table,
-                               const ElectronsCrossSectionTable &electron_CS_table,
-                               const GlobalSimulationParametersData &parameters,
-                               DoseData &dosi,
+void kernel_host_track_to_out (ParticlesData particles,
+                               const VoxVolumeData<ui16> vol,
+                               const MaterialsTable materials,
+                               const PhotonCrossSectionTable photon_CS_table,
+                               const ElectronsCrossSectionTable electron_CS_table,
+                               const GlobalSimulationParametersData parameters,
+                               DoseData dosi,
                                ui32 id );
 }
 

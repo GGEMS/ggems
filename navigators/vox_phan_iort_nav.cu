@@ -19,12 +19,12 @@
 ////// HOST-DEVICE GPU Codes ////////////////////////////////////////////
 
 __host__ __device__ void VPIORTN::track_to_out( ParticlesData &particles,
-                                                const VoxVolumeData<ui16> &vol,
-                                                const MaterialsTable &materials,
-                                                const PhotonCrossSectionTable &photon_CS_table,
-                                                const GlobalSimulationParametersData &parameters,
+                                                const VoxVolumeData<ui16> vol,
+                                                const MaterialsTable materials,
+                                                const PhotonCrossSectionTable photon_CS_table,
+                                                const GlobalSimulationParametersData parameters,
                                                 DoseData &dosi,
-                                                const Mu_MuEn_Table &mu_table,
+                                                const Mu_MuEn_Table mu_table,
                                                 HistoryMap &hist_map,
                                                 ui32 part_id )
 {
@@ -273,10 +273,10 @@ __host__ __device__ void VPIORTN::track_to_out( ParticlesData &particles,
 
 // Se TLE function
 __host__ __device__ void VPIORTN::track_seTLE( ParticlesData &particles,
-                                               const VoxVolumeData<ui16> &vol,
+                                               const VoxVolumeData<ui16> vol,
                                                COOHistoryMap &coo_hist_map,
                                                DoseData &dose,
-                                               const Mu_MuEn_Table &mu_table,
+                                               const Mu_MuEn_Table mu_table,
                                                ui32 nb_of_rays, f32 edep_th, ui32 id )
 {
     // Read an interaction position
@@ -449,7 +449,7 @@ __global__ void VPIORTN::kernel_device_track_to_in( ParticlesData particles, f32
 
 
 // Host Kernel that move particles to the voxelized volume boundary
-void VPIORTN::kernel_host_track_to_in( ParticlesData &particles, f32 xmin, f32 xmax,
+void VPIORTN::kernel_host_track_to_in( ParticlesData particles, f32 xmin, f32 xmax,
                                      f32 ymin, f32 ymax, f32 zmin, f32 zmax, f32 tolerance, ui32 part_id )
 {       
     transport_track_to_in_AABB( particles, xmin, xmax, ymin, ymax, zmin, zmax, tolerance, part_id);
@@ -481,14 +481,14 @@ __global__ void VPIORTN::kernel_device_track_to_out( ParticlesData particles,
 }
 
 // Host kernel that track particles within the voxelized volume until boundary
-void VPIORTN::kernel_host_track_to_out( ParticlesData &particles,
-                                        const VoxVolumeData<ui16> &vol,
-                                        const MaterialsTable &materials,
-                                        const PhotonCrossSectionTable &photon_CS_table,
-                                        const GlobalSimulationParametersData &parameters,
-                                        DoseData &dosi,
-                                        const Mu_MuEn_Table &mu_table,
-                                        HistoryMap &hist_map )
+void VPIORTN::kernel_host_track_to_out( ParticlesData particles,
+                                        const VoxVolumeData<ui16> vol,
+                                        const MaterialsTable materials,
+                                        const PhotonCrossSectionTable photon_CS_table,
+                                        const GlobalSimulationParametersData parameters,
+                                        DoseData dosi,
+                                        const Mu_MuEn_Table mu_table,
+                                        HistoryMap hist_map )
 {
 
     ui32 id=0;
@@ -522,11 +522,11 @@ __global__ void VPIORTN::kernel_device_seTLE( ParticlesData particles,
 }
 
 // Host kernel that perform seTLE
-void VPIORTN::kernel_host_seTLE( ParticlesData &particles,
-                                 const VoxVolumeData<ui16> &vol,
-                                 COOHistoryMap &coo_hist_map,
-                                 DoseData &dosi,
-                                 const Mu_MuEn_Table &mu_table , ui32 nb_of_rays , f32 edep_th )
+void VPIORTN::kernel_host_seTLE( ParticlesData particles,
+                                 const VoxVolumeData<ui16> vol,
+                                 COOHistoryMap coo_hist_map,
+                                 DoseData dosi,
+                                 const Mu_MuEn_Table mu_table , ui32 nb_of_rays , f32 edep_th )
 {
     ui32 id = 0;
     while ( id < coo_hist_map.nb_data )

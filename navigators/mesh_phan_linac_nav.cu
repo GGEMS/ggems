@@ -49,7 +49,7 @@ __global__ void MPLINACN::kernel_device_track_to_in( ParticlesData particles, co
 }
 
 // Host Kernel that move particles to the voxelized volume boundary
-void MPLINACN::kernel_host_track_to_in( ParticlesData &particles, const LinacData &linac, f32 geom_tolerance, ui32 id )
+void MPLINACN::kernel_host_track_to_in( ParticlesData particles, const LinacData linac, f32 geom_tolerance, ui32 id )
 {
     // read position and direction
     f32xyz pos = make_f32xyz( particles.px[ id ], particles.py[ id ], particles.pz[ id ] );
@@ -196,7 +196,7 @@ __host__ __device__ void m_transport_mesh( f32xyz pos, f32xyz dir,
 
 }
 
-__host__ __device__ void m_mlc_nav_out_mesh( f32xyz pos, f32xyz dir, const LinacData &linac,
+__host__ __device__ void m_mlc_nav_out_mesh( f32xyz pos, f32xyz dir, const LinacData linac,
                                              f32 geom_tol,
                                              ui32 *geometry_id, f32 *geometry_distance )
 {
@@ -563,7 +563,7 @@ __host__ __device__ void m_mlc_nav_out_mesh( f32xyz pos, f32xyz dir, const Linac
 
 }
 
-__host__ __device__ void m_mlc_nav_in_mesh( f32xyz pos, f32xyz dir, const LinacData &linac,
+__host__ __device__ void m_mlc_nav_in_mesh( f32xyz pos, f32xyz dir, const LinacData linac,
                                             f32 geom_tol,
                                             ui32 *geometry_id, f32 *geometry_distance )
 {
@@ -571,8 +571,6 @@ __host__ __device__ void m_mlc_nav_in_mesh( f32xyz pos, f32xyz dir, const LinacD
     //*geometry_distance = FLT_MAX;
     //*geometry_id = 0;
     //i8 navigation = OUTSIDE_MESH;
-
-
 
     // Read the geometry
     ui16 in_obj = m_read_geom_type( *geometry_id );
@@ -663,10 +661,10 @@ __host__ __device__ void m_mlc_nav_in_mesh( f32xyz pos, f32xyz dir, const LinacD
 
 
 __host__ __device__ void MPLINACN::track_to_out( ParticlesData &particles,
-                                                 const LinacData &linac,
-                                                 const MaterialsTable &materials,
-                                                 const PhotonCrossSectionTable &photon_CS_table,
-                                                 const GlobalSimulationParametersData &parameters,
+                                                 const LinacData linac,
+                                                 const MaterialsTable materials,
+                                                 const PhotonCrossSectionTable photon_CS_table,
+                                                 const GlobalSimulationParametersData parameters,
                                                  ui32 id )
 {
     // Read position
@@ -789,7 +787,7 @@ __host__ __device__ void MPLINACN::track_to_out( ParticlesData &particles,
 
 }
 
-__host__ __device__ void MPLINACN::track_to_out_nonav( ParticlesData &particles, const LinacData &linac,
+__host__ __device__ void MPLINACN::track_to_out_nonav( ParticlesData &particles, const LinacData linac,
                                                        ui32 id )
 {
     // Read position
@@ -1089,11 +1087,11 @@ __global__ void MPLINACN::kernel_device_track_to_out( ParticlesData particles,
 }
 
 // Host kernel that track particles within the voxelized volume until boundary
-void MPLINACN::kernel_host_track_to_out( ParticlesData &particles,
-                                         const LinacData &linac,
-                                         const MaterialsTable &materials,
-                                         const PhotonCrossSectionTable &photon_CS,
-                                         const GlobalSimulationParametersData &parameters,
+void MPLINACN::kernel_host_track_to_out( ParticlesData particles,
+                                         const LinacData linac,
+                                         const MaterialsTable materials,
+                                         const PhotonCrossSectionTable photon_CS,
+                                         const GlobalSimulationParametersData parameters,
                                          bool nav_within_mlc, ui32 id )
 {
     // Init geometry ID for navigation

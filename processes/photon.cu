@@ -72,7 +72,7 @@ __host__ __device__ f32 Compton_CSPA_standard(f32 E, ui16 Z) {
 }
 
 // Compute the total Compton cross section for a given material
-__host__ __device__ f32 Compton_CS_standard(const MaterialsTable &materials, ui16 mat, f32 E) {
+__host__ __device__ f32 Compton_CS_standard(const MaterialsTable materials, ui16 mat, f32 E) {
     f32 CS = 0.0f;
     i32 i;
     i32 index = materials.index[mat];
@@ -88,7 +88,7 @@ __host__ __device__ f32 Compton_CS_standard(const MaterialsTable &materials, ui1
 __host__ __device__ SecParticle Compton_SampleSecondaries_standard(ParticlesData &particles,
                                                                    f32 cutE,
                                                                    ui32 id,
-                                                                   const GlobalSimulationParametersData &parameters) {
+                                                                   const GlobalSimulationParametersData parameters) {
 
     f32 gamE0 = particles.E[id];
     f32 E0 = gamE0 / 0.510998910f;
@@ -165,7 +165,7 @@ __host__ __device__ SecParticle Compton_SampleSecondaries_standard(ParticlesData
 __host__ __device__ void Compton_standard(ParticlesData &particles,
                                           f32 cutE,
                                           ui32 id,
-                                          const GlobalSimulationParametersData &parameters) {
+                                          const GlobalSimulationParametersData parameters) {
 
     f32 gamE0 = particles.E[id];
     f32 E0 = gamE0 / 0.510998910f;
@@ -243,7 +243,7 @@ __host__ __device__ f32 Photoelec_CSPA_standard(f32 E, ui16 Z) {
 }
 
 // Compute the total Compton cross section for a given material
-__host__ __device__ f32 Photoelec_CS_standard(const MaterialsTable &materials,
+__host__ __device__ f32 Photoelec_CS_standard(const MaterialsTable materials,
                                               ui16 mat, f32 E) {
     f32 CS = 0.0f;
     i32 i;
@@ -283,13 +283,13 @@ __host__ __device__ f32 Photoelec_ElecCosThetaDistribution(ParticlesData &partic
 
 // PhotoElectric effect (standard) with secondary (e-)
 __host__ __device__ SecParticle Photoelec_SampleSecondaries_standard(ParticlesData &particles,
-                                                                     const MaterialsTable &mat,
-                                                                     const PhotonCrossSectionTable &photon_CS_table,
+                                                                     const MaterialsTable mat,
+                                                                     const PhotonCrossSectionTable photon_CS_table,
                                                                      ui32 E_index,
                                                                      f32 cutE,
                                                                      ui16 matindex,
                                                                      ui32 id,
-                                                                     const GlobalSimulationParametersData &parameters) {
+                                                                     const GlobalSimulationParametersData parameters) {
 
     // Kill the photon without mercy
     particles.endsimu[id] = PARTICLE_DEAD;
@@ -859,8 +859,8 @@ __host__ __device__ f32 Rayleigh_SF_Livermore(f32* rayl_sf, f32 E, i32 Z) {
 
 // Rayleigh Scattering (Livermore)
 __host__ __device__ void Rayleigh_SampleSecondaries_Livermore(ParticlesData &particles,
-                                                              const MaterialsTable &mat,
-                                                              const PhotonCrossSectionTable &photon_CS_table,
+                                                              const MaterialsTable mat,
+                                                              const PhotonCrossSectionTable photon_CS_table,
                                                               ui32 E_index,
                                                               ui16 matindex,
                                                               ui32 id) {

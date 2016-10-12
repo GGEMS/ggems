@@ -98,10 +98,10 @@ struct LinacData
 namespace MPLINACN
 {
     // Device Kernel that move particles to the linac volume boundary
-    __global__ void kernel_device_track_to_in( ParticlesData particles, LinacData linac, f32 geom_tolerance );
+    __global__ void kernel_device_track_to_in( ParticlesData particles, const LinacData linac, f32 geom_tolerance );
 
     // Host Kernel that move particles to the linac volume boundary
-    void kernel_host_track_to_in( ParticlesData &particles, const LinacData &linac, f32 geom_tolerance, ui32 id );
+    void kernel_host_track_to_in( ParticlesData particles, const LinacData linac, f32 geom_tolerance, ui32 id );
 
 
     __global__ void kernel_device_track_to_out( ParticlesData particles,
@@ -111,20 +111,20 @@ namespace MPLINACN
                                                 const GlobalSimulationParametersData parameters,
                                                 bool nav_within_mlc );
 
-    void kernel_host_track_to_out(ParticlesData &particles,
-                                  const LinacData &linac,
-                                  const MaterialsTable &materials,
-                                  const PhotonCrossSectionTable &photon_CS,
-                                  const GlobalSimulationParametersData &parameters,
+    void kernel_host_track_to_out(ParticlesData particles,
+                                  const LinacData linac,
+                                  const MaterialsTable materials,
+                                  const PhotonCrossSectionTable photon_CS,
+                                  const GlobalSimulationParametersData parameters,
                                   bool nav_within_mlc, ui32 id );
 
     __host__ __device__ void track_to_out(ParticlesData &particles,
-                                          const LinacData &linac,
-                                          const MaterialsTable &materials,
-                                          const PhotonCrossSectionTable &photon_CS_table,
-                                          const GlobalSimulationParametersData &parameters, ui32 id );
+                                          const LinacData linac,
+                                          const MaterialsTable materials,
+                                          const PhotonCrossSectionTable photon_CS_table,
+                                          const GlobalSimulationParametersData parameters, ui32 id );
 
-    __host__ __device__ void track_to_out_nonav( ParticlesData &particles, const LinacData &linac, ui32 id );
+    __host__ __device__ void track_to_out_nonav( ParticlesData &particles, const LinacData linac, ui32 id );
 }
 
 class MeshPhanLINACNav : public GGEMSPhantom

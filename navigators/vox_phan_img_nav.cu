@@ -19,10 +19,10 @@
 ////:: GPU Codes
 
 __host__ __device__ void VPIN::track_to_out ( ParticlesData &particles,
-                                              const VoxVolumeData<ui16> &vol,
-                                              const MaterialsTable &materials,
-                                              const PhotonCrossSectionTable &photon_CS_table,
-                                              const GlobalSimulationParametersData &parameters,
+                                              const VoxVolumeData<ui16> vol,
+                                              const MaterialsTable materials,
+                                              const PhotonCrossSectionTable photon_CS_table,
+                                              const GlobalSimulationParametersData parameters,
                                               ui32 part_id )
 {
     // Read position
@@ -153,7 +153,7 @@ __global__ void VPIN::kernel_device_track_to_in ( ParticlesData particles, f32 x
 }
 
 // Host Kernel that move particles to the voxelized volume boundary
-void VPIN::kernel_host_track_to_in ( ParticlesData &particles, f32 xmin, f32 xmax,
+void VPIN::kernel_host_track_to_in ( ParticlesData particles, f32 xmin, f32 xmax,
                                      f32 ymin, f32 ymax, f32 zmin, f32 zmax, f32 geom_tolerance, ui32 id )
 {
 
@@ -179,11 +179,11 @@ __global__ void VPIN::kernel_device_track_to_out ( ParticlesData particles,
 }
 
 // Host kernel that track particles within the voxelized volume until boundary
-void VPIN::kernel_host_track_to_out ( ParticlesData &particles,
-                                      const VoxVolumeData<ui16> &vol,
-                                      const MaterialsTable &materials,
-                                      const PhotonCrossSectionTable &photon_CS_table,
-                                      const GlobalSimulationParametersData &parameters, ui32 id )
+void VPIN::kernel_host_track_to_out ( ParticlesData particles,
+                                      const VoxVolumeData<ui16> vol,
+                                      const MaterialsTable materials,
+                                      const PhotonCrossSectionTable photon_CS_table,
+                                      const GlobalSimulationParametersData parameters, ui32 id )
 {
 
     // Stepping loop

@@ -37,7 +37,7 @@ f32 ElectronIonisation_DEDX( MaterialsTable materials, f32 Ekine, ui8 mat_id );
 f32 ElectronIonisation_CS( MaterialsTable materials, f32 Ekine, ui16 mat_id );
 f32 ElectronBremsstrahlung_DEDX( MaterialsTable materials, f32 Ekine, ui8 mat_id );
 __host__ __device__ f32 ElectronBremmsstrahlung_CSPA( f32 Z, f32 cut, f32 Ekine );
-__host__ __device__ f32 ElectronBremmsstrahlung_CS( const MaterialsTable &materials, f32 Ekine, f32 min_E, ui8 mat_id );
+__host__ __device__ f32 ElectronBremmsstrahlung_CS( const MaterialsTable materials, f32 Ekine, f32 min_E, ui8 mat_id );
 f32 ElectronMultipleScattering_CS( MaterialsTable material, f32 Ekine, ui8 mat_id);
 
 /*

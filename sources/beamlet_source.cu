@@ -17,7 +17,7 @@
 
 // Internal function that create a new particle to the buffer at the slot id
 __host__ __device__ void beamlet_source ( ParticlesData &particles, f32xyz pos, f32xyz src, f32xyz size,
-                                          const f32matrix44 &trans,
+                                          const f32matrix44 trans,
                                           f32 *spectrum_E, f32 *spectrum_CDF,
                                           ui32 nb_of_energy_bins, ui8 ptype, ui32 id )
 {

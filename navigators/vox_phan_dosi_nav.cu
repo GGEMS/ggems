@@ -19,10 +19,10 @@
 ////:: GPU Codes
 
 __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
-                                                       const VoxVolumeData<ui16> &vol,
-                                                       const MaterialsTable &materials,
-                                                       const ElectronsCrossSectionTable &electron_CS_table,
-                                                       const GlobalSimulationParametersData &parameters,
+                                                       const VoxVolumeData<ui16> vol,
+                                                       const MaterialsTable materials,
+                                                       const ElectronsCrossSectionTable electron_CS_table,
+                                                       const GlobalSimulationParametersData parameters,
                                                        DoseData &dosi,
                                                        f32 &randomnumbereIoni,
                                                        f32 &randomnumbereBrem,
@@ -371,10 +371,10 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
 
 
 __host__ __device__ void VPDN::track_photon_to_out ( ParticlesData &particles,
-                                                     const VoxVolumeData<ui16> &vol,
-                                                     const MaterialsTable &materials,
-                                                     const PhotonCrossSectionTable &photon_CS_table,
-                                                     const GlobalSimulationParametersData &parameters,
+                                                     const VoxVolumeData<ui16> vol,
+                                                     const MaterialsTable materials,
+                                                     const PhotonCrossSectionTable photon_CS_table,
+                                                     const GlobalSimulationParametersData parameters,
                                                      DoseData &dosi,
                                                      ui32 part_id )
 {        
@@ -561,7 +561,7 @@ __global__ void VPDN::kernel_device_track_to_in ( ParticlesData particles, f32 x
 
 
 // Host Kernel that move particles to the voxelized volume boundary
-void VPDN::kernel_host_track_to_in ( ParticlesData &particles, f32 xmin, f32 xmax,
+void VPDN::kernel_host_track_to_in ( ParticlesData particles, f32 xmin, f32 xmax,
                                      f32 ymin, f32 ymax, f32 zmin, f32 zmax, f32 tolerance, ui32 part_id )
 {       
     transport_track_to_in_AABB( particles, xmin, xmax, ymin, ymax, zmin, zmax, tolerance, part_id);
@@ -650,13 +650,13 @@ __global__ void VPDN::kernel_device_track_to_out ( ParticlesData particles,
 }
 
 // Host kernel that track particles within the voxelized volume until boundary
-void VPDN::kernel_host_track_to_out ( ParticlesData &particles,
-                                      const VoxVolumeData<ui16> &vol,
-                                      const MaterialsTable &materials,
-                                      const PhotonCrossSectionTable &photon_CS_table,
-                                      const ElectronsCrossSectionTable &electron_CS_table,
-                                      const GlobalSimulationParametersData &parameters,
-                                      DoseData &dosi,
+void VPDN::kernel_host_track_to_out ( ParticlesData particles,
+                                      const VoxVolumeData<ui16> vol,
+                                      const MaterialsTable materials,
+                                      const PhotonCrossSectionTable photon_CS_table,
+                                      const ElectronsCrossSectionTable electron_CS_table,
+                                      const GlobalSimulationParametersData parameters,
+                                      DoseData dosi,
                                       ui32 id )
 {
     // For multivoxels navigation

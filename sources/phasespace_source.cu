@@ -20,8 +20,8 @@
 
 // Internal function that create a new particle to the buffer at the slot id
 __host__ __device__ void PHSPSRC::phsp_source ( ParticlesData &particles_data,
-                                                const PhaseSpaceData &phasespace,
-                                                const PhSpTransform &transform, ui32 id )
+                                                const PhaseSpaceData phasespace,
+                                                const PhSpTransform transform, ui32 id )
 
 
 

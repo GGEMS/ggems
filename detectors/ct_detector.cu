@@ -22,7 +22,7 @@
 
 //// GPU functions ///////////////////////////////////////////////////////////////////////////////////////
 
-__host__ __device__ void ct_detector_track_to_in( ParticlesData &particles, const ObbData &detector_volume,  ui32 id )
+__host__ __device__ void ct_detector_track_to_in( ParticlesData &particles, const ObbData detector_volume,  ui32 id )
 {
     // If freeze (not dead), re-activate the current particle
     if( particles.endsimu[ id ] == PARTICLE_FREEZE )
@@ -80,7 +80,7 @@ __host__ __device__ void ct_detector_track_to_in( ParticlesData &particles, cons
 
 // Digitizer
 __host__ __device__ void ct_detector_digitizer( ParticlesData &particles,
-                                                const ObbData &detector_volume,
+                                                const ObbData detector_volume,
                                                 f32xyz pixel_size, ui32xyz nb_pixel,
                                                 f32 threshold, f32matrix44 transform,
                                                 f32* projection, ui32* scatter_order,
@@ -161,7 +161,7 @@ __global__ void kernel_ct_detector_track_to_in( ParticlesData particles,
 __global__ void kernel_ct_detector_digitizer( ParticlesData particles,
                                               const ObbData detector_volume,
                                               f32xyz pixel_size, ui32xyz nb_pixel,
-                                              f32 threshold, f32matrix44 transform,
+                                              f32 threshold, const f32matrix44 transform,
                                               f32* projection, ui32* scatter_order,
                                               ui8 record_option, bool scatter_option )
 {
