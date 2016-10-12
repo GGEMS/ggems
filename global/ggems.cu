@@ -410,6 +410,19 @@ void GGEMS::set_secondaries_level ( ui32 level )
     m_parameters.data_h.nb_of_secondaries = level;
 }
 
+void GGEMS::print_stack(ui32 n = 0)
+{
+    if ( m_particles_manager.particles.size > n ) n = m_particles_manager.particles.size;
+    if ( n == 0 ) n = m_particles_manager.particles.size;
+
+    if ( m_parameters.data_h.device_target == GPU_DEVICE )
+    {
+        m_particles_manager.copy_gpu2cpu( m_particles_manager.particles );
+    }
+
+    m_particles_manager.print_stack( m_particles_manager.particles, n );
+}
+
 ////// :: Private functions ::
 
 // Check mandatory parameters

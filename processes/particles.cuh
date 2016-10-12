@@ -169,8 +169,8 @@ public:
 
     Particles particles; // CPU and GPU stack
 
-    void copy_gpu2cpu(Particles part);
-    void print_stack(Particles part);
+    void copy_gpu2cpu(Particles &part);
+    void print_stack(Particles part, ui32 n);
 
 
 private:

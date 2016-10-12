@@ -294,8 +294,8 @@ void ParticleManager::m_copy_seed_cpu2gpu()
 }
 
 
-void ParticleManager::copy_gpu2cpu( Particles part )
-{
+void ParticleManager::copy_gpu2cpu( Particles &part )
+{    
     HANDLE_ERROR ( cudaMemcpy ( part.data_h.E, part.data_d.E, sizeof ( f32 ) *part.size, cudaMemcpyDeviceToHost ) );
 
     HANDLE_ERROR ( cudaMemcpy ( part.data_h.px, part.data_d.px, sizeof ( f32 ) *part.size, cudaMemcpyDeviceToHost ) );
@@ -311,14 +311,14 @@ void ParticleManager::copy_gpu2cpu( Particles part )
     HANDLE_ERROR ( cudaMemcpy ( part.data_h.endsimu, part.data_d.endsimu, sizeof ( ui8 ) *part.size, cudaMemcpyDeviceToHost ) );
 }
 
-void ParticleManager::print_stack( Particles part )
+void ParticleManager::print_stack( Particles part, ui32 n )
 {
     std::vector< std::string > status;
     status.push_back("Alive");
     status.push_back("Dead");
     status.push_back("Freeze");
 
-    ui32 i = 0; while ( i < part.size ) {
+    ui32 i = 0; while ( i < n ) {
         printf("%i - E %f - p %f %f %f - d %f %f %f - tof %f - Status %s\n", i, part.data_h.E[i], part.data_h.px[i],
                part.data_h.py[i], part.data_h.pz[i], part.data_h.dx[i], part.data_h.dy[i], part.data_h.dz[i], part.data_h.tof[i],
                status[ part.data_h.endsimu[ i ] ].c_str() );

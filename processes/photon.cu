@@ -818,7 +818,7 @@ __host__ __device__ f32 Rayleigh_CSPA_Livermore(f32* rayl_cs, f32 E, ui16 Z) {
 }
 
 // Compute the total Compton cross section for a given material
-__host__ __device__ f32 Rayleigh_CS_Livermore(const MaterialsTable &materials,
+__host__ __device__ f32 Rayleigh_CS_Livermore(const MaterialsTable materials,
                                               f32* rayl_cs, ui16 mat, f32 E) {
     f32 CS = 0.0f;
     i32 i;

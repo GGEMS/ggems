@@ -76,6 +76,7 @@ public:
     void set_display_in_color( bool flag );
     void set_display_energy_cuts( bool flag );
     void set_verbose( bool flag );
+    void print_stack( ui32 n );
 
     // Main functions
     void init_simulation();
