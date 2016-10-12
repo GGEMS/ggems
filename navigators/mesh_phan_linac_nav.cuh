@@ -98,17 +98,17 @@ struct LinacData
 namespace MPLINACN
 {
     // Device Kernel that move particles to the linac volume boundary
-    __global__ void kernel_device_track_to_in( ParticlesData &particles, const LinacData &linac, f32 geom_tolerance );
+    __global__ void kernel_device_track_to_in( ParticlesData particles, LinacData linac, f32 geom_tolerance );
 
     // Host Kernel that move particles to the linac volume boundary
     void kernel_host_track_to_in( ParticlesData &particles, const LinacData &linac, f32 geom_tolerance, ui32 id );
 
 
-    __global__ void kernel_device_track_to_out( ParticlesData &particles,
-                                                const LinacData &linac,
-                                                const MaterialsTable &materials,
-                                                const PhotonCrossSectionTable &photon_CS,
-                                                const GlobalSimulationParametersData &parameters,
+    __global__ void kernel_device_track_to_out( ParticlesData particles,
+                                                const LinacData linac,
+                                                const MaterialsTable materials,
+                                                const PhotonCrossSectionTable photon_CS,
+                                                const GlobalSimulationParametersData parameters,
                                                 bool nav_within_mlc );
 
     void kernel_host_track_to_out(ParticlesData &particles,

@@ -147,8 +147,8 @@ __host__ __device__ void ct_detector_digitizer( ParticlesData &particles,
 
 
 // Kernel that move particles to the voxelized volume boundary
-__global__ void kernel_ct_detector_track_to_in( ParticlesData &particles,
-                                                const ObbData &detector_volume )
+__global__ void kernel_ct_detector_track_to_in( ParticlesData particles,
+                                                const ObbData detector_volume )
 {
 
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
@@ -158,8 +158,8 @@ __global__ void kernel_ct_detector_track_to_in( ParticlesData &particles,
 }
 
 // Kernel digitizer
-__global__ void kernel_ct_detector_digitizer( ParticlesData &particles,
-                                              const ObbData &detector_volume,
+__global__ void kernel_ct_detector_digitizer( ParticlesData particles,
+                                              const ObbData detector_volume,
                                               f32xyz pixel_size, ui32xyz nb_pixel,
                                               f32 threshold, f32matrix44 transform,
                                               f32* projection, ui32* scatter_order,

@@ -42,9 +42,9 @@ namespace PHSPSRC
 __host__ __device__ void phsp_source(ParticlesData &particles_data,
                                      const PhaseSpaceData &phasespace,
                                      const PhSpTransform &transform, ui32 id );
-__global__ void phsp_point_source( ParticlesData &particles_data,
-                                   const PhaseSpaceData &phasespace,
-                                   const PhSpTransform &transform );
+__global__ void phsp_point_source( ParticlesData particles_data,
+                                   const PhaseSpaceData phasespace,
+                                   const PhSpTransform transform );
 }
 
 // PhaseSpace source

@@ -202,9 +202,9 @@ __host__ __device__ void linac_source ( ParticlesData &particles,
 
 // Kernel to create new particles. This kernel will only call the host/device function
 // beamlet source in order to get one new particle.
-__global__ void kernel_linac_source ( ParticlesData &particles,
-                                      const LinacSourceData &linac,
-                                      const f32matrix44 &trans )
+__global__ void kernel_linac_source ( ParticlesData particles,
+                                      const LinacSourceData linac,
+                                      const f32matrix44 trans )
 {
     // Get thread id
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;

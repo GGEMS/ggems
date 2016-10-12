@@ -21,7 +21,7 @@
 // == Track to in ===================================================================================
 
 // Device Kernel that move particles to the voxelized volume boundary
-__global__ void MPLINACN::kernel_device_track_to_in( ParticlesData &particles, const LinacData &linac, f32 geom_tolerance )
+__global__ void MPLINACN::kernel_device_track_to_in( ParticlesData particles, const LinacData linac, f32 geom_tolerance )
 {
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
     if ( id >= particles.size ) return;
@@ -1027,11 +1027,11 @@ __host__ __device__ void MPLINACN::track_to_out_nonav( ParticlesData &particles,
 
 
 // Device kernel that track particles within the voxelized volume until boundary
-__global__ void MPLINACN::kernel_device_track_to_out( ParticlesData &particles,
-                                                      const LinacData &linac,
-                                                      const MaterialsTable &materials,
-                                                      const PhotonCrossSectionTable &photon_CS,
-                                                      const GlobalSimulationParametersData &parameters,
+__global__ void MPLINACN::kernel_device_track_to_out( ParticlesData particles,
+                                                      const LinacData linac,
+                                                      const MaterialsTable materials,
+                                                      const PhotonCrossSectionTable photon_CS,
+                                                      const GlobalSimulationParametersData parameters,
                                                       bool nav_within_mlc )
 {
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;

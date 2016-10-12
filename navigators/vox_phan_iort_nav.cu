@@ -439,7 +439,7 @@ __host__ __device__ void VPIORTN::track_seTLE( ParticlesData &particles,
 
 
 // Device Kernel that move particles to the voxelized volume boundary
-__global__ void VPIORTN::kernel_device_track_to_in( ParticlesData &particles, f32 xmin, f32 xmax,
+__global__ void VPIORTN::kernel_device_track_to_in( ParticlesData particles, f32 xmin, f32 xmax,
                                                     f32 ymin, f32 ymax, f32 zmin, f32 zmax, f32 tolerance )
 {  
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
@@ -456,14 +456,14 @@ void VPIORTN::kernel_host_track_to_in( ParticlesData &particles, f32 xmin, f32 x
 }
 
 // Device kernel that track particles within the voxelized volume until boundary
-__global__ void VPIORTN::kernel_device_track_to_out( ParticlesData &particles,
-                                                     const VoxVolumeData<ui16> &vol,
-                                                     const MaterialsTable &materials,
-                                                     const PhotonCrossSectionTable &photon_CS_table,
-                                                     const GlobalSimulationParametersData &parameters,
-                                                     DoseData &dosi,
-                                                     const Mu_MuEn_Table &mu_table,
-                                                     HistoryMap &hist_map )
+__global__ void VPIORTN::kernel_device_track_to_out( ParticlesData particles,
+                                                     const VoxVolumeData<ui16> vol,
+                                                     const MaterialsTable materials,
+                                                     const PhotonCrossSectionTable photon_CS_table,
+                                                     const GlobalSimulationParametersData parameters,
+                                                     DoseData dosi,
+                                                     const Mu_MuEn_Table mu_table,
+                                                     HistoryMap hist_map )
 {   
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
     if ( id >= particles.size ) return;    
@@ -509,11 +509,11 @@ void VPIORTN::kernel_host_track_to_out( ParticlesData &particles,
 
 
 // Device kernel that perform seTLE
-__global__ void VPIORTN::kernel_device_seTLE( ParticlesData &particles,
-                                              const VoxVolumeData<ui16> &vol,
-                                              COOHistoryMap &coo_hist_map,
-                                              DoseData &dosi,
-                                              const Mu_MuEn_Table &mu_table , ui32 nb_of_rays , f32 edep_th )
+__global__ void VPIORTN::kernel_device_seTLE( ParticlesData particles,
+                                              const VoxVolumeData<ui16> vol,
+                                              COOHistoryMap coo_hist_map,
+                                              DoseData dosi,
+                                              const Mu_MuEn_Table mu_table , ui32 nb_of_rays , f32 edep_th )
 {
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
     if ( id >= coo_hist_map.nb_data ) return;

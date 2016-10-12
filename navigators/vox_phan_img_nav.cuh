@@ -37,13 +37,13 @@ __host__ __device__ void track_to_out (ParticlesData &particles,
                                        const PhotonCrossSectionTable &photon_CS_table,
                                        const GlobalSimulationParametersData &parameters,
                                        ui32 part_id );
-__global__ void kernel_device_track_to_in ( ParticlesData &particles, f32 xmin, f32 xmax,
+__global__ void kernel_device_track_to_in ( ParticlesData particles, f32 xmin, f32 xmax,
                                             f32 ymin, f32 ymax, f32 zmin, f32 zmax, f32 geom_tolerance );
-__global__ void kernel_device_track_to_out ( ParticlesData &particles,
-                                             const VoxVolumeData<ui16> &vol,
-                                             const MaterialsTable &materials,
-                                             const PhotonCrossSectionTable &photon_CS_table,
-                                             const GlobalSimulationParametersData &parameters );
+__global__ void kernel_device_track_to_out ( ParticlesData particles,
+                                             const VoxVolumeData<ui16> vol,
+                                             const MaterialsTable materials,
+                                             const PhotonCrossSectionTable photon_CS_table,
+                                             const GlobalSimulationParametersData parameters );
 void kernel_host_track_to_in (ParticlesData &particles, f32 xmin, f32 xmax,
                               f32 ymin, f32 ymax, f32 zmin, f32 zmax, f32 geom_tolerance, ui32 id );
 void kernel_host_track_to_out (ParticlesData &particles,

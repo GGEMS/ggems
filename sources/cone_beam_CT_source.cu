@@ -100,7 +100,7 @@ __host__ __device__ void cone_beam_ct_source( ParticlesData &particles, ui8 ptyp
 
 }
 
-__global__ void kernel_cone_beam_ct_source( ParticlesData &particles, ui8 ptype,
+__global__ void kernel_cone_beam_ct_source( ParticlesData particles, ui8 ptype,
                                             f32 *spectrum_E, f32 *spectrum_CDF, ui32 nb_of_energy_bins, f32 aperture,
                                             f32xyz foc, const f32matrix44 &transform )
 {

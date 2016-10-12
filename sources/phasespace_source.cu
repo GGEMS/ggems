@@ -92,9 +92,9 @@ __host__ __device__ void PHSPSRC::phsp_source ( ParticlesData &particles_data,
 //           particles_data.px[id], particles_data.py[id], particles_data.pz[id], particles_data.pname[id]);
 }
 
-__global__ void PHSPSRC::phsp_point_source (ParticlesData &particles_data,
-                                            const PhaseSpaceData &phasespace,
-                                            const PhSpTransform &transform )
+__global__ void PHSPSRC::phsp_point_source (ParticlesData particles_data,
+                                            const PhaseSpaceData phasespace,
+                                            const PhSpTransform transform )
 {
     // Get thread id
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
