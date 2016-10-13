@@ -14,6 +14,19 @@
 
 #include "global.cuh"
 
+// Cross section table for photon particle
+struct TestData{
+    f32 *A;
+    f32 *B;
+    f32 *C;
+    ui32 n;
+};
+
+// Struct that handle CPU&GPU CS data
+struct StructTest {
+    TestData data_h;
+    TestData data_d;
+};
 
 class Testing
 {
@@ -32,6 +45,8 @@ public:
     void allocation_unified_memory();
     void kernel_unified_memory();
 
+    void kernel_struct();
+
 private:
     f32 *host_A;
     f32 *host_B;
@@ -46,6 +61,8 @@ private:
     f32 *uni_C;
 
     ui32 N;
+
+    StructTest st_test;
 };
 
 #endif
