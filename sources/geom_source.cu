@@ -19,7 +19,7 @@
 ///////// GPU code ////////////////////////////////////////////////////
 
 // Get energy from spectrum
-__host__ __device__ f32 GEOMSRC::get_energy( ParticlesData &particles_data, f32 *energy, f32 *cdf, ui32 nb_bins, ui32 id )
+__host__ __device__ f32 GEOMSRC::get_energy( ParticlesData particles_data, f32 *energy, f32 *cdf, ui32 nb_bins, ui32 id )
 {
     if( nb_bins == 1 )
     {
@@ -44,7 +44,7 @@ __host__ __device__ f32 GEOMSRC::get_energy( ParticlesData &particles_data, f32 
 }
 
 // Internal function that create a new particle to the buffer at the slot id
-__host__ __device__ void GEOMSRC::point_source ( ParticlesData &particles_data,
+__host__ __device__ void GEOMSRC::point_source ( ParticlesData particles_data,
                                                  f32xyz pos, f32 *energy, f32 *cdf, ui32 nb_bins,
                                                  ui8 ptype, ui32 id )
 

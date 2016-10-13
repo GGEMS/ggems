@@ -22,9 +22,9 @@
 #include "cone_beam_CT_source.cuh"
 
 
-__host__ __device__ void cone_beam_ct_source( ParticlesData &particles, ui8 ptype,
+__host__ __device__ void cone_beam_ct_source( ParticlesData particles, ui8 ptype,
                                               f32 *spectrum_E, f32 *spectrum_CDF, ui32 nb_of_energy_bins, f32 aperture,
-                                              f32xyz foc, const f32matrix44 transform, ui32 id )
+                                              f32xyz foc, f32matrix44 transform, ui32 id )
 {            
     // This part is in double precision due to aliasing issue - JB 06/2016
 
@@ -102,7 +102,7 @@ __host__ __device__ void cone_beam_ct_source( ParticlesData &particles, ui8 ptyp
 
 __global__ void kernel_cone_beam_ct_source( ParticlesData particles, ui8 ptype,
                                             f32 *spectrum_E, f32 *spectrum_CDF, ui32 nb_of_energy_bins, f32 aperture,
-                                            f32xyz foc, const f32matrix44 transform )
+                                            f32xyz foc, f32matrix44 transform )
 {
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;;
     if( id >= particles.size ) return;

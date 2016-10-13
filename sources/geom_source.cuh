@@ -42,8 +42,8 @@ class GGEMSource;
 
 namespace GEOMSRC
 {
-__host__ __device__ f32 get_energy( ParticlesData &particles_data, f32 *energy, f32 *cdf, ui32 nb_bins, ui32 id );
-__host__ __device__ void point_source (ParticlesData &particles_data,
+__host__ __device__ f32 get_energy( ParticlesData particles_data, f32 *energy, f32 *cdf, ui32 nb_bins, ui32 id );
+__host__ __device__ void point_source (ParticlesData particles_data,
                                        f32xyz pos, f32 *energy, f32 *cdf, ui32 nb_bins, ui8 ptype, ui32 id);
 __global__ void kernel_point_source (ParticlesData particles_data,
                                      f32xyz pos, f32 *energy, f32 *cdf, ui32 nb_bins, ui8 ptype );

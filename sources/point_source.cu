@@ -19,7 +19,7 @@
 ///////// GPU code ////////////////////////////////////////////////////
 
 // Internal function that create a new particle to the buffer at the slot id
-__host__ __device__ void point_source ( ParticlesData &particles_data,
+__host__ __device__ void point_source ( ParticlesData particles_data,
                                         f32 px, f32 py, f32 pz, f32 energy, ui8 ptype, ui32 id)
 {
     // First get an isotropic particle direction

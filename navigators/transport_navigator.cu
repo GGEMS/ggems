@@ -83,7 +83,7 @@ f32 __host__ __device__ transport_compute_safety_AABB( f32xyz pos, f32 xmin, f32
 }
 
 // Transport the current particle to an AABB geometry
-void __host__ __device__ transport_track_to_in_AABB( ParticlesData &particles, f32 xmin, f32 xmax,
+void __host__ __device__ transport_track_to_in_AABB( ParticlesData particles, f32 xmin, f32 xmax,
                                                      f32 ymin, f32 ymax, f32 zmin, f32 zmax, f32 tolerance, ui32 id)
 {
 
@@ -229,7 +229,7 @@ void __host__ __device__ transport_track_to_in_AABB( ParticlesData &particles, f
 
 }
 
-void __host__ __device__ transport_track_to_in_AABB( ParticlesData &particles, const AabbData aabb, f32 tolerance, ui32 id)
+void __host__ __device__ transport_track_to_in_AABB( ParticlesData particles, AabbData aabb, f32 tolerance, ui32 id)
 {
     transport_track_to_in_AABB( particles, aabb.xmin, aabb.xmax, aabb.ymin, aabb.ymax, aabb.zmin, aabb.zmax, tolerance, id);
 }

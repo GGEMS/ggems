@@ -19,9 +19,9 @@
 ///////// GPU code ////////////////////////////////////////////////////
 
 // Internal function that create a new particle to the buffer at the slot id
-__host__ __device__ void PHSPSRC::phsp_source ( ParticlesData &particles_data,
-                                                const PhaseSpaceData phasespace,
-                                                const PhSpTransform transform, ui32 id )
+__host__ __device__ void PHSPSRC::phsp_source ( ParticlesData particles_data,
+                                                PhaseSpaceData phasespace,
+                                                PhSpTransform transform, ui32 id )
 
 
 
@@ -93,8 +93,8 @@ __host__ __device__ void PHSPSRC::phsp_source ( ParticlesData &particles_data,
 }
 
 __global__ void PHSPSRC::phsp_point_source (ParticlesData particles_data,
-                                            const PhaseSpaceData phasespace,
-                                            const PhSpTransform transform )
+                                            PhaseSpaceData phasespace,
+                                            PhSpTransform transform )
 {
     // Get thread id
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;

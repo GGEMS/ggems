@@ -18,12 +18,12 @@
 
 ////:: GPU Codes
 
-__host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
-                                                       const VoxVolumeData<ui16> vol,
-                                                       const MaterialsTable materials,
-                                                       const ElectronsCrossSectionTable electron_CS_table,
-                                                       const GlobalSimulationParametersData parameters,
-                                                       DoseData &dosi,
+__host__ __device__ void VPDN::track_electron_to_out ( ParticlesData particles,
+                                                       VoxVolumeData<ui16> vol,
+                                                       MaterialsTable materials,
+                                                       ElectronsCrossSectionTable electron_CS_table,
+                                                       GlobalSimulationParametersData parameters,
+                                                       DoseData dosi,
                                                        f32 &randomnumbereIoni,
                                                        f32 &randomnumbereBrem,
                                                        f32 &freeLength,
@@ -370,12 +370,12 @@ __host__ __device__ void VPDN::track_electron_to_out ( ParticlesData &particles,
 }
 
 
-__host__ __device__ void VPDN::track_photon_to_out ( ParticlesData &particles,
-                                                     const VoxVolumeData<ui16> vol,
-                                                     const MaterialsTable materials,
-                                                     const PhotonCrossSectionTable photon_CS_table,
-                                                     const GlobalSimulationParametersData parameters,
-                                                     DoseData &dosi,
+__host__ __device__ void VPDN::track_photon_to_out ( ParticlesData particles,
+                                                     VoxVolumeData<ui16> vol,
+                                                     MaterialsTable materials,
+                                                     PhotonCrossSectionTable photon_CS_table,
+                                                     GlobalSimulationParametersData parameters,
+                                                     DoseData dosi,
                                                      ui32 part_id )
 {        
     // Read position
@@ -569,11 +569,11 @@ void VPDN::kernel_host_track_to_in ( ParticlesData particles, f32 xmin, f32 xmax
 
 // Device kernel that track particles within the voxelized volume until boundary
 __global__ void VPDN::kernel_device_track_to_out ( ParticlesData particles,
-                                                   const VoxVolumeData<ui16> vol,
-                                                   const MaterialsTable materials,
-                                                   const PhotonCrossSectionTable photon_CS_table,
-                                                   const ElectronsCrossSectionTable electron_CS_table,
-                                                   const GlobalSimulationParametersData parameters,
+                                                   VoxVolumeData<ui16> vol,
+                                                   MaterialsTable materials,
+                                                   PhotonCrossSectionTable photon_CS_table,
+                                                   ElectronsCrossSectionTable electron_CS_table,
+                                                   GlobalSimulationParametersData parameters,
                                                    DoseData dosi )
 {   
 
@@ -651,11 +651,11 @@ __global__ void VPDN::kernel_device_track_to_out ( ParticlesData particles,
 
 // Host kernel that track particles within the voxelized volume until boundary
 void VPDN::kernel_host_track_to_out ( ParticlesData particles,
-                                      const VoxVolumeData<ui16> vol,
-                                      const MaterialsTable materials,
-                                      const PhotonCrossSectionTable photon_CS_table,
-                                      const ElectronsCrossSectionTable electron_CS_table,
-                                      const GlobalSimulationParametersData parameters,
+                                      VoxVolumeData<ui16> vol,
+                                      MaterialsTable materials,
+                                      PhotonCrossSectionTable photon_CS_table,
+                                      ElectronsCrossSectionTable electron_CS_table,
+                                      GlobalSimulationParametersData parameters,
                                       DoseData dosi,
                                       ui32 id )
 {

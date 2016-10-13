@@ -21,7 +21,7 @@
 /// CPU&GPU functions //////////////////////////////////////////////////////////
 
 // Analog deposition
-__host__ __device__ void dose_record_standard ( DoseData &dose, f32 Edep, f32 px, f32 py, f32 pz )
+__host__ __device__ void dose_record_standard ( DoseData dose, f32 Edep, f32 px, f32 py, f32 pz )
 {
 
     if (px < dose.xmin + EPSILON3 || px > dose.xmax - EPSILON3) return;
@@ -72,7 +72,7 @@ __host__ __device__ void dose_record_standard ( DoseData &dose, f32 Edep, f32 px
 }
 
 // TLE deposition
-__host__ __device__ void dose_record_TLE ( DoseData &dose, f32 Edep, f32 px, f32 py, f32 pz,
+__host__ __device__ void dose_record_TLE ( DoseData dose, f32 Edep, f32 px, f32 py, f32 pz,
                                            f32 length, f32 mu_en)
 {
 

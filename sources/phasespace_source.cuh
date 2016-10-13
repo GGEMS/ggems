@@ -39,12 +39,12 @@ class GGEMSource;
 
 namespace PHSPSRC
 {
-__host__ __device__ void phsp_source(ParticlesData &particles_data,
-                                     const PhaseSpaceData phasespace,
-                                     const PhSpTransform transform, ui32 id );
+__host__ __device__ void phsp_source(ParticlesData particles_data,
+                                     PhaseSpaceData phasespace,
+                                     PhSpTransform transform, ui32 id );
 __global__ void phsp_point_source( ParticlesData particles_data,
-                                   const PhaseSpaceData phasespace,
-                                   const PhSpTransform transform );
+                                   PhaseSpaceData phasespace,
+                                   PhSpTransform transform );
 }
 
 // PhaseSpace source

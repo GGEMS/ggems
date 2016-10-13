@@ -18,11 +18,11 @@
 
 ////:: GPU Codes
 
-__host__ __device__ void VPIN::track_to_out ( ParticlesData &particles,
-                                              const VoxVolumeData<ui16> vol,
-                                              const MaterialsTable materials,
-                                              const PhotonCrossSectionTable photon_CS_table,
-                                              const GlobalSimulationParametersData parameters,
+__host__ __device__ void VPIN::track_to_out ( ParticlesData particles,
+                                              VoxVolumeData<ui16> vol,
+                                              MaterialsTable materials,
+                                              PhotonCrossSectionTable photon_CS_table,
+                                              GlobalSimulationParametersData parameters,
                                               ui32 part_id )
 {
     // Read position
@@ -163,10 +163,10 @@ void VPIN::kernel_host_track_to_in ( ParticlesData particles, f32 xmin, f32 xmax
 
 // Device kernel that track particles within the voxelized volume until boundary
 __global__ void VPIN::kernel_device_track_to_out ( ParticlesData particles,
-                                                   const VoxVolumeData<ui16> vol,
-                                                   const MaterialsTable materials,
-                                                   const PhotonCrossSectionTable photon_CS_table,
-                                                   const GlobalSimulationParametersData parameters )
+                                                   VoxVolumeData<ui16> vol,
+                                                   MaterialsTable materials,
+                                                   PhotonCrossSectionTable photon_CS_table,
+                                                   GlobalSimulationParametersData parameters )
 {
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
     if ( id >= particles.size ) return;
@@ -180,10 +180,10 @@ __global__ void VPIN::kernel_device_track_to_out ( ParticlesData particles,
 
 // Host kernel that track particles within the voxelized volume until boundary
 void VPIN::kernel_host_track_to_out ( ParticlesData particles,
-                                      const VoxVolumeData<ui16> vol,
-                                      const MaterialsTable materials,
-                                      const PhotonCrossSectionTable photon_CS_table,
-                                      const GlobalSimulationParametersData parameters, ui32 id )
+                                      VoxVolumeData<ui16> vol,
+                                      MaterialsTable materials,
+                                      PhotonCrossSectionTable photon_CS_table,
+                                      GlobalSimulationParametersData parameters, ui32 id )
 {
 
     // Stepping loop

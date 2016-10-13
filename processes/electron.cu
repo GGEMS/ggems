@@ -374,7 +374,7 @@ __host__ __device__ f32 ElectronBremmsstrahlung_CSPA( f32 Z, f32 cut, f32 Ekine 
 
 
 //                                                                                           v-- CS table max energy - JB
-__host__ __device__ f32 ElectronBremmsstrahlung_CS( const MaterialsTable materials, f32 Ekine, f32 max_E, ui8 mat_id )
+__host__ __device__ f32 ElectronBremmsstrahlung_CS( MaterialsTable materials, f32 Ekine, f32 max_E, ui8 mat_id )
 {
     i32 i, n, nn, nmax = 100;
     f32 Cross = 0.;
