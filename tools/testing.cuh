@@ -13,20 +13,7 @@
 #define TESTING_CUH
 
 #include "global.cuh"
-
-// Cross section table for photon particle
-struct TestData{
-    f32 *A;
-    f32 *B;
-    f32 *C;
-    ui32 n;
-};
-
-// Struct that handle CPU&GPU CS data
-struct StructTest {
-    TestData data_h;
-    TestData data_d;
-};
+#include "testing_helper.cuh"
 
 class Testing
 {
@@ -63,6 +50,10 @@ private:
     ui32 N;
 
     StructTest st_test;
+    StructCoef st_coef;
+
+private:
+    void m_launch_kernel_do_add_struct( StructTest st_test, StructCoef st_coef );
 };
 
 #endif

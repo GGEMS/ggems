@@ -12,32 +12,7 @@
 #ifndef TESTING_CU
 #define TESTING_CU
 
-
 #include "testing.cuh"
-
-/////////////////////////////////////////////////////////////
-
-__host__ __device__ void fun2_do_add( TestData data, ui32 id )
-{
-    if (id==0) printf("InFun2 data size %i\n", data.n);
-    data.C[id] = data.A[id] + data.B[id];
-}
-
-__host__ __device__ void fun1_do_add( TestData data, ui32 id )
-{
-    if (id==0) printf("InFun1 data size %i\n", data.n);
-    fun2_do_add( data, id );
-}
-
-__global__ void kernel_do_add_struct( TestData data )
-{
-    const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;;
-    if( id >= data.n ) return;
-
-    if (id==0) printf("InKernel data size %i\n", data.n);
-    fun1_do_add( data, id );
-    if (id==0) printf("DoneKernel\n");
-}
 
 /////////////////////////////////////////////////////////////
 
@@ -82,6 +57,19 @@ Testing::~Testing()
 //    cudaFree( uni_B );
 //    cudaFree( uni_C );
 }
+
+void Testing::m_launch_kernel_do_add_struct( StructTest st_test, StructCoef st_coef )
+{
+    dim3 threads, grid;
+    threads.x = 128;
+    grid.x = ( st_test.data_h.n + 128 - 1 ) / 128;
+
+    kernel_do_add_struct<<<grid, threads>>>( st_test.data_d, st_coef.data_d );
+    cuda_error_check( "Error ", " kernel_testing_do_add_struct" );
+    cudaDeviceSynchronize();
+}
+
+/////////////////////////////////////////////////////////////
 
 void Testing::set_device_id(ui32 id)
 {
@@ -287,10 +275,16 @@ void Testing::kernel_struct()
     st_test.data_h.B = new f32[N];
     st_test.data_h.C = new f32[N];
 
+    st_coef.data_h.n = N;
+    st_coef.data_h.coef = new f32[N];
+
     st_test.data_d.n = N;
     HANDLE_ERROR( cudaMalloc( ( void** ) &st_test.data_d.A, N*sizeof( f32 ) ) );
     HANDLE_ERROR( cudaMalloc( ( void** ) &st_test.data_d.B, N*sizeof( f32 ) ) );
     HANDLE_ERROR( cudaMalloc( ( void** ) &st_test.data_d.C, N*sizeof( f32 ) ) );
+
+    st_coef.data_d.n = N;
+    HANDLE_ERROR( cudaMalloc( ( void** ) &st_coef.data_d.coef, N*sizeof( f32 ) ) );
     printf("[ok]\n");
 
     printf("Vectors setting");
@@ -299,6 +293,7 @@ void Testing::kernel_struct()
         st_test.data_h.A[i] = 1.0;
         st_test.data_h.B[i] = 2.0;
         st_test.data_h.C[i] = 0.0;
+        st_coef.data_h.coef[i] = 0.5;
         ++i;
     }
     printf("[ok]\n");
@@ -307,16 +302,11 @@ void Testing::kernel_struct()
     HANDLE_ERROR( cudaMemcpy( st_test.data_d.A, st_test.data_h.A, N*sizeof( f32 ), cudaMemcpyHostToDevice ) );
     HANDLE_ERROR( cudaMemcpy( st_test.data_d.B, st_test.data_h.B, N*sizeof( f32 ), cudaMemcpyHostToDevice ) );
     HANDLE_ERROR( cudaMemcpy( st_test.data_d.C, st_test.data_h.C, N*sizeof( f32 ), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( st_coef.data_d.coef, st_coef.data_h.coef, N*sizeof( f32 ), cudaMemcpyHostToDevice ) );
     printf("[ok]\n");
 
     printf("\nKernel:\n");
-    dim3 threads, grid;
-    threads.x = 128;
-    grid.x = ( N + 128 - 1 ) / 128;
-
-    kernel_do_add_struct<<<grid, threads>>>( st_test.data_d );
-    cuda_error_check( "Error ", " kernel_testing_do_add_struct" );
-    cudaDeviceSynchronize();
+    m_launch_kernel_do_add_struct( st_test, st_coef );
 
     printf("Results:\n");
     HANDLE_ERROR( cudaMemcpy( st_test.data_h.C, st_test.data_d.C, N*sizeof( f32 ), cudaMemcpyDeviceToHost ) );
