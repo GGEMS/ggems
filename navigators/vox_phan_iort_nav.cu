@@ -18,16 +18,17 @@
 
 ////// HOST-DEVICE GPU Codes ////////////////////////////////////////////
 
-__host__ __device__ void VPIORTN::track_to_out( ParticlesData particles,
-                                                VoxVolumeData<ui16> vol,
-                                                MaterialsTable materials,
-                                                PhotonCrossSectionTable photon_CS_table,
-                                                GlobalSimulationParametersData parameters,
-                                                DoseData dosi,
-                                                Mu_MuEn_Table mu_table,
-                                                HistoryMap hist_map,
-                                                ui32 part_id )
+__host__ __device__ void _track_to_out( ParticlesData particles,
+                                        VoxVolumeData<ui16> vol,
+                                        MaterialsTable &materials,
+                                        PhotonCrossSectionTable photon_CS_table,
+                                        GlobalSimulationParametersData parameters,
+                                        DoseData dosi,
+                                        Mu_MuEn_Table mu_table,
+                                        HistoryMap hist_map,
+                                        ui32 part_id )
 {
+//    printf("id %i - 1\n", part_id);
 
     // Read position
     f32xyz pos;
@@ -62,6 +63,8 @@ __host__ __device__ void VPIORTN::track_to_out( ParticlesData particles,
     f32 next_interaction_distance;
     ui8 next_discrete_process;
 
+//    printf("id %i - 2\n", part_id);
+
     //// Find next discrete interaction ///////////////////////////////////////
 
 #ifdef SKIP_VOXEL
@@ -87,6 +90,8 @@ __host__ __device__ void VPIORTN::track_to_out( ParticlesData particles,
 #endif
 
     //// Get the next distance boundary volume /////////////////////////////////
+
+//    printf("id %i - 3\n", part_id);
 
     f32 vox_xmin = index_phantom.x*vol.spacing_x - vol.off_x;
     f32 vox_ymin = index_phantom.y*vol.spacing_y - vol.off_y;
@@ -118,6 +123,8 @@ __host__ __device__ void VPIORTN::track_to_out( ParticlesData particles,
     }
 
     //// Move particle //////////////////////////////////////////////////////
+
+//    printf("id %i - 4\n", part_id);
 
     // get the new position
     pos = fxyz_add ( pos, fxyz_scale ( dir, next_interaction_distance ) );
@@ -195,11 +202,282 @@ __host__ __device__ void VPIORTN::track_to_out( ParticlesData particles,
         if ( next_discrete_process != GEOMETRY_BOUNDARY )
         {
 
+//            printf("id %i - resolve\n", part_id);
 
+//            printf("id %i matindex %i nb elts %i nb mat %i\n", part_id, mat_id, materials.nb_elements[0], materials.nb_materials);
 
             // Resolve discrete process
-            electron = photon_resolve_discrete_process ( particles, parameters, photon_CS_table,
+            electron = _photon_resolve_discrete_process ( particles, parameters, photon_CS_table,
                                                                      materials, mat_id, part_id );
+
+//            printf("id %i - done\n", part_id);
+
+            #ifdef SKIP_VOXEL
+                particles.geometry_id[ part_id ] = 999999999; // Init with unknow material id to force process update
+            #endif
+
+            /// Energy cut /////////////
+
+            // If gamma particle not enough energy (Energy cut)
+            if ( particles.E[ part_id ] <= materials.photon_energy_cut[ mat_id ] )
+            {
+                // Kill without mercy
+                particles.endsimu[ part_id ] = PARTICLE_DEAD;
+            }
+        }
+
+        // seTLE
+        if ( mu_table.flag == seTLE )
+        {
+            /// seTLE /////////////////
+
+            if ( next_discrete_process == PHOTON_COMPTON || next_discrete_process == PHOTON_RAYLEIGH )
+            {
+                // Increment the number of interactions at this position
+                index_phantom.x = ui32 ( ( pos.x + vol.off_x ) * ivoxsize.x );
+                index_phantom.y = ui32 ( ( pos.y + vol.off_y ) * ivoxsize.y );
+                index_phantom.z = ui32 ( ( pos.z + vol.off_z ) * ivoxsize.z );
+
+                index_phantom.w = index_phantom.z*vol.nb_vox_x*vol.nb_vox_y
+                        + index_phantom.y*vol.nb_vox_x
+                        + index_phantom.x; // linear index
+
+                ggems_atomic_add( hist_map.interaction, index_phantom.w, ui32 ( 1 ) );
+
+                // Add the particle energy in memory
+                ggems_atomic_add( hist_map.energy, index_phantom.w, particles.E[ part_id ] );
+            }
+
+        }
+        else // Analog
+        {
+            if ( next_discrete_process != GEOMETRY_BOUNDARY )
+            {
+                /// Drop energy ////////////
+
+                // If gamma particle is dead (PE, Compton or energy cut)
+                if ( particles.endsimu[ part_id ] == PARTICLE_DEAD &&  particles.E[ part_id ] != 0.0f )
+                {
+                    dose_record_standard( dosi, particles.E[ part_id ], pos.x,
+                                          pos.y, pos.z );
+                }
+
+                // If electron particle has energy
+                if ( electron.E != 0.0f )
+                {
+                    dose_record_standard( dosi, electron.E, pos.x,
+                                          pos.y, pos.z );
+                }
+            } // geom boundary
+
+        } // Analog
+
+    } // TLE
+
+    // store the new position
+    particles.px[part_id] = pos.x;
+    particles.py[part_id] = pos.y;
+    particles.pz[part_id] = pos.z;
+}
+
+
+
+
+
+__host__ __device__ void VPIORTN::track_to_out( ParticlesData particles,
+                                                VoxVolumeData<ui16> vol,
+                                                MaterialsTable materials,
+                                                PhotonCrossSectionTable photon_CS_table,
+                                                GlobalSimulationParametersData parameters,
+                                                DoseData dosi,
+                                                Mu_MuEn_Table mu_table,
+                                                HistoryMap hist_map,
+                                                ui32 part_id )
+{
+
+//    printf("id %i - 1\n", part_id);
+
+    // Read position
+    f32xyz pos;
+    pos.x = particles.px[part_id];
+    pos.y = particles.py[part_id];
+    pos.z = particles.pz[part_id];
+
+    // Read direction
+    f32xyz dir;
+    dir.x = particles.dx[part_id];
+    dir.y = particles.dy[part_id];
+    dir.z = particles.dz[part_id];
+
+    // Defined index phantom
+    f32xyz ivoxsize;
+    ivoxsize.x = 1.0 / vol.spacing_x;
+    ivoxsize.y = 1.0 / vol.spacing_y;
+    ivoxsize.z = 1.0 / vol.spacing_z;
+    ui32xyzw index_phantom;
+    index_phantom.x = ui32 ( ( pos.x + vol.off_x ) * ivoxsize.x );
+    index_phantom.y = ui32 ( ( pos.y + vol.off_y ) * ivoxsize.y );
+    index_phantom.z = ui32 ( ( pos.z + vol.off_z ) * ivoxsize.z );
+
+    index_phantom.w = index_phantom.z*vol.nb_vox_x*vol.nb_vox_y
+                      + index_phantom.y*vol.nb_vox_x
+                      + index_phantom.x; // linear index
+
+    // Get the material that compose this volume
+    ui16 mat_id = vol.values[ index_phantom.w ];
+
+    // Vars
+    f32 next_interaction_distance;
+    ui8 next_discrete_process;
+
+//    printf("id %i - 2\n", part_id);
+
+    //// Find next discrete interaction ///////////////////////////////////////
+
+#ifdef SKIP_VOXEL
+    if ( mat_id != particles.geometry_id[ part_id ] )
+    {
+        // Store the material id
+        particles.geometry_id[ part_id ] = mat_id;
+
+        // Get next interaction and update values
+        photon_get_next_interaction ( particles, parameters, photon_CS_table, mat_id, part_id );
+    }
+
+    // Read values
+    next_interaction_distance = particles.next_interaction_distance[part_id];
+    next_discrete_process = particles.next_discrete_process[part_id];
+
+#else
+    photon_get_next_interaction ( particles, parameters, photon_CS_table, mat_id, part_id );
+
+    next_interaction_distance = particles.next_interaction_distance[part_id];
+    next_discrete_process = particles.next_discrete_process[part_id];
+
+#endif
+
+    //// Get the next distance boundary volume /////////////////////////////////
+
+//    printf("id %i - 3\n", part_id);
+
+    f32 vox_xmin = index_phantom.x*vol.spacing_x - vol.off_x;
+    f32 vox_ymin = index_phantom.y*vol.spacing_y - vol.off_y;
+    f32 vox_zmin = index_phantom.z*vol.spacing_z - vol.off_z;
+    f32 vox_xmax = vox_xmin + vol.spacing_x;
+    f32 vox_ymax = vox_ymin + vol.spacing_y;
+    f32 vox_zmax = vox_zmin + vol.spacing_z;
+
+    // get a safety position for the particle within this voxel (sometime a particle can be right between two voxels)
+    // TODO: In theory this have to be applied just at the entry of the particle within the volume
+    //       in order to avoid particle entry between voxels. Then, computing improvement can be made
+    //       by calling this function only once, just for the particle step=0.    - JB
+    pos = transport_get_safety_inside_AABB( pos, vox_xmin, vox_xmax,
+                                            vox_ymin, vox_ymax, vox_zmin, vox_zmax, parameters.geom_tolerance );
+
+    f32 boundary_distance = hit_ray_AABB ( pos, dir, vox_xmin, vox_xmax,
+                                           vox_ymin, vox_ymax, vox_zmin, vox_zmax );
+
+    if ( boundary_distance <= next_interaction_distance )
+    {
+        next_interaction_distance = boundary_distance + parameters.geom_tolerance; // Overshoot
+        next_discrete_process = GEOMETRY_BOUNDARY;
+
+        #ifdef SKIP_VOXEL
+            // Update the the next distance interaction based on the length particle step
+            particles.next_interaction_distance[ part_id ] -= ( boundary_distance + parameters.geom_tolerance );
+        #endif
+
+    }
+
+    //// Move particle //////////////////////////////////////////////////////
+
+//    printf("id %i - 4\n", part_id);
+
+    // get the new position
+    pos = fxyz_add ( pos, fxyz_scale ( dir, next_interaction_distance ) );
+
+    // get safety position (outside the current voxel)
+    pos = transport_get_safety_outside_AABB( pos, vox_xmin, vox_xmax,
+                                             vox_ymin, vox_ymax, vox_zmin, vox_zmax, parameters.geom_tolerance );
+
+    // Stop simulation if out of the phantom
+    if ( !test_point_AABB_with_tolerance (pos, vol.xmin, vol.xmax, vol.ymin, vol.ymax, vol.zmin, vol.zmax, parameters.geom_tolerance ) )
+    {
+        particles.endsimu[part_id] = PARTICLE_FREEZE;
+        return;
+    }
+
+    //// Apply discrete process //////////////////////////////////////////////////
+
+    f32 energy = particles.E[ part_id ];
+
+    // If TLE
+    if ( mu_table.flag == TLE ) {
+
+        if ( next_discrete_process != GEOMETRY_BOUNDARY )
+        {
+            // Resolve discrete process
+            SecParticle electron = photon_resolve_discrete_process ( particles, parameters, photon_CS_table,
+                                                                     materials, mat_id, part_id );
+
+            #ifdef SKIP_VOXEL
+                particles.geometry_id[ part_id ] = 999999999; // Init with unknow material id to force process update
+            #endif
+
+        } // discrete process
+
+
+
+        /// Drop energy ////////////
+
+        // Get the mu_en for the current E
+        ui32 E_index = binary_search ( energy, mu_table.E_bins, mu_table.nb_bins );
+
+        f32 mu_en;
+
+        if ( E_index == 0 )
+        {
+            mu_en = mu_table.mu_en[ mat_id*mu_table.nb_bins ];
+        }
+        else
+        {
+            mu_en = linear_interpolation( mu_table.E_bins[E_index-1],  mu_table.mu_en[mat_id*mu_table.nb_bins + E_index-1],
+                                          mu_table.E_bins[E_index],    mu_table.mu_en[mat_id*mu_table.nb_bins + E_index],
+                                          energy );
+        }
+
+        //                             record to the old position (current voxel)
+        dose_record_TLE( dosi, energy, particles.px[ part_id ], particles.py[ part_id ],
+                         particles.pz[ part_id ], next_interaction_distance,  mu_en );
+
+        /// Energy cut /////////////
+
+
+
+        // If gamma particle not enough energy (Energy cut)
+        if ( particles.E[ part_id ] <= materials.photon_energy_cut[ mat_id ] )
+        {
+            // Kill without mercy
+            particles.endsimu[ part_id ] = PARTICLE_DEAD;
+        }
+
+    }
+    else // Else Analog or seTLE
+    {
+        // Resolve process
+        SecParticle electron;
+        if ( next_discrete_process != GEOMETRY_BOUNDARY )
+        {
+
+//            printf("id %i - resolve\n", part_id);
+
+//            printf("id %i matindex %i nb elts %i nb mat %i\n", part_id, mat_id, materials.nb_elements[0], materials.nb_materials);
+
+            // Resolve discrete process
+            electron = _photon_resolve_discrete_process ( particles, parameters, photon_CS_table,
+                                                                     materials, mat_id, part_id );
+
+//            printf("id %i - done\n", part_id);
 
             #ifdef SKIP_VOXEL
                 particles.geometry_id[ part_id ] = 999999999; // Init with unknow material id to force process update
@@ -444,7 +722,10 @@ __global__ void VPIORTN::kernel_device_track_to_in( ParticlesData particles, f32
 {  
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
     if ( id >= particles.size ) return;    
-    transport_track_to_in_AABB( particles, xmin, xmax, ymin, ymax, zmin, zmax, tolerance, id);   
+    transport_track_to_in_AABB( particles, xmin, xmax, ymin, ymax, zmin, zmax, tolerance, id);
+
+    printf("track2in id %i - pos %f %f %f - dir %f %f %f\n", id, particles.px[id], particles.py[id], particles.pz[id],
+           particles.dx[id], particles.dy[id], particles.dz[id]);
 }
 
 
@@ -466,19 +747,62 @@ __global__ void VPIORTN::kernel_device_track_to_out( ParticlesData particles,
                                                      HistoryMap hist_map )
 {   
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
+    if (id==0) printf("INKERNEL\n");
     if ( id >= particles.size ) return;    
 
 #ifdef SKIP_VOXEL
     particles.geometry_id[ id ] = 999999999; // Init with unknow material id
 #endif
 
+    printf("id %i - inside kernel\n", id);
+
+//    _track_to_out( particles, vol, materials, photon_CS_table, parameters, dosi, mu_table, hist_map, id );
+
     // Stepping loop - Get out of loop only if the particle was dead and it was a primary
     while ( particles.endsimu[id] != PARTICLE_DEAD && particles.endsimu[id] != PARTICLE_FREEZE )
     {
-        VPIORTN::track_to_out( particles, vol, materials, photon_CS_table, parameters, dosi, mu_table, hist_map, id );
+//        VPIORTN::track_to_out( particles, vol, materials, photon_CS_table, parameters, dosi, mu_table, hist_map, id );
+        //_track_to_out( particles, vol, materials, photon_CS_table, parameters, dosi, mu_table, hist_map, id );
+
+        break;
     }
 
 }
+
+
+// Device kernel that track particles within the voxelized volume until boundary
+__global__ void VPIORTN::_kernel_device_track_to_out( ParticlesData particles,
+                                                     VoxVolumeData<ui16> vol,
+                                                     MaterialsTable materials,
+                                                     PhotonCrossSectionTable photon_CS_table,
+                                                     GlobalSimulationParametersData parameters,
+                                                     DoseData dosi,
+                                                     Mu_MuEn_Table mu_table,
+                                                     HistoryMap hist_map )
+{
+    const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
+    if (id==0) printf("INKERNEL\n");
+    if ( id >= particles.size ) return;
+
+#ifdef SKIP_VOXEL
+    particles.geometry_id[ id ] = 999999999; // Init with unknow material id
+#endif
+
+//    printf("id %i - inside kernel\n", id);
+
+//    _track_to_out( particles, vol, materials, photon_CS_table, parameters, dosi, mu_table, hist_map, id );
+
+    // Stepping loop - Get out of loop only if the particle was dead and it was a primary
+    while ( particles.endsimu[id] != PARTICLE_DEAD && particles.endsimu[id] != PARTICLE_FREEZE )
+    {
+//        VPIORTN::track_to_out( particles, vol, materials, photon_CS_table, parameters, dosi, mu_table, hist_map, id );
+        _track_to_out( particles, vol, materials, photon_CS_table, parameters, dosi, mu_table, hist_map, id );
+
+//        break;
+    }
+
+}
+
 
 // Host kernel that track particles within the voxelized volume until boundary
 void VPIORTN::kernel_host_track_to_out( ParticlesData particles,
@@ -853,10 +1177,20 @@ void VoxPhanIORTNav::track_to_out ( Particles particles )
     else if ( m_params.data_h.device_target == GPU_DEVICE )
     {
 
+        printf("Track2out main\n");
+
         dim3 threads, grid;
         threads.x = m_params.data_h.gpu_block_size;
         grid.x = ( particles.size + m_params.data_h.gpu_block_size - 1 ) / m_params.data_h.gpu_block_size;
-        VPIORTN::kernel_device_track_to_out<<<grid, threads>>> ( particles.data_d, m_phantom.data_d, m_materials.data_d,
+//        VPIORTN::kernel_device_track_to_out<<<grid, threads>>> ( particles.data_d, m_phantom.data_d, m_materials.data_d,
+//                                                              m_cross_sections.photon_CS.data_d,
+//                                                              m_params.data_d, m_dose_calculator.dose,
+//                                                              m_mu_table, m_hist_map );
+
+//        MaterialsTable *mymat;
+//        mymat = &(m_materials.data_d);
+
+        VPIORTN::_kernel_device_track_to_out<<<grid, threads>>> ( particles.data_d, m_phantom.data_d, m_materials.data_d,
                                                               m_cross_sections.photon_CS.data_d,
                                                               m_params.data_d, m_dose_calculator.dose,
                                                               m_mu_table, m_hist_map );

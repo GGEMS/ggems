@@ -121,7 +121,51 @@ __host__ __device__ SecParticle photon_resolve_discrete_process ( ParticlesData 
 
 }
 
+__host__ __device__ SecParticle _photon_resolve_discrete_process ( ParticlesData particles,
+                                                                  GlobalSimulationParametersData parameters,
+                                                                  PhotonCrossSectionTable photon_CS_table,
+                                                                  MaterialsTable &materials,
+                                                                  ui16 mat_id, ui32 part_id )
+{
 
+    SecParticle electron;
+    electron.endsimu = PARTICLE_DEAD;
+    electron.dir.x = 0.;
+    electron.dir.y = 0.;
+    electron.dir.z = 1.;
+    electron.E = 0.;
+
+    ui8 next_discrete_process = particles.next_discrete_process[part_id];
+
+    //printf("id %i resolve  matid %i nb elts %i\n", part_id, mat_id, materials.nb_elements[0]);
+
+    //printf("id %i matindex %i nb elts %i nb mat %i\n", part_id, mat_id, materials.nb_elements[0], materials.nb_materials);
+
+    if ( next_discrete_process == PHOTON_COMPTON )
+    {
+        //printf("id %i Compton\n", part_id);
+        electron = Compton_SampleSecondaries_standard ( particles, materials.electron_energy_cut[mat_id],
+                   part_id, parameters );
+    }
+
+    if ( next_discrete_process == PHOTON_PHOTOELECTRIC )
+    {
+        //printf("id %i pe\n", part_id);
+        electron = Photoelec_SampleSecondaries_standard ( particles, materials, photon_CS_table,
+                   particles.E_index[part_id], materials.electron_energy_cut[mat_id],
+                   mat_id, part_id, parameters );
+    }
+
+    if ( next_discrete_process == PHOTON_RAYLEIGH )
+    {
+        //printf("id %i ray\n", part_id);
+        _Rayleigh_SampleSecondaries_Livermore( particles, materials, photon_CS_table, particles.E_index[part_id], mat_id, part_id );
+        //Rayleigh_SampleSecondaries_Livermore( particles, materials, photon_CS_table, particles.E_index[part_id], mat_id, part_id );
+    }
+
+    return electron;
+
+}
 
 
 

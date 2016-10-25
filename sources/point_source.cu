@@ -51,6 +51,9 @@ __host__ __device__ void point_source ( ParticlesData particles_data,
     particles_data.geometry_id[id] = 0;                        // Some internal variables
     particles_data.next_discrete_process[id] = NO_PROCESS;     //
     particles_data.next_interaction_distance[id] = 0.0;        //
+
+    printf("id %i - pos %f %f %f - dir %f %f %f\n", id, particles_data.px[id], particles_data.py[id], particles_data.pz[id],
+           particles_data.dx[id], particles_data.dy[id], particles_data.dz[id]);
 }
 
 // Kernel to create new particles. This kernel will only call the host/device function

@@ -115,6 +115,15 @@ __global__ void kernel_device_track_to_out (ParticlesData particles,
                                             Mu_MuEn_Table mu_table,
                                             HistoryMap hist_map);
 
+__global__ void _kernel_device_track_to_out (ParticlesData particles,
+                                            VoxVolumeData<ui16> vol,
+                                            MaterialsTable materials,
+                                            PhotonCrossSectionTable photon_CS_table,
+                                            GlobalSimulationParametersData parameters,
+                                            DoseData dosi ,
+                                            Mu_MuEn_Table mu_table,
+                                            HistoryMap hist_map);
+
 __global__ void kernel_device_seTLE(ParticlesData particles,
                                     VoxVolumeData<ui16> vol,
                                     COOHistoryMap coo_hist_map,

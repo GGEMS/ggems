@@ -673,23 +673,27 @@ void DoseCalculator::write ( std::string filename )
     std::string format = im_io->get_extension( filename );
     filename = im_io->get_filename_without_extension( filename );
 
-    // Convert Edep from f64 to f32
+    // Convert Edep and EdepSquared from f64 to f32
     ui32 tot = dose.nb_dosels.x*dose.nb_dosels.y*dose.nb_dosels.z;
     f32 *f32edep = new f32[ tot ];
+    f32 *f32edepSq = new f32[ tot ];
     ui32 i=0; while ( i < tot )
     {
         f32edep[ i ] = (f32)dose.edep[ i ];
+        f32edepSq[ i ] = (f32)dose.edep_squared[ i ];
         ++i;
     }
 
     // Get output name
     std::string edep_out( filename + "-Edep." + format );
+    std::string edep_squared_out( filename + "-EdepSquared." + format );
     std::string uncer_out( filename + "-Uncertainty." + format );
     std::string hit_out( filename + "-Hit." + format );
     std::string dose_out( filename + "-Dose." + format );
 
-    // Export Edep
+    // Export Edep and EdepSquared
     im_io->write_3D( edep_out, f32edep, dose.nb_dosels, dose.offset, dose.dosel_size );
+    im_io->write_3D( edep_squared_out, f32edepSq, dose.nb_dosels, dose.offset, dose.dosel_size );
 
     // Export uncertainty
     if ( !m_flag_uncertainty_calculated )
@@ -718,6 +722,7 @@ void DoseCalculator::write ( std::string filename )
     }
 
     delete im_io;
+    delete f32edep, f32edepSq;
 
 }
 

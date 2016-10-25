@@ -313,6 +313,7 @@ __host__ __device__ SecParticle Photoelec_SampleSecondaries_standard(ParticlesDa
 
     // Select randomly one element that composed the material
     ui32 n = mat.nb_elements[matindex]-1;
+    //printf("id %i PE nb elts %i\n", id, n);
     ui32 mixture_index = mat.index[matindex];
     ui32 Z = mat.mixture[mixture_index];
     ui32 i = 0;
@@ -926,6 +927,96 @@ __host__ __device__ void Rayleigh_SampleSecondaries_Livermore(ParticlesData part
 
 }
 
+// Rayleigh Scattering (Livermore)
+__host__ __device__ void _Rayleigh_SampleSecondaries_Livermore(ParticlesData particles,
+                                                              MaterialsTable &mat,
+                                                              PhotonCrossSectionTable photon_CS_table,
+                                                              ui32 E_index,
+                                                              ui16 matindex,
+                                                              ui32 id) {
+
+    if (particles.E[id] <= 250.0e-6f) { // 250 eV
+        // Kill the photon without mercy
+        particles.endsimu[id] = PARTICLE_DEAD;
+        return;
+    }
+
+    //printf("id %i  matid %i nb elts %i\n", id, matindex, mat.nb_elements[0]);
+
+    // Select randomly one element that composed the material
+    ui32 n = mat.nb_elements[matindex]-1;
+    ui32 mixture_index = mat.index[matindex];
+    ui32 Z = mat.mixture[mixture_index];
+    ui32 i = 0;
+
+    //printf("id %i - matid %i - nbelt %i index %i Z %i\n", id, matindex, n, mixture_index, Z);
+
+    if (n > 0) {
+        f32 x = prng_uniform( particles, id ) * linear_interpolation(photon_CS_table.E_bins[E_index-1],
+                                                               photon_CS_table.Rayleigh_Lv_CS[E_index-1],
+                                                               photon_CS_table.E_bins[E_index],
+                                                               photon_CS_table.Rayleigh_Lv_CS[E_index],
+                                                               particles.E[id]);
+        f32 xsec = 0.0f;
+        while (i < n) {
+            Z = mat.mixture[mixture_index+i];
+            xsec += photon_CS_table.Rayleigh_Lv_xCS[Z*photon_CS_table.nb_bins + E_index];
+            if (x <= xsec) break;
+            ++i;
+        }
+    }
+
+    //printf("id %i rnd1 %f rnd2 %f\n", id, prng_uniform( particles, id ), prng_uniform( particles, id ));
+
+    // Scattering
+    f32 wphot = 1.23984187539e-10f / particles.E[id];
+    f32 costheta, SF, x, sintheta, phi;
+    do
+    {
+        do
+        {
+            costheta = 2.0f * prng_uniform( particles, id ) - 1.0f;
+        } while ((1.0f + costheta*costheta)*0.5f < prng_uniform( particles, id ));
+
+        if (particles.E[id] > 5.0f)
+        {
+            costheta = 1.0f;
+        }
+        x = sqrt((1.0f - costheta) * 0.5f) / wphot;
+
+        if (x > 1.0e+05f)
+        {
+            SF = linear_interpolation(photon_CS_table.E_bins[E_index-1],
+                                      photon_CS_table.Rayleigh_Lv_SF[Z*photon_CS_table.nb_bins + E_index-1],
+                                      photon_CS_table.E_bins[E_index],
+                                      photon_CS_table.Rayleigh_Lv_SF[Z*photon_CS_table.nb_bins + E_index],
+                                      particles.E[id]);
+        }
+        else
+        {
+            SF = photon_CS_table.Rayleigh_Lv_SF[Z*photon_CS_table.nb_bins]; // for energy E=0.0f
+        }
+
+        //printf("id %i SF*SF %f  rnd %f  z*z %i\n", id, SF*SF, prng_uniform( particles, id ), Z*Z);
+
+    } while (SF*SF < prng_uniform( particles, id ) * Z*Z);
+
+
+
+
+    sintheta = sqrt(1.0f - costheta*costheta);
+    phi = prng_uniform( particles, id ) * gpu_twopi;
+
+    // Apply deflection
+    f32xyz gamDir0 = make_f32xyz(particles.dx[id], particles.dy[id], particles.dz[id]);
+    f32xyz gamDir1 = make_f32xyz(sintheta*cosf(phi), sintheta*sinf(phi), costheta);
+    gamDir1 = rotateUz(gamDir1, gamDir0);
+    gamDir1 = fxyz_unit( gamDir1 );
+    particles.dx[id] = gamDir1.x;
+    particles.dy[id] = gamDir1.y;
+    particles.dz[id] = gamDir1.z;
+
+}
 
 
 #endif

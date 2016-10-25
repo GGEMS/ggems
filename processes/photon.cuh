@@ -102,5 +102,12 @@ __host__ __device__ void Rayleigh_SampleSecondaries_Livermore(ParticlesData part
                                                               ui16 matindex,
                                                               ui32 id);
 
+__host__ __device__ void _Rayleigh_SampleSecondaries_Livermore(ParticlesData particles,
+                                                              MaterialsTable &mat,
+                                                              PhotonCrossSectionTable photon_CS_table,
+                                                              ui32 E_index,
+                                                              ui16 matindex,
+                                                              ui32 id);
+
 
 #endif
