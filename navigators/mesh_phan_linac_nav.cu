@@ -1874,6 +1874,12 @@ void MeshPhanLINACNav::m_translate_jaw_y( ui32 index, f32xyz T )
 
 void MeshPhanLINACNav::m_translate_leaf_A( ui32 index, f32xyz T )
 {
+    // If translation is very small, this mean that the leaf is not open
+    if (fxyz_mag(T) <= 0.40)  // 0.4 mm
+    {
+        return;
+    }
+
     ui32 offset = m_linac.A_leaf_index[ index ];
     ui32 nb_tri = m_linac.A_leaf_nb_triangles[ index ];
 
@@ -1928,6 +1934,12 @@ void MeshPhanLINACNav::m_translate_leaf_A( ui32 index, f32xyz T )
 
 void MeshPhanLINACNav::m_translate_leaf_B( ui32 index, f32xyz T )
 {
+    // If translation is very small, this mean that the leaf is not open
+    if (fxyz_mag(T) <= 0.40)  // 0.4 mm
+    {
+        return;
+    }
+
     ui32 offset = m_linac.B_leaf_index[ index ];
     ui32 nb_tri = m_linac.B_leaf_nb_triangles[ index ];
 
@@ -2717,7 +2729,7 @@ void MeshPhanLINACNav::initialize( GlobalSimulationParameters params )
         exit_simulation();
     }
     f32 mlc_dist = fxyz_mag( m_pos_mlc );
-    m_linac.scale_ratio = mlc_dist / m_sid;
+    m_linac.scale_ratio = mlc_dist / m_sid;    
 
     // Configure the linac
     m_configure_linac();
