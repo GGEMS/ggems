@@ -125,12 +125,7 @@ class Materials {
     public:
         Materials();
         // Load data provided by the user        
-        void load_materials_database(std::string filename);
-
-        //void load_elements_database(std::string filename);
-
-        //void add_materials_and_update_indices(std::vector<std::string> mats_list, ui16 *data, ui32 ndata);
-
+        void load_materials_database(std::string filename);        
         void initialize(std::vector<std::string> mats_list, GlobalSimulationParameters params);
 
         MaterialsTable data_h;

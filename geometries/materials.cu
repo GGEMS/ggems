@@ -955,16 +955,6 @@ void Materials::load_materials_database(std::string filename) {
     m_material_db.load_materials(filename);
 }
 
-/*
-// Load elements database from a given file (wrapper to the class MaterialDataBase)
-void Materials::load_elements_database(std::string filename) {
-    m_material_db.load_elements(filename);
-}
-*/
-
-
-
-
 // Print Material table
 void Materials::print()
 {
