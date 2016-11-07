@@ -19,6 +19,7 @@
 #include "cross_sections.cuh"
 #include "particles.cuh"
 #include "photon_navigator.cuh"
+#include "vector.cuh"
 
 // Class
 class EmCalculator
@@ -30,7 +31,7 @@ public:
 
     void initialize( std::string materials_db_filename );
 
-    void compute_photon_cdf_track(std::string mat_name, f32 energy , i32 n);
+    void compute_photon_cdf_track(std::string mat_name, ui32 nb_samples, f32 min_energy, f32 max_energy, ui32 nb_energy_bins, f32 max_dist, f32 max_edep, ui32 nb_bins);
 
 private:
     std::vector< std::string > m_get_all_materials_name( std::string filename );
