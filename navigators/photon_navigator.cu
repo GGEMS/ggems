@@ -120,7 +120,7 @@ __host__ __device__ SecParticle photon_resolve_discrete_process ( ParticlesData 
     return electron;
 
 }
-
+/*
 __host__ __device__ SecParticle _photon_resolve_discrete_process ( ParticlesData particles,
                                                                   GlobalSimulationParametersData parameters,
                                                                   PhotonCrossSectionTable photon_CS_table,
@@ -167,7 +167,7 @@ __host__ __device__ SecParticle _photon_resolve_discrete_process ( ParticlesData
 
 }
 
-
+*/
 
 
 

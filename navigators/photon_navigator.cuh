@@ -29,10 +29,10 @@ __host__ __device__ SecParticle photon_resolve_discrete_process (ParticlesData p
                                                                  ui16 mat_id, ui32 part_id );
 
 
-__host__ __device__ SecParticle _photon_resolve_discrete_process (ParticlesData particles,
-                                                                 GlobalSimulationParametersData parameters,
-                                                                 PhotonCrossSectionTable photon_CS_table,
-                                                                 MaterialsTable &materials,
-                                                                 ui16 mat_id, ui32 part_id );
+//__host__ __device__ SecParticle _photon_resolve_discrete_process (ParticlesData particles,
+//                                                                 GlobalSimulationParametersData parameters,
+//                                                                 PhotonCrossSectionTable photon_CS_table,
+//                                                                 MaterialsTable &materials,
+//                                                                 ui16 mat_id, ui32 part_id );
 
 #endif

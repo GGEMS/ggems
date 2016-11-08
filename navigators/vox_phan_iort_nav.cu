@@ -474,7 +474,7 @@ __host__ __device__ void VPIORTN::track_to_out( ParticlesData particles,
 //            printf("id %i matindex %i nb elts %i nb mat %i\n", part_id, mat_id, materials.nb_elements[0], materials.nb_materials);
 
             // Resolve discrete process
-            electron = _photon_resolve_discrete_process ( particles, parameters, photon_CS_table,
+            electron = photon_resolve_discrete_process ( particles, parameters, photon_CS_table,
                                                                      materials, mat_id, part_id );
 
 //            printf("id %i - done\n", part_id);

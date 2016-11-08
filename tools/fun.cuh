@@ -28,7 +28,7 @@ __host__ __device__ f32 loglog_interpolation ( f32 x, f32 x0, f32 y0, f32 x1, f3
 // __host__ __device__ ui32 binary_search(f32 key, f32* tab, ui32 size, ui32 min=0);
 // __host__ __device__ ui32 binary_search(f64 key, f64* tab, ui32 size, ui32 min=0);
 
-template < typename T, typename U >
+template < typename T, typename U >                            // !!!! size = total size of the data
 inline __host__ __device__ ui32 binary_search ( T key, U* tab, ui32 size, ui32 min=0 )
 {
     ui32 max=size, mid;
@@ -47,7 +47,7 @@ inline __host__ __device__ ui32 binary_search ( T key, U* tab, ui32 size, ui32 m
     return min;
 }
 
-template < typename T, typename U >
+template < typename T, typename U >                                // !!!! size = total size of the data
 inline __host__ __device__ ui32 binary_search_left ( T key, U* tab, ui32 size, ui32 min=0 )
 {
     ui32 max=size-1, mid;
@@ -61,6 +61,37 @@ inline __host__ __device__ ui32 binary_search_left ( T key, U* tab, ui32 size, u
             return mid;
         }
         else if ( key > tab[mid] )
+        {
+            min = mid+1;
+        }
+        else
+        {
+            max = mid;
+        }
+    }
+
+    if ( min > minmin )
+    {
+        min--;
+    }
+
+    return min;
+}
+
+template < typename T, typename U >                                      // !!!! size = size of vector within the matrix
+inline __host__ __device__ ui32 binary_search_left_offset( T key, U* tab, ui32 size, ui32 offset, ui32 min=0 )
+{
+    ui32 max=size-1, mid;
+    ui32 minmin = min;
+
+    while ( ( min < max ) )
+    {
+        mid = ( min + max ) >> 1;
+        if ( key == tab[ mid+offset ] )
+        {
+            return mid;
+        }
+        else if ( key > tab[ mid+offset ] )
         {
             min = mid+1;
         }
