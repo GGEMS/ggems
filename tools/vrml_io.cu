@@ -212,6 +212,14 @@ void VrmlIO::draw_source( ConeBeamCTSource *aSource )
     m_draw_axis( org, ax, ay, az );
 }
 
+void VrmlIO::draw_source( PointSource *aSource )
+{
+    f32xyz pos = aSource->get_position();
+
+//    m_draw_point( pos, m_yellow );
+    m_draw_sphere( pos, 2.0, m_yellow );
+}
+
 void VrmlIO::draw_phantom( VoxPhanDosiNav *aPhantom )
 {
     // Get back some info

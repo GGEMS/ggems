@@ -95,7 +95,7 @@ void PointSource::set_position( f32 posx, f32 posy, f32 posz )
     m_pz = posz;
 }
 
-//========== Setting ===============================================
+//========== Setting/Getting ===============================================
 
 // Setting particle type (photon or electron)
 void PointSource::set_particle_type( std::string pname )
@@ -122,6 +122,12 @@ void PointSource::set_particle_type( std::string pname )
 void PointSource::set_energy( f32 energy )
 {
     m_energy = energy;
+}
+
+// Getting position
+f32xyz PointSource::get_position()
+{
+    return make_f32xyz( m_px, m_py, m_pz );
 }
 
 //========= Main function ============================================

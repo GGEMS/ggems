@@ -73,6 +73,8 @@ public:
      */
     void draw_source( ConeBeamCTSource* aSource );
 
+    void draw_source( PointSource* aSrouce );
+
     /*!
      * \fn void draw_phantom( VoxPhanDosiNav* aPhantom )
      * \brief Draw in 3D a VoxPhanDosiNav into the VRML file

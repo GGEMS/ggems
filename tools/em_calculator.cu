@@ -122,7 +122,7 @@ void EmCalculator::compute_photon_cdf_track( std::string mat_name, ui32 nb_sampl
     f32 *values_edep = new f32[ nb_bins ];
     f32 *values_energy = new f32[ nb_energy_bins ];
 
-    f32 *proba_PE = new f32[ nb_energy_bins ];
+    //f32 *proba_PE = new f32[ nb_energy_bins ];
 
     // Init values
     ui32 i = 0; while( i < nb_energy_bins*nb_bins )
@@ -139,7 +139,7 @@ void EmCalculator::compute_photon_cdf_track( std::string mat_name, ui32 nb_sampl
         values_scatter[ i ] = 0.0;
         values_edep[ i ] = 0.0;
 
-        proba_PE[ i ] = 0.0;
+        //proba_PE[ i ] = 0.0;
 
         i++;
     }
@@ -165,13 +165,13 @@ void EmCalculator::compute_photon_cdf_track( std::string mat_name, ui32 nb_sampl
     }
 
     // Build CDF model for each energy bin value
-    ui32 index;
-    ui32 ct_PE = 0;   // Count the nb of photoelectric effect
+    ui32 index; f32 energy;
+    //ui32 ct_PE = 0;   // Count the nb of photoelectric effect
     for ( ui32 ie = 0; ie < nb_energy_bins; ie++)
     {
         energy = values_energy[ ie ];
         index  = ie*nb_bins;
-        ct_PE  = 0.0;
+        //ct_PE  = 0.0;
 
         for ( ui32 is = 0; is < nb_samples; is++ )
         {
@@ -192,17 +192,30 @@ void EmCalculator::compute_photon_cdf_track( std::string mat_name, ui32 nb_sampl
 
             //particles.E_index[part_id] = E_index;
             posi = dist / di_dist;
-#ifdef DEBUG
-            assert( posi < nb_bins );
-#endif
+
+            // Not within the dist max
+            if ( posi >= nb_bins )
+            {
+                continue;
+            }
+
+//#ifdef DEBUG
+//            if ( posi >= nb_bins )
+//            {
+//                printf("dist %f di_dist %f posi %i nb_bins %i E %f\n", dist, di_dist, posi, nb_bins, energy);
+//            }
+//            assert( posi < nb_bins );
+//#endif
             cdf_dist[ index+posi ]++;
+
 
             // If PE, record proba
             process = m_part_manager.particles.data_h.next_discrete_process[0];
             if ( process == PHOTON_PHOTOELECTRIC )
             {
-                ct_PE++;
-                continue;
+                //ct_PE++;
+                //continue;
+                //m_part_manager.particles.data_h.E[0] = 0.0;
             }
 
             // Get scattering and the dropped energy
@@ -260,7 +273,7 @@ void EmCalculator::compute_photon_cdf_track( std::string mat_name, ui32 nb_sampl
         }
 
         // Compute the final PE effect proba
-        proba_PE[ ie ] = f32(ct_PE) / f32(nb_samples);
+        //proba_PE[ ie ] = f32(ct_PE) / f32(nb_samples);
 
     } // energy bin loop
 
@@ -279,12 +292,25 @@ void EmCalculator::compute_photon_cdf_track( std::string mat_name, ui32 nb_sampl
     fwrite( values_dist, sizeof( f32 ), nb_bins, pFile );
     fwrite( values_edep, sizeof( f32 ), nb_bins, pFile );
     fwrite( values_scatter, sizeof( f32 ), nb_bins, pFile );
-    fwrite( proba_PE, sizeof( f32 ), nb_energy_bins, pFile );
+    //fwrite( proba_PE, sizeof( f32 ), nb_energy_bins, pFile );
     fwrite( cdf_dist, sizeof( f32 ), nb_bins*nb_energy_bins, pFile );
     fwrite( cdf_edep, sizeof( f32 ), nb_bins*nb_energy_bins, pFile );
     fwrite( cdf_scatter, sizeof( f32 ), nb_bins*nb_energy_bins, pFile );
 
     fclose( pFile );
+
+    pFile = fopen ( "im_dist.raw", "wb" );
+    fwrite( cdf_dist, sizeof( f32 ), nb_bins*nb_energy_bins, pFile );
+    fclose( pFile );
+
+    pFile = fopen ( "im_edep.raw", "wb" );
+    fwrite( cdf_edep, sizeof( f32 ), nb_bins*nb_energy_bins, pFile );
+    fclose( pFile );
+
+    pFile = fopen ( "im_scatter.raw", "wb" );
+    fwrite( cdf_scatter, sizeof( f32 ), nb_bins*nb_energy_bins, pFile );
+    fclose( pFile );
+
 }
 
 

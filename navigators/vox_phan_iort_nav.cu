@@ -17,7 +17,7 @@
 #include "vox_phan_iort_nav.cuh"
 
 ////// HOST-DEVICE GPU Codes ////////////////////////////////////////////
-
+/*
 __host__ __device__ void _track_to_out( ParticlesData particles,
                                         VoxVolumeData<ui16> vol,
                                         MaterialsTable &materials,
@@ -279,7 +279,7 @@ __host__ __device__ void _track_to_out( ParticlesData particles,
     particles.py[part_id] = pos.y;
     particles.pz[part_id] = pos.z;
 }
-
+*/
 
 
 
@@ -724,8 +724,8 @@ __global__ void VPIORTN::kernel_device_track_to_in( ParticlesData particles, f32
     if ( id >= particles.size ) return;    
     transport_track_to_in_AABB( particles, xmin, xmax, ymin, ymax, zmin, zmax, tolerance, id);
 
-    printf("track2in id %i - pos %f %f %f - dir %f %f %f\n", id, particles.px[id], particles.py[id], particles.pz[id],
-           particles.dx[id], particles.dy[id], particles.dz[id]);
+//    printf("track2in id %i - pos %f %f %f - dir %f %f %f\n", id, particles.px[id], particles.py[id], particles.pz[id],
+//           particles.dx[id], particles.dy[id], particles.dz[id]);
 }
 
 
@@ -747,29 +747,29 @@ __global__ void VPIORTN::kernel_device_track_to_out( ParticlesData particles,
                                                      HistoryMap hist_map )
 {   
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
-    if (id==0) printf("INKERNEL\n");
+//    if (id==0) printf("INKERNEL\n");
     if ( id >= particles.size ) return;    
 
 #ifdef SKIP_VOXEL
     particles.geometry_id[ id ] = 999999999; // Init with unknow material id
 #endif
 
-    printf("id %i - inside kernel\n", id);
+//    printf("id %i - inside kernel\n", id);
 
 //    _track_to_out( particles, vol, materials, photon_CS_table, parameters, dosi, mu_table, hist_map, id );
 
     // Stepping loop - Get out of loop only if the particle was dead and it was a primary
     while ( particles.endsimu[id] != PARTICLE_DEAD && particles.endsimu[id] != PARTICLE_FREEZE )
     {
-//        VPIORTN::track_to_out( particles, vol, materials, photon_CS_table, parameters, dosi, mu_table, hist_map, id );
+        VPIORTN::track_to_out( particles, vol, materials, photon_CS_table, parameters, dosi, mu_table, hist_map, id );
         //_track_to_out( particles, vol, materials, photon_CS_table, parameters, dosi, mu_table, hist_map, id );
 
-        break;
+//        break;
     }
 
 }
 
-
+/*
 // Device kernel that track particles within the voxelized volume until boundary
 __global__ void VPIORTN::_kernel_device_track_to_out( ParticlesData particles,
                                                      VoxVolumeData<ui16> vol,
@@ -781,7 +781,7 @@ __global__ void VPIORTN::_kernel_device_track_to_out( ParticlesData particles,
                                                      HistoryMap hist_map )
 {
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
-    if (id==0) printf("INKERNEL\n");
+//    if (id==0) printf("INKERNEL\n");
     if ( id >= particles.size ) return;
 
 #ifdef SKIP_VOXEL
@@ -802,7 +802,7 @@ __global__ void VPIORTN::_kernel_device_track_to_out( ParticlesData particles,
     }
 
 }
-
+*/
 
 // Host kernel that track particles within the voxelized volume until boundary
 void VPIORTN::kernel_host_track_to_out( ParticlesData particles,
@@ -1177,23 +1177,23 @@ void VoxPhanIORTNav::track_to_out ( Particles particles )
     else if ( m_params.data_h.device_target == GPU_DEVICE )
     {
 
-        printf("Track2out main\n");
+//        printf("Track2out main\n");
 
         dim3 threads, grid;
         threads.x = m_params.data_h.gpu_block_size;
         grid.x = ( particles.size + m_params.data_h.gpu_block_size - 1 ) / m_params.data_h.gpu_block_size;
-//        VPIORTN::kernel_device_track_to_out<<<grid, threads>>> ( particles.data_d, m_phantom.data_d, m_materials.data_d,
-//                                                              m_cross_sections.photon_CS.data_d,
-//                                                              m_params.data_d, m_dose_calculator.dose,
-//                                                              m_mu_table, m_hist_map );
+        VPIORTN::kernel_device_track_to_out<<<grid, threads>>> ( particles.data_d, m_phantom.data_d, m_materials.data_d,
+                                                              m_cross_sections.photon_CS.data_d,
+                                                              m_params.data_d, m_dose_calculator.dose,
+                                                              m_mu_table, m_hist_map );
 
 //        MaterialsTable *mymat;
 //        mymat = &(m_materials.data_d);
 
-        VPIORTN::_kernel_device_track_to_out<<<grid, threads>>> ( particles.data_d, m_phantom.data_d, m_materials.data_d,
-                                                              m_cross_sections.photon_CS.data_d,
-                                                              m_params.data_d, m_dose_calculator.dose,
-                                                              m_mu_table, m_hist_map );
+//        VPIORTN::_kernel_device_track_to_out<<<grid, threads>>> ( particles.data_d, m_phantom.data_d, m_materials.data_d,
+//                                                              m_cross_sections.photon_CS.data_d,
+//                                                              m_params.data_d, m_dose_calculator.dose,
+//                                                              m_mu_table, m_hist_map );
         cuda_error_check ( "Error ", " Kernel_VoxPhanDosi (track to out)" );             
         cudaDeviceSynchronize();
 

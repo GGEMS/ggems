@@ -18,6 +18,7 @@
 #include "particles.cuh"
 #include "ggems_source.cuh"
 #include "prng.cuh"
+#include "vector.cuh"
 
 class GGEMSource;
 
@@ -32,6 +33,9 @@ public:
     void set_position( f32 posx, f32 posy, f32 posz );
     void set_particle_type( std::string pname );
     void set_energy( f32 energy );
+
+    // Getting
+    f32xyz get_position();
 
     // Abstract from GGEMSSource (Mandatory funtions)
     void get_primaries_generator( Particles particles );
