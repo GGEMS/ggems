@@ -145,7 +145,13 @@ void EmCalculator::compute_photon_cdf_track( std::string mat_name, ui32 nb_sampl
     }
 
     // Compute CDF spacing
-    f32 di_dist = ( max_dist ) / f32( nb_bins - 1 );
+    f32 low_dist = 2.0 *mm;
+    ui32 half_nb_bins = nb_bins / 2;
+    f32 di_lowdist = ( low_dist ) / f32( half_nb_bins );  // remove (-1) to end with a value = (low_dist - di_lowdist)
+    f32 di_highdist = ( max_dist - low_dist ) / f32( half_nb_bins - 1 );
+
+    //f32 di_dist = ( max_dist ) / f32( nb_bins - 1 );
+
     f32 di_scatter = ( pi ) / f32( nb_bins - 1 );
     f32 di_edep = ( max_edep ) / f32( nb_bins - 1 );
     f32 di_energy = ( max_energy - min_energy ) / f32( nb_energy_bins - 1);
@@ -157,9 +163,13 @@ void EmCalculator::compute_photon_cdf_track( std::string mat_name, ui32 nb_sampl
     i = 0; while ( i < nb_bins )
     {
         values_energy[ i ] = min_energy + i*di_energy;
-        values_dist[ i ] = i*di_dist;
+
+        if ( i < half_nb_bins ) values_dist[ i ] = i*di_lowdist;
+        else                    values_dist[ i ] = low_dist + (i - half_nb_bins)*di_highdist;
         values_edep[ i ] = i*di_edep;
         values_scatter[ i ] = i*di_scatter;
+
+        printf("bin %i val %f\n", i, values_dist[ i ]);
 
         i++;
     }
@@ -191,7 +201,15 @@ void EmCalculator::compute_photon_cdf_track( std::string mat_name, ui32 nb_sampl
             dist = m_part_manager.particles.data_h.next_interaction_distance[0];
 
             //particles.E_index[part_id] = E_index;
-            posi = dist / di_dist;
+            if ( dist < low_dist )
+            {
+                posi = dist / di_lowdist;
+            }
+            else
+            {
+                posi = ( dist - low_dist ) / di_highdist;
+                posi += half_nb_bins;
+            }
 
             // Not within the dist max
             if ( posi >= nb_bins )

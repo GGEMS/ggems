@@ -17,14 +17,13 @@
 #include "vox_phan_gtrack_nav.cuh"
 
 ////// HOST-DEVICE GPU Codes ////////////////////////////////////////////
-
-__host__ __device__ void VPGTN::track_to_out( ParticlesData particles,
+/*
+__host__ __device__ void VPGTN::_track_to_out( ParticlesData particles,
                                               VoxVolumeData<ui16> vol,
                                               GTrackModelData model,
-                                              /*MaterialsTable materials,*/
-                                              /*PhotonCrossSectionTable photon_CS_table,*/
+
                                               GlobalSimulationParametersData parameters,
-                                              /*DoseData dosi,*/
+
                                               ui32 part_id )
 {
 
@@ -66,6 +65,12 @@ __host__ __device__ void VPGTN::track_to_out( ParticlesData particles,
     // Get index in table
     ui32 read_index = E_index * model.nb_bins;
 
+    if (part_id==12853)
+    {
+        printf("id %i: E %f  Eindex %i  valE %f  readIndex %i\n", part_id, energy, E_index, model.bin_energy[E_index],
+               read_index );
+    }
+
     // Fetch step value
     f32 rndm = prng_uniform( particles, part_id );
     ui32 bin_pos = binary_search_left_offset( rndm, model.cdf_step, model.nb_bins, read_index );
@@ -75,6 +80,11 @@ __host__ __device__ void VPGTN::track_to_out( ParticlesData particles,
 #endif
 
     f32 next_interaction_distance = model.bin_step[ bin_pos ];
+    f32 dist = next_interaction_distance;
+    ui32 bin_dist = bin_pos;
+    f32 rnd_pos = rndm;
+
+//    printf("id %i: rndm %f binPos %i next step %f\n", part_id, rndm, bin_pos, next_interaction_distance);
 
     //// Get the next distance boundary volume /////////////////////////////////
 
@@ -111,17 +121,31 @@ __host__ __device__ void VPGTN::track_to_out( ParticlesData particles,
     pos = transport_get_safety_outside_AABB( pos, vox_xmin, vox_xmax,
                                              vox_ymin, vox_ymax, vox_zmin, vox_zmax, parameters.geom_tolerance );
 
+    // store new position
+    particles.px[part_id] = pos.x;
+    particles.py[part_id] = pos.y;
+    particles.pz[part_id] = pos.z;
+
     // Stop simulation if out of the phantom
     if ( !test_point_AABB_with_tolerance (pos, vol.xmin, vol.xmax, vol.ymin, vol.ymax, vol.zmin, vol.zmax, parameters.geom_tolerance ) )
     {
         particles.endsimu[part_id] = PARTICLE_FREEZE;
+//        printf("id %i: E %f OutOfWorld\n", part_id, energy);
         return;
     }
 
     //// Apply discrete process //////////////////////////////////////////////////
 
     // If boundary
-    if ( exit ) return;
+    if ( exit )
+    {
+        if (part_id==12853)
+        {
+            printf("id %i: E %f Boundary dist %f pos %f %f %f (posBin %i val %f)\n", part_id, energy, boundary_distance,
+                   pos.x, pos.y, pos.z, bin_pos, dist);
+        }
+        return;
+    }
 
     // Scattering
     rndm = prng_uniform( particles, part_id );
@@ -153,9 +177,6 @@ __host__ __device__ void VPGTN::track_to_out( ParticlesData particles,
     particles.dx[ part_id ] = gamDir1.x;
     particles.dy[ part_id ] = gamDir1.y;
     particles.dz[ part_id ] = gamDir1.z;
-    particles.px[ part_id ] = pos.x;
-    particles.py[ part_id ] = pos.y;
-    particles.pz[ part_id ] = pos.z;
     particles.E[ part_id ] = energy;
 
     // Energy cut
@@ -164,7 +185,189 @@ __host__ __device__ void VPGTN::track_to_out( ParticlesData particles,
         particles.endsimu[ part_id ] = PARTICLE_DEAD;
     }
 
+    if (part_id==12853)
+    {
+        printf( "id %i: next step %f  angle %f  newE %f (rnd %f posBin %i valBin %f dist %f)\n", part_id, next_interaction_distance,
+                theta, energy, rnd_pos, bin_dist, model.cdf_step[ read_index + bin_dist ] , dist );
+    }
+
 }
+*/
+
+__host__ __device__ void VPGTN::track_to_out( ParticlesData particles,
+                                              VoxVolumeData<ui16> vol,
+                                              GTrackModelData model,
+                                              /*MaterialsTable materials,*/
+                                              /*PhotonCrossSectionTable photon_CS_table,*/
+                                              GlobalSimulationParametersData parameters,
+                                              /*DoseData dosi,*/
+                                              ui32 part_id )
+{
+
+    // Read position
+    f32xyz pos;
+    pos.x = particles.px[part_id];
+    pos.y = particles.py[part_id];
+    pos.z = particles.pz[part_id];
+
+    // Read direction
+    f32xyz dir;
+    dir.x = particles.dx[part_id];
+    dir.y = particles.dy[part_id];
+    dir.z = particles.dz[part_id];
+
+    // Defined index phantom
+    f32xyz ivoxsize;
+    ivoxsize.x = 1.0 / vol.spacing_x;
+    ivoxsize.y = 1.0 / vol.spacing_y;
+    ivoxsize.z = 1.0 / vol.spacing_z;
+    ui32xyzw index_phantom;
+    index_phantom.x = ui32 ( ( pos.x + vol.off_x ) * ivoxsize.x );
+    index_phantom.y = ui32 ( ( pos.y + vol.off_y ) * ivoxsize.y );
+    index_phantom.z = ui32 ( ( pos.z + vol.off_z ) * ivoxsize.z );
+
+    index_phantom.w = index_phantom.z*vol.nb_vox_x*vol.nb_vox_y
+                      + index_phantom.y*vol.nb_vox_x
+                      + index_phantom.x; // linear index
+
+    // Get the material that compose this volume
+    //ui16 mat_id = vol.values[ index_phantom.w ];
+
+    //// Get step distance ///////////////////////////////////////
+    f32 rndm = prng_uniform( particles, part_id );
+     rndm = prng_uniform( particles, part_id );
+     rndm = prng_uniform( particles, part_id );
+/*
+    // Search the energy index to read CS
+    f32 energy = particles.E[ part_id ];
+    ui32 E_index = binary_search( energy, model.bin_energy, model.nb_energy_bins );
+    //printf("E %f   EIndex %i   valE %f\n", energy, E_index, model.bin_energy[ E_index ]);
+
+    // Get index in table
+    ui32 read_index = E_index * model.nb_bins;
+
+    // Fetch step value
+    f32 rndm = prng_uniform( particles, part_id );
+    ui32 bin_pos = binary_search_left_offset( rndm, model.cdf_step, model.nb_bins, read_index );
+
+#ifdef DEBUG
+    assert( bin_pos < model.nb_bins );
+#endif
+
+    f32 next_interaction_distance = model.bin_step[ bin_pos ];
+    f32 dist = next_interaction_distance;
+    ui32 bin_dist = bin_pos;
+    f32 rnd_pos = rndm;
+*/
+//    printf("id %i: rndm %f binPos %i next step %f\n", part_id, rndm, bin_pos, next_interaction_distance);
+
+    //// Get the next distance boundary volume /////////////////////////////////
+
+    f32 vox_xmin = index_phantom.x*vol.spacing_x - vol.off_x;
+    f32 vox_ymin = index_phantom.y*vol.spacing_y - vol.off_y;
+    f32 vox_zmin = index_phantom.z*vol.spacing_z - vol.off_z;
+    f32 vox_xmax = vox_xmin + vol.spacing_x;
+    f32 vox_ymax = vox_ymin + vol.spacing_y;
+    f32 vox_zmax = vox_zmin + vol.spacing_z;
+
+    // get a safety position for the particle within this voxel (sometime a particle can be right between two voxels)
+    // TODO: In theory this have to be applied just at the entry of the particle within the volume
+    //       in order to avoid particle entry between voxels. Then, computing improvement can be made
+    //       by calling this function only once, just for the particle step=0.    - JB
+    pos = transport_get_safety_inside_AABB( pos, vox_xmin, vox_xmax,
+                                            vox_ymin, vox_ymax, vox_zmin, vox_zmax, parameters.geom_tolerance );
+
+    f32 boundary_distance = hit_ray_AABB ( pos, dir, vox_xmin, vox_xmax,
+                                           vox_ymin, vox_ymax, vox_zmin, vox_zmax );
+/*
+    ui8 exit = false;
+    if ( boundary_distance <= next_interaction_distance )
+    {
+        next_interaction_distance = boundary_distance + parameters.geom_tolerance; // Overshoot
+        exit = true;
+    }
+*/
+    //// Move particle //////////////////////////////////////////////////////
+
+    // get the new position
+    pos = fxyz_add ( pos, fxyz_scale ( dir, boundary_distance + parameters.geom_tolerance ) );
+
+    // get safety position (outside the current voxel)
+    pos = transport_get_safety_outside_AABB( pos, vox_xmin, vox_xmax,
+                                             vox_ymin, vox_ymax, vox_zmin, vox_zmax, parameters.geom_tolerance );
+
+    // store new position
+    particles.px[part_id] = pos.x;
+    particles.py[part_id] = pos.y;
+    particles.pz[part_id] = pos.z;
+
+    // Stop simulation if out of the phantom
+    if ( !test_point_AABB_with_tolerance (pos, vol.xmin, vol.xmax, vol.ymin, vol.ymax, vol.zmin, vol.zmax, parameters.geom_tolerance ) )
+    {
+        particles.endsimu[part_id] = PARTICLE_FREEZE;
+//        printf("id %i: E %f OutOfWorld\n", part_id, energy);
+        return;
+    }
+
+    //// Apply discrete process //////////////////////////////////////////////////
+/*
+    // If boundary
+    if ( exit )
+    {
+        if (part_id==12853)
+        {
+            printf("id %i: E %f Boundary dist %f pos %f %f %f (posBin %i val %f)\n", part_id, energy, boundary_distance,
+                   pos.x, pos.y, pos.z, bin_pos, dist);
+        }
+        return;
+    }
+
+    // Scattering
+    rndm = prng_uniform( particles, part_id );
+    bin_pos = binary_search_left_offset( rndm, model.cdf_scatter, model.nb_bins, read_index );
+
+#ifdef DEBUG
+    assert( bin_pos < model.nb_bins );
+#endif
+
+    f32 theta = model.bin_scatter[ bin_pos ];
+    f32 phi = prng_uniform( particles, part_id ) * gpu_twopi;
+
+    // Get scattered gamma
+    f32xyz gamDir1 = make_f32xyz( sinf(theta)*cosf(phi), sinf(theta)*sinf(phi), cosf(theta) );
+    gamDir1 = rotateUz(gamDir1, make_f32xyz( particles.dx[part_id], particles.dx[part_id], particles.dx[part_id] ) );
+    gamDir1 = fxyz_unit( gamDir1 );
+
+    // Get new energy
+    rndm = prng_uniform( particles, part_id );
+    bin_pos = binary_search_left_offset( rndm, model.cdf_edep, model.nb_bins, read_index );
+
+#ifdef DEBUG
+    assert( bin_pos < model.nb_bins );
+#endif
+
+    energy = energy - model.bin_edep[ bin_pos ];
+
+    // Update gamma
+    particles.dx[ part_id ] = gamDir1.x;
+    particles.dy[ part_id ] = gamDir1.y;
+    particles.dz[ part_id ] = gamDir1.z;
+    particles.E[ part_id ] = energy;
+
+    // Energy cut
+    if ( energy <= 1.0 *keV )
+    {
+        particles.endsimu[ part_id ] = PARTICLE_DEAD;
+    }
+
+    if (part_id==12853)
+    {
+        printf( "id %i: next step %f  angle %f  newE %f (rnd %f posBin %i valBin %f dist %f)\n", part_id, next_interaction_distance,
+                theta, energy, rnd_pos, bin_dist, model.cdf_step[ read_index + bin_dist ] , dist );
+    }
+*/
+}
+
 
 
 /// KERNELS /////////////////////////////////
@@ -213,6 +416,8 @@ __global__ void VPGTN::kernel_device_track_to_out( ParticlesData particles,
             break;
         }
     }
+
+//    printf("ID %i   %i steps\n", id, ct);
 
 }
 

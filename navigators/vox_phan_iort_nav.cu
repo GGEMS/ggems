@@ -758,14 +758,18 @@ __global__ void VPIORTN::kernel_device_track_to_out( ParticlesData particles,
 
 //    _track_to_out( particles, vol, materials, photon_CS_table, parameters, dosi, mu_table, hist_map, id );
 
+    ui32 ct = 0;
+
     // Stepping loop - Get out of loop only if the particle was dead and it was a primary
     while ( particles.endsimu[id] != PARTICLE_DEAD && particles.endsimu[id] != PARTICLE_FREEZE )
     {
         VPIORTN::track_to_out( particles, vol, materials, photon_CS_table, parameters, dosi, mu_table, hist_map, id );
+        ct++;
         //_track_to_out( particles, vol, materials, photon_CS_table, parameters, dosi, mu_table, hist_map, id );
 
 //        break;
     }
+//    printf("ID %i   %i steps\n", id, ct);
 
 }
 
