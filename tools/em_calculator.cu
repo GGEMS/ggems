@@ -388,6 +388,384 @@ void EmCalculator::compute_photon_tracking_uncorrelated_model( std::string mat_n
 }
 
 
+//// CORRELATED MODEL
+//
+// Per material:
+//  1.  Lambda(E)
+//  2.  Theta(Lambda)
+//  3.  dE(Theta)
+void EmCalculator::compute_photon_tracking_correlated_model( std::string mat_name, ui32 nb_samples,
+                                                             f32 min_energy, f32 max_energy, ui32 nb_energy_bins,
+                                                             f32 max_step, f32 max_substep, ui32 nb_step_bins,
+                                                             ui32 nb_theta_bins )
+{
+    // Get mat index
+    i32 mat_id=0; while( mat_id < m_mat_names_db.size() )
+    {
+        if ( m_mat_names_db[mat_id] == mat_name ) break;
+        ++mat_id;
+    }
+
+    // Set up the particle
+    m_part_manager.particles.data_h.tof[0] = 0.0f;                             // Time of flight
+    m_part_manager.particles.data_h.endsimu[0] = PARTICLE_ALIVE;               // Status of the particle
+
+    m_part_manager.particles.data_h.level[0] = PRIMARY;                        // It is a primary particle
+    m_part_manager.particles.data_h.pname[0] = PHOTON;                          // a photon or an electron
+
+    m_part_manager.particles.data_h.geometry_id[0] = 0;                        // Some internal variables
+    m_part_manager.particles.data_h.next_discrete_process[0] = NO_PROCESS;     //
+    m_part_manager.particles.data_h.next_interaction_distance[0] = 0.0;        //
+
+    // Open the output file
+    FILE *pFile;
+    pFile = fopen ( "gTrackModel.raw", "wb" );
+
+    // Some vars
+    f32xyz dd = {1.0f, 0.0f, 0.0f};    // default direction
+//    ui32 nb_bins_lut = 10000;          // for LCDF
+
+    f32 *cdf_dist = new f32[ nb_energy_bins*nb_step_bins ];      // Lambda(E)
+    f32 *cdf_scatter = new f32[ nb_step_bins*nb_theta_bins ];    // Theta(lambda)
+    f32 *cdf_edep = new f32[ nb_theta_bins*nb_energy_bins ];      // dE(theta)
+
+    // For LCDF (LUT-CDF)
+//    ui16 *lcdf_dist = new ui16[ nb_energy_bins*nb_bins_lut ];
+//    ui16 *lcdf_scatter = new ui16[ nb_energy_bins*nb_bins_lut ];
+//    ui16 *lcdf_edep = new ui16[ nb_energy_bins*nb_bins_lut ];
+
+    // Init values
+    ui32 i = 0; while( i < nb_energy_bins*nb_step_bins )
+    {
+        cdf_dist[ i++ ] = 0.0;
+    }
+    i = 0; while( i < nb_step_bins*nb_theta_bins )
+    {
+        cdf_scatter[ i++ ] = 0.0;
+    }
+    i = 0; while( i < nb_theta_bins*nb_energy_bins )
+    {
+        cdf_edep[ i++ ] = 0.0;
+    }
+
+    // Compute CDF spacing
+    ui32 half_nb_bins = nb_step_bins / 2;
+    f32 di_lowdist = ( max_substep ) / f32( half_nb_bins );  // remove (-1) to end with a value = (low_dist - di_lowdist)
+    f32 di_highdist = ( max_step - max_substep ) / f32( half_nb_bins - 1 );
+    f32 di_dist = ( max_substep ) / f32( nb_step_bins - 1 );
+
+    f32 di_scatter = ( pi ) / f32( nb_theta_bins - 1 );
+    f32 di_edep = ( max_energy ) / f32( nb_energy_bins - 1 );
+    f32 di_energy = ( max_energy - min_energy ) / f32( nb_energy_bins - 1);
+
+    // for LCDF
+//    f32 di_lut = 1.0 / (nb_bins_lut - 1);
+
+    // Some vars for histogramm
+    ui32 pos_step; ui32 pos_theta; ui32 pos_edep; ui32 pos_substep; f32 dist; ui8 process; f32 edep; f32 angle;
+/*
+    // Compute bin values
+    i = 0; while ( i < nb_bins )
+    {
+        values_energy[ i ] = min_energy + i*di_energy;
+
+        if ( i < half_nb_bins ) values_dist[ i ] = i*di_lowdist;
+        else                    values_dist[ i ] = max_substep + (i - half_nb_bins)*di_highdist;
+        values_edep[ i ] = i*di_edep;
+        values_scatter[ i ] = i*di_scatter;
+
+        //printf("bin %i val %f\n", i, values_dist[ i ]);
+
+        i++;
+    }
+*/
+    // Build CDF model
+    f32 energy; //ui16 index_cdf;
+    ui32 pos_energy;
+    for ( pos_energy = 0; pos_energy < nb_energy_bins; pos_energy++)
+    {
+        energy = min_energy + pos_energy*di_energy;
+        printf("Energy %f MeV\n", energy);
+
+        for ( ui32 is = 0; is < nb_samples; is++ )
+        {
+            // Init a particle
+            m_part_manager.particles.data_h.E[0] = energy;                             // Energy in MeV
+
+            m_part_manager.particles.data_h.px[0] = 0.0f;                              // Position in mm
+            m_part_manager.particles.data_h.py[0] = 0.0f;                              //
+            m_part_manager.particles.data_h.pz[0] = 0.0f;                              //
+
+            m_part_manager.particles.data_h.dx[0] = dd.x;                              // Direction (unit vector)
+            m_part_manager.particles.data_h.dy[0] = dd.y;                              //
+            m_part_manager.particles.data_h.dz[0] = dd.z;                              //
+
+            // Get step distance
+            photon_get_next_interaction( m_part_manager.particles.data_h, m_params.data_h, m_cross_sections.photon_CS.data_h, mat_id, 0 );
+            dist = m_part_manager.particles.data_h.next_interaction_distance[0];
+            if ( dist < max_substep )
+            {
+                pos_step = dist / di_lowdist;
+            }
+            else
+            {
+                pos_step = ( dist - max_substep ) / di_highdist;
+                pos_step += half_nb_bins;
+            }
+
+            // Not within the dist max
+            if ( pos_step >= nb_step_bins )
+            {
+                continue;
+            }
+
+            // Get process
+            process = m_part_manager.particles.data_h.next_discrete_process[0];
+
+            // Get scattering and the dropped energy
+            photon_resolve_discrete_process( m_part_manager.particles.data_h, m_params.data_h, m_cross_sections.photon_CS.data_h,
+                                             m_materials.data_h, mat_id, 0 );
+
+            // edep
+            if ( process == PHOTON_PHOTOELECTRIC )
+            {
+                edep = energy;
+            }
+            else
+            {
+                edep = energy - m_part_manager.particles.data_h.E[0];
+            }
+
+            // scatter
+            angle = acosf( fxyz_dot( make_f32xyz( m_part_manager.particles.data_h.dx[0],
+                                                  m_part_manager.particles.data_h.dy[0],
+                                                  m_part_manager.particles.data_h.dz[0] ), dd ) );
+
+            if ( dist <= max_substep )
+            {
+                // Get position within each vector
+                pos_theta = angle / di_scatter;
+                pos_edep = edep / di_edep;
+                pos_substep = dist / di_dist;
+
+#ifdef DEBUG
+                assert( pos_theta < nb_theta_bins );
+                assert( pos_edep < nb_energy_bins );
+                assert( pos_substep < nb_step_bins );
+#endif
+
+                // Assign values
+                cdf_scatter[ pos_substep*nb_theta_bins + pos_theta ]++;
+                cdf_edep[ pos_theta*nb_energy_bins + pos_edep ]++;
+            }
+
+            // Assign value
+            cdf_dist[ pos_energy*nb_step_bins + pos_step ]++;
+
+        } // Samples loop
+
+/*
+        // Build the LCDF (LUT-CDF) for Dist
+        f32 p_rnd;
+        index_cdf = 0;
+        i = 0; while ( i < nb_bins_lut )
+        {
+            p_rnd = i*di_lut;
+            while ( cdf_dist[ index+index_cdf ] < p_rnd && index_cdf < nb_bins )
+            {
+                index_cdf++;
+            }
+            lcdf_dist[ i + ie*nb_bins_lut ] = index_cdf;
+
+            //printf("i %i  p_rnd %f  index_cdf %i   cdf_dist %f\n", i, p_rnd, index_cdf, cdf_dist[ index+index_cdf ]);
+
+            i++;
+        }
+
+        // for edep
+        index_cdf = 0;
+        i = 0; while ( i < nb_bins_lut )
+        {
+            p_rnd = i*di_lut;
+            while ( cdf_edep[ index+index_cdf ] < p_rnd && index_cdf < nb_bins )
+            {
+                index_cdf++;
+            }
+            lcdf_edep[ i + ie*nb_bins_lut ] = index_cdf;
+            i++;
+        }
+
+        // for scatter
+        index_cdf = 0;
+        i = 0; while ( i < nb_bins_lut )
+        {
+            p_rnd = i*di_lut;
+            while ( cdf_scatter[ index+index_cdf ] < p_rnd && index_cdf < nb_bins )
+            {
+                index_cdf++;
+            }
+            lcdf_scatter[ i + ie*nb_bins_lut ] = index_cdf;
+            i++;
+        }
+*/
+
+    } // energy bin loop
+
+    //// Compute CDF for each row of each matrices
+
+    f64 sum;
+
+    // lambda(E)
+    pos_energy = 0; while ( pos_energy < nb_energy_bins )
+    {
+        // sum
+        sum = 0.0;
+        ui32 index = pos_energy*nb_step_bins;
+        pos_step = index; while ( pos_step < (index + nb_step_bins) )
+        {
+            sum += cdf_dist[ pos_step ];
+            pos_step++;
+        }
+        if (sum == 0)
+        {
+            printf("Warning: sum 0 lambda(E)\n");
+        }
+        // norm
+        pos_step = index; while ( pos_step < (index + nb_step_bins) )
+        {
+            cdf_dist[ pos_step ] /= sum;
+            pos_step++;
+        }
+        // CDF
+        pos_step = index+1; while ( pos_step < (index + nb_step_bins) )
+        {
+            cdf_dist[ pos_step ] += cdf_dist[ pos_step-1 ];
+            pos_step++;
+        }
+
+        pos_energy++;
+    }
+
+    // theta(lambda)
+    pos_step = 0; while ( pos_step < nb_step_bins )
+    {
+        // sum
+        sum = 0.0;
+        ui32 index = pos_step*nb_theta_bins;
+        pos_theta = index; while ( pos_theta < (index + nb_theta_bins) )
+        {
+            sum += cdf_scatter[ pos_theta ];
+            pos_theta++;
+        }
+        if (sum == 0)
+        {
+            printf("Warning: sum 0 theta(lambda)\n");
+        }
+        // norm
+        pos_theta = index; while ( pos_theta < (index + nb_theta_bins) )
+        {
+            cdf_scatter[ pos_theta ] /= sum;
+            pos_theta++;
+        }
+        // CDF
+        pos_theta = index+1; while ( pos_theta < (index + nb_theta_bins) )
+        {
+            cdf_scatter[ pos_theta ] += cdf_scatter[ pos_theta-1 ];
+            pos_theta++;
+        }
+
+        pos_step++;
+    }
+
+    // edep(theta)
+    pos_theta = 0; while ( pos_theta < nb_theta_bins )
+    {
+        // sum
+        sum = 0.0;
+        ui32 index = pos_theta*nb_energy_bins;
+        pos_edep = index; while ( pos_edep < (index + nb_energy_bins) )
+        {
+            sum += cdf_edep[ pos_edep ];
+            pos_edep++;
+        }
+        if (sum == 0)
+        {
+            printf("Warning: sum 0 edep(theta)\n");
+        }
+        // norm
+        pos_edep = index; while ( pos_edep < (index + nb_energy_bins) )
+        {
+            cdf_edep[ pos_edep ] /= sum;
+            pos_edep++;
+        }
+        // CDF
+        pos_edep = index+1; while ( pos_edep < (index + nb_energy_bins) )
+        {
+            cdf_edep[ pos_edep ] += cdf_scatter[ pos_edep-1 ];
+            pos_edep++;
+        }
+
+        pos_theta++;
+    }
+
+    // Export data:
+    //   Format for one material
+    //     [... di_energy ...]   (1)
+    //     [... max_substep ...] (1)
+    //     [... di_lowstep ...]  (1)
+    //     [... di_highstep ...] (1)
+    //     [... di_theta ...]    (1)
+    //     [... di_edep ...]     (1)
+
+    //     [... cdf_dist ...]
+    //     [... cdf_edep ...]
+    //     [... cdf_scatter ...]
+    // OR
+    //     [... lcdf_dist ...]
+    //     [... lcdf_edep ...]
+    //     [... lcdf_scatter ...]
+
+    fwrite( &di_energy, sizeof( f32 ), 1, pFile );
+    fwrite( &max_substep, sizeof( f32 ), 1, pFile );
+    fwrite( &di_lowdist, sizeof( f32 ), 1, pFile );
+    fwrite( &di_highdist, sizeof( f32 ), 1, pFile );
+    fwrite( &di_scatter, sizeof( f32 ), 1, pFile );
+    fwrite( &di_edep, sizeof( f32 ), 1, pFile );
+
+    fwrite( cdf_dist, sizeof( f32 ), nb_step_bins*nb_energy_bins, pFile );
+    fwrite( cdf_scatter, sizeof( f32 ), nb_step_bins*nb_theta_bins, pFile );
+    fwrite( cdf_edep, sizeof( f32 ), nb_theta_bins*nb_energy_bins, pFile );
+
+/*
+    fwrite( lcdf_dist, sizeof( ui16 ), nb_bins_lut*nb_energy_bins, pFile );
+    fwrite( lcdf_edep, sizeof( ui16 ), nb_bins_lut*nb_energy_bins, pFile );
+    fwrite( lcdf_scatter, sizeof( ui16 ), nb_bins_lut*nb_energy_bins, pFile );
+*/
+
+    fclose( pFile );
+
+//    pFile = fopen ( "im_lutdist.raw", "wb" );
+//    fwrite( lcdf_dist, sizeof( ui16 ), nb_bins_lut*nb_energy_bins, pFile );
+//    fclose( pFile );
+
+
+    pFile = fopen ( "im_dist.raw", "wb" );
+    fwrite( cdf_dist, sizeof( f32 ), nb_step_bins*nb_energy_bins, pFile );
+    fclose( pFile );
+
+    pFile = fopen ( "im_edep.raw", "wb" );
+    fwrite( cdf_edep, sizeof( f32 ), nb_theta_bins*nb_energy_bins, pFile );
+    fclose( pFile );
+
+    pFile = fopen ( "im_scatter.raw", "wb" );
+    fwrite( cdf_scatter, sizeof( f32 ), nb_step_bins*nb_theta_bins, pFile );
+    fclose( pFile );
+
+
+}
+
+
+
 /// Private ///////////////////////////////////////////
 
 std::vector< std::string > EmCalculator::m_get_all_materials_name(std::string filename)
