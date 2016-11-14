@@ -32,7 +32,7 @@
 //#include "mu_data.cuh"
 
 // GTrackModelData
-struct GTrackModelData {
+struct GTrackUncorrelatedModelData {
     f32 *bin_energy;
     f32 *bin_step;
     f32 *bin_edep;
@@ -42,36 +42,44 @@ struct GTrackModelData {
     f32 *cdf_edep;
     f32 *cdf_scatter;
 
+    ui16 *lcdf_step;
+    ui16 *lcdf_edep;
+    ui16 *lcdf_scatter;
+
+    f32 di_energy;
+    f32 di_lut;
+    f32 min_E;
+
     ui32 nb_bins;
     ui32 nb_energy_bins;
+    ui32 nb_lut_bins;
 };
-
 
 // VoxPhanGTrackNav -> VPGTN
 namespace VPGTN
 {
 
-__host__ __device__ void track_to_out(ParticlesData particles,
-                                      VoxVolumeData<ui16> vol,
-                                      GTrackModelData model,
-                                      GlobalSimulationParametersData parameters, ui32 part_id);
+__host__ __device__ void track_to_out_uncorrelated_model( ParticlesData particles,
+                                                          VoxVolumeData<ui16> vol,
+                                                          GTrackUncorrelatedModelData model,
+                                                          GlobalSimulationParametersData parameters, ui32 part_id);
 
 __global__ void kernel_device_track_to_in ( ParticlesData particles, f32 xmin, f32 xmax,
                                             f32 ymin, f32 ymax, f32 zmin, f32 zmax , f32 tolerance);
 
-__global__ void kernel_device_track_to_out ( ParticlesData particles,
-                                             VoxVolumeData<ui16> vol,
-                                             GTrackModelData model,
-                                             GlobalSimulationParametersData parameters );
+__global__ void kernel_device_track_to_out_uncorrelated_model ( ParticlesData particles,
+                                                                 VoxVolumeData<ui16> vol,
+                                                                 GTrackUncorrelatedModelData model,
+                                                                 GlobalSimulationParametersData parameters );
 
 
-void kernel_host_track_to_in( ParticlesData particles, f32 xmin, f32 xmax,
-                               f32 ymin, f32 ymax, f32 zmin, f32 zmax, f32 tolerance, ui32 part_id );
+//void kernel_host_track_to_in( ParticlesData particles, f32 xmin, f32 xmax,
+//                               f32 ymin, f32 ymax, f32 zmin, f32 zmax, f32 tolerance, ui32 part_id );
 
-void kernel_host_track_to_out( ParticlesData particles,
-                               VoxVolumeData<ui16> vol,
-                               GTrackModelData model,
-                               GlobalSimulationParametersData parameters );
+//void kernel_host_track_to_out( ParticlesData particles,
+//                               VoxVolumeData<ui16> vol,
+//                               GTrackModelData model,
+//                               GlobalSimulationParametersData parameters );
 
 }
 
@@ -90,7 +98,7 @@ public:
 
     void load_phantom_from_mhd( std::string filename, std::string range_mat_name );
 
-    void load_gtrack_model( std::string filename );
+    void load_gtrack_uncorrelated_model( std::string filename );
 
     //void calculate_dose_to_phantom();
     //void calculate_dose_to_water();
@@ -108,7 +116,7 @@ private:
     //Materials m_materials;
     //CrossSections m_cross_sections;
     //DoseCalculator m_dose_calculator;
-    GTrackModelData m_gtrack_model;
+    GTrackUncorrelatedModelData m_gtrack_uncorrelated_model;
 
     bool m_check_mandatory();
 

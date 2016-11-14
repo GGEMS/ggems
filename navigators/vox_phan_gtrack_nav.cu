@@ -194,14 +194,15 @@ __host__ __device__ void VPGTN::_track_to_out( ParticlesData particles,
 }
 */
 
-__host__ __device__ void VPGTN::track_to_out( ParticlesData particles,
-                                              VoxVolumeData<ui16> vol,
-                                              GTrackModelData model,
-                                              /*MaterialsTable materials,*/
-                                              /*PhotonCrossSectionTable photon_CS_table,*/
-                                              GlobalSimulationParametersData parameters,
-                                              /*DoseData dosi,*/
-                                              ui32 part_id )
+
+__host__ __device__ void VPGTN::track_to_out_uncorrelated_model( ParticlesData particles,
+                                                                VoxVolumeData<ui16> vol,
+                                                                GTrackUncorrelatedModelData model,
+                                                                /*MaterialsTable materials,*/
+                                                                /*PhotonCrossSectionTable photon_CS_table,*/
+                                                                GlobalSimulationParametersData parameters,
+                                                                /*DoseData dosi,*/
+                                                                ui32 part_id )
 {
 
     // Read position
@@ -234,31 +235,35 @@ __host__ __device__ void VPGTN::track_to_out( ParticlesData particles,
     //ui16 mat_id = vol.values[ index_phantom.w ];
 
     //// Get step distance ///////////////////////////////////////
-    f32 rndm = prng_uniform( particles, part_id );
-     rndm = prng_uniform( particles, part_id );
-     rndm = prng_uniform( particles, part_id );
-/*
+
     // Search the energy index to read CS
     f32 energy = particles.E[ part_id ];
-    ui32 E_index = binary_search( energy, model.bin_energy, model.nb_energy_bins );
-    //printf("E %f   EIndex %i   valE %f\n", energy, E_index, model.bin_energy[ E_index ]);
+    ui32 E_index = ui32( (energy - model.min_E) / model.di_energy );
+//    printf("id %i: energy %f diE %f binPos %i ValE %f\n", part_id, energy, model.di_energy, E_index, model.bin_energy[E_index]);
+
+
 
     // Get index in table
-    ui32 read_index = E_index * model.nb_bins;
+    ui32 read_index = E_index * model.nb_lut_bins;
 
     // Fetch step value
     f32 rndm = prng_uniform( particles, part_id );
-    ui32 bin_pos = binary_search_left_offset( rndm, model.cdf_step, model.nb_bins, read_index );
+    ui32 bin_pos = ui32( rndm / model.di_lut );
+//    printf("id %i: rndm %f binPos %i\n", part_id, rndm, bin_pos);
+
+    bin_pos = model.lcdf_step[ read_index + bin_pos ];
+
+//    printf("id %i: rndm %f GblPos %i StepPos %i\n", part_id, rndm, read_index+bin_pos, bin_pos);
 
 #ifdef DEBUG
     assert( bin_pos < model.nb_bins );
 #endif
 
     f32 next_interaction_distance = model.bin_step[ bin_pos ];
-    f32 dist = next_interaction_distance;
-    ui32 bin_dist = bin_pos;
-    f32 rnd_pos = rndm;
-*/
+//    f32 dist = next_interaction_distance;
+//    ui32 bin_dist = bin_pos;
+//    f32 rnd_pos = rndm;
+
 //    printf("id %i: rndm %f binPos %i next step %f\n", part_id, rndm, bin_pos, next_interaction_distance);
 
     //// Get the next distance boundary volume /////////////////////////////////
@@ -279,14 +284,14 @@ __host__ __device__ void VPGTN::track_to_out( ParticlesData particles,
 
     f32 boundary_distance = hit_ray_AABB ( pos, dir, vox_xmin, vox_xmax,
                                            vox_ymin, vox_ymax, vox_zmin, vox_zmax );
-/*
+
     ui8 exit = false;
     if ( boundary_distance <= next_interaction_distance )
     {
         next_interaction_distance = boundary_distance + parameters.geom_tolerance; // Overshoot
         exit = true;
     }
-*/
+
     //// Move particle //////////////////////////////////////////////////////
 
     // get the new position
@@ -310,21 +315,28 @@ __host__ __device__ void VPGTN::track_to_out( ParticlesData particles,
     }
 
     //// Apply discrete process //////////////////////////////////////////////////
-/*
+
     // If boundary
     if ( exit )
     {
-        if (part_id==12853)
-        {
-            printf("id %i: E %f Boundary dist %f pos %f %f %f (posBin %i val %f)\n", part_id, energy, boundary_distance,
-                   pos.x, pos.y, pos.z, bin_pos, dist);
-        }
+//        if (part_id==12853)
+//        {
+//            printf("id %i: E %f Boundary dist %f pos %f %f %f (posBin %i val %f)\n", part_id, energy, boundary_distance,
+//                   pos.x, pos.y, pos.z, bin_pos, dist);
+//        }
+
+//        printf("id %i: E %f Boundary dist %f pos %f %f %f (posBin %i val %f)\n", part_id, energy, boundary_distance,
+//                          pos.x, pos.y, pos.z, bin_pos, dist);
+
+
         return;
     }
 
     // Scattering
     rndm = prng_uniform( particles, part_id );
-    bin_pos = binary_search_left_offset( rndm, model.cdf_scatter, model.nb_bins, read_index );
+    //bin_pos = binary_search_left_offset( rndm, model.cdf_scatter, model.nb_bins, read_index );
+    bin_pos = ui32( rndm / model.di_lut );
+    bin_pos = model.lcdf_scatter[ read_index + bin_pos ];
 
 #ifdef DEBUG
     assert( bin_pos < model.nb_bins );
@@ -340,7 +352,9 @@ __host__ __device__ void VPGTN::track_to_out( ParticlesData particles,
 
     // Get new energy
     rndm = prng_uniform( particles, part_id );
-    bin_pos = binary_search_left_offset( rndm, model.cdf_edep, model.nb_bins, read_index );
+    //bin_pos = binary_search_left_offset( rndm, model.cdf_edep, model.nb_bins, read_index );
+    bin_pos = ui32( rndm / model.di_lut );
+    bin_pos = model.lcdf_edep[ read_index + bin_pos ];
 
 #ifdef DEBUG
     assert( bin_pos < model.nb_bins );
@@ -360,13 +374,18 @@ __host__ __device__ void VPGTN::track_to_out( ParticlesData particles,
         particles.endsimu[ part_id ] = PARTICLE_DEAD;
     }
 
-    if (part_id==12853)
-    {
-        printf( "id %i: next step %f  angle %f  newE %f (rnd %f posBin %i valBin %f dist %f)\n", part_id, next_interaction_distance,
-                theta, energy, rnd_pos, bin_dist, model.cdf_step[ read_index + bin_dist ] , dist );
-    }
-*/
+//    if (part_id==12853)
+//    {
+//        printf( "id %i: next step %f  angle %f  newE %f (rnd %f posBin %i valBin %f dist %f)\n", part_id, next_interaction_distance,
+//                theta, energy, rnd_pos, bin_dist, model.cdf_step[ read_index + bin_dist ] , dist );
+//    }
+
+//    printf( "id %i: next step %f  angle %f  newE %f (rnd %f posBin %i valBin %f dist %f)\n", part_id, next_interaction_distance,
+//            theta, energy, rnd_pos, bin_dist, model.lcdf_step[ read_index + bin_dist ], dist );
+
 }
+
+
 
 
 
@@ -375,27 +394,28 @@ __host__ __device__ void VPGTN::track_to_out( ParticlesData particles,
 
 // Device Kernel that move particles to the voxelized volume boundary
 __global__ void VPGTN::kernel_device_track_to_in( ParticlesData particles, f32 xmin, f32 xmax,
-                                                    f32 ymin, f32 ymax, f32 zmin, f32 zmax, f32 tolerance )
+                                                  f32 ymin, f32 ymax, f32 zmin, f32 zmax, f32 tolerance )
 {  
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
     if ( id >= particles.size ) return;    
     transport_track_to_in_AABB( particles, xmin, xmax, ymin, ymax, zmin, zmax, tolerance, id);
 }
 
-
+/*
 // Host Kernel that move particles to the voxelized volume boundary
 void VPGTN::kernel_host_track_to_in( ParticlesData particles, f32 xmin, f32 xmax,
                                      f32 ymin, f32 ymax, f32 zmin, f32 zmax, f32 tolerance, ui32 part_id )
 {       
     transport_track_to_in_AABB( particles, xmin, xmax, ymin, ymax, zmin, zmax, tolerance, part_id);
 }
+*/
 
 // Device kernel that track particles within the voxelized volume until boundary
-__global__ void VPGTN::kernel_device_track_to_out( ParticlesData particles,
+__global__ void VPGTN::kernel_device_track_to_out_uncorrelated_model( ParticlesData particles,
                                                    VoxVolumeData<ui16> vol,
                                                    /* MaterialsTable materials, */
                                                    /* PhotonCrossSectionTable photon_CS_table, */
-                                                   GTrackModelData model,
+                                                   GTrackUncorrelatedModelData model,
                                                    GlobalSimulationParametersData parameters
                                                    /*DoseData dosi*/ )
 {   
@@ -407,7 +427,7 @@ __global__ void VPGTN::kernel_device_track_to_out( ParticlesData particles,
     // Stepping loop - Get out of loop only if the particle was dead and it was a primary
     while ( particles.endsimu[id] != PARTICLE_DEAD && particles.endsimu[id] != PARTICLE_FREEZE )
     {
-        VPGTN::track_to_out( particles, vol, model, parameters, id );
+        VPGTN::track_to_out_uncorrelated_model( particles, vol, model, parameters, id );
         ct++;
 
         if (ct > 1000)
@@ -417,18 +437,19 @@ __global__ void VPGTN::kernel_device_track_to_out( ParticlesData particles,
         }
     }
 
-//    printf("ID %i   %i steps\n", id, ct);
+//    printf("%i steps\n", ct);
 
 }
 
+
+/*
 // Host kernel that track particles within the voxelized volume until boundary
 void VPGTN::kernel_host_track_to_out( ParticlesData particles,
                                       VoxVolumeData<ui16> vol,
-                                      /* MaterialsTable materials, */
-                                      /* PhotonCrossSectionTable photon_CS_table, */
+
                                       GTrackModelData model,
                                       GlobalSimulationParametersData parameters
-                                      /*DoseData dosi*/  )
+                                       )
 {
 
     ui32 id=0;
@@ -442,7 +463,7 @@ void VPGTN::kernel_host_track_to_out( ParticlesData particles,
         ++id;
     }
 }
-
+*/
 ////:: Privates
 
 bool VoxPhanGTrackNav::m_check_mandatory()
@@ -507,16 +528,16 @@ void VoxPhanGTrackNav::track_to_in( Particles particles )
 
     if ( m_params.data_h.device_target == CPU_DEVICE )
     {
-        ui32 id=0;
-        while ( id<particles.size )
-        {
-            VPDN::kernel_host_track_to_in ( particles.data_h, m_phantom.data_h.xmin, m_phantom.data_h.xmax,
-                                            m_phantom.data_h.ymin, m_phantom.data_h.ymax,
-                                            m_phantom.data_h.zmin, m_phantom.data_h.zmax,
-                                            m_params.data_h.geom_tolerance,
-                                            id );
-            ++id;
-        }
+//        ui32 id=0;
+//        while ( id<particles.size )
+//        {
+//            VPDN::kernel_host_track_to_in ( particles.data_h, m_phantom.data_h.xmin, m_phantom.data_h.xmax,
+//                                            m_phantom.data_h.ymin, m_phantom.data_h.ymax,
+//                                            m_phantom.data_h.zmin, m_phantom.data_h.zmax,
+//                                            m_params.data_h.geom_tolerance,
+//                                            id );
+//            ++id;
+//        }
     }
     else if ( m_params.data_h.device_target == GPU_DEVICE )
     {
@@ -540,9 +561,9 @@ void VoxPhanGTrackNav::track_to_out ( Particles particles )
     //
     if ( m_params.data_h.device_target == CPU_DEVICE )
     {
-        VPGTN::kernel_host_track_to_out( particles.data_h, m_phantom.data_h,
-                                         m_gtrack_model,
-                                         m_params.data_h );
+//        VPGTN::kernel_host_track_to_out( particles.data_h, m_phantom.data_h,
+//                                         m_gtrack_model,
+//                                         m_params.data_h );
     }
     else if ( m_params.data_h.device_target == GPU_DEVICE )
     {
@@ -550,9 +571,9 @@ void VoxPhanGTrackNav::track_to_out ( Particles particles )
         dim3 threads, grid;
         threads.x = m_params.data_h.gpu_block_size;
         grid.x = ( particles.size + m_params.data_h.gpu_block_size - 1 ) / m_params.data_h.gpu_block_size;
-        VPGTN::kernel_device_track_to_out<<<grid, threads>>> ( particles.data_d, m_phantom.data_d,
-                                                               m_gtrack_model,
-                                                               m_params.data_d );
+        VPGTN::kernel_device_track_to_out_uncorrelated_model<<<grid, threads>>> ( particles.data_d, m_phantom.data_d,
+                                                                                  m_gtrack_uncorrelated_model,
+                                                                                  m_params.data_d );
 
         cuda_error_check ( "Error ", " Kernel_VoxPhanGTrackNav (track to out)" );
         cudaDeviceSynchronize();        
@@ -565,24 +586,34 @@ void VoxPhanGTrackNav::load_phantom_from_mhd( std::string filename, std::string 
     m_phantom.load_from_mhd( filename, range_mat_name );
 }
 
-void VoxPhanGTrackNav::load_gtrack_model( std::string filename )
+void VoxPhanGTrackNav::load_gtrack_uncorrelated_model( std::string filename )
 {
     // TODO, open MHD header to read the params
     ui32 nb_bins = 100;
     ui32 nb_energy_bins = 100;
+    ui32 nb_lut = 10000;
 
-    m_gtrack_model.nb_bins = nb_bins;
-    m_gtrack_model.nb_energy_bins = nb_energy_bins;
+    m_gtrack_uncorrelated_model.nb_bins = nb_bins;
+    m_gtrack_uncorrelated_model.nb_energy_bins = nb_energy_bins;
+    m_gtrack_uncorrelated_model.nb_lut_bins = nb_lut;
+
+    m_gtrack_uncorrelated_model.di_lut = 1.0f / f32(nb_lut - 1);
+    m_gtrack_uncorrelated_model.di_energy = ( 50 *keV - 10 *keV ) / f32( nb_energy_bins - 1);
+    m_gtrack_uncorrelated_model.min_E = 10 *keV;
 
     // Allocation
-    HANDLE_ERROR( cudaMallocManaged( &(m_gtrack_model.bin_energy), nb_energy_bins * sizeof( f32 ) ) );
-    HANDLE_ERROR( cudaMallocManaged( &(m_gtrack_model.bin_step), nb_bins * sizeof( f32 ) ) );
-    HANDLE_ERROR( cudaMallocManaged( &(m_gtrack_model.bin_edep), nb_bins * sizeof( f32 ) ) );
-    HANDLE_ERROR( cudaMallocManaged( &(m_gtrack_model.bin_scatter), nb_bins * sizeof( f32 ) ) );
-
+    HANDLE_ERROR( cudaMallocManaged( &(m_gtrack_uncorrelated_model.bin_energy), nb_energy_bins * sizeof( f32 ) ) );
+    HANDLE_ERROR( cudaMallocManaged( &(m_gtrack_uncorrelated_model.bin_step), nb_bins * sizeof( f32 ) ) );
+    HANDLE_ERROR( cudaMallocManaged( &(m_gtrack_uncorrelated_model.bin_edep), nb_bins * sizeof( f32 ) ) );
+    HANDLE_ERROR( cudaMallocManaged( &(m_gtrack_uncorrelated_model.bin_scatter), nb_bins * sizeof( f32 ) ) );
+/*
     HANDLE_ERROR( cudaMallocManaged( &(m_gtrack_model.cdf_step), nb_bins*nb_energy_bins * sizeof( f32 ) ) );
     HANDLE_ERROR( cudaMallocManaged( &(m_gtrack_model.cdf_edep), nb_bins*nb_energy_bins * sizeof( f32 ) ) );
     HANDLE_ERROR( cudaMallocManaged( &(m_gtrack_model.cdf_scatter), nb_bins*nb_energy_bins * sizeof( f32 ) ) );
+*/
+    HANDLE_ERROR( cudaMallocManaged( &(m_gtrack_uncorrelated_model.lcdf_step), nb_lut*nb_energy_bins * sizeof( ui16 ) ) );
+    HANDLE_ERROR( cudaMallocManaged( &(m_gtrack_uncorrelated_model.lcdf_edep), nb_lut*nb_energy_bins * sizeof( ui16 ) ) );
+    HANDLE_ERROR( cudaMallocManaged( &(m_gtrack_uncorrelated_model.lcdf_scatter), nb_lut*nb_energy_bins * sizeof( ui16 ) ) );
 
     // Open data
     FILE *pfile = fopen(filename.c_str(), "rb");
@@ -593,14 +624,19 @@ void VoxPhanGTrackNav::load_gtrack_model( std::string filename )
     }
 
     // Load data
-    fread( m_gtrack_model.bin_energy, sizeof( f32 ), nb_energy_bins, pfile );
-    fread( m_gtrack_model.bin_step, sizeof( f32 ), nb_bins, pfile );
-    fread( m_gtrack_model.bin_edep, sizeof( f32 ), nb_bins, pfile );
-    fread( m_gtrack_model.bin_scatter, sizeof( f32 ), nb_bins, pfile );
-
+    fread( m_gtrack_uncorrelated_model.bin_energy, sizeof( f32 ), nb_energy_bins, pfile );
+    fread( m_gtrack_uncorrelated_model.bin_step, sizeof( f32 ), nb_bins, pfile );
+    fread( m_gtrack_uncorrelated_model.bin_edep, sizeof( f32 ), nb_bins, pfile );
+    fread( m_gtrack_uncorrelated_model.bin_scatter, sizeof( f32 ), nb_bins, pfile );
+/*
     fread( m_gtrack_model.cdf_step, sizeof( f32 ), nb_bins*nb_energy_bins, pfile );
     fread( m_gtrack_model.cdf_edep, sizeof( f32 ), nb_bins*nb_energy_bins, pfile );
     fread( m_gtrack_model.cdf_scatter, sizeof( f32 ), nb_bins*nb_energy_bins, pfile );
+*/
+
+    fread( m_gtrack_uncorrelated_model.lcdf_step, sizeof( ui16 ), nb_lut*nb_energy_bins, pfile );
+    fread( m_gtrack_uncorrelated_model.lcdf_edep, sizeof( ui16 ), nb_lut*nb_energy_bins, pfile );
+    fread( m_gtrack_uncorrelated_model.lcdf_scatter, sizeof( ui16 ), nb_lut*nb_energy_bins, pfile );
 
     fclose( pfile );
 
