@@ -396,7 +396,7 @@ void EmCalculator::compute_photon_tracking_uncorrelated_model( std::string mat_n
 //  3.  dE(Theta)
 void EmCalculator::compute_photon_tracking_correlated_model( std::string mat_name, ui32 nb_samples,
                                                              f32 min_energy, f32 max_energy, ui32 nb_energy_bins,
-                                                             f32 max_step, f32 max_substep, ui32 nb_step_bins,
+                                                             f32 max_step, ui32 nb_step_bins,
                                                              ui32 nb_theta_bins )
 {
     // Get mat index
@@ -428,6 +428,7 @@ void EmCalculator::compute_photon_tracking_correlated_model( std::string mat_nam
     f32 *cdf_dist = new f32[ nb_energy_bins*nb_step_bins ];      // Lambda(E)
     f32 *cdf_scatter = new f32[ nb_step_bins*nb_theta_bins ];    // Theta(lambda)
     f32 *cdf_edep = new f32[ nb_theta_bins*nb_energy_bins ];      // dE(theta)
+    f32 *proba_overstep = new f32[ nb_energy_bins ];
 
     // For LCDF (LUT-CDF)
 //    ui16 *lcdf_dist = new ui16[ nb_energy_bins*nb_bins_lut ];
@@ -447,13 +448,13 @@ void EmCalculator::compute_photon_tracking_correlated_model( std::string mat_nam
     {
         cdf_edep[ i++ ] = 0.0;
     }
+    i = 0; while( i < nb_energy_bins )
+    {
+        proba_overstep[ i++ ] = 0.0;
+    }
 
     // Compute CDF spacing
-    ui32 half_nb_bins = nb_step_bins / 2;
-    f32 di_lowdist = ( max_substep ) / f32( half_nb_bins );  // remove (-1) to end with a value = (low_dist - di_lowdist)
-    f32 di_highdist = ( max_step - max_substep ) / f32( half_nb_bins - 1 );
-    f32 di_dist = ( max_substep ) / f32( nb_step_bins - 1 );
-
+    f32 di_dist = ( max_step ) / f32( nb_step_bins - 1 );
     f32 di_scatter = ( pi ) / f32( nb_theta_bins - 1 );
     f32 di_edep = ( max_energy ) / f32( nb_energy_bins - 1 );
     f32 di_energy = ( max_energy - min_energy ) / f32( nb_energy_bins - 1);
@@ -462,7 +463,7 @@ void EmCalculator::compute_photon_tracking_correlated_model( std::string mat_nam
 //    f32 di_lut = 1.0 / (nb_bins_lut - 1);
 
     // Some vars for histogramm
-    ui32 pos_step; ui32 pos_theta; ui32 pos_edep; ui32 pos_substep; f32 dist; ui8 process; f32 edep; f32 angle;
+    ui32 pos_step; ui32 pos_theta; ui32 pos_edep; f32 dist; ui8 process; f32 edep; f32 angle;
 /*
     // Compute bin values
     i = 0; while ( i < nb_bins )
@@ -482,9 +483,13 @@ void EmCalculator::compute_photon_tracking_correlated_model( std::string mat_nam
     // Build CDF model
     f32 energy; //ui16 index_cdf;
     ui32 pos_energy;
+    ui32 ct_oversteps;
+    ui32 ct_steps;
     for ( pos_energy = 0; pos_energy < nb_energy_bins; pos_energy++)
     {
         energy = min_energy + pos_energy*di_energy;
+        ct_oversteps = 0;
+        ct_steps = 0;
         printf("Energy %f MeV\n", energy);
 
         for ( ui32 is = 0; is < nb_samples; is++ )
@@ -503,19 +508,12 @@ void EmCalculator::compute_photon_tracking_correlated_model( std::string mat_nam
             // Get step distance
             photon_get_next_interaction( m_part_manager.particles.data_h, m_params.data_h, m_cross_sections.photon_CS.data_h, mat_id, 0 );
             dist = m_part_manager.particles.data_h.next_interaction_distance[0];
-            if ( dist < max_substep )
-            {
-                pos_step = dist / di_lowdist;
-            }
-            else
-            {
-                pos_step = ( dist - max_substep ) / di_highdist;
-                pos_step += half_nb_bins;
-            }
+            ct_steps++;
 
-            // Not within the dist max
-            if ( pos_step >= nb_step_bins )
+            // To get the probabilty of the over stepping
+            if (dist > max_step+di_dist)
             {
+                ct_oversteps++;
                 continue;
             }
 
@@ -541,28 +539,30 @@ void EmCalculator::compute_photon_tracking_correlated_model( std::string mat_nam
                                                   m_part_manager.particles.data_h.dy[0],
                                                   m_part_manager.particles.data_h.dz[0] ), dd ) );
 
-            if ( dist <= max_substep )
-            {
-                // Get position within each vector
-                pos_theta = angle / di_scatter;
-                pos_edep = edep / di_edep;
-                pos_substep = dist / di_dist;
+            // Get position within each vector
+            pos_theta = angle / di_scatter;
+            pos_edep = edep / di_edep;
+            pos_step = dist / di_dist;
+
+//            if (pos_step == (nb_step_bins-1))
+//            {
+//                printf("pos_step = %i   angle = %f\n", pos_step, angle);
+//            }
 
 #ifdef DEBUG
-                assert( pos_theta < nb_theta_bins );
-                assert( pos_edep < nb_energy_bins );
-                assert( pos_substep < nb_step_bins );
+            assert( pos_theta < nb_theta_bins );
+            assert( pos_edep < nb_energy_bins );
+            assert( pos_step < nb_step_bins );
 #endif
-
-                // Assign values
-                cdf_scatter[ pos_substep*nb_theta_bins + pos_theta ]++;
-                cdf_edep[ pos_theta*nb_energy_bins + pos_edep ]++;
-            }
-
-            // Assign value
+            // Assign values
             cdf_dist[ pos_energy*nb_step_bins + pos_step ]++;
+            cdf_scatter[ pos_step*nb_theta_bins + pos_theta ]++;
+            cdf_edep[ pos_theta*nb_energy_bins + pos_edep ]++;
 
         } // Samples loop
+
+        // Compute the probability to over-stepping
+        proba_overstep[ pos_energy ] = f32( ct_oversteps ) / f32( ct_steps );
 
 /*
         // Build the LCDF (LUT-CDF) for Dist
@@ -701,40 +701,23 @@ void EmCalculator::compute_photon_tracking_correlated_model( std::string mat_nam
         // CDF
         pos_edep = index+1; while ( pos_edep < (index + nb_energy_bins) )
         {
-            cdf_edep[ pos_edep ] += cdf_scatter[ pos_edep-1 ];
+            cdf_edep[ pos_edep ] += cdf_edep[ pos_edep-1 ];
             pos_edep++;
         }
 
         pos_theta++;
     }
 
-    // Export data:
-    //   Format for one material
-    //     [... di_energy ...]   (1)
-    //     [... max_substep ...] (1)
-    //     [... di_lowstep ...]  (1)
-    //     [... di_highstep ...] (1)
-    //     [... di_theta ...]    (1)
-    //     [... di_edep ...]     (1)
-
-    //     [... cdf_dist ...]
-    //     [... cdf_edep ...]
-    //     [... cdf_scatter ...]
-    // OR
-    //     [... lcdf_dist ...]
-    //     [... lcdf_edep ...]
-    //     [... lcdf_scatter ...]
-
+    //fwrite( &max_step, sizeof( f32 ), 1, pFile );
     fwrite( &di_energy, sizeof( f32 ), 1, pFile );
-    fwrite( &max_substep, sizeof( f32 ), 1, pFile );
-    fwrite( &di_lowdist, sizeof( f32 ), 1, pFile );
-    fwrite( &di_highdist, sizeof( f32 ), 1, pFile );
+    fwrite( &di_dist, sizeof( f32 ), 1, pFile );
     fwrite( &di_scatter, sizeof( f32 ), 1, pFile );
     fwrite( &di_edep, sizeof( f32 ), 1, pFile );
 
     fwrite( cdf_dist, sizeof( f32 ), nb_step_bins*nb_energy_bins, pFile );
     fwrite( cdf_scatter, sizeof( f32 ), nb_step_bins*nb_theta_bins, pFile );
     fwrite( cdf_edep, sizeof( f32 ), nb_theta_bins*nb_energy_bins, pFile );
+    fwrite( proba_overstep, sizeof( f32 ), nb_energy_bins, pFile );
 
 /*
     fwrite( lcdf_dist, sizeof( ui16 ), nb_bins_lut*nb_energy_bins, pFile );
