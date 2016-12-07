@@ -37,7 +37,8 @@ public:
 
     void compute_photon_tracking_correlated_model(std::string mat_name, ui32 nb_samples,
                                                   f32 min_energy, f32 max_energy, ui32 nb_energy_bins,
-                                                  f32 max_step, ui32 nb_step_bins, ui32 nb_theta_bins);
+                                                  f32 max_step, ui32 nb_step_bins, ui32 nb_theta_bins,
+                                                  f32 max_edep, ui32 nb_edep_bins);
 
 private:
     std::vector< std::string > m_get_all_materials_name( std::string filename );

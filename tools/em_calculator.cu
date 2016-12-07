@@ -397,7 +397,8 @@ void EmCalculator::compute_photon_tracking_uncorrelated_model( std::string mat_n
 void EmCalculator::compute_photon_tracking_correlated_model( std::string mat_name, ui32 nb_samples,
                                                              f32 min_energy, f32 max_energy, ui32 nb_energy_bins,
                                                              f32 max_step, ui32 nb_step_bins,
-                                                             ui32 nb_theta_bins )
+                                                             ui32 nb_theta_bins,
+                                                             f32 max_edep, ui32 nb_edep_bins )
 {
     // Get mat index
     i32 mat_id=0; while( mat_id < m_mat_names_db.size() )
@@ -427,8 +428,9 @@ void EmCalculator::compute_photon_tracking_correlated_model( std::string mat_nam
 
     f32 *cdf_dist = new f32[ nb_energy_bins*nb_step_bins ];      // Lambda(E)
     f32 *cdf_scatter = new f32[ nb_step_bins*nb_theta_bins ];    // Theta(lambda)
-    f32 *cdf_edep = new f32[ nb_theta_bins*nb_energy_bins ];      // dE(theta)
+    f32 *cdf_edep = new f32[ nb_theta_bins*nb_edep_bins ];      // dE(theta)
     f32 *proba_overstep = new f32[ nb_energy_bins ];
+    f32 *proba_PE = new f32[ nb_energy_bins ];
 
     // For LCDF (LUT-CDF)
 //    ui16 *lcdf_dist = new ui16[ nb_energy_bins*nb_bins_lut ];
@@ -444,19 +446,20 @@ void EmCalculator::compute_photon_tracking_correlated_model( std::string mat_nam
     {
         cdf_scatter[ i++ ] = 0.0;
     }
-    i = 0; while( i < nb_theta_bins*nb_energy_bins )
+    i = 0; while( i < nb_theta_bins*nb_edep_bins )
     {
         cdf_edep[ i++ ] = 0.0;
     }
     i = 0; while( i < nb_energy_bins )
     {
-        proba_overstep[ i++ ] = 0.0;
+        proba_overstep[ i ] = 0.0;
+        proba_PE[ i++ ] = 0.0;
     }
 
     // Compute CDF spacing
     f32 di_dist = ( max_step ) / f32( nb_step_bins - 1 );
     f32 di_scatter = ( pi ) / f32( nb_theta_bins - 1 );
-    f32 di_edep = ( max_energy ) / f32( nb_energy_bins - 1 );
+    f32 di_edep = ( max_edep ) / f32( nb_edep_bins - 1 );
     f32 di_energy = ( max_energy - min_energy ) / f32( nb_energy_bins - 1);
 
     // for LCDF
@@ -483,13 +486,15 @@ void EmCalculator::compute_photon_tracking_correlated_model( std::string mat_nam
     // Build CDF model
     f32 energy; //ui16 index_cdf;
     ui32 pos_energy;
-    ui32 ct_oversteps;
-    ui32 ct_steps;
+    ui32 ct_oversteps; ui32 ct_PE;
+    ui32 ct_steps; ui32 ct_process;
     for ( pos_energy = 0; pos_energy < nb_energy_bins; pos_energy++)
     {
         energy = min_energy + pos_energy*di_energy;
         ct_oversteps = 0;
         ct_steps = 0;
+        ct_process = 0;
+        ct_PE = 0;
         printf("Energy %f MeV\n", energy);
 
         for ( ui32 is = 0; is < nb_samples; is++ )
@@ -518,21 +523,20 @@ void EmCalculator::compute_photon_tracking_correlated_model( std::string mat_nam
             }
 
             // Get process
+            ct_process++;
             process = m_part_manager.particles.data_h.next_discrete_process[0];
+            if ( process == PHOTON_PHOTOELECTRIC )
+            {
+                ct_PE++;
+                continue;
+            }
 
             // Get scattering and the dropped energy
             photon_resolve_discrete_process( m_part_manager.particles.data_h, m_params.data_h, m_cross_sections.photon_CS.data_h,
                                              m_materials.data_h, mat_id, 0 );
 
             // edep
-            if ( process == PHOTON_PHOTOELECTRIC )
-            {
-                edep = energy;
-            }
-            else
-            {
-                edep = energy - m_part_manager.particles.data_h.E[0];
-            }
+            edep = energy - m_part_manager.particles.data_h.E[0];
 
             // scatter
             angle = acosf( fxyz_dot( make_f32xyz( m_part_manager.particles.data_h.dx[0],
@@ -551,18 +555,19 @@ void EmCalculator::compute_photon_tracking_correlated_model( std::string mat_nam
 
 #ifdef DEBUG
             assert( pos_theta < nb_theta_bins );
-            assert( pos_edep < nb_energy_bins );
+            assert( pos_edep < nb_edep_bins );
             assert( pos_step < nb_step_bins );
 #endif
             // Assign values
             cdf_dist[ pos_energy*nb_step_bins + pos_step ]++;
             cdf_scatter[ pos_step*nb_theta_bins + pos_theta ]++;
-            cdf_edep[ pos_theta*nb_energy_bins + pos_edep ]++;
+            cdf_edep[ pos_theta*nb_edep_bins + pos_edep ]++;
 
         } // Samples loop
 
         // Compute the probability to over-stepping
         proba_overstep[ pos_energy ] = f32( ct_oversteps ) / f32( ct_steps );
+        proba_PE[ pos_energy ] = f32( ct_PE ) / f32( ct_process );
 
 /*
         // Build the LCDF (LUT-CDF) for Dist
@@ -682,8 +687,8 @@ void EmCalculator::compute_photon_tracking_correlated_model( std::string mat_nam
     {
         // sum
         sum = 0.0;
-        ui32 index = pos_theta*nb_energy_bins;
-        pos_edep = index; while ( pos_edep < (index + nb_energy_bins) )
+        ui32 index = pos_theta*nb_edep_bins;
+        pos_edep = index; while ( pos_edep < (index + nb_edep_bins) )
         {
             sum += cdf_edep[ pos_edep ];
             pos_edep++;
@@ -693,13 +698,13 @@ void EmCalculator::compute_photon_tracking_correlated_model( std::string mat_nam
             printf("Warning: sum 0 edep(theta)\n");
         }
         // norm
-        pos_edep = index; while ( pos_edep < (index + nb_energy_bins) )
+        pos_edep = index; while ( pos_edep < (index + nb_edep_bins) )
         {
             cdf_edep[ pos_edep ] /= sum;
             pos_edep++;
         }
         // CDF
-        pos_edep = index+1; while ( pos_edep < (index + nb_energy_bins) )
+        pos_edep = index+1; while ( pos_edep < (index + nb_edep_bins) )
         {
             cdf_edep[ pos_edep ] += cdf_edep[ pos_edep-1 ];
             pos_edep++;
@@ -716,7 +721,7 @@ void EmCalculator::compute_photon_tracking_correlated_model( std::string mat_nam
 
     fwrite( cdf_dist, sizeof( f32 ), nb_step_bins*nb_energy_bins, pFile );
     fwrite( cdf_scatter, sizeof( f32 ), nb_step_bins*nb_theta_bins, pFile );
-    fwrite( cdf_edep, sizeof( f32 ), nb_theta_bins*nb_energy_bins, pFile );
+    fwrite( cdf_edep, sizeof( f32 ), nb_theta_bins*nb_edep_bins, pFile );
     fwrite( proba_overstep, sizeof( f32 ), nb_energy_bins, pFile );
 
 /*
@@ -737,7 +742,7 @@ void EmCalculator::compute_photon_tracking_correlated_model( std::string mat_nam
     fclose( pFile );
 
     pFile = fopen ( "im_edep.raw", "wb" );
-    fwrite( cdf_edep, sizeof( f32 ), nb_theta_bins*nb_energy_bins, pFile );
+    fwrite( cdf_edep, sizeof( f32 ), nb_theta_bins*nb_edep_bins, pFile );
     fclose( pFile );
 
     pFile = fopen ( "im_scatter.raw", "wb" );
