@@ -97,6 +97,17 @@ __host__ __device__ void track_to_out(ParticlesData particles,
                                       Mu_MuEn_Table mu_table,
                                       HistoryMap hist_map, ui32 part_id);
 
+/// Experimental
+__host__ __device__ void track_to_out_woodcock(ParticlesData particles,
+                                               VoxVolumeData<ui16> vol,
+                                               MaterialsTable materials,
+                                               PhotonCrossSectionTable photon_CS_table,
+                                               GlobalSimulationParametersData parameters,
+                                               DoseData dosi,
+                                               f32* mumax_table,
+                                               ui32 part_id);
+//////////////////
+
 __host__ __device__ void track_seTLE(ParticlesData particles,
                                      VoxVolumeData<ui16> vol,
                                      COOHistoryMap coo_hist_map,
@@ -114,6 +125,16 @@ __global__ void kernel_device_track_to_out (ParticlesData particles,
                                             DoseData dosi ,
                                             Mu_MuEn_Table mu_table,
                                             HistoryMap hist_map);
+
+/// Experimental
+__global__ void kernel_device_track_to_out_woodcock (ParticlesData particles,
+                                                     VoxVolumeData<ui16> vol,
+                                                     MaterialsTable materials,
+                                                     PhotonCrossSectionTable photon_CS_table,
+                                                     GlobalSimulationParametersData parameters,
+                                                     DoseData dosi ,
+                                                     f32* mumax_table);
+/////////////////
 
 //__global__ void _kernel_device_track_to_out (ParticlesData particles,
 //                                            VoxVolumeData<ui16> vol,
@@ -175,6 +196,12 @@ public:
 
     void set_kerma_estimator( std::string kind );
 
+    /// Experimental ///////
+
+    void set_experimental( std::string kind );
+
+    ////////////////////////
+
     //void add_cylinder_objects( std::string filename, std::string mat_name );
 
     void export_density_map( std::string filename );
@@ -210,6 +237,11 @@ private:
     GlobalSimulationParameters m_params;
 
     std::string m_materials_filename;
+
+    // Experimental
+    bool m_flag_woodcock;
+    void m_build_mumax_table();
+    f32* m_mumax_table;
 
 //
 };

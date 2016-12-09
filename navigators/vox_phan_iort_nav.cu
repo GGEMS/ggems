@@ -549,6 +549,243 @@ __host__ __device__ void VPIORTN::track_to_out( ParticlesData particles,
 }
 
 
+/// Experimental ///////////////////////////////////////////////
+
+__host__ __device__ void VPIORTN::track_to_out_woodcock( ParticlesData particles,
+                                                VoxVolumeData<ui16> vol,
+                                                MaterialsTable materials,
+                                                PhotonCrossSectionTable photon_CS_table,
+                                                GlobalSimulationParametersData parameters,
+                                                DoseData dosi,
+                                                f32 *mumax_table,
+                                                ui32 part_id )
+{
+    // Read position
+    f32xyz pos;
+    pos.x = particles.px[part_id];
+    pos.y = particles.py[part_id];
+    pos.z = particles.pz[part_id];
+
+    // Read direction
+    f32xyz dir;
+    dir.x = particles.dx[part_id];
+    dir.y = particles.dy[part_id];
+    dir.z = particles.dz[part_id];
+
+
+
+    // Vars
+    f32 next_interaction_distance;
+    f32 interaction_distance;
+
+    //// Find next discrete interaction ///////////////////////////////////////
+
+    // Search the energy index to read CS
+    f32 energy = particles.E[part_id];
+    ui32 E_index = binary_search ( energy, photon_CS_table.E_bins,
+                                   photon_CS_table.nb_bins );
+
+    // Get index CS table (considering mat id)
+    f32 CS_max = get_CS_from_table ( photon_CS_table.E_bins, mumax_table,
+                                     energy, E_index, E_index );
+
+    // Woodcock tracking
+    next_interaction_distance = -log ( prng_uniform( particles, part_id ) ) * CS_max;
+
+    //printf("ID %i: step dist %f   CS_max %f   E_index %i\n", part_id, next_interaction_distance, CS_max, E_index);
+
+    //// Move particle //////////////////////////////////////////////////////
+
+    // get the new position
+    pos = fxyz_add ( pos, fxyz_scale ( dir, next_interaction_distance ) );
+
+//    printf("ID %i: pos %f %f %f     [%f %f - %f %f - %f %f] tol %f\n", part_id, pos.x, pos.y, pos.z,
+//           vol.xmin, vol.xmax, vol.ymin, vol.ymax, vol.zmin, vol.zmax, parameters.geom_tolerance);
+
+    // Stop simulation if out of the phantom
+    if ( !test_point_AABB_with_tolerance (pos, vol.xmin, vol.xmax, vol.ymin, vol.ymax, vol.zmin, vol.zmax, parameters.geom_tolerance ) )
+    {
+//        printf("ID %i: OUTSIDE\n", part_id);
+        particles.endsimu[part_id] = PARTICLE_FREEZE;
+        return;
+    }
+
+    // store the new position
+    particles.px[part_id] = pos.x;
+    particles.py[part_id] = pos.y;
+    particles.pz[part_id] = pos.z;
+
+//    printf("ID %i: store new pos\n", part_id);
+
+    //// Real or fictif process /////////////////////////////////////////////////
+
+    // Defined index phantom
+    f32xyz ivoxsize;
+    ivoxsize.x = 1.0 / vol.spacing_x;
+    ivoxsize.y = 1.0 / vol.spacing_y;
+    ivoxsize.z = 1.0 / vol.spacing_z;
+    ui32xyzw index_phantom;
+    index_phantom.x = ui32 ( ( pos.x + vol.off_x ) * ivoxsize.x );
+    index_phantom.y = ui32 ( ( pos.y + vol.off_y ) * ivoxsize.y );
+    index_phantom.z = ui32 ( ( pos.z + vol.off_z ) * ivoxsize.z );
+
+    index_phantom.w = index_phantom.z*vol.nb_vox_x*vol.nb_vox_y
+                      + index_phantom.y*vol.nb_vox_x
+                      + index_phantom.x; // linear index
+
+//    printf("ID %i: index %i\n", part_id, index_phantom.w);
+
+    // Get the material that compose this volume
+    ui16 mat_id = vol.values[ index_phantom.w ];
+
+//    printf("ID %i: mat id %i\n", part_id, mat_id);
+
+    // Get index CS table (considering mat id)
+    ui32 CS_index = mat_id*photon_CS_table.nb_bins + E_index;
+    f32 sum_CS = 0.0;
+    f32 CS_PE = 0.0;
+    f32 CS_CPT = 0.0;
+    f32 CS_RAY = 0.0;
+    next_interaction_distance = F32_MAX;
+    ui8 next_discrete_process = 0;
+
+    if ( parameters.physics_list[PHOTON_PHOTOELECTRIC] )
+    {
+        CS_PE = get_CS_from_table( photon_CS_table.E_bins, photon_CS_table.Photoelectric_Std_CS,
+                                   energy, E_index, CS_index );
+        sum_CS += CS_PE;
+    }
+
+    if ( parameters.physics_list[PHOTON_COMPTON] )
+    {
+        CS_CPT = get_CS_from_table( photon_CS_table.E_bins, photon_CS_table.Compton_Std_CS,
+                                    energy, E_index, CS_index );
+        sum_CS += CS_CPT;
+    }
+
+    if ( parameters.physics_list[PHOTON_RAYLEIGH] )
+    {
+        CS_RAY = get_CS_from_table( photon_CS_table.E_bins, photon_CS_table.Rayleigh_Lv_CS,
+                                    energy, E_index, CS_index );
+        sum_CS += CS_RAY;
+    }
+
+
+    f32 rnd = prng_uniform( particles, part_id );
+    //printf("ID %i: mat id %i  CS_index %i  CS_PE %f  CS_CPT %f  CS_RAY %f  CS_SUM %f  -  Reject %f Rnd %f\n", part_id,
+    //       mat_id, CS_index, CS_PE, CS_CPT, CS_RAY, sum_CS, sum_CS*CS_max, rnd);
+
+//    printf("ID %i: CS_max %f\n", mat_id, CS_max);
+    if ( rnd > sum_CS * CS_max  )
+    {
+        //printf("ID %i: REJECT\n", part_id);
+        // Fictive interaction, keep going!
+        return;
+    }
+
+    //// Apply discrete process //////////////////////////////////////////////////
+
+    // Resolve process
+    if ( parameters.physics_list[PHOTON_PHOTOELECTRIC] )
+    {
+        rnd = prng_uniform( particles, part_id );
+        interaction_distance = -log ( rnd ) / CS_PE;
+        if ( interaction_distance < next_interaction_distance )
+        {
+            next_interaction_distance = interaction_distance;
+            next_discrete_process = PHOTON_PHOTOELECTRIC;
+        }
+//        printf("ID %i: PE Dist %f  (rnd %f)\n", part_id, interaction_distance, rnd);
+    }
+
+    if ( parameters.physics_list[PHOTON_COMPTON] )
+    {
+        rnd = prng_uniform( particles, part_id );
+        interaction_distance = -log ( rnd ) / CS_CPT;
+        if ( interaction_distance < next_interaction_distance )
+        {
+            next_interaction_distance = interaction_distance;
+            next_discrete_process = PHOTON_COMPTON;
+        }
+//        printf("ID %i: CPT Dist %f  (rnd %f)\n", part_id, interaction_distance, rnd);
+    }
+
+    if ( parameters.physics_list[PHOTON_RAYLEIGH] )
+    {
+        rnd = prng_uniform( particles, part_id );
+        interaction_distance = -log ( rnd ) / CS_RAY;
+        if ( interaction_distance < next_interaction_distance )
+        {
+            next_interaction_distance = interaction_distance;
+            next_discrete_process = PHOTON_RAYLEIGH;
+        }
+//        printf("ID %i: RAY Dist %f  (rnd %f)\n", part_id, interaction_distance, rnd);
+    }
+
+    // Apply discrete process
+    SecParticle electron;
+    electron.endsimu = PARTICLE_DEAD;
+    electron.dir.x = 0.;
+    electron.dir.y = 0.;
+    electron.dir.z = 1.;
+    electron.E = 0.;
+    //ui8 next_discrete_process = particles.next_discrete_process[part_id];
+
+    if ( next_discrete_process == PHOTON_COMPTON )
+    {
+//        printf("ID %i: ===== COMPTON =====   old E %f\n", part_id, particles.E[ part_id ]);
+        electron = Compton_SampleSecondaries_standard ( particles, materials.electron_energy_cut[mat_id],
+                                                        part_id, parameters );
+//        printf("ID %i: ===== COMPTON =====   new E %f\n", part_id, particles.E[ part_id ]);
+    }
+
+    if ( next_discrete_process == PHOTON_PHOTOELECTRIC )
+    {
+//        printf("ID %i: ===== PE =====   old E %f\n", part_id, particles.E[ part_id ]);
+        electron = Photoelec_SampleSecondaries_standard ( particles, materials, photon_CS_table,
+                                                          E_index, materials.electron_energy_cut[mat_id],
+                                                          mat_id, part_id, parameters );
+//        printf("ID %i: ===== PE =====   new E %f\n", part_id, particles.E[ part_id ]);
+    }
+
+    if ( next_discrete_process == PHOTON_RAYLEIGH )
+    {
+//        printf("ID %i: ===== RAY =====   old E %f\n", part_id, particles.E[ part_id ]);
+        Rayleigh_SampleSecondaries_Livermore ( particles, materials, photon_CS_table, E_index, mat_id, part_id );
+//        printf("ID %i: ===== RAY =====   new E %f\n", part_id, particles.E[ part_id ]);
+    }
+
+    /// Energy cut /////////////
+
+    // If gamma particle not enough energy (Energy cut)
+    if ( particles.E[ part_id ] <= materials.photon_energy_cut[ mat_id ] )
+    {
+        // Kill without mercy
+        particles.endsimu[ part_id ] = PARTICLE_DEAD;
+    }
+
+    /// Drop energy ////////////
+
+    // If gamma particle is dead (PE, Compton or energy cut)
+    if ( particles.endsimu[ part_id ] == PARTICLE_DEAD &&  particles.E[ part_id ] != 0.0f )
+    {
+        dose_record_standard( dosi, particles.E[ part_id ], pos.x,
+                              pos.y, pos.z );
+    }
+
+    // If electron particle has energy
+    if ( electron.E != 0.0f )
+    {
+        dose_record_standard( dosi, electron.E, pos.x,
+                              pos.y, pos.z );
+    }
+
+}
+
+//////////////////////////////////////////////////////////////////////
+
+
+
 // Se TLE function
 __host__ __device__ void VPIORTN::track_seTLE( ParticlesData particles,
                                                VoxVolumeData<ui16> vol,
@@ -772,6 +1009,30 @@ __global__ void VPIORTN::kernel_device_track_to_out( ParticlesData particles,
 //    printf("%i steps\n", ct);
 
 }
+
+
+/// Experimental
+
+// Device kernel that track particles within the voxelized volume until boundary using Woodcock tracking
+__global__ void VPIORTN::kernel_device_track_to_out_woodcock( ParticlesData particles,
+                                                              VoxVolumeData<ui16> vol,
+                                                              MaterialsTable materials,
+                                                              PhotonCrossSectionTable photon_CS_table,
+                                                              GlobalSimulationParametersData parameters,
+                                                              DoseData dosi,
+                                                              f32 *mumax_table )
+{
+    const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
+    if ( id >= particles.size ) return;
+
+    // Stepping loop - Get out of loop only if the particle was dead and it was a primary
+    while ( particles.endsimu[id] != PARTICLE_DEAD && particles.endsimu[id] != PARTICLE_FREEZE )
+    {
+        VPIORTN::track_to_out_woodcock( particles, vol, materials, photon_CS_table, parameters, dosi, mumax_table, id );
+    }
+
+}
+/////////////////
 
 /*
 // Device kernel that track particles within the voxelized volume until boundary
@@ -1076,6 +1337,57 @@ ui64 VoxPhanIORTNav::m_get_memory_usage()
     return mem;
 }
 
+////:: Experimental
+
+// Use for woodcock navigation
+void VoxPhanIORTNav::m_build_mumax_table()
+{
+    // Init mumax table vector
+    ui32 nb_bins_E = m_cross_sections.photon_CS.data_h.nb_bins;
+    HANDLE_ERROR( cudaMallocManaged( &(m_mumax_table), nb_bins_E * sizeof( ui32 ) ) );
+
+    // Find the most attenuate material
+    f32 max_dens = 0.0;
+    ui32 ind_mat = 0;
+    ui32 i = 0; while ( i < m_materials.data_h.nb_materials )
+    {
+        if ( m_materials.data_h.density[i] > max_dens )
+        {
+            max_dens = m_materials.data_h.density[ i ];
+            ind_mat = i;
+        }
+        ++i;
+    }
+
+    // Build table using max density  [ 1 / Sum( CS ) ]
+    i=0; while ( i < nb_bins_E )
+    {
+        ui32 index = ind_mat * nb_bins_E + i;
+        f32 sum_CS = 0.0;
+
+        if ( m_params.data_h.physics_list[PHOTON_PHOTOELECTRIC] )
+        {
+            sum_CS += m_cross_sections.photon_CS.data_h.Photoelectric_Std_CS[ index ];
+        }
+
+        if ( m_params.data_h.physics_list[PHOTON_COMPTON] )
+        {
+            sum_CS += m_cross_sections.photon_CS.data_h.Compton_Std_CS[ index ];
+        }
+
+        if ( m_params.data_h.physics_list[PHOTON_RAYLEIGH] )
+        {
+            sum_CS += m_cross_sections.photon_CS.data_h.Rayleigh_Lv_CS[ index ];
+        }
+
+        m_mumax_table[ i ] = 1.0 / sum_CS;
+        ++i;
+    }
+
+
+}
+
+
 ////:: Main functions
 
 VoxPhanIORTNav::VoxPhanIORTNav ()
@@ -1114,6 +1426,10 @@ VoxPhanIORTNav::VoxPhanIORTNav ()
     m_coo_hist_map.nb_data = 0;
 
     m_mu_table.flag = analog; // Not used
+
+    // experimental
+    m_flag_woodcock = false;
+    m_mumax_table = NULL;
 
     set_name( "VoxPhanIORTNav" );
 }
@@ -1181,46 +1497,66 @@ void VoxPhanIORTNav::track_to_out ( Particles particles )
     else if ( m_params.data_h.device_target == GPU_DEVICE )
     {
 
-//        printf("Track2out main\n");
-
-        dim3 threads, grid;
-        threads.x = m_params.data_h.gpu_block_size;
-        grid.x = ( particles.size + m_params.data_h.gpu_block_size - 1 ) / m_params.data_h.gpu_block_size;
-        VPIORTN::kernel_device_track_to_out<<<grid, threads>>> ( particles.data_d, m_phantom.data_d, m_materials.data_d,
-                                                              m_cross_sections.photon_CS.data_d,
-                                                              m_params.data_d, m_dose_calculator.dose,
-                                                              m_mu_table, m_hist_map );
-
-//        MaterialsTable *mymat;
-//        mymat = &(m_materials.data_d);
-
-//        VPIORTN::_kernel_device_track_to_out<<<grid, threads>>> ( particles.data_d, m_phantom.data_d, m_materials.data_d,
-//                                                              m_cross_sections.photon_CS.data_d,
-//                                                              m_params.data_d, m_dose_calculator.dose,
-//                                                              m_mu_table, m_hist_map );
-        cuda_error_check ( "Error ", " Kernel_VoxPhanDosi (track to out)" );             
-        cudaDeviceSynchronize();
-
-        // Apply seTLE: splitting and determinstic raycasting
-        if( m_flag_TLE == seTLE )
+        /// experimental
+        if ( m_flag_woodcock )
         {
-            f64 t_start = get_time();
-            m_compress_history_map();
-            GGcout_time ( "Compress history map", get_time()-t_start );
-
-            threads.x = m_params.data_h.gpu_block_size;//
-            grid.x = ( m_coo_hist_map.nb_data + m_params.data_h.gpu_block_size - 1 ) / m_params.data_h.gpu_block_size;
-
-            t_start = get_time();
-            VPIORTN::kernel_device_seTLE<<<grid, threads>>> ( particles.data_d, m_phantom.data_d,
-                                                              m_coo_hist_map, m_dose_calculator.dose,
-                                                              m_mu_table, 1000, 0.0 *eV );
-            cuda_error_check ( "Error ", " Kernel_device_seTLE" );
+            dim3 threads, grid;
+            threads.x = m_params.data_h.gpu_block_size;
+            grid.x = ( particles.size + m_params.data_h.gpu_block_size - 1 ) / m_params.data_h.gpu_block_size;
+            VPIORTN::kernel_device_track_to_out_woodcock<<<grid, threads>>> ( particles.data_d,
+                                                                              m_phantom.data_d,
+                                                                              m_materials.data_d,
+                                                                              m_cross_sections.photon_CS.data_d,
+                                                                              m_params.data_d,
+                                                                              m_dose_calculator.dose,
+                                                                              m_mumax_table );
+            cuda_error_check ( "Error ", " Kernel_VoxPhanIORT (experimental track to out)" );
             cudaDeviceSynchronize();
-            GGcout_time ( "Raycast", get_time()-t_start );
-            GGnewline();
         }
-    }
+        else // Normal code
+        {
+            //        printf("Track2out main\n");
+
+            dim3 threads, grid;
+            threads.x = m_params.data_h.gpu_block_size;
+            grid.x = ( particles.size + m_params.data_h.gpu_block_size - 1 ) / m_params.data_h.gpu_block_size;
+            VPIORTN::kernel_device_track_to_out<<<grid, threads>>> ( particles.data_d, m_phantom.data_d, m_materials.data_d,
+                                                                     m_cross_sections.photon_CS.data_d,
+                                                                     m_params.data_d, m_dose_calculator.dose,
+                                                                     m_mu_table, m_hist_map );
+
+            //        MaterialsTable *mymat;
+            //        mymat = &(m_materials.data_d);
+
+            //        VPIORTN::_kernel_device_track_to_out<<<grid, threads>>> ( particles.data_d, m_phantom.data_d, m_materials.data_d,
+            //                                                              m_cross_sections.photon_CS.data_d,
+            //                                                              m_params.data_d, m_dose_calculator.dose,
+            //                                                              m_mu_table, m_hist_map );
+            cuda_error_check ( "Error ", " Kernel_VoxPhanDosi (track to out)" );
+            cudaDeviceSynchronize();
+
+            // Apply seTLE: splitting and determinstic raycasting
+            if( m_flag_TLE == seTLE )
+            {
+                f64 t_start = get_time();
+                m_compress_history_map();
+                GGcout_time ( "Compress history map", get_time()-t_start );
+
+                threads.x = m_params.data_h.gpu_block_size;//
+                grid.x = ( m_coo_hist_map.nb_data + m_params.data_h.gpu_block_size - 1 ) / m_params.data_h.gpu_block_size;
+
+                t_start = get_time();
+                VPIORTN::kernel_device_seTLE<<<grid, threads>>> ( particles.data_d, m_phantom.data_d,
+                                                                  m_coo_hist_map, m_dose_calculator.dose,
+                                                                  m_mu_table, 1000, 0.0 *eV );
+                cuda_error_check ( "Error ", " Kernel_device_seTLE" );
+                cudaDeviceSynchronize();
+                GGcout_time ( "Raycast", get_time()-t_start );
+                GGnewline();
+            }
+        }
+
+    } // DEVICE
         
 }
 
@@ -1358,6 +1694,12 @@ void VoxPhanIORTNav::initialize ( GlobalSimulationParameters params )
         }
     }
 
+    /// Experimental ///////////
+    if ( m_flag_woodcock )
+    {
+        m_build_mumax_table();
+    }
+
     // Some verbose if required
     if ( params.data_h.display_memory_usage )
     {
@@ -1424,7 +1766,23 @@ void VoxPhanIORTNav::set_kerma_estimator( std::string kind )
     }
     else
     {
-        GGcerr << "Track length estimator not recognized: '" << kind << "'!" << GGendl;
+        GGcerr << "Kerma estimator not recognized: '" << kind << "'!" << GGendl;
+        exit_simulation();
+    }
+}
+
+void VoxPhanIORTNav::set_experimental( std::string kind )
+{
+    // Transform the name of the process in small letter
+    std::transform( kind.begin(), kind.end(), kind.begin(), ::tolower );
+
+    if ( kind == "woodcock" )
+    {
+        m_flag_woodcock = true;
+    }
+    else
+    {
+        GGcerr << "Experimental value not recognized: '" << kind << "'!" << GGendl;
         exit_simulation();
     }
 }
