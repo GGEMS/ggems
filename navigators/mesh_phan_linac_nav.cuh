@@ -42,6 +42,11 @@
 #define OUTSIDE_MESH 0
 #define INSIDE_MESH 1
 
+#define NAV_OPT_FULL 0
+#define NAV_OPT_NONAV 1
+#define NAV_OPT_NOMESH 2        // TODO this one is not implented
+#define NAV_OPT_NOMESH_NONAV 3
+
 // LINAC data (GPU' proof but not a complete SoA support)
 struct LinacData
 {
@@ -104,19 +109,19 @@ namespace MPLINACN
     void kernel_host_track_to_in( ParticlesData particles, LinacData linac, f32 geom_tolerance, ui32 id );
 
 
-    __global__ void kernel_device_track_to_out( ParticlesData particles,
+    __global__ void kernel_device_track_to_out(ParticlesData particles,
                                                 LinacData linac,
                                                 MaterialsTable materials,
                                                 PhotonCrossSectionTable photon_CS,
                                                 GlobalSimulationParametersData parameters,
-                                                bool nav_within_mlc );
+                                                ui8 nav_option );
 
     void kernel_host_track_to_out(ParticlesData particles,
                                   LinacData linac,
                                   MaterialsTable materials,
                                   PhotonCrossSectionTable photon_CS,
                                   GlobalSimulationParametersData parameters,
-                                  bool nav_within_mlc, ui32 id );
+                                  ui8 nav_option, ui32 id );
 
     __host__ __device__ void track_to_out(ParticlesData particles,
                                           LinacData linac,
@@ -125,6 +130,8 @@ namespace MPLINACN
                                           GlobalSimulationParametersData parameters, ui32 id );
 
     __host__ __device__ void track_to_out_nonav( ParticlesData particles, LinacData linac, ui32 id );
+
+    __host__ __device__ void track_to_out_nonav_nomesh( ParticlesData particles, LinacData linac, ui32 id );
 }
 
 class MeshPhanLINACNav : public GGEMSPhantom
@@ -173,7 +180,7 @@ public:
 //                               f32 m10, f32 m11, f32 m12,
 //                               f32 m20, f32 m21, f32 m22 );
 
-    void set_navigation_within_mlc( bool flag );
+    void set_navigation_option( std::string opt );
 
     void set_materials( std::string filename );
     void set_linac_material( std::string mat_name );
@@ -224,7 +231,7 @@ private:
     ui32 m_beam_index;
     ui32 m_field_index;
 
-    bool m_nav_within_mlc;
+    ui8 m_nav_option;
 //
 };
 

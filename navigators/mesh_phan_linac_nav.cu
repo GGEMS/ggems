@@ -1008,8 +1008,6 @@ __host__ __device__ void MPLINACN::track_to_out_nonav( ParticlesData particles, 
         }
     }
 
-    /// TODO - Navigation within element - Kill the particle without mercy
-
     if ( in_obj != HIT_NOTHING )
     {
         particles.endsimu[ id ] = PARTICLE_DEAD;
@@ -1024,13 +1022,82 @@ __host__ __device__ void MPLINACN::track_to_out_nonav( ParticlesData particles, 
 }
 
 
+__host__ __device__ void MPLINACN::track_to_out_nonav_nomesh( ParticlesData particles, LinacData linac,
+                                                              ui32 id )
+{
+    // Read position
+    f32xyz pos;
+    pos.x = particles.px[ id ];
+    pos.y = particles.py[ id ];
+    pos.z = particles.pz[ id ];
+
+    // Read direction
+    f32xyz dir;
+    dir.x = particles.dx[ id ];
+    dir.y = particles.dy[ id ];
+    dir.z = particles.dz[ id ];
+
+    /// Get the hit of the closest geometry //////////////////////////////////
+
+    if ( linac.X_nb_jaw != 0 )
+    {
+        if ( test_ray_AABB( pos, dir, linac.X_jaw_aabb[ 0 ] ) ||
+             test_ray_AABB( pos, dir, linac.X_jaw_aabb[ 1 ] ) )
+        {
+            particles.endsimu[ id ] = PARTICLE_DEAD;
+            return;
+        }
+    }
+
+    if ( linac.Y_nb_jaw != 0 )
+    {
+        if ( test_ray_AABB( pos, dir, linac.Y_jaw_aabb[ 0 ] ) ||
+             test_ray_AABB( pos, dir, linac.Y_jaw_aabb[ 1 ] ) )
+        {
+            particles.endsimu[ id ] = PARTICLE_DEAD;
+            return;
+        }
+    }
+
+    if ( test_ray_AABB( pos, dir, linac.A_bank_aabb ) )
+    {
+        ui16 ileaf = 0; while( ileaf < linac.A_nb_leaves )
+        {
+            // If hit a leaf
+            if ( test_ray_AABB( pos, dir, linac.A_leaf_aabb[ ileaf ] ) )
+            {
+                particles.endsimu[ id ] = PARTICLE_DEAD;
+                return;
+            }
+            ileaf++;
+        }
+    }
+
+    if ( test_ray_AABB( pos, dir, linac.B_bank_aabb ) )
+    {
+        ui16 ileaf = 0; while( ileaf < linac.B_nb_leaves )
+        {
+            // If hit a leaf
+            if ( test_ray_AABB( pos, dir, linac.B_leaf_aabb[ ileaf ] ) )
+            {
+                particles.endsimu[ id ] = PARTICLE_DEAD;
+                return;
+            }
+            ileaf++;
+        }
+    }
+
+    particles.endsimu[ id ] = PARTICLE_FREEZE;
+}
+
+
 // Device kernel that track particles within the voxelized volume until boundary
 __global__ void MPLINACN::kernel_device_track_to_out( ParticlesData particles,
                                                       LinacData linac,
                                                       MaterialsTable materials,
                                                       PhotonCrossSectionTable photon_CS,
                                                       GlobalSimulationParametersData parameters,
-                                                      bool nav_within_mlc )
+                                                      ui8 nav_option )
 {
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
     if ( id >= particles.size ) return;
@@ -1039,30 +1106,39 @@ __global__ void MPLINACN::kernel_device_track_to_out( ParticlesData particles,
     particles.geometry_id[ id ] = 0;
 
     // Stepping loop
-    if ( nav_within_mlc )
+    if ( nav_option == NAV_OPT_FULL )
     {
+#ifdef DEBUG
         // DEBUG
         ui32 i = 0;
+#endif
 
         while ( particles.endsimu[ id ] != PARTICLE_DEAD && particles.endsimu[ id ] != PARTICLE_FREEZE )
         {
             //printf("Step\n");
             MPLINACN::track_to_out( particles, linac, materials, photon_CS, parameters, id );
-
+#ifdef DEBUG
             if ( i > 100 )
             {
                 printf(" ID %i break loop\n", id );
                 break;
             }
-
+#endif
             ++i;
         }
     }
-    else
+    else if ( nav_option == NAV_OPT_NONAV )
     {
         while ( particles.endsimu[ id ] != PARTICLE_DEAD && particles.endsimu[ id ] != PARTICLE_FREEZE )
         {
             MPLINACN::track_to_out_nonav( particles, linac, id );
+        }
+    }
+    else if ( nav_option == NAV_OPT_NOMESH_NONAV )
+    {
+        while ( particles.endsimu[ id ] != PARTICLE_DEAD && particles.endsimu[ id ] != PARTICLE_FREEZE )
+        {
+            MPLINACN::track_to_out_nonav_nomesh( particles, linac, id );
         }
     }
 
@@ -1092,26 +1168,34 @@ void MPLINACN::kernel_host_track_to_out( ParticlesData particles,
                                          MaterialsTable materials,
                                          PhotonCrossSectionTable photon_CS,
                                          GlobalSimulationParametersData parameters,
-                                         bool nav_within_mlc, ui32 id )
+                                         ui8 nav_option, ui32 id )
 {
     // Init geometry ID for navigation
     particles.geometry_id[ id ] = 0;
 
     // Stepping loop
-    if ( nav_within_mlc )
+    if ( nav_option == NAV_OPT_FULL )
     {
         while ( particles.endsimu[ id ] != PARTICLE_DEAD && particles.endsimu[ id ] != PARTICLE_FREEZE )
         {
             MPLINACN::track_to_out( particles, linac, materials, photon_CS, parameters, id );
         }
     }
-    else
+    else if ( nav_option == NAV_OPT_NONAV )
     {
         while ( particles.endsimu[ id ] != PARTICLE_DEAD && particles.endsimu[ id ] != PARTICLE_FREEZE )
         {
             MPLINACN::track_to_out_nonav( particles, linac, id );
         }
     }
+    else if ( nav_option == NAV_OPT_NOMESH_NONAV )
+    {
+        while ( particles.endsimu[ id ] != PARTICLE_DEAD && particles.endsimu[ id ] != PARTICLE_FREEZE )
+        {
+            MPLINACN::track_to_out_nonav_nomesh( particles, linac, id );
+        }
+    }
+
     /// Move the particle back to the global frame ///
 
     // read position and direction
@@ -2495,9 +2579,29 @@ void MeshPhanLINACNav::set_linac_local_axis( f32 m00, f32 m01, f32 m02,
                                      m20, m21, m22 );
 }
 
-void MeshPhanLINACNav::set_navigation_within_mlc( bool flag )
+void MeshPhanLINACNav::set_navigation_option( std::string opt )
 {
-    m_nav_within_mlc = flag;
+    // Transform the name of the process in small letter
+    std::transform( opt.begin(), opt.end(), opt.begin(), ::tolower );
+
+    if ( opt == "full" )
+    {
+        m_nav_option = NAV_OPT_FULL;
+    }
+    else if ( opt == "nonav" )
+    {
+        m_nav_option = NAV_OPT_NONAV;
+    }
+    else if ( opt == "nomesh" )
+    {
+        m_nav_option = NAV_OPT_NOMESH;
+        GGcerr << "NoMesh option for MeshPhanLINACNav is not implemented yet!" << GGendl;
+        exit_simulation();
+    }
+    else if ( opt == "nomeshnonav")
+    {
+        m_nav_option = NAV_OPT_NOMESH_NONAV;
+    }
 }
 
 void MeshPhanLINACNav::set_linac_material( std::string mat_name )
@@ -2608,7 +2712,7 @@ MeshPhanLINACNav::MeshPhanLINACNav ()
     m_beam_index = 0;
     m_field_index = 0;
 
-    m_nav_within_mlc = true;
+    m_nav_option = NAV_OPT_FULL;
     m_materials_filename = "";
     m_linac_material.push_back("");
 
@@ -2654,7 +2758,7 @@ void MeshPhanLINACNav::track_to_out( Particles particles )
             MPLINACN::kernel_host_track_to_out( particles.data_h, m_linac,
                                                 m_materials.data_h, m_cross_sections.photon_CS.data_h,
                                                 m_params.data_h,
-                                                m_nav_within_mlc,
+                                                m_nav_option,
                                                 id );
             ++id;
         }
@@ -2667,7 +2771,7 @@ void MeshPhanLINACNav::track_to_out( Particles particles )
 
         MPLINACN::kernel_device_track_to_out<<<grid, threads>>> ( particles.data_d, m_linac,
                                                                   m_materials.data_d, m_cross_sections.photon_CS.data_d,
-                                                                  m_params.data_d, m_nav_within_mlc );
+                                                                  m_params.data_d, m_nav_option );
         cuda_error_check ( "Error ", " Kernel_MeshPhanLINACNav (track to in)" );
         cudaDeviceSynchronize();
     }
