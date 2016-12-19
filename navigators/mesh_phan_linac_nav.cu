@@ -2793,7 +2793,7 @@ void MeshPhanLINACNav::initialize( GlobalSimulationParameters params )
         exit_simulation();
     }
 
-    if ( m_nav_within_mlc && ( m_materials_filename == "" || m_linac_material[ 0 ] == "" ) )
+    if ( m_materials_filename == "" || m_linac_material[ 0 ] == "" )
     {
         GGcerr << "MeshPhanLINACNav: navigation required but material information was not provided!" << GGendl;
         exit_simulation();
