@@ -684,7 +684,7 @@ ui64 VoxPhanDosiFastNav::m_get_memory_usage()
     // First the voxelized phantom
     mem += ( m_phantom.data_h.number_of_voxels * sizeof( ui16 ) );
     // Then material data
-    mem += ( ( 3 * m_materials.data_h.nb_elements_total + 23 * m_materials.data_h.nb_materials ) * sizeof( f32 ) );
+    mem += ( ( 3 * m_materials.tables.data_h.nb_elements_total + 23 * m_materials.tables.data_h.nb_materials ) * sizeof( f32 ) );
     // Then cross sections (gamma)
     ui64 n = m_cross_sections.photon_CS.data_h.nb_bins;
     ui64 k = m_cross_sections.photon_CS.data_h.nb_mat;
@@ -854,7 +854,7 @@ void VoxPhanDosiFastNav::track_to_out ( Particles particles )
         {
 
             VPDFN::photons_track_to_out( particles.data_h, m_electrons_buffer, m_phantom.data_h,
-                                         m_materials.data_h, m_cross_sections.photon_CS.data_h,
+                                         m_materials.tables.data_h, m_cross_sections.photon_CS.data_h,
                                          m_params.data_h, m_dose_calculator.dose,
                                          id );
             ++id;
@@ -870,7 +870,7 @@ void VoxPhanDosiFastNav::track_to_out ( Particles particles )
         grid.x = ( particles.size + m_params.data_h.gpu_block_size - 1 ) / m_params.data_h.gpu_block_size;                
 
         VPDFN::kernel_photons_track_to_out<<<grid, threads>>>( particles.data_d, m_electrons_buffer, m_phantom.data_d,
-                                                               m_materials.data_d, m_cross_sections.photon_CS.data_d,
+                                                               m_materials.tables.data_d, m_cross_sections.photon_CS.data_d,
                                                                m_params.data_d, m_dose_calculator.dose );
         cuda_error_check ( "Error ", " Kernel_VoxPhanDosi (track to out)" );
 
@@ -878,7 +878,7 @@ void VoxPhanDosiFastNav::track_to_out ( Particles particles )
 
         // Then track electrons
         VPDFN::kernel_electrons_track_to_out<<<grid, threads>>>( particles.data_d, m_electrons_buffer, m_phantom.data_d,
-                                                                 m_materials.data_d, m_cross_sections.electron_CS.data_d,
+                                                                 m_materials.tables.data_d, m_cross_sections.electron_CS.data_d,
                                                                  m_params.data_d, m_dose_calculator.dose );
         GGcout << "Electrons done!" << GGendl;
 
@@ -905,7 +905,7 @@ void VoxPhanDosiFastNav::export_density_map( std::string filename )
     ui32 i = 0;
     while (i < N)
     {
-        density[ i ] = m_materials.data_h.density[ m_phantom.data_h.values[ i ] ];
+        density[ i ] = m_materials.tables.data_h.density[ m_phantom.data_h.values[ i ] ];
         ++i;
     }
 

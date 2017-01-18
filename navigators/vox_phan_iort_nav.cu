@@ -1170,7 +1170,7 @@ void VoxPhanIORTNav::m_init_mu_table()
     }
 
     // Build mu and mu_en according material
-    m_mu_table.nb_mat = m_materials.data_h.nb_materials;
+    m_mu_table.nb_mat = m_materials.tables.data_h.nb_materials;
     m_mu_table.E_max = m_params.data_h.cs_table_max_E;
     m_mu_table.E_min = m_params.data_h.cs_table_min_E;
     m_mu_table.nb_bins = m_params.data_h.cs_table_nbins;
@@ -1205,11 +1205,11 @@ void VoxPhanIORTNav::m_init_mu_table()
 
             // For each element of the material
             mu_over_rho = 0.0f; mu_en_over_rho = 0.0f;
-            iZ=0; while (iZ < m_materials.data_h.nb_elements[ imat ]) {
+            iZ=0; while (iZ < m_materials.tables.data_h.nb_elements[ imat ]) {
 
                 // Get Z and mass fraction
-                Z = m_materials.data_h.mixture[ m_materials.data_h.index[ imat ] + iZ ];
-                frac = m_materials.data_h.mass_fraction[ m_materials.data_h.index[ imat ] + iZ ];
+                Z = m_materials.tables.data_h.mixture[ m_materials.tables.data_h.index[ imat ] + iZ ];
+                frac = m_materials.tables.data_h.mass_fraction[ m_materials.tables.data_h.index[ imat ] + iZ ];
 
                 // Get energy index
                 mu_index_E = mu_index_energy[ Z ];
@@ -1234,8 +1234,8 @@ void VoxPhanIORTNav::m_init_mu_table()
             }
 
             // Store values
-            m_mu_table.mu[ abs_index ] = mu_over_rho * m_materials.data_h.density[ imat ] / (g/cm3);
-            m_mu_table.mu_en[ abs_index ] = mu_en_over_rho * m_materials.data_h.density[ imat ] / (g/cm3);
+            m_mu_table.mu[ abs_index ] = mu_over_rho * m_materials.tables.data_h.density[ imat ] / (g/cm3);
+            m_mu_table.mu_en[ abs_index ] = mu_en_over_rho * m_materials.tables.data_h.density[ imat ] / (g/cm3);
 
             ++i;
 
@@ -1308,7 +1308,7 @@ ui64 VoxPhanIORTNav::m_get_memory_usage()
     // First the voxelized phantom
     mem += ( m_phantom.data_h.number_of_voxels * sizeof( ui16 ) );
     // Then material data
-    mem += ( ( 3 * m_materials.data_h.nb_elements_total + 23 * m_materials.data_h.nb_materials ) * sizeof( f32 ) );
+    mem += ( ( 3 * m_materials.tables.data_h.nb_elements_total + 23 * m_materials.tables.data_h.nb_materials ) * sizeof( f32 ) );
     // Then cross sections (gamma)
     ui64 n = m_cross_sections.photon_CS.data_h.nb_bins;
     ui64 k = m_cross_sections.photon_CS.data_h.nb_mat;
@@ -1349,11 +1349,11 @@ void VoxPhanIORTNav::m_build_mumax_table()
     // Find the most attenuate material
     f32 max_dens = 0.0;
     ui32 ind_mat = 0;
-    ui32 i = 0; while ( i < m_materials.data_h.nb_materials )
+    ui32 i = 0; while ( i < m_materials.tables.data_h.nb_materials )
     {
-        if ( m_materials.data_h.density[i] > max_dens )
+        if ( m_materials.tables.data_h.density[i] > max_dens )
         {
-            max_dens = m_materials.data_h.density[ i ];
+            max_dens = m_materials.tables.data_h.density[ i ];
             ind_mat = i;
         }
         ++i;
@@ -1473,7 +1473,7 @@ void VoxPhanIORTNav::track_to_out ( Particles particles )
     if ( m_params.data_h.device_target == CPU_DEVICE )
     {
         VPIORTN::kernel_host_track_to_out( particles.data_h, m_phantom.data_h,
-                                           m_materials.data_h, m_cross_sections.photon_CS.data_h,
+                                           m_materials.tables.data_h, m_cross_sections.photon_CS.data_h,
                                            m_params.data_h, m_dose_calculator.dose,
                                            m_mu_table, m_hist_map );
 
@@ -1505,7 +1505,7 @@ void VoxPhanIORTNav::track_to_out ( Particles particles )
             grid.x = ( particles.size + m_params.data_h.gpu_block_size - 1 ) / m_params.data_h.gpu_block_size;
             VPIORTN::kernel_device_track_to_out_woodcock<<<grid, threads>>> ( particles.data_d,
                                                                               m_phantom.data_d,
-                                                                              m_materials.data_d,
+                                                                              m_materials.tables.data_d,
                                                                               m_cross_sections.photon_CS.data_d,
                                                                               m_params.data_d,
                                                                               m_dose_calculator.dose,
@@ -1520,7 +1520,7 @@ void VoxPhanIORTNav::track_to_out ( Particles particles )
             dim3 threads, grid;
             threads.x = m_params.data_h.gpu_block_size;
             grid.x = ( particles.size + m_params.data_h.gpu_block_size - 1 ) / m_params.data_h.gpu_block_size;
-            VPIORTN::kernel_device_track_to_out<<<grid, threads>>> ( particles.data_d, m_phantom.data_d, m_materials.data_d,
+            VPIORTN::kernel_device_track_to_out<<<grid, threads>>> ( particles.data_d, m_phantom.data_d, m_materials.tables.data_d,
                                                                      m_cross_sections.photon_CS.data_d,
                                                                      m_params.data_d, m_dose_calculator.dose,
                                                                      m_mu_table, m_hist_map );
@@ -1580,7 +1580,7 @@ void VoxPhanIORTNav::export_density_map( std::string filename )
     ui32 i = 0;
     while (i < N)
     {
-        density[ i ] = m_materials.data_h.density[ m_phantom.data_h.values[ i ] ];
+        density[ i ] = m_materials.tables.data_h.density[ m_phantom.data_h.values[ i ] ];
         ++i;
     }
 

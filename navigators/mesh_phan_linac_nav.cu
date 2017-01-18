@@ -2756,7 +2756,7 @@ void MeshPhanLINACNav::track_to_out( Particles particles )
         while ( id<particles.size )
         {
             MPLINACN::kernel_host_track_to_out( particles.data_h, m_linac,
-                                                m_materials.data_h, m_cross_sections.photon_CS.data_h,
+                                                m_materials.tables.data_h, m_cross_sections.photon_CS.data_h,
                                                 m_params.data_h,
                                                 m_nav_option,
                                                 id );
@@ -2770,7 +2770,7 @@ void MeshPhanLINACNav::track_to_out( Particles particles )
         grid.x = ( particles.size + m_params.data_h.gpu_block_size - 1 ) / m_params.data_h.gpu_block_size;
 
         MPLINACN::kernel_device_track_to_out<<<grid, threads>>> ( particles.data_d, m_linac,
-                                                                  m_materials.data_d, m_cross_sections.photon_CS.data_d,
+                                                                  m_materials.tables.data_d, m_cross_sections.photon_CS.data_d,
                                                                   m_params.data_d, m_nav_option );
         cuda_error_check ( "Error ", " Kernel_MeshPhanLINACNav (track to in)" );
         cudaDeviceSynchronize();

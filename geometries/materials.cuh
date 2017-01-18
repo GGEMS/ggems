@@ -119,6 +119,12 @@ struct MaterialsTable {
     f32 *density;
 };
 
+// Struct that handle CPU&GPU CS data
+struct MaterialsData {
+    MaterialsTable data_h;
+    MaterialsTable data_d;
+};
+
 
 // This class is used to build the material table
 class Materials {
@@ -128,8 +134,7 @@ class Materials {
         void load_materials_database(std::string filename);        
         void initialize(std::vector<std::string> mats_list, GlobalSimulationParameters params);
 
-        MaterialsTable data_h;
-        MaterialsTable data_d;
+        MaterialsData tables;
 
         void print();
         

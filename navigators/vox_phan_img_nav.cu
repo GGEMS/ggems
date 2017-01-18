@@ -120,7 +120,6 @@ __host__ __device__ void VPIN::track_to_out ( ParticlesData particles,
         SecParticle electron = photon_resolve_discrete_process ( particles, parameters, photon_CS_table,
                                                                  materials, mat_id, part_id );
 
-
         // If the process is PHOTON_COMPTON or PHOTON_RAYLEIGH the scatter
         // order is incremented
         if( next_discrete_process == PHOTON_COMPTON
@@ -199,8 +198,8 @@ bool VoxPhanImgNav::m_check_mandatory()
 {
 
     if ( m_phantom.data_h.nb_vox_x == 0 || m_phantom.data_h.nb_vox_y == 0 || m_phantom.data_h.nb_vox_z == 0 ||
-            m_phantom.data_h.spacing_x == 0 || m_phantom.data_h.spacing_y == 0 || m_phantom.data_h.spacing_z == 0 ||
-            m_phantom.list_of_materials.size() == 0 || m_materials_filename.empty() )
+         m_phantom.data_h.spacing_x == 0 || m_phantom.data_h.spacing_y == 0 || m_phantom.data_h.spacing_z == 0 ||
+         m_phantom.list_of_materials.size() == 0 || m_materials_filename.empty() )
     {
         return false;
     }
@@ -219,7 +218,7 @@ ui64 VoxPhanImgNav::m_get_memory_usage()
     // First the voxelized phantom
     mem += ( m_phantom.data_h.number_of_voxels * sizeof( ui16 ) );
     // Then material data
-    mem += ( ( 3 * m_materials.data_h.nb_elements_total + 23 * m_materials.data_h.nb_materials ) * sizeof( f32 ) );
+    mem += ( ( 3 * m_materials.tables.data_h.nb_elements_total + 23 * m_materials.tables.data_h.nb_materials ) * sizeof( f32 ) );
     // Then cross sections (gamma)
     ui64 n = m_cross_sections.photon_CS.data_h.nb_bins;
     ui64 k = m_cross_sections.photon_CS.data_h.nb_mat;
@@ -282,7 +281,7 @@ void VoxPhanImgNav::track_to_out ( Particles particles )
         {
 
             VPIN::kernel_host_track_to_out ( particles.data_h, m_phantom.data_h,
-                                             m_materials.data_h, m_cross_sections.photon_CS.data_h, m_params.data_h, id );
+                                             m_materials.tables.data_h, m_cross_sections.photon_CS.data_h, m_params.data_h, id );
             ++id;
         }
     }
@@ -294,7 +293,7 @@ void VoxPhanImgNav::track_to_out ( Particles particles )
         grid.x = ( particles.size + m_params.data_h.gpu_block_size - 1 ) / m_params.data_h.gpu_block_size;
 
         // DEBUG
-        VPIN::kernel_device_track_to_out<<<grid, threads>>> ( particles.data_d, m_phantom.data_d, m_materials.data_d,
+        VPIN::kernel_device_track_to_out<<<grid, threads>>> ( particles.data_d, m_phantom.data_d, m_materials.tables.data_d,
                                                               m_cross_sections.photon_CS.data_d, m_params.data_d );
         cuda_error_check ( "Error ", " Kernel_VoxPhanImgNav (track to out)" );
         cudaDeviceSynchronize();

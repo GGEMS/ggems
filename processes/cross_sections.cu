@@ -413,8 +413,8 @@ void CrossSections::initialize(Materials materials, GlobalSimulationParameters p
     // Store global parameters
     m_parameters = parameters;
     m_nb_bins = m_parameters.data_h.cs_table_nbins;
-    m_nb_mat = materials.data_h.nb_materials;
-    m_materials = materials.data_h;
+    m_nb_mat = materials.tables.data_h.nb_materials;
+    m_materials = materials.tables.data_h;
 
     // Check if everything was set properly
     if ( !m_check_mandatory() ) {

@@ -226,7 +226,7 @@ void EmCalculator::compute_photon_tracking_uncorrelated_model( std::string mat_n
 
             // Get scattering and the dropped energy
             photon_resolve_discrete_process( m_part_manager.particles.data_h, m_params.data_h, m_cross_sections.photon_CS.data_h,
-                                             m_materials.data_h, mat_id, 0 );
+                                             m_materials.tables.data_h, mat_id, 0 );
 
             if ( process == PHOTON_PHOTOELECTRIC )
             {
@@ -533,7 +533,7 @@ void EmCalculator::compute_photon_tracking_correlated_model( std::string mat_nam
 
             // Get scattering and the dropped energy
             photon_resolve_discrete_process( m_part_manager.particles.data_h, m_params.data_h, m_cross_sections.photon_CS.data_h,
-                                             m_materials.data_h, mat_id, 0 );
+                                             m_materials.tables.data_h, mat_id, 0 );
 
             // edep
             edep = energy - m_part_manager.particles.data_h.E[0];

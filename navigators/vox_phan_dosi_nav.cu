@@ -752,7 +752,7 @@ ui64 VoxPhanDosiNav::m_get_memory_usage()
     // First the voxelized phantom
     mem += ( m_phantom.data_h.number_of_voxels * sizeof( ui16 ) );
     // Then material data
-    mem += ( ( 3 * m_materials.data_h.nb_elements_total + 23 * m_materials.data_h.nb_materials ) * sizeof( f32 ) );
+    mem += ( ( 3 * m_materials.tables.data_h.nb_elements_total + 23 * m_materials.tables.data_h.nb_materials ) * sizeof( f32 ) );
     // Then cross sections (gamma)
     ui64 n = m_cross_sections.photon_CS.data_h.nb_bins;
     ui64 k = m_cross_sections.photon_CS.data_h.nb_mat;
@@ -830,7 +830,7 @@ void VoxPhanDosiNav::track_to_out ( Particles particles )
         {
 
             VPDN::kernel_host_track_to_out ( particles.data_h, m_phantom.data_h,
-                                             m_materials.data_h, m_cross_sections.photon_CS.data_h, m_cross_sections.electron_CS.data_h,
+                                             m_materials.tables.data_h, m_cross_sections.photon_CS.data_h, m_cross_sections.electron_CS.data_h,
                                              m_params.data_h, m_dose_calculator.dose,
                                              id );
 
@@ -843,7 +843,7 @@ void VoxPhanDosiNav::track_to_out ( Particles particles )
         threads.x = m_params.data_h.gpu_block_size;//
         grid.x = ( particles.size + m_params.data_h.gpu_block_size - 1 ) / m_params.data_h.gpu_block_size;        
 
-        VPDN::kernel_device_track_to_out<<<grid, threads>>> ( particles.data_d, m_phantom.data_d, m_materials.data_d,
+        VPDN::kernel_device_track_to_out<<<grid, threads>>> ( particles.data_d, m_phantom.data_d, m_materials.tables.data_d,
                                                               m_cross_sections.photon_CS.data_d,
                                                               m_cross_sections.electron_CS.data_d,
                                                               m_params.data_d, m_dose_calculator.dose );
@@ -875,7 +875,7 @@ void VoxPhanDosiNav::export_density_map( std::string filename )
     ui32 i = 0;
     while (i < N)
     {
-        density[ i ] = m_materials.data_h.density[ m_phantom.data_h.values[ i ] ];
+        density[ i ] = m_materials.tables.data_h.density[ m_phantom.data_h.values[ i ] ];
         ++i;
     }
 

@@ -220,7 +220,7 @@ void DoseCalculator::m_dose_to_phantom_calculation( ui32 dosel_id_x, ui32 dosel_
 #endif
 
     // Get density for this voxel
-    f64 density = m_materials.data_h.density[ m_phantom.data_h.values[ index_phantom.w ] ]; // density given by the material id
+    f64 density = m_materials.tables.data_h.density[ m_phantom.data_h.values[ index_phantom.w ] ]; // density given by the material id
 
     // Compute the dose
     ui32 index = dosel_id_z * dose.slice_nb_dosels + dosel_id_y * dose.nb_dosels.x + dosel_id_x;

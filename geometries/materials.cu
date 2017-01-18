@@ -685,100 +685,100 @@ void Materials::m_copy_materials_table_cpu2gpu() {
     ui32 k = m_nb_elements_total;
 
     // First allocate the GPU mem for the scene
-    HANDLE_ERROR( cudaMalloc((void**) &data_d.nb_elements, n*sizeof(ui16)) );
-    HANDLE_ERROR( cudaMalloc((void**) &data_d.index, n*sizeof(ui16)) );
+    HANDLE_ERROR( cudaMalloc((void**) &tables.data_d.nb_elements, n*sizeof(ui16)) );
+    HANDLE_ERROR( cudaMalloc((void**) &tables.data_d.index, n*sizeof(ui16)) );
 
-    HANDLE_ERROR( cudaMalloc((void**) &data_d.mixture, k*sizeof(ui16)) );
-    HANDLE_ERROR( cudaMalloc((void**) &data_d.atom_num_dens, k*sizeof(f32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &data_d.mass_fraction, k*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &tables.data_d.mixture, k*sizeof(ui16)) );
+    HANDLE_ERROR( cudaMalloc((void**) &tables.data_d.atom_num_dens, k*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &tables.data_d.mass_fraction, k*sizeof(f32)) );
 
-    HANDLE_ERROR( cudaMalloc((void**) &data_d.nb_atoms_per_vol, n*sizeof(f32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &data_d.nb_electrons_per_vol, n*sizeof(f32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &data_d.electron_mean_excitation_energy, n*sizeof(ui32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &data_d.rad_length, n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &tables.data_d.nb_atoms_per_vol, n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &tables.data_d.nb_electrons_per_vol, n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &tables.data_d.electron_mean_excitation_energy, n*sizeof(ui32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &tables.data_d.rad_length, n*sizeof(f32)) );
 
-    HANDLE_ERROR( cudaMalloc((void**) &data_d.photon_energy_cut, n*sizeof(f32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &data_d.electron_energy_cut, n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &tables.data_d.photon_energy_cut, n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &tables.data_d.electron_energy_cut, n*sizeof(f32)) );
 
-    HANDLE_ERROR( cudaMalloc((void**) &data_d.fX0, n*sizeof(f32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &data_d.fX1, n*sizeof(f32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &data_d.fD0, n*sizeof(f32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &data_d.fC, n*sizeof(f32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &data_d.fA, n*sizeof(f32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &data_d.fM, n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &tables.data_d.fX0, n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &tables.data_d.fX1, n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &tables.data_d.fD0, n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &tables.data_d.fC, n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &tables.data_d.fA, n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &tables.data_d.fM, n*sizeof(f32)) );
 
-    HANDLE_ERROR( cudaMalloc((void**) &data_d.fF1, n*sizeof(f32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &data_d.fF2, n*sizeof(f32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &data_d.fEnergy0, n*sizeof(f32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &data_d.fEnergy1, n*sizeof(f32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &data_d.fEnergy2, n*sizeof(f32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &data_d.fLogEnergy1, n*sizeof(f32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &data_d.fLogEnergy2, n*sizeof(f32)) );
-    HANDLE_ERROR( cudaMalloc((void**) &data_d.fLogMeanExcitationEnergy, n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &tables.data_d.fF1, n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &tables.data_d.fF2, n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &tables.data_d.fEnergy0, n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &tables.data_d.fEnergy1, n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &tables.data_d.fEnergy2, n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &tables.data_d.fLogEnergy1, n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &tables.data_d.fLogEnergy2, n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &tables.data_d.fLogMeanExcitationEnergy, n*sizeof(f32)) );
 
-    HANDLE_ERROR( cudaMalloc((void**) &data_d.density, n*sizeof(f32)) );
+    HANDLE_ERROR( cudaMalloc((void**) &tables.data_d.density, n*sizeof(f32)) );
 
     // Copy data to the GPU
-    data_d.nb_materials = data_h.nb_materials;
-    data_d.nb_elements_total = data_h.nb_elements_total;
+    tables.data_d.nb_materials = tables.data_h.nb_materials;
+    tables.data_d.nb_elements_total = tables.data_h.nb_elements_total;
 
-    HANDLE_ERROR( cudaMemcpy( data_d.nb_elements, data_h.nb_elements,
+    HANDLE_ERROR( cudaMemcpy( tables.data_d.nb_elements, tables.data_h.nb_elements,
                              n*sizeof(ui16), cudaMemcpyHostToDevice) );
-    HANDLE_ERROR( cudaMemcpy( data_d.index, data_h.index,
+    HANDLE_ERROR( cudaMemcpy( tables.data_d.index,tables.data_h.index,
                              n*sizeof(ui16), cudaMemcpyHostToDevice) );
 
-    HANDLE_ERROR( cudaMemcpy( data_d.mixture, data_h.mixture,
+    HANDLE_ERROR( cudaMemcpy( tables.data_d.mixture, tables.data_h.mixture,
                              k*sizeof(ui16), cudaMemcpyHostToDevice) );
-    HANDLE_ERROR( cudaMemcpy( data_d.atom_num_dens, data_h.atom_num_dens,
+    HANDLE_ERROR( cudaMemcpy( tables.data_d.atom_num_dens, tables.data_h.atom_num_dens,
                              k*sizeof(f32), cudaMemcpyHostToDevice) );
-    HANDLE_ERROR( cudaMemcpy( data_d.mass_fraction, data_h.mass_fraction,
+    HANDLE_ERROR( cudaMemcpy( tables.data_d.mass_fraction, tables.data_h.mass_fraction,
                              k*sizeof(f32), cudaMemcpyHostToDevice) );
 
-    HANDLE_ERROR( cudaMemcpy( data_d.nb_atoms_per_vol, data_h.nb_atoms_per_vol,
+    HANDLE_ERROR( cudaMemcpy( tables.data_d.nb_atoms_per_vol, tables.data_h.nb_atoms_per_vol,
                              n*sizeof(f32), cudaMemcpyHostToDevice) );
-    HANDLE_ERROR( cudaMemcpy( data_d.nb_electrons_per_vol, data_h.nb_electrons_per_vol,
+    HANDLE_ERROR( cudaMemcpy( tables.data_d.nb_electrons_per_vol, tables.data_h.nb_electrons_per_vol,
                              n*sizeof(f32), cudaMemcpyHostToDevice) );
-    HANDLE_ERROR( cudaMemcpy( data_d.electron_mean_excitation_energy, data_h.electron_mean_excitation_energy,
+    HANDLE_ERROR( cudaMemcpy( tables.data_d.electron_mean_excitation_energy, tables.data_h.electron_mean_excitation_energy,
                              n*sizeof(f32), cudaMemcpyHostToDevice) );
-    HANDLE_ERROR( cudaMemcpy( data_d.rad_length, data_h.rad_length,
-                             n*sizeof(f32), cudaMemcpyHostToDevice) );
-
-    HANDLE_ERROR( cudaMemcpy( data_d.photon_energy_cut, data_h.photon_energy_cut,
-                             n*sizeof(f32), cudaMemcpyHostToDevice) );
-    HANDLE_ERROR( cudaMemcpy( data_d.electron_energy_cut, data_h.electron_energy_cut,
+    HANDLE_ERROR( cudaMemcpy( tables.data_d.rad_length, tables.data_h.rad_length,
                              n*sizeof(f32), cudaMemcpyHostToDevice) );
 
-    HANDLE_ERROR( cudaMemcpy( data_d.fX0, data_h.fX0,
+    HANDLE_ERROR( cudaMemcpy( tables.data_d.photon_energy_cut, tables.data_h.photon_energy_cut,
                              n*sizeof(f32), cudaMemcpyHostToDevice) );
-    HANDLE_ERROR( cudaMemcpy( data_d.fX1, data_h.fX1,
-                             n*sizeof(f32), cudaMemcpyHostToDevice) );
-    HANDLE_ERROR( cudaMemcpy( data_d.fD0, data_h.fD0,
-                             n*sizeof(f32), cudaMemcpyHostToDevice) );
-    HANDLE_ERROR( cudaMemcpy( data_d.fC, data_h.fC,
-                             n*sizeof(f32), cudaMemcpyHostToDevice) );
-    HANDLE_ERROR( cudaMemcpy( data_d.fA, data_h.fA,
-                             n*sizeof(f32), cudaMemcpyHostToDevice) );
-    HANDLE_ERROR( cudaMemcpy( data_d.fM, data_h.fM,
+    HANDLE_ERROR( cudaMemcpy( tables.data_d.electron_energy_cut, tables.data_h.electron_energy_cut,
                              n*sizeof(f32), cudaMemcpyHostToDevice) );
 
-    HANDLE_ERROR( cudaMemcpy( data_d.fF1, data_h.fF1,
+    HANDLE_ERROR( cudaMemcpy( tables.data_d.fX0, tables.data_h.fX0,
                              n*sizeof(f32), cudaMemcpyHostToDevice) );
-    HANDLE_ERROR( cudaMemcpy( data_d.fF2, data_h.fF2,
+    HANDLE_ERROR( cudaMemcpy( tables.data_d.fX1, tables.data_h.fX1,
                              n*sizeof(f32), cudaMemcpyHostToDevice) );
-    HANDLE_ERROR( cudaMemcpy( data_d.fEnergy0, data_h.fEnergy0,
+    HANDLE_ERROR( cudaMemcpy( tables.data_d.fD0, tables.data_h.fD0,
                              n*sizeof(f32), cudaMemcpyHostToDevice) );
-    HANDLE_ERROR( cudaMemcpy( data_d.fEnergy1, data_h.fEnergy1,
+    HANDLE_ERROR( cudaMemcpy( tables.data_d.fC, tables.data_h.fC,
                              n*sizeof(f32), cudaMemcpyHostToDevice) );
-    HANDLE_ERROR( cudaMemcpy( data_d.fEnergy2, data_h.fEnergy2,
+    HANDLE_ERROR( cudaMemcpy( tables.data_d.fA, tables.data_h.fA,
                              n*sizeof(f32), cudaMemcpyHostToDevice) );
-    HANDLE_ERROR( cudaMemcpy( data_d.fLogEnergy1, data_h.fLogEnergy1,
-                             n*sizeof(f32), cudaMemcpyHostToDevice) );
-    HANDLE_ERROR( cudaMemcpy( data_d.fLogEnergy2, data_h.fLogEnergy2,
-                             n*sizeof(f32), cudaMemcpyHostToDevice) );
-    HANDLE_ERROR( cudaMemcpy( data_d.fLogMeanExcitationEnergy, data_h.fLogMeanExcitationEnergy,
+    HANDLE_ERROR( cudaMemcpy( tables.data_d.fM, tables.data_h.fM,
                              n*sizeof(f32), cudaMemcpyHostToDevice) );
 
-    HANDLE_ERROR( cudaMemcpy( data_d.density, data_h.density,
+    HANDLE_ERROR( cudaMemcpy( tables.data_d.fF1, tables.data_h.fF1,
+                             n*sizeof(f32), cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy( tables.data_d.fF2, tables.data_h.fF2,
+                             n*sizeof(f32), cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy( tables.data_d.fEnergy0, tables.data_h.fEnergy0,
+                             n*sizeof(f32), cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy( tables.data_d.fEnergy1, tables.data_h.fEnergy1,
+                             n*sizeof(f32), cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy( tables.data_d.fEnergy2, tables.data_h.fEnergy2,
+                             n*sizeof(f32), cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy( tables.data_d.fLogEnergy1, tables.data_h.fLogEnergy1,
+                             n*sizeof(f32), cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy( tables.data_d.fLogEnergy2, tables.data_h.fLogEnergy2,
+                             n*sizeof(f32), cudaMemcpyHostToDevice) );
+    HANDLE_ERROR( cudaMemcpy( tables.data_d.fLogMeanExcitationEnergy, tables.data_h.fLogMeanExcitationEnergy,
+                             n*sizeof(f32), cudaMemcpyHostToDevice) );
+
+    HANDLE_ERROR( cudaMemcpy( tables.data_d.density, tables.data_h.density,
                              n*sizeof(f32), cudaMemcpyHostToDevice) );
 
 }
@@ -788,30 +788,30 @@ void Materials::m_build_materials_table(GlobalSimulationParameters params, std::
 
     // First allocated data to the structure according the number of materials
     m_nb_materials = mats_list.size();
-    data_h.nb_materials = mats_list.size();
-    data_h.nb_elements = (ui16*)malloc(sizeof(ui16)*m_nb_materials);
-    data_h.index = (ui16*)malloc(sizeof(ui16)*m_nb_materials);
-    data_h.nb_atoms_per_vol = (f32*)malloc(sizeof(f32)*m_nb_materials);
-    data_h.nb_electrons_per_vol = (f32*)malloc(sizeof(f32)*m_nb_materials);
-    data_h.electron_mean_excitation_energy = (f32*)malloc(sizeof(f32)*m_nb_materials);
-    data_h.rad_length = (f32*)malloc(sizeof(f32)*m_nb_materials);
-    data_h.photon_energy_cut = (f32*)malloc(sizeof(f32)*m_nb_materials);
-    data_h.electron_energy_cut = (f32*)malloc(sizeof(f32)*m_nb_materials);
-    data_h.fX0 = (f32*)malloc(sizeof(f32)*m_nb_materials);
-    data_h.fX1 = (f32*)malloc(sizeof(f32)*m_nb_materials);
-    data_h.fD0 = (f32*)malloc(sizeof(f32)*m_nb_materials);
-    data_h.fC = (f32*)malloc(sizeof(f32)*m_nb_materials);
-    data_h.fA = (f32*)malloc(sizeof(f32)*m_nb_materials);
-    data_h.fM = (f32*)malloc(sizeof(f32)*m_nb_materials);
-    data_h.density = (f32*)malloc(sizeof(f32)*m_nb_materials);
-    data_h.fF1 = (f32*)malloc(sizeof(f32)*m_nb_materials);
-    data_h.fF2 = (f32*)malloc(sizeof(f32)*m_nb_materials);
-    data_h.fEnergy0 = (f32*)malloc(sizeof(f32)*m_nb_materials);
-    data_h.fEnergy1 = (f32*)malloc(sizeof(f32)*m_nb_materials);
-    data_h.fEnergy2 = (f32*)malloc(sizeof(f32)*m_nb_materials);
-    data_h.fLogEnergy1 = (f32*)malloc(sizeof(f32)*m_nb_materials);
-    data_h.fLogEnergy2 = (f32*)malloc(sizeof(f32)*m_nb_materials);
-    data_h.fLogMeanExcitationEnergy = (f32*)malloc(sizeof(f32)*m_nb_materials);
+    tables.data_h.nb_materials = mats_list.size();
+    tables.data_h.nb_elements = (ui16*)malloc(sizeof(ui16)*m_nb_materials);
+    tables.data_h.index = (ui16*)malloc(sizeof(ui16)*m_nb_materials);
+    tables.data_h.nb_atoms_per_vol = (f32*)malloc(sizeof(f32)*m_nb_materials);
+    tables.data_h.nb_electrons_per_vol = (f32*)malloc(sizeof(f32)*m_nb_materials);
+    tables.data_h.electron_mean_excitation_energy = (f32*)malloc(sizeof(f32)*m_nb_materials);
+    tables.data_h.rad_length = (f32*)malloc(sizeof(f32)*m_nb_materials);
+    tables.data_h.photon_energy_cut = (f32*)malloc(sizeof(f32)*m_nb_materials);
+    tables.data_h.electron_energy_cut = (f32*)malloc(sizeof(f32)*m_nb_materials);
+    tables.data_h.fX0 = (f32*)malloc(sizeof(f32)*m_nb_materials);
+    tables.data_h.fX1 = (f32*)malloc(sizeof(f32)*m_nb_materials);
+    tables.data_h.fD0 = (f32*)malloc(sizeof(f32)*m_nb_materials);
+    tables.data_h.fC = (f32*)malloc(sizeof(f32)*m_nb_materials);
+    tables.data_h.fA = (f32*)malloc(sizeof(f32)*m_nb_materials);
+    tables.data_h.fM = (f32*)malloc(sizeof(f32)*m_nb_materials);
+    tables.data_h.density = (f32*)malloc(sizeof(f32)*m_nb_materials);
+    tables.data_h.fF1 = (f32*)malloc(sizeof(f32)*m_nb_materials);
+    tables.data_h.fF2 = (f32*)malloc(sizeof(f32)*m_nb_materials);
+    tables.data_h.fEnergy0 = (f32*)malloc(sizeof(f32)*m_nb_materials);
+    tables.data_h.fEnergy1 = (f32*)malloc(sizeof(f32)*m_nb_materials);
+    tables.data_h.fEnergy2 = (f32*)malloc(sizeof(f32)*m_nb_materials);
+    tables.data_h.fLogEnergy1 = (f32*)malloc(sizeof(f32)*m_nb_materials);
+    tables.data_h.fLogEnergy2 = (f32*)malloc(sizeof(f32)*m_nb_materials);
+    tables.data_h.fLogMeanExcitationEnergy = (f32*)malloc(sizeof(f32)*m_nb_materials);
 
     i32 i, j;
     ui32 access_index = 0;
@@ -830,10 +830,10 @@ void Materials::m_build_materials_table(GlobalSimulationParameters params, std::
             exit_simulation();
         }
         // get nb of elements
-        data_h.nb_elements[i] = cur_mat.nb_elements;
+        tables.data_h.nb_elements[i] = cur_mat.nb_elements;
 
         // compute index
-        data_h.index[i] = access_index;
+        tables.data_h.index[i] = access_index;
         access_index += cur_mat.nb_elements;
 
         ++i;
@@ -841,10 +841,10 @@ void Materials::m_build_materials_table(GlobalSimulationParameters params, std::
 
     // nb of total elements
     m_nb_elements_total = access_index;
-    data_h.nb_elements_total = access_index;
-    data_h.mixture = (ui16*)malloc(sizeof(ui16)*access_index);
-    data_h.atom_num_dens = (f32*)malloc(sizeof(f32)*access_index);
-    data_h.mass_fraction = (f32*)malloc(sizeof(f32)*access_index);
+    tables.data_h.nb_elements_total = access_index;
+    tables.data_h.mixture = (ui16*)malloc(sizeof(ui16)*access_index);
+    tables.data_h.atom_num_dens = (f32*)malloc(sizeof(f32)*access_index);
+    tables.data_h.mass_fraction = (f32*)malloc(sizeof(f32)*access_index);
 
     // Display energy cuts
     if ( params.data_h.display_energy_cuts )
@@ -863,10 +863,10 @@ void Materials::m_build_materials_table(GlobalSimulationParameters params, std::
         cur_mat = m_material_db.materials[mat_name];
 
         // get density
-        data_h.density[i] = m_material_db.get_density( mat_name );     // in g/cm3
+        tables.data_h.density[i] = m_material_db.get_density( mat_name );     // in g/cm3
 
-        data_h.nb_atoms_per_vol[i] = 0.0f;
-        data_h.nb_electrons_per_vol[i] = 0.0f;
+        tables.data_h.nb_atoms_per_vol[i] = 0.0f;
+        tables.data_h.nb_electrons_per_vol[i] = 0.0f;
 
         j=0; while (j < m_material_db.get_nb_elements( mat_name )) {
             // read element name
@@ -874,20 +874,20 @@ void Materials::m_build_materials_table(GlobalSimulationParameters params, std::
             elt_name = m_material_db.get_element_name( mat_name, j );
 
             // store Z
-            data_h.mixture[fill_index] = m_material_db.get_element_Z( elt_name );
+            tables.data_h.mixture[fill_index] = m_material_db.get_element_Z( elt_name );
 
             // compute atom num dens (Avo*fraction*dens) / Az
-            data_h.atom_num_dens[fill_index] = m_material_db.get_atom_num_dens( mat_name, j );
+            tables.data_h.atom_num_dens[fill_index] = m_material_db.get_atom_num_dens( mat_name, j );
 
             // get mass fraction
-            data_h.mass_fraction[fill_index] = m_material_db.get_mass_fraction( mat_name, j );
+            tables.data_h.mass_fraction[fill_index] = m_material_db.get_mass_fraction( mat_name, j );
 
             // compute nb atoms per volume
-            data_h.nb_atoms_per_vol[i] += data_h.atom_num_dens[fill_index];
+            tables.data_h.nb_atoms_per_vol[i] += tables.data_h.atom_num_dens[fill_index];
 
             // compute nb electrons per volume
-            data_h.nb_electrons_per_vol[i] += data_h.atom_num_dens[fill_index] *
-                                              m_material_db.get_element_Z( elt_name );            
+            tables.data_h.nb_electrons_per_vol[i] += tables.data_h.atom_num_dens[fill_index] *
+                                                     m_material_db.get_element_Z( elt_name );
 
             ++j;
             ++fill_index;
@@ -896,39 +896,39 @@ void Materials::m_build_materials_table(GlobalSimulationParameters params, std::
         /// electron Ionisation data
         m_material_db.compute_ioni_parameters( mat_name );
 
-        data_h.electron_mean_excitation_energy[i] = m_material_db.get_mean_excitation();
-        data_h.fLogMeanExcitationEnergy[i] = logf( m_material_db.get_mean_excitation() );
+        tables.data_h.electron_mean_excitation_energy[i] = m_material_db.get_mean_excitation();
+        tables.data_h.fLogMeanExcitationEnergy[i] = logf( m_material_db.get_mean_excitation() );
 
         // correction
-        data_h.fX0[i] = m_material_db.get_X0_density();
-        data_h.fX1[i] = m_material_db.get_X1_density();
-        data_h.fD0[i] = m_material_db.get_D0_density();
-        data_h.fC[i] = m_material_db.get_C_density();
-        data_h.fA[i] = m_material_db.get_A_density();
-        data_h.fM[i] = m_material_db.get_M_density();
+        tables.data_h.fX0[i] = m_material_db.get_X0_density();
+        tables.data_h.fX1[i] = m_material_db.get_X1_density();
+        tables.data_h.fD0[i] = m_material_db.get_D0_density();
+        tables.data_h.fC[i] = m_material_db.get_C_density();
+        tables.data_h.fA[i] = m_material_db.get_A_density();
+        tables.data_h.fM[i] = m_material_db.get_M_density();
 
         //eFluctuation parameters
-        data_h.fF1[i] = m_material_db.get_F1_fluct();
-        data_h.fF2[i] = m_material_db.get_F2_fluct();
-        data_h.fEnergy0[i] = m_material_db.get_Energy0_fluct();
-        data_h.fEnergy1[i] = m_material_db.get_Energy1_fluct();
-        data_h.fEnergy2[i] = m_material_db.get_Energy2_fluct();
-        data_h.fLogEnergy1[i] = m_material_db.get_LogEnergy1_fluct();
-        data_h.fLogEnergy2[i] = m_material_db.get_LogEnergy2_fluct();
+        tables.data_h.fF1[i] = m_material_db.get_F1_fluct();
+        tables.data_h.fF2[i] = m_material_db.get_F2_fluct();
+        tables.data_h.fEnergy0[i] = m_material_db.get_Energy0_fluct();
+        tables.data_h.fEnergy1[i] = m_material_db.get_Energy1_fluct();
+        tables.data_h.fEnergy2[i] = m_material_db.get_Energy2_fluct();
+        tables.data_h.fLogEnergy1[i] = m_material_db.get_LogEnergy1_fluct();
+        tables.data_h.fLogEnergy2[i] = m_material_db.get_LogEnergy2_fluct();
 
         /// others stuffs
 
-        data_h.rad_length[i] = m_material_db.get_rad_len( mat_name );
+        tables.data_h.rad_length[i] = m_material_db.get_rad_len( mat_name );
 
         /// Compute energy cut
-        f32 gEcut = m_rangecut.convert_gamma(params.data_h.photon_cut, data_h.mixture, data_h.nb_elements[i],
-                                             data_h.atom_num_dens, data_h.index[i]);
+        f32 gEcut = m_rangecut.convert_gamma(params.data_h.photon_cut, tables.data_h.mixture, tables.data_h.nb_elements[i],
+                                             tables.data_h.atom_num_dens, tables.data_h.index[i]);
 
-        f32 eEcut = m_rangecut.convert_electron(params.data_h.electron_cut, data_h.mixture, data_h.nb_elements[i],
-                                                data_h.atom_num_dens, data_h.density[i], data_h.index[i]);
+        f32 eEcut = m_rangecut.convert_electron(params.data_h.electron_cut, tables.data_h.mixture, tables.data_h.nb_elements[i],
+                                                tables.data_h.atom_num_dens, tables.data_h.density[i], tables.data_h.index[i]);
 
-        data_h.photon_energy_cut[i] = gEcut;
-        data_h.electron_energy_cut[i] = eEcut;
+        tables.data_h.photon_energy_cut[i] = gEcut;
+        tables.data_h.electron_energy_cut[i] = eEcut;
 
         if ( params.data_h.display_energy_cuts )
         {
@@ -959,47 +959,47 @@ void Materials::load_materials_database(std::string filename) {
 void Materials::print()
 {
     printf("[GGEMS] Materials table:\n");
-    printf("[GGEMS]    Nb materials: %i\n", data_h.nb_materials);
-    printf("[GGEMS]    Nb total elements: %i\n", data_h.nb_elements_total);
+    printf("[GGEMS]    Nb materials: %i\n", tables.data_h.nb_materials);
+    printf("[GGEMS]    Nb total elements: %i\n", tables.data_h.nb_elements_total);
     printf("[GGEMS]\n");
 
-    ui32 mat_id = 0; while ( mat_id < data_h.nb_materials )
+    ui32 mat_id = 0; while ( mat_id < tables.data_h.nb_materials )
     {
-        ui32 index = data_h.index[ mat_id ];
+        ui32 index = tables.data_h.index[ mat_id ];
         printf("[GGEMS]    %s\n", m_materials_list_name[ mat_id ].c_str());
-        printf("[GGEMS]       Nb elements: %i\n",  data_h.nb_elements[ mat_id ]);
+        printf("[GGEMS]       Nb elements: %i\n",  tables.data_h.nb_elements[ mat_id ]);
         printf("[GGEMS]       Access index: %i\n",  index);
-        printf("[GGEMS]       Nb atoms per vol: %e\n",  data_h.nb_atoms_per_vol[ mat_id ]);
-        printf("[GGEMS]       Nb electrons per vol: %e\n", data_h.nb_electrons_per_vol[ mat_id ]);
-        printf("[GGEMS]       Electron mean exitation energy: %e\n", data_h.electron_mean_excitation_energy[ mat_id ]);
-        printf("[GGEMS]       Rad length: %e\n", data_h.rad_length[ mat_id ]);
-        printf("[GGEMS]       Density: %e\n", data_h.density[ mat_id ]);
-        printf("[GGEMS]       Photon energy cut: %e\n", data_h.photon_energy_cut[ mat_id ]);
-        printf("[GGEMS]       Electon energy cut: %e\n", data_h.electron_energy_cut[ mat_id ]);
+        printf("[GGEMS]       Nb atoms per vol: %e\n",  tables.data_h.nb_atoms_per_vol[ mat_id ]);
+        printf("[GGEMS]       Nb electrons per vol: %e\n", tables.data_h.nb_electrons_per_vol[ mat_id ]);
+        printf("[GGEMS]       Electron mean exitation energy: %e\n", tables.data_h.electron_mean_excitation_energy[ mat_id ]);
+        printf("[GGEMS]       Rad length: %e\n", tables.data_h.rad_length[ mat_id ]);
+        printf("[GGEMS]       Density: %e\n", tables.data_h.density[ mat_id ]);
+        printf("[GGEMS]       Photon energy cut: %e\n", tables.data_h.photon_energy_cut[ mat_id ]);
+        printf("[GGEMS]       Electon energy cut: %e\n", tables.data_h.electron_energy_cut[ mat_id ]);
         printf("[GGEMS]\n");
         printf("[GGEMS]       Density correction:\n");
-        printf("[GGEMS]          fX0: %e\n", data_h.fX0[ mat_id ]);
-        printf("[GGEMS]          fX1: %e\n", data_h.fX1[ mat_id ]);
-        printf("[GGEMS]          fD0: %e\n", data_h.fD0[ mat_id ]);
-        printf("[GGEMS]          fC: %e\n", data_h.fC[ mat_id ]);
-        printf("[GGEMS]          fA: %e\n", data_h.fA[ mat_id ]);
-        printf("[GGEMS]          fM: %e\n", data_h.fM[ mat_id ]);
+        printf("[GGEMS]          fX0: %e\n", tables.data_h.fX0[ mat_id ]);
+        printf("[GGEMS]          fX1: %e\n", tables.data_h.fX1[ mat_id ]);
+        printf("[GGEMS]          fD0: %e\n", tables.data_h.fD0[ mat_id ]);
+        printf("[GGEMS]          fC: %e\n", tables.data_h.fC[ mat_id ]);
+        printf("[GGEMS]          fA: %e\n", tables.data_h.fA[ mat_id ]);
+        printf("[GGEMS]          fM: %e\n", tables.data_h.fM[ mat_id ]);
         printf("[GGEMS]\n");
         printf("[GGEMS]       Energy loss fluctuation:\n");
-        printf("[GGEMS]          fF1: %e\n", data_h.fF1[ mat_id ]);
-        printf("[GGEMS]          fF2: %e\n", data_h.fF2[ mat_id ]);
-        printf("[GGEMS]          fEnergy0: %e\n", data_h.fEnergy0[ mat_id ]);
-        printf("[GGEMS]          fEnergy1: %e\n", data_h.fEnergy1[ mat_id ]);
-        printf("[GGEMS]          fEnergy2: %e\n", data_h.fEnergy2[ mat_id ]);
-        printf("[GGEMS]          fLogEnergy1: %e\n", data_h.fLogEnergy1[ mat_id ]);
-        printf("[GGEMS]          fLogEnergy2: %e\n", data_h.fLogEnergy2[ mat_id ]);
-        printf("[GGEMS]          fLogMeanExcitationEnergy: %e\n", data_h.fLogMeanExcitationEnergy[ mat_id ]);
+        printf("[GGEMS]          fF1: %e\n", tables.data_h.fF1[ mat_id ]);
+        printf("[GGEMS]          fF2: %e\n", tables.data_h.fF2[ mat_id ]);
+        printf("[GGEMS]          fEnergy0: %e\n", tables.data_h.fEnergy0[ mat_id ]);
+        printf("[GGEMS]          fEnergy1: %e\n", tables.data_h.fEnergy1[ mat_id ]);
+        printf("[GGEMS]          fEnergy2: %e\n", tables.data_h.fEnergy2[ mat_id ]);
+        printf("[GGEMS]          fLogEnergy1: %e\n", tables.data_h.fLogEnergy1[ mat_id ]);
+        printf("[GGEMS]          fLogEnergy2: %e\n", tables.data_h.fLogEnergy2[ mat_id ]);
+        printf("[GGEMS]          fLogMeanExcitationEnergy: %e\n", tables.data_h.fLogMeanExcitationEnergy[ mat_id ]);
         printf("[GGEMS]\n");
         printf("[GGEMS]       Mixture:\n");
 
-        ui32 elt_id = 0; while ( elt_id < data_h.nb_elements[ mat_id ] )
+        ui32 elt_id = 0; while ( elt_id < tables.data_h.nb_elements[ mat_id ] )
         {
-            printf("[GGEMS]          Z: %i   Atom Num Dens: %e\n", data_h.mixture[ index+elt_id ], data_h.atom_num_dens[ index+elt_id ]);
+            printf("[GGEMS]          Z: %i   Atom Num Dens: %e\n", tables.data_h.mixture[ index+elt_id ], tables.data_h.atom_num_dens[ index+elt_id ]);
             ++elt_id;
         }
         printf("[GGEMS]\n");
