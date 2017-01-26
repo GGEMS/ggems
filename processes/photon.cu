@@ -87,8 +87,8 @@ __host__ __device__ f32 Compton_CS_standard(MaterialsTable materials, ui16 mat, 
 // Compton Scatter (Standard - Klein-Nishina) with secondary (e-)
 __host__ __device__ SecParticle Compton_SampleSecondaries_standard(ParticlesData particles,
                                                                    f32 cutE,
-                                                                   ui32 id,
-                                                                   GlobalSimulationParametersData parameters) {
+                                                                   bool flag_electron,
+                                                                   ui32 id ) {
 
     f32 gamE0 = particles.E[id];
     f32 E0 = gamE0 / 0.510998910f;
@@ -149,7 +149,7 @@ __host__ __device__ SecParticle Compton_SampleSecondaries_standard(ParticlesData
 
 
     //               DBL_MIN                  cut production
-    if (electron.E > 1.0e-38f && electron.E > cutE && parameters.secondaries_list[ELECTRON]) {
+    if (electron.E > 1.0e-38f && electron.E > cutE && flag_electron) {
         electron.dir = fxyz_sub(fxyz_scale(gamDir0, gamE0), fxyz_scale(gamDir1, gamE1));
         electron.dir = fxyz_unit(electron.dir);
         electron.endsimu = PARTICLE_ALIVE;
@@ -162,10 +162,8 @@ __host__ __device__ SecParticle Compton_SampleSecondaries_standard(ParticlesData
 }
 
 // Compton Scatter (Standard - Klein-Nishina) without secondary (e-)
-__host__ __device__ void Compton_standard(ParticlesData particles,
-                                          f32 cutE,
-                                          ui32 id,
-                                          GlobalSimulationParametersData parameters) {
+__host__ __device__ void Compton_standard(ParticlesData particles,                                         
+                                          ui32 id ) {
 
     f32 gamE0 = particles.E[id];
     f32 E0 = gamE0 / 0.510998910f;
@@ -288,8 +286,8 @@ __host__ __device__ SecParticle Photoelec_SampleSecondaries_standard(ParticlesDa
                                                                      ui32 E_index,
                                                                      f32 cutE,
                                                                      ui16 matindex,
-                                                                     ui32 id,
-                                                                     GlobalSimulationParametersData parameters) {
+                                                                     bool flag_electron,
+                                                                     ui32 id ) {
 
     // Kill the photon without mercy
     particles.endsimu[id] = PARTICLE_DEAD;
@@ -301,7 +299,7 @@ __host__ __device__ SecParticle Photoelec_SampleSecondaries_standard(ParticlesDa
     electron.E = 0.0f;
 
     // If no secondary required return a stillborn electron
-    if (parameters.secondaries_list[ELECTRON] == DISABLED) return electron;
+    if (flag_electron == DISABLED) return electron;
 
     // Get index CS table (considering mat id)
     ui32 CS_index = matindex*photon_CS_table.nb_bins + E_index;
@@ -941,15 +939,11 @@ __host__ __device__ void _Rayleigh_SampleSecondaries_Livermore(ParticlesData par
         return;
     }
 
-    //printf("id %i  matid %i nb elts %i\n", id, matindex, mat.nb_elements[0]);
-
     // Select randomly one element that composed the material
     ui32 n = mat.nb_elements[matindex]-1;
     ui32 mixture_index = mat.index[matindex];
     ui32 Z = mat.mixture[mixture_index];
     ui32 i = 0;
-
-    //printf("id %i - matid %i - nbelt %i index %i Z %i\n", id, matindex, n, mixture_index, Z);
 
     if (n > 0) {
         f32 x = prng_uniform( particles, id ) * linear_interpolation(photon_CS_table.E_bins[E_index-1],
@@ -965,8 +959,6 @@ __host__ __device__ void _Rayleigh_SampleSecondaries_Livermore(ParticlesData par
             ++i;
         }
     }
-
-    //printf("id %i rnd1 %f rnd2 %f\n", id, prng_uniform( particles, id ), prng_uniform( particles, id ));
 
     // Scattering
     f32 wphot = 1.23984187539e-10f / particles.E[id];
@@ -996,8 +988,6 @@ __host__ __device__ void _Rayleigh_SampleSecondaries_Livermore(ParticlesData par
         {
             SF = photon_CS_table.Rayleigh_Lv_SF[Z*photon_CS_table.nb_bins]; // for energy E=0.0f
         }
-
-        //printf("id %i SF*SF %f  rnd %f  z*z %i\n", id, SF*SF, prng_uniform( particles, id ), Z*Z);
 
     } while (SF*SF < prng_uniform( particles, id ) * Z*Z);
 

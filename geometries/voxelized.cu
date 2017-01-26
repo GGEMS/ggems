@@ -39,9 +39,6 @@ bool VoxelizedPhantom::m_check_mandatory() {
 // Copy the phantom to the GPU
 void VoxelizedPhantom::m_copy_phantom_cpu2gpu() {
 
-//     GGcout << "Phantom allocation " << GGendl; 
-//     GGcout << " --> " << data_h.number_of_voxels << GGendl;
-//     GGcout << " --> " << 
     // Mem allocation
     HANDLE_ERROR( cudaMalloc((void**) &data_d.values, data_h.number_of_voxels*sizeof(ui16)) );
     // Copy data
@@ -142,74 +139,17 @@ void VoxelizedPhantom::m_define_materials_from_range(Type *raw_data, std::string
 
 }
 
-/*
-// Convert range data into material ID
-void VoxelizedPhantom::m_define_materials_from_range(f32 *raw_data, std::string range_name) {
-
-    f32 start, stop;
-    std::string mat_name, line;
-    ui32 i;
-    f32 val;
-    ui16 mat_index = 0;
-
-    // Data allocation
-    data_h.values = (ui16*)malloc(data_h.number_of_voxels * sizeof(ui16));
-
-    // Read range file
-    std::ifstream file(range_name.c_str());
-    if(!file) {
-        printf("Error, file %s not found \n", range_name.c_str());
-        exit_simulation();
-    }
-    while (file) {
-        m_txt_reader.skip_comment(file);
-        std::getline(file, line);
-
-        if (file) {
-            start = m_txt_reader.read_start_range(line);
-            stop  = m_txt_reader.read_stop_range(line);
-            mat_name = m_txt_reader.read_mat_range(line);
-            list_of_materials.push_back(mat_name);
-//             printf("IND %i MAT %s \n", mat_index, mat_name.c_str());
-
-            // build labeled phantom according range data
-            i=0; while (i < data_h.number_of_voxels) {
-                val = raw_data[i];
-                if ((val==start && val==stop) || (val>=start && val<stop)) {
-                    data_h.values[i] = mat_index;
-                }
-                ++i;
-            } // over the volume
-
-        } // new material range
-        ++mat_index;
-
-    } // read file
-    
-    
-// GGcout << data_h.number_of_voxels << " voxels " << GGendl;
-// for(int i = 0;i<data_h.number_of_voxels;i++){
-//     if(data_h.values[i]!=0)printf("%d %d\n",i, data_h.values[i]);
-// 
-// }
-// exit(0);
-}
-*/
 ///:: Main functions
 
 // Init
-void VoxelizedPhantom::initialize(GlobalSimulationParameters parameters) {
+void VoxelizedPhantom::initialize() {
     // Check if everything was set properly
     if ( !m_check_mandatory() ) {
         print_error("Missing parameters for the voxelized phantom!");
         exit_simulation();
     }
 
-    // Handle GPU device
-    if (parameters.data_h.device_target == GPU_DEVICE) {
-       m_copy_phantom_cpu2gpu();
-    }
-
+    m_copy_phantom_cpu2gpu();
 }
 
 // Load phantom from binary data (f32)

@@ -18,12 +18,12 @@
 
 ////:: GPU Codes
 
-__host__ __device__ void VPIN::track_to_out ( ParticlesData particles,
-                                              VoxVolumeData<ui16> vol,
-                                              MaterialsTable materials,
-                                              PhotonCrossSectionTable photon_CS_table,
-                                              GlobalSimulationParametersData parameters,
-                                              ui32 part_id )
+__device__ void VPIN::track_to_out( ParticlesData particles,
+                                    VoxVolumeData<ui16> vol,
+                                    MaterialsTable materials,
+                                    PhotonCrossSectionTable photon_CS_table,
+                                    const GlobalSimulationParametersData *parameters,
+                                    ui32 part_id )
 {
     // Read position
     f32xyz pos;
@@ -75,7 +75,7 @@ __host__ __device__ void VPIN::track_to_out ( ParticlesData particles,
     //       in order to avoid particle entry between voxels. Then, computing improvement can be made
     //       by calling this function only once, just for the particle step=0.    - JB
     pos = transport_get_safety_inside_AABB( pos, vox_xmin, vox_xmax,
-                                            vox_ymin, vox_ymax, vox_zmin, vox_zmax, parameters.geom_tolerance );
+                                            vox_ymin, vox_ymax, vox_zmin, vox_zmax, parameters->geom_tolerance );
 
     // compute the next distance boundary
     f32 boundary_distance = hit_ray_AABB ( pos, dir, vox_xmin, vox_xmax,
@@ -83,7 +83,7 @@ __host__ __device__ void VPIN::track_to_out ( ParticlesData particles,
 
     if ( boundary_distance <= next_interaction_distance )
     {
-        next_interaction_distance = boundary_distance + parameters.geom_tolerance; // Overshoot
+        next_interaction_distance = boundary_distance + parameters->geom_tolerance; // Overshoot
         next_discrete_process = GEOMETRY_BOUNDARY;
     }
 
@@ -94,7 +94,7 @@ __host__ __device__ void VPIN::track_to_out ( ParticlesData particles,
 
     // get safety position (outside the current voxel)
     pos = transport_get_safety_outside_AABB( pos, vox_xmin, vox_xmax,
-                                             vox_ymin, vox_ymax, vox_zmin, vox_zmax, parameters.geom_tolerance );
+                                             vox_ymin, vox_ymax, vox_zmin, vox_zmax, parameters->geom_tolerance );
 
     // update tof
     particles.tof[part_id] += c_light * next_interaction_distance;
@@ -106,7 +106,7 @@ __host__ __device__ void VPIN::track_to_out ( ParticlesData particles,
 
     // Stop simulation if out of the phantom
     if ( !test_point_AABB_with_tolerance (pos, vol.xmin, vol.xmax, vol.ymin, vol.ymax,
-                                          vol.zmin, vol.zmax, parameters.geom_tolerance ) )
+                                          vol.zmin, vol.zmax, parameters->geom_tolerance ) )
     {
         particles.endsimu[part_id] = PARTICLE_FREEZE;
         return;
@@ -151,21 +151,12 @@ __global__ void VPIN::kernel_device_track_to_in ( ParticlesData particles, f32 x
 
 }
 
-// Host Kernel that move particles to the voxelized volume boundary
-void VPIN::kernel_host_track_to_in ( ParticlesData particles, f32 xmin, f32 xmax,
-                                     f32 ymin, f32 ymax, f32 zmin, f32 zmax, f32 geom_tolerance, ui32 id )
-{
-
-    transport_track_to_in_AABB( particles, xmin, xmax, ymin, ymax, zmin, zmax, geom_tolerance, id );
-
-}
-
 // Device kernel that track particles within the voxelized volume until boundary
 __global__ void VPIN::kernel_device_track_to_out ( ParticlesData particles,
                                                    VoxVolumeData<ui16> vol,
                                                    MaterialsTable materials,
                                                    PhotonCrossSectionTable photon_CS_table,
-                                                   GlobalSimulationParametersData parameters )
+                                                   const GlobalSimulationParametersData *parameters )
 {
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
     if ( id >= particles.size ) return;
@@ -175,21 +166,6 @@ __global__ void VPIN::kernel_device_track_to_out ( ParticlesData particles,
         VPIN::track_to_out ( particles, vol, materials, photon_CS_table, parameters, id );
     }
 
-}
-
-// Host kernel that track particles within the voxelized volume until boundary
-void VPIN::kernel_host_track_to_out ( ParticlesData particles,
-                                      VoxVolumeData<ui16> vol,
-                                      MaterialsTable materials,
-                                      PhotonCrossSectionTable photon_CS_table,
-                                      GlobalSimulationParametersData parameters, ui32 id )
-{
-
-    // Stepping loop
-    while ( particles.endsimu[id] != PARTICLE_DEAD && particles.endsimu[id] != PARTICLE_FREEZE )
-    {
-        VPIN::track_to_out ( particles, vol, materials, photon_CS_table, parameters, id );
-    }
 }
 
 ////:: Privates
@@ -236,69 +212,31 @@ VoxPhanImgNav::VoxPhanImgNav()
 }
 
 void VoxPhanImgNav::track_to_in ( Particles particles )
-{
+{        
+    dim3 threads, grid;
+    threads.x = mh_params->gpu_block_size;
+    grid.x = ( particles.size + mh_params->gpu_block_size - 1 ) / mh_params->gpu_block_size;
 
-    if ( m_params.data_h.device_target == CPU_DEVICE )
-    {
-        ui32 id=0;
-        while ( id<particles.size )
-        {
-            VPIN::kernel_host_track_to_in ( particles.data_h, m_phantom.data_h.xmin, m_phantom.data_h.xmax,
-                                            m_phantom.data_h.ymin, m_phantom.data_h.ymax,
-                                            m_phantom.data_h.zmin, m_phantom.data_h.zmax,
-                                            m_params.data_h.geom_tolerance,
-                                            id );
-            ++id;
-        }
-    }
-    else if ( m_params.data_h.device_target == GPU_DEVICE )
-    {
-
-        dim3 threads, grid;
-        threads.x = m_params.data_h.gpu_block_size;
-        grid.x = ( particles.size + m_params.data_h.gpu_block_size - 1 ) / m_params.data_h.gpu_block_size;
-
-        VPIN::kernel_device_track_to_in<<<grid, threads>>> ( particles.data_d, m_phantom.data_d.xmin, m_phantom.data_d.xmax,
-                                                             m_phantom.data_d.ymin, m_phantom.data_d.ymax,
-                                                             m_phantom.data_d.zmin, m_phantom.data_d.zmax,
-                                                             m_params.data_d.geom_tolerance );
-        cuda_error_check ( "Error ", " Kernel_VoxPhanImgNav (track to in)" );
-        cudaDeviceSynchronize();
-
-    }
-
+    VPIN::kernel_device_track_to_in<<<grid, threads>>> ( particles.data_d, m_phantom.data_d.xmin, m_phantom.data_d.xmax,
+                                                         m_phantom.data_d.ymin, m_phantom.data_d.ymax,
+                                                         m_phantom.data_d.zmin, m_phantom.data_d.zmax,
+                                                         mh_params->geom_tolerance );
+    cuda_error_check ( "Error ", " Kernel_VoxPhanImgNav (track to in)" );
+    cudaDeviceSynchronize();
 
 }
 
 void VoxPhanImgNav::track_to_out ( Particles particles )
 {
+    dim3 threads, grid;
+    threads.x = mh_params->gpu_block_size;
+    grid.x = ( particles.size + mh_params->gpu_block_size - 1 ) / mh_params->gpu_block_size;
 
-    if ( m_params.data_h.device_target == CPU_DEVICE )
-    {
-
-        ui32 id=0;
-        while ( id<particles.size )
-        {
-
-            VPIN::kernel_host_track_to_out ( particles.data_h, m_phantom.data_h,
-                                             m_materials.tables.data_h, m_cross_sections.photon_CS.data_h, m_params.data_h, id );
-            ++id;
-        }
-    }
-    else if ( m_params.data_h.device_target == GPU_DEVICE )
-    {
-
-        dim3 threads, grid;
-        threads.x = m_params.data_h.gpu_block_size;
-        grid.x = ( particles.size + m_params.data_h.gpu_block_size - 1 ) / m_params.data_h.gpu_block_size;
-
-        // DEBUG
-        VPIN::kernel_device_track_to_out<<<grid, threads>>> ( particles.data_d, m_phantom.data_d, m_materials.tables.data_d,
-                                                              m_cross_sections.photon_CS.data_d, m_params.data_d );
-        cuda_error_check ( "Error ", " Kernel_VoxPhanImgNav (track to out)" );
-        cudaDeviceSynchronize();
-
-    }
+    // DEBUG
+    VPIN::kernel_device_track_to_out<<<grid, threads>>> ( particles.data_d, m_phantom.data_d, m_materials.tables.data_d,
+                                                          m_cross_sections.photon_CS.data_d, md_params );
+    cuda_error_check ( "Error ", " Kernel_VoxPhanImgNav (track to out)" );
+    cudaDeviceSynchronize();
 }
 
 void VoxPhanImgNav::load_phantom_from_mhd ( std::string filename, std::string range_mat_name )
@@ -306,7 +244,7 @@ void VoxPhanImgNav::load_phantom_from_mhd ( std::string filename, std::string ra
     m_phantom.load_from_mhd ( filename, range_mat_name );
 }
 
-void VoxPhanImgNav::initialize ( GlobalSimulationParameters params )
+void VoxPhanImgNav::initialize(GlobalSimulationParametersData *h_params, GlobalSimulationParametersData *d_params)
 {
     // Check params
     if ( !m_check_mandatory() )
@@ -316,21 +254,22 @@ void VoxPhanImgNav::initialize ( GlobalSimulationParameters params )
     }
 
     // Params
-    m_params = params;
+    mh_params = h_params;
+    md_params = d_params;
 
     // Phantom
-    m_phantom.set_name ( "VoxPhanImgNav" );
-    m_phantom.initialize ( params );    
+    m_phantom.set_name( "VoxPhanImgNav" );
+    m_phantom.initialize();
 
     // Material
     m_materials.load_materials_database( m_materials_filename );
-    m_materials.initialize ( m_phantom.list_of_materials, params );
+    m_materials.initialize( m_phantom.list_of_materials, h_params );
 
     // Cross Sections
-    m_cross_sections.initialize ( m_materials, params );
+    m_cross_sections.initialize( m_materials, h_params );
 
     // Some verbose if required
-    if ( params.data_h.display_memory_usage )
+    if ( h_params->display_memory_usage )
     {
         ui64 mem = m_get_memory_usage();
         GGcout_mem("VoxPhanImgNav", mem);

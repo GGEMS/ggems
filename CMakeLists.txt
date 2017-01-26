@@ -135,9 +135,9 @@ cuda_add_library(${LIB_NAME} STATIC ${sourcesGPU} ${headersGPU})
 # Installation
 set(TEMPLATE 
     ${PROJECT_SOURCE_DIR}/sources/point_source.cu
-    ${PROJECT_SOURCE_DIR}/sources/point_source.cuh
-    ${PROJECT_SOURCE_DIR}/detectors/template_detector.cu
-    ${PROJECT_SOURCE_DIR}/detectors/template_detector.cuh)
+    ${PROJECT_SOURCE_DIR}/sources/point_source.cuh)
+    #${PROJECT_SOURCE_DIR}/detectors/template_detector.cu
+    #${PROJECT_SOURCE_DIR}/detectors/template_detector.cuh)
 
 install(TARGETS ${LIB_NAME} DESTINATION "lib")
 install(FILES ${headersGPU} DESTINATION "include")

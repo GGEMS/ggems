@@ -21,24 +21,24 @@
 #include "cross_sections.cuh"
 #include "materials.cuh"
 
-#include "testing.cuh"
+//#include "testing.cuh"
 
 #include "ggems_detector.cuh"
 #include "ct_detector.cuh"
 
 #include "point_source.cuh"
-#include "cone_beam_CT_source.cuh"
-#include "geom_source.cuh"
-#include "phasespace_source.cuh"
-#include "beamlet_source.cuh"
-#include "linac_source.cuh"
+//#include "cone_beam_CT_source.cuh"
+//#include "geom_source.cuh"
+//#include "phasespace_source.cuh"
+//#include "beamlet_source.cuh"
+//#include "linac_source.cuh"
 
-#include "mesh_phan_linac_nav.cuh"
-#include "vox_phan_dosi_nav.cuh"
-#include "vox_phan_dosi_fastnav.cuh"
+//#include "mesh_phan_linac_nav.cuh"
+//#include "vox_phan_dosi_nav.cuh"
+//#include "vox_phan_dosi_fastnav.cuh"
 #include "vox_phan_img_nav.cuh"
-#include "vox_phan_iort_nav.cuh"
-#include "vox_phan_gtrack_nav.cuh"
+//#include "vox_phan_iort_nav.cuh"
+//#include "vox_phan_gtrack_nav.cuh"
 
 class GGEMS
 {
@@ -46,8 +46,7 @@ public:
     GGEMS();
     ~GGEMS();
 
-    // Setting parameters    
-    void set_hardware_target ( std::string value );
+    // Setting parameters        
     void set_GPU_ID ( ui32 valid );
     void set_GPU_block_size ( ui32 val );
     void set_process ( std::string process_name );
@@ -78,7 +77,7 @@ public:
     void set_display_in_color( bool flag );
     void set_display_energy_cuts( bool flag );
     void set_verbose( bool flag );
-    void print_stack( ui32 n );
+//    void print_stack( ui32 n );
 
     // Main functions
     void init_simulation();
@@ -101,7 +100,8 @@ private:
     // Main parameters
     bool m_check_mandatory();    
     void m_copy_parameters_cpu2gpu();
-    GlobalSimulationParameters m_parameters;
+    GlobalSimulationParametersData *h_parameters;
+    GlobalSimulationParametersData *d_parameters;
     bool m_flag_init;    
 
 };

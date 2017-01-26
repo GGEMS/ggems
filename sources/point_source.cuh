@@ -39,12 +39,12 @@ public:
 
     // Abstract from GGEMSSource (Mandatory funtions)
     void get_primaries_generator( Particles particles );
-    void initialize( GlobalSimulationParameters params );
+    void initialize( GlobalSimulationParametersData *h_params );
 
 private:
     bool m_check_mandatory();
 
-    GlobalSimulationParameters m_params;
+    GlobalSimulationParametersData *mh_params;
 
     f32 m_px, m_py, m_pz;
     f32 m_energy;

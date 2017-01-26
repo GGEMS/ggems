@@ -784,7 +784,8 @@ void Materials::m_copy_materials_table_cpu2gpu() {
 }
 
 // Build the materials table according the list of materials
-void Materials::m_build_materials_table(GlobalSimulationParameters params, std::vector<std::string> mats_list) {
+void Materials::m_build_materials_table(GlobalSimulationParametersData *h_params,
+                                        std::vector<std::string> mats_list) {
 
     // First allocated data to the structure according the number of materials
     m_nb_materials = mats_list.size();
@@ -847,7 +848,7 @@ void Materials::m_build_materials_table(GlobalSimulationParameters params, std::
     tables.data_h.mass_fraction = (f32*)malloc(sizeof(f32)*access_index);
 
     // Display energy cuts
-    if ( params.data_h.display_energy_cuts )
+    if ( h_params->display_energy_cuts )
     {
         GGcout << GGendl;
         GGcout << "Energy cuts:" << GGendl;        
@@ -921,16 +922,16 @@ void Materials::m_build_materials_table(GlobalSimulationParameters params, std::
         tables.data_h.rad_length[i] = m_material_db.get_rad_len( mat_name );
 
         /// Compute energy cut
-        f32 gEcut = m_rangecut.convert_gamma(params.data_h.photon_cut, tables.data_h.mixture, tables.data_h.nb_elements[i],
+        f32 gEcut = m_rangecut.convert_gamma(h_params->photon_cut, tables.data_h.mixture, tables.data_h.nb_elements[i],
                                              tables.data_h.atom_num_dens, tables.data_h.index[i]);
 
-        f32 eEcut = m_rangecut.convert_electron(params.data_h.electron_cut, tables.data_h.mixture, tables.data_h.nb_elements[i],
+        f32 eEcut = m_rangecut.convert_electron(h_params->electron_cut, tables.data_h.mixture, tables.data_h.nb_elements[i],
                                                 tables.data_h.atom_num_dens, tables.data_h.density[i], tables.data_h.index[i]);
 
         tables.data_h.photon_energy_cut[i] = gEcut;
         tables.data_h.electron_energy_cut[i] = eEcut;
 
-        if ( params.data_h.display_energy_cuts )
+        if ( h_params->display_energy_cuts )
         {
             printf( "[GGEMS]    material: %s\t\tgamma: %s electron: %s\n", mat_name.c_str(),
                    Energy_str( gEcut ).c_str(), Energy_str( eEcut ).c_str() );
@@ -940,7 +941,7 @@ void Materials::m_build_materials_table(GlobalSimulationParameters params, std::
     }
 
     // Display energy cuts
-    if ( params.data_h.display_energy_cuts )
+    if ( h_params->display_energy_cuts )
     {
         GGcout << GGendl;
     }
@@ -1009,38 +1010,8 @@ void Materials::print()
 
 }
 
-/*
-// Add materials to the main list and update the corresponding indices
-void MaterialManager::add_materials_and_update_indices(std::vector<std::string> mats_list, ui16 *data, ui32 ndata) {
-
-
-    ui16 local_id_mat=0; while (local_id_mat<mats_list.size()) {
-
-        ui16 glb_id_mat = m_get_material_index(mats_list[local_id_mat]);
-
-        // If the material index is different to the mats_list index,
-        // the object local material list have to be
-        // re-index considering the main (and global) material list
-        if (glb_id_mat != local_id_mat) {
-
-            ui32 i=0; while (i<ndata) {
-                if (data[i] == local_id_mat) {
-                    data[i] = glb_id_mat;
-                }
-                ++i;
-            }
-
-        }
-
-        ++local_id_mat;
-    }
-
-
-}
-*/
-
 // Init
-void Materials::initialize(std::vector<std::string> mats_list, GlobalSimulationParameters params) {
+void Materials::initialize(std::vector<std::string> mats_list, GlobalSimulationParametersData *h_params) {
 
     m_nb_materials = mats_list.size();
     m_materials_list_name = mats_list;
@@ -1052,17 +1023,16 @@ void Materials::initialize(std::vector<std::string> mats_list, GlobalSimulationP
     }
 
     // Load elements data base
-    m_material_db.load_elements();
-    //load_elements_database( "data/materials/elts.dat" );
+    m_material_db.load_elements();    
 
     // Setting energy range for cut
-    m_rangecut.set_energy_range(params.data_h.cs_table_min_E, params.data_h.cs_table_max_E);
+    m_rangecut.set_energy_range(h_params->cs_table_min_E, h_params->cs_table_max_E);
 
     // Build materials table
-    m_build_materials_table(params, mats_list);
+    m_build_materials_table(h_params, mats_list);
     
     // Copy data to the GPU
-    if (params.data_h.device_target == GPU_DEVICE) m_copy_materials_table_cpu2gpu();
+    m_copy_materials_table_cpu2gpu();
 }
 
 #endif

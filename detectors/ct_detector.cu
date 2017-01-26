@@ -8,6 +8,7 @@
  * \version 0.3
  * \date december 2, 2015
  *
+ * v0.4: JB - Change all structs and remove CPU exec
  * v0.3: JB - Handle transformation (local frame to global frame) and add unified mem
  * v0.2: JB - Add digitizer
  * v0.1: DB - First code
@@ -84,7 +85,7 @@ __host__ __device__ void ct_detector_digitizer( ParticlesData particles,
                                                 f32xyz pixel_size, ui32xyz nb_pixel,
                                                 f32 threshold, f32matrix44 transform,
                                                 f32* projection, ui32* scatter_order,
-                                                ui8 record_option, bool scatter_option,
+                                                ui8 record_option, ui8 scatter_option,
                                                 ui32 id )
 {
     // If freeze or dead, quit
@@ -163,7 +164,7 @@ __global__ void kernel_ct_detector_digitizer( ParticlesData particles,
                                               f32xyz pixel_size, ui32xyz nb_pixel,
                                               f32 threshold, f32matrix44 transform,
                                               f32* projection, ui32* scatter_order,
-                                              ui8 record_option, bool scatter_option )
+                                              ui8 record_option, ui8 scatter_option )
 {
 
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
@@ -219,62 +220,32 @@ CTDetector::~CTDetector()
 }
 
 void CTDetector::track_to_in( Particles particles )
-{
-    if( m_params.data_h.device_target == CPU_DEVICE )
-    {
-        ui32 id = 0;
-        while( id < particles.size )
-        {
-            ct_detector_track_to_in( particles.data_h,
-                                     m_detector_volume,
-                                     id );
-            ++id;
-        }
-    }
-    else if( m_params.data_h.device_target == GPU_DEVICE )
-    {
-        dim3 threads, grid;
-        threads.x = m_params.data_h.gpu_block_size;
-        grid.x = ( particles.size + m_params.data_h.gpu_block_size - 1 )
-                / m_params.data_h.gpu_block_size;
+{   
+    dim3 threads, grid;
+    threads.x = mh_params->gpu_block_size;
+    grid.x = ( particles.size + mh_params->gpu_block_size - 1 )
+            / mh_params->gpu_block_size;
 
-        kernel_ct_detector_track_to_in<<<grid, threads>>>( particles.data_d,
-                                                           m_detector_volume );
-        cuda_error_check("Error ", " Kernel_ct_detector (track to in)");
-        cudaThreadSynchronize();
-    }
+    kernel_ct_detector_track_to_in<<<grid, threads>>>( particles.data_d,
+                                                       m_detector_volume );
+    cuda_error_check("Error ", " Kernel_ct_detector (track to in)");
+    cudaThreadSynchronize();
 }
 
 void CTDetector::digitizer( Particles particles )
-{
-    if( m_params.data_h.device_target == CPU_DEVICE )
-    {
-        ui32 id = 0;
-        while( id < particles.size )
-        {
-            ct_detector_digitizer( particles.data_h, m_detector_volume,
-                                   m_pixel_size, m_nb_pixel,
-                                   m_threshold, m_transform,
-                                   m_projection, m_scatter,
-                                   m_record_option, m_record_scatter, id );
-            ++id;
-        }
-    }
-    else if( m_params.data_h.device_target == GPU_DEVICE )
-    {
-        dim3 threads, grid;
-        threads.x = m_params.data_h.gpu_block_size;
-        grid.x = ( particles.size + m_params.data_h.gpu_block_size - 1 )
-                / m_params.data_h.gpu_block_size;
+{    
+    dim3 threads, grid;
+    threads.x = mh_params->gpu_block_size;
+    grid.x = ( particles.size + mh_params->gpu_block_size - 1 )
+            / mh_params->gpu_block_size;
 
-        kernel_ct_detector_digitizer<<<grid, threads>>>( particles.data_d, m_detector_volume,
-                                                         m_pixel_size, m_nb_pixel,
-                                                         m_threshold, m_transform,
-                                                         m_projection, m_scatter,
-                                                         m_record_option, m_record_scatter );
-        cuda_error_check("Error ", " Kernel_ct_detector (digitizer)");
-        cudaThreadSynchronize();
-    }
+    kernel_ct_detector_digitizer<<<grid, threads>>>( particles.data_d, m_detector_volume,
+                                                     m_pixel_size, m_nb_pixel,
+                                                     m_threshold, m_transform,
+                                                     m_projection, m_scatter,
+                                                     m_record_option, m_record_scatter );
+    cuda_error_check("Error ", " Kernel_ct_detector (digitizer)");
+    cudaThreadSynchronize();
 }
 
 void CTDetector::save_projection( std::string filename, std::string format )
@@ -529,8 +500,7 @@ void CTDetector::print_info_scatter()
 
 }
 
-
-void CTDetector::initialize( GlobalSimulationParameters params )
+void CTDetector::initialize( GlobalSimulationParametersData *h_params )
 {
     // Check the parameters
     if ( m_pixel_size.x == 0.0 || m_pixel_size.y == 0.0 || m_pixel_size.z == 0.0 ||
@@ -541,7 +511,7 @@ void CTDetector::initialize( GlobalSimulationParameters params )
     }
 
     // Params
-    m_params = params;
+    mh_params = h_params;
 
     // Compute the transformation matrix of the detector that map local frame to glboal frame
     TransformCalculator *trans = new TransformCalculator;

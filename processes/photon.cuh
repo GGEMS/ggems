@@ -59,12 +59,10 @@ __host__ __device__ f32 Compton_CS_standard(MaterialsTable materials, ui16 mat, 
 
 __host__ __device__ SecParticle Compton_SampleSecondaries_standard(ParticlesData particles,
                                                                    f32 cutE,
-                                                                   ui32 id,
-                                                                   GlobalSimulationParametersData parameters);
+                                                                   bool flag_electron,
+                                                                   ui32 id );
 __host__ __device__ void Compton_standard(ParticlesData particles,
-                                          f32 cutE,
-                                          ui32 id,
-                                          GlobalSimulationParametersData parameters);
+                                          ui32 id);
 
 //
 
@@ -77,9 +75,8 @@ __host__ __device__ SecParticle Photoelec_SampleSecondaries_standard(ParticlesDa
                                                                      PhotonCrossSectionTable photon_CS_table,
                                                                      ui32 E_index,
                                                                      f32 cutE,
-                                                                     ui16 matindex,
-                                                                     ui32 id,
-                                                                     GlobalSimulationParametersData parameters);
+                                                                     ui16 matindex, bool flag_electron,
+                                                                     ui32 id);
 
 //
 

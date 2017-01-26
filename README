@@ -52,6 +52,7 @@ hg glog | head
 * New branch
 hg branch MYBRANCH
 hg ci -m 'my new branch'
+hg push --new-branch
 
 * See branches
 hg branches

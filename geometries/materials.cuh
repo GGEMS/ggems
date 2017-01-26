@@ -132,18 +132,16 @@ class Materials {
         Materials();
         // Load data provided by the user        
         void load_materials_database(std::string filename);        
-        void initialize(std::vector<std::string> mats_list, GlobalSimulationParameters params);
+        void initialize(std::vector<std::string> mats_list, GlobalSimulationParametersData *h_params);
 
         MaterialsData tables;
 
         void print();
         
-    private:
-        //ui16 m_get_material_index(std::string material_name);
-
+    private:        
         bool m_check_mandatory();
         void m_copy_materials_table_cpu2gpu();
-        void m_build_materials_table(GlobalSimulationParameters params, std::vector<std::string> mats_list);
+        void m_build_materials_table(GlobalSimulationParametersData *h_params, std::vector<std::string> mats_list);
         //void m_free_materials_table();
 
         ui32 m_nb_materials;              // n

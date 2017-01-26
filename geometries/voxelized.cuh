@@ -42,7 +42,7 @@ class VoxelizedPhantom : public BaseObject {
 
         void load_from_mhd(std::string volume_name, std::string range_name);
 
-        void initialize(GlobalSimulationParameters parameters);
+        void initialize();
 
         void set_offset(f32 x, f32 y, f32 z);
 
@@ -52,7 +52,6 @@ class VoxelizedPhantom : public BaseObject {
 
     private:
         template<typename Type> void m_define_materials_from_range(Type *raw_data, std::string range_name);
-        //void m_define_materials_from_range(ui16 *raw_data, std::string range_name);
         void m_copy_phantom_cpu2gpu();
         bool m_check_mandatory();
         TxtReader m_txt_reader;

@@ -22,7 +22,7 @@ class GGEMSDetector {
         GGEMSDetector();
         virtual ~GGEMSDetector() {}
 
-        virtual void initialize(GlobalSimulationParameters params) = 0;
+        virtual void initialize(GlobalSimulationParametersData *h_params) = 0;
         virtual void track_to_in(Particles particles) = 0;
         virtual void track_to_out(Particles particles) = 0;
         virtual void digitizer(Particles particles) = 0;

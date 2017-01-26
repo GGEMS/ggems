@@ -26,7 +26,7 @@ void GGEMSDetector::set_name(std::string name) {
     m_detector_name = name;
 }
 
-void GGEMSDetector::initialize(GlobalSimulationParameters params) {}
+void GGEMSDetector::initialize(GlobalSimulationParametersData *h_params) {}
 
 // Move particle to the phantom boundary
 void GGEMSDetector::track_to_in(Particles particles) {}

@@ -52,8 +52,6 @@ __host__ __device__ void point_source ( ParticlesData particles_data,
     particles_data.next_discrete_process[id] = NO_PROCESS;     //
     particles_data.next_interaction_distance[id] = 0.0;        //
 
-//    printf("id %i - pos %f %f %f - dir %f %f %f\n", id, particles_data.px[id], particles_data.py[id], particles_data.pz[id],
-//           particles_data.dx[id], particles_data.dy[id], particles_data.dz[id]);
 }
 
 // Kernel to create new particles. This kernel will only call the host/device function
@@ -141,7 +139,7 @@ bool PointSource::m_check_mandatory()
 
 // Mandatory function, abstract from GGEMSSource. This function is called
 // by GGEMS to initialize and load all necessary data into the graphic card
-void PointSource::initialize ( GlobalSimulationParameters params )
+void PointSource::initialize( GlobalSimulationParametersData *h_params )
 {
     // Check if everything was set properly
     if ( !m_check_mandatory() )
@@ -153,53 +151,33 @@ void PointSource::initialize ( GlobalSimulationParameters params )
     // Store global parameters: params are provided by GGEMS and are used to
     // know different information about the simulation. For example if the targeted
     // device is a CPU or a GPU.
-    m_params = params;
+    mh_params = h_params;
 
     // Handle GPU device if needed. Here nothing is load to the GPU (simple source). But
     // in case of the use of a spectrum data should be allocated and transfered here.
-    if ( m_params.data_h.device_target == GPU_DEVICE )
-    {
-        // GPU mem allocation
 
-        // GPU mem copy
-    }
+    // GPU mem allocation
+
+    // GPU mem copy
 
 }
 
 // Mandatory function, abstract from GGEMSSource. This function is called
 // by GGEMS to fill particle buffer of new fresh particles, which is the role
 // of any source.
-void PointSource::get_primaries_generator ( Particles particles )
+void PointSource::get_primaries_generator( Particles particles )
 {
 
-    // If CPU running, do it on CPU
-    if ( m_params.data_h.device_target == CPU_DEVICE )
-    {
-        // Loop over the particle buffer
-        ui32 id=0;
-        while( id < particles.size )
-        {
-            // Call a point source that get a new particle at a time. In this case data from host (CPU)
-            // is passed to the function (particles.data_h).
-            point_source( particles.data_h, m_px, m_py, m_pz, m_energy, m_particle_type, id );
-            ++id;
-        }
+    // Defined threads and grid
+    dim3 threads, grid;
+    threads.x = mh_params->gpu_block_size;
+    grid.x = ( particles.size + mh_params->gpu_block_size - 1 ) / mh_params->gpu_block_size;
 
-    }
-    // If GPU running, do it on GPU
-    else if ( m_params.data_h.device_target == GPU_DEVICE )
-    {
-        // Defined threads and grid
-        dim3 threads, grid;
-        threads.x = m_params.data_h.gpu_block_size;
-        grid.x = ( particles.size + m_params.data_h.gpu_block_size - 1 ) / m_params.data_h.gpu_block_size;
-
-        // Call GPU kernel of a point source that get fill the complete particle buffer. In this case data
-        // from device (GPU) is passed to the kernel (particles.data_d).
-        kernel_point_source<<<grid, threads>>>( particles.data_d, m_px, m_py, m_pz, m_energy, m_particle_type );
-        cuda_error_check( "Error ", " Kernel_point_source" );
-        cudaDeviceSynchronize();
-    }
+    // Call GPU kernel of a point source that get fill the complete particle buffer. In this case data
+    // from device (GPU) is passed to the kernel (particles.data_d).
+    kernel_point_source<<<grid, threads>>>( particles.data_d, m_px, m_py, m_pz, m_energy, m_particle_type );
+    cuda_error_check( "Error ", " Kernel_point_source" );
+    cudaDeviceSynchronize();
 
 }
 

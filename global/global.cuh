@@ -37,11 +37,6 @@
 
 /////// CONSTANTS //////////////////////////////////////////////
 
-// Run on CPU
-#define CPU_DEVICE 0
-// Run on GPU
-#define GPU_DEVICE 1
-
 // Maximum number of processes
 #define NB_PROCESSES 20
 // Maximum number of photon processes
@@ -199,8 +194,8 @@
 // Global simulation parameters
 struct GlobalSimulationParametersData
 {
-    bool *physics_list;
-    bool *secondaries_list;
+    ui8* physics_list;
+    ui8* secondaries_list;
     f32 photon_cut;    // In energy for now, need to change for distance range.
     f32 electron_cut;
 
@@ -210,7 +205,6 @@ struct GlobalSimulationParametersData
     ui64 size_of_particles_batch;
     ui32 nb_of_batches;
 
-    ui8 device_target;
     ui32 gpu_id;
     ui32 gpu_block_size;
     ui32 gpu_grid_size;
@@ -232,14 +226,6 @@ struct GlobalSimulationParametersData
     f32 cs_table_max_E;
 };
 
-// Struct to handle CPU&GPU params
-struct GlobalSimulationParameters
-{
-    GlobalSimulationParametersData data_h;
-    GlobalSimulationParametersData data_d;
-};
-
-
 // GPU
 void set_gpu_device ( int deviceChoice );
 void reset_gpu_device();
@@ -250,12 +236,12 @@ void cuda_error_check ( const char * prefix, const char * postfix );
 void print_error ( std::string msg );
 void print_warning ( std::string msg );
 
-void print_banner (std::string version, GlobalSimulationParametersData params );
+void print_banner(std::string version, GlobalSimulationParametersData *params );
 void exit_simulation();
 
 void GGcout_time ( std::string txt, f64 t );
 void GGcout_mem ( std::string txt, ui64 valmem );
-void GGcout_params ( GlobalSimulationParametersData params );
+void GGcout_params(GlobalSimulationParametersData *params );
 void GGcout_timestamp ();
 void GGcout_version ();
 void GGcout_def();
@@ -265,16 +251,6 @@ std::string Energy_str( f32 E );
 std::string Range_str( f32 E );
 
 f64 get_time();
-
-
-
-// Struct that handle colors
-//struct Color {
-//    f32 r, g, b;
-//};
-//Color make_color(f32 r, f32 g, f32 b);
-
-
 
 
 #endif
