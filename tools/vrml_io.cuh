@@ -19,12 +19,13 @@
 // Sources
 #include "beamlet_source.cuh"
 #include "cone_beam_CT_source.cuh"
+#include "point_source.cuh"
 
 // Phantoms
-#include "vox_phan_dosi_nav.cuh"
+//#include "vox_phan_dosi_nav.cuh"
 #include "vox_phan_img_nav.cuh"
-#include "vox_phan_iort_nav.cuh"
-#include "mesh_phan_linac_nav.cuh"
+//#include "vox_phan_iort_nav.cuh"
+//#include "mesh_phan_linac_nav.cuh"
 
 // Detectors
 #include "ct_detector.cuh"
@@ -73,20 +74,20 @@ public:
      */
     void draw_source( ConeBeamCTSource* aSource );
 
-    void draw_source( PointSource* aSrouce );
+    void draw_source( PointSource* aSource );
 
     /*!
      * \fn void draw_phantom( VoxPhanDosiNav* aPhantom )
      * \brief Draw in 3D a VoxPhanDosiNav into the VRML file
      * \param aPhantom The phantom
      */
-    void draw_phantom( VoxPhanDosiNav* aPhantom );
+//    void draw_phantom( VoxPhanDosiNav* aPhantom );
 
-    void draw_phantom( VoxPhanIORTNav* aPhantom );
+//    void draw_phantom( VoxPhanIORTNav* aPhantom );
 
     void draw_phantom( VoxPhanImgNav* aPhantom );
 
-    void draw_phantom( MeshPhanLINACNav* aPhantom );
+//    void draw_phantom( MeshPhanLINACNav* aPhantom );
 
     void draw_detector( CTDetector* aDetector );
 

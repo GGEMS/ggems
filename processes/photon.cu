@@ -87,7 +87,7 @@ __host__ __device__ f32 Compton_CS_standard(const MaterialsData *materials, ui16
 // Compton Scatter (Standard - Klein-Nishina) with secondary (e-)
 __host__ __device__ SecParticle Compton_SampleSecondaries_standard(ParticlesData *particles,
                                                                    f32 cutE,
-                                                                   bool flag_electron,
+                                                                   ui8 flag_electron,
                                                                    ui32 id ) {
 
     f32 gamE0 = particles->E[id];
@@ -286,7 +286,7 @@ __host__ __device__ SecParticle Photoelec_SampleSecondaries_standard(ParticlesDa
                                                                      ui32 E_index,
                                                                      f32 cutE,
                                                                      ui16 matindex,
-                                                                     bool flag_electron,
+                                                                     ui8 flag_electron,
                                                                      ui32 id ) {
 
     // Kill the photon without mercy

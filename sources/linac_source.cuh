@@ -107,7 +107,7 @@ public:
 
 
 public:
-    f32matrix44 get_transformation_matrix();
+    f32matrix44 get_transformation_matrix();    
 
 public: // Abstract from GGEMSSource (Mandatory funtions)
 
@@ -116,13 +116,13 @@ public: // Abstract from GGEMSSource (Mandatory funtions)
      * \brief Generate particles
      * \param particles Stack of particles
      */
-    void get_primaries_generator( Particles particles );
+    void get_primaries_generator( ParticlesData *d_particles );
 
     /*!
      * \brief Initialize the source before running the simualtion
      * \param params Simulations parameters
      */
-    void initialize( GlobalSimulationParameters params );
+    void initialize( GlobalSimulationParametersData *h_params );
 
 private: // Make LinacSource class non-copyable
     /*!
@@ -141,6 +141,11 @@ private: // Make LinacSource class non-copyable
      */
     void m_load_linac_model();
 
+    /*!
+     * \brief Copy LINAC model data to the GPU
+     */
+    void m_copy_to_gpu();
+
 private:
 
     f32matrix33 m_axis_trans;             /*!< Axis transformation matrix */
@@ -148,9 +153,11 @@ private:
     f32xyz m_org;                         /*!< Position of Linac source frame */
     std::string m_model_filename;         /*!< filename of the Linac source model */
 
-    LinacSourceData m_linac_source_data;  /*!< Linac source model data */
     f32matrix44 m_transform;              /*!< Transformation matrix */
-    GlobalSimulationParameters m_params;  /*!< Simulation parameters */
+    GlobalSimulationParametersData *mh_params;  /*!< Simulation parameters */
+
+    LinacSourceData *h_linac_source;      /*!< Linac source model host data */
+    LinacSourceData *d_linac_source;      /*!< Linac source model device data */
 };
 
 #endif

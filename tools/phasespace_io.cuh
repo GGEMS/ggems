@@ -62,15 +62,15 @@ class PhaseSpaceIO {
         PhaseSpaceIO();
         ~PhaseSpaceIO(){}
 
-        PhaseSpaceData read_phasespace_file( std::string filename );
+        PhaseSpaceData* read_phasespace_file( std::string filename );
 
     private:
         // IAEA format
         void m_read_IAEA_header( std::string filename );
-        PhaseSpaceData m_read_IAEA_data();
+        PhaseSpaceData* m_read_IAEA_data();
         // MHD format
         void m_read_MHD_header( std::string filename );
-        PhaseSpaceData m_read_MHD_data();
+        PhaseSpaceData* m_read_MHD_data();
 
     private:
         std::string m_filename;

@@ -26,7 +26,8 @@ public:
     DVHCalculator();
     ~DVHCalculator();
 
-    void compute_dvh_from_mask( VoxVolumeData<f32> *dosemap, std::string mask_name, ui32 id_mask = 1, ui32 nb_of_bins = 100 );
+    void compute_dvh_from_mask( VoxVolumeData<f32> *dosemap, std::string mask_name,
+                                ui32 id_mask = 1, ui32 nb_of_bins = 100 );
 
     f32 get_dose_from_volume_percent( f32 volume_percent );
     f32 get_total_volume_size();

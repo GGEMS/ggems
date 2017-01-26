@@ -219,7 +219,7 @@ void VrmlIO::draw_source( PointSource *aSource )
 //    m_draw_point( pos, m_yellow );
     m_draw_sphere( pos, 2.0, m_yellow );
 }
-
+/*
 void VrmlIO::draw_phantom( VoxPhanDosiNav *aPhantom )
 {
     // Get back some info
@@ -235,7 +235,7 @@ void VrmlIO::draw_phantom( VoxPhanIORTNav *aPhantom )
 
     m_draw_wireframe_aabb( aabb, m_blue );
 }
-
+*/
 void VrmlIO::draw_phantom( VoxPhanImgNav *aPhantom )
 {
     // Get back some info
@@ -243,7 +243,7 @@ void VrmlIO::draw_phantom( VoxPhanImgNav *aPhantom )
 
     m_draw_wireframe_aabb( aabb, m_blue );
 }
-
+/*
 void VrmlIO::draw_phantom( MeshPhanLINACNav *aPhantom )
 {
     // Get the geometry
@@ -405,19 +405,19 @@ void VrmlIO::draw_phantom( MeshPhanLINACNav *aPhantom )
                      linac.Y_jaw_nb_triangles[ 1 ], m_red, 0.0, true );
     }
 
-/*
-    // Draw bounding box
-    m_draw_wireframe_aabb( linac.aabb, m_cyan );
-    m_draw_wireframe_aabb( linac.A_bank_aabb, m_cyan );
-    m_draw_wireframe_aabb( linac.B_bank_aabb, m_cyan );
-    m_draw_wireframe_aabb( linac.X_jaw_aabb[ 0 ], m_cyan );
-    m_draw_wireframe_aabb( linac.X_jaw_aabb[ 1 ], m_cyan );
-    m_draw_wireframe_aabb( linac.Y_jaw_aabb[ 0 ], m_cyan );
-    m_draw_wireframe_aabb( linac.Y_jaw_aabb[ 1 ], m_cyan );
-*/
+
+//    // Draw bounding box
+//    m_draw_wireframe_aabb( linac.aabb, m_cyan );
+//    m_draw_wireframe_aabb( linac.A_bank_aabb, m_cyan );
+//    m_draw_wireframe_aabb( linac.B_bank_aabb, m_cyan );
+//    m_draw_wireframe_aabb( linac.X_jaw_aabb[ 0 ], m_cyan );
+//    m_draw_wireframe_aabb( linac.X_jaw_aabb[ 1 ], m_cyan );
+//    m_draw_wireframe_aabb( linac.Y_jaw_aabb[ 0 ], m_cyan );
+//    m_draw_wireframe_aabb( linac.Y_jaw_aabb[ 1 ], m_cyan );
+
 
 }
-
+*/
 void VrmlIO::draw_detector( CTDetector *aDetector )
 {
     // Get back info

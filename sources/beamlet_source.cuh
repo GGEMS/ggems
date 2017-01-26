@@ -133,13 +133,13 @@ public: // Abstract from GGEMSSource (Mandatory funtions)
      * \brief Generate particles
      * \param particles Stack of particles
      */
-    void get_primaries_generator( Particles particles );
+    void get_primaries_generator( ParticlesData *d_particles );
 
     /*!
      * \brief Initialize the source before running the simualtion
      * \param params Simulations parameters
      */
-    void initialize( GlobalSimulationParameters params );
+    void initialize( GlobalSimulationParametersData *h_params );
 
 private: // Make BeamletSource class non-copyable
     /*!
@@ -172,7 +172,7 @@ private:
     f32 m_energy;                         /*!< In case of mono energy, the energy value */
     ui32 m_nb_of_energy_bins;             /*!< Number of the bins in the energy spectrum */
     f32matrix44 m_transform;              /*!< Trsnformation matrix */
-    GlobalSimulationParameters m_params;  /*!< Simulation parameters */
+    GlobalSimulationParametersData *mh_params;  /*!< Simulation parameters */
 };
 
 #endif

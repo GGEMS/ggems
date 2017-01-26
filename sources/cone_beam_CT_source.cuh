@@ -120,14 +120,14 @@ public: // Mandatory method from GGEMSSource abstract class
       \param particles particle to generate for the simulation
       \brief generation of the particle
     */
-    void get_primaries_generator( Particles particles );
+    void get_primaries_generator( ParticlesData *d_particles );
 
     /*!
       \fn void initialize( GlobalSimulationParameters params )
       \param params simulation parameters
       \brief initialize the source for the simulation
     */
-    void initialize( GlobalSimulationParameters params );
+    void initialize( GlobalSimulationParametersData *h_params );
 
 private: // Make ConeBeamCTSource class non-copyable
     /*!
@@ -167,7 +167,7 @@ private:
     std::string m_spectrum_filename;      /*!< Name of the file that contains the spectrum */
 
     ui32 m_nb_of_energy_bins; /*!< Number of the bins in the energy spectrum */
-    GlobalSimulationParameters m_params; /*!< Simulation parameters */
+    GlobalSimulationParametersData *mh_params; /*!< Simulation parameters */
 };
 
 #endif

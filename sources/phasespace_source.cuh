@@ -39,11 +39,11 @@ class GGEMSource;
 
 namespace PHSPSRC
 {
-__host__ __device__ void phsp_source(ParticlesData particles_data,
-                                     PhaseSpaceData phasespace,
+__host__ __device__ void phsp_source(ParticlesData *particles_data,
+                                     const PhaseSpaceData *phasespace,
                                      PhSpTransform transform, ui32 id );
-__global__ void phsp_point_source( ParticlesData particles_data,
-                                   PhaseSpaceData phasespace,
+__global__ void phsp_point_source(ParticlesData *particles_data,
+                                   const PhaseSpaceData *phasespace,
                                    PhSpTransform transform );
 }
 
@@ -65,22 +65,24 @@ public:
     void set_transformation_file( std::string filename );
 
     // Abstract from GGEMSSource (Mandatory funtions)
-    void get_primaries_generator( Particles particles );
-    void initialize( GlobalSimulationParameters params );
+    void get_primaries_generator( ParticlesData *d_particles );
+    void initialize( GlobalSimulationParametersData *h_params );
 
 private:
     std::string m_phasespace_file;
     std::string m_transformation_file;
     void m_load_phasespace_file();
     void m_load_transformation_file();
+    void m_copy_phasespace_to_gpu();
 
     bool m_check_mandatory();
     void m_transform_allocation( ui32 nb_sources );
     void m_skip_comment(std::istream & is);
 
-    GlobalSimulationParameters m_params;
+    GlobalSimulationParametersData *mh_params;
     PhSpTransform m_transform;    
-    PhaseSpaceData m_phasespace;    
+    PhaseSpaceData *mh_phasespace;
+    PhaseSpaceData *md_phasespace;
     i32 m_nb_part_max;
 
 };
