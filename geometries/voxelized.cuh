@@ -46,8 +46,8 @@ class VoxelizedPhantom : public BaseObject {
 
         void set_offset(f32 x, f32 y, f32 z);
 
-        VoxVolumeData<ui16> data_h;
-        VoxVolumeData<ui16> data_d;
+        VoxVolumeData<ui16> *h_volume;
+        VoxVolumeData<ui16> *d_volume;
         std::vector<std::string> list_of_materials;    
 
     private:

@@ -17,54 +17,84 @@
 #include "voxelized.cuh"
 
 VoxelizedPhantom::VoxelizedPhantom() {
-    data_h.xmin = 0.0f;
-    data_h.xmax = 0.0f;
-    data_h.ymin = 0.0f;
-    data_h.ymax = 0.0f;
-    data_h.zmin = 0.0f;
-    data_h.zmax = 0.0f;
+    h_volume = (VoxVolumeData<ui16>*)malloc( sizeof(VoxVolumeData<ui16>) );
+
+    h_volume->xmin = 0.0f;
+    h_volume->xmax = 0.0f;
+    h_volume->ymin = 0.0f;
+    h_volume->ymax = 0.0f;
+    h_volume->zmin = 0.0f;
+    h_volume->zmax = 0.0f;
 
     // Init pointer
-    data_h.values = NULL;
+    h_volume->values = nullptr;
 }
 
 ///:: Private
 
 // Check
 bool VoxelizedPhantom::m_check_mandatory() {
-    if (data_h.number_of_voxels == 0) return false;
+    if (h_volume->number_of_voxels == 0) return false;
     else return true;
 }
 
 // Copy the phantom to the GPU
 void VoxelizedPhantom::m_copy_phantom_cpu2gpu() {
 
-    // Mem allocation
-    HANDLE_ERROR( cudaMalloc((void**) &data_d.values, data_h.number_of_voxels*sizeof(ui16)) );
-    // Copy data
-    HANDLE_ERROR( cudaMemcpy(data_d.values, data_h.values,
-                  data_h.number_of_voxels*sizeof(ui16), cudaMemcpyHostToDevice) );
+    ui32 n = h_volume->number_of_voxels;
 
-    data_d.nb_vox_x = data_h.nb_vox_x;
-    data_d.nb_vox_y = data_h.nb_vox_y;
-    data_d.nb_vox_z = data_h.nb_vox_z;
+    /// First, struct allocation
+    HANDLE_ERROR( cudaMalloc( (void**) &d_volume, sizeof( VoxVolumeData<ui16> ) ) );
 
-    data_d.spacing_x = data_h.spacing_x;
-    data_d.spacing_y = data_h.spacing_y;
-    data_d.spacing_z = data_h.spacing_z;
+    /// Device pointers allocation
+    ui16 *values;
+    HANDLE_ERROR( cudaMalloc((void**) &values, n*sizeof(ui16)) );
 
-    data_d.off_x = data_h.off_x;
-    data_d.off_y = data_h.off_y;
-    data_d.off_z = data_h.off_z;
-    
-    data_d.xmin = data_h.xmin;
-    data_d.xmax = data_h.xmax;
-    data_d.ymin = data_h.ymin;
-    data_d.ymax = data_h.ymax;
-    data_d.zmin = data_h.zmin;
-    data_d.zmax = data_h.zmax;
+    /// Copy host data to device
+    HANDLE_ERROR( cudaMemcpy( values, h_volume->values,
+                              n*sizeof(ui16), cudaMemcpyHostToDevice ) );
 
-    data_d.number_of_voxels = data_h.number_of_voxels;
+    /// Bind data to the struct
+    HANDLE_ERROR( cudaMemcpy( &(d_volume->values), &values,
+                              sizeof(d_volume->values), cudaMemcpyHostToDevice ) );
+
+    HANDLE_ERROR( cudaMemcpy( &(d_volume->nb_vox_x), &(h_volume->nb_vox_x),
+                                sizeof(d_volume->nb_vox_x), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(d_volume->nb_vox_y), &(h_volume->nb_vox_y),
+                                sizeof(d_volume->nb_vox_y), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(d_volume->nb_vox_z), &(h_volume->nb_vox_z),
+                                sizeof(d_volume->nb_vox_z), cudaMemcpyHostToDevice ) );
+
+    HANDLE_ERROR( cudaMemcpy( &(d_volume->number_of_voxels), &(h_volume->number_of_voxels),
+                                sizeof(d_volume->number_of_voxels), cudaMemcpyHostToDevice ) );
+
+    HANDLE_ERROR( cudaMemcpy( &(d_volume->spacing_x), &(h_volume->spacing_x),
+                                sizeof(d_volume->spacing_x), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(d_volume->spacing_y), &(h_volume->spacing_y),
+                                sizeof(d_volume->spacing_y), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(d_volume->spacing_z), &(h_volume->spacing_z),
+                                sizeof(d_volume->spacing_z), cudaMemcpyHostToDevice ) );
+
+    HANDLE_ERROR( cudaMemcpy( &(d_volume->off_x), &(h_volume->off_x),
+                                sizeof(d_volume->off_x), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(d_volume->off_y), &(h_volume->off_y),
+                                sizeof(d_volume->off_y), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(d_volume->off_z), &(h_volume->off_z),
+                                sizeof(d_volume->off_z), cudaMemcpyHostToDevice ) );
+
+    HANDLE_ERROR( cudaMemcpy( &(d_volume->xmin), &(h_volume->xmin),
+                                sizeof(d_volume->xmin), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(d_volume->xmax), &(h_volume->xmax),
+                                sizeof(d_volume->xmax), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(d_volume->ymin), &(h_volume->ymin),
+                                sizeof(d_volume->ymin), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(d_volume->ymax), &(h_volume->ymax),
+                                sizeof(d_volume->ymax), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(d_volume->zmin), &(h_volume->zmin),
+                                sizeof(d_volume->zmin), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(d_volume->zmax), &(h_volume->zmax),
+                                sizeof(d_volume->zmax), cudaMemcpyHostToDevice ) );
+
 }
 
 // Convert range data into material ID
@@ -78,7 +108,7 @@ void VoxelizedPhantom::m_define_materials_from_range(Type *raw_data, std::string
     ui16 mat_index = 0;
     
     // Data allocation
-    data_h.values = (ui16*)malloc(data_h.number_of_voxels * sizeof(ui16));
+    h_volume->values = (ui16*)malloc(h_volume->number_of_voxels * sizeof(ui16));
 
     // Read range file
     std::ifstream file(range_name.c_str());
@@ -103,10 +133,10 @@ void VoxelizedPhantom::m_define_materials_from_range(Type *raw_data, std::string
             if ( stop  > max_val ) max_val = stop;
 
             // build labeled phantom according range data
-            i=0; while (i < data_h.number_of_voxels) {
+            i=0; while (i < h_volume->number_of_voxels) {
                 val = (f32) raw_data[i];
                 if ((val==start && val==stop) || (val>=start && val<stop)) {
-                    data_h.values[i] = mat_index;
+                    h_volume->values[i] = mat_index;
                 }
                 ++i;
             } // over the volume
@@ -117,7 +147,7 @@ void VoxelizedPhantom::m_define_materials_from_range(Type *raw_data, std::string
     } // read file
 
     // Check if everything was converted
-    i=0; while (i < data_h.number_of_voxels) {
+    i=0; while (i < h_volume->number_of_voxels) {
         val = (f32) raw_data[i];
 
         if ( val < min_val )
@@ -158,14 +188,14 @@ void VoxelizedPhantom::load_from_raw(std::string volume_name, std::string range_
 
     /////////////// First read the raw data from the phantom ////////////////////////
 
-    data_h.number_of_voxels = nx*ny*nz;
-    data_h.nb_vox_x = nx;
-    data_h.nb_vox_y = ny;
-    data_h.nb_vox_z = nz;
-    data_h.spacing_x = sx;
-    data_h.spacing_y = sy;
-    data_h.spacing_z = sz;
-    ui32 mem_size = sizeof(f32) * data_h.number_of_voxels;
+    h_volume->number_of_voxels = nx*ny*nz;
+    h_volume->nb_vox_x = nx;
+    h_volume->nb_vox_y = ny;
+    h_volume->nb_vox_z = nz;
+    h_volume->spacing_x = sx;
+    h_volume->spacing_y = sy;
+    h_volume->spacing_z = sz;
+    ui32 mem_size = sizeof(f32) * h_volume->number_of_voxels;
 
     FILE *pfile = fopen(volume_name.c_str(), "rb");
     if (!pfile) {
@@ -174,7 +204,7 @@ void VoxelizedPhantom::load_from_raw(std::string volume_name, std::string range_
     }
 
     f32 *raw_data = (f32*)malloc(mem_size);
-    fread(raw_data, sizeof(f32), data_h.number_of_voxels, pfile);
+    fread(raw_data, sizeof(f32), h_volume->number_of_voxels, pfile);
 
     fclose(pfile);
 
@@ -187,17 +217,17 @@ void VoxelizedPhantom::load_from_raw(std::string volume_name, std::string range_
 
     ///////////// Define a bounding box for this phantom //////////////////////////////
 
-    f32 h_lengthx = data_h.nb_vox_x * data_h.spacing_x * 0.5f;
-    f32 h_lengthy = data_h.nb_vox_y * data_h.spacing_y * 0.5f;
-    f32 h_lengthz = data_h.nb_vox_z * data_h.spacing_z * 0.5f;
+    f32 h_lengthx = h_volume->nb_vox_x * h_volume->spacing_x * 0.5f;
+    f32 h_lengthy = h_volume->nb_vox_y * h_volume->spacing_y * 0.5f;
+    f32 h_lengthz = h_volume->nb_vox_z * h_volume->spacing_z * 0.5f;
 
-    data_h.xmin = -h_lengthx; data_h.xmax = h_lengthx;
-    data_h.ymin = -h_lengthy; data_h.ymax = h_lengthy;
-    data_h.zmin = -h_lengthz; data_h.zmax = h_lengthz;
+    h_volume->xmin = -h_lengthx; h_volume->xmax = h_lengthx;
+    h_volume->ymin = -h_lengthy; h_volume->ymax = h_lengthy;
+    h_volume->zmin = -h_lengthz; h_volume->zmax = h_lengthz;
 
-    data_h.off_x = h_lengthx;
-    data_h.off_y = h_lengthy;
-    data_h.off_z = h_lengthz;
+    h_volume->off_x = h_lengthx;
+    h_volume->off_y = h_lengthy;
+    h_volume->off_z = h_lengthz;
 
 }
 
@@ -315,19 +345,19 @@ void VoxelizedPhantom::load_from_mhd(std::string volume_name, std::string range_
         }
     }
 
-    data_h.number_of_voxels = nx*ny*nz;
-    data_h.nb_vox_x = nx;
-    data_h.nb_vox_y = ny;
-    data_h.nb_vox_z = nz;
-    data_h.spacing_x = sx;
-    data_h.spacing_y = sy;
-    data_h.spacing_z = sz;
+    h_volume->number_of_voxels = nx*ny*nz;
+    h_volume->nb_vox_x = nx;
+    h_volume->nb_vox_y = ny;
+    h_volume->nb_vox_z = nz;
+    h_volume->spacing_x = sx;
+    h_volume->spacing_y = sy;
+    h_volume->spacing_z = sz;
     
     if(ElementType == "MET_FLOAT") {
-      ui32 mem_size = sizeof(f32) * data_h.number_of_voxels;
+      ui32 mem_size = sizeof(f32) * h_volume->number_of_voxels;
 
       f32 *raw_data = (f32*)malloc(mem_size);
-      fread(raw_data, sizeof(f32), data_h.number_of_voxels, pfile);
+      fread(raw_data, sizeof(f32), h_volume->number_of_voxels, pfile);
       fclose(pfile);
       
       /////////////// Then, convert the raw data into material id //////////////////////
@@ -339,10 +369,10 @@ void VoxelizedPhantom::load_from_mhd(std::string volume_name, std::string range_
     }
     
     if(ElementType == "MET_USHORT") {
-      ui32 mem_size = sizeof(ui16) * data_h.number_of_voxels;
+      ui32 mem_size = sizeof(ui16) * h_volume->number_of_voxels;
 
       ui16 *raw_data = (ui16*)malloc(mem_size);
-      fread(raw_data, sizeof(ui16), data_h.number_of_voxels, pfile);
+      fread(raw_data, sizeof(ui16), h_volume->number_of_voxels, pfile);
       fclose(pfile);
       /////////////// Then, convert the raw data into material id //////////////////////
       m_define_materials_from_range(raw_data, range_name);
@@ -352,10 +382,10 @@ void VoxelizedPhantom::load_from_mhd(std::string volume_name, std::string range_
     }  
 
     if(ElementType == "MET_SHORT") {
-      ui32 mem_size = sizeof(i16) * data_h.number_of_voxels;
+      ui32 mem_size = sizeof(i16) * h_volume->number_of_voxels;
 
       i16 *raw_data = (i16*)malloc(mem_size);
-      fread(raw_data, sizeof(i16), data_h.number_of_voxels, pfile);
+      fread(raw_data, sizeof(i16), h_volume->number_of_voxels, pfile);
       fclose(pfile);
       /////////////// Then, convert the raw data into material id //////////////////////
       m_define_materials_from_range(raw_data, range_name);
@@ -365,10 +395,10 @@ void VoxelizedPhantom::load_from_mhd(std::string volume_name, std::string range_
     }
 
     if(ElementType == "MET_UCHAR") {
-      ui32 mem_size = sizeof(ui8) * data_h.number_of_voxels;
+      ui32 mem_size = sizeof(ui8) * h_volume->number_of_voxels;
 
       ui8 *raw_data = (ui8*)malloc(mem_size);
-      fread(raw_data, sizeof(ui8), data_h.number_of_voxels, pfile);
+      fread(raw_data, sizeof(ui8), h_volume->number_of_voxels, pfile);
       fclose(pfile);
       /////////////// Then, convert the raw data into material id //////////////////////
       m_define_materials_from_range(raw_data, range_name);
@@ -378,10 +408,10 @@ void VoxelizedPhantom::load_from_mhd(std::string volume_name, std::string range_
     }
 
     if(ElementType == "MET_UINT") {
-      ui32 mem_size = sizeof(ui32) * data_h.number_of_voxels;
+      ui32 mem_size = sizeof(ui32) * h_volume->number_of_voxels;
 
       ui32 *raw_data = (ui32*)malloc(mem_size);
-      fread(raw_data, sizeof(ui32), data_h.number_of_voxels, pfile);
+      fread(raw_data, sizeof(ui32), h_volume->number_of_voxels, pfile);
       fclose(pfile);
       /////////////// Then, convert the raw data into material id //////////////////////
       m_define_materials_from_range(raw_data, range_name);
@@ -392,40 +422,40 @@ void VoxelizedPhantom::load_from_mhd(std::string volume_name, std::string range_
 
     ///////////// Define a bounding box for this phantom //////////////////////////////
 
-    f32 h_lengthx = data_h.nb_vox_x * data_h.spacing_x * 0.5f;
-    f32 h_lengthy = data_h.nb_vox_y * data_h.spacing_y * 0.5f;
-    f32 h_lengthz = data_h.nb_vox_z * data_h.spacing_z * 0.5f;
+    f32 h_lengthx = h_volume->nb_vox_x * h_volume->spacing_x * 0.5f;
+    f32 h_lengthy = h_volume->nb_vox_y * h_volume->spacing_y * 0.5f;
+    f32 h_lengthz = h_volume->nb_vox_z * h_volume->spacing_z * 0.5f;
 
     // If the offset is not defined, chose the volume center
     if ( !flag_offset ) {
-        data_h.off_x = h_lengthx;
-        data_h.off_y = h_lengthy;
-        data_h.off_z = h_lengthz;
+        h_volume->off_x = h_lengthx;
+        h_volume->off_y = h_lengthy;
+        h_volume->off_z = h_lengthz;
 
-        data_h.xmin = -h_lengthx; data_h.xmax = h_lengthx;
-        data_h.ymin = -h_lengthy; data_h.ymax = h_lengthy;
-        data_h.zmin = -h_lengthz; data_h.zmax = h_lengthz;
+        h_volume->xmin = -h_lengthx; h_volume->xmax = h_lengthx;
+        h_volume->ymin = -h_lengthy; h_volume->ymax = h_lengthy;
+        h_volume->zmin = -h_lengthz; h_volume->zmax = h_lengthz;
 
     } else {
-        data_h.off_x = ox;
-        data_h.off_y = oy;
-        data_h.off_z = oz;
+        h_volume->off_x = ox;
+        h_volume->off_y = oy;
+        h_volume->off_z = oz;
 
-        data_h.xmin = -ox; data_h.xmax = data_h.xmin + (data_h.nb_vox_x * data_h.spacing_x);
-        data_h.ymin = -oy; data_h.ymax = data_h.ymin + (data_h.nb_vox_y * data_h.spacing_y);
-        data_h.zmin = -oz; data_h.zmax = data_h.zmin + (data_h.nb_vox_z * data_h.spacing_z);
+        h_volume->xmin = -ox; h_volume->xmax = h_volume->xmin + (h_volume->nb_vox_x * h_volume->spacing_x);
+        h_volume->ymin = -oy; h_volume->ymax = h_volume->ymin + (h_volume->nb_vox_y * h_volume->spacing_y);
+        h_volume->zmin = -oz; h_volume->zmax = h_volume->zmin + (h_volume->nb_vox_z * h_volume->spacing_z);
     }
 
 }
 
 void VoxelizedPhantom::set_offset(f32 x, f32 y, f32 z) {
-    data_h.off_x = x;
-    data_h.off_y = y;
-    data_h.off_z = z;
+    h_volume->off_x = x;
+    h_volume->off_y = y;
+    h_volume->off_z = z;
 
-    data_h.xmin = -x; data_h.xmax = data_h.xmin + (data_h.nb_vox_x * data_h.spacing_x);
-    data_h.ymin = -y; data_h.ymax = data_h.ymin + (data_h.nb_vox_y * data_h.spacing_y);
-    data_h.zmin = -z; data_h.zmax = data_h.zmin + (data_h.nb_vox_z * data_h.spacing_z);
+    h_volume->xmin = -x; h_volume->xmax = h_volume->xmin + (h_volume->nb_vox_x * h_volume->spacing_x);
+    h_volume->ymin = -y; h_volume->ymax = h_volume->ymin + (h_volume->nb_vox_y * h_volume->spacing_y);
+    h_volume->zmin = -z; h_volume->zmax = h_volume->zmin + (h_volume->nb_vox_z * h_volume->spacing_z);
 }
 
 #endif
