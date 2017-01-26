@@ -55,12 +55,12 @@ class CTDetector : public GGEMSDetector
         ObbData get_bounding_box();
 
         // Tracking from outside to the detector
-        void track_to_in( Particles particles );
-        void track_to_out( Particles particles ){}
+        void track_to_in( ParticlesData *d_particles );
+        void track_to_out( ParticlesData *d_particles ){}
 
         // Init
         void initialize( GlobalSimulationParametersData *h_params );
-        void digitizer( Particles particles );
+        void digitizer( ParticlesData *d_particles );
 
         void save_projection( std::string filename , std::string format = "f32" );
         void save_scatter( std::string filename );

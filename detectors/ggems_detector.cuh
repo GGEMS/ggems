@@ -23,9 +23,9 @@ class GGEMSDetector {
         virtual ~GGEMSDetector() {}
 
         virtual void initialize(GlobalSimulationParametersData *h_params) = 0;
-        virtual void track_to_in(Particles particles) = 0;
-        virtual void track_to_out(Particles particles) = 0;
-        virtual void digitizer(Particles particles) = 0;
+        virtual void track_to_in(ParticlesData *d_particles) = 0;
+        virtual void track_to_out(ParticlesData *d_particles) = 0;
+        virtual void digitizer(ParticlesData *d_particles) = 0;
 
         std::string get_name();
 

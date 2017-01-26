@@ -85,14 +85,14 @@ __host__ __device__ f32 Compton_CS_standard(const MaterialsData *materials, ui16
 }
 
 // Compton Scatter (Standard - Klein-Nishina) with secondary (e-)
-__host__ __device__ SecParticle Compton_SampleSecondaries_standard(ParticlesData particles,
+__host__ __device__ SecParticle Compton_SampleSecondaries_standard(ParticlesData *particles,
                                                                    f32 cutE,
                                                                    bool flag_electron,
                                                                    ui32 id ) {
 
-    f32 gamE0 = particles.E[id];
+    f32 gamE0 = particles->E[id];
     f32 E0 = gamE0 / 0.510998910f;
-    f32xyz gamDir0 = make_f32xyz(particles.dx[id], particles.dy[id], particles.dz[id]);
+    f32xyz gamDir0 = make_f32xyz(particles->dx[id], particles->dy[id], particles->dz[id]);
 
     // sample the energy rate pf the scattered gamma
 
@@ -128,15 +128,15 @@ __host__ __device__ SecParticle Compton_SampleSecondaries_standard(ParticlesData
     gamDir1 = rotateUz(gamDir1, gamDir0);
     gamDir1 = fxyz_unit( gamDir1 );
 
-    particles.dx[id] = gamDir1.x;
-    particles.dy[id] = gamDir1.y;
-    particles.dz[id] = gamDir1.z;
+    particles->dx[id] = gamDir1.x;
+    particles->dy[id] = gamDir1.y;
+    particles->dz[id] = gamDir1.z;
 
     f32 gamE1  = gamE0 * eps;
-    if (gamE1 > 1.0e-06f) {particles.E[id] = gamE1;}
+    if (gamE1 > 1.0e-06f) {particles->E[id] = gamE1;}
     else {
-        particles.endsimu[id] = PARTICLE_DEAD;  // absorbed this particle
-        particles.E[id] = gamE1;                // Local energy deposit
+        particles->status[id] = PARTICLE_DEAD;  // absorbed this particle
+        particles->E[id] = gamE1;                // Local energy deposit
     }
 
     // kinematic of the scattered electron
@@ -162,12 +162,12 @@ __host__ __device__ SecParticle Compton_SampleSecondaries_standard(ParticlesData
 }
 
 // Compton Scatter (Standard - Klein-Nishina) without secondary (e-)
-__host__ __device__ void Compton_standard(ParticlesData particles,                                         
+__host__ __device__ void Compton_standard(ParticlesData *particles,
                                           ui32 id ) {
 
-    f32 gamE0 = particles.E[id];
+    f32 gamE0 = particles->E[id];
     f32 E0 = gamE0 / 0.510998910f;
-    f32xyz gamDir0 = make_f32xyz(particles.dx[id], particles.dy[id], particles.dz[id]);
+    f32xyz gamDir0 = make_f32xyz(particles->dx[id], particles->dy[id], particles->dz[id]);
 
     // sample the energy rate pf the scattered gamma
 
@@ -203,15 +203,15 @@ __host__ __device__ void Compton_standard(ParticlesData particles,
     gamDir1 = rotateUz(gamDir1, gamDir0);
     gamDir1 = fxyz_unit( gamDir1 );
 
-    particles.dx[id] = gamDir1.x;
-    particles.dy[id] = gamDir1.y;
-    particles.dz[id] = gamDir1.z;
+    particles->dx[id] = gamDir1.x;
+    particles->dy[id] = gamDir1.y;
+    particles->dz[id] = gamDir1.z;
 
     f32 gamE1  = gamE0 * eps;
-    if (gamE1 > 1.0e-06f) {particles.E[id] = gamE1;}
+    if (gamE1 > 1.0e-06f) {particles->E[id] = gamE1;}
     else {
-        particles.endsimu[id] = PARTICLE_DEAD;  // absorbed this particle
-        particles.E[id] = gamE1;                // Local energy deposit
+        particles->status[id] = PARTICLE_DEAD;  // absorbed this particle
+        particles->E[id] = gamE1;                // Local energy deposit
     }
 
 }
@@ -256,7 +256,7 @@ __host__ __device__ f32 Photoelec_CS_standard(const MaterialsData *materials,
 
 // Compute Theta distribution of the emitted electron, with respect to the incident Gamma
 // The Sauter-Gavrila distribution for the K-shell is used
-__host__ __device__ f32 Photoelec_ElecCosThetaDistribution(ParticlesData particles,
+__host__ __device__ f32 Photoelec_ElecCosThetaDistribution(ParticlesData *particles,
                                                            ui32 id,
                                                            f32 kineEnergy) {
     f32 costeta = 1.0f;
@@ -280,7 +280,7 @@ __host__ __device__ f32 Photoelec_ElecCosThetaDistribution(ParticlesData particl
 }
 
 // PhotoElectric effect (standard) with secondary (e-)
-__host__ __device__ SecParticle Photoelec_SampleSecondaries_standard(ParticlesData particles,
+__host__ __device__ SecParticle Photoelec_SampleSecondaries_standard(ParticlesData *particles,
                                                                      const MaterialsData *mat,
                                                                      const PhotonCrossSectionData *photon_CS_table,
                                                                      ui32 E_index,
@@ -290,7 +290,7 @@ __host__ __device__ SecParticle Photoelec_SampleSecondaries_standard(ParticlesDa
                                                                      ui32 id ) {
 
     // Kill the photon without mercy
-    particles.endsimu[id] = PARTICLE_DEAD;
+    particles->status[id] = PARTICLE_DEAD;
 
     // Electron allocation
     SecParticle electron;
@@ -306,8 +306,8 @@ __host__ __device__ SecParticle Photoelec_SampleSecondaries_standard(ParticlesDa
 
     //// Photo electron
 
-    f32 energy = particles.E[id];
-    f32xyz PhotonDirection = make_f32xyz(particles.dx[id], particles.dy[id], particles.dz[id]);
+    f32 energy = particles->E[id];
+    f32xyz PhotonDirection = make_f32xyz(particles->dx[id], particles->dy[id], particles->dz[id]);
 
     // Select randomly one element that composed the material
     ui32 n = mat->nb_elements[matindex]-1;
@@ -318,7 +318,7 @@ __host__ __device__ SecParticle Photoelec_SampleSecondaries_standard(ParticlesDa
     if (n > 0) {                
         f32 x = prng_uniform( particles, id ) * get_CS_from_table(photon_CS_table->E_bins,
                                                             photon_CS_table->Photoelectric_Std_CS,
-                                                            particles.E[id], E_index, CS_index);
+                                                            particles->E[id], E_index, CS_index);
         f32 xsec = 0.0f;
         while (i < n) {
             Z = mat->mixture[mixture_index+i];
@@ -333,7 +333,7 @@ __host__ __device__ SecParticle Photoelec_SampleSecondaries_standard(ParticlesDa
     mixture_index = atom_IndexOfShells(Z);
     f32 bindingEnergy = atom_BindingEnergies(mixture_index) * eV; //1.0e-06f; // in eV
     i=0; while (i < nShells && energy < bindingEnergy) {       
-        bindingEnergy = atom_BindingEnergies(mixture_index + i)* eV; //1.0e-06f; // in ev
+        bindingEnergy = atom_BindingEnergies(mixture_index + i) * eV; //1.0e-06f; // in ev
         ++i;
     }
         
@@ -357,7 +357,7 @@ __host__ __device__ SecParticle Photoelec_SampleSecondaries_standard(ParticlesDa
         electron.E = ElecKineEnergy;
         electron.endsimu = PARTICLE_ALIVE;
         // gamma will depose energy given by the binding energy
-        particles.E[id] = bindingEnergy;        
+        particles->E[id] = bindingEnergy;
     }
     
     // Return electron (dead or alive)
@@ -857,16 +857,16 @@ __host__ __device__ f32 Rayleigh_SF_Livermore(f32* rayl_sf, f32 E, i32 Z) {
 }
 
 // Rayleigh Scattering (Livermore)
-__host__ __device__ void Rayleigh_SampleSecondaries_Livermore(ParticlesData particles,
+__host__ __device__ void Rayleigh_SampleSecondaries_Livermore(ParticlesData *particles,
                                                               const MaterialsData *mat,
                                                               const PhotonCrossSectionData *photon_CS_table,
                                                               ui32 E_index,
                                                               ui16 matindex,
                                                               ui32 id) {
 
-    if (particles.E[id] <= 250.0e-6f) { // 250 eV
+    if (particles->E[id] <= 250.0e-6f) { // 250 eV
         // Kill the photon without mercy
-        particles.endsimu[id] = PARTICLE_DEAD;
+        particles->status[id] = PARTICLE_DEAD;
         return;
     }   
 
@@ -880,7 +880,7 @@ __host__ __device__ void Rayleigh_SampleSecondaries_Livermore(ParticlesData part
                                                                      photon_CS_table->Rayleigh_Lv_CS[E_index-1],
                                                                      photon_CS_table->E_bins[E_index],
                                                                      photon_CS_table->Rayleigh_Lv_CS[E_index],
-                                                                     particles.E[id]);
+                                                                     particles->E[id]);
         f32 xsec = 0.0f;
         while (i < n) {
             Z = mat->mixture[mixture_index+i];
@@ -891,12 +891,12 @@ __host__ __device__ void Rayleigh_SampleSecondaries_Livermore(ParticlesData part
     }
 
     // Scattering
-    f32 wphot = 1.23984187539e-10f / particles.E[id];
+    f32 wphot = 1.23984187539e-10f / particles->E[id];
     f32 costheta, SF, x, sintheta, phi;
     do {
         do {costheta = 2.0f * prng_uniform( particles, id ) - 1.0f;
         } while ((1.0f + costheta*costheta)*0.5f < prng_uniform( particles, id ));
-        if (particles.E[id] > 5.0f) {costheta = 1.0f;}
+        if (particles->E[id] > 5.0f) {costheta = 1.0f;}
         x = sqrt((1.0f - costheta) * 0.5f) / wphot;
 
         if (x > 1.0e+05f) {
@@ -904,7 +904,7 @@ __host__ __device__ void Rayleigh_SampleSecondaries_Livermore(ParticlesData part
                                       photon_CS_table->Rayleigh_Lv_SF[Z*photon_CS_table->nb_bins + E_index-1],
                                       photon_CS_table->E_bins[E_index],
                                       photon_CS_table->Rayleigh_Lv_SF[Z*photon_CS_table->nb_bins + E_index],
-                                      particles.E[id]);
+                                      particles->E[id]);
         } else {
             SF = photon_CS_table->Rayleigh_Lv_SF[Z*photon_CS_table->nb_bins]; // for energy E=0.0f
         }
@@ -915,13 +915,13 @@ __host__ __device__ void Rayleigh_SampleSecondaries_Livermore(ParticlesData part
     phi = prng_uniform( particles, id ) * gpu_twopi;
 
     // Apply deflection
-    f32xyz gamDir0 = make_f32xyz(particles.dx[id], particles.dy[id], particles.dz[id]);
+    f32xyz gamDir0 = make_f32xyz(particles->dx[id], particles->dy[id], particles->dz[id]);
     f32xyz gamDir1 = make_f32xyz(sintheta*cosf(phi), sintheta*sinf(phi), costheta);
     gamDir1 = rotateUz(gamDir1, gamDir0);
     gamDir1 = fxyz_unit( gamDir1 );
-    particles.dx[id] = gamDir1.x;
-    particles.dy[id] = gamDir1.y;
-    particles.dz[id] = gamDir1.z;
+    particles->dx[id] = gamDir1.x;
+    particles->dy[id] = gamDir1.y;
+    particles->dz[id] = gamDir1.z;
 
 }
 

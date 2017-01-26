@@ -31,15 +31,15 @@
 // VoxPhanImgNav -> VPIN
 namespace VPIN
 {
-__device__ void track_to_out(ParticlesData particles,
+__device__ void track_to_out( ParticlesData *particles,
                               const VoxVolumeData<ui16> *vol,
                               const MaterialsData *materials,
                               const PhotonCrossSectionData *photon_CS_table,
                               const GlobalSimulationParametersData *parameters,
                               ui32 part_id );
-__global__ void kernel_device_track_to_in( ParticlesData particles, f32 xmin, f32 xmax,
+__global__ void kernel_device_track_to_in(ParticlesData *particles, f32 xmin, f32 xmax,
                                             f32 ymin, f32 ymax, f32 zmin, f32 zmax, f32 geom_tolerance );
-__global__ void kernel_device_track_to_out(ParticlesData particles,
+__global__ void kernel_device_track_to_out(ParticlesData *particles,
                                             const VoxVolumeData<ui16> *vol,
                                             const MaterialsData *materials,
                                             const PhotonCrossSectionData *photon_CS_table,
@@ -55,9 +55,9 @@ public:
     // Init
     void initialize( GlobalSimulationParametersData *h_params,  GlobalSimulationParametersData *d_params);
     // Tracking from outside to the phantom broder
-    void track_to_in ( Particles particles );
+    void track_to_in ( ParticlesData *d_particles );
     // Tracking inside the phantom until the phantom border
-    void track_to_out ( Particles particles );
+    void track_to_out ( ParticlesData *d_particles );
 
     void load_phantom_from_mhd ( std::string filename, std::string range_mat_name );    
     void set_materials( std::string filename );

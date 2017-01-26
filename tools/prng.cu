@@ -109,7 +109,7 @@
 
 
 // JKISS 32-bit (period ~2^121=2.6x10^36), passes all of the Dieharder tests and the BigCrunch tests in TestU01
-__host__ __device__ f32 prng_uniform(ParticlesData &particles, ui32 id) {
+__host__ __device__ f32 prng_uniform(ParticlesData *particles, ui32 id) {
 
 
 
@@ -123,18 +123,18 @@ __host__ __device__ f32 prng_uniform(ParticlesData &particles, ui32 id) {
 //    x += 1411392427;
 
 
-    particles.prng_state_2[id] ^= (particles.prng_state_2[id] << 5);
-    particles.prng_state_2[id] ^= (particles.prng_state_2[id] >> 7);
-    particles.prng_state_2[id] ^= (particles.prng_state_2[id] << 22);
-    i32 t = particles.prng_state_3[id] + particles.prng_state_4[id] + particles.prng_state_5[id];
-    particles.prng_state_3[id] = particles.prng_state_4[id];
-    particles.prng_state_5[id] = t < 0;
-    particles.prng_state_4[id] = t & 2147483647;
-    particles.prng_state_1[id] += 1411392427;
+    particles->prng_state_2[id] ^= (particles->prng_state_2[id] << 5);
+    particles->prng_state_2[id] ^= (particles->prng_state_2[id] >> 7);
+    particles->prng_state_2[id] ^= (particles->prng_state_2[id] << 22);
+    i32 t = particles->prng_state_3[id] + particles->prng_state_4[id] + particles->prng_state_5[id];
+    particles->prng_state_3[id] = particles->prng_state_4[id];
+    particles->prng_state_5[id] = t < 0;
+    particles->prng_state_4[id] = t & 2147483647;
+    particles->prng_state_1[id] += 1411392427;
 
 
     // For the f32 version is more tricky
-    f32 temp= ((f32)(particles.prng_state_1[id]+particles.prng_state_2[id]+particles.prng_state_4[id])
+    f32 temp= ((f32)(particles->prng_state_1[id]+particles->prng_state_2[id]+particles->prng_state_4[id])
     //           UINT_MAX         1.0  - float32_precision
                  / 4294967295.0) * (1.0f - 1.0f/(1<<23));
 
@@ -156,7 +156,7 @@ __host__ __device__ f32 prng_uniform(ParticlesData &particles, ui32 id) {
 
 
 
-__host__ __device__ ui32 prng_poisson( ParticlesData &particles, ui32 id, f32 mean )
+__host__ __device__ ui32 prng_poisson(ParticlesData *particles, ui32 id, f32 mean )
 {
     f32 number = 0.;
 

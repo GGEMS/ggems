@@ -29,12 +29,12 @@ void GGEMSDetector::set_name(std::string name) {
 void GGEMSDetector::initialize(GlobalSimulationParametersData *h_params) {}
 
 // Move particle to the phantom boundary
-void GGEMSDetector::track_to_in(Particles particles) {}
+void GGEMSDetector::track_to_in(ParticlesData *d_particles) {}
 
 // Track particle within the phantom
-void GGEMSDetector::track_to_out(Particles particles) {}
+void GGEMSDetector::track_to_out(ParticlesData *d_particles) {}
 
-void GGEMSDetector::digitizer(Particles particles) {}
+void GGEMSDetector::digitizer(ParticlesData *d_particles) {}
 
 std::string GGEMSDetector::get_name() {
     return m_detector_name;

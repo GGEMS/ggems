@@ -23,37 +23,37 @@
 
 //// GPU functions ///////////////////////////////////////////////////////////////////////////////////////
 
-__host__ __device__ void ct_detector_track_to_in( ParticlesData particles, ObbData detector_volume,  ui32 id )
+__host__ __device__ void ct_detector_track_to_in( ParticlesData *particles, ObbData detector_volume,  ui32 id )
 {
     // If freeze (not dead), re-activate the current particle
-    if( particles.endsimu[ id ] == PARTICLE_FREEZE )
+    if( particles->status[ id ] == PARTICLE_FREEZE )
     {
-        particles.endsimu[ id ] = PARTICLE_ALIVE;
+        particles->status[ id ] = PARTICLE_ALIVE;
     }
-    else if ( particles.endsimu[ id ] == PARTICLE_DEAD )
+    else if ( particles->status[ id ] == PARTICLE_DEAD )
     {
         return;
     }
 
     // Read position
     f32xyz pos;
-    pos.x = particles.px[ id ];
-    pos.y = particles.py[ id ];
-    pos.z = particles.pz[ id ];
+    pos.x = particles->px[ id ];
+    pos.y = particles->py[ id ];
+    pos.z = particles->pz[ id ];
 
     // Read direction
     f32xyz dir;
-    dir.x = particles.dx[ id ];
-    dir.y = particles.dy[ id ];
-    dir.z = particles.dz[ id ];
+    dir.x = particles->dx[ id ];
+    dir.y = particles->dy[ id ];
+    dir.z = particles->dz[ id ];
 
     // Project particle to detector
     f32 dist = hit_ray_OBB( pos, dir, detector_volume );
 
     if( dist == FLT_MAX )
     {
-        particles.endsimu[id] = PARTICLE_DEAD;
-        particles.E[ id ] = 0.0f;
+        particles->status[id] = PARTICLE_DEAD;
+        particles->E[ id ] = 0.0f;
         return;
     }
     else
@@ -63,8 +63,8 @@ __host__ __device__ void ct_detector_track_to_in( ParticlesData particles, ObbDa
 
         if( cross < EPSILON3 )
         {
-            particles.endsimu[id] = PARTICLE_DEAD;
-            particles.E[ id ] = 0.0f;
+            particles->status[id] = PARTICLE_DEAD;
+            particles->E[ id ] = 0.0f;
             return;
         }
 
@@ -74,13 +74,13 @@ __host__ __device__ void ct_detector_track_to_in( ParticlesData particles, ObbDa
     }
 
     // Save particle position
-    particles.px[ id ] = pos.x;
-    particles.py[ id ] = pos.y;
-    particles.pz[ id ] = pos.z;
+    particles->px[ id ] = pos.x;
+    particles->py[ id ] = pos.y;
+    particles->pz[ id ] = pos.z;
 }
 
 // Digitizer
-__host__ __device__ void ct_detector_digitizer( ParticlesData particles,
+__host__ __device__ void ct_detector_digitizer( ParticlesData *particles,
                                                 ObbData detector_volume,
                                                 f32xyz pixel_size, ui32xyz nb_pixel,
                                                 f32 threshold, f32matrix44 transform,
@@ -89,16 +89,16 @@ __host__ __device__ void ct_detector_digitizer( ParticlesData particles,
                                                 ui32 id )
 {
     // If freeze or dead, quit
-    if( particles.endsimu[ id ] == PARTICLE_FREEZE || particles.endsimu[ id ] == PARTICLE_DEAD )
+    if( particles->status[ id ] == PARTICLE_FREEZE || particles->status[ id ] == PARTICLE_DEAD )
     {
         return;
     }
 
     // Read position
     f32xyz pos;
-    pos.x = particles.px[ id ];
-    pos.y = particles.py[ id ];
-    pos.z = particles.pz[ id ];
+    pos.x = particles->px[ id ];
+    pos.y = particles->py[ id ];
+    pos.z = particles->pz[ id ];
 
     // Convert global position into local position
     pos = fxyz_global_to_local_position( transform, pos );
@@ -108,10 +108,10 @@ __host__ __device__ void ct_detector_digitizer( ParticlesData particles,
                       ui32( pos.z / pixel_size.z ) };
 
     // Check and threshold
-    if ( index.x >= nb_pixel.x || index.y >= nb_pixel.y || index.z >= nb_pixel.z || particles.E[ id ] < threshold )
+    if ( index.x >= nb_pixel.x || index.y >= nb_pixel.y || index.z >= nb_pixel.z || particles->E[ id ] < threshold )
     {
-        particles.endsimu[id] = PARTICLE_DEAD;
-        particles.E[ id ] = 0.0f;
+        particles->status[id] = PARTICLE_DEAD;
+        particles->E[ id ] = 0.0f;
         return;
     }
 
@@ -123,15 +123,15 @@ __host__ __device__ void ct_detector_digitizer( ParticlesData particles,
     else if ( record_option == GET_ENERGY )
     {
         ggems_atomic_add( projection, index.z * nb_pixel.x*nb_pixel.y +
-                          index.y *nb_pixel.x + index.x , particles.E[ id ] );
+                          index.y *nb_pixel.x + index.x , particles->E[ id ] );
     }
 
 
     if ( scatter_option )
     {
         // Scatter increment index
-        ui32 n_scatter_order = ( particles.scatter_order[ id ] < MAX_SCATTER_ORDER ) ?
-                                 particles.scatter_order[ id ] : MAX_SCATTER_ORDER;
+        ui32 n_scatter_order = ( particles->scatter_order[ id ] < MAX_SCATTER_ORDER ) ?
+                                 particles->scatter_order[ id ] : MAX_SCATTER_ORDER;
 
         // Increment the scatter
         if( n_scatter_order != 0 )
@@ -148,18 +148,18 @@ __host__ __device__ void ct_detector_digitizer( ParticlesData particles,
 
 
 // Kernel that move particles to the voxelized volume boundary
-__global__ void kernel_ct_detector_track_to_in( ParticlesData particles,
+__global__ void kernel_ct_detector_track_to_in( ParticlesData *particles,
                                                 ObbData detector_volume )
 {
 
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
-    if (id >= particles.size) return;
+    if (id >= particles->size) return;
 
     ct_detector_track_to_in( particles, detector_volume, id);
 }
 
 // Kernel digitizer
-__global__ void kernel_ct_detector_digitizer( ParticlesData particles,
+__global__ void kernel_ct_detector_digitizer( ParticlesData *particles,
                                               ObbData detector_volume,
                                               f32xyz pixel_size, ui32xyz nb_pixel,
                                               f32 threshold, f32matrix44 transform,
@@ -168,7 +168,7 @@ __global__ void kernel_ct_detector_digitizer( ParticlesData particles,
 {
 
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
-    if (id >= particles.size) return;
+    if (id >= particles->size) return;
 
     ct_detector_digitizer( particles, detector_volume,
                            pixel_size, nb_pixel,
@@ -219,27 +219,26 @@ CTDetector::~CTDetector()
     }
 }
 
-void CTDetector::track_to_in( Particles particles )
+void CTDetector::track_to_in(ParticlesData *d_particles )
 {   
     dim3 threads, grid;
     threads.x = mh_params->gpu_block_size;
-    grid.x = ( particles.size + mh_params->gpu_block_size - 1 )
+    grid.x = ( mh_params->size_of_particles_batch + mh_params->gpu_block_size - 1 )
             / mh_params->gpu_block_size;
 
-    kernel_ct_detector_track_to_in<<<grid, threads>>>( particles.data_d,
-                                                       m_detector_volume );
+    kernel_ct_detector_track_to_in<<<grid, threads>>>( d_particles, m_detector_volume );
     cuda_error_check("Error ", " Kernel_ct_detector (track to in)");
     cudaThreadSynchronize();
 }
 
-void CTDetector::digitizer( Particles particles )
+void CTDetector::digitizer(ParticlesData *d_particles )
 {    
     dim3 threads, grid;
     threads.x = mh_params->gpu_block_size;
-    grid.x = ( particles.size + mh_params->gpu_block_size - 1 )
+    grid.x = ( mh_params->size_of_particles_batch + mh_params->gpu_block_size - 1 )
             / mh_params->gpu_block_size;
 
-    kernel_ct_detector_digitizer<<<grid, threads>>>( particles.data_d, m_detector_volume,
+    kernel_ct_detector_digitizer<<<grid, threads>>>( d_particles, m_detector_volume,
                                                      m_pixel_size, m_nb_pixel,
                                                      m_threshold, m_transform,
                                                      m_projection, m_scatter,

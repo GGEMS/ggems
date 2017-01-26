@@ -600,7 +600,7 @@ void GGEMS::init_simulation()
     // Display memory usage
     if (h_parameters->display_memory_usage) {
         // Particle stack
-        ui64 n = m_particles_manager.particles.size;
+        ui64 n = m_particles_manager.h_particles->size;
         ui64 l = h_parameters->nb_of_secondaries;
 
         ui64 mem = n * ( 12 * sizeof( f32 ) + 5 * sizeof( ui32 )  + 4 * sizeof( ui8 ) ) +
@@ -669,7 +669,7 @@ void GGEMS::start_simulation()
             GGcout << "      + Generating " << h_parameters->size_of_particles_batch << " particles from "
                    << m_source->get_name() << GGendl;
         }
-        m_source->get_primaries_generator( m_particles_manager.particles );
+        m_source->get_primaries_generator( m_particles_manager.d_particles );
 
         // Nav between source and phantom
         if ( m_phantoms.size() != 0 )
@@ -682,7 +682,7 @@ void GGEMS::start_simulation()
                     GGcout << "      + Navigation to the phantom " << m_phantoms[ i ]->get_name()
                            << " (" << i << ")" << GGendl;
                 }
-                m_phantoms[ i ]->track_to_in( m_particles_manager.particles );
+                m_phantoms[ i ]->track_to_in( m_particles_manager.d_particles );
 
                 // Nav within the phantom
                 if ( h_parameters->verbose )
@@ -690,7 +690,7 @@ void GGEMS::start_simulation()
                     GGcout << "      + Navigation within the phantom " << m_phantoms[ i ]->get_name()
                            << " (" << i << ")" << GGendl;
                 }
-                m_phantoms[ i ]->track_to_out( m_particles_manager.particles );
+                m_phantoms[ i ]->track_to_out( m_particles_manager.d_particles );
 
                 ++i;
             }
@@ -703,19 +703,19 @@ void GGEMS::start_simulation()
             {
                 GGcout << "      + Navigation to the detector " << m_detector->get_name() << GGendl;
             }
-            m_detector->track_to_in( m_particles_manager.particles );
+            m_detector->track_to_in( m_particles_manager.d_particles );
 
             if ( h_parameters->verbose )
             {
                 GGcout << "      + Navigation within the detector " << m_detector->get_name() << GGendl;
             }
-            m_detector->track_to_out( m_particles_manager.particles );
+            m_detector->track_to_out( m_particles_manager.d_particles );
 
             if ( h_parameters->verbose )
             {
                 GGcout << "      + Digitizer from " << m_detector->get_name() << GGendl;
             }
-            m_detector->digitizer( m_particles_manager.particles );
+            m_detector->digitizer( m_particles_manager.d_particles );
         }
 
         if ( h_parameters->verbose )

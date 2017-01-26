@@ -38,7 +38,7 @@ public:
     f32xyz get_position();
 
     // Abstract from GGEMSSource (Mandatory funtions)
-    void get_primaries_generator( Particles particles );
+    void get_primaries_generator( ParticlesData *d_particles );
     void initialize( GlobalSimulationParametersData *h_params );
 
 private:

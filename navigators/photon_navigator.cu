@@ -16,7 +16,7 @@
 
 #include "photon_navigator.cuh"
 
-__device__ void photon_get_next_interaction( ParticlesData particles,
+__device__ void photon_get_next_interaction( ParticlesData *particles,
                                              const GlobalSimulationParametersData *parameters,
                                              const PhotonCrossSectionData *photon_CS_table,
                                              ui16 mat_id, ui32 part_id )
@@ -27,7 +27,7 @@ __device__ void photon_get_next_interaction( ParticlesData particles,
     f32 cross_section;
 
     // Search the energy index to read CS
-    f32 energy = particles.E[part_id];
+    f32 energy = particles->E[part_id];
     ui32 E_index = binary_search ( energy, photon_CS_table->E_bins,
                                    photon_CS_table->nb_bins );
 
@@ -76,13 +76,13 @@ __device__ void photon_get_next_interaction( ParticlesData particles,
         }
     }
     // Store results
-    particles.next_interaction_distance[part_id] = next_interaction_distance;
-    particles.next_discrete_process[part_id] = next_discrete_process;
-    particles.E_index[part_id] = E_index;
+    particles->next_interaction_distance[part_id] = next_interaction_distance;
+    particles->next_discrete_process[part_id] = next_discrete_process;
+    particles->E_index[part_id] = E_index;
 
 }
 
-__device__ SecParticle photon_resolve_discrete_process( ParticlesData particles,
+__device__ SecParticle photon_resolve_discrete_process( ParticlesData *particles,
                                                         const GlobalSimulationParametersData *parameters,
                                                         const PhotonCrossSectionData *photon_CS_table,
                                                         const MaterialsData *materials,
@@ -95,7 +95,7 @@ __device__ SecParticle photon_resolve_discrete_process( ParticlesData particles,
     electron.dir.y = 0.;
     electron.dir.z = 1.;
     electron.E = 0.;
-    ui8 next_discrete_process = particles.next_discrete_process[part_id];    
+    ui8 next_discrete_process = particles->next_discrete_process[part_id];
 
     if ( next_discrete_process == PHOTON_COMPTON )
     {        
@@ -106,13 +106,13 @@ __device__ SecParticle photon_resolve_discrete_process( ParticlesData particles,
     if ( next_discrete_process == PHOTON_PHOTOELECTRIC )
     {        
         electron = Photoelec_SampleSecondaries_standard( particles, materials, photon_CS_table,
-                   particles.E_index[part_id], materials->electron_energy_cut[mat_id],
+                   particles->E_index[part_id], materials->electron_energy_cut[mat_id],
                    mat_id, parameters->secondaries_list[ELECTRON], part_id );
     }
 
     if ( next_discrete_process == PHOTON_RAYLEIGH )
     {        
-        Rayleigh_SampleSecondaries_Livermore( particles, materials, photon_CS_table, particles.E_index[part_id],
+        Rayleigh_SampleSecondaries_Livermore( particles, materials, photon_CS_table, particles->E_index[part_id],
                                               mat_id, part_id );
     }
 

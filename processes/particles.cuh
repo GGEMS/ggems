@@ -36,22 +36,23 @@ struct ParticlesData
     ui32* prng_state_4;
     ui32* prng_state_5;
 
-    // Scatter for imaging
-    ui32* scatter_order;
-
     // Navigation
-    ui32* geometry_id; // current geometry crossed by the particle
-    ui32* E_index;     // Energy index within CS and Mat tables
+    ui16* geometry_id;  // current geometry crossed by the particle
+    ui16* E_index;      // Energy index within CS and Mat tables
+    ui16* scatter_order; // Scatter for imaging
+
     // Interactions
     f32* next_interaction_distance;
     ui8* next_discrete_process;
+
     // simulation
-    ui8* endsimu;
+    ui8* status;
     ui8* level;
     ui8* pname; // particle name (photon, electron, etc)
+
     // size
     ui32 size;
-
+/*
     // Secondaries stack
     // Acces to level : Part_ID * size + hierarchy level
     f32* sec_E; // size * hierarchy level
@@ -63,17 +64,8 @@ struct ParticlesData
     f32* sec_pz;
     f32* sec_tof;
     ui8* sec_pname; // particle name (photon, electron, etc)
-
+*/
 }; //
-
-// Struct that handles particles
-struct Particles
-{
-    ParticlesData data_h;
-    ParticlesData data_d;
-
-    ui32 size;
-};
 
 // Helper to handle secondaries particles
 struct SecParticle
@@ -92,19 +84,21 @@ public:
 
     void initialize(GlobalSimulationParametersData *h_params );
 
-    Particles particles; // CPU and GPU stack
-
+    ParticlesData *h_particles;
+    ParticlesData *d_particles;
+/*
     void copy_gpu2cpu(Particles &part);
     void print_stack(Particles part, ui32 n);
-
+*/
 
 private:
     bool m_check_mandatory();
 
     void m_cpu_malloc_stack();
-    void m_gpu_malloc_stack();
     void m_cpu_init_stack_seed( ui32 seed );
-    void m_copy_seed_cpu2gpu();
+    void m_gpu_alloc_and_seed_copy();
+
+    ui32 m_particles_size;
 
     GlobalSimulationParametersData *mh_params;
 

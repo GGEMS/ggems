@@ -54,8 +54,8 @@
 
 //__host__  __device__ f32 JKISS32(ParticlesData &particles, ui32 id);
 
-__host__ __device__ f32 prng_uniform( ParticlesData &particles, ui32 id );
-__host__ __device__ ui32 prng_poisson( ParticlesData &particles, ui32 id, f32 lambda );
+__host__ __device__ f32 prng_uniform(ParticlesData *particles, ui32 id );
+__host__ __device__ ui32 prng_poisson( ParticlesData *particles, ui32 id, f32 lambda );
 
 //QUALIFIER f32 prng_uniform(prng_states *state);
 //QUALIFIER ui32 prng_poisson(prng_states *state, f32 lambda);
