@@ -25,7 +25,7 @@
 #include "vector.cuh"
 
 // Cross section table for photon particle
-struct PhotonCrossSectionTable{
+struct PhotonCrossSectionData{
     f32* E_bins;                // n
 
     f32* Compton_Std_CS;        // n*k
@@ -41,12 +41,6 @@ struct PhotonCrossSectionTable{
     f32 E_max;
     ui32 nb_bins;         // n
     ui32 nb_mat;          // k
-};
-
-// Struct that handle CPU&GPU CS data
-struct PhotonCrossSection {
-    PhotonCrossSectionTable data_h;
-    PhotonCrossSectionTable data_d;
 };
 
 // Utils
@@ -72,7 +66,7 @@ __host__ __device__ f32 Photoelec_CS_standard(const MaterialsData *materials,
                                               ui16 mat, f32 E);
 __host__ __device__ SecParticle Photoelec_SampleSecondaries_standard(ParticlesData particles,
                                                                      const MaterialsData *mat,
-                                                                     PhotonCrossSectionTable photon_CS_table,
+                                                                     const PhotonCrossSectionData *photon_CS_table,
                                                                      ui32 E_index,
                                                                      f32 cutE,
                                                                      ui16 matindex, bool flag_electron,
@@ -94,17 +88,17 @@ __host__ __device__ f32 Rayleigh_CS_Livermore(const MaterialsData *materials,
 __host__ __device__ f32 Rayleigh_SF_Livermore(f32* rayl_sf, f32 E, i32 Z);
 __host__ __device__ void Rayleigh_SampleSecondaries_Livermore(ParticlesData particles,
                                                               const MaterialsData *mat,
-                                                              PhotonCrossSectionTable photon_CS_table,
+                                                              const PhotonCrossSectionData *photon_CS_table,
                                                               ui32 E_index,
                                                               ui16 matindex,
                                                               ui32 id);
-
+/*
 __host__ __device__ void _Rayleigh_SampleSecondaries_Livermore(ParticlesData particles,
                                                               const MaterialsData *mat,
                                                               PhotonCrossSectionTable photon_CS_table,
                                                               ui32 E_index,
                                                               ui16 matindex,
                                                               ui32 id);
-
+*/
 
 #endif

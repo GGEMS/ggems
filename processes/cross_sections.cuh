@@ -24,10 +24,11 @@ class CrossSections {
     public:
         CrossSections();
 
-        void initialize(Materials materials, GlobalSimulationParametersData *h_parameters);
+        void initialize(const MaterialsData *h_materials, const GlobalSimulationParametersData *h_parameters);
         
         // CS data
-        PhotonCrossSection photon_CS;       // CPU & GPU
+        PhotonCrossSectionData *h_photon_CS;
+        PhotonCrossSectionData *d_photon_CS;
 //        ElectronsCrossSection electron_CS;  // CPU & GPU
 
     private:        
@@ -46,8 +47,8 @@ class CrossSections {
 */
         ui32 m_nb_bins, m_nb_mat;
 
-        GlobalSimulationParametersData *mh_parameters;
-        MaterialsData *mh_materials;
+        const GlobalSimulationParametersData *mh_parameters;
+        const MaterialsData *mh_materials;
 };
 
 #endif

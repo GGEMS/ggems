@@ -18,7 +18,7 @@
 
 __device__ void photon_get_next_interaction( ParticlesData particles,
                                              const GlobalSimulationParametersData *parameters,
-                                             PhotonCrossSectionTable photon_CS_table,
+                                             const PhotonCrossSectionData *photon_CS_table,
                                              ui16 mat_id, ui32 part_id )
 {
     f32 next_interaction_distance = F32_MAX;
@@ -28,16 +28,16 @@ __device__ void photon_get_next_interaction( ParticlesData particles,
 
     // Search the energy index to read CS
     f32 energy = particles.E[part_id];
-    ui32 E_index = binary_search ( energy, photon_CS_table.E_bins,
-                                   photon_CS_table.nb_bins );
+    ui32 E_index = binary_search ( energy, photon_CS_table->E_bins,
+                                   photon_CS_table->nb_bins );
 
     // Get index CS table (considering mat id)
-    ui32 CS_index = mat_id*photon_CS_table.nb_bins + E_index;
+    ui32 CS_index = mat_id*photon_CS_table->nb_bins + E_index;
 
     // If photoelectric
     if ( parameters->physics_list[PHOTON_PHOTOELECTRIC] )
     {
-        cross_section = get_CS_from_table ( photon_CS_table.E_bins, photon_CS_table.Photoelectric_Std_CS,
+        cross_section = get_CS_from_table ( photon_CS_table->E_bins, photon_CS_table->Photoelectric_Std_CS,
                                             energy, E_index, CS_index );
         interaction_distance = -log ( prng_uniform( particles, part_id ) ) / cross_section;
 
@@ -51,7 +51,7 @@ __device__ void photon_get_next_interaction( ParticlesData particles,
     // If Compton
     if ( parameters->physics_list[PHOTON_COMPTON] )
     {
-        cross_section = get_CS_from_table ( photon_CS_table.E_bins, photon_CS_table.Compton_Std_CS,
+        cross_section = get_CS_from_table ( photon_CS_table->E_bins, photon_CS_table->Compton_Std_CS,
                                             energy, E_index, CS_index );
         interaction_distance = -log ( prng_uniform( particles, part_id ) ) / cross_section;
 
@@ -65,7 +65,7 @@ __device__ void photon_get_next_interaction( ParticlesData particles,
     // If Rayleigh
     if ( parameters->physics_list[PHOTON_RAYLEIGH] )
     {
-        cross_section = get_CS_from_table ( photon_CS_table.E_bins, photon_CS_table.Rayleigh_Lv_CS,
+        cross_section = get_CS_from_table ( photon_CS_table->E_bins, photon_CS_table->Rayleigh_Lv_CS,
                                             energy, E_index, CS_index );
         interaction_distance = -log ( prng_uniform( particles, part_id ) ) / cross_section;
 
@@ -84,7 +84,7 @@ __device__ void photon_get_next_interaction( ParticlesData particles,
 
 __device__ SecParticle photon_resolve_discrete_process( ParticlesData particles,
                                                         const GlobalSimulationParametersData *parameters,
-                                                        PhotonCrossSectionTable photon_CS_table,
+                                                        const PhotonCrossSectionData *photon_CS_table,
                                                         const MaterialsData *materials,
                                                         ui16 mat_id, ui32 part_id )
 {

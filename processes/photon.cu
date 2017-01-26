@@ -282,7 +282,7 @@ __host__ __device__ f32 Photoelec_ElecCosThetaDistribution(ParticlesData particl
 // PhotoElectric effect (standard) with secondary (e-)
 __host__ __device__ SecParticle Photoelec_SampleSecondaries_standard(ParticlesData particles,
                                                                      const MaterialsData *mat,
-                                                                     PhotonCrossSectionTable photon_CS_table,
+                                                                     const PhotonCrossSectionData *photon_CS_table,
                                                                      ui32 E_index,
                                                                      f32 cutE,
                                                                      ui16 matindex,
@@ -302,7 +302,7 @@ __host__ __device__ SecParticle Photoelec_SampleSecondaries_standard(ParticlesDa
     if (flag_electron == DISABLED) return electron;
 
     // Get index CS table (considering mat id)
-    ui32 CS_index = matindex*photon_CS_table.nb_bins + E_index;
+    ui32 CS_index = matindex*photon_CS_table->nb_bins + E_index;
 
     //// Photo electron
 
@@ -316,13 +316,13 @@ __host__ __device__ SecParticle Photoelec_SampleSecondaries_standard(ParticlesDa
     ui32 Z = mat->mixture[mixture_index];
     ui32 i = 0;
     if (n > 0) {                
-        f32 x = prng_uniform( particles, id ) * get_CS_from_table(photon_CS_table.E_bins,
-                                                            photon_CS_table.Photoelectric_Std_CS,
+        f32 x = prng_uniform( particles, id ) * get_CS_from_table(photon_CS_table->E_bins,
+                                                            photon_CS_table->Photoelectric_Std_CS,
                                                             particles.E[id], E_index, CS_index);
         f32 xsec = 0.0f;
         while (i < n) {
             Z = mat->mixture[mixture_index+i];
-            xsec += photon_CS_table.Photoelectric_Std_xCS[Z*photon_CS_table.nb_bins + E_index];
+            xsec += photon_CS_table->Photoelectric_Std_xCS[Z*photon_CS_table->nb_bins + E_index];
             if (x <= xsec) break;
             ++i;
         }
@@ -859,7 +859,7 @@ __host__ __device__ f32 Rayleigh_SF_Livermore(f32* rayl_sf, f32 E, i32 Z) {
 // Rayleigh Scattering (Livermore)
 __host__ __device__ void Rayleigh_SampleSecondaries_Livermore(ParticlesData particles,
                                                               const MaterialsData *mat,
-                                                              PhotonCrossSectionTable photon_CS_table,
+                                                              const PhotonCrossSectionData *photon_CS_table,
                                                               ui32 E_index,
                                                               ui16 matindex,
                                                               ui32 id) {
@@ -876,15 +876,15 @@ __host__ __device__ void Rayleigh_SampleSecondaries_Livermore(ParticlesData part
     ui32 Z = mat->mixture[mixture_index];
     ui32 i = 0;
     if (n > 0) {
-        f32 x = prng_uniform( particles, id ) * linear_interpolation(photon_CS_table.E_bins[E_index-1],
-                                                               photon_CS_table.Rayleigh_Lv_CS[E_index-1],
-                                                               photon_CS_table.E_bins[E_index],
-                                                               photon_CS_table.Rayleigh_Lv_CS[E_index],
-                                                               particles.E[id]);
+        f32 x = prng_uniform( particles, id ) * linear_interpolation(photon_CS_table->E_bins[E_index-1],
+                                                                     photon_CS_table->Rayleigh_Lv_CS[E_index-1],
+                                                                     photon_CS_table->E_bins[E_index],
+                                                                     photon_CS_table->Rayleigh_Lv_CS[E_index],
+                                                                     particles.E[id]);
         f32 xsec = 0.0f;
         while (i < n) {
             Z = mat->mixture[mixture_index+i];
-            xsec += photon_CS_table.Rayleigh_Lv_xCS[Z*photon_CS_table.nb_bins + E_index];
+            xsec += photon_CS_table->Rayleigh_Lv_xCS[Z*photon_CS_table->nb_bins + E_index];
             if (x <= xsec) break;
             ++i;
         }
@@ -900,13 +900,13 @@ __host__ __device__ void Rayleigh_SampleSecondaries_Livermore(ParticlesData part
         x = sqrt((1.0f - costheta) * 0.5f) / wphot;
 
         if (x > 1.0e+05f) {
-            SF = linear_interpolation(photon_CS_table.E_bins[E_index-1],
-                                      photon_CS_table.Rayleigh_Lv_SF[Z*photon_CS_table.nb_bins + E_index-1],
-                                      photon_CS_table.E_bins[E_index],
-                                      photon_CS_table.Rayleigh_Lv_SF[Z*photon_CS_table.nb_bins + E_index],
+            SF = linear_interpolation(photon_CS_table->E_bins[E_index-1],
+                                      photon_CS_table->Rayleigh_Lv_SF[Z*photon_CS_table->nb_bins + E_index-1],
+                                      photon_CS_table->E_bins[E_index],
+                                      photon_CS_table->Rayleigh_Lv_SF[Z*photon_CS_table->nb_bins + E_index],
                                       particles.E[id]);
         } else {
-            SF = photon_CS_table.Rayleigh_Lv_SF[Z*photon_CS_table.nb_bins]; // for energy E=0.0f
+            SF = photon_CS_table->Rayleigh_Lv_SF[Z*photon_CS_table->nb_bins]; // for energy E=0.0f
         }
 
     } while (SF*SF < prng_uniform( particles, id ) * Z*Z);
@@ -925,6 +925,7 @@ __host__ __device__ void Rayleigh_SampleSecondaries_Livermore(ParticlesData part
 
 }
 
+/*
 // Rayleigh Scattering (Livermore)
 __host__ __device__ void _Rayleigh_SampleSecondaries_Livermore(ParticlesData particles,
                                                               const MaterialsData *mat,
@@ -1007,7 +1008,7 @@ __host__ __device__ void _Rayleigh_SampleSecondaries_Livermore(ParticlesData par
     particles.dz[id] = gamDir1.z;
 
 }
-
+*/
 
 #endif
 

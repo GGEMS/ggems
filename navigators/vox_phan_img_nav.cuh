@@ -34,7 +34,7 @@ namespace VPIN
 __device__ void track_to_out(ParticlesData particles,
                               VoxVolumeData<ui16> vol,
                               const MaterialsData *materials,
-                              PhotonCrossSectionTable photon_CS_table,
+                              const PhotonCrossSectionData *photon_CS_table,
                               const GlobalSimulationParametersData *parameters,
                               ui32 part_id );
 __global__ void kernel_device_track_to_in( ParticlesData particles, f32 xmin, f32 xmax,
@@ -42,7 +42,7 @@ __global__ void kernel_device_track_to_in( ParticlesData particles, f32 xmin, f3
 __global__ void kernel_device_track_to_out(ParticlesData particles,
                                             VoxVolumeData<ui16> vol,
                                             const MaterialsData *materials,
-                                            PhotonCrossSectionTable photon_CS_table,
+                                            const PhotonCrossSectionData *photon_CS_table,
                                             const GlobalSimulationParametersData *parameters );
 }
 

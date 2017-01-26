@@ -21,7 +21,7 @@
 __device__ void VPIN::track_to_out( ParticlesData particles,
                                     VoxVolumeData<ui16> vol,
                                     const MaterialsData *materials,
-                                    PhotonCrossSectionTable photon_CS_table,
+                                    const PhotonCrossSectionData *photon_CS_table,
                                     const GlobalSimulationParametersData *parameters,
                                     ui32 part_id )
 {
@@ -155,7 +155,7 @@ __global__ void VPIN::kernel_device_track_to_in ( ParticlesData particles, f32 x
 __global__ void VPIN::kernel_device_track_to_out ( ParticlesData particles,
                                                    VoxVolumeData<ui16> vol,
                                                    const MaterialsData *materials,
-                                                   PhotonCrossSectionTable photon_CS_table,
+                                                   const PhotonCrossSectionData *photon_CS_table,
                                                    const GlobalSimulationParametersData *parameters )
 {
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
@@ -196,8 +196,8 @@ ui64 VoxPhanImgNav::m_get_memory_usage()
     // Then material data
     mem += ( ( 3 * m_materials.h_materials->nb_elements_total + 23 * m_materials.h_materials->nb_materials ) * sizeof( f32 ) );
     // Then cross sections (gamma)
-    ui64 n = m_cross_sections.photon_CS.data_h.nb_bins;
-    ui64 k = m_cross_sections.photon_CS.data_h.nb_mat;
+    ui64 n = m_cross_sections.h_photon_CS->nb_bins;
+    ui64 k = m_cross_sections.h_photon_CS->nb_mat;
     mem += ( ( n + 3*n*k + 3*101*n ) * sizeof( f32 ) );
 
     return mem;
@@ -234,7 +234,7 @@ void VoxPhanImgNav::track_to_out ( Particles particles )
 
     // DEBUG
     VPIN::kernel_device_track_to_out<<<grid, threads>>> ( particles.data_d, m_phantom.data_d, m_materials.d_materials,
-                                                          m_cross_sections.photon_CS.data_d, md_params );
+                                                          m_cross_sections.d_photon_CS, md_params );
     cuda_error_check ( "Error ", " Kernel_VoxPhanImgNav (track to out)" );
     cudaDeviceSynchronize();
 }
@@ -266,7 +266,7 @@ void VoxPhanImgNav::initialize(GlobalSimulationParametersData *h_params, GlobalS
     m_materials.initialize( m_phantom.list_of_materials, h_params );
 
     // Cross Sections
-    m_cross_sections.initialize( m_materials, h_params );
+    m_cross_sections.initialize( m_materials.h_materials, h_params );
 
     // Some verbose if required
     if ( h_params->display_memory_usage )
