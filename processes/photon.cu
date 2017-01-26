@@ -72,14 +72,14 @@ __host__ __device__ f32 Compton_CSPA_standard(f32 E, ui16 Z) {
 }
 
 // Compute the total Compton cross section for a given material
-__host__ __device__ f32 Compton_CS_standard(MaterialsTable materials, ui16 mat, f32 E) {
+__host__ __device__ f32 Compton_CS_standard(const MaterialsData *materials, ui16 mat, f32 E) {
     f32 CS = 0.0f;
     i32 i;
-    i32 index = materials.index[mat];
+    i32 index = materials->index[mat];
     // Model standard
-    for (i = 0; i < materials.nb_elements[mat]; ++i) {
-        CS += (materials.atom_num_dens[index+i] * 
-               Compton_CSPA_standard(E, materials.mixture[index+i]));
+    for (i = 0; i < materials->nb_elements[mat]; ++i) {
+        CS += (materials->atom_num_dens[index+i] *
+               Compton_CSPA_standard(E, materials->mixture[index+i]));
     }
     return CS;
 }
@@ -241,15 +241,15 @@ __host__ __device__ f32 Photoelec_CSPA_standard(f32 E, ui16 Z) {
 }
 
 // Compute the total Compton cross section for a given material
-__host__ __device__ f32 Photoelec_CS_standard(MaterialsTable materials,
+__host__ __device__ f32 Photoelec_CS_standard(const MaterialsData *materials,
                                               ui16 mat, f32 E) {
     f32 CS = 0.0f;
     i32 i;
-    i32 index = materials.index[mat];
+    i32 index = materials->index[mat];
     // Model standard
-    for (i = 0; i < materials.nb_elements[mat]; ++i) {
-        CS += (materials.atom_num_dens[index+i] * 
-               Photoelec_CSPA_standard(E, materials.mixture[index+i]));
+    for (i = 0; i < materials->nb_elements[mat]; ++i) {
+        CS += (materials->atom_num_dens[index+i] *
+               Photoelec_CSPA_standard(E, materials->mixture[index+i]));
     }
     return CS;
 }
@@ -281,7 +281,7 @@ __host__ __device__ f32 Photoelec_ElecCosThetaDistribution(ParticlesData particl
 
 // PhotoElectric effect (standard) with secondary (e-)
 __host__ __device__ SecParticle Photoelec_SampleSecondaries_standard(ParticlesData particles,
-                                                                     MaterialsTable mat,
+                                                                     const MaterialsData *mat,
                                                                      PhotonCrossSectionTable photon_CS_table,
                                                                      ui32 E_index,
                                                                      f32 cutE,
@@ -310,10 +310,10 @@ __host__ __device__ SecParticle Photoelec_SampleSecondaries_standard(ParticlesDa
     f32xyz PhotonDirection = make_f32xyz(particles.dx[id], particles.dy[id], particles.dz[id]);
 
     // Select randomly one element that composed the material
-    ui32 n = mat.nb_elements[matindex]-1;
+    ui32 n = mat->nb_elements[matindex]-1;
     //printf("id %i PE nb elts %i\n", id, n);
-    ui32 mixture_index = mat.index[matindex];
-    ui32 Z = mat.mixture[mixture_index];
+    ui32 mixture_index = mat->index[matindex];
+    ui32 Z = mat->mixture[mixture_index];
     ui32 i = 0;
     if (n > 0) {                
         f32 x = prng_uniform( particles, id ) * get_CS_from_table(photon_CS_table.E_bins,
@@ -321,7 +321,7 @@ __host__ __device__ SecParticle Photoelec_SampleSecondaries_standard(ParticlesDa
                                                             particles.E[id], E_index, CS_index);
         f32 xsec = 0.0f;
         while (i < n) {
-            Z = mat.mixture[mixture_index+i];
+            Z = mat->mixture[mixture_index+i];
             xsec += photon_CS_table.Photoelectric_Std_xCS[Z*photon_CS_table.nb_bins + E_index];
             if (x <= xsec) break;
             ++i;
@@ -817,15 +817,15 @@ __host__ __device__ f32 Rayleigh_CSPA_Livermore(f32* rayl_cs, f32 E, ui16 Z) {
 }
 
 // Compute the total Compton cross section for a given material
-__host__ __device__ f32 Rayleigh_CS_Livermore(MaterialsTable materials,
+__host__ __device__ f32 Rayleigh_CS_Livermore(const MaterialsData *materials,
                                               f32* rayl_cs, ui16 mat, f32 E) {
     f32 CS = 0.0f;
     i32 i;
-    i32 index = materials.index[mat];
+    i32 index = materials->index[mat];
     // Model Livermore
-    for (i = 0; i < materials.nb_elements[mat]; ++i) {
-        CS += (materials.atom_num_dens[index+i] *
-               Rayleigh_CSPA_Livermore(rayl_cs, E, materials.mixture[index+i]));
+    for (i = 0; i < materials->nb_elements[mat]; ++i) {
+        CS += (materials->atom_num_dens[index+i] *
+               Rayleigh_CSPA_Livermore(rayl_cs, E, materials->mixture[index+i]));
     }
     return CS;
 }
@@ -858,7 +858,7 @@ __host__ __device__ f32 Rayleigh_SF_Livermore(f32* rayl_sf, f32 E, i32 Z) {
 
 // Rayleigh Scattering (Livermore)
 __host__ __device__ void Rayleigh_SampleSecondaries_Livermore(ParticlesData particles,
-                                                              MaterialsTable mat,
+                                                              const MaterialsData *mat,
                                                               PhotonCrossSectionTable photon_CS_table,
                                                               ui32 E_index,
                                                               ui16 matindex,
@@ -871,9 +871,9 @@ __host__ __device__ void Rayleigh_SampleSecondaries_Livermore(ParticlesData part
     }   
 
     // Select randomly one element that composed the material
-    ui32 n = mat.nb_elements[matindex]-1;
-    ui32 mixture_index = mat.index[matindex];
-    ui32 Z = mat.mixture[mixture_index];
+    ui32 n = mat->nb_elements[matindex]-1;
+    ui32 mixture_index = mat->index[matindex];
+    ui32 Z = mat->mixture[mixture_index];
     ui32 i = 0;
     if (n > 0) {
         f32 x = prng_uniform( particles, id ) * linear_interpolation(photon_CS_table.E_bins[E_index-1],
@@ -883,7 +883,7 @@ __host__ __device__ void Rayleigh_SampleSecondaries_Livermore(ParticlesData part
                                                                particles.E[id]);
         f32 xsec = 0.0f;
         while (i < n) {
-            Z = mat.mixture[mixture_index+i];
+            Z = mat->mixture[mixture_index+i];
             xsec += photon_CS_table.Rayleigh_Lv_xCS[Z*photon_CS_table.nb_bins + E_index];
             if (x <= xsec) break;
             ++i;
@@ -927,7 +927,7 @@ __host__ __device__ void Rayleigh_SampleSecondaries_Livermore(ParticlesData part
 
 // Rayleigh Scattering (Livermore)
 __host__ __device__ void _Rayleigh_SampleSecondaries_Livermore(ParticlesData particles,
-                                                              MaterialsTable &mat,
+                                                              const MaterialsData *mat,
                                                               PhotonCrossSectionTable photon_CS_table,
                                                               ui32 E_index,
                                                               ui16 matindex,
@@ -940,9 +940,9 @@ __host__ __device__ void _Rayleigh_SampleSecondaries_Livermore(ParticlesData par
     }
 
     // Select randomly one element that composed the material
-    ui32 n = mat.nb_elements[matindex]-1;
-    ui32 mixture_index = mat.index[matindex];
-    ui32 Z = mat.mixture[mixture_index];
+    ui32 n = mat->nb_elements[matindex]-1;
+    ui32 mixture_index = mat->index[matindex];
+    ui32 Z = mat->mixture[mixture_index];
     ui32 i = 0;
 
     if (n > 0) {
@@ -953,7 +953,7 @@ __host__ __device__ void _Rayleigh_SampleSecondaries_Livermore(ParticlesData par
                                                                particles.E[id]);
         f32 xsec = 0.0f;
         while (i < n) {
-            Z = mat.mixture[mixture_index+i];
+            Z = mat->mixture[mixture_index+i];
             xsec += photon_CS_table.Rayleigh_Lv_xCS[Z*photon_CS_table.nb_bins + E_index];
             if (x <= xsec) break;
             ++i;

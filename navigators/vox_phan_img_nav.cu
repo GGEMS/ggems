@@ -20,7 +20,7 @@
 
 __device__ void VPIN::track_to_out( ParticlesData particles,
                                     VoxVolumeData<ui16> vol,
-                                    MaterialsTable materials,
+                                    const MaterialsData *materials,
                                     PhotonCrossSectionTable photon_CS_table,
                                     const GlobalSimulationParametersData *parameters,
                                     ui32 part_id )
@@ -130,7 +130,7 @@ __device__ void VPIN::track_to_out( ParticlesData particles,
 
         //// Here e- are not tracked, and lost energy not drop
         //// Energy cut
-        if ( particles.E[ part_id ] <= materials.photon_energy_cut[ mat_id ])
+        if ( particles.E[ part_id ] <= materials->photon_energy_cut[ mat_id ])
         {
             // kill without mercy (energy not drop)
             particles.endsimu[part_id] = PARTICLE_DEAD;
@@ -154,7 +154,7 @@ __global__ void VPIN::kernel_device_track_to_in ( ParticlesData particles, f32 x
 // Device kernel that track particles within the voxelized volume until boundary
 __global__ void VPIN::kernel_device_track_to_out ( ParticlesData particles,
                                                    VoxVolumeData<ui16> vol,
-                                                   MaterialsTable materials,
+                                                   const MaterialsData *materials,
                                                    PhotonCrossSectionTable photon_CS_table,
                                                    const GlobalSimulationParametersData *parameters )
 {
@@ -194,7 +194,7 @@ ui64 VoxPhanImgNav::m_get_memory_usage()
     // First the voxelized phantom
     mem += ( m_phantom.data_h.number_of_voxels * sizeof( ui16 ) );
     // Then material data
-    mem += ( ( 3 * m_materials.tables.data_h.nb_elements_total + 23 * m_materials.tables.data_h.nb_materials ) * sizeof( f32 ) );
+    mem += ( ( 3 * m_materials.h_materials->nb_elements_total + 23 * m_materials.h_materials->nb_materials ) * sizeof( f32 ) );
     // Then cross sections (gamma)
     ui64 n = m_cross_sections.photon_CS.data_h.nb_bins;
     ui64 k = m_cross_sections.photon_CS.data_h.nb_mat;
@@ -233,7 +233,7 @@ void VoxPhanImgNav::track_to_out ( Particles particles )
     grid.x = ( particles.size + mh_params->gpu_block_size - 1 ) / mh_params->gpu_block_size;
 
     // DEBUG
-    VPIN::kernel_device_track_to_out<<<grid, threads>>> ( particles.data_d, m_phantom.data_d, m_materials.tables.data_d,
+    VPIN::kernel_device_track_to_out<<<grid, threads>>> ( particles.data_d, m_phantom.data_d, m_materials.d_materials,
                                                           m_cross_sections.photon_CS.data_d, md_params );
     cuda_error_check ( "Error ", " Kernel_VoxPhanImgNav (track to out)" );
     cudaDeviceSynchronize();

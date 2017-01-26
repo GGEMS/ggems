@@ -78,10 +78,7 @@ class MaterialsDataBase {
 };
 
 // Table containing every definition of the materials used in the world
-struct MaterialsTable {
-    ui32 nb_materials;              // n
-    ui32 nb_elements_total;         // k
-
+struct MaterialsData {
     ui16 *nb_elements;        // n
     ui16 *index;              // n
 
@@ -117,14 +114,10 @@ struct MaterialsTable {
     f32 *fLogMeanExcitationEnergy;
 
     f32 *density;
-};
 
-// Struct that handle CPU&GPU CS data
-struct MaterialsData {
-    MaterialsTable data_h;
-    MaterialsTable data_d;
+    ui32 nb_materials;              // n
+    ui32 nb_elements_total;         // k
 };
-
 
 // This class is used to build the material table
 class Materials {
@@ -132,16 +125,17 @@ class Materials {
         Materials();
         // Load data provided by the user        
         void load_materials_database(std::string filename);        
-        void initialize(std::vector<std::string> mats_list, GlobalSimulationParametersData *h_params);
+        void initialize(std::vector<std::string> mats_list, const GlobalSimulationParametersData *h_params);
 
-        MaterialsData tables;
+        MaterialsData *h_materials;
+        MaterialsData *d_materials;
 
         void print();
         
     private:        
         bool m_check_mandatory();
         void m_copy_materials_table_cpu2gpu();
-        void m_build_materials_table(GlobalSimulationParametersData *h_params, std::vector<std::string> mats_list);
+        void m_build_materials_table(const GlobalSimulationParametersData *h_params, std::vector<std::string> mats_list);
         //void m_free_materials_table();
 
         ui32 m_nb_materials;              // n

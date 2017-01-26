@@ -31,17 +31,17 @@
 // VoxPhanImgNav -> VPIN
 namespace VPIN
 {
-__device__ void track_to_out( ParticlesData particles,
+__device__ void track_to_out(ParticlesData particles,
                               VoxVolumeData<ui16> vol,
-                              MaterialsTable materials,
+                              const MaterialsData *materials,
                               PhotonCrossSectionTable photon_CS_table,
                               const GlobalSimulationParametersData *parameters,
                               ui32 part_id );
 __global__ void kernel_device_track_to_in( ParticlesData particles, f32 xmin, f32 xmax,
                                             f32 ymin, f32 ymax, f32 zmin, f32 zmax, f32 geom_tolerance );
-__global__ void kernel_device_track_to_out( ParticlesData particles,
+__global__ void kernel_device_track_to_out(ParticlesData particles,
                                             VoxVolumeData<ui16> vol,
-                                            MaterialsTable materials,
+                                            const MaterialsData *materials,
                                             PhotonCrossSectionTable photon_CS_table,
                                             const GlobalSimulationParametersData *parameters );
 }

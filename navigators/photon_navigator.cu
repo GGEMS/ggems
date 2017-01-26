@@ -85,7 +85,7 @@ __device__ void photon_get_next_interaction( ParticlesData particles,
 __device__ SecParticle photon_resolve_discrete_process( ParticlesData particles,
                                                         const GlobalSimulationParametersData *parameters,
                                                         PhotonCrossSectionTable photon_CS_table,
-                                                        MaterialsTable materials,
+                                                        const MaterialsData *materials,
                                                         ui16 mat_id, ui32 part_id )
 {
 
@@ -99,14 +99,14 @@ __device__ SecParticle photon_resolve_discrete_process( ParticlesData particles,
 
     if ( next_discrete_process == PHOTON_COMPTON )
     {        
-        electron = Compton_SampleSecondaries_standard( particles, materials.electron_energy_cut[mat_id],
+        electron = Compton_SampleSecondaries_standard( particles, materials->electron_energy_cut[mat_id],
                    part_id, parameters->secondaries_list[ELECTRON] );
     }
 
     if ( next_discrete_process == PHOTON_PHOTOELECTRIC )
     {        
         electron = Photoelec_SampleSecondaries_standard( particles, materials, photon_CS_table,
-                   particles.E_index[part_id], materials.electron_energy_cut[mat_id],
+                   particles.E_index[part_id], materials->electron_energy_cut[mat_id],
                    mat_id, parameters->secondaries_list[ELECTRON], part_id );
     }
 

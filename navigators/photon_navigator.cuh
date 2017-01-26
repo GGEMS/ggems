@@ -25,7 +25,7 @@ __device__ void photon_get_next_interaction(ParticlesData particles,
 __device__ SecParticle photon_resolve_discrete_process(ParticlesData particles,
                                                         const GlobalSimulationParametersData *parameters,
                                                         PhotonCrossSectionTable photon_CS_table,
-                                                        MaterialsTable materials,
+                                                        const MaterialsData *materials,
                                                         ui16 mat_id, ui32 part_id );
 
 #endif

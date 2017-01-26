@@ -47,7 +47,7 @@ class CrossSections {
         ui32 m_nb_bins, m_nb_mat;
 
         GlobalSimulationParametersData *mh_parameters;
-        MaterialsTable m_materials;
+        MaterialsData *mh_materials;
 };
 
 #endif

@@ -278,7 +278,7 @@ void CrossSections::m_build_photon_table()
 
             // for each phys effect
             if (mh_parameters->physics_list[PHOTON_COMPTON]) {
-                photon_CS.data_h.Compton_Std_CS[abs_index] = Compton_CS_standard(m_materials, imat,
+                photon_CS.data_h.Compton_Std_CS[abs_index] = Compton_CS_standard(mh_materials, imat,
                                                                                  photon_CS.data_h.E_bins[i]);
             }
             else
@@ -287,7 +287,7 @@ void CrossSections::m_build_photon_table()
             }
 
             if (mh_parameters->physics_list[PHOTON_PHOTOELECTRIC]) {
-                photon_CS.data_h.Photoelectric_Std_CS[abs_index] = Photoelec_CS_standard(m_materials, imat,
+                photon_CS.data_h.Photoelectric_Std_CS[abs_index] = Photoelec_CS_standard(mh_materials, imat,
                                                                                          photon_CS.data_h.E_bins[i]);
             }
             else
@@ -296,7 +296,7 @@ void CrossSections::m_build_photon_table()
             }
 
             if (mh_parameters->physics_list[PHOTON_RAYLEIGH]) {
-                photon_CS.data_h.Rayleigh_Lv_CS[abs_index] = Rayleigh_CS_Livermore(m_materials, g4_ray_cs,
+                photon_CS.data_h.Rayleigh_Lv_CS[abs_index] = Rayleigh_CS_Livermore(mh_materials, g4_ray_cs,
                                                                                    imat, photon_CS.data_h.E_bins[i]);
             }
             else
@@ -311,11 +311,11 @@ void CrossSections::m_build_photon_table()
         if ( mh_parameters->physics_list[PHOTON_RAYLEIGH] || mh_parameters->physics_list[PHOTON_PHOTOELECTRIC] ) {
             ui32 iZ, Z;
             // This table compute scatter factor for each Z (only for Z which were not already defined)
-            iZ=0; while (iZ < m_materials.nb_elements[ imat ]) {
+            iZ=0; while (iZ < mh_materials->nb_elements[ imat ]) {
 
-                Z = m_materials.mixture[ m_materials.index[ imat ] + iZ ];
+                Z = mh_materials->mixture[ mh_materials->index[ imat ] + iZ ];
 
-                f32 atom_num_dens = m_materials.atom_num_dens[ m_materials.index[ imat ] + iZ ];
+                f32 atom_num_dens = mh_materials->atom_num_dens[ mh_materials->index[ imat ] + iZ ];
 
                 // If for this Z nothing was already calculated
                 if ( !flag_Z[ Z ] ) {
@@ -367,7 +367,7 @@ void CrossSections::m_build_photon_table()
 
 bool CrossSections::m_check_mandatory()
 {
-    if (m_materials.nb_materials == 0 || mh_parameters->cs_table_nbins == 0) return false;
+    if (mh_materials->nb_materials == 0 || mh_parameters->cs_table_nbins == 0) return false;
     else return true;
 }
 
@@ -378,8 +378,8 @@ void CrossSections::initialize(Materials materials, GlobalSimulationParametersDa
     // Store global parameters
     mh_parameters = h_parameters;
     m_nb_bins = h_parameters->cs_table_nbins;
-    m_nb_mat = materials.tables.data_h.nb_materials;
-    m_materials = materials.tables.data_h;
+    m_nb_mat = materials.h_materials->nb_materials;
+    mh_materials = materials.h_materials;
 
     // Check if everything was set properly
     if ( !m_check_mandatory() ) {
