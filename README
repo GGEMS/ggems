@@ -14,12 +14,12 @@ GGEMS Enhancement Proposals (GEP)
 * **GEP008 - Improve PRNG by using others or cuRand, XORWOW is closer to MT from G4**
 * **GEP009 - tlimitminfix in eMscScattering and gLatCorrection should be used the defined geometry tolerance**
 * **GEP010 - Improve edep deposition while volume and doxel size are different to the phantom. Some aliasing appears in this case.**
-* **GEP011 - Change the name dose_to_phantom by dose_to_medium**
+* *GEP011 - Change the name dose_to_phantom by dose_to_medium - JB*
 * *GEP012 - Change name doxel into dosel - JB*
 * *GEP013 - Use Template for VoxVolumeData (in ui16) and f32VoxVolumeData (in f32) in order to have only one structure. - JB*
-* **GEP014 - Use unified memory for phantom data**
-* **GEP015 - Use unified memory for cross section data**
-* **GEP016 - Use unified memory for material data**
+* *GEP014 - Use unified memory for phantom data - withdraw JB*
+* *GEP015 - Use unified memory for cross section data - withdraw JB*
+* *GEP016 - Use unified memory for material data - withdraw JB*
 * **GRP017 - Use ImageIO to open MHD in voxelized.cu**
 
 GGEMS Bug Reporting (GBR) 
@@ -33,6 +33,7 @@ GGEMS Bug Reporting (GBR)
 * *GBR007 - Open 07/03/16 JB - Fix dose (no output) and uncertainty calculation (some nan) - close 08/03/16 - JB*
 * **GBR008 - Open 08/03/16 JB - Still strange values on Dose map...**
 * **GBR009 - Open 08/09/16 JB - Standard binary search to be not working properly, however if we use the binary_search_left, which is more right, electron tracking does not work... Meaning, that electron navigation was designed to work with the uncorrect binary_search. Both, binary_search code have to be fused and electron navigation adapt**
+* **GBR010 - Not working on arch > 5.0**
 
 ====
 Misc

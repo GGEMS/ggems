@@ -213,7 +213,7 @@ void PhaseSpaceSource::m_skip_comment(std::istream & is) {
 // Check if everything is ok to initialize this source
 bool PhaseSpaceSource::m_check_mandatory()
 {
-    if ( m_phasespace.tot_particles == 0 ) return false;
+    if ( mh_phasespace->tot_particles == 0 ) return false;
     else return true;
 }
 

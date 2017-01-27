@@ -21,35 +21,35 @@
 /// CPU&GPU functions //////////////////////////////////////////////////////////
 
 // Analog deposition
-__host__ __device__ void dose_record_standard ( DoseData dose, f32 Edep, f32 px, f32 py, f32 pz )
+__host__ __device__ void dose_record_standard ( DoseData *dose, f32 Edep, f32 px, f32 py, f32 pz )
 {
 
-    if (px < dose.xmin + EPSILON3 || px > dose.xmax - EPSILON3) return;
-    if (py < dose.ymin + EPSILON3 || py > dose.ymax - EPSILON3) return;
-    if (pz < dose.zmin + EPSILON3 || pz > dose.zmax - EPSILON3) return;
+    if (px < dose->xmin + EPSILON3 || px > dose->xmax - EPSILON3) return;
+    if (py < dose->ymin + EPSILON3 || py > dose->ymax - EPSILON3) return;
+    if (pz < dose->zmin + EPSILON3 || pz > dose->zmax - EPSILON3) return;
 
     // Defined index phantom    
     ui32xyzw index_phantom;
-    index_phantom.x = ui32 ( ( px + dose.offset.x ) * dose.inv_dosel_size.x );
-    index_phantom.y = ui32 ( ( py + dose.offset.y ) * dose.inv_dosel_size.y );
-    index_phantom.z = ui32 ( ( pz + dose.offset.z ) * dose.inv_dosel_size.z );
-    index_phantom.w = index_phantom.z * dose.slice_nb_dosels + index_phantom.y * dose.nb_dosels.x + index_phantom.x;
+    index_phantom.x = ui32 ( ( px + dose->offset.x ) * dose->inv_dosel_size.x );
+    index_phantom.y = ui32 ( ( py + dose->offset.y ) * dose->inv_dosel_size.y );
+    index_phantom.z = ui32 ( ( pz + dose->offset.z ) * dose->inv_dosel_size.z );
+    index_phantom.w = index_phantom.z * dose->slice_nb_dosels + index_phantom.y * dose->nb_dosels.x + index_phantom.x;
 
     //printf("Edep %e  pos %e %e %e  index %i\n", Edep, px, py, pz, index_phantom.w);
 
 #ifdef DEBUG
 
-    if ( index_phantom.x >= dose.nb_dosels.x || index_phantom.y >= dose.nb_dosels.y || index_phantom.z >= dose.nb_dosels.z)
+    if ( index_phantom.x >= dose->nb_dosels.x || index_phantom.y >= dose->nb_dosels.y || index_phantom.z >= dose->nb_dosels.z)
     {
-        printf(" IndexX %i  NbDox %i  px %f  Off %f invDox %f\n", index_phantom.x, dose.nb_dosels.x, px, dose.offset.x, dose.inv_dosel_size.x);
-        printf(" IndexY %i  NbDox %i  py %f  Off %f invDox %f\n", index_phantom.y, dose.nb_dosels.y, py, dose.offset.y, dose.inv_dosel_size.y);
-        printf(" IndexZ %i  NbDox %i  pz %f  Off %f invDox %f\n", index_phantom.z, dose.nb_dosels.z, pz, dose.offset.z, dose.inv_dosel_size.z);
+        printf(" IndexX %i  NbDox %i  px %f  Off %f invDox %f\n", index_phantom.x, dose->nb_dosels.x, px, dose->offset.x, dose->inv_dosel_size.x);
+        printf(" IndexY %i  NbDox %i  py %f  Off %f invDox %f\n", index_phantom.y, dose->nb_dosels.y, py, dose->offset.y, dose->inv_dosel_size.y);
+        printf(" IndexZ %i  NbDox %i  pz %f  Off %f invDox %f\n", index_phantom.z, dose->nb_dosels.z, pz, dose->offset.z, dose->inv_dosel_size.z);
         //index_phantom.z = 0;
     }
 
-    assert( index_phantom.x < dose.nb_dosels.x );
-    assert( index_phantom.y < dose.nb_dosels.y );
-    assert( index_phantom.z < dose.nb_dosels.z );
+    assert( index_phantom.x < dose->nb_dosels.x );
+    assert( index_phantom.y < dose->nb_dosels.y );
+    assert( index_phantom.z < dose->nb_dosels.z );
 #endif
 
 /*
@@ -64,42 +64,42 @@ __host__ __device__ void dose_record_standard ( DoseData dose, f32 Edep, f32 px,
 #endif
 */
 
-    ggems_atomic_add_f64( dose.edep, index_phantom.w, f64( Edep ) );
-    ggems_atomic_add_f64( dose.edep_squared, index_phantom.w, f64( Edep) * f64( Edep ) );
-    ggems_atomic_add( dose.number_of_hits, index_phantom.w, ui32 ( 1 ) );                  // ui32, limited to 4.29e9 - JB
+    ggems_atomic_add_f64( dose->edep, index_phantom.w, f64( Edep ) );
+    ggems_atomic_add_f64( dose->edep_squared, index_phantom.w, f64( Edep) * f64( Edep ) );
+    ggems_atomic_add( dose->number_of_hits, index_phantom.w, ui32 ( 1 ) );                  // ui32, limited to 4.29e9 - JB
 
 
 }
 
 // TLE deposition
-__host__ __device__ void dose_record_TLE ( DoseData dose, f32 Edep, f32 px, f32 py, f32 pz,
+__host__ __device__ void dose_record_TLE (DoseData *dose, f32 Edep, f32 px, f32 py, f32 pz,
                                            f32 length, f32 mu_en)
 {
 
-    if (px < dose.xmin + EPSILON3 || px > dose.xmax - EPSILON3) return;
-    if (py < dose.ymin + EPSILON3 || py > dose.ymax - EPSILON3) return;
-    if (pz < dose.zmin + EPSILON3 || pz > dose.zmax - EPSILON3) return;
+    if (px < dose->xmin + EPSILON3 || px > dose->xmax - EPSILON3) return;
+    if (py < dose->ymin + EPSILON3 || py > dose->ymax - EPSILON3) return;
+    if (pz < dose->zmin + EPSILON3 || pz > dose->zmax - EPSILON3) return;
 
     // Defined index phantom
     ui32xyzw index_phantom;
-    index_phantom.x = ui32 ( ( px + dose.offset.x ) * dose.inv_dosel_size.x );
-    index_phantom.y = ui32 ( ( py + dose.offset.y ) * dose.inv_dosel_size.y );
-    index_phantom.z = ui32 ( ( pz + dose.offset.z ) * dose.inv_dosel_size.z );
-    index_phantom.w = index_phantom.z * dose.slice_nb_dosels + index_phantom.y * dose.nb_dosels.x + index_phantom.x;
+    index_phantom.x = ui32 ( ( px + dose->offset.x ) * dose->inv_dosel_size.x );
+    index_phantom.y = ui32 ( ( py + dose->offset.y ) * dose->inv_dosel_size.y );
+    index_phantom.z = ui32 ( ( pz + dose->offset.z ) * dose->inv_dosel_size.z );
+    index_phantom.w = index_phantom.z * dose->slice_nb_dosels + index_phantom.y * dose->nb_dosels.x + index_phantom.x;
 
 #ifdef DEBUG
 
-    if ( index_phantom.x >= dose.nb_dosels.x || index_phantom.y >= dose.nb_dosels.y || index_phantom.z >= dose.nb_dosels.z)
+    if ( index_phantom.x >= dose->nb_dosels.x || index_phantom.y >= dose->nb_dosels.y || index_phantom.z >= dose->nb_dosels.z)
     {
-        printf(" IndexX %i  NbDox %i  px %f  Off %f invDox %f\n", index_phantom.x, dose.nb_dosels.x, px, dose.offset.x, dose.inv_dosel_size.x);
-        printf(" IndexY %i  NbDox %i  py %f  Off %f invDox %f\n", index_phantom.y, dose.nb_dosels.y, py, dose.offset.y, dose.inv_dosel_size.y);
-        printf(" IndexZ %i  NbDox %i  pz %f  Off %f invDox %f\n", index_phantom.z, dose.nb_dosels.z, pz, dose.offset.z, dose.inv_dosel_size.z);
+        printf(" IndexX %i  NbDox %i  px %f  Off %f invDox %f\n", index_phantom.x, dose->nb_dosels.x, px, dose->offset.x, dose->inv_dosel_size.x);
+        printf(" IndexY %i  NbDox %i  py %f  Off %f invDox %f\n", index_phantom.y, dose->nb_dosels.y, py, dose->offset.y, dose->inv_dosel_size.y);
+        printf(" IndexZ %i  NbDox %i  pz %f  Off %f invDox %f\n", index_phantom.z, dose->nb_dosels.z, pz, dose->offset.z, dose->inv_dosel_size.z);
         //index_phantom.z = 0;
     }
 
-    assert( index_phantom.x < dose.nb_dosels.x );
-    assert( index_phantom.y < dose.nb_dosels.y );
-    assert( index_phantom.z < dose.nb_dosels.z );
+    assert( index_phantom.x < dose->nb_dosels.x );
+    assert( index_phantom.y < dose->nb_dosels.y );
+    assert( index_phantom.z < dose->nb_dosels.z );
 #endif
 
     // TLE
@@ -117,9 +117,9 @@ __host__ __device__ void dose_record_TLE ( DoseData dose, f32 Edep, f32 px, f32 
 #endif
 */
 
-    ggems_atomic_add_f64( dose.edep, index_phantom.w, energy_dropped );
-    ggems_atomic_add_f64( dose.edep_squared, index_phantom.w, energy_dropped * energy_dropped );
-    ggems_atomic_add( dose.number_of_hits, index_phantom.w, ui32 ( 1 ) );                  // ui32, limited to 4.29e9 - JB
+    ggems_atomic_add_f64( dose->edep, index_phantom.w, energy_dropped );
+    ggems_atomic_add_f64( dose->edep_squared, index_phantom.w, energy_dropped * energy_dropped );
+    ggems_atomic_add( dose->number_of_hits, index_phantom.w, ui32 ( 1 ) );                  // ui32, limited to 4.29e9 - JB
 
 }
 
@@ -155,14 +155,14 @@ void DoseCalculator::m_uncertainty_calculation( ui32 dosel_id_x, ui32 dosel_id_y
     //  relError = s(x) / Sum(Edep)/N
     //
 
-    ui32 index = dosel_id_z * dose.slice_nb_dosels + dosel_id_y * dose.nb_dosels.x + dosel_id_x;
+    ui32 index = dosel_id_z * h_dose->slice_nb_dosels + dosel_id_y * h_dose->nb_dosels.x + dosel_id_x;
 
-    f64 N = dose.number_of_hits[index];
-    f64 sum_E = dose.edep[index];
+    f64 N = h_dose->number_of_hits[index];
+    f64 sum_E = h_dose->edep[index];
 
     if ( N > 1 && sum_E != 0.0 )
     {
-        f64 sum_E2 = dose.edep_squared[index];
+        f64 sum_E2 = h_dose->edep_squared[index];
         f64 sum2_E = sum_E * sum_E;
         f64 s = ( (N*sum_E2) - sum2_E ) / ( (N-1) * sum2_E );
 
@@ -182,51 +182,51 @@ void DoseCalculator::m_uncertainty_calculation( ui32 dosel_id_x, ui32 dosel_id_y
 void DoseCalculator::m_dose_to_water_calculation( ui32 dosel_id_x, ui32 dosel_id_y, ui32 dosel_id_z )
 {
 
-    f64 vox_vol = dose.dosel_size.x * dose.dosel_size.y * dose.dosel_size.z;
+    f64 vox_vol = h_dose->dosel_size.x * h_dose->dosel_size.y * h_dose->dosel_size.z;
     f64 density = 1.0 * gram/cm3;
-    ui32 index = dosel_id_z * dose.slice_nb_dosels + dosel_id_y * dose.nb_dosels.x + dosel_id_x;
+    ui32 index = dosel_id_z * h_dose->slice_nb_dosels + dosel_id_y * h_dose->nb_dosels.x + dosel_id_x;
 
-    m_dose_values[ index ] = dose.edep[ index ] / density / vox_vol / gray;
+    m_dose_values[ index ] = h_dose->edep[ index ] / density / vox_vol / gray;
 
 }
 
 void DoseCalculator::m_dose_to_phantom_calculation( ui32 dosel_id_x, ui32 dosel_id_y, ui32 dosel_id_z )
 {
 
-    f64 vox_vol = dose.dosel_size.x * dose.dosel_size.y * dose.dosel_size.z;
+    f64 vox_vol = h_dose->dosel_size.x * h_dose->dosel_size.y * h_dose->dosel_size.z;
 
     // Convert doxel_id into position
-    f32 pos_x = ( dosel_id_x * dose.dosel_size.x ) - dose.offset.x;
-    f32 pos_y = ( dosel_id_y * dose.dosel_size.y ) - dose.offset.y;
-    f32 pos_z = ( dosel_id_z * dose.dosel_size.z ) - dose.offset.z;
+    f32 pos_x = ( dosel_id_x * h_dose->dosel_size.x ) - h_dose->offset.x;
+    f32 pos_y = ( dosel_id_y * h_dose->dosel_size.y ) - h_dose->offset.y;
+    f32 pos_z = ( dosel_id_z * h_dose->dosel_size.z ) - h_dose->offset.z;
 
     // Convert position into phantom voxel index
     f32xyz ivoxsize;
-    ivoxsize.x = 1.0 / m_phantom.data_h.spacing_x;
-    ivoxsize.y = 1.0 / m_phantom.data_h.spacing_y;
-    ivoxsize.z = 1.0 / m_phantom.data_h.spacing_z;
+    ivoxsize.x = 1.0 / m_phantom.h_volume->spacing_x;
+    ivoxsize.y = 1.0 / m_phantom.h_volume->spacing_y;
+    ivoxsize.z = 1.0 / m_phantom.h_volume->spacing_z;
     ui32xyzw index_phantom;
-    index_phantom.x = ui32 ( ( pos_x + m_phantom.data_h.off_x ) * ivoxsize.x );
-    index_phantom.y = ui32 ( ( pos_y + m_phantom.data_h.off_y ) * ivoxsize.y );
-    index_phantom.z = ui32 ( ( pos_z + m_phantom.data_h.off_z ) * ivoxsize.z );
-    index_phantom.w = index_phantom.z*m_phantom.data_h.nb_vox_x*m_phantom.data_h.nb_vox_y
-                         + index_phantom.y*m_phantom.data_h.nb_vox_x
+    index_phantom.x = ui32 ( ( pos_x + m_phantom.h_volume->off_x ) * ivoxsize.x );
+    index_phantom.y = ui32 ( ( pos_y + m_phantom.h_volume->off_y ) * ivoxsize.y );
+    index_phantom.z = ui32 ( ( pos_z + m_phantom.h_volume->off_z ) * ivoxsize.z );
+    index_phantom.w = index_phantom.z*m_phantom.h_volume->nb_vox_x*m_phantom.h_volume->nb_vox_y
+                         + index_phantom.y*m_phantom.h_volume->nb_vox_x
                          + index_phantom.x; // linear index
 
 #ifdef DEBUG
-    assert( index_phantom.x < m_phantom.data_h.nb_vox_x );
-    assert( index_phantom.y < m_phantom.data_h.nb_vox_y );
-    assert( index_phantom.z < m_phantom.data_h.nb_vox_z );
+    assert( index_phantom.x < m_phantom.h_volume->nb_vox_x );
+    assert( index_phantom.y < m_phantom.h_volume->nb_vox_y );
+    assert( index_phantom.z < m_phantom.h_volume->nb_vox_z );
 #endif
 
     // Get density for this voxel
-    f64 density = m_materials.tables.data_h.density[ m_phantom.data_h.values[ index_phantom.w ] ]; // density given by the material id
+    f64 density = m_materials.h_materials->density[ m_phantom.h_volume->values[ index_phantom.w ] ]; // density given by the material id
 
     // Compute the dose
-    ui32 index = dosel_id_z * dose.slice_nb_dosels + dosel_id_y * dose.nb_dosels.x + dosel_id_x;
+    ui32 index = dosel_id_z * h_dose->slice_nb_dosels + dosel_id_y * h_dose->nb_dosels.x + dosel_id_x;
     if ( density > m_dose_min_density )
     {
-        m_dose_values[index] = dose.edep[ index ] / density / vox_vol / gray;
+        m_dose_values[index] = h_dose->edep[ index ] / density / vox_vol / gray;
     }
     else
     {
@@ -234,6 +234,100 @@ void DoseCalculator::m_dose_to_phantom_calculation( ui32 dosel_id_x, ui32 dosel_
     }
 
 }
+
+void DoseCalculator::m_copy_dosemap_to_gpu()
+{
+    ui32 n = h_dose->tot_nb_dosels;
+
+    /// First, struct allocation
+    HANDLE_ERROR( cudaMalloc( (void**) &d_dose, sizeof( DoseData ) ) );
+
+    /// Device pointers allocation
+    // Data
+    f64 *edep;
+    HANDLE_ERROR( cudaMalloc((void**) &edep, n*sizeof(f64)) );
+    f64 *edep_squared;
+    HANDLE_ERROR( cudaMalloc((void**) &edep_squared, n*sizeof(f64)) );
+    ui32 *number_of_hits;
+    HANDLE_ERROR( cudaMalloc((void**) &number_of_hits, n*sizeof(ui32)) );
+
+    /// Copy host data to device
+    HANDLE_ERROR( cudaMemcpy( edep, h_dose->edep,
+                              n*sizeof(f64), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( edep_squared, h_dose->edep_squared,
+                              n*sizeof(f64), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( number_of_hits, h_dose->number_of_hits,
+                              n*sizeof(ui32), cudaMemcpyHostToDevice ) );
+
+    /// Bind data to the struct
+    HANDLE_ERROR( cudaMemcpy( &(d_dose->edep), &edep,
+                              sizeof(d_dose->edep), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(d_dose->edep_squared), &edep_squared,
+                              sizeof(d_dose->edep_squared), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(d_dose->number_of_hits), &number_of_hits,
+                              sizeof(d_dose->number_of_hits), cudaMemcpyHostToDevice ) );
+
+    HANDLE_ERROR( cudaMemcpy( &(d_dose->nb_dosels), &(h_dose->nb_dosels),
+                              sizeof(d_dose->nb_dosels), cudaMemcpyHostToDevice ) );
+
+    HANDLE_ERROR( cudaMemcpy( &(d_dose->dosel_size), &(h_dose->dosel_size),
+                              sizeof(d_dose->dosel_size), cudaMemcpyHostToDevice ) );
+
+    HANDLE_ERROR( cudaMemcpy( &(d_dose->inv_dosel_size), &(h_dose->inv_dosel_size),
+                              sizeof(d_dose->inv_dosel_size), cudaMemcpyHostToDevice ) );
+
+    HANDLE_ERROR( cudaMemcpy( &(d_dose->offset), &(h_dose->offset),
+                              sizeof(d_dose->offset), cudaMemcpyHostToDevice ) );
+
+    HANDLE_ERROR( cudaMemcpy( &(d_dose->xmin), &(h_dose->xmin),
+                              sizeof(d_dose->xmin), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(d_dose->xmax), &(h_dose->xmax),
+                              sizeof(d_dose->xmax), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(d_dose->ymin), &(h_dose->ymin),
+                              sizeof(d_dose->ymin), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(d_dose->ymax), &(h_dose->ymax),
+                              sizeof(d_dose->ymax), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(d_dose->zmin), &(h_dose->zmin),
+                              sizeof(d_dose->zmin), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(d_dose->zmax), &(h_dose->zmax),
+                              sizeof(d_dose->zmax), cudaMemcpyHostToDevice ) );
+
+    HANDLE_ERROR( cudaMemcpy( &(d_dose->tot_nb_dosels), &(h_dose->tot_nb_dosels),
+                              sizeof(d_dose->tot_nb_dosels), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(d_dose->slice_nb_dosels), &(h_dose->slice_nb_dosels),
+                              sizeof(d_dose->slice_nb_dosels), cudaMemcpyHostToDevice ) );
+
+}
+
+
+void DoseCalculator::m_copy_dosemap_to_cpu()
+{
+    ui32 n = h_dose->tot_nb_dosels;
+
+    /// Device pointers allocation
+    f64 *edep;
+    f64 *edep_squared;
+    ui32 *number_of_hits;
+
+    /// Bind data struct to new pointer
+    HANDLE_ERROR( cudaMemcpy( &edep, &(d_dose->edep),
+                              sizeof(d_dose->edep), cudaMemcpyDeviceToHost ) );
+    HANDLE_ERROR( cudaMemcpy( &edep_squared, &(d_dose->edep_squared),
+                              sizeof(d_dose->edep_squared), cudaMemcpyDeviceToHost ) );
+    HANDLE_ERROR( cudaMemcpy( &number_of_hits, &(d_dose->number_of_hits),
+                              sizeof(d_dose->number_of_hits), cudaMemcpyDeviceToHost ) );
+
+    /// Copy device data to host
+    HANDLE_ERROR( cudaMemcpy( h_dose->edep, edep,
+                              n*sizeof(f64), cudaMemcpyDeviceToHost ) );
+    HANDLE_ERROR( cudaMemcpy( h_dose->edep_squared, edep_squared,
+                              n*sizeof(f64), cudaMemcpyDeviceToHost ) );
+    HANDLE_ERROR( cudaMemcpy( h_dose->number_of_hits, number_of_hits,
+                              n*sizeof(ui32), cudaMemcpyDeviceToHost ) );
+
+}
+
+
 
 /// Class
 DoseCalculator::DoseCalculator()
@@ -264,62 +358,44 @@ DoseCalculator::DoseCalculator()
     m_flag_uncertainty_calculated = false;
 
     // Init the struc
-    dose.edep = NULL;
-    dose.edep_squared = NULL;
-    dose.number_of_hits = NULL;
-    dose.nb_dosels.x = 0;
-    dose.nb_dosels.y = 0;
-    dose.nb_dosels.z = 0;
-    dose.dosel_size.x = 0;
-    dose.dosel_size.y = 0;
-    dose.dosel_size.z = 0;
-    dose.inv_dosel_size.x = 0;
-    dose.inv_dosel_size.y = 0;
-    dose.inv_dosel_size.z = 0;
-    dose.offset.x = 0;
-    dose.offset.y = 0;
-    dose.offset.z = 0;
-    dose.xmin = 0; dose.xmax = 0;
-    dose.ymin = 0; dose.ymax = 0;
-    dose.zmin = 0; dose.zmax = 0;
-    dose.tot_nb_dosels = 0;
-    dose.slice_nb_dosels = 0;
+    h_dose = (DoseData*) malloc( sizeof(DoseData) );
+    h_dose->edep = nullptr;
+    h_dose->edep_squared = nullptr;
+    h_dose->number_of_hits = nullptr;
+    h_dose->nb_dosels.x = 0;
+    h_dose->nb_dosels.y = 0;
+    h_dose->nb_dosels.z = 0;
+    h_dose->dosel_size.x = 0;
+    h_dose->dosel_size.y = 0;
+    h_dose->dosel_size.z = 0;
+    h_dose->inv_dosel_size.x = 0;
+    h_dose->inv_dosel_size.y = 0;
+    h_dose->inv_dosel_size.z = 0;
+    h_dose->offset.x = 0;
+    h_dose->offset.y = 0;
+    h_dose->offset.z = 0;
+    h_dose->xmin = 0; h_dose->xmax = 0;
+    h_dose->ymin = 0; h_dose->ymax = 0;
+    h_dose->zmin = 0; h_dose->zmax = 0;
+    h_dose->tot_nb_dosels = 0;
+    h_dose->slice_nb_dosels = 0;
 
     // Dose and uncertainty values
     m_dose_values = NULL;
     m_uncertainty_values = NULL;
 
+    // Init other struct
+    mh_params = nullptr;
+    d_dose = nullptr;
+
 }
 
 DoseCalculator::~DoseCalculator()
 {
-    cudaFree( dose.edep );
-    cudaFree( dose.edep_squared );
-    cudaFree( dose.number_of_hits );
 
-    delete[] m_dose_values;
-    delete[] m_uncertainty_values;
-
-/*
-    delete [] dose.data_h.edep ;
-    delete [] dose.data_h.dose ;
-    delete [] dose.data_h.edep_squared ;
-    delete [] dose.data_h.number_of_hits ;
-    delete [] dose.data_h.uncertainty ;
-*/
 }
 
 /// Setting
-
-/*
-void DoseCalculator::set_size_in_voxel ( ui32 nx, ui32 ny, ui32 nz )
-{
-    dose.data_h.nx = nx;
-    dose.data_h.ny = ny;
-    dose.data_h.nz = nz;
-    dose.data_h.nb_of_voxels = nx*ny*nz;
-}
-*/
 
 void DoseCalculator::set_dosel_size ( f32 sx, f32 sy, f32 sz )
 {
@@ -368,26 +444,26 @@ VoxVolumeData<f32> * DoseCalculator::get_dose_map()
     }
 
     VoxVolumeData<f32> *dosemap = new VoxVolumeData<f32>;
-    dosemap->nb_vox_x = dose.nb_dosels.x;
-    dosemap->nb_vox_y = dose.nb_dosels.y;
-    dosemap->nb_vox_z = dose.nb_dosels.z;
+    dosemap->nb_vox_x = h_dose->nb_dosels.x;
+    dosemap->nb_vox_y = h_dose->nb_dosels.y;
+    dosemap->nb_vox_z = h_dose->nb_dosels.z;
 
-    dosemap->off_x = dose.offset.x;
-    dosemap->off_y = dose.offset.y;
-    dosemap->off_z = dose.offset.z;
+    dosemap->off_x = h_dose->offset.x;
+    dosemap->off_y = h_dose->offset.y;
+    dosemap->off_z = h_dose->offset.z;
 
-    dosemap->spacing_x = dose.dosel_size.x;
-    dosemap->spacing_y = dose.dosel_size.y;
-    dosemap->spacing_z = dose.dosel_size.z;
+    dosemap->spacing_x = h_dose->dosel_size.x;
+    dosemap->spacing_y = h_dose->dosel_size.y;
+    dosemap->spacing_z = h_dose->dosel_size.z;
 
-    dosemap->number_of_voxels = dose.tot_nb_dosels;
+    dosemap->number_of_voxels = h_dose->tot_nb_dosels;
 
-    dosemap->xmin = dose.xmin;
-    dosemap->xmax = dose.xmax;
-    dosemap->ymin = dose.ymin;
-    dosemap->ymax = dose.ymax;
-    dosemap->zmin = dose.zmin;
-    dosemap->zmax = dose.zmax;
+    dosemap->xmin = h_dose->xmin;
+    dosemap->xmax = h_dose->xmax;
+    dosemap->ymin = h_dose->ymin;
+    dosemap->ymax = h_dose->ymax;
+    dosemap->zmin = h_dose->zmin;
+    dosemap->zmax = h_dose->zmax;
 
     dosemap->values = m_dose_values;
 
@@ -395,7 +471,7 @@ VoxVolumeData<f32> * DoseCalculator::get_dose_map()
 }
 
 /// Init
-void DoseCalculator::initialize ( GlobalSimulationParameters params )
+void DoseCalculator::initialize ( GlobalSimulationParametersData *h_params )
 {
 //     GGcout << " DoseCalculator initialize " << GGendl;
     
@@ -407,29 +483,29 @@ void DoseCalculator::initialize ( GlobalSimulationParameters params )
     }
 
     // Copy params
-    m_params = params;
+    mh_params = h_params;
 
     /// Compute dosemap parameters /////////////////////////////
 
     // Select a doxel size
     if ( m_dosel_size.x > 0.0 && m_dosel_size.y > 0.0 && m_dosel_size.z > 0.0 )
     {
-        dose.dosel_size = m_dosel_size;
-        dose.inv_dosel_size = fxyz_inv( m_dosel_size );
+        h_dose->dosel_size = m_dosel_size;
+        h_dose->inv_dosel_size = fxyz_inv( m_dosel_size );
     }
     else
     {
-        dose.dosel_size = make_f32xyz( m_phantom.data_h.spacing_x,
-                                       m_phantom.data_h.spacing_y,
-                                       m_phantom.data_h.spacing_z );
-        dose.inv_dosel_size = fxyz_inv( dose.dosel_size );
+        h_dose->dosel_size = make_f32xyz( m_phantom.h_volume->spacing_x,
+                                       m_phantom.h_volume->spacing_y,
+                                       m_phantom.h_volume->spacing_z );
+        h_dose->inv_dosel_size = fxyz_inv( h_dose->dosel_size );
     }
 
 /*
     // Compute min-max volume of interest
-    f32xyz phan_size = make_f32xyz( m_phantom.data_h.nb_vox_x * m_phantom.data_h.spacing_x,
-                                    m_phantom.data_h.nb_vox_y * m_phantom.data_h.spacing_y,
-                                    m_phantom.data_h.nb_vox_z * m_phantom.data_h.spacing_z );
+    f32xyz phan_size = make_f32xyz( m_phantom.h_volume->nb_vox_x * m_phantom.h_volume->spacing_x,
+                                    m_phantom.h_volume->nb_vox_y * m_phantom.h_volume->spacing_y,
+                                    m_phantom.h_volume->nb_vox_z * m_phantom.h_volume->spacing_z );
     f32xyz half_phan_size = fxyz_scale( phan_size, 0.5f );
     f32 phan_xmin = -half_phan_size.x; f32 phan_xmax = half_phan_size.x;
     f32 phan_ymin = -half_phan_size.y; f32 phan_ymax = half_phan_size.y;
@@ -439,37 +515,37 @@ void DoseCalculator::initialize ( GlobalSimulationParameters params )
     // Select a min-max VOI
     if ( !m_xmin && !m_xmax && !m_ymin && !m_ymax && !m_zmin && !m_zmax )
     {
-        dose.xmin = m_phantom.data_h.xmin;
-        dose.xmax = m_phantom.data_h.xmax;
-        dose.ymin = m_phantom.data_h.ymin;
-        dose.ymax = m_phantom.data_h.ymax;
-        dose.zmin = m_phantom.data_h.zmin;
-        dose.zmax = m_phantom.data_h.zmax;
+        h_dose->xmin = m_phantom.h_volume->xmin;
+        h_dose->xmax = m_phantom.h_volume->xmax;
+        h_dose->ymin = m_phantom.h_volume->ymin;
+        h_dose->ymax = m_phantom.h_volume->ymax;
+        h_dose->zmin = m_phantom.h_volume->zmin;
+        h_dose->zmax = m_phantom.h_volume->zmax;
     }
     else
     {
-        dose.xmin = m_xmin;
-        dose.xmax = m_xmax;
-        dose.ymin = m_ymin;
-        dose.ymax = m_ymax;
-        dose.zmin = m_zmin;
-        dose.zmax = m_zmax;
+        h_dose->xmin = m_xmin;
+        h_dose->xmax = m_xmax;
+        h_dose->ymin = m_ymin;
+        h_dose->ymax = m_ymax;
+        h_dose->zmin = m_zmin;
+        h_dose->zmax = m_zmax;
     }
 
     // Get the current dimension of the dose map
-    f32xyz cur_dose_size = make_f32xyz( dose.xmax - dose.xmin,
-                                        dose.ymax - dose.ymin,
-                                        dose.zmax - dose.zmin );
+    f32xyz cur_dose_size = make_f32xyz( h_dose->xmax - h_dose->xmin,
+                                        h_dose->ymax - h_dose->ymin,
+                                        h_dose->zmax - h_dose->zmin );
 
     // New nb of voxels
-    dose.nb_dosels.x = floor( cur_dose_size.x / dose.dosel_size.x );
-    dose.nb_dosels.y = floor( cur_dose_size.y / dose.dosel_size.y );
-    dose.nb_dosels.z = floor( cur_dose_size.z / dose.dosel_size.z );
-    dose.slice_nb_dosels = dose.nb_dosels.x * dose.nb_dosels.y;
-    dose.tot_nb_dosels = dose.slice_nb_dosels * dose.nb_dosels.z;
+    h_dose->nb_dosels.x = floor( cur_dose_size.x / h_dose->dosel_size.x );
+    h_dose->nb_dosels.y = floor( cur_dose_size.y / h_dose->dosel_size.y );
+    h_dose->nb_dosels.z = floor( cur_dose_size.z / h_dose->dosel_size.z );
+    h_dose->slice_nb_dosels = h_dose->nb_dosels.x * h_dose->nb_dosels.y;
+    h_dose->tot_nb_dosels = h_dose->slice_nb_dosels * h_dose->nb_dosels.z;
 
     // Compute the new size (due to integer nb of doxels)
-    f32xyz new_dose_size = fxyz_mul( dose.dosel_size, cast_ui32xyz_to_f32xyz( dose.nb_dosels ) );
+    f32xyz new_dose_size = fxyz_mul( h_dose->dosel_size, cast_ui32xyz_to_f32xyz( h_dose->nb_dosels ) );
 
     if ( new_dose_size.x <= 0.0 || new_dose_size.y <= 0.0 || new_dose_size.z <= 0.0 )
     {
@@ -483,22 +559,26 @@ void DoseCalculator::initialize ( GlobalSimulationParameters params )
     // Compute new min and max after voxel alignment // TODO: Check here, offset is not considered? - JB
     f32xyz half_delta_size = fxyz_scale( fxyz_sub( cur_dose_size, new_dose_size ), 0.5f );
 
-    dose.xmin += half_delta_size.x;
-    dose.xmax -= half_delta_size.x;
+    h_dose->xmin += half_delta_size.x;
+    h_dose->xmax -= half_delta_size.x;
 
-    dose.ymin += half_delta_size.y;
-    dose.ymax -= half_delta_size.y;
+    h_dose->ymin += half_delta_size.y;
+    h_dose->ymax -= half_delta_size.y;
 
-    dose.zmin += half_delta_size.z;
-    dose.zmax -= half_delta_size.z;
+    h_dose->zmin += half_delta_size.z;
+    h_dose->zmax -= half_delta_size.z;
 
     // Get the new offset
-    dose.offset.x = m_phantom.data_h.off_x - ( dose.xmin - m_phantom.data_h.xmin );
-    dose.offset.y = m_phantom.data_h.off_y - ( dose.ymin - m_phantom.data_h.ymin );
-    dose.offset.z = m_phantom.data_h.off_z - ( dose.zmin - m_phantom.data_h.zmin );
+    h_dose->offset.x = m_phantom.h_volume->off_x - ( h_dose->xmin - m_phantom.h_volume->xmin );
+    h_dose->offset.y = m_phantom.h_volume->off_y - ( h_dose->ymin - m_phantom.h_volume->ymin );
+    h_dose->offset.z = m_phantom.h_volume->off_z - ( h_dose->zmin - m_phantom.h_volume->zmin );
 
     //////////////////////////////////////////////////////////
 
+    // Device allocation and copy
+    m_copy_dosemap_to_gpu();
+
+    /*
     // Struct allocation
     HANDLE_ERROR( cudaMallocManaged( &(dose.edep), dose.tot_nb_dosels * sizeof( f64 ) ) );
     HANDLE_ERROR( cudaMallocManaged( &(dose.edep_squared), dose.tot_nb_dosels * sizeof( f64 ) ) );
@@ -518,6 +598,7 @@ void DoseCalculator::initialize ( GlobalSimulationParameters params )
         m_dose_values[ i ] = 0.0;
         m_uncertainty_values[ i ] = 0.0;
     }
+*/
 
 /*
     // Copy to GPU if required
@@ -536,12 +617,14 @@ void DoseCalculator::calculate_dose_to_water()
     GGcout << "Compute dose to water" << GGendl;
     GGcout << GGendl;           
 
+    m_copy_dosemap_to_cpu();
+
     // Calculate the dose to water and the uncertainty
-    for ( ui32 iz=0; iz < dose.nb_dosels.z; iz++ )
+    for ( ui32 iz=0; iz < h_dose->nb_dosels.z; iz++ )
     {
-        for ( ui32 iy=0; iy < dose.nb_dosels.y; iy++ )
+        for ( ui32 iy=0; iy < h_dose->nb_dosels.y; iy++ )
         {
-            for ( ui32 ix=0; ix < dose.nb_dosels.x; ix++ )
+            for ( ui32 ix=0; ix < h_dose->nb_dosels.x; ix++ )
             {
                 m_dose_to_water_calculation( ix, iy, iz );
                 m_uncertainty_calculation( ix, iy, iz );
@@ -553,7 +636,7 @@ void DoseCalculator::calculate_dose_to_water()
     m_flag_uncertainty_calculated = true;
 }
 
-void DoseCalculator::calculate_dose_to_phantom()
+void DoseCalculator::calculate_dose_to_medium()
 {
     // Check if everything was set properly
     if ( !m_flag_materials || !m_flag_phantom )
@@ -565,12 +648,14 @@ void DoseCalculator::calculate_dose_to_phantom()
     GGcout << "Compute dose to phantom" << GGendl;
     GGcout << GGendl;    
 
+    m_copy_dosemap_to_cpu();
+
     // Calculate the dose to phantom and the uncertainty
-    for ( ui32 iz=0; iz < dose.nb_dosels.z; iz++ )
+    for ( ui32 iz=0; iz < h_dose->nb_dosels.z; iz++ )
     {
-        for ( ui32 iy=0; iy < dose.nb_dosels.y; iy++ )
+        for ( ui32 iy=0; iy < h_dose->nb_dosels.y; iy++ )
         {
-            for ( ui32 ix=0; ix < dose.nb_dosels.x; ix++ )
+            for ( ui32 ix=0; ix < h_dose->nb_dosels.x; ix++ )
             {
                 m_dose_to_phantom_calculation( ix, iy, iz );
                 m_uncertainty_calculation( ix, iy, iz );
@@ -674,13 +759,13 @@ void DoseCalculator::write ( std::string filename )
     filename = im_io->get_filename_without_extension( filename );
 
     // Convert Edep and EdepSquared from f64 to f32
-    ui32 tot = dose.nb_dosels.x*dose.nb_dosels.y*dose.nb_dosels.z;
+    ui32 tot = h_dose->nb_dosels.x*h_dose->nb_dosels.y*h_dose->nb_dosels.z;
     f32 *f32edep = new f32[ tot ];
     f32 *f32edepSq = new f32[ tot ];
     ui32 i=0; while ( i < tot )
     {
-        f32edep[ i ] = (f32)dose.edep[ i ];
-        f32edepSq[ i ] = (f32)dose.edep_squared[ i ];
+        f32edep[ i ] = (f32)h_dose->edep[ i ];
+        f32edepSq[ i ] = (f32)h_dose->edep_squared[ i ];
         ++i;
     }
 
@@ -692,18 +777,18 @@ void DoseCalculator::write ( std::string filename )
     std::string dose_out( filename + "-Dose." + format );
 
     // Export Edep and EdepSquared
-    im_io->write_3D( edep_out, f32edep, dose.nb_dosels, dose.offset, dose.dosel_size );
-    im_io->write_3D( edep_squared_out, f32edepSq, dose.nb_dosels, dose.offset, dose.dosel_size );
+    im_io->write_3D( edep_out, f32edep, h_dose->nb_dosels, h_dose->offset, h_dose->dosel_size );
+    im_io->write_3D( edep_squared_out, f32edepSq, h_dose->nb_dosels, h_dose->offset, h_dose->dosel_size );
 
     // Export uncertainty
     if ( !m_flag_uncertainty_calculated )
     {
         // Calculate the dose to phantom and the uncertainty
-        for ( ui32 iz=0; iz < dose.nb_dosels.z; iz++ )
+        for ( ui32 iz=0; iz < h_dose->nb_dosels.z; iz++ )
         {
-            for ( ui32 iy=0; iy < dose.nb_dosels.y; iy++ )
+            for ( ui32 iy=0; iy < h_dose->nb_dosels.y; iy++ )
             {
-                for ( ui32 ix=0; ix < dose.nb_dosels.x; ix++ )
+                for ( ui32 ix=0; ix < h_dose->nb_dosels.x; ix++ )
                 {
                     m_uncertainty_calculation( ix, iy, iz );
                 }
@@ -712,13 +797,13 @@ void DoseCalculator::write ( std::string filename )
     }
 
     // Export uncertainty and hits
-    im_io->write_3D( uncer_out, m_uncertainty_values, dose.nb_dosels, dose.offset, dose.dosel_size );
-    im_io->write_3D( hit_out, dose.number_of_hits, dose.nb_dosels, dose.offset, dose.dosel_size );
+    im_io->write_3D( uncer_out, m_uncertainty_values, h_dose->nb_dosels, h_dose->offset, h_dose->dosel_size );
+    im_io->write_3D( hit_out, h_dose->number_of_hits, h_dose->nb_dosels, h_dose->offset, h_dose->dosel_size );
 
     // Export dose
     if ( m_flag_dose_calculated )
     {
-        im_io->write_3D( dose_out, m_dose_values, dose.nb_dosels, dose.offset, dose.dosel_size );
+        im_io->write_3D( dose_out, m_dose_values, h_dose->nb_dosels, h_dose->offset, h_dose->dosel_size );
     }
 
     delete im_io;

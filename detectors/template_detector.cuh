@@ -31,10 +31,10 @@ class TemplateDetector : public GGEMSDetector
         void set_dimension( f32 width, f32 height, f32 depth );
 
         // Mandatory functions from abstract class GGEMSDetector
-        void initialize( GlobalSimulationParameters params );   // Initialisation
-        void track_to_in( Particles particles );                // Navigation until the detector
-        void track_to_out( Particles particles );               // Navigation within the detector
-        void digitizer( Particles particles );                  // Hits processing into data (histo, image, etc.)
+        void initialize( GlobalSimulationParametersData *h_params );   // Initialisation
+        void track_to_in( ParticlesData *d_particles );                // Navigation until the detector
+        void track_to_out( ParticlesData *d_particles );               // Navigation within the detector
+        void digitizer( ParticlesData *d_particles );                  // Hits processing into data (histo, image, etc.)
 
         // Save data
         void save_data( std::string filename );
@@ -42,7 +42,7 @@ class TemplateDetector : public GGEMSDetector
     private:
         bool m_check_mandatory();
         f32 m_width, m_height, m_depth;
-        GlobalSimulationParameters m_params;
+        GlobalSimulationParametersData *mh_params;
 
 };
 
