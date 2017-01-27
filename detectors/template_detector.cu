@@ -22,11 +22,11 @@
 __host__ __device__ void template_detector_track_to_in( ParticlesData *particles, ui32 id )
 {
     // If freeze (not dead), re-activate the current particle
-    if( particles->endsimu[ id ] == PARTICLE_FREEZE )
+    if( particles->status[ id ] == PARTICLE_FREEZE )
     {
-        particles->endsimu[ id ] = PARTICLE_ALIVE;
+        particles->status[ id ] = PARTICLE_ALIVE;
     }
-    else if ( particles->endsimu[ id ] == PARTICLE_DEAD )
+    else if ( particles->status[ id ] == PARTICLE_DEAD )
     {
         return;
     }
@@ -168,7 +168,7 @@ void TemplateDetector::initialize( GlobalSimulationParametersData *params )
     // Store global parameters: params are provided by GGEMS and are used to
     // know different information about the simulation. For example if the targeted
     // device is a CPU or a GPU.
-    mh_params = h_params;
+    mh_params = params;
 
     // Handle GPU device if needed. Here nothing is load to the GPU (simple template). But
     // in case of the use of data on the GPU you should allocated and transfered here.

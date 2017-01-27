@@ -16,10 +16,10 @@
 
 #include "photon_navigator.cuh"
 
-__device__ void photon_get_next_interaction( ParticlesData *particles,
-                                             const GlobalSimulationParametersData *parameters,
-                                             const PhotonCrossSectionData *photon_CS_table,
-                                             ui16 mat_id, ui32 part_id )
+__host__ __device__ void photon_get_next_interaction( ParticlesData *particles,
+                                                      const GlobalSimulationParametersData *parameters,
+                                                      const PhotonCrossSectionData *photon_CS_table,
+                                                      ui16 mat_id, ui32 part_id )
 {
     f32 next_interaction_distance = F32_MAX;
     ui8 next_discrete_process = 0;
@@ -82,11 +82,11 @@ __device__ void photon_get_next_interaction( ParticlesData *particles,
 
 }
 
-__device__ SecParticle photon_resolve_discrete_process( ParticlesData *particles,
-                                                        const GlobalSimulationParametersData *parameters,
-                                                        const PhotonCrossSectionData *photon_CS_table,
-                                                        const MaterialsData *materials,
-                                                        ui16 mat_id, ui32 part_id )
+__host__ __device__ SecParticle photon_resolve_discrete_process( ParticlesData *particles,
+                                                                 const GlobalSimulationParametersData *parameters,
+                                                                 const PhotonCrossSectionData *photon_CS_table,
+                                                                 const MaterialsData *materials,
+                                                                 ui16 mat_id, ui32 part_id )
 {
 
     SecParticle electron;
@@ -100,7 +100,7 @@ __device__ SecParticle photon_resolve_discrete_process( ParticlesData *particles
     if ( next_discrete_process == PHOTON_COMPTON )
     {        
         electron = Compton_SampleSecondaries_standard( particles, materials->electron_energy_cut[mat_id],
-                   part_id, parameters->secondaries_list[ELECTRON] );
+                   parameters->secondaries_list[ELECTRON], part_id );
     }
 
     if ( next_discrete_process == PHOTON_PHOTOELECTRIC )

@@ -24,7 +24,7 @@
 // Phantoms
 //#include "vox_phan_dosi_nav.cuh"
 #include "vox_phan_img_nav.cuh"
-//#include "vox_phan_iort_nav.cuh"
+#include "vox_phan_iort_nav.cuh"
 //#include "mesh_phan_linac_nav.cuh"
 
 // Detectors
@@ -83,7 +83,7 @@ public:
      */
 //    void draw_phantom( VoxPhanDosiNav* aPhantom );
 
-//    void draw_phantom( VoxPhanIORTNav* aPhantom );
+    void draw_phantom( VoxPhanIORTNav* aPhantom );
 
     void draw_phantom( VoxPhanImgNav* aPhantom );
 

@@ -72,8 +72,8 @@ __host__ __device__ void dose_record_standard ( DoseData *dose, f32 Edep, f32 px
 }
 
 // TLE deposition
-__host__ __device__ void dose_record_TLE (DoseData *dose, f32 Edep, f32 px, f32 py, f32 pz,
-                                           f32 length, f32 mu_en)
+__host__ __device__ void dose_record_TLE( DoseData *dose, f32 Edep, f32 px, f32 py, f32 pz,
+                                          f32 length, f32 mu_en)
 {
 
     if (px < dose->xmin + EPSILON3 || px > dose->xmax - EPSILON3) return;
@@ -573,49 +573,28 @@ void DoseCalculator::initialize ( GlobalSimulationParametersData *h_params )
     h_dose->offset.y = m_phantom.h_volume->off_y - ( h_dose->ymin - m_phantom.h_volume->ymin );
     h_dose->offset.z = m_phantom.h_volume->off_z - ( h_dose->zmin - m_phantom.h_volume->zmin );
 
+    // Init dose map
+    h_dose->edep = (f64*)malloc( h_dose->tot_nb_dosels*sizeof(f64) );
+    h_dose->edep_squared = (f64*)malloc( h_dose->tot_nb_dosels*sizeof(f64) );
+    h_dose->number_of_hits = (ui32*)malloc( h_dose->tot_nb_dosels*sizeof(ui32) );
+    ui32 i=0; while (i < h_dose->tot_nb_dosels)
+    {
+        h_dose->edep[i] = 0.0;
+        h_dose->edep_squared[i] = 0.0;
+        h_dose->number_of_hits[i] = 0;
+        ++i;
+    }
+
     //////////////////////////////////////////////////////////
 
     // Device allocation and copy
     m_copy_dosemap_to_gpu();
 
-    /*
-    // Struct allocation
-    HANDLE_ERROR( cudaMallocManaged( &(dose.edep), dose.tot_nb_dosels * sizeof( f64 ) ) );
-    HANDLE_ERROR( cudaMallocManaged( &(dose.edep_squared), dose.tot_nb_dosels * sizeof( f64 ) ) );
-    HANDLE_ERROR( cudaMallocManaged( &(dose.number_of_hits), dose.tot_nb_dosels * sizeof( ui32 ) ) );
-
-    // Results allocation
-    m_dose_values = new f32[ dose.tot_nb_dosels ];
-    m_uncertainty_values = new f32[ dose.tot_nb_dosels ];
-
-    // Init values to 0
-    for ( ui32 i = 0; i< dose.tot_nb_dosels ; i++ )
-    {
-        dose.edep[ i ] = 0.0;
-        dose.edep_squared[ i ] = 0.0;
-        dose.number_of_hits[ i ] = 0.0;
-
-        m_dose_values[ i ] = 0.0;
-        m_uncertainty_values[ i ] = 0.0;
-    }
-*/
-
-/*
-    // Copy to GPU if required
-    if ( params.data_h.device_target == GPU_DEVICE )
-    {
-        // GPU allocation
-        m_gpu_malloc_dose();
-        // Copy data to the GPU
-        m_copy_dose_cpu2gpu();
-    }
-*/
 }
 
 void DoseCalculator::calculate_dose_to_water()
 {
-    GGcout << "Compute dose to water" << GGendl;
-    GGcout << GGendl;           
+    GGcout << "Compute dose to water" << GGendl;         
 
     m_copy_dosemap_to_cpu();
 
@@ -645,8 +624,7 @@ void DoseCalculator::calculate_dose_to_medium()
         exit_simulation();
     }
 
-    GGcout << "Compute dose to phantom" << GGendl;
-    GGcout << GGendl;    
+    GGcout << "Compute dose to medium" << GGendl;
 
     m_copy_dosemap_to_cpu();
 
@@ -657,14 +635,15 @@ void DoseCalculator::calculate_dose_to_medium()
         {
             for ( ui32 ix=0; ix < h_dose->nb_dosels.x; ix++ )
             {
-                m_dose_to_phantom_calculation( ix, iy, iz );
-                m_uncertainty_calculation( ix, iy, iz );
+                //m_dose_to_phantom_calculation( ix, iy, iz ); // THIS LINE NEED TO BE DEBUG
+                //m_uncertainty_calculation( ix, iy, iz );
             }
         }
     }
     
     m_flag_dose_calculated = true;
     m_flag_uncertainty_calculated = true;
+
 }
 
 
@@ -752,6 +731,9 @@ void DoseCalculator::m_copy_dose_gpu2cpu()
 
 void DoseCalculator::write ( std::string filename )
 {
+    // Update host dose data
+    m_copy_dosemap_to_cpu();
+
     // Create an IO object
     ImageIO *im_io = new ImageIO;
 
