@@ -224,15 +224,15 @@ void DoseCalculator::m_dose_to_phantom_calculation( ui32 dosel_id_x, ui32 dosel_
 
     // Compute the dose
     ui32 index = dosel_id_z * h_dose->slice_nb_dosels + dosel_id_y * h_dose->nb_dosels.x + dosel_id_x;
+
     if ( density > m_dose_min_density )
-    {
+    {        
         m_dose_values[index] = h_dose->edep[ index ] / density / vox_vol / gray;
     }
     else
     {
         m_dose_values[index] = 0.0f;
     }
-
 }
 
 void DoseCalculator::m_copy_dosemap_to_gpu()
@@ -587,6 +587,10 @@ void DoseCalculator::initialize ( GlobalSimulationParametersData *h_params )
 
     //////////////////////////////////////////////////////////
 
+    // Host allocation
+    m_dose_values = (f32*)malloc( h_dose->tot_nb_dosels * sizeof(f32) );
+    m_uncertainty_values = (f32*)malloc( h_dose->tot_nb_dosels * sizeof(f32) );
+
     // Device allocation and copy
     m_copy_dosemap_to_gpu();
 
@@ -635,8 +639,8 @@ void DoseCalculator::calculate_dose_to_medium()
         {
             for ( ui32 ix=0; ix < h_dose->nb_dosels.x; ix++ )
             {
-                //m_dose_to_phantom_calculation( ix, iy, iz ); // THIS LINE NEED TO BE DEBUG
-                //m_uncertainty_calculation( ix, iy, iz );
+                m_dose_to_phantom_calculation( ix, iy, iz );
+                m_uncertainty_calculation( ix, iy, iz );
             }
         }
     }
