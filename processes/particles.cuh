@@ -37,7 +37,7 @@ struct ParticlesData
     ui32* prng_state_5;
 
     // Navigation
-    ui16* geometry_id;  // current geometry crossed by the particle
+    ui32* geometry_id;  // current geometry crossed by the particle
     ui16* E_index;      // Energy index within CS and Mat tables
     ui16* scatter_order; // Scatter for imaging
 

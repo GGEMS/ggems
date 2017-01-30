@@ -76,7 +76,7 @@ void ParticleManager::m_cpu_malloc_stack()
     h_particles->prng_state_4 = ( ui32* ) malloc ( m_particles_size * sizeof ( ui32 ) );
     h_particles->prng_state_5 = ( ui32* ) malloc ( m_particles_size * sizeof ( ui32 ) );
 
-    h_particles->geometry_id = ( ui16* ) malloc ( m_particles_size * sizeof ( ui16 ) );
+    h_particles->geometry_id = ( ui32* ) malloc ( m_particles_size * sizeof ( ui32 ) );
     h_particles->E_index = ( ui16* ) malloc ( m_particles_size * sizeof ( ui16 ) );
     h_particles->scatter_order = (ui16*)malloc( m_particles_size * sizeof( ui16 ) );
 
@@ -143,8 +143,8 @@ void ParticleManager::m_gpu_alloc_and_seed_copy()
     HANDLE_ERROR( cudaMalloc((void**) &prng_state_5, n*sizeof(ui32)) );
 
     // Navigation
-    ui16* geometry_id;  // current geometry crossed by the particle
-    HANDLE_ERROR( cudaMalloc((void**) &geometry_id, n*sizeof(ui16)) );
+    ui32* geometry_id;  // current geometry crossed by the particle
+    HANDLE_ERROR( cudaMalloc((void**) &geometry_id, n*sizeof(ui32)) );
     ui16* E_index;      // Energy index within CS and Mat tables
     HANDLE_ERROR( cudaMalloc((void**) &E_index, n*sizeof(ui16)) );
     ui16* scatter_order; // Scatter for imaging

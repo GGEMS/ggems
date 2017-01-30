@@ -91,7 +91,8 @@ __host__ __device__ ui32 m_write_geom_nav( ui32 geometry, ui8 nav )
 }
 
 __host__ __device__ void m_transport_mesh( f32xyz pos, f32xyz dir,
-                                           f32xyz *v1, f32xyz *v2, f32xyz *v3, ui32 offset, ui32 nb_tri,
+                                           const f32xyz *v1, const f32xyz *v2, const f32xyz *v3,
+                                           ui32 offset, ui32 nb_tri,
                                            f32 geom_tol,
                                            bool *inside, bool *hit, f32 *distance )
 {
@@ -103,11 +104,14 @@ __host__ __device__ void m_transport_mesh( f32xyz pos, f32xyz dir,
     // Loop over triangles
     ui32 itri = 0; while ( itri < nb_tri )
     {
-        cur_distance = hit_ray_triangle( pos, dir, v1[ offset+itri ], v2[ offset+itri ], v3[ offset+itri ] );
+
+        cur_distance = hit_ray_triangle( pos, dir, v1[ offset+itri ], v2[ offset+itri ], v3[ offset+itri ] );        
+
         tmin = ( cur_distance < tmin ) ? cur_distance : tmin;
-        tmax = ( cur_distance > tmax ) ? cur_distance : tmax;
+        tmax = ( cur_distance > tmax && cur_distance != FLT_MAX ) ? cur_distance : tmax;
+//        tmax = ( cur_distance > tmax ) ? cur_distance : tmax;
         ++itri;
-    }
+    }   
 
     // Analyse tmin and tmax
 
@@ -344,17 +348,18 @@ __host__ __device__ void m_mlc_nav_out_mesh( f32xyz pos, f32xyz dir, const Linac
         }
 
         if ( in_obj == IN_JAW_Y1 )
-        {
+        {            
             m_transport_mesh( pos, dir, linac->Y_jaw_v1, linac->Y_jaw_v2, linac->Y_jaw_v3,
                               linac->Y_jaw_index[ 0 ], linac->Y_jaw_nb_triangles[ 0 ], geom_tol,
-                              &inside_mesh, &hit_mesh, &distance );
+                              &inside_mesh, &hit_mesh, &distance );            
 
             // If already inside the mesh
             if ( inside_mesh )
-            {
-                *geometry_id = m_write_geom_nav( *geometry_id, INSIDE_MESH );
-                *geometry_id = m_write_geom_type( *geometry_id, IN_JAW_Y1 );
+            {                
+                *geometry_id = m_write_geom_nav( *geometry_id, INSIDE_MESH );                
+                *geometry_id = m_write_geom_type( *geometry_id, IN_JAW_Y1 );                
                 *geometry_distance = 0.0;
+
                 return;
             }
             else if ( hit_mesh ) // Outside and hit the mesh
@@ -362,6 +367,7 @@ __host__ __device__ void m_mlc_nav_out_mesh( f32xyz pos, f32xyz dir, const Linac
                 *geometry_id = m_write_geom_nav( *geometry_id, INSIDE_MESH );
                 *geometry_id = m_write_geom_type( *geometry_id, IN_JAW_Y1 );
                 *geometry_distance = distance;
+
                 return;
             }
             else // Not inside not hitting (then get the AABB distance)
@@ -659,14 +665,22 @@ __host__ __device__ void MPLINACN::track_to_out( ParticlesData *particles,
     f32 boundary_distance;
     ui32 next_geometry_id = particles->geometry_id[ id ];
 
+//    printf("ID %i  next_geom %x  nav %i\n", id, next_geometry_id, navigation);
+
     if ( navigation == INSIDE_MESH )
     {
         m_mlc_nav_in_mesh( pos, dir, linac, parameters->geom_tolerance, &next_geometry_id, &boundary_distance );
+//        printf("   newstate next_geom %x\n", next_geometry_id);
     }
     else
     {
         m_mlc_nav_out_mesh( pos, dir, linac, parameters->geom_tolerance, &next_geometry_id, &boundary_distance );
+//        printf("   newstate next_geom %x\n", next_geometry_id);
     }
+
+//    ui16 geom = m_read_geom_type(next_geometry_id);
+//    ui8 nav = m_read_geom_nav(next_geometry_id);
+//    printf("ID %i OUTNAV next_geom %i  nav %i\n", id, geom, nav);
 
     if ( boundary_distance <= next_interaction_distance )
     {
@@ -708,13 +722,19 @@ __host__ __device__ void MPLINACN::track_to_out( ParticlesData *particles,
         {
             // kill without mercy (energy not drop)
             particles->status[ id ] = PARTICLE_DEAD;
+//            printf("kill\n");
             return;
         }
+
+//        printf("proc\n");
     }
     else
     {
+//        printf("update\n");
         // Update geometry id
         particles->geometry_id[ id ] = next_geometry_id;
+
+//        printf("partcile geom %x\n", particles->geometry_id[ id ]);
     }
 
 }
@@ -1034,10 +1054,9 @@ __global__ void MPLINACN::kernel_device_track_to_out( ParticlesData *particles,
     // Stepping loop
     if ( nav_option == NAV_OPT_FULL )
     {
-
         while ( particles->status[ id ] != PARTICLE_DEAD && particles->status[ id ] != PARTICLE_FREEZE )
         {
-            MPLINACN::track_to_out( particles, linac, materials, photon_CS, parameters, id );
+            MPLINACN::track_to_out( particles, linac, materials, photon_CS, parameters, id );     
         }
     }
     else if ( nav_option == NAV_OPT_NONAV )
