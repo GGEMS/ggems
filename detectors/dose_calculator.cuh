@@ -98,11 +98,6 @@ private :
     void m_dose_to_phantom_calculation( ui32 dosel_id_x, ui32 dosel_id_y, ui32 dosel_id_z );
     void m_copy_dosemap_to_gpu();
     void m_copy_dosemap_to_cpu();
-    //void m_cpu_malloc_dose();
-    //void m_gpu_malloc_dose();
-
-    //void m_copy_dose_cpu2gpu();
-    //void m_copy_dose_gpu2cpu();
 
     VoxelizedPhantom m_phantom;
     Materials m_materials;

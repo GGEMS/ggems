@@ -59,6 +59,7 @@ struct LinacData
     AabbData *A_leaf_aabb;         // Bounding box of each leaf
     AabbData  A_bank_aabb;         // Bounding box of the bank A
     ui32      A_nb_leaves;         // Number of leaves in the bank A
+    ui32      A_tot_triangles;     // Total number of triangles
 
     // Leaves in Bank B
     f32xyz   *B_leaf_v1;           // Vertex 1  - Triangular meshes
@@ -69,6 +70,7 @@ struct LinacData
     AabbData *B_leaf_aabb;         // Bounding box of each leaf
     AabbData  B_bank_aabb;         // Bounding box of the bank B
     ui32      B_nb_leaves;         // Number of leaves in the bank B
+    ui32      B_tot_triangles;     // Total number of triangles
 
     // Jaws X
     f32xyz   *X_jaw_v1;           // Vertex 1  - Triangular meshes
@@ -78,6 +80,7 @@ struct LinacData
     ui32     *X_jaw_nb_triangles; // Nb of triangles within each jaw
     AabbData *X_jaw_aabb;         // Bounding box of each jaw
     ui32      X_nb_jaw;           // Number of jaws
+    ui32      X_tot_triangles;    // Total number of triangles
 
     // Jaws Y
     f32xyz   *Y_jaw_v1;           // Vertex 1  - Triangular meshes
@@ -87,6 +90,7 @@ struct LinacData
     ui32     *Y_jaw_nb_triangles; // Nb of triangles within each jaw
     AabbData *Y_jaw_aabb;         // Bounding box of each jaw
     ui32      Y_nb_jaw;           // Number of jaws
+    ui32      Y_tot_triangles;    // Total number of triangles
 
     // Global AABB
     AabbData aabb;                // Global bounding box
@@ -103,35 +107,26 @@ struct LinacData
 namespace MPLINACN
 {
     // Device Kernel that move particles to the linac volume boundary
-    __global__ void kernel_device_track_to_in( ParticlesData particles, LinacData linac, f32 geom_tolerance );
-
-    // Host Kernel that move particles to the linac volume boundary
-    void kernel_host_track_to_in( ParticlesData particles, LinacData linac, f32 geom_tolerance, ui32 id );
+    __global__ void kernel_device_track_to_in( ParticlesData *particles,
+                                               const LinacData *linac, f32 geom_tolerance );
 
 
-    __global__ void kernel_device_track_to_out(ParticlesData particles,
-                                                LinacData linac,
-                                                MaterialsTable materials,
-                                                PhotonCrossSectionTable photon_CS,
-                                                GlobalSimulationParametersData parameters,
+    __global__ void kernel_device_track_to_out( ParticlesData *particles,
+                                                const LinacData *linac,
+                                                const MaterialsData *materials,
+                                                const PhotonCrossSectionData *photon_CS,
+                                                const GlobalSimulationParametersData *parameters,
                                                 ui8 nav_option );
 
-    void kernel_host_track_to_out(ParticlesData particles,
-                                  LinacData linac,
-                                  MaterialsTable materials,
-                                  PhotonCrossSectionTable photon_CS,
-                                  GlobalSimulationParametersData parameters,
-                                  ui8 nav_option, ui32 id );
+    __host__ __device__ void track_to_out( ParticlesData *particles,
+                                           const LinacData *linac,
+                                           const MaterialsData *materials,
+                                           const PhotonCrossSectionData *photon_CS_table,
+                                           const GlobalSimulationParametersData *parameters, ui32 id );
 
-    __host__ __device__ void track_to_out(ParticlesData particles,
-                                          LinacData linac,
-                                          MaterialsTable materials,
-                                          PhotonCrossSectionTable photon_CS_table,
-                                          GlobalSimulationParametersData parameters, ui32 id );
+    __host__ __device__ void track_to_out_nonav( ParticlesData *particles, const LinacData *linac, ui32 id );
 
-    __host__ __device__ void track_to_out_nonav( ParticlesData particles, LinacData linac, ui32 id );
-
-    __host__ __device__ void track_to_out_nonav_nomesh( ParticlesData particles, LinacData linac, ui32 id );
+    __host__ __device__ void track_to_out_nonav_nomesh( ParticlesData *particles, const LinacData *linac, ui32 id );
 }
 
 class MeshPhanLINACNav : public GGEMSPhantom
@@ -141,11 +136,11 @@ public:
     ~MeshPhanLINACNav() {}
 
     // Init
-    void initialize( GlobalSimulationParameters params );
+    void initialize( GlobalSimulationParametersData *h_params, GlobalSimulationParametersData *d_params );
     // Tracking from outside to the phantom border
-    void track_to_in( Particles particles );
+    void track_to_in( ParticlesData *d_particles );
     // Tracking inside the phantom until the phantom border
-    void track_to_out( Particles particles );
+    void track_to_out( ParticlesData *d_particles );
 
     void set_mlc_meshes( std::string filename );
     void set_jaw_x_meshes( std::string filename );
@@ -164,31 +159,17 @@ public:
                                f32 m10, f32 m11, f32 m12,
                                f32 m20, f32 m21, f32 m22 );
 
-    void set_local_jaw_x_position( f32 px, f32 py, f32 pz );
-
-    //void set_jaw_x_rotation( f32 rx, f32 ry, f32 rz );
-
-//    void set_jaw_x_local_axis( f32 m00, f32 m01, f32 m02,
-//                             f32 m10, f32 m11, f32 m12,
-//                             f32 m20, f32 m21, f32 m22 );
+    void set_local_jaw_x_position( f32 px, f32 py, f32 pz );  
 
     void set_local_jaw_y_position( f32 px, f32 py, f32 pz );
-
-//    void set_jaw_y_rotation( f32 rx, f32 ry, f32 rz );
-
-//    void set_jaw_y_local_axis( f32 m00, f32 m01, f32 m02,
-//                               f32 m10, f32 m11, f32 m12,
-//                               f32 m20, f32 m21, f32 m22 );
 
     void set_navigation_option( std::string opt );
 
     void set_materials( std::string filename );
     void set_linac_material( std::string mat_name );
 
-    LinacData get_linac_geometry();
+    LinacData* get_linac_geometry();
     f32matrix44 get_linac_transformation();
-
-//    void set_materials( std::string filename );
 
 private:
     void m_init_mlc();
@@ -201,19 +182,22 @@ private:
     void m_translate_leaf_B( ui32 index, f32xyz T );
 
     void m_configure_linac();
+    void m_copy_linac_to_gpu();
 
     std::vector< std::string > m_split_txt(std::string line);
 
 private:
 
-    LinacData m_linac;
+    LinacData *mh_linac;
+    LinacData *md_linac;
     Materials m_materials;
     CrossSections m_cross_sections;
 
     // Get the memory usage
     ui64 m_get_memory_usage();
 
-    GlobalSimulationParameters m_params;
+    GlobalSimulationParametersData *mh_params;
+    GlobalSimulationParametersData *md_params;
     std::string m_materials_filename;
     std::vector< std::string > m_linac_material;
     std::string m_beam_config_filename;

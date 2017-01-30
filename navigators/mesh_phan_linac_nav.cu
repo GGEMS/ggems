@@ -21,60 +21,32 @@
 // == Track to in ===================================================================================
 
 // Device Kernel that move particles to the voxelized volume boundary
-__global__ void MPLINACN::kernel_device_track_to_in( ParticlesData particles, LinacData linac, f32 geom_tolerance )
+__global__ void MPLINACN::kernel_device_track_to_in( ParticlesData *particles,
+                                                     const LinacData *linac, f32 geom_tolerance )
 {
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
-    if ( id >= particles.size ) return;
+    if ( id >= particles->size ) return;
 
     // read position and direction
-    f32xyz pos = make_f32xyz( particles.px[ id ], particles.py[ id ], particles.pz[ id ] );
-    f32xyz dir = make_f32xyz( particles.dx[ id ], particles.dy[ id ], particles.dz[ id ] );
+    f32xyz pos = make_f32xyz( particles->px[ id ], particles->py[ id ], particles->pz[ id ] );
+    f32xyz dir = make_f32xyz( particles->dx[ id ], particles->dy[ id ], particles->dz[ id ] );
 
     // Change the frame to the particle (global to linac)
-    pos = fxyz_global_to_local_position( linac.transform, pos );
-    dir = fxyz_global_to_local_direction( linac.transform, dir );
+    pos = fxyz_global_to_local_position( linac->transform, pos );
+    dir = fxyz_global_to_local_direction( linac->transform, dir );
 
     // Store data
-    particles.px[ id ] = pos.x;
-    particles.py[ id ] = pos.y;
-    particles.pz[ id ] = pos.z;
-    particles.dx[ id ] = dir.x;
-    particles.dy[ id ] = dir.y;
-    particles.dz[ id ] = dir.z;
+    particles->px[ id ] = pos.x;
+    particles->py[ id ] = pos.y;
+    particles->pz[ id ] = pos.z;
+    particles->dx[ id ] = dir.x;
+    particles->dy[ id ] = dir.y;
+    particles->dz[ id ] = dir.z;
 
-    transport_track_to_in_AABB( particles, linac.aabb, geom_tolerance, id );
-
-    // Start outside a mesh
-    particles.geometry_id[ id ] = 0;  // first Byte set to zeros (outside a mesh)
-}
-
-// Host Kernel that move particles to the voxelized volume boundary
-void MPLINACN::kernel_host_track_to_in( ParticlesData particles, LinacData linac, f32 geom_tolerance, ui32 id )
-{
-    // read position and direction
-    f32xyz pos = make_f32xyz( particles.px[ id ], particles.py[ id ], particles.pz[ id ] );
-    f32xyz dir = make_f32xyz( particles.dx[ id ], particles.dy[ id ], particles.dz[ id ] );
-
-//    printf("%i Track2in: pos %f %f %f\n", id, pos.x, pos.y, pos.z);
-
-    // Change the frame to the particle (global to linac)
-    pos = fxyz_global_to_local_position( linac.transform, pos );
-    dir = fxyz_global_to_local_direction( linac.transform, dir );
-
-    // Store data
-    particles.px[ id ] = pos.x;
-    particles.py[ id ] = pos.y;
-    particles.pz[ id ] = pos.z;
-    particles.dx[ id ] = dir.x;
-    particles.dy[ id ] = dir.y;
-    particles.dz[ id ] = dir.z;
-
-    transport_track_to_in_AABB( particles, linac.aabb, geom_tolerance, id );
+    transport_track_to_in_AABB( particles, linac->aabb, geom_tolerance, id );
 
     // Start outside a mesh
-    particles.geometry_id[ id ] = 0;  // first Byte set to zeros (outside a mesh)
-
-//    printf("%i transport: pos %f %f %f  status %i\n", id, pos.x, pos.y, pos.z, particles.endsimu[ id ]);
+    particles->geometry_id[ id ] = 0;  // first Byte set to zeros (outside a mesh)
 }
 
 // == Track to out ===================================================================================
@@ -196,7 +168,7 @@ __host__ __device__ void m_transport_mesh( f32xyz pos, f32xyz dir,
 
 }
 
-__host__ __device__ void m_mlc_nav_out_mesh( f32xyz pos, f32xyz dir, LinacData linac,
+__host__ __device__ void m_mlc_nav_out_mesh( f32xyz pos, f32xyz dir, const LinacData *linac,
                                              f32 geom_tol,
                                              ui32 *geometry_id, f32 *geometry_distance )
 {
@@ -207,98 +179,88 @@ __host__ __device__ void m_mlc_nav_out_mesh( f32xyz pos, f32xyz dir, LinacData l
 
     ui16 in_obj = IN_NOTHING;
 
-    if ( linac.X_nb_jaw != 0 )
+    if ( linac->X_nb_jaw != 0 )
     {
-        if ( test_point_AABB( pos, linac.X_jaw_aabb[ 0 ] ) )
+        if ( test_point_AABB( pos, linac->X_jaw_aabb[ 0 ] ) )
         {
             in_obj = IN_JAW_X1;
         }
-        if ( test_point_AABB( pos, linac.X_jaw_aabb[ 1 ] ) )
+        if ( test_point_AABB( pos, linac->X_jaw_aabb[ 1 ] ) )
         {
             in_obj = IN_JAW_X2;
         }
     }
 
-    if ( linac.Y_nb_jaw != 0 )
+    if ( linac->Y_nb_jaw != 0 )
     {
-        if ( test_point_AABB( pos, linac.Y_jaw_aabb[ 0 ] ) )
+        if ( test_point_AABB( pos, linac->Y_jaw_aabb[ 0 ] ) )
         {
             in_obj = IN_JAW_Y1;
         }
-        if ( test_point_AABB( pos, linac.Y_jaw_aabb[ 1 ] ) )
+        if ( test_point_AABB( pos, linac->Y_jaw_aabb[ 1 ] ) )
         {
             in_obj = IN_JAW_Y2;
         }
     }
 
-    if ( test_point_AABB( pos, linac.A_bank_aabb ) )
+    if ( test_point_AABB( pos, linac->A_bank_aabb ) )
     {
         in_obj = IN_BANK_A;
     }
 
-    if ( test_point_AABB( pos, linac.B_bank_aabb ) )
+    if ( test_point_AABB( pos, linac->B_bank_aabb ) )
     {
         in_obj = IN_BANK_B;
     }
 
-//    printf( " ---# In aabb %i\n", in_obj );
-
     // If the particle is outside the MLC element, then get the clostest bounding box //////////
 
-    *geometry_distance = FLT_MAX;
-    //*geometry_id = 0;
-    //ui8 navigation;
+    *geometry_distance = FLT_MAX;  
 
     f32 distance = FLT_MAX;
 
     if ( in_obj == IN_NOTHING )
     {
         // Mother volume (AABB of the LINAC)
-        *geometry_distance = hit_ray_AABB( pos, dir, linac.aabb );
+        *geometry_distance = hit_ray_AABB( pos, dir, linac->aabb );
 
-//        if (*geometry_distance < 0.0) printf(" LINAC WARNING %f\n", *geometry_distance);
-
-//        printf("  dist to linac aabb %f\n", *geometry_distance );
-
-        if ( linac.X_nb_jaw != 0 )
+        if ( linac->X_nb_jaw != 0 )
         {
-            distance = hit_ray_AABB( pos, dir, linac.X_jaw_aabb[ 0 ] );
+            distance = hit_ray_AABB( pos, dir, linac->X_jaw_aabb[ 0 ] );
             if ( distance < *geometry_distance )
             {
                 *geometry_distance = distance;
             }
 
-//            if (*geometry_distance < 0.0) printf(" JAW X1 WARNING %f\n", *geometry_distance);
-
-            distance = hit_ray_AABB( pos, dir, linac.X_jaw_aabb[ 1 ] );
+            distance = hit_ray_AABB( pos, dir, linac->X_jaw_aabb[ 1 ] );
             if ( distance < *geometry_distance )
             {
                 *geometry_distance = distance;
             }
         }
 
-        if ( linac.Y_nb_jaw != 0 )
+        if ( linac->Y_nb_jaw != 0 )
         {
-            distance = hit_ray_AABB( pos, dir, linac.Y_jaw_aabb[ 0 ] );
+            distance = hit_ray_AABB( pos, dir, linac->Y_jaw_aabb[ 0 ] );
             if ( distance < *geometry_distance )
             {
                 *geometry_distance = distance;
             }
 
-            distance = hit_ray_AABB( pos, dir, linac.Y_jaw_aabb[ 1 ] );
+            distance = hit_ray_AABB( pos, dir, linac->Y_jaw_aabb[ 1 ] );
             if ( distance < *geometry_distance )
             {
                 *geometry_distance = distance;
             }
         }
 
-        distance = hit_ray_AABB( pos, dir, linac.A_bank_aabb );
+        distance = hit_ray_AABB( pos, dir, linac->A_bank_aabb );
         if ( distance < *geometry_distance )
         {
             *geometry_distance = distance;
         }
 
-        distance = hit_ray_AABB( pos, dir, linac.B_bank_aabb );
+        distance = hit_ray_AABB( pos, dir, linac->B_bank_aabb );
         if ( distance < *geometry_distance )
         {
             *geometry_distance = distance;
@@ -323,8 +285,8 @@ __host__ __device__ void m_mlc_nav_out_mesh( f32xyz pos, f32xyz dir, LinacData l
 
         if ( in_obj == IN_JAW_X1 )
         {
-            m_transport_mesh( pos, dir, linac.X_jaw_v1, linac.X_jaw_v2, linac.X_jaw_v3,
-                              linac.X_jaw_index[ 0 ], linac.X_jaw_nb_triangles[ 0 ], geom_tol,
+            m_transport_mesh( pos, dir, linac->X_jaw_v1, linac->X_jaw_v2, linac->X_jaw_v3,
+                              linac->X_jaw_index[ 0 ], linac->X_jaw_nb_triangles[ 0 ], geom_tol,
                               &inside_mesh, &hit_mesh, &distance );
 
             // If already inside the mesh
@@ -346,15 +308,15 @@ __host__ __device__ void m_mlc_nav_out_mesh( f32xyz pos, f32xyz dir, LinacData l
             {
                 *geometry_id = m_write_geom_nav( *geometry_id, OUTSIDE_MESH );
                 *geometry_id = m_write_geom_type( *geometry_id, IN_NOTHING );
-                *geometry_distance = hit_ray_AABB( pos, dir, linac.X_jaw_aabb[ 0 ] );
+                *geometry_distance = hit_ray_AABB( pos, dir, linac->X_jaw_aabb[ 0 ] );
                 return;
             }
         }
 
         if ( in_obj == IN_JAW_X2 )
         {
-            m_transport_mesh( pos, dir, linac.X_jaw_v1, linac.X_jaw_v2, linac.X_jaw_v3,
-                              linac.X_jaw_index[ 1 ], linac.X_jaw_nb_triangles[ 1 ], geom_tol,
+            m_transport_mesh( pos, dir, linac->X_jaw_v1, linac->X_jaw_v2, linac->X_jaw_v3,
+                              linac->X_jaw_index[ 1 ], linac->X_jaw_nb_triangles[ 1 ], geom_tol,
                               &inside_mesh, &hit_mesh, &distance );
 
             // If already inside the mesh
@@ -376,15 +338,15 @@ __host__ __device__ void m_mlc_nav_out_mesh( f32xyz pos, f32xyz dir, LinacData l
             {
                 *geometry_id = m_write_geom_nav( *geometry_id, OUTSIDE_MESH );
                 *geometry_id = m_write_geom_type( *geometry_id, IN_NOTHING );
-                *geometry_distance = hit_ray_AABB( pos, dir, linac.X_jaw_aabb[ 1 ] );
+                *geometry_distance = hit_ray_AABB( pos, dir, linac->X_jaw_aabb[ 1 ] );
                 return;
             }
         }
 
         if ( in_obj == IN_JAW_Y1 )
         {
-            m_transport_mesh( pos, dir, linac.Y_jaw_v1, linac.Y_jaw_v2, linac.Y_jaw_v3,
-                              linac.Y_jaw_index[ 0 ], linac.Y_jaw_nb_triangles[ 0 ], geom_tol,
+            m_transport_mesh( pos, dir, linac->Y_jaw_v1, linac->Y_jaw_v2, linac->Y_jaw_v3,
+                              linac->Y_jaw_index[ 0 ], linac->Y_jaw_nb_triangles[ 0 ], geom_tol,
                               &inside_mesh, &hit_mesh, &distance );
 
             // If already inside the mesh
@@ -406,15 +368,15 @@ __host__ __device__ void m_mlc_nav_out_mesh( f32xyz pos, f32xyz dir, LinacData l
             {
                 *geometry_id = m_write_geom_nav( *geometry_id, OUTSIDE_MESH );
                 *geometry_id = m_write_geom_type( *geometry_id, IN_NOTHING );
-                *geometry_distance = hit_ray_AABB( pos, dir, linac.Y_jaw_aabb[ 0 ] );
+                *geometry_distance = hit_ray_AABB( pos, dir, linac->Y_jaw_aabb[ 0 ] );
                 return;
             }
         }
 
         if ( in_obj == IN_JAW_Y2 )
         {
-            m_transport_mesh( pos, dir, linac.Y_jaw_v1, linac.Y_jaw_v2, linac.Y_jaw_v3,
-                              linac.Y_jaw_index[ 1 ], linac.Y_jaw_nb_triangles[ 1 ], geom_tol,
+            m_transport_mesh( pos, dir, linac->Y_jaw_v1, linac->Y_jaw_v2, linac->Y_jaw_v3,
+                              linac->Y_jaw_index[ 1 ], linac->Y_jaw_nb_triangles[ 1 ], geom_tol,
                               &inside_mesh, &hit_mesh, &distance );
 
             // If already inside the mesh
@@ -436,7 +398,7 @@ __host__ __device__ void m_mlc_nav_out_mesh( f32xyz pos, f32xyz dir, LinacData l
             {
                 *geometry_id = m_write_geom_nav( *geometry_id, OUTSIDE_MESH );
                 *geometry_id = m_write_geom_type( *geometry_id, IN_NOTHING );
-                *geometry_distance = hit_ray_AABB( pos, dir, linac.Y_jaw_aabb[ 1 ] );
+                *geometry_distance = hit_ray_AABB( pos, dir, linac->Y_jaw_aabb[ 1 ] );
                 return;
             }
         }
@@ -444,14 +406,14 @@ __host__ __device__ void m_mlc_nav_out_mesh( f32xyz pos, f32xyz dir, LinacData l
         if ( in_obj == IN_BANK_A )
         {
             // Loop over leaves
-            ileaf = 0; while( ileaf < linac.A_nb_leaves )
+            ileaf = 0; while( ileaf < linac->A_nb_leaves )
             {
                 // If hit a leaf bounding box
-                if ( test_ray_AABB( pos, dir, linac.A_leaf_aabb[ ileaf ] ) )
+                if ( test_ray_AABB( pos, dir, linac->A_leaf_aabb[ ileaf ] ) )
                 {
 
-                    m_transport_mesh( pos, dir, linac.A_leaf_v1, linac.A_leaf_v2, linac.A_leaf_v3,
-                                      linac.A_leaf_index[ ileaf ], linac.A_leaf_nb_triangles[ ileaf ], geom_tol,
+                    m_transport_mesh( pos, dir, linac->A_leaf_v1, linac->A_leaf_v2, linac->A_leaf_v3,
+                                      linac->A_leaf_index[ ileaf ], linac->A_leaf_nb_triangles[ ileaf ], geom_tol,
                                       &inside_mesh, &hit_mesh, &distance );
 
                     // If already inside of one of them
@@ -485,7 +447,7 @@ __host__ __device__ void m_mlc_nav_out_mesh( f32xyz pos, f32xyz dir, LinacData l
                 *geometry_id = m_write_geom_nav( *geometry_id, OUTSIDE_MESH );
                 *geometry_id = m_write_geom_type( *geometry_id, IN_NOTHING );
                 *geometry_id = m_write_geom_index( *geometry_id, 0 );
-                *geometry_distance = hit_ray_AABB( pos, dir, linac.A_bank_aabb ); // Bounding box
+                *geometry_distance = hit_ray_AABB( pos, dir, linac->A_bank_aabb ); // Bounding box
             }
             else
             {
@@ -500,14 +462,14 @@ __host__ __device__ void m_mlc_nav_out_mesh( f32xyz pos, f32xyz dir, LinacData l
         if ( in_obj == IN_BANK_B )
         {
             // Loop over leaves
-            ileaf = 0; while( ileaf < linac.B_nb_leaves )
+            ileaf = 0; while( ileaf < linac->B_nb_leaves )
             {
                 // If hit a leaf bounding box
-                if ( test_ray_AABB( pos, dir, linac.B_leaf_aabb[ ileaf ] ) )
+                if ( test_ray_AABB( pos, dir, linac->B_leaf_aabb[ ileaf ] ) )
                 {
 
-                    m_transport_mesh( pos, dir, linac.B_leaf_v1, linac.B_leaf_v2, linac.B_leaf_v3,
-                                      linac.B_leaf_index[ ileaf ], linac.B_leaf_nb_triangles[ ileaf ], geom_tol,
+                    m_transport_mesh( pos, dir, linac->B_leaf_v1, linac->B_leaf_v2, linac->B_leaf_v3,
+                                      linac->B_leaf_index[ ileaf ], linac->B_leaf_nb_triangles[ ileaf ], geom_tol,
                                       &inside_mesh, &hit_mesh, &distance );
 
                     // If already inside of one of them
@@ -541,7 +503,7 @@ __host__ __device__ void m_mlc_nav_out_mesh( f32xyz pos, f32xyz dir, LinacData l
                 *geometry_id = m_write_geom_nav( *geometry_id, OUTSIDE_MESH );
                 *geometry_id = m_write_geom_type( *geometry_id, IN_NOTHING );
                 *geometry_id = m_write_geom_index( *geometry_id, 0 );
-                *geometry_distance = hit_ray_AABB( pos, dir, linac.B_bank_aabb ); // Bounding box
+                *geometry_distance = hit_ray_AABB( pos, dir, linac->B_bank_aabb ); // Bounding box
             }
             else
             {
@@ -563,15 +525,10 @@ __host__ __device__ void m_mlc_nav_out_mesh( f32xyz pos, f32xyz dir, LinacData l
 
 }
 
-__host__ __device__ void m_mlc_nav_in_mesh( f32xyz pos, f32xyz dir, LinacData linac,
+__host__ __device__ void m_mlc_nav_in_mesh( f32xyz pos, f32xyz dir, const LinacData *linac,
                                             f32 geom_tol,
                                             ui32 *geometry_id, f32 *geometry_distance )
-{
-
-    //*geometry_distance = FLT_MAX;
-    //*geometry_id = 0;
-    //i8 navigation = OUTSIDE_MESH;
-
+{   
     // Read the geometry
     ui16 in_obj = m_read_geom_type( *geometry_id );
 
@@ -579,70 +536,68 @@ __host__ __device__ void m_mlc_nav_in_mesh( f32xyz pos, f32xyz dir, LinacData li
     bool hit_mesh = false;
     f32 distance;
 
-//    printf(" ::: Nav Inside in obj %i\n", in_obj);
-
     if ( in_obj == IN_JAW_X1 )
     {
-        m_transport_mesh( pos, dir, linac.X_jaw_v1, linac.X_jaw_v2, linac.X_jaw_v3,
-                          linac.X_jaw_index[ 0 ], linac.X_jaw_nb_triangles[ 0 ], geom_tol,
+        m_transport_mesh( pos, dir, linac->X_jaw_v1, linac->X_jaw_v2, linac->X_jaw_v3,
+                          linac->X_jaw_index[ 0 ], linac->X_jaw_nb_triangles[ 0 ], geom_tol,
                           &inside_mesh, &hit_mesh, &distance );
 
         // If not inside (in case of crossing a tiny piece of matter get the AABB distance)
-        *geometry_distance = ( inside_mesh ) ? distance : hit_ray_AABB( pos, dir, linac.X_jaw_aabb[ 0 ] );
+        *geometry_distance = ( inside_mesh ) ? distance : hit_ray_AABB( pos, dir, linac->X_jaw_aabb[ 0 ] );
     }
 
     else if ( in_obj == IN_JAW_X2 )
     {
-        m_transport_mesh( pos, dir, linac.X_jaw_v1, linac.X_jaw_v2, linac.X_jaw_v3,
-                          linac.X_jaw_index[ 1 ], linac.X_jaw_nb_triangles[ 1 ], geom_tol,
+        m_transport_mesh( pos, dir, linac->X_jaw_v1, linac->X_jaw_v2, linac->X_jaw_v3,
+                          linac->X_jaw_index[ 1 ], linac->X_jaw_nb_triangles[ 1 ], geom_tol,
                           &inside_mesh, &hit_mesh, &distance );
 
         // If not inside (in case of crossing a tiny piece of matter get the AABB distance)
-        *geometry_distance = ( inside_mesh ) ? distance : hit_ray_AABB( pos, dir, linac.X_jaw_aabb[ 1 ] );
+        *geometry_distance = ( inside_mesh ) ? distance : hit_ray_AABB( pos, dir, linac->X_jaw_aabb[ 1 ] );
     }
 
     else if ( in_obj == IN_JAW_Y1 )
     {
-        m_transport_mesh( pos, dir, linac.Y_jaw_v1, linac.Y_jaw_v2, linac.Y_jaw_v3,
-                          linac.Y_jaw_index[ 0 ], linac.Y_jaw_nb_triangles[ 0 ], geom_tol,
+        m_transport_mesh( pos, dir, linac->Y_jaw_v1, linac->Y_jaw_v2, linac->Y_jaw_v3,
+                          linac->Y_jaw_index[ 0 ], linac->Y_jaw_nb_triangles[ 0 ], geom_tol,
                           &inside_mesh, &hit_mesh, &distance );
 
         // If not inside (in case of crossing a tiny piece of matter get the AABB distance)
-        *geometry_distance = ( inside_mesh ) ? distance : hit_ray_AABB( pos, dir, linac.Y_jaw_aabb[ 0 ] );
+        *geometry_distance = ( inside_mesh ) ? distance : hit_ray_AABB( pos, dir, linac->Y_jaw_aabb[ 0 ] );
     }
 
     else if ( in_obj == IN_JAW_Y2 )
     {
-        m_transport_mesh( pos, dir, linac.Y_jaw_v1, linac.Y_jaw_v2, linac.Y_jaw_v3,
-                          linac.Y_jaw_index[ 1 ], linac.Y_jaw_nb_triangles[ 1 ], geom_tol,
+        m_transport_mesh( pos, dir, linac->Y_jaw_v1, linac->Y_jaw_v2, linac->Y_jaw_v3,
+                          linac->Y_jaw_index[ 1 ], linac->Y_jaw_nb_triangles[ 1 ], geom_tol,
                           &inside_mesh, &hit_mesh, &distance );
 
         // If not inside (in case of crossing a tiny piece of matter get the AABB distance)
-        *geometry_distance = ( inside_mesh ) ? distance : hit_ray_AABB( pos, dir, linac.Y_jaw_aabb[ 1 ] );
+        *geometry_distance = ( inside_mesh ) ? distance : hit_ray_AABB( pos, dir, linac->Y_jaw_aabb[ 1 ] );
     }
 
     else if ( in_obj == IN_BANK_A )
     {
         ui16 ileaf = m_read_geom_index( *geometry_id );
 
-        m_transport_mesh( pos, dir, linac.A_leaf_v1, linac.A_leaf_v2, linac.A_leaf_v3,
-                          linac.A_leaf_index[ ileaf ], linac.A_leaf_nb_triangles[ ileaf ], geom_tol,
+        m_transport_mesh( pos, dir, linac->A_leaf_v1, linac->A_leaf_v2, linac->A_leaf_v3,
+                          linac->A_leaf_index[ ileaf ], linac->A_leaf_nb_triangles[ ileaf ], geom_tol,
                           &inside_mesh, &hit_mesh, &distance );
 
         // If not inside (in case of crossing a tiny piece of matter get the AABB distance)
-        *geometry_distance = ( inside_mesh ) ? distance : hit_ray_AABB( pos, dir, linac.A_leaf_aabb[ ileaf ] );
+        *geometry_distance = ( inside_mesh ) ? distance : hit_ray_AABB( pos, dir, linac->A_leaf_aabb[ ileaf ] );
     }
 
     else if ( in_obj == IN_BANK_B )
     {
         ui16 ileaf = m_read_geom_index( *geometry_id );
 
-        m_transport_mesh( pos, dir, linac.B_leaf_v1, linac.B_leaf_v2, linac.B_leaf_v3,
-                          linac.B_leaf_index[ ileaf ], linac.B_leaf_nb_triangles[ ileaf ], geom_tol,
+        m_transport_mesh( pos, dir, linac->B_leaf_v1, linac->B_leaf_v2, linac->B_leaf_v3,
+                          linac->B_leaf_index[ ileaf ], linac->B_leaf_nb_triangles[ ileaf ], geom_tol,
                           &inside_mesh, &hit_mesh, &distance );
 
         // If not inside (in case of crossing a tiny piece of matter get the AABB distance)
-        *geometry_distance = ( inside_mesh ) ? distance : hit_ray_AABB( pos, dir, linac.B_leaf_aabb[ ileaf ] );
+        *geometry_distance = ( inside_mesh ) ? distance : hit_ray_AABB( pos, dir, linac->B_leaf_aabb[ ileaf ] );
     }
 
     else
@@ -660,33 +615,31 @@ __host__ __device__ void m_mlc_nav_in_mesh( f32xyz pos, f32xyz dir, LinacData li
 }
 
 
-__host__ __device__ void MPLINACN::track_to_out( ParticlesData particles,
-                                                 LinacData linac,
-                                                 MaterialsTable materials,
-                                                 PhotonCrossSectionTable photon_CS_table,
-                                                 GlobalSimulationParametersData parameters,
+__host__ __device__ void MPLINACN::track_to_out( ParticlesData *particles,
+                                                 const LinacData *linac,
+                                                 const MaterialsData *materials,
+                                                 const PhotonCrossSectionData *photon_CS_table,
+                                                 const GlobalSimulationParametersData *parameters,
                                                  ui32 id )
 {
     // Read position
     f32xyz pos;
-    pos.x = particles.px[ id ];
-    pos.y = particles.py[ id ];
-    pos.z = particles.pz[ id ];
+    pos.x = particles->px[ id ];
+    pos.y = particles->py[ id ];
+    pos.z = particles->pz[ id ];
 
     // Read direction
     f32xyz dir;
-    dir.x = particles.dx[ id ];
-    dir.y = particles.dy[ id ];
-    dir.z = particles.dz[ id ];
+    dir.x = particles->dx[ id ];
+    dir.y = particles->dy[ id ];
+    dir.z = particles->dz[ id ];
 
     // In a mesh?
-    ui8 navigation = m_read_geom_nav( particles.geometry_id[ id ] );
+    ui8 navigation = m_read_geom_nav( particles->geometry_id[ id ] );
 
     //// Get material //////////////////////////////////////////////////////////////////
 
     i16 mat_id = ( navigation == INSIDE_MESH ) ? 0 : -1;   // 0 MLC mat, -1 not mat around the LINAC (vacuum)
-
-//    if (id==92) printf("id %i  - mat id %i - navigation %i\n", id, mat_id, navigation);
 
     //// Find next discrete interaction ///////////////////////////////////////
 
@@ -697,57 +650,47 @@ __host__ __device__ void MPLINACN::track_to_out( ParticlesData particles,
     if ( mat_id != - 1 )
     {
         photon_get_next_interaction ( particles, parameters, photon_CS_table, mat_id, id );
-        next_interaction_distance = particles.next_interaction_distance[ id ];
-        next_discrete_process = particles.next_discrete_process[ id ];
+        next_interaction_distance = particles->next_interaction_distance[ id ];
+        next_discrete_process = particles->next_discrete_process[ id ];
     }
 
     /// Get the hit distance of the closest geometry //////////////////////////////////
 
     f32 boundary_distance;
-    ui32 next_geometry_id = particles.geometry_id[ id ];
+    ui32 next_geometry_id = particles->geometry_id[ id ];
 
     if ( navigation == INSIDE_MESH )
     {
-//        if (id==92) printf("id %i - inside mesh - in obj %i\n", id, m_read_geom_type( next_geometry_id ));
-        m_mlc_nav_in_mesh( pos, dir, linac, parameters.geom_tolerance, &next_geometry_id, &boundary_distance );
-//        if (id==92) printf("id %i - inside mesh - dist %f\n", id, boundary_distance );
-
+        m_mlc_nav_in_mesh( pos, dir, linac, parameters->geom_tolerance, &next_geometry_id, &boundary_distance );
     }
     else
     {
-        m_mlc_nav_out_mesh( pos, dir, linac, parameters.geom_tolerance, &next_geometry_id, &boundary_distance );
-//        if (id==92) printf("id %i - outside mesh dist %f - hit obj %i\n", id, boundary_distance, m_read_geom_type( next_geometry_id ) );
+        m_mlc_nav_out_mesh( pos, dir, linac, parameters->geom_tolerance, &next_geometry_id, &boundary_distance );
     }
 
     if ( boundary_distance <= next_interaction_distance )
     {
-        next_interaction_distance = boundary_distance + parameters.geom_tolerance; // Overshoot
+        next_interaction_distance = boundary_distance + parameters->geom_tolerance; // Overshoot
         next_discrete_process = GEOMETRY_BOUNDARY;
     }
 
     //// Move particle //////////////////////////////////////////////////////
 
-//    if (id==92) printf( "id %i cur pos %f %f %f next dist %f\n", id, pos.x, pos.y, pos.z, next_interaction_distance );
-
     // get the new position
     pos = fxyz_add ( pos, fxyz_scale ( dir, next_interaction_distance ) );
 
     // update tof
-    //particles.tof[part_id] += c_light * next_interaction_distance;
+    //particles->tof[part_id] += c_light * next_interaction_distance;
 
     // store new position
-    particles.px[ id ] = pos.x;
-    particles.py[ id ] = pos.y;
-    particles.pz[ id ] = pos.z;
-
-//    printf( "id %i pos %f %f %f - aabb %f %f %f %f %f %f\n", id, pos.x, pos.y, pos.z,
-//            linac.aabb.xmin, linac.aabb.xmax, linac.aabb.ymin, linac.aabb.ymax,
-//            linac.aabb.zmin, linac.aabb.zmax );
+    particles->px[ id ] = pos.x;
+    particles->py[ id ] = pos.y;
+    particles->pz[ id ] = pos.z;
 
     // Stop simulation if out of the phantom
-    if ( !test_point_AABB_with_tolerance ( pos, linac.aabb, parameters.geom_tolerance ) )
+    if ( !test_point_AABB_with_tolerance ( pos, linac->aabb, parameters->geom_tolerance ) )
     {
-        particles.endsimu[ id ] = PARTICLE_FREEZE;
+        particles->status[ id ] = PARTICLE_FREEZE;
         return;
     }
 
@@ -755,54 +698,41 @@ __host__ __device__ void MPLINACN::track_to_out( ParticlesData particles,
 
     if ( next_discrete_process != GEOMETRY_BOUNDARY )
     {
-//        printf(" ---# phys effect\n");
-
-//        if (id==92) printf("id %i phys effect\n", id);
-
         // Resolve discrete process
         SecParticle electron = photon_resolve_discrete_process ( particles, parameters, photon_CS_table,
                                                                  materials, mat_id, id );
 
         //// Here e- are not tracked, and lost energy not drop
         //// Energy cut
-        if ( particles.E[ id ] <= materials.photon_energy_cut[ mat_id ])
+        if ( particles->E[ id ] <= materials->photon_energy_cut[ mat_id ])
         {
             // kill without mercy (energy not drop)
-            particles.endsimu[ id ] = PARTICLE_DEAD;
+            particles->status[ id ] = PARTICLE_DEAD;
             return;
         }
     }
     else
     {
-//        printf(" ---# geom effect\n");
-
-//        if (id==92) printf("id %i geom effect\n", id);
-
         // Update geometry id
-        particles.geometry_id[ id ] = next_geometry_id;
+        particles->geometry_id[ id ] = next_geometry_id;
     }
-
-    // DEBUG
-    //particles.endsimu[ id ] = PARTICLE_DEAD;
 
 }
 
-__host__ __device__ void MPLINACN::track_to_out_nonav( ParticlesData particles, LinacData linac,
+__host__ __device__ void MPLINACN::track_to_out_nonav( ParticlesData *particles, const LinacData *linac,
                                                        ui32 id )
 {
     // Read position
     f32xyz pos;
-    pos.x = particles.px[ id ];
-    pos.y = particles.py[ id ];
-    pos.z = particles.pz[ id ];
+    pos.x = particles->px[ id ];
+    pos.y = particles->py[ id ];
+    pos.z = particles->pz[ id ];
 
     // Read direction
     f32xyz dir;
-    dir.x = particles.dx[ id ];
-    dir.y = particles.dy[ id ];
-    dir.z = particles.dz[ id ];
-
-//    printf("%i - pos %f %f %f  status %i\n", id, pos.x, pos.y, pos.z, particles.endsimu[ id ]);
+    dir.x = particles->dx[ id ];
+    dir.y = particles->dy[ id ];
+    dir.z = particles->dz[ id ];
 
     /// Get the hit distance of the closest geometry //////////////////////////////////
 
@@ -813,16 +743,16 @@ __host__ __device__ void MPLINACN::track_to_out_nonav( ParticlesData particles, 
 
     // First get the distance to the bounding box
 
-    if ( linac.X_nb_jaw != 0 )
+    if ( linac->X_nb_jaw != 0 )
     {
-        geom_distance = hit_ray_AABB( pos, dir, linac.X_jaw_aabb[ 0 ] );
+        geom_distance = hit_ray_AABB( pos, dir, linac->X_jaw_aabb[ 0 ] );
         if ( geom_distance < min_distance )
         {
             min_distance = geom_distance;
             in_obj = HIT_JAW_X1;
         }
 
-        geom_distance = hit_ray_AABB( pos, dir, linac.X_jaw_aabb[ 1 ] );
+        geom_distance = hit_ray_AABB( pos, dir, linac->X_jaw_aabb[ 1 ] );
         if ( geom_distance < min_distance )
         {
             min_distance = geom_distance;
@@ -830,16 +760,16 @@ __host__ __device__ void MPLINACN::track_to_out_nonav( ParticlesData particles, 
         }
     }
 
-    if ( linac.Y_nb_jaw != 0 )
+    if ( linac->Y_nb_jaw != 0 )
     {
-        geom_distance = hit_ray_AABB( pos, dir, linac.Y_jaw_aabb[ 0 ] );
+        geom_distance = hit_ray_AABB( pos, dir, linac->Y_jaw_aabb[ 0 ] );
         if ( geom_distance < min_distance )
         {
             min_distance = geom_distance;
             in_obj = HIT_JAW_Y1;
         }
 
-        geom_distance = hit_ray_AABB( pos, dir, linac.Y_jaw_aabb[ 1 ] );
+        geom_distance = hit_ray_AABB( pos, dir, linac->Y_jaw_aabb[ 1 ] );
         if ( geom_distance < min_distance )
         {
             min_distance = geom_distance;
@@ -847,14 +777,14 @@ __host__ __device__ void MPLINACN::track_to_out_nonav( ParticlesData particles, 
         }
     }
 
-    geom_distance = hit_ray_AABB( pos, dir, linac.A_bank_aabb );
+    geom_distance = hit_ray_AABB( pos, dir, linac->A_bank_aabb );
     if ( geom_distance < min_distance )
     {
         min_distance = geom_distance;
         in_obj = HIT_BANK_A;
     }
 
-    geom_distance = hit_ray_AABB( pos, dir, linac.B_bank_aabb );
+    geom_distance = hit_ray_AABB( pos, dir, linac->B_bank_aabb );
     if ( geom_distance < min_distance )
     {
         min_distance = geom_distance;
@@ -868,13 +798,13 @@ __host__ __device__ void MPLINACN::track_to_out_nonav( ParticlesData particles, 
         in_obj = HIT_NOTHING;
         min_distance = FLT_MAX;
 
-        itri = 0; while ( itri < linac.X_jaw_nb_triangles[ 0 ] )
+        itri = 0; while ( itri < linac->X_jaw_nb_triangles[ 0 ] )
         {
-            offset = linac.X_jaw_index[ 0 ];
+            offset = linac->X_jaw_index[ 0 ];
             geom_distance = hit_ray_triangle( pos, dir,
-                                              linac.X_jaw_v1[ offset+itri ],
-                    linac.X_jaw_v2[ offset+itri ],
-                    linac.X_jaw_v3[ offset+itri ] );
+                                              linac->X_jaw_v1[ offset+itri ],
+                    linac->X_jaw_v2[ offset+itri ],
+                    linac->X_jaw_v3[ offset+itri ] );
             if ( geom_distance < min_distance )
             {
                 geom_distance = min_distance;
@@ -888,13 +818,13 @@ __host__ __device__ void MPLINACN::track_to_out_nonav( ParticlesData particles, 
         in_obj = HIT_NOTHING;
         min_distance = FLT_MAX;
 
-        itri = 0; while ( itri < linac.X_jaw_nb_triangles[ 1 ] )
+        itri = 0; while ( itri < linac->X_jaw_nb_triangles[ 1 ] )
         {
-            offset = linac.X_jaw_index[ 1 ];
+            offset = linac->X_jaw_index[ 1 ];
             geom_distance = hit_ray_triangle( pos, dir,
-                                              linac.X_jaw_v1[ offset+itri ],
-                                              linac.X_jaw_v2[ offset+itri ],
-                                              linac.X_jaw_v3[ offset+itri ] );
+                                              linac->X_jaw_v1[ offset+itri ],
+                                              linac->X_jaw_v2[ offset+itri ],
+                                              linac->X_jaw_v3[ offset+itri ] );
             if ( geom_distance < min_distance )
             {
                 geom_distance = min_distance;
@@ -909,13 +839,13 @@ __host__ __device__ void MPLINACN::track_to_out_nonav( ParticlesData particles, 
         min_distance = FLT_MAX;
 
         // Loop over triangles
-        itri = 0; while ( itri < linac.Y_jaw_nb_triangles[ 0 ] )
+        itri = 0; while ( itri < linac->Y_jaw_nb_triangles[ 0 ] )
         {
-            offset = linac.Y_jaw_index[ 0 ];
+            offset = linac->Y_jaw_index[ 0 ];
             geom_distance = hit_ray_triangle( pos, dir,
-                                              linac.Y_jaw_v1[ offset+itri ],
-                                              linac.Y_jaw_v2[ offset+itri ],
-                                              linac.Y_jaw_v3[ offset+itri ] );
+                                              linac->Y_jaw_v1[ offset+itri ],
+                                              linac->Y_jaw_v2[ offset+itri ],
+                                              linac->Y_jaw_v3[ offset+itri ] );
             if ( geom_distance < min_distance )
             {
                 geom_distance = min_distance;
@@ -929,13 +859,13 @@ __host__ __device__ void MPLINACN::track_to_out_nonav( ParticlesData particles, 
         in_obj = HIT_NOTHING;
         min_distance = FLT_MAX;
 
-        itri = 0; while ( itri < linac.Y_jaw_nb_triangles[ 1 ] )
+        itri = 0; while ( itri < linac->Y_jaw_nb_triangles[ 1 ] )
         {
-            offset = linac.Y_jaw_index[ 1 ];
+            offset = linac->Y_jaw_index[ 1 ];
             geom_distance = hit_ray_triangle( pos, dir,
-                                              linac.Y_jaw_v1[ offset+itri ],
-                                              linac.Y_jaw_v2[ offset+itri ],
-                                              linac.Y_jaw_v3[ offset+itri ] );
+                                              linac->Y_jaw_v1[ offset+itri ],
+                                              linac->Y_jaw_v2[ offset+itri ],
+                                              linac->Y_jaw_v3[ offset+itri ] );
             if ( geom_distance < min_distance )
             {
                 geom_distance = min_distance;
@@ -949,24 +879,23 @@ __host__ __device__ void MPLINACN::track_to_out_nonav( ParticlesData particles, 
         in_obj = HIT_NOTHING;
         min_distance = FLT_MAX;
 
-        ileaf = 0; while( ileaf < linac.A_nb_leaves )
+        ileaf = 0; while( ileaf < linac->A_nb_leaves )
         {
             // If hit a leaf
-            if ( test_ray_AABB( pos, dir, linac.A_leaf_aabb[ ileaf ] ) )
+            if ( test_ray_AABB( pos, dir, linac->A_leaf_aabb[ ileaf ] ) )
             {
                 // Loop over triangles
-                itri = 0; while ( itri < linac.A_leaf_nb_triangles[ ileaf ] )
+                itri = 0; while ( itri < linac->A_leaf_nb_triangles[ ileaf ] )
                 {
-                    offset = linac.A_leaf_index[ ileaf ];
+                    offset = linac->A_leaf_index[ ileaf ];
                     geom_distance = hit_ray_triangle( pos, dir,
-                                                      linac.A_leaf_v1[ offset+itri ],
-                                                      linac.A_leaf_v2[ offset+itri ],
-                                                      linac.A_leaf_v3[ offset+itri ] );
+                                                      linac->A_leaf_v1[ offset+itri ],
+                                                      linac->A_leaf_v2[ offset+itri ],
+                                                      linac->A_leaf_v3[ offset+itri ] );
                     if ( geom_distance < min_distance )
                     {
                         geom_distance = min_distance;
                         in_obj = HIT_BANK_A;
-                        //in_leaf = ileaf;
                     }
                     ++itri;
                 }
@@ -981,24 +910,23 @@ __host__ __device__ void MPLINACN::track_to_out_nonav( ParticlesData particles, 
         in_obj = HIT_NOTHING;
         min_distance = FLT_MAX;
 
-        ileaf = 0; while( ileaf < linac.B_nb_leaves )
+        ileaf = 0; while( ileaf < linac->B_nb_leaves )
         {
             // If hit a leaf
-            if ( test_ray_AABB( pos, dir, linac.B_leaf_aabb[ ileaf ] ) )
+            if ( test_ray_AABB( pos, dir, linac->B_leaf_aabb[ ileaf ] ) )
             {
                 // Loop over triangles
-                itri = 0; while ( itri < linac.B_leaf_nb_triangles[ ileaf ] )
+                itri = 0; while ( itri < linac->B_leaf_nb_triangles[ ileaf ] )
                 {
-                    offset = linac.B_leaf_index[ ileaf ];
+                    offset = linac->B_leaf_index[ ileaf ];
                     geom_distance = hit_ray_triangle( pos, dir,
-                                                      linac.B_leaf_v1[ offset+itri ],
-                                                      linac.B_leaf_v2[ offset+itri ],
-                                                      linac.B_leaf_v3[ offset+itri ] );
+                                                      linac->B_leaf_v1[ offset+itri ],
+                                                      linac->B_leaf_v2[ offset+itri ],
+                                                      linac->B_leaf_v3[ offset+itri ] );
                     if ( geom_distance < min_distance )
                     {
                         geom_distance = min_distance;
-                        in_obj = HIT_BANK_B;
-                        //in_leaf = ileaf;
+                        in_obj = HIT_BANK_B;                        
                     }
                     ++itri;
                 }
@@ -1010,133 +938,118 @@ __host__ __device__ void MPLINACN::track_to_out_nonav( ParticlesData particles, 
 
     if ( in_obj != HIT_NOTHING )
     {
-        particles.endsimu[ id ] = PARTICLE_DEAD;
-//        printf("%i kill touch %i\n", id, in_obj);
+        particles->status[ id ] = PARTICLE_DEAD;
     }
     else
     {
-        particles.endsimu[ id ] = PARTICLE_FREEZE;
-//        printf("%i freeze touch %i\n", id, in_obj);
+        particles->status[ id ] = PARTICLE_FREEZE;
     }
 
 }
 
 
-__host__ __device__ void MPLINACN::track_to_out_nonav_nomesh( ParticlesData particles, LinacData linac,
+__host__ __device__ void MPLINACN::track_to_out_nonav_nomesh( ParticlesData *particles, const LinacData *linac,
                                                               ui32 id )
 {
     // Read position
     f32xyz pos;
-    pos.x = particles.px[ id ];
-    pos.y = particles.py[ id ];
-    pos.z = particles.pz[ id ];
+    pos.x = particles->px[ id ];
+    pos.y = particles->py[ id ];
+    pos.z = particles->pz[ id ];
 
     // Read direction
     f32xyz dir;
-    dir.x = particles.dx[ id ];
-    dir.y = particles.dy[ id ];
-    dir.z = particles.dz[ id ];
+    dir.x = particles->dx[ id ];
+    dir.y = particles->dy[ id ];
+    dir.z = particles->dz[ id ];
 
     /// Get the hit of the closest geometry //////////////////////////////////
 
-    if ( linac.X_nb_jaw != 0 )
+    if ( linac->X_nb_jaw != 0 )
     {
-        if ( test_ray_AABB( pos, dir, linac.X_jaw_aabb[ 0 ] ) ||
-             test_ray_AABB( pos, dir, linac.X_jaw_aabb[ 1 ] ) )
+        if ( test_ray_AABB( pos, dir, linac->X_jaw_aabb[ 0 ] ) ||
+             test_ray_AABB( pos, dir, linac->X_jaw_aabb[ 1 ] ) )
         {
-            particles.endsimu[ id ] = PARTICLE_DEAD;
+            particles->status[ id ] = PARTICLE_DEAD;
             return;
         }
     }
 
-    if ( linac.Y_nb_jaw != 0 )
+    if ( linac->Y_nb_jaw != 0 )
     {
-        if ( test_ray_AABB( pos, dir, linac.Y_jaw_aabb[ 0 ] ) ||
-             test_ray_AABB( pos, dir, linac.Y_jaw_aabb[ 1 ] ) )
+        if ( test_ray_AABB( pos, dir, linac->Y_jaw_aabb[ 0 ] ) ||
+             test_ray_AABB( pos, dir, linac->Y_jaw_aabb[ 1 ] ) )
         {
-            particles.endsimu[ id ] = PARTICLE_DEAD;
+            particles->status[ id ] = PARTICLE_DEAD;
             return;
         }
     }
 
-    if ( test_ray_AABB( pos, dir, linac.A_bank_aabb ) )
+    if ( test_ray_AABB( pos, dir, linac->A_bank_aabb ) )
     {
-        ui16 ileaf = 0; while( ileaf < linac.A_nb_leaves )
+        ui16 ileaf = 0; while( ileaf < linac->A_nb_leaves )
         {
             // If hit a leaf
-            if ( test_ray_AABB( pos, dir, linac.A_leaf_aabb[ ileaf ] ) )
+            if ( test_ray_AABB( pos, dir, linac->A_leaf_aabb[ ileaf ] ) )
             {
-                particles.endsimu[ id ] = PARTICLE_DEAD;
+                particles->status[ id ] = PARTICLE_DEAD;
                 return;
             }
             ileaf++;
         }
     }
 
-    if ( test_ray_AABB( pos, dir, linac.B_bank_aabb ) )
+    if ( test_ray_AABB( pos, dir, linac->B_bank_aabb ) )
     {
-        ui16 ileaf = 0; while( ileaf < linac.B_nb_leaves )
+        ui16 ileaf = 0; while( ileaf < linac->B_nb_leaves )
         {
             // If hit a leaf
-            if ( test_ray_AABB( pos, dir, linac.B_leaf_aabb[ ileaf ] ) )
+            if ( test_ray_AABB( pos, dir, linac->B_leaf_aabb[ ileaf ] ) )
             {
-                particles.endsimu[ id ] = PARTICLE_DEAD;
+                particles->status[ id ] = PARTICLE_DEAD;
                 return;
             }
             ileaf++;
         }
     }
 
-    particles.endsimu[ id ] = PARTICLE_FREEZE;
+    particles->status[ id ] = PARTICLE_FREEZE;
 }
 
 
 // Device kernel that track particles within the voxelized volume until boundary
-__global__ void MPLINACN::kernel_device_track_to_out( ParticlesData particles,
-                                                      LinacData linac,
-                                                      MaterialsTable materials,
-                                                      PhotonCrossSectionTable photon_CS,
-                                                      GlobalSimulationParametersData parameters,
+__global__ void MPLINACN::kernel_device_track_to_out( ParticlesData *particles,
+                                                      const LinacData *linac,
+                                                      const MaterialsData *materials,
+                                                      const PhotonCrossSectionData *photon_CS,
+                                                      const GlobalSimulationParametersData *parameters,
                                                       ui8 nav_option )
 {
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
-    if ( id >= particles.size ) return;
+    if ( id >= particles->size ) return;
 
     // Init geometry ID for navigation
-    particles.geometry_id[ id ] = 0;
+    particles->geometry_id[ id ] = 0;
 
     // Stepping loop
     if ( nav_option == NAV_OPT_FULL )
     {
-#ifdef DEBUG
-        // DEBUG
-        ui32 i = 0;
-#endif
 
-        while ( particles.endsimu[ id ] != PARTICLE_DEAD && particles.endsimu[ id ] != PARTICLE_FREEZE )
+        while ( particles->status[ id ] != PARTICLE_DEAD && particles->status[ id ] != PARTICLE_FREEZE )
         {
-            //printf("Step\n");
             MPLINACN::track_to_out( particles, linac, materials, photon_CS, parameters, id );
-#ifdef DEBUG
-            if ( i > 100 )
-            {
-                printf(" ID %i break loop\n", id );
-                break;
-            }
-#endif
-            ++i;
         }
     }
     else if ( nav_option == NAV_OPT_NONAV )
     {
-        while ( particles.endsimu[ id ] != PARTICLE_DEAD && particles.endsimu[ id ] != PARTICLE_FREEZE )
+        while ( particles->status[ id ] != PARTICLE_DEAD && particles->status[ id ] != PARTICLE_FREEZE )
         {
             MPLINACN::track_to_out_nonav( particles, linac, id );
         }
     }
     else if ( nav_option == NAV_OPT_NOMESH_NONAV )
     {
-        while ( particles.endsimu[ id ] != PARTICLE_DEAD && particles.endsimu[ id ] != PARTICLE_FREEZE )
+        while ( particles->status[ id ] != PARTICLE_DEAD && particles->status[ id ] != PARTICLE_FREEZE )
         {
             MPLINACN::track_to_out_nonav_nomesh( particles, linac, id );
         }
@@ -1145,74 +1058,20 @@ __global__ void MPLINACN::kernel_device_track_to_out( ParticlesData particles,
     /// Move the particle back to the global frame ///
 
     // read position and direction
-    f32xyz pos = make_f32xyz( particles.px[ id ], particles.py[ id ], particles.pz[ id ] );
-    f32xyz dir = make_f32xyz( particles.dx[ id ], particles.dy[ id ], particles.dz[ id ] );
+    f32xyz pos = make_f32xyz( particles->px[ id ], particles->py[ id ], particles->pz[ id ] );
+    f32xyz dir = make_f32xyz( particles->dx[ id ], particles->dy[ id ], particles->dz[ id ] );
 
     // Change the frame to the particle (global to linac)
-    pos = fxyz_local_to_global_position( linac.transform, pos );
-    dir = fxyz_local_to_global_direction( linac.transform, dir );
+    pos = fxyz_local_to_global_position( linac->transform, pos );
+    dir = fxyz_local_to_global_direction( linac->transform, dir );
 
     // Store data
-    particles.px[ id ] = pos.x;
-    particles.py[ id ] = pos.y;
-    particles.pz[ id ] = pos.z;
-    particles.dx[ id ] = dir.x;
-    particles.dy[ id ] = dir.y;
-    particles.dz[ id ] = dir.z;
-
-}
-
-// Host kernel that track particles within the voxelized volume until boundary
-void MPLINACN::kernel_host_track_to_out( ParticlesData particles,
-                                         LinacData linac,
-                                         MaterialsTable materials,
-                                         PhotonCrossSectionTable photon_CS,
-                                         GlobalSimulationParametersData parameters,
-                                         ui8 nav_option, ui32 id )
-{
-    // Init geometry ID for navigation
-    particles.geometry_id[ id ] = 0;
-
-    // Stepping loop
-    if ( nav_option == NAV_OPT_FULL )
-    {
-        while ( particles.endsimu[ id ] != PARTICLE_DEAD && particles.endsimu[ id ] != PARTICLE_FREEZE )
-        {
-            MPLINACN::track_to_out( particles, linac, materials, photon_CS, parameters, id );
-        }
-    }
-    else if ( nav_option == NAV_OPT_NONAV )
-    {
-        while ( particles.endsimu[ id ] != PARTICLE_DEAD && particles.endsimu[ id ] != PARTICLE_FREEZE )
-        {
-            MPLINACN::track_to_out_nonav( particles, linac, id );
-        }
-    }
-    else if ( nav_option == NAV_OPT_NOMESH_NONAV )
-    {
-        while ( particles.endsimu[ id ] != PARTICLE_DEAD && particles.endsimu[ id ] != PARTICLE_FREEZE )
-        {
-            MPLINACN::track_to_out_nonav_nomesh( particles, linac, id );
-        }
-    }
-
-    /// Move the particle back to the global frame ///
-
-    // read position and direction
-    f32xyz pos = make_f32xyz( particles.px[ id ], particles.py[ id ], particles.pz[ id ] );
-    f32xyz dir = make_f32xyz( particles.dx[ id ], particles.dy[ id ], particles.dz[ id ] );
-
-    // Change the frame to the particle (global to linac)
-    pos = fxyz_local_to_global_position( linac.transform, pos );
-    dir = fxyz_local_to_global_direction( linac.transform, dir );
-
-    // Store data
-    particles.px[ id ] = pos.x;
-    particles.py[ id ] = pos.y;
-    particles.pz[ id ] = pos.z;
-    particles.dx[ id ] = dir.x;
-    particles.dy[ id ] = dir.y;
-    particles.dz[ id ] = dir.z;
+    particles->px[ id ] = pos.x;
+    particles->py[ id ] = pos.y;
+    particles->pz[ id ] = pos.z;
+    particles->dx[ id ] = dir.x;
+    particles->dy[ id ] = dir.y;
+    particles->dz[ id ] = dir.z;
 
 }
 
@@ -1245,25 +1104,6 @@ void MeshPhanLINACNav::m_init_mlc()
     MeshIO *meshio = new MeshIO;
     MeshData mlc = meshio->read_mesh_file( m_mlc_filename );
 
-//    ui32 i = 0; while ( i < mlc.mesh_names.size() )
-//    {
-//        GGcout << "Mesh " << i << GGendl;
-//        ui32 offset = mlc.mesh_index[ i ];
-
-//        ui32 j = 0; while ( j < mlc.nb_triangles[ i ] )
-//        {
-//            ui32 ii = offset+j;
-//            printf("  %f %f %f  -  %f %f %f  -  %f %f %f\n", mlc.v1[ii].x, mlc.v1[ii].y, mlc.v1[ii].z,
-//                   mlc.v2[ii].x, mlc.v2[ii].y, mlc.v2[ii].z,
-//                   mlc.v3[ii].x, mlc.v3[ii].y, mlc.v3[ii].z );
-//            ++j;
-//        }
-
-//        ++i;
-//    }
-
-//    GGcout << "Meshes read" << GGendl;
-
     // Check if there are at least one leaf
     if ( mlc.mesh_names.size() == 0 )
     {
@@ -1272,22 +1112,20 @@ void MeshPhanLINACNav::m_init_mlc()
     }
 
     // Check if the number of leaves match with the provided parameters
-    if ( m_linac.A_nb_leaves + m_linac.B_nb_leaves !=  mlc.mesh_names.size() )
+    if ( mh_linac->A_nb_leaves + mh_linac->B_nb_leaves !=  mlc.mesh_names.size() )
     {
         GGcerr << "MeshPhanLINACNav, number of leaves provided by the user is different to the number of meshes contained on the file!" << GGendl;
         exit_simulation();
     }
 
     // Some allocation
-    HANDLE_ERROR( cudaMallocManaged( &(m_linac.A_leaf_index), m_linac.A_nb_leaves * sizeof( ui32 ) ) );
-    HANDLE_ERROR( cudaMallocManaged( &(m_linac.A_leaf_nb_triangles), m_linac.A_nb_leaves * sizeof( ui32 ) ) );
-    HANDLE_ERROR( cudaMallocManaged( &(m_linac.A_leaf_aabb), m_linac.A_nb_leaves * sizeof( AabbData ) ) );
+    mh_linac->A_leaf_index = (ui32*)malloc( mh_linac->A_nb_leaves * sizeof( ui32 ) );
+    mh_linac->A_leaf_nb_triangles = (ui32*)malloc( mh_linac->A_nb_leaves * sizeof( ui32 ) );
+    mh_linac->A_leaf_aabb = (AabbData*)malloc( mh_linac->A_nb_leaves * sizeof( AabbData ) );
 
-    HANDLE_ERROR( cudaMallocManaged( &(m_linac.B_leaf_index), m_linac.B_nb_leaves * sizeof( ui32 ) ) );
-    HANDLE_ERROR( cudaMallocManaged( &(m_linac.B_leaf_nb_triangles), m_linac.B_nb_leaves * sizeof( ui32 ) ) );
-    HANDLE_ERROR( cudaMallocManaged( &(m_linac.B_leaf_aabb), m_linac.B_nb_leaves * sizeof( AabbData ) ) );
-
-//    GGcout << "first allocation" << GGendl;
+    mh_linac->B_leaf_index = (ui32*)malloc( mh_linac->B_nb_leaves * sizeof( ui32 ) );
+    mh_linac->B_leaf_nb_triangles = (ui32*)malloc( mh_linac->B_nb_leaves * sizeof( ui32 ) );
+    mh_linac->B_leaf_aabb = (AabbData*)malloc( mh_linac->B_nb_leaves * sizeof( AabbData ) );
 
     // Pre-calculation and checking of the data
     ui32 i_leaf = 0;
@@ -1318,7 +1156,7 @@ void MeshPhanLINACNav::m_init_mlc()
         if ( bank_name == "A" )
         {
             // Check
-            if ( index_leaf_bank == 0 || index_leaf_bank > m_linac.A_nb_leaves )
+            if ( index_leaf_bank == 0 || index_leaf_bank > mh_linac->A_nb_leaves )
             {
                 GGcerr << "MeshPhanLINACNav: name of leaves must have index starting from 1 to N leaves!" << GGendl;
                 exit_simulation();
@@ -1326,10 +1164,8 @@ void MeshPhanLINACNav::m_init_mlc()
 
             // Store in sort way te number of triangles for each leaf
             // index_leaf_bank-1 because leaf start from 1 to N
-            m_linac.A_leaf_nb_triangles[ index_leaf_bank-1 ] = mlc.nb_triangles[ i_leaf ];
+            mh_linac->A_leaf_nb_triangles[ index_leaf_bank-1 ] = mlc.nb_triangles[ i_leaf ];
             tot_tri_bank_A += mlc.nb_triangles[ i_leaf ];
-
-//            GGcout << " A nb tri " << m_linac.A_leaf_nb_triangles[ index_leaf_bank-1 ] << " ileaf " << i_leaf << GGendl;
 
         }
 
@@ -1337,7 +1173,7 @@ void MeshPhanLINACNav::m_init_mlc()
         if ( bank_name == "B" )
         {
             // Check
-            if ( index_leaf_bank == 0 || index_leaf_bank > m_linac.B_nb_leaves )
+            if ( index_leaf_bank == 0 || index_leaf_bank > mh_linac->B_nb_leaves )
             {
                 GGcerr << "MeshPhanLINACNav: name of leaves must have index starting from 1 to N leaves!" << GGendl;
                 exit_simulation();
@@ -1345,53 +1181,40 @@ void MeshPhanLINACNav::m_init_mlc()
 
             // Store in sort way te number of triangles for each leaf
             // index_leaf_bank-1 because leaf start from 1 to N
-            m_linac.B_leaf_nb_triangles[ index_leaf_bank-1 ] = mlc.nb_triangles[ i_leaf ];
+            mh_linac->B_leaf_nb_triangles[ index_leaf_bank-1 ] = mlc.nb_triangles[ i_leaf ];
             tot_tri_bank_B += mlc.nb_triangles[ i_leaf ];
-
-//            GGcout << " B nb tri " << m_linac.B_leaf_nb_triangles[ index_leaf_bank-1 ] << " ileaf " << i_leaf << GGendl;
-        }
+       }
 
         ++i_leaf;
     } // i_leaf
 
-//    GGcout << "Check ok" << GGendl;
-
     // Compute the offset for each leaf from bank A
-    m_linac.A_leaf_index[ 0 ] = 0;
-    i_leaf = 1; while ( i_leaf < m_linac.A_nb_leaves )
+    mh_linac->A_leaf_index[ 0 ] = 0;
+    i_leaf = 1; while ( i_leaf < mh_linac->A_nb_leaves )
     {
-        m_linac.A_leaf_index[ i_leaf ] = m_linac.A_leaf_index[ i_leaf-1 ] + m_linac.A_leaf_nb_triangles[ i_leaf-1 ];
-
-//        GGcout << " A offset " << m_linac.A_leaf_index[ i_leaf ]
-//                  << " ileaf " << i_leaf << " nb tri: " << m_linac.A_leaf_nb_triangles[ i_leaf ] << GGendl;
-
+        mh_linac->A_leaf_index[ i_leaf ] = mh_linac->A_leaf_index[ i_leaf-1 ] + mh_linac->A_leaf_nb_triangles[ i_leaf-1 ];
         ++i_leaf;
 
     }
 
     // Compute the offset for each leaf from bank B
-    m_linac.B_leaf_index[ 0 ] = 0;
-    i_leaf = 1; while ( i_leaf < m_linac.B_nb_leaves )
+    mh_linac->B_leaf_index[ 0 ] = 0;
+    i_leaf = 1; while ( i_leaf < mh_linac->B_nb_leaves )
     {
-        m_linac.B_leaf_index[ i_leaf ] = m_linac.B_leaf_index[ i_leaf-1 ] + m_linac.B_leaf_nb_triangles[ i_leaf-1 ];
-//        GGcout << " B offset " << m_linac.B_leaf_index[ i_leaf ]
-//                  << " ileaf " << i_leaf << " nb tri: " << m_linac.B_leaf_nb_triangles[ i_leaf ] << GGendl;
-
+        mh_linac->B_leaf_index[ i_leaf ] = mh_linac->B_leaf_index[ i_leaf-1 ] + mh_linac->B_leaf_nb_triangles[ i_leaf-1 ];
         ++i_leaf;
     }
 
-//    GGcout << "Get offset" << GGendl;
-
     // Some others allocations
-    HANDLE_ERROR( cudaMallocManaged( &(m_linac.A_leaf_v1), tot_tri_bank_A * sizeof( f32xyz ) ) );
-    HANDLE_ERROR( cudaMallocManaged( &(m_linac.A_leaf_v2), tot_tri_bank_A * sizeof( f32xyz ) ) );
-    HANDLE_ERROR( cudaMallocManaged( &(m_linac.A_leaf_v3), tot_tri_bank_A * sizeof( f32xyz ) ) );
+    mh_linac->A_leaf_v1 = (f32xyz*)malloc( tot_tri_bank_A * sizeof( f32xyz ) );
+    mh_linac->A_leaf_v2 = (f32xyz*)malloc( tot_tri_bank_A * sizeof( f32xyz ) );
+    mh_linac->A_leaf_v3 = (f32xyz*)malloc( tot_tri_bank_A * sizeof( f32xyz ) );
+    mh_linac->A_tot_triangles = tot_tri_bank_A;
 
-    HANDLE_ERROR( cudaMallocManaged( &(m_linac.B_leaf_v1), tot_tri_bank_B * sizeof( f32xyz ) ) );
-    HANDLE_ERROR( cudaMallocManaged( &(m_linac.B_leaf_v2), tot_tri_bank_B * sizeof( f32xyz ) ) );
-    HANDLE_ERROR( cudaMallocManaged( &(m_linac.B_leaf_v3), tot_tri_bank_B * sizeof( f32xyz ) ) );
-
-//    GGcout << "Second allocation" << GGendl;
+    mh_linac->B_leaf_v1 = (f32xyz*)malloc( tot_tri_bank_B * sizeof( f32xyz ) );
+    mh_linac->B_leaf_v2 = (f32xyz*)malloc( tot_tri_bank_B * sizeof( f32xyz ) );
+    mh_linac->B_leaf_v3 = (f32xyz*)malloc( tot_tri_bank_B * sizeof( f32xyz ) );
+    mh_linac->B_tot_triangles = tot_tri_bank_B;
 
     // Loop over leaf. Organize mesh data into the linac data.
     ui32 i_tri, offset_bank, offset_mlc;
@@ -1411,10 +1234,6 @@ void MeshPhanLINACNav::m_init_mlc()
         // index within the mlc (all meshes)
         offset_mlc = mlc.mesh_index[ i_leaf ];
 
-//        GGcout << "leaf " << i_leaf << " name: " << leaf_name
-//               << " bank: " << bank_name << " index: " << index_leaf_bank
-//               << " offset: " << offset_mlc << GGendl;
-
         // Init AABB
         xmin = FLT_MAX; xmax = -FLT_MAX;
         ymin = FLT_MAX; ymax = -FLT_MAX;
@@ -1424,28 +1243,19 @@ void MeshPhanLINACNav::m_init_mlc()
         if ( bank_name == "A" )
         {
             // index within the bank
-            offset_bank = m_linac.A_leaf_index[ index_leaf_bank ];
-
-//            GGcout << "    A offset bank: " << offset_bank << GGendl;
-
-//            GGcout << " Bank A leaft " << index_leaf_bank << GGendl;
+            offset_bank = mh_linac->A_leaf_index[ index_leaf_bank ];
 
             // loop over triangles
-            i_tri = 0; while ( i_tri < m_linac.A_leaf_nb_triangles[ index_leaf_bank ] )
+            i_tri = 0; while ( i_tri < mh_linac->A_leaf_nb_triangles[ index_leaf_bank ] )
             {
                 // Store on the right place
                 v1 = mlc.v1[ offset_mlc + i_tri ];
                 v2 = mlc.v2[ offset_mlc + i_tri ];
                 v3 = mlc.v3[ offset_mlc + i_tri ];
 
-//                if ( index_leaf_bank == 0 )
-//                {
-//                    printf("  v1 %f %f %f # v2 %f %f %f # v3 %f %f %f\n", v1.x, v1.y, v1.z, v2.x, v2.y, v2.z, v3.x, v3.y, v3.z);
-//                }
-
-                m_linac.A_leaf_v1[ offset_bank + i_tri ] = v1;
-                m_linac.A_leaf_v2[ offset_bank + i_tri ] = v2;
-                m_linac.A_leaf_v3[ offset_bank + i_tri ] = v3;
+                mh_linac->A_leaf_v1[ offset_bank + i_tri ] = v1;
+                mh_linac->A_leaf_v2[ offset_bank + i_tri ] = v2;
+                mh_linac->A_leaf_v3[ offset_bank + i_tri ] = v3;
 
                 // Determine AABB
                 if ( v1.x > xmax ) xmax = v1.x;
@@ -1475,38 +1285,32 @@ void MeshPhanLINACNav::m_init_mlc()
                 ++i_tri;
             }
 
-//            GGcout << "    A tri process" << GGendl;
-
             // Store the bounding box of the current leaf
-            m_linac.A_leaf_aabb[ index_leaf_bank ].xmin = xmin;
-            m_linac.A_leaf_aabb[ index_leaf_bank ].xmax = xmax;
-            m_linac.A_leaf_aabb[ index_leaf_bank ].ymin = ymin;
-            m_linac.A_leaf_aabb[ index_leaf_bank ].ymax = ymax;
-            m_linac.A_leaf_aabb[ index_leaf_bank ].zmin = zmin;
-            m_linac.A_leaf_aabb[ index_leaf_bank ].zmax = zmax;
+            mh_linac->A_leaf_aabb[ index_leaf_bank ].xmin = xmin;
+            mh_linac->A_leaf_aabb[ index_leaf_bank ].xmax = xmax;
+            mh_linac->A_leaf_aabb[ index_leaf_bank ].ymin = ymin;
+            mh_linac->A_leaf_aabb[ index_leaf_bank ].ymax = ymax;
+            mh_linac->A_leaf_aabb[ index_leaf_bank ].zmin = zmin;
+            mh_linac->A_leaf_aabb[ index_leaf_bank ].zmax = zmax;
 
-//            GGcout << "    A aabb" << GGendl;
-//            GGcout << " A" << index_leaf_bank << " aabb: " << xmin << " " << xmax << GGendl;
 
         }
         else // Bank B
         {
             // index within the bank
-            offset_bank = m_linac.B_leaf_index[ index_leaf_bank ];
-
-//            GGcout << "    B offset bank: " << offset_bank << GGendl;
+            offset_bank = mh_linac->B_leaf_index[ index_leaf_bank ];
 
             // loop over triangles
-            i_tri = 0; while ( i_tri < m_linac.B_leaf_nb_triangles[ index_leaf_bank ] )
+            i_tri = 0; while ( i_tri < mh_linac->B_leaf_nb_triangles[ index_leaf_bank ] )
             {
                 // Store on the right place
                 v1 = mlc.v1[ offset_mlc + i_tri ];
                 v2 = mlc.v2[ offset_mlc + i_tri ];
                 v3 = mlc.v3[ offset_mlc + i_tri ];
 
-                m_linac.B_leaf_v1[ offset_bank + i_tri ] = v1;
-                m_linac.B_leaf_v2[ offset_bank + i_tri ] = v2;
-                m_linac.B_leaf_v3[ offset_bank + i_tri ] = v3;
+                mh_linac->B_leaf_v1[ offset_bank + i_tri ] = v1;
+                mh_linac->B_leaf_v2[ offset_bank + i_tri ] = v2;
+                mh_linac->B_leaf_v3[ offset_bank + i_tri ] = v3;
 
                 // Determine AABB
                 if ( v1.x > xmax ) xmax = v1.x;
@@ -1536,74 +1340,66 @@ void MeshPhanLINACNav::m_init_mlc()
                 ++i_tri;
             }
 
-//            GGcout << "    B tri process" << GGendl;
-
             // Store the bounding box of the current leaf
-            m_linac.B_leaf_aabb[ index_leaf_bank ].xmin = xmin;
-            m_linac.B_leaf_aabb[ index_leaf_bank ].xmax = xmax;
-            m_linac.B_leaf_aabb[ index_leaf_bank ].ymin = ymin;
-            m_linac.B_leaf_aabb[ index_leaf_bank ].ymax = ymax;
-            m_linac.B_leaf_aabb[ index_leaf_bank ].zmin = zmin;
-            m_linac.B_leaf_aabb[ index_leaf_bank ].zmax = zmax;
+            mh_linac->B_leaf_aabb[ index_leaf_bank ].xmin = xmin;
+            mh_linac->B_leaf_aabb[ index_leaf_bank ].xmax = xmax;
+            mh_linac->B_leaf_aabb[ index_leaf_bank ].ymin = ymin;
+            mh_linac->B_leaf_aabb[ index_leaf_bank ].ymax = ymax;
+            mh_linac->B_leaf_aabb[ index_leaf_bank ].zmin = zmin;
+            mh_linac->B_leaf_aabb[ index_leaf_bank ].zmax = zmax;
 
-//            GGcout << "    B aabb " << GGendl;
-//            GGcout << " B" << index_leaf_bank << " aabb: " << xmin << " " << xmax << GGendl;
         }
 
         ++i_leaf;
     } // i_leaf
 
-//    GGcout << "Organize data" << GGendl;
-
     // Finally, compute the AABB of the bank A
     xmin = FLT_MAX; xmax = -FLT_MAX;
     ymin = FLT_MAX; ymax = -FLT_MAX;
     zmin = FLT_MAX; zmax = -FLT_MAX;
-    i_leaf = 0; while ( i_leaf < m_linac.A_nb_leaves )
+    i_leaf = 0; while ( i_leaf < mh_linac->A_nb_leaves )
     {
-        if ( m_linac.A_leaf_aabb[ i_leaf ].xmin < xmin ) xmin = m_linac.A_leaf_aabb[ i_leaf ].xmin;
-        if ( m_linac.A_leaf_aabb[ i_leaf ].ymin < ymin ) ymin = m_linac.A_leaf_aabb[ i_leaf ].ymin;
-        if ( m_linac.A_leaf_aabb[ i_leaf ].zmin < zmin ) zmin = m_linac.A_leaf_aabb[ i_leaf ].zmin;
+        if ( mh_linac->A_leaf_aabb[ i_leaf ].xmin < xmin ) xmin = mh_linac->A_leaf_aabb[ i_leaf ].xmin;
+        if ( mh_linac->A_leaf_aabb[ i_leaf ].ymin < ymin ) ymin = mh_linac->A_leaf_aabb[ i_leaf ].ymin;
+        if ( mh_linac->A_leaf_aabb[ i_leaf ].zmin < zmin ) zmin = mh_linac->A_leaf_aabb[ i_leaf ].zmin;
 
-        if ( m_linac.A_leaf_aabb[ i_leaf ].xmax > xmax ) xmax = m_linac.A_leaf_aabb[ i_leaf ].xmax;
-        if ( m_linac.A_leaf_aabb[ i_leaf ].ymax > ymax ) ymax = m_linac.A_leaf_aabb[ i_leaf ].ymax;
-        if ( m_linac.A_leaf_aabb[ i_leaf ].zmax > zmax ) zmax = m_linac.A_leaf_aabb[ i_leaf ].zmax;
+        if ( mh_linac->A_leaf_aabb[ i_leaf ].xmax > xmax ) xmax = mh_linac->A_leaf_aabb[ i_leaf ].xmax;
+        if ( mh_linac->A_leaf_aabb[ i_leaf ].ymax > ymax ) ymax = mh_linac->A_leaf_aabb[ i_leaf ].ymax;
+        if ( mh_linac->A_leaf_aabb[ i_leaf ].zmax > zmax ) zmax = mh_linac->A_leaf_aabb[ i_leaf ].zmax;
 
         ++i_leaf;
     }
 
-    m_linac.A_bank_aabb.xmin = xmin;
-    m_linac.A_bank_aabb.xmax = xmax;
-    m_linac.A_bank_aabb.ymin = ymin;
-    m_linac.A_bank_aabb.ymax = ymax;
-    m_linac.A_bank_aabb.zmin = zmin;
-    m_linac.A_bank_aabb.zmax = zmax;
+    mh_linac->A_bank_aabb.xmin = xmin;
+    mh_linac->A_bank_aabb.xmax = xmax;
+    mh_linac->A_bank_aabb.ymin = ymin;
+    mh_linac->A_bank_aabb.ymax = ymax;
+    mh_linac->A_bank_aabb.zmin = zmin;
+    mh_linac->A_bank_aabb.zmax = zmax;
 
     // And for the bank B
     xmin = FLT_MAX; xmax = -FLT_MAX;
     ymin = FLT_MAX; ymax = -FLT_MAX;
     zmin = FLT_MAX; zmax = -FLT_MAX;
-    i_leaf = 0; while ( i_leaf < m_linac.B_nb_leaves )
+    i_leaf = 0; while ( i_leaf < mh_linac->B_nb_leaves )
     {
-        if ( m_linac.B_leaf_aabb[ i_leaf ].xmin < xmin ) xmin = m_linac.B_leaf_aabb[ i_leaf ].xmin;
-        if ( m_linac.B_leaf_aabb[ i_leaf ].ymin < ymin ) ymin = m_linac.B_leaf_aabb[ i_leaf ].ymin;
-        if ( m_linac.B_leaf_aabb[ i_leaf ].zmin < zmin ) zmin = m_linac.B_leaf_aabb[ i_leaf ].zmin;
+        if ( mh_linac->B_leaf_aabb[ i_leaf ].xmin < xmin ) xmin = mh_linac->B_leaf_aabb[ i_leaf ].xmin;
+        if ( mh_linac->B_leaf_aabb[ i_leaf ].ymin < ymin ) ymin = mh_linac->B_leaf_aabb[ i_leaf ].ymin;
+        if ( mh_linac->B_leaf_aabb[ i_leaf ].zmin < zmin ) zmin = mh_linac->B_leaf_aabb[ i_leaf ].zmin;
 
-        if ( m_linac.B_leaf_aabb[ i_leaf ].xmax > xmax ) xmax = m_linac.B_leaf_aabb[ i_leaf ].xmax;
-        if ( m_linac.B_leaf_aabb[ i_leaf ].ymax > ymax ) ymax = m_linac.B_leaf_aabb[ i_leaf ].ymax;
-        if ( m_linac.B_leaf_aabb[ i_leaf ].zmax > zmax ) zmax = m_linac.B_leaf_aabb[ i_leaf ].zmax;
+        if ( mh_linac->B_leaf_aabb[ i_leaf ].xmax > xmax ) xmax = mh_linac->B_leaf_aabb[ i_leaf ].xmax;
+        if ( mh_linac->B_leaf_aabb[ i_leaf ].ymax > ymax ) ymax = mh_linac->B_leaf_aabb[ i_leaf ].ymax;
+        if ( mh_linac->B_leaf_aabb[ i_leaf ].zmax > zmax ) zmax = mh_linac->B_leaf_aabb[ i_leaf ].zmax;
 
         ++i_leaf;
     }
 
-    m_linac.B_bank_aabb.xmin = xmin;
-    m_linac.B_bank_aabb.xmax = xmax;
-    m_linac.B_bank_aabb.ymin = ymin;
-    m_linac.B_bank_aabb.ymax = ymax;
-    m_linac.B_bank_aabb.zmin = zmin;
-    m_linac.B_bank_aabb.zmax = zmax;
-
-//    GGcout << "Get AABB" << GGendl;
+    mh_linac->B_bank_aabb.xmin = xmin;
+    mh_linac->B_bank_aabb.xmax = xmax;
+    mh_linac->B_bank_aabb.ymin = ymin;
+    mh_linac->B_bank_aabb.ymax = ymax;
+    mh_linac->B_bank_aabb.zmin = zmin;
+    mh_linac->B_bank_aabb.zmax = zmax;
 
 }
 
@@ -1629,12 +1425,12 @@ void MeshPhanLINACNav::m_init_jaw_x()
         exit_simulation();
     }
 
-    m_linac.X_nb_jaw = jaw.mesh_names.size();
+    mh_linac->X_nb_jaw = jaw.mesh_names.size();
 
     // Some allocation
-    HANDLE_ERROR( cudaMallocManaged( &(m_linac.X_jaw_index), m_linac.X_nb_jaw * sizeof( ui32 ) ) );
-    HANDLE_ERROR( cudaMallocManaged( &(m_linac.X_jaw_nb_triangles), m_linac.X_nb_jaw * sizeof( ui32 ) ) );
-    HANDLE_ERROR( cudaMallocManaged( &(m_linac.X_jaw_aabb), m_linac.X_nb_jaw * sizeof( AabbData ) ) );
+    mh_linac->X_jaw_index = (ui32*)malloc( mh_linac->X_nb_jaw * sizeof( ui32 ) );
+    mh_linac->X_jaw_nb_triangles = (ui32*)malloc( mh_linac->X_nb_jaw * sizeof( ui32 ) );
+    mh_linac->X_jaw_aabb = (AabbData*)malloc( mh_linac->X_nb_jaw * sizeof( AabbData ) );
 
     // Pre-calculation and checking of the data
     ui32 i_jaw = 0;
@@ -1642,7 +1438,7 @@ void MeshPhanLINACNav::m_init_jaw_x()
     ui32 index_jaw;
     ui32 tot_tri_jaw = 0;
 
-    while ( i_jaw < m_linac.X_nb_jaw )
+    while ( i_jaw < mh_linac->X_nb_jaw )
     {
         // Get name of the jaw
         jaw_name = jaw.mesh_names[ i_jaw ];
@@ -1669,26 +1465,27 @@ void MeshPhanLINACNav::m_init_jaw_x()
 
         // Store the number of triangles for each jaw
         // index-1 because jaw start from 1 to 2
-        m_linac.X_jaw_nb_triangles[ index_jaw-1 ] = jaw.nb_triangles[ i_jaw ];
+        mh_linac->X_jaw_nb_triangles[ index_jaw-1 ] = jaw.nb_triangles[ i_jaw ];
         tot_tri_jaw += jaw.nb_triangles[ i_jaw ];
 
         ++i_jaw;
     } // i_leaf
 
     // Compute the offset for each jaw
-    m_linac.X_jaw_index[ 0 ] = 0;
-    m_linac.X_jaw_index[ 1 ] = m_linac.X_jaw_nb_triangles[ 0 ];
+    mh_linac->X_jaw_index[ 0 ] = 0;
+    mh_linac->X_jaw_index[ 1 ] = mh_linac->X_jaw_nb_triangles[ 0 ];
 
     // Some others allocations
-    HANDLE_ERROR( cudaMallocManaged( &(m_linac.X_jaw_v1), tot_tri_jaw * sizeof( f32xyz ) ) );
-    HANDLE_ERROR( cudaMallocManaged( &(m_linac.X_jaw_v2), tot_tri_jaw * sizeof( f32xyz ) ) );
-    HANDLE_ERROR( cudaMallocManaged( &(m_linac.X_jaw_v3), tot_tri_jaw * sizeof( f32xyz ) ) );
+    mh_linac->X_jaw_v1 = (f32xyz*)malloc( tot_tri_jaw * sizeof( f32xyz ) );
+    mh_linac->X_jaw_v2 = (f32xyz*)malloc( tot_tri_jaw * sizeof( f32xyz ) );
+    mh_linac->X_jaw_v3 = (f32xyz*)malloc( tot_tri_jaw * sizeof( f32xyz ) );
+    mh_linac->X_tot_triangles = tot_tri_jaw;
 
     // Loop over leaf. Organize mesh data into the linac data.
     ui32 i_tri, offset_mesh, offset_linac;
     f32xyz v1, v2, v3;
     f32 xmin, xmax, ymin, ymax, zmin, zmax;
-    i_jaw = 0; while ( i_jaw < m_linac.X_nb_jaw )
+    i_jaw = 0; while ( i_jaw < mh_linac->X_nb_jaw )
     {
         // Get name of the leaf
         jaw_name = jaw.mesh_names[ i_jaw ];
@@ -1705,19 +1502,19 @@ void MeshPhanLINACNav::m_init_jaw_x()
         zmin = FLT_MAX; zmax = -FLT_MAX;
 
         // index within the bank
-        offset_linac = m_linac.X_jaw_index[ index_jaw ];
+        offset_linac = mh_linac->X_jaw_index[ index_jaw ];
 
         // loop over triangles
-        i_tri = 0; while ( i_tri < m_linac.X_jaw_nb_triangles[ index_jaw ] )
+        i_tri = 0; while ( i_tri < mh_linac->X_jaw_nb_triangles[ index_jaw ] )
         {
             // Store on the right place
             v1 = jaw.v1[ offset_mesh + i_tri ];
             v2 = jaw.v2[ offset_mesh + i_tri ];
             v3 = jaw.v3[ offset_mesh + i_tri ];
 
-            m_linac.X_jaw_v1[ offset_linac + i_tri ] = v1;
-            m_linac.X_jaw_v2[ offset_linac + i_tri ] = v2;
-            m_linac.X_jaw_v3[ offset_linac + i_tri ] = v3;
+            mh_linac->X_jaw_v1[ offset_linac + i_tri ] = v1;
+            mh_linac->X_jaw_v2[ offset_linac + i_tri ] = v2;
+            mh_linac->X_jaw_v3[ offset_linac + i_tri ] = v3;
 
             // Determine AABB
             if ( v1.x > xmax ) xmax = v1.x;
@@ -1748,12 +1545,12 @@ void MeshPhanLINACNav::m_init_jaw_x()
         }
 
         // Store the bounding box of the current jaw
-        m_linac.X_jaw_aabb[ index_jaw ].xmin = xmin;
-        m_linac.X_jaw_aabb[ index_jaw ].xmax = xmax;
-        m_linac.X_jaw_aabb[ index_jaw ].ymin = ymin;
-        m_linac.X_jaw_aabb[ index_jaw ].ymax = ymax;
-        m_linac.X_jaw_aabb[ index_jaw ].zmin = zmin;
-        m_linac.X_jaw_aabb[ index_jaw ].zmax = zmax;
+        mh_linac->X_jaw_aabb[ index_jaw ].xmin = xmin;
+        mh_linac->X_jaw_aabb[ index_jaw ].xmax = xmax;
+        mh_linac->X_jaw_aabb[ index_jaw ].ymin = ymin;
+        mh_linac->X_jaw_aabb[ index_jaw ].ymax = ymax;
+        mh_linac->X_jaw_aabb[ index_jaw ].zmin = zmin;
+        mh_linac->X_jaw_aabb[ index_jaw ].zmax = zmax;
 
         ++i_jaw;
     } // i_jaw
@@ -1781,12 +1578,12 @@ void MeshPhanLINACNav::m_init_jaw_y()
         exit_simulation();
     }
 
-    m_linac.Y_nb_jaw = jaw.mesh_names.size();
+    mh_linac->Y_nb_jaw = jaw.mesh_names.size();
 
     // Some allocation
-    HANDLE_ERROR( cudaMallocManaged( &(m_linac.Y_jaw_index), m_linac.Y_nb_jaw * sizeof( ui32 ) ) );
-    HANDLE_ERROR( cudaMallocManaged( &(m_linac.Y_jaw_nb_triangles), m_linac.Y_nb_jaw * sizeof( ui32 ) ) );
-    HANDLE_ERROR( cudaMallocManaged( &(m_linac.Y_jaw_aabb), m_linac.Y_nb_jaw * sizeof( AabbData ) ) );
+    mh_linac->Y_jaw_index = (ui32*)malloc( mh_linac->Y_nb_jaw * sizeof( ui32 ) );
+    mh_linac->Y_jaw_nb_triangles = (ui32*)malloc( mh_linac->Y_nb_jaw * sizeof( ui32 ) );
+    mh_linac->Y_jaw_aabb = (AabbData*)malloc( mh_linac->Y_nb_jaw * sizeof( AabbData ) );
 
     // Pre-calculation and checking of the data
     ui32 i_jaw = 0;
@@ -1794,7 +1591,7 @@ void MeshPhanLINACNav::m_init_jaw_y()
     ui32 index_jaw;
     ui32 tot_tri_jaw = 0;
 
-    while ( i_jaw < m_linac.Y_nb_jaw )
+    while ( i_jaw < mh_linac->Y_nb_jaw )
     {
         // Get name of the jaw
         jaw_name = jaw.mesh_names[ i_jaw ];
@@ -1821,26 +1618,27 @@ void MeshPhanLINACNav::m_init_jaw_y()
 
         // Store the number of triangles for each jaw
         // index-1 because jaw start from 1 to 2
-        m_linac.Y_jaw_nb_triangles[ index_jaw-1 ] = jaw.nb_triangles[ i_jaw ];
+        mh_linac->Y_jaw_nb_triangles[ index_jaw-1 ] = jaw.nb_triangles[ i_jaw ];
         tot_tri_jaw += jaw.nb_triangles[ i_jaw ];
 
         ++i_jaw;
     } // i_leaf
 
     // Compute the offset for each jaw
-    m_linac.Y_jaw_index[ 0 ] = 0;
-    m_linac.Y_jaw_index[ 1 ] = m_linac.Y_jaw_nb_triangles[ 0 ];
+    mh_linac->Y_jaw_index[ 0 ] = 0;
+    mh_linac->Y_jaw_index[ 1 ] = mh_linac->Y_jaw_nb_triangles[ 0 ];
 
     // Some others allocations
-    HANDLE_ERROR( cudaMallocManaged( &(m_linac.Y_jaw_v1), tot_tri_jaw * sizeof( f32xyz ) ) );
-    HANDLE_ERROR( cudaMallocManaged( &(m_linac.Y_jaw_v2), tot_tri_jaw * sizeof( f32xyz ) ) );
-    HANDLE_ERROR( cudaMallocManaged( &(m_linac.Y_jaw_v3), tot_tri_jaw * sizeof( f32xyz ) ) );
+    mh_linac->Y_jaw_v1 = (f32xyz*)malloc( tot_tri_jaw * sizeof( f32xyz ) );
+    mh_linac->Y_jaw_v2 = (f32xyz*)malloc( tot_tri_jaw * sizeof( f32xyz ) );
+    mh_linac->Y_jaw_v3 = (f32xyz*)malloc( tot_tri_jaw * sizeof( f32xyz ) );
+    mh_linac->Y_tot_triangles = tot_tri_jaw;
 
     // Loop over leaf. Organize mesh data into the linac data.
     ui32 i_tri, offset_mesh, offset_linac;
     f32xyz v1, v2, v3;
     f32 xmin, xmax, ymin, ymax, zmin, zmax;
-    i_jaw = 0; while ( i_jaw < m_linac.Y_nb_jaw )
+    i_jaw = 0; while ( i_jaw < mh_linac->Y_nb_jaw )
     {
         // Get name of the leaf
         jaw_name = jaw.mesh_names[ i_jaw ];
@@ -1857,19 +1655,19 @@ void MeshPhanLINACNav::m_init_jaw_y()
         zmin = FLT_MAX; zmax = -FLT_MAX;
 
         // index within the bank
-        offset_linac = m_linac.Y_jaw_index[ index_jaw ];
+        offset_linac = mh_linac->Y_jaw_index[ index_jaw ];
 
         // loop over triangles
-        i_tri = 0; while ( i_tri < m_linac.Y_jaw_nb_triangles[ index_jaw ] )
+        i_tri = 0; while ( i_tri < mh_linac->Y_jaw_nb_triangles[ index_jaw ] )
         {
             // Store on the right place
             v1 = jaw.v1[ offset_mesh + i_tri ];
             v2 = jaw.v2[ offset_mesh + i_tri ];
             v3 = jaw.v3[ offset_mesh + i_tri ];
 
-            m_linac.Y_jaw_v1[ offset_linac + i_tri ] = v1;
-            m_linac.Y_jaw_v2[ offset_linac + i_tri ] = v2;
-            m_linac.Y_jaw_v3[ offset_linac + i_tri ] = v3;
+            mh_linac->Y_jaw_v1[ offset_linac + i_tri ] = v1;
+            mh_linac->Y_jaw_v2[ offset_linac + i_tri ] = v2;
+            mh_linac->Y_jaw_v3[ offset_linac + i_tri ] = v3;
 
             // Determine AABB
             if ( v1.x > xmax ) xmax = v1.x;
@@ -1900,12 +1698,12 @@ void MeshPhanLINACNav::m_init_jaw_y()
         }
 
         // Store the bounding box of the current jaw
-        m_linac.Y_jaw_aabb[ index_jaw ].xmin = xmin;
-        m_linac.Y_jaw_aabb[ index_jaw ].xmax = xmax;
-        m_linac.Y_jaw_aabb[ index_jaw ].ymin = ymin;
-        m_linac.Y_jaw_aabb[ index_jaw ].ymax = ymax;
-        m_linac.Y_jaw_aabb[ index_jaw ].zmin = zmin;
-        m_linac.Y_jaw_aabb[ index_jaw ].zmax = zmax;
+        mh_linac->Y_jaw_aabb[ index_jaw ].xmin = xmin;
+        mh_linac->Y_jaw_aabb[ index_jaw ].xmax = xmax;
+        mh_linac->Y_jaw_aabb[ index_jaw ].ymin = ymin;
+        mh_linac->Y_jaw_aabb[ index_jaw ].ymax = ymax;
+        mh_linac->Y_jaw_aabb[ index_jaw ].zmin = zmin;
+        mh_linac->Y_jaw_aabb[ index_jaw ].zmax = zmax;
 
         ++i_jaw;
     } // i_jaw
@@ -1914,46 +1712,46 @@ void MeshPhanLINACNav::m_init_jaw_y()
 
 void MeshPhanLINACNav::m_translate_jaw_x( ui32 index, f32xyz T )
 {
-    ui32 offset = m_linac.X_jaw_index[ index ];
-    ui32 nb_tri = m_linac.X_jaw_nb_triangles[ index ];
+    ui32 offset = mh_linac->X_jaw_index[ index ];
+    ui32 nb_tri = mh_linac->X_jaw_nb_triangles[ index ];
 
     ui32 i_tri = 0; while ( i_tri < nb_tri )
     {
-        m_linac.X_jaw_v1[ offset + i_tri ] = fxyz_add( m_linac.X_jaw_v1[ offset + i_tri ], T );
-        m_linac.X_jaw_v2[ offset + i_tri ] = fxyz_add( m_linac.X_jaw_v2[ offset + i_tri ], T );
-        m_linac.X_jaw_v3[ offset + i_tri ] = fxyz_add( m_linac.X_jaw_v3[ offset + i_tri ], T );
+        mh_linac->X_jaw_v1[ offset + i_tri ] = fxyz_add( mh_linac->X_jaw_v1[ offset + i_tri ], T );
+        mh_linac->X_jaw_v2[ offset + i_tri ] = fxyz_add( mh_linac->X_jaw_v2[ offset + i_tri ], T );
+        mh_linac->X_jaw_v3[ offset + i_tri ] = fxyz_add( mh_linac->X_jaw_v3[ offset + i_tri ], T );
         ++i_tri;
     }
 
     // Move as well the AABB
-    m_linac.X_jaw_aabb[ index ].xmin += T.x;
-    m_linac.X_jaw_aabb[ index ].xmax += T.x;
-    m_linac.X_jaw_aabb[ index ].ymin += T.y;
-    m_linac.X_jaw_aabb[ index ].ymax += T.y;
-    m_linac.X_jaw_aabb[ index ].zmin += T.z;
-    m_linac.X_jaw_aabb[ index ].zmax += T.z;
+    mh_linac->X_jaw_aabb[ index ].xmin += T.x;
+    mh_linac->X_jaw_aabb[ index ].xmax += T.x;
+    mh_linac->X_jaw_aabb[ index ].ymin += T.y;
+    mh_linac->X_jaw_aabb[ index ].ymax += T.y;
+    mh_linac->X_jaw_aabb[ index ].zmin += T.z;
+    mh_linac->X_jaw_aabb[ index ].zmax += T.z;
 }
 
 void MeshPhanLINACNav::m_translate_jaw_y( ui32 index, f32xyz T )
 {
-    ui32 offset = m_linac.Y_jaw_index[ index ];
-    ui32 nb_tri = m_linac.Y_jaw_nb_triangles[ index ];
+    ui32 offset = mh_linac->Y_jaw_index[ index ];
+    ui32 nb_tri = mh_linac->Y_jaw_nb_triangles[ index ];
 
     ui32 i_tri = 0; while ( i_tri < nb_tri )
     {
-        m_linac.Y_jaw_v1[ offset + i_tri ] = fxyz_add( m_linac.Y_jaw_v1[ offset + i_tri ], T );
-        m_linac.Y_jaw_v2[ offset + i_tri ] = fxyz_add( m_linac.Y_jaw_v2[ offset + i_tri ], T );
-        m_linac.Y_jaw_v3[ offset + i_tri ] = fxyz_add( m_linac.Y_jaw_v3[ offset + i_tri ], T );
+        mh_linac->Y_jaw_v1[ offset + i_tri ] = fxyz_add( mh_linac->Y_jaw_v1[ offset + i_tri ], T );
+        mh_linac->Y_jaw_v2[ offset + i_tri ] = fxyz_add( mh_linac->Y_jaw_v2[ offset + i_tri ], T );
+        mh_linac->Y_jaw_v3[ offset + i_tri ] = fxyz_add( mh_linac->Y_jaw_v3[ offset + i_tri ], T );
         ++i_tri;
     }
 
     // Move as well the AABB
-    m_linac.Y_jaw_aabb[ index ].xmin += T.x;
-    m_linac.Y_jaw_aabb[ index ].xmax += T.x;
-    m_linac.Y_jaw_aabb[ index ].ymin += T.y;
-    m_linac.Y_jaw_aabb[ index ].ymax += T.y;
-    m_linac.Y_jaw_aabb[ index ].zmin += T.z;
-    m_linac.Y_jaw_aabb[ index ].zmax += T.z;
+    mh_linac->Y_jaw_aabb[ index ].xmin += T.x;
+    mh_linac->Y_jaw_aabb[ index ].xmax += T.x;
+    mh_linac->Y_jaw_aabb[ index ].ymin += T.y;
+    mh_linac->Y_jaw_aabb[ index ].ymax += T.y;
+    mh_linac->Y_jaw_aabb[ index ].zmin += T.z;
+    mh_linac->Y_jaw_aabb[ index ].zmax += T.z;
 }
 
 void MeshPhanLINACNav::m_translate_leaf_A( ui32 index, f32xyz T )
@@ -1964,54 +1762,54 @@ void MeshPhanLINACNav::m_translate_leaf_A( ui32 index, f32xyz T )
         return;
     }
 
-    ui32 offset = m_linac.A_leaf_index[ index ];
-    ui32 nb_tri = m_linac.A_leaf_nb_triangles[ index ];
+    ui32 offset = mh_linac->A_leaf_index[ index ];
+    ui32 nb_tri = mh_linac->A_leaf_nb_triangles[ index ];
 
     ui32 i_tri = 0; while ( i_tri < nb_tri )
     {
-        m_linac.A_leaf_v1[ offset + i_tri ] = fxyz_add( m_linac.A_leaf_v1[ offset + i_tri ], T );
-        m_linac.A_leaf_v2[ offset + i_tri ] = fxyz_add( m_linac.A_leaf_v2[ offset + i_tri ], T );
-        m_linac.A_leaf_v3[ offset + i_tri ] = fxyz_add( m_linac.A_leaf_v3[ offset + i_tri ], T );
+        mh_linac->A_leaf_v1[ offset + i_tri ] = fxyz_add( mh_linac->A_leaf_v1[ offset + i_tri ], T );
+        mh_linac->A_leaf_v2[ offset + i_tri ] = fxyz_add( mh_linac->A_leaf_v2[ offset + i_tri ], T );
+        mh_linac->A_leaf_v3[ offset + i_tri ] = fxyz_add( mh_linac->A_leaf_v3[ offset + i_tri ], T );
         ++i_tri;
     }
 
     // Move as well the AABB
-    m_linac.A_leaf_aabb[ index ].xmin += T.x;
-    m_linac.A_leaf_aabb[ index ].xmax += T.x;
-    m_linac.A_leaf_aabb[ index ].ymin += T.y;
-    m_linac.A_leaf_aabb[ index ].ymax += T.y;
-    m_linac.A_leaf_aabb[ index ].zmin += T.z;
-    m_linac.A_leaf_aabb[ index ].zmax += T.z;
+    mh_linac->A_leaf_aabb[ index ].xmin += T.x;
+    mh_linac->A_leaf_aabb[ index ].xmax += T.x;
+    mh_linac->A_leaf_aabb[ index ].ymin += T.y;
+    mh_linac->A_leaf_aabb[ index ].ymax += T.y;
+    mh_linac->A_leaf_aabb[ index ].zmin += T.z;
+    mh_linac->A_leaf_aabb[ index ].zmax += T.z;
 
     // Update the bank AABB
-    if ( m_linac.A_leaf_aabb[ index ].xmin < m_linac.A_bank_aabb.xmin )
+    if ( mh_linac->A_leaf_aabb[ index ].xmin < mh_linac->A_bank_aabb.xmin )
     {
-        m_linac.A_bank_aabb.xmin = m_linac.A_leaf_aabb[ index ].xmin;
+        mh_linac->A_bank_aabb.xmin = mh_linac->A_leaf_aabb[ index ].xmin;
     }
 
-    if ( m_linac.A_leaf_aabb[ index ].ymin < m_linac.A_bank_aabb.ymin )
+    if ( mh_linac->A_leaf_aabb[ index ].ymin < mh_linac->A_bank_aabb.ymin )
     {
-        m_linac.A_bank_aabb.ymin = m_linac.A_leaf_aabb[ index ].ymin;
+        mh_linac->A_bank_aabb.ymin = mh_linac->A_leaf_aabb[ index ].ymin;
     }
 
-    if ( m_linac.A_leaf_aabb[ index ].zmin < m_linac.A_bank_aabb.zmin )
+    if ( mh_linac->A_leaf_aabb[ index ].zmin < mh_linac->A_bank_aabb.zmin )
     {
-        m_linac.A_bank_aabb.zmin = m_linac.A_leaf_aabb[ index ].zmin;
+        mh_linac->A_bank_aabb.zmin = mh_linac->A_leaf_aabb[ index ].zmin;
     }
 
-    if ( m_linac.A_leaf_aabb[ index ].xmax > m_linac.A_bank_aabb.xmax )
+    if ( mh_linac->A_leaf_aabb[ index ].xmax > mh_linac->A_bank_aabb.xmax )
     {
-        m_linac.A_bank_aabb.xmax = m_linac.A_leaf_aabb[ index ].xmax;
+        mh_linac->A_bank_aabb.xmax = mh_linac->A_leaf_aabb[ index ].xmax;
     }
 
-    if ( m_linac.A_leaf_aabb[ index ].ymax > m_linac.A_bank_aabb.ymax )
+    if ( mh_linac->A_leaf_aabb[ index ].ymax > mh_linac->A_bank_aabb.ymax )
     {
-        m_linac.A_bank_aabb.ymax = m_linac.A_leaf_aabb[ index ].ymax;
+        mh_linac->A_bank_aabb.ymax = mh_linac->A_leaf_aabb[ index ].ymax;
     }
 
-    if ( m_linac.A_leaf_aabb[ index ].zmax > m_linac.A_bank_aabb.zmax )
+    if ( mh_linac->A_leaf_aabb[ index ].zmax > mh_linac->A_bank_aabb.zmax )
     {
-        m_linac.A_bank_aabb.zmax = m_linac.A_leaf_aabb[ index ].zmax;
+        mh_linac->A_bank_aabb.zmax = mh_linac->A_leaf_aabb[ index ].zmax;
     }
 
 }
@@ -2024,54 +1822,54 @@ void MeshPhanLINACNav::m_translate_leaf_B( ui32 index, f32xyz T )
         return;
     }
 
-    ui32 offset = m_linac.B_leaf_index[ index ];
-    ui32 nb_tri = m_linac.B_leaf_nb_triangles[ index ];
+    ui32 offset = mh_linac->B_leaf_index[ index ];
+    ui32 nb_tri = mh_linac->B_leaf_nb_triangles[ index ];
 
     ui32 i_tri = 0; while ( i_tri < nb_tri )
     {
-        m_linac.B_leaf_v1[ offset + i_tri ] = fxyz_add( m_linac.B_leaf_v1[ offset + i_tri ], T );
-        m_linac.B_leaf_v2[ offset + i_tri ] = fxyz_add( m_linac.B_leaf_v2[ offset + i_tri ], T );
-        m_linac.B_leaf_v3[ offset + i_tri ] = fxyz_add( m_linac.B_leaf_v3[ offset + i_tri ], T );
+        mh_linac->B_leaf_v1[ offset + i_tri ] = fxyz_add( mh_linac->B_leaf_v1[ offset + i_tri ], T );
+        mh_linac->B_leaf_v2[ offset + i_tri ] = fxyz_add( mh_linac->B_leaf_v2[ offset + i_tri ], T );
+        mh_linac->B_leaf_v3[ offset + i_tri ] = fxyz_add( mh_linac->B_leaf_v3[ offset + i_tri ], T );
         ++i_tri;
     }
 
     // Move as well the AABB
-    m_linac.B_leaf_aabb[ index ].xmin += T.x;
-    m_linac.B_leaf_aabb[ index ].xmax += T.x;
-    m_linac.B_leaf_aabb[ index ].ymin += T.y;
-    m_linac.B_leaf_aabb[ index ].ymax += T.y;
-    m_linac.B_leaf_aabb[ index ].zmin += T.z;
-    m_linac.B_leaf_aabb[ index ].zmax += T.z;
+    mh_linac->B_leaf_aabb[ index ].xmin += T.x;
+    mh_linac->B_leaf_aabb[ index ].xmax += T.x;
+    mh_linac->B_leaf_aabb[ index ].ymin += T.y;
+    mh_linac->B_leaf_aabb[ index ].ymax += T.y;
+    mh_linac->B_leaf_aabb[ index ].zmin += T.z;
+    mh_linac->B_leaf_aabb[ index ].zmax += T.z;
 
     // Update the bank AABB
-    if ( m_linac.B_leaf_aabb[ index ].xmin < m_linac.B_bank_aabb.xmin )
+    if ( mh_linac->B_leaf_aabb[ index ].xmin < mh_linac->B_bank_aabb.xmin )
     {
-        m_linac.B_bank_aabb.xmin = m_linac.B_leaf_aabb[ index ].xmin;
+        mh_linac->B_bank_aabb.xmin = mh_linac->B_leaf_aabb[ index ].xmin;
     }
 
-    if ( m_linac.B_leaf_aabb[ index ].ymin < m_linac.B_bank_aabb.ymin )
+    if ( mh_linac->B_leaf_aabb[ index ].ymin < mh_linac->B_bank_aabb.ymin )
     {
-        m_linac.B_bank_aabb.ymin = m_linac.B_leaf_aabb[ index ].ymin;
+        mh_linac->B_bank_aabb.ymin = mh_linac->B_leaf_aabb[ index ].ymin;
     }
 
-    if ( m_linac.B_leaf_aabb[ index ].zmin < m_linac.B_bank_aabb.zmin )
+    if ( mh_linac->B_leaf_aabb[ index ].zmin < mh_linac->B_bank_aabb.zmin )
     {
-        m_linac.B_bank_aabb.zmin = m_linac.B_leaf_aabb[ index ].zmin;
+        mh_linac->B_bank_aabb.zmin = mh_linac->B_leaf_aabb[ index ].zmin;
     }
 
-    if ( m_linac.B_leaf_aabb[ index ].xmax > m_linac.B_bank_aabb.xmax )
+    if ( mh_linac->B_leaf_aabb[ index ].xmax > mh_linac->B_bank_aabb.xmax )
     {
-        m_linac.B_bank_aabb.xmax = m_linac.B_leaf_aabb[ index ].xmax;
+        mh_linac->B_bank_aabb.xmax = mh_linac->B_leaf_aabb[ index ].xmax;
     }
 
-    if ( m_linac.B_leaf_aabb[ index ].ymax > m_linac.B_bank_aabb.ymax )
+    if ( mh_linac->B_leaf_aabb[ index ].ymax > mh_linac->B_bank_aabb.ymax )
     {
-        m_linac.B_bank_aabb.ymax = m_linac.B_leaf_aabb[ index ].ymax;
+        mh_linac->B_bank_aabb.ymax = mh_linac->B_leaf_aabb[ index ].ymax;
     }
 
-    if ( m_linac.B_leaf_aabb[ index ].zmax > m_linac.B_bank_aabb.zmax )
+    if ( mh_linac->B_leaf_aabb[ index ].zmax > mh_linac->B_bank_aabb.zmax )
     {
-        m_linac.B_bank_aabb.zmax = m_linac.B_leaf_aabb[ index ].zmax;
+        mh_linac->B_bank_aabb.zmax = mh_linac->B_leaf_aabb[ index ].zmax;
     }
 
 }
@@ -2114,8 +1912,6 @@ void MeshPhanLINACNav::m_configure_linac()
         exit_simulation();
     }
 
-//    GGcout << "Find beam: " << line << GGendl;
-
     // Then look for the number of fields
     while ( file )
     {
@@ -2127,8 +1923,6 @@ void MeshPhanLINACNav::m_configure_linac()
             break;
         }
     }
-
-//    GGcout << "Find nb field: " << line << GGendl;
 
     keys = m_split_txt( line );
     ui32 nb_fields = std::stoi( keys[ 4 ] );
@@ -2160,14 +1954,12 @@ void MeshPhanLINACNav::m_configure_linac()
         exit_simulation();
     }
 
-//    GGcout << "Find nb leaves: " << line << GGendl;
-
     keys = m_split_txt( line );
     ui32 nb_leaves = std::stoi( keys[ 4 ] );
-    if ( m_linac.A_nb_leaves + m_linac.B_nb_leaves != nb_leaves )
+    if ( mh_linac->A_nb_leaves + mh_linac->B_nb_leaves != nb_leaves )
     {
         GGcerr << "Beam configuration error, " << nb_leaves
-               << " leaves were found but LINAC model have " << m_linac.A_nb_leaves + m_linac.B_nb_leaves
+               << " leaves were found but LINAC model have " << mh_linac->A_nb_leaves + mh_linac->B_nb_leaves
                << " leaves!" << GGendl;
         exit_simulation();
     }
@@ -2187,8 +1979,6 @@ void MeshPhanLINACNav::m_configure_linac()
             }
         }
     }
-
-//    GGcout << "Find field: " << line << GGendl;
 
     // Then read the index CDF (not use at the time, so skip the line)
     std::getline( file, line );
@@ -2229,7 +2019,7 @@ void MeshPhanLINACNav::m_configure_linac()
     trans->set_translation( m_pos_mlc );
     trans->set_rotation( m_rot_linac );
     trans->set_axis_transformation( m_axis_linac );
-    m_linac.transform = trans->get_transformation_matrix();
+    mh_linac->transform = trans->get_transformation_matrix();
     delete trans;
 
     //// JAWS //////////////////////////////////////////
@@ -2276,28 +2066,28 @@ void MeshPhanLINACNav::m_configure_linac()
     }
 
     // Check
-    if ( !jaw_x && m_linac.X_nb_jaw != 0 )
+    if ( !jaw_x && mh_linac->X_nb_jaw != 0 )
     {
         GGcerr << "Beam configuration error, geometry of the jaw-X was defined but the position values were not found!" << GGendl;
         exit_simulation();
     }
-    if ( !jaw_y && m_linac.Y_nb_jaw != 0 )
+    if ( !jaw_y && mh_linac->Y_nb_jaw != 0 )
     {
         GGcerr << "Beam configuration error, geometry of the jaw-Y was defined but the position values were not found!" << GGendl;
         exit_simulation();
     }
 
     // Configure the jaws
-    if ( m_linac.X_nb_jaw != 0 )
+    if ( mh_linac->X_nb_jaw != 0 )
     {
-        m_translate_jaw_x( 0, make_f32xyz( jaw_x_max * m_linac.scale_ratio, 0.0, 0.0 ) );   // X1 ( x > 0 )
-        m_translate_jaw_x( 1, make_f32xyz( jaw_x_min * m_linac.scale_ratio, 0.0, 0.0 ) );   // X2 ( x < 0 )
+        m_translate_jaw_x( 0, make_f32xyz( jaw_x_max * mh_linac->scale_ratio, 0.0, 0.0 ) );   // X1 ( x > 0 )
+        m_translate_jaw_x( 1, make_f32xyz( jaw_x_min * mh_linac->scale_ratio, 0.0, 0.0 ) );   // X2 ( x < 0 )
     }
 
-    if ( m_linac.Y_nb_jaw != 0 )
+    if ( mh_linac->Y_nb_jaw != 0 )
     {
-        m_translate_jaw_y( 0, make_f32xyz( 0.0, jaw_y_max * m_linac.scale_ratio, 0.0 ) );   // Y1 ( y > 0 )
-        m_translate_jaw_y( 1, make_f32xyz( 0.0, jaw_y_min * m_linac.scale_ratio, 0.0 ) );   // Y2 ( y < 0 )
+        m_translate_jaw_y( 0, make_f32xyz( 0.0, jaw_y_max * mh_linac->scale_ratio, 0.0 ) );   // Y1 ( y > 0 )
+        m_translate_jaw_y( 1, make_f32xyz( 0.0, jaw_y_min * mh_linac->scale_ratio, 0.0 ) );   // Y2 ( y < 0 )
     }
 
     //// LEAVES BANK A ///////////////////////////////////////////////
@@ -2321,7 +2111,7 @@ void MeshPhanLINACNav::m_configure_linac()
             }
 
             // watchdog
-            if ( ileaf >= m_linac.A_nb_leaves )
+            if ( ileaf >= mh_linac->A_nb_leaves )
             {
                 GGcerr << "Beam configuration error, find more leaves in the configuration "
                        << "file for the bank A than leaves in the LINAC model!" << GGendl;
@@ -2333,7 +2123,7 @@ void MeshPhanLINACNav::m_configure_linac()
 
             // read data and move the leaf
             keys = m_split_txt( line );
-            m_translate_leaf_A( ileaf++, make_f32xyz( std::stof( keys[ 3 ] ) * m_linac.scale_ratio, 0.0, 0.0 ) );
+            m_translate_leaf_A( ileaf++, make_f32xyz( std::stof( keys[ 3 ] ) * mh_linac->scale_ratio, 0.0, 0.0 ) );
 
         }
         else
@@ -2374,7 +2164,7 @@ void MeshPhanLINACNav::m_configure_linac()
             }
 
             // watchdog
-            if ( ileaf >= m_linac.B_nb_leaves )
+            if ( ileaf >= mh_linac->B_nb_leaves )
             {
                 GGcerr << "Beam configuration error, find more leaves in the configuration "
                        << "file for the bank B than leaves in the LINAC model!" << GGendl;
@@ -2386,7 +2176,7 @@ void MeshPhanLINACNav::m_configure_linac()
 
             // read data and move the leaf
             keys = m_split_txt( line );
-            m_translate_leaf_B( ileaf++, make_f32xyz( std::stof( keys[ 3 ] ) * m_linac.scale_ratio, 0.0, 0.0 ) );
+            m_translate_leaf_B( ileaf++, make_f32xyz( std::stof( keys[ 3 ] ) * mh_linac->scale_ratio, 0.0, 0.0 ) );
 
         }
         else
@@ -2410,61 +2200,281 @@ void MeshPhanLINACNav::m_configure_linac()
     f32 ymin = FLT_MAX; f32 ymax = -FLT_MAX;
     f32 zmin = FLT_MAX; f32 zmax = -FLT_MAX;
 
-    if ( m_linac.A_bank_aabb.xmin < xmin ) xmin = m_linac.A_bank_aabb.xmin;
-    if ( m_linac.B_bank_aabb.xmin < xmin ) xmin = m_linac.B_bank_aabb.xmin;
-    if ( m_linac.A_bank_aabb.ymin < ymin ) ymin = m_linac.A_bank_aabb.ymin;
-    if ( m_linac.B_bank_aabb.ymin < ymin ) ymin = m_linac.B_bank_aabb.ymin;
-    if ( m_linac.A_bank_aabb.zmin < zmin ) zmin = m_linac.A_bank_aabb.zmin;
-    if ( m_linac.B_bank_aabb.zmin < zmin ) zmin = m_linac.B_bank_aabb.zmin;
+    if ( mh_linac->A_bank_aabb.xmin < xmin ) xmin = mh_linac->A_bank_aabb.xmin;
+    if ( mh_linac->B_bank_aabb.xmin < xmin ) xmin = mh_linac->B_bank_aabb.xmin;
+    if ( mh_linac->A_bank_aabb.ymin < ymin ) ymin = mh_linac->A_bank_aabb.ymin;
+    if ( mh_linac->B_bank_aabb.ymin < ymin ) ymin = mh_linac->B_bank_aabb.ymin;
+    if ( mh_linac->A_bank_aabb.zmin < zmin ) zmin = mh_linac->A_bank_aabb.zmin;
+    if ( mh_linac->B_bank_aabb.zmin < zmin ) zmin = mh_linac->B_bank_aabb.zmin;
 
-    if ( m_linac.A_bank_aabb.xmax > xmax ) xmax = m_linac.A_bank_aabb.xmax;
-    if ( m_linac.B_bank_aabb.xmax > xmax ) xmax = m_linac.B_bank_aabb.xmax;
-    if ( m_linac.A_bank_aabb.ymax > ymax ) ymax = m_linac.A_bank_aabb.ymax;
-    if ( m_linac.B_bank_aabb.ymax > ymax ) ymax = m_linac.B_bank_aabb.ymax;
-    if ( m_linac.A_bank_aabb.zmax > zmax ) zmax = m_linac.A_bank_aabb.zmax;
-    if ( m_linac.B_bank_aabb.zmax > zmax ) zmax = m_linac.B_bank_aabb.zmax;
+    if ( mh_linac->A_bank_aabb.xmax > xmax ) xmax = mh_linac->A_bank_aabb.xmax;
+    if ( mh_linac->B_bank_aabb.xmax > xmax ) xmax = mh_linac->B_bank_aabb.xmax;
+    if ( mh_linac->A_bank_aabb.ymax > ymax ) ymax = mh_linac->A_bank_aabb.ymax;
+    if ( mh_linac->B_bank_aabb.ymax > ymax ) ymax = mh_linac->B_bank_aabb.ymax;
+    if ( mh_linac->A_bank_aabb.zmax > zmax ) zmax = mh_linac->A_bank_aabb.zmax;
+    if ( mh_linac->B_bank_aabb.zmax > zmax ) zmax = mh_linac->B_bank_aabb.zmax;
 
-    if ( m_linac.X_nb_jaw != 0 )
+    if ( mh_linac->X_nb_jaw != 0 )
     {
-        if ( m_linac.X_jaw_aabb[ 0 ].xmin < xmin ) xmin = m_linac.X_jaw_aabb[ 0 ].xmin;
-        if ( m_linac.X_jaw_aabb[ 1 ].xmin < xmin ) xmin = m_linac.X_jaw_aabb[ 1 ].xmin;
-        if ( m_linac.X_jaw_aabb[ 0 ].ymin < ymin ) ymin = m_linac.X_jaw_aabb[ 0 ].ymin;
-        if ( m_linac.X_jaw_aabb[ 1 ].ymin < ymin ) ymin = m_linac.X_jaw_aabb[ 1 ].ymin;
-        if ( m_linac.X_jaw_aabb[ 0 ].zmin < zmin ) zmin = m_linac.X_jaw_aabb[ 0 ].zmin;
-        if ( m_linac.X_jaw_aabb[ 1 ].zmin < zmin ) zmin = m_linac.X_jaw_aabb[ 1 ].zmin;
+        if ( mh_linac->X_jaw_aabb[ 0 ].xmin < xmin ) xmin = mh_linac->X_jaw_aabb[ 0 ].xmin;
+        if ( mh_linac->X_jaw_aabb[ 1 ].xmin < xmin ) xmin = mh_linac->X_jaw_aabb[ 1 ].xmin;
+        if ( mh_linac->X_jaw_aabb[ 0 ].ymin < ymin ) ymin = mh_linac->X_jaw_aabb[ 0 ].ymin;
+        if ( mh_linac->X_jaw_aabb[ 1 ].ymin < ymin ) ymin = mh_linac->X_jaw_aabb[ 1 ].ymin;
+        if ( mh_linac->X_jaw_aabb[ 0 ].zmin < zmin ) zmin = mh_linac->X_jaw_aabb[ 0 ].zmin;
+        if ( mh_linac->X_jaw_aabb[ 1 ].zmin < zmin ) zmin = mh_linac->X_jaw_aabb[ 1 ].zmin;
 
-        if ( m_linac.X_jaw_aabb[ 0 ].xmax > xmax ) xmax = m_linac.X_jaw_aabb[ 0 ].xmax;
-        if ( m_linac.X_jaw_aabb[ 1 ].xmax > xmax ) xmax = m_linac.X_jaw_aabb[ 1 ].xmax;
-        if ( m_linac.X_jaw_aabb[ 0 ].ymax > ymax ) ymax = m_linac.X_jaw_aabb[ 0 ].ymax;
-        if ( m_linac.X_jaw_aabb[ 1 ].ymax > ymax ) ymax = m_linac.X_jaw_aabb[ 1 ].ymax;
-        if ( m_linac.X_jaw_aabb[ 0 ].zmax > zmax ) zmax = m_linac.X_jaw_aabb[ 0 ].zmax;
-        if ( m_linac.X_jaw_aabb[ 1 ].zmax > zmax ) zmax = m_linac.X_jaw_aabb[ 1 ].zmax;
+        if ( mh_linac->X_jaw_aabb[ 0 ].xmax > xmax ) xmax = mh_linac->X_jaw_aabb[ 0 ].xmax;
+        if ( mh_linac->X_jaw_aabb[ 1 ].xmax > xmax ) xmax = mh_linac->X_jaw_aabb[ 1 ].xmax;
+        if ( mh_linac->X_jaw_aabb[ 0 ].ymax > ymax ) ymax = mh_linac->X_jaw_aabb[ 0 ].ymax;
+        if ( mh_linac->X_jaw_aabb[ 1 ].ymax > ymax ) ymax = mh_linac->X_jaw_aabb[ 1 ].ymax;
+        if ( mh_linac->X_jaw_aabb[ 0 ].zmax > zmax ) zmax = mh_linac->X_jaw_aabb[ 0 ].zmax;
+        if ( mh_linac->X_jaw_aabb[ 1 ].zmax > zmax ) zmax = mh_linac->X_jaw_aabb[ 1 ].zmax;
     }
 
-    if ( m_linac.Y_nb_jaw != 0 )
+    if ( mh_linac->Y_nb_jaw != 0 )
     {
-        if ( m_linac.Y_jaw_aabb[ 0 ].xmin < xmin ) xmin = m_linac.Y_jaw_aabb[ 0 ].xmin;
-        if ( m_linac.Y_jaw_aabb[ 1 ].xmin < xmin ) xmin = m_linac.Y_jaw_aabb[ 1 ].xmin;
-        if ( m_linac.Y_jaw_aabb[ 0 ].ymin < ymin ) ymin = m_linac.Y_jaw_aabb[ 0 ].ymin;
-        if ( m_linac.Y_jaw_aabb[ 1 ].ymin < ymin ) ymin = m_linac.Y_jaw_aabb[ 1 ].ymin;
-        if ( m_linac.Y_jaw_aabb[ 0 ].zmin < zmin ) zmin = m_linac.Y_jaw_aabb[ 0 ].zmin;
-        if ( m_linac.Y_jaw_aabb[ 1 ].zmin < zmin ) zmin = m_linac.Y_jaw_aabb[ 1 ].zmin;
+        if ( mh_linac->Y_jaw_aabb[ 0 ].xmin < xmin ) xmin = mh_linac->Y_jaw_aabb[ 0 ].xmin;
+        if ( mh_linac->Y_jaw_aabb[ 1 ].xmin < xmin ) xmin = mh_linac->Y_jaw_aabb[ 1 ].xmin;
+        if ( mh_linac->Y_jaw_aabb[ 0 ].ymin < ymin ) ymin = mh_linac->Y_jaw_aabb[ 0 ].ymin;
+        if ( mh_linac->Y_jaw_aabb[ 1 ].ymin < ymin ) ymin = mh_linac->Y_jaw_aabb[ 1 ].ymin;
+        if ( mh_linac->Y_jaw_aabb[ 0 ].zmin < zmin ) zmin = mh_linac->Y_jaw_aabb[ 0 ].zmin;
+        if ( mh_linac->Y_jaw_aabb[ 1 ].zmin < zmin ) zmin = mh_linac->Y_jaw_aabb[ 1 ].zmin;
 
-        if ( m_linac.Y_jaw_aabb[ 0 ].xmax > xmax ) xmax = m_linac.Y_jaw_aabb[ 0 ].xmax;
-        if ( m_linac.Y_jaw_aabb[ 1 ].xmax > xmax ) xmax = m_linac.Y_jaw_aabb[ 1 ].xmax;
-        if ( m_linac.Y_jaw_aabb[ 0 ].ymax > ymax ) ymax = m_linac.Y_jaw_aabb[ 0 ].ymax;
-        if ( m_linac.Y_jaw_aabb[ 1 ].ymax > ymax ) ymax = m_linac.Y_jaw_aabb[ 1 ].ymax;
-        if ( m_linac.Y_jaw_aabb[ 0 ].zmax > zmax ) zmax = m_linac.Y_jaw_aabb[ 0 ].zmax;
-        if ( m_linac.Y_jaw_aabb[ 1 ].zmax > zmax ) zmax = m_linac.Y_jaw_aabb[ 1 ].zmax;
+        if ( mh_linac->Y_jaw_aabb[ 0 ].xmax > xmax ) xmax = mh_linac->Y_jaw_aabb[ 0 ].xmax;
+        if ( mh_linac->Y_jaw_aabb[ 1 ].xmax > xmax ) xmax = mh_linac->Y_jaw_aabb[ 1 ].xmax;
+        if ( mh_linac->Y_jaw_aabb[ 0 ].ymax > ymax ) ymax = mh_linac->Y_jaw_aabb[ 0 ].ymax;
+        if ( mh_linac->Y_jaw_aabb[ 1 ].ymax > ymax ) ymax = mh_linac->Y_jaw_aabb[ 1 ].ymax;
+        if ( mh_linac->Y_jaw_aabb[ 0 ].zmax > zmax ) zmax = mh_linac->Y_jaw_aabb[ 0 ].zmax;
+        if ( mh_linac->Y_jaw_aabb[ 1 ].zmax > zmax ) zmax = mh_linac->Y_jaw_aabb[ 1 ].zmax;
     }
 
     // Store the data
-    m_linac.aabb.xmin = xmin;
-    m_linac.aabb.xmax = xmax;
-    m_linac.aabb.ymin = ymin;
-    m_linac.aabb.ymax = ymax;
-    m_linac.aabb.zmin = zmin;
-    m_linac.aabb.zmax = zmax;
+    mh_linac->aabb.xmin = xmin;
+    mh_linac->aabb.xmax = xmax;
+    mh_linac->aabb.ymin = ymin;
+    mh_linac->aabb.ymax = ymax;
+    mh_linac->aabb.zmin = zmin;
+    mh_linac->aabb.zmax = zmax;
+
+}
+
+// Copy linac data to the GPU
+void MeshPhanLINACNav::m_copy_linac_to_gpu()
+{
+    ui32 na_lea = mh_linac->A_nb_leaves;
+    ui32 na_tri = mh_linac->A_tot_triangles;
+    ui32 nb_lea = mh_linac->B_nb_leaves;
+    ui32 nb_tri = mh_linac->B_tot_triangles;
+
+    ui32 nx_lea = mh_linac->X_nb_jaw;
+    ui32 nx_tri = mh_linac->X_tot_triangles;
+    ui32 ny_lea = mh_linac->Y_nb_jaw;
+    ui32 ny_tri = mh_linac->Y_tot_triangles;
+
+    /// First, struct allocation
+
+    HANDLE_ERROR( cudaMalloc( (void**) &md_linac, sizeof( LinacData ) ) );
+
+    /// Device pointers allocation
+
+    f32xyz   *A_leaf_v1;           // Vertex 1  - Triangular meshes
+    HANDLE_ERROR( cudaMalloc((void**) &A_leaf_v1, na_tri*sizeof(f32xyz)) );
+    f32xyz   *A_leaf_v2;           // Vertex 2
+    HANDLE_ERROR( cudaMalloc((void**) &A_leaf_v2, na_tri*sizeof(f32xyz)) );
+    f32xyz   *A_leaf_v3;           // Vertex 3
+    HANDLE_ERROR( cudaMalloc((void**) &A_leaf_v3, na_tri*sizeof(f32xyz)) );
+    ui32     *A_leaf_index;        // Index to acces to a leaf
+    HANDLE_ERROR( cudaMalloc((void**) &A_leaf_index, na_lea*sizeof(ui32)) );
+    ui32     *A_leaf_nb_triangles; // Nb of triangles within each leaf
+    HANDLE_ERROR( cudaMalloc((void**) &A_leaf_nb_triangles, na_lea*sizeof(ui32)) );
+    AabbData *A_leaf_aabb;         // Bounding box of each leaf
+    HANDLE_ERROR( cudaMalloc((void**) &A_leaf_aabb, na_lea*sizeof(AabbData)) );
+
+    f32xyz   *B_leaf_v1;           // Vertex 1  - Triangular meshes
+    HANDLE_ERROR( cudaMalloc((void**) &B_leaf_v1, nb_tri*sizeof(f32xyz)) );
+    f32xyz   *B_leaf_v2;           // Vertex 2
+    HANDLE_ERROR( cudaMalloc((void**) &B_leaf_v2, nb_tri*sizeof(f32xyz)) );
+    f32xyz   *B_leaf_v3;           // Vertex 3
+    HANDLE_ERROR( cudaMalloc((void**) &B_leaf_v3, nb_tri*sizeof(f32xyz)) );
+    ui32     *B_leaf_index;        // Index to acces to a leaf
+    HANDLE_ERROR( cudaMalloc((void**) &B_leaf_index, nb_lea*sizeof(ui32)) );
+    ui32     *B_leaf_nb_triangles; // Nb of triangles within each leaf
+    HANDLE_ERROR( cudaMalloc((void**) &B_leaf_nb_triangles, nb_lea*sizeof(ui32)) );
+    AabbData *B_leaf_aabb;         // Bounding box of each leaf
+    HANDLE_ERROR( cudaMalloc((void**) &B_leaf_aabb, nb_lea*sizeof(AabbData)) );
+
+    f32xyz   *X_jaw_v1;           // Vertex 1  - Triangular meshes
+    HANDLE_ERROR( cudaMalloc((void**) &X_jaw_v1, nx_tri*sizeof(f32xyz)) );
+    f32xyz   *X_jaw_v2;           // Vertex 2
+    HANDLE_ERROR( cudaMalloc((void**) &X_jaw_v2, nx_tri*sizeof(f32xyz)) );
+    f32xyz   *X_jaw_v3;           // Vertex 3
+    HANDLE_ERROR( cudaMalloc((void**) &X_jaw_v3, nx_tri*sizeof(f32xyz)) );
+    ui32     *X_jaw_index;        // Index to acces to a leaf
+    HANDLE_ERROR( cudaMalloc((void**) &X_jaw_index, nx_lea*sizeof(ui32)) );
+    ui32     *X_jaw_nb_triangles; // Nb of triangles within each leaf
+    HANDLE_ERROR( cudaMalloc((void**) &X_jaw_nb_triangles, nx_lea*sizeof(ui32)) );
+    AabbData *X_jaw_aabb;         // Bounding box of each leaf
+    HANDLE_ERROR( cudaMalloc((void**) &X_jaw_aabb, nx_lea*sizeof(AabbData)) );
+
+    f32xyz   *Y_jaw_v1;           // Vertex 1  - Triangular meshes
+    HANDLE_ERROR( cudaMalloc((void**) &Y_jaw_v1, ny_tri*sizeof(f32xyz)) );
+    f32xyz   *Y_jaw_v2;           // Vertex 2
+    HANDLE_ERROR( cudaMalloc((void**) &Y_jaw_v2, ny_tri*sizeof(f32xyz)) );
+    f32xyz   *Y_jaw_v3;           // Vertex 3
+    HANDLE_ERROR( cudaMalloc((void**) &Y_jaw_v3, ny_tri*sizeof(f32xyz)) );
+    ui32     *Y_jaw_index;        // Index to acces to a leaf
+    HANDLE_ERROR( cudaMalloc((void**) &Y_jaw_index, ny_lea*sizeof(ui32)) );
+    ui32     *Y_jaw_nb_triangles; // Nb of triangles within each leaf
+    HANDLE_ERROR( cudaMalloc((void**) &Y_jaw_nb_triangles, ny_lea*sizeof(ui32)) );
+    AabbData *Y_jaw_aabb;         // Bounding box of each leaf
+    HANDLE_ERROR( cudaMalloc((void**) &Y_jaw_aabb, ny_lea*sizeof(AabbData)) );
+
+    /// Copy host data to device
+
+    HANDLE_ERROR( cudaMemcpy( A_leaf_v1, mh_linac->A_leaf_v1,
+                              na_tri*sizeof(f32xyz), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( A_leaf_v2, mh_linac->A_leaf_v2,
+                              na_tri*sizeof(f32xyz), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( A_leaf_v3, mh_linac->A_leaf_v3,
+                              na_tri*sizeof(f32xyz), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( A_leaf_index, mh_linac->A_leaf_index,
+                              na_lea*sizeof(ui32), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( A_leaf_nb_triangles, mh_linac->A_leaf_nb_triangles,
+                              na_lea*sizeof(ui32), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( A_leaf_aabb, mh_linac->A_leaf_aabb,
+                              na_lea*sizeof(AabbData), cudaMemcpyHostToDevice ) );
+
+    HANDLE_ERROR( cudaMemcpy( B_leaf_v1, mh_linac->B_leaf_v1,
+                              nb_tri*sizeof(f32xyz), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( B_leaf_v2, mh_linac->B_leaf_v2,
+                              nb_tri*sizeof(f32xyz), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( B_leaf_v3, mh_linac->B_leaf_v3,
+                              nb_tri*sizeof(f32xyz), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( B_leaf_index, mh_linac->B_leaf_index,
+                              nb_lea*sizeof(ui32), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( B_leaf_nb_triangles, mh_linac->B_leaf_nb_triangles,
+                              nb_lea*sizeof(ui32), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( B_leaf_aabb, mh_linac->B_leaf_aabb,
+                              nb_lea*sizeof(AabbData), cudaMemcpyHostToDevice ) );
+
+    HANDLE_ERROR( cudaMemcpy( X_jaw_v1, mh_linac->X_jaw_v1,
+                              nx_tri*sizeof(f32xyz), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( X_jaw_v2, mh_linac->X_jaw_v2,
+                              nx_tri*sizeof(f32xyz), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( X_jaw_v3, mh_linac->X_jaw_v3,
+                              nx_tri*sizeof(f32xyz), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( X_jaw_index, mh_linac->X_jaw_index,
+                              nx_lea*sizeof(ui32), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( X_jaw_nb_triangles, mh_linac->X_jaw_nb_triangles,
+                              nx_lea*sizeof(ui32), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( X_jaw_aabb, mh_linac->X_jaw_aabb,
+                              nx_lea*sizeof(AabbData), cudaMemcpyHostToDevice ) );
+
+    HANDLE_ERROR( cudaMemcpy( Y_jaw_v1, mh_linac->Y_jaw_v1,
+                              ny_tri*sizeof(f32xyz), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( Y_jaw_v2, mh_linac->Y_jaw_v2,
+                              ny_tri*sizeof(f32xyz), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( Y_jaw_v3, mh_linac->Y_jaw_v3,
+                              ny_tri*sizeof(f32xyz), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( Y_jaw_index, mh_linac->Y_jaw_index,
+                              ny_lea*sizeof(ui32), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( Y_jaw_nb_triangles, mh_linac->Y_jaw_nb_triangles,
+                              ny_lea*sizeof(ui32), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( Y_jaw_aabb, mh_linac->Y_jaw_aabb,
+                              ny_lea*sizeof(AabbData), cudaMemcpyHostToDevice ) );
+
+    /// Bind data to the struct
+
+    HANDLE_ERROR( cudaMemcpy( &(md_linac->A_leaf_v1), &A_leaf_v1,
+                              sizeof(md_linac->A_leaf_v1), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(md_linac->A_leaf_v2), &A_leaf_v2,
+                              sizeof(md_linac->A_leaf_v2), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(md_linac->A_leaf_v3), &A_leaf_v3,
+                              sizeof(md_linac->A_leaf_v3), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(md_linac->A_leaf_index), &A_leaf_index,
+                              sizeof(md_linac->A_leaf_index), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(md_linac->A_leaf_nb_triangles), &A_leaf_nb_triangles,
+                              sizeof(md_linac->A_leaf_nb_triangles), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(md_linac->A_leaf_aabb), &A_leaf_aabb,
+                              sizeof(md_linac->A_leaf_aabb), cudaMemcpyHostToDevice ) );
+
+    HANDLE_ERROR( cudaMemcpy( &(md_linac->A_bank_aabb), &(mh_linac->A_bank_aabb),
+                              sizeof(md_linac->A_bank_aabb), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(md_linac->A_nb_leaves), &(mh_linac->A_nb_leaves),
+                              sizeof(md_linac->A_nb_leaves), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(md_linac->A_tot_triangles), &(mh_linac->A_tot_triangles),
+                              sizeof(md_linac->A_tot_triangles), cudaMemcpyHostToDevice ) );
+
+    //
+
+    HANDLE_ERROR( cudaMemcpy( &(md_linac->B_leaf_v1), &B_leaf_v1,
+                              sizeof(md_linac->B_leaf_v1), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(md_linac->B_leaf_v2), &B_leaf_v2,
+                              sizeof(md_linac->B_leaf_v2), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(md_linac->B_leaf_v3), &B_leaf_v3,
+                              sizeof(md_linac->B_leaf_v3), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(md_linac->B_leaf_index), &B_leaf_index,
+                              sizeof(md_linac->B_leaf_index), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(md_linac->B_leaf_nb_triangles), &B_leaf_nb_triangles,
+                              sizeof(md_linac->B_leaf_nb_triangles), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(md_linac->B_leaf_aabb), &B_leaf_aabb,
+                              sizeof(md_linac->B_leaf_aabb), cudaMemcpyHostToDevice ) );
+
+    HANDLE_ERROR( cudaMemcpy( &(md_linac->B_bank_aabb), &(mh_linac->B_bank_aabb),
+                              sizeof(md_linac->B_bank_aabb), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(md_linac->B_nb_leaves), &(mh_linac->B_nb_leaves),
+                              sizeof(md_linac->B_nb_leaves), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(md_linac->B_tot_triangles), &(mh_linac->B_tot_triangles),
+                              sizeof(md_linac->B_tot_triangles), cudaMemcpyHostToDevice ) );
+
+    //
+
+    HANDLE_ERROR( cudaMemcpy( &(md_linac->X_jaw_v1), &X_jaw_v1,
+                              sizeof(md_linac->X_jaw_v1), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(md_linac->X_jaw_v2), &X_jaw_v2,
+                              sizeof(md_linac->X_jaw_v2), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(md_linac->X_jaw_v3), &X_jaw_v3,
+                              sizeof(md_linac->X_jaw_v3), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(md_linac->X_jaw_index), &X_jaw_index,
+                              sizeof(md_linac->X_jaw_index), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(md_linac->X_jaw_nb_triangles), &X_jaw_nb_triangles,
+                              sizeof(md_linac->X_jaw_nb_triangles), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(md_linac->X_jaw_aabb), &X_jaw_aabb,
+                              sizeof(md_linac->X_jaw_aabb), cudaMemcpyHostToDevice ) );
+
+    HANDLE_ERROR( cudaMemcpy( &(md_linac->X_nb_jaw), &(mh_linac->X_nb_jaw),
+                              sizeof(md_linac->X_nb_jaw), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(md_linac->X_tot_triangles), &(mh_linac->X_tot_triangles),
+                              sizeof(md_linac->X_tot_triangles), cudaMemcpyHostToDevice ) );
+
+    //
+
+    HANDLE_ERROR( cudaMemcpy( &(md_linac->Y_jaw_v1), &Y_jaw_v1,
+                              sizeof(md_linac->Y_jaw_v1), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(md_linac->Y_jaw_v2), &Y_jaw_v2,
+                              sizeof(md_linac->Y_jaw_v2), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(md_linac->Y_jaw_v3), &Y_jaw_v3,
+                              sizeof(md_linac->Y_jaw_v3), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(md_linac->Y_jaw_index), &Y_jaw_index,
+                              sizeof(md_linac->Y_jaw_index), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(md_linac->Y_jaw_nb_triangles), &Y_jaw_nb_triangles,
+                              sizeof(md_linac->Y_jaw_nb_triangles), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(md_linac->Y_jaw_aabb), &Y_jaw_aabb,
+                              sizeof(md_linac->Y_jaw_aabb), cudaMemcpyHostToDevice ) );
+
+    HANDLE_ERROR( cudaMemcpy( &(md_linac->Y_nb_jaw), &(mh_linac->Y_nb_jaw),
+                              sizeof(md_linac->Y_nb_jaw), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(md_linac->Y_tot_triangles), &(mh_linac->Y_tot_triangles),
+                              sizeof(md_linac->Y_tot_triangles), cudaMemcpyHostToDevice ) );
+
+    //
+
+    HANDLE_ERROR( cudaMemcpy( &(md_linac->aabb), &(mh_linac->aabb),
+                              sizeof(md_linac->aabb), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(md_linac->transform), &(mh_linac->transform),
+                              sizeof(md_linac->transform), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(md_linac->scale_ratio), &(mh_linac->scale_ratio),
+                              sizeof(md_linac->scale_ratio), cudaMemcpyHostToDevice ) );
 
 }
 
@@ -2476,47 +2486,47 @@ ui64 MeshPhanLINACNav::m_get_memory_usage()
     // Get tot nb triangles
     ui32 tot_tri = 0;
 
-    ui32 ileaf = 0; while ( ileaf < m_linac.A_nb_leaves )
+    ui32 ileaf = 0; while ( ileaf < mh_linac->A_nb_leaves )
     {
-        tot_tri += m_linac.A_leaf_nb_triangles[ ileaf++ ];
+        tot_tri += mh_linac->A_leaf_nb_triangles[ ileaf++ ];
     }
 
-    ileaf = 0; while ( ileaf < m_linac.B_nb_leaves )
+    ileaf = 0; while ( ileaf < mh_linac->B_nb_leaves )
     {
-        tot_tri += m_linac.B_leaf_nb_triangles[ ileaf++ ];
+        tot_tri += mh_linac->B_leaf_nb_triangles[ ileaf++ ];
     }
 
-    if ( m_linac.X_nb_jaw != 0 )
+    if ( mh_linac->X_nb_jaw != 0 )
     {
-        tot_tri += m_linac.X_jaw_nb_triangles[ 0 ];
-        tot_tri += m_linac.X_jaw_nb_triangles[ 1 ];
+        tot_tri += mh_linac->X_jaw_nb_triangles[ 0 ];
+        tot_tri += mh_linac->X_jaw_nb_triangles[ 1 ];
     }
 
-    if ( m_linac.Y_nb_jaw != 0 )
+    if ( mh_linac->Y_nb_jaw != 0 )
     {
-        tot_tri += m_linac.Y_jaw_nb_triangles[ 0 ];
-        tot_tri += m_linac.Y_jaw_nb_triangles[ 1 ];
+        tot_tri += mh_linac->Y_jaw_nb_triangles[ 0 ];
+        tot_tri += mh_linac->Y_jaw_nb_triangles[ 1 ];
     }
 
     // All tri
     mem = 3 * tot_tri * sizeof( f32xyz );
 
     // Bank A
-    mem += m_linac.A_nb_leaves * 2 * sizeof( ui32 ); // index, nb tri
-    mem += m_linac.A_nb_leaves * 6 * sizeof( f32 );  // aabb
+    mem += mh_linac->A_nb_leaves * 2 * sizeof( ui32 ); // index, nb tri
+    mem += mh_linac->A_nb_leaves * 6 * sizeof( f32 );  // aabb
     mem += 6 * sizeof( f32 ) + sizeof( ui32 );       // main aabb, nb leaves
 
     // Bank B
-    mem += m_linac.B_nb_leaves * 2 * sizeof( ui32 ); // index, nb tri
-    mem += m_linac.B_nb_leaves * 6 * sizeof( f32 );  // aabb
+    mem += mh_linac->B_nb_leaves * 2 * sizeof( ui32 ); // index, nb tri
+    mem += mh_linac->B_nb_leaves * 6 * sizeof( f32 );  // aabb
     mem += 6 * sizeof( f32 ) + sizeof( ui32 );       // main aabb, nb leaves
 
     // Jaws X
-    mem += m_linac.X_nb_jaw * 2 * sizeof( ui32 );    // inedx, nb tri
+    mem += mh_linac->X_nb_jaw * 2 * sizeof( ui32 );    // inedx, nb tri
     mem += 6 * sizeof( f32 ) + sizeof( ui32 );       // main aabb, nb jaws
 
     // Jaws Y
-    mem += m_linac.Y_nb_jaw * 2 * sizeof( ui32 );    // inedx, nb tri
+    mem += mh_linac->Y_nb_jaw * 2 * sizeof( ui32 );    // inedx, nb tri
     mem += 6 * sizeof( f32 ) + sizeof( ui32 );       // main aabb, nb jaws
 
     // Global aabb
@@ -2551,8 +2561,8 @@ void MeshPhanLINACNav::set_beam_configuration( std::string filename, ui32 beam_i
 
 void MeshPhanLINACNav::set_number_of_leaves( ui32 nb_bank_A, ui32 nb_bank_B )
 {
-    m_linac.A_nb_leaves = nb_bank_A;
-    m_linac.B_nb_leaves = nb_bank_B;
+    mh_linac->A_nb_leaves = nb_bank_A;
+    mh_linac->B_nb_leaves = nb_bank_B;
 }
 
 void MeshPhanLINACNav::set_mlc_position( f32 px, f32 py, f32 pz )
@@ -2614,14 +2624,14 @@ void MeshPhanLINACNav::set_source_to_isodose_distance( f32 dist )
     m_sid = dist;
 }
 
-LinacData MeshPhanLINACNav::get_linac_geometry()
+LinacData* MeshPhanLINACNav::get_linac_geometry()
 {
-    return m_linac;
+    return mh_linac;
 }
 
 f32matrix44 MeshPhanLINACNav::get_linac_transformation()
 {
-    return m_linac.transform;
+    return mh_linac->transform;
 }
 
 void MeshPhanLINACNav::set_materials(std::string filename )
@@ -2633,68 +2643,76 @@ void MeshPhanLINACNav::set_materials(std::string filename )
 
 MeshPhanLINACNav::MeshPhanLINACNav ()
 {
+    // Allocate and init struct
+    mh_linac = (LinacData*)malloc( sizeof( LinacData ) );
+    md_linac = nullptr;
+
     // Leaves in Bank A
-    m_linac.A_leaf_v1 = NULL;           // Vertex 1  - Triangular meshes
-    m_linac.A_leaf_v2 = NULL;           // Vertex 2
-    m_linac.A_leaf_v3 = NULL;           // Vertex 3
-    m_linac.A_leaf_index = NULL;        // Index to acces to a leaf
-    m_linac.A_leaf_nb_triangles = NULL; // Nb of triangles within each leaf
-    m_linac.A_leaf_aabb = NULL;         // Bounding box of each leaf
+    mh_linac->A_leaf_v1 = nullptr;           // Vertex 1  - Triangular meshes
+    mh_linac->A_leaf_v2 = nullptr;           // Vertex 2
+    mh_linac->A_leaf_v3 = nullptr;           // Vertex 3
+    mh_linac->A_leaf_index = nullptr;        // Index to acces to a leaf
+    mh_linac->A_leaf_nb_triangles = nullptr; // Nb of triangles within each leaf
+    mh_linac->A_leaf_aabb = nullptr;         // Bounding box of each leaf
 
-    m_linac.A_bank_aabb.xmin = 0.0;     // Bounding box of the bank A
-    m_linac.A_bank_aabb.xmax = 0.0;
-    m_linac.A_bank_aabb.ymin = 0.0;
-    m_linac.A_bank_aabb.ymax = 0.0;
-    m_linac.A_bank_aabb.zmin = 0.0;
-    m_linac.A_bank_aabb.zmax = 0.0;
+    mh_linac->A_bank_aabb.xmin = 0.0;     // Bounding box of the bank A
+    mh_linac->A_bank_aabb.xmax = 0.0;
+    mh_linac->A_bank_aabb.ymin = 0.0;
+    mh_linac->A_bank_aabb.ymax = 0.0;
+    mh_linac->A_bank_aabb.zmin = 0.0;
+    mh_linac->A_bank_aabb.zmax = 0.0;
 
-    m_linac.A_nb_leaves = 0;            // Number of leaves in the bank A
+    mh_linac->A_nb_leaves = 0;            // Number of leaves in the bank A
+    mh_linac->A_tot_triangles = 0;
 
     // Leaves in Bank B
-    m_linac.B_leaf_v1 = NULL;           // Vertex 1  - Triangular meshes
-    m_linac.B_leaf_v2 = NULL;           // Vertex 2
-    m_linac.B_leaf_v3 = NULL;           // Vertex 3
-    m_linac.B_leaf_index = NULL;        // Index to acces to a leaf
-    m_linac.B_leaf_nb_triangles = NULL; // Nb of triangles within each leaf
-    m_linac.B_leaf_aabb = NULL;         // Bounding box of each leaf
+    mh_linac->B_leaf_v1 = nullptr;           // Vertex 1  - Triangular meshes
+    mh_linac->B_leaf_v2 = nullptr;           // Vertex 2
+    mh_linac->B_leaf_v3 = nullptr;           // Vertex 3
+    mh_linac->B_leaf_index = nullptr;        // Index to acces to a leaf
+    mh_linac->B_leaf_nb_triangles = nullptr; // Nb of triangles within each leaf
+    mh_linac->B_leaf_aabb = nullptr;         // Bounding box of each leaf
 
-    m_linac.B_bank_aabb.xmin = 0.0;     // Bounding box of the bank B
-    m_linac.B_bank_aabb.xmax = 0.0;
-    m_linac.B_bank_aabb.ymin = 0.0;
-    m_linac.B_bank_aabb.ymax = 0.0;
-    m_linac.B_bank_aabb.zmin = 0.0;
-    m_linac.B_bank_aabb.zmax = 0.0;
+    mh_linac->B_bank_aabb.xmin = 0.0;     // Bounding box of the bank B
+    mh_linac->B_bank_aabb.xmax = 0.0;
+    mh_linac->B_bank_aabb.ymin = 0.0;
+    mh_linac->B_bank_aabb.ymax = 0.0;
+    mh_linac->B_bank_aabb.zmin = 0.0;
+    mh_linac->B_bank_aabb.zmax = 0.0;
 
-    m_linac.B_nb_leaves = 0;            // Number of leaves in the bank B
+    mh_linac->B_nb_leaves = 0;            // Number of leaves in the bank B
+    mh_linac->B_tot_triangles = 0;
 
     // Jaws X
-    m_linac.X_jaw_v1 = NULL;           // Vertex 1  - Triangular meshes
-    m_linac.X_jaw_v2 = NULL;           // Vertex 2
-    m_linac.X_jaw_v3 = NULL;           // Vertex 3
-    m_linac.X_jaw_index = NULL;        // Index to acces to a jaw
-    m_linac.X_jaw_nb_triangles = NULL; // Nb of triangles within each jaw
-    m_linac.X_jaw_aabb = NULL;         // Bounding box of each jaw
-    m_linac.X_nb_jaw = 0;              // Number of jaws
+    mh_linac->X_jaw_v1 = nullptr;           // Vertex 1  - Triangular meshes
+    mh_linac->X_jaw_v2 = nullptr;           // Vertex 2
+    mh_linac->X_jaw_v3 = nullptr;           // Vertex 3
+    mh_linac->X_jaw_index = nullptr;        // Index to acces to a jaw
+    mh_linac->X_jaw_nb_triangles = nullptr; // Nb of triangles within each jaw
+    mh_linac->X_jaw_aabb = nullptr;         // Bounding box of each jaw
+    mh_linac->X_nb_jaw = 0;              // Number of jaws
+    mh_linac->X_tot_triangles = 0;
 
     // Jaws Y
-    m_linac.Y_jaw_v1 = NULL;           // Vertex 1  - Triangular meshes
-    m_linac.Y_jaw_v2 = NULL;           // Vertex 2
-    m_linac.Y_jaw_v3 = NULL;           // Vertex 3
-    m_linac.Y_jaw_index = NULL;        // Index to acces to a jaw
-    m_linac.Y_jaw_nb_triangles = NULL; // Nb of triangles within each jaw
-    m_linac.Y_jaw_aabb = NULL;         // Bounding box of each jaw
-    m_linac.Y_nb_jaw = 0;              // Number of jaws
+    mh_linac->Y_jaw_v1 = nullptr;           // Vertex 1  - Triangular meshes
+    mh_linac->Y_jaw_v2 = nullptr;           // Vertex 2
+    mh_linac->Y_jaw_v3 = nullptr;           // Vertex 3
+    mh_linac->Y_jaw_index = nullptr;        // Index to acces to a jaw
+    mh_linac->Y_jaw_nb_triangles = nullptr; // Nb of triangles within each jaw
+    mh_linac->Y_jaw_aabb = nullptr;         // Bounding box of each jaw
+    mh_linac->Y_nb_jaw = 0;              // Number of jaws
+    mh_linac->Y_tot_triangles = 0;
 
-    m_linac.aabb.xmin = 0.0;           // Bounding box of the LINAC
-    m_linac.aabb.xmax = 0.0;
-    m_linac.aabb.ymin = 0.0;
-    m_linac.aabb.ymax = 0.0;
-    m_linac.aabb.zmin = 0.0;
-    m_linac.aabb.zmax = 0.0;
+    mh_linac->aabb.xmin = 0.0;           // Bounding box of the LINAC
+    mh_linac->aabb.xmax = 0.0;
+    mh_linac->aabb.ymin = 0.0;
+    mh_linac->aabb.ymax = 0.0;
+    mh_linac->aabb.zmin = 0.0;
+    mh_linac->aabb.zmax = 0.0;
 
-    m_linac.transform = make_f32matrix44_zeros();
+    mh_linac->transform = make_f32matrix44_zeros();
 
-    m_linac.scale_ratio = 1.0;
+    mh_linac->scale_ratio = 1.0;
 
     set_name( "MeshPhanLINACNav" );
     m_mlc_filename = "";
@@ -2716,69 +2734,43 @@ MeshPhanLINACNav::MeshPhanLINACNav ()
     m_materials_filename = "";
     m_linac_material.push_back("");
 
+    mh_params = nullptr;
+    md_params = nullptr;
+
 }
 
 //// Mandatory functions
 
-void MeshPhanLINACNav::track_to_in( Particles particles )
-{
-    if ( m_params.data_h.device_target == CPU_DEVICE )
-    {
-        ui32 id=0;
-        while ( id<particles.size )
-        {
-            MPLINACN::kernel_host_track_to_in( particles.data_h, m_linac,
-                                               m_params.data_h.geom_tolerance,
-                                               id );
-            ++id;
-        }
-    }
-    else if ( m_params.data_h.device_target == GPU_DEVICE )
-    {
-        dim3 threads, grid;
-        threads.x = m_params.data_h.gpu_block_size;
-        grid.x = ( particles.size + m_params.data_h.gpu_block_size - 1 ) / m_params.data_h.gpu_block_size;
-
-        MPLINACN::kernel_device_track_to_in<<<grid, threads>>> ( particles.data_d, m_linac,
-                                                                 m_params.data_d.geom_tolerance );
-        cuda_error_check ( "Error ", " Kernel_MeshPhanLINACNav (track to in)" );
-        cudaDeviceSynchronize();
-    }
-}
-
-void MeshPhanLINACNav::track_to_out( Particles particles )
+void MeshPhanLINACNav::track_to_in( ParticlesData *d_particles )
 {
 
+    dim3 threads, grid;
+    threads.x = mh_params->gpu_block_size;
+    grid.x = ( mh_params->size_of_particles_batch + mh_params->gpu_block_size - 1 ) / mh_params->gpu_block_size;
 
-    if ( m_params.data_h.device_target == CPU_DEVICE )
-    {
-        ui32 id=0;
-        while ( id<particles.size )
-        {
-            MPLINACN::kernel_host_track_to_out( particles.data_h, m_linac,
-                                                m_materials.tables.data_h, m_cross_sections.photon_CS.data_h,
-                                                m_params.data_h,
-                                                m_nav_option,
-                                                id );
-            ++id;
-        }
-    }
-    else if ( m_params.data_h.device_target == GPU_DEVICE )
-    {
-        dim3 threads, grid;
-        threads.x = m_params.data_h.gpu_block_size;
-        grid.x = ( particles.size + m_params.data_h.gpu_block_size - 1 ) / m_params.data_h.gpu_block_size;
-
-        MPLINACN::kernel_device_track_to_out<<<grid, threads>>> ( particles.data_d, m_linac,
-                                                                  m_materials.tables.data_d, m_cross_sections.photon_CS.data_d,
-                                                                  m_params.data_d, m_nav_option );
-        cuda_error_check ( "Error ", " Kernel_MeshPhanLINACNav (track to in)" );
-        cudaDeviceSynchronize();
-    }
+    MPLINACN::kernel_device_track_to_in<<<grid, threads>>>( d_particles, md_linac,
+                                                            mh_params->geom_tolerance );
+    cuda_error_check ( "Error ", " Kernel_MeshPhanLINACNav (track to in)" );
+    cudaDeviceSynchronize();
 
 }
 
-void MeshPhanLINACNav::initialize( GlobalSimulationParameters params )
+void MeshPhanLINACNav::track_to_out(ParticlesData *d_particles )
+{
+
+    dim3 threads, grid;
+    threads.x = mh_params->gpu_block_size;
+    grid.x = ( mh_params->size_of_particles_batch + mh_params->gpu_block_size - 1 ) / mh_params->gpu_block_size;
+
+    MPLINACN::kernel_device_track_to_out<<<grid, threads>>>( d_particles, md_linac,
+                                                             m_materials.d_materials, m_cross_sections.d_photon_CS,
+                                                             md_params, m_nav_option );
+    cuda_error_check ( "Error ", " Kernel_MeshPhanLINACNav (track to in)" );
+    cudaDeviceSynchronize();
+
+}
+
+void MeshPhanLINACNav::initialize(GlobalSimulationParametersData *h_params , GlobalSimulationParametersData *d_params)
 {
     // Check params
     if ( m_mlc_filename == "" )
@@ -2787,7 +2779,7 @@ void MeshPhanLINACNav::initialize( GlobalSimulationParameters params )
         exit_simulation();
     }
 
-    if ( m_linac.A_nb_leaves == 0 && m_linac.B_nb_leaves == 0 )
+    if ( mh_linac->A_nb_leaves == 0 && mh_linac->B_nb_leaves == 0 )
     {
         GGcerr << "MeshPhanLINACNav: number of leaves per bank must be specified!" << GGendl;
         exit_simulation();
@@ -2800,7 +2792,8 @@ void MeshPhanLINACNav::initialize( GlobalSimulationParameters params )
     }
 
     // Params
-    m_params = params;
+    mh_params = h_params;
+    md_params = d_params;
 
     // Init MLC
     m_init_mlc();    
@@ -2833,36 +2826,28 @@ void MeshPhanLINACNav::initialize( GlobalSimulationParameters params )
         exit_simulation();
     }
     f32 mlc_dist = fxyz_mag( m_pos_mlc );
-    m_linac.scale_ratio = mlc_dist / m_sid;    
+    mh_linac->scale_ratio = mlc_dist / m_sid;
 
     // Configure the linac
     m_configure_linac();
 
+    // Copy the linac to the GPU
+    m_copy_linac_to_gpu();
+
     // Init materials
     m_materials.load_materials_database( m_materials_filename );
-    m_materials.initialize( m_linac_material, params );
+    m_materials.initialize( m_linac_material, h_params );
 
     // Cross Sections
-    m_cross_sections.initialize( m_materials, params );
+    m_cross_sections.initialize( m_materials.h_materials, h_params );
 
     // Some verbose if required
-    if ( params.data_h.display_memory_usage )
+    if ( h_params->display_memory_usage )
     {
         ui64 mem = m_get_memory_usage();
         GGcout_mem( "MeshPhanLINACNav", mem );
     }
 
-    /*
-
-    // Materials table
-    m_materials.load_materials_database( m_materials_filename );
-    m_materials.initialize( m_phantom.list_of_materials, params );    
-
-    // Cross Sections
-    m_cross_sections.initialize( m_materials, params );   
-
-
-    */
 }
 
 

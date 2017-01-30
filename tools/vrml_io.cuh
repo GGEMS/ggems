@@ -25,7 +25,7 @@
 //#include "vox_phan_dosi_nav.cuh"
 #include "vox_phan_img_nav.cuh"
 #include "vox_phan_iort_nav.cuh"
-//#include "mesh_phan_linac_nav.cuh"
+#include "mesh_phan_linac_nav.cuh"
 
 // Detectors
 #include "ct_detector.cuh"
@@ -87,7 +87,7 @@ public:
 
     void draw_phantom( VoxPhanImgNav* aPhantom );
 
-//    void draw_phantom( MeshPhanLINACNav* aPhantom );
+    void draw_phantom( MeshPhanLINACNav* aPhantom );
 
     void draw_detector( CTDetector* aDetector );
 
