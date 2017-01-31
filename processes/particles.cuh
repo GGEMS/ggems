@@ -82,7 +82,8 @@ class ParticleManager
 public:
     ParticleManager();
 
-    void initialize(GlobalSimulationParametersData *h_params );
+    void initialize( GlobalSimulationParametersData *h_params );
+    void initialize_secondaries( GlobalSimulationParametersData *h_params );
 
     ParticlesData *h_particles;
     ParticlesData *d_particles;
@@ -95,10 +96,13 @@ private:
     bool m_check_mandatory();
 
     void m_cpu_malloc_stack();
+    void m_cpu_malloc_secondaries();
     void m_cpu_init_stack_seed( ui32 seed );
-    void m_gpu_alloc_and_seed_copy();
+    void m_gpu_alloc_stack_and_seed_copy();
+    void m_gpu_alloc_secondaries();
 
     ui32 m_particles_size;
+    ui32 m_nb_levels_secondaries;
 
     GlobalSimulationParametersData *mh_params;
 

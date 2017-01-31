@@ -219,7 +219,7 @@ void VrmlIO::draw_source( PointSource *aSource )
 //    m_draw_point( pos, m_yellow );
     m_draw_sphere( pos, 2.0, m_yellow );
 }
-/*
+
 void VrmlIO::draw_phantom( VoxPhanDosiNav *aPhantom )
 {
     // Get back some info
@@ -227,7 +227,7 @@ void VrmlIO::draw_phantom( VoxPhanDosiNav *aPhantom )
 
     m_draw_wireframe_aabb( aabb, m_blue );
 }
-*/
+
 void VrmlIO::draw_phantom( VoxPhanIORTNav *aPhantom )
 {
     // Get back some info

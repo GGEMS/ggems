@@ -575,7 +575,6 @@ void GGEMS::init_simulation()
     // Copy params to the GPU
     m_copy_parameters_cpu2gpu();
 
-
     /// Init Sources /////////////////////////////////
     m_source->initialize( h_parameters );
 
@@ -600,11 +599,8 @@ void GGEMS::init_simulation()
     // Display memory usage
     if (h_parameters->display_memory_usage) {
         // Particle stack
-        ui64 n = m_particles_manager.h_particles->size;
-        ui64 l = h_parameters->nb_of_secondaries;
-
-        ui64 mem = n * ( 12 * sizeof( f32 ) + 5 * sizeof( ui32 )  + 4 * sizeof( ui8 ) ) +
-                   n*l * ( 8 * sizeof ( f32 ) + sizeof( ui8 ) );
+        ui64 n = m_particles_manager.h_particles->size;        
+        ui64 mem = n * ( 12 * sizeof( f32 ) + 5 * sizeof( ui32 )  + 4 * sizeof( ui8 ) );
 
         GGcout_mem("Particle stacks", mem);
 

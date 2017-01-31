@@ -22,7 +22,7 @@
 #include "point_source.cuh"
 
 // Phantoms
-//#include "vox_phan_dosi_nav.cuh"
+#include "vox_phan_dosi_nav.cuh"
 #include "vox_phan_img_nav.cuh"
 #include "vox_phan_iort_nav.cuh"
 #include "mesh_phan_linac_nav.cuh"
@@ -81,7 +81,7 @@ public:
      * \brief Draw in 3D a VoxPhanDosiNav into the VRML file
      * \param aPhantom The phantom
      */
-//    void draw_phantom( VoxPhanDosiNav* aPhantom );
+    void draw_phantom( VoxPhanDosiNav* aPhantom );
 
     void draw_phantom( VoxPhanIORTNav* aPhantom );
 
