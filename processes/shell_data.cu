@@ -1,19 +1,4 @@
-// This file is part of GGEMS
-//
-// FIREwork is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// FIREwork is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with FIREwork.  If not, see <http://www.gnu.org/licenses/>.
-//
-// GGEMS Copyright (C) 2013-2014 Julien Bert
+// GGEMS Copyright (C) 2017
 
 #ifndef SHELL_DATA_CU
 #define SHELL_DATA_CU
@@ -407,8 +392,7 @@ __constant__ f32 GPU_atom_BindingEnergies[1540] = {
      29.0 ,     7.0 ,
 };
 
-
-
+#ifndef __CUDA_ARCH__
 // Number of shells
 const ui16 CPU_atom_NumberOfShells[101] = {
  0 ,  // nonexisting zero element
@@ -789,6 +773,7 @@ const f32 CPU_atom_BindingEnergies[1540] = {
     453.0 ,   375.0 ,   275.0 ,   160.0 ,  145.0 ,   15.0 ,   69.0 ,   45.0 ,
      29.0 ,     7.0 ,
 };
+#endif
 
 __host__ __device__ ui16 atom_NumberOfShells(ui32 pos){
 #ifdef __CUDA_ARCH__

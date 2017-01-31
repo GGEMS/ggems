@@ -1,19 +1,15 @@
-// This file is part of GGEMS
-//
-// GGEMS is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// GGEMS is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with GGEMS.  If not, see <http://www.gnu.org/licenses/>.
-//
-// GGEMS Copyright (C) 2013-2014 Julien Bert
+// GGEMS Copyright (C) 2017
+
+/*!
+ * \file particles.cuh
+ * \brief
+ * \author J. Bert <bert.jul@gmail.com>
+ * \version 0.2
+ * \date 18 novembre 2015
+ *
+ * v0.2: JB - Change all structs and remove CPU exec
+ *
+ */
 
 #ifndef PARTICLES_CUH
 #define PARTICLES_CUH
@@ -21,87 +17,94 @@
 #include "global.cuh"
 
 // Stack of particles, format data is defined as SoA
-struct ParticleStack{
+struct ParticlesData
+{
     // property
-    f64* E;
-    f64* dx;
-    f64* dy;
-    f64* dz;
-    f64* px;
-    f64* py;
-    f64* pz;
-    f64* tof;
+    f32* E;
+    f32* dx;
+    f32* dy;
+    f32* dz;
+    f32* px;
+    f32* py;
+    f32* pz;
+    f32* tof;
+
     // PRNG
     ui32* prng_state_1;
     ui32* prng_state_2;
     ui32* prng_state_3;
     ui32* prng_state_4;
     ui32* prng_state_5;
+
     // Navigation
-    ui32* geometry_id; // current geometry crossed by the particle
+    ui32* geometry_id;  // current geometry crossed by the particle
+    ui16* E_index;      // Energy index within CS and Mat tables
+    ui16* scatter_order; // Scatter for imaging
+
+    // Interactions
+    f32* next_interaction_distance;
+    ui8* next_discrete_process;
+
     // simulation
-    ui8* endsimu;
+    ui8* status;
     ui8* level;
     ui8* pname; // particle name (photon, electron, etc)
-    // stack size
+
+    // size
     ui32 size;
+/*
+    // Secondaries stack
+    // Acces to level : Part_ID * size + hierarchy level
+    f32* sec_E; // size * hierarchy level
+    f32* sec_dx;
+    f32* sec_dy;
+    f32* sec_dz;
+    f32* sec_px;
+    f32* sec_py;
+    f32* sec_pz;
+    f32* sec_tof;
+    ui8* sec_pname; // particle name (photon, electron, etc)
+*/
 }; //
 
 // Helper to handle secondaries particles
-struct SecParticle {
+struct SecParticle
+{
     f32xyz dir;
     f32 E;
     ui8 pname;
     ui8 endsimu;
 };
 
-// Helper to handle history of particles
-struct OneParticleStep {
-    f32xyz pos;
-    f32xyz dir;
-    f32 E;
-};
-
-// History class
-class HistoryBuilder {
-    public:
-        HistoryBuilder();
-
-        void cpu_new_particle_track(ui32 a_pname);
-        void cpu_record_a_step(ParticleStack particles, ui32 id_part);
-
-        std::vector<ui8> pname;
-        std::vector<ui32> nb_steps;
-        std::vector< std::vector<OneParticleStep> > history_data;
-
-        ui8 record_flag;      // Record or not
-        ui32 max_nb_particles;  // Max nb of particles keep in the history
-        ui32 cur_iter;          // Current number of iterations
-        ui32 stack_size;        // Size fo the particle stack
-
-    private:
-        ui32 current_particle_id;
-        ui8 type_of_particles;
-};
-
-
 // Particles class
-class ParticleBuilder {
-    public:
-        ParticleBuilder();
-        void set_stack_size(ui32 nb);
-        void set_seed(ui32 val_seed);
-        void cpu_malloc_stack();
-        void cpu_free_stack();
-        void gpu_malloc_stack();
-        void cpu_init_stack_seed();
-        void copy_seed_cpu2gpu();
-        void cpu_print_stack(ui32 nlim);
+class ParticleManager
+{
+public:
+    ParticleManager();
 
-        ParticleStack stack, dstack; // CPU and GPU stack
-        ui32 seed;
+    void initialize( GlobalSimulationParametersData *h_params );
+    void initialize_secondaries( GlobalSimulationParametersData *h_params );
 
-    private:
+    ParticlesData *h_particles;
+    ParticlesData *d_particles;
+/*
+    void copy_gpu2cpu(Particles &part);
+    void print_stack(Particles part, ui32 n);
+*/
+
+private:
+    bool m_check_mandatory();
+
+    void m_cpu_malloc_stack();
+    void m_cpu_malloc_secondaries();
+    void m_cpu_init_stack_seed( ui32 seed );
+    void m_gpu_alloc_stack_and_seed_copy();
+    void m_gpu_alloc_secondaries();
+
+    ui32 m_particles_size;
+    ui32 m_nb_levels_secondaries;
+
+    GlobalSimulationParametersData *mh_params;
 
 
 };

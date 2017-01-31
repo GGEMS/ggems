@@ -1,24 +1,9 @@
-// This file is part of GGEMS
-//
-// FIREwork is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// FIREwork is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with FIREwork.  If not, see <http://www.gnu.org/licenses/>.
-//
-// GGEMS Copyright (C) 2013-2014 Julien Bert
+// GGEMS Copyright (C) 2017
+
 #ifndef SANDIA_TABLE_CU
 #define SANDIA_TABLE_CU
 
 #include "sandia_table.cuh"
-
 
 // ************************************************************************
 // * PE - Standard (Sandia table)
@@ -1511,7 +1496,7 @@ __constant__ f32 GPU_PhotoElec_std_SandiaTable[981][5] =
 // ************************************************************************
 // * PE - Standard (Sandia table)
 // ************************************************************************
-
+#ifndef __CUDA_ARCH__
 const ui16 CPU_PhotoElec_std_NbIntervals [101] =
 {
 
@@ -2994,7 +2979,7 @@ const f32 CPU_PhotoElec_std_SandiaTable[981][5] =
 { 500.0,        0.8135E+01,  0.1726E+05,  0.1171E+08, -0.1346E+10 }
 
 } ;  // --------------- end of fSandiaTable array -----------------------
-
+#endif
 
 
 __host__ __device__ ui16 PhotoElec_std_NbIntervals(ui32 pos) {

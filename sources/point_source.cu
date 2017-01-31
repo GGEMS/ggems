@@ -1,94 +1,201 @@
-// This file is part of GGEMS
-//
-// GGEMS is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// GGEMS is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with GGEMS.  If not, see <http://www.gnu.org/licenses/>.
-//
-// GGEMS Copyright (C) 2013-2014 Julien Bert
+// GGEMS Copyright (C) 2017
+
+/*!
+ * \file point_source.cu
+ * \brief
+ * \author J. Bert <bert.jul@gmail.com>
+ * \version 0.2
+ * \date 13 novembre 2015
+ *
+ * v0.2: JB - Change all structs and remove CPU exec
+ *
+ */
 
 #ifndef POINT_SOURCE_CU
 #define POINT_SOURCE_CU
 
 #include "point_source.cuh"
 
-// External function
-__host__ __device__ void point_source_primary_generator(ParticleStack particles, ui32 id,
-                                                        f32 px, f32 py, f32 pz, f32 energy,
-                                                        ui8 type, ui32 geom_id) {
+///////// GPU code ////////////////////////////////////////////////////
 
-    f32 phi = JKISS32(particles, id);
-    f32 theta = JKISS32(particles, id);
-
+// Internal function that create a new particle to the buffer at the slot id
+__host__ __device__ void point_source ( ParticlesData *particles_data,
+                                        f32 px, f32 py, f32 pz, f32 energy, ui8 ptype, ui32 id)
+{
+    // First get an isotropic particle direction
+    f32 phi = prng_uniform( particles_data, id );
+    f32 theta = prng_uniform( particles_data, id );
     phi  *= gpu_twopi;
-    theta = acosf(1.0f - 2.0f*theta);
+    theta = acosf ( 1.0f - 2.0f*theta );
+    f32 dx = cosf( phi ) * sinf( theta );
+    f32 dy = sinf( phi ) * sinf( theta );
+    f32 dz = cosf( theta );
 
-    // set photons
-    particles.E[id] = energy;
-    particles.dx[id] = cosf(phi)*sinf(theta);
-    particles.dy[id] = sinf(phi)*sinf(theta);
-    particles.dz[id] = cosf(theta);
-    particles.px[id] = px;
-    particles.py[id] = py;
-    particles.pz[id] = pz;
-    particles.tof[id] = 0.0f;
-    particles.endsimu[id] = PARTICLE_ALIVE;
-    particles.level[id] = PRIMARY;
-    particles.pname[id] = type;
-    particles.geometry_id[id] = geom_id;
-}
+    // Then set the mandatory field to create a new particle
+    particles_data->E[id] = energy;                             // Energy in MeV
 
+    particles_data->px[id] = px;                                // Position in mm
+    particles_data->py[id] = py;                                //
+    particles_data->pz[id] = pz;                                //
 
+    particles_data->dx[id] = dx;                                // Direction (unit vector)
+    particles_data->dy[id] = dy;                                //
+    particles_data->dz[id] = dz;                                //
 
-PointSource::PointSource(f32 vpx, f32 vpy, f32 vpz, ui32 vseed, std::string vname, ui32 vgeom_id) {
+    particles_data->tof[id] = 0.0f;                             // Time of flight
+    particles_data->status[id] = PARTICLE_ALIVE;                // Status of the particle
 
-    // Default parameters
-    px = vpx; py = vpy; pz = vpz;
-    source_name = vname;
-    seed = vseed;
-    geometry_id = vgeom_id;
-    
-}
+    particles_data->level[id] = PRIMARY;                        // It is a primary particle
+    particles_data->pname[id] = ptype;                          // a photon or an electron
 
-PointSource::PointSource() {
-
-    // Default parameters
-    px = 0.0f; py = 0.0f; pz = 0.0f;
-    source_name = "Source01";
-    seed = 10;
-    geometry_id = 0;
+    particles_data->geometry_id[id] = 0;                        // Some internal variables
+    particles_data->next_discrete_process[id] = NO_PROCESS;     //
+    particles_data->next_interaction_distance[id] = 0.0;        //
 
 }
 
-// Setting function
+// Kernel to create new particles. This kernel will only call the host/device function
+// point source in order to get one new particle.
+__global__ void kernel_point_source ( ParticlesData *particles_data,
+                                      f32 px, f32 py, f32 pz, f32 energy, ui8 ptype )
+{
+    // Get thread id
+    const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
+    if ( id >= particles_data->size ) return;
 
-void PointSource::set_position(f32 vpx, f32 vpy, f32 vpz) {
-    px=vpx; py=vpy; pz=vpz;
+    // Get a new particle
+    point_source( particles_data, px, py, pz, energy, ptype, id );
 }
 
-void PointSource::set_histpoint(f32 venergy, f32 vpart) {
-      energy_hist.push_back(venergy);
-      partpdec.push_back(vpart);
-}  
+//////// Class //////////////////////////////////////////////////////////
 
-void PointSource::set_seed(ui32 vseed) {
-    seed=vseed;
+// Constructor
+PointSource::PointSource()
+    : GGEMSSource(),
+      m_px( 0.0 ),
+      m_py( 0.0 ),
+      m_pz( 0.0 ),
+      m_energy( 0.0 ),
+      m_particle_type( PHOTON )
+{
+    // Set the name of the source
+    set_name( "PointSource" );
 }
 
-void PointSource::set_in_geometry(ui32 vgeometry_id) {
-    geometry_id=vgeometry_id;
+// Destructor
+PointSource::~PointSource() {}
+
+// Setting position of the source
+void PointSource::set_position( f32 posx, f32 posy, f32 posz )
+{
+    m_px = posx;
+    m_py = posy;
+    m_pz = posz;
 }
 
-void PointSource::set_source_name(std::string vsource_name) {
-    source_name=vsource_name;
+//========== Setting/Getting ===============================================
+
+// Setting particle type (photon or electron)
+void PointSource::set_particle_type( std::string pname )
+{
+    // Transform the name of the particle in small letter
+    std::transform( pname.begin(), pname.end(), pname.begin(), ::tolower );
+
+    if( pname == "photon" )
+    {
+        m_particle_type = PHOTON;
+    }
+    else if( pname == "electron" )
+    {
+        m_particle_type = ELECTRON;
+    }
+    else
+    {
+        GGcerr << "Particle '" << pname << "' not recognized!!!" << GGendl;
+        exit_simulation();
+    }
+}
+
+// Setting energy
+void PointSource::set_energy( f32 energy )
+{
+    m_energy = energy;
+}
+
+// Getting position
+f32xyz PointSource::get_position()
+{
+    return make_f32xyz( m_px, m_py, m_pz );
+}
+
+//========= Main function ============================================
+
+// Check if everything is ok to initialize this source
+bool PointSource::m_check_mandatory()
+{
+    if ( m_energy == 0.0 ) return false;
+    else return true;
+}
+
+// Mandatory function, abstract from GGEMSSource. This function is called
+// by GGEMS to initialize and load all necessary data into the graphic card
+void PointSource::initialize( GlobalSimulationParametersData *h_params )
+{
+    // Check if everything was set properly
+    if ( !m_check_mandatory() )
+    {
+        GGcerr << "Point source was not set properly!" << GGendl;
+        exit_simulation();
+    }
+
+    // Store global parameters: params are provided by GGEMS and are used to
+    // know different information about the simulation. For example if the targeted
+    // device is a CPU or a GPU.
+    mh_params = h_params;
+
+    // Handle GPU device if needed. Here nothing is load to the GPU (simple source). But
+    // in case of the use of a spectrum data should be allocated and transfered here.
+
+    // GPU mem allocation
+
+    // GPU mem copy
+
+}
+
+// Mandatory function, abstract from GGEMSSource. This function is called
+// by GGEMS to fill particle buffer of new fresh particles, which is the role
+// of any source.
+void PointSource::get_primaries_generator(ParticlesData *d_particles )
+{
+
+    // Defined threads and grid
+    dim3 threads, grid;
+    threads.x = mh_params->gpu_block_size;
+    grid.x = ( mh_params->size_of_particles_batch + mh_params->gpu_block_size - 1 ) / mh_params->gpu_block_size;
+
+    // Call GPU kernel of a point source that get fill the complete particle buffer. In this case data
+    // from device (GPU) is passed to the kernel (particles.data_d).
+    kernel_point_source<<<grid, threads>>>( d_particles, m_px, m_py, m_pz, m_energy, m_particle_type );
+    cuda_error_check( "Error ", " Kernel_point_source" );
+    cudaDeviceSynchronize();
+
 }
 
 #endif
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

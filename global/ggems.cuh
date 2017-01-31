@@ -1,118 +1,109 @@
-// This file is part of GGEMS
-//
-// GGEMS is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// GGEMS is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with GGEMS.  If not, see <http://www.gnu.org/licenses/>.
-//
-// GGEMS Copyright (C) 2013-2014 Julien Bert
+// GGEMS Copyright (C) 2017
+
+/*!
+ * \file ggems.cuh
+ * \brief Main header of GGEMS lib
+ * \author J. Bert <bert.jul@gmail.com>
+ * \version 0.2
+ * \date 13 novembre 2015
+ *
+ * Header of the main GGEMS lib
+ *
+ * v0.2: JB - Change all structs and remove CPU exec
+ */
 
 #ifndef GGEMS_CUH
 #define GGEMS_CUH
 
 #include "global.cuh"
-
-#include "constants.cuh"
+#include "ggems_source.cuh"
+#include "ggems_phantom.cuh"
 #include "particles.cuh"
-#include "cross_sections_builder.cuh"
-#include "global.cuh"
-#include "geometry_builder.cuh"
+#include "cross_sections.cuh"
 #include "materials.cuh"
-#include "source_builder.cuh"
 
-#include "aabb.cuh"
-#include "obb.cuh"
-#include "sphere.cuh"
-#include "meshed.cuh"
-#include "voxelized.cuh"
+//#include "testing.cuh"
+
+#include "ggems_detector.cuh"
+#include "ct_detector.cuh"
+
 #include "point_source.cuh"
-#include "digitizer.cuh"
+#include "cone_beam_CT_source.cuh"
+//#include "geom_source.cuh"
+#include "phasespace_source.cuh"
+#include "beamlet_source.cuh"
+#include "linac_source.cuh"
 
-#include "main_navigator.cuh"
+#include "mesh_phan_linac_nav.cuh"
+#include "vox_phan_dosi_nav.cuh"
+//#include "vox_phan_dosi_fastnav.cuh"
+#include "vox_phan_img_nav.cuh"
+#include "vox_phan_iort_nav.cuh"
+//#include "vox_phan_gtrack_nav.cuh"
 
-#include "vrml.cuh"
-#include "mathplot.cuh"
-#include "fun.cuh"
+class GGEMS
+{
+public:
+    GGEMS();
+    ~GGEMS();
 
-#include "flat_panel_detector.cuh"
+    // Setting parameters        
+    void set_GPU_ID ( ui32 valid );
+    void set_GPU_block_size ( ui32 val );
+    void set_process ( std::string process_name );
+    void set_secondary ( std::string pname );
+    void set_particle_cut ( std::string pname, f32 E );
 
-// Class to manage the hierarchical structure of the world
-class SimulationBuilder {
-    public:
-        SimulationBuilder();
+    void set_number_of_particles ( ui64 nb );
+    void set_size_of_particles_batch ( ui64 nb );
 
-        // Set simulation object
-        void set_geometry(GeometryBuilder obj);
-        void set_materials(MaterialBuilder tab);
-        void set_sources(SourceBuilder src);
-        void set_particles(ParticleBuilder p);
-        void set_digitizer(Digitizer dig);
+    void set_CS_table_nbins ( ui32 valbin );
+    void set_CS_table_E_min ( f32 valE );
+    void set_CS_table_E_max ( f32 valE );
+    void set_electron_cut ( f32 valE );
+    void set_photon_cut ( f32 valE );
+    void set_secondaries_level ( ui32 level );
+    void set_geometry_tolerance ( f32 tolerance );
 
-        // Setting parameters
-        void set_hardware_target(std::string value);
-        void set_GPU_ID(ui32 valid);
-        void set_GPU_block_size(ui32 val);
-        void set_process(std::string process_name);
-        void set_secondary(std::string pname);
-        void set_number_of_particles(ui64 nb);
-        void set_max_number_of_iterations(ui32 nb);
-        void set_record_history(ui64 nb_particles);
-        void set_CS_table_nbins(ui32 valbin);
-        void set_CS_table_E_min(f32 valE);
-        void set_CS_table_E_max(f32 valE);
-        void set_seed(ui32 vseed);
+    void set_seed ( ui32 vseed );
 
-        // Utils
-        void set_display_run_time();
-        void set_display_memory_usage();
+    // Setting simulation objects
+    void set_source ( GGEMSSource* aSource );
+    void set_phantom ( GGEMSPhantom* aPhantom );
+    void set_detector( GGEMSDetector* aDetector );
 
-        // Main functions
-        void init_simulation();
-        void start_simulation();
+    // Utils
+    void set_display_run_time( bool flag );
+    void set_display_memory_usage( bool flag );
+    void set_display_in_color( bool flag );
+    void set_display_energy_cuts( bool flag );
+    void set_verbose( bool flag );
+//    void print_stack( ui32 n );
 
-        // Get data
-        ParticleBuilder get_particles();
+    // Main functions
+    void init_simulation();
+    void start_simulation();
 
-        // Parameters
-        ui16 target;
-        ui64 nb_of_particles;
-        ui32 nb_of_iterations;
-        ui32 max_iteration;
+private:
+    // Particles handler
+    ParticleManager m_particles_manager;
 
-        // Main elements of the simulation
-        ParticleBuilder particles;                  // (CPU & GPU)
-        GeometryBuilder geometry;                   // (CPU & GPU
-        MaterialBuilder materials;                  // (CPU & GPU)
-        SourceBuilder sources;
-        GlobalSimulationParameters parameters;      // CPU
-        GlobalSimulationParameters dparameters;     // GPU
-        CrossSectionsBuilder cs_tables;             // (CPU & GPU)
-        Digitizer digitizer;                        // (CPU & GPU)
+    // Source manager
+    GGEMSSource* m_source;
 
-        // Record history for some particles (only CPU version)
-        HistoryBuilder history;
+    // Phantom manager
+    GGEMSPhantom* m_phantom;
+    std::vector< GGEMSPhantom* > m_phantoms;
 
-    private:
+    // TODO Detector manager
+    GGEMSDetector* m_detector;
 
-        // Main functions
-        void primaries_generator();
-        void main_navigator();
-
-        // For GPU
-        ui32 gpu_id, gpu_block_size;
-        void copy_parameters_cpu2gpu();
-
-        // Parameters
-        bool display_run_time_flag, display_memory_usage_flag;
-        ui32 seed;
+    // Main parameters
+    bool m_check_mandatory();    
+    void m_copy_parameters_cpu2gpu();
+    GlobalSimulationParametersData *h_parameters;
+    GlobalSimulationParametersData *d_parameters;
+    bool m_flag_init;    
 
 };
 

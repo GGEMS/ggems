@@ -1,45 +1,106 @@
-CUDA_FLAGS := --generate-code arch=compute_30,code=sm_30 --relocatable-device-code true -lcudadevrt --compiler-options '-fPIC' -use_fast_math
-#CUDA_FLAGS := --generate-code arch=compute_30,code=sm_30 -Xptxas="-v" --relocatable-device-code true -lcudadevrt --compiler-options '-fPIC' -use_fast_math
+# GGEMS makefile
+#
+# JB 20/03/2016
+################################################################
 
-FLAGS := -lggems -lelectron -lelectron_navigator -lglobal -lmain_navigator -lmeshed -lphoton -lphoton_navigator -lprng -lproton -lproton_navigator -lraytracing -lsphere -lstructures -lvector -lvoxelized -lparticles -lsandia_table -lshell_data -lfun -lcross_sections_builder
+## Users options ###############################################
+
+# Options
+FAST_MATH_ENABLED := yes
+FLOAT_DOUBLE_PRECISION := yes
+VERBOSE := no
+DEBUG := yes
+
+# SM targetted
+SMS := 20 30 35 37 50 52
+
+# Main directory and sources
+BUILDDIR := build
+SRCDIR := src
+
+# Release directories
+RELEASEDIR := release
+BINDIR := $(RELEASEDIR)/bin
+LIBDIR := $(RELEASEDIR)/lib
+DATADIR := $(RELEASEDIR)/data
+INCDIR := $(RELEASEDIR)/include
+DOCDIR := $(RELEASEDIR)/doc
+
+################################################################
+## FLAGS #######################################################
+################################################################
+
+NVCC_FLAGS := --relocatable-device-code true -lcudadevrt --compiler-options -w --std=c++11
+#NVCCFLAGS := --relocatable-device-code true -lcudadevrt --compiler-options '-fPIC'
+
+ifeq ($(FAST_MATH_ENABLED),yes)
+NVCC_FLAGS += -use_fast_math
+endif
+
+# By default double is used in the code
+ifeq ($(FLOAT_DOUBLE_PRECISION),no)
+NVCC_FLAGS += --define-macro SINGLE_PRECISION
+endif
+
+ifeq ($(VERBOSE),yes)
+NVCC_FLAGS += -Xptxas="-v"
+endif
+
+ifeq ($(DEBUG),yes)
+NVCC_FLAGS += --define-macro DEBUG
+endif
+
+# Generate code for each SM architecture listed in $(SMS)
+$(foreach sm,$(SMS),$(eval NVCC_FLAGS += -gencode arch=compute_$(sm),code=sm_$(sm)))
+
+###############################################################
+## COMPILATION ################################################
+###############################################################
+
+VPATH := ${SRCDIR}/detectors \
+         ${SRCDIR}/data \
+         ${SRCDIR}/geometries \
+         ${SRCDIR}/global \
+         ${SRCDIR}/tools \
+         ${SRCDIR}/navigators \
+         ${SRCDIR}/processes \
+         ${SRCDIR}/sources
+
+# Glob CU
+SOURCES :=
+$(foreach dir,$(VPATH),$(eval SOURCES += $(wildcard $(dir)/*.cu)))
+
+# Glob Include Dir
+INC_FLAGS :=
+$(foreach dir,$(VPATH),$(eval INC_FLAGS += -I$(dir)))
+
+#$(info $(NVCC_FLAGS))
 
 
-G4DIRHEADERS = $(G4HOME)/include/Geant4
-G4DIRLIBS = $(G4HOME)/lib
-CLHEPHEADERS = $(CLHEPHOME)/include
-CLHEPLIBS = $(CLHEPHOME)/lib
-
-G4INCLUDES = -I$(G4DIRHEADERS) -I$(CLHEPHEADERS)
-G4LIBS = -L$(G4DIRLIBS) -lG4materials -lG4global -lG4particles -lG4processes -lG4intercoms 
-#-L$(CLHEPLIBS) -lCLHEP-2.1.1.0
-
-SOURCES = $(wildcard */*.cu)
-
-BUILDDIR = build
-LIBDIR = lib
-
-# totoall : dir $(patsubst %.cu,%.o, $(wildcard */*.cu)) 
-# 	$(patsubst %.cu,%.o, $(wildcard */*.cu)) 
-# 	make install
+OBJ := $(patsubst %.cu,$(BUILDDIR)/%.o, $(notdir $(SOURCES)))
 	
-all: clean dir $(patsubst %.cu,%.o, $(wildcard */*.cu)) 
-	make copy
-	make install
+#$(info $(OBJ))
+
+all: dir $(OBJ)
+	# nothing
 
 dir:
 	mkdir -p $(BUILDDIR)
-	mkdir -p $(LIBDIR)
 
 copy :
 	mv */*.o $(BUILDDIR)
 	
+$(BUILDDIR)/%.o : %.cu
+	nvcc -c $< -o $@ $(NVCC_FLAGS) $(INC_FLAGS)
+
+
+#%.o: %.cu 
+#	nvcc -c $^ -o $(BUILDDIR)/$(notdir $@) $(NVCC_FLAGS) $(INC_FLAGS)
 	
+
 #biggems:
 #	nvcc $(CUDA_FLAGS) -c -o ggems.o global/ggems.cu -Llib -laabb -lbuilder -ldosimetry -lelectron -lelectron_navigator -lfun -lglobal -lmain_navigator -lmeshed -lphoton -lphoton_navigator -lprng -lproton -lproton_navigator -lraytracing -lsphere -lstructures -lvector -lvoxelized $(G4INCLUDES) $(G4LIBS)	
 
-%.o: %.cu 
-	nvcc $^ -c -o $@ $(G4INCLUDES) $(G4LIBS) $(CUDA_FLAGS)
-	
 #processes/photon.o: processes/photon.cu
 #	nvcc $(CUDA_FLAGS) $^ -c -o $@ -lsandia_table -lshell_data $(G4INCLUDES) $(G4LIBS)
 
@@ -98,5 +159,4 @@ cleanall:
 	rm -rf $(BUILDDIR) | true
 	rm -rf $(LIBDIR) | true
 	rm *~ | true
-	
 	
