@@ -546,17 +546,6 @@ void GGEMS::init_simulation()
     // CPU PRNG
     srand( h_parameters->seed );
 
-    ui32 adr = sources.sources.ptr_sources[0];
-    // Read the kind of sources
-    ui32 type = (ui32)(sources.sources.data_sources[adr+ADR_SRC_TYPE]);
-    
-    if (type == VOXELIZED_SOURCE) {
-        nb_of_particles = (ui64)(sources.sources.data_sources[adr+ADR_VOX_SOURCE_TOT_ACTIVITY]);
-    }
-    
-    //nb_of_particles /= 100;
-    printf("nb particules %lu \n", nb_of_particles);
-
     h_parameters->nb_of_batches = ui32 ( ( f32 ) h_parameters->nb_of_particles / ( f32 ) h_parameters->size_of_particles_batch );
 
     if( h_parameters->nb_of_particles % h_parameters->size_of_particles_batch )
