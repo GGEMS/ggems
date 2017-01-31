@@ -1,16 +1,17 @@
 #ifndef GUARD_CONE_BEAM_CT_SOURCE_CUH
 #define GUARD_CONE_BEAM_CT_SOURCE_CUH
 
-// GGEMS Copyright (C) 2015
+// GGEMS Copyright (C) 2017
 
 /*!
  * \file cone_beam_CT_source.cuh
  * \brief Cone beam source for CT
  * \author Didier Benoit <didier.benoit13@gmail.com>
  * \author Julien Bert <bert.jul@gmail.com>
- * \version 0.2
+ * \version 0.3
  * \date Friday January 8, 2015
  *
+ * v0.3 - JB: Change all structs and remove CPU exec
  * v0.2 - JB: Add local and global frame and unified memory
  * v0.1 - DB: First code
 */
@@ -120,14 +121,14 @@ public: // Mandatory method from GGEMSSource abstract class
       \param particles particle to generate for the simulation
       \brief generation of the particle
     */
-    void get_primaries_generator( Particles particles );
+    void get_primaries_generator( ParticlesData *d_particles );
 
     /*!
       \fn void initialize( GlobalSimulationParameters params )
       \param params simulation parameters
       \brief initialize the source for the simulation
     */
-    void initialize( GlobalSimulationParameters params );
+    void initialize( GlobalSimulationParametersData *h_params );
 
 private: // Make ConeBeamCTSource class non-copyable
     /*!
@@ -167,7 +168,7 @@ private:
     std::string m_spectrum_filename;      /*!< Name of the file that contains the spectrum */
 
     ui32 m_nb_of_energy_bins; /*!< Number of the bins in the energy spectrum */
-    GlobalSimulationParameters m_params; /*!< Simulation parameters */
+    GlobalSimulationParametersData *mh_params; /*!< Simulation parameters */
 };
 
 #endif

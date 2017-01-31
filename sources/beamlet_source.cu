@@ -1,11 +1,14 @@
-// GGEMS Copyright (C) 2015
+// GGEMS Copyright (C) 2017
 
 /*!
  * \file beamlet_source.cu
  * \brief Beamlet source
  * \author Julien Bert <bert.jul@gmail.com>
- * \version 0.1
+ * \version 0.2
  * \date Thursday May 19, 2016
+ *
+ * v0.2: JB - Change all structs and remove CPU exec
+ *
 */
 
 #ifndef BEAMLET_SOURCE_CU
@@ -16,7 +19,7 @@
 ///////// GPU code ////////////////////////////////////////////////////
 
 // Internal function that create a new particle to the buffer at the slot id
-__host__ __device__ void beamlet_source ( ParticlesData particles, f32xyz pos, f32xyz src, f32xyz size,
+__host__ __device__ void beamlet_source ( ParticlesData *particles, f32xyz pos, f32xyz src, f32xyz size,
                                           f32matrix44 trans,
                                           f32 *spectrum_E, f32 *spectrum_CDF,
                                           ui32 nb_of_energy_bins, ui8 ptype, ui32 id )
@@ -51,7 +54,7 @@ __host__ __device__ void beamlet_source ( ParticlesData particles, f32xyz pos, f
     // 4. Get energy
     if( nb_of_energy_bins == 1 ) // mono energy
     {
-        particles.E[ id ] = spectrum_E[ 0 ];
+        particles->E[ id ] = spectrum_E[ 0 ];
     }
     else // poly
     {
@@ -59,35 +62,35 @@ __host__ __device__ void beamlet_source ( ParticlesData particles, f32xyz pos, f
         ui32 pos = binary_search_left( rndm, spectrum_CDF, nb_of_energy_bins );
         if ( pos == ( nb_of_energy_bins - 1 ) )
         {
-            particles.E[ id ] = spectrum_E[ pos ];
+            particles->E[ id ] = spectrum_E[ pos ];
         }
         else
         {
-            particles.E[ id ] = linear_interpolation ( spectrum_CDF[ pos ],     spectrum_E[ pos ],
+            particles->E[ id ] = linear_interpolation ( spectrum_CDF[ pos ],     spectrum_E[ pos ],
                                                        spectrum_CDF[ pos + 1 ], spectrum_E[ pos + 1 ], rndm );
         }
 
     }
 
     // 5. Then set the mandatory field to create a new particle
-    particles.px[id] = part_pos.x;                        // Position in mm
-    particles.py[id] = part_pos.y;                        //
-    particles.pz[id] = part_pos.z;                        //
+    particles->px[id] = part_pos.x;                        // Position in mm
+    particles->py[id] = part_pos.y;                        //
+    particles->pz[id] = part_pos.z;                        //
 
-    particles.dx[id] = part_dir.x;                        // Direction (unit vector)
-    particles.dy[id] = part_dir.y;                        //
-    particles.dz[id] = part_dir.z;                        //
+    particles->dx[id] = part_dir.x;                        // Direction (unit vector)
+    particles->dy[id] = part_dir.y;                        //
+    particles->dz[id] = part_dir.z;                        //
 
-    particles.tof[id] = 0.0f;                             // Time of flight
-    particles.endsimu[id] = PARTICLE_ALIVE;               // Status of the particle
+    particles->tof[id] = 0.0f;                             // Time of flight
+    particles->status[id] = PARTICLE_ALIVE;               // Status of the particle
 
-    particles.level[id] = PRIMARY;                        // It is a primary particle
-    particles.pname[id] = ptype;                          // a photon or an electron
+    particles->level[id] = PRIMARY;                        // It is a primary particle
+    particles->pname[id] = ptype;                          // a photon or an electron
 
-    particles.geometry_id[id] = 0;                        // Some internal variables
-    particles.next_discrete_process[id] = NO_PROCESS;     //
-    particles.next_interaction_distance[id] = 0.0;        //
-    particles.scatter_order[ id ] = 0;                    //
+    particles->geometry_id[id] = 0;                        // Some internal variables
+    particles->next_discrete_process[id] = NO_PROCESS;     //
+    particles->next_interaction_distance[id] = 0.0;        //
+    particles->scatter_order[ id ] = 0;                    //
 
 
 //    printf("src id %i p %f %f %f d %f %f %f E %f\n", id, part_pos.x, part_pos.y, part_pos.z,
@@ -97,14 +100,14 @@ __host__ __device__ void beamlet_source ( ParticlesData particles, f32xyz pos, f
 
 // Kernel to create new particles. This kernel will only call the host/device function
 // beamlet source in order to get one new particle.
-__global__ void kernel_beamlet_source ( ParticlesData particles, f32xyz pos, f32xyz src, f32xyz size,
+__global__ void kernel_beamlet_source ( ParticlesData *particles, f32xyz pos, f32xyz src, f32xyz size,
                                         f32matrix44 trans,
                                         f32 *spectrum_E, f32 *spectrum_CDF,
                                         ui32 nb_of_energy_bins, ui8 particle_type )
 {
     // Get thread id
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
-    if ( id >= particles.size ) return;    
+    if ( id >= particles->size ) return;
 
     // Get a new particle
     beamlet_source( particles, pos, src, size, trans, spectrum_E, spectrum_CDF, nb_of_energy_bins,
@@ -134,6 +137,8 @@ BeamletSource::BeamletSource() : GGEMSSource()
     m_nb_of_energy_bins = 0;
     m_energy = 0;
     m_spectrum_filename = "";
+
+    mh_params = nullptr;
 }
 
 // Destructor
@@ -298,7 +303,7 @@ f32matrix44 BeamletSource::get_transformation_matrix()
 
 // Mandatory function, abstract from GGEMSSource. This function is called
 // by GGEMS to initialize and load all necessary data into the graphic card
-void BeamletSource::initialize ( GlobalSimulationParameters params )
+void BeamletSource::initialize( GlobalSimulationParametersData *h_params )
 {
     // Check if everything was set properly
     if ( m_energy == 0 && m_spectrum_filename == "" )
@@ -329,7 +334,7 @@ void BeamletSource::initialize ( GlobalSimulationParameters params )
     // Store global parameters: params are provided by GGEMS and are used to
     // know different information about the simulation. For example if the targeted
     // device is a CPU or a GPU.
-    m_params = params;
+    mh_params = h_params;
 
     // Compute the transformation matrix (Beamlet plane is set along the x-axis (angle 0))
     TransformCalculator *trans = new TransformCalculator;
@@ -355,7 +360,7 @@ void BeamletSource::initialize ( GlobalSimulationParameters params )
     m_size.z *= ratio;
 
     // Some verbose if required
-    if ( params.data_h.display_memory_usage )
+    if ( h_params->display_memory_usage )
     {
         ui32 mem = 8 * m_nb_of_energy_bins;
         GGcout_mem("Beamlet source", mem);
@@ -366,43 +371,21 @@ void BeamletSource::initialize ( GlobalSimulationParameters params )
 // Mandatory function, abstract from GGEMSSource. This function is called
 // by GGEMS to fill particle buffer of new fresh particles, which is the role
 // of any source.
-void BeamletSource::get_primaries_generator ( Particles particles )
+void BeamletSource::get_primaries_generator( ParticlesData *d_particles )
 {
 
-    // If CPU running, do it on CPU
-    if ( m_params.data_h.device_target == CPU_DEVICE )        
-    {
+    // Defined threads and grid
+    dim3 threads, grid;
+    threads.x = mh_params->gpu_block_size;
+    grid.x = ( mh_params->size_of_particles_batch + mh_params->gpu_block_size - 1 ) / mh_params->gpu_block_size;
 
-        // Loop over the particle buffer
-        ui32 id=0;
-        while( id < particles.size )
-        {
-            // Call a point source that get a new particle at a time. In this case data from host (CPU)
-            // is passed to the function (particles.data_h).
-            beamlet_source( particles.data_h, m_pos, m_src, m_size, m_transform,
-                            m_spectrum_E, m_spectrum_CDF, m_nb_of_energy_bins,
-                            m_particle_type, id );
-            ++id;
-        }
-
-    }
-    // If GPU running, do it on GPU
-    else if ( m_params.data_h.device_target == GPU_DEVICE )
-    {        
-
-        // Defined threads and grid
-        dim3 threads, grid;
-        threads.x = m_params.data_h.gpu_block_size;
-        grid.x = ( particles.size + m_params.data_h.gpu_block_size - 1 ) / m_params.data_h.gpu_block_size;
-
-        // Call GPU kernel of a point source that get fill the complete particle buffer. In this case data
-        // from device (GPU) is passed to the kernel (particles.data_d).
-        kernel_beamlet_source<<<grid, threads>>>( particles.data_d, m_pos, m_src, m_size, m_transform,
-                                                  m_spectrum_E, m_spectrum_CDF, m_nb_of_energy_bins,
-                                                  m_particle_type );
-        cuda_error_check( "Error ", " Kernel_beamlet_source" );
-        cudaDeviceSynchronize();
-    }
+    // Call GPU kernel of a point source that get fill the complete particle buffer. In this case data
+    // from device (GPU) is passed to the kernel (particles.data_d).
+    kernel_beamlet_source<<<grid, threads>>>( d_particles, m_pos, m_src, m_size, m_transform,
+                                              m_spectrum_E, m_spectrum_CDF, m_nb_of_energy_bins,
+                                              m_particle_type );
+    cuda_error_check( "Error ", " Kernel_beamlet_source" );
+    cudaDeviceSynchronize();
 
 }
 

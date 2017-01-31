@@ -1,4 +1,4 @@
-// GGEMS Copyright (C) 2015
+// GGEMS Copyright (C) 2017
 
 /*!
  * \file vrml_io.cuh
@@ -19,6 +19,7 @@
 // Sources
 #include "beamlet_source.cuh"
 #include "cone_beam_CT_source.cuh"
+#include "point_source.cuh"
 
 // Phantoms
 #include "vox_phan_dosi_nav.cuh"
@@ -73,7 +74,7 @@ public:
      */
     void draw_source( ConeBeamCTSource* aSource );
 
-    void draw_source( PointSource* aSrouce );
+    void draw_source( PointSource* aSource );
 
     /*!
      * \fn void draw_phantom( VoxPhanDosiNav* aPhantom )

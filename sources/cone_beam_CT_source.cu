@@ -1,11 +1,15 @@
-// GGEMS Copyright (C) 2015
+// GGEMS Copyright (C) 2017
 
 /*!
  * \file cone_beam_CT_source.cu
  * \brief Cone beam source for CT
  * \author Didier Benoit <didier.benoit13@gmail.com>
- * \version 0.1
+ * \author Julien Bert <julien.bert@univ-brest.fr>
+ * \version 0.2
  * \date Friday January 8, 2015
+ *
+ * v0.2: JB - Change all structs and remove CPU exec
+ *
 */
 
 #include <stdexcept>
@@ -22,7 +26,7 @@
 #include "cone_beam_CT_source.cuh"
 
 
-__host__ __device__ void cone_beam_ct_source( ParticlesData particles, ui8 ptype,
+__host__ __device__ void cone_beam_ct_source( ParticlesData *particles, ui8 ptype,
                                               f32 *spectrum_E, f32 *spectrum_CDF, ui32 nb_of_energy_bins, f32 aperture,
                                               f32xyz foc, f32matrix44 transform, ui32 id )
 {            
@@ -61,7 +65,7 @@ __host__ __device__ void cone_beam_ct_source( ParticlesData particles, ui8 ptype
     // Get energy
     if( nb_of_energy_bins == 1 ) // mono energy
     {
-        particles.E[ id ] = spectrum_E[ 0 ];
+        particles->E[ id ] = spectrum_E[ 0 ];
     }
     else // poly
     {
@@ -69,43 +73,43 @@ __host__ __device__ void cone_beam_ct_source( ParticlesData particles, ui8 ptype
         ui32 pos = binary_search_left( rndm, spectrum_CDF, nb_of_energy_bins );
         if ( pos == ( nb_of_energy_bins - 1 ) )
         {
-            particles.E[ id ] = spectrum_E[ pos ];
+            particles->E[ id ] = spectrum_E[ pos ];
         }
         else
         {
-            particles.E[ id ] = linear_interpolation ( spectrum_CDF[ pos ],     spectrum_E[ pos ],
+            particles->E[ id ] = linear_interpolation ( spectrum_CDF[ pos ],     spectrum_E[ pos ],
                                                        spectrum_CDF[ pos + 1 ], spectrum_E[ pos + 1 ], rndm );
         }       
     }
 
     // Then set the mandatory field to create a new particle
-    particles.px[id] = gbl_pos.x;                        // Position in mm
-    particles.py[id] = gbl_pos.y;                        //
-    particles.pz[id] = gbl_pos.z;                        //
+    particles->px[id] = gbl_pos.x;                        // Position in mm
+    particles->py[id] = gbl_pos.y;                        //
+    particles->pz[id] = gbl_pos.z;                        //
 
-    particles.dx[id] = dir.x;                        // Direction (unit vector)
-    particles.dy[id] = dir.y;                        //
-    particles.dz[id] = dir.z;                        //
+    particles->dx[id] = dir.x;                        // Direction (unit vector)
+    particles->dy[id] = dir.y;                        //
+    particles->dz[id] = dir.z;                        //
 
-    particles.tof[id] = 0.0f;                             // Time of flight
-    particles.endsimu[id] = PARTICLE_ALIVE;               // Status of the particle
+    particles->tof[id] = 0.0f;                             // Time of flight
+    particles->status[id] = PARTICLE_ALIVE;               // Status of the particle
 
-    particles.level[id] = PRIMARY;                        // It is a primary particle
-    particles.pname[id] = ptype;                          // a photon or an electron
+    particles->level[id] = PRIMARY;                        // It is a primary particle
+    particles->pname[id] = ptype;                          // a photon or an electron
 
-    particles.geometry_id[id] = 0;                        // Some internal variables
-    particles.next_discrete_process[id] = NO_PROCESS;     //
-    particles.next_interaction_distance[id] = 0.0;        //
-    particles.scatter_order[ id ] = 0;                    //
+    particles->geometry_id[id] = 0;                        // Some internal variables
+    particles->next_discrete_process[id] = NO_PROCESS;     //
+    particles->next_interaction_distance[id] = 0.0;        //
+    particles->scatter_order[ id ] = 0;                    //
 
 }
 
-__global__ void kernel_cone_beam_ct_source( ParticlesData particles, ui8 ptype,
+__global__ void kernel_cone_beam_ct_source( ParticlesData *particles, ui8 ptype,
                                             f32 *spectrum_E, f32 *spectrum_CDF, ui32 nb_of_energy_bins, f32 aperture,
                                             f32xyz foc, f32matrix44 transform )
 {
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;;
-    if( id >= particles.size ) return;
+    if( id >= particles->size ) return;
 
     cone_beam_ct_source( particles, ptype, spectrum_E, spectrum_CDF, nb_of_energy_bins, aperture,
                          foc, transform, id );
@@ -122,6 +126,8 @@ ConeBeamCTSource::ConeBeamCTSource()
 {
     // Set the name of the source
     set_name( "ConeBeamCTSource" );
+
+    mh_params = nullptr;
 
     m_pos = make_f32xyz( 0.0, 0.0, 0.0 );
     m_angles = make_f32xyz( 0.0, 0.0, 0.0 );
@@ -335,7 +341,7 @@ std::ostream& operator<<( std::ostream& os, ConeBeamCTSource const& cbct )
     return os;
 }
 
-void ConeBeamCTSource::initialize( GlobalSimulationParameters params )
+void ConeBeamCTSource::initialize( GlobalSimulationParametersData *h_params )
 {
     // Check if everything was set properly
     if ( m_energy == 0 && m_spectrum_filename == "" )
@@ -345,7 +351,7 @@ void ConeBeamCTSource::initialize( GlobalSimulationParameters params )
     }
 
     // Store global parameters
-    m_params = params;
+    mh_params = h_params;
 
     // Compute the transformation matrix of the source that map local frame to global frame
     TransformCalculator *trans = new TransformCalculator;
@@ -373,30 +379,19 @@ void ConeBeamCTSource::initialize( GlobalSimulationParameters params )
 
 }
 
-void ConeBeamCTSource::get_primaries_generator( Particles particles )
+void ConeBeamCTSource::get_primaries_generator( ParticlesData *d_particles )
 {
-    if( m_params.data_h.device_target == CPU_DEVICE )
-    {
-        ui32 id = 0;
-        while( id < particles.size )
-        {
-            cone_beam_ct_source( particles.data_h, m_particle_type, m_spectrum_E, m_spectrum_CDF,
-                                 m_nb_of_energy_bins, m_aperture, m_foc, m_transform, id );
-            ++id;
-        }
-    }
-    else if( m_params.data_h.device_target == GPU_DEVICE )
-    {
-        dim3 threads, grid;
-        threads.x = m_params.data_h.gpu_block_size;
-        grid.x = ( particles.size + m_params.data_h.gpu_block_size - 1 )
-                / m_params.data_h.gpu_block_size;
 
-        kernel_cone_beam_ct_source<<<grid, threads>>>( particles.data_d, m_particle_type, m_spectrum_E, m_spectrum_CDF,
-                                                       m_nb_of_energy_bins, m_aperture, m_foc, m_transform );
-        cuda_error_check( "Error ", " kernel_cone_beam_ct_source" );
-        cudaDeviceSynchronize();
-    }
+    dim3 threads, grid;
+    threads.x = mh_params->gpu_block_size;
+    grid.x = ( mh_params->size_of_particles_batch + mh_params->gpu_block_size - 1 )
+            / mh_params->gpu_block_size;
+
+    kernel_cone_beam_ct_source<<<grid, threads>>>( d_particles, m_particle_type, m_spectrum_E, m_spectrum_CDF,
+                                                   m_nb_of_energy_bins, m_aperture, m_foc, m_transform );
+    cuda_error_check( "Error ", " kernel_cone_beam_ct_source" );
+    cudaDeviceSynchronize();
+
 }
 
 

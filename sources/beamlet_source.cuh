@@ -1,12 +1,13 @@
-// GGEMS Copyright (C) 2015
+// GGEMS Copyright (C) 2017
 
 /*!
  * \file beamlet_source.cuh
  * \brief Beamlet source
  * \author J. Bert <bert.jul@gmail.com>
- * \version 0.1
+ * \version 0.2
  * \date Thursday May 19, 2016
  *
+ * v0.2: JB - Change all structs and remove CPU exec
  */
 
 #ifndef BEAMLET_SOURCE_CUH
@@ -133,13 +134,13 @@ public: // Abstract from GGEMSSource (Mandatory funtions)
      * \brief Generate particles
      * \param particles Stack of particles
      */
-    void get_primaries_generator( Particles particles );
+    void get_primaries_generator( ParticlesData *d_particles );
 
     /*!
      * \brief Initialize the source before running the simualtion
      * \param params Simulations parameters
      */
-    void initialize( GlobalSimulationParameters params );
+    void initialize( GlobalSimulationParametersData *h_params );
 
 private: // Make BeamletSource class non-copyable
     /*!
@@ -172,7 +173,7 @@ private:
     f32 m_energy;                         /*!< In case of mono energy, the energy value */
     ui32 m_nb_of_energy_bins;             /*!< Number of the bins in the energy spectrum */
     f32matrix44 m_transform;              /*!< Trsnformation matrix */
-    GlobalSimulationParameters m_params;  /*!< Simulation parameters */
+    GlobalSimulationParametersData *mh_params;  /*!< Simulation parameters */
 };
 
 #endif

@@ -1,4 +1,4 @@
-// GGEMS Copyright (C) 2015
+// GGEMS Copyright (C) 2017
 
 /*!
  * \file fun.cuh
@@ -112,9 +112,9 @@ inline __host__ __device__ ui32 binary_search_left_offset( T key, U* tab, ui32 s
 // Linear interpolation
 __host__ __device__ f32 linear_interpolation ( f32 xa,f32 ya, f32 xb,  f32 yb, f32 x );
 
-__host__ __device__ i32 G4Poisson(f32 mean, ParticlesData &particles, ui32 id );
+//__host__ __device__ i32 G4Poisson(f32 mean, ParticlesData *particles, ui32 id );
 
-__host__ __device__ f32 Gaussian ( f32 mean,f32 rms, ParticlesData &particles, ui32 id );
+__host__ __device__ f32 Gaussian (f32 mean, f32 rms, ParticlesData *particles, ui32 id );
 
 
 // Filtering

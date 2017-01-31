@@ -1,4 +1,4 @@
-// GGEMS Copyright (C) 2015
+// GGEMS Copyright (C) 2017
 
 /*!
  * \file base_object.cuh
@@ -23,18 +23,9 @@ class BaseObject {
 
         void set_material(std::string mat_name);
         void set_name(std::string obj_name);
-        //void set_color(f32 r, f32 g, f32 b);
-        //void set_transparency(f32 val);
-        //void set_wireframe(bool val);
-        //void set_sensitive(bool val);
 
         // Bounding box
-        f32 xmin, xmax, ymin, ymax, zmin, zmax;
-
-        // Viewing
-        //Color color;
-        //f32 transparency;
-        //bool wireframe;
+        f32 xmin, xmax, ymin, ymax, zmin, zmax;       
 
         // Property
         std::string material_name;

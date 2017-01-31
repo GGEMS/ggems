@@ -1,11 +1,14 @@
-// GGEMS Copyright (C) 2015
+// GGEMS Copyright (C) 2017
 
 /*!
  * \file linac_source.cu
  * \brief Linac source
  * \author Julien Bert <bert.jul@gmail.com>
- * \version 0.1
+ * \version 0.2
  * \date Thursday September 1st, 2016
+ *
+ * v0.2: JB - Change all structs and remove CPU exec
+ *
 */
 
 #ifndef LINAC_SOURCE_CU
@@ -16,8 +19,8 @@
 ///////// GPU code ////////////////////////////////////////////////////
 
 // Internal function that create a new particle to the buffer at the slot id
-__host__ __device__ void linac_source ( ParticlesData particles,
-                                        LinacSourceData linac,
+__host__ __device__ void linac_source ( ParticlesData *particles,
+                                        const LinacSourceData *linac,
                                         f32matrix44 trans, ui32 id )
 {
     // Main vars
@@ -29,7 +32,7 @@ __host__ __device__ void linac_source ( ParticlesData particles,
     rnd = prng_uniform( particles, id );
 
 
-    ind = binary_search_left( rnd, linac.cdf_rho, linac.n_rho );
+    ind = binary_search_left( rnd, linac->cdf_rho, linac->n_rho );
 
     if ( ind == 0 )
     {
@@ -37,13 +40,13 @@ __host__ __device__ void linac_source ( ParticlesData particles,
     }
     else
     {
-        f_ind = linear_interpolation( linac.cdf_rho[ ind - 1 ],     f32(ind - 1),
-                                      linac.cdf_rho[ ind],          f32(ind), rnd );
+        f_ind = linear_interpolation( linac->cdf_rho[ ind - 1 ],     f32(ind - 1),
+                                      linac->cdf_rho[ ind],          f32(ind), rnd );
     }
 
-    f32 rho = f_ind * linac.s_rho;    // in mm
+    f32 rho = f_ind * linac->s_rho;    // in mm
 
-    //f32 rho = rnd * linac.rho_max;
+    //f32 rho = rnd * linac->rho_max;
     f32 psi = prng_uniform( particles, id ) * twopi;
 
     f32xyz pos = { 0.0, 0.0, 0.0 };
@@ -61,59 +64,59 @@ __host__ __device__ void linac_source ( ParticlesData particles,
 
     pos = fxyz_local_to_global_position( trans, pos );
 
-    particles.px[ id ] = pos.x;                        // Position in mm
-    particles.py[ id ] = pos.y;                        //
-    particles.pz[ id ] = pos.z;                        //
+    particles->px[ id ] = pos.x;                        // Position in mm
+    particles->py[ id ] = pos.y;                        //
+    particles->pz[ id ] = pos.z;                        //
 
     // 2. Get energy (rho E)
 
-    ui32 rho_ind = rho / linac.s_rho_E.x;
-    gbl_ind = rho_ind * linac.n_rho_E.y;            // 2D array, get the right E row
+    ui32 rho_ind = rho / linac->s_rho_E.x;
+    gbl_ind = rho_ind * linac->n_rho_E.y;            // 2D array, get the right E row
 
     rnd = prng_uniform( particles, id );
-    ind = binary_search_left( rnd, linac.cdf_rho_E, gbl_ind+linac.n_rho_E.y, gbl_ind );
+    ind = binary_search_left( rnd, linac->cdf_rho_E, gbl_ind+linac->n_rho_E.y, gbl_ind );
 
-    if ( ind == (gbl_ind + linac.n_rho_E.y - 1) )
+    if ( ind == (gbl_ind + linac->n_rho_E.y - 1) )
     {
         f_ind = ind;
     }
     else
     {
-        f_ind = linear_interpolation( linac.cdf_rho_E[ ind - 1 ],     f32(ind - 1),
-                                      linac.cdf_rho_E[ ind ],         f32(ind), rnd );
+        f_ind = linear_interpolation( linac->cdf_rho_E[ ind - 1 ],     f32(ind - 1),
+                                      linac->cdf_rho_E[ ind ],         f32(ind), rnd );
     }
-    f32 E = (f_ind - gbl_ind) * linac.s_rho_E.y;
+    f32 E = (f_ind - gbl_ind) * linac->s_rho_E.y;
 
     //printf( "id%i E %f\n", id, E );
 
-    particles.E[ id ] = E;
+    particles->E[ id ] = E;
 
 
-    //particles.E[ id ] = 1.0;
+    //particles->E[ id ] = 1.0;
 
     // 3. Get direction
 
 
     // 3.1 Get theta (rho E Theta)
 
-    rho_ind = rho / linac.s_rho_E_theta.x;
-    ui32 E_ind = E / linac.s_rho_E_theta.y;
-    gbl_ind = rho_ind * linac.n_rho_E_theta.y * linac.n_rho_E_theta.z + E_ind * linac.n_rho_E_theta.z;
+    rho_ind = rho / linac->s_rho_E_theta.x;
+    ui32 E_ind = E / linac->s_rho_E_theta.y;
+    gbl_ind = rho_ind * linac->n_rho_E_theta.y * linac->n_rho_E_theta.z + E_ind * linac->n_rho_E_theta.z;
 
     rnd = prng_uniform( particles, id );
-    ind = binary_search_left( rnd, linac.cdf_rho_E_theta, gbl_ind+linac.n_rho_E_theta.z, gbl_ind );
+    ind = binary_search_left( rnd, linac->cdf_rho_E_theta, gbl_ind+linac->n_rho_E_theta.z, gbl_ind );
 
-    if ( ind == (gbl_ind + linac.n_rho_E_theta.z - 1) )
+    if ( ind == (gbl_ind + linac->n_rho_E_theta.z - 1) )
     {
         f_ind = ind;
     }
     else
     {
-        f_ind = linear_interpolation( linac.cdf_rho_E_theta[ ind ],       f32( ind ),
-                                      linac.cdf_rho_E_theta[ ind + 1 ],   f32( ind + 1 ), rnd );
+        f_ind = linear_interpolation( linac->cdf_rho_E_theta[ ind ],       f32( ind ),
+                                      linac->cdf_rho_E_theta[ ind + 1 ],   f32( ind + 1 ), rnd );
     }
 
-    f32 cos_theta = ( (f_ind - gbl_ind) * linac.s_rho_E_theta.z ) + cos(linac.theta_max);
+    f32 cos_theta = ( (f_ind - gbl_ind) * linac->s_rho_E_theta.z ) + cos(linac->theta_max);
 
 #ifdef DEBUG
     assert(cos_theta <= 1.0f);
@@ -124,9 +127,9 @@ __host__ __device__ void linac_source ( ParticlesData particles,
 
     /*
     printf("rho %f E %f  -  rho_ind %i E_ind %i\n", rho, E, rho_ind, E_ind);
-    ui32 i=gbl_ind; while (i<gbl_ind+linac.theta_nb_bins)
+    ui32 i=gbl_ind; while (i<gbl_ind+linac->theta_nb_bins)
     {
-        printf("i %i p %e\n", i, linac.cdf_rho_E_theta[i]);
+        printf("i %i p %e\n", i, linac->cdf_rho_E_theta[i]);
         ++i;
     }
     */
@@ -134,23 +137,23 @@ __host__ __device__ void linac_source ( ParticlesData particles,
     //printf( "id%i theta %f\n", id, theta );
 
     // 3.2 Get phi
-    rho_ind = rho / linac.s_rho_theta_phi.x;
-    ui32 theta_ind = theta / linac.s_rho_theta_phi.y;
-    gbl_ind = rho_ind * linac.n_rho_theta_phi.y * linac.n_rho_theta_phi.z + theta_ind * linac.n_rho_theta_phi.z;
+    rho_ind = rho / linac->s_rho_theta_phi.x;
+    ui32 theta_ind = theta / linac->s_rho_theta_phi.y;
+    gbl_ind = rho_ind * linac->n_rho_theta_phi.y * linac->n_rho_theta_phi.z + theta_ind * linac->n_rho_theta_phi.z;
 
     rnd = prng_uniform( particles, id );
-    ind = binary_search_left( rnd, linac.cdf_rho_theta_phi, gbl_ind+linac.n_rho_theta_phi.z, gbl_ind );
+    ind = binary_search_left( rnd, linac->cdf_rho_theta_phi, gbl_ind+linac->n_rho_theta_phi.z, gbl_ind );
 
-    if ( ind == (gbl_ind + linac.n_rho_theta_phi.z - 1) )
+    if ( ind == (gbl_ind + linac->n_rho_theta_phi.z - 1) )
     {
         f_ind = ind;
     }
     else
     {
-        f_ind = linear_interpolation( linac.cdf_rho_theta_phi[ ind ],     f32( ind ),
-                                      linac.cdf_rho_theta_phi[ ind + 1 ], f32( ind + 1 ), rnd );
+        f_ind = linear_interpolation( linac->cdf_rho_theta_phi[ ind ],     f32( ind ),
+                                      linac->cdf_rho_theta_phi[ ind + 1 ], f32( ind + 1 ), rnd );
     }
-    f32 phi = (f_ind-gbl_ind) * linac.s_rho_theta_phi.z;
+    f32 phi = (f_ind-gbl_ind) * linac->s_rho_theta_phi.z;
 
     // 3.3 Get vector
 
@@ -176,22 +179,22 @@ __host__ __device__ void linac_source ( ParticlesData particles,
     dir.y = 1.0f;
     dir.z = 0.0f;
 */
-    particles.dx[id] = dir.x;                        // Direction (unit vector)
-    particles.dy[id] = dir.y;                        //
-    particles.dz[id] = dir.z;                        //
+    particles->dx[id] = dir.x;                        // Direction (unit vector)
+    particles->dy[id] = dir.y;                        //
+    particles->dz[id] = dir.z;                        //
 
 
     // 4. Then set the mandatory field to create a new particle
-    particles.tof[id] = 0.0f;                             // Time of flight
-    particles.endsimu[id] = PARTICLE_ALIVE;               // Status of the particle
+    particles->tof[id] = 0.0f;                             // Time of flight
+    particles->status[id] = PARTICLE_ALIVE;               // Status of the particle
 
-    particles.level[id] = PRIMARY;                        // It is a primary particle
-    particles.pname[id] = PHOTON;                         // a photon or an electron
+    particles->level[id] = PRIMARY;                        // It is a primary particle
+    particles->pname[id] = PHOTON;                         // a photon or an electron
 
-    particles.geometry_id[id] = 0;                        // Some internal variables
-    particles.next_discrete_process[id] = NO_PROCESS;     //
-    particles.next_interaction_distance[id] = 0.0;        //
-    particles.scatter_order[ id ] = 0;                    //
+    particles->geometry_id[id] = 0;                        // Some internal variables
+    particles->next_discrete_process[id] = NO_PROCESS;     //
+    particles->next_interaction_distance[id] = 0.0;        //
+    particles->scatter_order[ id ] = 0;                    //
 
 
 //    printf("src id %i p %f %f %f d %f %f %f E %f\n", id, pos.x, pos.y, pos.z,
@@ -202,13 +205,13 @@ __host__ __device__ void linac_source ( ParticlesData particles,
 
 // Kernel to create new particles. This kernel will only call the host/device function
 // beamlet source in order to get one new particle.
-__global__ void kernel_linac_source ( ParticlesData particles,
-                                      LinacSourceData linac,
+__global__ void kernel_linac_source ( ParticlesData *particles,
+                                      const LinacSourceData *linac,
                                       f32matrix44 trans )
 {
     // Get thread id
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
-    if ( id >= particles.size ) return;
+    if ( id >= particles->size ) return;
 
     // Get a new particle
     linac_source( particles, linac, trans, id );
@@ -230,15 +233,20 @@ LinacSource::LinacSource() : GGEMSSource()
     m_org = make_f32xyz( 0.0, 0.0, 0.0 );
     m_model_filename = "";
 
-    m_linac_source_data.s_rho = 0.0;
-    m_linac_source_data.s_rho_E = make_f32xy( 0.0, 0.0 );
-    m_linac_source_data.s_rho_E_theta = make_f32xyz( 0.0, 0.0, 0.0 );
-    m_linac_source_data.s_rho_theta_phi = make_f32xyz( 0.0, 0.0, 0.0 );
+    mh_params = nullptr;
+    d_linac_source = nullptr;
 
-    m_linac_source_data.n_rho = 0;
-    m_linac_source_data.n_rho_E = make_ui32xy( 0, 0 );
-    m_linac_source_data.n_rho_E_theta = make_ui32xyz( 0, 0, 0 );
-    m_linac_source_data.n_rho_theta_phi = make_ui32xyz( 0, 0, 0 );
+    h_linac_source = (LinacSourceData*) malloc( sizeof(LinacSourceData) );
+
+    h_linac_source->s_rho = 0.0;
+    h_linac_source->s_rho_E = make_f32xy( 0.0, 0.0 );
+    h_linac_source->s_rho_E_theta = make_f32xyz( 0.0, 0.0, 0.0 );
+    h_linac_source->s_rho_theta_phi = make_f32xyz( 0.0, 0.0, 0.0 );
+
+    h_linac_source->n_rho = 0;
+    h_linac_source->n_rho_E = make_ui32xy( 0, 0 );
+    h_linac_source->n_rho_E_theta = make_ui32xyz( 0, 0, 0 );
+    h_linac_source->n_rho_theta_phi = make_ui32xyz( 0, 0, 0 );
 }
 
 // Destructor
@@ -247,7 +255,7 @@ LinacSource::~LinacSource() {}
 //========== Private ===============================================
 
 void LinacSource::m_load_linac_model()
-{
+{    
     // Get a txt reader
     TxtReader *txt_reader = new TxtReader;
 
@@ -283,21 +291,21 @@ void LinacSource::m_load_linac_model()
             if ( key == "ElementDataFile" )      ElementDataFile = txt_reader->read_key_string_arg( line );
             if ( key == "ObjectType" )           ObjectType = txt_reader->read_key_string_arg( line );
 
-            if ( key == "NRho" )                 m_linac_source_data.n_rho = txt_reader->read_key_i32_arg( line );
+            if ( key == "NRho" )                 h_linac_source->n_rho = txt_reader->read_key_i32_arg( line );
             if ( key == "NRhoE" )
             {
-                m_linac_source_data.n_rho_E = make_ui32xy( txt_reader->read_key_i32_arg_atpos( line, 0 ),
+                h_linac_source->n_rho_E = make_ui32xy( txt_reader->read_key_i32_arg_atpos( line, 0 ),
                                                            txt_reader->read_key_i32_arg_atpos( line, 1 ) );
             }
             if ( key == "NRhoETheta" )
             {
-                m_linac_source_data.n_rho_E_theta = make_ui32xyz( txt_reader->read_key_i32_arg_atpos( line, 0 ),
+                h_linac_source->n_rho_E_theta = make_ui32xyz( txt_reader->read_key_i32_arg_atpos( line, 0 ),
                                                                   txt_reader->read_key_i32_arg_atpos( line, 1 ),
                                                                   txt_reader->read_key_i32_arg_atpos( line, 2 ) );
             }
             if ( key == "NRhoThetaPhi" )
             {
-                m_linac_source_data.n_rho_theta_phi = make_ui32xyz( txt_reader->read_key_i32_arg_atpos( line, 0 ),
+                h_linac_source->n_rho_theta_phi = make_ui32xyz( txt_reader->read_key_i32_arg_atpos( line, 0 ),
                                                                     txt_reader->read_key_i32_arg_atpos( line, 1 ),
                                                                     txt_reader->read_key_i32_arg_atpos( line, 2 ) );
             }
@@ -317,47 +325,47 @@ void LinacSource::m_load_linac_model()
     }
 
     if ( rho_max == 0 || E_max == 0 || theta_max == 0 || phi_max == 0 ||
-         m_linac_source_data.n_rho == 0 ||
-         m_linac_source_data.n_rho_E.x == 0 || m_linac_source_data.n_rho_E.y == 0 ||
-         m_linac_source_data.n_rho_E_theta.x == 0 || m_linac_source_data.n_rho_E_theta.y == 0 || m_linac_source_data.n_rho_E_theta.z == 0 ||
-         m_linac_source_data.n_rho_theta_phi.x == 0 || m_linac_source_data.n_rho_theta_phi.y == 0 || m_linac_source_data.n_rho_theta_phi.z == 0 )
+         h_linac_source->n_rho == 0 ||
+         h_linac_source->n_rho_E.x == 0 || h_linac_source->n_rho_E.y == 0 ||
+         h_linac_source->n_rho_E_theta.x == 0 || h_linac_source->n_rho_E_theta.y == 0 || h_linac_source->n_rho_E_theta.z == 0 ||
+         h_linac_source->n_rho_theta_phi.x == 0 || h_linac_source->n_rho_theta_phi.y == 0 || h_linac_source->n_rho_theta_phi.z == 0 )
     {
         GGcerr << "Missing parameter(s) in the header of Linac source model file!" << GGendl;
         exit_simulation();
     }
 
     // Store data and mem allocation
-    m_linac_source_data.rho_max = rho_max;
-    m_linac_source_data.E_max = E_max;
-    m_linac_source_data.theta_max = theta_max;
-    m_linac_source_data.phi_max = phi_max;
+    h_linac_source->rho_max = rho_max;
+    h_linac_source->E_max = E_max;
+    h_linac_source->theta_max = theta_max;
+    h_linac_source->phi_max = phi_max;
 
-    m_linac_source_data.s_rho = rho_max / f32( m_linac_source_data.n_rho - 1 );
+    h_linac_source->s_rho = rho_max / f32( h_linac_source->n_rho - 1 );
 
-    m_linac_source_data.s_rho_E = make_f32xy( rho_max / f32( m_linac_source_data.n_rho_E.x - 1 ),
-                                              E_max / f32( m_linac_source_data.n_rho_E.y - 1 ));
+    h_linac_source->s_rho_E = make_f32xy( rho_max / f32( h_linac_source->n_rho_E.x - 1 ),
+                                          E_max / f32( h_linac_source->n_rho_E.y - 1 ));
 
-    m_linac_source_data.s_rho_E_theta = make_f32xyz( rho_max / f32( m_linac_source_data.n_rho_E_theta.x - 1 ),
-                                                     E_max / f32( m_linac_source_data.n_rho_E_theta.y - 1),
-                                                     ( 1 - cos( theta_max ) ) / f32( m_linac_source_data.n_rho_E_theta.z - 1 ) );
+    h_linac_source->s_rho_E_theta = make_f32xyz( rho_max / f32( h_linac_source->n_rho_E_theta.x - 1 ),
+                                                 E_max / f32( h_linac_source->n_rho_E_theta.y - 1),
+                                                 ( 1 - cos( theta_max ) ) / f32( h_linac_source->n_rho_E_theta.z - 1 ) );
 
-    m_linac_source_data.s_rho_theta_phi = make_f32xyz( rho_max / f32( m_linac_source_data.n_rho_theta_phi.x - 1 ),
-                                                       theta_max / f32( m_linac_source_data.n_rho_theta_phi.y - 1 ),
-                                                       phi_max / f32( m_linac_source_data.n_rho_theta_phi.z - 1 ) );
+    h_linac_source->s_rho_theta_phi = make_f32xyz( rho_max / f32( h_linac_source->n_rho_theta_phi.x - 1 ),
+                                                   theta_max / f32( h_linac_source->n_rho_theta_phi.y - 1 ),
+                                                   phi_max / f32( h_linac_source->n_rho_theta_phi.z - 1 ) );
+/*
+    HANDLE_ERROR( cudaMallocManaged( &(h_linac_source.cdf_rho), h_linac_source.n_rho * sizeof( f32 ) ) );
 
-    HANDLE_ERROR( cudaMallocManaged( &(m_linac_source_data.cdf_rho), m_linac_source_data.n_rho * sizeof( f32 ) ) );
+    HANDLE_ERROR( cudaMallocManaged( &(h_linac_source.cdf_rho_E), h_linac_source.n_rho_E.x
+                                     * h_linac_source.n_rho_E.y * sizeof( f32 ) ) );
 
-    HANDLE_ERROR( cudaMallocManaged( &(m_linac_source_data.cdf_rho_E), m_linac_source_data.n_rho_E.x
-                                     * m_linac_source_data.n_rho_E.y * sizeof( f32 ) ) );
+    HANDLE_ERROR( cudaMallocManaged( &(h_linac_source.cdf_rho_E_theta),
+                                     h_linac_source.n_rho_E_theta.x * h_linac_source.n_rho_E_theta.y *
+                                     h_linac_source.n_rho_E_theta.z * sizeof( f32 ) ) );
 
-    HANDLE_ERROR( cudaMallocManaged( &(m_linac_source_data.cdf_rho_E_theta),
-                                     m_linac_source_data.n_rho_E_theta.x * m_linac_source_data.n_rho_E_theta.y *
-                                     m_linac_source_data.n_rho_E_theta.z * sizeof( f32 ) ) );
-
-    HANDLE_ERROR( cudaMallocManaged( &(m_linac_source_data.cdf_rho_theta_phi),
-                                     m_linac_source_data.n_rho_theta_phi.x * m_linac_source_data.n_rho_theta_phi.y *
-                                     m_linac_source_data.n_rho_theta_phi.z * sizeof( f32 ) ) );
-
+    HANDLE_ERROR( cudaMallocManaged( &(h_linac_source.cdf_rho_theta_phi),
+                                     h_linac_source.n_rho_theta_phi.x * h_linac_source.n_rho_theta_phi.y *
+                                     h_linac_source.n_rho_theta_phi.z * sizeof( f32 ) ) );
+*/
     // Read data
     FILE *pfile = fopen(ElementDataFile.c_str(), "rb");
 
@@ -376,17 +384,90 @@ void LinacSource::m_load_linac_model()
         }
     }
 
-    fread( m_linac_source_data.cdf_rho, sizeof(f32), m_linac_source_data.n_rho, pfile );
-    fread( m_linac_source_data.cdf_rho_E, sizeof(f32), m_linac_source_data.n_rho_E.x
-                                                        * m_linac_source_data.n_rho_E.y, pfile );
-    fread( m_linac_source_data.cdf_rho_E_theta, sizeof(f32), m_linac_source_data.n_rho_E_theta.x *
-                                                             m_linac_source_data.n_rho_E_theta.y *
-                                                             m_linac_source_data.n_rho_E_theta.z, pfile );
-    fread( m_linac_source_data.cdf_rho_theta_phi, sizeof(f32), m_linac_source_data.n_rho_theta_phi.x *
-                                                               m_linac_source_data.n_rho_theta_phi.y *
-                                                               m_linac_source_data.n_rho_theta_phi.z, pfile );
+    fread( h_linac_source->cdf_rho, sizeof(f32), h_linac_source->n_rho, pfile );
+    fread( h_linac_source->cdf_rho_E, sizeof(f32), h_linac_source->n_rho_E.x
+                                                        * h_linac_source->n_rho_E.y, pfile );
+    fread( h_linac_source->cdf_rho_E_theta, sizeof(f32), h_linac_source->n_rho_E_theta.x *
+                                                             h_linac_source->n_rho_E_theta.y *
+                                                             h_linac_source->n_rho_E_theta.z, pfile );
+    fread( h_linac_source->cdf_rho_theta_phi, sizeof(f32), h_linac_source->n_rho_theta_phi.x *
+                                                               h_linac_source->n_rho_theta_phi.y *
+                                                               h_linac_source->n_rho_theta_phi.z, pfile );
 
     fclose( pfile );
+}
+
+void LinacSource::m_copy_to_gpu()
+{
+    ui32 n_rho = h_linac_source->n_rho;
+    ui32 n_rho_E = h_linac_source->n_rho_E.x * h_linac_source->n_rho_E.y;
+    ui32 n_rho_E_theta = h_linac_source->n_rho_E_theta.x *
+                         h_linac_source->n_rho_E_theta.y *
+                         h_linac_source->n_rho_E_theta.z;
+    ui32 n_rho_theta_phi = h_linac_source->n_rho_theta_phi.x *
+                           h_linac_source->n_rho_theta_phi.y *
+                           h_linac_source->n_rho_theta_phi.z;
+
+    /// First, struct allocation
+    HANDLE_ERROR( cudaMalloc( (void**) &d_linac_source, sizeof( LinacSourceData ) ) );
+
+    /// Device pointers allocation
+    f32 *cdf_rho;
+    HANDLE_ERROR( cudaMalloc((void**) &cdf_rho, n_rho*sizeof(f32)) );
+    f32 *cdf_rho_E;
+    HANDLE_ERROR( cudaMalloc((void**) &cdf_rho_E, n_rho_E*sizeof(f32)) );
+    f32 *cdf_rho_E_theta;
+    HANDLE_ERROR( cudaMalloc((void**) &cdf_rho_E_theta, n_rho_E_theta*sizeof(f32)) );
+    f32 *cdf_rho_theta_phi;
+    HANDLE_ERROR( cudaMalloc((void**) &cdf_rho_theta_phi, n_rho_theta_phi*sizeof(f32)) );
+
+    /// Copy host data to device
+    HANDLE_ERROR( cudaMemcpy( cdf_rho, h_linac_source->cdf_rho,
+                              n_rho*sizeof(f32), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( cdf_rho_E, h_linac_source->cdf_rho_E,
+                              n_rho_E*sizeof(f32), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( cdf_rho_E_theta, h_linac_source->cdf_rho_E_theta,
+                              n_rho_E_theta*sizeof(f32), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( cdf_rho_theta_phi, h_linac_source->cdf_rho_theta_phi,
+                              n_rho_theta_phi*sizeof(f32), cudaMemcpyHostToDevice ) );
+
+    /// Bind data to the struct
+    HANDLE_ERROR( cudaMemcpy( &(d_linac_source->cdf_rho), &cdf_rho,
+                              sizeof(d_linac_source->cdf_rho), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(d_linac_source->cdf_rho_E), &cdf_rho_E,
+                              sizeof(d_linac_source->cdf_rho_E), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(d_linac_source->cdf_rho_E_theta), &cdf_rho_E_theta,
+                              sizeof(d_linac_source->cdf_rho_E_theta), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(d_linac_source->cdf_rho_theta_phi), &cdf_rho_theta_phi,
+                              sizeof(d_linac_source->cdf_rho_theta_phi), cudaMemcpyHostToDevice ) );
+
+    HANDLE_ERROR( cudaMemcpy( &(d_linac_source->rho_max), &(h_linac_source->rho_max),
+                              sizeof(d_linac_source->rho_max), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(d_linac_source->E_max), &(h_linac_source->E_max),
+                              sizeof(d_linac_source->E_max), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(d_linac_source->theta_max), &(h_linac_source->theta_max),
+                              sizeof(d_linac_source->theta_max), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(d_linac_source->phi_max), &(h_linac_source->phi_max),
+                              sizeof(d_linac_source->phi_max), cudaMemcpyHostToDevice ) );
+
+    HANDLE_ERROR( cudaMemcpy( &(d_linac_source->s_rho), &(h_linac_source->s_rho),
+                              sizeof(d_linac_source->s_rho), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(d_linac_source->s_rho_E), &(h_linac_source->s_rho_E),
+                              sizeof(d_linac_source->s_rho_E), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(d_linac_source->s_rho_E_theta), &(h_linac_source->s_rho_E_theta),
+                              sizeof(d_linac_source->s_rho_E_theta), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(d_linac_source->s_rho_theta_phi), &(h_linac_source->s_rho_theta_phi),
+                              sizeof(d_linac_source->s_rho_theta_phi), cudaMemcpyHostToDevice ) );
+
+    HANDLE_ERROR( cudaMemcpy( &(d_linac_source->n_rho), &(h_linac_source->n_rho),
+                              sizeof(d_linac_source->n_rho), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(d_linac_source->n_rho_E), &(h_linac_source->n_rho_E),
+                              sizeof(d_linac_source->n_rho_E), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(d_linac_source->n_rho_E_theta), &(h_linac_source->n_rho_E_theta),
+                              sizeof(d_linac_source->n_rho_E_theta), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(d_linac_source->n_rho_theta_phi), &(h_linac_source->n_rho_theta_phi),
+                              sizeof(d_linac_source->n_rho_theta_phi), cudaMemcpyHostToDevice ) );
+
 }
 
 //========== Setting ===============================================
@@ -436,7 +517,7 @@ f32matrix44 LinacSource::get_transformation_matrix()
 
 // Mandatory function, abstract from GGEMSSource. This function is called
 // by GGEMS to initialize and load all necessary data into the graphic card
-void LinacSource::initialize ( GlobalSimulationParameters params )
+void LinacSource::initialize (GlobalSimulationParametersData *h_params )
 {
     // Some checking
     if ( m_model_filename == "" )
@@ -452,13 +533,15 @@ void LinacSource::initialize ( GlobalSimulationParameters params )
         exit_simulation();
     }
 
-    // Read and load data
-    m_load_linac_model();
-
     // Store global parameters: params are provided by GGEMS and are used to
     // know different information about the simulation. For example if the targeted
     // device is a CPU or a GPU.
-    m_params = params;
+    mh_params = h_params;
+
+
+    // Read and load data
+    m_load_linac_model();
+    m_copy_to_gpu();
 
     // Compute the transformation matrix (Beamlet plane is set along the x-axis (angle 0))
     TransformCalculator *trans = new TransformCalculator;
@@ -469,12 +552,12 @@ void LinacSource::initialize ( GlobalSimulationParameters params )
     delete trans;
 
     // Some verbose if required
-    if ( params.data_h.display_memory_usage )
+    if ( h_params->display_memory_usage )
     {
-        ui32 mem = 4 * ( m_linac_source_data.n_rho +
-                         m_linac_source_data.n_rho_E.x + m_linac_source_data.n_rho_E.y +
-                         m_linac_source_data.n_rho_E_theta.x + m_linac_source_data.n_rho_E_theta.y + m_linac_source_data.n_rho_E_theta.z +
-                         m_linac_source_data.n_rho_theta_phi.x + m_linac_source_data.n_rho_theta_phi.y + m_linac_source_data.n_rho_theta_phi.z );
+        ui32 mem = 4 * ( h_linac_source->n_rho +
+                         h_linac_source->n_rho_E.x + h_linac_source->n_rho_E.y +
+                         h_linac_source->n_rho_E_theta.x + h_linac_source->n_rho_E_theta.y + h_linac_source->n_rho_E_theta.z +
+                         h_linac_source->n_rho_theta_phi.x + h_linac_source->n_rho_theta_phi.y + h_linac_source->n_rho_theta_phi.z );
         GGcout_mem("Linac source", mem);
     }
 
@@ -483,42 +566,20 @@ void LinacSource::initialize ( GlobalSimulationParameters params )
 // Mandatory function, abstract from GGEMSSource. This function is called
 // by GGEMS to fill particle buffer of new fresh particles, which is the role
 // of any source.
-void LinacSource::get_primaries_generator ( Particles particles )
+void LinacSource::get_primaries_generator (ParticlesData *d_particles )
 {
 
-    // If CPU running, do it on CPU
-    if ( m_params.data_h.device_target == CPU_DEVICE )
-    {
+    // Defined threads and grid
+    dim3 threads, grid;
+    threads.x = mh_params->gpu_block_size;
+    grid.x = ( mh_params->size_of_particles_batch + mh_params->gpu_block_size - 1 ) / mh_params->gpu_block_size;
 
-        // Loop over the particle buffer
-        ui32 id=0;
-        while( id < particles.size )
-        {
-            // Call a point source that get a new particle at a time. In this case data from host (CPU)
-            // is passed to the function (particles.data_h).
-            linac_source( particles.data_h, m_linac_source_data,
-                          m_transform,
-                          id );
-            ++id;
-        }
-
-    }
-    // If GPU running, do it on GPU
-    else if ( m_params.data_h.device_target == GPU_DEVICE )
-    {
-
-        // Defined threads and grid
-        dim3 threads, grid;
-        threads.x = m_params.data_h.gpu_block_size;
-        grid.x = ( particles.size + m_params.data_h.gpu_block_size - 1 ) / m_params.data_h.gpu_block_size;
-
-        // Call GPU kernel of a point source that get fill the complete particle buffer. In this case data
-        // from device (GPU) is passed to the kernel (particles.data_d).
-        kernel_linac_source<<<grid, threads>>>( particles.data_d, m_linac_source_data,
-                                                m_transform );
-        cuda_error_check( "Error ", " Kernel_beamlet_source" );
-        cudaDeviceSynchronize();
-    }
+    // Call GPU kernel of a point source that get fill the complete particle buffer. In this case data
+    // from device (GPU) is passed to the kernel (particles.data_d).
+    kernel_linac_source<<<grid, threads>>>( d_particles, d_linac_source,
+                                            m_transform );
+    cuda_error_check( "Error ", " Kernel_beamlet_source" );
+    cudaDeviceSynchronize();
 
 }
 

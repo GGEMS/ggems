@@ -1,13 +1,13 @@
-// GGEMS Copyright (C) 2015
+// GGEMS Copyright (C) 2017
 
 /*!
  * \file particles.cuh
  * \brief
  * \author J. Bert <bert.jul@gmail.com>
- * \version 0.1
+ * \version 0.2
  * \date 18 novembre 2015
  *
- *
+ * v0.2: JB - Change all structs and remove CPU exec
  *
  */
 
@@ -36,22 +36,23 @@ struct ParticlesData
     ui32* prng_state_4;
     ui32* prng_state_5;
 
-    // Scatter for imaging
-    ui32* scatter_order;
-
     // Navigation
-    ui32* geometry_id; // current geometry crossed by the particle
-    ui32* E_index;     // Energy index within CS and Mat tables
+    ui32* geometry_id;  // current geometry crossed by the particle
+    ui16* E_index;      // Energy index within CS and Mat tables
+    ui16* scatter_order; // Scatter for imaging
+
     // Interactions
     f32* next_interaction_distance;
     ui8* next_discrete_process;
+
     // simulation
-    ui8* endsimu;
+    ui8* status;
     ui8* level;
     ui8* pname; // particle name (photon, electron, etc)
+
     // size
     ui32 size;
-
+/*
     // Secondaries stack
     // Acces to level : Part_ID * size + hierarchy level
     f32* sec_E; // size * hierarchy level
@@ -63,58 +64,8 @@ struct ParticlesData
     f32* sec_pz;
     f32* sec_tof;
     ui8* sec_pname; // particle name (photon, electron, etc)
-/*
-    friend std::ostream& operator<< ( std::ostream& os, const ParticlesData v )
-    {
-        os  << std::fixed << std::setprecision ( 2 );
-        os  << "Particle state : " << std::endl;
-
-        os  << "\t"  <<  "+"  << std::setfill ( '-' ) << std::setw ( 30 ) << "+" << std::endl;
-        os  << std::setfill ( ' ' );
-
-        os  << "\t"   << "|"
-            << std::left  << std::setw ( 9 ) << ""
-            << std::right << std::setw ( 5 ) << "X"
-            << std::right << std::setw ( 7 ) << "Y"
-            << std::right << std::setw ( 7 ) << "Z"
-            << std::setw ( 2 ) << "|" << std::endl;
-
-        os  << "\t"   << "|"
-            << std::left  << std::setw ( 9 ) << "Position"
-            << std::right << std::setw ( 5 ) << *v.px
-            << std::right << std::setw ( 7 ) << *v.py
-            << std::right << std::setw ( 7 ) << *v.pz
-            << std::setw ( 2 ) << "|" << std::endl;
-
-        os  << "\t"   << "|"
-            << std::left  << std::setw ( 9 ) << "Direction"
-            << std::right << std::setw ( 5 ) << v.dx
-            << std::right << std::setw ( 7 ) << v.dy
-            << std::right << std::setw ( 7 ) << v.dz
-            << std::setw ( 2 ) << "|" << std::endl;
-
-        os << "\t"   << "|"
-           << std::left  << std::setw ( 9 ) << "Energy"
-           << std::right << std::setw ( 5 ) << *v.E
-           << std::right << std::setw ( 7 ) << *v.E
-           << std::right << std::setw ( 7 ) << *v.E
-           << std::setw ( 2 ) << "|" << std::endl;
-
-        os << "\t"   <<  "+"  << std::setfill ( '-' ) << std::setw ( 30 ) << "+" << std::endl;
-        return os;
-
-    }
 */
 }; //
-
-// Struct that handles particles
-struct Particles
-{
-    ParticlesData data_h;
-    ParticlesData data_d;
-
-    ui32 size;
-};
 
 // Helper to handle secondaries particles
 struct SecParticle
@@ -125,65 +76,35 @@ struct SecParticle
     ui8 endsimu;
 };
 
-/*
-// Helper to handle history of particles
-struct OneParticleStep {
-    f32xyz pos;
-    f32xyz dir;
-    f32 E;
-};
-*/
-
-/*
-// History class
-class HistoryBuilder {
-    public:
-        HistoryBuilder();
-
-        void cpu_new_particle_track(ui32 a_pname);
-        void cpu_record_a_step(ParticleStack particles, ui32 id_part);
-
-        std::vector<ui8> pname;
-        std::vector<ui32> nb_steps;
-        std::vector< std::vector<OneParticleStep> > history_data;
-
-        ui8 record_flag;      // Record or not
-        ui32 max_nb_particles;  // Max nb of particles keep in the history
-        ui32 cur_iter;          // Current number of iterations
-        ui32 stack_size;        // Size fo the particle stack
-
-    private:
-        ui32 current_particle_id;
-        ui8 type_of_particles;
-};
-*/
-
-
 // Particles class
 class ParticleManager
 {
 public:
     ParticleManager();
 
-    void initialize ( GlobalSimulationParameters params );    
+    void initialize( GlobalSimulationParametersData *h_params );
+    void initialize_secondaries( GlobalSimulationParametersData *h_params );
 
-    Particles particles; // CPU and GPU stack
-
+    ParticlesData *h_particles;
+    ParticlesData *d_particles;
+/*
     void copy_gpu2cpu(Particles &part);
     void print_stack(Particles part, ui32 n);
-
+*/
 
 private:
     bool m_check_mandatory();
 
     void m_cpu_malloc_stack();
-    //void m_cpu_free_stack();
-    void m_gpu_malloc_stack();
-    void m_cpu_init_stack_seed ( ui32 seed );
-    //void m_gpu_init_stack_seed ( ui32 seed );
-    void m_copy_seed_cpu2gpu();
+    void m_cpu_malloc_secondaries();
+    void m_cpu_init_stack_seed( ui32 seed );
+    void m_gpu_alloc_stack_and_seed_copy();
+    void m_gpu_alloc_secondaries();
 
-    GlobalSimulationParameters m_params;
+    ui32 m_particles_size;
+    ui32 m_nb_levels_secondaries;
+
+    GlobalSimulationParametersData *mh_params;
 
 
 };

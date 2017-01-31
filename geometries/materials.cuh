@@ -1,4 +1,14 @@
-// GGEMS Copyright (C) 2015
+// GGEMS Copyright (C) 2017
+
+/*!
+ * \file materials.cuh
+ * \brief Materials manager
+ * \author J. Bert <bert.jul@gmail.com>
+ * \version 0.4
+ * \date december 2, 2015
+ *
+ * v0.4: JB - Change all structs and remove CPU exec
+ */
 
 #ifndef MATERIALS_CUH
 #define MATERIALS_CUH
@@ -78,10 +88,7 @@ class MaterialsDataBase {
 };
 
 // Table containing every definition of the materials used in the world
-struct MaterialsTable {
-    ui32 nb_materials;              // n
-    ui32 nb_elements_total;         // k
-
+struct MaterialsData {
     ui16 *nb_elements;        // n
     ui16 *index;              // n
 
@@ -117,14 +124,10 @@ struct MaterialsTable {
     f32 *fLogMeanExcitationEnergy;
 
     f32 *density;
-};
 
-// Struct that handle CPU&GPU CS data
-struct MaterialsData {
-    MaterialsTable data_h;
-    MaterialsTable data_d;
+    ui32 nb_materials;              // n
+    ui32 nb_elements_total;         // k
 };
-
 
 // This class is used to build the material table
 class Materials {
@@ -132,18 +135,17 @@ class Materials {
         Materials();
         // Load data provided by the user        
         void load_materials_database(std::string filename);        
-        void initialize(std::vector<std::string> mats_list, GlobalSimulationParameters params);
+        void initialize(std::vector<std::string> mats_list, const GlobalSimulationParametersData *h_params);
 
-        MaterialsData tables;
+        MaterialsData *h_materials;
+        MaterialsData *d_materials;
 
         void print();
         
-    private:
-        //ui16 m_get_material_index(std::string material_name);
-
+    private:        
         bool m_check_mandatory();
         void m_copy_materials_table_cpu2gpu();
-        void m_build_materials_table(GlobalSimulationParameters params, std::vector<std::string> mats_list);
+        void m_build_materials_table(const GlobalSimulationParametersData *h_params, std::vector<std::string> mats_list);
         //void m_free_materials_table();
 
         ui32 m_nb_materials;              // n

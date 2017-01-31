@@ -1,4 +1,14 @@
-// GGEMS Copyright (C) 2015
+// GGEMS Copyright (C) 2017
+
+/*!
+ * \file mu_data.cuh
+ * \brief
+ * \author J. Bert <bert.jul@gmail.com>
+ * \version 0.1
+ * \date 5 december 2016
+ *
+ *
+ */
 
 #ifndef MU_DATA_CUH
 #define MU_DATA_CUH

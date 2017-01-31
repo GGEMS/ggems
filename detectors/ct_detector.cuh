@@ -1,4 +1,4 @@
-// GGEMS Copyright (C) 2015
+// GGEMS Copyright (C) 2017
 
 /*!
  * \file ct_detector.cuh
@@ -8,6 +8,7 @@
  * \version 0.3
  * \date december 2, 2015
  *
+ * v0.4: JB - Change all structs and remove CPU exec
  * v0.3: JB - Handle transformation (local frame to global frame) and add unified mem
  * v0.2: JB - Add digitizer
  * v0.1: DB - First code
@@ -54,12 +55,12 @@ class CTDetector : public GGEMSDetector
         ObbData get_bounding_box();
 
         // Tracking from outside to the detector
-        void track_to_in( Particles particles );
-        void track_to_out( Particles particles ){}
+        void track_to_in( ParticlesData *d_particles );
+        void track_to_out( ParticlesData *d_particles ){}
 
         // Init
-        void initialize( GlobalSimulationParameters params );
-        void digitizer( Particles particles );
+        void initialize( GlobalSimulationParametersData *h_params );
+        void digitizer( ParticlesData *d_particles );
 
         void save_projection( std::string filename , std::string format = "f32" );
         void save_scatter( std::string filename );
@@ -88,9 +89,9 @@ class CTDetector : public GGEMSDetector
         ObbData m_detector_volume;
 
         ui8 m_record_option;
-        bool m_record_scatter;
+        ui8 m_record_scatter;
         f32matrix44 m_transform;
-        GlobalSimulationParameters m_params;
+        GlobalSimulationParametersData *mh_params;
 };
 
 #endif

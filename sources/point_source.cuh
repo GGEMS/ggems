@@ -1,14 +1,15 @@
-// GGEMS Copyright (C) 2015
+// GGEMS Copyright (C) 2017
 
 /*!
  * \file point_source.cuh
  * \brief Header of point source class
  * \author J. Bert <bert.jul@gmail.com>
- * \version 0.1
+ * \version 0.2
  * \date 13 novembre 2015
  *
  * Point source class
  *
+ * v0.2: JB - Change all structs and remove CPU exec
  */
 
 #ifndef POINT_SOURCE_CUH
@@ -38,13 +39,13 @@ public:
     f32xyz get_position();
 
     // Abstract from GGEMSSource (Mandatory funtions)
-    void get_primaries_generator( Particles particles );
-    void initialize( GlobalSimulationParameters params );
+    void get_primaries_generator( ParticlesData *d_particles );
+    void initialize( GlobalSimulationParametersData *h_params );
 
 private:
     bool m_check_mandatory();
 
-    GlobalSimulationParameters m_params;
+    GlobalSimulationParametersData *mh_params;
 
     f32 m_px, m_py, m_pz;
     f32 m_energy;

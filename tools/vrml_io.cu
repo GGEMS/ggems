@@ -1,4 +1,4 @@
-// GGEMS Copyright (C) 2015
+// GGEMS Copyright (C) 2017
 
 /*!
  * \file vrml_io.cuh
@@ -247,7 +247,7 @@ void VrmlIO::draw_phantom( VoxPhanImgNav *aPhantom )
 void VrmlIO::draw_phantom( MeshPhanLINACNav *aPhantom )
 {
     // Get the geometry
-    LinacData linac = aPhantom->get_linac_geometry();
+    const LinacData *linac = aPhantom->get_linac_geometry();
     f32matrix44 trans = aPhantom->get_linac_transformation();
 
 //    GGcout << "Matrix: " << GGendl;
@@ -270,31 +270,31 @@ void VrmlIO::draw_phantom( MeshPhanLINACNav *aPhantom )
     ui32 ileaf;
 
     /// Tranform all leaves ///////////////////////////////////////////////
-    ileaf = 0; while ( ileaf < linac.A_nb_leaves ) // linac.A_nb_leaves
+    ileaf = 0; while ( ileaf < linac->A_nb_leaves ) // linac->A_nb_leaves
     {
-        ui32 offset = linac.A_leaf_index[ ileaf ];
-        ui32 nbtri = linac.A_leaf_nb_triangles[ ileaf ];
+        ui32 offset = linac->A_leaf_index[ ileaf ];
+        ui32 nbtri = linac->A_leaf_nb_triangles[ ileaf ];
 
         ui32 itri = 0; while ( itri < nbtri )
         {
-            linac.A_leaf_v1[ offset + itri ] = fxyz_local_to_global_position( trans, linac.A_leaf_v1[ offset + itri ] );
-            linac.A_leaf_v2[ offset + itri ] = fxyz_local_to_global_position( trans, linac.A_leaf_v2[ offset + itri ] );
-            linac.A_leaf_v3[ offset + itri ] = fxyz_local_to_global_position( trans, linac.A_leaf_v3[ offset + itri ] );
+            linac->A_leaf_v1[ offset + itri ] = fxyz_local_to_global_position( trans, linac->A_leaf_v1[ offset + itri ] );
+            linac->A_leaf_v2[ offset + itri ] = fxyz_local_to_global_position( trans, linac->A_leaf_v2[ offset + itri ] );
+            linac->A_leaf_v3[ offset + itri ] = fxyz_local_to_global_position( trans, linac->A_leaf_v3[ offset + itri ] );
             ++itri;
         }
         ++ileaf;
     }
 
-    ileaf = 0; while ( ileaf < linac.B_nb_leaves )
+    ileaf = 0; while ( ileaf < linac->B_nb_leaves )
     {
-        ui32 offset = linac.B_leaf_index[ ileaf ];
-        ui32 nbtri = linac.B_leaf_nb_triangles[ ileaf ];
+        ui32 offset = linac->B_leaf_index[ ileaf ];
+        ui32 nbtri = linac->B_leaf_nb_triangles[ ileaf ];
 
         ui32 itri = 0; while ( itri < nbtri )
         {
-            linac.B_leaf_v1[ offset + itri ] = fxyz_local_to_global_position( trans, linac.B_leaf_v1[ offset + itri ] );
-            linac.B_leaf_v2[ offset + itri ] = fxyz_local_to_global_position( trans, linac.B_leaf_v2[ offset + itri ] );
-            linac.B_leaf_v3[ offset + itri ] = fxyz_local_to_global_position( trans, linac.B_leaf_v3[ offset + itri ] );
+            linac->B_leaf_v1[ offset + itri ] = fxyz_local_to_global_position( trans, linac->B_leaf_v1[ offset + itri ] );
+            linac->B_leaf_v2[ offset + itri ] = fxyz_local_to_global_position( trans, linac->B_leaf_v2[ offset + itri ] );
+            linac->B_leaf_v3[ offset + itri ] = fxyz_local_to_global_position( trans, linac->B_leaf_v3[ offset + itri ] );
             ++itri;
         }
         ++ileaf;
@@ -302,62 +302,62 @@ void VrmlIO::draw_phantom( MeshPhanLINACNav *aPhantom )
 
     /// Transform backup ///////////////////////////////////////////////////
 
-    ui32 offset = linac.X_jaw_index[ 0 ];
-    ui32 nbtri = linac.X_jaw_nb_triangles[ 0 ];
+    ui32 offset = linac->X_jaw_index[ 0 ];
+    ui32 nbtri = linac->X_jaw_nb_triangles[ 0 ];
     ui32 itri = 0; while ( itri < nbtri )
     {
-        linac.X_jaw_v1[ offset + itri ] = fxyz_local_to_global_position( trans, linac.X_jaw_v1[ offset + itri ] );
-        linac.X_jaw_v2[ offset + itri ] = fxyz_local_to_global_position( trans, linac.X_jaw_v2[ offset + itri ] );
-        linac.X_jaw_v3[ offset + itri ] = fxyz_local_to_global_position( trans, linac.X_jaw_v3[ offset + itri ] );
+        linac->X_jaw_v1[ offset + itri ] = fxyz_local_to_global_position( trans, linac->X_jaw_v1[ offset + itri ] );
+        linac->X_jaw_v2[ offset + itri ] = fxyz_local_to_global_position( trans, linac->X_jaw_v2[ offset + itri ] );
+        linac->X_jaw_v3[ offset + itri ] = fxyz_local_to_global_position( trans, linac->X_jaw_v3[ offset + itri ] );
         ++itri;
     }
 
-    offset = linac.X_jaw_index[ 1 ];
-    nbtri = linac.X_jaw_nb_triangles[ 1 ];
+    offset = linac->X_jaw_index[ 1 ];
+    nbtri = linac->X_jaw_nb_triangles[ 1 ];
     itri = 0; while ( itri < nbtri )
     {
-        linac.X_jaw_v1[ offset + itri ] = fxyz_local_to_global_position( trans, linac.X_jaw_v1[ offset + itri ] );
-        linac.X_jaw_v2[ offset + itri ] = fxyz_local_to_global_position( trans, linac.X_jaw_v2[ offset + itri ] );
-        linac.X_jaw_v3[ offset + itri ] = fxyz_local_to_global_position( trans, linac.X_jaw_v3[ offset + itri ] );
+        linac->X_jaw_v1[ offset + itri ] = fxyz_local_to_global_position( trans, linac->X_jaw_v1[ offset + itri ] );
+        linac->X_jaw_v2[ offset + itri ] = fxyz_local_to_global_position( trans, linac->X_jaw_v2[ offset + itri ] );
+        linac->X_jaw_v3[ offset + itri ] = fxyz_local_to_global_position( trans, linac->X_jaw_v3[ offset + itri ] );
         ++itri;
     }
 
-    offset = linac.Y_jaw_index[ 0 ];
-    nbtri = linac.Y_jaw_nb_triangles[ 0 ];
+    offset = linac->Y_jaw_index[ 0 ];
+    nbtri = linac->Y_jaw_nb_triangles[ 0 ];
     itri = 0; while ( itri < nbtri )
     {
-        linac.Y_jaw_v1[ offset + itri ] = fxyz_local_to_global_position( trans, linac.Y_jaw_v1[ offset + itri ] );
-        linac.Y_jaw_v2[ offset + itri ] = fxyz_local_to_global_position( trans, linac.Y_jaw_v2[ offset + itri ] );
-        linac.Y_jaw_v3[ offset + itri ] = fxyz_local_to_global_position( trans, linac.Y_jaw_v3[ offset + itri ] );
+        linac->Y_jaw_v1[ offset + itri ] = fxyz_local_to_global_position( trans, linac->Y_jaw_v1[ offset + itri ] );
+        linac->Y_jaw_v2[ offset + itri ] = fxyz_local_to_global_position( trans, linac->Y_jaw_v2[ offset + itri ] );
+        linac->Y_jaw_v3[ offset + itri ] = fxyz_local_to_global_position( trans, linac->Y_jaw_v3[ offset + itri ] );
         ++itri;
     }
 
-    offset = linac.Y_jaw_index[ 1 ];
-    nbtri = linac.Y_jaw_nb_triangles[ 1 ];
+    offset = linac->Y_jaw_index[ 1 ];
+    nbtri = linac->Y_jaw_nb_triangles[ 1 ];
     itri = 0; while ( itri < nbtri )
     {
-        linac.Y_jaw_v1[ offset + itri ] = fxyz_local_to_global_position( trans, linac.Y_jaw_v1[ offset + itri ] );
-        linac.Y_jaw_v2[ offset + itri ] = fxyz_local_to_global_position( trans, linac.Y_jaw_v2[ offset + itri ] );
-        linac.Y_jaw_v3[ offset + itri ] = fxyz_local_to_global_position( trans, linac.Y_jaw_v3[ offset + itri ] );
+        linac->Y_jaw_v1[ offset + itri ] = fxyz_local_to_global_position( trans, linac->Y_jaw_v1[ offset + itri ] );
+        linac->Y_jaw_v2[ offset + itri ] = fxyz_local_to_global_position( trans, linac->Y_jaw_v2[ offset + itri ] );
+        linac->Y_jaw_v3[ offset + itri ] = fxyz_local_to_global_position( trans, linac->Y_jaw_v3[ offset + itri ] );
         ++itri;
     }
 
     /// Drawing //////////////////////////////////////////////////////////////
 
     // Draw leaves from bank A
-    ileaf = 0; while ( ileaf < linac.A_nb_leaves )    // linac.A_nb_leaves
+    ileaf = 0; while ( ileaf < linac->A_nb_leaves )    // linac->A_nb_leaves
     {
-        ui32 offset = linac.A_leaf_index[ ileaf ];
-        ui32 nbtri = linac.A_leaf_nb_triangles[ ileaf ];
+        ui32 offset = linac->A_leaf_index[ ileaf ];
+        ui32 nbtri = linac->A_leaf_nb_triangles[ ileaf ];
 
         if ( ileaf == 0 )
         {
-            m_draw_mesh( &(linac.A_leaf_v1[ offset ]), &(linac.A_leaf_v2[ offset ]), &(linac.A_leaf_v3[ offset ]),
+            m_draw_mesh( &(linac->A_leaf_v1[ offset ]), &(linac->A_leaf_v2[ offset ]), &(linac->A_leaf_v3[ offset ]),
                          nbtri, m_green, 0.0, false );
         }
         else
         {
-            m_draw_mesh( &(linac.A_leaf_v1[ offset ]), &(linac.A_leaf_v2[ offset ]), &(linac.A_leaf_v3[ offset ]),
+            m_draw_mesh( &(linac->A_leaf_v1[ offset ]), &(linac->A_leaf_v2[ offset ]), &(linac->A_leaf_v3[ offset ]),
                          nbtri, m_blue, 0.0, false );
         }
 
@@ -367,54 +367,54 @@ void VrmlIO::draw_phantom( MeshPhanLINACNav *aPhantom )
     }
 
     // Draw leaves from bank B
-    ileaf = 0; while ( ileaf < linac.B_nb_leaves )    // linac.A_nb_leaves
+    ileaf = 0; while ( ileaf < linac->B_nb_leaves )    // linac->A_nb_leaves
     {
-        ui32 offset = linac.B_leaf_index[ ileaf ];
-        ui32 nbtri = linac.B_leaf_nb_triangles[ ileaf ];
+        ui32 offset = linac->B_leaf_index[ ileaf ];
+        ui32 nbtri = linac->B_leaf_nb_triangles[ ileaf ];
 
-        m_draw_mesh( &(linac.B_leaf_v1[ offset ]), &(linac.B_leaf_v2[ offset ]), &(linac.B_leaf_v3[ offset ]),
+        m_draw_mesh( &(linac->B_leaf_v1[ offset ]), &(linac->B_leaf_v2[ offset ]), &(linac->B_leaf_v3[ offset ]),
                      nbtri, m_red, 0.0, true );
 
         ++ileaf;
     }
 
     // Draw jaws
-    if ( linac.X_nb_jaw != 0 )
+    if ( linac->X_nb_jaw != 0 )
     {
-        m_draw_mesh( &(linac.X_jaw_v1[ linac.X_jaw_index[ 0 ] ]),
-                     &(linac.X_jaw_v2[ linac.X_jaw_index[ 0 ] ]),
-                     &(linac.X_jaw_v3[ linac.X_jaw_index[ 0 ] ]),
-                     linac.X_jaw_nb_triangles[ 0 ], m_blue, 0.0, true );
+        m_draw_mesh( &(linac->X_jaw_v1[ linac->X_jaw_index[ 0 ] ]),
+                     &(linac->X_jaw_v2[ linac->X_jaw_index[ 0 ] ]),
+                     &(linac->X_jaw_v3[ linac->X_jaw_index[ 0 ] ]),
+                     linac->X_jaw_nb_triangles[ 0 ], m_blue, 0.0, true );
 
-        m_draw_mesh( &(linac.X_jaw_v1[ linac.X_jaw_index[ 1 ] ]),
-                     &(linac.X_jaw_v2[ linac.X_jaw_index[ 1 ] ]),
-                     &(linac.X_jaw_v3[ linac.X_jaw_index[ 1 ] ]),
-                     linac.X_jaw_nb_triangles[ 1 ], m_red, 0.0, false );
+        m_draw_mesh( &(linac->X_jaw_v1[ linac->X_jaw_index[ 1 ] ]),
+                     &(linac->X_jaw_v2[ linac->X_jaw_index[ 1 ] ]),
+                     &(linac->X_jaw_v3[ linac->X_jaw_index[ 1 ] ]),
+                     linac->X_jaw_nb_triangles[ 1 ], m_red, 0.0, false );
     }
 
-    if ( linac.Y_nb_jaw != 0 )
+    if ( linac->Y_nb_jaw != 0 )
     {
-        m_draw_mesh( &(linac.Y_jaw_v1[ linac.Y_jaw_index[ 0 ] ]),
-                     &(linac.Y_jaw_v2[ linac.Y_jaw_index[ 0 ] ]),
-                     &(linac.Y_jaw_v3[ linac.Y_jaw_index[ 0 ] ]),
-                     linac.Y_jaw_nb_triangles[ 0 ], m_blue, 0.0, false );
+        m_draw_mesh( &(linac->Y_jaw_v1[ linac->Y_jaw_index[ 0 ] ]),
+                     &(linac->Y_jaw_v2[ linac->Y_jaw_index[ 0 ] ]),
+                     &(linac->Y_jaw_v3[ linac->Y_jaw_index[ 0 ] ]),
+                     linac->Y_jaw_nb_triangles[ 0 ], m_blue, 0.0, false );
 
-        m_draw_mesh( &(linac.Y_jaw_v1[ linac.Y_jaw_index[ 1 ] ]),
-                     &(linac.Y_jaw_v2[ linac.Y_jaw_index[ 1 ] ]),
-                     &(linac.Y_jaw_v3[ linac.Y_jaw_index[ 1 ] ]),
-                     linac.Y_jaw_nb_triangles[ 1 ], m_red, 0.0, true );
+        m_draw_mesh( &(linac->Y_jaw_v1[ linac->Y_jaw_index[ 1 ] ]),
+                     &(linac->Y_jaw_v2[ linac->Y_jaw_index[ 1 ] ]),
+                     &(linac->Y_jaw_v3[ linac->Y_jaw_index[ 1 ] ]),
+                     linac->Y_jaw_nb_triangles[ 1 ], m_red, 0.0, true );
     }
 
-/*
-    // Draw bounding box
-    m_draw_wireframe_aabb( linac.aabb, m_cyan );
-    m_draw_wireframe_aabb( linac.A_bank_aabb, m_cyan );
-    m_draw_wireframe_aabb( linac.B_bank_aabb, m_cyan );
-    m_draw_wireframe_aabb( linac.X_jaw_aabb[ 0 ], m_cyan );
-    m_draw_wireframe_aabb( linac.X_jaw_aabb[ 1 ], m_cyan );
-    m_draw_wireframe_aabb( linac.Y_jaw_aabb[ 0 ], m_cyan );
-    m_draw_wireframe_aabb( linac.Y_jaw_aabb[ 1 ], m_cyan );
-*/
+
+//    // Draw bounding box
+//    m_draw_wireframe_aabb( linac->aabb, m_cyan );
+//    m_draw_wireframe_aabb( linac->A_bank_aabb, m_cyan );
+//    m_draw_wireframe_aabb( linac->B_bank_aabb, m_cyan );
+//    m_draw_wireframe_aabb( linac->X_jaw_aabb[ 0 ], m_cyan );
+//    m_draw_wireframe_aabb( linac->X_jaw_aabb[ 1 ], m_cyan );
+//    m_draw_wireframe_aabb( linac->Y_jaw_aabb[ 0 ], m_cyan );
+//    m_draw_wireframe_aabb( linac->Y_jaw_aabb[ 1 ], m_cyan );
+
 
 }
 

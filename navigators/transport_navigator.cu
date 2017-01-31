@@ -1,13 +1,13 @@
-// GGEMS Copyright (C) 2015
+// GGEMS Copyright (C) 2017
 
 /*!
  * \file transport_navigator.cu
  * \brief
  * \author J. Bert <bert.jul@gmail.com>
- * \version 0.1
+ * \version 0.2
  * \date 5 february 2016
  *
- *
+ * v0.2: JB - Change all structs and remove CPU exec
  *
  */
 
@@ -83,31 +83,31 @@ f32 __host__ __device__ transport_compute_safety_AABB( f32xyz pos, f32 xmin, f32
 }
 
 // Transport the current particle to an AABB geometry
-void __host__ __device__ transport_track_to_in_AABB( ParticlesData particles, f32 xmin, f32 xmax,
+void __host__ __device__ transport_track_to_in_AABB( ParticlesData *particles, f32 xmin, f32 xmax,
                                                      f32 ymin, f32 ymax, f32 zmin, f32 zmax, f32 tolerance, ui32 id)
 {
 
     // If freeze (not dead), re-activate the current particle
-    if( particles.endsimu[ id ] == PARTICLE_FREEZE )
+    if( particles->status[ id ] == PARTICLE_FREEZE )
     {
-        particles.endsimu[ id ] = PARTICLE_ALIVE;
+        particles->status[ id ] = PARTICLE_ALIVE;
     }
-    else if ( particles.endsimu[ id ] == PARTICLE_DEAD )
+    else if ( particles->status[ id ] == PARTICLE_DEAD )
     {
         return;
     }
 
     // Read position
     f32xyz pos;
-    pos.x = particles.px[ id ];
-    pos.y = particles.py[ id ];
-    pos.z = particles.pz[ id ];
+    pos.x = particles->px[ id ];
+    pos.y = particles->py[ id ];
+    pos.z = particles->pz[ id ];
 
     // Read direction
     f32xyz dir;
-    dir.x = particles.dx[ id ];
-    dir.y = particles.dy[ id ];
-    dir.z = particles.dz[ id ];
+    dir.x = particles->dx[ id ];
+    dir.y = particles->dy[ id ];
+    dir.z = particles->dz[ id ];
 
 #ifdef DEBUG_TRACK_ID
         if ( id == DEBUG_TRACK_ID )
@@ -143,7 +143,7 @@ void __host__ __device__ transport_track_to_in_AABB( ParticlesData particles, f3
     // the particle not hitting the voxelized volume
     if ( dist == FLT_MAX )                            // TODO: Don't know why F32_MAX doesn't work...
     {
-        particles.endsimu[ id ] = PARTICLE_FREEZE;
+        particles->status[ id ] = PARTICLE_FREEZE;
 
 #ifdef DEBUG_TRACK_ID
         if ( id == DEBUG_TRACK_ID )
@@ -169,7 +169,7 @@ void __host__ __device__ transport_track_to_in_AABB( ParticlesData particles, f3
 
         if ( cross < ( 2*tolerance ) )
         {
-            particles.endsimu[ id ] = PARTICLE_FREEZE;
+            particles->status[ id ] = PARTICLE_FREEZE;
 
 #ifdef DEBUG_TRACK_ID
         if ( id == DEBUG_TRACK_ID )
@@ -200,12 +200,12 @@ void __host__ __device__ transport_track_to_in_AABB( ParticlesData particles, f3
 #endif
 
         // update tof
-        particles.tof[ id ] += c_light * dist;
+        particles->tof[ id ] += c_light * dist;
 
         // set the new position
-        particles.px[ id ] = pos.x;
-        particles.py[ id ] = pos.y;
-        particles.pz[ id ] = pos.z;
+        particles->px[ id ] = pos.x;
+        particles->py[ id ] = pos.y;
+        particles->pz[ id ] = pos.z;
 
 #ifdef DEBUG_TRACK_ID
         if ( id == DEBUG_TRACK_ID )
@@ -215,7 +215,7 @@ void __host__ __device__ transport_track_to_in_AABB( ParticlesData particles, f3
 #endif
 
         // reset geom id
-        particles.geometry_id[ id ] = 0;
+        particles->geometry_id[ id ] = 0;
 
 #ifdef DEBUG_TRACK_ID
         if ( id == DEBUG_TRACK_ID )
@@ -229,7 +229,7 @@ void __host__ __device__ transport_track_to_in_AABB( ParticlesData particles, f3
 
 }
 
-void __host__ __device__ transport_track_to_in_AABB( ParticlesData particles, AabbData aabb, f32 tolerance, ui32 id)
+void __host__ __device__ transport_track_to_in_AABB( ParticlesData *particles, AabbData aabb, f32 tolerance, ui32 id)
 {
     transport_track_to_in_AABB( particles, aabb.xmin, aabb.xmax, aabb.ymin, aabb.ymax, aabb.zmin, aabb.zmax, tolerance, id);
 }

@@ -1,4 +1,4 @@
-// GGEMS Copyright (C) 2015
+// GGEMS Copyright (C) 2017
 
 /*!
  * \file phasespace_io.cu
@@ -77,20 +77,18 @@ PhaseSpaceIO::PhaseSpaceIO()
 }
 
 // Read a phasespace file
-PhaseSpaceData PhaseSpaceIO::read_phasespace_file( std::string filename )
+PhaseSpaceData* PhaseSpaceIO::read_phasespace_file( std::string filename )
 {
-    PhaseSpaceData phsp;
-
     std::string ext = filename.substr( filename.find_last_of( "." ) + 1 );
     if ( ext == "IAEAheader" )
     {
         m_read_IAEA_header( filename );
-        phsp = m_read_IAEA_data();
+        return m_read_IAEA_data();
     }
     else if ( ext == "mhd" )
     {
         m_read_MHD_header( filename );
-        phsp = m_read_MHD_data();
+        return m_read_MHD_data();
     }
     else
     {
@@ -98,7 +96,7 @@ PhaseSpaceData PhaseSpaceIO::read_phasespace_file( std::string filename )
         exit_simulation();
     }
 
-    return phsp;
+    return nullptr;
 }
 
 /////:: Private functions
@@ -288,7 +286,7 @@ void PhaseSpaceIO::m_read_IAEA_header( std::string filename )
 // Longs extra Int 1
 
 // Read data from IAEA data
-PhaseSpaceData PhaseSpaceIO::m_read_IAEA_data()
+PhaseSpaceData* PhaseSpaceIO::m_read_IAEA_data()
 {
     if ( m_header_loaded != "iaea" )
     {
@@ -319,19 +317,23 @@ PhaseSpaceData PhaseSpaceIO::m_read_IAEA_data()
     //i32 extra_l;
 
     // Mem allocation
-    PhaseSpaceData phasespace;
-    HANDLE_ERROR( cudaMallocManaged( &(phasespace.energy), N * sizeof( f32 ) ) );
-    HANDLE_ERROR( cudaMallocManaged( &(phasespace.pos_x), N * sizeof( f32 ) ) );
-    HANDLE_ERROR( cudaMallocManaged( &(phasespace.pos_y), N * sizeof( f32 ) ) );
-    HANDLE_ERROR( cudaMallocManaged( &(phasespace.pos_z), N * sizeof( f32 ) ) );
-    HANDLE_ERROR( cudaMallocManaged( &(phasespace.dir_x), N * sizeof( f32 ) ) );
-    HANDLE_ERROR( cudaMallocManaged( &(phasespace.dir_y), N * sizeof( f32 ) ) );
-    HANDLE_ERROR( cudaMallocManaged( &(phasespace.dir_z), N * sizeof( f32 ) ) );
-    HANDLE_ERROR( cudaMallocManaged( &(phasespace.ptype), N * sizeof( ui8 ) ) );
-    phasespace.tot_particles = N;
-    phasespace.nb_photons = m_nb_photons;
-    phasespace.nb_electrons = m_nb_electrons;
-    phasespace.nb_positrons = m_nb_positrons;
+    PhaseSpaceData *phasespace;
+    phasespace = (PhaseSpaceData*)malloc( sizeof(PhaseSpaceData) );
+
+    phasespace->energy = (f32*)malloc( N*sizeof(f32) );
+    phasespace->pos_x = (f32*)malloc( N*sizeof(f32) );
+    phasespace->pos_y = (f32*)malloc( N*sizeof(f32) );
+    phasespace->pos_z = (f32*)malloc( N*sizeof(f32) );
+    phasespace->dir_x = (f32*)malloc( N*sizeof(f32) );
+    phasespace->dir_y = (f32*)malloc( N*sizeof(f32) );
+    phasespace->dir_z = (f32*)malloc( N*sizeof(f32) );
+    phasespace->ptype = (ui8*)malloc( N*sizeof(ui8) );
+
+    phasespace->tot_particles = N;
+    phasespace->nb_photons = m_nb_photons;
+    phasespace->nb_electrons = m_nb_electrons;
+    phasespace->nb_positrons = m_nb_positrons;
+
 
     // For reading data
     ui32 rec_to_read = 6;                     // energy, pos and dir are always read
@@ -355,9 +357,9 @@ PhaseSpaceData PhaseSpaceIO::m_read_IAEA_data()
         }
 
         // ptype - photon:1 electron:2 positron:3 neutron:4 proton:5
-        if ( pType == 1 ) phasespace.ptype[ i ] = PHOTON;
-        if ( pType == 2 ) phasespace.ptype[ i ] = ELECTRON;
-        if ( pType == 3 ) phasespace.ptype[ i ] = POSITRON;
+        if ( pType == 1 ) phasespace->ptype[ i ] = PHOTON;
+        if ( pType == 2 ) phasespace->ptype[ i ] = ELECTRON;
+        if ( pType == 3 ) phasespace->ptype[ i ] = POSITRON;
 
         // Read bunch of float
         fread( float_array, sizeof(f32), rec_to_read, pfile );
@@ -365,12 +367,12 @@ PhaseSpaceData PhaseSpaceIO::m_read_IAEA_data()
         // History (not used) and energy
         // new_history = 0;
         // if( float_array[ 0 ] < 0 ) new_history = 1; // like egsnrc
-        phasespace.energy[ i ] = fabs( float_array[ 0 ] ); // E in MeV
+        phasespace->energy[ i ] = fabs( float_array[ 0 ] ); // E in MeV
 
         // Pos and dir
-        phasespace.pos_x[ i ] = float_array[ 1 ] *cm;   // X
-        phasespace.pos_y[ i ] = float_array[ 2 ] *cm;   // Y
-        phasespace.pos_z[ i ] = float_array[ 3 ] *cm;   // Z
+        phasespace->pos_x[ i ] = float_array[ 1 ] *cm;   // X
+        phasespace->pos_y[ i ] = float_array[ 2 ] *cm;   // Y
+        phasespace->pos_z[ i ] = float_array[ 3 ] *cm;   // Z
         U = float_array[ 4 ];
         V = float_array[ 5 ];
 
@@ -388,9 +390,9 @@ PhaseSpaceData PhaseSpaceIO::m_read_IAEA_data()
             V /= aux;
         }
 
-        phasespace.dir_x[ i ] = U;
-        phasespace.dir_y[ i ] = V;
-        phasespace.dir_z[ i ] = W;
+        phasespace->dir_x[ i ] = U;
+        phasespace->dir_y[ i ] = V;
+        phasespace->dir_z[ i ] = W;
 
         // Extra data
         if ( extra_read > 0 ) fread(&garbage_array, sizeof(i8), extra_read, pfile);
@@ -507,7 +509,7 @@ void PhaseSpaceIO::m_read_MHD_header( std::string filename )
 //  w
 
 // Read data from MHD format
-PhaseSpaceData PhaseSpaceIO::m_read_MHD_data()
+PhaseSpaceData* PhaseSpaceIO::m_read_MHD_data()
 {
 
     if ( m_header_loaded != "mhd" )
@@ -535,19 +537,22 @@ PhaseSpaceData PhaseSpaceIO::m_read_MHD_data()
     f32 u, v, w;
 
     // Mem allocation
-    PhaseSpaceData phasespace;
-    HANDLE_ERROR( cudaMallocManaged( &(phasespace.energy), N * sizeof( f32 ) ) );
-    HANDLE_ERROR( cudaMallocManaged( &(phasespace.pos_x), N * sizeof( f32 ) ) );
-    HANDLE_ERROR( cudaMallocManaged( &(phasespace.pos_y), N * sizeof( f32 ) ) );
-    HANDLE_ERROR( cudaMallocManaged( &(phasespace.pos_z), N * sizeof( f32 ) ) );
-    HANDLE_ERROR( cudaMallocManaged( &(phasespace.dir_x), N * sizeof( f32 ) ) );
-    HANDLE_ERROR( cudaMallocManaged( &(phasespace.dir_y), N * sizeof( f32 ) ) );
-    HANDLE_ERROR( cudaMallocManaged( &(phasespace.dir_z), N * sizeof( f32 ) ) );
-    HANDLE_ERROR( cudaMallocManaged( &(phasespace.ptype), N * sizeof( ui8 ) ) );
-    phasespace.tot_particles = N;
-    phasespace.nb_photons = m_nb_photons;
-    phasespace.nb_electrons = m_nb_electrons;
-    phasespace.nb_positrons = m_nb_positrons;
+    PhaseSpaceData *phasespace;
+    phasespace = (PhaseSpaceData*)malloc( sizeof(PhaseSpaceData) );
+
+    phasespace->energy = (f32*)malloc( N*sizeof(f32) );
+    phasespace->pos_x = (f32*)malloc( N*sizeof(f32) );
+    phasespace->pos_y = (f32*)malloc( N*sizeof(f32) );
+    phasespace->pos_z = (f32*)malloc( N*sizeof(f32) );
+    phasespace->dir_x = (f32*)malloc( N*sizeof(f32) );
+    phasespace->dir_y = (f32*)malloc( N*sizeof(f32) );
+    phasespace->dir_z = (f32*)malloc( N*sizeof(f32) );
+    phasespace->ptype = (ui8*)malloc( N*sizeof(ui8) );
+
+    phasespace->tot_particles = N;
+    phasespace->nb_photons = m_nb_photons;
+    phasespace->nb_electrons = m_nb_electrons;
+    phasespace->nb_positrons = m_nb_positrons;
 
     // If not compressed
     if ( m_compression_type == "False" )
@@ -566,16 +571,16 @@ PhaseSpaceData PhaseSpaceIO::m_read_MHD_data()
             fread(&w, sizeof(f32), 1, pfile);
 
             // Store a particle
-            if ( pType == 1 ) phasespace.ptype[ i ] = PHOTON;
-            if ( pType == 2 ) phasespace.ptype[ i ] = ELECTRON;
-            if ( pType == 3 ) phasespace.ptype[ i ] = POSITRON;
-            phasespace.energy[ i ] = E;
-            phasespace.pos_x[ i ] = px;
-            phasespace.pos_y[ i ] = py;
-            phasespace.pos_z[ i ] = pz;
-            phasespace.dir_x[ i ] = u;
-            phasespace.dir_y[ i ] = v;
-            phasespace.dir_z[ i ] = w;
+            if ( pType == 1 ) phasespace->ptype[ i ] = PHOTON;
+            if ( pType == 2 ) phasespace->ptype[ i ] = ELECTRON;
+            if ( pType == 3 ) phasespace->ptype[ i ] = POSITRON;
+            phasespace->energy[ i ] = E;
+            phasespace->pos_x[ i ] = px;
+            phasespace->pos_y[ i ] = py;
+            phasespace->pos_z[ i ] = pz;
+            phasespace->dir_x[ i ] = u;
+            phasespace->dir_y[ i ] = v;
+            phasespace->dir_z[ i ] = w;
             ++i;
         }
     }

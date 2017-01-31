@@ -1,13 +1,13 @@
-// GGEMS Copyright (C) 2015
+// GGEMS Copyright (C) 2017
 
 /*!
  * \file electron_navigator.cu
  * \brief
- * \author Yannick Lemaréchal <yannick.lemarechal@univ-brest.fr>
+ * \author J. Bert <julien.bert@univ-brest.fr>
  * \version 0.1
  * \date 20 novembre 2015
  *
- *
+ * v0.4: JB - Change all structs and remove CPU exec
  *
  */
 
@@ -85,12 +85,10 @@ f32  coefsig[8][11]= {{.4638,.37748,.32249,-.060362,-.065004,-.033457,-.004583,.
 #endif
 
 __host__ __device__ f32 compute_lambda_for_scaled_energy( f32 CS, f32 e,
-                                                          ElectronsCrossSectionTable table, ui16 mat_id )
+                                                          const ElectronsCrossSectionData *table, ui16 mat_id )
 {
 
-    f32 E_CS_max = table.eIonisation_E_CS_max[ mat_id ];
-
-
+    f32 E_CS_max = table->eIonisation_E_CS_max[ mat_id ];
 
     if (e <= E_CS_max)
     {
@@ -108,33 +106,33 @@ __host__ __device__ f32 compute_lambda_for_scaled_energy( f32 CS, f32 e,
 
             // Find energy index
             ui32 energy_index;
-            if ( e1 <= table.E_min )
+            if ( e1 <= table->E_min )
             {
                 energy_index = 0;
             }
-            else if ( e1 >= table.E_max )
+            else if ( e1 >= table->E_max )
             {
-                energy_index = table.nb_bins-1;
+                energy_index = table->nb_bins-1;
             }
             else
             {
-                energy_index = binary_search ( e1, table.E, table.nb_bins );
+                energy_index = binary_search ( e1, table->E, table->nb_bins );
             }
 
             // Get absolute index table (considering mat id)
-            ui32 table_index = mat_id*table.nb_bins + energy_index;
+            ui32 table_index = mat_id*table->nb_bins + energy_index;
 
             f32 preStepLambda1;
 
             // Get CS for e1
             if ( energy_index == 0 )
             {
-                preStepLambda1 = table.eIonisationCS[ table_index ];
+                preStepLambda1 = table->eIonisationCS[ table_index ];
             }
             else
             {
-                preStepLambda1 = linear_interpolation ( table.E[ energy_index-1 ], table.eIonisationCS[ table_index-1 ],
-                                                        table.E[ energy_index ], table.eIonisationCS[ table_index ], e1 );
+                preStepLambda1 = linear_interpolation ( table->E[ energy_index-1 ], table->eIonisationCS[ table_index-1 ],
+                                                        table->E[ energy_index ], table->eIonisationCS[ table_index ], e1 );
             }
 
             /////////////////////////////////////////////////////
@@ -146,7 +144,7 @@ __host__ __device__ f32 compute_lambda_for_scaled_energy( f32 CS, f32 e,
         }
         else
         {
-            CS = table.eIonisation_CS_max[ mat_id ];  // fFactor = 1.0  - JB
+            CS = table->eIonisation_CS_max[ mat_id ];  // fFactor = 1.0  - JB
         }
     }
 
@@ -154,65 +152,64 @@ __host__ __device__ f32 compute_lambda_for_scaled_energy( f32 CS, f32 e,
 
 }
 
-__host__ __device__ void e_read_CS_table (
-                                            ui16 mat, //material
-                                            f32 energy, //energy of particle
-                                            ElectronsCrossSectionTable d_table,
-                                            ui8 &next_discrete_process, //next discrete process id
-                                            ui32 &table_index,
-                                            f32 &next_interaction_distance,
-                                            f32 &dedxeIoni,
-                                            f32 &dedxeBrem,
-                                            f32 &erange,
-                                            f32 &lambda,
-                                            f32 randomnumbereBrem,
-                                            f32 randomnumbereIoni,
-                                            GlobalSimulationParametersData parameters )
+__host__ __device__ void e_read_CS_table ( ui16 mat, //material
+                                           f32 energy, //energy of particle
+                                           const ElectronsCrossSectionData *d_table,
+                                           ui8 &next_discrete_process, //next discrete process id
+                                           ui32 &table_index,
+                                           f32 &next_interaction_distance,
+                                           f32 &dedxeIoni,
+                                           f32 &dedxeBrem,
+                                           f32 &erange,
+                                           f32 &lambda,
+                                           f32 randomnumbereBrem,
+                                           f32 randomnumbereIoni,
+                                           const GlobalSimulationParametersData *parameters )
 {
     // Find energy index
     ui32 energy_index;
-    if ( energy <= d_table.E_min )
+    if ( energy <= d_table->E_min )
     {
         energy_index = 0;       
     }
-    else if ( energy >= d_table.E_max )
+    else if ( energy >= d_table->E_max )
     {
-        energy_index = d_table.nb_bins-1;       
+        energy_index = d_table->nb_bins-1;
     }
     else
     {
-        energy_index = binary_search ( energy, d_table.E, d_table.nb_bins );        
+        energy_index = binary_search ( energy, d_table->E, d_table->nb_bins );
     }    
 
 #ifdef DEBUG
-    assert( energy_index < d_table.nb_bins );
+    assert( energy_index < d_table->nb_bins );
 #endif
 
     // Get absolute index table (considering mat id)
-    table_index = mat*d_table.nb_bins + energy_index;   
+    table_index = mat*d_table->nb_bins + energy_index;
 
     // Vars
     f32 CS, interaction_distance;
 
     // Electron ionisation
-    if ( parameters.physics_list[ELECTRON_IONISATION] == ENABLED )
+    if ( parameters->physics_list[ELECTRON_IONISATION] == ENABLED )
     {
 
         // Get CS and dE/dx
         if ( energy_index==0 )
         {
-            CS = d_table.eIonisationCS[ table_index ];
+            CS = d_table->eIonisationCS[ table_index ];
         }
         else
         {
-            CS = linear_interpolation ( d_table.E[ energy_index-1 ], d_table.eIonisationCS[ table_index-1 ],
-                                        d_table.E[ energy_index ], d_table.eIonisationCS[ table_index ], energy );
+            CS = linear_interpolation ( d_table->E[ energy_index-1 ], d_table->eIonisationCS[ table_index-1 ],
+                                        d_table->E[ energy_index ], d_table->eIonisationCS[ table_index ], energy );
 
             // This correction increases the simulation run time, and is not really mandatory - JB
             CS = compute_lambda_for_scaled_energy( CS, energy, d_table, mat );
 
-            dedxeIoni = linear_interpolation ( d_table.E[ energy_index-1 ], d_table.eIonisationdedx[ table_index-1 ],
-                                               d_table.E[ energy_index ], d_table.eIonisationdedx[ table_index ], energy );
+            dedxeIoni = linear_interpolation ( d_table->E[ energy_index-1 ], d_table->eIonisationdedx[ table_index-1 ],
+                                               d_table->E[ energy_index ], d_table->eIonisationdedx[ table_index ], energy );
 
 
         }
@@ -237,20 +234,20 @@ __host__ __device__ void e_read_CS_table (
     } // eIoni
 
     // Bremsstrahlung
-    if ( parameters.physics_list[ELECTRON_BREMSSTRAHLUNG] == ENABLED )
+    if ( parameters->physics_list[ELECTRON_BREMSSTRAHLUNG] == ENABLED )
     {
         // Get CS and dE/dx
         if ( energy_index==0 )
         {
-            CS = d_table.eBremCS[ table_index ];
+            CS = d_table->eBremCS[ table_index ];
         }
         else
         {
-            CS = linear_interpolation ( d_table.E[ energy_index-1 ], d_table.eBremCS[ table_index-1 ],
-                                        d_table.E[ energy_index ], d_table.eBremCS[ table_index ], energy );
+            CS = linear_interpolation ( d_table->E[ energy_index-1 ], d_table->eBremCS[ table_index-1 ],
+                                        d_table->E[ energy_index ], d_table->eBremCS[ table_index ], energy );
 
-            dedxeBrem = linear_interpolation ( d_table.E[ energy_index-1 ], d_table.eBremdedx[ table_index-1 ],
-                                               d_table.E[ energy_index ], d_table.eBremdedx[ table_index ], energy );
+            dedxeBrem = linear_interpolation ( d_table->E[ energy_index-1 ], d_table->eBremdedx[ table_index-1 ],
+                                               d_table->E[ energy_index ], d_table->eBremdedx[ table_index ], energy );
         }
 
         // Get interaction distance
@@ -271,17 +268,17 @@ __host__ __device__ void e_read_CS_table (
     } // eBrem
 
     // Multiple scattering
-    if ( parameters.physics_list[ELECTRON_MSC] == ENABLED )
+    if ( parameters->physics_list[ELECTRON_MSC] == ENABLED )
     {
         // Get CS
         if ( energy_index==0 )
         {
-            lambda = d_table.eMSC[ table_index ];
+            lambda = d_table->eMSC[ table_index ];
         }
         else
         {
-            lambda = linear_interpolation ( d_table.E[ energy_index-1 ], d_table.eMSC[ table_index-1 ],
-                                            d_table.E[ energy_index ], d_table.eMSC[ table_index ], energy );
+            lambda = linear_interpolation ( d_table->E[ energy_index-1 ], d_table->eMSC[ table_index-1 ],
+                                            d_table->E[ energy_index ], d_table->eMSC[ table_index ], energy );
         }
 
         if ( lambda != 0.0 )
@@ -297,12 +294,12 @@ __host__ __device__ void e_read_CS_table (
     // Electron range
     if ( energy_index==0 )
     {
-        erange = d_table.eRange[ table_index ];
+        erange = d_table->eRange[ table_index ];
     }
     else
     {
-        erange = linear_interpolation ( d_table.E[ energy_index-1 ], d_table.eRange[ table_index-1 ],
-                                        d_table.E[ energy_index ], d_table.eRange[ table_index ], energy );
+        erange = linear_interpolation ( d_table->E[ energy_index-1 ], d_table->eRange[ table_index-1 ],
+                                        d_table->E[ energy_index ], d_table->eRange[ table_index ], energy );
     }    
 
 }
@@ -348,12 +345,12 @@ __host__ __device__ f32 LossApproximation ( f32 StepLength, f32 Ekine, f32 erang
 #define fw 4.
 #define nmaxCont 16
 #define minLoss 10.*eV
-__host__ __device__ f32 eFluctuation (f32 meanLoss, f32 Ekine,
-                                      MaterialsTable materials,
-                                      ParticlesData particles, ui32 id, ui8 id_mat )
+__host__ __device__ f32 eFluctuation( f32 meanLoss, f32 Ekine,
+                                      const MaterialsData *materials,
+                                      ParticlesData *particles, ui32 id, ui8 id_mat )
 {
 
-    f32 cutEnergy = materials.electron_energy_cut[ id_mat ];
+    f32 cutEnergy = materials->electron_energy_cut[ id_mat ];
 
     i32 nb, k;
     f32 LossFluct = 0., lossc = 0.;//,minLoss=10.*eV;
@@ -372,19 +369,16 @@ __host__ __device__ f32 eFluctuation (f32 meanLoss, f32 Ekine,
     gamma2 = ( tau + 1.0 ) * ( tau + 1.0 );
     beta2 = tau * ( tau+2. ) / gamma2;
 
-    F1 = materials.fF1[ id_mat ];
-    F2 = materials.fF2[ id_mat ];
-    E0 = materials.fEnergy0[ id_mat ];
-    E1 = materials.fEnergy1[ id_mat ];
-    E2 = materials.fEnergy2[ id_mat ];
-    E1Log = materials.fLogEnergy1[ id_mat ];
-    E2Log = materials.fLogEnergy2[ id_mat ];
-    I = materials.electron_mean_excitation_energy[ id_mat ];
-    ILog = logf ( I ); //materials.fLogMeanExcitationEnergy[id_mat];
+    F1 = materials->fF1[ id_mat ];
+    F2 = materials->fF2[ id_mat ];
+    E0 = materials->fEnergy0[ id_mat ];
+    E1 = materials->fEnergy1[ id_mat ];
+    E2 = materials->fEnergy2[ id_mat ];
+    E1Log = materials->fLogEnergy1[ id_mat ];
+    E2Log = materials->fLogEnergy2[ id_mat ];
+    I = materials->electron_mean_excitation_energy[ id_mat ];
+    ILog = logf ( I ); //materials->fLogMeanExcitationEnergy[id_mat];
     esmall = .5*sqrtf ( E0*I );
-
-
-
 
     if ( tmax <= E0 )
     {
@@ -441,20 +435,6 @@ __host__ __device__ f32 eFluctuation (f32 meanLoss, f32 Ekine,
         if ( p1 > 0. ) LossFluct += ( 1. - 2.* prng_uniform( particles, id ) ) *e1;
     }
 
-//#ifdef DEBUG_TRACK_ID
-//        if ( id == DEBUG_TRACK_ID )
-//        {
-////            printf("Ekin=%e tmax= %e E0= %e I=%e\n  lossc %e a1 %e a2 %e a3 %e LossFluct %e\n \
-////                      emean %e sige %e p1 %e e1 %e\n", meanLoss, tmax, E0, I,
-////                   lossc, a1, a2, a3, LossFluct, emean, sige, p1, e1);
-
-//            printf("a1 %e a2 %e a3 %e LossFluct %e rndpois %i rnduni %f\n", a1, a2, a3, LossFluct,
-//                   prng_poisson( &(particles.prng[id]), 1 ),
-//                   prng_uniform( &(particles.prng[id]) ));
-//        }
-//#endif
-
-
     if ( a2 > nmaxCont )
     {
         emean += ( a2*e2 );
@@ -466,9 +446,6 @@ __host__ __device__ f32 eFluctuation (f32 meanLoss, f32 Ekine,
         LossFluct += ( p2*e2 );
         if ( p2 > 0. ) LossFluct += ( 1. - 2.*prng_uniform( particles, id ) ) *e2;
     }
-
-
-
 
     if ( a3 > 0. )
     {
@@ -503,8 +480,6 @@ __host__ __device__ f32 eFluctuation (f32 meanLoss, f32 Ekine,
         LossFluct += max ( 0., Gaussian ( emean, sige, particles, id ) );
     }
 
-
-
     LossFluct += lossc;
 
     return  LossFluct;
@@ -516,23 +491,12 @@ __host__ __device__ f32 eFluctuation (f32 meanLoss, f32 Ekine,
 
 
 __host__ __device__ f32 eLoss( f32 LossLength, f32 Ekine, f32 dedxeIoni, f32 dedxeBrem, f32 erange,
-                               ElectronsCrossSectionTable d_table, ui8 mat,
-                               MaterialsTable materials,
-                               ParticlesData particles, ui32 id )
-{    
-    // DEBUG
-    //LossLength = 0.09;
+                               const ElectronsCrossSectionData *d_table, ui8 mat,
+                               const MaterialsData *materials,
+                               ParticlesData *particles, ui32 id )
+{        
 
     f32 perteTot = LossLength * ( dedxeIoni + dedxeBrem );   
-
-//#ifdef DEBUG_TRACK_ID
-//        if ( id == DEBUG_TRACK_ID )
-//        {
-//            printf("ID %i dedx= %e  Ekin= %e  erange= %e  eLoss= %e length= %e\n",
-//                   id, dedxeIoni + dedxeBrem, Ekine, erange, perteTot, LossLength);
-//        }
-//#endif
-
 
     // Long step
     if ( perteTot > Ekine * 0.01 ) // linLossLimit = 0.01
@@ -547,53 +511,16 @@ __host__ __device__ f32 eLoss( f32 LossLength, f32 Ekine, f32 dedxeIoni, f32 ded
 
         perteTot = GetEnergy( erange, d_table, mat);
         perteTot = Ekine - perteTot;
-
-//#ifdef DEBUG_TRACK_ID
-//        if ( id == DEBUG_TRACK_ID )
-//        {
-
-
-//            printf("ID %i Ekin= %e  erange= %e  GetE= %e Pertot=%e eFluc=%e\n",
-//                   id, Ekine, erange, GetEnergy( erange, d_table, mat), perteTot,
-//                   eFluctuation ( perteTot, Ekine, materials, particles, id, mat ));
-//        }
-//#endif
-
-        //printf("   long step: EkinforLoss= %e  ::: eLoss= %e\n", GetEnergy( erange, d_table, mat), perteTot);
     }
 
     /// Warning ADD for eFluctuation
     if ( dedxeIoni > 0. ) {
         perteTot = eFluctuation ( perteTot, Ekine, materials, particles, id, mat );
-
-
-//        #ifdef DEBUG_TRACK_ID
-//                if ( id == DEBUG_TRACK_ID )
-//                {
-
-
-//                    printf("rndpois %i rnduni %f\n",
-//                           prng_poisson( &(particles.prng[id]), 1 ),
-//                           prng_uniform( &(particles.prng[id]) ));
-//                }
-//        #endif
-
-
-
-
-        //printf("   Fluc ::: eloss= %e\n", perteTot);
     }
-/*
-    if ( ( Ekine-perteTot ) <= ( 1.*eV ) )
-    {
-        perteTot = Ekine;
-    }
-*/
+
     perteTot = fminf( Ekine, perteTot );
 
-    particles.E[ id ] -= perteTot;
-
-    //printf("eloss= %e  Ekin= %e\n", perteTot, particles.E[ id ]);
+    particles->E[ id ] -= perteTot;
 
     return  perteTot;
 }
@@ -634,7 +561,7 @@ __host__ __device__ f32 gGeomLengthLimit ( f32 gPath, f32 currentLambda, f32 cur
 #undef tausmall
 
 
-__host__ __device__ f32 eSimpleScattering ( f32 xmeanth, f32 x2meanth, ui32 id, ParticlesData particles )
+__host__ __device__ f32 eSimpleScattering (f32 xmeanth, f32 x2meanth, ui32 id, ParticlesData *particles )
 {
     f32 a = ( 2.*xmeanth + 9.*x2meanth - 3. ) / ( 2.*xmeanth - 3.*x2meanth + 1. );
     f32 prob = ( a + 2. ) * xmeanth/a;
@@ -647,15 +574,12 @@ __host__ __device__ f32 eSimpleScattering ( f32 xmeanth, f32 x2meanth, ui32 id, 
     {
         return -1. + 2.*prng_uniform( particles, id );
     }
-
 }
 
-
-
-__host__ __device__ f32 eCosineTheta (f32 trueStep, f32 currentRange, f32 currentLambda, f32 currentEnergy, f32 *currentTau,
-                                       f32 par1, f32 par2, MaterialsTable materials, ui8 id_mat, ui32 id, ParticlesData particles )
+__host__ __device__ f32 eCosineTheta( f32 trueStep, f32 currentRange, f32 currentLambda, f32 currentEnergy, f32 *currentTau,
+                                       f32 par1, f32 par2, const MaterialsData *materials, ui8 id_mat, ui32 id, ParticlesData *particles )
 {
-    f32 particleEnergy = particles.E[id];
+    f32 particleEnergy = particles->E[id];
     f32  costh,sinth;
     f32  tau;
     const f32 taubig=8., tausmall=1.E-16, taulim=1.E-6;
@@ -704,18 +628,18 @@ __host__ __device__ f32 eCosineTheta (f32 trueStep, f32 currentRange, f32 curren
 
         if ( 1. - particleEnergy/currentEnergy >.5 )
         {
-            return eSimpleScattering ( xmeanth, x2meanth, id, particles );
+            return eSimpleScattering( xmeanth, x2meanth, id, particles );
         }
 
         betacp = sqrtf ( currentEnergy * ( currentEnergy + 2.*electron_mass_c2 )
                         * particleEnergy * ( particleEnergy + 2.*electron_mass_c2 )
                        / ( ( currentEnergy + electron_mass_c2 ) * ( particleEnergy + electron_mass_c2 ) ) );
 
-        y = trueStep / materials.rad_length[ id_mat ];
+        y = trueStep / materials->rad_length[ id_mat ];
         theta0 = c_highland*sqrtf ( y ) / betacp;
         y = logf ( y );
 
-        f32 Zeff = materials.nb_electrons_per_vol[ id_mat ] / materials.nb_atoms_per_vol[ id_mat ];
+        f32 Zeff = materials->nb_electrons_per_vol[ id_mat ] / materials->nb_atoms_per_vol[ id_mat ];
 
         corr = ( 1.-8.778E-2 / Zeff ) * ( .87 + .03*logf ( Zeff ) )
               + ( 4.078E-2 + 1.7315E-4*Zeff ) * ( .87 + .03*logf ( Zeff ) ) *y;
@@ -727,7 +651,7 @@ __host__ __device__ f32 eCosineTheta (f32 trueStep, f32 currentRange, f32 curren
         }
         if ( theta0 > theta0max )
         {            
-            return  eSimpleScattering ( xmeanth, x2meanth, id, particles );
+            return  eSimpleScattering( xmeanth, x2meanth, id, particles );
         }
 
         sinth = sinf ( .5*theta0 );
@@ -738,7 +662,7 @@ __host__ __device__ f32 eCosineTheta (f32 trueStep, f32 currentRange, f32 curren
         x0 = 1. - xsi/a;
         if ( xmean1 <= .999*xmeanth )
         {
-            return  eSimpleScattering ( xmeanth, x2meanth, id, particles );
+            return  eSimpleScattering( xmeanth, x2meanth, id, particles );
         }
 
         c = 2.943 - .197*logf ( Zeff + 1. ) + ( .0987 - .0143*logf ( Zeff + 1. ) ) * y;
@@ -775,8 +699,8 @@ __host__ __device__ f32 eCosineTheta (f32 trueStep, f32 currentRange, f32 curren
 
 
 
-__host__ __device__ void gLatCorrection ( f32xyz currentDir, f32 tPath, f32 zPath, f32 currentTau, f32 phi, f32 sinth,
-                                          ParticlesData particles, ui32 id, f32 safety )
+__host__ __device__ void gLatCorrection( f32xyz currentDir, f32 tPath, f32 zPath, f32 currentTau, f32 phi, f32 sinth,
+                                         ParticlesData *particles, ui32 id, f32 safety )
 {
     f32 latcorr, etau, rmean, rmax, Phi, psi, lambdaeff;
     const f32 kappa = 2.5, taulim = 1.E-6, tausmall = 1.E-16, taubig = 8., geomMin = 1.E-6*mm;
@@ -884,38 +808,36 @@ __host__ __device__ void gLatCorrection ( f32xyz currentDir, f32 tPath, f32 zPat
 
             if ( rmean > safety ) rmean = safety*.99;
 
-            particles.px[ id ] += latDir.x*rmean;
-            particles.py[ id ] += latDir.y*rmean;
-            particles.pz[ id ] += latDir.z*rmean;
+            particles->px[ id ] += latDir.x*rmean;
+            particles->py[ id ] += latDir.y*rmean;
+            particles->pz[ id ] += latDir.z*rmean;
         }
 
     } // if safety
 
-
 }
 
 
-__host__ __device__ void eMscScattering ( f32 tPath, f32 zPath, f32 currentRange, f32 currentLambda,
-                                          f32 currentEnergy, f32 par1, f32 par2, ParticlesData particles,
-                                          ui32 id, MaterialsTable materials, ui8 mat,
-                                          VoxVolumeData<ui16> phantom/*, ui32xyzw index_phantom */)
+__host__ __device__ void eMscScattering( f32 tPath, f32 zPath, f32 currentRange, f32 currentLambda, f32 currentEnergy, f32 par1, f32 par2,
+                                         ParticlesData *particles, ui32 id, const MaterialsData *materials, ui8 mat,
+                                         const VoxVolumeData<ui16> *phantom )
 {
     f32  costh, sinth, phi, currentTau;
     const f32 tlimitminfix = 1.E-10*mm, tausmall = 1.E-16; //,taulim=1.E-6
     f32xyz Dir, currentDir;
 
-    if ( ( particles.E[id] < 0. ) || ( tPath <= tlimitminfix ) || ( tPath/tausmall < currentLambda ) )
+    if ( ( particles->E[id] < 0. ) || ( tPath <= tlimitminfix ) || ( tPath/tausmall < currentLambda ) )
     {
         return;
     }
 
-    costh = eCosineTheta ( tPath, currentRange, currentLambda, currentEnergy, &currentTau, par1, par2, materials, mat, id,particles );
+    costh = eCosineTheta( tPath, currentRange, currentLambda, currentEnergy, &currentTau, par1, par2, materials, mat, id,particles );
 
     if ( fabs ( costh ) > 1. )
     {
         return;
     }
-    if ( costh < ( 1. - 1000.*tPath/currentLambda ) && ( particles.E[id] ) > ( 20.*MeV ) )
+    if ( costh < ( 1. - 1000.*tPath/currentLambda ) && ( particles->E[id] ) > ( 20.*MeV ) )
     {
         do
         {
@@ -929,23 +851,23 @@ __host__ __device__ void eMscScattering ( f32 tPath, f32 zPath, f32 currentRange
 
     Dir = make_f32xyz ( sinth*cosf ( phi ), sinth*sinf ( phi ), costh );
 
-    particles.px[ id ] += particles.dx[ id ] * zPath;
-    particles.py[ id ] += particles.dy[ id ] * zPath;
-    particles.pz[ id ] += particles.dz[ id ] * zPath;
+    particles->px[ id ] += particles->dx[ id ] * zPath;
+    particles->py[ id ] += particles->dy[ id ] * zPath;
+    particles->pz[ id ] += particles->dz[ id ] * zPath;
 
-    currentDir = make_f32xyz ( particles.dx[ id ], particles.dy[ id ], particles.dz[ id ] );
+    currentDir = make_f32xyz ( particles->dx[ id ], particles->dy[ id ], particles->dz[ id ] );
 
     Dir = rotateUz ( Dir,currentDir );
 
-    particles.dx[ id ] = Dir.x;
-    particles.dy[ id ] = Dir.y;
-    particles.dz[ id ] = Dir.z;
+    particles->dx[ id ] = Dir.x;
+    particles->dy[ id ] = Dir.y;
+    particles->dz[ id ] = Dir.z;
 
     // Read position
     f32xyz position; // mm
-    position.x = particles.px[id];
-    position.y = particles.py[id];
-    position.z = particles.pz[id];
+    position.x = particles->px[id];
+    position.y = particles->py[id];
+    position.z = particles->pz[id];
 
 //    // Defined index phantom
 //    f32xyz ivoxsize;
@@ -974,45 +896,43 @@ __host__ __device__ void eMscScattering ( f32 tPath, f32 zPath, f32 currentRange
 //                                                vox_zmin, vox_zmax );
 
 
-    /// TODO: safety of voxel or of the volume ?? - JB
+    /// TODO: safety on the voxel or on the volume ?? - JB
 
     // Get safety within the voxel
-    f32 safety = transport_compute_safety_AABB( position, phantom.xmin, phantom.xmax, phantom.ymin, phantom.ymax,
-                                                phantom.zmin, phantom.zmax );
+    f32 safety = transport_compute_safety_AABB( position, phantom->xmin, phantom->xmax, phantom->ymin, phantom->ymax,
+                                                phantom->zmin, phantom->zmax );
 
 
     // Lateral correction
-    gLatCorrection ( currentDir, tPath, zPath, currentTau, phi, sinth, particles, id, safety );
+    gLatCorrection( currentDir, tPath, zPath, currentTau, phi, sinth, particles, id, safety );
 
 }
 
 
 // From Eric's code
-__host__ __device__ f32 GlobalMscScattering ( f32 GeomPath,f32 cutstep,f32 CurrentRange,f32 CurrentEnergy, f32 CurrentLambda,
-                                              f32 dedxeIoni, f32 dedxeBrem, ElectronsCrossSectionTable d_table, ui8 mat,
-                                              ParticlesData particles, ui32 id,f32 par1,f32 par2, MaterialsTable materials,
-                                              DoseData dosi, ui32xyzw index_phantom, VoxVolumeData<ui16> phantom,
-                                              GlobalSimulationParametersData parameters )
+__host__ __device__ f32 GlobalMscScattering( f32 GeomPath, f32 cutstep, f32 CurrentRange, f32 CurrentEnergy, f32 CurrentLambda,
+                                             f32 dedxeIoni, f32 dedxeBrem, const ElectronsCrossSectionData *d_table, ui8 mat,
+                                             ParticlesData *particles, ui32 id, f32 par1, f32 par2, const MaterialsData *materials,
+                                             DoseData *dosi, const VoxVolumeData<ui16> *phantom,
+                                             const GlobalSimulationParametersData *parameters )
 {
 
     f32  edep, TruePath, zPath;//,tausmall=1.E-16;
 
-    if ( parameters.physics_list[ELECTRON_MSC] != ENABLED )
+    if ( parameters->physics_list[ELECTRON_MSC] != ENABLED )
     {
 
-        particles.px[id] += particles.dx[id] * GeomPath;
-        particles.py[id] += particles.dy[id] * GeomPath;
-        particles.pz[id] += particles.dz[id] * GeomPath;
+        particles->px[id] += particles->dx[id] * GeomPath;
+        particles->py[id] += particles->dy[id] * GeomPath;
+        particles->pz[id] += particles->dz[id] * GeomPath;
 
         if ( GeomPath < cutstep )
         {
-            edep = eLoss ( GeomPath, particles.E[ id ], dedxeIoni, dedxeBrem, CurrentRange, d_table,
-                           mat, materials, particles, id );
+            edep = eLoss( GeomPath, particles->E[ id ], dedxeIoni, dedxeBrem, CurrentRange, d_table,
+                          mat, materials, particles, id );
 
             // Drop dose
-            dose_record_standard ( dosi, edep, particles.px[id], particles.py[id], particles.pz[id] );
-            //printf("Edep %e  - pos %e %e %e - MscProc\n", edep, particles.px[id], particles.py[id], particles.pz[id]);
-
+            dose_record_standard( dosi, edep, particles->px[id], particles->py[id], particles->pz[id] );
         }
 
         return  GeomPath;
@@ -1020,47 +940,46 @@ __host__ __device__ f32 GlobalMscScattering ( f32 GeomPath,f32 cutstep,f32 Curre
 
     if ( GeomPath == cutstep )
     {
-        zPath = gTransformToGeom ( GeomPath, CurrentRange, CurrentLambda,
-                                   CurrentEnergy, par1, par2, d_table, mat );
+        zPath = gTransformToGeom( GeomPath, CurrentRange, CurrentLambda,
+                                  CurrentEnergy, par1, par2, d_table, mat );
     }
     else
     {
         zPath = GeomPath;
-        TruePath = gGeomLengthLimit ( GeomPath, CurrentLambda, CurrentRange, par1, par2 );
+        TruePath = gGeomLengthLimit( GeomPath, CurrentLambda, CurrentRange, par1, par2 );
         GeomPath = TruePath;
 
-        edep = eLoss ( TruePath, particles.E[ id ], dedxeIoni, dedxeBrem, CurrentRange,
-                       d_table, mat, materials, particles, id );
+        edep = eLoss( TruePath, particles->E[ id ], dedxeIoni, dedxeBrem, CurrentRange,
+                      d_table, mat, materials, particles, id );
 
-        dose_record_standard ( dosi, edep, particles.px[id], particles.py[id], particles.pz[id] );
+        dose_record_standard( dosi, edep, particles->px[id], particles->py[id], particles->pz[id] );
     }
 
-
-    if ( particles.E[id] > 0.0 ) // if not laststep
+    if ( particles->E[id] > 0.0 ) // if not laststep
     {
-        eMscScattering ( GeomPath, zPath, CurrentRange, CurrentLambda, CurrentEnergy, par1, par2, particles,
-                         id, materials, mat, phantom /*, index_phantom*/ );
+        eMscScattering( GeomPath, zPath, CurrentRange, CurrentLambda, CurrentEnergy, par1, par2, particles,
+                        id, materials, mat, phantom );
     }
     else
     {
-        particles.endsimu[ id ] = PARTICLE_DEAD;
-        particles.px[ id ] += particles.dx[ id ]*zPath;
-        particles.py[ id ] += particles.dy[ id ]*zPath;
-        particles.pz[ id ] += particles.dz[ id ]*zPath;
+        particles->status[ id ] = PARTICLE_DEAD;
+        particles->px[ id ] += particles->dx[ id ]*zPath;
+        particles->py[ id ] += particles->dy[ id ]*zPath;
+        particles->pz[ id ] += particles->dz[ id ]*zPath;
     }
 
     return  TruePath;
 }
 
 
-__host__ __device__ SecParticle eSampleSecondarieElectron ( f32 CutEnergy, ParticlesData particles, ui32 id )
+__host__ __device__ SecParticle eSampleSecondarieElectron( f32 CutEnergy, ParticlesData *particles, ui32 id )
 {
-    f32  totalEnergy, deltaEnergy, totMom, deltaMom;
-    f32  xmin, xmax, gamma; //, gamma2;//,beta2;
-    f32  x, z, q, grej, g, y;
-    f32  cost, sint, phi;
-    f32  Ekine = particles.E[ id ];
-    f32  tmax = fmin ( 1.*GeV, .5 * Ekine );
+    f32 totalEnergy, deltaEnergy, totMom, deltaMom;
+    f32 xmin, xmax, gamma; //, gamma2;//,beta2;
+    f32 x, z, q, grej, g, y;
+    f32 cost, sint, phi;
+    f32 Ekine = particles->E[ id ];
+    f32 tmax = fmin ( 1.*GeV, .5 * Ekine );
 
     f32xyz  ElecDir;
 
@@ -1103,19 +1022,19 @@ __host__ __device__ SecParticle eSampleSecondarieElectron ( f32 CutEnergy, Parti
     ElecDir.y = sint*sinf ( phi );
     ElecDir.z = cost;
 
-    f32xyz currentDir = make_f32xyz ( particles.dx[id], particles.dy[id], particles.dz[id] );
+    f32xyz currentDir = make_f32xyz ( particles->dx[id], particles->dy[id], particles->dz[id] );
 
     ElecDir = rotateUz ( ElecDir, currentDir );
 
-    particles.E[id]= Ekine - deltaEnergy;
+    particles->E[id]= Ekine - deltaEnergy;
 
     //printf("Ekin= %e   deltaEnergy= %e\n", Ekine, deltaEnergy);
 
-    if ( particles.E[id] > 0.0 ) currentDir = CorrUnit ( currentDir, ElecDir, totMom, deltaMom );
+    if ( particles->E[id] > 0.0 ) currentDir = CorrUnit ( currentDir, ElecDir, totMom, deltaMom );
 
-    particles.dx[id] = currentDir.x;
-    particles.dy[id] = currentDir.y;
-    particles.dz[id] = currentDir.z;
+    particles->dx[id] = currentDir.x;
+    particles->dy[id] = currentDir.y;
+    particles->dz[id] = currentDir.z;
 
     // SecParticle secondary_part;
     secondary_part.E = deltaEnergy;
@@ -1153,7 +1072,7 @@ __host__ __device__ f32xyz CorrUnit ( f32xyz u, f32xyz v, f32 uMom, f32 vMom )
 #define tlimitminfix 1.E-6*mm
 #define dtrl 5./100
 __host__ __device__ f32 gTransformToGeom (f32 TPath, f32 currentRange, f32 currentLambda, f32 currentEnergy,
-                                          f32 &par1, f32 &par2, ElectronsCrossSectionTable electron_CS_table, ui8 mat )
+                                          f32 &par1, f32 &par2, const ElectronsCrossSectionData *electron_CS_table, ui8 mat )
 {
     f32  ZPath, zmean;
 //     f32  tausmall=1.E-20,taulim=1.E-6,tlimitminfix=1.E-6*mm;
@@ -1225,103 +1144,60 @@ __host__ __device__ f32 gTransformToGeom (f32 TPath, f32 currentRange, f32 curre
 #undef tlimitminfix
 #undef dtrl
 
-__host__ __device__ f32 GetEnergy ( f32 Range, ElectronsCrossSectionTable d_table, ui8 mat )
+__host__ __device__ f32 GetEnergy (f32 Range, const ElectronsCrossSectionData *d_table, ui8 mat )
 {
-    ui32 index = binary_search ( Range, d_table.eRange, d_table.nb_bins*mat+d_table.nb_bins, d_table.nb_bins*mat );
-    ui32 E_index = index - d_table.nb_bins*mat;
+    ui32 index = binary_search ( Range, d_table->eRange, d_table->nb_bins*mat+d_table->nb_bins, d_table->nb_bins*mat );
+    ui32 E_index = index - d_table->nb_bins*mat;
 
     if ( E_index == 0 )
     {
-        return d_table.E[ E_index ];
+        return d_table->E[ E_index ];
     }
     else
     {
-        return linear_interpolation ( d_table.eRange[ index-1 ], d_table.E[ E_index-1 ],
-                                      d_table.eRange[ index ], d_table.E[ E_index ], Range );
+        return linear_interpolation ( d_table->eRange[ index-1 ], d_table->E[ E_index-1 ],
+                                      d_table->eRange[ index ], d_table->E[ E_index ], Range );
     }
 }
 
 // Get Lambda with flag 1, in the code only flag 1 is used, so I fixed the function to flag 1 - JB
-__host__ __device__ f32 GetLambda ( f32 energy, ElectronsCrossSectionTable d_table, ui8 mat )
+__host__ __device__ f32 GetLambda (f32 energy, const ElectronsCrossSectionData *d_table, ui8 mat )
 {
-    ui32 E_index = binary_search ( energy, d_table.E, d_table.nb_bins );
-    ui32 index = d_table.nb_bins*mat + E_index;
+    ui32 E_index = binary_search ( energy, d_table->E, d_table->nb_bins );
+    ui32 index = d_table->nb_bins*mat + E_index;
 
     if ( E_index == 0)
     {
-        return d_table.eMSC[ index ];
+        return d_table->eMSC[ index ];
     }
     else
     {
-        return linear_interpolation ( d_table.E[ E_index-1 ], d_table.eMSC[ index-1 ],
-                                      d_table.E[ E_index ], d_table.eMSC[ index ], energy );
+        return linear_interpolation ( d_table->E[ E_index-1 ], d_table->eMSC[ index-1 ],
+                                      d_table->E[ E_index ], d_table->eMSC[ index ], energy );
     }
 }
-
-//// Old GetLambda function
-//__host__ __device__ f32 GetLambda ( f32 Range, unsigned short int flag, ElectronsCrossSectionTable d_table, int mat )
-//{
-//    int index = binary_search ( Range, d_table.E, d_table.nb_bins*mat+d_table.nb_bins, d_table.nb_bins*mat );
-
-//    if ( flag == 1 ) return linear_interpolation ( d_table.E[index-1],d_table.eMSC[index-1], d_table.E[index], d_table.eMSC[index], Range );
-
-//    else if ( flag == 2 ) return linear_interpolation ( d_table.E[index-1],d_table.eIonisationCS[index-1], d_table.E[index], d_table.eIonisationCS[index], Range );
-
-//    else /*if (flag == 3)*/ return linear_interpolation ( d_table.E[index-1],d_table.eBremCS[index-1], d_table.E[index], d_table.eBremCS[index], Range );
-
-//}
-//// Old RandomAtom function
-/*
-__host__ __device__ int RandomAtom ( f32 CutEnergyGamma, ParticlesData &particles, ui32 id, MaterialsTable materials, ui8 id_mat )
-{                 
-    ui32 indice, last_index;
-    f32 rval;
-
-    last_index = materials.index[ id_mat ] + materials.nb_elements[ id_mat ] - 1;
-
-    rval = JKISS32 ( particles, id );
-    rval *= materials.atom_num_dens[ id_mat ];
-    rval/=materials.nb_atoms_per_vol[id_mat];
-    rval*=eBremCrossSectionPerAtom ( materials.mixture[tmp],CutEnergyGamma, particles.E[id] );
-
-    for ( int i=0; i<materials.nb_elements[id_mat]; ++i )
-    {
-        int indexelt= i+ materials.index[id_mat];
-        f32 U =materials.atom_num_dens[id_mat];
-        U/=materials.nb_atoms_per_vol[id_mat];
-        U*eBremCrossSectionPerAtom ( materials.mixture[indexelt],CutEnergyGamma, particles.E[id] );
-
-        if ( rval<=U )
-        {
-            indice=indexelt;
-            break;
-        }
-    }
-    return  indice;
-}
-*/
 
 // The old function from GGEMS V1 was wrong, I extracted this one from G4.10  - JB
-__host__ __device__ ui16 RandomAtom ( f32 CutEnergyGamma, f32 min_E, ParticlesData particles, ui32 id,
-                                      MaterialsTable materials, ui8 mat_id )
+__host__ __device__ ui16 RandomAtom( f32 CutEnergyGamma, f32 min_E, ParticlesData *particles, ui32 id,
+                                     const MaterialsData *materials, ui8 mat_id )
 {
 
-    ui32 n = materials.nb_elements[ mat_id ] - 1;
-    ui32 index = materials.index[ mat_id ];
-    ui16 cur_Z = materials.mixture[ index + n ];
-    f32 Ekine = particles.E[ id ];
+    ui32 n = materials->nb_elements[ mat_id ] - 1;
+    ui32 index = materials->index[ mat_id ];
+    ui16 cur_Z = materials->mixture[ index + n ];
+    f32 Ekine = particles->E[ id ];
 
     f32 x = prng_uniform( particles, id ) * ElectronBremmsstrahlung_CS( materials, Ekine, min_E, mat_id );
 
     f32 xsec = 0.0;
     for ( ui16 i = 0; i < n; ++i )
     {
-        xsec += materials.atom_num_dens[ index + i ] *
-                ElectronBremmsstrahlung_CSPA( materials.mixture[ index + i ], CutEnergyGamma, Ekine );
+        xsec += materials->atom_num_dens[ index + i ] *
+                ElectronBremmsstrahlung_CSPA( materials->mixture[ index + i ], CutEnergyGamma, Ekine );
 
         if ( x <= xsec )
         {
-            cur_Z = materials.mixture[ index + i ];
+            cur_Z = materials->mixture[ index + i ];
             break;
         }
     }
@@ -1364,7 +1240,7 @@ __host__ __device__ f32 RejectionFunction ( f32 value, f32 rej1, f32 rej2, f32 r
 }
 
 
-__host__ __device__ f32 AngleDistribution ( f32 initial_energy, f32 final_energy, f32 Z, ParticlesData particles, ui32 id )
+__host__ __device__ f32 AngleDistribution ( f32 initial_energy, f32 final_energy, f32 Z, ParticlesData *particles, ui32 id )
 {
     f32  initialTotalEnergy = ( initial_energy + electron_mass_c2 ) /electron_mass_c2;
     f32  finalTotalEnergy = ( final_energy + electron_mass_c2 ) /electron_mass_c2;
@@ -1398,26 +1274,24 @@ __host__ __device__ f32 AngleDistribution ( f32 initial_energy, f32 final_energy
     return sqrtf ( rand ) / initialTotalEnergy;
 }
 
-
-
 __host__ __device__
-void eSampleSecondarieGamma ( f32 minEnergy, f32 maxEnergy, ParticlesData particles, ui32 id,
-                              MaterialsTable materials, ui8 id_mat )
+void eSampleSecondarieGamma( f32 minEnergy, f32 maxEnergy, ParticlesData *particles, ui32 id,
+                             const MaterialsData *materials, ui8 id_mat )
 {
     ui32 Z;
-    f32  gammaEnergy, totalEnergy;
-    f32  xmin, xmax, kappa, epsilmin, epsilmax;
-    f32  lnZ, FZ, Z3, ZZ, F1, F2, theta, sint, phi;
-    f32  Ekine = particles.E[ id ];
-    f32  tmin = materials.photon_energy_cut[ id_mat ];
-    f32  tmax = fminf ( maxEnergy, Ekine ); // MaxKinEnergy = 250* MeV
-    f32  MigdalFactor, MigdalConstant = elec_radius*hbarc*hbarc*4.*pi/ ( electron_mass_c2*electron_mass_c2 );
-    f32  x, xm, epsil, greject, migdal, grejmax, q, U, U2;
-    f32  ah, bh, screenvar, screenmin, screenfac = 0.;
-    f32  ah1, ah2, ah3, bh1, bh2, bh3;
-    f32  al1, al2, al0, bl1, bl2, bl0;
-    f32  tlow = 1.*MeV;
-    f32  totMom;
+    f32 gammaEnergy, totalEnergy;
+    f32 xmin, xmax, kappa, epsilmin, epsilmax;
+    f32 lnZ, FZ, Z3, ZZ, F1, F2, theta, sint, phi;
+    f32 Ekine = particles->E[ id ];
+    f32 tmin = materials->photon_energy_cut[ id_mat ];
+    f32 tmax = fminf ( maxEnergy, Ekine ); // MaxKinEnergy = 250* MeV
+    f32 MigdalFactor, MigdalConstant = elec_radius*hbarc*hbarc*4.*pi/ ( electron_mass_c2*electron_mass_c2 );
+    f32 x, xm, epsil, greject, migdal, grejmax, q, U, U2;
+    f32 ah, bh, screenvar, screenmin, screenfac = 0.;
+    f32 ah1, ah2, ah3, bh1, bh2, bh3;
+    f32 al1, al2, al0, bl1, bl2, bl0;
+    f32 tlow = 1.*MeV;
+    f32 totMom;
 
     if ( tmin >= tmax ) return;
 
@@ -1444,7 +1318,7 @@ void eSampleSecondarieGamma ( f32 minEnergy, f32 maxEnergy, ParticlesData partic
 
     epsilmin = tmin / totalEnergy;
     epsilmax = tmax / totalEnergy;
-    MigdalFactor = materials.nb_electrons_per_vol[ id_mat ] * MigdalConstant/ ( epsilmax*epsilmax );
+    MigdalFactor = materials->nb_electrons_per_vol[ id_mat ] * MigdalConstant/ ( epsilmax*epsilmax );
     U = logf ( Ekine / electron_mass_c2 );
     U2 = U*U;
 
@@ -1517,20 +1391,17 @@ void eSampleSecondarieGamma ( f32 minEnergy, f32 maxEnergy, ParticlesData partic
     GamDir.z = cos ( theta );
 
     f32xyz currentDir;
-    currentDir = make_f32xyz ( particles.dx[id], particles.dy[id], particles.dz[id] );
+    currentDir = make_f32xyz ( particles->dx[id], particles->dy[id], particles->dz[id] );
     GamDir = rotateUz ( GamDir, currentDir );
     totMom = sqrtf ( Ekine * ( totalEnergy + electron_mass_c2 ) );
 
     currentDir = CorrUnit ( currentDir, GamDir, totMom, gammaEnergy );
 
     // Update electron
-    particles.dx[ id ] = currentDir.x;
-    particles.dy[ id ] = currentDir.y;
-    particles.dz[ id ] = currentDir.z;
-    particles.E[ id ] = Ekine - gammaEnergy;
-
-    // Photon not produced
-    //printf("Gamme energy %e\n", gammaEnergy);
+    particles->dx[ id ] = currentDir.x;
+    particles->dy[ id ] = currentDir.y;
+    particles->dz[ id ] = currentDir.z;
+    particles->E[ id ] = Ekine - gammaEnergy;
 
 }
 #endif

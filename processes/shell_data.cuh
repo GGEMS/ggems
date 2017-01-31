@@ -1,4 +1,4 @@
-// GGEMS Copyright (C) 2015
+// GGEMS Copyright (C) 2017
 
 #ifndef SHELL_DATA_CUH
 #define SHELL_DATA_CUH

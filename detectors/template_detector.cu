@@ -1,13 +1,13 @@
-// GGEMS Copyright (C) 2015
+// GGEMS Copyright (C) 2017
 
 /*!
  * \file template_detector.cu
  * \brief
  * \author J. Bert <bert.jul@gmail.com>
- * \version 0.1
+ * \version 0.2
  * \date 02/03/2016
  *
- *
+ * v0.2: JB - Change all structs and remove CPU exec
  *
  */
 
@@ -19,14 +19,14 @@
 //// GPU Codes //////////////////////////////////////////////
 
 // This function navigate particle from the phantom to the detector (to in).
-__host__ __device__ void template_detector_track_to_in( ParticlesData particles, ui32 id )
+__host__ __device__ void template_detector_track_to_in( ParticlesData *particles, ui32 id )
 {
     // If freeze (not dead), re-activate the current particle
-    if( particles.endsimu[ id ] == PARTICLE_FREEZE )
+    if( particles->status[ id ] == PARTICLE_FREEZE )
     {
-        particles.endsimu[ id ] = PARTICLE_ALIVE;
+        particles->status[ id ] = PARTICLE_ALIVE;
     }
-    else if ( particles.endsimu[ id ] == PARTICLE_DEAD )
+    else if ( particles->status[ id ] == PARTICLE_DEAD )
     {
         return;
     }
@@ -34,22 +34,22 @@ __host__ __device__ void template_detector_track_to_in( ParticlesData particles,
 /*
     // Read position
     f32xyz pos;
-    pos.x = particles.px[ id ];
-    pos.y = particles.py[ id ];
-    pos.z = particles.pz[ id ];
+    pos.x = particles->px[ id ];
+    pos.y = particles->py[ id ];
+    pos.z = particles->pz[ id ];
 
     // Read direction
     f32xyz dir;
-    dir.x = particles.dx[ id ];
-    dir.y = particles.dy[ id ];
-    dir.z = particles.dz[ id ];
+    dir.x = particles->dx[ id ];
+    dir.y = particles->dy[ id ];
+    dir.z = particles->dz[ id ];
 
     // Do some raytracing function to map particle on the detector boundary
 
     // Save particle position
-    particles.px[ id ] = pos.x;
-    particles.py[ id ] = pos.y;
-    particles.pz[ id ] = pos.z;
+    particles->px[ id ] = pos.x;
+    particles->py[ id ] = pos.y;
+    particles->pz[ id ] = pos.z;
 
     // ...
     // ...
@@ -65,10 +65,10 @@ __host__ __device__ void template_detector_track_to_in( ParticlesData particles,
 
 // Digitizer record and process data into the detector. For example in CT imaging the digitizer will compute
 // the number of particle per pixel.
-__host__ __device__ void template_detector_digitizer( ParticlesData particles, ui32 id )
+__host__ __device__ void template_detector_digitizer( ParticlesData *particles, ui32 id )
 {
     // If freeze or dead, quit
-    if( particles.endsimu[ id ] == PARTICLE_FREEZE || particles.endsimu[ id ] == PARTICLE_DEAD )
+    if( particles->status[ id ] == PARTICLE_FREEZE || particles->status[ id ] == PARTICLE_DEAD )
     {
         return;
     }
@@ -76,9 +76,9 @@ __host__ __device__ void template_detector_digitizer( ParticlesData particles, u
 /*
     // Read position
     f32xyz pos;
-    pos.x = particles.px[ id ];
-    pos.y = particles.py[ id ];
-    pos.z = particles.pz[ id ];
+    pos.x = particles->px[ id ];
+    pos.y = particles->py[ id ];
+    pos.z = particles->pz[ id ];
 
     // Do some processing
 */
@@ -86,29 +86,29 @@ __host__ __device__ void template_detector_digitizer( ParticlesData particles, u
 }
 
 // Kernel that launch the function track_to_in on GPU
-__global__ void kernel_template_detector_track_to_in( ParticlesData particles )
+__global__ void kernel_template_detector_track_to_in( ParticlesData *particles )
 {
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
-    if (id >= particles.size) return;
+    if (id >= particles->size) return;
 
     template_detector_track_to_in( particles, id);
 }
 
 // If navigation within the detector is required this function must be used
 // Kernel that launch the function track_to_in on GPU
-//__global__ void kernel_dummy_detector_track_to_out( ParticlesData particles )
+//__global__ void kernel_dummy_detector_track_to_out( ParticlesData *particles )
 //{
 //    const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
-//    if (id >= particles.size) return;
+//    if (id >= particles->size) return;
 
 //    template_detector_track_to_out( particles, id);
 //}
 
 // Kernel that launch digitizer on GPU
-__global__ void kernel_template_detector_digitizer( ParticlesData particles )
+__global__ void kernel_template_detector_digitizer( ParticlesData *particles )
 {
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
-    if (id >= particles.size) return;
+    if (id >= particles->size) return;
 
     template_detector_digitizer( particles, id );
 }
@@ -156,7 +156,7 @@ bool TemplateDetector::m_check_mandatory()
 
 // This function is mandatory and called by GGEMS to initialize and load all
 // necessary data on the graphic card
-void TemplateDetector::initialize( GlobalSimulationParameters params )
+void TemplateDetector::initialize( GlobalSimulationParametersData *params )
 {
     // Check the parameters
     if( !m_check_mandatory() )
@@ -168,76 +168,50 @@ void TemplateDetector::initialize( GlobalSimulationParameters params )
     // Store global parameters: params are provided by GGEMS and are used to
     // know different information about the simulation. For example if the targeted
     // device is a CPU or a GPU.
-    m_params = params;
+    mh_params = params;
 
     // Handle GPU device if needed. Here nothing is load to the GPU (simple template). But
     // in case of the use of data on the GPU you should allocated and transfered here.
-    if ( m_params.data_h.device_target == GPU_DEVICE )
-    {
-        // GPU mem allocation
-        //HANDLE_ERROR( cudaMalloc( (void**)&data_d, N * sizeof( f32 ) ) );
 
-        // GPU mem copy
-        //HANDLE_ERROR( cudaMemcpy( data_d, data_h, N * sizeof( f32 ), cudaMemcpyHostToDevice ) );
-    }
+    // GPU mem allocation
+    //HANDLE_ERROR( cudaMalloc( (void**)&data_d, N * sizeof( f32 ) ) );
+
+    // GPU mem copy
+    //HANDLE_ERROR( cudaMemcpy( data_d, data_h, N * sizeof( f32 ), cudaMemcpyHostToDevice ) );
+
 }
 
 // Mandatory function, that handle track_to_in
-void TemplateDetector::track_to_in( Particles particles )
+void TemplateDetector::track_to_in( ParticlesData *d_particles )
 {
-    // If CPU is running, do it on CPU
-    if( m_params.data_h.device_target == CPU_DEVICE )
-    {
-        ui32 id = 0;
-        while( id < particles.size )
-        {
-            //                             passe host data (meaning from CPU)
-            template_detector_track_to_in( particles.data_h, id );
-            ++id;
-        }
-    }
-    // If GPU is running, do it on GPU
-    else if( m_params.data_h.device_target == GPU_DEVICE )
-    {
-        dim3 threads, grid;
-        threads.x = m_params.data_h.gpu_block_size;
-        grid.x = ( particles.size + m_params.data_h.gpu_block_size - 1 )
-                / m_params.data_h.gpu_block_size;
-        //                                                       pass device data (meaning from GPU)
-        kernel_template_detector_track_to_in<<<grid, threads>>>( particles.data_d );
-        cuda_error_check("Error ", " Kernel_template_detector (track to in)");
-        cudaThreadSynchronize();
-    }
+
+    dim3 threads, grid;
+    threads.x = mh_params->gpu_block_size;
+    grid.x = ( mh_params->size_of_particles_batch + mh_params->gpu_block_size - 1 )
+             / mh_params->gpu_block_size;
+    //                                                       pass device data (meaning from GPU)
+    kernel_template_detector_track_to_in<<<grid, threads>>>( d_particles );
+    cuda_error_check("Error ", " Kernel_template_detector (track to in)");
+    cudaThreadSynchronize();
+
 }
 
 // If navigation within the detector is required te track_to_out function should be
 // equivalent to the track_to_in function. Here there is no navigation. However, this function
 // is mandatory, and must be defined
-void TemplateDetector::track_to_out( Particles particles ) {}
+void TemplateDetector::track_to_out( ParticlesData *d_particles ) {}
 
 // Same mandatory function to drive the digitizer function between CPU and GPU
-void TemplateDetector::digitizer( Particles particles )
+void TemplateDetector::digitizer( ParticlesData *d_particles )
 {
-    if( m_params.data_h.device_target == CPU_DEVICE )
-    {
-        ui32 id = 0;
-        while( id < particles.size )
-        {
-            template_detector_digitizer( particles.data_h, id );
-            ++id;
-        }
-    }
-    else if( m_params.data_h.device_target == GPU_DEVICE )
-    {
-        dim3 threads, grid;
-        threads.x = m_params.data_h.gpu_block_size;
-        grid.x = ( particles.size + m_params.data_h.gpu_block_size - 1 )
-                / m_params.data_h.gpu_block_size;
+    dim3 threads, grid;
+    threads.x = mh_params->gpu_block_size;
+    grid.x = ( mh_params->size_of_particles_batch + mh_params->gpu_block_size - 1 )
+             / mh_params->gpu_block_size;
 
-        kernel_template_detector_digitizer<<<grid, threads>>>( particles.data_d );
-        cuda_error_check("Error ", " Kernel_template_detector (digitizer)");
-        cudaThreadSynchronize();
-    }
+    kernel_template_detector_digitizer<<<grid, threads>>>( d_particles );
+    cuda_error_check("Error ", " Kernel_template_detector (digitizer)");
+    cudaThreadSynchronize();
 }
 
 

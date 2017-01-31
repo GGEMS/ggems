@@ -47,7 +47,7 @@ private:
     Materials m_materials;
     CrossSections m_cross_sections;
     ParticleManager m_part_manager;
-    GlobalSimulationParameters m_params;
+    GlobalSimulationParametersData mh_params;
     std::vector< std::string > m_mat_names_db;
 
 };

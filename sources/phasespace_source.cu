@@ -1,11 +1,13 @@
-// GGEMS Copyright (C) 2015
+// GGEMS Copyright (C) 2017
 
 /*!
  * \file phasespace_source.cu
  * \brief phasespace source class
  * \author J. Bert <bert.jul@gmail.com>
- * \version 0.1
+ * \version 0.2
  * \date 9 mars 2016
+ *
+ * v0.2: JB - Change all structs and remove CPU exec
  *
  * phasespace source class
  * 
@@ -19,8 +21,8 @@
 ///////// GPU code ////////////////////////////////////////////////////
 
 // Internal function that create a new particle to the buffer at the slot id
-__host__ __device__ void PHSPSRC::phsp_source ( ParticlesData particles_data,
-                                                PhaseSpaceData phasespace,
+__host__ __device__ void PHSPSRC::phsp_source ( ParticlesData *particles_data,
+                                                const PhaseSpaceData *phasespace,
                                                 PhSpTransform transform, ui32 id )
 
 
@@ -42,18 +44,18 @@ __host__ __device__ void PHSPSRC::phsp_source ( ParticlesData particles_data,
 #endif
 
     // Get a random particle from the phasespace
-    ui32 phsp_id = (ui32) ( f32(phasespace.tot_particles) * prng_uniform( particles_data, id ) );
+    ui32 phsp_id = (ui32) ( f32(phasespace->tot_particles) * prng_uniform( particles_data, id ) );
 
 #ifdef DEBUG
-    assert( phsp_id < phasespace.tot_particles );
+    assert( phsp_id < phasespace->tot_particles );
 #endif
 
     // Then set the mandatory field to create a new particle
-    particles_data.E[id] = phasespace.energy[ phsp_id ];     // Energy in MeV
+    particles_data->E[id] = phasespace->energy[ phsp_id ];     // Energy in MeV
 
     // Aplly trsnformation
-    f32xyz pos = make_f32xyz( phasespace.pos_x[ phsp_id ], phasespace.pos_y[ phsp_id ], phasespace.pos_z[ phsp_id ] );
-    f32xyz dir = make_f32xyz( phasespace.dir_x[ phsp_id ], phasespace.dir_y[ phsp_id ], phasespace.dir_z[ phsp_id ] );
+    f32xyz pos = make_f32xyz( phasespace->pos_x[ phsp_id ], phasespace->pos_y[ phsp_id ], phasespace->pos_z[ phsp_id ] );
+    f32xyz dir = make_f32xyz( phasespace->dir_x[ phsp_id ], phasespace->dir_y[ phsp_id ], phasespace->dir_z[ phsp_id ] );
     f32xyz t = make_f32xyz( transform.tx[ source_id ], transform.ty[ source_id ], transform.tz[ source_id ] );
 
     //printf("ID %i rot %f %f %f\n", id, transform.rx, transform.ry, transform.rz);
@@ -68,37 +70,37 @@ __host__ __device__ void PHSPSRC::phsp_source ( ParticlesData particles_data,
     dir = fxyz_rotate_x_axis( dir, transform.rx[ source_id ] );
     dir = fxyz_unit( dir );
 
-    particles_data.px[id] = pos.x;     // Position in mm
-    particles_data.py[id] = pos.y;     //
-    particles_data.pz[id] = pos.z;     //
+    particles_data->px[id] = pos.x;     // Position in mm
+    particles_data->py[id] = pos.y;     //
+    particles_data->pz[id] = pos.z;     //
 
-    particles_data.dx[id] = dir.x;     // Direction (unit vector)
-    particles_data.dy[id] = dir.y;     //
-    particles_data.dz[id] = dir.z;     //
+    particles_data->dx[id] = dir.x;     // Direction (unit vector)
+    particles_data->dy[id] = dir.y;     //
+    particles_data->dz[id] = dir.z;     //
 
-    particles_data.tof[id] = 0.0f;                             // Time of flight
-    particles_data.endsimu[id] = PARTICLE_ALIVE;               // Status of the particle
+    particles_data->tof[id] = 0.0f;                             // Time of flight
+    particles_data->status[id] = PARTICLE_ALIVE;               // Status of the particle
 
-    particles_data.level[id] = PRIMARY;                        // It is a primary particle
-    particles_data.pname[id] = phasespace.ptype[ phsp_id ];    // a photon or an electron
+    particles_data->level[id] = PRIMARY;                        // It is a primary particle
+    particles_data->pname[id] = phasespace->ptype[ phsp_id ];    // a photon or an electron
 
-    particles_data.geometry_id[id] = 0;                        // Some internal variables
-    particles_data.next_discrete_process[id] = NO_PROCESS;     //
-    particles_data.next_interaction_distance[id] = 0.0;        //
-    particles_data.scatter_order[ id ] = 0;                    //
+    particles_data->geometry_id[id] = 0;                        // Some internal variables
+    particles_data->next_discrete_process[id] = NO_PROCESS;     //
+    particles_data->next_interaction_distance[id] = 0.0;        //
+    particles_data->scatter_order[ id ] = 0;                    //
 
 
-//    printf(" ID %i E %e pos %e %e %e ptype %i\n", id, particles_data.E[id],
-//           particles_data.px[id], particles_data.py[id], particles_data.pz[id], particles_data.pname[id]);
+//    printf(" ID %i E %e pos %e %e %e ptype %i\n", id, particles_data->E[id],
+//           particles_data->px[id], particles_data->py[id], particles_data->pz[id], particles_data->pname[id]);
 }
 
-__global__ void PHSPSRC::phsp_point_source (ParticlesData particles_data,
-                                            PhaseSpaceData phasespace,
+__global__ void PHSPSRC::phsp_point_source (ParticlesData *particles_data,
+                                            const PhaseSpaceData *phasespace,
                                             PhSpTransform transform )
 {
     // Get thread id
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
-    if ( id >= particles_data.size ) return;
+    if ( id >= particles_data->size ) return;
 
     // Get a new particle
     phsp_source( particles_data, phasespace, transform, id );
@@ -110,10 +112,7 @@ __global__ void PHSPSRC::phsp_point_source (ParticlesData particles_data,
 PhaseSpaceSource::PhaseSpaceSource(): GGEMSSource()
 {
     // Set the name of the source
-    set_name( "PhaseSpaceSource" );
-
-    // Init    
-    m_phasespace.tot_particles = 0;
+    set_name( "PhaseSpaceSource" );   
 
     // Default transformation
     m_transform.nb_sources = 0;
@@ -124,6 +123,10 @@ PhaseSpaceSource::PhaseSpaceSource(): GGEMSSource()
     // Vars
     m_phasespace_file = "";
     m_transformation_file = "";
+
+    mh_params = nullptr;
+    mh_phasespace = nullptr;
+    md_phasespace = nullptr;
 }
 
 // Destructor
@@ -212,7 +215,7 @@ void PhaseSpaceSource::m_skip_comment(std::istream & is) {
 // Check if everything is ok to initialize this source
 bool PhaseSpaceSource::m_check_mandatory()
 {
-    if ( m_phasespace.tot_particles == 0 ) return false;
+    if ( mh_phasespace->tot_particles == 0 ) return false;
     else return true;
 }
 
@@ -241,7 +244,7 @@ void PhaseSpaceSource::m_transform_allocation( ui32 nb_sources )
 void PhaseSpaceSource::m_load_phasespace_file()
 {
     PhaseSpaceIO *reader = new PhaseSpaceIO;
-    m_phasespace = reader->read_phasespace_file( m_phasespace_file );
+    mh_phasespace = reader->read_phasespace_file( m_phasespace_file );
     delete reader;
 }
 
@@ -322,11 +325,91 @@ void PhaseSpaceSource::m_load_transformation_file()
 
 }
 
+void PhaseSpaceSource::m_copy_phasespace_to_gpu()
+{
+    ui32 n = mh_phasespace->tot_particles;
+
+    /// First, struct allocation
+    HANDLE_ERROR( cudaMalloc( (void**) &md_phasespace, sizeof( PhaseSpaceData ) ) );
+
+    /// Device pointers allocation
+    f32 *energy;
+    HANDLE_ERROR( cudaMalloc((void**) &energy, n*sizeof(f32)) );
+    f32 *pos_x;
+    HANDLE_ERROR( cudaMalloc((void**) &pos_x, n*sizeof(f32)) );
+    f32 *pos_y;
+    HANDLE_ERROR( cudaMalloc((void**) &pos_y, n*sizeof(f32)) );
+    f32 *pos_z;
+    HANDLE_ERROR( cudaMalloc((void**) &pos_z, n*sizeof(f32)) );
+
+    f32 *dir_x;
+    HANDLE_ERROR( cudaMalloc((void**) &dir_x, n*sizeof(f32)) );
+    f32 *dir_y;
+    HANDLE_ERROR( cudaMalloc((void**) &dir_y, n*sizeof(f32)) );
+    f32 *dir_z;
+    HANDLE_ERROR( cudaMalloc((void**) &dir_z, n*sizeof(f32)) );
+
+    ui8 *ptype;
+    HANDLE_ERROR( cudaMalloc((void**) &ptype, n*sizeof(ui8)) );
+
+    /// Copy host data to device
+    HANDLE_ERROR( cudaMemcpy( energy, mh_phasespace->energy,
+                              n*sizeof(f32), cudaMemcpyHostToDevice ) );
+
+    HANDLE_ERROR( cudaMemcpy( pos_x, mh_phasespace->pos_x,
+                              n*sizeof(f32), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( pos_y, mh_phasespace->pos_y,
+                              n*sizeof(f32), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( pos_z, mh_phasespace->pos_z,
+                              n*sizeof(f32), cudaMemcpyHostToDevice ) );
+
+    HANDLE_ERROR( cudaMemcpy( dir_x, mh_phasespace->dir_x,
+                              n*sizeof(f32), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( dir_y, mh_phasespace->dir_y,
+                              n*sizeof(f32), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( dir_z, mh_phasespace->dir_z,
+                              n*sizeof(f32), cudaMemcpyHostToDevice ) );
+
+    HANDLE_ERROR( cudaMemcpy( ptype, mh_phasespace->energy,
+                              n*sizeof(ui8), cudaMemcpyHostToDevice ) );
+
+    /// Bind data to the struct
+    HANDLE_ERROR( cudaMemcpy( &(md_phasespace->energy), &energy,
+                              sizeof(md_phasespace->energy), cudaMemcpyHostToDevice ) );
+
+    HANDLE_ERROR( cudaMemcpy( &(md_phasespace->pos_x), &pos_x,
+                              sizeof(md_phasespace->pos_x), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(md_phasespace->pos_y), &pos_y,
+                              sizeof(md_phasespace->pos_y), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(md_phasespace->pos_z), &pos_z,
+                              sizeof(md_phasespace->pos_z), cudaMemcpyHostToDevice ) );
+
+    HANDLE_ERROR( cudaMemcpy( &(md_phasespace->dir_x), &dir_x,
+                              sizeof(md_phasespace->dir_x), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(md_phasespace->dir_y), &dir_y,
+                              sizeof(md_phasespace->dir_y), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(md_phasespace->dir_z), &dir_z,
+                              sizeof(md_phasespace->dir_z), cudaMemcpyHostToDevice ) );
+
+    HANDLE_ERROR( cudaMemcpy( &(md_phasespace->ptype), &ptype,
+                              sizeof(md_phasespace->ptype), cudaMemcpyHostToDevice ) );
+
+    HANDLE_ERROR( cudaMemcpy( &(md_phasespace->tot_particles), &(mh_phasespace->tot_particles),
+                              sizeof(md_phasespace->tot_particles), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(md_phasespace->nb_photons), &(mh_phasespace->nb_photons),
+                              sizeof(md_phasespace->nb_photons), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(md_phasespace->nb_electrons), &(mh_phasespace->nb_electrons),
+                              sizeof(md_phasespace->nb_electrons), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(md_phasespace->nb_positrons), &(mh_phasespace->nb_positrons),
+                              sizeof(md_phasespace->nb_positrons), cudaMemcpyHostToDevice ) );
+
+}
+
 //========= Main function ============================================
 
 // Mandatory function, abstract from GGEMSSource. This function is called
 // by GGEMS to initialize and load all necessary data into the graphic card
-void PhaseSpaceSource::initialize ( GlobalSimulationParameters params )
+void PhaseSpaceSource::initialize (GlobalSimulationParametersData *h_params )
 {    
     // Load the phasespace file (CPU & GPU)
     if ( m_phasespace_file != "" )
@@ -348,36 +431,36 @@ void PhaseSpaceSource::initialize ( GlobalSimulationParameters params )
     }
 
     // Store global parameters
-    m_params = params;   
+    mh_params = h_params;
 
     // Check if the physics is set properly considering the phasespace file
-    bool there_is_photon = m_params.data_h.physics_list[PHOTON_COMPTON] ||
-                           m_params.data_h.physics_list[PHOTON_PHOTOELECTRIC] ||
-                           m_params.data_h.physics_list[PHOTON_RAYLEIGH];
+    bool there_is_photon = mh_params->physics_list[PHOTON_COMPTON] ||
+                           mh_params->physics_list[PHOTON_PHOTOELECTRIC] ||
+                           mh_params->physics_list[PHOTON_RAYLEIGH];
 
-    bool there_is_electron = m_params.data_h.physics_list[ELECTRON_IONISATION] ||
-                             m_params.data_h.physics_list[ELECTRON_BREMSSTRAHLUNG] ||
-                             m_params.data_h.physics_list[ELECTRON_MSC];
+    bool there_is_electron = mh_params->physics_list[ELECTRON_IONISATION] ||
+                             mh_params->physics_list[ELECTRON_BREMSSTRAHLUNG] ||
+                             mh_params->physics_list[ELECTRON_MSC];
 
-    if ( !there_is_electron && m_phasespace.nb_electrons != 0 )
+    if ( !there_is_electron && mh_phasespace->nb_electrons != 0 )
     {
-        GGcerr << "Phasespace file contains " << m_phasespace.nb_electrons
+        GGcerr << "Phasespace file contains " << mh_phasespace->nb_electrons
                << " electrons and there are no electron physics effects enabled!"
                << GGendl;
         exit_simulation();
     }
 
-    if ( !there_is_photon && m_phasespace.nb_photons != 0 )
+    if ( !there_is_photon && mh_phasespace->nb_photons != 0 )
     {
-        GGcerr << "Phasespace file contains " << m_phasespace.nb_photons
+        GGcerr << "Phasespace file contains " << mh_phasespace->nb_photons
                << " photons and there are no photon physics effects enabled!"
                << GGendl;
         exit_simulation();
     }
 
-    if ( m_phasespace.nb_positrons != 0 )
+    if ( mh_phasespace->nb_positrons != 0 )
     {
-        GGcerr << "Phasespace file contains " << m_phasespace.nb_positrons
+        GGcerr << "Phasespace file contains " << mh_phasespace->nb_positrons
                << " positrons and there are no positron physics effects enabled!"
                << GGendl;
         exit_simulation();
@@ -408,16 +491,19 @@ void PhaseSpaceSource::initialize ( GlobalSimulationParameters params )
     // Cut off the number of particles according the user parameter
     if ( m_nb_part_max != -1 )
     {
-        if ( m_nb_part_max < m_phasespace.tot_particles )
+        if ( m_nb_part_max < mh_phasespace->tot_particles )
         {
-            m_phasespace.tot_particles = m_nb_part_max;
+            mh_phasespace->tot_particles = m_nb_part_max;
         }
     }
 
+    // Copy data on GPU
+    m_copy_phasespace_to_gpu();
+
     // Some verbose if required
-    if ( params.data_h.display_memory_usage )
+    if ( mh_params->display_memory_usage )
     {
-        ui32 mem = 29 * m_phasespace.tot_particles;
+        ui32 mem = 29 * mh_phasespace->tot_particles;
         GGcout_mem("PhaseSpace source", mem);
     }
 
@@ -426,34 +512,17 @@ void PhaseSpaceSource::initialize ( GlobalSimulationParameters params )
 // Mandatory function, abstract from GGEMSSource. This function is called
 // by GGEMS to fill particle buffer of new fresh particles, which is the role
 // of any source.
-void PhaseSpaceSource::get_primaries_generator ( Particles particles )
+void PhaseSpaceSource::get_primaries_generator (ParticlesData *d_particles )
 {
 
-    // If CPU running, do it on CPU
-    if ( m_params.data_h.device_target == CPU_DEVICE )
-    {
-        ui32 id=0;
+    // Defined threads and grid
+    dim3 threads, grid;
+    threads.x = mh_params->gpu_block_size;
+    grid.x = ( mh_params->size_of_particles_batch + mh_params->gpu_block_size - 1 ) / mh_params->gpu_block_size;
 
-        // Loop over the particle buffer
-        while( id < particles.size )
-        {
-            PHSPSRC::phsp_source( particles.data_h, m_phasespace, m_transform, id );
-            ++id;
-        }
-    }
-    // If GPU running, do it on GPU
-    else if ( m_params.data_h.device_target == GPU_DEVICE )
-    {
-        // Defined threads and grid
-        dim3 threads, grid;
-        threads.x = m_params.data_h.gpu_block_size;
-        grid.x = ( particles.size + m_params.data_h.gpu_block_size - 1 ) / m_params.data_h.gpu_block_size;
-
-        PHSPSRC::phsp_point_source<<<grid, threads>>>( particles.data_d, m_phasespace, m_transform );
-        cuda_error_check( "Error ", " Kernel_phasespace_source" );
-        cudaDeviceSynchronize();
-
-    }
+    PHSPSRC::phsp_point_source<<<grid, threads>>>( d_particles, md_phasespace, m_transform );
+    cuda_error_check( "Error ", " Kernel_phasespace_source" );
+    cudaDeviceSynchronize();
 
 }
 

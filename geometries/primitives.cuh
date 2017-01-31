@@ -1,4 +1,4 @@
-// GGEMS Copyright (C) 2015
+// GGEMS Copyright (C) 2017
 
 /*!
  * \file primitives.cuh
@@ -32,20 +32,5 @@ struct ObbData {
     //f32xyz center;                           // OBB center
     //f32xyz u, v, w;                          // Absolute frame (OBB orthogonal space u, v, w)
 };
-
-//// Struct that handle a meshed (not in SoA)
-//struct MeshedData {
-//    f32triangle *triangles;
-//    AabbData aabb;
-//    ui32 nb_of_triangles;
-//};
-
-/* TODO: to remove
-// Struct that handle CPU&GPU data
-struct ObbVolume {
-    ObbData data_h;   // Host
-    ObbData data_d;   // Device
-};
-*/
 
 #endif

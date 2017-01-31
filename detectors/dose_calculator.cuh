@@ -1,14 +1,14 @@
-// GGEMS Copyright (C) 2015
+// GGEMS Copyright (C) 2017
 
 /*!
  * \file dose_calculator.cuh
- * \brief
- * \author Y. Lemaréchal <yannick.lemarechal@univ-brest.fr>
+ * \brief 
  * \author J. Bert <bert.jul@gmail.com>
- * \version 0.2
+ * \version 0.4
  * \date 02/12/2015
  * \date 26/02/2016, add volume of interest, change offset handling and fix many bugs - JB
  *
+ * v0.4: JB - Change all structs and remove CPU exec
  *
  */
 
@@ -28,10 +28,8 @@ struct DoseData
 {
     // Data
     f64 *edep;    
-    //f64 *dose;
     f64 *edep_squared;
     ui32 *number_of_hits;
-    //f64 *uncertainty;
 
     // Number of dosels per dimension
     ui32xyz nb_dosels;
@@ -56,18 +54,9 @@ struct DoseData
     ui32 slice_nb_dosels;
 };
 
-/*
-// Struct that handle CPU&GPU data
-struct Dose
-{
-    DoseData data_h;
-    DoseData data_d;
-};
-*/
-
 // Dose functions
-__host__ __device__ void dose_record_standard ( DoseData dose, f32 Edep, f32 px, f32 py, f32 pz );
-__host__ __device__ void dose_record_TLE ( DoseData dose, f32 Edep, f32 px, f32 py, f32 pz,
+__host__ __device__ void dose_record_standard ( DoseData *dose, f32 Edep, f32 px, f32 py, f32 pz );
+__host__ __device__ void dose_record_TLE ( DoseData *dose, f32 Edep, f32 px, f32 py, f32 pz,
                                            f32 length, f32 mu_en);
 
 // Class
@@ -91,26 +80,24 @@ public:
     VoxVolumeData<f32> * get_dose_map();
 
     // Init
-    void initialize( GlobalSimulationParameters params );
+    void initialize( GlobalSimulationParametersData *h_params );
 
     // Dose calculation
     void calculate_dose_to_water();
-    void calculate_dose_to_phantom();
+    void calculate_dose_to_medium();
 
     void write( std::string filename = "dosimetry.mhd" );
 
-    DoseData dose;
+    DoseData *h_dose;
+    DoseData *d_dose;
 
 private :
     bool m_check_mandatory();
     void m_uncertainty_calculation( ui32 dosel_id_x, ui32 dosel_id_y, ui32 dosel_id_z );
     void m_dose_to_water_calculation( ui32 dosel_id_x, ui32 dosel_id_y, ui32 dosel_id_z );
     void m_dose_to_phantom_calculation( ui32 dosel_id_x, ui32 dosel_id_y, ui32 dosel_id_z );
-    //void m_cpu_malloc_dose();
-    //void m_gpu_malloc_dose();
-
-    //void m_copy_dose_cpu2gpu();
-    //void m_copy_dose_gpu2cpu();
+    void m_copy_dosemap_to_gpu();
+    void m_copy_dosemap_to_cpu();
 
     VoxelizedPhantom m_phantom;
     Materials m_materials;
@@ -122,7 +109,7 @@ private :
 
     f32 m_dose_min_density;
 
-    GlobalSimulationParameters m_params;
+    GlobalSimulationParametersData *mh_params;
 
     f32 *m_dose_values;
     f32 *m_uncertainty_values;

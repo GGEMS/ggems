@@ -1,13 +1,13 @@
-// GGEMS Copyright (C) 2015
+// GGEMS Copyright (C) 2017
 
 /*!
  * \file voxelized.cuh
  * \brief
  * \author J. Bert <bert.jul@gmail.com>
- * \version 0.1
+ * \version 0.2
  * \date 18 novembre 2015
  *
- *
+ * v0.2: JB - Change all structs and remove CPU exec
  *
  */
 
@@ -42,17 +42,16 @@ class VoxelizedPhantom : public BaseObject {
 
         void load_from_mhd(std::string volume_name, std::string range_name);
 
-        void initialize(GlobalSimulationParameters parameters);
+        void initialize();
 
         void set_offset(f32 x, f32 y, f32 z);
 
-        VoxVolumeData<ui16> data_h;
-        VoxVolumeData<ui16> data_d;
+        VoxVolumeData<ui16> *h_volume;
+        VoxVolumeData<ui16> *d_volume;
         std::vector<std::string> list_of_materials;    
 
     private:
         template<typename Type> void m_define_materials_from_range(Type *raw_data, std::string range_name);
-        //void m_define_materials_from_range(ui16 *raw_data, std::string range_name);
         void m_copy_phantom_cpu2gpu();
         bool m_check_mandatory();
         TxtReader m_txt_reader;
