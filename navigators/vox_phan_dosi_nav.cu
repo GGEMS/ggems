@@ -560,7 +560,7 @@ __global__ void VPDN::kernel_device_track_to_in ( ParticlesData *particles, f32 
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
     if ( id >= particles->size ) return;
 
-    //transport_track_to_in_AABB( particles, xmin, xmax, ymin, ymax, zmin, zmax, tolerance, id );
+    transport_track_to_in_AABB( particles, xmin, xmax, ymin, ymax, zmin, zmax, tolerance, id );
 }
 
 // Device kernel that track particles within the voxelized volume until boundary
@@ -595,7 +595,7 @@ __global__ void VPDN::kernel_device_track_to_out( ParticlesData *particles, Part
         }
 
         else if ( particles->pname[id] == ELECTRON )
-        {
+        {            
             VPDN::track_electron_to_out( particles, buffer, vol, materials, electron_CS_table, parameters, dosi,
                                          randomnumbereIoni, randomnumbereBrem, freeLength, id );
         }
