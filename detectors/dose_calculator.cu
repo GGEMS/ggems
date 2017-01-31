@@ -1,15 +1,15 @@
-// GGEMS Copyright (C) 2015
+// GGEMS Copyright (C) 2017
 
 /*!
  * \file dose_calculator.cu
  * \brief
- * \author Y. Lemaréchal
  * \author J. Bert <bert.jul@gmail.com>
- * \version 0.2
+ * \version 0.4
  * \date 02/12/2015
  * \date 26/02/2016, add volume of interest, change offset handling and fix many bugs - JB
  * \date 18/04/2016, change every things, use unified memory, improve code - JB
  *
+ * v0.4: JB - Change all structs and remove CPU exec
  *
  */
 

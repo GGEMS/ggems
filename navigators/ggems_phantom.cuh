@@ -1,14 +1,15 @@
-// GGEMS Copyright (C) 2015
+// GGEMS Copyright (C) 2017
 
 /*!
  * \file ggems_phantom.cuh
  * \brief Header of the abstract phantom class
  * \author J. Bert <bert.jul@gmail.com>
- * \version 0.1
+ * \version 0.2
  * \date 17 december 2015
  *
  * Abstract class that handle every phantoms used in GGEMS
  *
+ * v0.2: JB - Change all structs and remove CPU exec
  */
 
 #ifndef GGEMS_PHANTOM_CUH

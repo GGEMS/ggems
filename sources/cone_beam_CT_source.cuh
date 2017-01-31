@@ -1,16 +1,17 @@
 #ifndef GUARD_CONE_BEAM_CT_SOURCE_CUH
 #define GUARD_CONE_BEAM_CT_SOURCE_CUH
 
-// GGEMS Copyright (C) 2015
+// GGEMS Copyright (C) 2017
 
 /*!
  * \file cone_beam_CT_source.cuh
  * \brief Cone beam source for CT
  * \author Didier Benoit <didier.benoit13@gmail.com>
  * \author Julien Bert <bert.jul@gmail.com>
- * \version 0.2
+ * \version 0.3
  * \date Friday January 8, 2015
  *
+ * v0.3 - JB: Change all structs and remove CPU exec
  * v0.2 - JB: Add local and global frame and unified memory
  * v0.1 - DB: First code
 */

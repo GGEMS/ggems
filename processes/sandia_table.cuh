@@ -1,4 +1,4 @@
-// GGEMS Copyright (C) 2015
+// GGEMS Copyright (C) 2017
 
 #ifndef SANDIA_TABLE_CUH
 #define SANDIA_TABLE_CUH

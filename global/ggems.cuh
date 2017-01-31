@@ -1,14 +1,15 @@
-// GGEMS Copyright (C) 2015
+// GGEMS Copyright (C) 2017
 
 /*!
  * \file ggems.cuh
  * \brief Main header of GGEMS lib
  * \author J. Bert <bert.jul@gmail.com>
- * \version 0.1
+ * \version 0.2
  * \date 13 novembre 2015
  *
  * Header of the main GGEMS lib
  *
+ * v0.2: JB - Change all structs and remove CPU exec
  */
 
 #ifndef GGEMS_CUH

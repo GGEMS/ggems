@@ -1,11 +1,15 @@
-// GGEMS Copyright (C) 2015
+// GGEMS Copyright (C) 2017
 
 /*!
  * \file cone_beam_CT_source.cu
  * \brief Cone beam source for CT
  * \author Didier Benoit <didier.benoit13@gmail.com>
- * \version 0.1
+ * \author Julien Bert <julien.bert@univ-brest.fr>
+ * \version 0.2
  * \date Friday January 8, 2015
+ *
+ * v0.2: JB - Change all structs and remove CPU exec
+ *
 */
 
 #include <stdexcept>

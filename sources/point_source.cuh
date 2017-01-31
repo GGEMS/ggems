@@ -1,14 +1,15 @@
-// GGEMS Copyright (C) 2015
+// GGEMS Copyright (C) 2017
 
 /*!
  * \file point_source.cuh
  * \brief Header of point source class
  * \author J. Bert <bert.jul@gmail.com>
- * \version 0.1
+ * \version 0.2
  * \date 13 novembre 2015
  *
  * Point source class
  *
+ * v0.2: JB - Change all structs and remove CPU exec
  */
 
 #ifndef POINT_SOURCE_CUH

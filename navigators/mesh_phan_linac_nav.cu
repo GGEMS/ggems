@@ -1,14 +1,14 @@
-// GGEMS Copyright (C) 2015
+// GGEMS Copyright (C) 2017
 
 /*!
  * \file mesh_phan_linac_nav.cuh
  * \brief
  * \author J. Bert <bert.jul@gmail.com>
- * \version 0.1
+ * \version 0.2
  * \date Monday June 13, 2016
  *
  * v0.1: JB - First code
- *
+ * v0.2: JB - Change all structs and remove CPU exec
  */
 
 #ifndef MESH_PHAN_LINAC_NAV_CU

@@ -1,4 +1,14 @@
-// GGEMS Copyright (C) 2015
+// GGEMS Copyright (C) 2017
+
+/*!
+ * \file global.cu
+ * \brief Global functions
+ * \author J. Bert <bert.jul@gmail.com>
+ * \version 0.4
+ * \date december 2, 2015
+ *
+ * v0.4: JB - Change all structs and remove CPU exec
+ */
 
 #ifndef GLOBAL_CUH
 #define GLOBAL_CUH

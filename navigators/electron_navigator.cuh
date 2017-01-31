@@ -1,13 +1,13 @@
-// GGEMS Copyright (C) 2015
+// GGEMS Copyright (C) 2017
 
 /*!
- * \file electron_navigator.cuh
+ * \file electron_navigator.cu
  * \brief
- * \author Yannick Lemaréchal <yannick.lemarechal@univ-brest.fr>
+ * \author J. Bert <julien.bert@univ-brest.fr>
  * \version 0.1
  * \date 20 novembre 2015
  *
- *
+ * v0.4: JB - Change all structs and remove CPU exec
  *
  */
 

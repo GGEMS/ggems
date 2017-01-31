@@ -1,11 +1,13 @@
-// GGEMS Copyright (C) 2015
+// GGEMS Copyright (C) 2017
 
 /*!
  * \file linac_source.cuh
  * \brief Linac source
  * \author J. Bert <bert.jul@gmail.com>
- * \version 0.1
+ * \version 0.2
  * \date Thursday September 1st, 2016
+ *
+ * v0.2: JB - Change all structs and remove CPU exec
  *
  */
 

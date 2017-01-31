@@ -1,15 +1,15 @@
-// GGEMS Copyright (C) 2015
+// GGEMS Copyright (C) 2017
 
 /*!
  * \file phasespace_source.cuh
  * \brief Header of the phasespace source class
  * \author J. Bert <bert.jul@gmail.com>
- * \version 0.1
+ * \version 0.2
  * \date 15 mars 2016
  *
  * Phasespace class
  *
- * UNDER CONSTRUCTION
+ * v0.2: JB - Change all structs and remove CPU exec
  *
  */
 

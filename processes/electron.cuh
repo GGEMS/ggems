@@ -1,4 +1,15 @@
-// GGEMS Copyright (C) 2015
+// GGEMS Copyright (C) 2017
+
+/*!
+ * \file electron.cuh
+ * \brief
+ * \author J. Bert <bert.jul@gmail.com>
+ * \version 0.2
+ * \date 18 novembre 2015
+ *
+ * v0.2: JB - Change all structs and remove CPU exec
+ *
+ */
 
 #include "global.cuh"
 #include "materials.cuh"

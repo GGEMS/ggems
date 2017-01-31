@@ -1,4 +1,14 @@
-// GGEMS Copyright (C) 2015
+// GGEMS Copyright (C) 2017
+
+/*!
+ * \file materials.cuh
+ * \brief Materials manager
+ * \author J. Bert <bert.jul@gmail.com>
+ * \version 0.4
+ * \date december 2, 2015
+ *
+ * v0.4: JB - Change all structs and remove CPU exec
+ */
 
 #ifndef MATERIALS_CUH
 #define MATERIALS_CUH

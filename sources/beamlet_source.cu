@@ -1,11 +1,14 @@
-// GGEMS Copyright (C) 2015
+// GGEMS Copyright (C) 2017
 
 /*!
  * \file beamlet_source.cu
  * \brief Beamlet source
  * \author Julien Bert <bert.jul@gmail.com>
- * \version 0.1
+ * \version 0.2
  * \date Thursday May 19, 2016
+ *
+ * v0.2: JB - Change all structs and remove CPU exec
+ *
 */
 
 #ifndef BEAMLET_SOURCE_CU
