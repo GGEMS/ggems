@@ -560,7 +560,7 @@ __global__ void VPDN::kernel_device_track_to_in ( ParticlesData *particles, f32 
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
     if ( id >= particles->size ) return;
 
-    transport_track_to_in_AABB( particles, xmin, xmax, ymin, ymax, zmin, zmax, tolerance, id );
+    //transport_track_to_in_AABB( particles, xmin, xmax, ymin, ymax, zmin, zmax, tolerance, id );
 }
 
 // Device kernel that track particles within the voxelized volume until boundary
@@ -716,21 +716,24 @@ VoxPhanDosiNav::VoxPhanDosiNav ()
 }
 
 void VoxPhanDosiNav::track_to_in( ParticlesData *d_particles )
-{    
+{
+
     dim3 threads, grid;
     threads.x = mh_params->gpu_block_size;
     grid.x = ( mh_params->size_of_particles_batch + mh_params->gpu_block_size - 1 ) / mh_params->gpu_block_size;
 
-    VPDN::kernel_device_track_to_in<<<grid, threads>>>( d_particles, m_phantom.d_volume->xmin, m_phantom.d_volume->xmax,
-                                                        m_phantom.d_volume->ymin, m_phantom.d_volume->ymax,
-                                                        m_phantom.d_volume->zmin, m_phantom.d_volume->zmax,
+    VPDN::kernel_device_track_to_in<<<grid, threads>>>( d_particles, m_phantom.h_volume->xmin, m_phantom.h_volume->xmax,
+                                                        m_phantom.h_volume->ymin, m_phantom.h_volume->ymax,
+                                                        m_phantom.h_volume->zmin, m_phantom.h_volume->zmax,
                                                         mh_params->geom_tolerance );
     cuda_error_check ( "Error ", " Kernel_VoxPhanDosi (track to in)" );
     cudaDeviceSynchronize();
+
 }
 
 void VoxPhanDosiNav::track_to_out( ParticlesData *d_particles )
-{    
+{
+
     dim3 threads, grid;
     threads.x = mh_params->gpu_block_size;
     grid.x = ( mh_params->size_of_particles_batch + mh_params->gpu_block_size - 1 ) / mh_params->gpu_block_size;
@@ -743,6 +746,7 @@ void VoxPhanDosiNav::track_to_out( ParticlesData *d_particles )
     cuda_error_check ( "Error ", " Kernel_VoxPhanDosi (track to out)" );
 
     cudaDeviceSynchronize();
+
 }
 
 void VoxPhanDosiNav::load_phantom_from_mhd ( std::string filename, std::string range_mat_name )

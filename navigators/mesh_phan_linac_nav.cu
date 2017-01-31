@@ -2627,7 +2627,7 @@ void MeshPhanLINACNav::set_navigation_option( std::string opt )
         GGcerr << "NoMesh option for MeshPhanLINACNav is not implemented yet!" << GGendl;
         exit_simulation();
     }
-    else if ( opt == "nomeshnonav")
+    else if ( opt == "nomeshnonav" || opt == "nonavnomesh")
     {
         m_nav_option = NAV_OPT_NOMESH_NONAV;
     }
