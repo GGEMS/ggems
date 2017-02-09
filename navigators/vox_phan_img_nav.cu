@@ -219,8 +219,8 @@ void VoxPhanImgNav::track_to_in(ParticlesData *d_particles )
                                                         m_phantom.h_volume->ymin, m_phantom.h_volume->ymax,
                                                         m_phantom.h_volume->zmin, m_phantom.h_volume->zmax,
                                                         mh_params->geom_tolerance );
-    cuda_error_check ( "Error ", " Kernel_VoxPhanImgNav (track to in)" );
     cudaDeviceSynchronize();
+    cuda_error_check ( "Error ", " Kernel_VoxPhanImgNav (track to in)" );    
 
 }
 

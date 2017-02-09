@@ -726,8 +726,8 @@ void VoxPhanDosiNav::track_to_in( ParticlesData *d_particles )
                                                         m_phantom.h_volume->ymin, m_phantom.h_volume->ymax,
                                                         m_phantom.h_volume->zmin, m_phantom.h_volume->zmax,
                                                         mh_params->geom_tolerance );
-    cuda_error_check ( "Error ", " Kernel_VoxPhanDosi (track to in)" );
     cudaDeviceSynchronize();
+    cuda_error_check ( "Error ", " Kernel_VoxPhanDosi (track to in)" );    
 
 }
 
@@ -743,9 +743,8 @@ void VoxPhanDosiNav::track_to_out( ParticlesData *d_particles )
                                                          m_cross_sections.d_photon_CS,
                                                          m_cross_sections.d_electron_CS,
                                                          md_params, m_dose_calculator.d_dose );
-    cuda_error_check ( "Error ", " Kernel_VoxPhanDosi (track to out)" );
-
     cudaDeviceSynchronize();
+    cuda_error_check ( "Error ", " Kernel_VoxPhanDosi (track to out)" );    
 
 }
 
