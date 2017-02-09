@@ -19,6 +19,7 @@
 #include "global.cuh"
 #include "vector.cuh"
 #include "particles.cuh"
+#include "ggems_source.cuh"
 
 class GGEMSSource;
 
