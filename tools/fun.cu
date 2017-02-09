@@ -86,16 +86,13 @@ __host__ __device__ f32 linear_interpolation ( f32 xa, f32 ya, f32 xb, f32 yb, f
     // Taylor young 1st order
 //     if ( xa > x ) return ya;
 //     if ( xb < x ) return yb;
-    
+
     if (xa > xb) return yb;
     if (xa >= x) return ya;
-    if (xb <= x) return yb;
-    
+    if (xb <= x) return yb;        
+
     return ya + ( x-xa ) * ( yb-ya ) / ( xb-xa );
 }
-
-
-
 
 __host__ __device__ f32 Gaussian (f32 mean, f32 rms, ParticlesData *particles, ui32 id )
 {

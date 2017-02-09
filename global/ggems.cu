@@ -204,7 +204,7 @@ void GGEMS::set_secondary ( std::string pname )
 // Set the number of particles required for the simulation
 void GGEMS::set_number_of_particles ( ui64 nb )
 {
-    h_parameters->nb_of_particles = nb;
+    h_parameters->nb_of_particles = nb;    
 }
 
 // Set the geometry tolerance
@@ -219,7 +219,7 @@ void GGEMS::set_geometry_tolerance( f32 tolerance )
 // Set the size of particles batch
 void GGEMS::set_size_of_particles_batch ( ui64 nb )
 {
-    h_parameters->size_of_particles_batch = nb;
+    h_parameters->size_of_particles_batch = nb;    
 }
 
 // Set parameters to generate cross sections table
@@ -545,6 +545,9 @@ void GGEMS::init_simulation()
 
     // CPU PRNG
     srand( h_parameters->seed );
+
+    // Get nb of batch
+    h_parameters->size_of_particles_batch = fminf( h_parameters->nb_of_particles, h_parameters->size_of_particles_batch );
 
     h_parameters->nb_of_batches = ui32 ( ( f32 ) h_parameters->nb_of_particles / ( f32 ) h_parameters->size_of_particles_batch );
 

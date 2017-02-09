@@ -111,7 +111,7 @@ __host__ __device__ SecParticle photon_resolve_discrete_process( ParticlesData *
     }
 
     if ( next_discrete_process == PHOTON_RAYLEIGH )
-    {        
+    {                
         Rayleigh_SampleSecondaries_Livermore( particles, materials, photon_CS_table, particles->E_index[part_id],
                                               mat_id, part_id );
     }

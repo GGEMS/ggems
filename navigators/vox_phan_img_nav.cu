@@ -114,7 +114,8 @@ __device__ void VPIN::track_to_out( ParticlesData *particles,
     //// Apply discrete process //////////////////////////////////////////////////
 
     if ( next_discrete_process != GEOMETRY_BOUNDARY )
-    {
+    {        
+
         // Resolve discrete process
         SecParticle electron = photon_resolve_discrete_process ( particles, parameters, photon_CS_table,
                                                                  materials, mat_id, part_id );
@@ -135,7 +136,7 @@ __device__ void VPIN::track_to_out( ParticlesData *particles,
             particles->status[part_id] = PARTICLE_DEAD;
             return;
         }
-    }
+    }    
 }
 
 // Device Kernel that move particles to the voxelized volume boundary
@@ -147,7 +148,6 @@ __global__ void VPIN::kernel_device_track_to_in ( ParticlesData *particles, f32 
     if ( id >= particles->size ) return;
 
     transport_track_to_in_AABB( particles, xmin, xmax, ymin, ymax, zmin, zmax, geom_tolerance, id );
-
 }
 
 // Device kernel that track particles within the voxelized volume until boundary
@@ -164,7 +164,6 @@ __global__ void VPIN::kernel_device_track_to_out ( ParticlesData *particles,
     {        
         VPIN::track_to_out( particles, vol, materials, photon_CS_table, parameters, id );
     }
-
 }
 
 ////:: Privates
@@ -234,8 +233,9 @@ void VoxPhanImgNav::track_to_out(ParticlesData *d_particles )
     // DEBUG
     VPIN::kernel_device_track_to_out<<<grid, threads>>> ( d_particles, m_phantom.d_volume, m_materials.d_materials,
                                                           m_cross_sections.d_photon_CS, md_params );
-    cuda_error_check ( "Error ", " Kernel_VoxPhanImgNav (track to out)" );
     cudaDeviceSynchronize();
+    cuda_error_check ( "Error ", " Kernel_VoxPhanImgNav (track to out)" );
+
 }
 
 void VoxPhanImgNav::load_phantom_from_mhd ( std::string filename, std::string range_mat_name )
@@ -254,7 +254,7 @@ void VoxPhanImgNav::initialize(GlobalSimulationParametersData *h_params, GlobalS
 
     // Params
     mh_params = h_params;
-    md_params = d_params;
+    md_params = d_params;    
 
     // Phantom
     m_phantom.set_name( "VoxPhanImgNav" );

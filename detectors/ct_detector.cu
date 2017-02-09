@@ -221,14 +221,16 @@ CTDetector::~CTDetector()
 
 void CTDetector::track_to_in(ParticlesData *d_particles )
 {   
+
     dim3 threads, grid;
     threads.x = mh_params->gpu_block_size;
     grid.x = ( mh_params->size_of_particles_batch + mh_params->gpu_block_size - 1 )
             / mh_params->gpu_block_size;
 
     kernel_ct_detector_track_to_in<<<grid, threads>>>( d_particles, m_detector_volume );
+
     cuda_error_check("Error ", " Kernel_ct_detector (track to in)");
-    cudaThreadSynchronize();
+    cudaDeviceSynchronize();
 }
 
 void CTDetector::digitizer(ParticlesData *d_particles )
@@ -244,7 +246,7 @@ void CTDetector::digitizer(ParticlesData *d_particles )
                                                      m_projection, m_scatter,
                                                      m_record_option, m_record_scatter );
     cuda_error_check("Error ", " Kernel_ct_detector (digitizer)");
-    cudaThreadSynchronize();
+    cudaDeviceSynchronize();
 }
 
 void CTDetector::save_projection( std::string filename, std::string format )

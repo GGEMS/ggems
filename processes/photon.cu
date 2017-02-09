@@ -871,11 +871,14 @@ __host__ __device__ void Rayleigh_SampleSecondaries_Livermore(ParticlesData *par
     }   
 
     // Select randomly one element that composed the material
-    ui32 n = mat->nb_elements[matindex]-1;
+    ui32 n = mat->nb_elements[matindex]-1;    
     ui32 mixture_index = mat->index[matindex];
     ui32 Z = mat->mixture[mixture_index];
+
+
     ui32 i = 0;
     if (n > 0) {
+
         f32 x = prng_uniform( particles, id ) * linear_interpolation(photon_CS_table->E_bins[E_index-1],
                                                                      photon_CS_table->Rayleigh_Lv_CS[E_index-1],
                                                                      photon_CS_table->E_bins[E_index],
@@ -888,6 +891,7 @@ __host__ __device__ void Rayleigh_SampleSecondaries_Livermore(ParticlesData *par
             if (x <= xsec) break;
             ++i;
         }
+
     }
 
     // Scattering
@@ -922,6 +926,7 @@ __host__ __device__ void Rayleigh_SampleSecondaries_Livermore(ParticlesData *par
     particles->dx[id] = gamDir1.x;
     particles->dy[id] = gamDir1.y;
     particles->dz[id] = gamDir1.z;
+
 
 }
 
