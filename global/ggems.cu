@@ -83,6 +83,9 @@ GGEMS::GGEMS()
     // To know if initialisation was performed
     m_flag_init = false;
 
+    // Verbosity
+    m_flag_verbose_init = false;
+
 #ifdef _WIN32
     h_parameters->display_in_color = DISABLED;
 #else
@@ -91,9 +94,9 @@ GGEMS::GGEMS()
 
     // Element of the simulation
     m_source = nullptr;
-    //m_phantom = nullptr;
+    m_phantom = nullptr;
     m_phantoms.clear();
-//    m_detector = nullptr;
+    m_detector = nullptr;
 
 }
 
@@ -385,6 +388,12 @@ void GGEMS::set_verbose( bool flag )
     }
 }
 
+// Verbosity during the initialization
+void GGEMS::set_verbose_init( bool flag )
+{
+    m_flag_verbose_init = flag;
+}
+
 void GGEMS::set_secondaries_level ( ui32 level )
 {
     h_parameters->nb_of_secondaries = level;
@@ -533,8 +542,14 @@ void GGEMS::init_simulation()
         print_banner("V2.1", h_parameters );
     }
 
+    // Verbosity for init
+    if ( m_flag_verbose_init ) GGcout << "Banner ok" << GGendl;
+
     // Check
     m_check_mandatory();
+
+    // Verbosity for init
+    if ( m_flag_verbose_init ) GGcout << "Mandatory ok" << GGendl;
 
     // Run time
     f64 t_start = 0;
@@ -543,8 +558,14 @@ void GGEMS::init_simulation()
         t_start = get_time();
     }
 
+    // Verbosity for init
+    if ( m_flag_verbose_init ) GGcout << "Start time ok" << GGendl;
+
     // CPU PRNG
     srand( h_parameters->seed );
+
+    // Verbosity for init
+    if ( m_flag_verbose_init ) GGcout << "Random ok" << GGendl;
 
     // Get nb of batch
     h_parameters->size_of_particles_batch = fminf( h_parameters->nb_of_particles, h_parameters->size_of_particles_batch );
@@ -556,6 +577,9 @@ void GGEMS::init_simulation()
         h_parameters->nb_of_batches++;
     }
 
+    // Verbosity for init
+    if ( m_flag_verbose_init ) GGcout << "Nb particles and batches ok" << GGendl;
+
     // Print some information
     if ( h_parameters->verbose )
     {
@@ -566,18 +590,32 @@ void GGEMS::init_simulation()
         GGcout_params( h_parameters );
     }
 
+    // Verbosity for init
+    if ( m_flag_verbose_init ) GGcout << "Verboses ok" << GGendl;
 
     // Set the gpu id
     set_gpu_device( h_parameters->gpu_id );
 
+    // Verbosity for init
+    if ( m_flag_verbose_init ) GGcout << "Setting GPU ok" << GGendl;
+
     // Reset device
     reset_gpu_device();
+
+    // Verbosity for init
+    if ( m_flag_verbose_init ) GGcout << "Resetting GPU ok" << GGendl;
 
     // Copy params to the GPU
     m_copy_parameters_cpu2gpu();
 
+    // Verbosity for init
+    if ( m_flag_verbose_init ) GGcout << "Copy parameters to GPU ok" << GGendl;
+
     /// Init Sources /////////////////////////////////
     m_source->initialize( h_parameters );
+
+    // Verbosity for init
+    if ( m_flag_verbose_init ) GGcout << "Source initialized ok" << GGendl;
 
     /// Init Phantoms ////////////////////////////////
     if ( m_phantoms.size() != 0 )
@@ -588,12 +626,21 @@ void GGEMS::init_simulation()
         }
     }
 
+    // Verbosity for init
+    if ( m_flag_verbose_init ) GGcout << "Phantoms initialized ok" << GGendl;
+
     /// Init Detectors /////////////////////////
     // The detector is not mandatory
     if ( m_detector ) m_detector->initialize( h_parameters );
 
+    // Verbosity for init
+    if ( m_flag_verbose_init ) GGcout << "Detectors initialized ok" << GGendl;
+
     /// Init Particles Stack /////////////////////////
     m_particles_manager.initialize( h_parameters );
+
+    // Verbosity for init
+    if ( m_flag_verbose_init ) GGcout << "Particles manager ok" << GGendl;
 
     /// Verbose information //////////////////////////
 
@@ -608,14 +655,23 @@ void GGEMS::init_simulation()
         GGnewline();
     }
 
+    // Verbosity for init
+    if ( m_flag_verbose_init ) GGcout << "Memory usage ok" << GGendl;
+
     // Run time
     if ( h_parameters->display_run_time ) {
         GGcout_time ( "Initialization", get_time()-t_start );
         GGnewline();
     }
 
+    // Verbosity for init
+    if ( m_flag_verbose_init ) GGcout << "Run time ok" << GGendl;
+
     // Succesfull init
     m_flag_init = true;
+
+    // Verbosity for init
+    if ( m_flag_verbose_init ) GGcout << "Initialization completed ok" << GGendl;
 
 }
 

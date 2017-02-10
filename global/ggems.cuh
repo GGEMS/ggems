@@ -77,6 +77,7 @@ public:
     void set_display_memory_usage( bool flag );
     void set_display_in_color( bool flag );
     void set_display_energy_cuts( bool flag );
+    void set_verbose_init( bool flag );
     void set_verbose( bool flag );
 //    void print_stack( ui32 n );
 
@@ -104,6 +105,7 @@ private:
     GlobalSimulationParametersData *h_parameters;
     GlobalSimulationParametersData *d_parameters;
     bool m_flag_init;    
+    bool m_flag_verbose_init;
 
 };
 
