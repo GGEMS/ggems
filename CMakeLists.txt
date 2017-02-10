@@ -74,6 +74,21 @@ if(WITH_ARCH_52)
     set(LIBSCUDA ${LIBSCUDA} --generate-code arch=compute_52,code=sm_52)
 endif()
 
+option(WITH_ARCH_60 "With arch and sm 6.0" ON)
+if(WITH_ARCH_60)
+    set(LIBSCUDA ${LIBSCUDA} --generate-code arch=compute_60,code=sm_60)
+endif()
+
+option(WITH_ARCH_61 "With arch and sm 6.1" ON)
+if(WITH_ARCH_61)
+    set(LIBSCUDA ${LIBSCUDA} --generate-code arch=compute_61,code=sm_61)
+endif()
+
+option(WITH_ARCH_62 "With arch and sm 6.2" ON)
+if(WITH_ARCH_62)
+    set(LIBSCUDA ${LIBSCUDA} --generate-code arch=compute_62,code=sm_62)
+endif()
+
 # OPTIONS FAST MATH
 option(WITH_FAST_MATH "Fast math flag" ON)
 if(WITH_FAST_MATH)
