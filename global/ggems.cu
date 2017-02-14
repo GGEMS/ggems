@@ -745,7 +745,7 @@ void GGEMS::start_simulation()
                 }
                 m_phantoms[ i ]->track_to_out( m_particles_manager.d_particles );
 
-                ++i;
+                ++i;                
             }
         }
 

@@ -72,6 +72,12 @@ f32xyz __host__ __device__ transport_get_safety_outside_AABB( f32xyz pos, f32 xm
     return pos;
 }
 
+// Get a safety position outside an AABB geometry
+f32xyz __host__ __device__ transport_get_safety_outside_AABB( f32xyz pos, AabbData box, f32 tolerance )
+{
+    return transport_get_safety_outside_AABB( pos, box.xmin, box.xmax, box.ymin, box.ymax, box.zmin, box.zmax, tolerance );
+}
+
 // Get safety position considering AABB geometry
 f32 __host__ __device__ transport_compute_safety_AABB( f32xyz pos, f32 xmin, f32 xmax, f32 ymin, f32 ymax, f32 zmin, f32 zmax )
 {

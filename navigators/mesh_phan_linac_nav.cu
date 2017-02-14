@@ -172,6 +172,10 @@ __host__ __device__ void m_transport_mesh( f32xyz pos, f32xyz dir,
 
 }
 
+
+//transport_get_safety_outside_AABB( f32xyz pos, f32 xmin, f32 xmax, f32 ymin, f32 ymax,
+//                                                              f32 zmin, f32 zmax, f32 tolerance )
+
 __host__ __device__ void m_mlc_nav_out_mesh( f32xyz pos, f32xyz dir, const LinacData *linac,
                                              f32 geom_tol,
                                              ui32 *geometry_id, f32 *geometry_distance )
@@ -185,10 +189,12 @@ __host__ __device__ void m_mlc_nav_out_mesh( f32xyz pos, f32xyz dir, const Linac
 
     if ( linac->X_nb_jaw != 0 )
     {
+        pos = transport_get_safety_outside_AABB( pos, linac->X_jaw_aabb[ 0 ], geom_tol );
         if ( test_point_AABB( pos, linac->X_jaw_aabb[ 0 ] ) )
         {
             in_obj = IN_JAW_X1;
         }
+        pos = transport_get_safety_outside_AABB( pos, linac->X_jaw_aabb[ 1 ], geom_tol );
         if ( test_point_AABB( pos, linac->X_jaw_aabb[ 1 ] ) )
         {
             in_obj = IN_JAW_X2;
@@ -197,21 +203,25 @@ __host__ __device__ void m_mlc_nav_out_mesh( f32xyz pos, f32xyz dir, const Linac
 
     if ( linac->Y_nb_jaw != 0 )
     {
+        pos = transport_get_safety_outside_AABB( pos, linac->Y_jaw_aabb[ 0 ], geom_tol );
         if ( test_point_AABB( pos, linac->Y_jaw_aabb[ 0 ] ) )
         {
             in_obj = IN_JAW_Y1;
         }
+        pos = transport_get_safety_outside_AABB( pos, linac->Y_jaw_aabb[ 1 ], geom_tol );
         if ( test_point_AABB( pos, linac->Y_jaw_aabb[ 1 ] ) )
         {
             in_obj = IN_JAW_Y2;
         }
     }
 
+    pos = transport_get_safety_outside_AABB( pos, linac->A_bank_aabb, geom_tol );
     if ( test_point_AABB( pos, linac->A_bank_aabb ) )
     {
         in_obj = IN_BANK_A;
     }
 
+    pos = transport_get_safety_outside_AABB( pos, linac->B_bank_aabb, geom_tol );
     if ( test_point_AABB( pos, linac->B_bank_aabb ) )
     {
         in_obj = IN_BANK_B;
@@ -665,28 +675,34 @@ __host__ __device__ void MPLINACN::track_to_out( ParticlesData *particles,
     f32 boundary_distance;
     ui32 next_geometry_id = particles->geometry_id[ id ];
 
-//    printf("ID %i  next_geom %x  nav %i\n", id, next_geometry_id, navigation);
+//    if ( id == 30966 ) printf("ID %i  next_geom %x  nav %i   Proc %i DistInt %e\n", id, next_geometry_id, navigation, next_discrete_process, next_interaction_distance);
 
     if ( navigation == INSIDE_MESH )
     {
         m_mlc_nav_in_mesh( pos, dir, linac, parameters->geom_tolerance, &next_geometry_id, &boundary_distance );
-//        printf("   newstate next_geom %x\n", next_geometry_id);
+//        if ( id == 30966 ) printf("   inside newstate next_geom %x dist %e\n", next_geometry_id, boundary_distance);
     }
     else
     {
         m_mlc_nav_out_mesh( pos, dir, linac, parameters->geom_tolerance, &next_geometry_id, &boundary_distance );
-//        printf("   newstate next_geom %x\n", next_geometry_id);
+//        if ( id == 30966 ) printf("   outside newstate next_geom %x dist %e pos %f %f %f  dir %f %f %f  AABB %f %f %f %f %f %f\n", next_geometry_id, boundary_distance,
+//                                  pos.x, pos.y, pos.z, dir.x, dir.y, dir.z,
+//                                  linac->X_jaw_aabb[ 1 ].xmin, linac->X_jaw_aabb[ 1 ].xmax,
+//                                  linac->X_jaw_aabb[ 1 ].ymin, linac->X_jaw_aabb[ 1 ].ymax,
+//                                  linac->X_jaw_aabb[ 1 ].zmin, linac->X_jaw_aabb[ 1 ].zmax);
     }
 
-//    ui16 geom = m_read_geom_type(next_geometry_id);
-//    ui8 nav = m_read_geom_nav(next_geometry_id);
-//    printf("ID %i OUTNAV next_geom %i  nav %i\n", id, geom, nav);
+    ui16 geom = m_read_geom_type(next_geometry_id);
+    ui8 nav = m_read_geom_nav(next_geometry_id);
+
 
     if ( boundary_distance <= next_interaction_distance )
     {
         next_interaction_distance = boundary_distance + parameters->geom_tolerance; // Overshoot
         next_discrete_process = GEOMETRY_BOUNDARY;
     }
+
+//    if ( id == 30966 ) printf("ID %i OUTNAV next_geom %i  nav %i   Proc %i  Dist %e\n", id, geom, nav, next_discrete_process, next_interaction_distance);
 
     //// Move particle //////////////////////////////////////////////////////
 
@@ -726,11 +742,11 @@ __host__ __device__ void MPLINACN::track_to_out( ParticlesData *particles,
             return;
         }
 
-//        printf("proc\n");
+//        if ( id == 30966 ) printf("proc\n");
     }
     else
     {
-//        printf("update\n");
+//        if ( id == 30966 ) printf("update\n");
         // Update geometry id
         particles->geometry_id[ id ] = next_geometry_id;
 
@@ -1054,9 +1070,18 @@ __global__ void MPLINACN::kernel_device_track_to_out( ParticlesData *particles,
     // Stepping loop
     if ( nav_option == NAV_OPT_FULL )
     {
+//        ui32 i = 0;
         while ( particles->status[ id ] != PARTICLE_DEAD && particles->status[ id ] != PARTICLE_FREEZE )
         {
             MPLINACN::track_to_out( particles, linac, materials, photon_CS, parameters, id );     
+
+//            ++i;
+
+//            if ( id == 30966 )
+//            {
+//                printf("id %i step pos %f %f %f  status %i\n", id, particles->px[id], particles->py[id], particles->pz[id], particles->status[id]);
+//                if (i > 100) break;
+//            }
         }
     }
     else if ( nav_option == NAV_OPT_NONAV )
@@ -2785,7 +2810,7 @@ void MeshPhanLINACNav::track_to_out(ParticlesData *d_particles )
                                                              m_materials.d_materials, m_cross_sections.d_photon_CS,
                                                              md_params, m_nav_option );
     cuda_error_check ( "Error ", " Kernel_MeshPhanLINACNav (track to in)" );
-    cudaDeviceSynchronize();
+    cudaDeviceSynchronize();    
 
 }
 
