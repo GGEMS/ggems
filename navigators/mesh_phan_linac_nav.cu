@@ -9,6 +9,7 @@
  *
  * v0.1: JB - First code
  * v0.2: JB - Change all structs and remove CPU exec
+ * v0.3: JB - Rewrote the mesh navigation to consider overlap meshes, and add option Nav-NoMesh
  */
 
 #ifndef MESH_PHAN_LINAC_NAV_CU
@@ -50,7 +51,7 @@ __global__ void MPLINACN::kernel_device_track_to_in( ParticlesData *particles,
 }
 
 // == Track to out ===================================================================================
-
+/*
 //            32   28   24   20   16   12   8    4
 // geometry:  0000 0000 0000 0000 0000 0000 0000 0000
 //            \__/ \____________/ \_________________/
@@ -89,6 +90,7 @@ __host__ __device__ ui32 m_write_geom_nav( ui32 geometry, ui8 nav )
     //              mask           write   shift
     return ( geometry & 0x0FFFFFFF ) | ( nav << 28 ) ;
 }
+*/
 
 __host__ __device__ void m_transport_mesh( f32xyz pos, f32xyz dir,
                                            const f32xyz *v1, const f32xyz *v2, const f32xyz *v3,
@@ -172,7 +174,7 @@ __host__ __device__ void m_transport_mesh( f32xyz pos, f32xyz dir,
 
 }
 
-
+// Raytracing within the LINAC head
 __host__ __device__ void m_raytracing_linac( f32xyz pos, f32xyz dir, const LinacData *linac, f32 geom_tol,
                                              ui16 *geom_id, f32 *distance )
 {
@@ -201,17 +203,32 @@ __host__ __device__ void m_raytracing_linac( f32xyz pos, f32xyz dir, const Linac
                               linac->X_jaw_index[ 0 ], linac->X_jaw_nb_triangles[ 0 ], geom_tol,
                               flag_inside_mesh, hit_mesh, hit_distance );
 
+            // inside the mesh
             if ( *flag_inside_mesh == INSIDE_MESH )
             {
                 *geom_id = IN_JAW_X1;
                 *distance = *hit_distance;
                 return;
             }
+            // not inside but the trajectory will hit the mesh
             else if ( hit_mesh )
             {
                 if ( *hit_distance < *distance ) *distance = *hit_distance;
             }
+            // not inside and the trajectory will not hit the mesh, then return the AABB distance
+            else
+            {
+                *hit_distance = hit_ray_AABB( pos, dir, linac->X_jaw_aabb[ 0 ] );
+                if ( *hit_distance < *distance ) *distance = *hit_distance;
+            }
         }
+        // Not inside the AABB, get the distance to in
+        else
+        {
+            *hit_distance = hit_ray_AABB( pos, dir, linac->X_jaw_aabb[ 0 ] );
+            if ( *hit_distance < *distance ) *distance = *hit_distance;
+        }
+
         pos = transport_get_safety_outside_AABB( pos, linac->X_jaw_aabb[ 1 ], geom_tol );
         if ( test_point_AABB( pos, linac->X_jaw_aabb[ 1 ] ) )
         {
@@ -219,16 +236,30 @@ __host__ __device__ void m_raytracing_linac( f32xyz pos, f32xyz dir, const Linac
                               linac->X_jaw_index[ 1 ], linac->X_jaw_nb_triangles[ 1 ], geom_tol,
                               flag_inside_mesh, hit_mesh, hit_distance );
 
+            // inside the mesh
             if ( *flag_inside_mesh == INSIDE_MESH )
             {
                 *geom_id = IN_JAW_X2;
                 *distance = *hit_distance;
                 return;
             }
+            // not inside but the trajectory will hit the mesh
             else if ( hit_mesh )
             {
                 if ( *hit_distance < *distance ) *distance = *hit_distance;
             }
+            // not inside and the trajectory will not hit the mesh, then return the AABB distance
+            else
+            {
+                *hit_distance = hit_ray_AABB( pos, dir, linac->X_jaw_aabb[ 1 ] );
+                if ( *hit_distance < *distance ) *distance = *hit_distance;
+            }
+        }
+        // Not inside the AABB, get the distance to in
+        else
+        {
+            *hit_distance = hit_ray_AABB( pos, dir, linac->X_jaw_aabb[ 1 ] );
+            if ( *hit_distance < *distance ) *distance = *hit_distance;
         }
     }
 
@@ -242,17 +273,32 @@ __host__ __device__ void m_raytracing_linac( f32xyz pos, f32xyz dir, const Linac
                               linac->Y_jaw_index[ 0 ], linac->Y_jaw_nb_triangles[ 0 ], geom_tol,
                               flag_inside_mesh, hit_mesh, hit_distance );
 
+            // inside the mesh
             if ( *flag_inside_mesh == INSIDE_MESH )
             {
                 *geom_id = IN_JAW_Y1;
                 *distance = *hit_distance;
                 return;
             }
+            // not inside but the trajectory will hit the mesh
             else if ( hit_mesh )
             {
                 if ( *hit_distance < *distance ) *distance = *hit_distance;
             }
+            // not inside and the trajectory will not hit the mesh, then return the AABB distance
+            else
+            {
+                *hit_distance = hit_ray_AABB( pos, dir, linac->Y_jaw_aabb[ 0 ] );
+                if ( *hit_distance < *distance ) *distance = *hit_distance;
+            }
         }
+        // Not inside the AABB, get the distance to in
+        else
+        {
+            *hit_distance = hit_ray_AABB( pos, dir, linac->Y_jaw_aabb[ 0 ] );
+            if ( *hit_distance < *distance ) *distance = *hit_distance;
+        }
+
         pos = transport_get_safety_outside_AABB( pos, linac->Y_jaw_aabb[ 1 ], geom_tol );
         if ( test_point_AABB( pos, linac->Y_jaw_aabb[ 1 ] ) )
         {
@@ -260,16 +306,30 @@ __host__ __device__ void m_raytracing_linac( f32xyz pos, f32xyz dir, const Linac
                               linac->Y_jaw_index[ 1 ], linac->Y_jaw_nb_triangles[ 1 ], geom_tol,
                               flag_inside_mesh, hit_mesh, hit_distance );
 
+            // inside the mesh
             if ( *flag_inside_mesh == INSIDE_MESH )
             {
                 *geom_id = IN_JAW_Y2;
                 *distance = *hit_distance;
                 return;
             }
+            // not inside but the trajectory will hit the mesh
             else if ( hit_mesh )
             {
                 if ( *hit_distance < *distance ) *distance = *hit_distance;
             }
+            // not inside and the trajectory will not hit the mesh, then return the AABB distance
+            else
+            {
+                *hit_distance = hit_ray_AABB( pos, dir, linac->Y_jaw_aabb[ 1 ] );
+                if ( *hit_distance < *distance ) *distance = *hit_distance;
+            }
+        }
+        // Not inside the AABB, get the distance to in
+        else
+        {
+            *hit_distance = hit_ray_AABB( pos, dir, linac->Y_jaw_aabb[ 1 ] );
+            if ( *hit_distance < *distance ) *distance = *hit_distance;
         }
     }
 
@@ -294,13 +354,32 @@ __host__ __device__ void m_raytracing_linac( f32xyz pos, f32xyz dir, const Linac
                     *distance = *hit_distance;
                     return;
                 }
+                // not inside but the trajectory will hit the mesh
                 else if ( hit_mesh )
                 {
                     if ( *hit_distance < *distance ) *distance = *hit_distance;
                 }
+                // not inside and the trajectory will not hit the mesh, then return the AABB distance
+                else
+                {
+                    *hit_distance = hit_ray_AABB( pos, dir, linac->A_leaf_aabb[ ileaf ] );
+                    if ( *hit_distance < *distance ) *distance = *hit_distance;
+                }
             } // in a leaf bounding box
+            else
+            {
+                *hit_distance = hit_ray_AABB( pos, dir, linac->A_leaf_aabb[ ileaf ] );
+                if ( *hit_distance < *distance ) *distance = *hit_distance;
+            }
+
             ++ileaf;
         } // each leaf
+    }
+    // Not inside the AABB, get the distance to in
+    else
+    {
+        *hit_distance = hit_ray_AABB( pos, dir, linac->A_bank_aabb );
+        if ( *hit_distance < *distance ) *distance = *hit_distance;
     }
 
     // Bank B
@@ -313,7 +392,6 @@ __host__ __device__ void m_raytracing_linac( f32xyz pos, f32xyz dir, const Linac
             // If hit a leaf bounding box
             if ( test_ray_AABB( pos, dir, linac->B_leaf_aabb[ ileaf ] ) )
             {
-
                 m_transport_mesh( pos, dir, linac->B_leaf_v1, linac->B_leaf_v2, linac->B_leaf_v3,
                                   linac->B_leaf_index[ ileaf ], linac->B_leaf_nb_triangles[ ileaf ], geom_tol,
                                   flag_inside_mesh, hit_mesh, hit_distance );
@@ -325,20 +403,175 @@ __host__ __device__ void m_raytracing_linac( f32xyz pos, f32xyz dir, const Linac
                     *distance = *hit_distance;
                     return;
                 }
+                // not inside but the trajectory will hit the mesh
                 else if ( hit_mesh )
                 {
                     if ( *hit_distance < *distance ) *distance = *hit_distance;
                 }
+                // not inside and the trajectory will not hit the mesh, then return the AABB distance
+                else
+                {
+                    *hit_distance = hit_ray_AABB( pos, dir, linac->B_leaf_aabb[ ileaf ] );
+                    if ( *hit_distance < *distance ) *distance = *hit_distance;
+                }
             } // in a leaf bounding box
+            else
+            {
+                *hit_distance = hit_ray_AABB( pos, dir, linac->B_leaf_aabb[ ileaf ] );
+                if ( *hit_distance < *distance ) *distance = *hit_distance;
+            }
+
             ++ileaf;
         } // each leaf
     }
+    // Not inside the AABB, get the distance to in
+    else
+    {
+        *hit_distance = hit_ray_AABB( pos, dir, linac->B_bank_aabb );
+        if ( *hit_distance < *distance ) *distance = *hit_distance;
+    }
 
+    // If not already return, it's mean that the particle is outside
+
+}
+
+// Raytracing within the LINAC head by considering only bounding box
+__host__ __device__ void m_raytracing_AABB_linac( f32xyz pos, f32xyz dir, const LinacData *linac, f32 geom_tol,
+                                                  ui16 *geom_id, f32 *distance )
+{
+
+    f32 hit_distance[1];
+    hit_distance[0] = FLT_MAX;
+    ui32 ileaf;
+
+    *geom_id = IN_NOTHING;
+    *distance = hit_ray_AABB( pos, dir, linac->aabb );
+
+    // X-Jaw
+    if ( linac->X_nb_jaw != 0 )
+    {
+        pos = transport_get_safety_outside_AABB( pos, linac->X_jaw_aabb[ 0 ], geom_tol );
+        if ( test_point_AABB( pos, linac->X_jaw_aabb[ 0 ] ) )
+        {
+            *geom_id = IN_JAW_X1;
+            *distance = hit_ray_AABB( pos, dir, linac->X_jaw_aabb[ 0 ] );
+            return;
+        }
+        else
+        {
+            *hit_distance = hit_ray_AABB( pos, dir, linac->X_jaw_aabb[ 0 ] );
+            if ( *hit_distance < *distance ) *distance = *hit_distance;
+        }
+
+        pos = transport_get_safety_outside_AABB( pos, linac->X_jaw_aabb[ 1 ], geom_tol );
+        if ( test_point_AABB( pos, linac->X_jaw_aabb[ 1 ] ) )
+        {
+            *geom_id = IN_JAW_X2;
+            *distance = hit_ray_AABB( pos, dir, linac->X_jaw_aabb[ 1 ] );
+            return;
+        }
+        else
+        {
+            *hit_distance = hit_ray_AABB( pos, dir, linac->X_jaw_aabb[ 1 ] );
+            if ( *hit_distance < *distance ) *distance = *hit_distance;
+        }
+    }
+
+    // Y-Jaw
+    if ( linac->Y_nb_jaw != 0 )
+    {
+        pos = transport_get_safety_outside_AABB( pos, linac->Y_jaw_aabb[ 0 ], geom_tol );
+        if ( test_point_AABB( pos, linac->Y_jaw_aabb[ 0 ] ) )
+        {
+            *geom_id = IN_JAW_Y1;
+            *distance = hit_ray_AABB( pos, dir, linac->Y_jaw_aabb[ 0 ] );
+            return;
+        }
+        else
+        {
+            *hit_distance = hit_ray_AABB( pos, dir, linac->Y_jaw_aabb[ 0 ] );
+            if ( *hit_distance < *distance ) *distance = *hit_distance;
+        }
+
+        pos = transport_get_safety_outside_AABB( pos, linac->Y_jaw_aabb[ 1 ], geom_tol );
+        if ( test_point_AABB( pos, linac->Y_jaw_aabb[ 1 ] ) )
+        {
+            *geom_id = IN_JAW_Y2;
+            *distance = hit_ray_AABB( pos, dir, linac->Y_jaw_aabb[ 1 ] );
+            return;
+        }
+        else
+        {
+            *hit_distance = hit_ray_AABB( pos, dir, linac->Y_jaw_aabb[ 1 ] );
+            if ( *hit_distance < *distance ) *distance = *hit_distance;
+        }
+    }
+
+    // Bank A
+    pos = transport_get_safety_outside_AABB( pos, linac->A_bank_aabb, geom_tol );
+    if ( test_point_AABB( pos, linac->A_bank_aabb ) )
+    {
+        // Loop over leaves
+        ileaf = 0; while( ileaf < linac->A_nb_leaves )
+        {
+            // If hit a leaf bounding box
+            if ( test_ray_AABB( pos, dir, linac->A_leaf_aabb[ ileaf ] ) )
+            {
+                *geom_id = IN_BANK_A;
+                *distance = hit_ray_AABB( pos, dir, linac->A_leaf_aabb[ ileaf ] );
+                return;
+            } // in a leaf bounding box
+            else
+            {
+                *hit_distance = hit_ray_AABB( pos, dir, linac->A_leaf_aabb[ ileaf ] );
+                if ( *hit_distance < *distance ) *distance = *hit_distance;
+            }
+
+            ++ileaf;
+        } // each leaf
+    }
+    // Not inside the AABB, get the distance to in
+    else
+    {
+        *hit_distance = hit_ray_AABB( pos, dir, linac->A_bank_aabb );
+        if ( *hit_distance < *distance ) *distance = *hit_distance;
+    }
+
+    // Bank B
+    pos = transport_get_safety_outside_AABB( pos, linac->B_bank_aabb, geom_tol );
+    if ( test_point_AABB( pos, linac->B_bank_aabb ) )
+    {
+        // Loop over leaves
+        ileaf = 0; while( ileaf < linac->B_nb_leaves )
+        {
+            // If hit a leaf bounding box
+            if ( test_ray_AABB( pos, dir, linac->B_leaf_aabb[ ileaf ] ) )
+            {
+                *geom_id = IN_BANK_B;
+                *distance = hit_ray_AABB( pos, dir, linac->B_leaf_aabb[ ileaf ] );
+                return;
+            } // in a leaf bounding box
+            else
+            {
+                *hit_distance = hit_ray_AABB( pos, dir, linac->B_leaf_aabb[ ileaf ] );
+                if ( *hit_distance < *distance ) *distance = *hit_distance;
+            }
+
+            ++ileaf;
+        } // each leaf
+    }
+    // Not inside the AABB, get the distance to in
+    else
+    {
+        *hit_distance = hit_ray_AABB( pos, dir, linac->B_bank_aabb );
+        if ( *hit_distance < *distance ) *distance = *hit_distance;
+    }
     // If not already return, it's mean that the particle is outside
 
 
 }
 
+/*
 __host__ __device__ void m_mlc_nav_out_mesh( f32xyz pos, f32xyz dir, const LinacData *linac,
                                              f32 geom_tol,
                                              ui32 *geometry_id, f32 *geometry_distance )
@@ -789,8 +1022,9 @@ __host__ __device__ void m_mlc_nav_in_mesh( f32xyz pos, f32xyz dir, const LinacD
     return;
 
 }
+*/
 
-__host__ __device__ void MPLINACN::new_track_to_out( ParticlesData *particles,
+__host__ __device__ void MPLINACN::track_to_out( ParticlesData *particles,
                                                  const LinacData *linac,
                                                  const MaterialsData *materials,
                                                  const PhotonCrossSectionData *photon_CS_table,
@@ -883,7 +1117,100 @@ __host__ __device__ void MPLINACN::new_track_to_out( ParticlesData *particles,
 
 }
 
+__host__ __device__ void MPLINACN::track_to_out_nomesh( ParticlesData *particles,
+                                                        const LinacData *linac,
+                                                        const MaterialsData *materials,
+                                                        const PhotonCrossSectionData *photon_CS_table,
+                                                        const GlobalSimulationParametersData *parameters,
+                                                        ui32 id )
+{
+    // Read position
+    f32xyz pos;
+    pos.x = particles->px[ id ];
+    pos.y = particles->py[ id ];
+    pos.z = particles->pz[ id ];
 
+    // Read direction
+    f32xyz dir;
+    dir.x = particles->dx[ id ];
+    dir.y = particles->dy[ id ];
+    dir.z = particles->dz[ id ];
+
+    // Where is the particle? Distance of the next boundary?
+    ui16 geom_id[1];
+    geom_id[0] = IN_NOTHING;
+    f32 boundary_distance[1];
+    boundary_distance[0] = F32_MAX;
+
+    m_raytracing_AABB_linac( pos, dir, linac, parameters->geom_tolerance,
+                             geom_id, boundary_distance );
+
+    //// Get material //////////////////////////////////////////////////////////////////
+
+    i16 mat_id = ( *geom_id == IN_NOTHING ) ? -1 : 0;   // -1 not mat around the LINAC (vacuum), 0 MLC mat
+
+    //// Find next discrete interaction ///////////////////////////////////////
+
+    f32 next_interaction_distance = F32_MAX;
+    ui8 next_discrete_process = 0;
+
+    // If inside a mesh do physics else only tranportation (vacuum around the LINAC)
+    if ( mat_id != - 1 )
+    {
+        photon_get_next_interaction ( particles, parameters, photon_CS_table, mat_id, id );
+        next_interaction_distance = particles->next_interaction_distance[ id ];
+        next_discrete_process = particles->next_discrete_process[ id ];
+    }
+
+    /// Get the hit distance of the closest geometry //////////////////////////////////
+
+    if ( *boundary_distance <= next_interaction_distance )
+    {
+        next_interaction_distance = *boundary_distance + parameters->geom_tolerance; // Overshoot
+        next_discrete_process = GEOMETRY_BOUNDARY;
+    }
+
+    //// Move particle //////////////////////////////////////////////////////
+
+    // get the new position
+    pos = fxyz_add ( pos, fxyz_scale ( dir, next_interaction_distance ) );
+
+    // update tof
+    //particles->tof[part_id] += c_light * next_interaction_distance;
+
+    // store new position
+    particles->px[ id ] = pos.x;
+    particles->py[ id ] = pos.y;
+    particles->pz[ id ] = pos.z;
+
+    // Stop simulation if out of the phantom
+    if ( !test_point_AABB_with_tolerance ( pos, linac->aabb, parameters->geom_tolerance ) )
+    {
+        particles->status[ id ] = PARTICLE_FREEZE;
+        return;
+    }
+
+    //// Apply discrete process //////////////////////////////////////////////////
+
+    if ( next_discrete_process != GEOMETRY_BOUNDARY )
+    {
+        // Resolve discrete process
+        SecParticle electron = photon_resolve_discrete_process ( particles, parameters, photon_CS_table,
+                                                                 materials, mat_id, id );
+
+        //// Here e- are not tracked, and lost energy not drop
+        //// Energy cut
+        if ( particles->E[ id ] <= materials->photon_energy_cut[ mat_id ])
+        {
+            // kill without mercy (energy not drop)
+            particles->status[ id ] = PARTICLE_DEAD;
+            return;
+        }
+    }
+
+}
+
+/*
 __host__ __device__ void MPLINACN::track_to_out( ParticlesData *particles,
                                                  const LinacData *linac,
                                                  const MaterialsData *materials,
@@ -1007,6 +1334,7 @@ __host__ __device__ void MPLINACN::track_to_out( ParticlesData *particles,
     }
 
 }
+*/
 
 __host__ __device__ void MPLINACN::track_to_out_nonav( ParticlesData *particles, const LinacData *linac,
                                                        ui32 id )
@@ -1322,21 +1650,10 @@ __global__ void MPLINACN::kernel_device_track_to_out( ParticlesData *particles,
 
     // Stepping loop
     if ( nav_option == NAV_OPT_FULL )
-    {
-//        ui32 i = 0;
+    {       
         while ( particles->status[ id ] != PARTICLE_DEAD && particles->status[ id ] != PARTICLE_FREEZE )
         {
-            //MPLINACN::track_to_out( particles, linac, materials, photon_CS, parameters, id );
-            MPLINACN::new_track_to_out( particles, linac, materials, photon_CS, parameters, id );
-
-
-//            ++i;
-
-//            if ( id == 30966 )
-//            {
-//                printf("id %i step pos %f %f %f  status %i\n", id, particles->px[id], particles->py[id], particles->pz[id], particles->status[id]);
-//                if (i > 100) break;
-//            }
+            MPLINACN::track_to_out( particles, linac, materials, photon_CS, parameters, id );
         }
     }
     else if ( nav_option == NAV_OPT_NONAV )
@@ -1344,6 +1661,13 @@ __global__ void MPLINACN::kernel_device_track_to_out( ParticlesData *particles,
         while ( particles->status[ id ] != PARTICLE_DEAD && particles->status[ id ] != PARTICLE_FREEZE )
         {
             MPLINACN::track_to_out_nonav( particles, linac, id );
+        }
+    }
+    else if ( nav_option == NAV_OPT_NOMESH )
+    {
+        while ( particles->status[ id ] != PARTICLE_DEAD && particles->status[ id ] != PARTICLE_FREEZE )
+        {
+            MPLINACN::track_to_out_nomesh( particles, linac, materials, photon_CS, parameters, id );
         }
     }
     else if ( nav_option == NAV_OPT_NOMESH_NONAV )
@@ -2893,7 +3217,7 @@ void MeshPhanLINACNav::set_navigation_option( std::string opt )
     // Transform the name of the process in small letter
     std::transform( opt.begin(), opt.end(), opt.begin(), ::tolower );
 
-    if ( opt == "full" )
+    if ( opt == "full" || opt == "navmesh" || opt == "meshnav" )
     {
         m_nav_option = NAV_OPT_FULL;
     }
@@ -2904,12 +3228,16 @@ void MeshPhanLINACNav::set_navigation_option( std::string opt )
     else if ( opt == "nomesh" )
     {
         m_nav_option = NAV_OPT_NOMESH;
-        GGcerr << "NoMesh option for MeshPhanLINACNav is not implemented yet!" << GGendl;
-        exit_simulation();
+
     }
     else if ( opt == "nomeshnonav" || opt == "nonavnomesh")
     {
         m_nav_option = NAV_OPT_NOMESH_NONAV;
+    }
+    else
+    {
+        GGcerr << "Navigation option for MeshPhanLINACNav is not recognized!" << GGendl;
+        exit_simulation();
     }
 }
 
