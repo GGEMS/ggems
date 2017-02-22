@@ -199,6 +199,16 @@ __host__ __device__ ui32 prng_poisson(ParticlesData *particles, ui32 id, f32 mea
 }
 
 
+__host__ __device__ f32 prng_gaussian( ParticlesData *particles, ui32 id, f32 sigma )
+{
+    // Box-Muller transformation
+    f32 u1 = prng_uniform( particles, id );
+    f32 u2 = prng_uniform( particles, id );
+    f32 r1 = sqrtf( -2.0 * logf(u1) );
+    f32 r2 = 2.0*gpu_pi*u2;
+
+    return sigma * r1*cosf( r2 );
+}
 
 
 

@@ -50,7 +50,7 @@ __host__ void cuda_error_check ( const char * prefix, const char * postfix )
 void set_gpu_device ( int deviceChoice )
 {
 
-    f32 minversion = 3.0;
+    f32 minversion = 5.0;
 
     i32 deviceCount = 0;
     cudaError_t error_id = cudaGetDeviceCount( &deviceCount );
@@ -73,7 +73,7 @@ void set_gpu_device ( int deviceChoice )
 
     if ( prop.major < minversion )
     {
-        GGcerr << "Your device is not compatible with " << minversion << " version" << GGendl;
+        GGcerr << "Your device (architecture " << prop.major << ") is not compatible, an architecture superior to " << minversion << " is required." << GGendl;
         exit_simulation();
     }
 

@@ -48,6 +48,7 @@ class CTDetector : public GGEMSDetector
                                   f32 m20, f32 m21, f32 m22 );
         void set_record_option( std::string opt );
         void set_record_scatter( bool flag );
+        void set_spatial_blurring( f32 spx, f32 spy, f32 spz );
 
         void set_threshold( f32 threshold );
 
@@ -84,6 +85,7 @@ class CTDetector : public GGEMSDetector
         f32xyz m_dim;
         f32xyz m_pos;
         f32xyz m_angle;
+        f32xyz m_spatial_blurring;
         f32matrix33 m_proj_axis;
         f32 m_threshold;        
         ObbData m_detector_volume;

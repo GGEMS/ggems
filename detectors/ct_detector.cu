@@ -81,10 +81,11 @@ __host__ __device__ void ct_detector_track_to_in( ParticlesData *particles, ObbD
 
 // Digitizer
 __host__ __device__ void ct_detector_digitizer( ParticlesData *particles,
-                                                ObbData detector_volume,
+                                                /* ObbData detector_volume, */
                                                 f32xyz pixel_size, ui32xyz nb_pixel,
                                                 f32 threshold, f32matrix44 transform,
                                                 f32* projection, ui32* scatter_order,
+                                                f32xyz spatial_blurring,
                                                 ui8 record_option, ui8 scatter_option,
                                                 ui32 id )
 {
@@ -102,6 +103,11 @@ __host__ __device__ void ct_detector_digitizer( ParticlesData *particles,
 
     // Convert global position into local position
     pos = fxyz_global_to_local_position( transform, pos );
+
+    // If need apply spatial resolution
+    if ( spatial_blurring.x != 0.0 ) pos.x += prng_gaussian( particles, id, spatial_blurring.x );
+    if ( spatial_blurring.y != 0.0 ) pos.y += prng_gaussian( particles, id, spatial_blurring.y );
+    if ( spatial_blurring.z != 0.0 ) pos.z += prng_gaussian( particles, id, spatial_blurring.z );
 
     ui32xyz index = { ui32( pos.x / pixel_size.x ),
                       ui32( pos.y / pixel_size.y ),
@@ -143,7 +149,6 @@ __host__ __device__ void ct_detector_digitizer( ParticlesData *particles,
         }
     }
 
-
 }
 
 
@@ -160,20 +165,23 @@ __global__ void kernel_ct_detector_track_to_in( ParticlesData *particles,
 
 // Kernel digitizer
 __global__ void kernel_ct_detector_digitizer( ParticlesData *particles,
-                                              ObbData detector_volume,
+                                              /* ObbData detector_volume, */
                                               f32xyz pixel_size, ui32xyz nb_pixel,
                                               f32 threshold, f32matrix44 transform,
                                               f32* projection, ui32* scatter_order,
+                                              f32xyz spatial_blurring,
                                               ui8 record_option, ui8 scatter_option )
 {
 
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
     if (id >= particles->size) return;
 
-    ct_detector_digitizer( particles, detector_volume,
+    ct_detector_digitizer( particles,
+                           /* detector_volume, */
                            pixel_size, nb_pixel,
                            threshold, transform,
                            projection, scatter_order,
+                           spatial_blurring,
                            record_option, scatter_option,
                            id );
 }
@@ -194,6 +202,7 @@ CTDetector::CTDetector(): GGEMSDetector(),
     m_dim = make_f32xyz( 0.0, 0.0, 0.0 );
     m_pos = make_f32xyz( 0.0, 0.0, 0.0 );
     m_angle = make_f32xyz( 0.0, 0.0, 0.0 );
+    m_spatial_blurring = make_f32xyz( 0.0, 0.0, 0.0 );
 
     m_proj_axis.m00 = 0.0;
     m_proj_axis.m01 = 0.0;
@@ -240,10 +249,12 @@ void CTDetector::digitizer(ParticlesData *d_particles )
     grid.x = ( mh_params->size_of_particles_batch + mh_params->gpu_block_size - 1 )
             / mh_params->gpu_block_size;
 
-    kernel_ct_detector_digitizer<<<grid, threads>>>( d_particles, m_detector_volume,
+    kernel_ct_detector_digitizer<<<grid, threads>>>( d_particles,
+                                                     /* m_detector_volume, */
                                                      m_pixel_size, m_nb_pixel,
                                                      m_threshold, m_transform,
                                                      m_projection, m_scatter,
+                                                     m_spatial_blurring,
                                                      m_record_option, m_record_scatter );
     cudaDeviceSynchronize();
     cuda_error_check("Error ", " Kernel_ct_detector (digitizer)");
@@ -373,6 +384,13 @@ void CTDetector::set_threshold( f32 threshold )
 void CTDetector::set_rotation( f32 rx, f32 ry, f32 rz )
 {
     m_angle = make_f32xyz( rx, ry, rz );
+}
+
+// Spatial blurring specified by the FWHM in distance (mm for example)
+void CTDetector::set_spatial_blurring( f32 spx, f32 spy, f32 spz )
+{
+    // Convert in standard deviation
+    m_spatial_blurring = make_f32xyz( spx/2.355f, spy/2.355f, spz/2.355f );
 }
 
 // Setting the axis transformation matrix
