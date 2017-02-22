@@ -124,6 +124,13 @@ namespace MPLINACN
                                            const PhotonCrossSectionData *photon_CS_table,
                                            const GlobalSimulationParametersData *parameters, ui32 id );
 
+    __host__ __device__ void new_track_to_out( ParticlesData *particles,
+                                               const LinacData *linac,
+                                               const MaterialsData *materials,
+                                               const PhotonCrossSectionData *photon_CS_table,
+                                               const GlobalSimulationParametersData *parameters,
+                                               ui32 id );
+
     __host__ __device__ void track_to_out_nonav( ParticlesData *particles, const LinacData *linac, ui32 id );
 
     __host__ __device__ void track_to_out_nonav_nomesh( ParticlesData *particles, const LinacData *linac, ui32 id );
