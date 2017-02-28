@@ -99,7 +99,9 @@ struct LinacData
     f32matrix44 transform;
 
     // Scale ratio between MLC and isocenter
-    f32 scale_ratio;
+    f32 mlc_motion_ratio;
+    f32 xjaw_motion_ratio;
+    f32 yjaw_motion_ratio;
 };
 
 
@@ -168,6 +170,10 @@ public:
     void set_local_jaw_x_position( f32 px, f32 py, f32 pz );  
 
     void set_local_jaw_y_position( f32 px, f32 py, f32 pz );
+
+    void set_mlc_motion_scaling_factor( f32 scale );
+    void set_jaw_x_motion_scaling_factor( f32 scale );
+    void set_jaw_y_motion_scaling_factor( f32 scale );
 
     void set_navigation_option( std::string opt );
 

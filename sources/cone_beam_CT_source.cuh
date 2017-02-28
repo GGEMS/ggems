@@ -98,6 +98,8 @@ public:
     */
     void set_energy_spectrum( std::string filename );
 
+    void update_rotation( f32 rx, f32 ry, f32 rz );
+
     f32xyz get_position();
 
     f32xyz get_orbiting_angles();

@@ -52,6 +52,9 @@ class CTDetector : public GGEMSDetector
 
         void set_threshold( f32 threshold );
 
+        void update_clear();
+        void update_rotation( f32 rx, f32 ry, f32 rz );
+
         f32matrix44 get_transformation();
         ObbData get_bounding_box();
 

@@ -436,6 +436,41 @@ void CTDetector::set_record_scatter( bool flag )
     m_record_scatter = flag;
 }
 
+//// Update functions ///////////////////////////////////////////////
+
+void CTDetector::update_clear()
+{
+    // Clear
+    ui32 i = 0; while (i < m_nb_pixel.x*m_nb_pixel.y*m_nb_pixel.z )
+    {
+        m_projection[i++] = 0.0;
+    }
+
+    if ( m_record_scatter )
+    {
+        ui32 j = 0; while (j < MAX_SCATTER_ORDER * m_nb_pixel.x*m_nb_pixel.y*m_nb_pixel.z )
+        {
+            m_scatter[j++] = 0.0;
+        }
+    }
+}
+
+void CTDetector::update_rotation(f32 rx, f32 ry, f32 rz)
+{
+    m_angle = make_f32xyz( rx, ry, rz );
+
+    // Recalculate the transformation matrix of the detector that map local frame to glboal frame
+    TransformCalculator *trans = new TransformCalculator;
+    trans->set_translation( m_pos.x, m_pos.y, m_pos.z );
+    trans->set_rotation( m_angle );
+    trans->set_axis_transformation( m_proj_axis );
+    m_transform = trans->get_transformation_matrix();
+    delete trans;
+
+    // Store the matrix
+    m_detector_volume.transformation = m_transform;
+}
+
 //// Getting functions ///////////////////////////////////////////////
 
 f32matrix44 CTDetector::get_transformation()

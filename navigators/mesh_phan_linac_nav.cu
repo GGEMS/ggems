@@ -2703,14 +2703,14 @@ void MeshPhanLINACNav::m_configure_linac()
     // Configure the jaws
     if ( mh_linac->X_nb_jaw != 0 )
     {
-        m_translate_jaw_x( 0, make_f32xyz( jaw_x_max * mh_linac->scale_ratio, 0.0, 0.0 ) );   // X1 ( x > 0 )
-        m_translate_jaw_x( 1, make_f32xyz( jaw_x_min * mh_linac->scale_ratio, 0.0, 0.0 ) );   // X2 ( x < 0 )
+        m_translate_jaw_x( 0, make_f32xyz( jaw_x_max * mh_linac->xjaw_motion_ratio, 0.0, 0.0 ) );   // X1 ( x > 0 )
+        m_translate_jaw_x( 1, make_f32xyz( jaw_x_min * mh_linac->xjaw_motion_ratio, 0.0, 0.0 ) );   // X2 ( x < 0 )
     }
 
     if ( mh_linac->Y_nb_jaw != 0 )
     {
-        m_translate_jaw_y( 0, make_f32xyz( 0.0, jaw_y_max * mh_linac->scale_ratio, 0.0 ) );   // Y1 ( y > 0 )
-        m_translate_jaw_y( 1, make_f32xyz( 0.0, jaw_y_min * mh_linac->scale_ratio, 0.0 ) );   // Y2 ( y < 0 )
+        m_translate_jaw_y( 0, make_f32xyz( 0.0, jaw_y_max * mh_linac->yjaw_motion_ratio, 0.0 ) );   // Y1 ( y > 0 )
+        m_translate_jaw_y( 1, make_f32xyz( 0.0, jaw_y_min * mh_linac->yjaw_motion_ratio, 0.0 ) );   // Y2 ( y < 0 )
     }
 
     //// LEAVES BANK A ///////////////////////////////////////////////
@@ -2746,7 +2746,7 @@ void MeshPhanLINACNav::m_configure_linac()
 
             // read data and move the leaf
             keys = m_split_txt( line );
-            m_translate_leaf_A( ileaf++, make_f32xyz( std::stof( keys[ 3 ] ) * mh_linac->scale_ratio, 0.0, 0.0 ) );
+            m_translate_leaf_A( ileaf++, make_f32xyz( std::stof( keys[ 3 ] ) * mh_linac->mlc_motion_ratio, 0.0, 0.0 ) );
 
         }
         else
@@ -2799,7 +2799,7 @@ void MeshPhanLINACNav::m_configure_linac()
 
             // read data and move the leaf
             keys = m_split_txt( line );
-            m_translate_leaf_B( ileaf++, make_f32xyz( std::stof( keys[ 3 ] ) * mh_linac->scale_ratio, 0.0, 0.0 ) );
+            m_translate_leaf_B( ileaf++, make_f32xyz( std::stof( keys[ 3 ] ) * mh_linac->mlc_motion_ratio, 0.0, 0.0 ) );
 
         }
         else
@@ -3096,8 +3096,12 @@ void MeshPhanLINACNav::m_copy_linac_to_gpu()
                               sizeof(md_linac->aabb), cudaMemcpyHostToDevice ) );
     HANDLE_ERROR( cudaMemcpy( &(md_linac->transform), &(mh_linac->transform),
                               sizeof(md_linac->transform), cudaMemcpyHostToDevice ) );
-    HANDLE_ERROR( cudaMemcpy( &(md_linac->scale_ratio), &(mh_linac->scale_ratio),
-                              sizeof(md_linac->scale_ratio), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(md_linac->mlc_motion_ratio), &(mh_linac->mlc_motion_ratio),
+                              sizeof(md_linac->mlc_motion_ratio), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(md_linac->xjaw_motion_ratio), &(mh_linac->xjaw_motion_ratio),
+                              sizeof(md_linac->xjaw_motion_ratio), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(md_linac->yjaw_motion_ratio), &(mh_linac->yjaw_motion_ratio),
+                              sizeof(md_linac->yjaw_motion_ratio), cudaMemcpyHostToDevice ) );
 
 }
 
@@ -3201,6 +3205,21 @@ void MeshPhanLINACNav::set_local_jaw_x_position( f32 px, f32 py, f32 pz )
 void MeshPhanLINACNav::set_local_jaw_y_position( f32 px, f32 py, f32 pz )
 {
     m_loc_pos_jaw_y = make_f32xyz( px, py, pz );
+}
+
+void MeshPhanLINACNav::set_mlc_motion_scaling_factor( f32 scale )
+{
+    mh_linac->mlc_motion_ratio = scale;
+}
+
+void MeshPhanLINACNav::set_jaw_x_motion_scaling_factor( f32 scale )
+{
+    mh_linac->xjaw_motion_ratio = scale;
+}
+
+void MeshPhanLINACNav::set_jaw_y_motion_scaling_factor( f32 scale )
+{
+    mh_linac->yjaw_motion_ratio = scale;
 }
 
 void MeshPhanLINACNav::set_linac_local_axis( f32 m00, f32 m01, f32 m02,
@@ -3339,7 +3358,9 @@ MeshPhanLINACNav::MeshPhanLINACNav ()
 
     mh_linac->transform = make_f32matrix44_zeros();
 
-    mh_linac->scale_ratio = 1.0;
+    mh_linac->mlc_motion_ratio = -1.0;
+    mh_linac->xjaw_motion_ratio = -1.0;
+    mh_linac->yjaw_motion_ratio = -1.0;
 
     set_name( "MeshPhanLINACNav" );
     m_mlc_filename = "";
@@ -3430,10 +3451,9 @@ void MeshPhanLINACNav::initialize(GlobalSimulationParametersData *h_params , Glo
     {
         m_init_jaw_x();
 
-        // move the jaw relatively to the mlc (local frame)
+        // place the jaw relatively to the mlc (local frame)
         m_translate_jaw_x( 0, m_loc_pos_jaw_x );
-        m_translate_jaw_x( 1, m_loc_pos_jaw_x );
-
+        m_translate_jaw_x( 1, m_loc_pos_jaw_x );        
     }
 
     // If jaw y is defined, init
@@ -3441,19 +3461,32 @@ void MeshPhanLINACNav::initialize(GlobalSimulationParametersData *h_params , Glo
     {
         m_init_jaw_y();
 
-        // move the jaw relatively to the mlc (local frame)
+        // place the jaw relatively to the mlc (local frame)
         m_translate_jaw_y( 0, m_loc_pos_jaw_y );
         m_translate_jaw_y( 1, m_loc_pos_jaw_y );
     }
 
-    // Get scale ratio between MLC frame and isocenter
+    // Get scale ratio between MLC frame and isocenter, if not defined
     if ( m_sid == 0.0 )
     {
         GGcerr << "MeshPanLINACNav: source to isocenter distance must be defined!" << GGendl;
         exit_simulation();
-    }
+    }    
     f32 mlc_dist = fxyz_mag( m_pos_mlc );
-    mh_linac->scale_ratio = mlc_dist / m_sid;
+    if ( mh_linac->mlc_motion_ratio == -1 )
+    {
+        mh_linac->mlc_motion_ratio = (m_sid - mlc_dist) / m_sid;
+    }
+
+    // Get the other scale ratio if not defined
+    if ( m_jaw_x_filename != "" && mh_linac->xjaw_motion_ratio == -1 )
+    {
+        mh_linac->xjaw_motion_ratio = ( m_sid - mlc_dist - fxyz_mag(m_loc_pos_jaw_x) ) / m_sid;
+    }
+    if ( m_jaw_y_filename != "" && mh_linac->yjaw_motion_ratio == -1 )
+    {
+        mh_linac->yjaw_motion_ratio = ( m_sid - mlc_dist - fxyz_mag(m_loc_pos_jaw_y) ) / m_sid;
+    }
 
     // Configure the linac
     m_configure_linac();

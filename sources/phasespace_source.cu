@@ -53,7 +53,7 @@ __host__ __device__ void PHSPSRC::phsp_source ( ParticlesData *particles_data,
     // Then set the mandatory field to create a new particle
     particles_data->E[id] = phasespace->energy[ phsp_id ];     // Energy in MeV
 
-    // Aplly trsnformation
+    // Apply transformation
     f32xyz pos = make_f32xyz( phasespace->pos_x[ phsp_id ], phasespace->pos_y[ phsp_id ], phasespace->pos_z[ phsp_id ] );
     f32xyz dir = make_f32xyz( phasespace->dir_x[ phsp_id ], phasespace->dir_y[ phsp_id ], phasespace->dir_z[ phsp_id ] );
     f32xyz t = make_f32xyz( transform.tx[ source_id ], transform.ty[ source_id ], transform.tz[ source_id ] );
@@ -90,8 +90,10 @@ __host__ __device__ void PHSPSRC::phsp_source ( ParticlesData *particles_data,
     particles_data->scatter_order[ id ] = 0;                    //
 
 
-//    printf(" ID %i E %e pos %e %e %e ptype %i\n", id, particles_data->E[id],
-//           particles_data->px[id], particles_data->py[id], particles_data->pz[id], particles_data->pname[id]);
+//    printf(" ID %i E %e pos %e %e %e dir %e %e %e ptype %i\n", id, particles_data->E[id],
+//           particles_data->px[id], particles_data->py[id], particles_data->pz[id],
+//           particles_data->dx[id], particles_data->dy[id], particles_data->dz[id],
+//           particles_data->pname[id]);
 }
 
 __global__ void PHSPSRC::phsp_point_source (ParticlesData *particles_data,
@@ -114,9 +116,6 @@ PhaseSpaceSource::PhaseSpaceSource(): GGEMSSource()
     // Set the name of the source
     set_name( "PhaseSpaceSource" );   
 
-    // Default transformation
-    m_transform.nb_sources = 0;
-
     // Max number of particles used from the phase-space file
     m_nb_part_max = -1;  // -1 mean take all particles
 
@@ -125,8 +124,27 @@ PhaseSpaceSource::PhaseSpaceSource(): GGEMSSource()
     m_transformation_file = "";
 
     mh_params = nullptr;
+
     mh_phasespace = nullptr;
     md_phasespace = nullptr;
+
+    // Init the struc
+    mh_transform = (PhSpTransform*) malloc( sizeof(PhSpTransform) );
+    mh_transform->nb_sources = 0;
+    mh_transform->rx = nullptr;
+    mh_transform->ry = nullptr;
+    mh_transform->rz = nullptr;
+
+    mh_transform->tx = nullptr;
+    mh_transform->ty = nullptr;
+    mh_transform->tz = nullptr;
+
+    mh_transform->sx = nullptr;
+    mh_transform->sy = nullptr;
+    mh_transform->sz = nullptr;
+
+    mh_transform->cdf = nullptr;
+
 }
 
 // Destructor
@@ -145,40 +163,26 @@ PhaseSpaceSource::~PhaseSpaceSource() {
 // Setting position of the source
 void PhaseSpaceSource::set_translation( f32 tx, f32 ty, f32 tz )
 {
-    if( m_transform.nb_sources == 0)
-    {
-        // Allocation of one transformation
-        m_transform_allocation( 1 );
-    }
-
-    m_transform.tx[ 0 ] = tx;
-    m_transform.ty[ 0 ] = ty;
-    m_transform.tz[ 0 ] = tz;
+    m_tx = tx;
+    m_ty = ty;
+    m_tz = tz;
 }
 
 // Setting rotation of the source
 void PhaseSpaceSource::set_rotation( f32 aroundx, f32 aroundy, f32 aroundz )
 {
-    if( m_transform.nb_sources == 0)
-    {
-        // Allocation of one transformation
-        m_transform_allocation( 1 );
-    }
-
-    m_transform.rx[ 0 ] = aroundx;  // right hand rule - JB
-    m_transform.ry[ 0 ] = aroundy;
-    m_transform.rz[ 0 ] = aroundz;
+    m_rx = aroundx;
+    m_ry = aroundy;
+    m_rz = aroundz;
 }
 
-/*
 // Setting scaling of the source
 void PhaseSpaceSource::set_scaling( f32 sx, f32 sy, f32 sz )
 {
-    m_transform.sx = sx;
-    m_transform.sy = sy;
-    m_transform.sz = sz;
+    m_sx = sx;
+    m_sy = sy;
+    m_sz = sz;
 }
-*/
 
 // Setting the maximum number of particles used from the phase-space file
 void PhaseSpaceSource::set_max_number_of_particles( ui32 nb_part_max )
@@ -194,6 +198,83 @@ void PhaseSpaceSource::set_phasespace_file( std::string filename )
 void PhaseSpaceSource::set_transformation_file( std::string filename )
 {
     m_transformation_file = filename;
+}
+
+void PhaseSpaceSource::update_phasespace_file( std::string filename )
+{
+    m_phasespace_file = filename;
+
+    // Load the phasespace file (CPU & GPU)
+    if ( m_phasespace_file != "" )
+    {
+        m_load_phasespace_file();
+    }
+    else
+    {
+        GGcerr << "Phasespace filename is not valid!" << GGendl;
+        exit_simulation();
+    }
+
+    // Check if everything was set properly
+    if ( !m_check_mandatory() )
+    {
+        GGcerr << "Phasespace source was not set properly!" << GGendl;
+        exit_simulation();
+    }
+
+    // Check if the physics is set properly considering the phasespace file
+    bool there_is_photon = mh_params->physics_list[PHOTON_COMPTON] ||
+                           mh_params->physics_list[PHOTON_PHOTOELECTRIC] ||
+                           mh_params->physics_list[PHOTON_RAYLEIGH];
+
+    bool there_is_electron = mh_params->physics_list[ELECTRON_IONISATION] ||
+                             mh_params->physics_list[ELECTRON_BREMSSTRAHLUNG] ||
+                             mh_params->physics_list[ELECTRON_MSC];
+
+    if ( !there_is_electron && mh_phasespace->nb_electrons != 0 )
+    {
+        GGcerr << "Phasespace file contains " << mh_phasespace->nb_electrons
+               << " electrons and there are no electron physics effects enabled!"
+               << GGendl;
+        exit_simulation();
+    }
+
+    if ( !there_is_photon && mh_phasespace->nb_photons != 0 )
+    {
+        GGcerr << "Phasespace file contains " << mh_phasespace->nb_photons
+               << " photons and there are no photon physics effects enabled!"
+               << GGendl;
+        exit_simulation();
+    }
+
+    if ( mh_phasespace->nb_positrons != 0 )
+    {
+        GGcerr << "Phasespace file contains " << mh_phasespace->nb_positrons
+               << " positrons and there are no positron physics effects enabled!"
+               << GGendl;
+        exit_simulation();
+    }
+
+    // Cut off the number of particles according the user parameter
+    if ( m_nb_part_max != -1 )
+    {
+        if ( m_nb_part_max < mh_phasespace->tot_particles )
+        {
+            mh_phasespace->tot_particles = m_nb_part_max;
+        }
+    }
+
+    // Update data on GPU
+    m_free_phasespace_to_gpu();
+    m_copy_phasespace_to_gpu();
+
+    // Some verbose if required
+    if ( mh_params->display_memory_usage )
+    {
+        ui32 mem = 29 * mh_phasespace->tot_particles;
+        GGcout_mem("PhaseSpace source", mem);
+    }
+
 }
 
 //========= Private ============================================
@@ -222,6 +303,7 @@ bool PhaseSpaceSource::m_check_mandatory()
 // Transform data allocation
 void PhaseSpaceSource::m_transform_allocation( ui32 nb_sources )
 {
+    /*
     // Allocation
     HANDLE_ERROR( cudaMallocManaged( &(m_transform.tx), nb_sources*sizeof( f32 ) ) );
     HANDLE_ERROR( cudaMallocManaged( &(m_transform.ty), nb_sources*sizeof( f32 ) ) );
@@ -236,8 +318,23 @@ void PhaseSpaceSource::m_transform_allocation( ui32 nb_sources )
     HANDLE_ERROR( cudaMallocManaged( &(m_transform.sz), nb_sources*sizeof( f32 ) ) );
 
     HANDLE_ERROR( cudaMallocManaged( &(m_transform.cdf), nb_sources*sizeof( f32 ) ) );
+    */
 
-    m_transform.nb_sources = nb_sources;
+    mh_transform->nb_sources = nb_sources;
+
+    mh_transform->tx = (f32*)malloc( nb_sources*sizeof( f32 ) );
+    mh_transform->ty = (f32*)malloc( nb_sources*sizeof( f32 ) );
+    mh_transform->tz = (f32*)malloc( nb_sources*sizeof( f32 ) );
+
+    mh_transform->rx = (f32*)malloc( nb_sources*sizeof( f32 ) );
+    mh_transform->ry = (f32*)malloc( nb_sources*sizeof( f32 ) );
+    mh_transform->rz = (f32*)malloc( nb_sources*sizeof( f32 ) );
+
+    mh_transform->sx = (f32*)malloc( nb_sources*sizeof( f32 ) );
+    mh_transform->sy = (f32*)malloc( nb_sources*sizeof( f32 ) );
+    mh_transform->sz = (f32*)malloc( nb_sources*sizeof( f32 ) );
+
+    mh_transform->cdf = (f32*)malloc( nb_sources*sizeof( f32 ) );
 }
 
 // Load phasespace file
@@ -261,14 +358,14 @@ void PhaseSpaceSource::m_load_transformation_file()
 
     // Get the number of sources
     std::string line;
-    m_transform.nb_sources = 0;
+    mh_transform->nb_sources = 0;
 
     while( input )
     {
         m_skip_comment( input );
         std::getline( input, line );
 
-        if ( input ) ++m_transform.nb_sources;
+        if ( input ) ++mh_transform->nb_sources;
     }
 
     // Returning to beginning of the file to read it again
@@ -276,7 +373,7 @@ void PhaseSpaceSource::m_load_transformation_file()
     input.seekg( 0, std::ios::beg );
 
     // Allocating buffers to store data
-    m_transform_allocation( m_transform.nb_sources );
+    m_transform_allocation( mh_transform->nb_sources );
 
     // Store data from file
     size_t idx = 0;
@@ -291,34 +388,34 @@ void PhaseSpaceSource::m_load_transformation_file()
             // Format
             // tx ty tz rx ry rz sx sy sz activity(prob emission)
             std::istringstream iss( line );
-            iss >> m_transform.tx[ idx ] >> m_transform.ty[ idx ] >> m_transform.tz[ idx ]
-                >> m_transform.rx[ idx ] >> m_transform.ry[ idx ] >> m_transform.rz[ idx ]
-                >> m_transform.sx[ idx ] >> m_transform.sy[ idx ] >> m_transform.sz[ idx ]
-                >> m_transform.cdf[ idx ];
-            sum_act += m_transform.cdf[ idx ];
+            iss >> mh_transform->tx[ idx ] >> mh_transform->ty[ idx ] >> mh_transform->tz[ idx ]
+                >> mh_transform->rx[ idx ] >> mh_transform->ry[ idx ] >> mh_transform->rz[ idx ]
+                >> mh_transform->sx[ idx ] >> mh_transform->sy[ idx ] >> mh_transform->sz[ idx ]
+                >> mh_transform->cdf[ idx ];
+            sum_act += mh_transform->cdf[ idx ];
 
             // Units
-            m_transform.tx[ idx ] *= mm;
-            m_transform.ty[ idx ] *= mm;
-            m_transform.tz[ idx ] *= mm;
+            mh_transform->tx[ idx ] *= mm;
+            mh_transform->ty[ idx ] *= mm;
+            mh_transform->tz[ idx ] *= mm;
 
-            m_transform.rx[ idx ] *= deg;
-            m_transform.ry[ idx ] *= deg;
-            m_transform.rz[ idx ] *= deg;
+            mh_transform->x[ idx ] *= deg;
+            mh_transform->ry[ idx ] *= deg;
+            mh_transform->rz[ idx ] *= deg;
 
             ++idx;
         }
     }
 
     // Compute CDF and normalized in same time by security
-    m_transform.cdf[ 0 ] /= sum_act;
-    for( ui32 i = 1; i < m_transform.nb_sources; ++i )
+    mh_transform->cdf[ 0 ] /= sum_act;
+    for( ui32 i = 1; i < mh_transform->nb_sources; ++i )
     {
-        m_transform.cdf[ i ] = m_transform.cdf[ i ] / sum_act + m_transform.cdf[ i - 1 ];
+        mh_transform->cdf[ i ] = mh_transform->cdf[ i ] / sum_act + mh_transform->cdf[ i - 1 ];
     }
 
     // Watch dog
-    m_transform.cdf[ m_transform.nb_sources - 1 ] = 1.0;
+    mh_transform->cdf[ mh_transform->nb_sources - 1 ] = 1.0;
 
     // Close the file
     input.close();
@@ -402,6 +499,88 @@ void PhaseSpaceSource::m_copy_phasespace_to_gpu()
                               sizeof(md_phasespace->nb_electrons), cudaMemcpyHostToDevice ) );
     HANDLE_ERROR( cudaMemcpy( &(md_phasespace->nb_positrons), &(mh_phasespace->nb_positrons),
                               sizeof(md_phasespace->nb_positrons), cudaMemcpyHostToDevice ) );
+
+}
+
+void PhaseSpaceSource::m_free_phasespace_to_gpu()
+{
+
+//    ui32 n = mh_phasespace->tot_particles;
+
+    /// Device pointers allocation
+    f32 *energy;
+//    HANDLE_ERROR( cudaMalloc((void**) &energy, n*sizeof(f32)) );
+    f32 *pos_x;
+//    HANDLE_ERROR( cudaMalloc((void**) &pos_x, n*sizeof(f32)) );
+    f32 *pos_y;
+//    HANDLE_ERROR( cudaMalloc((void**) &pos_y, n*sizeof(f32)) );
+    f32 *pos_z;
+//    HANDLE_ERROR( cudaMalloc((void**) &pos_z, n*sizeof(f32)) );
+
+    f32 *dir_x;
+//    HANDLE_ERROR( cudaMalloc((void**) &dir_x, n*sizeof(f32)) );
+    f32 *dir_y;
+//    HANDLE_ERROR( cudaMalloc((void**) &dir_y, n*sizeof(f32)) );
+    f32 *dir_z;
+//    HANDLE_ERROR( cudaMalloc((void**) &dir_z, n*sizeof(f32)) );
+
+    ui8 *ptype;
+//    HANDLE_ERROR( cudaMalloc((void**) &ptype, n*sizeof(ui8)) );
+
+    /// Unbind
+
+    /// Bind data to the struct
+    HANDLE_ERROR( cudaMemcpy( &energy, &(md_phasespace->energy),
+                              sizeof(md_phasespace->energy), cudaMemcpyDeviceToHost ) );
+
+    HANDLE_ERROR( cudaMemcpy( &pos_x, &(md_phasespace->pos_x),
+                              sizeof(md_phasespace->pos_x), cudaMemcpyDeviceToHost ) );
+    HANDLE_ERROR( cudaMemcpy( &pos_y, &(md_phasespace->pos_y),
+                              sizeof(md_phasespace->pos_y), cudaMemcpyDeviceToHost ) );
+    HANDLE_ERROR( cudaMemcpy( &pos_z, &(md_phasespace->pos_z),
+                              sizeof(md_phasespace->pos_z), cudaMemcpyDeviceToHost ) );
+
+    HANDLE_ERROR( cudaMemcpy( &dir_x, &(md_phasespace->dir_x),
+                              sizeof(md_phasespace->dir_x), cudaMemcpyDeviceToHost ) );
+    HANDLE_ERROR( cudaMemcpy( &dir_y, &(md_phasespace->dir_y),
+                              sizeof(md_phasespace->dir_y), cudaMemcpyDeviceToHost ) );
+    HANDLE_ERROR( cudaMemcpy( &dir_z, &(md_phasespace->dir_z),
+                              sizeof(md_phasespace->dir_z), cudaMemcpyDeviceToHost ) );
+
+    HANDLE_ERROR( cudaMemcpy( &ptype, &(md_phasespace->ptype),
+                              sizeof(md_phasespace->ptype), cudaMemcpyDeviceToHost ) );
+
+
+    /// Free memory
+    cudaFree( energy );
+
+    cudaFree( pos_x );
+    cudaFree( pos_y );
+    cudaFree( pos_z );
+
+    cudaFree( dir_x );
+    cudaFree( dir_y );
+    cudaFree( dir_z );
+
+    cudaFree( ptype );
+
+    cudaFree( md_phasespace );
+
+//    cudaFree( md_phasespace->energy );
+
+//    cudaFree( (md_phasespace->pos_x) );
+//    cudaFree( (md_phasespace->pos_y) );
+//    cudaFree( (md_phasespace->pos_z) );
+
+//    cudaFree( (md_phasespace->dir_x) );
+//    cudaFree( (md_phasespace->dir_y) );
+//    cudaFree( (md_phasespace->dir_z) );
+
+//    cudaFree( (md_phasespace->ptype) );
+
+//    cudaFree( md_phasespace );
+
+    md_phasespace = nullptr;
 
 }
 

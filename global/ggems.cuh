@@ -96,7 +96,7 @@ private:
     GGEMSPhantom* m_phantom;
     std::vector< GGEMSPhantom* > m_phantoms;
 
-    // TODO Detector manager
+    // Detector manager
     GGEMSDetector* m_detector;
 
     // Main parameters

@@ -266,6 +266,19 @@ void ConeBeamCTSource::m_load_spectrum()
     input.close();
 }
 
+void ConeBeamCTSource::update_rotation( f32 rx, f32 ry, f32 rz )
+{
+    m_angles = make_f32xyz( rx, ry, rz );
+
+    // Update the transformation matrix of the source that map local frame to global frame
+    TransformCalculator *trans = new TransformCalculator;
+    trans->set_translation( m_pos.x, m_pos.y, m_pos.z );
+    trans->set_rotation( m_angles );
+    trans->set_axis_transformation( m_local_axis );
+    m_transform = trans->get_transformation_matrix();
+    delete trans;
+}
+
 f32xyz ConeBeamCTSource::get_position()
 {
     // Compute position
@@ -380,8 +393,7 @@ void ConeBeamCTSource::initialize( GlobalSimulationParametersData *h_params )
 }
 
 void ConeBeamCTSource::get_primaries_generator( ParticlesData *d_particles )
-{
-
+{    
     dim3 threads, grid;
     threads.x = mh_params->gpu_block_size;
     grid.x = ( mh_params->size_of_particles_batch + mh_params->gpu_block_size - 1 )
