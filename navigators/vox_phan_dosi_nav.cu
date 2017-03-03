@@ -560,7 +560,7 @@ __global__ void VPDN::kernel_device_track_to_in ( ParticlesData *particles, f32 
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
     if ( id >= particles->size ) return;
 
-    transport_track_to_in_AABB( particles, xmin, xmax, ymin, ymax, zmin, zmax, tolerance, id );
+    transport_track_to_in_AABB( particles, xmin, xmax, ymin, ymax, zmin, zmax, tolerance, id );   
 }
 
 // Device kernel that track particles within the voxelized volume until boundary
@@ -583,7 +583,7 @@ __global__ void VPDN::kernel_device_track_to_out( ParticlesData *particles, Part
 
 #ifdef DEBUG
     ui32 iter = 0;
-#endif
+#endif   
 
     // Stepping loop - Get out of loop only if the particle was dead and it was a primary
     while ( particles->status[id] != PARTICLE_DEAD && particles->status[id] != PARTICLE_FREEZE )
@@ -635,6 +635,15 @@ __global__ void VPDN::kernel_device_track_to_out( ParticlesData *particles, Part
 
 #ifdef DEBUG
         ++iter;
+
+//        if ( id == 99 )
+//        {
+//            printf("id %i E %f pos %f %f %f dir %f %f %f status %i pname %i\n", id, particles->E[ id ],
+//                   particles->px[ id ], particles->py[ id ], particles->pz[ id ],
+//                   particles->dx[ id ], particles->dy[ id ], particles->dz[ id ],
+//                   particles->status[ id ],
+//                   particles->pname[ id ] );
+//        }
 
         if ( iter > 10000 )
         {

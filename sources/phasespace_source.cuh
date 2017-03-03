@@ -42,10 +42,10 @@ namespace PHSPSRC
 {
 __host__ __device__ void phsp_source(ParticlesData *particles_data,
                                      const PhaseSpaceData *phasespace,
-                                     PhSpTransform transform, ui32 id );
+                                     const PhSpTransform *transform, ui32 id );
 __global__ void phsp_point_source(ParticlesData *particles_data,
                                    const PhaseSpaceData *phasespace,
-                                   PhSpTransform transform );
+                                   const PhSpTransform *transform );
 }
 
 // PhaseSpace source
@@ -79,6 +79,7 @@ private:
     void m_load_transformation_file();
     void m_copy_phasespace_to_gpu();    
     void m_free_phasespace_to_gpu();
+    void m_copy_transformation_to_gpu();
 
     bool m_check_mandatory();
     void m_transform_allocation( ui32 nb_sources );

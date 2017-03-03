@@ -23,23 +23,23 @@
 // Internal function that create a new particle to the buffer at the slot id
 __host__ __device__ void PHSPSRC::phsp_source ( ParticlesData *particles_data,
                                                 const PhaseSpaceData *phasespace,
-                                                PhSpTransform transform, ui32 id )
+                                                const PhSpTransform *transform, ui32 id )
 
 
 
 {
     // Get a random sources (i.e. virtual sources that use the same phasespace)
     ui32 source_id = 0;
-    if ( transform.nb_sources > 1 )
+    if ( transform->nb_sources > 1 )
     {
-        source_id = binary_search_left( prng_uniform( particles_data, id ), transform.cdf, transform.nb_sources );
+        source_id = binary_search_left( prng_uniform( particles_data, id ), transform->cdf, transform->nb_sources );
     }
 
 #ifdef DEBUG
-    assert( source_id < transform.nb_sources );
-    if ( source_id >= transform.nb_sources )
+    assert( source_id < transform->nb_sources );
+    if ( source_id >= transform->nb_sources )
     {
-        printf("   source id %i    nb sources %i\n", source_id, transform.nb_sources);
+        printf("   source id %i    nb sources %i\n", source_id, transform->nb_sources);
     }
 #endif
 
@@ -56,18 +56,18 @@ __host__ __device__ void PHSPSRC::phsp_source ( ParticlesData *particles_data,
     // Apply transformation
     f32xyz pos = make_f32xyz( phasespace->pos_x[ phsp_id ], phasespace->pos_y[ phsp_id ], phasespace->pos_z[ phsp_id ] );
     f32xyz dir = make_f32xyz( phasespace->dir_x[ phsp_id ], phasespace->dir_y[ phsp_id ], phasespace->dir_z[ phsp_id ] );
-    f32xyz t = make_f32xyz( transform.tx[ source_id ], transform.ty[ source_id ], transform.tz[ source_id ] );
+    f32xyz t = make_f32xyz( transform->tx[ source_id ], transform->ty[ source_id ], transform->tz[ source_id ] );
 
-    //printf("ID %i rot %f %f %f\n", id, transform.rx, transform.ry, transform.rz);
+    //printf("ID %i rot %f %f %f\n", id, transform->rx, transform->ry, transform->rz);
 
     pos = fxyz_add( pos, t );                                        // translate
-    pos = fxyz_rotate_z_axis( pos, transform.rz[ source_id ] );      // Rotate: yaw, pitch, and roll convetion (RzRyRx)
-    pos = fxyz_rotate_y_axis( pos, transform.ry[ source_id ] );      //         for Euler convention RzRyRz
-    pos = fxyz_rotate_x_axis( pos, transform.rx[ source_id ] );      //         Here is a right-hand rule
+    pos = fxyz_rotate_z_axis( pos, transform->rz[ source_id ] );      // Rotate: yaw, pitch, and roll convetion (RzRyRx)
+    pos = fxyz_rotate_y_axis( pos, transform->ry[ source_id ] );      //         for Euler convention RzRyRz
+    pos = fxyz_rotate_x_axis( pos, transform->rx[ source_id ] );      //         Here is a right-hand rule
     //                TODO add scaling - JB
-    dir = fxyz_rotate_z_axis( dir, transform.rz[ source_id ] );
-    dir = fxyz_rotate_y_axis( dir, transform.ry[ source_id ] );
-    dir = fxyz_rotate_x_axis( dir, transform.rx[ source_id ] );
+    dir = fxyz_rotate_z_axis( dir, transform->rz[ source_id ] );
+    dir = fxyz_rotate_y_axis( dir, transform->ry[ source_id ] );
+    dir = fxyz_rotate_x_axis( dir, transform->rx[ source_id ] );
     dir = fxyz_unit( dir );
 
     particles_data->px[id] = pos.x;     // Position in mm
@@ -90,15 +90,15 @@ __host__ __device__ void PHSPSRC::phsp_source ( ParticlesData *particles_data,
     particles_data->scatter_order[ id ] = 0;                    //
 
 
-//    printf(" ID %i E %e pos %e %e %e dir %e %e %e ptype %i\n", id, particles_data->E[id],
+//    printf("Source ID %i E %e pos %e %e %e dir %e %e %e ptype %i phsptype %i\n", id, particles_data->E[id],
 //           particles_data->px[id], particles_data->py[id], particles_data->pz[id],
 //           particles_data->dx[id], particles_data->dy[id], particles_data->dz[id],
-//           particles_data->pname[id]);
+//           particles_data->pname[id], phasespace->ptype[ phsp_id ]);
 }
 
 __global__ void PHSPSRC::phsp_point_source (ParticlesData *particles_data,
                                             const PhaseSpaceData *phasespace,
-                                            PhSpTransform transform )
+                                            const PhSpTransform *transform )
 {
     // Get thread id
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
@@ -144,6 +144,16 @@ PhaseSpaceSource::PhaseSpaceSource(): GGEMSSource()
     mh_transform->sz = nullptr;
 
     mh_transform->cdf = nullptr;
+
+    m_rx = 0;
+    m_ry = 0;
+    m_rz = 0;
+    m_tx = 0.0;
+    m_ty = 0.0;
+    m_tz = 0.0;
+    m_sx = 1.0;
+    m_sy = 1.0;
+    m_sz = 1.0;
 
 }
 
@@ -342,7 +352,7 @@ void PhaseSpaceSource::m_load_phasespace_file()
 {
     PhaseSpaceIO *reader = new PhaseSpaceIO;
     mh_phasespace = reader->read_phasespace_file( m_phasespace_file );
-    delete reader;
+    delete reader;    
 }
 
 // Load transformation file
@@ -399,7 +409,7 @@ void PhaseSpaceSource::m_load_transformation_file()
             mh_transform->ty[ idx ] *= mm;
             mh_transform->tz[ idx ] *= mm;
 
-            mh_transform->x[ idx ] *= deg;
+            mh_transform->rx[ idx ] *= deg;
             mh_transform->ry[ idx ] *= deg;
             mh_transform->rz[ idx ] *= deg;
 
@@ -467,7 +477,7 @@ void PhaseSpaceSource::m_copy_phasespace_to_gpu()
     HANDLE_ERROR( cudaMemcpy( dir_z, mh_phasespace->dir_z,
                               n*sizeof(f32), cudaMemcpyHostToDevice ) );
 
-    HANDLE_ERROR( cudaMemcpy( ptype, mh_phasespace->energy,
+    HANDLE_ERROR( cudaMemcpy( ptype, mh_phasespace->ptype,
                               n*sizeof(ui8), cudaMemcpyHostToDevice ) );
 
     /// Bind data to the struct
@@ -499,6 +509,96 @@ void PhaseSpaceSource::m_copy_phasespace_to_gpu()
                               sizeof(md_phasespace->nb_electrons), cudaMemcpyHostToDevice ) );
     HANDLE_ERROR( cudaMemcpy( &(md_phasespace->nb_positrons), &(mh_phasespace->nb_positrons),
                               sizeof(md_phasespace->nb_positrons), cudaMemcpyHostToDevice ) );
+
+}
+
+void PhaseSpaceSource::m_copy_transformation_to_gpu()
+{
+    ui32 n = mh_transform->nb_sources;
+
+    /// First, struct allocation
+    HANDLE_ERROR( cudaMalloc( (void**) &md_transform, sizeof( PhSpTransform ) ) );
+
+    /// Device pointers allocation
+    f32 *tx;
+    HANDLE_ERROR( cudaMalloc((void**) &tx, n*sizeof(f32)) );
+    f32 *ty;
+    HANDLE_ERROR( cudaMalloc((void**) &ty, n*sizeof(f32)) );
+    f32 *tz;
+    HANDLE_ERROR( cudaMalloc((void**) &tz, n*sizeof(f32)) );
+
+    f32 *rx;
+    HANDLE_ERROR( cudaMalloc((void**) &rx, n*sizeof(f32)) );
+    f32 *ry;
+    HANDLE_ERROR( cudaMalloc((void**) &ry, n*sizeof(f32)) );
+    f32 *rz;
+    HANDLE_ERROR( cudaMalloc((void**) &rz, n*sizeof(f32)) );
+
+    f32 *sx;
+    HANDLE_ERROR( cudaMalloc((void**) &sx, n*sizeof(f32)) );
+    f32 *sy;
+    HANDLE_ERROR( cudaMalloc((void**) &sy, n*sizeof(f32)) );
+    f32 *sz;
+    HANDLE_ERROR( cudaMalloc((void**) &sz, n*sizeof(f32)) );
+
+    f32 *cdf;
+    HANDLE_ERROR( cudaMalloc((void**) &cdf, n*sizeof(f32)) );
+
+
+    /// Copy host data to device
+    HANDLE_ERROR( cudaMemcpy( tx, mh_transform->tx,
+                              n*sizeof(f32), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( ty, mh_transform->ty,
+                              n*sizeof(f32), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( tz, mh_transform->tz,
+                              n*sizeof(f32), cudaMemcpyHostToDevice ) );
+
+    HANDLE_ERROR( cudaMemcpy( rx, mh_transform->rx,
+                              n*sizeof(f32), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( ry, mh_transform->ry,
+                              n*sizeof(f32), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( rz, mh_transform->rz,
+                              n*sizeof(f32), cudaMemcpyHostToDevice ) );
+
+    HANDLE_ERROR( cudaMemcpy( sx, mh_transform->sx,
+                              n*sizeof(f32), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( sy, mh_transform->sy,
+                              n*sizeof(f32), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( sz, mh_transform->sz,
+                              n*sizeof(f32), cudaMemcpyHostToDevice ) );
+
+    HANDLE_ERROR( cudaMemcpy( cdf, mh_transform->cdf,
+                              n*sizeof(f32), cudaMemcpyHostToDevice ) );
+
+
+    /// Bind data to the struct
+    HANDLE_ERROR( cudaMemcpy( &(md_transform->tx), &tx,
+                              sizeof(md_transform->tx), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(md_transform->ty), &ty,
+                              sizeof(md_transform->ty), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(md_transform->tz), &tz,
+                              sizeof(md_transform->tz), cudaMemcpyHostToDevice ) );
+
+    HANDLE_ERROR( cudaMemcpy( &(md_transform->rx), &rx,
+                              sizeof(md_transform->rx), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(md_transform->ry), &ry,
+                              sizeof(md_transform->ry), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(md_transform->rz), &rz,
+                              sizeof(md_transform->rz), cudaMemcpyHostToDevice ) );
+
+    HANDLE_ERROR( cudaMemcpy( &(md_transform->sx), &sx,
+                              sizeof(md_transform->sx), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(md_transform->sy), &sy,
+                              sizeof(md_transform->sy), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(md_transform->sz), &sz,
+                              sizeof(md_transform->sz), cudaMemcpyHostToDevice ) );
+
+    HANDLE_ERROR( cudaMemcpy( &(md_transform->cdf), &cdf,
+                              sizeof(md_transform->cdf), cudaMemcpyHostToDevice ) );
+
+
+    HANDLE_ERROR( cudaMemcpy( &(md_transform->nb_sources), &(mh_transform->nb_sources),
+                              sizeof(md_transform->nb_sources), cudaMemcpyHostToDevice ) );
 
 }
 
@@ -601,6 +701,25 @@ void PhaseSpaceSource::initialize (GlobalSimulationParametersData *h_params )
     {
         m_load_transformation_file();
     }
+    else
+    {
+        m_transform_allocation( 1 );
+
+        mh_transform->tx[ 0 ] = m_tx;
+        mh_transform->ty[ 0 ] = m_ty;
+        mh_transform->tz[ 0 ] = m_tz;
+
+        mh_transform->rx[ 0 ] = m_rx;
+        mh_transform->ry[ 0 ] = m_ry;
+        mh_transform->rz[ 0 ] = m_rz;
+
+        mh_transform->sx[ 0 ] = m_sx;
+        mh_transform->sy[ 0 ] = m_sy;
+        mh_transform->sz[ 0 ] = m_sz;
+
+        mh_transform->cdf[ 0 ] = 1.0;
+        mh_transform->nb_sources = 1;
+    }
 
     // Check if everything was set properly
     if ( !m_check_mandatory() )
@@ -643,29 +762,7 @@ void PhaseSpaceSource::initialize (GlobalSimulationParametersData *h_params )
                << " positrons and there are no positron physics effects enabled!"
                << GGendl;
         exit_simulation();
-    }
-
-    // Check transformation
-    if ( m_transform.nb_sources == 0 )
-    {
-        // Allocation of one transformation
-        m_transform_allocation( 1 );
-
-        m_transform.tx[ 0 ] = 0;
-        m_transform.ty[ 0 ] = 0;
-        m_transform.tz[ 0 ] = 0;
-
-        m_transform.rx[ 0 ] = 0;
-        m_transform.ry[ 0 ] = 0;
-        m_transform.rz[ 0 ] = 0;
-
-        m_transform.sx[ 0 ] = 1;
-        m_transform.sy[ 0 ] = 1;
-        m_transform.sz[ 0 ] = 1;
-
-        m_transform.cdf[ 0 ] = 1;
-        m_transform.nb_sources = 1;
-    }
+    }   
 
     // Cut off the number of particles according the user parameter
     if ( m_nb_part_max != -1 )
@@ -678,6 +775,7 @@ void PhaseSpaceSource::initialize (GlobalSimulationParametersData *h_params )
 
     // Copy data on GPU
     m_copy_phasespace_to_gpu();
+    m_copy_transformation_to_gpu();
 
     // Some verbose if required
     if ( mh_params->display_memory_usage )
@@ -699,7 +797,7 @@ void PhaseSpaceSource::get_primaries_generator (ParticlesData *d_particles )
     threads.x = mh_params->gpu_block_size;
     grid.x = ( mh_params->size_of_particles_batch + mh_params->gpu_block_size - 1 ) / mh_params->gpu_block_size;
 
-    PHSPSRC::phsp_point_source<<<grid, threads>>>( d_particles, md_phasespace, m_transform );
+    PHSPSRC::phsp_point_source<<<grid, threads>>>( d_particles, md_phasespace, md_transform );
     cuda_error_check( "Error ", " Kernel_phasespace_source" );
     cudaDeviceSynchronize();
 

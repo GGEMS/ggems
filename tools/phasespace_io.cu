@@ -572,8 +572,10 @@ PhaseSpaceData* PhaseSpaceIO::m_read_MHD_data()
 
             // Store a particle
             if ( pType == 1 ) phasespace->ptype[ i ] = PHOTON;
-            if ( pType == 2 ) phasespace->ptype[ i ] = ELECTRON;
-            if ( pType == 3 ) phasespace->ptype[ i ] = POSITRON;
+            else if ( pType == 2 ) phasespace->ptype[ i ] = ELECTRON;
+            else if ( pType == 3 ) phasespace->ptype[ i ] = POSITRON;
+            else GGwarn << "Unknow particle [" << i << "] type: " << pType << GGendl;
+
             phasespace->energy[ i ] = E;
             phasespace->pos_x[ i ] = px;
             phasespace->pos_y[ i ] = py;
@@ -581,7 +583,8 @@ PhaseSpaceData* PhaseSpaceIO::m_read_MHD_data()
             phasespace->dir_x[ i ] = u;
             phasespace->dir_y[ i ] = v;
             phasespace->dir_z[ i ] = w;
-            ++i;
+            ++i;           
+
         }
     }
     else

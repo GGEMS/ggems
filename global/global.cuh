@@ -259,6 +259,7 @@ void GGnewline( );
 
 std::string Energy_str( f32 E );
 std::string Range_str( f32 E );
+std::string Status_str( ui8 status );
 
 f64 get_time();
 

@@ -232,6 +232,27 @@ std::string Range_str( f32 range )
     return std::string( tmp );
 }
 
+std::string Status_str( ui8 status )
+{
+    if ( status == PARTICLE_ALIVE )
+    {
+        return std::string( "Alive" );
+    }
+    else if ( status == PARTICLE_DEAD )
+    {
+        return std::string( "Dead" );
+    }
+    else if ( status == PARTICLE_FREEZE )
+    {
+        return std::string( "Freeze" );
+    }
+    else
+    {
+        return std::string( "Unknow" );
+    }
+
+}
+
 // Print params
 void GGcout_params( GlobalSimulationParametersData *params )
 {
