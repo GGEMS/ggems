@@ -67,6 +67,10 @@ public:
 
     // Update
     void update_phasespace_file( std::string filename );
+    void update_transformation_file( std::string filename );
+    void update_translation( f32 tx, f32 ty, f32 tz );
+    void update_rotation( f32 aroundx, f32 aroundy, f32 aroundz );
+    void update_scaling( f32 sx, f32 sy, f32 sz );
 
     // Abstract from GGEMSSource (Mandatory funtions)
     void get_primaries_generator( ParticlesData *d_particles );
@@ -80,6 +84,8 @@ private:
     void m_copy_phasespace_to_gpu();    
     void m_free_phasespace_to_gpu();
     void m_copy_transformation_to_gpu();
+    void m_free_transformation_to_gpu();
+    void m_update_transformation_to_gpu();
 
     bool m_check_mandatory();
     void m_transform_allocation( ui32 nb_sources );

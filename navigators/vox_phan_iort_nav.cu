@@ -1373,6 +1373,8 @@ void VoxPhanIORTNav::calculate_dose_to_medium()
 
 }
 
+/// Setting ////////////////////////////////
+
 void VoxPhanIORTNav::set_materials( std::string filename )
 {
     m_materials_filename = filename;
@@ -1405,6 +1407,15 @@ void VoxPhanIORTNav::set_vrt( std::string kind )
         exit_simulation();
     }
 }
+
+/// Updating /////////////////////////////////
+
+void VoxPhanIORTNav::update_clear_deposition()
+{
+    m_dose_calculator.clear_deposition();
+}
+
+/// Getting //////////////////////////////////
 
 VoxVolumeData<f32> * VoxPhanIORTNav::get_dose_map()
 {

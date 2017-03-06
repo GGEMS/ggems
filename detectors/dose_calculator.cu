@@ -123,6 +123,18 @@ __host__ __device__ void dose_record_TLE( DoseData *dose, f32 Edep, f32 px, f32 
 
 }
 
+// Kernel that move particles to the voxelized volume boundary
+__global__ void kernel_clear_deposition( DoseData *dose )
+{
+    const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
+    if (id >= dose->tot_nb_dosels) return;
+
+    dose->edep[ id ] = 0.0;
+    dose->edep_squared[ id ] = 0.0;
+    dose->number_of_hits[ id ] = 0;
+}
+
+
 /// Private /////////////////////////////////////////////////////////////////////
 
 bool DoseCalculator::m_check_mandatory()
@@ -469,6 +481,30 @@ VoxVolumeData<f32> * DoseCalculator::get_dose_map()
 
     return dosemap;
 }
+
+/// Updating/clearing
+
+void DoseCalculator::clear_deposition()
+{
+    // Clear all maps
+    ui32 i=0; while (i < h_dose->tot_nb_dosels)
+    {
+        h_dose->edep[i] = 0.0;
+        h_dose->edep_squared[i] = 0.0;
+        h_dose->number_of_hits[i] = 0;
+        ++i;
+    }
+
+    dim3 threads, grid;
+    threads.x = mh_params->gpu_block_size;
+    grid.x = ( h_dose->tot_nb_dosels + mh_params->gpu_block_size - 1 ) / mh_params->gpu_block_size;
+
+    kernel_clear_deposition<<<grid, threads>>>( d_dose );
+    cudaDeviceSynchronize();
+    cuda_error_check("Error ", " Kernel_clear_deposition (DoseCalculator)");
+
+}
+
 
 /// Init
 void DoseCalculator::initialize ( GlobalSimulationParametersData *h_params )

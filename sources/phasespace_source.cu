@@ -210,6 +210,68 @@ void PhaseSpaceSource::set_transformation_file( std::string filename )
     m_transformation_file = filename;
 }
 
+//========== Update ======================================================
+
+// Updating the transformation file
+void PhaseSpaceSource::update_transformation_file( std::string filename )
+{
+    m_transformation_file = filename;
+
+    m_update_transformation_to_gpu();
+}
+
+// Updating position of the source
+void PhaseSpaceSource::update_translation( f32 tx, f32 ty, f32 tz )
+{
+    // First check if there is only one soruce defined
+    if ( mh_transform->nb_sources != 1 )
+    {
+        GGcerr << "Phasespace source: to update position only one source must be defined" << GGendl;
+        exit_simulation();
+    }
+
+    m_tx = tx;
+    m_ty = ty;
+    m_tz = tz;
+
+    m_update_transformation_to_gpu();
+
+}
+
+// Setting rotation of the source
+void PhaseSpaceSource::update_rotation( f32 aroundx, f32 aroundy, f32 aroundz )
+{
+    // First check if there is only one soruce defined
+    if ( mh_transform->nb_sources != 1 )
+    {
+        GGcerr << "Phasespace source: to update position only one source must be defined" << GGendl;
+        exit_simulation();
+    }
+
+    m_rx = aroundx;
+    m_ry = aroundy;
+    m_rz = aroundz;
+
+    m_update_transformation_to_gpu();
+}
+
+// Setting scaling of the source
+void PhaseSpaceSource::update_scaling( f32 sx, f32 sy, f32 sz )
+{
+    // First check if there is only one soruce defined
+    if ( mh_transform->nb_sources != 1 )
+    {
+        GGcerr << "Phasespace source: to update position only one source must be defined" << GGendl;
+        exit_simulation();
+    }
+
+    m_sx = sx;
+    m_sy = sy;
+    m_sz = sz;
+
+    m_update_transformation_to_gpu();
+}
+
 void PhaseSpaceSource::update_phasespace_file( std::string filename )
 {
     m_phasespace_file = filename;
@@ -682,6 +744,118 @@ void PhaseSpaceSource::m_free_phasespace_to_gpu()
 
     md_phasespace = nullptr;
 
+}
+
+void PhaseSpaceSource::m_free_transformation_to_gpu()
+{
+//    ui32 n = mh_transform->nb_sources;
+
+    /// First, struct allocation
+//    HANDLE_ERROR( cudaMalloc( (void**) &md_transform, sizeof( PhSpTransform ) ) );
+
+    /// Device pointers allocation
+    f32 *tx;
+//    HANDLE_ERROR( cudaMalloc((void**) &tx, n*sizeof(f32)) );
+    f32 *ty;
+//    HANDLE_ERROR( cudaMalloc((void**) &ty, n*sizeof(f32)) );
+    f32 *tz;
+//    HANDLE_ERROR( cudaMalloc((void**) &tz, n*sizeof(f32)) );
+
+    f32 *rx;
+//    HANDLE_ERROR( cudaMalloc((void**) &rx, n*sizeof(f32)) );
+    f32 *ry;
+//    HANDLE_ERROR( cudaMalloc((void**) &ry, n*sizeof(f32)) );
+    f32 *rz;
+//    HANDLE_ERROR( cudaMalloc((void**) &rz, n*sizeof(f32)) );
+
+    f32 *sx;
+//    HANDLE_ERROR( cudaMalloc((void**) &sx, n*sizeof(f32)) );
+    f32 *sy;
+//    HANDLE_ERROR( cudaMalloc((void**) &sy, n*sizeof(f32)) );
+    f32 *sz;
+//    HANDLE_ERROR( cudaMalloc((void**) &sz, n*sizeof(f32)) );
+
+    f32 *cdf;
+//    HANDLE_ERROR( cudaMalloc((void**) &cdf, n*sizeof(f32)) );
+
+
+    /// Unbind data to the struct
+    HANDLE_ERROR( cudaMemcpy( &tx, &(md_transform->tx),
+                              sizeof(md_transform->tx), cudaMemcpyDeviceToHost ) );
+    HANDLE_ERROR( cudaMemcpy( &ty, &(md_transform->ty),
+                              sizeof(md_transform->ty), cudaMemcpyDeviceToHost ) );
+    HANDLE_ERROR( cudaMemcpy( &tz, &(md_transform->tz),
+                              sizeof(md_transform->tz), cudaMemcpyDeviceToHost ) );
+
+    HANDLE_ERROR( cudaMemcpy( &rx, &(md_transform->rx),
+                              sizeof(md_transform->rx), cudaMemcpyDeviceToHost ) );
+    HANDLE_ERROR( cudaMemcpy( &ry, &(md_transform->ry),
+                              sizeof(md_transform->ry), cudaMemcpyDeviceToHost ) );
+    HANDLE_ERROR( cudaMemcpy( &rz, &(md_transform->rz),
+                              sizeof(md_transform->rz), cudaMemcpyDeviceToHost ) );
+
+    HANDLE_ERROR( cudaMemcpy( &sx, &(md_transform->sx),
+                              sizeof(md_transform->sx), cudaMemcpyDeviceToHost ) );
+    HANDLE_ERROR( cudaMemcpy( &sy, &(md_transform->sy),
+                              sizeof(md_transform->sy), cudaMemcpyDeviceToHost ) );
+    HANDLE_ERROR( cudaMemcpy( &sz, &(md_transform->sz),
+                              sizeof(md_transform->sz), cudaMemcpyDeviceToHost ) );
+
+    HANDLE_ERROR( cudaMemcpy( &cdf, &(md_transform->cdf),
+                              sizeof(md_transform->cdf), cudaMemcpyDeviceToHost ) );
+
+    // Free memory
+    cudaFree( tx );
+    cudaFree( ty );
+    cudaFree( tz );
+
+    cudaFree( rx );
+    cudaFree( ry );
+    cudaFree( rz );
+
+    cudaFree( sx );
+    cudaFree( sy );
+    cudaFree( sz );
+
+    cudaFree( cdf );
+
+    cudaFree( md_transform );
+    md_transform = nullptr;
+
+}
+
+void PhaseSpaceSource::m_update_transformation_to_gpu()
+{
+    // Free memory
+    m_free_transformation_to_gpu();
+
+    // Load transformation file (CPU & GPU)
+    if ( m_transformation_file != "" )
+    {
+        m_load_transformation_file();
+    }
+    else
+    {
+        m_transform_allocation( 1 );
+
+        mh_transform->tx[ 0 ] = m_tx;
+        mh_transform->ty[ 0 ] = m_ty;
+        mh_transform->tz[ 0 ] = m_tz;
+
+        mh_transform->rx[ 0 ] = m_rx;
+        mh_transform->ry[ 0 ] = m_ry;
+        mh_transform->rz[ 0 ] = m_rz;
+
+        mh_transform->sx[ 0 ] = m_sx;
+        mh_transform->sy[ 0 ] = m_sy;
+        mh_transform->sz[ 0 ] = m_sz;
+
+        mh_transform->cdf[ 0 ] = 1.0;
+        mh_transform->nb_sources = 1;
+    }
+
+    // Copy to GPU
+    m_copy_transformation_to_gpu();
 }
 
 //========= Main function ============================================

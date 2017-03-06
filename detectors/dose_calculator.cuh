@@ -76,6 +76,9 @@ public:
     void set_materials( Materials materials );
     void set_min_density( f32 min ); // Min density to consider the dose calculation
 
+    // Updating
+    void clear_deposition();
+
     // Getting
     VoxVolumeData<f32> * get_dose_map();
 
@@ -97,7 +100,7 @@ private :
     void m_dose_to_water_calculation( ui32 dosel_id_x, ui32 dosel_id_y, ui32 dosel_id_z );
     void m_dose_to_phantom_calculation( ui32 dosel_id_x, ui32 dosel_id_y, ui32 dosel_id_z );
     void m_copy_dosemap_to_gpu();
-    void m_copy_dosemap_to_cpu();
+    void m_copy_dosemap_to_cpu();    
 
     VoxelizedPhantom m_phantom;
     Materials m_materials;

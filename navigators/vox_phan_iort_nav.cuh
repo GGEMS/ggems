@@ -189,6 +189,10 @@ public:
     void set_vrt( std::string kind );
 
     ////////////////////////
+    // Update
+    void update_clear_deposition();
+
+    ////////////////////////
 
     void export_density_map( std::string filename );
     void export_materials_map( std::string filename );
