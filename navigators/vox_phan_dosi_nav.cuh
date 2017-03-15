@@ -97,6 +97,8 @@ public:
 
     AabbData get_bounding_box();
 
+    void update_clear_deposition();
+
 private:
 
     VoxelizedPhantom m_phantom;

@@ -896,4 +896,11 @@ AabbData VoxPhanDosiNav::get_bounding_box()
     return box;
 }
 
+/// Updating /////////////////////////////////
+
+void VoxPhanDosiNav::update_clear_deposition()
+{
+    m_dose_calculator.clear_deposition();
+}
+
 #endif
