@@ -183,7 +183,7 @@ public:
     void calculate_dose_to_medium();
     void calculate_dose_to_water();
     
-    void write( std::string filename = "dosimetry.mhd" );
+    void write( std::string filename = "dosimetry.mhd", std::string options = "all" );
     void set_materials( std::string filename );
 
     void set_vrt( std::string kind );

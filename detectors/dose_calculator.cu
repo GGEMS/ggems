@@ -686,8 +686,64 @@ void DoseCalculator::calculate_dose_to_medium()
 
 }
 
-void DoseCalculator::write ( std::string filename )
+void DoseCalculator::write( std::string filename , std::string option )
 {
+    // Transform the name of option in small letter
+    std::transform( option.begin(), option.end(), option.begin(), ::tolower );
+    std::string edep( "energy" );
+    std::string dose( "dose" );
+    std::string unc( "uncertainty" );
+    std::string edepSq( "energysquared" );
+    std::string hit( "hit" );
+
+    ui8 flag_edep = false;
+    ui8 flag_edepSq = false;
+    ui8 flag_dose = false;
+    ui8 flag_unc = false;
+    ui8 flag_hit = false;
+
+    if ( option == "all" )
+    {
+        flag_edep = true;
+        flag_edepSq = true;
+        flag_dose = true;
+        flag_unc = true;
+        flag_hit = true;
+    }
+    else
+    {
+        if ( option.find(edep) != std::string::npos )
+        {
+            flag_edep = true;
+        }
+
+        if ( option.find(edepSq) != std::string::npos )
+        {
+            flag_edepSq = true;
+        }
+
+        if ( option.find(dose) != std::string::npos )
+        {
+            flag_dose = true;
+        }
+
+        if ( option.find(unc) != std::string::npos )
+        {
+            flag_unc = true;
+        }
+
+        if ( option.find(hit) != std::string::npos )
+        {
+            flag_hit = true;
+        }
+
+        if ( !flag_edep && !flag_edepSq && !flag_dose && !flag_unc && !flag_hit )
+        {
+            GGwarn << "No options to export the results from the DoseCalculator were recognized!" << GGendl;
+            return;
+        }
+    }
+
     // Update host dose data
     m_copy_dosemap_to_cpu();
 
@@ -716,11 +772,11 @@ void DoseCalculator::write ( std::string filename )
     std::string dose_out( filename + "-Dose." + format );
 
     // Export Edep and EdepSquared
-    im_io->write_3D( edep_out, f32edep, h_dose->nb_dosels, h_dose->offset, h_dose->dosel_size );
-    im_io->write_3D( edep_squared_out, f32edepSq, h_dose->nb_dosels, h_dose->offset, h_dose->dosel_size );
+    if ( flag_edep ) im_io->write_3D( edep_out, f32edep, h_dose->nb_dosels, h_dose->offset, h_dose->dosel_size );
+    if ( flag_edepSq ) im_io->write_3D( edep_squared_out, f32edepSq, h_dose->nb_dosels, h_dose->offset, h_dose->dosel_size );
 
     // Export uncertainty
-    if ( !m_flag_uncertainty_calculated )
+    if ( !m_flag_uncertainty_calculated && flag_unc )
     {
         // Calculate the dose to phantom and the uncertainty
         for ( ui32 iz=0; iz < h_dose->nb_dosels.z; iz++ )
@@ -736,11 +792,11 @@ void DoseCalculator::write ( std::string filename )
     }
 
     // Export uncertainty and hits
-    im_io->write_3D( uncer_out, m_uncertainty_values, h_dose->nb_dosels, h_dose->offset, h_dose->dosel_size );
-    im_io->write_3D( hit_out, h_dose->number_of_hits, h_dose->nb_dosels, h_dose->offset, h_dose->dosel_size );
+    if ( flag_unc ) im_io->write_3D( uncer_out, m_uncertainty_values, h_dose->nb_dosels, h_dose->offset, h_dose->dosel_size );
+    if ( flag_hit ) im_io->write_3D( hit_out, h_dose->number_of_hits, h_dose->nb_dosels, h_dose->offset, h_dose->dosel_size );
 
     // Export dose
-    if ( m_flag_dose_calculated )
+    if ( m_flag_dose_calculated && flag_dose )
     {
         im_io->write_3D( dose_out, m_dose_values, h_dose->nb_dosels, h_dose->offset, h_dose->dosel_size );
     }

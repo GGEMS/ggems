@@ -763,11 +763,9 @@ void VoxPhanDosiNav::load_phantom_from_mhd ( std::string filename, std::string r
     m_phantom.load_from_mhd ( filename, range_mat_name );
 }
 
-void VoxPhanDosiNav::write ( std::string filename )
+void VoxPhanDosiNav::write(std::string filename, std::string options )
 {
-//     m_dose_calculator.m_copy_dose_gpu2cpu();
-
-    m_dose_calculator.write ( filename );
+    m_dose_calculator.write( filename, options );
 }
 
 // Export density values of the phantom

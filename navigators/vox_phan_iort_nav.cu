@@ -1212,9 +1212,9 @@ void VoxPhanIORTNav::load_phantom_from_mhd( std::string filename, std::string ra
     m_phantom.load_from_mhd( filename, range_mat_name );
 }
 
-void VoxPhanIORTNav::write( std::string filename )
+void VoxPhanIORTNav::write( std::string filename , std::string options )
 {
-    m_dose_calculator.write( filename );
+    m_dose_calculator.write( filename, options );
 }
 
 // Export density values of the phantom

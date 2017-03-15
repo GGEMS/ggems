@@ -86,7 +86,7 @@ public:
     void calculate_dose_to_medium();
     void calculate_dose_to_water();
     
-    void write( std::string filename = "dosimetry.mhd" );
+    void write( std::string filename = "dosimetry.mhd", std::string options = "all" );
     void set_materials( std::string filename );
     void set_dosel_size( f32 sizex, f32 sizey, f32 sizez );
     void set_dose_min_density( f32 min );

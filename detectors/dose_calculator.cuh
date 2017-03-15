@@ -89,7 +89,7 @@ public:
     void calculate_dose_to_water();
     void calculate_dose_to_medium();
 
-    void write( std::string filename = "dosimetry.mhd" );
+    void write( std::string filename = "dosimetry.mhd", std::string option = "all" );
 
     DoseData *h_dose;
     DoseData *d_dose;
