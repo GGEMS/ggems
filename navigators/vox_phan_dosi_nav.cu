@@ -331,13 +331,14 @@ __host__ __device__ void VPDN::track_electron_to_out( ParticlesData *particles, 
                     dose_record_standard( dosi, secondary_part.E, particles->px[ part_id ],
                                           particles->py[ part_id ], particles->pz[ part_id ] );
                 }
-
+/*
 #ifdef DEBUG
                 if ( particles->level[ part_id ] == parameters->nb_of_secondaries )
                 {
                     printf( "[ERROR] track_electron_to_out: reach max secondary level\n");
                 }
 #endif
+*/
             }
 
             //totalLength += trueStepLength;
