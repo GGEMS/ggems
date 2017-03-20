@@ -1,7 +1,7 @@
 // GGEMS Copyright (C) 2017
 
 /*!
- * \file vox_phan_iort_nav.cuh
+ * \file vox_phan_vrt_nav.cuh
  * \brief
  * \author J. Bert <bert.jul@gmail.com>
  * \version 0.2
@@ -11,8 +11,8 @@
  *
  */
 
-#ifndef VOX_PHAN_IORT_NAV_CUH
-#define VOX_PHAN_IORT_NAV_CUH
+#ifndef VOX_PHAN_VRT_NAV_CUH
+#define VOX_PHAN_VRT_NAV_CUH
 
 #include "ggems.cuh"
 #include "global.cuh"
@@ -29,13 +29,14 @@
 #include "transport_navigator.cuh"
 #include "mu_data.cuh"
 
-// For variance reduction (use in IORT for instance)
+// For variance reduction (use in VRT for instance)
 #define VRT_ANALOG   0
 #define VRT_TLE      1
 #define VRT_WOODCOCK 2
 #define VRT_SETLE    3
 
 // Mu and Mu_en table used by TLE
+/*
 struct Mu_MuEn_Data {
     f32* E_bins;      // n
     f32* mu;          // n*k
@@ -47,6 +48,7 @@ struct Mu_MuEn_Data {
     f32 E_min;
     f32 E_max;     
 };
+*/
 
 /*
 // History map used by seTLE
@@ -67,8 +69,8 @@ struct COOHistoryMap {
 };
 */
 
-// VoxPhanIORTNav -> VPIN
-namespace VPIORTN
+// VoxPhanVRTNav -> VPVRTN
+namespace VPVRTN
 {
 
 __host__ __device__ void track_to_out_analog( ParticlesData *particles,
@@ -165,11 +167,11 @@ __global__ void kernel_device_seTLE(ParticlesData particles,
 
 }
 
-class VoxPhanIORTNav : public GGEMSPhantom
+class VoxPhanVRTNav : public GGEMSPhantom
 {
 public:
-    VoxPhanIORTNav();
-    ~VoxPhanIORTNav() {}
+    VoxPhanVRTNav();
+    ~VoxPhanVRTNav() {}
 
     // Init
     void initialize( GlobalSimulationParametersData *h_params, GlobalSimulationParametersData *d_params );

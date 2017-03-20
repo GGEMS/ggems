@@ -1,7 +1,7 @@
 // GGEMS Copyright (C) 2017
 
 /*!
- * \file vox_phan_iort_nav.cu
+ * \file vox_phan_vrt_nav.cu
  * \brief
  * \author J. Bert <bert.jul@gmail.com>
  * \version 0.2
@@ -11,14 +11,14 @@
  *
  */
 
-#ifndef VOX_PHAN_IORT_NAV_CU
-#define VOX_PHAN_IORT_NAV_CU
+#ifndef VOX_PHAN_VRT_NAV_CU
+#define VOX_PHAN_VRT_NAV_CU
 
-#include "vox_phan_iort_nav.cuh"
+#include "vox_phan_vrt_nav.cuh"
 
 ////// HOST-DEVICE GPU Codes ////////////////////////////////////////////
 
-__host__ __device__ void VPIORTN::track_to_out_analog( ParticlesData *particles,
+__host__ __device__ void VPVRTN::track_to_out_analog( ParticlesData *particles,
                                                        const VoxVolumeData<ui16> *vol,
                                                        const MaterialsData *materials,
                                                        const PhotonCrossSectionData *photon_CS_table,
@@ -149,7 +149,7 @@ __host__ __device__ void VPIORTN::track_to_out_analog( ParticlesData *particles,
 
 }
 
-__host__ __device__ void VPIORTN::track_to_out_tle( ParticlesData *particles,
+__host__ __device__ void VPVRTN::track_to_out_tle( ParticlesData *particles,
                                                     const VoxVolumeData<ui16> *vol,
                                                     const MaterialsData *materials,
                                                     const PhotonCrossSectionData *photon_CS_table,
@@ -292,7 +292,7 @@ __host__ __device__ void VPIORTN::track_to_out_tle( ParticlesData *particles,
 
 /// Experimental ///////////////////////////////////////////////
 
-__host__ __device__ void VPIORTN::track_to_out_woodcock( ParticlesData *particles,
+__host__ __device__ void VPVRTN::track_to_out_woodcock( ParticlesData *particles,
                                                          const VoxVolumeData<ui16> *vol,
                                                          const MaterialsData *materials,
                                                          const PhotonCrossSectionData *photon_CS_table,
@@ -499,7 +499,7 @@ __host__ __device__ void VPIORTN::track_to_out_woodcock( ParticlesData *particle
 
 /*
 // Se TLE function
-__host__ __device__ void VPIORTN::track_seTLE( ParticlesData particles,
+__host__ __device__ void VPVRTN::track_seTLE( ParticlesData particles,
                                                VoxVolumeData<ui16> vol,
                                                COOHistoryMap coo_hist_map,
                                                DoseData dose,
@@ -666,7 +666,7 @@ __host__ __device__ void VPIORTN::track_seTLE( ParticlesData particles,
 
 
 // Device Kernel that move particles to the voxelized volume boundary
-__global__ void VPIORTN::kernel_device_track_to_in( ParticlesData *particles, f32 xmin, f32 xmax,
+__global__ void VPVRTN::kernel_device_track_to_in( ParticlesData *particles, f32 xmin, f32 xmax,
                                                     f32 ymin, f32 ymax, f32 zmin, f32 zmax, f32 tolerance )
 {  
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
@@ -675,7 +675,7 @@ __global__ void VPIORTN::kernel_device_track_to_in( ParticlesData *particles, f3
 }
 
 // Device kernel that track particles within the voxelized volume until boundary
-__global__ void VPIORTN::kernel_device_track_to_out_analog( ParticlesData *particles,
+__global__ void VPVRTN::kernel_device_track_to_out_analog( ParticlesData *particles,
                                                             const VoxVolumeData<ui16> *vol,
                                                             const MaterialsData *materials,
                                                             const PhotonCrossSectionData *photon_CS_table,
@@ -688,12 +688,12 @@ __global__ void VPIORTN::kernel_device_track_to_out_analog( ParticlesData *parti
     // Stepping loop - Get out of loop only if the particle was dead and it was a primary
     while ( particles->status[id] != PARTICLE_DEAD && particles->status[id] != PARTICLE_FREEZE )
     {
-        VPIORTN::track_to_out_analog( particles, vol, materials, photon_CS_table, parameters, dosi, id );
+        VPVRTN::track_to_out_analog( particles, vol, materials, photon_CS_table, parameters, dosi, id );
     }
 }
 
 // Device kernel that track particles within the voxelized volume until boundary
-__global__ void VPIORTN::kernel_device_track_to_out_tle( ParticlesData *particles,
+__global__ void VPVRTN::kernel_device_track_to_out_tle( ParticlesData *particles,
                                                          const VoxVolumeData<ui16> *vol,
                                                          const MaterialsData *materials,
                                                          const PhotonCrossSectionData *photon_CS_table,
@@ -707,7 +707,7 @@ __global__ void VPIORTN::kernel_device_track_to_out_tle( ParticlesData *particle
     // Stepping loop - Get out of loop only if the particle was dead and it was a primary
     while ( particles->status[id] != PARTICLE_DEAD && particles->status[id] != PARTICLE_FREEZE )
     {
-        VPIORTN::track_to_out_tle( particles, vol, materials, photon_CS_table,
+        VPVRTN::track_to_out_tle( particles, vol, materials, photon_CS_table,
                                    parameters, dosi, mu_table, id );
     }
 }
@@ -715,7 +715,7 @@ __global__ void VPIORTN::kernel_device_track_to_out_tle( ParticlesData *particle
 /// Experimental
 
 // Device kernel that track particles within the voxelized volume until boundary
-__global__ void VPIORTN::kernel_device_track_to_out_woodcock( ParticlesData *particles,
+__global__ void VPVRTN::kernel_device_track_to_out_woodcock( ParticlesData *particles,
                                                               const VoxVolumeData<ui16> *vol,
                                                               const MaterialsData *materials,
                                                               const PhotonCrossSectionData *photon_CS_table,
@@ -729,14 +729,14 @@ __global__ void VPIORTN::kernel_device_track_to_out_woodcock( ParticlesData *par
     // Stepping loop - Get out of loop only if the particle was dead and it was a primary
     while ( particles->status[id] != PARTICLE_DEAD && particles->status[id] != PARTICLE_FREEZE )
     {
-        VPIORTN::track_to_out_woodcock( particles, vol, materials, photon_CS_table,
+        VPVRTN::track_to_out_woodcock( particles, vol, materials, photon_CS_table,
                                         parameters, dosi, mumax_table, id );
     }
 }
 
 /*
 // Device kernel that perform seTLE
-__global__ void VPIORTN::kernel_device_seTLE( ParticlesData particles,
+__global__ void VPVRTN::kernel_device_seTLE( ParticlesData particles,
                                               VoxVolumeData<ui16> vol,
                                               COOHistoryMap coo_hist_map,
                                               DoseData dosi,
@@ -745,11 +745,11 @@ __global__ void VPIORTN::kernel_device_seTLE( ParticlesData particles,
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
     if ( id >= coo_hist_map.nb_data ) return;
 
-    VPIORTN::track_seTLE( particles, vol, coo_hist_map, dosi, mu_table, nb_of_rays, edep_th, id );
+    VPVRTN::track_seTLE( particles, vol, coo_hist_map, dosi, mu_table, nb_of_rays, edep_th, id );
 }
 
 // Host kernel that perform seTLE
-void VPIORTN::kernel_host_seTLE( ParticlesData particles,
+void VPVRTN::kernel_host_seTLE( ParticlesData particles,
                                  VoxVolumeData<ui16> vol,
                                  COOHistoryMap coo_hist_map,
                                  DoseData dosi,
@@ -758,7 +758,7 @@ void VPIORTN::kernel_host_seTLE( ParticlesData particles,
     ui32 id = 0;
     while ( id < coo_hist_map.nb_data )
     {
-        VPIORTN::track_seTLE( particles, vol, coo_hist_map, dosi, mu_table, nb_of_rays, edep_th, id );
+        VPVRTN::track_seTLE( particles, vol, coo_hist_map, dosi, mu_table, nb_of_rays, edep_th, id );
         ++id;
     }
 }
@@ -766,7 +766,7 @@ void VPIORTN::kernel_host_seTLE( ParticlesData particles,
 
 ///////////////////// Privates
 
-bool VoxPhanIORTNav::m_check_mandatory()
+bool VoxPhanVRTNav::m_check_mandatory()
 {
 
     if ( m_phantom.h_volume->nb_vox_x == 0 || m_phantom.h_volume->nb_vox_y == 0 || m_phantom.h_volume->nb_vox_z == 0 ||
@@ -783,7 +783,7 @@ bool VoxPhanIORTNav::m_check_mandatory()
 }
 
 // Init mu and mu_en table
-void VoxPhanIORTNav::m_init_mu_table()
+void VoxPhanVRTNav::m_init_mu_table()
 {
     // Load mu data
     f32 *energies  = new f32[mu_nb_energies];
@@ -931,7 +931,7 @@ void VoxPhanIORTNav::m_init_mu_table()
 
 /*
 // Compress history map to be process by the GPU (in a non-sparse way)
-void VoxPhanIORTNav::m_compress_history_map()
+void VoxPhanVRTNav::m_compress_history_map()
 {
     // 1. count the number of non-zero
     ui32 ct = 0; ui32 i = 0; ui32 val_int;
@@ -984,7 +984,7 @@ void VoxPhanIORTNav::m_compress_history_map()
 */
 
 // return memory usage
-ui64 VoxPhanIORTNav::m_get_memory_usage()
+ui64 VoxPhanVRTNav::m_get_memory_usage()
 {
     ui64 mem = 0;
 
@@ -1032,7 +1032,7 @@ ui64 VoxPhanIORTNav::m_get_memory_usage()
 ////:: Experimental
 
 // Use for woodcock navigation
-void VoxPhanIORTNav::m_build_mumax_table()
+void VoxPhanVRTNav::m_build_mumax_table()
 {
     // Init mumax table vector
     ui32 nb_bins_E = m_cross_sections.h_photon_CS->nb_bins;
@@ -1081,7 +1081,7 @@ void VoxPhanIORTNav::m_build_mumax_table()
 
 ////:: Main functions
 
-VoxPhanIORTNav::VoxPhanIORTNav ()
+VoxPhanVRTNav::VoxPhanVRTNav ()
 {
     // Default doxel size (if 0 = same size to the phantom)
     m_dosel_size_x = 0;
@@ -1125,25 +1125,25 @@ VoxPhanIORTNav::VoxPhanIORTNav ()
     mh_params = nullptr;
     md_params = nullptr;
 
-    set_name( "VoxPhanIORTNav" );
+    set_name( "VoxPhanVRTNav" );
 }
 
-void VoxPhanIORTNav::track_to_in(ParticlesData *d_particles )
+void VoxPhanVRTNav::track_to_in(ParticlesData *d_particles )
 {    
     dim3 threads, grid;
     threads.x = mh_params->gpu_block_size;
     grid.x = ( mh_params->size_of_particles_batch + mh_params->gpu_block_size - 1 ) / mh_params->gpu_block_size;
 
-    VPIORTN::kernel_device_track_to_in<<<grid, threads>>> ( d_particles, m_phantom.h_volume->xmin, m_phantom.h_volume->xmax,
+    VPVRTN::kernel_device_track_to_in<<<grid, threads>>> ( d_particles, m_phantom.h_volume->xmin, m_phantom.h_volume->xmax,
                                                             m_phantom.h_volume->ymin, m_phantom.h_volume->ymax,
                                                             m_phantom.h_volume->zmin, m_phantom.h_volume->zmax,
                                                             mh_params->geom_tolerance );
     cudaDeviceSynchronize();
-    cuda_error_check ( "Error ", " Kernel_VoxPhanIORT (track to in)" );    
+    cuda_error_check ( "Error ", " Kernel_VoxPhanVRT (track to in)" );
 
 }
 
-void VoxPhanIORTNav::track_to_out(ParticlesData *d_particles )
+void VoxPhanVRTNav::track_to_out(ParticlesData *d_particles )
 {
 
     dim3 threads, grid;
@@ -1152,7 +1152,7 @@ void VoxPhanIORTNav::track_to_out(ParticlesData *d_particles )
 
     if ( m_flag_vrt == VRT_ANALOG )
     {
-        VPIORTN::kernel_device_track_to_out_analog<<<grid, threads>>>( d_particles,
+        VPVRTN::kernel_device_track_to_out_analog<<<grid, threads>>>( d_particles,
                                                                        m_phantom.d_volume,
                                                                        m_materials.d_materials,
                                                                        m_cross_sections.d_photon_CS,
@@ -1161,7 +1161,7 @@ void VoxPhanIORTNav::track_to_out(ParticlesData *d_particles )
     }
     else if ( m_flag_vrt == VRT_TLE )
     {
-        VPIORTN::kernel_device_track_to_out_tle<<<grid, threads>>>( d_particles,
+        VPVRTN::kernel_device_track_to_out_tle<<<grid, threads>>>( d_particles,
                                                                     m_phantom.d_volume,
                                                                     m_materials.d_materials,
                                                                     m_cross_sections.d_photon_CS,
@@ -1171,7 +1171,7 @@ void VoxPhanIORTNav::track_to_out(ParticlesData *d_particles )
     }
     else if ( m_flag_vrt == VRT_WOODCOCK )
     {
-        VPIORTN::kernel_device_track_to_out_woodcock<<<grid, threads>>>( d_particles,
+        VPVRTN::kernel_device_track_to_out_woodcock<<<grid, threads>>>( d_particles,
                                                                     m_phantom.d_volume,
                                                                     m_materials.d_materials,
                                                                     m_cross_sections.d_photon_CS,
@@ -1180,7 +1180,7 @@ void VoxPhanIORTNav::track_to_out(ParticlesData *d_particles )
                                                                     m_mumax_table );
     }
     cudaDeviceSynchronize();
-    cuda_error_check ( "Error ", " Kernel_VoxPhanIORT" );    
+    cuda_error_check ( "Error ", " Kernel_VoxPhanVRT" );
 
 
 /*
@@ -1195,7 +1195,7 @@ void VoxPhanIORTNav::track_to_out(ParticlesData *d_particles )
             grid.x = ( m_coo_hist_map.nb_data + m_params.data_h.gpu_block_size - 1 ) / m_params.data_h.gpu_block_size;
 
             t_start = get_time();
-            VPIORTN::kernel_device_seTLE<<<grid, threads>>> ( d_particles.data_d, m_phantom.data_d,
+            VPVRTN::kernel_device_seTLE<<<grid, threads>>> ( d_particles.data_d, m_phantom.data_d,
                                                               m_coo_hist_map, m_dose_calculator.dose,
                                                               m_mu_table, 1000, 0.0 *eV );
             cuda_error_check ( "Error ", " Kernel_device_seTLE" );
@@ -1207,18 +1207,18 @@ void VoxPhanIORTNav::track_to_out(ParticlesData *d_particles )
 
 }
 
-void VoxPhanIORTNav::load_phantom_from_mhd( std::string filename, std::string range_mat_name )
+void VoxPhanVRTNav::load_phantom_from_mhd( std::string filename, std::string range_mat_name )
 {
     m_phantom.load_from_mhd( filename, range_mat_name );
 }
 
-void VoxPhanIORTNav::write( std::string filename , std::string options )
+void VoxPhanVRTNav::write( std::string filename , std::string options )
 {
     m_dose_calculator.write( filename, options );
 }
 
 // Export density values of the phantom
-void VoxPhanIORTNav::export_density_map( std::string filename )
+void VoxPhanVRTNav::export_density_map( std::string filename )
 {
     ui32 N = m_phantom.h_volume->number_of_voxels;
     f32 *density = new f32[ N ];
@@ -1239,7 +1239,7 @@ void VoxPhanIORTNav::export_density_map( std::string filename )
 }
 
 // Export materials index of the phantom
-void VoxPhanIORTNav::export_materials_map( std::string filename )
+void VoxPhanVRTNav::export_materials_map( std::string filename )
 {
     f32xyz offset = make_f32xyz( m_phantom.h_volume->off_x, m_phantom.h_volume->off_y, m_phantom.h_volume->off_z );
     f32xyz voxsize = make_f32xyz( m_phantom.h_volume->spacing_x, m_phantom.h_volume->spacing_y, m_phantom.h_volume->spacing_z );
@@ -1252,7 +1252,7 @@ void VoxPhanIORTNav::export_materials_map( std::string filename )
 
 /*
 // Export history map from seTLE
-void VoxPhanIORTNav::export_history_map( std::string filename )
+void VoxPhanVRTNav::export_history_map( std::string filename )
 {
     if ( m_flag_TLE == seTLE )
     {
@@ -1291,13 +1291,13 @@ void VoxPhanIORTNav::export_history_map( std::string filename )
 }
 */
 
-void VoxPhanIORTNav::initialize (GlobalSimulationParametersData *h_params , GlobalSimulationParametersData *d_params)
+void VoxPhanVRTNav::initialize (GlobalSimulationParametersData *h_params , GlobalSimulationParametersData *d_params)
 {   
 
     // Check params
     if ( !m_check_mandatory() )
     {
-        print_error ( "VoxPhanIORT: missing parameters." );
+        print_error ( "VoxPhanVRT: missing parameters." );
         exit_simulation();
     }
 
@@ -1306,7 +1306,7 @@ void VoxPhanIORTNav::initialize (GlobalSimulationParametersData *h_params , Glob
     md_params = d_params;
 
     // Phantom
-    m_phantom.set_name( "VoxPhanIORTNav" );
+    m_phantom.set_name( "VoxPhanVRTNav" );
     m_phantom.initialize();
 
     // Materials table
@@ -1356,18 +1356,18 @@ void VoxPhanIORTNav::initialize (GlobalSimulationParametersData *h_params , Glob
     if ( mh_params->display_memory_usage )
     {
         ui64 mem = m_get_memory_usage();
-        GGcout_mem("VoxPhanIORTNav", mem);
+        GGcout_mem("VoxPhanVRTNav", mem);
     }
 
 }
 
-void VoxPhanIORTNav::calculate_dose_to_water()
+void VoxPhanVRTNav::calculate_dose_to_water()
 {
     m_dose_calculator.calculate_dose_to_water();
 
 }
 
-void VoxPhanIORTNav::calculate_dose_to_medium()
+void VoxPhanVRTNav::calculate_dose_to_medium()
 {
     m_dose_calculator.calculate_dose_to_medium();
 
@@ -1375,12 +1375,12 @@ void VoxPhanIORTNav::calculate_dose_to_medium()
 
 /// Setting ////////////////////////////////
 
-void VoxPhanIORTNav::set_materials( std::string filename )
+void VoxPhanVRTNav::set_materials( std::string filename )
 {
     m_materials_filename = filename;
 }
 
-void VoxPhanIORTNav::set_vrt( std::string kind )
+void VoxPhanVRTNav::set_vrt( std::string kind )
 {
     // Transform the name of the process in small letter
     std::transform( kind.begin(), kind.end(), kind.begin(), ::tolower );
@@ -1410,19 +1410,19 @@ void VoxPhanIORTNav::set_vrt( std::string kind )
 
 /// Updating /////////////////////////////////
 
-void VoxPhanIORTNav::update_clear_deposition()
+void VoxPhanVRTNav::update_clear_deposition()
 {
     m_dose_calculator.clear_deposition();
 }
 
 /// Getting //////////////////////////////////
 
-VoxVolumeData<f32> * VoxPhanIORTNav::get_dose_map()
+VoxVolumeData<f32> * VoxPhanVRTNav::get_dose_map()
 {
     return m_dose_calculator.get_dose_map();
 }
 
-AabbData VoxPhanIORTNav::get_bounding_box()
+AabbData VoxPhanVRTNav::get_bounding_box()
 {
     AabbData box;
 
