@@ -34,10 +34,10 @@
 #define VRT_TLE      1
 #define VRT_WOODCOCK 2
 #define VRT_SETLE    3
+#define VRT_SVW    4 // Super Voxel Woodcock
 
 // Mu and Mu_en table used by TLE
-/*
-struct Mu_MuEn_Data {
+struct VRT_Mu_MuEn_Data {
     f32* E_bins;      // n
     f32* mu;          // n*k
     f32* mu_en;       // n*k
@@ -48,7 +48,6 @@ struct Mu_MuEn_Data {
     f32 E_min;
     f32 E_max;     
 };
-*/
 
 /*
 // History map used by seTLE
@@ -87,7 +86,7 @@ __host__ __device__ void track_to_out_tle( ParticlesData *particles,
                                            const PhotonCrossSectionData *photon_CS_table,
                                            const GlobalSimulationParametersData *parameters,
                                            DoseData *dosi,
-                                           const Mu_MuEn_Data *mu_table,
+                                           const VRT_Mu_MuEn_Data *mu_table,
                                            ui32 part_id );
 
 /// Experimental
@@ -100,6 +99,18 @@ __host__ __device__ void track_to_out_woodcock( ParticlesData *particles,
                                                 DoseData *dosi,
                                                 f32* mumax_table,
                                                 ui32 part_id );
+
+/// Experimental (Super Voxel Woodcock)
+
+__host__ __device__ void track_to_out_svw( ParticlesData *particles,
+                                            const VoxVolumeData<ui16> *vol,
+                                            const MaterialsData *materials,
+                                            const PhotonCrossSectionData *photon_CS_table,
+                                            const GlobalSimulationParametersData *parameters,
+                                            DoseData *dosi,
+                                            f32* mumax_table,
+                                            ui32* mumax_index_table,
+                                            ui32 part_id );
 /*
 __host__ __device__ void track_to_out_setle(ParticlesData particles,
                                       VoxVolumeData<ui16> vol,
@@ -137,7 +148,7 @@ __global__ void kernel_device_track_to_out_tle( ParticlesData *particles,
                                                 const PhotonCrossSectionData *photon_CS_table,
                                                 const GlobalSimulationParametersData *parameters,
                                                 DoseData *dosi,
-                                                const Mu_MuEn_Data *mu_table );
+                                                const VRT_Mu_MuEn_Data *mu_table );
 
 /// Experimental
 __global__ void kernel_device_track_to_out_woodcock( ParticlesData *particles,
@@ -147,6 +158,16 @@ __global__ void kernel_device_track_to_out_woodcock( ParticlesData *particles,
                                                      const GlobalSimulationParametersData *parameters,
                                                      DoseData *dosi,
                                                      f32* mumax_table );
+
+/// Experimental (Super Voxel Woodcock)
+__global__ void kernel_device_track_to_out_svw( ParticlesData *particles,
+                                                     const VoxVolumeData<ui16> *vol,
+                                                     const MaterialsData *materials,
+                                                     const PhotonCrossSectionData *photon_CS_table,
+                                                     const GlobalSimulationParametersData *parameters,
+                                                     DoseData *dosi,
+                                                     f32* mumax_table,
+                                                     ui32* mumax_index_table );
 /*
 __global__ void kernel_device_track_to_out_setle( ParticlesData *particles,
                                                  const VoxVolumeData<ui16> *vol,
@@ -190,6 +211,9 @@ public:
 
     void set_vrt( std::string kind );
 
+    // Set the super voxel resolution
+    void set_nb_bins_sup_voxel( f32 nb_bins_sup_voxel );
+
     ////////////////////////
     // Update
     void update_clear_deposition();
@@ -207,12 +231,13 @@ public:
 private:
 
     VoxelizedPhantom m_phantom;
+    VoxVolumeData<f32> m_super_voxels; // Super Voxel Woodcock
     Materials m_materials;
     CrossSections m_cross_sections;
     DoseCalculator m_dose_calculator;
 
-    Mu_MuEn_Data *mh_mu_table;
-    Mu_MuEn_Data *md_mu_table;
+    VRT_Mu_MuEn_Data *mh_mu_table;
+    VRT_Mu_MuEn_Data *md_mu_table;
 //    HistoryMap m_hist_map;
 //    COOHistoryMap m_coo_hist_map;
 
@@ -224,7 +249,8 @@ private:
     ui64 m_get_memory_usage();
 
     f32 m_dosel_size_x, m_dosel_size_y, m_dosel_size_z;
-    f32 m_xmin, m_xmax, m_ymin, m_ymax, m_zmin, m_zmax;    
+    f32 m_xmin, m_xmax, m_ymin, m_ymax, m_zmin, m_zmax;
+    ui32 m_nb_bins_sup_voxel;
 
     GlobalSimulationParametersData *mh_params;
     GlobalSimulationParametersData *md_params;
@@ -235,7 +261,12 @@ private:
 
     // Experimental (Woodcock tracking)
     void m_build_mumax_table();
+
+    // Experimental (Super Voxel Woodcock tracking)
+    void m_build_svw_mumax_table();
+
     f32* m_mumax_table;
+    ui32* m_mumax_index_table;
 
 //
 };
