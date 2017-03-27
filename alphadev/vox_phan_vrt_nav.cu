@@ -1324,7 +1324,7 @@ void VoxPhanVRTNav::m_build_svw_mumax_table()
     // Init voxel -> super voxel index
     ui32 *sup_vox_index = new ui32[m_phantom.h_volume->number_of_voxels];
 
-    // Init super voxel dimensions
+    // Init the super voxel size
     ui32 nbx_sup_vox = (m_phantom.h_volume->nb_vox_x % m_nb_bins_sup_voxel == 0)
             ? m_phantom.h_volume->nb_vox_x / m_nb_bins_sup_voxel
             : m_phantom.h_volume->nb_vox_x / m_nb_bins_sup_voxel + 1;
@@ -1790,7 +1790,7 @@ void VoxPhanVRTNav::set_vrt( std::string kind )
     }
 }
 
-// Set the super voxel resolution
+// Set the super voxel size
 void VoxPhanVRTNav::set_nb_bins_sup_voxel( ui32 nb_bins_sup_voxel )
 {
     m_nb_bins_sup_voxel = nb_bins_sup_voxel;
