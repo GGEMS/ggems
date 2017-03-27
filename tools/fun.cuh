@@ -31,10 +31,15 @@ __host__ __device__ f32 loglog_interpolation ( f32 x, f32 x0, f32 y0, f32 x1, f3
 template < typename T, typename U >                            // !!!! size = total size of the data
 inline __host__ __device__ ui32 binary_search ( T key, U* tab, ui32 size, ui32 min=0 )
 {
+    //printf("size: %d\n", size);
+    //printf("min: %d\n", min);
     ui32 max=size, mid;
     while ( ( min < max ) )
     {
         mid = ( min + max ) >> 1;
+        //printf("min: %d\n", min);
+        //printf("mid: %d\n", mid);
+        //printf("max: %d\n", max);
         if ( key > tab[mid] )
         {
             min = mid+1;
@@ -44,6 +49,7 @@ inline __host__ __device__ ui32 binary_search ( T key, U* tab, ui32 size, ui32 m
             max = mid;
         }
     }
+    //printf("niveau atteint");
     return min;
 }
 

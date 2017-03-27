@@ -126,7 +126,7 @@ file(GLOB sourcesGPU
     ${PROJECT_SOURCE_DIR}/sources/*.cu)
 
 file(GLOB headersGPU
-    ${PROJECT_SOURCE_DIR}/aplhadev/vox_phan_vrt_nav.cuh
+    ${PROJECT_SOURCE_DIR}/alphadev/vox_phan_vrt_nav.cuh
     ${PROJECT_SOURCE_DIR}/detectors/*.cuh
     ${PROJECT_SOURCE_DIR}/data/*.cuh
     ${PROJECT_SOURCE_DIR}/geometries/*.cuh

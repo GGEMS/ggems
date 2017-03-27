@@ -212,7 +212,7 @@ public:
     void set_vrt( std::string kind );
 
     // Set the super voxel resolution
-    void set_nb_bins_sup_voxel( f32 nb_bins_sup_voxel );
+    void set_nb_bins_sup_voxel( ui32 nb_bins_sup_voxel );
 
     ////////////////////////
     // Update

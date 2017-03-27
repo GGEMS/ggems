@@ -19,12 +19,12 @@
 ////// HOST-DEVICE GPU Codes ////////////////////////////////////////////
 
 __host__ __device__ void VPVRTN::track_to_out_analog( ParticlesData *particles,
-                                                       const VoxVolumeData<ui16> *vol,
-                                                       const MaterialsData *materials,
-                                                       const PhotonCrossSectionData *photon_CS_table,
-                                                       const GlobalSimulationParametersData *parameters,
-                                                       DoseData *dosi,
-                                                       ui32 part_id )
+                                                      const VoxVolumeData<ui16> *vol,
+                                                      const MaterialsData *materials,
+                                                      const PhotonCrossSectionData *photon_CS_table,
+                                                      const GlobalSimulationParametersData *parameters,
+                                                      DoseData *dosi,
+                                                      ui32 part_id )
 {
     // Read position
     f32xyz pos;
@@ -49,8 +49,8 @@ __host__ __device__ void VPVRTN::track_to_out_analog( ParticlesData *particles,
     index_phantom.z = ui32 ( ( pos.z + vol->off_z ) * ivoxsize.z );
 
     index_phantom.w = index_phantom.z*vol->nb_vox_x*vol->nb_vox_y
-                      + index_phantom.y*vol->nb_vox_x
-                      + index_phantom.x; // linear index
+            + index_phantom.y*vol->nb_vox_x
+            + index_phantom.x; // linear index
 
     // Get the material that compose this volume
     ui16 mat_id = vol->values[ index_phantom.w ];
@@ -115,7 +115,7 @@ __host__ __device__ void VPVRTN::track_to_out_analog( ParticlesData *particles,
     {
         // Resolve discrete process
         SecParticle electron = photon_resolve_discrete_process ( particles, parameters, photon_CS_table,
-                                                     materials, mat_id, part_id );
+                                                                 materials, mat_id, part_id );
         /// Energy cut /////////////
 
         // If gamma particle not enough energy (Energy cut)
@@ -150,13 +150,13 @@ __host__ __device__ void VPVRTN::track_to_out_analog( ParticlesData *particles,
 }
 
 __host__ __device__ void VPVRTN::track_to_out_tle( ParticlesData *particles,
-                                                    const VoxVolumeData<ui16> *vol,
-                                                    const MaterialsData *materials,
-                                                    const PhotonCrossSectionData *photon_CS_table,
-                                                    const GlobalSimulationParametersData *parameters,
-                                                    DoseData *dosi,
-                                                    const VRT_Mu_MuEn_Data *mu_table,
-                                                    ui32 part_id )
+                                                   const VoxVolumeData<ui16> *vol,
+                                                   const MaterialsData *materials,
+                                                   const PhotonCrossSectionData *photon_CS_table,
+                                                   const GlobalSimulationParametersData *parameters,
+                                                   DoseData *dosi,
+                                                   const VRT_Mu_MuEn_Data *mu_table,
+                                                   ui32 part_id )
 {
     // Read position
     f32xyz pos;
@@ -181,8 +181,8 @@ __host__ __device__ void VPVRTN::track_to_out_tle( ParticlesData *particles,
     index_phantom.z = ui32 ( ( pos.z + vol->off_z ) * ivoxsize.z );
 
     index_phantom.w = index_phantom.z*vol->nb_vox_x*vol->nb_vox_y
-                      + index_phantom.y*vol->nb_vox_x
-                      + index_phantom.x; // linear index
+            + index_phantom.y*vol->nb_vox_x
+            + index_phantom.x; // linear index
 
     // Get the material that compose this volume
     ui16 mat_id = vol->values[ index_phantom.w ];
@@ -265,8 +265,8 @@ __host__ __device__ void VPVRTN::track_to_out_tle( ParticlesData *particles,
     else
     {
         mu_en = linear_interpolation( mu_table->E_bins[E_index-1],  mu_table->mu_en[mat_id*mu_table->nb_bins + E_index-1],
-                                      mu_table->E_bins[E_index],    mu_table->mu_en[mat_id*mu_table->nb_bins + E_index],
-                                      energy );
+                mu_table->E_bins[E_index],    mu_table->mu_en[mat_id*mu_table->nb_bins + E_index],
+                energy );
     }
 
     //                             record to the old position (current voxel)
@@ -293,13 +293,13 @@ __host__ __device__ void VPVRTN::track_to_out_tle( ParticlesData *particles,
 /// Experimental ///////////////////////////////////////////////
 
 __host__ __device__ void VPVRTN::track_to_out_woodcock( ParticlesData *particles,
-                                                         const VoxVolumeData<ui16> *vol,
-                                                         const MaterialsData *materials,
-                                                         const PhotonCrossSectionData *photon_CS_table,
-                                                         const GlobalSimulationParametersData *parameters,
-                                                         DoseData *dosi,
-                                                         f32* mumax_table,
-                                                         ui32 part_id )
+                                                        const VoxVolumeData<ui16> *vol,
+                                                        const MaterialsData *materials,
+                                                        const PhotonCrossSectionData *photon_CS_table,
+                                                        const GlobalSimulationParametersData *parameters,
+                                                        DoseData *dosi,
+                                                        f32* mumax_table,
+                                                        ui32 part_id )
 {
     // Read position
     f32xyz pos;
@@ -362,8 +362,8 @@ __host__ __device__ void VPVRTN::track_to_out_woodcock( ParticlesData *particles
     index_phantom.z = ui32( ( pos.z + vol->off_z ) * ivoxsize.z );
 
     index_phantom.w = index_phantom.z*vol->nb_vox_x*vol->nb_vox_y
-                      + index_phantom.y*vol->nb_vox_x
-                      + index_phantom.x; // linear index
+            + index_phantom.y*vol->nb_vox_x
+            + index_phantom.x; // linear index
 
     // Get the material that compose this volume
     ui16 mat_id = vol->values[ index_phantom.w ];
@@ -401,7 +401,7 @@ __host__ __device__ void VPVRTN::track_to_out_woodcock( ParticlesData *particles
     f32 rnd = prng_uniform( particles, part_id );
 
     if ( rnd > sum_CS * CS_max  )
-    {        
+    {
         // Fictive interaction, keep going!
         return;
     }
@@ -448,7 +448,7 @@ __host__ __device__ void VPVRTN::track_to_out_woodcock( ParticlesData *particles
     electron.dir.x = 0.;
     electron.dir.y = 0.;
     electron.dir.z = 1.;
-    electron.E = 0.;    
+    electron.E = 0.;
 
     if ( next_discrete_process == PHOTON_COMPTON )
     {
@@ -501,15 +501,16 @@ __host__ __device__ void VPVRTN::track_to_out_woodcock( ParticlesData *particles
 /// Experimental (Super Voxel Woodcock) ///////////////////////////////////////////////
 
 __host__ __device__ void VPVRTN::track_to_out_svw( ParticlesData *particles,
-                                                         const VoxVolumeData<ui16> *vol,
-                                                         const MaterialsData *materials,
-                                                         const PhotonCrossSectionData *photon_CS_table,
-                                                         const GlobalSimulationParametersData *parameters,
-                                                         DoseData *dosi,
-                                                         f32* mumax_table,
-                                                         ui32* mumax_index_table,
-                                                         ui32 part_id )
+                                                   const VoxVolumeData<ui16> *vol,
+                                                   const MaterialsData *materials,
+                                                   const PhotonCrossSectionData *photon_CS_table,
+                                                   const GlobalSimulationParametersData *parameters,
+                                                   DoseData *dosi,
+                                                   f32* mumax_table,
+                                                   ui32* mumax_index_table,
+                                                   ui32 part_id )
 {
+
     // Read position
     f32xyz pos;
     pos.x = particles->px[part_id];
@@ -539,8 +540,8 @@ __host__ __device__ void VPVRTN::track_to_out_svw( ParticlesData *particles,
     index_phantom.z = ui32( ( pos.z + vol->off_z ) * ivoxsize.z );
 
     index_phantom.w = index_phantom.z*vol->nb_vox_x*vol->nb_vox_y
-                      + index_phantom.y*vol->nb_vox_x
-                      + index_phantom.x; // linear index
+            + index_phantom.y*vol->nb_vox_x
+            + index_phantom.x; // linear index
 
     // Search the energy index to read CS
     f32 energy = particles->E[part_id];
@@ -548,13 +549,10 @@ __host__ __device__ void VPVRTN::track_to_out_svw( ParticlesData *particles,
                                   photon_CS_table->nb_bins );
 
     // Get index CS table the coresponding super voxel
-    ui32 CS_max_index = binary_search ( energy, mumax_table,
-                                    ( mumax_index_table[ index_phantom.w ] + 1 ) * photon_CS_table->nb_bins - 1, //max
-                                    mumax_index_table[ index_phantom.w ] * photon_CS_table->nb_bins  //min
-                                   );
+    ui32 CS_max_index = mumax_index_table[ index_phantom.w ] * photon_CS_table->nb_bins + E_index;
 
     f32 CS_max = ( E_index == 0 )? mumax_table[CS_max_index]: linear_interpolation(photon_CS_table->E_bins[E_index-1], mumax_table[CS_max_index-1],
-                                                                               photon_CS_table->E_bins[E_index], mumax_table[CS_max_index], energy);
+            photon_CS_table->E_bins[E_index], mumax_table[CS_max_index], energy);
 
 
     // Woodcock tracking
@@ -881,7 +879,7 @@ __host__ __device__ void VPVRTN::track_seTLE( ParticlesData particles,
 
 // Device Kernel that move particles to the voxelized volume boundary
 __global__ void VPVRTN::kernel_device_track_to_in( ParticlesData *particles, f32 xmin, f32 xmax,
-                                                    f32 ymin, f32 ymax, f32 zmin, f32 zmax, f32 tolerance )
+                                                   f32 ymin, f32 ymax, f32 zmin, f32 zmax, f32 tolerance )
 {  
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
     if ( id >= particles->size ) return;
@@ -890,11 +888,11 @@ __global__ void VPVRTN::kernel_device_track_to_in( ParticlesData *particles, f32
 
 // Device kernel that track particles within the voxelized volume until boundary
 __global__ void VPVRTN::kernel_device_track_to_out_analog( ParticlesData *particles,
-                                                            const VoxVolumeData<ui16> *vol,
-                                                            const MaterialsData *materials,
-                                                            const PhotonCrossSectionData *photon_CS_table,
-                                                            const GlobalSimulationParametersData *parameters,
-                                                            DoseData *dosi  )
+                                                           const VoxVolumeData<ui16> *vol,
+                                                           const MaterialsData *materials,
+                                                           const PhotonCrossSectionData *photon_CS_table,
+                                                           const GlobalSimulationParametersData *parameters,
+                                                           DoseData *dosi  )
 {
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
     if ( id >= particles->size ) return;
@@ -908,12 +906,12 @@ __global__ void VPVRTN::kernel_device_track_to_out_analog( ParticlesData *partic
 
 // Device kernel that track particles within the voxelized volume until boundary
 __global__ void VPVRTN::kernel_device_track_to_out_tle( ParticlesData *particles,
-                                                         const VoxVolumeData<ui16> *vol,
-                                                         const MaterialsData *materials,
-                                                         const PhotonCrossSectionData *photon_CS_table,
-                                                         const GlobalSimulationParametersData *parameters,
-                                                         DoseData *dosi,
-                                                         const VRT_Mu_MuEn_Data *mu_table )
+                                                        const VoxVolumeData<ui16> *vol,
+                                                        const MaterialsData *materials,
+                                                        const PhotonCrossSectionData *photon_CS_table,
+                                                        const GlobalSimulationParametersData *parameters,
+                                                        DoseData *dosi,
+                                                        const VRT_Mu_MuEn_Data *mu_table )
 {
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
     if ( id >= particles->size ) return;
@@ -922,7 +920,7 @@ __global__ void VPVRTN::kernel_device_track_to_out_tle( ParticlesData *particles
     while ( particles->status[id] != PARTICLE_DEAD && particles->status[id] != PARTICLE_FREEZE )
     {
         VPVRTN::track_to_out_tle( particles, vol, materials, photon_CS_table,
-                                   parameters, dosi, mu_table, id );
+                                  parameters, dosi, mu_table, id );
     }
 }
 
@@ -930,12 +928,12 @@ __global__ void VPVRTN::kernel_device_track_to_out_tle( ParticlesData *particles
 
 // Device kernel that track particles within the voxelized volume until boundary
 __global__ void VPVRTN::kernel_device_track_to_out_woodcock( ParticlesData *particles,
-                                                              const VoxVolumeData<ui16> *vol,
-                                                              const MaterialsData *materials,
-                                                              const PhotonCrossSectionData *photon_CS_table,
-                                                              const GlobalSimulationParametersData *parameters,
-                                                              DoseData *dosi,
-                                                              f32* mumax_table )
+                                                             const VoxVolumeData<ui16> *vol,
+                                                             const MaterialsData *materials,
+                                                             const PhotonCrossSectionData *photon_CS_table,
+                                                             const GlobalSimulationParametersData *parameters,
+                                                             DoseData *dosi,
+                                                             f32* mumax_table )
 {
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
     if ( id >= particles->size ) return;
@@ -944,19 +942,19 @@ __global__ void VPVRTN::kernel_device_track_to_out_woodcock( ParticlesData *part
     while ( particles->status[id] != PARTICLE_DEAD && particles->status[id] != PARTICLE_FREEZE )
     {
         VPVRTN::track_to_out_woodcock( particles, vol, materials, photon_CS_table,
-                                        parameters, dosi, mumax_table, id );
+                                       parameters, dosi, mumax_table, id );
     }
 }
 
 // Device kernel that track particles within the voxelized volume until boundary (Super Voxel Woodcock)
 __global__ void VPVRTN::kernel_device_track_to_out_svw( ParticlesData *particles,
-                                                         const VoxVolumeData<ui16> *vol,
-                                                         const MaterialsData *materials,
-                                                         const PhotonCrossSectionData *photon_CS_table,
-                                                         const GlobalSimulationParametersData *parameters,
-                                                         DoseData *dosi,
-                                                         f32* mumax_table,
-                                                         ui32* mumax_index_table)
+                                                        const VoxVolumeData<ui16> *vol,
+                                                        const MaterialsData *materials,
+                                                        const PhotonCrossSectionData *photon_CS_table,
+                                                        const GlobalSimulationParametersData *parameters,
+                                                        DoseData *dosi,
+                                                        f32* mumax_table,
+                                                        ui32* mumax_index_table)
 {
     const ui32 id = blockIdx.x * blockDim.x + threadIdx.x;
     if ( id >= particles->size ) return;
@@ -965,7 +963,7 @@ __global__ void VPVRTN::kernel_device_track_to_out_svw( ParticlesData *particles
     while ( particles->status[id] != PARTICLE_DEAD && particles->status[id] != PARTICLE_FREEZE )
     {
         VPVRTN::track_to_out_svw( particles, vol, materials, photon_CS_table,
-                                        parameters, dosi, mumax_table, mumax_index_table, id );
+                                  parameters, dosi, mumax_table, mumax_index_table, id );
     }
 }
 
@@ -1101,11 +1099,11 @@ void VoxPhanVRTNav::m_init_mu_table()
                 else
                 {
                     mu_over_rho += frac * linear_interpolation(energies[E_index-1],  mu[E_index-1],
-                                                               energies[E_index],    mu[E_index],
-                                                               energy);
+                            energies[E_index],    mu[E_index],
+                            energy);
                     mu_en_over_rho += frac * linear_interpolation(energies[E_index-1],  mu_en[E_index-1],
-                                                                  energies[E_index],    mu_en[E_index],
-                                                                  energy);
+                            energies[E_index],    mu_en[E_index],
+                            energy);
                 }
                 ++iZ;
             }
@@ -1261,6 +1259,12 @@ ui64 VoxPhanVRTNav::m_get_memory_usage()
         mem += m_cross_sections.h_photon_CS->nb_bins * sizeof(ui32);
     }
 
+    // If Super Voxel Woodcock
+    if ( m_flag_vrt == VRT_SVW)
+    {
+        mem += m_cross_sections.h_photon_CS->nb_bins * sizeof(ui32);
+    }
+
     return mem;
 }
 
@@ -1332,58 +1336,49 @@ void VoxPhanVRTNav::m_build_svw_mumax_table()
             : m_phantom.h_volume->nb_vox_z / m_nb_bins_sup_voxel + 1;
 
     // Init super voxels mumax table vector and material index
-    //f32 *sup_vox_mumax_table = new f32[nbx_sup_vox * nby_sup_vox * nbz_sup_vox];
     ui32 *sup_vox_ind_mat_table = new ui32[nbx_sup_vox * nby_sup_vox * nbz_sup_vox];
+    for (ui32 i = 0; i < nbx_sup_vox * nby_sup_vox * nbz_sup_vox; ++i) {
+            sup_vox_ind_mat_table [ i ] = 0;
+    }
 
     // Find the most attenuate material in each super voxel
-    f32 max_dens = 0.0;
-    ui32 x_start = 0; ui32 x_end = (m_nb_bins_sup_voxel <= m_phantom.h_volume->nb_vox_x)
-            ? m_nb_bins_sup_voxel - 1: m_phantom.h_volume->nb_vox_x - 1;
-    ui32 y_start = 0; ui32 y_end = (m_nb_bins_sup_voxel <= m_phantom.h_volume->nb_vox_y)
-            ? m_nb_bins_sup_voxel - 1: m_phantom.h_volume->nb_vox_y - 1;
-    ui32 z_start = 0; ui32 z_end = (m_nb_bins_sup_voxel <= m_phantom.h_volume->nb_vox_z)
-            ? m_nb_bins_sup_voxel - 1: m_phantom.h_volume->nb_vox_z - 1;
-
-    ui32 ind_sup_vol = 0; ui32 ind_vol = 0; while ( ind_vol < m_phantom.h_volume->number_of_voxels -1)
+    ui32 ind_sup_vol = 0;
+    ui32 i, j, k, ii, jj, kk, rest;
+    ui32 xy = m_phantom.h_volume->nb_vox_x * m_phantom.h_volume->nb_vox_y;
+    ui32 sv_xy = nbx_sup_vox * nby_sup_vox;
+    ui32 ind_vol = 0; while ( ind_vol < m_phantom.h_volume->number_of_voxels )
     {
-        max_dens = 0.0;
-        ui32 k = z_start; while ( k <= z_end ) {
-            ui32 j = y_start; while ( j <= y_end ) {
-                ui32 i = x_start; while ( i <= x_end ) {
-                    ind_vol = k * m_phantom.h_volume->nb_vox_y * m_phantom.h_volume->nb_vox_x
-                            + j * m_phantom.h_volume->nb_vox_x
-                            + i;
-                    if ( m_materials.h_materials->density[ m_phantom.h_volume->values[ ind_vol ] ] > max_dens )
-                    {
-                        max_dens = m_materials.h_materials->density[ m_phantom.h_volume->values[ ind_vol ] ];
-                        // Material index associated to the super voxel ind_sup_vol
-                        sup_vox_ind_mat_table [ind_sup_vol] = m_phantom.h_volume->values[ ind_vol ];
-                        // super voxel index associated to the the voxel ind_vol
-                        sup_vox_index[ ind_vol ] = ind_sup_vol;
-                    }
-                    ++i;
-                }
-                x_start = (x_end < m_phantom.h_volume->nb_vox_x - 1)? x_end + 1 : INT32_MAX;
-                x_end = (x_end + m_nb_bins_sup_voxel <= m_phantom.h_volume->nb_vox_x - 1)? x_end + m_nb_bins_sup_voxel: m_phantom.h_volume->nb_vox_x - 1;
-                ++j;
-            }
-            y_start = (y_end <= m_phantom.h_volume->nb_vox_y - 1)? y_end + 1 : INT32_MAX;
-            y_end = (y_end + m_nb_bins_sup_voxel <= m_phantom.h_volume->nb_vox_y - 1)? y_end + m_nb_bins_sup_voxel: m_phantom.h_volume->nb_vox_y - 1;
-            ++k;
+        // Calculate the i, j, k voxel index
+        k = ind_vol / xy;
+        rest = ind_vol % xy;
+        j = ( rest ) / m_phantom.h_volume->nb_vox_x;
+        i = rest % m_phantom.h_volume->nb_vox_x;
+        // Calculate the ii, jj, kk super voxel index
+        ii = i / m_nb_bins_sup_voxel;
+        jj = j / m_nb_bins_sup_voxel;
+        kk = k / m_nb_bins_sup_voxel;
+        ind_sup_vol = kk * sv_xy + jj * nbx_sup_vox + ii;
+
+        // super voxel index associated to the the voxel ind_vol
+        sup_vox_index[ ind_vol ] = ind_sup_vol;
+
+
+        // Material index associated to the super voxel ind_sup_vol
+        if ( m_materials.h_materials->density[ m_phantom.h_volume->values[ ind_vol ] ] > m_materials.h_materials->density[ sup_vox_ind_mat_table [ind_sup_vol] ] )
+        {
+            sup_vox_ind_mat_table [ind_sup_vol] = m_phantom.h_volume->values[ ind_vol ];
         }
-        z_start = (z_end <= m_phantom.h_volume->nb_vox_z - 1)? z_end + 1 : INT32_MAX;
-        z_end = (z_end + m_nb_bins_sup_voxel <= m_phantom.h_volume->nb_vox_z - 1)? z_end + m_nb_bins_sup_voxel: m_phantom.h_volume->nb_vox_z - 1;
-        //sup_vox_mumax_table [ind_sup_vol] = m_materials.h_materials->density[ ind_vol ];
-        ++ind_sup_vol;
+        ++ind_vol;
     }
 
     // Reduce the sup_vox_ind_mat table size (removing duplicates)
     std::vector<ui32> red_sup_vox_ind_mat_table(1, sup_vox_ind_mat_table [ 0 ]);
     ui32 *old_to_red_link = new ui32[nbx_sup_vox * nby_sup_vox * nbz_sup_vox];
-    bool ind_not_found = true;
+    bool ind_not_found;
     old_to_red_link [0] = 0;
-    ui32 i = 1; while ( i < nbx_sup_vox * nby_sup_vox * nbz_sup_vox )
+    i = 1; while ( i < nbx_sup_vox * nby_sup_vox * nbz_sup_vox )
     {
+        ind_not_found = true;
         ui32 j = 0; while (j < red_sup_vox_ind_mat_table.size()) {
             if ( sup_vox_ind_mat_table [ i ] == red_sup_vox_ind_mat_table [ j ] ) {
                 old_to_red_link [i] = j;
@@ -1403,12 +1398,14 @@ void VoxPhanVRTNav::m_build_svw_mumax_table()
     HANDLE_ERROR( cudaMallocManaged( &(m_mumax_index_table), m_phantom.h_volume->number_of_voxels * sizeof( ui32 ) ) );
     i = 0; while (i < m_phantom.h_volume->number_of_voxels) {
         m_mumax_index_table[ i ] = old_to_red_link[ sup_vox_index[ i ] ];
+        ++i;
     }
 
     // Build table using max density  [ 1 / Sum( CS ) ]
     // Init voxels mumax table vector
     ui32 nb_bins_E = m_cross_sections.h_photon_CS->nb_bins;
-    HANDLE_ERROR( cudaMallocManaged( &(m_mumax_table), red_sup_vox_ind_mat_table.size() * nb_bins_E * sizeof( f32 ) ) );
+    ui32 size = red_sup_vox_ind_mat_table.size() * nb_bins_E;
+    HANDLE_ERROR( cudaMallocManaged( &(m_mumax_table), size * sizeof( f32 ) ) );
 
     i = 0; while ( i < red_sup_vox_ind_mat_table.size() )
     {
@@ -1432,7 +1429,7 @@ void VoxPhanVRTNav::m_build_svw_mumax_table()
                 sum_CS += m_cross_sections.h_photon_CS->Rayleigh_Lv_CS[ index ];
             }
 
-            m_mumax_table[ i * m_phantom.h_volume->number_of_voxels + j ] = 1.0 / sum_CS;
+            m_mumax_table[ i * nb_bins_E + j ] = 1.0 / sum_CS;
             ++j;
         }
         ++i;
@@ -1452,7 +1449,7 @@ VoxPhanVRTNav::VoxPhanVRTNav ()
     m_ymin = 0.0; m_ymax = 0.0;
     m_zmin = 0.0; m_zmax = 0.0;
 
-    m_nb_bins_sup_voxel = 5;
+    m_nb_bins_sup_voxel = 10;
 
     m_flag_vrt = VRT_ANALOG;
 
@@ -1469,7 +1466,7 @@ VoxPhanVRTNav::VoxPhanVRTNav ()
     mh_mu_table->E_bins = nullptr;
     mh_mu_table->mu = nullptr;
     mh_mu_table->mu_en = nullptr;
-/*
+    /*
     m_hist_map.interaction = NULL;
     m_hist_map.energy = NULL;
 
@@ -1499,9 +1496,9 @@ void VoxPhanVRTNav::track_to_in(ParticlesData *d_particles )
     grid.x = ( mh_params->size_of_particles_batch + mh_params->gpu_block_size - 1 ) / mh_params->gpu_block_size;
 
     VPVRTN::kernel_device_track_to_in<<<grid, threads>>> ( d_particles, m_phantom.h_volume->xmin, m_phantom.h_volume->xmax,
-                                                            m_phantom.h_volume->ymin, m_phantom.h_volume->ymax,
-                                                            m_phantom.h_volume->zmin, m_phantom.h_volume->zmax,
-                                                            mh_params->geom_tolerance );
+                                                           m_phantom.h_volume->ymin, m_phantom.h_volume->ymax,
+                                                           m_phantom.h_volume->zmin, m_phantom.h_volume->zmax,
+                                                           mh_params->geom_tolerance );
     cudaDeviceSynchronize();
     cuda_error_check ( "Error ", " Kernel_VoxPhanVRT (track to in)" );
 
@@ -1517,48 +1514,48 @@ void VoxPhanVRTNav::track_to_out(ParticlesData *d_particles )
     if ( m_flag_vrt == VRT_ANALOG )
     {
         VPVRTN::kernel_device_track_to_out_analog<<<grid, threads>>>( d_particles,
-                                                                       m_phantom.d_volume,
-                                                                       m_materials.d_materials,
-                                                                       m_cross_sections.d_photon_CS,
-                                                                       md_params,
-                                                                       m_dose_calculator.d_dose );
+                                                                      m_phantom.d_volume,
+                                                                      m_materials.d_materials,
+                                                                      m_cross_sections.d_photon_CS,
+                                                                      md_params,
+                                                                      m_dose_calculator.d_dose );
     }
     else if ( m_flag_vrt == VRT_TLE )
     {
         VPVRTN::kernel_device_track_to_out_tle<<<grid, threads>>>( d_particles,
-                                                                    m_phantom.d_volume,
-                                                                    m_materials.d_materials,
-                                                                    m_cross_sections.d_photon_CS,
-                                                                    md_params,
-                                                                    m_dose_calculator.d_dose,
-                                                                    md_mu_table );
+                                                                   m_phantom.d_volume,
+                                                                   m_materials.d_materials,
+                                                                   m_cross_sections.d_photon_CS,
+                                                                   md_params,
+                                                                   m_dose_calculator.d_dose,
+                                                                   md_mu_table );
     }
     else if ( m_flag_vrt == VRT_WOODCOCK )
     {
         VPVRTN::kernel_device_track_to_out_woodcock<<<grid, threads>>>( d_particles,
-                                                                    m_phantom.d_volume,
-                                                                    m_materials.d_materials,
-                                                                    m_cross_sections.d_photon_CS,
-                                                                    md_params,
-                                                                    m_dose_calculator.d_dose,
-                                                                    m_mumax_table );
+                                                                        m_phantom.d_volume,
+                                                                        m_materials.d_materials,
+                                                                        m_cross_sections.d_photon_CS,
+                                                                        md_params,
+                                                                        m_dose_calculator.d_dose,
+                                                                        m_mumax_table );
     }
     else if ( m_flag_vrt == VRT_SVW )
     {
         VPVRTN::kernel_device_track_to_out_svw<<<grid, threads>>>( d_particles,
-                                                                    m_phantom.d_volume,
-                                                                    m_materials.d_materials,
-                                                                    m_cross_sections.d_photon_CS,
-                                                                    md_params,
-                                                                    m_dose_calculator.d_dose,
-                                                                    m_mumax_table,
-                                                                    m_mumax_index_table);
+                                                                   m_phantom.d_volume,
+                                                                   m_materials.d_materials,
+                                                                   m_cross_sections.d_photon_CS,
+                                                                   md_params,
+                                                                   m_dose_calculator.d_dose,
+                                                                   m_mumax_table,
+                                                                   m_mumax_index_table);
     }
     cudaDeviceSynchronize();
     cuda_error_check ( "Error ", " Kernel_VoxPhanVRT" );
 
 
-/*
+    /*
         // Apply seTLE: splitting and determinstic raycasting
         if( m_flag_TLE == seTLE )
         {
@@ -1717,7 +1714,7 @@ void VoxPhanVRTNav::initialize (GlobalSimulationParametersData *h_params , Globa
     }
 
 
-/*
+    /*
     // if seTLE init history map
     if ( m_flag_TLE == seTLE )
     {
@@ -1782,6 +1779,10 @@ void VoxPhanVRTNav::set_vrt( std::string kind )
     {
         m_flag_vrt = VRT_WOODCOCK;
     }
+    else if ( kind == "svw" )
+    {
+        m_flag_vrt = VRT_SVW;
+    }
     else
     {
         GGcerr << "Variance reduction technique not recognized: '" << kind << "'!" << GGendl;
@@ -1790,7 +1791,7 @@ void VoxPhanVRTNav::set_vrt( std::string kind )
 }
 
 // Set the super voxel resolution
-void VoxPhanVRTNav::set_nb_bins_sup_voxel( f32 nb_bins_sup_voxel )
+void VoxPhanVRTNav::set_nb_bins_sup_voxel( ui32 nb_bins_sup_voxel )
 {
     m_nb_bins_sup_voxel = nb_bins_sup_voxel;
 }
