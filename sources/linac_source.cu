@@ -247,6 +247,12 @@ LinacSource::LinacSource() : GGEMSSource()
     h_linac_source->n_rho_E = make_ui32xy( 0, 0 );
     h_linac_source->n_rho_E_theta = make_ui32xyz( 0, 0, 0 );
     h_linac_source->n_rho_theta_phi = make_ui32xyz( 0, 0, 0 );
+
+    h_linac_source->cdf_rho = nullptr;
+    h_linac_source->cdf_rho_E = nullptr;
+    h_linac_source->cdf_rho_E_theta = nullptr;
+    h_linac_source->val_rho_E_theta_max = nullptr;
+    h_linac_source->cdf_rho_theta_phi = nullptr;
 }
 
 // Destructor
@@ -295,19 +301,19 @@ void LinacSource::m_load_linac_model()
             if ( key == "NRhoE" )
             {
                 h_linac_source->n_rho_E = make_ui32xy( txt_reader->read_key_i32_arg_atpos( line, 0 ),
-                                                           txt_reader->read_key_i32_arg_atpos( line, 1 ) );
+                                                       txt_reader->read_key_i32_arg_atpos( line, 1 ) );
             }
             if ( key == "NRhoETheta" )
             {
                 h_linac_source->n_rho_E_theta = make_ui32xyz( txt_reader->read_key_i32_arg_atpos( line, 0 ),
-                                                                  txt_reader->read_key_i32_arg_atpos( line, 1 ),
-                                                                  txt_reader->read_key_i32_arg_atpos( line, 2 ) );
+                                                              txt_reader->read_key_i32_arg_atpos( line, 1 ),
+                                                              txt_reader->read_key_i32_arg_atpos( line, 2 ) );
             }
             if ( key == "NRhoThetaPhi" )
             {
                 h_linac_source->n_rho_theta_phi = make_ui32xyz( txt_reader->read_key_i32_arg_atpos( line, 0 ),
-                                                                    txt_reader->read_key_i32_arg_atpos( line, 1 ),
-                                                                    txt_reader->read_key_i32_arg_atpos( line, 2 ) );
+                                                                txt_reader->read_key_i32_arg_atpos( line, 1 ),
+                                                                txt_reader->read_key_i32_arg_atpos( line, 2 ) );
             }
         }
 
@@ -340,32 +346,19 @@ void LinacSource::m_load_linac_model()
     h_linac_source->theta_max = theta_max;
     h_linac_source->phi_max = phi_max;
 
-    h_linac_source->s_rho = rho_max / f32( h_linac_source->n_rho - 1 );
+    h_linac_source->s_rho = rho_max / f32( h_linac_source->n_rho );
 
-    h_linac_source->s_rho_E = make_f32xy( rho_max / f32( h_linac_source->n_rho_E.x - 1 ),
-                                          E_max / f32( h_linac_source->n_rho_E.y - 1 ));
+    h_linac_source->s_rho_E = make_f32xy( rho_max / f32( h_linac_source->n_rho_E.x ),
+                                          E_max / f32( h_linac_source->n_rho_E.y ));
 
-    h_linac_source->s_rho_E_theta = make_f32xyz( rho_max / f32( h_linac_source->n_rho_E_theta.x - 1 ),
-                                                 E_max / f32( h_linac_source->n_rho_E_theta.y - 1),
-                                                 ( 1 - cos( theta_max ) ) / f32( h_linac_source->n_rho_E_theta.z - 1 ) );
+    h_linac_source->s_rho_E_theta = make_f32xyz( rho_max / f32( h_linac_source->n_rho_E_theta.x ),
+                                                 E_max / f32( h_linac_source->n_rho_E_theta.y ),
+                                                 0.0f );
 
-    h_linac_source->s_rho_theta_phi = make_f32xyz( rho_max / f32( h_linac_source->n_rho_theta_phi.x - 1 ),
-                                                   theta_max / f32( h_linac_source->n_rho_theta_phi.y - 1 ),
-                                                   phi_max / f32( h_linac_source->n_rho_theta_phi.z - 1 ) );
-/*
-    HANDLE_ERROR( cudaMallocManaged( &(h_linac_source.cdf_rho), h_linac_source.n_rho * sizeof( f32 ) ) );
+    h_linac_source->s_rho_theta_phi = make_f32xyz( rho_max / f32( h_linac_source->n_rho_theta_phi.x ),
+                                                   theta_max / f32( h_linac_source->n_rho_theta_phi.y ),
+                                                   phi_max / f32( h_linac_source->n_rho_theta_phi.z ) );
 
-    HANDLE_ERROR( cudaMallocManaged( &(h_linac_source.cdf_rho_E), h_linac_source.n_rho_E.x
-                                     * h_linac_source.n_rho_E.y * sizeof( f32 ) ) );
-
-    HANDLE_ERROR( cudaMallocManaged( &(h_linac_source.cdf_rho_E_theta),
-                                     h_linac_source.n_rho_E_theta.x * h_linac_source.n_rho_E_theta.y *
-                                     h_linac_source.n_rho_E_theta.z * sizeof( f32 ) ) );
-
-    HANDLE_ERROR( cudaMallocManaged( &(h_linac_source.cdf_rho_theta_phi),
-                                     h_linac_source.n_rho_theta_phi.x * h_linac_source.n_rho_theta_phi.y *
-                                     h_linac_source.n_rho_theta_phi.z * sizeof( f32 ) ) );
-*/
     // Read data
     FILE *pfile = fopen(ElementDataFile.c_str(), "rb");
 
@@ -384,15 +377,33 @@ void LinacSource::m_load_linac_model()
         }
     }
 
+    // Allocation
+    h_linac_source->cdf_rho = (f32*)malloc( h_linac_source->n_rho * sizeof(f32) );
+    h_linac_source->cdf_rho_E = (f32*)malloc( h_linac_source->n_rho_E.x * h_linac_source->n_rho_E.y * sizeof(f32) );
+    h_linac_source->cdf_rho_E_theta = (f32*)malloc( h_linac_source->n_rho_E_theta.x *
+                                                    h_linac_source->n_rho_E_theta.y *
+                                                    h_linac_source->n_rho_E_theta.z * sizeof(f32) );
+    h_linac_source->val_rho_E_theta_max = (f32*)malloc( h_linac_source->n_rho_E_theta.x *
+                                                        h_linac_source->n_rho_E_theta.y * sizeof(f32) );
+    h_linac_source->cdf_rho_theta_phi = (f32*)malloc( h_linac_source->n_rho_theta_phi.x *
+                                                      h_linac_source->n_rho_theta_phi.y *
+                                                      h_linac_source->n_rho_theta_phi.z * sizeof(f32) );
+
+    // Read rho
     fread( h_linac_source->cdf_rho, sizeof(f32), h_linac_source->n_rho, pfile );
-    fread( h_linac_source->cdf_rho_E, sizeof(f32), h_linac_source->n_rho_E.x
-                                                        * h_linac_source->n_rho_E.y, pfile );
+    // E(rho)
+    fread( h_linac_source->cdf_rho_E, sizeof(f32), h_linac_source->n_rho_E.x * h_linac_source->n_rho_E.y, pfile );
+    // thetamax(rho, E)
+    fread( h_linac_source->val_rho_E_theta_max, sizeof(f32), h_linac_source->n_rho_E_theta.x *
+                                                             h_linac_source->n_rho_E_theta.y, pfile );
+    // theta(rho, E)
     fread( h_linac_source->cdf_rho_E_theta, sizeof(f32), h_linac_source->n_rho_E_theta.x *
-                                                             h_linac_source->n_rho_E_theta.y *
-                                                             h_linac_source->n_rho_E_theta.z, pfile );
+                                                         h_linac_source->n_rho_E_theta.y *
+                                                         h_linac_source->n_rho_E_theta.z, pfile );
+    // phi(rho, theta)
     fread( h_linac_source->cdf_rho_theta_phi, sizeof(f32), h_linac_source->n_rho_theta_phi.x *
-                                                               h_linac_source->n_rho_theta_phi.y *
-                                                               h_linac_source->n_rho_theta_phi.z, pfile );
+                                                           h_linac_source->n_rho_theta_phi.y *
+                                                           h_linac_source->n_rho_theta_phi.z, pfile );
 
     fclose( pfile );
 }
@@ -418,6 +429,8 @@ void LinacSource::m_copy_to_gpu()
     HANDLE_ERROR( cudaMalloc((void**) &cdf_rho_E, n_rho_E*sizeof(f32)) );
     f32 *cdf_rho_E_theta;
     HANDLE_ERROR( cudaMalloc((void**) &cdf_rho_E_theta, n_rho_E_theta*sizeof(f32)) );
+    f32 *val_rho_E_theta_max;
+    HANDLE_ERROR( cudaMalloc((void**) &val_rho_E_theta_max, h_linac_source->n_rho_E_theta.x*h_linac_source->n_rho_E_theta.y*sizeof(f32)) );
     f32 *cdf_rho_theta_phi;
     HANDLE_ERROR( cudaMalloc((void**) &cdf_rho_theta_phi, n_rho_theta_phi*sizeof(f32)) );
 
@@ -428,6 +441,8 @@ void LinacSource::m_copy_to_gpu()
                               n_rho_E*sizeof(f32), cudaMemcpyHostToDevice ) );
     HANDLE_ERROR( cudaMemcpy( cdf_rho_E_theta, h_linac_source->cdf_rho_E_theta,
                               n_rho_E_theta*sizeof(f32), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( val_rho_E_theta_max, h_linac_source->val_rho_E_theta_max,
+                              h_linac_source->n_rho_E_theta.x*h_linac_source->n_rho_E_theta.y*sizeof(f32), cudaMemcpyHostToDevice ) );
     HANDLE_ERROR( cudaMemcpy( cdf_rho_theta_phi, h_linac_source->cdf_rho_theta_phi,
                               n_rho_theta_phi*sizeof(f32), cudaMemcpyHostToDevice ) );
 
@@ -438,6 +453,8 @@ void LinacSource::m_copy_to_gpu()
                               sizeof(d_linac_source->cdf_rho_E), cudaMemcpyHostToDevice ) );
     HANDLE_ERROR( cudaMemcpy( &(d_linac_source->cdf_rho_E_theta), &cdf_rho_E_theta,
                               sizeof(d_linac_source->cdf_rho_E_theta), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( &(d_linac_source->val_rho_E_theta_max), &val_rho_E_theta_max,
+                              sizeof(d_linac_source->val_rho_E_theta_max), cudaMemcpyHostToDevice ) );
     HANDLE_ERROR( cudaMemcpy( &(d_linac_source->cdf_rho_theta_phi), &cdf_rho_theta_phi,
                               sizeof(d_linac_source->cdf_rho_theta_phi), cudaMemcpyHostToDevice ) );
 
