@@ -53,6 +53,26 @@ inline __host__ __device__ ui32 binary_search ( T key, U* tab, ui32 size, ui32 m
     return min;
 }
 
+template < typename T, typename U >
+inline __host__ __device__ ui32 binary_search_index ( T key, U* tab, ui32 min_id, ui32 max_id )
+{
+    ui32 mid;
+    while ( ( min_id < max_id ) )
+    {
+        mid = ( min_id + max_id ) >> 1;
+        if ( key > tab[mid] )
+        {
+            min_id = mid+1;
+        }
+        else
+        {
+            max_id = mid;
+        }
+    }
+    return min_id;
+}
+
+
 template < typename T, typename U >                                // !!!! size = total size of the data
 inline __host__ __device__ ui32 binary_search_left ( T key, U* tab, ui32 size, ui32 min=0 )
 {

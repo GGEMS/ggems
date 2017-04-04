@@ -148,7 +148,7 @@ private: // Make LinacSource class non-copyable
     /*!
      * \brief Copy LINAC model data to the GPU
      */
-    void m_copy_to_gpu();
+    void m_copy_to_gpu();    
 
 private:
 

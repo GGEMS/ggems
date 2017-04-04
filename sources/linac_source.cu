@@ -24,161 +24,147 @@ __host__ __device__ void linac_source ( ParticlesData *particles,
                                         f32matrix44 trans, ui32 id )
 {
     // Main vars
-    ui32 gbl_ind, ind;
-    f32 f_ind, rnd;
+    ui32 offset, ind;
+    f32 rnd, xa, ya, xb, yb;
 
     // 1. Get position (rho)
 
     rnd = prng_uniform( particles, id );
+    ind = binary_search_index( rnd, linac->cdf_rho, 0, (linac->n_rho-1) );
 
-
-    ind = binary_search_left( rnd, linac->cdf_rho, linac->n_rho );
-
+    f32 rho;
     if ( ind == 0 )
     {
-        f_ind = ind;
+        rho = 0.0f;
     }
     else
     {
-        f_ind = linear_interpolation( linac->cdf_rho[ ind - 1 ],     f32(ind - 1),
-                                      linac->cdf_rho[ ind],          f32(ind), rnd );
+        xa = linac->cdf_rho[ ind - 1 ];
+        xb = linac->cdf_rho[ ind];
+        ya = f32(ind - 1) * linac->s_rho;
+        yb = f32(ind) * linac->s_rho;
+        rho = linear_interpolation( xa, ya, xb, yb, rnd );
     }
 
-    f32 rho = f_ind * linac->s_rho;    // in mm
+    // 2. Get 2D position
 
-    //f32 rho = rnd * linac->rho_max;
     f32 psi = prng_uniform( particles, id ) * twopi;
-
-    f32xyz pos = { 0.0, 0.0, 0.0 };
-
-    //f32 val_cos = 1.0f - 2.0f * prng_uniform( particles, id );
-    //f32 val_sin = sqrt( 1.0 - val_cos*val_cos );
-    //f32 sgn_sin = 1.0f - 2.0f * prng_uniform( particles, id );
-    //if ( sgn_sin < 0.0 ) val_sin = -val_sin;
-
+    f32xyz pos = { 0.0, 0.0, 0.0 };    
     pos.x = rho * cos( psi );
     pos.y = rho * sin( psi );
-
-//    pos.x = rho * val_cos;
-//    pos.y = rho * val_sin;
-
     pos = fxyz_local_to_global_position( trans, pos );
-
     particles->px[ id ] = pos.x;                        // Position in mm
     particles->py[ id ] = pos.y;                        //
     particles->pz[ id ] = pos.z;                        //
 
     // 2. Get energy (rho E)
 
-    ui32 rho_ind = rho / linac->s_rho_E.x;
-    gbl_ind = rho_ind * linac->n_rho_E.y;            // 2D array, get the right E row
+    ui32 irho = floor( f64(rho) / f64(linac->s_rho_E.x) );
+
+#ifdef DEBUG
+    assert( irho < linac->n_rho_E.x );
+#endif
 
     rnd = prng_uniform( particles, id );
-    ind = binary_search_left( rnd, linac->cdf_rho_E, gbl_ind+linac->n_rho_E.y, gbl_ind );
+    offset = irho * linac->n_rho_E.y;
+    ind = binary_search_index( rnd, linac->cdf_rho_E, offset, offset+linac->n_rho_E.x-1 );
 
-    if ( ind == (gbl_ind + linac->n_rho_E.y - 1) )
+    f32 E;
+    if ( ind == 0 )
     {
-        f_ind = ind;
+        E = 0.0f;   // WARNING Should be Emin ?! - JB
     }
     else
     {
-        f_ind = linear_interpolation( linac->cdf_rho_E[ ind - 1 ],     f32(ind - 1),
-                                      linac->cdf_rho_E[ ind ],         f32(ind), rnd );
+        xa = linac->cdf_rho_E[ ind - 1 ];
+        xb = linac->cdf_rho_E[ ind ];
+        ya = f32( ind - 1 ) * linac->s_rho_E.y;
+        yb = f32( ind ) * linac->s_rho_E.y;
+        E = linear_interpolation( xa, ya, xb, yb, rnd );
     }
-    f32 E = (f_ind - gbl_ind) * linac->s_rho_E.y;
-
-    //printf( "id%i E %f\n", id, E );
 
     particles->E[ id ] = E;
 
-
-    //particles->E[ id ] = 1.0;
-
     // 3. Get direction
-
 
     // 3.1 Get theta (rho E Theta)
 
-    rho_ind = rho / linac->s_rho_E_theta.x;
-    ui32 E_ind = E / linac->s_rho_E_theta.y;
-    gbl_ind = rho_ind * linac->n_rho_E_theta.y * linac->n_rho_E_theta.z + E_ind * linac->n_rho_E_theta.z;
-
-    rnd = prng_uniform( particles, id );
-    ind = binary_search_left( rnd, linac->cdf_rho_E_theta, gbl_ind+linac->n_rho_E_theta.z, gbl_ind );
-
-    if ( ind == (gbl_ind + linac->n_rho_E_theta.z - 1) )
-    {
-        f_ind = ind;
-    }
-    else
-    {
-        f_ind = linear_interpolation( linac->cdf_rho_E_theta[ ind ],       f32( ind ),
-                                      linac->cdf_rho_E_theta[ ind + 1 ],   f32( ind + 1 ), rnd );
-    }
-
-    f32 cos_theta = ( (f_ind - gbl_ind) * linac->s_rho_E_theta.z ) + cos(linac->theta_max);
+    irho = floor( f64(rho) / f64(linac->s_rho_E_theta.x) );
 
 #ifdef DEBUG
-    assert(cos_theta <= 1.0f);
+    assert( irho < linac->n_rho_E_theta.x );
 #endif
 
-    f32 theta = acos(cos_theta);
+    ui32 iE = floor( f64(E) / f64(linac->s_rho_E_theta.y) );
 
+#ifdef DEBUG
+    assert( iE < linac->n_rho_E_theta.y );
+#endif
 
-    /*
-    printf("rho %f E %f  -  rho_ind %i E_ind %i\n", rho, E, rho_ind, E_ind);
-    ui32 i=gbl_ind; while (i<gbl_ind+linac->theta_nb_bins)
-    {
-        printf("i %i p %e\n", i, linac->cdf_rho_E_theta[i]);
-        ++i;
-    }
-    */
-
-    //printf( "id%i theta %f\n", id, theta );
-
-    // 3.2 Get phi
-    rho_ind = rho / linac->s_rho_theta_phi.x;
-    ui32 theta_ind = theta / linac->s_rho_theta_phi.y;
-    gbl_ind = rho_ind * linac->n_rho_theta_phi.y * linac->n_rho_theta_phi.z + theta_ind * linac->n_rho_theta_phi.z;
+    f32 theta_max = linac->val_rho_E_theta_max[ irho*linac->n_rho_E_theta.y + iE ];
+    f32 theta_spacing = theta_max / f32( linac->n_rho_E_theta.z );
 
     rnd = prng_uniform( particles, id );
-    ind = binary_search_left( rnd, linac->cdf_rho_theta_phi, gbl_ind+linac->n_rho_theta_phi.z, gbl_ind );
+    offset = irho*linac->n_rho_E_theta.y*linac->n_rho_E_theta.z + iE*linac->n_rho_E_theta.z;
+    ind = binary_search_index( rnd, linac->cdf_rho_E_theta, offset, offset+linac->n_rho_E_theta.z-1 );
 
-    if ( ind == (gbl_ind + linac->n_rho_theta_phi.z - 1) )
+    f32 theta;
+    if ( ind == 0 )
     {
-        f_ind = ind;
+        theta = 0.0f;
     }
     else
     {
-        f_ind = linear_interpolation( linac->cdf_rho_theta_phi[ ind ],     f32( ind ),
-                                      linac->cdf_rho_theta_phi[ ind + 1 ], f32( ind + 1 ), rnd );
-    }
-    f32 phi = (f_ind-gbl_ind) * linac->s_rho_theta_phi.z;
+        xa = linac->cdf_rho_E_theta[ ind - 1 ];
+        xb = linac->cdf_rho_E_theta[ ind ];
+        ya = f32( ind - 1 ) * theta_spacing;
+        yb = f32( ind ) * theta_spacing;
+        theta = linear_interpolation( xa, ya, xb, yb, rnd );
+    }   
 
-    // 3.3 Get vector
+    // 3.2 Get phi
+
+    irho = floor( f64(rho) / f64(linac->s_rho_theta_phi.x) );
+
+#ifdef DEBUG
+    assert( irho < linac->n_rho_theta_phi.x );
+#endif
+
+    ui32 itheta = floor( f64(theta) / f64(linac->s_rho_theta_phi.y) );
+
+#ifdef DEBUG
+    assert( itheta < linac->n_rho_theta_phi.y );
+#endif
+
+    rnd = prng_uniform( particles, id );
+    offset = irho*linac->n_rho_theta_phi.y*linac->n_rho_theta_phi.z + itheta*linac->n_rho_theta_phi.z;
+    ind = binary_search_index( rnd, linac->cdf_rho_theta_phi, offset, offset+linac->n_rho_theta_phi.z-1 );
+
+    f32 phi;
+    if ( ind == 0 )
+    {
+        phi = 0.0f;
+    }
+    else
+    {
+        xa = linac->cdf_rho_theta_phi[ ind - 1 ];
+        xb = linac->cdf_rho_theta_phi[ ind ];
+        ya = f32( ind - 1 ) * linac->s_rho_theta_phi.z;
+        yb = f32( ind ) * linac->s_rho_theta_phi.z;
+        phi = linear_interpolation( xa, ya, xb, yb, rnd );
+    }
+
+    // 3.3 Get direction vector
 
     f32xyz dir = { 0.0, 0.0, 0.0 };
     dir.x = sin( theta ) * cos( psi+phi );
     dir.y = sin( theta ) * sin( psi+phi );
     dir.z = cos( theta );
 
-//    dir.x = sin( theta ) * cos( psi );
-//    dir.y = sin( theta ) * sin( psi );
-//    dir.z = cos( theta );
-
-
-
-    //dir = fxyz_unit( dir );
-
-
-
+    // ????  dz *= -1.0 ????
 
     dir = fxyz_local_to_global_direction( trans, dir );
-/*
-    dir.x = 0.0f;
-    dir.y = 1.0f;
-    dir.z = 0.0f;
-*/
+
     particles->dx[id] = dir.x;                        // Direction (unit vector)
     particles->dy[id] = dir.y;                        //
     particles->dz[id] = dir.z;                        //
@@ -554,7 +540,6 @@ void LinacSource::initialize (GlobalSimulationParametersData *h_params )
     // know different information about the simulation. For example if the targeted
     // device is a CPU or a GPU.
     mh_params = h_params;
-
 
     // Read and load data
     m_load_linac_model();
