@@ -279,6 +279,7 @@ void PhaseSpaceSource::update_phasespace_file( std::string filename )
     // Load the phasespace file (CPU & GPU)
     if ( m_phasespace_file != "" )
     {
+        m_free_phasespace_to_cpu();
         m_load_phasespace_file();
     }
     else
@@ -662,6 +663,19 @@ void PhaseSpaceSource::m_copy_transformation_to_gpu()
     HANDLE_ERROR( cudaMemcpy( &(md_transform->nb_sources), &(mh_transform->nb_sources),
                               sizeof(md_transform->nb_sources), cudaMemcpyHostToDevice ) );
 
+}
+
+
+void PhaseSpaceSource::m_free_phasespace_to_cpu()
+{
+    free( mh_phasespace->energy );
+    free( mh_phasespace->pos_x );
+    free( mh_phasespace->pos_y );
+    free( mh_phasespace->pos_z );
+    free( mh_phasespace->dir_x );
+    free( mh_phasespace->dir_y );
+    free( mh_phasespace->dir_z );
+    free( mh_phasespace->ptype );
 }
 
 void PhaseSpaceSource::m_free_phasespace_to_gpu()

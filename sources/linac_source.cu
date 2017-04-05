@@ -67,7 +67,7 @@ __host__ __device__ void linac_source ( ParticlesData *particles,
 
     rnd = prng_uniform( particles, id );
     offset = irho * linac->n_rho_E.y;
-    ind = binary_search_index( rnd, linac->cdf_rho_E, offset, offset+linac->n_rho_E.x-1 );
+    ind = binary_search_index( rnd, linac->cdf_rho_E, offset, offset+linac->n_rho_E.y-1 );
 
     f32 E;
     if ( ind == 0 )
@@ -78,8 +78,8 @@ __host__ __device__ void linac_source ( ParticlesData *particles,
     {
         xa = linac->cdf_rho_E[ ind - 1 ];
         xb = linac->cdf_rho_E[ ind ];
-        ya = f32( ind - 1 ) * linac->s_rho_E.y;
-        yb = f32( ind ) * linac->s_rho_E.y;
+        ya = f32( ind-offset - 1 ) * linac->s_rho_E.y;
+        yb = f32( ind-offset ) * linac->s_rho_E.y;
         E = linear_interpolation( xa, ya, xb, yb, rnd );
     }
 
@@ -117,8 +117,8 @@ __host__ __device__ void linac_source ( ParticlesData *particles,
     {
         xa = linac->cdf_rho_E_theta[ ind - 1 ];
         xb = linac->cdf_rho_E_theta[ ind ];
-        ya = f32( ind - 1 ) * theta_spacing;
-        yb = f32( ind ) * theta_spacing;
+        ya = f32( ind-offset - 1 ) * theta_spacing;
+        yb = f32( ind-offset ) * theta_spacing;
         theta = linear_interpolation( xa, ya, xb, yb, rnd );
     }   
 
@@ -149,8 +149,8 @@ __host__ __device__ void linac_source ( ParticlesData *particles,
     {
         xa = linac->cdf_rho_theta_phi[ ind - 1 ];
         xb = linac->cdf_rho_theta_phi[ ind ];
-        ya = f32( ind - 1 ) * linac->s_rho_theta_phi.z;
-        yb = f32( ind ) * linac->s_rho_theta_phi.z;
+        ya = f32( ind-offset - 1 ) * linac->s_rho_theta_phi.z;
+        yb = f32( ind-offset ) * linac->s_rho_theta_phi.z;
         phi = linear_interpolation( xa, ya, xb, yb, rnd );
     }
 
@@ -306,7 +306,7 @@ void LinacSource::m_load_linac_model()
     } // read file
 
     // Check the header
-    if ( ObjectType != "VirtualLinacSource" ) {
+    if ( ObjectType != "GPILS" ) {
         GGcerr << "Linac source model header: not a virtual source model, ObjectType = " << ObjectType << " !" << GGendl;
         exit_simulation();
     }

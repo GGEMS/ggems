@@ -83,6 +83,7 @@ private:
     void m_load_transformation_file();
     void m_copy_phasespace_to_gpu();    
     void m_free_phasespace_to_gpu();
+    void m_free_phasespace_to_cpu();
     void m_copy_transformation_to_gpu();
     void m_free_transformation_to_gpu();
     void m_update_transformation_to_gpu();
