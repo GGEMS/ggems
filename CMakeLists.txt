@@ -44,26 +44,6 @@ endif()
 # CUDA OPTIONS    
 set(LIBSCUDA --relocatable-device-code true -lcudadevrt --compiler-options -w)   
 
-option(WITH_ARCH_30 "With arch and sm 3.0" ON)
-if(WITH_ARCH_30)
-    set(LIBSCUDA ${LIBSCUDA} --generate-code arch=compute_30,code=sm_30)
-endif()
-
-option(WITH_ARCH_32 "With arch and sm 3.2" ON)
-if(WITH_ARCH_32)
-    set(LIBSCUDA ${LIBSCUDA} --generate-code arch=compute_32,code=sm_32)
-endif()
-
-option(WITH_ARCH_35 "With arch and sm 3.5" ON)
-if(WITH_ARCH_35)
-    set(LIBSCUDA ${LIBSCUDA} --generate-code arch=compute_35,code=sm_35)
-endif()
-
-option(WITH_ARCH_37 "With arch and sm 3.7" ON)
-if(WITH_ARCH_37)
-    set(LIBSCUDA ${LIBSCUDA} --generate-code arch=compute_37,code=sm_37)
-endif()
-
 option(WITH_ARCH_50 "With arch and sm 5.0" ON)
 if(WITH_ARCH_50)
     set(LIBSCUDA ${LIBSCUDA} --generate-code arch=compute_50,code=sm_50)
