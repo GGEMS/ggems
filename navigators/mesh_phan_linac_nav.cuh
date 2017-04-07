@@ -183,6 +183,8 @@ public:
     LinacData* get_linac_geometry();
     f32matrix44 get_linac_transformation();
 
+    void update_beam_configuration( std::string filename, ui32 beam_index, ui32 field_index );
+
 private:
     void m_init_mlc();
     void m_init_jaw_x();
@@ -194,6 +196,10 @@ private:
     void m_translate_leaf_B( ui32 index, f32xyz T );
 
     void m_configure_linac();
+    void _m_configure_linac();
+
+    void m_free_linac_to_gpu();
+    void m_free_linac_to_cpu();
     void m_copy_linac_to_gpu();
 
     std::vector< std::string > m_split_txt(std::string line);

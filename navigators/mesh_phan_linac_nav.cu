@@ -2881,6 +2881,612 @@ void MeshPhanLINACNav::m_configure_linac()
 
 }
 
+
+
+
+void MeshPhanLINACNav::_m_configure_linac()
+{
+
+    // Open the beam file
+    std::ifstream file( m_beam_config_filename.c_str(), std::ios::in );
+    if( !file )
+    {
+        GGcerr << "Error to open the Beam file'" << m_beam_config_filename << "'!" << GGendl;
+        exit_simulation();
+    }
+
+    std::string line;
+    std::vector< std::string > keys;
+
+    // Look for the beam number
+    bool find_beam = false;
+    while ( file )
+    {
+        // Read a line
+        std::getline( file, line );
+        keys = m_split_txt( line );
+
+        if ( keys.size() >= 3 )
+        {
+            if ( keys[ 0 ] == "Beam" && std::stoi( keys[ 2 ] ) == m_beam_index )
+            {
+                find_beam = true;
+                break;
+            }
+        }
+    }
+
+    if ( !find_beam )
+    {
+        GGcerr << "Beam configuration error: beam " << m_beam_index << " was not found!" << GGendl;
+        exit_simulation();
+    }
+
+    // Then look for the number of fields
+    while ( file )
+    {
+        // Read a line
+        std::getline( file, line );
+
+        if ( line.find("Number of Fields") != std::string::npos )
+        {
+            break;
+        }
+    }
+
+    keys = m_split_txt( line );
+    ui32 nb_fields = std::stoi( keys[ 4 ] );
+
+    if ( m_field_index >= nb_fields )
+    {
+        GGcerr << "Out of index for the field number, asked: " << m_field_index
+               << " but a total of field of " << nb_fields << GGendl;
+        exit_simulation();
+    }
+
+    // Look for the number of leaves
+    bool find_field = false;
+    while ( file )
+    {
+        // Read a line
+        std::getline( file, line );
+
+        if ( line.find("Number of Leaves") != std::string::npos )
+        {
+            find_field = true;
+            break;
+        }
+    }
+
+    if ( !find_field )
+    {
+        GGcerr << "Beam configuration error: field " << m_field_index << " was not found!" << GGendl;
+        exit_simulation();
+    }
+
+    keys = m_split_txt( line );
+    ui32 nb_leaves = std::stoi( keys[ 4 ] );
+    if ( mh_linac->A_nb_leaves + mh_linac->B_nb_leaves != nb_leaves )
+    {
+        GGcerr << "Beam configuration error, " << nb_leaves
+               << " leaves were found but LINAC model have " << mh_linac->A_nb_leaves + mh_linac->B_nb_leaves
+               << " leaves!" << GGendl;
+        exit_simulation();
+    }
+
+    // Search the required field
+    while ( file )
+    {
+        // Read a line
+        std::getline( file, line );
+        keys = m_split_txt( line );
+
+        if ( keys.size() >= 3 )
+        {
+            if ( keys[ 0 ] == "Control" && std::stoi( keys[ 2 ] ) == m_field_index )
+            {
+                break;
+            }
+        }
+    }
+
+    // Then read the index CDF (not use at the time, so skip the line)
+    std::getline( file, line );
+
+    // Get the gantry angle
+    std::getline( file, line );
+
+    // Check
+    if ( line.find( "Gantry Angle" ) == std::string::npos )
+    {
+        GGcerr << "Beam configuration error, no gantry angle was found!" << GGendl;
+        exit_simulation();
+    }
+
+    // Read gantry angle values
+    keys = m_split_txt( line );
+
+    // if only one angle, rotate around the z-axis
+    if ( keys.size() == 4 )
+    {
+        m_rot_linac = make_f32xyz( 0.0, 0.0, std::stof( keys[ 3 ] ) *deg );
+    }
+    else if ( keys.size() == 6 ) // non-coplanar beam, or rotation on the carousel
+    {
+        m_rot_linac = make_f32xyz( std::stof( keys[ 3 ] ) *deg,
+                                   std::stof( keys[ 4 ] ) *deg,
+                                   std::stof( keys[ 5 ] ) *deg );
+    }
+    else // otherwise, it seems that there is an error somewhere
+    {
+        GGcerr << "Beam configuration error, gantry angle must have one angle or the three rotation angles: "
+               << keys.size() - 3 << " angles found!" << GGendl;
+        exit_simulation();
+    }
+
+    // Get the transformation matrix to map local to global coordinate
+    TransformCalculator *trans = new TransformCalculator;
+    trans->set_translation( m_pos_mlc );
+    trans->set_rotation( m_rot_linac );
+    trans->set_axis_transformation( m_axis_linac );
+    mh_linac->transform = trans->get_transformation_matrix();
+    delete trans;
+
+    //// JAWS //////////////////////////////////////////
+
+    // Next four lines should the jaw config
+    f32 jaw_x_min = 0.0; bool jaw_x = false;
+    f32 jaw_x_max = 0.0;
+    f32 jaw_y_min = 0.0; bool jaw_y = false;
+    f32 jaw_y_max = 0.0;
+
+    while ( file )
+    {
+        // Read a line
+        std::getline( file, line );
+
+        if ( line.find( "Jaw" ) != std::string::npos )
+        {
+            keys = m_split_txt( line );
+            if ( keys[ 1 ] == "X" && keys[ 2 ] == "min" )
+            {
+                jaw_x_min = std::stof( keys[ 4 ] );
+                jaw_x = true;
+            }
+            if ( keys[ 1 ] == "X" && keys[ 2 ] == "max" )
+            {
+                jaw_x_max = std::stof( keys[ 4 ] );
+                jaw_x = true;
+            }
+            if ( keys[ 1 ] == "Y" && keys[ 2 ] == "min" )
+            {
+                jaw_y_min = std::stof( keys[ 4 ] );
+                jaw_y = true;
+            }
+            if ( keys[ 1 ] == "Y" && keys[ 2 ] == "max" )
+            {
+                jaw_y_max = std::stof( keys[ 4 ] );
+                jaw_y = true;
+            }
+        }
+        else
+        {
+            break;
+        }
+    }
+
+    // Check
+    if ( !jaw_x && mh_linac->X_nb_jaw != 0 )
+    {
+        GGcerr << "Beam configuration error, geometry of the jaw-X was defined but the position values were not found!" << GGendl;
+        exit_simulation();
+    }
+    if ( !jaw_y && mh_linac->Y_nb_jaw != 0 )
+    {
+        GGcerr << "Beam configuration error, geometry of the jaw-Y was defined but the position values were not found!" << GGendl;
+        exit_simulation();
+    }
+
+    // Configure the jaws
+    if ( mh_linac->X_nb_jaw != 0 )
+    {
+
+        m_translate_jaw_x( 0, make_f32xyz( jaw_x_max * mh_linac->xjaw_motion_ratio, 0.0, 0.0 ) );   // X1 ( x > 0 )
+        m_translate_jaw_x( 1, make_f32xyz( jaw_x_min * mh_linac->xjaw_motion_ratio, 0.0, 0.0 ) );   // X2 ( x < 0 )
+    }
+/*
+    if ( mh_linac->Y_nb_jaw != 0 )
+    {
+        m_translate_jaw_y( 0, make_f32xyz( 0.0, jaw_y_max * mh_linac->yjaw_motion_ratio, 0.0 ) );   // Y1 ( y > 0 )
+        m_translate_jaw_y( 1, make_f32xyz( 0.0, jaw_y_min * mh_linac->yjaw_motion_ratio, 0.0 ) );   // Y2 ( y < 0 )
+    }
+/*
+    //// LEAVES BANK A ///////////////////////////////////////////////
+
+    ui32 ileaf = 0;
+    bool wd_leaf = false; // watchdog
+    while ( file )
+    {
+        if ( line.find( "Leaf" ) != std::string::npos && line.find( "A" ) != std::string::npos )
+        {
+            // If first leaf of the bank A, check
+            if ( ileaf == 0 )
+            {
+                keys = m_split_txt( line );
+                if ( keys[ 1 ] != "1A" )
+                {
+                    GGcerr << "Beam configuration error, first leaf of the bank A must start by index '1A': " << keys[ 1 ]
+                           << " found." << GGendl;
+                    exit_simulation();
+                }
+            }
+
+            // watchdog
+            if ( ileaf >= mh_linac->A_nb_leaves )
+            {
+                GGcerr << "Beam configuration error, find more leaves in the configuration "
+                       << "file for the bank A than leaves in the LINAC model!" << GGendl;
+                exit_simulation();
+            }
+
+            // find at least one leaf
+            if ( !wd_leaf ) wd_leaf = true;
+
+            // read data and move the leaf
+            keys = m_split_txt( line );
+            m_translate_leaf_A( ileaf++, make_f32xyz( std::stof( keys[ 3 ] ) * mh_linac->mlc_motion_ratio, 0.0, 0.0 ) );
+
+        }
+        else
+        {
+            break;
+        }
+
+        // Read a line
+        std::getline( file, line );
+    }
+
+    // No leaves were found
+    if ( !wd_leaf )
+    {
+        GGcerr << "Beam configuration error, no leaves from the bank A were found!" << GGendl;
+        exit_simulation();
+    }
+
+    //// LEAVES BANK B ///////////////////////////////////////////////
+
+    ileaf = 0;
+    wd_leaf = false; // watchdog
+    while ( file )
+    {
+
+        if ( line.find( "Leaf" ) != std::string::npos && line.find( "B" ) != std::string::npos )
+        {
+            // If first leaf of the bank A, check
+            if ( ileaf == 0 )
+            {
+                keys = m_split_txt( line );
+                if ( keys[ 1 ] != "1B" )
+                {
+                    GGcerr << "Beam configuration error, first leaf of the bank B must start by index '1B': " << keys[ 1 ]
+                           << " found." << GGendl;
+                    exit_simulation();
+                }
+            }
+
+            // watchdog
+            if ( ileaf >= mh_linac->B_nb_leaves )
+            {
+                GGcerr << "Beam configuration error, find more leaves in the configuration "
+                       << "file for the bank B than leaves in the LINAC model!" << GGendl;
+                exit_simulation();
+            }
+
+            // find at least one leaf
+            if ( !wd_leaf ) wd_leaf = true;
+
+            // read data and move the leaf
+            keys = m_split_txt( line );
+            m_translate_leaf_B( ileaf++, make_f32xyz( std::stof( keys[ 3 ] ) * mh_linac->mlc_motion_ratio, 0.0, 0.0 ) );
+
+        }
+        else
+        {
+            break;
+        }
+
+        // Read a line
+        std::getline( file, line );
+    }
+
+    // No leaves were found
+    if ( !wd_leaf )
+    {
+        GGcerr << "Beam configuration error, no leaves from the bank B were found!" << GGendl;
+        exit_simulation();
+    }
+
+    // Finally compute the global bounding box of the LINAC
+    f32 xmin = FLT_MAX; f32 xmax = -FLT_MAX;
+    f32 ymin = FLT_MAX; f32 ymax = -FLT_MAX;
+    f32 zmin = FLT_MAX; f32 zmax = -FLT_MAX;
+
+    if ( mh_linac->A_bank_aabb.xmin < xmin ) xmin = mh_linac->A_bank_aabb.xmin;
+    if ( mh_linac->B_bank_aabb.xmin < xmin ) xmin = mh_linac->B_bank_aabb.xmin;
+    if ( mh_linac->A_bank_aabb.ymin < ymin ) ymin = mh_linac->A_bank_aabb.ymin;
+    if ( mh_linac->B_bank_aabb.ymin < ymin ) ymin = mh_linac->B_bank_aabb.ymin;
+    if ( mh_linac->A_bank_aabb.zmin < zmin ) zmin = mh_linac->A_bank_aabb.zmin;
+    if ( mh_linac->B_bank_aabb.zmin < zmin ) zmin = mh_linac->B_bank_aabb.zmin;
+
+    if ( mh_linac->A_bank_aabb.xmax > xmax ) xmax = mh_linac->A_bank_aabb.xmax;
+    if ( mh_linac->B_bank_aabb.xmax > xmax ) xmax = mh_linac->B_bank_aabb.xmax;
+    if ( mh_linac->A_bank_aabb.ymax > ymax ) ymax = mh_linac->A_bank_aabb.ymax;
+    if ( mh_linac->B_bank_aabb.ymax > ymax ) ymax = mh_linac->B_bank_aabb.ymax;
+    if ( mh_linac->A_bank_aabb.zmax > zmax ) zmax = mh_linac->A_bank_aabb.zmax;
+    if ( mh_linac->B_bank_aabb.zmax > zmax ) zmax = mh_linac->B_bank_aabb.zmax;
+
+    if ( mh_linac->X_nb_jaw != 0 )
+    {
+        if ( mh_linac->X_jaw_aabb[ 0 ].xmin < xmin ) xmin = mh_linac->X_jaw_aabb[ 0 ].xmin;
+        if ( mh_linac->X_jaw_aabb[ 1 ].xmin < xmin ) xmin = mh_linac->X_jaw_aabb[ 1 ].xmin;
+        if ( mh_linac->X_jaw_aabb[ 0 ].ymin < ymin ) ymin = mh_linac->X_jaw_aabb[ 0 ].ymin;
+        if ( mh_linac->X_jaw_aabb[ 1 ].ymin < ymin ) ymin = mh_linac->X_jaw_aabb[ 1 ].ymin;
+        if ( mh_linac->X_jaw_aabb[ 0 ].zmin < zmin ) zmin = mh_linac->X_jaw_aabb[ 0 ].zmin;
+        if ( mh_linac->X_jaw_aabb[ 1 ].zmin < zmin ) zmin = mh_linac->X_jaw_aabb[ 1 ].zmin;
+
+        if ( mh_linac->X_jaw_aabb[ 0 ].xmax > xmax ) xmax = mh_linac->X_jaw_aabb[ 0 ].xmax;
+        if ( mh_linac->X_jaw_aabb[ 1 ].xmax > xmax ) xmax = mh_linac->X_jaw_aabb[ 1 ].xmax;
+        if ( mh_linac->X_jaw_aabb[ 0 ].ymax > ymax ) ymax = mh_linac->X_jaw_aabb[ 0 ].ymax;
+        if ( mh_linac->X_jaw_aabb[ 1 ].ymax > ymax ) ymax = mh_linac->X_jaw_aabb[ 1 ].ymax;
+        if ( mh_linac->X_jaw_aabb[ 0 ].zmax > zmax ) zmax = mh_linac->X_jaw_aabb[ 0 ].zmax;
+        if ( mh_linac->X_jaw_aabb[ 1 ].zmax > zmax ) zmax = mh_linac->X_jaw_aabb[ 1 ].zmax;
+    }
+
+    if ( mh_linac->Y_nb_jaw != 0 )
+    {
+        if ( mh_linac->Y_jaw_aabb[ 0 ].xmin < xmin ) xmin = mh_linac->Y_jaw_aabb[ 0 ].xmin;
+        if ( mh_linac->Y_jaw_aabb[ 1 ].xmin < xmin ) xmin = mh_linac->Y_jaw_aabb[ 1 ].xmin;
+        if ( mh_linac->Y_jaw_aabb[ 0 ].ymin < ymin ) ymin = mh_linac->Y_jaw_aabb[ 0 ].ymin;
+        if ( mh_linac->Y_jaw_aabb[ 1 ].ymin < ymin ) ymin = mh_linac->Y_jaw_aabb[ 1 ].ymin;
+        if ( mh_linac->Y_jaw_aabb[ 0 ].zmin < zmin ) zmin = mh_linac->Y_jaw_aabb[ 0 ].zmin;
+        if ( mh_linac->Y_jaw_aabb[ 1 ].zmin < zmin ) zmin = mh_linac->Y_jaw_aabb[ 1 ].zmin;
+
+        if ( mh_linac->Y_jaw_aabb[ 0 ].xmax > xmax ) xmax = mh_linac->Y_jaw_aabb[ 0 ].xmax;
+        if ( mh_linac->Y_jaw_aabb[ 1 ].xmax > xmax ) xmax = mh_linac->Y_jaw_aabb[ 1 ].xmax;
+        if ( mh_linac->Y_jaw_aabb[ 0 ].ymax > ymax ) ymax = mh_linac->Y_jaw_aabb[ 0 ].ymax;
+        if ( mh_linac->Y_jaw_aabb[ 1 ].ymax > ymax ) ymax = mh_linac->Y_jaw_aabb[ 1 ].ymax;
+        if ( mh_linac->Y_jaw_aabb[ 0 ].zmax > zmax ) zmax = mh_linac->Y_jaw_aabb[ 0 ].zmax;
+        if ( mh_linac->Y_jaw_aabb[ 1 ].zmax > zmax ) zmax = mh_linac->Y_jaw_aabb[ 1 ].zmax;
+    }
+
+    // Store the data
+    mh_linac->aabb.xmin = xmin;
+    mh_linac->aabb.xmax = xmax;
+    mh_linac->aabb.ymin = ymin;
+    mh_linac->aabb.ymax = ymax;
+    mh_linac->aabb.zmin = zmin;
+    mh_linac->aabb.zmax = zmax;
+*/
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Free linac data to the CPU
+void MeshPhanLINACNav::m_free_linac_to_cpu()
+{
+    free( mh_linac->A_leaf_v1 );           // Vertex 1  - Triangular meshes
+    free( mh_linac->A_leaf_v2 );           // Vertex 2
+    free( mh_linac->A_leaf_v3 );           // Vertex 3
+    free( mh_linac->A_leaf_index );        // Index to acces to a leaf
+    free( mh_linac->A_leaf_nb_triangles ); // Nb of triangles within each leaf
+    free( mh_linac->A_leaf_aabb );         // Bounding box of each leaf
+
+    free( mh_linac->B_leaf_v1 );           // Vertex 1  - Triangular meshes
+    free( mh_linac->B_leaf_v2 );           // Vertex 2
+    free( mh_linac->B_leaf_v3 );           // Vertex 3
+    free( mh_linac->B_leaf_index );        // Index to acces to a leaf
+    free( mh_linac->B_leaf_nb_triangles ); // Nb of triangles within each leaf
+    free( mh_linac->B_leaf_aabb );         // Bounding box of each leaf
+
+    free( mh_linac->X_jaw_v1 );           // Vertex 1  - Triangular meshes
+    free( mh_linac->X_jaw_v2 );           // Vertex 2
+    free( mh_linac->X_jaw_v3 );           // Vertex 3
+    free( mh_linac->X_jaw_index );        // Index to acces to a leaf
+    free( mh_linac->X_jaw_nb_triangles ); // Nb of triangles within each leaf
+    free( mh_linac->X_jaw_aabb );         // Bounding box of each leaf
+
+    free( mh_linac->Y_jaw_v1 );           // Vertex 1  - Triangular meshes
+    free( mh_linac->Y_jaw_v2 );           // Vertex 2
+    free( mh_linac->Y_jaw_v3 );           // Vertex 3
+    free( mh_linac->Y_jaw_index );        // Index to acces to a leaf
+    free( mh_linac->Y_jaw_nb_triangles ); // Nb of triangles within each leaf
+    free( mh_linac->Y_jaw_aabb );         // Bounding box of each leaf
+
+    mh_linac->A_leaf_v1 = nullptr;           // Vertex 1  - Triangular meshes
+    mh_linac->A_leaf_v2 = nullptr;           // Vertex 2
+    mh_linac->A_leaf_v3 = nullptr;           // Vertex 3
+    mh_linac->A_leaf_index = nullptr;        // Index to acces to a leaf
+    mh_linac->A_leaf_nb_triangles = nullptr; // Nb of triangles within each leaf
+    mh_linac->A_leaf_aabb = nullptr;         // Bounding box of each leaf
+
+    // Leaves in Bank B
+    mh_linac->B_leaf_v1 = nullptr;           // Vertex 1  - Triangular meshes
+    mh_linac->B_leaf_v2 = nullptr;           // Vertex 2
+    mh_linac->B_leaf_v3 = nullptr;           // Vertex 3
+    mh_linac->B_leaf_index = nullptr;        // Index to acces to a leaf
+    mh_linac->B_leaf_nb_triangles = nullptr; // Nb of triangles within each leaf
+    mh_linac->B_leaf_aabb = nullptr;         // Bounding box of each leaf
+
+    // Jaws X
+    mh_linac->X_jaw_v1 = nullptr;           // Vertex 1  - Triangular meshes
+    mh_linac->X_jaw_v2 = nullptr;           // Vertex 2
+    mh_linac->X_jaw_v3 = nullptr;           // Vertex 3
+    mh_linac->X_jaw_index = nullptr;        // Index to acces to a jaw
+    mh_linac->X_jaw_nb_triangles = nullptr; // Nb of triangles within each jaw
+    mh_linac->X_jaw_aabb = nullptr;         // Bounding box of each jaw
+
+    // Jaws Y
+    mh_linac->Y_jaw_v1 = nullptr;           // Vertex 1  - Triangular meshes
+    mh_linac->Y_jaw_v2 = nullptr;           // Vertex 2
+    mh_linac->Y_jaw_v3 = nullptr;           // Vertex 3
+    mh_linac->Y_jaw_index = nullptr;        // Index to acces to a jaw
+    mh_linac->Y_jaw_nb_triangles = nullptr; // Nb of triangles within each jaw
+    mh_linac->Y_jaw_aabb = nullptr;         // Bounding box of each jaw
+
+}
+
+
+// Free linac data to the GPU
+void MeshPhanLINACNav::m_free_linac_to_gpu()
+{
+
+    /// Device pointers allocation
+
+    f32xyz   *A_leaf_v1;           // Vertex 1  - Triangular meshes
+    f32xyz   *A_leaf_v2;           // Vertex 2
+    f32xyz   *A_leaf_v3;           // Vertex 3
+    ui32     *A_leaf_index;        // Index to acces to a leaf
+    ui32     *A_leaf_nb_triangles; // Nb of triangles within each leaf
+    AabbData *A_leaf_aabb;         // Bounding box of each leaf
+
+    f32xyz   *B_leaf_v1;           // Vertex 1  - Triangular meshes
+    f32xyz   *B_leaf_v2;           // Vertex 2
+    f32xyz   *B_leaf_v3;           // Vertex 3
+    ui32     *B_leaf_index;        // Index to acces to a leaf
+    ui32     *B_leaf_nb_triangles; // Nb of triangles within each leaf
+    AabbData *B_leaf_aabb;         // Bounding box of each leaf
+
+    f32xyz   *X_jaw_v1;           // Vertex 1  - Triangular meshes
+    f32xyz   *X_jaw_v2;           // Vertex 2
+    f32xyz   *X_jaw_v3;           // Vertex 3
+    ui32     *X_jaw_index;        // Index to acces to a leaf
+    ui32     *X_jaw_nb_triangles; // Nb of triangles within each leaf
+    AabbData *X_jaw_aabb;         // Bounding box of each leaf
+
+    f32xyz   *Y_jaw_v1;           // Vertex 1  - Triangular meshes
+    f32xyz   *Y_jaw_v2;           // Vertex 2
+    f32xyz   *Y_jaw_v3;           // Vertex 3
+    ui32     *Y_jaw_index;        // Index to acces to a leaf
+    ui32     *Y_jaw_nb_triangles; // Nb of triangles within each leaf
+    AabbData *Y_jaw_aabb;         // Bounding box of each leaf
+
+    /// Unbind
+
+    /// Bind data to the struct
+
+    HANDLE_ERROR( cudaMemcpy( &A_leaf_v1, &(md_linac->A_leaf_v1),
+                              sizeof(md_linac->A_leaf_v1), cudaMemcpyDeviceToHost ) );
+    HANDLE_ERROR( cudaMemcpy( &A_leaf_v2, &(md_linac->A_leaf_v2),
+                              sizeof(md_linac->A_leaf_v2), cudaMemcpyDeviceToHost ) );
+    HANDLE_ERROR( cudaMemcpy( &A_leaf_v3, &(md_linac->A_leaf_v3),
+                              sizeof(md_linac->A_leaf_v3), cudaMemcpyDeviceToHost ) );
+    HANDLE_ERROR( cudaMemcpy( &A_leaf_index, &(md_linac->A_leaf_index),
+                              sizeof(md_linac->A_leaf_index), cudaMemcpyDeviceToHost ) );
+    HANDLE_ERROR( cudaMemcpy( &A_leaf_nb_triangles, &(md_linac->A_leaf_nb_triangles),
+                              sizeof(md_linac->A_leaf_nb_triangles), cudaMemcpyDeviceToHost ) );
+    HANDLE_ERROR( cudaMemcpy( &A_leaf_aabb, &(md_linac->A_leaf_aabb),
+                              sizeof(md_linac->A_leaf_aabb), cudaMemcpyDeviceToHost ) );
+
+    //
+
+    HANDLE_ERROR( cudaMemcpy( &B_leaf_v1, &(md_linac->B_leaf_v1),
+                              sizeof(md_linac->B_leaf_v1), cudaMemcpyDeviceToHost ) );
+    HANDLE_ERROR( cudaMemcpy( &B_leaf_v2, &(md_linac->B_leaf_v2),
+                              sizeof(md_linac->B_leaf_v2), cudaMemcpyDeviceToHost ) );
+    HANDLE_ERROR( cudaMemcpy( &B_leaf_v3, &(md_linac->B_leaf_v3),
+                              sizeof(md_linac->B_leaf_v3), cudaMemcpyDeviceToHost ) );
+    HANDLE_ERROR( cudaMemcpy( &B_leaf_index, &(md_linac->B_leaf_index),
+                              sizeof(md_linac->B_leaf_index), cudaMemcpyDeviceToHost ) );
+    HANDLE_ERROR( cudaMemcpy( &B_leaf_nb_triangles, &(md_linac->B_leaf_nb_triangles),
+                              sizeof(md_linac->B_leaf_nb_triangles), cudaMemcpyDeviceToHost ) );
+    HANDLE_ERROR( cudaMemcpy( &B_leaf_aabb, &(md_linac->B_leaf_aabb),
+                              sizeof(md_linac->B_leaf_aabb), cudaMemcpyDeviceToHost ) );
+
+    //
+
+    HANDLE_ERROR( cudaMemcpy( &X_jaw_v1, &(md_linac->X_jaw_v1),
+                              sizeof(md_linac->X_jaw_v1), cudaMemcpyDeviceToHost ) );
+    HANDLE_ERROR( cudaMemcpy( &X_jaw_v2, &(md_linac->X_jaw_v2),
+                              sizeof(md_linac->X_jaw_v2), cudaMemcpyDeviceToHost ) );
+    HANDLE_ERROR( cudaMemcpy( &X_jaw_v3, &(md_linac->X_jaw_v3),
+                              sizeof(md_linac->X_jaw_v3), cudaMemcpyDeviceToHost ) );
+    HANDLE_ERROR( cudaMemcpy( &X_jaw_index, &(md_linac->X_jaw_index),
+                              sizeof(md_linac->X_jaw_index), cudaMemcpyDeviceToHost ) );
+    HANDLE_ERROR( cudaMemcpy( &X_jaw_nb_triangles, &(md_linac->X_jaw_nb_triangles),
+                              sizeof(md_linac->X_jaw_nb_triangles), cudaMemcpyDeviceToHost ) );
+    HANDLE_ERROR( cudaMemcpy( &X_jaw_aabb, &(md_linac->X_jaw_aabb),
+                              sizeof(md_linac->X_jaw_aabb), cudaMemcpyDeviceToHost ) );
+
+    //
+
+    HANDLE_ERROR( cudaMemcpy( &Y_jaw_v1, &(md_linac->Y_jaw_v1),
+                              sizeof(md_linac->Y_jaw_v1), cudaMemcpyDeviceToHost ) );
+    HANDLE_ERROR( cudaMemcpy( &Y_jaw_v2, &(md_linac->Y_jaw_v2),
+                              sizeof(md_linac->Y_jaw_v2), cudaMemcpyDeviceToHost ) );
+    HANDLE_ERROR( cudaMemcpy( &Y_jaw_v3, &(md_linac->Y_jaw_v3),
+                              sizeof(md_linac->Y_jaw_v3), cudaMemcpyDeviceToHost ) );
+    HANDLE_ERROR( cudaMemcpy( &Y_jaw_index, &(md_linac->Y_jaw_index),
+                              sizeof(md_linac->Y_jaw_index), cudaMemcpyDeviceToHost ) );
+    HANDLE_ERROR( cudaMemcpy( &Y_jaw_nb_triangles, &(md_linac->Y_jaw_nb_triangles),
+                              sizeof(md_linac->Y_jaw_nb_triangles), cudaMemcpyDeviceToHost ) );
+    HANDLE_ERROR( cudaMemcpy( &Y_jaw_aabb, &(md_linac->Y_jaw_aabb),
+                              sizeof(md_linac->Y_jaw_aabb), cudaMemcpyDeviceToHost ) );
+
+
+    /// Free memory
+
+    cudaFree( A_leaf_v1 );           // Vertex 1  - Triangular meshes
+    cudaFree( A_leaf_v2 );           // Vertex 2
+    cudaFree( A_leaf_v3 );           // Vertex 3
+    cudaFree( A_leaf_index );        // Index to acces to a leaf
+    cudaFree( A_leaf_nb_triangles ); // Nb of triangles within each leaf
+    cudaFree( A_leaf_aabb );         // Bounding box of each leaf
+
+    cudaFree( B_leaf_v1 );           // Vertex 1  - Triangular meshes
+    cudaFree( B_leaf_v2 );           // Vertex 2
+    cudaFree( B_leaf_v3 );           // Vertex 3
+    cudaFree( B_leaf_index );        // Index to acces to a leaf
+    cudaFree( B_leaf_nb_triangles ); // Nb of triangles within each leaf
+    cudaFree( B_leaf_aabb );         // Bounding box of each leaf
+
+    cudaFree( X_jaw_v1 );           // Vertex 1  - Triangular meshes
+    cudaFree( X_jaw_v2 );           // Vertex 2
+    cudaFree( X_jaw_v3 );           // Vertex 3
+    cudaFree( X_jaw_index );        // Index to acces to a leaf
+    cudaFree( X_jaw_nb_triangles ); // Nb of triangles within each leaf
+    cudaFree( X_jaw_aabb );         // Bounding box of each leaf
+
+    cudaFree( Y_jaw_v1 );           // Vertex 1  - Triangular meshes
+    cudaFree( Y_jaw_v2 );           // Vertex 2
+    cudaFree( Y_jaw_v3 );           // Vertex 3
+    cudaFree( Y_jaw_index );        // Index to acces to a leaf
+    cudaFree( Y_jaw_nb_triangles ); // Nb of triangles within each leaf
+    cudaFree( Y_jaw_aabb );         // Bounding box of each leaf
+
+    cudaFree( md_linac );
+}
+
 // Copy linac data to the GPU
 void MeshPhanLINACNav::m_copy_linac_to_gpu()
 {
@@ -3284,6 +3890,52 @@ void MeshPhanLINACNav::set_materials(std::string filename )
 {
     m_materials_filename = filename;
 }
+
+void MeshPhanLINACNav::update_beam_configuration( std::string filename, ui32 beam_index, ui32 field_index )
+{
+    m_beam_config_filename = filename;
+    m_beam_index = beam_index;
+    m_field_index = field_index;
+
+    // Init linac configuration
+    m_free_linac_to_cpu();
+
+    /// Init Jaws
+
+    // If jaw x is defined, init
+    if ( m_jaw_x_filename != "" )
+    {
+        m_init_jaw_x();
+
+        // place the jaw relatively to the mlc (local frame)
+        m_translate_jaw_x( 0, m_loc_pos_jaw_x );
+        m_translate_jaw_x( 1, m_loc_pos_jaw_x );
+    }
+
+    // If jaw y is defined, init
+    if ( m_jaw_y_filename != "" )
+    {
+        m_init_jaw_y();
+
+        // place the jaw relatively to the mlc (local frame)
+        m_translate_jaw_y( 0, m_loc_pos_jaw_y );
+        m_translate_jaw_y( 1, m_loc_pos_jaw_y );
+    }
+
+    // Init MLC
+    m_init_mlc();
+
+    // Configure the linac
+    m_configure_linac();
+
+    // Free linac to the GPU
+    m_free_linac_to_gpu();
+
+    // Copy the linac to the GPU
+    m_copy_linac_to_gpu();
+
+}
+
 
 ////// Main functions
 

@@ -516,6 +516,21 @@ f32matrix44 LinacSource::get_transformation_matrix()
     return m_transform;
 }
 
+//========== Update ===============================================
+
+void LinacSource::update_rotation(f32 rx, f32 ry, f32 rz)
+{
+    m_angle = make_f32xyz( rx, ry, rz );
+
+    // Recalculate the transformation matrix of the detector that map local frame to glboal frame
+    TransformCalculator *trans = new TransformCalculator;
+    trans->set_translation( m_org );
+    trans->set_rotation( m_angle );
+    trans->set_axis_transformation( m_axis_trans );
+    m_transform = trans->get_transformation_matrix();
+    delete trans;
+}
+
 //========= Main function ============================================
 
 // Mandatory function, abstract from GGEMSSource. This function is called

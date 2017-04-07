@@ -109,6 +109,10 @@ public:
      */
     void set_model_filename( std::string filename );
 
+    void set_beam_configuration( std::string filename, ui32 beam_index, ui32 field_index );
+
+public:
+    void update_rotation( f32 rx, f32 ry, f32 rz );
 
 public:
     f32matrix44 get_transformation_matrix();    
@@ -148,14 +152,14 @@ private: // Make LinacSource class non-copyable
     /*!
      * \brief Copy LINAC model data to the GPU
      */
-    void m_copy_to_gpu();    
+    void m_copy_to_gpu();        
 
 private:
 
     f32matrix33 m_axis_trans;             /*!< Axis transformation matrix */
     f32xyz m_angle;                       /*!< Orientation of the beamlet */
     f32xyz m_org;                         /*!< Position of Linac source frame */
-    std::string m_model_filename;         /*!< filename of the Linac source model */
+    std::string m_model_filename;         /*!< filename of the Linac source model */   
 
     f32matrix44 m_transform;              /*!< Transformation matrix */
     GlobalSimulationParametersData *mh_params;  /*!< Simulation parameters */
