@@ -257,6 +257,8 @@ void GGcout_version ();
 void GGcout_def();
 void GGnewline( );
 
+ui8 GGassert( bool cmp, const char *file, ui32 line );
+
 std::string Energy_str( f32 E );
 std::string Range_str( f32 E );
 std::string Status_str( ui8 status );

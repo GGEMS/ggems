@@ -46,6 +46,19 @@ __host__ void cuda_error_check ( const char * prefix, const char * postfix )
     }
 }
 
+ui8 GGassert( bool cmp, const char *file, ui32 line )
+{
+    if (cmp == true)
+    {
+        return 1;
+    }
+    else
+    {
+        printf("Failed assertion %s at line %d\n", file, line);
+    }
+    return 0;
+}
+
 // Set a GPU device
 void set_gpu_device ( int deviceChoice )
 {
