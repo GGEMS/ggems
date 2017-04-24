@@ -60,7 +60,7 @@ ui8 GGassert( bool cmp, const char *file, ui32 line )
 }
 
 // Set a GPU device
-void set_gpu_device ( int deviceChoice )
+void set_gpu_device ( int deviceChoice, bool verbose )
 {
 
     f32 minversion = 5.0;
@@ -91,8 +91,11 @@ void set_gpu_device ( int deviceChoice )
     }
 
     cudaSetDevice ( deviceChoice%deviceCount );
-    GGcout << "GPU found: " << prop.name << " (id: " << deviceChoice%deviceCount << ") " << GGendl;
-    GGnewline();
+    if ( verbose )
+    {
+        GGcout << "GPU found: " << prop.name << " (id: " << deviceChoice%deviceCount << ") " << GGendl;
+        GGnewline();
+    }
     
 }
 

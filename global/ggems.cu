@@ -595,7 +595,7 @@ void GGEMS::init_simulation()
     if ( m_flag_verbose_init ) GGcout << "Verboses ok" << GGendl;
 
     // Set the gpu id
-    set_gpu_device( h_parameters->gpu_id );
+    set_gpu_device( h_parameters->gpu_id, h_parameters->verbose );
 
     // Verbosity for init
     if ( m_flag_verbose_init ) GGcout << "Setting GPU ok" << GGendl;
@@ -779,7 +779,6 @@ void GGEMS::start_simulation()
 
         ++ibatch;
     }
-    std::cout << std::endl;
 
     // Run time
     if ( h_parameters->display_run_time ) {

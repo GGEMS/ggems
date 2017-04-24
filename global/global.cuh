@@ -237,7 +237,7 @@ struct GlobalSimulationParametersData
 };
 
 // GPU
-void set_gpu_device ( int deviceChoice );
+void set_gpu_device ( int deviceChoice, bool verbose );
 void reset_gpu_device();
 void HandleError ( cudaError_t err, const char *file, int line );
 void cuda_error_check ( const char * prefix, const char * postfix );
