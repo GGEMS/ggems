@@ -143,8 +143,8 @@ __host__ __device__ f32 linear_interpolation ( f32 xa,f32 ya, f32 xb,  f32 yb, f
 __host__ __device__ f32 Gaussian (f32 mean, f32 rms, ParticlesData *particles, ui32 id );
 
 
-// Filtering
-namespace Filter
+// DataProcessing
+namespace DataProcessing
 {
     f32 *mean( f32* input,  ui32 nx, ui32 ny, ui32 nz, ui32 w_size );
     f32 *median( f32* input,  ui32 nx, ui32 ny, ui32 nz, ui32 w_size );
@@ -153,6 +153,7 @@ namespace Filter
     f32 *cropping_vox_around_center( f32* input, ui32 nx, ui32 ny, ui32 nz,
                                      i32 xmin, i32 xmax, i32 ymin, i32 ymax, i32 zmin, i32 zmax );
     void capping_values( f32* input, ui32 nx, ui32 ny, ui32 nz, f32 val_min, f32 val_max );
+    void scale_values( f32* input, ui32 nx, ui32 ny, ui32 nz, f32 val_scale );
 }
 
 // Atomic add

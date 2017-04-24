@@ -199,7 +199,7 @@ f32xyz get_win_min_max_mead( f32* input, ui32 w_size, ui32 nx, ui32 ny, ui32 x, 
 }
 
 // 3D Median Filter
-f32* Filter::median( f32* input,  ui32 nx, ui32 ny, ui32 nz, ui32 w_size ) {
+f32* DataProcessing::median( f32* input,  ui32 nx, ui32 ny, ui32 nz, ui32 w_size ) {
 
     // init output
     f32 *output = new f32[ nx*ny*nz ];
@@ -259,7 +259,7 @@ f32* Filter::median( f32* input,  ui32 nx, ui32 ny, ui32 nz, ui32 w_size ) {
 }
 
 // 3D Mean Filter
-f32* Filter::mean( f32* input,  ui32 nx, ui32 ny, ui32 nz, ui32 w_size ) {
+f32* DataProcessing::mean( f32* input,  ui32 nx, ui32 ny, ui32 nz, ui32 w_size ) {
 
     // init output
     f32 *output = new f32[ nx*ny*nz ];
@@ -313,7 +313,7 @@ f32* Filter::mean( f32* input,  ui32 nx, ui32 ny, ui32 nz, ui32 w_size ) {
 }
 
 // 3D Adaptive Median Filter
-f32* Filter::adaptive_median(f32* input,  ui32 nx, ui32 ny, ui32 nz,
+f32* DataProcessing::adaptive_median(f32* input,  ui32 nx, ui32 ny, ui32 nz,
                              ui32 w_size, ui32 w_size_max )
 {
     // init output
@@ -407,7 +407,7 @@ f32* Filter::adaptive_median(f32* input,  ui32 nx, ui32 ny, ui32 nz,
 // 3D Resampling by Lanczos3 (uses backwarp mapping)
 #define pi 3.141592653589793238462643383279
 #define SINC(x) ((x)==(0)?1:sin(pi*(x))/(pi*(x)))
-f32* Filter::resampling_lanczos3(f32* input, ui32 nx, ui32 ny, ui32 nz, ui32 new_nx, ui32 new_ny, ui32 new_nz) {
+f32* DataProcessing::resampling_lanczos3(f32* input, ui32 nx, ui32 ny, ui32 nz, ui32 new_nx, ui32 new_ny, ui32 new_nz) {
 
     // init output
     f32 *output = new f32[ new_nx*new_ny*new_nz ];
@@ -500,7 +500,7 @@ f32* Filter::resampling_lanczos3(f32* input, ui32 nx, ui32 ny, ui32 nz, ui32 new
 #undef pi
 #undef SINC
 
-f32* Filter::cropping_vox_around_center( f32* input, ui32 nx, ui32 ny, ui32 nz,
+f32* DataProcessing::cropping_vox_around_center( f32* input, ui32 nx, ui32 ny, ui32 nz,
                                          i32 xmin, i32 xmax, i32 ymin, i32 ymax, i32 zmin, i32 zmax )
 {
     // get center
@@ -552,13 +552,23 @@ f32* Filter::cropping_vox_around_center( f32* input, ui32 nx, ui32 ny, ui32 nz,
     return output;
 }
 
-void Filter::capping_values( f32* input, ui32 nx, ui32 ny, ui32 nz, f32 val_min, f32 val_max )
+void DataProcessing::capping_values( f32* input, ui32 nx, ui32 ny, ui32 nz, f32 val_min, f32 val_max )
 {
     ui32 index = nx*ny*nz;
     ui32 i=0; while ( i < index )
     {
         if ( input[ i ] > val_max ) input[ i ] = val_max;
         if ( input[ i ] < val_min ) input[ i ] = val_min;
+        ++i;
+    }
+}
+
+void DataProcessing::scale_values( f32 *input, ui32 nx, ui32 ny, ui32 nz, f32 val_scale )
+{
+    ui32 index = nx*ny*nz;
+    ui32 i=0; while ( i < index )
+    {
+        input[ i ] = input[ i ] * val_scale;
         ++i;
     }
 }

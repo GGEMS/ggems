@@ -1373,6 +1373,11 @@ void VoxPhanIORTNav::calculate_dose_to_medium()
 
 }
 
+void VoxPhanIORTNav::dose_scaling( f32 factor )
+{
+    m_dose_calculator.dose_scaling( factor );
+}
+
 /// Setting ////////////////////////////////
 
 void VoxPhanIORTNav::set_materials( std::string filename )

@@ -88,6 +88,7 @@ public:
     // Dose calculation
     void calculate_dose_to_water();
     void calculate_dose_to_medium();
+    void dose_scaling( f32 factor );
 
     void write( std::string filename = "dosimetry.mhd", std::string option = "all" );
 

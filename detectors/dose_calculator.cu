@@ -686,6 +686,22 @@ void DoseCalculator::calculate_dose_to_medium()
 
 }
 
+void DoseCalculator::dose_scaling( f32 factor )
+{
+    if ( !m_flag_dose_calculated )
+    {
+        GGcerr << "Dose calculator, the dose map was not calculated, not possible to scale it!" << GGendl;
+    }
+    else
+    {
+        ui32 n = h_dose->tot_nb_dosels;
+        ui32 i = 0; while( i < n)
+        {
+            m_dose_values[i++] *= factor;
+        }
+    }
+}
+
 void DoseCalculator::write(std::string filename , std::string option )
 {
     // Transform the name of option in small letter

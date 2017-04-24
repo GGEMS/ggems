@@ -182,6 +182,7 @@ public:
 
     void calculate_dose_to_medium();
     void calculate_dose_to_water();
+    void dose_scaling( f32 factor );
     
     void write( std::string filename = "dosimetry.mhd", std::string options = "all" );
     void set_materials( std::string filename );
