@@ -634,7 +634,7 @@ void DoseCalculator::initialize ( GlobalSimulationParametersData *h_params )
 
 void DoseCalculator::calculate_dose_to_water()
 {
-    GGcout << "Compute dose to water" << GGendl;         
+    if (mh_params->verbose) GGcout << "Compute dose to water" << GGendl;
 
     m_copy_dosemap_to_cpu();
 
@@ -664,7 +664,7 @@ void DoseCalculator::calculate_dose_to_medium()
         exit_simulation();
     }
 
-    GGcout << "Compute dose to medium" << GGendl;
+    if (mh_params->verbose) GGcout << "Compute dose to medium" << GGendl;
 
     m_copy_dosemap_to_cpu();
 
@@ -686,7 +686,7 @@ void DoseCalculator::calculate_dose_to_medium()
 
 }
 
-void DoseCalculator::write( std::string filename , std::string option )
+void DoseCalculator::write(std::string filename , std::string option )
 {
     // Transform the name of option in small letter
     std::transform( option.begin(), option.end(), option.begin(), ::tolower );
@@ -772,8 +772,16 @@ void DoseCalculator::write( std::string filename , std::string option )
     std::string dose_out( filename + "-Dose." + format );
 
     // Export Edep and EdepSquared
-    if ( flag_edep ) im_io->write_3D( edep_out, f32edep, h_dose->nb_dosels, h_dose->offset, h_dose->dosel_size );
-    if ( flag_edepSq ) im_io->write_3D( edep_squared_out, f32edepSq, h_dose->nb_dosels, h_dose->offset, h_dose->dosel_size );
+    if ( flag_edep )
+    {
+        im_io->write_3D( edep_out, f32edep, h_dose->nb_dosels, h_dose->offset, h_dose->dosel_size );
+        if (mh_params->verbose) GGcout << "Write image " << edep_out << " ... " << GGendl;
+    }
+    if ( flag_edepSq )
+    {
+        im_io->write_3D( edep_squared_out, f32edepSq, h_dose->nb_dosels, h_dose->offset, h_dose->dosel_size );
+        if (mh_params->verbose) GGcout << "Write image " << edep_squared_out << " ... " << GGendl;
+    }
 
     // Export uncertainty
     if ( !m_flag_uncertainty_calculated && flag_unc )
@@ -792,13 +800,22 @@ void DoseCalculator::write( std::string filename , std::string option )
     }
 
     // Export uncertainty and hits
-    if ( flag_unc ) im_io->write_3D( uncer_out, m_uncertainty_values, h_dose->nb_dosels, h_dose->offset, h_dose->dosel_size );
-    if ( flag_hit ) im_io->write_3D( hit_out, h_dose->number_of_hits, h_dose->nb_dosels, h_dose->offset, h_dose->dosel_size );
+    if ( flag_unc )
+    {
+        im_io->write_3D( uncer_out, m_uncertainty_values, h_dose->nb_dosels, h_dose->offset, h_dose->dosel_size );
+        if (mh_params->verbose) GGcout << "Write image " << uncer_out << " ... " << GGendl;
+    }
+    if ( flag_hit )
+    {
+        im_io->write_3D( hit_out, h_dose->number_of_hits, h_dose->nb_dosels, h_dose->offset, h_dose->dosel_size );
+        if (mh_params->verbose) GGcout << "Write image " << hit_out << " ... " << GGendl;
+    }
 
     // Export dose
     if ( m_flag_dose_calculated && flag_dose )
     {
         im_io->write_3D( dose_out, m_dose_values, h_dose->nb_dosels, h_dose->offset, h_dose->dosel_size );
+        if (mh_params->verbose) GGcout << "Write image " << dose_out << " ... " << GGendl;
     }
 
     delete im_io;

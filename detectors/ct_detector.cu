@@ -288,6 +288,7 @@ void CTDetector::save_projection( std::string filename, std::string format )
             projection16[ i ] = (ui16)m_projection[ i ];
         }
         im_io->write_3D( filename, projection16, m_nb_pixel, offset, m_pixel_size );
+        if (mh_params->verbose) GGcout << "Write image " << filename << " ... " << GGendl;
         delete[] projection16;
     }
 
@@ -300,6 +301,7 @@ void CTDetector::save_projection( std::string filename, std::string format )
             projection32[ i ] = (ui32)m_projection[ i ];
         }
         im_io->write_3D( filename, projection32, m_nb_pixel, offset, m_pixel_size );
+        if (mh_params->verbose) GGcout << "Write image " << filename << " ... " << GGendl;
         delete[] projection32;
     }
 
@@ -307,6 +309,7 @@ void CTDetector::save_projection( std::string filename, std::string format )
     if ( format == "f32" )
     {
         im_io->write_3D( filename, m_projection, m_nb_pixel, offset, m_pixel_size );
+        if (mh_params->verbose) GGcout << "Write image " << filename << " ... " << GGendl;
     }
 
     delete im_io;
@@ -352,6 +355,7 @@ void CTDetector::save_scatter( std::string filename )
 
         // Record the projection
         im_io->write_3D( out.str(), scatter16, m_nb_pixel, offset, m_pixel_size );
+        if (mh_params->verbose) GGcout << "Write image " << filename << " ... " << GGendl;
 
     }
     delete[] scatter16;

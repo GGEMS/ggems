@@ -68,8 +68,7 @@ void ImageIO::m_create_directory_tree( std::string dirname )
 
 template<typename Type2D>
 void ImageIO::m_write_2D( std::string filename, Type2D *data, ui32xy size, f32xy offset, f32xy spacing, bool sparse_compression )
-{
-    GGcout << "Write image " << filename << " ... " << GGendl;
+{    
 
     // Check format
     std::string format = get_extension( filename );
@@ -212,9 +211,7 @@ void ImageIO::m_write_2D( std::string filename, Type2D *data, ui32xy size, f32xy
 
 template<typename Type3D>
 void ImageIO::m_write_3D( std::string filename, Type3D *data, ui32xyz size, f32xyz offset, f32xyz spacing, bool sparse_compression )
-{
-
-    GGcout << "Write image " << filename << " ... " << GGendl;
+{    
 
     // Check format
     std::string format = get_extension( filename );
