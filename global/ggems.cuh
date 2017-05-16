@@ -42,6 +42,10 @@
 #include "vox_phan_vrt_nav.cuh"
 //#include "vox_phan_gtrack_nav.cuh"
 
+// Include tools
+#include "dvh_calculator.cuh"
+#include "data_processing.cuh"
+
 class GGEMS
 {
 public:

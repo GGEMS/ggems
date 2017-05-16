@@ -30,7 +30,6 @@ struct LinacSourceData
     f32 *val_rho_E_theta_max;
     f32 *cdf_rho_theta_phi;
 
-
     f32 rho_max;
     f32 E_max;
     f32 theta_max;

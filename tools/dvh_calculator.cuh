@@ -34,6 +34,8 @@ public:
     f32 get_total_dose();
     f32 get_max_dose();
     f32 get_min_dose();
+    f32 get_mean_dose();
+    f32 get_std_dose();
 
     void print_dvh();
 
@@ -43,7 +45,7 @@ private:
 
     bool m_dvh_calcualted;
 
-    f32 m_dose_min, m_dose_max, m_dose_total;
+    f32 m_dose_min, m_dose_max, m_dose_total, m_mean_dose, m_std_dose;
     f32 m_spacing_x, m_spacing_y, m_spacing_z;
     ui32 m_nb_dosels, m_nb_bins;
 

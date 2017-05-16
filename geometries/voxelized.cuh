@@ -42,9 +42,10 @@ class VoxelizedPhantom : public BaseObject {
 
         void load_from_mhd(std::string volume_name, std::string range_name);
 
+        // Copy vol CPU to GPU
         void initialize();
 
-        void set_offset(f32 x, f32 y, f32 z);
+        void set_offset(f32 x, f32 y, f32 z);        
 
         VoxVolumeData<ui16> *h_volume;
         VoxVolumeData<ui16> *d_volume;

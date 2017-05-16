@@ -1427,6 +1427,11 @@ VoxVolumeData<f32> * VoxPhanIORTNav::get_dose_map()
     return m_dose_calculator.get_dose_map();
 }
 
+VoxVolumeData<f32> * VoxPhanIORTNav::get_uncertainty_map()
+{
+    return m_dose_calculator.get_uncertainty_map();
+}
+
 AabbData VoxPhanIORTNav::get_bounding_box()
 {
     AabbData box;

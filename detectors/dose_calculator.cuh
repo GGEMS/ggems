@@ -81,6 +81,7 @@ public:
 
     // Getting
     VoxVolumeData<f32> * get_dose_map();
+    VoxVolumeData<f32> * get_uncertainty_map();
 
     // Init
     void initialize( GlobalSimulationParametersData *h_params );

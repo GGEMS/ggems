@@ -23,6 +23,8 @@ DVHCalculator::DVHCalculator()
     m_dose_min =  F32_MAX;
     m_dose_max = -F32_MAX;
     m_dose_total = 0.0;
+    m_mean_dose = 0.0;
+    m_std_dose = 0.0;
     m_nb_dosels = 0;
     m_nb_bins = 0;
 
@@ -78,9 +80,11 @@ void DVHCalculator::compute_dvh_from_mask(VoxVolumeData<f32> *dosemap, std::stri
     m_spacing_y = dosemap->spacing_y;
     m_spacing_z = dosemap->spacing_z;
 
-    // Get min, max, total dose and nb of voxels under the mask
+    // Get min, max, mean, std, total dose and nb of voxels under the mask
     f32 val = 0.0;
-    i32 i = 0;
+    ui32 i = 0;
+    m_nb_dosels = 0;
+    m_dose_total = 0.0;
     while( i < dosemap->number_of_voxels )
     {
         if ( mask[ i ] == id_mask )
@@ -97,6 +101,22 @@ void DVHCalculator::compute_dvh_from_mask(VoxVolumeData<f32> *dosemap, std::stri
 
         i++;
     }
+    m_mean_dose = m_dose_total / f32( m_nb_dosels );
+
+    // Std
+    m_std_dose = 0.0;
+    i = 0; while( i < dosemap->number_of_voxels )
+    {
+        if ( mask[ i ] == id_mask )
+        {
+            val = dosemap->values[ i ];
+            m_std_dose += (val - m_mean_dose)*(val - m_mean_dose);
+        }
+
+        i++;
+    }
+    m_std_dose /= f32( m_nb_dosels );
+    m_std_dose  = sqrt( m_std_dose );
 
     /// Build dvh (histogram of dose) ///
 
@@ -179,17 +199,57 @@ void DVHCalculator::compute_dvh_from_mask(VoxVolumeData<f32> *dosemap, std::stri
 
 f32 DVHCalculator::get_max_dose()
 {
+    if ( !m_dvh_calcualted )
+    {
+        GGcerr << "First you need to compute DVH values from dose map!" << GGendl;
+        return 0.0;
+    }
+
     return m_dose_max;
 }
 
 f32 DVHCalculator::get_min_dose()
 {
+    if ( !m_dvh_calcualted )
+    {
+        GGcerr << "First you need to compute DVH values from dose map!" << GGendl;
+        return 0.0;
+    }
+
     return m_dose_min;
 }
 
 f32 DVHCalculator::get_total_dose()
 {
+    if ( !m_dvh_calcualted )
+    {
+        GGcerr << "First you need to compute DVH values from dose map!" << GGendl;
+        return 0.0;
+    }
+
     return m_dose_total;
+}
+
+f32 DVHCalculator::get_mean_dose()
+{
+    if ( !m_dvh_calcualted )
+    {
+        GGcerr << "First you need to compute DVH values from dose map!" << GGendl;
+        return 0.0;
+    }
+
+    return m_mean_dose;
+}
+
+f32 DVHCalculator::get_std_dose()
+{
+    if ( !m_dvh_calcualted )
+    {
+        GGcerr << "First you need to compute DVH values from dose map!" << GGendl;
+        return 0.0;
+    }
+
+    return m_std_dose;
 }
 
 f32 DVHCalculator::get_total_volume_size()
@@ -237,7 +297,7 @@ void DVHCalculator::print_dvh()
     }
 
     GGcout << "=== DVH ===" << GGendl;
-    GGcout << "bins - values" << GGendl;
+    GGcout << "dose - volume" << GGendl;
     ui32 i = 0;
     while (i < m_nb_bins )
     {

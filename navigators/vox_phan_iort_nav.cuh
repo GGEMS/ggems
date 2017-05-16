@@ -200,6 +200,7 @@ public:
 //    void export_history_map( std::string filename );
 
     VoxVolumeData<f32> * get_dose_map();
+    VoxVolumeData<f32> * get_uncertainty_map();
 
     AabbData get_bounding_box();
 

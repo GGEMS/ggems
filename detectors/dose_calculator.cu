@@ -452,6 +452,7 @@ VoxVolumeData<f32> * DoseCalculator::get_dose_map()
 {
     if ( !m_flag_dose_calculated )
     {
+        GGwarn << "DoseCalculator, dose map was not calculated! Compute dose to water." << GGendl;
         calculate_dose_to_water();
     }
 
@@ -480,6 +481,42 @@ VoxVolumeData<f32> * DoseCalculator::get_dose_map()
     dosemap->values = m_dose_values;
 
     return dosemap;
+}
+
+VoxVolumeData<f32> * DoseCalculator::get_uncertainty_map()
+{
+    if ( !m_flag_dose_calculated )
+    {
+        GGwarn << "DoseCalculator, dose map was not calculated! Compute dose to water." << GGendl;
+        calculate_dose_to_water();
+    }
+
+    VoxVolumeData<f32> *uncert = new VoxVolumeData<f32>;
+    uncert->nb_vox_x = h_dose->nb_dosels.x;
+    uncert->nb_vox_y = h_dose->nb_dosels.y;
+    uncert->nb_vox_z = h_dose->nb_dosels.z;
+
+    uncert->off_x = h_dose->offset.x;
+    uncert->off_y = h_dose->offset.y;
+    uncert->off_z = h_dose->offset.z;
+
+    uncert->spacing_x = h_dose->dosel_size.x;
+    uncert->spacing_y = h_dose->dosel_size.y;
+    uncert->spacing_z = h_dose->dosel_size.z;
+
+    uncert->number_of_voxels = h_dose->tot_nb_dosels;
+
+    uncert->xmin = h_dose->xmin;
+    uncert->xmax = h_dose->xmax;
+    uncert->ymin = h_dose->ymin;
+    uncert->ymax = h_dose->ymax;
+    uncert->zmin = h_dose->zmin;
+    uncert->zmax = h_dose->zmax;
+
+    uncert->values = m_uncertainty_values;
+
+    return uncert;
+
 }
 
 /// Updating/clearing

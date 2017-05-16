@@ -105,6 +105,10 @@ static __inline__ __host__ __device__ f32xyz make_f32xyz(f32 vx, f32 vy, f32 vz)
     f32xyz t; t.x = vx; t.y = vy; t.z = vz; return t;
 }
 
+static __inline__ __host__ __device__ f32xyzw make_f32xyzw(f32 vx, f32 vy, f32 vz, f32 vw) {
+    f32xyzw t; t.x = vx; t.y = vy; t.z = vz; t.w = vw; return t;
+}
+
 static __inline__ __host__ __device__ f32xyz make_f32xyz_zeros() {
     f32xyz t; t.x = 0.0; t.y = 0.0; t.z = 0.0; return t;
 }
