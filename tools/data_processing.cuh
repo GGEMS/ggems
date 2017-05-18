@@ -65,7 +65,7 @@ namespace DataProcessing
      * \brief Adaptive median filter (3D)
      * \param input input voxelized volume (float)
      * \param w_size window size (odd value)
-     * * \param w_size_maw maximum window size (odd value)
+     * \param w_size_maw maximum window size (odd value)
      * \return New voxelized volume after filtering
      */
     VoxVolumeData<f32> *filter_adaptive_median( const VoxVolumeData<f32> *input, ui32 w_size, ui32 w_size_max );

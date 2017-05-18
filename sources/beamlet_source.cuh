@@ -114,18 +114,71 @@ public:
     void set_energy_spectrum( std::string filename );
 
     /*!
-     * \fn void set_size( f32 sizex, f32 sizey )
+     * \fn void set_local_size( f32 sizex, f32 sizey, f32 sizez )
      * \brief Set the size of the beamlet
      * \param sizex Beamlet size along x-axis
      * \param sizey Beamlet size along y-axis
+     * \param sizey Beamlet size along z-axis
      */
     void set_local_size( f32 sizex, f32 sizey, f32 sizez );
 
 public:
+    /*!
+     * \fn f32xyz get_local_beamlet_position()
+     * \brief Get the local beamlet position
+     * \return 3D position of the local beamlet position
+     */
     f32xyz get_local_beamlet_position();
+
+    /*!
+     * \fn f32xyz get_local_source_position()
+     * \brief Get the local source position
+     * \return 3D position of the local source position
+     */
     f32xyz get_local_source_position();
+
+    /*!
+     * \fn f32xyz get_local_size()
+     * \brief Get the beamlet size (local frame)
+     * \return 3D size of the beamlet
+     */
     f32xyz get_local_size();
+
+    /*!
+     * \fn  f32matrix44 get_transformation_matrix();
+     * \brief Get transformation matrix (global frame to local frame)
+     * \return Transformation matris 4x4
+     */
     f32matrix44 get_transformation_matrix();
+
+public:
+
+    /*!
+     * \fn void update_rotation( f32 agx, f32 agy, f32 agz )
+     * \brief Update rotation of the beamlet frame (gantry)
+     * \param agx Angle along x-axis (non-coplanar angle)
+     * \param agy Angle along y-axis (Carousel rotation)
+     * \param agz Angle along z-axis (Gantry angle)
+     */
+    void update_rotation( f32 agx, f32 agy, f32 agz );
+
+    /*!
+     * \fn void update_local_size( f32 sizex, f32 sizey, f32 sizez )
+     * \brief Update the beamlet size (local frame)
+     * \param sizex Beamlet size along x-axis
+     * \param sizey Beamlet size along y-axis
+     * \param sizez Beamlet size along z-axis
+     */
+    void update_local_size( f32 sizex, f32 sizey, f32 sizez );
+
+    /*!
+     * \fn void update_local_beamlet_position( f32 posx, f32 posy, f32 posz )
+     * \brief Update the beamlet position (local frame)
+     * \param posx Position of the origin in X
+     * \param posy Position of the origin in Y
+     * \param posz Position of the origin in Z
+     */
+    void update_local_beamlet_position( f32 posx, f32 posy, f32 posz );
 
 public: // Abstract from GGEMSSource (Mandatory funtions)
 

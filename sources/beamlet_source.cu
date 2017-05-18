@@ -299,6 +299,31 @@ f32matrix44 BeamletSource::get_transformation_matrix()
     return m_transform;
 }
 
+//=========== Updating ===============================================
+
+void BeamletSource::update_rotation(f32 agx, f32 agy, f32 agz)
+{
+    m_angle = make_f32xyz( agx, agy, agz );
+
+    // update transformation matrix
+    TransformCalculator *trans = new TransformCalculator;
+    trans->set_translation( m_org );
+    trans->set_rotation( m_angle );
+    trans->set_axis_transformation( m_axis_trans );
+    m_transform = trans->get_transformation_matrix();
+    delete trans;
+}
+
+void BeamletSource::update_local_size(f32 sizex, f32 sizey, f32 sizez)
+{
+    m_size = make_f32xyz( sizex, sizey, sizez );
+}
+
+void BeamletSource::update_local_beamlet_position(f32 posx, f32 posy, f32 posz)
+{
+    m_pos = make_f32xyz( posx, posy, posz );
+}
+
 //========= Main function ============================================
 
 // Mandatory function, abstract from GGEMSSource. This function is called
