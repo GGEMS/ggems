@@ -882,6 +882,8 @@ void VoxPhanDosiNav::set_volume_of_interest( f32 xmin, f32 xmax, f32 ymin, f32 y
     m_zmin = zmin; m_zmax = zmax;
 }
 
+/// Getting /////////////////////////////////////
+
 AabbData VoxPhanDosiNav::get_bounding_box()
 {
     AabbData box;
@@ -894,6 +896,16 @@ AabbData VoxPhanDosiNav::get_bounding_box()
     box.zmax = m_phantom.h_volume->zmax;
 
     return box;
+}
+
+VoxVolumeData<f32> * VoxPhanDosiNav::get_dose_map()
+{
+    return m_dose_calculator.get_dose_map();
+}
+
+VoxVolumeData<f32> * VoxPhanDosiNav::get_uncertainty_map()
+{
+    return m_dose_calculator.get_uncertainty_map();
 }
 
 /// Updating /////////////////////////////////

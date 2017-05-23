@@ -95,8 +95,24 @@ public:
     void export_density_map( std::string filename );
     void export_materials_map( std::string filename );
 
+public:
     AabbData get_bounding_box();
 
+    /*!
+     * \fn  VoxVolumeData<f32> * get_dose_map()
+     * \brief Return the dose map
+     * \return Dose map in VoxVolumeData format (f32)
+     */
+    VoxVolumeData<f32> * get_dose_map();
+
+    /*!
+     * \fn  VoxVolumeData<f32> * get_uncertainty_map()
+     * \brief Return the uncertainty map
+     * \return Uncertainty map in VoxVolumeData format (f32)
+     */
+    VoxVolumeData<f32> * get_uncertainty_map();
+
+public:
     void update_clear_deposition();
 
 private:
