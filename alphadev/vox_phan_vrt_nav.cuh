@@ -72,13 +72,13 @@ struct COOHistoryMap {
 namespace VPVRTN
 {
 
-__host__ __device__ void track_to_out_analog( ParticlesData *particles,
+__host__ __device__ void track_to_out_analog(ParticlesData *particles,
                                               const VoxVolumeData<ui16> *vol,
                                               const MaterialsData *materials,
                                               const PhotonCrossSectionData *photon_CS_table,
                                               const GlobalSimulationParametersData *parameters,
                                               DoseData *dosi,
-                                              ui32 part_id );
+                                              ui32 part_id);
 
 __host__ __device__ void track_to_out_tle( ParticlesData *particles,
                                            const VoxVolumeData<ui16> *vol,
@@ -91,7 +91,7 @@ __host__ __device__ void track_to_out_tle( ParticlesData *particles,
 
 /// Experimental
 
-__host__ __device__ void track_to_out_woodcock( ParticlesData *particles,
+__host__ __device__ void track_to_out_woodcock(ParticlesData *particles,
                                                 const VoxVolumeData<ui16> *vol,
                                                 const MaterialsData *materials,
                                                 const PhotonCrossSectionData *photon_CS_table,
@@ -103,14 +103,15 @@ __host__ __device__ void track_to_out_woodcock( ParticlesData *particles,
 /// Experimental (Super Voxel Woodcock)
 
 __host__ __device__ void track_to_out_svw( ParticlesData *particles,
-                                            const VoxVolumeData<ui16> *vol,
-                                            const MaterialsData *materials,
-                                            const PhotonCrossSectionData *photon_CS_table,
-                                            const GlobalSimulationParametersData *parameters,
-                                            DoseData *dosi,
-                                            f32* mumax_table,
-                                            ui32* mumax_index_table,
-                                            ui32 part_id );
+                                               const VoxVolumeData<ui16> *vol,
+                                               const MaterialsData *materials,
+                                               const PhotonCrossSectionData *photon_CS_table,
+                                               const GlobalSimulationParametersData *parameters,
+                                               DoseData *dosi,
+                                               f32* mumax_table,
+                                               ui32* mumax_index_table,
+                                               ui32 part_id,
+                                               ui32 nb_bins_sup_voxel );
 /*
 __host__ __device__ void track_to_out_setle(ParticlesData particles,
                                       VoxVolumeData<ui16> vol,
@@ -135,12 +136,12 @@ __host__ __device__ void track_seTLE(ParticlesData particles,
 __global__ void kernel_device_track_to_in( ParticlesData *particles, f32 xmin, f32 xmax,
                                             f32 ymin, f32 ymax, f32 zmin, f32 zmax , f32 tolerance);
 
-__global__ void kernel_device_track_to_out_analog( ParticlesData *particles,
+__global__ void kernel_device_track_to_out_analog(ParticlesData *particles,
                                                    const VoxVolumeData<ui16> *vol,
                                                    const MaterialsData *materials,
                                                    const PhotonCrossSectionData *photon_CS_table,
                                                    const GlobalSimulationParametersData *parameters,
-                                                   DoseData *dosi );
+                                                   DoseData *dosi);
 
 __global__ void kernel_device_track_to_out_tle( ParticlesData *particles,
                                                 const VoxVolumeData<ui16> *vol,
@@ -151,7 +152,7 @@ __global__ void kernel_device_track_to_out_tle( ParticlesData *particles,
                                                 const VRT_Mu_MuEn_Data *mu_table );
 
 /// Experimental
-__global__ void kernel_device_track_to_out_woodcock( ParticlesData *particles,
+__global__ void kernel_device_track_to_out_woodcock(ParticlesData *particles,
                                                      const VoxVolumeData<ui16> *vol,
                                                      const MaterialsData *materials,
                                                      const PhotonCrossSectionData *photon_CS_table,
@@ -160,14 +161,16 @@ __global__ void kernel_device_track_to_out_woodcock( ParticlesData *particles,
                                                      f32* mumax_table );
 
 /// Experimental (Super Voxel Woodcock)
-__global__ void kernel_device_track_to_out_svw( ParticlesData *particles,
-                                                     const VoxVolumeData<ui16> *vol,
-                                                     const MaterialsData *materials,
-                                                     const PhotonCrossSectionData *photon_CS_table,
-                                                     const GlobalSimulationParametersData *parameters,
-                                                     DoseData *dosi,
-                                                     f32* mumax_table,
-                                                     ui32* mumax_index_table );
+
+__global__ void kernel_device_track_to_out_svw(  ParticlesData *particles,
+                                                 const VoxVolumeData<ui16> *vol,
+                                                 const MaterialsData *materials,
+                                                 const PhotonCrossSectionData *photon_CS_table,
+                                                 const GlobalSimulationParametersData *parameters,
+                                                 DoseData *dosi,
+                                                 f32* mumax_table,
+                                                 ui32* mumax_index_table,
+                                                 ui32 nb_bins_sup_voxel);
 /*
 __global__ void kernel_device_track_to_out_setle( ParticlesData *particles,
                                                  const VoxVolumeData<ui16> *vol,
