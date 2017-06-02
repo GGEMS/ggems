@@ -15,6 +15,7 @@
 #define VOX_PHAN_VRT_NAV_CU
 
 #include "vox_phan_vrt_nav.cuh"
+#include "image_io.cuh"
 
 ////// HOST-DEVICE GPU Codes ////////////////////////////////////////////
 
@@ -565,7 +566,7 @@ __host__ __device__ void VPVRTN::track_to_out_svw (ParticlesData *particles,
                                   photon_CS_table->nb_bins );
 
     // Get index CS table the coresponding super voxel
-    ui32 CS_max_index = mumax_index_table[ index_phantom.w ] * photon_CS_table->nb_bins + E_index;
+    ui32 CS_max_index = mumax_index_table[ index_phantom.w * photon_CS_table->nb_bins + E_index ] * photon_CS_table->nb_bins + E_index;
 
     f32 CS_max = ( E_index == 0 )? mumax_table[CS_max_index]: linear_interpolation(photon_CS_table->E_bins[E_index-1], mumax_table[CS_max_index-1],
             photon_CS_table->E_bins[E_index], mumax_table[CS_max_index], energy);
@@ -1377,12 +1378,11 @@ void VoxPhanVRTNav::m_build_mumax_table()
         m_mumax_table[ i ] = 1.0 / sum_CS;
         ++i;
     }
-
 }
-
 
 void VoxPhanVRTNav::m_build_svw_mumax_table()
 {
+    ui32 nb_bins_E = m_cross_sections.h_photon_CS->nb_bins;
     // Init voxel -> super voxel index
     ui32 *sup_vox_index = new ui32[m_phantom.h_volume->number_of_voxels];
 
@@ -1397,30 +1397,61 @@ void VoxPhanVRTNav::m_build_svw_mumax_table()
             ? m_phantom.h_volume->nb_vox_z / m_nb_bins_sup_voxel
             : m_phantom.h_volume->nb_vox_z / m_nb_bins_sup_voxel + 1;
 
-    // Find the less attenuate material
-    f32 min_dens = F32_MAX;
-    ui32 min_dens_ind_mat = 0;
-    ui32 i = 0; while ( i < m_materials.h_materials->nb_materials )
+    // Init material mumax table
+    f32 *mu_mat = new f32[ m_materials.h_materials->nb_materials  * nb_bins_E ];
+    ui32 ind_mat = 0; while ( ind_mat < m_materials.h_materials->nb_materials )
     {
-        if ( m_materials.h_materials->density[i] < min_dens )
+        ui32 n=0; while ( n < nb_bins_E )
         {
-            min_dens = m_materials.h_materials->density[ i ];
-            min_dens_ind_mat = i;
+            ui32 index = ind_mat * nb_bins_E + n;
+            f32 cs = 0.0;
+            if ( mh_params->physics_list[PHOTON_PHOTOELECTRIC] )
+            {
+                cs += m_cross_sections.h_photon_CS->Photoelectric_Std_CS[ index ];
+            }
+
+            if ( mh_params->physics_list[PHOTON_COMPTON] )
+            {
+                cs += m_cross_sections.h_photon_CS->Compton_Std_CS[ index ];
+            }
+
+            if ( mh_params->physics_list[PHOTON_RAYLEIGH] )
+            {
+                cs += m_cross_sections.h_photon_CS->Rayleigh_Lv_CS[ index ];
+            }
+            mu_mat [ index ] = cs;
+            ++n;
         }
-        ++i;
+        ++ind_mat;
+    }
+
+    // Find the less attenuate material
+    ui32 *mumin_ind_mat = new ui32[ nb_bins_E ];
+    ui32 ind_bins_E = 0; while ( ind_bins_E < nb_bins_E ) {
+        mumin_ind_mat [ ind_bins_E ] = 0;
+        ind_mat = 1; while ( ind_mat < m_materials.h_materials->nb_materials )
+        {
+            if ( mu_mat [ ind_mat * nb_bins_E + ind_bins_E ] < mu_mat [ mumin_ind_mat[ ind_bins_E ] * nb_bins_E + ind_bins_E ] ) {
+                mumin_ind_mat [ ind_bins_E ] = ind_mat;
+            }
+            ++ind_mat;
+        }
+        ++ind_bins_E;
     }
 
     // Init super voxels mumax table vector and material index
-    ui32 *sup_vox_ind_mat_table = new ui32[ nbx_sup_vox * nby_sup_vox * nbz_sup_vox ];
-    i = 0; while ( i < nbx_sup_vox * nby_sup_vox * nbz_sup_vox )
+    ui32 *sup_vox_ind_mat_table = new ui32[ nbx_sup_vox * nby_sup_vox * nbz_sup_vox * nb_bins_E];
+    ui32 ind_sup_vol = 0; while ( ind_sup_vol < nbx_sup_vox * nby_sup_vox * nbz_sup_vox )
     {
-        sup_vox_ind_mat_table [ i ] = min_dens_ind_mat;
-        ++i;
+        ind_bins_E = 0; while ( ind_bins_E < nb_bins_E ) {
+            sup_vox_ind_mat_table [ ind_sup_vol * nb_bins_E + ind_bins_E ] = mumin_ind_mat [ ind_bins_E ];
+            ++ind_bins_E;
+        }
+        ++ind_sup_vol;
     }
 
     // Find the most attenuate material in each super voxel
-    ui32 ind_sup_vol = 0;
-    ui32 j, k, ii, jj, kk, rest;
+    ui32 i, j, k, ii, jj, kk, rest;
     ui32 xy = m_phantom.h_volume->nb_vox_x * m_phantom.h_volume->nb_vox_y;
     ui32 sv_xy = nbx_sup_vox * nby_sup_vox;
     ui32 ind_vol = 0; while ( ind_vol < m_phantom.h_volume->number_of_voxels )
@@ -1439,27 +1470,33 @@ void VoxPhanVRTNav::m_build_svw_mumax_table()
         // super voxel index associated to the the voxel ind_vol
         sup_vox_index[ ind_vol ] = ind_sup_vol;
 
-        // Material index associated to the super voxel ind_sup_vol
-        if ( m_materials.h_materials->density[ sup_vox_ind_mat_table [ind_sup_vol] ] < m_materials.h_materials->density[ m_phantom.h_volume->values[ ind_vol ] ] )
+        ind_mat = m_phantom.h_volume->values[ ind_vol ];
+
+        // Material index associated to the super voxel ind_sup_vol according to E_bins
+        ind_bins_E = 0; while ( ind_bins_E < nb_bins_E )
         {
-            sup_vox_ind_mat_table [ind_sup_vol] = m_phantom.h_volume->values[ ind_vol ];
+            if ( mu_mat[ sup_vox_ind_mat_table [ ind_sup_vol * nb_bins_E + ind_bins_E ] * nb_bins_E + ind_bins_E ] < mu_mat[ ind_mat  * nb_bins_E + ind_bins_E ] )
+            {
+                sup_vox_ind_mat_table [ ind_sup_vol * nb_bins_E + ind_bins_E ] = ind_mat;
+            }
+            ++ind_bins_E;
         }
         ++ind_vol;
     }
 
     // Reduce the sup_vox_ind_mat table size (removing duplicates)
     std::vector<ui32> red_sup_vox_ind_mat_table(1, sup_vox_ind_mat_table [ 0 ]);
-    ui32 *old_to_red_link = new ui32[nbx_sup_vox * nby_sup_vox * nbz_sup_vox];
+    ui32 *old_to_red_link = new ui32[ nbx_sup_vox * nby_sup_vox * nbz_sup_vox * nb_bins_E ];
     bool ind_not_found;
     old_to_red_link [0] = 0;
-    i = 1; while ( i < nbx_sup_vox * nby_sup_vox * nbz_sup_vox )
+    ui32 ind = 1; while ( ind < nbx_sup_vox * nby_sup_vox * nbz_sup_vox * nb_bins_E)
     {
         ind_not_found = true;
         ui32 j = 0; while (j < red_sup_vox_ind_mat_table.size())
         {
-            if ( sup_vox_ind_mat_table [ i ] == red_sup_vox_ind_mat_table [ j ] )
+            if ( sup_vox_ind_mat_table [ ind ] == red_sup_vox_ind_mat_table [ j ] )
             {
-                old_to_red_link [i] = j;
+                old_to_red_link [ind] = j;
                 ind_not_found = false;
                 break;
             }
@@ -1467,31 +1504,34 @@ void VoxPhanVRTNav::m_build_svw_mumax_table()
         }
         if (ind_not_found)
         {
-            red_sup_vox_ind_mat_table.push_back(sup_vox_ind_mat_table [ i ]);
-            old_to_red_link [ i ] = red_sup_vox_ind_mat_table.size() - 1;
+            red_sup_vox_ind_mat_table.push_back(sup_vox_ind_mat_table [ ind ]);
+            old_to_red_link [ ind ] = red_sup_vox_ind_mat_table.size() - 1;
         }
-        ++i;
+        ++ind;
     }
 
     // Link voxels to the reduced mumax index table
-    HANDLE_ERROR( cudaMallocManaged( &(m_mumax_index_table), m_phantom.h_volume->number_of_voxels * sizeof( ui32 ) ) );
-    i = 0; while (i < m_phantom.h_volume->number_of_voxels)
+    HANDLE_ERROR( cudaMallocManaged( &(m_mumax_index_table), m_phantom.h_volume->number_of_voxels * nb_bins_E * sizeof( ui32 ) ) );
+    ind_vol = 0; while ( ind_vol < m_phantom.h_volume->number_of_voxels )
     {
-        m_mumax_index_table[ i ] = old_to_red_link[ sup_vox_index[ i ] ];
-        ++i;
+        ind_bins_E = 0; while ( ind_bins_E < nb_bins_E ) {
+            m_mumax_index_table[ ind_vol * nb_bins_E + ind_bins_E ] = old_to_red_link[ sup_vox_index[ ind_vol ]  * nb_bins_E + ind_bins_E ];
+            ++ind_bins_E;
+        }
+        ++ind_vol;
     }
 
     // Build table using max density  [ 1 / Sum( CS ) ]
     // Init voxels mumax table vector
-    ui32 nb_bins_E = m_cross_sections.h_photon_CS->nb_bins;
+
     ui32 size = red_sup_vox_ind_mat_table.size() * nb_bins_E;
     HANDLE_ERROR( cudaMallocManaged( &(m_mumax_table), size * sizeof( f32 ) ) );
 
-    i = 0; while ( i < red_sup_vox_ind_mat_table.size() )
+    ind_mat = 0; while ( ind_mat < red_sup_vox_ind_mat_table.size() )
     {
         ui32 j=0; while ( j < nb_bins_E )
         {
-            ui32 index = red_sup_vox_ind_mat_table[ i ] * nb_bins_E + j;
+            ui32 index = red_sup_vox_ind_mat_table[ ind_mat ] * nb_bins_E + j;
             f32 sum_CS = 0.0;
 
             if ( mh_params->physics_list[PHOTON_PHOTOELECTRIC] )
@@ -1509,10 +1549,10 @@ void VoxPhanVRTNav::m_build_svw_mumax_table()
                 sum_CS += m_cross_sections.h_photon_CS->Rayleigh_Lv_CS[ index ];
             }
 
-            m_mumax_table[ i * nb_bins_E + j ] = 1.0 / sum_CS;
+            m_mumax_table[ ind_mat * nb_bins_E + j ] = 1.0 / sum_CS;
             ++j;
         }
-        ++i;
+        ++ind_mat;
     }
 }
 
