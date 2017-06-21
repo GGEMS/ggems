@@ -34,7 +34,8 @@
 #define VRT_TLE      1
 #define VRT_WOODCOCK 2
 #define VRT_SETLE    3
-#define VRT_SVW    4 // Super Voxel Woodcock
+#define VRT_SVW      4 // Super Voxel Woodcock
+#define VRT_SVW_TLE  5 // Super Voxel Woodcock + TLE
 
 // Mu and Mu_en table used by TLE
 struct VRT_Mu_MuEn_Data {
@@ -109,9 +110,23 @@ __host__ __device__ void track_to_out_svw( ParticlesData *particles,
                                                const GlobalSimulationParametersData *parameters,
                                                DoseData *dosi,
                                                f32* mumax_table,
-                                               ui32* mumax_index_table,
+                                               ui16* mumax_index_table,
                                                ui32 part_id,
                                                ui32 nb_bins_sup_voxel );
+
+/// Experimental (Super Voxel Woodcock + TLE)
+
+__host__ __device__ void track_to_out_svw_tle(ParticlesData *particles,
+                                               const VoxVolumeData<ui16> *vol,
+                                               const MaterialsData *materials,
+                                               const PhotonCrossSectionData *photon_CS_table,
+                                               const GlobalSimulationParametersData *parameters,
+                                               DoseData *dosi,
+                                               f32* mumax_table,
+                                               ui16* mumax_index_table,
+                                               ui32 part_id,
+                                               ui32 nb_bins_sup_voxel,
+                                               const VRT_Mu_MuEn_Data *mu_table);
 /*
 __host__ __device__ void track_to_out_setle(ParticlesData particles,
                                       VoxVolumeData<ui16> vol,
@@ -162,15 +177,28 @@ __global__ void kernel_device_track_to_out_woodcock(ParticlesData *particles,
 
 /// Experimental (Super Voxel Woodcock)
 
-__global__ void kernel_device_track_to_out_svw(  ParticlesData *particles,
+__global__ void kernel_device_track_to_out_svw(ParticlesData *particles,
                                                  const VoxVolumeData<ui16> *vol,
                                                  const MaterialsData *materials,
                                                  const PhotonCrossSectionData *photon_CS_table,
                                                  const GlobalSimulationParametersData *parameters,
                                                  DoseData *dosi,
                                                  f32* mumax_table,
-                                                 ui32* mumax_index_table,
+                                                 ui16 *mumax_index_table,
                                                  ui32 nb_bins_sup_voxel);
+
+/// Experimental (Super Voxel Woodcock + TLE)
+
+__global__ void kernel_device_track_to_out_svw_tle(ParticlesData *particles,
+                                                 const VoxVolumeData<ui16> *vol,
+                                                 const MaterialsData *materials,
+                                                 const PhotonCrossSectionData *photon_CS_table,
+                                                 const GlobalSimulationParametersData *parameters,
+                                                 DoseData *dosi,
+                                                 f32* mumax_table,
+                                                 ui16 *mumax_index_table,
+                                                 ui32 nb_bins_sup_voxel,
+                                                 const VRT_Mu_MuEn_Data *mu_table );
 /*
 __global__ void kernel_device_track_to_out_setle( ParticlesData *particles,
                                                  const VoxVolumeData<ui16> *vol,
@@ -269,7 +297,7 @@ private:
     void m_build_svw_mumax_table();
 
     f32* m_mumax_table;
-    ui32* m_mumax_index_table;
+    ui16* m_mumax_index_table;
 
 //
 };
