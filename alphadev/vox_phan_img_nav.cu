@@ -17,7 +17,7 @@
 
 ////:: GPU Codes
 
-__device__ void VPIN::track_to_out( ParticlesData *particles,
+__device__ void VPIM::track_to_out( ParticlesData *particles,
                                     const VoxVolumeData<ui16> *vol,
                                     const MaterialsData *materials,
                                     const PhotonCrossSectionData *photon_CS_table,
@@ -140,7 +140,7 @@ __device__ void VPIN::track_to_out( ParticlesData *particles,
 }
 
 // Device Kernel that move particles to the voxelized volume boundary
-__global__ void VPIN::kernel_device_track_to_in ( ParticlesData *particles, f32 xmin, f32 xmax,
+__global__ void VPIM::kernel_device_track_to_in ( ParticlesData *particles, f32 xmin, f32 xmax,
                                                   f32 ymin, f32 ymax, f32 zmin, f32 zmax, f32 geom_tolerance )
 {
 
@@ -151,7 +151,7 @@ __global__ void VPIN::kernel_device_track_to_in ( ParticlesData *particles, f32 
 }
 
 // Device kernel that track particles within the voxelized volume until boundary
-__global__ void VPIN::kernel_device_track_to_out ( ParticlesData *particles,
+__global__ void VPIM::kernel_device_track_to_out ( ParticlesData *particles,
                                                    const VoxVolumeData<ui16> *vol,
                                                    const MaterialsData *materials,
                                                    const PhotonCrossSectionData *photon_CS_table,
@@ -162,7 +162,7 @@ __global__ void VPIN::kernel_device_track_to_out ( ParticlesData *particles,
 
     while ( particles->status[id] != PARTICLE_DEAD && particles->status[id] != PARTICLE_FREEZE )
     {        
-        VPIN::track_to_out( particles, vol, materials, photon_CS_table, parameters, id );
+        VPIM::track_to_out( particles, vol, materials, photon_CS_table, parameters, id );
     }
 }
 
@@ -215,7 +215,7 @@ void VoxPhanImgNav::track_to_in(ParticlesData *d_particles )
     threads.x = mh_params->gpu_block_size;
     grid.x = ( mh_params->size_of_particles_batch + mh_params->gpu_block_size - 1 ) / mh_params->gpu_block_size;
 
-    VPIN::kernel_device_track_to_in<<<grid, threads>>>( d_particles, m_phantom.h_volume->xmin, m_phantom.h_volume->xmax,
+    VPIM::kernel_device_track_to_in<<<grid, threads>>>( d_particles, m_phantom.h_volume->xmin, m_phantom.h_volume->xmax,
                                                         m_phantom.h_volume->ymin, m_phantom.h_volume->ymax,
                                                         m_phantom.h_volume->zmin, m_phantom.h_volume->zmax,
                                                         mh_params->geom_tolerance );
@@ -231,7 +231,7 @@ void VoxPhanImgNav::track_to_out(ParticlesData *d_particles )
     grid.x = ( mh_params->size_of_particles_batch + mh_params->gpu_block_size - 1 ) / mh_params->gpu_block_size;
 
     // DEBUG
-    VPIN::kernel_device_track_to_out<<<grid, threads>>> ( d_particles, m_phantom.d_volume, m_materials.d_materials,
+    VPIM::kernel_device_track_to_out<<<grid, threads>>> ( d_particles, m_phantom.d_volume, m_materials.d_materials,
                                                           m_cross_sections.d_photon_CS, md_params );
     cudaDeviceSynchronize();
     cuda_error_check ( "Error ", " Kernel_VoxPhanImgNav (track to out)" );

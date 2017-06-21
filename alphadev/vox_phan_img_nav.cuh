@@ -28,8 +28,8 @@
 // debug
 #include "particles.cuh"
 
-// VoxPhanImgNav -> VPIN
-namespace VPIN
+// VoxPhanImgNav -> VPIM
+namespace VPIM
 {
 __device__ void track_to_out( ParticlesData *particles,
                               const VoxVolumeData<ui16> *vol,
