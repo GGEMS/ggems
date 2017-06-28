@@ -244,6 +244,14 @@ void VrmlIO::draw_phantom( VoxPhanImgNav *aPhantom )
     m_draw_wireframe_aabb( aabb, m_blue );
 }
 
+void VrmlIO::draw_phantom( VoxPhanIVRTNav *aPhantom )
+{
+    // Get back some info
+    AabbData aabb = aPhantom->get_bounding_box();
+
+    m_draw_wireframe_aabb( aabb, m_blue );
+}
+
 void VrmlIO::draw_phantom( MeshPhanLINACNav *aPhantom )
 {
     // Get the geometry

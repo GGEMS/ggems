@@ -24,6 +24,7 @@
 // Phantoms
 #include "vox_phan_dosi_nav.cuh"
 #include "vox_phan_img_nav.cuh"
+#include "vox_phan_ivrt_nav.cuh"
 #include "vox_phan_iort_nav.cuh"
 #include "mesh_phan_linac_nav.cuh"
 
@@ -86,6 +87,8 @@ public:
     void draw_phantom( VoxPhanIORTNav* aPhantom );
 
     void draw_phantom( VoxPhanImgNav* aPhantom );
+
+    void draw_phantom( VoxPhanIVRTNav* aPhantom );
 
     void draw_phantom( MeshPhanLINACNav* aPhantom );
 

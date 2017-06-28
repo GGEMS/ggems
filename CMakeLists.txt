@@ -96,7 +96,7 @@ include_directories(
 # Locate sources and headers for this project
 file(GLOB sourcesGPU
     ${PROJECT_SOURCE_DIR}/alphadev/vox_phan_vrt_nav.cu
-    ${PROJECT_SOURCE_DIR}/alphadev/vox_phan_img_vrt_nav.cu
+    ${PROJECT_SOURCE_DIR}/alphadev/vox_phan_ivrt_nav.cu
     ${PROJECT_SOURCE_DIR}/detectors/*.cu
     ${PROJECT_SOURCE_DIR}/data/*.cu
     ${PROJECT_SOURCE_DIR}/geometries/*.cu
@@ -108,7 +108,7 @@ file(GLOB sourcesGPU
 
 file(GLOB headersGPU
     ${PROJECT_SOURCE_DIR}/alphadev/vox_phan_vrt_nav.cuh
-    ${PROJECT_SOURCE_DIR}/alphadev/vox_phan_img_vrt_nav.cuh
+    ${PROJECT_SOURCE_DIR}/alphadev/vox_phan_ivrt_nav.cuh
     ${PROJECT_SOURCE_DIR}/detectors/*.cuh
     ${PROJECT_SOURCE_DIR}/data/*.cuh
     ${PROJECT_SOURCE_DIR}/geometries/*.cuh

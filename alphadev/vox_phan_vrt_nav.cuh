@@ -262,7 +262,6 @@ public:
 private:
 
     VoxelizedPhantom m_phantom;
-    VoxVolumeData<f32> m_super_voxels; // Super Voxel Woodcock
     Materials m_materials;
     CrossSections m_cross_sections;
     DoseCalculator m_dose_calculator;

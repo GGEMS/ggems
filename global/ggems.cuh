@@ -40,6 +40,7 @@
 #include "vox_phan_img_nav.cuh"
 #include "vox_phan_iort_nav.cuh"
 #include "vox_phan_vrt_nav.cuh"
+#include "vox_phan_ivrt_nav.cuh"
 //#include "vox_phan_gtrack_nav.cuh"
 
 // Include tools

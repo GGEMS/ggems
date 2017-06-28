@@ -2182,7 +2182,7 @@ void VoxPhanVRTNav::initialize (GlobalSimulationParametersData *h_params , Globa
     // If Super Voxel Woodcock init mumax table
     if ( m_flag_vrt == VRT_SVW || m_flag_vrt == VRT_SVW_TLE)
     {
-        m_build_svw_mumax_table(); //I need to edit "GlobalSimulationParametersData" in global.cu and global.cuh to add "nb_bins_sup_vox" parameter
+        m_build_svw_mumax_table();
     }
 
 
