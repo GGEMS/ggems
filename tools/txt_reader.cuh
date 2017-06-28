@@ -53,6 +53,9 @@ class TxtReader {
         i32 read_i32_atpos(std::string, i32);
         f32 read_f32_atpos(std::string, i32);
 
+        // Function that read directly the file
+        std::string readfile_line_atpos(std::string filename, i32 num_line);
+
     private:
         std::string m_remove_white_space(std::string);
         // TODO: Carefull this function was never test !!!

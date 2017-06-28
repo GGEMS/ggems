@@ -10,10 +10,10 @@
  * v0.2: JB - Change all structs and remove CPU exec *
  */
 
-#ifndef VOX_PHAN_IMG_NAV_CU
-#define VOX_PHAN_IMG_NAV_CU
+#ifndef VOX_PHAN_IMG_VRT_NAV_CU
+#define VOX_PHAN_IMG_VRT_NAV_CU
 
-#include "vox_phan_img_nav.cuh"
+#include "vox_phan_img_vrt_nav.cuh"
 
 ////:: GPU Codes
 
@@ -168,7 +168,7 @@ __global__ void VPIM::kernel_device_track_to_out ( ParticlesData *particles,
 
 ////:: Privates
 
-bool VoxPhanImgNav::m_check_mandatory()
+bool VoxPhanImgVRTNav::m_check_mandatory()
 {
 
     if ( m_phantom.h_volume->nb_vox_x == 0 || m_phantom.h_volume->nb_vox_y == 0 || m_phantom.h_volume->nb_vox_z == 0 ||
@@ -185,7 +185,7 @@ bool VoxPhanImgNav::m_check_mandatory()
 }
 
 // return memory usage
-ui64 VoxPhanImgNav::m_get_memory_usage()
+ui64 VoxPhanImgVRTNav::m_get_memory_usage()
 {
     ui64 mem = 0;
 
@@ -203,13 +203,13 @@ ui64 VoxPhanImgNav::m_get_memory_usage()
 
 ////:: Main functions
 
-VoxPhanImgNav::VoxPhanImgNav()
+VoxPhanImgVRTNav::VoxPhanImgVRTNav()
 {
     m_materials_filename = "";
     set_name( "VoxPhanImgNav" );
 }
 
-void VoxPhanImgNav::track_to_in(ParticlesData *d_particles )
+void VoxPhanImgVRTNav::track_to_in(ParticlesData *d_particles )
 {        
     dim3 threads, grid;
     threads.x = mh_params->gpu_block_size;
@@ -224,7 +224,7 @@ void VoxPhanImgNav::track_to_in(ParticlesData *d_particles )
 
 }
 
-void VoxPhanImgNav::track_to_out(ParticlesData *d_particles )
+void VoxPhanImgVRTNav::track_to_out(ParticlesData *d_particles )
 {
     dim3 threads, grid;
     threads.x = mh_params->gpu_block_size;
@@ -238,12 +238,12 @@ void VoxPhanImgNav::track_to_out(ParticlesData *d_particles )
 
 }
 
-void VoxPhanImgNav::load_phantom_from_mhd ( std::string filename, std::string range_mat_name )
+void VoxPhanImgVRTNav::load_phantom_from_mhd ( std::string filename, std::string range_mat_name )
 {   
     m_phantom.load_from_mhd( filename, range_mat_name );
 }
 
-void VoxPhanImgNav::initialize(GlobalSimulationParametersData *h_params, GlobalSimulationParametersData *d_params)
+void VoxPhanImgVRTNav::initialize(GlobalSimulationParametersData *h_params, GlobalSimulationParametersData *d_params)
 {
     // Check params
     if ( !m_check_mandatory() )
@@ -276,12 +276,12 @@ void VoxPhanImgNav::initialize(GlobalSimulationParametersData *h_params, GlobalS
 
 }
 
-void VoxPhanImgNav::set_materials( std::string filename )
+void VoxPhanImgVRTNav::set_materials( std::string filename )
 {
     m_materials_filename = filename;
 }
 
-AabbData VoxPhanImgNav::get_bounding_box()
+AabbData VoxPhanImgVRTNav::get_bounding_box()
 {
     AabbData box;
     box.xmin = m_phantom.h_volume->xmin;

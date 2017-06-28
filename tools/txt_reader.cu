@@ -261,6 +261,38 @@ f32 TxtReader::read_f32_atpos(std::string txt, i32 pos) {
     return res;
 }
 
+// Read line at position
+std::string TxtReader::readfile_line_atpos(std::string filename, i32 num_line)
+{
+    // Read file
+    std::ifstream file(filename.c_str());
+    if ( !file ) {
+        GGcerr << "Error, file " << filename.c_str() << " not found!" << GGendl;
+        exit_simulation();
+    }
+
+    std::string line;
+
+    i32 i = 0;
+    num_line++;  // Padding, first line #0 must have 1 iteration on the while loop
+    while ( i < num_line )
+    {
+
+        std::getline( file, line );
+
+        if ( !file )
+        {
+            GGcerr << "Error, read file " << filename.c_str() << ": line number out of bound!" << GGendl;
+            exit_simulation();
+        }
+
+
+        ++i;
+    }
+
+    return line;
+}
+
 std::vector<std::string> split_vector(std::string str, std::string split)
     {
     std::vector<std::string> tokens;

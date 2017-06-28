@@ -11,8 +11,8 @@
  *
  */
 
-#ifndef VOX_PHAN_IMG_NAV_CUH
-#define VOX_PHAN_IMG_NAV_CUH
+#ifndef VOX_PHAN_IMG_VRT_NAV_CUH
+#define VOX_PHAN_IMG_VRT_NAV_CUH
 
 #include "global.cuh"
 #include "ggems_phantom.cuh"
@@ -46,11 +46,11 @@ __global__ void kernel_device_track_to_out(ParticlesData *particles,
                                             const GlobalSimulationParametersData *parameters );
 }
 
-class VoxPhanImgNav : public GGEMSPhantom
+class VoxPhanImgVRTNav : public GGEMSPhantom
 {
 public:
-    VoxPhanImgNav();
-    ~VoxPhanImgNav() {}
+    VoxPhanImgVRTNav();
+    ~VoxPhanImgVRTNav() {}
 
     // Init
     void initialize( GlobalSimulationParametersData *h_params,  GlobalSimulationParametersData *d_params);
