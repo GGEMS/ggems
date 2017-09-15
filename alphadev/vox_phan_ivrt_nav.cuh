@@ -37,7 +37,7 @@
 // VoxPhanIVRTNav -> VPIVRTN
 namespace VPIVRTN
 {
-__device__ void track_to_out( ParticlesData *particles,
+__device__ void track_to_out_analog( ParticlesData *particles,
                               const VoxVolumeData<ui16> *vol,
                               const MaterialsData *materials,
                               const PhotonCrossSectionData *photon_CS_table,
@@ -52,20 +52,21 @@ __device__ void track_to_out_woodcock( ParticlesData *particles,
                                        ui32 part_id,
                                        f32* mumax_table );
 
-__device__ void track_to_out_svw( ParticlesData *particles,
+__device__ void track_to_out_svw(ParticlesData *particles,
                                   const VoxVolumeData<ui16> *vol,
                                   const MaterialsData *materials,
                                   const PhotonCrossSectionData *photon_CS_table,
                                   const GlobalSimulationParametersData *parameters,
                                   ui32 part_id,
                                   f32* mumax_table,
-                                  ui16* mumax_index_table,
-                                  ui32 nb_bins_sup_voxel );
+                                  ui8 *mumax_index_table,
+                                  ui32 nb_bins_sup_voxel,
+                                  ui32xyzw nb_sup_voxel );
 
 __global__ void kernel_device_track_to_in(  ParticlesData *particles, f32 xmin, f32 xmax,
                                             f32 ymin, f32 ymax, f32 zmin, f32 zmax, f32 geom_tolerance );
 
-__global__ void kernel_device_track_to_out( ParticlesData *particles,
+__global__ void kernel_device_track_to_out_analog( ParticlesData *particles,
                                             const VoxVolumeData<ui16> *vol,
                                             const MaterialsData *materials,
                                             const PhotonCrossSectionData *photon_CS_table,
@@ -84,8 +85,9 @@ __global__ void kernel_device_track_to_out_svw( ParticlesData *particles,
                                                 const PhotonCrossSectionData *photon_CS_table,
                                                 const GlobalSimulationParametersData *parameters,
                                                 f32* mumax_table,
-                                                ui16 *mumax_index_table,
-                                                ui32 nb_bins_sup_voxel);
+                                                ui8 *mumax_index_table,
+                                                ui32 nb_bins_sup_voxel,
+                                                ui32xyzw nb_sup_voxel );
 }
 
 class VoxPhanIVRTNav : public GGEMSPhantom
@@ -101,7 +103,7 @@ public:
     // Tracking inside the phantom until the phantom border
     void track_to_out ( ParticlesData *d_particles );
 
-    void load_phantom_from_mhd ( std::string filename, std::string range_mat_name );    
+    void load_phantom_from_mhd ( std::string filename, std::string range_mat_name );
     void set_materials( std::string filename );
 
     void set_vrt( std::string kind );
@@ -111,7 +113,7 @@ public:
 
     AabbData get_bounding_box();
 
-private:   
+private:
     std::string m_materials_filename;
 
     VoxelizedPhantom m_phantom;
@@ -125,6 +127,7 @@ private:
 
     f32 m_xmin, m_xmax, m_ymin, m_ymax, m_zmin, m_zmax;
     ui32 m_nb_bins_sup_voxel;
+    ui32xyzw m_nb_sup_voxel;
 
     GlobalSimulationParametersData *mh_params;
     GlobalSimulationParametersData *md_params;
@@ -138,7 +141,7 @@ private:
     void m_build_svw_mumax_table();
 
     f32* m_mumax_table;
-    ui16* m_mumax_index_table;
+    ui8* m_mumax_index_table;
 };
 
 #endif
