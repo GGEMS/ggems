@@ -103,16 +103,17 @@ __host__ __device__ void track_to_out_woodcock(ParticlesData *particles,
 
 /// Experimental (Super Voxel Woodcock)
 
-__host__ __device__ void track_to_out_svw( ParticlesData *particles,
+__host__ __device__ void track_to_out_svw(ParticlesData *particles,
                                                const VoxVolumeData<ui16> *vol,
                                                const MaterialsData *materials,
                                                const PhotonCrossSectionData *photon_CS_table,
                                                const GlobalSimulationParametersData *parameters,
                                                DoseData *dosi,
                                                f32* mumax_table,
-                                               ui16* mumax_index_table,
+                                               ui8* mumax_index_table,
                                                ui32 part_id,
-                                               ui32 nb_bins_sup_voxel );
+                                               ui32 nb_bins_sup_voxel,
+                                               ui32xyzw nb_sup_voxel );
 
 /// Experimental (Super Voxel Woodcock + TLE)
 
@@ -123,7 +124,7 @@ __host__ __device__ void track_to_out_svw_tle(ParticlesData *particles,
                                                const GlobalSimulationParametersData *parameters,
                                                DoseData *dosi,
                                                f32* mumax_table,
-                                               ui16* mumax_index_table,
+                                               ui8* mumax_index_table,
                                                ui32 part_id,
                                                ui32 nb_bins_sup_voxel,
                                                const VRT_Mu_MuEn_Data *mu_table);
@@ -184,8 +185,9 @@ __global__ void kernel_device_track_to_out_svw(ParticlesData *particles,
                                                  const GlobalSimulationParametersData *parameters,
                                                  DoseData *dosi,
                                                  f32* mumax_table,
-                                                 ui16 *mumax_index_table,
-                                                 ui32 nb_bins_sup_voxel);
+                                                 ui8 *mumax_index_table,
+                                                 ui32 nb_bins_sup_voxel,
+                                                 ui32xyzw nb_sup_voxel );
 
 /// Experimental (Super Voxel Woodcock + TLE)
 
@@ -196,7 +198,7 @@ __global__ void kernel_device_track_to_out_svw_tle(ParticlesData *particles,
                                                  const GlobalSimulationParametersData *parameters,
                                                  DoseData *dosi,
                                                  f32* mumax_table,
-                                                 ui16 *mumax_index_table,
+                                                 ui8 *mumax_index_table,
                                                  ui32 nb_bins_sup_voxel,
                                                  const VRT_Mu_MuEn_Data *mu_table );
 /*
@@ -281,6 +283,7 @@ private:
     f32 m_dosel_size_x, m_dosel_size_y, m_dosel_size_z;
     f32 m_xmin, m_xmax, m_ymin, m_ymax, m_zmin, m_zmax;
     ui32 m_nb_bins_sup_voxel;
+    ui32xyzw m_nb_sup_voxel;
 
     GlobalSimulationParametersData *mh_params;
     GlobalSimulationParametersData *md_params;
@@ -296,7 +299,7 @@ private:
     void m_build_svw_mumax_table();
 
     f32* m_mumax_table;
-    ui16* m_mumax_index_table;
+    ui8* m_mumax_index_table;
 
 //
 };
