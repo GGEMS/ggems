@@ -1,6 +1,0 @@
-#ifndef GUARD_CONCERTO_OPENCL_OPENCLCONFIGURATION_HH                                                                                                                                                                        
-#define GUARD_CONCERTO_OPENCL_OPENCLCONFIGURATION_HH
-
-#cmakedefine GGEMSHOME "@GGEMSHOME@"
-
-#endif // GUARD_CONCERTO_OPENCL_OPENCLCONFIGURATION_HH
