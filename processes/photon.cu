@@ -14,7 +14,7 @@
 #ifndef PHOTON_CU
 #define PHOTON_CU
 #include "photon.cuh"
-
+#include "ggems_configuration.hh"
 
 __host__ __device__ f32 get_CS_from_table(f32 *E_bins, f32 *CSTable, f32 energy,
                                           ui32 E_index, ui32 CS_index) {
@@ -757,8 +757,9 @@ f32* Rayleigh_CS_Livermore_load_data() {
     ui32 mem_cs = ncs * sizeof(f32);
     f32* raylcs = (f32*)malloc(mem_cs);
 
-    std::string filename = std::string(getenv("GGEMSHOME"));
-    filename += "/data/rayleigh_cs.bin";
+    //std::string filename = std::string(getenv("GGEMSHOME"));
+    std::string filename = GGEMSHOME;
+    filename += "/include/GGEMS/rayleigh_cs.bin";
 
     FILE * pfile = fopen(filename.c_str(), "rb");
 
@@ -780,8 +781,9 @@ f32* Rayleigh_SF_Livermore_load_data() {
     ui32 mem_sf = nsf * sizeof(f32);
     f32* raylsf = (f32*)malloc(mem_sf);
 
-    std::string filename = std::string(getenv("GGEMSHOME"));
-    filename += "/data/rayleigh_sf.bin";
+    //std::string filename = std::string(getenv("GGEMSHOME"));
+    std::string filename = GGEMSHOME;
+    filename += "/include/GGEMS/rayleigh_sf.bin";
 
     FILE * pfile = fopen(filename.c_str(), "rb");
 

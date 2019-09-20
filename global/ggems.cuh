@@ -28,7 +28,7 @@
 #include "ct_detector.cuh"
 
 #include "point_source.cuh"
-#include "cone_beam_CT_source.cuh"
+//#include "cone_beam_CT_source.cuh"
 //#include "geom_source.cuh"
 #include "phasespace_source.cuh"
 #include "beamlet_source.cuh"

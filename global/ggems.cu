@@ -16,6 +16,7 @@
 #define GGEMS_CU
 
 #include <fcntl.h>
+#include "ggems_configuration.hh"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -29,11 +30,13 @@
 
 GGEMS::GGEMS()
 {
-    if(std::string(getenv("GGEMSHOME")) == "")
-    {
-        print_error("GGEMSHOME not found... Please source /path/to/bin/ggems.sh");
-        exit_simulation();
-    }
+    //if(std::string(getenv("GGEMSHOME")) == "")
+   // {
+   //     print_error("GGEMSHOME not found... Please source /path/to/bin/ggems.sh");
+    //    exit_simulation();
+    //}
+
+  std::cout << GGEMSHOME << std::endl;
 
     // Allocate struct
     h_parameters = (GlobalSimulationParametersData*)malloc( sizeof(GlobalSimulationParametersData) );
