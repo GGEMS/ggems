@@ -1,0 +1,55 @@
+import os
+import shutil
+
+# ------------------------------------------------------------------------------
+# Choose your compiler: 'CLANG', 'GCC', 'CL' (Visual Studio)
+os.environ['COMPILER'] = 'CLANG'
+os.environ['CC'] = 'clang-9'
+os.environ['CXX'] = 'clang++-9'
+
+# On Windows
+# os.system('export COMPILER=CL')
+# os.system('export CC=')
+# os.system('export CXX=')
+
+# ------------------------------------------------------------------------------
+# Set the GGEMS folder (GGEMS source folder), the build folder (where GGEMS
+# will be compiled) and the install folder
+GGEMS_FOLDER = "/home/dbenoit/data/Dropbox/GGEMS_OpenCL"
+BUILD_FOLDER = "/home/dbenoit/data/Build/GGEMS_OpenCL"
+INSTALL_FOLDER = "/home/dbenoit"
+
+# ------------------------------------------------------------------------------
+# Print infos
+print('')
+print('***********')
+print('Compiler:', os.environ['COMPILER'])
+print('GGEMS folder:', GGEMS_FOLDER)
+print('GGEMS build folder:', INSTALL_FOLDER)
+print('***********')
+print('')
+
+# ------------------------------------------------------------------------------
+# Delete CMAKE cache and file
+if os.path.exists(BUILD_FOLDER + "/CMakeCache.txt"):
+    print('Removing CMAKE cache...')
+    os.remove(BUILD_FOLDER + "/CMakeCache.txt")
+
+if os.path.isdir(BUILD_FOLDER + "/CMakeFiles"):
+    print('Removing CMakeFiles...')
+    shutil.rmtree(BUILD_FOLDER + "/CMakeFiles")
+
+# ------------------------------------------------------------------------------
+# Launching CMAKE
+cmake_cmd = "cmake"
+cmake_cmd += " -DCMAKE_BUILD_TYPE=Release"
+cmake_cmd += " -DOPENCL_KERNEL_PATH=" + GGEMS_FOLDER + "/kernel"
+cmake_cmd += " -DGGEMS_PATH=" + GGEMS_FOLDER
+cmake_cmd += " -DGGEMS_DOUBLE_PRECISION=ON"
+cmake_cmd += " -DGGEMS_FAST_MATH=ON"
+cmake_cmd += " -DCMAKE_VERBOSE_MAKEFILE=OFF"
+cmake_cmd += " -DCOMPILER=" + os.environ['COMPILER']
+cmake_cmd += " -DCMAKE_INSTALL_PREFIX=" + INSTALL_FOLDER
+cmake_cmd += " -S " + GGEMS_FOLDER + " -B " + BUILD_FOLDER
+
+os.system(cmake_cmd)
