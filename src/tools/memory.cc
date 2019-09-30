@@ -1,0 +1,22 @@
+/*!
+  \file memory.cc
+
+  \brief Aligned memory
+
+  \author Julien BERT <julien.bert@univ-brest.fr>
+  \author Didier BENOIT <didier.benoit@inserm.fr>
+  \author LaTIM, Brest, FRANCE
+  \version 1.0
+  \date Tuesday September 24, 2019
+*/
+
+#include "GGEMS/tools/memory.hh"
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void Memory::MemFree(void *p)
+{
+  ::free(static_cast<void**>(p)[-1]);
+}
