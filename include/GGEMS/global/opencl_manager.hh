@@ -197,6 +197,15 @@ class GGEMS_EXPORT OpenCLManager
       return vp_contexts_act_cl_.size();
     }
 
+    /*!
+      \fn std::size_t GetContext() const
+      \brief return the activated context
+    */
+    inline cl::Context* GetContext() const
+    {
+      return vp_contexts_act_cl_.front();
+    };
+
   private: // OpenCL command queue
     /*!
       \fn void CreateCommandQueue()
@@ -211,12 +220,65 @@ class GGEMS_EXPORT OpenCLManager
     */
     void PrintCommandQueueInfos() const;
 
+    /*!
+      \fn cl::CommandQueue* GetCommandQueue() const
+      \brief Return the command queue to activated context
+    */
+    inline cl::CommandQueue* GetCommandQueue() const
+    {
+      return vp_queues_cl_.at(GetGlobalContextID(vp_contexts_act_cl_.at(0)));
+    }
+
   private: // OpenCL event
     /*!
       \fn void CreateEvent()
       \brief creating an event for each context
     */
     void CreateEvent();
+
+  public:
+    /*!
+      \fn cl::Event* GetEvent() const
+      \brief return an event to activated context
+    */
+    inline cl::Event* GetEvent() const
+    {
+      return vp_event_cl_.at(GetGlobalContextID(vp_contexts_act_cl_.at(0)));
+    }
+
+  public:
+    /*!
+      \fn cl::Kernel* CompileKernel(std::string const& kernel_filename, std::string const& kernel_name, char* const p_custom_options = nullptr, char* const p_additional_options = nullptr)
+      \param kernel_filename - filename where is declared the kernel
+      \param kernel_name - name of the kernel
+      \param p_custom_options - new compilation option for the kernel
+      \param p_additionnal_options - additionnal compilation option
+      \brief Compile the OpenCL kernel on the activated context
+      \return the pointer on the OpenCL kernel
+    */
+    cl::Kernel* CompileKernel(std::string const& kernel_filename,
+      std::string const& kernel_name, char* const p_custom_options = nullptr,
+      char* const p_additional_options = nullptr);
+
+  public:
+    /*!
+      \fn cl::Buffer* Allocate(void* p_host_ptr, std::size_t size, cl_mem_flags flags)
+      \param p_host_ptr - pointer to buffer in host memory
+      \param size - size of the buffer in bytes
+      \param flags - mode to open the buffer
+      \brief Allocation of OpenCL memory
+      \return a pointer to an OpenCL buffer
+    */
+    cl::Buffer* Allocate(void* p_host_ptr, std::size_t size,
+      cl_mem_flags flags);
+
+    /*
+      \fn void Deallocate(cl::Buffer* p_buffer, std::size_t size)
+      \param p_buffer - pointer to a buffer
+      \param size - size of the buffer in bytes
+      \brief Deallocation of OpenCL memory
+    */
+    void Deallocate(cl::Buffer* p_buffer, std::size_t size);
 
   private: // RAM manager
     /*!
@@ -233,20 +295,25 @@ class GGEMS_EXPORT OpenCLManager
     void PrintRAMStatus() const;
 
     /*!
-      \fn void AddRAMMemory(cl::Context* const p_context, cl_ulong const size)
-      \param p_context - context pointer
+      \fn void AddRAMMemory(cl_ulong const size)
       \param size - size of the allocated buffer in byte
       \brief store the size of the allocated buffer
     */
-    void AddRAMMemory(cl::Context* const p_context, cl_ulong const size);
+    void AddRAMMemory(cl_ulong const size);
 
     /*!
-      \fn SubRAMMemory(cl::Context* const p_context, cl_ulong const size)
-      \param p_context - context pointer
+      \fn SubRAMMemory(cl_ulong const size)
       \param size - size of the allocated buffer in byte
       \brief substract the size of the allocated buffer
     */
-    void SubRAMMemory(cl::Context* const p_context, cl_ulong const size);
+    void SubRAMMemory(cl_ulong const size);
+
+  public:
+    /*!
+      \fn void DisplayElapsedTimeInKernel(std::string const& kernel_name) const
+      \brief Compute and display elapsed time in kernel for an activated context
+    */
+    void DisplayElapsedTimeInKernel(std::string const& kernel_name) const;
 
   private: // Platforms
     std::vector<cl::Platform> v_platforms_cl_; /*!< Vector of platforms */
@@ -319,15 +386,18 @@ class GGEMS_EXPORT OpenCLManager
   private: // OpenCL event
     std::vector<cl::Event*> vp_event_cl_; /*!< List of pointer to OpenCL event, for profiling */
 
+  private: // Kernels
+    std::vector<cl::Kernel*> vp_kernel_cl_; /*!< List of pointer to OpenCL kernel */
+
   private: // RAM handler
     cl_ulong *p_used_ram_; /*!< Memory RAM used by context */
 };
 
 /*!
-  \fn OpenCLManager* get_instance(void)
+  \fn OpenCLManager* get_instance_opencl_manager(void)
   \brief Get the OpenCLManager pointer for python user.
 */
-extern "C" GGEMS_EXPORT OpenCLManager* get_instance(void);
+extern "C" GGEMS_EXPORT OpenCLManager* get_instance_opencl_manager(void);
 
 /*!
   \fn void print_platform(OpenCLManager* opencl_manager)
@@ -374,6 +444,7 @@ extern "C" GGEMS_EXPORT void print_command_queue(OpenCLManager* opencl_manager);
 /*!
   \fn void set_context_index(OpenCLManager* opencl_manager, uint32_t const context_id)
   \param opencl_manager - pointer on the singleton
+  \param context_id - index of the context
   \brief Set the context index to activate
 */
 extern "C" GGEMS_EXPORT void set_context_index(OpenCLManager* opencl_manager,

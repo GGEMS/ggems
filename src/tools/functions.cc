@@ -17,6 +17,8 @@
 #include <iostream>
 
 #include "GGEMS/tools/functions.hh"
+#include "GGEMS/global/ggems_manager.hh"
+#include "GGEMS/tools/print.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -66,4 +68,33 @@ void Misc::ThrowException(std::string const& class_name,
   oss << "[ConCerto " << class_name << "::" << method_name << "] EXCEPTION!!! "
       << message;
   throw std::runtime_error(oss.str());
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSTools::PrintBanner()
+{
+  // Call the GGEMS singleton
+  GGEMSManager& ggems_manager = GGEMSManager::GetInstance();
+  // Get the GGEMS version
+  std::string const kGGEMSVersion = ggems_manager.GetVersion();
+
+  // Print the banner
+  GGEMScout("GGEMSTools", "PrintBanner", 0) << "      ____                  "
+    << GGEMSendl;
+  GGEMScout("GGEMSTools", "PrintBanner", 0) << ".--. /\\__/\\ .--.            "
+    << GGEMSendl;
+  GGEMScout("GGEMSTools", "PrintBanner", 0) << "`O  / /  \\ \\  .`     GGEMS "
+    << kGGEMSVersion << GGEMSendl;
+  GGEMScout("GGEMSTools", "PrintBanner", 0) << "  `-| |  | |O`              "
+    << GGEMSendl;
+  GGEMScout("GGEMSTools", "PrintBanner", 0) << "   -|`|..|`|-        "
+    << GGEMSendl;
+  GGEMScout("GGEMSTools", "PrintBanner", 0) << " .` \\.\\__/./ `.    "
+    << GGEMSendl;
+  GGEMScout("GGEMSTools", "PrintBanner", 0) << "'.-` \\/__\\/ `-.'   "
+    << GGEMSendl;
+  GGEMScout("GGEMSTools", "PrintBanner", 0) << GGEMSendl;
 }
