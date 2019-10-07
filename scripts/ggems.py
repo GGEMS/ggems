@@ -1,8 +1,13 @@
 import ctypes
+import sys
 
 # The user has to set the location of the libggems.so/dll/dylib library
-ggems_lib = ctypes.cdll.LoadLibrary(
-  "/home/dbenoit/data/Build/GGEMS_OpenCL/libggems.so")
+if sys.platform == "linux" or sys.platform == "darwin":
+    ggems_lib = ctypes.cdll.LoadLibrary(
+        "/home/dbenoit/data/Build/GGEMS_OpenCL/libggems.so")
+elif sys.platform == "win32":
+    ggems_lib = ctypes.cdll.LoadLibrary(
+        "C:\\Users\\dbenoit\\Desktop\\build\\ggems.dll")
 
 
 class OpenCLManager(object):
