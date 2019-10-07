@@ -3,21 +3,24 @@ import shutil
 
 # ------------------------------------------------------------------------------
 # Choose your compiler: 'CLANG', 'GCC', 'CL' (Visual Studio)
-os.environ['COMPILER'] = 'CLANG'
-os.environ['CC'] = 'clang-9'
-os.environ['CXX'] = 'clang++-9'
+# os.environ['COMPILER'] = 'CLANG'
+# os.environ['CC'] = 'clang-9'
+# os.environ['CXX'] = 'clang++-9'
 
-# On Windows
-# os.system('export COMPILER=CL')
-# os.system('export CC=')
-# os.system('export CXX=')
+# On Windows (Visual Studio)
+os.environ['COMPILER'] = 'CL'
+os.environ['CC'] = 'cl.exe'
+os.environ['CXX'] = 'cl.exe'
 
 # ------------------------------------------------------------------------------
 # Set the GGEMS folder (GGEMS source folder), the build folder (where GGEMS
 # will be compiled) and the install folder
-GGEMS_FOLDER = "/home/dbenoit/data/Dropbox/GGEMS_OpenCL"
-BUILD_FOLDER = "/home/dbenoit/data/Build/GGEMS_OpenCL"
-INSTALL_FOLDER = "/home/dbenoit"
+# GGEMS_FOLDER = "/home/dbenoit/data/Dropbox/GGEMS_OpenCL"
+# BUILD_FOLDER = "/home/dbenoit/data/Build/GGEMS_OpenCL"
+# INSTALL_FOLDER = "/home/dbenoit"
+GGEMS_FOLDER = "F:\\Dropbox\\GGEMS_OpenCL"
+BUILD_FOLDER = "C:\\Users\\dbenoit\\Desktop\\build"
+INSTALL_FOLDER = "C:\\Users\\dbenoit"
 
 # ------------------------------------------------------------------------------
 # Print infos
@@ -42,6 +45,7 @@ if os.path.isdir(BUILD_FOLDER + "/CMakeFiles"):
 # ------------------------------------------------------------------------------
 # Launching CMAKE
 cmake_cmd = "cmake"
+cmake_cmd += " -G \"NMake Makefiles\""  # Adapter cette partie pour Windows
 cmake_cmd += " -DCMAKE_BUILD_TYPE=Release"
 cmake_cmd += " -DOPENCL_KERNEL_PATH=" + GGEMS_FOLDER + "/kernel"
 cmake_cmd += " -DGGEMS_PATH=" + GGEMS_FOLDER

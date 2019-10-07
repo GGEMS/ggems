@@ -6,10 +6,11 @@
 
   \brief Namespaces for different useful fonctions
 
+  \author Julien BERT <julien.bert@univ-brest.fr>
   \author Didier BENOIT <didier.benoit@inserm.fr>
   \author LaTIM, Brest, FRANCE
   \version 1.0
-  \date Wednesday October 10, 2018
+  \date Monday September 30, 2019
 */
 
 #include <fstream>
@@ -49,10 +50,27 @@ namespace Misc
   bool IsEqual(T const& a, T const& b);
 
   /*!
-    \fn void ThrowException(std::string const& class_name, std::string const&method_name, std::string const& message)
+    \fn void ThrowException(std::string const& class_name, std::string const& method_name, std::string const& message)
+    \param class_name - Name of the class
+    \param method_name - Name of the methode or function
+    \param message - Message to print for the exception
+    \brief Throw a C++ exception
   */
   void ThrowException(std::string const& class_name, std::string const&
     method_name, std::string const& message);
+}
+
+/*!
+  \namespace GGEMSTools
+  \brief namespace storing GGEMS tool functions
+*/
+namespace GGEMSTools
+{
+  /*!
+    \fn void PrintBanner()
+    \brief Print GGEMS banner
+  */
+  void PrintBanner();
 }
 
 #endif // End of GUARD_GGEMS_TOOLS_FUNCTIONS_HH

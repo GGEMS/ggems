@@ -9,7 +9,7 @@ class OpenCLManager(object):
     """Get the OpenCL C++ singleton and print infos or managing it
     """
     def __init__(self):
-        ggems_lib.get_instance.restype = ctypes.c_void_p
+        ggems_lib.get_instance_opencl_manager.restype = ctypes.c_void_p
 
         ggems_lib.print_platform.argtypes = [ctypes.c_void_p]
         ggems_lib.print_platform.restype = ctypes.c_void_p
@@ -36,7 +36,7 @@ class OpenCLManager(object):
         ggems_lib.print_activated_context.argtypes = [ctypes.c_void_p]
         ggems_lib.print_activated_context.restype = ctypes.c_void_p
 
-        self.obj = ggems_lib.get_instance()
+        self.obj = ggems_lib.get_instance_opencl_manager()
 
     def print_info(self):
         ggems_lib.print_platform(self.obj)
@@ -72,8 +72,88 @@ class Verbosity(object):
 
         ggems_lib.set_verbose(val)
 
-#
-#class GGEMS(object):
-#    """GGEMS class managing the simulation
-#    """
-#    def __init__(self):
+
+class GGEMSManager(object):
+    """GGEMS class managing the simulation
+    """
+    def __init__(self):
+        ggems_lib.get_instance_ggems_manager.restype = ctypes.c_void_p
+
+        ggems_lib.set_seed.argtypes = [ctypes.c_void_p, ctypes.c_uint32]
+        ggems_lib.set_seed.restype = ctypes.c_void_p
+
+        ggems_lib.initialize_simulation.argtypes = [ctypes.c_void_p]
+        ggems_lib.initialize_simulation.restype = ctypes.c_void_p
+
+        ggems_lib.set_number_of_particles.argtypes = [
+            ctypes.c_void_p, ctypes.c_uint64]
+        ggems_lib.set_number_of_particles.restype = ctypes.c_void_p
+
+        ggems_lib.set_number_of_batchs.argtypes = [
+            ctypes.c_void_p, ctypes.c_uint64]
+        ggems_lib.set_number_of_batchs.restype = ctypes.c_void_p
+
+        ggems_lib.set_process.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
+        ggems_lib.set_process.restype = ctypes.c_void_p
+
+        ggems_lib.set_particle_cut.argtypes = [
+            ctypes.c_void_p, ctypes.c_char_p, ctypes.c_double]
+        ggems_lib.set_particle_cut.restype = ctypes.c_void_p
+
+        ggems_lib.set_geometry_tolerance.argtypes = [
+            ctypes.c_void_p, ctypes.c_double]
+        ggems_lib.set_geometry_tolerance.restype = ctypes.c_void_p
+
+        ggems_lib.set_secondary_particle_and_level.argtypes = [
+            ctypes.c_void_p, ctypes.c_char_p, ctypes.c_uint32]
+        ggems_lib.set_secondary_particle_and_level.restype = ctypes.c_void_p
+
+        ggems_lib.set_cross_section_table_number_of_bins.argtypes = [
+            ctypes.c_void_p, ctypes.c_uint32]
+        ggems_lib.set_cross_section_table_number_of_bins.restype =\
+            ctypes.c_void_p
+
+        ggems_lib.set_cross_section_table_energy_min.argtypes = [
+            ctypes.c_void_p, ctypes.c_double]
+        ggems_lib.set_cross_section_table_energy_min.restype = ctypes.c_void_p
+
+        ggems_lib.set_cross_section_table_energy_max.argtypes = [
+            ctypes.c_void_p, ctypes.c_double]
+        ggems_lib.set_cross_section_table_energy_max.restype = ctypes.c_void_p
+
+        self.obj = ggems_lib.get_instance_ggems_manager()
+
+    def set_seed(self, seed):
+        ggems_lib.set_seed(self.obj, seed)
+
+    def initialize_simulation(self):
+        ggems_lib.initialize_simulation(self.obj)
+
+    def set_number_of_particles(self, number_of_particles):
+        ggems_lib.set_number_of_particles(self.obj, number_of_particles)
+
+    def set_number_of_batchs(self, number_of_batchs):
+        ggems_lib.set_number_of_batchs(self.obj, number_of_batchs)
+
+    def set_process(self, process_name):
+        ggems_lib.set_process(self.obj, process_name)
+
+    def set_particle_cut(self, particle_name, distance):
+        ggems_lib.set_particle_cut(self.obj, particle_name, distance)
+
+    def set_geometry_tolerance(self, distance):
+        ggems_lib.set_geometry_tolerance(self.obj, distance)
+
+    def set_secondary_particle_and_level(self, particle_name, level):
+        ggems_lib.set_secondary_particle_and_level(
+            self.obj, particle_name, level)
+
+    def set_cross_section_table_number_of_bins(self, number_of_bins):
+        ggems_lib.set_cross_section_table_number_of_bins(
+            self.obj, number_of_bins)
+
+    def set_cross_section_table_energy_min(self, min_energy):
+        ggems_lib.set_cross_section_table_energy_min(self.obj, min_energy)
+
+    def set_cross_section_table_energy_max(self, max_energy):
+        ggems_lib.set_cross_section_table_energy_max(self.obj, max_energy)

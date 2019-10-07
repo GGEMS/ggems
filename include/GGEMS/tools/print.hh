@@ -89,7 +89,7 @@ GGEMSStream& GGEMSStream::operator<<(T const& message)
   if (stream_counter_ == 0) {
     if (verbosity_level_ <= verbosity_limit_) {
       if (!class_name_.empty() && !method_name_.empty()) {
-        stream_ << std::fixed << std::setprecision(20) << "[GGEMS "
+        stream_ << std::scientific << "[GGEMS "
           << class_name_ << "::" << method_name_ << "](" << verbosity_level_
           << ") " << message;
       }

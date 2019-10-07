@@ -17,6 +17,7 @@
 #include "GGEMS/tools/print.hh"
 #include "GGEMS/tools/functions.hh"
 #include "GGEMS/tools/memory.hh"
+#include "GGEMS/tools/chrono.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -82,6 +83,7 @@ OpenCLManager::OpenCLManager(void)
   vp_contexts_act_cl_(0),
   vp_queues_cl_(0),
   vp_event_cl_(0),
+  vp_kernel_cl_(0),
   p_used_ram_(nullptr)
 {
   GGEMScout("OpenCLManager", "OpenCLManager", 1)
@@ -496,6 +498,7 @@ OpenCLManager::~OpenCLManager(void)
   for (auto&& q : vp_queues_cl_) delete q;
   for (auto&& e : vp_event_cl_) delete e;
   for (auto&& d : vp_devices_cl_) delete d;
+  for (auto&& k : vp_kernel_cl_) delete k;
 
   // RAM manager
   if (p_used_ram_) Memory::MemFree(p_used_ram_);
@@ -868,6 +871,85 @@ void OpenCLManager::CreateEvent()
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+cl::Kernel* OpenCLManager::CompileKernel(std::string const& kernel_filename,
+  std::string const& kernel_name, char* const p_custom_options,
+  char* const p_additional_options)
+{
+  // Checking the compilation options
+  if (p_custom_options && p_additional_options) {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "Custom and additional options can not by set in same time!!!";
+    Misc::ThrowException("OpenCLManager", "CompileKernel", oss.str());
+  }
+
+  // Check if the source kernel file exists
+  std::ifstream source_file_stream(kernel_filename.c_str(), std::ios::in);
+  Stream::CheckInputStream(source_file_stream, kernel_filename);
+
+  // Handling options to OpenCL compilation kernel
+  char kernel_compilation_option[512];
+  if (p_custom_options) {
+    ::strcpy(kernel_compilation_option, p_custom_options);
+  }
+  else if (p_additional_options) {
+    ::strcpy(kernel_compilation_option, build_options_.c_str());
+    ::strcat(kernel_compilation_option, " ");
+    ::strcat(kernel_compilation_option, p_additional_options);
+  }
+  else {
+    ::strcpy(kernel_compilation_option, build_options_.c_str());
+  }
+
+  GGEMScout("OpenCLManager", "CompileKernel", 0) << "Compile a new kernel '"
+    << kernel_name << "' from file: " << kernel_filename << " on context: "
+    << GetGlobalContextID(vp_contexts_act_cl_.at(0)) << " with options: "
+    << kernel_compilation_option << GGEMSendl;
+
+  // Store kernel in a std::string buffer
+  std::string source_code(std::istreambuf_iterator<char>(source_file_stream),
+    (std::istreambuf_iterator<char>()));
+
+  // Creating an OpenCL program
+  cl::Program::Sources program_source(1,
+    std::make_pair(source_code.c_str(), source_code.length() + 1));
+
+  // Make program from source code in specific context
+  cl::Program program = cl::Program(*vp_contexts_act_cl_.at(0), program_source);
+
+  // Vector storing all the devices from a context
+  // In GGEMS a device is associated to a context
+  std::vector<cl::Device> devices;
+
+  // Get the vector of devices
+  CheckOpenCLError(vp_contexts_act_cl_.at(0)->getInfo(CL_CONTEXT_DEVICES,
+    &devices));
+
+  // Compile source code on devices
+  cl_int build_status = program.build(devices, kernel_compilation_option);
+  if (build_status != CL_SUCCESS) {
+    std::ostringstream oss(std::ostringstream::out);
+    std::string log;
+    program.getBuildInfo(devices[0], CL_PROGRAM_BUILD_LOG, &log);
+    oss << ErrorType(build_status) << std::endl;
+    oss << log;
+    Misc::ThrowException("OpenCLManager", "CompileKernel", oss.str());
+  }
+
+  GGEMScout("OpenCLManager", "CompileKernel", 0) << "Compilation OK"
+    << GGEMSendl;
+
+  // Storing the kernel in the singleton
+  vp_kernel_cl_.push_back(new cl::Kernel(program, kernel_name.c_str(),
+    &build_status));
+  CheckOpenCLError(build_status);
+
+  return vp_kernel_cl_.back();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 void OpenCLManager::InitializeRAMManager()
 {
   GGEMScout("OpenCLManager", "InitializeRAMManager", 1)
@@ -905,27 +987,55 @@ void OpenCLManager::PrintRAMStatus() const
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void OpenCLManager::AddRAMMemory(cl::Context* p_context, cl_ulong const size)
+void OpenCLManager::AddRAMMemory(cl_ulong const size)
 {
   // Getting the context id
-  std::size_t const context_id = GetGlobalContextID(p_context);
+  std::size_t const kContextGlobalID =
+    GetGlobalContextID(vp_contexts_act_cl_.front());
 
   // Increment size
-  p_used_ram_[context_id] += size;
+  p_used_ram_[kContextGlobalID] += size;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void OpenCLManager::SubRAMMemory(cl::Context* const p_context,
-  cl_ulong const size)
+void OpenCLManager::SubRAMMemory(cl_ulong const size)
 {
   // Getting the context id
-  std::size_t context_id = GetGlobalContextID(p_context);
+  std::size_t const kContextGlobalID =
+    GetGlobalContextID(vp_contexts_act_cl_.front());
 
   // Decrement size
-  p_used_ram_[context_id] -= size;
+  p_used_ram_[kContextGlobalID] -= size;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void OpenCLManager::DisplayElapsedTimeInKernel(
+  std::string const& kernel_name) const
+{
+  // Get the activated event
+  cl::Event* p_event = vp_event_cl_.at(
+    GetGlobalContextID(vp_contexts_act_cl_.at(0)));
+
+  // Get the start and end of the activated event
+  cl_ulong start = 0, end = 0;
+
+  // Start
+  CheckOpenCLError(p_event->getProfilingInfo(
+    CL_PROFILING_COMMAND_START, &start));
+  // End
+  CheckOpenCLError(p_event->getProfilingInfo(
+    CL_PROFILING_COMMAND_END, &end));
+
+  DurationNano duration = static_cast<std::chrono::nanoseconds>((end-start));
+
+  // Display time in kernel
+  Chrono::DisplayTime(duration, kernel_name);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -989,6 +1099,32 @@ void OpenCLManager::PrintContextInfos() const
       GGEMScout("OpenCLManager", "PrintContextInfos", 1) << GGEMSendl;
     }
   }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+cl::Buffer* OpenCLManager::Allocate(void* p_host_ptr, std::size_t size,
+  cl_mem_flags flags)
+{
+  cl_int error = 0;
+  cl::Buffer* p_buffer = new cl::Buffer(*vp_contexts_act_cl_.front(), flags,
+    size, p_host_ptr, &error);
+  CheckOpenCLError(error);
+  AddRAMMemory(size);
+  return p_buffer;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void OpenCLManager::Deallocate(cl::Buffer* p_buffer, std::size_t size)
+{
+  SubRAMMemory(size);
+  delete p_buffer;
+  p_buffer = nullptr;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1566,7 +1702,7 @@ std::string OpenCLManager::ErrorType(cl_int const& error) const
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-OpenCLManager* get_instance(void)
+OpenCLManager* get_instance_opencl_manager(void)
 {
   return &OpenCLManager::GetInstance();
 }
