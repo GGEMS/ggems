@@ -48,6 +48,102 @@ Particle::~Particle()
       number_of_particles_ * sizeof(cl_float));
   }
 
+  if (p_primary_particles_->p_dx_) {
+    opencl_manager.Deallocate(p_primary_particles_->p_dx_,
+      number_of_particles_ * sizeof(cl_float));
+  }
+
+  if (p_primary_particles_->p_dy_) {
+    opencl_manager.Deallocate(p_primary_particles_->p_dy_,
+      number_of_particles_ * sizeof(cl_float));
+  }
+
+  if (p_primary_particles_->p_dz_) {
+    opencl_manager.Deallocate(p_primary_particles_->p_dz_,
+      number_of_particles_ * sizeof(cl_float));
+  }
+
+  if (p_primary_particles_->p_px_) {
+    opencl_manager.Deallocate(p_primary_particles_->p_px_,
+      number_of_particles_ * sizeof(cl_float));
+  }
+
+  if (p_primary_particles_->p_py_) {
+    opencl_manager.Deallocate(p_primary_particles_->p_py_,
+      number_of_particles_ * sizeof(cl_float));
+  }
+
+  if (p_primary_particles_->p_pz_) {
+    opencl_manager.Deallocate(p_primary_particles_->p_pz_,
+      number_of_particles_ * sizeof(cl_float));
+  }
+
+  if (p_primary_particles_->p_prng_state_1_) {
+    opencl_manager.Deallocate(p_primary_particles_->p_prng_state_1_,
+      number_of_particles_ * sizeof(cl_uint));
+  }
+
+  if (p_primary_particles_->p_prng_state_2_) {
+    opencl_manager.Deallocate(p_primary_particles_->p_prng_state_2_,
+      number_of_particles_ * sizeof(cl_uint));
+  }
+
+  if (p_primary_particles_->p_prng_state_3_) {
+    opencl_manager.Deallocate(p_primary_particles_->p_prng_state_3_,
+      number_of_particles_ * sizeof(cl_uint));
+  }
+
+  if (p_primary_particles_->p_prng_state_4_) {
+    opencl_manager.Deallocate(p_primary_particles_->p_prng_state_4_,
+      number_of_particles_ * sizeof(cl_uint));
+  }
+
+  if (p_primary_particles_->p_prng_state_5_) {
+    opencl_manager.Deallocate(p_primary_particles_->p_prng_state_5_,
+      number_of_particles_ * sizeof(cl_uint));
+  }
+
+  if (p_primary_particles_->p_geometry_id_) {
+    opencl_manager.Deallocate(p_primary_particles_->p_geometry_id_,
+      number_of_particles_ * sizeof(cl_uint));
+  }
+
+  if (p_primary_particles_->p_E_index_) {
+    opencl_manager.Deallocate(p_primary_particles_->p_E_index_,
+      number_of_particles_ * sizeof(cl_ushort));
+  }
+
+  if (p_primary_particles_->p_scatter_order_) {
+    opencl_manager.Deallocate(p_primary_particles_->p_scatter_order_,
+      number_of_particles_ * sizeof(cl_ushort));
+  }
+
+  if (p_primary_particles_->p_next_interaction_distance_) {
+    opencl_manager.Deallocate(
+      p_primary_particles_->p_next_interaction_distance_,
+      number_of_particles_ * sizeof(cl_float));
+  }
+
+  if (p_primary_particles_->p_next_discrete_process_) {
+    opencl_manager.Deallocate(p_primary_particles_->p_next_discrete_process_,
+      number_of_particles_ * sizeof(cl_uchar));
+  }
+
+  if (p_primary_particles_->p_status_) {
+    opencl_manager.Deallocate(p_primary_particles_->p_status_,
+      number_of_particles_ * sizeof(cl_uchar));
+  }
+
+  if (p_primary_particles_->p_level_) {
+    opencl_manager.Deallocate(p_primary_particles_->p_level_,
+      number_of_particles_ * sizeof(cl_uchar));
+  }
+
+  if (p_primary_particles_->p_pname_) {
+    opencl_manager.Deallocate(p_primary_particles_->p_pname_,
+      number_of_particles_ * sizeof(cl_uchar));
+  }
+
   if (p_primary_particles_) {
     delete p_primary_particles_;
     p_primary_particles_ = nullptr;
@@ -78,6 +174,69 @@ void Particle::Initialize()
 
   // Allocation of the PrimaryParticle structure
   AllocatePrimaryParticles();
+
+  // Generate seeds for each particle
+  InitializeSeeds();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void Particle::InitializeSeeds()
+{
+  GGEMScout("Particle", "InitializeSeeds", 1)
+    << "Initialization of seeds for each particles..." << GGEMSendl;
+
+  // Get the queue from OpenCL manager
+  OpenCLManager& opencl_manager = OpenCLManager::GetInstance();
+  cl::CommandQueue* p_queue = opencl_manager.GetCommandQueue();
+
+  // Get the pointer from OpenCL device
+  cl_uint* p_prng_state_1 = static_cast<uint32_t*>(p_queue->enqueueMapBuffer(
+    *p_primary_particles_->p_prng_state_1_, CL_TRUE, CL_MAP_WRITE, 0,
+    number_of_particles_ * sizeof(cl_uint), nullptr, nullptr, nullptr));
+
+  cl_uint* p_prng_state_2 = static_cast<uint32_t*>(p_queue->enqueueMapBuffer(
+    *p_primary_particles_->p_prng_state_2_, CL_TRUE, CL_MAP_WRITE, 0,
+    number_of_particles_ * sizeof(cl_uint), nullptr, nullptr, nullptr));
+
+  cl_uint* p_prng_state_3 = static_cast<uint32_t*>(p_queue->enqueueMapBuffer(
+    *p_primary_particles_->p_prng_state_3_, CL_TRUE, CL_MAP_WRITE, 0,
+    number_of_particles_ * sizeof(cl_uint), nullptr, nullptr, nullptr));
+
+  cl_uint* p_prng_state_4 = static_cast<uint32_t*>(p_queue->enqueueMapBuffer(
+    *p_primary_particles_->p_prng_state_4_, CL_TRUE, CL_MAP_WRITE, 0,
+    number_of_particles_ * sizeof(cl_uint), nullptr, nullptr, nullptr));
+
+  cl_uint* p_prng_state_5 = static_cast<uint32_t*>(p_queue->enqueueMapBuffer(
+    *p_primary_particles_->p_prng_state_5_, CL_TRUE, CL_MAP_WRITE, 0,
+    number_of_particles_ * sizeof(cl_uint), nullptr, nullptr, nullptr));
+
+  // For each particle a seed is generated
+  for (uint64_t i = 0; i < number_of_particles_; ++i) {
+    p_prng_state_1[i] = static_cast<cl_uint>(rand());
+    p_prng_state_2[i] = static_cast<cl_uint>(rand());
+    p_prng_state_3[i] = static_cast<cl_uint>(rand());
+    p_prng_state_4[i] = static_cast<cl_uint>(rand());
+    p_prng_state_5[i] = static_cast<cl_uint>(rand());
+  }
+
+  // Unmapping the memory
+  p_queue->enqueueUnmapMemObject(*p_primary_particles_->p_prng_state_1_,
+    p_prng_state_1);
+
+  p_queue->enqueueUnmapMemObject(*p_primary_particles_->p_prng_state_2_,
+    p_prng_state_2);
+
+  p_queue->enqueueUnmapMemObject(*p_primary_particles_->p_prng_state_3_,
+    p_prng_state_3);
+
+  p_queue->enqueueUnmapMemObject(*p_primary_particles_->p_prng_state_4_,
+    p_prng_state_4);
+
+  p_queue->enqueueUnmapMemObject(*p_primary_particles_->p_prng_state_5_,
+    p_prng_state_5);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -96,10 +255,69 @@ void Particle::AllocatePrimaryParticles()
   p_primary_particles_->p_E_ = opencl_manager.Allocate(nullptr,
     sizeof(cl_float)*number_of_particles_, CL_MEM_READ_WRITE);
 
-  // Allocation of device memory for the particle
-  //p_primary_particles_->p_E_ = new cl::Buffer();
+  p_primary_particles_->p_dx_ = opencl_manager.Allocate(nullptr,
+    sizeof(cl_float)*number_of_particles_, CL_MEM_READ_WRITE);
 
-  //p_primary_particles_->number_of_primaries_ = number_of_particles_;
+  p_primary_particles_->p_dy_ = opencl_manager.Allocate(nullptr,
+    sizeof(cl_float)*number_of_particles_, CL_MEM_READ_WRITE);
+
+  p_primary_particles_->p_dz_ = opencl_manager.Allocate(nullptr,
+    sizeof(cl_float)*number_of_particles_, CL_MEM_READ_WRITE);
+
+  p_primary_particles_->p_px_ = opencl_manager.Allocate(nullptr,
+    sizeof(cl_float)*number_of_particles_, CL_MEM_READ_WRITE);
+
+  p_primary_particles_->p_py_ = opencl_manager.Allocate(nullptr,
+    sizeof(cl_float)*number_of_particles_, CL_MEM_READ_WRITE);
+
+  p_primary_particles_->p_pz_ = opencl_manager.Allocate(nullptr,
+    sizeof(cl_float)*number_of_particles_, CL_MEM_READ_WRITE);
+
+  p_primary_particles_->p_tof_ = opencl_manager.Allocate(nullptr,
+    sizeof(cl_float)*number_of_particles_, CL_MEM_READ_WRITE);
+
+  p_primary_particles_->p_prng_state_1_ = opencl_manager.Allocate(nullptr,
+    sizeof(cl_uint)*number_of_particles_, CL_MEM_READ_WRITE);
+
+  p_primary_particles_->p_prng_state_2_ = opencl_manager.Allocate(nullptr,
+    sizeof(cl_uint)*number_of_particles_, CL_MEM_READ_WRITE);
+
+  p_primary_particles_->p_prng_state_3_ = opencl_manager.Allocate(nullptr,
+    sizeof(cl_uint)*number_of_particles_, CL_MEM_READ_WRITE);
+
+  p_primary_particles_->p_prng_state_4_ = opencl_manager.Allocate(nullptr,
+    sizeof(cl_uint)*number_of_particles_, CL_MEM_READ_WRITE);
+
+  p_primary_particles_->p_prng_state_5_ = opencl_manager.Allocate(nullptr,
+    sizeof(cl_uint)*number_of_particles_, CL_MEM_READ_WRITE);
+
+  p_primary_particles_->p_geometry_id_ = opencl_manager.Allocate(nullptr,
+    sizeof(cl_uint)*number_of_particles_, CL_MEM_READ_WRITE);
+
+  p_primary_particles_->p_E_index_ = opencl_manager.Allocate(nullptr,
+    sizeof(cl_ushort)*number_of_particles_, CL_MEM_READ_WRITE);
+
+  p_primary_particles_->p_scatter_order_ = opencl_manager.Allocate(nullptr,
+    sizeof(cl_ushort)*number_of_particles_, CL_MEM_READ_WRITE);
+
+  p_primary_particles_->p_next_interaction_distance_ =
+    opencl_manager.Allocate(nullptr, sizeof(cl_float)*number_of_particles_,
+    CL_MEM_READ_WRITE);
+
+  p_primary_particles_->p_next_discrete_process_ =
+    opencl_manager.Allocate(nullptr, sizeof(cl_uchar)*number_of_particles_,
+    CL_MEM_READ_WRITE);
+
+  p_primary_particles_->p_status_ = opencl_manager.Allocate(nullptr,
+    sizeof(cl_uchar)*number_of_particles_, CL_MEM_READ_WRITE);
+
+  p_primary_particles_->p_level_ = opencl_manager.Allocate(nullptr,
+    sizeof(cl_uchar)*number_of_particles_, CL_MEM_READ_WRITE);
+
+  p_primary_particles_->p_pname_ = opencl_manager.Allocate(nullptr,
+    sizeof(cl_uchar)*number_of_particles_, CL_MEM_READ_WRITE);
+
+  p_primary_particles_->number_of_primaries_ = number_of_particles_;
 
   // Test with OpenCL
   /*OpenCLManager& opencl_manager = OpenCLManager::GetInstance();

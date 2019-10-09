@@ -29,7 +29,7 @@ typedef struct GGEMS_EXPORT PrimaryParticles_t
   cl::Buffer* p_px_; /*!< Momentum of the particle in x in float */
   cl::Buffer* p_py_; /*!< Momentum of the particle in y in float */
   cl::Buffer* p_pz_; /*!< Momentum of the particle in z in float */
-  cl::Buffer* tof_; /*!< Time of flight in float */
+  cl::Buffer* p_tof_; /*!< Time of flight in float */
 
   cl::Buffer* p_prng_state_1_; /*!< State 1 of the prng in unsigned int 32 */
   cl::Buffer* p_prng_state_2_; /*!< State 2 of the prng in unsigned int 32 */
@@ -39,7 +39,7 @@ typedef struct GGEMS_EXPORT PrimaryParticles_t
 
   cl::Buffer* p_geometry_id_; /*!< current geometry crossed by the particle in unsigned int 32 */
   cl::Buffer* p_E_index_; /*!< Energy index within CS and Mat tables in unsigned int 16 */
-  cl::Buffer* p_scatter_order_; /*!< Scatter order, usefull for the imageryin unsigned int 16 */
+  cl::Buffer* p_scatter_order_; /*!< Scatter order, usefull for the imagery in unsigned int 16 */
 
   cl::Buffer* p_next_interaction_distance_; /*!< Distance to the next interaction in float */
   cl::Buffer* p_next_discrete_process_; /*!< Next process in unsigned int 8 */
@@ -119,6 +119,12 @@ class GGEMS_EXPORT Particle
       \brief Allocate memory for primary particles
     */
     void AllocatePrimaryParticles();
+
+    /*!
+      \fn void InitializeSeeds()
+      \brief Initialize seeds for each particle
+    */
+    void InitializeSeeds();
 
   private:
     uint64_t number_of_particles_; /*!< Number of the particles to simulate in a batch */
