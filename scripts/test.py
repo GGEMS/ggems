@@ -26,8 +26,8 @@ opencl_manager.print_RAM()
 # Setting GGEMS simulation parameters
 ggems_manager = ggems.GGEMSManager()
 ggems_manager.set_seed(777)  # Range [1;4294967295]
-ggems_manager.set_number_of_particles(1238)  # Range [1;18446744073709551615]
-ggems_manager.set_number_of_batchs(10)
+ggems_manager.set_number_of_particles(861635)  # Range [1;18446744073709551615]
+ggems_manager.set_number_of_batchs(16)
 
 # Cross section parameters
 ggems_manager.set_cross_section_table_number_of_bins(220)

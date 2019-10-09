@@ -20,7 +20,7 @@ else:  # Unknown system
 # Set the GGEMS folder (GGEMS source folder), the build folder (where GGEMS
 # will be compiled) and the install folder
 if sys.platform == "linux" or sys.platform == "darwin":
-    GGEMS_FOLDER = "/home/dbenoit/data/Dropbox/GGEMS_OpenCL"
+    GGEMS_FOLDER = "/home/dbenoit/Desktop/GGEMS"
     BUILD_FOLDER = "/home/dbenoit/data/Build/GGEMS_OpenCL"
     INSTALL_FOLDER = "/home/dbenoit"
 elif sys.platform == "win32":

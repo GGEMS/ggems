@@ -263,7 +263,7 @@ void GGEMSManager::SetParticleSecondaryAndLevel(char const* particle_name,
 void GGEMSManager::SetGeometryTolerance(double const& distance)
 {
   // Geometry tolerance distance in the range [1mm;1nm]
-  geometry_tolerance_ = max(Units::nm, min(Units::mm, distance));
+  geometry_tolerance_ = fmax(Units::nm, fmin(Units::mm, distance));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
