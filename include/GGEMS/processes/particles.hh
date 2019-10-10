@@ -26,33 +26,35 @@
 #endif
 typedef struct PACKED PrimaryParticles_t
 {
-  //cl_float p_E_[861635]; /*!< Energies of particles in float */
-  //cl::Buffer* p_dx_; /*!< Position of the particle in x in float */
-  //cl::Buffer* p_dy_; /*!< Position of the particle in y in float */
-  //cl::Buffer* p_dz_; /*!< Position of the particle in z in float */
-  //cl::Buffer* p_px_; /*!< Momentum of the particle in x in float */
-  //cl::Buffer* p_py_; /*!< Momentum of the particle in y in float */
-  //cl::Buffer* p_pz_; /*!< Momentum of the particle in z in float */
-  //cl::Buffer* p_tof_; /*!< Time of flight in float */
+  cl_ulong number_of_primaries_; /*!< Number of the primaries */
+  
+  cl_float p_E_[MAXIMUM_PARTICLES]; /*!< Energies of particles */
+  cl_float p_dx_[MAXIMUM_PARTICLES]; /*!< Position of the particle in x */
+  cl_float p_dy_[MAXIMUM_PARTICLES]; /*!< Position of the particle in y */
+  cl_float p_dz_[MAXIMUM_PARTICLES]; /*!< Position of the particle in z */
+  cl_float p_px_[MAXIMUM_PARTICLES]; /*!< Momentum of the particle in x */
+  cl_float p_py_[MAXIMUM_PARTICLES]; /*!< Momentum of the particle in y */
+  cl_float p_pz_[MAXIMUM_PARTICLES]; /*!< Momentum of the particle in z */
+  cl_float p_tof_[MAXIMUM_PARTICLES]; /*!< Time of flight */
 
-  cl_uint p_prng_state_1_[861635]; /*!< State 1 of the prng in unsigned int 32 */
-  cl_uint p_prng_state_2_[861635]; /*!< State 2 of the prng in unsigned int 32 */
-  cl_uint p_prng_state_3_[861635]; /*!< State 3 of the prng in unsigned int 32 */
-  cl_uint p_prng_state_4_[861635]; /*!< State 4 of the prng in unsigned int 32 */
-  cl_uint p_prng_state_5_[861635]; /*!< State 5 of the prng in unsigned int 32 */
+  cl_uint p_prng_state_1_[MAXIMUM_PARTICLES]; /*!< State 1 of the prng */
+  cl_uint p_prng_state_2_[MAXIMUM_PARTICLES]; /*!< State 2 of the prng */
+  cl_uint p_prng_state_3_[MAXIMUM_PARTICLES]; /*!< State 3 of the prng */
+  cl_uint p_prng_state_4_[MAXIMUM_PARTICLES]; /*!< State 4 of the prng */
+  cl_uint p_prng_state_5_[MAXIMUM_PARTICLES]; /*!< State 5 of the prng */
 
-  //cl::Buffer* p_geometry_id_; /*!< current geometry crossed by the particle in unsigned int 32 */
-  //cl::Buffer* p_E_index_; /*!< Energy index within CS and Mat tables in unsigned int 16 */
-  //cl::Buffer* p_scatter_order_; /*!< Scatter order, usefull for the imagery in unsigned int 16 */
+  cl_uint p_geometry_id_[MAXIMUM_PARTICLES]; /*!< current geometry crossed by the particle */
+  cl_ushort p_E_index_[MAXIMUM_PARTICLES]; /*!< Energy index within CS and Mat tables */
+  cl_ushort p_scatter_order_[MAXIMUM_PARTICLES]; /*!< Scatter order, usefull for the imagery */
 
-  //cl::Buffer* p_next_interaction_distance_; /*!< Distance to the next interaction in float */
-  //cl::Buffer* p_next_discrete_process_; /*!< Next process in unsigned int 8 */
+  cl_float p_next_interaction_distance_[MAXIMUM_PARTICLES]; /*!< Distance to the next interaction */
+  cl_uchar p_next_discrete_process_[MAXIMUM_PARTICLES]; /*!< Next process */
 
-  //cl::Buffer* p_status_; /*!< in unsigned int 8 */
-  //cl::Buffer* p_level_; /*!<  in unsigned int 8 */
-  //cl::Buffer* p_pname_; /*!< particle name (photon, electron, etc) in unsigned int 8 */
+  cl_uchar p_status_[MAXIMUM_PARTICLES]; /*!< */
+  cl_uchar p_level_[MAXIMUM_PARTICLES]; /*!< */
+  cl_uchar* p_pname_[MAXIMUM_PARTICLES]; /*!< particle name (photon, electron, etc) */
 
-  size_t number_of_primaries_; /*!< Number of the primaries */
+  
 } PrimaryParticles;
 #if defined _MSC_VER
 #pragma pack(pop)
@@ -119,6 +121,24 @@ class GGEMS_EXPORT Particle
       \brief Initialize the Particle object
     */
     void Initialize();
+
+    /*!
+      \fn void SetNumberOfParticlesInBatch(uint64_t const& number_of_particles_in_batch)
+      \param number_of_particles_in_batch - Number of the particles in the batch
+      \brief Set the number of the particles to simulate in a batch
+    */
+    void SetNumberOfParticlesInBatch(
+      uint64_t const& number_of_particles_in_batch);
+
+    /*!
+      \fn PrimaryParticles* GetPrimaryParticlesDevice() const
+      \brief Get the pointer on primary particles on OpenCL device memory
+      \return The pointer on primary particles in device memory
+    */
+    PrimaryParticles* GetPrimaryParticlesDevice() const;
+
+    void ReleasePrimaryParticlesDevice(
+      PrimaryParticles* p_primary_particles) const;
 
   private:
     /*!

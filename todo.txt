@@ -1,0 +1,12 @@
+- Gerer nombre de particules automatiquement, modifiable à partir du CMAKE et
+supprimer l'option du batch
+
+- A chaque nouveau batch redonner le bon nombre de particles dans le batch
+
+- Désactiver HD Graphics
+
+- Controler la disponibilité des calculs en double précision
+
+- Random: faire le Dieharder test et Bigcrunch test
+
+- Faire un installer pratique pour Windows, MAC et Linux
