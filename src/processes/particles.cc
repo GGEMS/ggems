@@ -16,7 +16,6 @@
 #include "GGEMS/processes/particles.hh"
 #include "GGEMS/tools/functions.hh"
 #include "GGEMS/tools/print.hh"
-#include "GGEMS/global/ggems_configuration.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -79,6 +78,50 @@ void Particle::Initialize()
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+void Particle::SetNumberOfParticlesInBatch(
+  uint64_t const& number_of_particles_in_batch)
+{
+  // Updating the number of particle variable
+  number_of_particles_ = number_of_particles_in_batch;
+
+  // Copy this data on device memory
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+PrimaryParticles* Particle::GetPrimaryParticlesDevice() const
+{
+  // Get the queue from OpenCL manager
+  OpenCLManager& opencl_manager = OpenCLManager::GetInstance();
+  cl::CommandQueue* p_queue = opencl_manager.GetCommandQueue();
+
+  return static_cast<PrimaryParticles*>(
+    p_queue->enqueueMapBuffer(*p_primary_particles_, CL_TRUE, CL_MAP_WRITE, 0,
+    sizeof(PrimaryParticles), nullptr, nullptr, nullptr));
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void Particle::ReleasePrimaryParticlesDevice(
+  PrimaryParticles* p_primary_particles) const
+{
+  // Get the queue from OpenCL manager
+  OpenCLManager& opencl_manager = OpenCLManager::GetInstance();
+  cl::CommandQueue* p_queue = opencl_manager.GetCommandQueue();
+
+  // Unmap the memory
+  p_queue->enqueueUnmapMemObject(*p_primary_particles_, p_primary_particles);
+  p_queue->finish(); // Be sure everything is written on device memory
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 void Particle::InitializeSeeds()
 {
   GGEMScout("Particle", "InitializeSeeds", 1)
@@ -88,10 +131,8 @@ void Particle::InitializeSeeds()
   OpenCLManager& opencl_manager = OpenCLManager::GetInstance();
   cl::CommandQueue* p_queue = opencl_manager.GetCommandQueue();
 
-  // Get the pointer from OpenCL device
-  PrimaryParticles* p_primary_particles = static_cast<PrimaryParticles*>(
-    p_queue->enqueueMapBuffer(*p_primary_particles_, CL_TRUE, CL_MAP_WRITE, 0,
-    sizeof(PrimaryParticles), nullptr, nullptr, nullptr));
+  // Get the pointer on device
+  PrimaryParticles* p_primary_particles = GetPrimaryParticlesDevice();
 
   // For each particle a seed is generated
   for (uint64_t i = 0; i < number_of_particles_; ++i) {
@@ -99,11 +140,15 @@ void Particle::InitializeSeeds()
     p_primary_particles->p_prng_state_2_[i] = static_cast<cl_uint>(rand());
     p_primary_particles->p_prng_state_3_[i] = static_cast<cl_uint>(rand());
     p_primary_particles->p_prng_state_4_[i] = static_cast<cl_uint>(rand());
-    p_primary_particles->p_prng_state_5_[i] = 0;
+    p_primary_particles->p_prng_state_5_[i] = static_cast<cl_uint>(0);
   }
 
-  // Unmap the memory
-  p_queue->enqueueUnmapMemObject(*p_primary_particles_, p_primary_particles);
+  // To Delete!!!!!!
+  p_primary_particles->number_of_primaries_ = number_of_particles_;
+
+  // Release the pointer, mandatory step to be sure all data written on device
+  // memory
+  ReleasePrimaryParticlesDevice(p_primary_particles);
 
   // Auxiliary function test
   std::string const kOpenCLKernelPath = OPENCL_KERNEL_PATH;
@@ -112,8 +157,8 @@ void Particle::InitializeSeeds()
   cl::Kernel* p_kernel = opencl_manager.CompileKernel(kFilename,
     "print_primary_particle");
 
+  // Get the event to print time elapsed in kernel
   cl::Event* p_event = opencl_manager.GetEvent();
-  cl::Context* p_context = opencl_manager.GetContext();
 
   p_kernel->setArg(0, *p_primary_particles_);
 
@@ -125,7 +170,10 @@ void Particle::InitializeSeeds()
   cl_int kernel_status = p_queue->enqueueNDRangeKernel(*p_kernel, offset,
     global, cl::NullRange, nullptr, p_event);
   opencl_manager.CheckOpenCLError(kernel_status);
-  p_queue->finish();
+  p_queue->finish(); // Wait until the kernel status is finish
+
+  // Displaying time in kernel
+  opencl_manager.DisplayElapsedTimeInKernel("print_primary_particle");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -143,61 +191,4 @@ void Particle::AllocatePrimaryParticles()
   // Allocation of memory on OpenCL device
   p_primary_particles_ = opencl_manager.Allocate(nullptr,
     sizeof(PrimaryParticles), CL_MEM_READ_WRITE);
-/*
-
-  cl::CommandQueue* p_queue = opencl_manager.GetCommandQueue();
-
-  PrimaryParticles* p_primary_particles = static_cast<PrimaryParticles*>(
-    p_queue->enqueueMapBuffer(*p_primary_particles_, CL_TRUE, CL_MAP_WRITE, 0,
-    sizeof(PrimaryParticles), nullptr, nullptr, nullptr));
-
-  for (int i = 0; i < 100; ++i) {
-    p_primary_particles->p_E_[i] = 100.0;
-  }
-  p_primary_particles->number_of_primaries_ = number_of_particles_;
-
-  p_queue->enqueueUnmapMemObject(*p_primary_particles_, p_primary_particles);
-
-  //p_primary_particles_->number_of_primaries_ = number_of_particles_;
-
-  // Test with OpenCL
-  /*OpenCLManager& opencl_manager = OpenCLManager::GetInstance();
-  std::string const kOpenCLKernelPath = OPENCL_KERNEL_PATH;
-  std::string const kFilename = kOpenCLKernelPath + "/print_primary_particle.cl";
-  cl::Kernel* p_kernel = opencl_manager.CompileKernel(kFilename, "print_primary_particle");
-
-  cl::CommandQueue* p_queue = opencl_manager.GetCommandQueue();
-  cl::Event* p_event = opencl_manager.GetEvent();
-  cl::Context* p_context = opencl_manager.GetContext();
-
-  p_primary_particles_cl_ = new PrimaryParticles;
-
-  p_primary_particles_cl_->p_E_ = new cl::Buffer(*p_context,
-    CL_MEM_READ_WRITE, sizeof(cl_float)*1000000, nullptr, nullptr);
-
-  float* p_pp = static_cast<float*>(
-    p_queue->enqueueMapBuffer(*p_primary_particles_cl_->p_E_, CL_TRUE,
-    CL_MAP_WRITE, 0, sizeof(cl_float)*1000000, nullptr, nullptr, nullptr));
-
-  std::iota(p_pp, p_pp + 1000000, 0);
-
-  // Unmapping the buffer
-  p_queue->enqueueUnmapMemObject(*p_primary_particles_cl_->p_E_, p_pp);
-
-  p_kernel->setArg(0, *p_primary_particles_cl_->p_E_);
-  p_kernel->setArg(1, 15);
-
-  // Define the number of work-item to launch
-  cl::NDRange global(1000000);
-  cl::NDRange offset(0);
-
-  // Launching kernel
-  cl_int kernel_status = p_queue->enqueueNDRangeKernel(*p_kernel, offset, global, cl::NullRange, nullptr, p_event);
-  opencl_manager.CheckOpenCLError(kernel_status);
-  p_queue->finish();
-
-  delete p_primary_particles_cl_->p_E_;
-  delete p_primary_particles_cl_;
-
-  opencl_manager.DisplayElapsedTimeInKernel("print_primary_particle");*/
 }

@@ -28,30 +28,35 @@ SET(CMAKE_BUILD_TYPE "Release" CACHE STRING
   "Choose the type of build, options are: Debug Release")
 SET_PROPERTY(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release")
 
-#------------------------------------------------------------------------------
-# Defining a configuration file
-CONFIGURE_FILE("${PROJECT_SOURCE_DIR}/cmake-config/ggems_configuration.hh.in"
-  "${PROJECT_SOURCE_DIR}/include/GGEMS/global/ggems_configuration.hh"
-  @ONLY)
-
-#------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 # Setting the compiler type: 'CLANG' 'GCC' or 'CL'
 SET(COMPILER ${COMPILER})
 
-#------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 # Setting the OPENCL_KERNEL_PATH variable
 SET(OPENCL_KERNEL_PATH ${PROJECT_SOURCE_DIR}/kernel CACHE PATH
   "Path to the OpenCL kernel repository")
 
-#------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 # Setting the GGEMSHOME_PATH variable
 SET(GGEMS_PATH ${PROJECT_SOURCE_DIR} CACHE PATH
   "Path to the GGEMS project repository")
 
-#------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 # Compilation options
 OPTION(GGEMS_DOUBLE_PRECISION "Float number with double precision" OFF)
 OPTION(GGEMS_FAST_MATH "OpenCL fast math flag" OFF)
+
+#-------------------------------------------------------------------------------
+# Set a maximum of particle in a buffer
+SET(MAXIMUM_PARTICLES "5000000"
+  CACHE STRING "Maximum of particles simulated in a buffer")
+
+#-------------------------------------------------------------------------------
+# Defining a configuration file
+CONFIGURE_FILE("${PROJECT_SOURCE_DIR}/cmake-config/ggems_configuration.hh.in"
+  "${PROJECT_SOURCE_DIR}/include/GGEMS/global/ggems_configuration.hh"
+  @ONLY)
 
 #-------------------------------------------------------------------------------
 # Compilation options Windows/Unix

@@ -385,13 +385,26 @@ OpenCLManager::OpenCLManager(void)
 
   // Define the compilation options by default for OpenCL
   build_options_ = "-cl-std=CL1.2";
-  build_options_ += " -cl-kernel-arg-info -w -Werror";
+  build_options_ += " -w -Werror";
 
-  // If Kernel path defined, add it to the header include directory,
-  // mandatory for auxiliary function
+  // If Kernel path defined, add auxiliary function folder path
   #ifdef OPENCL_KERNEL_PATH
   build_options_ += " -I";
   build_options_ += OPENCL_KERNEL_PATH;
+  build_options_ += "/auxiliary_functions";
+  #elif
+  Misc::ThrowException("OpenCLManager","OpenCLManager",
+    "OPENCL_KERNEL_PATH not defined or not find!!!");
+  #endif
+
+  // If GGEMS path defined, add ggems_configurations folder path
+  #ifdef GGEMS_PATH
+  build_options_ += " -I";
+  build_options_ += GGEMS_PATH;
+  build_options_ += "/include";
+  #elif
+  Misc::ThrowException("OpenCLManager","OpenCLManager",
+    "OPENCL_KERNEL_PATH not defined or not find!!!");
   #endif
 
   // Activated fast math optimization
