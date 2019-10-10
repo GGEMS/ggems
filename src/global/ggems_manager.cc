@@ -104,7 +104,7 @@ uint32_t GGEMSManager::GenerateSeed() const
     Misc::ThrowException("GGEMSManager", "GenerateSeed",
       oss.str());
   }
-  return static_cast<uint64_t>(seedWin32);
+  return static_cast<uint32_t>(seedWin32);
   #else
   // Open a system random file
   int file_descriptor = ::open("/dev/urandom", O_RDONLY | O_NONBLOCK);

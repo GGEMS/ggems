@@ -6,4 +6,10 @@
 #cmakedefine GGEMS_DOUBLE_PRECISION @GGEMS_DOUBLE_PRECISION@
 #cmakedefine GGEMS_FAST_MATH @GGEMS_FAST_MATH@
 
+#if defined _MSC_VER
+#define PACKED
+#else
+#define PACKED __attribute__ ((__packed__))
+#endif
+
 #endif // GUARD_GGEMS_CONFIGURATION_HH
