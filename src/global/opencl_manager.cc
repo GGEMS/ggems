@@ -387,6 +387,13 @@ OpenCLManager::OpenCLManager(void)
   build_options_ = "-cl-std=CL1.2";
   build_options_ += " -cl-kernel-arg-info -w -Werror";
 
+  // If Kernel path defined, add it to the header include directory,
+  // mandatory for auxiliary function
+  #ifdef OPENCL_KERNEL_PATH
+  build_options_ += " -I";
+  build_options_ += OPENCL_KERNEL_PATH;
+  #endif
+
   // Activated fast math optimization
   #ifdef GGEMS_FAST_MATH
   build_options_ += " -cl-fast-relaxed-math";
@@ -889,15 +896,29 @@ cl::Kernel* OpenCLManager::CompileKernel(std::string const& kernel_filename,
   // Handling options to OpenCL compilation kernel
   char kernel_compilation_option[512];
   if (p_custom_options) {
+    #if defined _MSC_VER
+    ::strcpy_s(kernel_compilation_option, p_custom_options);
+    #else
     ::strcpy(kernel_compilation_option, p_custom_options);
+    #endif
   }
   else if (p_additional_options) {
+    #if defined _MSC_VER
+    ::strcpy_s(kernel_compilation_option, build_options_.c_str());
+    ::strcat_s(kernel_compilation_option, " ");
+    ::strcat_s(kernel_compilation_option, p_additional_options);
+    #else
     ::strcpy(kernel_compilation_option, build_options_.c_str());
     ::strcat(kernel_compilation_option, " ");
     ::strcat(kernel_compilation_option, p_additional_options);
+    #endif
   }
   else {
+    #if defined _MSC_VER
+    ::strcpy_s(kernel_compilation_option, build_options_.c_str());
+    #else
     ::strcpy(kernel_compilation_option, build_options_.c_str());
+    #endif
   }
 
   GGEMScout("OpenCLManager", "CompileKernel", 0) << "Compile a new kernel '"
@@ -1133,7 +1154,7 @@ void OpenCLManager::Deallocate(cl::Buffer* p_buffer, std::size_t size)
 
 void OpenCLManager::CheckOpenCLError(cl_int const& error) const
 {
-  if (error != CL_SUCCESS) throw std::runtime_error(ErrorType(error));
+  if (error != CL_SUCCESS) Misc::ThrowException("", "", ErrorType(error));
 }
 
 ////////////////////////////////////////////////////////////////////////////////

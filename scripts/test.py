@@ -9,7 +9,7 @@ ggems.Verbosity(1)
 opencl_manager = ggems.OpenCLManager()
 
 # Activate a context
-opencl_manager.set_context_index(0)
+opencl_manager.set_context_index(1)
 
 # Printing informations about OpenCL
 opencl_manager.print_info()
@@ -27,7 +27,7 @@ opencl_manager.print_RAM()
 ggems_manager = ggems.GGEMSManager()
 ggems_manager.set_seed(777)  # Range [1;4294967295]
 ggems_manager.set_number_of_particles(861635)  # Range [1;18446744073709551615]
-ggems_manager.set_number_of_batchs(16)
+ggems_manager.set_number_of_batchs(1)
 
 # Cross section parameters
 ggems_manager.set_cross_section_table_number_of_bins(220)

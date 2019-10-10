@@ -13,6 +13,7 @@
   \date Thrusday October 3, 2019
 */
 
+#include "GGEMS/global/ggems_configuration.hh"
 #include "GGEMS/global/ggems_export.hh"
 #include "GGEMS/global/opencl_manager.hh"
 
@@ -20,36 +21,42 @@
   \struct PrimaryParticles_t
   \brief Structure storing informations about primary particles for OpenCL
 */
-typedef struct GGEMS_EXPORT PrimaryParticles_t
+#if defined _MSC_VER
+#pragma pack(push, 1)
+#endif
+typedef struct PACKED PrimaryParticles_t
 {
-  cl::Buffer* p_E_; /*!< Energies of particles in float */
-  cl::Buffer* p_dx_; /*!< Position of the particle in x in float */
-  cl::Buffer* p_dy_; /*!< Position of the particle in y in float */
-  cl::Buffer* p_dz_; /*!< Position of the particle in z in float */
-  cl::Buffer* p_px_; /*!< Momentum of the particle in x in float */
-  cl::Buffer* p_py_; /*!< Momentum of the particle in y in float */
-  cl::Buffer* p_pz_; /*!< Momentum of the particle in z in float */
-  cl::Buffer* p_tof_; /*!< Time of flight in float */
+  //cl_float p_E_[861635]; /*!< Energies of particles in float */
+  //cl::Buffer* p_dx_; /*!< Position of the particle in x in float */
+  //cl::Buffer* p_dy_; /*!< Position of the particle in y in float */
+  //cl::Buffer* p_dz_; /*!< Position of the particle in z in float */
+  //cl::Buffer* p_px_; /*!< Momentum of the particle in x in float */
+  //cl::Buffer* p_py_; /*!< Momentum of the particle in y in float */
+  //cl::Buffer* p_pz_; /*!< Momentum of the particle in z in float */
+  //cl::Buffer* p_tof_; /*!< Time of flight in float */
 
-  cl::Buffer* p_prng_state_1_; /*!< State 1 of the prng in unsigned int 32 */
-  cl::Buffer* p_prng_state_2_; /*!< State 2 of the prng in unsigned int 32 */
-  cl::Buffer* p_prng_state_3_; /*!< State 3 of the prng in unsigned int 32 */
-  cl::Buffer* p_prng_state_4_; /*!< State 4 of the prng in unsigned int 32 */
-  cl::Buffer* p_prng_state_5_; /*!< State 5 of the prng in unsigned int 32 */
+  cl_uint p_prng_state_1_[861635]; /*!< State 1 of the prng in unsigned int 32 */
+  cl_uint p_prng_state_2_[861635]; /*!< State 2 of the prng in unsigned int 32 */
+  cl_uint p_prng_state_3_[861635]; /*!< State 3 of the prng in unsigned int 32 */
+  cl_uint p_prng_state_4_[861635]; /*!< State 4 of the prng in unsigned int 32 */
+  cl_uint p_prng_state_5_[861635]; /*!< State 5 of the prng in unsigned int 32 */
 
-  cl::Buffer* p_geometry_id_; /*!< current geometry crossed by the particle in unsigned int 32 */
-  cl::Buffer* p_E_index_; /*!< Energy index within CS and Mat tables in unsigned int 16 */
-  cl::Buffer* p_scatter_order_; /*!< Scatter order, usefull for the imagery in unsigned int 16 */
+  //cl::Buffer* p_geometry_id_; /*!< current geometry crossed by the particle in unsigned int 32 */
+  //cl::Buffer* p_E_index_; /*!< Energy index within CS and Mat tables in unsigned int 16 */
+  //cl::Buffer* p_scatter_order_; /*!< Scatter order, usefull for the imagery in unsigned int 16 */
 
-  cl::Buffer* p_next_interaction_distance_; /*!< Distance to the next interaction in float */
-  cl::Buffer* p_next_discrete_process_; /*!< Next process in unsigned int 8 */
+  //cl::Buffer* p_next_interaction_distance_; /*!< Distance to the next interaction in float */
+  //cl::Buffer* p_next_discrete_process_; /*!< Next process in unsigned int 8 */
 
-  cl::Buffer* p_status_; /*!< in unsigned int 8 */
-  cl::Buffer* p_level_; /*!<  in unsigned int 8 */
-  cl::Buffer* p_pname_; /*!< particle name (photon, electron, etc) in unsigned int 8 */
+  //cl::Buffer* p_status_; /*!< in unsigned int 8 */
+  //cl::Buffer* p_level_; /*!<  in unsigned int 8 */
+  //cl::Buffer* p_pname_; /*!< particle name (photon, electron, etc) in unsigned int 8 */
 
-  cl_ulong number_of_primaries_; /*!< Number of the primaries */
+  size_t number_of_primaries_; /*!< Number of the primaries */
 } PrimaryParticles;
+#if defined _MSC_VER
+#pragma pack(pop)
+#endif
 
 /*!
   \struct PrimaryParticles
@@ -128,7 +135,8 @@ class GGEMS_EXPORT Particle
 
   private:
     uint64_t number_of_particles_; /*!< Number of the particles to simulate in a batch */
-    PrimaryParticles* p_primary_particles_; /*!< Pointer storing info about primary particles in batch */
+    //PrimaryParticles* p_primary_particles_; /*!< Pointer storing info about primary particles in batch */
+    cl::Buffer* p_primary_particles_;
 };
 
 #endif // End of GUARD_GGEMS_PROCESSES_PARTICLES_HH

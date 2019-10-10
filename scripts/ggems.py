@@ -7,7 +7,7 @@ if sys.platform == "linux" or sys.platform == "darwin":
         "/home/dbenoit/data/Build/GGEMS_OpenCL/libggems.so")
 elif sys.platform == "win32":
     ggems_lib = ctypes.cdll.LoadLibrary(
-        "C:\\Users\\dbenoit\\Desktop\\build\\ggems.dll")
+        "C:\\Users\\dbenoit\\Desktop\\ggems_opencl_build\\ggems.dll")
 
 
 class OpenCLManager(object):

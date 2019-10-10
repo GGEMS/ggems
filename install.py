@@ -25,7 +25,7 @@ if sys.platform == "linux" or sys.platform == "darwin":
     INSTALL_FOLDER = "/home/dbenoit"
 elif sys.platform == "win32":
     GGEMS_FOLDER = "C:\\Users\\dbenoit\\Desktop\\ggems_opencl"
-    BUILD_FOLDER = "C:\\Users\\dbenoit\\Desktop\\build"
+    BUILD_FOLDER = "C:\\Users\\dbenoit\\Desktop\\ggems_opencl_build"
     INSTALL_FOLDER = "C:\\Users\\dbenoit"
 
 # ------------------------------------------------------------------------------
