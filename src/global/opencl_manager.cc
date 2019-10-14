@@ -531,7 +531,7 @@ OpenCLManager::~OpenCLManager(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void OpenCLManager::PrintPlatformInfos() const
+void OpenCLManager::PrintPlatformInfos(void) const
 {
   // Loop over the platforms
   for (uint32_t i = 0; i < v_platforms_cl_.size(); ++i) {
@@ -548,7 +548,7 @@ void OpenCLManager::PrintPlatformInfos() const
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void OpenCLManager::PrintDeviceInfos() const
+void OpenCLManager::PrintDeviceInfos(void) const
 {
   for (std::size_t i = 0; i < vp_devices_cl_.size(); ++i) {
     GGEMScout("OpenCLManager", "PrintDeviceInfos", 1) << GGEMSendl;
@@ -609,7 +609,8 @@ void OpenCLManager::PrintDeviceInfos() const
     GGEMScout("OpenCLManager", "PrintDeviceInfos", 1)
       << "+ Mem. Base Addr. Align.: " << p_device_mem_base_addr_align_[i]
       << " bytes" << GGEMSendl;
-    GGEMScout("OpenCLManager", "PrintDeviceInfos", 1) << "+ Printf Buffer Size: "
+    GGEMScout("OpenCLManager", "PrintDeviceInfos", 1)
+      << "+ Printf Buffer Size: "
       << p_device_printf_buffer_size_[i] << " bytes" << GGEMSendl;
     if (p_device_image_support_[ i ] == static_cast<cl_bool>(true)) {
       GGEMScout("OpenCLManager", "PrintDeviceInfos", 1) << "+ Image Support: ON"
@@ -619,7 +620,8 @@ void OpenCLManager::PrintDeviceInfos() const
       GGEMScout("OpenCLManager", "PrintDeviceInfos", 1)
         << "+ Image Support: OFF" << GGEMSendl;
     }
-    GGEMScout("OpenCLManager", "PrintDeviceInfos", 1) << "+ Image Max Array Size: "
+    GGEMScout("OpenCLManager", "PrintDeviceInfos", 1)
+      << "+ Image Max Array Size: "
       << p_device_image_max_array_size_[i] << GGEMSendl;
     GGEMScout("OpenCLManager", "PrintDeviceInfos", 1)
       << "+ Image Max Buffer Size: " << p_device_image_max_buffer_size_[i]
@@ -715,7 +717,7 @@ void OpenCLManager::PrintDeviceInfos() const
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void OpenCLManager::PrintBuildOptions() const
+void OpenCLManager::PrintBuildOptions(void) const
 {
   GGEMScout("OpenCLManager", "PrintBuildOptions", 1)
     << "OpenCL building options: " << build_options_ << GGEMSendl;
@@ -725,7 +727,7 @@ void OpenCLManager::PrintBuildOptions() const
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void OpenCLManager::CreateContextCPUGPU()
+void OpenCLManager::CreateContextCPUGPU(void)
 {
   GGEMScout("OpenCLManager", "CreateContextCPUGPU", 0)
     << "Creating context for CPU and/or GPU..." << GGEMSendl;
@@ -760,13 +762,34 @@ void OpenCLManager::ContextToActivate(uint32_t const& context_id)
 
   // Activate the context
   vp_contexts_act_cl_.push_back(vp_contexts_cl_.at(context_id));
+
+  // Checking if an Intel HD Graphics has been selected and send a warning
+  std::size_t found_device = p_device_name_[context_id].find("HD Graphics");
+  if (found_device != std::string::npos) {
+    GGEMScout("OpenCLManager", "ContextToActivate", 0)
+      << "##########################################" << GGEMSendl;
+    GGEMScout("OpenCLManager", "ContextToActivate", 0)
+      << "#                WARNING!!!              #" << GGEMSendl;
+    GGEMScout("OpenCLManager", "ContextToActivate", 0)
+      << "##########################################" << GGEMSendl;
+    GGEMScout("OpenCLManager", "ContextToActivate", 0)
+      << "You are using a HD Graphics architecture, GGEMS could work on this"
+      << " device, but the computation is very slow and the result could be"
+      << " hazardous. Please use a CPU architecture or a GPU." << GGEMSendl;
+  }
+
+  // Checking if the double precision is activated on OpenCL device
+  if (p_device_native_vector_width_double_[context_id] == 0) {
+    Misc::ThrowException("OpenCLManager", "ContextToActivate",
+      "Your OpenCL device does not support double precision!!!");
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void OpenCLManager::PrintActivatedContextInfos() const
+void OpenCLManager::PrintActivatedContextInfos(void) const
 {
   cl_uint context_num_devices = 0;
   std::vector<cl::Device> device;
@@ -829,7 +852,7 @@ void OpenCLManager::PrintActivatedContextInfos() const
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void OpenCLManager::CreateCommandQueue()
+void OpenCLManager::CreateCommandQueue(void)
 {
   GGEMScout("OpenCLManager","CreateCommandQueue",0)
     << "Creating command queue for CPU and/or GPU..." << GGEMSendl;
@@ -850,7 +873,7 @@ void OpenCLManager::CreateCommandQueue()
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void OpenCLManager::PrintCommandQueueInfos() const
+void OpenCLManager::PrintCommandQueueInfos(void) const
 {
   cl::Device device;
   std::string device_name;
@@ -877,7 +900,7 @@ void OpenCLManager::PrintCommandQueueInfos() const
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void OpenCLManager::CreateEvent()
+void OpenCLManager::CreateEvent(void)
 {
   GGEMScout("OpenCLManager","CreateEvent",0)
     << "Creating event for CPU and/or GPU..." << GGEMSendl;
@@ -984,7 +1007,7 @@ cl::Kernel* OpenCLManager::CompileKernel(std::string const& kernel_filename,
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void OpenCLManager::InitializeRAMManager()
+void OpenCLManager::InitializeRAMManager(void)
 {
   GGEMScout("OpenCLManager", "InitializeRAMManager", 1)
     << "Initializing a RAM handler for each context..." << GGEMSendl;
@@ -998,7 +1021,7 @@ void OpenCLManager::InitializeRAMManager()
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void OpenCLManager::PrintRAMStatus() const
+void OpenCLManager::PrintRAMStatus(void) const
 {
   GGEMScout("OpenCLManager", "PrintRAMStatus", 1)
     << "---------------------------" << GGEMSendl;
@@ -1076,7 +1099,7 @@ void OpenCLManager::DisplayElapsedTimeInKernel(
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void OpenCLManager::PrintContextInfos() const
+void OpenCLManager::PrintContextInfos(void) const
 {
   cl_uint context_number_devices = 0;
   cl_uint reference_count = 0;

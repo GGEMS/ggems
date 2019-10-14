@@ -107,19 +107,19 @@ class GGEMS_EXPORT OpenCLManager
       \fn void PrintPlatformInfos() const
       \brief print all the informations about the platform
     */
-    void PrintPlatformInfos() const;
+    void PrintPlatformInfos(void) const;
 
     /*!
-      \fn void PrintDeviceInfos() const
+      \fn void PrintDeviceInfos(void) const
       \brief print all informations about devices
     */
-   void PrintDeviceInfos() const;
+   void PrintDeviceInfos(void) const;
 
     /*!
-      \fn void PrintBuildOptions() const
+      \fn void PrintBuildOptions(void) const
       \brief print global build options used during kernel compilation
     */
-   void PrintBuildOptions() const;
+   void PrintBuildOptions(void) const;
 
   private: // Informations about device
     /*!
@@ -134,10 +134,10 @@ class GGEMS_EXPORT OpenCLManager
 
   private: // Context management
     /*!
-      \fn void CreateContextCPUGPU()
+      \fn void CreateContextCPUGPU(void)
       \brief Create a context for GPU or CPU
     */
-    void CreateContextCPUGPU();
+    void CreateContextCPUGPU(void);
 
     /*!
       \fn cl_ulong GetGlobalMemoryContext(std::size_t const& context_id) const
@@ -177,22 +177,22 @@ class GGEMS_EXPORT OpenCLManager
 
   public:
     /*!
-      \fn void PrintContextInfos() const
+      \fn void PrintContextInfos(void) const
       \brief print infos about each context
     */
-    void PrintContextInfos() const;
+    void PrintContextInfos(void) const;
 
     /*!
-      \fn void PrintActivatedContextInfos() const
+      \fn void PrintActivatedContextInfos(void) const
       \brief print infos about each activated context
     */
-    void PrintActivatedContextInfos() const;
+    void PrintActivatedContextInfos(void) const;
 
     /*!
       \fn std::size_t GetNumberOfActivatedContext() const
       \brief return the number of the activated contexts
     */
-    inline std::size_t GetNumberOfActivatedContext() const
+    inline std::size_t GetNumberOfActivatedContext(void) const
     {
       return vp_contexts_act_cl_.size();
     }
@@ -201,7 +201,7 @@ class GGEMS_EXPORT OpenCLManager
       \fn std::size_t GetContext() const
       \brief return the activated context
     */
-    inline cl::Context* GetContext() const
+    inline cl::Context* GetContext(void) const
     {
       return vp_contexts_act_cl_.front();
     };
@@ -211,20 +211,20 @@ class GGEMS_EXPORT OpenCLManager
       \fn void CreateCommandQueue()
       \brief create a command queue for each context
     */
-    void CreateCommandQueue();
+    void CreateCommandQueue(void);
 
   public:
     /*!
       \fn void PrintCommandQueueInfos() const
       \brief print the informations about the command queue
     */
-    void PrintCommandQueueInfos() const;
+    void PrintCommandQueueInfos(void) const;
 
     /*!
       \fn cl::CommandQueue* GetCommandQueue() const
       \brief Return the command queue to activated context
     */
-    inline cl::CommandQueue* GetCommandQueue() const
+    inline cl::CommandQueue* GetCommandQueue(void) const
     {
       return vp_queues_cl_.at(GetGlobalContextID(vp_contexts_act_cl_.at(0)));
     }
@@ -238,10 +238,10 @@ class GGEMS_EXPORT OpenCLManager
 
   public:
     /*!
-      \fn cl::Event* GetEvent() const
+      \fn cl::Event* GetEvent(void) const
       \brief return an event to activated context
     */
-    inline cl::Event* GetEvent() const
+    inline cl::Event* GetEvent(void) const
     {
       return vp_event_cl_.at(GetGlobalContextID(vp_contexts_act_cl_.at(0)));
     }
@@ -285,14 +285,14 @@ class GGEMS_EXPORT OpenCLManager
       \fn void InitializeRAMManager()
       \brief initialization of the RAM manager by context
     */
-    void InitializeRAMManager();
+    void InitializeRAMManager(void);
 
   public:
     /*!
       \fn void PrintRAMStatus() const
       \brief print the RAM memory status for each context
     */
-    void PrintRAMStatus() const;
+    void PrintRAMStatus(void) const;
 
     /*!
       \fn void AddRAMMemory(cl_ulong const size)

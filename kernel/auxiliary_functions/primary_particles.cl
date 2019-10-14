@@ -1,8 +1,8 @@
-#ifndef GUARD_GGEMS_AUXILIARYFUNCTIONS_PRIMARYPARTICLES_HH
-#define GUARD_GGEMS_AUXILIARYFUNCTIONS_PRIMARYPARTICLES_HH
+#ifndef GUARD_GGEMS_AUXILIARYFUNCTIONS_PRIMARYPARTICLES_CL
+#define GUARD_GGEMS_AUXILIARYFUNCTIONS_PRIMARYPARTICLES_CL
 
 /*!
-  \file primary_particles.hh
+  \file primary_particles.cl
 
   \brief Structure storing primary particles on device
 
@@ -48,8 +48,6 @@ typedef struct __attribute__((aligned (1))) PrimaryParticles_t
   unsigned char p_status_[MAXIMUM_PARTICLES];
   unsigned char p_level_[MAXIMUM_PARTICLES];
   unsigned char p_pname_[MAXIMUM_PARTICLES];
-
-  
 }PrimaryParticles;
 
 #endif // End of GUARD_GGEMS_AUXILIARYFUNCTIONS_PRIMARYPARTICLES_HH
