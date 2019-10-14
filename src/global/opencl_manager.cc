@@ -385,7 +385,7 @@ OpenCLManager::OpenCLManager(void)
 
   // Define the compilation options by default for OpenCL
   build_options_ = "-cl-std=CL1.2";
-  build_options_ += " -w -Werror";
+  build_options_ += " -w -Werror"; // Errors
 
   // If Kernel path defined, add auxiliary function folder path
   #ifdef OPENCL_KERNEL_PATH

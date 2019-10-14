@@ -3,10 +3,22 @@ supprimer l'option du batch
 
 - A chaque nouveau batch redonner le bon nombre de particles dans le batch
 
-- Désactiver HD Graphics
+- Gestion des batchs automatique
+
+- Désactiver ou avertir HD Graphics
 
 - Controler la disponibilité des calculs en double précision
 
 - Random: faire le Dieharder test et Bigcrunch test
 
 - Faire un installer pratique pour Windows, MAC et Linux
+
+- Vérifier que l'indice du contexte souhaité est disponible
+
+- Meilleur gestion du mapping à faire faire par le opencl_manager
+
+- Faire la macro script en C++
+
+- Changer le suffixe des "auxiliary functions"
+
+- Enlever les size_t du côté de OpenCL
