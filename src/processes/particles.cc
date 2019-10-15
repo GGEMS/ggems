@@ -21,7 +21,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-Particle::Particle()
+Particle::Particle(void)
 : number_of_particles_(0),
   p_primary_particles_(nullptr)
 {
@@ -33,7 +33,7 @@ Particle::Particle()
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-Particle::~Particle()
+Particle::~Particle(void)
 {
   // Get the pointer on OpenCL singleton
   OpenCLManager& opencl_manager = OpenCLManager::GetInstance();
@@ -52,7 +52,7 @@ Particle::~Particle()
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void Particle::Initialize()
+void Particle::Initialize(void)
 {
   GGEMScout("Particle", "Initialize", 1)
     << "Initialization of Particle..." << GGEMSendl;
@@ -91,48 +91,17 @@ void Particle::SetNumberOfParticlesInBatch(
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-PrimaryParticles* Particle::GetPrimaryParticlesDevice() const
-{
-  // Get the queue from OpenCL manager
-  OpenCLManager& opencl_manager = OpenCLManager::GetInstance();
-  cl::CommandQueue* p_queue = opencl_manager.GetCommandQueue();
-
-  return static_cast<PrimaryParticles*>(
-    p_queue->enqueueMapBuffer(*p_primary_particles_, CL_TRUE, CL_MAP_WRITE, 0,
-    sizeof(PrimaryParticles), nullptr, nullptr, nullptr));
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void Particle::ReleasePrimaryParticlesDevice(
-  PrimaryParticles* p_primary_particles) const
-{
-  // Get the queue from OpenCL manager
-  OpenCLManager& opencl_manager = OpenCLManager::GetInstance();
-  cl::CommandQueue* p_queue = opencl_manager.GetCommandQueue();
-
-  // Unmap the memory
-  p_queue->enqueueUnmapMemObject(*p_primary_particles_, p_primary_particles);
-  p_queue->finish(); // Be sure everything is written on device memory
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void Particle::InitializeSeeds()
+void Particle::InitializeSeeds(void)
 {
   GGEMScout("Particle", "InitializeSeeds", 1)
     << "Initialization of seeds for each particles..." << GGEMSendl;
 
-  // Get the queue from OpenCL manager
+  // Get the pointer on the OpenCL Manager singleton
   OpenCLManager& opencl_manager = OpenCLManager::GetInstance();
-  cl::CommandQueue* p_queue = opencl_manager.GetCommandQueue();
 
   // Get the pointer on device
-  PrimaryParticles* p_primary_particles = GetPrimaryParticlesDevice();
+  PrimaryParticles* p_primary_particles =
+    opencl_manager.GetDeviceBufferWrite<PrimaryParticles>(p_primary_particles_);
 
   // For each particle a seed is generated
   for (uint64_t i = 0; i < number_of_particles_; ++i) {
@@ -143,14 +112,14 @@ void Particle::InitializeSeeds()
     p_primary_particles->p_prng_state_5_[i] = static_cast<cl_uint>(0);
   }
 
-  // To Delete!!!!!!
+  // To Delete!!!!!! Gestion du nombre de particules
   p_primary_particles->number_of_primaries_ = number_of_particles_;
 
-  // Release the pointer, mandatory step to be sure all data written on device
-  // memory
-  ReleasePrimaryParticlesDevice(p_primary_particles);
+  // Release the pointer, mandatory step!!!
+  opencl_manager.ReleaseDeviceBuffer(p_primary_particles_, p_primary_particles);
 
   // Auxiliary function test
+  /*cl::CommandQueue* p_queue = opencl_manager.GetCommandQueue();
   std::string const kOpenCLKernelPath = OPENCL_KERNEL_PATH;
   std::string const kFilename = kOpenCLKernelPath
     + "/print_primary_particle.cl";
@@ -173,14 +142,14 @@ void Particle::InitializeSeeds()
   p_queue->finish(); // Wait until the kernel status is finish
 
   // Displaying time in kernel
-  opencl_manager.DisplayElapsedTimeInKernel("print_primary_particle");
+  opencl_manager.DisplayElapsedTimeInKernel("print_primary_particle");*/
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void Particle::AllocatePrimaryParticles()
+void Particle::AllocatePrimaryParticles(void)
 {
   GGEMScout("Particle", "AllocatePrimaryParticles", 1)
     << "Allocation of primary particles..." << GGEMSendl;

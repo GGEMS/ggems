@@ -760,6 +760,14 @@ void OpenCLManager::ContextToActivate(uint32_t const& context_id)
       "A context has already been activated!!!");
   }
 
+  // Checking the index of the context
+  if (context_id >= vp_contexts_cl_.size()) {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "Your context index is out of range!!! " << vp_contexts_cl_.size()
+      << " context(s) detected.";
+    Misc::ThrowException("OpenCLManager", "ContextToActivate", oss.str());
+  }
+
   // Activate the context
   vp_contexts_act_cl_.push_back(vp_contexts_cl_.at(context_id));
 

@@ -79,12 +79,12 @@ class GGEMS_EXPORT Particle
     /*!
       \brief Particle constructor
     */
-    Particle();
+    Particle(void);
 
     /*!
       \brief Particle destructor
     */
-    ~Particle();
+    ~Particle(void);
 
   public:
     /*!
@@ -117,10 +117,10 @@ class GGEMS_EXPORT Particle
 
   public:
     /*!
-      \fn void Initialize()
+      \fn void Initialize(void)
       \brief Initialize the Particle object
     */
-    void Initialize();
+    void Initialize(void);
 
     /*!
       \fn void SetNumberOfParticlesInBatch(uint64_t const& number_of_particles_in_batch)
@@ -130,28 +130,18 @@ class GGEMS_EXPORT Particle
     void SetNumberOfParticlesInBatch(
       uint64_t const& number_of_particles_in_batch);
 
-    /*!
-      \fn PrimaryParticles* GetPrimaryParticlesDevice() const
-      \brief Get the pointer on primary particles on OpenCL device memory
-      \return The pointer on primary particles in device memory
-    */
-    PrimaryParticles* GetPrimaryParticlesDevice() const;
-
-    void ReleasePrimaryParticlesDevice(
-      PrimaryParticles* p_primary_particles) const;
-
   private:
     /*!
-      \fn void AllocatePrimaryParticles()
+      \fn void AllocatePrimaryParticles(void)
       \brief Allocate memory for primary particles
     */
-    void AllocatePrimaryParticles();
+    void AllocatePrimaryParticles(void);
 
     /*!
-      \fn void InitializeSeeds()
+      \fn void InitializeSeeds(void)
       \brief Initialize seeds for each particle
     */
-    void InitializeSeeds();
+    void InitializeSeeds(void);
 
   private:
     uint64_t number_of_particles_; /*!< Number of the particles to simulate in a batch */

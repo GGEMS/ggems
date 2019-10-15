@@ -15,6 +15,10 @@
 
 #include "system_of_units.cl"
 
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 /*!
   \fn inline float prng_uniform(__global PrimaryParticles* p_primary_particle, size_t const index)
   \param p_primary_particle - pointer on primary particles on device
@@ -58,14 +62,76 @@ inline float prng_uniform(__global PrimaryParticles* p_primary_particle,
     / 4294967295.0) * (1.0f - 1.0f/(1<<23));
 }
 
-//inline unsigned int prng_poisson(ParticlesData *particles, unsigned int id, float lambda )
-//{
-//  ;
-//}
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
-//inline float prng_gaussian(ParticlesData *particles, unsigned int id, float sigma)
-//{
-//  ;
-//}
+/*!
+  \fn inline float prng_poisson(__global PrimaryParticles* p_primary_particle, int const index, float const mean)
+  \param p_primary_particle - pointer on primary particles on device
+  \param index - index of thread
+  \param mean - mean of the Poisson distribution
+  \brief Poisson random from G4Poisson in Geant4
+*/
+inline unsigned int prng_poisson(__global PrimaryParticles* p_primary_particle,
+  int const index, float const mean)
+{
+  // Initialization of parameters
+  unsigned int number = 0;
+  float position, poisson_value, poisson_sum;
+  float value, y, t;
+
+  if (mean <= 16.) {// border == 16, gaussian after 16
+    // to avoid 1 due to f32 approximation
+    do {
+      position = prng_uniform(p_primary_particle, index);
+    }
+    while ((1.f-position) < 2.e-7f);
+
+    poisson_value = exp(-mean);
+    poisson_sum = poisson_value;
+    //  v---- Why ? It's not in G4Poisson - JB
+    while ((poisson_sum <= position) && (number < 40000.)) {
+      number++;
+      poisson_value *= mean/number;
+      // Not in G4, is it to manage f32 ?  - JB
+      if ((poisson_sum + poisson_value) == poisson_sum) break;
+      poisson_sum += poisson_value;
+    }
+    return number;
+  }
+
+  t = sqrt(-2.f*log(prng_uniform(p_primary_particle, index)));
+  y = 2.f * PI_GPU * prng_uniform(p_primary_particle, index);
+  t *= cos(y);
+  value = mean + t*sqrt(mean) + 0.5f;
+
+  if (value <= 0.) return (unsigned int)0;
+
+  return (value >= 2.e9f) ? (unsigned int)2.e9f : (unsigned int)value;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+/*!
+  \fn inline float prng_gaussian(__global PrimaryParticles* p_primary_particle, int const index, float const sigma)
+  \param p_primary_particle - pointer on primary particles on device
+  \param index - index of thread
+  \param sigma - standard deviation
+  \brief Gaussian random
+*/
+inline float prng_gaussian(__global PrimaryParticles* p_primary_particle,
+  int const index, float const sigma)
+{
+  // Box-Muller transformation
+  float const u1 = prng_uniform(p_primary_particle, index);
+  float const u2 = prng_uniform(p_primary_particle, index);
+  float const r1 = sqrt(-2.0f * log(u1));
+  float const r2 = 2.0f * PI_GPU * u2;
+
+  return sigma * r1 * cos(r2);
+}
 
 #endif // End of GUARD_GGEMS_GLOBAL_OPENCL_MANAGER_HH

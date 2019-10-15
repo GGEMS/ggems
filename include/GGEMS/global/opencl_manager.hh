@@ -208,20 +208,20 @@ class GGEMS_EXPORT OpenCLManager
 
   private: // OpenCL command queue
     /*!
-      \fn void CreateCommandQueue()
+      \fn void CreateCommandQueue(void)
       \brief create a command queue for each context
     */
     void CreateCommandQueue(void);
 
   public:
     /*!
-      \fn void PrintCommandQueueInfos() const
+      \fn void PrintCommandQueueInfos(void) const
       \brief print the informations about the command queue
     */
     void PrintCommandQueueInfos(void) const;
 
     /*!
-      \fn cl::CommandQueue* GetCommandQueue() const
+      \fn cl::CommandQueue* GetCommandQueue(void) const
       \brief Return the command queue to activated context
     */
     inline cl::CommandQueue* GetCommandQueue(void) const
@@ -260,7 +260,7 @@ class GGEMS_EXPORT OpenCLManager
       std::string const& kernel_name, char* const p_custom_options = nullptr,
       char* const p_additional_options = nullptr);
 
-  public:
+  public: // OpenCL buffer handling
     /*!
       \fn cl::Buffer* Allocate(void* p_host_ptr, std::size_t size, cl_mem_flags flags)
       \param p_host_ptr - pointer to buffer in host memory
@@ -279,6 +279,41 @@ class GGEMS_EXPORT OpenCLManager
       \brief Deallocation of OpenCL memory
     */
     void Deallocate(cl::Buffer* p_buffer, std::size_t size);
+
+    /*
+      \fn T* GetDeviceBufferWrite(cl::Buffer* p_device_ptr) const
+      \tparam T - type of the returned pointer on host memory
+      \param p_device_ptr - pointer on device memory
+      \brief Get the device pointer on host to write on it. ReleaseDeviceBuffer
+      must be used after this method!!!
+      \return the pointer on host memory on write mode
+    */
+    template <typename T>
+    T* GetDeviceBufferWrite(cl::Buffer* const p_device_ptr) const;
+
+    /*
+      \fn T* GetDeviceBufferRead(cl::Buffer* p_device_ptr) const
+      \tparam T - type of the returned pointer on host memory
+      \param p_device_ptr - pointer on device memory
+      \brief Get the device pointer on host to read it. ReleaseDeviceBuffer
+      must be used after this method!!!
+      \return the pointer on host memory on read mode
+    */
+    template <typename T>
+    T* GetDeviceBufferRead(cl::Buffer* const p_device_ptr) const;
+
+    /*
+      \fn void ReleaseDeviceBuffer(cl::Buffer* const p_device_ptr, T* p_host_ptr) const
+      \tparam T - type of host memory pointer to release
+      \param p_device_ptr - pointer on device memory
+      \param p_host_ptr - pointer on host memory mapped on device memory
+      \brief Get the device pointer on host to write on it. Mandatory after a
+      GetDeviceBufferWrite ou GetDeviceBufferRead!!!
+      \return the pointer on host memory on write mode
+    */
+    template <typename T>
+    void ReleaseDeviceBuffer(cl::Buffer* const p_device_ptr,
+      T* p_host_ptr) const;
 
   private: // RAM manager
     /*!
@@ -392,6 +427,29 @@ class GGEMS_EXPORT OpenCLManager
   private: // RAM handler
     cl_ulong *p_used_ram_; /*!< Memory RAM used by context */
 };
+
+template <typename T>
+T* OpenCLManager::GetDeviceBufferWrite(cl::Buffer* const p_device_ptr) const
+{
+  return static_cast<T*>(GetCommandQueue()->enqueueMapBuffer(*p_device_ptr,
+    CL_TRUE, CL_MAP_WRITE, 0, sizeof(T), nullptr, nullptr, nullptr));
+}
+
+template <typename T>
+T* OpenCLManager::GetDeviceBufferRead(cl::Buffer* const p_device_ptr) const
+{
+  return static_cast<T*>(GetCommandQueue()->enqueueMapBuffer(*p_device_ptr,
+    CL_TRUE, CL_MAP_READ, 0, sizeof(T), nullptr, nullptr, nullptr));
+}
+
+template <typename T>
+void OpenCLManager::ReleaseDeviceBuffer(cl::Buffer* const p_device_ptr,
+  T* p_host_ptr) const
+{
+  // Unmap the memory
+  GetCommandQueue()->enqueueUnmapMemObject(*p_device_ptr, p_host_ptr);
+  GetCommandQueue()->finish();
+}
 
 /*!
   \fn OpenCLManager* get_instance_opencl_manager(void)

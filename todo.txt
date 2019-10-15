@@ -1,6 +1,3 @@
-- Gerer nombre de particules automatiquement, modifiable à partir du CMAKE et
-supprimer l'option du batch
-
 - A chaque nouveau batch redonner le bon nombre de particles dans le batch
 
 - Gestion des batchs automatique
@@ -9,12 +6,6 @@ supprimer l'option du batch
 
 - Faire un installer pratique pour Windows, MAC et Linux
 
-- Vérifier que l'indice du contexte souhaité est disponible
-
-- Meilleur gestion du mapping à faire faire par le opencl_manager
-
 - Faire la macro script en C++
-
-- Enlever les size_t du côté de OpenCL
 
 - Driver et version de OpenCL en windows ne s'affiche pas ???
