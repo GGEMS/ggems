@@ -9,3 +9,7 @@
 - Faire la macro script en C++
 
 - Driver et version de OpenCL en windows ne s'affiche pas ???
+
+- Faire un benchmark CT
+
+- Faire la visu au format VRML 2.0 ou x3D

@@ -14,12 +14,15 @@
   \date Tuesday October 15, 2019
 */
 
+#include "GGEMS/global/ggems_export.hh"
+#include "GGEMS/global/opencl_manager.hh"
+
 /*!
   \class GGEMSSourceDefinition
   \brief GGEMS class managing the source in GGEMS, every new sources in GGEMS
   inherit from this class
 */
-class GGEMSSourceDefinition
+class GGEMS_EXPORT GGEMSSourceDefinition
 {
   public:
     /*!
@@ -30,7 +33,7 @@ class GGEMSSourceDefinition
     /*!
       \brief GGEMSSourceDefinition destructor
     */
-    ~GGEMSSourceDefinition(void);
+    virtual ~GGEMSSourceDefinition(void);
 
   public:
     /*!
@@ -62,6 +65,31 @@ class GGEMSSourceDefinition
     */
     GGEMSSourceDefinition& operator=(
       GGEMSSourceDefinition const&& ggems_source) = delete;
+
+  public:
+    /*!
+      \fn bool IsReady(void) const
+      \return return false is the source is not ready
+      \brief Check if the source is ready to be used
+    */
+    bool IsReady(void) const;
+
+  protected: // Pure abstract method
+    /*!
+      \fn void GetPrimaries(cl::Buffer* p_primary_particles) = 0
+      \param p_primary_particles - buffer of primary particles on OpenCL device
+      \brief Generate primary particles
+    */
+    virtual void GetPrimaries(cl::Buffer* p_primary_particles) = 0;
+
+    /*!
+      \fn void Initialize(void) = 0
+      \brief Initialize a GGEMS source
+    */
+    virtual void Initialize(void) = 0;
+
+  protected:
+    bool is_initialized_; /*!< Boolean checking if the source is initialized */
 };
 
 #endif // End of GUARD_GGEMS_SOURCES_GGEMSSOURCEDEFINITION_HH

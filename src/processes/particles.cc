@@ -119,7 +119,7 @@ void Particle::InitializeSeeds(void)
   opencl_manager.ReleaseDeviceBuffer(p_primary_particles_, p_primary_particles);
 
   // Auxiliary function test
-  cl::CommandQueue* p_queue = opencl_manager.GetCommandQueue();
+  /*cl::CommandQueue* p_queue = opencl_manager.GetCommandQueue();
   std::string const kOpenCLKernelPath = OPENCL_KERNEL_PATH;
   std::string const kFilename = kOpenCLKernelPath
     + "/print_primary_particle.cl";
@@ -142,7 +142,7 @@ void Particle::InitializeSeeds(void)
   p_queue->finish(); // Wait until the kernel status is finish
 
   // Displaying time in kernel
-  opencl_manager.DisplayElapsedTimeInKernel("print_primary_particle");
+  opencl_manager.DisplayElapsedTimeInKernel("print_primary_particle");*/
 }
 
 ////////////////////////////////////////////////////////////////////////////////
