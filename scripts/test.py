@@ -9,7 +9,7 @@ ggems.Verbosity(1)
 opencl_manager = ggems.OpenCLManager()
 
 # Activate a context
-opencl_manager.set_context_index(0)
+opencl_manager.set_context_index(4)
 
 # Printing informations about OpenCL
 opencl_manager.print_info()
@@ -21,7 +21,7 @@ opencl_manager.print_activated_context()
 
 # ------------------------------------------------------------------------------
 # STEP 2: Initializing a source
-
+xray_source = ggems.XRaySource()
 
 # ------------------------------------------------------------------------------
 # STEP 3: GGEMS simulation parameters
@@ -44,8 +44,14 @@ ggems_manager.set_particle_cut(b"Photon", 0.5)  # 0.5 mm
 # Set the geometry tolerance in the range [1mm;1nm]
 ggems_manager.set_geometry_tolerance(0.001)  # 1 um
 
+# Set the GGEMS source
+ggems_manager.set_source(xray_source)
+
 # Initializing the GGEMS simulation
 ggems_manager.initialize_simulation()
 
 # Printing RAM status after all initializations
 opencl_manager.print_RAM()
+
+# Freeing memory
+xray_source.delete()

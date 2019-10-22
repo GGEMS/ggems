@@ -47,7 +47,8 @@ GGEMSManager::GGEMSManager(void)
   cross_section_table_number_of_bins_(Limit::CROSS_SECTION_TABLE_NUMBER_BINS),
   cross_section_table_energy_min_(Limit::CROSS_SECTION_TABLE_ENERGY_MIN),
   cross_section_table_energy_max_(Limit::CROSS_SECTION_TABLE_ENERGY_MAX),
-  p_particle_(nullptr)
+  p_particle_(nullptr),
+  p_source_definition_(nullptr)
 {
   GGEMScout("GGEMSManager", "GGEMSManager", 1)
     << "Allocation of GGEMS Manager singleton..." << GGEMSendl;
@@ -142,6 +143,15 @@ void GGEMSManager::SetNumberOfParticles(uint64_t const& number_of_particles)
 void GGEMSManager::SetNumberOfBatchs(uint32_t const& number_of_batchs)
 {
   v_number_of_particles_in_batch_.resize(number_of_batchs, 0);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSManager::SetSource(GGEMSSourceDefinition* p_source_defintion)
+{
+  p_source_definition_ = p_source_defintion;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -313,11 +323,12 @@ void GGEMSManager::CheckParameters()
     Misc::ThrowException("GGEMSManager", "CheckParameters", oss.str());
   }
 
-  if (v_number_of_particles_in_batch_.empty()) {
+  // Checking if the source is defined by the user
+ /* if (!p_source_definition_) {
     std::ostringstream oss(std::ostringstream::out);
-    oss << "You have to set a number of batch > 0";
+    oss << "You have to define a source!!!";
     Misc::ThrowException("GGEMSManager", "CheckParameters", oss.str());
-  }
+  }*/
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -419,104 +430,117 @@ GGEMSManager* get_instance_ggems_manager(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_seed(GGEMSManager* ggems_manager, uint32_t const seed)
+void set_seed(GGEMSManager* p_ggems_manager, uint32_t const seed)
 {
-  ggems_manager->SetSeed(seed);
+  p_ggems_manager->SetSeed(seed);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void initialize_simulation(GGEMSManager* ggems_manager)
+void initialize_simulation(GGEMSManager* p_ggems_manager)
 {
-  ggems_manager->Initialize();
+  p_ggems_manager->Initialize();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_number_of_particles(GGEMSManager* ggems_manager,
+void set_number_of_particles(GGEMSManager* p_ggems_manager,
   uint64_t const number_of_particles)
 {
-  ggems_manager->SetNumberOfParticles(number_of_particles);
+  p_ggems_manager->SetNumberOfParticles(number_of_particles);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_number_of_batchs(GGEMSManager* ggems_manager,
+void set_number_of_batchs(GGEMSManager* p_ggems_manager,
   uint32_t const number_of_batchs)
 {
-  ggems_manager->SetNumberOfBatchs(number_of_batchs);
+  p_ggems_manager->SetNumberOfBatchs(number_of_batchs);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_process(GGEMSManager* ggems_manager, char const* process_name)
+void set_process(GGEMSManager* p_ggems_manager, char const* process_name)
 {
-  ggems_manager->SetProcess(process_name);
+  p_ggems_manager->SetProcess(process_name);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_particle_cut(GGEMSManager* ggems_manager, char const* particle_name,
+void set_particle_cut(GGEMSManager* p_ggems_manager, char const* particle_name,
   double const distance)
 {
-  ggems_manager->SetParticleCut(particle_name, distance);
+  p_ggems_manager->SetParticleCut(particle_name, distance);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_geometry_tolerance(GGEMSManager* ggems_manager, double const distance)
+void set_geometry_tolerance(GGEMSManager* p_ggems_manager,
+  double const distance)
 {
-  ggems_manager->SetGeometryTolerance(distance);
+  p_ggems_manager->SetGeometryTolerance(distance);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_secondary_particle_and_level(GGEMSManager* ggems_manager,
+void set_secondary_particle_and_level(GGEMSManager* p_ggems_manager,
   char const* particle_name, uint32_t const level)
 {
-  ggems_manager->SetParticleSecondaryAndLevel(particle_name, level);
+  p_ggems_manager->SetParticleSecondaryAndLevel(particle_name, level);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_cross_section_table_number_of_bins(GGEMSManager* ggems_manager,
+void set_cross_section_table_number_of_bins(GGEMSManager* p_ggems_manager,
   uint32_t const number_of_bins)
 {
-  ggems_manager->SetCrossSectionTableNumberOfBins(number_of_bins);
+  p_ggems_manager->SetCrossSectionTableNumberOfBins(number_of_bins);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_cross_section_table_energy_min(GGEMSManager* ggems_manager,
+void set_cross_section_table_energy_min(GGEMSManager* p_ggems_manager,
   double const min_energy)
 {
-  ggems_manager->SetCrossSectionTableEnergyMin(min_energy);
+  p_ggems_manager->SetCrossSectionTableEnergyMin(min_energy);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_cross_section_table_energy_max(GGEMSManager* ggems_manager,
+void set_cross_section_table_energy_max(GGEMSManager* p_ggems_manager,
   double const max_energy)
 {
-  ggems_manager->SetCrossSectionTableEnergyMax(max_energy);
+  p_ggems_manager->SetCrossSectionTableEnergyMax(max_energy);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void set_source(GGEMSManager* p_ggems_manager,
+  GGEMSSourceDefinition* p_source_definition)
+{
+  if (p_ggems_manager && p_source_definition) std::cout << "toto" << std::endl;
+  //p_ggems_manager->SetSource(
+    //reinterpret_cast<GGEMSSourceDefinition*>(p_source_definition));
 }

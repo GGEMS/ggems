@@ -1,10 +1,12 @@
 import ctypes
 import sys
 
-# The user has to set the location of the libggems.so/dll/dylib library
-if sys.platform == "linux" or sys.platform == "darwin":
+if sys.platform == "linux":
     ggems_lib = ctypes.cdll.LoadLibrary(
         "/home/dbenoit/data/Build/GGEMS_OpenCL/libggems.so")
+elif sys.platform == "darwin":
+    ggems_lib = ctypes.cdll.LoadLibrary(
+        "/home/dbenoit/data/Build/GGEMS_OpenCL/libggems.dylib")
 elif sys.platform == "win32":
     ggems_lib = ctypes.cdll.LoadLibrary(
         "C:\\Users\\dbenoit\\Desktop\\ggems_opencl_build\\libggems.dll")
@@ -78,6 +80,21 @@ class Verbosity(object):
         ggems_lib.set_verbose(val)
 
 
+class XRaySource(object):
+    """XRay source class managing source for CT/CBCT simulation
+    """
+    def __init__(self):
+        ggems_lib.create_ggems_xray_source.restype = ctypes.c_void_p
+
+        ggems_lib.delete_ggems_xray_source.argtypes = [ctypes.c_void_p]
+        ggems_lib.delete_ggems_xray_source.restype = ctypes.c_void_p
+
+        self.obj = ggems_lib.create_ggems_xray_source()
+
+    def delete(self):
+        ggems_lib.delete_ggems_xray_source(self.obj)
+
+
 class GGEMSManager(object):
     """GGEMS class managing the simulation
     """
@@ -126,6 +143,9 @@ class GGEMSManager(object):
             ctypes.c_void_p, ctypes.c_double]
         ggems_lib.set_cross_section_table_energy_max.restype = ctypes.c_void_p
 
+        ggems_lib.set_source.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
+        ggems_lib.set_source.restype = ctypes.c_void_p
+
         self.obj = ggems_lib.get_instance_ggems_manager()
 
     def set_seed(self, seed):
@@ -162,3 +182,6 @@ class GGEMSManager(object):
 
     def set_cross_section_table_energy_max(self, max_energy):
         ggems_lib.set_cross_section_table_energy_max(self.obj, max_energy)
+
+    def set_source(self, source):
+        ggems_lib.set_source(self.obj, source)

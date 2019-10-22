@@ -118,6 +118,10 @@ void Particle::InitializeSeeds(void)
   // Release the pointer, mandatory step!!!
   opencl_manager.ReleaseDeviceBuffer(p_primary_particles_, p_primary_particles);
 
+  // Windows
+  //system("Color A1");
+  // Linux
+  //std::cout << "\033[1;31mToto\033[0m" << std::endl;
   // Auxiliary function test
   /*cl::CommandQueue* p_queue = opencl_manager.GetCommandQueue();
   std::string const kOpenCLKernelPath = OPENCL_KERNEL_PATH;

@@ -13,3 +13,6 @@
 - Faire un benchmark CT
 
 - Faire la visu au format VRML 2.0 ou x3D
+
+- Mettre des couleurs sur terminal : vert = OK, orange = Warning, red =
+exception ou erreur
