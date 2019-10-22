@@ -458,62 +458,63 @@ void OpenCLManager::ReleaseDeviceBuffer(cl::Buffer* const p_device_ptr,
 extern "C" GGEMS_EXPORT OpenCLManager* get_instance_opencl_manager(void);
 
 /*!
-  \fn void print_platform(OpenCLManager* opencl_manager)
-  \param opencl_manager - pointer on the singleton
+  \fn void print_platform(OpenCLManager* p_opencl_manager)
+  \param p_opencl_manager - pointer on the singleton
   \brief Print information about OpenCL platform
 */
-extern "C" GGEMS_EXPORT void print_platform(OpenCLManager* opencl_manager);
+extern "C" GGEMS_EXPORT void print_platform(OpenCLManager* p_opencl_manager);
 
 /*!
-  \fn void print_device(OpenCLManager* opencl_manager)
-  \param opencl_manager - pointer on the singleton
+  \fn void print_device(OpenCLManager* p_opencl_manager)
+  \param p_opencl_manager - pointer on the singleton
   \brief Print information about OpenCL device
 */
-extern "C" GGEMS_EXPORT void print_device(OpenCLManager* opencl_manager);
+extern "C" GGEMS_EXPORT void print_device(OpenCLManager* p_opencl_manager);
 
 /*!
-  \fn void print_build_options(OpenCLManager* opencl_manager)
-  \param opencl_manager - pointer on the singleton
+  \fn void print_build_options(OpenCLManager* p_opencl_manager)
+  \param p_opencl_manager - pointer on the singleton
   \brief Print information about OpenCL compilation option
 */
-extern "C" GGEMS_EXPORT void print_build_options(OpenCLManager* opencl_manager);
+extern "C" GGEMS_EXPORT void print_build_options(OpenCLManager* p_opencl_manager);
 
 /*!
-  \fn void print_context(OpenCLManager* opencl_manager)
-  \param opencl_manager - pointer on the singleton
+  \fn void print_context(OpenCLManager* p_opencl_manager)
+  \param p_opencl_manager - pointer on the singleton
   \brief Print information about OpenCL context
 */
-extern "C" GGEMS_EXPORT void print_context(OpenCLManager* opencl_manager);
+extern "C" GGEMS_EXPORT void print_context(OpenCLManager* p_opencl_manager);
 
 /*!
-  \fn void print_RAM(OpenCLManager* opencl_manager)
-  \param opencl_manager - pointer on the singleton
+  \fn void print_RAM(OpenCLManager* p_opencl_manager)
+  \param p_opencl_manager - pointer on the singleton
   \brief Print information about RAM in OpenCL context
 */
-extern "C" GGEMS_EXPORT void print_RAM(OpenCLManager* opencl_manager);
+extern "C" GGEMS_EXPORT void print_RAM(OpenCLManager* p_opencl_manager);
 
 /*!
-  \fn void print_command_queue(OpenCLManager* opencl_manager)
-  \param opencl_manager - pointer on the singleton
+  \fn void print_command_queue(OpenCLManager* p_opencl_manager)
+  \param p_opencl_manager - pointer on the singleton
   \brief Print information about command in OpenCL for each context
 */
-extern "C" GGEMS_EXPORT void print_command_queue(OpenCLManager* opencl_manager);
+extern "C" GGEMS_EXPORT void print_command_queue(
+  OpenCLManager* p_opencl_manager);
 
 /*!
-  \fn void set_context_index(OpenCLManager* opencl_manager, uint32_t const context_id)
-  \param opencl_manager - pointer on the singleton
+  \fn void set_context_index(OpenCLManager* p_opencl_manager, uint32_t const context_id)
+  \param p_opencl_manager - pointer on the singleton
   \param context_id - index of the context
   \brief Set the context index to activate
 */
-extern "C" GGEMS_EXPORT void set_context_index(OpenCLManager* opencl_manager,
+extern "C" GGEMS_EXPORT void set_context_index(OpenCLManager* p_opencl_manager,
   uint32_t const context_id);
 
 /*!
-  \fn void print_activated_context(OpenCLManager* opencl_manager)
-  \param opencl_manager - pointer on the singleton
+  \fn void print_activated_context(OpenCLManager* p_opencl_manager)
+  \param p_opencl_manager - pointer on the singleton
   \brief Print information about activated context
 */
 extern "C" GGEMS_EXPORT void print_activated_context(
-  OpenCLManager* opencl_manager);
+  OpenCLManager* p_opencl_manager);
 
 #endif // GUARD_GGEMS_GLOBAL_OPENCL_MANAGER_HH
