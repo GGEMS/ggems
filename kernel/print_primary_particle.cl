@@ -10,15 +10,15 @@ __kernel void print_primary_particle(
   // Check index
   if (kGlobalIndex >= p_primary_particle->number_of_primaries_) return;
 
-  //for (int i = 0; i < 100000; ++i) {
-  //  float uniform = prng_uniform(p_primary_particle, kGlobalIndex);
-  //}
+  for (int i = 0; i < 100000; ++i) {
+    float uniform = prng_uniform(p_primary_particle, kGlobalIndex);
+  }
 
   //for (int i = 0; i < 100000; ++i) {
   //  float gaussian = prng_gaussian(p_primary_particle, kGlobalIndex, 2.5f);
  // }
 
-  for (int i = 0; i < 100000; ++i) {
-    unsigned int poisson = prng_poisson(p_primary_particle, kGlobalIndex, 5);
-  }
+  //for (int i = 0; i < 100000; ++i) {
+  //  unsigned int poisson = prng_poisson(p_primary_particle, kGlobalIndex, 5);
+  //}
 }

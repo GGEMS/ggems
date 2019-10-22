@@ -22,7 +22,7 @@
 void Chrono::DisplayTime(DurationNano const& duration,
   std::string const& displayed_text)
 {
-  #if (_MSC_VER > 1800) || __linux__ || __APPLE__
+  #if __MINGW64__ || __clang__ || (_MSC_VER > 1800) || __GNUC__
   // Display the iteration time
   GGEMScout("Chrono", "DisplayTime", 0) << "Elapsed time (" << displayed_text
     << "): " << std::setfill( '0' ) << std::setw(2)

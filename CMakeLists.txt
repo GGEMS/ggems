@@ -61,16 +61,31 @@ CONFIGURE_FILE("${PROJECT_SOURCE_DIR}/cmake-config/ggems_configuration.hh.in"
 #-------------------------------------------------------------------------------
 # Compilation options Windows/Unix
 IF(WIN32)
-  # Delete some flags by default provided by CMAKE
-  STRING(REPLACE "/W3" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
-  STRING(REPLACE "/O2" "" CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
-  STRING(REPLACE "/D NDEBUG" "" CMAKE_CXX_FLAGS_RELEASE
-    ${CMAKE_CXX_FLAGS_RELEASE})
+  # Checking compiler for Windows
+  IF(COMPILER STREQUAL "GCC")
+    # Delete some flags by default provided by CMAKE
+    STRING(REPLACE "-O3" "" CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
+    STRING(REPLACE "-DNDEBUG" "" CMAKE_CXX_FLAGS_RELEASE
+      ${CMAKE_CXX_FLAGS_RELEASE})
 
-  # Visual studio flags
-  SET(CXX_FLAGS /MP /EHsc /nologo /W3 /std:c++17)
-  SET(CXX_FLAGS_RELEASE /Ox /Qpar ${CXX_FLAGS})
-  SET(CXX_FLAGS_DEBUG /Od /DEBUG /Zi ${CXX_FLAGS})
+    SET(CXX_FLAGS -std=c++17 -Wall -Wextra -Werror -pedantic -m64 -march=native
+      -Wconversion -Wfatal-errors -Weffc++ -Wold-style-cast
+      -pedantic-errors -ftree-vectorize -mtune=native -mavx2)
+    SET(CXX_FLAGS_RELEASE -Ofast ${CXX_FLAGS})
+    SET(CXX_FLAGS_DEBUG -O0 -g3 ${CXX_FLAGS})
+  ELSEIF(COMPILER STREQUAL "CL")
+    STRING(REPLACE "/W3" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
+    STRING(REPLACE "/O2" "" CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
+    STRING(REPLACE "/D NDEBUG" "" CMAKE_CXX_FLAGS_RELEASE
+      ${CMAKE_CXX_FLAGS_RELEASE})
+
+    SET(CXX_FLAGS /MP /EHsc /nologo /W3 /std:c++17)
+    SET(CXX_FLAGS_RELEASE /Ox /Qpar ${CXX_FLAGS})
+    SET(CXX_FLAGS_DEBUG /Od /DEBUG /Zi ${CXX_FLAGS})
+  ELSE()
+    MESSAGE(FATAL_ERROR "Only 'CLANG' and 'GCC' are available for Windows")
+  ENDIF()
+
   ADD_COMPILE_OPTIONS("$<$<CONFIG:RELEASE>:${CXX_FLAGS_RELEASE}>"
     "$<$<CONFIG:DEBUG>:${CXX_FLAGS_DEBUG}>")
 ELSE()
@@ -86,7 +101,7 @@ ELSE()
   STRING(REPLACE "-DNDEBUG" "" CMAKE_CXX_FLAGS_RELEASE
     ${CMAKE_CXX_FLAGS_RELEASE})
 
-  # Checking compiler
+  # Checking compiler for Unix
   IF(COMPILER STREQUAL "CLANG")
     SET(CXX_FLAGS -std=c++2a -Wall -mavx2 -Wextra -Werror -pedantic -m64
       -march=native -Wconversion -Wfatal-errors -Weffc++ -Wold-style-cast
@@ -96,13 +111,13 @@ ELSE()
   ELSEIF(COMPILER STREQUAL "GCC")
     SET(CXX_FLAGS -std=c++17 -Wall -Wextra -Werror -pedantic -m64 -march=native
       -Wconversion -Wfatal-errors -Weffc++ -Wold-style-cast
-      -pedantic-errors -flto -ftree-vectorize -fopt-info-vec-all
-      -mtune=native -mavx2 -ftree-vectorizer-verbose=5)
+      -pedantic-errors -ftree-vectorize -mtune=native -mavx2)
     SET(CXX_FLAGS_RELEASE -Ofast ${CXX_FLAGS})
     SET(CXX_FLAGS_DEBUG -O0 -g3 ${CXX_FLAGS})
   ELSE()
-    MESSAGE(FATAL_ERROR "Only 'CLANG' and 'GCC' are available")
+    MESSAGE(FATAL_ERROR "Only 'CLANG' and 'GCC' are available for Unix")
   ENDIF()
+
   ADD_COMPILE_OPTIONS("$<$<CONFIG:RELEASE>:${CXX_FLAGS_RELEASE}>"
     "$<$<CONFIG:DEBUG>:${CXX_FLAGS_DEBUG}>")
 ENDIF()
@@ -136,6 +151,7 @@ INCLUDE(GenerateExportHeader)
 # Create shared library
 ADD_LIBRARY(ggems SHARED ${source_ggems})
 TARGET_LINK_LIBRARIES(ggems ${OpenCL_LIBRARY})
+SET_TARGET_PROPERTIES(ggems PROPERTIES PREFIX "lib")
 
 #-------------------------------------------------------------------------------
 # DLL export for windows
