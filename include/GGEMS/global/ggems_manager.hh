@@ -13,7 +13,7 @@
   \date Monday September 30, 2019
 */
 
-#ifdef _WIN32
+#ifdef _MSC_VER
 #pragma warning(disable: 4251) // Deleting warning exporting STL members!!!
 #endif
 

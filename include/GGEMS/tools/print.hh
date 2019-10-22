@@ -22,7 +22,7 @@
 #define GGEMSendl (static_cast<std::ostream& (*)(std::ostream&)>(std::endl))
 #define GGEMScin (std::cin)
 
-#ifdef _WIN32
+#ifdef _MSC_VER
 #pragma warning(disable: 4251) // Deleting warning exporting STL members!!!
 #endif
 

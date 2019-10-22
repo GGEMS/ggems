@@ -9,7 +9,7 @@ ggems.Verbosity(1)
 opencl_manager = ggems.OpenCLManager()
 
 # Activate a context
-opencl_manager.set_context_index(4)
+opencl_manager.set_context_index(0)
 
 # Printing informations about OpenCL
 opencl_manager.print_info()

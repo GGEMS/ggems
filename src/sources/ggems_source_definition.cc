@@ -19,6 +19,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 GGEMSSourceDefinition::GGEMSSourceDefinition(void)
+: is_initialized_(false)
 {
   GGEMScout("GGEMSSourceDefinition", "GGEMSSourceDefinition", 1)
     << "Allocation of GGEMSSourceDefinition..." << GGEMSendl;
@@ -40,5 +41,5 @@ GGEMSSourceDefinition::~GGEMSSourceDefinition(void)
 
 bool GGEMSSourceDefinition::IsReady(void) const
 {
-  ;
+  return is_initialized_;
 }

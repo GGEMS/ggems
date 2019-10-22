@@ -21,7 +21,7 @@
 typedef std::chrono::time_point<std::chrono::system_clock> ChronoTime;
 typedef std::chrono::duration<int64_t,std::nano> DurationNano;
 
-#if ( _MSC_VER > 1800 ) || __linux__ || __APPLE__
+#if __MINGW64__ || __clang__ || (_MSC_VER > 1800) || __GNUC__
 typedef std::chrono::milliseconds Ms;
 typedef std::chrono::seconds Secs;
 typedef std::chrono::minutes Mins;

@@ -21,7 +21,7 @@
   \struct PrimaryParticles_t
   \brief Structure storing informations about primary particles for OpenCL
 */
-#if defined _MSC_VER
+#ifdef _MSC_VER
 #pragma pack(push, 1)
 #endif
 typedef struct PACKED PrimaryParticles_t
@@ -56,7 +56,7 @@ typedef struct PACKED PrimaryParticles_t
 
   
 } PrimaryParticles;
-#if defined _MSC_VER
+#ifdef _MSC_VER
 #pragma pack(pop)
 #endif
 
