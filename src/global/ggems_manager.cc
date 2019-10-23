@@ -27,6 +27,7 @@
 #include "GGEMS/global/ggems_constants.hh"
 #include "GGEMS/tools/memory.hh"
 #include "GGEMS/processes/particles.hh"
+#include "GGEMS/sources/ggems_source_manager.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -324,11 +325,12 @@ void GGEMSManager::CheckParameters()
   }
 
   // Checking if the source is defined by the user
- /* if (!p_source_definition_) {
+  GGEMSSourceManager& source_manager = GGEMSSourceManager::GetInstance();
+  if (!source_manager.IsReady()) {
     std::ostringstream oss(std::ostringstream::out);
     oss << "You have to define a source!!!";
     Misc::ThrowException("GGEMSManager", "CheckParameters", oss.str());
-  }*/
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -361,6 +363,10 @@ void GGEMSManager::Initialize()
   p_particle_->Initialize();
   GGEMScout("GGEMSManager", "Initialize", 0)
     << "Initialization of particles OK" << GGEMSendl;
+
+  // Initialization of the source
+  GGEMSSourceManager& source_manager = GGEMSSourceManager::GetInstance();
+  source_manager.Initialize();
 
   // Printing informations about the simulation
   PrintInfos();
@@ -531,16 +537,4 @@ void set_cross_section_table_energy_max(GGEMSManager* p_ggems_manager,
   double const max_energy)
 {
   p_ggems_manager->SetCrossSectionTableEnergyMax(max_energy);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void set_source(GGEMSManager* p_ggems_manager,
-  GGEMSSourceDefinition* p_source_definition)
-{
-  if (p_ggems_manager && p_source_definition) std::cout << "toto" << std::endl;
-  //p_ggems_manager->SetSource(
-    //reinterpret_cast<GGEMSSourceDefinition*>(p_source_definition));
 }

@@ -14,14 +14,21 @@
 */
 
 #include "GGEMS/global/ggems_export.hh"
-#include "GGEMS/sources/ggems_source_definition.hh"
+#include "GGEMS/sources/ggems_source_manager.hh"
 /*!
   \class XRaySource
   \brief This class define a XRay source in GGEMS useful for CT/CBCT simulation
 */
-class GGEMS_EXPORT XRaySource : public GGEMSSourceDefinition
+class GGEMS_EXPORT XRaySource : public GGEMSSourceManager
 {
   public:
+    /*!
+      \fn static void GetInstance()
+      \brief Create at first time the Singleton
+    */
+    static void GetInstance() {new XRaySource;};
+
+  protected:
     /*!
       \brief XRaySource constructor
     */
@@ -61,7 +68,7 @@ class GGEMS_EXPORT XRaySource : public GGEMSSourceDefinition
     */
     XRaySource& operator=(XRaySource const&& xray_source) = delete;
 
-  private:
+  public:
     /*!
       \fn void GetPrimaries(cl::Buffer* p_primary_particles)
       \param p_primary_particles - buffer of primary particles on OpenCL device
@@ -77,17 +84,15 @@ class GGEMS_EXPORT XRaySource : public GGEMSSourceDefinition
 };
 
 /*!
-  \fn XRaySource* create_ggems_xray_source(void)
+  \fn XRaySource create_ggems_xray_source(void)
   \brief Get the XRaySource pointer for python user.
 */
-extern "C" GGEMS_EXPORT GGEMSSourceDefinition* create_ggems_xray_source(void);
+extern "C" GGEMS_EXPORT void create_ggems_xray_source(void);
 
 /*!
-  \fn void delete_ggems_xray_source(XRaySource* p_xray_source)
-  \param p_xray_source - pointer on the xray source
-  \brief Delete XRay source from memory
+  \fn void delete_ggems_xray_source(void)
+  \brief Delete the XRaySource pointer for python user
 */
-extern "C" GGEMS_EXPORT void delete_ggems_xray_source(
-  XRaySource* p_xray_source);
+extern "C" GGEMS_EXPORT void delete_ggems_xray_source(void);
 
 #endif // End of GUARD_GGEMS_SOURCES_XRAYSOURCE_HH
