@@ -2,7 +2,7 @@
 #define GUARD_GGEMS_GLOBAL_GGEMSMANAGER_HH
 
 /*!
-  \file ggems_manager.hh
+  \file ggems_source_manager.hh
 
   \brief GGEMS class managing the complete simulation
 
@@ -374,14 +374,5 @@ extern "C" GGEMS_EXPORT void set_cross_section_table_energy_min(
 */
 extern "C" GGEMS_EXPORT void set_cross_section_table_energy_max(
   GGEMSManager* p_ggems_manager, double const max_energy);
-
-/*!
-  \fn void set_source(GGEMSManager* p_ggems_manager, GGEMSSourceDefinition* p_source_definition)
-  \param p_ggems_manager - pointer on the singleton
-  \param p_source_definition - pointer on the GGEMS source
-  \brief set the pointer on the GGEMS source
-*/
-extern "C" GGEMS_EXPORT void set_source(GGEMSManager* p_ggems_manager,
-  GGEMSSourceDefinition* p_source_definition);
 
 #endif // End of GUARD_GGEMS_GLOBAL_GGEMSMANAGER_HH

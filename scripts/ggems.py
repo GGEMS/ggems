@@ -143,9 +143,6 @@ class GGEMSManager(object):
             ctypes.c_void_p, ctypes.c_double]
         ggems_lib.set_cross_section_table_energy_max.restype = ctypes.c_void_p
 
-        ggems_lib.set_source.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
-        ggems_lib.set_source.restype = ctypes.c_void_p
-
         self.obj = ggems_lib.get_instance_ggems_manager()
 
     def set_seed(self, seed):
@@ -182,6 +179,3 @@ class GGEMSManager(object):
 
     def set_cross_section_table_energy_max(self, max_energy):
         ggems_lib.set_cross_section_table_energy_max(self.obj, max_energy)
-
-    def set_source(self, source):
-        ggems_lib.set_source(self.obj, source)
