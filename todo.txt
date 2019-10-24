@@ -12,7 +12,9 @@
 
 - Faire un benchmark CT
 
-- Faire la visu au format VRML 2.0 ou x3D
+- Faire la visu au format x3D et/ou Qt
 
 - Mettre des couleurs sur terminal : vert = OK, orange = Warning, red =
 exception ou erreur
+
+- Regarder Gitlab
