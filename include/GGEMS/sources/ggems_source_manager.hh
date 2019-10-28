@@ -93,10 +93,10 @@ class GGEMS_EXPORT GGEMSSourceManager
     inline GGEMSSourceManager* GetSource() const {return p_current_source_;};
 
     /*!
-      \fn static void DeleteInstance()
+      \fn static void DeleteInstance(void)
       \brief Delete properly the singleton
     */
-    static void DeleteInstance();
+    static void DeleteInstance(void);
 
   public: // Pure abstract method
     /*!
@@ -112,8 +112,15 @@ class GGEMS_EXPORT GGEMSSourceManager
     */
     virtual void Initialize(void) = 0;
 
+  private: // Pure abstract method
+    /*!
+      \fn void CheckParameters(void) const = 0
+      \brief Check mandatory parameters for a source
+    */
+    virtual void CheckParameters(void) const = 0;
+
   protected:
-    bool is_instanciated_; /*!< Boolean checking if the source is initialized */
+    bool is_initialized_; /*!< Boolean checking if the source is initialized */
 
   private: // Storing the source
     static GGEMSSourceManager* p_current_source_; /*!< Current source */

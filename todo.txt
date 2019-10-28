@@ -4,17 +4,30 @@
 
 - Random: faire le Dieharder test et Bigcrunch test
 
+- Améliorer le random Poisson et Gauss
+
 - Faire un installer pratique pour Windows, MAC et Linux
 
 - Faire la macro script en C++
 
 - Driver et version de OpenCL en windows ne s'affiche pas ???
 
+- Destructeur des singletons avec Visual Studio
+
 - Faire un benchmark CT
 
-- Faire la visu au format x3D et/ou Qt
+- Faire la visu avec Qt (Qt Quick) et activer l'option Qt à partir du CMAKE.
+Si possible, faire la visualization sur carte graphique avec OpenCL
+
+- Dessiner les particules :
+  * Photon -> vert
+  * Positron -> rouge
+  * Electron -> bleu
 
 - Mettre des couleurs sur terminal : vert = OK, orange = Warning, red =
 exception ou erreur
 
 - Regarder Gitlab
+
+- Source X complète en tenant compte du courant, volt, temperature, anode,
+filtre etc... (Si possible???)
