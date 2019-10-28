@@ -25,7 +25,7 @@ GGEMSSourceManager* GGEMSSourceManager::p_current_source_ = nullptr;
 ////////////////////////////////////////////////////////////////////////////////
 
 GGEMSSourceManager::GGEMSSourceManager()
-: is_instanciated_(true)
+: is_initialized_(false)
 {
   GGEMScout("GGEMSSourceManager", "GGEMSSourceManager", 1)
     << "Allocation of GGEMSSourceManager..." << GGEMSendl;
@@ -48,7 +48,7 @@ GGEMSSourceManager::~GGEMSSourceManager(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSSourceManager::DeleteInstance()
+void GGEMSSourceManager::DeleteInstance(void)
 {
   if (p_current_source_)
   {
@@ -63,5 +63,5 @@ void GGEMSSourceManager::DeleteInstance()
 
 bool GGEMSSourceManager::IsReady(void) const
 {
-  return is_instanciated_;
+  return is_initialized_;
 }

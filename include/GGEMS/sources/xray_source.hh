@@ -23,10 +23,10 @@ class GGEMS_EXPORT XRaySource : public GGEMSSourceManager
 {
   public:
     /*!
-      \fn static void GetInstance()
+      \fn static XRaySource* GetInstance()
       \brief Create at first time the Singleton
     */
-    static void GetInstance() {new XRaySource;};
+    static XRaySource* GetInstance() {return new XRaySource;};
 
   protected:
     /*!
@@ -81,18 +81,33 @@ class GGEMS_EXPORT XRaySource : public GGEMSSourceManager
       \brief Initialize a GGEMS source
     */
     void Initialize(void);
+
+  private:
+    /*!
+      \fn void CheckParameters(void) const
+      \brief Check mandatory parameters for a X-Ray source
+    */
+    void CheckParameters(void) const;
 };
 
 /*!
-  \fn XRaySource create_ggems_xray_source(void)
+  \fn XRaySource* create_ggems_xray_source(void)
   \brief Get the XRaySource pointer for python user.
 */
-extern "C" GGEMS_EXPORT void create_ggems_xray_source(void);
+extern "C" GGEMS_EXPORT XRaySource* create_ggems_xray_source(void);
 
 /*!
   \fn void delete_ggems_xray_source(void)
   \brief Delete the XRaySource pointer for python user
 */
 extern "C" GGEMS_EXPORT void delete_ggems_xray_source(void);
+
+/*!
+  \fn void initialize_xray_source(XRaySource* source_manager)
+  \param source_manager - pointer on the source
+  \brief Initialize the X-Ray source
+*/
+extern "C" GGEMS_EXPORT void initialize_xray_source(
+  XRaySource* p_source_manager);
 
 #endif // End of GUARD_GGEMS_SOURCES_XRAYSOURCE_HH

@@ -6,7 +6,7 @@ import ctypes
 ggems.Verbosity(1)
 
 # ------------------------------------------------------------------------------
-# STEP 1: Initializing OpenCL (C++ singleton)
+# STEP 1: Initializing OpenCL
 opencl_manager = ggems.OpenCLManager()
 
 # Activate a context
@@ -21,11 +21,12 @@ opencl_manager.print_command_queue()
 opencl_manager.print_activated_context()
 
 # ------------------------------------------------------------------------------
-# STEP 2: Initializing a source (C++ singleton)
+# STEP 2: Initializing a source
 xray_source = ggems.XRaySource()
+xray_source.initialize()
 
 # ------------------------------------------------------------------------------
-# STEP 3: GGEMS simulation parameters (C++ singleton)
+# STEP 3: GGEMS simulation parameters
 ggems_manager = ggems.GGEMSManager()
 ggems_manager.set_seed(777)
 ggems_manager.set_number_of_particles(861635)
@@ -46,7 +47,7 @@ ggems_manager.set_particle_cut(b"Photon", 0.5)  # 0.5 mm
 ggems_manager.set_geometry_tolerance(0.001)  # 1 um
 
 # Initializing the GGEMS simulation
-ggems_manager.initialize_simulation()
+ggems_manager.initialize()
 
 # Printing RAM status after all initializations
 opencl_manager.print_RAM()

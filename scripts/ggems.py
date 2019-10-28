@@ -89,10 +89,16 @@ class XRaySource(object):
         ggems_lib.delete_ggems_xray_source.argtypes = [ctypes.c_void_p]
         ggems_lib.delete_ggems_xray_source.restype = ctypes.c_void_p
 
+        ggems_lib.initialize_xray_source.argtypes = [ctypes.c_void_p]
+        ggems_lib.initialize_xray_source.restype = ctypes.c_void_p
+
         self.obj = ggems_lib.create_ggems_xray_source()
 
     def delete(self):
         ggems_lib.delete_ggems_xray_source(self.obj)
+
+    def initialize(self):
+        ggems_lib.initialize_xray_source(self.obj)
 
 
 class GGEMSManager(object):
@@ -104,8 +110,8 @@ class GGEMSManager(object):
         ggems_lib.set_seed.argtypes = [ctypes.c_void_p, ctypes.c_uint32]
         ggems_lib.set_seed.restype = ctypes.c_void_p
 
-        ggems_lib.initialize_simulation.argtypes = [ctypes.c_void_p]
-        ggems_lib.initialize_simulation.restype = ctypes.c_void_p
+        ggems_lib.initialize_ggems.argtypes = [ctypes.c_void_p]
+        ggems_lib.initialize_ggems.restype = ctypes.c_void_p
 
         ggems_lib.set_number_of_particles.argtypes = [
             ctypes.c_void_p, ctypes.c_uint64]
@@ -148,8 +154,8 @@ class GGEMSManager(object):
     def set_seed(self, seed):
         ggems_lib.set_seed(self.obj, seed)
 
-    def initialize_simulation(self):
-        ggems_lib.initialize_simulation(self.obj)
+    def initialize(self):
+        ggems_lib.initialize_ggems(self.obj)
 
     def set_number_of_particles(self, number_of_particles):
         ggems_lib.set_number_of_particles(self.obj, number_of_particles)

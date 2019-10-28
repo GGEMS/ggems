@@ -24,7 +24,7 @@
 #include "GGEMS/global/ggems_export.hh"
 
 class Particle;
-class GGEMSSourceDefinition;
+class GGEMSSourceManager;
 
 /*!
   \class GGEMSManager
@@ -209,14 +209,6 @@ class GGEMS_EXPORT GGEMSManager
     */
     void ComputeNumberOfParticlesInBatch();
 
-  public:
-    /*!
-      \fn void SetSource(GGEMSSourceDefinition* const p_source_definition)
-      \param p_source_definition - Pointer on the source definition
-      \brief Set the source for the GGEMS simulation
-    */
-    void SetSource(GGEMSSourceDefinition* p_source_definition);
-
   public: // Cross section part
     /*!
       \fn void SetCrossSectionTableNumberOfBins(uint32_t const& number_of_bins)
@@ -266,7 +258,7 @@ class GGEMS_EXPORT GGEMSManager
     Particle* p_particle_; /*!< Pointer on particle management */
 
   private: // Source management
-    GGEMSSourceDefinition* p_source_definition_; /*!< Pointer on source management */
+    GGEMSSourceManager& source_manager_;
 };
 
 /*!
@@ -285,12 +277,11 @@ extern "C" GGEMS_EXPORT void set_seed(GGEMSManager* ggems_manager,
   uint32_t const seed);
 
 /*!
-  \fn void initialize_simulation(GGEMSManager* p_ggems_manager)
+  \fn void initialize_ggems(GGEMSManager* p_ggems_manager)
   \param p_ggems_manager - pointer on the singleton
   \brief Initialize GGEMS simulation
 */
-extern "C" GGEMS_EXPORT void initialize_simulation(
-  GGEMSManager* p_ggems_manager);
+extern "C" GGEMS_EXPORT void initialize_ggems(GGEMSManager* p_ggems_manager);
 
 /*!
   \fn void set_number_of_particles(GGEMSManager* p_ggems_manager, uint64_t const number_of_particles)

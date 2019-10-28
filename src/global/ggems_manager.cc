@@ -49,7 +49,7 @@ GGEMSManager::GGEMSManager(void)
   cross_section_table_energy_min_(Limit::CROSS_SECTION_TABLE_ENERGY_MIN),
   cross_section_table_energy_max_(Limit::CROSS_SECTION_TABLE_ENERGY_MAX),
   p_particle_(nullptr),
-  p_source_definition_(nullptr)
+  source_manager_(GGEMSSourceManager::GetInstance())
 {
   GGEMScout("GGEMSManager", "GGEMSManager", 1)
     << "Allocation of GGEMS Manager singleton..." << GGEMSendl;
@@ -144,15 +144,6 @@ void GGEMSManager::SetNumberOfParticles(uint64_t const& number_of_particles)
 void GGEMSManager::SetNumberOfBatchs(uint32_t const& number_of_batchs)
 {
   v_number_of_particles_in_batch_.resize(number_of_batchs, 0);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void GGEMSManager::SetSource(GGEMSSourceDefinition* p_source_defintion)
-{
-  p_source_definition_ = p_source_defintion;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -325,10 +316,9 @@ void GGEMSManager::CheckParameters()
   }
 
   // Checking if the source is defined by the user
-  GGEMSSourceManager& source_manager = GGEMSSourceManager::GetInstance();
-  if (!source_manager.IsReady()) {
+  if (!source_manager_.IsReady()) {
     std::ostringstream oss(std::ostringstream::out);
-    oss << "You have to define a source!!!";
+    oss << "You have to define and initialize a source!!!";
     Misc::ThrowException("GGEMSManager", "CheckParameters", oss.str());
   }
 }
@@ -365,8 +355,7 @@ void GGEMSManager::Initialize()
     << "Initialization of particles OK" << GGEMSendl;
 
   // Initialization of the source
-  GGEMSSourceManager& source_manager = GGEMSSourceManager::GetInstance();
-  source_manager.Initialize();
+  source_manager_.Initialize();
 
   // Printing informations about the simulation
   PrintInfos();
@@ -445,7 +434,7 @@ void set_seed(GGEMSManager* p_ggems_manager, uint32_t const seed)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void initialize_simulation(GGEMSManager* p_ggems_manager)
+void initialize_ggems(GGEMSManager* p_ggems_manager)
 {
   p_ggems_manager->Initialize();
 }
