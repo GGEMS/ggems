@@ -29,5 +29,7 @@ exception ou erreur
 
 - Regarder Gitlab
 
+- Documentation avec Sphinx ?
+
 - Source X complète en tenant compte du courant, volt, temperature, anode,
 filtre etc... (Si possible???)
