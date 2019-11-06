@@ -23,6 +23,7 @@ opencl_manager.print_activated_context()
 # ------------------------------------------------------------------------------
 # STEP 2: Initializing a source
 xray_source = ggems.XRaySource()
+xray_source.set_position(0.0, 0.0, 0.0)
 xray_source.initialize()
 
 # ------------------------------------------------------------------------------

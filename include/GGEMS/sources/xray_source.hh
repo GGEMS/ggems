@@ -68,7 +68,7 @@ class GGEMS_EXPORT XRaySource : public GGEMSSourceManager
     */
     XRaySource& operator=(XRaySource const&& xray_source) = delete;
 
-  public:
+  public: // Pure abstract method from GGEMSSourceManager
     /*!
       \fn void GetPrimaries(cl::Buffer* p_primary_particles)
       \param p_primary_particles - buffer of primary particles on OpenCL device
@@ -82,12 +82,26 @@ class GGEMS_EXPORT XRaySource : public GGEMSSourceManager
     */
     void Initialize(void);
 
+  public:
+    /*!
+      \fn void SetPosition(float const& pos_x, float const& pos_y, float const& pos_z)
+      \param pos_x - Position of the source in X
+      \param pos_y - Position of the source in Y
+      \param pos_z - Position of the source in Z
+      \brief Set the position of the source in the global coordinates
+    */
+    void SetPosition(float const& pos_x, float const& pos_y,
+      float const& pos_z);
+
   private:
     /*!
       \fn void CheckParameters(void) const
       \brief Check mandatory parameters for a X-Ray source
     */
     void CheckParameters(void) const;
+
+  private:
+    cl_float3 pos_; /*!< Position of the source */
 };
 
 /*!
@@ -109,5 +123,17 @@ extern "C" GGEMS_EXPORT void delete_ggems_xray_source(void);
 */
 extern "C" GGEMS_EXPORT void initialize_xray_source(
   XRaySource* p_source_manager);
+
+/*!
+  \fn void set_position_xray_source(XRaySource* p_source_manager, float const pos_x, float const pos_y, float const pos_z)
+  \param source_manager - pointer on the source
+  \param pos_x - Position of the source in X
+  \param pos_y - Position of the source in Y
+  \param pos_z - Position of the source in Z
+  \brief Set the position of the source in the global coordinates
+*/
+extern "C" GGEMS_EXPORT void set_position_xray_source(
+  XRaySource* p_source_manager, float const pos_x, float const pos_y,
+  float const pos_z);
 
 #endif // End of GUARD_GGEMS_SOURCES_XRAYSOURCE_HH

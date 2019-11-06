@@ -48,6 +48,6 @@ typedef struct __attribute__((aligned (1))) PrimaryParticles_t
   unsigned char p_status_[MAXIMUM_PARTICLES];
   unsigned char p_level_[MAXIMUM_PARTICLES];
   unsigned char p_pname_[MAXIMUM_PARTICLES];
-}PrimaryParticles;
+} PrimaryParticles;
 
 #endif // End of GUARD_GGEMS_AUXILIARYFUNCTIONS_PRIMARYPARTICLES_HH
