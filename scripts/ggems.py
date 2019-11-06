@@ -92,6 +92,10 @@ class XRaySource(object):
         ggems_lib.initialize_xray_source.argtypes = [ctypes.c_void_p]
         ggems_lib.initialize_xray_source.restype = ctypes.c_void_p
 
+        ggems_lib.set_position_xray_source.argtypes = [
+            ctypes.c_void_p, ctypes.c_float, ctypes.c_float, ctypes.c_float]
+        ggems_lib.set_position_xray_source.restype = ctypes.c_void_p
+
         self.obj = ggems_lib.create_ggems_xray_source()
 
     def delete(self):
@@ -99,6 +103,9 @@ class XRaySource(object):
 
     def initialize(self):
         ggems_lib.initialize_xray_source(self.obj)
+
+    def set_position(self, x, y, z):
+        ggems_lib.set_position_xray_source(self.obj, x, y, z)
 
 
 class GGEMSManager(object):
