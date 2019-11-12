@@ -98,6 +98,24 @@ class GGEMS_EXPORT GGEMSSourceManager
     */
     static void DeleteInstance(void);
 
+  public:
+    /*!
+      \fn void SetPosition(float const& pos_x, float const& pos_y, float const& pos_z)
+      \param pos_x - Position of the source in X
+      \param pos_y - Position of the source in Y
+      \param pos_z - Position of the source in Z
+      \brief Set the position of the source in the global coordinates
+    */
+    virtual void SetPosition(float const& pos_x, float const& pos_y,
+      float const& pos_z);
+
+    /*!
+      \fn void SetParticleType(char const* particle_type)
+      \param particle_type - Type of the particle
+      \brief Set the type of the particle: electron, positron or photon
+    */
+    virtual void SetParticleType(char const* particle_type);
+
   public: // Pure abstract method
     /*!
       \fn void GetPrimaries(cl::Buffer* p_primary_particles) = 0
@@ -112,6 +130,12 @@ class GGEMS_EXPORT GGEMSSourceManager
     */
     virtual void Initialize(void) = 0;
 
+    /*!
+      \fn void PrintInfos(void) const = 0
+      \brief Printing infos about the source
+    */
+    virtual void PrintInfos(void) const = 0;
+
   private: // Pure abstract method
     /*!
       \fn void CheckParameters(void) const = 0
@@ -121,6 +145,8 @@ class GGEMS_EXPORT GGEMSSourceManager
 
   protected:
     bool is_initialized_; /*!< Boolean checking if the source is initialized */
+    cl_float3 pos_; /*!< Position of the source */
+    int particle_type_; /*!< Type of particle: photon, electron or positron */
 
   private: // Storing the source
     static GGEMSSourceManager* p_current_source_; /*!< Current source */

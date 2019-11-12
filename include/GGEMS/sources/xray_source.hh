@@ -82,6 +82,12 @@ class GGEMS_EXPORT XRaySource : public GGEMSSourceManager
     */
     void Initialize(void);
 
+    /*!
+      \fn void PrintInfos(void)
+      \brief Printing infos about the source
+    */
+    void PrintInfos(void) const;
+
   public:
     /*!
       \fn void SetPosition(float const& pos_x, float const& pos_y, float const& pos_z)
@@ -93,6 +99,15 @@ class GGEMS_EXPORT XRaySource : public GGEMSSourceManager
     void SetPosition(float const& pos_x, float const& pos_y,
       float const& pos_z);
 
+    /*!
+      \fn void SetParticleType(char const* particle_type)
+      \param particle_type - Type of the particle
+      \brief Set the type of the particle: electron, positron or photon
+    */
+    void SetParticleType(char const* particle_type);
+
+  public:
+
   private:
     /*!
       \fn void CheckParameters(void) const
@@ -101,7 +116,6 @@ class GGEMS_EXPORT XRaySource : public GGEMSSourceManager
     void CheckParameters(void) const;
 
   private:
-    cl_float3 pos_; /*!< Position of the source */
 };
 
 /*!
@@ -135,5 +149,22 @@ extern "C" GGEMS_EXPORT void initialize_xray_source(
 extern "C" GGEMS_EXPORT void set_position_xray_source(
   XRaySource* p_source_manager, float const pos_x, float const pos_y,
   float const pos_z);
+
+/*!
+  \fn void print_infos_xray_source(XRaySource* p_source_manager)
+  \param source_manager - pointer on the source
+  \brief Printing informations about the XRaySource
+*/
+extern "C" GGEMS_EXPORT void print_infos_xray_source(XRaySource*
+  p_source_manager);
+
+/*!
+  \fn void SetParticleType_xray_source(XRaySource* p_source_manager, char const* particle_name)
+  \param source_manager - pointer on the source
+  \param particle_name - name/type of the particle: photon or electron
+  \brief Set the type of the particle
+*/
+extern "C" GGEMS_EXPORT void set_particle_type_xray_source(XRaySource*
+  p_source_manager, char const* particle_name);
 
 #endif // End of GUARD_GGEMS_SOURCES_XRAYSOURCE_HH

@@ -11,8 +11,12 @@
   \date Tuesday October 15, 2019
 */
 
+#include <algorithm>
+
 #include "GGEMS/sources/ggems_source_manager.hh"
 #include "GGEMS/tools/print.hh"
+#include "GGEMS/global/ggems_constants.hh"
+#include "GGEMS/tools/functions.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -25,10 +29,16 @@ GGEMSSourceManager* GGEMSSourceManager::p_current_source_ = nullptr;
 ////////////////////////////////////////////////////////////////////////////////
 
 GGEMSSourceManager::GGEMSSourceManager()
-: is_initialized_(false)
+: is_initialized_(false),
+  particle_type_(-1)
 {
   GGEMScout("GGEMSSourceManager", "GGEMSSourceManager", 1)
     << "Allocation of GGEMSSourceManager..." << GGEMSendl;
+
+  // Initialization of parameters
+  pos_.s[0] = 0.0f;
+  pos_.s[1] = 0.0f;
+  pos_.s[2] = 0.0f;
 
   // Storing the pointer
   p_current_source_ = this;
@@ -64,4 +74,42 @@ void GGEMSSourceManager::DeleteInstance(void)
 bool GGEMSSourceManager::IsReady(void) const
 {
   return is_initialized_;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSSourceManager::SetPosition(float const& pos_x, float const& pos_y,
+  float const& pos_z)
+{
+  pos_.s[0] = pos_x;
+  pos_.s[1] = pos_y;
+  pos_.s[2] = pos_z;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSSourceManager::SetParticleType(char const* particle_type)
+{
+  // Convert the particle type in string
+  std::string particle_type_str(particle_type);
+
+  // Transform the string to lower character
+  std::transform(particle_type_str.begin(), particle_type_str.end(),
+    particle_type_str.begin(), ::tolower);
+
+  if (!particle_type_str.compare("photon")) {
+    particle_type_ = ParticleName::PHOTON;
+  }
+  else if (!particle_type_str.compare("electron")) {
+    particle_type_ = ParticleName::ELECTRON;
+  }
+  else
+  {
+    Misc::ThrowException("GGEMSSourceManager", "SetParticleType",
+      "Unknown particle!!!");
+  }
 }
