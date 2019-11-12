@@ -13,7 +13,7 @@ opencl_manager = ggems.OpenCLManager()
 opencl_manager.set_context_index(4)
 
 # Printing informations about OpenCL
-opencl_manager.print_info()
+opencl_manager.print_infos()
 opencl_manager.print_device()
 opencl_manager.print_build_options()
 opencl_manager.print_context()
@@ -24,6 +24,8 @@ opencl_manager.print_activated_context()
 # STEP 2: Initializing a source
 xray_source = ggems.XRaySource()
 xray_source.set_position(0.0, 0.0, 0.0)
+xray_source.set_particle_type(b"photon")
+xray_source.print_infos()
 xray_source.initialize()
 
 # ------------------------------------------------------------------------------

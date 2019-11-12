@@ -12,6 +12,7 @@
 
 #include "GGEMS/sources/xray_source.hh"
 #include "GGEMS/tools/print.hh"
+#include "GGEMS/global/ggems_constants.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -22,11 +23,6 @@ XRaySource::XRaySource(void)
 {
   GGEMScout("XRaySource", "XRaySource", 1)
     << "Allocation of XRaySource..." << GGEMSendl;
-
-  // Initialization of parameters
-  pos_.s[0] = 0.0f;
-  pos_.s[1] = 0.0f;
-  pos_.s[2] = 0.0f;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -46,6 +42,27 @@ XRaySource::~XRaySource(void)
 void XRaySource::GetPrimaries(cl::Buffer* p_primary_particles)
 {
   if (p_primary_particles) std::cout << "Test" << std::endl;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void XRaySource::PrintInfos(void) const
+{
+  GGEMScout("XRaySource", "PrintInfos", 0) << GGEMSendl;
+  GGEMScout("XRaySource", "PrintInfos", 0) << "XRaySource Infos:" << GGEMSendl;
+  GGEMScout("XRaySource", "PrintInfos", 0) << "-----------------" << GGEMSendl;
+  GGEMScout("XRaySource", "PrintInfos", 0) << "*Particle type: ";
+  if (particle_type_ == ParticleName::PHOTON) {
+    std::cout << "Photon" << std::endl;
+  }
+  if (particle_type_ == ParticleName::ELECTRON) {
+    std::cout << "Electron" << std::endl;
+  }
+  GGEMScout("XRaySource", "PrintInfos", 0) << "*Position: " << "(" << pos_.s[0]
+    << ", " << pos_.s[1] << ", " << pos_.s[2] << " ) mm3" << GGEMSendl;
+  GGEMScout("XRaySource", "PrintInfos", 0) << GGEMSendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -78,9 +95,16 @@ void XRaySource::Initialize(void)
 void XRaySource::SetPosition(float const& pos_x, float const& pos_y,
   float const& pos_z)
 {
-  pos_.s[0] = pos_x;
-  pos_.s[1] = pos_y;
-  pos_.s[2] = pos_z;
+  GGEMSSourceManager::SetPosition(pos_x, pos_y, pos_z);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void XRaySource::SetParticleType(char const* particle_type)
+{
+  GGEMSSourceManager::SetParticleType(particle_type);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -118,4 +142,23 @@ void set_position_xray_source(XRaySource* p_source_manager, float const pos_x,
   float const pos_y, float const pos_z)
 {
   p_source_manager->SetPosition(pos_x, pos_y, pos_z);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void print_infos_xray_source(XRaySource* p_source_manager)
+{
+  p_source_manager->PrintInfos();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void set_particle_type_xray_source(XRaySource* p_source_manager,
+  char const* particle_name)
+{
+  p_source_manager->SetParticleType(particle_name);
 }

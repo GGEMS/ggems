@@ -45,7 +45,7 @@ class OpenCLManager(object):
 
         self.obj = ggems_lib.get_instance_opencl_manager()
 
-    def print_info(self):
+    def print_infos(self):
         ggems_lib.print_platform(self.obj)
 
     def print_device(self):
@@ -96,6 +96,13 @@ class XRaySource(object):
             ctypes.c_void_p, ctypes.c_float, ctypes.c_float, ctypes.c_float]
         ggems_lib.set_position_xray_source.restype = ctypes.c_void_p
 
+        ggems_lib.print_infos_xray_source.argtypes = [ctypes.c_void_p]
+        ggems_lib.print_infos_xray_source.restype = ctypes.c_void_p
+
+        ggems_lib.set_particle_type_xray_source.argtypes = [
+            ctypes.c_void_p, ctypes.c_char_p]
+        ggems_lib.set_particle_type_xray_source.restype = ctypes.c_void_p
+
         self.obj = ggems_lib.create_ggems_xray_source()
 
     def delete(self):
@@ -106,6 +113,12 @@ class XRaySource(object):
 
     def set_position(self, x, y, z):
         ggems_lib.set_position_xray_source(self.obj, x, y, z)
+
+    def print_infos(self):
+        ggems_lib.print_infos_xray_source(self.obj)
+
+    def set_particle_type(self, particle_type):
+        ggems_lib.set_particle_type_xray_source(self.obj, particle_type)
 
 
 class GGEMSManager(object):
