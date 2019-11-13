@@ -23,8 +23,10 @@ opencl_manager.print_activated_context()
 # ------------------------------------------------------------------------------
 # STEP 2: Initializing a source
 xray_source = ggems.XRaySource()
-xray_source.set_position(0.0, 0.0, 0.0)
+xray_source.set_position(-1000.0, 10.0, 50.0)  # in mm
 xray_source.set_particle_type(b"photon")
+xray_source.set_beam_aperture(10.0)  # in degree
+xray_source.set_focal_spot_size(0.6, 1.2, 0.0)  # in mm
 xray_source.print_infos()
 xray_source.initialize()
 
@@ -44,10 +46,10 @@ ggems_manager.set_cross_section_table_energy_max(250.0)  # in MeV
 ggems_manager.set_process(b"Compton")
 ggems_manager.set_process(b"PhotoElectric")
 ggems_manager.set_process(b"Rayleigh")
-ggems_manager.set_particle_cut(b"Photon", 0.5)  # 0.5 mm
+ggems_manager.set_particle_cut(b"Photon", 0.5)  # in mm
 
 # Set the geometry tolerance in the range [1mm;1nm]
-ggems_manager.set_geometry_tolerance(0.001)  # 1 um
+ggems_manager.set_geometry_tolerance(0.001)  # in mm
 
 # Initializing the GGEMS simulation
 ggems_manager.initialize()

@@ -103,6 +103,21 @@ class XRaySource(object):
             ctypes.c_void_p, ctypes.c_char_p]
         ggems_lib.set_particle_type_xray_source.restype = ctypes.c_void_p
 
+        ggems_lib.set_beam_aperture_xray_source.argtypes = [
+            ctypes.c_void_p, ctypes.c_float]
+        ggems_lib.set_beam_aperture_xray_source.restype = ctypes.c_void_p
+
+        ggems_lib.set_focal_spot_size_xray_source.argtypes = [
+            ctypes.c_void_p, ctypes.c_float, ctypes.c_float, ctypes.c_float]
+        ggems_lib.set_focal_spot_size_xray_source.restype = ctypes.c_void_p
+
+        ggems_lib.set_local_axis_xray_source.argtypes = [
+            ctypes.c_void_p,
+            ctypes.c_float, ctypes.c_float, ctypes.c_float,
+            ctypes.c_float, ctypes.c_float, ctypes.c_float,
+            ctypes.c_float, ctypes.c_float, ctypes.c_float]
+        ggems_lib.set_focal_spot_size_xray_source.restype = ctypes.c_void_p
+
         self.obj = ggems_lib.create_ggems_xray_source()
 
     def delete(self):
@@ -119,6 +134,17 @@ class XRaySource(object):
 
     def set_particle_type(self, particle_type):
         ggems_lib.set_particle_type_xray_source(self.obj, particle_type)
+
+    def set_beam_aperture(self, beam_aperture):
+        ggems_lib.set_beam_aperture_xray_source(self.obj, beam_aperture)
+
+    def set_focal_spot_size(self, width, height, depth):
+        ggems_lib.set_focal_spot_size_xray_source(
+            self.obj, width, height, depth)
+
+    def set_local_axis(self, m00, m01, m02, m10, m11, m12, m20, m21, m22):
+        ggems_lib.set_local_axis_xray_source(
+            self.obj, m00, m01, m02, m10, m11, m12, m20, m21, m22)
 
 
 class GGEMSManager(object):

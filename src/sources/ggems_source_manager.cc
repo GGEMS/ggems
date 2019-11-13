@@ -35,10 +35,17 @@ GGEMSSourceManager::GGEMSSourceManager()
   GGEMScout("GGEMSSourceManager", "GGEMSSourceManager", 1)
     << "Allocation of GGEMSSourceManager..." << GGEMSendl;
 
-  // Initialization of parameters
-  pos_.s[0] = 0.0f;
-  pos_.s[1] = 0.0f;
-  pos_.s[2] = 0.0f;
+  // Initialization of source position
+  source_position_ = Matrix::MakeFloatXYZZeros();
+
+  // Initialization of the source orbiting angles
+  source_orbiting_angle_ = Matrix::MakeFloatXYZZeros();
+
+  // Initialization of local axis
+  local_axis_ = Matrix::MakeFloat3x3Zeros();
+
+  // Initialization of matrix transformation
+  transformation_matrix_ = Matrix::MakeFloat4x4Zeros();
 
   // Storing the pointer
   p_current_source_ = this;
@@ -83,9 +90,7 @@ bool GGEMSSourceManager::IsReady(void) const
 void GGEMSSourceManager::SetPosition(float const& pos_x, float const& pos_y,
   float const& pos_z)
 {
-  pos_.s[0] = pos_x;
-  pos_.s[1] = pos_y;
-  pos_.s[2] = pos_z;
+  source_position_ = Matrix::MakeFloatXYZ(pos_x, pos_y, pos_z);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -112,4 +117,20 @@ void GGEMSSourceManager::SetParticleType(char const* particle_type)
     Misc::ThrowException("GGEMSSourceManager", "SetParticleType",
       "Unknown particle!!!");
   }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSSourceManager::SetLocalAxis(
+  float const& m00, float const& m01, float const& m02,
+  float const& m10, float const& m11, float const& m12,
+  float const& m20, float const& m21, float const& m22)
+{
+  local_axis_ = Matrix::MakeFloat3x3(
+    m00, m01, m02,
+    m10, m11, m12,
+    m20, m21, m22
+  );
 }
