@@ -19,10 +19,21 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 XRaySource::XRaySource(void)
-: GGEMSSourceManager()
+: GGEMSSourceManager(),
+  beam_aperture_(0.0f)
 {
   GGEMScout("XRaySource", "XRaySource", 1)
     << "Allocation of XRaySource..." << GGEMSendl;
+
+  // Initialization of parameters
+  focal_spot_size_ = Matrix::MakeFloatXYZZeros();
+
+  // Initialization of local axis
+  local_axis_ = Matrix::MakeFloat3x3(
+    0.0f, 0.0f, -1.0f,
+    0.0f, 1.0f, 0.0f,
+    1.0f, 0.0f, 0.0f
+  );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -60,8 +71,23 @@ void XRaySource::PrintInfos(void) const
   if (particle_type_ == ParticleName::ELECTRON) {
     std::cout << "Electron" << std::endl;
   }
-  GGEMScout("XRaySource", "PrintInfos", 0) << "*Position: " << "(" << pos_.s[0]
-    << ", " << pos_.s[1] << ", " << pos_.s[2] << " ) mm3" << GGEMSendl;
+  GGEMScout("XRaySource", "PrintInfos", 0) << "*Position: " << "("
+    << source_position_.s[0] << ", " << source_position_.s[1] << ", "
+    << source_position_.s[2] << " ) mm3" << GGEMSendl;
+  GGEMScout("XRaySource", "PrintInfos", 0) << "*Beam aperture: "
+    << beam_aperture_ << " degrees" << GGEMSendl;
+  GGEMScout("XRaySource", "PrintInfos", 0) << "*Focal spot size: " << "("
+    << focal_spot_size_.s[0] << ", " << focal_spot_size_.s[1] << ", "
+    << focal_spot_size_.s[2] << " ) mm3" << GGEMSendl;
+  GGEMScout("XRaySource", "PrintInfos", 0) << "*Local axis: " << GGEMSendl;
+  GGEMScout("XRaySource", "PrintInfos", 0) << "[" << GGEMSendl;
+  GGEMScout("XRaySource", "PrintInfos", 0) << "    " << local_axis_.m00_ << " "
+    << local_axis_.m01_ << " " << local_axis_.m02_ << GGEMSendl;
+  GGEMScout("XRaySource", "PrintInfos", 0) << "    " << local_axis_.m10_ << " "
+    << local_axis_.m11_ << " " << local_axis_.m12_ << GGEMSendl;
+  GGEMScout("XRaySource", "PrintInfos", 0) << "    " << local_axis_.m20_ << " "
+    << local_axis_.m21_ << " " << local_axis_.m22_ << GGEMSendl;
+  GGEMScout("XRaySource", "PrintInfos", 0) << "]" << GGEMSendl;
   GGEMScout("XRaySource", "PrintInfos", 0) << GGEMSendl;
 }
 
@@ -92,6 +118,25 @@ void XRaySource::Initialize(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+void XRaySource::SetBeamAperture(float const& beam_aperture)
+{
+  beam_aperture_ = beam_aperture;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void XRaySource::SetFocalSpotSize(float const& width, float const& height,
+  float const& depth)
+{
+  focal_spot_size_ = Matrix::MakeFloatXYZ(width, height, depth);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 void XRaySource::SetPosition(float const& pos_x, float const& pos_y,
   float const& pos_z)
 {
@@ -105,6 +150,22 @@ void XRaySource::SetPosition(float const& pos_x, float const& pos_y,
 void XRaySource::SetParticleType(char const* particle_type)
 {
   GGEMSSourceManager::SetParticleType(particle_type);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void XRaySource::SetLocalAxis(
+  float const& m00, float const& m01, float const& m02,
+  float const& m10, float const& m11, float const& m12,
+  float const& m20, float const& m21, float const& m22)
+{
+  GGEMSSourceManager::SetLocalAxis(
+    m00, m01, m02,
+    m10, m11, m12,
+    m20, m21, m22
+  );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -161,4 +222,40 @@ void set_particle_type_xray_source(XRaySource* p_source_manager,
   char const* particle_name)
 {
   p_source_manager->SetParticleType(particle_name);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void set_beam_aperture_xray_source(XRaySource* p_source_manager,
+  float const beam_aperture)
+{
+  p_source_manager->SetBeamAperture(beam_aperture);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void set_focal_spot_size_xray_source(XRaySource* p_source_manager,
+  float const width, float const height, float const depth)
+{
+  p_source_manager->SetFocalSpotSize(width, height, depth);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void set_local_axis_xray_source(XRaySource* p_source_manager,
+  float const m00, float const m01, float const m02,
+  float const m10, float const m11, float const m12,
+  float const m20, float const m21, float const m22)
+{
+  p_source_manager->SetLocalAxis(
+    m00, m01, m02,
+    m10, m11, m12,
+    m20, m21, m22
+  );
 }

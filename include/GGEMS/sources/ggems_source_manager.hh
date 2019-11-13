@@ -16,6 +16,7 @@
 
 #include "GGEMS/global/ggems_export.hh"
 #include "GGEMS/global/opencl_manager.hh"
+#include "GGEMS/tools/matrix.hh"
 
 /*!
   \class GGEMSSourceManager
@@ -116,6 +117,24 @@ class GGEMS_EXPORT GGEMSSourceManager
     */
     virtual void SetParticleType(char const* particle_type);
 
+    /*!
+      \fn void SetLocalAxis(float const& m00, float const& m01, float const& m02, float const& m10, float const& m11, float const& m12, float const& m20, float const& m21, float const& m22)
+      \param m00 - Element 0,0 in the matrix 3x3 for local axis
+      \param m01 - Element 0,1 in the matrix 3x3 for local axis
+      \param m02 - Element 0,2 in the matrix 3x3 for local axis
+      \param m10 - Element 1,0 in the matrix 3x3 for local axis
+      \param m11 - Element 1,1 in the matrix 3x3 for local axis
+      \param m12 - Element 1,2 in the matrix 3x3 for local axis
+      \param m20 - Element 2,0 in the matrix 3x3 for local axis
+      \param m21 - Element 2,1 in the matrix 3x3 for local axis
+      \param m22 - Element 2,2 in the matrix 3x3 for local axis
+      \brief Set the local axis element describing the source compared to global axis (center of world)
+    */
+    virtual void SetLocalAxis(
+      float const& m00, float const& m01, float const& m02,
+      float const& m10, float const& m11, float const& m12,
+      float const& m20, float const& m21, float const& m22);
+
   public: // Pure abstract method
     /*!
       \fn void GetPrimaries(cl::Buffer* p_primary_particles) = 0
@@ -145,8 +164,11 @@ class GGEMS_EXPORT GGEMSSourceManager
 
   protected:
     bool is_initialized_; /*!< Boolean checking if the source is initialized */
-    cl_float3 pos_; /*!< Position of the source */
+    cl_float3 source_position_; /*!< Position of the source */
     int particle_type_; /*!< Type of particle: photon, electron or positron */
+    cl_float3 source_orbiting_angle_; /*!< Orbiting angle around the center of the world */
+    Matrix::float3x3 local_axis_; /*!< 3x3 matrix for local axis */
+    Matrix::float4x4 transformation_matrix_; /*!< Matrix transformation for local to global axis or global to local axis */
 
   private: // Storing the source
     static GGEMSSourceManager* p_current_source_; /*!< Current source */
