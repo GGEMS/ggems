@@ -90,42 +90,6 @@ class GGEMS_EXPORT XRaySource : public GGEMSSourceManager
 
   public:
     /*!
-      \fn void SetPosition(float const& pos_x, float const& pos_y, float const& pos_z)
-      \param pos_x - Position of the source in X
-      \param pos_y - Position of the source in Y
-      \param pos_z - Position of the source in Z
-      \brief Set the position of the source in the global coordinates
-    */
-    void SetPosition(float const& pos_x, float const& pos_y,
-      float const& pos_z);
-
-    /*!
-      \fn void SetParticleType(char const* particle_type)
-      \param particle_type - Type of the particle
-      \brief Set the type of the particle: electron, positron or photon
-    */
-    void SetParticleType(char const* particle_type);
-
-    /*!
-      \fn void SetLocalAxis(float const& m00, float const& m01, float const& m02, float const& m10, float const& m11, float const& m12, float const& m20, float const& m21, float const& m22)
-      \param m00 - Element 0,0 in the matrix 3x3 for local axis
-      \param m01 - Element 0,1 in the matrix 3x3 for local axis
-      \param m02 - Element 0,2 in the matrix 3x3 for local axis
-      \param m10 - Element 1,0 in the matrix 3x3 for local axis
-      \param m11 - Element 1,1 in the matrix 3x3 for local axis
-      \param m12 - Element 1,2 in the matrix 3x3 for local axis
-      \param m20 - Element 2,0 in the matrix 3x3 for local axis
-      \param m21 - Element 2,1 in the matrix 3x3 for local axis
-      \param m22 - Element 2,2 in the matrix 3x3 for local axis
-      \brief Set the local axis element describing the source compared to global axis (center of world)
-    */
-    void SetLocalAxis(
-      float const& m00, float const& m01, float const& m02,
-      float const& m10, float const& m11, float const& m12,
-      float const& m20, float const& m21, float const& m22);
-
-  public:
-    /*!
       \fn void SetBeamAperture(float const& beam_aperture)
       \param beam_aperture - beam aperture of the x-ray source
       \brief Set the beam aperture of the source
@@ -240,5 +204,16 @@ extern "C" GGEMS_EXPORT void set_local_axis_xray_source(
   float const m00, float const m01, float const m02,
   float const m10, float const m11, float const m12,
   float const m20, float const m21, float const m22);
+
+/*!
+  \fn void set_rotation_xray_source(XRaySource* p_source_manager, float const rx, float const ry, float const rz)
+  \param p_source_manager - pointer on the source
+  \param rx - Rotation around X along global axis
+  \param ry - Rotation around Y along global axis
+  \param rz - Rotation around Z along global axis
+  \brief Set the rotation of the source around global axis
+*/
+extern "C" GGEMS_EXPORT void set_rotation_xray_source(
+  XRaySource* p_source_manager, float const rx, float const ry, float const rz);
 
 #endif // End of GUARD_GGEMS_SOURCES_XRAYSOURCE_HH

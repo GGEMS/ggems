@@ -35,17 +35,14 @@ GGEMSSourceManager::GGEMSSourceManager()
   GGEMScout("GGEMSSourceManager", "GGEMSSourceManager", 1)
     << "Allocation of GGEMSSourceManager..." << GGEMSendl;
 
-  // Initialization of source position
-  source_position_ = Matrix::MakeFloatXYZZeros();
-
-  // Initialization of the source orbiting angles
-  source_orbiting_angle_ = Matrix::MakeFloatXYZZeros();
-
   // Initialization of local axis
-  local_axis_ = Matrix::MakeFloat3x3Zeros();
+  //local_axis_ = Matrix::MakeFloat3x3Zeros();
 
   // Initialization of matrix transformation
-  transformation_matrix_ = Matrix::MakeFloat4x4Zeros();
+  //transformation_matrix_ = Matrix::MakeFloat4x4Zeros();
+
+  // Allocation of geometry transformation
+  p_geometry_transformation_ = new TransformCalculator;
 
   // Storing the pointer
   p_current_source_ = this;
@@ -57,6 +54,11 @@ GGEMSSourceManager::GGEMSSourceManager()
 
 GGEMSSourceManager::~GGEMSSourceManager(void)
 {
+  if (p_geometry_transformation_) {
+    delete p_geometry_transformation_;
+    p_geometry_transformation_ = nullptr;
+  }
+
   GGEMScout("GGEMSSourceDefinition", "~GGEMSSourceDefinition", 1)
     << "Deallocation of GGEMSSourceDefinition..." << GGEMSendl;
 }
@@ -90,7 +92,8 @@ bool GGEMSSourceManager::IsReady(void) const
 void GGEMSSourceManager::SetPosition(float const& pos_x, float const& pos_y,
   float const& pos_z)
 {
-  source_position_ = Matrix::MakeFloatXYZ(pos_x, pos_y, pos_z);
+  p_geometry_transformation_->SetTranslation(
+    Matrix::MakeFloatXYZ(pos_x, pos_y, pos_z));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -128,9 +131,19 @@ void GGEMSSourceManager::SetLocalAxis(
   float const& m10, float const& m11, float const& m12,
   float const& m20, float const& m21, float const& m22)
 {
-  local_axis_ = Matrix::MakeFloat3x3(
+  p_geometry_transformation_->SetAxisTransformation(
     m00, m01, m02,
     m10, m11, m12,
     m20, m21, m22
   );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSSourceManager::SetRotation(float const& rx, float const& ry,
+  float const& rz)
+{
+  p_geometry_transformation_->SetRotation(Matrix::MakeFloatXYZ(rx, ry, rz));
 }

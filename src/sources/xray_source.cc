@@ -29,11 +29,11 @@ XRaySource::XRaySource(void)
   focal_spot_size_ = Matrix::MakeFloatXYZZeros();
 
   // Initialization of local axis
-  local_axis_ = Matrix::MakeFloat3x3(
-    0.0f, 0.0f, -1.0f,
-    0.0f, 1.0f, 0.0f,
-    1.0f, 0.0f, 0.0f
-  );
+  //local_axis_ = Matrix::MakeFloat3x3(
+  //  0.0f, 0.0f, -1.0f,
+  //  0.0f, 1.0f, 0.0f,
+  //  1.0f, 0.0f, 0.0f
+  //);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -72,13 +72,17 @@ void XRaySource::PrintInfos(void) const
     std::cout << "Electron" << std::endl;
   }
   GGEMScout("XRaySource", "PrintInfos", 0) << "*Position: " << "("
-    << source_position_.s[0] << ", " << source_position_.s[1] << ", "
-    << source_position_.s[2] << " ) mm3" << GGEMSendl;
+    << p_geometry_transformation_->GetPosition().s[0] << ", "
+    << p_geometry_transformation_->GetPosition().s[1] << ", "
+    << p_geometry_transformation_->GetPosition().s[2] << " ) m3" << GGEMSendl;
+  /*GGEMScout("XRaySource", "PrintInfos", 0) << "*Rotation: " << "("
+    << source_orbiting_angle_.s[0] << ", " << source_orbiting_angle_.s[1]
+    << ", " << source_orbiting_angle_.s[2] << ") degree" << GGEMSendl;
   GGEMScout("XRaySource", "PrintInfos", 0) << "*Beam aperture: "
     << beam_aperture_ << " degrees" << GGEMSendl;
   GGEMScout("XRaySource", "PrintInfos", 0) << "*Focal spot size: " << "("
     << focal_spot_size_.s[0] << ", " << focal_spot_size_.s[1] << ", "
-    << focal_spot_size_.s[2] << " ) mm3" << GGEMSendl;
+    << focal_spot_size_.s[2] << ") mm3" << GGEMSendl;
   GGEMScout("XRaySource", "PrintInfos", 0) << "*Local axis: " << GGEMSendl;
   GGEMScout("XRaySource", "PrintInfos", 0) << "[" << GGEMSendl;
   GGEMScout("XRaySource", "PrintInfos", 0) << "    " << local_axis_.m00_ << " "
@@ -88,14 +92,14 @@ void XRaySource::PrintInfos(void) const
   GGEMScout("XRaySource", "PrintInfos", 0) << "    " << local_axis_.m20_ << " "
     << local_axis_.m21_ << " " << local_axis_.m22_ << GGEMSendl;
   GGEMScout("XRaySource", "PrintInfos", 0) << "]" << GGEMSendl;
-  GGEMScout("XRaySource", "PrintInfos", 0) << GGEMSendl;
+  GGEMScout("XRaySource", "PrintInfos", 0) << GGEMSendl;*/
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void XRaySource::CheckParameters() const
+void XRaySource::CheckParameters(void) const
 {
   GGEMScout("XRaySource", "CheckParameters", 1)
     << "Checking the mandatory parameters..." << GGEMSendl;
@@ -131,41 +135,6 @@ void XRaySource::SetFocalSpotSize(float const& width, float const& height,
   float const& depth)
 {
   focal_spot_size_ = Matrix::MakeFloatXYZ(width, height, depth);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void XRaySource::SetPosition(float const& pos_x, float const& pos_y,
-  float const& pos_z)
-{
-  GGEMSSourceManager::SetPosition(pos_x, pos_y, pos_z);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void XRaySource::SetParticleType(char const* particle_type)
-{
-  GGEMSSourceManager::SetParticleType(particle_type);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void XRaySource::SetLocalAxis(
-  float const& m00, float const& m01, float const& m02,
-  float const& m10, float const& m11, float const& m12,
-  float const& m20, float const& m21, float const& m22)
-{
-  GGEMSSourceManager::SetLocalAxis(
-    m00, m01, m02,
-    m10, m11, m12,
-    m20, m21, m22
-  );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -258,4 +227,14 @@ void set_local_axis_xray_source(XRaySource* p_source_manager,
     m10, m11, m12,
     m20, m21, m22
   );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void set_rotation_xray_source(XRaySource* p_source_manager, float const rx,
+  float const ry, float const rz)
+{
+  p_source_manager->SetRotation(rx, ry, rz);
 }
