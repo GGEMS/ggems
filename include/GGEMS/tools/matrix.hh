@@ -131,6 +131,44 @@ namespace Matrix
   }
 
   /*!
+    \fn inline float4x4 MakeFloat4x4(float const& m00, float const& m01, float const& m02, float const& m03, float const& m10, float const& m11, float const& m12, float const& m13, float const& m20, float const& m21, float const& m22, float const& m23, float const& m30, float const& m31, float const& m32, float const& m33)
+    \param m00 - Element 0,0 in the matrix 4x4 for local axis
+    \param m01 - Element 0,1 in the matrix 4x4 for local axis
+    \param m02 - Element 0,2 in the matrix 4x4 for local axis
+    \param m03 - Element 0,3 in the matrix 4x4 for local axis
+    \param m10 - Element 1,0 in the matrix 4x4 for local axis
+    \param m11 - Element 1,1 in the matrix 4x4 for local axis
+    \param m12 - Element 1,2 in the matrix 4x4 for local axis
+    \param m13 - Element 1,3 in the matrix 4x4 for local axis
+    \param m20 - Element 2,0 in the matrix 4x4 for local axis
+    \param m21 - Element 2,1 in the matrix 4x4 for local axis
+    \param m22 - Element 2,2 in the matrix 4x4 for local axis
+    \param m23 - Element 2,3 in the matrix 4x4 for local axis
+    \param m30 - Element 3,0 in the matrix 4x4 for local axis
+    \param m31 - Element 3,1 in the matrix 4x4 for local axis
+    \param m32 - Element 3,2 in the matrix 4x4 for local axis
+    \param m33 - Element 3,3 in the matrix 4x4 for local axis
+    \brief Make a float4x4 with custom values
+  */
+  inline float4x4 MakeFloat4x4(
+    float const& m00, float const& m01, float const& m02, float const& m03,
+    float const& m10, float const& m11, float const& m12, float const& m13,
+    float const& m20, float const& m21, float const& m22, float const& m23,
+    float const& m30, float const& m31, float const& m32, float const& m33)
+  {
+    float4x4 tmp;
+    // Row 1
+    tmp.m00_ = m00; tmp.m01_ = m01; tmp.m02_ = m02; tmp.m03_ = m03;
+    // Row 2
+    tmp.m10_ = m10; tmp.m11_ = m11; tmp.m12_ = m12; tmp.m13_ = m13;
+    // Row 3
+    tmp.m20_ = m20; tmp.m21_ = m21; tmp.m22_ = m22; tmp.m23_ = m23;
+    // Row 4
+    tmp.m30_ = m30; tmp.m31_ = m31; tmp.m32_ = m32; tmp.m33_ = m33;
+    return tmp;
+  }
+
+  /*!
     \fn inline float4x4 MakeFloat3x3Zeros()
     \brief Make a float4x4 with zeros for value
   */
@@ -147,6 +185,159 @@ namespace Matrix
     tmp.m30_ = 0.0f; tmp.m31_ = 0.0f; tmp.m32_ = 0.0f; tmp.m33_ = 0.0f;
     return tmp;
   }
+
+  inline float4x4 MatrixMult4x4(float4x4 const& A, float4x4 const& B)
+  {
+    float4x4 tmp = MakeFloat4x4Zeros();
+
+    // Row 1
+    tmp.m00_ = A.m00_*B.m00_ + A.m01_*B.m10_ + A.m02_*B.m20_ + A.m03_*B.m30_;
+    tmp.m01_ = A.m00_*B.m01_ + A.m01_*B.m11_ + A.m02_*B.m21_ + A.m03_*B.m31_;
+    tmp.m02_ = A.m00_*B.m02_ + A.m01_*B.m12_ + A.m02_*B.m22_ + A.m03_*B.m32_;
+    tmp.m03_ = A.m00_*B.m03_ + A.m01_*B.m13_ + A.m02_*B.m23_ + A.m03_*B.m33_;
+
+    // Row 2
+    tmp.m10_ = A.m10_*B.m00_ + A.m11_*B.m10_ + A.m12_*B.m20_ + A.m13_*B.m30_;
+    tmp.m11_ = A.m10_*B.m01_ + A.m11_*B.m11_ + A.m12_*B.m21_ + A.m13_*B.m31_;
+    tmp.m12_ = A.m10_*B.m02_ + A.m11_*B.m12_ + A.m12_*B.m22_ + A.m13_*B.m32_;
+    tmp.m13_ = A.m10_*B.m03_ + A.m11_*B.m13_ + A.m12_*B.m23_ + A.m13_*B.m33_;
+
+    // Row 3
+    tmp.m20_ = A.m20_*B.m00_ + A.m21_*B.m10_ + A.m22_*B.m20_ + A.m23_*B.m30_;
+    tmp.m21_ = A.m20_*B.m01_ + A.m21_*B.m11_ + A.m22_*B.m21_ + A.m23_*B.m31_;
+    tmp.m22_ = A.m20_*B.m02_ + A.m21_*B.m12_ + A.m22_*B.m22_ + A.m23_*B.m32_;
+    tmp.m23_ = A.m20_*B.m03_ + A.m21_*B.m13_ + A.m22_*B.m23_ + A.m23_*B.m33_;
+
+    // Row 4
+    tmp.m30_ = A.m30_*B.m00_ + A.m31_*B.m10_ + A.m32_*B.m20_ + A.m33_*B.m30_;
+    tmp.m31_ = A.m30_*B.m01_ + A.m31_*B.m11_ + A.m32_*B.m21_ + A.m33_*B.m31_;
+    tmp.m32_ = A.m30_*B.m02_ + A.m31_*B.m12_ + A.m32_*B.m22_ + A.m33_*B.m32_;
+    tmp.m33_ = A.m30_*B.m03_ + A.m31_*B.m13_ + A.m32_*B.m23_ + A.m33_*B.m33_;
+
+    return tmp;
+  }
 }
+
+/*!
+  \class TransformCalculator
+  \brief This class handles everything about geometry transformation
+*/
+class TransformCalculator
+{
+  public:
+    /*!
+      \brief TransformCalculator constructor
+    */
+    TransformCalculator(void);
+
+    /*!
+      \brief TransformCalculator destructor
+    */
+    ~TransformCalculator(void);
+
+  public:
+    /*!
+      \fn TransformCalculator(TransformCalculator const& transform_calculator) = delete
+      \param ggems_manager - reference on the ggems manager
+      \brief Avoid copy of the class by reference
+    */
+    TransformCalculator(
+      TransformCalculator const& transform_calculator) = delete;
+
+    /*!
+      \fn TransformCalculator& operator=(TransformCalculator const& transform_calculator) = delete
+      \param ggems_manager - reference on the ggems manager
+      \brief Avoid assignement of the class by reference
+    */
+    TransformCalculator& operator=(
+      TransformCalculator const& transform_calculator) = delete;
+
+    /*!
+      \fn TransformCalculator(TransformCalculator const&& transform_calculator) = delete
+      \param ggems_manager - rvalue reference on the ggems manager
+      \brief Avoid copy of the class by rvalue reference
+    */
+    TransformCalculator(
+      TransformCalculator const&& transform_calculator) = delete;
+
+    /*!
+      \fn TransformCalculator& operator=(TransformCalculator const&& transform_calculator) = delete
+      \param ggems_manager - rvalue reference on the ggems manager
+      \brief Avoid copy of the class by rvalue reference
+    */
+    TransformCalculator& operator=(
+      TransformCalculator const&& transform_calculator) = delete;
+
+  public:
+    /*!
+      \fn void SetTranslation(float const& tx, float const& ty, float const& tz)
+      \param tx - Translation in X
+      \param ty - Translation in Y
+      \param tz - Translation in Z
+      \brief Set the translation in X, Y and Z
+    */
+    void SetTranslation(float const& tx, float const& ty, float const& tz);
+
+    /*!
+      \fn void SetTranslation(cl_float3 const& txyz)
+      \param txyz - Translation in X, Y and Z
+      \brief Set the translation in X, Y and Z
+    */
+    void SetTranslation(cl_float3 const& txyz);
+
+    inline Matrix::float4x4 GetTranslation() const {return translation_;};
+
+    inline cl_float3 GetPosition() const
+    {
+      return Matrix::MakeFloatXYZ(
+        translation_.m03_, translation_.m13_, translation_.m23_);
+    }
+
+    /*!
+      \fn void SetRotation(float const& rx, float const& ry, float const& rz)
+      \param rx - Rotation in X
+      \param ry - Rotation in Y
+      \param rz - Rotation in Z
+      \brief Set the Rotation in X, Y and Z around global axis
+    */
+    void SetRotation(float const& rx, float const& ry, float const& rz);
+
+    /*!
+      \fn void SetRotation(cl_float3 const& rxyz)
+      \param rxyz - Rotation around X, Y and Z global axis
+      \biref Set the rotation around global axis
+    */
+    void SetRotation(cl_float3 const& rxyz);
+
+    /*!
+      \fn void SetAxisTransformation(Matrix::float3x3 const& axis)
+      \param axis - Matrix (3x3) that contains the mapping of the coordinates (ex. x becomes y and vice-versa). Values are 0, 1 or -1.
+      \brief Set the transformation of the frame, usefull for mirroring or convert 3D to 2D
+    */
+    void SetAxisTransformation(Matrix::float3x3 const& axis);
+
+    /*!
+      \fn void SetAxisTransformation(float const& m00, float const& m01, float const& m02, float const& m10, float const& m11, float const& m12, float const& m20, float const& m21, float const& m22)
+      \param m00 - Element 0,0 in the matrix 3x3 for local axis
+      \param m01 - Element 0,1 in the matrix 3x3 for local axis
+      \param m02 - Element 0,2 in the matrix 3x3 for local axis
+      \param m10 - Element 1,0 in the matrix 3x3 for local axis
+      \param m11 - Element 1,1 in the matrix 3x3 for local axis
+      \param m12 - Element 1,2 in the matrix 3x3 for local axis
+      \param m20 - Element 2,0 in the matrix 3x3 for local axis
+      \param m21 - Element 2,1 in the matrix 3x3 for local axis
+      \param m22 - Element 2,2 in the matrix 3x3 for local axis
+      \brief Set the transformation of the frame, usefull for mirroring or convert 3D to 2D
+    */
+    void SetAxisTransformation(
+      float const& m00, float const& m01, float const& m02,
+      float const& m10, float const& m11, float const& m12,
+      float const& m20, float const& m21, float const& m22);
+
+  private:
+    Matrix::float4x4 translation_; /*!< Matrix of translation */
+    Matrix::float4x4 rotation_; /*!< Matrix of rotation */
+    Matrix::float4x4 orthographic_projection_; /*!< Matrix of orthographic projection */
+};
 
 #endif // End of GUARD_GGEMS_TOOLS_MATRIX_HH

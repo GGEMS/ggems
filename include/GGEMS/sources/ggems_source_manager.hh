@@ -107,7 +107,7 @@ class GGEMS_EXPORT GGEMSSourceManager
       \param pos_z - Position of the source in Z
       \brief Set the position of the source in the global coordinates
     */
-    virtual void SetPosition(float const& pos_x, float const& pos_y,
+    void SetPosition(float const& pos_x, float const& pos_y,
       float const& pos_z);
 
     /*!
@@ -115,7 +115,7 @@ class GGEMS_EXPORT GGEMSSourceManager
       \param particle_type - Type of the particle
       \brief Set the type of the particle: electron, positron or photon
     */
-    virtual void SetParticleType(char const* particle_type);
+    void SetParticleType(char const* particle_type);
 
     /*!
       \fn void SetLocalAxis(float const& m00, float const& m01, float const& m02, float const& m10, float const& m11, float const& m12, float const& m20, float const& m21, float const& m22)
@@ -130,10 +130,19 @@ class GGEMS_EXPORT GGEMSSourceManager
       \param m22 - Element 2,2 in the matrix 3x3 for local axis
       \brief Set the local axis element describing the source compared to global axis (center of world)
     */
-    virtual void SetLocalAxis(
+    void SetLocalAxis(
       float const& m00, float const& m01, float const& m02,
       float const& m10, float const& m11, float const& m12,
       float const& m20, float const& m21, float const& m22);
+
+    /*!
+      \fn void SetRotation(float const& rx, float const& ry, float const& rz)
+      \param rx - Rotation around X along global axis
+      \param ry - Rotation around Y along global axis
+      \param rz - Rotation around Z along global axis
+      \brief Set the rotation of the source around global axis
+    */
+    void SetRotation(float const& rx, float const& ry, float const& rz);
 
   public: // Pure abstract method
     /*!
@@ -164,11 +173,10 @@ class GGEMS_EXPORT GGEMSSourceManager
 
   protected:
     bool is_initialized_; /*!< Boolean checking if the source is initialized */
-    cl_float3 source_position_; /*!< Position of the source */
     int particle_type_; /*!< Type of particle: photon, electron or positron */
-    cl_float3 source_orbiting_angle_; /*!< Orbiting angle around the center of the world */
-    Matrix::float3x3 local_axis_; /*!< 3x3 matrix for local axis */
-    Matrix::float4x4 transformation_matrix_; /*!< Matrix transformation for local to global axis or global to local axis */
+    //Matrix::float3x3 local_axis_; /*!< 3x3 matrix for local axis */
+    //Matrix::float4x4 transformation_matrix_; /*!< Matrix transformation for local to global axis or global to local axis */
+    TransformCalculator* p_geometry_transformation_; /*!< Pointer storing the geometry transformation */
 
   private: // Storing the source
     static GGEMSSourceManager* p_current_source_; /*!< Current source */
