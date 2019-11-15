@@ -20,30 +20,46 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 TransformCalculator::TransformCalculator()
+: need_updated_(false),
+  position_(Matrix::MakeFloatXYZ(0.0f, 0.0f, 0.0f)),
+  rotation_(Matrix::MakeFloatXYZ(0.0f, 0.0f, 0.0f))
 {
   GGEMScout("TransformCalculator", "TransformCalculator", 1)
     << "Allocation of TransformCalculator..." << GGEMSendl;
 
+  // Initialize the local axis
+  local_axis_ = Matrix::MakeFloat3x3(
+    1.0f, 0.0f, 0.0f,
+    0.0f, 1.0f, 0.0f,
+    0.0f, 0.0f, 1.0f);
+
   // Initializing translation matrix
-  translation_ = Matrix::MakeFloat4x4(
+  matrix_translation_ = Matrix::MakeFloat4x4(
     1.0f, 0.0f, 0.0f, 0.0f,
     0.0f, 1.0f, 0.0f, 0.0f,
     0.0f, 0.0f, 1.0f, 0.0f,
     0.0f, 0.0f, 0.0f, 1.0f);
 
   // Initializing rotation matrix
-  rotation_ = Matrix::MakeFloat4x4(
+  matrix_rotation_ = Matrix::MakeFloat4x4(
     1.0f, 0.0f, 0.0f, 0.0f,
     0.0f, 1.0f, 0.0f, 0.0f,
     0.0f, 0.0f, 1.0f, 0.0f,
     0.0f, 0.0f, 0.0f, 1.0f);
 
   // Initializing orthographic projection matrix
-  orthographic_projection_ = Matrix::MakeFloat4x4(
+  matrix_orthographic_projection_ = Matrix::MakeFloat4x4(
     1.0f, 0.0f, 0.0f, 0.0f,
     0.0f, 1.0f, 0.0f, 0.0f,
     0.0f, 0.0f, 1.0f, 0.0f,
     0.0f, 0.0f, 0.0f, 1.0f);
+
+  // Initializing the transformation matrix
+  matrix_transformation_ = Matrix::MakeFloat4x4(
+    0.0f, 0.0f, 0.0f, 0.0f,
+    0.0f, 0.0f, 0.0f, 0.0f,
+    0.0f, 0.0f, 0.0f, 0.0f,
+    0.0f, 0.0f, 0.0f, 0.0f);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -63,11 +79,18 @@ TransformCalculator::~TransformCalculator()
 void TransformCalculator::SetTranslation(float const& tx, float const& ty,
   float const& tz)
 {
-  translation_ = Matrix::MakeFloat4x4(
-    1.0f, 0.0f, 0.0f, tx,
-    0.0f, 1.0f, 0.0f, ty,
-    0.0f, 0.0f, 1.0f, tz,
+  // Fill the position buffer first
+  position_ = Matrix::MakeFloatXYZ(tx, ty, tz);
+
+  // Filling the translation matrix
+  matrix_translation_ = Matrix::MakeFloat4x4(
+    1.0f, 0.0f, 0.0f, position_.s[0],
+    0.0f, 1.0f, 0.0f, position_.s[1],
+    0.0f, 0.0f, 1.0f, position_.s[2],
     0.0f, 0.0f, 0.0f, 1.0f);
+
+  // Need to be updated if the Transformation matrix is called
+  need_updated_ = true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -86,6 +109,9 @@ void TransformCalculator::SetTranslation(cl_float3 const& txyz)
 void TransformCalculator::SetRotation(float const& rx, float const& ry,
   float const& rz)
 {
+  // Filling the rotation buffer
+  rotation_ = Matrix::MakeFloatXYZ(rx, ry, rz);
+
   // Definition of cosinus and sinus
   double cosinus = 0.0, sinus = 0.0;
 
@@ -122,8 +148,11 @@ void TransformCalculator::SetRotation(float const& rx, float const& ry,
     0.0f, 0.0f, 0.0f, 1.0f);
 
   // Get the total rotation matrix
-  rotation_ = Matrix::MatrixMult4x4(kRotationY, kRotationX);
-  rotation_ = Matrix::MatrixMult4x4(kRotationZ, rotation_);
+  matrix_rotation_ = Matrix::MatrixMult4x4(kRotationY, kRotationX);
+  matrix_rotation_ = Matrix::MatrixMult4x4(kRotationZ, matrix_rotation_);
+
+  // Need to be updated if the Transformation matrix is called
+  need_updated_ = true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -158,9 +187,32 @@ void TransformCalculator::SetAxisTransformation(
 
 void TransformCalculator::SetAxisTransformation(Matrix::float3x3 const& axis)
 {
-  orthographic_projection_ = Matrix::MakeFloat4x4(
+  // Filling the local axis buffer first
+  local_axis_ = Matrix::MakeFloat3x3(
+    axis.m00_, axis.m01_, axis.m02_,
+    axis.m10_, axis.m11_, axis.m12_,
+    axis.m20_, axis.m21_, axis.m22_);
+
+  matrix_orthographic_projection_ = Matrix::MakeFloat4x4(
     axis.m00_, axis.m01_, axis.m02_, 0.0f,
     axis.m10_, axis.m11_, axis.m12_, 0.0f,
     axis.m20_, axis.m21_, axis.m22_, 0.0f,
     0.0f, 0.0f, 0.0f, 1.0f);
+
+  // Need to be updated if the Transformation matrix is called
+  need_updated_ = true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void TransformCalculator::UpdateTransformationMatrix(void)
+{
+  matrix_transformation_ = Matrix::MatrixMult4x4( matrix_rotation_,
+      Matrix::MatrixMult4x4(matrix_translation_,
+      matrix_orthographic_projection_));
+
+  // Update is done
+  need_updated_ = false;
 }

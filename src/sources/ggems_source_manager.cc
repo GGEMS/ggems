@@ -35,12 +35,6 @@ GGEMSSourceManager::GGEMSSourceManager()
   GGEMScout("GGEMSSourceManager", "GGEMSSourceManager", 1)
     << "Allocation of GGEMSSourceManager..." << GGEMSendl;
 
-  // Initialization of local axis
-  //local_axis_ = Matrix::MakeFloat3x3Zeros();
-
-  // Initialization of matrix transformation
-  //transformation_matrix_ = Matrix::MakeFloat4x4Zeros();
-
   // Allocation of geometry transformation
   p_geometry_transformation_ = new TransformCalculator;
 
