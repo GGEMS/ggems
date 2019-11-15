@@ -174,8 +174,6 @@ class GGEMS_EXPORT GGEMSSourceManager
   protected:
     bool is_initialized_; /*!< Boolean checking if the source is initialized */
     int particle_type_; /*!< Type of particle: photon, electron or positron */
-    //Matrix::float3x3 local_axis_; /*!< 3x3 matrix for local axis */
-    //Matrix::float4x4 transformation_matrix_; /*!< Matrix transformation for local to global axis or global to local axis */
     TransformCalculator* p_geometry_transformation_; /*!< Pointer storing the geometry transformation */
 
   private: // Storing the source

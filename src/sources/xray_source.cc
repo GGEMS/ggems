@@ -29,11 +29,11 @@ XRaySource::XRaySource(void)
   focal_spot_size_ = Matrix::MakeFloatXYZZeros();
 
   // Initialization of local axis
-  //local_axis_ = Matrix::MakeFloat3x3(
-  //  0.0f, 0.0f, -1.0f,
-  //  0.0f, 1.0f, 0.0f,
-  //  1.0f, 0.0f, 0.0f
-  //);
+  p_geometry_transformation_->SetAxisTransformation(
+    0.0f, 0.0f, -1.0f,
+    0.0f, 1.0f, 0.0f,
+    1.0f, 0.0f, 0.0f
+  );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -75,24 +75,32 @@ void XRaySource::PrintInfos(void) const
     << p_geometry_transformation_->GetPosition().s[0] << ", "
     << p_geometry_transformation_->GetPosition().s[1] << ", "
     << p_geometry_transformation_->GetPosition().s[2] << " ) m3" << GGEMSendl;
-  /*GGEMScout("XRaySource", "PrintInfos", 0) << "*Rotation: " << "("
-    << source_orbiting_angle_.s[0] << ", " << source_orbiting_angle_.s[1]
-    << ", " << source_orbiting_angle_.s[2] << ") degree" << GGEMSendl;
+  GGEMScout("XRaySource", "PrintInfos", 0) << "*Rotation: " << "("
+    << p_geometry_transformation_->GetRotation().s[0] << ", "
+    << p_geometry_transformation_->GetRotation().s[1] << ", "
+    << p_geometry_transformation_->GetRotation().s[2] << ") degree" << GGEMSendl;
   GGEMScout("XRaySource", "PrintInfos", 0) << "*Beam aperture: "
     << beam_aperture_ << " degrees" << GGEMSendl;
   GGEMScout("XRaySource", "PrintInfos", 0) << "*Focal spot size: " << "("
-    << focal_spot_size_.s[0] << ", " << focal_spot_size_.s[1] << ", "
+    << focal_spot_size_.s[0] << ", "
+    << focal_spot_size_.s[1] << ", "
     << focal_spot_size_.s[2] << ") mm3" << GGEMSendl;
   GGEMScout("XRaySource", "PrintInfos", 0) << "*Local axis: " << GGEMSendl;
   GGEMScout("XRaySource", "PrintInfos", 0) << "[" << GGEMSendl;
-  GGEMScout("XRaySource", "PrintInfos", 0) << "    " << local_axis_.m00_ << " "
-    << local_axis_.m01_ << " " << local_axis_.m02_ << GGEMSendl;
-  GGEMScout("XRaySource", "PrintInfos", 0) << "    " << local_axis_.m10_ << " "
-    << local_axis_.m11_ << " " << local_axis_.m12_ << GGEMSendl;
-  GGEMScout("XRaySource", "PrintInfos", 0) << "    " << local_axis_.m20_ << " "
-    << local_axis_.m21_ << " " << local_axis_.m22_ << GGEMSendl;
+  GGEMScout("XRaySource", "PrintInfos", 0) << "    "
+    << p_geometry_transformation_->GetLocalAxis().m00_ << " "
+    << p_geometry_transformation_->GetLocalAxis().m01_ << " "
+    << p_geometry_transformation_->GetLocalAxis().m02_ << GGEMSendl;
+  GGEMScout("XRaySource", "PrintInfos", 0) << "    "
+    << p_geometry_transformation_->GetLocalAxis().m10_ << " "
+    << p_geometry_transformation_->GetLocalAxis().m11_ << " "
+    << p_geometry_transformation_->GetLocalAxis().m12_ << GGEMSendl;
+  GGEMScout("XRaySource", "PrintInfos", 0) << "    "
+    << p_geometry_transformation_->GetLocalAxis().m20_ << " "
+    << p_geometry_transformation_->GetLocalAxis().m21_ << " "
+    << p_geometry_transformation_->GetLocalAxis().m22_ << GGEMSendl;
   GGEMScout("XRaySource", "PrintInfos", 0) << "]" << GGEMSendl;
-  GGEMScout("XRaySource", "PrintInfos", 0) << GGEMSendl;*/
+  GGEMScout("XRaySource", "PrintInfos", 0) << GGEMSendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

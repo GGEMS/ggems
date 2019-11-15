@@ -285,13 +285,15 @@ class TransformCalculator
     */
     void SetTranslation(cl_float3 const& txyz);
 
-    inline Matrix::float4x4 GetTranslation() const {return translation_;};
-
-    inline cl_float3 GetPosition() const
+    /*!
+      \fn inline Matrix::float4x4 GetMatrixTranslation(void) const
+      \return the translation matrix
+      \brief Return the translation matrix
+    */
+    inline Matrix::float4x4 GetMatrixTranslation(void) const
     {
-      return Matrix::MakeFloatXYZ(
-        translation_.m03_, translation_.m13_, translation_.m23_);
-    }
+      return matrix_translation_;
+    };
 
     /*!
       \fn void SetRotation(float const& rx, float const& ry, float const& rz)
@@ -308,6 +310,16 @@ class TransformCalculator
       \biref Set the rotation around global axis
     */
     void SetRotation(cl_float3 const& rxyz);
+
+    /*!
+      \fn inline Matrix::float4x4 GetMatrixRotation(void) const
+      \return the translation matrix
+      \brief Return the translation matrix
+    */
+    inline Matrix::float4x4 GetMatrixRotation(void) const
+    {
+      return matrix_rotation_;
+    };
 
     /*!
       \fn void SetAxisTransformation(Matrix::float3x3 const& axis)
@@ -334,10 +346,66 @@ class TransformCalculator
       float const& m10, float const& m11, float const& m12,
       float const& m20, float const& m21, float const& m22);
 
+    /*!
+      \fn inline Matrix::float4x4 GetMatrixOrthographicProjection(void) const
+      \return the matrix of orthographic projection
+      \brief return the matrix of orthographic projection
+    */
+    inline Matrix::float4x4 GetMatrixOrthographicProjection(void) const
+    {
+      return matrix_orthographic_projection_;
+    };
+
+    /*!
+      \fn inline cl_float3 GetPosition(void) const
+      \return The position of source/detector...
+      \brief Return the current position
+    */
+    inline cl_float3 GetPosition(void) const {return position_;}
+
+    /*!
+      \fn inline cl_float3 GetRotation(void) const
+      \return The rotation of source/detector...
+      \brief Return the current rotation
+    */
+    inline cl_float3 GetRotation(void) const {return rotation_;}
+
+    /*!
+      \fn inline Matrix::float3x3 GetLocalAxis(void) const
+      \return The local axis matrix
+      \brief return the local axis matrix
+    */
+    inline Matrix::float3x3 GetLocalAxis(void) const {return local_axis_;}
+
+    /*!
+      \fn void UpdateTransformationMatrix(void)
+      \brief update the transformation matrix
+    */
+    void UpdateTransformationMatrix(void);
+
+    /*!
+      \fn Matrix::float4x4 GetTransformationMatrix(void) const
+      \return the transformation matrix
+      \brief return the transformation matrix
+    */
+    inline Matrix::float4x4 GetTransformationMatrix(void)
+    {
+      // Check if we need to update
+      if (need_updated_) UpdateTransformationMatrix();
+
+      // Return the transformation matrix
+      return matrix_transformation_;
+    }
+
   private:
-    Matrix::float4x4 translation_; /*!< Matrix of translation */
-    Matrix::float4x4 rotation_; /*!< Matrix of rotation */
-    Matrix::float4x4 orthographic_projection_; /*!< Matrix of orthographic projection */
+    bool need_updated_; /*!< Check if the transformation matrix need to be updated */
+    cl_float3 position_; /*!< Position of the source/detector... */
+    cl_float3 rotation_; /*! Rotation of the source/detector... */
+    Matrix::float3x3 local_axis_; /*!< Matrix of local axis */
+    Matrix::float4x4 matrix_translation_; /*!< Matrix of translation */
+    Matrix::float4x4 matrix_rotation_; /*!< Matrix of rotation */
+    Matrix::float4x4 matrix_orthographic_projection_; /*!< Matrix of orthographic projection */
+    Matrix::float4x4 matrix_transformation_; /*!< Matrix of transformation */
 };
 
 #endif // End of GUARD_GGEMS_TOOLS_MATRIX_HH
