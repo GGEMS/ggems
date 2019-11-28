@@ -25,7 +25,7 @@ opencl_manager.print_activated_context()
 xray_source = ggems.XRaySource()
 xray_source.set_position(-1000.0, 10.0, 50.0)  # in mm
 xray_source.set_particle_type(b"photon")
-xray_source.set_beam_aperture(10.0)  # in degree
+xray_source.set_beam_aperture(5.0)  # in degree
 xray_source.set_focal_spot_size(0.6, 1.2, 0.0)  # in mm
 xray_source.set_rotation(0.0, 0.0, 0.0)  # in degree
 xray_source.print_infos()
@@ -44,10 +44,10 @@ ggems_manager.set_cross_section_table_energy_min(0.00099)  # in MeV
 ggems_manager.set_cross_section_table_energy_max(250.0)  # in MeV
 
 # Add processes and cut for photon
-ggems_manager.set_process(b"Compton")
-ggems_manager.set_process(b"PhotoElectric")
-ggems_manager.set_process(b"Rayleigh")
-ggems_manager.set_particle_cut(b"Photon", 0.5)  # in mm
+ggems_manager.set_process(b"compton")
+ggems_manager.set_process(b"photoElectric")
+ggems_manager.set_process(b"rayleigh")
+ggems_manager.set_particle_cut(b"photon", 0.5)  # in mm
 
 # Set the geometry tolerance in the range [1mm;1nm]
 ggems_manager.set_geometry_tolerance(0.001)  # in mm

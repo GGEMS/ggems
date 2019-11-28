@@ -141,3 +141,42 @@ void GGEMSSourceManager::SetRotation(float const& rx, float const& ry,
 {
   p_geometry_transformation_->SetRotation(Matrix::MakeFloatXYZ(rx, ry, rz));
 }
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSSourceManager::CheckParameters(void) const
+{
+  GGEMScout("GGEMSSourceManager", "CheckParameters", 1)
+    << "Checking the mandatory parameters..." << GGEMSendl;
+
+  // Checking the type of particles
+  if (particle_type_ == -1) {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "You have to set a particle type for the source:" << std::endl;
+    oss << "    - Photon" << std::endl;
+    oss << "    - Electron" << std::endl;
+    Misc::ThrowException("GGEMSSourceManager", "CheckParameters", oss.str());
+  }
+
+  // Checking the position of particles
+  cl_float3 const kPosition = p_geometry_transformation_->GetPosition();
+  if (Misc::IsEqual(kPosition.s[0], std::numeric_limits<float>::min()) ||
+      Misc::IsEqual(kPosition.s[1], std::numeric_limits<float>::min()) ||
+      Misc::IsEqual(kPosition.s[2], std::numeric_limits<float>::min())) {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "You have to set a position for the source!!!";
+    Misc::ThrowException("GGEMSSourceManager", "CheckParameters", oss.str());
+  }
+
+  // Checking the rotation of particles
+  cl_float3 const kRotation = p_geometry_transformation_->GetRotation();
+  if (Misc::IsEqual(kRotation.s[0], std::numeric_limits<float>::min()) ||
+      Misc::IsEqual(kRotation.s[1], std::numeric_limits<float>::min()) ||
+      Misc::IsEqual(kRotation.s[2], std::numeric_limits<float>::min())) {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "You have to set a rotation for the source!!!";
+    Misc::ThrowException("GGEMSSourceManager", "CheckParameters", oss.str());
+  }
+}

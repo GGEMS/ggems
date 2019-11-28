@@ -11,6 +11,7 @@
 */
 
 #include <cmath>
+#include <limits>
 
 #include "GGEMS/tools/matrix.hh"
 #include "GGEMS/tools/print.hh"
@@ -20,12 +21,24 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 TransformCalculator::TransformCalculator()
-: need_updated_(false),
-  position_(Matrix::MakeFloatXYZ(0.0f, 0.0f, 0.0f)),
-  rotation_(Matrix::MakeFloatXYZ(0.0f, 0.0f, 0.0f))
+: need_updated_(false)
 {
   GGEMScout("TransformCalculator", "TransformCalculator", 1)
     << "Allocation of TransformCalculator..." << GGEMSendl;
+
+  // Initialize the position with min. float
+  position_ = Matrix::MakeFloatXYZ(
+    std::numeric_limits<float>::min(),
+    std::numeric_limits<float>::min(),
+    std::numeric_limits<float>::min()
+  );
+
+  // Initialize the rotation with min. float
+  rotation_ = Matrix::MakeFloatXYZ(
+    std::numeric_limits<float>::min(),
+    std::numeric_limits<float>::min(),
+    std::numeric_limits<float>::min()
+  );
 
   // Initialize the local axis
   local_axis_ = Matrix::MakeFloat3x3(
