@@ -164,19 +164,19 @@ class GGEMS_EXPORT GGEMSSourceManager
     */
     virtual void PrintInfos(void) const = 0;
 
-  private: // Pure abstract method
+  public:
     /*!
-      \fn void CheckParameters(void) const = 0
+      \fn void CheckParameters(void) const
       \brief Check mandatory parameters for a source
     */
-    virtual void CheckParameters(void) const = 0;
+    virtual void CheckParameters(void) const;
 
   protected:
     bool is_initialized_; /*!< Boolean checking if the source is initialized */
     int particle_type_; /*!< Type of particle: photon, electron or positron */
     TransformCalculator* p_geometry_transformation_; /*!< Pointer storing the geometry transformation */
 
-  private: // Storing the source
+  protected: // Storing the source
     static GGEMSSourceManager* p_current_source_; /*!< Current source */
 };
 

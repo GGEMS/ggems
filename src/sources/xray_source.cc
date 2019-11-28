@@ -13,6 +13,7 @@
 #include "GGEMS/sources/xray_source.hh"
 #include "GGEMS/tools/print.hh"
 #include "GGEMS/global/ggems_constants.hh"
+#include "GGEMS/tools/functions.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -20,13 +21,17 @@
 
 XRaySource::XRaySource(void)
 : GGEMSSourceManager(),
-  beam_aperture_(0.0f)
+  beam_aperture_(std::numeric_limits<float>::min())
 {
   GGEMScout("XRaySource", "XRaySource", 1)
     << "Allocation of XRaySource..." << GGEMSendl;
 
   // Initialization of parameters
-  focal_spot_size_ = Matrix::MakeFloatXYZZeros();
+  focal_spot_size_ = Matrix::MakeFloatXYZ(
+    std::numeric_limits<float>::min(),
+    std::numeric_limits<float>::min(),
+    std::numeric_limits<float>::min()
+  );
 
   // Initialization of local axis
   p_geometry_transformation_->SetAxisTransformation(
@@ -78,7 +83,8 @@ void XRaySource::PrintInfos(void) const
   GGEMScout("XRaySource", "PrintInfos", 0) << "*Rotation: " << "("
     << p_geometry_transformation_->GetRotation().s[0] << ", "
     << p_geometry_transformation_->GetRotation().s[1] << ", "
-    << p_geometry_transformation_->GetRotation().s[2] << ") degree" << GGEMSendl;
+    << p_geometry_transformation_->GetRotation().s[2] << ") degree"
+    << GGEMSendl;
   GGEMScout("XRaySource", "PrintInfos", 0) << "*Beam aperture: "
     << beam_aperture_ << " degrees" << GGEMSendl;
   GGEMScout("XRaySource", "PrintInfos", 0) << "*Focal spot size: " << "("
@@ -111,6 +117,39 @@ void XRaySource::CheckParameters(void) const
 {
   GGEMScout("XRaySource", "CheckParameters", 1)
     << "Checking the mandatory parameters..." << GGEMSendl;
+
+  // Checking the parameters of Source Manager
+  GGEMSSourceManager::CheckParameters();
+
+  // Checking the beam aperture
+  if (Misc::IsEqual(beam_aperture_, std::numeric_limits<float>::min())) {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "You have to set a beam aperture for the source!!!";
+    Misc::ThrowException("XRaySource", "CheckParameters", oss.str());
+  }
+  else if (beam_aperture_ < 0.0f) {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "The beam aperture must be >= 0!!!";
+    Misc::ThrowException("XRaySource", "CheckParameters", oss.str());
+  }
+
+  // Checking the focal spot size
+  if (Misc::IsEqual(focal_spot_size_.s[0], std::numeric_limits<float>::min()) ||
+      Misc::IsEqual(focal_spot_size_.s[1], std::numeric_limits<float>::min()) ||
+      Misc::IsEqual(focal_spot_size_.s[2], std::numeric_limits<float>::min())) {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "You have to set a focal spot size!!!";
+    Misc::ThrowException("XRaySource", "CheckParameters", oss.str());
+  }
+
+  // Focal spot size must be a positive value
+  if (focal_spot_size_.s[0] < 0.0f ||
+      focal_spot_size_.s[1] < 0.0f ||
+      focal_spot_size_.s[2] < 0.0f) {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "The focal spot size is a posivite value!!!";
+    Misc::ThrowException("XRaySource", "CheckParameters", oss.str());
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
