@@ -12,6 +12,7 @@
 */
 
 #include <algorithm>
+#include <sstream>
 
 #include "GGEMS/sources/ggems_source_manager.hh"
 #include "GGEMS/tools/print.hh"

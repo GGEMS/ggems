@@ -69,7 +69,7 @@ IF(WIN32)
       ${CMAKE_CXX_FLAGS_RELEASE})
 
     SET(CXX_FLAGS -std=c++17 -Wall -Wextra -Werror -pedantic -m64 -march=native
-      -Wconversion -Wfatal-errors -Weffc++ -Wold-style-cast
+      -Wconversion -Wfatal-errors -Wold-style-cast
       -pedantic-errors -ftree-vectorize -mtune=native -mavx2)
     SET(CXX_FLAGS_RELEASE -Ofast ${CXX_FLAGS})
     SET(CXX_FLAGS_DEBUG -O0 -g3 ${CXX_FLAGS})

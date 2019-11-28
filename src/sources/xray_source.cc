@@ -10,6 +10,8 @@
   \date Tuesday October 22, 2019
 */
 
+#include <sstream>
+
 #include "GGEMS/sources/xray_source.hh"
 #include "GGEMS/tools/print.hh"
 #include "GGEMS/global/ggems_constants.hh"
