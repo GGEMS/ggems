@@ -386,18 +386,10 @@ OpenCLManager::OpenCLManager(void)
   // Define the compilation options by default for OpenCL
   build_options_ = "-cl-std=CL1.2";
   build_options_ += " -w -Werror"; // Errors
+  build_options_ += " -DGGEMS_DOUBLE_PRECISION"; // Using double for OpenCL
+  build_options_ += " -cl-fast-relaxed-math"; // Fast math for OpenCL
 
-  // If Kernel path defined, add auxiliary function folder path
-  #ifdef OPENCL_KERNEL_PATH
-  build_options_ += " -I";
-  build_options_ += OPENCL_KERNEL_PATH;
-  build_options_ += "/auxiliary_functions";
-  #elif
-  Misc::ThrowException("OpenCLManager","OpenCLManager",
-    "OPENCL_KERNEL_PATH not defined or not find!!!");
-  #endif
-
-  // If GGEMS path defined, add ggems_configurations folder path
+  // Add auxiliary function path to OpenCL options
   #ifdef GGEMS_PATH
   build_options_ += " -I";
   build_options_ += GGEMS_PATH;
@@ -405,15 +397,6 @@ OpenCLManager::OpenCLManager(void)
   #elif
   Misc::ThrowException("OpenCLManager","OpenCLManager",
     "OPENCL_KERNEL_PATH not defined or not find!!!");
-  #endif
-
-  // Activated fast math optimization
-  #ifdef GGEMS_FAST_MATH
-  build_options_ += " -cl-fast-relaxed-math";
-  #endif
-
-  #ifdef GGEMS_DOUBLE_PRECISION
-  build_options_ += " -DGGEMS_DOUBLE_PRECISION";
   #endif
 
   // Creating a context for each device

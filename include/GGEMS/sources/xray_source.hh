@@ -15,6 +15,7 @@
 
 #include "GGEMS/global/ggems_export.hh"
 #include "GGEMS/sources/ggems_source_manager.hh"
+
 /*!
   \class XRaySource
   \brief This class define a XRay source in GGEMS useful for CT/CBCT simulation
@@ -106,6 +107,20 @@ class GGEMS_EXPORT XRaySource : public GGEMSSourceManager
     void SetFocalSpotSize(float const& width, float const& height,
       float const& depth);
 
+    /*!
+      \fn void SetMonoenergy(float const& monoenergy)
+      \param monoenergy - Monoenergy value
+      \brief set the value of energy in monoenergy mode
+    */
+    void SetMonoenergy(float const& monoenergy);
+
+    /*!
+      \fn void SetPolyenergy(const char* energy_spectrum_filename)
+      \param energy_spectrum_filename - filename containing the energy spectrum
+      \brief set the energy spectrum file for polyenergy mode
+    */
+    void SetPolyenergy(const char* energy_spectrum_filename);
+
   private:
     /*!
       \fn void CheckParameters(void) const
@@ -113,9 +128,27 @@ class GGEMS_EXPORT XRaySource : public GGEMSSourceManager
     */
     void CheckParameters(void) const;
 
-  private:
+    /*!
+      \fn void FillEnergy(void)
+      \brief fill energy for poly or mono energy mode
+    */
+    void FillEnergy(void);
+
+    /*!
+      \fn void InitializeKernel(void)
+      \brief Initialize kernel for XRaySource in OpenCL
+    */
+    void InitializeKernel(void);
+
+  private: // Specific members for XRaySource
     float beam_aperture_; /*!< Beam aperture of the x-ray source */
     cl_float3 focal_spot_size_; /*!< Focal spot size of the x-ray source */
+    bool is_monoenergy_mode_; /*!< Boolean checking the mode of energy */
+    float monoenergy_; /*!< Monoenergy mode */
+    std::string energy_spectrum_filename_; /*!< The energy spectrum filename for polyenergetic mode */
+    cl_uint number_of_energy_bins_; /*!< Number of energy bins for the polyenergetic mode */
+    cl::Buffer* p_energy_spectrum_; /*!< Energy spectrum for OpenCL device */
+    cl::Buffer* p_cdf_; /*!< Cumulative distribution function to generate a random energy */
 };
 
 /*!
@@ -150,7 +183,10 @@ extern "C" GGEMS_EXPORT void set_position_xray_source(
   XRaySource* p_source_manager, float const pos_x, float const pos_y,
   float const pos_z);
 
-/*!f32ut the XRaySource
+/*!
+  \fn void print_infos_xray_source(XRaySource const* p_source_manager)
+  \param p_source_manager - pointer on the source
+  \brief Print infos about the XRaySource
 */
 extern "C" GGEMS_EXPORT void print_infos_xray_source(
   XRaySource* p_source_manager);
@@ -214,6 +250,25 @@ extern "C" GGEMS_EXPORT void set_local_axis_xray_source(
   \brief Set the rotation of the source around global axis
 */
 extern "C" GGEMS_EXPORT void set_rotation_xray_source(
-  XRaySource* p_source_manager, float const rx, float const ry, float const rz);
+  XRaySource* p_source_manager, float const rx, float const ry,
+  float const rz);
+
+/*!
+  \fn void set_monoenergy_xray_source(XRaySource const* p_source_manager, float const monoenergy)
+  \param p_source_manager - pointer on the source
+  \param monoenergy - monoenergetic value
+  \brief Set the monoenergy value for the XRaySource
+*/
+extern "C" GGEMS_EXPORT void set_monoenergy_xray_source(
+  XRaySource* p_source_manager, float const monoenergy);
+
+/*!
+  \fn void set_polyenergy_xray_source(XRaySource const* p_source_manager, char const* energy_spectrum)
+  \param p_source_manager - pointer on the source
+  \param energy_spectrum - polyenergetic spectrum
+  \brief Set the polyenergetic spectrum value for the XRaySource
+*/
+extern "C" GGEMS_EXPORT void set_polyenergy_xray_source(
+  XRaySource* p_source_manager, char const* energy_spectrum);
 
 #endif // End of GUARD_GGEMS_SOURCES_XRAYSOURCE_HH

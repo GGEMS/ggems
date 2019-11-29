@@ -14,6 +14,10 @@
   \date Tuesday October 15, 2019
 */
 
+#ifdef _MSC_VER
+#pragma warning(disable: 4251) // Deleting warning exporting STL members!!!
+#endif
+
 #include "GGEMS/global/ggems_export.hh"
 #include "GGEMS/global/opencl_manager.hh"
 #include "GGEMS/tools/matrix.hh"
@@ -175,6 +179,9 @@ class GGEMS_EXPORT GGEMSSourceManager
     bool is_initialized_; /*!< Boolean checking if the source is initialized */
     int particle_type_; /*!< Type of particle: photon, electron or positron */
     TransformCalculator* p_geometry_transformation_; /*!< Pointer storing the geometry transformation */
+
+  protected: // kernel generating primaries
+    cl::Kernel* p_kernel_get_primaries_; /*!< Kernel generating primaries on OpenCL device */
 
   protected: // Storing the source
     static GGEMSSourceManager* p_current_source_; /*!< Current source */

@@ -391,14 +391,14 @@ class TransformCalculator
     inline Matrix::float4x4 GetTransformationMatrix(void)
     {
       // Check if we need to update
-      if (need_updated_) UpdateTransformationMatrix();
+      if (is_need_updated_) UpdateTransformationMatrix();
 
       // Return the transformation matrix
       return matrix_transformation_;
     }
 
   private:
-    bool need_updated_; /*!< Check if the transformation matrix need to be updated */
+    bool is_need_updated_; /*!< Check if the transformation matrix need to be updated */
     cl_float3 position_; /*!< Position of the source/detector... */
     cl_float3 rotation_; /*! Rotation of the source/detector... */
     Matrix::float3x3 local_axis_; /*!< Matrix of local axis */

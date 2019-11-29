@@ -21,7 +21,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 TransformCalculator::TransformCalculator()
-: need_updated_(false)
+: is_need_updated_(false)
 {
   GGEMScout("TransformCalculator", "TransformCalculator", 1)
     << "Allocation of TransformCalculator..." << GGEMSendl;
@@ -103,7 +103,7 @@ void TransformCalculator::SetTranslation(float const& tx, float const& ty,
     0.0f, 0.0f, 0.0f, 1.0f);
 
   // Need to be updated if the Transformation matrix is called
-  need_updated_ = true;
+  is_need_updated_ = true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -165,7 +165,7 @@ void TransformCalculator::SetRotation(float const& rx, float const& ry,
   matrix_rotation_ = Matrix::MatrixMult4x4(kRotationZ, matrix_rotation_);
 
   // Need to be updated if the Transformation matrix is called
-  need_updated_ = true;
+  is_need_updated_ = true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -213,7 +213,7 @@ void TransformCalculator::SetAxisTransformation(Matrix::float3x3 const& axis)
     0.0f, 0.0f, 0.0f, 1.0f);
 
   // Need to be updated if the Transformation matrix is called
-  need_updated_ = true;
+  is_need_updated_ = true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -227,5 +227,5 @@ void TransformCalculator::UpdateTransformationMatrix(void)
       matrix_orthographic_projection_));
 
   // Update is done
-  need_updated_ = false;
+  is_need_updated_ = false;
 }
