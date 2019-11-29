@@ -314,13 +314,6 @@ void GGEMSManager::CheckParameters()
     oss << "You have to set a number of particles > 0!!!";
     Misc::ThrowException("GGEMSManager", "CheckParameters", oss.str());
   }
-
-  // Checking if the source is defined by the user
-  if (!source_manager_.IsReady()) {
-    std::ostringstream oss(std::ostringstream::out);
-    oss << "You have to define and initialize a source!!!";
-    Misc::ThrowException("GGEMSManager", "CheckParameters", oss.str());
-  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -356,6 +349,12 @@ void GGEMSManager::Initialize()
 
   // Initialization of the source
   source_manager_.Initialize();
+  // Checking if the source is defined by the user
+  if (!source_manager_.IsReady()) {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "Problem during the source initialization!!!";
+    Misc::ThrowException("GGEMSManager", "Initialize", oss.str());
+  }
 
   // Printing informations about the simulation
   PrintInfos();

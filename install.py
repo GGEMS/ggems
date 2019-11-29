@@ -57,11 +57,9 @@ if sys.platform == "linux" or sys.platform == "darwin":
 elif sys.platform == "win32":
     cmake_cmd += " -G \"NMake Makefiles\""
 cmake_cmd += " -DCMAKE_BUILD_TYPE=Release"
-cmake_cmd += " -DOPENCL_KERNEL_PATH=" + GGEMS_FOLDER + "/kernel"
+cmake_cmd += " -DOPENCL_KERNEL_PATH=" + GGEMS_FOLDER + "/src/kernels"
 cmake_cmd += " -DGGEMS_PATH=" + GGEMS_FOLDER
-cmake_cmd += " -DGGEMS_DOUBLE_PRECISION=ON"
 cmake_cmd += " -DMAXIMUM_PARTICLES=5000000"
-cmake_cmd += " -DGGEMS_FAST_MATH=ON"
 cmake_cmd += " -DCMAKE_VERBOSE_MAKEFILE=OFF"
 cmake_cmd += " -DCOMPILER=" + os.environ['COMPILER']
 cmake_cmd += " -DCMAKE_INSTALL_PREFIX=" + INSTALL_FOLDER

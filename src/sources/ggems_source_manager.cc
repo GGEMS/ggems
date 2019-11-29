@@ -31,7 +31,8 @@ GGEMSSourceManager* GGEMSSourceManager::p_current_source_ = nullptr;
 
 GGEMSSourceManager::GGEMSSourceManager()
 : is_initialized_(false),
-  particle_type_(-1)
+  particle_type_(-1),
+  p_kernel_get_primaries_(nullptr)
 {
   GGEMScout("GGEMSSourceManager", "GGEMSSourceManager", 1)
     << "Allocation of GGEMSSourceManager..." << GGEMSendl;

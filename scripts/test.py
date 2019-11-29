@@ -28,8 +28,9 @@ xray_source.set_particle_type(b"photon")
 xray_source.set_beam_aperture(5.0)  # in degree
 xray_source.set_focal_spot_size(0.6, 1.2, 0.0)  # in mm
 xray_source.set_rotation(0.0, 0.0, 0.0)  # in degree
+xray_source.set_polyenergy(b"scripts/spectrum_120kVp_2mmAl.dat")
+# xray_source.set_monoenergy(100.0)
 xray_source.print_infos()
-xray_source.initialize()
 
 # ------------------------------------------------------------------------------
 # STEP 3: GGEMS simulation parameters

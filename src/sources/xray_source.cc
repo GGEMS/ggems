@@ -23,7 +23,13 @@
 
 XRaySource::XRaySource(void)
 : GGEMSSourceManager(),
-  beam_aperture_(std::numeric_limits<float>::min())
+  beam_aperture_(std::numeric_limits<float>::min()),
+  is_monoenergy_mode_(false),
+  monoenergy_(-1.0f),
+  energy_spectrum_filename_(""),
+  number_of_energy_bins_(0),
+  p_energy_spectrum_(nullptr),
+  p_cdf_(nullptr)
 {
   GGEMScout("XRaySource", "XRaySource", 1)
     << "Allocation of XRaySource..." << GGEMSendl;
@@ -49,6 +55,22 @@ XRaySource::XRaySource(void)
 
 XRaySource::~XRaySource(void)
 {
+  // Get the pointer on OpenCL singleton
+  OpenCLManager& opencl_manager = OpenCLManager::GetInstance();
+
+  // Freeing the device buffers
+  if (p_energy_spectrum_) {
+    opencl_manager.Deallocate(p_energy_spectrum_,
+      number_of_energy_bins_ * sizeof(cl_double));
+    p_energy_spectrum_ = nullptr;
+  }
+
+  if (p_cdf_) {
+    opencl_manager.Deallocate(p_cdf_,
+      number_of_energy_bins_ * sizeof(cl_double));
+    p_cdf_ = nullptr;
+  }
+
   GGEMScout("XRaySource", "~XRaySource", 1)
     << "Deallocation of XRaySource..." << GGEMSendl;
 }
@@ -57,8 +79,33 @@ XRaySource::~XRaySource(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+void XRaySource::InitializeKernel(void)
+{
+  GGEMScout("XRaySource", "InitializeKernel", 1)
+    << "Initializing kernel..." << GGEMSendl;
+
+  // Getting the pointer on OpenCL manager
+  OpenCLManager& opencl_manager = OpenCLManager::GetInstance();
+
+  // Getting the path to kernel
+  std::string const kOpenCLKernelPath = OPENCL_KERNEL_PATH;
+  std::string const kFilename = kOpenCLKernelPath
+    + "/get_primaries_xray_source.cl";
+
+  // Compiling the kernel
+  p_kernel_get_primaries_ = opencl_manager.CompileKernel(kFilename,
+    "get_primaries_xray_source");
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 void XRaySource::GetPrimaries(cl::Buffer* p_primary_particles)
 {
+  GGEMScout("XRaySource", "GetPrimaries", 1)
+    << "Getting primaries..." << GGEMSendl;
+
   if (p_primary_particles) std::cout << "Test" << std::endl;
 }
 
@@ -78,6 +125,9 @@ void XRaySource::PrintInfos(void) const
   if (particle_type_ == ParticleName::ELECTRON) {
     std::cout << "Electron" << std::endl;
   }
+  GGEMScout("XRaySource", "PrintInfos", 0) << "*Energy mode: ";
+  if (is_monoenergy_mode_) std::cout << "Monoenergy" << std::endl;
+  else std::cout << "Polyenergy" << std::endl;
   GGEMScout("XRaySource", "PrintInfos", 0) << "*Position: " << "("
     << p_geometry_transformation_->GetPosition().s[0] << ", "
     << p_geometry_transformation_->GetPosition().s[1] << ", "
@@ -109,6 +159,26 @@ void XRaySource::PrintInfos(void) const
     << p_geometry_transformation_->GetLocalAxis().m22_ << GGEMSendl;
   GGEMScout("XRaySource", "PrintInfos", 0) << "]" << GGEMSendl;
   GGEMScout("XRaySource", "PrintInfos", 0) << GGEMSendl;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void XRaySource::SetMonoenergy(float const& monoenergy)
+{
+  monoenergy_ = monoenergy;
+  is_monoenergy_mode_ = true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void XRaySource::SetPolyenergy(char const* energy_spectrum_filename)
+{
+  energy_spectrum_filename_ = energy_spectrum_filename;
+  is_monoenergy_mode_ = false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -152,6 +222,114 @@ void XRaySource::CheckParameters(void) const
     oss << "The focal spot size is a posivite value!!!";
     Misc::ThrowException("XRaySource", "CheckParameters", oss.str());
   }
+
+  // Checking the energy
+  if (is_monoenergy_mode_) {
+    if (Misc::IsEqual(monoenergy_, -1.0f)) {
+      std::ostringstream oss(std::ostringstream::out);
+      oss << "You have to set an energy in monoenergetic mode!!!";
+      Misc::ThrowException("XRaySource", "CheckParameters", oss.str());
+    }
+
+    if (monoenergy_ < 0.0f) {
+      std::ostringstream oss(std::ostringstream::out);
+      oss << "The energy must be a positive value!!!";
+      Misc::ThrowException("XRaySource", "CheckParameters", oss.str());
+    }
+  }
+
+  if (!is_monoenergy_mode_) {
+    if (energy_spectrum_filename_.empty()) {
+      std::ostringstream oss(std::ostringstream::out);
+      oss << "You have to provide a energy spectrum file in polyenergy mode!!!";
+      Misc::ThrowException("XRaySource", "CheckParameters", oss.str());
+    }
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void XRaySource::FillEnergy(void)
+{
+  GGEMScout("XRaySource", "FillEnergy", 1) << "Filling energy..." << GGEMSendl;
+
+  // Get the pointer on OpenCL Manager
+  OpenCLManager& opencl_manager = OpenCLManager::GetInstance();
+
+  // Monoenergy mode
+  if (is_monoenergy_mode_) {
+    number_of_energy_bins_ = 1;
+
+    // Allocation of memory on OpenCL device
+    // Energy
+    p_energy_spectrum_ = opencl_manager.Allocate(nullptr, 1 * sizeof(cl_double),
+      CL_MEM_READ_WRITE);
+
+    // Cumulative distribution function
+    p_cdf_ = opencl_manager.Allocate(nullptr, 1 * sizeof(cl_double),
+      CL_MEM_READ_WRITE);
+  }
+  else { // Polyenergy mode 
+    // Read a first time the spectrum file counting the number of lines
+    std::ifstream spectrum_stream(energy_spectrum_filename_, std::ios::in);
+    Stream::CheckInputStream(spectrum_stream, energy_spectrum_filename_);
+
+    // Compute number of energy bins
+    std::string line;
+    while (std::getline(spectrum_stream, line)) ++number_of_energy_bins_;
+
+    // Returning to beginning of the file to read it again
+    spectrum_stream.clear();
+    spectrum_stream.seekg(0, std::ios::beg);
+
+    // Allocation of memory on OpenCL device
+    // Energy
+    p_energy_spectrum_ = opencl_manager.Allocate(nullptr,
+      number_of_energy_bins_ * sizeof(cl_double), CL_MEM_READ_WRITE);
+
+    // Cumulative distribution function
+    p_cdf_ = opencl_manager.Allocate(nullptr,
+      number_of_energy_bins_ * sizeof(cl_double), CL_MEM_READ_WRITE);
+
+    // Creating 2 temporary buffers for energy and cdf on host memory
+    //double* p_tmp_energy = new double[number_of_energy_bins_];
+    //double* p_tmp_cdf = new double[number_of_energy_bins_];
+
+    // Get the energy pointer on OpenCL device
+    cl_double* p_energy_spectrum =
+      opencl_manager.GetDeviceBufferWrite<cl_double>(p_energy_spectrum_);
+
+    // Get the cdf pointer on OpenCL device
+    cl_double* p_cdf = opencl_manager.GetDeviceBufferWrite<cl_double>(p_cdf_);
+
+    // Read the input spectrum and computing the sum for the cdf
+    int line_index = 0;
+    double sum_cdf = 0.0;
+    while (std::getline(spectrum_stream, line)) {
+      std::istringstream iss(line);
+      iss >> p_energy_spectrum[line_index] >> p_cdf[line_index];
+      sum_cdf += p_cdf[line_index];
+      ++line_index;
+    }
+
+    // Compute CDF and normalized in same time by security
+    p_cdf[0] /= sum_cdf;
+    for (cl_uint i = 1; i < number_of_energy_bins_; ++i) {
+      p_cdf[i] = p_cdf[i]/sum_cdf + p_cdf[i-1];
+    }
+
+    // By security, final value of cdf must be 1 !!!
+    p_cdf[number_of_energy_bins_ - 1] = 1.0;
+
+    // Release the pointers, mandatory step!!!
+    opencl_manager.ReleaseDeviceBuffer(p_energy_spectrum_, p_energy_spectrum);
+    opencl_manager.ReleaseDeviceBuffer(p_cdf_, p_cdf);
+
+    // Closing file
+    spectrum_stream.close();
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -160,8 +338,17 @@ void XRaySource::CheckParameters(void) const
 
 void XRaySource::Initialize(void)
 {
+  GGEMScout("XRaySource", "Initialize", 1)
+    << "Initializing the X-Ray source..." << GGEMSendl;
+
   // Check the mandatory parameters
   CheckParameters();
+
+  // Initializing the kernel for OpenCL
+  InitializeKernel();
+
+  // Filling the energy
+  FillEnergy();
 
   // The source is initialized
   is_initialized_ = true;
@@ -286,4 +473,24 @@ void set_rotation_xray_source(XRaySource* p_source_manager, float const rx,
   float const ry, float const rz)
 {
   p_source_manager->SetRotation(rx, ry, rz);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void set_monoenergy_xray_source(XRaySource* p_source_manager,
+  float const monoenergy)
+{
+  p_source_manager->SetMonoenergy(monoenergy);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void set_polyenergy_xray_source(XRaySource* p_source_manager,
+  char const* energy_spectrum)
+{
+  p_source_manager->SetPolyenergy(energy_spectrum);
 }

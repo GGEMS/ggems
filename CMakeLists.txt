@@ -34,18 +34,13 @@ SET(COMPILER ${COMPILER})
 
 #-------------------------------------------------------------------------------
 # Setting the OPENCL_KERNEL_PATH variable
-SET(OPENCL_KERNEL_PATH ${PROJECT_SOURCE_DIR}/kernel CACHE PATH
+SET(OPENCL_KERNEL_PATH ${PROJECT_SOURCE_DIR}/src CACHE PATH
   "Path to the OpenCL kernel repository")
 
 #-------------------------------------------------------------------------------
 # Setting the GGEMSHOME_PATH variable
 SET(GGEMS_PATH ${PROJECT_SOURCE_DIR} CACHE PATH
   "Path to the GGEMS project repository")
-
-#-------------------------------------------------------------------------------
-# Compilation options
-OPTION(GGEMS_DOUBLE_PRECISION "Float number with double precision" OFF)
-OPTION(GGEMS_FAST_MATH "OpenCL fast math flag" OFF)
 
 #-------------------------------------------------------------------------------
 # Set a maximum of particle in a buffer
@@ -68,8 +63,8 @@ IF(WIN32)
     STRING(REPLACE "-DNDEBUG" "" CMAKE_CXX_FLAGS_RELEASE
       ${CMAKE_CXX_FLAGS_RELEASE})
 
-    SET(CXX_FLAGS -std=c++17 -Wall -Wextra -Werror -pedantic -m64 -march=native
-      -Wconversion -Wfatal-errors -Wold-style-cast
+    SET(CXX_FLAGS -std=c++17 -Wall -Wextra -pedantic -m64 -march=native
+      -Wconversion -Wold-style-cast
       -pedantic-errors -ftree-vectorize -mtune=native -mavx2)
     SET(CXX_FLAGS_RELEASE -Ofast ${CXX_FLAGS})
     SET(CXX_FLAGS_DEBUG -O0 -g3 ${CXX_FLAGS})
@@ -103,14 +98,14 @@ ELSE()
 
   # Checking compiler for Unix
   IF(COMPILER STREQUAL "CLANG")
-    SET(CXX_FLAGS -std=c++2a -Wall -mavx2 -Wextra -Werror -pedantic -m64
-      -march=native -Wconversion -Wfatal-errors -Weffc++ -Wold-style-cast
+    SET(CXX_FLAGS -std=c++2a -Wall -mavx2 -Wextra -pedantic -m64
+      -march=native -Wconversion -Weffc++ -Wold-style-cast
       -pedantic-errors -mtune=native -ftree-vectorize)
     SET(CXX_FLAGS_RELEASE -Ofast ${CXX_FLAGS})
     SET(CXX_FLAGS_DEBUG -O0 -g3 ${CXX_FLAGS})
   ELSEIF(COMPILER STREQUAL "GCC")
-    SET(CXX_FLAGS -std=c++17 -Wall -Wextra -Werror -pedantic -m64 -march=native
-      -Wconversion -Wfatal-errors -Weffc++ -Wold-style-cast
+    SET(CXX_FLAGS -std=c++17 -Wall -Wextra -pedantic -m64 -march=native
+      -Wconversion -Weffc++ -Wold-style-cast
       -pedantic-errors -ftree-vectorize -mtune=native -mavx2)
     SET(CXX_FLAGS_RELEASE -Ofast ${CXX_FLAGS})
     SET(CXX_FLAGS_DEBUG -O0 -g3 ${CXX_FLAGS})
