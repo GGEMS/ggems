@@ -386,7 +386,6 @@ OpenCLManager::OpenCLManager(void)
   // Define the compilation options by default for OpenCL
   build_options_ = "-cl-std=CL1.2";
   build_options_ += " -w -Werror"; // Errors
-  build_options_ += " -DGGEMS_DOUBLE_PRECISION"; // Using double for OpenCL
   build_options_ += " -cl-fast-relaxed-math"; // Fast math for OpenCL
 
   // Add auxiliary function path to OpenCL options

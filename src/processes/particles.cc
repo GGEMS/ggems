@@ -79,7 +79,7 @@ void Particle::Initialize(void)
 ////////////////////////////////////////////////////////////////////////////////
 
 void Particle::SetNumberOfParticlesInBatch(
-  uint64_t const& number_of_particles_in_batch)
+  cl_ulong const& number_of_particles_in_batch)
 {
   // Updating the number of particle variable
   number_of_particles_ = number_of_particles_in_batch;
@@ -101,10 +101,10 @@ void Particle::InitializeSeeds(void)
 
   // Get the pointer on device
   PrimaryParticles* p_primary_particles =
-    opencl_manager.GetDeviceBufferWrite<PrimaryParticles>(p_primary_particles_);
+    opencl_manager.GetDeviceBuffer<PrimaryParticles>(p_primary_particles_);
 
   // For each particle a seed is generated
-  for (uint64_t i = 0; i < number_of_particles_; ++i) {
+  for (cl_ulong i = 0; i < number_of_particles_; ++i) {
     p_primary_particles->p_prng_state_1_[i] = static_cast<cl_uint>(rand());
     p_primary_particles->p_prng_state_2_[i] = static_cast<cl_uint>(rand());
     p_primary_particles->p_prng_state_3_[i] = static_cast<cl_uint>(rand());

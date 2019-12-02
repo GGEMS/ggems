@@ -222,7 +222,7 @@ void TransformCalculator::SetAxisTransformation(Matrix::float3x3 const& axis)
 
 void TransformCalculator::UpdateTransformationMatrix(void)
 {
-  matrix_transformation_ = Matrix::MatrixMult4x4( matrix_rotation_,
+  matrix_transformation_ = Matrix::MatrixMult4x4(matrix_rotation_,
       Matrix::MatrixMult4x4(matrix_translation_,
       matrix_orthographic_projection_));
 

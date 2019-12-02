@@ -16,6 +16,8 @@
 #include "GGEMS/tools/print.hh"
 #include "GGEMS/global/ggems_constants.hh"
 #include "GGEMS/tools/functions.hh"
+#include "GGEMS/tools/matrix.hh"
+#include "GGEMS/processes/particles.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -71,6 +73,10 @@ XRaySource::~XRaySource(void)
     p_cdf_ = nullptr;
   }
 
+    opencl_manager.Deallocate(p_debug_,
+      number_of_energy_bins_ * sizeof(cl_float));
+    p_debug_ = nullptr;
+
   GGEMScout("XRaySource", "~XRaySource", 1)
     << "Deallocation of XRaySource..." << GGEMSendl;
 }
@@ -101,12 +107,44 @@ void XRaySource::InitializeKernel(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void XRaySource::GetPrimaries(cl::Buffer* p_primary_particles)
+void XRaySource::GetPrimaries(Particle* p_particle)
 {
   GGEMScout("XRaySource", "GetPrimaries", 1)
     << "Getting primaries..." << GGEMSendl;
 
-  if (p_primary_particles) std::cout << "Test" << std::endl;
+  // Getting the opencl manager for event and command queue
+  OpenCLManager& opencl_manager = OpenCLManager::GetInstance();
+
+  // Command queue
+  cl::CommandQueue* p_queue = opencl_manager.GetCommandQueue();
+
+  // Event
+  cl::Event* p_event = opencl_manager.GetEvent();
+
+  // Get the number of particles
+  cl_ulong const kNumberOfParticles = p_particle->GetNumberOfParticles();
+
+  GGEMScout("XRaySource", "GetPrimaries", 0) << "Generating "
+    << kNumberOfParticles << " new particles..." << GGEMSendl;
+
+  // Set parameters for kernel
+  //p_kernel_get_primaries_->setArg(0, *p_cdf_);
+  //p_kernel_get_primaries_->setArg(1, *p_energy_spectrum_);
+  p_kernel_get_primaries_->setArg(0, *p_debug_);
+  p_kernel_get_primaries_->setArg(1, number_of_energy_bins_);
+
+  // Define the number of work-item to launch
+  cl::NDRange global(kNumberOfParticles);
+  cl::NDRange offset(0);
+
+  // Launching kernel
+  cl_int kernel_status = p_queue->enqueueNDRangeKernel(*p_kernel_get_primaries_,
+    offset, global, cl::NullRange, nullptr, p_event);
+  opencl_manager.CheckOpenCLError(kernel_status);
+  p_queue->finish(); // Wait until the kernel status is finish
+
+  // Displaying time in kernel
+  opencl_manager.DisplayElapsedTimeInKernel("GetPrimaries");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -284,48 +322,66 @@ void XRaySource::FillEnergy(void)
     spectrum_stream.clear();
     spectrum_stream.seekg(0, std::ios::beg);
 
+    p_debug_ = opencl_manager.Allocate(nullptr,
+      number_of_energy_bins_ * sizeof(cl_float), CL_MEM_READ_WRITE);
+
+    cl_float* p_debug =
+      opencl_manager.GetDeviceBuffer<cl_float>(p_debug_);
+
+    for (int i = 0; i < number_of_energy_bins_; ++i) {
+      p_debug[i] = 10.0f;
+    }
     // Allocation of memory on OpenCL device
     // Energy
-    p_energy_spectrum_ = opencl_manager.Allocate(nullptr,
-      number_of_energy_bins_ * sizeof(cl_double), CL_MEM_READ_WRITE);
+//    p_energy_spectrum_ = opencl_manager.Allocate(nullptr,
+ //     number_of_energy_bins_ * sizeof(cl_double), CL_MEM_READ_WRITE);
 
     // Cumulative distribution function
-    p_cdf_ = opencl_manager.Allocate(nullptr,
-      number_of_energy_bins_ * sizeof(cl_double), CL_MEM_READ_WRITE);
+    //p_cdf_ = opencl_manager.Allocate(nullptr,
+      //number_of_energy_bins_ * sizeof(cl_double), CL_MEM_READ_WRITE);
 
     // Creating 2 temporary buffers for energy and cdf on host memory
     //double* p_tmp_energy = new double[number_of_energy_bins_];
     //double* p_tmp_cdf = new double[number_of_energy_bins_];
 
     // Get the energy pointer on OpenCL device
-    cl_double* p_energy_spectrum =
-      opencl_manager.GetDeviceBufferWrite<cl_double>(p_energy_spectrum_);
+   // cl_double* p_energy_spectrum =
+   //   opencl_manager.GetDeviceBuffer<cl_double>(p_energy_spectrum_);
 
     // Get the cdf pointer on OpenCL device
-    cl_double* p_cdf = opencl_manager.GetDeviceBufferWrite<cl_double>(p_cdf_);
+    //cl_double* p_cdf = opencl_manager.GetDeviceBufferWrite<cl_double>(p_cdf_);
 
     // Read the input spectrum and computing the sum for the cdf
-    int line_index = 0;
+   /* double test = 0.0;
+    for (int i = 0; i < 10; ++i) {
+      test = 10.0 + i;
+      p_energy_spectrum[i] = test;
+    }*/
+    /*int line_index = 0;
     double sum_cdf = 0.0;
     while (std::getline(spectrum_stream, line)) {
       std::istringstream iss(line);
-      iss >> p_energy_spectrum[line_index] >> p_cdf[line_index];
-      sum_cdf += p_cdf[line_index];
+      *p_energy_spectrum = 2.0;
+      //iss >> *p_energy_spectrum++;// >> p_cdf[line_index];
+      //sum_cdf += p_cdf[line_index];
+      std::cout << *p_energy_spectrum << std::endl;
+      ++p_energy_spectrum;
       ++line_index;
-    }
+    }*/
 
     // Compute CDF and normalized in same time by security
-    p_cdf[0] /= sum_cdf;
+  /*  p_cdf[0] /= sum_cdf;
     for (cl_uint i = 1; i < number_of_energy_bins_; ++i) {
       p_cdf[i] = p_cdf[i]/sum_cdf + p_cdf[i-1];
     }
 
     // By security, final value of cdf must be 1 !!!
-    p_cdf[number_of_energy_bins_ - 1] = 1.0;
+    p_cdf[number_of_energy_bins_ - 1] = 1.0;*/
 
-    // Release the pointers, mandatory step!!!
-    opencl_manager.ReleaseDeviceBuffer(p_energy_spectrum_, p_energy_spectrum);
-    opencl_manager.ReleaseDeviceBuffer(p_cdf_, p_cdf);
+    // Release the pointers
+   // opencl_manager.ReleaseDeviceBuffer(p_energy_spectrum_, p_energy_spectrum);
+    //opencl_manager.ReleaseDeviceBuffer(p_cdf_, p_cdf);
+    opencl_manager.ReleaseDeviceBuffer(p_debug_, p_debug);
 
     // Closing file
     spectrum_stream.close();
@@ -473,6 +529,16 @@ void set_rotation_xray_source(XRaySource* p_source_manager, float const rx,
   float const ry, float const rz)
 {
   p_source_manager->SetRotation(rx, ry, rz);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void update_rotation_xray_source(XRaySource* p_source_manager, float const rx,
+  float const ry, float const rz)
+{
+  p_source_manager->UpdateRotation(rx, ry, rz);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

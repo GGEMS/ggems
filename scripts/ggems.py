@@ -122,6 +122,10 @@ class XRaySource(object):
             ctypes.c_void_p, ctypes.c_float, ctypes.c_float, ctypes.c_float]
         ggems_lib.set_rotation_xray_source.restype = ctypes.c_void_p
 
+        ggems_lib.update_rotation_xray_source.argtypes = [
+            ctypes.c_void_p, ctypes.c_float, ctypes.c_float, ctypes.c_float]
+        ggems_lib.update_rotation_xray_source.restype = ctypes.c_void_p
+
         ggems_lib.set_monoenergy_xray_source.argtypes = [
             ctypes.c_void_p, ctypes.c_float]
         ggems_lib.set_monoenergy_xray_source.restype = ctypes.c_void_p
@@ -166,6 +170,9 @@ class XRaySource(object):
 
     def set_polyenergy(self, file):
         ggems_lib.set_polyenergy_xray_source(self.obj, file)
+
+    def update_rotation(self, rx, ry, rz):
+        ggems_lib.update_rotation_xray_source(self.obj, rx, ry, rz)
 
 
 class GGEMSManager(object):
