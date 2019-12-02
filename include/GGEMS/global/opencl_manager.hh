@@ -27,6 +27,7 @@
 #endif
 
 #include "GGEMS/global/ggems_export.hh"
+#include "GGEMS/tools/print.hh"
 
 /*!
   \class OpenCLManager
@@ -226,7 +227,7 @@ class GGEMS_EXPORT OpenCLManager
     */
     inline cl::CommandQueue* GetCommandQueue(void) const
     {
-      return vp_queues_cl_.at(GetGlobalContextID(vp_contexts_act_cl_.at(0)));
+      return vp_queues_cl_.at(GetGlobalContextID(vp_contexts_act_cl_.front()));
     }
 
   private: // OpenCL event
@@ -281,26 +282,14 @@ class GGEMS_EXPORT OpenCLManager
     void Deallocate(cl::Buffer* p_buffer, std::size_t size);
 
     /*
-      \fn T* GetDeviceBufferWrite(cl::Buffer* p_device_ptr) const
+      \fn T* GetDeviceBuffer(cl::Buffer* p_device_ptr) const
       \tparam T - type of the returned pointer on host memory
       \param p_device_ptr - pointer on device memory
-      \brief Get the device pointer on host to write on it. ReleaseDeviceBuffer
-      must be used after this method!!!
-      \return the pointer on host memory on write mode
+      \brief Get the device pointer on host to write on it. ReleaseDeviceBuffer must be used after this method!!!
+      \return the pointer on host memory on write/read mode
     */
     template <typename T>
-    T* GetDeviceBufferWrite(cl::Buffer* const p_device_ptr) const;
-
-    /*
-      \fn T* GetDeviceBufferRead(cl::Buffer* p_device_ptr) const
-      \tparam T - type of the returned pointer on host memory
-      \param p_device_ptr - pointer on device memory
-      \brief Get the device pointer on host to read it. ReleaseDeviceBuffer
-      must be used after this method!!!
-      \return the pointer on host memory on read mode
-    */
-    template <typename T>
-    T* GetDeviceBufferRead(cl::Buffer* const p_device_ptr) const;
+    T* GetDeviceBuffer(cl::Buffer* const p_device_ptr) const;
 
     /*
       \fn void ReleaseDeviceBuffer(cl::Buffer* const p_device_ptr, T* p_host_ptr) const
@@ -429,26 +418,42 @@ class GGEMS_EXPORT OpenCLManager
 };
 
 template <typename T>
-T* OpenCLManager::GetDeviceBufferWrite(cl::Buffer* const p_device_ptr) const
+T* OpenCLManager::GetDeviceBuffer(cl::Buffer* const p_device_ptr) const
 {
-  return static_cast<T*>(GetCommandQueue()->enqueueMapBuffer(*p_device_ptr,
-    CL_TRUE, CL_MAP_WRITE, 0, sizeof(T), nullptr, nullptr, nullptr));
-}
+  GGEMScout("OpenCLManager", "GetDeviceBuffer", 2) << GGEMSendl;
 
-template <typename T>
-T* OpenCLManager::GetDeviceBufferRead(cl::Buffer* const p_device_ptr) const
-{
-  return static_cast<T*>(GetCommandQueue()->enqueueMapBuffer(*p_device_ptr,
-    CL_TRUE, CL_MAP_READ, 0, sizeof(T), nullptr, nullptr, nullptr));
+  cl::CommandQueue* p_queue = GetCommandQueue();
+  cl::Event* p_event = GetEvent();
+  cl_int err = 0;
+  T* ptr = static_cast<T*>(p_queue->enqueueMapBuffer(*p_device_ptr, CL_TRUE,
+    CL_MAP_WRITE | CL_MAP_READ, 0, sizeof(T), nullptr, p_event, &err));
+  CheckOpenCLError(err);
+  p_queue->finish();
+  cl_ulong start = 0, end = 0, queue = 0, submit = 0, status = 0;
+  p_event->wait();
+  p_event->getProfilingInfo(CL_PROFILING_COMMAND_START, &start);
+  p_event->getProfilingInfo(CL_PROFILING_COMMAND_END, &end);
+  p_event->getProfilingInfo(CL_PROFILING_COMMAND_QUEUED, &queue);
+  p_event->getProfilingInfo(CL_PROFILING_COMMAND_SUBMIT, &submit);
+  p_event->getInfo(CL_EVENT_COMMAND_EXECUTION_STATUS, &status);
+  std::cout << start << " " << end << " " << end - start << std::endl;
+  std::cout << queue << std::endl;
+  std::cout << submit << std::endl;
+  std::cout << status << std::endl;
+  return ptr;
 }
 
 template <typename T>
 void OpenCLManager::ReleaseDeviceBuffer(cl::Buffer* const p_device_ptr,
   T* p_host_ptr) const
 {
+  GGEMScout("OpenCLManager", "ReleaseDeviceBuffer", 2) << GGEMSendl;
+// Rajouter Event
+  cl::CommandQueue* p_queue = GetCommandQueue();
   // Unmap the memory
-  GetCommandQueue()->enqueueUnmapMemObject(*p_device_ptr, p_host_ptr);
-  GetCommandQueue()->finish();
+  cl_int err = p_queue->enqueueUnmapMemObject(*p_device_ptr, p_host_ptr);
+  CheckOpenCLError(err);
+  p_queue->finish();
 }
 
 /*!

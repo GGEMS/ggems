@@ -20,7 +20,9 @@
 
 #include "GGEMS/global/ggems_export.hh"
 #include "GGEMS/global/opencl_manager.hh"
-#include "GGEMS/tools/matrix.hh"
+
+class Particle;
+class TransformCalculator;
 
 /*!
   \class GGEMSSourceManager
@@ -148,13 +150,22 @@ class GGEMS_EXPORT GGEMSSourceManager
     */
     void SetRotation(float const& rx, float const& ry, float const& rz);
 
+    /*!
+      \fn void UpdateRotation(float const& rx, float const& ry, float const& rz)
+      \param rx - Rotation around X along global axis
+      \param ry - Rotation around Y along global axis
+      \param rz - Rotation around Z along global axis
+      \brief Update the rotation of the source around global axis
+    */
+    void UpdateRotation(float const& rx, float const& ry, float const& rz);
+
   public: // Pure abstract method
     /*!
-      \fn void GetPrimaries(cl::Buffer* p_primary_particles) = 0
-      \param p_primary_particles - buffer of primary particles on OpenCL device
+      \fn void GetPrimaries(Particle* p_particle) = 0
+      \param p_particle - pointer storing informations about particle
       \brief Generate primary particles
     */
-    virtual void GetPrimaries(cl::Buffer* p_primary_particles) = 0;
+    virtual void GetPrimaries(Particle* p_particle) = 0;
 
     /*!
       \fn void Initialize(void) = 0

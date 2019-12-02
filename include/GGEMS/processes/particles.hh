@@ -123,12 +123,26 @@ class GGEMS_EXPORT Particle
     void Initialize(void);
 
     /*!
-      \fn void SetNumberOfParticlesInBatch(uint64_t const& number_of_particles_in_batch)
+      \fn void SetNumberOfParticlesInBatch(cl_ulong const& number_of_particles_in_batch)
       \param number_of_particles_in_batch - Number of the particles in the batch
       \brief Set the number of the particles to simulate in a batch
     */
     void SetNumberOfParticlesInBatch(
-      uint64_t const& number_of_particles_in_batch);
+      cl_ulong const& number_of_particles_in_batch);
+
+    /*!
+      \fn cl_ulong GetNumberOfParticles() const
+      \brief return the number of particles in the batch
+      \return the number of particles in the current batch
+    */
+    inline cl_ulong GetNumberOfParticles() const {return number_of_particles_;};
+
+    /*!
+      \fn cl::Buffer* GetPrimaryParticles()
+      \brief Return the pointer on primary particles
+      \return Pointer on OpenCL buffer storing primary particles
+    */
+    //inline cl::Buffer* GetPrimaryParticles() {return p_primary_particles_;};
 
   private:
     /*!
@@ -144,9 +158,9 @@ class GGEMS_EXPORT Particle
     void InitializeSeeds(void);
 
   private:
-    uint64_t number_of_particles_; /*!< Number of the particles to simulate in a batch */
+    cl_ulong number_of_particles_; /*!< Number of the particles to simulate in a batch */
     //PrimaryParticles* p_primary_particles_; /*!< Pointer storing info about primary particles in batch */
-    cl::Buffer* p_primary_particles_;
+    cl::Buffer* p_primary_particles_; /*!< Pointer storing info about primary particles in batch on OpenCL device */
 };
 
 #endif // End of GUARD_GGEMS_PROCESSES_PARTICLES_HH

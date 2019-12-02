@@ -71,11 +71,11 @@ class GGEMS_EXPORT XRaySource : public GGEMSSourceManager
 
   public: // Pure abstract method from GGEMSSourceManager
     /*!
-      \fn void GetPrimaries(cl::Buffer* p_primary_particles)
-      \param p_primary_particles - buffer of primary particles on OpenCL device
+      \fn void GetPrimaries(Particle* p_particle)
+      \param p_particle - pointer storing informations about particle
       \brief Generate primary particles
     */
-    void GetPrimaries(cl::Buffer* p_primary_particles);
+    void GetPrimaries(Particle* p_particle);
 
     /*!
       \fn void Initialize(void)
@@ -147,8 +147,11 @@ class GGEMS_EXPORT XRaySource : public GGEMSSourceManager
     float monoenergy_; /*!< Monoenergy mode */
     std::string energy_spectrum_filename_; /*!< The energy spectrum filename for polyenergetic mode */
     cl_uint number_of_energy_bins_; /*!< Number of energy bins for the polyenergetic mode */
+
+  private: // Buffer for OpenCL
     cl::Buffer* p_energy_spectrum_; /*!< Energy spectrum for OpenCL device */
     cl::Buffer* p_cdf_; /*!< Cumulative distribution function to generate a random energy */
+    cl::Buffer* p_debug_;
 };
 
 /*!
@@ -250,6 +253,18 @@ extern "C" GGEMS_EXPORT void set_local_axis_xray_source(
   \brief Set the rotation of the source around global axis
 */
 extern "C" GGEMS_EXPORT void set_rotation_xray_source(
+  XRaySource* p_source_manager, float const rx, float const ry,
+  float const rz);
+
+/*!
+  \fn void update_rotation_xray_source(XRaySource* p_source_manager, float const rx, float const ry, float const rz)
+  \param p_source_manager - pointer on the source
+  \param rx - Rotation around X along global axis
+  \param ry - Rotation around Y along global axis
+  \param rz - Rotation around Z along global axis
+  \brief Update the rotation of the source around global axis
+*/
+extern "C" GGEMS_EXPORT void update_rotation_xray_source(
   XRaySource* p_source_manager, float const rx, float const ry,
   float const rz);
 

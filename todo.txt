@@ -38,3 +38,8 @@ filtre etc... (Si possible???)
 
 - 5000000 particules par défaut, checker se nombre en function de la RAM
 disponible et proposer un nouveau chiffre si besoin
+
+- Meilleure gestion des queue et event, notamment les submits et queue. Limiter
+à un seul queue et event actif pour un code plus simple. Gestion des events
+status et callback pour vérifier que les kernels fonctionnent que la mémoire est
+bien écrite

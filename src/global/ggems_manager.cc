@@ -356,6 +356,9 @@ void GGEMSManager::Initialize()
     Misc::ThrowException("GGEMSManager", "Initialize", oss.str());
   }
 
+  // Test
+  source_manager_.GetPrimaries(p_particle_);
+
   // Printing informations about the simulation
   PrintInfos();
 }

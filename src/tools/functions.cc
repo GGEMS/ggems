@@ -65,7 +65,7 @@ void Misc::ThrowException(std::string const& class_name,
   std::string const& method_name, std::string const& message)
 {
   std::ostringstream oss(std::ostringstream::out);
-  oss << "[ConCerto " << class_name << "::" << method_name << "] EXCEPTION!!! "
+  oss << "[GGEMS " << class_name << "::" << method_name << "] EXCEPTION!!! "
       << message;
   #if defined _MSC_VER
   GGEMScout(class_name, method_name, 0) << oss.str() << GGEMSendl;
