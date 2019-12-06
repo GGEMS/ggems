@@ -19,6 +19,12 @@
 #include "GGEMS/tools/matrix.hh"
 #include "GGEMS/processes/particles.hh"
 
+#ifdef _WIN32
+#ifdef min
+#undef min
+#endif
+#endif
+
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -140,7 +146,7 @@ void XRaySource::GetPrimaries(Particle* p_particle)
   // Launching kernel
   cl_int kernel_status = p_queue->enqueueNDRangeKernel(*p_kernel_get_primaries_,
     offset, global, cl::NullRange, nullptr, p_event);
-  opencl_manager.CheckOpenCLError(kernel_status);
+  opencl_manager.CheckOpenCLError(kernel_status, "XRaySource", "GetPrimaries");
   p_queue->finish(); // Wait until the kernel status is finish
 
   // Displaying time in kernel

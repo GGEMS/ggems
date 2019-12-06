@@ -13,20 +13,22 @@
 #include "GGEMS/tools/print.hh"
 
 // Initializations
-GGEMSStream GGEMScout = GGEMSStream(std::cout);
-GGEMSStream GGEMScerr = GGEMSStream(std::cerr);
+GGEMSStream GGEMScout = GGEMSStream(std::cout, ConsoleColor::green);
+GGEMSStream GGEMScerr = GGEMSStream(std::cerr, ConsoleColor::red);
+GGEMSStream GGEMSwarn = GGEMSStream(std::cout, ConsoleColor::yellow);
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSStream::GGEMSStream(std::ostream& stream)
+GGEMSStream::GGEMSStream(std::ostream& stream, ConsoleColor const& color)
 : class_name_(""),
   method_name_(""),
   verbosity_limit_(1),
   verbosity_level_(0),
   stream_counter_(0),
-  stream_(stream)
+  stream_(stream),
+  color_(color)
 {
   ;
 }
@@ -62,4 +64,5 @@ void set_verbose(int verbosity)
 {
   GGEMScout.SetVerbosity(verbosity);
   GGEMScerr.SetVerbosity(verbosity);
+  GGEMSwarn.SetVerbosity(verbosity);
 }

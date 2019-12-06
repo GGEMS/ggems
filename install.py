@@ -10,9 +10,9 @@ if sys.platform == "linux" or sys.platform == "darwin":
     os.environ['CC'] = 'clang-9'
     os.environ['CXX'] = 'clang++-9'
 elif sys.platform == "win32":
-    os.environ['COMPILER'] = 'CL'
-    os.environ['CC'] = 'cl.exe'
-    os.environ['CXX'] = 'cl.exe'
+    os.environ['COMPILER'] = 'GCC'
+    os.environ['CC'] = 'gcc.exe'
+    os.environ['CXX'] = 'g++.exe'
 else:  # Unknown system
     print("Unknown architecture!!!", file=sys.stderr)
 
@@ -24,8 +24,8 @@ if sys.platform == "linux" or sys.platform == "darwin":
     BUILD_FOLDER = "/home/dbenoit/data/Build/GGEMS_OpenCL"
     INSTALL_FOLDER = "/home/dbenoit"
 elif sys.platform == "win32":
-    GGEMS_FOLDER = "C:\\Users\\dbenoit\\Desktop\\ggems_opencl"
-    BUILD_FOLDER = "C:\\Users\\dbenoit\\Desktop\\ggems_opencl_build"
+    GGEMS_FOLDER = "C:\\Users\\dbenoit\\Workspace\\GGEMS_OpenCL"
+    BUILD_FOLDER = "C:\\Users\\dbenoit\\Workspace\\GGEMS_OpenCL_build"
     INSTALL_FOLDER = "C:\\Users\\dbenoit"
 
 # ------------------------------------------------------------------------------
