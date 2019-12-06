@@ -89,11 +89,14 @@ class GGEMS_EXPORT OpenCLManager
 
   public: // Error stream management
     /*!
-      \fn void CheckOpenCLError( cl_int const& error ) const
+      \fn void CheckOpenCLError(cl_int const& error, std::string const& class_name, std::string const& method_name) const
       \param error - error index
+      \param class_name - name of the class
+      \param method_name - name of the method
       \brief check the OpenCL error
     */
-    void CheckOpenCLError(cl_int const& error) const;
+    void CheckOpenCLError(cl_int const& error, std::string const& class_name,
+      std::string const& method_name) const;
 
   private:
     /*!
@@ -135,10 +138,10 @@ class GGEMS_EXPORT OpenCLManager
 
   private: // Context management
     /*!
-      \fn void CreateContextCPUGPU(void)
+      \fn void CreateContext(void)
       \brief Create a context for GPU or CPU
     */
-    void CreateContextCPUGPU(void);
+    void CreateContext(void);
 
     /*!
       \fn cl_ulong GetGlobalMemoryContext(std::size_t const& context_id) const
@@ -359,39 +362,10 @@ class GGEMS_EXPORT OpenCLManager
     cl_uint *p_device_mem_base_addr_align_; /*!< Alignment memory */
     std::string *p_device_name_; /*!< Name of the device */
     std::string *p_device_opencl_c_version_; /*!< OpenCL C version */
-    size_t *p_device_printf_buffer_size_; /*!< Printf buffer size */
-    size_t *p_device_image_max_array_size_; /*!< Image max array size */
-    size_t *p_device_image_max_buffer_size_; /*!< Image max buffer size */
-    cl_bool *p_device_image_support_; /*!< Flag on image support */
-    size_t *p_device_image_2d_max_w_; /*!< Image2D max width */
-    size_t *p_device_image_2d_max_h_; /*!< Image2D max height */
-    size_t *p_device_image_3d_max_w_; /*!< Image3D max width */
-    size_t *p_device_image_3d_max_h_; /*!< Image3D max height */
-    size_t *p_device_image_3d_max_d_; /*!< Image3D max depth */
     cl_uint *p_device_max_clock_frequency_; /*!< Max clock frequency */
     cl_uint *p_device_max_compute_units_; /*!< Max compute units */
     cl_ulong *p_device_constant_buffer_size_; /*!< Constant buffer size */
     cl_ulong *p_device_mem_alloc_size_; /*!< Memory allocation size */
-    cl_uint *p_device_max_read_image_args_; /*!< Max read image arguments */
-    cl_uint *p_device_max_write_image_args_; /*!< Max write image arguments */
-    size_t *p_device_parameter_size_; /*!< Parameter size */
-    cl_uint *p_device_samplers_; /*!< Number of maximum samplers */
-    cl_uint *p_device_workitem_dimensions_; /*!< Work item dimensions */
-    size_t *p_device_workgroup_size_; /*!< Work group size */
-    std::vector<size_t> *p_device_workitem_size_; /*!< Work item size */
-    cl_platform_id *p_device_platform_id_; /*!< Platform ID */
-    cl_uint *p_device_native_vector_width_char_; /*!< Native size of the char */
-    cl_uint *p_device_preferred_vector_width_char_; /*!< Preferred size of the char */
-    cl_uint *p_device_native_vector_width_int_; /*!< Native size of the int */
-    cl_uint *p_device_preferred_vector_width_int_; /*!< Preferred size of the int */
-    cl_uint *p_device_native_vector_width_long_; /*!< Native size of the long */
-    cl_uint *p_device_preferred_vector_width_long_; /*!< Preferred size of the long */
-    cl_uint *p_device_native_vector_width_short_; /*!< Native size of the short */
-    cl_uint *p_device_preferred_vector_width_short_; /*!< Preferred size of the short */
-    cl_uint *p_device_native_vector_width_half_; /*!< Native size of the half */
-    cl_uint *p_device_preferred_vector_width_half_; /*!< Preferred size of the half */
-    cl_uint *p_device_native_vector_width_float_; /*!< Native size of the float */
-    cl_uint *p_device_preferred_vector_width_float_; /*!< Preferred size of the float */
     cl_uint *p_device_native_vector_width_double_; /*!< Native size of the double */
     cl_uint *p_device_preferred_vector_width_double_; /*!< Preferred size of the double */
 
@@ -420,6 +394,9 @@ class GGEMS_EXPORT OpenCLManager
 template <typename T>
 T* OpenCLManager::GetDeviceBuffer(cl::Buffer* const p_device_ptr) const
 {
+  GGEMScout("OpenCLManager", "GetDeviceBuffer", 3)
+    << "Getting mapped memory buffer on OpenCL device..." << GGEMSendl;
+
   GGEMScout("OpenCLManager", "GetDeviceBuffer", 2) << GGEMSendl;
 
   cl::CommandQueue* p_queue = GetCommandQueue();
@@ -427,7 +404,7 @@ T* OpenCLManager::GetDeviceBuffer(cl::Buffer* const p_device_ptr) const
   cl_int err = 0;
   T* ptr = static_cast<T*>(p_queue->enqueueMapBuffer(*p_device_ptr, CL_TRUE,
     CL_MAP_WRITE | CL_MAP_READ, 0, sizeof(T), nullptr, p_event, &err));
-  CheckOpenCLError(err);
+  CheckOpenCLError(err, "OpenCLManager", "GetDeviceBuffer");
   p_queue->finish();
   cl_ulong start = 0, end = 0, queue = 0, submit = 0, status = 0;
   p_event->wait();
@@ -447,12 +424,15 @@ template <typename T>
 void OpenCLManager::ReleaseDeviceBuffer(cl::Buffer* const p_device_ptr,
   T* p_host_ptr) const
 {
+  GGEMScout("OpenCLManager", "ReleaseDeviceBuffer", 3)
+    << "Releasing mapped memory buffer on OpenCL device..." << GGEMSendl;
+
   GGEMScout("OpenCLManager", "ReleaseDeviceBuffer", 2) << GGEMSendl;
 // Rajouter Event
   cl::CommandQueue* p_queue = GetCommandQueue();
   // Unmap the memory
   cl_int err = p_queue->enqueueUnmapMemObject(*p_device_ptr, p_host_ptr);
-  CheckOpenCLError(err);
+  CheckOpenCLError(err, "OpenCLManager", "ReleaseDeviceBuffer");
   p_queue->finish();
 }
 
@@ -481,7 +461,8 @@ extern "C" GGEMS_EXPORT void print_device(OpenCLManager* p_opencl_manager);
   \param p_opencl_manager - pointer on the singleton
   \brief Print information about OpenCL compilation option
 */
-extern "C" GGEMS_EXPORT void print_build_options(OpenCLManager* p_opencl_manager);
+extern "C" GGEMS_EXPORT void print_build_options(
+  OpenCLManager* p_opencl_manager);
 
 /*!
   \fn void print_context(OpenCLManager* p_opencl_manager)

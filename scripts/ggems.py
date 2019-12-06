@@ -9,7 +9,7 @@ elif sys.platform == "darwin":
         "/home/dbenoit/data/Build/GGEMS_OpenCL/libggems.dylib")
 elif sys.platform == "win32":
     ggems_lib = ctypes.cdll.LoadLibrary(
-        "C:\\Users\\dbenoit\\Desktop\\ggems_opencl_build\\libggems.dll")
+        "C:\\Users\\dbenoit\\Workspace\\GGEMS_OpenCL_build\\libggems.dll")
 
 
 class OpenCLManager(object):
@@ -45,7 +45,7 @@ class OpenCLManager(object):
 
         self.obj = ggems_lib.get_instance_opencl_manager()
 
-    def print_infos(self):
+    def print_platform(self):
         ggems_lib.print_platform(self.obj)
 
     def print_device(self):
