@@ -20,12 +20,6 @@
 #include "GGEMS/global/ggems_manager.hh"
 #include "GGEMS/tools/print.hh"
 
-#ifdef _WIN32
-#ifdef max
-#undef max
-#endif
-#endif
-
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -71,11 +65,8 @@ void Misc::ThrowException(std::string const& class_name,
   std::string const& method_name, std::string const& message)
 {
   std::ostringstream oss(std::ostringstream::out);
-  oss //<< "[GGEMS " << class_name << "::" << method_name << "] EXCEPTION!!! "
-      << message;
-  #if defined _MSC_VER
-  GGEMScerr(class_name, method_name, 0) << oss.str() << GGEMSendl;
-  #endif
+  oss << message;
+  GGEMScerr(class_name, method_name, 0) << GGEMSendl;
   throw std::runtime_error(oss.str());
 }
 

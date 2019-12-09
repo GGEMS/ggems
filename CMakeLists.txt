@@ -64,8 +64,20 @@ IF(WIN32)
       ${CMAKE_CXX_FLAGS_RELEASE})
 
     SET(CXX_FLAGS -std=c++17 -Wall -Wextra -pedantic -m64 -march=native
-      -Wconversion -Wold-style-cast
-      -pedantic-errors -ftree-vectorize -mtune=native -mavx2)
+      -Wconversion -Wold-style-cast -pedantic-errors -ftree-vectorize
+      -mtune=native -mavx2)
+    SET(CXX_FLAGS_RELEASE -Ofast ${CXX_FLAGS})
+    SET(CXX_FLAGS_DEBUG -O0 -g3 ${CXX_FLAGS})
+  ELSEIF(COMPILER STREQUAL "CLANG")
+    # Delete some flags by default provided by CMAKE
+    STRING(REPLACE "-O3" "" CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
+    STRING(REPLACE "-DNDEBUG" "" CMAKE_CXX_FLAGS_RELEASE
+      ${CMAKE_CXX_FLAGS_RELEASE})
+
+    #SET(CXX_FLAGS -std=c++2a -Wall -mavx2 -Wextra -pedantic -m64
+    #-march=native -Wconversion -Weffc++ -Wold-style-cast
+    #-pedantic-errors -mtune=native -ftree-vectorize)
+
     SET(CXX_FLAGS_RELEASE -Ofast ${CXX_FLAGS})
     SET(CXX_FLAGS_DEBUG -O0 -g3 ${CXX_FLAGS})
   ELSEIF(COMPILER STREQUAL "CL")
@@ -78,7 +90,8 @@ IF(WIN32)
     SET(CXX_FLAGS_RELEASE /Ox /Qpar ${CXX_FLAGS})
     SET(CXX_FLAGS_DEBUG /Od /DEBUG /Zi ${CXX_FLAGS})
   ELSE()
-    MESSAGE(FATAL_ERROR "Only 'CLANG' and 'GCC' are available for Windows")
+    MESSAGE(FATAL_ERROR
+      "Only 'CL', 'CLANG' and 'GCC' are available for Windows")
   ENDIF()
 
   ADD_COMPILE_OPTIONS("$<$<CONFIG:RELEASE>:${CXX_FLAGS_RELEASE}>"
@@ -101,17 +114,15 @@ ELSE()
     SET(CXX_FLAGS -std=c++2a -Wall -mavx2 -Wextra -pedantic -m64
       -march=native -Wconversion -Weffc++ -Wold-style-cast
       -pedantic-errors -mtune=native -ftree-vectorize)
-    SET(CXX_FLAGS_RELEASE -Ofast ${CXX_FLAGS})
-    SET(CXX_FLAGS_DEBUG -O0 -g3 ${CXX_FLAGS})
   ELSEIF(COMPILER STREQUAL "GCC")
     SET(CXX_FLAGS -std=c++17 -Wall -Wextra -pedantic -m64 -march=native
       -Wconversion -Weffc++ -Wold-style-cast
       -pedantic-errors -ftree-vectorize -mtune=native -mavx2)
-    SET(CXX_FLAGS_RELEASE -Ofast ${CXX_FLAGS})
-    SET(CXX_FLAGS_DEBUG -O0 -g3 ${CXX_FLAGS})
   ELSE()
     MESSAGE(FATAL_ERROR "Only 'CLANG' and 'GCC' are available for Unix")
   ENDIF()
+  SET(CXX_FLAGS_RELEASE -Ofast ${CXX_FLAGS})
+  SET(CXX_FLAGS_DEBUG -O0 -g3 ${CXX_FLAGS})
 
   ADD_COMPILE_OPTIONS("$<$<CONFIG:RELEASE>:${CXX_FLAGS_RELEASE}>"
     "$<$<CONFIG:DEBUG>:${CXX_FLAGS_DEBUG}>")

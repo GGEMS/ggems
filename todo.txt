@@ -1,3 +1,12 @@
+--------------------------------------------------------------------------------
+- Gestion des verboses:
+  * 0 Print demandé et info indispensable
+  * 1 Infos plus détaillées
+  * 2 Infos détaillées des résultats avec détails
+  * 3 Entrées et sorties des constructeurs, destructeurs et fonctions
+--------------------------------------------------------------------------------
+
+
 - A chaque nouveau batch redonner le bon nombre de particles dans le batch
 
 - Gestion des batchs automatique
@@ -24,7 +33,7 @@ Si possible, faire la visualization sur carte graphique avec OpenCL
 
 - Regarder Gitlab
 
-- Documentation avec Sphinx ?
+- Documentation avec Sphinx
 
 - Source X complète en tenant compte du courant, volt, temperature, anode,
 filtre etc... (Si possible???)
@@ -39,8 +48,4 @@ disponible et proposer un nouveau chiffre si besoin
 status et callback pour vérifier que les kernels fonctionnent que la mémoire est
 bien écrite
 
-- Gestion des verboses:
-  * 0 Print demandé et info indispensable
-  * 1 Infos plus détaillées
-  * 2 Infos détaillées des résultats avec détails
-  * 3 Entrées et sorties des constructeurs, destructeurs et fonctions
+- Vérifier la compilation Windows et G++

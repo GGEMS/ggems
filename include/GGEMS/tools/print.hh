@@ -19,7 +19,8 @@
 #include "GGEMS/global/ggems_export.hh"
 
 #ifdef _WIN32
-#include <Windows.h>
+#define NOMINMAX
+#include <windows.h>
 #endif
 
 // Simple redefinition of std::endl
@@ -34,7 +35,29 @@
   \enum ConsoleColor
   \brief define a color for the console terminal
 */
-enum class ConsoleColor {red, yellow, green};
+enum ConsoleColor : unsigned char
+{
+  black = 0, blue, green, aqua, red, purple, yellow, white, gray
+};
+
+#ifdef _WIN32
+namespace
+{
+  WORD const color [] = {
+    0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
+  };
+}
+#else
+namespace
+{
+  std::string const color[] = {
+    "\033[30m", "\033[34m", "\033[32m", "\033[36m", "\033[31m",
+    "\033[35m", "\033[33m", "\033[97m", "\033[37m"
+  };
+
+  std::string const color_default("\033[0m");
+}
+#endif
 
 /*!
   \class GGEMSStream
@@ -87,7 +110,7 @@ class GGEMS_EXPORT GGEMSStream
     int verbosity_level_; /*!< Verbosity level of the print */
     int stream_counter_; /*!< Counter printing multiple stream */
     std::ostream& stream_; /*!< Stream handling std::cout or std::endl */
-    ConsoleColor color_; /*!< Color to print on screen */
+    ConsoleColor color_index_; /*!< Color to print on screen */
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -107,71 +130,27 @@ GGEMSStream& GGEMSStream::operator<<(T const& message)
 
   if (stream_counter_ == 0) {
     if (verbosity_level_ <= verbosity_limit_) {
+      stream_ << std::scientific << "[";
       if (!class_name_.empty() && !method_name_.empty()) {
-        stream_ << std::scientific << "[";
-          if (color_ == ConsoleColor::red) {
-            #ifdef _WIN32
-            SetConsoleTextAttribute(hConsole, 4);
-            stream_ << "GGEMS " << class_name_ << "::" << method_name_;
-            SetConsoleTextAttribute(hConsole, info.wAttributes);
-            #else
-            stream_ << "\033[31mGGEMS " << class_name_ << "::" << method_name_
-              << "\033[0m";
-            #endif
-          }
-          else if (color_ == ConsoleColor::green) {
-            #ifdef _WIN32
-            SetConsoleTextAttribute(hConsole, 2);
-            stream_ << "GGEMS " << class_name_ << "::" << method_name_;
-            SetConsoleTextAttribute(hConsole, info.wAttributes);
-            #else
-            stream_ << "\033[32mGGEMS " << class_name_ << "::" << method_name_
-              << "\033[0m";
-            #endif
-          }
-          else if (color_ == ConsoleColor::yellow) {
-            #ifdef _WIN32
-            SetConsoleTextAttribute(hConsole, 6);
-            stream_ << "GGEMS " << class_name_ << "::" << method_name_;
-            SetConsoleTextAttribute(hConsole, info.wAttributes);
-            #else
-            stream_ << "\033[33mGGEMS " << class_name_ << "::" << method_name_;
-              << "\033[0m";
-            #endif
-          }
-          stream_ << "](" << verbosity_level_ << ") " << message;
+        #ifdef _WIN32
+        SetConsoleTextAttribute(hConsole, color[color_index_]);
+        stream_ << "GGEMS " << class_name_ << "::" << method_name_;
+        SetConsoleTextAttribute(hConsole, info.wAttributes);
+        #else
+        stream_ << color[color_index_] << "GGEMS " << class_name_ << "::"
+          << method_name_ << color_default;
+        #endif
       }
       else {
-        stream_ << "[";
-          if (color_ == ConsoleColor::red) {
-            #ifdef _WIN32
-            SetConsoleTextAttribute(hConsole, 4);
-            stream_ << "GGEMS";
-            SetConsoleTextAttribute(hConsole, info.wAttributes);
-            #else
-            stream_ << "\033[31mGGEMS\033[0m";
-            #endif
-          }
-          else if (color_ == ConsoleColor::green) {
-            #ifdef _WIN32
-            SetConsoleTextAttribute(hConsole, 2);
-            stream_ << "GGEMS";
-            SetConsoleTextAttribute(hConsole, info.wAttributes);
-            #else
-            stream_ << "\033[32mGGEMS\033[0m";
-            #endif
-          }
-          else if (color_ == ConsoleColor::yellow) {
-            #ifdef _WIN32
-            SetConsoleTextAttribute(hConsole, 6);
-            stream_ << "GGEMS";
-            SetConsoleTextAttribute(hConsole, info.wAttributes);
-            #else
-            stream_ << "\033[33mGGEMS\033[0m";
-            #endif
-          }
-        stream_ << "](" << verbosity_level_ << ") " << message;
+        #ifdef _WIN32
+        SetConsoleTextAttribute(hConsole, color[color_index_]);
+        stream_ << "GGEMS";
+        SetConsoleTextAttribute(hConsole, info.wAttributes);
+        #else
+        stream_ << color[color_index_] << "GGEMS" << color_default;
+        #endif
       }
+      stream_ << "](" << verbosity_level_ << ") " << message;
       stream_counter_++;
     }
   }

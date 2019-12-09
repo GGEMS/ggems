@@ -204,6 +204,15 @@ OpenCLManager::OpenCLManager(void)
       "OpenCLManager");
   }
 
+  if (!vp_devices_cl_.empty()) {
+    for (std::size_t i = 0; i < vp_devices_cl_.size(); ++i) {
+      GGEMSwarn("OpenCLManager", "~OpenCLManager", 0) << i << GGEMSendl;
+      delete vp_devices_cl_.at(i);
+      vp_devices_cl_.at(i) = nullptr;
+    }
+    vp_devices_cl_.clear();
+  }
+
   // Define the compilation options by default for OpenCL
   build_options_ = "-cl-std=CL1.2 -w -Werror";
 
@@ -218,7 +227,7 @@ OpenCLManager::OpenCLManager(void)
   #endif
 
   // Creating a context for each device
-  CreateContext();
+  //CreateContext();
 
   // Creating the command queue for CPU and GPU
   //CreateCommandQueue();
@@ -227,7 +236,7 @@ OpenCLManager::OpenCLManager(void)
   //CreateEvent();
 
   // Initialization of the RAM manager
-  InitializeRAMManager();
+  // InitializeRAMManager();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -245,6 +254,7 @@ OpenCLManager::~OpenCLManager(void)
   // Device(s)
   if (!vp_devices_cl_.empty()) {
     for (std::size_t i = 0; i < vp_devices_cl_.size(); ++i) {
+      GGEMSwarn("OpenCLManager", "~OpenCLManager", 0) << i << GGEMSendl;
       delete vp_devices_cl_.at(i);
       vp_devices_cl_.at(i) = nullptr;
     }
@@ -288,7 +298,7 @@ OpenCLManager::~OpenCLManager(void)
   //for (auto&& q : vp_queues_cl_) delete q;
   //for (auto&& e : vp_event_cl_) delete e;
 
-  vp_contexts_act_cl_.clear();
+  /*vp_contexts_act_cl_.clear();
   vp_contexts_cpu_cl_.clear();
   vp_contexts_cpu_cl_.clear();
   for (std::size_t i = 0; i < vp_contexts_cl_.size(); ++i) {
@@ -296,7 +306,7 @@ OpenCLManager::~OpenCLManager(void)
     delete (vp_contexts_cl_[i]);
     vp_contexts_cl_[i] = nullptr;
   }
-  vp_contexts_cl_.clear();
+  vp_contexts_cl_.clear();*/
   // Deleting context(s)
  /* if (!vp_contexts_cl_.empty()) {
     std::cout << vp_contexts_cl_.size() << std::endl;
@@ -324,8 +334,6 @@ OpenCLManager::~OpenCLManager(void)
  // for (std::size_t i = 0; i < vp_kernel_cl_.size(); ++i) {
  //   delete vp_kernel_cl_.at(i);
  // }
-
-
 
   GGEMScout("OpenCLManager", "~OpenCLManager", 3)
     << "Deallocation of OpenCL Manager singleton..." << GGEMSendl;
