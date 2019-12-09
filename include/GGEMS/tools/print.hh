@@ -19,7 +19,9 @@
 #include "GGEMS/global/ggems_export.hh"
 
 #ifdef _WIN32
+#ifdef _MSC_VER
 #define NOMINMAX
+#endif
 #include <windows.h>
 #endif
 
@@ -69,6 +71,7 @@ class GGEMS_EXPORT GGEMSStream
     /*!
       \brief GGEMSStream constructor
       \param stream - an output stream
+      \param color - define a color on the screen
     */
     GGEMSStream(std::ostream& stream, ConsoleColor const& color);
 

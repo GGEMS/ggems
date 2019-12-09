@@ -15,7 +15,7 @@
 // Initializations
 GGEMSStream GGEMScout = GGEMSStream(std::cout, ConsoleColor::green);
 GGEMSStream GGEMScerr = GGEMSStream(std::cerr, ConsoleColor::red);
-GGEMSStream GGEMSwarn = GGEMSStream(std::cout, ConsoleColor::purple);
+GGEMSStream GGEMSwarn = GGEMSStream(std::cout, ConsoleColor::yellow);
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////

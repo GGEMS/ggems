@@ -328,7 +328,7 @@ void XRaySource::FillEnergy(void)
     cl_float* p_debug =
       opencl_manager.GetDeviceBuffer<cl_float>(p_debug_);
 
-    for (int i = 0; i < number_of_energy_bins_; ++i) {
+    for (cl_uint i = 0; i < number_of_energy_bins_; ++i) {
       p_debug[i] = 10.0f;
     }
     // Allocation of memory on OpenCL device
