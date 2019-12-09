@@ -74,9 +74,9 @@ IF(WIN32)
     STRING(REPLACE "-DNDEBUG" "" CMAKE_CXX_FLAGS_RELEASE
       ${CMAKE_CXX_FLAGS_RELEASE})
 
-    #SET(CXX_FLAGS -std=c++2a -Wall -mavx2 -Wextra -pedantic -m64
-    #-march=native -Wconversion -Weffc++ -Wold-style-cast
-    #-pedantic-errors -mtune=native -ftree-vectorize)
+    SET(CXX_FLAGS -std=c++2a -Wall -mavx2 -Wextra -pedantic -m64
+    -march=native -Wconversion -Weffc++ -Wold-style-cast
+    -pedantic-errors -mtune=native -ftree-vectorize)
 
     SET(CXX_FLAGS_RELEASE -Ofast ${CXX_FLAGS})
     SET(CXX_FLAGS_DEBUG -O0 -g3 ${CXX_FLAGS})

@@ -14,7 +14,9 @@
 
 #include <fcntl.h>
 #ifdef _WIN32
+#ifdef _MSC_VER
 #define NOMINMAX
+#endif
 #include <windows.h>
 #include <wincrypt.h>
 #else

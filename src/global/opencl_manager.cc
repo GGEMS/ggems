@@ -204,15 +204,6 @@ OpenCLManager::OpenCLManager(void)
       "OpenCLManager");
   }
 
-  if (!vp_devices_cl_.empty()) {
-    for (std::size_t i = 0; i < vp_devices_cl_.size(); ++i) {
-      GGEMSwarn("OpenCLManager", "~OpenCLManager", 0) << i << GGEMSendl;
-      delete vp_devices_cl_.at(i);
-      vp_devices_cl_.at(i) = nullptr;
-    }
-    vp_devices_cl_.clear();
-  }
-
   // Define the compilation options by default for OpenCL
   build_options_ = "-cl-std=CL1.2 -w -Werror";
 
@@ -251,15 +242,16 @@ OpenCLManager::~OpenCLManager(void)
     v_platforms_cl_.clear();
   }
 
+  for (auto&& d : vp_devices_cl_) delete d;
   // Device(s)
-  if (!vp_devices_cl_.empty()) {
+  /*if (!vp_devices_cl_.empty()) {
     for (std::size_t i = 0; i < vp_devices_cl_.size(); ++i) {
-      GGEMSwarn("OpenCLManager", "~OpenCLManager", 0) << i << GGEMSendl;
       delete vp_devices_cl_.at(i);
       vp_devices_cl_.at(i) = nullptr;
     }
     vp_devices_cl_.clear();
-  }
+  }*/
+
   if (p_device_device_type_) Memory::MemFree(p_device_device_type_);
   if (p_device_vendor_) Memory::MemFree(p_device_vendor_);
   if (p_device_version_) Memory::MemFree(p_device_version_);
