@@ -22,7 +22,7 @@
 /*!
   \namespace Memory
   \brief namespace storing template allocating aligned memory and another
-  function freeing the memory. By default the alignement is done on 4096 bytes
+  function freeing the memory. By default the alignement is done on 128 bytes
   Usage:
   Allocating memory for 10 float with 32 bytes alignment
   float* toto = Memory::MemAlloc<float,32>( 10 );
@@ -37,7 +37,7 @@ namespace Memory {
     \param elt number of elements in the buffer
     \return the aligned buffer
   */
-  template<typename T, std::size_t A = 4096>
+  template<typename T, std::size_t A = 128>
   T* MemAlloc(std::size_t const& elt)
   {
     std::size_t const size = sizeof(T) * elt;

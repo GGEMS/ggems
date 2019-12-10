@@ -43,6 +43,9 @@ class OpenCLManager(object):
         ggems_lib.print_activated_context.argtypes = [ctypes.c_void_p]
         ggems_lib.print_activated_context.restype = ctypes.c_void_p
 
+        ggems_lib.clean_opencl_manager.argtypes = [ctypes.c_void_p]
+        ggems_lib.clean_opencl_manager.restype = ctypes.c_void_p
+
         self.obj = ggems_lib.get_instance_opencl_manager()
 
     def print_platform(self):
@@ -68,6 +71,9 @@ class OpenCLManager(object):
 
     def print_activated_context(self):
         ggems_lib.print_activated_context(self.obj)
+
+    def clean(self):
+        ggems_lib.clean_opencl_manager(self.obj)
 
 
 class Verbosity(object):

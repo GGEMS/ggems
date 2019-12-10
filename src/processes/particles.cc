@@ -100,7 +100,7 @@ void Particle::InitializeSeeds(void)
   OpenCLManager& opencl_manager = OpenCLManager::GetInstance();
 
   // Get the pointer on device
-  PrimaryParticles* p_primary_particles =
+ /* PrimaryParticles* p_primary_particles =
     opencl_manager.GetDeviceBuffer<PrimaryParticles>(p_primary_particles_);
 
   // For each particle a seed is generated
@@ -116,7 +116,7 @@ void Particle::InitializeSeeds(void)
   p_primary_particles->number_of_primaries_ = number_of_particles_;
 
   // Release the pointer, mandatory step!!!
-  opencl_manager.ReleaseDeviceBuffer(p_primary_particles_, p_primary_particles);
+  opencl_manager.ReleaseDeviceBuffer(p_primary_particles_, p_primary_particles);*/
 
   // Windows
   //system("Color A1");

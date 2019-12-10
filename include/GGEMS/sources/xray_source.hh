@@ -151,7 +151,6 @@ class GGEMS_EXPORT XRaySource : public GGEMSSourceManager
   private: // Buffer for OpenCL
     cl::Buffer* p_energy_spectrum_; /*!< Energy spectrum for OpenCL device */
     cl::Buffer* p_cdf_; /*!< Cumulative distribution function to generate a random energy */
-    cl::Buffer* p_debug_;
 };
 
 /*!

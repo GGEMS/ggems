@@ -33,7 +33,7 @@ XRaySource::XRaySource(void)
   p_energy_spectrum_(nullptr),
   p_cdf_(nullptr)
 {
-  GGEMScout("XRaySource", "XRaySource", 1)
+  GGEMScout("XRaySource", "XRaySource", 3)
     << "Allocation of XRaySource..." << GGEMSendl;
 
   // Initialization of parameters
@@ -73,11 +73,7 @@ XRaySource::~XRaySource(void)
     p_cdf_ = nullptr;
   }
 
-    opencl_manager.Deallocate(p_debug_,
-      number_of_energy_bins_ * sizeof(cl_float));
-    p_debug_ = nullptr;
-
-  GGEMScout("XRaySource", "~XRaySource", 1)
+  GGEMScout("XRaySource", "~XRaySource", 3)
     << "Deallocation of XRaySource..." << GGEMSendl;
 }
 
@@ -87,7 +83,7 @@ XRaySource::~XRaySource(void)
 
 void XRaySource::InitializeKernel(void)
 {
-  GGEMScout("XRaySource", "InitializeKernel", 1)
+  GGEMScout("XRaySource", "InitializeKernel", 3)
     << "Initializing kernel..." << GGEMSendl;
 
   // Getting the pointer on OpenCL manager
@@ -109,7 +105,7 @@ void XRaySource::InitializeKernel(void)
 
 void XRaySource::GetPrimaries(Particle* p_particle)
 {
-  GGEMScout("XRaySource", "GetPrimaries", 1)
+  GGEMScout("XRaySource", "GetPrimaries", 3)
     << "Getting primaries..." << GGEMSendl;
 
   // Getting the opencl manager for event and command queue
@@ -128,10 +124,9 @@ void XRaySource::GetPrimaries(Particle* p_particle)
     << kNumberOfParticles << " new particles..." << GGEMSendl;
 
   // Set parameters for kernel
-  //p_kernel_get_primaries_->setArg(0, *p_cdf_);
-  //p_kernel_get_primaries_->setArg(1, *p_energy_spectrum_);
-  p_kernel_get_primaries_->setArg(0, *p_debug_);
-  p_kernel_get_primaries_->setArg(1, number_of_energy_bins_);
+  p_kernel_get_primaries_->setArg(0, *p_cdf_);
+  p_kernel_get_primaries_->setArg(1, *p_energy_spectrum_);
+  p_kernel_get_primaries_->setArg(2, number_of_energy_bins_);
 
   // Define the number of work-item to launch
   cl::NDRange global(kNumberOfParticles);
@@ -225,7 +220,7 @@ void XRaySource::SetPolyenergy(char const* energy_spectrum_filename)
 
 void XRaySource::CheckParameters(void) const
 {
-  GGEMScout("XRaySource", "CheckParameters", 1)
+  GGEMScout("XRaySource", "CheckParameters", 3)
     << "Checking the mandatory parameters..." << GGEMSendl;
 
   // Checking the parameters of Source Manager
@@ -291,7 +286,7 @@ void XRaySource::CheckParameters(void) const
 
 void XRaySource::FillEnergy(void)
 {
-  GGEMScout("XRaySource", "FillEnergy", 1) << "Filling energy..." << GGEMSendl;
+  GGEMScout("XRaySource", "FillEnergy", 3) << "Filling energy..." << GGEMSendl;
 
   // Get the pointer on OpenCL Manager
   OpenCLManager& opencl_manager = OpenCLManager::GetInstance();
@@ -322,66 +317,48 @@ void XRaySource::FillEnergy(void)
     spectrum_stream.clear();
     spectrum_stream.seekg(0, std::ios::beg);
 
-    p_debug_ = opencl_manager.Allocate(nullptr,
-      number_of_energy_bins_ * sizeof(cl_float), CL_MEM_READ_WRITE);
+    cl::Context* p_context = opencl_manager.GetContext();
+    cl::CommandQueue* p_queue = opencl_manager.GetCommandQueue();
 
-    cl_float* p_debug =
-      opencl_manager.GetDeviceBuffer<cl_float>(p_debug_);
-
-    for (cl_uint i = 0; i < number_of_energy_bins_; ++i) {
-      p_debug[i] = 10.0f;
-    }
     // Allocation of memory on OpenCL device
     // Energy
-//    p_energy_spectrum_ = opencl_manager.Allocate(nullptr,
- //     number_of_energy_bins_ * sizeof(cl_double), CL_MEM_READ_WRITE);
+    p_energy_spectrum_ = opencl_manager.Allocate(nullptr,
+      number_of_energy_bins_ * sizeof(cl_double), CL_MEM_READ_WRITE);
 
     // Cumulative distribution function
-    //p_cdf_ = opencl_manager.Allocate(nullptr,
-      //number_of_energy_bins_ * sizeof(cl_double), CL_MEM_READ_WRITE);
-
-    // Creating 2 temporary buffers for energy and cdf on host memory
-    //double* p_tmp_energy = new double[number_of_energy_bins_];
-    //double* p_tmp_cdf = new double[number_of_energy_bins_];
+    p_cdf_ = opencl_manager.Allocate(nullptr,
+      number_of_energy_bins_ * sizeof(cl_double), CL_MEM_READ_WRITE);
 
     // Get the energy pointer on OpenCL device
-   // cl_double* p_energy_spectrum =
-   //   opencl_manager.GetDeviceBuffer<cl_double>(p_energy_spectrum_);
+    cl_double* p_energy_spectrum = opencl_manager.GetDeviceBuffer<cl_double>(
+      p_energy_spectrum_, number_of_energy_bins_ * sizeof(cl_double));
 
     // Get the cdf pointer on OpenCL device
-    //cl_double* p_cdf = opencl_manager.GetDeviceBufferWrite<cl_double>(p_cdf_);
+    cl_double* p_cdf = opencl_manager.GetDeviceBuffer<cl_double>(p_cdf_,
+      number_of_energy_bins_ * sizeof(cl_double));
 
     // Read the input spectrum and computing the sum for the cdf
-   /* double test = 0.0;
-    for (int i = 0; i < 10; ++i) {
-      test = 10.0 + i;
-      p_energy_spectrum[i] = test;
-    }*/
-    /*int line_index = 0;
+    int line_index = 0;
     double sum_cdf = 0.0;
     while (std::getline(spectrum_stream, line)) {
       std::istringstream iss(line);
-      *p_energy_spectrum = 2.0;
-      //iss >> *p_energy_spectrum++;// >> p_cdf[line_index];
-      //sum_cdf += p_cdf[line_index];
-      std::cout << *p_energy_spectrum << std::endl;
-      ++p_energy_spectrum;
+      iss >> p_energy_spectrum[line_index] >> p_cdf[line_index];
+      sum_cdf += p_cdf[line_index];
       ++line_index;
-    }*/
+    }
 
-    // Compute CDF and normalized in same time by security
-  /*  p_cdf[0] /= sum_cdf;
+    // Compute CDF and normalized it
+    p_cdf[0] /= sum_cdf;
     for (cl_uint i = 1; i < number_of_energy_bins_; ++i) {
       p_cdf[i] = p_cdf[i]/sum_cdf + p_cdf[i-1];
     }
 
     // By security, final value of cdf must be 1 !!!
-    p_cdf[number_of_energy_bins_ - 1] = 1.0;*/
+    p_cdf[number_of_energy_bins_-1] = 1.0;
 
     // Release the pointers
-   // opencl_manager.ReleaseDeviceBuffer(p_energy_spectrum_, p_energy_spectrum);
-    //opencl_manager.ReleaseDeviceBuffer(p_cdf_, p_cdf);
-    opencl_manager.ReleaseDeviceBuffer(p_debug_, p_debug);
+    opencl_manager.ReleaseDeviceBuffer(p_energy_spectrum_, p_energy_spectrum);
+    opencl_manager.ReleaseDeviceBuffer(p_cdf_, p_cdf);
 
     // Closing file
     spectrum_stream.close();
@@ -394,7 +371,7 @@ void XRaySource::FillEnergy(void)
 
 void XRaySource::Initialize(void)
 {
-  GGEMScout("XRaySource", "Initialize", 1)
+  GGEMScout("XRaySource", "Initialize", 3)
     << "Initializing the X-Ray source..." << GGEMSendl;
 
   // Check the mandatory parameters

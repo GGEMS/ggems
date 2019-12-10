@@ -41,7 +41,7 @@ GGEMSSourceManager::GGEMSSourceManager()
   particle_type_(-1),
   p_kernel_get_primaries_(nullptr)
 {
-  GGEMScout("GGEMSSourceManager", "GGEMSSourceManager", 1)
+  GGEMScout("GGEMSSourceManager", "GGEMSSourceManager", 3)
     << "Allocation of GGEMSSourceManager..." << GGEMSendl;
 
   // Allocation of geometry transformation
@@ -62,7 +62,7 @@ GGEMSSourceManager::~GGEMSSourceManager(void)
     p_geometry_transformation_ = nullptr;
   }
 
-  GGEMScout("GGEMSSourceDefinition", "~GGEMSSourceDefinition", 1)
+  GGEMScout("GGEMSSourceDefinition", "~GGEMSSourceDefinition", 3)
     << "Deallocation of GGEMSSourceDefinition..." << GGEMSendl;
 }
 
@@ -167,7 +167,7 @@ void GGEMSSourceManager::UpdateRotation(float const& rx, float const& ry,
 
 void GGEMSSourceManager::CheckParameters(void) const
 {
-  GGEMScout("GGEMSSourceManager", "CheckParameters", 1)
+  GGEMScout("GGEMSSourceManager", "CheckParameters", 3)
     << "Checking the mandatory parameters..." << GGEMSendl;
 
   // Checking the type of particles
