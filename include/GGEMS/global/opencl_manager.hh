@@ -87,6 +87,13 @@ class GGEMS_EXPORT OpenCLManager
     */
     OpenCLManager& operator=(OpenCLManager const&& opencl_manager) = delete;
 
+  public: // Clean memory of correctly
+    /*!
+      \fn void Clean(void)
+      \brief Clean correctly OpenCL platform, device, context, command queue, event and kernel
+    */
+    void Clean(void);
+
   public: // Error stream management
     /*!
       \fn void CheckOpenCLError(cl_int const& error, std::string const& class_name, std::string const& method_name) const
@@ -125,17 +132,6 @@ class GGEMS_EXPORT OpenCLManager
     */
    void PrintBuildOptions(void) const;
 
-  private: // Informations about device
-    /*!
-      \fn cl_device_type GetDeviceType(std::size_t const& device_id) const
-      \param device_id - index of device
-      \brief return the device type
-    */
-    inline cl_device_type GetDeviceType(std::size_t const& device_id) const
-    {
-      return p_device_device_type_[device_id];
-    }
-
   private: // Context management
     /*!
       \fn void CreateContext(void)
@@ -143,35 +139,7 @@ class GGEMS_EXPORT OpenCLManager
     */
     void CreateContext(void);
 
-    /*!
-      \fn cl_ulong GetGlobalMemoryContext(std::size_t const& context_id) const
-      \param context_id - index of context
-      \brief return the global memory in a specific context
-    */
-    inline cl_ulong GetGlobalMemoryContext(std::size_t const& context_id) const
-    {
-      return p_device_global_mem_size_[context_id];
-    }
-
   public:
-    /*!
-      \fn std::size_t GetGlobalContextID(cl::Context* const p_context) const
-      \param p_context - pointer on the context
-      \return the global id of the context
-    */
-    inline std::size_t GetGlobalContextID(cl::Context* const p_context) const
-    {
-      std::size_t context_id = 0;
-      // Loop over the contexts to find the good one
-      for (std::size_t i = 0; i < vp_contexts_cl_.size(); ++i) {
-        if (p_context == vp_contexts_cl_.at(i)) {
-          context_id = i;
-          break;
-        }
-      }
-      return context_id;
-    }
-
     /*!
       \fn void ContextToActivate(uint32_t const& context_id)
       \param context_id - context index
@@ -193,21 +161,12 @@ class GGEMS_EXPORT OpenCLManager
     void PrintActivatedContextInfos(void) const;
 
     /*!
-      \fn std::size_t GetNumberOfActivatedContext() const
-      \brief return the number of the activated contexts
-    */
-    inline std::size_t GetNumberOfActivatedContext(void) const
-    {
-      return vp_contexts_act_cl_.size();
-    }
-
-    /*!
       \fn std::size_t GetContext() const
       \brief return the activated context
     */
     inline cl::Context* GetContext(void) const
     {
-      return vp_contexts_act_cl_.front();
+      return vp_contexts_act_cl_.at(0);
     };
 
   private: // OpenCL command queue
@@ -230,7 +189,7 @@ class GGEMS_EXPORT OpenCLManager
     */
     inline cl::CommandQueue* GetCommandQueue(void) const
     {
-      return vp_queues_cl_.at(GetGlobalContextID(vp_contexts_act_cl_.front()));
+      return vp_queues_act_cl_.at(0);
     }
 
   private: // OpenCL event
@@ -247,7 +206,7 @@ class GGEMS_EXPORT OpenCLManager
     */
     inline cl::Event* GetEvent(void) const
     {
-      return vp_event_cl_.at(GetGlobalContextID(vp_contexts_act_cl_.at(0)));
+      return vp_event_act_cl_.at(0);
     }
 
   public:
@@ -285,14 +244,16 @@ class GGEMS_EXPORT OpenCLManager
     void Deallocate(cl::Buffer* p_buffer, std::size_t size);
 
     /*
-      \fn T* GetDeviceBuffer(cl::Buffer* p_device_ptr) const
+      \fn T* GetDeviceBuffer(cl::Buffer* p_device_ptr, std::size_t const size) const
       \tparam T - type of the returned pointer on host memory
       \param p_device_ptr - pointer on device memory
+      \param size - size of region to map
       \brief Get the device pointer on host to write on it. ReleaseDeviceBuffer must be used after this method!!!
       \return the pointer on host memory on write/read mode
     */
     template <typename T>
-    T* GetDeviceBuffer(cl::Buffer* const p_device_ptr) const;
+    T* GetDeviceBuffer(cl::Buffer* const p_device_ptr,
+      std::size_t const size) const;
 
     /*
       \fn void ReleaseDeviceBuffer(cl::Buffer* const p_device_ptr, T* p_host_ptr) const
@@ -322,18 +283,18 @@ class GGEMS_EXPORT OpenCLManager
     void PrintRAMStatus(void) const;
 
     /*!
-      \fn void AddRAMMemory(cl_ulong const size)
+      \fn void AddRAMMemory(cl_ulong const& size)
       \param size - size of the allocated buffer in byte
       \brief store the size of the allocated buffer
     */
-    void AddRAMMemory(cl_ulong const size);
+    void AddRAMMemory(cl_ulong const& size);
 
     /*!
-      \fn SubRAMMemory(cl_ulong const size)
+      \fn SubRAMMemory(cl_ulong const& size)
       \param size - size of the allocated buffer in byte
       \brief substract the size of the allocated buffer
     */
-    void SubRAMMemory(cl_ulong const size);
+    void SubRAMMemory(cl_ulong const& size);
 
   public:
     /*!
@@ -341,6 +302,14 @@ class GGEMS_EXPORT OpenCLManager
       \brief Compute and display elapsed time in kernel for an activated context
     */
     void DisplayElapsedTimeInKernel(std::string const& kernel_name) const;
+
+  private:
+    /*!
+      \fn void CheckRAMMemory(std::size_t const& size)
+      \param size - size in bytes to allocate
+      \brief Checking RAM memory allocation
+    */
+    void CheckRAMMemory(std::size_t const& size);
 
   private: // Platforms
     std::vector<cl::Platform> v_platforms_cl_; /*!< Vector of platforms */
@@ -373,16 +342,19 @@ class GGEMS_EXPORT OpenCLManager
     std::string build_options_; /*!< list of option to OpenCL compiler */
 
   private: // Context and informations about them
+    uint32_t context_index_; /*!< Index of the activated context */
     std::vector<cl::Context*> vp_contexts_cl_; /*!< Vector of context */
     std::vector<cl::Context*> vp_contexts_cpu_cl_; /*!< Vector of CPU context */
     std::vector<cl::Context*> vp_contexts_gpu_cl_; /*!< Vector of GPU context */
-    std::vector<cl::Context*> vp_contexts_act_cl_; /*!< List of activated context */
+    std::vector<cl::Context*> vp_contexts_act_cl_; /*!< Activated context */
 
   private: // Command queue informations
     std::vector<cl::CommandQueue*> vp_queues_cl_; /*!< Command queue for all the context */
+    std::vector<cl::CommandQueue*> vp_queues_act_cl_; /*!< Activated command queue */
 
   private: // OpenCL event
     std::vector<cl::Event*> vp_event_cl_; /*!< List of pointer to OpenCL event, for profiling */
+    std::vector<cl::Event*> vp_event_act_cl_; /*!< Activated event */
 
   private: // Kernels
     std::vector<cl::Kernel*> vp_kernel_cl_; /*!< List of pointer to OpenCL kernel */
@@ -392,31 +364,17 @@ class GGEMS_EXPORT OpenCLManager
 };
 
 template <typename T>
-T* OpenCLManager::GetDeviceBuffer(cl::Buffer* const p_device_ptr) const
+T* OpenCLManager::GetDeviceBuffer(cl::Buffer* const p_device_ptr,
+  std::size_t const size) const
 {
   GGEMScout("OpenCLManager", "GetDeviceBuffer", 3)
     << "Getting mapped memory buffer on OpenCL device..." << GGEMSendl;
 
-  GGEMScout("OpenCLManager", "GetDeviceBuffer", 2) << GGEMSendl;
-
-  cl::CommandQueue* p_queue = GetCommandQueue();
-  cl::Event* p_event = GetEvent();
   cl_int err = 0;
-  T* ptr = static_cast<T*>(p_queue->enqueueMapBuffer(*p_device_ptr, CL_TRUE,
-    CL_MAP_WRITE | CL_MAP_READ, 0, sizeof(T), nullptr, p_event, &err));
+  T* ptr = static_cast<T*>(vp_queues_act_cl_.at(0)->enqueueMapBuffer(
+    *p_device_ptr, CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, 0, size, nullptr,
+    nullptr, &err));
   CheckOpenCLError(err, "OpenCLManager", "GetDeviceBuffer");
-  p_queue->finish();
-  cl_ulong start = 0, end = 0, queue = 0, submit = 0, status = 0;
-  p_event->wait();
-  p_event->getProfilingInfo(CL_PROFILING_COMMAND_START, &start);
-  p_event->getProfilingInfo(CL_PROFILING_COMMAND_END, &end);
-  p_event->getProfilingInfo(CL_PROFILING_COMMAND_QUEUED, &queue);
-  p_event->getProfilingInfo(CL_PROFILING_COMMAND_SUBMIT, &submit);
-  p_event->getInfo(CL_EVENT_COMMAND_EXECUTION_STATUS, &status);
-  std::cout << start << " " << end << " " << end - start << std::endl;
-  std::cout << queue << std::endl;
-  std::cout << submit << std::endl;
-  std::cout << status << std::endl;
   return ptr;
 }
 
@@ -427,13 +385,9 @@ void OpenCLManager::ReleaseDeviceBuffer(cl::Buffer* const p_device_ptr,
   GGEMScout("OpenCLManager", "ReleaseDeviceBuffer", 3)
     << "Releasing mapped memory buffer on OpenCL device..." << GGEMSendl;
 
-  GGEMScout("OpenCLManager", "ReleaseDeviceBuffer", 2) << GGEMSendl;
-// Rajouter Event
-  cl::CommandQueue* p_queue = GetCommandQueue();
   // Unmap the memory
-  cl_int err = p_queue->enqueueUnmapMemObject(*p_device_ptr, p_host_ptr);
-  CheckOpenCLError(err, "OpenCLManager", "ReleaseDeviceBuffer");
-  p_queue->finish();
+  CheckOpenCLError(vp_queues_act_cl_.at(0)->enqueueUnmapMemObject(*p_device_ptr,
+    p_host_ptr), "OpenCLManager", "ReleaseDeviceBuffer");
 }
 
 /*!
@@ -501,6 +455,14 @@ extern "C" GGEMS_EXPORT void set_context_index(OpenCLManager* p_opencl_manager,
   \brief Print information about activated context
 */
 extern "C" GGEMS_EXPORT void print_activated_context(
+  OpenCLManager* p_opencl_manager);
+
+/*!
+  \fn void clean_opencl_manager(OpenCLManager* p_opencl_manager)
+  \param p_opencl_manager - pointer on the singleton
+  \brief Clean correctly OpenCL platform, device, context, command queue, event and kernel
+*/
+extern "C" GGEMS_EXPORT void clean_opencl_manager(
   OpenCLManager* p_opencl_manager);
 
 #endif // GUARD_GGEMS_GLOBAL_OPENCL_MANAGER_HH

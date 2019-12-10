@@ -6,7 +6,6 @@
   * 3 Entrées et sorties des constructeurs, destructeurs et fonctions
 --------------------------------------------------------------------------------
 
-
 - A chaque nouveau batch redonner le bon nombre de particles dans le batch
 
 - Gestion des batchs automatique
@@ -18,8 +17,6 @@
 - Faire un installer pratique pour Windows, MAC et Linux
 
 - Faire la macro script en C++
-
-- Destructeur des singletons avec Visual Studio
 
 - Faire un benchmark CT
 
@@ -42,10 +39,3 @@ filtre etc... (Si possible???)
 
 - 5000000 particules par défaut, checker se nombre en function de la RAM
 disponible et proposer un nouveau chiffre si besoin
-
-- Meilleure gestion des queue et event, notamment les submits et queue. Limiter
-à un seul queue et event actif pour un code plus simple. Gestion des events
-status et callback pour vérifier que les kernels fonctionnent que la mémoire est
-bien écrite
-
-- Vérifier la compilation Windows et G++

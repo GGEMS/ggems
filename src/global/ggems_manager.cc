@@ -360,7 +360,7 @@ void GGEMSManager::Initialize()
   }
 
   // Test
-  source_manager_.GetPrimaries(p_particle_);
+  //source_manager_.GetPrimaries(p_particle_);
 
   // Printing informations about the simulation
   PrintInfos();

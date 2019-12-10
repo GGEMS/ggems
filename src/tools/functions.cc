@@ -66,8 +66,8 @@ void Misc::ThrowException(std::string const& class_name,
 {
   std::ostringstream oss(std::ostringstream::out);
   oss << message;
-  GGEMScerr(class_name, method_name, 0) << GGEMSendl;
-  throw std::runtime_error(oss.str());
+  GGEMScerr(class_name, method_name, 0) << oss.str() << GGEMSendl;
+  throw std::runtime_error("");
 }
 
 ////////////////////////////////////////////////////////////////////////////////

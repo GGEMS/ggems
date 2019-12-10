@@ -10,9 +10,9 @@ if sys.platform == "linux" or sys.platform == "darwin":
     os.environ['CC'] = 'clang-9'
     os.environ['CXX'] = 'clang++-9'
 elif sys.platform == "win32":
-    os.environ['COMPILER'] = 'CLANG'
-    os.environ['CC'] = 'clang.exe'
-    os.environ['CXX'] = 'clang++.exe'
+    os.environ['COMPILER'] = 'CL'
+    os.environ['CC'] = 'cl.exe'
+    os.environ['CXX'] = 'cl.exe'
 else:  # Unknown system
     print("Unknown architecture!!!", file=sys.stderr)
 
@@ -59,7 +59,7 @@ elif sys.platform == "win32":
 cmake_cmd += " -DCMAKE_BUILD_TYPE=Release"
 cmake_cmd += " -DOPENCL_KERNEL_PATH=" + GGEMS_FOLDER + "/src/kernels"
 cmake_cmd += " -DGGEMS_PATH=" + GGEMS_FOLDER
-cmake_cmd += " -DMAXIMUM_PARTICLES=5000000"
+cmake_cmd += " -DMAXIMUM_PARTICLES=1000000"
 cmake_cmd += " -DCMAKE_VERBOSE_MAKEFILE=OFF"
 cmake_cmd += " -DCOMPILER=" + os.environ['COMPILER']
 cmake_cmd += " -DCMAKE_INSTALL_PREFIX=" + INSTALL_FOLDER

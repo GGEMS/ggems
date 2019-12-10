@@ -23,7 +23,7 @@
 TransformCalculator::TransformCalculator()
 : is_need_updated_(false)
 {
-  GGEMScout("TransformCalculator", "TransformCalculator", 1)
+  GGEMScout("TransformCalculator", "TransformCalculator", 3)
     << "Allocation of TransformCalculator..." << GGEMSendl;
 
   // Initialize the position with min. float
@@ -81,7 +81,7 @@ TransformCalculator::TransformCalculator()
 
 TransformCalculator::~TransformCalculator()
 {
-  GGEMScout("TransformCalculator", "~TransformCalculator", 1)
+  GGEMScout("TransformCalculator", "~TransformCalculator", 3)
     << "Deallocation of TransformCalculator..." << GGEMSendl;
 }
 

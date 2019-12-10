@@ -112,6 +112,8 @@ class GGEMS_EXPORT GGEMSStream
     int verbosity_limit_; /*! Verbosity limit fixed by user */
     int verbosity_level_; /*!< Verbosity level of the print */
     int stream_counter_; /*!< Counter printing multiple stream */
+
+  protected: // Avoid warnings using clang on Windows system
     std::ostream& stream_; /*!< Stream handling std::cout or std::endl */
     ConsoleColor color_index_; /*!< Color to print on screen */
 };
