@@ -28,8 +28,7 @@ xray_source.set_particle_type(b"photon")
 xray_source.set_beam_aperture(5.0)  # in degree
 xray_source.set_focal_spot_size(0.6, 1.2, 0.0)  # in mm
 xray_source.set_rotation(0.0, 0.0, 0.0)  # in degree
-# xray_source.set_polyenergy(b"scripts/spectrum_120kVp_2mmAl.dat")
-xray_source.set_polyenergy(b"scripts/test_spectrum.dat")
+xray_source.set_polyenergy(b"scripts/spectrum_120kVp_2mmAl.dat")
 xray_source.print_infos()
 
 # ------------------------------------------------------------------------------
@@ -37,7 +36,6 @@ xray_source.print_infos()
 ggems_manager = ggems.GGEMSManager()
 ggems_manager.set_seed(777)
 ggems_manager.set_number_of_particles(861635)
-ggems_manager.set_number_of_batchs(1)
 
 # Cross section parameters
 ggems_manager.set_cross_section_table_number_of_bins(220)
@@ -55,9 +53,11 @@ ggems_manager.set_geometry_tolerance(0.001)  # in mm
 
 # Initializing the GGEMS simulation
 ggems_manager.initialize()
-
 # Printing RAM status after all initializations
 opencl_manager.print_RAM()
+
+# Start GGEMS simulation
+ggems_manager.run()
 
 # Freeing properly the memory
 xray_source.delete()

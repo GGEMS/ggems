@@ -25,6 +25,7 @@
 
 #include "GGEMS/tools/system_of_units.hh"
 #include "GGEMS/tools/print.hh"
+#include "GGEMS/tools/chrono.hh"
 #include "GGEMS/global/ggems_manager.hh"
 #include "GGEMS/tools/functions.hh"
 #include "GGEMS/global/ggems_constants.hh"
@@ -52,9 +53,10 @@ GGEMSManager::GGEMSManager(void)
   cross_section_table_energy_min_(Limit::CROSS_SECTION_TABLE_ENERGY_MIN),
   cross_section_table_energy_max_(Limit::CROSS_SECTION_TABLE_ENERGY_MAX),
   p_particle_(nullptr),
-  source_manager_(GGEMSSourceManager::GetInstance())
+  source_manager_(GGEMSSourceManager::GetInstance()),
+  opencl_manager_(OpenCLManager::GetInstance())
 {
-  GGEMScout("GGEMSManager", "GGEMSManager", 1)
+  GGEMScout("GGEMSManager", "GGEMSManager", 3)
     << "Allocation of GGEMS Manager singleton..." << GGEMSendl;
 
   // Allocation of the memory for the physics list
@@ -79,7 +81,7 @@ GGEMSManager::~GGEMSManager(void)
     p_particle_ = nullptr;
   }
 
-  GGEMScout("GGEMSManager", "~GGEMSManager", 1)
+  GGEMScout("GGEMSManager", "~GGEMSManager", 3)
     << "Deallocation of GGEMS Manager singleton..." << GGEMSendl;
 }
 
@@ -144,28 +146,78 @@ void GGEMSManager::SetNumberOfParticles(uint64_t const& number_of_particles)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSManager::SetNumberOfBatchs(uint32_t const& number_of_batchs)
+void GGEMSManager::CheckMemoryForParticles(void) const
 {
-  v_number_of_particles_in_batch_.resize(number_of_batchs, 0);
+  // By security the particle allocation by batch should not exceed 10% of
+  // RAM memory
+
+  // Compute the RAM memory percentage allocated for primary particles
+  double const kRAMPrimaryParticles =
+    static_cast<double>(sizeof(PrimaryParticles));
+
+  // Getting the RAM memory on activated device
+  double const kMaxRAMDevice = static_cast<double>(
+    opencl_manager_.GetMaxRAMMemoryOnActivatedDevice());
+
+  // Computing the ratio of used RAM memory on device
+  double const kMaxRatioUsedRAM = kRAMPrimaryParticles / kMaxRAMDevice;
+
+  // Computing a theoric max. number of particles depending on activated
+  // device and advice this number to the user. 10% of RAM memory for particles
+  cl_ulong const kTheoricMaxNumberOfParticles = static_cast<cl_ulong>(
+    0.1 * kMaxRAMDevice / (static_cast<double>(sizeof(PrimaryParticles))
+    /MAXIMUM_PARTICLES));
+
+  if (kMaxRatioUsedRAM > 0.1) { // Printing warning
+    GGEMSwarn("GGEMSManager", "CheckMemoryForParticles", 0)
+      << "Warning!!! The number of particles in a batch defined during GGEMS "
+      << "compilation is maybe to high. We recommand to not use more than 10% "
+      << "of RAM memory for particles allocation. Your theoric number of "
+      << "particles is " << kTheoricMaxNumberOfParticles << ". Recompile GGEMS "
+      << "with this number of particles is recommended." << GGEMSendl;
+  }
+  else { // Printing theoric number of particle
+    GGEMScout("GGEMSManager", "CheckMemoryForParticles", 0)
+      << "The number of particles in a batch defined during the compilation is "
+      << "correct. We recommend to not used more than 10% of memory for "
+      << "particle allocation. Your theoric number of particles is "
+      << kTheoricMaxNumberOfParticles << ". Recompile GGEMS with this number "
+      << " of particles is recommended" << GGEMSendl;
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSManager::ComputeNumberOfParticlesInBatch()
+void GGEMSManager::OrganizeParticlesInBatch(void)
 {
-  // Get the number of batchs
-  size_t const kNumberOfBatchs = v_number_of_particles_in_batch_.size();
+  GGEMScout("GGEMSManager", "OrganizeParticlesInBatch", 3)
+    << "Organizing the number of particles in batch..." << GGEMSendl;
 
-  // Distribute the number of particles in batch
-  for (auto&& i : v_number_of_particles_in_batch_) {
-    i = number_of_particles_ / kNumberOfBatchs;
+  // Computing the number of batch depending on the number of simulated
+  // particles and the maximum simulated particles defined during GGEMS
+  // compilation
+  std::size_t const kNumberOfBatchs =
+    number_of_particles_ / MAXIMUM_PARTICLES + 1;
+
+  // Resizing vector storing the number of particles in batch
+  v_number_of_particles_in_batch_.resize(kNumberOfBatchs, 0);
+
+  // Computing the number of simulated particles in batch
+  if (kNumberOfBatchs == 1) {
+    v_number_of_particles_in_batch_[0] = number_of_particles_;
   }
+  else {
+    for (auto&& i : v_number_of_particles_in_batch_) {
+      i = number_of_particles_ / kNumberOfBatchs;
+    }
 
-  // Add the remaining particles
-  for (uint32_t i = 0; i < number_of_particles_ % kNumberOfBatchs; ++i)
-    v_number_of_particles_in_batch_[i]++;
+    // Adding the remaing particles
+    for (std::size_t i = 0; i < number_of_particles_ % kNumberOfBatchs; ++i) {
+      v_number_of_particles_in_batch_[i]++;
+    }
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -340,8 +392,12 @@ void GGEMSManager::Initialize()
   GGEMScout("GGEMSManager", "Initialize", 0)
     << "Pseudo-random number generator seeded OK" << GGEMSendl;
 
-  // Compute the number of particles in batch
-  ComputeNumberOfParticlesInBatch();
+  // Checking the RAM memory for particle and propose a new MAXIMUM_PARTICLE
+  // number
+  CheckMemoryForParticles();
+
+  // Organize the particles in batch
+  OrganizeParticlesInBatch();
   GGEMScout("GGEMSManager", "Initialize", 0)
     << "Particles arranged in batch OK" << GGEMSendl;
 
@@ -359,11 +415,42 @@ void GGEMSManager::Initialize()
     Misc::ThrowException("GGEMSManager", "Initialize", oss.str());
   }
 
-  // Test
-  //source_manager_.GetPrimaries(p_particle_);
-
   // Printing informations about the simulation
   PrintInfos();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSManager::Run()
+{
+  GGEMScout("GGEMSManager", "Run", 0)
+    << "GGEMS simulation is running..." << GGEMSendl;
+
+  // Get the start time
+  ChronoTime start_time = Chrono::Now();
+
+  // Loop over the number of batch
+  for (std::size_t i = 0; i < v_number_of_particles_in_batch_.size(); ++i) {
+    GGEMScout("GGEMSManager", "Run", 0) << "----> Launching batch " << i+1
+      << "/" << v_number_of_particles_in_batch_.size() << GGEMSendl;
+
+    // Generating particles
+    GGEMScout("GGEMSManager", "Run", 0) << "      + Generating "
+      << v_number_of_particles_in_batch_[i] << " particles..." << GGEMSendl;
+    source_manager_.GetPrimaries(p_particle_,
+      v_number_of_particles_in_batch_[i]);
+  }
+
+  // Get the end time
+  ChronoTime end_time = Chrono::Now();
+
+  GGEMScout("GGEMSManager", "Run", 0)
+    << "GGEMS is finished!" << GGEMSendl;
+
+  // Display the elapsed time in GGEMS
+  Chrono::DisplayTime(end_time - start_time, "GGEMS simulation");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -379,11 +466,6 @@ void GGEMSManager::PrintInfos() const
     << number_of_particles_ << GGEMSendl;
   GGEMScout("GGEMSManager", "PrintInfos", 0) << "*Number of batchs: "
     << v_number_of_particles_in_batch_.size() << GGEMSendl;
-  GGEMScout("GGEMSManager", "PrintInfos", 1) << "*Number of particles in batch:"
-    << GGEMSendl;
-  for (auto&& i : v_number_of_particles_in_batch_) {
-    GGEMScout("GGEMSManager", "PrintInfos", 1) << "  --> " << i << GGEMSendl;
-  }
   GGEMScout("GGEMSManager", "PrintInfos", 0) << "*Physics list:" << GGEMSendl;
   GGEMScout("GGEMSManager", "PrintInfos", 0) << "  --> Photon: "
     << (v_physics_list_.at(0) ? "Compton " : "")
@@ -458,16 +540,6 @@ void set_number_of_particles(GGEMSManager* p_ggems_manager,
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_number_of_batchs(GGEMSManager* p_ggems_manager,
-  uint32_t const number_of_batchs)
-{
-  p_ggems_manager->SetNumberOfBatchs(number_of_batchs);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
 void set_process(GGEMSManager* p_ggems_manager, char const* process_name)
 {
   p_ggems_manager->SetProcess(process_name);
@@ -531,4 +603,13 @@ void set_cross_section_table_energy_max(GGEMSManager* p_ggems_manager,
   double const max_energy)
 {
   p_ggems_manager->SetCrossSectionTableEnergyMax(max_energy);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void run(GGEMSManager* p_ggems_manager)
+{
+  p_ggems_manager->Run();
 }

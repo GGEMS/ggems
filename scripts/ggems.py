@@ -197,10 +197,6 @@ class GGEMSManager(object):
             ctypes.c_void_p, ctypes.c_uint64]
         ggems_lib.set_number_of_particles.restype = ctypes.c_void_p
 
-        ggems_lib.set_number_of_batchs.argtypes = [
-            ctypes.c_void_p, ctypes.c_uint64]
-        ggems_lib.set_number_of_batchs.restype = ctypes.c_void_p
-
         ggems_lib.set_process.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
         ggems_lib.set_process.restype = ctypes.c_void_p
 
@@ -229,6 +225,9 @@ class GGEMSManager(object):
             ctypes.c_void_p, ctypes.c_double]
         ggems_lib.set_cross_section_table_energy_max.restype = ctypes.c_void_p
 
+        ggems_lib.run.argtypes = [ctypes.c_void_p]
+        ggems_lib.run.restype = ctypes.c_void_p
+
         self.obj = ggems_lib.get_instance_ggems_manager()
 
     def set_seed(self, seed):
@@ -239,9 +238,6 @@ class GGEMSManager(object):
 
     def set_number_of_particles(self, number_of_particles):
         ggems_lib.set_number_of_particles(self.obj, number_of_particles)
-
-    def set_number_of_batchs(self, number_of_batchs):
-        ggems_lib.set_number_of_batchs(self.obj, number_of_batchs)
 
     def set_process(self, process_name):
         ggems_lib.set_process(self.obj, process_name)
@@ -265,3 +261,6 @@ class GGEMSManager(object):
 
     def set_cross_section_table_energy_max(self, max_energy):
         ggems_lib.set_cross_section_table_energy_max(self.obj, max_energy)
+
+    def run(self):
+        ggems_lib.run(self.obj)
