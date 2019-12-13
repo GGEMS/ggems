@@ -6,12 +6,6 @@
   * 3 Entrées et sorties des constructeurs, destructeurs et fonctions
 --------------------------------------------------------------------------------
 
-- A chaque nouveau batch redonner le bon nombre de particles dans le batch
-
-- Gestion des batchs automatique
-
-- Random: faire le Dieharder test et Bigcrunch test
-
 - Améliorer le random Poisson et Gauss
 
 - Faire un installer pratique pour Windows, MAC et Linux
@@ -37,5 +31,4 @@ filtre etc... (Si possible???)
 
 - Prévoir place pour les kernel customs
 
-- 5000000 particules par défaut, checker se nombre en function de la RAM
-disponible et proposer un nouveau chiffre si besoin
+- Faire une physics list automatique en fonction du type de particule

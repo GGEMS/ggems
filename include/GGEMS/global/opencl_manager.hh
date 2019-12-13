@@ -296,6 +296,15 @@ class GGEMS_EXPORT OpenCLManager
     */
     void SubRAMMemory(cl_ulong const& size);
 
+    /*!
+      \fn cl_ulong GetMaxRAMMemoryOnActivatedDevice(void) const
+      \brief Get the maximum RAM memory on activated OpenCL device
+    */
+    inline cl_ulong GetMaxRAMMemoryOnActivatedDevice(void) const
+    {
+      return p_device_global_mem_size_[context_index_];
+    }
+
   public:
     /*!
       \fn void DisplayElapsedTimeInKernel(std::string const& kernel_name) const

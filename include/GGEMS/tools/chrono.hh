@@ -45,16 +45,16 @@ namespace Chrono
     std::string const& displayed_text);
 
   /*!
-    \fn inline ChronoTime Now()
+    \fn inline ChronoTime Now(void)
     \return the current time in nanoseconds
   */
-  inline ChronoTime Now() {return std::chrono::system_clock::now();}
+  inline ChronoTime Now(void) {return std::chrono::system_clock::now();}
 
   /*!
-    \fn inline DurationNano Zero()
+    \fn inline DurationNano Zero(void)
     \brief Initialization at zero nanosecond
   */
-  inline DurationNano Zero()
+  inline DurationNano Zero(void)
   {
     return std::chrono::duration<int64_t,std::nano>::zero();
   }

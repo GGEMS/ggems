@@ -71,11 +71,12 @@ class GGEMS_EXPORT XRaySource : public GGEMSSourceManager
 
   public: // Pure abstract method from GGEMSSourceManager
     /*!
-      \fn void GetPrimaries(Particle* p_particle)
+      \fn void GetPrimaries(Particle* p_particle, uint64_t const& number_of_particles)
       \param p_particle - pointer storing informations about particle
       \brief Generate primary particles
     */
-    void GetPrimaries(Particle* p_particle);
+    void GetPrimaries(Particle* p_particle,
+      uint64_t const& number_of_particles);
 
     /*!
       \fn void Initialize(void)

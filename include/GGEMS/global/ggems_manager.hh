@@ -25,6 +25,7 @@
 
 class Particle;
 class GGEMSSourceManager;
+class OpenCLManager;
 
 /*!
   \class GGEMSManager
@@ -86,10 +87,16 @@ class GGEMS_EXPORT GGEMSManager
 
   public:
     /*!
-      \fn void Initialize()
+      \fn void Initialize(void)
       \brief Initialization of the GGEMS simulation and check parameters
     */
-    void Initialize();
+    void Initialize(void);
+
+    /*!
+      \fn void Run(void)
+      \brief run the GGEMS simulation
+    */
+    void Run(void);
 
   private:
     /*!
@@ -144,23 +151,6 @@ class GGEMS_EXPORT GGEMSManager
     inline uint64_t GetNumberOfParticles() const {return number_of_particles_;};
 
     /*!
-      \fn inline uint64_t GetNumberOfParticlesInFirstBatch() const
-      \brief Get the number of particles in the first batch
-      \return the number of particles in the first batch
-    */
-    inline uint64_t GetNumberOfParticlesInFirstBatch() const
-    {
-      return v_number_of_particles_in_batch_.front();
-    }
-
-    /*!
-      \fn void SetNumberOfBatchs(uint32_t const& number_of_batchs)
-      \param number_of_batchs - number of batch of particles
-      \brief Set the number of batchs of particles
-    */
-    void SetNumberOfBatchs(uint32_t const& number_of_batchs);
-
-    /*!
       \fn inline uint32_t GetNumberOfBatchs() const
       \brief Get the number of particles in batch
       \return the number of simulated particles in batch
@@ -204,10 +194,16 @@ class GGEMS_EXPORT GGEMSManager
 
   private:
     /*!
-      \fn void ComputeNumberOfParticlesInBatch
-      \brief Compute the number of particles in batch
+      \fn void OrganizeParticlesInBatch
+      \brief Organize the particles in batch
     */
-    void ComputeNumberOfParticlesInBatch();
+    void OrganizeParticlesInBatch(void);
+
+    /*!
+      \fn void CheckMemoryForParticles(void) const
+      \brief Check the memory for particles and propose an optimized MAXIMUM_NUMBER of particles if necessary
+    */
+    void CheckMemoryForParticles(void) const;
 
   public: // Cross section part
     /*!
@@ -258,7 +254,8 @@ class GGEMS_EXPORT GGEMSManager
     Particle* p_particle_; /*!< Pointer on particle management */
 
   private: // Source management
-    GGEMSSourceManager& source_manager_;
+    GGEMSSourceManager& source_manager_; /*!< Reference to source manager singleton */
+    OpenCLManager& opencl_manager_; /*!< Reference to opencl manager singleton */
 };
 
 /*!
@@ -291,15 +288,6 @@ extern "C" GGEMS_EXPORT void initialize_ggems(GGEMSManager* p_ggems_manager);
 */
 extern "C" GGEMS_EXPORT void set_number_of_particles(
   GGEMSManager* p_ggems_manager, uint64_t const number_of_particles);
-
-/*!
-  \fn void set_number_of_batchs(GGEMSManager* p_ggems_manager, uint32_t const number_of_particles_in_batch)
-  \param p_ggems_manager - pointer on the singleton
-  \param number_of_particles_in_batch - number of particles in batch
-  \brief Set the number of particles to simulate by batch
-*/
-extern "C" GGEMS_EXPORT void set_number_of_batchs(GGEMSManager* p_ggems_manager,
-  uint32_t const number_of_batchs);
 
 /*!
   \fn void set_process(GGEMSManager* p_ggems_manager, std::string const process_name)
@@ -365,5 +353,12 @@ extern "C" GGEMS_EXPORT void set_cross_section_table_energy_min(
 */
 extern "C" GGEMS_EXPORT void set_cross_section_table_energy_max(
   GGEMSManager* p_ggems_manager, double const max_energy);
+
+/*!
+  \fn void run(GGEMSManager* p_ggems_manager)
+  \param ggems_manager - pointer on the singleton
+  \brief Run the GGEMS simulation
+*/
+extern "C" GGEMS_EXPORT void run(GGEMSManager* p_ggems_manager);
 
 #endif // End of GUARD_GGEMS_GLOBAL_GGEMSMANAGER_HH

@@ -57,18 +57,15 @@ XRaySource::XRaySource(void)
 
 XRaySource::~XRaySource(void)
 {
-  // Get the pointer on OpenCL singleton
-  OpenCLManager& opencl_manager = OpenCLManager::GetInstance();
-
   // Freeing the device buffers
   if (p_energy_spectrum_) {
-    opencl_manager.Deallocate(p_energy_spectrum_,
+    opencl_manager_.Deallocate(p_energy_spectrum_,
       number_of_energy_bins_ * sizeof(cl_double));
     p_energy_spectrum_ = nullptr;
   }
 
   if (p_cdf_) {
-    opencl_manager.Deallocate(p_cdf_,
+    opencl_manager_.Deallocate(p_cdf_,
       number_of_energy_bins_ * sizeof(cl_double));
     p_cdf_ = nullptr;
   }
@@ -86,16 +83,13 @@ void XRaySource::InitializeKernel(void)
   GGEMScout("XRaySource", "InitializeKernel", 3)
     << "Initializing kernel..." << GGEMSendl;
 
-  // Getting the pointer on OpenCL manager
-  OpenCLManager& opencl_manager = OpenCLManager::GetInstance();
-
   // Getting the path to kernel
   std::string const kOpenCLKernelPath = OPENCL_KERNEL_PATH;
   std::string const kFilename = kOpenCLKernelPath
     + "/get_primaries_xray_source.cl";
 
   // Compiling the kernel
-  p_kernel_get_primaries_ = opencl_manager.CompileKernel(kFilename,
+  p_kernel_get_primaries_ = opencl_manager_.CompileKernel(kFilename,
     "get_primaries_xray_source");
 }
 
@@ -103,26 +97,17 @@ void XRaySource::InitializeKernel(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void XRaySource::GetPrimaries(Particle* p_particle)
+void XRaySource::GetPrimaries(Particle* p_particle,
+  uint64_t const& number_of_particles)
 {
-  GGEMScout("XRaySource", "GetPrimaries", 3)
-    << "Getting primaries..." << GGEMSendl;
+  GGEMScout("XRaySource", "GetPrimaries", 3) << "Generating "
+    << number_of_particles << " new particles..." << GGEMSendl;
 
-  // Getting the opencl manager for event and command queue
-  OpenCLManager& opencl_manager = OpenCLManager::GetInstance();
+  // Get command queue and event
+  cl::CommandQueue* p_queue = opencl_manager_.GetCommandQueue();
+  cl::Event* p_event = opencl_manager_.GetEvent();
 
-  // Command queue
-  cl::CommandQueue* p_queue = opencl_manager.GetCommandQueue();
-
-  // Event
-  cl::Event* p_event = opencl_manager.GetEvent();
-
-  // Get the number of particles
-  cl_ulong const kNumberOfParticles = p_particle->GetNumberOfParticles();
-
-  GGEMScout("XRaySource", "GetPrimaries", 0) << "Generating "
-    << kNumberOfParticles << " new particles..." << GGEMSendl;
-
+/*
   // Set parameters for kernel
   p_kernel_get_primaries_->setArg(0, *p_cdf_);
   p_kernel_get_primaries_->setArg(1, *p_energy_spectrum_);
@@ -139,7 +124,7 @@ void XRaySource::GetPrimaries(Particle* p_particle)
   p_queue->finish(); // Wait until the kernel status is finish
 
   // Displaying time in kernel
-  opencl_manager.DisplayElapsedTimeInKernel("GetPrimaries");
+  opencl_manager.DisplayElapsedTimeInKernel("GetPrimaries");*/
 }
 
 ////////////////////////////////////////////////////////////////////////////////

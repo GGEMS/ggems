@@ -26,8 +26,6 @@
 #endif
 typedef struct PACKED PrimaryParticles_t
 {
-  cl_ulong number_of_primaries_; /*!< Number of the primaries */
-  
   cl_float p_E_[MAXIMUM_PARTICLES]; /*!< Energies of particles */
   cl_float p_dx_[MAXIMUM_PARTICLES]; /*!< Position of the particle in x */
   cl_float p_dy_[MAXIMUM_PARTICLES]; /*!< Position of the particle in y */
@@ -54,7 +52,6 @@ typedef struct PACKED PrimaryParticles_t
   cl_uchar p_level_[MAXIMUM_PARTICLES]; /*!< */
   cl_uchar* p_pname_[MAXIMUM_PARTICLES]; /*!< particle name (photon, electron, etc) */
 
-  
 } PrimaryParticles;
 #ifdef _MSC_VER
 #pragma pack(pop)
@@ -122,28 +119,6 @@ class GGEMS_EXPORT Particle
     */
     void Initialize(void);
 
-    /*!
-      \fn void SetNumberOfParticlesInBatch(cl_ulong const& number_of_particles_in_batch)
-      \param number_of_particles_in_batch - Number of the particles in the batch
-      \brief Set the number of the particles to simulate in a batch
-    */
-    void SetNumberOfParticlesInBatch(
-      cl_ulong const& number_of_particles_in_batch);
-
-    /*!
-      \fn cl_ulong GetNumberOfParticles() const
-      \brief return the number of particles in the batch
-      \return the number of particles in the current batch
-    */
-    inline cl_ulong GetNumberOfParticles() const {return number_of_particles_;};
-
-    /*!
-      \fn cl::Buffer* GetPrimaryParticles()
-      \brief Return the pointer on primary particles
-      \return Pointer on OpenCL buffer storing primary particles
-    */
-    //inline cl::Buffer* GetPrimaryParticles() {return p_primary_particles_;};
-
   private:
     /*!
       \fn void AllocatePrimaryParticles(void)
@@ -158,9 +133,8 @@ class GGEMS_EXPORT Particle
     void InitializeSeeds(void);
 
   private:
-    cl_ulong number_of_particles_; /*!< Number of the particles to simulate in a batch */
-    //PrimaryParticles* p_primary_particles_; /*!< Pointer storing info about primary particles in batch */
     cl::Buffer* p_primary_particles_; /*!< Pointer storing info about primary particles in batch on OpenCL device */
+    OpenCLManager& opencl_manager_; /*!< Reference to OpenCL manager singleton */
 };
 
 #endif // End of GUARD_GGEMS_PROCESSES_PARTICLES_HH

@@ -161,11 +161,13 @@ class GGEMS_EXPORT GGEMSSourceManager
 
   public: // Pure abstract method
     /*!
-      \fn void GetPrimaries(Particle* p_particle) = 0
+      \fn void GetPrimaries(Particle* p_particle, uint64_t const& number_of particles) = 0
       \param p_particle - pointer storing informations about particle
+      \param number_of_particles - number of particles to generate
       \brief Generate primary particles
     */
-    virtual void GetPrimaries(Particle* p_particle) = 0;
+    virtual void GetPrimaries(Particle* p_particle,
+      uint64_t const& number_of_particles) = 0;
 
     /*!
       \fn void Initialize(void) = 0
@@ -193,6 +195,9 @@ class GGEMS_EXPORT GGEMSSourceManager
 
   protected: // kernel generating primaries
     cl::Kernel* p_kernel_get_primaries_; /*!< Kernel generating primaries on OpenCL device */
+
+  protected:
+    OpenCLManager& opencl_manager_; /*!< Reference to opencl manager singleton */
 
   protected: // Storing the source
     static GGEMSSourceManager* p_current_source_; /*!< Current source */
