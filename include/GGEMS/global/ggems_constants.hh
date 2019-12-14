@@ -20,86 +20,148 @@
   \namespace ProcessName
   \brief Namespace storing constants about processes
 */
+#ifdef __cplusplus
 namespace ProcessName
 {
-  inline static constexpr int NUMBER_PROCESSES = 7; /*!< Maximum number of processes */
-  inline static constexpr int NUMBER_PHOTON_PROCESSES = 3; /*!< Maximum number of photon processes */
-  inline static constexpr int NUMBER_ELECTRON_PROCESSES = 3; /*!< Maximum number of electron processes */
-  inline static constexpr int NUMBER_PARTICLES = 3; /*!< Maximum number of different particles */
+#endif
+  __constant int NUMBER_PROCESSES = 7; /*!< Maximum number of processes */
+  __constant int NUMBER_PHOTON_PROCESSES = 3; /*!< Maximum number of photon processes */
+  __constant int NUMBER_ELECTRON_PROCESSES = 3; /*!< Maximum number of electron processes */
+  __constant int NUMBER_PARTICLES = 3; /*!< Maximum number of different particles */
 
-  inline static constexpr int PHOTON_COMPTON = 0; /*!< Compton process */
-  inline static constexpr int PHOTON_PHOTOELECTRIC = 1; /*!< Photoelectric process */
-  inline static constexpr int PHOTON_RAYLEIGH = 2; /*!< Rayleigh process */
-  inline static constexpr int PHOTON_BONDARY_VOXEL = 3; /*!< Photon on the boundaries */
+  __constant int PHOTON_COMPTON = 0; /*!< Compton process */
+  __constant int PHOTON_PHOTOELECTRIC = 1; /*!< Photoelectric process */
+  __constant int PHOTON_RAYLEIGH = 2; /*!< Rayleigh process */
+  __constant int PHOTON_BONDARY_VOXEL = 3; /*!< Photon on the boundaries */
 
-  inline static constexpr int ELECTRON_IONISATION = 4; /*!< Electron ionisation process */
-  inline static constexpr int ELECTRON_MSC = 5; /*!< Electron multiple scattering process */
-  inline static constexpr int ELECTRON_BREMSSTRAHLUNG = 6; /*!< Bremsstralung electron process */
+  __constant int ELECTRON_IONISATION = 4; /*!< Electron ionisation process */
+  __constant int ELECTRON_MSC = 5; /*!< Electron multiple scattering process */
+  __constant int ELECTRON_BREMSSTRAHLUNG = 6; /*!< Bremsstralung electron process */
 
-  inline static constexpr int NO_PROCESS = 99; /*!< No process */
+  __constant int NO_PROCESS = 99; /*!< No process */
+#ifdef __cplusplus
 }
+#endif
 
 /*!
   \namespace ParticleName
   \brief Namespace storing particles handling by GGEMS
 */
+#ifdef __cplusplus
 namespace ParticleName
 {
-  inline static constexpr int PHOTON = 0; /*!< Photon particle */
-  inline static constexpr int ELECTRON = 1; /*!< Electron particle */
-  inline static constexpr int POSITRON = 2; /*!< Positron particle */
+#endif
+  __constant int PHOTON = 0; /*!< Photon particle */
+  __constant int ELECTRON = 1; /*!< Electron particle */
+  __constant int POSITRON = 2; /*!< Positron particle */
+#ifdef __cplusplus
 }
+#endif
 
 /*!
   \namespace ParticleState
   \brief Namespace storing the state of the particle
 */
+#ifdef __cplusplus
 namespace ParticleState
 {
-  inline static constexpr int PRIMARY = 0; /*!< Primary particle */
-  inline static constexpr int GEOMETRY_BOUNDARY = 99; /*!< Particle on the boundary */
-  inline static constexpr int ALIVE = 0; /*!< Particle alive */
-  inline static constexpr int DEAD = 1; /*!< Particle dead */
-  inline static constexpr int FREEZE = 2; /*!< Particle freeze */
+#endif
+  __constant int PRIMARY = 0; /*!< Primary particle */
+  __constant int GEOMETRY_BOUNDARY = 99; /*!< Particle on the boundary */
+  __constant int ALIVE = 0; /*!< Particle alive */
+  __constant int DEAD = 1; /*!< Particle dead */
+  __constant int FREEZE = 2; /*!< Particle freeze */
+#ifdef __cplusplus
 }
+#endif
 
 /*!
   \namespace Tolerance
   \brief Namespace storing the tolerance for the float computations
 */
+#ifdef __cplusplus
 namespace Tolerance
 {
-  inline static constexpr double EPSILON2 = 1.0e-02; /*!< Epsilon of 0.01 */
-  inline static constexpr double EPSILON3 = 1.0e-03; /*!< Epsilon of 0.001 */
-  inline static constexpr double EPSILON6 = 1.0e-06; /*!< Epsilon of 0.000001 */
-  inline static constexpr double GEOMETRY = 100.0*Units::nm; /*!< Tolerance for the geometry navigation */
+#endif
+  __constant double EPSILON2 = 1.0e-02; /*!< Epsilon of 0.01 */
+  __constant double EPSILON3 = 1.0e-03; /*!< Epsilon of 0.001 */
+  __constant double EPSILON6 = 1.0e-06; /*!< Epsilon of 0.000001 */
+  __constant double GEOMETRY = 100.0*
+  #ifdef __cplusplus
+  Units::nm; /*!< Tolerance for the geometry navigation */
+  #else
+  (1.e-9 *1000.*1.0);
+  #endif
+#ifdef __cplusplus
 }
+#endif
 
 /*!
   \namespace State
   \brief Namespace storing the state of the particle
 */
+#ifdef __cplusplus
 namespace State
 {
-  inline static constexpr int SOLID = 0; /*!< Solid state */
-  inline static constexpr int GAS = 1; /*!< Gas state */
+#endif
+  __constant int SOLID = 0; /*!< Solid state */
+  __constant int GAS = 1; /*!< Gas state */
+#ifdef __cplusplus
 }
+#endif
 
 /*!
   \namespace Limit
   \brief Namespace storing the energy threshold
 */
+#ifdef __cplusplus
 namespace Limit
 {
-  inline static constexpr double KINETIC_ENERGY_MIN = 1.0*Units::eV; /*!< Min kinetic energy */
-  inline static constexpr int CROSS_SECTION_TABLE_NUMBER_BINS = 220; /*!< Number of bins in the cross section table */
-  inline static constexpr double CROSS_SECTION_TABLE_ENERGY_MIN =
-    990.0*Units::eV; /*!< Min energy in the cross section table */
-  inline static constexpr double CROSS_SECTION_TABLE_ENERGY_MAX =
-    250.0*Units::MeV; /*!< Max energy in the cross section table */
-  inline static constexpr double PHOTON_CUT = 1.0*Units::um; /*!< Photon cut */
-  inline static constexpr double ELECTRON_CUT = 1.0*Units::um; /*!< Electron cut */
-  inline static constexpr double POSITRON_CUT = 1.0*Units::um; /*!< Positron cut */
+#endif
+  __constant double KINETIC_ENERGY_MIN = 1.0*
+  #ifdef __cplusplus
+  Units::eV; /*!< Min kinetic energy */
+  #else
+  1.e-6*1.;
+  #endif
+
+  __constant int CROSS_SECTION_TABLE_NUMBER_BINS = 220; /*!< Number of bins in the cross section table */
+  __constant double CROSS_SECTION_TABLE_ENERGY_MIN = 990.0*
+  #ifdef __cplusplus
+  Units::eV; /*!< Min energy in the cross section table */
+  #else
+  1.e-6*1.;
+  #endif
+
+  __constant double CROSS_SECTION_TABLE_ENERGY_MAX = 250.0*
+  #ifdef __cplusplus
+  Units::MeV; /*!< Max energy in the cross section table */
+  #else
+  1.;
+  #endif
+
+  __constant double PHOTON_CUT = 1.0*
+  #ifdef __cplusplus
+  Units::um; /*!< Photon cut */
+  #else
+  1.e-6 *1000.*1.0;
+  #endif
+
+  __constant double ELECTRON_CUT = 1.0*
+  #ifdef __cplusplus
+  Units::um; /*!< Electron cut */
+  #else
+  1.e-6 *1000.*1.0;
+  #endif
+
+  __constant double POSITRON_CUT = 1.0*
+  #ifdef __cplusplus
+  Units::um; /*!< Positron cut */
+  #else
+  1.e-6 *1000.*1.0;
+  #endif
+#ifdef __cplusplus
 }
+#endif
 
 #endif // End of GUARD_GGEMS_GLOBAL_GGEMSCONSTANTS_HH
