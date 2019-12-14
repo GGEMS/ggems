@@ -1,4 +1,18 @@
-#include "GGEMS/auxiliary/use_double_precision.hh"
+#include "GGEMS/opencl/use_double_precision.hh"
+
+//typedef __attribute__((aligned (1))) struct Units_t
+//{
+//__constant double a = 4.0;
+//}Units;
+
+//Units unit = {4.0};
+/*#ifdef __cpluscplus
+namespace Toto {
+#endif
+  static double const a = 4.0;
+#ifdef __cpluscplus
+}
+#endif*/
 
 __kernel void get_primaries_xray_source(
   __global double const* p_cdf,

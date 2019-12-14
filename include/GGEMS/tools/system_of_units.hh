@@ -13,223 +13,231 @@
   \date Tuesday October 1, 2019
 */
 
-#include <cmath>
+#ifdef PASCAL
+#undef PASCAL
+#endif
+
+#ifdef __cplusplus
+#define __constant inline static constexpr
+#endif
 
 /*!
   \namespace Units
   \brief namespace storing all the usefull physical units
 */
+#ifdef __cplusplus
 namespace Units
 {
+#endif
   // Pi definitions
-  inline static constexpr double kPi    = 3.141592653589793238463;
-  inline static constexpr double k2_Pi  = 2.0 * kPi;
-  inline static constexpr double kPi_2  = kPi / 2.0;
-  inline static constexpr double kPi_Pi = kPi * kPi;
+  __constant double PI       = 3.141592653589793238463;
+  __constant double PI_TWICE = 2.0 * 3.141592653589793238463;
+  __constant double PI_HALF  = 3.141592653589793238463 / 2.0;
+  __constant double PI_PI    = 3.141592653589793238463 * 3.141592653589793238463;
 
   // Lengths
-  inline static constexpr double kMillimeter  = 1.0;
-  inline static constexpr double kMillimeter2 = kMillimeter*kMillimeter;
-  inline static constexpr double kMillimeter3 =
-    kMillimeter*kMillimeter*kMillimeter;
+  __constant double MILLIMETER  = 1.0;
+  __constant double MILLIMETER2 = 1.0*1.0;
+  __constant double MILLIMETER3 = 1.0*1.0*1.0;
 
-  inline static constexpr double kCentimeter  = 10.*kMillimeter;
-  inline static constexpr double kCentimeter2 = kCentimeter*kCentimeter;
-  inline static constexpr double kCentimeter3 =
-    kCentimeter*kCentimeter*kCentimeter;
+  __constant double CENTIMETER  = 10.*1.0;
+  __constant double CENTIMETER2 = 10.*1.0*10.*1.0;
+  __constant double CENTIMETER3 = 10.*1.0*10.*1.0*10.*1.0;
 
-  inline static constexpr double kMeter  = 1000.*kMillimeter;
-  inline static constexpr double kMeter2 = kMeter*kMeter;
-  inline static constexpr double kMeter3 = kMeter*kMeter*kMeter;
+  __constant double METER  = 1000.*1.0;
+  __constant double METER2 = 1000.*1.0*1000.*1.0;
+  __constant double METER3 = 1000.*1.0*1000.*1.0*1000.*1.0;
 
-  inline static constexpr double kKilometer  = 1000.*kMeter;
-  inline static constexpr double kKilometer2 = kKilometer*kKilometer;
-  inline static constexpr double kKilometer3 = kKilometer*kKilometer*kKilometer;
+  __constant double KILOMETER  = 1000.*1000.*1.0;
+  __constant double KILOMETER2 = 1000.*1000.*1.0*1000.*1000.*1.0;
+  __constant double KILOMETER3 = 1000.*1000.*1.0*1000.*1000.*1.0*1000.*1000.*1.0;
 
-  inline static constexpr double kParsec = 96939420213600000*kMeter/kPi;
+  __constant double PARSEC = 96939420213600000*1000.*1.0/3.141592653589793238463;
 
-  inline static constexpr double kMicrometer = 1.e-6 *kMeter;
-  inline static constexpr double kNanometer  = 1.e-9 *kMeter;
-  inline static constexpr double kAngstrom   = 1.e-10*kMeter;
-  inline static constexpr double kFermi      = 1.e-15*kMeter;
+  __constant double MICROMETER = 1.e-6 *1000.*1.0;
+  __constant double NANOMETER  = 1.e-9 *1000.*1.0;
+  __constant double ANGSTROM   = 1.e-10*1000.*1.0;
+  __constant double FERMI      = 1.e-15*1000.*1.0;
 
-  inline static constexpr double kBarn      = 1.e-28*kMeter;
-  inline static constexpr double kMillibarn = 1.e-3 *kBarn;
-  inline static constexpr double kMicrobarn = 1.e-6 *kBarn;
-  inline static constexpr double kNanobarn  = 1.e-9 *kBarn;
-  inline static constexpr double kPicobarn  = 1.e-12*kBarn;
+  __constant double BARN      = 1.e-28*1000.*1.0;
+  __constant double MILLIBARN = 1.e-3 *1.e-28*1000.*1.0;
+  __constant double MICROBARN = 1.e-6 *1.e-28*1000.*1.0;
+  __constant double NANOBARN  = 1.e-9 *1.e-28*1000.*1.0;
+  __constant double PICOBARN  = 1.e-12*1.e-28*1000.*1.0;
 
   // Symbol definitions
-  inline static constexpr double nm  = kNanometer;
-  inline static constexpr double um  = kMicrometer;
+  __constant double nm  = 1.e-9 *1000.*1.0;
+  __constant double um  = 1.e-6 *1000.*1.0;
 
-  inline static constexpr double mm  = kMillimeter;
-  inline static constexpr double mm2 = kMillimeter2;
-  inline static constexpr double mm3 = kMillimeter3;
+  __constant double mm = 1.0;
+  __constant double mm2 = 1.0*1.0;
+  __constant double mm3 = 1.0*1.0*1.0;
 
-  inline static constexpr double cm  = kCentimeter;
-  inline static constexpr double cm2 = kCentimeter2;
-  inline static constexpr double cm3 = kCentimeter3;
+  __constant double cm  = 10.*1.0;
+  __constant double cm2 = 10.*1.0*10.*1.0;
+  __constant double cm3 = 10.*1.0*10.*1.0*10.*1.0;
 
-  inline static constexpr double m  = kMeter;
-  inline static constexpr double m2 = kMeter2;
-  inline static constexpr double m3 = kMeter3;
+  __constant double m  = 1000.*1.0;
+  __constant double m2 = 1000.*1.0*1000.*1.0;
+  __constant double m3 = 1000.*1.0*1000.*1.0*1000.*1.0;
 
-  inline static constexpr double km  = kKilometer;
-  inline static constexpr double km2 = kKilometer2;
-  inline static constexpr double km3 = kKilometer3;
+  __constant double Km  = 1000.*1000.*1.0;
+  __constant double Km2 = 1000.*1000.*1.0*1000.*1000.*1.0;
+  __constant double Km3 = 1000.*1000.*1.0*1000.*1000.*1.0*1000.*1000.*1.0;
 
-  inline static constexpr double pc = kParsec;
+  __constant double pc = 96939420213600000*1000.*1.0/3.141592653589793238463;
 
   // Angles
-  inline static constexpr double kRadian      = 1.0;
-  inline static constexpr double kMilliradian = 1.e-3*kRadian;
-  inline static constexpr double kDegree      = (kPi/180.0)*kRadian;
+  __constant double RADIAN      = 1.0;
+  __constant double MILLIRADIAN = 1.e-3*1.0;
+  __constant double DEGREE      = (3.141592653589793238463/180.0)*1.0;
 
-  inline static constexpr double kSteradian = 1.0;
+  __constant double STERADIAN = 1.0;
 
   // Symbols definitions
-  inline static constexpr double rad  = kRadian;
-  inline static constexpr double mrad = kMilliradian;
-  inline static constexpr double sr   = kSteradian;
-  inline static constexpr double deg  = kDegree;
+  __constant double rad  = 1.0;
+  __constant double mrad = 1.e-3*1.0;
+  __constant double sr   = 1.0;
+  __constant double deg  = (3.141592653589793238463/180.0)*1.0;
 
   // Time
-  inline static constexpr double kNanosecond  = 1.;
-  inline static constexpr double kSecond      = 1.e+9 *kNanosecond;
-  inline static constexpr double kMillisecond = 1.e-3 *kSecond;
-  inline static constexpr double kMicrosecond = 1.e-6 *kSecond;
-  inline static constexpr double kPicosecond  = 1.e-12*kSecond;
+  __constant double NANOSECOND  = 1.;
+  __constant double SECOND      = 1.e+9 *1.;
+  __constant double MILLISECOND = 1.e-3 *1.e+9 *1.;
+  __constant double MICROSECOND = 1.e-6 *1.e+9 *1.;
+  __constant double PICOSECOND  = 1.e-12*1.e+9 *1.;
 
-  inline static constexpr double kHertz     = 1./kSecond;
-  inline static constexpr double kKilohertz = 1.e+3*kHertz;
-  inline static constexpr double kMegahertz = 1.e+6*kHertz;
+  __constant double HERTZ     = 1./(1.e+9 *1.);
+  __constant double KILOHERTZ = 1.e+3*(1./(1.e+9 *1.));
+  __constant double MEGAHERTZ = 1.e+6*(1./(1.e+9 *1.));
 
   // Symbols definitions
-  inline static constexpr double ns = kNanosecond;
-  inline static constexpr double s  = kSecond;
-  inline static constexpr double ms = kMillisecond;
+  __constant double ns = 1.;
+  __constant double s  = 1.e+9 *1.;
+  __constant double ms = 1.e-3 *1.e+9 *1.;
 
   // Electric charge [Q]
-  inline static constexpr double kEplus   = 1. ;// positron charge
-  inline static constexpr double kESI     = 1.602176487e-19;// positron charge in coulomb
-  inline static constexpr double kCoulomb = kEplus/kESI;// coulomb = 6.24150 e+18 * eplus
+  __constant double EPLUS   = 1. ;// positron charge
+  __constant double ESI     = 1.602176487e-19;// positron charge in coulomb
+  __constant double COULOMB = 1./1.602176487e-19;// coulomb = 6.24150 e+18 * eplus
 
   // Energy [E]
-  inline static constexpr double kMegaelectronvolt = 1. ;
-  inline static constexpr double kElectronvolt     = 1.e-6*kMegaelectronvolt;
-  inline static constexpr double kKiloelectronvolt = 1.e-3*kMegaelectronvolt;
-  inline static constexpr double kGigaelectronvolt = 1.e+3*kMegaelectronvolt;
-  inline static constexpr double kTeraelectronvolt = 1.e+6*kMegaelectronvolt;
-  inline static constexpr double kPetaelectronvolt = 1.e+9*kMegaelectronvolt;
+  __constant double MEGAELECTRONVOLT = 1. ;
+  __constant double ELECTRONVOLT     = 1.e-6*1.;
+  __constant double KILOELECTRONVOLT = 1.e-3*1.;
+  __constant double GIGAELECTRONVOLT = 1.e+3*1.;
+  __constant double TERAELECTRONVOLT = 1.e+6*1.;
+  __constant double PETAELECTRONVOLT = 1.e+9*1.;
 
-  inline static constexpr double kJoule = kElectronvolt/kESI;// joule = 6.24150 e+12 * MeV
+  __constant double JOULE = 1.e-6*1./1.602176487e-19;// joule = 6.24150 e+12 * MeV
 
   // Symbols definitions
-  inline static constexpr double MeV = kMegaelectronvolt;
-  inline static constexpr double eV  = kElectronvolt;
-  inline static constexpr double keV = kKiloelectronvolt;
-  inline static constexpr double GeV = kGigaelectronvolt;
-  inline static constexpr double TeV = kTeraelectronvolt;
-  inline static constexpr double PeV = kPetaelectronvolt;
+  __constant double MeV = 1.;
+  __constant double eV  = 1.e-6*1.;
+  __constant double KeV = 1.e-3*1.;
+  __constant double GeV = 1.e+3*1.;
+  __constant double TeV = 1.e+6*1.;
+  __constant double PeV = 1.e+9*1.;
 
   // Mass [E][T^2][L^-2]
-  inline static constexpr double kKilogram  = kJoule*kSecond*kSecond/(kMeter*kMeter);
-  inline static constexpr double kGram      = 1.e-3*kKilogram;
-  inline static constexpr double kMilligram = 1.e-3*kGram;
+  __constant double KILOGRAM  = 1.e-6*1./1.602176487e-19*1.e+9 *1.*1.e+9 *1./(1000.*1.0*1000.*1.0);
+  __constant double GRAM      = 1.e-3*(1.e-6*1./1.602176487e-19*1.e+9 *1.*1.e+9 *1./(1000.*1.0*1000.*1.0));
+  __constant double MILLIGRAM = 1.e-3*1.e-3*(1.e-6*1./1.602176487e-19*1.e+9 *1.*1.e+9 *1./(1000.*1.0*1000.*1.0));
 
   // Symbols definitions
-  inline static constexpr double  kg = kKilogram;
-  inline static constexpr double  g  = kGram;
-  inline static constexpr double  mg = kMilligram;
+  __constant double  Kg = 1.e-6*1./1.602176487e-19*1.e+9 *1.*1.e+9 *1./(1000.*1.0*1000.*1.0);
+  __constant double  g  = 1.e-3*(1.e-6*1./1.602176487e-19*1.e+9 *1.*1.e+9 *1./(1000.*1.0*1000.*1.0));
+  __constant double  Mg = 1.e-3*1.e-3*(1.e-6*1./1.602176487e-19*1.e+9 *1.*1.e+9 *1./(1000.*1.0*1000.*1.0));
 
   // Power [E][T^-1]
-  inline static constexpr double kWatt = kJoule/kSecond;// watt = 6.24150 e+3 * MeV/ns
+  __constant double WATT = 1.e-6*1./1.602176487e-19/(1.e+9 *1.);// watt = 6.24150 e+3 * MeV/ns
 
   // Force [E][L^-1]
-  inline static constexpr double kNewton = kJoule/kMeter;// newton = 6.24150 e+9 * MeV/mm
+  __constant double NEWTON = 1.e-6*1./1.602176487e-19/(1000.*1.0);// newton = 6.24150 e+9 * MeV/mm
 
   // Pressure [E][L^-3]
-  inline static constexpr double kPascal     = kNewton/m2;   // pascal = 6.24150 e+3 * MeV/mm3
-  inline static constexpr double kBar        = 100000*kPascal; // bar    = 6.24150 e+8 * MeV/mm3
-  inline static constexpr double kAtmosphere = 101325*kPascal; // atm    = 6.32420 e+8 * MeV/mm3
+  __constant double PASCAL     = (1.e-6*1./1.602176487e-19/(1000.*1.0))/(1000.*1.0*1000.*1.0);   // pascal = 6.24150 e+3 * MeV/mm3
+  __constant double BAR        = 100000*((1.e-6*1./1.602176487e-19/(1000.*1.0))/(1000.*1.0*1000.*1.0)); // bar    = 6.24150 e+8 * MeV/mm3
+  __constant double ATMOSPHERE = 101325*((1.e-6*1./1.602176487e-19/(1000.*1.0))/(1000.*1.0*1000.*1.0)); // atm    = 6.32420 e+8 * MeV/mm3
 
   // Electric current [Q][T^-1]
-  inline static constexpr double kAmpere      = kCoulomb/kSecond; // ampere = 6.24150 e+9 * eplus/ns
-  inline static constexpr double kMilliampere = 1.e-3*kAmpere;
-  inline static constexpr double kMicroampere = 1.e-6*kAmpere;
-  inline static constexpr double kNanoampere  = 1.e-9*kAmpere;
+  __constant double AMPERE      = (1./1.602176487e-19)/(1.e+9 *1.); // ampere = 6.24150 e+9 * eplus/ns
+  __constant double MILLIAMPERE = 1.e-3*((1./1.602176487e-19)/(1.e+9 *1.));
+  __constant double MICROAMPERE = 1.e-6*((1./1.602176487e-19)/(1.e+9 *1.));
+  __constant double NANOAMPERE  = 1.e-9*((1./1.602176487e-19)/(1.e+9 *1.));
 
   // Electric potential [E][Q^-1]
-  inline static constexpr double kMegavolt = kMegaelectronvolt/kEplus;
-  inline static constexpr double kKilovolt = 1.e-3*kMegavolt;
-  inline static constexpr double kVolt     = 1.e-6*kMegavolt;
+  __constant double MEGAVOLT = (1.)/(1.);
+  __constant double KILOVOLT = 1.e-3*((1.)/(1.));
+  __constant double VOLT     = 1.e-6*((1.)/(1.));
 
   // Electric resistance [E][T][Q^-2]
-  inline static constexpr double kOhm = kVolt/kAmpere;// ohm = 1.60217e-16*(MeV/eplus)/(eplus/ns)
+  __constant double OHM = (1.e-6*((1.)/(1.)))/((1./1.602176487e-19)/(1.e+9 *1.));// ohm = 1.60217e-16*(MeV/eplus)/(eplus/ns)
 
   // Electric capacitance [Q^2][E^-1]
-  inline static constexpr double kFarad = kCoulomb/kVolt;// farad = 6.24150e+24 * eplus/Megavolt
-  inline static constexpr double kMillifarad = 1.e-3*kFarad;
-  inline static constexpr double kMicrofarad = 1.e-6*kFarad;
-  inline static constexpr double kNanofarad = 1.e-9*kFarad;
-  inline static constexpr double kPicofarad = 1.e-12*kFarad;
+  __constant double FARAD = (1./1.602176487e-19)/(1.e-6*((1.)/(1.)));// farad = 6.24150e+24 * eplus/Megavolt
+  __constant double MILLIFARAD = 1.e-3*((1./1.602176487e-19)/(1.e-6*((1.)/(1.))));
+  __constant double MICROFARAD = 1.e-6*((1./1.602176487e-19)/(1.e-6*((1.)/(1.))));
+  __constant double NANOFARAD = 1.e-9*((1./1.602176487e-19)/(1.e-6*((1.)/(1.))));
+  __constant double PICOFARAD = 1.e-12*((1./1.602176487e-19)/(1.e-6*((1.)/(1.))));
 
   // Magnetic Flux [T][E][Q^-1]
-  inline static constexpr double kWeber = kVolt*kSecond;// weber = 1000*megavolt*ns
+  __constant double WEBER = (1.e-6*((1.)/(1.)))*(1.e+9 *1.);// weber = 1000*megavolt*ns
 
   // Magnetic Field [T][E][Q^-1][L^-2]
-  inline static constexpr double kTesla     = kVolt*kSecond/kMeter2;// tesla =0.001*megavolt*ns/mm2
+  __constant double TESLA     = (1.e-6*((1.)/(1.)))*(1.e+9 *1.)/(1000.*1.0*1000.*1.0);// tesla =0.001*megavolt*ns/mm2
 
-  inline static constexpr double kGauss     = 1.e-4*kTesla;
-  inline static constexpr double kKilogauss = 1.e-1*kTesla;
+  __constant double GAUSS     = 1.e-4*((1.e-6*((1.)/(1.)))*(1.e+9 *1.)/(1000.*1.0*1000.*1.0));
+  __constant double KILOGAUSS = 1.e-1*((1.e-6*((1.)/(1.)))*(1.e+9 *1.)/(1000.*1.0*1000.*1.0));
 
   // Inductance [T^2][E][Q^-2]
-  inline static constexpr double kHenry = kWeber/kAmpere;// henry = 1.60217e-7*MeV*(ns/eplus)**2
+  __constant double HENRY = ((1.e-6*((1.)/(1.)))*(1.e+9 *1.))/((1./1.602176487e-19)/(1.e+9 *1.));// henry = 1.60217e-7*MeV*(ns/eplus)**2
 
   // Temperature
-  inline static constexpr double kKelvin = 1.;
+  __constant double KELVIN = 1.;
 
   // Amount of substance
-  inline static constexpr double kMole = 1.;
+  __constant double MOLE = 1.;
 
   // Activity [T^-1]
-  inline static constexpr double kBecquerel     = 1./kSecond ;
-  inline static constexpr double kCurie         = 3.7e+10 * kBecquerel;
-  inline static constexpr double kKilobecquerel = 1.e+3*kBecquerel;
-  inline static constexpr double kMegabecquerel = 1.e+6*kBecquerel;
-  inline static constexpr double kGigabecquerel = 1.e+9*kBecquerel;
-  inline static constexpr double kMillicurie    = 1.e-3*kCurie;
-  inline static constexpr double kMicrocurie    = 1.e-6*kCurie;
+  __constant double BECQUEREL     = 1./(1.e+9 *1.) ;
+  __constant double CURIE         = 3.7e+10 * (1./(1.e+9 *1.));
+  __constant double KILOBECQUEREL = 1.e+3*(1./(1.e+9 *1.));
+  __constant double MEGABECQUEREL = 1.e+6*(1./(1.e+9 *1.));
+  __constant double GIGABECQUEREL = 1.e+9*(1./(1.e+9 *1.));
+  __constant double MILLICURIE    = 1.e-3*(3.7e+10 * (1./(1.e+9 *1.)));
+  __constant double MICROCURIE    = 1.e-6*(3.7e+10 * (1./(1.e+9 *1.)));
 
   // Symbols definitions
-  inline static constexpr double Bq  = kBecquerel;
-  inline static constexpr double kBq = kKilobecquerel;
-  inline static constexpr double MBq = kMegabecquerel;
-  inline static constexpr double GBq = kGigabecquerel;
-  inline static constexpr double Ci  = kCurie;
-  inline static constexpr double mCi = kMillicurie;
-  inline static constexpr double uCi = kMicrocurie;
+  __constant double Bq  = (1./(1.e+9 *1.));
+  __constant double kBq = (1.e+3*(1./(1.e+9 *1.)));
+  __constant double MBq = (1.e+6*(1./(1.e+9 *1.)));
+  __constant double GBq = (1.e+9*(1./(1.e+9 *1.)));
+  __constant double Ci  = (3.7e+10 * (1./(1.e+9 *1.)));
+  __constant double mCi = (1.e-3*(3.7e+10 * (1./(1.e+9 *1.))));
+  __constant double uCi = (1.e-6*(3.7e+10 * (1./(1.e+9 *1.))));
 
   // Absorbed dose [L^2][T^-2]
-  inline static constexpr double kGray      = kJoule/kKilogram;
-  inline static constexpr double kKilogray  = 1.e+3*kGray;
-  inline static constexpr double kMilligray = 1.e-3*kGray;
-  inline static constexpr double kMicrogray = 1.e-6*kGray;
+  __constant double GRAY      = (1.e-6*1./1.602176487e-19)/(1.e-6*1./1.602176487e-19*1.e+9 *1.*1.e+9 *1./(1000.*1.0*1000.*1.0));
+  __constant double KILOGRAY  = 1.e+3*((1.e-6*1./1.602176487e-19)/(1.e-6*1./1.602176487e-19*1.e+9 *1.*1.e+9 *1./(1000.*1.0*1000.*1.0)));
+  __constant double MILLIGRAY = 1.e-3*((1.e-6*1./1.602176487e-19)/(1.e-6*1./1.602176487e-19*1.e+9 *1.*1.e+9 *1./(1000.*1.0*1000.*1.0)));
+  __constant double MICROGRAY = 1.e-6*((1.e-6*1./1.602176487e-19)/(1.e-6*1./1.602176487e-19*1.e+9 *1.*1.e+9 *1./(1000.*1.0*1000.*1.0)));
 
   // Luminous intensity [I]
-  inline static constexpr double kCandela = 1.;
+  __constant double CANDELA = 1.;
 
   // Luminous flux [I]
-  inline static constexpr double kLumen = kCandela*kSteradian;
+  __constant double LUMEN = (1.)*(1.0);
 
   // Illuminance [I][L^-2]
-  inline static constexpr double kLux = kLumen/kMeter2;
+  __constant double LUX = ((1.)*(1.0))/(1000.*1.0*1000.*1.0);
 
   // Miscellaneous
-  inline static constexpr double kPerCent     = 0.01 ;
-  inline static constexpr double kPerThousand = 0.001;
-  inline static constexpr double kPerMillion  = 0.000001;
+  __constant double PERCENT     = 0.01 ;
+  __constant double PERTHOUSAND = 0.001;
+  __constant double PERMILLION  = 0.000001;
+#ifdef __cplusplus
 }
+#endif
 
 #endif // End of GUARD_GGEMS_TOOLS_SYSTEMOFUNITS_HH

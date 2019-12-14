@@ -244,11 +244,6 @@ OpenCLManager::~OpenCLManager(void)
     p_used_ram_ = nullptr;
   }
 
-  // Deleting kernel(s)
- // for (std::size_t i = 0; i < vp_kernel_cl_.size(); ++i) {
- //   delete vp_kernel_cl_.at(i);
- // }
-
   GGEMScout("OpenCLManager", "~OpenCLManager", 3)
     << "Deallocation of OpenCL Manager singleton..." << GGEMSendl;
 }
@@ -340,6 +335,14 @@ void OpenCLManager::Clean(void)
   }
   vp_event_cl_.clear();
   vp_event_act_cl_.clear();
+
+  // Deleting kernel(s)
+  GGEMScout("OpenCLManager", "Clean", 1)
+    << "Deleting OpenCL kernel(s)..." << GGEMSendl;
+  for (auto&& k : vp_kernel_cl_) {
+    delete k;
+    k = nullptr;
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
