@@ -24,6 +24,7 @@
 #include "GGEMS/global/ggems_export.hh"
 
 class Particle;
+class RandomGenerator;
 class GGEMSSourceManager;
 class OpenCLManager;
 
@@ -252,6 +253,9 @@ class GGEMS_EXPORT GGEMSManager
 
   private: // Particles management
     Particle* p_particle_; /*!< Pointer on particle management */
+
+  private: // Random generator management
+    RandomGenerator* p_random_generator_; /*!< Pointer on pseudo random generator */
 
   private: // Source management
     GGEMSSourceManager& source_manager_; /*!< Reference to source manager singleton */

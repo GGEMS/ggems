@@ -23,15 +23,22 @@
 #include <unistd.h>
 #endif
 
+#include "GGEMS/sources/ggems_source_manager.hh"
+
 #include "GGEMS/tools/system_of_units.hh"
 #include "GGEMS/tools/print.hh"
 #include "GGEMS/tools/chrono.hh"
-#include "GGEMS/global/ggems_manager.hh"
-#include "GGEMS/tools/functions.hh"
-#include "GGEMS/global/ggems_constants.hh"
 #include "GGEMS/tools/memory.hh"
+#include "GGEMS/tools/functions.hh"
+
+#include "GGEMS/global/ggems_manager.hh"
+#include "GGEMS/global/ggems_constants.hh"
+
 #include "GGEMS/processes/particles.hh"
-#include "GGEMS/sources/ggems_source_manager.hh"
+#include "GGEMS/processes/primary_particles.hh"
+
+#include "GGEMS/randoms/pseudo_random_generator.hh"
+#include "GGEMS/randoms/random.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -53,6 +60,7 @@ GGEMSManager::GGEMSManager(void)
   cross_section_table_energy_min_(Limit::CROSS_SECTION_TABLE_ENERGY_MIN),
   cross_section_table_energy_max_(Limit::CROSS_SECTION_TABLE_ENERGY_MAX),
   p_particle_(nullptr),
+  p_random_generator_(nullptr),
   source_manager_(GGEMSSourceManager::GetInstance()),
   opencl_manager_(OpenCLManager::GetInstance())
 {
@@ -65,8 +73,11 @@ GGEMSManager::GGEMSManager(void)
   // Allocation of the memory for the secondaries list
   v_secondaries_list_.resize(ProcessName::NUMBER_PARTICLES, false);
 
-  // Allocation of particle object
+  // Allocation of particle
   p_particle_ = new Particle();
+
+  // Allocation of pseudo random generator
+  p_random_generator_ = new RandomGenerator();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -79,6 +90,11 @@ GGEMSManager::~GGEMSManager(void)
   if (p_particle_) {
     delete p_particle_;
     p_particle_ = nullptr;
+  }
+
+  if (p_random_generator_) {
+    delete p_random_generator_;
+    p_random_generator_ = nullptr;
   }
 
   GGEMScout("GGEMSManager", "~GGEMSManager", 3)
@@ -152,21 +168,21 @@ void GGEMSManager::CheckMemoryForParticles(void) const
   // RAM memory
 
   // Compute the RAM memory percentage allocated for primary particles
-  double const kRAMPrimaryParticles =
-    static_cast<double>(sizeof(PrimaryParticles));
+  double const kRAMParticles =
+    static_cast<double>(sizeof(PrimaryParticles))
+    + static_cast<double>(sizeof(Random));
 
   // Getting the RAM memory on activated device
   double const kMaxRAMDevice = static_cast<double>(
     opencl_manager_.GetMaxRAMMemoryOnActivatedDevice());
 
   // Computing the ratio of used RAM memory on device
-  double const kMaxRatioUsedRAM = kRAMPrimaryParticles / kMaxRAMDevice;
+  double const kMaxRatioUsedRAM = kRAMParticles / kMaxRAMDevice;
 
   // Computing a theoric max. number of particles depending on activated
   // device and advice this number to the user. 10% of RAM memory for particles
   cl_ulong const kTheoricMaxNumberOfParticles = static_cast<cl_ulong>(
-    0.1 * kMaxRAMDevice / (static_cast<double>(sizeof(PrimaryParticles))
-    /MAXIMUM_PARTICLES));
+    0.1 * kMaxRAMDevice / (kRAMParticles/MAXIMUM_PARTICLES));
 
   if (kMaxRatioUsedRAM > 0.1) { // Printing warning
     GGEMSwarn("GGEMSManager", "CheckMemoryForParticles", 0)
@@ -390,7 +406,7 @@ void GGEMSManager::Initialize()
   // Initialize the pseudo random number generator
   srand(seed_);
   GGEMScout("GGEMSManager", "Initialize", 0)
-    << "Pseudo-random number generator seeded OK" << GGEMSendl;
+    << "C++ Pseudo-random number generator seeded OK" << GGEMSendl;
 
   // Checking the RAM memory for particle and propose a new MAXIMUM_PARTICLE
   // number
@@ -405,6 +421,15 @@ void GGEMSManager::Initialize()
   p_particle_->Initialize();
   GGEMScout("GGEMSManager", "Initialize", 0)
     << "Initialization of particles OK" << GGEMSendl;
+
+  // Initialization of GGEMS pseudo random generator
+  p_random_generator_->Initialize();
+  GGEMScout("GGEMSManager", "Initialize", 0)
+    << "Initialization of GGEMS pseudo random generator OK" << GGEMSendl;
+
+  // Give particle and random to source
+  source_manager_.SetParticle(p_particle_);
+  source_manager_.SetRandomGenerator(p_random_generator_);
 
   // Initialization of the source
   source_manager_.Initialize();
@@ -439,8 +464,7 @@ void GGEMSManager::Run()
     // Generating particles
     GGEMScout("GGEMSManager", "Run", 0) << "      + Generating "
       << v_number_of_particles_in_batch_[i] << " particles..." << GGEMSendl;
-    source_manager_.GetPrimaries(p_particle_,
-      v_number_of_particles_in_batch_[i]);
+    source_manager_.GetPrimaries(v_number_of_particles_in_batch_[i]);
   }
 
   // Get the end time

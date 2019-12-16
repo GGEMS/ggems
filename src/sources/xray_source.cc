@@ -18,6 +18,7 @@
 #include "GGEMS/tools/functions.hh"
 #include "GGEMS/tools/matrix.hh"
 #include "GGEMS/processes/particles.hh"
+#include "GGEMS/randoms/pseudo_random_generator.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -97,8 +98,7 @@ void XRaySource::InitializeKernel(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void XRaySource::GetPrimaries(Particle* p_particle,
-  uint64_t const& number_of_particles)
+void XRaySource::GetPrimaries(uint64_t const& number_of_particles)
 {
   GGEMScout("XRaySource", "GetPrimaries", 3) << "Generating "
     << number_of_particles << " new particles..." << GGEMSendl;
@@ -107,24 +107,29 @@ void XRaySource::GetPrimaries(Particle* p_particle,
   cl::CommandQueue* p_queue = opencl_manager_.GetCommandQueue();
   cl::Event* p_event = opencl_manager_.GetEvent();
 
-/*
+  // Get the OpenCL buffers
+  cl::Buffer* p_particles = p_particle_->GetPrimaryParticles();
+  cl::Buffer* p_randoms = p_random_generator_->GetRandomNumbers();
+
   // Set parameters for kernel
-  p_kernel_get_primaries_->setArg(0, *p_cdf_);
-  p_kernel_get_primaries_->setArg(1, *p_energy_spectrum_);
-  p_kernel_get_primaries_->setArg(2, number_of_energy_bins_);
+  p_kernel_get_primaries_->setArg(0, *p_particles);
+  p_kernel_get_primaries_->setArg(1, *p_randoms);
+  p_kernel_get_primaries_->setArg(2, *p_energy_spectrum_);
+  p_kernel_get_primaries_->setArg(3, *p_cdf_);
+  p_kernel_get_primaries_->setArg(4, number_of_energy_bins_);
 
   // Define the number of work-item to launch
-  cl::NDRange global(kNumberOfParticles);
+  cl::NDRange global(number_of_particles);
   cl::NDRange offset(0);
 
   // Launching kernel
   cl_int kernel_status = p_queue->enqueueNDRangeKernel(*p_kernel_get_primaries_,
     offset, global, cl::NullRange, nullptr, p_event);
-  opencl_manager.CheckOpenCLError(kernel_status, "XRaySource", "GetPrimaries");
+  opencl_manager_.CheckOpenCLError(kernel_status, "XRaySource", "GetPrimaries");
   p_queue->finish(); // Wait until the kernel status is finish
 
   // Displaying time in kernel
-  opencl_manager.DisplayElapsedTimeInKernel("GetPrimaries");*/
+  opencl_manager_.DisplayElapsedTimeInKernel("GetPrimaries");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -441,10 +446,10 @@ void print_infos_xray_source(XRaySource* p_source_manager)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_particle_type_xray_source(XRaySource* p_source_manager,
+void set_source_particle_type_xray_source(XRaySource* p_source_manager,
   char const* particle_name)
 {
-  p_source_manager->SetParticleType(particle_name);
+  p_source_manager->SetSourceParticleType(particle_name);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -71,12 +71,10 @@ class GGEMS_EXPORT XRaySource : public GGEMSSourceManager
 
   public: // Pure abstract method from GGEMSSourceManager
     /*!
-      \fn void GetPrimaries(Particle* p_particle, uint64_t const& number_of_particles)
-      \param p_particle - pointer storing informations about particle
+      \fn void GetPrimaries(uint64_t const& number_of_particles)
       \brief Generate primary particles
     */
-    void GetPrimaries(Particle* p_particle,
-      uint64_t const& number_of_particles);
+    void GetPrimaries(uint64_t const& number_of_particles);
 
     /*!
       \fn void Initialize(void)
@@ -195,12 +193,12 @@ extern "C" GGEMS_EXPORT void print_infos_xray_source(
   XRaySource* p_source_manager);
 
 /*!
-  \fn void SetParticleType_xray_source(XRaySource* p_source_manager, char const* particle_name)
+  \fn void set_source_particle_type_xray_source(XRaySource* p_source_manager, char const* particle_name)
   \param source_manager - pointer on the source
   \param particle_name - name/type of the particle: photon or electron
-  \brief Set the type of the particle
+  \brief Set the type of the source particle
 */
-extern "C" GGEMS_EXPORT void set_particle_type_xray_source(
+extern "C" GGEMS_EXPORT void set_source_particle_type_xray_source(
   XRaySource* p_source_manager, char const* particle_name);
 
 /*!

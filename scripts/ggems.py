@@ -105,9 +105,9 @@ class XRaySource(object):
         ggems_lib.print_infos_xray_source.argtypes = [ctypes.c_void_p]
         ggems_lib.print_infos_xray_source.restype = ctypes.c_void_p
 
-        ggems_lib.set_particle_type_xray_source.argtypes = [
+        ggems_lib.set_source_particle_type_xray_source.argtypes = [
             ctypes.c_void_p, ctypes.c_char_p]
-        ggems_lib.set_particle_type_xray_source.restype = ctypes.c_void_p
+        ggems_lib.set_source_particle_type_xray_source.restype = ctypes.c_void_p
 
         ggems_lib.set_beam_aperture_xray_source.argtypes = [
             ctypes.c_void_p, ctypes.c_float]
@@ -154,8 +154,8 @@ class XRaySource(object):
     def print_infos(self):
         ggems_lib.print_infos_xray_source(self.obj)
 
-    def set_particle_type(self, particle_type):
-        ggems_lib.set_particle_type_xray_source(self.obj, particle_type)
+    def set_source_particle_type(self, particle_type):
+        ggems_lib.set_source_particle_type_xray_source(self.obj, particle_type)
 
     def set_beam_aperture(self, beam_aperture):
         ggems_lib.set_beam_aperture_xray_source(self.obj, beam_aperture)
