@@ -24,7 +24,7 @@ opencl_manager.print_activated_context()
 # STEP 2: Initializing a source
 xray_source = ggems.XRaySource()
 xray_source.set_position(-1000.0, 10.0, 50.0)  # in mm
-xray_source.set_particle_type(b"photon")
+xray_source.set_source_particle_type(b"photon")
 xray_source.set_beam_aperture(5.0)  # in degree
 xray_source.set_focal_spot_size(0.6, 1.2, 0.0)  # in mm
 xray_source.set_rotation(0.0, 0.0, 0.0)  # in degree

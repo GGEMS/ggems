@@ -16,9 +16,6 @@
 #include <cstring>
 #include <sstream>
 
-#include "GGEMS/tools/print.hh"
-#include "GGEMS/global/ggems_export.hh"
-
 /*!
   \namespace Memory
   \brief namespace storing template allocating aligned memory and another
@@ -68,7 +65,7 @@ namespace Memory {
     \param p - Pointer to the aligned buffer
     \brief Free allocated memory
   */
-  void GGEMS_EXPORT MemFree(void *p);
+  void MemFree(void *p);
 }
 
 #endif // GUARD_GGEMS_TOOLS_MEMORY_HH

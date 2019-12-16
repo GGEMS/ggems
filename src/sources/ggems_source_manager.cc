@@ -40,6 +40,8 @@ GGEMSSourceManager::GGEMSSourceManager()
 : is_initialized_(false),
   particle_type_(-1),
   p_kernel_get_primaries_(nullptr),
+  p_particle_(nullptr),
+  p_random_generator_(nullptr),
   opencl_manager_(OpenCLManager::GetInstance())
 {
   GGEMScout("GGEMSSourceManager", "GGEMSSourceManager", 3)
@@ -104,7 +106,26 @@ void GGEMSSourceManager::SetPosition(float const& pos_x, float const& pos_y,
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSSourceManager::SetParticleType(char const* particle_type)
+void GGEMSSourceManager::SetParticle(Particle* const p_particle)
+{
+  p_particle_ = p_particle;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSSourceManager::SetRandomGenerator(
+  RandomGenerator* const p_random_generator)
+{
+  p_random_generator_ = p_random_generator;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSSourceManager::SetSourceParticleType(char const* particle_type)
 {
   // Convert the particle type in string
   std::string particle_type_str(particle_type);
@@ -177,6 +198,20 @@ void GGEMSSourceManager::CheckParameters(void) const
     oss << "You have to set a particle type for the source:" << std::endl;
     oss << "    - Photon" << std::endl;
     oss << "    - Electron" << std::endl;
+    Misc::ThrowException("GGEMSSourceManager", "CheckParameters", oss.str());
+  }
+
+  // Checking the particle pointer
+  if (!p_particle_) {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "The particle pointer is empty in source manager!!!" << std::endl;
+    Misc::ThrowException("GGEMSSourceManager", "CheckParameters", oss.str());
+  }
+
+  // Checking the random generator pointer
+  if (!p_random_generator_) {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "The random generator pointer is empty in source manager!!!" << std::endl;
     Misc::ThrowException("GGEMSSourceManager", "CheckParameters", oss.str());
   }
 

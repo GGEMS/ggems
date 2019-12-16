@@ -22,6 +22,7 @@
 #include "GGEMS/global/opencl_manager.hh"
 
 class Particle;
+class RandomGenerator;
 class TransformCalculator;
 
 /*!
@@ -117,11 +118,11 @@ class GGEMS_EXPORT GGEMSSourceManager
       float const& pos_z);
 
     /*!
-      \fn void SetParticleType(char const* particle_type)
+      \fn void SetSourceParticleType(char const* particle_type)
       \param particle_type - Type of the particle
       \brief Set the type of the particle: electron, positron or photon
     */
-    void SetParticleType(char const* particle_type);
+    void SetSourceParticleType(char const* particle_type);
 
     /*!
       \fn void SetLocalAxis(float const& m00, float const& m01, float const& m02, float const& m10, float const& m11, float const& m12, float const& m20, float const& m21, float const& m22)
@@ -159,15 +160,27 @@ class GGEMS_EXPORT GGEMSSourceManager
     */
     void UpdateRotation(float const& rx, float const& ry, float const& rz);
 
+    /*!
+      \fn void SetParticle(Particle* const p_particle)
+      \param p_particle - pointer on particle
+      \brief Set the particle pointer to source manager
+    */
+   void SetParticle(Particle* const p_particle);
+
+    /*!
+      \fn void SetRandomGenerator(RandomGenerator* const p_random_generator)
+      \param p_random_generator - pointer on random generator
+      \brief Set the random generator pointer to source manager
+    */
+   void SetRandomGenerator(RandomGenerator* const p_random_generator);
+
   public: // Pure abstract method
     /*!
-      \fn void GetPrimaries(Particle* p_particle, uint64_t const& number_of particles) = 0
-      \param p_particle - pointer storing informations about particle
+      \fn void GetPrimaries(uint64_t const& number_of particles) = 0
       \param number_of_particles - number of particles to generate
       \brief Generate primary particles
     */
-    virtual void GetPrimaries(Particle* p_particle,
-      uint64_t const& number_of_particles) = 0;
+    virtual void GetPrimaries(uint64_t const& number_of_particles) = 0;
 
     /*!
       \fn void Initialize(void) = 0
@@ -195,6 +208,10 @@ class GGEMS_EXPORT GGEMSSourceManager
 
   protected: // kernel generating primaries
     cl::Kernel* p_kernel_get_primaries_; /*!< Kernel generating primaries on OpenCL device */
+
+  protected: // Pointer on particle and random
+    Particle* p_particle_; /*!< Pointer storing infos about particles */
+    RandomGenerator* p_random_generator_; /*!< Pointer storing infos about random numbers */
 
   protected:
     OpenCLManager& opencl_manager_; /*!< Reference to opencl manager singleton */

@@ -207,7 +207,7 @@ OpenCLManager::OpenCLManager(void)
   }
 
   // Define the compilation options by default for OpenCL
-  build_options_ = "-cl-std=CL1.2 -w -Werror";
+  build_options_ = "-cl-std=CL1.2 -w -Werror -DOPENCL_COMPILER";
 
   // Add auxiliary function path to OpenCL options
   #ifdef GGEMS_PATH
@@ -735,7 +735,7 @@ cl::Kernel* OpenCLManager::CompileKernel(std::string const& kernel_filename,
     #endif
   }
 
-  GGEMScout("OpenCLManager", "CompileKernel", 0) << "Compile a new kernel '"
+  GGEMScout("OpenCLManager", "CompileKernel", 1) << "Compile a new kernel '"
     << kernel_name << "' from file: " << kernel_filename << " on context: "
     << context_index_ << " with options: " << kernel_compilation_option
     << GGEMSendl;
