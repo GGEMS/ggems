@@ -16,7 +16,7 @@
 #include "GGEMS/tools/print.hh"
 #include "GGEMS/global/ggems_constants.hh"
 #include "GGEMS/tools/functions.hh"
-#include "GGEMS/tools/matrix.hh"
+#include "GGEMS/maths/geometry_transformation.hh"
 #include "GGEMS/processes/particles.hh"
 #include "GGEMS/randoms/pseudo_random_generator.hh"
 
@@ -38,7 +38,7 @@ XRaySource::XRaySource(void)
     << "Allocation of XRaySource..." << GGEMSendl;
 
   // Initialization of parameters
-  focal_spot_size_ = Matrix::MakeFloatXYZ(
+  focal_spot_size_ = MakeFloatXYZ(
     std::numeric_limits<float>::min(),
     std::numeric_limits<float>::min(),
     std::numeric_limits<float>::min()
@@ -114,9 +114,11 @@ void XRaySource::GetPrimaries(uint64_t const& number_of_particles)
   // Set parameters for kernel
   p_kernel_get_primaries_->setArg(0, *p_particles);
   p_kernel_get_primaries_->setArg(1, *p_randoms);
-  p_kernel_get_primaries_->setArg(2, *p_energy_spectrum_);
-  p_kernel_get_primaries_->setArg(3, *p_cdf_);
-  p_kernel_get_primaries_->setArg(4, number_of_energy_bins_);
+  p_kernel_get_primaries_->setArg(2, particle_type_);
+  p_kernel_get_primaries_->setArg(3, *p_energy_spectrum_);
+  p_kernel_get_primaries_->setArg(4, *p_cdf_);
+  p_kernel_get_primaries_->setArg(5, number_of_energy_bins_);
+  p_kernel_get_primaries_->setArg(6, beam_aperture_);
 
   // Define the number of work-item to launch
   cl::NDRange global(number_of_particles);
@@ -307,9 +309,6 @@ void XRaySource::FillEnergy(void)
     spectrum_stream.clear();
     spectrum_stream.seekg(0, std::ios::beg);
 
-    cl::Context* p_context = opencl_manager.GetContext();
-    cl::CommandQueue* p_queue = opencl_manager.GetCommandQueue();
-
     // Allocation of memory on OpenCL device
     // Energy
     p_energy_spectrum_ = opencl_manager.Allocate(nullptr,
@@ -393,7 +392,7 @@ void XRaySource::SetBeamAperture(float const& beam_aperture)
 void XRaySource::SetFocalSpotSize(float const& width, float const& height,
   float const& depth)
 {
-  focal_spot_size_ = Matrix::MakeFloatXYZ(width, height, depth);
+  focal_spot_size_ = MakeFloatXYZ(width, height, depth);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

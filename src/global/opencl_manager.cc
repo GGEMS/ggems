@@ -476,12 +476,12 @@ void OpenCLManager::CreateContext(void)
   // Loop over the devices
   for (std::size_t i = 0; i < vp_devices_cl_.size(); ++i) {
     // Get GPU type
-    if ((p_device_device_type_[i] == CL_DEVICE_TYPE_GPU)) {
+    if (p_device_device_type_[i] == CL_DEVICE_TYPE_GPU) {
       vp_contexts_cl_.push_back(new cl::Context(*vp_devices_cl_[i]));
       vp_contexts_gpu_cl_.push_back(vp_contexts_cl_.back());
     }
 
-    if ((p_device_device_type_[i] == CL_DEVICE_TYPE_CPU)) {
+    if (p_device_device_type_[i] == CL_DEVICE_TYPE_CPU) {
       vp_contexts_cl_.push_back(new cl::Context(*vp_devices_cl_[i]));
       vp_contexts_cpu_cl_.push_back(vp_contexts_cl_.back());
     }

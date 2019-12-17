@@ -1,5 +1,5 @@
-#ifndef GUARD_GGEMS_SOURCES_GGEMSSOURCEMANAGER_HH
-#define GUARD_GGEMS_SOURCES_GGEMSSOURCEMANAGER_HH
+#ifndef GUARD_GGEMS_SOURCES_GGEMS_SOURCE_MANAGER_HH
+#define GUARD_GGEMS_SOURCES_GGEMS_SOURCE_MANAGER_HH
 
 /*!
   \file ggems_source_definition.hh
@@ -20,10 +20,11 @@
 
 #include "GGEMS/global/ggems_export.hh"
 #include "GGEMS/global/opencl_manager.hh"
+#include "GGEMS/opencl/types.hh"
 
 class Particle;
 class RandomGenerator;
-class TransformCalculator;
+class GeometryTransformation;
 
 /*!
   \class GGEMSSourceManager
@@ -203,8 +204,8 @@ class GGEMS_EXPORT GGEMSSourceManager
 
   protected:
     bool is_initialized_; /*!< Boolean checking if the source is initialized */
-    int particle_type_; /*!< Type of particle: photon, electron or positron */
-    TransformCalculator* p_geometry_transformation_; /*!< Pointer storing the geometry transformation */
+    ucharcl_t particle_type_; /*!< Type of particle: photon, electron or positron */
+    GeometryTransformation* p_geometry_transformation_; /*!< Pointer storing the geometry transformation */
 
   protected: // kernel generating primaries
     cl::Kernel* p_kernel_get_primaries_; /*!< Kernel generating primaries on OpenCL device */
