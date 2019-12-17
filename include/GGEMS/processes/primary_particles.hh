@@ -1,5 +1,5 @@
-#ifndef GUARD_GGEMS_PROCESSES_PRIMARY_PARTICLES
-#define GUARD_GGEMS_PROCESSES_PRIMARY_PARTICLES
+#ifndef GUARD_GGEMS_PROCESSES_PRIMARY_PARTICLES_HH
+#define GUARD_GGEMS_PROCESSES_PRIMARY_PARTICLES_HH
 
 /*!
   \file primary_particles.hh
@@ -47,7 +47,7 @@ typedef struct PACKED PrimaryParticles_t
 
   ucharcl_t p_status_[MAXIMUM_PARTICLES]; /*!< */
   ucharcl_t p_level_[MAXIMUM_PARTICLES]; /*!< */
-  ucharcl_t* p_pname_[MAXIMUM_PARTICLES]; /*!< particle name (photon, electron, etc) */
+  ucharcl_t p_pname_[MAXIMUM_PARTICLES]; /*!< particle name (photon, electron, etc) */
 } PrimaryParticles;
 #ifndef OPENCL_COMPILER
 #ifdef _MSC_VER
@@ -55,4 +55,4 @@ typedef struct PACKED PrimaryParticles_t
 #endif
 #endif
 
-#endif // GUARD_GGEMS_PROCESSES_PRIMARY_PARTICLES
+#endif // GUARD_GGEMS_PROCESSES_PRIMARY_PARTICLES_HH

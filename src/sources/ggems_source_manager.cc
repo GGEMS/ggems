@@ -18,7 +18,7 @@
 #include "GGEMS/tools/print.hh"
 #include "GGEMS/global/ggems_constants.hh"
 #include "GGEMS/tools/functions.hh"
-#include "GGEMS/tools/matrix.hh"
+#include "GGEMS/maths/geometry_transformation.hh"
 
 #ifdef _WIN32
 #ifdef min
@@ -38,7 +38,7 @@ GGEMSSourceManager* GGEMSSourceManager::p_current_source_ = nullptr;
 
 GGEMSSourceManager::GGEMSSourceManager()
 : is_initialized_(false),
-  particle_type_(-1),
+  particle_type_(99),
   p_kernel_get_primaries_(nullptr),
   p_particle_(nullptr),
   p_random_generator_(nullptr),
@@ -48,7 +48,7 @@ GGEMSSourceManager::GGEMSSourceManager()
     << "Allocation of GGEMSSourceManager..." << GGEMSendl;
 
   // Allocation of geometry transformation
-  p_geometry_transformation_ = new TransformCalculator;
+  p_geometry_transformation_ = new GeometryTransformation;
 
   // Storing the pointer
   p_current_source_ = this;
@@ -99,7 +99,7 @@ void GGEMSSourceManager::SetPosition(float const& pos_x, float const& pos_y,
   float const& pos_z)
 {
   p_geometry_transformation_->SetTranslation(
-    Matrix::MakeFloatXYZ(pos_x, pos_y, pos_z));
+    MakeFloatXYZ(pos_x, pos_y, pos_z));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -170,7 +170,7 @@ void GGEMSSourceManager::SetLocalAxis(
 void GGEMSSourceManager::SetRotation(float const& rx, float const& ry,
   float const& rz)
 {
-  p_geometry_transformation_->SetRotation(Matrix::MakeFloatXYZ(rx, ry, rz));
+  p_geometry_transformation_->SetRotation(MakeFloatXYZ(rx, ry, rz));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -180,7 +180,7 @@ void GGEMSSourceManager::SetRotation(float const& rx, float const& ry,
 void GGEMSSourceManager::UpdateRotation(float const& rx, float const& ry,
   float const& rz)
 {
-  p_geometry_transformation_->SetRotation(Matrix::MakeFloatXYZ(rx, ry, rz));
+  p_geometry_transformation_->SetRotation(MakeFloatXYZ(rx, ry, rz));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -193,7 +193,7 @@ void GGEMSSourceManager::CheckParameters(void) const
     << "Checking the mandatory parameters..." << GGEMSendl;
 
   // Checking the type of particles
-  if (particle_type_ == -1) {
+  if (particle_type_ == 99) {
     std::ostringstream oss(std::ostringstream::out);
     oss << "You have to set a particle type for the source:" << std::endl;
     oss << "    - Photon" << std::endl;

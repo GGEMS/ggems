@@ -148,6 +148,7 @@ FILE(GLOB source_ggems
   ${PROJECT_SOURCE_DIR}/src/processes/*.cc
   ${PROJECT_SOURCE_DIR}/src/sources/*.cc
   ${PROJECT_SOURCE_DIR}/src/randoms/*.cc
+  ${PROJECT_SOURCE_DIR}/src/maths/*.cc
 )
 
 #-------------------------------------------------------------------------------
