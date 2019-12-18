@@ -64,13 +64,13 @@ typedef struct PACKED float4x4_t
 #endif
 
 /*!
-  \fn inline f323cl_t MakeFloatXYZ(f32cl_t const x, f32cl_t const y, f32cl_t const z)
+  \fn inline f323cl_t MakeFloat3x1(f32cl_t const x, f32cl_t const y, f32cl_t const z)
   \param x - x parameter
   \param y - y parameter
   \param z - z parameter
   \brief Make a float X, Y and Z with custom values
 */
-inline f323cl_t MakeFloatXYZ(f32cl_t const x, f32cl_t const y, f32cl_t const z)
+inline f323cl_t MakeFloat3x1(f32cl_t const x, f32cl_t const y, f32cl_t const z)
 {
   f323cl_t tmp;
   #ifdef OPENCL_COMPILER
@@ -89,7 +89,7 @@ inline f323cl_t MakeFloatXYZ(f32cl_t const x, f32cl_t const y, f32cl_t const z)
   \fn inline f323cl_t MakeFloatXYZZeros()
   \brief Make a float X, Y and Z with zeros for value
 */
-inline f323cl_t MakeFloatXYZZeros()
+inline f323cl_t MakeFloat3x1Zeros()
 {
   f323cl_t tmp;
   #ifdef OPENCL_COMPILER

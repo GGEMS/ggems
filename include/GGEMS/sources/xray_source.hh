@@ -141,7 +141,7 @@ class GGEMS_EXPORT XRaySource : public GGEMSSourceManager
 
   private: // Specific members for XRaySource
     float beam_aperture_; /*!< Beam aperture of the x-ray source */
-    cl_float3 focal_spot_size_; /*!< Focal spot size of the x-ray source */
+    f323cl_t focal_spot_size_; /*!< Focal spot size of the x-ray source */
     bool is_monoenergy_mode_; /*!< Boolean checking the mode of energy */
     float monoenergy_; /*!< Monoenergy mode */
     std::string energy_spectrum_filename_; /*!< The energy spectrum filename for polyenergetic mode */

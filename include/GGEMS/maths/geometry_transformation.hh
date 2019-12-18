@@ -15,6 +15,7 @@
 
 #include "GGEMS/opencl/types.hh"
 #include "GGEMS/maths/matrix_types.hh"
+#include "GGEMS/global/opencl_manager.hh"
 
 /*!
   \class GeometryTransformation
@@ -186,14 +187,17 @@ class GeometryTransformation
       \return the transformation matrix
       \brief return the transformation matrix
     */
-    inline float4x4 GetTransformationMatrix(void)
+    inline cl::Buffer* GetTransformationMatrix(void)
     {
       // Check if we need to update
       if (is_need_updated_) UpdateTransformationMatrix();
 
       // Return the transformation matrix
-      return matrix_transformation_;
+      return p_matrix_transformation_;
     }
+
+  private:
+    OpenCLManager& opencl_manager_; /*!< Reference to opencl manager singleton */
 
   private:
     bool is_need_updated_; /*!< Check if the transformation matrix need to be updated */
@@ -203,7 +207,7 @@ class GeometryTransformation
     float4x4 matrix_translation_; /*!< Matrix of translation */
     float4x4 matrix_rotation_; /*!< Matrix of rotation */
     float4x4 matrix_orthographic_projection_; /*!< Matrix of orthographic projection */
-    float4x4 matrix_transformation_; /*!< Matrix of transformation */
+    cl::Buffer* p_matrix_transformation_; /*!< OpenCL buffer storing the matrix transformation */
 };
 
 #endif // End of GUARD_GGEMS_MATHS_TRANSFORMATION_MATRIX_HH
