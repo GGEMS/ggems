@@ -218,7 +218,7 @@ class GGEMS_EXPORT GGEMSSourceManager
     OpenCLManager& opencl_manager_; /*!< Reference to opencl manager singleton */
 
   protected: // Storing the source
-    static GGEMSSourceManager* p_current_source_; /*!< Current source */
+    inline static GGEMSSourceManager* p_current_source_ = nullptr; /*!< Current source */
 };
 
 #endif // End of GUARD_GGEMS_SOURCES_GGEMSSOURCEMANAGER_HH

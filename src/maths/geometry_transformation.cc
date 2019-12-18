@@ -22,20 +22,21 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 GeometryTransformation::GeometryTransformation()
-: is_need_updated_(false)
+: opencl_manager_(OpenCLManager::GetInstance()),
+  is_need_updated_(false)
 {
   GGEMScout("GeometryTransformation", "GeometryTransformation", 3)
     << "Allocation of GeometryTransformation..." << GGEMSendl;
 
   // Initialize the position with min. float
-  position_ = MakeFloatXYZ(
+  position_ = MakeFloat3x1(
     std::numeric_limits<float>::min(),
     std::numeric_limits<float>::min(),
     std::numeric_limits<float>::min()
   );
 
   // Initialize the rotation with min. float
-  rotation_ = MakeFloatXYZ(
+  rotation_ = MakeFloat3x1(
     std::numeric_limits<float>::min(),
     std::numeric_limits<float>::min(),
     std::numeric_limits<float>::min()
@@ -68,12 +69,9 @@ GeometryTransformation::GeometryTransformation()
     0.0f, 0.0f, 1.0f, 0.0f,
     0.0f, 0.0f, 0.0f, 1.0f);
 
-  // Initializing the transformation matrix
-  matrix_transformation_ = MakeFloat4x4(
-    0.0f, 0.0f, 0.0f, 0.0f,
-    0.0f, 0.0f, 0.0f, 0.0f,
-    0.0f, 0.0f, 0.0f, 0.0f,
-    0.0f, 0.0f, 0.0f, 0.0f);
+  // Allocation of matrix transformation on OpenCL device
+  p_matrix_transformation_ = opencl_manager_.Allocate(nullptr,
+    sizeof(float4x4), CL_MEM_READ_WRITE);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -82,6 +80,12 @@ GeometryTransformation::GeometryTransformation()
 
 GeometryTransformation::~GeometryTransformation()
 {
+  // Freeing memory
+  if (p_matrix_transformation_) {
+    opencl_manager_.Deallocate(p_matrix_transformation_, sizeof(float4x4));
+    p_matrix_transformation_ = nullptr;
+  }
+
   GGEMScout("GeometryTransformation", "~GeometryTransformation", 3)
     << "Deallocation of GeometryTransformation..." << GGEMSendl;
 }
@@ -94,7 +98,7 @@ void GeometryTransformation::SetTranslation(float const& tx, float const& ty,
   float const& tz)
 {
   // Fill the position buffer first
-  position_ = MakeFloatXYZ(tx, ty, tz);
+  position_ = MakeFloat3x1(tx, ty, tz);
 
   // Filling the translation matrix
   matrix_translation_ = MakeFloat4x4(
@@ -124,7 +128,7 @@ void GeometryTransformation::SetRotation(float const& rx, float const& ry,
   float const& rz)
 {
   // Filling the rotation buffer
-  rotation_ = MakeFloatXYZ(rx, ry, rz);
+  rotation_ = MakeFloat3x1(rx, ry, rz);
 
   // Definition of cosinus and sinus
   double cosinus = 0.0, sinus = 0.0;
@@ -162,8 +166,8 @@ void GeometryTransformation::SetRotation(float const& rx, float const& ry,
     0.0f, 0.0f, 0.0f, 1.0f);
 
   // Get the total rotation matrix
-  matrix_rotation_ = MatrixMult4x4(kRotationY, kRotationX);
-  matrix_rotation_ = MatrixMult4x4(kRotationZ, matrix_rotation_);
+  matrix_rotation_ = MatrixMult4x4_4x4(kRotationY, kRotationX);
+  matrix_rotation_ = MatrixMult4x4_4x4(kRotationZ, matrix_rotation_);
 
   // Need to be updated if the Transformation matrix is called
   is_need_updated_ = true;
@@ -223,9 +227,45 @@ void GeometryTransformation::SetAxisTransformation(float3x3 const& axis)
 
 void GeometryTransformation::UpdateTransformationMatrix(void)
 {
-  matrix_transformation_ = MatrixMult4x4(matrix_rotation_,
+  GGEMScout("GeometryTransformation", "UpdateTransformationMatrix", 3)
+    << "Updating the transformation matrix..." << GGEMSendl;
+
+  /*matrix_transformation_ = MatrixMult4x4(matrix_rotation_,
       MatrixMult4x4(matrix_translation_,
-      matrix_orthographic_projection_));
+      matrix_orthographic_projection_));*/
+
+  // Update the transformation matrix on OpenCL device
+  // Get the pointer on device
+  float4x4* p_matrix = opencl_manager_.GetDeviceBuffer<float4x4>(
+    p_matrix_transformation_, sizeof(float4x4));
+
+  // Compute a temporary matrix then copy it on OpenCL device
+  float4x4 matrix_tmp = MatrixMult4x4_4x4(matrix_rotation_,
+    MatrixMult4x4_4x4(matrix_translation_, matrix_orthographic_projection_));
+
+  // Copy step
+  p_matrix->m00_ = matrix_tmp.m00_;
+  p_matrix->m01_ = matrix_tmp.m01_;
+  p_matrix->m02_ = matrix_tmp.m02_;
+  p_matrix->m03_ = matrix_tmp.m03_;
+
+  p_matrix->m10_ = matrix_tmp.m10_;
+  p_matrix->m11_ = matrix_tmp.m11_;
+  p_matrix->m12_ = matrix_tmp.m12_;
+  p_matrix->m13_ = matrix_tmp.m13_;
+
+  p_matrix->m20_ = matrix_tmp.m20_;
+  p_matrix->m21_ = matrix_tmp.m21_;
+  p_matrix->m22_ = matrix_tmp.m22_;
+  p_matrix->m23_ = matrix_tmp.m23_;
+
+  p_matrix->m30_ = matrix_tmp.m30_;
+  p_matrix->m31_ = matrix_tmp.m31_;
+  p_matrix->m32_ = matrix_tmp.m32_;
+  p_matrix->m33_ = matrix_tmp.m33_;
+
+  // Release the pointer, mandatory step!!!
+  opencl_manager_.ReleaseDeviceBuffer(p_matrix_transformation_, p_matrix);
 
   // Update is done
   is_need_updated_ = false;

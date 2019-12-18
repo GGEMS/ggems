@@ -38,7 +38,7 @@ XRaySource::XRaySource(void)
     << "Allocation of XRaySource..." << GGEMSendl;
 
   // Initialization of parameters
-  focal_spot_size_ = MakeFloatXYZ(
+  focal_spot_size_ = MakeFloat3x1(
     std::numeric_limits<float>::min(),
     std::numeric_limits<float>::min(),
     std::numeric_limits<float>::min()
@@ -110,6 +110,8 @@ void XRaySource::GetPrimaries(uint64_t const& number_of_particles)
   // Get the OpenCL buffers
   cl::Buffer* p_particles = p_particle_->GetPrimaryParticles();
   cl::Buffer* p_randoms = p_random_generator_->GetRandomNumbers();
+  cl::Buffer* p_matrix_transformation =
+    p_geometry_transformation_->GetTransformationMatrix();
 
   // Set parameters for kernel
   p_kernel_get_primaries_->setArg(0, *p_particles);
@@ -119,6 +121,8 @@ void XRaySource::GetPrimaries(uint64_t const& number_of_particles)
   p_kernel_get_primaries_->setArg(4, *p_cdf_);
   p_kernel_get_primaries_->setArg(5, number_of_energy_bins_);
   p_kernel_get_primaries_->setArg(6, beam_aperture_);
+  p_kernel_get_primaries_->setArg(7, focal_spot_size_);
+  p_kernel_get_primaries_->setArg(8, *p_matrix_transformation);
 
   // Define the number of work-item to launch
   cl::NDRange global(number_of_particles);
@@ -392,7 +396,7 @@ void XRaySource::SetBeamAperture(float const& beam_aperture)
 void XRaySource::SetFocalSpotSize(float const& width, float const& height,
   float const& depth)
 {
-  focal_spot_size_ = MakeFloatXYZ(width, height, depth);
+  focal_spot_size_ = MakeFloat3x1(width, height, depth);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -30,12 +30,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSSourceManager* GGEMSSourceManager::p_current_source_ = nullptr;
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
 GGEMSSourceManager::GGEMSSourceManager()
 : is_initialized_(false),
   particle_type_(99),
@@ -99,7 +93,7 @@ void GGEMSSourceManager::SetPosition(float const& pos_x, float const& pos_y,
   float const& pos_z)
 {
   p_geometry_transformation_->SetTranslation(
-    MakeFloatXYZ(pos_x, pos_y, pos_z));
+    MakeFloat3x1(pos_x, pos_y, pos_z));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -170,7 +164,7 @@ void GGEMSSourceManager::SetLocalAxis(
 void GGEMSSourceManager::SetRotation(float const& rx, float const& ry,
   float const& rz)
 {
-  p_geometry_transformation_->SetRotation(MakeFloatXYZ(rx, ry, rz));
+  p_geometry_transformation_->SetRotation(MakeFloat3x1(rx, ry, rz));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -180,7 +174,7 @@ void GGEMSSourceManager::SetRotation(float const& rx, float const& ry,
 void GGEMSSourceManager::UpdateRotation(float const& rx, float const& ry,
   float const& rz)
 {
-  p_geometry_transformation_->SetRotation(MakeFloatXYZ(rx, ry, rz));
+  p_geometry_transformation_->SetRotation(MakeFloat3x1(rx, ry, rz));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
