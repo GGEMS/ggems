@@ -40,7 +40,7 @@ typedef struct PACKED PrimaryParticles_t
 
   uintcl_t p_geometry_id_[MAXIMUM_PARTICLES]; /*!< current geometry crossed by the particle */
   ushortcl_t p_E_index_[MAXIMUM_PARTICLES]; /*!< Energy index within CS and Mat tables */
-  ushortcl_t p_scatter_order_[MAXIMUM_PARTICLES]; /*!< Scatter order, usefull for the imagery */
+  ucharcl_t p_scatter_order_[MAXIMUM_PARTICLES]; /*!< Scatter order, usefull for the imagery */
 
   f32cl_t p_next_interaction_distance_[MAXIMUM_PARTICLES]; /*!< Distance to the next interaction */
   ucharcl_t p_next_discrete_process_[MAXIMUM_PARTICLES]; /*!< Next process */

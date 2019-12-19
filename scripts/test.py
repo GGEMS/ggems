@@ -35,7 +35,7 @@ xray_source.print_infos()
 # STEP 3: GGEMS simulation parameters
 ggems_manager = ggems.GGEMSManager()
 ggems_manager.set_seed(777)
-ggems_manager.set_number_of_particles(861635)
+ggems_manager.set_number_of_particles(86163500)
 
 # Cross section parameters
 ggems_manager.set_cross_section_table_number_of_bins(220)

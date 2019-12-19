@@ -2,8 +2,9 @@
 #include "GGEMS/processes/primary_particles.hh"
 #include "GGEMS/randoms/random.hh"
 #include "GGEMS/randoms/kiss_engine.hh"
-#include "GGEMS/opencl/types.hh"
 #include "GGEMS/maths/matrix_functions.hh"
+#include "GGEMS/maths/math_functions.hh"
+#include "GGEMS/global/ggems_constants.hh"
 
 __kernel void get_primaries_xray_source(
   __global PrimaryParticles* p_primary_particle,
@@ -56,17 +57,51 @@ __kernel void get_primaries_xray_source(
   global_position = LocalToGlobalPosition(p_matrix_transformation,
     global_position);
 
-  if (kGlobalIndex==2) {
-    printf("Particle ID: %d\n", kGlobalIndex);
-    printf("Focal: %4.7f %4.7f %4.7f\n", focal_spot_size.x, focal_spot_size.y, focal_spot_size.z);
-    printf("phi: %4.7f, theta: %4.7f, particle: %u\n", phi, theta, particle_name);
-    printf("rotation: %4.7f %4.7f %4.7f\n", rotation.x, rotation.y, rotation.z);
-    printf("global position: %4.7f %4.7f %4.7f\n", global_position.x, global_position.y, global_position.z);
-    printf("direction: %4.7f %4.7f %4.7f\n", direction.x, direction.y, direction.z);
-    printf("matrix transformation:\n");
-    printf("[%4.7f %4.7f %4.7f %4.7f\n", p_matrix_transformation->m00_, p_matrix_transformation->m01_, p_matrix_transformation->m02_, p_matrix_transformation->m03_);
-    printf(" %4.7f %4.7f %4.7f %4.7f\n", p_matrix_transformation->m10_, p_matrix_transformation->m11_, p_matrix_transformation->m12_, p_matrix_transformation->m13_);
-    printf(" %4.7f %4.7f %4.7f %4.7f\n", p_matrix_transformation->m20_, p_matrix_transformation->m21_, p_matrix_transformation->m22_, p_matrix_transformation->m23_);
-    printf(" %4.7f %4.7f %4.7f %4.7f]\n", p_matrix_transformation->m30_, p_matrix_transformation->m31_, p_matrix_transformation->m32_, p_matrix_transformation->m33_);
+  // Getting a random energy
+  f32cl_t rndm_for_energy = kiss_uniform(p_random, kGlobalIndex);
+
+  // Get index in cdf
+  uintcl_t index_for_energy = binary_search_left(
+    rndm_for_energy,
+    p_cdf,
+    number_of_energy_bins,
+    0,
+    0
+  );
+
+  // Setting the energy for particles
+  if (index_for_energy == number_of_energy_bins - 1) {
+    p_primary_particle->p_E_[kGlobalIndex] =
+      p_energy_spectrum[index_for_energy];
   }
+  else
+  {
+    p_primary_particle->p_E_[kGlobalIndex] = linear_interpolation(
+      p_cdf[index_for_energy],
+      p_energy_spectrum[index_for_energy],
+      p_cdf[index_for_energy + 1],
+      p_energy_spectrum[index_for_energy + 1],
+      rndm_for_energy
+    );
+  }
+
+  // Then set the mandatory field to create a new particle
+  p_primary_particle->p_px_[kGlobalIndex] = global_position.x;
+  p_primary_particle->p_py_[kGlobalIndex] = global_position.y;
+  p_primary_particle->p_pz_[kGlobalIndex] = global_position.z;
+
+  p_primary_particle->p_dx_[kGlobalIndex] = direction.x;
+  p_primary_particle->p_dy_[kGlobalIndex] = direction.y;
+  p_primary_particle->p_dz_[kGlobalIndex] = direction.z;
+
+  p_primary_particle->p_tof_[kGlobalIndex] = 0.0f;
+  p_primary_particle->p_status_[kGlobalIndex] = ALIVE;
+
+  p_primary_particle->p_level_[kGlobalIndex] = PRIMARY;
+  p_primary_particle->p_pname_[kGlobalIndex] = particle_name;
+
+  p_primary_particle->p_geometry_id_[kGlobalIndex] = 0;
+  p_primary_particle->p_next_discrete_process_[kGlobalIndex] = NO_PROCESS;
+  p_primary_particle->p_next_interaction_distance_[kGlobalIndex] = 0.0f;
+  p_primary_particle->p_scatter_order_[ kGlobalIndex ] = 0;
 }
