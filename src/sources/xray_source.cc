@@ -289,16 +289,34 @@ void XRaySource::FillEnergy(void)
 
   // Monoenergy mode
   if (is_monoenergy_mode_) {
-    number_of_energy_bins_ = 1;
+    number_of_energy_bins_ = 2;
 
     // Allocation of memory on OpenCL device
     // Energy
-    p_energy_spectrum_ = opencl_manager.Allocate(nullptr, 1 * sizeof(cl_double),
+    p_energy_spectrum_ = opencl_manager.Allocate(nullptr, 2 * sizeof(cl_double),
       CL_MEM_READ_WRITE);
 
     // Cumulative distribution function
-    p_cdf_ = opencl_manager.Allocate(nullptr, 1 * sizeof(cl_double),
+    p_cdf_ = opencl_manager.Allocate(nullptr, 2 * sizeof(cl_double),
       CL_MEM_READ_WRITE);
+
+    // Get the energy pointer on OpenCL device
+    cl_double* p_energy_spectrum = opencl_manager.GetDeviceBuffer<cl_double>(
+      p_energy_spectrum_, 2 * sizeof(cl_double));
+
+    // Get the cdf pointer on OpenCL device
+    cl_double* p_cdf = opencl_manager.GetDeviceBuffer<cl_double>(p_cdf_,
+      2 * sizeof(cl_double));
+
+    p_energy_spectrum[0] = static_cast<double>(monoenergy_);
+    p_energy_spectrum[1] = static_cast<double>(monoenergy_);
+
+    p_cdf[0] = 1.0;
+    p_cdf[1] = 1.0;
+
+    // Release the pointers
+    opencl_manager.ReleaseDeviceBuffer(p_energy_spectrum_, p_energy_spectrum);
+    opencl_manager.ReleaseDeviceBuffer(p_cdf_, p_cdf);
   }
   else { // Polyenergy mode 
     // Read a first time the spectrum file counting the number of lines
