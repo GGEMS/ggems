@@ -94,9 +94,9 @@ inline f323cl_t f323x1_sub(f323cl_t const u, f323cl_t const v)
 {
   f323cl_t vector = {
     #ifdef OPENCL_COMPILER
-    u.x-v.x, u.y-v.y, u.z-v.z
+    {u.x-v.x, u.y-v.y, u.z-v.z}
     #else
-    u.s[0]-v.s[0], u.s[1]-v.s[1], u.s[2]-v.s[2]
+    {u.s[0]-v.s[0], u.s[1]-v.s[1], u.s[2]-v.s[2]}
     #endif
   };
   return vector;
@@ -118,21 +118,21 @@ inline f323cl_t MatrixMult4x4_3x1(float4x4 const* matrix, f323cl_t const point)
 {
   #ifdef OPENCL_COMPILER
   f323cl_t vector = {
-    matrix->m00_*point.x + matrix->m01_*point.y + matrix->m02_*point.z
+    {matrix->m00_*point.x + matrix->m01_*point.y + matrix->m02_*point.z
       + matrix->m03_*1.0f,
     matrix->m10_*point.x + matrix->m11_*point.y + matrix->m12_*point.z
       + matrix->m13_*1.0f,
     matrix->m20_*point.x + matrix->m21_*point.y + matrix->m22_*point.z
-      + matrix->m23_*1.0f
+      + matrix->m23_*1.0f}
   };
   #else
   f323cl_t vector = {
-    matrix->m00_*point.s[0] + matrix->m01_*point.s[1] + matrix->m02_*point.s[2]
+    {matrix->m00_*point.s[0] + matrix->m01_*point.s[1] + matrix->m02_*point.s[2]
       + matrix->m03_*1.0f,
     matrix->m10_*point.s[0] + matrix->m11_*point.s[1] + matrix->m12_*point.s[2]
       + matrix->m13_*1.0f,
     matrix->m20_*point.s[0] + matrix->m21_*point.s[1] + matrix->m22_*point.s[2]
-      + matrix->m23_*1.0f
+      + matrix->m23_*1.0f}
   };
   #endif
 
