@@ -1,5 +1,5 @@
 /*!
-  \file chrono.cc
+  \file GGChrono.cc
 
   \brief Structure storing static method computing/displaying the time
 
@@ -12,14 +12,14 @@
 
 #include <iomanip>
 
-#include "GGEMS/tools/chrono.hh"
-#include "GGEMS/tools/print.hh"
+#include "GGEMS/tools/GGChrono.hh"
+#include "GGEMS/tools/GGPrint.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void Chrono::DisplayTime(DurationNano const& duration,
+void GGChrono::DisplayTime(DurationNano const& duration,
   std::string const& displayed_text)
 {
   #if __MINGW64__ || __clang__ || (_MSC_VER > 1800) || __GNUC__

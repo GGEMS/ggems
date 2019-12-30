@@ -1,5 +1,5 @@
 /*!
-  \file print.cc
+  \file GGPrint.cc
 
   \brief Print a custom std::cout end std::cerr handling verbosity
 
@@ -10,18 +10,18 @@
   \date Monday September 23, 2019
 */
 
-#include "GGEMS/tools/print.hh"
+#include "GGEMS/tools/GGPrint.hh"
 
 // Initializations
-GGEMSStream GGEMScout = GGEMSStream(std::cout, ConsoleColor::green);
-GGEMSStream GGEMScerr = GGEMSStream(std::cerr, ConsoleColor::red);
-GGEMSStream GGEMSwarn = GGEMSStream(std::cout, ConsoleColor::yellow);
+GGStream GGcout = GGStream(std::cout, GGConsoleColor::green);
+GGStream GGcerr = GGStream(std::cerr, GGConsoleColor::red);
+GGStream GGwarn = GGStream(std::cout, GGConsoleColor::yellow);
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSStream::GGEMSStream(std::ostream& stream, ConsoleColor const& color)
+GGStream::GGStream(std::ostream& stream, GGConsoleColor const& color)
 : class_name_(""),
   method_name_(""),
   verbosity_limit_(1),
@@ -37,7 +37,7 @@ GGEMSStream::GGEMSStream(std::ostream& stream, ConsoleColor const& color)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSStream::SetVerbosity(int const& verbosity_limit)
+void GGStream::SetVerbosity(GGint const& verbosity_limit)
 {
   verbosity_limit_ = verbosity_limit;
 }
@@ -46,8 +46,8 @@ void GGEMSStream::SetVerbosity(int const& verbosity_limit)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSStream& GGEMSStream::operator()(std::string const& class_name,
-  std::string const& method_name, int const& verbosity_level)
+GGStream& GGStream::operator()(std::string const& class_name,
+  std::string const& method_name, GGint const& verbosity_level)
 {
   class_name_ = class_name;
   method_name_ = method_name;
@@ -60,9 +60,9 @@ GGEMSStream& GGEMSStream::operator()(std::string const& class_name,
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_verbose(int verbosity)
+void set_verbose(GGint verbosity)
 {
-  GGEMScout.SetVerbosity(verbosity);
-  GGEMScerr.SetVerbosity(verbosity);
-  GGEMSwarn.SetVerbosity(verbosity);
+  GGcout.SetVerbosity(verbosity);
+  GGcerr.SetVerbosity(verbosity);
+  GGwarn.SetVerbosity(verbosity);
 }

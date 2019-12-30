@@ -1,8 +1,8 @@
-#ifndef GUARD_GGEMS_GLOBAL_OPENCL_MANAGER_HH
-#define GUARD_GGEMS_GLOBAL_OPENCL_MANAGER_HH
+#ifndef GUARD_GGEMS_GLOBAL_GGOPENCLMANAGER_HH
+#define GUARD_GGEMS_GLOBAL_GGOPENCLMANAGER_HH
 
 /*!
-  \file opencl_manager.hh
+  \file GGOpenCLManager.hh
 
   \brief Singleton class storing all informations about OpenCL and managing
   GPU/CPU contexts and kernels for GGEMS
@@ -26,66 +26,66 @@
 #include <CL/cl.hpp>
 #endif
 
-#include "GGEMS/global/ggems_export.hh"
-#include "GGEMS/tools/print.hh"
+#include "GGEMS/global/GGExport.hh"
+#include "GGEMS/tools/GGPrint.hh"
 
 /*!
-  \class OpenCLManager
+  \class GGOpenCLManager
   \brief Singleton class storing all information about OpenCL in GGEMS
 */
-class GGEMS_EXPORT OpenCLManager
+class GGEMS_EXPORT GGOpenCLManager
 {
   private:
     /*!
       \brief Unable the constructor for the user
     */
-    OpenCLManager(void);
+    GGOpenCLManager(void);
 
     /*!
       \brief Unable the destructor for the user
     */
-    ~OpenCLManager(void);
+    ~GGOpenCLManager(void);
 
   public:
     /*!
-      \fn static OpenCLManager& GetInstance(void)
+      \fn static GGOpenCLManager& GetInstance(void)
       \brief Create at first time the Singleton
-      \return Object of type OpenCLManager
+      \return Object of type GGOpenCLManager
     */
-    static OpenCLManager& GetInstance(void)
+    static GGOpenCLManager& GetInstance(void)
     {
-      static OpenCLManager instance;
+      static GGOpenCLManager instance;
       return instance;
     }
 
   public:
     /*!
-      \fn OpenCLManager(OpenCLManager const& opencl_manager) = delete
+      \fn GGOpenCLManager(GGOpenCLManager const& opencl_manager) = delete
       \param opencl_manager - reference on the singleton
       \brief Avoid copy of the singleton by reference
     */
-    OpenCLManager(OpenCLManager const& opencl_manager) = delete;
+    GGOpenCLManager(GGOpenCLManager const& opencl_manager) = delete;
 
     /*!
-      \fn OpenCLManager& operator=(OpenCLManager const& opencl_manager) = delete
+      \fn GGOpenCLManager& operator=(GGOpenCLManager const& opencl_manager) = delete
       \param opencl_manager - reference on the singleton
       \brief Avoid assignement of the singleton by reference
     */
-    OpenCLManager& operator=(OpenCLManager const& opencl_manager) = delete;
+    GGOpenCLManager& operator=(GGOpenCLManager const& opencl_manager) = delete;
 
     /*!
       \fn OpenCLManager(OpenCLManager const&& opencl_manager) = delete
       \param opencl_manager - rvalue reference on the singleton
       \brief Avoid copy of the singleton by rvalue reference
     */
-    OpenCLManager(OpenCLManager const&& opencl_manager) = delete;
+    GGOpenCLManager(GGOpenCLManager const&& opencl_manager) = delete;
 
     /*!
-      \fn OpenCLManager& operator=(OpenCLManager const&& opencl_manager) = delete
+      \fn GGOpenCLManager& operator=(GGOpenCLManager const&& opencl_manager) = delete
       \param opencl_manager - rvalue reference on the singleton
       \brief Avoid copy of the singleton by rvalue reference
     */
-    OpenCLManager& operator=(OpenCLManager const&& opencl_manager) = delete;
+    GGOpenCLManager& operator=(GGOpenCLManager const&& opencl_manager) = delete;
 
   public: // Clean memory of correctly
     /*!
@@ -96,22 +96,22 @@ class GGEMS_EXPORT OpenCLManager
 
   public: // Error stream management
     /*!
-      \fn void CheckOpenCLError(cl_int const& error, std::string const& class_name, std::string const& method_name) const
+      \fn void CheckOpenCLError(GGint const& error, std::string const& class_name, std::string const& method_name) const
       \param error - error index
       \param class_name - name of the class
       \param method_name - name of the method
       \brief check the OpenCL error
     */
-    void CheckOpenCLError(cl_int const& error, std::string const& class_name,
+    void CheckOpenCLError(GGint const& error, std::string const& class_name,
       std::string const& method_name) const;
 
   private:
     /*!
-      \fn std::string ErrorType(cl_int const& error) const
+      \fn std::string ErrorType(GGint const& error) const
       \param error - error index from OpenCL library
       \brief get the error description
     */
-    std::string ErrorType(cl_int const& error) const;
+    std::string ErrorType(GGint const& error) const;
 
   public: // OpenCL infos
     /*!
@@ -141,11 +141,11 @@ class GGEMS_EXPORT OpenCLManager
 
   public:
     /*!
-      \fn void ContextToActivate(uint32_t const& context_id)
+      \fn void ContextToActivate(GGuint const& context_id)
       \param context_id - context index
       \brief set the index of the context to activate
     */
-    void ContextToActivate(uint32_t const& context_id);
+    void ContextToActivate(GGuint const& context_id);
 
   public:
     /*!
@@ -211,7 +211,7 @@ class GGEMS_EXPORT OpenCLManager
 
   public:
     /*!
-      \fn cl::Kernel* CompileKernel(std::string const& kernel_filename, std::string const& kernel_name, char* const p_custom_options = nullptr, char* const p_additional_options = nullptr)
+      \fn cl::Kernel* CompileKernel(std::string const& kernel_filename, std::string const& kernel_name, GGchar* const p_custom_options = nullptr, GGchar* const p_additional_options = nullptr)
       \param kernel_filename - filename where is declared the kernel
       \param kernel_name - name of the kernel
       \param p_custom_options - new compilation option for the kernel
@@ -283,24 +283,24 @@ class GGEMS_EXPORT OpenCLManager
     void PrintRAMStatus(void) const;
 
     /*!
-      \fn void AddRAMMemory(cl_ulong const& size)
+      \fn void AddRAMMemory(GGulong const& size)
       \param size - size of the allocated buffer in byte
       \brief store the size of the allocated buffer
     */
-    void AddRAMMemory(cl_ulong const& size);
+    void AddRAMMemory(GGulong const& size);
 
     /*!
-      \fn SubRAMMemory(cl_ulong const& size)
+      \fn SubRAMMemory(GGulong const& size)
       \param size - size of the allocated buffer in byte
       \brief substract the size of the allocated buffer
     */
-    void SubRAMMemory(cl_ulong const& size);
+    void SubRAMMemory(GGulong const& size);
 
     /*!
-      \fn cl_ulong GetMaxRAMMemoryOnActivatedDevice(void) const
+      \fn GGulong GetMaxRAMMemoryOnActivatedDevice(void) const
       \brief Get the maximum RAM memory on activated OpenCL device
     */
-    inline cl_ulong GetMaxRAMMemoryOnActivatedDevice(void) const
+    inline GGulong GetMaxRAMMemoryOnActivatedDevice(void) const
     {
       return p_device_global_mem_size_[context_index_];
     }
@@ -330,28 +330,28 @@ class GGEMS_EXPORT OpenCLManager
     std::string *p_device_vendor_; /*!< Vendor of the device */
     std::string *p_device_version_; /*!< Version of the device */
     std::string *p_device_driver_version_; /*!< Driver version of the device */
-    cl_uint *p_device_address_bits_; /*!< Address Bits */
-    cl_bool *p_device_available_; /*!< Flag on device availability */
-    cl_bool *p_device_compiler_available_; /*!< Flag on compiler availability */
-    cl_ulong *p_device_global_mem_cache_size_; /*!< Global memory cache size */
-    cl_uint *p_device_global_mem_cacheline_size_; /*!< Global memory cache line size */
-    cl_ulong *p_device_global_mem_size_; /*!< Global memory size */
-    cl_ulong *p_device_local_mem_size_; /*!< Local memory size */
-    cl_uint *p_device_mem_base_addr_align_; /*!< Alignment memory */
+    GGuint *p_device_address_bits_; /*!< Address Bits */
+    GGbool *p_device_available_; /*!< Flag on device availability */
+    GGbool *p_device_compiler_available_; /*!< Flag on compiler availability */
+    GGulong *p_device_global_mem_cache_size_; /*!< Global memory cache size */
+    GGuint *p_device_global_mem_cacheline_size_; /*!< Global memory cache line size */
+    GGulong *p_device_global_mem_size_; /*!< Global memory size */
+    GGulong *p_device_local_mem_size_; /*!< Local memory size */
+    GGuint *p_device_mem_base_addr_align_; /*!< Alignment memory */
     std::string *p_device_name_; /*!< Name of the device */
     std::string *p_device_opencl_c_version_; /*!< OpenCL C version */
-    cl_uint *p_device_max_clock_frequency_; /*!< Max clock frequency */
-    cl_uint *p_device_max_compute_units_; /*!< Max compute units */
-    cl_ulong *p_device_constant_buffer_size_; /*!< Constant buffer size */
-    cl_ulong *p_device_mem_alloc_size_; /*!< Memory allocation size */
-    cl_uint *p_device_native_vector_width_double_; /*!< Native size of the double */
-    cl_uint *p_device_preferred_vector_width_double_; /*!< Preferred size of the double */
+    GGuint *p_device_max_clock_frequency_; /*!< Max clock frequency */
+    GGuint *p_device_max_compute_units_; /*!< Max compute units */
+    GGulong *p_device_constant_buffer_size_; /*!< Constant buffer size */
+    GGulong *p_device_mem_alloc_size_; /*!< Memory allocation size */
+    GGuint *p_device_native_vector_width_double_; /*!< Native size of the double */
+    GGuint *p_device_preferred_vector_width_double_; /*!< Preferred size of the double */
 
   private: // OpenCL compilation options
     std::string build_options_; /*!< list of option to OpenCL compiler */
 
   private: // Context and informations about them
-    uint32_t context_index_; /*!< Index of the activated context */
+    GGuint context_index_; /*!< Index of the activated context */
     std::vector<cl::Context*> vp_contexts_cl_; /*!< Vector of context */
     std::vector<cl::Context*> vp_contexts_cpu_cl_; /*!< Vector of CPU context */
     std::vector<cl::Context*> vp_contexts_gpu_cl_; /*!< Vector of GPU context */
@@ -369,17 +369,17 @@ class GGEMS_EXPORT OpenCLManager
     std::vector<cl::Kernel*> vp_kernel_cl_; /*!< List of pointer to OpenCL kernel */
 
   private: // RAM handler
-    cl_ulong *p_used_ram_; /*!< Memory RAM used by context */
+    GGulong *p_used_ram_; /*!< Memory RAM used by context */
 };
 
 template <typename T>
-T* OpenCLManager::GetDeviceBuffer(cl::Buffer* const p_device_ptr,
+T* GGOpenCLManager::GetDeviceBuffer(cl::Buffer* const p_device_ptr,
   std::size_t const size) const
 {
   GGEMScout("OpenCLManager", "GetDeviceBuffer", 3)
     << "Getting mapped memory buffer on OpenCL device..." << GGEMSendl;
 
-  cl_int err = 0;
+  GGint err = 0;
   T* ptr = static_cast<T*>(vp_queues_act_cl_.at(0)->enqueueMapBuffer(
     *p_device_ptr, CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, 0, size, nullptr,
     nullptr, &err));
@@ -388,7 +388,7 @@ T* OpenCLManager::GetDeviceBuffer(cl::Buffer* const p_device_ptr,
 }
 
 template <typename T>
-void OpenCLManager::ReleaseDeviceBuffer(cl::Buffer* const p_device_ptr,
+void GGOpenCLManager::ReleaseDeviceBuffer(cl::Buffer* const p_device_ptr,
   T* p_host_ptr) const
 {
   GGEMScout("OpenCLManager", "ReleaseDeviceBuffer", 3)
@@ -400,24 +400,24 @@ void OpenCLManager::ReleaseDeviceBuffer(cl::Buffer* const p_device_ptr,
 }
 
 /*!
-  \fn OpenCLManager* get_instance_opencl_manager(void)
+  \fn GGOpenCLManager* get_instance_opencl_manager(void)
   \brief Get the OpenCLManager pointer for python user.
 */
-extern "C" GGEMS_EXPORT OpenCLManager* get_instance_opencl_manager(void);
+extern "C" GGEMS_EXPORT GGOpenCLManager* get_instance_opencl_manager(void);
 
 /*!
   \fn void print_platform(OpenCLManager* p_opencl_manager)
   \param p_opencl_manager - pointer on the singleton
   \brief Print information about OpenCL platform
 */
-extern "C" GGEMS_EXPORT void print_platform(OpenCLManager* p_opencl_manager);
+extern "C" GGEMS_EXPORT void print_platform(GGOpenCLManager* p_opencl_manager);
 
 /*!
   \fn void print_device(OpenCLManager* p_opencl_manager)
   \param p_opencl_manager - pointer on the singleton
   \brief Print information about OpenCL device
 */
-extern "C" GGEMS_EXPORT void print_device(OpenCLManager* p_opencl_manager);
+extern "C" GGEMS_EXPORT void print_device(GGOpenCLManager* p_opencl_manager);
 
 /*!
   \fn void print_build_options(OpenCLManager* p_opencl_manager)
@@ -425,21 +425,21 @@ extern "C" GGEMS_EXPORT void print_device(OpenCLManager* p_opencl_manager);
   \brief Print information about OpenCL compilation option
 */
 extern "C" GGEMS_EXPORT void print_build_options(
-  OpenCLManager* p_opencl_manager);
+  GGOpenCLManager* p_opencl_manager);
 
 /*!
   \fn void print_context(OpenCLManager* p_opencl_manager)
   \param p_opencl_manager - pointer on the singleton
   \brief Print information about OpenCL context
 */
-extern "C" GGEMS_EXPORT void print_context(OpenCLManager* p_opencl_manager);
+extern "C" GGEMS_EXPORT void print_context(GGOpenCLManager* p_opencl_manager);
 
 /*!
   \fn void print_RAM(OpenCLManager* p_opencl_manager)
   \param p_opencl_manager - pointer on the singleton
   \brief Print information about RAM in OpenCL context
 */
-extern "C" GGEMS_EXPORT void print_RAM(OpenCLManager* p_opencl_manager);
+extern "C" GGEMS_EXPORT void print_RAM(GGOpenCLManager* p_opencl_manager);
 
 /*!
   \fn void print_command_queue(OpenCLManager* p_opencl_manager)
@@ -447,7 +447,7 @@ extern "C" GGEMS_EXPORT void print_RAM(OpenCLManager* p_opencl_manager);
   \brief Print information about command in OpenCL for each context
 */
 extern "C" GGEMS_EXPORT void print_command_queue(
-  OpenCLManager* p_opencl_manager);
+  GGOpenCLManager* p_opencl_manager);
 
 /*!
   \fn void set_context_index(OpenCLManager* p_opencl_manager, uint32_t const context_id)
@@ -455,8 +455,8 @@ extern "C" GGEMS_EXPORT void print_command_queue(
   \param context_id - index of the context
   \brief Set the context index to activate
 */
-extern "C" GGEMS_EXPORT void set_context_index(OpenCLManager* p_opencl_manager,
-  uint32_t const context_id);
+extern "C" GGEMS_EXPORT void set_context_index(
+  GGOpenCLManager* p_opencl_manager, GGuint const context_id);
 
 /*!
   \fn void print_activated_context(OpenCLManager* p_opencl_manager)
@@ -464,7 +464,7 @@ extern "C" GGEMS_EXPORT void set_context_index(OpenCLManager* p_opencl_manager,
   \brief Print information about activated context
 */
 extern "C" GGEMS_EXPORT void print_activated_context(
-  OpenCLManager* p_opencl_manager);
+  GGOpenCLManager* p_opencl_manager);
 
 /*!
   \fn void clean_opencl_manager(OpenCLManager* p_opencl_manager)
@@ -472,6 +472,6 @@ extern "C" GGEMS_EXPORT void print_activated_context(
   \brief Clean correctly OpenCL platform, device, context, command queue, event and kernel
 */
 extern "C" GGEMS_EXPORT void clean_opencl_manager(
-  OpenCLManager* p_opencl_manager);
+  GGOpenCLManager* p_opencl_manager);
 
 #endif // GUARD_GGEMS_GLOBAL_OPENCL_MANAGER_HH
