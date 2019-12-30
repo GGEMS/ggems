@@ -6,7 +6,7 @@
   * 3 Entrées et sorties des constructeurs, destructeurs et fonctions
 --------------------------------------------------------------------------------
 
-- Améliorer le random Poisson et Gauss
+- Améliorer le random Poisson et Gauss ?
 
 - Faire un installer pratique pour Windows, MAC et Linux
 
@@ -26,9 +26,19 @@ Si possible, faire la visualization sur carte graphique avec OpenCL
 
 - Documentation avec Sphinx
 
-- Source X complète en tenant compte du courant, volt, temperature, anode,
-filtre etc... (Si possible???)
+- Compilation des kernels OpenCL lors de l'installation
 
 - Prévoir place pour les kernel customs
 
 - Faire une physics list automatique en fonction du type de particule
+
+- Encapsuler tout dans des namespaces pour le C++ et clarifier les noms des
+fichiers (plus intuitifs)
+
+- Redéfinition des types int, float, etc...
+  int -> GGint
+  float -> GGfloat
+
+- Renommer fichier xray_source.cc -> GGXRaySource.cc
+
+- Dans test.py faire un print_infos pour OpenCL manager

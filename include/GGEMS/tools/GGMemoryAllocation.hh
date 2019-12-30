@@ -1,8 +1,8 @@
-#ifndef GUARD_GGEMS_TOOLS_MEMORY_HH
-#define GUARD_GGEMS_TOOLS_MEMORY_HH
+#ifndef GUARD_GGEMS_TOOLS_GGMEMORYALLOCATION_HH
+#define GUARD_GGEMS_TOOLS_GGMEMORYALLOCATION_HH
 
 /*!
-  \file memory.hh
+  \file GGMemoryAllocation.hh
 
   \brief Aligned memory
 
@@ -26,16 +26,16 @@
   Freeing memory
   Memory::MemFree<float,32>( toto );
 */
-namespace Memory {
+namespace GGMem {
   /*!
-    \fn T* MemAlloc( std::size_t const& elt )
+    \fn T* Alloc( std::size_t const& elt )
     \tparam T - Type of buffer to align
     \tparam A - Alignment in byte
     \param elt number of elements in the buffer
     \return the aligned buffer
   */
   template<typename T, std::size_t A = 128>
-  T* MemAlloc(std::size_t const& elt)
+  inline T* Alloc(std::size_t const& elt)
   {
     std::size_t const size = sizeof(T) * elt;
     std::size_t const total_size = size + (A - 1) + sizeof(void*);
@@ -61,11 +61,11 @@ namespace Memory {
   }
 
   /*!
-    \fn void MemFree(void *p)
+    \fn void Free(void *p)
     \param p - Pointer to the aligned buffer
     \brief Free allocated memory
   */
-  void MemFree(void *p);
+  inline void Free(void *p) {::free(static_cast<void**>(p)[-1]);};
 }
 
-#endif // GUARD_GGEMS_TOOLS_MEMORY_HH
+#endif // GUARD_GGEMS_TOOLS_GGMEMORYALLOCATION_HH

@@ -2,23 +2,14 @@ import ggems
 import ctypes
 
 # ------------------------------------------------------------------------------
-# Setting the verbosity
+# Setting global verbosity
 ggems.Verbosity(3)
 
 # ------------------------------------------------------------------------------
 # STEP 1: Initializing OpenCL
 opencl_manager = ggems.OpenCLManager()
-
-# Activate a context
-opencl_manager.set_context_index(2)
-
-# Printing informations about OpenCL
-opencl_manager.print_platform()
-opencl_manager.print_device()
-opencl_manager.print_build_options()
-opencl_manager.print_context()
-opencl_manager.print_command_queue()
-opencl_manager.print_activated_context()
+opencl_manager.set_context_index(2)  # Activate a context
+opencl_manager.print_infos()  # Printing informations about OpenCL
 
 # ------------------------------------------------------------------------------
 # STEP 2: Initializing a source
@@ -35,7 +26,7 @@ xray_source.print_infos()
 # STEP 3: GGEMS simulation parameters
 ggems_manager = ggems.GGEMSManager()
 ggems_manager.set_seed(777)
-ggems_manager.set_number_of_particles(86163500)
+ggems_manager.set_number_of_particles(861635)
 
 # Cross section parameters
 ggems_manager.set_cross_section_table_number_of_bins(220)

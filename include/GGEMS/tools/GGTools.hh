@@ -1,8 +1,8 @@
-#ifndef GUARD_GGEMS_TOOLS_FUNCTIONS_HH
-#define GUARD_GGEMS_TOOLS_FUNCTIONS_HH
+#ifndef GUARD_GGEMS_TOOLS_GGTOOLS_HH
+#define GUARD_GGEMS_TOOLS_GGTOOLS_HH
 
 /*!
-  \file functions.hh
+  \file GGTools.hh
 
   \brief Namespaces for different useful fonctions
 
@@ -14,14 +14,15 @@
 */
 
 #include <fstream>
-#include "GGEMS/global/opencl_manager.hh"
-#include "GGEMS/global/ggems_configuration.hh"
+
+#include "GGEMS/global/GGConfiguration.hh"
+#include "GGEMS/tools/GGTypes.hh"
 
 /*!
-  \namespace Stream
+  \namespace GGStream
   \brief namespace checking file stream in input and output
 */
-namespace Stream
+namespace GGStream
 {
   /*!
     \fn void CheckInputStream(std::ifstream const& input_stream, std::string const& filename)
@@ -34,10 +35,10 @@ namespace Stream
 }
 
 /*!
-  \namespace Misc
+  \namespace GGMisc
   \brief namespace storing miscellaneous functions
 */
-namespace Misc
+namespace GGMisc
 {
   /*!
     \fn bool IsEqual(T const& a, T const& b)
@@ -47,7 +48,7 @@ namespace Misc
     \brief Check if 2 floats/doubles are equal (or almost equal)
   */
   template<typename T>
-  bool IsEqual(T const& a, T const& b);
+  GGbool IsEqual(T const& a, T const& b);
 
   /*!
     \fn void ThrowException(std::string const& class_name, std::string const& method_name, std::string const& message)
@@ -73,4 +74,4 @@ namespace GGEMSTools
   void PrintBanner();
 }
 
-#endif // End of GUARD_GGEMS_TOOLS_FUNCTIONS_HH
+#endif // End of GUARD_GGEMS_TOOLS_GGTOOLS_HH

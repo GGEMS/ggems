@@ -39,8 +39,8 @@ inline f323cl_t RotateUz(f323cl_t vector, f323cl_t const new_uz)
     up = sqrt(up);
     #ifdef OPENCL_COMPILER
     f32cl_t px = vector.x,  py = vector.y, pz = vector.z;
-    vector.x = ( u1*u3*px - u2*py ) /up + u1*pz;
-    vector.y = ( u2*u3*px + u1*py ) /up + u2*pz;
+    vector.x = (u1*u3*px - u2*py) /up + u1*pz;
+    vector.y = (u2*u3*px + u1*py) /up + u2*pz;
     vector.z =    -up*px +             u3*pz;
     #else
     f32cl_t px = vector.s[0], py = vector.s[1], pz = vector.s[2];

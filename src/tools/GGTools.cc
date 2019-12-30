@@ -1,5 +1,5 @@
 /*!
-  \file functions.cc
+  \file GGTools.cc
 
   \brief Namespaces for different useful fonctions
 
@@ -16,15 +16,16 @@
 #include <cmath>
 #include <iostream>
 
-#include "GGEMS/tools/functions.hh"
-#include "GGEMS/global/ggems_manager.hh"
-#include "GGEMS/tools/print.hh"
+#include "GGEMS/tools/GGTools.hh"
+#include "GGEMS/tools/GGPrint.hh"
+
+#include "GGEMS/global/GGEMSManager.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void Stream::CheckInputStream(std::ifstream const& input_stream,
+void GGStream::CheckInputStream(std::ifstream const& input_stream,
   std::string const& filename)
 {
   if (!input_stream) {
@@ -46,12 +47,12 @@ void Stream::CheckInputStream(std::ifstream const& input_stream,
 ////////////////////////////////////////////////////////////////////////////////
 
 /// @cond
-template bool Misc::IsEqual<double>(double const&, double const&);
-template bool Misc::IsEqual<float>(float const&, float const&);
+template GGbool GGMisc::IsEqual<GGdouble>(GGdouble const&, GGdouble const&);
+template GGbool GGMisc::IsEqual<float>(GGfloat const&, GGfloat const&);
 /// @endcond
 
 template <typename T>
-bool Misc::IsEqual(T const& a, T const& b)
+GGbool GGMisc::IsEqual(T const& a, T const& b)
 {
   return std::nextafter(a, std::numeric_limits<T>::lowest()) <= b
     && std::nextafter(a, std::numeric_limits<T>::max()) >= b;
@@ -61,12 +62,12 @@ bool Misc::IsEqual(T const& a, T const& b)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void Misc::ThrowException(std::string const& class_name,
+void GGMisc::ThrowException(std::string const& class_name,
   std::string const& method_name, std::string const& message)
 {
   std::ostringstream oss(std::ostringstream::out);
   oss << message;
-  GGEMScerr(class_name, method_name, 0) << oss.str() << GGEMSendl;
+  GGcerr(class_name, method_name, 0) << oss.str() << GGendl;
   throw std::runtime_error("");
 }
 
@@ -82,19 +83,19 @@ void GGEMSTools::PrintBanner()
   std::string const kGGEMSVersion = ggems_manager.GetVersion();
 
   // Print the banner
-  GGEMScout("GGEMSTools", "PrintBanner", 0) << "      ____                  "
-    << GGEMSendl;
-  GGEMScout("GGEMSTools", "PrintBanner", 0) << ".--. /\\__/\\ .--.            "
-    << GGEMSendl;
-  GGEMScout("GGEMSTools", "PrintBanner", 0) << "`O  / /  \\ \\  .`     GGEMS "
-    << kGGEMSVersion << GGEMSendl;
-  GGEMScout("GGEMSTools", "PrintBanner", 0) << "  `-| |  | |O`              "
-    << GGEMSendl;
-  GGEMScout("GGEMSTools", "PrintBanner", 0) << "   -|`|..|`|-        "
-    << GGEMSendl;
-  GGEMScout("GGEMSTools", "PrintBanner", 0) << " .` \\.\\__/./ `.    "
-    << GGEMSendl;
-  GGEMScout("GGEMSTools", "PrintBanner", 0) << "'.-` \\/__\\/ `-.'   "
-    << GGEMSendl;
-  GGEMScout("GGEMSTools", "PrintBanner", 0) << GGEMSendl;
+  GGcout("GGEMSTools", "PrintBanner", 0) << "      ____                  "
+    << GGendl;
+  GGcout("GGEMSTools", "PrintBanner", 0) << ".--. /\\__/\\ .--.            "
+    << GGendl;
+  GGcout("GGEMSTools", "PrintBanner", 0) << "`O  / /  \\ \\  .`     GGEMS "
+    << kGGEMSVersion << GGendl;
+  GGcout("GGEMSTools", "PrintBanner", 0) << "  `-| |  | |O`              "
+    << GGendl;
+  GGcout("GGEMSTools", "PrintBanner", 0) << "   -|`|..|`|-        "
+    << GGendl;
+  GGcout("GGEMSTools", "PrintBanner", 0) << " .` \\.\\__/./ `.    "
+    << GGendl;
+  GGcout("GGEMSTools", "PrintBanner", 0) << "'.-` \\/__\\/ `-.'   "
+    << GGendl;
+  GGcout("GGEMSTools", "PrintBanner", 0) << GGendl;
 }

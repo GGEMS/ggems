@@ -48,29 +48,19 @@ class OpenCLManager(object):
 
         self.obj = ggems_lib.get_instance_opencl_manager()
 
-    def print_platform(self):
+    def print_infos(self):
         ggems_lib.print_platform(self.obj)
-
-    def print_device(self):
         ggems_lib.print_device(self.obj)
-
-    def print_build_options(self):
         ggems_lib.print_build_options(self.obj)
-
-    def print_context(self):
         ggems_lib.print_context(self.obj)
+        ggems_lib.print_command_queue(self.obj)
+        ggems_lib.print_activated_context(self.obj)
 
     def print_RAM(self):
         ggems_lib.print_RAM(self.obj)
 
-    def print_command_queue(self):
-        ggems_lib.print_command_queue(self.obj)
-
     def set_context_index(self, context_id):
         ggems_lib.set_context_index(self.obj, context_id)
-
-    def print_activated_context(self):
-        ggems_lib.print_activated_context(self.obj)
 
     def clean(self):
         ggems_lib.clean_opencl_manager(self.obj)
@@ -107,7 +97,8 @@ class XRaySource(object):
 
         ggems_lib.set_source_particle_type_xray_source.argtypes = [
             ctypes.c_void_p, ctypes.c_char_p]
-        ggems_lib.set_source_particle_type_xray_source.restype = ctypes.c_void_p
+        ggems_lib.set_source_particle_type_xray_source.restype =\
+            ctypes.c_void_p
 
         ggems_lib.set_beam_aperture_xray_source.argtypes = [
             ctypes.c_void_p, ctypes.c_float]

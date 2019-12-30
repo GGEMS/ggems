@@ -1,8 +1,8 @@
-#ifndef GUARD_GGEMS_TOOLS_CHRONO_HH
-#define GUARD_GGEMS_TOOLS_CHRONO_HH
+#ifndef GUARD_GGEMS_TOOLS_GGCHRONO_HH
+#define GUARD_GGEMS_TOOLS_GGCHRONO_HH
 
 /*!
-  \file chrono.hh
+  \file GGChrono.hh
 
   \brief Namespace computing/displaying the time
 
@@ -16,7 +16,7 @@
 #include <chrono>
 #include <string>
 
-#include "GGEMS/global/ggems_export.hh"
+#include "GGEMS/global/GGExport.hh"
 
 typedef std::chrono::time_point<std::chrono::system_clock> ChronoTime;
 typedef std::chrono::duration<int64_t,std::nano> DurationNano;
@@ -29,10 +29,10 @@ typedef std::chrono::hours Hs;
 #endif
 
 /*!
-  \namespace Chrono
+  \namespace GGChrono
   \brief namespace computing/displaying the time
 */
-namespace Chrono
+namespace GGChrono
 {
   /*!
     \fn void DisplayTime( DurationNano const& duration, std::string const& displayedText )
