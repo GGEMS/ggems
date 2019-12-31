@@ -1,8 +1,8 @@
-#ifndef GUARD_GGEMS_TOOLS_GGTOOLS_HH
-#define GUARD_GGEMS_TOOLS_GGTOOLS_HH
+#ifndef GUARD_GGEMS_TOOLS_GGEMSTOOLS_HH
+#define GUARD_GGEMS_TOOLS_GGEMSTOOLS_HH
 
 /*!
-  \file GGTools.hh
+  \file GGEMSTools.hh
 
   \brief Namespaces for different useful fonctions
 
@@ -15,14 +15,14 @@
 
 #include <fstream>
 
-#include "GGEMS/global/GGConfiguration.hh"
-#include "GGEMS/tools/GGTypes.hh"
+#include "GGEMS/global/GGEMSConfiguration.hh"
+#include "GGEMS/tools/GGEMSTypes.hh"
 
 /*!
-  \namespace GGStream
+  \namespace GGEMSStream
   \brief namespace checking file stream in input and output
 */
-namespace GGStream
+namespace GGEMSStream
 {
   /*!
     \fn void CheckInputStream(std::ifstream const& input_stream, std::string const& filename)
@@ -35,10 +35,10 @@ namespace GGStream
 }
 
 /*!
-  \namespace GGMisc
+  \namespace GGEMSMisc
   \brief namespace storing miscellaneous functions
 */
-namespace GGMisc
+namespace GGEMSMisc
 {
   /*!
     \fn bool IsEqual(T const& a, T const& b)
@@ -61,17 +61,4 @@ namespace GGMisc
     method_name, std::string const& message);
 }
 
-/*!
-  \namespace GGEMSTools
-  \brief namespace storing GGEMS tool functions
-*/
-namespace GGEMSTools
-{
-  /*!
-    \fn void PrintBanner()
-    \brief Print GGEMS banner
-  */
-  void PrintBanner();
-}
-
-#endif // End of GUARD_GGEMS_TOOLS_GGTOOLS_HH
+#endif // End of GUARD_GGEMS_TOOLS_GGEMSTOOLS_HH

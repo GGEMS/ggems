@@ -12,68 +12,68 @@ elif sys.platform == "win32":
         "C:\\Users\\dbenoit\\Workspace\\GGEMS_OpenCL_build\\libggems.dll")
 
 
-class OpenCLManager(object):
+class GGEMSOpenCLManager(object):
     """Get the OpenCL C++ singleton and print infos or managing it
     """
     def __init__(self):
-        ggems_lib.get_instance_opencl_manager.restype = ctypes.c_void_p
+        ggems_lib.get_instance_ggems_opencl_manager.restype = ctypes.c_void_p
 
-        ggems_lib.print_platform.argtypes = [ctypes.c_void_p]
-        ggems_lib.print_platform.restype = ctypes.c_void_p
+        ggems_lib.print_platform_ggems_opencl_manager.argtypes = [ctypes.c_void_p]
+        ggems_lib.print_platform_ggems_opencl_manager.restype = ctypes.c_void_p
 
-        ggems_lib.print_device.argtypes = [ctypes.c_void_p]
-        ggems_lib.print_device.restype = ctypes.c_void_p
+        ggems_lib.print_device_ggems_opencl_manager.argtypes = [ctypes.c_void_p]
+        ggems_lib.print_device_ggems_opencl_manager.restype = ctypes.c_void_p
 
-        ggems_lib.print_build_options.argtypes = [ctypes.c_void_p]
-        ggems_lib.print_build_options.restype = ctypes.c_void_p
+        ggems_lib.print_build_options_ggems_opencl_manager.argtypes = [ctypes.c_void_p]
+        ggems_lib.print_build_options_ggems_opencl_manager.restype = ctypes.c_void_p
 
-        ggems_lib.print_context.argtypes = [ctypes.c_void_p]
-        ggems_lib.print_context.restype = ctypes.c_void_p
+        ggems_lib.print_context_ggems_opencl_manager.argtypes = [ctypes.c_void_p]
+        ggems_lib.print_context_ggems_opencl_manager.restype = ctypes.c_void_p
 
-        ggems_lib.print_RAM.argtypes = [ctypes.c_void_p]
-        ggems_lib.print_RAM.restype = ctypes.c_void_p
+        ggems_lib.print_RAM_ggems_opencl_manager.argtypes = [ctypes.c_void_p]
+        ggems_lib.print_RAM_ggems_opencl_manager.restype = ctypes.c_void_p
 
-        ggems_lib.print_command_queue.argtypes = [ctypes.c_void_p]
-        ggems_lib.print_command_queue.restype = ctypes.c_void_p
+        ggems_lib.print_command_queue_ggems_opencl_manager.argtypes = [ctypes.c_void_p]
+        ggems_lib.print_command_queue_ggems_opencl_manager.restype = ctypes.c_void_p
 
-        ggems_lib.set_context_index.argtypes = [
+        ggems_lib.set_context_index_ggems_opencl_manager.argtypes = [
             ctypes.c_void_p, ctypes.c_uint32]
-        ggems_lib.set_context_index.restype = ctypes.c_void_p
+        ggems_lib.set_context_index_ggems_opencl_manager.restype = ctypes.c_void_p
 
-        ggems_lib.print_activated_context.argtypes = [ctypes.c_void_p]
-        ggems_lib.print_activated_context.restype = ctypes.c_void_p
+        ggems_lib.print_activated_context_ggems_opencl_manager.argtypes = [ctypes.c_void_p]
+        ggems_lib.print_activated_context_ggems_opencl_manager.restype = ctypes.c_void_p
 
-        ggems_lib.clean_opencl_manager.argtypes = [ctypes.c_void_p]
-        ggems_lib.clean_opencl_manager.restype = ctypes.c_void_p
+        ggems_lib.clean_ggems_opencl_manager.argtypes = [ctypes.c_void_p]
+        ggems_lib.clean_ggems_opencl_manager.restype = ctypes.c_void_p
 
-        self.obj = ggems_lib.get_instance_opencl_manager()
+        self.obj = ggems_lib.get_instance_ggems_opencl_manager()
 
     def print_infos(self):
-        ggems_lib.print_platform(self.obj)
-        ggems_lib.print_device(self.obj)
-        ggems_lib.print_build_options(self.obj)
-        ggems_lib.print_context(self.obj)
-        ggems_lib.print_command_queue(self.obj)
-        ggems_lib.print_activated_context(self.obj)
+        ggems_lib.print_platform_ggems_opencl_manager(self.obj)
+        ggems_lib.print_device_ggems_opencl_manager(self.obj)
+        ggems_lib.print_build_options_ggems_opencl_manager(self.obj)
+        ggems_lib.print_context_ggems_opencl_manager(self.obj)
+        ggems_lib.print_command_queue_ggems_opencl_manager(self.obj)
+        ggems_lib.print_activated_context_ggems_opencl_manager(self.obj)
 
     def print_RAM(self):
-        ggems_lib.print_RAM(self.obj)
+        ggems_lib.print_RAM_ggems_opencl_manager(self.obj)
 
     def set_context_index(self, context_id):
-        ggems_lib.set_context_index(self.obj, context_id)
+        ggems_lib.set_context_index_ggems_opencl_manager(self.obj, context_id)
 
     def clean(self):
-        ggems_lib.clean_opencl_manager(self.obj)
+        ggems_lib.clean_ggems_opencl_manager(self.obj)
 
 
-class Verbosity(object):
+class GGEMSVerbosity(object):
     """Set the verbosity of infos in GGEMS
     """
     def __init__(self, val):
-        ggems_lib.set_verbose.argtypes = [ctypes.c_int]
-        ggems_lib.set_verbose.restype = ctypes.c_void_p
+        ggems_lib.set_ggems_verbose.argtypes = [ctypes.c_int]
+        ggems_lib.set_ggems_verbose.restype = ctypes.c_void_p
 
-        ggems_lib.set_verbose(val)
+        ggems_lib.set_ggems_verbose(val)
 
 
 class XRaySource(object):
