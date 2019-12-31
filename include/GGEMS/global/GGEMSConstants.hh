@@ -1,8 +1,8 @@
-#ifndef GUARD_GGEMS_GLOBAL_GGCONSTANTS_HH
-#define GUARD_GGEMS_GLOBAL_GGCONSTANTS_HH
+#ifndef GUARD_GGEMS_GLOBAL_GGEMSCONSTANTS_HH
+#define GUARD_GGEMS_GLOBAL_GGEMSCONSTANTS_HH
 
 /*!
-  \file GGConstants.hh
+  \file GGEMSConstants.hh
 
   \brief Different namespaces storing constants useful for GGEMS
 
@@ -13,15 +13,15 @@
   \date Wednesday October 2, 2019
 */
 
-#include "GGEMS/global/GGExport.hh"
-#include "GGEMS/tools/GGSystemOfUnits.hh"
+#include "GGEMS/global/GGEMSExport.hh"
+#include "GGEMS/tools/GGEMSSystemOfUnits.hh"
 
 /*!
-  \namespace GGProcessName
+  \namespace GGEMSProcessName
   \brief Namespace storing constants about processes
 */
 #ifndef OPENCL_COMPILER
-namespace GGProcessName
+namespace GGEMSProcessName
 {
 #endif
   __constant GGuchar NUMBER_PROCESSES = 7; /*!< Maximum number of processes */
@@ -44,11 +44,11 @@ namespace GGProcessName
 #endif
 
 /*!
-  \namespace GGParticleName
+  \namespace GGEMSParticleName
   \brief Namespace storing particles handling by GGEMS
 */
 #ifndef OPENCL_COMPILER
-namespace GGParticleName
+namespace GGEMSParticleName
 {
 #endif
   __constant GGuchar PHOTON = 0; /*!< Photon particle */
@@ -59,11 +59,11 @@ namespace GGParticleName
 #endif
 
 /*!
-  \namespace ParticleState
+  \namespace GGEMSParticleState
   \brief Namespace storing the state of the particle
 */
 #ifndef OPENCL_COMPILER
-namespace GGParticleState
+namespace GGEMSParticleState
 {
 #endif
   __constant GGuchar PRIMARY = 0; /*!< Primary particle */
@@ -76,11 +76,11 @@ namespace GGParticleState
 #endif
 
 /*!
-  \namespace Tolerance
+  \namespace GGEMSTolerance
   \brief Namespace storing the tolerance for the float computations
 */
 #ifndef OPENCL_COMPILER
-namespace GGTolerance
+namespace GGEMSTolerance
 {
 #endif
   __constant GGdouble EPSILON2 = 1.0e-02; /*!< Epsilon of 0.01 */
@@ -88,7 +88,7 @@ namespace GGTolerance
   __constant GGdouble EPSILON6 = 1.0e-06; /*!< Epsilon of 0.000001 */
   __constant GGdouble GEOMETRY = 100.0*
   #ifndef OPENCL_COMPILER
-  GGUnits::nm; /*!< Tolerance for the geometry navigation */
+  GGEMSUnits::nm; /*!< Tolerance for the geometry navigation */
   #else
   (1.e-9 *1000.*1.0);
   #endif
@@ -97,11 +97,11 @@ namespace GGTolerance
 #endif
 
 /*!
-  \namespace GGState
+  \namespace GGEMSState
   \brief Namespace storing the state of the particle
 */
 #ifndef OPENCL_COMPILER
-namespace GGState
+namespace GGEMSState
 {
 #endif
   __constant GGuchar SOLID = 0; /*!< Solid state */
@@ -111,16 +111,16 @@ namespace GGState
 #endif
 
 /*!
-  \namespace GGLimit
+  \namespace GGEMSLimit
   \brief Namespace storing the energy threshold
 */
 #ifndef OPENCL_COMPILER
-namespace Limit
+namespace GGEMSLimit
 {
 #endif
   __constant GGdouble KINETIC_ENERGY_MIN = 1.0*
   #ifndef OPENCL_COMPILER
-  GGUnits::eV; /*!< Min kinetic energy */
+  GGEMSUnits::eV; /*!< Min kinetic energy */
   #else
   1.e-6*1.;
   #endif
@@ -128,35 +128,35 @@ namespace Limit
   __constant GGuint CROSS_SECTION_TABLE_NUMBER_BINS = 220; /*!< Number of bins in the cross section table */
   __constant GGdouble CROSS_SECTION_TABLE_ENERGY_MIN = 990.0*
   #ifndef OPENCL_COMPILER
-  GGUnits::eV; /*!< Min energy in the cross section table */
+  GGEMSUnits::eV; /*!< Min energy in the cross section table */
   #else
   1.e-6*1.;
   #endif
 
   __constant GGdouble CROSS_SECTION_TABLE_ENERGY_MAX = 250.0*
   #ifndef OPENCL_COMPILER
-  GGUnits::MeV; /*!< Max energy in the cross section table */
+  GGEMSUnits::MeV; /*!< Max energy in the cross section table */
   #else
   1.;
   #endif
 
   __constant GGdouble PHOTON_CUT = 1.0*
   #ifndef OPENCL_COMPILER
-  GGUnits::um; /*!< Photon cut */
+  GGEMSUnits::um; /*!< Photon cut */
   #else
   1.e-6 *1000.*1.0;
   #endif
 
   __constant GGdouble ELECTRON_CUT = 1.0*
   #ifndef OPENCL_COMPILER
-  GGUnits::um; /*!< Electron cut */
+  GGEMSUnits::um; /*!< Electron cut */
   #else
   1.e-6 *1000.*1.0;
   #endif
 
   __constant GGdouble POSITRON_CUT = 1.0*
   #ifndef OPENCL_COMPILER
-  GGUnits::um; /*!< Positron cut */
+  GGEMSUnits::um; /*!< Positron cut */
   #else
   1.e-6 *1000.*1.0;
   #endif

@@ -1,8 +1,8 @@
-#ifndef GUARD_GGEMS_TOOLS_GGMEMORYALLOCATION_HH
-#define GUARD_GGEMS_TOOLS_GGMEMORYALLOCATION_HH
+#ifndef GUARD_GGEMS_TOOLS_GGEMSMEMORYALLOCATION_HH
+#define GUARD_GGEMS_TOOLS_GGEMSMEMORYALLOCATION_HH
 
 /*!
-  \file GGMemoryAllocation.hh
+  \file GGEMSMemoryAllocation.hh
 
   \brief Aligned memory
 
@@ -17,16 +17,16 @@
 #include <sstream>
 
 /*!
-  \namespace Memory
+  \namespace GGEMSMem
   \brief namespace storing template allocating aligned memory and another
   function freeing the memory. By default the alignement is done on 128 bytes
   Usage:
   Allocating memory for 10 float with 32 bytes alignment
-  float* toto = Memory::MemAlloc<float,32>( 10 );
+  float* toto = GGEMSMem::Alloc<float,32>(10);
   Freeing memory
-  Memory::MemFree<float,32>( toto );
+  GGEMSMem::Free<float,32>(toto);
 */
-namespace GGMem {
+namespace GGEMSMem {
   /*!
     \fn T* Alloc( std::size_t const& elt )
     \tparam T - Type of buffer to align
@@ -41,8 +41,8 @@ namespace GGMem {
     std::size_t const total_size = size + (A - 1) + sizeof(void*);
 
     void *p_memory = ::malloc(total_size);
-    void *p_align_memory = reinterpret_cast<void*>( static_cast<uint64_t>(
-      reinterpret_cast<uint64_t>(p_memory) + (A-1) + sizeof(void*))
+    void *p_align_memory = reinterpret_cast<void*>( static_cast<GGulong>(
+      reinterpret_cast<GGulong>(p_memory) + (A-1) + sizeof(void*))
       & ~(A-1));
 
     static_cast<void**>(p_align_memory)[-1] = p_memory;
@@ -68,4 +68,4 @@ namespace GGMem {
   inline void Free(void *p) {::free(static_cast<void**>(p)[-1]);};
 }
 
-#endif // GUARD_GGEMS_TOOLS_GGMEMORYALLOCATION_HH
+#endif // GUARD_GGEMS_TOOLS_GGEMSMEMORYALLOCATION_HH

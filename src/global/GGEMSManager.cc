@@ -1,7 +1,7 @@
 /*!
-  \file ggems_manager.cc
+  \file GGEMSManager.cc
 
-  \brief GGEMS class managing the complete simulation
+  \brief GGEMS class managing the GGEMS simulation
 
   \author Julien BERT <julien.bert@univ-brest.fr>
   \author Didier BENOIT <didier.benoit@inserm.fr>
@@ -11,8 +11,8 @@
 */
 
 #include <algorithm>
-
 #include <fcntl.h>
+
 #ifdef _WIN32
 #ifdef _MSC_VER
 #define NOMINMAX
@@ -25,14 +25,14 @@
 
 #include "GGEMS/sources/ggems_source_manager.hh"
 
-#include "GGEMS/tools/system_of_units.hh"
-#include "GGEMS/tools/print.hh"
-#include "GGEMS/tools/chrono.hh"
-#include "GGEMS/tools/memory.hh"
-#include "GGEMS/tools/functions.hh"
+#include "GGEMS/tools/GGEMSSystemOfUnits.hh"
+#include "GGEMS/tools/GGEMSPrint.hh"
+#include "GGEMS/tools/GGEMSChrono.hh"
+#include "GGEMS/tools/GGEMSMemoryAllocation.hh"
+#include "GGEMS/tools/GGEMSTools.hh"
 
-#include "GGEMS/global/ggems_manager.hh"
-#include "GGEMS/global/ggems_constants.hh"
+#include "GGEMS/global/GGEMSManager.hh"
+#include "GGEMS/global/GGEMSConstants.hh"
 
 #include "GGEMS/processes/particles.hh"
 #include "GGEMS/processes/primary_particles.hh"
@@ -114,7 +114,7 @@ void GGEMSManager::SetSeed(uint32_t const& seed)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-uint32_t GGEMSManager::GenerateSeed() const
+GGuint GGEMSManager::GenerateSeed() const
 {
   #ifdef _WIN32
   HCRYPTPROV seedWin32;
@@ -130,7 +130,7 @@ uint32_t GGEMSManager::GenerateSeed() const
   return static_cast<uint32_t>(seedWin32);
   #else
   // Open a system random file
-  int file_descriptor = ::open("/dev/urandom", O_RDONLY | O_NONBLOCK);
+  GGint file_descriptor = ::open("/dev/urandom", O_RDONLY | O_NONBLOCK);
   if (file_descriptor < 0) {
     std::ostringstream oss( std::ostringstream::out );
     oss << "Error opening the file '/dev/urandom': " << strerror(errno)
@@ -140,11 +140,11 @@ uint32_t GGEMSManager::GenerateSeed() const
   }
 
   // Buffer storing 8 characters
-  char seedArray[sizeof(uint32_t)];
-  ::read(file_descriptor, reinterpret_cast<uint32_t*>(seedArray),
-     sizeof(uint32_t));
+  char seedArray[sizeof(GGuint)];
+  ::read(file_descriptor, reinterpret_cast<GGuint*>(seedArray),
+     sizeof(GGuint));
   ::close(file_descriptor);
-  uint32_t *seedUInt = reinterpret_cast<uint32_t*>(seedArray);
+  GGuint *seedUInt = reinterpret_cast<GGuint*>(seedArray);
   return *seedUInt;
   #endif
 }
@@ -153,7 +153,7 @@ uint32_t GGEMSManager::GenerateSeed() const
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSManager::SetNumberOfParticles(uint64_t const& number_of_particles)
+void GGEMSManager::SetNumberOfParticles(GGulong const& number_of_particles)
 {
   number_of_particles_ = number_of_particles;
 }
@@ -168,20 +168,20 @@ void GGEMSManager::CheckMemoryForParticles(void) const
   // RAM memory
 
   // Compute the RAM memory percentage allocated for primary particles
-  double const kRAMParticles =
-    static_cast<double>(sizeof(PrimaryParticles))
-    + static_cast<double>(sizeof(Random));
+  GGdouble const kRAMParticles =
+    static_cast<GGdouble>(sizeof(PrimaryParticles))
+    + static_cast<GGdouble>(sizeof(Random));
 
   // Getting the RAM memory on activated device
-  double const kMaxRAMDevice = static_cast<double>(
+  GGdouble const kMaxRAMDevice = static_cast<GGdouble>(
     opencl_manager_.GetMaxRAMMemoryOnActivatedDevice());
 
   // Computing the ratio of used RAM memory on device
-  double const kMaxRatioUsedRAM = kRAMParticles / kMaxRAMDevice;
+  GGdouble const kMaxRatioUsedRAM = kRAMParticles / kMaxRAMDevice;
 
   // Computing a theoric max. number of particles depending on activated
   // device and advice this number to the user. 10% of RAM memory for particles
-  cl_ulong const kTheoricMaxNumberOfParticles = static_cast<cl_ulong>(
+  GGulong const kTheoricMaxNumberOfParticles = static_cast<GGulong>(
     0.1 * kMaxRAMDevice / (kRAMParticles/MAXIMUM_PARTICLES));
 
   if (kMaxRatioUsedRAM > 0.1) { // Printing warning
@@ -278,7 +278,7 @@ void GGEMSManager::SetProcess(char const* process_name)
 ////////////////////////////////////////////////////////////////////////////////
 
 void GGEMSManager::SetParticleCut(char const* particle_name,
-  double const& distance)
+  GGdouble const& distance)
 {
   // Convert the particle name in string
   std::string particle_name_str(particle_name);
@@ -304,7 +304,7 @@ void GGEMSManager::SetParticleCut(char const* particle_name,
 ////////////////////////////////////////////////////////////////////////////////
 
 void GGEMSManager::SetParticleSecondaryAndLevel(char const* particle_name,
-  uint32_t const& level)
+  GGuint const& level)
 {
   // Convert the particle name in string
   std::string particle_name_str(particle_name);
@@ -333,7 +333,7 @@ void GGEMSManager::SetParticleSecondaryAndLevel(char const* particle_name,
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSManager::SetGeometryTolerance(double const& distance)
+void GGEMSManager::SetGeometryTolerance(GGdouble const& distance)
 {
   // Geometry tolerance distance in the range [1mm;1nm]
   geometry_tolerance_ = fmax(Units::nm, fmin(Units::mm, distance));
@@ -344,7 +344,7 @@ void GGEMSManager::SetGeometryTolerance(double const& distance)
 ////////////////////////////////////////////////////////////////////////////////
 
 void GGEMSManager::SetCrossSectionTableNumberOfBins(
-  uint32_t const& number_of_bins)
+  GGuint const& number_of_bins)
 {
   cross_section_table_number_of_bins_ = number_of_bins;
 }
@@ -353,7 +353,7 @@ void GGEMSManager::SetCrossSectionTableNumberOfBins(
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSManager::SetCrossSectionTableEnergyMin(double const& min_energy)
+void GGEMSManager::SetCrossSectionTableEnergyMin(GGdouble const& min_energy)
 {
   cross_section_table_energy_min_ = min_energy;
 }
@@ -362,7 +362,7 @@ void GGEMSManager::SetCrossSectionTableEnergyMin(double const& min_energy)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSManager::SetCrossSectionTableEnergyMax(double const& max_energy)
+void GGEMSManager::SetCrossSectionTableEnergyMax(GGdouble const& max_energy)
 {
   cross_section_table_energy_max_ = max_energy;
 }
@@ -397,7 +397,7 @@ void GGEMSManager::Initialize()
     << "Initialization of GGEMS Manager singleton..." << GGEMSendl;
 
   // Printing the banner with the GGEMS version
-  GGEMSTools::PrintBanner();
+  PrintBanner();
 
   // Checking the mandatory parameters
   CheckParameters();
@@ -481,7 +481,7 @@ void GGEMSManager::Run()
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSManager::PrintInfos() const
+void GGEMSManager::PrintInfos(void) const
 {
   GGEMScout("GGEMSManager", "PrintInfos", 0) << GGEMSendl;
   GGEMScout("GGEMSManager", "PrintInfos", 0) << "++++++++++++++++" << GGEMSendl;
@@ -527,6 +527,29 @@ void GGEMSManager::PrintInfos() const
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+void GGEMSManager::PrintBanner(void) const
+{
+  GGcout("GGEMSManager", "PrintBanner", 0) << "      ____                  "
+    << GGendl;
+  GGcout("GGEMSManager", "PrintBanner", 0) << ".--. /\\__/\\ .--.            "
+    << GGendl;
+  GGcout("GGEMSManager", "PrintBanner", 0) << "`O  / /  \\ \\  .`     GGEMS "
+    << version_ << GGendl;
+  GGcout("GGEMSManager", "PrintBanner", 0) << "  `-| |  | |O`              "
+    << GGendl;
+  GGcout("GGEMSManager", "PrintBanner", 0) << "   -|`|..|`|-        "
+    << GGendl;
+  GGcout("GGEMSManager", "PrintBanner", 0) << " .` \\.\\__/./ `.    "
+    << GGendl;
+  GGcout("GGEMSManager", "PrintBanner", 0) << "'.-` \\/__\\/ `-.'   "
+    << GGendl;
+  GGcout("GGEMSManager", "PrintBanner", 0) << GGendl;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 GGEMSManager* get_instance_ggems_manager(void)
 {
   return &GGEMSManager::GetInstance();
@@ -536,7 +559,7 @@ GGEMSManager* get_instance_ggems_manager(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_seed(GGEMSManager* p_ggems_manager, uint32_t const seed)
+void set_seed_ggems_manager(GGEMSManager* p_ggems_manager, GGuint const seed)
 {
   p_ggems_manager->SetSeed(seed);
 }
@@ -545,7 +568,7 @@ void set_seed(GGEMSManager* p_ggems_manager, uint32_t const seed)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void initialize_ggems(GGEMSManager* p_ggems_manager)
+void initialize_ggems_manager(GGEMSManager* p_ggems_manager)
 {
   p_ggems_manager->Initialize();
 }
@@ -554,8 +577,8 @@ void initialize_ggems(GGEMSManager* p_ggems_manager)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_number_of_particles(GGEMSManager* p_ggems_manager,
-  uint64_t const number_of_particles)
+void set_number_of_particles_ggems_manager(GGEMSManager* p_ggems_manager,
+  GGulong const number_of_particles)
 {
   p_ggems_manager->SetNumberOfParticles(number_of_particles);
 }
@@ -564,7 +587,8 @@ void set_number_of_particles(GGEMSManager* p_ggems_manager,
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_process(GGEMSManager* p_ggems_manager, char const* process_name)
+void set_process_ggems_manager(GGEMSManager* p_ggems_manager,
+  char const* process_name)
 {
   p_ggems_manager->SetProcess(process_name);
 }
@@ -573,8 +597,8 @@ void set_process(GGEMSManager* p_ggems_manager, char const* process_name)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_particle_cut(GGEMSManager* p_ggems_manager, char const* particle_name,
-  double const distance)
+void set_particle_cut_ggems_manager(GGEMSManager* p_ggems_manager,
+  char const* particle_name, GGdouble const distance)
 {
   p_ggems_manager->SetParticleCut(particle_name, distance);
 }
@@ -583,8 +607,8 @@ void set_particle_cut(GGEMSManager* p_ggems_manager, char const* particle_name,
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_geometry_tolerance(GGEMSManager* p_ggems_manager,
-  double const distance)
+void set_geometry_tolerance_ggems_manager(GGEMSManager* p_ggems_manager,
+  GGdouble const distance)
 {
   p_ggems_manager->SetGeometryTolerance(distance);
 }
@@ -593,8 +617,8 @@ void set_geometry_tolerance(GGEMSManager* p_ggems_manager,
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_secondary_particle_and_level(GGEMSManager* p_ggems_manager,
-  char const* particle_name, uint32_t const level)
+void set_secondary_particle_and_level_ggems_manager(
+  GGEMSManager* p_ggems_manager, char const* particle_name, GGuint const level)
 {
   p_ggems_manager->SetParticleSecondaryAndLevel(particle_name, level);
 }
@@ -603,8 +627,8 @@ void set_secondary_particle_and_level(GGEMSManager* p_ggems_manager,
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_cross_section_table_number_of_bins(GGEMSManager* p_ggems_manager,
-  uint32_t const number_of_bins)
+void set_cross_section_table_number_of_bins_ggems_manager(
+  GGEMSManager* p_ggems_manager, GGuint const number_of_bins)
 {
   p_ggems_manager->SetCrossSectionTableNumberOfBins(number_of_bins);
 }
@@ -613,8 +637,8 @@ void set_cross_section_table_number_of_bins(GGEMSManager* p_ggems_manager,
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_cross_section_table_energy_min(GGEMSManager* p_ggems_manager,
-  double const min_energy)
+void set_cross_section_table_energy_min_ggems_manager(
+  GGEMSManager* p_ggems_manager, GGdouble const min_energy)
 {
   p_ggems_manager->SetCrossSectionTableEnergyMin(min_energy);
 }
@@ -623,8 +647,8 @@ void set_cross_section_table_energy_min(GGEMSManager* p_ggems_manager,
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_cross_section_table_energy_max(GGEMSManager* p_ggems_manager,
-  double const max_energy)
+void set_cross_section_table_energy_max_ggems_manager(
+  GGEMSManager* p_ggems_manager, GGdouble const max_energy)
 {
   p_ggems_manager->SetCrossSectionTableEnergyMax(max_energy);
 }
@@ -633,7 +657,7 @@ void set_cross_section_table_energy_max(GGEMSManager* p_ggems_manager,
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void run(GGEMSManager* p_ggems_manager)
+void run_ggems_manager(GGEMSManager* p_ggems_manager)
 {
   p_ggems_manager->Run();
 }

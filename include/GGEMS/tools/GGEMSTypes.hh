@@ -1,8 +1,8 @@
-#ifndef GUARD_GGEMS_TOOLS_GGTYPES_HH
-#define GUARD_GGEMS_TOOLS_GGTYPES_HH
+#ifndef GUARD_GGEMS_TOOLS_GGEMSTYPES_HH
+#define GUARD_GGEMS_TOOLS_GGEMSTYPES_HH
 
 /*!
-  \file GGTypes.hh
+  \file GGEMSTypes.hh
 
   \brief Redefining types for OpenCL device and host
 
@@ -74,4 +74,4 @@
 #define GGdouble16 cl_double16
 #endif
 
-#endif // End of GUARD_GGEMS_OPENCL_GGTYPES_HH
+#endif // End of GUARD_GGEMS_TOOLS_GGEMSTYPES_HH

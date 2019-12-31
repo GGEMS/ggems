@@ -1,8 +1,8 @@
-#ifndef GUARD_GGEMS_TOOLS_GGPRINT_HH
-#define GUARD_GGEMS_TOOLS_GGPRINT_HH
+#ifndef GUARD_GGEMS_TOOLS_GGEMSPRINT_HH
+#define GUARD_GGEMS_TOOLS_GGEMSPRINT_HH
 
 /*!
-  \file GGPrint.hh
+  \file GGEMSPrint.hh
 
   \brief Print a custom std::cout end std::cerr handling verbosity
 
@@ -17,8 +17,8 @@
 #include <ostream>
 #include <iomanip>
 
-#include "GGEMS/global/GGExport.hh"
-#include "GGEMS/tools/GGTypes.hh"
+#include "GGEMS/global/GGEMSExport.hh"
+#include "GGEMS/tools/GGEMSTypes.hh"
 
 #ifdef _WIN32
 #ifdef _MSC_VER
@@ -36,10 +36,10 @@
 #endif
 
 /*!
-  \enum GGConsoleColor
+  \enum GGEMSConsoleColor
   \brief define a color for the console terminal
 */
-enum GGConsoleColor : unsigned char
+enum GGEMSConsoleColor : GGuchar
 {
   black = 0, blue, green, aqua, red, purple, yellow, white, gray
 };
@@ -67,39 +67,39 @@ namespace
   \class GGEMSStream
   \brief Generic class redefining standard output
 */
-class GGEMS_EXPORT GGStream
+class GGEMS_EXPORT GGEMSStream
 {
   public:
     /*!
-      \brief GGStream constructor
+      \brief GGEMSStream constructor
       \param stream - an output stream
       \param color - define a color on the screen
     */
-    GGStream(std::ostream& stream, GGConsoleColor const& color);
+    GGEMSStream(std::ostream& stream, GGEMSConsoleColor const& color);
 
     /*!
       \brief GGStream destructor
     */
-    ~GGStream(){};
+    ~GGEMSStream(){};
 
   public:
     /*!
-      \fn GGStream& operator()(std::string const& class_name, std::string const& method_name, GGint const& verbosity_level)
+      \fn GGEMSStream& operator()(std::string const& class_name, std::string const& method_name, GGint const& verbosity_level)
       \param class_name - Name of the class to print
       \param method_name - Name of the method to print
       \param verbosity_level - Verbosity level to display
       \brief setting private members to display them to standart output
     */
-    GGStream& operator()(std::string const& class_name,
+    GGEMSStream& operator()(std::string const& class_name,
       std::string const& method_name, GGint const& verbosity_level);
 
     /*!
-      \fn GGStream& operator<<(std::string const& message)
+      \fn GGEMSStream& operator<<(std::string const& message)
       \param message - message displayed to screen
       \brief overloading << to print a message in standard output
     */
     template<typename T>
-    GGStream& operator<<(T const& message);
+    GGEMSStream& operator<<(T const& message);
 
     /*!
       \fn void SetVerbosity(GGint const& verbosity_limit)
@@ -117,7 +117,7 @@ class GGEMS_EXPORT GGStream
 
   protected: // Avoid warnings using clang on Windows system
     std::ostream& stream_; /*!< Stream handling std::cout or std::endl */
-    GGConsoleColor color_index_; /*!< Color to print on screen */
+    GGEMSConsoleColor color_index_; /*!< Color to print on screen */
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -125,7 +125,7 @@ class GGEMS_EXPORT GGStream
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
-GGStream& GGStream::operator<<(T const& message)
+GGEMSStream& GGEMSStream::operator<<(T const& message)
 {
   #ifdef _WIN32
   // Get current color of terminal
@@ -173,14 +173,14 @@ GGStream& GGStream::operator<<(T const& message)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-extern GGEMS_EXPORT GGStream GGcout;
-extern GGEMS_EXPORT GGStream GGcerr;
-extern GGEMS_EXPORT GGStream GGwarn;
+extern GGEMS_EXPORT GGEMSStream GGcout;
+extern GGEMS_EXPORT GGEMSStream GGcerr;
+extern GGEMS_EXPORT GGEMSStream GGwarn;
 
 /*!
-  \fn void set_verbose(GGint verbosity)
+  \fn void set_ggems_verbose(GGint verbosity)
   \brief Set the verbosity of output stream
 */
-extern "C" GGEMS_EXPORT void set_verbose(GGint verbosity);
+extern "C" GGEMS_EXPORT void set_ggems_verbose(GGint verbosity);
 
 #endif // GUARD_GGEMS_TOOLS_GGPRINT_HH

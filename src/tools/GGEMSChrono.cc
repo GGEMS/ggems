@@ -1,5 +1,5 @@
 /*!
-  \file GGChrono.cc
+  \file GGEMSChrono.cc
 
   \brief Structure storing static method computing/displaying the time
 
@@ -12,8 +12,8 @@
 
 #include <iomanip>
 
-#include "GGEMS/tools/GGChrono.hh"
-#include "GGEMS/tools/GGPrint.hh"
+#include "GGEMS/tools/GGEMSChrono.hh"
+#include "GGEMS/tools/GGEMSPrint.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////

@@ -49,8 +49,8 @@ SET(MAXIMUM_PARTICLES "5000000"
 
 #-------------------------------------------------------------------------------
 # Defining a configuration file
-CONFIGURE_FILE("${PROJECT_SOURCE_DIR}/cmake-config/GGConfiguration.hh.in"
-  "${PROJECT_SOURCE_DIR}/include/GGEMS/global/GGConfiguration.hh"
+CONFIGURE_FILE("${PROJECT_SOURCE_DIR}/cmake-config/GGEMSConfiguration.hh.in"
+  "${PROJECT_SOURCE_DIR}/include/GGEMS/global/GGEMSConfiguration.hh"
   @ONLY)
 
 #-------------------------------------------------------------------------------
@@ -164,7 +164,7 @@ SET_TARGET_PROPERTIES(ggems PROPERTIES PREFIX "lib")
 #-------------------------------------------------------------------------------
 # DLL export for windows
 GENERATE_EXPORT_HEADER(ggems EXPORT_FILE_NAME 
-  ${PROJECT_SOURCE_DIR}/include/GGEMS/global/GGExport.hh)
+  ${PROJECT_SOURCE_DIR}/include/GGEMS/global/GGEMSExport.hh)
 
 #-------------------------------------------------------------------------------
 # Installing GGEMS library

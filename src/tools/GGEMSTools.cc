@@ -1,5 +1,5 @@
 /*!
-  \file GGTools.cc
+  \file GGEMSTools.cc
 
   \brief Namespaces for different useful fonctions
 
@@ -16,8 +16,8 @@
 #include <cmath>
 #include <iostream>
 
-#include "GGEMS/tools/GGTools.hh"
-#include "GGEMS/tools/GGPrint.hh"
+#include "GGEMS/tools/GGEMSTools.hh"
+#include "GGEMS/tools/GGEMSPrint.hh"
 
 #include "GGEMS/global/GGEMSManager.hh"
 
@@ -25,7 +25,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGStream::CheckInputStream(std::ifstream const& input_stream,
+void GGEMSStream::CheckInputStream(std::ifstream const& input_stream,
   std::string const& filename)
 {
   if (!input_stream) {
@@ -52,7 +52,7 @@ template GGbool GGMisc::IsEqual<float>(GGfloat const&, GGfloat const&);
 /// @endcond
 
 template <typename T>
-GGbool GGMisc::IsEqual(T const& a, T const& b)
+GGbool GGEMSMisc::IsEqual(T const& a, T const& b)
 {
   return std::nextafter(a, std::numeric_limits<T>::lowest()) <= b
     && std::nextafter(a, std::numeric_limits<T>::max()) >= b;
@@ -62,40 +62,11 @@ GGbool GGMisc::IsEqual(T const& a, T const& b)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGMisc::ThrowException(std::string const& class_name,
+void GGEMSMisc::ThrowException(std::string const& class_name,
   std::string const& method_name, std::string const& message)
 {
   std::ostringstream oss(std::ostringstream::out);
   oss << message;
   GGcerr(class_name, method_name, 0) << oss.str() << GGendl;
   throw std::runtime_error("");
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void GGEMSTools::PrintBanner()
-{
-  // Call the GGEMS singleton
-  GGEMSManager& ggems_manager = GGEMSManager::GetInstance();
-  // Get the GGEMS version
-  std::string const kGGEMSVersion = ggems_manager.GetVersion();
-
-  // Print the banner
-  GGcout("GGEMSTools", "PrintBanner", 0) << "      ____                  "
-    << GGendl;
-  GGcout("GGEMSTools", "PrintBanner", 0) << ".--. /\\__/\\ .--.            "
-    << GGendl;
-  GGcout("GGEMSTools", "PrintBanner", 0) << "`O  / /  \\ \\  .`     GGEMS "
-    << kGGEMSVersion << GGendl;
-  GGcout("GGEMSTools", "PrintBanner", 0) << "  `-| |  | |O`              "
-    << GGendl;
-  GGcout("GGEMSTools", "PrintBanner", 0) << "   -|`|..|`|-        "
-    << GGendl;
-  GGcout("GGEMSTools", "PrintBanner", 0) << " .` \\.\\__/./ `.    "
-    << GGendl;
-  GGcout("GGEMSTools", "PrintBanner", 0) << "'.-` \\/__\\/ `-.'   "
-    << GGendl;
-  GGcout("GGEMSTools", "PrintBanner", 0) << GGendl;
 }

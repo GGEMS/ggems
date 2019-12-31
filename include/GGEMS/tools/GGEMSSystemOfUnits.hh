@@ -1,5 +1,5 @@
-#ifndef GUARD_GGEMS_TOOLS_GGSYSTEMOFUNITS_HH
-#define GUARD_GGEMS_TOOLS_GGSYSTEMOFUNITS_HH
+#ifndef GUARD_GGEMS_TOOLS_GGEMSSYSTEMOFUNITS_HH
+#define GUARD_GGEMS_TOOLS_GGEMSSYSTEMOFUNITS_HH
 
 /*!
   \file GGSystemOfUnits.hh
@@ -13,7 +13,7 @@
   \date Tuesday October 1, 2019
 */
 
-#include "GGEMS/tools/GGTypes.hh"
+#include "GGEMS/tools/GGEMSTypes.hh"
 
 #ifdef PASCAL
 #undef PASCAL
@@ -24,11 +24,11 @@
 #endif
 
 /*!
-  \namespace GGUnits
+  \namespace GGEMSUnits
   \brief namespace storing all the usefull physical units
 */
 #ifndef OPENCL_COMPILER
-namespace GGUnits
+namespace GGEMSUnits
 {
 #endif
   // Pi definitions
@@ -267,4 +267,4 @@ namespace GGUnits
 }
 #endif
 
-#endif // End of GUARD_GGEMS_TOOLS_GGSYSTEMOFUNITS_HH
+#endif // End of GUARD_GGEMS_TOOLS_GGEMSSYSTEMOFUNITS_HH
