@@ -37,8 +37,8 @@
 #include "GGEMS/processes/particles.hh"
 #include "GGEMS/processes/primary_particles.hh"
 
-#include "GGEMS/randoms/pseudo_random_generator.hh"
-#include "GGEMS/randoms/random.hh"
+#include "GGEMS/randoms/GGEMSPseudoRandomGenerator.hh"
+#include "GGEMS/randoms/GGEMSRandomStack.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////

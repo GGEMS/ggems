@@ -1,10 +1,10 @@
-#ifndef GUARD_GGEMS_RANDOMS_KISS_ENGINE_HH
-#define GUARD_GGEMS_RANDOMS_KISS_ENGINE_HH
+#ifndef GUARD_GGEMS_RANDOMS_GGEMSKISSENGINE_HH
+#define GUARD_GGEMS_RANDOMS_GGEMSKISSENGINE_HH
 
 /*!
-  \file kiss_engine.hh
+  \file GGEMSKissEngine.hh
 
-  \brief Functions for pseudo random number generator using KISS (Keep it Simple Stupid) engine
+  \brief Functions for pseudo random number generator using KISS (Keep it Simple Stupid) engine. This functions can be used only by an OpenCL kernel
 
   \author Julien BERT <julien.bert@univ-brest.fr>
   \author Didier BENOIT <didier.benoit@inserm.fr>
@@ -15,8 +15,8 @@
 
 #ifdef OPENCL_COMPILER
 
-#include "GGEMS/randoms/random.hh"
-#include "GGEMS/tools/system_of_units.hh"
+#include "GGEMS/randoms/GGEMSRandomStack.hh"
+#include "GGEMS/tools/GGEMSSystemOfUnits.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -29,7 +29,7 @@
   \brief JKISS 32-bit (period ~2^121=2.6x10^36), passes all of the Dieharder
   and the BigCrunch tests in TestU01
 */
-inline float kiss_uniform(__global Random* p_random, int const index)
+inline float kiss_uniform(__global Random* p_random, GGint const index)
 {
   // y ^= (y<<5);
   // y ^= (y>>7);
@@ -44,7 +44,7 @@ inline float kiss_uniform(__global Random* p_random, int const index)
   p_random->p_prng_state_2_[index] ^= p_random->p_prng_state_2_[index] >> 7;
   p_random->p_prng_state_2_[index] ^= p_random->p_prng_state_2_[index] << 22;
 
-  int t = p_random->p_prng_state_3_[index] + p_random->p_prng_state_4_[index]
+  GGint t = p_random->p_prng_state_3_[index] + p_random->p_prng_state_4_[index]
     + p_random->p_prng_state_5_[index];
 
   p_random->p_prng_state_3_[index] = p_random->p_prng_state_4_[index];
@@ -70,13 +70,13 @@ inline float kiss_uniform(__global Random* p_random, int const index)
   \param mean - mean of the Poisson distribution
   \brief Poisson random from G4Poisson in Geant4
 */
-inline unsigned int kiss_poisson(__global Random* p_random, int const index,
-  float const mean)
+inline unsigned int kiss_poisson(__global Random* p_random, GGint const index,
+  GGfloat const mean)
 {
   // Initialization of parameters
-  unsigned int number = 0;
-  float position = 0.0, poisson_value = 0.0, poisson_sum = 0.0;
-  float value = 0.0, y = 0.0, t = 0.0;
+  GGuint number = 0;
+  GGfloat position = 0.0, poisson_value = 0.0, poisson_sum = 0.0;
+  GGfloat value = 0.0, y = 0.0, t = 0.0;
 
   if (mean <= 16.) {// border == 16, gaussian after 16
     // to avoid 1 due to f32 approximation
@@ -113,24 +113,24 @@ inline unsigned int kiss_poisson(__global Random* p_random, int const index,
 ////////////////////////////////////////////////////////////////////////////////
 
 /*!
-  \fn inline float kiss_gauss(__global Random* p_random, int const index, float const sigma)
+  \fn inline float kiss_gauss(__global Random* p_random, GGint const index, GGfloat const sigma)
   \param p_random - pointer on random buffer on OpenCL device
   \param index - index of thread
   \param sigma - standard deviation
   \brief Gaussian random
 */
-inline float kiss_gauss(__global Random* p_random, int const index,
-  float const sigma)
+inline float kiss_gauss(__global Random* p_random, GGint const index,
+  GGfloat const sigma)
 {
   // Box-Muller transformation
-  float const u1 = kiss_uniform(p_random, index);
-  float const u2 = kiss_uniform(p_random, index);
-  float const r1 = sqrt(-2.0f * log(u1));
-  float const r2 = 2.0f * PI * u2;
+  GGfloat const u1 = kiss_uniform(p_random, index);
+  GGfloat const u2 = kiss_uniform(p_random, index);
+  GGfloat const r1 = sqrt(-2.0f * log(u1));
+  GGfloat const r2 = 2.0f * PI * u2;
 
   return sigma * r1 * cos(r2);
 }
 
 #endif
 
-#endif // End of GUARD_GGEMS_RANDOMS_KISS_ENGINE_HH
+#endif // End of GUARD_GGEMS_RANDOMS_GGEMSKISSENGINE_HH

@@ -18,30 +18,40 @@ class GGEMSOpenCLManager(object):
     def __init__(self):
         ggems_lib.get_instance_ggems_opencl_manager.restype = ctypes.c_void_p
 
-        ggems_lib.print_platform_ggems_opencl_manager.argtypes = [ctypes.c_void_p]
+        ggems_lib.print_platform_ggems_opencl_manager.argtypes = [
+            ctypes.c_void_p]
         ggems_lib.print_platform_ggems_opencl_manager.restype = ctypes.c_void_p
 
-        ggems_lib.print_device_ggems_opencl_manager.argtypes = [ctypes.c_void_p]
+        ggems_lib.print_device_ggems_opencl_manager.argtypes = [
+            ctypes.c_void_p]
         ggems_lib.print_device_ggems_opencl_manager.restype = ctypes.c_void_p
 
-        ggems_lib.print_build_options_ggems_opencl_manager.argtypes = [ctypes.c_void_p]
-        ggems_lib.print_build_options_ggems_opencl_manager.restype = ctypes.c_void_p
+        ggems_lib.print_build_options_ggems_opencl_manager.argtypes = [
+            ctypes.c_void_p]
+        ggems_lib.print_build_options_ggems_opencl_manager.restype =
+        ctypes.c_void_p
 
-        ggems_lib.print_context_ggems_opencl_manager.argtypes = [ctypes.c_void_p]
+        ggems_lib.print_context_ggems_opencl_manager.argtypes = [
+            ctypes.c_void_p]
         ggems_lib.print_context_ggems_opencl_manager.restype = ctypes.c_void_p
 
         ggems_lib.print_RAM_ggems_opencl_manager.argtypes = [ctypes.c_void_p]
         ggems_lib.print_RAM_ggems_opencl_manager.restype = ctypes.c_void_p
 
-        ggems_lib.print_command_queue_ggems_opencl_manager.argtypes = [ctypes.c_void_p]
-        ggems_lib.print_command_queue_ggems_opencl_manager.restype = ctypes.c_void_p
+        ggems_lib.print_command_queue_ggems_opencl_manager.argtypes = [
+            ctypes.c_void_p]
+        ggems_lib.print_command_queue_ggems_opencl_manager.restype =
+        ctypes.c_void_p
 
         ggems_lib.set_context_index_ggems_opencl_manager.argtypes = [
             ctypes.c_void_p, ctypes.c_uint32]
-        ggems_lib.set_context_index_ggems_opencl_manager.restype = ctypes.c_void_p
+        ggems_lib.set_context_index_ggems_opencl_manager.restype =
+        ctypes.c_void_p
 
-        ggems_lib.print_activated_context_ggems_opencl_manager.argtypes = [ctypes.c_void_p]
-        ggems_lib.print_activated_context_ggems_opencl_manager.restype = ctypes.c_void_p
+        ggems_lib.print_activated_context_ggems_opencl_manager.argtypes = [
+            ctypes.c_void_p]
+        ggems_lib.print_activated_context_ggems_opencl_manager.restype =
+        ctypes.c_void_p
 
         ggems_lib.clean_ggems_opencl_manager.argtypes = [ctypes.c_void_p]
         ggems_lib.clean_ggems_opencl_manager.restype = ctypes.c_void_p
