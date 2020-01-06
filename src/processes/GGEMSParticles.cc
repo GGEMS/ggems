@@ -1,5 +1,5 @@
 /*!
-  \file particles.cc
+  \file GGEMSParticles.cc
 
   \brief Class managing the particles in GGEMS
 
@@ -10,45 +10,46 @@
   \date Thrusday October 3, 2019
 */
 
-#include "GGEMS/processes/particles.hh"
-#include "GGEMS/processes/primary_particles.hh"
+#include "GGEMS/processes/GGEMSParticles.hh"
+#include "GGEMS/processes/GGEMSPrimaryParticlesStack.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-Particle::Particle(void)
+GGEMSParticles::GGEMSParticles(void)
 : p_primary_particles_(nullptr),
-  opencl_manager_(OpenCLManager::GetInstance())
+  opencl_manager_(GGEMSOpenCLManager::GetInstance())
 {
-  GGEMScout("Particle", "Particle", 3)
-    << "Allocation of Particle..." << GGEMSendl;
+  GGcout("GGEMSParticles", "GGEMSParticles", 3)
+    << "Allocation of GGEMSParticles..." << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-Particle::~Particle(void)
+GGEMSParticles::~GGEMSParticles(void)
 {
   // Freeing the device buffer
   if (p_primary_particles_) {
-    opencl_manager_.Deallocate(p_primary_particles_, sizeof(PrimaryParticles));
+    opencl_manager_.Deallocate(p_primary_particles_,
+      sizeof(GGEMSPrimaryParticles));
     p_primary_particles_ = nullptr;
   }
 
-  GGEMScout("Particle", "~Particle", 3)
-    << "Deallocation of Particle..." << GGEMSendl;
+  GGcout("GGEMSParticles", "~GGEMSParticles", 3)
+    << "Deallocation of GGEMSParticles..." << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void Particle::Initialize(void)
+void GGEMSParticles::Initialize(void)
 {
-  GGEMScout("Particle", "Initialize", 1)
-    << "Initialization of Particle..." << GGEMSendl;
+  GGcout("GGEMSParticles", "Initialize", 1)
+    << "Initialization of GGEMSParticles..." << GGendl;
 
   // Allocation of the PrimaryParticle structure
   AllocatePrimaryParticles();
@@ -58,12 +59,12 @@ void Particle::Initialize(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void Particle::AllocatePrimaryParticles(void)
+void GGEMSParticles::AllocatePrimaryParticles(void)
 {
-  GGEMScout("Particle", "AllocatePrimaryParticles", 1)
-    << "Allocation of primary particles..." << GGEMSendl;
+  GGcout("GGEMSParticles", "AllocatePrimaryParticles", 1)
+    << "Allocation of primary particles..." << GGendl;
 
   // Allocation of memory on OpenCL device
   p_primary_particles_ = opencl_manager_.Allocate(nullptr,
-    sizeof(PrimaryParticles), CL_MEM_READ_WRITE);
+    sizeof(GGEMSPrimaryParticles), CL_MEM_READ_WRITE);
 }

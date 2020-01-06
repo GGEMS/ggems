@@ -1,8 +1,8 @@
-#ifndef GUARD_GGEMS_MATHS_GEOMETRY_TRANSFORMATION_HH
-#define GUARD_GGEMS_MATHS_GEOMETRY_TRANSFORMATION_HH
+#ifndef GUARD_GGEMS_MATHS_GGEMSGEOMETRYTRANSFORMATION_HH
+#define GUARD_GGEMS_MATHS_GGEMSGEOMETRYTRANSFORMATION_HH
 
 /*!
-  \file geometry_transformation.hh
+  \file GGEMSGeometryTransformation.hh
 
   \brief Class managing the geometry transformation
 
@@ -13,109 +13,110 @@
   \date Wednesday November 13, 2019
 */
 
-#include "GGEMS/opencl/types.hh"
-#include "GGEMS/maths/matrix_types.hh"
-#include "GGEMS/global/opencl_manager.hh"
+#include "GGEMS/tools/GGEMSTypes.hh"
+#include "GGEMS/maths/GGEMSMatrixTypes.hh"
+#include "GGEMS/global/GGEMSOpenCLManager.hh"
 
 /*!
-  \class GeometryTransformation
+  \class GGEMSGeometryTransformation
   \brief This class handles everything about geometry transformation
 */
-class GeometryTransformation
+class GGEMSGeometryTransformation
 {
   public:
     /*!
-      \brief GeometryTransformation constructor
+      \brief GGEMSGeometryTransformation constructor
     */
-    GeometryTransformation(void);
+    GGEMSGeometryTransformation(void);
 
     /*!
-      \brief GeometryTransformation destructor
+      \brief GGEMSGeometryTransformation destructor
     */
-    ~GeometryTransformation(void);
+    ~GGEMSGeometryTransformation(void);
 
   public:
     /*!
-      \fn GeometryTransformation(GeometryTransformation const& geometry_transformation) = delete
+      \fn GGEMSGeometryTransformation(GGEMSGeometryTransformation const& geometry_transformation) = delete
       \param geometry_transformation - reference on the geometry transformation
       \brief Avoid copy of the class by reference
     */
-    GeometryTransformation(
-      GeometryTransformation const& transform_calculator) = delete;
+    GGEMSGeometryTransformation(
+      GGEMSGeometryTransformation const& transform_calculator) = delete;
 
     /*!
-      \fn GeometryTransformation& operator=(GeometryTransformation const& geometry_transformation) = delete
+      \fn GGEMSGeometryTransformation& operator=(GGEMSGeometryTransformation const& geometry_transformation) = delete
       \param geometry_transformation - reference on the geometry transformation
       \brief Avoid assignement of the class by reference
     */
-    GeometryTransformation& operator=(
-      GeometryTransformation const& geometry_transformation) = delete;
+    GGEMSGeometryTransformation& operator=(
+      GGEMSGeometryTransformation const& geometry_transformation) = delete;
 
     /*!
-      \fn TransfGeometryTransformationormCalculator(GeometryTransformation const&& geometry_transformation) = delete
+      \fn TransfGeometryTransformationormCalculator(GGEMSGeometryTransformation const&& geometry_transformation) = delete
       \param geometry_transformation - rvalue reference on the geometry transformation
       \brief Avoid copy of the class by rvalue reference
     */
-    GeometryTransformation(
-      GeometryTransformation const&& geometry_transformation) = delete;
+    GGEMSGeometryTransformation(
+      GGEMSGeometryTransformation const&& geometry_transformation) = delete;
 
     /*!
-      \fn GeometryTransformation& operator=(GeometryTransformation const&& geometry_transformation) = delete
+      \fn GGEMSGeometryTransformation& operator=(GGEMSGeometryTransformation const&& geometry_transformation) = delete
       \param geometry_transformation - rvalue reference on the geometry transformation
       \brief Avoid copy of the class by rvalue reference
     */
-    GeometryTransformation& operator=(
-      GeometryTransformation const&& geometry_transformation) = delete;
+    GGEMSGeometryTransformation& operator=(
+      GGEMSGeometryTransformation const&& geometry_transformation) = delete;
 
   public:
     /*!
-      \fn void SetTranslation(float const& tx, float const& ty, float const& tz)
+      \fn void SetTranslation(GGfloat const& tx, GGfloat const& ty, GGfloat const& tz)
       \param tx - Translation in X
       \param ty - Translation in Y
       \param tz - Translation in Z
       \brief Set the translation in X, Y and Z
     */
-    void SetTranslation(float const& tx, float const& ty, float const& tz);
+    void SetTranslation(GGfloat const& tx, GGfloat const& ty,
+      GGfloat const& tz);
 
     /*!
-      \fn void SetTranslation(cl_float3 const& txyz)
+      \fn void SetTranslation(GGfloat3 const& txyz)
       \param txyz - Translation in X, Y and Z
       \brief Set the translation in X, Y and Z
     */
-    void SetTranslation(cl_float3 const& txyz);
+    void SetTranslation(GGfloat3 const& txyz);
 
     /*!
       \fn inline float4x4 GetMatrixTranslation(void) const
       \return the translation matrix
       \brief Return the translation matrix
     */
-    inline float4x4 GetMatrixTranslation(void) const
+    inline GGfloat44 GetMatrixTranslation(void) const
     {
       return matrix_translation_;
     };
 
     /*!
-      \fn void SetRotation(float const& rx, float const& ry, float const& rz)
+      \fn void SetRotation(GGfloat const& rx, GGfloat const& ry, GGfloat const& rz)
       \param rx - Rotation in X
       \param ry - Rotation in Y
       \param rz - Rotation in Z
       \brief Set the Rotation in X, Y and Z around global axis
     */
-    void SetRotation(float const& rx, float const& ry, float const& rz);
+    void SetRotation(GGfloat const& rx, GGfloat const& ry, GGfloat const& rz);
 
     /*!
-      \fn void SetRotation(cl_float3 const& rxyz)
+      \fn void SetRotation(GGfloat3 const& rxyz)
       \param rxyz - Rotation around X, Y and Z global axis
       \biref Set the rotation around global axis
     */
-    void SetRotation(f323cl_t const& rxyz);
+    void SetRotation(GGfloat3 const& rxyz);
 
     /*!
-      \fn inline Matrix::float4x4 GetMatrixRotation(void) const
+      \fn inline GGfloat44 GetMatrixRotation(void) const
       \return the translation matrix
       \brief Return the translation matrix
     */
-    inline float4x4 GetMatrixRotation(void) const
+    inline GGfloat44 GetMatrixRotation(void) const
     {
       return matrix_rotation_;
     };
@@ -125,10 +126,10 @@ class GeometryTransformation
       \param axis - Matrix (3x3) that contains the mapping of the coordinates (ex. x becomes y and vice-versa). Values are 0, 1 or -1.
       \brief Set the transformation of the frame, usefull for mirroring or convert 3D to 2D
     */
-    void SetAxisTransformation(float3x3 const& axis);
+    void SetAxisTransformation(GGfloat33 const& axis);
 
     /*!
-      \fn void SetAxisTransformation(float const& m00, float const& m01, float const& m02, float const& m10, float const& m11, float const& m12, float const& m20, float const& m21, float const& m22)
+      \fn void SetAxisTransformation(GGfloat const& m00, GGfloat const& m01, GGfloat const& m02, GGfloat const& m10, GGfloat const& m11, GGfloat const& m12, GGfloat const& m20, GGfloat const& m21, GGfloat const& m22)
       \param m00 - Element 0,0 in the matrix 3x3 for local axis
       \param m01 - Element 0,1 in the matrix 3x3 for local axis
       \param m02 - Element 0,2 in the matrix 3x3 for local axis
@@ -141,40 +142,40 @@ class GeometryTransformation
       \brief Set the transformation of the frame, usefull for mirroring or convert 3D to 2D
     */
     void SetAxisTransformation(
-      float const& m00, float const& m01, float const& m02,
-      float const& m10, float const& m11, float const& m12,
-      float const& m20, float const& m21, float const& m22);
+      GGfloat const& m00, GGfloat const& m01, GGfloat const& m02,
+      GGfloat const& m10, GGfloat const& m11, GGfloat const& m12,
+      GGfloat const& m20, GGfloat const& m21, GGfloat const& m22);
 
     /*!
-      \fn inline float4x4 GetMatrixOrthographicProjection(void) const
+      \fn inline GGfloat44 GetMatrixOrthographicProjection(void) const
       \return the matrix of orthographic projection
       \brief return the matrix of orthographic projection
     */
-    inline float4x4 GetMatrixOrthographicProjection(void) const
+    inline GGfloat44 GetMatrixOrthographicProjection(void) const
     {
       return matrix_orthographic_projection_;
     };
 
     /*!
-      \fn inline f323cl_t GetPosition(void) const
+      \fn inline GGfloat3 GetPosition(void) const
       \return The position of source/detector...
       \brief Return the current position
     */
-    inline f323cl_t GetPosition(void) const {return position_;}
+    inline GGfloat3 GetPosition(void) const {return position_;}
 
     /*!
-      \fn inline f323cl_t GetRotation(void) const
+      \fn inline GGfloat3 GetRotation(void) const
       \return The rotation of source/detector...
       \brief Return the current rotation
     */
-    inline f323cl_t GetRotation(void) const {return rotation_;}
+    inline GGfloat3 GetRotation(void) const {return rotation_;}
 
     /*!
-      \fn inline float3x3 GetLocalAxis(void) const
+      \fn inline GGfloat33 GetLocalAxis(void) const
       \return The local axis matrix
       \brief return the local axis matrix
     */
-    inline float3x3 GetLocalAxis(void) const {return local_axis_;}
+    inline GGfloat33 GetLocalAxis(void) const {return local_axis_;}
 
     /*!
       \fn void UpdateTransformationMatrix(void)
@@ -197,16 +198,16 @@ class GeometryTransformation
     }
 
   private:
-    OpenCLManager& opencl_manager_; /*!< Reference to opencl manager singleton */
+    GGEMSOpenCLManager& opencl_manager_; /*!< Reference to opencl manager singleton */
 
   private:
-    bool is_need_updated_; /*!< Check if the transformation matrix need to be updated */
-    f323cl_t position_; /*!< Position of the source/detector... */
-    f323cl_t rotation_; /*! Rotation of the source/detector... */
-    float3x3 local_axis_; /*!< Matrix of local axis */
-    float4x4 matrix_translation_; /*!< Matrix of translation */
-    float4x4 matrix_rotation_; /*!< Matrix of rotation */
-    float4x4 matrix_orthographic_projection_; /*!< Matrix of orthographic projection */
+    GGbool is_need_updated_; /*!< Check if the transformation matrix need to be updated */
+    GGfloat3 position_; /*!< Position of the source/detector... */
+    GGfloat3 rotation_; /*! Rotation of the source/detector... */
+    GGfloat33 local_axis_; /*!< Matrix of local axis */
+    GGfloat44 matrix_translation_; /*!< Matrix of translation */
+    GGfloat44 matrix_rotation_; /*!< Matrix of rotation */
+    GGfloat44 matrix_orthographic_projection_; /*!< Matrix of orthographic projection */
     cl::Buffer* p_matrix_transformation_; /*!< OpenCL buffer storing the matrix transformation */
 };
 

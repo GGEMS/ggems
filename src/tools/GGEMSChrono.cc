@@ -19,12 +19,12 @@
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGChrono::DisplayTime(DurationNano const& duration,
+void GGEMSChrono::DisplayTime(DurationNano const& duration,
   std::string const& displayed_text)
 {
   #if __MINGW64__ || __clang__ || (_MSC_VER > 1800) || __GNUC__
   // Display the iteration time
-  GGEMScout("Chrono", "DisplayTime", 0) << "Elapsed time (" << displayed_text
+  GGcout("GGEMSChrono", "DisplayTime", 0) << "Elapsed time (" << displayed_text
     << "): " << std::setfill( '0' ) << std::setw(2)
     << std::chrono::duration_cast<Hs>((duration)).count()
     << " hours " << std::setw(2)
@@ -34,9 +34,9 @@ void GGChrono::DisplayTime(DurationNano const& duration,
         (duration) % Mins(1) ).count()
     << " secs " << std::setw(3)
     << std::chrono::duration_cast<Ms>((duration) % Secs(1)).count()
-    << " ms" << GGEMSendl;
+    << " ms" << GGendl;
   #else
-  GGEMScout("Chrono", "DisplayTime", 0) << "Elapsed time (" << displayedText
+  GGcout("Chrono", "DisplayTime", 0) << "Elapsed time (" << displayedText
     << "): " << duration.count() / 1000000000.0f
     << "sec";
   #endif

@@ -1,5 +1,5 @@
 /*!
-  \file geometry_transformation.cc
+  \file GGEMSGeometryTransformation.cc
 
   \brief Class managing the geometry transformation
 
@@ -13,57 +13,57 @@
 #include <cmath>
 #include <limits>
 
-#include "GGEMS/maths/geometry_transformation.hh"
-#include "GGEMS/maths/matrix_functions.hh"
-#include "GGEMS/tools/print.hh"
+#include "GGEMS/maths/GGEMSGeometryTransformation.hh"
+#include "GGEMS/maths/GGEMSMatrixOperations.hh"
+#include "GGEMS/tools/GGEMSPrint.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GeometryTransformation::GeometryTransformation()
-: opencl_manager_(OpenCLManager::GetInstance()),
+GGEMSGeometryTransformation::GGEMSGeometryTransformation()
+: opencl_manager_(GGEMSOpenCLManager::GetInstance()),
   is_need_updated_(false)
 {
-  GGEMScout("GeometryTransformation", "GeometryTransformation", 3)
-    << "Allocation of GeometryTransformation..." << GGEMSendl;
+  GGcout("GGEMSGeometryTransformation", "GGEMSGeometryTransformation", 3)
+    << "Allocation of GGEMSGeometryTransformation..." << GGendl;
 
-  // Initialize the position with min. float
-  position_ = MakeFloat3x1(
-    std::numeric_limits<float>::min(),
-    std::numeric_limits<float>::min(),
-    std::numeric_limits<float>::min()
+  // Initialize the position with min. GGfloat
+  position_ = MakeFloat3(
+    std::numeric_limits<GGfloat>::min(),
+    std::numeric_limits<GGfloat>::min(),
+    std::numeric_limits<GGfloat>::min()
   );
 
-  // Initialize the rotation with min. float
-  rotation_ = MakeFloat3x1(
-    std::numeric_limits<float>::min(),
-    std::numeric_limits<float>::min(),
-    std::numeric_limits<float>::min()
+  // Initialize the rotation with min. GGfloat
+  rotation_ = MakeFloat3(
+    std::numeric_limits<GGfloat>::min(),
+    std::numeric_limits<GGfloat>::min(),
+    std::numeric_limits<GGfloat>::min()
   );
 
   // Initialize the local axis
-  local_axis_ = MakeFloat3x3(
+  local_axis_ = MakeFloat33(
     1.0f, 0.0f, 0.0f,
     0.0f, 1.0f, 0.0f,
     0.0f, 0.0f, 1.0f);
 
   // Initializing translation matrix
-  matrix_translation_ = MakeFloat4x4(
+  matrix_translation_ = MakeFloat44(
     1.0f, 0.0f, 0.0f, 0.0f,
     0.0f, 1.0f, 0.0f, 0.0f,
     0.0f, 0.0f, 1.0f, 0.0f,
     0.0f, 0.0f, 0.0f, 1.0f);
 
   // Initializing rotation matrix
-  matrix_rotation_ = MakeFloat4x4(
+  matrix_rotation_ = MakeFloat44(
     1.0f, 0.0f, 0.0f, 0.0f,
     0.0f, 1.0f, 0.0f, 0.0f,
     0.0f, 0.0f, 1.0f, 0.0f,
     0.0f, 0.0f, 0.0f, 1.0f);
 
   // Initializing orthographic projection matrix
-  matrix_orthographic_projection_ = MakeFloat4x4(
+  matrix_orthographic_projection_ = MakeFloat44(
     1.0f, 0.0f, 0.0f, 0.0f,
     0.0f, 1.0f, 0.0f, 0.0f,
     0.0f, 0.0f, 1.0f, 0.0f,
@@ -71,37 +71,37 @@ GeometryTransformation::GeometryTransformation()
 
   // Allocation of matrix transformation on OpenCL device
   p_matrix_transformation_ = opencl_manager_.Allocate(nullptr,
-    sizeof(float4x4), CL_MEM_READ_WRITE);
+    sizeof(GGfloat44), CL_MEM_READ_WRITE);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GeometryTransformation::~GeometryTransformation()
+GGEMSGeometryTransformation::~GGEMSGeometryTransformation()
 {
   // Freeing memory
   if (p_matrix_transformation_) {
-    opencl_manager_.Deallocate(p_matrix_transformation_, sizeof(float4x4));
+    opencl_manager_.Deallocate(p_matrix_transformation_, sizeof(GGfloat44));
     p_matrix_transformation_ = nullptr;
   }
 
-  GGEMScout("GeometryTransformation", "~GeometryTransformation", 3)
-    << "Deallocation of GeometryTransformation..." << GGEMSendl;
+  GGcout("GGEMSGeometryTransformation", "~GGEMSGeometryTransformation", 3)
+    << "Deallocation of GGEMSGeometryTransformation..." << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GeometryTransformation::SetTranslation(float const& tx, float const& ty,
-  float const& tz)
+void GGEMSGeometryTransformation::SetTranslation(GGfloat const& tx,
+  GGfloat const& ty, GGfloat const& tz)
 {
   // Fill the position buffer first
-  position_ = MakeFloat3x1(tx, ty, tz);
+  position_ = MakeFloat3(tx, ty, tz);
 
   // Filling the translation matrix
-  matrix_translation_ = MakeFloat4x4(
+  matrix_translation_ = MakeFloat44(
     1.0f, 0.0f, 0.0f, position_.s[0],
     0.0f, 1.0f, 0.0f, position_.s[1],
     0.0f, 0.0f, 1.0f, position_.s[2],
@@ -115,7 +115,7 @@ void GeometryTransformation::SetTranslation(float const& tx, float const& ty,
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GeometryTransformation::SetTranslation(f323cl_t const& txyz)
+void GGEMSGeometryTransformation::SetTranslation(GGfloat3 const& txyz)
 {
   SetTranslation(txyz.s[0], txyz.s[1], txyz.s[2]);
 }
@@ -124,23 +124,23 @@ void GeometryTransformation::SetTranslation(f323cl_t const& txyz)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GeometryTransformation::SetRotation(float const& rx, float const& ry,
-  float const& rz)
+void GGEMSGeometryTransformation::SetRotation(GGfloat const& rx,
+  GGfloat const& ry, GGfloat const& rz)
 {
   // Filling the rotation buffer
-  rotation_ = MakeFloat3x1(rx, ry, rz);
+  rotation_ = MakeFloat3(rx, ry, rz);
 
   // Definition of cosinus and sinus
-  double cosinus = 0.0, sinus = 0.0;
+  GGdouble cosinus = 0.0, sinus = 0.0;
 
   // X axis
   cosinus = cos(rx);
   sinus = sin(rx);
 
-  float4x4 const kRotationX = MakeFloat4x4(
+  GGfloat44 const kRotationX = MakeFloat44(
     1.0f, 0.0f, 0.0f, 0.0f,
-    0.0f, static_cast<float>(cosinus), -static_cast<float>(sinus), 0.0f,
-    0.0f, static_cast<float>(sinus), static_cast<float>(cosinus), 0.0f,
+    0.0f, static_cast<GGfloat>(cosinus), -static_cast<GGfloat>(sinus), 0.0f,
+    0.0f, static_cast<GGfloat>(sinus), static_cast<GGfloat>(cosinus), 0.0f,
     0.0f, 0.0f, 0.0f, 1.0f
   );
 
@@ -148,10 +148,10 @@ void GeometryTransformation::SetRotation(float const& rx, float const& ry,
   cosinus = cos(ry);
   sinus = sin(ry);
 
-  float4x4 const kRotationY = MakeFloat4x4(
-    static_cast<float>(cosinus), 0.0f, static_cast<float>(sinus), 0.0f,
+  GGfloat44 const kRotationY = MakeFloat44(
+    static_cast<GGfloat>(cosinus), 0.0f, static_cast<GGfloat>(sinus), 0.0f,
     0.0f, 1.0f, 0.0f, 0.0f,
-    -static_cast<float>(sinus), 0.0f, static_cast<float>(cosinus), 0.0f,
+    -static_cast<GGfloat>(sinus), 0.0f, static_cast<GGfloat>(cosinus), 0.0f,
     0.0f, 0.0f, 0.0f, 1.0f
   );
 
@@ -159,15 +159,15 @@ void GeometryTransformation::SetRotation(float const& rx, float const& ry,
   cosinus = cos(rz);
   sinus = sin(rz);
 
-  float4x4 const kRotationZ = MakeFloat4x4(
-    static_cast<float>(cosinus), -static_cast<float>(sinus), 0.0f, 0.0f,
-    static_cast<float>(sinus), static_cast<float>(cosinus), 0.0f, 0.0f,
+  GGfloat44 const kRotationZ = MakeFloat44(
+    static_cast<GGfloat>(cosinus), -static_cast<GGfloat>(sinus), 0.0f, 0.0f,
+    static_cast<GGfloat>(sinus), static_cast<GGfloat>(cosinus), 0.0f, 0.0f,
     0.0f, 0.0f, 1.0f, 0.0f,
     0.0f, 0.0f, 0.0f, 1.0f);
 
   // Get the total rotation matrix
-  matrix_rotation_ = MatrixMult4x4_4x4(kRotationY, kRotationX);
-  matrix_rotation_ = MatrixMult4x4_4x4(kRotationZ, matrix_rotation_);
+  matrix_rotation_ = GGfloat44MultGGfloat44(kRotationY, kRotationX);
+  matrix_rotation_ = GGfloat44MultGGfloat44(kRotationZ, matrix_rotation_);
 
   // Need to be updated if the Transformation matrix is called
   is_need_updated_ = true;
@@ -177,7 +177,7 @@ void GeometryTransformation::SetRotation(float const& rx, float const& ry,
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GeometryTransformation::SetRotation(cl_float3 const& rxyz)
+void GGEMSGeometryTransformation::SetRotation(GGfloat3 const& rxyz)
 {
   SetRotation(rxyz.s[0], rxyz.s[1], rxyz.s[2]);
 }
@@ -186,12 +186,12 @@ void GeometryTransformation::SetRotation(cl_float3 const& rxyz)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GeometryTransformation::SetAxisTransformation(
-  float const& m00, float const& m01, float const& m02,
-  float const& m10, float const& m11, float const& m12,
-  float const& m20, float const& m21, float const& m22)
+void GGEMSGeometryTransformation::SetAxisTransformation(
+  GGfloat const& m00, GGfloat const& m01, GGfloat const& m02,
+  GGfloat const& m10, GGfloat const& m11, GGfloat const& m12,
+  GGfloat const& m20, GGfloat const& m21, GGfloat const& m22)
 {
-  float3x3 const kTmp = MakeFloat3x3(
+  GGfloat33 const kTmp = MakeFloat33(
     m00, m01, m02,
     m10, m11, m12,
     m20, m21, m22);
@@ -203,15 +203,15 @@ void GeometryTransformation::SetAxisTransformation(
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GeometryTransformation::SetAxisTransformation(float3x3 const& axis)
+void GGEMSGeometryTransformation::SetAxisTransformation(GGfloat33 const& axis)
 {
   // Filling the local axis buffer first
-  local_axis_ = MakeFloat3x3(
+  local_axis_ = MakeFloat33(
     axis.m00_, axis.m01_, axis.m02_,
     axis.m10_, axis.m11_, axis.m12_,
     axis.m20_, axis.m21_, axis.m22_);
 
-  matrix_orthographic_projection_ = MakeFloat4x4(
+  matrix_orthographic_projection_ = MakeFloat44(
     axis.m00_, axis.m01_, axis.m02_, 0.0f,
     axis.m10_, axis.m11_, axis.m12_, 0.0f,
     axis.m20_, axis.m21_, axis.m22_, 0.0f,
@@ -225,23 +225,20 @@ void GeometryTransformation::SetAxisTransformation(float3x3 const& axis)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GeometryTransformation::UpdateTransformationMatrix(void)
+void GGEMSGeometryTransformation::UpdateTransformationMatrix(void)
 {
-  GGEMScout("GeometryTransformation", "UpdateTransformationMatrix", 3)
-    << "Updating the transformation matrix..." << GGEMSendl;
-
-  /*matrix_transformation_ = MatrixMult4x4(matrix_rotation_,
-      MatrixMult4x4(matrix_translation_,
-      matrix_orthographic_projection_));*/
+  GGcout("GGEMSGeometryTransformation", "UpdateTransformationMatrix", 3)
+    << "Updating the transformation matrix..." << GGendl;
 
   // Update the transformation matrix on OpenCL device
   // Get the pointer on device
-  float4x4* p_matrix = opencl_manager_.GetDeviceBuffer<float4x4>(
-    p_matrix_transformation_, sizeof(float4x4));
+  GGfloat44* p_matrix = opencl_manager_.GetDeviceBuffer<GGfloat44>(
+    p_matrix_transformation_, sizeof(GGfloat44));
 
   // Compute a temporary matrix then copy it on OpenCL device
-  float4x4 matrix_tmp = MatrixMult4x4_4x4(matrix_rotation_,
-    MatrixMult4x4_4x4(matrix_translation_, matrix_orthographic_projection_));
+  GGfloat44 matrix_tmp = GGfloat44MultGGfloat44(matrix_rotation_,
+    GGfloat44MultGGfloat44(matrix_translation_,
+    matrix_orthographic_projection_));
 
   // Copy step
   p_matrix->m00_ = matrix_tmp.m00_;

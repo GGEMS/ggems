@@ -21,12 +21,12 @@
   \brief Structure storing informations about random
 */
 #ifdef OPENCL_COMPILER
-typedef struct __attribute__((aligned (1))) Random_t
+typedef struct __attribute__((aligned (1))) GGEMSRandom_t
 #else
 #ifdef _MSC_VER
 #pragma pack(push, 1)
 #endif
-typedef struct PACKED Random_t
+typedef struct PACKED GGEMSRandom_t
 #endif
 {
   GGuint p_prng_state_1_[MAXIMUM_PARTICLES]; /*!< State 1 of the prng */
@@ -34,7 +34,7 @@ typedef struct PACKED Random_t
   GGuint p_prng_state_3_[MAXIMUM_PARTICLES]; /*!< State 3 of the prng */
   GGuint p_prng_state_4_[MAXIMUM_PARTICLES]; /*!< State 4 of the prng */
   GGuint p_prng_state_5_[MAXIMUM_PARTICLES]; /*!< State 5 of the prng */
-} Random;
+} GGEMSRandom;
 #ifndef OPENCL_COMPILER
 #ifdef _MSC_VER
 #pragma pack(pop)

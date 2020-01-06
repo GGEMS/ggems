@@ -1,8 +1,8 @@
-#ifndef GUARD_GGEMS_MATHS_MATH_FUNCTIONS_HH
-#define GUARD_GGEMS_MATHS_MATH_FUNCTIONS_HH
+#ifndef GUARD_GGEMS_MATHS_GGEMSMATHALGORITHMS_HH
+#define GUARD_GGEMS_MATHS_GGEMSMATHALGORITHMS_HH
 
 /*!
-  \file math_functions.hh
+  \file GGEMSMathAlgorithms.hh
 
   \brief Definitions of miscellaneous mathematical functions
 
@@ -13,10 +13,10 @@
   \date Thrusday December 18, 2019
 */
 
-#include "GGEMS/opencl/types.hh"
+#include "GGEMS/tools/GGEMSTypes.hh"
 
 /*!
-  \fn inline uintcl_t binary_search_left(f64cl_t const key, f64cl_t const* p_array, uintcl_t const size, uintcl_t const offset = 0, uintcl_t min = 0)
+  \fn inline GGuint BinarySearchLeft(GGfloat const key, GGfloat const* p_array, GGuint const size, GGuint const offset = 0, GGuint min = 0)
   \param key - value in p_array to find
   \param p_array - p_array where is the key value
   \param size - size of p_array, number of elements
@@ -26,16 +26,16 @@
   \brief Find the index of the key value in the p_array buffer
 */
 #ifdef OPENCL_COMPILER
-inline uintcl_t binary_search_left(f64cl_t const key,
-  __global f64cl_t const* p_array, uintcl_t const size, uintcl_t const offset,
-  uintcl_t min)
+inline GGuint BinarySearchLeft(GGfloat const key,
+  __global GGfloat const* p_array, GGuint const size, GGuint const offset,
+  GGuint min)
 #else
-inline uintcl_t binary_search_left(f64cl_t const key, f64cl_t const* p_array,
-  uintcl_t const size, uintcl_t const offset, uintcl_t min)
+inline GGuint BinarySearchLeft(GGfloat const key, GGfloat const* p_array,
+  GGuint const size, GGuint const offset, GGuint min)
 #endif
 {
-  uintcl_t max = size - 1, mid = 0; // Max element, and median element
-  uintcl_t const kMinCheck = min; // Min element
+  GGuint max = size - 1, mid = 0; // Max element, and median element
+  GGuint const kMinCheck = min; // Min element
 
   while (min < max) {
     // Computing median index
@@ -59,7 +59,7 @@ inline uintcl_t binary_search_left(f64cl_t const key, f64cl_t const* p_array,
 }
 
 /*!
-  \fn inline f64cl_t linear_interpolation(f64cl_t xa, f64cl_t ya, f64cl_t xb, f64cl_t yb, f64cl_t x)
+  \fn inline GGfloat LinearInterpolation(GGfloat xa, GGfloat ya, GGfloat xb, GGfloat yb, GGfloat x)
   \param xa - Coordinate x of point A
   \param ya - Coordinate y of point A
   \param xb - Coordinate x of point B
@@ -68,8 +68,8 @@ inline uintcl_t binary_search_left(f64cl_t const key, f64cl_t const* p_array,
   \return the interpolated value
   \brief interpolate the x value between point A and B
 */
-inline f64cl_t linear_interpolation(f64cl_t const xa, f64cl_t const ya,
-  f64cl_t const xb, f64cl_t const yb, f64cl_t const x)
+inline GGfloat LinearInterpolation(GGfloat const xa, GGfloat const ya,
+  GGfloat const xb, GGfloat const yb, GGfloat const x)
 {
   // Taylor young 1st order
   // if ( xa > x ) return ya;
@@ -81,4 +81,4 @@ inline f64cl_t linear_interpolation(f64cl_t const xa, f64cl_t const ya,
   return ya + (x - xa)*(yb - ya)/(xb - xa);
 }
 
-#endif // GUARD_GGEMS_MATHS_MATH_FUNCTIONS_HH
+#endif // GUARD_GGEMS_MATHS_GGEMSMATHALGORITHMS_HH

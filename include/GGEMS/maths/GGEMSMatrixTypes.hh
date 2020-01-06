@@ -1,8 +1,8 @@
-#ifndef GUARD_GGEMS_MATHS_MATRIX_TYPES_HH
-#define GUARD_GGEMS_MATHS_MATRIX_TYPES_HH
+#ifndef GUARD_GGEMS_MATHS_GGEMSMATRIXTYPES_HH
+#define GUARD_GGEMS_MATHS_GGEMSMATRIXTYPES_HH
 
 /*!
-  \file matrix_types.hh
+  \file GGEMSMatrixTypes.hh
 
   \brief Class managing the matrix types
 
@@ -13,26 +13,26 @@
   \date Wednesday November 13, 2019
 */
 
-#include "GGEMS/global/ggems_configuration.hh"
-#include "GGEMS/opencl/types.hh"
+#include "GGEMS/global/GGEMSConfiguration.hh"
+#include "GGEMS/tools/GGEMSTypes.hh"
 
 /*!
-  \struct float3x3_t
+  \struct GGfloat33_t
   \brief Structure storing float 3 x 3 matrix
 */
 #ifdef OPENCL_COMPILER
-typedef struct __attribute__((aligned (1))) float3x3_t
+typedef struct __attribute__((aligned (1))) GGfloat33_t
 #else
 #ifdef _MSC_VER
 #pragma pack(push, 1)
 #endif
-typedef struct PACKED float3x3_t
+typedef struct PACKED GGfloat33_t
 #endif
 {
-  f32cl_t m00_, m01_, m02_;
-  f32cl_t m10_, m11_, m12_;
-  f32cl_t m20_, m21_, m22_;
-} float3x3;
+  GGfloat m00_, m01_, m02_;
+  GGfloat m10_, m11_, m12_;
+  GGfloat m20_, m21_, m22_;
+} GGfloat33;
 #ifndef OPENCL_COMPILER
 #ifdef _MSC_VER
 #pragma pack(pop)
@@ -40,23 +40,23 @@ typedef struct PACKED float3x3_t
 #endif
 
 /*!
-  \struct float4x4_t
+  \struct GGfloat44_t
   \brief Structure storing float 4 x 4 matrix
 */
 #ifdef OPENCL_COMPILER
-typedef struct __attribute__((aligned (1))) float4x4_t
+typedef struct __attribute__((aligned (1))) GGfloat44_t
 #else
 #ifdef _MSC_VER
 #pragma pack(push, 1)
 #endif
-typedef struct PACKED float4x4_t
+typedef struct PACKED GGfloat44_t
 #endif
 {
-  f32cl_t m00_, m01_, m02_, m03_;
-  f32cl_t m10_, m11_, m12_, m13_;
-  f32cl_t m20_, m21_, m22_, m23_;
-  f32cl_t m30_, m31_, m32_, m33_;
-} float4x4;
+  GGfloat m00_, m01_, m02_, m03_;
+  GGfloat m10_, m11_, m12_, m13_;
+  GGfloat m20_, m21_, m22_, m23_;
+  GGfloat m30_, m31_, m32_, m33_;
+} GGfloat44;
 #ifndef OPENCL_COMPILER
 #ifdef _MSC_VER
 #pragma pack(pop)
@@ -64,48 +64,7 @@ typedef struct PACKED float4x4_t
 #endif
 
 /*!
-  \fn inline f323cl_t MakeFloat3x1(f32cl_t const x, f32cl_t const y, f32cl_t const z)
-  \param x - x parameter
-  \param y - y parameter
-  \param z - z parameter
-  \brief Make a float X, Y and Z with custom values
-*/
-inline f323cl_t MakeFloat3x1(f32cl_t const x, f32cl_t const y, f32cl_t const z)
-{
-  f323cl_t tmp;
-  #ifdef OPENCL_COMPILER
-  tmp.x = x;
-  tmp.y = y;
-  tmp.z = z;
-  #else
-  tmp.s[0] = x;
-  tmp.s[1] = y;
-  tmp.s[2] = z;
-  #endif
-  return tmp;
-}
-
-/*!
-  \fn inline f323cl_t MakeFloatXYZZeros()
-  \brief Make a float X, Y and Z with zeros for value
-*/
-inline f323cl_t MakeFloat3x1Zeros()
-{
-  f323cl_t tmp;
-  #ifdef OPENCL_COMPILER
-  tmp.x = 0.0f;
-  tmp.y = 0.0f;
-  tmp.z = 0.0f;
-  #else
-  tmp.s[0] = 0.0f;
-  tmp.s[1] = 0.0f;
-  tmp.s[2] = 0.0f;
-  #endif
-  return tmp;
-}
-
-/*!
-  \fn inline float3x3 MakeFloat3x3(f32cl_t const m00, f32cl_t const m01, f32cl_t const m02, f32cl_t const m10, f32cl_t const m11, f32cl_t const m12, f32cl_t const m20, f32cl_t const m21, f32cl_t const m22)
+  \fn inline GGfloat33 MakeFloat33(GGfloat const m00, GGfloat const m01, GGfloat const m02, GGfloat const m10, GGfloat const m11, GGfloat const m12, GGfloat const m20, GGfloat const m21, GGfloat const m22)
   \param m00 - Element 0,0 in the matrix 3x3 for local axis
   \param m01 - Element 0,1 in the matrix 3x3 for local axis
   \param m02 - Element 0,2 in the matrix 3x3 for local axis
@@ -117,12 +76,12 @@ inline f323cl_t MakeFloat3x1Zeros()
   \param m22 - Element 2,2 in the matrix 3x3 for local axis
   \brief Make a float3x3 with custom values
 */
-inline float3x3 MakeFloat3x3(
-  f32cl_t const m00, f32cl_t const m01, f32cl_t const m02,
-  f32cl_t const m10, f32cl_t const m11, f32cl_t const m12,
-  f32cl_t const m20, f32cl_t const m21, f32cl_t const m22)
+inline GGfloat33 MakeFloat33(
+  GGfloat const m00, GGfloat const m01, GGfloat const m02,
+  GGfloat const m10, GGfloat const m11, GGfloat const m12,
+  GGfloat const m20, GGfloat const m21, GGfloat const m22)
 {
-  float3x3 tmp;
+  GGfloat33 tmp;
   // Row 1
   tmp.m00_ = m00; tmp.m01_ = m01; tmp.m02_ = m02;
   // Row 2
@@ -133,12 +92,12 @@ inline float3x3 MakeFloat3x3(
 }
 
 /*!
-  \fn inline float3x3 MakeFloat3x3Zeros()
+  \fn inline float3x3 MakeFloat33Zeros()
   \brief Make a float3x3 with zeros for value
 */
-inline float3x3 MakeFloat3x3Zeros()
+inline GGfloat33 MakeFloat33Zeros()
 {
-  float3x3 tmp;
+  GGfloat33 tmp;
   // Row 1
   tmp.m00_ = 0.0f; tmp.m01_ = 0.0f; tmp.m02_ = 0.0f;
   // Row 2
@@ -149,7 +108,7 @@ inline float3x3 MakeFloat3x3Zeros()
 }
 
 /*!
-  \fn inline float4x4 MakeFloat4x4(float const m00, float const m01, float const m02, float const m03, float const m10, float const m11, float const m12, float const m13, float const m20, float const m21, float const m22, float const m23, float const m30, float const m31, float const m32, float const m33)
+  \fn inline float4x4 MakeFloat44(float const m00, float const m01, float const m02, float const m03, float const m10, float const m11, float const m12, float const m13, float const m20, float const m21, float const m22, float const m23, float const m30, float const m31, float const m32, float const m33)
   \param m00 - Element 0,0 in the matrix 4x4 for local axis
   \param m01 - Element 0,1 in the matrix 4x4 for local axis
   \param m02 - Element 0,2 in the matrix 4x4 for local axis
@@ -166,15 +125,15 @@ inline float3x3 MakeFloat3x3Zeros()
   \param m31 - Element 3,1 in the matrix 4x4 for local axis
   \param m32 - Element 3,2 in the matrix 4x4 for local axis
   \param m33 - Element 3,3 in the matrix 4x4 for local axis
-  \brief Make a float4x4 with custom values
+  \brief Make a GGfloat44 with custom values
 */
-inline float4x4 MakeFloat4x4(
-  f32cl_t const m00, f32cl_t const m01, f32cl_t const m02, f32cl_t const m03,
-  f32cl_t const m10, f32cl_t const m11, f32cl_t const m12, f32cl_t const m13,
-  f32cl_t const m20, f32cl_t const m21, f32cl_t const m22, f32cl_t const m23,
-  f32cl_t const m30, f32cl_t const m31, f32cl_t const m32, f32cl_t const m33)
+inline GGfloat44 MakeFloat44(
+  GGfloat const m00, GGfloat const m01, GGfloat const m02, GGfloat const m03,
+  GGfloat const m10, GGfloat const m11, GGfloat const m12, GGfloat const m13,
+  GGfloat const m20, GGfloat const m21, GGfloat const m22, GGfloat const m23,
+  GGfloat const m30, GGfloat const m31, GGfloat const m32, GGfloat const m33)
 {
-  float4x4 tmp;
+  GGfloat44 tmp;
   // Row 1
   tmp.m00_ = m00; tmp.m01_ = m01; tmp.m02_ = m02; tmp.m03_ = m03;
   // Row 2
@@ -187,12 +146,12 @@ inline float4x4 MakeFloat4x4(
 }
 
 /*!
-  \fn inline float4x4 MakeFloat3x3Zeros()
-  \brief Make a float4x4 with zeros for value
+  \fn inline GGfloat44 MakeFloat44Zeros()
+  \brief Make a GGfloat44 with zeros for value
 */
-inline float4x4 MakeFloat4x4Zeros()
+inline GGfloat44 MakeFloat44Zeros()
 {
-  float4x4 tmp;
+  GGfloat44 tmp;
   // Row 1
   tmp.m00_ = 0.0f; tmp.m01_ = 0.0f; tmp.m02_ = 0.0f; tmp.m03_ = 0.0f;
   // Row 2
@@ -204,4 +163,4 @@ inline float4x4 MakeFloat4x4Zeros()
   return tmp;
 }
 
-#endif // End of GUARD_GGEMS_MATHS_MATRIX_TYPES_HH
+#endif // End of GUARD_GGEMS_MATHS_GGEMSMATRIXTYPES_HH
