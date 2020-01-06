@@ -49,7 +49,7 @@
 #include <CL/cl.hpp>
 #endif
 
-#define GGbool bool
+#define GGbool cl_bool
 #define GGchar cl_char
 #define GGuchar cl_uchar
 #define GGshort cl_short
@@ -73,5 +73,46 @@
 #define GGdouble8 cl_double8
 #define GGdouble16 cl_double16
 #endif
+
+/*!
+  \fn inline GGfloat MakeFloat3(GGfloat const x, GGfloat const y, GGfloat const z)
+  \param x - x parameter
+  \param y - y parameter
+  \param z - z parameter
+  \brief Make a float X, Y and Z with custom values
+*/
+inline GGfloat3 MakeFloat3(GGfloat const x, GGfloat const y, GGfloat const z)
+{
+  GGfloat3 tmp;
+  #ifdef OPENCL_COMPILER
+  tmp.x = x;
+  tmp.y = y;
+  tmp.z = z;
+  #else
+  tmp.s[0] = x;
+  tmp.s[1] = y;
+  tmp.s[2] = z;
+  #endif
+  return tmp;
+}
+
+/*!
+  \fn inline GGfloat3 MakeFloat3Zeros()
+  \brief Make a float X, Y and Z with zeros for value
+*/
+inline GGfloat3 MakeFloat3Zeros()
+{
+  GGfloat3 tmp;
+  #ifdef OPENCL_COMPILER
+  tmp.x = 0.0f;
+  tmp.y = 0.0f;
+  tmp.z = 0.0f;
+  #else
+  tmp.s[0] = 0.0f;
+  tmp.s[1] = 0.0f;
+  tmp.s[2] = 0.0f;
+  #endif
+  return tmp;
+}
 
 #endif // End of GUARD_GGEMS_TOOLS_GGEMSTYPES_HH

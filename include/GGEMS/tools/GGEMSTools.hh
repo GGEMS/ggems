@@ -19,10 +19,10 @@
 #include "GGEMS/tools/GGEMSTypes.hh"
 
 /*!
-  \namespace GGEMSStream
+  \namespace GGEMSFileStream
   \brief namespace checking file stream in input and output
 */
-namespace GGEMSStream
+namespace GGEMSFileStream
 {
   /*!
     \fn void CheckInputStream(std::ifstream const& input_stream, std::string const& filename)

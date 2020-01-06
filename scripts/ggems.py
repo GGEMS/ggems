@@ -28,8 +28,8 @@ class GGEMSOpenCLManager(object):
 
         ggems_lib.print_build_options_ggems_opencl_manager.argtypes = [
             ctypes.c_void_p]
-        ggems_lib.print_build_options_ggems_opencl_manager.restype =
-        ctypes.c_void_p
+        ggems_lib.print_build_options_ggems_opencl_manager.restype =\
+            ctypes.c_void_p
 
         ggems_lib.print_context_ggems_opencl_manager.argtypes = [
             ctypes.c_void_p]
@@ -40,18 +40,18 @@ class GGEMSOpenCLManager(object):
 
         ggems_lib.print_command_queue_ggems_opencl_manager.argtypes = [
             ctypes.c_void_p]
-        ggems_lib.print_command_queue_ggems_opencl_manager.restype =
-        ctypes.c_void_p
+        ggems_lib.print_command_queue_ggems_opencl_manager.restype =\
+            ctypes.c_void_p
 
         ggems_lib.set_context_index_ggems_opencl_manager.argtypes = [
             ctypes.c_void_p, ctypes.c_uint32]
-        ggems_lib.set_context_index_ggems_opencl_manager.restype =
-        ctypes.c_void_p
+        ggems_lib.set_context_index_ggems_opencl_manager.restype =\
+            ctypes.c_void_p
 
         ggems_lib.print_activated_context_ggems_opencl_manager.argtypes = [
             ctypes.c_void_p]
-        ggems_lib.print_activated_context_ggems_opencl_manager.restype =
-        ctypes.c_void_p
+        ggems_lib.print_activated_context_ggems_opencl_manager.restype =\
+            ctypes.c_void_p
 
         ggems_lib.clean_ggems_opencl_manager.argtypes = [ctypes.c_void_p]
         ggems_lib.clean_ggems_opencl_manager.restype = ctypes.c_void_p
@@ -86,8 +86,8 @@ class GGEMSVerbosity(object):
         ggems_lib.set_ggems_verbose(val)
 
 
-class XRaySource(object):
-    """XRay source class managing source for CT/CBCT simulation
+class GGEMSXRaySource(object):
+    """GGEMS XRay source class managing source for CT/CBCT simulation
     """
     def __init__(self):
         ggems_lib.create_ggems_xray_source.restype = ctypes.c_void_p
@@ -95,51 +95,53 @@ class XRaySource(object):
         ggems_lib.delete_ggems_xray_source.argtypes = [ctypes.c_void_p]
         ggems_lib.delete_ggems_xray_source.restype = ctypes.c_void_p
 
-        ggems_lib.initialize_xray_source.argtypes = [ctypes.c_void_p]
-        ggems_lib.initialize_xray_source.restype = ctypes.c_void_p
+        ggems_lib.initialize_ggems_xray_source.argtypes = [ctypes.c_void_p]
+        ggems_lib.initialize_ggems_xray_source.restype = ctypes.c_void_p
 
-        ggems_lib.set_position_xray_source.argtypes = [
+        ggems_lib.set_position_ggems_xray_source.argtypes = [
             ctypes.c_void_p, ctypes.c_float, ctypes.c_float, ctypes.c_float]
-        ggems_lib.set_position_xray_source.restype = ctypes.c_void_p
+        ggems_lib.set_position_ggems_xray_source.restype = ctypes.c_void_p
 
-        ggems_lib.print_infos_xray_source.argtypes = [ctypes.c_void_p]
-        ggems_lib.print_infos_xray_source.restype = ctypes.c_void_p
+        ggems_lib.print_infos_ggems_xray_source.argtypes = [ctypes.c_void_p]
+        ggems_lib.print_infos_ggems_xray_source.restype = ctypes.c_void_p
 
-        ggems_lib.set_source_particle_type_xray_source.argtypes = [
+        ggems_lib.set_source_particle_type_ggems_xray_source.argtypes = [
             ctypes.c_void_p, ctypes.c_char_p]
-        ggems_lib.set_source_particle_type_xray_source.restype =\
+        ggems_lib.set_source_particle_type_ggems_xray_source.restype =\
             ctypes.c_void_p
 
-        ggems_lib.set_beam_aperture_xray_source.argtypes = [
+        ggems_lib.set_beam_aperture_ggems_xray_source.argtypes = [
             ctypes.c_void_p, ctypes.c_float]
-        ggems_lib.set_beam_aperture_xray_source.restype = ctypes.c_void_p
+        ggems_lib.set_beam_aperture_ggems_xray_source.restype = ctypes.c_void_p
 
-        ggems_lib.set_focal_spot_size_xray_source.argtypes = [
+        ggems_lib.set_focal_spot_size_ggems_xray_source.argtypes = [
             ctypes.c_void_p, ctypes.c_float, ctypes.c_float, ctypes.c_float]
-        ggems_lib.set_focal_spot_size_xray_source.restype = ctypes.c_void_p
+        ggems_lib.set_focal_spot_size_ggems_xray_source.restype =\
+            ctypes.c_void_p
 
-        ggems_lib.set_local_axis_xray_source.argtypes = [
+        ggems_lib.set_local_axis_ggems_xray_source.argtypes = [
             ctypes.c_void_p,
             ctypes.c_float, ctypes.c_float, ctypes.c_float,
             ctypes.c_float, ctypes.c_float, ctypes.c_float,
             ctypes.c_float, ctypes.c_float, ctypes.c_float]
-        ggems_lib.set_focal_spot_size_xray_source.restype = ctypes.c_void_p
+        ggems_lib.set_focal_spot_size_ggems_xray_source.restype =\
+            ctypes.c_void_p
 
-        ggems_lib.set_rotation_xray_source.argtypes = [
+        ggems_lib.set_rotation_ggems_xray_source.argtypes = [
             ctypes.c_void_p, ctypes.c_float, ctypes.c_float, ctypes.c_float]
-        ggems_lib.set_rotation_xray_source.restype = ctypes.c_void_p
+        ggems_lib.set_rotation_ggems_xray_source.restype = ctypes.c_void_p
 
-        ggems_lib.update_rotation_xray_source.argtypes = [
+        ggems_lib.update_rotation_ggems_xray_source.argtypes = [
             ctypes.c_void_p, ctypes.c_float, ctypes.c_float, ctypes.c_float]
-        ggems_lib.update_rotation_xray_source.restype = ctypes.c_void_p
+        ggems_lib.update_rotation_ggems_xray_source.restype = ctypes.c_void_p
 
-        ggems_lib.set_monoenergy_xray_source.argtypes = [
+        ggems_lib.set_monoenergy_ggems_xray_source.argtypes = [
             ctypes.c_void_p, ctypes.c_float]
-        ggems_lib.set_monoenergy_xray_source.restype = ctypes.c_void_p
+        ggems_lib.set_monoenergy_ggems_xray_source.restype = ctypes.c_void_p
 
-        ggems_lib.set_polyenergy_xray_source.argtypes = [
+        ggems_lib.set_polyenergy_ggems_xray_source.argtypes = [
             ctypes.c_void_p, ctypes.c_char_p]
-        ggems_lib.set_polyenergy_xray_source.restype = ctypes.c_void_p
+        ggems_lib.set_polyenergy_ggems_xray_source.restype = ctypes.c_void_p
 
         self.obj = ggems_lib.create_ggems_xray_source()
 
@@ -147,39 +149,40 @@ class XRaySource(object):
         ggems_lib.delete_ggems_xray_source(self.obj)
 
     def initialize(self):
-        ggems_lib.initialize_xray_source(self.obj)
+        ggems_lib.initialize_ggems_xray_source(self.obj)
 
     def set_position(self, x, y, z):
-        ggems_lib.set_position_xray_source(self.obj, x, y, z)
+        ggems_lib.set_position_ggems_xray_source(self.obj, x, y, z)
 
     def print_infos(self):
-        ggems_lib.print_infos_xray_source(self.obj)
+        ggems_lib.print_infos_ggems_xray_source(self.obj)
 
     def set_source_particle_type(self, particle_type):
-        ggems_lib.set_source_particle_type_xray_source(self.obj, particle_type)
+        ggems_lib.set_source_particle_type_ggems_xray_source(
+            self.obj, particle_type)
 
     def set_beam_aperture(self, beam_aperture):
-        ggems_lib.set_beam_aperture_xray_source(self.obj, beam_aperture)
+        ggems_lib.set_beam_aperture_ggems_xray_source(self.obj, beam_aperture)
 
     def set_focal_spot_size(self, width, height, depth):
-        ggems_lib.set_focal_spot_size_xray_source(
+        ggems_lib.set_focal_spot_size_ggems_xray_source(
             self.obj, width, height, depth)
 
     def set_local_axis(self, m00, m01, m02, m10, m11, m12, m20, m21, m22):
-        ggems_lib.set_local_axis_xray_source(
+        ggems_lib.set_local_axis_ggems_xray_source(
             self.obj, m00, m01, m02, m10, m11, m12, m20, m21, m22)
 
     def set_rotation(self, rx, ry, rz):
-        ggems_lib.set_rotation_xray_source(self.obj, rx, ry, rz)
+        ggems_lib.set_rotation_ggems_xray_source(self.obj, rx, ry, rz)
 
     def set_monoenergy(self, e):
-        ggems_lib.set_monoenergy_xray_source(self.obj, e)
+        ggems_lib.set_monoenergy_ggems_xray_source(self.obj, e)
 
     def set_polyenergy(self, file):
-        ggems_lib.set_polyenergy_xray_source(self.obj, file)
+        ggems_lib.set_polyenergy_ggems_xray_source(self.obj, file)
 
     def update_rotation(self, rx, ry, rz):
-        ggems_lib.update_rotation_xray_source(self.obj, rx, ry, rz)
+        ggems_lib.update_rotation_ggems_xray_source(self.obj, rx, ry, rz)
 
 
 class GGEMSManager(object):
@@ -188,80 +191,91 @@ class GGEMSManager(object):
     def __init__(self):
         ggems_lib.get_instance_ggems_manager.restype = ctypes.c_void_p
 
-        ggems_lib.set_seed.argtypes = [ctypes.c_void_p, ctypes.c_uint32]
-        ggems_lib.set_seed.restype = ctypes.c_void_p
-
-        ggems_lib.initialize_ggems.argtypes = [ctypes.c_void_p]
-        ggems_lib.initialize_ggems.restype = ctypes.c_void_p
-
-        ggems_lib.set_number_of_particles.argtypes = [
-            ctypes.c_void_p, ctypes.c_uint64]
-        ggems_lib.set_number_of_particles.restype = ctypes.c_void_p
-
-        ggems_lib.set_process.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
-        ggems_lib.set_process.restype = ctypes.c_void_p
-
-        ggems_lib.set_particle_cut.argtypes = [
-            ctypes.c_void_p, ctypes.c_char_p, ctypes.c_double]
-        ggems_lib.set_particle_cut.restype = ctypes.c_void_p
-
-        ggems_lib.set_geometry_tolerance.argtypes = [
-            ctypes.c_void_p, ctypes.c_double]
-        ggems_lib.set_geometry_tolerance.restype = ctypes.c_void_p
-
-        ggems_lib.set_secondary_particle_and_level.argtypes = [
-            ctypes.c_void_p, ctypes.c_char_p, ctypes.c_uint32]
-        ggems_lib.set_secondary_particle_and_level.restype = ctypes.c_void_p
-
-        ggems_lib.set_cross_section_table_number_of_bins.argtypes = [
+        ggems_lib.set_seed_ggems_manager.argtypes = [
             ctypes.c_void_p, ctypes.c_uint32]
-        ggems_lib.set_cross_section_table_number_of_bins.restype =\
+        ggems_lib.set_seed_ggems_manager.restype = ctypes.c_void_p
+
+        ggems_lib.initialize_ggems_manager.argtypes = [ctypes.c_void_p]
+        ggems_lib.initialize_ggems_manager.restype = ctypes.c_void_p
+
+        ggems_lib.set_number_of_particles_ggems_manager.argtypes = [
+            ctypes.c_void_p, ctypes.c_uint64]
+        ggems_lib.set_number_of_particles_ggems_manager.restype =\
             ctypes.c_void_p
 
-        ggems_lib.set_cross_section_table_energy_min.argtypes = [
-            ctypes.c_void_p, ctypes.c_double]
-        ggems_lib.set_cross_section_table_energy_min.restype = ctypes.c_void_p
+        ggems_lib.set_process_ggems_manager.argtypes = [
+            ctypes.c_void_p, ctypes.c_char_p]
+        ggems_lib.set_process_ggems_manager.restype = ctypes.c_void_p
 
-        ggems_lib.set_cross_section_table_energy_max.argtypes = [
-            ctypes.c_void_p, ctypes.c_double]
-        ggems_lib.set_cross_section_table_energy_max.restype = ctypes.c_void_p
+        ggems_lib.set_particle_cut_ggems_manager.argtypes = [
+            ctypes.c_void_p, ctypes.c_char_p, ctypes.c_double]
+        ggems_lib.set_particle_cut_ggems_manager.restype = ctypes.c_void_p
 
-        ggems_lib.run.argtypes = [ctypes.c_void_p]
-        ggems_lib.run.restype = ctypes.c_void_p
+        ggems_lib.set_geometry_tolerance_ggems_manager.argtypes = [
+            ctypes.c_void_p, ctypes.c_double]
+        ggems_lib.set_geometry_tolerance_ggems_manager.restype =\
+            ctypes.c_void_p
+
+        ggems_lib.set_secondary_particle_and_level_ggems_manager.argtypes = [
+            ctypes.c_void_p, ctypes.c_char_p, ctypes.c_uint32]
+        ggems_lib.set_secondary_particle_and_level_ggems_manager.restype =\
+            ctypes.c_void_p
+
+        ggems_lib.set_cross_section_table_number_of_bins_ggems_manager\
+            .argtypes = [ctypes.c_void_p, ctypes.c_uint32]
+        ggems_lib.set_cross_section_table_number_of_bins_ggems_manager.restype\
+            = ctypes.c_void_p
+
+        ggems_lib.set_cross_section_table_energy_min_ggems_manager.argtypes = [
+            ctypes.c_void_p, ctypes.c_double]
+        ggems_lib.set_cross_section_table_energy_min_ggems_manager.restype =\
+            ctypes.c_void_p
+
+        ggems_lib.set_cross_section_table_energy_max_ggems_manager.argtypes = [
+            ctypes.c_void_p, ctypes.c_double]
+        ggems_lib.set_cross_section_table_energy_max_ggems_manager.restype =\
+            ctypes.c_void_p
+
+        ggems_lib.run_ggems_manager.argtypes = [ctypes.c_void_p]
+        ggems_lib.run_ggems_manager.restype = ctypes.c_void_p
 
         self.obj = ggems_lib.get_instance_ggems_manager()
 
     def set_seed(self, seed):
-        ggems_lib.set_seed(self.obj, seed)
+        ggems_lib.set_seed_ggems_manager(self.obj, seed)
 
     def initialize(self):
-        ggems_lib.initialize_ggems(self.obj)
+        ggems_lib.initialize_ggems_manager(self.obj)
 
     def set_number_of_particles(self, number_of_particles):
-        ggems_lib.set_number_of_particles(self.obj, number_of_particles)
+        ggems_lib.set_number_of_particles_ggems_manager(
+            self.obj, number_of_particles)
 
     def set_process(self, process_name):
-        ggems_lib.set_process(self.obj, process_name)
+        ggems_lib.set_process_ggems_manager(self.obj, process_name)
 
     def set_particle_cut(self, particle_name, distance):
-        ggems_lib.set_particle_cut(self.obj, particle_name, distance)
+        ggems_lib.set_particle_cut_ggems_manager(
+            self.obj, particle_name, distance)
 
     def set_geometry_tolerance(self, distance):
-        ggems_lib.set_geometry_tolerance(self.obj, distance)
+        ggems_lib.set_geometry_tolerance_ggems_manager(self.obj, distance)
 
     def set_secondary_particle_and_level(self, particle_name, level):
-        ggems_lib.set_secondary_particle_and_level(
+        ggems_lib.set_secondary_particle_and_level_ggems_manager(
             self.obj, particle_name, level)
 
     def set_cross_section_table_number_of_bins(self, number_of_bins):
-        ggems_lib.set_cross_section_table_number_of_bins(
+        ggems_lib.set_cross_section_table_number_of_bins_ggems_manager(
             self.obj, number_of_bins)
 
     def set_cross_section_table_energy_min(self, min_energy):
-        ggems_lib.set_cross_section_table_energy_min(self.obj, min_energy)
+        ggems_lib.set_cross_section_table_energy_min_ggems_manager(
+            self.obj, min_energy)
 
     def set_cross_section_table_energy_max(self, max_energy):
-        ggems_lib.set_cross_section_table_energy_max(self.obj, max_energy)
+        ggems_lib.set_cross_section_table_energy_max_ggems_manager(
+            self.obj, max_energy)
 
     def run(self):
-        ggems_lib.run(self.obj)
+        ggems_lib.run_ggems_manager(self.obj)

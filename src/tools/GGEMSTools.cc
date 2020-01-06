@@ -25,7 +25,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSStream::CheckInputStream(std::ifstream const& input_stream,
+void GGEMSFileStream::CheckInputStream(std::ifstream const& input_stream,
   std::string const& filename)
 {
   if (!input_stream) {
@@ -47,8 +47,8 @@ void GGEMSStream::CheckInputStream(std::ifstream const& input_stream,
 ////////////////////////////////////////////////////////////////////////////////
 
 /// @cond
-template GGbool GGMisc::IsEqual<GGdouble>(GGdouble const&, GGdouble const&);
-template GGbool GGMisc::IsEqual<float>(GGfloat const&, GGfloat const&);
+template GGbool GGEMSMisc::IsEqual<GGdouble>(GGdouble const&, GGdouble const&);
+template GGbool GGEMSMisc::IsEqual<float>(GGfloat const&, GGfloat const&);
 /// @endcond
 
 template <typename T>

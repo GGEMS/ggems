@@ -1,8 +1,8 @@
-#ifndef GUARD_GGEMS_SOURCES_XRAY_SOURCE_HH
-#define GUARD_GGEMS_SOURCES_XRAY_SOURCE_HH
+#ifndef GUARD_GGEMS_SOURCES_GGEMSXRAYSOURCE_HH
+#define GUARD_GGEMS_SOURCES_GGEMSXRAYSOURCE_HH
 
 /*!
-  \file xray_source.hh
+  \file GGEMSXRaySource.hh
 
   \brief This class define a XRay source in GGEMS useful for CT/CBCT simulation
 
@@ -13,68 +13,68 @@
   \date Tuesday October 22, 2019
 */
 
-#include "GGEMS/global/ggems_export.hh"
-#include "GGEMS/sources/ggems_source_manager.hh"
+#include "GGEMS/global/GGEMSExport.hh"
+#include "GGEMS/sources/GGEMSSourceManager.hh"
 
 /*!
-  \class XRaySource
+  \class GGEMSXRaySource
   \brief This class define a XRay source in GGEMS useful for CT/CBCT simulation
 */
-class GGEMS_EXPORT XRaySource : public GGEMSSourceManager
+class GGEMS_EXPORT GGEMSXRaySource : public GGEMSSourceManager
 {
   public:
     /*!
-      \fn static XRaySource* GetInstance()
+      \fn static GGEMSXRaySource* GetInstance()
       \brief Create at first time the Singleton
     */
-    static XRaySource* GetInstance() {return new XRaySource;};
+    static GGEMSXRaySource* GetInstance() {return new GGEMSXRaySource;};
 
   protected:
     /*!
-      \brief XRaySource constructor
+      \brief GGEMSXRaySource constructor
     */
-    XRaySource(void);
+    GGEMSXRaySource(void);
 
     /*!
-      \brief XRaySource destructor
+      \brief GGEMSXRaySource destructor
     */
-    ~XRaySource(void);
+    ~GGEMSXRaySource(void);
 
   public:
     /*!
-      \fn XRaySource(XRaySource const& xray_source) = delete
+      \fn GGEMSXRaySource(GGEMSXRaySource const& xray_source) = delete
       \param ggems_manager - reference on the ggems manager
       \brief Avoid copy of the class by reference
     */
-    XRaySource(XRaySource const& xray_source) = delete;
+    GGEMSXRaySource(GGEMSXRaySource const& xray_source) = delete;
 
     /*!
-      \fn XRaySource& operator=(XRaySource const& xray_source) = delete
+      \fn GGEMSXRaySource& operator=(GGEMSXRaySource const& xray_source) = delete
       \param ggems_manager - reference on the ggems manager
       \brief Avoid assignement of the class by reference
     */
-    XRaySource& operator=(XRaySource const& xray_source) = delete;
+    GGEMSXRaySource& operator=(GGEMSXRaySource const& xray_source) = delete;
 
     /*!
-      \fn XRaySource(XRaySource const&& xray_source) = delete
+      \fn GGEMSXRaySource(GGEMSXRaySource const&& xray_source) = delete
       \param ggems_manager - rvalue reference on the ggems manager
       \brief Avoid copy of the class by rvalue reference
     */
-    XRaySource(XRaySource const&& xray_source) = delete;
+    GGEMSXRaySource(GGEMSXRaySource const&& xray_source) = delete;
 
     /*!
       \fn GGEMSSourceDefinition& operator=(GGEMSSourceDefinition const&& xray_source) = delete
       \param ggems_manager - rvalue reference on the ggems manager
       \brief Avoid copy of the class by rvalue reference
     */
-    XRaySource& operator=(XRaySource const&& xray_source) = delete;
+    GGEMSXRaySource& operator=(GGEMSXRaySource const&& xray_source) = delete;
 
   public: // Pure abstract method from GGEMSSourceManager
     /*!
-      \fn void GetPrimaries(uint64_t const& number_of_particles)
+      \fn void GetPrimaries(GGulong const& number_of_particles)
       \brief Generate primary particles
     */
-    void GetPrimaries(uint64_t const& number_of_particles);
+    void GetPrimaries(GGulong const& number_of_particles);
 
     /*!
       \fn void Initialize(void)
@@ -90,35 +90,35 @@ class GGEMS_EXPORT XRaySource : public GGEMSSourceManager
 
   public:
     /*!
-      \fn void SetBeamAperture(float const& beam_aperture)
+      \fn void SetBeamAperture(GGfloat const& beam_aperture)
       \param beam_aperture - beam aperture of the x-ray source
       \brief Set the beam aperture of the source
     */
-    void SetBeamAperture(float const& beam_aperture);
+    void SetBeamAperture(GGfloat const& beam_aperture);
 
     /*!
-      \fn void SetFocalSpotSize(float const& width, float const& height, float const& depth)
+      \fn void SetFocalSpotSize(GGfloat const& width, GGfloat const& height, GGfloat const& depth)
       \param width - width of the focal spot size
       \param height - height of the focal spot size
       \param depth - depth of the focal spot size
       \brief Set the focal spot size of the x-ray source
     */
-    void SetFocalSpotSize(float const& width, float const& height,
-      float const& depth);
+    void SetFocalSpotSize(GGfloat const& width, GGfloat const& height,
+      GGfloat const& depth);
 
     /*!
-      \fn void SetMonoenergy(float const& monoenergy)
+      \fn void SetMonoenergy(GGfloat const& monoenergy)
       \param monoenergy - Monoenergy value
       \brief set the value of energy in monoenergy mode
     */
-    void SetMonoenergy(float const& monoenergy);
+    void SetMonoenergy(GGfloat const& monoenergy);
 
     /*!
-      \fn void SetPolyenergy(const char* energy_spectrum_filename)
+      \fn void SetPolyenergy(char const* energy_spectrum_filename)
       \param energy_spectrum_filename - filename containing the energy spectrum
       \brief set the energy spectrum file for polyenergy mode
     */
-    void SetPolyenergy(const char* energy_spectrum_filename);
+    void SetPolyenergy(char const* energy_spectrum_filename);
 
   private:
     /*!
@@ -135,17 +135,17 @@ class GGEMS_EXPORT XRaySource : public GGEMSSourceManager
 
     /*!
       \fn void InitializeKernel(void)
-      \brief Initialize kernel for XRaySource in OpenCL
+      \brief Initialize kernel for GGEMSXRaySource in OpenCL
     */
     void InitializeKernel(void);
 
-  private: // Specific members for XRaySource
-    float beam_aperture_; /*!< Beam aperture of the x-ray source */
-    f323cl_t focal_spot_size_; /*!< Focal spot size of the x-ray source */
-    bool is_monoenergy_mode_; /*!< Boolean checking the mode of energy */
-    float monoenergy_; /*!< Monoenergy mode */
+  private: // Specific members for GGEMSXRaySource
+    GGfloat beam_aperture_; /*!< Beam aperture of the x-ray source */
+    GGfloat3 focal_spot_size_; /*!< Focal spot size of the x-ray source */
+    GGbool is_monoenergy_mode_; /*!< Boolean checking the mode of energy */
+    GGfloat monoenergy_; /*!< Monoenergy mode */
     std::string energy_spectrum_filename_; /*!< The energy spectrum filename for polyenergetic mode */
-    cl_uint number_of_energy_bins_; /*!< Number of energy bins for the polyenergetic mode */
+    GGuint number_of_energy_bins_; /*!< Number of energy bins for the polyenergetic mode */
 
   private: // Buffer for OpenCL
     cl::Buffer* p_energy_spectrum_; /*!< Energy spectrum for OpenCL device */
@@ -153,77 +153,77 @@ class GGEMS_EXPORT XRaySource : public GGEMSSourceManager
 };
 
 /*!
-  \fn XRaySource* create_ggems_xray_source(void)
-  \brief Get the XRaySource pointer for python user.
+  \fn GGEMSXRaySource* create_ggems_xray_source(void)
+  \brief Get the GGEMSXRaySource pointer for python user.
 */
-extern "C" GGEMS_EXPORT XRaySource* create_ggems_xray_source(void);
+extern "C" GGEMS_EXPORT GGEMSXRaySource* create_ggems_xray_source(void);
 
 /*!
   \fn void delete_ggems_xray_source(void)
-  \brief Delete the XRaySource pointer for python user
+  \brief Delete the GGEMSXRaySource pointer for python user
 */
 extern "C" GGEMS_EXPORT void delete_ggems_xray_source(void);
 
 /*!
-  \fn void initialize_xray_source(XRaySource* source_manager)
+  \fn void initialize_ggems_xray_source(GGEMSXRaySource* source_manager)
   \param source_manager - pointer on the source
   \brief Initialize the X-Ray source
 */
-extern "C" GGEMS_EXPORT void initialize_xray_source(
-  XRaySource* p_source_manager);
+extern "C" GGEMS_EXPORT void initialize_ggems_xray_source(
+  GGEMSXRaySource* p_source_manager);
 
 /*!
-  \fn void set_position_xray_source(XRaySource* p_source_manager, float const pos_x, float const pos_y, float const pos_z)
+  \fn void set_position_ggems_xray_source(GGEMSXRaySource* p_source_manager, GGfloat const pos_x, GGfloat const pos_y, GGfloat const pos_z)
   \param source_manager - pointer on the source
   \param pos_x - Position of the source in X
   \param pos_y - Position of the source in Y
   \param pos_z - Position of the source in Z
   \brief Set the position of the source in the global coordinates
 */
-extern "C" GGEMS_EXPORT void set_position_xray_source(
-  XRaySource* p_source_manager, float const pos_x, float const pos_y,
-  float const pos_z);
+extern "C" GGEMS_EXPORT void set_position_ggems_xray_source(
+  GGEMSXRaySource* p_source_manager, GGfloat const pos_x, GGfloat const pos_y,
+  GGfloat const pos_z);
 
 /*!
-  \fn void print_infos_xray_source(XRaySource const* p_source_manager)
+  \fn void print_infos_ggems_xray_source(GGEMSXRaySource const* p_source_manager)
   \param p_source_manager - pointer on the source
-  \brief Print infos about the XRaySource
+  \brief Print infos about the GGEMSXRaySource
 */
-extern "C" GGEMS_EXPORT void print_infos_xray_source(
-  XRaySource* p_source_manager);
+extern "C" GGEMS_EXPORT void print_infos_ggems_xray_source(
+  GGEMSXRaySource* p_source_manager);
 
 /*!
-  \fn void set_source_particle_type_xray_source(XRaySource* p_source_manager, char const* particle_name)
+  \fn void set_source_particle_type_ggems_xray_source(GGEMSXRaySource* p_source_manager, char const* particle_name)
   \param source_manager - pointer on the source
   \param particle_name - name/type of the particle: photon or electron
   \brief Set the type of the source particle
 */
-extern "C" GGEMS_EXPORT void set_source_particle_type_xray_source(
-  XRaySource* p_source_manager, char const* particle_name);
+extern "C" GGEMS_EXPORT void set_source_particle_type_ggems_xray_source(
+  GGEMSXRaySource* p_source_manager, char const* particle_name);
 
 /*!
-  \fn void set_beam_aperture_xray_source(XRaySource* p_source_manager, float const beam_aperture)
+  \fn void set_beam_aperture_ggems_xray_source(GGEMSXRaySource* p_source_manager, GGfloat const beam_aperture)
   \param p_source_manager - pointer on the source
   \param beam_aperture - beam aperture of the x-ray source
   \brief set the beam aperture of the x-ray source
 */
-extern "C" GGEMS_EXPORT void set_beam_aperture_xray_source(
-  XRaySource* p_source_manager, float const beam_aperture);
+extern "C" GGEMS_EXPORT void set_beam_aperture_ggems_xray_source(
+  GGEMSXRaySource* p_source_manager, GGfloat const beam_aperture);
 
 /*!
-  \fn void set_focal_spot_size_xray_source(XRaySource* p_source_manager, float const width, float const height, float const depth)
+  \fn void set_focal_spot_size_ggems_xray_source(GGEMSXRaySource* p_source_manager, GGfloat const width, GGfloat const height, GGfloat const depth)
   \param p_source_manager - pointer on the source
   \param width - width of the focal spot size
   \param height - height of the focal spot size
   \param depth - depth of the focal spot size
   \brief Set the focal spot size of the x-ray source
 */
-extern "C" GGEMS_EXPORT void set_focal_spot_size_xray_source(
-  XRaySource* p_source_manager, float const width, float const height,
-  float const depth);
+extern "C" GGEMS_EXPORT void set_focal_spot_size_ggems_xray_source(
+  GGEMSXRaySource* p_source_manager, GGfloat const width, GGfloat const height,
+  GGfloat const depth);
 
 /*!
-  \fn void set_local_axis_xray_source(XRaySource* p_source_manager, float const m00, float const m01, float const m02, float const m10, float const m11, float const m12, float const m20, float const m21, float const m22)
+  \fn void set_local_axis_xray_source(GGEMSXRaySource* p_source_manager, GGfloat const m00, GGfloat const m01, GGfloat const m02, GGfloat const m10, GGfloat const m11, GGfloat const m12, GGfloat const m20, GGfloat const m21, GGfloat const m22)
   \param p_source_manager - pointer on the source
   \param m00 - Element 0,0 in the matrix 3x3 for local axis
   \param m01 - Element 0,1 in the matrix 3x3 for local axis
@@ -236,52 +236,52 @@ extern "C" GGEMS_EXPORT void set_focal_spot_size_xray_source(
   \param m22 - Element 2,2 in the matrix 3x3 for local axis
   \brief Set the local axis element describing the source compared to global axis (center of world)
 */
-extern "C" GGEMS_EXPORT void set_local_axis_xray_source(
-  XRaySource* p_source_manager,
-  float const m00, float const m01, float const m02,
-  float const m10, float const m11, float const m12,
-  float const m20, float const m21, float const m22);
+extern "C" GGEMS_EXPORT void set_local_axis_ggems_xray_source(
+  GGEMSXRaySource* p_source_manager,
+  GGfloat const m00, GGfloat const m01, GGfloat const m02,
+  GGfloat const m10, GGfloat const m11, GGfloat const m12,
+  GGfloat const m20, GGfloat const m21, GGfloat const m22);
 
 /*!
-  \fn void set_rotation_xray_source(XRaySource* p_source_manager, float const rx, float const ry, float const rz)
+  \fn void set_rotation_xray_source(GGEMSXRaySource* p_source_manager, GGfloat const rx, GGfloat const ry, GGfloat const rz)
   \param p_source_manager - pointer on the source
   \param rx - Rotation around X along global axis
   \param ry - Rotation around Y along global axis
   \param rz - Rotation around Z along global axis
   \brief Set the rotation of the source around global axis
 */
-extern "C" GGEMS_EXPORT void set_rotation_xray_source(
-  XRaySource* p_source_manager, float const rx, float const ry,
-  float const rz);
+extern "C" GGEMS_EXPORT void set_rotation_ggems_xray_source(
+  GGEMSXRaySource* p_source_manager, GGfloat const rx, GGfloat const ry,
+  GGfloat const rz);
 
 /*!
-  \fn void update_rotation_xray_source(XRaySource* p_source_manager, float const rx, float const ry, float const rz)
+  \fn void update_rotation_xray_source(GGEMSXRaySource* p_source_manager, GGfloat const rx, GGfloat const ry, GGfloat const rz)
   \param p_source_manager - pointer on the source
   \param rx - Rotation around X along global axis
   \param ry - Rotation around Y along global axis
   \param rz - Rotation around Z along global axis
   \brief Update the rotation of the source around global axis
 */
-extern "C" GGEMS_EXPORT void update_rotation_xray_source(
-  XRaySource* p_source_manager, float const rx, float const ry,
-  float const rz);
+extern "C" GGEMS_EXPORT void update_rotation_ggems_xray_source(
+  GGEMSXRaySource* p_source_manager, GGfloat const rx, GGfloat const ry,
+  GGfloat const rz);
 
 /*!
-  \fn void set_monoenergy_xray_source(XRaySource const* p_source_manager, float const monoenergy)
+  \fn void set_monoenergy_ggems_xray_source(GGEMSXRaySource const* p_source_manager, GGfloat const monoenergy)
   \param p_source_manager - pointer on the source
   \param monoenergy - monoenergetic value
-  \brief Set the monoenergy value for the XRaySource
+  \brief Set the monoenergy value for the GGEMSXRaySource
 */
-extern "C" GGEMS_EXPORT void set_monoenergy_xray_source(
-  XRaySource* p_source_manager, float const monoenergy);
+extern "C" GGEMS_EXPORT void set_monoenergy_ggems_xray_source(
+  GGEMSXRaySource* p_source_manager, GGfloat const monoenergy);
 
 /*!
-  \fn void set_polyenergy_xray_source(XRaySource const* p_source_manager, char const* energy_spectrum)
+  \fn void set_polyenergy_ggems_xray_source(GGEMSXRaySource const* p_source_manager, char const* energy_spectrum)
   \param p_source_manager - pointer on the source
   \param energy_spectrum - polyenergetic spectrum
-  \brief Set the polyenergetic spectrum value for the XRaySource
+  \brief Set the polyenergetic spectrum value for the GGEMSXRaySource
 */
-extern "C" GGEMS_EXPORT void set_polyenergy_xray_source(
-  XRaySource* p_source_manager, char const* energy_spectrum);
+extern "C" GGEMS_EXPORT void set_polyenergy_ggems_xray_source(
+  GGEMSXRaySource* p_source_manager, char const* energy_spectrum);
 
-#endif // End of GUARD_GGEMS_SOURCES_XRAYSOURCE_HH
+#endif // End of GUARD_GGEMS_SOURCES_GGEMSXRAYSOURCE_HH

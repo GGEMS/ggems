@@ -1,8 +1,8 @@
-#ifndef GUARD_GGEMS_SOURCES_GGEMS_SOURCE_MANAGER_HH
-#define GUARD_GGEMS_SOURCES_GGEMS_SOURCE_MANAGER_HH
+#ifndef GUARD_GGEMS_SOURCES_GGEMSSOURCEMANAGER_HH
+#define GUARD_GGEMS_SOURCES_GGEMSSOURCEMANAGER_HH
 
 /*!
-  \file ggems_source_definition.hh
+  \file GGEMSSourceManager.hh
 
   \brief GGEMS class managing the source in GGEMS, every new sources in GGEMS
   inherit from this class
@@ -18,13 +18,13 @@
 #pragma warning(disable: 4251) // Deleting warning exporting STL members!!!
 #endif
 
-#include "GGEMS/global/ggems_export.hh"
-#include "GGEMS/global/opencl_manager.hh"
-#include "GGEMS/opencl/types.hh"
+#include "GGEMS/global/GGEMSExport.hh"
+#include "GGEMS/global/GGEMSOpenCLManager.hh"
+#include "GGEMS/tools/GGEMSTypes.hh"
 
-class Particle;
-class RandomGenerator;
-class GeometryTransformation;
+class GGEMSParticles;
+class GGEMSPseudoRandomGenerator;
+class GGEMSGeometryTransformation;
 
 /*!
   \class GGEMSSourceManager
@@ -88,11 +88,11 @@ class GGEMS_EXPORT GGEMSSourceManager
 
   public:
     /*!
-      \fn bool IsReady(void) const
+      \fn GGbool IsReady(void) const
       \return return false is the source is not ready
       \brief Check if the source is ready to be used
     */
-    bool IsReady(void) const;
+    GGbool IsReady(void) const;
 
     /*!
       \fn GGEMSSourceManager* GetSource() const
@@ -109,14 +109,14 @@ class GGEMS_EXPORT GGEMSSourceManager
 
   public:
     /*!
-      \fn void SetPosition(float const& pos_x, float const& pos_y, float const& pos_z)
+      \fn void SetPosition(GGfloat const& pos_x, GGfloat const& pos_y, GGfloat const& pos_z)
       \param pos_x - Position of the source in X
       \param pos_y - Position of the source in Y
       \param pos_z - Position of the source in Z
       \brief Set the position of the source in the global coordinates
     */
-    void SetPosition(float const& pos_x, float const& pos_y,
-      float const& pos_z);
+    void SetPosition(GGfloat const& pos_x, GGfloat const& pos_y,
+      GGfloat const& pos_z);
 
     /*!
       \fn void SetSourceParticleType(char const* particle_type)
@@ -126,7 +126,7 @@ class GGEMS_EXPORT GGEMSSourceManager
     void SetSourceParticleType(char const* particle_type);
 
     /*!
-      \fn void SetLocalAxis(float const& m00, float const& m01, float const& m02, float const& m10, float const& m11, float const& m12, float const& m20, float const& m21, float const& m22)
+      \fn void SetLocalAxis(GGfloat const& m00, GGfloat const& m01, GGfloat const& m02, GGfloat const& m10, GGfloat const& m11, GGfloat const& m12, GGfloat const& m20, GGfloat const& m21, GGfloat const& m22)
       \param m00 - Element 0,0 in the matrix 3x3 for local axis
       \param m01 - Element 0,1 in the matrix 3x3 for local axis
       \param m02 - Element 0,2 in the matrix 3x3 for local axis
@@ -139,49 +139,51 @@ class GGEMS_EXPORT GGEMSSourceManager
       \brief Set the local axis element describing the source compared to global axis (center of world)
     */
     void SetLocalAxis(
-      float const& m00, float const& m01, float const& m02,
-      float const& m10, float const& m11, float const& m12,
-      float const& m20, float const& m21, float const& m22);
+      GGfloat const& m00, GGfloat const& m01, GGfloat const& m02,
+      GGfloat const& m10, GGfloat const& m11, GGfloat const& m12,
+      GGfloat const& m20, GGfloat const& m21, GGfloat const& m22);
 
     /*!
-      \fn void SetRotation(float const& rx, float const& ry, float const& rz)
+      \fn void SetRotation(GGfloat const& rx, GGfloat const& ry, GGfloat const& rz)
       \param rx - Rotation around X along global axis
       \param ry - Rotation around Y along global axis
       \param rz - Rotation around Z along global axis
       \brief Set the rotation of the source around global axis
     */
-    void SetRotation(float const& rx, float const& ry, float const& rz);
+    void SetRotation(GGfloat const& rx, GGfloat const& ry, GGfloat const& rz);
 
     /*!
-      \fn void UpdateRotation(float const& rx, float const& ry, float const& rz)
+      \fn void UpdateRotation(GGfloat const& rx, GGfloat const& ry, GGfloat const& rz)
       \param rx - Rotation around X along global axis
       \param ry - Rotation around Y along global axis
       \param rz - Rotation around Z along global axis
       \brief Update the rotation of the source around global axis
     */
-    void UpdateRotation(float const& rx, float const& ry, float const& rz);
+    void UpdateRotation(GGfloat const& rx, GGfloat const& ry,
+      GGfloat const& rz);
 
     /*!
-      \fn void SetParticle(Particle* const p_particle)
+      \fn void SetParticle(GGEMSParticles* const p_particle)
       \param p_particle - pointer on particle
       \brief Set the particle pointer to source manager
     */
-   void SetParticle(Particle* const p_particle);
+   void SetParticle(GGEMSParticles* const p_particle);
 
     /*!
-      \fn void SetRandomGenerator(RandomGenerator* const p_random_generator)
+      \fn void SetRandomGenerator(GGEMSPseudoRandomGenerator* const p_random_generator)
       \param p_random_generator - pointer on random generator
       \brief Set the random generator pointer to source manager
     */
-   void SetRandomGenerator(RandomGenerator* const p_random_generator);
+   void SetRandomGenerator(
+     GGEMSPseudoRandomGenerator* const p_random_generator);
 
   public: // Pure abstract method
     /*!
-      \fn void GetPrimaries(uint64_t const& number_of particles) = 0
+      \fn void GetPrimaries(GGulong const& number_of particles) = 0
       \param number_of_particles - number of particles to generate
       \brief Generate primary particles
     */
-    virtual void GetPrimaries(uint64_t const& number_of_particles) = 0;
+    virtual void GetPrimaries(GGulong const& number_of_particles) = 0;
 
     /*!
       \fn void Initialize(void) = 0
@@ -204,18 +206,18 @@ class GGEMS_EXPORT GGEMSSourceManager
 
   protected:
     bool is_initialized_; /*!< Boolean checking if the source is initialized */
-    ucharcl_t particle_type_; /*!< Type of particle: photon, electron or positron */
-    GeometryTransformation* p_geometry_transformation_; /*!< Pointer storing the geometry transformation */
+    GGuchar particle_type_; /*!< Type of particle: photon, electron or positron */
+    GGEMSGeometryTransformation* p_geometry_transformation_; /*!< Pointer storing the geometry transformation */
 
   protected: // kernel generating primaries
     cl::Kernel* p_kernel_get_primaries_; /*!< Kernel generating primaries on OpenCL device */
 
   protected: // Pointer on particle and random
-    Particle* p_particle_; /*!< Pointer storing infos about particles */
-    RandomGenerator* p_random_generator_; /*!< Pointer storing infos about random numbers */
+    GGEMSParticles* p_particle_; /*!< Pointer storing infos about particles */
+    GGEMSPseudoRandomGenerator* p_pseudo_random_generator_; /*!< Pointer storing infos about random numbers */
 
   protected:
-    OpenCLManager& opencl_manager_; /*!< Reference to opencl manager singleton */
+    GGEMSOpenCLManager& opencl_manager_; /*!< Reference to opencl manager singleton */
 
   protected: // Storing the source
     inline static GGEMSSourceManager* p_current_source_ = nullptr; /*!< Current source */

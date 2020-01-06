@@ -64,8 +64,8 @@ void GGEMSPseudoRandomGenerator::InitializeSeeds(void)
     << "Initialization of seeds for each particles..." << GGendl;
 
   // Get the pointer on device
-  Random* p_random = opencl_manager_.GetDeviceBuffer<Random>(
-    p_pseudo_random_numbers_, sizeof(Random));
+  GGEMSRandom* p_random = opencl_manager_.GetDeviceBuffer<GGEMSRandom>(
+    p_pseudo_random_numbers_, sizeof(GGEMSRandom));
 
   // For each particle a seed is generated
   for (std::size_t i = 0; i < MAXIMUM_PARTICLES; ++i) {
@@ -91,5 +91,5 @@ void GGEMSPseudoRandomGenerator::AllocateRandom(void)
 
   // Allocation of memory on OpenCL device
   p_pseudo_random_numbers_ = opencl_manager_.Allocate(nullptr,
-    sizeof(Random), CL_MEM_READ_WRITE);
+    sizeof(GGEMSRandom), CL_MEM_READ_WRITE);
 }

@@ -23,8 +23,8 @@
 
 #include "GGEMS/global/GGEMSExport.hh"
 
-class GGEMSParticle;
-class GGEMSRandomGenerator;
+class GGEMSParticles;
+class GGEMSPseudoRandomGenerator;
 class GGEMSSourceManager;
 class GGEMSOpenCLManager;
 
@@ -258,10 +258,10 @@ class GGEMS_EXPORT GGEMSManager
     GGdouble cross_section_table_energy_max_; /*!< Max. energy for the cross section table */
 
   private: // Particles management
-    GGEMSParticle* p_particle_; /*!< Pointer on particle management */
+    GGEMSParticles* p_particle_; /*!< Pointer on particle management */
 
   private: // Random generator management
-    GGEMSRandomGenerator* p_random_generator_; /*!< Pointer on pseudo random generator */
+    GGEMSPseudoRandomGenerator* p_pseudo_random_generator_; /*!< Pointer on pseudo random generator */
 
   private: // Source management
     GGEMSSourceManager& source_manager_; /*!< Reference to source manager singleton */

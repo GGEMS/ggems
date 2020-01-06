@@ -1,34 +1,34 @@
-#include "GGEMS/opencl/use_double_precision.hh"
-#include "GGEMS/processes/primary_particles.hh"
-#include "GGEMS/randoms/random.hh"
-#include "GGEMS/randoms/kiss_engine.hh"
-#include "GGEMS/maths/matrix_functions.hh"
-#include "GGEMS/maths/math_functions.hh"
-#include "GGEMS/global/ggems_constants.hh"
+#include "GGEMS/tools/GGEMSTypes.hh"
+#include "GGEMS/processes/GGEMSPrimaryParticlesStack.hh"
+#include "GGEMS/randoms/GGEMSRandomStack.hh"
+#include "GGEMS/randoms/GGEMSKissEngine.hh"
+#include "GGEMS/maths/GGEMSMatrixOperations.hh"
+#include "GGEMS/maths/GGEMSMathAlgorithms.hh"
+#include "GGEMS/global/GGEMSConstants.hh"
 
 __kernel void get_primaries_xray_source(
-  __global PrimaryParticles* p_primary_particle,
-  __global Random* p_random,
-  ucharcl_t const particle_name,
-  __global double const* p_energy_spectrum,
-  __global double const* p_cdf,
-  uintcl_t const number_of_energy_bins,
-  f32cl_t const aperture,
-  f323cl_t const focal_spot_size,
-  __global float4x4 const* p_matrix_transformation)
+  __global GGEMSPrimaryParticles* p_primary_particle,
+  __global GGEMSRandom* p_random,
+  GGuchar const particle_name,
+  __global GGdouble const* p_energy_spectrum,
+  __global GGdouble const* p_cdf,
+  GGuint const number_of_energy_bins,
+  GGfloat const aperture,
+  GGfloat3 const focal_spot_size,
+  __global GGfloat44 const* p_matrix_transformation)
 {
   // Get the index of thread
-  int const kGlobalIndex = get_global_id(0);
+  GGint const kGlobalIndex = get_global_id(0);
 
   // Get random angles
-  f64cl_t phi = kiss_uniform(p_random, kGlobalIndex);
-  f64cl_t theta = kiss_uniform(p_random, kGlobalIndex);
-  f64cl_t const kAperture = 1.0 - cos((f64cl_t)aperture);
+  GGdouble phi = kiss_uniform(p_random, kGlobalIndex);
+  GGdouble theta = kiss_uniform(p_random, kGlobalIndex);
+  GGdouble const kAperture = 1.0 - cos((GGdouble)aperture);
   phi += PI_TWICE;
-  theta = acos((f64cl_t)1.0 - kAperture*theta);
+  theta = acos((GGdouble)1.0 - kAperture*theta);
 
   // Compute rotation
-  f323cl_t rotation = {
+  GGfloat3 rotation = {
     cos(phi) * sin(theta),
     sin(phi) * sin(theta),
     cos(theta)
@@ -36,14 +36,14 @@ __kernel void get_primaries_xray_source(
 
   // Get direction of the cone beam. The beam is targeted to the isocenter, then
   // the direction is directly related to the position of the source.
-  f323cl_t global_position = LocalToGlobalPosition(p_matrix_transformation,
-    MakeFloat3x1Zeros());
-  f323cl_t direction = f323x1_unit(
-    f323x1_sub(MakeFloat3x1Zeros(), global_position));
+  GGfloat3 global_position = LocalToGlobalPosition(p_matrix_transformation,
+    MakeFloat3Zeros());
+  GGfloat3 direction = GGfloat3UnitVector(
+    GGfloat3Sub(MakeFloat3Zeros(), global_position));
 
   // Apply deflection (global coordinate)
   direction = RotateUz(rotation, direction);
-  direction = f323x1_unit(direction);
+  direction = GGfloat3UnitVector(direction);
 
   // Postition with focal (local)
   global_position.x = focal_spot_size.x
@@ -58,10 +58,10 @@ __kernel void get_primaries_xray_source(
     global_position);
 
   // Getting a random energy
-  f32cl_t rndm_for_energy = kiss_uniform(p_random, kGlobalIndex);
+  GGfloat rndm_for_energy = kiss_uniform(p_random, kGlobalIndex);
 
   // Get index in cdf
-  uintcl_t index_for_energy = binary_search_left(
+  GGuint index_for_energy = BinarySearchLeft(
     rndm_for_energy,
     p_cdf,
     number_of_energy_bins,
@@ -76,7 +76,7 @@ __kernel void get_primaries_xray_source(
   }
   else
   {
-    p_primary_particle->p_E_[kGlobalIndex] = linear_interpolation(
+    p_primary_particle->p_E_[kGlobalIndex] = LinearInterpolation(
       p_cdf[index_for_energy],
       p_energy_spectrum[index_for_energy],
       p_cdf[index_for_energy + 1],

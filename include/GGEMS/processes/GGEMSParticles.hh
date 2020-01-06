@@ -1,8 +1,8 @@
-#ifndef GUARD_GGEMS_PROCESSES_PARTICLES_HH
-#define GUARD_GGEMS_PROCESSES_PARTICLES_HH
+#ifndef GUARD_GGEMS_PROCESSES_GGEMSPARTICLES_HH
+#define GUARD_GGEMS_PROCESSES_GGEMSPARTICLES_HH
 
 /*!
-  \file particles.hh
+  \file GGEMSParticles.hh
 
   \brief Class managing the particles in GGEMS
 
@@ -13,60 +13,60 @@
   \date Thrusday October 3, 2019
 */
 
-#include "GGEMS/global/ggems_configuration.hh"
-#include "GGEMS/global/ggems_export.hh"
-#include "GGEMS/global/opencl_manager.hh"
+#include "GGEMS/global/GGEMSConfiguration.hh"
+#include "GGEMS/global/GGEMSExport.hh"
+#include "GGEMS/global/GGEMSOpenCLManager.hh"
 
 /*!
-  \class Particle
+  \class GGEMSParticles
   \brief Class managing the particles in GGEMS
 */
-class GGEMS_EXPORT Particle
+class GGEMS_EXPORT GGEMSParticles
 {
   public:
     /*!
-      \brief Particle constructor
+      \brief GGEMSParticles constructor
     */
-    Particle(void);
+    GGEMSParticles(void);
 
     /*!
-      \brief Particle destructor
+      \brief GGEMSParticles destructor
     */
-    ~Particle(void);
+    ~GGEMSParticles(void);
 
   public:
     /*!
-      \fn Particle(Particle const& particle) = delete
+      \fn GGEMSParticles(GGEMSParticles const& particle) = delete
       \param ggems_manager - reference on the ggems manager
       \brief Avoid copy of the class by reference
     */
-    Particle(Particle const& particle) = delete;
+    GGEMSParticles(GGEMSParticles const& particle) = delete;
 
     /*!
-      \fn Particle& operator=(Particle const& particle) = delete
+      \fn GGEMSParticles& operator=(GGEMSParticles const& particle) = delete
       \param ggems_manager - reference on the ggems manager
       \brief Avoid assignement of the class by reference
     */
-    Particle& operator=(Particle const& particle) = delete;
+    GGEMSParticles& operator=(GGEMSParticles const& particle) = delete;
 
     /*!
-      \fn Particle(Particle const&& particle) = delete
+      \fn GGEMSParticles(GGEMSParticles const&& particle) = delete
       \param ggems_manager - rvalue reference on the ggems manager
       \brief Avoid copy of the class by rvalue reference
     */
-    Particle(Particle const&& particle) = delete;
+    GGEMSParticles(GGEMSParticles const&& particle) = delete;
 
     /*!
-      \fn Particle& operator=(Particle const&& particle) = delete
+      \fn GGEMSParticles& operator=(GGEMSParticles const&& particle) = delete
       \param ggems_manager - rvalue reference on the ggems manager
       \brief Avoid copy of the class by rvalue reference
     */
-    Particle& operator=(Particle const&& particle) = delete;
+    GGEMSParticles& operator=(GGEMSParticles const&& particle) = delete;
 
   public:
     /*!
       \fn void Initialize(void)
-      \brief Initialize the Particle object
+      \brief Initialize the GGEMSParticles object
     */
     void Initialize(void);
 
@@ -90,7 +90,7 @@ class GGEMS_EXPORT Particle
 
   private:
     cl::Buffer* p_primary_particles_; /*!< Pointer storing info about primary particles in batch on OpenCL device */
-    OpenCLManager& opencl_manager_; /*!< Reference to OpenCL manager singleton */
+    GGEMSOpenCLManager& opencl_manager_; /*!< Reference to OpenCL manager singleton */
 };
 
-#endif // End of GUARD_GGEMS_PROCESSES_PARTICLES_HH
+#endif // End of GUARD_GGEMS_PROCESSES_GGEMSPARTICLES_HH

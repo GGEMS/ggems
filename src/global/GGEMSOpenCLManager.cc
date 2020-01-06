@@ -74,11 +74,11 @@ GGEMSOpenCLManager::GGEMSOpenCLManager(void)
   p_platform_vendor_ = GGEMSMem::Alloc<std::string>(v_platforms_cl_.size());
   for (std::size_t i = 0; i < v_platforms_cl_.size(); ++i) {
     CheckOpenCLError(v_platforms_cl_[i].getInfo(CL_PLATFORM_VENDOR,
-      &p_platform_vendor_[i]), "OpenCLManager", "OpenCLManager");
+      &p_platform_vendor_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
   }
 
   // Retrieve all the available devices
-  GGcout("GGEMSOpenCLManager", "OpenCLManager", 1)
+  GGcout("GGEMSOpenCLManager", "GGEMSOpenCLManager", 1)
     << "Retrieving OpenCL device(s)..." << GGendl;
   for (auto& p : v_platforms_cl_) {
     std::vector<cl::Device> v_current_device;
@@ -216,6 +216,7 @@ GGEMSOpenCLManager::GGEMSOpenCLManager(void)
 
   // Define the compilation options by default for OpenCL
   build_options_ = "-cl-std=CL1.2 -w -Werror -DOPENCL_COMPILER";
+  build_options_ += " -cl-fast-relaxed-math";
 
   // Add auxiliary function path to OpenCL options
   #ifdef GGEMS_PATH
@@ -410,7 +411,7 @@ void GGEMSOpenCLManager::PrintDeviceInfos(void) const
     }
     GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "+ Address Bits: "
       << p_device_address_bits_[i] << " bits" << GGendl;
-    if (p_device_available_[i] == static_cast<cl_bool>(true)) {
+    if (p_device_available_[i] == static_cast<GGbool>(true)) {
       GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0)
         << "+ Device Available: ON" << GGendl;
     }
@@ -418,7 +419,7 @@ void GGEMSOpenCLManager::PrintDeviceInfos(void) const
       GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0)
         << "+ Device Available: OFF" << GGendl;
     }
-    if (p_device_compiler_available_[i] == static_cast<cl_bool>(true)) {
+    if (p_device_compiler_available_[i] == static_cast<GGbool>(true)) {
       GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0)
         << "+ Compiler Available: ON" << GGendl;
     }
@@ -716,7 +717,7 @@ cl::Kernel* GGEMSOpenCLManager::CompileKernel(std::string const& kernel_filename
 
   // Check if the source kernel file exists
   std::ifstream source_file_stream(kernel_filename.c_str(), std::ios::in);
-  GGEMSStream::CheckInputStream(source_file_stream, kernel_filename);
+  GGEMSFileStream::CheckInputStream(source_file_stream, kernel_filename);
 
   // Handling options to OpenCL compilation kernel
   char kernel_compilation_option[512];
