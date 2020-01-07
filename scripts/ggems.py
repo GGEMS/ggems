@@ -72,7 +72,7 @@ class GGEMSOpenCLManager(object):
     def set_context_index(self, context_id):
         ggems_lib.set_context_index_ggems_opencl_manager(self.obj, context_id)
 
-    def clean(self):
+    def delete(self):
         ggems_lib.clean_ggems_opencl_manager(self.obj)
 
 

@@ -22,7 +22,7 @@
 #endif
 
 #ifndef GGEMS_DEPRECATED
-#  define GGEMS_DEPRECATED __attribute__ ((__deprecated__))
+#  define GGEMS_DEPRECATED __declspec(deprecated)
 #endif
 
 #ifndef GGEMS_DEPRECATED_EXPORT
