@@ -59,7 +59,7 @@ GGEMSSourceManager::~GGEMSSourceManager(void)
     p_geometry_transformation_ = nullptr;
   }
 
-  GGcout("GGEMSSourceDefinition", "~GGEMSSourceDefinition", 3)
+  GGcout("GGEMSSourceManager", "~GGEMSSourceManager", 3)
     << "Deallocation of GGEMSSourceManager..." << GGendl;
 }
 

@@ -6,13 +6,13 @@ import ctypes
 ggems.GGEMSVerbosity(3)
 
 # ------------------------------------------------------------------------------
-# STEP 1: Initializing OpenCL
+# STEP 1: OpenCL Initialization
 opencl_manager = ggems.GGEMSOpenCLManager()
 opencl_manager.set_context_index(2)  # Activate a context
 opencl_manager.print_infos()  # Printing informations about OpenCL
 
 # ------------------------------------------------------------------------------
-# STEP 2: Initializing a source
+# STEP 2: Source Initialization
 xray_source = ggems.GGEMSXRaySource()
 xray_source.set_position(-1000.0, 10.0, 50.0)  # in mm
 xray_source.set_source_particle_type(b"photon")
@@ -52,4 +52,4 @@ ggems_manager.run()
 
 # Freeing properly the memory
 xray_source.delete()
-opencl_manager.clean()
+opencl_manager.delete()
