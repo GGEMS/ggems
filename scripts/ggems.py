@@ -279,3 +279,14 @@ class GGEMSManager(object):
 
     def run(self):
         ggems_lib.run_ggems_manager(self.obj)
+
+
+class GGEMSPhantomCreatorManager(object):
+    """Get Phantom Creator Manager to convert analytical volume to voxelized
+    volume
+    """
+    def __init__(self):
+        ggems_lib.get_instance_phantom_creator_manager.restype =\
+             ctypes.c_void_p
+
+        self.obj = ggems_lib.get_instance_phantom_creator_manager()

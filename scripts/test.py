@@ -1,5 +1,4 @@
 import ggems
-import ctypes
 
 # ------------------------------------------------------------------------------
 # Setting global verbosity
