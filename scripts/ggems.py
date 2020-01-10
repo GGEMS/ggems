@@ -289,4 +289,32 @@ class GGEMSPhantomCreatorManager(object):
         ggems_lib.get_instance_phantom_creator_manager.restype =\
              ctypes.c_void_p
 
+        ggems_lib.set_phantom_dimension_phantom_creator_manager.argtypes = [
+            ctypes.c_void_p, ctypes.c_uint32, ctypes.c_uint32, ctypes.c_uint32]
+
+        ggems_lib.set_element_sizes_phantom_creator_manager.argtypes = [
+            ctypes.c_void_p, ctypes.c_double, ctypes.c_double, ctypes.c_double]
+
+        ggems_lib.set_position_phantom_creator_manager.argtypes = [
+            ctypes.c_void_p, ctypes.c_double, ctypes.c_double, ctypes.c_double]
+
+        ggems_lib.set_output_basename_phantom_creator_manager.argtypes = [
+            ctypes.c_void_p, ctypes.c_char_p]
+
         self.obj = ggems_lib.get_instance_phantom_creator_manager()
+
+    def set_dimensions(self, width, height, depth):
+        ggems_lib.set_phantom_dimension_phantom_creator_manager(
+            self.obj, width, height, depth)
+
+    def set_position(self, pos_x, pos_y, pos_z):
+        ggems_lib.set_position_phantom_creator_manager(
+            self.obj, pos_x, pos_y, pos_z)
+
+    def set_element_sizes(self, width, height, depth):
+        ggems_lib.set_element_sizes_phantom_creator_manager(
+            self.obj, width, height, depth)
+
+    def set_mhd_output(self, output):
+        ggems_lib.set_output_basename_phantom_creator_manager(
+            self.obj, output)

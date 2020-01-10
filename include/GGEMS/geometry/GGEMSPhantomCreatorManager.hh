@@ -94,6 +94,16 @@ class GGEMS_EXPORT GGEMSPhantomCreatorManager
       GGdouble const& voxel_height, GGdouble const& voxel_depth);
 
     /*!
+      \fn void SetPosition(GGdouble const& pos_x, GGdouble const& pos_y, GGdouble const& pos_z)
+      \param pos_x - position x from isocenter
+      \param pos_y - position y from isocenter
+      \param pos_z - position z from isocenter
+      \brief Set position x, y and z of phantom from isocenter
+    */
+    void SetPosition(GGdouble const& pos_x, GGdouble const& pos_y,
+      GGdouble const& pos_z);
+
+    /*!
       \fn void SetPhantomDimensions(GGuint const& phantom_width, GGuint const& phantom_height, GGuint const& phantom_depth)
       \param phantom_width - phantom width
       \param phantom_height - phatom height
@@ -104,14 +114,15 @@ class GGEMS_EXPORT GGEMSPhantomCreatorManager
       GGuint const& phantom_height, GGuint const& phantom_depth);
 
     /*!
-      \fn void SetOutputBasename(std::string const& output_MHD_basename)
+      \fn void SetOutputBasename(char const* output_MHD_basename)
       \param output_MHD_basename - output MHD basename
       \brief Set the basename of MHD output
     */
-    void SetOutputBasename(std::string const& output_MHD_basename);
+    void SetOutputBasename(char const* output_MHD_basename);
 
   private:
     GGdouble3 element_sizes_; /*!< Size of voxels of voxelized phantom */
+    GGdouble3 positions_; /*!< Position x, y and z from isocenter */
     GGuint3 phantom_dimensions_; /*!< Dimension of phantom X, Y, Z */
     std::string output_MHD_basename_; /*!< Output MHD where is stored the voxelized phantom */
 };
@@ -122,5 +133,53 @@ class GGEMS_EXPORT GGEMSPhantomCreatorManager
 */
 extern "C" GGEMS_EXPORT GGEMSPhantomCreatorManager*
   get_instance_phantom_creator_manager(void);
+
+/*!
+  \fn void set_phantom_dimension_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager, GGuint const phantom_width, GGuint const phantom_height, GGuint const phantom_depth)
+  \param phantom_creator_manager - pointer on the singleton
+  \param phantom_width - phantom width
+  \param phantom_height - phatom height
+  \param phantom_depth - phantom depth
+  \brief Set the dimension of the phantom for the voxelized phantom
+*/
+extern "C" GGEMS_EXPORT void set_phantom_dimension_phantom_creator_manager(
+  GGEMSPhantomCreatorManager* phantom_creator_manager,
+  GGuint const phantom_width, GGuint const phantom_height,
+  GGuint const phantom_depth);
+
+/*!
+  \fn void set_element_sizes_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager, GGdouble const voxel_width, GGdouble const voxel_height, GGdouble const voxel_depth)
+  \param phantom_creator_manager - pointer on the singleton
+  \param voxel_width - voxel width
+  \param voxel_height - voxel height
+  \param voxel_depth - voxel depth
+  \brief Set the size of the elements for the voxelized phantom
+*/
+extern "C" GGEMS_EXPORT void set_element_sizes_phantom_creator_manager(
+  GGEMSPhantomCreatorManager* phantom_creator_manager,
+  GGdouble const voxel_width, GGdouble const voxel_height,
+  GGdouble const voxel_depth);
+
+/*!
+  \fn void set_position_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager, GGdouble const pos_x, GGdouble const pos_y,  GGdouble const pos_z)
+  \param phantom_creator_manager - pointer on the singleton
+  \param pos_x - position x from isocenter
+  \param pos_y - position y from isocenter
+  \param pos_z - position z from isocenter
+  \brief Set position x, y and z of phantom from isocenter
+*/
+extern "C" GGEMS_EXPORT void set_position_phantom_creator_manager(
+  GGEMSPhantomCreatorManager* phantom_creator_manager, GGdouble const pos_x,
+  GGdouble const pos_y,  GGdouble const pos_z);
+
+/*!
+  \fn void set_output_basename_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager, char const* output_basename)
+  \param phantom_creator_manager - pointer on the singleton
+  \param output_MHD_basename - output MHD basename
+  \brief Set the basename of MHD output
+*/
+extern "C" GGEMS_EXPORT void set_output_basename_phantom_creator_manager(
+  GGEMSPhantomCreatorManager* phantom_creator_manager,
+  char const* output_MHD_basename);
 
 #endif // GUARD_GGEMS_GEOMETRY_GGEMSPHANTOMCREATORMANAGER_HH
