@@ -91,7 +91,7 @@ void GGEMSXRaySource::InitializeKernel(void)
 
   // Compiling the kernel
   p_kernel_get_primaries_ = opencl_manager_.CompileKernel(kFilename,
-    "get_primaries_xray_source");
+    "get_primaries_ggems_xray_source");
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -19,7 +19,6 @@
 
 GGEMSPhantomCreatorManager::GGEMSPhantomCreatorManager(void)
 : element_sizes_(GGdouble3{0.0, 0.0, 0.0}),
-  positions_(GGdouble3{0.0, 0.0, 0.0}),
   phantom_dimensions_(GGuint3{0, 0, 0}),
   output_MHD_basename_("")
 {
@@ -47,18 +46,6 @@ void GGEMSPhantomCreatorManager::SetElementSizes(GGdouble const& voxel_width,
   element_sizes_.s[0] = voxel_width;
   element_sizes_.s[1] = voxel_height;
   element_sizes_.s[2] = voxel_depth;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void GGEMSPhantomCreatorManager::SetPosition(GGdouble const& pos_x,
-  GGdouble const& pos_y, GGdouble const& pos_z)
-{
-  positions_.s[0] = pos_x;
-  positions_.s[1] = pos_y;
-  positions_.s[2] = pos_z;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -105,17 +92,6 @@ void set_phantom_dimension_phantom_creator_manager(
 {
   phantom_creator_manager->SetPhantomDimensions(phantom_width, phantom_height,
     phantom_depth);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void set_position_phantom_creator_manager(
-  GGEMSPhantomCreatorManager* phantom_creator_manager, GGdouble const pos_x,
-  GGdouble const pos_y,  GGdouble const pos_z)
-{
-  phantom_creator_manager->SetPosition(pos_x, pos_y, pos_z);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

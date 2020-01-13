@@ -58,14 +58,14 @@ class GGEMS_EXPORT GGEMSSourceManager
   public:
     /*!
       \fn GGEMSSourceManager(GGEMSSourceManager const& ggems_source) = delete
-      \param ggems_manager - reference on the ggems manager
+      \param ggems_source - reference on the ggems source manager
       \brief Avoid copy of the class by reference
     */
     GGEMSSourceManager(GGEMSSourceManager const& ggems_source) = delete;
 
     /*!
       \fn GGEMSSourceManager& operator=(GGEMSSourceManager const& ggems_source) = delete
-      \param ggems_manager - reference on the ggems manager
+      \param ggems_source - reference on the ggems source manager
       \brief Avoid assignement of the class by reference
     */
     GGEMSSourceManager& operator=(
@@ -73,14 +73,14 @@ class GGEMS_EXPORT GGEMSSourceManager
 
     /*!
       \fn GGEMSSourceManager(GGEMSSourceManager const&& ggems_source) = delete
-      \param ggems_manager - rvalue reference on the ggems manager
+      \param ggems_source - rvalue reference on the ggems source manager
       \brief Avoid copy of the class by rvalue reference
     */
     GGEMSSourceManager(GGEMSSourceManager const&& ggems_source) = delete;
 
     /*!
       \fn GGEMSSourceManager& operator=(GGEMSSourceManager const&& ggems_source) = delete
-      \param ggems_manager - rvalue reference on the ggems manager
+      \param ggems_source - rvalue reference on the ggems source manager
       \brief Avoid copy of the class by rvalue reference
     */
     GGEMSSourceManager& operator=(

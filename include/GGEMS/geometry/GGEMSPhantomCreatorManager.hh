@@ -94,16 +94,6 @@ class GGEMS_EXPORT GGEMSPhantomCreatorManager
       GGdouble const& voxel_height, GGdouble const& voxel_depth);
 
     /*!
-      \fn void SetPosition(GGdouble const& pos_x, GGdouble const& pos_y, GGdouble const& pos_z)
-      \param pos_x - position x from isocenter
-      \param pos_y - position y from isocenter
-      \param pos_z - position z from isocenter
-      \brief Set position x, y and z of phantom from isocenter
-    */
-    void SetPosition(GGdouble const& pos_x, GGdouble const& pos_y,
-      GGdouble const& pos_z);
-
-    /*!
       \fn void SetPhantomDimensions(GGuint const& phantom_width, GGuint const& phantom_height, GGuint const& phantom_depth)
       \param phantom_width - phantom width
       \param phantom_height - phatom height
@@ -114,6 +104,23 @@ class GGEMS_EXPORT GGEMSPhantomCreatorManager
       GGuint const& phantom_height, GGuint const& phantom_depth);
 
     /*!
+      \fn GGdouble3 GetElementsSizes(void) const
+      \return a 3d double with the size of voxel in voxelized phantom
+      \brief size of voxels in the voxelized phantom
+    */
+    inline GGdouble3 GetElementsSizes(void) const {return element_sizes_;};
+
+    /*!
+      \fn GGuint3 GetPhantomDimensions(void) const
+      \return a 3d int with the dimenstion of the voxelized phantom
+      \brief dimensions of phantom
+    */
+    inline GGuint3 GetPhantomDimensions(void) const
+    {
+      return phantom_dimensions_;
+    };
+
+    /*!
       \fn void SetOutputBasename(char const* output_MHD_basename)
       \param output_MHD_basename - output MHD basename
       \brief Set the basename of MHD output
@@ -122,7 +129,6 @@ class GGEMS_EXPORT GGEMSPhantomCreatorManager
 
   private:
     GGdouble3 element_sizes_; /*!< Size of voxels of voxelized phantom */
-    GGdouble3 positions_; /*!< Position x, y and z from isocenter */
     GGuint3 phantom_dimensions_; /*!< Dimension of phantom X, Y, Z */
     std::string output_MHD_basename_; /*!< Output MHD where is stored the voxelized phantom */
 };
@@ -159,18 +165,6 @@ extern "C" GGEMS_EXPORT void set_element_sizes_phantom_creator_manager(
   GGEMSPhantomCreatorManager* phantom_creator_manager,
   GGdouble const voxel_width, GGdouble const voxel_height,
   GGdouble const voxel_depth);
-
-/*!
-  \fn void set_position_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager, GGdouble const pos_x, GGdouble const pos_y,  GGdouble const pos_z)
-  \param phantom_creator_manager - pointer on the singleton
-  \param pos_x - position x from isocenter
-  \param pos_y - position y from isocenter
-  \param pos_z - position z from isocenter
-  \brief Set position x, y and z of phantom from isocenter
-*/
-extern "C" GGEMS_EXPORT void set_position_phantom_creator_manager(
-  GGEMSPhantomCreatorManager* phantom_creator_manager, GGdouble const pos_x,
-  GGdouble const pos_y,  GGdouble const pos_z);
 
 /*!
   \fn void set_output_basename_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager, char const* output_basename)
