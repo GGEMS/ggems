@@ -43,28 +43,28 @@ class GGEMS_EXPORT GGEMSXRaySource : public GGEMSSourceManager
   public:
     /*!
       \fn GGEMSXRaySource(GGEMSXRaySource const& xray_source) = delete
-      \param ggems_manager - reference on the ggems manager
+      \param xray_source - reference on the ggems xray source manager
       \brief Avoid copy of the class by reference
     */
     GGEMSXRaySource(GGEMSXRaySource const& xray_source) = delete;
 
     /*!
       \fn GGEMSXRaySource& operator=(GGEMSXRaySource const& xray_source) = delete
-      \param ggems_manager - reference on the ggems manager
+      \param xray_source - reference on the ggems xray source manager
       \brief Avoid assignement of the class by reference
     */
     GGEMSXRaySource& operator=(GGEMSXRaySource const& xray_source) = delete;
 
     /*!
       \fn GGEMSXRaySource(GGEMSXRaySource const&& xray_source) = delete
-      \param ggems_manager - rvalue reference on the ggems manager
+      \param xray_source - rvalue reference on the ggems xray source manager
       \brief Avoid copy of the class by rvalue reference
     */
     GGEMSXRaySource(GGEMSXRaySource const&& xray_source) = delete;
 
     /*!
       \fn GGEMSSourceDefinition& operator=(GGEMSSourceDefinition const&& xray_source) = delete
-      \param ggems_manager - rvalue reference on the ggems manager
+      \param xray_source - rvalue reference on the ggems xray source manager
       \brief Avoid copy of the class by rvalue reference
     */
     GGEMSXRaySource& operator=(GGEMSXRaySource const&& xray_source) = delete;

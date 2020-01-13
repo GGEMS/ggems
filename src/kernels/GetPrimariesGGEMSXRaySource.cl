@@ -6,7 +6,7 @@
 #include "GGEMS/maths/GGEMSMathAlgorithms.hh"
 #include "GGEMS/global/GGEMSConstants.hh"
 
-__kernel void get_primaries_xray_source(
+__kernel void get_primaries_ggems_xray_source(
   __global GGEMSPrimaryParticles* p_primary_particle,
   __global GGEMSRandom* p_random,
   GGuchar const particle_name,
