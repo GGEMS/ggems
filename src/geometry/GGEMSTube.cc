@@ -83,6 +83,9 @@ void GGEMSTube::CheckParameters(void) const
 
 void GGEMSTube::Initialize(void)
 {
+  GGcout("GGEMSTube", "Initialize", 3)
+    << "Initializing GGEMSTube solid volume..." << GGendl;
+
   // Check mandatory parameters
   CheckParameters();
 
@@ -108,29 +111,22 @@ void GGEMSTube::Draw(void)
   cl::CommandQueue* p_queue = opencl_manager_.GetCommandQueue();
   cl::Event* p_event = opencl_manager_.GetEvent();
 
-  // Get the OpenCL buffers
-  /*cl::Buffer* p_particles = p_particle_->GetPrimaryParticles();
-  cl::Buffer* p_randoms = p_pseudo_random_generator_->GetPseudoRandomNumbers();
-  cl::Buffer* p_matrix_transformation =
-    p_geometry_transformation_->GetTransformationMatrix();
-*/
   // Get parameters from phantom creator
   GGdouble3 const kVoxelSizes = phantom_creator_manager_.GetElementsSizes();
   GGuint3 const kPhantomDimensions =
     phantom_creator_manager_.GetPhantomDimensions();
-  GGuint const kNumberThreads = kPhantomDimensions.s[0] *
-    kPhantomDimensions.s[1] * kPhantomDimensions.s[2];
+  GGulong const kNumberThreads = phantom_creator_manager_.GetNumberElements();
+  cl::Buffer* p_voxelized_phantom =
+    phantom_creator_manager_.GetVoxelizedPhantom();
 
   // Set parameters for kernel
   p_kernel_draw_solid_->setArg(0, kVoxelSizes);
   p_kernel_draw_solid_->setArg(1, kPhantomDimensions);
-  /*p_kernel_get_primaries_->setArg(2, particle_type_);
-  p_kernel_get_primaries_->setArg(3, *p_energy_spectrum_);
-  p_kernel_get_primaries_->setArg(4, *p_cdf_);
-  p_kernel_get_primaries_->setArg(5, number_of_energy_bins_);
-  p_kernel_get_primaries_->setArg(6, beam_aperture_);
-  p_kernel_get_primaries_->setArg(7, focal_spot_size_);
-  p_kernel_get_primaries_->setArg(8, *p_matrix_transformation);*/
+  p_kernel_draw_solid_->setArg(2, positions_);
+  p_kernel_draw_solid_->setArg(3, label_value_);
+  p_kernel_draw_solid_->setArg(4, height_);
+  p_kernel_draw_solid_->setArg(5, radius_);
+  p_kernel_draw_solid_->setArg(6, *p_voxelized_phantom);
 
   // Define the number of work-item to launch
   cl::NDRange global(kNumberThreads);
@@ -139,11 +135,11 @@ void GGEMSTube::Draw(void)
   // Launching kernel
   cl_int kernel_status = p_queue->enqueueNDRangeKernel(*p_kernel_draw_solid_,
     offset, global, cl::NullRange, nullptr, p_event);
-  opencl_manager_.CheckOpenCLError(kernel_status, "GGEMSTube", "Draw");
+  opencl_manager_.CheckOpenCLError(kernel_status, "GGEMSTube", "Draw Tube");
   p_queue->finish(); // Wait until the kernel status is finish
 
   // Displaying time in kernel
-  opencl_manager_.DisplayElapsedTimeInKernel("Draw");
+  opencl_manager_.DisplayElapsedTimeInKernel("Draw Tube");
 }
 
 ////////////////////////////////////////////////////////////////////////////////

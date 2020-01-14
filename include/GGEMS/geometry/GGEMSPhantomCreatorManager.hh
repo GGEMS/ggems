@@ -19,6 +19,7 @@
 
 #include "GGEMS/global/GGEMSExport.hh"
 #include "GGEMS/tools/GGEMSTypes.hh"
+#include "GGEMS/global/GGEMSOpenCLManager.hh"
 
 /*!
   \class GGEMSPhantomCreatorManager
@@ -108,7 +109,7 @@ class GGEMS_EXPORT GGEMSPhantomCreatorManager
       \return a 3d double with the size of voxel in voxelized phantom
       \brief size of voxels in the voxelized phantom
     */
-    inline GGdouble3 GetElementsSizes(void) const {return element_sizes_;};
+    inline GGdouble3 GetElementsSizes(void) const {return element_sizes_;}
 
     /*!
       \fn GGuint3 GetPhantomDimensions(void) const
@@ -121,16 +122,67 @@ class GGEMS_EXPORT GGEMSPhantomCreatorManager
     };
 
     /*!
-      \fn void SetOutputBasename(char const* output_MHD_basename)
-      \param output_MHD_basename - output MHD basename
+      \fn GGulong GetNumberElements(void)
+      \return number of voxel in the voxelized phantom
+      \brief Return the total number of voxels
+    */
+    inline GGulong GetNumberElements(void) const {return number_elements_;}
+
+    /*!
+      \fn cl::Buffer* GetVoxelizedPhantom(void) const
+      \return pointer on OpenCL device storing voxelized phantom
+      \brief Return the voxelized phantom on OpenCL device
+    */
+    inline cl::Buffer* GetVoxelizedPhantom(void) const
+    {
+      return p_voxelized_phantom_;
+    }
+
+    /*!
+      \fn void SetOutputBasename(char const* output_basename, char const* format)
+      \param output_basename - output basename
+      \param format - format of the output file
       \brief Set the basename of MHD output
     */
-    void SetOutputBasename(char const* output_MHD_basename);
+    void SetOutputBasename(char const* output_basename, char const* format);
+
+    /*!
+      \fn void Initialize(void)
+      \brief Initialize the Phantom Creator manager
+    */
+    void Initialize(void);
+
+    /*!
+      \fn void Write(void)
+      \brief Save the voxelized phantom to raw data in mhd file
+    */
+    void Write(void);
+
+  private:
+    /*!
+      \fn void CheckParameters(void) const
+      \brief Check the mandatory parameters
+    */
+    void CheckParameters(void) const;
+
+    /*!
+      \fn void WriteMHD(void)
+      \brief Write output MHD file
+    */
+    void WriteMHD(void);
 
   private:
     GGdouble3 element_sizes_; /*!< Size of voxels of voxelized phantom */
     GGuint3 phantom_dimensions_; /*!< Dimension of phantom X, Y, Z */
-    std::string output_MHD_basename_; /*!< Output MHD where is stored the voxelized phantom */
+    GGulong number_elements_; /*!< Total number of elements */
+    std::string output_basename_; /*!< Output MHD where is stored the voxelized phantom */
+    std::string format_; /*!< Format of the output file */
+
+  private: // OpenCL buffer
+    cl::Buffer* p_voxelized_phantom_; /*!< Voxelized phantom on OpenCL device */
+
+  private:
+    GGEMSOpenCLManager& opencl_manager_; /*!< Reference to opencl manager singleton */
 };
 
 /*!
@@ -174,6 +226,22 @@ extern "C" GGEMS_EXPORT void set_element_sizes_phantom_creator_manager(
 */
 extern "C" GGEMS_EXPORT void set_output_basename_phantom_creator_manager(
   GGEMSPhantomCreatorManager* phantom_creator_manager,
-  char const* output_MHD_basename);
+  char const* output_basename, char const* format);
+
+/*!
+  \fn void initialize_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager)
+  \param phantom_creator_manager - pointer on the singleton
+  \brief Initialize the phantom creator manager
+*/
+extern "C" GGEMS_EXPORT void initialize_phantom_creator_manager(
+  GGEMSPhantomCreatorManager* phantom_creator_manager);
+
+/*!
+  \fn void write_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager)
+  \param phantom_creator_manager - pointer on the singleton
+  \brief Save the voxelized phantom to raw data in mhd file
+*/
+extern "C" GGEMS_EXPORT void write_phantom_creator_manager(
+  GGEMSPhantomCreatorManager* phantom_creator_manager);
 
 #endif // GUARD_GGEMS_GEOMETRY_GGEMSPHANTOMCREATORMANAGER_HH

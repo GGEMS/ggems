@@ -19,7 +19,7 @@
 
 GGEMSVolumeSolid::GGEMSVolumeSolid(void)
 : label_value_(1.0),
-  position_(GGdouble3{0.0,0.0,0.0}),
+  positions_(GGdouble3{0.0,0.0,0.0}),
   p_kernel_draw_solid_(nullptr),
   opencl_manager_(GGEMSOpenCLManager::GetInstance()),
   phantom_creator_manager_(GGEMSPhantomCreatorManager::GetInstance())
@@ -54,7 +54,7 @@ void GGEMSVolumeSolid::SetLabelValue(GGfloat const& label_value)
 void GGEMSVolumeSolid::SetPosition(GGdouble const& pos_x, GGdouble const& pos_y,
   GGdouble const& pos_z)
 {
-  position_.s[0] = pos_x;
-  position_.s[0] = pos_z;
-  position_.s[0] = pos_y;
+  positions_.s[0] = pos_x;
+  positions_.s[1] = pos_y;
+  positions_.s[2] = pos_z;
 }

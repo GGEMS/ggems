@@ -304,6 +304,13 @@ class GGEMSPhantomCreatorManager(object):
         ggems_lib.set_output_basename_phantom_creator_manager.restype =\
             ctypes.c_void_p
 
+        ggems_lib.initialize_phantom_creator_manager.argtypes = [
+            ctypes.c_void_p]
+        ggems_lib.initialize_phantom_creator_manager.restype = ctypes.c_void_p
+
+        ggems_lib.write_phantom_creator_manager.argtypes = [ctypes.c_void_p]
+        ggems_lib.write_phantom_creator_manager.restype = ctypes.c_void_p
+
         self.obj = ggems_lib.get_instance_phantom_creator_manager()
 
     def set_dimensions(self, width, height, depth):
@@ -314,9 +321,15 @@ class GGEMSPhantomCreatorManager(object):
         ggems_lib.set_element_sizes_phantom_creator_manager(
             self.obj, width, height, depth)
 
-    def set_mhd_output(self, output):
+    def set_output(self, output, format):
         ggems_lib.set_output_basename_phantom_creator_manager(
-            self.obj, output)
+            self.obj, output, format)
+
+    def initialize(self):
+        ggems_lib.initialize_phantom_creator_manager(self.obj)
+
+    def write(self):
+        ggems_lib.write_phantom_creator_manager(self.obj)
 
 
 class GGEMSTube(object):
