@@ -2,61 +2,55 @@
 
 __kernel void draw_ggems_tube(
   GGdouble3 const element_sizes,
-  GGuint3 const phantom_dimensions)
+  GGuint3 const phantom_dimensions,
+  GGdouble3 const positions,
+  GGfloat const label_value,
+  GGdouble const height,
+  GGdouble const radius,
+  __global GGfloat* p_voxelized_phantom
+)
 {
   // Getting index of thread
   GGint const kGlobalIndex = get_global_id(0);
 
-/*
-	// Take the arguments of the line
-	double xCoord = 0.0, yCoord = 0.0, zCoord = 0.0, radius = 0.0, height = 0.0;
-	unsigned short value = 0;
+  // Get dimension of voxelized phantom
+  GGuint const kX = phantom_dimensions.x;
+  GGuint const kY = phantom_dimensions.y;
+  GGuint const kZ = phantom_dimensions.z;
 
-	// Scanning the line
-	sscanf( line, "%*s %lf %lf %lf %lf %lf %hu", &xCoord, &yCoord, &zCoord,
-		&radius, &height, &value );
+  // Get size of voxels
+  GGdouble const kSizeX = element_sizes.x;
+  GGdouble const kSizeY = element_sizes.y;
+  GGdouble const kSizeZ = element_sizes.z;
 
-	fprintf( stdout, "Drawing cylinder in %4.3f %4.3f %4.3f mm, ", xCoord, yCoord,
-		zCoord );
-	fprintf( stdout, "radius: %4.3f mm, height: %4.3f mm, value: %u ...\n",
-		radius, height, value );
+  // Get the isocenter position of solid
+  GGdouble const kPosIsoX = positions.x;
+  GGdouble const kPosIsoY = positions.y;
+  GGdouble const kPosIsoZ = positions.z;
 
-	// Taking the dimensions and sizes
-	unsigned short const w = self->nX_;
-	unsigned short const h = self->nY_;
-	unsigned short const d = self->nZ_;
+  // Radius square and half of height
+  GGdouble const kR2 = radius * radius;
+  GGdouble const kHalfHeight = height / 2.0;
 
-	// Size of voxels
-	double const vxlSzX = self->xSize_;
-	double const vxlSzY = self->ySize_;
-	double const vxlSzZ = self->zSize_;
+  // Get index i, j and k of current voxel
+  GGuint const j = (kGlobalIndex % (kX * kY)) / kX;
+  GGuint const i = (kGlobalIndex % (kX * kY)) - j * kX;
+  GGuint const k = kGlobalIndex / (kX * kY);
 
-	// Conditions to be in the cylinder
-	// ( x - x0 ) * ( x - x0 ) + ( y - y0 ) * ( y - y0 ) <= radius
-	// -H / 2 < ( z - z0 ) < H / 2
+  // Get the coordinates of the current voxel
+  GGdouble x = (kSizeX / 2.0) * (1.0 - (GGdouble)kX + 2.0 * i);
+  GGdouble y = (kSizeY / 2.0) * (1.0 - (GGdouble)kY + 2.0 * j);
+  GGdouble z = (kSizeZ / 2.0) * (1.0 - (GGdouble)kZ + 2.0 * k);
 
-	double const r = radius * radius;
-	double const h2 = height / 2.0;
+  // Apply solid isocenter
+  x -= kPosIsoX;
+  y -= kPosIsoY;
+  z -= kPosIsoZ;
 
-	// Take the pointer on the stack
-	unsigned short* p = self->data_;
-
-	// Loop over the whole stack
-	for( unsigned short z = 0; z < d; ++z )
-	{
-		double Z = ( z + 0.5 ) * vxlSzZ - zCoord;
-		for( unsigned short y = 0; y < h; ++y )
-		{
-			double Y = ( y + 0.5 ) * vxlSzY - yCoord;
-			for( unsigned short x = 0; x < w; ++x )
-			{
-				double X = ( x + 0.5 ) * vxlSzX - xCoord;
-				if( X * X + Y * Y <= r && Z >= -h2 && Z <= h2 )
-				{
-					*p = value;
-				}
-				++p; // Increment the stack
-			}
-		}
-	}*/
+  // Check if voxel is outside/inside analytical volume
+  if (z <= kHalfHeight && z >= -kHalfHeight) {
+    if (x * x + y * y <= kR2) {
+      p_voxelized_phantom[kGlobalIndex] = label_value;
+    }
+  }
 }

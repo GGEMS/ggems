@@ -61,13 +61,13 @@ GGEMSXRaySource::~GGEMSXRaySource(void)
   // Freeing the device buffers
   if (p_energy_spectrum_) {
     opencl_manager_.Deallocate(p_energy_spectrum_,
-      number_of_energy_bins_ * sizeof(cl_double));
+      number_of_energy_bins_ * sizeof(GGdouble));
     p_energy_spectrum_ = nullptr;
   }
 
   if (p_cdf_) {
     opencl_manager_.Deallocate(p_cdf_,
-      number_of_energy_bins_ * sizeof(cl_double));
+      number_of_energy_bins_ * sizeof(GGdouble));
     p_cdf_ = nullptr;
   }
 
@@ -292,28 +292,25 @@ void GGEMSXRaySource::FillEnergy(void)
 {
   GGcout("GGEMSXRaySource", "FillEnergy", 3) << "Filling energy..." << GGendl;
 
-  // Get the pointer on OpenCL Manager
-  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
-
   // Monoenergy mode
   if (is_monoenergy_mode_) {
     number_of_energy_bins_ = 2;
 
     // Allocation of memory on OpenCL device
     // Energy
-    p_energy_spectrum_ = opencl_manager.Allocate(nullptr, 2 * sizeof(GGdouble),
+    p_energy_spectrum_ = opencl_manager_.Allocate(nullptr, 2 * sizeof(GGdouble),
       CL_MEM_READ_WRITE);
 
     // Cumulative distribution function
-    p_cdf_ = opencl_manager.Allocate(nullptr, 2 * sizeof(GGdouble),
+    p_cdf_ = opencl_manager_.Allocate(nullptr, 2 * sizeof(GGdouble),
       CL_MEM_READ_WRITE);
 
     // Get the energy pointer on OpenCL device
-    cl_double* p_energy_spectrum = opencl_manager.GetDeviceBuffer<GGdouble>(
+    cl_double* p_energy_spectrum = opencl_manager_.GetDeviceBuffer<GGdouble>(
       p_energy_spectrum_, 2 * sizeof(GGdouble));
 
     // Get the cdf pointer on OpenCL device
-    cl_double* p_cdf = opencl_manager.GetDeviceBuffer<GGdouble>(p_cdf_,
+    cl_double* p_cdf = opencl_manager_.GetDeviceBuffer<GGdouble>(p_cdf_,
       2 * sizeof(GGdouble));
 
     p_energy_spectrum[0] = static_cast<GGdouble>(monoenergy_);
@@ -323,8 +320,8 @@ void GGEMSXRaySource::FillEnergy(void)
     p_cdf[1] = 1.0;
 
     // Release the pointers
-    opencl_manager.ReleaseDeviceBuffer(p_energy_spectrum_, p_energy_spectrum);
-    opencl_manager.ReleaseDeviceBuffer(p_cdf_, p_cdf);
+    opencl_manager_.ReleaseDeviceBuffer(p_energy_spectrum_, p_energy_spectrum);
+    opencl_manager_.ReleaseDeviceBuffer(p_cdf_, p_cdf);
   }
   else { // Polyenergy mode 
     // Read a first time the spectrum file counting the number of lines
@@ -342,19 +339,19 @@ void GGEMSXRaySource::FillEnergy(void)
 
     // Allocation of memory on OpenCL device
     // Energy
-    p_energy_spectrum_ = opencl_manager.Allocate(nullptr,
+    p_energy_spectrum_ = opencl_manager_.Allocate(nullptr,
       number_of_energy_bins_ * sizeof(GGdouble), CL_MEM_READ_WRITE);
 
     // Cumulative distribution function
-    p_cdf_ = opencl_manager.Allocate(nullptr,
+    p_cdf_ = opencl_manager_.Allocate(nullptr,
       number_of_energy_bins_ * sizeof(GGdouble), CL_MEM_READ_WRITE);
 
     // Get the energy pointer on OpenCL device
-    GGdouble* p_energy_spectrum = opencl_manager.GetDeviceBuffer<GGdouble>(
+    GGdouble* p_energy_spectrum = opencl_manager_.GetDeviceBuffer<GGdouble>(
       p_energy_spectrum_, number_of_energy_bins_ * sizeof(GGdouble));
 
     // Get the cdf pointer on OpenCL device
-    GGdouble* p_cdf = opencl_manager.GetDeviceBuffer<GGdouble>(p_cdf_,
+    GGdouble* p_cdf = opencl_manager_.GetDeviceBuffer<GGdouble>(p_cdf_,
       number_of_energy_bins_ * sizeof(GGdouble));
 
     // Read the input spectrum and computing the sum for the cdf
@@ -369,7 +366,7 @@ void GGEMSXRaySource::FillEnergy(void)
 
     // Compute CDF and normalized it
     p_cdf[0] /= sum_cdf;
-    for (cl_uint i = 1; i < number_of_energy_bins_; ++i) {
+    for (GGuint i = 1; i < number_of_energy_bins_; ++i) {
       p_cdf[i] = p_cdf[i]/sum_cdf + p_cdf[i-1];
     }
 
@@ -377,8 +374,8 @@ void GGEMSXRaySource::FillEnergy(void)
     p_cdf[number_of_energy_bins_-1] = 1.0;
 
     // Release the pointers
-    opencl_manager.ReleaseDeviceBuffer(p_energy_spectrum_, p_energy_spectrum);
-    opencl_manager.ReleaseDeviceBuffer(p_cdf_, p_cdf);
+    opencl_manager_.ReleaseDeviceBuffer(p_energy_spectrum_, p_energy_spectrum);
+    opencl_manager_.ReleaseDeviceBuffer(p_cdf_, p_cdf);
 
     // Closing file
     spectrum_stream.close();

@@ -15,7 +15,6 @@
 
 #include "GGEMS/global/GGEMSExport.hh"
 #include "GGEMS/tools/GGEMSTypes.hh"
-#include "GGEMS/global/GGEMSOpenCLManager.hh"
 #include "GGEMS/geometry/GGEMSPhantomCreatorManager.hh"
 
 /*!
@@ -38,28 +37,28 @@ class GGEMS_EXPORT GGEMSVolumeSolid
   public:
     /*!
       \fn GGEMSVolumeSolid(GGEMSVolumeSolid const& volume_solid) = delete
-      \param ggems_manager - reference on the ggems manager
+      \param volume_solid - reference on the volume solid
       \brief Avoid copy of the class by reference
     */
     GGEMSVolumeSolid(GGEMSVolumeSolid const& volume_solid) = delete;
 
     /*!
       \fn GGEMSVolumeSolid& operator=(GGEMSVolumeSolid const& volume_solid) = delete
-      \param ggems_manager - reference on the ggems manager
+      \param volume_solid - reference on the volume solid
       \brief Avoid assignement of the class by reference
     */
     GGEMSVolumeSolid& operator=(GGEMSVolumeSolid const& volume_solid) = delete;
 
     /*!
       \fn GGEMSVolumeSolid(GGEMSVolumeSolid const&& volume_solid) = delete
-      \param ggems_manager - rvalue reference on the ggems manager
+      \param volume_solid - rvalue reference on the volume solid
       \brief Avoid copy of the class by rvalue reference
     */
     GGEMSVolumeSolid(GGEMSVolumeSolid const&& volume_solid) = delete;
 
     /*!
       \fn GGEMSVolumeSolid& operator=(GGEMSVolumeSolid const&& volume_solid) = delete
-      \param ggems_manager - rvalue reference on the ggems manager
+      \param volume_solid - rvalue reference on the volume solid
       \brief Avoid copy of the class by rvalue reference
     */
     GGEMSVolumeSolid& operator=(GGEMSVolumeSolid const&& volume_solid) = delete;
@@ -104,7 +103,7 @@ class GGEMS_EXPORT GGEMSVolumeSolid
 
   protected:
     GGfloat label_value_; /*!< Value of label in solid volume */
-    GGdouble3 position_; /*!< Position of solid volume */
+    GGdouble3 positions_; /*!< Position of solid volume */
 
   protected: // kernel draw solid
     cl::Kernel* p_kernel_draw_solid_; /*!< Kernel drawing solid using OpenCL */
