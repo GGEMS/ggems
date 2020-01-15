@@ -1,5 +1,5 @@
 /*!
-  \file GGEMSMHD.hh
+  \file GGEMSMHDImage.hh
 
   \brief I/O class handling MHD file
 
@@ -12,7 +12,7 @@
 
 #include <fstream>
 
-#include "GGEMS/io/GGEMSMHD.hh"
+#include "GGEMS/io/GGEMSMHDImage.hh"
 #include "GGEMS/tools/GGEMSTools.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
 
@@ -20,31 +20,33 @@
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSMHD::GGEMSMHD(void)
+GGEMSMHDImage::GGEMSMHDImage(void)
 : mhd_header_file_(""),
   mhd_raw_file_(""),
   element_sizes_(GGdouble3{0.0, 0.0, 0.0}),
-  dimensions_(GGuint3{0, 0, 0})
+  dimensions_(GGuint3{0, 0, 0}),
+  offsets_(GGdouble3{0.0, 0.0, 0.0}),
+  opencl_manager_(GGEMSOpenCLManager::GetInstance())
 {
-  GGcout("GGEMSMHD", "GGEMSMHD", 3)
-    << "Allocation of GGEMSMHD..." << GGendl;
+  GGcout("GGEMSMHDImage", "GGEMSMHDImage", 3)
+    << "Allocation of GGEMSMHDImage..." << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSMHD::~GGEMSMHD(void)
+GGEMSMHDImage::~GGEMSMHDImage(void)
 {
-  GGcout("GGEMSMHD", "~GGEMSMHD", 3)
-    << "Deallocation of GGEMSMHD..." << GGendl;
+  GGcout("GGEMSMHDImage", "~GGEMSMHDImage", 3)
+    << "Deallocation of GGEMSMHDImage..." << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSMHD::SetBaseName(std::string const& basename)
+void GGEMSMHDImage::SetBaseName(std::string const& basename)
 {
   mhd_header_file_ = basename + ".mhd";
   mhd_raw_file_ = basename + ".raw";
@@ -54,7 +56,7 @@ void GGEMSMHD::SetBaseName(std::string const& basename)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSMHD::SetElementSizes(GGdouble3 const& element_sizes)
+void GGEMSMHDImage::SetElementSizes(GGdouble3 const& element_sizes)
 {
   element_sizes_ = element_sizes;
 }
@@ -63,7 +65,16 @@ void GGEMSMHD::SetElementSizes(GGdouble3 const& element_sizes)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSMHD::SetDimensions(GGuint3 const& dimensions)
+void GGEMSMHDImage::SetOffsets(GGdouble3 const& offsets)
+{
+  offsets_ = offsets;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSMHDImage::SetDimensions(GGuint3 const& dimensions)
 {
   dimensions_ = dimensions;
 }
@@ -72,49 +83,67 @@ void GGEMSMHD::SetDimensions(GGuint3 const& dimensions)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSMHD::Write(void)
+void GGEMSMHDImage::Write(cl::Buffer* p_image) const
 {
+  GGcout("GGEMSMHDImage", "~GGEMSMHDImage", 0)
+    << "Writing MHD Image..." << GGendl;
+
   // Checking parameters before to write
   CheckParameters();
 
-  // header
+  // header data
   std::ofstream outHeaderStream(mhd_header_file_, std::ios::out);
-
   outHeaderStream << "ObjectType = Image" << std::endl;
   outHeaderStream << "NDims = 3" << std::endl;
   outHeaderStream << "BinaryData = True" << std::endl;
-  outHeaderStream << "BinaryDataByteOrderMSB = False" << std::endl;
   outHeaderStream << "CompressedData = False" << std::endl;
-  outHeaderStream << "TransformMatrix = 1 0 0 0 1 0 0 0 1" << std::endl;
-  outHeaderStream << "CenterOfRotation = 0 0 0" << std::endl;
+  outHeaderStream << "Offset = " << offsets_.s[0] << " " << offsets_.s[1]
+    << " " << offsets_.s[2] << std::endl;
   outHeaderStream << "ElementSpacing = " << element_sizes_.s[0] << " "
     << element_sizes_.s[1] << " " << element_sizes_.s[2] << std::endl;
   outHeaderStream << "DimSize = " << dimensions_.s[0] << " " << dimensions_.s[1]
     << " " << dimensions_.s[2] << std::endl;
+  outHeaderStream << "ElementType = MET_FLOAT" << std::endl;
   outHeaderStream << "ElementDataFile = " << mhd_raw_file_ << std::endl;
-
   outHeaderStream.close();
+
+  // raw data
+  std::ofstream outRawStream(mhd_raw_file_, std::ios::out | std::ios::binary);
+
+  // Mapping data
+  GGfloat* p_data_image = opencl_manager_.GetDeviceBuffer<GGfloat>(
+    p_image,
+    dimensions_.s[0] * dimensions_.s[1] * dimensions_.s[2] * sizeof(GGfloat)
+  );
+
+  // Writing data on file
+  outRawStream.write(reinterpret_cast<char*>(p_data_image),
+    dimensions_.s[0] * dimensions_.s[1] * dimensions_.s[2] * sizeof(GGfloat));
+
+  // Release the pointers
+  opencl_manager_.ReleaseDeviceBuffer(p_image, p_data_image);
+  outRawStream.close();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSMHD::CheckParameters(void) const
+void GGEMSMHDImage::CheckParameters(void) const
 {
   if (mhd_header_file_.empty()) {
-    GGEMSMisc::ThrowException("GGEMSMHD", "CheckParameters",
+    GGEMSMisc::ThrowException("GGEMSMHDImage", "CheckParameters",
       "MHD header filename is empty!!!");
   }
 
   if (mhd_raw_file_.empty()) {
-    GGEMSMisc::ThrowException("GGEMSMHD", "CheckParameters",
+    GGEMSMisc::ThrowException("GGEMSMHDImage", "CheckParameters",
       "MHD raw filename is empty!!!");
   }
 
   // Checking phantom dimensions
   if (dimensions_.s[0] == 0 && dimensions_.s[1] == 0 && dimensions_.s[2] == 0) {
-    GGEMSMisc::ThrowException("GGEMSMHD", "CheckParameters",
+    GGEMSMisc::ThrowException("GGEMSMHDImage", "CheckParameters",
       "Phantom dimensions have to be > 0!!!");
   }
 
@@ -122,7 +151,7 @@ void GGEMSMHD::CheckParameters(void) const
   if (GGEMSMisc::IsEqual(element_sizes_.s[0], 0.0) &&
     GGEMSMisc::IsEqual(element_sizes_.s[1], 0.0) &&
     GGEMSMisc::IsEqual(element_sizes_.s[2], 0.0)) {
-    GGEMSMisc::ThrowException("GGEMSMHD", "CheckParameters",
+    GGEMSMisc::ThrowException("GGEMSMHDImage", "CheckParameters",
       "Phantom voxel sizes have to be > 0.0!!!");
-    }
+  }
 }

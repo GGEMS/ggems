@@ -1,10 +1,10 @@
-#ifndef GUARD_GGEMS_IO_GGEMSMHD_HH
-#define GUARD_GGEMS_IO_GGEMSMHD_HH
+#ifndef GUARD_GGEMS_IO_GGEMSMHDIMAGE_HH
+#define GUARD_GGEMS_IO_GGEMSMHDIMAGE_HH
 
 /*!
-  \file GGEMSMHD.hh
+  \file GGEMSMHDImage.hh
 
-  \brief I/O class handling MHD file
+  \brief I/O class handling MHD image file
 
   \author Julien BERT <julien.bert@univ-brest.fr>
   \author Didier BENOIT <didier.benoit@inserm.fr>
@@ -19,52 +19,53 @@
 
 #include "GGEMS/global/GGEMSExport.hh"
 #include "GGEMS/tools/GGEMSTypes.hh"
+#include "GGEMS/global/GGEMSOpenCLManager.hh"
 
 /*!
-  \class GGEMSMHD
+  \class GGEMSMHDImage
   \brief I/O class handling MHD file
 */
-class GGEMS_EXPORT GGEMSMHD
+class GGEMS_EXPORT GGEMSMHDImage
 {
   public:
     /*!
-      \brief GGEMSMHD constructor
+      \brief GGEMSMHDImage constructor
     */
-    GGEMSMHD(void);
+    GGEMSMHDImage(void);
 
     /*!
-      \brief GGEMSMHD destructor
+      \brief GGEMSMHDImage destructor
     */
-    ~GGEMSMHD(void);
+    ~GGEMSMHDImage(void);
 
   public:
     /*!
-      \fn GGEMSMHD(GGEMSMHD const& mhd) = delete
+      \fn GGEMSMHDImage(GGEMSMHDImage const& mhd) = delete
       \param mhd - reference on the mhd file
       \brief Avoid copy of the class by reference
     */
-    GGEMSMHD(GGEMSMHD const& mhd) = delete;
+    GGEMSMHDImage(GGEMSMHDImage const& mhd) = delete;
 
     /*!
-      \fn GGEMSMHD& operator=(GGEMSMHD const& mhd) = delete
+      \fn GGEMSMHDImage& operator=(GGEMSMHDImage const& mhd) = delete
       \param mhd - reference on the mhd file
       \brief Avoid assignement of the class by reference
     */
-    GGEMSMHD& operator=(GGEMSMHD const& mhd) = delete;
+    GGEMSMHDImage& operator=(GGEMSMHDImage const& mhd) = delete;
 
     /*!
-      \fn GGEMSMHD(GGEMSMHD const&& mhd) = delete
+      \fn GGEMSMHDImage(GGEMSMHDImage const&& mhd) = delete
       \param mhd - rvalue reference on the mhd file
       \brief Avoid copy of the class by rvalue reference
     */
-    GGEMSMHD(GGEMSMHD const&& mhd) = delete;
+    GGEMSMHDImage(GGEMSMHDImage const&& mhd) = delete;
 
     /*!
-      \fn GGEMSMHD& operator=(GGEMSMHD const&& mhd) = delete
+      \fn GGEMSMHDImage& operator=(GGEMSMHDImage const&& mhd) = delete
       \param mhd - rvalue reference on the mhd file
       \brief Avoid copy of the class by rvalue reference
     */
-    GGEMSMHD& operator=(GGEMSMHD const&& mhd) = delete;
+    GGEMSMHDImage& operator=(GGEMSMHDImage const&& mhd) = delete;
 
   public:
     /*!
@@ -75,10 +76,11 @@ class GGEMS_EXPORT GGEMSMHD
     void SetBaseName(std::string const& basename);
 
     /*!
-      \fn void Write(void)
+      \fn void Write(cl::Buffer* p_image) const
+      \param p_image - image to write on output file
       \brief Write mhd header/raw file
     */
-    void Write(void);
+    void Write(cl::Buffer* p_image) const;
 
     /*!
       \fn void SetElementSizes(GGdouble3 const& element_sizes)
@@ -94,6 +96,13 @@ class GGEMS_EXPORT GGEMSMHD
     */
     void SetDimensions(GGuint3 const& dimensions);
 
+    /*!
+      \fn void SetOffsets(GGdouble3 const& offsets)
+      \param offsets - offset of image in X, Y, Z
+      \brief set offsets for the image
+    */
+    void SetOffsets(GGdouble3 const& offsets);
+
   private:
     /*!
       \fn void CheckParameters(void) const
@@ -106,6 +115,10 @@ class GGEMS_EXPORT GGEMSMHD
     std::string mhd_raw_file_; /*!< Name of the MHD raw file */
     GGdouble3 element_sizes_; /*!< Size of elements */
     GGuint3 dimensions_; /*!< Dimension volume X, Y, Z */
+    GGdouble3 offsets_; /*!< Offset of the image */
+
+  private:
+    GGEMSOpenCLManager& opencl_manager_; /*!< Reference to opencl manager singleton */
 };
 
-#endif // End of GUARD_GGEMS_IO_GGEMSMHD_HH
+#endif // End of GUARD_GGEMS_IO_GGEMSMHDIMAGE_HH

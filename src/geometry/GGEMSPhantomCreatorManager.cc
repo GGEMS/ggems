@@ -15,7 +15,7 @@
 #include "GGEMS/geometry/GGEMSPhantomCreatorManager.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
 #include "GGEMS/tools/GGEMSTools.hh"
-#include "GGEMS/io/GGEMSMHD.hh"
+#include "GGEMS/io/GGEMSMHDImage.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -25,6 +25,8 @@ GGEMSPhantomCreatorManager::GGEMSPhantomCreatorManager(void)
 : element_sizes_(GGdouble3{0.0, 0.0, 0.0}),
   phantom_dimensions_(GGuint3{0, 0, 0}),
   number_elements_(0),
+  offsets_(GGdouble3{0.0, 0.0, 0.0}),
+  isocenter_position_(GGdouble3{0.0, 0.0, 0.0}),
   output_basename_(""),
   format_(""),
   p_voxelized_phantom_(nullptr),
@@ -75,6 +77,19 @@ void GGEMSPhantomCreatorManager::SetPhantomDimensions(
   phantom_dimensions_.s[1] = phantom_height;
   phantom_dimensions_.s[2] = phantom_depth;
   number_elements_ = phantom_width * phantom_height * phantom_depth;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSPhantomCreatorManager::SetIsocenterPositions(
+  GGdouble const& iso_pos_x, GGdouble const& iso_pos_y,
+  GGdouble const& iso_pos_z)
+{
+  isocenter_position_.s[0] = iso_pos_x;
+  isocenter_position_.s[1] = iso_pos_y;
+  isocenter_position_.s[2] = iso_pos_z;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -158,55 +173,48 @@ void GGEMSPhantomCreatorManager::Initialize(void)
   // Release the pointers
   opencl_manager_.ReleaseDeviceBuffer(p_voxelized_phantom_,
     p_voxelized_phantom);
+
+  // Computing the phantom offsets
+  offsets_.s[0] = phantom_dimensions_.s[0]*element_sizes_.s[0];
+  offsets_.s[1] = phantom_dimensions_.s[1]*element_sizes_.s[1];
+  offsets_.s[2] = phantom_dimensions_.s[2]*element_sizes_.s[2];
+
+  offsets_.s[0] /= 2.0;
+  offsets_.s[1] /= 2.0;
+  offsets_.s[2] /= 2.0;
+
+  // Apply volume position
+  offsets_.s[0] += isocenter_position_.s[0];
+  offsets_.s[1] += isocenter_position_.s[1];
+  offsets_.s[2] += isocenter_position_.s[2];
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSPhantomCreatorManager::Write(void)
+void GGEMSPhantomCreatorManager::Write(void) const
 {
   // Write output in the correct format
-  if (format_ == "mhd") WriteMHD();
-
-  // Writing header of raw data
-
-  // Writing raw data
-  // Name of the raw data file
-/*  std::string const kRawFilename = output_MHD_basename_ + ".raw";
-  std::ofstream outputStream(kRawFilename, std::ios::out | std::ios::binary);
-
-  // Map voxelized phantom from OpenCL memory
-  GGfloat* p_voxelized_phantom = opencl_manager_.GetDeviceBuffer<GGfloat>(
-    p_voxelized_phantom_, number_elements_ * sizeof(GGfloat));
-
-  // Writing data on file
-  outputStream.write(reinterpret_cast<char*>(p_voxelized_phantom),
-    number_elements_ * sizeof(GGfloat));
-
-  // Release the pointers
-  opencl_manager_.ReleaseDeviceBuffer(p_voxelized_phantom_,
-    p_voxelized_phantom);
-
-  // Closing stream
-  outputStream.close();*/
+  if (format_ == "mhd") WriteMHDImage();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSPhantomCreatorManager::WriteMHD(void)
+void GGEMSPhantomCreatorManager::WriteMHDImage(void) const
 {
   GGcout("GGEMSPhantomCreatorManager", "WriteMHD", 3)
     << "Writing MHD output file..." << GGendl;
 
   // Write MHD file
-  GGEMSMHD mhd;
-  mhd.SetBaseName(output_basename_);
-  mhd.SetDimensions(phantom_dimensions_);
-  mhd.SetElementSizes(element_sizes_);
-  mhd.Write();
+  GGEMSMHDImage mhdImage;
+  mhdImage.SetBaseName(output_basename_);
+  mhdImage.SetDimensions(phantom_dimensions_);
+  mhdImage.SetElementSizes(element_sizes_);
+  mhdImage.SetOffsets(offsets_);
+  mhdImage.Write(p_voxelized_phantom_);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -242,6 +250,19 @@ void set_element_sizes_phantom_creator_manager(
 {
   phantom_creator_manager->SetElementSizes(voxel_width, voxel_height,
     voxel_depth);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void set_isocenter_positions(
+  GGEMSPhantomCreatorManager* phantom_creator_manager,
+  GGdouble const iso_pos_x, GGdouble const iso_pos_y,
+  GGdouble const iso_pos_z)
+{
+  phantom_creator_manager->SetIsocenterPositions(iso_pos_x, iso_pos_y,
+    iso_pos_z);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
