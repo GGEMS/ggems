@@ -95,6 +95,13 @@ class GGEMS_EXPORT GGEMSPhantomCreatorManager
       GGdouble const& voxel_height, GGdouble const& voxel_depth);
 
     /*!
+      \fn GGdouble3 GetElementsSizes(void) const
+      \return a 3d double with the size of voxel in voxelized phantom
+      \brief size of voxels in the voxelized phantom
+    */
+    inline GGdouble3 GetElementsSizes(void) const {return element_sizes_;}
+
+    /*!
       \fn void SetPhantomDimensions(GGuint const& phantom_width, GGuint const& phantom_height, GGuint const& phantom_depth)
       \param phantom_width - phantom width
       \param phantom_height - phatom height
@@ -105,13 +112,6 @@ class GGEMS_EXPORT GGEMSPhantomCreatorManager
       GGuint const& phantom_height, GGuint const& phantom_depth);
 
     /*!
-      \fn GGdouble3 GetElementsSizes(void) const
-      \return a 3d double with the size of voxel in voxelized phantom
-      \brief size of voxels in the voxelized phantom
-    */
-    inline GGdouble3 GetElementsSizes(void) const {return element_sizes_;}
-
-    /*!
       \fn GGuint3 GetPhantomDimensions(void) const
       \return a 3d int with the dimenstion of the voxelized phantom
       \brief dimensions of phantom
@@ -120,6 +120,23 @@ class GGEMS_EXPORT GGEMSPhantomCreatorManager
     {
       return phantom_dimensions_;
     };
+
+    /*!
+      \fn void SetIsocenterPositions(GGdouble const& iso_pos_x, GGdouble const& iso_pos_y, GGdouble const& iso_pos_z)
+      \param iso_pos_x - Isocenter position in X
+      \param iso_pos_x - Isocenter position in X
+      \param iso_pos_x - Isocenter position in X
+      \brief Set isocenter position of the phantom
+    */
+    void SetIsocenterPositions(GGdouble const& iso_pos_x,
+      GGdouble const& iso_pos_y, GGdouble const& iso_pos_z);
+
+    /*!
+      \fn GGdouble3 GetIsocenterPositions(void) const
+      \return double buffer with offsets
+      \brief return offset of phantom taking account isocenter position
+    */
+    inline GGdouble3 GetOffsets(void) const {return offsets_;}
 
     /*!
       \fn GGulong GetNumberElements(void)
@@ -153,10 +170,10 @@ class GGEMS_EXPORT GGEMSPhantomCreatorManager
     void Initialize(void);
 
     /*!
-      \fn void Write(void)
+      \fn void Write(void) const
       \brief Save the voxelized phantom to raw data in mhd file
     */
-    void Write(void);
+    void Write(void) const;
 
   private:
     /*!
@@ -166,15 +183,17 @@ class GGEMS_EXPORT GGEMSPhantomCreatorManager
     void CheckParameters(void) const;
 
     /*!
-      \fn void WriteMHD(void)
+      \fn void WriteMHDImage(void) const
       \brief Write output MHD file
     */
-    void WriteMHD(void);
+    void WriteMHDImage(void) const;
 
   private:
     GGdouble3 element_sizes_; /*!< Size of voxels of voxelized phantom */
     GGuint3 phantom_dimensions_; /*!< Dimension of phantom X, Y, Z */
     GGulong number_elements_; /*!< Total number of elements */
+    GGdouble3 offsets_; /*!< Offset of the phantom taking account of isocenter position */
+    GGdouble3 isocenter_position_; /*!< Isocenter position of the phantom */
     std::string output_basename_; /*!< Output MHD where is stored the voxelized phantom */
     std::string format_; /*!< Format of the output file */
 
@@ -217,6 +236,18 @@ extern "C" GGEMS_EXPORT void set_element_sizes_phantom_creator_manager(
   GGEMSPhantomCreatorManager* phantom_creator_manager,
   GGdouble const voxel_width, GGdouble const voxel_height,
   GGdouble const voxel_depth);
+
+/*!
+  \fn void set_isocenter_positions(GGEMSPhantomCreatorManager* phantom_creator_manager, GGdouble const& iso_pos_x, GGdouble const& iso_pos_y, GGdouble const& iso_pos_z)
+  \param iso_pos_x - Isocenter position in X
+  \param iso_pos_x - Isocenter position in X
+  \param iso_pos_x - Isocenter position in X
+  \brief Set isocenter position of the phantom
+*/
+extern "C" GGEMS_EXPORT void set_isocenter_positions(
+  GGEMSPhantomCreatorManager* phantom_creator_manager,
+  GGdouble const iso_pos_x, GGdouble const iso_pos_y,
+  GGdouble const iso_pos_z);
 
 /*!
   \fn void set_output_basename_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager, char const* output_basename)

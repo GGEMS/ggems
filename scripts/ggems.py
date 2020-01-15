@@ -311,6 +311,10 @@ class GGEMSPhantomCreatorManager(object):
         ggems_lib.write_phantom_creator_manager.argtypes = [ctypes.c_void_p]
         ggems_lib.write_phantom_creator_manager.restype = ctypes.c_void_p
 
+        ggems_lib.set_isocenter_positions.argtypes = [
+            ctypes.c_void_p, ctypes.c_double, ctypes.c_double, ctypes.c_double]
+        ggems_lib.set_isocenter_positions.restype = ctypes.c_void_p
+
         self.obj = ggems_lib.get_instance_phantom_creator_manager()
 
     def set_dimensions(self, width, height, depth):
@@ -330,6 +334,10 @@ class GGEMSPhantomCreatorManager(object):
 
     def write(self):
         ggems_lib.write_phantom_creator_manager(self.obj)
+
+    def set_isocenter_positions(self, iso_pos_x, iso_pos_y, iso_pos_z):
+        ggems_lib.set_isocenter_positions(
+            self.obj, iso_pos_x, iso_pos_y, iso_pos_z)
 
 
 class GGEMSTube(object):

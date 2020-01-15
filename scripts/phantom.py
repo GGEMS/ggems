@@ -2,7 +2,7 @@ import ggems
 
 # ------------------------------------------------------------------------------
 # STEP 1: Setting global verbosity
-ggems.GGEMSVerbosity(1)
+ggems.GGEMSVerbosity(0)
 
 # ------------------------------------------------------------------------------
 # STEP 2: OpenCL Initialization
@@ -16,6 +16,7 @@ opencl_manager.print_infos()  # Printing informations about OpenCL
 phantom_creator_manager = ggems.GGEMSPhantomCreatorManager()
 phantom_creator_manager.set_dimensions(400, 320, 800)
 phantom_creator_manager.set_element_sizes(0.375, 0.5, 0.625)
+phantom_creator_manager.set_isocenter_positions(0.0, 0.0, 0.0)
 phantom_creator_manager.set_output(b"phantom1", b"mhd")
 phantom_creator_manager.initialize()
 
