@@ -22,11 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 GGEMSPhantomCreatorManager::GGEMSPhantomCreatorManager(void)
-: element_sizes_(GGdouble3{0.0, 0.0, 0.0}),
-  phantom_dimensions_(GGuint3{0, 0, 0}),
+: element_sizes_(GGdouble3{{0.0, 0.0, 0.0}}),
+  phantom_dimensions_(GGuint3{{0, 0, 0}}),
   number_elements_(0),
-  offsets_(GGdouble3{0.0, 0.0, 0.0}),
-  isocenter_position_(GGdouble3{0.0, 0.0, 0.0}),
+  offsets_(GGdouble3{{0.0, 0.0, 0.0}}),
+  isocenter_position_(GGdouble3{{0.0, 0.0, 0.0}}),
   output_basename_(""),
   format_(""),
   p_voxelized_phantom_(nullptr),

@@ -23,9 +23,9 @@
 GGEMSMHDImage::GGEMSMHDImage(void)
 : mhd_header_file_(""),
   mhd_raw_file_(""),
-  element_sizes_(GGdouble3{0.0, 0.0, 0.0}),
-  dimensions_(GGuint3{0, 0, 0}),
-  offsets_(GGdouble3{0.0, 0.0, 0.0}),
+  element_sizes_(GGdouble3{{0.0, 0.0, 0.0}}),
+  dimensions_(GGuint3{{0, 0, 0}}),
+  offsets_(GGdouble3{{0.0, 0.0, 0.0}}),
   opencl_manager_(GGEMSOpenCLManager::GetInstance())
 {
   GGcout("GGEMSMHDImage", "GGEMSMHDImage", 3)
