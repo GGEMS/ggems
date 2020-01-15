@@ -29,5 +29,3 @@ Si possible, faire la visualization sur carte graphique avec OpenCL
 - Prévoir place pour les kernel customs
 
 - Faire une physics list automatique en fonction du type de particule
-
-- Faire un GGEMSMHDImage et GGEMSMHDPhaseSpace

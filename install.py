@@ -10,23 +10,18 @@ if sys.platform == "linux" or sys.platform == "darwin":
     os.environ['CC'] = 'clang-9'
     os.environ['CXX'] = 'clang++-9'
 elif sys.platform == "win32":
-    os.environ['COMPILER'] = 'CL'
-    os.environ['CC'] = 'cl.exe'
-    os.environ['CXX'] = 'cl.exe'
+    os.environ['COMPILER'] = 'CLANG'
+    os.environ['CC'] = 'clang.exe'
+    os.environ['CXX'] = 'clang++.exe'
 else:  # Unknown system
     print("Unknown architecture!!!", file=sys.stderr)
 
 # ------------------------------------------------------------------------------
 # Set the GGEMS folder (GGEMS source folder), the build folder (where GGEMS
 # will be compiled) and the install folder
-if sys.platform == "linux" or sys.platform == "darwin":
-    GGEMS_FOLDER = "/home/dbenoit/Desktop/GGEMS"
-    BUILD_FOLDER = "/home/dbenoit/data/Build/GGEMS_OpenCL"
-    INSTALL_FOLDER = "/home/dbenoit"
-elif sys.platform == "win32":
-    GGEMS_FOLDER = "C:\\Users\\dbenoit\\Workspace\\GGEMS_OpenCL"
-    BUILD_FOLDER = "C:\\Users\\dbenoit\\Workspace\\GGEMS_OpenCL_build"
-    INSTALL_FOLDER = "C:\\Users\\dbenoit"
+GGEMS_FOLDER = os.path.abspath(os.path.dirname(sys.argv[0]))
+BUILD_FOLDER = os.path.join(os.path.dirname(GGEMS_FOLDER),"GGEMS_OpenCL_build")
+INSTALL_FOLDER = os.path.expanduser("~")
 
 # ------------------------------------------------------------------------------
 # Print infos
