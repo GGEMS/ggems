@@ -25,7 +25,7 @@
 
 class GGEMSParticles;
 class GGEMSPseudoRandomGenerator;
-class GGEMSSourceManager;
+//class GGEMSSourceManager;
 class GGEMSOpenCLManager;
 
 /*!
@@ -264,7 +264,7 @@ class GGEMS_EXPORT GGEMSManager
     GGEMSPseudoRandomGenerator* p_pseudo_random_generator_; /*!< Pointer on pseudo random generator */
 
   private: // Source management
-    GGEMSSourceManager& source_manager_; /*!< Reference to source manager singleton */
+    //GGEMSSourceManager& source_manager_; /*!< Reference to source manager singleton */
     GGEMSOpenCLManager& opencl_manager_; /*!< Reference to opencl manager singleton */
 };
 

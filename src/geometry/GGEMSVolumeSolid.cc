@@ -19,7 +19,7 @@
 
 GGEMSVolumeSolid::GGEMSVolumeSolid(void)
 : label_value_(1.0),
-  positions_(GGdouble3{0.0,0.0,0.0}),
+  positions_(GGdouble3{{0.0, 0.0, 0.0}}),
   p_kernel_draw_solid_(nullptr),
   opencl_manager_(GGEMSOpenCLManager::GetInstance()),
   phantom_creator_manager_(GGEMSPhantomCreatorManager::GetInstance())

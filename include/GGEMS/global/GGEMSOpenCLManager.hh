@@ -168,7 +168,7 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     */
     inline cl::Context* GetContext(void) const
     {
-      return vp_contexts_act_cl_.at(0);
+      return p_contexts_act_.front();
     };
 
   private: // OpenCL command queue
@@ -191,7 +191,7 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     */
     inline cl::CommandQueue* GetCommandQueue(void) const
     {
-      return vp_queues_act_cl_.at(0);
+      return p_queues_act_.front();
     }
 
   private: // OpenCL event
@@ -208,7 +208,7 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     */
     inline cl::Event* GetEvent(void) const
     {
-      return vp_event_act_cl_.at(0);
+      return p_event_act_.front();
     }
 
   public:
@@ -323,11 +323,11 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     void CheckRAMMemory(std::size_t const& size);
 
   private: // Platforms
-    std::vector<cl::Platform> v_platforms_cl_; /*!< Vector of platforms */
+    std::vector<cl::Platform> platforms_; /*!< Vector of platforms */
     std::string *p_platform_vendor_; /*!< Vendor of the platform */
 
   private: // Devices
-    std::vector<cl::Device*> vp_devices_cl_; /*!< Vector of pointers of devices */
+    std::vector<cl::Device*> p_devices_; /*!< Vector of pointers of devices */
     cl_device_type *p_device_device_type_; /*!< Type of device */
     std::string *p_device_vendor_; /*!< Vendor of the device */
     std::string *p_device_version_; /*!< Version of the device */
@@ -354,21 +354,21 @@ class GGEMS_EXPORT GGEMSOpenCLManager
 
   private: // Context and informations about them
     GGuint context_index_; /*!< Index of the activated context */
-    std::vector<cl::Context*> vp_contexts_cl_; /*!< Vector of context */
-    std::vector<cl::Context*> vp_contexts_cpu_cl_; /*!< Vector of CPU context */
-    std::vector<cl::Context*> vp_contexts_gpu_cl_; /*!< Vector of GPU context */
-    std::vector<cl::Context*> vp_contexts_act_cl_; /*!< Activated context */
+    std::vector<cl::Context*> p_contexts_; /*!< Vector of context */
+    std::vector<cl::Context*> p_contexts_cpu_; /*!< Vector of CPU context */
+    std::vector<cl::Context*> p_contexts_gpu_; /*!< Vector of GPU context */
+    std::vector<cl::Context*> p_contexts_act_; /*!< Activated context */
 
   private: // Command queue informations
-    std::vector<cl::CommandQueue*> vp_queues_cl_; /*!< Command queue for all the context */
-    std::vector<cl::CommandQueue*> vp_queues_act_cl_; /*!< Activated command queue */
+    std::vector<cl::CommandQueue*> p_queues_; /*!< Command queue for all the context */
+    std::vector<cl::CommandQueue*> p_queues_act_; /*!< Activated command queue */
 
   private: // OpenCL event
-    std::vector<cl::Event*> vp_event_cl_; /*!< List of pointer to OpenCL event, for profiling */
-    std::vector<cl::Event*> vp_event_act_cl_; /*!< Activated event */
+    std::vector<cl::Event*> p_event_; /*!< List of pointer to OpenCL event, for profiling */
+    std::vector<cl::Event*> p_event_act_; /*!< Activated event */
 
   private: // Kernels
-    std::vector<cl::Kernel*> vp_kernel_cl_; /*!< List of pointer to OpenCL kernel */
+    std::vector<cl::Kernel*> p_kernel_; /*!< List of pointer to OpenCL kernel */
 
   private: // RAM handler
     GGulong *p_used_ram_; /*!< Memory RAM used by context */
@@ -382,7 +382,7 @@ T* GGEMSOpenCLManager::GetDeviceBuffer(cl::Buffer* const p_device_ptr,
     << "Getting mapped memory buffer on OpenCL device..." << GGendl;
 
   GGint err = 0;
-  T* ptr = static_cast<T*>(vp_queues_act_cl_.at(0)->enqueueMapBuffer(
+  T* ptr = static_cast<T*>(p_queues_act_.front()->enqueueMapBuffer(
     *p_device_ptr, CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, 0, size, nullptr,
     nullptr, &err));
   CheckOpenCLError(err, "GGEMSOpenCLManager", "GetDeviceBuffer");
@@ -397,7 +397,7 @@ void GGEMSOpenCLManager::ReleaseDeviceBuffer(cl::Buffer* const p_device_ptr,
     << "Releasing mapped memory buffer on OpenCL device..." << GGendl;
 
   // Unmap the memory
-  CheckOpenCLError(vp_queues_act_cl_.at(0)->enqueueUnmapMemObject(*p_device_ptr,
+  CheckOpenCLError(p_queues_act_.front()->enqueueUnmapMemObject(*p_device_ptr,
     p_host_ptr), "GGEMSOpenCLManager", "ReleaseDeviceBuffer");
 }
 

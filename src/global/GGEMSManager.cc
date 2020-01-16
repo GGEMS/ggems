@@ -23,7 +23,7 @@
 #include <unistd.h>
 #endif
 
-#include "GGEMS/sources/GGEMSSourceManager.hh"
+//#include "GGEMS/sources/GGEMSSourceManager.hh"
 
 #include "GGEMS/tools/GGEMSSystemOfUnits.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
@@ -62,7 +62,7 @@ GGEMSManager::GGEMSManager(void)
   cross_section_table_energy_max_(GGEMSLimit::CROSS_SECTION_TABLE_ENERGY_MAX),
   p_particle_(nullptr),
   p_pseudo_random_generator_(nullptr),
-  source_manager_(GGEMSSourceManager::GetInstance()),
+  //source_manager_(GGEMSSourceManager::GetInstance()),
   opencl_manager_(GGEMSOpenCLManager::GetInstance())
 {
   GGcout("GGEMSManager", "GGEMSManager", 3)
@@ -430,17 +430,11 @@ void GGEMSManager::Initialize()
     << "Initialization of GGEMS pseudo random generator OK" << GGendl;
 
   // Give particle and random to source
-  source_manager_.SetParticle(p_particle_);
-  source_manager_.SetRandomGenerator(p_pseudo_random_generator_);
+  //source_manager_.SetParticle(p_particle_);
+  //source_manager_.SetRandomGenerator(p_pseudo_random_generator_);
 
   // Initialization of the source
-  source_manager_.Initialize();
-  // Checking if the source is defined by the user
-  if (!source_manager_.IsReady()) {
-    std::ostringstream oss(std::ostringstream::out);
-    oss << "Problem during the source initialization!!!";
-    GGEMSMisc::ThrowException("GGEMSManager", "Initialize", oss.str());
-  }
+  //source_manager_.Initialize();
 
   // Printing informations about the simulation
   PrintInfos();
@@ -466,7 +460,7 @@ void GGEMSManager::Run()
     // Generating particles
     GGcout("GGEMSManager", "Run", 0) << "      + Generating "
       << v_number_of_particles_in_batch_[i] << " particles..." << GGendl;
-    source_manager_.GetPrimaries(v_number_of_particles_in_batch_[i]);
+    //source_manager_.GetPrimaries(v_number_of_particles_in_batch_[i]);
   }
 
   // Get the end time
@@ -477,6 +471,9 @@ void GGEMSManager::Run()
 
   // Display the elapsed time in GGEMS
   GGEMSChrono::DisplayTime(end_time - start_time, "GGEMS simulation");
+
+  // Cleaning source
+  //source_manager_.DeleteInstance();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
