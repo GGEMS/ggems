@@ -10,7 +10,7 @@
   \date Tuesday October 22, 2019
 */
 
-#include <sstream>
+/*#include <sstream>
 
 #include "GGEMS/sources/GGEMSXRaySource.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
@@ -399,9 +399,6 @@ void GGEMSXRaySource::Initialize(void)
 
   // Filling the energy
   FillEnergy();
-
-  // The source is initialized
-  is_initialized_ = true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -430,15 +427,6 @@ void GGEMSXRaySource::SetFocalSpotSize(GGfloat const& width,
 GGEMSXRaySource* create_ggems_xray_source(void)
 {
   return GGEMSXRaySource::GetInstance();
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void delete_ggems_xray_source(void)
-{
-  GGEMSSourceManager::DeleteInstance();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -553,4 +541,4 @@ void set_polyenergy_ggems_xray_source(GGEMSXRaySource* p_source_manager,
   char const* energy_spectrum)
 {
   p_source_manager->SetPolyenergy(energy_spectrum);
-}
+}*/
