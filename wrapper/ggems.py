@@ -86,11 +86,11 @@ class GGEMSVerbosity(object):
         ggems_lib.set_ggems_verbose(val)
 
 
-# class GGEMSXRaySource(object):
-    # """GGEMS XRay source class managing source for CT/CBCT simulation
-    # """
-    # def __init__(self):
-        # ggems_lib.create_ggems_xray_source.restype = ctypes.c_void_p
+class GGEMSXRaySource(object):
+    """GGEMS XRay source class managing source for CT/CBCT simulation
+    """
+    def __init__(self):
+        ggems_lib.create_ggems_xray_source.restype = ctypes.c_void_p
 
         # ggems_lib.initialize_ggems_xray_source.argtypes = [ctypes.c_void_p]
         # ggems_lib.initialize_ggems_xray_source.restype = ctypes.c_void_p
@@ -99,13 +99,13 @@ class GGEMSVerbosity(object):
         #     ctypes.c_void_p, ctypes.c_float, ctypes.c_float, ctypes.c_float]
         # ggems_lib.set_position_ggems_xray_source.restype = ctypes.c_void_p
 
-        # ggems_lib.print_infos_ggems_xray_source.argtypes = [ctypes.c_void_p]
-        # ggems_lib.print_infos_ggems_xray_source.restype = ctypes.c_void_p
+        ggems_lib.print_infos_ggems_xray_source.argtypes = [ctypes.c_void_p]
+        ggems_lib.print_infos_ggems_xray_source.restype = ctypes.c_void_p
 
-        # ggems_lib.set_source_particle_type_ggems_xray_source.argtypes = [
-            # ctypes.c_void_p, ctypes.c_char_p]
-        # ggems_lib.set_source_particle_type_ggems_xray_source.restype =\
-            # ctypes.c_void_p
+        ggems_lib.set_source_particle_type_ggems_xray_source.argtypes = [
+            ctypes.c_void_p, ctypes.c_char_p]
+        ggems_lib.set_source_particle_type_ggems_xray_source.restype =\
+            ctypes.c_void_p
 
         # ggems_lib.set_beam_aperture_ggems_xray_source.argtypes = [
             # ctypes.c_void_p, ctypes.c_float]
@@ -140,7 +140,7 @@ class GGEMSVerbosity(object):
             # ctypes.c_void_p, ctypes.c_char_p]
         # ggems_lib.set_polyenergy_ggems_xray_source.restype = ctypes.c_void_p
 
-        # self.obj = ggems_lib.create_ggems_xray_source()
+        self.obj = ggems_lib.create_ggems_xray_source()
 
     # def initialize(self):
         # ggems_lib.initialize_ggems_xray_source(self.obj)
@@ -148,12 +148,12 @@ class GGEMSVerbosity(object):
     # def set_position(self, x, y, z):
         # ggems_lib.set_position_ggems_xray_source(self.obj, x, y, z)
 
-    # def print_infos(self):
-        # ggems_lib.print_infos_ggems_xray_source(self.obj)
+    def print_infos(self):
+        ggems_lib.print_infos_ggems_xray_source(self.obj)
 
-    # def set_source_particle_type(self, particle_type):
-        # ggems_lib.set_source_particle_type_ggems_xray_source(
-            # self.obj, particle_type)
+    def set_source_particle_type(self, particle_type):
+        ggems_lib.set_source_particle_type_ggems_xray_source(
+            self.obj, particle_type)
 
     # def set_beam_aperture(self, beam_aperture):
         # ggems_lib.set_beam_aperture_ggems_xray_source(self.obj, beam_aperture)

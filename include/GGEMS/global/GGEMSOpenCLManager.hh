@@ -96,6 +96,12 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     */
     void Clean(void);
 
+    /*!
+      \fn GGbool IsReady(void) const
+      \param Checking if the OpenCL manager is ready, it means if a context is set
+    */
+    GGbool IsReady(void) const;
+
   public: // Error stream management
     /*!
       \fn void CheckOpenCLError(GGint const& error, std::string const& class_name, std::string const& method_name) const

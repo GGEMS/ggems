@@ -23,7 +23,7 @@
 #include <unistd.h>
 #endif
 
-//#include "GGEMS/sources/GGEMSSourceManager.hh"
+#include "GGEMS/sources/GGEMSSourceManager.hh"
 
 #include "GGEMS/tools/GGEMSSystemOfUnits.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
@@ -62,7 +62,7 @@ GGEMSManager::GGEMSManager(void)
   cross_section_table_energy_max_(GGEMSLimit::CROSS_SECTION_TABLE_ENERGY_MAX),
   p_particle_(nullptr),
   p_pseudo_random_generator_(nullptr),
-  //source_manager_(GGEMSSourceManager::GetInstance()),
+  source_manager_(GGEMSSourceManager::GetInstance()),
   opencl_manager_(GGEMSOpenCLManager::GetInstance())
 {
   GGcout("GGEMSManager", "GGEMSManager", 3)
@@ -76,6 +76,9 @@ GGEMSManager::GGEMSManager(void)
 
   // Allocation of particle
   p_particle_ = new GGEMSParticles();
+
+  std::cout << "n source: " << source_manager_.GetNumberOfSources() << std::endl;
+  source_manager_.Print();
 
   // Allocation of pseudo random generator
   p_pseudo_random_generator_ = new GGEMSPseudoRandomGenerator();

@@ -17,10 +17,12 @@
 #pragma warning(disable: 4251) // Deleting warning exporting STL members!!!
 #endif
 
-#include "GGEMS/global/GGEMSExport.hh"
 #include <vector>
 
-class GGEMSSource;
+#include "GGEMS/global/GGEMSExport.hh"
+#include "GGEMS/tools/GGEMSTypes.hh"
+
+#include "GGEMS/sources/GGEMSSource.hh"
 
 /*!
   \class GGEMSSourceManager
@@ -81,6 +83,21 @@ class GGEMS_EXPORT GGEMSSourceManager
     */
     GGEMSSourceManager& operator=(GGEMSSourceManager const&& source_manager)
       = delete;
+
+  public:
+    /*!
+      \fn void Store(GGEMSSource* p_source)
+      \brief store a source in the source manager
+    */
+    void Store(GGEMSSource* p_source);
+
+    inline std::size_t GetNumberOfSources(void) const {return p_source_.size();}
+    inline void Print(void) const
+    {
+      for (std::size_t i = 0; i < p_source_.size(); ++i) {
+        p_source_[i]->PrintInfos();
+      }
+    }
 
   private:
     std::vector<GGEMSSource*> p_source_; /*! Vector storing the sources in GGEMS */

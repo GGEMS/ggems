@@ -14,60 +14,24 @@
 */
 
 //#include "GGEMS/global/GGEMSExport.hh"
-//#include "GGEMS/sources/GGEMSSource.hh"
+#include "GGEMS/sources/GGEMSSource.hh"
 
 /*!
   \class GGEMSXRaySource
   \brief This class define a XRay source in GGEMS useful for CT/CBCT simulation
 */
-//class GGEMS_EXPORT GGEMSXRaySource : public GGEMSSource
-//{
- // public:
-    /*!
-      \fn static GGEMSXRaySource* GetInstance()
-      \brief Create at first time the Singleton
-    */
-  //  static GGEMSXRaySource* GetInstance() {return new GGEMSXRaySource;};
-
- // protected:
+class GGEMS_EXPORT GGEMSXRaySource : public GGEMSSource
+{
+  public:
     /*!
       \brief GGEMSXRaySource constructor
     */
-  //  GGEMSXRaySource(void);
+    GGEMSXRaySource(void);
 
     /*!
       \brief GGEMSXRaySource destructor
     */
-   // ~GGEMSXRaySource(void);
-
- // public:
-    /*!
-      \fn GGEMSXRaySource(GGEMSXRaySource const& xray_source) = delete
-      \param xray_source - reference on the ggems xray source manager
-      \brief Avoid copy of the class by reference
-    */
- //   GGEMSXRaySource(GGEMSXRaySource const& xray_source) = delete;
-
-    /*!
-      \fn GGEMSXRaySource& operator=(GGEMSXRaySource const& xray_source) = delete
-      \param xray_source - reference on the ggems xray source manager
-      \brief Avoid assignement of the class by reference
-    */
-  //  GGEMSXRaySource& operator=(GGEMSXRaySource const& xray_source) = delete;
-
-    /*!
-      \fn GGEMSXRaySource(GGEMSXRaySource const&& xray_source) = delete
-      \param xray_source - rvalue reference on the ggems xray source manager
-      \brief Avoid copy of the class by rvalue reference
-    */
- //   GGEMSXRaySource(GGEMSXRaySource const&& xray_source) = delete;
-
-    /*!
-      \fn GGEMSSourceDefinition& operator=(GGEMSSourceDefinition const&& xray_source) = delete
-      \param xray_source - rvalue reference on the ggems xray source manager
-      \brief Avoid copy of the class by rvalue reference
-    */
-  //  GGEMSXRaySource& operator=(GGEMSXRaySource const&& xray_source) = delete;
+    ~GGEMSXRaySource(void);
 
  // public: // Pure abstract method from GGEMSSourceManager
     /*!
@@ -83,10 +47,10 @@
  //   void Initialize(void);
 
     /*!
-      \fn void PrintInfos(void)
+      \fn void PrintInfos(void) override
       \brief Printing infos about the source
     */
- //   void PrintInfos(void) const;
+    void PrintInfos(void) const override;
 
  // public:
     /*!
@@ -139,24 +103,34 @@
     */
   //  void InitializeKernel(void);
 
- // private: // Specific members for GGEMSXRaySource
- //   GGfloat beam_aperture_; /*!< Beam aperture of the x-ray source */
- //   GGfloat3 focal_spot_size_; /*!< Focal spot size of the x-ray source */
- //   GGbool is_monoenergy_mode_; /*!< Boolean checking the mode of energy */
-  //  GGfloat monoenergy_; /*!< Monoenergy mode */
- //   std::string energy_spectrum_filename_; /*!< The energy spectrum filename for polyenergetic mode */
- //   GGuint number_of_energy_bins_; /*!< Number of energy bins for the polyenergetic mode */
+  public:
+    /*!
+      \fn inline GGEMSSource* Clone(void) const = 0
+      \brief Clone class to store it in source manager
+    */
+    inline GGEMSXRaySource* Clone() const override
+    {
+      return new GGEMSXRaySource(*this);
+    }
 
- // private: // Buffer for OpenCL
- //   cl::Buffer* p_energy_spectrum_; /*!< Energy spectrum for OpenCL device */
- //   cl::Buffer* p_cdf_; /*!< Cumulative distribution function to generate a random energy */
-//};
+  private: // Specific members for GGEMSXRaySource
+    GGfloat beam_aperture_; /*!< Beam aperture of the x-ray source */
+    GGfloat3 focal_spot_size_; /*!< Focal spot size of the x-ray source */
+    GGbool is_monoenergy_mode_; /*!< Boolean checking the mode of energy */
+    GGfloat monoenergy_; /*!< Monoenergy mode */
+    std::string energy_spectrum_filename_; /*!< The energy spectrum filename for polyenergetic mode */
+    GGuint number_of_energy_bins_; /*!< Number of energy bins for the polyenergetic mode */
+
+  private: // Buffer for OpenCL
+    cl::Buffer* p_energy_spectrum_; /*!< Energy spectrum for OpenCL device */
+    cl::Buffer* p_cdf_; /*!< Cumulative distribution function to generate a random energy */
+};
 
 /*!
   \fn GGEMSXRaySource* create_ggems_xray_source(void)
   \brief Get the GGEMSXRaySource pointer for python user.
 */
-//extern "C" GGEMS_EXPORT GGEMSXRaySource* create_ggems_xray_source(void);
+extern "C" GGEMS_EXPORT GGEMSXRaySource* create_ggems_xray_source(void);
 
 /*!
   \fn void initialize_ggems_xray_source(GGEMSXRaySource* source_manager)
@@ -183,8 +157,8 @@
   \param p_source_manager - pointer on the source
   \brief Print infos about the GGEMSXRaySource
 */
-//extern "C" GGEMS_EXPORT void print_infos_ggems_xray_source(
-  //GGEMSXRaySource* p_source_manager);
+extern "C" GGEMS_EXPORT void print_infos_ggems_xray_source(
+  GGEMSXRaySource* p_source_manager);
 
 /*!
   \fn void set_source_particle_type_ggems_xray_source(GGEMSXRaySource* p_source_manager, char const* particle_name)
@@ -192,8 +166,8 @@
   \param particle_name - name/type of the particle: photon or electron
   \brief Set the type of the source particle
 */
-//extern "C" GGEMS_EXPORT void set_source_particle_type_ggems_xray_source(
-  //GGEMSXRaySource* p_source_manager, char const* particle_name);
+extern "C" GGEMS_EXPORT void set_source_particle_type_ggems_xray_source(
+  GGEMSXRaySource* p_source_manager, char const* particle_name);
 
 /*!
   \fn void set_beam_aperture_ggems_xray_source(GGEMSXRaySource* p_source_manager, GGfloat const beam_aperture)

@@ -10,77 +10,58 @@
   \date Tuesday October 15, 2019
 */
 
-#include "GGEMS/sources/GGEMSSource.hh"
-
-/*#include <algorithm>
 #include <sstream>
+#include <algorithm>
 
-
-#include "GGEMS/tools/GGEMSPrint.hh"
-#include "GGEMS/tools/GGEMSTools.hh"
 #include "GGEMS/global/GGEMSConstants.hh"
+#include "GGEMS/sources/GGEMSSource.hh"
 #include "GGEMS/maths/GGEMSGeometryTransformation.hh"
-
-#ifdef _WIN32
-#ifdef min
-#undef min
-#endif
-#endif
+#include "GGEMS/tools/GGEMSTools.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSSourceManager::GGEMSSourceManager()
+GGEMSSource::GGEMSSource(void)
 : particle_type_(99),
   p_kernel_get_primaries_(nullptr),
   p_particle_(nullptr),
   p_pseudo_random_generator_(nullptr),
   opencl_manager_(GGEMSOpenCLManager::GetInstance())
 {
-  GGcout("GGEMSSourceManager", "GGEMSSourceManager", 3)
-    << "Allocation of GGEMSSourceManager..." << GGendl;
+  GGcout("GGEMSSource", "GGEMSSource", 3)
+    << "Allocation of GGEMSSource..." << GGendl;
+
+  // Checking if a context is activated
+  if (!opencl_manager_.IsReady()) {
+    GGEMSMisc::ThrowException("GGEMSSource", "GGEMSSource",
+      "OpenCL Manager is not ready, you have to choose a context!!!");
+  }
 
   // Allocation of geometry transformation
   p_geometry_transformation_ = new GGEMSGeometryTransformation;
-
-  // Storing the pointer
-  p_current_source_ = this;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSSourceManager::~GGEMSSourceManager(void)
+GGEMSSource::~GGEMSSource(void)
 {
   if (p_geometry_transformation_) {
     delete p_geometry_transformation_;
     p_geometry_transformation_ = nullptr;
   }
 
-  GGcout("GGEMSSourceManager", "~GGEMSSourceManager", 3)
-    << "Deallocation of GGEMSSourceManager..." << GGendl;
+  GGcout("GGEMSSource", "~GGEMSSource", 3)
+    << "Deallocation of GGEMSSource..." << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSSourceManager::DeleteInstance(void)
-{
-  if (p_current_source_)
-  {
-    delete p_current_source_;
-    p_current_source_ = nullptr;
-  }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void GGEMSSourceManager::SetPosition(GGfloat const& pos_x, GGfloat const& pos_y,
+void GGEMSSource::SetPosition(GGfloat const& pos_x, GGfloat const& pos_y,
   GGfloat const& pos_z)
 {
   p_geometry_transformation_->SetTranslation(
@@ -91,7 +72,7 @@ void GGEMSSourceManager::SetPosition(GGfloat const& pos_x, GGfloat const& pos_y,
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSSourceManager::SetParticle(GGEMSParticles* const p_particle)
+void GGEMSSource::SetParticle(GGEMSParticles* const p_particle)
 {
   p_particle_ = p_particle;
 }
@@ -100,7 +81,7 @@ void GGEMSSourceManager::SetParticle(GGEMSParticles* const p_particle)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSSourceManager::SetRandomGenerator(
+void GGEMSSource::SetRandomGenerator(
   GGEMSPseudoRandomGenerator* const p_random_generator)
 {
   p_pseudo_random_generator_ = p_random_generator;
@@ -110,7 +91,7 @@ void GGEMSSourceManager::SetRandomGenerator(
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSSourceManager::SetSourceParticleType(char const* particle_type)
+void GGEMSSource::SetSourceParticleType(char const* particle_type)
 {
   // Convert the particle type in string
   std::string particle_type_str(particle_type);
@@ -136,7 +117,7 @@ void GGEMSSourceManager::SetSourceParticleType(char const* particle_type)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSSourceManager::SetLocalAxis(
+void GGEMSSource::SetLocalAxis(
   GGfloat const& m00, GGfloat const& m01, GGfloat const& m02,
   GGfloat const& m10, GGfloat const& m11, GGfloat const& m12,
   GGfloat const& m20, GGfloat const& m21, GGfloat const& m22)
@@ -152,7 +133,7 @@ void GGEMSSourceManager::SetLocalAxis(
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSSourceManager::SetRotation(GGfloat const& rx, GGfloat const& ry,
+void GGEMSSource::SetRotation(GGfloat const& rx, GGfloat const& ry,
   GGfloat const& rz)
 {
   p_geometry_transformation_->SetRotation(MakeFloat3(rx, ry, rz));
@@ -162,7 +143,7 @@ void GGEMSSourceManager::SetRotation(GGfloat const& rx, GGfloat const& ry,
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSSourceManager::UpdateRotation(GGfloat const& rx, GGfloat const& ry,
+void GGEMSSource::UpdateRotation(GGfloat const& rx, GGfloat const& ry,
   GGfloat const& rz)
 {
   p_geometry_transformation_->SetRotation(MakeFloat3(rx, ry, rz));
@@ -172,9 +153,9 @@ void GGEMSSourceManager::UpdateRotation(GGfloat const& rx, GGfloat const& ry,
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSSourceManager::CheckParameters(void) const
+void GGEMSSource::CheckParameters(void) const
 {
-  GGcout("GGEMSSourceManager", "CheckParameters", 3)
+  GGcout("GGEMSSource", "CheckParameters", 3)
     << "Checking the mandatory parameters..." << GGendl;
 
   // Checking the type of particles
@@ -183,16 +164,14 @@ void GGEMSSourceManager::CheckParameters(void) const
     oss << "You have to set a particle type for the source:" << std::endl;
     oss << "    - Photon" << std::endl;
     oss << "    - Electron" << std::endl;
-    GGEMSMisc::ThrowException("GGEMSSourceManager", "CheckParameters",
-      oss.str());
+    GGEMSMisc::ThrowException("GGEMSSource", "CheckParameters", oss.str());
   }
 
   // Checking the particle pointer
   if (!p_particle_) {
     std::ostringstream oss(std::ostringstream::out);
     oss << "The particle pointer is empty in source manager!!!" << std::endl;
-    GGEMSMisc::ThrowException("GGEMSSourceManager", "CheckParameters",
-      oss.str());
+    GGEMSMisc::ThrowException("GGEMSSource", "CheckParameters", oss.str());
   }
 
   // Checking the random generator pointer
@@ -200,8 +179,7 @@ void GGEMSSourceManager::CheckParameters(void) const
     std::ostringstream oss(std::ostringstream::out);
     oss << "The random generator pointer is empty in source manager!!!"
       << std::endl;
-    GGEMSMisc::ThrowException("GGEMSSourceManager", "CheckParameters",
-      oss.str());
+    GGEMSMisc::ThrowException("GGEMSSource", "CheckParameters", oss.str());
   }
 
   // Checking the position of particles
@@ -211,8 +189,7 @@ void GGEMSSourceManager::CheckParameters(void) const
       GGEMSMisc::IsEqual(kPosition.s[2], std::numeric_limits<float>::min())) {
     std::ostringstream oss(std::ostringstream::out);
     oss << "You have to set a position for the source!!!";
-    GGEMSMisc::ThrowException("GGEMSSourceManager", "CheckParameters",
-      oss.str());
+    GGEMSMisc::ThrowException("GGEMSSource", "CheckParameters", oss.str());
   }
 
   // Checking the rotation of particles
@@ -222,8 +199,6 @@ void GGEMSSourceManager::CheckParameters(void) const
       GGEMSMisc::IsEqual(kRotation.s[2], std::numeric_limits<float>::min())) {
     std::ostringstream oss(std::ostringstream::out);
     oss << "You have to set a rotation for the source!!!";
-    GGEMSMisc::ThrowException("GGEMSSourceManager", "CheckParameters",
-      oss.str());
+    GGEMSMisc::ThrowException("GGEMSSource", "CheckParameters", oss.str());
   }
 }
-*/

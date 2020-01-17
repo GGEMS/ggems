@@ -63,23 +63,23 @@ class GGEMS_EXPORT GGEMSTube : public GGEMSVolumeSolid
 
   public:
     /*!
-      \fn void Initialize(void)
+      \fn void Initialize(void) override
       \brief Initialize the solid and store it in Phantom creator manager
     */
-    void Initialize(void);
+    void Initialize(void) override;
 
     /*!
       \fn void Draw(void)
       \brief Draw analytical volume in voxelized phantom
     */
-    void Draw(void);
+    void Draw(void) override;
 
   protected:
     /*!
       \fn void CheckParameters(void) const
       \brief check parameters for each type of volume
     */
-    void CheckParameters(void) const;
+    void CheckParameters(void) const override;
 
   private:
     GGdouble height_; /*!< Height of the cylinder */

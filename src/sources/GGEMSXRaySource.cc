@@ -10,22 +10,25 @@
   \date Tuesday October 22, 2019
 */
 
+#include "GGEMS/sources/GGEMSXRaySource.hh"
+#include "GGEMS/sources/GGEMSSourceManager.hh"
+#include "GGEMS/maths/GGEMSGeometryTransformation.hh"
+#include "GGEMS/global/GGEMSConstants.hh"
+
 /*#include <sstream>
 
-#include "GGEMS/sources/GGEMSXRaySource.hh"
-#include "GGEMS/tools/GGEMSPrint.hh"
 #include "GGEMS/tools/GGEMSTools.hh"
-#include "GGEMS/global/GGEMSConstants.hh"
-#include "GGEMS/maths/GGEMSGeometryTransformation.hh"
+
+
 #include "GGEMS/processes/GGEMSParticles.hh"
-#include "GGEMS/randoms/GGEMSPseudoRandomGenerator.hh"
+#include "GGEMS/randoms/GGEMSPseudoRandomGenerator.hh"*/
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
 GGEMSXRaySource::GGEMSXRaySource(void)
-: GGEMSSourceManager(),
+: GGEMSSource(),
   beam_aperture_(std::numeric_limits<GGfloat>::min()),
   is_monoenergy_mode_(false),
   monoenergy_(-1.0f),
@@ -50,6 +53,11 @@ GGEMSXRaySource::GGEMSXRaySource(void)
     0.0f, 1.0f, 0.0f,
     1.0f, 0.0f, 0.0f
   );
+
+  // Call the source manager
+  GGEMSSourceManager& source_manager = GGEMSSourceManager::GetInstance();
+  // Storing the source
+  source_manager.Store(this);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -74,7 +82,7 @@ GGEMSXRaySource::~GGEMSXRaySource(void)
   GGcout("GGEMSXRaySource", "~GGEMSXRaySource", 3)
     << "Deallocation of GGEMSXRaySource..." << GGendl;
 }
-
+/*
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -137,7 +145,7 @@ void GGEMSXRaySource::GetPrimaries(GGulong const& number_of_particles)
 
   // Displaying time in kernel
   opencl_manager_.DisplayElapsedTimeInKernel("GetPrimaries");
-}
+}*/
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -146,8 +154,8 @@ void GGEMSXRaySource::GetPrimaries(GGulong const& number_of_particles)
 void GGEMSXRaySource::PrintInfos(void) const
 {
   GGcout("GGEMSXRaySource", "PrintInfos", 0) << GGendl;
-  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "GGEMSXRaySource Infos:"
-    << GGendl;
+  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "GGEMSXRaySource Infos: "
+    << this << GGendl;
   GGcout("GGEMSXRaySource", "PrintInfos", 0) << "-----------------" << GGendl;
   GGcout("GGEMSXRaySource", "PrintInfos", 0) << "*Particle type: ";
   if (particle_type_ == GGEMSParticleName::PHOTON) {
@@ -195,7 +203,7 @@ void GGEMSXRaySource::PrintInfos(void) const
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-
+/*
 void GGEMSXRaySource::SetMonoenergy(GGfloat const& monoenergy)
 {
   monoenergy_ = monoenergy;
@@ -419,6 +427,7 @@ void GGEMSXRaySource::SetFocalSpotSize(GGfloat const& width,
 {
   focal_spot_size_ = MakeFloat3(width, height, depth);
 }
+*/
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -426,13 +435,13 @@ void GGEMSXRaySource::SetFocalSpotSize(GGfloat const& width,
 
 GGEMSXRaySource* create_ggems_xray_source(void)
 {
-  return GGEMSXRaySource::GetInstance();
+  return new(std::nothrow) GGEMSXRaySource;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-
+/*
 void initialize_ggems_xray_source(GGEMSXRaySource* p_source_manager)
 {
   p_source_manager->Initialize();
@@ -451,22 +460,22 @@ void set_position_ggems_xray_source(GGEMSXRaySource* p_source_manager,
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-
+*/
 void print_infos_ggems_xray_source(GGEMSXRaySource* p_source_manager)
 {
   p_source_manager->PrintInfos();
 }
-
+/*
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-
+*/
 void set_source_particle_type_ggems_xray_source(
   GGEMSXRaySource* p_source_manager, char const* particle_name)
 {
   p_source_manager->SetSourceParticleType(particle_name);
 }
-
+/*
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
