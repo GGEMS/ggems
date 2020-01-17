@@ -20,7 +20,8 @@
 GGEMSSourceManager::GGEMSSourceManager(void)
 : p_source_(0)
 {
-  ;
+  GGcout("GGEMSSourceManager", "GGEMSSourceManager", 3)
+    << "Allocation of GGEMSSourceManager..." << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -29,6 +30,15 @@ GGEMSSourceManager::GGEMSSourceManager(void)
 
 GGEMSSourceManager::~GGEMSSourceManager(void)
 {
-  ;
+  GGcout("GGEMSSourceManager", "~GGEMSSourceManager", 3)
+    << "Deallocation of GGEMSSourceManager..." << GGendl;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSSourceManager::Store(GGEMSSource* p_source)
+{
+  p_source_.push_back(p_source->Clone());
+}

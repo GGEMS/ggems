@@ -12,18 +12,18 @@ opencl_manager.print_infos()  # Printing informations about OpenCL
 
 # ------------------------------------------------------------------------------
 # STEP XXX: Source Initialization
-# xray_source = ggems.GGEMSXRaySource()
+xray_source = ggems.GGEMSXRaySource()
 # xray_source.set_position(-1000.0, 10.0, 50.0)  # in mm
-# xray_source.set_source_particle_type(b"photon")
+xray_source.set_source_particle_type(b"photon")
 # xray_source.set_beam_aperture(5.0)  # in degree
 # xray_source.set_focal_spot_size(0.6, 1.2, 0.0)  # in mm
 # xray_source.set_rotation(0.0, 0.0, 0.0)  # in degree
 # xray_source.set_polyenergy(b"data/spectrum_120kVp_2mmAl.dat")
-# xray_source.print_infos()
+xray_source.print_infos()
 
 # ------------------------------------------------------------------------------
 # STEP 3: GGEMS simulation parameters
-#ggems_manager = ggems.GGEMSManager()
+ggems_manager = ggems.GGEMSManager()
 #ggems_manager.set_seed(777)
 #ggems_manager.set_number_of_particles(861635)
 
@@ -51,4 +51,4 @@ opencl_manager.print_RAM()
 # ggems_manager.run()
 
 # Cleaning OpenCL Manager manually
-opencl_manager.clean()
+#opencl_manager.clean()
