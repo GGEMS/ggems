@@ -29,3 +29,6 @@ Si possible, faire la visualization sur carte graphique avec OpenCL
 - Prévoir place pour les kernel customs
 
 - Faire une physics list automatique en fonction du type de particule
+
+- Nombre de particules doit être géré par GGEMSSourceManager ainsi
+que le random et les particules. Interdir plusieurs sources.

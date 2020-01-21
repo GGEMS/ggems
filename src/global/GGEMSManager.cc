@@ -33,12 +33,7 @@
 
 #include "GGEMS/global/GGEMSManager.hh"
 #include "GGEMS/global/GGEMSConstants.hh"
-
-#include "GGEMS/processes/GGEMSParticles.hh"
-#include "GGEMS/processes/GGEMSPrimaryParticlesStack.hh"
-
-#include "GGEMS/randoms/GGEMSPseudoRandomGenerator.hh"
-#include "GGEMS/randoms/GGEMSRandomStack.hh"
+#include "GGEMS/global/GGEMSOpenCLManager.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -47,8 +42,7 @@
 GGEMSManager::GGEMSManager(void)
 : seed_(0),
   version_("1.0"),
-  number_of_particles_(0),
-  v_number_of_particles_in_batch_(0),
+  //v_number_of_particles_in_batch_(0),
   v_physics_list_(0),
   v_secondaries_list_(0),
   photon_distance_cut_(GGEMSUnits::um),
@@ -60,8 +54,6 @@ GGEMSManager::GGEMSManager(void)
     GGEMSLimit::CROSS_SECTION_TABLE_NUMBER_BINS),
   cross_section_table_energy_min_(GGEMSLimit::CROSS_SECTION_TABLE_ENERGY_MIN),
   cross_section_table_energy_max_(GGEMSLimit::CROSS_SECTION_TABLE_ENERGY_MAX),
-  p_particle_(nullptr),
-  p_pseudo_random_generator_(nullptr),
   source_manager_(GGEMSSourceManager::GetInstance()),
   opencl_manager_(GGEMSOpenCLManager::GetInstance())
 {
@@ -73,15 +65,6 @@ GGEMSManager::GGEMSManager(void)
 
   // Allocation of the memory for the secondaries list
   v_secondaries_list_.resize(GGEMSProcessName::NUMBER_PARTICLES, false);
-
-  // Allocation of particle
-  p_particle_ = new GGEMSParticles();
-
-  std::cout << "n source: " << source_manager_.GetNumberOfSources() << std::endl;
-  source_manager_.Print();
-
-  // Allocation of pseudo random generator
-  p_pseudo_random_generator_ = new GGEMSPseudoRandomGenerator();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -90,17 +73,6 @@ GGEMSManager::GGEMSManager(void)
 
 GGEMSManager::~GGEMSManager(void)
 {
-  // Freeing memory
-  if (p_particle_) {
-    delete p_particle_;
-    p_particle_ = nullptr;
-  }
-
-  if (p_pseudo_random_generator_) {
-    delete p_pseudo_random_generator_;
-    p_pseudo_random_generator_ = nullptr;
-  }
-
   GGcout("GGEMSManager", "~GGEMSManager", 3)
     << "Deallocation of GGEMS Manager singleton..." << GGendl;
 }
@@ -157,16 +129,7 @@ GGuint GGEMSManager::GenerateSeed() const
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSManager::SetNumberOfParticles(GGulong const& number_of_particles)
-{
-  number_of_particles_ = number_of_particles;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void GGEMSManager::CheckMemoryForParticles(void) const
+/*void GGEMSManager::CheckMemoryForParticles(void) const
 {
   // By security the particle allocation by batch should not exceed 10% of
   // RAM memory
@@ -204,13 +167,13 @@ void GGEMSManager::CheckMemoryForParticles(void) const
       << kTheoricMaxNumberOfParticles << ". Recompile GGEMS with this number "
       << " of particles is recommended" << GGendl;
   }
-}
+}*/
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSManager::OrganizeParticlesInBatch(void)
+/*void GGEMSManager::OrganizeParticlesInBatch(void)
 {
   GGcout("GGEMSManager", "OrganizeParticlesInBatch", 3)
     << "Organizing the number of particles in batch..." << GGendl;
@@ -238,7 +201,7 @@ void GGEMSManager::OrganizeParticlesInBatch(void)
       v_number_of_particles_in_batch_[i]++;
     }
   }
-}
+}*/
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -385,11 +348,11 @@ void GGEMSManager::CheckParameters()
   if (seed_ == 0) seed_ = GenerateSeed();
 
   // Checking the number of particles
-  if (number_of_particles_ == 0) {
-    std::ostringstream oss(std::ostringstream::out);
-    oss << "You have to set a number of particles > 0!!!";
-    GGEMSMisc::ThrowException("GGEMSManager", "CheckParameters", oss.str());
-  }
+  //if (number_of_particles_ == 0) {
+    //std::ostringstream oss(std::ostringstream::out);
+    //oss << "You have to set a number of particles > 0!!!";
+    //GGEMSMisc::ThrowException("GGEMSManager", "CheckParameters", oss.str());
+  //}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -415,28 +378,28 @@ void GGEMSManager::Initialize()
 
   // Checking the RAM memory for particle and propose a new MAXIMUM_PARTICLE
   // number
-  CheckMemoryForParticles();
+  //CheckMemoryForParticles();
 
   // Organize the particles in batch
-  OrganizeParticlesInBatch();
-  GGcout("GGEMSManager", "Initialize", 0)
-    << "Particles arranged in batch OK" << GGendl;
+  //OrganizeParticlesInBatch();
+  //GGcout("GGEMSManager", "Initialize", 0)
+    //<< "Particles arranged in batch OK" << GGendl;
 
   // Initialization of the particles
-  p_particle_->Initialize();
-  GGcout("GGEMSManager", "Initialize", 0)
-    << "Initialization of particles OK" << GGendl;
+  //p_particle_->Initialize();
+  //GGcout("GGEMSManager", "Initialize", 0)
+    //<< "Initialization of particles OK" << GGendl;
 
   // Initialization of GGEMS pseudo random generator
-  p_pseudo_random_generator_->Initialize();
-  GGcout("GGEMSManager", "Initialize", 0)
-    << "Initialization of GGEMS pseudo random generator OK" << GGendl;
+  //p_pseudo_random_generator_->Initialize();
+  //GGcout("GGEMSManager", "Initialize", 0)
+    //<< "Initialization of GGEMS pseudo random generator OK" << GGendl;
 
   // Give particle and random to source
   //source_manager_.SetParticle(p_particle_);
   //source_manager_.SetRandomGenerator(p_pseudo_random_generator_);
 
-  // Initialization of the source
+  // Initialization of the source(s)
   //source_manager_.Initialize();
 
   // Printing informations about the simulation
@@ -449,34 +412,29 @@ void GGEMSManager::Initialize()
 
 void GGEMSManager::Run()
 {
-  GGcout("GGEMSManager", "Run", 0)
-    << "GGEMS simulation is running..." << GGendl;
+  GGcout("GGEMSManager", "Run", 0) << "GGEMS simulation started!!!" << GGendl;
 
   // Get the start time
   ChronoTime start_time = GGEMSChrono::Now();
 
   // Loop over the number of batch
-  for (std::size_t i = 0; i < v_number_of_particles_in_batch_.size(); ++i) {
-    GGcout("GGEMSManager", "Run", 0) << "----> Launching batch " << i+1
-      << "/" << v_number_of_particles_in_batch_.size() << GGendl;
+  //for (std::size_t i = 0; i < v_number_of_particles_in_batch_.size(); ++i) {
+    //GGcout("GGEMSManager", "Run", 0) << "----> Launching batch " << i+1
+      //<< "/" << v_number_of_particles_in_batch_.size() << GGendl;
 
     // Generating particles
-    GGcout("GGEMSManager", "Run", 0) << "      + Generating "
-      << v_number_of_particles_in_batch_[i] << " particles..." << GGendl;
+    //GGcout("GGEMSManager", "Run", 0) << "      + Generating "
+      //<< v_number_of_particles_in_batch_[i] << " particles..." << GGendl;
     //source_manager_.GetPrimaries(v_number_of_particles_in_batch_[i]);
-  }
+  //}
 
   // Get the end time
   ChronoTime end_time = GGEMSChrono::Now();
 
-  GGcout("GGEMSManager", "Run", 0)
-    << "GGEMS is finished!" << GGendl;
+  GGcout("GGEMSManager", "Run", 0) << "GGEMS simulation succeeded!!!" << GGendl;
 
   // Display the elapsed time in GGEMS
   GGEMSChrono::DisplayTime(end_time - start_time, "GGEMS simulation");
-
-  // Cleaning source
-  //source_manager_.DeleteInstance();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -488,10 +446,8 @@ void GGEMSManager::PrintInfos(void) const
   GGcout("GGEMSManager", "PrintInfos", 0) << GGendl;
   GGcout("GGEMSManager", "PrintInfos", 0) << "++++++++++++++++" << GGendl;
   GGcout("GGEMSManager", "PrintInfos", 0) << "*Seed: " << seed_ << GGendl;
-  GGcout("GGEMSManager", "PrintInfos", 0) << "*Number of particles: "
-    << number_of_particles_ << GGendl;
-  GGcout("GGEMSManager", "PrintInfos", 0) << "*Number of batchs: "
-    << v_number_of_particles_in_batch_.size() << GGendl;
+  //GGcout("GGEMSManager", "PrintInfos", 0) << "*Number of batchs: "
+    //<< v_number_of_particles_in_batch_.size() << GGendl;
   GGcout("GGEMSManager", "PrintInfos", 0) << "*Physics list:" << GGendl;
   GGcout("GGEMSManager", "PrintInfos", 0) << "  --> Photon: "
     << (v_physics_list_.at(0) ? "Compton " : "")
@@ -650,16 +606,6 @@ void set_seed_ggems_manager(GGEMSManager* p_ggems_manager, GGuint const seed)
 void initialize_ggems_manager(GGEMSManager* p_ggems_manager)
 {
   p_ggems_manager->Initialize();
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void set_number_of_particles_ggems_manager(GGEMSManager* p_ggems_manager,
-  GGulong const number_of_particles)
-{
-  p_ggems_manager->SetNumberOfParticles(number_of_particles);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

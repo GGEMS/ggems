@@ -26,7 +26,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 GGEMSOpenCLManager::GGEMSOpenCLManager(void)
-: platforms_(0),
+: p_platforms_(0),
   p_platform_vendor_(nullptr),
   p_devices_(0),
   p_device_device_type_(nullptr),
@@ -67,20 +67,20 @@ GGEMSOpenCLManager::GGEMSOpenCLManager(void)
 
   GGcout("GGEMSOpenCLManager", "GGEMSOpenCLManager", 1)
     << "Retrieving OpenCL platform(s)..." << GGendl;
-  CheckOpenCLError(cl::Platform::get(&platforms_), "GGEMSOpenCLManager",
+  CheckOpenCLError(cl::Platform::get(&p_platforms_), "GGEMSOpenCLManager",
     "GGEMSOpenCLManager");
 
   // Getting infos about platform(s)
-  p_platform_vendor_ = GGEMSMem::Alloc<std::string>(platforms_.size());
-  for (std::size_t i = 0; i < platforms_.size(); ++i) {
-    CheckOpenCLError(platforms_[i].getInfo(CL_PLATFORM_VENDOR,
+  p_platform_vendor_ = GGEMSMem::Alloc<std::string>(p_platforms_.size());
+  for (std::size_t i = 0; i < p_platforms_.size(); ++i) {
+    CheckOpenCLError(p_platforms_[i].getInfo(CL_PLATFORM_VENDOR,
       &p_platform_vendor_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
   }
 
   // Retrieve all the available devices
   GGcout("GGEMSOpenCLManager", "GGEMSOpenCLManager", 1)
     << "Retrieving OpenCL device(s)..." << GGendl;
-  for (auto& p : platforms_) {
+  for (auto& p : p_platforms_) {
     std::vector<cl::Device> v_current_device;
     CheckOpenCLError(p.getDevices(CL_DEVICE_TYPE_ALL, &v_current_device),
       "GGEMSOpenCLManager", "GGEMSOpenCLManager");
@@ -264,7 +264,7 @@ void GGEMSOpenCLManager::Clean(void)
   if (p_platform_vendor_) {
     GGEMSMem::Free(p_platform_vendor_);
     p_platform_vendor_ = nullptr;
-    platforms_.clear();
+    p_platforms_.clear();
   }
 
   // Deleting device(s)
@@ -365,7 +365,7 @@ void GGEMSOpenCLManager::PrintPlatformInfos(void) const
     << "Printing infos about OpenCL platform(s)..." << GGendl;
 
   // Loop over the platforms
-  for (std::size_t i = 0; i < platforms_.size(); ++i) {
+  for (std::size_t i = 0; i < p_platforms_.size(); ++i) {
     GGcout("GGEMSOpenCLManager", "PrintPlatformInfos", 0) << GGendl;
     GGcout("GGEMSOpenCLManager", "PrintPlatformInfos", 0) << "#### PLATFORM: "
       << i << " ####" << GGendl;

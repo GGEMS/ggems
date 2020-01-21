@@ -23,8 +23,6 @@
 
 #include "GGEMS/global/GGEMSExport.hh"
 
-class GGEMSParticles;
-class GGEMSPseudoRandomGenerator;
 class GGEMSSourceManager;
 class GGEMSOpenCLManager;
 
@@ -136,30 +134,23 @@ class GGEMS_EXPORT GGEMSManager
     */
     inline std::string GetVersion() const {return version_;};
 
-  public: // Particles
-    /*!
-      \fn void SetNumberOfParticles(GGulong const& number_of_particles)
-      \param number_of_particles - number of particles to simulate
-      \brief Set the number of particles to simulate during the simulation
-    */
-    void SetNumberOfParticles(GGulong const& number_of_particles);
-
+  public:
     /*!
       \fn inline GGulong GetNumberOfParticles() const
       \brief Get the number of simulated particles
       \return the number of simulated particles
     */
-    inline GGulong GetNumberOfParticles() const {return number_of_particles_;};
+    //inline GGulong GetNumberOfParticles() const {return number_of_particles_;};
 
     /*!
       \fn inline GGuint GetNumberOfBatchs() const
       \brief Get the number of particles in batch
       \return the number of simulated particles in batch
     */
-    inline GGuint GetNumberOfBatchs() const
-    {
-      return static_cast<GGuint>(v_number_of_particles_in_batch_.size());
-    }
+    //inline GGuint GetNumberOfBatchs() const
+    //{
+      //return static_cast<GGuint>(v_number_of_particles_in_batch_.size());
+    //}
 
   public:
     /*!
@@ -198,13 +189,13 @@ class GGEMS_EXPORT GGEMSManager
       \fn void OrganizeParticlesInBatch
       \brief Organize the particles in batch
     */
-    void OrganizeParticlesInBatch(void);
+    //void OrganizeParticlesInBatch(void);
 
     /*!
       \fn void CheckMemoryForParticles(void) const
       \brief Check the memory for particles and propose an optimized MAXIMUM_NUMBER of particles if necessary
     */
-    void CheckMemoryForParticles(void) const;
+    //void CheckMemoryForParticles(void) const;
 
   public: // Cross section part
     /*!
@@ -244,8 +235,7 @@ class GGEMS_EXPORT GGEMSManager
   private: // Global simulation parameters
     GGuint seed_; /*!< Seed for the random generator */
     std::string version_; /*!< Version of GGEMS */
-    GGulong number_of_particles_; /*!< Number of particles */
-    std::vector<GGulong> v_number_of_particles_in_batch_; /*!< Number of particles in batch */
+    //std::vector<GGulong> v_number_of_particles_in_batch_; /*!< Number of particles in batch */
     std::vector<GGbool> v_physics_list_; /*!< Vector storing the activated physics list */
     std::vector<GGbool> v_secondaries_list_; /*!< Vector storing the secondaries list */
     GGdouble photon_distance_cut_; /*!< Photon distance cut */
@@ -256,12 +246,6 @@ class GGEMS_EXPORT GGEMSManager
     GGuint cross_section_table_number_of_bins_; /*!< Number of bins in the cross section table */
     GGdouble cross_section_table_energy_min_; /*!< Min. energy for the cross section table */
     GGdouble cross_section_table_energy_max_; /*!< Max. energy for the cross section table */
-
-  private: // Particles management
-    GGEMSParticles* p_particle_; /*!< Pointer on particle management */
-
-  private: // Random generator management
-    GGEMSPseudoRandomGenerator* p_pseudo_random_generator_; /*!< Pointer on pseudo random generator */
 
   private: // Source management
     GGEMSSourceManager& source_manager_; /*!< Reference to source manager singleton */
@@ -290,15 +274,6 @@ extern "C" GGEMS_EXPORT void set_seed_ggems_manager(GGEMSManager* ggems_manager,
 */
 extern "C" GGEMS_EXPORT void initialize_ggems_manager(
   GGEMSManager* p_ggems_manager);
-
-/*!
-  \fn void set_number_of_particles_ggems_manager(GGEMSManager* p_ggems_manager, GGulong const number_of_particles)
-  \param p_ggems_manager - pointer on the singleton
-  \param number_of_particles - number of particles
-  \brief Set the number of particles to simulate during the simulation
-*/
-extern "C" GGEMS_EXPORT void set_number_of_particles_ggems_manager(
-  GGEMSManager* p_ggems_manager, GGulong const number_of_particles);
 
 /*!
   \fn void set_process(GGEMSManager* p_ggems_manager, std::string const process_name)
