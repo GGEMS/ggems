@@ -329,7 +329,7 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     void CheckRAMMemory(std::size_t const& size);
 
   private: // Platforms
-    std::vector<cl::Platform> platforms_; /*!< Vector of platforms */
+    std::vector<cl::Platform> p_platforms_; /*!< Vector of platforms */
     std::string *p_platform_vendor_; /*!< Vendor of the platform */
 
   private: // Devices

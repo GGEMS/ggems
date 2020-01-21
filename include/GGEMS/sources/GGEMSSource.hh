@@ -40,6 +40,35 @@ class GGEMS_EXPORT GGEMSSource
 
   public:
     /*!
+      \fn GGEMSSource(GGEMSSource const& p_source) = delete
+      \param p_source - reference on the GGEMS source
+      \brief Avoid copy by reference
+    */
+    GGEMSSource(GGEMSSource const& p_source) = delete;
+
+    /*!
+      \fn GGEMSSource& operator=(GGEMSSource const& p_source) = delete
+      \param p_source - reference on the GGEMS source
+      \brief Avoid assignement by reference
+    */
+    GGEMSSource& operator=(GGEMSSource const& p_source) = delete;
+
+    /*!
+      \fn GGEMSSource(GGEMSSource const&& p_source) = delete
+      \param p_source - rvalue reference on the GGEMS source
+      \brief Avoid copy by rvalue reference
+    */
+    GGEMSSource(GGEMSSource const&& p_source) = delete;
+
+    /*!
+      \fn GGEMSSource& operator=(GGEMSSource const&& p_source) = delete
+      \param p_source - rvalue reference on the GGEMS source
+      \brief Avoid copy by rvalue reference
+    */
+    GGEMSSource& operator=(GGEMSSource const&& p_source) = delete;
+  
+  public:
+    /*!
       \fn void SetPosition(GGfloat const& pos_x, GGfloat const& pos_y, GGfloat const& pos_z)
       \param pos_x - Position of the source in X
       \param pos_y - Position of the source in Y
@@ -84,29 +113,11 @@ class GGEMS_EXPORT GGEMSSource
     void SetRotation(GGfloat const& rx, GGfloat const& ry, GGfloat const& rz);
 
     /*!
-      \fn void UpdateRotation(GGfloat const& rx, GGfloat const& ry, GGfloat const& rz)
-      \param rx - Rotation around X along global axis
-      \param ry - Rotation around Y along global axis
-      \param rz - Rotation around Z along global axis
-      \brief Update the rotation of the source around global axis
+      \fn void SetNumberOfParticles(GGulong const& number_of_particles)
+      \param number_of_particles - number of particles to simulate
+      \brief Set the number of particles to simulate during the simulation
     */
-    void UpdateRotation(GGfloat const& rx, GGfloat const& ry,
-      GGfloat const& rz);
-
-    /*!
-      \fn void SetParticle(GGEMSParticles* const p_particle)
-      \param p_particle - pointer on particle
-      \brief Set the particle pointer to source manager
-    */
-    void SetParticle(GGEMSParticles* const p_particle);
-
-    /*!
-      \fn void SetRandomGenerator(GGEMSPseudoRandomGenerator* const p_random_generator)
-      \param p_random_generator - pointer on random generator
-      \brief Set the random generator pointer to source manager
-    */
-    void SetRandomGenerator(
-      GGEMSPseudoRandomGenerator* const p_random_generator);
+    void SetNumberOfParticles(GGulong const& number_of_particles);
 
   public: // Pure abstract method
     /*!
@@ -114,13 +125,13 @@ class GGEMS_EXPORT GGEMSSource
       \param number_of_particles - number of particles to generate
       \brief Generate primary particles
     */
-    //virtual void GetPrimaries(GGulong const& number_of_particles) = 0;
+    virtual void GetPrimaries(GGulong const& number_of_particles) = 0;
 
     /*!
       \fn void Initialize(void) = 0
       \brief Initialize a GGEMS source
     */
-  //  virtual void Initialize(void) = 0;
+    virtual void Initialize(void) = 0;
 
     /*!
       \fn void PrintInfos(void) const = 0
@@ -128,11 +139,12 @@ class GGEMS_EXPORT GGEMSSource
     */
     virtual void PrintInfos(void) const = 0;
 
+  protected:
     /*!
-      \fn GGEMSSource* Clone(void) const = 0
-      \brief Clone class to store it in source manager
+      \fn void InitializeKernel(void)
+      \brief Initialize kernel for specific source in OpenCL
     */
-    virtual GGEMSSource* Clone(void) const = 0;
+    virtual void InitializeKernel(void) = 0;
 
   public:
     /*!
@@ -142,6 +154,7 @@ class GGEMS_EXPORT GGEMSSource
     virtual void CheckParameters(void) const;
 
   protected:
+    GGulong number_of_particles_; /*!< Number of particles */
     GGuchar particle_type_; /*!< Type of particle: photon, electron or positron */
     GGEMSGeometryTransformation* p_geometry_transformation_; /*!< Pointer storing the geometry transformation */
 

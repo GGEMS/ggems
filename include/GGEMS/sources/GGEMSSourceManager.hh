@@ -17,12 +17,12 @@
 #pragma warning(disable: 4251) // Deleting warning exporting STL members!!!
 #endif
 
-#include <vector>
-
 #include "GGEMS/global/GGEMSExport.hh"
 #include "GGEMS/tools/GGEMSTypes.hh"
 
-#include "GGEMS/sources/GGEMSSource.hh"
+class GGEMSSource;
+class GGEMSParticles;
+class GGEMSPseudoRandomGenerator;
 
 /*!
   \class GGEMSSourceManager
@@ -87,20 +87,18 @@ class GGEMS_EXPORT GGEMSSourceManager
   public:
     /*!
       \fn void Store(GGEMSSource* p_source)
-      \brief store a source in the source manager
+      \param p_source - pointer to GGEMS source
+      \brief storing the source pointer to source manager
     */
     void Store(GGEMSSource* p_source);
 
-    inline std::size_t GetNumberOfSources(void) const {return p_source_.size();}
-    inline void Print(void) const
-    {
-      for (std::size_t i = 0; i < p_source_.size(); ++i) {
-        p_source_[i]->PrintInfos();
-      }
-    }
+  private: // Source infos
+    GGEMSSource* p_sources_; /*!< Pointer on GGEMS sources */
+    GGuint number_of_sources_; /*!< Number of source */
 
-  private:
-    std::vector<GGEMSSource*> p_source_; /*! Vector storing the sources in GGEMS */
+  private: // Particle and random infos
+    GGEMSParticles* p_particle_; /*!< Pointer on particle management */
+    GGEMSPseudoRandomGenerator* p_pseudo_random_generator_; /*!< Pointer on pseudo random generator */
 };
 
 #endif // End of GUARD_GGEMS_SOURCES_GGEMSSOURCEMANAGER
