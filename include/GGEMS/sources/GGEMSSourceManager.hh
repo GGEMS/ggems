@@ -19,8 +19,8 @@
 
 #include "GGEMS/global/GGEMSExport.hh"
 #include "GGEMS/tools/GGEMSTypes.hh"
+#include "GGEMS/sources/GGEMSSource.hh"
 
-class GGEMSSource;
 class GGEMSParticles;
 class GGEMSPseudoRandomGenerator;
 
@@ -92,12 +92,65 @@ class GGEMS_EXPORT GGEMSSourceManager
     */
     void Store(GGEMSSource* p_source);
 
+    /*!
+      \fn void Initialize(void) const
+      \brief Initialize a GGEMS source
+    */
+    void Initialize(void) const;
+
+    /*!
+      \fn inline std::size_t GetNumberOfBatchs(void) const
+      \return the number of batch of particle
+      \brief method returning the number of particles by batch
+    */
+    inline std::size_t GetNumberOfBatchs(void) const
+    {
+      return p_sources_->GetNumberOfBatchs();
+    }
+
+    /*!
+      \fn inline GGulong GetNumberOfParticlesInBatch(std::size_t const& batch_index)
+      \return the number of particle for a specific batch
+      \brief method returning the number of particles in a specific batch
+    */
+    inline GGulong GetNumberOfParticlesInBatch(std::size_t const& batch_index)
+    {
+      return p_sources_->GetNumberOfParticlesInBatch(batch_index);
+    }
+
+    /*!
+      \fn GGEMSParticles* GetParticles(void) const
+      \return pointer on particle stack
+      \brief method returning the OpenCL stack on particles
+    */
+    inline GGEMSParticles* GetParticles(void) const {return p_particles_;}
+
+    /*!
+      \fn GGEMSPseudoRandomGenerator* GetPseudoRandomGenerator(void) const
+      \return pointer on pseudo random stack
+      \brief method returning the OpenCL stack on pseudo random numbers
+    */
+    inline GGEMSPseudoRandomGenerator* GetPseudoRandomGenerator(void) const
+    {
+      return p_pseudo_random_generator_;
+    }
+
+    /*!
+      \fn void GetPrimaries(GGulong const& number_of_particles) const
+      \param number_of_particles - number of particles to simulate
+      \brief Generate primary particles for a specific source
+    */
+    inline void GetPrimaries(GGulong const& number_of_particles) const
+    {
+      p_sources_->GetPrimaries(number_of_particles);
+    }
+
   private: // Source infos
     GGEMSSource* p_sources_; /*!< Pointer on GGEMS sources */
     GGuint number_of_sources_; /*!< Number of source */
 
   private: // Particle and random infos
-    GGEMSParticles* p_particle_; /*!< Pointer on particle management */
+    GGEMSParticles* p_particles_; /*!< Pointer on particle management */
     GGEMSPseudoRandomGenerator* p_pseudo_random_generator_; /*!< Pointer on pseudo random generator */
 };
 

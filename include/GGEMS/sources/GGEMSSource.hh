@@ -119,6 +119,39 @@ class GGEMS_EXPORT GGEMSSource
     */
     void SetNumberOfParticles(GGulong const& number_of_particles);
 
+    /*!
+      \fn inline std::size_t GetNumberOfBatchs(void) const
+      \return the number of batch of particle
+      \brief method returning the number of particles by batch
+    */
+    inline std::size_t GetNumberOfBatchs(void) const
+    {
+      return p_number_of_particles_in_batch_.size();
+    }
+
+    /*!
+      \fn inline GGulong GetNumberOfParticlesInBatch(std::size_t const& batch_index)
+      \return the number of particle for a specific batch
+      \brief method returning the number of particles in a specific batch
+    */
+    inline GGulong GetNumberOfParticlesInBatch(std::size_t const& batch_index)
+    {
+      return p_number_of_particles_in_batch_.at(batch_index);
+    }
+
+  private:
+    /*!
+      \fn void OrganizeParticlesInBatch
+      \brief Organize the particles in batch
+    */
+    void OrganizeParticlesInBatch(void);
+
+    /*!
+      \fn void CheckMemoryForParticles(void) const
+      \brief Check the memory for particles and propose an optimized MAXIMUM_NUMBER of particles if necessary
+    */
+    void CheckMemoryForParticles(void) const;
+
   public: // Pure abstract method
     /*!
       \fn void GetPrimaries(GGulong const& number_of particles) = 0
@@ -126,12 +159,6 @@ class GGEMS_EXPORT GGEMSSource
       \brief Generate primary particles
     */
     virtual void GetPrimaries(GGulong const& number_of_particles) = 0;
-
-    /*!
-      \fn void Initialize(void) = 0
-      \brief Initialize a GGEMS source
-    */
-    virtual void Initialize(void) = 0;
 
     /*!
       \fn void PrintInfos(void) const = 0
@@ -153,17 +180,20 @@ class GGEMS_EXPORT GGEMSSource
     */
     virtual void CheckParameters(void) const;
 
+    /*!
+      \fn void Initialize(void)
+      \brief Initialize a GGEMS source
+    */
+    virtual void Initialize(void);
+
   protected:
     GGulong number_of_particles_; /*!< Number of particles */
+    std::vector<GGulong> p_number_of_particles_in_batch_; /*!< Number of particles in batch */
     GGuchar particle_type_; /*!< Type of particle: photon, electron or positron */
     GGEMSGeometryTransformation* p_geometry_transformation_; /*!< Pointer storing the geometry transformation */
 
   protected: // kernel generating primaries
     cl::Kernel* p_kernel_get_primaries_; /*!< Kernel generating primaries on OpenCL device */
-
-  protected: // Pointer on particle and random
-    GGEMSParticles* p_particle_; /*!< Pointer storing infos about particles */
-    GGEMSPseudoRandomGenerator* p_pseudo_random_generator_; /*!< Pointer storing infos about random numbers */
 
   protected:
     GGEMSOpenCLManager& opencl_manager_; /*!< Reference to opencl manager singleton */

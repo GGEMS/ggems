@@ -17,6 +17,8 @@
 #include "GGEMS/sources/GGEMSSource.hh"
 #include "GGEMS/maths/GGEMSGeometryTransformation.hh"
 #include "GGEMS/tools/GGEMSTools.hh"
+#include "GGEMS/processes/GGEMSPrimaryParticlesStack.hh"
+#include "GGEMS/randoms/GGEMSRandomStack.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -24,10 +26,9 @@
 
 GGEMSSource::GGEMSSource(void)
 : number_of_particles_(0),
+  p_number_of_particles_in_batch_(0),
   particle_type_(99),
   p_kernel_get_primaries_(nullptr),
-  p_particle_(nullptr),
-  p_pseudo_random_generator_(nullptr),
   opencl_manager_(GGEMSOpenCLManager::GetInstance())
 {
   GGcout("GGEMSSource", "GGEMSSource", 3)
@@ -148,23 +149,15 @@ void GGEMSSource::CheckParameters(void) const
     GGEMSMisc::ThrowException("GGEMSSource", "CheckParameters", oss.str());
   }
 
-  // Checking the particle pointer
-  if (!p_particle_) {
+  // Checking the number of particles
+  if (number_of_particles_ == 0) {
     std::ostringstream oss(std::ostringstream::out);
-    oss << "The particle pointer is empty in source manager!!!" << std::endl;
-    GGEMSMisc::ThrowException("GGEMSSource", "CheckParameters", oss.str());
-  }
-
-  // Checking the random generator pointer
-  if (!p_pseudo_random_generator_) {
-    std::ostringstream oss(std::ostringstream::out);
-    oss << "The random generator pointer is empty in source manager!!!"
-      << std::endl;
+    oss << "You have to set a number of particles > 0!!!";
     GGEMSMisc::ThrowException("GGEMSSource", "CheckParameters", oss.str());
   }
 
   // Checking the position of particles
-  cl_float3 const kPosition = p_geometry_transformation_->GetPosition();
+  GGfloat3 const kPosition = p_geometry_transformation_->GetPosition();
   if (GGEMSMisc::IsEqual(kPosition.s[0], std::numeric_limits<float>::min()) ||
       GGEMSMisc::IsEqual(kPosition.s[1], std::numeric_limits<float>::min()) ||
       GGEMSMisc::IsEqual(kPosition.s[2], std::numeric_limits<float>::min())) {
@@ -174,7 +167,7 @@ void GGEMSSource::CheckParameters(void) const
   }
 
   // Checking the rotation of particles
-  cl_float3 const kRotation = p_geometry_transformation_->GetRotation();
+  GGfloat3 const kRotation = p_geometry_transformation_->GetRotation();
   if (GGEMSMisc::IsEqual(kRotation.s[0], std::numeric_limits<float>::min()) ||
       GGEMSMisc::IsEqual(kRotation.s[1], std::numeric_limits<float>::min()) ||
       GGEMSMisc::IsEqual(kRotation.s[2], std::numeric_limits<float>::min())) {
@@ -182,4 +175,101 @@ void GGEMSSource::CheckParameters(void) const
     oss << "You have to set a rotation for the source!!!";
     GGEMSMisc::ThrowException("GGEMSSource", "CheckParameters", oss.str());
   }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSSource::CheckMemoryForParticles(void) const
+{
+  // By security the particle allocation by batch should not exceed 10% of
+  // RAM memory
+
+  // Compute the RAM memory percentage allocated for primary particles
+  GGdouble const kRAMParticles =
+    static_cast<GGdouble>(sizeof(GGEMSPrimaryParticles))
+    + static_cast<GGdouble>(sizeof(GGEMSRandom));
+
+  // Getting the RAM memory on activated device
+  GGdouble const kMaxRAMDevice = static_cast<GGdouble>(
+    opencl_manager_.GetMaxRAMMemoryOnActivatedDevice());
+
+  // Computing the ratio of used RAM memory on device
+  GGdouble const kMaxRatioUsedRAM = kRAMParticles / kMaxRAMDevice;
+
+  // Computing a theoric max. number of particles depending on activated
+  // device and advice this number to the user. 10% of RAM memory for particles
+  GGulong const kTheoricMaxNumberOfParticles = static_cast<GGulong>(
+    0.1 * kMaxRAMDevice / (kRAMParticles/MAXIMUM_PARTICLES));
+
+  if (kMaxRatioUsedRAM > 0.1) { // Printing warning
+    GGwarn("GGEMSSourceManager", "CheckMemoryForParticles", 0)
+      << "Warning!!! The number of particles in a batch defined during GGEMS "
+      << "compilation is maybe to high. We recommand to not use more than 10% "
+      << "of RAM memory for particles allocation. Your theoric number of "
+      << "particles is " << kTheoricMaxNumberOfParticles << ". Recompile GGEMS "
+      << "with this number of particles is recommended." << GGendl;
+  }
+  else { // Printing theoric number of particle
+    GGcout("GGEMSSourceManager", "CheckMemoryForParticles", 0)
+      << "The number of particles in a batch defined during the compilation is "
+      << "correct. We recommend to not used more than 10% of memory for "
+      << "particle allocation. Your theoric number of particles is "
+      << kTheoricMaxNumberOfParticles << ". Recompile GGEMS with this number "
+      << " of particles is recommended" << GGendl;
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSSource::OrganizeParticlesInBatch(void)
+{
+  GGcout("GGEMSSource", "OrganizeParticlesInBatch", 3)
+    << "Organizing the number of particles in batch..." << GGendl;
+
+  // Computing the number of batch depending on the number of simulated
+  // particles and the maximum simulated particles defined during GGEMS
+  // compilation
+  std::size_t const kNumberOfBatchs =
+    number_of_particles_ / MAXIMUM_PARTICLES + 1;
+
+  // Resizing vector storing the number of particles in batch
+  p_number_of_particles_in_batch_.resize(kNumberOfBatchs, 0);
+
+  // Computing the number of simulated particles in batch
+  if (kNumberOfBatchs == 1) {
+    p_number_of_particles_in_batch_[0] = number_of_particles_;
+  }
+  else {
+    for (auto&& i : p_number_of_particles_in_batch_) {
+      i = number_of_particles_ / kNumberOfBatchs;
+    }
+
+    // Adding the remaing particles
+    for (std::size_t i = 0; i < number_of_particles_ % kNumberOfBatchs; ++i) {
+      p_number_of_particles_in_batch_[i]++;
+    }
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSSource::Initialize(void)
+{
+  GGcout("GGEMSSource", "Initialize", 3)
+    << "Initializing the GGEMS source..." << GGendl;
+
+  // Checking the RAM memory for particle and propose a new MAXIMUM_PARTICLE
+  // number
+  CheckMemoryForParticles();
+
+  // Organize the particles in batch
+  OrganizeParticlesInBatch();
+  GGcout("GGEMSSource", "Initialize", 0)
+    << "Particles arranged in batch OK" << GGendl;
 }
