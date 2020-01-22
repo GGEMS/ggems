@@ -42,7 +42,6 @@
 GGEMSManager::GGEMSManager(void)
 : seed_(0),
   version_("1.0"),
-  //v_number_of_particles_in_batch_(0),
   v_physics_list_(0),
   v_secondaries_list_(0),
   photon_distance_cut_(GGEMSUnits::um),
@@ -124,84 +123,6 @@ GGuint GGEMSManager::GenerateSeed() const
   return *seedUInt;
   #endif
 }
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-/*void GGEMSManager::CheckMemoryForParticles(void) const
-{
-  // By security the particle allocation by batch should not exceed 10% of
-  // RAM memory
-
-  // Compute the RAM memory percentage allocated for primary particles
-  GGdouble const kRAMParticles =
-    static_cast<GGdouble>(sizeof(GGEMSPrimaryParticles))
-    + static_cast<GGdouble>(sizeof(GGEMSRandom));
-
-  // Getting the RAM memory on activated device
-  GGdouble const kMaxRAMDevice = static_cast<GGdouble>(
-    opencl_manager_.GetMaxRAMMemoryOnActivatedDevice());
-
-  // Computing the ratio of used RAM memory on device
-  GGdouble const kMaxRatioUsedRAM = kRAMParticles / kMaxRAMDevice;
-
-  // Computing a theoric max. number of particles depending on activated
-  // device and advice this number to the user. 10% of RAM memory for particles
-  GGulong const kTheoricMaxNumberOfParticles = static_cast<GGulong>(
-    0.1 * kMaxRAMDevice / (kRAMParticles/MAXIMUM_PARTICLES));
-
-  if (kMaxRatioUsedRAM > 0.1) { // Printing warning
-    GGwarn("GGEMSManager", "CheckMemoryForParticles", 0)
-      << "Warning!!! The number of particles in a batch defined during GGEMS "
-      << "compilation is maybe to high. We recommand to not use more than 10% "
-      << "of RAM memory for particles allocation. Your theoric number of "
-      << "particles is " << kTheoricMaxNumberOfParticles << ". Recompile GGEMS "
-      << "with this number of particles is recommended." << GGendl;
-  }
-  else { // Printing theoric number of particle
-    GGcout("GGEMSManager", "CheckMemoryForParticles", 0)
-      << "The number of particles in a batch defined during the compilation is "
-      << "correct. We recommend to not used more than 10% of memory for "
-      << "particle allocation. Your theoric number of particles is "
-      << kTheoricMaxNumberOfParticles << ". Recompile GGEMS with this number "
-      << " of particles is recommended" << GGendl;
-  }
-}*/
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-/*void GGEMSManager::OrganizeParticlesInBatch(void)
-{
-  GGcout("GGEMSManager", "OrganizeParticlesInBatch", 3)
-    << "Organizing the number of particles in batch..." << GGendl;
-
-  // Computing the number of batch depending on the number of simulated
-  // particles and the maximum simulated particles defined during GGEMS
-  // compilation
-  std::size_t const kNumberOfBatchs =
-    number_of_particles_ / MAXIMUM_PARTICLES + 1;
-
-  // Resizing vector storing the number of particles in batch
-  v_number_of_particles_in_batch_.resize(kNumberOfBatchs, 0);
-
-  // Computing the number of simulated particles in batch
-  if (kNumberOfBatchs == 1) {
-    v_number_of_particles_in_batch_[0] = number_of_particles_;
-  }
-  else {
-    for (auto&& i : v_number_of_particles_in_batch_) {
-      i = number_of_particles_ / kNumberOfBatchs;
-    }
-
-    // Adding the remaing particles
-    for (std::size_t i = 0; i < number_of_particles_ % kNumberOfBatchs; ++i) {
-      v_number_of_particles_in_batch_[i]++;
-    }
-  }
-}*/
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -346,13 +267,6 @@ void GGEMSManager::CheckParameters()
 
   // Checking the seed of the random generator
   if (seed_ == 0) seed_ = GenerateSeed();
-
-  // Checking the number of particles
-  //if (number_of_particles_ == 0) {
-    //std::ostringstream oss(std::ostringstream::out);
-    //oss << "You have to set a number of particles > 0!!!";
-    //GGEMSMisc::ThrowException("GGEMSManager", "CheckParameters", oss.str());
-  //}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -376,31 +290,8 @@ void GGEMSManager::Initialize()
   GGcout("GGEMSManager", "Initialize", 0)
     << "C++ Pseudo-random number generator seeded OK" << GGendl;
 
-  // Checking the RAM memory for particle and propose a new MAXIMUM_PARTICLE
-  // number
-  //CheckMemoryForParticles();
-
-  // Organize the particles in batch
-  //OrganizeParticlesInBatch();
-  //GGcout("GGEMSManager", "Initialize", 0)
-    //<< "Particles arranged in batch OK" << GGendl;
-
-  // Initialization of the particles
-  //p_particle_->Initialize();
-  //GGcout("GGEMSManager", "Initialize", 0)
-    //<< "Initialization of particles OK" << GGendl;
-
-  // Initialization of GGEMS pseudo random generator
-  //p_pseudo_random_generator_->Initialize();
-  //GGcout("GGEMSManager", "Initialize", 0)
-    //<< "Initialization of GGEMS pseudo random generator OK" << GGendl;
-
-  // Give particle and random to source
-  //source_manager_.SetParticle(p_particle_);
-  //source_manager_.SetRandomGenerator(p_pseudo_random_generator_);
-
-  // Initialization of the source(s)
-  //source_manager_.Initialize();
+  // Initialization of the source
+  source_manager_.Initialize();
 
   // Printing informations about the simulation
   PrintInfos();
@@ -418,15 +309,18 @@ void GGEMSManager::Run()
   ChronoTime start_time = GGEMSChrono::Now();
 
   // Loop over the number of batch
-  //for (std::size_t i = 0; i < v_number_of_particles_in_batch_.size(); ++i) {
-    //GGcout("GGEMSManager", "Run", 0) << "----> Launching batch " << i+1
-      //<< "/" << v_number_of_particles_in_batch_.size() << GGendl;
+  for (std::size_t i = 0; i < source_manager_.GetNumberOfBatchs(); ++i) {
+    GGcout("GGEMSManager", "Run", 0) << "----> Launching batch " << i+1
+      << "/" << source_manager_.GetNumberOfBatchs() << GGendl;
 
-    // Generating particles
-    //GGcout("GGEMSManager", "Run", 0) << "      + Generating "
-      //<< v_number_of_particles_in_batch_[i] << " particles..." << GGendl;
-    //source_manager_.GetPrimaries(v_number_of_particles_in_batch_[i]);
-  //}
+    GGulong const kNumberParticles =
+      source_manager_.GetNumberOfParticlesInBatch(i);
+
+    // Generating primary particles
+    GGcout("GGEMSManager", "Run", 0) << "      + Generating "
+      << kNumberParticles << " particles..." << GGendl;
+    source_manager_.GetPrimaries(kNumberParticles);
+  }
 
   // Get the end time
   ChronoTime end_time = GGEMSChrono::Now();

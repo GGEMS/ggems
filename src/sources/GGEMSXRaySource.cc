@@ -116,14 +116,17 @@ void GGEMSXRaySource::GetPrimaries(GGulong const& number_of_particles)
   cl::Event* p_event = opencl_manager_.GetEvent();
 
   // Get the OpenCL buffers
-  cl::Buffer* p_particles = p_particle_->GetPrimaryParticles();
-  cl::Buffer* p_randoms = p_pseudo_random_generator_->GetPseudoRandomNumbers();
+  GGEMSSourceManager& p_source_manager = GGEMSSourceManager::GetInstance();
+  cl::Buffer* p_particles =
+    p_source_manager.GetParticles()->GetPrimaryParticles();
+  cl::Buffer* p_random =
+    p_source_manager.GetPseudoRandomGenerator()->GetPseudoRandomNumbers();
   cl::Buffer* p_matrix_transformation =
     p_geometry_transformation_->GetTransformationMatrix();
 
   // Set parameters for kernel
   p_kernel_get_primaries_->setArg(0, *p_particles);
-  p_kernel_get_primaries_->setArg(1, *p_randoms);
+  p_kernel_get_primaries_->setArg(1, *p_random);
   p_kernel_get_primaries_->setArg(2, particle_type_);
   p_kernel_get_primaries_->setArg(3, *p_energy_spectrum_);
   p_kernel_get_primaries_->setArg(4, *p_cdf_);
@@ -400,6 +403,9 @@ void GGEMSXRaySource::Initialize(void)
 {
   GGcout("GGEMSXRaySource", "Initialize", 3)
     << "Initializing the GGEMS X-Ray source..." << GGendl;
+
+  // Initialize GGEMS source
+  GGEMSSource::Initialize();
 
   // Check the mandatory parameters
   CheckParameters();

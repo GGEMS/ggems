@@ -184,19 +184,6 @@ class GGEMS_EXPORT GGEMSManager
     */
     void SetGeometryTolerance(GGdouble const& distance);
 
-  private:
-    /*!
-      \fn void OrganizeParticlesInBatch
-      \brief Organize the particles in batch
-    */
-    //void OrganizeParticlesInBatch(void);
-
-    /*!
-      \fn void CheckMemoryForParticles(void) const
-      \brief Check the memory for particles and propose an optimized MAXIMUM_NUMBER of particles if necessary
-    */
-    //void CheckMemoryForParticles(void) const;
-
   public: // Cross section part
     /*!
       \fn void SetCrossSectionTableNumberOfBins(GGuint const& number_of_bins)
@@ -235,7 +222,6 @@ class GGEMS_EXPORT GGEMSManager
   private: // Global simulation parameters
     GGuint seed_; /*!< Seed for the random generator */
     std::string version_; /*!< Version of GGEMS */
-    //std::vector<GGulong> v_number_of_particles_in_batch_; /*!< Number of particles in batch */
     std::vector<GGbool> v_physics_list_; /*!< Vector storing the activated physics list */
     std::vector<GGbool> v_secondaries_list_; /*!< Vector storing the secondaries list */
     GGdouble photon_distance_cut_; /*!< Photon distance cut */
