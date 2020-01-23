@@ -65,7 +65,7 @@ namespace GGEMSMem {
     \param p - Pointer to the aligned buffer
     \brief Free allocated memory
   */
-  inline void Free(void *p) {::free(static_cast<void**>(p)[-1]);};
+  inline void Free(void *p) {::free(static_cast<void**>(p)[-1]);}
 }
 
 #endif // GUARD_GGEMS_TOOLS_GGEMSMEMORYALLOCATION_HH

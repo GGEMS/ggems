@@ -11,7 +11,21 @@ opencl.set_context_index(2)  # Activate a context
 opencl.print_infos()  # Printing informations about OpenCL
 
 # ------------------------------------------------------------------------------
-# STEP 2: Source Declaration
+# STEP 2: Visualization Declaration
+
+
+# ------------------------------------------------------------------------------
+# STEP 3: Materials Declaration
+# material = ggems.GGEMSMaterialsManager()
+# material.set_materials_database(b"data/materials.dat")
+
+# ------------------------------------------------------------------------------
+# STEP X: Phantom and Navigator
+# phantom1 = ggems.GGEMSVoxelizedPhantom()
+# phantom1.set_name(b"phantom1")
+
+# ------------------------------------------------------------------------------
+# STEP X: Source Declaration
 xray_source = ggems.GGEMSXRaySource()
 xray_source.set_source_particle_type(b"photon")
 xray_source.set_number_of_particles(861635)
@@ -23,11 +37,11 @@ xray_source.set_polyenergy(b"data/spectrum_120kVp_2mmAl.dat")
 xray_source.print_infos()
 
 # ------------------------------------------------------------------------------
-# STEP 3: Phantom, Navigator and Physic Declarations
+# STEP X: Physics Declaration
 
 
 # ------------------------------------------------------------------------------
-# STEP 5: GGEMS simulation parameters
+# STEP X: GGEMS simulation parameters
 ggems = ggems.GGEMSManager()
 ggems.set_seed(777)
 

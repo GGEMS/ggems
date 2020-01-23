@@ -63,7 +63,7 @@ IF(WIN32)
     STRING(REPLACE "-DNDEBUG" "" CMAKE_CXX_FLAGS_RELEASE
       ${CMAKE_CXX_FLAGS_RELEASE})
 
-    SET(CXX_FLAGS -std=c++17 -Wall -Wextra -pedantic -m64 -march=native
+    SET(CXX_FLAGS -std=c++2a -Wall -Wextra -pedantic -m64 -march=native
       -Wconversion -Wold-style-cast -pedantic-errors -ftree-vectorize
       -mtune=native -mavx2)
     SET(CXX_FLAGS_RELEASE -Ofast ${CXX_FLAGS})
@@ -145,7 +145,7 @@ FILE(GLOB source_ggems
   ${PROJECT_SOURCE_DIR}/src/geometry/*.cc
   ${PROJECT_SOURCE_DIR}/src/tools/*.cc
   ${PROJECT_SOURCE_DIR}/src/navigators/*.cc
-  ${PROJECT_SOURCE_DIR}/src/processes/*.cc
+  ${PROJECT_SOURCE_DIR}/src/physics/*.cc
   ${PROJECT_SOURCE_DIR}/src/sources/*.cc
   ${PROJECT_SOURCE_DIR}/src/randoms/*.cc
   ${PROJECT_SOURCE_DIR}/src/maths/*.cc

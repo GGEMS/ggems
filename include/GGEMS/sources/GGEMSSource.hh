@@ -188,7 +188,7 @@ class GGEMS_EXPORT GGEMSSource
 
   protected:
     GGulong number_of_particles_; /*!< Number of particles */
-    std::vector<GGulong> p_number_of_particles_in_batch_; /*!< Number of particles in batch */
+    std::vector<unsigned long long> p_number_of_particles_in_batch_; /*!< Number of particles in batch */
     GGuchar particle_type_; /*!< Type of particle: photon, electron or positron */
     GGEMSGeometryTransformation* p_geometry_transformation_; /*!< Pointer storing the geometry transformation */
 

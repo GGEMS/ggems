@@ -10,8 +10,8 @@
   \date Thrusday October 3, 2019
 */
 
-#include "GGEMS/processes/GGEMSParticles.hh"
-#include "GGEMS/processes/GGEMSPrimaryParticlesStack.hh"
+#include "GGEMS/physics/GGEMSParticles.hh"
+#include "GGEMS/physics/GGEMSPrimaryParticlesStack.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
