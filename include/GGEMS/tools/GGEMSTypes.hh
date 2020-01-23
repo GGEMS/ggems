@@ -90,13 +90,14 @@
 #define GGdouble8 double8
 #define GGdouble16 double16
 #else // On host device
+
 #ifdef __APPLE__
 #include <OpenCL/opencl.hpp>
 #else
 #include <CL/cl.hpp>
 #endif
 
-#define GGbool cl_bool
+#define GGbool bool
 
 #define GGchar cl_char
 #define GGchar2 cl_char2

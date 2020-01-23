@@ -12,6 +12,7 @@
 
 #include <algorithm>
 #include <fcntl.h>
+#include <cmath>
 
 #ifdef _WIN32
 #ifdef _MSC_VER
@@ -139,22 +140,22 @@ void GGEMSManager::SetProcess(char const* process_name)
 
   // Activate process
   if (!process_name_str.compare("compton")) {
-    v_physics_list_.at(GGEMSProcessName::PHOTON_COMPTON) = true;
+    v_physics_list_.at(GGEMSProcessName::PHOTON_COMPTON) = 1;
   }
   else if (!process_name_str.compare("photoelectric")) {
-    v_physics_list_.at(GGEMSProcessName::PHOTON_PHOTOELECTRIC) = true;
+    v_physics_list_.at(GGEMSProcessName::PHOTON_PHOTOELECTRIC) = 1;
   }
   else if (!process_name_str.compare("rayleigh")) {
-    v_physics_list_.at(GGEMSProcessName::PHOTON_RAYLEIGH) = true;
+    v_physics_list_.at(GGEMSProcessName::PHOTON_RAYLEIGH) = 1;
   }
   else if (!process_name_str.compare("eionisation")) {
-    v_physics_list_.at(GGEMSProcessName::ELECTRON_IONISATION) = true;
+    v_physics_list_.at(GGEMSProcessName::ELECTRON_IONISATION) = 1;
   }
   else if (!process_name_str.compare("ebremsstrahlung")) {
-    v_physics_list_.at(GGEMSProcessName::ELECTRON_BREMSSTRAHLUNG) = true;
+    v_physics_list_.at(GGEMSProcessName::ELECTRON_BREMSSTRAHLUNG) = 1;
   }
   else if (!process_name_str.compare("emultiplescattering")) {
-    v_physics_list_.at(GGEMSProcessName::ELECTRON_MSC) = true;
+    v_physics_list_.at(GGEMSProcessName::ELECTRON_MSC) = 1;
   }
   else {
     GGEMSMisc::ThrowException("GGEMSManager", "SetProcess",

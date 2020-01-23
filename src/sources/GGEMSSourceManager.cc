@@ -16,12 +16,8 @@
 #include "GGEMS/sources/GGEMSSourceManager.hh"
 #include "GGEMS/sources/GGEMSSource.hh"
 #include "GGEMS/sources/GGEMSXRaySource.hh"
-
 #include "GGEMS/tools/GGEMSTools.hh"
-
-#include "GGEMS/processes/GGEMSParticles.hh"
-
-
+#include "GGEMS/physics/GGEMSParticles.hh"
 #include "GGEMS/randoms/GGEMSPseudoRandomGenerator.hh"
 
 

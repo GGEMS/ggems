@@ -14,15 +14,10 @@
 
 #include "GGEMS/sources/GGEMSXRaySource.hh"
 #include "GGEMS/sources/GGEMSSourceManager.hh"
-
 #include "GGEMS/maths/GGEMSGeometryTransformation.hh"
-
 #include "GGEMS/global/GGEMSConstants.hh"
-
 #include "GGEMS/tools/GGEMSTools.hh"
-
-#include "GGEMS/processes/GGEMSParticles.hh"
-
+#include "GGEMS/physics/GGEMSParticles.hh"
 #include "GGEMS/randoms/GGEMSPseudoRandomGenerator.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -31,7 +26,7 @@
 
 GGEMSXRaySource::GGEMSXRaySource(void)
 : GGEMSSource(),
-  beam_aperture_(std::numeric_limits<GGfloat>::min()),
+  beam_aperture_(std::numeric_limits<float>::min()),
   is_monoenergy_mode_(false),
   monoenergy_(-1.0f),
   energy_spectrum_filename_(""),
@@ -44,9 +39,9 @@ GGEMSXRaySource::GGEMSXRaySource(void)
 
   // Initialization of parameters
   focal_spot_size_ = MakeFloat3(
-    std::numeric_limits<GGfloat>::min(),
-    std::numeric_limits<GGfloat>::min(),
-    std::numeric_limits<GGfloat>::min()
+    std::numeric_limits<float>::min(),
+    std::numeric_limits<float>::min(),
+    std::numeric_limits<float>::min()
   );
 
   // Initialization of local axis
@@ -238,7 +233,7 @@ void GGEMSXRaySource::CheckParameters(void) const
   GGEMSSource::CheckParameters();
 
   // Checking the beam aperture
-  if (GGEMSMisc::IsEqual(beam_aperture_, std::numeric_limits<GGfloat>::min())) {
+  if (GGEMSMisc::IsEqual(beam_aperture_, std::numeric_limits<float>::min())) {
     std::ostringstream oss(std::ostringstream::out);
     oss << "You have to set a beam aperture for the source!!!";
     GGEMSMisc::ThrowException("GGEMSXRaySource", "CheckParameters", oss.str());
@@ -251,11 +246,11 @@ void GGEMSXRaySource::CheckParameters(void) const
 
   // Checking the focal spot size
   if (GGEMSMisc::IsEqual(focal_spot_size_.s[0],
-    std::numeric_limits<GGfloat>::min()) ||
+    std::numeric_limits<float>::min()) ||
       GGEMSMisc::IsEqual(focal_spot_size_.s[1],
-    std::numeric_limits<GGfloat>::min()) ||
+    std::numeric_limits<float>::min()) ||
       GGEMSMisc::IsEqual(focal_spot_size_.s[2],
-    std::numeric_limits<GGfloat>::min())) {
+    std::numeric_limits<float>::min())) {
     std::ostringstream oss(std::ostringstream::out);
     oss << "You have to set a focal spot size!!!";
     GGEMSMisc::ThrowException("GGEMSXRaySource", "CheckParameters", oss.str());

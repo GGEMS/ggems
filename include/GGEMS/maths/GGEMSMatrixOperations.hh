@@ -36,7 +36,7 @@ inline GGfloat3 RotateUz(GGfloat3 vector, GGfloat3 const new_uz)
   GGfloat up = u1*u1 + u2*u2;
 
   if (up > 0) {
-    up = sqrt(up);
+    up = sqrtf(up);
     #ifdef OPENCL_COMPILER
     GGfloat px = vector.x,  py = vector.y, pz = vector.z;
     vector.x = (u1*u3*px - u2*py) /up + u1*pz;
@@ -78,7 +78,7 @@ inline GGfloat3 GGfloat3UnitVector(GGfloat3 const u)
   GGfloat norm = 1.0f / sqrt(u.x*u.x + u.y*u.y + u.z*u.z);
   return MakeFloat3(u.x*norm, u.y*norm, u.z*norm);
   #else
-  GGfloat norm = 1.0f / sqrt(u.s[0]*u.s[0] + u.s[1]*u.s[1] + u.s[2]*u.s[2]);
+  GGfloat norm = 1.0f / sqrtf(u.s[0]*u.s[0] + u.s[1]*u.s[1] + u.s[2]*u.s[2]);
   return MakeFloat3(u.s[0]*norm, u.s[1]*norm, u.s[2]*norm);
   #endif
 }

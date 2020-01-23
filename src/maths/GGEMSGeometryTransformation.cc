@@ -28,18 +28,18 @@ GGEMSGeometryTransformation::GGEMSGeometryTransformation()
   GGcout("GGEMSGeometryTransformation", "GGEMSGeometryTransformation", 3)
     << "Allocation of GGEMSGeometryTransformation..." << GGendl;
 
-  // Initialize the position with min. GGfloat
+  // Initialize the position with min. float
   position_ = MakeFloat3(
-    std::numeric_limits<GGfloat>::min(),
-    std::numeric_limits<GGfloat>::min(),
-    std::numeric_limits<GGfloat>::min()
+    std::numeric_limits<float>::min(),
+    std::numeric_limits<float>::min(),
+    std::numeric_limits<float>::min()
   );
 
-  // Initialize the rotation with min. GGfloat
+  // Initialize the rotation with min. float
   rotation_ = MakeFloat3(
-    std::numeric_limits<GGfloat>::min(),
-    std::numeric_limits<GGfloat>::min(),
-    std::numeric_limits<GGfloat>::min()
+    std::numeric_limits<float>::min(),
+    std::numeric_limits<float>::min(),
+    std::numeric_limits<float>::min()
   );
 
   // Initialize the local axis

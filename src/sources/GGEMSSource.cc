@@ -17,7 +17,7 @@
 #include "GGEMS/sources/GGEMSSource.hh"
 #include "GGEMS/maths/GGEMSGeometryTransformation.hh"
 #include "GGEMS/tools/GGEMSTools.hh"
-#include "GGEMS/processes/GGEMSPrimaryParticlesStack.hh"
+#include "GGEMS/physics/GGEMSPrimaryParticlesStack.hh"
 #include "GGEMS/randoms/GGEMSRandomStack.hh"
 
 ////////////////////////////////////////////////////////////////////////////////

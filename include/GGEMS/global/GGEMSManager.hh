@@ -222,8 +222,8 @@ class GGEMS_EXPORT GGEMSManager
   private: // Global simulation parameters
     GGuint seed_; /*!< Seed for the random generator */
     std::string version_; /*!< Version of GGEMS */
-    std::vector<GGbool> v_physics_list_; /*!< Vector storing the activated physics list */
-    std::vector<GGbool> v_secondaries_list_; /*!< Vector storing the secondaries list */
+    std::vector<GGuchar> v_physics_list_; /*!< Vector storing the activated physics list */
+    std::vector<GGuchar> v_secondaries_list_; /*!< Vector storing the secondaries list */
     GGdouble photon_distance_cut_; /*!< Photon distance cut */
     GGdouble electron_distance_cut_; /*!< Electron distance cut */
     GGdouble geometry_tolerance_; /*!< Geometry tolerance */
