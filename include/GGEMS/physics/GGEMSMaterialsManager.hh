@@ -4,7 +4,7 @@
 /*!
   \file GGEMSMaterialsManager.hh
 
-  \brief GGEMS class managing the material database
+  \brief GGEMS singleton class managing the material database
 
   \author Julien BERT <julien.bert@univ-brest.fr>
   \author Didier BENOIT <didier.benoit@inserm.fr>
@@ -44,7 +44,7 @@ class GGEMS_EXPORT GGEMSMaterialsManager
       return instance;
     }
 
-  private:
+  public:
     /*!
       \fn GGEMSManager(GGEMSManager const& material_manager) = delete
       \param material_manager - reference on the material manager
@@ -76,6 +76,41 @@ class GGEMS_EXPORT GGEMSMaterialsManager
     */
     GGEMSMaterialsManager& operator=(
       GGEMSMaterialsManager const&& material_manager) = delete;
+
+  public:
+    /*!
+      \fn void SetMaterialsDatabase(char const* filename)
+      \param filename - name of the file containing material database
+      \brief set the material filename
+    */
+    void SetMaterialsDatabase(char const* filename);
+
+  private:
+    /*!
+      \fn void LoadMaterialsDatabase(std::string const& filename)
+      \param filename - filename containing materials for GGEMS
+      \brief Load materials for GGEMS
+    */
+    void LoadMaterialsDatabase(std::string const& filename);
+
+  private:
+    bool is_database_loaded_; /*!< Boolean checking if the database is loaded */
 };
+
+/*!
+  \fn GGEMSMaterialsManager* get_instance_materials_manager(void)
+  \brief Get the GGEMSMaterialsManager pointer for python user.
+*/
+extern "C" GGEMS_EXPORT GGEMSMaterialsManager*
+  get_instance_materials_manager(void);
+
+/*!
+  \fn void set_process(GGEMSMaterialsManager* p_ggems_materials_manager, char const* filename)
+  \param p_ggems_manager - pointer on the singleton
+  \param process_name - name of the process to activate
+  \brief activate a specific process
+*/
+extern "C" GGEMS_EXPORT void set_materials_database_ggems_materials_manager(
+  GGEMSMaterialsManager* p_ggems_materials_manager, char const* filename);
 
 #endif // End of GUARD_GGEMS_PHYSICS_GGEMSMATERIALSMANAGER_HH

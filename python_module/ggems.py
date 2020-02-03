@@ -180,6 +180,24 @@ class GGEMSXRaySource(object):
         ggems_lib.set_polyenergy_ggems_xray_source(self.obj, file)
 
 
+class GGEMSMaterialsManager(object):
+    """Class handling the materials in GGEMS
+    """
+    def __init__(self):
+        ggems_lib.get_instance_materials_manager.restype = ctypes.c_void_p
+
+        ggems_lib.set_materials_database_ggems_materials_manager.argtypes = [
+            ctypes.c_void_p, ctypes.c_char_p]
+        ggems_lib.set_materials_database_ggems_materials_manager.restype =\
+            ctypes.c_void_p
+
+        self.obj = ggems_lib.get_instance_materials_manager()
+
+    def set_materials_database(self, filename):
+        ggems_lib.set_materials_database_ggems_materials_manager(
+            self.obj, filename)
+
+
 class GGEMSManager(object):
     """GGEMS class managing the simulation
     """
