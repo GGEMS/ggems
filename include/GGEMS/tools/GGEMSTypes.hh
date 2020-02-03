@@ -97,7 +97,7 @@
 #include <CL/cl.hpp>
 #endif
 
-#define GGbool bool
+#define GGbool cl_bool
 
 #define GGchar cl_char
 #define GGchar2 cl_char2

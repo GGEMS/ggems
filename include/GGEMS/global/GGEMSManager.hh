@@ -55,7 +55,7 @@ class GGEMS_EXPORT GGEMSManager
       return instance;
     }
 
-  private:
+  public:
     /*!
       \fn GGEMSManager(GGEMSManager const& ggems_manager) = delete
       \param ggems_manager - reference on the ggems manager
@@ -262,7 +262,7 @@ extern "C" GGEMS_EXPORT void initialize_ggems_manager(
   GGEMSManager* p_ggems_manager);
 
 /*!
-  \fn void set_process(GGEMSManager* p_ggems_manager, std::string const process_name)
+  \fn void set_process(GGEMSManager* p_ggems_manager, char const* process_name)
   \param p_ggems_manager - pointer on the singleton
   \param process_name - name of the process to activate
   \brief activate a specific process

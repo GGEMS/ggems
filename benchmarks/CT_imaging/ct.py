@@ -16,8 +16,8 @@ opencl.print_infos()  # Printing informations about OpenCL
 
 # ------------------------------------------------------------------------------
 # STEP 3: Materials Declaration
-# material = ggems.GGEMSMaterialsManager()
-# material.set_materials_database(b"data/materials.dat")
+materials = ggems.GGEMSMaterialsManager()
+materials.set_materials_database(b"data/materials.dat")
 
 # ------------------------------------------------------------------------------
 # STEP X: Phantom and Navigator
