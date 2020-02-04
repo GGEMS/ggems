@@ -15,6 +15,8 @@
 
 #include "GGEMS/global/GGEMSExport.hh"
 
+class GGEMSMaterialsDatabase;
+
 /*!
   \class GGEMSMaterialsManager
   \brief GGEMS class managing the material database
@@ -95,6 +97,7 @@ class GGEMS_EXPORT GGEMSMaterialsManager
 
   private:
     bool is_database_loaded_; /*!< Boolean checking if the database is loaded */
+    GGEMSMaterialsDatabase* p_material_database_; /*!< Database of all materials */
 };
 
 /*!

@@ -12,6 +12,7 @@
 
 #include "GGEMS/tools/GGEMSPrint.hh"
 #include "GGEMS/physics/GGEMSMaterialsManager.hh"
+#include "GGEMS/physics/GGEMSMaterials.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -22,6 +23,9 @@ GGEMSMaterialsManager::GGEMSMaterialsManager(void)
 {
   GGcout("GGEMSMaterialsManager", "GGEMSMaterialsManager", 3)
     << "Allocation of GGEMS Materials singleton..." << GGendl;
+
+  // Creating a material database
+  p_material_database_ = new GGEMSMaterialsDatabase;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -30,6 +34,12 @@ GGEMSMaterialsManager::GGEMSMaterialsManager(void)
 
 GGEMSMaterialsManager::~GGEMSMaterialsManager(void)
 {
+  // Deleting the material database
+  if (p_material_database_) {
+    delete p_material_database_;
+    p_material_database_ = nullptr;
+  }
+
   GGcout("GGEMSMaterialsManager", "~GGEMSMaterialsManager", 3)
     << "Deallocation of GGEMS Materials singleton..." << GGendl;
 }
@@ -43,18 +53,10 @@ void GGEMSMaterialsManager::SetMaterialsDatabase(char const* filename)
   // Converting char* to string
   std::string filename_str(filename);
 
-  // Loading materials
-  LoadMaterialsDatabase(filename_str);
-}
+  // Loading materials in database
+  p_material_database_->LoadMaterialsDatabase(filename_str);
 
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void GGEMSMaterialsManager::LoadMaterialsDatabase(std::string const& filename)
-{
-  GGcout("GGEMSMaterialsManager", "LoadMaterialsDatabase", 0)
-    << "Loading materials in GGEMS..." << GGendl;
+  // Loading chemical elements
 
   // Database if loaded
   is_database_loaded_ = true;
