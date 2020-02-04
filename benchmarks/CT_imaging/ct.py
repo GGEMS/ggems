@@ -26,15 +26,15 @@ materials.set_materials_database(b"data/materials.dat")
 
 # ------------------------------------------------------------------------------
 # STEP X: Source Declaration
-xray_source = ggems.GGEMSXRaySource()
-xray_source.set_source_particle_type(b"photon")
-xray_source.set_number_of_particles(861635)
-xray_source.set_position(-1000.0, 10.0, 50.0)  # in mm
-xray_source.set_rotation(0.0, 0.0, 0.0)  # in degree
-xray_source.set_beam_aperture(5.0)  # in degree
-xray_source.set_focal_spot_size(0.6, 1.2, 0.0)  # in mm
-xray_source.set_polyenergy(b"data/spectrum_120kVp_2mmAl.dat")
-xray_source.print_infos()
+# xray_source = ggems.GGEMSXRaySource()
+# xray_source.set_source_particle_type(b"photon")
+# xray_source.set_number_of_particles(861635)
+# xray_source.set_position(-1000.0, 10.0, 50.0)  # in mm
+# xray_source.set_rotation(0.0, 0.0, 0.0)  # in degree
+# xray_source.set_beam_aperture(5.0)  # in degree
+# xray_source.set_focal_spot_size(0.6, 1.2, 0.0)  # in mm
+# xray_source.set_polyenergy(b"data/spectrum_120kVp_2mmAl.dat")
+# xray_source.print_infos()
 
 # ------------------------------------------------------------------------------
 # STEP X: Physics Declaration
@@ -42,8 +42,8 @@ xray_source.print_infos()
 
 # ------------------------------------------------------------------------------
 # STEP X: GGEMS simulation parameters
-ggems = ggems.GGEMSManager()
-ggems.set_seed(777)
+# ggems = ggems.GGEMSManager()
+# ggems.set_seed(777)
 
 # Cross section parameters
 # ggems_manager.set_cross_section_table_number_of_bins(220)
@@ -60,10 +60,10 @@ ggems.set_seed(777)
 # ggems_manager.set_geometry_tolerance(0.001)  # in mm
 
 # Initializing the GGEMS simulation
-ggems.initialize()
+# ggems.initialize()
 
 # Printing RAM status after all initializations
 opencl.print_RAM()
 
 # Start GGEMS simulation
-ggems.run()
+# ggems.run()
