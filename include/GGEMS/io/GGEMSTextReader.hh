@@ -16,14 +16,54 @@
 
 #include <fstream>
 
+#include "GGEMS/tools/GGEMSTypes.hh"
+
 /*!
   \namespace GGEMSMaterialTextReader
   \brief namespace reading material database file
 */
-/*namespace GGEMSMaterialTextReader
+namespace GGEMSMaterialReader
 {
-  
-}*/
+  /*!
+    \fn std::string ReadMaterialName(std::string const& line)
+    \param line - string to analyze
+    \return name of the material
+    \brief return the name of the material
+  */
+  std::string ReadMaterialName(std::string const& line);
+
+  /*!
+    \fn GGdouble ReadMaterialDensity(std::string const& line)
+    \param line - string to analyze
+    \return density of material
+    \brief return the density of material
+  */
+  GGdouble ReadMaterialDensity(std::string const& line);
+
+  /*!
+    \fn GGushort ReadMaterialNumberOfElements(std::string const& line)
+    \param line - string to analyze
+    \return number of elements in material
+    \brief return the number of elements in material
+  */
+  GGushort ReadMaterialNumberOfElements(std::string const& line);
+
+  /*!
+    \fn std::string ReadMaterialElementName(std::string const& line)
+    \param line - string to analyze
+    \return name of the material element
+    \brief return the name of material element name
+  */
+  std::string ReadMaterialElementName(std::string const& line);
+
+  /*!
+    \fn GGdouble ReadMaterialElementFraction(std::string const& line)
+    \param line - string to analyze
+    \return number of elements fraction
+    \brief return the number of element fraction
+  */
+  GGdouble ReadMaterialElementFraction(std::string const& line);
+}
 
 /*!
   \namespace GGEMSTextReader
@@ -42,9 +82,19 @@ namespace GGEMSTextReader
     char const comment = '#');
 
   /*!
-    \fn void SkipBlankLine
+    \fn bool IsBlankLine(std::string const& line)
+    \param line - string to analyze
+    \return true is blank line otherwize false
+    \brief check if the line is blank or not
   */
-  //void SkipBlankLine(std::ifstream& stream, std::string& line);
+  bool IsBlankLine(std::string const& line);
+
+  /*!
+    \fn void RemoveSpace(std::string& line)
+    \param line - string to analyze
+    \brief remove all spaces and tab from a string
+  */
+  void RemoveSpace(std::string& line);
 }
 
 #endif // End of GUARD_GGEMS_IO_GGEMSTEXTREADER_HH

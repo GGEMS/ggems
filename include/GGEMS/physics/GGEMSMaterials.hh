@@ -65,10 +65,10 @@ struct GGEMS_EXPORT GGEMSSingleMaterial
   GGEMSSingleMaterial& operator=(GGEMSSingleMaterial const&& material) = delete;
 
   std::vector<std::string> mixture_Z_; /*! Atomic number (number of protons) by elements in material */
-  std::vector<GGfloat> mixture_f_; /*!< Fraction of element in material */
+  std::vector<GGdouble> mixture_f_; /*!< Fraction of element in material */
   std::string name_; /*!< Name of material */
-  GGfloat density_; /*!< Density of material */
-  GGuchar nb_elements_; /*!< Number of elements in material */
+  GGdouble density_; /*!< Density of material */
+  GGushort nb_elements_; /*!< Number of elements in material */
 };
 
 /*!
