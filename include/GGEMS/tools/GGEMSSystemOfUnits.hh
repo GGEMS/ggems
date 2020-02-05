@@ -153,11 +153,11 @@ namespace GGEMSUnits
     /(1000.*1.0*1000.*1.0));
 
   // Symbols definitions
-  __constant GGdouble Kg = 1.e-6*1./1.602176487e-19*1.e+9 *1.*1.e+9 *1.
+  __constant GGdouble kg = 1.e-6*1./1.602176487e-19*1.e+9 *1.*1.e+9 *1.
     /(1000.*1.0*1000.*1.0);
   __constant GGdouble g = 1.e-3*(1.e-6*1./1.602176487e-19*1.e+9 *1.*1.e+9 *1.
     /(1000.*1.0*1000.*1.0));
-  __constant GGdouble Mg = 1.e-3*1.e-3*(1.e-6*1./1.602176487e-19*1.e+9
+  __constant GGdouble mg = 1.e-3*1.e-3*(1.e-6*1./1.602176487e-19*1.e+9
     *1.*1.e+9 *1./(1000.*1.0*1000.*1.0));
 
   // Power [E][T^-1]

@@ -659,4 +659,3 @@ MetallImplants_39: d=2.7321 g/cm3 ; n=1;
 # Material 40 corresponding to H=[ 2970.02;4000 ]
 MetallImplants_40: d=2.79105 g/cm3 ; n=1; 
 +el: name=Titanium; f=1
-

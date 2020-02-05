@@ -53,10 +53,16 @@ void GGEMSMaterialsManager::SetMaterialsDatabase(char const* filename)
   // Converting char* to string
   std::string filename_str(filename);
 
-  // Loading materials in database
-  p_material_database_->LoadMaterialsDatabase(filename_str);
-
-  // Loading chemical elements
+  // Loading materials and elements in database
+  if (is_database_loaded_) {
+    GGwarn("GGEMSMaterialsManager", "SetMaterialsDatabase", 0)
+      << "Material database if already loaded!!!" << GGendl;
+  }
+  else {
+    // Materials
+    p_material_database_->LoadMaterialsDatabase(filename_str);
+    // Elements
+  }
 
   // Database if loaded
   is_database_loaded_ = true;

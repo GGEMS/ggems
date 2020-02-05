@@ -72,9 +72,30 @@ void GGEMSMaterialsDatabase::LoadMaterialsDatabase(std::string const& filename)
   // Reading database file
   std::string line;
   while (std::getline(database_stream, line)) {
+    // Skip comment
     GGEMSTextReader::SkipComment(database_stream, line);
-    //GGEMSTextReader::SkipBlankLine(database_stream, line);
-    std::cout << line << std::endl;
+    // Check if blank line
+    if (GGEMSTextReader::IsBlankLine(line)) continue;
+
+    // Remove space/tab from line
+    GGEMSTextReader::RemoveSpace(line);
+
+    // Store infos about materials
+    std::cout << GGEMSMaterialReader::ReadMaterialName(line) << std::endl;
+    std::cout << GGEMSMaterialReader::ReadMaterialDensity(line) << std::endl;
+
+    // Loop over number of elements
+    GGushort const kNumberOfElements =
+      GGEMSMaterialReader::ReadMaterialNumberOfElements(line);
+    for (GGushort i = 0; i < kNumberOfElements; ++i) {
+      // Get next line element by element
+      std::getline(database_stream, line);
+      // Remove space/tab from line
+      GGEMSTextReader::RemoveSpace(line);
+      std::cout << GGEMSMaterialReader::ReadMaterialElementName(line)
+        << " " << GGEMSMaterialReader::ReadMaterialElementFraction(line)
+        << std::endl;
+    }
   }
 
   // Closing file stream
