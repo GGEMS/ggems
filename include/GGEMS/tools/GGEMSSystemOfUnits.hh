@@ -85,9 +85,9 @@ namespace GGEMSUnits
   __constant GGdouble m2 = 1000.*1.0*1000.*1.0;
   __constant GGdouble m3 = 1000.*1.0*1000.*1.0*1000.*1.0;
 
-  __constant GGdouble Km = 1000.*1000.*1.0;
-  __constant GGdouble Km2 = 1000.*1000.*1.0*1000.*1000.*1.0;
-  __constant GGdouble Km3 = 1000.*1000.*1.0*1000.*1000.*1.0*1000.*1000.*1.0;
+  __constant GGdouble km = 1000.*1000.*1.0;
+  __constant GGdouble km2 = 1000.*1000.*1.0*1000.*1000.*1.0;
+  __constant GGdouble km3 = 1000.*1000.*1.0*1000.*1000.*1.0*1000.*1000.*1.0;
 
   __constant GGdouble pc = 96939420213600000*1000.*1.0/3.141592653589793238463;
 
@@ -138,7 +138,7 @@ namespace GGEMSUnits
   // Symbols definitions
   __constant GGdouble MeV = 1.;
   __constant GGdouble eV = 1.e-6*1.;
-  __constant GGdouble KeV = 1.e-3*1.;
+  __constant GGdouble keV = 1.e-3*1.;
   __constant GGdouble GeV = 1.e+3*1.;
   __constant GGdouble TeV = 1.e+6*1.;
   __constant GGdouble PeV = 1.e+9*1.;
@@ -221,6 +221,7 @@ namespace GGEMSUnits
 
   // Amount of substance
   __constant GGdouble MOLE = 1.;
+  __constant GGdouble mol = 1.;
 
   // Activity [T^-1]
   __constant GGdouble BECQUEREL = 1./(1.e+9 *1.) ;

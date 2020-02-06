@@ -88,14 +88,6 @@ class GGEMS_EXPORT GGEMSMaterialsManager
     void SetMaterialsDatabase(char const* filename);
 
   private:
-    /*!
-      \fn void LoadMaterialsDatabase(std::string const& filename)
-      \param filename - filename containing materials for GGEMS
-      \brief Load materials for GGEMS
-    */
-    void LoadMaterialsDatabase(std::string const& filename);
-
-  private:
     bool is_database_loaded_; /*!< Boolean checking if the database is loaded */
     GGEMSMaterialsDatabase* p_material_database_; /*!< Database of all materials */
 };
@@ -109,7 +101,7 @@ extern "C" GGEMS_EXPORT GGEMSMaterialsManager*
 
 /*!
   \fn void set_process(GGEMSMaterialsManager* p_ggems_materials_manager, char const* filename)
-  \param p_ggems_manager - pointer on the singleton
+  \param p_ggems_materials_manager - pointer on the singleton
   \param process_name - name of the process to activate
   \brief activate a specific process
 */

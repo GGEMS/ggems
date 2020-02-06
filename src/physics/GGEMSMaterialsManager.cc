@@ -61,7 +61,8 @@ void GGEMSMaterialsManager::SetMaterialsDatabase(char const* filename)
   else {
     // Materials
     p_material_database_->LoadMaterialsDatabase(filename_str);
-    // Elements
+    // Chemical Elements
+    p_material_database_->LoadChemicalElements();
   }
 
   // Database if loaded
