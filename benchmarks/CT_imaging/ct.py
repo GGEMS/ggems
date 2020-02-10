@@ -18,11 +18,17 @@ opencl.print_infos()  # Printing informations about OpenCL
 # STEP 3: Materials Declaration
 materials = ggems.GGEMSMaterialsManager()
 materials.set_materials(b"data/materials.dat")
+materials.print_available_chemical_elements()
+materials.print_available_materials()
 
 # ------------------------------------------------------------------------------
 # STEP X: Phantom and Navigator
 # phantom1 = ggems.GGEMSVoxelizedPhantom()
 # phantom1.set_name(b"phantom1")
+
+# ------------------------------------------------------------------------------
+# STEP X: Physics Declaration
+
 
 # ------------------------------------------------------------------------------
 # STEP X: Source Declaration
@@ -35,10 +41,6 @@ materials.set_materials(b"data/materials.dat")
 # xray_source.set_focal_spot_size(0.6, 1.2, 0.0)  # in mm
 # xray_source.set_polyenergy(b"data/spectrum_120kVp_2mmAl.dat")
 # xray_source.print_infos()
-
-# ------------------------------------------------------------------------------
-# STEP X: Physics Declaration
-
 
 # ------------------------------------------------------------------------------
 # STEP X: GGEMS simulation parameters

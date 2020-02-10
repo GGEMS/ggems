@@ -296,7 +296,7 @@ void GGEMSMaterialsManager::PrintAvailableMaterials(void) const
       << "    * Material: \"" << i.first << "\"" << GGendl;
     GGcout("GGEMSMaterialsManager", "PrintAvailableMaterials", 0)
       << "        - Density: "
-      << i.second.density_ / (GGEMSUnits::g / GGEMSUnits::cm3) << " g/cm3"
+      << i.second.density_ / (GGEMSUnits::g/GGEMSUnits::cm3) << " g/cm3"
       << GGendl;
     GGcout("GGEMSMaterialsManager", "PrintAvailableMaterials", 0)
       << "        - Number of elements: " << i.second.nb_elements_ << GGendl;
