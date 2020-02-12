@@ -142,7 +142,7 @@ LINK_DIRECTORIES(${OpenCL_LIBRARY})
 FILE(GLOB source_ggems
   ${PROJECT_SOURCE_DIR}/src/detectors/*.cc
   ${PROJECT_SOURCE_DIR}/src/global/*.cc
-  ${PROJECT_SOURCE_DIR}/src/geometry/*.cc
+  ${PROJECT_SOURCE_DIR}/src/geometries/*.cc
   ${PROJECT_SOURCE_DIR}/src/tools/*.cc
   ${PROJECT_SOURCE_DIR}/src/navigators/*.cc
   ${PROJECT_SOURCE_DIR}/src/physics/*.cc

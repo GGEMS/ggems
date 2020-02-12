@@ -15,7 +15,7 @@
 
 #include "GGEMS/global/GGEMSExport.hh"
 #include "GGEMS/tools/GGEMSTypes.hh"
-#include "GGEMS/geometry/GGEMSPhantomCreatorManager.hh"
+#include "GGEMS/geometries/GGEMSPhantomCreatorManager.hh"
 
 /*!
   \class GGEMSVolumeSolid

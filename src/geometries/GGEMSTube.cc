@@ -11,7 +11,7 @@
 */
 
 #include "GGEMS/tools/GGEMSPrint.hh"
-#include "GGEMS/geometry/GGEMSTube.hh"
+#include "GGEMS/geometries/GGEMSTube.hh"
 #include "GGEMS/tools/GGEMSTools.hh"
 
 ////////////////////////////////////////////////////////////////////////////////

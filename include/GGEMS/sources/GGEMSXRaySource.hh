@@ -13,7 +13,6 @@
   \date Tuesday October 22, 2019
 */
 
-//#include "GGEMS/global/GGEMSExport.hh"
 #include "GGEMS/sources/GGEMSSource.hh"
 
 /*!
@@ -35,32 +34,32 @@ class GGEMS_EXPORT GGEMSXRaySource : public GGEMSSource
 
   public:
     /*!
-      \fn GGEMSXRaySource(GGEMSXRaySource const& p_xray_source) = delete
-      \param p_xray_source - reference on the GGEMS XRay source
+      \fn GGEMSXRaySource(GGEMSXRaySource const& xray_source) = delete
+      \param xray_source - reference on the GGEMS XRay source
       \brief Avoid copy by reference
     */
-    GGEMSXRaySource(GGEMSXRaySource const& p_xray_source) = delete;
+    GGEMSXRaySource(GGEMSXRaySource const& xray_source) = delete;
 
     /*!
-      \fn GGEMSXRaySource& operator=(GGEMSXRaySource const& p_xray_source) = delete
-      \param p_xray_source - reference on the GGEMS XRay source
+      \fn GGEMSXRaySource& operator=(GGEMSXRaySource const& xray_source) = delete
+      \param xray_source - reference on the GGEMS XRay source
       \brief Avoid assignement by reference
     */
-    GGEMSXRaySource& operator=(GGEMSXRaySource const& p_xray_source) = delete;
+    GGEMSXRaySource& operator=(GGEMSXRaySource const& xray_source) = delete;
 
     /*!
-      \fn GGEMSXRaySource(GGEMSXRaySource const&& p_xray_source) = delete
-      \param p_xray_source - rvalue reference on the GGEMS XRay source
+      \fn GGEMSXRaySource(GGEMSXRaySource const&& xray_source) = delete
+      \param xray_source - rvalue reference on the GGEMS XRay source
       \brief Avoid copy by rvalue reference
     */
-    GGEMSXRaySource(GGEMSXRaySource const&& p_xray_source) = delete;
+    GGEMSXRaySource(GGEMSXRaySource const&& xray_source) = delete;
 
     /*!
-      \fn GGEMSXRaySource& operator=(GGEMSXRaySource const&& p_xray_source) = delete
-      \param p_xray_source - rvalue reference on the GGEMS XRay source
+      \fn GGEMSXRaySource& operator=(GGEMSXRaySource const&& xray_source) = delete
+      \param xray_source - rvalue reference on the GGEMS XRay source
       \brief Avoid copy by rvalue reference
     */
-    GGEMSXRaySource& operator=(GGEMSXRaySource const&& p_xray_source) = delete;
+    GGEMSXRaySource& operator=(GGEMSXRaySource const&& xray_source) = delete;
 
   public: // Pure abstract method from GGEMSSourceManager
     /*!

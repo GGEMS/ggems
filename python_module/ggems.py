@@ -72,6 +72,33 @@ class GGEMSVerbosity(object):
         ggems_lib.set_ggems_verbose(val)
 
 
+class GGEMSVoxelizedPhantomNavigatorImagery(object):
+    """Class for the voxelized phantom navigator for imagery application
+    """
+    def __init__(self):
+        ggems_lib.create_ggems_voxelized_phantom_navigator_imagery.restype = ctypes.c_void_p
+
+        ggems_lib.set_phantom_name_ggems_voxelized_phantom_navigator_imagery.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
+        ggems_lib.set_phantom_name_ggems_voxelized_phantom_navigator_imagery.restype = ctypes.c_void_p
+
+        ggems_lib.set_phantom_file_ggems_voxelized_phantom_navigator_imagery.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
+        ggems_lib.set_phantom_file_ggems_voxelized_phantom_navigator_imagery.restype = ctypes.c_void_p
+
+        ggems_lib.set_range_to_material_filename_ggems_voxelized_phantom_navigator_imagery.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
+        ggems_lib.set_range_to_material_filename_ggems_voxelized_phantom_navigator_imagery.restype = ctypes.c_void_p
+
+        self.obj = ggems_lib.create_ggems_voxelized_phantom_navigator_imagery()
+
+    def set_phantom_name(self, name):
+        ggems_lib.set_phantom_name_ggems_voxelized_phantom_navigator_imagery(self.obj, name)
+
+    def set_phantom_image(self, name):
+        ggems_lib.set_phantom_file_ggems_voxelized_phantom_navigator_imagery(self.obj, name)
+
+    def set_range_to_material(self, name):
+        ggems_lib.set_range_to_material_filename_ggems_voxelized_phantom_navigator_imagery(self.obj, name)
+
+
 class GGEMSXRaySource(object):
     """GGEMS XRay source class managing source for CT/CBCT simulation
     """

@@ -12,7 +12,7 @@
 
 #include <algorithm>
 
-#include "GGEMS/geometry/GGEMSPhantomCreatorManager.hh"
+#include "GGEMS/geometries/GGEMSPhantomCreatorManager.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
 #include "GGEMS/tools/GGEMSTools.hh"
 #include "GGEMS/io/GGEMSMHDImage.hh"
