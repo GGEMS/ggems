@@ -1,4 +1,263 @@
-# Breast
+################################################################################
+#                              1 ELEMENT MATERIAL                              #
+################################################################################
+
+Lithium: d=0.534 g/cm3; n=1;
+	+el: name=Lithium ; f=1.0
+
+Beryllium: d=1.848 g/cm3; n=1;
+	+el: name=Beryllium ; f=1.0
+
+Boron: d=2.34 g/cm3; n=1;
+	+el: name=Boron ; f=1.0
+
+Carbon: d=2.0 g/cm3; n=1;
+	+el: name=Carbon ; f=1.0
+
+Sodium: d=0.971 g/cm3; n=1;
+	+el: name=Sodium ; f=1.0
+
+Magnesium: d=1.738 g/cm3; n=1;
+	+el: name=Magnesium ; f=1.0
+
+Aluminium: d=2.7 g/cm3; n=1;
+	+el: name=Aluminium ; f=1.0
+
+Silicon: d=2.33 g/cm3; n=1;
+	+el: name=Silicon ; f=1.0
+
+Phosphor: d=1.82 g/cm3; n=1;
+	+el: name=Phosphor ; f=1.0
+
+Sulfur: d=2.07 g/cm3; n=1;
+	+el: name=Sulfur ; f=1.0
+
+Potassium: d=0.89 g/cm3; n=1;
+	+el: name=Potassium ; f=1.0
+
+Calcium: d=1.54 g/cm3; n=1;
+	+el: name=Calcium ; f=1.0
+
+Scandium: d=2.989 g/cm3; n=1;
+	+el: name=Scandium ; f=1.0
+
+Titanium: d=4.51 g/cm3; n=1;
+	+el: name=Titanium ; f=1.0
+
+Vandium: d=6.0 g/cm3; n=1;
+	+el: name=Vandium ; f=1.0
+
+Chromium: d=7.15 g/cm3; n=1;
+	+el: name=Chromium ; f=1.0
+
+Manganese: d=7.3 g/cm3; n=1;
+	+el: name=Manganese ; f=1.0
+
+Iron: d=7.874 g/cm3; n=1;
+	+el: name=Iron ; f=1.0
+
+Cobalt: d=8.9 g/cm3; n=1;
+	+el: name=Cobalt ; f=1.0
+
+Nickel: d=8.902 g/cm3; n=1;
+	+el: name=Nickel ; f=1.0
+
+Copper: d=8.96 g/cm3; n=1;
+	+el: name=Copper ; f=1.0
+
+Zinc: d=7.134 g/cm3; n=1;
+	+el: name=Zinc ; f=1.0
+
+Gallium: d=5.904 g/cm3; n=1;
+	+el: name=Gallium ; f=1.0
+
+Germanium: d=5.323 g/cm3; n=1;
+	+el: name=Germanium ; f=1.0
+
+Arsenic: d=5.72 g/cm3; n=1;
+	+el: name=Arsenic ; f=1.0
+
+Selenium: d=4.79 g/cm3; n=1;
+	+el: name=Selenium ; f=1.0
+
+Bromine: d=3.12 g/cm3; n=1;
+	+el: name=Bromine ; f=1.0
+
+Rubidium: d=1.532 g/cm3; n=1;
+	+el: name=Rubidium ; f=1.0
+
+Strontium: d=2.64 g/cm3; n=1;
+	+el: name=Strontium ; f=1.0
+
+Yttrium: d=4.469 g/cm3; n=1;
+	+el: name=Yttrium ; f=1.0
+
+Zirconium: d=6.52 g/cm3; n=1;
+	+el: name=Zirconium ; f=1.0
+
+Niobium: d=8.57 g/cm3; n=1;
+	+el: name=Niobium ; f=1.0
+
+Molybdenum: d=10.22 g/cm3; n=1;
+	+el: name=Molybdenum ; f=1.0
+
+Technetium: d=11.5 g/cm3; n=1;
+	+el: name=Technetium ; f=1.0
+
+Ruthenium: d=12.1 g/cm3; n=1;
+	+el: name=Ruthenium ; f=1.0
+
+Rhodium: d=12.41 g/cm3; n=1;
+	+el: name=Rhodium ; f=1.0
+
+Palladium: d=12.02 g/cm3; n=1;
+	+el: name=Palladium ; f=1.0
+
+Silver: d=10.5 g/cm3; n=1;
+	+el: name=Silver ; f=1.0
+
+Cadmium: d=8.69 g/cm3; n=1;
+	+el: name=Cadmium ; f=1.0
+
+Indium: d=7.31 g/cm3; n=1;
+	+el: name=Indium ; f=1.0
+
+Tin: d=7.29 g/cm3; n=1;
+	+el: name=Tin ; f=1.0
+
+Antimony: d=6.68 g/cm3; n=1;
+	+el: name=Antimony ; f=1.0
+
+Tellurium: d=6.23 g/cm3; n=1;
+	+el: name=Tellurium ; f=1.0
+
+Iodine: d=4.93 g/cm3; n=1;
+    +el: name=Iodine    ; f=1.0
+
+Caesium: d=1.87 g/cm3; n=1;
+	+el: name=Caesium ; f=1.0
+
+Barium: d=3.62 g/cm3; n=1;
+    +el: name=Barium    ; f=1.0
+
+Lanthanum: d=6.145 g/cm3; n=1;
+    +el: name=Lanthanum    ; f=1.0
+
+Cerium: d=6.77 g/cm3; n=1;
+    +el: name=Cerium    ; f=1.0
+
+Praseodymium: d=6.773 g/cm3; n=1;
+    +el: name=Praseodymium    ; f=1.0
+
+Neodymium: d=7.008 g/cm3; n=1;
+    +el: name=Neodymium    ; f=1.0
+
+Promethium: d=7.264 g/cm3; n=1;
+    +el: name=Promethium    ; f=1.0
+
+Samarium: d=7.52 g/cm3; n=1;
+    +el: name=Samarium    ; f=1.0
+
+Europium: d=5.244 g/cm3; n=1;
+    +el: name=Europium    ; f=1.0
+
+Gadolinium: d=7.901 g/cm3; n=1;
+    +el: name=Gadolinium    ; f=1.0
+
+Terbium: d=8.23 g/cm3; n=1;
+    +el: name=Terbium    ; f=1.0
+
+Dysprosium: d=8.551 g/cm3; n=1;
+    +el: name=Dysprosium    ; f=1.0
+
+Holmium: d=8.795 g/cm3; n=1;
+    +el: name=Holmium    ; f=1.0
+
+Erbium: d=9.066 g/cm3; n=1;
+    +el: name=Erbium    ; f=1.0
+
+Thulium: d=9.321 g/cm3; n=1;
+    +el: name=Thulium    ; f=1.0
+
+Ytterbium: d=6.9 g/cm3; n=1;
+    +el: name=Ytterbium    ; f=1.0
+
+Lutetium: d=9.841 g/cm3; n=1;
+    +el: name=Lutetium    ; f=1.0
+
+Hafnium: d=13.31 g/cm3; n=1;
+    +el: name=Hafnium    ; f=1.0
+
+Tantalum: d=16.4 g/cm3; n=1;
+    +el: name=Tantalum    ; f=1.0
+
+Tungsten: d=19.3 g/cm3; n=1;
+    +el: name=Tungsten    ; f=1.0
+
+Rhenium: d=20.8 g/cm3; n=1;
+    +el: name=Rhenium    ; f=1.0
+
+Osmium: d=22.587 g/cm3; n=1;
+    +el: name=Osmium    ; f=1.0
+
+Iridium: d=22.562 g/cm3; n=1;
+    +el: name=Iridium    ; f=1.0
+
+Platinum: d=21.45 g/cm3; n=1;
+    +el: name=Platinum    ; f=1.0
+
+Gold: d=19.3 g/cm3; n=1;
+    +el: name=Gold      ; f=1.0
+
+Mercury: d=13.546 g/cm3; n=1;
+    +el: name=Mercury    ; f=1.0
+
+Thallium: d=11.85 g/cm3; n=1;
+    +el: name=Thallium    ; f=1.0
+
+Lead: d=11.34 g/cm3; n=1;
+    +el: name=Lead      ; f=1.0
+
+Bismuth: d=9.79 g/cm3; n=1;
+    +el: name=Bismuth    ; f=1.0
+
+Polonium: d=9.2 g/cm3; n=1;
+    +el: name=Polonium    ; f=1.0
+
+Francium: d=1.87 g/cm3; n=1;
+    +el: name=Francium    ; f=1.0
+
+Radium: d=5.0 g/cm3; n=1;
+    +el: name=Radium    ; f=1.0
+
+Actinium: d=10.07 g/cm3; n=1;
+    +el: name=Actinium    ; f=1.0
+
+Thorium: d=11.72 g/cm3; n=1;
+    +el: name=Thorium    ; f=1.0
+
+Protactinium: d=15.37 g/cm3; n=1;
+    +el: name=Protactinium    ; f=1.0
+
+Uranium: d=19.1 g/cm3; n=1;
+    +el: name:Uranium ; f=1.0
+
+Neptunium: d=20.25 g/cm3; n=1;
+    +el: name=Neptunium    ; f=1.0
+
+Plutonium: d=19.816 g/cm3; n=1;
+    +el: name=Plutonium    ; f=1.0
+
+Americium: d=12.0 g/cm3; n=1;
+    +el: name=Americium    ; f=1.0
+
+Curium: d=13.51 g/cm3; n=1;
+    +el: name=Curium    ; f=1.0
+
+################################################################################
+#                               COMPLEX MATERIAL                               #
+################################################################################
+
 Breast: d=1.020 g/cm3; n=8;
 	+el: name=Oxygen    ; f=0.5270
 	+el: name=Carbon    ; f=0.3320
@@ -9,18 +268,12 @@ Breast: d=1.020 g/cm3; n=8;
 	+el: name=Phosphor  ; f=0.0010
 	+el: name=Chlorine  ; f=0.0010
 
-# Air
 Air: d=1.29 mg/cm3; n=4;
 	+el: name=Nitrogen  ; f=0.755268
 	+el: name=Oxygen    ; f=0.231781
 	+el: name=Argon     ; f=0.012827
 	+el: name=Carbon    ; f=0.000124
 
-# Aluminium
-Aluminium: d=2.7 g/cm3; n=1;
-	+el: name=Aluminium ; f=1.0
-
-# Pyrex
 Pyrex: d=2.23 g/cm3; n=6;
 	+el: name=Boron	    ; f=0.040064
 	+el: name=Oxygen    ; f=0.539562
@@ -29,7 +282,6 @@ Pyrex: d=2.23 g/cm3; n=6;
 	+el: name=Silicon   ; f=0.377220
 	+el: name=Potassium ; f=0.003321
 
-# Lung
 Lung: d=0.26 g/cm3; n=9;
     +el: name=Hydrogen  ; f=0.103
 	+el: name=Carbon    ; f=0.105
@@ -41,12 +293,10 @@ Lung: d=0.26 g/cm3; n=9;
     +el: name=Chlorine  ; f=0.003
     +el: name=Potassium ; f=0.002
 
-# Body
 Body: d=1.00 g/cm3; n=2;
     +el: name=Hydrogen  ; f=0.112
     +el: name=Oxygen    ; f=0.888
 
-# RibBone
 RibBone: d=1.92 g/cm3; n=9;
     +el: name=Hydrogen  ; f=0.034
     +el: name=Carbon    ; f=0.155
@@ -58,7 +308,6 @@ RibBone: d=1.92 g/cm3; n=9;
     +el: name=Sulfur    ; f=0.003
     +el: name=Calcium   ; f=0.225
 
-# SpineBone
 SpineBone: d=1.42 g/cm3; n=11;
     +el: name=Hydrogen  ; f=0.063
     +el: name=Carbon    ; f=0.261
@@ -72,7 +321,6 @@ SpineBone: d=1.42 g/cm3; n=11;
     +el: name=Potassium ; f=0.001
     +el: name=Calcium   ; f=0.133
 
-# Intestine
 Intestine: d=1.03 g/cm3; n=9;
     +el: name=Hydrogen  ; f=0.106
     +el: name=Carbon    ; f=0.115
@@ -84,7 +332,6 @@ Intestine: d=1.03 g/cm3; n=9;
     +el: name=Chlorine  ; f=0.002
     +el: name=Potassium ; f=0.001
 
-# Spleen
 Spleen: d=1.06 g/cm3; n=9;
     +el: name=Hydrogen  ; f=0.103
     +el: name=Carbon    ; f=0.113
@@ -96,7 +343,6 @@ Spleen: d=1.06 g/cm3; n=9;
     +el: name=Chlorine  ; f=0.002
     +el: name=Potassium ; f=0.003
 
-# Blood
 Blood: d=1.06 g/cm3; n=10;
     +el: name=Hydrogen  ; f=0.102
     +el: name=Carbon    ; f=0.11
@@ -165,11 +411,6 @@ BloodIodine20: d=1.834 g/cm3; n=11;
     +el: name=Iron      ; f=0.0008
     +el: name=Iodine    ; f=0.2
 
-# Iodine
-Iodine: d=4.93 g/cm3; n=1;
-    +el: name=Iodine    ; f=1.0
-
-# Heart
 Heart: d=1.05 g/cm3; n=9;
     +el: name=Hydrogen  ; f=0.104
     +el: name=Carbon    ; f=0.139
@@ -181,7 +422,6 @@ Heart: d=1.05 g/cm3; n=9;
     +el: name=Chlorine  ; f=0.002
     +el: name=Potassium ; f=0.003
 
-# Liver    
 Liver: d=1.06 g/cm3; n=9;
     +el: name=Hydrogen  ; f=0.102
     +el: name=Carbon    ; f=0.139
@@ -193,7 +433,6 @@ Liver: d=1.06 g/cm3; n=9;
     +el: name=Chlorine  ; f=0.002
     +el: name=Potassium ; f=0.003
 
-# Kidney    
 Kidney: d=1.05 g/cm3; n=10;
     +el: name=Hydrogen  ; f=0.103
     +el: name=Carbon    ; f=0.132
@@ -205,15 +444,19 @@ Kidney: d=1.05 g/cm3; n=10;
     +el: name=Chlorine  ; f=0.002
     +el: name=Potassium ; f=0.002
     +el: name=Calcium   ; f=0.001
-    
-# Water    
+
 Water: d=1.00 g/cm3; n=2;
     +el: name=Hydrogen  ; f=0.111
     +el: name=Oxygen    ; f=0.889
 
-# Lead
-Lead: d=11.34 g/cm3; n=1;
-    +el: name=Lead      ; f=1.0
+LSO: d=7.4 g/cm3; n=3;
+    +el: name=Lutetium; f=0.764
+    +el: name=Oxygen; f=0.174
+    +el: name=Silicon; f=0.062
+
+NaI: d=3.67 g/cm3; n=2;
+    +el: name=Sodium; f=0.153
+    +el: name=Iodine; f=0.847
 
 # STM125I_Caps    
 STM125I_Caps: d=4.54 g/cm3; n=1;
@@ -225,20 +468,11 @@ STM125I_Alu: d=2.7 g/cm3; n=1;
     
 # STM125I_GoldCore  
 STM125I_GoldCore: d=19.3 g/cm3; n=1;
-    +el: name=Gold       ; f=1.00   
+    +el: name=Gold       ; f=1.00
 
-# LSO
-LSO: d=7.4 g/cm3; n=3;
-+el: name=Lutetium; f=0.764
-+el: name=Oxygen; f=0.174
-+el: name=Silicon; f=0.062
-
-# NaI
-NaI: d=3.67 g/cm3; n=2;
-+el: name=Sodium; f=0.153
-+el: name=Iodine; f=0.847
-
-###### Materials from CT data ######
+################################################################################
+#                            MATERIALS FROM CT DATA                            #
+################################################################################
 
 # Material 0 corresponding to H=[ -1050;-950 ]
 Air_0: d=1.21 mg/cm3; n=3; 

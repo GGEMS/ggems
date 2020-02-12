@@ -8,7 +8,7 @@ ggems.GGEMSVerbosity(3)
 # STEP 1: OpenCL Declaration
 opencl = ggems.GGEMSOpenCLManager()
 opencl.set_context_index(2)  # Activate a context
-opencl.print_infos()  # Printing informations about OpenCL
+# opencl.print_infos()  # Printing informations about OpenCL
 
 # ------------------------------------------------------------------------------
 # STEP 2: Visualization Declaration
@@ -18,13 +18,22 @@ opencl.print_infos()  # Printing informations about OpenCL
 # STEP 3: Materials Declaration
 materials = ggems.GGEMSMaterialsManager()
 materials.set_materials(b"data/materials.dat")
-materials.print_available_chemical_elements()
-materials.print_available_materials()
+# materials.print_available_chemical_elements()
+# materials.print_available_materials()
 
 # ------------------------------------------------------------------------------
-# STEP X: Phantom and Navigator
-# phantom1 = ggems.GGEMSVoxelizedPhantom()
-# phantom1.set_name(b"phantom1")
+# STEP X: Phantom, Navigator and System
+# First phantom
+phantom_1 = ggems.GGEMSVoxelizedPhantomNavigatorImagery()
+phantom_1.set_phantom_name(b"phantom_1")
+phantom_1.set_phantom_image(b"data/phantom_1.mhd")
+phantom_1.set_range_to_material(b"data/range_phantom_1.dat")
+
+# Second phantom
+phantom_2 = ggems.GGEMSVoxelizedPhantomNavigatorImagery()
+phantom_2.set_phantom_name(b"phantom_2")
+phantom_2.set_phantom_image(b"data/phantom_2.mhd")
+phantom_2.set_range_to_material(b"data/range_phantom_2.dat")
 
 # ------------------------------------------------------------------------------
 # STEP X: Physics Declaration
@@ -65,7 +74,7 @@ materials.print_available_materials()
 # ggems.initialize()
 
 # Printing RAM status after all initializations
-opencl.print_RAM()
+# opencl.print_RAM()
 
 # Start GGEMS simulation
 # ggems.run()

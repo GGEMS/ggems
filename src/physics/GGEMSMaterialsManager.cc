@@ -106,6 +106,8 @@ void GGEMSMaterialsManager::LoadMaterialsDatabase(std::string const& filename)
     }
 
     // Storing the material
+    GGcout("GGEMSMaterialsManager", "LoadMaterialsDatabase", 3)
+      << "Adding material: " << kMaterialName << "..." << GGendl;
     materials_.insert(std::make_pair(kMaterialName, material));
   }
 
@@ -230,7 +232,7 @@ void GGEMSMaterialsManager::AddChemicalElements(
   GGdouble const& element_A, GGdouble const& element_I)
 {
   GGcout("GGEMSMaterialsManager", "AddChemicalElements", 3)
-    << "Adding element: " << element_name << " ..." << GGendl;
+    << "Adding element: " << element_name << "..." << GGendl;
 
   // Creating chemical element and store it
   GGEMSChemicalElement element;

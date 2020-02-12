@@ -12,6 +12,10 @@
 
 - Faire un benchmark CT
 
+- Faire les benchmarks avec C++
+
+- Meilleur gestion de la verbosity avec GGEMS
+
 - Faire la visu avec Qt (Qt Quick) et activer l'option Qt à partir du CMAKE.
 Si possible, faire la visualization sur carte graphique avec OpenCL
 

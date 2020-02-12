@@ -29,43 +29,43 @@ class GGEMS_EXPORT GGEMSSource
 {
   public:
     /*!
-      \brief GGEMSSourceManager constructor
+      \brief GGEMSSource constructor
     */
     GGEMSSource(void);
 
     /*!
-      \brief GGEMSSourceManager destructor
+      \brief GGEMSSource destructor
     */
     virtual ~GGEMSSource(void);
 
   public:
     /*!
-      \fn GGEMSSource(GGEMSSource const& p_source) = delete
-      \param p_source - reference on the GGEMS source
+      \fn GGEMSSource(GGEMSSource const& source) = delete
+      \param source - reference on the GGEMS source
       \brief Avoid copy by reference
     */
-    GGEMSSource(GGEMSSource const& p_source) = delete;
+    GGEMSSource(GGEMSSource const& source) = delete;
 
     /*!
-      \fn GGEMSSource& operator=(GGEMSSource const& p_source) = delete
-      \param p_source - reference on the GGEMS source
+      \fn GGEMSSource& operator=(GGEMSSource const& source) = delete
+      \param source - reference on the GGEMS source
       \brief Avoid assignement by reference
     */
-    GGEMSSource& operator=(GGEMSSource const& p_source) = delete;
+    GGEMSSource& operator=(GGEMSSource const& source) = delete;
 
     /*!
-      \fn GGEMSSource(GGEMSSource const&& p_source) = delete
-      \param p_source - rvalue reference on the GGEMS source
+      \fn GGEMSSource(GGEMSSource const&& source) = delete
+      \param source - rvalue reference on the GGEMS source
       \brief Avoid copy by rvalue reference
     */
-    GGEMSSource(GGEMSSource const&& p_source) = delete;
+    GGEMSSource(GGEMSSource const&& source) = delete;
 
     /*!
-      \fn GGEMSSource& operator=(GGEMSSource const&& p_source) = delete
-      \param p_source - rvalue reference on the GGEMS source
+      \fn GGEMSSource& operator=(GGEMSSource const&& source) = delete
+      \param source - rvalue reference on the GGEMS source
       \brief Avoid copy by rvalue reference
     */
-    GGEMSSource& operator=(GGEMSSource const&& p_source) = delete;
+    GGEMSSource& operator=(GGEMSSource const&& source) = delete;
   
   public:
     /*!

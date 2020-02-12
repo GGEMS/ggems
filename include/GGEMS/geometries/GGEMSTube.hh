@@ -13,7 +13,7 @@
   \date Monday January 13, 2020
 */
 
-#include "GGEMS/geometry/GGEMSVolumeSolid.hh"
+#include "GGEMS/geometries/GGEMSVolumeSolid.hh"
 
 class GGEMS_EXPORT GGEMSTube : public GGEMSVolumeSolid
 {
