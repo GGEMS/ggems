@@ -23,7 +23,7 @@ GGEMSPhantomNavigatorManager::GGEMSPhantomNavigatorManager(void)
   number_of_phantom_navigators_(0)
 {
   GGcout("GGEMSPhantomNavigatorManager", "GGEMSPhantomNavigatorManager", 3)
-    << "Allocation of GGEMSPhantomNavigatorManager..." << GGendl;
+    << "Allocation of GGEMS phantom navigator manager..." << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -43,7 +43,7 @@ GGEMSPhantomNavigatorManager::~GGEMSPhantomNavigatorManager(void)
   }
 
   GGcout("GGEMSPhantomNavigatorManager", "~GGEMSPhantomNavigatorManager", 3)
-    << "Deallocation of GGEMSPhantomNavigatorManager..." << GGendl;
+    << "Deallocation of GGEMS phantom navigator manager..." << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -83,4 +83,39 @@ void GGEMSPhantomNavigatorManager::Store(
     p_new_buffer[number_of_phantom_navigators_ - 1] = p_phantom_navigator;
     p_phantom_navigators_ = p_new_buffer;
   }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSPhantomNavigatorManager::PrintInfos(void) const
+{
+  GGcout("GGEMSPhantomNavigatorManager", "PrintInfos", 0)
+    << "Printing infos about phantom navigators" << GGendl;
+  GGcout("GGEMSPhantomNavigatorManager", "PrintInfos", 0)
+    << "Number of phantom navigator(s): " << number_of_phantom_navigators_
+    << GGendl;
+
+  // Printing infos about each navigator
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+GGEMSPhantomNavigatorManager*
+  get_instance_ggems_phantom_navigator_manager(void)
+{
+  return &GGEMSPhantomNavigatorManager::GetInstance();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void print_infos_ggems_phantom_navigator_manager(
+  GGEMSPhantomNavigatorManager* p_phantom_navigator_manager)
+{
+  p_phantom_navigator_manager->PrintInfos();
 }

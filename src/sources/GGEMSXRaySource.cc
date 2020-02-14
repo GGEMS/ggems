@@ -25,7 +25,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 GGEMSXRaySource::GGEMSXRaySource(void)
-: GGEMSSource(),
+: GGEMSSource(this),
   beam_aperture_(std::numeric_limits<float>::min()),
   is_monoenergy_mode_(false),
   monoenergy_(-1.0f),
@@ -50,9 +50,6 @@ GGEMSXRaySource::GGEMSXRaySource(void)
     0.0f, 1.0f, 0.0f,
     1.0f, 0.0f, 0.0f
   );
-
-  // Store the source in source manager
-  GGEMSSourceManager::GetInstance().Store(this);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -15,51 +15,25 @@ class GGEMSOpenCLManager(object):
     def __init__(self):
         ggems_lib.get_instance_ggems_opencl_manager.restype = ctypes.c_void_p
 
-        ggems_lib.print_platform_ggems_opencl_manager.argtypes = [ctypes.c_void_p]
-        ggems_lib.print_platform_ggems_opencl_manager.restype = ctypes.c_void_p
-
-        ggems_lib.print_device_ggems_opencl_manager.argtypes = [ctypes.c_void_p]
-        ggems_lib.print_device_ggems_opencl_manager.restype = ctypes.c_void_p
-
-        ggems_lib.print_build_options_ggems_opencl_manager.argtypes = [ctypes.c_void_p]
-        ggems_lib.print_build_options_ggems_opencl_manager.restype = ctypes.c_void_p
-
-        ggems_lib.print_context_ggems_opencl_manager.argtypes = [ctypes.c_void_p]
-        ggems_lib.print_context_ggems_opencl_manager.restype = ctypes.c_void_p
+        ggems_lib.print_infos_opencl_manager.argtypes = [ctypes.c_void_p]
+        ggems_lib.print_infos_opencl_manager.restype = ctypes.c_void_p
 
         ggems_lib.print_RAM_ggems_opencl_manager.argtypes = [ctypes.c_void_p]
         ggems_lib.print_RAM_ggems_opencl_manager.restype = ctypes.c_void_p
 
-        ggems_lib.print_command_queue_ggems_opencl_manager.argtypes = [ctypes.c_void_p]
-        ggems_lib.print_command_queue_ggems_opencl_manager.restype = ctypes.c_void_p
-
         ggems_lib.set_context_index_ggems_opencl_manager.argtypes = [ctypes.c_void_p, ctypes.c_uint32]
         ggems_lib.set_context_index_ggems_opencl_manager.restype = ctypes.c_void_p
-
-        ggems_lib.print_activated_context_ggems_opencl_manager.argtypes = [ctypes.c_void_p]
-        ggems_lib.print_activated_context_ggems_opencl_manager.restype = ctypes.c_void_p
-
-        ggems_lib.clean_ggems_opencl_manager.argtypes = [ctypes.c_void_p]
-        ggems_lib.clean_ggems_opencl_manager.restype = ctypes.c_void_p
 
         self.obj = ggems_lib.get_instance_ggems_opencl_manager()
 
     def print_infos(self):
-        ggems_lib.print_platform_ggems_opencl_manager(self.obj)
-        ggems_lib.print_device_ggems_opencl_manager(self.obj)
-        ggems_lib.print_build_options_ggems_opencl_manager(self.obj)
-        ggems_lib.print_context_ggems_opencl_manager(self.obj)
-        ggems_lib.print_command_queue_ggems_opencl_manager(self.obj)
-        ggems_lib.print_activated_context_ggems_opencl_manager(self.obj)
+        ggems_lib.print_infos_opencl_manager(self.obj)
 
     def print_RAM(self):
         ggems_lib.print_RAM_ggems_opencl_manager(self.obj)
 
     def set_context_index(self, context_id):
         ggems_lib.set_context_index_ggems_opencl_manager(self.obj, context_id)
-
-    def clean(self):
-        ggems_lib.clean_ggems_opencl_manager(self.obj)
 
 
 class GGEMSVerbosity(object):
@@ -70,6 +44,21 @@ class GGEMSVerbosity(object):
         ggems_lib.set_ggems_verbose.restype = ctypes.c_void_p
 
         ggems_lib.set_ggems_verbose(val)
+
+
+class GGEMSPhantomNavigatorManager(object):
+    """Class managing phantom navigator in GGEMS
+    """
+    def __init__(self):
+        ggems_lib.get_instance_ggems_phantom_navigator_manager.restype = ctypes.c_void_p
+
+        ggems_lib.print_infos_ggems_phantom_navigator_manager.argtypes = [ctypes.c_void_p]
+        ggems_lib.print_infos_ggems_phantom_navigator_manager.restype = ctypes.c_void_p
+
+        self.obj = ggems_lib.get_instance_ggems_phantom_navigator_manager()
+
+    def print_infos(self):
+        ggems_lib.print_infos_ggems_phantom_navigator_manager(self.obj)
 
 
 class GGEMSVoxelizedPhantomNavigatorImagery(object):
@@ -87,6 +76,9 @@ class GGEMSVoxelizedPhantomNavigatorImagery(object):
         ggems_lib.set_range_to_material_filename_ggems_voxelized_phantom_navigator_imagery.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
         ggems_lib.set_range_to_material_filename_ggems_voxelized_phantom_navigator_imagery.restype = ctypes.c_void_p
 
+        ggems_lib.set_geometry_tolerance_ggems_voxelized_phantom_navigator_imagery.argtypes = [ctypes.c_void_p, ctypes.c_double, ctypes.c_char_p]
+        ggems_lib.set_geometry_tolerance_ggems_voxelized_phantom_navigator_imagery.restype = ctypes.c_void_p
+
         self.obj = ggems_lib.create_ggems_voxelized_phantom_navigator_imagery()
 
     def set_phantom_name(self, name):
@@ -97,6 +89,9 @@ class GGEMSVoxelizedPhantomNavigatorImagery(object):
 
     def set_range_to_material(self, name):
         ggems_lib.set_range_to_material_filename_ggems_voxelized_phantom_navigator_imagery(self.obj, name)
+
+    def set_geometry_tolerance(self, distance, unit):
+        ggems_lib.set_geometry_tolerance_ggems_voxelized_phantom_navigator_imagery(self.obj, distance, unit)
 
 
 class GGEMSXRaySource(object):
@@ -219,9 +214,6 @@ class GGEMSManager(object):
         ggems_lib.set_particle_cut_ggems_manager.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_double]
         ggems_lib.set_particle_cut_ggems_manager.restype = ctypes.c_void_p
 
-        ggems_lib.set_geometry_tolerance_ggems_manager.argtypes = [ctypes.c_void_p, ctypes.c_double]
-        ggems_lib.set_geometry_tolerance_ggems_manager.restype = ctypes.c_void_p
-
         ggems_lib.set_secondary_particle_and_level_ggems_manager.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_uint32]
         ggems_lib.set_secondary_particle_and_level_ggems_manager.restype = ctypes.c_void_p
 
@@ -250,9 +242,6 @@ class GGEMSManager(object):
 
     def set_particle_cut(self, particle_name, distance):
         ggems_lib.set_particle_cut_ggems_manager(self.obj, particle_name, distance)
-
-    def set_geometry_tolerance(self, distance):
-        ggems_lib.set_geometry_tolerance_ggems_manager(self.obj, distance)
 
     def set_secondary_particle_and_level(self, particle_name, level):
         ggems_lib.set_secondary_particle_and_level_ggems_manager(self.obj, particle_name, level)
@@ -365,3 +354,16 @@ class GGEMSTube(object):
 
     def draw(self):
         ggems_lib.draw_tube(self.obj)
+
+
+# ------------------------------------------------------------------------------
+# Setting global verbosity to 0 for initialization
+# 0 - minimum infos
+# 3 - max infos, maybe too much!!!
+GGEMSVerbosity(3)
+
+# ------------------------------------------------------------------------------
+# Calling all C++ singleton managers
+opencl_manager = GGEMSOpenCLManager()
+material_manager = GGEMSMaterialsManager()
+phantom_manager = GGEMSPhantomNavigatorManager()

@@ -23,7 +23,7 @@
 GGEMSMaterialsManager::GGEMSMaterialsManager(void)
 {
   GGcout("GGEMSMaterialsManager", "GGEMSMaterialsManager", 3)
-    << "Allocation of GGEMS Materials singleton..." << GGendl;
+    << "Allocation of GGEMS materials manager..." << GGendl;
 
   // Loading GGEMS chemical elements
   LoadChemicalElements();
@@ -36,7 +36,7 @@ GGEMSMaterialsManager::GGEMSMaterialsManager(void)
 GGEMSMaterialsManager::~GGEMSMaterialsManager(void)
 {
   GGcout("GGEMSMaterialsManager", "~GGEMSMaterialsManager", 3)
-    << "Deallocation of GGEMS Materials singleton..." << GGendl;
+    << "Deallocation of GGEMS materials manager..." << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

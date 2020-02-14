@@ -88,9 +88,30 @@ class GGEMS_EXPORT GGEMSPhantomNavigatorManager
     */
     void Store(GGEMSPhantomNavigator* p_phantom_navigator);
 
+    /*!
+      \fn void PrintInfos(void)
+      \brief Printing infos about the phantom navigators
+    */
+    void PrintInfos(void) const;
+
   private:
     GGEMSPhantomNavigator** p_phantom_navigators_; /*!< Pointer on the phantom navigators */
     GGuint number_of_phantom_navigators_; /*!< Number of source */
 };
+
+/*!
+  \fn GGEMSPhantomNavigatorManager* get_instance_ggems_phantom_navigator_manager(void)
+  \brief Get the GGEMSPhantomNavigatorManager pointer for python user.
+*/
+extern "C" GGEMS_EXPORT GGEMSPhantomNavigatorManager*
+  get_instance_ggems_phantom_navigator_manager(void);
+
+/*!
+  \fn void print_infos_ggems_phantom_navigator_manager(GGEMSPhantomNavigatorManager* p_phantom_navigator_manager)
+  \param p_phantom_navigator_manager - pointer on the phantom navigator manager
+  \brief print infos about all declared phantom navigators
+*/
+extern "C" void GGEMS_EXPORT print_infos_ggems_phantom_navigator_manager(
+  GGEMSPhantomNavigatorManager* p_phantom_navigator_manager);
 
 #endif // End of GUARD_GGEMS_GEOMETRIES_GGEMSPHANTOMNAVIGATORMANAGER_HH

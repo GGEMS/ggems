@@ -47,7 +47,6 @@ GGEMSManager::GGEMSManager(void)
   v_secondaries_list_(0),
   photon_distance_cut_(GGEMSUnits::um),
   electron_distance_cut_(GGEMSUnits::um),
-  geometry_tolerance_(GGEMSTolerance::GEOMETRY),
   photon_level_secondaries_(0),
   electron_level_secondaries_(0),
   cross_section_table_number_of_bins_(
@@ -223,16 +222,6 @@ void GGEMSManager::SetParticleSecondaryAndLevel(char const* particle_name,
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSManager::SetGeometryTolerance(GGdouble const& distance)
-{
-  // Geometry tolerance distance in the range [1mm;1nm]
-  geometry_tolerance_ = fmax(GGEMSUnits::nm, fmin(GGEMSUnits::mm, distance));
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
 void GGEMSManager::SetCrossSectionTableNumberOfBins(
   GGuint const& number_of_bins)
 {
@@ -293,6 +282,8 @@ void GGEMSManager::Initialize()
 
   // Initialization of the source
   source_manager_.Initialize();
+
+  // Initialization of the phantom(s)
 
   // Printing informations about the simulation
   PrintInfos();
@@ -369,8 +360,6 @@ void GGEMSManager::PrintInfos(void) const
     << electron_level_secondaries_ << GGendl;
   GGcout("GGEMSManager", "PrintInfos", 0) << "*Geometry tolerance:"
     << GGendl;
-  GGcout("GGEMSManager", "PrintInfos", 0) << "  --> Range: "
-    << geometry_tolerance_/GGEMSUnits::mm << " mm" << GGendl;
   GGcout("GGEMSManager", "PrintInfos", 0) << "++++++++++++++++" << GGendl;
   GGcout("GGEMSManager", "PrintInfos", 0) << GGendl;
   ;
@@ -521,16 +510,6 @@ void set_particle_cut_ggems_manager(GGEMSManager* p_ggems_manager,
   char const* particle_name, GGdouble const distance)
 {
   p_ggems_manager->SetParticleCut(particle_name, distance);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void set_geometry_tolerance_ggems_manager(GGEMSManager* p_ggems_manager,
-  GGdouble const distance)
-{
-  p_ggems_manager->SetGeometryTolerance(distance);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
