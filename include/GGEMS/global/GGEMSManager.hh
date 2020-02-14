@@ -177,12 +177,6 @@ class GGEMS_EXPORT GGEMSManager
     void SetParticleSecondaryAndLevel(char const* particle_name,
       GGuint const& level);
 
-    /*!
-      \fn void SetGeometryTolerance(GGdouble const& distance)
-      \param distance - geometry distance
-      \brief Set the geometry tolerance in distance
-    */
-    void SetGeometryTolerance(GGdouble const& distance);
 
   public: // Cross section part
     /*!
@@ -226,7 +220,6 @@ class GGEMS_EXPORT GGEMSManager
     std::vector<GGuchar> v_secondaries_list_; /*!< Vector storing the secondaries list */
     GGdouble photon_distance_cut_; /*!< Photon distance cut */
     GGdouble electron_distance_cut_; /*!< Electron distance cut */
-    GGdouble geometry_tolerance_; /*!< Geometry tolerance */
     GGuint photon_level_secondaries_; /*!< Level of the secondaries */
     GGuint electron_level_secondaries_; /*!< Level of the secondaries */
     GGuint cross_section_table_number_of_bins_; /*!< Number of bins in the cross section table */

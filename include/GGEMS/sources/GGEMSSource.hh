@@ -31,7 +31,7 @@ class GGEMS_EXPORT GGEMSSource
     /*!
       \brief GGEMSSource constructor
     */
-    GGEMSSource(void);
+    GGEMSSource(GGEMSSource* p_source);
 
     /*!
       \brief GGEMSSource destructor

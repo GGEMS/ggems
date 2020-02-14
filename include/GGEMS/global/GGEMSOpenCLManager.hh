@@ -415,35 +415,11 @@ extern "C" GGEMS_EXPORT GGEMSOpenCLManager*
   get_instance_ggems_opencl_manager(void);
 
 /*!
-  \fn void print_platform_ggems_opencl_manager(GGEMSOpenCLManager* p_opencl_manager)
+  \fn void print_infos_opencl_manager(GGEMSOpenCLManager* p_opencl_manager)
   \param p_opencl_manager - pointer on the singleton
-  \brief Print information about OpenCL platform
+  \brief Print information about OpenCL
 */
-extern "C" GGEMS_EXPORT void print_platform_ggems_opencl_manager(
-  GGEMSOpenCLManager* p_opencl_manager);
-
-/*!
-  \fn void print_device_ggems_opencl_manager(GGEMSOpenCLManager* p_opencl_manager)
-  \param p_opencl_manager - pointer on the singleton
-  \brief Print information about OpenCL device
-*/
-extern "C" GGEMS_EXPORT void print_device_ggems_opencl_manager(
-  GGEMSOpenCLManager* p_opencl_manager);
-
-/*!
-  \fn void print_build_options_ggems_opencl_manager(GGEMSOpenCLManager* p_opencl_manager)
-  \param p_opencl_manager - pointer on the singleton
-  \brief Print information about OpenCL compilation option
-*/
-extern "C" GGEMS_EXPORT void print_build_options_ggems_opencl_manager(
-  GGEMSOpenCLManager* p_opencl_manager);
-
-/*!
-  \fn void print_context_ggems_opencl_manager(GGEMSOpenCLManager* p_opencl_manager)
-  \param p_opencl_manager - pointer on the singleton
-  \brief Print information about OpenCL context
-*/
-extern "C" GGEMS_EXPORT void print_context_ggems_opencl_manager(
+extern "C" GGEMS_EXPORT void print_infos_opencl_manager(
   GGEMSOpenCLManager* p_opencl_manager);
 
 /*!
@@ -455,14 +431,6 @@ extern "C" GGEMS_EXPORT void print_RAM_ggems_opencl_manager(
   GGEMSOpenCLManager* p_opencl_manager);
 
 /*!
-  \fn void print_command_queue_ggems_opencl_manager(GGEMSOpenCLManager* p_opencl_manager)
-  \param p_opencl_manager - pointer on the singleton
-  \brief Print information about command in OpenCL for each context
-*/
-extern "C" GGEMS_EXPORT void print_command_queue_ggems_opencl_manager(
-  GGEMSOpenCLManager* p_opencl_manager);
-
-/*!
   \fn void set_context_index_ggems_opencl_manager(GGEMSOpenCLManager* p_opencl_manager, uint32_t const context_id)
   \param p_opencl_manager - pointer on the singleton
   \param context_id - index of the context
@@ -470,21 +438,5 @@ extern "C" GGEMS_EXPORT void print_command_queue_ggems_opencl_manager(
 */
 extern "C" GGEMS_EXPORT void set_context_index_ggems_opencl_manager(
   GGEMSOpenCLManager* p_opencl_manager, GGuint const context_id);
-
-/*!
-  \fn void print_activated_context_ggems_opencl_manager(GGEMSOpenCLManager* p_opencl_manager)
-  \param p_opencl_manager - pointer on the singleton
-  \brief Print information about activated context
-*/
-extern "C" GGEMS_EXPORT void print_activated_context_ggems_opencl_manager(
-  GGEMSOpenCLManager* p_opencl_manager);
-
-/*!
-  \fn void clean_ggems_opencl_manager(GGEMSOpenCLManager* p_opencl_manager)
-  \param p_opencl_manager - pointer on the singleton
-  \brief Clean correctly OpenCL platform, device, context, command queue, event and kernel
-*/
-extern "C" GGEMS_EXPORT void clean_ggems_opencl_manager(
-  GGEMSOpenCLManager* p_opencl_manager);
 
 #endif // GUARD_GGEMS_GLOBAL_GGEMSOPENCLMANAGER_HH

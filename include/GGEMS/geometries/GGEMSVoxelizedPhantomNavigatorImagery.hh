@@ -69,6 +69,13 @@ class GGEMS_EXPORT GGEMSVoxelizedPhantomNavigatorImagery
     GGEMSVoxelizedPhantomNavigatorImagery& operator=(
       GGEMSVoxelizedPhantomNavigatorImagery const&&
       voxelized_phantom_navigator_imagery) = delete;
+
+  public:
+    /*!
+      \fn void PrintInfos(void) const
+      \brief Printing infos about the phantom navigator
+    */
+    void PrintInfos(void) const override;
 };
 
 /*!
@@ -110,5 +117,17 @@ extern "C" GGEMS_EXPORT
   void set_range_to_material_filename_ggems_voxelized_phantom_navigator_imagery(
   GGEMSVoxelizedPhantomNavigatorImagery* p_voxelized_phantom_navigator_imagery,
   char const* range_data_filename);
+
+/*!
+  \fn void set_geometry_tolerance_ggems_voxelized_phantom_navigator_imagery(GGEMSVoxelizedPhantomNavigatorImagery* p_voxelized_phantom_navigator_imagery, GGdouble const range_data_filename, char const* unit)
+  \param p_voxelized_phantom_navigator_imagery - pointer on the navigator
+  \param distance - distance for the geometry tolerance
+  \param unit - unit of the distance
+  \brief set the filename of range to material data
+*/
+extern "C" GGEMS_EXPORT
+  void set_geometry_tolerance_ggems_voxelized_phantom_navigator_imagery(
+  GGEMSVoxelizedPhantomNavigatorImagery* p_voxelized_phantom_navigator_imagery,
+  GGdouble const distance, char const* unit);
 
 #endif // End of GUARD_GGEMS_GEOMETRIES_GGEMSVOXELIZEDPHANTOMNAVIGATORIMAGERY_HH

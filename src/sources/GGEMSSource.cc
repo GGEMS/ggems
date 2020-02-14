@@ -15,6 +15,7 @@
 
 #include "GGEMS/global/GGEMSConstants.hh"
 #include "GGEMS/sources/GGEMSSource.hh"
+#include "GGEMS/sources/GGEMSSourceManager.hh"
 #include "GGEMS/maths/GGEMSGeometryTransformation.hh"
 #include "GGEMS/tools/GGEMSTools.hh"
 #include "GGEMS/physics/GGEMSPrimaryParticlesStack.hh"
@@ -24,7 +25,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSSource::GGEMSSource(void)
+GGEMSSource::GGEMSSource(GGEMSSource* p_source)
 : number_of_particles_(0),
   p_number_of_particles_in_batch_(0),
   particle_type_(99),
@@ -42,6 +43,9 @@ GGEMSSource::GGEMSSource(void)
 
   // Allocation of geometry transformation
   p_geometry_transformation_ = new GGEMSGeometryTransformation;
+
+  // Store the source in source manager
+  GGEMSSourceManager::GetInstance().Store(p_source);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

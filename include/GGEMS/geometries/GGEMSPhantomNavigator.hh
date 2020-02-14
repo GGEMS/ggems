@@ -20,6 +20,7 @@
 #include <string>
 
 #include "GGEMS/global/GGEMSExport.hh"
+#include "GGEMS/tools/GGEMSTypes.hh"
 
 /*!
   \class GGEMSPhantomNavigator
@@ -93,10 +94,27 @@ class GGEMS_EXPORT GGEMSPhantomNavigator
     */
     void SetRangeToMaterialFile(char const* range_data_filename);
 
+    /*!
+      \fn void SetGeometryTolerance(GGdouble const& distance, char const* unit)
+      \param distance - geometry distance
+      \param unit - unit of the distance
+      \brief Set the geometry tolerance in distance
+    */
+    void SetGeometryTolerance(GGdouble const& distance,
+      char const* unit = "mm");
+
+  public:
+    /*!
+      \fn void PrintInfos(void) const = 0
+      \brief Printing infos about the phantom navigator
+    */
+    virtual void PrintInfos(void) const = 0;
+
   protected:
     std::string phantom_navigator_name_; /*!< Name of the phantom navigator name */
     std::string phantom_mhd_header_filename_; /*!< Filename of MHD file for phantom */
     std::string range_data_filename_; /*!< Filename of file for range data */
+    GGdouble geometry_tolerance_; /*!< Tolerance of geometry range [1mm;1nm] */
 };
 
 #endif // End of GUARD_GGEMS_GEOMETRIES_GGEMSPHANTOMNAVIGATOR_HH
