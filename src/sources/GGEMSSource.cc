@@ -26,7 +26,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 GGEMSSource::GGEMSSource(GGEMSSource* p_source)
-: number_of_particles_(0),
+: source_name_(""),
+  number_of_particles_(0),
   p_number_of_particles_in_batch_(0),
   particle_type_(99),
   p_kernel_get_primaries_(nullptr),
@@ -61,6 +62,15 @@ GGEMSSource::~GGEMSSource(void)
 
   GGcout("GGEMSSource", "~GGEMSSource", 3)
     << "Deallocation of GGEMSSource..." << GGendl;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSSource::SetSourceName(char const* source_name)
+{
+  source_name_ = source_name;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -150,6 +160,13 @@ void GGEMSSource::CheckParameters(void) const
     oss << "You have to set a particle type for the source:" << std::endl;
     oss << "    - Photon" << std::endl;
     oss << "    - Electron" << std::endl;
+    GGEMSMisc::ThrowException("GGEMSSource", "CheckParameters", oss.str());
+  }
+
+  // Checking name of the source
+  if (source_name_.empty()) {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "You have to set a name for the source!!!";
     GGEMSMisc::ThrowException("GGEMSSource", "CheckParameters", oss.str());
   }
 

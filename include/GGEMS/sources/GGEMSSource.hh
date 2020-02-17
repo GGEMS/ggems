@@ -69,6 +69,13 @@ class GGEMS_EXPORT GGEMSSource
   
   public:
     /*!
+      \fn void SetSourceName(char const* source_name)
+      \param source_name - name of the source
+      \brief save the name of the source
+    */
+    void SetSourceName(char const* source_name);
+
+    /*!
       \fn void SetPosition(GGfloat const& pos_x, GGfloat const& pos_y, GGfloat const& pos_z)
       \param pos_x - Position of the source in X
       \param pos_y - Position of the source in Y
@@ -187,6 +194,7 @@ class GGEMS_EXPORT GGEMSSource
     virtual void Initialize(void);
 
   protected:
+    std::string source_name_; /*!< Name of the source */
     GGulong number_of_particles_; /*!< Number of particles */
     std::vector<unsigned long long> p_number_of_particles_in_batch_; /*!< Number of particles in batch */
     GGuchar particle_type_; /*!< Type of particle: photon, electron or positron */

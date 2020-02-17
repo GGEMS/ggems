@@ -93,29 +93,45 @@ class GGEMS_EXPORT GGEMSSourceManager
     void Store(GGEMSSource* p_source);
 
     /*!
+      \fn void PrintInfos(void)
+      \brief Printing infos about the sources
+    */
+    void PrintInfos(void) const;
+
+    /*!
+      \fn GGuint GetNumberOfSources(void) const
+      \brief Get the number of sources
+      \return the number of sources
+    */
+    inline GGuint GetNumberOfSources(void) const {return number_of_sources_;}
+
+    /*!
       \fn void Initialize(void) const
       \brief Initialize a GGEMS source
     */
     void Initialize(void) const;
 
     /*!
-      \fn inline std::size_t GetNumberOfBatchs(void) const
+      \fn inline std::size_t GetNumberOfBatchs(std::size_t const& source_index) const
+      \param source_index - index of the source
       \return the number of batch of particle
       \brief method returning the number of particles by batch
     */
-    inline std::size_t GetNumberOfBatchs(void) const
+    inline std::size_t GetNumberOfBatchs(std::size_t const& source_index) const
     {
-      return p_sources_->GetNumberOfBatchs();
+      return p_sources_[source_index]->GetNumberOfBatchs();
     }
 
     /*!
-      \fn inline GGulong GetNumberOfParticlesInBatch(std::size_t const& batch_index)
+      \fn inline GGulong GetNumberOfParticlesInBatch(std::size_t const& source_index, std::size_t const& batch_index)
+      \param source_index - index of the source
       \return the number of particle for a specific batch
       \brief method returning the number of particles in a specific batch
     */
-    inline GGulong GetNumberOfParticlesInBatch(std::size_t const& batch_index)
+    inline GGulong GetNumberOfParticlesInBatch(std::size_t const& source_index,
+      std::size_t const& batch_index)
     {
-      return p_sources_->GetNumberOfParticlesInBatch(batch_index);
+      return p_sources_[source_index]->GetNumberOfParticlesInBatch(batch_index);
     }
 
     /*!
@@ -136,22 +152,39 @@ class GGEMS_EXPORT GGEMSSourceManager
     }
 
     /*!
-      \fn void GetPrimaries(GGulong const& number_of_particles) const
+      \fn void GetPrimaries(std::size_t const& source_index, GGulong const& number_of_particles) const
+      \param source_index - index of the source
       \param number_of_particles - number of particles to simulate
       \brief Generate primary particles for a specific source
     */
-    inline void GetPrimaries(GGulong const& number_of_particles) const
+    inline void GetPrimaries(std::size_t const& source_index,
+      GGulong const& number_of_particles) const
     {
-      p_sources_->GetPrimaries(number_of_particles);
+      p_sources_[source_index]->GetPrimaries(number_of_particles);
     }
 
   private: // Source infos
-    GGEMSSource* p_sources_; /*!< Pointer on GGEMS sources */
+    GGEMSSource** p_sources_; /*!< Pointer on GGEMS sources */
     GGuint number_of_sources_; /*!< Number of source */
 
   private: // Particle and random infos
     GGEMSParticles* p_particles_; /*!< Pointer on particle management */
     GGEMSPseudoRandomGenerator* p_pseudo_random_generator_; /*!< Pointer on pseudo random generator */
 };
+
+/*!
+  \fn GGEMSSourceManager* get_instance_ggems_source_manager(void)
+  \brief Get the GGEMSSourceManager pointer for python user.
+*/
+extern "C" GGEMS_EXPORT GGEMSSourceManager*
+  get_instance_ggems_source_manager(void);
+
+/*!
+  \fn void print_infos_ggems_source_manager(GGEMSSourceManager* p_source_manager)
+  \param p_source_manager - pointer on the source manager
+  \brief print infos about all declared sources
+*/
+extern "C" void GGEMS_EXPORT print_infos_ggems_source_manager(
+  GGEMSSourceManager* p_source_manager);
 
 #endif // End of GUARD_GGEMS_SOURCES_GGEMSSOURCEMANAGER

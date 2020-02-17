@@ -12,6 +12,7 @@
 
 #include "GGEMS/geometries/GGEMSVoxelizedPhantomNavigatorImagery.hh"
 #include "GGEMS/geometries/GGEMSPhantomNavigatorManager.hh"
+#include "GGEMS/tools/GGEMSSystemOfUnits.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -47,7 +48,21 @@ GGEMSVoxelizedPhantomNavigatorImagery::~GGEMSVoxelizedPhantomNavigatorImagery(
 
 void GGEMSVoxelizedPhantomNavigatorImagery::PrintInfos(void) const
 {
-  ;
+  GGcout("GGEMSVoxelizedPhantomNavigatorImagery", "PrintInfos", 0) << GGendl;
+  GGcout("GGEMSVoxelizedPhantomNavigatorImagery", "PrintInfos", 0)
+    << "GGEMSVoxelizedPhantomNavigatorImagery Infos: " << GGendl;
+  GGcout("GGEMSVoxelizedPhantomNavigatorImagery", "PrintInfos", 0)
+    << "--------------------------------------------" << GGendl;
+  GGcout("GGEMSVoxelizedPhantomNavigatorImagery", "PrintInfos", 0)
+    << "*Phantom navigator name: " << phantom_navigator_name_ << GGendl;
+  GGcout("GGEMSVoxelizedPhantomNavigatorImagery", "PrintInfos", 0)
+    << "*Phantom header filename: " << phantom_mhd_header_filename_ << GGendl;
+  GGcout("GGEMSVoxelizedPhantomNavigatorImagery", "PrintInfos", 0)
+    << "*Range label to material filename: " << range_data_filename_ << GGendl;
+  GGcout("GGEMSVoxelizedPhantomNavigatorImagery", "PrintInfos", 0)
+    << "*Geometry tolerance: " << geometry_tolerance_/GGEMSUnits::mm
+    << " mm" << GGendl;
+  GGcout("GGEMSVoxelizedPhantomNavigatorImagery", "PrintInfos", 0) << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

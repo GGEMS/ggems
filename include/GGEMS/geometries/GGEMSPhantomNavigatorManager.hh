@@ -94,6 +94,16 @@ class GGEMS_EXPORT GGEMSPhantomNavigatorManager
     */
     void PrintInfos(void) const;
 
+    /*!
+      \fn GGuint GetNumberOfPhantomNavigators(void) const
+      \brief Get the number of phantom navigators
+      \return the number of phantom navigators
+    */
+    inline GGuint GetNumberOfPhantomNavigators(void) const
+    {
+      return number_of_phantom_navigators_;
+    }
+
   private:
     GGEMSPhantomNavigator** p_phantom_navigators_; /*!< Pointer on the phantom navigators */
     GGuint number_of_phantom_navigators_; /*!< Number of source */

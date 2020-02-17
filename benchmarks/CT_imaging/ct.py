@@ -4,6 +4,8 @@ from ggems import *
 # STEP 1: Choosing an OpenCL context
 opencl_manager.set_context_index(2)
 
+opencl_manager.print_infos()
+
 # ------------------------------------------------------------------------------
 # STEP 2: Visualization
 
@@ -11,6 +13,9 @@ opencl_manager.set_context_index(2)
 # ------------------------------------------------------------------------------
 # STEP 3: Setting GGEMS materials
 material_manager.set_materials(b"data/materials.dat")
+
+material_manager.print_available_chemical_elements()
+material_manager.print_available_materials()
 
 # ------------------------------------------------------------------------------
 # STEP 4: Phantom, Navigator and System
@@ -49,16 +54,30 @@ phantom_manager.print_infos()
 # ggems_manager.set_cross_section_table_energy_max(250.0)  # in MeV
 
 # ------------------------------------------------------------------------------
-# STEP 6: Source Declaration
-# xray_source = ggems.GGEMSXRaySource()
-# xray_source.set_source_particle_type(b"photon")
-# xray_source.set_number_of_particles(861635)
-# xray_source.set_position(-1000.0, 10.0, 50.0)  # in mm
-# xray_source.set_rotation(0.0, 0.0, 0.0)  # in degree
-# xray_source.set_beam_aperture(5.0)  # in degree
-# xray_source.set_focal_spot_size(0.6, 1.2, 0.0)  # in mm
-# xray_source.set_polyenergy(b"data/spectrum_120kVp_2mmAl.dat")
-# xray_source.print_infos()
+# STEP 6: Source Declaration AJOUTER LES UNITES
+# First source
+xray_source_1 = GGEMSXRaySource()
+xray_source_1.set_source_name(b"xray_source_1")
+xray_source_1.set_source_particle_type(b"photon")
+xray_source_1.set_number_of_particles(8616350000)
+xray_source_1.set_position(-1000.0, 0.0, 0.0)  # in mm
+xray_source_1.set_rotation(0.0, 0.0, 0.0)  # in degree
+xray_source_1.set_beam_aperture(5.0)  # in degree
+xray_source_1.set_focal_spot_size(0.6, 1.2, 0.0)  # in mm
+xray_source_1.set_polyenergy(b"data/spectrum_120kVp_2mmAl.dat")
+
+# Second source
+xray_source_2 = GGEMSXRaySource()
+xray_source_2.set_source_name(b"xray_source_2")
+xray_source_2.set_source_particle_type(b"photon")
+xray_source_2.set_number_of_particles(861635)
+xray_source_2.set_position(0.0, -1000.0, 0.0)  # in mm
+xray_source_2.set_rotation(0.0, 0.0, 0.0)  # in degree
+xray_source_2.set_beam_aperture(7.0)  # in degree
+xray_source_2.set_focal_spot_size(0.3, 0.5, 0.0)  # in mm
+xray_source_2.set_monoenergy(60.2)
+
+source_manager.print_infos()
 
 # ------------------------------------------------------------------------------
 # STEP 7: Detector/Digitizer Declaration
@@ -66,8 +85,7 @@ phantom_manager.print_infos()
 
 # ------------------------------------------------------------------------------
 # STEP X: GGEMS simulation parameters
-# ggems = ggems.GGEMSManager()
-# ggems.set_seed(777)
+ggems_manager.set_seed(777)
 
 # ggems.opencl_verbose(true/false)
 # ggems.phantoms_verbose(true/false)
@@ -79,7 +97,7 @@ phantom_manager.print_infos()
 # ggems.tracking_verbose(true/false)
 
 # Initializing the GGEMS simulation
-# ggems.initialize()
+ggems_manager.initialize()
 
 # Start GGEMS simulation
 # ggems.run()

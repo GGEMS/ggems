@@ -16,13 +16,7 @@
 
 - Faire processe list intell...
 
-- Ajouter unité dans script python
-
-- Bug nombre de particules
-
 - Meilleur gestion de la verbosity avec GGEMS
-
-- Mettre particle et random dans le GGEMSSource et pas la manager
 
 - Faire le Store dans GGEMSSource et GGEMSPhantomNavigator et non pas dans la
 fille

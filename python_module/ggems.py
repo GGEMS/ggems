@@ -94,6 +94,21 @@ class GGEMSVoxelizedPhantomNavigatorImagery(object):
         ggems_lib.set_geometry_tolerance_ggems_voxelized_phantom_navigator_imagery(self.obj, distance, unit)
 
 
+class GGEMSSourceManager(object):
+    """Class managing source in GGEMS
+    """
+    def __init__(self):
+        ggems_lib.get_instance_ggems_source_manager.restype = ctypes.c_void_p
+
+        ggems_lib.print_infos_ggems_source_manager.argtypes = [ctypes.c_void_p]
+        ggems_lib.print_infos_ggems_source_manager.restype = ctypes.c_void_p
+
+        self.obj = ggems_lib.get_instance_ggems_source_manager()
+
+    def print_infos(self):
+        ggems_lib.print_infos_ggems_source_manager(self.obj)
+
+
 class GGEMSXRaySource(object):
     """GGEMS XRay source class managing source for CT/CBCT simulation
     """
@@ -103,14 +118,14 @@ class GGEMSXRaySource(object):
         ggems_lib.initialize_ggems_xray_source.argtypes = [ctypes.c_void_p]
         ggems_lib.initialize_ggems_xray_source.restype = ctypes.c_void_p
 
+        ggems_lib.set_source_name_ggems_xray_source.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
+        ggems_lib.set_source_name_ggems_xray_source.restype = ctypes.c_void_p
+    
         ggems_lib.set_position_ggems_xray_source.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_float, ctypes.c_float]
         ggems_lib.set_position_ggems_xray_source.restype = ctypes.c_void_p
 
-        ggems_lib.set_number_of_particles_xray_source.argtypes = [ctypes.c_void_p, ctypes.c_ulong]
+        ggems_lib.set_number_of_particles_xray_source.argtypes = [ctypes.c_void_p, ctypes.c_ulonglong]
         ggems_lib.set_number_of_particles_xray_source.restype = ctypes.c_void_p
-
-        ggems_lib.print_infos_ggems_xray_source.argtypes = [ctypes.c_void_p]
-        ggems_lib.print_infos_ggems_xray_source.restype = ctypes.c_void_p
 
         ggems_lib.set_source_particle_type_ggems_xray_source.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
         ggems_lib.set_source_particle_type_ggems_xray_source.restype = ctypes.c_void_p
@@ -138,11 +153,11 @@ class GGEMSXRaySource(object):
     def initialize(self):
         ggems_lib.initialize_ggems_xray_source(self.obj)
 
+    def set_source_name(self, name):
+        ggems_lib.set_source_name_ggems_xray_source(self.obj, name)
+
     def set_position(self, x, y, z):
         ggems_lib.set_position_ggems_xray_source(self.obj, x, y, z)
-
-    def print_infos(self):
-        ggems_lib.print_infos_ggems_xray_source(self.obj)
 
     def set_number_of_particles(self, number_of_particles):
         ggems_lib.set_number_of_particles_xray_source(self.obj, number_of_particles)
@@ -367,3 +382,5 @@ GGEMSVerbosity(3)
 opencl_manager = GGEMSOpenCLManager()
 material_manager = GGEMSMaterialsManager()
 phantom_manager = GGEMSPhantomNavigatorManager()
+source_manager = GGEMSSourceManager()
+ggems_manager = GGEMSManager()

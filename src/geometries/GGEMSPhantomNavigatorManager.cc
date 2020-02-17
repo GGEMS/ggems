@@ -98,6 +98,9 @@ void GGEMSPhantomNavigatorManager::PrintInfos(void) const
     << GGendl;
 
   // Printing infos about each navigator
+  for (GGuint i = 0; i < number_of_phantom_navigators_; ++i) {
+    p_phantom_navigators_[i]->PrintInfos();
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
