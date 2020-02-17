@@ -48,6 +48,10 @@ GGEMSSourceManager::~GGEMSSourceManager(void)
 {
   // Deleting source
   if (p_sources_) {
+    for (GGuint i = 0; i < number_of_sources_; ++i) {
+      delete p_sources_[i];
+      p_sources_[i] = nullptr;
+    }
     delete p_sources_;
     p_sources_ = nullptr;
   }
@@ -81,12 +85,43 @@ void GGEMSSourceManager::Store(GGEMSSource* p_source)
 
   // If number of source == 1, not need to resize
   if (number_of_sources_ == 1) {
-    p_sources_ = p_source;
+    // Allocating 1 source
+    p_sources_ = new GGEMSSource*[1];
+
+    // Storing the source
+    p_sources_[0] = p_source;
   }
   else {
-    number_of_sources_ = 1;
-    GGEMSMisc::ThrowException("GGEMSSourceManager", "Store",
-      "Multiple defined sources in not allowed by GGEMS!!!");
+    // Creating new buffer
+    GGEMSSource** p_new_buffer = new GGEMSSource*[number_of_sources_];
+
+    // Saving old pointer in new buffer and freeing old buffer
+    for (GGuint i = 0; i < number_of_sources_ - 1; ++i) {
+      p_new_buffer[i] = p_sources_[i];
+    }
+    delete p_sources_;
+    p_sources_ = nullptr;
+
+    // Give new buffer
+    p_new_buffer[number_of_sources_ - 1] = p_source;
+    p_sources_ = p_new_buffer;
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSSourceManager::PrintInfos(void) const
+{
+  GGcout("GGEMSSourceManager", "PrintInfos", 0)
+    << "Printing infos about sources" << GGendl;
+  GGcout("GGEMSSourceManager", "PrintInfos", 0)
+    << "Number of source(s): " << number_of_sources_ << GGendl;
+
+  // Printing infos about each navigator
+  for (GGuint i = 0; i < number_of_sources_; ++i) {
+    p_sources_[i]->PrintInfos();
   }
 }
 
@@ -108,6 +143,26 @@ void GGEMSSourceManager::Initialize(void) const
   GGcout("GGEMSSourceManager", "Initialize", 0)
     << "Initialization of GGEMS pseudo random generator OK" << GGendl;
 
-  // Initialization of the specific source
-  p_sources_->Initialize();
+  // Initialization of sources
+  for (GGuint i = 0; i < number_of_sources_; ++i) {
+    p_sources_[i]->Initialize();
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+GGEMSSourceManager* get_instance_ggems_source_manager(void)
+{
+  return &GGEMSSourceManager::GetInstance();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void print_infos_ggems_source_manager(GGEMSSourceManager* p_source_manager)
+{
+  p_source_manager->PrintInfos();
 }

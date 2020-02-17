@@ -301,7 +301,7 @@ void GGEMSManager::Run()
   ChronoTime start_time = GGEMSChrono::Now();
 
   // Loop over the number of batch
-  for (std::size_t i = 0; i < source_manager_.GetNumberOfBatchs(); ++i) {
+/*  for (std::size_t i = 0; i < source_manager_.GetNumberOfBatchs(); ++i) {
     GGcout("GGEMSManager", "Run", 0) << "----> Launching batch " << i+1
       << "/" << source_manager_.GetNumberOfBatchs() << GGendl;
 
@@ -312,7 +312,7 @@ void GGEMSManager::Run()
     GGcout("GGEMSManager", "Run", 0) << "      + Generating "
       << kNumberParticles << " particles..." << GGendl;
     source_manager_.GetPrimaries(kNumberParticles);
-  }
+  }*/
 
   // Get the end time
   ChronoTime end_time = GGEMSChrono::Now();

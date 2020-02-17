@@ -151,13 +151,19 @@ void GGEMSXRaySource::PrintInfos(void) const
   GGcout("GGEMSXRaySource", "PrintInfos", 0) << GGendl;
   GGcout("GGEMSXRaySource", "PrintInfos", 0) << "GGEMSXRaySource Infos: "
     << GGendl;
-  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "-----------------" << GGendl;
+  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "----------------------"
+    << GGendl;
+  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "*Source name: " << source_name_
+    << GGendl;
   GGcout("GGEMSXRaySource", "PrintInfos", 0) << "*Particle type: ";
   if (particle_type_ == GGEMSParticleName::PHOTON) {
     std::cout << "Photon" << std::endl;
   }
-  if (particle_type_ == GGEMSParticleName::ELECTRON) {
+  else if (particle_type_ == GGEMSParticleName::ELECTRON) {
     std::cout << "Electron" << std::endl;
+  }
+  else {
+    std::cout << "Unknown" << std::endl;
   }
   GGcout("GGEMSXRaySource", "PrintInfos", 0) << "*Number of particles: "
     << number_of_particles_ << GGendl;
@@ -451,19 +457,20 @@ void initialize_ggems_xray_source(GGEMSXRaySource* p_source_manager)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_position_ggems_xray_source(GGEMSXRaySource* p_source_manager,
-  GGfloat const pos_x, GGfloat const pos_y, GGfloat const pos_z)
+void set_source_name_ggems_xray_source(GGEMSXRaySource* p_xray_source,
+  char const* source_name)
 {
-  p_source_manager->SetPosition(pos_x, pos_y, pos_z);
+  p_xray_source->SetSourceName(source_name);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void print_infos_ggems_xray_source(GGEMSXRaySource* p_source_manager)
+void set_position_ggems_xray_source(GGEMSXRaySource* p_source_manager,
+  GGfloat const pos_x, GGfloat const pos_y, GGfloat const pos_z)
 {
-  p_source_manager->PrintInfos();
+  p_source_manager->SetPosition(pos_x, pos_y, pos_z);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
