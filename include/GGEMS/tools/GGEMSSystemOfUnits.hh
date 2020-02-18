@@ -2,7 +2,7 @@
 #define GUARD_GGEMS_TOOLS_GGEMSSYSTEMOFUNITS_HH
 
 /*!
-  \file GGSystemOfUnits.hh
+  \file GGEMSSystemOfUnits.hh
 
   \brief Namespace storing all the usefull physical units
 
@@ -12,6 +12,8 @@
   \version 1.0
   \date Tuesday October 1, 2019
 */
+
+#include <algorithm>
 
 #include "GGEMS/tools/GGEMSTypes.hh"
 
@@ -264,6 +266,145 @@ namespace GGEMSUnits
   __constant GGdouble PERCENT = 0.01 ;
   __constant GGdouble PERTHOUSAND = 0.001;
   __constant GGdouble PERMILLION  = 0.000001;
+
+  #ifndef OPENCL_COMPILER
+  /*!
+    \fn T BestDistanceUnit(T const& value, char const* unit)
+    \tparam T - type of the value to convert unit
+    \param value - value to check
+    \param unit - distance unit
+    \brief Choose best distance unit
+    \return value in the good unit
+  */
+  template <typename T>
+  T BestDistanceUnit(T const& value, char const* unit)
+  {
+    // Convert char* to string
+    std::string unit_str = unit;
+
+    T new_value = static_cast<T>(0);
+    if (unit_str == "nm") {
+      new_value = static_cast<T>(value * GGEMSUnits::nm);
+    }
+    else if (unit_str == "um") {
+      new_value = static_cast<T>(value * GGEMSUnits::um);
+    }
+    else if (unit_str == "mm") {
+      new_value = static_cast<T>(value * GGEMSUnits::mm);
+    }
+    else if (unit_str == "cm") {
+      new_value = static_cast<T>(value * GGEMSUnits::cm);
+    }
+    else if (unit_str == "m") {
+      new_value = static_cast<T>(value * GGEMSUnits::m);
+    }
+    else if (unit_str == "km") {
+      new_value = static_cast<T>(value * GGEMSUnits::km);
+    }
+    else if (unit_str == "pc") {
+      new_value = static_cast<T>(value * GGEMSUnits::pc);
+    }
+    else {
+      std::ostringstream oss(std::ostringstream::out);
+      oss << "Unknown unit!!! You have choice between:" << std::endl;
+      oss << "    - \"nm\": nanometer" << std::endl;
+      oss << "    - \"um\": micrometer" << std::endl;
+      oss << "    - \"mm\": millimeter" << std::endl;
+      oss << "    - \"cm\": centimeter" << std::endl;
+      oss << "    - \"m\": meter" << std::endl;
+      oss << "    - \"km\": kilometer" << std::endl;
+      oss << "    - \"pc\": parsec";
+      GGEMSMisc::ThrowException("GGEMSUnits", "BestDistanceUnit", oss.str());
+    }
+    return new_value;
+  }
+
+  /*!
+    \fn T BestEnergyUnit(T const& value, char const* unit)
+    \tparam T - type of the value to convert unit
+    \param value - value to check
+    \param unit - energy unit
+    \brief Choose best energy unit
+    \return value in the good unit
+  */
+  template <typename T>
+  T BestEnergyUnit(T const& value, char const* unit)
+  {
+    // Convert char* to string
+    std::string unit_str = unit;
+
+    T new_value = static_cast<T>(0);
+    if (unit_str == "ev") {
+      new_value = static_cast<T>(value * GGEMSUnits::eV);
+    }
+    else if (unit_str == "keV") {
+      new_value = static_cast<T>(value * GGEMSUnits::keV);
+    }
+    else if (unit_str == "MeV") {
+      new_value = static_cast<T>(value * GGEMSUnits::MeV);
+    }
+    else if (unit_str == "GeV") {
+      new_value = static_cast<T>(value * GGEMSUnits::GeV);
+    }
+    else if (unit_str == "TeV") {
+      new_value = static_cast<T>(value * GGEMSUnits::TeV);
+    }
+    else if (unit_str == "PeV") {
+      new_value = static_cast<T>(value * GGEMSUnits::PeV);
+    }
+    else {
+      std::ostringstream oss(std::ostringstream::out);
+      oss << "Unknown unit!!! You have choice between:" << std::endl;
+      oss << "    - \"eV\": electronvolt" << std::endl;
+      oss << "    - \"keV\": kiloelectronvolt" << std::endl;
+      oss << "    - \"MeV\": megaelectronvolt" << std::endl;
+      oss << "    - \"GeV\": gigaelectronvolt" << std::endl;
+      oss << "    - \"TeV\": teraelectronvolt" << std::endl;
+      oss << "    - \"PeV\": petaelectronvolt" << std::endl;
+      GGEMSMisc::ThrowException("GGEMSUnits", "BestEnergyUnit", oss.str());
+    }
+    return new_value;
+  }
+
+  /*!
+    \fn T BestAngleUnit(T const& value, char const* unit)
+    \tparam T - type of the value to convert unit
+    \param value - value to check
+    \param unit - angle unit
+    \brief Choose best angle unit
+    \return value in the good unit
+  */
+  template <typename T>
+  T BestAngleUnit(T const& value, char const* unit)
+  {
+    // Convert char* to string
+    std::string unit_str = unit;
+
+    T new_value = static_cast<T>(0);
+    if (unit_str == "rad") {
+      new_value = static_cast<T>(value * GGEMSUnits::rad);
+    }
+    else if (unit_str == "mrad") {
+      new_value = static_cast<T>(value * GGEMSUnits::mrad);
+    }
+    else if (unit_str == "deg") {
+      new_value = static_cast<T>(value * GGEMSUnits::deg);
+    }
+    else if (unit_str == "sr") {
+      new_value = static_cast<T>(value * GGEMSUnits::sr);
+    }
+    else {
+      std::ostringstream oss(std::ostringstream::out);
+      oss << "Unknown unit!!! You have choice between:" << std::endl;
+      oss << "    - \"rad\": radian" << std::endl;
+      oss << "    - \"mrad\": milliradian" << std::endl;
+      oss << "    - \"deg\": degree" << std::endl;
+      oss << "    - \"sr\": steradian" << std::endl;
+      GGEMSMisc::ThrowException("GGEMSUnits", "BestAngleUnit", oss.str());
+    }
+    return new_value;
+  }
+  #endif
 #ifndef OPENCL_COMPILER
 }
 #endif

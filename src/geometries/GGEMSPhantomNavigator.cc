@@ -77,29 +77,5 @@ void GGEMSPhantomNavigator::SetRangeToMaterialFile(
 void GGEMSPhantomNavigator::SetGeometryTolerance(GGdouble const& distance,
   char const* unit)
 {
-  // Convert char* to string
-  std::string const kUnit = unit;
-
-  if (kUnit == "nm") {
-    geometry_tolerance_ = distance * GGEMSUnits::nm;
-  }
-  else if (kUnit == "um") {
-    geometry_tolerance_ = distance * GGEMSUnits::um;
-  }
-  else if (kUnit == "mm") {
-    geometry_tolerance_ = distance * GGEMSUnits::mm;
-  }
-  else if (kUnit == "cm") {
-    geometry_tolerance_ = distance * GGEMSUnits::cm;
-  }
-  else {
-    std::ostringstream oss(std::ostringstream::out);
-    oss << "Unknown unit!!! You have choice between:" << std::endl;
-    oss << "    - \"nm\": nanometer" << std::endl;
-    oss << "    - \"um\": micrometer" << std::endl;
-    oss << "    - \"mm\": millimeter" << std::endl;
-    oss << "    - \"cm\": centimeter";
-    GGEMSMisc::ThrowException("GGEMSPhantomNavigator", "SetGeometryTolerance",
-      oss.str());
-  }
+  geometry_tolerance_ = GGEMSUnits::BestDistanceUnit(distance, unit);
 }
