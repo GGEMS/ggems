@@ -171,9 +171,10 @@ void GGEMSXRaySource::PrintInfos(void) const
   if (is_monoenergy_mode_) std::cout << "Monoenergy" << std::endl;
   else std::cout << "Polyenergy" << std::endl;
   GGcout("GGEMSXRaySource", "PrintInfos", 0) << "*Position: " << "("
-    << p_geometry_transformation_->GetPosition().s[0] << ", "
-    << p_geometry_transformation_->GetPosition().s[1] << ", "
-    << p_geometry_transformation_->GetPosition().s[2] << " ) m3" << GGendl;
+    << p_geometry_transformation_->GetPosition().s[0]/GGEMSUnits::mm << ", "
+    << p_geometry_transformation_->GetPosition().s[1]/GGEMSUnits::mm << ", "
+    << p_geometry_transformation_->GetPosition().s[2]/GGEMSUnits::mm << " ) mm3"
+    << GGendl;
   GGcout("GGEMSXRaySource", "PrintInfos", 0) << "*Rotation: " << "("
     << p_geometry_transformation_->GetRotation().s[0] << ", "
     << p_geometry_transformation_->GetRotation().s[1] << ", "
@@ -207,9 +208,9 @@ void GGEMSXRaySource::PrintInfos(void) const
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSXRaySource::SetMonoenergy(GGfloat const& monoenergy)
+void GGEMSXRaySource::SetMonoenergy(GGfloat const& monoenergy, char const* unit)
 {
-  monoenergy_ = monoenergy;
+  monoenergy_ = GGEMSUnits::BestEnergyUnit(monoenergy, unit);
   is_monoenergy_mode_ = true;
 }
 
@@ -419,9 +420,10 @@ void GGEMSXRaySource::Initialize(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSXRaySource::SetBeamAperture(GGfloat const& beam_aperture)
+void GGEMSXRaySource::SetBeamAperture(GGfloat const& beam_aperture,
+  char const* unit)
 {
-  beam_aperture_ = beam_aperture;
+  beam_aperture_ = GGEMSUnits::BestAngleUnit(beam_aperture, unit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -429,11 +431,14 @@ void GGEMSXRaySource::SetBeamAperture(GGfloat const& beam_aperture)
 ////////////////////////////////////////////////////////////////////////////////
 
 void GGEMSXRaySource::SetFocalSpotSize(GGfloat const& width,
-  GGfloat const& height, GGfloat const& depth)
+  GGfloat const& height, GGfloat const& depth, char const* unit)
 {
-  focal_spot_size_ = MakeFloat3(width, height, depth);
+  focal_spot_size_ = MakeFloat3(
+    GGEMSUnits::BestDistanceUnit(width, unit),
+    GGEMSUnits::BestDistanceUnit(height, unit),
+    GGEMSUnits::BestDistanceUnit(depth, unit)
+  );
 }
-
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -448,9 +453,9 @@ GGEMSXRaySource* create_ggems_xray_source(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void initialize_ggems_xray_source(GGEMSXRaySource* p_source_manager)
+void initialize_ggems_xray_source(GGEMSXRaySource* p_xray_source)
 {
-  p_source_manager->Initialize();
+  p_xray_source->Initialize();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -467,20 +472,21 @@ void set_source_name_ggems_xray_source(GGEMSXRaySource* p_xray_source,
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_position_ggems_xray_source(GGEMSXRaySource* p_source_manager,
-  GGfloat const pos_x, GGfloat const pos_y, GGfloat const pos_z)
+void set_position_ggems_xray_source(GGEMSXRaySource* p_xray_source,
+  GGfloat const pos_x, GGfloat const pos_y, GGfloat const pos_z,
+  char const* unit)
 {
-  p_source_manager->SetPosition(pos_x, pos_y, pos_z);
+  p_xray_source->SetPosition(pos_x, pos_y, pos_z, unit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_number_of_particles_xray_source(GGEMSXRaySource* p_source_manager,
+void set_number_of_particles_xray_source(GGEMSXRaySource* p_xray_source,
   GGulong const number_of_particles)
 {
-  p_source_manager->SetNumberOfParticles(number_of_particles);
+  p_xray_source->SetNumberOfParticles(number_of_particles);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -488,41 +494,42 @@ void set_number_of_particles_xray_source(GGEMSXRaySource* p_source_manager,
 ////////////////////////////////////////////////////////////////////////////////
 
 void set_source_particle_type_ggems_xray_source(
-  GGEMSXRaySource* p_source_manager, char const* particle_name)
+  GGEMSXRaySource* p_xray_source, char const* particle_name)
 {
-  p_source_manager->SetSourceParticleType(particle_name);
+  p_xray_source->SetSourceParticleType(particle_name);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_beam_aperture_ggems_xray_source(GGEMSXRaySource* p_source_manager,
-  GGfloat const beam_aperture)
+void set_beam_aperture_ggems_xray_source(GGEMSXRaySource* p_xray_source,
+  GGfloat const beam_aperture, char const* unit)
 {
-  p_source_manager->SetBeamAperture(beam_aperture);
+  p_xray_source->SetBeamAperture(beam_aperture, unit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_focal_spot_size_ggems_xray_source(GGEMSXRaySource* p_source_manager,
-  GGfloat const width, GGfloat const height, GGfloat const depth)
+void set_focal_spot_size_ggems_xray_source(GGEMSXRaySource* p_xray_source,
+  GGfloat const width, GGfloat const height, GGfloat const depth,
+  char const* unit)
 {
-  p_source_manager->SetFocalSpotSize(width, height, depth);
+  p_xray_source->SetFocalSpotSize(width, height, depth, unit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_local_axis_ggems_xray_source(GGEMSXRaySource* p_source_manager,
+void set_local_axis_ggems_xray_source(GGEMSXRaySource* p_xray_source,
   GGfloat const m00, GGfloat const m01, GGfloat const m02,
   GGfloat const m10, GGfloat const m11, GGfloat const m12,
   GGfloat const m20, GGfloat const m21, GGfloat const m22)
 {
-  p_source_manager->SetLocalAxis(
+  p_xray_source->SetLocalAxis(
     m00, m01, m02,
     m10, m11, m12,
     m20, m21, m22
@@ -533,28 +540,28 @@ void set_local_axis_ggems_xray_source(GGEMSXRaySource* p_source_manager,
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_rotation_ggems_xray_source(GGEMSXRaySource* p_source_manager,
-  GGfloat const rx, GGfloat const ry, GGfloat const rz)
+void set_rotation_ggems_xray_source(GGEMSXRaySource* p_xray_source,
+  GGfloat const rx, GGfloat const ry, GGfloat const rz, char const* unit)
 {
-  p_source_manager->SetRotation(rx, ry, rz);
+  p_xray_source->SetRotation(rx, ry, rz, unit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_monoenergy_ggems_xray_source(GGEMSXRaySource* p_source_manager,
-  GGfloat const monoenergy)
+void set_monoenergy_ggems_xray_source(GGEMSXRaySource* p_xray_source,
+  GGfloat const monoenergy, char const* unit)
 {
-  p_source_manager->SetMonoenergy(monoenergy);
+  p_xray_source->SetMonoenergy(monoenergy, unit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_polyenergy_ggems_xray_source(GGEMSXRaySource* p_source_manager,
+void set_polyenergy_ggems_xray_source(GGEMSXRaySource* p_xray_source,
   char const* energy_spectrum)
 {
-  p_source_manager->SetPolyenergy(energy_spectrum);
+  p_xray_source->SetPolyenergy(energy_spectrum);
 }

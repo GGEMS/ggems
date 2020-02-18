@@ -76,14 +76,15 @@ class GGEMS_EXPORT GGEMSSource
     void SetSourceName(char const* source_name);
 
     /*!
-      \fn void SetPosition(GGfloat const& pos_x, GGfloat const& pos_y, GGfloat const& pos_z)
+      \fn void SetPosition(GGfloat const& pos_x, GGfloat const& pos_y, GGfloat const& pos_z, char const* unit = "mm")
       \param pos_x - Position of the source in X
       \param pos_y - Position of the source in Y
       \param pos_z - Position of the source in Z
+      \param unit - unit of the distance
       \brief Set the position of the source in the global coordinates
     */
     void SetPosition(GGfloat const& pos_x, GGfloat const& pos_y,
-      GGfloat const& pos_z);
+      GGfloat const& pos_z, char const* unit = "mm");
 
     /*!
       \fn void SetSourceParticleType(char const* particle_type)
@@ -115,9 +116,11 @@ class GGEMS_EXPORT GGEMSSource
       \param rx - Rotation around X along global axis
       \param ry - Rotation around Y along global axis
       \param rz - Rotation around Z along global axis
+      \param unit - unit of the angle
       \brief Set the rotation of the source around global axis
     */
-    void SetRotation(GGfloat const& rx, GGfloat const& ry, GGfloat const& rz);
+    void SetRotation(GGfloat const& rx, GGfloat const& ry, GGfloat const& rz,
+      char const* unit = "deg");
 
     /*!
       \fn void SetNumberOfParticles(GGulong const& number_of_particles)

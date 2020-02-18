@@ -78,10 +78,13 @@ void GGEMSSource::SetSourceName(char const* source_name)
 ////////////////////////////////////////////////////////////////////////////////
 
 void GGEMSSource::SetPosition(GGfloat const& pos_x, GGfloat const& pos_y,
-  GGfloat const& pos_z)
+  GGfloat const& pos_z, char const* unit)
 {
-  p_geometry_transformation_->SetTranslation(
-    MakeFloat3(pos_x, pos_y, pos_z));
+  p_geometry_transformation_->SetTranslation(MakeFloat3(
+    GGEMSUnits::BestDistanceUnit(pos_x, unit),
+    GGEMSUnits::BestDistanceUnit(pos_y, unit),
+    GGEMSUnits::BestDistanceUnit(pos_z, unit))
+  );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -140,9 +143,13 @@ void GGEMSSource::SetLocalAxis(
 ////////////////////////////////////////////////////////////////////////////////
 
 void GGEMSSource::SetRotation(GGfloat const& rx, GGfloat const& ry,
-  GGfloat const& rz)
+  GGfloat const& rz, char const* unit)
 {
-  p_geometry_transformation_->SetRotation(MakeFloat3(rx, ry, rz));
+  p_geometry_transformation_->SetRotation(MakeFloat3(
+    GGEMSUnits::BestAngleUnit(rx, unit),
+    GGEMSUnits::BestAngleUnit(ry, unit),
+    GGEMSUnits::BestAngleUnit(rz, unit))
+  );
 }
 
 ////////////////////////////////////////////////////////////////////////////////

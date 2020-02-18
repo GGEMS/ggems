@@ -60,10 +60,10 @@ xray_source_1 = GGEMSXRaySource()
 xray_source_1.set_source_name(b"xray_source_1")
 xray_source_1.set_source_particle_type(b"photon")
 xray_source_1.set_number_of_particles(8616350000)
-xray_source_1.set_position(-1000.0, 0.0, 0.0)  # in mm
-xray_source_1.set_rotation(0.0, 0.0, 0.0)  # in degree
-xray_source_1.set_beam_aperture(5.0)  # in degree
-xray_source_1.set_focal_spot_size(0.6, 1.2, 0.0)  # in mm
+xray_source_1.set_position(-1000.0, 0.0, 0.0, b"mm")
+xray_source_1.set_rotation(0.0, 0.0, 0.0, b"deg")
+xray_source_1.set_beam_aperture(5.0, b"deg")
+xray_source_1.set_focal_spot_size(0.6, 1.2, 0.0, b"mm")
 xray_source_1.set_polyenergy(b"data/spectrum_120kVp_2mmAl.dat")
 
 # Second source
@@ -71,11 +71,11 @@ xray_source_2 = GGEMSXRaySource()
 xray_source_2.set_source_name(b"xray_source_2")
 xray_source_2.set_source_particle_type(b"photon")
 xray_source_2.set_number_of_particles(861635)
-xray_source_2.set_position(0.0, -1000.0, 0.0)  # in mm
-xray_source_2.set_rotation(0.0, 0.0, 0.0)  # in degree
-xray_source_2.set_beam_aperture(7.0)  # in degree
-xray_source_2.set_focal_spot_size(0.3, 0.5, 0.0)  # in mm
-xray_source_2.set_monoenergy(60.2)
+xray_source_2.set_position(0.0, -1000.0, 0.0, b"mm")
+xray_source_2.set_rotation(0.0, 0.0, 0.0, b"deg")
+xray_source_2.set_beam_aperture(7.0, b"deg")
+xray_source_2.set_focal_spot_size(0.3, 0.5, 0.0, b"mm")
+xray_source_2.set_monoenergy(60.2, b"keV")
 
 source_manager.print_infos()
 

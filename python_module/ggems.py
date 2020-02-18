@@ -121,7 +121,7 @@ class GGEMSXRaySource(object):
         ggems_lib.set_source_name_ggems_xray_source.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
         ggems_lib.set_source_name_ggems_xray_source.restype = ctypes.c_void_p
     
-        ggems_lib.set_position_ggems_xray_source.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_float, ctypes.c_float]
+        ggems_lib.set_position_ggems_xray_source.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_char_p]
         ggems_lib.set_position_ggems_xray_source.restype = ctypes.c_void_p
 
         ggems_lib.set_number_of_particles_xray_source.argtypes = [ctypes.c_void_p, ctypes.c_ulonglong]
@@ -130,19 +130,19 @@ class GGEMSXRaySource(object):
         ggems_lib.set_source_particle_type_ggems_xray_source.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
         ggems_lib.set_source_particle_type_ggems_xray_source.restype = ctypes.c_void_p
 
-        ggems_lib.set_beam_aperture_ggems_xray_source.argtypes = [ctypes.c_void_p, ctypes.c_float]
+        ggems_lib.set_beam_aperture_ggems_xray_source.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_char_p]
         ggems_lib.set_beam_aperture_ggems_xray_source.restype = ctypes.c_void_p
 
-        ggems_lib.set_focal_spot_size_ggems_xray_source.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_float, ctypes.c_float]
+        ggems_lib.set_focal_spot_size_ggems_xray_source.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_char_p]
         ggems_lib.set_focal_spot_size_ggems_xray_source.restype = ctypes.c_void_p
 
         ggems_lib.set_local_axis_ggems_xray_source.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_float]
         ggems_lib.set_local_axis_ggems_xray_source.restype = ctypes.c_void_p
 
-        ggems_lib.set_rotation_ggems_xray_source.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_float, ctypes.c_float]
+        ggems_lib.set_rotation_ggems_xray_source.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_char_p]
         ggems_lib.set_rotation_ggems_xray_source.restype = ctypes.c_void_p
 
-        ggems_lib.set_monoenergy_ggems_xray_source.argtypes = [ctypes.c_void_p, ctypes.c_float]
+        ggems_lib.set_monoenergy_ggems_xray_source.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_char_p]
         ggems_lib.set_monoenergy_ggems_xray_source.restype = ctypes.c_void_p
 
         ggems_lib.set_polyenergy_ggems_xray_source.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
@@ -156,8 +156,8 @@ class GGEMSXRaySource(object):
     def set_source_name(self, name):
         ggems_lib.set_source_name_ggems_xray_source(self.obj, name)
 
-    def set_position(self, x, y, z):
-        ggems_lib.set_position_ggems_xray_source(self.obj, x, y, z)
+    def set_position(self, x, y, z, unit):
+        ggems_lib.set_position_ggems_xray_source(self.obj, x, y, z, unit)
 
     def set_number_of_particles(self, number_of_particles):
         ggems_lib.set_number_of_particles_xray_source(self.obj, number_of_particles)
@@ -165,20 +165,20 @@ class GGEMSXRaySource(object):
     def set_source_particle_type(self, particle_type):
         ggems_lib.set_source_particle_type_ggems_xray_source(self.obj, particle_type)
 
-    def set_beam_aperture(self, beam_aperture):
-        ggems_lib.set_beam_aperture_ggems_xray_source(self.obj, beam_aperture)
+    def set_beam_aperture(self, beam_aperture, unit):
+        ggems_lib.set_beam_aperture_ggems_xray_source(self.obj, beam_aperture, unit)
 
-    def set_focal_spot_size(self, width, height, depth):
-        ggems_lib.set_focal_spot_size_ggems_xray_source(self.obj, width, height, depth)
+    def set_focal_spot_size(self, width, height, depth, unit):
+        ggems_lib.set_focal_spot_size_ggems_xray_source(self.obj, width, height, depth, unit)
 
     def set_local_axis(self, m00, m01, m02, m10, m11, m12, m20, m21, m22):
         ggems_lib.set_local_axis_ggems_xray_source(self.obj, m00, m01, m02, m10, m11, m12, m20, m21, m22)
 
-    def set_rotation(self, rx, ry, rz):
-        ggems_lib.set_rotation_ggems_xray_source(self.obj, rx, ry, rz)
+    def set_rotation(self, rx, ry, rz, unit):
+        ggems_lib.set_rotation_ggems_xray_source(self.obj, rx, ry, rz, unit)
 
-    def set_monoenergy(self, e):
-        ggems_lib.set_monoenergy_ggems_xray_source(self.obj, e)
+    def set_monoenergy(self, e, unit):
+        ggems_lib.set_monoenergy_ggems_xray_source(self.obj, e, unit)
 
     def set_polyenergy(self, file):
         ggems_lib.set_polyenergy_ggems_xray_source(self.obj, file)

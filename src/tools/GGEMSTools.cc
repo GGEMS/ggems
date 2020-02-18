@@ -46,22 +46,6 @@ void GGEMSFileStream::CheckInputStream(std::ifstream const& input_stream,
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-/// @cond
-template GGbool GGEMSMisc::IsEqual<GGdouble>(GGdouble const&, GGdouble const&);
-template GGbool GGEMSMisc::IsEqual<float>(GGfloat const&, GGfloat const&);
-/// @endcond
-
-template <typename T>
-GGbool GGEMSMisc::IsEqual(T const& a, T const& b)
-{
-  return std::nextafter(a, std::numeric_limits<T>::lowest()) <= b
-    && std::nextafter(a, std::numeric_limits<T>::max()) >= b;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
 void GGEMSMisc::ThrowException(std::string const& class_name,
   std::string const& method_name, std::string const& message)
 {
