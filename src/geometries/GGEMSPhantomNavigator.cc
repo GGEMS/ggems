@@ -13,6 +13,7 @@
 #include <sstream>
 
 #include "GGEMS/geometries/GGEMSPhantomNavigator.hh"
+#include "GGEMS/geometries/GGEMSPhantomNavigatorManager.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
 #include "GGEMS/tools/GGEMSSystemOfUnits.hh"
 #include "GGEMS/tools/GGEMSTools.hh"
@@ -22,7 +23,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSPhantomNavigator::GGEMSPhantomNavigator(void)
+GGEMSPhantomNavigator::GGEMSPhantomNavigator(
+  GGEMSPhantomNavigator* p_phantom_navigator)
 : phantom_navigator_name_(""),
   phantom_mhd_header_filename_(""),
   range_data_filename_(""),
@@ -30,6 +32,9 @@ GGEMSPhantomNavigator::GGEMSPhantomNavigator(void)
 {
   GGcout("GGEMSPhantomNavigator", "GGEMSPhantomNavigator", 3)
     << "Allocation of GGEMSPhantomNavigator..." << GGendl;
+
+  // Store the phantom navigator in phantom navigator manager
+  GGEMSPhantomNavigatorManager::GetInstance().Store(p_phantom_navigator);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -18,8 +18,7 @@
 
 - Meilleur gestion de la verbosity avec GGEMS
 
-- Faire le Store dans GGEMSSource et GGEMSPhantomNavigator et non pas dans la
-fille
+- Smart pointer C++ et supprimer alignement buffer et écriture avec p_* (pointeur)
 
 - Faire la visu avec Qt (Qt Quick) et activer l'option Qt à partir du CMAKE.
 Si possible, faire la visualization sur carte graphique avec OpenCL
