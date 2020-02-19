@@ -20,14 +20,12 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 GGEMSVoxelizedPhantomNavigatorImagery::GGEMSVoxelizedPhantomNavigatorImagery(
-  void) : GGEMSPhantomNavigator()
+  void)
+: GGEMSPhantomNavigator(this)
 {
   GGcout("GGEMSVoxelizedPhantomNavigatorImagery",
     "GGEMSVoxelizedPhantomNavigatorImagery", 3)
     << "Allocation of GGEMSVoxelizedPhantomNavigatorImagery..." << GGendl;
-
-  // Store the pointer to manager
-  GGEMSPhantomNavigatorManager::GetInstance().Store(this);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

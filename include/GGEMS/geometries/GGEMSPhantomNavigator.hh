@@ -32,7 +32,7 @@ class GGEMS_EXPORT GGEMSPhantomNavigator
     /*!
       \brief GGEMSPhantomNavigator constructor
     */
-    GGEMSPhantomNavigator(void);
+    GGEMSPhantomNavigator(GGEMSPhantomNavigator* p_phantom_navigator);
 
     /*!
       \brief GGEMSPhantomNavigator destructor
