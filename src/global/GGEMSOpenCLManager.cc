@@ -1,9 +1,7 @@
 /*!
   \file GGEMSOpenCLManager.cc
 
-  \brief Singleton class storing all informations about OpenCL and managing
-  GPU/CPU contexts and kernels for GGEMS
-  IMPORTANT: Only 1 context has to be activated.
+  \brief Singleton class storing all informations about OpenCL and managing GPU/CPU contexts and kernels for GGEMS
 
   \author Julien BERT <julien.bert@univ-brest.fr>
   \author Didier BENOIT <didier.benoit@inserm.fr>
@@ -26,8 +24,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 GGEMSOpenCLManager::GGEMSOpenCLManager(void)
-: p_platforms_(0),
-  p_platform_vendor_(nullptr),
+: platforms_(0),
+  platform_vendor_(0),
   p_devices_(0),
   p_device_device_type_(nullptr),
   p_device_vendor_(nullptr),
@@ -62,25 +60,22 @@ GGEMSOpenCLManager::GGEMSOpenCLManager(void)
   p_kernel_(0),
   p_used_ram_(nullptr)
 {
-  GGcout("GGEMSOpenCLManager", "GGEMSOpenCLManager", 3)
-    << "Allocation of GGEMS OpenCL manager..." << GGendl;
+  GGcout("GGEMSOpenCLManager", "GGEMSOpenCLManager", 3) << "Allocation of GGEMS OpenCL manager..." << GGendl;
 
-  GGcout("GGEMSOpenCLManager", "GGEMSOpenCLManager", 1)
-    << "Retrieving OpenCL platform(s)..." << GGendl;
-  CheckOpenCLError(cl::Platform::get(&p_platforms_), "GGEMSOpenCLManager",
-    "GGEMSOpenCLManager");
+  GGcout("GGEMSOpenCLManager", "GGEMSOpenCLManager", 1) << "Retrieving OpenCL platform(s)..." << GGendl;
+  CheckOpenCLError(cl::Platform::get(&platforms_), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
 
   // Getting infos about platform(s)
-  p_platform_vendor_ = GGEMSMem::Alloc<std::string>(p_platforms_.size());
-  for (std::size_t i = 0; i < p_platforms_.size(); ++i) {
-    CheckOpenCLError(p_platforms_[i].getInfo(CL_PLATFORM_VENDOR,
-      &p_platform_vendor_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+  for (std::size_t i = 0; i < platforms_.size(); ++i) {
+    std::string platform_vendor("");
+    CheckOpenCLError(platforms_[i].getInfo(CL_PLATFORM_VENDOR, &platform_vendor), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    platform_vendor_.push_back(platform_vendor);
   }
 
   // Retrieve all the available devices
   GGcout("GGEMSOpenCLManager", "GGEMSOpenCLManager", 1)
     << "Retrieving OpenCL device(s)..." << GGendl;
-  for (auto& p : p_platforms_) {
+  for (auto&& p : platforms_) {
     std::vector<cl::Device> v_current_device;
     CheckOpenCLError(p.getDevices(CL_DEVICE_TYPE_ALL, &v_current_device),
       "GGEMSOpenCLManager", "GGEMSOpenCLManager");
@@ -238,14 +233,12 @@ GGEMSOpenCLManager::GGEMSOpenCLManager(void)
 
 GGEMSOpenCLManager::~GGEMSOpenCLManager(void)
 {
-  // RAM manager
   if (p_used_ram_) {
     GGEMSMem::Free(p_used_ram_);
     p_used_ram_ = nullptr;
   }
 
-  GGcout("GGEMSOpenCLManager", "~GGEMSOpenCLManager", 3)
-    << "Deallocation of GGEMS OpenCL manager..." << GGendl;
+  GGcout("GGEMSOpenCLManager", "~GGEMSOpenCLManager", 3) << "Deallocation of GGEMS OpenCL manager..." << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -261,11 +254,13 @@ void GGEMSOpenCLManager::Clean(void)
   // Deleting platform(s) and infos
   GGcout("GGEMSOpenCLManager", "Clean", 1) << "Deleting OpenCL platform(s)..."
     << GGendl;
-  if (p_platform_vendor_) {
+  /*if (platform_vendor_) {
     GGEMSMem::Free(p_platform_vendor_);
     p_platform_vendor_ = nullptr;
-    p_platforms_.clear();
-  }
+    platforms_.clear();
+  }*/
+  platforms_.clear();
+  platform_vendor_.clear();
 
   // Deleting device(s)
   GGcout("GGEMSOpenCLManager", "Clean", 1)
@@ -365,12 +360,12 @@ void GGEMSOpenCLManager::PrintPlatformInfos(void) const
     << "Printing infos about OpenCL platform(s)..." << GGendl;
 
   // Loop over the platforms
-  for (std::size_t i = 0; i < p_platforms_.size(); ++i) {
+  for (std::size_t i = 0; i < platforms_.size(); ++i) {
     GGcout("GGEMSOpenCLManager", "PrintPlatformInfos", 0) << GGendl;
     GGcout("GGEMSOpenCLManager", "PrintPlatformInfos", 0) << "#### PLATFORM: "
       << i << " ####" << GGendl;
     GGcout("GGEMSOpenCLManager", "PrintPlatformInfos", 0) << "+ Vendor: "
-      << p_platform_vendor_[i] << GGendl;
+      << platform_vendor_[i] << GGendl;
   }
   GGcout("GGEMSOpenCLManager", "PrintPlatformInfos", 0) << GGendl;
 }
