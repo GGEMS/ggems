@@ -11,12 +11,12 @@
 */
 
 #include <algorithm>
+#include <sstream>
 
 #include "GGEMS/global/GGEMSConfiguration.hh"
 #include "GGEMS/global/GGEMSOpenCLManager.hh"
 
 #include "GGEMS/tools/GGEMSTools.hh"
-#include "GGEMS/tools/GGEMSMemoryAllocation.hh"
 #include "GGEMS/tools/GGEMSChrono.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
