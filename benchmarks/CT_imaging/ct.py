@@ -100,3 +100,8 @@ opencl_manager.print_infos()
 
 # Start GGEMS simulation
 # ggems.run()
+
+# ------------------------------------------------------------------------------
+# STEP X: Exit GGEMS safely
+opencl_manager.clean()
+exit()

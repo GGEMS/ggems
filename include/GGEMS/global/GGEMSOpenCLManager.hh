@@ -95,7 +95,11 @@ class GGEMS_EXPORT GGEMSOpenCLManager
       \fn GGbool IsReady(void) const
       \brief Checking if the OpenCL manager is ready, it means if a context is set
     */
-    GGbool IsReady(void) const;
+    inline GGbool IsReady(void) const
+    {
+      if (context_act_) return true;
+      else return false;
+    }
 
     /*!
       \fn void PrintPlatformInfos(void) const
@@ -164,37 +168,25 @@ class GGEMS_EXPORT GGEMSOpenCLManager
       \fn GGulong GetMaxRAMMemoryOnActivatedDevice(void) const
       \brief Get the maximum RAM memory on activated OpenCL device
     */
-    inline GGulong GetMaxRAMMemoryOnActivatedDevice(void) const
-    {
-      return p_device_global_mem_size_[context_index_];
-    }
+    inline GGulong GetMaxRAMMemoryOnActivatedDevice(void) const {return device_global_mem_size_[context_index_];}
 
     /*!
-      \fn std::size_t GetContext(void) const
+      \fn cl::Context* GetContext(void) const
       \brief return the activated context
     */
-    inline cl::Context* GetContext(void) const
-    {
-      return p_contexts_act_.front();
-    };
+    inline cl::Context* GetContext(void) const {return context_act_.get();}
 
     /*!
       \fn cl::CommandQueue* GetCommandQueue(void) const
       \brief Return the command queue to activated context
     */
-    inline cl::CommandQueue* GetCommandQueue(void) const
-    {
-      return p_queues_act_.front();
-    }
+    inline cl::CommandQueue* GetCommandQueue(void) const {return queue_act_.get();}
 
     /*!
       \fn cl::Event* GetEvent(void) const
       \brief return an event to activated context
     */
-    inline cl::Event* GetEvent(void) const
-    {
-      return p_event_act_.front();
-    }
+    inline cl::Event* GetEvent(void) const {return event_act_.get();}
 
     /*!
       \fn cl::Kernel* CompileKernel(std::string const& kernel_filename, std::string const& kernel_name, char* const custom_options = nullptr, char* const additional_options = nullptr)
@@ -277,10 +269,10 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     void CreateCommandQueue(void);
 
     /*!
-      \fn void CreateEvent()
+      \fn void CreateEvent(void)
       \brief creating an event for each context
     */
-    void CreateEvent();
+    void CreateEvent(void);
 
     /*!
       \fn void InitializeRAMManager()
@@ -308,51 +300,50 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     std::vector<std::string> platform_vendor_; /*!< Vendor of the platform */
 
     // Devices
-    std::vector<cl::Device*> p_devices_; /*!< Vector of pointers of devices */
-    cl_device_type *p_device_device_type_; /*!< Type of device */
-    std::string *p_device_vendor_; /*!< Vendor of the device */
-    std::string *p_device_version_; /*!< Version of the device */
-    std::string *p_device_driver_version_; /*!< Driver version of the device */
-    GGuint *p_device_address_bits_; /*!< Address Bits */
-    GGbool *p_device_available_; /*!< Flag on device availability */
-    GGbool *p_device_compiler_available_; /*!< Flag on compiler availability */
-    GGulong *p_device_global_mem_cache_size_; /*!< Global memory cache size */
-    GGuint *p_device_global_mem_cacheline_size_; /*!< Global memory cache line size */
-    GGulong *p_device_global_mem_size_; /*!< Global memory size */
-    GGulong *p_device_local_mem_size_; /*!< Local memory size */
-    GGuint *p_device_mem_base_addr_align_; /*!< Alignment memory */
-    std::string *p_device_name_; /*!< Name of the device */
-    std::string *p_device_opencl_c_version_; /*!< OpenCL C version */
-    GGuint *p_device_max_clock_frequency_; /*!< Max clock frequency */
-    GGuint *p_device_max_compute_units_; /*!< Max compute units */
-    GGulong *p_device_constant_buffer_size_; /*!< Constant buffer size */
-    GGulong *p_device_mem_alloc_size_; /*!< Memory allocation size */
-    GGuint *p_device_native_vector_width_double_; /*!< Native size of the double */
-    GGuint *p_device_preferred_vector_width_double_; /*!< Preferred size of the double */
+    std::vector<std::unique_ptr<cl::Device>> devices_;
+    std::vector<cl_device_type> device_device_type_; /*!< Type of device */
+    std::vector<std::string> device_vendor_; /*!< Vendor of the device */
+    std::vector<std::string> device_version_; /*!< Version of the device */
+    std::vector<std::string> device_driver_version_; /*!< Driver version of the device */
+    std::vector<GGuint> device_address_bits_; /*!< Address Bits */
+    std::vector<GGbool> device_available_; /*!< Flag on device availability */
+    std::vector<GGbool> device_compiler_available_; /*!< Flag on compiler availability */
+    std::vector<GGulong> device_global_mem_cache_size_; /*!< Global memory cache size */
+    std::vector<GGuint> device_global_mem_cacheline_size_; /*!< Global memory cache line size */
+    std::vector<GGulong> device_global_mem_size_; /*!< Global memory size */
+    std::vector<GGulong> device_local_mem_size_; /*!< Local memory size */
+    std::vector<GGuint> device_mem_base_addr_align_; /*!< Alignment memory */
+    std::vector<std::string> device_name_; /*!< Name of the device */
+    std::vector<std::string> device_opencl_c_version_; /*!< OpenCL C version */
+    std::vector<GGuint> device_max_clock_frequency_; /*!< Max frequency of device */
+    std::vector<GGuint> device_max_compute_units_; /*!< Max compute units */
+    std::vector<GGulong> device_constant_buffer_size_; /*!< Constant buffer size */
+    std::vector<GGulong> device_mem_alloc_size_; /*!< Memory allocation size */
+    std::vector<GGuint> device_native_vector_width_double_; /*!< Native size of double */
 
-  private: // OpenCL compilation options
+    // OpenCL compilation options
     std::string build_options_; /*!< list of option to OpenCL compiler */
 
-  private: // Context and informations about them
+    // Context and informations about them
     GGuint context_index_; /*!< Index of the activated context */
-    std::vector<cl::Context*> p_contexts_; /*!< Vector of context */
-    std::vector<cl::Context*> p_contexts_cpu_; /*!< Vector of CPU context */
-    std::vector<cl::Context*> p_contexts_gpu_; /*!< Vector of GPU context */
-    std::vector<cl::Context*> p_contexts_act_; /*!< Activated context */
+    std::vector<std::shared_ptr<cl::Context>> contexts_; /*!< Vector of context */
+    std::vector<std::shared_ptr<cl::Context>> contexts_cpu_; /*!< Vector of CPU context */
+    std::vector<std::shared_ptr<cl::Context>> contexts_gpu_; /*!< Vector of GPU context */
+    std::shared_ptr<cl::Context> context_act_; /*!< Activated context */
 
-  private: // Command queue informations
-    std::vector<cl::CommandQueue*> p_queues_; /*!< Command queue for all the context */
-    std::vector<cl::CommandQueue*> p_queues_act_; /*!< Activated command queue */
+    // Command queue informations
+    std::vector<std::shared_ptr<cl::CommandQueue>> queues_; /*!< Command queue for all the context */
+    std::shared_ptr<cl::CommandQueue> queue_act_; /*!< Activated command queue */
 
-  private: // OpenCL event
-    std::vector<cl::Event*> p_event_; /*!< List of pointer to OpenCL event, for profiling */
-    std::vector<cl::Event*> p_event_act_; /*!< Activated event */
+    // OpenCL event
+    std::vector<std::shared_ptr<cl::Event>> events_; /*!< List of pointer to OpenCL event, for profiling */
+    std::shared_ptr<cl::Event> event_act_; /*!< Activated event */
 
-  private: // Kernels
-    std::vector<cl::Kernel*> p_kernel_; /*!< List of pointer to OpenCL kernel */
+    // Kernels
+    std::vector<std::shared_ptr<cl::Kernel>> kernels_; /*!< List of pointer to OpenCL kernel */
 
-  private: // RAM handler
-    GGulong *p_used_ram_; /*!< Memory RAM used by context */
+    // RAM handler
+    std::vector<GGulong> used_ram_; /*!< Memory RAM used by context */
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -365,7 +356,7 @@ T* GGEMSOpenCLManager::GetDeviceBuffer(cl::Buffer* const device_ptr, std::size_t
   GGcout("GGEMSOpenCLManager", "GetDeviceBuffer", 3) << "Getting mapped memory buffer on OpenCL device..." << GGendl;
 
   GGint err = 0;
-  T* ptr = static_cast<T*>(p_queues_act_.front()->enqueueMapBuffer(*device_ptr, CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, 0, size, nullptr, nullptr, &err));
+  T* ptr = static_cast<T*>(queue_act_.get()->enqueueMapBuffer(*device_ptr, CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, 0, size, nullptr, nullptr, &err));
   CheckOpenCLError(err, "GGEMSOpenCLManager", "GetDeviceBuffer");
   return ptr;
 }
@@ -380,7 +371,7 @@ void GGEMSOpenCLManager::ReleaseDeviceBuffer(cl::Buffer* const device_ptr, T* ho
   GGcout("GGEMSOpenCLManager", "ReleaseDeviceBuffer", 3) << "Releasing mapped memory buffer on OpenCL device..." << GGendl;
 
   // Unmap the memory
-  CheckOpenCLError(p_queues_act_.front()->enqueueUnmapMemObject(*device_ptr, host_ptr), "GGEMSOpenCLManager", "ReleaseDeviceBuffer");
+  CheckOpenCLError(queue_act_.get()->enqueueUnmapMemObject(*device_ptr, host_ptr), "GGEMSOpenCLManager", "ReleaseDeviceBuffer");
 }
 
 /*!
@@ -410,5 +401,11 @@ extern "C" GGEMS_EXPORT void print_RAM_ggems_opencl_manager(GGEMSOpenCLManager* 
   \brief Set the context index to activate
 */
 extern "C" GGEMS_EXPORT void set_context_index_ggems_opencl_manager(GGEMSOpenCLManager* opencl_manager, GGuint const context_id);
+
+/*!
+  \fn void clean_opencl_manager(GGEMSOpenCLManager* opencl_manager)
+  \brief Clean OpenCL manager safely with python
+*/
+extern "C" GGEMS_EXPORT void clean_opencl_manager(GGEMSOpenCLManager* opencl_manager);
 
 #endif // GUARD_GGEMS_GLOBAL_GGEMSOPENCLMANAGER_HH
