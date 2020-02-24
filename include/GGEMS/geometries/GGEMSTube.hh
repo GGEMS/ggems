@@ -28,7 +28,6 @@ class GGEMS_EXPORT GGEMSTube : public GGEMSVolumeSolid
     */
     ~GGEMSTube(void);
 
-  public:
     /*!
       \fn GGEMSTube(GGEMSTube const& tube) = delete
       \param tube - reference on the tube solid volume
@@ -57,11 +56,20 @@ class GGEMS_EXPORT GGEMSTube : public GGEMSVolumeSolid
     */
     GGEMSTube& operator=(GGEMSTube const&& tube) = delete;
 
-  public:
+    /*!
+      \fn void SetHeight(GGdouble const& height)
+      \param height - height of the tube
+      \brief set the height of the tube
+    */
     void SetHeight(GGdouble const& height);
+
+    /*!
+      \fn void SetRadius(GGdouble const& radius)
+      \param radius - radius of the tube
+      \brief set the radius of the tube
+    */
     void SetRadius(GGdouble const& radius);
 
-  public:
     /*!
       \fn void Initialize(void) override
       \brief Initialize the solid and store it in Phantom creator manager
@@ -93,59 +101,58 @@ class GGEMS_EXPORT GGEMSTube : public GGEMSVolumeSolid
 extern "C" GGEMS_EXPORT GGEMSTube* create_tube(void);
 
 /*!
-  \fn GGEMSTube* create_tube(void)
+  \fn GGEMSTube* delete_tube(GGEMSTube* tube)
+  \param tube - pointer on the solid tube
   \brief Delete instance of GGEMSTube
 */
-extern "C" GGEMS_EXPORT void delete_tube(GGEMSTube* p_tube);
+extern "C" GGEMS_EXPORT void delete_tube(GGEMSTube* tube);
 
 /*!
-  \fn void void set_height_tube(GGEMSTube* p_tube, GGdouble const height)
-  \param p_tube - pointer on the solid tube
+  \fn void void set_height_tube(GGEMSTube* tube, GGdouble const height)
+  \param tube - pointer on the solid tube
   \param height - height of the tube
   \brief Set the height of the tube
 */
-extern "C" GGEMS_EXPORT void set_height_tube(GGEMSTube* p_tube,
-  GGdouble const height);
+extern "C" GGEMS_EXPORT void set_height_tube(GGEMSTube* tube, GGdouble const height);
 
 /*!
-  \fn void void set_radius_tube(GGEMSTube* p_tube, GGdouble const radius)
-  \param p_tube - pointer on the solid tube
+  \fn void void set_radius_tube(GGEMSTube* tube, GGdouble const radius)
+  \param tube - pointer on the solid tube
   \param radius - radius of the tube
   \brief Set the radius of the tube
 */
-extern "C" GGEMS_EXPORT void set_radius_tube(GGEMSTube* p_tube,
-  GGdouble const radius);
+extern "C" GGEMS_EXPORT void set_radius_tube(GGEMSTube* tube, GGdouble const radius);
 
 /*!
-  \fn void void set_position_tube(GGEMSTube* p_tube, GGdouble const pos_x, GGdouble const pos_y, GGdouble const pos_z)
-  \param p_tube - pointer on the solid tube
+  \fn void void set_position_tube(GGEMSTube* tube, GGdouble const pos_x, GGdouble const pos_y, GGdouble const pos_z)
+  \param tube - pointer on the solid tube
   \param pos_x - radius of the tube
   \param pos_y - radius of the tube
   \param pos_z - radius of the tube
   \brief Set the position of the tube
 */
-extern "C" GGEMS_EXPORT void set_position_tube(GGEMSTube* p_tube,
-  GGdouble const pos_x, GGdouble const pos_y, GGdouble const pos_z);
+extern "C" GGEMS_EXPORT void set_position_tube(GGEMSTube* tube, GGdouble const pos_x, GGdouble const pos_y, GGdouble const pos_z);
 
 /*!
-  \fn void void set_label_value_tube(GGEMSTube* p_tube, GGfloat const label_value)
-  \param p_tube - pointer on the solid tube
+  \fn void void set_label_value_tube(GGEMSTube* tube, GGfloat const label_value)
+  \param tube - pointer on the solid tube
   \param label_value - label value in tube
   \brief Set the label value in tube
 */
-extern "C" GGEMS_EXPORT void set_label_value_tube(GGEMSTube* p_tube,
-  GGfloat const label_value);
+extern "C" GGEMS_EXPORT void set_label_value_tube(GGEMSTube* tube, GGfloat const label_value);
 
 /*!
-  \fn void initialize_tube(GGEMSTube* p_tube)
+  \fn void initialize_tube(GGEMSTube* tube)
+  \param tube - pointer on the solid tube
   \brief Initialize the solid and store it in Phantom creator manager
 */
-extern "C" GGEMS_EXPORT void initialize_tube(GGEMSTube* p_tube);
+extern "C" GGEMS_EXPORT void initialize_tube(GGEMSTube* tube);
 
 /*!
-  \fn void draw_tube(GGEMSTube* p_tube)
+  \fn void draw_tube(GGEMSTube* tube)
+  \param tube - pointer on the solid tube
   \brief Draw analytical volume in voxelized phantom
 */
-extern "C" GGEMS_EXPORT void draw_tube(GGEMSTube* p_tube);
+extern "C" GGEMS_EXPORT void draw_tube(GGEMSTube* tube);
 
 #endif // End of GUARD_GGEMS_GEOMETRY_GGEMSTUBE_HH

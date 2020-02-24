@@ -55,7 +55,6 @@ class GGEMS_EXPORT GGEMSManager
       return instance;
     }
 
-  public:
     /*!
       \fn GGEMSManager(GGEMSManager const& ggems_manager) = delete
       \param ggems_manager - reference on the ggems manager
@@ -84,7 +83,6 @@ class GGEMS_EXPORT GGEMSManager
     */
     GGEMSManager& operator=(GGEMSManager const&& ggems_manager) = delete;
 
-  public:
     /*!
       \fn void Initialize(void)
       \brief Initialization of the GGEMS simulation and check parameters
@@ -97,14 +95,6 @@ class GGEMS_EXPORT GGEMSManager
     */
     void Run(void);
 
-  private:
-    /*!
-      \fn void CheckParameters()
-      \brief check the mandatory parameters for the GGEMS simulation
-    */
-    void CheckParameters();
-
-  public: // Seed
     /*!
       \fn void SetSeed(GGuint const& seed)
       \param seed - seed for the random generator
@@ -119,40 +109,12 @@ class GGEMS_EXPORT GGEMSManager
     */
     inline GGuint GetSeed() const {return seed_;};
 
-  private:
-    /*!
-      \fn GGuint GenerateSeed() const
-      \return the seed computed by GGEMS
-      \brief generate a seed by GGEMS and return it
-    */
-    GGuint GenerateSeed() const;
-
-  public:
     /*!
       \fn inline std::string GetVersion() const
       \brief Get the version of GGEMS
     */
     inline std::string GetVersion() const {return version_;};
 
-  public:
-    /*!
-      \fn inline GGulong GetNumberOfParticles() const
-      \brief Get the number of simulated particles
-      \return the number of simulated particles
-    */
-    //inline GGulong GetNumberOfParticles() const {return number_of_particles_;};
-
-    /*!
-      \fn inline GGuint GetNumberOfBatchs() const
-      \brief Get the number of particles in batch
-      \return the number of simulated particles in batch
-    */
-    //inline GGuint GetNumberOfBatchs() const
-    //{
-      //return static_cast<GGuint>(v_number_of_particles_in_batch_.size());
-    //}
-
-  public:
     /*!
       \fn void SetProcess(char const* process_name)
       \param process_name - name of the process to activate
@@ -174,11 +136,8 @@ class GGEMS_EXPORT GGEMSManager
       \param level - Level of the secondary particle
       \brief set the particle to activate to follow the secondaries with a specific level
     */
-    void SetParticleSecondaryAndLevel(char const* particle_name,
-      GGuint const& level);
+    void SetParticleSecondaryAndLevel(char const* particle_name, GGuint const& level);
 
-
-  public: // Cross section part
     /*!
       \fn void SetCrossSectionTableNumberOfBins(GGuint const& number_of_bins)
       \param number_of_bins - Number of bins in the cross section table
@@ -213,11 +172,24 @@ class GGEMS_EXPORT GGEMSManager
     */
     void PrintBanner(void) const;
 
+    /*!
+      \fn void CheckParameters(void)
+      \brief check the mandatory parameters for the GGEMS simulation
+    */
+    void CheckParameters(void);
+
+    /*!
+      \fn GGuint GenerateSeed(void) const
+      \return the seed computed by GGEMS
+      \brief generate a seed by GGEMS and return it
+    */
+    GGuint GenerateSeed(void) const;
+
   private: // Global simulation parameters
     GGuint seed_; /*!< Seed for the random generator */
     std::string version_; /*!< Version of GGEMS */
-    std::vector<GGuchar> v_physics_list_; /*!< Vector storing the activated physics list */
-    std::vector<GGuchar> v_secondaries_list_; /*!< Vector storing the secondaries list */
+    std::vector<GGuchar> physics_list_; /*!< Vector storing the activated physics list */
+    std::vector<GGuchar> secondaries_list_; /*!< Vector storing the secondaries list */
     GGdouble photon_distance_cut_; /*!< Photon distance cut */
     GGdouble electron_distance_cut_; /*!< Electron distance cut */
     GGuint photon_level_secondaries_; /*!< Level of the secondaries */
@@ -226,7 +198,6 @@ class GGEMS_EXPORT GGEMSManager
     GGdouble cross_section_table_energy_min_; /*!< Min. energy for the cross section table */
     GGdouble cross_section_table_energy_max_; /*!< Max. energy for the cross section table */
 
-  private: // Source management
     GGEMSSourceManager& source_manager_; /*!< Reference to source manager singleton */
     GGEMSOpenCLManager& opencl_manager_; /*!< Reference to opencl manager singleton */
 };
@@ -243,89 +214,78 @@ extern "C" GGEMS_EXPORT GGEMSManager* get_instance_ggems_manager(void);
   \param seed - seed given by the user
   \brief Set the seed for the simulation
 */
-extern "C" GGEMS_EXPORT void set_seed_ggems_manager(GGEMSManager* ggems_manager,
-  GGuint const seed);
+extern "C" GGEMS_EXPORT void set_seed_ggems_manager(GGEMSManager* ggems_manager, GGuint const seed);
 
 /*!
   \fn void initialize_ggems_manager(GGEMSManager* p_ggems_manager)
-  \param p_ggems_manager - pointer on the singleton
+  \param ggems_manager - pointer on the singleton
   \brief Initialize GGEMS simulation
 */
-extern "C" GGEMS_EXPORT void initialize_ggems_manager(
-  GGEMSManager* p_ggems_manager);
+extern "C" GGEMS_EXPORT void initialize_ggems_manager(GGEMSManager* ggems_manager);
 
 /*!
   \fn void set_process(GGEMSManager* p_ggems_manager, char const* process_name)
-  \param p_ggems_manager - pointer on the singleton
+  \param ggems_manager - pointer on the singleton
   \param process_name - name of the process to activate
   \brief activate a specific process
 */
-extern "C" GGEMS_EXPORT void set_process_ggems_manager(
-  GGEMSManager* p_ggems_manager, char const* process_name);
+extern "C" GGEMS_EXPORT void set_process_ggems_manager(GGEMSManager* ggems_manager, char const* process_name);
 
 /*!
-  \fn void set_particle_cut_ggems_manager(GGEMSManager* p_ggems_manager, char const* particle_name, GGdouble const distance)
-  \param p_ggems_manager - pointer on the singleton
+  \fn void set_particle_cut_ggems_manager(GGEMSManager* ggems_manager, char const* particle_name, GGdouble const distance)
+  \param ggems_manager - pointer on the singleton
   \param particle_name - name of the particle
   \param distance - cut in distance for the particle
   \brief set a cut in distance for a specific particle
 */
-extern "C" GGEMS_EXPORT void set_particle_cut_ggems_manager(
-  GGEMSManager* p_ggems_manager, char const* particle_name,
-  GGdouble const distance);
+extern "C" GGEMS_EXPORT void set_particle_cut_ggems_manager(GGEMSManager* ggems_manager, char const* particle_name, GGdouble const distance);
 
 /*!
   \fn void set_geometry_tolerance_ggems_manager(GGEMSManager* p_ggems_manager, GGdouble const distance)
-  \param p_ggems_manager - pointer on the singleton
+  \param ggems_manager - pointer on the singleton
   \param distance - geometry distance tolerance
   \brief set the geometry distance tolerance
 */
-extern "C" GGEMS_EXPORT void set_geometry_tolerance_ggems_manager(
-  GGEMSManager* p_ggems_manager, GGdouble const distance);
+extern "C" GGEMS_EXPORT void set_geometry_tolerance_ggems_manager(GGEMSManager* ggems_manager, GGdouble const distance);
 
 /*!
-  \fn void set_secondary_particle_and_level_ggems_manager(GGEMSManager* p_ggems_manager, char const* particle_name, GGuint const level)
-  \param p_ggems_manager - pointer on the singleton
+  \fn void set_secondary_particle_and_level_ggems_manager(GGEMSManager* ggems_manager, char const* particle_name, GGuint const level)
+  \param ggems_manager - pointer on the singleton
   \param particle_name - name of the particle
   \param level - level of the secondary
   \brief set the particle to follow secondary and set the level
 */
-extern "C" GGEMS_EXPORT void set_secondary_particle_and_level_ggems_manager(
-  GGEMSManager* p_ggems_manager, char const* particle_name, GGuint const level);
+extern "C" GGEMS_EXPORT void set_secondary_particle_and_level_ggems_manager(GGEMSManager* ggems_manager, char const* particle_name, GGuint const level);
 
 /*!
-  \fn void set_cross_section_table_number_of_bins_ggems_manager(GGEMSManager* p_ggems_manager, GGuint const number_of_bins)
-  \param p_ggems_manager - pointer on the singleton
+  \fn void set_cross_section_table_number_of_bins_ggems_manager(GGEMSManager* ggems_manager, GGuint const number_of_bins)
+  \param ggems_manager - pointer on the singleton
   \param number_of_bins - number of the bins in the cross section table
   \brief set the number of bins in the cross section table
 */
-extern "C" GGEMS_EXPORT
-void set_cross_section_table_number_of_bins_ggems_manager(
-  GGEMSManager* p_ggems_manager, GGuint const number_of_bins);
+extern "C" GGEMS_EXPORT void set_cross_section_table_number_of_bins_ggems_manager(GGEMSManager* ggems_manager, GGuint const number_of_bins);
 
 /*!
-  \fn void set_cross_section_table_energy_min_ggems_manager(GGEMSManager* p_ggems_manager, GGdouble const min_energy)
-  \param p_ggems_manager - pointer on the singleton
+  \fn void set_cross_section_table_energy_min_ggems_manager(GGEMSManager* ggems_manager, GGdouble const min_energy)
+  \param ggems_manager - pointer on the singleton
   \param min_energy - min. energy in the cross section table
   \brief set the min. energy in the cross section table
 */
-extern "C" GGEMS_EXPORT void set_cross_section_table_energy_min_ggems_manager(
-  GGEMSManager* p_ggems_manager, GGdouble const min_energy);
+extern "C" GGEMS_EXPORT void set_cross_section_table_energy_min_ggems_manager(GGEMSManager* ggems_manager, GGdouble const min_energy);
 
 /*!
-  \fn void set_cross_section_table_energy_max_ggems_manager(GGEMSManager* p_ggems_manager, GGdouble const min_energy)
-  \param p_ggems_manager - pointer on the singleton
+  \fn void set_cross_section_table_energy_max_ggems_manager(GGEMSManager* ggems_manager, GGdouble const min_energy)
+  \param ggems_manager - pointer on the singleton
   \param max_energy - max. energy in the cross section table
   \brief set the max. energy in the cross section table
 */
-extern "C" GGEMS_EXPORT void set_cross_section_table_energy_max_ggems_manager(
-  GGEMSManager* p_ggems_manager, GGdouble const max_energy);
+extern "C" GGEMS_EXPORT void set_cross_section_table_energy_max_ggems_manager(GGEMSManager* ggems_manager, GGdouble const max_energy);
 
 /*!
-  \fn void run_ggems_manager(GGEMSManager* p_ggems_manager)
+  \fn void run_ggems_manager(GGEMSManager* ggems_manager)
   \param ggems_manager - pointer on the singleton
   \brief Run the GGEMS simulation
 */
-extern "C" GGEMS_EXPORT void run_ggems_manager(GGEMSManager* p_ggems_manager);
+extern "C" GGEMS_EXPORT void run_ggems_manager(GGEMSManager* ggems_manager);
 
 #endif // End of GUARD_GGEMS_GLOBAL_GGEMSMANAGER_HH

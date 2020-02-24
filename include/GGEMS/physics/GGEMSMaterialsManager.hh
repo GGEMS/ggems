@@ -42,8 +42,7 @@ struct GGEMS_EXPORT GGEMSSingleMaterial
   GGushort nb_elements_; /*!< Number of elements in material */
 };
 
-typedef std::unordered_map<std::string, GGEMSChemicalElement>
-  ChemicalElementUMap;
+typedef std::unordered_map<std::string, GGEMSChemicalElement> ChemicalElementUMap;
 typedef std::unordered_map<std::string, GGEMSSingleMaterial> MaterialUMap;
 
 /*!
@@ -75,40 +74,34 @@ class GGEMS_EXPORT GGEMSMaterialsManager
       return instance;
     }
 
-  public:
     /*!
       \fn GGEMSManager(GGEMSManager const& material_manager) = delete
       \param material_manager - reference on the material manager
       \brief Avoid copy of the class by reference
     */
-    GGEMSMaterialsManager(GGEMSMaterialsManager const& material_manager)
-      = delete;
+    GGEMSMaterialsManager(GGEMSMaterialsManager const& material_manager) = delete;
 
     /*!
       \fn GGEMSManager& operator=(GGEMSManager const& material_manager) = delete
       \param material_manager - reference on the material manager
       \brief Avoid assignement of the class by reference
     */
-    GGEMSMaterialsManager& operator=(
-      GGEMSMaterialsManager const& material_manager) = delete;
+    GGEMSMaterialsManager& operator=(GGEMSMaterialsManager const& material_manager) = delete;
 
     /*!
       \fn GGEMSManager(GGEMSManager const&& material_manager) = delete
       \param material_manager - rvalue reference on the material manager
       \brief Avoid copy of the class by rvalue reference
     */
-    GGEMSMaterialsManager(GGEMSMaterialsManager const&& material_manager)
-      = delete;
+    GGEMSMaterialsManager(GGEMSMaterialsManager const&& material_manager) = delete;
 
     /*!
       \fn GGEMSManager& operator=(GGEMSManager const&& material_manager) = delete
       \param material_manager - rvalue reference on the material manager
       \brief Avoid copy of the class by rvalue reference
     */
-    GGEMSMaterialsManager& operator=(
-      GGEMSMaterialsManager const&& material_manager) = delete;
+    GGEMSMaterialsManager& operator=(GGEMSMaterialsManager const&& material_manager) = delete;
 
-  public:
     /*!
       \fn void SetMaterialsDatabase(char const* filename)
       \param filename - name of the file containing material database
@@ -150,9 +143,7 @@ class GGEMS_EXPORT GGEMSMaterialsManager
       \param element_I - Mean excitation energy of the element
       \brief Adding a chemical element in GGEMS
     */
-    void AddChemicalElements(std::string const& element_name,
-      GGushort const& element_Z, GGdouble const& element_A,
-      GGdouble const& element_I);
+    void AddChemicalElements(std::string const& element_name, GGushort const& element_Z, GGdouble const& element_A, GGdouble const& element_I);
 
   private:
     MaterialUMap materials_; /*!< Map storing the GGEMS materials */
@@ -163,34 +154,28 @@ class GGEMS_EXPORT GGEMSMaterialsManager
   \fn GGEMSMaterialsManager* get_instance_materials_manager(void)
   \brief Get the GGEMSMaterialsManager pointer for python user.
 */
-extern "C" GGEMS_EXPORT GGEMSMaterialsManager*
-  get_instance_materials_manager(void);
+extern "C" GGEMS_EXPORT GGEMSMaterialsManager* get_instance_materials_manager(void);
 
 /*!
-  \fn void set_materials_database_ggems_materials_manager(GGEMSMaterialsManager* p_ggems_materials_manager, char const* filename)
-  \param p_ggems_materials_manager - pointer on the singleton
+  \fn void set_materials_database_ggems_materials_manager(GGEMSMaterialsManager* ggems_materials_manager, char const* filename)
+  \param ggems_materials_manager - pointer on the singleton
   \param process_name - name of the process to activate
   \brief activate a specific process
 */
-extern "C" GGEMS_EXPORT void set_materials_ggems_materials_manager(
-  GGEMSMaterialsManager* p_ggems_materials_manager, char const* filename);
+extern "C" GGEMS_EXPORT void set_materials_ggems_materials_manager(GGEMSMaterialsManager* ggems_materials_manager, char const* filename);
 
 /*!
-  \fn void print_available_chemical_elements_ggems_materials_manager(GGEMSMaterialsManager* p_ggems_materials_manager)
+  \fn void print_available_chemical_elements_ggems_materials_manager(GGEMSMaterialsManager* ggems_materials_manager)
   \param p_ggems_materials_manager - pointer on the singleton
   \brief print all available chemical elements
 */
-extern "C" GGEMS_EXPORT
-void print_available_chemical_elements_ggems_materials_manager(
-  GGEMSMaterialsManager* p_ggems_materials_manager);
+extern "C" GGEMS_EXPORT void print_available_chemical_elements_ggems_materials_manager(GGEMSMaterialsManager* ggems_materials_manager);
 
 /*!
-  \fn void print_available_materials_ggems_materials_manager(GGEMSMaterialsManager* p_ggems_materials_manager)
+  \fn void print_available_materials_ggems_materials_manager(GGEMSMaterialsManager* ggems_materials_manager)
   \param p_ggems_materials_manager - pointer on the singleton
   \brief print all available materials
 */
-extern "C" GGEMS_EXPORT
-void print_available_materials_ggems_materials_manager(
-  GGEMSMaterialsManager* p_ggems_materials_manager);
+extern "C" GGEMS_EXPORT void print_available_materials_ggems_materials_manager(GGEMSMaterialsManager* ggems_materials_manager);
 
 #endif // End of GUARD_GGEMS_PHYSICS_GGEMSMATERIALSMANAGER_HH

@@ -20,12 +20,11 @@
 GGEMSVolumeSolid::GGEMSVolumeSolid(void)
 : label_value_(1.0),
   positions_(GGdouble3{{0.0, 0.0, 0.0}}),
-  p_kernel_draw_solid_(nullptr),
+  kernel_draw_solid_(nullptr),
   opencl_manager_(GGEMSOpenCLManager::GetInstance()),
   phantom_creator_manager_(GGEMSPhantomCreatorManager::GetInstance())
 {
-  GGcout("GGEMSVolumeSolid", "GGEMSVolumeSolid", 3)
-    << "Allocation of GGEMSVolumeSolid..." << GGendl;
+  GGcout("GGEMSVolumeSolid", "GGEMSVolumeSolid", 3) << "Allocation of GGEMSVolumeSolid..." << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -34,8 +33,7 @@ GGEMSVolumeSolid::GGEMSVolumeSolid(void)
 
 GGEMSVolumeSolid::~GGEMSVolumeSolid(void)
 {
-  GGcout("GGEMSVolumeSolid", "~GGEMSVolumeSolid", 3)
-    << "Deallocation of GGEMSVolumeSolid..." << GGendl;
+  GGcout("GGEMSVolumeSolid", "~GGEMSVolumeSolid", 3) << "Deallocation of GGEMSVolumeSolid..." << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -51,8 +49,7 @@ void GGEMSVolumeSolid::SetLabelValue(GGfloat const& label_value)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSVolumeSolid::SetPosition(GGdouble const& pos_x, GGdouble const& pos_y,
-  GGdouble const& pos_z)
+void GGEMSVolumeSolid::SetPosition(GGdouble const& pos_x, GGdouble const& pos_y, GGdouble const& pos_z)
 {
   positions_.s[0] = pos_x;
   positions_.s[1] = pos_y;

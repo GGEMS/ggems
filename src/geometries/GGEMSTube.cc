@@ -23,18 +23,16 @@ GGEMSTube::GGEMSTube(void)
   height_(0.0),
   radius_(0.0)
 {
-  GGcout("GGEMSTube", "GGEMSTube", 3)
-    << "Allocation of GGEMSTube..." << GGendl;
+  GGcout("GGEMSTube", "GGEMSTube", 3) << "Allocation of GGEMSTube..." << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSTube::~GGEMSTube()
+GGEMSTube::~GGEMSTube(void)
 {
-  GGcout("GGEMSTube", "~GGEMSTube", 3)
-    << "Deallocation of GGEMSTube..." << GGendl;
+  GGcout("GGEMSTube", "~GGEMSTube", 3) << "Deallocation of GGEMSTube..." << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -61,19 +59,16 @@ void GGEMSTube::SetRadius(GGdouble const& radius)
 
 void GGEMSTube::CheckParameters(void) const
 {
-  GGcout("GGEMSTube", "CheckParameters", 3)
-    << "Checking mandatory parameters..." << GGendl;
+  GGcout("GGEMSTube", "CheckParameters", 3) << "Checking mandatory parameters..." << GGendl;
 
   // Checking radius
   if (GGEMSMisc::IsEqual(radius_, 0.0)) {
-    GGEMSMisc::ThrowException("GGEMSTube", "CheckParameters",
-      "The tube radius has to be > 0!!!");
+    GGEMSMisc::ThrowException("GGEMSTube", "CheckParameters", "The tube radius has to be > 0!!!");
   }
 
   // Checking height
   if (GGEMSMisc::IsEqual(height_, 0.0)) {
-    GGEMSMisc::ThrowException("GGEMSTube", "CheckParameters",
-      "The tube height has to be > 0!!!");
+    GGEMSMisc::ThrowException("GGEMSTube", "CheckParameters", "The tube height has to be > 0!!!");
   }
 }
 
@@ -83,20 +78,17 @@ void GGEMSTube::CheckParameters(void) const
 
 void GGEMSTube::Initialize(void)
 {
-  GGcout("GGEMSTube", "Initialize", 3)
-    << "Initializing GGEMSTube solid volume..." << GGendl;
+  GGcout("GGEMSTube", "Initialize", 3) << "Initializing GGEMSTube solid volume..." << GGendl;
 
   // Check mandatory parameters
   CheckParameters();
 
   // Getting the path to kernel
   std::string const kOpenCLKernelPath = OPENCL_KERNEL_PATH;
-  std::string const kFilename = kOpenCLKernelPath
-    + "/DrawGGEMSTube.cl";
+  std::string const kFilename = kOpenCLKernelPath + "/DrawGGEMSTube.cl";
 
   // Compiling the kernel
-  p_kernel_draw_solid_ = opencl_manager_.CompileKernel(kFilename,
-    "draw_ggems_tube");
+  kernel_draw_solid_ = opencl_manager_.CompileKernel(kFilename, "draw_ggems_tube");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -113,28 +105,25 @@ void GGEMSTube::Draw(void)
 
   // Get parameters from phantom creator
   GGdouble3 const kVoxelSizes = phantom_creator_manager_.GetElementsSizes();
-  GGuint3 const kPhantomDimensions =
-    phantom_creator_manager_.GetPhantomDimensions();
+  GGuint3 const kPhantomDimensions = phantom_creator_manager_.GetPhantomDimensions();
   GGulong const kNumberThreads = phantom_creator_manager_.GetNumberElements();
-  cl::Buffer* p_voxelized_phantom =
-    phantom_creator_manager_.GetVoxelizedPhantom();
+  cl::Buffer* voxelized_phantom = phantom_creator_manager_.GetVoxelizedPhantom();
 
   // Set parameters for kernel
-  p_kernel_draw_solid_->setArg(0, kVoxelSizes);
-  p_kernel_draw_solid_->setArg(1, kPhantomDimensions);
-  p_kernel_draw_solid_->setArg(2, positions_);
-  p_kernel_draw_solid_->setArg(3, label_value_);
-  p_kernel_draw_solid_->setArg(4, height_);
-  p_kernel_draw_solid_->setArg(5, radius_);
-  p_kernel_draw_solid_->setArg(6, *p_voxelized_phantom);
+  kernel_draw_solid_->setArg(0, kVoxelSizes);
+  kernel_draw_solid_->setArg(1, kPhantomDimensions);
+  kernel_draw_solid_->setArg(2, positions_);
+  kernel_draw_solid_->setArg(3, label_value_);
+  kernel_draw_solid_->setArg(4, height_);
+  kernel_draw_solid_->setArg(5, radius_);
+  kernel_draw_solid_->setArg(6, *voxelized_phantom);
 
   // Define the number of work-item to launch
   cl::NDRange global(kNumberThreads);
   cl::NDRange offset(0);
 
   // Launching kernel
-  cl_int kernel_status = p_queue->enqueueNDRangeKernel(*p_kernel_draw_solid_,
-    offset, global, cl::NullRange, nullptr, p_event);
+  cl_int kernel_status = p_queue->enqueueNDRangeKernel(*kernel_draw_solid_, offset, global, cl::NullRange, nullptr, p_event);
   opencl_manager_.CheckOpenCLError(kernel_status, "GGEMSTube", "Draw Tube");
   p_queue->finish(); // Wait until the kernel status is finish
 
@@ -155,11 +144,11 @@ GGEMSTube* create_tube(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void delete_tube(GGEMSTube* p_tube)
+void delete_tube(GGEMSTube* tube)
 {
-  if (p_tube) {
-    delete p_tube;
-    p_tube = nullptr;
+  if (tube) {
+    delete tube;
+    tube = nullptr;
   }
 }
 
@@ -167,53 +156,52 @@ void delete_tube(GGEMSTube* p_tube)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_height_tube(GGEMSTube* p_tube, GGdouble const height)
+void set_height_tube(GGEMSTube* tube, GGdouble const height)
 {
-  p_tube->SetHeight(height);
+  tube->SetHeight(height);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_radius_tube(GGEMSTube* p_tube, GGdouble const radius)
+void set_radius_tube(GGEMSTube* tube, GGdouble const radius)
 {
-  p_tube->SetRadius(radius);
+  tube->SetRadius(radius);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_position_tube(GGEMSTube* p_tube, GGdouble const pos_x,
-  GGdouble const pos_y, GGdouble const pos_z)
+void set_position_tube(GGEMSTube* tube, GGdouble const pos_x, GGdouble const pos_y, GGdouble const pos_z)
 {
-  p_tube->SetPosition(pos_x, pos_y, pos_z);
+  tube->SetPosition(pos_x, pos_y, pos_z);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_label_value_tube(GGEMSTube* p_tube, GGfloat const label_value)
+void set_label_value_tube(GGEMSTube* tube, GGfloat const label_value)
 {
-  p_tube->SetLabelValue(label_value);
+  tube->SetLabelValue(label_value);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void initialize_tube(GGEMSTube* p_tube)
+void initialize_tube(GGEMSTube* tube)
 {
-  p_tube->Initialize();
+  tube->Initialize();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void draw_tube(GGEMSTube* p_tube)
+void draw_tube(GGEMSTube* tube)
 {
-  p_tube->Draw();
+  tube->Draw();
 }

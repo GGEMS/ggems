@@ -54,11 +54,9 @@ namespace GGEMSUnits
 
   __constant GGdouble KILOMETER = 1000.*1000.*1.0;
   __constant GGdouble KILOMETER2 = 1000.*1000.*1.0*1000.*1000.*1.0;
-  __constant GGdouble KILOMETER3 =
-    1000.*1000.*1.0*1000.*1000.*1.0*1000.*1000.*1.0;
+  __constant GGdouble KILOMETER3 = 1000.*1000.*1.0*1000.*1000.*1.0*1000.*1000.*1.0;
 
-  __constant GGdouble PARSEC = 96939420213600000*1000.*1.0
-    /3.141592653589793238463;
+  __constant GGdouble PARSEC = 96939420213600000*1000.*1.0/3.141592653589793238463;
 
   __constant GGdouble MICROMETER = 1.e-6 *1000.*1.0;
   __constant GGdouble NANOMETER = 1.e-9 *1000.*1.0;
@@ -146,21 +144,14 @@ namespace GGEMSUnits
   __constant GGdouble PeV = 1.e+9*1.;
 
   // Mass [E][T^2][L^-2]
-  __constant GGdouble KILOGRAM = 1.e-6*1./1.602176487e-19*1.e+9 *1.*1.e+9 *1.
-    /(1000.*1.0*1000.*1.0);
-  __constant GGdouble GRAM = 1.e-3*(1.e-6*1./1.602176487e-19*1.e+9 *1.*1.e+9*1.
-    /(1000.*1.0*1000.*1.0));
-  __constant GGdouble MILLIGRAM =
-    1.e-3*1.e-3*(1.e-6*1./1.602176487e-19*1.e+9 *1.*1.e+9 *1.
-    /(1000.*1.0*1000.*1.0));
+  __constant GGdouble KILOGRAM = 1.e-6*1./1.602176487e-19*1.e+9 *1.*1.e+9 *1./(1000.*1.0*1000.*1.0);
+  __constant GGdouble GRAM = 1.e-3*(1.e-6*1./1.602176487e-19*1.e+9 *1.*1.e+9*1./(1000.*1.0*1000.*1.0));
+  __constant GGdouble MILLIGRAM = 1.e-3*1.e-3*(1.e-6*1./1.602176487e-19*1.e+9 *1.*1.e+9 *1./(1000.*1.0*1000.*1.0));
 
   // Symbols definitions
-  __constant GGdouble kg = 1.e-6*1./1.602176487e-19*1.e+9 *1.*1.e+9 *1.
-    /(1000.*1.0*1000.*1.0);
-  __constant GGdouble g = 1.e-3*(1.e-6*1./1.602176487e-19*1.e+9 *1.*1.e+9 *1.
-    /(1000.*1.0*1000.*1.0));
-  __constant GGdouble mg = 1.e-3*1.e-3*(1.e-6*1./1.602176487e-19*1.e+9
-    *1.*1.e+9 *1./(1000.*1.0*1000.*1.0));
+  __constant GGdouble kg = 1.e-6*1./1.602176487e-19*1.e+9 *1.*1.e+9 *1./(1000.*1.0*1000.*1.0);
+  __constant GGdouble g = 1.e-3*(1.e-6*1./1.602176487e-19*1.e+9 *1.*1.e+9 *1./(1000.*1.0*1000.*1.0));
+  __constant GGdouble mg = 1.e-3*1.e-3*(1.e-6*1./1.602176487e-19*1.e+9*1.*1.e+9 *1./(1000.*1.0*1000.*1.0));
 
   // Power [E][T^-1]
   __constant GGdouble WATT = 1.e-6*1./1.602176487e-19/(1.e+9 *1.);// watt = 6.24150 e+3 * MeV/ns
@@ -169,12 +160,9 @@ namespace GGEMSUnits
   __constant GGdouble NEWTON = 1.e-6*1./1.602176487e-19/(1000.*1.0);// newton = 6.24150 e+9 * MeV/mm
 
   // Pressure [E][L^-3]
-  __constant GGdouble PASCAL = (1.e-6*1./1.602176487e-19/(1000.*1.0))
-    /(1000.*1.0*1000.*1.0);   // pascal = 6.24150 e+3 * MeV/mm3
-  __constant GGdouble BAR = 100000*((1.e-6*1./1.602176487e-19/(1000.*1.0))
-    /(1000.*1.0*1000.*1.0)); // bar    = 6.24150 e+8 * MeV/mm3
-  __constant GGdouble ATMOSPHERE = 101325*((1.e-6*1./1.602176487e-19
-    /(1000.*1.0))/(1000.*1.0*1000.*1.0)); // atm    = 6.32420 e+8 * MeV/mm3
+  __constant GGdouble PASCAL = (1.e-6*1./1.602176487e-19/(1000.*1.0))/(1000.*1.0*1000.*1.0);   // pascal = 6.24150 e+3 * MeV/mm3
+  __constant GGdouble BAR = 100000*((1.e-6*1./1.602176487e-19/(1000.*1.0))/(1000.*1.0*1000.*1.0)); // bar    = 6.24150 e+8 * MeV/mm3
+  __constant GGdouble ATMOSPHERE = 101325*((1.e-6*1./1.602176487e-19/(1000.*1.0))/(1000.*1.0*1000.*1.0)); // atm    = 6.32420 e+8 * MeV/mm3
 
   // Electric current [Q][T^-1]
   __constant GGdouble AMPERE = (1./1.602176487e-19)/(1.e+9 *1.); // ampere = 6.24150 e+9 * eplus/ns
@@ -188,35 +176,26 @@ namespace GGEMSUnits
   __constant GGdouble VOLT = 1.e-6*((1.)/(1.));
 
   // Electric resistance [E][T][Q^-2]
-  __constant GGdouble OHM = (1.e-6*((1.)/(1.)))/((1./1.602176487e-19)
-    /(1.e+9 *1.));// ohm = 1.60217e-16*(MeV/eplus)/(eplus/ns)
+  __constant GGdouble OHM = (1.e-6*((1.)/(1.)))/((1./1.602176487e-19)/(1.e+9 *1.));// ohm = 1.60217e-16*(MeV/eplus)/(eplus/ns)
 
   // Electric capacitance [Q^2][E^-1]
   __constant GGdouble FARAD = (1./1.602176487e-19)/(1.e-6*((1.)/(1.)));// farad = 6.24150e+24 * eplus/Megavolt
-  __constant GGdouble MILLIFARAD = 1.e-3*((1./1.602176487e-19)/(1.e-6*((1.)
-    /(1.))));
-  __constant GGdouble MICROFARAD = 1.e-6*((1./1.602176487e-19)/(1.e-6*((1.)
-    /(1.))));
-  __constant GGdouble NANOFARAD = 1.e-9*((1./1.602176487e-19)/(1.e-6*((1.)
-    /(1.))));
-  __constant GGdouble PICOFARAD = 1.e-12*((1./1.602176487e-19)/(1.e-6*((1.)
-    /(1.))));
+  __constant GGdouble MILLIFARAD = 1.e-3*((1./1.602176487e-19)/(1.e-6*((1.)/(1.))));
+  __constant GGdouble MICROFARAD = 1.e-6*((1./1.602176487e-19)/(1.e-6*((1.)/(1.))));
+  __constant GGdouble NANOFARAD = 1.e-9*((1./1.602176487e-19)/(1.e-6*((1.)/(1.))));
+  __constant GGdouble PICOFARAD = 1.e-12*((1./1.602176487e-19)/(1.e-6*((1.)/(1.))));
 
   // Magnetic Flux [T][E][Q^-1]
   __constant GGdouble WEBER = (1.e-6*((1.)/(1.)))*(1.e+9 *1.);// weber = 1000*megavolt*ns
 
   // Magnetic Field [T][E][Q^-1][L^-2]
-  __constant GGdouble TESLA = (1.e-6*((1.)/(1.)))*(1.e+9 *1.)
-    /(1000.*1.0*1000.*1.0);// tesla =0.001*megavolt*ns/mm2
+  __constant GGdouble TESLA = (1.e-6*((1.)/(1.)))*(1.e+9 *1.)/(1000.*1.0*1000.*1.0);// tesla =0.001*megavolt*ns/mm2
 
-  __constant GGdouble GAUSS = 1.e-4*((1.e-6*((1.)/(1.)))*(1.e+9 *1.)
-    /(1000.*1.0*1000.*1.0));
-  __constant GGdouble KILOGAUSS = 1.e-1*((1.e-6*((1.)/(1.)))*(1.e+9 *1.)
-    /(1000.*1.0*1000.*1.0));
+  __constant GGdouble GAUSS = 1.e-4*((1.e-6*((1.)/(1.)))*(1.e+9 *1.)/(1000.*1.0*1000.*1.0));
+  __constant GGdouble KILOGAUSS = 1.e-1*((1.e-6*((1.)/(1.)))*(1.e+9 *1.)/(1000.*1.0*1000.*1.0));
 
   // Inductance [T^2][E][Q^-2]
-  __constant GGdouble HENRY = ((1.e-6*((1.)/(1.)))*(1.e+9 *1.))
-    /((1./1.602176487e-19)/(1.e+9 *1.));// henry = 1.60217e-7*MeV*(ns/eplus)**2
+  __constant GGdouble HENRY = ((1.e-6*((1.)/(1.)))*(1.e+9 *1.))/((1./1.602176487e-19)/(1.e+9 *1.));// henry = 1.60217e-7*MeV*(ns/eplus)**2
 
   // Temperature
   __constant GGdouble KELVIN = 1.;
@@ -244,14 +223,10 @@ namespace GGEMSUnits
   __constant GGdouble uCi = (1.e-6*(3.7e+10 * (1./(1.e+9 *1.))));
 
   // Absorbed dose [L^2][T^-2]
-  __constant GGdouble GRAY = (1.e-6*1./1.602176487e-19)/(1.e-6*1.
-    /1.602176487e-19*1.e+9 *1.*1.e+9 *1./(1000.*1.0*1000.*1.0));
-  __constant GGdouble KILOGRAY = 1.e+3*((1.e-6*1./1.602176487e-19)
-    /(1.e-6*1./1.602176487e-19*1.e+9 *1.*1.e+9 *1./(1000.*1.0*1000.*1.0)));
-  __constant GGdouble MILLIGRAY = 1.e-3*((1.e-6*1./1.602176487e-19)
-    /(1.e-6*1./1.602176487e-19*1.e+9 *1.*1.e+9 *1./(1000.*1.0*1000.*1.0)));
-  __constant GGdouble MICROGRAY = 1.e-6*((1.e-6*1./1.602176487e-19)
-    /(1.e-6*1./1.602176487e-19*1.e+9*1.*1.e+9 *1./(1000.*1.0*1000.*1.0)));
+  __constant GGdouble GRAY = (1.e-6*1./1.602176487e-19)/(1.e-6*1./1.602176487e-19*1.e+9 *1.*1.e+9 *1./(1000.*1.0*1000.*1.0));
+  __constant GGdouble KILOGRAY = 1.e+3*((1.e-6*1./1.602176487e-19)/(1.e-6*1./1.602176487e-19*1.e+9 *1.*1.e+9 *1./(1000.*1.0*1000.*1.0)));
+  __constant GGdouble MILLIGRAY = 1.e-3*((1.e-6*1./1.602176487e-19)/(1.e-6*1./1.602176487e-19*1.e+9 *1.*1.e+9 *1./(1000.*1.0*1000.*1.0)));
+  __constant GGdouble MICROGRAY = 1.e-6*((1.e-6*1./1.602176487e-19)/(1.e-6*1./1.602176487e-19*1.e+9*1.*1.e+9 *1./(1000.*1.0*1000.*1.0)));
 
   // Luminous intensity [I]
   __constant GGdouble CANDELA = 1.;

@@ -26,53 +26,47 @@
   \class GGEMSPhantomNavigator
   \brief GGEMS mother class for phantom navigation
 */
-class GGEMS_EXPORT GGEMSPhantomNavigator
+class GGEMS_EXPORT GGEMSPhantomNavigator : public std::enable_shared_from_this<GGEMSPhantomNavigator>
 {
   public:
     /*!
       \brief GGEMSPhantomNavigator constructor
     */
-    GGEMSPhantomNavigator(GGEMSPhantomNavigator* p_phantom_navigator);
+    explicit GGEMSPhantomNavigator(std::shared_ptr<GGEMSPhantomNavigator> phantom_navigator);
 
     /*!
       \brief GGEMSPhantomNavigator destructor
     */
     virtual ~GGEMSPhantomNavigator(void);
 
-  public:
     /*!
       \fn GGEMSPhantomNavigator(GGEMSPhantomNavigator const& phantom_navigator) = delete
       \param phantom_navigator - reference on the GGEMS phantom navigator
       \brief Avoid copy by reference
     */
-    GGEMSPhantomNavigator(GGEMSPhantomNavigator const& phantom_navigator)
-      = delete;
+    GGEMSPhantomNavigator(GGEMSPhantomNavigator const& phantom_navigator) = delete;
 
     /*!
       \fn GGEMSPhantomNavigator& operator=(GGEMSPhantomNavigator const& phantom_navigator) = delete
       \param phantom_navigator - reference on the GGEMS phantom navigator
       \brief Avoid assignement by reference
     */
-    GGEMSPhantomNavigator& operator=(
-      GGEMSPhantomNavigator const& phantom_navigator) = delete;
+    GGEMSPhantomNavigator& operator=(GGEMSPhantomNavigator const& phantom_navigator) = delete;
 
     /*!
       \fn GGEMSPhantomNavigator(GGEMSPhantomNavigator const&& phantom_navigator) = delete
       \param phantom_navigator - rvalue reference on the GGEMS phantom navigator
       \brief Avoid copy by rvalue reference
     */
-    GGEMSPhantomNavigator(GGEMSPhantomNavigator const&& phantom_navigator)
-      = delete;
+    GGEMSPhantomNavigator(GGEMSPhantomNavigator const&& phantom_navigator) = delete;
 
     /*!
       \fn GGEMSPhantomNavigator& operator=(GGEMSPhantomNavigator const&& phantom_navigator) = delete
       \param phantom_navigator - rvalue reference on the GGEMS phantom navigator
       \brief Avoid copy by rvalue reference
     */
-    GGEMSPhantomNavigator& operator=(
-      GGEMSPhantomNavigator const&& phantom_navigator) = delete;
+    GGEMSPhantomNavigator& operator=(GGEMSPhantomNavigator const&& phantom_navigator) = delete;
 
-  public:
     /*!
       \fn void SetPhantomName(char const* phantom_navigator_name)
       \param phantom_navigator_name - name of the navigator
@@ -100,8 +94,7 @@ class GGEMS_EXPORT GGEMSPhantomNavigator
       \param unit - unit of the distance
       \brief Set the geometry tolerance in distance
     */
-    void SetGeometryTolerance(GGdouble const& distance,
-      char const* unit = "mm");
+    void SetGeometryTolerance(GGdouble const& distance, char const* unit = "mm");
 
   public:
     /*!

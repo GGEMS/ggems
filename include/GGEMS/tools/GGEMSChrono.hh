@@ -41,8 +41,7 @@ namespace GGEMSChrono
     \brief Print the execution time
     \return no value is returned
   */
-  void GGEMS_EXPORT DisplayTime(DurationNano const& duration,
-    std::string const& displayed_text);
+  void GGEMS_EXPORT DisplayTime(DurationNano const& duration, std::string const& displayed_text);
 
   /*!
     \fn inline ChronoTime Now(void)
@@ -54,10 +53,7 @@ namespace GGEMSChrono
     \fn inline DurationNano Zero(void)
     \brief Initialization at zero nanosecond
   */
-  inline DurationNano Zero(void)
-  {
-    return std::chrono::duration<int64_t,std::nano>::zero();
-  }
+  inline DurationNano Zero(void) {return std::chrono::duration<int64_t,std::nano>::zero();}
 }
 
 #endif // End of GUARD_GGEMS_TOOLS_CHRONO_HH

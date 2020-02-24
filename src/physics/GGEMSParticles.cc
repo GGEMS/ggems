@@ -18,11 +18,10 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 GGEMSParticles::GGEMSParticles(void)
-: p_primary_particles_(nullptr),
+: primary_particles_(nullptr),
   opencl_manager_(GGEMSOpenCLManager::GetInstance())
 {
-  GGcout("GGEMSParticles", "GGEMSParticles", 3)
-    << "Allocation of GGEMSParticles..." << GGendl;
+  GGcout("GGEMSParticles", "GGEMSParticles", 3) << "Allocation of GGEMSParticles..." << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -31,15 +30,7 @@ GGEMSParticles::GGEMSParticles(void)
 
 GGEMSParticles::~GGEMSParticles(void)
 {
-  // Freeing the device buffer
-  if (p_primary_particles_) {
-    opencl_manager_.Deallocate(p_primary_particles_,
-      sizeof(GGEMSPrimaryParticles));
-    p_primary_particles_ = nullptr;
-  }
-
-  GGcout("GGEMSParticles", "~GGEMSParticles", 3)
-    << "Deallocation of GGEMSParticles..." << GGendl;
+  GGcout("GGEMSParticles", "~GGEMSParticles", 3) << "Deallocation of GGEMSParticles..." << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -48,8 +39,7 @@ GGEMSParticles::~GGEMSParticles(void)
 
 void GGEMSParticles::Initialize(void)
 {
-  GGcout("GGEMSParticles", "Initialize", 1)
-    << "Initialization of GGEMSParticles..." << GGendl;
+  GGcout("GGEMSParticles", "Initialize", 1) << "Initialization of GGEMSParticles..." << GGendl;
 
   // Allocation of the PrimaryParticle structure
   AllocatePrimaryParticles();
@@ -61,10 +51,9 @@ void GGEMSParticles::Initialize(void)
 
 void GGEMSParticles::AllocatePrimaryParticles(void)
 {
-  GGcout("GGEMSParticles", "AllocatePrimaryParticles", 1)
-    << "Allocation of primary particles..." << GGendl;
+  GGcout("GGEMSParticles", "AllocatePrimaryParticles", 1) << "Allocation of primary particles..." << GGendl;
 
   // Allocation of memory on OpenCL device
-  p_primary_particles_ = opencl_manager_.Allocate(nullptr,
-    sizeof(GGEMSPrimaryParticles), CL_MEM_READ_WRITE);
+  primary_particles_ = opencl_manager_.Allocate(nullptr, sizeof(GGEMSPrimaryParticles), CL_MEM_READ_WRITE);
+  opencl_manager_.AddRAMMemory(sizeof(GGEMSPrimaryParticles));
 }

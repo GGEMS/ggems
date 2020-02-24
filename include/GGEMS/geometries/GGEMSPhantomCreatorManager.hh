@@ -50,40 +50,34 @@ class GGEMS_EXPORT GGEMSPhantomCreatorManager
       return instance;
     }
 
-  public:
     /*!
       \fn GGEMSPhantomCreatorManager(GGEMSPhantomCreatorManager const& opencl_manager) = delete
       \param opencl_manager - reference on the singleton
       \brief Avoid copy of the singleton by reference
     */
-    GGEMSPhantomCreatorManager(
-      GGEMSPhantomCreatorManager const& phantom_creator_manager) = delete;
+    GGEMSPhantomCreatorManager(GGEMSPhantomCreatorManager const& phantom_creator_manager) = delete;
 
     /*!
       \fn GGEMSPhantomCreatorManager& operator=(GGEMSPhantomCreatorManager const& opencl_manager) = delete
       \param opencl_manager - reference on the singleton
       \brief Avoid assignement of the singleton by reference
     */
-    GGEMSPhantomCreatorManager& operator=(
-      GGEMSPhantomCreatorManager const& phantom_creator_manager) = delete;
+    GGEMSPhantomCreatorManager& operator=(GGEMSPhantomCreatorManager const& phantom_creator_manager) = delete;
 
     /*!
       \fn GGEMSOpenCLManager(GGEMSPhantomCreatorManager const&& opencl_manager) = delete
       \param opencl_manager - rvalue reference on the singleton
       \brief Avoid copy of the singleton by rvalue reference
     */
-    GGEMSPhantomCreatorManager(
-      GGEMSPhantomCreatorManager const&& phantom_creator_manager) = delete;
+    GGEMSPhantomCreatorManager(GGEMSPhantomCreatorManager const&& phantom_creator_manager) = delete;
 
     /*!
       \fn GGEMSOpenCLManager& operator=(GGEMSOpenCLManager const&& opencl_manager) = delete
       \param opencl_manager - rvalue reference on the singleton
       \brief Avoid copy of the singleton by rvalue reference
     */
-    GGEMSPhantomCreatorManager& operator=(
-      GGEMSPhantomCreatorManager const&& phantom_creator_manager) = delete;
+    GGEMSPhantomCreatorManager& operator=(GGEMSPhantomCreatorManager const&& phantom_creator_manager) = delete;
 
-  public:
     /*!
       \fn void SetElementSizes(double const& voxel_width, double const& voxel_height, double const& voxel_depth)
       \param voxel_width - voxel width
@@ -91,8 +85,7 @@ class GGEMS_EXPORT GGEMSPhantomCreatorManager
       \param voxel_depth - voxel depth
       \brief Set the size of the elements for the voxelized phantom
     */
-    void SetElementSizes(GGdouble const& voxel_width,
-      GGdouble const& voxel_height, GGdouble const& voxel_depth);
+    void SetElementSizes(GGdouble const& voxel_width, GGdouble const& voxel_height, GGdouble const& voxel_depth);
 
     /*!
       \fn GGdouble3 GetElementsSizes(void) const
@@ -108,18 +101,14 @@ class GGEMS_EXPORT GGEMSPhantomCreatorManager
       \param phantom_depth - phantom depth
       \brief Set the dimension of the phantom for the voxelized phantom
     */
-    void SetPhantomDimensions(GGuint const& phantom_width,
-      GGuint const& phantom_height, GGuint const& phantom_depth);
+    void SetPhantomDimensions(GGuint const& phantom_width, GGuint const& phantom_height, GGuint const& phantom_depth);
 
     /*!
       \fn GGuint3 GetPhantomDimensions(void) const
       \return a 3d int with the dimenstion of the voxelized phantom
       \brief dimensions of phantom
     */
-    inline GGuint3 GetPhantomDimensions(void) const
-    {
-      return phantom_dimensions_;
-    };
+    inline GGuint3 GetPhantomDimensions(void) const {return phantom_dimensions_;};
 
     /*!
       \fn void SetIsocenterPositions(GGdouble const& iso_pos_x, GGdouble const& iso_pos_y, GGdouble const& iso_pos_z)
@@ -128,8 +117,7 @@ class GGEMS_EXPORT GGEMSPhantomCreatorManager
       \param iso_pos_x - Isocenter position in X
       \brief Set isocenter position of the phantom
     */
-    void SetIsocenterPositions(GGdouble const& iso_pos_x,
-      GGdouble const& iso_pos_y, GGdouble const& iso_pos_z);
+    void SetIsocenterPositions(GGdouble const& iso_pos_x, GGdouble const& iso_pos_y, GGdouble const& iso_pos_z);
 
     /*!
       \fn GGdouble3 GetIsocenterPositions(void) const
@@ -150,10 +138,7 @@ class GGEMS_EXPORT GGEMSPhantomCreatorManager
       \return pointer on OpenCL device storing voxelized phantom
       \brief Return the voxelized phantom on OpenCL device
     */
-    inline cl::Buffer* GetVoxelizedPhantom(void) const
-    {
-      return p_voxelized_phantom_;
-    }
+    inline cl::Buffer* GetVoxelizedPhantom(void) const {return voxelized_phantom_.get();}
 
     /*!
       \fn void SetOutputBasename(char const* output_basename, char const* format)
@@ -196,11 +181,7 @@ class GGEMS_EXPORT GGEMSPhantomCreatorManager
     GGdouble3 isocenter_position_; /*!< Isocenter position of the phantom */
     std::string output_basename_; /*!< Output MHD where is stored the voxelized phantom */
     std::string format_; /*!< Format of the output file */
-
-  private: // OpenCL buffer
-    cl::Buffer* p_voxelized_phantom_; /*!< Voxelized phantom on OpenCL device */
-
-  private:
+    std::shared_ptr<cl::Buffer> voxelized_phantom_; /*!< Voxelized phantom on OpenCL device */
     GGEMSOpenCLManager& opencl_manager_; /*!< Reference to opencl manager singleton */
 };
 
@@ -208,8 +189,7 @@ class GGEMS_EXPORT GGEMSPhantomCreatorManager
   \fn GGEMSPhantomCreatorManager* get_instance_ggems_phantom_creator_manager(void)
   \brief Get the GGEMSOpenCLManager pointer for python user.
 */
-extern "C" GGEMS_EXPORT GGEMSPhantomCreatorManager*
-  get_instance_phantom_creator_manager(void);
+extern "C" GGEMS_EXPORT GGEMSPhantomCreatorManager* get_instance_phantom_creator_manager(void);
 
 /*!
   \fn void set_phantom_dimension_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager, GGuint const phantom_width, GGuint const phantom_height, GGuint const phantom_depth)
@@ -219,10 +199,7 @@ extern "C" GGEMS_EXPORT GGEMSPhantomCreatorManager*
   \param phantom_depth - phantom depth
   \brief Set the dimension of the phantom for the voxelized phantom
 */
-extern "C" GGEMS_EXPORT void set_phantom_dimension_phantom_creator_manager(
-  GGEMSPhantomCreatorManager* phantom_creator_manager,
-  GGuint const phantom_width, GGuint const phantom_height,
-  GGuint const phantom_depth);
+extern "C" GGEMS_EXPORT void set_phantom_dimension_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager, GGuint const phantom_width, GGuint const phantom_height, GGuint const phantom_depth);
 
 /*!
   \fn void set_element_sizes_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager, GGdouble const voxel_width, GGdouble const voxel_height, GGdouble const voxel_depth)
@@ -232,10 +209,7 @@ extern "C" GGEMS_EXPORT void set_phantom_dimension_phantom_creator_manager(
   \param voxel_depth - voxel depth
   \brief Set the size of the elements for the voxelized phantom
 */
-extern "C" GGEMS_EXPORT void set_element_sizes_phantom_creator_manager(
-  GGEMSPhantomCreatorManager* phantom_creator_manager,
-  GGdouble const voxel_width, GGdouble const voxel_height,
-  GGdouble const voxel_depth);
+extern "C" GGEMS_EXPORT void set_element_sizes_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager, GGdouble const voxel_width, GGdouble const voxel_height, GGdouble const voxel_depth);
 
 /*!
   \fn void set_isocenter_positions(GGEMSPhantomCreatorManager* phantom_creator_manager, GGdouble const& iso_pos_x, GGdouble const& iso_pos_y, GGdouble const& iso_pos_z)
@@ -244,10 +218,7 @@ extern "C" GGEMS_EXPORT void set_element_sizes_phantom_creator_manager(
   \param iso_pos_x - Isocenter position in X
   \brief Set isocenter position of the phantom
 */
-extern "C" GGEMS_EXPORT void set_isocenter_positions(
-  GGEMSPhantomCreatorManager* phantom_creator_manager,
-  GGdouble const iso_pos_x, GGdouble const iso_pos_y,
-  GGdouble const iso_pos_z);
+extern "C" GGEMS_EXPORT void set_isocenter_positions(GGEMSPhantomCreatorManager* phantom_creator_manager, GGdouble const iso_pos_x, GGdouble const iso_pos_y, GGdouble const iso_pos_z);
 
 /*!
   \fn void set_output_basename_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager, char const* output_basename)
@@ -255,24 +226,20 @@ extern "C" GGEMS_EXPORT void set_isocenter_positions(
   \param output_MHD_basename - output MHD basename
   \brief Set the basename of MHD output
 */
-extern "C" GGEMS_EXPORT void set_output_basename_phantom_creator_manager(
-  GGEMSPhantomCreatorManager* phantom_creator_manager,
-  char const* output_basename, char const* format);
+extern "C" GGEMS_EXPORT void set_output_basename_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager,char const* output_basename, char const* format);
 
 /*!
   \fn void initialize_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager)
   \param phantom_creator_manager - pointer on the singleton
   \brief Initialize the phantom creator manager
 */
-extern "C" GGEMS_EXPORT void initialize_phantom_creator_manager(
-  GGEMSPhantomCreatorManager* phantom_creator_manager);
+extern "C" GGEMS_EXPORT void initialize_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager);
 
 /*!
   \fn void write_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager)
   \param phantom_creator_manager - pointer on the singleton
   \brief Save the voxelized phantom to raw data in mhd file
 */
-extern "C" GGEMS_EXPORT void write_phantom_creator_manager(
-  GGEMSPhantomCreatorManager* phantom_creator_manager);
+extern "C" GGEMS_EXPORT void write_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager);
 
 #endif // GUARD_GGEMS_GEOMETRY_GGEMSPHANTOMCREATORMANAGER_HH

@@ -16,9 +16,9 @@
 #include "GGEMS/tools/GGEMSTypes.hh"
 
 /*!
-  \fn inline GGuint BinarySearchLeft(GGfloat const key, GGfloat const* p_array, GGuint const size, GGuint const offset = 0, GGuint min = 0)
+  \fn inline GGuint BinarySearchLeft(GGfloat const key, GGfloat const* array, GGuint const size, GGuint const offset = 0, GGuint min = 0)
   \param key - value in p_array to find
-  \param p_array - p_array where is the key value
+  \param array - p_array where is the key value
   \param size - size of p_array, number of elements
   \param offset - apply offset when searching index (optionnal)
   \param min - apply a min index (optionnal)
@@ -26,12 +26,9 @@
   \brief Find the index of the key value in the p_array buffer
 */
 #ifdef OPENCL_COMPILER
-inline GGuint BinarySearchLeft(GGfloat const key,
-  __global GGfloat const* p_array, GGuint const size, GGuint const offset,
-  GGuint min)
+inline GGuint BinarySearchLeft(GGfloat const key, __global GGfloat const* array, GGuint const size, GGuint const offset, GGuint min)
 #else
-inline GGuint BinarySearchLeft(GGfloat const key, GGfloat const* p_array,
-  GGuint const size, GGuint const offset, GGuint min)
+inline GGuint BinarySearchLeft(GGfloat const key, GGfloat const* array, GGuint const size, GGuint const offset, GGuint min)
 #endif
 {
   GGuint max = size - 1, mid = 0; // Max element, and median element
@@ -40,10 +37,10 @@ inline GGuint BinarySearchLeft(GGfloat const key, GGfloat const* p_array,
   while (min < max) {
     // Computing median index
     mid = (min + max) >> 1;
-    if (key == p_array[mid + offset]) {
+    if (key == array[mid + offset]) {
       return mid;
     }
-    else if (key > p_array[mid + offset]) {
+    else if (key > array[mid + offset]) {
       min = mid + 1;
     }
     else {
@@ -68,8 +65,7 @@ inline GGuint BinarySearchLeft(GGfloat const key, GGfloat const* p_array,
   \return the interpolated value
   \brief interpolate the x value between point A and B
 */
-inline GGfloat LinearInterpolation(GGfloat const xa, GGfloat const ya,
-  GGfloat const xb, GGfloat const yb, GGfloat const x)
+inline GGfloat LinearInterpolation(GGfloat const xa, GGfloat const ya, GGfloat const xb, GGfloat const yb, GGfloat const x)
 {
   // Taylor young 1st order
   // if ( xa > x ) return ya;

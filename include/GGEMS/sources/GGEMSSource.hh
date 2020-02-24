@@ -25,13 +25,13 @@ class GGEMSGeometryTransformation;
   \class GGEMSSource
   \brief GGEMS mother class for the source
 */
-class GGEMS_EXPORT GGEMSSource
+class GGEMS_EXPORT GGEMSSource : public std::enable_shared_from_this<GGEMSSource>
 {
   public:
     /*!
       \brief GGEMSSource constructor
     */
-    GGEMSSource(GGEMSSource* p_source);
+    explicit GGEMSSource(std::shared_ptr<GGEMSSource> source);
 
     /*!
       \brief GGEMSSource destructor
@@ -66,8 +66,7 @@ class GGEMS_EXPORT GGEMSSource
       \brief Avoid copy by rvalue reference
     */
     GGEMSSource& operator=(GGEMSSource const&& source) = delete;
-  
-  public:
+
     /*!
       \fn void SetSourceName(char const* source_name)
       \param source_name - name of the source
@@ -83,8 +82,7 @@ class GGEMS_EXPORT GGEMSSource
       \param unit - unit of the distance
       \brief Set the position of the source in the global coordinates
     */
-    void SetPosition(GGfloat const& pos_x, GGfloat const& pos_y,
-      GGfloat const& pos_z, char const* unit = "mm");
+    void SetPosition(GGfloat const& pos_x, GGfloat const& pos_y, GGfloat const& pos_z, char const* unit = "mm");
 
     /*!
       \fn void SetSourceParticleType(char const* particle_type)
@@ -106,10 +104,7 @@ class GGEMS_EXPORT GGEMSSource
       \param m22 - Element 2,2 in the matrix 3x3 for local axis
       \brief Set the local axis element describing the source compared to global axis (center of world)
     */
-    void SetLocalAxis(
-      GGfloat const& m00, GGfloat const& m01, GGfloat const& m02,
-      GGfloat const& m10, GGfloat const& m11, GGfloat const& m12,
-      GGfloat const& m20, GGfloat const& m21, GGfloat const& m22);
+    void SetLocalAxis(GGfloat const& m00, GGfloat const& m01, GGfloat const& m02, GGfloat const& m10, GGfloat const& m11, GGfloat const& m12, GGfloat const& m20, GGfloat const& m21, GGfloat const& m22);
 
     /*!
       \fn void SetRotation(GGfloat const& rx, GGfloat const& ry, GGfloat const& rz)
@@ -119,8 +114,7 @@ class GGEMS_EXPORT GGEMSSource
       \param unit - unit of the angle
       \brief Set the rotation of the source around global axis
     */
-    void SetRotation(GGfloat const& rx, GGfloat const& ry, GGfloat const& rz,
-      char const* unit = "deg");
+    void SetRotation(GGfloat const& rx, GGfloat const& ry, GGfloat const& rz, char const* unit = "deg");
 
     /*!
       \fn void SetNumberOfParticles(GGulong const& number_of_particles)
@@ -134,20 +128,46 @@ class GGEMS_EXPORT GGEMSSource
       \return the number of batch of particle
       \brief method returning the number of particles by batch
     */
-    inline std::size_t GetNumberOfBatchs(void) const
-    {
-      return p_number_of_particles_in_batch_.size();
-    }
+    inline std::size_t GetNumberOfBatchs(void) const {return number_of_particles_in_batch_.size();}
 
     /*!
       \fn inline GGulong GetNumberOfParticlesInBatch(std::size_t const& batch_index)
       \return the number of particle for a specific batch
       \brief method returning the number of particles in a specific batch
     */
-    inline GGulong GetNumberOfParticlesInBatch(std::size_t const& batch_index)
-    {
-      return p_number_of_particles_in_batch_.at(batch_index);
-    }
+    inline GGulong GetNumberOfParticlesInBatch(std::size_t const& batch_index) {return number_of_particles_in_batch_.at(batch_index);}
+
+    /*!
+      \fn void GetPrimaries(GGulong const& number_of particles) = 0
+      \param number_of_particles - number of particles to generate
+      \brief Generate primary particles
+    */
+    virtual void GetPrimaries(GGulong const& number_of_particles) = 0;
+
+    /*!
+      \fn void PrintInfos(void) const = 0
+      \brief Printing infos about the source
+    */
+    virtual void PrintInfos(void) const = 0;
+
+    /*!
+      \fn void CheckParameters(void) const
+      \brief Check mandatory parameters for a source
+    */
+    virtual void CheckParameters(void) const;
+
+    /*!
+      \fn void Initialize(void)
+      \brief Initialize a GGEMS source
+    */
+    virtual void Initialize(void);
+
+  protected:
+    /*!
+      \fn void InitializeKernel(void)
+      \brief Initialize kernel for specific source in OpenCL
+    */
+    virtual void InitializeKernel(void) = 0;
 
   private:
     /*!
@@ -162,51 +182,13 @@ class GGEMS_EXPORT GGEMSSource
     */
     void CheckMemoryForParticles(void) const;
 
-  public: // Pure abstract method
-    /*!
-      \fn void GetPrimaries(GGulong const& number_of particles) = 0
-      \param number_of_particles - number of particles to generate
-      \brief Generate primary particles
-    */
-    virtual void GetPrimaries(GGulong const& number_of_particles) = 0;
-
-    /*!
-      \fn void PrintInfos(void) const = 0
-      \brief Printing infos about the source
-    */
-    virtual void PrintInfos(void) const = 0;
-
-  protected:
-    /*!
-      \fn void InitializeKernel(void)
-      \brief Initialize kernel for specific source in OpenCL
-    */
-    virtual void InitializeKernel(void) = 0;
-
-  public:
-    /*!
-      \fn void CheckParameters(void) const
-      \brief Check mandatory parameters for a source
-    */
-    virtual void CheckParameters(void) const;
-
-    /*!
-      \fn void Initialize(void)
-      \brief Initialize a GGEMS source
-    */
-    virtual void Initialize(void);
-
   protected:
     std::string source_name_; /*!< Name of the source */
     GGulong number_of_particles_; /*!< Number of particles */
-    std::vector<unsigned long long> p_number_of_particles_in_batch_; /*!< Number of particles in batch */
+    std::vector<unsigned long long> number_of_particles_in_batch_; /*!< Number of particles in batch */
     GGuchar particle_type_; /*!< Type of particle: photon, electron or positron */
-    GGEMSGeometryTransformation* p_geometry_transformation_; /*!< Pointer storing the geometry transformation */
-
-  protected: // kernel generating primaries
-    cl::Kernel* p_kernel_get_primaries_; /*!< Kernel generating primaries on OpenCL device */
-
-  protected:
+    std::unique_ptr<GGEMSGeometryTransformation> geometry_transformation_; /*!< Pointer storing the geometry transformation */
+    std::shared_ptr<cl::Kernel> kernel_get_primaries_; /*!< Kernel generating primaries on OpenCL device */
     GGEMSOpenCLManager& opencl_manager_; /*!< Reference to opencl manager singleton */
 };
 

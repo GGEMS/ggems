@@ -76,11 +76,11 @@ class GGEMS_EXPORT GGEMSMHDImage
     void SetBaseName(std::string const& basename);
 
     /*!
-      \fn void Write(cl::Buffer* p_image) const
-      \param p_image - image to write on output file
+      \fn void Write(std::shared_ptr<cl::Buffer> image) const
+      \param image - image to write on output file
       \brief Write mhd header/raw file
     */
-    void Write(cl::Buffer* p_image) const;
+    void Write(std::shared_ptr<cl::Buffer> image) const;
 
     /*!
       \fn void SetElementSizes(GGdouble3 const& element_sizes)

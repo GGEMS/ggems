@@ -23,8 +23,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSPhantomNavigator::GGEMSPhantomNavigator(
-  GGEMSPhantomNavigator* p_phantom_navigator)
+GGEMSPhantomNavigator::GGEMSPhantomNavigator(std::shared_ptr<GGEMSPhantomNavigator> phantom_navigator)
 : phantom_navigator_name_(""),
   phantom_mhd_header_filename_(""),
   range_data_filename_(""),
@@ -34,7 +33,7 @@ GGEMSPhantomNavigator::GGEMSPhantomNavigator(
     << "Allocation of GGEMSPhantomNavigator..." << GGendl;
 
   // Store the phantom navigator in phantom navigator manager
-  GGEMSPhantomNavigatorManager::GetInstance().Store(p_phantom_navigator);
+  GGEMSPhantomNavigatorManager::GetInstance().Store(phantom_navigator);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -43,8 +42,7 @@ GGEMSPhantomNavigator::GGEMSPhantomNavigator(
 
 GGEMSPhantomNavigator::~GGEMSPhantomNavigator(void)
 {
-  GGcout("GGEMSPhantomNavigator", "~GGEMSPhantomNavigator", 3)
-    << "Deallocation of GGEMSPhantomNavigator..." << GGendl;
+  GGcout("GGEMSPhantomNavigator", "~GGEMSPhantomNavigator", 3) << "Deallocation of GGEMSPhantomNavigator..." << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -69,8 +67,7 @@ void GGEMSPhantomNavigator::SetPhantomFile(char const* phantom_filename)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSPhantomNavigator::SetRangeToMaterialFile(
-  char const* range_data_filename)
+void GGEMSPhantomNavigator::SetRangeToMaterialFile(char const* range_data_filename)
 {
   range_data_filename_ = range_data_filename;
 }
@@ -79,8 +76,7 @@ void GGEMSPhantomNavigator::SetRangeToMaterialFile(
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSPhantomNavigator::SetGeometryTolerance(GGdouble const& distance,
-  char const* unit)
+void GGEMSPhantomNavigator::SetGeometryTolerance(GGdouble const& distance, char const* unit)
 {
   geometry_tolerance_ = GGEMSUnits::BestDistanceUnit(distance, unit);
 }
