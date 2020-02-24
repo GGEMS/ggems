@@ -76,17 +76,11 @@ typedef struct PACKED GGfloat44_t
   \param m22 - Element 2,2 in the matrix 3x3 for local axis
   \brief Make a float3x3 with custom values
 */
-inline GGfloat33 MakeFloat33(
-  GGfloat const m00, GGfloat const m01, GGfloat const m02,
-  GGfloat const m10, GGfloat const m11, GGfloat const m12,
-  GGfloat const m20, GGfloat const m21, GGfloat const m22)
+inline GGfloat33 MakeFloat33(GGfloat const m00, GGfloat const m01, GGfloat const m02, GGfloat const m10, GGfloat const m11, GGfloat const m12, GGfloat const m20, GGfloat const m21, GGfloat const m22)
 {
   GGfloat33 tmp;
-  // Row 1
   tmp.m00_ = m00; tmp.m01_ = m01; tmp.m02_ = m02;
-  // Row 2
   tmp.m10_ = m10; tmp.m11_ = m11; tmp.m12_ = m12;
-  // Row 3
   tmp.m20_ = m20; tmp.m21_ = m21; tmp.m22_ = m22;
   return tmp;
 }
@@ -98,11 +92,8 @@ inline GGfloat33 MakeFloat33(
 inline GGfloat33 MakeFloat33Zeros()
 {
   GGfloat33 tmp;
-  // Row 1
   tmp.m00_ = 0.0f; tmp.m01_ = 0.0f; tmp.m02_ = 0.0f;
-  // Row 2
   tmp.m10_ = 0.0f; tmp.m11_ = 0.0f; tmp.m12_ = 0.0f;
-  // Row 3
   tmp.m20_ = 0.0f; tmp.m21_ = 0.0f; tmp.m22_ = 0.0f;
   return tmp;
 }
@@ -127,20 +118,12 @@ inline GGfloat33 MakeFloat33Zeros()
   \param m33 - Element 3,3 in the matrix 4x4 for local axis
   \brief Make a GGfloat44 with custom values
 */
-inline GGfloat44 MakeFloat44(
-  GGfloat const m00, GGfloat const m01, GGfloat const m02, GGfloat const m03,
-  GGfloat const m10, GGfloat const m11, GGfloat const m12, GGfloat const m13,
-  GGfloat const m20, GGfloat const m21, GGfloat const m22, GGfloat const m23,
-  GGfloat const m30, GGfloat const m31, GGfloat const m32, GGfloat const m33)
+inline GGfloat44 MakeFloat44(GGfloat const m00, GGfloat const m01, GGfloat const m02, GGfloat const m03, GGfloat const m10, GGfloat const m11, GGfloat const m12, GGfloat const m13, GGfloat const m20, GGfloat const m21, GGfloat const m22, GGfloat const m23, GGfloat const m30, GGfloat const m31, GGfloat const m32, GGfloat const m33)
 {
   GGfloat44 tmp;
-  // Row 1
   tmp.m00_ = m00; tmp.m01_ = m01; tmp.m02_ = m02; tmp.m03_ = m03;
-  // Row 2
   tmp.m10_ = m10; tmp.m11_ = m11; tmp.m12_ = m12; tmp.m13_ = m13;
-  // Row 3
   tmp.m20_ = m20; tmp.m21_ = m21; tmp.m22_ = m22; tmp.m23_ = m23;
-  // Row 4
   tmp.m30_ = m30; tmp.m31_ = m31; tmp.m32_ = m32; tmp.m33_ = m33;
   return tmp;
 }
@@ -152,13 +135,9 @@ inline GGfloat44 MakeFloat44(
 inline GGfloat44 MakeFloat44Zeros()
 {
   GGfloat44 tmp;
-  // Row 1
   tmp.m00_ = 0.0f; tmp.m01_ = 0.0f; tmp.m02_ = 0.0f; tmp.m03_ = 0.0f;
-  // Row 2
   tmp.m10_ = 0.0f; tmp.m11_ = 0.0f; tmp.m12_ = 0.0f; tmp.m13_ = 0.0f;
-  // Row 3
   tmp.m20_ = 0.0f; tmp.m21_ = 0.0f; tmp.m22_ = 0.0f; tmp.m23_ = 0.0f;
-  // Row 4
   tmp.m30_ = 0.0f; tmp.m31_ = 0.0f; tmp.m32_ = 0.0f; tmp.m33_ = 0.0f;
   return tmp;
 }

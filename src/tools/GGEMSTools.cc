@@ -25,18 +25,15 @@
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSFileStream::CheckInputStream(std::ifstream const& input_stream,
-  std::string const& filename)
+void GGEMSFileStream::CheckInputStream(std::ifstream const& input_stream, std::string const& filename)
 {
   if (!input_stream) {
     std::ostringstream oss(std::ostringstream::out);
     #ifdef _WIN32
     char buffer_error[ 256 ];
-    oss << "Problem reading filename '" << filename << "': "
-        << strerror_s(buffer_error, 256, errno);
+    oss << "Problem reading filename '" << filename << "': " << strerror_s(buffer_error, 256, errno);
     #else
-    oss << "Problem reading filename '" << filename << "': "
-        << strerror(errno);
+    oss << "Problem reading filename '" << filename << "': " << strerror(errno);
     #endif
     throw std::runtime_error(oss.str());
   }
@@ -46,8 +43,7 @@ void GGEMSFileStream::CheckInputStream(std::ifstream const& input_stream,
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSMisc::ThrowException(std::string const& class_name,
-  std::string const& method_name, std::string const& message)
+void GGEMSMisc::ThrowException(std::string const& class_name, std::string const& method_name, std::string const& message)
 {
   std::ostringstream oss(std::ostringstream::out);
   oss << message;

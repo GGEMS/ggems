@@ -7,8 +7,7 @@ __kernel void draw_ggems_tube(
   GGfloat const label_value,
   GGdouble const height,
   GGdouble const radius,
-  __global GGfloat* p_voxelized_phantom
-)
+  __global GGfloat* voxelized_phantom)
 {
   // Getting index of thread
   GGint const kGlobalIndex = get_global_id(0);
@@ -50,7 +49,7 @@ __kernel void draw_ggems_tube(
   // Check if voxel is outside/inside analytical volume
   if (z <= kHalfHeight && z >= -kHalfHeight) {
     if (x * x + y * y <= kR2) {
-      p_voxelized_phantom[kGlobalIndex] = label_value;
+      voxelized_phantom[kGlobalIndex] = label_value;
     }
   }
 }

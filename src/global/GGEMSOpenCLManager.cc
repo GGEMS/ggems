@@ -241,16 +241,13 @@ void GGEMSOpenCLManager::Clean(void)
 
 void GGEMSOpenCLManager::PrintPlatformInfos(void) const
 {
-  GGcout("GGEMSOpenCLManager", "PrintPlatformInfos", 3)
-    << "Printing infos about OpenCL platform(s)..." << GGendl;
+  GGcout("GGEMSOpenCLManager", "PrintPlatformInfos", 3) << "Printing infos about OpenCL platform(s)..." << GGendl;
 
   // Loop over the platforms
   for (std::size_t i = 0; i < platforms_.size(); ++i) {
     GGcout("GGEMSOpenCLManager", "PrintPlatformInfos", 0) << GGendl;
-    GGcout("GGEMSOpenCLManager", "PrintPlatformInfos", 0) << "#### PLATFORM: "
-      << i << " ####" << GGendl;
-    GGcout("GGEMSOpenCLManager", "PrintPlatformInfos", 0) << "+ Vendor: "
-      << platform_vendor_[i] << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintPlatformInfos", 0) << "#### PLATFORM: " << i << " ####" << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintPlatformInfos", 0) << "+ Vendor: " << platform_vendor_[i] << GGendl;
   }
   GGcout("GGEMSOpenCLManager", "PrintPlatformInfos", 0) << GGendl;
 }
@@ -501,7 +498,7 @@ void GGEMSOpenCLManager::CreateEvent(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-cl::Kernel* GGEMSOpenCLManager::CompileKernel(std::string const& kernel_filename, std::string const& kernel_name, char* const p_custom_options, char* const p_additional_options)
+std::shared_ptr<cl::Kernel> GGEMSOpenCLManager::CompileKernel(std::string const& kernel_filename, std::string const& kernel_name, char* const p_custom_options, char* const p_additional_options)
 {
   GGcout("GGEMSOpenCLManager","CompileKernel", 3) << "Compiling a kernel on OpenCL activated context..." << GGendl;
 
@@ -579,7 +576,7 @@ cl::Kernel* GGEMSOpenCLManager::CompileKernel(std::string const& kernel_filename
   kernels_.emplace_back(new cl::Kernel(program, kernel_name.c_str(), &build_status));
   CheckOpenCLError(build_status, "GGEMSOpenCLManager", "CompileKernel");
 
-  return kernels_.back().get();
+  return kernels_.back();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -743,42 +740,23 @@ void GGEMSOpenCLManager::PrintContextInfos(void) const
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-cl::Buffer* GGEMSOpenCLManager::Allocate(void* p_host_ptr, std::size_t size, cl_mem_flags flags)
+std::unique_ptr<cl::Buffer> GGEMSOpenCLManager::Allocate(void* host_ptr, std::size_t size, cl_mem_flags flags)
 {
   GGcout("GGEMSOpenCLManager","Allocate", 3) << "Allocating memory on OpenCL device memory..." << GGendl;
 
-  ///////////////
-  // Checking if enough memory on device!!!
-  ///////////////////
-  // Checking memory usage
   CheckRAMMemory(size);
 
   GGint error = 0;
-  cl::Buffer* p_buffer = new cl::Buffer(*(context_act_.get()), flags, size, p_host_ptr, &error);
+  std::unique_ptr<cl::Buffer> buffer(new cl::Buffer(*(context_act_.get()), flags, size, host_ptr, &error));
   CheckOpenCLError(error, "GGEMSOpenCLManager", "Allocate");
-  AddRAMMemory(size);
-  return p_buffer;
+  return buffer;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSOpenCLManager::Deallocate(cl::Buffer* p_buffer, std::size_t size)
-{
-  GGcout("GGEMSOpenCLManager","Deallocate", 3) << "Deallocating memory on OpenCL device memory..." << GGendl;
-
-  SubRAMMemory(size);
-  delete p_buffer;
-  p_buffer = nullptr;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void GGEMSOpenCLManager::CheckOpenCLError(GGint const& error,
-  std::string const& class_name, std::string const& method_name) const
+void GGEMSOpenCLManager::CheckOpenCLError(GGint const& error, std::string const& class_name, std::string const& method_name) const
 {
   if (error != CL_SUCCESS) GGEMSMisc::ThrowException(class_name, method_name, ErrorType(error));
 }
@@ -1173,33 +1151,32 @@ GGEMSOpenCLManager* get_instance_ggems_opencl_manager(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void print_infos_opencl_manager(GGEMSOpenCLManager* p_opencl_manager)
+void print_infos_opencl_manager(GGEMSOpenCLManager* opencl_manager)
 {
-  p_opencl_manager->PrintPlatformInfos();
-  p_opencl_manager->PrintDeviceInfos();
-  p_opencl_manager->PrintBuildOptions();
-  p_opencl_manager->PrintContextInfos();
-  p_opencl_manager->PrintCommandQueueInfos();
-  p_opencl_manager->PrintActivatedContextInfos();
+  opencl_manager->PrintPlatformInfos();
+  opencl_manager->PrintDeviceInfos();
+  opencl_manager->PrintBuildOptions();
+  opencl_manager->PrintContextInfos();
+  opencl_manager->PrintCommandQueueInfos();
+  opencl_manager->PrintActivatedContextInfos();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void print_RAM_ggems_opencl_manager(GGEMSOpenCLManager* p_opencl_manager)
+void print_RAM_ggems_opencl_manager(GGEMSOpenCLManager* opencl_manager)
 {
-  p_opencl_manager->PrintRAMStatus();
+  opencl_manager->PrintRAMStatus();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_context_index_ggems_opencl_manager(
-  GGEMSOpenCLManager* p_opencl_manager, GGuint const context_index)
+void set_context_index_ggems_opencl_manager(GGEMSOpenCLManager* opencl_manager, GGuint const context_index)
 {
-  p_opencl_manager->ContextToActivate(context_index);
+  opencl_manager->ContextToActivate(context_index);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -78,8 +78,7 @@ namespace GGEMSTextReader
     \param comment - special comment caracter to skip
     \brief skip a special line beginning by a comment caracter
   */
-  void SkipComment(std::ifstream& stream, std::string& line,
-    char const comment = '#');
+  void SkipComment(std::ifstream& stream, std::string& line, char const comment = '#');
 
   /*!
     \fn bool IsBlankLine(std::string const& line)

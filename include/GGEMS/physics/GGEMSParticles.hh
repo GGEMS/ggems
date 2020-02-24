@@ -76,10 +76,7 @@ class GGEMS_EXPORT GGEMSParticles
       \return pointer to OpenCL buffer storing particles
       \brief return the pointer to OpenCL buffer storing particles
     */
-    inline cl::Buffer* GetPrimaryParticles() const
-    {
-      return p_primary_particles_;
-    };
+    inline cl::Buffer* GetPrimaryParticles() const {return primary_particles_.get();};
 
   private:
     /*!
@@ -89,7 +86,7 @@ class GGEMS_EXPORT GGEMSParticles
     void AllocatePrimaryParticles(void);
 
   private:
-    cl::Buffer* p_primary_particles_; /*!< Pointer storing info about primary particles in batch on OpenCL device */
+    std::unique_ptr<cl::Buffer> primary_particles_; /*!< Pointer storing info about primary particles in batch on OpenCL device */
     GGEMSOpenCLManager& opencl_manager_; /*!< Reference to OpenCL manager singleton */
 };
 

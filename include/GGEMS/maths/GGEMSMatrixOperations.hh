@@ -110,30 +110,22 @@ inline GGfloat3 GGfloat3Sub(GGfloat3 const u, GGfloat3 const v)
   \brief Compute the multiplication of matrix 4x4 and a point 3x1
 */
 #ifdef OPENCL_COMPILER
-inline GGfloat3 GGfloat44MultGGfloat3(__global GGfloat44 const* matrix,
-  GGfloat3 const point)
+inline GGfloat3 GGfloat44MultGGfloat3(__global GGfloat44 const* matrix, GGfloat3 const point)
 #else
-inline GGfloat3 GGfloat44MultGGfloat3(GGfloat44 const* matrix,
-  GGfloat3 const point)
+inline GGfloat3 GGfloat44MultGGfloat3(GGfloat44 const* matrix, GGfloat3 const point)
 #endif
 {
   #ifdef OPENCL_COMPILER
   GGfloat3 vector = {
-    matrix->m00_*point.x + matrix->m01_*point.y + matrix->m02_*point.z
-      + matrix->m03_*1.0f,
-    matrix->m10_*point.x + matrix->m11_*point.y + matrix->m12_*point.z
-      + matrix->m13_*1.0f,
-    matrix->m20_*point.x + matrix->m21_*point.y + matrix->m22_*point.z
-      + matrix->m23_*1.0f
+    matrix->m00_*point.x + matrix->m01_*point.y + matrix->m02_*point.z + matrix->m03_*1.0f,
+    matrix->m10_*point.x + matrix->m11_*point.y + matrix->m12_*point.z + matrix->m13_*1.0f,
+    matrix->m20_*point.x + matrix->m21_*point.y + matrix->m22_*point.z + matrix->m23_*1.0f
   };
   #else
   GGfloat3 vector = {
-    {matrix->m00_*point.s[0] + matrix->m01_*point.s[1] + matrix->m02_*point.s[2]
-      + matrix->m03_*1.0f,
-    matrix->m10_*point.s[0] + matrix->m11_*point.s[1] + matrix->m12_*point.s[2]
-      + matrix->m13_*1.0f,
-    matrix->m20_*point.s[0] + matrix->m21_*point.s[1] + matrix->m22_*point.s[2]
-      + matrix->m23_*1.0f}
+    {matrix->m00_*point.s[0] + matrix->m01_*point.s[1] + matrix->m02_*point.s[2] + matrix->m03_*1.0f,
+    matrix->m10_*point.s[0] + matrix->m11_*point.s[1] + matrix->m12_*point.s[2] + matrix->m13_*1.0f,
+    matrix->m20_*point.s[0] + matrix->m21_*point.s[1] + matrix->m22_*point.s[2] + matrix->m23_*1.0f}
   };
   #endif
 
@@ -148,11 +140,9 @@ inline GGfloat3 GGfloat44MultGGfloat3(GGfloat44 const* matrix,
  \brief Transform a 3D point from local to global frame
 */
 #ifdef OPENCL_COMPILER
-inline GGfloat3 LocalToGlobalPosition(__global GGfloat44 const* matrix,
-  GGfloat3 const point)
+inline GGfloat3 LocalToGlobalPosition(__global GGfloat44 const* matrix, GGfloat3 const point)
 #else
-inline GGfloat3 LocalToGlobalPosition(GGfloat44 const* matrix,
-  GGfloat3 const point)
+inline GGfloat3 LocalToGlobalPosition(GGfloat44 const* matrix, GGfloat3 const point)
 #endif
 {
   return GGfloat44MultGGfloat3(matrix, point);

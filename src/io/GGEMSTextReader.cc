@@ -39,10 +39,7 @@ GGdouble GGEMSMaterialReader::ReadMaterialDensity(std::string const& line)
   // Get the position of the first and last number of density
   std::size_t first_pos = line.find_first_of("0123456789", line.find("d="));
   std::size_t last_pos = line.find_first_not_of("0123456789.", first_pos);
-  std::string density_str = line.substr(
-    first_pos,
-    last_pos != std::string::npos ? last_pos - first_pos : last_pos
-  );
+  std::string density_str = line.substr(first_pos, last_pos != std::string::npos ? last_pos - first_pos : last_pos);
 
   // Convert string to double
   GGdouble density = 0.0;
@@ -51,10 +48,7 @@ GGdouble GGEMSMaterialReader::ReadMaterialDensity(std::string const& line)
   // Check units of density and convert
   first_pos = last_pos;
   last_pos = line.find_first_of(";");
-  std::string unit_str = line.substr(
-    first_pos,
-    last_pos != std::string::npos ? last_pos - first_pos : last_pos
-  );
+  std::string unit_str = line.substr(first_pos, last_pos != std::string::npos ? last_pos - first_pos : last_pos);
 
   if (unit_str == "g/cm3") {
     density *= GGEMSUnits::g / GGEMSUnits::cm3;
@@ -63,8 +57,7 @@ GGdouble GGEMSMaterialReader::ReadMaterialDensity(std::string const& line)
     density *= GGEMSUnits::mg / GGEMSUnits::cm3;
   }
   else {
-    GGEMSMisc::ThrowException("GGEMSMaterialReader", "ReadMaterialDensity",
-      "Unknown density unit in material database file!!!");
+    GGEMSMisc::ThrowException("GGEMSMaterialReader", "ReadMaterialDensity", "Unknown density unit in material database file!!!");
   }
 
   return density;
@@ -74,16 +67,12 @@ GGdouble GGEMSMaterialReader::ReadMaterialDensity(std::string const& line)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGushort GGEMSMaterialReader::ReadMaterialNumberOfElements(
-  std::string const& line)
+GGushort GGEMSMaterialReader::ReadMaterialNumberOfElements(std::string const& line)
 {
   // Get the position of the first and last number of density
   std::size_t first_pos = line.find_first_of("0123456789", line.find("n="));
   std::size_t last_pos = line.find_last_of(";");
-  std::string element_str = line.substr(
-    first_pos,
-    last_pos != std::string::npos ? last_pos - first_pos : last_pos
-  );
+  std::string element_str = line.substr(first_pos,last_pos != std::string::npos ? last_pos - first_pos : last_pos);
 
   // Convert string to unsigned char
   GGushort number_elements = 0;
@@ -101,10 +90,7 @@ std::string GGEMSMaterialReader::ReadMaterialElementName(
 {
   std::size_t first_pos = line.find("name=")+5;
   std::size_t last_pos = line.find_first_of(";");
-  std::string element_name_str = line.substr(
-    first_pos,
-    last_pos != std::string::npos ? last_pos - first_pos : last_pos
-  );
+  std::string element_name_str = line.substr(first_pos, last_pos != std::string::npos ? last_pos - first_pos : last_pos);
 
   return element_name_str;
 }
@@ -113,15 +99,11 @@ std::string GGEMSMaterialReader::ReadMaterialElementName(
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGdouble GGEMSMaterialReader::ReadMaterialElementFraction(
-  std::string const& line)
+GGdouble GGEMSMaterialReader::ReadMaterialElementFraction(std::string const& line)
 {
   std::size_t first_pos = line.find_first_of("0123456789", line.find("f="));
   std::size_t last_pos = line.find_last_of(";");
-  std::string fraction_str = line.substr(
-    first_pos,
-    last_pos != std::string::npos ? last_pos - first_pos : last_pos
-  );
+  std::string fraction_str = line.substr(first_pos, last_pos != std::string::npos ? last_pos - first_pos : last_pos);
 
   // Convert string to double
   GGdouble fraction = 0.0;
@@ -134,8 +116,7 @@ GGdouble GGEMSMaterialReader::ReadMaterialElementFraction(
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSTextReader::SkipComment(std::ifstream& stream, std::string& line,
-  char const comment)
+void GGEMSTextReader::SkipComment(std::ifstream& stream, std::string& line, char const comment)
 {
   // If first caracter = comment -> it's a comment and get the next line
   while (1) {

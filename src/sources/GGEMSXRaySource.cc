@@ -25,27 +25,22 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 GGEMSXRaySource::GGEMSXRaySource(void)
-: GGEMSSource(this),
+: GGEMSSource(shared_from_this()),
   beam_aperture_(std::numeric_limits<float>::min()),
   is_monoenergy_mode_(false),
   monoenergy_(-1.0f),
   energy_spectrum_filename_(""),
   number_of_energy_bins_(0),
-  p_energy_spectrum_(nullptr),
-  p_cdf_(nullptr)
+  energy_spectrum_(nullptr),
+  cdf_(nullptr)
 {
-  GGcout("GGEMSXRaySource", "GGEMSXRaySource", 3)
-    << "Allocation of GGEMSXRaySource..." << GGendl;
+  GGcout("GGEMSXRaySource", "GGEMSXRaySource", 3) << "Allocation of GGEMSXRaySource..." << GGendl;
 
   // Initialization of parameters
-  focal_spot_size_ = MakeFloat3(
-    std::numeric_limits<float>::min(),
-    std::numeric_limits<float>::min(),
-    std::numeric_limits<float>::min()
-  );
+  focal_spot_size_ = MakeFloat3(std::numeric_limits<float>::min(), std::numeric_limits<float>::min(), std::numeric_limits<float>::min());
 
   // Initialization of local axis
-  p_geometry_transformation_->SetAxisTransformation(
+  geometry_transformation_->SetAxisTransformation(
     0.0f, 0.0f, -1.0f,
     0.0f, 1.0f, 0.0f,
     1.0f, 0.0f, 0.0f
@@ -58,21 +53,7 @@ GGEMSXRaySource::GGEMSXRaySource(void)
 
 GGEMSXRaySource::~GGEMSXRaySource(void)
 {
-  // Freeing the device buffers
-  if (p_energy_spectrum_) {
-    opencl_manager_.Deallocate(p_energy_spectrum_,
-      number_of_energy_bins_ * sizeof(GGdouble));
-    p_energy_spectrum_ = nullptr;
-  }
-
-  if (p_cdf_) {
-    opencl_manager_.Deallocate(p_cdf_,
-      number_of_energy_bins_ * sizeof(GGdouble));
-    p_cdf_ = nullptr;
-  }
-
-  GGcout("GGEMSXRaySource", "~GGEMSXRaySource", 3)
-    << "Deallocation of GGEMSXRaySource..." << GGendl;
+  GGcout("GGEMSXRaySource", "~GGEMSXRaySource", 3) << "Deallocation of GGEMSXRaySource..." << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -81,17 +62,14 @@ GGEMSXRaySource::~GGEMSXRaySource(void)
 
 void GGEMSXRaySource::InitializeKernel(void)
 {
-  GGcout("GGEMSXRaySource", "InitializeKernel", 3)
-    << "Initializing kernel..." << GGendl;
+  GGcout("GGEMSXRaySource", "InitializeKernel", 3) << "Initializing kernel..." << GGendl;
 
   // Getting the path to kernel
   std::string const kOpenCLKernelPath = OPENCL_KERNEL_PATH;
-  std::string const kFilename = kOpenCLKernelPath
-    + "/GetPrimariesGGEMSXRaySource.cl";
+  std::string const kFilename = kOpenCLKernelPath + "/GetPrimariesGGEMSXRaySource.cl";
 
   // Compiling the kernel
-  p_kernel_get_primaries_ = opencl_manager_.CompileKernel(kFilename,
-    "get_primaries_ggems_xray_source");
+  kernel_get_primaries_ = opencl_manager_.CompileKernel(kFilename, "get_primaries_ggems_xray_source");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -100,43 +78,37 @@ void GGEMSXRaySource::InitializeKernel(void)
 
 void GGEMSXRaySource::GetPrimaries(GGulong const& number_of_particles)
 {
-  GGcout("GGEMSXRaySource", "GetPrimaries", 3) << "Generating "
-    << number_of_particles << " new particles..." << GGendl;
+  GGcout("GGEMSXRaySource", "GetPrimaries", 3) << "Generating " << number_of_particles << " new particles..." << GGendl;
 
   // Get command queue and event
-  cl::CommandQueue* p_queue = opencl_manager_.GetCommandQueue();
-  cl::Event* p_event = opencl_manager_.GetEvent();
+  cl::CommandQueue* queue = opencl_manager_.GetCommandQueue();
+  cl::Event* event = opencl_manager_.GetEvent();
 
   // Get the OpenCL buffers
   GGEMSSourceManager& p_source_manager = GGEMSSourceManager::GetInstance();
-  cl::Buffer* p_particles =
-    p_source_manager.GetParticles()->GetPrimaryParticles();
-  cl::Buffer* p_random =
-    p_source_manager.GetPseudoRandomGenerator()->GetPseudoRandomNumbers();
-  cl::Buffer* p_matrix_transformation =
-    p_geometry_transformation_->GetTransformationMatrix();
+  cl::Buffer* particles = p_source_manager.GetParticles()->GetPrimaryParticles();
+  cl::Buffer* randoms = p_source_manager.GetPseudoRandomGenerator()->GetPseudoRandomNumbers();
+  cl::Buffer* matrix_transformation = geometry_transformation_->GetTransformationMatrix();
 
   // Set parameters for kernel
-  p_kernel_get_primaries_->setArg(0, *p_particles);
-  p_kernel_get_primaries_->setArg(1, *p_random);
-  p_kernel_get_primaries_->setArg(2, particle_type_);
-  p_kernel_get_primaries_->setArg(3, *p_energy_spectrum_);
-  p_kernel_get_primaries_->setArg(4, *p_cdf_);
-  p_kernel_get_primaries_->setArg(5, number_of_energy_bins_);
-  p_kernel_get_primaries_->setArg(6, beam_aperture_);
-  p_kernel_get_primaries_->setArg(7, focal_spot_size_);
-  p_kernel_get_primaries_->setArg(8, *p_matrix_transformation);
+  kernel_get_primaries_->setArg(0, *particles);
+  kernel_get_primaries_->setArg(1, *randoms);
+  kernel_get_primaries_->setArg(2, particle_type_);
+  kernel_get_primaries_->setArg(3, *energy_spectrum_);
+  kernel_get_primaries_->setArg(4, *cdf_);
+  kernel_get_primaries_->setArg(5, number_of_energy_bins_);
+  kernel_get_primaries_->setArg(6, beam_aperture_);
+  kernel_get_primaries_->setArg(7, focal_spot_size_);
+  kernel_get_primaries_->setArg(8, *matrix_transformation);
 
   // Define the number of work-item to launch
   cl::NDRange global(number_of_particles);
   cl::NDRange offset(0);
 
   // Launching kernel
-  cl_int kernel_status = p_queue->enqueueNDRangeKernel(*p_kernel_get_primaries_,
-    offset, global, cl::NullRange, nullptr, p_event);
-  opencl_manager_.CheckOpenCLError(kernel_status, "GGEMSXRaySource",
-    "GetPrimaries");
-  p_queue->finish(); // Wait until the kernel status is finish
+  cl_int kernel_status = queue->enqueueNDRangeKernel(*kernel_get_primaries_, offset, global, cl::NullRange, nullptr, event);
+  opencl_manager_.CheckOpenCLError(kernel_status, "GGEMSXRaySource", "GetPrimaries");
+  queue->finish(); // Wait until the kernel status is finish
 
   // Displaying time in kernel
   opencl_manager_.DisplayElapsedTimeInKernel("GetPrimaries");
@@ -149,12 +121,9 @@ void GGEMSXRaySource::GetPrimaries(GGulong const& number_of_particles)
 void GGEMSXRaySource::PrintInfos(void) const
 {
   GGcout("GGEMSXRaySource", "PrintInfos", 0) << GGendl;
-  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "GGEMSXRaySource Infos: "
-    << GGendl;
-  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "----------------------"
-    << GGendl;
-  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "*Source name: " << source_name_
-    << GGendl;
+  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "GGEMSXRaySource Infos: " << GGendl;
+  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "----------------------"  << GGendl;
+  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "*Source name: " << source_name_ << GGendl;
   GGcout("GGEMSXRaySource", "PrintInfos", 0) << "*Particle type: ";
   if (particle_type_ == GGEMSParticleName::PHOTON) {
     std::cout << "Photon" << std::endl;
@@ -165,41 +134,23 @@ void GGEMSXRaySource::PrintInfos(void) const
   else {
     std::cout << "Unknown" << std::endl;
   }
-  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "*Number of particles: "
-    << number_of_particles_ << GGendl;
+  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "*Number of particles: " << number_of_particles_ << GGendl;
   GGcout("GGEMSXRaySource", "PrintInfos", 0) << "*Energy mode: ";
-  if (is_monoenergy_mode_) std::cout << "Monoenergy" << std::endl;
-  else std::cout << "Polyenergy" << std::endl;
-  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "*Position: " << "("
-    << p_geometry_transformation_->GetPosition().s[0]/GGEMSUnits::mm << ", "
-    << p_geometry_transformation_->GetPosition().s[1]/GGEMSUnits::mm << ", "
-    << p_geometry_transformation_->GetPosition().s[2]/GGEMSUnits::mm << " ) mm3"
-    << GGendl;
-  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "*Rotation: " << "("
-    << p_geometry_transformation_->GetRotation().s[0] << ", "
-    << p_geometry_transformation_->GetRotation().s[1] << ", "
-    << p_geometry_transformation_->GetRotation().s[2] << ") degree"
-    << GGendl;
-  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "*Beam aperture: "
-    << beam_aperture_ << " degrees" << GGendl;
-  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "*Focal spot size: " << "("
-    << focal_spot_size_.s[0] << ", "
-    << focal_spot_size_.s[1] << ", "
-    << focal_spot_size_.s[2] << ") mm3" << GGendl;
+  if (is_monoenergy_mode_) {
+    std::cout << "Monoenergy" << std::endl;
+  }
+  else {
+    std::cout << "Polyenergy" << std::endl;
+  }
+  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "*Position: " << "(" << geometry_transformation_->GetPosition().s[0]/GGEMSUnits::mm << ", " << geometry_transformation_->GetPosition().s[1]/GGEMSUnits::mm << ", " << geometry_transformation_->GetPosition().s[2]/GGEMSUnits::mm << " ) mm3" << GGendl;
+  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "*Rotation: " << "(" << geometry_transformation_->GetRotation().s[0] << ", " << geometry_transformation_->GetRotation().s[1] << ", " << geometry_transformation_->GetRotation().s[2] << ") degree" << GGendl;
+  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "*Beam aperture: " << beam_aperture_/GGEMSUnits::deg << " degrees" << GGendl;
+  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "*Focal spot size: " << "(" << focal_spot_size_.s[0]/GGEMSUnits::mm << ", " << focal_spot_size_.s[1]/GGEMSUnits::mm << ", " << focal_spot_size_.s[2]/GGEMSUnits::mm << ") mm3" << GGendl;
   GGcout("GGEMSXRaySource", "PrintInfos", 0) << "*Local axis: " << GGendl;
   GGcout("GGEMSXRaySource", "PrintInfos", 0) << "[" << GGendl;
-  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "    "
-    << p_geometry_transformation_->GetLocalAxis().m00_ << " "
-    << p_geometry_transformation_->GetLocalAxis().m01_ << " "
-    << p_geometry_transformation_->GetLocalAxis().m02_ << GGendl;
-  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "    "
-    << p_geometry_transformation_->GetLocalAxis().m10_ << " "
-    << p_geometry_transformation_->GetLocalAxis().m11_ << " "
-    << p_geometry_transformation_->GetLocalAxis().m12_ << GGendl;
-  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "    "
-    << p_geometry_transformation_->GetLocalAxis().m20_ << " "
-    << p_geometry_transformation_->GetLocalAxis().m21_ << " "
-    << p_geometry_transformation_->GetLocalAxis().m22_ << GGendl;
+  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "    " << geometry_transformation_->GetLocalAxis().m00_ << " " << geometry_transformation_->GetLocalAxis().m01_ << " " << geometry_transformation_->GetLocalAxis().m02_ << GGendl;
+  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "    " << geometry_transformation_->GetLocalAxis().m10_ << " " << geometry_transformation_->GetLocalAxis().m11_ << " " << geometry_transformation_->GetLocalAxis().m12_ << GGendl;
+  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "    " << geometry_transformation_->GetLocalAxis().m20_ << " " << geometry_transformation_->GetLocalAxis().m21_ << " " << geometry_transformation_->GetLocalAxis().m22_ << GGendl;
   GGcout("GGEMSXRaySource", "PrintInfos", 0) << "]" << GGendl;
   GGcout("GGEMSXRaySource", "PrintInfos", 0) << GGendl;
 }
@@ -230,8 +181,7 @@ void GGEMSXRaySource::SetPolyenergy(char const* energy_spectrum_filename)
 
 void GGEMSXRaySource::CheckParameters(void) const
 {
-  GGcout("GGEMSXRaySource", "CheckParameters", 3)
-    << "Checking the mandatory parameters..." << GGendl;
+  GGcout("GGEMSXRaySource", "CheckParameters", 3) << "Checking the mandatory parameters..." << GGendl;
 
   // Checking the parameters of Source Manager
   GGEMSSource::CheckParameters();
@@ -249,21 +199,14 @@ void GGEMSXRaySource::CheckParameters(void) const
   }
 
   // Checking the focal spot size
-  if (GGEMSMisc::IsEqual(focal_spot_size_.s[0],
-    std::numeric_limits<float>::min()) ||
-      GGEMSMisc::IsEqual(focal_spot_size_.s[1],
-    std::numeric_limits<float>::min()) ||
-      GGEMSMisc::IsEqual(focal_spot_size_.s[2],
-    std::numeric_limits<float>::min())) {
+  if (GGEMSMisc::IsEqual(focal_spot_size_.s[0], std::numeric_limits<float>::min()) || GGEMSMisc::IsEqual(focal_spot_size_.s[1], std::numeric_limits<float>::min()) || GGEMSMisc::IsEqual(focal_spot_size_.s[2], std::numeric_limits<float>::min())) {
     std::ostringstream oss(std::ostringstream::out);
     oss << "You have to set a focal spot size!!!";
     GGEMSMisc::ThrowException("GGEMSXRaySource", "CheckParameters", oss.str());
   }
 
   // Focal spot size must be a positive value
-  if (focal_spot_size_.s[0] < 0.0f ||
-      focal_spot_size_.s[1] < 0.0f ||
-      focal_spot_size_.s[2] < 0.0f) {
+  if (focal_spot_size_.s[0] < 0.0f || focal_spot_size_.s[1] < 0.0f || focal_spot_size_.s[2] < 0.0f) {
     std::ostringstream oss(std::ostringstream::out);
     oss << "The focal spot size is a posivite value!!!";
     GGEMSMisc::ThrowException("GGEMSXRaySource", "CheckParameters", oss.str());
@@ -274,15 +217,13 @@ void GGEMSXRaySource::CheckParameters(void) const
     if (GGEMSMisc::IsEqual(monoenergy_, -1.0f)) {
       std::ostringstream oss(std::ostringstream::out);
       oss << "You have to set an energy in monoenergetic mode!!!";
-      GGEMSMisc::ThrowException("GGEMSXRaySource", "CheckParameters",
-        oss.str());
+      GGEMSMisc::ThrowException("GGEMSXRaySource", "CheckParameters", oss.str());
     }
 
     if (monoenergy_ < 0.0f) {
       std::ostringstream oss(std::ostringstream::out);
       oss << "The energy must be a positive value!!!";
-      GGEMSMisc::ThrowException("GGEMSXRaySource", "CheckParameters",
-        oss.str());
+      GGEMSMisc::ThrowException("GGEMSXRaySource", "CheckParameters", oss.str());
     }
   }
 
@@ -290,8 +231,7 @@ void GGEMSXRaySource::CheckParameters(void) const
     if (energy_spectrum_filename_.empty()) {
       std::ostringstream oss(std::ostringstream::out);
       oss << "You have to provide a energy spectrum file in polyenergy mode!!!";
-      GGEMSMisc::ThrowException("GGEMSXRaySource", "CheckParameters",
-        oss.str());
+      GGEMSMisc::ThrowException("GGEMSXRaySource", "CheckParameters", oss.str());
     }
   }
 }
@@ -310,36 +250,31 @@ void GGEMSXRaySource::FillEnergy(void)
 
     // Allocation of memory on OpenCL device
     // Energy
-    p_energy_spectrum_ = opencl_manager_.Allocate(nullptr, 2 * sizeof(GGdouble),
-      CL_MEM_READ_WRITE);
+    energy_spectrum_ = opencl_manager_.Allocate(nullptr, 2 * sizeof(GGdouble), CL_MEM_READ_WRITE);
 
     // Cumulative distribution function
-    p_cdf_ = opencl_manager_.Allocate(nullptr, 2 * sizeof(GGdouble),
-      CL_MEM_READ_WRITE);
+    cdf_ = opencl_manager_.Allocate(nullptr, 2 * sizeof(GGdouble), CL_MEM_READ_WRITE);
 
     // Get the energy pointer on OpenCL device
-    cl_double* p_energy_spectrum = opencl_manager_.GetDeviceBuffer<GGdouble>(
-      p_energy_spectrum_, 2 * sizeof(GGdouble));
+    GGdouble* energy_spectrum = opencl_manager_.GetDeviceBuffer<GGdouble>(energy_spectrum_, 2 * sizeof(GGdouble));
 
     // Get the cdf pointer on OpenCL device
-    cl_double* p_cdf = opencl_manager_.GetDeviceBuffer<GGdouble>(p_cdf_,
-      2 * sizeof(GGdouble));
+    GGdouble* cdf = opencl_manager_.GetDeviceBuffer<GGdouble>(cdf_, 2 * sizeof(GGdouble));
 
-    p_energy_spectrum[0] = static_cast<GGdouble>(monoenergy_);
-    p_energy_spectrum[1] = static_cast<GGdouble>(monoenergy_);
+    energy_spectrum[0] = static_cast<GGdouble>(monoenergy_);
+    energy_spectrum[1] = static_cast<GGdouble>(monoenergy_);
 
-    p_cdf[0] = 1.0;
-    p_cdf[1] = 1.0;
+    cdf[0] = 1.0;
+    cdf[1] = 1.0;
 
     // Release the pointers
-    opencl_manager_.ReleaseDeviceBuffer(p_energy_spectrum_, p_energy_spectrum);
-    opencl_manager_.ReleaseDeviceBuffer(p_cdf_, p_cdf);
+    opencl_manager_.ReleaseDeviceBuffer(energy_spectrum_, energy_spectrum);
+    opencl_manager_.ReleaseDeviceBuffer(cdf_, cdf);
   }
   else { // Polyenergy mode 
     // Read a first time the spectrum file counting the number of lines
     std::ifstream spectrum_stream(energy_spectrum_filename_, std::ios::in);
-    GGEMSFileStream::CheckInputStream(spectrum_stream,
-      energy_spectrum_filename_);
+    GGEMSFileStream::CheckInputStream(spectrum_stream, energy_spectrum_filename_);
 
     // Compute number of energy bins
     std::string line;
@@ -351,43 +286,39 @@ void GGEMSXRaySource::FillEnergy(void)
 
     // Allocation of memory on OpenCL device
     // Energy
-    p_energy_spectrum_ = opencl_manager_.Allocate(nullptr,
-      number_of_energy_bins_ * sizeof(GGdouble), CL_MEM_READ_WRITE);
+    energy_spectrum_ = opencl_manager_.Allocate(nullptr, number_of_energy_bins_ * sizeof(GGdouble), CL_MEM_READ_WRITE);
 
     // Cumulative distribution function
-    p_cdf_ = opencl_manager_.Allocate(nullptr,
-      number_of_energy_bins_ * sizeof(GGdouble), CL_MEM_READ_WRITE);
+    cdf_ = opencl_manager_.Allocate(nullptr, number_of_energy_bins_ * sizeof(GGdouble), CL_MEM_READ_WRITE);
 
     // Get the energy pointer on OpenCL device
-    GGdouble* p_energy_spectrum = opencl_manager_.GetDeviceBuffer<GGdouble>(
-      p_energy_spectrum_, number_of_energy_bins_ * sizeof(GGdouble));
+    GGdouble* energy_spectrum = opencl_manager_.GetDeviceBuffer<GGdouble>(energy_spectrum_, number_of_energy_bins_ * sizeof(GGdouble));
 
     // Get the cdf pointer on OpenCL device
-    GGdouble* p_cdf = opencl_manager_.GetDeviceBuffer<GGdouble>(p_cdf_,
-      number_of_energy_bins_ * sizeof(GGdouble));
+    GGdouble* cdf = opencl_manager_.GetDeviceBuffer<GGdouble>(cdf_, number_of_energy_bins_ * sizeof(GGdouble));
 
     // Read the input spectrum and computing the sum for the cdf
     GGint line_index = 0;
     GGdouble sum_cdf = 0.0;
     while (std::getline(spectrum_stream, line)) {
       std::istringstream iss(line);
-      iss >> p_energy_spectrum[line_index] >> p_cdf[line_index];
-      sum_cdf += p_cdf[line_index];
+      iss >> energy_spectrum[line_index] >> cdf[line_index];
+      sum_cdf += cdf[line_index];
       ++line_index;
     }
 
     // Compute CDF and normalized it
-    p_cdf[0] /= sum_cdf;
+    cdf[0] /= sum_cdf;
     for (GGuint i = 1; i < number_of_energy_bins_; ++i) {
-      p_cdf[i] = p_cdf[i]/sum_cdf + p_cdf[i-1];
+      cdf[i] = cdf[i]/sum_cdf + cdf[i-1];
     }
 
     // By security, final value of cdf must be 1 !!!
-    p_cdf[number_of_energy_bins_-1] = 1.0;
+    cdf[number_of_energy_bins_-1] = 1.0;
 
     // Release the pointers
-    opencl_manager_.ReleaseDeviceBuffer(p_energy_spectrum_, p_energy_spectrum);
-    opencl_manager_.ReleaseDeviceBuffer(p_cdf_, p_cdf);
+    opencl_manager_.ReleaseDeviceBuffer(energy_spectrum_, energy_spectrum);
+    opencl_manager_.ReleaseDeviceBuffer(cdf_, cdf);
 
     // Closing file
     spectrum_stream.close();
@@ -400,8 +331,7 @@ void GGEMSXRaySource::FillEnergy(void)
 
 void GGEMSXRaySource::Initialize(void)
 {
-  GGcout("GGEMSXRaySource", "Initialize", 3)
-    << "Initializing the GGEMS X-Ray source..." << GGendl;
+  GGcout("GGEMSXRaySource", "Initialize", 3) << "Initializing the GGEMS X-Ray source..." << GGendl;
 
   // Initialize GGEMS source
   GGEMSSource::Initialize();
@@ -420,8 +350,7 @@ void GGEMSXRaySource::Initialize(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSXRaySource::SetBeamAperture(GGfloat const& beam_aperture,
-  char const* unit)
+void GGEMSXRaySource::SetBeamAperture(GGfloat const& beam_aperture, char const* unit)
 {
   beam_aperture_ = GGEMSUnits::BestAngleUnit(beam_aperture, unit);
 }
@@ -430,14 +359,9 @@ void GGEMSXRaySource::SetBeamAperture(GGfloat const& beam_aperture,
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSXRaySource::SetFocalSpotSize(GGfloat const& width,
-  GGfloat const& height, GGfloat const& depth, char const* unit)
+void GGEMSXRaySource::SetFocalSpotSize(GGfloat const& width, GGfloat const& height, GGfloat const& depth, char const* unit)
 {
-  focal_spot_size_ = MakeFloat3(
-    GGEMSUnits::BestDistanceUnit(width, unit),
-    GGEMSUnits::BestDistanceUnit(height, unit),
-    GGEMSUnits::BestDistanceUnit(depth, unit)
-  );
+  focal_spot_size_ = MakeFloat3(GGEMSUnits::BestDistanceUnit(width, unit), GGEMSUnits::BestDistanceUnit(height, unit), GGEMSUnits::BestDistanceUnit(depth, unit));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -453,115 +377,97 @@ GGEMSXRaySource* create_ggems_xray_source(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void initialize_ggems_xray_source(GGEMSXRaySource* p_xray_source)
+void initialize_ggems_xray_source(GGEMSXRaySource* xray_source)
 {
-  p_xray_source->Initialize();
+  xray_source->Initialize();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_source_name_ggems_xray_source(GGEMSXRaySource* p_xray_source,
-  char const* source_name)
+void set_source_name_ggems_xray_source(GGEMSXRaySource* xray_source, char const* source_name)
 {
-  p_xray_source->SetSourceName(source_name);
+  xray_source->SetSourceName(source_name);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_position_ggems_xray_source(GGEMSXRaySource* p_xray_source,
-  GGfloat const pos_x, GGfloat const pos_y, GGfloat const pos_z,
-  char const* unit)
+void set_position_ggems_xray_source(GGEMSXRaySource* xray_source, GGfloat const pos_x, GGfloat const pos_y, GGfloat const pos_z, char const* unit)
 {
-  p_xray_source->SetPosition(pos_x, pos_y, pos_z, unit);
+  xray_source->SetPosition(pos_x, pos_y, pos_z, unit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_number_of_particles_xray_source(GGEMSXRaySource* p_xray_source,
-  GGulong const number_of_particles)
+void set_number_of_particles_xray_source(GGEMSXRaySource* xray_source, GGulong const number_of_particles)
 {
-  p_xray_source->SetNumberOfParticles(number_of_particles);
+  xray_source->SetNumberOfParticles(number_of_particles);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_source_particle_type_ggems_xray_source(
-  GGEMSXRaySource* p_xray_source, char const* particle_name)
+void set_source_particle_type_ggems_xray_source( GGEMSXRaySource* xray_source, char const* particle_name)
 {
-  p_xray_source->SetSourceParticleType(particle_name);
+  xray_source->SetSourceParticleType(particle_name);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_beam_aperture_ggems_xray_source(GGEMSXRaySource* p_xray_source,
-  GGfloat const beam_aperture, char const* unit)
+void set_beam_aperture_ggems_xray_source(GGEMSXRaySource* xray_source, GGfloat const beam_aperture, char const* unit)
 {
-  p_xray_source->SetBeamAperture(beam_aperture, unit);
+  xray_source->SetBeamAperture(beam_aperture, unit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_focal_spot_size_ggems_xray_source(GGEMSXRaySource* p_xray_source,
-  GGfloat const width, GGfloat const height, GGfloat const depth,
-  char const* unit)
+void set_focal_spot_size_ggems_xray_source(GGEMSXRaySource* xray_source, GGfloat const width, GGfloat const height, GGfloat const depth, char const* unit)
 {
-  p_xray_source->SetFocalSpotSize(width, height, depth, unit);
+  xray_source->SetFocalSpotSize(width, height, depth, unit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_local_axis_ggems_xray_source(GGEMSXRaySource* p_xray_source,
-  GGfloat const m00, GGfloat const m01, GGfloat const m02,
-  GGfloat const m10, GGfloat const m11, GGfloat const m12,
-  GGfloat const m20, GGfloat const m21, GGfloat const m22)
+void set_local_axis_ggems_xray_source(GGEMSXRaySource* xray_source, GGfloat const m00, GGfloat const m01, GGfloat const m02,GGfloat const m10, GGfloat const m11, GGfloat const m12, GGfloat const m20, GGfloat const m21, GGfloat const m22)
 {
-  p_xray_source->SetLocalAxis(
-    m00, m01, m02,
-    m10, m11, m12,
-    m20, m21, m22
-  );
+  xray_source->SetLocalAxis(m00, m01, m02, m10, m11, m12, m20, m21, m22);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_rotation_ggems_xray_source(GGEMSXRaySource* p_xray_source,
-  GGfloat const rx, GGfloat const ry, GGfloat const rz, char const* unit)
+void set_rotation_ggems_xray_source(GGEMSXRaySource* xray_source, GGfloat const rx, GGfloat const ry, GGfloat const rz, char const* unit)
 {
-  p_xray_source->SetRotation(rx, ry, rz, unit);
+  xray_source->SetRotation(rx, ry, rz, unit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_monoenergy_ggems_xray_source(GGEMSXRaySource* p_xray_source,
-  GGfloat const monoenergy, char const* unit)
+void set_monoenergy_ggems_xray_source(GGEMSXRaySource* xray_source, GGfloat const monoenergy, char const* unit)
 {
-  p_xray_source->SetMonoenergy(monoenergy, unit);
+  xray_source->SetMonoenergy(monoenergy, unit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_polyenergy_ggems_xray_source(GGEMSXRaySource* p_xray_source,
-  char const* energy_spectrum)
+void set_polyenergy_ggems_xray_source(GGEMSXRaySource* xray_source, char const* energy_spectrum)
 {
-  p_xray_source->SetPolyenergy(energy_spectrum);
+  xray_source->SetPolyenergy(energy_spectrum);
 }

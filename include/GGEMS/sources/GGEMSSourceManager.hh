@@ -53,7 +53,6 @@ class GGEMS_EXPORT GGEMSSourceManager
       return instance;
     }
 
-  private:
     /*!
       \fn GGEMSSourceManager(GGEMSSourceManager const& source_manager) = delete
       \param source_manager - reference on the source manager
@@ -66,8 +65,7 @@ class GGEMS_EXPORT GGEMSSourceManager
       \param source_manager - reference on the source manager
       \brief Avoid assignement of the class by reference
     */
-    GGEMSSourceManager& operator=(GGEMSSourceManager const& source_manager)
-      = delete;
+    GGEMSSourceManager& operator=(GGEMSSourceManager const& source_manager) = delete;
 
     /*!
       \fn GGEMSSourceManager(GGEMSSourceManager const&& source_manager) = delete
@@ -81,16 +79,14 @@ class GGEMS_EXPORT GGEMSSourceManager
       \param source_manager - rvalue reference on the source manager
       \brief Avoid copy of the class by rvalue reference
     */
-    GGEMSSourceManager& operator=(GGEMSSourceManager const&& source_manager)
-      = delete;
+    GGEMSSourceManager& operator=(GGEMSSourceManager const&& source_manager) = delete;
 
-  public:
     /*!
-      \fn void Store(GGEMSSource* p_source)
-      \param p_source - pointer to GGEMS source
+      \fn void Store(std::shared_ptr<GGEMSSource> source)
+      \param source - pointer to GGEMS source
       \brief storing the source pointer to source manager
     */
-    void Store(GGEMSSource* p_source);
+    void Store(std::shared_ptr<GGEMSSource> source);
 
     /*!
       \fn void PrintInfos(void)
@@ -99,11 +95,11 @@ class GGEMS_EXPORT GGEMSSourceManager
     void PrintInfos(void) const;
 
     /*!
-      \fn GGuint GetNumberOfSources(void) const
+      \fn std::size_t GetNumberOfSources(void) const
       \brief Get the number of sources
       \return the number of sources
     */
-    inline GGuint GetNumberOfSources(void) const {return number_of_sources_;}
+    inline std::size_t GetNumberOfSources(void) const {return sources_.size();}
 
     /*!
       \fn void Initialize(void) const
@@ -117,10 +113,7 @@ class GGEMS_EXPORT GGEMSSourceManager
       \return the number of batch of particle
       \brief method returning the number of particles by batch
     */
-    inline std::size_t GetNumberOfBatchs(std::size_t const& source_index) const
-    {
-      return p_sources_[source_index]->GetNumberOfBatchs();
-    }
+    inline std::size_t GetNumberOfBatchs(std::size_t const& source_index) const {return sources_[source_index]->GetNumberOfBatchs();}
 
     /*!
       \fn inline GGulong GetNumberOfParticlesInBatch(std::size_t const& source_index, std::size_t const& batch_index)
@@ -128,28 +121,21 @@ class GGEMS_EXPORT GGEMSSourceManager
       \return the number of particle for a specific batch
       \brief method returning the number of particles in a specific batch
     */
-    inline GGulong GetNumberOfParticlesInBatch(std::size_t const& source_index,
-      std::size_t const& batch_index)
-    {
-      return p_sources_[source_index]->GetNumberOfParticlesInBatch(batch_index);
-    }
+    inline GGulong GetNumberOfParticlesInBatch(std::size_t const& source_index, std::size_t const& batch_index) {return sources_[source_index]->GetNumberOfParticlesInBatch(batch_index);}
 
     /*!
       \fn GGEMSParticles* GetParticles(void) const
       \return pointer on particle stack
       \brief method returning the OpenCL stack on particles
     */
-    inline GGEMSParticles* GetParticles(void) const {return p_particles_;}
+    inline GGEMSParticles* GetParticles(void) const {return particles_.get();}
 
     /*!
       \fn GGEMSPseudoRandomGenerator* GetPseudoRandomGenerator(void) const
       \return pointer on pseudo random stack
       \brief method returning the OpenCL stack on pseudo random numbers
     */
-    inline GGEMSPseudoRandomGenerator* GetPseudoRandomGenerator(void) const
-    {
-      return p_pseudo_random_generator_;
-    }
+    inline GGEMSPseudoRandomGenerator* GetPseudoRandomGenerator(void) const {return pseudo_random_generator_.get();}
 
     /*!
       \fn void GetPrimaries(std::size_t const& source_index, GGulong const& number_of_particles) const
@@ -157,34 +143,27 @@ class GGEMS_EXPORT GGEMSSourceManager
       \param number_of_particles - number of particles to simulate
       \brief Generate primary particles for a specific source
     */
-    inline void GetPrimaries(std::size_t const& source_index,
-      GGulong const& number_of_particles) const
-    {
-      p_sources_[source_index]->GetPrimaries(number_of_particles);
-    }
+    inline void GetPrimaries(std::size_t const& source_index, GGulong const& number_of_particles) const {sources_[source_index]->GetPrimaries(number_of_particles);}
 
   private: // Source infos
-    GGEMSSource** p_sources_; /*!< Pointer on GGEMS sources */
-    GGuint number_of_sources_; /*!< Number of source */
+    std::vector<std::shared_ptr<GGEMSSource>> sources_; /*!< Pointer on GGEMS sources */
 
   private: // Particle and random infos
-    GGEMSParticles* p_particles_; /*!< Pointer on particle management */
-    GGEMSPseudoRandomGenerator* p_pseudo_random_generator_; /*!< Pointer on pseudo random generator */
+    std::shared_ptr<GGEMSParticles> particles_; /*!< Pointer on particle management */
+    std::shared_ptr<GGEMSPseudoRandomGenerator> pseudo_random_generator_; /*!< Pointer on pseudo random generator */
 };
 
 /*!
   \fn GGEMSSourceManager* get_instance_ggems_source_manager(void)
   \brief Get the GGEMSSourceManager pointer for python user.
 */
-extern "C" GGEMS_EXPORT GGEMSSourceManager*
-  get_instance_ggems_source_manager(void);
+extern "C" GGEMS_EXPORT GGEMSSourceManager* get_instance_ggems_source_manager(void);
 
 /*!
-  \fn void print_infos_ggems_source_manager(GGEMSSourceManager* p_source_manager)
-  \param p_source_manager - pointer on the source manager
+  \fn void print_infos_ggems_source_manager(GGEMSSourceManager* source_manager)
+  \param source_manager - pointer on the source manager
   \brief print infos about all declared sources
 */
-extern "C" void GGEMS_EXPORT print_infos_ggems_source_manager(
-  GGEMSSourceManager* p_source_manager);
+extern "C" void GGEMS_EXPORT print_infos_ggems_source_manager(GGEMSSourceManager* source_manager);
 
 #endif // End of GUARD_GGEMS_SOURCES_GGEMSSOURCEMANAGER

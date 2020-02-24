@@ -189,7 +189,7 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     inline cl::Event* GetEvent(void) const {return event_act_.get();}
 
     /*!
-      \fn cl::Kernel* CompileKernel(std::string const& kernel_filename, std::string const& kernel_name, char* const custom_options = nullptr, char* const additional_options = nullptr)
+      \fn std::shared_ptr<cl::Kernel> CompileKernel(std::string const& kernel_filename, std::string const& kernel_name, char* const custom_options = nullptr, char* const additional_options = nullptr)
       \param kernel_filename - filename where is declared the kernel
       \param kernel_name - name of the kernel
       \param custom_options - new compilation option for the kernel
@@ -197,28 +197,20 @@ class GGEMS_EXPORT GGEMSOpenCLManager
       \brief Compile the OpenCL kernel on the activated context
       \return the pointer on the OpenCL kernel
     */
-    cl::Kernel* CompileKernel(std::string const& kernel_filename, std::string const& kernel_name, char* const custom_options = nullptr, char* const additional_options = nullptr);
+    std::shared_ptr<cl::Kernel> CompileKernel(std::string const& kernel_filename, std::string const& kernel_name, char* const custom_options = nullptr, char* const additional_options = nullptr);
 
     /*!
-      \fn cl::Buffer* Allocate(void* host_ptr, std::size_t size, cl_mem_flags flags)
+      \fn std::unique_ptr<cl::Buffer> Allocate(void* host_ptr, std::size_t size, cl_mem_flags flags)
       \param host_ptr - pointer to buffer in host memory
       \param size - size of the buffer in bytes
       \param flags - mode to open the buffer
       \brief Allocation of OpenCL memory
-      \return a pointer to an OpenCL buffer
+      \return an unique pointer to an OpenCL buffer
     */
-    cl::Buffer* Allocate(void* host_ptr, std::size_t size, cl_mem_flags flags);
+    std::unique_ptr<cl::Buffer> Allocate(void* host_ptr, std::size_t size, cl_mem_flags flags);
 
     /*
-      \fn void Deallocate(cl::Buffer* buffer, std::size_t size)
-      \param buffer - pointer to a buffer
-      \param size - size of the buffer in bytes
-      \brief Deallocation of OpenCL memory
-    */
-    void Deallocate(cl::Buffer* buffer, std::size_t size);
-
-    /*
-      \fn T* GetDeviceBuffer(cl::Buffer* device_ptr, std::size_t const size) const
+      \fn T* GetDeviceBuffer(std::shared_ptr<cl::Buffer> device_ptr, std::size_t const size) const
       \tparam T - type of the returned pointer on host memory
       \param p_device_ptr - pointer on device memory
       \param size - size of region to map
@@ -226,10 +218,10 @@ class GGEMS_EXPORT GGEMSOpenCLManager
       \return the pointer on host memory on write/read mode
     */
     template <typename T>
-    T* GetDeviceBuffer(cl::Buffer* const device_ptr, std::size_t const size) const;
+    T* GetDeviceBuffer(std::shared_ptr<cl::Buffer> const device_ptr, std::size_t const size) const;
 
     /*
-      \fn void ReleaseDeviceBuffer(cl::Buffer* const p_device_ptr, T* p_host_ptr) const
+      \fn void ReleaseDeviceBuffer(std::shared_ptr<cl::Buffer> const p_device_ptr, T* p_host_ptr) const
       \tparam T - type of host memory pointer to release
       \param p_device_ptr - pointer on device memory
       \param p_host_ptr - pointer on host memory mapped on device memory
@@ -238,7 +230,7 @@ class GGEMS_EXPORT GGEMSOpenCLManager
       \return the pointer on host memory on write mode
     */
     template <typename T>
-    void ReleaseDeviceBuffer(cl::Buffer* const device_ptr, T* host_ptr) const;
+    void ReleaseDeviceBuffer(std::shared_ptr<cl::Buffer> const device_ptr, T* host_ptr) const;
 
     /*!
       \fn void DisplayElapsedTimeInKernel(std::string const& kernel_name) const
@@ -300,7 +292,7 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     std::vector<std::string> platform_vendor_; /*!< Vendor of the platform */
 
     // Devices
-    std::vector<std::unique_ptr<cl::Device>> devices_;
+    std::vector<std::unique_ptr<cl::Device>> devices_; /*!< Vector of devices */
     std::vector<cl_device_type> device_device_type_; /*!< Type of device */
     std::vector<std::string> device_vendor_; /*!< Vendor of the device */
     std::vector<std::string> device_version_; /*!< Version of the device */
@@ -351,7 +343,7 @@ class GGEMS_EXPORT GGEMSOpenCLManager
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
-T* GGEMSOpenCLManager::GetDeviceBuffer(cl::Buffer* const device_ptr, std::size_t const size) const
+T* GGEMSOpenCLManager::GetDeviceBuffer(std::shared_ptr<cl::Buffer> const device_ptr, std::size_t const size) const
 {
   GGcout("GGEMSOpenCLManager", "GetDeviceBuffer", 3) << "Getting mapped memory buffer on OpenCL device..." << GGendl;
 
@@ -366,7 +358,7 @@ T* GGEMSOpenCLManager::GetDeviceBuffer(cl::Buffer* const device_ptr, std::size_t
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
-void GGEMSOpenCLManager::ReleaseDeviceBuffer(cl::Buffer* const device_ptr, T* host_ptr) const
+void GGEMSOpenCLManager::ReleaseDeviceBuffer(std::shared_ptr<cl::Buffer> const device_ptr, T* host_ptr) const
 {
   GGcout("GGEMSOpenCLManager", "ReleaseDeviceBuffer", 3) << "Releasing mapped memory buffer on OpenCL device..." << GGendl;
 

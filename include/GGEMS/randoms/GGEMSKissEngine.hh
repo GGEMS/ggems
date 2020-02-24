@@ -23,13 +23,13 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 /*!
-  \fn inline float kiss_uniform(__global GGEMSRandom* p_random, int const index)
+  \fn inline float kiss_uniform(__global GGEMSRandom* random, int const index)
   \param p_random - pointer on random buffer on OpenCL device
   \param index - index of thread
   \brief JKISS 32-bit (period ~2^121=2.6x10^36), passes all of the Dieharder
   and the BigCrunch tests in TestU01
 */
-inline float kiss_uniform(__global GGEMSRandom* p_random, GGint const index)
+inline float kiss_uniform(__global GGEMSRandom* random, GGint const index)
 {
   // y ^= (y<<5);
   // y ^= (y>>7);
@@ -40,21 +40,18 @@ inline float kiss_uniform(__global GGEMSRandom* p_random, GGint const index)
   // w = t & 2147483647;
   // x += 1411392427;
 
-  p_random->p_prng_state_2_[index] ^= p_random->p_prng_state_2_[index] << 5;
-  p_random->p_prng_state_2_[index] ^= p_random->p_prng_state_2_[index] >> 7;
-  p_random->p_prng_state_2_[index] ^= p_random->p_prng_state_2_[index] << 22;
+  random->prng_state_2_[index] ^= random->prng_state_2_[index] << 5;
+  random->prng_state_2_[index] ^= random->prng_state_2_[index] >> 7;
+  random->prng_state_2_[index] ^= random->prng_state_2_[index] << 22;
 
-  GGint t = p_random->p_prng_state_3_[index] + p_random->p_prng_state_4_[index]
-    + p_random->p_prng_state_5_[index];
+  GGint t = random->prng_state_3_[index] + random->prng_state_4_[index] + random->prng_state_5_[index];
 
-  p_random->p_prng_state_3_[index] = p_random->p_prng_state_4_[index];
-  p_random->p_prng_state_5_[index] = t < 0;
-  p_random->p_prng_state_4_[index] = t & 2147483647;
-  p_random->p_prng_state_1_[index] += 1411392427;
+  random->prng_state_3_[index] = random->prng_state_4_[index];
+  random->prng_state_5_[index] = t < 0;
+  random->prng_state_4_[index] = t & 2147483647;
+  random->prng_state_1_[index] += 1411392427;
 
-  return ((GGfloat)(p_random->p_prng_state_1_[index]
-    + p_random->p_prng_state_2_[index]
-    + p_random->p_prng_state_4_[index])
+  return ((GGfloat)(random->prng_state_1_[index] + random->prng_state_2_[index] + random->prng_state_4_[index])
     //  UINT_MAX       1.0  - float32_precision
     / 4294967295.0) * (1.0f - 1.0f/(1<<23));
 }
@@ -64,14 +61,13 @@ inline float kiss_uniform(__global GGEMSRandom* p_random, GGint const index)
 ////////////////////////////////////////////////////////////////////////////////
 
 /*!
-  \fn GGuint kiss_poisson(__global GGEMSRandom* p_random, int const index, float const mean)
+  \fn GGuint kiss_poisson(__global GGEMSRandom* random, int const index, float const mean)
   \param p_random - pointer on random buffer on OpenCL device
   \param index - index of thread
   \param mean - mean of the Poisson distribution
   \brief Poisson random from G4Poisson in Geant4
 */
-inline GGuint kiss_poisson(__global GGEMSRandom* p_random,
-  GGint const index, GGfloat const mean)
+inline GGuint kiss_poisson(__global GGEMSRandom* random, GGint const index, GGfloat const mean)
 {
   // Initialization of parameters
   GGuint number = 0;
@@ -81,7 +77,7 @@ inline GGuint kiss_poisson(__global GGEMSRandom* p_random,
   if (mean <= 16.) {// border == 16, gaussian after 16
     // to avoid 1 due to f32 approximation
     do {
-      position = kiss_uniform(p_random, index);
+      position = kiss_uniform(random, index);
     }
     while ((1.f-position) < 2.e-7f);
 
@@ -98,8 +94,8 @@ inline GGuint kiss_poisson(__global GGEMSRandom* p_random,
     return number;
   }
 
-  t = sqrt(-2.f*log(kiss_uniform(p_random, index)));
-  y = 2.f * PI * kiss_uniform(p_random, index);
+  t = sqrt(-2.f*log(kiss_uniform(random, index)));
+  y = 2.f * PI * kiss_uniform(random, index);
   t *= cos(y);
   value = mean + t*sqrt(mean) + 0.5f;
 
@@ -113,18 +109,17 @@ inline GGuint kiss_poisson(__global GGEMSRandom* p_random,
 ////////////////////////////////////////////////////////////////////////////////
 
 /*!
-  \fn inline float kiss_gauss(__global GGEMSRandom* p_random, GGint const index, GGfloat const sigma)
+  \fn inline float kiss_gauss(__global GGEMSRandom* random, GGint const index, GGfloat const sigma)
   \param p_random - pointer on random buffer on OpenCL device
   \param index - index of thread
   \param sigma - standard deviation
   \brief Gaussian random
 */
-inline float kiss_gauss(__global GGEMSRandom* p_random, GGint const index,
-  GGfloat const sigma)
+inline float kiss_gauss(__global GGEMSRandom* random, GGint const index, GGfloat const sigma)
 {
   // Box-Muller transformation
-  GGfloat const u1 = kiss_uniform(p_random, index);
-  GGfloat const u2 = kiss_uniform(p_random, index);
+  GGfloat const u1 = kiss_uniform(random, index);
+  GGfloat const u2 = kiss_uniform(random, index);
   GGfloat const r1 = sqrt(-2.0f * log(u1));
   GGfloat const r2 = 2.0f * PI * u2;
 

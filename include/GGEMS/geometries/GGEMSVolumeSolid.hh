@@ -34,7 +34,6 @@ class GGEMS_EXPORT GGEMSVolumeSolid
     */
     virtual ~GGEMSVolumeSolid(void);
 
-  public:
     /*!
       \fn GGEMSVolumeSolid(GGEMSVolumeSolid const& volume_solid) = delete
       \param volume_solid - reference on the volume solid
@@ -63,7 +62,6 @@ class GGEMS_EXPORT GGEMSVolumeSolid
     */
     GGEMSVolumeSolid& operator=(GGEMSVolumeSolid const&& volume_solid) = delete;
 
-  public:
     /*!
       \fn void SetLabelValue(GGfloat const& label_value)
       \param label_value - label value in solid phantom
@@ -78,10 +76,8 @@ class GGEMS_EXPORT GGEMSVolumeSolid
       \param pos_z - position of analytical phantom in Z
       \brief Set the solid phantom position
     */
-    void SetPosition(GGdouble const& pos_x, GGdouble const& pos_y,
-      GGdouble const& pos_z);
+    void SetPosition(GGdouble const& pos_x, GGdouble const& pos_y, GGdouble const& pos_z);
 
-  public:
     /*!
       \fn void Initialize(void)
       \brief Initialize the solid and store it in Phantom creator manager
@@ -104,11 +100,7 @@ class GGEMS_EXPORT GGEMSVolumeSolid
   protected:
     GGfloat label_value_; /*!< Value of label in solid volume */
     GGdouble3 positions_; /*!< Position of solid volume */
-
-  protected: // kernel draw solid
-    cl::Kernel* p_kernel_draw_solid_; /*!< Kernel drawing solid using OpenCL */
-
-  protected:
+    std::shared_ptr<cl::Kernel> kernel_draw_solid_; /*!< Kernel drawing solid using OpenCL */
     GGEMSOpenCLManager& opencl_manager_; /*!< Reference to opencl manager singleton */
     GGEMSPhantomCreatorManager& phantom_creator_manager_; /*!< Reference to phantom creator manager */
 };

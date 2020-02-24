@@ -47,46 +47,40 @@ class GGEMS_EXPORT GGEMSPhantomNavigatorManager
       return instance;
     }
 
-  private:
     /*!
       \fn GGEMSPhantomNavigatorManager(GGEMSPhantomNavigatorManager const& phantom_navigator_manager) = delete
       \param phantom_navigator_manager - reference on the phantom navigator manager
       \brief Avoid copy of the class by reference
     */
-    GGEMSPhantomNavigatorManager(
-      GGEMSPhantomNavigatorManager const& phantom_navigator_manager) = delete;
+    GGEMSPhantomNavigatorManager(GGEMSPhantomNavigatorManager const& phantom_navigator_manager) = delete;
 
     /*!
       \fn GGEMSPhantomNavigatorManager& operator=(GGEMSPhantomNavigatorManager const& source_manager) = delete
       \param phantom_navigator_manager - reference on the phantom navigator manager
       \brief Avoid assignement of the class by reference
     */
-    GGEMSPhantomNavigatorManager& operator=(
-      GGEMSPhantomNavigatorManager const& phantom_navigator_manager) = delete;
+    GGEMSPhantomNavigatorManager& operator=(GGEMSPhantomNavigatorManager const& phantom_navigator_manager) = delete;
 
     /*!
       \fn GGEMSPhantomNavigatorManager(GGEMSPhantomNavigatorManager const&& source_manager) = delete
       \param phantom_navigator_manager - rvalue reference on the phantom navigator manager
       \brief Avoid copy of the class by rvalue reference
     */
-    GGEMSPhantomNavigatorManager(
-      GGEMSPhantomNavigatorManager const&& phantom_navigator_manager) = delete;
+    GGEMSPhantomNavigatorManager(GGEMSPhantomNavigatorManager const&& phantom_navigator_manager) = delete;
 
     /*!
       \fn GGEMSPhantomNavigatorManager& operator=(GGEMSPhantomNavigatorManager const&& source_manager) = delete
       \param phantom_navigator_manager - rvalue reference on the phantom navigator manager
       \brief Avoid copy of the class by rvalue reference
     */
-    GGEMSPhantomNavigatorManager& operator=(
-      GGEMSPhantomNavigatorManager const&& phantom_navigator_manager) = delete;
+    GGEMSPhantomNavigatorManager& operator=(GGEMSPhantomNavigatorManager const&& phantom_navigator_manager) = delete;
 
-  public:
     /*!
-      \fn void Store(GGEMSPhantomNavigator* p_phantom_navigator)
-      \param p_phantom_navigator - pointer to GGEMS phantom navigator
+      \fn void Store(std::shared_ptr<GGEMSPhantomNavigator> phantom_navigator)
+      \param phantom_navigator - pointer to GGEMS phantom navigator
       \brief storing the phantom navigator pointer to phantom navigator manager
     */
-    void Store(GGEMSPhantomNavigator* p_phantom_navigator);
+    void Store(std::shared_ptr<GGEMSPhantomNavigator> phantom_navigator);
 
     /*!
       \fn void PrintInfos(void)
@@ -95,33 +89,27 @@ class GGEMS_EXPORT GGEMSPhantomNavigatorManager
     void PrintInfos(void) const;
 
     /*!
-      \fn GGuint GetNumberOfPhantomNavigators(void) const
+      \fn std::size_t GetNumberOfPhantomNavigators(void) const
       \brief Get the number of phantom navigators
       \return the number of phantom navigators
     */
-    inline GGuint GetNumberOfPhantomNavigators(void) const
-    {
-      return number_of_phantom_navigators_;
-    }
+    inline std::size_t GetNumberOfPhantomNavigators(void) const {return phantom_navigators_.size();}
 
   private:
-    GGEMSPhantomNavigator** p_phantom_navigators_; /*!< Pointer on the phantom navigators */
-    GGuint number_of_phantom_navigators_; /*!< Number of source */
+    std::vector<std::shared_ptr<GGEMSPhantomNavigator>> phantom_navigators_; /*!< Pointer on the phantom navigators */
 };
 
 /*!
   \fn GGEMSPhantomNavigatorManager* get_instance_ggems_phantom_navigator_manager(void)
   \brief Get the GGEMSPhantomNavigatorManager pointer for python user.
 */
-extern "C" GGEMS_EXPORT GGEMSPhantomNavigatorManager*
-  get_instance_ggems_phantom_navigator_manager(void);
+extern "C" GGEMS_EXPORT GGEMSPhantomNavigatorManager* get_instance_ggems_phantom_navigator_manager(void);
 
 /*!
-  \fn void print_infos_ggems_phantom_navigator_manager(GGEMSPhantomNavigatorManager* p_phantom_navigator_manager)
-  \param p_phantom_navigator_manager - pointer on the phantom navigator manager
+  \fn void print_infos_ggems_phantom_navigator_manager(GGEMSPhantomNavigatorManager* phantom_navigator_manager)
+  \param phantom_navigator_manager - pointer on the phantom navigator manager
   \brief print infos about all declared phantom navigators
 */
-extern "C" void GGEMS_EXPORT print_infos_ggems_phantom_navigator_manager(
-  GGEMSPhantomNavigatorManager* p_phantom_navigator_manager);
+extern "C" void GGEMS_EXPORT print_infos_ggems_phantom_navigator_manager(GGEMSPhantomNavigatorManager* phantom_navigator_manager);
 
 #endif // End of GUARD_GGEMS_GEOMETRIES_GGEMSPHANTOMNAVIGATORMANAGER_HH

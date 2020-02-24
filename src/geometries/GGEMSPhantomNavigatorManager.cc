@@ -19,11 +19,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 GGEMSPhantomNavigatorManager::GGEMSPhantomNavigatorManager(void)
-: p_phantom_navigators_(nullptr),
-  number_of_phantom_navigators_(0)
+: phantom_navigators_(0)
 {
-  GGcout("GGEMSPhantomNavigatorManager", "GGEMSPhantomNavigatorManager", 3)
-    << "Allocation of GGEMS phantom navigator manager..." << GGendl;
+  GGcout("GGEMSPhantomNavigatorManager", "GGEMSPhantomNavigatorManager", 3) << "Allocation of GGEMS phantom navigator manager..." << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -33,56 +31,19 @@ GGEMSPhantomNavigatorManager::GGEMSPhantomNavigatorManager(void)
 GGEMSPhantomNavigatorManager::~GGEMSPhantomNavigatorManager(void)
 {
   // Freeing memory
-  if (p_phantom_navigators_) {
-    for (GGuint i = 0; i < number_of_phantom_navigators_; ++i) {
-      delete p_phantom_navigators_[i];
-      p_phantom_navigators_[i] = nullptr;
-    }
-    delete p_phantom_navigators_;
-    p_phantom_navigators_ = nullptr;
-  }
+  phantom_navigators_.clear();
 
-  GGcout("GGEMSPhantomNavigatorManager", "~GGEMSPhantomNavigatorManager", 3)
-    << "Deallocation of GGEMS phantom navigator manager..." << GGendl;
+  GGcout("GGEMSPhantomNavigatorManager", "~GGEMSPhantomNavigatorManager", 3) << "Deallocation of GGEMS phantom navigator manager..." << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSPhantomNavigatorManager::Store(
-  GGEMSPhantomNavigator* p_phantom_navigator)
+void GGEMSPhantomNavigatorManager::Store(std::shared_ptr<GGEMSPhantomNavigator> phantom_navigator)
 {
-  GGcout("GGEMSPhantomNavigatorManager", "Store", 3)
-    << "Storing new phantom navigator in GGEMS..." << GGendl;
-
-  // Compute new size of buffer
-  number_of_phantom_navigators_ += 1;
-
-  // If number of phantom navigators == 1, not need to resize
-  if (number_of_phantom_navigators_ == 1) {
-    // Allocating 1 phantom navigator
-    p_phantom_navigators_ = new GGEMSPhantomNavigator*[1];
-
-    // Store the navigator
-    p_phantom_navigators_[0] = p_phantom_navigator;
-  }
-  else {
-    // Creating new buffer
-    GGEMSPhantomNavigator** p_new_buffer =
-      new GGEMSPhantomNavigator*[number_of_phantom_navigators_];
-
-    // Saving old pointer in new buffer and freeing old buffer
-    for (GGuint i = 0; i < number_of_phantom_navigators_ - 1; ++i) {
-      p_new_buffer[i] = p_phantom_navigators_[i];
-    }
-    delete p_phantom_navigators_;
-    p_phantom_navigators_ = nullptr;
-
-    // Give new buffer
-    p_new_buffer[number_of_phantom_navigators_ - 1] = p_phantom_navigator;
-    p_phantom_navigators_ = p_new_buffer;
-  }
+  GGcout("GGEMSPhantomNavigatorManager", "Store", 3) << "Storing new phantom navigator in GGEMS..." << GGendl;
+  phantom_navigators_.emplace_back(phantom_navigator);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -91,24 +52,18 @@ void GGEMSPhantomNavigatorManager::Store(
 
 void GGEMSPhantomNavigatorManager::PrintInfos(void) const
 {
-  GGcout("GGEMSPhantomNavigatorManager", "PrintInfos", 0)
-    << "Printing infos about phantom navigators" << GGendl;
-  GGcout("GGEMSPhantomNavigatorManager", "PrintInfos", 0)
-    << "Number of phantom navigator(s): " << number_of_phantom_navigators_
-    << GGendl;
+  GGcout("GGEMSPhantomNavigatorManager", "PrintInfos", 0) << "Printing infos about phantom navigators" << GGendl;
+  GGcout("GGEMSPhantomNavigatorManager", "PrintInfos", 0) << "Number of phantom navigator(s): " << phantom_navigators_.size() << GGendl;
 
   // Printing infos about each navigator
-  for (GGuint i = 0; i < number_of_phantom_navigators_; ++i) {
-    p_phantom_navigators_[i]->PrintInfos();
-  }
+  for (auto&&i : phantom_navigators_) i->PrintInfos();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSPhantomNavigatorManager*
-  get_instance_ggems_phantom_navigator_manager(void)
+GGEMSPhantomNavigatorManager* get_instance_ggems_phantom_navigator_manager(void)
 {
   return &GGEMSPhantomNavigatorManager::GetInstance();
 }
@@ -117,8 +72,7 @@ GGEMSPhantomNavigatorManager*
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void print_infos_ggems_phantom_navigator_manager(
-  GGEMSPhantomNavigatorManager* p_phantom_navigator_manager)
+void print_infos_ggems_phantom_navigator_manager(GGEMSPhantomNavigatorManager* phantom_navigator_manager)
 {
-  p_phantom_navigator_manager->PrintInfos();
+  phantom_navigator_manager->PrintInfos();
 }

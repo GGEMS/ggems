@@ -47,18 +47,12 @@ enum GGEMSConsoleColor : GGuchar
 #ifdef _WIN32
 namespace
 {
-  WORD constexpr kColor [] = {
-    0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
-  };
+  WORD constexpr kColor [] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
 }
 #else
 namespace
 {
-  std::string constexpr kColor[] = {
-    "\033[30m", "\033[34m", "\033[32m", "\033[36m", "\033[31m",
-    "\033[35m", "\033[33m", "\033[97m", "\033[37m"
-  };
-
+  std::string constexpr kColor[] = {"\033[30m", "\033[34m", "\033[32m", "\033[36m", "\033[31m", "\033[35m", "\033[33m", "\033[97m", "\033[37m"};
   std::string constexpr kDefaultColor("\033[0m");
 }
 #endif
@@ -90,8 +84,7 @@ class GGEMS_EXPORT GGEMSStream
       \param verbosity_level - Verbosity level to display
       \brief setting private members to display them to standart output
     */
-    GGEMSStream& operator()(std::string const& class_name,
-      std::string const& method_name, GGint const& verbosity_level);
+    GGEMSStream& operator()(std::string const& class_name, std::string const& method_name, GGint const& verbosity_level);
 
     /*!
       \fn GGEMSStream& operator<<(std::string const& message)
@@ -144,8 +137,7 @@ GGEMSStream& GGEMSStream::operator<<(T const& message)
         stream_ << "GGEMS " << class_name_ << "::" << method_name_;
         SetConsoleTextAttribute(hConsole, info.wAttributes);
         #else
-        stream_ << kColor[color_index_] << "GGEMS " << class_name_ << "::"
-          << method_name_ << kDefaultColor;
+        stream_ << kColor[color_index_] << "GGEMS " << class_name_ << "::" << method_name_ << kDefaultColor;
         #endif
       }
       else {
@@ -162,9 +154,7 @@ GGEMSStream& GGEMSStream::operator<<(T const& message)
     }
   }
   else {
-    if (verbosity_level_ <= verbosity_limit_) {
-      stream_ << message;
-    }
+    if (verbosity_level_ <= verbosity_limit_) stream_ << message;
   }
   return *this;
 }

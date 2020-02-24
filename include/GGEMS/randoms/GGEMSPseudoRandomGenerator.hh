@@ -40,32 +40,28 @@ class GGEMS_EXPORT GGEMSPseudoRandomGenerator
       \param ggems_manager - reference on the ggems manager
       \brief Avoid copy of the class by reference
     */
-    GGEMSPseudoRandomGenerator(GGEMSPseudoRandomGenerator const& random)
-      = delete;
+    GGEMSPseudoRandomGenerator(GGEMSPseudoRandomGenerator const& random) = delete;
 
     /*!
       \fn GGEMSPseudoRandomGenerator& operator=(GGEMSPseudoRandomGenerator const& random) = delete
       \param ggems_manager - reference on the ggems manager
       \brief Avoid assignement of the class by reference
     */
-    GGEMSPseudoRandomGenerator& operator=(GGEMSPseudoRandomGenerator const& random)
-      = delete;
+    GGEMSPseudoRandomGenerator& operator=(GGEMSPseudoRandomGenerator const& random) = delete;
 
     /*!
       \fn GGEMSPseudoRandomGenerator(GGEMSPseudoRandomGenerator const&& random) = delete
       \param ggems_manager - rvalue reference on the ggems manager
       \brief Avoid copy of the class by rvalue reference
     */
-    GGEMSPseudoRandomGenerator(GGEMSPseudoRandomGenerator const&& random)
-      = delete;
+    GGEMSPseudoRandomGenerator(GGEMSPseudoRandomGenerator const&& random) = delete;
 
     /*!
       \fn GGEMSPseudoRandomGenerator& operator=(GGEMSPseudoRandomGenerator const&& random) = delete
       \param ggems_manager - rvalue reference on the ggems manager
       \brief Avoid copy of the class by rvalue reference
     */
-    GGEMSPseudoRandomGenerator& operator=(
-      GGEMSPseudoRandomGenerator const&& random) = delete;
+    GGEMSPseudoRandomGenerator& operator=(GGEMSPseudoRandomGenerator const&& random) = delete;
 
   public:
     /*!
@@ -93,13 +89,10 @@ class GGEMS_EXPORT GGEMSPseudoRandomGenerator
       \return pointer to OpenCL buffer storing random numbers
       \brief return the pointer to OpenCL buffer storing random numbers
     */
-    inline cl::Buffer* GetPseudoRandomNumbers() const
-    {
-      return p_pseudo_random_numbers_;
-    };
+    inline cl::Buffer* GetPseudoRandomNumbers() const {return pseudo_random_numbers_.get();};
 
   private:
-    cl::Buffer* p_pseudo_random_numbers_; /*!< Pointer storing the buffer about random numbers */
+    std::shared_ptr<cl::Buffer> pseudo_random_numbers_; /*!< Pointer storing the buffer about random numbers */
     GGEMSOpenCLManager& opencl_manager_; /*!< Reference to OpenCL manager singleton */
 };
 

@@ -30,8 +30,7 @@ namespace GGEMSFileStream
     \param filename - filename associated to the input stream
     \brief check the input stream during the opening
   */
-  void CheckInputStream(std::ifstream const& input_stream,
-    std::string const& filename);
+  void CheckInputStream(std::ifstream const& input_stream, std::string const& filename);
 }
 
 /*!
@@ -50,8 +49,7 @@ namespace GGEMSMisc
   template<typename T>
   GGbool IsEqual(T const& a, T const& b)
   {
-    return std::nextafter(a, std::numeric_limits<T>::lowest()) <= b
-      && std::nextafter(a, std::numeric_limits<T>::max()) >= b;
+    return std::nextafter(a, std::numeric_limits<T>::lowest()) <= b && std::nextafter(a, std::numeric_limits<T>::max()) >= b;
   }
 
   /*!
@@ -61,8 +59,7 @@ namespace GGEMSMisc
     \param message - Message to print for the exception
     \brief Throw a C++ exception
   */
-  void ThrowException(std::string const& class_name, std::string const&
-    method_name, std::string const& message);
+  void ThrowException(std::string const& class_name, std::string const& method_name, std::string const& message);
 }
 
 #endif // End of GUARD_GGEMS_TOOLS_GGEMSTOOLS_HH
