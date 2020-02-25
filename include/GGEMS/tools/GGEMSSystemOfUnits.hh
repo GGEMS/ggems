@@ -14,8 +14,10 @@
 */
 
 #include <algorithm>
+#include <sstream>
 
 #include "GGEMS/tools/GGEMSTypes.hh"
+#include "GGEMS/tools/GGEMSTools.hh"
 
 #ifdef PASCAL
 #undef PASCAL

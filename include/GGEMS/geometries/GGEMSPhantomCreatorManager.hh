@@ -17,9 +17,13 @@
 #pragma warning(disable: 4251) // Deleting warning exporting STL members!!!
 #endif
 
+#include <map>
+
 #include "GGEMS/global/GGEMSExport.hh"
 #include "GGEMS/tools/GGEMSTypes.hh"
 #include "GGEMS/global/GGEMSOpenCLManager.hh"
+
+typedef std::map<float, std::string> LabelToMaterialMap;
 
 /*!
   \class GGEMSPhantomCreatorManager
@@ -79,13 +83,14 @@ class GGEMS_EXPORT GGEMSPhantomCreatorManager
     GGEMSPhantomCreatorManager& operator=(GGEMSPhantomCreatorManager const&& phantom_creator_manager) = delete;
 
     /*!
-      \fn void SetElementSizes(double const& voxel_width, double const& voxel_height, double const& voxel_depth)
+      \fn void SetElementSizes(double const& voxel_width, double const& voxel_height, double const& voxel_depth, char const* unit = "mm")
       \param voxel_width - voxel width
       \param voxel_height - voxel height
       \param voxel_depth - voxel depth
+      \param unit - unit of the distance
       \brief Set the size of the elements for the voxelized phantom
     */
-    void SetElementSizes(GGdouble const& voxel_width, GGdouble const& voxel_height, GGdouble const& voxel_depth);
+    void SetElementSizes(GGdouble const& voxel_width, GGdouble const& voxel_height, GGdouble const& voxel_depth, char const* unit = "mm");
 
     /*!
       \fn GGdouble3 GetElementsSizes(void) const
@@ -111,13 +116,21 @@ class GGEMS_EXPORT GGEMSPhantomCreatorManager
     inline GGuint3 GetPhantomDimensions(void) const {return phantom_dimensions_;};
 
     /*!
-      \fn void SetIsocenterPositions(GGdouble const& iso_pos_x, GGdouble const& iso_pos_y, GGdouble const& iso_pos_z)
+      \fn void SetIsocenterPositions(GGdouble const& iso_pos_x, GGdouble const& iso_pos_y, GGdouble const& iso_pos_z, char const* unit = "mm")
       \param iso_pos_x - Isocenter position in X
       \param iso_pos_x - Isocenter position in X
       \param iso_pos_x - Isocenter position in X
+      \param unit - unit of the distance
       \brief Set isocenter position of the phantom
     */
-    void SetIsocenterPositions(GGdouble const& iso_pos_x, GGdouble const& iso_pos_y, GGdouble const& iso_pos_z);
+    void SetIsocenterPositions(GGdouble const& iso_pos_x, GGdouble const& iso_pos_y, GGdouble const& iso_pos_z, char const* unit = "mm");
+
+    /*!
+      \fn void SetMaterial(char const* material)
+      \param material - name of the material
+      \brief set the material, Air by default
+    */
+    void SetMaterial(char const* material = "Air");
 
     /*!
       \fn GGdouble3 GetIsocenterPositions(void) const
@@ -141,12 +154,26 @@ class GGEMS_EXPORT GGEMSPhantomCreatorManager
     inline cl::Buffer* GetVoxelizedPhantom(void) const {return voxelized_phantom_.get();}
 
     /*!
-      \fn void SetOutputBasename(char const* output_basename, char const* format)
-      \param output_basename - output basename
-      \param format - format of the output file
-      \brief Set the basename of MHD output
+      \fn void SetOutputImageFilename(char const* output_image_filename)
+      \param output_image_filename - output image filename
+      \brief Set the filename of MHD output
     */
-    void SetOutputBasename(char const* output_basename, char const* format);
+    void SetOutputImageFilename(char const* output_image_filename);
+
+    /*!
+      \fn void SetOutputImageFilename(char const* output_range_to_material_filename)
+      \param output_range_to_material_filename - output range to material filename
+      \brief Set the filename of range to material data
+    */
+    void SetRangeToMaterialDataFilename(char const* output_range_to_material_filename);
+
+    /*!
+      \fn void AddLabelAndMaterial(GGfloat const& label, std::string const& material)
+      \param label - label of material
+      \param material - material of the volume
+      \brief add the label and the material
+    */
+    void AddLabelAndMaterial(GGfloat const& label, std::string const& material);
 
     /*!
       \fn void Initialize(void)
@@ -155,10 +182,10 @@ class GGEMS_EXPORT GGEMSPhantomCreatorManager
     void Initialize(void);
 
     /*!
-      \fn void Write(void) const
+      \fn void Write(void)
       \brief Save the voxelized phantom to raw data in mhd file
     */
-    void Write(void) const;
+    void Write(void);
 
   private:
     /*!
@@ -173,15 +200,23 @@ class GGEMS_EXPORT GGEMSPhantomCreatorManager
     */
     void WriteMHDImage(void) const;
 
+    /*!
+      \fn void WriteRangeToMaterialFile(void)
+      \brief Write the file with range to material data
+    */
+    void WriteRangeToMaterialFile(void);
+
   private:
     GGdouble3 element_sizes_; /*!< Size of voxels of voxelized phantom */
     GGuint3 phantom_dimensions_; /*!< Dimension of phantom X, Y, Z */
     GGulong number_elements_; /*!< Total number of elements */
     GGdouble3 offsets_; /*!< Offset of the phantom taking account of isocenter position */
     GGdouble3 isocenter_position_; /*!< Isocenter position of the phantom */
-    std::string output_basename_; /*!< Output MHD where is stored the voxelized phantom */
-    std::string format_; /*!< Format of the output file */
+    std::string material_; /*!< Material for background, air by default */
+    std::string output_image_filename_; /*!< Output MHD where is stored the voxelized phantom */
+    std::string output_range_to_material_filename_; /*!< Output text file with range to material data */
     std::shared_ptr<cl::Buffer> voxelized_phantom_; /*!< Voxelized phantom on OpenCL device */
+    LabelToMaterialMap label_to_material_; /*!< Map of label to material */
     GGEMSOpenCLManager& opencl_manager_; /*!< Reference to opencl manager singleton */
 };
 
@@ -207,26 +242,36 @@ extern "C" GGEMS_EXPORT void set_phantom_dimension_phantom_creator_manager(GGEMS
   \param voxel_width - voxel width
   \param voxel_height - voxel height
   \param voxel_depth - voxel depth
+  \param unit - unit of the distance
   \brief Set the size of the elements for the voxelized phantom
 */
-extern "C" GGEMS_EXPORT void set_element_sizes_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager, GGdouble const voxel_width, GGdouble const voxel_height, GGdouble const voxel_depth);
+extern "C" GGEMS_EXPORT void set_element_sizes_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager, GGdouble const voxel_width, GGdouble const voxel_height, GGdouble const voxel_depth, char const* unit);
 
 /*!
   \fn void set_isocenter_positions(GGEMSPhantomCreatorManager* phantom_creator_manager, GGdouble const& iso_pos_x, GGdouble const& iso_pos_y, GGdouble const& iso_pos_z)
   \param iso_pos_x - Isocenter position in X
   \param iso_pos_x - Isocenter position in X
   \param iso_pos_x - Isocenter position in X
+  \param unit - unit of the distance
   \brief Set isocenter position of the phantom
 */
-extern "C" GGEMS_EXPORT void set_isocenter_positions(GGEMSPhantomCreatorManager* phantom_creator_manager, GGdouble const iso_pos_x, GGdouble const iso_pos_y, GGdouble const iso_pos_z);
+extern "C" GGEMS_EXPORT void set_isocenter_positions(GGEMSPhantomCreatorManager* phantom_creator_manager, GGdouble const iso_pos_x, GGdouble const iso_pos_y, GGdouble const iso_pos_z, char const* unit);
 
 /*!
-  \fn void set_output_basename_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager, char const* output_basename)
+  \fn void set_output_basename_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager, char const* output_image_filename)
   \param phantom_creator_manager - pointer on the singleton
-  \param output_MHD_basename - output MHD basename
-  \brief Set the basename of MHD output
+  \param output_image_filename - output MHD filename
+  \brief Set the filename of MHD output
 */
-extern "C" GGEMS_EXPORT void set_output_basename_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager,char const* output_basename, char const* format);
+extern "C" GGEMS_EXPORT void set_output_image_filename_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager,char const* output_image_filename);
+
+/*!
+  \fn void set_output_range_to_material_filename_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager, char const* output_range_to_material_filename)
+  \param phantom_creator_manager - pointer on the singleton
+  \param output_range_to_material_filename - output range to material filename
+  \brief Set the filename of range to material data
+*/
+extern "C" GGEMS_EXPORT void set_output_range_to_material_filename_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager,char const* output_range_to_material_filename);
 
 /*!
   \fn void initialize_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager)
@@ -241,5 +286,13 @@ extern "C" GGEMS_EXPORT void initialize_phantom_creator_manager(GGEMSPhantomCrea
   \brief Save the voxelized phantom to raw data in mhd file
 */
 extern "C" GGEMS_EXPORT void write_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager);
+
+/*!
+  \fn void set_material_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager, char const* material)
+  \param phantom_creator_manager - pointer on the singleton
+  \param material - name of the material
+  \brief set the material of the global (background phantom)
+*/
+extern "C" GGEMS_EXPORT void set_material_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager, char const* material);
 
 #endif // GUARD_GGEMS_GEOMETRY_GGEMSPHANTOMCREATORMANAGER_HH

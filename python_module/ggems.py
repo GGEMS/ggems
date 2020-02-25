@@ -290,11 +290,14 @@ class GGEMSPhantomCreatorManager(object):
         ggems_lib.set_phantom_dimension_phantom_creator_manager.argtypes = [ctypes.c_void_p, ctypes.c_uint32, ctypes.c_uint32, ctypes.c_uint32]
         ggems_lib.set_phantom_dimension_phantom_creator_manager.restype = ctypes.c_void_p
 
-        ggems_lib.set_element_sizes_phantom_creator_manager.argtypes = [ctypes.c_void_p, ctypes.c_double, ctypes.c_double, ctypes.c_double]
+        ggems_lib.set_element_sizes_phantom_creator_manager.argtypes = [ctypes.c_void_p, ctypes.c_double, ctypes.c_double, ctypes.c_double, ctypes.c_char_p]
         ggems_lib.set_element_sizes_phantom_creator_manager.restype = ctypes.c_void_p
 
-        ggems_lib.set_output_basename_phantom_creator_manager.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
-        ggems_lib.set_output_basename_phantom_creator_manager.restype = ctypes.c_void_p
+        ggems_lib.set_output_image_filename_phantom_creator_manager.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
+        ggems_lib.set_output_image_filename_phantom_creator_manager.restype = ctypes.c_void_p
+
+        ggems_lib.set_output_range_to_material_filename_phantom_creator_manager.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
+        ggems_lib.set_output_range_to_material_filename_phantom_creator_manager.restype = ctypes.c_void_p
 
         ggems_lib.initialize_phantom_creator_manager.argtypes = [ctypes.c_void_p]
         ggems_lib.initialize_phantom_creator_manager.restype = ctypes.c_void_p
@@ -302,19 +305,25 @@ class GGEMSPhantomCreatorManager(object):
         ggems_lib.write_phantom_creator_manager.argtypes = [ctypes.c_void_p]
         ggems_lib.write_phantom_creator_manager.restype = ctypes.c_void_p
 
-        ggems_lib.set_isocenter_positions.argtypes = [ctypes.c_void_p, ctypes.c_double, ctypes.c_double, ctypes.c_double]
+        ggems_lib.set_isocenter_positions.argtypes = [ctypes.c_void_p, ctypes.c_double, ctypes.c_double, ctypes.c_double, ctypes.c_char_p]
         ggems_lib.set_isocenter_positions.restype = ctypes.c_void_p
+
+        ggems_lib.set_material_phantom_creator_manager.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
+        ggems_lib.set_material_phantom_creator_manager.restype = ctypes.c_void_p
 
         self.obj = ggems_lib.get_instance_phantom_creator_manager()
 
     def set_dimensions(self, width, height, depth):
         ggems_lib.set_phantom_dimension_phantom_creator_manager(self.obj, width, height, depth)
 
-    def set_element_sizes(self, width, height, depth):
-        ggems_lib.set_element_sizes_phantom_creator_manager(self.obj, width, height, depth)
+    def set_element_sizes(self, width, height, depth, unit):
+        ggems_lib.set_element_sizes_phantom_creator_manager(self.obj, width, height, depth, unit)
 
-    def set_output(self, output, format):
-        ggems_lib.set_output_basename_phantom_creator_manager(self.obj, output, format)
+    def set_output(self, output):
+        ggems_lib.set_output_image_filename_phantom_creator_manager(self.obj, output)
+
+    def set_range_output(self, output):
+        ggems_lib.set_output_range_to_material_filename_phantom_creator_manager(self.obj, output)
 
     def initialize(self):
         ggems_lib.initialize_phantom_creator_manager(self.obj)
@@ -322,8 +331,11 @@ class GGEMSPhantomCreatorManager(object):
     def write(self):
         ggems_lib.write_phantom_creator_manager(self.obj)
 
-    def set_isocenter_positions(self, iso_pos_x, iso_pos_y, iso_pos_z):
-        ggems_lib.set_isocenter_positions(self.obj, iso_pos_x, iso_pos_y, iso_pos_z)
+    def set_isocenter_positions(self, iso_pos_x, iso_pos_y, iso_pos_z, unit):
+        ggems_lib.set_isocenter_positions(self.obj, iso_pos_x, iso_pos_y, iso_pos_z, unit)
+
+    def set_material(self, material):
+        ggems_lib.set_material_phantom_creator_manager(self.obj, material)
 
 
 class GGEMSTube(object):
@@ -335,17 +347,20 @@ class GGEMSTube(object):
         ggems_lib.delete_tube.argtypes = [ctypes.c_void_p]
         ggems_lib.delete_tube.restype = ctypes.c_void_p
 
-        ggems_lib.set_height_tube.argtypes = [ctypes.c_void_p, ctypes.c_double]
+        ggems_lib.set_height_tube.argtypes = [ctypes.c_void_p, ctypes.c_double, ctypes.c_char_p]
         ggems_lib.set_height_tube.restype = ctypes.c_void_p
 
-        ggems_lib.set_radius_tube.argtypes = [ctypes.c_void_p, ctypes.c_double]
+        ggems_lib.set_radius_tube.argtypes = [ctypes.c_void_p, ctypes.c_double, ctypes.c_char_p]
         ggems_lib.set_radius_tube.restype = ctypes.c_void_p
 
-        ggems_lib.set_position_tube.argtypes = [ctypes.c_void_p, ctypes.c_double, ctypes.c_double, ctypes.c_double]
+        ggems_lib.set_position_tube.argtypes = [ctypes.c_void_p, ctypes.c_double, ctypes.c_double, ctypes.c_double, ctypes.c_char_p]
         ggems_lib.set_position_tube.restype = ctypes.c_void_p
 
         ggems_lib.set_label_value_tube.argtypes = [ctypes.c_void_p, ctypes.c_float]
         ggems_lib.set_label_value_tube.restype = ctypes.c_void_p
+
+        ggems_lib.set_material_tube.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
+        ggems_lib.set_material_tube.restype = ctypes.c_void_p
 
         ggems_lib.initialize_tube.argtypes = [ctypes.c_void_p]
         ggems_lib.initialize_tube.restype = ctypes.c_void_p
@@ -358,17 +373,20 @@ class GGEMSTube(object):
     def delete(self):
         ggems_lib.delete_tube(self.obj)
 
-    def set_height(self, height):
-        ggems_lib.set_height_tube(self.obj, height)
+    def set_height(self, height, unit):
+        ggems_lib.set_height_tube(self.obj, height, unit)
 
-    def set_radius(self, radius):
-        ggems_lib.set_radius_tube(self.obj, radius)
+    def set_radius(self, radius, unit):
+        ggems_lib.set_radius_tube(self.obj, radius, unit)
 
     def set_label_value(self, label_value):
         ggems_lib.set_label_value_tube(self.obj, label_value)
 
-    def set_position(self, pos_x, pos_y, pos_z):
-        ggems_lib.set_position_tube(self.obj, pos_x, pos_y, pos_z)
+    def set_position(self, pos_x, pos_y, pos_z, unit):
+        ggems_lib.set_position_tube(self.obj, pos_x, pos_y, pos_z, unit)
+
+    def set_material(self, material):
+        ggems_lib.set_material_tube(self.obj, material)
 
     def initialize(self):
         ggems_lib.initialize_tube(self.obj)

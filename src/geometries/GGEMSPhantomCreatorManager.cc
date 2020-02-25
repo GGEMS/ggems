@@ -15,6 +15,7 @@
 #include "GGEMS/geometries/GGEMSPhantomCreatorManager.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
 #include "GGEMS/tools/GGEMSTools.hh"
+#include "GGEMS/tools/GGEMSSystemOfUnits.hh"
 #include "GGEMS/io/GGEMSMHDImage.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -27,8 +28,9 @@ GGEMSPhantomCreatorManager::GGEMSPhantomCreatorManager(void)
   number_elements_(0),
   offsets_(GGdouble3{{0.0, 0.0, 0.0}}),
   isocenter_position_(GGdouble3{{0.0, 0.0, 0.0}}),
-  output_basename_(""),
-  format_(""),
+  material_("Air"),
+  output_image_filename_(""),
+  output_range_to_material_filename_(""),
   voxelized_phantom_(nullptr),
   opencl_manager_(GGEMSOpenCLManager::GetInstance())
 {
@@ -48,11 +50,11 @@ GGEMSPhantomCreatorManager::~GGEMSPhantomCreatorManager(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSPhantomCreatorManager::SetElementSizes(GGdouble const& voxel_width, GGdouble const& voxel_height, GGdouble const& voxel_depth)
+void GGEMSPhantomCreatorManager::SetElementSizes(GGdouble const& voxel_width, GGdouble const& voxel_height, GGdouble const& voxel_depth, char const* unit)
 {
-  element_sizes_.s[0] = voxel_width;
-  element_sizes_.s[1] = voxel_height;
-  element_sizes_.s[2] = voxel_depth;
+  element_sizes_.s[0] = GGEMSUnits::BestDistanceUnit(voxel_width, unit);
+  element_sizes_.s[1] = GGEMSUnits::BestDistanceUnit(voxel_height, unit);
+  element_sizes_.s[2] = GGEMSUnits::BestDistanceUnit(voxel_depth, unit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -71,29 +73,61 @@ void GGEMSPhantomCreatorManager::SetPhantomDimensions(GGuint const& phantom_widt
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSPhantomCreatorManager::SetIsocenterPositions(GGdouble const& iso_pos_x, GGdouble const& iso_pos_y, GGdouble const& iso_pos_z)
+void GGEMSPhantomCreatorManager::SetIsocenterPositions(GGdouble const& iso_pos_x, GGdouble const& iso_pos_y, GGdouble const& iso_pos_z, char const* unit)
 {
-  isocenter_position_.s[0] = iso_pos_x;
-  isocenter_position_.s[1] = iso_pos_y;
-  isocenter_position_.s[2] = iso_pos_z;
+  isocenter_position_.s[0] = GGEMSUnits::BestDistanceUnit(iso_pos_x, unit);
+  isocenter_position_.s[1] = GGEMSUnits::BestDistanceUnit(iso_pos_y, unit);
+  isocenter_position_.s[2] = GGEMSUnits::BestDistanceUnit(iso_pos_z, unit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSPhantomCreatorManager::SetOutputBasename(char const* output_basename, char const* format)
+void GGEMSPhantomCreatorManager::SetMaterial(char const* material)
 {
-  // Output basename
-  std::string output_basename_str(output_basename);
-  output_basename_ = output_basename_str;
+  material_ = material;
 
-  // Output format
-  std::string format_str(format);
-  format_ = format_str;
+  // Store the material in map
+  label_to_material_.insert(std::make_pair(0.0f, material_));
+}
 
-  // Transform the string to lower character
-  std::transform(format_.begin(), format_.end(), format_.begin(), ::tolower);
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSPhantomCreatorManager::AddLabelAndMaterial(GGfloat const& label, std::string const& material)
+{
+  GGcout("GGEMSPhantomCreatorManager", "AddLabelAndMaterial", 3) << "Adding new material and label..." << GGendl;
+
+  // Insert label and check if the label exists already
+  auto const [iter, success] = label_to_material_.insert(std::make_pair(label, material));
+  if (!success) {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "The label: " << iter->first << " already exists...";
+    GGEMSMisc::ThrowException("GGEMSPhantomCreatorManager", "AddLabelAndMaterial", oss.str());
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSPhantomCreatorManager::SetOutputImageFilename(char const* output_image_filename)
+{
+  output_image_filename_ = output_image_filename;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSPhantomCreatorManager::SetRangeToMaterialDataFilename(char const* output_range_to_material_filename)
+{
+  output_range_to_material_filename_ = output_range_to_material_filename;
+
+  // Adding suffix
+  output_range_to_material_filename_ += ".txt";
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -115,13 +149,13 @@ void GGEMSPhantomCreatorManager::CheckParameters(void) const
     }
 
   // Checking output name
-  if (output_basename_.empty()) {
-    GGEMSMisc::ThrowException("GGEMSPhantomCreatorManager", "CheckParameters", "A basename has to be done to phantom manager!!!");
+  if (output_image_filename_.empty()) {
+    GGEMSMisc::ThrowException("GGEMSPhantomCreatorManager", "CheckParameters", "A output image filename has to be done to phantom manager!!!");
   }
 
-  // Checking the format
-  if (format_ != "mhd") {
-    GGEMSMisc::ThrowException("GGEMSPhantomCreatorManager", "CheckParameters", "Output format can be only: mhd");
+  // Checking range to material data name
+  if (output_range_to_material_filename_.empty()) {
+    GGEMSMisc::ThrowException("GGEMSPhantomCreatorManager", "CheckParameters", "A output range to material data filename has to be done to phantom manager!!!");
   }
 }
 
@@ -166,10 +200,34 @@ void GGEMSPhantomCreatorManager::Initialize(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSPhantomCreatorManager::Write(void) const
+void GGEMSPhantomCreatorManager::Write(void)
 {
-  // Write output in the correct format
-  if (format_ == "mhd") WriteMHDImage();
+  // Writing output image
+  WriteMHDImage();
+
+  // Writing the range to material file
+  WriteRangeToMaterialFile();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSPhantomCreatorManager::WriteRangeToMaterialFile(void)
+{
+  GGcout("GGEMSPhantomCreatorManager", "WriteRangeToMaterialFile", 3) << "Writing range to material text file..." << GGendl;
+
+  GGcout("GGEMSPhantomCreatorManager", "WriteRangeToMaterialFile", 0) << "List of label and material:" << GGendl;
+  for(auto&& i : label_to_material_) {
+    GGcout("GGEMSPhantomCreatorManager", "WriteRangeToMaterialFile", 0) << "    * Material: " << i.second << ", label: " << i.first << GGendl;
+  }
+
+  // Write file
+  std::ofstream range_to_data_stream(output_range_to_material_filename_, std::ios::out);
+  for(auto&& i : label_to_material_) {
+    range_to_data_stream << i.first << " " << i.first << " " << i.second << std::endl;
+  }
+  range_to_data_stream.close();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -178,12 +236,11 @@ void GGEMSPhantomCreatorManager::Write(void) const
 
 void GGEMSPhantomCreatorManager::WriteMHDImage(void) const
 {
-  GGcout("GGEMSPhantomCreatorManager", "WriteMHD", 3)
-    << "Writing MHD output file..." << GGendl;
+  GGcout("GGEMSPhantomCreatorManager", "WriteMHDImage", 3) << "Writing MHD output file..." << GGendl;
 
   // Write MHD file
   GGEMSMHDImage mhdImage;
-  mhdImage.SetBaseName(output_basename_);
+  mhdImage.SetBaseName(output_image_filename_);
   mhdImage.SetDimensions(phantom_dimensions_);
   mhdImage.SetElementSizes(element_sizes_);
   mhdImage.SetOffsets(offsets_);
@@ -212,27 +269,36 @@ void set_phantom_dimension_phantom_creator_manager(GGEMSPhantomCreatorManager* p
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_element_sizes_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager, GGdouble const voxel_width, GGdouble const voxel_height, GGdouble const voxel_depth)
+void set_element_sizes_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager, GGdouble const voxel_width, GGdouble const voxel_height, GGdouble const voxel_depth, char const* unit)
 {
-  phantom_creator_manager->SetElementSizes(voxel_width, voxel_height, voxel_depth);
+  phantom_creator_manager->SetElementSizes(voxel_width, voxel_height, voxel_depth, unit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_isocenter_positions(GGEMSPhantomCreatorManager* phantom_creator_manager, GGdouble const iso_pos_x, GGdouble const iso_pos_y, GGdouble const iso_pos_z)
+void set_isocenter_positions(GGEMSPhantomCreatorManager* phantom_creator_manager, GGdouble const iso_pos_x, GGdouble const iso_pos_y, GGdouble const iso_pos_z, char const* unit)
 {
-  phantom_creator_manager->SetIsocenterPositions(iso_pos_x, iso_pos_y, iso_pos_z);
+  phantom_creator_manager->SetIsocenterPositions(iso_pos_x, iso_pos_y, iso_pos_z, unit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_output_basename_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager, char const* output_basename, char const* format)
+void set_output_image_filename_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager, char const* output_image_filename)
 {
-  phantom_creator_manager->SetOutputBasename(output_basename, format);
+  phantom_creator_manager->SetOutputImageFilename(output_image_filename);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void set_output_range_to_material_filename_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager,char const* output_range_to_material_filename)
+{
+  phantom_creator_manager->SetRangeToMaterialDataFilename(output_range_to_material_filename);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -251,4 +317,13 @@ void initialize_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_crea
 void write_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager)
 {
   phantom_creator_manager->Write();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void set_material_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager, char const* material)
+{
+  phantom_creator_manager->SetMaterial(material);
 }

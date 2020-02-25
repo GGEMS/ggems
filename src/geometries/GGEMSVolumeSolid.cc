@@ -12,6 +12,7 @@
 
 #include "GGEMS/tools/GGEMSPrint.hh"
 #include "GGEMS/geometries/GGEMSVolumeSolid.hh"
+#include "GGEMS/tools/GGEMSSystemOfUnits.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -45,13 +46,19 @@ void GGEMSVolumeSolid::SetLabelValue(GGfloat const& label_value)
   label_value_ = label_value;
 }
 
+void GGEMSVolumeSolid::SetMaterial(char const* material)
+{
+  // Adding the material to phantom creator manager
+  phantom_creator_manager_.AddLabelAndMaterial(label_value_, material);
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSVolumeSolid::SetPosition(GGdouble const& pos_x, GGdouble const& pos_y, GGdouble const& pos_z)
+void GGEMSVolumeSolid::SetPosition(GGdouble const& pos_x, GGdouble const& pos_y, GGdouble const& pos_z, char const* unit)
 {
-  positions_.s[0] = pos_x;
-  positions_.s[1] = pos_y;
-  positions_.s[2] = pos_z;
+  positions_.s[0] = GGEMSUnits::BestDistanceUnit(pos_x, unit);
+  positions_.s[1] = GGEMSUnits::BestDistanceUnit(pos_y, unit);
+  positions_.s[2] = GGEMSUnits::BestDistanceUnit(pos_z, unit);
 }
