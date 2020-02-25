@@ -34,5 +34,3 @@
 - Prévoir place pour les kernel customs
 
 - Faire une physics list automatique en fonction du type de particule
-
-- Mettre les unités dans le créateur de volume
