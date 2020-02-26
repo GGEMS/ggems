@@ -20,7 +20,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 GGEMSVoxelizedPhantomNavigatorImagery::GGEMSVoxelizedPhantomNavigatorImagery(void)
-: GGEMSPhantomNavigator(shared_from_this())
+: GGEMSPhantomNavigator(this)
 {
   GGcout("GGEMSVoxelizedPhantomNavigatorImagery", "GGEMSVoxelizedPhantomNavigatorImagery", 3) << "Allocation of GGEMSVoxelizedPhantomNavigatorImagery..." << GGendl;
 }

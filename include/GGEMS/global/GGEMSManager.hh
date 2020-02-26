@@ -25,6 +25,8 @@
 
 class GGEMSSourceManager;
 class GGEMSOpenCLManager;
+class GGEMSMaterialsManager;
+class GGEMSPhantomNavigatorManager;
 
 /*!
   \class GGEMSManager
@@ -116,11 +118,46 @@ class GGEMS_EXPORT GGEMSManager
     inline std::string GetVersion() const {return version_;};
 
     /*!
+      \fn void SetOpenCLVerbose(bool const& is_opencl_verbose)
+      \param is_opencl_verbose - flag for opencl verbosity
+      \brief set the flag for OpenCL verbosity
+    */
+    void SetOpenCLVerbose(bool const& is_opencl_verbose);
+
+    /*!
+      \fn void SetMaterialDatabaseVerbose(bool const& is_material_database_verbose)
+      \param is_material_database_verbose - flag for material database verbosity
+      \brief set the flag for OpenCL verbosity
+    */
+    void SetMaterialDatabaseVerbose(bool const& is_material_database_verbose);
+
+    /*!
+      \fn void SetSourceVerbose(bool const& is_source_verbose)
+      \param is_source_verbose - flag for source verbosity
+      \brief set the flag for OpenCL verbosity
+    */
+    void SetSourceVerbose(bool const& is_source_verbose);
+
+    /*!
+      \fn void SetPhantomVerbose(bool const is_phantom_verbose)
+      \param is_phantom_verbose - flag for phantom verbosity
+      \brief set the flag for OpenCL verbosity
+    */
+    void SetPhantomVerbose(bool const& is_phantom_verbose);
+
+    /*!
+      \fn void SetMemoryRAMVerbose(bool const& is_memory_ram_verbose)
+      \param is_memory_ram_verbose - flag for memory RAM verbosity
+      \brief set the flag for OpenCL verbosity
+    */
+    void SetMemoryRAMVerbose(bool const& is_memory_ram_verbose);
+
+    /*!
       \fn void SetProcess(char const* process_name)
       \param process_name - name of the process to activate
       \brief activate a specific process
     */
-    void SetProcess(char const* process_name);
+    //void SetProcess(char const* process_name);
 
     /*!
       \fn void SetParticleCut(char const* particle_name, GGdouble const& distance)
@@ -128,7 +165,7 @@ class GGEMS_EXPORT GGEMSManager
       \param distance - Cut in distance
       \brief Set the cut in distance for a specific particle
     */
-    void SetParticleCut(char const* particle_name, GGdouble const& distance);
+    //void SetParticleCut(char const* particle_name, GGdouble const& distance);
 
     /*!
       \fn void SetParticleSecondary(char const* particle_name, GGuint const& level)
@@ -136,28 +173,28 @@ class GGEMS_EXPORT GGEMSManager
       \param level - Level of the secondary particle
       \brief set the particle to activate to follow the secondaries with a specific level
     */
-    void SetParticleSecondaryAndLevel(char const* particle_name, GGuint const& level);
+    //void SetParticleSecondaryAndLevel(char const* particle_name, GGuint const& level);
 
     /*!
       \fn void SetCrossSectionTableNumberOfBins(GGuint const& number_of_bins)
       \param number_of_bins - Number of bins in the cross section table
       \brief set the number of bins in the cross section table
     */
-    void SetCrossSectionTableNumberOfBins(GGuint const& number_of_bins);
+    //void SetCrossSectionTableNumberOfBins(GGuint const& number_of_bins);
 
     /*!
       \fn void SetCrossSectionTableEnergyMin(GGdouble const& min_energy)
       \param min_energy - Min. energy in the cross section table
       \brief set min. energy in the cross section table
     */
-    void SetCrossSectionTableEnergyMin(GGdouble const& min_energy);
+    //void SetCrossSectionTableEnergyMin(GGdouble const& min_energy);
 
     /*!
       \fn void SetCrossSectionTableEnergyMax(GGdouble const& max_energy)
       \param max_energy - Max. energy in the cross section table
       \brief set max. energy in the cross section table
     */
-    void SetCrossSectionTableEnergyMax(GGdouble const& max_energy);
+    //void SetCrossSectionTableEnergyMax(GGdouble const& max_energy);
 
   private:
     /*!
@@ -188,18 +225,27 @@ class GGEMS_EXPORT GGEMSManager
   private: // Global simulation parameters
     GGuint seed_; /*!< Seed for the random generator */
     std::string version_; /*!< Version of GGEMS */
-    std::vector<GGuchar> physics_list_; /*!< Vector storing the activated physics list */
-    std::vector<GGuchar> secondaries_list_; /*!< Vector storing the secondaries list */
-    GGdouble photon_distance_cut_; /*!< Photon distance cut */
-    GGdouble electron_distance_cut_; /*!< Electron distance cut */
-    GGuint photon_level_secondaries_; /*!< Level of the secondaries */
-    GGuint electron_level_secondaries_; /*!< Level of the secondaries */
-    GGuint cross_section_table_number_of_bins_; /*!< Number of bins in the cross section table */
-    GGdouble cross_section_table_energy_min_; /*!< Min. energy for the cross section table */
-    GGdouble cross_section_table_energy_max_; /*!< Max. energy for the cross section table */
-
+    bool is_opencl_verbose_; /*!< Flag for OpenCL verbosity */
+    bool is_material_database_verbose_; /*!< Flag for material database verbosity */
+    bool is_source_verbose_; /*!< Flag for source verbosity */
+    bool is_phantom_verbose_; /*!< Flag for phantom verbosity */
+    bool is_memory_ram_verbose_; /*!< Flag for memory RAM verbosity */
     GGEMSSourceManager& source_manager_; /*!< Reference to source manager singleton */
     GGEMSOpenCLManager& opencl_manager_; /*!< Reference to opencl manager singleton */
+    GGEMSMaterialsManager& material_manager_; /*!< Reference to material manager singleton */
+    GGEMSPhantomNavigatorManager& phantom_navigator_manager_; /*!< Reference to phantom navigator manager */
+
+    //std::vector<GGuchar> physics_list_; /*!< Vector storing the activated physics list */
+    //std::vector<GGuchar> secondaries_list_; /*!< Vector storing the secondaries list */
+    //GGdouble photon_distance_cut_; /*!< Photon distance cut */
+   // GGdouble electron_distance_cut_; /*!< Electron distance cut */
+    //GGuint photon_level_secondaries_; /*!< Level of the secondaries */
+    //GGuint electron_level_secondaries_; /*!< Level of the secondaries */
+    //GGuint cross_section_table_number_of_bins_; /*!< Number of bins in the cross section table */
+    //GGdouble cross_section_table_energy_min_; /*!< Min. energy for the cross section table */
+    //GGdouble cross_section_table_energy_max_; /*!< Max. energy for the cross section table */
+
+
 };
 
 /*!
@@ -224,12 +270,59 @@ extern "C" GGEMS_EXPORT void set_seed_ggems_manager(GGEMSManager* ggems_manager,
 extern "C" GGEMS_EXPORT void initialize_ggems_manager(GGEMSManager* ggems_manager);
 
 /*!
+  \fn void set_opencl_verbose_ggems_manager(GGEMSManager* ggems_manager, bool const is_opencl_verbose)
+  \param ggems_manager - pointer on the singleton
+  \param is_opencl_verbose - flag on opencl verbose
+  \brief Set the OpenCL verbosity
+*/
+extern "C" GGEMS_EXPORT void set_opencl_verbose_ggems_manager(GGEMSManager* ggems_manager, bool const is_opencl_verbose);
+
+/*!
+  \fn void set_material_database_verbose_ggems_manager(GGEMSManager* ggems_manager, bool const is_material_database_verbose)
+  \param ggems_manager - pointer on the singleton
+  \param is_material_database_verbose - flag on material database verbose
+  \brief Set the material database verbosity
+*/
+extern "C" GGEMS_EXPORT void set_material_database_verbose_ggems_manager(GGEMSManager* ggems_manager, bool const is_material_database_verbose);
+
+/*!
+  \fn void set_source_ggems_manager(GGEMSManager* ggems_manager, bool const is_source_verbose)
+  \param ggems_manager - pointer on the singleton
+  \param is_source_verbose - flag on source verbose
+  \brief Set the source verbosity
+*/
+extern "C" GGEMS_EXPORT void set_source_ggems_manager(GGEMSManager* ggems_manager, bool const is_source_verbose);
+
+/*!
+  \fn void set_phantom_ggems_manager(GGEMSManager* ggems_manager, bool const is_phantom_verbose)
+  \param ggems_manager - pointer on the singleton
+  \param is_phantom_verbose - flag on phantom verbose
+  \brief Set the phantom verbosity
+*/
+extern "C" GGEMS_EXPORT void set_phantom_ggems_manager(GGEMSManager* ggems_manager, bool const is_phantom_verbose);
+
+/*!
+  \fn void set_memory_ram_ggems_manager(GGEMSManager* ggems_manager, bool const is_memory_ram_verbose)
+  \param ggems_manager - pointer on the singleton
+  \param is_memory_ram_verbose - flag on memory RAM verbose
+  \brief Set the memory RAM verbosity
+*/
+extern "C" GGEMS_EXPORT void set_memory_ram_ggems_manager(GGEMSManager* ggems_manager, bool const is_memory_ram_verbose);
+
+/*!
+  \fn void run_ggems_manager(GGEMSManager* ggems_manager)
+  \param ggems_manager - pointer on the singleton
+  \brief Run the GGEMS simulation
+*/
+extern "C" GGEMS_EXPORT void run_ggems_manager(GGEMSManager* ggems_manager);
+
+/*!
   \fn void set_process(GGEMSManager* p_ggems_manager, char const* process_name)
   \param ggems_manager - pointer on the singleton
   \param process_name - name of the process to activate
   \brief activate a specific process
 */
-extern "C" GGEMS_EXPORT void set_process_ggems_manager(GGEMSManager* ggems_manager, char const* process_name);
+//extern "C" GGEMS_EXPORT void set_process_ggems_manager(GGEMSManager* ggems_manager, char const* process_name);
 
 /*!
   \fn void set_particle_cut_ggems_manager(GGEMSManager* ggems_manager, char const* particle_name, GGdouble const distance)
@@ -238,15 +331,7 @@ extern "C" GGEMS_EXPORT void set_process_ggems_manager(GGEMSManager* ggems_manag
   \param distance - cut in distance for the particle
   \brief set a cut in distance for a specific particle
 */
-extern "C" GGEMS_EXPORT void set_particle_cut_ggems_manager(GGEMSManager* ggems_manager, char const* particle_name, GGdouble const distance);
-
-/*!
-  \fn void set_geometry_tolerance_ggems_manager(GGEMSManager* p_ggems_manager, GGdouble const distance)
-  \param ggems_manager - pointer on the singleton
-  \param distance - geometry distance tolerance
-  \brief set the geometry distance tolerance
-*/
-extern "C" GGEMS_EXPORT void set_geometry_tolerance_ggems_manager(GGEMSManager* ggems_manager, GGdouble const distance);
+//extern "C" GGEMS_EXPORT void set_particle_cut_ggems_manager(GGEMSManager* ggems_manager, char const* particle_name, GGdouble const distance);
 
 /*!
   \fn void set_secondary_particle_and_level_ggems_manager(GGEMSManager* ggems_manager, char const* particle_name, GGuint const level)
@@ -255,7 +340,7 @@ extern "C" GGEMS_EXPORT void set_geometry_tolerance_ggems_manager(GGEMSManager* 
   \param level - level of the secondary
   \brief set the particle to follow secondary and set the level
 */
-extern "C" GGEMS_EXPORT void set_secondary_particle_and_level_ggems_manager(GGEMSManager* ggems_manager, char const* particle_name, GGuint const level);
+//extern "C" GGEMS_EXPORT void set_secondary_particle_and_level_ggems_manager(GGEMSManager* ggems_manager, char const* particle_name, GGuint const level);
 
 /*!
   \fn void set_cross_section_table_number_of_bins_ggems_manager(GGEMSManager* ggems_manager, GGuint const number_of_bins)
@@ -263,7 +348,7 @@ extern "C" GGEMS_EXPORT void set_secondary_particle_and_level_ggems_manager(GGEM
   \param number_of_bins - number of the bins in the cross section table
   \brief set the number of bins in the cross section table
 */
-extern "C" GGEMS_EXPORT void set_cross_section_table_number_of_bins_ggems_manager(GGEMSManager* ggems_manager, GGuint const number_of_bins);
+//extern "C" GGEMS_EXPORT void set_cross_section_table_number_of_bins_ggems_manager(GGEMSManager* ggems_manager, GGuint const number_of_bins);
 
 /*!
   \fn void set_cross_section_table_energy_min_ggems_manager(GGEMSManager* ggems_manager, GGdouble const min_energy)
@@ -271,7 +356,7 @@ extern "C" GGEMS_EXPORT void set_cross_section_table_number_of_bins_ggems_manage
   \param min_energy - min. energy in the cross section table
   \brief set the min. energy in the cross section table
 */
-extern "C" GGEMS_EXPORT void set_cross_section_table_energy_min_ggems_manager(GGEMSManager* ggems_manager, GGdouble const min_energy);
+//extern "C" GGEMS_EXPORT void set_cross_section_table_energy_min_ggems_manager(GGEMSManager* ggems_manager, GGdouble const min_energy);
 
 /*!
   \fn void set_cross_section_table_energy_max_ggems_manager(GGEMSManager* ggems_manager, GGdouble const min_energy)
@@ -279,13 +364,6 @@ extern "C" GGEMS_EXPORT void set_cross_section_table_energy_min_ggems_manager(GG
   \param max_energy - max. energy in the cross section table
   \brief set the max. energy in the cross section table
 */
-extern "C" GGEMS_EXPORT void set_cross_section_table_energy_max_ggems_manager(GGEMSManager* ggems_manager, GGdouble const max_energy);
-
-/*!
-  \fn void run_ggems_manager(GGEMSManager* ggems_manager)
-  \param ggems_manager - pointer on the singleton
-  \brief Run the GGEMS simulation
-*/
-extern "C" GGEMS_EXPORT void run_ggems_manager(GGEMSManager* ggems_manager);
+//extern "C" GGEMS_EXPORT void set_cross_section_table_energy_max_ggems_manager(GGEMSManager* ggems_manager, GGdouble const max_energy);
 
 #endif // End of GUARD_GGEMS_GLOBAL_GGEMSMANAGER_HH

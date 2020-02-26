@@ -26,13 +26,13 @@
   \class GGEMSPhantomNavigator
   \brief GGEMS mother class for phantom navigation
 */
-class GGEMS_EXPORT GGEMSPhantomNavigator : public std::enable_shared_from_this<GGEMSPhantomNavigator>
+class GGEMS_EXPORT GGEMSPhantomNavigator
 {
   public:
     /*!
       \brief GGEMSPhantomNavigator constructor
     */
-    explicit GGEMSPhantomNavigator(std::shared_ptr<GGEMSPhantomNavigator> phantom_navigator);
+    explicit GGEMSPhantomNavigator(GGEMSPhantomNavigator* phantom_navigator);
 
     /*!
       \brief GGEMSPhantomNavigator destructor

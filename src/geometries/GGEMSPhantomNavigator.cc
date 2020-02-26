@@ -23,7 +23,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSPhantomNavigator::GGEMSPhantomNavigator(std::shared_ptr<GGEMSPhantomNavigator> phantom_navigator)
+GGEMSPhantomNavigator::GGEMSPhantomNavigator(GGEMSPhantomNavigator* phantom_navigator)
 : phantom_navigator_name_(""),
   phantom_mhd_header_filename_(""),
   range_data_filename_(""),

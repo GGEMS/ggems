@@ -16,12 +16,12 @@
 #include "GGEMS/maths/GGEMSMatrixTypes.hh"
 
 /*!
-  \fn inline GGfloat3 RotateUz(GGfloat3 vector, GGfloat3 const new_uz)
+  \fn inline GGfloat3 RotateUnitZ(GGfloat3 vector, GGfloat3 const new_uz)
   \param vector - vector to change
   \param new_uz - new direction
   \brief rotateUz, function from CLHEP
 */
-inline GGfloat3 RotateUz(GGfloat3 vector, GGfloat3 const new_uz)
+inline GGfloat3 RotateUnitZ(GGfloat3 vector, GGfloat3 const new_uz)
 {
   #ifdef OPENCL_COMPILER
   GGfloat const u1 = new_uz.x;
@@ -34,15 +34,15 @@ inline GGfloat3 RotateUz(GGfloat3 vector, GGfloat3 const new_uz)
   #endif
 
   GGfloat up = u1*u1 + u2*u2;
-
   if (up > 0) {
-    up = sqrtf(up);
     #ifdef OPENCL_COMPILER
+    up = sqrt(up);
     GGfloat px = vector.x,  py = vector.y, pz = vector.z;
     vector.x = (u1*u3*px - u2*py) /up + u1*pz;
     vector.y = (u2*u3*px + u1*py) /up + u2*pz;
     vector.z =    -up*px +             u3*pz;
     #else
+    up = sqrtf(up);
     GGfloat px = vector.s[0], py = vector.s[1], pz = vector.s[2];
     vector.s[0] = (u1*u3*px - u2*py)/up + u1*pz;
     vector.s[1] = (u2*u3*px + u1*py)/up + u2*pz;
@@ -54,7 +54,7 @@ inline GGfloat3 RotateUz(GGfloat3 vector, GGfloat3 const new_uz)
     vector.x = -vector.x;    // phi=0  theta=gpu_pi
     vector.z = -vector.z;
     #else
-    vector.s[0] = -vector.s[1];    // phi=0  theta=gpu_pi
+    vector.s[0] = -vector.s[0];    // phi=0  theta=gpu_pi
     vector.s[2] = -vector.s[2];
     #endif
   }

@@ -40,7 +40,7 @@ GGEMSPhantomNavigatorManager::~GGEMSPhantomNavigatorManager(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSPhantomNavigatorManager::Store(std::shared_ptr<GGEMSPhantomNavigator> phantom_navigator)
+void GGEMSPhantomNavigatorManager::Store(GGEMSPhantomNavigator* phantom_navigator)
 {
   GGcout("GGEMSPhantomNavigatorManager", "Store", 3) << "Storing new phantom navigator in GGEMS..." << GGendl;
   phantom_navigators_.emplace_back(phantom_navigator);

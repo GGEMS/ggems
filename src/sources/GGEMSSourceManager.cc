@@ -54,7 +54,7 @@ GGEMSSourceManager::~GGEMSSourceManager(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSSourceManager::Store(std::shared_ptr<GGEMSSource> source)
+void GGEMSSourceManager::Store(GGEMSSource* source)
 {
   GGcout("GGEMSSourceManager", "Store", 3) << "Storing new source in GGEMS source manager..." << GGendl;
   sources_.emplace_back(source);

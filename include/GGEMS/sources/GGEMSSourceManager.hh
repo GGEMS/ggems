@@ -82,11 +82,11 @@ class GGEMS_EXPORT GGEMSSourceManager
     GGEMSSourceManager& operator=(GGEMSSourceManager const&& source_manager) = delete;
 
     /*!
-      \fn void Store(std::shared_ptr<GGEMSSource> source)
+      \fn void Store(GGEMSSource* source)
       \param source - pointer to GGEMS source
       \brief storing the source pointer to source manager
     */
-    void Store(std::shared_ptr<GGEMSSource> source);
+    void Store(GGEMSSource* source);
 
     /*!
       \fn void PrintInfos(void)
