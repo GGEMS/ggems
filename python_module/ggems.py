@@ -229,23 +229,38 @@ class GGEMSManager(object):
         ggems_lib.initialize_ggems_manager.argtypes = [ctypes.c_void_p]
         ggems_lib.initialize_ggems_manager.restype = ctypes.c_void_p
 
-        ggems_lib.set_process_ggems_manager.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
-        ggems_lib.set_process_ggems_manager.restype = ctypes.c_void_p
+        ggems_lib.set_opencl_verbose_ggems_manager.argtypes = [ctypes.c_void_p, ctypes.c_bool]
+        ggems_lib.set_opencl_verbose_ggems_manager.restype = ctypes.c_void_p
 
-        ggems_lib.set_particle_cut_ggems_manager.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_double]
-        ggems_lib.set_particle_cut_ggems_manager.restype = ctypes.c_void_p
+        ggems_lib.set_material_database_verbose_ggems_manager.argtypes = [ctypes.c_void_p, ctypes.c_bool]
+        ggems_lib.set_material_database_verbose_ggems_manager.restype = ctypes.c_void_p
 
-        ggems_lib.set_secondary_particle_and_level_ggems_manager.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_uint32]
-        ggems_lib.set_secondary_particle_and_level_ggems_manager.restype = ctypes.c_void_p
+        ggems_lib.set_source_ggems_manager.argtypes = [ctypes.c_void_p, ctypes.c_bool]
+        ggems_lib.set_source_ggems_manager.restype = ctypes.c_void_p
 
-        ggems_lib.set_cross_section_table_number_of_bins_ggems_manager.argtypes = [ctypes.c_void_p, ctypes.c_uint32]
-        ggems_lib.set_cross_section_table_number_of_bins_ggems_manager.restype = ctypes.c_void_p
+        ggems_lib.set_phantom_ggems_manager.argtypes = [ctypes.c_void_p, ctypes.c_bool]
+        ggems_lib.set_phantom_ggems_manager.restype = ctypes.c_void_p
 
-        ggems_lib.set_cross_section_table_energy_min_ggems_manager.argtypes = [ctypes.c_void_p, ctypes.c_double]
-        ggems_lib.set_cross_section_table_energy_min_ggems_manager.restype = ctypes.c_void_p
+        ggems_lib.set_memory_ram_ggems_manager.argtypes = [ctypes.c_void_p, ctypes.c_bool]
+        ggems_lib.set_memory_ram_ggems_manager.restype = ctypes.c_void_p
 
-        ggems_lib.set_cross_section_table_energy_max_ggems_manager.argtypes = [ctypes.c_void_p, ctypes.c_double]
-        ggems_lib.set_cross_section_table_energy_max_ggems_manager.restype = ctypes.c_void_p
+        #ggems_lib.set_process_ggems_manager.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
+        #ggems_lib.set_process_ggems_manager.restype = ctypes.c_void_p
+
+        #ggems_lib.set_particle_cut_ggems_manager.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_double]
+        #ggems_lib.set_particle_cut_ggems_manager.restype = ctypes.c_void_p
+
+        #ggems_lib.set_secondary_particle_and_level_ggems_manager.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_uint32]
+        #ggems_lib.set_secondary_particle_and_level_ggems_manager.restype = ctypes.c_void_p
+
+        #ggems_lib.set_cross_section_table_number_of_bins_ggems_manager.argtypes = [ctypes.c_void_p, ctypes.c_uint32]
+        #ggems_lib.set_cross_section_table_number_of_bins_ggems_manager.restype = ctypes.c_void_p
+
+        #ggems_lib.set_cross_section_table_energy_min_ggems_manager.argtypes = [ctypes.c_void_p, ctypes.c_double]
+        #ggems_lib.set_cross_section_table_energy_min_ggems_manager.restype = ctypes.c_void_p
+
+        #ggems_lib.set_cross_section_table_energy_max_ggems_manager.argtypes = [ctypes.c_void_p, ctypes.c_double]
+        #ggems_lib.set_cross_section_table_energy_max_ggems_manager.restype = ctypes.c_void_p
 
         ggems_lib.run_ggems_manager.argtypes = [ctypes.c_void_p]
         ggems_lib.run_ggems_manager.restype = ctypes.c_void_p
@@ -258,26 +273,43 @@ class GGEMSManager(object):
     def initialize(self):
         ggems_lib.initialize_ggems_manager(self.obj)
 
-    def set_process(self, process_name):
-        ggems_lib.set_process_ggems_manager(self.obj, process_name)
-
-    def set_particle_cut(self, particle_name, distance):
-        ggems_lib.set_particle_cut_ggems_manager(self.obj, particle_name, distance)
-
-    def set_secondary_particle_and_level(self, particle_name, level):
-        ggems_lib.set_secondary_particle_and_level_ggems_manager(self.obj, particle_name, level)
-
-    def set_cross_section_table_number_of_bins(self, number_of_bins):
-        ggems_lib.set_cross_section_table_number_of_bins_ggems_manager(self.obj, number_of_bins)
-
-    def set_cross_section_table_energy_min(self, min_energy):
-        ggems_lib.set_cross_section_table_energy_min_ggems_manager(self.obj, min_energy)
-
-    def set_cross_section_table_energy_max(self, max_energy):
-        ggems_lib.set_cross_section_table_energy_max_ggems_manager(self.obj, max_energy)
-
     def run(self):
         ggems_lib.run_ggems_manager(self.obj)
+
+    def opencl_verbose(self, flag):
+        ggems_lib.set_opencl_verbose_ggems_manager(self.obj, flag)
+
+    def material_verbose(self, flag):
+        ggems_lib.set_material_database_verbose_ggems_manager(self.obj, flag)
+
+    def phantom_verbose(self, flag):
+        ggems_lib.set_phantom_ggems_manager(self.obj, flag)
+
+    def source_verbose(self, flag):
+        ggems_lib.set_source_ggems_manager(self.obj, flag)
+
+    def memory_verbose(self, flag):
+        ggems_lib.set_memory_ram_ggems_manager(self.obj, flag)
+
+    #def set_process(self, process_name):
+        #ggems_lib.set_process_ggems_manager(self.obj, process_name)
+
+    #def set_particle_cut(self, particle_name, distance):
+        #ggems_lib.set_particle_cut_ggems_manager(self.obj, particle_name, distance)
+
+    #def set_secondary_particle_and_level(self, particle_name, level):
+        #ggems_lib.set_secondary_particle_and_level_ggems_manager(self.obj, particle_name, level)
+
+    #def set_cross_section_table_number_of_bins(self, number_of_bins):
+        #ggems_lib.set_cross_section_table_number_of_bins_ggems_manager(self.obj, number_of_bins)
+
+    #def set_cross_section_table_energy_min(self, min_energy):
+        #ggems_lib.set_cross_section_table_energy_min_ggems_manager(self.obj, min_energy)
+
+    #def set_cross_section_table_energy_max(self, max_energy):
+        #ggems_lib.set_cross_section_table_energy_max_ggems_manager(self.obj, max_energy)
+
+
 
 
 class GGEMSPhantomCreatorManager(object):

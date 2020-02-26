@@ -1,5 +1,5 @@
 #include "GGEMS/tools/GGEMSTypes.hh"
-#include "GGEMS/processes/GGEMSPrimaryParticlesStack.hh"
+#include "GGEMS/physics/GGEMSPrimaryParticlesStack.hh"
 #include "GGEMS/randoms/GGEMSRandomStack.hh"
 #include "GGEMS/randoms/GGEMSKissEngine.hh"
 #include "GGEMS/maths/GGEMSMatrixOperations.hh"
@@ -21,8 +21,8 @@ __kernel void get_primaries_ggems_xray_source(
   GGint const kGlobalIndex = get_global_id(0);
 
   // Get random angles
-  GGdouble phi = kiss_uniform(random, kGlobalIndex);
-  GGdouble theta = kiss_uniform(random, kGlobalIndex);
+  GGdouble phi = KissUniform(random, kGlobalIndex);
+  GGdouble theta = KissUniform(random, kGlobalIndex);
   GGdouble const kAperture = 1.0 - cos((GGdouble)aperture);
   phi += PI_TWICE;
   theta = acos((GGdouble)1.0 - kAperture*theta);
@@ -36,19 +36,19 @@ __kernel void get_primaries_ggems_xray_source(
   GGfloat3 direction = GGfloat3UnitVector(GGfloat3Sub(MakeFloat3Zeros(), global_position));
 
   // Apply deflection (global coordinate)
-  direction = RotateUz(rotation, direction);
+  direction = RotateUnitZ(rotation, direction);
   direction = GGfloat3UnitVector(direction);
 
   // Postition with focal (local)
-  global_position.x = focal_spot_size.x * (kiss_uniform(random, kGlobalIndex) - 0.5f);
-  global_position.y = focal_spot_size.y * (kiss_uniform(random, kGlobalIndex) - 0.5f);
-  global_position.z = focal_spot_size.z * (kiss_uniform(random, kGlobalIndex) - 0.5f);
+  global_position.x = focal_spot_size.x * (KissUniform(random, kGlobalIndex) - 0.5f);
+  global_position.y = focal_spot_size.y * (KissUniform(random, kGlobalIndex) - 0.5f);
+  global_position.z = focal_spot_size.z * (KissUniform(random, kGlobalIndex) - 0.5f);
 
   // Apply transformation (local to global frame)
   global_position = LocalToGlobalPosition(matrix_transformation, global_position);
 
   // Getting a random energy
-  GGfloat rndm_for_energy = kiss_uniform(random, kGlobalIndex);
+  GGfloat rndm_for_energy = KissUniform(random, kGlobalIndex);
 
   // Get index in cdf
   GGuint index_for_energy = BinarySearchLeft(rndm_for_energy, cdf, number_of_energy_bins, 0, 0);
@@ -58,7 +58,7 @@ __kernel void get_primaries_ggems_xray_source(
     primary_particle->E_[kGlobalIndex] = energy_spectrum[index_for_energy];
   }
   else {
-    primary_particle->p_E_[kGlobalIndex] = LinearInterpolation(cdf[index_for_energy], energy_spectrum[index_for_energy], cdf[index_for_energy + 1], energy_spectrum[index_for_energy + 1], rndm_for_energy);
+    primary_particle->E_[kGlobalIndex] = LinearInterpolation(cdf[index_for_energy], energy_spectrum[index_for_energy], cdf[index_for_energy + 1], energy_spectrum[index_for_energy + 1], rndm_for_energy);
   }
 
   // Then set the mandatory field to create a new particle

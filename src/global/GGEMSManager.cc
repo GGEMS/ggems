@@ -36,6 +36,10 @@
 #include "GGEMS/global/GGEMSConstants.hh"
 #include "GGEMS/global/GGEMSOpenCLManager.hh"
 
+#include "GGEMS/physics/GGEMSMaterialsManager.hh"
+
+#include "GGEMS/geometries/GGEMSPhantomNavigatorManager.hh"
+
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -43,25 +47,32 @@
 GGEMSManager::GGEMSManager(void)
 : seed_(0),
   version_("1.0"),
-  physics_list_(0),
-  secondaries_list_(0),
-  photon_distance_cut_(GGEMSUnits::um),
-  electron_distance_cut_(GGEMSUnits::um),
-  photon_level_secondaries_(0),
-  electron_level_secondaries_(0),
-  cross_section_table_number_of_bins_(GGEMSLimit::CROSS_SECTION_TABLE_NUMBER_BINS),
-  cross_section_table_energy_min_(GGEMSLimit::CROSS_SECTION_TABLE_ENERGY_MIN),
-  cross_section_table_energy_max_(GGEMSLimit::CROSS_SECTION_TABLE_ENERGY_MAX),
+  is_opencl_verbose_(false),
+  is_material_database_verbose_(false),
+  is_source_verbose_(false),
+  is_phantom_verbose_(false),
+  is_memory_ram_verbose_(false),
   source_manager_(GGEMSSourceManager::GetInstance()),
-  opencl_manager_(GGEMSOpenCLManager::GetInstance())
+  opencl_manager_(GGEMSOpenCLManager::GetInstance()),
+  material_manager_(GGEMSMaterialsManager::GetInstance()),
+  phantom_navigator_manager_(GGEMSPhantomNavigatorManager::GetInstance())
+  //physics_list_(0),
+  //secondaries_list_(0),
+  //photon_distance_cut_(GGEMSUnits::um),
+  //electron_distance_cut_(GGEMSUnits::um),
+  //photon_level_secondaries_(0),
+  //electron_level_secondaries_(0),
+  //cross_section_table_number_of_bins_(GGEMSLimit::CROSS_SECTION_TABLE_NUMBER_BINS),
+  //cross_section_table_energy_min_(GGEMSLimit::CROSS_SECTION_TABLE_ENERGY_MIN),
+  //cross_section_table_energy_max_(GGEMSLimit::CROSS_SECTION_TABLE_ENERGY_MAX),
 {
   GGcout("GGEMSManager", "GGEMSManager", 3) << "Allocation of GGEMS Manager singleton..." << GGendl;
 
   // Allocation of the memory for the physics list
-  physics_list_.resize(GGEMSProcessName::NUMBER_PROCESSES, false);
+  //physics_list_.resize(GGEMSProcessName::NUMBER_PROCESSES, false);
 
   // Allocation of the memory for the secondaries list
-  secondaries_list_.resize(GGEMSProcessName::NUMBER_PARTICLES, false);
+  //secondaries_list_.resize(GGEMSProcessName::NUMBER_PARTICLES, false);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -119,7 +130,52 @@ GGuint GGEMSManager::GenerateSeed(void) const
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSManager::SetProcess(char const* process_name)
+void GGEMSManager::SetOpenCLVerbose(bool const& is_opencl_verbose)
+{
+  is_opencl_verbose_ = is_opencl_verbose;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSManager::SetMaterialDatabaseVerbose(bool const& is_material_database_verbose)
+{
+  is_material_database_verbose_ = is_material_database_verbose;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSManager::SetSourceVerbose(bool const& is_source_verbose)
+{
+  is_source_verbose_ = is_source_verbose;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSManager::SetPhantomVerbose(bool const& is_phantom_verbose)
+{
+  is_phantom_verbose_ = is_phantom_verbose;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSManager::SetMemoryRAMVerbose(bool const& is_memory_ram_verbose)
+{
+  is_memory_ram_verbose_ = is_memory_ram_verbose;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+/*void GGEMSManager::SetProcess(char const* process_name)
 {
   // Convert the process name in string
   std::string process_name_str(process_name);
@@ -149,13 +205,13 @@ void GGEMSManager::SetProcess(char const* process_name)
   else {
     GGEMSMisc::ThrowException("GGEMSManager", "SetProcess", "Unknown process!!!");
   }
-}
+}*/
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSManager::SetParticleCut(char const* particle_name, GGdouble const& distance)
+/*void GGEMSManager::SetParticleCut(char const* particle_name, GGdouble const& distance)
 {
   // Convert the particle name in string
   std::string particle_name_str(particle_name);
@@ -172,13 +228,13 @@ void GGEMSManager::SetParticleCut(char const* particle_name, GGdouble const& dis
   else {
     GGEMSMisc::ThrowException("GGEMSManager", "SetParticleCut", "Unknown particle!!!");
   }
-}
+}*/
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSManager::SetParticleSecondaryAndLevel(char const* particle_name, GGuint const& level)
+/*void GGEMSManager::SetParticleSecondaryAndLevel(char const* particle_name, GGuint const& level)
 {
   // Convert the particle name in string
   std::string particle_name_str(particle_name);
@@ -198,34 +254,34 @@ void GGEMSManager::SetParticleSecondaryAndLevel(char const* particle_name, GGuin
   else {
     GGEMSMisc::ThrowException("GGEMSManager", "SetParticleSecondaryAndLevel", "Unknown particle!!!");
   }
-}
+}*/
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSManager::SetCrossSectionTableNumberOfBins(GGuint const& number_of_bins)
-{
-  cross_section_table_number_of_bins_ = number_of_bins;
-}
+//void GGEMSManager::SetCrossSectionTableNumberOfBins(GGuint const& number_of_bins)
+//{
+  //cross_section_table_number_of_bins_ = number_of_bins;
+//}
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSManager::SetCrossSectionTableEnergyMin(GGdouble const& min_energy)
-{
-  cross_section_table_energy_min_ = min_energy;
-}
+//void GGEMSManager::SetCrossSectionTableEnergyMin(GGdouble const& min_energy)
+//{
+  //cross_section_table_energy_min_ = min_energy;
+//}
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSManager::SetCrossSectionTableEnergyMax(GGdouble const& max_energy)
-{
-  cross_section_table_energy_max_ = max_energy;
-}
+//void GGEMSManager::SetCrossSectionTableEnergyMax(GGdouble const& max_energy)
+//{
+  //cross_section_table_energy_max_ = max_energy;
+//}
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -264,8 +320,36 @@ void GGEMSManager::Initialize(void)
 
   // Initialization of the phantom(s)
 
-  // Printing informations about the simulation
-  PrintInfos();
+  // Printing infos about OpenCL
+  if (is_opencl_verbose_) {
+    opencl_manager_.PrintPlatformInfos();
+    opencl_manager_.PrintDeviceInfos();
+    opencl_manager_.PrintContextInfos();
+    opencl_manager_.PrintCommandQueueInfos();
+    opencl_manager_.PrintActivatedContextInfos();
+    opencl_manager_.PrintBuildOptions();
+  }
+
+  // Printing infos about material database
+  if (is_material_database_verbose_) {
+    // Print only material for the simulation !!!
+    material_manager_.PrintAvailableMaterials();
+  }
+
+  // Printing infos about source(s)
+  if (is_source_verbose_) {
+    source_manager_.PrintInfos();
+  }
+
+  // Printing infos about phantom(s)
+  if (is_phantom_verbose_) {
+    phantom_navigator_manager_.PrintInfos();
+  }
+
+  // Printing infos about RAM
+  if (is_memory_ram_verbose_) {
+    opencl_manager_.PrintRAMStatus();
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -308,7 +392,7 @@ void GGEMSManager::Run()
 
 void GGEMSManager::PrintInfos(void) const
 {
-  GGcout("GGEMSManager", "PrintInfos", 0) << GGendl;
+  /*GGcout("GGEMSManager", "PrintInfos", 0) << GGendl;
   GGcout("GGEMSManager", "PrintInfos", 0) << "++++++++++++++++" << GGendl;
   GGcout("GGEMSManager", "PrintInfos", 0) << "*Seed: " << seed_ << GGendl;
   GGcout("GGEMSManager", "PrintInfos", 0) << "*Physics list:" << GGendl;
@@ -321,8 +405,7 @@ void GGEMSManager::PrintInfos(void) const
   GGcout("GGEMSManager", "PrintInfos", 0) << "  --> Electron level: " << electron_level_secondaries_ << GGendl;
   GGcout("GGEMSManager", "PrintInfos", 0) << "*Geometry tolerance:" << GGendl;
   GGcout("GGEMSManager", "PrintInfos", 0) << "++++++++++++++++" << GGendl;
-  GGcout("GGEMSManager", "PrintInfos", 0) << GGendl;
-  ;
+  GGcout("GGEMSManager", "PrintInfos", 0) << GGendl;*/
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -455,54 +538,45 @@ void initialize_ggems_manager(GGEMSManager* ggems_manager)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_process_ggems_manager(GGEMSManager* ggems_manager, char const* process_name)
+void set_opencl_verbose_ggems_manager(GGEMSManager* ggems_manager, bool const is_opencl_verbose)
 {
-  ggems_manager->SetProcess(process_name);
+  ggems_manager->SetOpenCLVerbose(is_opencl_verbose);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_particle_cut_ggems_manager(GGEMSManager* ggems_manager, char const* particle_name, GGdouble const distance)
+void set_material_database_verbose_ggems_manager(GGEMSManager* ggems_manager, bool const is_material_database_verbose)
 {
-  ggems_manager->SetParticleCut(particle_name, distance);
+  ggems_manager->SetMaterialDatabaseVerbose(is_material_database_verbose);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_secondary_particle_and_level_ggems_manager(GGEMSManager* ggems_manager, char const* particle_name, GGuint const level)
+void set_source_ggems_manager(GGEMSManager* ggems_manager, bool const is_source_verbose)
 {
-  ggems_manager->SetParticleSecondaryAndLevel(particle_name, level);
+  ggems_manager->SetSourceVerbose(is_source_verbose);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_cross_section_table_number_of_bins_ggems_manager(GGEMSManager* ggems_manager, GGuint const number_of_bins)
+void set_phantom_ggems_manager(GGEMSManager* ggems_manager, bool const is_phantom_verbose)
 {
-  ggems_manager->SetCrossSectionTableNumberOfBins(number_of_bins);
+  ggems_manager->SetPhantomVerbose(is_phantom_verbose);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_cross_section_table_energy_min_ggems_manager(GGEMSManager* ggems_manager, GGdouble const min_energy)
+void set_memory_ram_ggems_manager(GGEMSManager* ggems_manager, bool const is_memory_ram_verbose)
 {
-  ggems_manager->SetCrossSectionTableEnergyMin(min_energy);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void set_cross_section_table_energy_max_ggems_manager(GGEMSManager* ggems_manager, GGdouble const max_energy)
-{
-  ggems_manager->SetCrossSectionTableEnergyMax(max_energy);
+  ggems_manager->SetMemoryRAMVerbose(is_memory_ram_verbose);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -513,3 +587,57 @@ void run_ggems_manager(GGEMSManager* ggems_manager)
 {
   ggems_manager->Run();
 }
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+//void set_process_ggems_manager(GGEMSManager* ggems_manager, char const* process_name)
+//{
+  //ggems_manager->SetProcess(process_name);
+//}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+//void set_particle_cut_ggems_manager(GGEMSManager* ggems_manager, char const* particle_name, GGdouble const distance)
+//{
+  //ggems_manager->SetParticleCut(particle_name, distance);
+//}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+//void set_secondary_particle_and_level_ggems_manager(GGEMSManager* ggems_manager, char const* particle_name, GGuint const level)
+//{
+  //ggems_manager->SetParticleSecondaryAndLevel(particle_name, level);
+//}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+//void set_cross_section_table_number_of_bins_ggems_manager(GGEMSManager* ggems_manager, GGuint const number_of_bins)
+//{
+  //ggems_manager->SetCrossSectionTableNumberOfBins(number_of_bins);
+//}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+//void set_cross_section_table_energy_min_ggems_manager(GGEMSManager* ggems_manager, GGdouble const min_energy)
+//{
+  //ggems_manager->SetCrossSectionTableEnergyMin(min_energy);
+//}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+//void set_cross_section_table_energy_max_ggems_manager(GGEMSManager* ggems_manager, GGdouble const max_energy)
+//{
+  //ggems_manager->SetCrossSectionTableEnergyMax(max_energy);
+//}

@@ -25,7 +25,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 GGEMSXRaySource::GGEMSXRaySource(void)
-: GGEMSSource(shared_from_this()),
+: GGEMSSource(this),
   beam_aperture_(std::numeric_limits<float>::min()),
   is_monoenergy_mode_(false),
   monoenergy_(-1.0f),

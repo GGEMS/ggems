@@ -13,11 +13,7 @@
   \date Tuesday October 1, 2019
 */
 
-#include <algorithm>
-#include <sstream>
-
 #include "GGEMS/tools/GGEMSTypes.hh"
-#include "GGEMS/tools/GGEMSTools.hh"
 
 #ifdef PASCAL
 #undef PASCAL
@@ -25,6 +21,9 @@
 
 #ifndef OPENCL_COMPILER
 #define __constant inline static constexpr
+#include <algorithm>
+#include <sstream>
+#include "GGEMS/tools/GGEMSTools.hh"
 #endif
 
 /*!

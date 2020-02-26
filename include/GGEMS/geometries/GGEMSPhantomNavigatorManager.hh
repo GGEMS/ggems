@@ -80,7 +80,7 @@ class GGEMS_EXPORT GGEMSPhantomNavigatorManager
       \param phantom_navigator - pointer to GGEMS phantom navigator
       \brief storing the phantom navigator pointer to phantom navigator manager
     */
-    void Store(std::shared_ptr<GGEMSPhantomNavigator> phantom_navigator);
+    void Store(GGEMSPhantomNavigator* phantom_navigator);
 
     /*!
       \fn void PrintInfos(void)

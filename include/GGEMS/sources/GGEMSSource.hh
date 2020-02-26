@@ -25,13 +25,13 @@ class GGEMSGeometryTransformation;
   \class GGEMSSource
   \brief GGEMS mother class for the source
 */
-class GGEMS_EXPORT GGEMSSource : public std::enable_shared_from_this<GGEMSSource>
+class GGEMS_EXPORT GGEMSSource
 {
   public:
     /*!
       \brief GGEMSSource constructor
     */
-    explicit GGEMSSource(std::shared_ptr<GGEMSSource> source);
+    explicit GGEMSSource(GGEMSSource* source);
 
     /*!
       \brief GGEMSSource destructor
