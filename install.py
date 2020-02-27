@@ -10,9 +10,9 @@ if sys.platform == "linux" or sys.platform == "darwin":
     os.environ['CC'] = 'clang-9'
     os.environ['CXX'] = 'clang++-9'
 elif sys.platform == "win32":
-    os.environ['COMPILER'] = 'CL'
-    os.environ['CC'] = 'cl.exe'
-    os.environ['CXX'] = 'cl.exe'
+    os.environ['COMPILER'] = 'GCC'
+    os.environ['CC'] = 'gcc.exe'
+    os.environ['CXX'] = 'g++.exe'
 else:  # Unknown system
     print("Unknown architecture!!!", file=sys.stderr)
 

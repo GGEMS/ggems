@@ -21,7 +21,7 @@
   \class GGEMSGeometryTransformation
   \brief This class handles everything about geometry transformation
 */
-class GGEMSGeometryTransformation
+class GGEMS_EXPORT GGEMSGeometryTransformation
 {
   public:
     /*!

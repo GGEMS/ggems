@@ -79,7 +79,7 @@ void GGEMSSourceManager::PrintInfos(void) const
 
 void GGEMSSourceManager::Initialize(void) const
 {
-  GGcout("GGEMSSourceManager", "Initialize", 3) << "Initializing the GGEMS source..." << GGendl;
+  GGcout("GGEMSSourceManager", "Initialize", 3) << "Initializing the GGEMS source(s)..." << GGendl;
 
   // Initialization of particle stack and random stack
   particles_->Initialize();

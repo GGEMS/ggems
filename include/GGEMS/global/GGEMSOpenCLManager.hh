@@ -18,14 +18,14 @@
 #pragma warning(disable: 4251) // Deleting warning exporting STL members!!!
 #endif
 
-#include <iostream>
+#include <memory>
+
 #ifdef __APPLE__
 #include <OpenCL/opencl.hpp>
 #else
 #include <CL/cl.hpp>
 #endif
 
-#include "GGEMS/global/GGEMSExport.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
 
 /*!

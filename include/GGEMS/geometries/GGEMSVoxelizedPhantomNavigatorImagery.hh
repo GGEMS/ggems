@@ -60,7 +60,12 @@ class GGEMS_EXPORT GGEMSVoxelizedPhantomNavigatorImagery : public GGEMSPhantomNa
     */
     GGEMSVoxelizedPhantomNavigatorImagery& operator=(GGEMSVoxelizedPhantomNavigatorImagery const&& voxelized_phantom_navigator_imagery) = delete;
 
-  public:
+    /*!
+      \fn void Initialize(void) override
+      \brief Initialize a GGEMS source
+    */
+    void Initialize(void) override;
+
     /*!
       \fn void PrintInfos(void) const
       \brief Printing infos about the phantom navigator

@@ -13,6 +13,8 @@
   \date Tuesday February 11, 2020
 */
 
+#include <memory>
+
 #include "GGEMS/global/GGEMSExport.hh"
 #include "GGEMS/tools/GGEMSTypes.hh"
 
@@ -81,6 +83,12 @@ class GGEMS_EXPORT GGEMSPhantomNavigatorManager
       \brief storing the phantom navigator pointer to phantom navigator manager
     */
     void Store(GGEMSPhantomNavigator* phantom_navigator);
+
+    /*!
+      \fn void Initialize(void) const
+      \brief Initialize a GGEMS phantom
+    */
+    void Initialize(void) const;
 
     /*!
       \fn void PrintInfos(void)

@@ -26,19 +26,14 @@
 #endif
 
 #include "GGEMS/sources/GGEMSSourceManager.hh"
-
-#include "GGEMS/tools/GGEMSSystemOfUnits.hh"
-#include "GGEMS/tools/GGEMSPrint.hh"
-#include "GGEMS/tools/GGEMSChrono.hh"
-#include "GGEMS/tools/GGEMSTools.hh"
-
+#include "GGEMS/physics/GGEMSMaterialsManager.hh"
+#include "GGEMS/global/GGEMSOpenCLManager.hh"
 #include "GGEMS/global/GGEMSManager.hh"
 #include "GGEMS/global/GGEMSConstants.hh"
-#include "GGEMS/global/GGEMSOpenCLManager.hh"
-
-#include "GGEMS/physics/GGEMSMaterialsManager.hh"
-
 #include "GGEMS/geometries/GGEMSPhantomNavigatorManager.hh"
+#include "GGEMS/tools/GGEMSSystemOfUnits.hh"
+#include "GGEMS/tools/GGEMSChrono.hh"
+#include "GGEMS/tools/GGEMSTools.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -319,6 +314,7 @@ void GGEMSManager::Initialize(void)
   source_manager_.Initialize();
 
   // Initialization of the phantom(s)
+  phantom_navigator_manager_.Initialize();
 
   // Printing infos about OpenCL
   if (is_opencl_verbose_) {

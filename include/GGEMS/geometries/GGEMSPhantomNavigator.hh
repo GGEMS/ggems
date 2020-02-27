@@ -96,12 +96,23 @@ class GGEMS_EXPORT GGEMSPhantomNavigator
     */
     void SetGeometryTolerance(GGdouble const& distance, char const* unit = "mm");
 
-  public:
     /*!
       \fn void PrintInfos(void) const = 0
       \brief Printing infos about the phantom navigator
     */
     virtual void PrintInfos(void) const = 0;
+
+    /*!
+      \fn void CheckParameters(void) const
+      \brief Check mandatory parameters for a phantom
+    */
+    virtual void CheckParameters(void) const;
+
+    /*!
+      \fn void Initialize(void)
+      \brief Initialize a GGEMS phantom
+    */
+    virtual void Initialize(void);
 
   protected:
     std::string phantom_navigator_name_; /*!< Name of the phantom navigator name */

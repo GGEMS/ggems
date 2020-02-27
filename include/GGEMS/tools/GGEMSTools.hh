@@ -14,6 +14,7 @@
 */
 
 #include <fstream>
+#include <cmath>
 
 #include "GGEMS/global/GGEMSConfiguration.hh"
 #include "GGEMS/tools/GGEMSTypes.hh"
