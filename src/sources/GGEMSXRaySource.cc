@@ -183,9 +183,6 @@ void GGEMSXRaySource::CheckParameters(void) const
 {
   GGcout("GGEMSXRaySource", "CheckParameters", 3) << "Checking the mandatory parameters..." << GGendl;
 
-  // Checking the parameters of Source Manager
-  GGEMSSource::CheckParameters();
-
   // Checking the beam aperture
   if (GGEMSMisc::IsEqual(beam_aperture_, std::numeric_limits<float>::min())) {
     std::ostringstream oss(std::ostringstream::out);

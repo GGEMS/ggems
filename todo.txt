@@ -34,3 +34,5 @@
 - Prévoir place pour les kernel customs
 
 - Faire une physics list automatique en fonction du type de particule
+
+- Supprimer les headers superflus

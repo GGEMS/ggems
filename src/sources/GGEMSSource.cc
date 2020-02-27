@@ -251,10 +251,12 @@ void GGEMSSource::OrganizeParticlesInBatch(void)
 
 void GGEMSSource::Initialize(void)
 {
-  GGcout("GGEMSSource", "Initialize", 3) << "Initializing the GGEMS source..." << GGendl;
+  GGcout("GGEMSSource", "Initialize", 3) << "Initializing the a GGEMS source..." << GGendl;
 
-  // Checking the RAM memory for particle and propose a new MAXIMUM_PARTICLE
-  // number
+  // Checking the parameters of Source
+  CheckParameters();
+
+  // Checking the RAM memory for particle and propose a new MAXIMUM_PARTICLE number
   CheckMemoryForParticles();
 
   // Organize the particles in batch

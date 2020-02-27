@@ -80,3 +80,49 @@ void GGEMSPhantomNavigator::SetGeometryTolerance(GGdouble const& distance, char 
 {
   geometry_tolerance_ = GGEMSUnits::BestDistanceUnit(distance, unit);
 }
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSPhantomNavigator::CheckParameters(void) const
+{
+  GGcout("GGEMSPhantomNavigator", "CheckParameters", 3) << "Checking the mandatory parameters..." << GGendl;
+
+  // Checking the phantom name
+  if (phantom_navigator_name_.empty()) {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "You have to set a name for the phantom!!!";
+    GGEMSMisc::ThrowException("GGEMSPhantomNavigator", "CheckParameters", oss.str());
+  }
+
+  // Checking the phantom name
+  if (phantom_mhd_header_filename_.empty()) {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "You have to set a mhd file containing the phantom!!!";
+    GGEMSMisc::ThrowException("GGEMSPhantomNavigator", "CheckParameters", oss.str());
+  }
+
+  // Checking the phantom name
+  if (range_data_filename_.empty()) {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "You have to set a file with the range to material data!!!";
+    GGEMSMisc::ThrowException("GGEMSPhantomNavigator", "CheckParameters", oss.str());
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSPhantomNavigator::Initialize(void)
+{
+  GGcout("GGEMSPhantomNavigator", "Initialize", 3) << "Initializing a GGEMS phantom..." << GGendl;
+
+  // Checking the parameters of phantom
+  CheckParameters();
+
+  // Loading the phantom to OpenCL device
+
+  // Creating matrix of material label
+}
