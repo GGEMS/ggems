@@ -20,7 +20,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 GGEMSTube::GGEMSTube(void)
-: GGEMSVolumeSolid(),
+: GGEMSSolidVolume(),
   height_(0.0),
   radius_(0.0)
 {
