@@ -1,5 +1,5 @@
 /*!
-  \file GGEMSVolumeSolid.cc
+  \file GGEMSSolidVolume.cc
 
   \brief Mother class handle solid volume
 
@@ -11,42 +11,42 @@
 */
 
 #include "GGEMS/tools/GGEMSPrint.hh"
-#include "GGEMS/geometries/GGEMSVolumeSolid.hh"
+#include "GGEMS/geometries/GGEMSSolidVolume.hh"
 #include "GGEMS/tools/GGEMSSystemOfUnits.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSVolumeSolid::GGEMSVolumeSolid(void)
+GGEMSSolidVolume::GGEMSSolidVolume(void)
 : label_value_(1.0),
   positions_(GGdouble3{{0.0, 0.0, 0.0}}),
   kernel_draw_solid_(nullptr),
   opencl_manager_(GGEMSOpenCLManager::GetInstance()),
   phantom_creator_manager_(GGEMSPhantomCreatorManager::GetInstance())
 {
-  GGcout("GGEMSVolumeSolid", "GGEMSVolumeSolid", 3) << "Allocation of GGEMSVolumeSolid..." << GGendl;
+  GGcout("GGEMSSolidVolume", "GGEMSSolidVolume", 3) << "Allocation of GGEMSSolidVolume..." << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSVolumeSolid::~GGEMSVolumeSolid(void)
+GGEMSSolidVolume::~GGEMSSolidVolume(void)
 {
-  GGcout("GGEMSVolumeSolid", "~GGEMSVolumeSolid", 3) << "Deallocation of GGEMSVolumeSolid..." << GGendl;
+  GGcout("GGEMSSolidVolume", "~GGEMSSolidVolume", 3) << "Deallocation of GGEMSSolidVolume..." << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSVolumeSolid::SetLabelValue(GGfloat const& label_value)
+void GGEMSSolidVolume::SetLabelValue(GGfloat const& label_value)
 {
   label_value_ = label_value;
 }
 
-void GGEMSVolumeSolid::SetMaterial(char const* material)
+void GGEMSSolidVolume::SetMaterial(char const* material)
 {
   // Adding the material to phantom creator manager
   phantom_creator_manager_.AddLabelAndMaterial(label_value_, material);
@@ -56,7 +56,7 @@ void GGEMSVolumeSolid::SetMaterial(char const* material)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSVolumeSolid::SetPosition(GGdouble const& pos_x, GGdouble const& pos_y, GGdouble const& pos_z, char const* unit)
+void GGEMSSolidVolume::SetPosition(GGdouble const& pos_x, GGdouble const& pos_y, GGdouble const& pos_z, char const* unit)
 {
   positions_.s[0] = GGEMSUnits::BestDistanceUnit(pos_x, unit);
   positions_.s[1] = GGEMSUnits::BestDistanceUnit(pos_y, unit);

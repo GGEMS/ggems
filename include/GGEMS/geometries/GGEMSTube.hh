@@ -13,9 +13,9 @@
   \date Monday January 13, 2020
 */
 
-#include "GGEMS/geometries/GGEMSVolumeSolid.hh"
+#include "GGEMS/geometries/GGEMSSolidVolume.hh"
 
-class GGEMS_EXPORT GGEMSTube : public GGEMSVolumeSolid
+class GGEMS_EXPORT GGEMSTube : public GGEMSSolidVolume
 {
   public:
     /*!
