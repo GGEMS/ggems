@@ -14,6 +14,7 @@
 
 #include "GGEMS/geometries/GGEMSPhantomNavigator.hh"
 #include "GGEMS/geometries/GGEMSPhantomNavigatorManager.hh"
+#include "GGEMS/geometries/GGEMSSolidPhantom.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
 #include "GGEMS/tools/GGEMSSystemOfUnits.hh"
 #include "GGEMS/tools/GGEMSTools.hh"
@@ -29,11 +30,13 @@ GGEMSPhantomNavigator::GGEMSPhantomNavigator(GGEMSPhantomNavigator* phantom_navi
   range_data_filename_(""),
   geometry_tolerance_(GGEMSTolerance::GEOMETRY)
 {
-  GGcout("GGEMSPhantomNavigator", "GGEMSPhantomNavigator", 3)
-    << "Allocation of GGEMSPhantomNavigator..." << GGendl;
+  GGcout("GGEMSPhantomNavigator", "GGEMSPhantomNavigator", 3) << "Allocation of GGEMSPhantomNavigator..." << GGendl;
 
   // Store the phantom navigator in phantom navigator manager
   GGEMSPhantomNavigatorManager::GetInstance().Store(phantom_navigator);
+
+  // Allocation of solid phantom
+  solid_phantom_.reset(new GGEMSSolidPhantom());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -122,7 +125,9 @@ void GGEMSPhantomNavigator::Initialize(void)
   // Checking the parameters of phantom
   CheckParameters();
 
-  // Loading the phantom to OpenCL device
+  // Loading the phantom
+  solid_phantom_->LoadPhantomImage(phantom_mhd_header_filename_);
 
   // Creating matrix of material label
+  solid_phantom_->LoadRangeToMaterialData(range_data_filename_);
 }

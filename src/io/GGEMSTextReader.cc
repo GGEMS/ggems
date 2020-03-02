@@ -13,7 +13,6 @@
 
 #include <string>
 #include <algorithm>
-#include <sstream>
 
 #include <iostream>
 
@@ -147,4 +146,30 @@ void GGEMSTextReader::RemoveSpace(std::string& line)
   line.erase(std::remove(line.begin(), line.end(), '\t'), line.end());
   // Erasing space
   line.erase(std::remove(line.begin(), line.end(), ' '), line.end());
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+std::string GGEMSMHDReader::ReadKey(std::string& line)
+{
+  // Getting the key
+  std::string key = line.substr(line.find_first_not_of("\t "), line.find('=')-1);
+  
+  // Remove space/tab
+  GGEMSTextReader::RemoveSpace(key);
+
+  // Return the key
+  return key;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+std::istringstream GGEMSMHDReader::ReadValue(std::string& line)
+{
+  std::istringstream iss(line.substr(line.find("=")+1), std::istringstream::in);
+  return iss;
 }

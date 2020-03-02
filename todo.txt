@@ -36,3 +36,7 @@
 - Faire une physics list automatique en fonction du type de particule
 
 - Supprimer les headers superflus
+
+- Si deux volumes, controles l'overlap
+
+- Gestion offset pour les phantoms
