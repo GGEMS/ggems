@@ -18,9 +18,12 @@
 #endif
 
 #include <string>
+#include <memory>
 
 #include "GGEMS/global/GGEMSExport.hh"
 #include "GGEMS/tools/GGEMSTypes.hh"
+
+class GGEMSSolidPhantom;
 
 /*!
   \class GGEMSPhantomNavigator
@@ -119,6 +122,7 @@ class GGEMS_EXPORT GGEMSPhantomNavigator
     std::string phantom_mhd_header_filename_; /*!< Filename of MHD file for phantom */
     std::string range_data_filename_; /*!< Filename of file for range data */
     GGdouble geometry_tolerance_; /*!< Tolerance of geometry range [1mm;1nm] */
+    std::shared_ptr<GGEMSSolidPhantom> solid_phantom_; /*!< Solid phantom with geometric infos and label */
 };
 
 #endif // End of GUARD_GGEMS_GEOMETRIES_GGEMSPHANTOMNAVIGATOR_HH

@@ -17,9 +17,27 @@
 #pragma warning(disable: 4251) // Deleting warning exporting STL members!!!
 #endif
 
+#include <string>
+#include <memory>
+
 #include "GGEMS/global/GGEMSExport.hh"
 #include "GGEMS/tools/GGEMSTypes.hh"
 #include "GGEMS/global/GGEMSOpenCLManager.hh"
+
+/*!
+  \struct GGEMSSolidPhantomData_t
+  \brief Structure storing data for MHD header
+*/
+typedef struct GGEMSMHDHeaderData_t
+{
+  std::string object_type_; /*!< Type of the image */
+  GGushort3 number_of_voxels_xyz_; /*!< Number of voxel in X, Y and Z [0, 65535] */
+  GGuint number_of_voxels_; /*!< Total number of voxels */
+  GGdouble3 voxel_sizes_xyz_; /*!< Size of voxels in X, Y and Z */
+  GGdouble3 offsets_xyz_; /*!< Offset of phantom in X, Y and Z */
+  GGdouble3 border_min_xyz_; /*!< Min. of border in X, Y and Z */
+  GGdouble3 border_max_xyz_; /*!< Max. of border in X, Y and Z */
+} GGEMSMHDHeaderData;
 
 /*!
   \class GGEMSMHDImage
@@ -76,6 +94,13 @@ class GGEMS_EXPORT GGEMSMHDImage
     void SetBaseName(std::string const& basename);
 
     /*!
+      \fn void Read(std::string const& image_mhd_header_filename)
+      \param image - input mhd filename
+      \brief read the mhd header
+    */
+    void Read(std::string const& image_mhd_header_filename);
+
+    /*!
       \fn void Write(std::shared_ptr<cl::Buffer> image) const
       \param image - image to write on output file
       \brief Write mhd header/raw file
@@ -116,9 +141,8 @@ class GGEMS_EXPORT GGEMSMHDImage
     GGdouble3 element_sizes_; /*!< Size of elements */
     GGuint3 dimensions_; /*!< Dimension volume X, Y, Z */
     GGdouble3 offsets_; /*!< Offset of the image */
-
-  private:
     GGEMSOpenCLManager& opencl_manager_; /*!< Reference to opencl manager singleton */
+    std::unique_ptr<GGEMSMHDHeaderData> mhd_header_data_; /*!< MHD header data */
 };
 
 #endif // End of GUARD_GGEMS_IO_GGEMSMHDIMAGE_HH

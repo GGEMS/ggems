@@ -1,8 +1,8 @@
-#ifndef GUARD_GGEMS_PHYSICS_GGEMSPRIMARYPARTICLES_HH
-#define GUARD_GGEMS_PHYSICS_GGEMSPRIMARYPARTICLES_HH
+#ifndef GUARD_GGEMS_PHYSICS_GGEMSPRIMARYPARTICLESSTACK_HH
+#define GUARD_GGEMS_PHYSICS_GGEMSPRIMARYPARTICLESSTACK_HH
 
 /*!
-  \file GGEMSPrimaryParticles.hh
+  \file GGEMSPrimaryParticlesStack.hh
 
   \brief Structure storing the primary particle buffers for both OpenCL and GGEMS
 
@@ -55,4 +55,4 @@ typedef struct PACKED GGEMSPrimaryParticles_t
 #endif
 #endif
 
-#endif // GUARD_GGEMS_PHYSICS_GGEMSPRIMARYPARTICLES_HH
+#endif // GUARD_GGEMS_PHYSICS_GGEMSPRIMARYPARTICLESSTACK_HH

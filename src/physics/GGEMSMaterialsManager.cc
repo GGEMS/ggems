@@ -69,7 +69,7 @@ void GGEMSMaterialsManager::LoadMaterialsDatabase(std::string const& filename)
   GGEMSFileStream::CheckInputStream(database_stream, filename);
 
   // Reading database file
-  std::string line;
+  std::string line("");
   while (std::getline(database_stream, line)) {
     // Skip comment
     GGEMSTextReader::SkipComment(database_stream, line);

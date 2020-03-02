@@ -15,6 +15,7 @@
 */
 
 #include <fstream>
+#include <sstream>
 
 #include "GGEMS/tools/GGEMSTypes.hh"
 
@@ -94,6 +95,27 @@ namespace GGEMSTextReader
     \brief remove all spaces and tab from a string
   */
   void RemoveSpace(std::string& line);
+}
+
+/*!
+  \namespace GGEMSMHDReader
+  \brief namespace reading mhd header
+*/
+namespace GGEMSMHDReader
+{
+  /*!
+    \fn std::string ReadKey(std::string& line)
+    \param line - string to analyze
+    \brief get the key of MHD header
+  */
+  std::string ReadKey(std::string& line);
+
+  /*!
+    \fn std::istringstream ReadValue(std::string& line)
+    \param line - string to analyze
+    \brief get string stream of value
+  */
+  std::istringstream ReadValue(std::string& line);
 }
 
 #endif // End of GUARD_GGEMS_IO_GGEMSTEXTREADER_HH
