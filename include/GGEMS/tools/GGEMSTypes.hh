@@ -211,4 +211,45 @@ inline GGfloat3 MakeFloat3Zeros()
   return tmp;
 }
 
+/*!
+  \fn inline GGdouble3 MakeDouble3(GGdouble const x, GGdouble const y, GGdouble const z)
+  \param x - x parameter
+  \param y - y parameter
+  \param z - z parameter
+  \brief Make a double X, Y and Z with custom values
+*/
+inline GGdouble3 MakeDouble3(GGdouble const x, GGdouble const y, GGdouble const z)
+{
+  GGdouble3 tmp;
+  #ifdef OPENCL_COMPILER
+  tmp.x = x;
+  tmp.y = y;
+  tmp.z = z;
+  #else
+  tmp.s[0] = x;
+  tmp.s[1] = y;
+  tmp.s[2] = z;
+  #endif
+  return tmp;
+}
+
+/*!
+  \fn inline GGdouble3 MakeDouble3Zeros()
+  \brief Make a double X, Y and Z with zeros for value
+*/
+inline GGdouble3 MakeDouble3Zeros()
+{
+  GGdouble3 tmp;
+  #ifdef OPENCL_COMPILER
+  tmp.x = 0.0f;
+  tmp.y = 0.0f;
+  tmp.z = 0.0f;
+  #else
+  tmp.s[0] = 0.0f;
+  tmp.s[1] = 0.0f;
+  tmp.s[2] = 0.0f;
+  #endif
+  return tmp;
+}
+
 #endif // End of GUARD_GGEMS_TOOLS_GGEMSTYPES_HH

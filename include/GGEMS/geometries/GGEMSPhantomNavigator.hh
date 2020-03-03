@@ -100,6 +100,16 @@ class GGEMS_EXPORT GGEMSPhantomNavigator
     void SetGeometryTolerance(GGdouble const& distance, char const* unit = "mm");
 
     /*!
+      \fn void SetOffset(GGdouble const offset_x, GGdouble const offset_y, GGdouble const offset_z, char const* unit = "mm")
+      \param offset_x - offset in X
+      \param offset_y - offset in Y
+      \param offset_z - offset in Z
+      \param unit - unit of the distance
+      \brief set the offset of the phantom in X, Y and Z
+    */
+    void SetOffset(GGdouble const offset_x, GGdouble const offset_y, GGdouble const offset_z, char const* unit = "mm");
+
+    /*!
       \fn void PrintInfos(void) const = 0
       \brief Printing infos about the phantom navigator
     */
@@ -122,6 +132,8 @@ class GGEMS_EXPORT GGEMSPhantomNavigator
     std::string phantom_mhd_header_filename_; /*!< Filename of MHD file for phantom */
     std::string range_data_filename_; /*!< Filename of file for range data */
     GGdouble geometry_tolerance_; /*!< Tolerance of geometry range [1mm;1nm] */
+    GGdouble3 offset_xyz_; /*!< Offset of the phantom in X, Y and Z */
+    bool is_offset_flag_; /*!< Apply offset */
     std::shared_ptr<GGEMSSolidPhantom> solid_phantom_; /*!< Solid phantom with geometric infos and label */
 };
 

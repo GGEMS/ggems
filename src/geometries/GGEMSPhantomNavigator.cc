@@ -28,7 +28,9 @@ GGEMSPhantomNavigator::GGEMSPhantomNavigator(GGEMSPhantomNavigator* phantom_navi
 : phantom_navigator_name_(""),
   phantom_mhd_header_filename_(""),
   range_data_filename_(""),
-  geometry_tolerance_(GGEMSTolerance::GEOMETRY)
+  geometry_tolerance_(GGEMSTolerance::GEOMETRY),
+  offset_xyz_(MakeDouble3Zeros()),
+  is_offset_flag_(false)
 {
   GGcout("GGEMSPhantomNavigator", "GGEMSPhantomNavigator", 3) << "Allocation of GGEMSPhantomNavigator..." << GGendl;
 
@@ -88,6 +90,18 @@ void GGEMSPhantomNavigator::SetGeometryTolerance(GGdouble const& distance, char 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+void GGEMSPhantomNavigator::SetOffset(GGdouble const offset_x, GGdouble const offset_y, GGdouble const offset_z, char const* unit)
+{
+  offset_xyz_.s[0] = GGEMSUnits::BestDistanceUnit(offset_x, unit);
+  offset_xyz_.s[1] = GGEMSUnits::BestDistanceUnit(offset_y, unit);
+  offset_xyz_.s[2] = GGEMSUnits::BestDistanceUnit(offset_z, unit);
+  is_offset_flag_ = true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 void GGEMSPhantomNavigator::CheckParameters(void) const
 {
   GGcout("GGEMSPhantomNavigator", "CheckParameters", 3) << "Checking the mandatory parameters..." << GGendl;
@@ -125,9 +139,11 @@ void GGEMSPhantomNavigator::Initialize(void)
   // Checking the parameters of phantom
   CheckParameters();
 
-  // Loading the phantom
-  solid_phantom_->LoadPhantomImage(phantom_mhd_header_filename_);
+  // Loading the phantom and convert image to material data
+  solid_phantom_->LoadPhantomImage(phantom_mhd_header_filename_, range_data_filename_);
 
-  // Creating matrix of material label
-  solid_phantom_->LoadRangeToMaterialData(range_data_filename_);
+  // Apply offset
+  if (is_offset_flag_) {
+    solid_phantom_->ApplyOffset(offset_xyz_);
+  }
 }

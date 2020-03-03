@@ -11,6 +11,7 @@
   \date Tuesday March 2, 2020
 */
 
+#include "GGEMS/geometries/GGEMSSolidPhantomStack.hh"
 #include "GGEMS/geometries/GGEMSSolidPhantom.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
 #include "GGEMS/io/GGEMSMHDImage.hh"
@@ -20,8 +21,13 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 GGEMSSolidPhantom::GGEMSSolidPhantom(void)
+: opencl_manager_(GGEMSOpenCLManager::GetInstance())
 {
   GGcout("GGEMSSolidPhantom", "GGEMSSolidPhantom", 3) << "Allocation of GGEMSSolidPhantom..." << GGendl;
+
+  // Allocation of memory on OpenCL device for header data
+  solid_phantom_data_ = opencl_manager_.Allocate(nullptr, sizeof(GGEMSSolidPhantomData), CL_MEM_READ_WRITE);
+  opencl_manager_.AddRAMMemory(sizeof(GGEMSSolidPhantomData));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -35,133 +41,48 @@ GGEMSSolidPhantom::~GGEMSSolidPhantom(void)
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSSolidPhantom::LoadPhantomImage(std::string const& phantom_filename)
+void GGEMSSolidPhantom::LoadPhantomImage(std::string const& phantom_filename, std::string const& range_data_filename)
 {
   GGcout("GGEMSSolidPhantom", "LoadPhantomImage", 3) << "Loading image phantom from mhd file..." << GGendl;
 
   // Read MHD input file
   GGEMSMHDImage mhd_input_phantom;
-  mhd_input_phantom.Read(phantom_filename);
+  mhd_input_phantom.Read(phantom_filename, solid_phantom_data_);
 
-/*  std::string line, key;
-    i32 nx=-1, ny=-1, nz=-1;
-    f32 sx=0, sy=0, sz=0;
-    f32 ox=0, oy=0, oz=0;
+  // Get the name of raw file from mhd reader
+  std::string const kRawFilename = mhd_input_phantom.GetRawMDHfilename();
 
-    bool flag_offset = false;
+  // Get the type
+  std::string const kDataType = mhd_input_phantom.GetDataMHDType();
 
-    // Watchdog
-    std::string ObjectType="", BinaryData="", BinaryDataByteOrderMSB="", CompressedData="",
-                ElementType="", ElementDataFile="";
-    i32 NDims=0;
+  // Convert raw data to material id data
+  if (!kDataType.compare("MET_CHAR")) {
+    ConvertImageToLabel<char>(kRawFilename);
+  }
+  else if (!kDataType.compare("MET_UCHAR")) {
+    ConvertImageToLabel<unsigned char>(kRawFilename);
+  }
+  else if (!kDataType.compare("MET_SHORT")) {
+    ConvertImageToLabel<GGshort>(kRawFilename);
+  }
+  else if (!kDataType.compare("MET_USHORT")) {
+    ConvertImageToLabel<GGushort>(kRawFilename);
+  }
+  else if (!kDataType.compare("MET_INT")) {
+    ConvertImageToLabel<GGint>(kRawFilename);
+  }
+  else if (!kDataType.compare("MET_UINT")) {
+    ConvertImageToLabel<GGuint>(kRawFilename);
+  }
+  else if (!kDataType.compare("MET_FLOAT")) {
+    ConvertImageToLabel<GGfloat>(kRawFilename);
+  }
 
-    // Read file
-    std::ifstream file(volume_name.c_str());
-    if(!file) {
-        printf("Error, file %s not found \n", volume_name.c_str());
-        exit_simulation();
-    }
-    while (file) {
-        m_txt_reader.skip_comment(file);
-        std::getline(file, line);
-
-        if (file) {
-            key = m_txt_reader.read_key(line);
-            if (key=="ObjectType")              ObjectType = m_txt_reader.read_key_string_arg(line);
-            if (key=="NDims")                   NDims = m_txt_reader.read_key_i32_arg(line);
-            if (key=="BinaryData")              BinaryData = m_txt_reader.read_key_string_arg(line);
-            if (key=="BinaryDataByteOrderMSB")  BinaryDataByteOrderMSB = m_txt_reader.read_key_string_arg(line);
-            if (key=="CompressedData")          CompressedData = m_txt_reader.read_key_string_arg(line);
-            //if (key=="TransformMatrix") printf("Matrix\n");
-            if (key=="Offset")                  {
-                                                ox = m_txt_reader.read_key_f32_arg_atpos(line, 0);
-                                                oy = m_txt_reader.read_key_f32_arg_atpos(line, 1);
-                                                oz = m_txt_reader.read_key_f32_arg_atpos(line, 2);
-                                                flag_offset = true;
-            }
-            //if (key=="CenterOfRotation") printf("CoR\n");
-            if (key=="ElementSpacing") {
-                                                sx = m_txt_reader.read_key_f32_arg_atpos(line, 0);
-                                                sy = m_txt_reader.read_key_f32_arg_atpos(line, 1);
-                                                sz = m_txt_reader.read_key_f32_arg_atpos(line, 2);
-            }
-            if (key=="DimSize") {
-                                                nx = m_txt_reader.read_key_i32_arg_atpos(line, 0);
-                                                ny = m_txt_reader.read_key_i32_arg_atpos(line, 1);
-                                                nz = m_txt_reader.read_key_i32_arg_atpos(line, 2);
-            }
-
-            //if (key=="AnatomicalOrientation") printf("Anato\n");
-            if (key=="ElementType")             ElementType = m_txt_reader.read_key_string_arg(line);
-            if (key=="ElementDataFile")         ElementDataFile = m_txt_reader.read_key_string_arg(line);
-        }
-
-    } // read file
-
-    // Check header
-    if (ObjectType != "Image") {
-        printf("Error, mhd header: ObjectType = %s\n", ObjectType.c_str());
-        exit_simulation();
-    }
-    if (BinaryData != "True") {
-        printf("Error, mhd header: BinaryData = %s\n", BinaryData.c_str());
-        exit_simulation();
-    }
-    if (BinaryDataByteOrderMSB != "False") {
-        printf("Error, mhd header: BinaryDataByteOrderMSB = %s\n", BinaryDataByteOrderMSB.c_str());
-        exit_simulation();
-    }
-    if (CompressedData != "False") {
-        printf("Error, mhd header: CompressedData = %s\n", CompressedData.c_str());
-        exit_simulation();
-    }
-    if (ElementType != "MET_FLOAT" && ElementType != "MET_SHORT" && ElementType != "MET_USHORT" &&
-        ElementType != "MET_UCHAR" && ElementType != "MET_UINT") {
-        printf("Error, mhd header: ElementType = %s\n", ElementType.c_str());
-        exit_simulation();
-    }
-    if (ElementDataFile == "") {
-        printf("Error, mhd header: ElementDataFile = %s\n", ElementDataFile.c_str());
-        exit_simulation();
-    }
-    if (NDims != 3) {
-        printf("Error, mhd header: NDims = %i\n", NDims);
-        exit_simulation();
-    }
-
-    if (nx == -1 || ny == -1 || nz == -1 || sx == 0 || sy == 0 || sz == 0) {
-        printf("Error when loading mhd file (unknown dimension and spacing)\n");
-        printf("   => dim %i %i %i - spacing %f %f %f\n", nx, ny, nz, sx, sy, sz);
-        exit_simulation();
-    }
-    // Read data
+/*  // Read data
     FILE *pfile = fopen(ElementDataFile.c_str(), "rb");
 
-    // Reative path?
-    if (!pfile) {
-        std::string nameWithRelativePath = volume_name;
-        i32 lastindex = nameWithRelativePath.find_last_of("/");
-        nameWithRelativePath = nameWithRelativePath.substr(0, lastindex);       
-        nameWithRelativePath += ( "/" + ElementDataFile );
-
-        pfile = fopen(nameWithRelativePath.c_str(), "rb");
-        if (!pfile) {
-            printf("Error when loading mhd file: %s\n", ElementDataFile.c_str());
-
-            exit_simulation();
-        }
-    }
-
-    h_volume->number_of_voxels = nx*ny*nz;
-    h_volume->nb_vox_x = nx;
-    h_volume->nb_vox_y = ny;
-    h_volume->nb_vox_z = nz;
-    h_volume->spacing_x = sx;
-    h_volume->spacing_y = sy;
-    h_volume->spacing_z = sz;
-    
     if(ElementType == "MET_FLOAT") {
       ui32 mem_size = sizeof(f32) * h_volume->number_of_voxels;
 
@@ -170,7 +91,6 @@ void GGEMSSolidPhantom::LoadPhantomImage(std::string const& phantom_filename)
       fclose(pfile);
       
       /////////////// Then, convert the raw data into material id //////////////////////
-
       m_define_materials_from_range(raw_data, range_name);
 
       // Free memory
@@ -228,39 +148,50 @@ void GGEMSSolidPhantom::LoadPhantomImage(std::string const& phantom_filename)
       // Free memory
       free(raw_data);
     }
-
-    ///////////// Define a bounding box for this phantom //////////////////////////////
-
-    f32 h_lengthx = h_volume->nb_vox_x * h_volume->spacing_x * 0.5f;
-    f32 h_lengthy = h_volume->nb_vox_y * h_volume->spacing_y * 0.5f;
-    f32 h_lengthz = h_volume->nb_vox_z * h_volume->spacing_z * 0.5f;
-
-    // If the offset is not defined, chose the volume center
-    if ( !flag_offset ) {
-        h_volume->off_x = h_lengthx;
-        h_volume->off_y = h_lengthy;
-        h_volume->off_z = h_lengthz;
-
-        h_volume->xmin = -h_lengthx; h_volume->xmax = h_lengthx;
-        h_volume->ymin = -h_lengthy; h_volume->ymax = h_lengthy;
-        h_volume->zmin = -h_lengthz; h_volume->zmax = h_lengthz;
-
-    } else {
-        h_volume->off_x = ox;
-        h_volume->off_y = oy;
-        h_volume->off_z = oz;
-
-        h_volume->xmin = -ox; h_volume->xmax = h_volume->xmin + (h_volume->nb_vox_x * h_volume->spacing_x);
-        h_volume->ymin = -oy; h_volume->ymax = h_volume->ymin + (h_volume->nb_vox_y * h_volume->spacing_y);
-        h_volume->zmin = -oz; h_volume->zmax = h_volume->zmin + (h_volume->nb_vox_z * h_volume->spacing_z);
-    }*/
+*/
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSSolidPhantom::LoadRangeToMaterialData(std::string const& range_data_filename)
+void GGEMSSolidPhantom::ApplyOffset(GGdouble3 const& offset_xyz)
 {
-  GGcout("GGEMSSolidPhantom", "LoadRangeToMaterialData", 3) << "Loading range to material data and label..." << GGendl;
+  GGcout("GGEMSSolidPhantom", "ApplyOffset", 3) << "Applyng the offset defined by the user..." << GGendl;
+
+  // Get pointer on OpenCL device
+  GGEMSSolidPhantomData* solid_data = opencl_manager_.GetDeviceBuffer<GGEMSSolidPhantomData>(solid_phantom_data_, sizeof(GGEMSSolidPhantomData));
+
+  solid_data->offsets_xyz_.s[0] = offset_xyz.s[0];
+  solid_data->offsets_xyz_.s[1] = offset_xyz.s[1];
+  solid_data->offsets_xyz_.s[2] = offset_xyz.s[2];
+
+  // Release the pointer
+  opencl_manager_.ReleaseDeviceBuffer(solid_phantom_data_, solid_data);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSSolidPhantom::PrintInfos(void) const
+{
+  // Get pointer on OpenCL device
+  GGEMSSolidPhantomData* solid_data = opencl_manager_.GetDeviceBuffer<GGEMSSolidPhantomData>(solid_phantom_data_, sizeof(GGEMSSolidPhantomData));
+
+  GGcout("GGEMSSolidPhantom", "PrintInfos", 0) << GGendl;
+  GGcout("GGEMSSolidPhantom", "PrintInfos", 0) << "GGEMSSolidPhantom Infos: " << GGendl;
+  GGcout("GGEMSSolidPhantom", "PrintInfos", 0) << "--------------------------------------------" << GGendl;
+  GGcout("GGEMSSolidPhantom", "PrintInfos", 0) << "*Dimension: " << solid_data->number_of_voxels_xyz_.s[0] << " " << solid_data->number_of_voxels_xyz_.s[1] << " " << solid_data->number_of_voxels_xyz_.s[2] << GGendl;
+  GGcout("GGEMSSolidPhantom", "PrintInfos", 0) << "*Number of voxels: " << solid_data->number_of_voxels_ << GGendl;
+  GGcout("GGEMSSolidPhantom", "PrintInfos", 0) << "*Size of voxels: (" << solid_data->voxel_sizes_xyz_.s[0] << "x" << solid_data->voxel_sizes_xyz_.s[1] << "x" << solid_data->voxel_sizes_xyz_.s[2] << ") mm3" << GGendl;
+  GGcout("GGEMSSolidPhantom", "PrintInfos", 0) << "*Offset: (" << solid_data->offsets_xyz_.s[0] << "x" << solid_data->offsets_xyz_.s[1] << "x" << solid_data->offsets_xyz_.s[2] << ") mm3" << GGendl;
+  GGcout("GGEMSSolidPhantom", "PrintInfos", 0) << "*Bounding box:" << GGendl;
+  GGcout("GGEMSSolidPhantom", "PrintInfos", 0) << "    - X: " << solid_data->border_min_xyz_.s[0] << " <-> " << solid_data->border_max_xyz_.s[0] << GGendl;
+  GGcout("GGEMSSolidPhantom", "PrintInfos", 0) << "    - Y: " << solid_data->border_min_xyz_.s[1] << " <-> " << solid_data->border_max_xyz_.s[1] << GGendl;
+  GGcout("GGEMSSolidPhantom", "PrintInfos", 0) << "    - Z: " << solid_data->border_min_xyz_.s[2] << " <-> " << solid_data->border_max_xyz_.s[2] << GGendl;
+  GGcout("GGEMSSolidPhantom", "PrintInfos", 0) << GGendl;
+
+  // Release the pointer
+  opencl_manager_.ReleaseDeviceBuffer(solid_phantom_data_, solid_data);
 }

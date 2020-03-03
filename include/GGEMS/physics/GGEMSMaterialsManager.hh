@@ -121,6 +121,21 @@ class GGEMS_EXPORT GGEMSMaterialsManager
     */
     void PrintAvailableMaterials(void) const;
 
+    /*!
+      \fn bool IsReady(void) const
+      \brief check if the material manager is ready
+      \return true if the material manager is ready otherwize false
+    */
+    inline bool IsReady(void) const
+    {
+      if (materials_.empty()) {
+        return false;
+      }
+      else {
+        return true;
+      }
+    }
+
   private:
     /*!
       \fn void LoadMaterialsDatabase(std::string const& filename)

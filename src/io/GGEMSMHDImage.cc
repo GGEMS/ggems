@@ -14,6 +14,7 @@
 #include <vector>
 #include <sstream>
 
+#include "GGEMS/geometries/GGEMSSolidPhantomStack.hh"
 #include "GGEMS/io/GGEMSMHDImage.hh"
 #include "GGEMS/tools/GGEMSTools.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
@@ -26,32 +27,13 @@
 GGEMSMHDImage::GGEMSMHDImage(void)
 : mhd_header_file_(""),
   mhd_raw_file_(""),
+  mhd_data_type_("MET_FLOAT"),
   element_sizes_(GGdouble3{{0.0, 0.0, 0.0}}),
   dimensions_(GGuint3{{0, 0, 0}}),
   offsets_(GGdouble3{{0.0, 0.0, 0.0}}),
   opencl_manager_(GGEMSOpenCLManager::GetInstance())
 {
   GGcout("GGEMSMHDImage", "GGEMSMHDImage", 3) << "Allocation of GGEMSMHDImage..." << GGendl;
-
-  // Initialization of the header data structure
-  mhd_header_data_.reset(new GGEMSMHDHeaderData);
-  mhd_header_data_->object_type_ = "Image";
-  mhd_header_data_->number_of_voxels_xyz_.s[0] = 0;
-  mhd_header_data_->number_of_voxels_xyz_.s[1] = 0;
-  mhd_header_data_->number_of_voxels_xyz_.s[2] = 0;
-  mhd_header_data_->number_of_voxels_ = 0;
-  mhd_header_data_->voxel_sizes_xyz_.s[0] = 0.0;
-  mhd_header_data_->voxel_sizes_xyz_.s[1] = 0.0;
-  mhd_header_data_->voxel_sizes_xyz_.s[2] = 0.0;
-  mhd_header_data_->offsets_xyz_.s[0] = 0.0;
-  mhd_header_data_->offsets_xyz_.s[1] = 0.0;
-  mhd_header_data_->offsets_xyz_.s[2] = 0.0;
-  mhd_header_data_->border_min_xyz_.s[0] = 0.0;
-  mhd_header_data_->border_min_xyz_.s[1] = 0.0;
-  mhd_header_data_->border_min_xyz_.s[2] = 0.0;
-  mhd_header_data_->border_max_xyz_.s[0] = 0.0;
-  mhd_header_data_->border_max_xyz_.s[1] = 0.0;
-  mhd_header_data_->border_max_xyz_.s[2] = 0.0;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -104,7 +86,7 @@ void GGEMSMHDImage::SetDimensions(GGuint3 const& dimensions)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSMHDImage::Read(std::string const& image_mhd_header_filename)
+void GGEMSMHDImage::Read(std::string const& image_mhd_header_filename, std::shared_ptr<cl::Buffer> solid_phantom_data)
 {
   GGcout("GGEMSMHDImage", "Read", 0) << "Reading MHD Image..." << GGendl;
 
@@ -112,9 +94,8 @@ void GGEMSMHDImage::Read(std::string const& image_mhd_header_filename)
   std::ifstream in_header_stream(image_mhd_header_filename, std::ios::in);
   GGEMSFileStream::CheckInputStream(in_header_stream, image_mhd_header_filename);
 
-  // Strings for type and raw data
-  std::string data_type("");
-  std::string raw_data_filename("");
+  // Get pointer on OpenCL device
+  GGEMSSolidPhantomData* solid_data = opencl_manager_.GetDeviceBuffer<GGEMSSolidPhantomData>(solid_phantom_data, sizeof(GGEMSSolidPhantomData));
 
   // Read the file
   std::string line("");
@@ -132,40 +113,39 @@ void GGEMSMHDImage::Read(std::string const& image_mhd_header_filename)
 
     // Compare key and store data if valid
     if (!kKey.compare("ObjectType")) {
-      iss >> mhd_header_data_->object_type_;
-
+      GGwarn("GGEMSMHDImage", "Read", 0) << "The key 'ObjectType' is useless in GGEMS." << GGendl;
     }
     else if (!kKey.compare("DimSize")) {
-      iss >> mhd_header_data_->number_of_voxels_xyz_.s[0] >> mhd_header_data_->number_of_voxels_xyz_.s[1] >> mhd_header_data_->number_of_voxels_xyz_.s[2];
+      iss >> solid_data->number_of_voxels_xyz_.s[0] >> solid_data->number_of_voxels_xyz_.s[1] >> solid_data->number_of_voxels_xyz_.s[2];
       // Computing number of voxels
-      mhd_header_data_->number_of_voxels_ = mhd_header_data_->number_of_voxels_xyz_.s[0] * mhd_header_data_->number_of_voxels_xyz_.s[1] * mhd_header_data_->number_of_voxels_xyz_.s[2];
-    }
-    else if (!kKey.compare("Offset")) {
-      iss >> mhd_header_data_->offsets_xyz_.s[0] >> mhd_header_data_->offsets_xyz_.s[1] >> mhd_header_data_->offsets_xyz_.s[2];
+      solid_data->number_of_voxels_ = solid_data->number_of_voxels_xyz_.s[0] * solid_data->number_of_voxels_xyz_.s[1] * solid_data->number_of_voxels_xyz_.s[2];
     }
     else if (!kKey.compare("ElementSpacing")) {
-      iss >> mhd_header_data_->voxel_sizes_xyz_.s[0] >> mhd_header_data_->voxel_sizes_xyz_.s[1] >> mhd_header_data_->voxel_sizes_xyz_.s[2];
+      iss >> solid_data->voxel_sizes_xyz_.s[0] >> solid_data->voxel_sizes_xyz_.s[1] >> solid_data->voxel_sizes_xyz_.s[2];
     }
     else if (!kKey.compare("ElementType")) {
-      iss >> data_type;
+      iss >> mhd_data_type_;
     }
     else if (!kKey.compare("ElementDataFile")) {
-      iss >> raw_data_filename;
+      iss >> mhd_raw_file_;
+    }
+    else if (!kKey.compare("Offset")) {
+      GGwarn("GGEMSMHDImage", "Read", 0) << "The key 'Offset' is useless in GGEMS." << GGendl;
     }
     else if (!kKey.compare("NDims")) {
-      GGwarn("GGEMSMHDImage", "Read", 1) << "The key 'NDims' is useless in GGEMS." << GGendl;
+      GGwarn("GGEMSMHDImage", "Read", 0) << "The key 'NDims' is useless in GGEMS." << GGendl;
     }
     else if (!kKey.compare("BinaryData")) {
-      GGwarn("GGEMSMHDImage", "Read", 1) << "The key 'BinaryData' is useless in GGEMS." << GGendl;
+      GGwarn("GGEMSMHDImage", "Read", 0) << "The key 'BinaryData' is useless in GGEMS." << GGendl;
     }
     else if (!kKey.compare("CompressedData")) {
-      GGwarn("GGEMSMHDImage", "Read", 1) << "The key 'CompressedData' is useless in GGEMS." << GGendl;
+      GGwarn("GGEMSMHDImage", "Read", 0) << "The key 'CompressedData' is useless in GGEMS." << GGendl;
     }
     else if (!kKey.compare("BinaryDataByteOrderMSB")) {
-      GGwarn("GGEMSMHDImage", "Read", 1) << "The key 'BinaryDataByteOrderMSB' is useless in GGEMS." << GGendl;
+      GGwarn("GGEMSMHDImage", "Read", 0) << "The key 'BinaryDataByteOrderMSB' is useless in GGEMS." << GGendl;
     }
     else if (!kKey.compare("BinaryDataByteOrderMSB")) {
-      GGwarn("GGEMSMHDImage", "Read", 1) << "The key 'BinaryDataByteOrderMSB' is useless in GGEMS." << GGendl;
+      GGwarn("GGEMSMHDImage", "Read", 0) << "The key 'BinaryDataByteOrderMSB' is useless in GGEMS." << GGendl;
     }
     else {
       std::ostringstream oss(std::ostringstream::out);
@@ -174,50 +154,48 @@ void GGEMSMHDImage::Read(std::string const& image_mhd_header_filename)
     }
   }
 
-  // Checking the values
-  if (mhd_header_data_->object_type_.compare("Image")) {
-    std::ostringstream oss(std::ostringstream::out);
-    oss << "Value invalid for the key 'ObjectType'!!! The value have to be 'Image'";
-    GGEMSMisc::ThrowException("GGEMSMHDImage", "Read", oss.str());
-  }
+  // Closing the input header
+  in_header_stream.close();
 
-  if (mhd_header_data_->number_of_voxels_xyz_.s[0] <= 0 || mhd_header_data_->number_of_voxels_xyz_.s[1] <= 0 || mhd_header_data_->number_of_voxels_xyz_.s[2] <= 0) {
+  // Checking the values
+  if (solid_data->number_of_voxels_xyz_.s[0] <= 0 || solid_data->number_of_voxels_xyz_.s[1] <= 0 || solid_data->number_of_voxels_xyz_.s[2] <= 0) {
     std::ostringstream oss(std::ostringstream::out);
     oss << "Dimension invalid for the key 'DimSize'!!! The values have to be > 0";
     GGEMSMisc::ThrowException("GGEMSMHDImage", "Read", oss.str());
   }
 
-  if (GGEMSMisc::IsEqual(mhd_header_data_->voxel_sizes_xyz_.s[0], 0.0) || GGEMSMisc::IsEqual(mhd_header_data_->voxel_sizes_xyz_.s[1], 0.0) || GGEMSMisc::IsEqual(mhd_header_data_->voxel_sizes_xyz_.s[2], 0.0)) {
+  if (GGEMSMisc::IsEqual(solid_data->voxel_sizes_xyz_.s[0], 0.0) || GGEMSMisc::IsEqual(solid_data->voxel_sizes_xyz_.s[1], 0.0) || GGEMSMisc::IsEqual(solid_data->voxel_sizes_xyz_.s[2], 0.0)) {
     std::ostringstream oss(std::ostringstream::out);
     oss << "Voxel size invalid for the key 'ElementSpacing'!!! The values have to be > 0";
     GGEMSMisc::ThrowException("GGEMSMHDImage", "Read", oss.str());
   }
 
-  if (data_type.empty() && data_type.compare("MET_FLOAT") && data_type.compare("MET_SHORT") && data_type.compare("MET_USHORT") && data_type.compare("MET_UCHAR") && data_type.compare("MET_CHAR") && data_type.compare("MET_UINT") && data_type.compare("MET_INT")) {
+  if (mhd_data_type_.empty() && mhd_data_type_.compare("MET_FLOAT") && mhd_data_type_.compare("MET_SHORT") && mhd_data_type_.compare("MET_USHORT") && mhd_data_type_.compare("MET_UCHAR") && mhd_data_type_.compare("MET_CHAR") && mhd_data_type_.compare("MET_UINT") && mhd_data_type_.compare("MET_INT")) {
     std::ostringstream oss(std::ostringstream::out);
     oss << "Value invalid for the key 'ElementType'!!! The value have to be 'MET_FLOAT' or 'MET_SHORT' or 'MET_USHORT' or 'MET_UCHAR' or 'MET_CHAR' or 'MET_UINT' or 'MET_INT'";
     GGEMSMisc::ThrowException("GGEMSMHDImage", "Read", oss.str());
   }
 
-  if (raw_data_filename.empty()) {
+  if (mhd_raw_file_.empty()) {
     std::ostringstream oss(std::ostringstream::out);
     oss << "Value invalid for the key 'ElementDataFile'!!! A filename for raw data has to be given";
     GGEMSMisc::ThrowException("GGEMSMHDImage", "Read", oss.str());
   }
 
-  // Computing border for bounding box
+  // Computing the offset and bounding box
+  solid_data->offsets_xyz_.s[0] = solid_data->number_of_voxels_xyz_.s[0] * solid_data->voxel_sizes_xyz_.s[0] * 0.5;
+  solid_data->offsets_xyz_.s[1] = solid_data->number_of_voxels_xyz_.s[1] * solid_data->voxel_sizes_xyz_.s[1] * 0.5;
+  solid_data->offsets_xyz_.s[2] = solid_data->number_of_voxels_xyz_.s[2] * solid_data->voxel_sizes_xyz_.s[2] * 0.5;
 
-  GGcout("GGEMSMHDImage", "Read", 1) << "Header of the MHD Input Image..." << GGendl;
-  GGcout("GGEMSMHDImage", "Read", 1) << "    *Object type: " << mhd_header_data_->object_type_ << GGendl;
-  GGcout("GGEMSMHDImage", "Read", 1) << "    *Dimension: " << mhd_header_data_->number_of_voxels_xyz_.s[0] << " " << mhd_header_data_->number_of_voxels_xyz_.s[1] << " " << mhd_header_data_->number_of_voxels_xyz_.s[2] << GGendl;
-  GGcout("GGEMSMHDImage", "Read", 1) << "    *Number of voxels: " << mhd_header_data_->number_of_voxels_ << GGendl;
-  GGcout("GGEMSMHDImage", "Read", 1) << "    *Size of voxels: (" << mhd_header_data_->voxel_sizes_xyz_.s[0] << "x" << mhd_header_data_->voxel_sizes_xyz_.s[1] << "x" << mhd_header_data_->voxel_sizes_xyz_.s[2] << ") mm3" << GGendl;
-  GGcout("GGEMSMHDImage", "Read", 1) << "    *Offset: (" << mhd_header_data_->offsets_xyz_.s[0] << "x" << mhd_header_data_->offsets_xyz_.s[1] << "x" << mhd_header_data_->offsets_xyz_.s[2] << ") mm3" << GGendl;
-  GGcout("GGEMSMHDImage", "Read", 1) << "    *Type: " << data_type << GGendl;
-  GGcout("GGEMSMHDImage", "Read", 1) << "    *Raw filename: " << raw_data_filename << GGendl;
+  solid_data->border_min_xyz_.s[0] = -solid_data->offsets_xyz_.s[0];
+  solid_data->border_max_xyz_.s[0] = solid_data->offsets_xyz_.s[0];
+  solid_data->border_min_xyz_.s[1] = -solid_data->offsets_xyz_.s[1];
+  solid_data->border_max_xyz_.s[1] = solid_data->offsets_xyz_.s[1];
+  solid_data->border_min_xyz_.s[2] = -solid_data->offsets_xyz_.s[2];
+  solid_data->border_max_xyz_.s[2] = solid_data->offsets_xyz_.s[2];
 
-  // Closing the input header
-  in_header_stream.close();
+  // Release the pointer
+  opencl_manager_.ReleaseDeviceBuffer(solid_phantom_data, solid_data);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -240,7 +218,7 @@ void GGEMSMHDImage::Write(std::shared_ptr<cl::Buffer> image) const
   out_header_stream << "Offset = " << offsets_.s[0] << " " << offsets_.s[1] << " " << offsets_.s[2] << std::endl;
   out_header_stream << "ElementSpacing = " << element_sizes_.s[0] << " " << element_sizes_.s[1] << " " << element_sizes_.s[2] << std::endl;
   out_header_stream << "DimSize = " << dimensions_.s[0] << " " << dimensions_.s[1] << " " << dimensions_.s[2] << std::endl;
-  out_header_stream << "ElementType = MET_FLOAT" << std::endl;
+  out_header_stream << "ElementType = " << mhd_data_type_ << std::endl;
   out_header_stream << "ElementDataFile = " << mhd_raw_file_ << std::endl;
   out_header_stream.close();
 

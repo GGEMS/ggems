@@ -112,4 +112,15 @@ extern "C" GGEMS_EXPORT void set_range_to_material_filename_ggems_voxelized_phan
 */
 extern "C" GGEMS_EXPORT void set_geometry_tolerance_ggems_voxelized_phantom_navigator_imagery(GGEMSVoxelizedPhantomNavigatorImagery* voxelized_phantom_navigator_imagery, GGdouble const distance, char const* unit);
 
+/*!
+  \fn void set_offset_ggems_voxelized_phantom_navigator_imagery(GGEMSVoxelizedPhantomNavigatorImagery* voxelized_phantom_navigator_imagery, GGdouble const offset_x, GGdouble const offset_y, GGdouble const offset_z, char const* unit)
+  \param voxelized_phantom_navigator_imagery - pointer on the navigator
+  \param offset_x - offset in X
+  \param offset_y - offset in Y
+  \param offset_z - offset in Z
+  \param unit - unit of the distance
+  \brief set the offset of the phantom in X, Y and Z
+*/
+extern "C" GGEMS_EXPORT void set_offset_ggems_voxelized_phantom_navigator_imagery(GGEMSVoxelizedPhantomNavigatorImagery* voxelized_phantom_navigator_imagery, GGdouble const offset_x, GGdouble const offset_y, GGdouble const offset_z, char const* unit);
+
 #endif // End of GUARD_GGEMS_GEOMETRIES_GGEMSVOXELIZEDPHANTOMNAVIGATORIMAGERY_HH
