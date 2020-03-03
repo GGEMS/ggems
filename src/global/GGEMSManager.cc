@@ -298,6 +298,9 @@ void GGEMSManager::Initialize(void)
 {
   GGcout("GGEMSManager", "Initialize", 1) << "Initialization of GGEMS Manager singleton..." << GGendl;
 
+  // Get the start time
+  ChronoTime start_time = GGEMSChrono::Now();
+
   // Printing the banner with the GGEMS version
   PrintBanner();
 
@@ -307,14 +310,18 @@ void GGEMSManager::Initialize(void)
 
   // Initialize the pseudo random number generator
   srand(seed_);
-  GGcout("GGEMSManager", "Initialize", 0)
-    << "C++ Pseudo-random number generator seeded OK" << GGendl;
+  GGcout("GGEMSManager", "Initialize", 0) << "C++ Pseudo-random number generator seeded OK" << GGendl;
+
+  // Checking if material manager is ready
+  if (!material_manager_.IsReady()) GGEMSMisc::ThrowException("GGEMSManager", "Initialize", "Materials are not loaded in GGEMS!!!");
 
   // Initialization of the source
   source_manager_.Initialize();
 
   // Initialization of the phantom(s)
   phantom_navigator_manager_.Initialize();
+
+  // Checking overlap between phantom
 
   // Printing infos about OpenCL
   if (is_opencl_verbose_) {
@@ -327,25 +334,24 @@ void GGEMSManager::Initialize(void)
   }
 
   // Printing infos about material database
-  if (is_material_database_verbose_) {
-    // Print only material for the simulation !!!
-    material_manager_.PrintAvailableMaterials();
-  }
+  if (is_material_database_verbose_) material_manager_.PrintAvailableMaterials();
 
   // Printing infos about source(s)
-  if (is_source_verbose_) {
-    source_manager_.PrintInfos();
-  }
+  if (is_source_verbose_) source_manager_.PrintInfos();
 
   // Printing infos about phantom(s)
-  if (is_phantom_verbose_) {
-    phantom_navigator_manager_.PrintInfos();
-  }
+  if (is_phantom_verbose_) phantom_navigator_manager_.PrintInfos();
 
   // Printing infos about RAM
-  if (is_memory_ram_verbose_) {
-    opencl_manager_.PrintRAMStatus();
-  }
+  if (is_memory_ram_verbose_) opencl_manager_.PrintRAMStatus();
+
+  // Get the end time
+  ChronoTime end_time = GGEMSChrono::Now();
+
+  GGcout("GGEMSManager", "Initialize", 0) << "GGEMS initialization succeeded" << GGendl;
+
+  // Display the elapsed time in GGEMS
+  GGEMSChrono::DisplayTime(end_time - start_time, "GGEMS initialization");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -354,7 +360,7 @@ void GGEMSManager::Initialize(void)
 
 void GGEMSManager::Run()
 {
-  GGcout("GGEMSManager", "Run", 0) << "GGEMS simulation started!!!" << GGendl;
+  GGcout("GGEMSManager", "Run", 0) << "GGEMS simulation started" << GGendl;
 
   // Get the start time
   ChronoTime start_time = GGEMSChrono::Now();
@@ -376,7 +382,7 @@ void GGEMSManager::Run()
   // Get the end time
   ChronoTime end_time = GGEMSChrono::Now();
 
-  GGcout("GGEMSManager", "Run", 0) << "GGEMS simulation succeeded!!!" << GGendl;
+  GGcout("GGEMSManager", "Run", 0) << "GGEMS simulation succeeded" << GGendl;
 
   // Display the elapsed time in GGEMS
   GGEMSChrono::DisplayTime(end_time - start_time, "GGEMS simulation");

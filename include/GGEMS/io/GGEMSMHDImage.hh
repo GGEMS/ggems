@@ -25,21 +25,6 @@
 #include "GGEMS/global/GGEMSOpenCLManager.hh"
 
 /*!
-  \struct GGEMSSolidPhantomData_t
-  \brief Structure storing data for MHD header
-*/
-typedef struct GGEMSMHDHeaderData_t
-{
-  std::string object_type_; /*!< Type of the image */
-  GGushort3 number_of_voxels_xyz_; /*!< Number of voxel in X, Y and Z [0, 65535] */
-  GGuint number_of_voxels_; /*!< Total number of voxels */
-  GGdouble3 voxel_sizes_xyz_; /*!< Size of voxels in X, Y and Z */
-  GGdouble3 offsets_xyz_; /*!< Offset of phantom in X, Y and Z */
-  GGdouble3 border_min_xyz_; /*!< Min. of border in X, Y and Z */
-  GGdouble3 border_max_xyz_; /*!< Max. of border in X, Y and Z */
-} GGEMSMHDHeaderData;
-
-/*!
   \class GGEMSMHDImage
   \brief I/O class handling MHD file
 */
@@ -94,11 +79,12 @@ class GGEMS_EXPORT GGEMSMHDImage
     void SetBaseName(std::string const& basename);
 
     /*!
-      \fn void Read(std::string const& image_mhd_header_filename)
+      \fn void Read(std::string const& image_mhd_header_filename, std::shared_ptr<cl::Buffer> solid_phantom_data)
       \param image - input mhd filename
+      \param solid_phantom_data - pointer on solid phantom data
       \brief read the mhd header
     */
-    void Read(std::string const& image_mhd_header_filename);
+    void Read(std::string const& image_mhd_header_filename, std::shared_ptr<cl::Buffer> solid_phantom_data);
 
     /*!
       \fn void Write(std::shared_ptr<cl::Buffer> image) const
@@ -128,6 +114,20 @@ class GGEMS_EXPORT GGEMSMHDImage
     */
     void SetOffsets(GGdouble3 const& offsets);
 
+    /*!
+      \fn std::string GetDataMHDType(void) const
+      \brief get the mhd data type
+      \return the type of data for mhd file
+    */
+    inline std::string GetDataMHDType(void) const {return mhd_data_type_;};
+
+    /*!
+      \fn std::string GetRawMDHfilename(void) const
+      \brief get the filename of raw data
+      \return the name of raw file
+    */
+    inline std::string GetRawMDHfilename(void) const {return mhd_raw_file_;};
+
   private:
     /*!
       \fn void CheckParameters(void) const
@@ -138,11 +138,11 @@ class GGEMS_EXPORT GGEMSMHDImage
   private:
     std::string mhd_header_file_; /*!< Name of the MHD header file */
     std::string mhd_raw_file_; /*!< Name of the MHD raw file */
+    std::string mhd_data_type_; /*< Type of data */
     GGdouble3 element_sizes_; /*!< Size of elements */
     GGuint3 dimensions_; /*!< Dimension volume X, Y, Z */
     GGdouble3 offsets_; /*!< Offset of the image */
     GGEMSOpenCLManager& opencl_manager_; /*!< Reference to opencl manager singleton */
-    std::unique_ptr<GGEMSMHDHeaderData> mhd_header_data_; /*!< MHD header data */
 };
 
 #endif // End of GUARD_GGEMS_IO_GGEMSMHDIMAGE_HH

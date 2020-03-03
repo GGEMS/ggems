@@ -12,6 +12,7 @@
 
 #include "GGEMS/geometries/GGEMSVoxelizedPhantomNavigatorImagery.hh"
 #include "GGEMS/geometries/GGEMSPhantomNavigatorManager.hh"
+#include "GGEMS/geometries/GGEMSSolidPhantom.hh"
 #include "GGEMS/tools/GGEMSSystemOfUnits.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
 
@@ -59,6 +60,7 @@ void GGEMSVoxelizedPhantomNavigatorImagery::PrintInfos(void) const
   GGcout("GGEMSVoxelizedPhantomNavigatorImagery", "PrintInfos", 0) << "*Phantom header filename: " << phantom_mhd_header_filename_ << GGendl;
   GGcout("GGEMSVoxelizedPhantomNavigatorImagery", "PrintInfos", 0) << "*Range label to material filename: " << range_data_filename_ << GGendl;
   GGcout("GGEMSVoxelizedPhantomNavigatorImagery", "PrintInfos", 0) << "*Geometry tolerance: " << geometry_tolerance_/GGEMSUnits::mm << " mm" << GGendl;
+  solid_phantom_->PrintInfos();
   GGcout("GGEMSVoxelizedPhantomNavigatorImagery", "PrintInfos", 0) << GGendl;
 }
 
@@ -105,4 +107,13 @@ void set_range_to_material_filename_ggems_voxelized_phantom_navigator_imagery(GG
 void set_geometry_tolerance_ggems_voxelized_phantom_navigator_imagery(GGEMSVoxelizedPhantomNavigatorImagery* voxelized_phantom_navigator_imagery, GGdouble const distance, char const* unit)
 {
   voxelized_phantom_navigator_imagery->SetGeometryTolerance(distance, unit);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void set_offset_ggems_voxelized_phantom_navigator_imagery(GGEMSVoxelizedPhantomNavigatorImagery* voxelized_phantom_navigator_imagery, GGdouble const offset_x, GGdouble const offset_y, GGdouble const offset_z, char const* unit)
+{
+  voxelized_phantom_navigator_imagery->SetOffset(offset_x, offset_y, offset_z, unit);
 }

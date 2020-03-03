@@ -119,7 +119,8 @@ class GGEMS_EXPORT GGEMSStream
     GGEMSStream& operator()(std::string const& class_name, std::string const& method_name, GGint const& verbosity_level);
 
     /*!
-      \fn GGEMSStream& operator<<(std::string const& message)
+      \fn template<typename T> GGEMSStream& operator<<(std::string const& message)
+      \tparam T - type of data
       \param message - message displayed to screen
       \brief overloading << to print a message in standard output
     */

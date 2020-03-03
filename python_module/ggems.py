@@ -85,6 +85,9 @@ class GGEMSVoxelizedPhantomNavigatorImagery(object):
         ggems_lib.set_geometry_tolerance_ggems_voxelized_phantom_navigator_imagery.argtypes = [ctypes.c_void_p, ctypes.c_double, ctypes.c_char_p]
         ggems_lib.set_geometry_tolerance_ggems_voxelized_phantom_navigator_imagery.restype = ctypes.c_void_p
 
+        ggems_lib.set_offset_ggems_voxelized_phantom_navigator_imagery.argtypes = [ctypes.c_void_p, ctypes.c_double, ctypes.c_double, ctypes.c_double, ctypes.c_char_p]
+        ggems_lib.set_offset_ggems_voxelized_phantom_navigator_imagery.restype = ctypes.c_void_p
+
         self.obj = ggems_lib.create_ggems_voxelized_phantom_navigator_imagery()
 
     def set_phantom_name(self, name):
@@ -98,6 +101,9 @@ class GGEMSVoxelizedPhantomNavigatorImagery(object):
 
     def set_geometry_tolerance(self, distance, unit):
         ggems_lib.set_geometry_tolerance_ggems_voxelized_phantom_navigator_imagery(self.obj, distance, unit)
+
+    def set_offset(self, offset_x, offset_y, offset_z, unit):
+        ggems_lib.set_offset_ggems_voxelized_phantom_navigator_imagery(self.obj, offset_x, offset_y, offset_z, unit)
 
 
 class GGEMSSourceManager(object):

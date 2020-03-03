@@ -10,7 +10,7 @@ opencl_manager.set_context_index(2)
 
 # ------------------------------------------------------------------------------
 # STEP 3: Setting GGEMS materials
-material_manager.set_materials(b"data/materials.dat")
+material_manager.set_materials(b"data/materials.txt")
 
 # ------------------------------------------------------------------------------
 # STEP 4: Phantom, Navigator and System
@@ -19,12 +19,14 @@ phantom_1 = GGEMSVoxelizedPhantomNavigatorImagery()
 phantom_1.set_phantom_name(b"phantom_1")
 phantom_1.set_phantom_image(b"data/phantom_1.mhd")
 phantom_1.set_range_to_material(b"data/range_phantom_1.txt")
+phantom_1.set_offset(101.5, 50.0, 50.0, b"mm")
 
 # Second phantom
 phantom_2 = GGEMSVoxelizedPhantomNavigatorImagery()
 phantom_2.set_phantom_name(b"phantom_2")
 phantom_2.set_phantom_image(b"data/phantom_2.mhd")
 phantom_2.set_range_to_material(b"data/range_phantom_2.txt")
+phantom_2.set_offset(-1.5, 50.0, 50.0, b"mm")
 
 # ------------------------------------------------------------------------------
 # STEP 5: Physics Declaration
