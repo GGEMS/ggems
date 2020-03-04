@@ -118,4 +118,18 @@ namespace GGEMSMHDReader
   std::istringstream ReadValue(std::string& line);
 }
 
+/*!
+  \namespace GGEMSRangeReader
+  \brief namespace reading range material in text file
+*/
+namespace GGEMSRangeReader
+{
+  /*!
+    \fn std::istringstream ReadRangeMaterial(std::string& line)
+    \param line - string to analyze
+    \brief get string stream of value for material range
+  */
+  std::istringstream ReadRangeMaterial(std::string& line);
+}
+
 #endif // End of GUARD_GGEMS_IO_GGEMSTEXTREADER_HH

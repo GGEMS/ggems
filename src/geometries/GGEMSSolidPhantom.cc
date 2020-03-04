@@ -20,8 +20,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSSolidPhantom::GGEMSSolidPhantom(void)
-: opencl_manager_(GGEMSOpenCLManager::GetInstance())
+GGEMSSolidPhantom::GGEMSSolidPhantom(std::shared_ptr<GGEMSMaterials> materials)
+: materials_(materials),
+  opencl_manager_(GGEMSOpenCLManager::GetInstance())
 {
   GGcout("GGEMSSolidPhantom", "GGEMSSolidPhantom", 3) << "Allocation of GGEMSSolidPhantom..." << GGendl;
 
@@ -59,96 +60,26 @@ void GGEMSSolidPhantom::LoadPhantomImage(std::string const& phantom_filename, st
 
   // Convert raw data to material id data
   if (!kDataType.compare("MET_CHAR")) {
-    ConvertImageToLabel<char>(kRawFilename);
+    ConvertImageToLabel<char>(kRawFilename, range_data_filename);
   }
   else if (!kDataType.compare("MET_UCHAR")) {
-    ConvertImageToLabel<unsigned char>(kRawFilename);
+    ConvertImageToLabel<unsigned char>(kRawFilename, range_data_filename);
   }
   else if (!kDataType.compare("MET_SHORT")) {
-    ConvertImageToLabel<GGshort>(kRawFilename);
+    ConvertImageToLabel<GGshort>(kRawFilename, range_data_filename);
   }
   else if (!kDataType.compare("MET_USHORT")) {
-    ConvertImageToLabel<GGushort>(kRawFilename);
+    ConvertImageToLabel<GGushort>(kRawFilename, range_data_filename);
   }
   else if (!kDataType.compare("MET_INT")) {
-    ConvertImageToLabel<GGint>(kRawFilename);
+    ConvertImageToLabel<GGint>(kRawFilename, range_data_filename);
   }
   else if (!kDataType.compare("MET_UINT")) {
-    ConvertImageToLabel<GGuint>(kRawFilename);
+    ConvertImageToLabel<GGuint>(kRawFilename, range_data_filename);
   }
   else if (!kDataType.compare("MET_FLOAT")) {
-    ConvertImageToLabel<GGfloat>(kRawFilename);
+    ConvertImageToLabel<GGfloat>(kRawFilename, range_data_filename);
   }
-
-/*  // Read data
-    FILE *pfile = fopen(ElementDataFile.c_str(), "rb");
-
-    if(ElementType == "MET_FLOAT") {
-      ui32 mem_size = sizeof(f32) * h_volume->number_of_voxels;
-
-      f32 *raw_data = (f32*)malloc(mem_size);
-      fread(raw_data, sizeof(f32), h_volume->number_of_voxels, pfile);
-      fclose(pfile);
-      
-      /////////////// Then, convert the raw data into material id //////////////////////
-      m_define_materials_from_range(raw_data, range_name);
-
-      // Free memory
-      free(raw_data);
-    }
-    
-    if(ElementType == "MET_USHORT") {
-      ui32 mem_size = sizeof(ui16) * h_volume->number_of_voxels;
-
-      ui16 *raw_data = (ui16*)malloc(mem_size);
-      fread(raw_data, sizeof(ui16), h_volume->number_of_voxels, pfile);
-      fclose(pfile);
-      /////////////// Then, convert the raw data into material id //////////////////////
-      m_define_materials_from_range(raw_data, range_name);
-
-      // Free memory
-      free(raw_data);
-    }  
-
-    if(ElementType == "MET_SHORT") {
-      ui32 mem_size = sizeof(i16) * h_volume->number_of_voxels;
-
-      i16 *raw_data = (i16*)malloc(mem_size);
-      fread(raw_data, sizeof(i16), h_volume->number_of_voxels, pfile);
-      fclose(pfile);
-      /////////////// Then, convert the raw data into material id //////////////////////
-      m_define_materials_from_range(raw_data, range_name);
-
-      // Free memory
-      free(raw_data);
-    }
-
-    if(ElementType == "MET_UCHAR") {
-      ui32 mem_size = sizeof(ui8) * h_volume->number_of_voxels;
-
-      ui8 *raw_data = (ui8*)malloc(mem_size);
-      fread(raw_data, sizeof(ui8), h_volume->number_of_voxels, pfile);
-      fclose(pfile);
-      /////////////// Then, convert the raw data into material id //////////////////////
-      m_define_materials_from_range(raw_data, range_name);
-
-      // Free memory
-      free(raw_data);
-    }
-
-    if(ElementType == "MET_UINT") {
-      ui32 mem_size = sizeof(ui32) * h_volume->number_of_voxels;
-
-      ui32 *raw_data = (ui32*)malloc(mem_size);
-      fread(raw_data, sizeof(ui32), h_volume->number_of_voxels, pfile);
-      fclose(pfile);
-      /////////////// Then, convert the raw data into material id //////////////////////
-      m_define_materials_from_range(raw_data, range_name);
-
-      // Free memory
-      free(raw_data);
-    }
-*/
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -190,6 +121,7 @@ void GGEMSSolidPhantom::PrintInfos(void) const
   GGcout("GGEMSSolidPhantom", "PrintInfos", 0) << "    - X: " << solid_data->border_min_xyz_.s[0] << " <-> " << solid_data->border_max_xyz_.s[0] << GGendl;
   GGcout("GGEMSSolidPhantom", "PrintInfos", 0) << "    - Y: " << solid_data->border_min_xyz_.s[1] << " <-> " << solid_data->border_max_xyz_.s[1] << GGendl;
   GGcout("GGEMSSolidPhantom", "PrintInfos", 0) << "    - Z: " << solid_data->border_min_xyz_.s[2] << " <-> " << solid_data->border_max_xyz_.s[2] << GGendl;
+  materials_->PrintLabels();
   GGcout("GGEMSSolidPhantom", "PrintInfos", 0) << GGendl;
 
   // Release the pointer

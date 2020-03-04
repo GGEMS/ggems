@@ -227,6 +227,7 @@ void GGEMSMaterialsManager::AddChemicalElements(std::string const& element_name,
   element.atomic_mass_A_ = element_A * (GGEMSUnits::g / GGEMSUnits::mol);
   element.mean_excitation_energy_I_ = element_I * GGEMSUnits::eV;
 
+  // No need to check if element already insert
   chemical_elements_.insert(std::make_pair(element_name, element));
 }
 

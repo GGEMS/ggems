@@ -24,6 +24,7 @@
 #include "GGEMS/tools/GGEMSTypes.hh"
 
 class GGEMSSolidPhantom;
+class GGEMSMaterials;
 
 /*!
   \class GGEMSPhantomNavigator
@@ -135,6 +136,7 @@ class GGEMS_EXPORT GGEMSPhantomNavigator
     GGdouble3 offset_xyz_; /*!< Offset of the phantom in X, Y and Z */
     bool is_offset_flag_; /*!< Apply offset */
     std::shared_ptr<GGEMSSolidPhantom> solid_phantom_; /*!< Solid phantom with geometric infos and label */
+    std::shared_ptr<GGEMSMaterials> materials_; /*!< Materials of phantom */
 };
 
 #endif // End of GUARD_GGEMS_GEOMETRIES_GGEMSPHANTOMNAVIGATOR_HH
