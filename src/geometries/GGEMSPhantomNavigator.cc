@@ -15,6 +15,7 @@
 #include "GGEMS/geometries/GGEMSPhantomNavigator.hh"
 #include "GGEMS/geometries/GGEMSPhantomNavigatorManager.hh"
 #include "GGEMS/geometries/GGEMSSolidPhantom.hh"
+#include "GGEMS/physics/GGEMSMaterials.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
 #include "GGEMS/tools/GGEMSSystemOfUnits.hh"
 #include "GGEMS/tools/GGEMSTools.hh"
@@ -37,8 +38,11 @@ GGEMSPhantomNavigator::GGEMSPhantomNavigator(GGEMSPhantomNavigator* phantom_navi
   // Store the phantom navigator in phantom navigator manager
   GGEMSPhantomNavigatorManager::GetInstance().Store(phantom_navigator);
 
+  // Allocation of materials
+  materials_.reset(new GGEMSMaterials());
+
   // Allocation of solid phantom
-  solid_phantom_.reset(new GGEMSSolidPhantom());
+  solid_phantom_.reset(new GGEMSSolidPhantom(materials_));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -139,7 +143,7 @@ void GGEMSPhantomNavigator::Initialize(void)
   // Checking the parameters of phantom
   CheckParameters();
 
-  // Loading the phantom and convert image to material data
+  // Loading the phantom and convert image to material data, and storing material
   solid_phantom_->LoadPhantomImage(phantom_mhd_header_filename_, range_data_filename_);
 
   // Apply offset

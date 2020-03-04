@@ -244,8 +244,6 @@ class GGEMS_EXPORT GGEMSManager
     //GGuint cross_section_table_number_of_bins_; /*!< Number of bins in the cross section table */
     //GGdouble cross_section_table_energy_min_; /*!< Min. energy for the cross section table */
     //GGdouble cross_section_table_energy_max_; /*!< Max. energy for the cross section table */
-
-
 };
 
 /*!

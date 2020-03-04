@@ -16,8 +16,6 @@
 
 - Faire processe list intell...
 
-- Smart pointer C++ et supprimer alignement buffer et écriture avec p_* (pointeur)
-
 - Faire la visu avec Qt (Qt Quick) et activer l'option Qt à partir du CMAKE. Si possible, faire la visualization sur carte graphique avec OpenCL
 
 - Dessiner les particules :
@@ -25,9 +23,7 @@
   * Positron -> rouge
   * Electron -> bleu
 
-- Regarder Gitlab
-
-- Documentation avec Sphinx
+- Documentation avec Sphinx + Doxygen
 
 - Compilation des kernels OpenCL lors de l'installation
 
@@ -39,4 +35,8 @@
 
 - Si deux volumes, controles l'overlap
 
-- Gestion offset pour les phantoms
+- Site internet GGEMS + mailing list
+
+- Faire source indépendantes sans lancer la simulation complète -> phase space
+
+- Faire physique indépendante afin de l'interroger en fonction de l'énergie et matériau
