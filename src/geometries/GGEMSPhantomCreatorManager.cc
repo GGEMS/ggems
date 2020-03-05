@@ -26,8 +26,7 @@ GGEMSPhantomCreatorManager::GGEMSPhantomCreatorManager(void)
 : element_sizes_(GGdouble3{{0.0, 0.0, 0.0}}),
   phantom_dimensions_(GGuint3{{0, 0, 0}}),
   number_elements_(0),
-  offsets_(GGdouble3{{0.0, 0.0, 0.0}}),
-  isocenter_position_(GGdouble3{{0.0, 0.0, 0.0}}),
+  data_type_("MET_FLOAT"),
   material_("Air"),
   output_image_filename_(""),
   output_range_to_material_filename_(""),
@@ -73,23 +72,35 @@ void GGEMSPhantomCreatorManager::SetPhantomDimensions(GGuint const& phantom_widt
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSPhantomCreatorManager::SetIsocenterPositions(GGdouble const& iso_pos_x, GGdouble const& iso_pos_y, GGdouble const& iso_pos_z, char const* unit)
-{
-  isocenter_position_.s[0] = GGEMSUnits::BestDistanceUnit(iso_pos_x, unit);
-  isocenter_position_.s[1] = GGEMSUnits::BestDistanceUnit(iso_pos_y, unit);
-  isocenter_position_.s[2] = GGEMSUnits::BestDistanceUnit(iso_pos_z, unit);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
 void GGEMSPhantomCreatorManager::SetMaterial(char const* material)
 {
   material_ = material;
 
   // Store the material in map
   label_to_material_.insert(std::make_pair(0.0f, material_));
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSPhantomCreatorManager::SetDataType(std::string const& data_type)
+{
+  data_type_ = data_type;
+
+  // Convert raw data to material id data
+  if (data_type_.compare("MET_CHAR") && data_type_.compare("MET_UCHAR") && data_type_.compare("MET_SHORT") && data_type_.compare("MET_USHORT") && data_type_.compare("MET_INT") && data_type_.compare("MET_UINT") && data_type_.compare("MET_FLOAT")) {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "Your type in not compatible. The type has to be:" << std::endl;
+    oss << "    - MET_CHAR" << std::endl;
+    oss << "    - MET_UCHAR" << std::endl;
+    oss << "    - MET_SHORT" << std::endl;
+    oss << "    - MET_USHORT" << std::endl;
+    oss << "    - MET_INT" << std::endl;
+    oss << "    - MET_UINT" << std::endl;
+    oss << "    - MET_FLOAT" << std::endl;
+    GGEMSMisc::ThrowException("GGEMSPhantomCreatorManager", "SetDataType", oss.str());
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -170,30 +181,13 @@ void GGEMSPhantomCreatorManager::Initialize(void)
   // Check mandatory parameters
   CheckParameters();
 
-  // Allocation of memory on OpenCL device
-  voxelized_phantom_ = opencl_manager_.Allocate(nullptr, number_elements_ * sizeof(GGfloat), CL_MEM_READ_WRITE);
-
-  // Initialize the buffer to zero
-  GGfloat* voxelized_phantom = opencl_manager_.GetDeviceBuffer<GGfloat>(voxelized_phantom_, number_elements_ * sizeof(GGfloat));
-
-  for (GGulong i = 0; i < number_elements_; ++i) voxelized_phantom[i] = 0.0;
-
-  // Release the pointers
-  opencl_manager_.ReleaseDeviceBuffer(voxelized_phantom_, voxelized_phantom);
-
-  // Computing the phantom offsets
-  offsets_.s[0] = phantom_dimensions_.s[0]*element_sizes_.s[0];
-  offsets_.s[1] = phantom_dimensions_.s[1]*element_sizes_.s[1];
-  offsets_.s[2] = phantom_dimensions_.s[2]*element_sizes_.s[2];
-
-  offsets_.s[0] /= 2.0;
-  offsets_.s[1] /= 2.0;
-  offsets_.s[2] /= 2.0;
-
-  // Apply volume position
-  offsets_.s[0] += isocenter_position_.s[0];
-  offsets_.s[1] += isocenter_position_.s[1];
-  offsets_.s[2] += isocenter_position_.s[2];
+  if (!data_type_.compare("MET_CHAR")) AllocateImage<char>();
+  else if (!data_type_.compare("MET_UCHAR")) AllocateImage<unsigned char>();
+  else if (!data_type_.compare("MET_SHORT")) AllocateImage<GGshort>();
+  else if (!data_type_.compare("MET_USHORT")) AllocateImage<GGushort>();
+  else if (!data_type_.compare("MET_INT")) AllocateImage<GGint>();
+  else if (!data_type_.compare("MET_UINT")) AllocateImage<GGuint>();
+  else if (!data_type_.compare("MET_FLOAT")) AllocateImage<GGfloat>();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -241,9 +235,9 @@ void GGEMSPhantomCreatorManager::WriteMHDImage(void) const
   // Write MHD file
   GGEMSMHDImage mhdImage;
   mhdImage.SetBaseName(output_image_filename_);
+  mhdImage.SetDataType(data_type_);
   mhdImage.SetDimensions(phantom_dimensions_);
   mhdImage.SetElementSizes(element_sizes_);
-  mhdImage.SetOffsets(offsets_);
   mhdImage.Write(voxelized_phantom_);
 }
 
@@ -272,15 +266,6 @@ void set_phantom_dimension_phantom_creator_manager(GGEMSPhantomCreatorManager* p
 void set_element_sizes_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager, GGdouble const voxel_width, GGdouble const voxel_height, GGdouble const voxel_depth, char const* unit)
 {
   phantom_creator_manager->SetElementSizes(voxel_width, voxel_height, voxel_depth, unit);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void set_isocenter_positions(GGEMSPhantomCreatorManager* phantom_creator_manager, GGdouble const iso_pos_x, GGdouble const iso_pos_y, GGdouble const iso_pos_z, char const* unit)
-{
-  phantom_creator_manager->SetIsocenterPositions(iso_pos_x, iso_pos_y, iso_pos_z, unit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -326,4 +311,13 @@ void write_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_m
 void set_material_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager, char const* material)
 {
   phantom_creator_manager->SetMaterial(material);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void set_data_type_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager, char const* data_type)
+{
+  phantom_creator_manager->SetDataType(data_type);
 }

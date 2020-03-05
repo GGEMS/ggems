@@ -343,11 +343,11 @@ class GGEMSPhantomCreatorManager(object):
         ggems_lib.write_phantom_creator_manager.argtypes = [ctypes.c_void_p]
         ggems_lib.write_phantom_creator_manager.restype = ctypes.c_void_p
 
-        ggems_lib.set_isocenter_positions.argtypes = [ctypes.c_void_p, ctypes.c_double, ctypes.c_double, ctypes.c_double, ctypes.c_char_p]
-        ggems_lib.set_isocenter_positions.restype = ctypes.c_void_p
-
         ggems_lib.set_material_phantom_creator_manager.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
         ggems_lib.set_material_phantom_creator_manager.restype = ctypes.c_void_p
+
+        ggems_lib.set_data_type_phantom_creator_manager.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
+        ggems_lib.set_data_type_phantom_creator_manager.restype = ctypes.c_void_p
 
         self.obj = ggems_lib.get_instance_phantom_creator_manager()
 
@@ -369,11 +369,11 @@ class GGEMSPhantomCreatorManager(object):
     def write(self):
         ggems_lib.write_phantom_creator_manager(self.obj)
 
-    def set_isocenter_positions(self, iso_pos_x, iso_pos_y, iso_pos_z, unit):
-        ggems_lib.set_isocenter_positions(self.obj, iso_pos_x, iso_pos_y, iso_pos_z, unit)
-
     def set_material(self, material):
         ggems_lib.set_material_phantom_creator_manager(self.obj, material)
+
+    def set_data_type(self, data_type):
+        ggems_lib.set_data_type_phantom_creator_manager(self.obj, data_type)
 
 
 class GGEMSTube(object):

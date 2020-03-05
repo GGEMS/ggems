@@ -30,7 +30,6 @@ GGEMSMHDImage::GGEMSMHDImage(void)
   mhd_data_type_("MET_FLOAT"),
   element_sizes_(GGdouble3{{0.0, 0.0, 0.0}}),
   dimensions_(GGuint3{{0, 0, 0}}),
-  offsets_(GGdouble3{{0.0, 0.0, 0.0}}),
   opencl_manager_(GGEMSOpenCLManager::GetInstance())
 {
   GGcout("GGEMSMHDImage", "GGEMSMHDImage", 3) << "Allocation of GGEMSMHDImage..." << GGendl;
@@ -68,9 +67,9 @@ void GGEMSMHDImage::SetElementSizes(GGdouble3 const& element_sizes)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSMHDImage::SetOffsets(GGdouble3 const& offsets)
+void GGEMSMHDImage::SetDataType(std::string const& data_type)
 {
-  offsets_ = offsets;
+  mhd_data_type_ = data_type;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -183,16 +182,12 @@ void GGEMSMHDImage::Read(std::string const& image_mhd_header_filename, std::shar
   }
 
   // Computing the offset and bounding box
-  solid_data->offsets_xyz_.s[0] = solid_data->number_of_voxels_xyz_.s[0] * solid_data->voxel_sizes_xyz_.s[0] * 0.5;
-  solid_data->offsets_xyz_.s[1] = solid_data->number_of_voxels_xyz_.s[1] * solid_data->voxel_sizes_xyz_.s[1] * 0.5;
-  solid_data->offsets_xyz_.s[2] = solid_data->number_of_voxels_xyz_.s[2] * solid_data->voxel_sizes_xyz_.s[2] * 0.5;
+  for (GGuint i = 0; i < 3; ++i) {
+    solid_data->offsets_xyz_.s[i] = solid_data->number_of_voxels_xyz_.s[i] * solid_data->voxel_sizes_xyz_.s[i] * 0.5;
 
-  solid_data->border_min_xyz_.s[0] = -solid_data->offsets_xyz_.s[0];
-  solid_data->border_max_xyz_.s[0] = solid_data->offsets_xyz_.s[0];
-  solid_data->border_min_xyz_.s[1] = -solid_data->offsets_xyz_.s[1];
-  solid_data->border_max_xyz_.s[1] = solid_data->offsets_xyz_.s[1];
-  solid_data->border_min_xyz_.s[2] = -solid_data->offsets_xyz_.s[2];
-  solid_data->border_max_xyz_.s[2] = solid_data->offsets_xyz_.s[2];
+    solid_data->border_min_xyz_.s[i] = -solid_data->offsets_xyz_.s[i];
+    solid_data->border_max_xyz_.s[i] = solid_data->offsets_xyz_.s[i];
+  }
 
   // Release the pointer
   opencl_manager_.ReleaseDeviceBuffer(solid_phantom_data, solid_data);
@@ -211,29 +206,20 @@ void GGEMSMHDImage::Write(std::shared_ptr<cl::Buffer> image) const
 
   // header data
   std::ofstream out_header_stream(mhd_header_file_, std::ios::out);
-  out_header_stream << "ObjectType = Image" << std::endl;
-  out_header_stream << "NDims = 3" << std::endl;
-  out_header_stream << "BinaryData = True" << std::endl;
-  out_header_stream << "CompressedData = False" << std::endl;
-  out_header_stream << "Offset = " << offsets_.s[0] << " " << offsets_.s[1] << " " << offsets_.s[2] << std::endl;
   out_header_stream << "ElementSpacing = " << element_sizes_.s[0] << " " << element_sizes_.s[1] << " " << element_sizes_.s[2] << std::endl;
   out_header_stream << "DimSize = " << dimensions_.s[0] << " " << dimensions_.s[1] << " " << dimensions_.s[2] << std::endl;
   out_header_stream << "ElementType = " << mhd_data_type_ << std::endl;
   out_header_stream << "ElementDataFile = " << mhd_raw_file_ << std::endl;
   out_header_stream.close();
 
-  // raw data
-  std::ofstream out_raw_stream(mhd_raw_file_, std::ios::out | std::ios::binary);
-
-  // Mapping data
-  GGfloat* data_image = opencl_manager_.GetDeviceBuffer<GGfloat>(image, dimensions_.s[0] * dimensions_.s[1] * dimensions_.s[2] * sizeof(GGfloat));
-
-  // Writing data on file
-  out_raw_stream.write(reinterpret_cast<char*>(data_image), dimensions_.s[0] * dimensions_.s[1] * dimensions_.s[2] * sizeof(GGfloat));
-
-  // Release the pointers
-  opencl_manager_.ReleaseDeviceBuffer(image, data_image);
-  out_raw_stream.close();
+  // Writing raw data to file
+  if (!mhd_data_type_.compare("MET_CHAR")) WriteRaw<char>(image);
+  else if (!mhd_data_type_.compare("MET_UCHAR")) WriteRaw<unsigned char>(image);
+  else if (!mhd_data_type_.compare("MET_SHORT")) WriteRaw<GGshort>(image);
+  else if (!mhd_data_type_.compare("MET_USHORT")) WriteRaw<GGushort>(image);
+  else if (!mhd_data_type_.compare("MET_INT")) WriteRaw<GGint>(image);
+  else if (!mhd_data_type_.compare("MET_UINT")) WriteRaw<GGuint>(image);
+  else if (!mhd_data_type_.compare("MET_FLOAT")) WriteRaw<GGfloat>(image);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

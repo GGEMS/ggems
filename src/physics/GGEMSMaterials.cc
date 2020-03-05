@@ -12,6 +12,7 @@
 
 #include "GGEMS/physics/GGEMSMaterials.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
+#include "GGEMS/tools/GGEMSTools.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -37,6 +38,11 @@ GGEMSMaterials::~GGEMSMaterials(void)
 
 bool GGEMSMaterials::AddMaterial(std::string const& material)
 {
+  // Checking the number of material (maximum is 255)
+  if (materials_.size() == 255) {
+    GGEMSMisc::ThrowException("GGEMSMaterials", "AddMaterial", "Limit of material reached. The limit is 255 materials!!!");
+  }
+
   // Add material and check if the material already exists
   return materials_.insert(material).second;
 }

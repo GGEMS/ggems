@@ -19,14 +19,28 @@ phantom_1 = GGEMSVoxelizedPhantomNavigatorImagery()
 phantom_1.set_phantom_name(b"phantom_1")
 phantom_1.set_phantom_image(b"data/phantom_1.mhd")
 phantom_1.set_range_to_material(b"data/range_phantom_1.txt")
-phantom_1.set_offset(101.5, 50.0, 50.0, b"mm")
+phantom_1.set_offset(50.0, 25.0, 0.0, b"mm")
 
 # Second phantom
 phantom_2 = GGEMSVoxelizedPhantomNavigatorImagery()
 phantom_2.set_phantom_name(b"phantom_2")
 phantom_2.set_phantom_image(b"data/phantom_2.mhd")
 phantom_2.set_range_to_material(b"data/range_phantom_2.txt")
-phantom_2.set_offset(-1.5, 50.0, 50.0, b"mm")
+phantom_2.set_offset(0.0, 25.0, 0.0, b"mm")
+
+# Third phantom
+phantom_3 = GGEMSVoxelizedPhantomNavigatorImagery()
+phantom_3.set_phantom_name(b"phantom_3")
+phantom_3.set_phantom_image(b"data/phantom_3.mhd")
+phantom_3.set_range_to_material(b"data/range_phantom_3.txt")
+phantom_3.set_offset(50.0, 25.0, 50.0, b"mm")
+
+# Fourth phantom
+phantom_4 = GGEMSVoxelizedPhantomNavigatorImagery()
+phantom_4.set_phantom_name(b"phantom_4")
+phantom_4.set_phantom_image(b"data/phantom_4.mhd")
+phantom_4.set_range_to_material(b"data/range_phantom_4.txt")
+phantom_4.set_offset(0.0, 25.0, 50.0, b"mm")
 
 # ------------------------------------------------------------------------------
 # STEP 5: Physics Declaration

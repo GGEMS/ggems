@@ -88,8 +88,9 @@ void GGEMSTube::Initialize(void)
   std::string const kOpenCLKernelPath = OPENCL_KERNEL_PATH;
   std::string const kFilename = kOpenCLKernelPath + "/DrawGGEMSTube.cl";
 
-  // Compiling the kernel
-  kernel_draw_solid_ = opencl_manager_.CompileKernel(kFilename, "draw_ggems_tube");
+  // Get the data type and compiling kernel
+  std::string const kDataType = "-D" + phantom_creator_manager_.GetDataType();
+  kernel_draw_solid_ = opencl_manager_.CompileKernel(kFilename, "draw_ggems_tube", nullptr, const_cast<char*>(kDataType.c_str()));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
