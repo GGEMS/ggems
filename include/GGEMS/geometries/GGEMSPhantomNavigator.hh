@@ -111,6 +111,20 @@ class GGEMS_EXPORT GGEMSPhantomNavigator
     void SetOffset(GGdouble const offset_x, GGdouble const offset_y, GGdouble const offset_z, char const* unit = "mm");
 
     /*!
+      \fn inline std::string GetPhantomName(void) const
+      \brief Get the name of the phantom
+      \return the name of the phantom
+    */
+    inline std::string GetPhantomName(void) const {return phantom_navigator_name_;};
+
+    /*!
+      \fn inline std::shared_ptr<GGEMSSolidPhantom> GetSolidPhantom(void) const
+      \brief get the pointer on solid phantom
+      \return the pointer on solid phantom
+    */
+    inline std::shared_ptr<GGEMSSolidPhantom> GetSolidPhantom(void) const {return solid_phantom_;};
+
+    /*!
       \fn void PrintInfos(void) const = 0
       \brief Printing infos about the phantom navigator
     */

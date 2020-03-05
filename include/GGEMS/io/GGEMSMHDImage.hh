@@ -108,11 +108,11 @@ class GGEMS_EXPORT GGEMSMHDImage
     void SetDimensions(GGuint3 const& dimensions);
 
     /*!
-      \fn void SetOffsets(GGdouble3 const& offsets)
-      \param offsets - offset of image in X, Y, Z
-      \brief set offsets for the image
+      \fn void SetDataType(std::string const& data_type)
+      \param data_type - type of data
+      \brief set the type of data
     */
-    void SetOffsets(GGdouble3 const& offsets);
+    void SetDataType(std::string const& data_type);
 
     /*!
       \fn std::string GetDataMHDType(void) const
@@ -135,14 +135,43 @@ class GGEMS_EXPORT GGEMSMHDImage
     */
     void CheckParameters(void) const;
 
+    /*!
+      \fn template <typename T> void WriteRaw(std::shared_ptr<cl::Buffer> image) const
+      \tparam T - type of the data
+      \param image - image to write on output file
+      \brief write the raw data to file
+    */
+    template <typename T>
+    void WriteRaw(std::shared_ptr<cl::Buffer> image) const;
+
   private:
     std::string mhd_header_file_; /*!< Name of the MHD header file */
     std::string mhd_raw_file_; /*!< Name of the MHD raw file */
     std::string mhd_data_type_; /*< Type of data */
     GGdouble3 element_sizes_; /*!< Size of elements */
     GGuint3 dimensions_; /*!< Dimension volume X, Y, Z */
-    GGdouble3 offsets_; /*!< Offset of the image */
     GGEMSOpenCLManager& opencl_manager_; /*!< Reference to opencl manager singleton */
 };
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename T>
+void GGEMSMHDImage::WriteRaw(std::shared_ptr<cl::Buffer> image) const
+{
+  // raw data
+  std::ofstream out_raw_stream(mhd_raw_file_, std::ios::out | std::ios::binary);
+
+  // Mapping data
+  T* data_image = opencl_manager_.GetDeviceBuffer<T>(image, dimensions_.s[0] * dimensions_.s[1] * dimensions_.s[2] * sizeof(T));
+
+  // Writing data on file
+  out_raw_stream.write(reinterpret_cast<char*>(data_image), dimensions_.s[0] * dimensions_.s[1] * dimensions_.s[2] * sizeof(T));
+
+  // Release the pointers
+  opencl_manager_.ReleaseDeviceBuffer(image, data_image);
+  out_raw_stream.close();
+}
 
 #endif // End of GUARD_GGEMS_IO_GGEMSMHDIMAGE_HH

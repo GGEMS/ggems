@@ -321,8 +321,6 @@ void GGEMSManager::Initialize(void)
   // Initialization of the phantom(s)
   phantom_navigator_manager_.Initialize();
 
-  // Checking overlap between phantom
-
   // Printing infos about OpenCL
   if (is_opencl_verbose_) {
     opencl_manager_.PrintPlatformInfos();

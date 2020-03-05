@@ -28,7 +28,7 @@
 #define GGuchar8 uchar8
 #define GGuchar16 uchar16
 
-#define GGushort short
+#define GGshort short
 #define GGshort2 short2
 #define GGshort3 short3
 #define GGshort4 short4

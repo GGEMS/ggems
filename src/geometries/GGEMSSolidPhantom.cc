@@ -93,9 +93,14 @@ void GGEMSSolidPhantom::ApplyOffset(GGdouble3 const& offset_xyz)
   // Get pointer on OpenCL device
   GGEMSSolidPhantomData* solid_data = opencl_manager_.GetDeviceBuffer<GGEMSSolidPhantomData>(solid_phantom_data_, sizeof(GGEMSSolidPhantomData));
 
-  solid_data->offsets_xyz_.s[0] = offset_xyz.s[0];
-  solid_data->offsets_xyz_.s[1] = offset_xyz.s[1];
-  solid_data->offsets_xyz_.s[2] = offset_xyz.s[2];
+  for (GGuint i = 0; i < 3; ++i ) {
+    // Offset
+    solid_data->offsets_xyz_.s[i] = offset_xyz.s[i];
+
+    // Bounding box
+    solid_data->border_min_xyz_.s[i] = -solid_data->offsets_xyz_.s[i];
+    solid_data->border_max_xyz_.s[i] = solid_data->border_min_xyz_.s[i] + solid_data->number_of_voxels_xyz_.s[i] * solid_data->voxel_sizes_xyz_.s[i];
+  }
 
   // Release the pointer
   opencl_manager_.ReleaseDeviceBuffer(solid_phantom_data_, solid_data);

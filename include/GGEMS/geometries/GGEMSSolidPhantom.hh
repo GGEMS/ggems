@@ -24,6 +24,7 @@
 #include "GGEMS/tools/GGEMSTools.hh"
 #include "GGEMS/io/GGEMSTextReader.hh"
 #include "GGEMS/physics/GGEMSMaterials.hh"
+#include "GGEMS/geometries/GGEMSSolidPhantomStack.hh"
 
 /*!
   \class GGEMSSolidPhantom
@@ -90,6 +91,13 @@ class GGEMS_EXPORT GGEMSSolidPhantom
       \brief printing infos about solid phantom
     */
     void PrintInfos(void) const;
+
+    /*!
+      \fn inline std::shared_ptr<cl::Buffer> GetSolidPhantomData(void) const
+      \brief get the informations about the solid phantom geometry
+      \return header data OpenCL pointer about solid phantom
+    */
+    inline std::shared_ptr<cl::Buffer> GetSolidPhantomData(void) const {return solid_phantom_data_;};
 
   private:
     /*!

@@ -116,16 +116,6 @@ class GGEMS_EXPORT GGEMSPhantomCreatorManager
     inline GGuint3 GetPhantomDimensions(void) const {return phantom_dimensions_;};
 
     /*!
-      \fn void SetIsocenterPositions(GGdouble const& iso_pos_x, GGdouble const& iso_pos_y, GGdouble const& iso_pos_z, char const* unit = "mm")
-      \param iso_pos_x - Isocenter position in X
-      \param iso_pos_x - Isocenter position in X
-      \param iso_pos_x - Isocenter position in X
-      \param unit - unit of the distance
-      \brief Set isocenter position of the phantom
-    */
-    void SetIsocenterPositions(GGdouble const& iso_pos_x, GGdouble const& iso_pos_y, GGdouble const& iso_pos_z, char const* unit = "mm");
-
-    /*!
       \fn void SetMaterial(char const* material)
       \param material - name of the material
       \brief set the material, Air by default
@@ -133,18 +123,18 @@ class GGEMS_EXPORT GGEMSPhantomCreatorManager
     void SetMaterial(char const* material = "Air");
 
     /*!
-      \fn GGdouble3 GetIsocenterPositions(void) const
-      \return double buffer with offsets
-      \brief return offset of phantom taking account isocenter position
-    */
-    inline GGdouble3 GetOffsets(void) const {return offsets_;}
-
-    /*!
-      \fn GGulong GetNumberElements(void)
+      \fn GGulong GetNumberElements(void) const
       \return number of voxel in the voxelized phantom
       \brief Return the total number of voxels
     */
     inline GGulong GetNumberElements(void) const {return number_elements_;}
+
+    /*!
+      \fn std::string GetDataType(void) const
+      \brief get the type of data
+      \return the type of the data
+    */
+    inline std::string GetDataType(void) const {return data_type_;};
 
     /*!
       \fn cl::Buffer* GetVoxelizedPhantom(void) const
@@ -174,6 +164,13 @@ class GGEMS_EXPORT GGEMSPhantomCreatorManager
       \brief add the label and the material
     */
     void AddLabelAndMaterial(GGfloat const& label, std::string const& material);
+
+    /*!
+      \fn void SetDataType(std::string const& data_type = "MET_FLOAT")
+      \param data_type - type of data
+      \brief set the type of data
+    */
+    void SetDataType(std::string const& data_type = "MET_FLOAT");
 
     /*!
       \fn void Initialize(void)
@@ -206,12 +203,19 @@ class GGEMS_EXPORT GGEMSPhantomCreatorManager
     */
     void WriteRangeToMaterialFile(void);
 
+    /*!
+      \fn template <typename T> void AllocateImage(void)
+      \tparam T - type of data
+      \brief allocating buffer storing volume
+    */
+    template <typename T>
+    void AllocateImage(void);
+
   private:
     GGdouble3 element_sizes_; /*!< Size of voxels of voxelized phantom */
     GGuint3 phantom_dimensions_; /*!< Dimension of phantom X, Y, Z */
     GGulong number_elements_; /*!< Total number of elements */
-    GGdouble3 offsets_; /*!< Offset of the phantom taking account of isocenter position */
-    GGdouble3 isocenter_position_; /*!< Isocenter position of the phantom */
+    std::string data_type_; /*!< Type of data */
     std::string material_; /*!< Material for background, air by default */
     std::string output_image_filename_; /*!< Output MHD where is stored the voxelized phantom */
     std::string output_range_to_material_filename_; /*!< Output text file with range to material data */
@@ -219,6 +223,25 @@ class GGEMS_EXPORT GGEMSPhantomCreatorManager
     LabelToMaterialMap label_to_material_; /*!< Map of label to material */
     GGEMSOpenCLManager& opencl_manager_; /*!< Reference to opencl manager singleton */
 };
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename T>
+void GGEMSPhantomCreatorManager::AllocateImage(void)
+{
+  // Allocation of memory on OpenCL device depending of type
+  voxelized_phantom_ = opencl_manager_.Allocate(nullptr, number_elements_ * sizeof(T), CL_MEM_READ_WRITE);
+
+  // Initialize the buffer to zero
+  T* voxelized_phantom = opencl_manager_.GetDeviceBuffer<T>(voxelized_phantom_, number_elements_ * sizeof(T));
+
+  for (GGulong i = 0; i < number_elements_; ++i) voxelized_phantom[i] = static_cast<T>(0);
+
+  // Release the pointers
+  opencl_manager_.ReleaseDeviceBuffer(voxelized_phantom_, voxelized_phantom);
+}
 
 /*!
   \fn GGEMSPhantomCreatorManager* get_instance_ggems_phantom_creator_manager(void)
@@ -246,16 +269,6 @@ extern "C" GGEMS_EXPORT void set_phantom_dimension_phantom_creator_manager(GGEMS
   \brief Set the size of the elements for the voxelized phantom
 */
 extern "C" GGEMS_EXPORT void set_element_sizes_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager, GGdouble const voxel_width, GGdouble const voxel_height, GGdouble const voxel_depth, char const* unit);
-
-/*!
-  \fn void set_isocenter_positions(GGEMSPhantomCreatorManager* phantom_creator_manager, GGdouble const& iso_pos_x, GGdouble const& iso_pos_y, GGdouble const& iso_pos_z)
-  \param iso_pos_x - Isocenter position in X
-  \param iso_pos_x - Isocenter position in X
-  \param iso_pos_x - Isocenter position in X
-  \param unit - unit of the distance
-  \brief Set isocenter position of the phantom
-*/
-extern "C" GGEMS_EXPORT void set_isocenter_positions(GGEMSPhantomCreatorManager* phantom_creator_manager, GGdouble const iso_pos_x, GGdouble const iso_pos_y, GGdouble const iso_pos_z, char const* unit);
 
 /*!
   \fn void set_output_basename_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager, char const* output_image_filename)
@@ -294,5 +307,13 @@ extern "C" GGEMS_EXPORT void write_phantom_creator_manager(GGEMSPhantomCreatorMa
   \brief set the material of the global (background phantom)
 */
 extern "C" GGEMS_EXPORT void set_material_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager, char const* material);
+
+/*!
+  \fn void set_data_type_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager, char const* data_type)
+  \param phantom_creator_manager - pointer on the singleton
+  \param data_type - type of data
+  \brief set the type of data
+*/
+extern "C" GGEMS_EXPORT void set_data_type_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager, char const* data_type);
 
 #endif // GUARD_GGEMS_GEOMETRY_GGEMSPHANTOMCREATORMANAGER_HH

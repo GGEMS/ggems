@@ -17,6 +17,7 @@
 
 #include "GGEMS/global/GGEMSExport.hh"
 #include "GGEMS/tools/GGEMSTypes.hh"
+#include "GGEMS/global/GGEMSOpenCLManager.hh"
 
 class GGEMSPhantomNavigator;
 
@@ -104,7 +105,18 @@ class GGEMS_EXPORT GGEMSPhantomNavigatorManager
     inline std::size_t GetNumberOfPhantomNavigators(void) const {return phantom_navigators_.size();}
 
   private:
+    /*
+      \fn bool CheckOverlap(std::shared_ptr<GGEMSPhantomNavigator> phantom_a, std::shared_ptr<GGEMSPhantomNavigator> phantom_b) const
+      \param phantom_a - point on a phantom A
+      \param phantom_b - point on a phantom B
+      \brief check the overlap between phantom A and B
+      \return true if there is an overlap and stop simulation
+    */
+    bool CheckOverlap(std::shared_ptr<GGEMSPhantomNavigator> phantom_a, std::shared_ptr<GGEMSPhantomNavigator> phantom_b) const;
+
+  private:
     std::vector<std::shared_ptr<GGEMSPhantomNavigator>> phantom_navigators_; /*!< Pointer on the phantom navigators */
+    GGEMSOpenCLManager& opencl_manager_; /*!< Reference to OpenCL manager singleton */
 };
 
 /*!
