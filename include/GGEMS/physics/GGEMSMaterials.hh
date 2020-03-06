@@ -82,6 +82,12 @@ class GGEMS_EXPORT GGEMSMaterials
     */
     void PrintLabels(void) const;
 
+    /*!
+      \fn void Initialize(void)
+      \brief Initialize the materials for a navigator/phantom
+    */
+    void Initialize(void);
+
   private:
     std::set<std::string> materials_; /*!< Defined material for a phantom */
 };

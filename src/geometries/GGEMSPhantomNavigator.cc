@@ -150,4 +150,7 @@ void GGEMSPhantomNavigator::Initialize(void)
   if (is_offset_flag_) {
     solid_phantom_->ApplyOffset(offset_xyz_);
   }
+
+  // Loading the materials
+  materials_->Initialize();
 }

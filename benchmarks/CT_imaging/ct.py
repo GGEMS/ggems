@@ -10,32 +10,28 @@ opencl_manager.set_context_index(2)
 
 # ------------------------------------------------------------------------------
 # STEP 3: Setting GGEMS materials
-material_manager.set_materials(b"data/materials.txt")
+materials_manager.set_materials(b"data/materials.txt")
 
 # ------------------------------------------------------------------------------
-# STEP 4: Phantom, Navigator and System
-# First phantom
+# STEP 4: Phantoms, navigators and systems
 phantom_1 = GGEMSVoxelizedPhantomNavigatorImagery()
 phantom_1.set_phantom_name(b"phantom_1")
 phantom_1.set_phantom_image(b"data/phantom_1.mhd")
 phantom_1.set_range_to_material(b"data/range_phantom_1.txt")
 phantom_1.set_offset(50.0, 25.0, 0.0, b"mm")
 
-# Second phantom
 phantom_2 = GGEMSVoxelizedPhantomNavigatorImagery()
 phantom_2.set_phantom_name(b"phantom_2")
 phantom_2.set_phantom_image(b"data/phantom_2.mhd")
 phantom_2.set_range_to_material(b"data/range_phantom_2.txt")
 phantom_2.set_offset(0.0, 25.0, 0.0, b"mm")
 
-# Third phantom
 phantom_3 = GGEMSVoxelizedPhantomNavigatorImagery()
 phantom_3.set_phantom_name(b"phantom_3")
 phantom_3.set_phantom_image(b"data/phantom_3.mhd")
 phantom_3.set_range_to_material(b"data/range_phantom_3.txt")
 phantom_3.set_offset(50.0, 25.0, 50.0, b"mm")
 
-# Fourth phantom
 phantom_4 = GGEMSVoxelizedPhantomNavigatorImagery()
 phantom_4.set_phantom_name(b"phantom_4")
 phantom_4.set_phantom_image(b"data/phantom_4.mhd")
@@ -43,8 +39,16 @@ phantom_4.set_range_to_material(b"data/range_phantom_4.txt")
 phantom_4.set_offset(0.0, 25.0, 50.0, b"mm")
 
 # ------------------------------------------------------------------------------
-# STEP 5: Physics Declaration
-# First phantom
+# STEP 5: Physics
+
+
+# ------------------------------------------------------------------------------
+# STEP 6: Cuts
+range_cuts_manager.set_cuts("phantom_1", "gamma", 1.0, b"mm")
+range_cuts_manager.set_cuts("phantom_2", "gamma", 0.2, b"cm")
+range_cuts_manager.set_cuts("phantom_3", "gamma", 13.0, b"um")
+range_cuts_manager.set_cuts("phantom_4", "gamma", 0.015, b"m")
+
 # processes = ggems.GGEMSProcessesManager()
 # processes.add_process("Compton", b"phantom_1")
 # processes.add_process("Rayleigh", b"phantom_1")
@@ -61,7 +65,7 @@ phantom_4.set_offset(0.0, 25.0, 50.0, b"mm")
 # ggems_manager.set_cross_section_table_energy_max(250.0)  # in MeV
 
 # ------------------------------------------------------------------------------
-# STEP 6: Source Declaration AJOUTER LES UNITES
+# STEP 7: Sources
 # First source
 xray_source_1 = GGEMSXRaySource()
 xray_source_1.set_source_name(b"xray_source_1")
@@ -85,18 +89,19 @@ xray_source_2.set_focal_spot_size(0.3, 0.5, 0.0, b"mm")
 xray_source_2.set_monoenergy(60.2, b"keV")
 
 # ------------------------------------------------------------------------------
-# STEP 7: Detector/Digitizer Declaration
+# STEP 8: Detector/Digitizer Declaration
 
 
 # ------------------------------------------------------------------------------
-# STEP X: GGEMS simulation parameters
-ggems_manager.set_seed(777)
+# STEP 9: GGEMS simulation parameters
+ggems_manager.set_seed(777) # Optional, if not set, the seed is automatically computed
 
 ggems_manager.opencl_verbose(True)
 ggems_manager.material_verbose(True)
 ggems_manager.phantom_verbose(True)
 ggems_manager.source_verbose(True)
 ggems_manager.memory_verbose(True)
+ggems_manager.range_cuts_verbose(True)
 
 # ggems_manager.processes_verbose(true/false)
 # ggems_manager.detector_verbose(true/false)
@@ -109,6 +114,6 @@ ggems_manager.initialize()
 ggems_manager.run()
 
 # ------------------------------------------------------------------------------
-# STEP X: Exit GGEMS safely
+# STEP 10: Exit GGEMS safely
 opencl_manager.clean()
 exit()

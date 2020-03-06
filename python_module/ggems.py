@@ -250,24 +250,6 @@ class GGEMSManager(object):
         ggems_lib.set_memory_ram_ggems_manager.argtypes = [ctypes.c_void_p, ctypes.c_bool]
         ggems_lib.set_memory_ram_ggems_manager.restype = ctypes.c_void_p
 
-        #ggems_lib.set_process_ggems_manager.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
-        #ggems_lib.set_process_ggems_manager.restype = ctypes.c_void_p
-
-        #ggems_lib.set_particle_cut_ggems_manager.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_double]
-        #ggems_lib.set_particle_cut_ggems_manager.restype = ctypes.c_void_p
-
-        #ggems_lib.set_secondary_particle_and_level_ggems_manager.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_uint32]
-        #ggems_lib.set_secondary_particle_and_level_ggems_manager.restype = ctypes.c_void_p
-
-        #ggems_lib.set_cross_section_table_number_of_bins_ggems_manager.argtypes = [ctypes.c_void_p, ctypes.c_uint32]
-        #ggems_lib.set_cross_section_table_number_of_bins_ggems_manager.restype = ctypes.c_void_p
-
-        #ggems_lib.set_cross_section_table_energy_min_ggems_manager.argtypes = [ctypes.c_void_p, ctypes.c_double]
-        #ggems_lib.set_cross_section_table_energy_min_ggems_manager.restype = ctypes.c_void_p
-
-        #ggems_lib.set_cross_section_table_energy_max_ggems_manager.argtypes = [ctypes.c_void_p, ctypes.c_double]
-        #ggems_lib.set_cross_section_table_energy_max_ggems_manager.restype = ctypes.c_void_p
-
         ggems_lib.run_ggems_manager.argtypes = [ctypes.c_void_p]
         ggems_lib.run_ggems_manager.restype = ctypes.c_void_p
 
@@ -297,30 +279,18 @@ class GGEMSManager(object):
     def memory_verbose(self, flag):
         ggems_lib.set_memory_ram_ggems_manager(self.obj, flag)
 
-    #def set_process(self, process_name):
-        #ggems_lib.set_process_ggems_manager(self.obj, process_name)
 
-    #def set_particle_cut(self, particle_name, distance):
-        #ggems_lib.set_particle_cut_ggems_manager(self.obj, particle_name, distance)
+class GGEMSRangeCutsManager(object):
+    """Class managing the range cuts in GGEMS
+    """
+    def __init__(self):
+        ggems_lib.get_instance_range_cuts_manager.restype = ctypes.c_void_p
 
-    #def set_secondary_particle_and_level(self, particle_name, level):
-        #ggems_lib.set_secondary_particle_and_level_ggems_manager(self.obj, particle_name, level)
-
-    #def set_cross_section_table_number_of_bins(self, number_of_bins):
-        #ggems_lib.set_cross_section_table_number_of_bins_ggems_manager(self.obj, number_of_bins)
-
-    #def set_cross_section_table_energy_min(self, min_energy):
-        #ggems_lib.set_cross_section_table_energy_min_ggems_manager(self.obj, min_energy)
-
-    #def set_cross_section_table_energy_max(self, max_energy):
-        #ggems_lib.set_cross_section_table_energy_max_ggems_manager(self.obj, max_energy)
-
-
+        self.obj = ggems_lib.get_instance_range_cuts_manager()
 
 
 class GGEMSPhantomCreatorManager(object):
-    """Get Phantom Creator Manager to convert analytical volume to voxelized
-    volume
+    """Get Phantom Creator Manager to convert analytical volume to voxelized volume
     """
     def __init__(self):
         ggems_lib.get_instance_phantom_creator_manager.restype = ctypes.c_void_p
@@ -442,8 +412,9 @@ GGEMSVerbosity(3)
 # ------------------------------------------------------------------------------
 # Calling all C++ singleton managers
 opencl_manager = GGEMSOpenCLManager()
-material_manager = GGEMSMaterialsManager()
+materials_manager = GGEMSMaterialsManager()
 phantom_manager = GGEMSPhantomNavigatorManager()
 source_manager = GGEMSSourceManager()
+range_cuts_manager = GGEMSRangeCutsManager()
 ggems_manager = GGEMSManager()
 phantom_creator_manager = GGEMSPhantomCreatorManager()
