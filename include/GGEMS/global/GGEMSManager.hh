@@ -27,6 +27,8 @@ class GGEMSSourceManager;
 class GGEMSOpenCLManager;
 class GGEMSMaterialsManager;
 class GGEMSPhantomNavigatorManager;
+class GGEMSProcessesManager;
+class GGEMSRangeCutsManager;
 
 /*!
   \class GGEMSManager
@@ -127,30 +129,51 @@ class GGEMS_EXPORT GGEMSManager
     /*!
       \fn void SetMaterialDatabaseVerbose(bool const& is_material_database_verbose)
       \param is_material_database_verbose - flag for material database verbosity
-      \brief set the flag for OpenCL verbosity
+      \brief set the flag for material database verbosity
     */
     void SetMaterialDatabaseVerbose(bool const& is_material_database_verbose);
 
     /*!
       \fn void SetSourceVerbose(bool const& is_source_verbose)
       \param is_source_verbose - flag for source verbosity
-      \brief set the flag for OpenCL verbosity
+      \brief set the flag for source verbosity
     */
     void SetSourceVerbose(bool const& is_source_verbose);
 
     /*!
       \fn void SetPhantomVerbose(bool const is_phantom_verbose)
       \param is_phantom_verbose - flag for phantom verbosity
-      \brief set the flag for OpenCL verbosity
+      \brief set the flag for phantom verbosity
     */
     void SetPhantomVerbose(bool const& is_phantom_verbose);
 
     /*!
       \fn void SetMemoryRAMVerbose(bool const& is_memory_ram_verbose)
       \param is_memory_ram_verbose - flag for memory RAM verbosity
-      \brief set the flag for OpenCL verbosity
+      \brief set the flag for memory RAM verbosity
     */
     void SetMemoryRAMVerbose(bool const& is_memory_ram_verbose);
+
+    /*!
+      \fn void SetProcessesVerbose(bool const& is_processes_verbose)
+      \param is_processes_verbose - flag for processes verbosity
+      \brief set the flag for processes verbosity
+    */
+    void SetProcessesVerbose(bool const& is_processes_verbose);
+
+    /*!
+      \fn void SetRangeCutsVerbose(bool const& is_range_cuts_verbose)
+      \param is_range_cuts_verbose - flag for range cuts verbosity
+      \brief set the flag for range cuts verbosity
+    */
+    void SetRangeCutsVerbose(bool const& is_range_cuts_verbose);
+
+    /*!
+      \fn void SetRandomVerbose(bool const& is_random_verbose)
+      \param is_random_verbose - flag for random verbosity
+      \brief set the flag for random verbosity
+    */
+    void SetRandomVerbose(bool const& is_random_verbose);
 
     /*!
       \fn void SetProcess(char const* process_name)
@@ -174,27 +197,6 @@ class GGEMS_EXPORT GGEMSManager
       \brief set the particle to activate to follow the secondaries with a specific level
     */
     //void SetParticleSecondaryAndLevel(char const* particle_name, GGuint const& level);
-
-    /*!
-      \fn void SetCrossSectionTableNumberOfBins(GGuint const& number_of_bins)
-      \param number_of_bins - Number of bins in the cross section table
-      \brief set the number of bins in the cross section table
-    */
-    //void SetCrossSectionTableNumberOfBins(GGuint const& number_of_bins);
-
-    /*!
-      \fn void SetCrossSectionTableEnergyMin(GGdouble const& min_energy)
-      \param min_energy - Min. energy in the cross section table
-      \brief set min. energy in the cross section table
-    */
-    //void SetCrossSectionTableEnergyMin(GGdouble const& min_energy);
-
-    /*!
-      \fn void SetCrossSectionTableEnergyMax(GGdouble const& max_energy)
-      \param max_energy - Max. energy in the cross section table
-      \brief set max. energy in the cross section table
-    */
-    //void SetCrossSectionTableEnergyMax(GGdouble const& max_energy);
 
   private:
     /*!
@@ -230,20 +232,22 @@ class GGEMS_EXPORT GGEMSManager
     bool is_source_verbose_; /*!< Flag for source verbosity */
     bool is_phantom_verbose_; /*!< Flag for phantom verbosity */
     bool is_memory_ram_verbose_; /*!< Flag for memory RAM verbosity */
+    bool is_processes_verbose_; /*! Flag for processes verbosity */
+    bool is_range_cuts_verbose_; /*! Flag for range cuts verbosity */
+    bool is_random_verbose_; /*! Flag for random verbosity */
     GGEMSSourceManager& source_manager_; /*!< Reference to source manager singleton */
     GGEMSOpenCLManager& opencl_manager_; /*!< Reference to opencl manager singleton */
     GGEMSMaterialsManager& material_manager_; /*!< Reference to material manager singleton */
     GGEMSPhantomNavigatorManager& phantom_navigator_manager_; /*!< Reference to phantom navigator manager */
+    GGEMSRangeCutsManager& range_cuts_manager_; /*!< Reference to range cut manager */
+    GGEMSProcessesManager& processes_manager_; /*!< Reference to processes manager */
 
     //std::vector<GGuchar> physics_list_; /*!< Vector storing the activated physics list */
     //std::vector<GGuchar> secondaries_list_; /*!< Vector storing the secondaries list */
     //GGdouble photon_distance_cut_; /*!< Photon distance cut */
-   // GGdouble electron_distance_cut_; /*!< Electron distance cut */
+    //GGdouble electron_distance_cut_; /*!< Electron distance cut */
     //GGuint photon_level_secondaries_; /*!< Level of the secondaries */
     //GGuint electron_level_secondaries_; /*!< Level of the secondaries */
-    //GGuint cross_section_table_number_of_bins_; /*!< Number of bins in the cross section table */
-    //GGdouble cross_section_table_energy_min_; /*!< Min. energy for the cross section table */
-    //GGdouble cross_section_table_energy_max_; /*!< Max. energy for the cross section table */
 };
 
 /*!
@@ -306,6 +310,30 @@ extern "C" GGEMS_EXPORT void set_phantom_ggems_manager(GGEMSManager* ggems_manag
   \brief Set the memory RAM verbosity
 */
 extern "C" GGEMS_EXPORT void set_memory_ram_ggems_manager(GGEMSManager* ggems_manager, bool const is_memory_ram_verbose);
+
+/*!
+  \fn void set_processes_ggems_manager(GGEMSManager* ggems_manager, bool const is_processes_verbose)
+  \param ggems_manager - pointer on the singleton
+  \param is_processes_verbose - flag on processes verbose
+  \brief Set the processes verbosity
+*/
+extern "C" GGEMS_EXPORT void set_processes_ggems_manager(GGEMSManager* ggems_manager, bool const is_processes_verbose);
+
+/*!
+  \fn void set_range_cuts_ggems_manager(GGEMSManager* ggems_manager, bool const is_range_cuts_verbose)
+  \param ggems_manager - pointer on the singleton
+  \param is_range_cuts_verbose - flag on range cuts verbose
+  \brief Set the range cuts verbosity
+*/
+extern "C" GGEMS_EXPORT void set_range_cuts_ggems_manager(GGEMSManager* ggems_manager, bool const is_range_cuts_verbose);
+
+/*!
+  \fn void set_random_ggems_manager(GGEMSManager* ggems_manager, bool const is_random_verbose)
+  \param ggems_manager - pointer on the singleton
+  \param is_random_verbose - flag on random verbose
+  \brief Set the random verbosity
+*/
+extern "C" GGEMS_EXPORT void set_random_ggems_manager(GGEMSManager* ggems_manager, bool const is_random_verbose);
 
 /*!
   \fn void run_ggems_manager(GGEMSManager* ggems_manager)

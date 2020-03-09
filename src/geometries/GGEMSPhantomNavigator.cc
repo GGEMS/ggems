@@ -42,7 +42,7 @@ GGEMSPhantomNavigator::GGEMSPhantomNavigator(GGEMSPhantomNavigator* phantom_navi
   materials_.reset(new GGEMSMaterials());
 
   // Allocation of solid phantom
-  solid_phantom_.reset(new GGEMSSolidPhantom(materials_));
+  solid_phantom_.reset(new GGEMSSolidPhantom());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -143,14 +143,26 @@ void GGEMSPhantomNavigator::Initialize(void)
   // Checking the parameters of phantom
   CheckParameters();
 
-  // Loading the phantom and convert image to material data, and storing material
-  solid_phantom_->LoadPhantomImage(phantom_mhd_header_filename_, range_data_filename_);
+  // Loading the phantom and convert image to material data, and adding material to GGEMS
+  solid_phantom_->LoadPhantomImage(phantom_mhd_header_filename_, range_data_filename_, materials_);
 
   // Apply offset
-  if (is_offset_flag_) {
-    solid_phantom_->ApplyOffset(offset_xyz_);
-  }
+  if (is_offset_flag_) solid_phantom_->ApplyOffset(offset_xyz_);
 
   // Loading the materials
   materials_->Initialize();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSPhantomNavigator::PrintInfos(void) const
+{
+  GGcout("GGEMSPhantomNavigator", "PrintInfos", 0) << GGendl;
+  GGcout("GGEMSPhantomNavigator", "PrintInfos", 0) << "GGEMSPhantomNavigator Infos: " << GGendl;
+  GGcout("GGEMSPhantomNavigator", "PrintInfos", 0) << "--------------------------------------------" << GGendl;
+  solid_phantom_->PrintInfos();
+  materials_->PrintInfos();
+  GGcout("GGEMSPhantomNavigator", "PrintInfos", 0) << GGendl;
 }

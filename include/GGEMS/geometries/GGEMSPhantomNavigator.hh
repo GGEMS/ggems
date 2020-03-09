@@ -125,10 +125,10 @@ class GGEMS_EXPORT GGEMSPhantomNavigator
     inline std::shared_ptr<GGEMSSolidPhantom> GetSolidPhantom(void) const {return solid_phantom_;};
 
     /*!
-      \fn void PrintInfos(void) const = 0
+      \fn void PrintInfos(void) const
       \brief Printing infos about the phantom navigator
     */
-    virtual void PrintInfos(void) const = 0;
+    virtual void PrintInfos(void) const;
 
     /*!
       \fn void CheckParameters(void) const

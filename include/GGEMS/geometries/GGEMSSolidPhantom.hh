@@ -36,7 +36,7 @@ class GGEMS_EXPORT GGEMSSolidPhantom
     /*!
       \brief GGEMSSolidPhantom constructor
     */
-    explicit GGEMSSolidPhantom(std::shared_ptr<GGEMSMaterials> materials);
+  GGEMSSolidPhantom();
 
     /*!
       \brief GGEMSSolidPhantom destructor
@@ -72,12 +72,13 @@ class GGEMS_EXPORT GGEMSSolidPhantom
     GGEMSSolidPhantom& operator=(GGEMSSolidPhantom const&& solid_phantom) = delete;
 
     /*!
-      \fn void LoadPhantomImage(std::string const& phantom_filename, std::string const& range_data_filename)
+      \fn void LoadPhantomImage(std::string const& phantom_filename, std::string const& range_data_filename, std::shared_ptr<GGEMSMaterials> materials)
       \param phantom_filename - name of the MHF file containing the phantom
       \param range_data_filename - name of the file containing the range to material data
+      \param materials - pointer on material for a phantom
       \brief load phantom image to GGEMS and create a volume of label in GGEMS
     */
-    void LoadPhantomImage(std::string const& phantom_filename, std::string const& range_data_filename);
+    void LoadPhantomImage(std::string const& phantom_filename, std::string const& range_data_filename, std::shared_ptr<GGEMSMaterials> materials);
 
     /*!
       \fn void ApplyOffset(GGdouble3 const& offset_xyz)
@@ -101,14 +102,15 @@ class GGEMS_EXPORT GGEMSSolidPhantom
 
   private:
     /*!
-      \fn template <typename T> void ConvertImageToLabel(std::string const& raw_data_filename, std::string const& range_data_filename)
+      \fn template <typename T> void ConvertImageToLabel(std::string const& raw_data_filename, std::string const& range_data_filename, std::shared_ptr<GGEMSMaterials> materials)
       \tparam T - type of data
       \param raw_data_filename - raw data filename from mhd
       \param range_data_filename - name of the file containing the range to material data
+      \param materials - pointer on material for a phantom
       \brief convert image data to label data
     */
     template <typename T>
-    void ConvertImageToLabel(std::string const& raw_data_filename, std::string const& range_data_filename);
+    void ConvertImageToLabel(std::string const& raw_data_filename, std::string const& range_data_filename, std::shared_ptr<GGEMSMaterials> materials);
 
   private:
     std::shared_ptr<cl::Buffer> solid_phantom_data_; /*!< Data about solid phantom */
@@ -122,7 +124,7 @@ class GGEMS_EXPORT GGEMSSolidPhantom
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
-void GGEMSSolidPhantom::ConvertImageToLabel(std::string const& raw_data_filename, std::string const& range_data_filename)
+void GGEMSSolidPhantom::ConvertImageToLabel(std::string const& raw_data_filename, std::string const& range_data_filename, std::shared_ptr<GGEMSMaterials> materials)
 {
   GGcout("GGEMSSolidPhantom", "ConvertImageToLabel", 3) << "Converting image material data to label data..." << GGendl;
 
@@ -177,7 +179,7 @@ void GGEMSSolidPhantom::ConvertImageToLabel(std::string const& raw_data_filename
     iss >> first_label_value >> last_label_value >> material_name;
 
     // Adding the material
-    bool is_added = materials_->AddMaterial(material_name);
+    bool is_added = materials->AddMaterial(material_name);
     if (!is_added) {
       GGwarn("GGEMSSolidPhantom", "ConvertImageToLabel", 0) << "The material '" << material_name << "' is already added!!!" << GGendl;
       continue;

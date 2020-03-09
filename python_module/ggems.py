@@ -250,6 +250,15 @@ class GGEMSManager(object):
         ggems_lib.set_memory_ram_ggems_manager.argtypes = [ctypes.c_void_p, ctypes.c_bool]
         ggems_lib.set_memory_ram_ggems_manager.restype = ctypes.c_void_p
 
+        ggems_lib.set_processes_ggems_manager.argtypes = [ctypes.c_void_p, ctypes.c_bool]
+        ggems_lib.set_processes_ggems_manager.restype = ctypes.c_void_p
+
+        ggems_lib.set_range_cuts_ggems_manager.argtypes = [ctypes.c_void_p, ctypes.c_bool]
+        ggems_lib.set_range_cuts_ggems_manager.restype = ctypes.c_void_p
+
+        ggems_lib.set_random_ggems_manager.argtypes = [ctypes.c_void_p, ctypes.c_bool]
+        ggems_lib.set_random_ggems_manager.restype = ctypes.c_void_p
+
         ggems_lib.run_ggems_manager.argtypes = [ctypes.c_void_p]
         ggems_lib.run_ggems_manager.restype = ctypes.c_void_p
 
@@ -279,6 +288,15 @@ class GGEMSManager(object):
     def memory_verbose(self, flag):
         ggems_lib.set_memory_ram_ggems_manager(self.obj, flag)
 
+    def processes_verbose(self, flag):
+        ggems_lib.set_processes_ggems_manager(self.obj, flag)
+
+    def range_cuts_verbose(self, flag):
+        ggems_lib.set_range_cuts_ggems_manager(self.obj, flag)
+
+    def random_verbose(self, flag):
+        ggems_lib.set_random_ggems_manager(self.obj, flag)
+
 
 class GGEMSRangeCutsManager(object):
     """Class managing the range cuts in GGEMS
@@ -287,6 +305,45 @@ class GGEMSRangeCutsManager(object):
         ggems_lib.get_instance_range_cuts_manager.restype = ctypes.c_void_p
 
         self.obj = ggems_lib.get_instance_range_cuts_manager()
+
+
+class GGEMSProcessesManager(object):
+    """Class managing the processes in GGEMS
+    """
+    def __init__(self):
+        ggems_lib.get_instance_processes_manager.restype = ctypes.c_void_p
+
+        ggems_lib.set_cross_section_table_number_of_bins_processes_manager.argtypes = [ctypes.c_void_p, ctypes.c_uint16]
+        ggems_lib.set_cross_section_table_number_of_bins_processes_manager.restype = ctypes.c_void_p
+
+        ggems_lib.set_cross_section_table_minimum_energy_processes_manager.argtypes = [ctypes.c_void_p, ctypes.c_double, ctypes.c_char_p]
+        ggems_lib.set_cross_section_table_minimum_energy_processes_manager.restype = ctypes.c_void_p
+
+        ggems_lib.set_cross_section_table_maximum_energy_processes_manager.argtypes = [ctypes.c_void_p, ctypes.c_double, ctypes.c_char_p]
+        ggems_lib.set_cross_section_table_maximum_energy_processes_manager.restype = ctypes.c_void_p
+
+        ggems_lib.print_infos_processes_manager.argtypes = [ctypes.c_void_p]
+        ggems_lib.print_infos_processes_manager.restype = ctypes.c_void_p
+
+        ggems_lib.print_available_processes_manager.argtypes = [ctypes.c_void_p]
+        ggems_lib.print_available_processes_manager.restype = ctypes.c_void_p
+
+        self.obj = ggems_lib.get_instance_processes_manager()
+
+    def set_cross_section_table_number_of_bins(self, number_of_bins):
+        ggems_lib.set_cross_section_table_number_of_bins_processes_manager(self.obj, number_of_bins)
+
+    def set_cross_section_table_energy_min(self, energy, unit):
+        ggems_lib.set_cross_section_table_minimum_energy_processes_manager(self.obj, energy, unit)
+
+    def set_cross_section_table_energy_max(self, energy, unit):
+        ggems_lib.set_cross_section_table_maximum_energy_processes_manager(self.obj, energy, unit)
+
+    def print_available_processes(self):
+        ggems_lib.print_available_processes_manager(self.obj)
+
+    def print_infos(self):
+        ggems_lib.print_infos_processes_manager(self.obj)
 
 
 class GGEMSPhantomCreatorManager(object):
@@ -415,6 +472,7 @@ opencl_manager = GGEMSOpenCLManager()
 materials_manager = GGEMSMaterialsManager()
 phantom_manager = GGEMSPhantomNavigatorManager()
 source_manager = GGEMSSourceManager()
+processes_manager = GGEMSProcessesManager()
 range_cuts_manager = GGEMSRangeCutsManager()
 ggems_manager = GGEMSManager()
 phantom_creator_manager = GGEMSPhantomCreatorManager()

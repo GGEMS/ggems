@@ -20,8 +20,10 @@
 #include <set>
 #include <string>
 
+#include "GGEMS/global/GGEMSOpenCLManager.hh"
 #include "GGEMS/global/GGEMSExport.hh"
 #include "GGEMS/tools/GGEMSTypes.hh"
+#include "GGEMS/physics/GGEMSMaterialsStack.hh"
 
 /*!
   \class GGEMSMaterials
@@ -77,10 +79,10 @@ class GGEMS_EXPORT GGEMSMaterials
     bool AddMaterial(std::string const& material);
 
     /*!
-      \fn void PrintLabels(void) const
-      \brief printing labels and materials
+      \fn void PrintInfos(void) const
+      \brief printing labels and materials infos
     */
-    void PrintLabels(void) const;
+    void PrintInfos(void) const;
 
     /*!
       \fn void Initialize(void)
@@ -89,7 +91,15 @@ class GGEMS_EXPORT GGEMSMaterials
     void Initialize(void);
 
   private:
+    /*!
+      \fn void BuildMaterialTables(void)
+      \brief Building material tables
+    */
+    void BuildMaterialTables(void);
+
+  private:
     std::set<std::string> materials_; /*!< Defined material for a phantom */
+    std::shared_ptr<cl::Buffer> material_tables_; /*!< Material tables on OpenCL devices */
 };
 
 #endif // End of GUARD_GGEMS_PHYSICS_GGEMSMATERIALS_HH
