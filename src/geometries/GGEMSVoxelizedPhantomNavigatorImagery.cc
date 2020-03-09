@@ -53,6 +53,7 @@ void GGEMSVoxelizedPhantomNavigatorImagery::Initialize(void)
 
 void GGEMSVoxelizedPhantomNavigatorImagery::PrintInfos(void) const
 {
+  // Infos about GGEMSVoxelizedPhantomNavigatorImagery
   GGcout("GGEMSVoxelizedPhantomNavigatorImagery", "PrintInfos", 0) << GGendl;
   GGcout("GGEMSVoxelizedPhantomNavigatorImagery", "PrintInfos", 0) << "GGEMSVoxelizedPhantomNavigatorImagery Infos: " << GGendl;
   GGcout("GGEMSVoxelizedPhantomNavigatorImagery", "PrintInfos", 0) << "--------------------------------------------" << GGendl;
@@ -60,8 +61,10 @@ void GGEMSVoxelizedPhantomNavigatorImagery::PrintInfos(void) const
   GGcout("GGEMSVoxelizedPhantomNavigatorImagery", "PrintInfos", 0) << "*Phantom header filename: " << phantom_mhd_header_filename_ << GGendl;
   GGcout("GGEMSVoxelizedPhantomNavigatorImagery", "PrintInfos", 0) << "*Range label to material filename: " << range_data_filename_ << GGendl;
   GGcout("GGEMSVoxelizedPhantomNavigatorImagery", "PrintInfos", 0) << "*Geometry tolerance: " << geometry_tolerance_/GGEMSUnits::mm << " mm" << GGendl;
-  solid_phantom_->PrintInfos();
   GGcout("GGEMSVoxelizedPhantomNavigatorImagery", "PrintInfos", 0) << GGendl;
+
+  // Printing infos about GGEMSPhantomNavigator
+  GGEMSPhantomNavigator::PrintInfos();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

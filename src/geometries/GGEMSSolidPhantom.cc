@@ -20,9 +20,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSSolidPhantom::GGEMSSolidPhantom(std::shared_ptr<GGEMSMaterials> materials)
-: materials_(materials),
-  opencl_manager_(GGEMSOpenCLManager::GetInstance())
+GGEMSSolidPhantom::GGEMSSolidPhantom()
+: opencl_manager_(GGEMSOpenCLManager::GetInstance())
 {
   GGcout("GGEMSSolidPhantom", "GGEMSSolidPhantom", 3) << "Allocation of GGEMSSolidPhantom..." << GGendl;
 
@@ -44,7 +43,7 @@ GGEMSSolidPhantom::~GGEMSSolidPhantom(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSSolidPhantom::LoadPhantomImage(std::string const& phantom_filename, std::string const& range_data_filename)
+void GGEMSSolidPhantom::LoadPhantomImage(std::string const& phantom_filename, std::string const& range_data_filename, std::shared_ptr<GGEMSMaterials> materials)
 {
   GGcout("GGEMSSolidPhantom", "LoadPhantomImage", 3) << "Loading image phantom from mhd file..." << GGendl;
 
@@ -60,25 +59,25 @@ void GGEMSSolidPhantom::LoadPhantomImage(std::string const& phantom_filename, st
 
   // Convert raw data to material id data
   if (!kDataType.compare("MET_CHAR")) {
-    ConvertImageToLabel<char>(kRawFilename, range_data_filename);
+    ConvertImageToLabel<char>(kRawFilename, range_data_filename, materials);
   }
   else if (!kDataType.compare("MET_UCHAR")) {
-    ConvertImageToLabel<unsigned char>(kRawFilename, range_data_filename);
+    ConvertImageToLabel<unsigned char>(kRawFilename, range_data_filename, materials);
   }
   else if (!kDataType.compare("MET_SHORT")) {
-    ConvertImageToLabel<GGshort>(kRawFilename, range_data_filename);
+    ConvertImageToLabel<GGshort>(kRawFilename, range_data_filename, materials);
   }
   else if (!kDataType.compare("MET_USHORT")) {
-    ConvertImageToLabel<GGushort>(kRawFilename, range_data_filename);
+    ConvertImageToLabel<GGushort>(kRawFilename, range_data_filename, materials);
   }
   else if (!kDataType.compare("MET_INT")) {
-    ConvertImageToLabel<GGint>(kRawFilename, range_data_filename);
+    ConvertImageToLabel<GGint>(kRawFilename, range_data_filename, materials);
   }
   else if (!kDataType.compare("MET_UINT")) {
-    ConvertImageToLabel<GGuint>(kRawFilename, range_data_filename);
+    ConvertImageToLabel<GGuint>(kRawFilename, range_data_filename, materials);
   }
   else if (!kDataType.compare("MET_FLOAT")) {
-    ConvertImageToLabel<GGfloat>(kRawFilename, range_data_filename);
+    ConvertImageToLabel<GGfloat>(kRawFilename, range_data_filename, materials);
   }
 }
 
@@ -126,7 +125,6 @@ void GGEMSSolidPhantom::PrintInfos(void) const
   GGcout("GGEMSSolidPhantom", "PrintInfos", 0) << "    - X: " << solid_data->border_min_xyz_.s[0] << " <-> " << solid_data->border_max_xyz_.s[0] << GGendl;
   GGcout("GGEMSSolidPhantom", "PrintInfos", 0) << "    - Y: " << solid_data->border_min_xyz_.s[1] << " <-> " << solid_data->border_max_xyz_.s[1] << GGendl;
   GGcout("GGEMSSolidPhantom", "PrintInfos", 0) << "    - Z: " << solid_data->border_min_xyz_.s[2] << " <-> " << solid_data->border_max_xyz_.s[2] << GGendl;
-  materials_->PrintLabels();
   GGcout("GGEMSSolidPhantom", "PrintInfos", 0) << GGendl;
 
   // Release the pointer

@@ -27,6 +27,8 @@
 
 #include "GGEMS/sources/GGEMSSourceManager.hh"
 #include "GGEMS/physics/GGEMSMaterialsManager.hh"
+#include "GGEMS/physics/GGEMSProcessesManager.hh"
+#include "GGEMS/physics/GGEMSRangeCutsManager.hh"
 #include "GGEMS/global/GGEMSOpenCLManager.hh"
 #include "GGEMS/global/GGEMSManager.hh"
 #include "GGEMS/global/GGEMSConstants.hh"
@@ -47,19 +49,21 @@ GGEMSManager::GGEMSManager(void)
   is_source_verbose_(false),
   is_phantom_verbose_(false),
   is_memory_ram_verbose_(false),
+  is_processes_verbose_(false),
+  is_range_cuts_verbose_(false),
+  is_random_verbose_(false),
   source_manager_(GGEMSSourceManager::GetInstance()),
   opencl_manager_(GGEMSOpenCLManager::GetInstance()),
   material_manager_(GGEMSMaterialsManager::GetInstance()),
-  phantom_navigator_manager_(GGEMSPhantomNavigatorManager::GetInstance())
+  phantom_navigator_manager_(GGEMSPhantomNavigatorManager::GetInstance()),
+  range_cuts_manager_(GGEMSRangeCutsManager::GetInstance()),
+  processes_manager_(GGEMSProcessesManager::GetInstance())
   //physics_list_(0),
   //secondaries_list_(0),
   //photon_distance_cut_(GGEMSUnits::um),
   //electron_distance_cut_(GGEMSUnits::um),
   //photon_level_secondaries_(0),
-  //electron_level_secondaries_(0),
-  //cross_section_table_number_of_bins_(GGEMSLimit::CROSS_SECTION_TABLE_NUMBER_BINS),
-  //cross_section_table_energy_min_(GGEMSLimit::CROSS_SECTION_TABLE_ENERGY_MIN),
-  //cross_section_table_energy_max_(GGEMSLimit::CROSS_SECTION_TABLE_ENERGY_MAX),
+  //electron_level_secondaries_(0)
 {
   GGcout("GGEMSManager", "GGEMSManager", 3) << "Allocation of GGEMS Manager..." << GGendl;
 
@@ -170,6 +174,33 @@ void GGEMSManager::SetMemoryRAMVerbose(bool const& is_memory_ram_verbose)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+void GGEMSManager::SetProcessesVerbose(bool const& is_processes_verbose)
+{
+  is_processes_verbose_ = is_processes_verbose;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSManager::SetRangeCutsVerbose(bool const& is_range_cuts_verbose)
+{
+  is_range_cuts_verbose_ = is_range_cuts_verbose;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSManager::SetRandomVerbose(bool const& is_random_verbose)
+{
+  is_random_verbose_ = is_random_verbose;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 /*void GGEMSManager::SetProcess(char const* process_name)
 {
   // Convert the process name in string
@@ -255,33 +286,6 @@ void GGEMSManager::SetMemoryRAMVerbose(bool const& is_memory_ram_verbose)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-//void GGEMSManager::SetCrossSectionTableNumberOfBins(GGuint const& number_of_bins)
-//{
-  //cross_section_table_number_of_bins_ = number_of_bins;
-//}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-//void GGEMSManager::SetCrossSectionTableEnergyMin(GGdouble const& min_energy)
-//{
-  //cross_section_table_energy_min_ = min_energy;
-//}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-//void GGEMSManager::SetCrossSectionTableEnergyMax(GGdouble const& max_energy)
-//{
-  //cross_section_table_energy_max_ = max_energy;
-//}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
 void GGEMSManager::CheckParameters(void)
 {
   GGcout("GGEMSManager", "CheckParameters", 1) << "Checking the mandatory parameters..." << GGendl;
@@ -339,6 +343,18 @@ void GGEMSManager::Initialize(void)
 
   // Printing infos about phantom(s)
   if (is_phantom_verbose_) phantom_navigator_manager_.PrintInfos();
+
+  // Printing infos about processe(s)
+  if (is_processes_verbose_) {
+    processes_manager_.PrintAvailableProcesses();
+    processes_manager_.PrintInfos();
+  }
+
+  // Printing infos about range cuts
+  //if (is_range_cuts_verbose_) range_cuts_manager_.PrintInfos();
+
+  // Printing infos about random in GGEMS
+  if (is_random_verbose_) GGcout("GGEMSManager", "Initialize", 0) << "Seed: " << seed_ << GGendl;
 
   // Printing infos about RAM
   if (is_memory_ram_verbose_) opencl_manager_.PrintRAMStatus();
@@ -577,6 +593,33 @@ void set_phantom_ggems_manager(GGEMSManager* ggems_manager, bool const is_phanto
 void set_memory_ram_ggems_manager(GGEMSManager* ggems_manager, bool const is_memory_ram_verbose)
 {
   ggems_manager->SetMemoryRAMVerbose(is_memory_ram_verbose);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void set_processes_ggems_manager(GGEMSManager* ggems_manager, bool const is_processes_verbose)
+{
+  ggems_manager->SetProcessesVerbose(is_processes_verbose);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void set_range_cuts_ggems_manager(GGEMSManager* ggems_manager, bool const is_range_cuts_verbose)
+{
+  ggems_manager->SetRangeCutsVerbose(is_range_cuts_verbose);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void set_random_ggems_manager(GGEMSManager* ggems_manager, bool const is_random_verbose)
+{
+  ggems_manager->SetRandomVerbose(is_random_verbose);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

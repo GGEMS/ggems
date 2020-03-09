@@ -53,21 +53,21 @@ class GGEMS_EXPORT GGEMSRangeCutsManager
 
     /*!
       \fn GGEMSRangeCutsManager& operator=(GGEMSRangeCutsManager const& range_cuts_manager) = delete
-      \param range_cuts_manager - reference on the ggems manager
+      \param range_cuts_manager - reference on the range cuts manager
       \brief Avoid assignement of the class by reference
     */
     GGEMSRangeCutsManager& operator=(GGEMSRangeCutsManager const& range_cuts_manager) = delete;
 
     /*!
       \fn GGEMSRangeCutsManager(GGEMSRangeCutsManager const&& range_cuts_manager) = delete
-      \param range_cuts_manager - rvalue reference on the ggems manager
+      \param range_cuts_manager - rvalue reference on the range cuts manager
       \brief Avoid copy of the class by rvalue reference
     */
     GGEMSRangeCutsManager(GGEMSRangeCutsManager const&& range_cuts_manager) = delete;
 
     /*!
       \fn GGEMSRangeCutsManager& operator=(GGEMSRangeCutsManager const&& range_cuts_manager) = delete
-      \param range_cuts_manager - rvalue reference on the ggems manager
+      \param range_cuts_manager - rvalue reference on the range cuts manager
       \brief Avoid copy of the class by rvalue reference
     */
     GGEMSRangeCutsManager& operator=(GGEMSRangeCutsManager const&& range_cuts_manager) = delete;

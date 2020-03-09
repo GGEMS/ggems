@@ -125,7 +125,7 @@ namespace GGEMSLimit
   1.e-6*1.;
   #endif
 
-  __constant GGuint CROSS_SECTION_TABLE_NUMBER_BINS = 220; /*!< Number of bins in the cross section table */
+  __constant GGushort CROSS_SECTION_TABLE_NUMBER_BINS = 220; /*!< Number of bins in the cross section table */
   __constant GGdouble CROSS_SECTION_TABLE_ENERGY_MIN = 990.0*
   #ifndef OPENCL_COMPILER
   GGEMSUnits::eV; /*!< Min energy in the cross section table */

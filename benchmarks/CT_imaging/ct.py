@@ -40,29 +40,41 @@ phantom_4.set_offset(0.0, 25.0, 50.0, b"mm")
 
 # ------------------------------------------------------------------------------
 # STEP 5: Physics
+# processes_manager.add_process(b"Compton", b"gamma", b"all")
+# or
+# processes_manager.add_process(b"Compton", b"gamma", b"phantom_1")
+# processes_manager.add_process(b"Compton", b"gamma", b"phantom_2")
+# processes_manager.add_process(b"Compton", b"gamma", b"phantom_3")
+# processes_manager.add_process(b"Compton", b"gamma", b"phantom_4")
 
+# processes_manager.add_process(b"Photoelectric", b"gamma", b"all")
+# or
+# processes_manager.add_process(b"Photoelectric", b"gamma", b"phantom_1")
+# processes_manager.add_process(b"Photoelectric", b"gamma", b"phantom_2")
+# processes_manager.add_process(b"Photoelectric", b"gamma", b"phantom_3")
+# processes_manager.add_process(b"Photoelectric", b"gamma", b"phantom_4")
+
+# processes_manager.add_process(b"Rayleigh", b"gamma", b"all")
+# or
+# processes_manager.add_process(b"Rayleigh", b"gamma", b"phantom_1")
+# processes_manager.add_process(b"Rayleigh", b"gamma", b"phantom_2")
+# processes_manager.add_process(b"Rayleigh", b"gamma", b"phantom_3")
+# processes_manager.add_process(b"Rayleigh", b"gamma", b"phantom_4")
+
+processes_manager.set_cross_section_table_number_of_bins(220)
+processes_manager.set_cross_section_table_energy_min(0.99, b"keV")
+processes_manager.set_cross_section_table_energy_max(250.0, b"MeV")
 
 # ------------------------------------------------------------------------------
 # STEP 6: Cuts
-range_cuts_manager.set_cuts("phantom_1", "gamma", 1.0, b"mm")
-range_cuts_manager.set_cuts("phantom_2", "gamma", 0.2, b"cm")
-range_cuts_manager.set_cuts("phantom_3", "gamma", 13.0, b"um")
-range_cuts_manager.set_cuts("phantom_4", "gamma", 0.015, b"m")
+# range_cuts_manager.set_cut("all", "gamma", 1.0, b"mm")
+# or
+# range_cuts_manager.set_cut("phantom_1", "gamma", 1.0, b"mm")
+# range_cuts_manager.set_cut("phantom_2", "gamma", 0.2, b"cm")
+# range_cuts_manager.set_cut("phantom_3", "gamma", 13.0, b"um")
+# range_cuts_manager.set_cut("phantom_4", "gamma", 0.015, b"m")
 
-# processes = ggems.GGEMSProcessesManager()
-# processes.add_process("Compton", b"phantom_1")
-# processes.add_process("Rayleigh", b"phantom_1")
-# processes.add_process("Photoelectric", b"phantom_1")
-
-# processes.print_available_process()
-# processes.print_infos()
-
-# processes.set_particle_cut(b"photon", b"phantom_1", 0.5)  # in mm
-# set_particle_cut(b"photon", b"phantom_2", 1.5)  # in mm
-
-# physics.set_cross_section_table_number_of_bins(b"phantom_1", 220)
-# ggems_manager.set_cross_section_table_energy_min(0.00099)  # in MeV
-# ggems_manager.set_cross_section_table_energy_max(250.0)  # in MeV
+# range_cuts_manager.print_infos()
 
 # ------------------------------------------------------------------------------
 # STEP 7: Sources
@@ -101,9 +113,10 @@ ggems_manager.material_verbose(True)
 ggems_manager.phantom_verbose(True)
 ggems_manager.source_verbose(True)
 ggems_manager.memory_verbose(True)
+ggems_manager.processes_verbose(True)
 ggems_manager.range_cuts_verbose(True)
+ggems_manager.random_verbose(True)
 
-# ggems_manager.processes_verbose(true/false)
 # ggems_manager.detector_verbose(true/false)
 # ggems_manager.tracking_verbose(true/false)
 

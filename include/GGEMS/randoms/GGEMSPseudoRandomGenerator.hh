@@ -63,12 +63,19 @@ class GGEMS_EXPORT GGEMSPseudoRandomGenerator
     */
     GGEMSPseudoRandomGenerator& operator=(GGEMSPseudoRandomGenerator const&& random) = delete;
 
-  public:
     /*!
       \fn void Initialize(void)
       \brief Initialize the Random object
     */
     void Initialize(void);
+
+  public:
+    /*!
+      \fn inline cl::Buffer* GetPseudoRandomNumbers() const
+      \return pointer to OpenCL buffer storing random numbers
+      \brief return the pointer to OpenCL buffer storing random numbers
+    */
+    inline cl::Buffer* GetPseudoRandomNumbers() const {return pseudo_random_numbers_.get();};
 
   private:
     /*!
@@ -82,14 +89,6 @@ class GGEMS_EXPORT GGEMSPseudoRandomGenerator
       \brief Initialize seeds for random
     */
     void InitializeSeeds(void);
-
-  public:
-    /*!
-      \fn inline cl::Buffer* GetPseudoRandomNumbers() const
-      \return pointer to OpenCL buffer storing random numbers
-      \brief return the pointer to OpenCL buffer storing random numbers
-    */
-    inline cl::Buffer* GetPseudoRandomNumbers() const {return pseudo_random_numbers_.get();};
 
   private:
     std::shared_ptr<cl::Buffer> pseudo_random_numbers_; /*!< Pointer storing the buffer about random numbers */
