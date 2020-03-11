@@ -33,7 +33,7 @@ std::string GGEMSMaterialReader::ReadMaterialName(std::string const& line)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGdouble GGEMSMaterialReader::ReadMaterialDensity(std::string const& line)
+GGfloat GGEMSMaterialReader::ReadMaterialDensity(std::string const& line)
 {
   // Get the position of the first and last number of density
   std::size_t first_pos = line.find_first_of("0123456789", line.find("d="));
@@ -41,7 +41,7 @@ GGdouble GGEMSMaterialReader::ReadMaterialDensity(std::string const& line)
   std::string density_str = line.substr(first_pos, last_pos != std::string::npos ? last_pos - first_pos : last_pos);
 
   // Convert string to double
-  GGdouble density = 0.0;
+  GGfloat density = 0.0f;
   std::stringstream(density_str) >> density;
 
   // Check units of density and convert
@@ -98,14 +98,14 @@ std::string GGEMSMaterialReader::ReadMaterialElementName(
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGdouble GGEMSMaterialReader::ReadMaterialElementFraction(std::string const& line)
+GGfloat GGEMSMaterialReader::ReadMaterialElementFraction(std::string const& line)
 {
   std::size_t first_pos = line.find_first_of("0123456789", line.find("f="));
   std::size_t last_pos = line.find_last_of(";");
   std::string fraction_str = line.substr(first_pos, last_pos != std::string::npos ? last_pos - first_pos : last_pos);
 
   // Convert string to double
-  GGdouble fraction = 0.0;
+  GGfloat fraction = 0.0f;
   std::stringstream(fraction_str) >> fraction;
 
   return fraction;

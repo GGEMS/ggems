@@ -83,14 +83,14 @@ namespace GGEMSParticleState
 namespace GGEMSTolerance
 {
 #endif
-  __constant GGdouble EPSILON2 = 1.0e-02; /*!< Epsilon of 0.01 */
-  __constant GGdouble EPSILON3 = 1.0e-03; /*!< Epsilon of 0.001 */
-  __constant GGdouble EPSILON6 = 1.0e-06; /*!< Epsilon of 0.000001 */
-  __constant GGdouble GEOMETRY = 100.0*
+  __constant GGfloat EPSILON2 = 1.0e-02f; /*!< Epsilon of 0.01 */
+  __constant GGfloat EPSILON3 = 1.0e-03f; /*!< Epsilon of 0.001 */
+  __constant GGfloat EPSILON6 = 1.0e-06f; /*!< Epsilon of 0.000001 */
+  __constant GGfloat GEOMETRY = 100.0f*
   #ifndef OPENCL_COMPILER
   GGEMSUnits::nm; /*!< Tolerance for the geometry navigation */
   #else
-  (1.e-9 *1000.*1.0);
+  (1.e-9f *1000.f*1.0f);
   #endif
 #ifndef OPENCL_COMPILER
 }
@@ -118,47 +118,47 @@ namespace GGEMSState
 namespace GGEMSLimit
 {
 #endif
-  __constant GGdouble KINETIC_ENERGY_MIN = 1.0*
+  __constant GGfloat KINETIC_ENERGY_MIN = 1.0f*
   #ifndef OPENCL_COMPILER
   GGEMSUnits::eV; /*!< Min kinetic energy */
   #else
-  1.e-6*1.;
+  1.e-6f*1.f;
   #endif
 
   __constant GGushort CROSS_SECTION_TABLE_NUMBER_BINS = 220; /*!< Number of bins in the cross section table */
-  __constant GGdouble CROSS_SECTION_TABLE_ENERGY_MIN = 990.0*
+  __constant GGdouble CROSS_SECTION_TABLE_ENERGY_MIN = 990.0f*
   #ifndef OPENCL_COMPILER
   GGEMSUnits::eV; /*!< Min energy in the cross section table */
   #else
-  1.e-6*1.;
+  1.e-6f*1.f;
   #endif
 
-  __constant GGdouble CROSS_SECTION_TABLE_ENERGY_MAX = 250.0*
+  __constant GGfloat CROSS_SECTION_TABLE_ENERGY_MAX = 250.0f*
   #ifndef OPENCL_COMPILER
   GGEMSUnits::MeV; /*!< Max energy in the cross section table */
   #else
-  1.;
+  1.f;
   #endif
 
-  __constant GGdouble PHOTON_CUT = 1.0*
+  __constant GGfloat PHOTON_CUT = 1.0f*
   #ifndef OPENCL_COMPILER
   GGEMSUnits::um; /*!< Photon cut */
   #else
-  1.e-6 *1000.*1.0;
+  1.e-6f *1000.f*1.0f;
   #endif
 
-  __constant GGdouble ELECTRON_CUT = 1.0*
+  __constant GGfloat ELECTRON_CUT = 1.0f*
   #ifndef OPENCL_COMPILER
   GGEMSUnits::um; /*!< Electron cut */
   #else
-  1.e-6 *1000.*1.0;
+  1.e-6f *1000.f*1.0f;
   #endif
 
-  __constant GGdouble POSITRON_CUT = 1.0*
+  __constant GGfloat POSITRON_CUT = 1.0f*
   #ifndef OPENCL_COMPILER
   GGEMSUnits::um; /*!< Positron cut */
   #else
-  1.e-6 *1000.*1.0;
+  1.e-6f*1000.f*1.0f;
   #endif
 #ifndef OPENCL_COMPILER
 }

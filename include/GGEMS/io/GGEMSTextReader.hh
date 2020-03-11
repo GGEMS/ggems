@@ -34,12 +34,12 @@ namespace GGEMSMaterialReader
   std::string ReadMaterialName(std::string const& line);
 
   /*!
-    \fn GGdouble ReadMaterialDensity(std::string const& line)
+    \fn GGfloat ReadMaterialDensity(std::string const& line)
     \param line - string to analyze
     \return density of material
     \brief return the density of material
   */
-  GGdouble ReadMaterialDensity(std::string const& line);
+  GGfloat ReadMaterialDensity(std::string const& line);
 
   /*!
     \fn GGushort ReadMaterialNumberOfElements(std::string const& line)
@@ -58,12 +58,12 @@ namespace GGEMSMaterialReader
   std::string ReadMaterialElementName(std::string const& line);
 
   /*!
-    \fn GGdouble ReadMaterialElementFraction(std::string const& line)
+    \fn GGfloat ReadMaterialElementFraction(std::string const& line)
     \param line - string to analyze
     \return number of elements fraction
     \brief return the number of element fraction
   */
-  GGdouble ReadMaterialElementFraction(std::string const& line);
+  GGfloat ReadMaterialElementFraction(std::string const& line);
 }
 
 /*!

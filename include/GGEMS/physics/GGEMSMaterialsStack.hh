@@ -29,56 +29,39 @@ typedef struct __attribute__((aligned (1))) GGEMSMaterialTables_t
 typedef struct PACKED GGEMSMaterialTables_t
 #endif
 {
+  // Global parameters
   GGuchar number_of_materials_; /*!< Number of the materials */
+  GGushort total_number_of_chemical_elements_; /*!< Total number of chemical elements */
 
-/*    ui16 *nb_elements;        // n
-    ui16 *index;              // n
-    ui16 *mixture;            // k
-    f32 *atom_num_dens;       // k
-    f32 *mass_fraction;       // k
-    f32 *nb_atoms_per_vol;                // n
-    f32 *nb_electrons_per_vol;            // n
-    f32 *electron_mean_excitation_energy; // n
-    f32 *rad_length;                      // n
-    f32 *photon_energy_cut;               // n
-    f32 *electron_energy_cut;             // n
-    f32 *fX0;                             // n
-    f32 *fX1;
-    f32 *fD0;
-    f32 *fC;
-    f32 *fA;
-    f32 *fM;
-    f32 *fF1;
-    f32 *fF2;
-    f32 *fEnergy0;
-    f32 *fEnergy1;
-    f32 *fEnergy2;
-    f32 *fLogEnergy1;
-    f32 *fLogEnergy2;
-    f32 *fLogMeanExcitationEnergy;
-    f32 *density;
-    ui32 nb_materials;              // n
-    ui32 nb_elements_total;         // k
-*/
-  //GGfloat E_[MAXIMUM_PARTICLES]; /*!< Energies of particles */
-  //GGfloat dx_[MAXIMUM_PARTICLES]; /*!< Position of the particle in x */
-  //GGfloat dy_[MAXIMUM_PARTICLES]; /*!< Position of the particle in y */
-  //GGfloat dz_[MAXIMUM_PARTICLES]; /*!< Position of the particle in z */
-  //GGfloat px_[MAXIMUM_PARTICLES]; /*!< Momentum of the particle in x */
-  //GGfloat py_[MAXIMUM_PARTICLES]; /*!< Momentum of the particle in y */
-  //GGfloat pz_[MAXIMUM_PARTICLES]; /*!< Momentum of the particle in z */
-  //GGfloat tof_[MAXIMUM_PARTICLES]; /*!< Time of flight */
+  // Infos by materials
+  GGuchar number_of_chemical_elements_[255]; /*!< Number of chemical elements in a single material */
+  GGfloat density_of_material_[255]; /*! Density of material in g/cm3 */
+  GGfloat number_of_atoms_by_volume_[255]; /*!< Number of atoms by volume */
+  GGfloat number_of_electrons_by_volume_[255]; /*!< Number of electrons by volume */
+  GGfloat mean_excitation_energy_[255]; /*!< Mean of excitation energy */
+  GGfloat log_mean_excitation_energy_[255]; /*!< Log of mean of excitation energy */
+  GGfloat radiation_length_[255]; /*!< Radiation length */
+  GGfloat x0_density_[255]; /*!< x0 density correction */
+  GGfloat x1_density_[255]; /*!< x1 density correction */
+  GGfloat d0_density_[255]; /*!< d0 density correction */
+  GGfloat c_density_[255]; /*!< c density correction */
+  GGfloat a_density_[255]; /*!< a density correction */
+  GGfloat m_density_[255]; /*!< m density correction */
+  GGfloat f1_fluct_[255]; /*!< f1 energy loss fluctuation model */
+  GGfloat f2_fluct_[255]; /*!< f2 energy loss fluctuation model */
+  GGfloat energy0_fluct_[255]; /*!< energy 0 energy loss fluctuation model */
+  GGfloat energy1_fluct_[255]; /*!< energy 1 energy loss fluctuation model */
+  GGfloat energy2_fluct_[255]; /*!< energy 2 energy loss fluctuation model */
+  GGfloat log_energy1_fluct_[255]; /*!< log of energy 0 energy loss fluctuation model */
+  GGfloat log_energy2_fluct_[255]; /*!< log of energy 1 energy loss fluctuation model */
+  GGfloat photon_energy_cut[255]; /*!< Photon energy cut */
+  GGfloat electron_energy_cut[255]; /*!< Electron energy cut */
 
-  //GGuint geometry_id_[MAXIMUM_PARTICLES]; /*!< current geometry crossed by the particle */
-  //GGushort E_index_[MAXIMUM_PARTICLES]; /*!< Energy index within CS and Mat tables */
-  //GGuchar scatter_order_[MAXIMUM_PARTICLES]; /*!< Scatter order, usefull for the imagery */
-
-  //GGfloat next_interaction_distance_[MAXIMUM_PARTICLES]; /*!< Distance to the next interaction */
-  //GGuchar next_discrete_process_[MAXIMUM_PARTICLES]; /*!< Next process */
-
-  //GGuchar status_[MAXIMUM_PARTICLES]; /*!< */
-  //GGuchar level_[MAXIMUM_PARTICLES]; /*!< */
-  //GGuchar pname_[MAXIMUM_PARTICLES]; /*!< particle name (photon, electron, etc) */
+  // Infos by chemical elements by materials
+  GGushort index_of_chemical_elements_[255]; /*!< Index to chemical element by material */
+  GGuchar atomic_number_Z_[255*10]; /*!< Atomic number Z by chemical elements */
+  GGfloat atomic_number_density_[255*10]; /*!< Atomic number density : fraction of element in material * density * Avogadro / Atomic mass */
+  GGfloat mass_fraction_[255*10]; /*!< Mass fraction of element in material */
 } GGEMSMaterialTables;
 #ifndef OPENCL_COMPILER
 #ifdef _MSC_VER
