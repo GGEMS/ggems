@@ -34,214 +34,209 @@
 namespace GGEMSUnits
 {
 #endif
-  // Pi definitions
-  __constant GGdouble PI = 3.141592653589793238463;
-  __constant GGdouble PI_TWICE = 2.0 * 3.141592653589793238463;
-  __constant GGdouble PI_HALF = 3.141592653589793238463 / 2.0;
-  __constant GGdouble PI_PI = 3.141592653589793238463 * 3.141592653589793238463;
 
   // Lengths
-  __constant GGdouble MILLIMETER = 1.0;
-  __constant GGdouble MILLIMETER2 = 1.0*1.0;
-  __constant GGdouble MILLIMETER3 = 1.0*1.0*1.0;
+  __constant GGfloat MILLIMETER = 1.0f;
+  __constant GGfloat MILLIMETER2 = 1.0f*1.0f;
+  __constant GGfloat MILLIMETER3 = 1.0f*1.0f*1.0f;
 
-  __constant GGdouble CENTIMETER = 10.*1.0;
-  __constant GGdouble CENTIMETER2 = 10.*1.0*10.*1.0;
-  __constant GGdouble CENTIMETER3 = 10.*1.0*10.*1.0*10.*1.0;
+  __constant GGfloat CENTIMETER = 10.f*1.0f;
+  __constant GGfloat CENTIMETER2 = 10.f*1.0f*10.f*1.0f;
+  __constant GGfloat CENTIMETER3 = 10.f*1.0f*10.f*1.0*10.*1.0f;
 
-  __constant GGdouble METER = 1000.*1.0;
-  __constant GGdouble METER2 = 1000.*1.0*1000.*1.0;
-  __constant GGdouble METER3 = 1000.*1.0*1000.*1.0*1000.*1.0;
+  __constant GGfloat METER = 1000.f*1.0f;
+  __constant GGfloat METER2 = 1000.f*1.0f*1000.f*1.0f;
+  __constant GGfloat METER3 = 1000.f*1.0f*1000.f*1.0f*1000.*1.0f;
 
-  __constant GGdouble KILOMETER = 1000.*1000.*1.0;
-  __constant GGdouble KILOMETER2 = 1000.*1000.*1.0*1000.*1000.*1.0;
-  __constant GGdouble KILOMETER3 = 1000.*1000.*1.0*1000.*1000.*1.0*1000.*1000.*1.0;
+  __constant GGfloat KILOMETER = 1000.f*1000.f*1.0f;
+  __constant GGfloat KILOMETER2 = 1000.f*1000.f*1.0f*1000.f*1000.f*1.0f;
+  __constant GGfloat KILOMETER3 = 1000.f*1000.f*1.0f*1000.f*1000.f*1.0f*1000.f*1000.f*1.0f;
 
-  __constant GGdouble PARSEC = 96939420213600000*1000.*1.0/3.141592653589793238463;
+  __constant GGfloat PARSEC = 96939420213600000.0f*1000.f*1.0f/3.141592653589793238463f;
 
-  __constant GGdouble MICROMETER = 1.e-6 *1000.*1.0;
-  __constant GGdouble NANOMETER = 1.e-9 *1000.*1.0;
-  __constant GGdouble ANGSTROM = 1.e-10*1000.*1.0;
-  __constant GGdouble FERMI = 1.e-15*1000.*1.0;
+  __constant GGfloat MICROMETER = 1.e-6f *1000.f*1.0f;
+  __constant GGfloat NANOMETER = 1.e-9f *1000.f*1.0f;
+  __constant GGfloat ANGSTROM = 1.e-10f*1000.f*1.0f;
+  __constant GGfloat FERMI = 1.e-15f*1000.f*1.0f;
 
-  __constant GGdouble BARN = 1.e-28*1000.*1.0;
-  __constant GGdouble MILLIBARN = 1.e-3 *1.e-28*1000.*1.0;
-  __constant GGdouble MICROBARN = 1.e-6 *1.e-28*1000.*1.0;
-  __constant GGdouble NANOBARN = 1.e-9 *1.e-28*1000.*1.0;
-  __constant GGdouble PICOBARN = 1.e-12*1.e-28*1000.*1.0;
+  __constant GGfloat BARN = 1.e-28f*1000.f*1.0f;
+  __constant GGfloat MILLIBARN = 1.e-3f *1.e-28f*1000.f*1.0f;
+  __constant GGfloat MICROBARN = 1.e-6f *1.e-28f*1000.f*1.0f;
+  __constant GGfloat NANOBARN = 1.e-9f *1.e-28f*1000.f*1.0f;
+  __constant GGfloat PICOBARN = 1.e-12f*1.e-28f*1000.f*1.0f;
 
   // Symbol definitions
-  __constant GGdouble nm = 1.e-9 *1000.*1.0;
-  __constant GGdouble um = 1.e-6 *1000.*1.0;
+  __constant GGfloat nm = 1.e-9f *1000.f*1.0f;
+  __constant GGfloat um = 1.e-6f *1000.f*1.0f;
 
-  __constant GGdouble mm = 1.0;
-  __constant GGdouble mm2 = 1.0*1.0;
-  __constant GGdouble mm3 = 1.0*1.0*1.0;
+  __constant GGfloat mm = 1.0f;
+  __constant GGfloat mm2 = 1.0f*1.0f;
+  __constant GGfloat mm3 = 1.0f*1.0f*1.0f;
 
-  __constant GGdouble cm  = 10.*1.0;
-  __constant GGdouble cm2 = 10.*1.0*10.*1.0;
-  __constant GGdouble cm3 = 10.*1.0*10.*1.0*10.*1.0;
+  __constant GGfloat cm  = 10.f*1.0f;
+  __constant GGfloat cm2 = 10.f*1.0f*10.f*1.0f;
+  __constant GGfloat cm3 = 10.f*1.0f*10.f*1.0f*10.f*1.0f;
 
-  __constant GGdouble m = 1000.*1.0;
-  __constant GGdouble m2 = 1000.*1.0*1000.*1.0;
-  __constant GGdouble m3 = 1000.*1.0*1000.*1.0*1000.*1.0;
+  __constant GGfloat m = 1000.*1.0f;
+  __constant GGfloat m2 = 1000.*1.0f*1000.f*1.0f;
+  __constant GGfloat m3 = 1000.f*1.0f*1000.f*1.0f*1000.f*1.0f;
 
-  __constant GGdouble km = 1000.*1000.*1.0;
-  __constant GGdouble km2 = 1000.*1000.*1.0*1000.*1000.*1.0;
-  __constant GGdouble km3 = 1000.*1000.*1.0*1000.*1000.*1.0*1000.*1000.*1.0;
+  __constant GGfloat km = 1000.f*1000.f*1.0f;
+  __constant GGfloat km2 = 1000.f*1000.f*1.0f*1000.f*1000.f*1.0f;
+  __constant GGfloat km3 = 1000.f*1000.f*1.0f*1000.f*1000.f*1.0f*1000.f*1000.f*1.0f;
 
-  __constant GGdouble pc = 96939420213600000*1000.*1.0/3.141592653589793238463;
+  __constant GGfloat pc = 96939420213600000.0f*1000.f*1.0f/3.141592653589793238463f;
 
   // Angles
-  __constant GGdouble RADIAN = 1.0;
-  __constant GGdouble MILLIRADIAN = 1.e-3*1.0;
-  __constant GGdouble DEGREE = (3.141592653589793238463/180.0)*1.0;
+  __constant GGfloat RADIAN = 1.0f;
+  __constant GGfloat MILLIRADIAN = 1.e-3f*1.0f;
+  __constant GGfloat DEGREE = (3.141592653589793238463f/180.0f)*1.0f;
 
-  __constant GGdouble STERADIAN = 1.0;
+  __constant GGfloat STERADIAN = 1.0f;
 
   // Symbols definitions
-  __constant GGdouble rad  = 1.0;
-  __constant GGdouble mrad = 1.e-3*1.0;
-  __constant GGdouble sr = 1.0;
-  __constant GGdouble deg  = (3.141592653589793238463/180.0)*1.0;
+  __constant GGfloat rad  = 1.0f;
+  __constant GGfloat mrad = 1.e-3f*1.0f;
+  __constant GGfloat sr = 1.0f;
+  __constant GGfloat deg  = (3.141592653589793238463f/180.0f)*1.0f;
 
   // Time
-  __constant GGdouble NANOSECOND = 1.;
-  __constant GGdouble SECOND = 1.e+9 *1.;
-  __constant GGdouble MILLISECOND = 1.e-3 *1.e+9 *1.;
-  __constant GGdouble MICROSECOND = 1.e-6 *1.e+9 *1.;
-  __constant GGdouble PICOSECOND = 1.e-12*1.e+9 *1.;
+  __constant GGfloat NANOSECOND = 1.f;
+  __constant GGfloat SECOND = 1.e+9f *1.f;
+  __constant GGfloat MILLISECOND = 1.e-3f *1.e+9f *1.f;
+  __constant GGfloat MICROSECOND = 1.e-6f *1.e+9f *1.f;
+  __constant GGfloat PICOSECOND = 1.e-12f*1.e+9f *1.f;
 
-  __constant GGdouble HERTZ = 1./(1.e+9 *1.);
-  __constant GGdouble KILOHERTZ = 1.e+3*(1./(1.e+9 *1.));
-  __constant GGdouble MEGAHERTZ = 1.e+6*(1./(1.e+9 *1.));
+  __constant GGfloat HERTZ = 1.f/(1.e+9f *1.f);
+  __constant GGfloat KILOHERTZ = 1.e+3f*(1.f/(1.e+9f *1.f));
+  __constant GGfloat MEGAHERTZ = 1.e+6f*(1.f/(1.e+9f *1.f));
 
   // Symbols definitions
-  __constant GGdouble ns = 1.;
-  __constant GGdouble s = 1.e+9 *1.;
-  __constant GGdouble ms = 1.e-3 *1.e+9 *1.;
+  __constant GGfloat ns = 1.f;
+  __constant GGfloat s = 1.e+9f *1.f;
+  __constant GGfloat ms = 1.e-3f *1.e+9f *1.f;
 
   // Electric charge [Q]
-  __constant GGdouble EPLUS = 1. ;// positron charge
-  __constant GGdouble ESI = 1.602176487e-19;// positron charge in coulomb
-  __constant GGdouble COULOMB = 1./1.602176487e-19;// coulomb = 6.24150 e+18 * eplus
+  __constant GGfloat eplus = 1.f ;// positron charge
+  __constant GGfloat ESI = 1.602176487e-19f;// positron charge in coulomb
+  __constant GGfloat COULOMB = 1.f/1.602176487e-19f;// coulomb = 6.24150 e+18 * eplus
 
   // Energy [E]
-  __constant GGdouble MEGAELECTRONVOLT = 1. ;
-  __constant GGdouble ELECTRONVOLT = 1.e-6*1.;
-  __constant GGdouble KILOELECTRONVOLT = 1.e-3*1.;
-  __constant GGdouble GIGAELECTRONVOLT = 1.e+3*1.;
-  __constant GGdouble TERAELECTRONVOLT = 1.e+6*1.;
-  __constant GGdouble PETAELECTRONVOLT = 1.e+9*1.;
+  __constant GGfloat MEGAELECTRONVOLT = 1.f;
+  __constant GGfloat ELECTRONVOLT = 1.e-6f*1.f;
+  __constant GGfloat KILOELECTRONVOLT = 1.e-3f*1.f;
+  __constant GGfloat GIGAELECTRONVOLT = 1.e+3f*1.f;
+  __constant GGfloat TERAELECTRONVOLT = 1.e+6f*1.f;
+  __constant GGfloat PETAELECTRONVOLT = 1.e+9f*1.f;
 
-  __constant GGdouble JOULE = 1.e-6*1./1.602176487e-19;// joule = 6.24150 e+12 * MeV
+  __constant GGfloat joule = 1.e-6f*1.f/1.602176487e-19f;// joule = 6.24150 e+12 * MeV
 
   // Symbols definitions
-  __constant GGdouble MeV = 1.;
-  __constant GGdouble eV = 1.e-6*1.;
-  __constant GGdouble keV = 1.e-3*1.;
-  __constant GGdouble GeV = 1.e+3*1.;
-  __constant GGdouble TeV = 1.e+6*1.;
-  __constant GGdouble PeV = 1.e+9*1.;
+  __constant GGfloat MeV = 1.f;
+  __constant GGfloat eV = 1.e-6f*1.f;
+  __constant GGfloat keV = 1.e-3f*1.f;
+  __constant GGfloat GeV = 1.e+3f*1.f;
+  __constant GGfloat TeV = 1.e+6f*1.f;
+  __constant GGfloat PeV = 1.e+9f*1.f;
 
   // Mass [E][T^2][L^-2]
-  __constant GGdouble KILOGRAM = 1.e-6*1./1.602176487e-19*1.e+9 *1.*1.e+9 *1./(1000.*1.0*1000.*1.0);
-  __constant GGdouble GRAM = 1.e-3*(1.e-6*1./1.602176487e-19*1.e+9 *1.*1.e+9*1./(1000.*1.0*1000.*1.0));
-  __constant GGdouble MILLIGRAM = 1.e-3*1.e-3*(1.e-6*1./1.602176487e-19*1.e+9 *1.*1.e+9 *1./(1000.*1.0*1000.*1.0));
+  __constant GGfloat KILOGRAM = 1.e-6f*1.f/1.602176487e-19f*1.e+9f*1.f*1.e+9f*1.f/(1000.f*1.0f*1000.f*1.0f);
+  __constant GGfloat GRAM = 1.e-3f*(1.e-6f*1.f/1.602176487e-19f*1.e+9f *1.f*1.e+9f*1.f/(1000.f*1.0f*1000.f*1.0f));
+  __constant GGfloat MILLIGRAM = 1.e-3f*1.e-3f*(1.e-6f*1.f/1.602176487e-19f*1.e+9f *1.f*1.e+9f *1.f/(1000.f*1.0f*1000.f*1.0f));
 
   // Symbols definitions
-  __constant GGdouble kg = 1.e-6*1./1.602176487e-19*1.e+9 *1.*1.e+9 *1./(1000.*1.0*1000.*1.0);
-  __constant GGdouble g = 1.e-3*(1.e-6*1./1.602176487e-19*1.e+9 *1.*1.e+9 *1./(1000.*1.0*1000.*1.0));
-  __constant GGdouble mg = 1.e-3*1.e-3*(1.e-6*1./1.602176487e-19*1.e+9*1.*1.e+9 *1./(1000.*1.0*1000.*1.0));
+  __constant GGfloat kg = 1.e-6f*1.f/1.602176487e-19f*1.e+9f *1.f*1.e+9f *1.f/(1000.f*1.0f*1000.f*1.0f);
+  __constant GGfloat g = 1.e-3f*(1.e-6f*1.f/1.602176487e-19f*1.e+9f *1.f*1.e+9f *1.f/(1000.f*1.0f*1000.f*1.0f));
+  __constant GGfloat mg = 1.e-3f*1.e-3f*(1.e-6f*1.f/1.602176487e-19f*1.e+9f*1.f*1.e+9f *1.f/(1000.f*1.0f*1000.f*1.0f));
 
   // Power [E][T^-1]
-  __constant GGdouble WATT = 1.e-6*1./1.602176487e-19/(1.e+9 *1.);// watt = 6.24150 e+3 * MeV/ns
+  __constant GGfloat WATT = 1.e-6f*1.f/1.602176487e-19f/(1.e+9f*1.f);// watt = 6.24150 e+3 * MeV/ns
 
   // Force [E][L^-1]
-  __constant GGdouble NEWTON = 1.e-6*1./1.602176487e-19/(1000.*1.0);// newton = 6.24150 e+9 * MeV/mm
+  __constant GGfloat NEWTON = 1.e-6f*1.f/1.602176487e-19f/(1000.f*1.0f);// newton = 6.24150 e+9 * MeV/mm
 
   // Pressure [E][L^-3]
-  __constant GGdouble PASCAL = (1.e-6*1./1.602176487e-19/(1000.*1.0))/(1000.*1.0*1000.*1.0);   // pascal = 6.24150 e+3 * MeV/mm3
-  __constant GGdouble BAR = 100000*((1.e-6*1./1.602176487e-19/(1000.*1.0))/(1000.*1.0*1000.*1.0)); // bar    = 6.24150 e+8 * MeV/mm3
-  __constant GGdouble ATMOSPHERE = 101325*((1.e-6*1./1.602176487e-19/(1000.*1.0))/(1000.*1.0*1000.*1.0)); // atm    = 6.32420 e+8 * MeV/mm3
+  __constant GGfloat PASCAL = (1.e-6f*1.f/1.602176487e-19f/(1000.f*1.0f))/(1000.f*1.0f*1000.f*1.0f);   // pascal = 6.24150 e+3 * MeV/mm3
+  __constant GGfloat BAR = 100000.0f*((1.e-6f*1.f/1.602176487e-19f/(1000.f*1.0f))/(1000.f*1.0f*1000.f*1.0f)); // bar    = 6.24150 e+8 * MeV/mm3
+  __constant GGfloat ATMOSPHERE = 101325.0f*((1.e-6f*1.f/1.602176487e-19f/(1000.f*1.0f))/(1000.f*1.0f*1000.f*1.0f)); // atm    = 6.32420 e+8 * MeV/mm3
 
   // Electric current [Q][T^-1]
-  __constant GGdouble AMPERE = (1./1.602176487e-19)/(1.e+9 *1.); // ampere = 6.24150 e+9 * eplus/ns
-  __constant GGdouble MILLIAMPERE = 1.e-3*((1./1.602176487e-19)/(1.e+9 *1.));
-  __constant GGdouble MICROAMPERE = 1.e-6*((1./1.602176487e-19)/(1.e+9 *1.));
-  __constant GGdouble NANOAMPERE = 1.e-9*((1./1.602176487e-19)/(1.e+9 *1.));
+  __constant GGfloat AMPERE = (1.f/1.602176487e-19f)/(1.e+9f *1.f); // ampere = 6.24150 e+9 * eplus/ns
+  __constant GGfloat MILLIAMPERE = 1.e-3f*((1.f/1.602176487e-19f)/(1.e+9f *1.f));
+  __constant GGfloat MICROAMPERE = 1.e-6f*((1.f/1.602176487e-19f)/(1.e+9f *1.f));
+  __constant GGfloat NANOAMPERE = 1.e-9f*((1.f/1.602176487e-19f)/(1.e+9f *1.f));
 
   // Electric potential [E][Q^-1]
-  __constant GGdouble MEGAVOLT = (1.)/(1.);
-  __constant GGdouble KILOVOLT = 1.e-3*((1.)/(1.));
-  __constant GGdouble VOLT = 1.e-6*((1.)/(1.));
+  __constant GGfloat MEGAVOLT = (1.f)/(1.f);
+  __constant GGfloat KILOVOLT = 1.e-3f*((1.f)/(1.f));
+  __constant GGfloat VOLT = 1.e-6f*((1.f)/(1.f));
 
   // Electric resistance [E][T][Q^-2]
-  __constant GGdouble OHM = (1.e-6*((1.)/(1.)))/((1./1.602176487e-19)/(1.e+9 *1.));// ohm = 1.60217e-16*(MeV/eplus)/(eplus/ns)
+  __constant GGfloat OHM = (1.e-6f*((1.f)/(1.f)))/((1.f/1.602176487e-19f)/(1.e+9f *1.f));// ohm = 1.60217e-16*(MeV/eplus)/(eplus/ns)
 
   // Electric capacitance [Q^2][E^-1]
-  __constant GGdouble FARAD = (1./1.602176487e-19)/(1.e-6*((1.)/(1.)));// farad = 6.24150e+24 * eplus/Megavolt
-  __constant GGdouble MILLIFARAD = 1.e-3*((1./1.602176487e-19)/(1.e-6*((1.)/(1.))));
-  __constant GGdouble MICROFARAD = 1.e-6*((1./1.602176487e-19)/(1.e-6*((1.)/(1.))));
-  __constant GGdouble NANOFARAD = 1.e-9*((1./1.602176487e-19)/(1.e-6*((1.)/(1.))));
-  __constant GGdouble PICOFARAD = 1.e-12*((1./1.602176487e-19)/(1.e-6*((1.)/(1.))));
+  __constant GGfloat FARAD = (1.f/1.602176487e-19f)/(1.e-6f*((1.f)/(1.f)));// farad = 6.24150e+24 * eplus/Megavolt
+  __constant GGfloat MILLIFARAD = 1.e-3f*((1.f/1.602176487e-19f)/(1.e-6f*((1.f)/(1.f))));
+  __constant GGfloat MICROFARAD = 1.e-6f*((1.f/1.602176487e-19f)/(1.e-6f*((1.f)/(1.f))));
+  __constant GGfloat NANOFARAD = 1.e-9f*((1.f/1.602176487e-19f)/(1.e-6f*((1.f)/(1.f))));
+  __constant GGfloat PICOFARAD = 1.e-12f*((1.f/1.602176487e-19f)/(1.e-6f*((1.f)/(1.f))));
 
   // Magnetic Flux [T][E][Q^-1]
-  __constant GGdouble WEBER = (1.e-6*((1.)/(1.)))*(1.e+9 *1.);// weber = 1000*megavolt*ns
+  __constant GGfloat WEBER = (1.e-6f*((1.f)/(1.f)))*(1.e+9f *1.f);// weber = 1000*megavolt*ns
 
   // Magnetic Field [T][E][Q^-1][L^-2]
-  __constant GGdouble TESLA = (1.e-6*((1.)/(1.)))*(1.e+9 *1.)/(1000.*1.0*1000.*1.0);// tesla =0.001*megavolt*ns/mm2
+  __constant GGfloat TESLA = (1.e-6f*((1.f)/(1.f)))*(1.e+9f *1.f)/(1000.f*1.0f*1000.f*1.0f);// tesla =0.001*megavolt*ns/mm2
 
-  __constant GGdouble GAUSS = 1.e-4*((1.e-6*((1.)/(1.)))*(1.e+9 *1.)/(1000.*1.0*1000.*1.0));
-  __constant GGdouble KILOGAUSS = 1.e-1*((1.e-6*((1.)/(1.)))*(1.e+9 *1.)/(1000.*1.0*1000.*1.0));
+  __constant GGfloat GAUSS = 1.e-4f*((1.e-6f*((1.f)/(1.f)))*(1.e+9f *1.f)/(1000.f*1.0f*1000.f*1.0f));
+  __constant GGfloat KILOGAUSS = 1.e-1f*((1.e-6f*((1.f)/(1.f)))*(1.e+9f *1.f)/(1000.f*1.0f*1000.f*1.0f));
 
   // Inductance [T^2][E][Q^-2]
-  __constant GGdouble HENRY = ((1.e-6*((1.)/(1.)))*(1.e+9 *1.))/((1./1.602176487e-19)/(1.e+9 *1.));// henry = 1.60217e-7*MeV*(ns/eplus)**2
+  __constant GGfloat henry = ((1.e-6f*((1.f)/(1.f)))*(1.e+9f *1.f))/((1.f/1.602176487e-19f)/(1.e+9f *1.f));// henry = 1.60217e-7*MeV*(ns/eplus)**2
 
   // Temperature
-  __constant GGdouble KELVIN = 1.;
+  __constant GGfloat KELVIN = 1.f;
 
   // Amount of substance
-  __constant GGdouble MOLE = 1.;
-  __constant GGdouble mol = 1.;
+  __constant GGfloat MOLE = 1.f;
+  __constant GGfloat mol = 1.f;
 
   // Activity [T^-1]
-  __constant GGdouble BECQUEREL = 1./(1.e+9 *1.) ;
-  __constant GGdouble CURIE = 3.7e+10 * (1./(1.e+9 *1.));
-  __constant GGdouble KILOBECQUEREL = 1.e+3*(1./(1.e+9 *1.));
-  __constant GGdouble MEGABECQUEREL = 1.e+6*(1./(1.e+9 *1.));
-  __constant GGdouble GIGABECQUEREL = 1.e+9*(1./(1.e+9 *1.));
-  __constant GGdouble MILLICURIE = 1.e-3*(3.7e+10 * (1./(1.e+9 *1.)));
-  __constant GGdouble MICROCURIE = 1.e-6*(3.7e+10 * (1./(1.e+9 *1.)));
+  __constant GGfloat BECQUEREL = 1.f/(1.e+9f *1.f) ;
+  __constant GGfloat CURIE = 3.7e+10f * (1.f/(1.e+9f *1.f));
+  __constant GGfloat KILOBECQUEREL = 1.e+3f*(1.f/(1.e+9f *1.f));
+  __constant GGfloat MEGABECQUEREL = 1.e+6f*(1.f/(1.e+9f *1.f));
+  __constant GGfloat GIGABECQUEREL = 1.e+9f*(1.f/(1.e+9f *1.f));
+  __constant GGfloat MILLICURIE = 1.e-3f*(3.7e+10f * (1.f/(1.e+9f *1.f)));
+  __constant GGfloat MICROCURIE = 1.e-6f*(3.7e+10f * (1.f/(1.e+9f *1.f)));
 
   // Symbols definitions
-  __constant GGdouble Bq = (1./(1.e+9 *1.));
-  __constant GGdouble kBq = (1.e+3*(1./(1.e+9 *1.)));
-  __constant GGdouble MBq = (1.e+6*(1./(1.e+9 *1.)));
-  __constant GGdouble GBq = (1.e+9*(1./(1.e+9 *1.)));
-  __constant GGdouble Ci = (3.7e+10 * (1./(1.e+9 *1.)));
-  __constant GGdouble mCi = (1.e-3*(3.7e+10 * (1./(1.e+9 *1.))));
-  __constant GGdouble uCi = (1.e-6*(3.7e+10 * (1./(1.e+9 *1.))));
+  __constant GGfloat Bq = (1.f/(1.e+9f *1.f));
+  __constant GGfloat kBq = (1.e+3f*(1.f/(1.e+9f *1.f)));
+  __constant GGfloat MBq = (1.e+6f*(1.f/(1.e+9f *1.f)));
+  __constant GGfloat GBq = (1.e+9f*(1.f/(1.e+9f *1.f)));
+  __constant GGfloat Ci = (3.7e+10f * (1.f/(1.e+9f *1.f)));
+  __constant GGfloat mCi = (1.e-3f*(3.7e+10f * (1.f/(1.e+9f *1.f))));
+  __constant GGfloat uCi = (1.e-6f*(3.7e+10f * (1.f/(1.e+9f *1.f))));
 
   // Absorbed dose [L^2][T^-2]
-  __constant GGdouble GRAY = (1.e-6*1./1.602176487e-19)/(1.e-6*1./1.602176487e-19*1.e+9 *1.*1.e+9 *1./(1000.*1.0*1000.*1.0));
-  __constant GGdouble KILOGRAY = 1.e+3*((1.e-6*1./1.602176487e-19)/(1.e-6*1./1.602176487e-19*1.e+9 *1.*1.e+9 *1./(1000.*1.0*1000.*1.0)));
-  __constant GGdouble MILLIGRAY = 1.e-3*((1.e-6*1./1.602176487e-19)/(1.e-6*1./1.602176487e-19*1.e+9 *1.*1.e+9 *1./(1000.*1.0*1000.*1.0)));
-  __constant GGdouble MICROGRAY = 1.e-6*((1.e-6*1./1.602176487e-19)/(1.e-6*1./1.602176487e-19*1.e+9*1.*1.e+9 *1./(1000.*1.0*1000.*1.0)));
+  __constant GGfloat GRAY = (1.e-6f*1.f/1.602176487e-19f)/(1.e-6f*1.f/1.602176487e-19f*1.e+9f *1.f*1.e+9f *1.f/(1000.f*1.0f*1000.f*1.0f));
+  __constant GGfloat KILOGRAY = 1.e+3f*((1.e-6f*1.f/1.602176487e-19f)/(1.e-6f*1.f/1.602176487e-19f*1.e+9f *1.f*1.e+9f *1.f/(1000.f*1.0f*1000.f*1.0f)));
+  __constant GGfloat MILLIGRAY = 1.e-3f*((1.e-6f*1.f/1.602176487e-19f)/(1.e-6f*1.f/1.602176487e-19f*1.e+9f *1.f*1.e+9f *1.f/(1000.f*1.0f*1000.f*1.0f)));
+  __constant GGfloat MICROGRAY = 1.e-6f*((1.e-6f*1.f/1.602176487e-19f)/(1.e-6f*1.f/1.602176487e-19f*1.e+9f*1.f*1.e+9f *1.f/(1000.f*1.0f*1000.f*1.0f)));
 
   // Luminous intensity [I]
-  __constant GGdouble CANDELA = 1.;
+  __constant GGfloat CANDELA = 1.f;
 
   // Luminous flux [I]
-  __constant GGdouble LUMEN = (1.)*(1.0);
+  __constant GGfloat LUMEN = (1.f)*(1.0f);
 
   // Illuminance [I][L^-2]
-  __constant GGdouble LUX = ((1.)*(1.0))/(1000.*1.0*1000.*1.0);
+  __constant GGfloat LUX = ((1.f)*(1.0f))/(1000.f*1.0f*1000.f*1.0f);
 
   // Miscellaneous
-  __constant GGdouble PERCENT = 0.01 ;
-  __constant GGdouble PERTHOUSAND = 0.001;
-  __constant GGdouble PERMILLION  = 0.000001;
+  __constant GGfloat PERCENT = 0.01f ;
+  __constant GGfloat PERTHOUSAND = 0.001f;
+  __constant GGfloat PERMILLION  = 0.000001f;
 
   #ifndef OPENCL_COMPILER
   /*!
@@ -381,6 +376,130 @@ namespace GGEMSUnits
     return new_value;
   }
   #endif
+#ifndef OPENCL_COMPILER
+}
+#endif
+
+/*!
+  \namespace GGEMSPhysicalConstants
+  \brief namespace storing all physical constants
+*/
+#ifndef OPENCL_COMPILER
+namespace GGEMSPhysicalConstants
+{
+#endif
+
+  __constant GGfloat PI = 3.141592653589793238463f;
+  __constant GGfloat PI_TWICE = 2.0 * 3.141592653589793238463f;
+  __constant GGfloat PI_HALF = 3.141592653589793238463f / 2.0f;
+  __constant GGfloat PI_PI = 3.141592653589793238463f * 3.141592653589793238463f;
+
+  __constant GGfloat AVOGADRO = 6.02214179e+23f/
+  #ifndef OPENCL_COMPILER
+  GGEMSUnits::mol;
+  #else
+  1.0f;
+  #endif
+
+  __constant GGfloat GASTHRESHOLD = 10.f*
+  #ifndef OPENCL_COMPILER
+  GGEMSUnits::mg/GGEMSUnits::cm3;
+  #else
+  1.e-3f*1.e-3f*(1.e-6f*1.f/1.602176487e-19f*1.e+9f*1.f*1.e+9f *1.f/(1000.f*1.0f*1000.f*1.0f))*10.f*1.0f*10.f*1.0f*10.f*1.0f;
+  #endif
+
+  // c   = 299.792458 mm/ns
+  // c^2 = 898.7404 (mm/ns)^2
+  __constant GGfloat C_LIGHT = 2.99792458e+8f*
+  #ifndef OPENCL_COMPILER
+  GGEMSUnits::m/GGEMSUnits::s;
+  #else
+  1000.*1.0f/1.e+9f *1.f;
+  #endif
+
+  __constant GGfloat C_SQUARED = C_LIGHT * C_LIGHT;
+
+  __constant GGfloat ELECTRON_CHARGE =
+  #ifndef OPENCL_COMPILER
+  -GGEMSUnits::eplus;
+  #else
+  -1.0f;
+  #endif
+
+  __constant GGfloat E_SQUARED =
+  #ifndef OPENCL_COMPILER
+  GGEMSUnits::eplus * GGEMSUnits::eplus;
+  #else
+  1.0f*1.0f;
+  #endif
+
+  // amu_c2 - atomic equivalent mass unit
+  //        - AKA, unified atomic mass unit (u)
+  // amu    - atomic mass unit
+  __constant GGfloat ELECTRON_MASS_C2 = 0.510998910f*
+  #ifndef OPENCL_COMPILER
+  GGEMSUnits::MeV;
+  #else
+  1.0f;
+  #endif
+
+  __constant GGfloat PROTON_MASS_C2 = 938.272013f*
+  #ifndef OPENCL_COMPILER
+  GGEMSUnits::MeV;
+  #else
+  1.0f;
+  #endif
+
+  __constant GGfloat NEUTRON_MASS_C2 = 939.56536f*
+  #ifndef OPENCL_COMPILER
+  GGEMSUnits::MeV;
+  #else
+  1.0f;
+  #endif
+
+  __constant GGfloat AMU_C2 = 931.494028f*
+  #ifndef OPENCL_COMPILER
+  GGEMSUnits::MeV;
+  #else
+  1.0f;
+  #endif
+
+  __constant GGfloat AMU = AMU_C2/C_SQUARED;
+
+  // permeability of free space mu0    = 2.01334e-16 Mev*(ns*eplus)^2/mm
+  // permittivity of free space epsil0 = 5.52636e+10 eplus^2/(MeV*mm)
+  __constant GGfloat MU0      = 4.0f*PI*1.e-7f*
+  #ifndef OPENCL_COMPILER
+  GGEMSUnits::henry / GGEMSUnits::m;
+  #else
+  ((1.e-6f*((1.f)/(1.f)))*(1.e+9f *1.f))/((1.f/1.602176487e-19f)/(1.e+9f *1.f))/1000.0f;
+  #endif
+
+  __constant GGfloat EPSILON0 = 1.0f/(C_SQUARED*MU0);
+
+  // h     = 4.13566e-12 MeV*ns
+  // hbar  = 6.58212e-13 MeV*ns
+  // hbarc = 197.32705e-12 MeV*mm
+  __constant GGfloat H_PLANCK = 6.62606896e-34f*
+  #ifndef OPENCL_COMPILER
+  GGEMSUnits::joule * GGEMSUnits::s;
+  #else
+  1.e-6f*1.f/1.602176487e-19f*1.e+9f *1.f;
+  #endif
+
+  __constant GGfloat HBAR_PLANCK   = H_PLANCK/PI_TWICE;
+  __constant GGfloat HBARC         = HBAR_PLANCK * C_LIGHT;
+  __constant GGfloat HBARC_SQUARED = HBARC * HBARC;
+
+  // electromagnetic coupling = 1.43996e-12 MeV*mm/(eplus^2)
+  __constant GGfloat ELM_COUPLING           = E_SQUARED/(4.0f*PI*EPSILON0);
+  __constant GGfloat FINE_STRUCTURE_CONST   = ELM_COUPLING/HBARC;
+  __constant GGfloat CLASSIC_ELECTRON_RADIUS  = ELM_COUPLING/ELECTRON_MASS_C2;
+  __constant GGfloat ELECTRON_COMPTON_LENGTH = HBARC/ELECTRON_MASS_C2;
+  __constant GGfloat BOHR_RADIUS = ELECTRON_COMPTON_LENGTH/FINE_STRUCTURE_CONST;
+
+  __constant GGfloat ALPHA_RCL2 = FINE_STRUCTURE_CONST * CLASSIC_ELECTRON_RADIUS * CLASSIC_ELECTRON_RADIUS;
+
 #ifndef OPENCL_COMPILER
 }
 #endif

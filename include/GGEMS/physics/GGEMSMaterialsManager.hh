@@ -13,11 +13,18 @@
   \date Thrusday January 23, 2020
 */
 
+#ifdef _MSC_VER
+#pragma warning(disable: 4251) // Deleting warning exporting STL members!!!
+#endif
+
 #include <vector>
 #include <unordered_map>
+#include <sstream>
 
 #include "GGEMS/global/GGEMSExport.hh"
 #include "GGEMS/tools/GGEMSTypes.hh"
+#include "GGEMS/tools/GGEMSTools.hh"
+#include "GGEMS/global/GGEMSConstants.hh"
 
 /*!
   \struct GGEMSChemicalElement
@@ -25,9 +32,11 @@
 */
 struct GGEMS_EXPORT GGEMSChemicalElement
 {
-  GGushort atomic_number_Z_; /*!< Atomic number */
-  GGdouble atomic_mass_A_; /*!< Atomic mass */
-  GGdouble mean_excitation_energy_I_; /*! Mean excitation energy */
+  GGuchar atomic_number_Z_; /*!< Atomic number */
+  GGfloat molar_mass_M_; /*!< Molar mass */
+  GGfloat mean_excitation_energy_I_; /*!< Mean excitation energy */
+  GGuchar state_; /*!< state of element GAS or SOLID */
+  GGshort index_density_correction_; /*!< Index for density correction */
 };
 
 /*!
@@ -36,10 +45,10 @@ struct GGEMS_EXPORT GGEMSChemicalElement
 */
 struct GGEMS_EXPORT GGEMSSingleMaterial
 {
-  std::vector<std::string> mixture_Z_; /*! Atomic number (number of protons) by elements in material */
-  std::vector<GGdouble> mixture_f_; /*!< Fraction of element in material */
-  GGdouble density_; /*!< Density of material */
-  GGushort nb_elements_; /*!< Number of elements in material */
+  std::vector<std::string> chemical_element_name_; /*! Name of the chemical elements */
+  std::vector<GGfloat> mixture_f_; /*!< Fraction of element in material */
+  GGfloat density_; /*!< Density of material */
+  GGuchar nb_elements_; /*!< Number of elements in material */
 };
 
 typedef std::unordered_map<std::string, GGEMSChemicalElement> ChemicalElementUMap;
@@ -136,6 +145,48 @@ class GGEMS_EXPORT GGEMSMaterialsManager
       }
     }
 
+    /*!
+      \fn inline GGEMSSingleMaterial GetMaterial(std::string const& material_name) const
+      \param material_name - name of the material
+      \return the structure to a material
+      \brief get the material
+    */
+    inline GGEMSSingleMaterial GetMaterial(std::string const& material_name) const
+    {
+      MaterialUMap::const_iterator iter = materials_.find(material_name);
+
+      // Checking if the material exists
+      if (iter == materials_.end())
+      {
+        std::ostringstream oss(std::ostringstream::out);
+        oss << "Material '" << material_name << "' not found in the database!!!" << std::endl;
+        GGEMSMisc::ThrowException("GGEMSMaterialsManager", "GetMaterial", oss.str());
+      }
+
+      return iter->second;
+    };
+
+    /*!
+      \fn inline GGEMSChemicalElement GetChemicalElement(std::string const& chemical_element_name) const
+      \param chemical_element - name of the chemical element
+      \return the structure to a chemical element
+      \brief get the chemical element
+    */
+    inline GGEMSChemicalElement GetChemicalElement(std::string const& chemical_element_name) const
+    {
+      ChemicalElementUMap::const_iterator iter = chemical_elements_.find(chemical_element_name);
+
+      // Checking if the material exists
+      if (iter == chemical_elements_.end())
+      {
+        std::ostringstream oss(std::ostringstream::out);
+        oss << "Chemical element '" << chemical_element_name << "' not found in the database!!!" << std::endl;
+        GGEMSMisc::ThrowException("GGEMSMaterialsManager", "GetChemicalElement", oss.str());
+      }
+
+      return iter->second;
+    };
+
   private:
     /*!
       \fn void LoadMaterialsDatabase(std::string const& filename)
@@ -151,14 +202,16 @@ class GGEMS_EXPORT GGEMSMaterialsManager
     void LoadChemicalElements(void);
 
     /*!
-      \fn void AddChemicalElements(std::string const& element_name, GGushort const& element_Z, GGdouble const& element_A, GGdouble const& element_I_)
+      \fn void AddChemicalElements(std::string const& element_name, GGuchar const& element_Z, GGfloat const& element_M, GGfloat const& element_I, GGuchar const& state, GGshort const& index_density_correction)
       \param element_name - Name of the element
       \param element_Z - Atomic number of the element
-      \param element_A - Atomic mass of the element
+      \param element_M - Molar mass of the element
       \param element_I - Mean excitation energy of the element
+      \param state - state of the material, gas/solid
+      \param index_density_correction - index for the density correction
       \brief Adding a chemical element in GGEMS
     */
-    void AddChemicalElements(std::string const& element_name, GGushort const& element_Z, GGdouble const& element_A, GGdouble const& element_I);
+    void AddChemicalElements(std::string const& element_name, GGuchar const& element_Z, GGfloat const& element_M, GGfloat const& element_I, GGuchar const& state, GGshort const& index_density_correction);
 
   private:
     MaterialUMap materials_; /*!< Map storing the GGEMS materials */

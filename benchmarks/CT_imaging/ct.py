@@ -108,14 +108,14 @@ xray_source_2.set_monoenergy(60.2, b"keV")
 # STEP 9: GGEMS simulation parameters
 ggems_manager.set_seed(777) # Optional, if not set, the seed is automatically computed
 
-ggems_manager.opencl_verbose(True)
-ggems_manager.material_verbose(True)
+ggems_manager.opencl_verbose(False)
+ggems_manager.material_verbose(False)
 ggems_manager.phantom_verbose(True)
-ggems_manager.source_verbose(True)
+ggems_manager.source_verbose(False)
 ggems_manager.memory_verbose(True)
 ggems_manager.processes_verbose(True)
 ggems_manager.range_cuts_verbose(True)
-ggems_manager.random_verbose(True)
+ggems_manager.random_verbose(False)
 
 # ggems_manager.detector_verbose(true/false)
 # ggems_manager.tracking_verbose(true/false)

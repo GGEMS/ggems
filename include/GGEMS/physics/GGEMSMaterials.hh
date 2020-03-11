@@ -23,6 +23,7 @@
 #include "GGEMS/global/GGEMSOpenCLManager.hh"
 #include "GGEMS/global/GGEMSExport.hh"
 #include "GGEMS/tools/GGEMSTypes.hh"
+#include "GGEMS/physics/GGEMSMaterialsManager.hh"
 #include "GGEMS/physics/GGEMSMaterialsStack.hh"
 
 /*!
@@ -97,9 +98,19 @@ class GGEMS_EXPORT GGEMSMaterials
     */
     void BuildMaterialTables(void);
 
+    /*
+      \fn GGfloat GetRadiationLength(std::string const& material) const
+      \param material - name of the material
+      \return the radiation length of a material
+      \brief get the radiation length of a material
+    */
+    GGfloat GetRadiationLength(std::string const& material) const;
+
   private:
     std::set<std::string> materials_; /*!< Defined material for a phantom */
     std::shared_ptr<cl::Buffer> material_tables_; /*!< Material tables on OpenCL devices */
+    GGEMSOpenCLManager& opencl_manager_; /*!< Reference to OpenCL manager */
+    GGEMSMaterialsManager& material_manager_; /*!< Reference to material manager */
 };
 
 #endif // End of GUARD_GGEMS_PHYSICS_GGEMSMATERIALS_HH
