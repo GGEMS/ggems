@@ -198,7 +198,7 @@ void GGEMSMaterials::BuildMaterialTables(void)
       material_table->mass_fraction_[j+index_to_chemical_element] = kSingleMaterial.mixture_f_[j];
 
       // Atomic number density
-      material_table->atomic_number_density_[j+index_to_chemical_element] = GGEMSPhysicalConstants::AVOGADRO / kChemicalElement.molar_mass_M_ * kSingleMaterial.density_ * kSingleMaterial.mixture_f_[j];
+      material_table->atomic_number_density_[j+index_to_chemical_element] = static_cast<GGfloat>(static_cast<GGdouble>(GGEMSPhysicalConstants::AVOGADRO) / kChemicalElement.molar_mass_M_ * kSingleMaterial.density_ * kSingleMaterial.mixture_f_[j]);
 
       // Increment density of atoms and electrons
       material_table->number_of_atoms_by_volume_[i] += material_table->atomic_number_density_[j+index_to_chemical_element];
@@ -230,7 +230,7 @@ void GGEMSMaterials::BuildMaterialTables(void)
 
     // Computing the access to chemical element by material
     material_table->index_of_chemical_elements_[i] = index_to_chemical_element;
-    index_to_chemical_element += material_table->number_of_chemical_elements_[i];
+    index_to_chemical_element += static_cast<GGushort>(material_table->number_of_chemical_elements_[i]);
   }
 
   // Storing number total of chemical elements
@@ -418,7 +418,7 @@ GGfloat GGEMSMaterials::GetRadiationLength(std::string const& material) const
 
     //  Compute Tsai's Expression for the Radiation Length
     //  (Phys Rev. D50 3-1 (1994) page 1254)
-    GGfloat const logZ3 = std::logf(zeff) / 3.0f;
+    GGfloat const logZ3 = std::log(zeff) / 3.0f;
 
     GGfloat l_rad = 0.0f;
     GGfloat lp_rad = 0.0f;
@@ -428,12 +428,12 @@ GGfloat GGEMSMaterials::GetRadiationLength(std::string const& material) const
       lp_rad = lp_rad_light[iz];
     }
     else {
-      l_rad = std::logf(184.15f) - logZ3;
-      lp_rad = std::logf(1194.0f) - 2.0f*logZ3;
+      l_rad = std::log(184.15f) - logZ3;
+      lp_rad = std::log(1194.0f) - 2.0f*logZ3;
     }
 
     tsai_radiation = 4.0f * GGEMSPhysicalConstants::ALPHA_RCL2 * zeff * ( zeff * ( l_rad - coulomb ) + lp_rad );
-    inverse_radiation += GGEMSPhysicalConstants::AVOGADRO / kChemicalElement.molar_mass_M_ * kSingleMaterial.density_ * kSingleMaterial.mixture_f_[i] * tsai_radiation;
+    inverse_radiation += static_cast<GGfloat>(static_cast<GGdouble>(GGEMSPhysicalConstants::AVOGADRO) / kChemicalElement.molar_mass_M_ * kSingleMaterial.density_ * kSingleMaterial.mixture_f_[i] * tsai_radiation);
   }
 
   return (inverse_radiation <= 0.0f ? std::numeric_limits<GGfloat>::max() : 1.0f / inverse_radiation);

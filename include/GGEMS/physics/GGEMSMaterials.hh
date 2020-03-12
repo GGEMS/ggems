@@ -111,6 +111,7 @@ class GGEMS_EXPORT GGEMSMaterials
     std::shared_ptr<cl::Buffer> material_tables_; /*!< Material tables on OpenCL devices */
     GGEMSOpenCLManager& opencl_manager_; /*!< Reference to OpenCL manager */
     GGEMSMaterialsManager& material_manager_; /*!< Reference to material manager */
+    // std::unordered_map<std::string, float> gamma_length_cut;
 };
 
 #endif // End of GUARD_GGEMS_PHYSICS_GGEMSMATERIALS_HH

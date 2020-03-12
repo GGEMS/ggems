@@ -104,6 +104,13 @@ class GGEMS_EXPORT GGEMSPhantomNavigatorManager
     */
     inline std::size_t GetNumberOfPhantomNavigators(void) const {return phantom_navigators_.size();}
 
+    /*!
+      \fn inline std::vector<std::shared_ptr<GGEMSPhantomNavigator>> GetPhantomNavigator(void) const
+      \return the phantom navigator
+      \brief get the list of phantom navigator
+    */
+    inline std::vector<std::shared_ptr<GGEMSPhantomNavigator>> GetPhantomNavigator(void) const {return phantom_navigators_;}
+
   private:
     /*
       \fn bool CheckOverlap(std::shared_ptr<GGEMSPhantomNavigator> phantom_a, std::shared_ptr<GGEMSPhantomNavigator> phantom_b) const

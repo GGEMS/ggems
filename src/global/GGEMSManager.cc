@@ -351,7 +351,7 @@ void GGEMSManager::Initialize(void)
   }
 
   // Printing infos about range cuts
-  //if (is_range_cuts_verbose_) range_cuts_manager_.PrintInfos();
+  if (is_range_cuts_verbose_) range_cuts_manager_.PrintInfos();
 
   // Printing infos about random in GGEMS
   if (is_random_verbose_) GGcout("GGEMSManager", "Initialize", 0) << "Seed: " << seed_ << GGendl;
