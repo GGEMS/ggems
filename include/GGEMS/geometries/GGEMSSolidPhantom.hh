@@ -115,7 +115,6 @@ class GGEMS_EXPORT GGEMSSolidPhantom
   private:
     std::shared_ptr<cl::Buffer> solid_phantom_data_; /*!< Data about solid phantom */
     std::shared_ptr<cl::Buffer> label_data_; /*!< Pointer storing the buffer about label data */
-    std::shared_ptr<GGEMSMaterials> materials_; /*!< Material of phantom */
     GGEMSOpenCLManager& opencl_manager_; /*!< Reference to OpenCL manager singleton */
 };
 

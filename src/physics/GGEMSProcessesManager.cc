@@ -49,7 +49,7 @@ void GGEMSProcessesManager::SetCrossSectionTableNumberOfBins(GGushort const& num
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSProcessesManager::SetCrossSectionTableMinimumEnergy(GGdouble const& energy, char const* unit)
+void GGEMSProcessesManager::SetCrossSectionTableMinimumEnergy(GGfloat const& energy, char const* unit)
 {
   cross_section_table_min_energy_ = GGEMSUnits::BestEnergyUnit(energy, unit);
 
@@ -65,7 +65,7 @@ void GGEMSProcessesManager::SetCrossSectionTableMinimumEnergy(GGdouble const& en
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSProcessesManager::SetCrossSectionTableMaximumEnergy(GGdouble const& energy, char const* unit)
+void GGEMSProcessesManager::SetCrossSectionTableMaximumEnergy(GGfloat const& energy, char const* unit)
 {
   cross_section_table_max_energy_ = GGEMSUnits::BestEnergyUnit(energy, unit);
 
@@ -119,7 +119,7 @@ void set_cross_section_table_number_of_bins_processes_manager(GGEMSProcessesMana
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_cross_section_table_minimum_energy_processes_manager(GGEMSProcessesManager* processes_manager, GGdouble const energy, char const* unit)
+void set_cross_section_table_minimum_energy_processes_manager(GGEMSProcessesManager* processes_manager, GGfloat const energy, char const* unit)
 {
   processes_manager->SetCrossSectionTableMinimumEnergy(energy, unit);
 }
@@ -128,7 +128,7 @@ void set_cross_section_table_minimum_energy_processes_manager(GGEMSProcessesMana
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_cross_section_table_maximum_energy_processes_manager(GGEMSProcessesManager* processes_manager, GGdouble const energy, char const* unit)
+void set_cross_section_table_maximum_energy_processes_manager(GGEMSProcessesManager* processes_manager, GGfloat const energy, char const* unit)
 {
   processes_manager->SetCrossSectionTableMaximumEnergy(energy, unit);
 }

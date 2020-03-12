@@ -114,7 +114,7 @@ void GGEMSMaterialsManager::LoadChemicalElements(void)
 {
   GGcout("GGEMSMaterialsManager", "LoadChemicalElements", 0) << "Loading chemical elements in GGEMS..." << GGendl;
 
-  // Name, Z (atomic number), M (molar mass g/mol), I (mean excitation energy eV), state
+  // Name, Z (atomic number), M (molar mass g/mol), I (mean excitation energy eV), state, index for density correction
   AddChemicalElements("Hydrogen",        1,   1.00794258759021f,   19.2f,   GGEMSState::GAS,  1);
   AddChemicalElements("Helium",          2,   4.00256163944925f,   41.8f,   GGEMSState::GAS,  2);
   AddChemicalElements("Lithium",         3,   6.94107031304227f,   40.0f, GGEMSState::SOLID,  3);

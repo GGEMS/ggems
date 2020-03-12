@@ -81,18 +81,18 @@ class GGEMS_EXPORT GGEMSProcessesManager
     void SetCrossSectionTableNumberOfBins(GGushort const& number_of_bins);
 
     /*!
-      \fn void SetCrossSectionTableMinimumEnergy(GGdouble const& energy, char const* unit = "keV")
+      \fn void SetCrossSectionTableMinimumEnergy(GGfloat const& energy, char const* unit = "keV")
       \param energy - minimum energy in the cross section table
       \brief set the minimum energy in the cross section table
     */
-    void SetCrossSectionTableMinimumEnergy(GGdouble const& energy, char const* unit = "keV");
+    void SetCrossSectionTableMinimumEnergy(GGfloat const& energy, char const* unit = "keV");
 
     /*!
-      \fn void SetCrossSectionTableMaximumEnergy(GGdouble const& energy, char const* unit = "keV")
+      \fn void SetCrossSectionTableMaximumEnergy(GGfloat const& energy, char const* unit = "keV")
       \param energy - maximum energy in the cross section table
       \brief set the maximum energy in the cross section table
     */
-    void SetCrossSectionTableMaximumEnergy(GGdouble const& energy, char const* unit = "keV");
+    void SetCrossSectionTableMaximumEnergy(GGfloat const& energy, char const* unit = "keV");
 
     /*!
       \fn void PrintInfos(void) const
@@ -108,8 +108,8 @@ class GGEMS_EXPORT GGEMSProcessesManager
 
   private:
     GGushort cross_section_table_number_of_bins_;
-    GGdouble cross_section_table_min_energy_;
-    GGdouble cross_section_table_max_energy_;
+    GGfloat cross_section_table_min_energy_;
+    GGfloat cross_section_table_max_energy_;
 };
 
 /*!
@@ -127,20 +127,20 @@ extern "C" GGEMS_EXPORT GGEMSProcessesManager* get_instance_processes_manager(vo
 extern "C" GGEMS_EXPORT void set_cross_section_table_number_of_bins_processes_manager(GGEMSProcessesManager* processes_manager, GGushort const number_of_bins);
 
 /*!
-  \fn void set_cross_section_table_minimum_energy_processes_manager(GGEMSProcessesManager* processes_manager, GGdouble const energy, char const* unit)
+  \fn void set_cross_section_table_minimum_energy_processes_manager(GGEMSProcessesManager* processes_manager, GGfloat const energy, char const* unit)
   \param processes_manager - pointer on the processes manager
   \param energy - minimum energy
   \brief set the minimum energy in the cross section table
 */
-extern "C" GGEMS_EXPORT void set_cross_section_table_minimum_energy_processes_manager(GGEMSProcessesManager* processes_manager, GGdouble const energy, char const* unit);
+extern "C" GGEMS_EXPORT void set_cross_section_table_minimum_energy_processes_manager(GGEMSProcessesManager* processes_manager, GGfloat const energy, char const* unit);
 
 /*!
-  \fn void set_cross_section_table_maximum_energy_processes_manager(GGEMSProcessesManager* processes_manager, GGdouble const energy, char const* unit)
+  \fn void set_cross_section_table_maximum_energy_processes_manager(GGEMSProcessesManager* processes_manager, GGfloat const energy, char const* unit)
   \param processes_manager - pointer on the processes manager
   \param energy - maximum energy
   \brief set the maximum energy in the cross section table
 */
-extern "C" GGEMS_EXPORT void set_cross_section_table_maximum_energy_processes_manager(GGEMSProcessesManager* processes_manager, GGdouble const energy, char const* unit);
+extern "C" GGEMS_EXPORT void set_cross_section_table_maximum_energy_processes_manager(GGEMSProcessesManager* processes_manager, GGfloat const energy, char const* unit);
 
 /*!
   \fn void print_infos_ggems_phantom_navigator_manager(GGEMSProcessesManager* processes_manager)
