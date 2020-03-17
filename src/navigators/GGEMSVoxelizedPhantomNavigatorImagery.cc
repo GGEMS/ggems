@@ -10,9 +10,10 @@
   \date Tuesday February 11, 2020
 */
 
-#include "GGEMS/geometries/GGEMSVoxelizedPhantomNavigatorImagery.hh"
-#include "GGEMS/geometries/GGEMSPhantomNavigatorManager.hh"
-#include "GGEMS/geometries/GGEMSSolidPhantom.hh"
+#include "GGEMS/navigators/GGEMSPhantomNavigatorManager.hh"
+
+#include "GGEMS/navigators/GGEMSVoxelizedPhantomNavigatorImagery.hh"
+#include "GGEMS/navigators/GGEMSSolidPhantom.hh"
 #include "GGEMS/tools/GGEMSSystemOfUnits.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
 
@@ -107,7 +108,7 @@ void set_range_to_material_filename_ggems_voxelized_phantom_navigator_imagery(GG
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_geometry_tolerance_ggems_voxelized_phantom_navigator_imagery(GGEMSVoxelizedPhantomNavigatorImagery* voxelized_phantom_navigator_imagery, GGdouble const distance, char const* unit)
+void set_geometry_tolerance_ggems_voxelized_phantom_navigator_imagery(GGEMSVoxelizedPhantomNavigatorImagery* voxelized_phantom_navigator_imagery, GGfloat const distance, char const* unit)
 {
   voxelized_phantom_navigator_imagery->SetGeometryTolerance(distance, unit);
 }
@@ -116,7 +117,7 @@ void set_geometry_tolerance_ggems_voxelized_phantom_navigator_imagery(GGEMSVoxel
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_offset_ggems_voxelized_phantom_navigator_imagery(GGEMSVoxelizedPhantomNavigatorImagery* voxelized_phantom_navigator_imagery, GGdouble const offset_x, GGdouble const offset_y, GGdouble const offset_z, char const* unit)
+void set_offset_ggems_voxelized_phantom_navigator_imagery(GGEMSVoxelizedPhantomNavigatorImagery* voxelized_phantom_navigator_imagery, GGfloat const offset_x, GGfloat const offset_y, GGfloat const offset_z, char const* unit)
 {
   voxelized_phantom_navigator_imagery->SetOffset(offset_x, offset_y, offset_z, unit);
 }

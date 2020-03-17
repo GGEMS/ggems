@@ -57,20 +57,20 @@ class GGEMS_EXPORT GGEMSTube : public GGEMSSolidVolume
     GGEMSTube& operator=(GGEMSTube const&& tube) = delete;
 
     /*!
-      \fn void SetHeight(GGdouble const& height, char const* unit = "mm")
+      \fn void SetHeight(GGfloat const& height, char const* unit = "mm")
       \param height - height of the tube
       \param unit - unit of the distance
       \brief set the height of the tube
     */
-    void SetHeight(GGdouble const& height, char const* unit = "mm");
+    void SetHeight(GGfloat const& height, char const* unit = "mm");
 
     /*!
-      \fn void SetRadius(GGdouble const& radius, char const* unit = "mm")
+      \fn void SetRadius(GGfloat const& radius, char const* unit = "mm")
       \param radius - radius of the tube
       \param unit - unit of the distance
       \brief set the radius of the tube
     */
-    void SetRadius(GGdouble const& radius, char const* unit = "mm");
+    void SetRadius(GGfloat const& radius, char const* unit = "mm");
 
     /*!
       \fn void Initialize(void) override
@@ -92,8 +92,8 @@ class GGEMS_EXPORT GGEMSTube : public GGEMSSolidVolume
     void CheckParameters(void) const override;
 
   private:
-    GGdouble height_; /*!< Height of the cylinder */
-    GGdouble radius_; /*!< Radius of the cylinder */
+    GGfloat height_; /*!< Height of the cylinder */
+    GGfloat radius_; /*!< Radius of the cylinder */
 };
 
 /*!
@@ -128,7 +128,7 @@ extern "C" GGEMS_EXPORT void set_height_tube(GGEMSTube* tube, GGdouble const hei
 extern "C" GGEMS_EXPORT void set_radius_tube(GGEMSTube* tube, GGdouble const radius, char const* unit);
 
 /*!
-  \fn void set_position_tube(GGEMSTube* tube, GGdouble const pos_x, GGdouble const pos_y, GGdouble const pos_z)
+  \fn void set_position_tube(GGEMSTube* tube, GGfloat const pos_x, GGfloat const pos_y, GGfloat const pos_z)
   \param tube - pointer on the solid tube
   \param pos_x - radius of the tube
   \param pos_y - radius of the tube
@@ -136,7 +136,7 @@ extern "C" GGEMS_EXPORT void set_radius_tube(GGEMSTube* tube, GGdouble const rad
   \param unit - unit of the distance
   \brief Set the position of the tube
 */
-extern "C" GGEMS_EXPORT void set_position_tube(GGEMSTube* tube, GGdouble const pos_x, GGdouble const pos_y, GGdouble const pos_z, char const* unit);
+extern "C" GGEMS_EXPORT void set_position_tube(GGEMSTube* tube, GGfloat const pos_x, GGfloat const pos_y, GGfloat const pos_z, char const* unit);
 
 /*!
   \fn void set_material_tube(GGEMSTube* tube, char const* material)

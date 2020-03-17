@@ -1,5 +1,5 @@
-#ifndef GUARD_GGEMS_PHYSICS_GGEMSIONIZATIONPARAMSMATERIAL_HH
-#define GUARD_GGEMS_PHYSICS_GGEMSIONIZATIONPARAMSMATERIAL_HH
+#ifndef GUARD_GGEMS_MATERIALS_GGEMSIONIZATIONPARAMSMATERIAL_HH
+#define GUARD_GGEMS_MATERIALS_GGEMSIONIZATIONPARAMSMATERIAL_HH
 
 /*!
   \file GGEMSIonizationParamsMaterial.hh
@@ -15,8 +15,9 @@
 
 #include <memory>
 
+#include "GGEMS/materials/GGEMSMaterialsDatabaseManager.hh"
+
 #include "GGEMS/global/GGEMSExport.hh"
-#include "GGEMS/physics/GGEMSMaterialsManager.hh"
 
 /*!
   \namespace GGEMSDensityParams

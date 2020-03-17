@@ -53,7 +53,6 @@ namespace GGEMSParticleName
 #endif
   __constant GGuchar PHOTON = 0; /*!< Photon particle */
   __constant GGuchar ELECTRON = 1; /*!< Electron particle */
-  __constant GGuchar POSITRON = 2; /*!< Positron particle */
 #ifndef OPENCL_COMPILER
 }
 #endif
@@ -90,7 +89,7 @@ namespace GGEMSTolerance
   #ifndef OPENCL_COMPILER
   GGEMSUnits::nm; /*!< Tolerance for the geometry navigation */
   #else
-  (1.e-9f *1000.f*1.0f);
+  1.e-6f;
   #endif
 #ifndef OPENCL_COMPILER
 }
@@ -111,18 +110,18 @@ namespace GGEMSState
 #endif
 
 /*!
-  \namespace GGEMSLimit
-  \brief Namespace storing the energy threshold
+  \namespace GGEMSDefaultParams
+  \brief Namespace storing the default parameters
 */
 #ifndef OPENCL_COMPILER
-namespace GGEMSLimit
+namespace GGEMSDefaultParams
 {
 #endif
   __constant GGfloat KINETIC_ENERGY_MIN = 1.0f*
   #ifndef OPENCL_COMPILER
   GGEMSUnits::eV; /*!< Min kinetic energy */
   #else
-  1.e-6f*1.f;
+  1.e-6f;
   #endif
 
   __constant GGushort CROSS_SECTION_TABLE_NUMBER_BINS = 220; /*!< Number of bins in the cross section table */
@@ -130,7 +129,7 @@ namespace GGEMSLimit
   #ifndef OPENCL_COMPILER
   GGEMSUnits::eV; /*!< Min energy in the cross section table */
   #else
-  1.e-6f*1.f;
+  1.e-6f;
   #endif
 
   __constant GGfloat CROSS_SECTION_TABLE_ENERGY_MAX = 250.0f*
@@ -144,22 +143,148 @@ namespace GGEMSLimit
   #ifndef OPENCL_COMPILER
   GGEMSUnits::um; /*!< Photon cut */
   #else
-  1.e-6f *1000.f*1.0f;
+  1.e-3f;
   #endif
 
   __constant GGfloat ELECTRON_CUT = 1.0f*
   #ifndef OPENCL_COMPILER
   GGEMSUnits::um; /*!< Electron cut */
   #else
-  1.e-6f *1000.f*1.0f;
+  1.e-3f;
   #endif
 
-  __constant GGfloat POSITRON_CUT = 1.0f*
+#ifndef OPENCL_COMPILER
+}
+#endif
+
+/*!
+  \namespace GGEMSMathematicalConstant
+  \brief namespace storing mathematical constants
+*/
+#ifndef OPENCL_COMPILER
+namespace GGEMSMathematicalConstant
+{
+#endif
+
+  // PI variables
+  __constant GGfloat PI         = 3.141592653589793f;
+  __constant GGfloat TWO_PI     = 6.283185307179586f;
+  __constant GGfloat HALF_PI    = 1.570796326794896f;
+  __constant GGfloat PI_SQUARED = 9.869604401089358f;
+
+#ifndef OPENCL_COMPILER
+}
+#endif
+
+/*!
+  \namespace GGEMSPhysicalConstant
+  \brief namespace storing all physical constants
+*/
+#ifndef OPENCL_COMPILER
+namespace GGEMSPhysicalConstant
+{
+#endif
+
+  // Number of Avogadro
+  __constant GGfloat AVOGADRO = 6.02214179e+23f/
   #ifndef OPENCL_COMPILER
-  GGEMSUnits::um; /*!< Positron cut */
+  GGEMSUnits::mol;
   #else
-  1.e-6f*1000.f*1.0f;
+  1.0f;
   #endif
+
+  // Limit of density between gas and solid
+  __constant GGfloat GASTHRESHOLD = 10.f*
+  #ifndef OPENCL_COMPILER
+  GGEMSUnits::mg/GGEMSUnits::cm3;
+  #else
+  6.241510246e+15f;
+  #endif
+
+  // Speed of light
+  __constant GGfloat C_LIGHT = 2.99792458e+8f*
+  #ifndef OPENCL_COMPILER
+  GGEMSUnits::m/GGEMSUnits::s;
+  #else
+  1.e-6f;
+  #endif
+  __constant GGfloat C_LIGHT_SQUARED = 89875.5178736817f;
+
+  // Charge of electron
+  __constant GGfloat ELECTRON_CHARGE = 1.0f*
+  #ifndef OPENCL_COMPILER
+  -GGEMSUnits::eplus;
+  #else
+  -1.0f;
+  #endif
+  __constant GGfloat ELECTRON_CHARGE_SQUARED = 1.0f;
+
+  // electron mass
+  __constant GGfloat ELECTRON_MASS_C2 = 0.510998910f*
+  #ifndef OPENCL_COMPILER
+  GGEMSUnits::MeV;
+  #else
+  1.0f;
+  #endif
+
+  // proton mass
+  __constant GGfloat PROTON_MASS_C2 = 938.272013f*
+  #ifndef OPENCL_COMPILER
+  GGEMSUnits::MeV;
+  #else
+  1.0f;
+  #endif
+
+  // neutron mass
+  __constant GGfloat NEUTRON_MASS_C2 = 939.56536f*
+  #ifndef OPENCL_COMPILER
+  GGEMSUnits::MeV;
+  #else
+  1.0f;
+  #endif
+
+  // // Atomic mass unitamu    - atomic mass unit
+  __constant GGfloat ATOMIC_MASS_UNIT_C2 = 931.494028f*
+  #ifndef OPENCL_COMPILER
+  GGEMSUnits::MeV;
+  #else
+  1.0f;
+  #endif
+
+  __constant GGfloat ATOMIC_MASS_UNIT = 0.01036426891f;
+
+  // permeability of free space mu0    = 2.01334e-16 Mev*(ns*eplus)^2/mm
+  // permittivity of free space epsil0 = 5.52636e+10 eplus^2/(MeV*mm)
+  __constant GGfloat MU0      = 4.0f*3.141592653589793f*1.e-7f*
+  #ifndef OPENCL_COMPILER
+  GGEMSUnits::H / GGEMSUnits::m;
+  #else
+  1.602176383e-10f;
+  #endif
+  __constant GGfloat EPSILON0 = 5.526349824e+10f;
+
+  // h     = 4.13566e-12 MeV*ns
+  // hbar  = 6.58212e-13 MeV*ns
+  // hbarc = 197.32705e-12 MeV*mm
+  __constant GGfloat H_PLANCK = 6.62606896e-34f*
+  #ifndef OPENCL_COMPILER
+  GGEMSUnits::J * GGEMSUnits::s;
+  #else
+  6.241509704e+12f;
+  #endif
+
+  __constant GGfloat HBAR_PLANCK   = 6.582118206e-13f;
+  __constant GGfloat HBARC         = 1.973269187e-10f;
+  __constant GGfloat HBARC_SQUARED = 1.973269187e-20F;
+
+  // electromagnetic coupling = 1.43996e-12 MeV*mm/(eplus^2)
+  __constant GGfloat ELM_COUPLING            = 1.439964467e-12f;
+  __constant GGfloat FINE_STRUCTURE_CONST    = 0.007297354285f;
+  __constant GGfloat CLASSIC_ELECTRON_RADIUS = 2.817940326e-12f;
+  __constant GGfloat ELECTRON_COMPTON_LENGTH = 3.86159188e-10f;
+  __constant GGfloat BOHR_RADIUS             = 5.291769867e-08f;
+  __constant GGfloat ALPHA_RCL2              = 5.794673922e-26f;
+
 #ifndef OPENCL_COMPILER
 }
 #endif

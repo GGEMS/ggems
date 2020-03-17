@@ -1,5 +1,5 @@
-#ifndef GUARD_GGEMS_GEOMETRIES_GGEMSPHANTOMNAVIGATORMANAGER_HH
-#define GUARD_GGEMS_GEOMETRIES_GGEMSPHANTOMNAVIGATORMANAGER_HH
+#ifndef GUARD_GGEMS_NAVIGATORS_GGEMSPHANTOMNAVIGATORMANAGER_HH
+#define GUARD_GGEMS_NAVIGATORS_GGEMSPHANTOMNAVIGATORMANAGER_HH
 
 /*!
   \file GGEMSPhantomNavigatorManager.hh
@@ -15,9 +15,10 @@
 
 #include <memory>
 
+#include "GGEMS/global/GGEMSOpenCLManager.hh"
+
 #include "GGEMS/global/GGEMSExport.hh"
 #include "GGEMS/tools/GGEMSTypes.hh"
-#include "GGEMS/global/GGEMSOpenCLManager.hh"
 
 class GGEMSPhantomNavigator;
 
@@ -139,4 +140,4 @@ extern "C" GGEMS_EXPORT GGEMSPhantomNavigatorManager* get_instance_ggems_phantom
 */
 extern "C" void GGEMS_EXPORT print_infos_ggems_phantom_navigator_manager(GGEMSPhantomNavigatorManager* phantom_navigator_manager);
 
-#endif // End of GUARD_GGEMS_GEOMETRIES_GGEMSPHANTOMNAVIGATORMANAGER_HH
+#endif // End of GUARD_GGEMS_NAVIGATORS_GGEMSPHANTOMNAVIGATORMANAGER_HH

@@ -104,9 +104,9 @@ class GGEMS_EXPORT GGEMSRangeCutsManager
     void PrintInfos(void) const;
 
   private:
-    RangeUMap photon_cuts_; /*!< Photon cut for each phantom */
-    RangeUMap electron_cuts_; /*!< Electron cuts for each phantom */
-    RangeUMap positron_cuts_; /*!< Positron cuts for each phantom */
+    RangeUMap photon_cuts_; /*!< Photon cut in length for each phantom */
+    RangeUMap electron_cuts_; /*!< Electron cuts in length for each phantom */
+    RangeUMap positron_cuts_; /*!< Positron cuts in length for each phantom */
 };
 
 /*!

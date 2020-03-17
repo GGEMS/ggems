@@ -22,10 +22,11 @@
 #include <vector>
 
 #include "GGEMS/global/GGEMSExport.hh"
+#include "GGEMS/tools/GGEMSTypes.hh"
 
 class GGEMSSourceManager;
 class GGEMSOpenCLManager;
-class GGEMSMaterialsManager;
+class GGEMSMaterialsDatabaseManager;
 class GGEMSPhantomNavigatorManager;
 class GGEMSProcessesManager;
 class GGEMSRangeCutsManager;
@@ -175,29 +176,6 @@ class GGEMS_EXPORT GGEMSManager
     */
     void SetRandomVerbose(bool const& is_random_verbose);
 
-    /*!
-      \fn void SetProcess(char const* process_name)
-      \param process_name - name of the process to activate
-      \brief activate a specific process
-    */
-    //void SetProcess(char const* process_name);
-
-    /*!
-      \fn void SetParticleCut(char const* particle_name, GGdouble const& distance)
-      \param particle_name - Name of the particle
-      \param distance - Cut in distance
-      \brief Set the cut in distance for a specific particle
-    */
-    //void SetParticleCut(char const* particle_name, GGdouble const& distance);
-
-    /*!
-      \fn void SetParticleSecondary(char const* particle_name, GGuint const& level)
-      \param particle_name - Name of the particle
-      \param level - Level of the secondary particle
-      \brief set the particle to activate to follow the secondaries with a specific level
-    */
-    //void SetParticleSecondaryAndLevel(char const* particle_name, GGuint const& level);
-
   private:
     /*!
       \fn void PrintInfos() const
@@ -237,17 +215,10 @@ class GGEMS_EXPORT GGEMSManager
     bool is_random_verbose_; /*! Flag for random verbosity */
     GGEMSSourceManager& source_manager_; /*!< Reference to source manager singleton */
     GGEMSOpenCLManager& opencl_manager_; /*!< Reference to opencl manager singleton */
-    GGEMSMaterialsManager& material_manager_; /*!< Reference to material manager singleton */
+    GGEMSMaterialsDatabaseManager& material_manager_; /*!< Reference to material manager singleton */
     GGEMSPhantomNavigatorManager& phantom_navigator_manager_; /*!< Reference to phantom navigator manager */
     GGEMSRangeCutsManager& range_cuts_manager_; /*!< Reference to range cut manager */
     GGEMSProcessesManager& processes_manager_; /*!< Reference to processes manager */
-
-    //std::vector<GGuchar> physics_list_; /*!< Vector storing the activated physics list */
-    //std::vector<GGuchar> secondaries_list_; /*!< Vector storing the secondaries list */
-    //GGdouble photon_distance_cut_; /*!< Photon distance cut */
-    //GGdouble electron_distance_cut_; /*!< Electron distance cut */
-    //GGuint photon_level_secondaries_; /*!< Level of the secondaries */
-    //GGuint electron_level_secondaries_; /*!< Level of the secondaries */
 };
 
 /*!

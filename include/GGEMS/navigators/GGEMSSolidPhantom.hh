@@ -1,5 +1,5 @@
-#ifndef GUARD_GGEMS_GEOMETRIES_GGEMSSOLIDPHANTOM_HH
-#define GUARD_GGEMS_GEOMETRIES_GGEMSSOLIDPHANTOM_HH
+#ifndef GUARD_GGEMS_NAVIGATORS_GGEMSSOLIDPHANTOM_HH
+#define GUARD_GGEMS_NAVIGATORS_GGEMSSOLIDPHANTOM_HH
 
 /*!
   \file GGEMSSolidPhantom.hh
@@ -20,11 +20,12 @@
 #include <algorithm>
 
 #include "GGEMS/global/GGEMSOpenCLManager.hh"
+
 #include "GGEMS/global/GGEMSExport.hh"
 #include "GGEMS/tools/GGEMSTools.hh"
 #include "GGEMS/io/GGEMSTextReader.hh"
-#include "GGEMS/physics/GGEMSMaterials.hh"
-#include "GGEMS/geometries/GGEMSSolidPhantomStack.hh"
+#include "GGEMS/materials/GGEMSMaterials.hh"
+#include "GGEMS/navigators/GGEMSSolidPhantomStack.hh"
 
 /*!
   \class GGEMSSolidPhantom
@@ -81,11 +82,11 @@ class GGEMS_EXPORT GGEMSSolidPhantom
     void LoadPhantomImage(std::string const& phantom_filename, std::string const& range_data_filename, std::shared_ptr<GGEMSMaterials> materials);
 
     /*!
-      \fn void ApplyOffset(GGdouble3 const& offset_xyz)
+      \fn void ApplyOffset(GGfloat3 const& offset_xyz)
       \param offset_xyz - offset in X, Y and Z
       \brief apply an offset defined by the user
     */
-    void ApplyOffset(GGdouble3 const& offset_xyz);
+    void ApplyOffset(GGfloat3 const& offset_xyz);
 
     /*!
       \fn void PrintInfos(void) const
@@ -218,4 +219,4 @@ void GGEMSSolidPhantom::ConvertImageToLabel(std::string const& raw_data_filename
   }
 }
 
-#endif // End of GUARD_GGEMS_GEOMETRIES_GGEMSSOLIDPHANTOM_HH
+#endif // End of GUARD_GGEMS_NAVIGATORS_GGEMSSOLIDPHANTOM_HH

@@ -23,7 +23,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 GGEMSPhantomCreatorManager::GGEMSPhantomCreatorManager(void)
-: element_sizes_(GGdouble3{{0.0, 0.0, 0.0}}),
+: element_sizes_(GGfloat3{{0.0, 0.0, 0.0}}),
   phantom_dimensions_(GGuint3{{0, 0, 0}}),
   number_elements_(0),
   data_type_("MET_FLOAT"),
@@ -49,11 +49,11 @@ GGEMSPhantomCreatorManager::~GGEMSPhantomCreatorManager(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSPhantomCreatorManager::SetElementSizes(GGdouble const& voxel_width, GGdouble const& voxel_height, GGdouble const& voxel_depth, char const* unit)
+void GGEMSPhantomCreatorManager::SetElementSizes(GGfloat const& voxel_width, GGfloat const& voxel_height, GGfloat const& voxel_depth, char const* unit)
 {
-  element_sizes_.s[0] = GGEMSUnits::BestDistanceUnit(voxel_width, unit);
-  element_sizes_.s[1] = GGEMSUnits::BestDistanceUnit(voxel_height, unit);
-  element_sizes_.s[2] = GGEMSUnits::BestDistanceUnit(voxel_depth, unit);
+  element_sizes_.s[0] = GGEMSUnits::DistanceUnit(voxel_width, unit);
+  element_sizes_.s[1] = GGEMSUnits::DistanceUnit(voxel_height, unit);
+  element_sizes_.s[2] = GGEMSUnits::DistanceUnit(voxel_depth, unit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -155,7 +155,7 @@ void GGEMSPhantomCreatorManager::CheckParameters(void) const
   }
 
   // Checking size of voxels
-  if (GGEMSMisc::IsEqual(element_sizes_.s[0], 0.0) && GGEMSMisc::IsEqual(element_sizes_.s[1], 0.0) && GGEMSMisc::IsEqual(element_sizes_.s[2], 0.0)) {
+  if (GGEMSMisc::IsEqual(element_sizes_.s[0], 0.0f) && GGEMSMisc::IsEqual(element_sizes_.s[1], 0.0f) && GGEMSMisc::IsEqual(element_sizes_.s[2], 0.0f)) {
     GGEMSMisc::ThrowException("GGEMSPhantomCreatorManager", "CheckParameters", "Phantom voxel sizes have to be > 0.0!!!");
     }
 
@@ -263,7 +263,7 @@ void set_phantom_dimension_phantom_creator_manager(GGEMSPhantomCreatorManager* p
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_element_sizes_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager, GGdouble const voxel_width, GGdouble const voxel_height, GGdouble const voxel_depth, char const* unit)
+void set_element_sizes_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager, GGfloat const voxel_width, GGfloat const voxel_height, GGfloat const voxel_depth, char const* unit)
 {
   phantom_creator_manager->SetElementSizes(voxel_width, voxel_height, voxel_depth, unit);
 }

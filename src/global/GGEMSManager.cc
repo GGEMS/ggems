@@ -25,15 +25,15 @@
 #include <unistd.h>
 #endif
 
-#include "GGEMS/sources/GGEMSSourceManager.hh"
-#include "GGEMS/physics/GGEMSMaterialsManager.hh"
+#include "GGEMS/global/GGEMSManager.hh"
+
+#include "GGEMS/materials/GGEMSMaterialsDatabaseManager.hh"
 #include "GGEMS/physics/GGEMSProcessesManager.hh"
 #include "GGEMS/physics/GGEMSRangeCutsManager.hh"
-#include "GGEMS/global/GGEMSOpenCLManager.hh"
-#include "GGEMS/global/GGEMSManager.hh"
+#include "GGEMS/sources/GGEMSSourceManager.hh"
+#include "GGEMS/navigators/GGEMSPhantomNavigatorManager.hh"
+
 #include "GGEMS/global/GGEMSConstants.hh"
-#include "GGEMS/geometries/GGEMSPhantomNavigatorManager.hh"
-#include "GGEMS/tools/GGEMSSystemOfUnits.hh"
 #include "GGEMS/tools/GGEMSChrono.hh"
 #include "GGEMS/tools/GGEMSTools.hh"
 
@@ -54,14 +54,12 @@ GGEMSManager::GGEMSManager(void)
   is_random_verbose_(false),
   source_manager_(GGEMSSourceManager::GetInstance()),
   opencl_manager_(GGEMSOpenCLManager::GetInstance()),
-  material_manager_(GGEMSMaterialsManager::GetInstance()),
+  material_manager_(GGEMSMaterialsDatabaseManager::GetInstance()),
   phantom_navigator_manager_(GGEMSPhantomNavigatorManager::GetInstance()),
   range_cuts_manager_(GGEMSRangeCutsManager::GetInstance()),
   processes_manager_(GGEMSProcessesManager::GetInstance())
   //physics_list_(0),
   //secondaries_list_(0),
-  //photon_distance_cut_(GGEMSUnits::um),
-  //electron_distance_cut_(GGEMSUnits::um),
   //photon_level_secondaries_(0),
   //electron_level_secondaries_(0)
 {

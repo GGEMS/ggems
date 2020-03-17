@@ -12,8 +12,9 @@
 
 #include <cmath>
 
-#include "GGEMS/physics/GGEMSIonizationParamsMaterial.hh"
-#include "GGEMS/physics/GGEMSMaterialsManager.hh"
+#include "GGEMS/materials/GGEMSMaterialsDatabaseManager.hh"
+
+#include "GGEMS/materials/GGEMSIonizationParamsMaterial.hh"
 #include "GGEMS/global/GGEMSConstants.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
 
@@ -65,7 +66,7 @@ void GGEMSIonizationParamsMaterial::ComputeIonizationParameters(void)
   GGcout("GGEMSIonizationParamsMaterial", "ComputeIonizationParameters", 3) << "Computing ionization parameters for ..." << GGendl;
 
   // Get the material manager
-  GGEMSMaterialsManager& material_manager = GGEMSMaterialsManager::GetInstance();
+  GGEMSMaterialsDatabaseManager& material_manager = GGEMSMaterialsDatabaseManager::GetInstance();
 
   // Number of chemical elements in material
   GGuchar const kNumberOfChemicalElements = material_->nb_elements_;
@@ -76,7 +77,7 @@ void GGEMSIonizationParamsMaterial::ComputeIonizationParameters(void)
   for (GGuchar i = 0; i < kNumberOfChemicalElements; ++i) {
     // Get element by element
     GGEMSChemicalElement const& kChemicalElement = material_manager.GetChemicalElement(material_->chemical_element_name_[i]);
-    axZ = static_cast<GGfloat>(static_cast<GGdouble>(GGEMSPhysicalConstants::AVOGADRO) / kChemicalElement.molar_mass_M_ * material_->density_ * material_->mixture_f_[i] * static_cast<GGdouble>(kChemicalElement.atomic_number_Z_));
+    axZ = static_cast<GGfloat>(static_cast<GGdouble>(GGEMSPhysicalConstant::AVOGADRO) / kChemicalElement.molar_mass_M_ * material_->density_ * material_->mixture_f_[i] * static_cast<GGdouble>(kChemicalElement.atomic_number_Z_));
     log_mean_excitation_energy_ += axZ * std::log(kChemicalElement.mean_excitation_energy_I_);
     total_number_of_electron_per_volume += axZ;
   }
@@ -87,7 +88,7 @@ void GGEMSIonizationParamsMaterial::ComputeIonizationParameters(void)
   // Compute density correction factor
   // define material state (approximation based on threshold)
   GGuchar state = GGEMSState::GAS;
-  if (material_->density_ > GGEMSPhysicalConstants::GASTHRESHOLD) state = GGEMSState::SOLID;
+  if (material_->density_ > GGEMSPhysicalConstant::GASTHRESHOLD) state = GGEMSState::SOLID;
 
   // Check if density effect data exist in the table
   // R.M. Sternheimer, Atomic Data and Nuclear Data Tables, 30: 261 (1984)
@@ -108,7 +109,7 @@ void GGEMSIonizationParamsMaterial::ComputeIonizationParameters(void)
     d0_density_ = GGEMSDensityParams::data[index_density_correction][7];
   }
   else { // Computing the density correction
-    static constexpr GGfloat kCd2 = 4.0f * GGEMSPhysicalConstants::PI * GGEMSPhysicalConstants::HBARC_SQUARED * GGEMSPhysicalConstants::CLASSIC_ELECTRON_RADIUS;
+    static constexpr GGfloat kCd2 = 4.0f * GGEMSMathematicalConstant::PI * GGEMSPhysicalConstant::HBARC_SQUARED * GGEMSPhysicalConstant::CLASSIC_ELECTRON_RADIUS;
 
     GGfloat const kPlasmaEnergy = std::sqrt(kCd2*total_number_of_electron_per_volume);
 

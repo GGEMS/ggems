@@ -20,7 +20,7 @@
 
 GGEMSSolidVolume::GGEMSSolidVolume(void)
 : label_value_(1.0),
-  positions_(GGdouble3{{0.0, 0.0, 0.0}}),
+  positions_(GGfloat3{{0.0, 0.0, 0.0}}),
   kernel_draw_solid_(nullptr),
   opencl_manager_(GGEMSOpenCLManager::GetInstance()),
   phantom_creator_manager_(GGEMSPhantomCreatorManager::GetInstance())
@@ -56,9 +56,9 @@ void GGEMSSolidVolume::SetMaterial(char const* material)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSSolidVolume::SetPosition(GGdouble const& pos_x, GGdouble const& pos_y, GGdouble const& pos_z, char const* unit)
+void GGEMSSolidVolume::SetPosition(GGfloat const& pos_x, GGfloat const& pos_y, GGfloat const& pos_z, char const* unit)
 {
-  positions_.s[0] = GGEMSUnits::BestDistanceUnit(pos_x, unit);
-  positions_.s[1] = GGEMSUnits::BestDistanceUnit(pos_y, unit);
-  positions_.s[2] = GGEMSUnits::BestDistanceUnit(pos_z, unit);
+  positions_.s[0] = GGEMSUnits::DistanceUnit(pos_x, unit);
+  positions_.s[1] = GGEMSUnits::DistanceUnit(pos_y, unit);
+  positions_.s[2] = GGEMSUnits::DistanceUnit(pos_z, unit);
 }

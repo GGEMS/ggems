@@ -82,10 +82,10 @@ class GGEMSVoxelizedPhantomNavigatorImagery(object):
         ggems_lib.set_range_to_material_filename_ggems_voxelized_phantom_navigator_imagery.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
         ggems_lib.set_range_to_material_filename_ggems_voxelized_phantom_navigator_imagery.restype = ctypes.c_void_p
 
-        ggems_lib.set_geometry_tolerance_ggems_voxelized_phantom_navigator_imagery.argtypes = [ctypes.c_void_p, ctypes.c_double, ctypes.c_char_p]
+        ggems_lib.set_geometry_tolerance_ggems_voxelized_phantom_navigator_imagery.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_char_p]
         ggems_lib.set_geometry_tolerance_ggems_voxelized_phantom_navigator_imagery.restype = ctypes.c_void_p
 
-        ggems_lib.set_offset_ggems_voxelized_phantom_navigator_imagery.argtypes = [ctypes.c_void_p, ctypes.c_double, ctypes.c_double, ctypes.c_double, ctypes.c_char_p]
+        ggems_lib.set_offset_ggems_voxelized_phantom_navigator_imagery.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_char_p]
         ggems_lib.set_offset_ggems_voxelized_phantom_navigator_imagery.restype = ctypes.c_void_p
 
         self.obj = ggems_lib.create_ggems_voxelized_phantom_navigator_imagery()
@@ -361,7 +361,7 @@ class GGEMSPhantomCreatorManager(object):
         ggems_lib.set_phantom_dimension_phantom_creator_manager.argtypes = [ctypes.c_void_p, ctypes.c_uint32, ctypes.c_uint32, ctypes.c_uint32]
         ggems_lib.set_phantom_dimension_phantom_creator_manager.restype = ctypes.c_void_p
 
-        ggems_lib.set_element_sizes_phantom_creator_manager.argtypes = [ctypes.c_void_p, ctypes.c_double, ctypes.c_double, ctypes.c_double, ctypes.c_char_p]
+        ggems_lib.set_element_sizes_phantom_creator_manager.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_char_p]
         ggems_lib.set_element_sizes_phantom_creator_manager.restype = ctypes.c_void_p
 
         ggems_lib.set_output_image_filename_phantom_creator_manager.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
@@ -418,13 +418,13 @@ class GGEMSTube(object):
         ggems_lib.delete_tube.argtypes = [ctypes.c_void_p]
         ggems_lib.delete_tube.restype = ctypes.c_void_p
 
-        ggems_lib.set_height_tube.argtypes = [ctypes.c_void_p, ctypes.c_double, ctypes.c_char_p]
+        ggems_lib.set_height_tube.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_char_p]
         ggems_lib.set_height_tube.restype = ctypes.c_void_p
 
-        ggems_lib.set_radius_tube.argtypes = [ctypes.c_void_p, ctypes.c_double, ctypes.c_char_p]
+        ggems_lib.set_radius_tube.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_char_p]
         ggems_lib.set_radius_tube.restype = ctypes.c_void_p
 
-        ggems_lib.set_position_tube.argtypes = [ctypes.c_void_p, ctypes.c_double, ctypes.c_double, ctypes.c_double, ctypes.c_char_p]
+        ggems_lib.set_position_tube.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_char_p]
         ggems_lib.set_position_tube.restype = ctypes.c_void_p
 
         ggems_lib.set_label_value_tube.argtypes = [ctypes.c_void_p, ctypes.c_float]

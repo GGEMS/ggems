@@ -83,21 +83,21 @@ class GGEMS_EXPORT GGEMSPhantomCreatorManager
     GGEMSPhantomCreatorManager& operator=(GGEMSPhantomCreatorManager const&& phantom_creator_manager) = delete;
 
     /*!
-      \fn void SetElementSizes(double const& voxel_width, double const& voxel_height, double const& voxel_depth, char const* unit = "mm")
+      \fn void SetElementSizes(GGfloat const& voxel_width, GGfloat const& voxel_height, GGfloat const& voxel_depth, char const* unit = "mm")
       \param voxel_width - voxel width
       \param voxel_height - voxel height
       \param voxel_depth - voxel depth
       \param unit - unit of the distance
       \brief Set the size of the elements for the voxelized phantom
     */
-    void SetElementSizes(GGdouble const& voxel_width, GGdouble const& voxel_height, GGdouble const& voxel_depth, char const* unit = "mm");
+    void SetElementSizes(GGfloat const& voxel_width, GGfloat const& voxel_height, GGfloat const& voxel_depth, char const* unit = "mm");
 
     /*!
-      \fn GGdouble3 GetElementsSizes(void) const
+      \fn GGfloat3 GetElementsSizes(void) const
       \return a 3d double with the size of voxel in voxelized phantom
       \brief size of voxels in the voxelized phantom
     */
-    inline GGdouble3 GetElementsSizes(void) const {return element_sizes_;}
+    inline GGfloat3 GetElementsSizes(void) const {return element_sizes_;}
 
     /*!
       \fn void SetPhantomDimensions(GGuint const& phantom_width, GGuint const& phantom_height, GGuint const& phantom_depth)
@@ -212,7 +212,7 @@ class GGEMS_EXPORT GGEMSPhantomCreatorManager
     void AllocateImage(void);
 
   private:
-    GGdouble3 element_sizes_; /*!< Size of voxels of voxelized phantom */
+    GGfloat3 element_sizes_; /*!< Size of voxels of voxelized phantom */
     GGuint3 phantom_dimensions_; /*!< Dimension of phantom X, Y, Z */
     GGulong number_elements_; /*!< Total number of elements */
     std::string data_type_; /*!< Type of data */
@@ -260,7 +260,7 @@ extern "C" GGEMS_EXPORT GGEMSPhantomCreatorManager* get_instance_phantom_creator
 extern "C" GGEMS_EXPORT void set_phantom_dimension_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager, GGuint const phantom_width, GGuint const phantom_height, GGuint const phantom_depth);
 
 /*!
-  \fn void set_element_sizes_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager, GGdouble const voxel_width, GGdouble const voxel_height, GGdouble const voxel_depth)
+  \fn void set_element_sizes_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager, GGfloat const voxel_width, GGfloat const voxel_height, GGfloat const voxel_depth)
   \param phantom_creator_manager - pointer on the singleton
   \param voxel_width - voxel width
   \param voxel_height - voxel height
@@ -268,7 +268,7 @@ extern "C" GGEMS_EXPORT void set_phantom_dimension_phantom_creator_manager(GGEMS
   \param unit - unit of the distance
   \brief Set the size of the elements for the voxelized phantom
 */
-extern "C" GGEMS_EXPORT void set_element_sizes_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager, GGdouble const voxel_width, GGdouble const voxel_height, GGdouble const voxel_depth, char const* unit);
+extern "C" GGEMS_EXPORT void set_element_sizes_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager, GGfloat const voxel_width, GGfloat const voxel_height, GGfloat const voxel_depth, char const* unit);
 
 /*!
   \fn void set_output_basename_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager, char const* output_image_filename)

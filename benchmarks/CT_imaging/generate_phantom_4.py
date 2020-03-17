@@ -2,7 +2,7 @@ from ggems import *
 
 # ------------------------------------------------------------------------------
 # STEP 1: OpenCL Initialization
-opencl_manager.set_context_index(2)  # Activate a context
+opencl_manager.set_context_index(0)  # Activate a context
 
 # ------------------------------------------------------------------------------
 # STEP 2: Initializing phantom creator manager and setting the informations about the global voxelized volume
