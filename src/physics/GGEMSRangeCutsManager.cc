@@ -10,8 +10,9 @@
   \date Friday March 6, 2020
 */
 
-#include "GGEMS/geometries/GGEMSPhantomNavigatorManager.hh"
-#include "GGEMS/geometries/GGEMSPhantomNavigator.hh"
+#include "GGEMS/navigators/GGEMSPhantomNavigatorManager.hh"
+
+#include "GGEMS/navigators/GGEMSPhantomNavigator.hh"
 #include "GGEMS/physics/GGEMSRangeCutsManager.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
 #include "GGEMS/tools/GGEMSSystemOfUnits.hh"
@@ -73,13 +74,13 @@ void GGEMSRangeCutsManager::SetRangeCut(char const* phantom_name, char const* pa
     for (size_t i = 0; i < phantom_navigators.GetNumberOfPhantomNavigators(); ++i) {
       std::string const kName = ((phantom_navigators.GetPhantomNavigator())[i])->GetPhantomName();
       if (!kParticleName.compare("gamma")) {
-        photon_cuts_[kName] = GGEMSUnits::BestDistanceUnit(value, unit);
+        photon_cuts_[kName] = GGEMSUnits::DistanceUnit(value, unit);
       }
       else if (!kParticleName.compare("e-")) {
-        electron_cuts_[kName] = GGEMSUnits::BestDistanceUnit(value, unit);
+        electron_cuts_[kName] = GGEMSUnits::DistanceUnit(value, unit);
       }
       else if (!kParticleName.compare("e+")) {
-        positron_cuts_[kName] = GGEMSUnits::BestDistanceUnit(value, unit);
+        positron_cuts_[kName] = GGEMSUnits::DistanceUnit(value, unit);
       }
       else {
         GGEMSMisc::ThrowException("GGEMSRangeCutsManager", "SetRangeCut", "The type of particle is wrong!!!");
@@ -88,13 +89,13 @@ void GGEMSRangeCutsManager::SetRangeCut(char const* phantom_name, char const* pa
   }
   else {
     if (!kParticleName.compare("gamma")) {
-      photon_cuts_[kPhantomName] = GGEMSUnits::BestDistanceUnit(value, unit);
+      photon_cuts_[kPhantomName] = GGEMSUnits::DistanceUnit(value, unit);
     }
     else if (!kParticleName.compare("e-")) {
-      electron_cuts_[kPhantomName] = GGEMSUnits::BestDistanceUnit(value, unit);
+      electron_cuts_[kPhantomName] = GGEMSUnits::DistanceUnit(value, unit);
     }
     else if (!kParticleName.compare("e+")) {
-      positron_cuts_[kPhantomName] = GGEMSUnits::BestDistanceUnit(value, unit);
+      positron_cuts_[kPhantomName] = GGEMSUnits::DistanceUnit(value, unit);
     }
     else {
       GGEMSMisc::ThrowException("GGEMSRangeCutsManager", "SetRangeCut", "The type of particle is wrong!!!");

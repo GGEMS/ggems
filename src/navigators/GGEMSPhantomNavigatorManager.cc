@@ -12,11 +12,12 @@
 
 #include <sstream>
 
+#include "GGEMS/navigators/GGEMSPhantomNavigatorManager.hh"
 #include "GGEMS/physics/GGEMSRangeCutsManager.hh"
-#include "GGEMS/geometries/GGEMSPhantomNavigator.hh"
-#include "GGEMS/geometries/GGEMSSolidPhantom.hh"
-#include "GGEMS/geometries/GGEMSSolidPhantomStack.hh"
-#include "GGEMS/geometries/GGEMSPhantomNavigatorManager.hh"
+
+#include "GGEMS/navigators/GGEMSPhantomNavigator.hh"
+#include "GGEMS/navigators/GGEMSSolidPhantom.hh"
+#include "GGEMS/navigators/GGEMSSolidPhantomStack.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
 #include "GGEMS/tools/GGEMSTools.hh"
 

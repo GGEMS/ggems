@@ -14,7 +14,7 @@
 #include <vector>
 #include <sstream>
 
-#include "GGEMS/geometries/GGEMSSolidPhantomStack.hh"
+#include "GGEMS/navigators/GGEMSSolidPhantomStack.hh"
 #include "GGEMS/io/GGEMSMHDImage.hh"
 #include "GGEMS/tools/GGEMSTools.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
@@ -28,7 +28,7 @@ GGEMSMHDImage::GGEMSMHDImage(void)
 : mhd_header_file_(""),
   mhd_raw_file_(""),
   mhd_data_type_("MET_FLOAT"),
-  element_sizes_(GGdouble3{{0.0, 0.0, 0.0}}),
+  element_sizes_(GGfloat3{{0.0, 0.0, 0.0}}),
   dimensions_(GGuint3{{0, 0, 0}}),
   opencl_manager_(GGEMSOpenCLManager::GetInstance())
 {
@@ -58,7 +58,7 @@ void GGEMSMHDImage::SetBaseName(std::string const& basename)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSMHDImage::SetElementSizes(GGdouble3 const& element_sizes)
+void GGEMSMHDImage::SetElementSizes(GGfloat3 const& element_sizes)
 {
   element_sizes_ = element_sizes;
 }
@@ -242,7 +242,7 @@ void GGEMSMHDImage::CheckParameters(void) const
   }
 
   // Checking size of voxels
-  if (GGEMSMisc::IsEqual(element_sizes_.s[0], 0.0) && GGEMSMisc::IsEqual(element_sizes_.s[1], 0.0) && GGEMSMisc::IsEqual(element_sizes_.s[2], 0.0)) {
+  if (GGEMSMisc::IsEqual(element_sizes_.s[0], 0.0f) && GGEMSMisc::IsEqual(element_sizes_.s[1], 0.0f) && GGEMSMisc::IsEqual(element_sizes_.s[2], 0.0f)) {
     GGEMSMisc::ThrowException("GGEMSMHDImage", "CheckParameters", "Phantom voxel sizes have to be > 0.0!!!");
   }
 }

@@ -38,13 +38,6 @@ GGEMSXRaySource::GGEMSXRaySource(void)
 
   // Initialization of parameters
   focal_spot_size_ = MakeFloat3(std::numeric_limits<float>::min(), std::numeric_limits<float>::min(), std::numeric_limits<float>::min());
-
-  // Initialization of local axis
-  geometry_transformation_->SetAxisTransformation(
-    0.0f, 0.0f, -1.0f,
-    0.0f, 1.0f, 0.0f,
-    1.0f, 0.0f, 0.0f
-  );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -161,7 +154,7 @@ void GGEMSXRaySource::PrintInfos(void) const
 
 void GGEMSXRaySource::SetMonoenergy(GGfloat const& monoenergy, char const* unit)
 {
-  monoenergy_ = GGEMSUnits::BestEnergyUnit(monoenergy, unit);
+  monoenergy_ = GGEMSUnits::EnergyUnit(monoenergy, unit);
   is_monoenergy_mode_ = true;
 }
 
@@ -247,19 +240,19 @@ void GGEMSXRaySource::FillEnergy(void)
 
     // Allocation of memory on OpenCL device
     // Energy
-    energy_spectrum_ = opencl_manager_.Allocate(nullptr, 2 * sizeof(GGdouble), CL_MEM_READ_WRITE);
+    energy_spectrum_ = opencl_manager_.Allocate(nullptr, 2 * sizeof(GGfloat), CL_MEM_READ_WRITE);
 
     // Cumulative distribution function
-    cdf_ = opencl_manager_.Allocate(nullptr, 2 * sizeof(GGdouble), CL_MEM_READ_WRITE);
+    cdf_ = opencl_manager_.Allocate(nullptr, 2 * sizeof(GGfloat), CL_MEM_READ_WRITE);
 
     // Get the energy pointer on OpenCL device
-    GGdouble* energy_spectrum = opencl_manager_.GetDeviceBuffer<GGdouble>(energy_spectrum_, 2 * sizeof(GGdouble));
+    GGfloat* energy_spectrum = opencl_manager_.GetDeviceBuffer<GGfloat>(energy_spectrum_, 2 * sizeof(GGfloat));
 
     // Get the cdf pointer on OpenCL device
-    GGdouble* cdf = opencl_manager_.GetDeviceBuffer<GGdouble>(cdf_, 2 * sizeof(GGdouble));
+    GGfloat* cdf = opencl_manager_.GetDeviceBuffer<GGfloat>(cdf_, 2 * sizeof(GGfloat));
 
-    energy_spectrum[0] = static_cast<GGdouble>(monoenergy_);
-    energy_spectrum[1] = static_cast<GGdouble>(monoenergy_);
+    energy_spectrum[0] = monoenergy_;
+    energy_spectrum[1] = monoenergy_;
 
     cdf[0] = 1.0;
     cdf[1] = 1.0;
@@ -283,20 +276,20 @@ void GGEMSXRaySource::FillEnergy(void)
 
     // Allocation of memory on OpenCL device
     // Energy
-    energy_spectrum_ = opencl_manager_.Allocate(nullptr, number_of_energy_bins_ * sizeof(GGdouble), CL_MEM_READ_WRITE);
+    energy_spectrum_ = opencl_manager_.Allocate(nullptr, number_of_energy_bins_ * sizeof(GGfloat), CL_MEM_READ_WRITE);
 
     // Cumulative distribution function
-    cdf_ = opencl_manager_.Allocate(nullptr, number_of_energy_bins_ * sizeof(GGdouble), CL_MEM_READ_WRITE);
+    cdf_ = opencl_manager_.Allocate(nullptr, number_of_energy_bins_ * sizeof(GGfloat), CL_MEM_READ_WRITE);
 
     // Get the energy pointer on OpenCL device
-    GGdouble* energy_spectrum = opencl_manager_.GetDeviceBuffer<GGdouble>(energy_spectrum_, number_of_energy_bins_ * sizeof(GGdouble));
+    GGfloat* energy_spectrum = opencl_manager_.GetDeviceBuffer<GGfloat>(energy_spectrum_, number_of_energy_bins_ * sizeof(GGfloat));
 
     // Get the cdf pointer on OpenCL device
-    GGdouble* cdf = opencl_manager_.GetDeviceBuffer<GGdouble>(cdf_, number_of_energy_bins_ * sizeof(GGdouble));
+    GGfloat* cdf = opencl_manager_.GetDeviceBuffer<GGfloat>(cdf_, number_of_energy_bins_ * sizeof(GGfloat));
 
     // Read the input spectrum and computing the sum for the cdf
     GGint line_index = 0;
-    GGdouble sum_cdf = 0.0;
+    GGfloat sum_cdf = 0.0;
     while (std::getline(spectrum_stream, line)) {
       std::istringstream iss(line);
       iss >> energy_spectrum[line_index] >> cdf[line_index];
@@ -349,7 +342,7 @@ void GGEMSXRaySource::Initialize(void)
 
 void GGEMSXRaySource::SetBeamAperture(GGfloat const& beam_aperture, char const* unit)
 {
-  beam_aperture_ = GGEMSUnits::BestAngleUnit(beam_aperture, unit);
+  beam_aperture_ = GGEMSUnits::AngleUnit(beam_aperture, unit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -358,7 +351,7 @@ void GGEMSXRaySource::SetBeamAperture(GGfloat const& beam_aperture, char const* 
 
 void GGEMSXRaySource::SetFocalSpotSize(GGfloat const& width, GGfloat const& height, GGfloat const& depth, char const* unit)
 {
-  focal_spot_size_ = MakeFloat3(GGEMSUnits::BestDistanceUnit(width, unit), GGEMSUnits::BestDistanceUnit(height, unit), GGEMSUnits::BestDistanceUnit(depth, unit));
+  focal_spot_size_ = MakeFloat3(GGEMSUnits::DistanceUnit(width, unit), GGEMSUnits::DistanceUnit(height, unit), GGEMSUnits::DistanceUnit(depth, unit));
 }
 
 ////////////////////////////////////////////////////////////////////////////////

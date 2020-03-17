@@ -13,8 +13,8 @@
 #include <sstream>
 #include <limits>
 
-#include "GGEMS/physics/GGEMSMaterials.hh"
-#include "GGEMS/physics/GGEMSIonizationParamsMaterial.hh"
+#include "GGEMS/materials/GGEMSMaterials.hh"
+#include "GGEMS/materials/GGEMSIonizationParamsMaterial.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
 #include "GGEMS/tools/GGEMSTools.hh"
 #include "GGEMS/tools/GGEMSSystemOfUnits.hh"
@@ -25,7 +25,7 @@
 
 GGEMSMaterials::GGEMSMaterials(void)
 : opencl_manager_(GGEMSOpenCLManager::GetInstance()),
-  material_manager_(GGEMSMaterialsManager::GetInstance())
+  material_manager_(GGEMSMaterialsDatabaseManager::GetInstance())
 {
   GGcout("GGEMSMaterials", "GGEMSMaterials", 3) << "Allocation of GGEMSMaterials..." << GGendl;
 }
@@ -82,7 +82,7 @@ void GGEMSMaterials::PrintInfos(void) const
     for (GGuchar j = 0; j < material_table->number_of_chemical_elements_[i]; ++j) {
       GGushort const kIndexChemicalElement = material_table->index_of_chemical_elements_[i];
       GGcout("GGEMSMaterials", "PrintInfos", 0) << "        + Z = " << static_cast<GGushort>(material_table->atomic_number_Z_[j+kIndexChemicalElement]) << GGendl;
-      GGcout("GGEMSMaterials", "PrintInfos", 0) << "        + fraction of chemical element = " << material_table->mass_fraction_[j+kIndexChemicalElement]*100.0f << " %" << GGendl;
+      GGcout("GGEMSMaterials", "PrintInfos", 0) << "        + fraction of chemical element = " << material_table->mass_fraction_[j+kIndexChemicalElement]/GGEMSUnits::PERCENT << " %" << GGendl;
       GGcout("GGEMSMaterials", "PrintInfos", 0) << "        + Atomic number density = " << material_table->atomic_number_density_[j+kIndexChemicalElement]/(GGEMSUnits::mol/GGEMSUnits::cm3) << " atom/cm3" << GGendl;
       GGcout("GGEMSMaterials", "PrintInfos", 0) << "        + Element abundance = " << 100.0*material_table->atomic_number_density_[j+kIndexChemicalElement]/material_table->number_of_atoms_by_volume_[i] << " %" << GGendl;
     }
@@ -198,7 +198,7 @@ void GGEMSMaterials::BuildMaterialTables(void)
       material_table->mass_fraction_[j+index_to_chemical_element] = kSingleMaterial.mixture_f_[j];
 
       // Atomic number density
-      material_table->atomic_number_density_[j+index_to_chemical_element] = static_cast<GGfloat>(static_cast<GGdouble>(GGEMSPhysicalConstants::AVOGADRO) / kChemicalElement.molar_mass_M_ * kSingleMaterial.density_ * kSingleMaterial.mixture_f_[j]);
+      material_table->atomic_number_density_[j+index_to_chemical_element] = static_cast<GGfloat>(static_cast<GGdouble>(GGEMSPhysicalConstant::AVOGADRO) / kChemicalElement.molar_mass_M_ * kSingleMaterial.density_ * kSingleMaterial.mixture_f_[j]);
 
       // Increment density of atoms and electrons
       material_table->number_of_atoms_by_volume_[i] += material_table->atomic_number_density_[j+index_to_chemical_element];
@@ -412,7 +412,7 @@ GGfloat GGEMSMaterials::GetRadiationLength(std::string const& material) const
     zeff = static_cast<GGfloat>(kChemicalElement.atomic_number_Z_);
 
     //  Compute Coulomb correction factor (Phys Rev. D50 3-1 (1994) page 1254)
-    GGfloat az2 = (GGEMSPhysicalConstants::FINE_STRUCTURE_CONST*zeff)*(GGEMSPhysicalConstants::FINE_STRUCTURE_CONST*zeff);
+    GGfloat az2 = (GGEMSPhysicalConstant::FINE_STRUCTURE_CONST*zeff)*(GGEMSPhysicalConstant::FINE_STRUCTURE_CONST*zeff);
     GGfloat az4 = az2 * az2;
     coulomb = ( k1*az4 + k2 + 1.0f/ (1.0f+az2) ) * az2 - ( k3*az4 + k4 ) * az4;
 
@@ -432,8 +432,8 @@ GGfloat GGEMSMaterials::GetRadiationLength(std::string const& material) const
       lp_rad = std::log(1194.0f) - 2.0f*logZ3;
     }
 
-    tsai_radiation = 4.0f * GGEMSPhysicalConstants::ALPHA_RCL2 * zeff * ( zeff * ( l_rad - coulomb ) + lp_rad );
-    inverse_radiation += static_cast<GGfloat>(static_cast<GGdouble>(GGEMSPhysicalConstants::AVOGADRO) / kChemicalElement.molar_mass_M_ * kSingleMaterial.density_ * kSingleMaterial.mixture_f_[i] * tsai_radiation);
+    tsai_radiation = 4.0f * GGEMSPhysicalConstant::ALPHA_RCL2 * zeff * ( zeff * ( l_rad - coulomb ) + lp_rad );
+    inverse_radiation += static_cast<GGfloat>(static_cast<GGdouble>(GGEMSPhysicalConstant::AVOGADRO) / kChemicalElement.molar_mass_M_ * kSingleMaterial.density_ * kSingleMaterial.mixture_f_[i] * tsai_radiation);
   }
 
   return (inverse_radiation <= 0.0f ? std::numeric_limits<GGfloat>::max() : 1.0f / inverse_radiation);

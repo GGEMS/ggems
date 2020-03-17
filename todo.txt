@@ -41,4 +41,3 @@
 
 - Faire physique indépendante afin de l'interroger en fonction de l'énergie et matériau
 
-- Ajouter l'attenuation de l'air dans le transport

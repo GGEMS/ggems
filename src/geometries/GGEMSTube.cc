@@ -40,18 +40,18 @@ GGEMSTube::~GGEMSTube(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSTube::SetHeight(GGdouble const& height, char const* unit)
+void GGEMSTube::SetHeight(GGfloat const& height, char const* unit)
 {
-  height_ = GGEMSUnits::BestDistanceUnit(height, unit);
+  height_ = GGEMSUnits::DistanceUnit(height, unit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSTube::SetRadius(GGdouble const& radius, char const* unit)
+void GGEMSTube::SetRadius(GGfloat const& radius, char const* unit)
 {
-  radius_ = GGEMSUnits::BestDistanceUnit(radius, unit);
+  radius_ = GGEMSUnits::DistanceUnit(radius, unit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -63,12 +63,12 @@ void GGEMSTube::CheckParameters(void) const
   GGcout("GGEMSTube", "CheckParameters", 3) << "Checking mandatory parameters..." << GGendl;
 
   // Checking radius
-  if (GGEMSMisc::IsEqual(radius_, 0.0)) {
+  if (GGEMSMisc::IsEqual(radius_, 0.0f)) {
     GGEMSMisc::ThrowException("GGEMSTube", "CheckParameters", "The tube radius has to be > 0!!!");
   }
 
   // Checking height
-  if (GGEMSMisc::IsEqual(height_, 0.0)) {
+  if (GGEMSMisc::IsEqual(height_, 0.0f)) {
     GGEMSMisc::ThrowException("GGEMSTube", "CheckParameters", "The tube height has to be > 0!!!");
   }
 }
@@ -106,7 +106,7 @@ void GGEMSTube::Draw(void)
   cl::Event* p_event = opencl_manager_.GetEvent();
 
   // Get parameters from phantom creator
-  GGdouble3 const kVoxelSizes = phantom_creator_manager_.GetElementsSizes();
+  GGfloat3 const kVoxelSizes = phantom_creator_manager_.GetElementsSizes();
   GGuint3 const kPhantomDimensions = phantom_creator_manager_.GetPhantomDimensions();
   GGulong const kNumberThreads = phantom_creator_manager_.GetNumberElements();
   cl::Buffer* voxelized_phantom = phantom_creator_manager_.GetVoxelizedPhantom();
@@ -158,7 +158,7 @@ void delete_tube(GGEMSTube* tube)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_height_tube(GGEMSTube* tube, GGdouble const height, char const* unit)
+void set_height_tube(GGEMSTube* tube, GGfloat const height, char const* unit)
 {
   tube->SetHeight(height, unit);
 }
@@ -167,7 +167,7 @@ void set_height_tube(GGEMSTube* tube, GGdouble const height, char const* unit)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_radius_tube(GGEMSTube* tube, GGdouble const radius, char const* unit)
+void set_radius_tube(GGEMSTube* tube, GGfloat const radius, char const* unit)
 {
   tube->SetRadius(radius, unit);
 }
@@ -176,7 +176,7 @@ void set_radius_tube(GGEMSTube* tube, GGdouble const radius, char const* unit)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_position_tube(GGEMSTube* tube, GGdouble const pos_x, GGdouble const pos_y, GGdouble const pos_z, char const* unit)
+void set_position_tube(GGEMSTube* tube, GGfloat const pos_x, GGfloat const pos_y, GGfloat const pos_z, char const* unit)
 {
   tube->SetPosition(pos_x, pos_y, pos_z, unit);
 }

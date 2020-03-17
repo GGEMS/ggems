@@ -1,5 +1,5 @@
-#ifndef GUARD_GGEMS_PHYSICS_GGEMSMATERIALS_HH
-#define GUARD_GGEMS_PHYSICS_GGEMSMATERIALS_HH
+#ifndef GUARD_GGEMS_MATERIALS_GGEMSMATERIALS_HH
+#define GUARD_GGEMS_MATERIALS_GGEMSMATERIALS_HH
 
 /*!
   \file GGEMSMaterials.hh
@@ -21,10 +21,11 @@
 #include <string>
 
 #include "GGEMS/global/GGEMSOpenCLManager.hh"
+#include "GGEMS/materials/GGEMSMaterialsDatabaseManager.hh"
+
 #include "GGEMS/global/GGEMSExport.hh"
 #include "GGEMS/tools/GGEMSTypes.hh"
-#include "GGEMS/physics/GGEMSMaterialsManager.hh"
-#include "GGEMS/physics/GGEMSMaterialsStack.hh"
+#include "GGEMS/materials/GGEMSMaterialsStack.hh"
 
 /*!
   \class GGEMSMaterials
@@ -110,8 +111,7 @@ class GGEMS_EXPORT GGEMSMaterials
     std::set<std::string> materials_; /*!< Defined material for a phantom */
     std::shared_ptr<cl::Buffer> material_tables_; /*!< Material tables on OpenCL devices */
     GGEMSOpenCLManager& opencl_manager_; /*!< Reference to OpenCL manager */
-    GGEMSMaterialsManager& material_manager_; /*!< Reference to material manager */
-    // std::unordered_map<std::string, float> gamma_length_cut;
+    GGEMSMaterialsDatabaseManager& material_manager_; /*!< Reference to material manager */
 };
 
 #endif // End of GUARD_GGEMS_PHYSICS_GGEMSMATERIALS_HH

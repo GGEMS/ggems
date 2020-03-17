@@ -12,10 +12,11 @@
 
 #include <sstream>
 
-#include "GGEMS/geometries/GGEMSPhantomNavigator.hh"
-#include "GGEMS/geometries/GGEMSPhantomNavigatorManager.hh"
-#include "GGEMS/geometries/GGEMSSolidPhantom.hh"
-#include "GGEMS/physics/GGEMSMaterials.hh"
+#include "GGEMS/navigators/GGEMSPhantomNavigatorManager.hh"
+
+#include "GGEMS/navigators/GGEMSPhantomNavigator.hh"
+#include "GGEMS/navigators/GGEMSSolidPhantom.hh"
+#include "GGEMS/materials/GGEMSMaterials.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
 #include "GGEMS/tools/GGEMSSystemOfUnits.hh"
 #include "GGEMS/tools/GGEMSTools.hh"
@@ -30,7 +31,7 @@ GGEMSPhantomNavigator::GGEMSPhantomNavigator(GGEMSPhantomNavigator* phantom_navi
   phantom_mhd_header_filename_(""),
   range_data_filename_(""),
   geometry_tolerance_(GGEMSTolerance::GEOMETRY),
-  offset_xyz_(MakeDouble3Zeros()),
+  offset_xyz_(MakeFloat3Zeros()),
   is_offset_flag_(false)
 {
   GGcout("GGEMSPhantomNavigator", "GGEMSPhantomNavigator", 3) << "Allocation of GGEMSPhantomNavigator..." << GGendl;
@@ -85,20 +86,20 @@ void GGEMSPhantomNavigator::SetRangeToMaterialFile(char const* range_data_filena
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSPhantomNavigator::SetGeometryTolerance(GGdouble const& distance, char const* unit)
+void GGEMSPhantomNavigator::SetGeometryTolerance(GGfloat const& distance, char const* unit)
 {
-  geometry_tolerance_ = GGEMSUnits::BestDistanceUnit(distance, unit);
+  geometry_tolerance_ = GGEMSUnits::DistanceUnit(distance, unit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSPhantomNavigator::SetOffset(GGdouble const offset_x, GGdouble const offset_y, GGdouble const offset_z, char const* unit)
+void GGEMSPhantomNavigator::SetOffset(GGfloat const offset_x, GGfloat const offset_y, GGfloat const offset_z, char const* unit)
 {
-  offset_xyz_.s[0] = GGEMSUnits::BestDistanceUnit(offset_x, unit);
-  offset_xyz_.s[1] = GGEMSUnits::BestDistanceUnit(offset_y, unit);
-  offset_xyz_.s[2] = GGEMSUnits::BestDistanceUnit(offset_z, unit);
+  offset_xyz_.s[0] = GGEMSUnits::DistanceUnit(offset_x, unit);
+  offset_xyz_.s[1] = GGEMSUnits::DistanceUnit(offset_y, unit);
+  offset_xyz_.s[2] = GGEMSUnits::DistanceUnit(offset_z, unit);
   is_offset_flag_ = true;
 }
 

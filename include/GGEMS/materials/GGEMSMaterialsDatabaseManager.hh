@@ -1,8 +1,8 @@
-#ifndef GUARD_GGEMS_PHYSICS_GGEMSMATERIALSMANAGER_HH
-#define GUARD_GGEMS_PHYSICS_GGEMSMATERIALSMANAGER_HH
+#ifndef GUARD_GGEMS_MATERIALS_GGEMSMATERIALSDATABASEMANAGER_HH
+#define GUARD_GGEMS_MATERIALS_GGEMSMATERIALSDATABASEMANAGER_HH
 
 /*!
-  \file GGEMSMaterialsManager.hh
+  \file GGEMSMaterialsDatabaseManager.hh
 
   \brief GGEMS singleton class managing the material database
 
@@ -55,31 +55,31 @@ typedef std::unordered_map<std::string, GGEMSChemicalElement> ChemicalElementUMa
 typedef std::unordered_map<std::string, GGEMSSingleMaterial> MaterialUMap;
 
 /*!
-  \class GGEMSMaterialsManager
+  \class GGEMSMaterialsDatabaseManager
   \brief GGEMS class managing the material database
 */
-class GGEMS_EXPORT GGEMSMaterialsManager
+class GGEMS_EXPORT GGEMSMaterialsDatabaseManager
 {
   private:
     /*!
       \brief Unable the constructor for the user
     */
-    GGEMSMaterialsManager(void);
+    GGEMSMaterialsDatabaseManager(void);
 
     /*!
       \brief Unable the destructor for the user
     */
-    ~GGEMSMaterialsManager(void);
+    ~GGEMSMaterialsDatabaseManager(void);
 
   public:
     /*!
-      \fn static GGEMSMaterialsManager& GetInstance(void)
+      \fn static GGEMSMaterialsDatabaseManager& GetInstance(void)
       \brief Create at first time the Singleton
-      \return Object of type GGEMSMaterialsManager
+      \return Object of type GGEMSMaterialsDatabaseManager
     */
-    static GGEMSMaterialsManager& GetInstance(void)
+    static GGEMSMaterialsDatabaseManager& GetInstance(void)
     {
-      static GGEMSMaterialsManager instance;
+      static GGEMSMaterialsDatabaseManager instance;
       return instance;
     }
 
@@ -88,28 +88,28 @@ class GGEMS_EXPORT GGEMSMaterialsManager
       \param material_manager - reference on the material manager
       \brief Avoid copy of the class by reference
     */
-    GGEMSMaterialsManager(GGEMSMaterialsManager const& material_manager) = delete;
+    GGEMSMaterialsDatabaseManager(GGEMSMaterialsDatabaseManager const& material_manager) = delete;
 
     /*!
       \fn GGEMSManager& operator=(GGEMSManager const& material_manager) = delete
       \param material_manager - reference on the material manager
       \brief Avoid assignement of the class by reference
     */
-    GGEMSMaterialsManager& operator=(GGEMSMaterialsManager const& material_manager) = delete;
+    GGEMSMaterialsDatabaseManager& operator=(GGEMSMaterialsDatabaseManager const& material_manager) = delete;
 
     /*!
       \fn GGEMSManager(GGEMSManager const&& material_manager) = delete
       \param material_manager - rvalue reference on the material manager
       \brief Avoid copy of the class by rvalue reference
     */
-    GGEMSMaterialsManager(GGEMSMaterialsManager const&& material_manager) = delete;
+    GGEMSMaterialsDatabaseManager(GGEMSMaterialsDatabaseManager const&& material_manager) = delete;
 
     /*!
       \fn GGEMSManager& operator=(GGEMSManager const&& material_manager) = delete
       \param material_manager - rvalue reference on the material manager
       \brief Avoid copy of the class by rvalue reference
     */
-    GGEMSMaterialsManager& operator=(GGEMSMaterialsManager const&& material_manager) = delete;
+    GGEMSMaterialsDatabaseManager& operator=(GGEMSMaterialsDatabaseManager const&& material_manager) = delete;
 
     /*!
       \fn void SetMaterialsDatabase(char const* filename)
@@ -160,7 +160,7 @@ class GGEMS_EXPORT GGEMSMaterialsManager
       {
         std::ostringstream oss(std::ostringstream::out);
         oss << "Material '" << material_name << "' not found in the database!!!" << std::endl;
-        GGEMSMisc::ThrowException("GGEMSMaterialsManager", "GetMaterial", oss.str());
+        GGEMSMisc::ThrowException("GGEMSMaterialsDatabaseManager", "GetMaterial", oss.str());
       }
 
       return iter->second;
@@ -181,7 +181,7 @@ class GGEMS_EXPORT GGEMSMaterialsManager
       {
         std::ostringstream oss(std::ostringstream::out);
         oss << "Chemical element '" << chemical_element_name << "' not found in the database!!!" << std::endl;
-        GGEMSMisc::ThrowException("GGEMSMaterialsManager", "GetChemicalElement", oss.str());
+        GGEMSMisc::ThrowException("GGEMSMaterialsDatabaseManager", "GetChemicalElement", oss.str());
       }
 
       return iter->second;
@@ -219,31 +219,31 @@ class GGEMS_EXPORT GGEMSMaterialsManager
 };
 
 /*!
-  \fn GGEMSMaterialsManager* get_instance_materials_manager(void)
-  \brief Get the GGEMSMaterialsManager pointer for python user.
+  \fn GGEMSMaterialsDatabaseManager* get_instance_materials_manager(void)
+  \brief Get the GGEMSMaterialsDatabaseManager pointer for python user.
 */
-extern "C" GGEMS_EXPORT GGEMSMaterialsManager* get_instance_materials_manager(void);
+extern "C" GGEMS_EXPORT GGEMSMaterialsDatabaseManager* get_instance_materials_manager(void);
 
 /*!
-  \fn void set_materials_database_ggems_materials_manager(GGEMSMaterialsManager* ggems_materials_manager, char const* filename)
+  \fn void set_materials_database_ggems_materials_manager(GGEMSMaterialsDatabaseManager* ggems_materials_manager, char const* filename)
   \param ggems_materials_manager - pointer on the singleton
   \param process_name - name of the process to activate
   \brief activate a specific process
 */
-extern "C" GGEMS_EXPORT void set_materials_ggems_materials_manager(GGEMSMaterialsManager* ggems_materials_manager, char const* filename);
+extern "C" GGEMS_EXPORT void set_materials_ggems_materials_manager(GGEMSMaterialsDatabaseManager* ggems_materials_manager, char const* filename);
 
 /*!
-  \fn void print_available_chemical_elements_ggems_materials_manager(GGEMSMaterialsManager* ggems_materials_manager)
+  \fn void print_available_chemical_elements_ggems_materials_manager(GGEMSMaterialsDatabaseManager* ggems_materials_manager)
   \param p_ggems_materials_manager - pointer on the singleton
   \brief print all available chemical elements
 */
-extern "C" GGEMS_EXPORT void print_available_chemical_elements_ggems_materials_manager(GGEMSMaterialsManager* ggems_materials_manager);
+extern "C" GGEMS_EXPORT void print_available_chemical_elements_ggems_materials_manager(GGEMSMaterialsDatabaseManager* ggems_materials_manager);
 
 /*!
-  \fn void print_available_materials_ggems_materials_manager(GGEMSMaterialsManager* ggems_materials_manager)
+  \fn void print_available_materials_ggems_materials_manager(GGEMSMaterialsDatabaseManager* ggems_materials_manager)
   \param p_ggems_materials_manager - pointer on the singleton
   \brief print all available materials
 */
-extern "C" GGEMS_EXPORT void print_available_materials_ggems_materials_manager(GGEMSMaterialsManager* ggems_materials_manager);
+extern "C" GGEMS_EXPORT void print_available_materials_ggems_materials_manager(GGEMSMaterialsDatabaseManager* ggems_materials_manager);
 
-#endif // End of GUARD_GGEMS_PHYSICS_GGEMSMATERIALSMANAGER_HH
+#endif // End of GUARD_GGEMS_PHYSICS_GGEMSMATERIALSDATABASEMANAGER_HH

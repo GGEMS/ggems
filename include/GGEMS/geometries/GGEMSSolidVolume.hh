@@ -70,14 +70,14 @@ class GGEMS_EXPORT GGEMSSolidVolume
     void SetLabelValue(GGfloat const& label_value);
 
     /*!
-      \fn void SetPosition(GGdouble const& pos_x, GGdouble const& pos_y, GGdouble const& pos_z, char const* unit = "mm")
+      \fn void SetPosition(GGfloat const& pos_x, GGfloat const& pos_y, GGfloat const& pos_z, char const* unit = "mm")
       \param pos_x - position of analytical phantom in X
       \param pos_y - position of analytical phantom in Y
       \param pos_z - position of analytical phantom in Z
       \param unit - unit of the distance
       \brief Set the solid phantom position
     */
-    void SetPosition(GGdouble const& pos_x, GGdouble const& pos_y, GGdouble const& pos_z, char const* unit = "mm");
+    void SetPosition(GGfloat const& pos_x, GGfloat const& pos_y, GGfloat const& pos_z, char const* unit = "mm");
 
     /*!
       \fn void SetMaterial(char const* material)
@@ -107,7 +107,7 @@ class GGEMS_EXPORT GGEMSSolidVolume
 
   protected:
     GGfloat label_value_; /*!< Value of label in solid volume */
-    GGdouble3 positions_; /*!< Position of solid volume */
+    GGfloat3 positions_; /*!< Position of solid volume */
     std::shared_ptr<cl::Kernel> kernel_draw_solid_; /*!< Kernel drawing solid using OpenCL */
     GGEMSOpenCLManager& opencl_manager_; /*!< Reference to opencl manager singleton */
     GGEMSPhantomCreatorManager& phantom_creator_manager_; /*!< Reference to phantom creator manager */

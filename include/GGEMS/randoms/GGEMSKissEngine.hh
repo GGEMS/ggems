@@ -16,20 +16,20 @@
 #ifdef OPENCL_COMPILER
 
 #include "GGEMS/randoms/GGEMSRandomStack.hh"
-#include "GGEMS/tools/GGEMSSystemOfUnits.hh"
+#include "GGEMS/global/GGEMSConstants.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
 /*!
-  \fn inline float KissUniform(__global GGEMSRandom* random, int const index)
+  \fn inline GGfloat KissUniform(__global GGEMSRandom* random, int const index)
   \param p_random - pointer on random buffer on OpenCL device
   \param index - index of thread
   \brief JKISS 32-bit (period ~2^121=2.6x10^36), passes all of the Dieharder
   and the BigCrunch tests in TestU01
 */
-inline float KissUniform(__global GGEMSRandom* random, GGint const index)
+inline GGfloat KissUniform(__global GGEMSRandom* random, GGint const index)
 {
   // y ^= (y<<5);
   // y ^= (y>>7);
@@ -109,13 +109,13 @@ inline GGuint KissPoisson(__global GGEMSRandom* random, GGint const index, GGflo
 ////////////////////////////////////////////////////////////////////////////////
 
 /*!
-  \fn inline float KissGauss(__global GGEMSRandom* random, GGint const index, GGfloat const sigma)
+  \fn inline GGfloat KissGauss(__global GGEMSRandom* random, GGint const index, GGfloat const sigma)
   \param p_random - pointer on random buffer on OpenCL device
   \param index - index of thread
   \param sigma - standard deviation
   \brief Gaussian random
 */
-inline float kiss_gauss(__global GGEMSRandom* random, GGint const index, GGfloat const sigma)
+inline GGfloat KissGauss(__global GGEMSRandom* random, GGint const index, GGfloat const sigma)
 {
   // Box-Muller transformation
   GGfloat const u1 = KissUniform(random, index);

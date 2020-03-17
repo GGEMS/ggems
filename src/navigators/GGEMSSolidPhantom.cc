@@ -11,8 +11,8 @@
   \date Tuesday March 2, 2020
 */
 
-#include "GGEMS/geometries/GGEMSSolidPhantomStack.hh"
-#include "GGEMS/geometries/GGEMSSolidPhantom.hh"
+#include "GGEMS/navigators/GGEMSSolidPhantomStack.hh"
+#include "GGEMS/navigators/GGEMSSolidPhantom.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
 #include "GGEMS/io/GGEMSMHDImage.hh"
 
@@ -85,7 +85,7 @@ void GGEMSSolidPhantom::LoadPhantomImage(std::string const& phantom_filename, st
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSSolidPhantom::ApplyOffset(GGdouble3 const& offset_xyz)
+void GGEMSSolidPhantom::ApplyOffset(GGfloat3 const& offset_xyz)
 {
   GGcout("GGEMSSolidPhantom", "ApplyOffset", 3) << "Applyng the offset defined by the user..." << GGendl;
 

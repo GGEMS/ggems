@@ -33,8 +33,7 @@ GGEMSSource::GGEMSSource(GGEMSSource* source)
   kernel_get_primaries_(nullptr),
   opencl_manager_(GGEMSOpenCLManager::GetInstance())
 {
-  GGcout("GGEMSSource", "GGEMSSource", 3)
-    << "Allocation of GGEMSSource..." << GGendl;
+  GGcout("GGEMSSource", "GGEMSSource", 3) << "Allocation of GGEMSSource..." << GGendl;
 
   // Checking if a context is activated
   if (!opencl_manager_.IsReady()) {
@@ -44,6 +43,13 @@ GGEMSSource::GGEMSSource(GGEMSSource* source)
 
   // Allocation of geometry transformation
   geometry_transformation_.reset(new GGEMSGeometryTransformation());
+
+  // Initialization of local axis
+  geometry_transformation_->SetAxisTransformation(
+    0.0f, 0.0f, -1.0f,
+    0.0f, 1.0f, 0.0f,
+    1.0f, 0.0f, 0.0f
+  );
 
   // Store the source in source manager
   GGEMSSourceManager::GetInstance().Store(source);
@@ -73,7 +79,7 @@ void GGEMSSource::SetSourceName(char const* source_name)
 
 void GGEMSSource::SetPosition(GGfloat const& pos_x, GGfloat const& pos_y, GGfloat const& pos_z, char const* unit)
 {
-  geometry_transformation_->SetTranslation(MakeFloat3(GGEMSUnits::BestDistanceUnit(pos_x, unit), GGEMSUnits::BestDistanceUnit(pos_y, unit), GGEMSUnits::BestDistanceUnit(pos_z, unit)));
+  geometry_transformation_->SetTranslation(MakeFloat3(GGEMSUnits::DistanceUnit(pos_x, unit), GGEMSUnits::DistanceUnit(pos_y, unit), GGEMSUnits::DistanceUnit(pos_z, unit)));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -129,9 +135,9 @@ void GGEMSSource::SetLocalAxis(GGfloat const& m00, GGfloat const& m01, GGfloat c
 void GGEMSSource::SetRotation(GGfloat const& rx, GGfloat const& ry, GGfloat const& rz, char const* unit)
 {
   geometry_transformation_->SetRotation(MakeFloat3(
-    GGEMSUnits::BestAngleUnit(rx, unit),
-    GGEMSUnits::BestAngleUnit(ry, unit),
-    GGEMSUnits::BestAngleUnit(rz, unit))
+    GGEMSUnits::AngleUnit(rx, unit),
+    GGEMSUnits::AngleUnit(ry, unit),
+    GGEMSUnits::AngleUnit(rz, unit))
   );
 }
 

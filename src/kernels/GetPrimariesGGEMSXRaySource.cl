@@ -10,8 +10,8 @@ __kernel void get_primaries_ggems_xray_source(
   __global GGEMSPrimaryParticles* primary_particle,
   __global GGEMSRandom* random,
   GGuchar const particle_name,
-  __global GGdouble const* energy_spectrum,
-  __global GGdouble const* cdf,
+  __global GGfloat const* energy_spectrum,
+  __global GGfloat const* cdf,
   GGuint const number_of_energy_bins,
   GGfloat const aperture,
   GGfloat3 const focal_spot_size,
@@ -24,7 +24,7 @@ __kernel void get_primaries_ggems_xray_source(
   GGdouble phi = KissUniform(random, kGlobalIndex);
   GGdouble theta = KissUniform(random, kGlobalIndex);
   GGdouble const kAperture = 1.0 - cos((GGdouble)aperture);
-  phi += PI_TWICE;
+  phi += TWO_PI;
   theta = acos((GGdouble)1.0 - kAperture*theta);
 
   // Compute rotation

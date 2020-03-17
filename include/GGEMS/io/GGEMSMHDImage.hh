@@ -20,9 +20,10 @@
 #include <string>
 #include <memory>
 
+#include "GGEMS/global/GGEMSOpenCLManager.hh"
+
 #include "GGEMS/global/GGEMSExport.hh"
 #include "GGEMS/tools/GGEMSTypes.hh"
-#include "GGEMS/global/GGEMSOpenCLManager.hh"
 
 /*!
   \class GGEMSMHDImage
@@ -94,11 +95,11 @@ class GGEMS_EXPORT GGEMSMHDImage
     void Write(std::shared_ptr<cl::Buffer> image) const;
 
     /*!
-      \fn void SetElementSizes(GGdouble3 const& element_sizes)
+      \fn void SetElementSizes(GGfloat3 const& element_sizes)
       \param element_sizes - size of elements in X, Y, Z
       \brief set the size of the elements
     */
-    void SetElementSizes(GGdouble3 const& element_sizes);
+    void SetElementSizes(GGfloat3 const& element_sizes);
 
     /*!
       \fn void SetDimensions(GGuint3 const& dimensions)
@@ -148,7 +149,7 @@ class GGEMS_EXPORT GGEMSMHDImage
     std::string mhd_header_file_; /*!< Name of the MHD header file */
     std::string mhd_raw_file_; /*!< Name of the MHD raw file */
     std::string mhd_data_type_; /*< Type of data */
-    GGdouble3 element_sizes_; /*!< Size of elements */
+    GGfloat3 element_sizes_; /*!< Size of elements */
     GGuint3 dimensions_; /*!< Dimension volume X, Y, Z */
     GGEMSOpenCLManager& opencl_manager_; /*!< Reference to opencl manager singleton */
 };

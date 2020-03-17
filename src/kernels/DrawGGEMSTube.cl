@@ -1,12 +1,12 @@
 #include "GGEMS/tools/GGEMSTypes.hh"
 
 __kernel void draw_ggems_tube(
-  GGdouble3 const element_sizes,
+  GGfloat3 const element_sizes,
   GGuint3 const phantom_dimensions,
-  GGdouble3 const positions,
+  GGfloat3 const positions,
   GGfloat const label_value,
-  GGdouble const height,
-  GGdouble const radius,
+  GGfloat const height,
+  GGfloat const radius,
   #ifdef MET_CHAR
   __global GGchar* voxelized_phantom
   #elif MET_UCHAR
@@ -35,18 +35,18 @@ __kernel void draw_ggems_tube(
   GGuint const kZ = phantom_dimensions.z;
 
   // Get size of voxels
-  GGdouble const kSizeX = element_sizes.x;
-  GGdouble const kSizeY = element_sizes.y;
-  GGdouble const kSizeZ = element_sizes.z;
+  GGfloat const kSizeX = element_sizes.x;
+  GGfloat const kSizeY = element_sizes.y;
+  GGfloat const kSizeZ = element_sizes.z;
 
   // Get the isocenter position of solid
-  GGdouble const kPosIsoX = positions.x;
-  GGdouble const kPosIsoY = positions.y;
-  GGdouble const kPosIsoZ = positions.z;
+  GGfloat const kPosIsoX = positions.x;
+  GGfloat const kPosIsoY = positions.y;
+  GGfloat const kPosIsoZ = positions.z;
 
   // Radius square and half of height
-  GGdouble const kR2 = radius * radius;
-  GGdouble const kHalfHeight = height / 2.0;
+  GGfloat const kR2 = radius * radius;
+  GGfloat const kHalfHeight = height / 2.0;
 
   // Get index i, j and k of current voxel
   GGuint const j = (kGlobalIndex % (kX * kY)) / kX;
@@ -54,9 +54,9 @@ __kernel void draw_ggems_tube(
   GGuint const k = kGlobalIndex / (kX * kY);
 
   // Get the coordinates of the current voxel
-  GGdouble x = (kSizeX / 2.0) * (1.0 - (GGdouble)kX + 2.0 * i);
-  GGdouble y = (kSizeY / 2.0) * (1.0 - (GGdouble)kY + 2.0 * j);
-  GGdouble z = (kSizeZ / 2.0) * (1.0 - (GGdouble)kZ + 2.0 * k);
+  GGfloat x = (kSizeX / 2.0) * (1.0 - (GGfloat)kX + 2.0 * i);
+  GGfloat y = (kSizeY / 2.0) * (1.0 - (GGfloat)kY + 2.0 * j);
+  GGfloat z = (kSizeZ / 2.0) * (1.0 - (GGfloat)kZ + 2.0 * k);
 
   // Apply solid isocenter
   x -= kPosIsoX;

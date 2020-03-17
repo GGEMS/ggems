@@ -1,5 +1,5 @@
 /*!
-  \file GGEMSMaterialsManager.cc
+  \file GGEMSMaterialsDatabaseManager.cc
 
   \brief GGEMS singleton class managing the material database
 
@@ -10,19 +10,18 @@
   \date Thrusday January 23, 2020
 */
 
+#include "GGEMS/materials/GGEMSMaterialsDatabaseManager.hh"
+
 #include "GGEMS/tools/GGEMSPrint.hh"
 #include "GGEMS/io/GGEMSTextReader.hh"
-#include "GGEMS/physics/GGEMSMaterialsManager.hh"
-#include "GGEMS/tools/GGEMSSystemOfUnits.hh"
-#include "GGEMS/tools/GGEMSTools.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSMaterialsManager::GGEMSMaterialsManager(void)
+GGEMSMaterialsDatabaseManager::GGEMSMaterialsDatabaseManager(void)
 {
-  GGcout("GGEMSMaterialsManager", "GGEMSMaterialsManager", 3) << "Allocation of GGEMS materials manager..." << GGendl;
+  GGcout("GGEMSMaterialsDatabaseManager", "GGEMSMaterialsDatabaseManager", 3) << "Allocation of GGEMS materials manager..." << GGendl;
 
   // Loading GGEMS chemical elements
   LoadChemicalElements();
@@ -32,23 +31,23 @@ GGEMSMaterialsManager::GGEMSMaterialsManager(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSMaterialsManager::~GGEMSMaterialsManager(void)
+GGEMSMaterialsDatabaseManager::~GGEMSMaterialsDatabaseManager(void)
 {
-  GGcout("GGEMSMaterialsManager", "~GGEMSMaterialsManager", 3) << "Deallocation of GGEMS materials manager..." << GGendl;
+  GGcout("GGEMSMaterialsDatabaseManager", "~GGEMSMaterialsDatabaseManager", 3) << "Deallocation of GGEMS materials manager..." << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSMaterialsManager::SetMaterialsDatabase(char const* filename)
+void GGEMSMaterialsDatabaseManager::SetMaterialsDatabase(char const* filename)
 {
   // Converting char* to string
   std::string filename_str(filename);
 
   // Loading materials and elements in database
   if (!materials_.empty()) {
-    GGwarn("GGEMSMaterialsManager", "SetMaterialsDatabase", 0) << "Material database if already loaded!!!" << GGendl;
+    GGwarn("GGEMSMaterialsDatabaseManager", "SetMaterialsDatabase", 0) << "Material database if already loaded!!!" << GGendl;
   }
   else {
     // Materials
@@ -60,9 +59,9 @@ void GGEMSMaterialsManager::SetMaterialsDatabase(char const* filename)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSMaterialsManager::LoadMaterialsDatabase(std::string const& filename)
+void GGEMSMaterialsDatabaseManager::LoadMaterialsDatabase(std::string const& filename)
 {
-  GGcout("GGEMSMaterialsManager", "LoadMaterialsDatabase", 0) << "Loading materials database in GGEMS..." << GGendl;
+  GGcout("GGEMSMaterialsDatabaseManager", "LoadMaterialsDatabase", 0) << "Loading materials database in GGEMS..." << GGendl;
 
   // Opening the input file containing materials
   std::ifstream database_stream(filename, std::ios::in);
@@ -98,7 +97,7 @@ void GGEMSMaterialsManager::LoadMaterialsDatabase(std::string const& filename)
     }
 
     // Storing the material
-    GGcout("GGEMSMaterialsManager", "LoadMaterialsDatabase", 3) << "Adding material: " << kMaterialName << "..." << GGendl;
+    GGcout("GGEMSMaterialsDatabaseManager", "LoadMaterialsDatabase", 3) << "Adding material: " << kMaterialName << "..." << GGendl;
     materials_.insert(std::make_pair(kMaterialName, material));
   }
 
@@ -110,9 +109,9 @@ void GGEMSMaterialsManager::LoadMaterialsDatabase(std::string const& filename)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSMaterialsManager::LoadChemicalElements(void)
+void GGEMSMaterialsDatabaseManager::LoadChemicalElements(void)
 {
-  GGcout("GGEMSMaterialsManager", "LoadChemicalElements", 0) << "Loading chemical elements in GGEMS..." << GGendl;
+  GGcout("GGEMSMaterialsDatabaseManager", "LoadChemicalElements", 0) << "Loading chemical elements in GGEMS..." << GGendl;
 
   // Name, Z (atomic number), M (molar mass g/mol), I (mean excitation energy eV), state, index for density correction
   AddChemicalElements("Hydrogen",        1,   1.00794258759021f,   19.2f,   GGEMSState::GAS,  1);
@@ -239,9 +238,9 @@ void GGEMSMaterialsManager::LoadChemicalElements(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSMaterialsManager::AddChemicalElements(std::string const& element_name, GGuchar const& element_Z, GGfloat const& element_M, GGfloat const& element_I, GGuchar const& state, GGshort const& index_density_correction)
+void GGEMSMaterialsDatabaseManager::AddChemicalElements(std::string const& element_name, GGuchar const& element_Z, GGfloat const& element_M, GGfloat const& element_I, GGuchar const& state, GGshort const& index_density_correction)
 {
-  GGcout("GGEMSMaterialsManager", "AddChemicalElements", 3) << "Adding element: " << element_name << "..." << GGendl;
+  GGcout("GGEMSMaterialsDatabaseManager", "AddChemicalElements", 3) << "Adding element: " << element_name << "..." << GGendl;
 
   // Creating chemical element and store it
   GGEMSChemicalElement element;
@@ -259,18 +258,18 @@ void GGEMSMaterialsManager::AddChemicalElements(std::string const& element_name,
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSMaterialsManager::PrintAvailableChemicalElements(void) const
+void GGEMSMaterialsDatabaseManager::PrintAvailableChemicalElements(void) const
 {
-  GGcout("GGEMSMaterialsManager", "PrintAvailableChemicalElements", 3) << "Printing available chemical elements..." << GGendl;
+  GGcout("GGEMSMaterialsDatabaseManager", "PrintAvailableChemicalElements", 3) << "Printing available chemical elements..." << GGendl;
 
-  GGcout("GGEMSMaterialsManager", "PrintAvailableChemicalElements", 0) << "Number of chemical elements in GGEMS: " << chemical_elements_.size() << GGendl;
+  GGcout("GGEMSMaterialsDatabaseManager", "PrintAvailableChemicalElements", 0) << "Number of chemical elements in GGEMS: " << chemical_elements_.size() << GGendl;
 
   // Loop over the elements
   for (auto&& i : chemical_elements_) {
-    GGcout("GGEMSMaterialsManager", "PrintAvailableChemicalElements", 0) << "    * Chemical element: \"" << i.first << "\"" << GGendl;
-    GGcout("GGEMSMaterialsManager", "PrintAvailableChemicalElements", 0) << "        - Atomic number (Z): " << i.second.atomic_number_Z_ << GGendl;
-    GGcout("GGEMSMaterialsManager", "PrintAvailableChemicalElements", 0) << "        - Molar mass (M): " << i.second.molar_mass_M_ / (GGEMSUnits::g / GGEMSUnits::mol) << " g/mol" << GGendl;
-    GGcout("GGEMSMaterialsManager", "PrintAvailableChemicalElements", 0) << "        - Mean excitation energy (I): " << i.second.mean_excitation_energy_I_/GGEMSUnits::eV << " eV" << GGendl;
+    GGcout("GGEMSMaterialsDatabaseManager", "PrintAvailableChemicalElements", 0) << "    * Chemical element: \"" << i.first << "\"" << GGendl;
+    GGcout("GGEMSMaterialsDatabaseManager", "PrintAvailableChemicalElements", 0) << "        - Atomic number (Z): " << i.second.atomic_number_Z_ << GGendl;
+    GGcout("GGEMSMaterialsDatabaseManager", "PrintAvailableChemicalElements", 0) << "        - Molar mass (M): " << i.second.molar_mass_M_ / (GGEMSUnits::g / GGEMSUnits::mol) << " g/mol" << GGendl;
+    GGcout("GGEMSMaterialsDatabaseManager", "PrintAvailableChemicalElements", 0) << "        - Mean excitation energy (I): " << i.second.mean_excitation_energy_I_/GGEMSUnits::eV << " eV" << GGendl;
   }
 }
 
@@ -278,24 +277,24 @@ void GGEMSMaterialsManager::PrintAvailableChemicalElements(void) const
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSMaterialsManager::PrintAvailableMaterials(void) const
+void GGEMSMaterialsDatabaseManager::PrintAvailableMaterials(void) const
 {
-  GGcout("GGEMSMaterialsManager", "PrintAvailableMaterials", 3) << "Printing available materials..." << GGendl;
+  GGcout("GGEMSMaterialsDatabaseManager", "PrintAvailableMaterials", 3) << "Printing available materials..." << GGendl;
 
   if (materials_.empty()) {
-    GGcout("GGEMSMaterialsManager", "PrintAvailableMaterials", 0) << "For moment the GGEMS material database is empty, provide your material file to GGEMS." << GGendl;
+    GGcout("GGEMSMaterialsDatabaseManager", "PrintAvailableMaterials", 0) << "For moment the GGEMS material database is empty, provide your material file to GGEMS." << GGendl;
     return;
   }
 
-  GGcout("GGEMSMaterialsManager", "PrintAvailableMaterials", 0) << "Number of materials in GGEMS: " << materials_.size() << GGendl;
+  GGcout("GGEMSMaterialsDatabaseManager", "PrintAvailableMaterials", 0) << "Number of materials in GGEMS: " << materials_.size() << GGendl;
 
   // Loop over the materials
   for (auto&& i : materials_) {
-    GGcout("GGEMSMaterialsManager", "PrintAvailableMaterials", 0) << "    * Material: \"" << i.first << "\"" << GGendl;
-    GGcout("GGEMSMaterialsManager", "PrintAvailableMaterials", 0) << "        - Density: " << i.second.density_ / (GGEMSUnits::g/GGEMSUnits::cm3) << " g/cm3" << GGendl;
-    GGcout("GGEMSMaterialsManager", "PrintAvailableMaterials", 0) << "        - Number of elements: " << i.second.nb_elements_ << GGendl;
+    GGcout("GGEMSMaterialsDatabaseManager", "PrintAvailableMaterials", 0) << "    * Material: \"" << i.first << "\"" << GGendl;
+    GGcout("GGEMSMaterialsDatabaseManager", "PrintAvailableMaterials", 0) << "        - Density: " << i.second.density_ / (GGEMSUnits::g/GGEMSUnits::cm3) << " g/cm3" << GGendl;
+    GGcout("GGEMSMaterialsDatabaseManager", "PrintAvailableMaterials", 0) << "        - Number of elements: " << i.second.nb_elements_ << GGendl;
     for (GGushort j = 0; j < i.second.nb_elements_; ++j) {
-      GGcout("GGEMSMaterialsManager", "PrintAvailableMaterials", 0) << "            * Element: " << i.second.chemical_element_name_.at(j) << ", fraction: " << i.second.mixture_f_.at(j) << GGendl;
+      GGcout("GGEMSMaterialsDatabaseManager", "PrintAvailableMaterials", 0) << "            * Element: " << i.second.chemical_element_name_.at(j) << ", fraction: " << i.second.mixture_f_.at(j) << GGendl;
     }
   }
 }
@@ -304,16 +303,16 @@ void GGEMSMaterialsManager::PrintAvailableMaterials(void) const
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSMaterialsManager* get_instance_materials_manager(void)
+GGEMSMaterialsDatabaseManager* get_instance_materials_manager(void)
 {
-  return &GGEMSMaterialsManager::GetInstance();
+  return &GGEMSMaterialsDatabaseManager::GetInstance();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_materials_ggems_materials_manager(GGEMSMaterialsManager* ggems_materials_manager, char const* filename)
+void set_materials_ggems_materials_manager(GGEMSMaterialsDatabaseManager* ggems_materials_manager, char const* filename)
 {
   ggems_materials_manager->SetMaterialsDatabase(filename);
 }
@@ -322,7 +321,7 @@ void set_materials_ggems_materials_manager(GGEMSMaterialsManager* ggems_material
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void print_available_chemical_elements_ggems_materials_manager(GGEMSMaterialsManager* ggems_materials_manager)
+void print_available_chemical_elements_ggems_materials_manager(GGEMSMaterialsDatabaseManager* ggems_materials_manager)
 {
   ggems_materials_manager->PrintAvailableChemicalElements();
 }
@@ -331,7 +330,7 @@ void print_available_chemical_elements_ggems_materials_manager(GGEMSMaterialsMan
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void print_available_materials_ggems_materials_manager(GGEMSMaterialsManager* ggems_materials_manager)
+void print_available_materials_ggems_materials_manager(GGEMSMaterialsDatabaseManager* ggems_materials_manager)
 {
   ggems_materials_manager->PrintAvailableMaterials();
 }
