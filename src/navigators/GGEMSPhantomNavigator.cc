@@ -21,6 +21,7 @@
 #include "GGEMS/tools/GGEMSSystemOfUnits.hh"
 #include "GGEMS/tools/GGEMSTools.hh"
 #include "GGEMS/global/GGEMSConstants.hh"
+#include "GGEMS/physics/GGEMSRangeCuts.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -41,6 +42,9 @@ GGEMSPhantomNavigator::GGEMSPhantomNavigator(GGEMSPhantomNavigator* phantom_navi
 
   // Allocation of materials
   materials_.reset(new GGEMSMaterials());
+
+  // Allocation of cuts
+  range_cuts_.reset(new GGEMSRangeCuts());
 
   // Allocation of solid phantom
   solid_phantom_.reset(new GGEMSSolidPhantom());
@@ -150,9 +154,10 @@ void GGEMSPhantomNavigator::Initialize(void)
   // Apply offset
   if (is_offset_flag_) solid_phantom_->ApplyOffset(offset_xyz_);
 
-  // Loading the materials
-  // materials_SetGammaCut(gamma_cut);
-  // materials_SetElectronCuts();
+  // Converting length cut to energy cut
+  //range_cuts_->ConvertCuts(materials_);
+
+  // Loading the materials to OpenCL device and converting cuts
   materials_->Initialize();
 }
 

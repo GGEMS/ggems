@@ -152,7 +152,6 @@ namespace GGEMSDefaultParams
   #else
   1.e-3f;
   #endif
-
 #ifndef OPENCL_COMPILER
 }
 #endif

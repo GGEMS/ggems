@@ -15,7 +15,6 @@
 #include "GGEMS/navigators/GGEMSPhantomNavigatorManager.hh"
 #include "GGEMS/physics/GGEMSRangeCutsManager.hh"
 
-#include "GGEMS/navigators/GGEMSPhantomNavigator.hh"
 #include "GGEMS/navigators/GGEMSSolidPhantom.hh"
 #include "GGEMS/navigators/GGEMSSolidPhantomStack.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
@@ -61,9 +60,6 @@ void GGEMSPhantomNavigatorManager::Store(GGEMSPhantomNavigator* phantom_navigato
 void GGEMSPhantomNavigatorManager::Initialize(void) const
 {
   GGcout("GGEMSPhantomNavigatorManager", "Initialize", 3) << "Initializing the GGEMS phantom(s)..." << GGendl;
-
-  // Checking cuts
-  GGEMSRangeCutsManager::GetInstance().CheckRangeCuts();
 
   // Initialization of phantoms
   for (auto&& i : phantom_navigators_) i->Initialize();

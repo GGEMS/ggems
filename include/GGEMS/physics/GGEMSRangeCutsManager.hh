@@ -17,12 +17,9 @@
 #pragma warning(disable: 4251) // Deleting warning exporting STL members!!!
 #endif
 
-#include <unordered_map>
-
 #include "GGEMS/tools/GGEMSTypes.hh"
 #include "GGEMS/global/GGEMSExport.hh"
 
-typedef std::unordered_map<std::string, GGfloat> RangeUMap;
 
 /*!
   \class GGEMSRangeCutsManager
@@ -82,31 +79,20 @@ class GGEMS_EXPORT GGEMSRangeCutsManager
     GGEMSRangeCutsManager& operator=(GGEMSRangeCutsManager const&& range_cuts_manager) = delete;
 
     /*!
-      \fn void SetRangeCut(char const* phantom_name, char const* particle_name, GGfloat const& value, char const* unit)
+      \fn void SetLengthCut(char const* phantom_name, char const* particle_name, GGfloat const& value, char const* unit)
       \param phantom_name - name of the phantom
       \param particle_name - name of the particle
       \param value - value of the cut
       \param unit - unit of the cut in length
-      \brief set the range cut for a phantom and a particle
+      \brief set the range cut length for a phantom and a particle
     */
-    void SetRangeCut(char const* phantom_name, char const* particle_name, GGfloat const& value, char const* unit = "mm");
-
-    /*!
-      \fn void CheckRangeCuts(void)
-      \brief check the cuts for all phantoms and particle
-    */
-    void CheckRangeCuts(void);
+    void SetLengthCut(char const* phantom_name, char const* particle_name, GGfloat const& value, char const* unit = "mm");
 
     /*!
       \fn void PrintInfos(void) const
       \brief print infos about range cut manager
     */
     void PrintInfos(void) const;
-
-  private:
-    RangeUMap photon_cuts_; /*!< Photon cut in length for each phantom */
-    RangeUMap electron_cuts_; /*!< Electron cuts in length for each phantom */
-    RangeUMap positron_cuts_; /*!< Positron cuts in length for each phantom */
 };
 
 /*!

@@ -101,9 +101,9 @@ namespace GGEMSUnits
   __constant GGfloat atm = 101325.0f*6.241509766e+3f;
 
   // Electric current [Q][T^-1] (C.ns-1)
-  __constant GGfloat A  = 6.241509696e+9F;
-  __constant GGfloat mA = 6.241509696e+6F;
-  __constant GGfloat uA = 6.241509696e+3F;
+  __constant GGfloat A  = 6.241509696e+9f;
+  __constant GGfloat mA = 6.241509696e+6f;
+  __constant GGfloat uA = 6.241509696e+3f;
   __constant GGfloat nA = 6.241509696f;
 
   // Electric potential [E][Q^-1] 
