@@ -16,11 +16,11 @@
 #include <memory>
 
 #include "GGEMS/global/GGEMSOpenCLManager.hh"
-
 #include "GGEMS/global/GGEMSExport.hh"
 #include "GGEMS/tools/GGEMSTypes.hh"
+#include "GGEMS/tools/GGEMSTools.hh"
 
-class GGEMSPhantomNavigator;
+#include "GGEMS/navigators/GGEMSPhantomNavigator.hh"
 
 /*!
   \class GGEMSPhantomNavigatorManager
@@ -80,7 +80,7 @@ class GGEMS_EXPORT GGEMSPhantomNavigatorManager
     GGEMSPhantomNavigatorManager& operator=(GGEMSPhantomNavigatorManager const&& phantom_navigator_manager) = delete;
 
     /*!
-      \fn void Store(std::shared_ptr<GGEMSPhantomNavigator> phantom_navigator)
+      \fn void Store(GGEMSPhantomNavigator* phantom_navigator)
       \param phantom_navigator - pointer to GGEMS phantom navigator
       \brief storing the phantom navigator pointer to phantom navigator manager
     */
@@ -106,11 +106,29 @@ class GGEMS_EXPORT GGEMSPhantomNavigatorManager
     inline std::size_t GetNumberOfPhantomNavigators(void) const {return phantom_navigators_.size();}
 
     /*!
-      \fn inline std::vector<std::shared_ptr<GGEMSPhantomNavigator>> GetPhantomNavigator(void) const
+      \fn inline std::vector<std::shared_ptr<GGEMSPhantomNavigator>> GetPhantomNavigators(void) const
       \return the phantom navigator
       \brief get the list of phantom navigator
     */
-    inline std::vector<std::shared_ptr<GGEMSPhantomNavigator>> GetPhantomNavigator(void) const {return phantom_navigators_;}
+    inline std::vector<std::shared_ptr<GGEMSPhantomNavigator>> GetPhantomNavigators(void) const {return phantom_navigators_;}
+
+    /*!
+      \fn inline std::shared_ptr<GGEMSPhantomNavigator> GetPhantomNavigator(std::string const& phantom_navigator_name) const
+      \param phantom_navigator_name - name of the phantom navigator
+      \return the phantom navigator by the name
+      \brief get the phantom navigator by the name
+    */
+    inline std::shared_ptr<GGEMSPhantomNavigator> GetPhantomNavigator(std::string const& phantom_navigator_name) const
+    {
+      // Loop over the phantom
+      for (std::size_t i = 0; i < phantom_navigators_.size(); ++i) {
+        if (phantom_navigator_name == (phantom_navigators_.at(i))->GetPhantomName()) {
+          return phantom_navigators_.at(i);
+        }
+      }
+      GGEMSMisc::ThrowException("GGEMSPhantomNavigatorManager", "GetPhantomNavigator", "Name of the phantom unknown!!!");
+      return nullptr;
+    }
 
   private:
     /*

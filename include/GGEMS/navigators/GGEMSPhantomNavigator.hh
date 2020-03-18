@@ -25,6 +25,7 @@
 
 class GGEMSSolidPhantom;
 class GGEMSMaterials;
+class GGEMSRangeCuts;
 
 /*!
   \class GGEMSPhantomNavigator
@@ -115,14 +116,21 @@ class GGEMS_EXPORT GGEMSPhantomNavigator
       \brief Get the name of the phantom
       \return the name of the phantom
     */
-    inline std::string GetPhantomName(void) const {return phantom_navigator_name_;};
+    inline std::string GetPhantomName(void) const {return phantom_navigator_name_;}
 
     /*!
       \fn inline std::shared_ptr<GGEMSSolidPhantom> GetSolidPhantom(void) const
       \brief get the pointer on solid phantom
       \return the pointer on solid phantom
     */
-    inline std::shared_ptr<GGEMSSolidPhantom> GetSolidPhantom(void) const {return solid_phantom_;};
+    inline std::shared_ptr<GGEMSSolidPhantom> GetSolidPhantom(void) const {return solid_phantom_;}
+
+    /*!
+      \fn inline std::shared_ptr<GGEMSRangeCuts> GetRangeCuts(void) const
+      \brief get the pointer on range cuts
+      \return the pointer on range cuts
+    */
+    inline std::shared_ptr<GGEMSRangeCuts> GetRangeCuts(void) const {return range_cuts_;}
 
     /*!
       \fn void PrintInfos(void) const
@@ -149,8 +157,10 @@ class GGEMS_EXPORT GGEMSPhantomNavigator
     GGfloat geometry_tolerance_; /*!< Tolerance of geometry range [1mm;1nm] */
     GGfloat3 offset_xyz_; /*!< Offset of the phantom in X, Y and Z */
     bool is_offset_flag_; /*!< Apply offset */
+
     std::shared_ptr<GGEMSSolidPhantom> solid_phantom_; /*!< Solid phantom with geometric infos and label */
     std::shared_ptr<GGEMSMaterials> materials_; /*!< Materials of phantom */
+    std::shared_ptr<GGEMSRangeCuts> range_cuts_; /*!< Cut for particles */
 };
 
 #endif // End of GUARD_GGEMS_NAVIGATORS_GGEMSPHANTOMNAVIGATOR_HH

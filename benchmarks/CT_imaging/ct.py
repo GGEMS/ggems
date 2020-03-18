@@ -67,19 +67,11 @@ processes_manager.set_cross_section_table_energy_max(250.0, b"MeV")
 
 # ------------------------------------------------------------------------------
 # STEP 6: Cuts
-range_cuts_manager.set_cut(b"gamma", 1.0, b"mm", b"all")
-# or
-#range_cuts_manager.set_cut(b"gamma", 2.0, b"mm", b"phantom_1")
-# range_cuts_manager.set_cut("phantom_2", "gamma", 0.2, b"cm")
-# range_cuts_manager.set_cut("phantom_3", "gamma", 13.0, b"um")
-# range_cuts_manager.set_cut("phantom_4", "gamma", 0.015, b"m")
-
-# range_cuts_manager.set_cut("all", "e-", 1.0, b"mm")
-# or
-# range_cuts_manager.set_cut("phantom_1", "e-", 1.0, b"mm")
-# range_cuts_manager.set_cut("phantom_2", "e-", 0.2, b"cm")
-# range_cuts_manager.set_cut("phantom_3", "e-", 13.0, b"um")
-# range_cuts_manager.set_cut("phantom_4", "e-", 0.015, b"m")
+# By default cuts are 1 um
+# Apply a cut of 1 mm for each particle and each phantom
+range_cuts_manager.set_cut(b"gamma", 1.0, b"mm")
+# For a specific phatom
+range_cuts_manager.set_cut(b"gamma", 5.0, b"mm", b"phantom_1")
 
 # ------------------------------------------------------------------------------
 # STEP 7: Sources
