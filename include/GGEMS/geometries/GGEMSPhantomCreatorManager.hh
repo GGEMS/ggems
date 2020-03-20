@@ -23,7 +23,7 @@
 #include "GGEMS/tools/GGEMSTypes.hh"
 #include "GGEMS/global/GGEMSOpenCLManager.hh"
 
-typedef std::map<float, std::string> LabelToMaterialMap;
+typedef std::map<float, std::string> LabelToMaterialMap; /*!< Map of label value to material */
 
 /*!
   \class GGEMSPhantomCreatorManager
@@ -55,29 +55,29 @@ class GGEMS_EXPORT GGEMSPhantomCreatorManager
     }
 
     /*!
-      \fn GGEMSPhantomCreatorManager(GGEMSPhantomCreatorManager const& opencl_manager) = delete
-      \param opencl_manager - reference on the singleton
+      \fn GGEMSPhantomCreatorManager(GGEMSPhantomCreatorManager const& phantom_creator_manager) = delete
+      \param phantom_creator_manager - reference on the singleton
       \brief Avoid copy of the singleton by reference
     */
     GGEMSPhantomCreatorManager(GGEMSPhantomCreatorManager const& phantom_creator_manager) = delete;
 
     /*!
-      \fn GGEMSPhantomCreatorManager& operator=(GGEMSPhantomCreatorManager const& opencl_manager) = delete
-      \param opencl_manager - reference on the singleton
+      \fn GGEMSPhantomCreatorManager& operator=(GGEMSPhantomCreatorManager const& phantom_creator_manager) = delete
+      \param phantom_creator_manager - reference on the singleton
       \brief Avoid assignement of the singleton by reference
     */
     GGEMSPhantomCreatorManager& operator=(GGEMSPhantomCreatorManager const& phantom_creator_manager) = delete;
 
     /*!
-      \fn GGEMSOpenCLManager(GGEMSPhantomCreatorManager const&& opencl_manager) = delete
-      \param opencl_manager - rvalue reference on the singleton
+      \fn GGEMSPhantomCreatorManager(GGEMSPhantomCreatorManager const&& phantom_creator_manager) = delete
+      \param phantom_creator_manager - rvalue reference on the singleton
       \brief Avoid copy of the singleton by rvalue reference
     */
     GGEMSPhantomCreatorManager(GGEMSPhantomCreatorManager const&& phantom_creator_manager) = delete;
 
     /*!
-      \fn GGEMSOpenCLManager& operator=(GGEMSOpenCLManager const&& opencl_manager) = delete
-      \param opencl_manager - rvalue reference on the singleton
+      \fn GGEMSPhantomCreatorManager& operator=(GGEMSPhantomCreatorManager const&& phantom_creator_manager) = delete
+      \param phantom_creator_manager - rvalue reference on the singleton
       \brief Avoid copy of the singleton by rvalue reference
     */
     GGEMSPhantomCreatorManager& operator=(GGEMSPhantomCreatorManager const&& phantom_creator_manager) = delete;
@@ -151,7 +151,7 @@ class GGEMS_EXPORT GGEMSPhantomCreatorManager
     void SetOutputImageFilename(char const* output_image_filename);
 
     /*!
-      \fn void SetOutputImageFilename(char const* output_range_to_material_filename)
+      \fn void SetRangeToMaterialDataFilename(char const* output_range_to_material_filename)
       \param output_range_to_material_filename - output range to material filename
       \brief Set the filename of range to material data
     */
@@ -244,8 +244,9 @@ void GGEMSPhantomCreatorManager::AllocateImage(void)
 }
 
 /*!
-  \fn GGEMSPhantomCreatorManager* get_instance_ggems_phantom_creator_manager(void)
-  \brief Get the GGEMSOpenCLManager pointer for python user.
+  \fn GGEMSPhantomCreatorManager* get_instance_phantom_creator_manager(void)
+  \return the pointer on the singleton
+  \brief Get the GGEMSPhantomCreatorManager pointer for python user.
 */
 extern "C" GGEMS_EXPORT GGEMSPhantomCreatorManager* get_instance_phantom_creator_manager(void);
 
@@ -260,7 +261,7 @@ extern "C" GGEMS_EXPORT GGEMSPhantomCreatorManager* get_instance_phantom_creator
 extern "C" GGEMS_EXPORT void set_phantom_dimension_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager, GGuint const phantom_width, GGuint const phantom_height, GGuint const phantom_depth);
 
 /*!
-  \fn void set_element_sizes_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager, GGfloat const voxel_width, GGfloat const voxel_height, GGfloat const voxel_depth)
+  \fn void set_element_sizes_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager, GGfloat const voxel_width, GGfloat const voxel_height, GGfloat const voxel_depth, char const* unit)
   \param phantom_creator_manager - pointer on the singleton
   \param voxel_width - voxel width
   \param voxel_height - voxel height
@@ -271,7 +272,7 @@ extern "C" GGEMS_EXPORT void set_phantom_dimension_phantom_creator_manager(GGEMS
 extern "C" GGEMS_EXPORT void set_element_sizes_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager, GGfloat const voxel_width, GGfloat const voxel_height, GGfloat const voxel_depth, char const* unit);
 
 /*!
-  \fn void set_output_basename_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager, char const* output_image_filename)
+  \fn void set_output_image_filename_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager, char const* output_image_filename)
   \param phantom_creator_manager - pointer on the singleton
   \param output_image_filename - output MHD filename
   \brief Set the filename of MHD output

@@ -81,7 +81,7 @@ class GGEMS_EXPORT GGEMSMHDImage
 
     /*!
       \fn void Read(std::string const& image_mhd_header_filename, std::shared_ptr<cl::Buffer> solid_phantom_data)
-      \param image - input mhd filename
+      \param image_mhd_header_filename - input mhd filename
       \param solid_phantom_data - pointer on solid phantom data
       \brief read the mhd header
     */
@@ -148,7 +148,7 @@ class GGEMS_EXPORT GGEMSMHDImage
   private:
     std::string mhd_header_file_; /*!< Name of the MHD header file */
     std::string mhd_raw_file_; /*!< Name of the MHD raw file */
-    std::string mhd_data_type_; /*< Type of data */
+    std::string mhd_data_type_; /*!< Type of data */
     GGfloat3 element_sizes_; /*!< Size of elements */
     GGuint3 dimensions_; /*!< Dimension volume X, Y, Z */
     GGEMSOpenCLManager& opencl_manager_; /*!< Reference to opencl manager singleton */

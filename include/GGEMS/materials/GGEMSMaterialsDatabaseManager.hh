@@ -23,7 +23,6 @@
 
 #include "GGEMS/global/GGEMSExport.hh"
 #include "GGEMS/tools/GGEMSTypes.hh"
-#include "GGEMS/tools/GGEMSTools.hh"
 #include "GGEMS/global/GGEMSConstants.hh"
 
 /*!
@@ -32,7 +31,7 @@
 */
 struct GGEMS_EXPORT GGEMSChemicalElement
 {
-  GGuchar atomic_number_Z_; /*!< Atomic number */
+  GGuchar atomic_number_Z_; /*!< Atomic number Z */
   GGfloat molar_mass_M_; /*!< Molar mass */
   GGfloat mean_excitation_energy_I_; /*!< Mean excitation energy */
   GGuchar state_; /*!< state of element GAS or SOLID */
@@ -45,14 +44,14 @@ struct GGEMS_EXPORT GGEMSChemicalElement
 */
 struct GGEMS_EXPORT GGEMSSingleMaterial
 {
-  std::vector<std::string> chemical_element_name_; /*! Name of the chemical elements */
+  std::vector<std::string> chemical_element_name_; /*!< Name of the chemical elements */
   std::vector<GGfloat> mixture_f_; /*!< Fraction of element in material */
   GGfloat density_; /*!< Density of material */
   GGuchar nb_elements_; /*!< Number of elements in material */
 };
 
-typedef std::unordered_map<std::string, GGEMSChemicalElement> ChemicalElementUMap;
-typedef std::unordered_map<std::string, GGEMSSingleMaterial> MaterialUMap;
+typedef std::unordered_map<std::string, GGEMSChemicalElement> ChemicalElementUMap; /*!< Unordered map with key : name of element, value the chemical element structure */
+typedef std::unordered_map<std::string, GGEMSSingleMaterial> MaterialUMap; /*!< Unordered map with key : name of the material, value the material */
 
 /*!
   \class GGEMSMaterialsDatabaseManager
@@ -84,28 +83,28 @@ class GGEMS_EXPORT GGEMSMaterialsDatabaseManager
     }
 
     /*!
-      \fn GGEMSManager(GGEMSManager const& material_manager) = delete
+      \fn GGEMSMaterialsDatabaseManager(GGEMSMaterialsDatabaseManager const& material_manager) = delete
       \param material_manager - reference on the material manager
       \brief Avoid copy of the class by reference
     */
     GGEMSMaterialsDatabaseManager(GGEMSMaterialsDatabaseManager const& material_manager) = delete;
 
     /*!
-      \fn GGEMSManager& operator=(GGEMSManager const& material_manager) = delete
+      \fn GGEMSMaterialsDatabaseManager& operator=(GGEMSMaterialsDatabaseManager const& material_manager) = delete
       \param material_manager - reference on the material manager
       \brief Avoid assignement of the class by reference
     */
     GGEMSMaterialsDatabaseManager& operator=(GGEMSMaterialsDatabaseManager const& material_manager) = delete;
 
     /*!
-      \fn GGEMSManager(GGEMSManager const&& material_manager) = delete
+      \fn GGEMSMaterialsDatabaseManager(GGEMSMaterialsDatabaseManager const&& material_manager) = delete
       \param material_manager - rvalue reference on the material manager
       \brief Avoid copy of the class by rvalue reference
     */
     GGEMSMaterialsDatabaseManager(GGEMSMaterialsDatabaseManager const&& material_manager) = delete;
 
     /*!
-      \fn GGEMSManager& operator=(GGEMSManager const&& material_manager) = delete
+      \fn GGEMSMaterialsDatabaseManager& operator=(GGEMSMaterialsDatabaseManager const&& material_manager) = delete
       \param material_manager - rvalue reference on the material manager
       \brief Avoid copy of the class by rvalue reference
     */
@@ -131,18 +130,14 @@ class GGEMS_EXPORT GGEMSMaterialsDatabaseManager
     void PrintAvailableMaterials(void) const;
 
     /*!
-      \fn bool IsReady(void) const
+      \fn inline bool IsReady(void) const
       \brief check if the material manager is ready
       \return true if the material manager is ready otherwize false
     */
     inline bool IsReady(void) const
     {
-      if (materials_.empty()) {
-        return false;
-      }
-      else {
-        return true;
-      }
+      if (materials_.empty()) return false;
+      else return true;
     }
 
     /*!
@@ -168,7 +163,7 @@ class GGEMS_EXPORT GGEMSMaterialsDatabaseManager
 
     /*!
       \fn inline GGEMSChemicalElement GetChemicalElement(std::string const& chemical_element_name) const
-      \param chemical_element - name of the chemical element
+      \param chemical_element_name - name of the chemical element
       \return the structure to a chemical element
       \brief get the chemical element
     */
@@ -186,6 +181,33 @@ class GGEMS_EXPORT GGEMSMaterialsDatabaseManager
 
       return iter->second;
     };
+
+    /*!
+      \fn GGfloat GetRadiationLength(std::string const& material) const
+      \param material - name of the material
+      \return the radiation length of a material
+      \brief get the radiation length of a material
+    */
+    GGfloat GetRadiationLength(std::string const& material) const;
+
+    /*!
+      \fn inline GGfloat GetAtomicNumberDensity(std::string const& material, GGuchar const& index) const
+      \param material - name of the material
+      \param index - index of the element in the material
+      \return get the atomic number density of an element in a material
+      \brief Compute the atomic number density of an element in a material
+    */
+    inline GGfloat GetAtomicNumberDensity(std::string const& material, GGuchar const& index) const
+    {
+      // Getting the material
+      GGEMSSingleMaterial const& kSingleMaterial = GetMaterial(material);
+
+      // Getting the specific chemical element
+      GGEMSChemicalElement const& kChemicalElement = GetChemicalElement(kSingleMaterial.chemical_element_name_[index]);
+
+      // return the atomic number density, the number could be higher than float!!! Double is used
+      return static_cast<GGfloat>(static_cast<GGdouble>(GGEMSPhysicalConstant::AVOGADRO) / kChemicalElement.molar_mass_M_ * kSingleMaterial.density_ * kSingleMaterial.mixture_f_[index]);
+    }
 
   private:
     /*!
@@ -220,28 +242,29 @@ class GGEMS_EXPORT GGEMSMaterialsDatabaseManager
 
 /*!
   \fn GGEMSMaterialsDatabaseManager* get_instance_materials_manager(void)
+  \return the pointer on the singleton
   \brief Get the GGEMSMaterialsDatabaseManager pointer for python user.
 */
 extern "C" GGEMS_EXPORT GGEMSMaterialsDatabaseManager* get_instance_materials_manager(void);
 
 /*!
-  \fn void set_materials_database_ggems_materials_manager(GGEMSMaterialsDatabaseManager* ggems_materials_manager, char const* filename)
+  \fn void set_materials_ggems_materials_manager(GGEMSMaterialsDatabaseManager* ggems_materials_manager, char const* filename)
   \param ggems_materials_manager - pointer on the singleton
-  \param process_name - name of the process to activate
-  \brief activate a specific process
+  \param filename - file with list of materials
+  \brief enter the material database to GGEMS
 */
 extern "C" GGEMS_EXPORT void set_materials_ggems_materials_manager(GGEMSMaterialsDatabaseManager* ggems_materials_manager, char const* filename);
 
 /*!
   \fn void print_available_chemical_elements_ggems_materials_manager(GGEMSMaterialsDatabaseManager* ggems_materials_manager)
-  \param p_ggems_materials_manager - pointer on the singleton
+  \param ggems_materials_manager - pointer on the singleton
   \brief print all available chemical elements
 */
 extern "C" GGEMS_EXPORT void print_available_chemical_elements_ggems_materials_manager(GGEMSMaterialsDatabaseManager* ggems_materials_manager);
 
 /*!
   \fn void print_available_materials_ggems_materials_manager(GGEMSMaterialsDatabaseManager* ggems_materials_manager)
-  \param p_ggems_materials_manager - pointer on the singleton
+  \param ggems_materials_manager - pointer on the singleton
   \brief print all available materials
 */
 extern "C" GGEMS_EXPORT void print_available_materials_ggems_materials_manager(GGEMSMaterialsDatabaseManager* ggems_materials_manager);

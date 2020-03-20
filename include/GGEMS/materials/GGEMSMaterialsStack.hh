@@ -35,7 +35,7 @@ typedef struct PACKED GGEMSMaterialTables_t
 
   // Infos by materials
   GGuchar number_of_chemical_elements_[255]; /*!< Number of chemical elements in a single material */
-  GGfloat density_of_material_[255]; /*! Density of material in g/cm3 */
+  GGfloat density_of_material_[255]; /*!< Density of material in g/cm3 */
   GGfloat number_of_atoms_by_volume_[255]; /*!< Number of atoms by volume */
   GGfloat number_of_electrons_by_volume_[255]; /*!< Number of electrons by volume */
   GGfloat mean_excitation_energy_[255]; /*!< Mean of excitation energy */
@@ -62,7 +62,7 @@ typedef struct PACKED GGEMSMaterialTables_t
   GGuchar atomic_number_Z_[255*10]; /*!< Atomic number Z by chemical elements */
   GGfloat atomic_number_density_[255*10]; /*!< Atomic number density : fraction of element in material * density * Avogadro / Atomic mass */
   GGfloat mass_fraction_[255*10]; /*!< Mass fraction of element in material */
-} GGEMSMaterialTables;
+} GGEMSMaterialTables; /*!< Using C convention name of struct to C++ (_t deletion) */
 #ifndef OPENCL_COMPILER
 #ifdef _MSC_VER
 #pragma pack(pop)

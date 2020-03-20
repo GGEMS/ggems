@@ -45,6 +45,7 @@ namespace GGEMSMisc
     \tparam T - float or double number
     \param a - first value
     \param b - second value
+    \return true if equal or false otherwize
     \brief Check if 2 floats/doubles are equal (or almost equal)
   */
   template<typename T>

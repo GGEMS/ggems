@@ -116,6 +116,7 @@ class GGEMS_EXPORT GGEMSManager
 
     /*!
       \fn inline std::string GetVersion() const
+      \return string of GGEMS version
       \brief Get the version of GGEMS
     */
     inline std::string GetVersion() const {return version_;};
@@ -210,9 +211,9 @@ class GGEMS_EXPORT GGEMSManager
     bool is_source_verbose_; /*!< Flag for source verbosity */
     bool is_phantom_verbose_; /*!< Flag for phantom verbosity */
     bool is_memory_ram_verbose_; /*!< Flag for memory RAM verbosity */
-    bool is_processes_verbose_; /*! Flag for processes verbosity */
-    bool is_range_cuts_verbose_; /*! Flag for range cuts verbosity */
-    bool is_random_verbose_; /*! Flag for random verbosity */
+    bool is_processes_verbose_; /*!< Flag for processes verbosity */
+    bool is_range_cuts_verbose_; /*!< Flag for range cuts verbosity */
+    bool is_random_verbose_; /*!< Flag for random verbosity */
     GGEMSSourceManager& source_manager_; /*!< Reference to source manager singleton */
     GGEMSOpenCLManager& opencl_manager_; /*!< Reference to opencl manager singleton */
     GGEMSMaterialsDatabaseManager& material_manager_; /*!< Reference to material manager singleton */
@@ -223,20 +224,21 @@ class GGEMS_EXPORT GGEMSManager
 
 /*!
   \fn GGEMSManager* get_instance_ggems_manager(void)
+  \return the pointer on the singleton
   \brief Get the GGEMSManager pointer for python user.
 */
 extern "C" GGEMS_EXPORT GGEMSManager* get_instance_ggems_manager(void);
 
 /*!
-  \fn void set_seed_ggems_manager(GGEMSManager* ggems_manager, uint32_t const seed)
+  \fn void set_seed_ggems_manager(GGEMSManager* ggems_manager, GGuint const seed)
   \param ggems_manager - pointer on the singleton
   \param seed - seed given by the user
   \brief Set the seed for the simulation
 */
-extern "C" GGEMS_EXPORT void set_seed_ggems_manager(GGEMSManager* ggems_manager, GGuint const seed);
+extern "C" void GGEMS_EXPORT set_seed_ggems_manager(GGEMSManager* ggems_manager, GGuint const seed);
 
 /*!
-  \fn void initialize_ggems_manager(GGEMSManager* p_ggems_manager)
+  \fn void initialize_ggems_manager(GGEMSManager* ggems_manager)
   \param ggems_manager - pointer on the singleton
   \brief Initialize GGEMS simulation
 */

@@ -29,10 +29,10 @@ typedef struct __attribute__((aligned (1))) GGfloat33_t
 typedef struct PACKED GGfloat33_t
 #endif
 {
-  GGfloat m00_, m01_, m02_;
-  GGfloat m10_, m11_, m12_;
-  GGfloat m20_, m21_, m22_;
-} GGfloat33;
+  GGfloat m00_ /*!< Value 00 of matrix */, m01_ /*!< Value 01 of matrix */, m02_ /*!< Value 02 of matrix */;
+  GGfloat m10_ /*!< Value 10 of matrix */, m11_ /*!< Value 11 of matrix */, m12_ /*!< Value 12 of matrix */;
+  GGfloat m20_ /*!< Value 20 of matrix */, m21_ /*!< Value 21 of matrix */, m22_ /*!< Value 22 of matrix */;
+} GGfloat33; /*!< Using C convention name of struct to C++ (_t deletion) */
 #ifndef OPENCL_COMPILER
 #ifdef _MSC_VER
 #pragma pack(pop)
@@ -52,11 +52,11 @@ typedef struct __attribute__((aligned (1))) GGfloat44_t
 typedef struct PACKED GGfloat44_t
 #endif
 {
-  GGfloat m00_, m01_, m02_, m03_;
-  GGfloat m10_, m11_, m12_, m13_;
-  GGfloat m20_, m21_, m22_, m23_;
-  GGfloat m30_, m31_, m32_, m33_;
-} GGfloat44;
+  GGfloat m00_ /*!< Value 00 of matrix */, m01_ /*!< Value 01 of matrix */, m02_ /*!< Value 02 of matrix */, m03_ /*!< Value 03 of matrix */;
+  GGfloat m10_ /*!< Value 10 of matrix */, m11_ /*!< Value 11 of matrix */, m12_ /*!< Value 12 of matrix */, m13_ /*!< Value 13 of matrix */;
+  GGfloat m20_ /*!< Value 20 of matrix */, m21_ /*!< Value 21 of matrix */, m22_ /*!< Value 22 of matrix */, m23_ /*!< Value 23 of matrix */;
+  GGfloat m30_ /*!< Value 30 of matrix */, m31_ /*!< Value 31 of matrix */, m32_ /*!< Value 32 of matrix */, m33_ /*!< Value 33 of matrix */;
+} GGfloat44; /*!< Using C convention name of struct to C++ (_t deletion) */
 #ifndef OPENCL_COMPILER
 #ifdef _MSC_VER
 #pragma pack(pop)
@@ -74,7 +74,8 @@ typedef struct PACKED GGfloat44_t
   \param m20 - Element 2,0 in the matrix 3x3 for local axis
   \param m21 - Element 2,1 in the matrix 3x3 for local axis
   \param m22 - Element 2,2 in the matrix 3x3 for local axis
-  \brief Make a float3x3 with custom values
+  \return a 3x3 float matrix
+  \brief Make a GGfloat33 with custom values
 */
 inline GGfloat33 MakeFloat33(GGfloat const m00, GGfloat const m01, GGfloat const m02, GGfloat const m10, GGfloat const m11, GGfloat const m12, GGfloat const m20, GGfloat const m21, GGfloat const m22)
 {
@@ -86,8 +87,9 @@ inline GGfloat33 MakeFloat33(GGfloat const m00, GGfloat const m01, GGfloat const
 }
 
 /*!
-  \fn inline float3x3 MakeFloat33Zeros()
-  \brief Make a float3x3 with zeros for value
+  \fn inline GGfloat33 MakeFloat33Zeros()
+  \return a 3x3 float matrix of 0
+  \brief Make a GGfloat33 with zeros for value
 */
 inline GGfloat33 MakeFloat33Zeros()
 {
@@ -99,7 +101,7 @@ inline GGfloat33 MakeFloat33Zeros()
 }
 
 /*!
-  \fn inline float4x4 MakeFloat44(float const m00, float const m01, float const m02, float const m03, float const m10, float const m11, float const m12, float const m13, float const m20, float const m21, float const m22, float const m23, float const m30, float const m31, float const m32, float const m33)
+  \fn inline GGfloat44 MakeFloat44(GGfloat const m00, GGfloat const m01, GGfloat const m02, GGfloat const m03, GGfloat const m10, GGfloat const m11, GGfloat const m12, GGfloat const m13, GGfloat const m20, GGfloat const m21, GGfloat const m22, GGfloat const m23, GGfloat const m30, GGfloat const m31, GGfloat const m32, GGfloat const m33)
   \param m00 - Element 0,0 in the matrix 4x4 for local axis
   \param m01 - Element 0,1 in the matrix 4x4 for local axis
   \param m02 - Element 0,2 in the matrix 4x4 for local axis
@@ -116,6 +118,7 @@ inline GGfloat33 MakeFloat33Zeros()
   \param m31 - Element 3,1 in the matrix 4x4 for local axis
   \param m32 - Element 3,2 in the matrix 4x4 for local axis
   \param m33 - Element 3,3 in the matrix 4x4 for local axis
+  \return a 4x4 float matrix
   \brief Make a GGfloat44 with custom values
 */
 inline GGfloat44 MakeFloat44(GGfloat const m00, GGfloat const m01, GGfloat const m02, GGfloat const m03, GGfloat const m10, GGfloat const m11, GGfloat const m12, GGfloat const m13, GGfloat const m20, GGfloat const m21, GGfloat const m22, GGfloat const m23, GGfloat const m30, GGfloat const m31, GGfloat const m32, GGfloat const m33)
@@ -130,6 +133,7 @@ inline GGfloat44 MakeFloat44(GGfloat const m00, GGfloat const m01, GGfloat const
 
 /*!
   \fn inline GGfloat44 MakeFloat44Zeros()
+  \return a 4x4 float matrix
   \brief Make a GGfloat44 with zeros for value
 */
 inline GGfloat44 MakeFloat44Zeros()

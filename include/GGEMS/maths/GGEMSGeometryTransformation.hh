@@ -50,7 +50,7 @@ class GGEMS_EXPORT GGEMSGeometryTransformation
     GGEMSGeometryTransformation& operator=(GGEMSGeometryTransformation const& geometry_transformation) = delete;
 
     /*!
-      \fn TransfGeometryTransformationormCalculator(GGEMSGeometryTransformation const&& geometry_transformation) = delete
+      \fn GGEMSGeometryTransformation(GGEMSGeometryTransformation const&& geometry_transformation) = delete
       \param geometry_transformation - rvalue reference on the geometry transformation
       \brief Avoid copy of the class by rvalue reference
     */
@@ -99,7 +99,7 @@ class GGEMS_EXPORT GGEMSGeometryTransformation
     /*!
       \fn void SetRotation(GGfloat3 const& rxyz)
       \param rxyz - Rotation around X, Y and Z global axis
-      \biref Set the rotation around global axis
+      \brief Set the rotation around global axis
     */
     void SetRotation(GGfloat3 const& rxyz);
 
@@ -111,7 +111,7 @@ class GGEMS_EXPORT GGEMSGeometryTransformation
     inline GGfloat44 GetMatrixRotation(void) const {return matrix_rotation_;};
 
     /*!
-      \fn void SetAxisTransformation(float3x3 const& axis)
+      \fn void SetAxisTransformation(GGfloat33 const& axis)
       \param axis - Matrix (3x3) that contains the mapping of the coordinates (ex. x becomes y and vice-versa). Values are 0, 1 or -1.
       \brief Set the transformation of the frame, usefull for mirroring or convert 3D to 2D
     */
@@ -185,8 +185,8 @@ class GGEMS_EXPORT GGEMSGeometryTransformation
 
   private:
     GGbool is_need_updated_; /*!< Check if the transformation matrix need to be updated */
-    GGfloat3 position_; /*!< Position of the source/detector... */
-    GGfloat3 rotation_; /*! Rotation of the source/detector... */
+    GGfloat3 position_; /*!< Position of the source/detector */
+    GGfloat3 rotation_; /*!< Rotation of the source/detector */
     GGfloat33 local_axis_; /*!< Matrix of local axis */
     GGfloat44 matrix_translation_; /*!< Matrix of translation */
     GGfloat44 matrix_rotation_; /*!< Matrix of rotation */

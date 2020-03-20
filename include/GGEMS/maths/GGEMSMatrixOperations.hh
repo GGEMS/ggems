@@ -19,6 +19,7 @@
   \fn inline GGfloat3 RotateUnitZ(GGfloat3 vector, GGfloat3 const new_uz)
   \param vector - vector to change
   \param new_uz - new direction
+  \return a vector of 3x1 float
   \brief rotateUz, function from CLHEP
 */
 inline GGfloat3 RotateUnitZ(GGfloat3 vector, GGfloat3 const new_uz)
@@ -84,7 +85,7 @@ inline GGfloat3 GGfloat3UnitVector(GGfloat3 const u)
 }
 
 /*!
-  \fn inline GGfloat3 f323x1_sub(GGfloat3 const u, GGfloat3 const v)
+  \fn inline GGfloat3 GGfloat3Sub(GGfloat3 const u, GGfloat3 const v)
   \param u - 3D vector
   \param v - 3D vector
   \return the 3D vector u - v
@@ -103,7 +104,7 @@ inline GGfloat3 GGfloat3Sub(GGfloat3 const u, GGfloat3 const v)
 }
 
 /*!
-  \fn inline GGfloat3 GGfloat44MultGGfloat3(GGfloat44 const matrix, GGfloat3 const point)
+  \fn inline GGfloat3 GGfloat44MultGGfloat3(GGfloat44 const* matrix, GGfloat3 const point)
   \param matrix - A matrix (4x4)
   \param point - Point in 3D (x, y, z)
   \return a vector 3x1
@@ -133,7 +134,7 @@ inline GGfloat3 GGfloat44MultGGfloat3(GGfloat44 const* matrix, GGfloat3 const po
 }
 
 /*!
- \fn inline GGfloat3 local_to_global_position(float4x4 const* matrix, GGfloat3 const point)
+ \fn inline GGfloat3 LocalToGlobalPosition(GGfloat44 const* matrix, GGfloat3 const point)
  \param matrix - A matrix (4x4)
  \param point - Point in 3D (x, y, z)
  \return The point expresses in the global frame
@@ -149,7 +150,7 @@ inline GGfloat3 LocalToGlobalPosition(GGfloat44 const* matrix, GGfloat3 const po
 }
 
 /*!
-  \fn inline float4x4 MatrixMult4x4_4x4(GGfloat44 const A, GGfloat44 const B)
+  \fn inline GGfloat44 GGfloat44MultGGfloat44(GGfloat44 const A, GGfloat44 const B)
   \param A - first matrix
   \param B - second matrix
   \brief Perform the matrix (4x4) multiplication

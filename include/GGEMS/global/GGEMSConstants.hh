@@ -166,10 +166,10 @@ namespace GGEMSMathematicalConstant
 #endif
 
   // PI variables
-  __constant GGfloat PI         = 3.141592653589793f;
-  __constant GGfloat TWO_PI     = 6.283185307179586f;
-  __constant GGfloat HALF_PI    = 1.570796326794896f;
-  __constant GGfloat PI_SQUARED = 9.869604401089358f;
+  __constant GGfloat PI         = 3.141592653589793f; /*!< Pi */
+  __constant GGfloat TWO_PI     = 6.283185307179586f; /*!< Pi * 2 */
+  __constant GGfloat HALF_PI    = 1.570796326794896f; /*!< Pi / 2 */
+  __constant GGfloat PI_SQUARED = 9.869604401089358f; /*!< Pi * Pi */
 
 #ifndef OPENCL_COMPILER
 }
@@ -183,106 +183,93 @@ namespace GGEMSMathematicalConstant
 namespace GGEMSPhysicalConstant
 {
 #endif
-
-  // Number of Avogadro
   __constant GGfloat AVOGADRO = 6.02214179e+23f/
   #ifndef OPENCL_COMPILER
-  GGEMSUnits::mol;
+  GGEMSUnits::mol; /*!< Number of Avogadro */
   #else
   1.0f;
   #endif
 
-  // Limit of density between gas and solid
   __constant GGfloat GASTHRESHOLD = 10.f*
   #ifndef OPENCL_COMPILER
-  GGEMSUnits::mg/GGEMSUnits::cm3;
+  GGEMSUnits::mg/GGEMSUnits::cm3; /*!< Limit between gas and other state in density */
   #else
   6.241510246e+15f;
   #endif
 
-  // Speed of light
   __constant GGfloat C_LIGHT = 2.99792458e+8f*
   #ifndef OPENCL_COMPILER
-  GGEMSUnits::m/GGEMSUnits::s;
+  GGEMSUnits::m/GGEMSUnits::s; /*!< Speed of light */
   #else
   1.e-6f;
   #endif
-  __constant GGfloat C_LIGHT_SQUARED = 89875.5178736817f;
+  __constant GGfloat C_LIGHT_SQUARED = 89875.5178736817f; /*!< squared speed of ligth in mm.ns-1 */
 
-  // Charge of electron
   __constant GGfloat ELECTRON_CHARGE = 1.0f*
   #ifndef OPENCL_COMPILER
-  -GGEMSUnits::eplus;
+  -GGEMSUnits::eplus; /*!< Charge of the electron */
   #else
   -1.0f;
   #endif
-  __constant GGfloat ELECTRON_CHARGE_SQUARED = 1.0f;
+  __constant GGfloat ELECTRON_CHARGE_SQUARED = 1.0f; /*!< Squared charge of electron */
 
-  // electron mass
   __constant GGfloat ELECTRON_MASS_C2 = 0.510998910f*
   #ifndef OPENCL_COMPILER
-  GGEMSUnits::MeV;
+  GGEMSUnits::MeV; /*!< Mass of the electron in MeV */
   #else
   1.0f;
   #endif
 
-  // proton mass
   __constant GGfloat PROTON_MASS_C2 = 938.272013f*
   #ifndef OPENCL_COMPILER
-  GGEMSUnits::MeV;
+  GGEMSUnits::MeV; /*!< Mass of the proton in MeV */
   #else
   1.0f;
   #endif
 
-  // neutron mass
   __constant GGfloat NEUTRON_MASS_C2 = 939.56536f*
   #ifndef OPENCL_COMPILER
-  GGEMSUnits::MeV;
+  GGEMSUnits::MeV; /*!< Mass of the neutron in MeV */
   #else
   1.0f;
   #endif
 
-  // // Atomic mass unitamu    - atomic mass unit
   __constant GGfloat ATOMIC_MASS_UNIT_C2 = 931.494028f*
   #ifndef OPENCL_COMPILER
-  GGEMSUnits::MeV;
+  GGEMSUnits::MeV; /*!< Unified atomic mass unit in Mev */
   #else
   1.0f;
   #endif
+  __constant GGfloat ATOMIC_MASS_UNIT = 0.01036426891f; /*!<Atomic mass unit c2 / c2 in MeV/(mm.ns-1)*/
 
-  __constant GGfloat ATOMIC_MASS_UNIT = 0.01036426891f;
-
-  // permeability of free space mu0    = 2.01334e-16 Mev*(ns*eplus)^2/mm
-  // permittivity of free space epsil0 = 5.52636e+10 eplus^2/(MeV*mm)
   __constant GGfloat MU0      = 4.0f*3.141592653589793f*1.e-7f*
   #ifndef OPENCL_COMPILER
-  GGEMSUnits::H / GGEMSUnits::m;
+  GGEMSUnits::H / GGEMSUnits::m; /*!< permeability of free space in MeV.(ns.eplus)^2.mm-1 */
   #else
   1.602176383e-10f;
   #endif
-  __constant GGfloat EPSILON0 = 5.526349824e+10f;
+  __constant GGfloat EPSILON0 = 5.526349824e+10f; /*!< permittivity of free space in eplus^2/(Mev.mm) */
 
-  // h     = 4.13566e-12 MeV*ns
   // hbar  = 6.58212e-13 MeV*ns
   // hbarc = 197.32705e-12 MeV*mm
   __constant GGfloat H_PLANCK = 6.62606896e-34f*
   #ifndef OPENCL_COMPILER
-  GGEMSUnits::J * GGEMSUnits::s;
+  GGEMSUnits::J * GGEMSUnits::s; /*!< Planck constant in Mev.ns */
   #else
   6.241509704e+12f;
   #endif
 
-  __constant GGfloat HBAR_PLANCK   = 6.582118206e-13f;
-  __constant GGfloat HBARC         = 1.973269187e-10f;
-  __constant GGfloat HBARC_SQUARED = 1.973269187e-20F;
+  __constant GGfloat HBAR_PLANCK   = 6.582118206e-13f; /*!< h_planck / (2*PI) */
+  __constant GGfloat HBARC         = 1.973269187e-10f; /*!< speed of light * h_planck / (2*PI) */
+  __constant GGfloat HBARC_SQUARED = 3.89351824e-20F; /*!< hbar * hbar */
 
   // electromagnetic coupling = 1.43996e-12 MeV*mm/(eplus^2)
-  __constant GGfloat ELM_COUPLING            = 1.439964467e-12f;
-  __constant GGfloat FINE_STRUCTURE_CONST    = 0.007297354285f;
-  __constant GGfloat CLASSIC_ELECTRON_RADIUS = 2.817940326e-12f;
-  __constant GGfloat ELECTRON_COMPTON_LENGTH = 3.86159188e-10f;
-  __constant GGfloat BOHR_RADIUS             = 5.291769867e-08f;
-  __constant GGfloat ALPHA_RCL2              = 5.794673922e-26f;
+  __constant GGfloat ELM_COUPLING            = 1.439964467e-12f; /*!< Electromagnetic coupling in MeV.mm/(eplus^2), ELECTRON_CHARGE^2/(4*PI*EPSILON0) */
+  __constant GGfloat FINE_STRUCTURE_CONST    = 0.007297354285f; /*!< Structure fine constant, ELM_COUPLING/HBARC*/
+  __constant GGfloat CLASSIC_ELECTRON_RADIUS = 2.817940326e-12f; /*!< Classical radius of electron in mm, ELM_COUPLING/ELECTRON_MASS_C2 */
+  __constant GGfloat ELECTRON_COMPTON_LENGTH = 3.86159188e-10f; /*!< Length of electron Compton in mm, HBARC/ELECTRON_MASS_C2 */
+  __constant GGfloat BOHR_RADIUS             = 5.291769867e-08f; /*!< Radius of Bohr in mm, ELECTRON_COMPTON_LENGTH/FINE_STRUCTURE_CONST */
+  __constant GGfloat ALPHA_RCL2              = 5.794673922e-26f; /*!< Constant FINE_STRUCTURE_CONST * CLASSIC_ELECTRON_RADIUS^2 */
 
 #ifndef OPENCL_COMPILER
 }

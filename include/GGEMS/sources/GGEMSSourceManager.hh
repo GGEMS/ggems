@@ -118,6 +118,7 @@ class GGEMS_EXPORT GGEMSSourceManager
     /*!
       \fn inline GGulong GetNumberOfParticlesInBatch(std::size_t const& source_index, std::size_t const& batch_index)
       \param source_index - index of the source
+      \param batch_index - index of the source
       \return the number of particle for a specific batch
       \brief method returning the number of particles in a specific batch
     */
@@ -155,6 +156,7 @@ class GGEMS_EXPORT GGEMSSourceManager
 
 /*!
   \fn GGEMSSourceManager* get_instance_ggems_source_manager(void)
+  \return the pointer on the singleton
   \brief Get the GGEMSSourceManager pointer for python user.
 */
 extern "C" GGEMS_EXPORT GGEMSSourceManager* get_instance_ggems_source_manager(void);

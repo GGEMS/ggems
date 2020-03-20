@@ -2,7 +2,7 @@
 #define GUARD_GGEMS_RANDOMS_GGEMSRANDOMSTACK_HH
 
 /*!
-  \file random.hh
+  \file GGEMSRandomStack.hh
 
   \brief Structure storing the random buffers for both OpenCL and GGEMS
 
@@ -17,7 +17,7 @@
 #include "GGEMS/tools/GGEMSTypes.hh"
 
 /*!
-  \struct Random_t
+  \struct GGEMSRandom_t
   \brief Structure storing informations about random
 */
 #ifdef OPENCL_COMPILER
@@ -34,7 +34,7 @@ typedef struct PACKED GGEMSRandom_t
   GGuint prng_state_3_[MAXIMUM_PARTICLES]; /*!< State 3 of the prng */
   GGuint prng_state_4_[MAXIMUM_PARTICLES]; /*!< State 4 of the prng */
   GGuint prng_state_5_[MAXIMUM_PARTICLES]; /*!< State 5 of the prng */
-} GGEMSRandom;
+} GGEMSRandom; /*!< Using C convention name of struct to C++ (_t deletion) */
 #ifndef OPENCL_COMPILER
 #ifdef _MSC_VER
 #pragma pack(pop)

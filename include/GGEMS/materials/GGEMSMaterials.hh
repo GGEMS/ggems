@@ -99,14 +99,6 @@ class GGEMS_EXPORT GGEMSMaterials
     */
     void BuildMaterialTables(void);
 
-    /*
-      \fn GGfloat GetRadiationLength(std::string const& material) const
-      \param material - name of the material
-      \return the radiation length of a material
-      \brief get the radiation length of a material
-    */
-    GGfloat GetRadiationLength(std::string const& material) const;
-
   private:
     std::set<std::string> materials_; /*!< Defined material for a phantom */
     std::shared_ptr<cl::Buffer> material_tables_; /*!< Material tables on OpenCL device */

@@ -93,6 +93,7 @@ class GGEMS_EXPORT GGEMSOpenCLManager
 
     /*!
       \fn GGbool IsReady(void) const
+      \return true if OpenCL manager is ready, otherwize false
       \brief Checking if the OpenCL manager is ready, it means if a context is set
     */
     inline GGbool IsReady(void) const
@@ -166,24 +167,28 @@ class GGEMS_EXPORT GGEMSOpenCLManager
 
     /*!
       \fn GGulong GetMaxRAMMemoryOnActivatedDevice(void) const
+      \return Max RAM memory on a device
       \brief Get the maximum RAM memory on activated OpenCL device
     */
     inline GGulong GetMaxRAMMemoryOnActivatedDevice(void) const {return device_global_mem_size_[context_index_];}
 
     /*!
       \fn cl::Context* GetContext(void) const
+      \return the pointer on activated context
       \brief return the activated context
     */
     inline cl::Context* GetContext(void) const {return context_act_.get();}
 
     /*!
       \fn cl::CommandQueue* GetCommandQueue(void) const
+      \return the pointer on activated command queue
       \brief Return the command queue to activated context
     */
     inline cl::CommandQueue* GetCommandQueue(void) const {return queue_act_.get();}
 
     /*!
       \fn cl::Event* GetEvent(void) const
+      \return the pointer on activated event
       \brief return an event to activated context
     */
     inline cl::Event* GetEvent(void) const {return event_act_.get();}
@@ -193,7 +198,7 @@ class GGEMS_EXPORT GGEMSOpenCLManager
       \param kernel_filename - filename where is declared the kernel
       \param kernel_name - name of the kernel
       \param custom_options - new compilation option for the kernel
-      \param additionnal_options - additionnal compilation option
+      \param additional_options - additionnal compilation option
       \brief Compile the OpenCL kernel on the activated context
       \return the pointer on the OpenCL kernel
     */
@@ -209,31 +214,28 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     */
     std::unique_ptr<cl::Buffer> Allocate(void* host_ptr, std::size_t size, cl_mem_flags flags);
 
-    /*
-      \fn T* GetDeviceBuffer(std::shared_ptr<cl::Buffer> device_ptr, std::size_t const size) const
-      \tparam T - type of the returned pointer on host memory
-      \param p_device_ptr - pointer on device memory
-      \param size - size of region to map
-      \brief Get the device pointer on host to write on it. ReleaseDeviceBuffer must be used after this method!!!
+    /*!
       \return the pointer on host memory on write/read mode
+      \brief Get the device pointer on host to write on it. ReleaseDeviceBuffer must be used after this method!!!
+      \param device_ptr - pointer on device memory
+      \param size - size of region to map
+      \tparam T - type of the returned pointer on host memory
     */
     template <typename T>
-    T* GetDeviceBuffer(std::shared_ptr<cl::Buffer> const device_ptr, std::size_t const size) const;
+    T* GetDeviceBuffer(std::shared_ptr<cl::Buffer> device_ptr, std::size_t const size) const;
 
-    /*
-      \fn void ReleaseDeviceBuffer(std::shared_ptr<cl::Buffer> const p_device_ptr, T* p_host_ptr) const
+    /*!
+      \brief Get the device pointer on host to write on it. Mandatory after a GetDeviceBufferWrite ou GetDeviceBufferRead!!!
+      \param device_ptr - pointer on device memory
+      \param host_ptr - pointer on host memory mapped on device memory
       \tparam T - type of host memory pointer to release
-      \param p_device_ptr - pointer on device memory
-      \param p_host_ptr - pointer on host memory mapped on device memory
-      \brief Get the device pointer on host to write on it. Mandatory after a
-      GetDeviceBufferWrite ou GetDeviceBufferRead!!!
-      \return the pointer on host memory on write mode
     */
     template <typename T>
     void ReleaseDeviceBuffer(std::shared_ptr<cl::Buffer> const device_ptr, T* host_ptr) const;
 
     /*!
       \fn void DisplayElapsedTimeInKernel(std::string const& kernel_name) const
+      \param kernel_name - name of the kernel for time displaying
       \brief Compute and display elapsed time in kernel for an activated context
     */
     void DisplayElapsedTimeInKernel(std::string const& kernel_name) const;
@@ -282,6 +284,7 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     /*!
       \fn std::string ErrorType(GGint const& error) const
       \param error - error index from OpenCL library
+      \return the message error
       \brief get the error description
     */
     std::string ErrorType(GGint const& error) const;
@@ -368,6 +371,7 @@ void GGEMSOpenCLManager::ReleaseDeviceBuffer(std::shared_ptr<cl::Buffer> const d
 
 /*!
   \fn GGEMSOpenCLManager* get_instance_ggems_opencl_manager(void)
+  \return the pointer on the singleton
   \brief Get the GGEMSOpenCLManager pointer for python user.
 */
 extern "C" GGEMS_EXPORT GGEMSOpenCLManager* get_instance_ggems_opencl_manager(void);
@@ -387,7 +391,7 @@ extern "C" GGEMS_EXPORT void print_infos_opencl_manager(GGEMSOpenCLManager* open
 extern "C" GGEMS_EXPORT void print_RAM_ggems_opencl_manager(GGEMSOpenCLManager* opencl_manager);
 
 /*!
-  \fn void set_context_index_ggems_opencl_manager(GGEMSOpenCLManager* opencl_manager, uint32_t const context_id)
+  \fn void set_context_index_ggems_opencl_manager(GGEMSOpenCLManager* opencl_manager, GGuint const context_id)
   \param opencl_manager - pointer on the singleton
   \param context_id - index of the context
   \brief Set the context index to activate
@@ -396,6 +400,7 @@ extern "C" GGEMS_EXPORT void set_context_index_ggems_opencl_manager(GGEMSOpenCLM
 
 /*!
   \fn void clean_opencl_manager(GGEMSOpenCLManager* opencl_manager)
+  \param opencl_manager - pointer on the singleton
   \brief Clean OpenCL manager safely with python
 */
 extern "C" GGEMS_EXPORT void clean_opencl_manager(GGEMSOpenCLManager* opencl_manager);

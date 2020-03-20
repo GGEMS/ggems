@@ -18,8 +18,8 @@
 
 #include "GGEMS/global/GGEMSExport.hh"
 
-typedef std::chrono::time_point<std::chrono::system_clock> ChronoTime;
-typedef std::chrono::duration<int64_t,std::nano> DurationNano;
+typedef std::chrono::time_point<std::chrono::system_clock> ChronoTime; /*!< Alias to C++ chrono time */
+typedef std::chrono::duration<int64_t,std::nano> DurationNano; /*!< Alias to duration in nanosecond */
 
 #if __MINGW64__ || __clang__ || (_MSC_VER > 1800) || __GNUC__
 typedef std::chrono::milliseconds Ms;
@@ -35,11 +35,10 @@ typedef std::chrono::hours Hs;
 namespace GGEMSChrono
 {
   /*!
-    \fn void DisplayTime( DurationNano const& duration, std::string const& displayedText )
+    \fn void DisplayTime(DurationNano const& duration, std::string const& displayed_text)
     \param duration - Duration of code/method in nanoseconds
-    \param displayedText - Text into the screen/file
+    \param displayed_text - Text into the screen/file
     \brief Print the execution time
-    \return no value is returned
   */
   void GGEMS_EXPORT DisplayTime(DurationNano const& duration, std::string const& displayed_text);
 
@@ -51,6 +50,7 @@ namespace GGEMSChrono
 
   /*!
     \fn inline DurationNano Zero(void)
+    \return DurationNano initialized to 0 nanoseconds
     \brief Initialization at zero nanosecond
   */
   inline DurationNano Zero(void) {return std::chrono::duration<int64_t,std::nano>::zero();}

@@ -23,7 +23,7 @@
 #include "GGEMS/global/GGEMSExport.hh"
 #include "GGEMS/tools/GGEMSTypes.hh"
 
-typedef std::unordered_map<std::string, GGfloat> EnergyCutUMap;
+typedef std::unordered_map<std::string, GGfloat> EnergyCutUMap; /*!< Unordered map of material and energy cut */
 
 /*!
   \class GGEMSRangeCuts

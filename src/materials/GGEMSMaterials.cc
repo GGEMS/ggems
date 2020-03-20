@@ -109,50 +109,6 @@ void GGEMSMaterials::PrintInfos(void) const
 
   // Release the pointer, mandatory step!!!
   opencl_manager_.ReleaseDeviceBuffer(material_tables_, material_table);
-
-/*
-
-    ui32 mat_id = 0; while ( mat_id < h_materials->nb_materials )
-    {
-        ui32 index = h_materials->index[ mat_id ];
-
-        printf("[GGEMS]       Nb atoms per vol: %e\n",  h_materials->nb_atoms_per_vol[ mat_id ]);
-        printf("[GGEMS]       Nb electrons per vol: %e\n", h_materials->nb_electrons_per_vol[ mat_id ]);
-        printf("[GGEMS]       Electron mean exitation energy: %e\n", h_materials->electron_mean_excitation_energy[ mat_id ]);
-        printf("[GGEMS]       Rad length: %e\n", h_materials->rad_length[ mat_id ]);
-        printf("[GGEMS]       Density: %e\n", h_materials->density[ mat_id ]);
-        printf("[GGEMS]       Photon energy cut: %e\n", h_materials->photon_energy_cut[ mat_id ]);
-        printf("[GGEMS]       Electon energy cut: %e\n", h_materials->electron_energy_cut[ mat_id ]);
-
-        printf("[GGEMS]       Density correction:\n");
-        printf("[GGEMS]          fX0: %e\n", h_materials->fX0[ mat_id ]);
-        printf("[GGEMS]          fX1: %e\n", h_materials->fX1[ mat_id ]);
-        printf("[GGEMS]          fD0: %e\n", h_materials->fD0[ mat_id ]);
-        printf("[GGEMS]          fC: %e\n", h_materials->fC[ mat_id ]);
-        printf("[GGEMS]          fA: %e\n", h_materials->fA[ mat_id ]);
-        printf("[GGEMS]          fM: %e\n", h_materials->fM[ mat_id ]);
-
-        printf("[GGEMS]       Energy loss fluctuation:\n");
-        printf("[GGEMS]          fF1: %e\n", h_materials->fF1[ mat_id ]);
-        printf("[GGEMS]          fF2: %e\n", h_materials->fF2[ mat_id ]);
-        printf("[GGEMS]          fEnergy0: %e\n", h_materials->fEnergy0[ mat_id ]);
-        printf("[GGEMS]          fEnergy1: %e\n", h_materials->fEnergy1[ mat_id ]);
-        printf("[GGEMS]          fEnergy2: %e\n", h_materials->fEnergy2[ mat_id ]);
-        printf("[GGEMS]          fLogEnergy1: %e\n", h_materials->fLogEnergy1[ mat_id ]);
-        printf("[GGEMS]          fLogEnergy2: %e\n", h_materials->fLogEnergy2[ mat_id ]);
-        printf("[GGEMS]          fLogMeanExcitationEnergy: %e\n", h_materials->fLogMeanExcitationEnergy[ mat_id ]);
-
-        printf("[GGEMS]       Mixture:\n");
-
-        ui32 elt_id = 0; while ( elt_id < h_materials->nb_elements[ mat_id ] )
-        {
-            printf("[GGEMS]          Z: %i   Atom Num Dens: %e\n", h_materials->mixture[ index+elt_id ], h_materials->atom_num_dens[ index+elt_id ]);
-            ++elt_id;
-        }
-
-        ++mat_id;
-    }
-  */
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -199,7 +155,7 @@ void GGEMSMaterials::BuildMaterialTables(void)
       material_table->mass_fraction_[j+index_to_chemical_element] = kSingleMaterial.mixture_f_[j];
 
       // Atomic number density
-      material_table->atomic_number_density_[j+index_to_chemical_element] = static_cast<GGfloat>(static_cast<GGdouble>(GGEMSPhysicalConstant::AVOGADRO) / kChemicalElement.molar_mass_M_ * kSingleMaterial.density_ * kSingleMaterial.mixture_f_[j]);
+      material_table->atomic_number_density_[j+index_to_chemical_element] = material_manager_.GetAtomicNumberDensity(*iter_material, j);
 
       // Increment density of atoms and electrons
       material_table->number_of_atoms_by_volume_[i] += material_table->atomic_number_density_[j+index_to_chemical_element];
@@ -227,7 +183,7 @@ void GGEMSMaterials::BuildMaterialTables(void)
     material_table->log_energy2_fluct_[i] = ionization_params.GetLogEnergy2Fluct();
 
     // others stuffs
-    material_table->radiation_length_[i] = GetRadiationLength(*iter_material);
+    material_table->radiation_length_[i] = material_manager_.GetRadiationLength(*iter_material);
 
     // Computing the access to chemical element by material
     material_table->index_of_chemical_elements_[i] = index_to_chemical_element;
@@ -381,63 +337,6 @@ void GGEMSMaterials::BuildMaterialTables(void)
     }
 
     */
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-GGfloat GGEMSMaterials::GetRadiationLength(std::string const& material) const
-{
-  GGfloat inverse_radiation = 0.0f;
-  GGfloat tsai_radiation = 0.0f;
-  GGfloat zeff = 0.0f;
-  GGfloat coulomb = 0.0f;
-
-  static constexpr GGfloat l_rad_light[]  = {5.310f , 4.790f , 4.740f, 4.710f};
-  static constexpr GGfloat lp_rad_light[] = {6.144f , 5.621f , 5.805f, 5.924f};
-  static constexpr GGfloat k1 = 0.00830f;
-  static constexpr GGfloat k2 = 0.20206f;
-  static constexpr GGfloat k3 = 0.00200f;
-  static constexpr GGfloat k4 = 0.03690f;
-
-  // Getting the material infos from database
-  GGEMSSingleMaterial const& kSingleMaterial = material_manager_.GetMaterial(material);
-
-  // Loop over the chemical elements by material
-  for (GGuchar i = 0; i < kSingleMaterial.nb_elements_; ++i) {
-    // Getting the chemical element
-    GGEMSChemicalElement const& kChemicalElement = material_manager_.GetChemicalElement(kSingleMaterial.chemical_element_name_[i]);
-
-    // Z effective
-    zeff = static_cast<GGfloat>(kChemicalElement.atomic_number_Z_);
-
-    //  Compute Coulomb correction factor (Phys Rev. D50 3-1 (1994) page 1254)
-    GGfloat az2 = (GGEMSPhysicalConstant::FINE_STRUCTURE_CONST*zeff)*(GGEMSPhysicalConstant::FINE_STRUCTURE_CONST*zeff);
-    GGfloat az4 = az2 * az2;
-    coulomb = ( k1*az4 + k2 + 1.0f/ (1.0f+az2) ) * az2 - ( k3*az4 + k4 ) * az4;
-
-    //  Compute Tsai's Expression for the Radiation Length
-    //  (Phys Rev. D50 3-1 (1994) page 1254)
-    GGfloat const logZ3 = std::log(zeff) / 3.0f;
-
-    GGfloat l_rad = 0.0f;
-    GGfloat lp_rad = 0.0f;
-    GGint iz = static_cast<GGint>(( zeff + 0.5f ) - 1);
-    if (iz <= 3){
-      l_rad = l_rad_light[iz];
-      lp_rad = lp_rad_light[iz];
-    }
-    else {
-      l_rad = std::log(184.15f) - logZ3;
-      lp_rad = std::log(1194.0f) - 2.0f*logZ3;
-    }
-
-    tsai_radiation = 4.0f * GGEMSPhysicalConstant::ALPHA_RCL2 * zeff * ( zeff * ( l_rad - coulomb ) + lp_rad );
-    inverse_radiation += static_cast<GGfloat>(static_cast<GGdouble>(GGEMSPhysicalConstant::AVOGADRO) / kChemicalElement.molar_mass_M_ * kSingleMaterial.density_ * kSingleMaterial.mixture_f_[i] * tsai_radiation);
-  }
-
-  return (inverse_radiation <= 0.0f ? std::numeric_limits<GGfloat>::max() : 1.0f / inverse_radiation);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
