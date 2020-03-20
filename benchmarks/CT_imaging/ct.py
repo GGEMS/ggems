@@ -2,7 +2,7 @@ from ggems import *
 
 # ------------------------------------------------------------------------------
 # STEP 1: Choosing an OpenCL context
-opencl_manager.set_context_index(0)
+opencl_manager.set_context_index(2)
 
 # ------------------------------------------------------------------------------
 # STEP 2: Visualization
@@ -61,17 +61,22 @@ phantom_4.set_offset(0.0, 25.0, 50.0, b"mm")
 # processes_manager.add_process(b"Rayleigh", b"gamma", b"phantom_3")
 # processes_manager.add_process(b"Rayleigh", b"gamma", b"phantom_4")
 
+# Optional options, the following are by default
 processes_manager.set_cross_section_table_number_of_bins(220)
 processes_manager.set_cross_section_table_energy_min(0.99, b"keV")
 processes_manager.set_cross_section_table_energy_max(250.0, b"MeV")
 
 # ------------------------------------------------------------------------------
-# STEP 6: Cuts
-# By default cuts are 1 um
+# STEP 6: Cuts, by default but are 1 um
 # Apply a cut of 1 mm for each particle and each phantom
-range_cuts_manager.set_cut(b"gamma", 1.0, b"mm")
-# For a specific phatom
-range_cuts_manager.set_cut(b"gamma", 5.0, b"mm", b"phantom_1")
+#range_cuts_manager.set_cut(b"gamma", 1.0, b"mm")
+# Or
+#range_cuts_manager.set_cut(b"gamma", 1.0, b"mm", b"all")
+# Or
+range_cuts_manager.set_cut(b"gamma", 1.0, b"mm", b"phantom_1")
+range_cuts_manager.set_cut(b"gamma", 1.0, b"cm", b"phantom_2")
+range_cuts_manager.set_cut(b"gamma", 1.0, b"um", b"phantom_3")
+range_cuts_manager.set_cut(b"gamma", 0.1, b"m", b"phantom_4")
 
 # ------------------------------------------------------------------------------
 # STEP 7: Sources

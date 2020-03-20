@@ -45,10 +45,10 @@ typedef struct PACKED GGEMSPrimaryParticles_t
   GGfloat next_interaction_distance_[MAXIMUM_PARTICLES]; /*!< Distance to the next interaction */
   GGuchar next_discrete_process_[MAXIMUM_PARTICLES]; /*!< Next process */
 
-  GGuchar status_[MAXIMUM_PARTICLES]; /*!< */
-  GGuchar level_[MAXIMUM_PARTICLES]; /*!< */
+  GGuchar status_[MAXIMUM_PARTICLES]; /*!< Status of the particle */
+  GGuchar level_[MAXIMUM_PARTICLES]; /*!< Level of the particle */
   GGuchar pname_[MAXIMUM_PARTICLES]; /*!< particle name (photon, electron, etc) */
-} GGEMSPrimaryParticles;
+} GGEMSPrimaryParticles; /*!< Using C convention name of struct to C++ (_t deletion) */
 #ifndef OPENCL_COMPILER
 #ifdef _MSC_VER
 #pragma pack(pop)

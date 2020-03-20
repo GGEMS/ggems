@@ -34,31 +34,30 @@ class GGEMS_EXPORT GGEMSParticles
     */
     ~GGEMSParticles(void);
 
-  public:
     /*!
       \fn GGEMSParticles(GGEMSParticles const& particle) = delete
-      \param ggems_manager - reference on the ggems manager
+      \param particle - reference on the particle
       \brief Avoid copy of the class by reference
     */
     GGEMSParticles(GGEMSParticles const& particle) = delete;
 
     /*!
       \fn GGEMSParticles& operator=(GGEMSParticles const& particle) = delete
-      \param ggems_manager - reference on the ggems manager
+      \param particle - reference on the particle
       \brief Avoid assignement of the class by reference
     */
     GGEMSParticles& operator=(GGEMSParticles const& particle) = delete;
 
     /*!
       \fn GGEMSParticles(GGEMSParticles const&& particle) = delete
-      \param ggems_manager - rvalue reference on the ggems manager
+      \param particle - rvalue reference on the particle
       \brief Avoid copy of the class by rvalue reference
     */
     GGEMSParticles(GGEMSParticles const&& particle) = delete;
 
     /*!
       \fn GGEMSParticles& operator=(GGEMSParticles const&& particle) = delete
-      \param ggems_manager - rvalue reference on the ggems manager
+      \param particle - rvalue reference on the particle
       \brief Avoid copy of the class by rvalue reference
     */
     GGEMSParticles& operator=(GGEMSParticles const&& particle) = delete;

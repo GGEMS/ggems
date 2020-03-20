@@ -59,21 +59,21 @@ class GGEMS_EXPORT GGEMSPhantomNavigatorManager
     GGEMSPhantomNavigatorManager(GGEMSPhantomNavigatorManager const& phantom_navigator_manager) = delete;
 
     /*!
-      \fn GGEMSPhantomNavigatorManager& operator=(GGEMSPhantomNavigatorManager const& source_manager) = delete
+      \fn GGEMSPhantomNavigatorManager& operator=(GGEMSPhantomNavigatorManager const& phantom_navigator_manager) = delete
       \param phantom_navigator_manager - reference on the phantom navigator manager
       \brief Avoid assignement of the class by reference
     */
     GGEMSPhantomNavigatorManager& operator=(GGEMSPhantomNavigatorManager const& phantom_navigator_manager) = delete;
 
     /*!
-      \fn GGEMSPhantomNavigatorManager(GGEMSPhantomNavigatorManager const&& source_manager) = delete
+      \fn GGEMSPhantomNavigatorManager(GGEMSPhantomNavigatorManager const&& phantom_navigator_manager) = delete
       \param phantom_navigator_manager - rvalue reference on the phantom navigator manager
       \brief Avoid copy of the class by rvalue reference
     */
     GGEMSPhantomNavigatorManager(GGEMSPhantomNavigatorManager const&& phantom_navigator_manager) = delete;
 
     /*!
-      \fn GGEMSPhantomNavigatorManager& operator=(GGEMSPhantomNavigatorManager const&& source_manager) = delete
+      \fn GGEMSPhantomNavigatorManager& operator=(GGEMSPhantomNavigatorManager const&& phantom_navigator_manager) = delete
       \param phantom_navigator_manager - rvalue reference on the phantom navigator manager
       \brief Avoid copy of the class by rvalue reference
     */
@@ -106,9 +106,9 @@ class GGEMS_EXPORT GGEMSPhantomNavigatorManager
     inline std::size_t GetNumberOfPhantomNavigators(void) const {return phantom_navigators_.size();}
 
     /*!
-      \fn inline std::vector<std::shared_ptr<GGEMSPhantomNavigator>> GetPhantomNavigators(void) const
+      \fn inline std::vector< std::shared_ptr<GGEMSPhantomNavigator> > GetPhantomNavigators(void) const
       \return the phantom navigator
-      \brief get the list of phantom navigator
+      \brief get the list of phantom navigators
     */
     inline std::vector<std::shared_ptr<GGEMSPhantomNavigator>> GetPhantomNavigators(void) const {return phantom_navigators_;}
 
@@ -131,7 +131,7 @@ class GGEMS_EXPORT GGEMSPhantomNavigatorManager
     }
 
   private:
-    /*
+    /*!
       \fn bool CheckOverlap(std::shared_ptr<GGEMSPhantomNavigator> phantom_a, std::shared_ptr<GGEMSPhantomNavigator> phantom_b) const
       \param phantom_a - point on a phantom A
       \param phantom_b - point on a phantom B
@@ -147,6 +147,7 @@ class GGEMS_EXPORT GGEMSPhantomNavigatorManager
 
 /*!
   \fn GGEMSPhantomNavigatorManager* get_instance_ggems_phantom_navigator_manager(void)
+  \return the pointer on the singleton
   \brief Get the GGEMSPhantomNavigatorManager pointer for python user.
 */
 extern "C" GGEMS_EXPORT GGEMSPhantomNavigatorManager* get_instance_ggems_phantom_navigator_manager(void);

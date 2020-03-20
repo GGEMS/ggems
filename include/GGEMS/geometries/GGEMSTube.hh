@@ -15,6 +15,10 @@
 
 #include "GGEMS/geometries/GGEMSSolidVolume.hh"
 
+/*!
+  \class GGEMSTube
+  \brief Class GGEMSTube inheriting from GGEMSVolumeSolid handling Tube solid
+*/
 class GGEMS_EXPORT GGEMSTube : public GGEMSSolidVolume
 {
   public:
@@ -50,7 +54,7 @@ class GGEMS_EXPORT GGEMSTube : public GGEMSSolidVolume
     GGEMSTube(GGEMSTube const&& tube) = delete;
 
     /*!
-      \fn GGEMSSourceDefinition& operator=(GGEMSSourceDefinition const&& tube) = delete
+      \fn GGEMSTube& operator=(GGEMSTube const&& tube) = delete
       \param tube - rvalue reference on the tube solid volume
       \brief Avoid copy of the class by rvalue reference
     */
@@ -98,6 +102,7 @@ class GGEMS_EXPORT GGEMSTube : public GGEMSSolidVolume
 
 /*!
   \fn GGEMSTube* create_tube(void)
+  \return the pointer on the singleton
   \brief Create instance of GGEMSTube
 */
 extern "C" GGEMS_EXPORT GGEMSTube* create_tube(void);
@@ -110,25 +115,25 @@ extern "C" GGEMS_EXPORT GGEMSTube* create_tube(void);
 extern "C" GGEMS_EXPORT void delete_tube(GGEMSTube* tube);
 
 /*!
-  \fn void set_height_tube(GGEMSTube* tube, GGdouble const height)
+  \fn void set_height_tube(GGEMSTube* tube, GGfloat const height, char const* unit)
   \param tube - pointer on the solid tube
   \param height - height of the tube
   \param unit - unit of the distance
   \brief Set the height of the tube
 */
-extern "C" GGEMS_EXPORT void set_height_tube(GGEMSTube* tube, GGdouble const height, char const* unit);
+extern "C" GGEMS_EXPORT void set_height_tube(GGEMSTube* tube, GGfloat const height, char const* unit);
 
 /*!
-  \fn void set_radius_tube(GGEMSTube* tube, GGdouble const radius)
+  \fn void set_radius_tube(GGEMSTube* tube, GGfloat const radius, char const* unit)
   \param tube - pointer on the solid tube
   \param radius - radius of the tube
   \param unit - unit of the distance
   \brief Set the radius of the tube
 */
-extern "C" GGEMS_EXPORT void set_radius_tube(GGEMSTube* tube, GGdouble const radius, char const* unit);
+extern "C" GGEMS_EXPORT void set_radius_tube(GGEMSTube* tube, GGfloat const radius, char const* unit);
 
 /*!
-  \fn void set_position_tube(GGEMSTube* tube, GGfloat const pos_x, GGfloat const pos_y, GGfloat const pos_z)
+  \fn void set_position_tube(GGEMSTube* tube, GGfloat const pos_x, GGfloat const pos_y, GGfloat const pos_z, char const* unit)
   \param tube - pointer on the solid tube
   \param pos_x - radius of the tube
   \param pos_y - radius of the tube

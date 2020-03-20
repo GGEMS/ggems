@@ -1174,9 +1174,9 @@ void print_RAM_ggems_opencl_manager(GGEMSOpenCLManager* opencl_manager)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_context_index_ggems_opencl_manager(GGEMSOpenCLManager* opencl_manager, GGuint const context_index)
+void set_context_index_ggems_opencl_manager(GGEMSOpenCLManager* opencl_manager, GGuint const context_id)
 {
-  opencl_manager->ContextToActivate(context_index);
+  opencl_manager->ContextToActivate(context_id);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

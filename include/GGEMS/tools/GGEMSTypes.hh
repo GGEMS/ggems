@@ -97,77 +97,77 @@
 #include <CL/cl.hpp>
 #endif
 
-#define GGbool cl_bool
+#define GGbool cl_bool /*!< define a new type for cl_bool */
 
-#define GGchar cl_char
-#define GGchar2 cl_char2
-#define GGchar3 cl_char3
-#define GGchar4 cl_char4
-#define GGchar8 cl_char8
-#define GGchar16 cl_char16
+#define GGchar cl_char /*!< define a new type for cl_char */
+#define GGchar2 cl_char2 /*!< define a new type for cl_char2 */
+#define GGchar3 cl_char3 /*!< define a new type for cl_char3 */
+#define GGchar4 cl_char4 /*!< define a new type for cl_char4 */
+#define GGchar8 cl_char8 /*!< define a new type for cl_char8 */
+#define GGchar16 cl_char16 /*!< define a new type for cl_char16 */
 
-#define GGuchar cl_uchar
-#define GGuchar2 cl_uchar2
-#define GGuchar3 cl_uchar3
-#define GGuchar4 cl_uchar4
-#define GGuchar8 cl_uchar8
-#define GGuchar16 cl_uchar16
+#define GGuchar cl_uchar /*!< define a new type for cl_uchar */
+#define GGuchar2 cl_uchar2 /*!< define a new type for cl_uchar2 */
+#define GGuchar3 cl_uchar3 /*!< define a new type for cl_uchar3 */
+#define GGuchar4 cl_uchar4 /*!< define a new type for cl_uchar4 */
+#define GGuchar8 cl_uchar8 /*!< define a new type for cl_uchar8 */
+#define GGuchar16 cl_uchar16 /*!< define a new type for cl_uchar16 */
 
-#define GGshort cl_short
-#define GGshort2 cl_short2
-#define GGshort3 cl_short3
-#define GGshort4 cl_short4
-#define GGshort8 cl_short8
-#define GGshort16 cl_short16
+#define GGshort cl_short /*!< define a new type for cl_short */
+#define GGshort2 cl_short2 /*!< define a new type for cl_short2 */
+#define GGshort3 cl_short3 /*!< define a new type for cl_short3 */
+#define GGshort4 cl_short4 /*!< define a new type for cl_short4 */
+#define GGshort8 cl_short8 /*!< define a new type for cl_short8 */
+#define GGshort16 cl_short16 /*!< define a new type for cl_short16 */
 
-#define GGushort cl_ushort
-#define GGushort2 cl_ushort2
-#define GGushort3 cl_ushort3
-#define GGushort4 cl_ushort4
-#define GGushort8 cl_ushort8
-#define GGushort16 cl_ushort16
+#define GGushort cl_ushort /*!< define a new type for cl_ushort */
+#define GGushort2 cl_ushort2 /*!< define a new type for cl_ushort2 */
+#define GGushort3 cl_ushort3 /*!< define a new type for cl_ushort3 */
+#define GGushort4 cl_ushort4 /*!< define a new type for cl_ushort4 */
+#define GGushort8 cl_ushort8 /*!< define a new type for cl_ushort8 */
+#define GGushort16 cl_ushort16 /*!< define a new type for cl_ushort16 */
 
-#define GGint cl_int
-#define GGint2 cl_int2
-#define GGint3 cl_int3
-#define GGint4 cl_int4
-#define GGint8 cl_int8
-#define GGint16 cl_int16
+#define GGint cl_int /*!< define a new type for cl_int */
+#define GGint2 cl_int2 /*!< define a new type for cl_int2 */
+#define GGint3 cl_int3 /*!< define a new type for cl_int3 */
+#define GGint4 cl_int4 /*!< define a new type for cl_int4 */
+#define GGint8 cl_int8 /*!< define a new type for cl_int8 */
+#define GGint16 cl_int16 /*!< define a new type for cl_int16 */
 
-#define GGuint cl_uint
-#define GGuint2 cl_uint2
-#define GGuint3 cl_uint3
-#define GGuint4 cl_uint4
-#define GGuint8 cl_uint8
-#define GGuint16 cl_uint16
+#define GGuint cl_uint /*!< define a new type for cl_uint */
+#define GGuint2 cl_uint2 /*!< define a new type for cl_uint2 */
+#define GGuint3 cl_uint3 /*!< define a new type for cl_uint3 */
+#define GGuint4 cl_uint4 /*!< define a new type for cl_uint4 */
+#define GGuint8 cl_uint8 /*!< define a new type for cl_uint8 */
+#define GGuint16 cl_uint16 /*!< define a new type for cl_uint16 */
 
-#define GGlong cl_long
-#define GGlong2 cl_long2
-#define GGlong3 cl_long3
-#define GGlong4 cl_long4
-#define GGlong8 cl_long8
-#define GGlong16 cl_long16
+#define GGlong cl_long /*!< define a new type for cl_long */
+#define GGlong2 cl_long2 /*!< define a new type for cl_long2 */
+#define GGlong3 cl_long3 /*!< define a new type for cl_long3 */
+#define GGlong4 cl_long4 /*!< define a new type for cl_long4 */
+#define GGlong8 cl_long8 /*!< define a new type for cl_long8 */
+#define GGlong16 cl_long16 /*!< define a new type for cl_long16 */
 
-#define GGulong cl_ulong
-#define GGulong2 cl_ulong2
-#define GGulong3 cl_ulong3
-#define GGulong4 cl_ulong4
-#define GGulong8 cl_ulong8
-#define GGulong16 cl_ulong16
+#define GGulong cl_ulong /*!< define a new type for cl_ulong */
+#define GGulong2 cl_ulong2 /*!< define a new type for cl_ulong2 */
+#define GGulong3 cl_ulong3 /*!< define a new type for cl_ulong3 */
+#define GGulong4 cl_ulong4 /*!< define a new type for cl_ulong4 */
+#define GGulong8 cl_ulong8 /*!< define a new type for cl_ulong8 */
+#define GGulong16 cl_ulong16 /*!< define a new type for cl_ulong16 */
 
-#define GGfloat cl_float
-#define GGfloat2 cl_float2
-#define GGfloat3 cl_float3
-#define GGfloat4 cl_float4
-#define GGfloat8 cl_float8
-#define GGfloat16 cl_float16
+#define GGfloat cl_float /*!< define a new type for cl_float */
+#define GGfloat2 cl_float2 /*!< define a new type for cl_float2 */
+#define GGfloat3 cl_float3 /*!< define a new type for cl_float3 */
+#define GGfloat4 cl_float4 /*!< define a new type for cl_float4 */
+#define GGfloat8 cl_float8 /*!< define a new type for cl_float8 */
+#define GGfloat16 cl_float16 /*!< define a new type for cl_float16 */
 
-#define GGdouble cl_double
-#define GGdouble2 cl_double2
-#define GGdouble3 cl_double3
-#define GGdouble4 cl_double4
-#define GGdouble8 cl_double8
-#define GGdouble16 cl_double16
+#define GGdouble cl_double /*!< define a new type for cl_double */
+#define GGdouble2 cl_double2 /*!< define a new type for cl_double2 */
+#define GGdouble3 cl_double3 /*!< define a new type for cl_double3 */
+#define GGdouble4 cl_double4 /*!< define a new type for cl_double4 */
+#define GGdouble8 cl_double8 /*!< define a new type for cl_double8 */
+#define GGdouble16 cl_double16 /*!< define a new type for cl_double16 */
 #endif
 
 /*!
@@ -175,6 +175,7 @@
   \param x - x parameter
   \param y - y parameter
   \param z - z parameter
+  \return a matrix of 3x1 float
   \brief Make a float X, Y and Z with custom values
 */
 inline GGfloat3 MakeFloat3(GGfloat const x, GGfloat const y, GGfloat const z)
@@ -194,6 +195,7 @@ inline GGfloat3 MakeFloat3(GGfloat const x, GGfloat const y, GGfloat const z)
 
 /*!
   \fn inline GGfloat3 MakeFloat3Zeros()
+    \return a matrix of 3x1 float of zero
   \brief Make a float X, Y and Z with zeros for value
 */
 inline GGfloat3 MakeFloat3Zeros()
@@ -216,6 +218,7 @@ inline GGfloat3 MakeFloat3Zeros()
   \param x - x parameter
   \param y - y parameter
   \param z - z parameter
+  \return a matrix of 3x1 double
   \brief Make a double X, Y and Z with custom values
 */
 inline GGdouble3 MakeDouble3(GGdouble const x, GGdouble const y, GGdouble const z)
@@ -235,6 +238,7 @@ inline GGdouble3 MakeDouble3(GGdouble const x, GGdouble const y, GGdouble const 
 
 /*!
   \fn inline GGdouble3 MakeDouble3Zeros()
+  \return a matrix of 3x1 double of zero
   \brief Make a double X, Y and Z with zeros for value
 */
 inline GGdouble3 MakeDouble3Zeros()

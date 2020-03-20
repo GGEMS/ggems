@@ -27,8 +27,16 @@
 #include <windows.h>
 #endif
 
-// Simple redefinition of std::endl
+/*!
+  \def GGendl
+  \brief overload C++ std::endl
+*/
 #define GGendl (static_cast<std::ostream& (*)(std::ostream&)>(std::endl))
+
+/*!
+  \def GGcin
+  \brief overload C++ std::cin
+*/
 #define GGcin (std::cin)
 
 #ifdef _MSC_VER
@@ -53,12 +61,11 @@ enum GGEMSConsoleColor : GGuchar
 };
 
 /*!
-  \namespace
   \brief namespace storing color code
 */
-#ifdef _WIN32
 namespace
 {
+  #ifdef _WIN32
   WORD constexpr kColor [] = {
     0x00,
     0x01,
@@ -69,11 +76,8 @@ namespace
     0x06,
     0x07,
     0x08
-  };
-}
-#else
-namespace
-{
+  }; /*!< List of color for Windows */
+  #else
   std::string const kColor[] = {
     "\033[30m",
     "\033[34m",
@@ -84,10 +88,10 @@ namespace
     "\033[33m",
     "\033[97m",
     "\033[37m"
-  };
-  std::string const kDefaultColor("\033[0m");
+  }; /*!< List of color for Unix */
+  std::string const kDefaultColor("\033[0m"); /*!< Default color for Unix */
+  #endif
 }
-#endif
 
 /*!
   \class GGEMSStream
@@ -114,14 +118,16 @@ class GGEMS_EXPORT GGEMSStream
       \param class_name - Name of the class to print
       \param method_name - Name of the method to print
       \param verbosity_level - Verbosity level to display
+      \return sstream of message
       \brief setting private members to display them to standart output
     */
     GGEMSStream& operator()(std::string const& class_name, std::string const& method_name, GGint const& verbosity_level);
 
     /*!
-      \fn template<typename T> GGEMSStream& operator<<(std::string const& message)
+      \fn template<typename T> GGEMSStream& operator<<(T const& message)
       \tparam T - type of data
       \param message - message displayed to screen
+      \return stream of message
       \brief overloading << to print a message in standard output
     */
     template<typename T>
@@ -137,7 +143,7 @@ class GGEMS_EXPORT GGEMSStream
   private:
     std::string class_name_; /*!< Name of the class to print */
     std::string method_name_; /*!< Name of the method to print */
-    GGint verbosity_limit_; /*! Verbosity limit fixed by user */
+    GGint verbosity_limit_; /*!< Verbosity limit fixed by user */
     GGint verbosity_level_; /*!< Verbosity level of the print */
     GGint stream_counter_; /*!< Counter printing multiple stream */
 
@@ -196,12 +202,13 @@ GGEMSStream& GGEMSStream::operator<<(T const& message)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-extern GGEMS_EXPORT GGEMSStream GGcout;
-extern GGEMS_EXPORT GGEMSStream GGcerr;
-extern GGEMS_EXPORT GGEMSStream GGwarn;
+extern GGEMS_EXPORT GGEMSStream GGcout; /*!< Define a new std::cout with green color */
+extern GGEMS_EXPORT GGEMSStream GGcerr; /*!< Define a new std::cerr with green red */
+extern GGEMS_EXPORT GGEMSStream GGwarn; /*!< Define a new std::cout for warning with orange color */
 
 /*!
   \fn void set_ggems_verbose(GGint verbosity)
+  \param verbosity - level of verbosity
   \brief Set the verbosity of output stream
 */
 extern "C" GGEMS_EXPORT void set_ggems_verbose(GGint verbosity);

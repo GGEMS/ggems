@@ -35,7 +35,7 @@ typedef struct PACKED GGEMSSolidPhantomData_t
   GGdouble3 offsets_xyz_; /*!< Offset of phantom in X, Y and Z */
   GGdouble3 border_min_xyz_; /*!< Min. of border in X, Y and Z */
   GGdouble3 border_max_xyz_; /*!< Max. of border in X, Y and Z */
-} GGEMSSolidPhantomData;
+} GGEMSSolidPhantomData; /*!< Using C convention name of struct to C++ (_t deletion) */
 #ifndef OPENCL_COMPILER
 #ifdef _MSC_VER
 #pragma pack(pop)

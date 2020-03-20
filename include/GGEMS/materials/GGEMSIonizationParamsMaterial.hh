@@ -27,7 +27,7 @@ namespace GGEMSDensityParams
 {
   inline static constexpr GGfloat data[96][9] = {
     // Eplasma, rho, -C, X_0, X_1, a, m, delta_0, delta_max
-    { 0.000f, 0.000f,  0.0000f,  0.0000f, 0.0000f, 0.000000f, 0.0000f, 0.00f, 0.000f},  // Z=0
+    { 0.000f, 0.000f,  0.0000f,  0.0000f, 0.0000f, 0.000000f, 0.0000f, 0.00f, 0.000f},
     { 0.263f, 1.412f,  9.5835f,  1.8639f, 3.2718f, 0.140920f, 5.7273f, 0.00f, 0.024f},
     { 0.263f, 1.700f, 11.1393f,  2.2017f, 3.6122f, 0.134430f, 5.8347f, 0.00f, 0.024f},
     {13.844f, 1.535f,  3.1221f,  0.1304f, 1.6397f, 0.951360f, 2.4993f, 0.14f, 0.062f},
@@ -134,6 +134,7 @@ class GGEMS_EXPORT GGEMSIonizationParamsMaterial
 {
   public:
     /*!
+      \param material - pointer to material
       \brief GGEMSIonizationParamsMaterial constructor
     */
     explicit GGEMSIonizationParamsMaterial(GGEMSSingleMaterial const* material);
@@ -145,28 +146,28 @@ class GGEMS_EXPORT GGEMSIonizationParamsMaterial
 
     /*!
       \fn GGEMSIonizationParamsMaterial(GGEMSIonizationParamsMaterial const& ionization_params) = delete
-      \param ionization params - reference on the GGEMS ionization params
+      \param ionization_params - reference on the GGEMS ionization params
       \brief Avoid copy by reference
     */
     GGEMSIonizationParamsMaterial(GGEMSIonizationParamsMaterial const& ionization_params) = delete;
 
     /*!
-      \fn GGEMSIonizationParamsMaterial& operator=(GGEMSIonizationParamsMaterial const& ionization params) = delete
-      \param ionization params - reference on the GGEMS ionization params
+      \fn GGEMSIonizationParamsMaterial& operator=(GGEMSIonizationParamsMaterial const& ionization_params) = delete
+      \param ionization_params - reference on the GGEMS ionization params
       \brief Avoid assignement by reference
     */
     GGEMSIonizationParamsMaterial& operator=(GGEMSIonizationParamsMaterial const& ionization_params) = delete;
 
     /*!
       \fn GGEMSIonizationParamsMaterial(GGEMSIonizationParamsMaterial const&& ionization_params) = delete
-      \param ionization params - rvalue reference on the GGEMS ionization params
+      \param ionization_params - rvalue reference on the GGEMS ionization params
       \brief Avoid copy by rvalue reference
     */
     GGEMSIonizationParamsMaterial(GGEMSIonizationParamsMaterial const&& ionization_params) = delete;
 
     /*!
-      \fn GGEMSIonizationParamsMaterial& operator=(GGEMSIonizationParamsMaterial const&& ionization params) = delete
-      \param ionization params - rvalue reference on the GGEMS ionization params
+      \fn GGEMSIonizationParamsMaterial& operator=(GGEMSIonizationParamsMaterial const&& ionization_params) = delete
+      \param ionization_params - rvalue reference on the GGEMS ionization params
       \brief Avoid copy by rvalue reference
     */
     GGEMSIonizationParamsMaterial& operator=(GGEMSIonizationParamsMaterial const&& ionization_params) = delete;

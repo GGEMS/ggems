@@ -258,6 +258,63 @@ void GGEMSMaterialsDatabaseManager::AddChemicalElements(std::string const& eleme
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+GGfloat GGEMSMaterialsDatabaseManager::GetRadiationLength(std::string const& material) const
+{
+  GGfloat inverse_radiation = 0.0f;
+  GGfloat tsai_radiation = 0.0f;
+  GGfloat zeff = 0.0f;
+  GGfloat coulomb = 0.0f;
+
+  static constexpr GGfloat l_rad_light[]  = {5.310f , 4.790f , 4.740f, 4.710f};
+  static constexpr GGfloat lp_rad_light[] = {6.144f , 5.621f , 5.805f, 5.924f};
+  static constexpr GGfloat k1 = 0.00830f;
+  static constexpr GGfloat k2 = 0.20206f;
+  static constexpr GGfloat k3 = 0.00200f;
+  static constexpr GGfloat k4 = 0.03690f;
+
+  // Getting the material infos from database
+  GGEMSSingleMaterial const& kSingleMaterial = GetMaterial(material);
+
+  // Loop over the chemical elements by material
+  for (GGuchar i = 0; i < kSingleMaterial.nb_elements_; ++i) {
+    // Getting the chemical element
+    GGEMSChemicalElement const& kChemicalElement = GetChemicalElement(kSingleMaterial.chemical_element_name_[i]);
+
+    // Z effective
+    zeff = static_cast<GGfloat>(kChemicalElement.atomic_number_Z_);
+
+    //  Compute Coulomb correction factor (Phys Rev. D50 3-1 (1994) page 1254)
+    GGfloat az2 = (GGEMSPhysicalConstant::FINE_STRUCTURE_CONST*zeff)*(GGEMSPhysicalConstant::FINE_STRUCTURE_CONST*zeff);
+    GGfloat az4 = az2 * az2;
+    coulomb = ( k1*az4 + k2 + 1.0f/ (1.0f+az2) ) * az2 - ( k3*az4 + k4 ) * az4;
+
+    //  Compute Tsai's Expression for the Radiation Length
+    //  (Phys Rev. D50 3-1 (1994) page 1254)
+    GGfloat const logZ3 = std::log(zeff) / 3.0f;
+
+    GGfloat l_rad = 0.0f;
+    GGfloat lp_rad = 0.0f;
+    GGint iz = static_cast<GGint>(( zeff + 0.5f ) - 1);
+    if (iz <= 3){
+      l_rad = l_rad_light[iz];
+      lp_rad = lp_rad_light[iz];
+    }
+    else {
+      l_rad = std::log(184.15f) - logZ3;
+      lp_rad = std::log(1194.0f) - 2.0f*logZ3;
+    }
+
+    tsai_radiation = 4.0f * GGEMSPhysicalConstant::ALPHA_RCL2 * zeff * ( zeff * ( l_rad - coulomb ) + lp_rad );
+    inverse_radiation += GetAtomicNumberDensity(material, i) * tsai_radiation;
+  }
+
+  return (inverse_radiation <= 0.0f ? std::numeric_limits<GGfloat>::max() : 1.0f / inverse_radiation);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 void GGEMSMaterialsDatabaseManager::PrintAvailableChemicalElements(void) const
 {
   GGcout("GGEMSMaterialsDatabaseManager", "PrintAvailableChemicalElements", 3) << "Printing available chemical elements..." << GGendl;

@@ -37,28 +37,28 @@ class GGEMS_EXPORT GGEMSPseudoRandomGenerator
   public:
     /*!
       \fn GGEMSPseudoRandomGenerator(GGEMSPseudoRandomGenerator const& random) = delete
-      \param ggems_manager - reference on the ggems manager
+      \param random - reference on the random
       \brief Avoid copy of the class by reference
     */
     GGEMSPseudoRandomGenerator(GGEMSPseudoRandomGenerator const& random) = delete;
 
     /*!
       \fn GGEMSPseudoRandomGenerator& operator=(GGEMSPseudoRandomGenerator const& random) = delete
-      \param ggems_manager - reference on the ggems manager
+      \param random - reference on the random
       \brief Avoid assignement of the class by reference
     */
     GGEMSPseudoRandomGenerator& operator=(GGEMSPseudoRandomGenerator const& random) = delete;
 
     /*!
       \fn GGEMSPseudoRandomGenerator(GGEMSPseudoRandomGenerator const&& random) = delete
-      \param ggems_manager - rvalue reference on the ggems manager
+      \param random - rvalue reference on the random
       \brief Avoid copy of the class by rvalue reference
     */
     GGEMSPseudoRandomGenerator(GGEMSPseudoRandomGenerator const&& random) = delete;
 
     /*!
       \fn GGEMSPseudoRandomGenerator& operator=(GGEMSPseudoRandomGenerator const&& random) = delete
-      \param ggems_manager - rvalue reference on the ggems manager
+      \param random - rvalue reference on the random
       \brief Avoid copy of the class by rvalue reference
     */
     GGEMSPseudoRandomGenerator& operator=(GGEMSPseudoRandomGenerator const&& random) = delete;

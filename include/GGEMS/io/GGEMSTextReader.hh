@@ -106,6 +106,7 @@ namespace GGEMSMHDReader
   /*!
     \fn std::string ReadKey(std::string& line)
     \param line - string to analyze
+    \return the key of the MHD reader
     \brief get the key of MHD header
   */
   std::string ReadKey(std::string& line);
@@ -113,6 +114,7 @@ namespace GGEMSMHDReader
   /*!
     \fn std::istringstream ReadValue(std::string& line)
     \param line - string to analyze
+    \return line in stream
     \brief get string stream of value
   */
   std::istringstream ReadValue(std::string& line);
@@ -127,6 +129,7 @@ namespace GGEMSRangeReader
   /*!
     \fn std::istringstream ReadRangeMaterial(std::string& line)
     \param line - string to analyze
+    \return the string stream of value for material range
     \brief get string stream of value for material range
   */
   std::istringstream ReadRangeMaterial(std::string& line);

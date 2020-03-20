@@ -29,6 +29,7 @@ class GGEMS_EXPORT GGEMSSource
 {
   public:
     /*!
+      \param source - pointer on the daughter source
       \brief GGEMSSource constructor
     */
     explicit GGEMSSource(GGEMSSource* source);
@@ -132,6 +133,7 @@ class GGEMS_EXPORT GGEMSSource
 
     /*!
       \fn inline GGulong GetNumberOfParticlesInBatch(std::size_t const& batch_index)
+      \param batch_index - index of the batch
       \return the number of particle for a specific batch
       \brief method returning the number of particles in a specific batch
     */
@@ -140,24 +142,28 @@ class GGEMS_EXPORT GGEMSSource
     /*!
       \fn void GetPrimaries(GGulong const& number_of particles) = 0
       \param number_of_particles - number of particles to generate
+      \return no returned value
       \brief Generate primary particles
     */
     virtual void GetPrimaries(GGulong const& number_of_particles) = 0;
 
     /*!
       \fn void PrintInfos(void) const = 0
+      \return no returned value
       \brief Printing infos about the source
     */
     virtual void PrintInfos(void) const = 0;
 
     /*!
       \fn void CheckParameters(void) const
+      \return no returned value
       \brief Check mandatory parameters for a source
     */
     virtual void CheckParameters(void) const;
 
     /*!
       \fn void Initialize(void)
+      \return no returned value
       \brief Initialize a GGEMS source
     */
     virtual void Initialize(void);
@@ -165,6 +171,7 @@ class GGEMS_EXPORT GGEMSSource
   protected:
     /*!
       \fn void InitializeKernel(void)
+      \return no returned value
       \brief Initialize kernel for specific source in OpenCL
     */
     virtual void InitializeKernel(void) = 0;

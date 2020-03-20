@@ -97,6 +97,7 @@ class GGEMS_EXPORT GGEMSRangeCutsManager
 
 /*!
   \fn GGEMSRangeCutsManager* get_instance_range_cuts_manager(void)
+  \return the pointer on the singleton
   \brief Get the GGEMSRangeCutsManager pointer for python user.
 */
 extern "C" GGEMS_EXPORT GGEMSRangeCutsManager* get_instance_range_cuts_manager(void);
@@ -107,6 +108,7 @@ extern "C" GGEMS_EXPORT GGEMSRangeCutsManager* get_instance_range_cuts_manager(v
   \param phantom_name - name of the phantom
   \param particle_name - name of the particle
   \param value - value of the cut
+  \param unit - unit of distance
   \brief set the range cut for a phantom and a particle
 */
 extern "C" GGEMS_EXPORT void set_cut_range_cuts_manager(GGEMSRangeCutsManager* range_cut_manager, char const* phantom_name, char const* particle_name, GGfloat const value, char const* unit);
