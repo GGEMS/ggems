@@ -89,7 +89,7 @@ namespace GGEMSTolerance
   #ifndef OPENCL_COMPILER
   GGEMSUnits::nm; /*!< Tolerance for the geometry navigation */
   #else
-  1.e-6f;
+  1.e-6f; /*!< Tolerance for the geometry navigation */
   #endif
 #ifndef OPENCL_COMPILER
 }
@@ -121,7 +121,7 @@ namespace GGEMSDefaultParams
   #ifndef OPENCL_COMPILER
   GGEMSUnits::eV; /*!< Min kinetic energy */
   #else
-  1.e-6f;
+  1.e-6f; /*!< Min kinetic energy */
   #endif
 
   __constant GGushort CROSS_SECTION_TABLE_NUMBER_BINS = 220; /*!< Number of bins in the cross section table */
@@ -129,28 +129,28 @@ namespace GGEMSDefaultParams
   #ifndef OPENCL_COMPILER
   GGEMSUnits::eV; /*!< Min energy in the cross section table */
   #else
-  1.e-6f;
+  1.e-6f; /*!< Min energy in the cross section table */
   #endif
 
   __constant GGfloat CROSS_SECTION_TABLE_ENERGY_MAX = 250.0f*
   #ifndef OPENCL_COMPILER
   GGEMSUnits::MeV; /*!< Max energy in the cross section table */
   #else
-  1.f;
+  1.f; /*!< Max energy in the cross section table */
   #endif
 
   __constant GGfloat PHOTON_CUT = 1.0f*
   #ifndef OPENCL_COMPILER
   GGEMSUnits::um; /*!< Photon cut */
   #else
-  1.e-3f;
+  1.e-3f; /*!< Photon cut */
   #endif
 
   __constant GGfloat ELECTRON_CUT = 1.0f*
   #ifndef OPENCL_COMPILER
   GGEMSUnits::um; /*!< Electron cut */
   #else
-  1.e-3f;
+  1.e-3f; /*!< Electron cut */
   #endif
 #ifndef OPENCL_COMPILER
 }
@@ -187,21 +187,21 @@ namespace GGEMSPhysicalConstant
   #ifndef OPENCL_COMPILER
   GGEMSUnits::mol; /*!< Number of Avogadro */
   #else
-  1.0f;
+  1.0f; /*!< Number of Avogadro */
   #endif
 
   __constant GGfloat GASTHRESHOLD = 10.f*
   #ifndef OPENCL_COMPILER
   GGEMSUnits::mg/GGEMSUnits::cm3; /*!< Limit between gas and other state in density */
   #else
-  6.241510246e+15f;
+  6.241510246e+15f; /*!< Limit between gas and other state in density */
   #endif
 
   __constant GGfloat C_LIGHT = 2.99792458e+8f*
   #ifndef OPENCL_COMPILER
   GGEMSUnits::m/GGEMSUnits::s; /*!< Speed of light */
   #else
-  1.e-6f;
+  1.e-6f; /*!< Speed of light */
   #endif
   __constant GGfloat C_LIGHT_SQUARED = 89875.5178736817f; /*!< squared speed of ligth in mm.ns-1 */
 
@@ -209,7 +209,7 @@ namespace GGEMSPhysicalConstant
   #ifndef OPENCL_COMPILER
   -GGEMSUnits::eplus; /*!< Charge of the electron */
   #else
-  -1.0f;
+  -1.0f; /*!< Charge of the electron */
   #endif
   __constant GGfloat ELECTRON_CHARGE_SQUARED = 1.0f; /*!< Squared charge of electron */
 
@@ -217,28 +217,28 @@ namespace GGEMSPhysicalConstant
   #ifndef OPENCL_COMPILER
   GGEMSUnits::MeV; /*!< Mass of the electron in MeV */
   #else
-  1.0f;
+  1.0f; /*!< Mass of the electron in MeV */
   #endif
 
   __constant GGfloat PROTON_MASS_C2 = 938.272013f*
   #ifndef OPENCL_COMPILER
   GGEMSUnits::MeV; /*!< Mass of the proton in MeV */
   #else
-  1.0f;
+  1.0f; /*!< Mass of the proton in MeV */
   #endif
 
   __constant GGfloat NEUTRON_MASS_C2 = 939.56536f*
   #ifndef OPENCL_COMPILER
   GGEMSUnits::MeV; /*!< Mass of the neutron in MeV */
   #else
-  1.0f;
+  1.0f; /*!< Mass of the neutron in MeV */
   #endif
 
   __constant GGfloat ATOMIC_MASS_UNIT_C2 = 931.494028f*
   #ifndef OPENCL_COMPILER
   GGEMSUnits::MeV; /*!< Unified atomic mass unit in Mev */
   #else
-  1.0f;
+  1.0f; /*!< Unified atomic mass unit in Mev */
   #endif
   __constant GGfloat ATOMIC_MASS_UNIT = 0.01036426891f; /*!<Atomic mass unit c2 / c2 in MeV/(mm.ns-1)*/
 
@@ -246,7 +246,7 @@ namespace GGEMSPhysicalConstant
   #ifndef OPENCL_COMPILER
   GGEMSUnits::H / GGEMSUnits::m; /*!< permeability of free space in MeV.(ns.eplus)^2.mm-1 */
   #else
-  1.602176383e-10f;
+  1.602176383e-10f; /*!< permeability of free space in MeV.(ns.eplus)^2.mm-1 */
   #endif
   __constant GGfloat EPSILON0 = 5.526349824e+10f; /*!< permittivity of free space in eplus^2/(Mev.mm) */
 
@@ -256,7 +256,7 @@ namespace GGEMSPhysicalConstant
   #ifndef OPENCL_COMPILER
   GGEMSUnits::J * GGEMSUnits::s; /*!< Planck constant in Mev.ns */
   #else
-  6.241509704e+12f;
+  6.241509704e+12f; /*!< Planck constant in Mev.ns */
   #endif
 
   __constant GGfloat HBAR_PLANCK   = 6.582118206e-13f; /*!< h_planck / (2*PI) */

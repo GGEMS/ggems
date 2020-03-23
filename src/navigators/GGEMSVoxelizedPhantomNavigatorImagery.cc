@@ -1,5 +1,5 @@
 /*!
-  \file GGEMSVoxelizedPhantomNavigatorImagery.hh
+  \file GGEMSVoxelizedPhantomNavigatorImagery.cc
 
   \brief GGEMS class managing voxelized phantom navigator for imagery application
 
@@ -14,8 +14,6 @@
 
 #include "GGEMS/navigators/GGEMSVoxelizedPhantomNavigatorImagery.hh"
 #include "GGEMS/navigators/GGEMSSolidPhantom.hh"
-#include "GGEMS/tools/GGEMSSystemOfUnits.hh"
-#include "GGEMS/tools/GGEMSPrint.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////

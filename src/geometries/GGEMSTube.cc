@@ -10,7 +10,6 @@
   \date Monday January 13, 2020
 */
 
-#include "GGEMS/tools/GGEMSPrint.hh"
 #include "GGEMS/geometries/GGEMSTube.hh"
 #include "GGEMS/tools/GGEMSTools.hh"
 #include "GGEMS/tools/GGEMSSystemOfUnits.hh"

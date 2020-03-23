@@ -13,15 +13,9 @@
   \date Tuesday March 2, 2020
 */
 
-#include <string>
-#include <memory>
-#include <fstream>
 #include <limits>
 #include <algorithm>
 
-#include "GGEMS/global/GGEMSOpenCLManager.hh"
-
-#include "GGEMS/global/GGEMSExport.hh"
 #include "GGEMS/tools/GGEMSTools.hh"
 #include "GGEMS/io/GGEMSTextReader.hh"
 #include "GGEMS/materials/GGEMSMaterials.hh"

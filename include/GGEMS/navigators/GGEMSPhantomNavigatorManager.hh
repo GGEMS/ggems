@@ -13,11 +13,7 @@
   \date Tuesday February 11, 2020
 */
 
-#include <memory>
-
 #include "GGEMS/global/GGEMSOpenCLManager.hh"
-#include "GGEMS/global/GGEMSExport.hh"
-#include "GGEMS/tools/GGEMSTypes.hh"
 #include "GGEMS/tools/GGEMSTools.hh"
 
 #include "GGEMS/navigators/GGEMSPhantomNavigator.hh"

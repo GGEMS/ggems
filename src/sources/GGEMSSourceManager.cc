@@ -1,5 +1,5 @@
 /*!
-  \file GGEMSSourceManager.hh
+  \file GGEMSSourceManager.cc
 
   \brief GGEMS class handling the source(s)
 
@@ -14,8 +14,6 @@
 #include <sstream>
 
 #include "GGEMS/sources/GGEMSSourceManager.hh"
-#include "GGEMS/sources/GGEMSSource.hh"
-#include "GGEMS/sources/GGEMSXRaySource.hh"
 #include "GGEMS/tools/GGEMSTools.hh"
 #include "GGEMS/physics/GGEMSParticles.hh"
 #include "GGEMS/randoms/GGEMSPseudoRandomGenerator.hh"

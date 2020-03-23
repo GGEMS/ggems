@@ -13,8 +13,6 @@
   \date Monday January 13, 2020
 */
 
-#include "GGEMS/global/GGEMSExport.hh"
-#include "GGEMS/tools/GGEMSTypes.hh"
 #include "GGEMS/geometries/GGEMSPhantomCreatorManager.hh"
 
 /*!

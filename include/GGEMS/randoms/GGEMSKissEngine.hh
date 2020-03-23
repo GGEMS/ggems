@@ -23,11 +23,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 /*!
-  \fn inline GGfloat KissUniform(__global GGEMSRandom* random, int const index)
-  \param p_random - pointer on random buffer on OpenCL device
+  \fn inline GGfloat KissUniform(__global GGEMSRandom* random, GGint const index)
+  \param random - pointer on random buffer on OpenCL device
   \param index - index of thread
-  \brief JKISS 32-bit (period ~2^121=2.6x10^36), passes all of the Dieharder
-  and the BigCrunch tests in TestU01
+  \return Uniform random float number
+  \brief JKISS 32-bit (period ~2^121=2.6x10^36), passes all of the Dieharder and the BigCrunch tests in TestU01
 */
 inline GGfloat KissUniform(__global GGEMSRandom* random, GGint const index)
 {
@@ -61,10 +61,11 @@ inline GGfloat KissUniform(__global GGEMSRandom* random, GGint const index)
 ////////////////////////////////////////////////////////////////////////////////
 
 /*!
-  \fn GGuint KissPoisson(__global GGEMSRandom* random, int const index, float const mean)
-  \param p_random - pointer on random buffer on OpenCL device
+  \fn GGuint KissPoisson(__global GGEMSRandom* random, GGint const index, GGfloat const mean)
+  \param random - pointer on random buffer on OpenCL device
   \param index - index of thread
   \param mean - mean of the Poisson distribution
+  \return Poisson random uint number
   \brief Poisson random from G4Poisson in Geant4
 */
 inline GGuint KissPoisson(__global GGEMSRandom* random, GGint const index, GGfloat const mean)
@@ -110,9 +111,10 @@ inline GGuint KissPoisson(__global GGEMSRandom* random, GGint const index, GGflo
 
 /*!
   \fn inline GGfloat KissGauss(__global GGEMSRandom* random, GGint const index, GGfloat const sigma)
-  \param p_random - pointer on random buffer on OpenCL device
+  \param random - pointer on random buffer on OpenCL device
   \param index - index of thread
   \param sigma - standard deviation
+  \return Gaussian random float number
   \brief Gaussian random
 */
 inline GGfloat KissGauss(__global GGEMSRandom* random, GGint const index, GGfloat const sigma)

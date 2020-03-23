@@ -103,6 +103,17 @@ inline GGfloat3 GGfloat3Sub(GGfloat3 const u, GGfloat3 const v)
   return vector;
 }
 
+
+#ifdef OPENCL_COMPILER
+/*!
+  \fn inline GGfloat3 GGfloat44MultGGfloat3(__global GGfloat44 const* matrix, GGfloat3 const point)
+  \param matrix - A matrix (4x4)
+  \param point - Point in 3D (x, y, z)
+  \return a vector 3x1
+  \brief Compute the multiplication of matrix 4x4 and a point 3x1
+*/
+inline GGfloat3 GGfloat44MultGGfloat3(__global GGfloat44 const* matrix, GGfloat3 const point)
+#else
 /*!
   \fn inline GGfloat3 GGfloat44MultGGfloat3(GGfloat44 const* matrix, GGfloat3 const point)
   \param matrix - A matrix (4x4)
@@ -110,9 +121,6 @@ inline GGfloat3 GGfloat3Sub(GGfloat3 const u, GGfloat3 const v)
   \return a vector 3x1
   \brief Compute the multiplication of matrix 4x4 and a point 3x1
 */
-#ifdef OPENCL_COMPILER
-inline GGfloat3 GGfloat44MultGGfloat3(__global GGfloat44 const* matrix, GGfloat3 const point)
-#else
 inline GGfloat3 GGfloat44MultGGfloat3(GGfloat44 const* matrix, GGfloat3 const point)
 #endif
 {
@@ -133,6 +141,17 @@ inline GGfloat3 GGfloat44MultGGfloat3(GGfloat44 const* matrix, GGfloat3 const po
   return vector;
 }
 
+
+#ifdef OPENCL_COMPILER
+/*!
+ \fn inline GGfloat3 LocalToGlobalPosition(__global GGfloat44 const* matrix, GGfloat3 const point)
+ \param matrix - A matrix (4x4)
+ \param point - Point in 3D (x, y, z)
+ \return The point expresses in the global frame
+ \brief Transform a 3D point from local to global frame
+*/
+inline GGfloat3 LocalToGlobalPosition(__global GGfloat44 const* matrix, GGfloat3 const point)
+#else
 /*!
  \fn inline GGfloat3 LocalToGlobalPosition(GGfloat44 const* matrix, GGfloat3 const point)
  \param matrix - A matrix (4x4)
@@ -140,9 +159,6 @@ inline GGfloat3 GGfloat44MultGGfloat3(GGfloat44 const* matrix, GGfloat3 const po
  \return The point expresses in the global frame
  \brief Transform a 3D point from local to global frame
 */
-#ifdef OPENCL_COMPILER
-inline GGfloat3 LocalToGlobalPosition(__global GGfloat44 const* matrix, GGfloat3 const point)
-#else
 inline GGfloat3 LocalToGlobalPosition(GGfloat44 const* matrix, GGfloat3 const point)
 #endif
 {

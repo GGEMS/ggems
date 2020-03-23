@@ -1,5 +1,5 @@
 /*!
-  \file GGEMSMHDImage.hh
+  \file GGEMSMHDImage.cc
 
   \brief I/O class handling MHD file
 

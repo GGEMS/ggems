@@ -13,7 +13,6 @@
   \date Wednesday November 13, 2019
 */
 
-#include "GGEMS/tools/GGEMSTypes.hh"
 #include "GGEMS/maths/GGEMSMatrixTypes.hh"
 #include "GGEMS/global/GGEMSOpenCLManager.hh"
 

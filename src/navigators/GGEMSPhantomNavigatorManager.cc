@@ -10,15 +10,10 @@
   \date Tuesday February 11, 2020
 */
 
-#include <sstream>
-
 #include "GGEMS/navigators/GGEMSPhantomNavigatorManager.hh"
 #include "GGEMS/physics/GGEMSRangeCutsManager.hh"
-
 #include "GGEMS/navigators/GGEMSSolidPhantom.hh"
 #include "GGEMS/navigators/GGEMSSolidPhantomStack.hh"
-#include "GGEMS/tools/GGEMSPrint.hh"
-#include "GGEMS/tools/GGEMSTools.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////

@@ -16,9 +16,7 @@
 #include "GGEMS/materials/GGEMSMaterials.hh"
 
 #include "GGEMS/materials/GGEMSIonizationParamsMaterial.hh"
-#include "GGEMS/tools/GGEMSPrint.hh"
 #include "GGEMS/tools/GGEMSTools.hh"
-#include "GGEMS/tools/GGEMSSystemOfUnits.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////

@@ -11,9 +11,7 @@
   \date Tuesday March 2, 2020
 */
 
-#include "GGEMS/navigators/GGEMSSolidPhantomStack.hh"
 #include "GGEMS/navigators/GGEMSSolidPhantom.hh"
-#include "GGEMS/tools/GGEMSPrint.hh"
 #include "GGEMS/io/GGEMSMHDImage.hh"
 
 ////////////////////////////////////////////////////////////////////////////////

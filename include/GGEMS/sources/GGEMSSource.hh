@@ -14,8 +14,6 @@
 */
 
 #include "GGEMS/global/GGEMSOpenCLManager.hh"
-#include "GGEMS/global/GGEMSExport.hh"
-#include "GGEMS/tools/GGEMSTypes.hh"
 
 class GGEMSParticles;
 class GGEMSPseudoRandomGenerator;

@@ -13,8 +13,6 @@
 #include <sstream>
 #include <cerrno>
 #include <cstring>
-#include <cmath>
-#include <iostream>
 
 #include "GGEMS/tools/GGEMSTools.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
