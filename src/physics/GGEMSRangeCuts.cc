@@ -1,5 +1,5 @@
 /*!
-  \file GGEMSRangeCuts.hh
+  \file GGEMSRangeCuts.cc
 
   \brief GGEMS class storing and converting the cut in energy cut
 

@@ -10,8 +10,6 @@
   \date Friday October 4, 2019
 */
 
-#include <iomanip>
-
 #include "GGEMS/tools/GGEMSChrono.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
 

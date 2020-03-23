@@ -2203,7 +2203,10 @@ INCLUDE_FILE_PATTERNS  =
 # This tag requires that the tag ENABLE_PREPROCESSING is set to YES.
 
 PREDEFINED             = _WIN32 \
-                         "GGEMS_EXPORT= "
+                         "GGEMS_EXPORT= " \
+                         OPENCL_COMPILER \
+                         __attribute__(x)= \
+                         INLINE=
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then this
 # tag can be used to specify a list of macro names that should be expanded. The

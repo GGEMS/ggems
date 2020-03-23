@@ -17,8 +17,6 @@
 
 #include "GGEMS/materials/GGEMSMaterialsDatabaseManager.hh"
 
-#include "GGEMS/global/GGEMSExport.hh"
-
 /*!
   \namespace GGEMSDensityParams
   \brief namespace data for density correction

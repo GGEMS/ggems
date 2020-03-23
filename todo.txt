@@ -31,10 +31,6 @@
 
 - Faire une physics list automatique en fonction du type de particule
 
-- Supprimer les headers superflus
-
-- Si deux volumes, controles l'overlap
-
 - Site internet GGEMS + mailing list
 
 - Faire source indépendantes sans lancer la simulation complète -> phase space

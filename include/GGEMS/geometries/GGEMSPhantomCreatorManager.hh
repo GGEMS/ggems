@@ -19,8 +19,6 @@
 
 #include <map>
 
-#include "GGEMS/global/GGEMSExport.hh"
-#include "GGEMS/tools/GGEMSTypes.hh"
 #include "GGEMS/global/GGEMSOpenCLManager.hh"
 
 typedef std::map<float, std::string> LabelToMaterialMap; /*!< Map of label value to material */

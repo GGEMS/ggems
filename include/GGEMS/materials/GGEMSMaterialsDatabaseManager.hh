@@ -21,8 +21,6 @@
 #include <unordered_map>
 #include <sstream>
 
-#include "GGEMS/global/GGEMSExport.hh"
-#include "GGEMS/tools/GGEMSTypes.hh"
 #include "GGEMS/global/GGEMSConstants.hh"
 
 /*!

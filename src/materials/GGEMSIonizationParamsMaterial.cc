@@ -10,12 +10,7 @@
   \date Tuesday March 10, 2020
 */
 
-#include <cmath>
-
-#include "GGEMS/materials/GGEMSMaterialsDatabaseManager.hh"
-
 #include "GGEMS/materials/GGEMSIonizationParamsMaterial.hh"
-#include "GGEMS/global/GGEMSConstants.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
 
 ////////////////////////////////////////////////////////////////////////////////

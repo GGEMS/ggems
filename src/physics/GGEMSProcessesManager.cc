@@ -12,7 +12,6 @@
 
 #include "GGEMS/physics/GGEMSProcessesManager.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
-#include "GGEMS/tools/GGEMSSystemOfUnits.hh"
 #include "GGEMS/global/GGEMSConstants.hh"
 
 ////////////////////////////////////////////////////////////////////////////////

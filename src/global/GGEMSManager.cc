@@ -12,8 +12,6 @@
 
 #include <algorithm>
 #include <fcntl.h>
-#include <cmath>
-#include <sstream>
 
 #ifdef _WIN32
 #ifdef _MSC_VER
@@ -33,9 +31,7 @@
 #include "GGEMS/sources/GGEMSSourceManager.hh"
 #include "GGEMS/navigators/GGEMSPhantomNavigatorManager.hh"
 
-#include "GGEMS/global/GGEMSConstants.hh"
 #include "GGEMS/tools/GGEMSChrono.hh"
-#include "GGEMS/tools/GGEMSTools.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////

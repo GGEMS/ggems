@@ -14,7 +14,6 @@
 */
 
 #include "GGEMS/global/GGEMSConfiguration.hh"
-#include "GGEMS/global/GGEMSExport.hh"
 #include "GGEMS/global/GGEMSOpenCLManager.hh"
 
 /*!

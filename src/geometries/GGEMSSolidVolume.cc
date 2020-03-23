@@ -10,7 +10,6 @@
   \date Monday January 13, 2020
 */
 
-#include "GGEMS/tools/GGEMSPrint.hh"
 #include "GGEMS/geometries/GGEMSSolidVolume.hh"
 #include "GGEMS/tools/GGEMSSystemOfUnits.hh"
 

@@ -18,12 +18,8 @@
 #endif
 
 #include <string>
-#include <memory>
 
 #include "GGEMS/global/GGEMSOpenCLManager.hh"
-
-#include "GGEMS/global/GGEMSExport.hh"
-#include "GGEMS/tools/GGEMSTypes.hh"
 
 /*!
   \class GGEMSMHDImage
