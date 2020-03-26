@@ -17,13 +17,11 @@
 #pragma warning(disable: 4251) // Deleting warning exporting STL members!!!
 #endif
 
-#include <set>
 #include <string>
 
 #include "GGEMS/global/GGEMSOpenCLManager.hh"
 #include "GGEMS/materials/GGEMSMaterialsDatabaseManager.hh"
 
-#include "GGEMS/global/GGEMSExport.hh"
 #include "GGEMS/materials/GGEMSMaterialsStack.hh"
 
 /*!
@@ -72,12 +70,33 @@ class GGEMS_EXPORT GGEMSMaterials
     GGEMSMaterials& operator=(GGEMSMaterials const&& materials) = delete;
 
     /*!
-      \fn bool AddMaterial(std::string const& material)
+      \fn void AddMaterial(std::string const& material)
       \param material - name of the material
       \brief Add a material associated to a phantom
-      \return false if material already added
     */
-    bool AddMaterial(std::string const& material);
+    void AddMaterial(std::string const& material);
+
+    /*!
+      \fn inline std::string GetMaterialName(std::size_t i) const
+      \param i - index of the material
+      \return name of the material
+      \brief get the name of the material at position i
+    */
+    inline std::string GetMaterialName(std::size_t i) const {return materials_.at(i);}
+
+    /*!
+      \fn inline std::size_t GetNumberOfMaterials(void) const
+      \return the number of materials in the phantom
+      \brief Get the number of materials in the phantom
+    */
+    inline std::size_t GetNumberOfMaterials(void) const {return materials_.size();}
+
+    /*!
+      \fn inline std::shared_ptr<cl::Buffer> GetMaterialTables(void) const
+      \return the pointer on material tables on OpenCL device
+      \brief get the pointer on material tables on OpenCL device
+    */
+    inline std::shared_ptr<cl::Buffer> GetMaterialTables(void) const {return material_tables_;}
 
     /*!
       \fn void PrintInfos(void) const
@@ -99,7 +118,7 @@ class GGEMS_EXPORT GGEMSMaterials
     void BuildMaterialTables(void);
 
   private:
-    std::set<std::string> materials_; /*!< Defined material for a phantom */
+    std::vector<std::string> materials_; /*!< Defined material for a phantom */
     std::shared_ptr<cl::Buffer> material_tables_; /*!< Material tables on OpenCL device */
 
     // C++ singleton for OpenCL ang GGEMSMaterialsDatabase

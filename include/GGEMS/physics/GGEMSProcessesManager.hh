@@ -97,6 +97,27 @@ class GGEMS_EXPORT GGEMSProcessesManager
     void SetCrossSectionTableMaximumEnergy(GGfloat const& energy, char const* unit = "keV");
 
     /*!
+      \fn inline GGfloat GetCrossSectionTableMinEnergy(void) const
+      \return the minimum energy in the cross section table
+      \brief get the minimum energy in the cross section table
+    */
+    inline GGfloat GetCrossSectionTableMinEnergy(void) const {return cross_section_table_min_energy_;}
+
+    /*!
+      \fn inline GGfloat GetCrossSectionTableMaxEnergy(void) const
+      \return the maximum energy in the cross section table
+      \brief get the maximum energy in the cross section table
+    */
+    inline GGfloat GetCrossSectionTableMaxEnergy(void) const {return cross_section_table_max_energy_;}
+
+    /*!
+      \fn inline GGushort GetCrossSectionTableNumberOfBins(void) const
+      \return the number of bins in the cross section table
+      \brief get the number of bins in the cross section table
+    */
+    inline GGushort GetCrossSectionTableNumberOfBins(void) const {return cross_section_table_number_of_bins_;}
+
+    /*!
       \fn void PrintInfos(void) const
       \brief Print all infos about processes
     */

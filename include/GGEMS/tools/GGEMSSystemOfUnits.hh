@@ -56,6 +56,13 @@ namespace GGEMSUnits
   __constant GGfloat km3 = 1.e18f; /*!< Cubic kilometer */
   __constant GGfloat pc  = 3.0856775807e+19f; /*!< Parsec */
 
+  // Cross section unit (mm2)
+  __constant GGfloat b = 1.e-22f; /*!< Barn */
+  __constant GGfloat mb = 1.e-25f; /*!< millibarn */
+  __constant GGfloat ub = 1.e-28f; /*!< microbarn */
+  __constant GGfloat nb = 1.e-31f; /*!< nanobarn */
+  __constant GGfloat pb = 1.e-34f; /*!< picobarn */
+
   // Angles
   __constant GGfloat rad  = 1.0f; /*!< Radian (REFERENCE) */
   __constant GGfloat mrad = 1.e-3f; /*!< milliradian */
@@ -240,7 +247,7 @@ namespace GGEMSUnits
     std::string unit_str = unit;
 
     T new_value = static_cast<T>(0);
-    if (unit_str == "ev") {
+    if (unit_str == "eV") {
       new_value = static_cast<T>(value * GGEMSUnits::eV);
     }
     else if (unit_str == "keV") {

@@ -1,3 +1,15 @@
+/*!
+  \file DrawGGEMSTube.cl
+
+  \brief OpenCL kernel drawing a tube in voxelized image
+
+  \author Julien BERT <julien.bert@univ-brest.fr>
+  \author Didier BENOIT <didier.benoit@inserm.fr>
+  \author LaTIM, INSERM - U1101, Brest, FRANCE
+  \version 1.0
+  \date Monday January 13, 2020
+*/
+
 #include "GGEMS/tools/GGEMSTypes.hh"
 
 __kernel void draw_ggems_tube(

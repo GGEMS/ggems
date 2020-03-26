@@ -10,7 +10,6 @@
   \date Tuesday March 4, 2020
 */
 
-#include <sstream>
 #include <limits>
 
 #include "GGEMS/materials/GGEMSMaterials.hh"
@@ -42,7 +41,7 @@ GGEMSMaterials::~GGEMSMaterials(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-bool GGEMSMaterials::AddMaterial(std::string const& material)
+void GGEMSMaterials::AddMaterial(std::string const& material)
 {
   // Checking the number of material (maximum is 255)
   if (materials_.size() == 255) {
@@ -50,7 +49,7 @@ bool GGEMSMaterials::AddMaterial(std::string const& material)
   }
 
   // Add material and check if the material already exists
-  return materials_.insert(material).second;
+  materials_.push_back(material);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -63,17 +62,18 @@ void GGEMSMaterials::PrintInfos(void) const
   GGEMSMaterialTables* material_table = opencl_manager_.GetDeviceBuffer<GGEMSMaterialTables>(material_tables_, sizeof(GGEMSMaterialTables));
 
   // Getting list of activated materials
-  std::set<std::string>::iterator iter_material = materials_.begin();
-
   GGcout("GGEMSMaterials", "PrintInfos", 0) << GGendl;
   GGcout("GGEMSMaterials", "PrintInfos", 0) << "Number of materials: " << static_cast<GGuint>(material_table->number_of_materials_) << GGendl;
   GGcout("GGEMSMaterials", "PrintInfos", 0) << "Total number of chemical elements: " << material_table->total_number_of_chemical_elements_ << GGendl;
   GGcout("GGEMSMaterials", "PrintInfos", 0) << "Activated Materials: " << GGendl;
   GGcout("GGEMSMaterials", "PrintInfos", 0) << "-----------------------------------" << GGendl;
-  for (GGuchar i = 0; i < material_table->number_of_materials_; ++i, ++iter_material) {
-    GGcout("GGEMSMaterials", "PrintInfos", 0) << "* " << *iter_material << GGendl;
+  for (std::size_t i = 0; i < material_table->number_of_materials_; ++i) {
+    GGcout("GGEMSMaterials", "PrintInfos", 0) << "* " << materials_.at(i) << GGendl;
     GGcout("GGEMSMaterials", "PrintInfos", 0) << "    - Number of chemical elements: " << static_cast<GGushort>(material_table->number_of_chemical_elements_[i]) << GGendl;
     GGcout("GGEMSMaterials", "PrintInfos", 0) << "    - Density: " << material_table->density_of_material_[i]/(GGEMSUnits::g/GGEMSUnits::cm3) << " g/cm3" << GGendl;
+    GGcout("GGEMSMaterials", "PrintInfos", 0) << "    - Photon cut: " << material_table->photon_energy_cut_[i]/GGEMSUnits::keV << " keV" << GGendl;
+    GGcout("GGEMSMaterials", "PrintInfos", 0) << "    - Electron cut: " << material_table->electron_energy_cut_[i]/GGEMSUnits::keV << " keV" << GGendl;
+    GGcout("GGEMSMaterials", "PrintInfos", 0) << "    - Positron cut: " << material_table->positron_energy_cut_[i]/GGEMSUnits::keV << " keV" << GGendl;
     GGcout("GGEMSMaterials", "PrintInfos", 0) << "    - Radiation length: " << material_table->radiation_length_[i]/(GGEMSUnits::cm) << " cm" << GGendl;
     GGcout("GGEMSMaterials", "PrintInfos", 0) << "    - Total atomic density: " << material_table->number_of_atoms_by_volume_[i]/(GGEMSUnits::mol/GGEMSUnits::cm3) << " atom/cm3" << GGendl;
     GGcout("GGEMSMaterials", "PrintInfos", 0) << "    - Total Electron density: " << material_table->number_of_electrons_by_volume_[i]/(GGEMSUnits::mol/GGEMSUnits::cm3) << " e-/cm3" << GGendl;
@@ -127,11 +127,10 @@ void GGEMSMaterials::BuildMaterialTables(void)
   material_table->number_of_materials_ = static_cast<GGuchar>(materials_.size());
 
   // Loop over the materials
-  std::set<std::string>::iterator iter_material = materials_.begin();
   GGushort index_to_chemical_element = 0;
-  for (std::size_t i = 0; i < materials_.size(); ++i, ++iter_material) {
+  for (std::size_t i = 0; i < materials_.size(); ++i) {
     // Getting the material infos from database
-    GGEMSSingleMaterial const& kSingleMaterial = material_manager_.GetMaterial(*iter_material);
+    GGEMSSingleMaterial const& kSingleMaterial = material_manager_.GetMaterial(materials_.at(i));
 
     // Storing infos about material
     material_table->number_of_chemical_elements_[i] = kSingleMaterial.nb_elements_;
@@ -153,7 +152,7 @@ void GGEMSMaterials::BuildMaterialTables(void)
       material_table->mass_fraction_[j+index_to_chemical_element] = kSingleMaterial.mixture_f_[j];
 
       // Atomic number density
-      material_table->atomic_number_density_[j+index_to_chemical_element] = material_manager_.GetAtomicNumberDensity(*iter_material, j);
+      material_table->atomic_number_density_[j+index_to_chemical_element] = material_manager_.GetAtomicNumberDensity(materials_.at(i), j);
 
       // Increment density of atoms and electrons
       material_table->number_of_atoms_by_volume_[i] += material_table->atomic_number_density_[j+index_to_chemical_element];
@@ -181,7 +180,7 @@ void GGEMSMaterials::BuildMaterialTables(void)
     material_table->log_energy2_fluct_[i] = ionization_params.GetLogEnergy2Fluct();
 
     // others stuffs
-    material_table->radiation_length_[i] = material_manager_.GetRadiationLength(*iter_material);
+    material_table->radiation_length_[i] = material_manager_.GetRadiationLength(materials_.at(i));
 
     // Computing the access to chemical element by material
     material_table->index_of_chemical_elements_[i] = index_to_chemical_element;
@@ -193,148 +192,6 @@ void GGEMSMaterials::BuildMaterialTables(void)
 
   // Release the pointer, mandatory step!!!
   opencl_manager_.ReleaseDeviceBuffer(material_tables_, material_table);
-
-/*
-    h_materials->electron_mean_excitation_energy = (f32*)malloc(sizeof(f32)*m_nb_materials);
-    h_materials->rad_length = (f32*)malloc(sizeof(f32)*m_nb_materials);
-    h_materials->photon_energy_cut = (f32*)malloc(sizeof(f32)*m_nb_materials);
-    h_materials->electron_energy_cut = (f32*)malloc(sizeof(f32)*m_nb_materials);
-    h_materials->fX0 = (f32*)malloc(sizeof(f32)*m_nb_materials);
-    h_materials->fX1 = (f32*)malloc(sizeof(f32)*m_nb_materials);
-    h_materials->fD0 = (f32*)malloc(sizeof(f32)*m_nb_materials);
-    h_materials->fC = (f32*)malloc(sizeof(f32)*m_nb_materials);
-    h_materials->fA = (f32*)malloc(sizeof(f32)*m_nb_materials);
-    h_materials->fM = (f32*)malloc(sizeof(f32)*m_nb_materials);
-    h_materials->fF1 = (f32*)malloc(sizeof(f32)*m_nb_materials);
-    h_materials->fF2 = (f32*)malloc(sizeof(f32)*m_nb_materials);
-    h_materials->fEnergy0 = (f32*)malloc(sizeof(f32)*m_nb_materials);
-    h_materials->fEnergy1 = (f32*)malloc(sizeof(f32)*m_nb_materials);
-    h_materials->fEnergy2 = (f32*)malloc(sizeof(f32)*m_nb_materials);
-    h_materials->fLogEnergy1 = (f32*)malloc(sizeof(f32)*m_nb_materials);
-    h_materials->fLogEnergy2 = (f32*)malloc(sizeof(f32)*m_nb_materials);
-    h_materials->fLogMeanExcitationEnergy = (f32*)malloc(sizeof(f32)*m_nb_materials);
-
-    i32 i, j;
-    ui32 access_index = 0;
-    ui32 fill_index = 0;
-    std::string mat_name, elt_name;
-    aMaterial cur_mat;
-
-    i=0; while (i < m_nb_materials) {
-        // get mat name
-        mat_name = mats_list[i];
-
-        // read mat from databse
-        cur_mat = m_material_db.materials[mat_name];
-        if (cur_mat.name == "") {
-            printf("[ERROR] Material %s is not on your database (%s function)\n", mat_name.c_str(),__FUNCTION__);
-            exit_simulation();
-        }
-        // get nb of elements
-        h_materials->nb_elements[i] = cur_mat.nb_elements;
-
-        // compute index
-        h_materials->index[i] = access_index;
-        access_index += cur_mat.nb_elements;
-
-        ++i;
-    }
-
-    // nb of total elements
-    m_nb_elements_total = access_index;
-    h_materials->nb_elements_total = access_index;
-    h_materials->mixture = (ui16*)malloc(sizeof(ui16)*access_index);
-    h_materials->atom_num_dens = (f32*)malloc(sizeof(f32)*access_index);
-    h_materials->mass_fraction = (f32*)malloc(sizeof(f32)*access_index);
-
-
-    // store mixture element and compute atomic density
-    i=0; while (i < m_nb_materials) {
-
-        // get mat name
-        mat_name = mats_list[i];
-
-        // read mat from database
-        cur_mat = m_material_db.materials[mat_name];
-
-        // get density
-        h_materials->density[i] = m_material_db.get_density( mat_name );     // in g/cm3
-
-        h_materials->nb_atoms_per_vol[i] = 0.0f;
-        h_materials->nb_electrons_per_vol[i] = 0.0f;
-
-        j=0; while (j < m_material_db.get_nb_elements( mat_name )) {
-            // read element name
-            //elt_name = cur_mat.mixture_Z[j];
-            elt_name = m_material_db.get_element_name( mat_name, j );
-
-            // store Z
-            h_materials->mixture[fill_index] = m_material_db.get_element_Z( elt_name );
-
-            // compute atom num dens (Avo*fraction*dens) / Az
-            h_materials->atom_num_dens[fill_index] = m_material_db.get_atom_num_dens( mat_name, j );
-
-            // get mass fraction
-            h_materials->mass_fraction[fill_index] = m_material_db.get_mass_fraction( mat_name, j );
-
-            // compute nb atoms per volume
-            h_materials->nb_atoms_per_vol[i] += h_materials->atom_num_dens[fill_index];
-
-            // compute nb electrons per volume
-            h_materials->nb_electrons_per_vol[i] += h_materials->atom_num_dens[fill_index] *
-                                                     m_material_db.get_element_Z( elt_name );
-
-            ++j;
-            ++fill_index;
-        }
-
-        /// electron Ionisation data
-        m_material_db.compute_ioni_parameters( mat_name );
-
-        h_materials->electron_mean_excitation_energy[i] = m_material_db.get_mean_excitation();
-        h_materials->fLogMeanExcitationEnergy[i] = logf( m_material_db.get_mean_excitation() );
-
-        // correction
-        h_materials->fX0[i] = m_material_db.get_X0_density();
-        h_materials->fX1[i] = m_material_db.get_X1_density();
-        h_materials->fD0[i] = m_material_db.get_D0_density();
-        h_materials->fC[i] = m_material_db.get_C_density();
-        h_materials->fA[i] = m_material_db.get_A_density();
-        h_materials->fM[i] = m_material_db.get_M_density();
-
-        //eFluctuation parameters
-        h_materials->fF1[i] = m_material_db.get_F1_fluct();
-        h_materials->fF2[i] = m_material_db.get_F2_fluct();
-        h_materials->fEnergy0[i] = m_material_db.get_Energy0_fluct();
-        h_materials->fEnergy1[i] = m_material_db.get_Energy1_fluct();
-        h_materials->fEnergy2[i] = m_material_db.get_Energy2_fluct();
-        h_materials->fLogEnergy1[i] = m_material_db.get_LogEnergy1_fluct();
-        h_materials->fLogEnergy2[i] = m_material_db.get_LogEnergy2_fluct();
-
-        /// others stuffs
-
-        h_materials->rad_length[i] = m_material_db.get_rad_len( mat_name );
-
-        /// Compute energy cut
-        f32 gEcut = m_rangecut.convert_gamma(h_params->photon_cut, h_materials->mixture, h_materials->nb_elements[i],
-                                             h_materials->atom_num_dens, h_materials->index[i]);
-
-        f32 eEcut = m_rangecut.convert_electron(h_params->electron_cut, h_materials->mixture, h_materials->nb_elements[i],
-                                                h_materials->atom_num_dens, h_materials->density[i], h_materials->index[i]);
-
-        h_materials->photon_energy_cut[i] = gEcut;
-        h_materials->electron_energy_cut[i] = eEcut;
-
-        if ( h_params->display_energy_cuts )
-        {
-            printf( "[GGEMS]    material: %s\t\tgamma: %s electron: %s\n", mat_name.c_str(),
-                   Energy_str( gEcut ).c_str(), Energy_str( eEcut ).c_str() );
-        }
-
-        ++i;
-    }
-
-    */
 }
 
 ////////////////////////////////////////////////////////////////////////////////

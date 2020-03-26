@@ -146,11 +146,11 @@ void GGEMSPhantomNavigator::Initialize(void)
   // Apply offset
   if (is_offset_flag_) solid_phantom_->ApplyOffset(offset_xyz_);
 
-  // Converting length cut to energy cut
-  //range_cuts_->ConvertCuts(materials_);
-
-  // Loading the materials to OpenCL device and converting cuts
+  // Loading the materials and building tables to OpenCL device
   materials_->Initialize();
+
+  // Converting length cut to energy cut
+  range_cuts_->ConvertCutsFromLengthToEnergy(materials_);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
