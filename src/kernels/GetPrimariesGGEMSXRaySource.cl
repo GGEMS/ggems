@@ -1,10 +1,19 @@
-#include "GGEMS/tools/GGEMSTypes.hh"
+/*!
+  \file GetPrimariesGGEMSXRaySource.cl
+
+  \brief OpenCL kernel generating primaries for X-Ray source
+
+  \author Julien BERT <julien.bert@univ-brest.fr>
+  \author Didier BENOIT <didier.benoit@inserm.fr>
+  \author LaTIM, INSERM - U1101, Brest, FRANCE
+  \version 1.0
+  \date Tuesday October 22, 2019
+*/
+
 #include "GGEMS/physics/GGEMSPrimaryParticlesStack.hh"
-#include "GGEMS/randoms/GGEMSRandomStack.hh"
 #include "GGEMS/randoms/GGEMSKissEngine.hh"
 #include "GGEMS/maths/GGEMSMatrixOperations.hh"
 #include "GGEMS/maths/GGEMSMathAlgorithms.hh"
-#include "GGEMS/global/GGEMSConstants.hh"
 
 __kernel void get_primaries_ggems_xray_source(
   __global GGEMSPrimaryParticles* primary_particle,

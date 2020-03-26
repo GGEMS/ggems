@@ -69,21 +69,33 @@ processes_manager.set_cross_section_table_energy_max(250.0, b"MeV")
 # ------------------------------------------------------------------------------
 # STEP 6: Cuts, by default but are 1 um
 # Apply a cut of 1 mm for each particle and each phantom
-#range_cuts_manager.set_cut(b"gamma", 1.0, b"mm")
+range_cuts_manager.set_cut(b"gamma", 1.0, b"mm")
 # Or
-#range_cuts_manager.set_cut(b"gamma", 1.0, b"mm", b"all")
+#range_cuts_manager.set_cut(b"gamma", 1.0, b"mm", b"phantom_1")
+#range_cuts_manager.set_cut(b"gamma", 1.0, b"mm", b"phantom_2")
+#range_cuts_manager.set_cut(b"gamma", 1.0, b"mm", b"phantom_3")
+#range_cuts_manager.set_cut(b"gamma", 1.0, b"mm", b"phantom_4")
+
+range_cuts_manager.set_cut(b"e-", 1.0, b"mm")
 # Or
-range_cuts_manager.set_cut(b"gamma", 1.0, b"mm", b"phantom_1")
-range_cuts_manager.set_cut(b"gamma", 1.0, b"cm", b"phantom_2")
-range_cuts_manager.set_cut(b"gamma", 1.0, b"um", b"phantom_3")
-range_cuts_manager.set_cut(b"gamma", 0.1, b"m", b"phantom_4")
+#range_cuts_manager.set_cut(b"e-", 1.0, b"mm", b"phantom_1")
+#range_cuts_manager.set_cut(b"e-", 1.0, b"mm", b"phantom_2")
+#range_cuts_manager.set_cut(b"e-", 1.0, b"mm", b"phantom_3")
+#range_cuts_manager.set_cut(b"e-", 1.0, b"mm", b"phantom_4")
+
+#range_cuts_manager.set_cut(b"e-", 1.0, b"mm")
+# Or
+#range_cuts_manager.set_cut(b"e-", 1.0, b"mm", b"phantom_1")
+#range_cuts_manager.set_cut(b"e-", 1.0, b"mm", b"phantom_2")
+#range_cuts_manager.set_cut(b"e-", 1.0, b"mm", b"phantom_3")
+#range_cuts_manager.set_cut(b"e-", 1.0, b"mm", b"phantom_4")
 
 # ------------------------------------------------------------------------------
 # STEP 7: Sources
 # First source
 xray_source_1 = GGEMSXRaySource()
 xray_source_1.set_source_name(b"xray_source_1")
-xray_source_1.set_source_particle_type(b"photon")
+xray_source_1.set_source_particle_type(b"photon") # Change to gamma!!!
 xray_source_1.set_number_of_particles(8616350000)
 xray_source_1.set_position(-1000.0, 0.0, 0.0, b"mm")
 xray_source_1.set_rotation(0.0, 0.0, 0.0, b"deg")

@@ -14,8 +14,6 @@
 
 - Faire les benchmarks avec C++
 
-- Faire processe list intell...
-
 - Faire la visu avec Qt (Qt Quick) et activer l'option Qt à partir du CMAKE. Si possible, faire la visualization sur carte graphique avec OpenCL
 
 - Dessiner les particules :
@@ -23,13 +21,11 @@
   * Positron -> rouge
   * Electron -> bleu
 
-- Documentation avec Sphinx + Doxygen
+- Documentation avec Sphinx + Doxygen + ou site .io avec doc
 
 - Compilation des kernels OpenCL lors de l'installation
 
 - Prévoir place pour les kernel customs
-
-- Faire une physics list automatique en fonction du type de particule
 
 - Site internet GGEMS + mailing list
 

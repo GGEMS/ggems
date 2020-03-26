@@ -149,7 +149,7 @@ void GGEMSSolidPhantom::ConvertImageToLabel(std::string const& raw_data_filename
   // Get pointer on OpenCL device
   GGuchar* label_data = opencl_manager_.GetDeviceBuffer<GGuchar>(label_data_, kNumberOfVoxels * sizeof(GGuchar));
 
-  // Set value to max of GGushort$
+  // Set value to max of GGuchar
   std::fill(label_data, label_data + kNumberOfVoxels, std::numeric_limits<GGuchar>::max());
 
   // Opening range data file
@@ -173,11 +173,7 @@ void GGEMSSolidPhantom::ConvertImageToLabel(std::string const& raw_data_filename
     iss >> first_label_value >> last_label_value >> material_name;
 
     // Adding the material
-    bool is_added = materials->AddMaterial(material_name);
-    if (!is_added) {
-      GGwarn("GGEMSSolidPhantom", "ConvertImageToLabel", 0) << "The material '" << material_name << "' is already added!!!" << GGendl;
-      continue;
-    }
+    materials->AddMaterial(material_name);
 
     // Setting the label
     for (GGuint i = 0; i < kNumberOfVoxels; ++i) {

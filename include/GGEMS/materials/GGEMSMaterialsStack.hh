@@ -54,14 +54,15 @@ typedef struct PACKED GGEMSMaterialTables_t
   GGfloat energy2_fluct_[255]; /*!< energy 2 energy loss fluctuation model */
   GGfloat log_energy1_fluct_[255]; /*!< log of energy 0 energy loss fluctuation model */
   GGfloat log_energy2_fluct_[255]; /*!< log of energy 1 energy loss fluctuation model */
-  GGfloat photon_energy_cut[255]; /*!< Photon energy cut */
-  GGfloat electron_energy_cut[255]; /*!< Electron energy cut */
+  GGfloat photon_energy_cut_[255]; /*!< Photon energy cut */
+  GGfloat electron_energy_cut_[255]; /*!< Electron energy cut */
+  GGfloat positron_energy_cut_[255]; /*!< Positron energy cut */
 
   // Infos by chemical elements by materials
   GGushort index_of_chemical_elements_[255]; /*!< Index to chemical element by material */
-  GGuchar atomic_number_Z_[255*10]; /*!< Atomic number Z by chemical elements */
-  GGfloat atomic_number_density_[255*10]; /*!< Atomic number density : fraction of element in material * density * Avogadro / Atomic mass */
-  GGfloat mass_fraction_[255*10]; /*!< Mass fraction of element in material */
+  GGuchar atomic_number_Z_[255*16]; /*!< Atomic number Z by chemical elements */
+  GGfloat atomic_number_density_[255*16]; /*!< Atomic number density : fraction of element in material * density * Avogadro / Atomic mass */
+  GGfloat mass_fraction_[255*16]; /*!< Mass fraction of element in material */
 } GGEMSMaterialTables; /*!< Using C convention name of struct to C++ (_t deletion) */
 #ifndef OPENCL_COMPILER
 #ifdef _MSC_VER

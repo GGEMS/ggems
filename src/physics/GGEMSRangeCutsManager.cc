@@ -54,13 +54,23 @@ void GGEMSRangeCutsManager::PrintInfos(void) const
     GGcout("GGEMSRangeCutsManager", "PrintInfos", 0) << "Length cuts:" << GGendl;
     GGcout("GGEMSRangeCutsManager", "PrintInfos", 0) << "    * Photon: " << range_cuts->GetPhotonLengthCut()/GGEMSUnits::mm << " mm"<< GGendl;
     GGcout("GGEMSRangeCutsManager", "PrintInfos", 0) << "    * Electron: " << range_cuts->GetElectronLengthCut()/GGEMSUnits::mm << " mm" << GGendl;
+    GGcout("GGEMSRangeCutsManager", "PrintInfos", 0) << "    * Positron: " << range_cuts->GetPositronLengthCut()/GGEMSUnits::mm << " mm" << GGendl;
     GGcout("GGEMSRangeCutsManager", "PrintInfos", 0) << "Energy cuts:" << GGendl;
     GGcout("GGEMSRangeCutsManager", "PrintInfos", 0) << "    * Photon:" << GGendl;
-    // List of materials
+    EnergyCutUMap const kEnergyCutsPhoton = range_cuts->GetPhotonEnergyCut();
+    for (auto&& j : kEnergyCutsPhoton) {
+      GGcout("GGEMSRangeCutsManager", "PrintInfos", 0) << "        - " << j.first << ": " << j.second/GGEMSUnits::keV << " keV" << GGendl;
+    }
     GGcout("GGEMSRangeCutsManager", "PrintInfos", 0) << "    * Electron:" << GGendl;
-    // List of materials
-
-    // Printing energy cut by materials
+    EnergyCutUMap const kEnergyCutsElectron = range_cuts->GetElectronEnergyCut();
+    for (auto&& j : kEnergyCutsElectron) {
+      GGcout("GGEMSRangeCutsManager", "PrintInfos", 0) << "        - " << j.first << ": " << j.second/GGEMSUnits::keV << " keV" << GGendl;
+    }
+    GGcout("GGEMSRangeCutsManager", "PrintInfos", 0) << "    * Positron:" << GGendl;
+    EnergyCutUMap const kEnergyCutsPositron = range_cuts->GetPositronEnergyCut();
+    for (auto&& j : kEnergyCutsPositron) {
+      GGcout("GGEMSRangeCutsManager", "PrintInfos", 0) << "        - " << j.first << ": " << j.second/GGEMSUnits::keV << " keV" << GGendl;
+    }
     GGcout("GGEMSRangeCutsManager", "PrintInfos", 0) << GGendl;
   }
 }
@@ -103,11 +113,25 @@ void GGEMSRangeCutsManager::SetLengthCut(char const* phantom_name, char const* p
       range_cuts->SetElectronLengthCut(GGEMSUnits::DistanceUnit(value, unit));
     }
   }
+  else if (!kParticleName.compare("e+")) {
+    // Check if all phantoms in same time, or specific phantom
+    if (!kPhantomCase.compare("all")) {
+      for (size_t i = 0; i < phantom_navigator_manager.GetNumberOfPhantomNavigators(); ++i) {
+        std::shared_ptr<GGEMSRangeCuts> range_cuts = ((phantom_navigator_manager.GetPhantomNavigators()).at(i))->GetRangeCuts();
+        range_cuts->SetPositronLengthCut(GGEMSUnits::DistanceUnit(value, unit));
+      }
+    }
+    else {
+      std::shared_ptr<GGEMSRangeCuts> range_cuts = phantom_navigator_manager.GetPhantomNavigator(kPhantomCase)->GetRangeCuts();
+      range_cuts->SetPositronLengthCut(GGEMSUnits::DistanceUnit(value, unit));
+    }
+  }
   else {
     std::ostringstream oss(std::ostringstream::out);
     oss << "Particle name " << kParticleName << " unknown!!! The particles are:" << std::endl;
     oss << "    - gamma" << std::endl;
-    oss << "    - e-";
+    oss << "    - e-" << std::endl;
+    oss << "    - e+";
     GGEMSMisc::ThrowException("GGEMSRangeCutsManager", "SetLengthCut", oss.str());
   }
 }

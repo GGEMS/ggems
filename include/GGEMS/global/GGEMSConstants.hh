@@ -152,6 +152,13 @@ namespace GGEMSDefaultParams
   #else
   1.e-3f; /*!< Electron cut */
   #endif
+
+  __constant GGfloat POSITRON_CUT = 1.0f*
+  #ifndef OPENCL_COMPILER
+  GGEMSUnits::um; /*!< Positron cut */
+  #else
+  1.e-3f; /*!< Positron cut */
+  #endif
 #ifndef OPENCL_COMPILER
 }
 #endif
