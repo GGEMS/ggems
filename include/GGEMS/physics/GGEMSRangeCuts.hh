@@ -133,11 +133,11 @@ class GGEMS_EXPORT GGEMSRangeCuts
     inline EnergyCutUMap GetPositronEnergyCut(void) const {return energy_cuts_positron_;}
 
     /*!
-      \fn void ConvertCutsFromLengthToEnergy(std::shared_ptr<GGEMSMaterials> materials)
+      \fn void ConvertCutsFromLengthToEnergy(GGEMSMaterials* materials)
       \param materials - pointer on the list of activated materials
       \brief Convert cut from length to energy
     */
-    void ConvertCutsFromLengthToEnergy(std::shared_ptr<GGEMSMaterials> materials);
+    void ConvertCutsFromLengthToEnergy(GGEMSMaterials* materials);
 
   private:
     /*!
@@ -151,13 +151,13 @@ class GGEMS_EXPORT GGEMSRangeCuts
     GGfloat ConvertToEnergy(GGEMSMaterialTables* material_table, GGuchar const& index_mat, std::string const& particle_name);
 
     /*!
-      \fn void BuildLossTableElements(GGEMSMaterialTables* material_table, GGuchar const& index_mat, std::string const& particle_name)
+      \fn void BuildElementsLossTable(GGEMSMaterialTables* material_table, GGuchar const& index_mat, std::string const& particle_name)
       \param material_table - material table on OpenCL device
       \param index_mat - index of the material
       \param particle_name - name of the particle
       \brief Build loss table for elements in material
     */
-    void BuildLossTableElements(GGEMSMaterialTables* material_table, GGuchar const& index_mat, std::string const& particle_name);
+    void BuildElementsLossTable(GGEMSMaterialTables* material_table, GGuchar const& index_mat, std::string const& particle_name);
 
     /*!
       \fn void BuildAbsorptionLengthTable(GGEMSMaterialTables* material_table, GGuchar const& index_mat)

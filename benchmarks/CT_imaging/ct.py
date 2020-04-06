@@ -40,55 +40,18 @@ phantom_4.set_offset(0.0, 25.0, 50.0, b"mm")
 
 # ------------------------------------------------------------------------------
 # STEP 5: Physics
-# processes_manager.add_process(b"Compton", b"gamma", b"all")
-# or
-# processes_manager.add_process(b"Compton", b"gamma", b"phantom_1")
-# processes_manager.add_process(b"Compton", b"gamma", b"phantom_2")
-# processes_manager.add_process(b"Compton", b"gamma", b"phantom_3")
-# processes_manager.add_process(b"Compton", b"gamma", b"phantom_4")
-
+processes_manager.add_process(b"Compton", b"gamma", b"phantom_4")
 # processes_manager.add_process(b"Photoelectric", b"gamma", b"all")
-# or
-# processes_manager.add_process(b"Photoelectric", b"gamma", b"phantom_1")
-# processes_manager.add_process(b"Photoelectric", b"gamma", b"phantom_2")
-# processes_manager.add_process(b"Photoelectric", b"gamma", b"phantom_3")
-# processes_manager.add_process(b"Photoelectric", b"gamma", b"phantom_4")
-
 # processes_manager.add_process(b"Rayleigh", b"gamma", b"all")
-# or
-# processes_manager.add_process(b"Rayleigh", b"gamma", b"phantom_1")
-# processes_manager.add_process(b"Rayleigh", b"gamma", b"phantom_2")
-# processes_manager.add_process(b"Rayleigh", b"gamma", b"phantom_3")
-# processes_manager.add_process(b"Rayleigh", b"gamma", b"phantom_4")
 
 # Optional options, the following are by default
-processes_manager.set_cross_section_table_number_of_bins(220)
+processes_manager.set_cross_section_table_number_of_bins(220) # Not exceed 1000 bins
 processes_manager.set_cross_section_table_energy_min(0.99, b"keV")
 processes_manager.set_cross_section_table_energy_max(250.0, b"MeV")
 
 # ------------------------------------------------------------------------------
 # STEP 6: Cuts, by default but are 1 um
-# Apply a cut of 1 mm for each particle and each phantom
-range_cuts_manager.set_cut(b"gamma", 1.0, b"mm")
-# Or
-#range_cuts_manager.set_cut(b"gamma", 1.0, b"mm", b"phantom_1")
-#range_cuts_manager.set_cut(b"gamma", 1.0, b"mm", b"phantom_2")
-#range_cuts_manager.set_cut(b"gamma", 1.0, b"mm", b"phantom_3")
-#range_cuts_manager.set_cut(b"gamma", 1.0, b"mm", b"phantom_4")
-
-range_cuts_manager.set_cut(b"e-", 1.0, b"mm")
-# Or
-#range_cuts_manager.set_cut(b"e-", 1.0, b"mm", b"phantom_1")
-#range_cuts_manager.set_cut(b"e-", 1.0, b"mm", b"phantom_2")
-#range_cuts_manager.set_cut(b"e-", 1.0, b"mm", b"phantom_3")
-#range_cuts_manager.set_cut(b"e-", 1.0, b"mm", b"phantom_4")
-
-#range_cuts_manager.set_cut(b"e-", 1.0, b"mm")
-# Or
-#range_cuts_manager.set_cut(b"e-", 1.0, b"mm", b"phantom_1")
-#range_cuts_manager.set_cut(b"e-", 1.0, b"mm", b"phantom_2")
-#range_cuts_manager.set_cut(b"e-", 1.0, b"mm", b"phantom_3")
-#range_cuts_manager.set_cut(b"e-", 1.0, b"mm", b"phantom_4")
+range_cuts_manager.set_cut(b"gamma", 1.0, b"mm", b"all")
 
 # ------------------------------------------------------------------------------
 # STEP 7: Sources
@@ -126,11 +89,10 @@ ggems_manager.opencl_verbose(False)
 ggems_manager.material_verbose(False)
 ggems_manager.phantom_verbose(True)
 ggems_manager.source_verbose(False)
-ggems_manager.memory_verbose(True)
+ggems_manager.memory_verbose(True) # Indiquer RAM requise pour tous les éléments pris indépendemment
 ggems_manager.processes_verbose(True)
-ggems_manager.range_cuts_verbose(True)
+ggems_manager.range_cuts_verbose(False)
 ggems_manager.random_verbose(False)
-
 # ggems_manager.detector_verbose(true/false)
 # ggems_manager.tracking_verbose(true/false)
 

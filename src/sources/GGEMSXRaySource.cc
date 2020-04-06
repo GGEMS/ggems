@@ -118,10 +118,10 @@ void GGEMSXRaySource::PrintInfos(void) const
   GGcout("GGEMSXRaySource", "PrintInfos", 0) << "----------------------"  << GGendl;
   GGcout("GGEMSXRaySource", "PrintInfos", 0) << "*Source name: " << source_name_ << GGendl;
   GGcout("GGEMSXRaySource", "PrintInfos", 0) << "*Particle type: ";
-  if (particle_type_ == GGEMSParticleName::PHOTON) {
+  if (particle_type_ == GGEMSParticle::PHOTON) {
     std::cout << "Photon" << std::endl;
   }
-  else if (particle_type_ == GGEMSParticleName::ELECTRON) {
+  else if (particle_type_ == GGEMSParticle::ELECTRON) {
     std::cout << "Electron" << std::endl;
   }
   else {

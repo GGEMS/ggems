@@ -24,6 +24,20 @@
 #include "GGEMS/global/GGEMSConstants.hh"
 
 /*!
+  \namespace GGEMSState
+  \brief Namespace storing the state of the particle
+*/
+#ifndef OPENCL_COMPILER
+namespace GGEMSState
+{
+#endif
+  __constant GGuchar SOLID = 0; /*!< Solid state */
+  __constant GGuchar GAS = 1; /*!< Gas state */
+#ifndef OPENCL_COMPILER
+}
+#endif
+
+/*!
   \struct GGEMSChemicalElement
   \brief GGEMS structure managing a specific chemical element
 */

@@ -10,10 +10,6 @@
 
 - Faire un installer pratique pour Windows, MAC et Linux
 
-- Faire un benchmark CT
-
-- Faire les benchmarks avec C++
-
 - Faire la visu avec Qt (Qt Quick) et activer l'option Qt à partir du CMAKE. Si possible, faire la visualization sur carte graphique avec OpenCL
 
 - Dessiner les particules :
@@ -33,3 +29,8 @@
 
 - Faire physique indépendante afin de l'interroger en fonction de l'énergie et matériau
 
+- Passage wrapper python char* -> GGString
+
+- Indiquer la memoire requise par OpenCL pour les phantoms, particles, processes etc...
+
+- Pour plus de clarté, faire distinction _host et _device  pointer

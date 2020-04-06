@@ -12,9 +12,8 @@
 
 #include <limits>
 
-#include "GGEMS/materials/GGEMSMaterials.hh"
-
 #include "GGEMS/materials/GGEMSIonizationParamsMaterial.hh"
+#include "GGEMS/physics/GGEMSRangeCuts.hh"
 #include "GGEMS/tools/GGEMSTools.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -26,6 +25,9 @@ GGEMSMaterials::GGEMSMaterials(void)
   material_manager_(GGEMSMaterialsDatabaseManager::GetInstance())
 {
   GGcout("GGEMSMaterials", "GGEMSMaterials", 3) << "Allocation of GGEMSMaterials..." << GGendl;
+
+  // Allocation of cuts
+  range_cuts_.reset(new GGEMSRangeCuts());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -44,12 +46,38 @@ GGEMSMaterials::~GGEMSMaterials(void)
 void GGEMSMaterials::AddMaterial(std::string const& material)
 {
   // Checking the number of material (maximum is 255)
-  if (materials_.size() == 255) {
-    GGEMSMisc::ThrowException("GGEMSMaterials", "AddMaterial", "Limit of material reached. The limit is 255 materials!!!");
+  if (materials_.size() == 256) {
+    GGEMSMisc::ThrowException("GGEMSMaterials", "AddMaterial", "Limit of material reached. The limit is 256 materials!!!");
   }
 
   // Add material and check if the material already exists
   materials_.push_back(material);
+}
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSMaterials::SetLengthCut(std::string const& particle_name, GGfloat const& value, std::string const& unit)
+{
+  GGfloat const kCut = GGEMSUnits::DistanceUnit(value, unit.c_str());
+
+  if (particle_name == "gamma") {
+    range_cuts_->SetPhotonLengthCut(kCut);
+  }
+  else if (particle_name == "e+") {
+    range_cuts_->SetPositronLengthCut(kCut);
+  }
+  else if (particle_name == "e-") {
+    range_cuts_->SetElectronLengthCut(kCut);
+  }
+  else {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "Particle name " << particle_name << " unknown!!! The particles are:" << std::endl;
+    oss << "    - gamma" << std::endl;
+    oss << "    - e-" << std::endl;
+    oss << "    - e+";
+    GGEMSMisc::ThrowException("GGEMSMaterials", "SetCut", oss.str());
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -76,7 +104,7 @@ void GGEMSMaterials::PrintInfos(void) const
     GGcout("GGEMSMaterials", "PrintInfos", 0) << "    - Positron cut: " << material_table->positron_energy_cut_[i]/GGEMSUnits::keV << " keV" << GGendl;
     GGcout("GGEMSMaterials", "PrintInfos", 0) << "    - Radiation length: " << material_table->radiation_length_[i]/(GGEMSUnits::cm) << " cm" << GGendl;
     GGcout("GGEMSMaterials", "PrintInfos", 0) << "    - Total atomic density: " << material_table->number_of_atoms_by_volume_[i]/(GGEMSUnits::mol/GGEMSUnits::cm3) << " atom/cm3" << GGendl;
-    GGcout("GGEMSMaterials", "PrintInfos", 0) << "    - Total Electron density: " << material_table->number_of_electrons_by_volume_[i]/(GGEMSUnits::mol/GGEMSUnits::cm3) << " e-/cm3" << GGendl;
+    GGcout("GGEMSMaterials", "PrintInfos", 0) << "    - Total electron density: " << material_table->number_of_electrons_by_volume_[i]/(GGEMSUnits::mol/GGEMSUnits::cm3) << " e-/cm3" << GGendl;
     GGcout("GGEMSMaterials", "PrintInfos", 0) << "    - Chemical Elements:" << GGendl;
     for (GGuchar j = 0; j < material_table->number_of_chemical_elements_[i]; ++j) {
       GGushort const kIndexChemicalElement = material_table->index_of_chemical_elements_[i];
@@ -179,7 +207,7 @@ void GGEMSMaterials::BuildMaterialTables(void)
     material_table->log_energy1_fluct_[i] = ionization_params.GetLogEnergy1Fluct();
     material_table->log_energy2_fluct_[i] = ionization_params.GetLogEnergy2Fluct();
 
-    // others stuffs
+    // Radiation length
     material_table->radiation_length_[i] = material_manager_.GetRadiationLength(materials_.at(i));
 
     // Computing the access to chemical element by material
@@ -192,6 +220,9 @@ void GGEMSMaterials::BuildMaterialTables(void)
 
   // Release the pointer, mandatory step!!!
   opencl_manager_.ReleaseDeviceBuffer(material_tables_, material_table);
+
+  // Converting length cut to energy cut
+  range_cuts_->ConvertCutsFromLengthToEnergy(this);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -204,4 +235,49 @@ void GGEMSMaterials::Initialize(void)
 
   // Build material table depending on physics and cuts
   BuildMaterialTables();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+GGEMSMaterials* create_ggems_materials(void)
+{
+  return new(std::nothrow) GGEMSMaterials;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void add_material_ggems_materials(GGEMSMaterials* materials, char const* material_name)
+{
+  materials->AddMaterial(material_name);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void set_cut_ggems_materials(GGEMSMaterials* materials, char const* particle_type, GGfloat const cut, char const* unit)
+{
+  materials->SetLengthCut(particle_type, cut, unit);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void initialize_ggems_materials(GGEMSMaterials* materials)
+{
+  materials->Initialize();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void print_material_properties_ggems_materials(GGEMSMaterials* materials)
+{
+  materials->PrintInfos();
 }

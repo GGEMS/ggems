@@ -10,6 +10,8 @@
   \date Wednesday March 18, 2020
 */
 
+#include <cmath>
+
 #include "GGEMS/physics/GGEMSRangeCuts.hh"
 
 #include "GGEMS/physics/GGEMSRangeCutsManager.hh"
@@ -24,9 +26,9 @@ GGEMSRangeCuts::GGEMSRangeCuts(void)
 : min_energy_(0.0f),
   max_energy_(10.0f*GGEMSUnits::GeV),
   number_of_bins_(300),
-  length_cut_photon_(GGEMSDefaultParams::PHOTON_CUT),
-  length_cut_electron_(GGEMSDefaultParams::ELECTRON_CUT),
-  length_cut_positron_(GGEMSDefaultParams::POSITRON_CUT)
+  length_cut_photon_(GGEMSProcessParams::PHOTON_CUT),
+  length_cut_electron_(GGEMSProcessParams::ELECTRON_CUT),
+  length_cut_positron_(GGEMSProcessParams::POSITRON_CUT)
 {
   GGcout("GGEMSRangeCuts", "GGEMSRangeCuts", 3) << "Allocation of GGEMSRangeCuts..." << GGendl;
 }
@@ -47,9 +49,9 @@ GGEMSRangeCuts::~GGEMSRangeCuts(void)
 void GGEMSRangeCuts::SetPhotonLengthCut(GGfloat const& cut)
 {
   length_cut_photon_ = cut;
-  if (length_cut_photon_ < GGEMSDefaultParams::PHOTON_CUT) {
+  if (length_cut_photon_ < GGEMSProcessParams::PHOTON_CUT) {
     std::ostringstream oss(std::ostringstream::out);
-    oss << "Cut length for photon " << cut << " mm is too small!!! Minimum value is " << GGEMSDefaultParams::PHOTON_CUT << " mm!!!";
+    oss << "Cut length for photon " << cut << " mm is too small!!! Minimum value is " << GGEMSProcessParams::PHOTON_CUT << " mm!!!";
     GGEMSMisc::ThrowException("GGEMSRangeCuts", "SetPhotonLengthCut", oss.str());
   }
 }
@@ -61,9 +63,9 @@ void GGEMSRangeCuts::SetPhotonLengthCut(GGfloat const& cut)
 void GGEMSRangeCuts::SetElectronLengthCut(GGfloat const& cut)
 {
   length_cut_electron_ = cut;
-  if (length_cut_electron_ < GGEMSDefaultParams::ELECTRON_CUT) {
+  if (length_cut_electron_ < GGEMSProcessParams::ELECTRON_CUT) {
     std::ostringstream oss(std::ostringstream::out);
-    oss << "Cut length for electron " << cut << " mm is too small!!! Minimum value is " << GGEMSDefaultParams::ELECTRON_CUT << " mm!!!";
+    oss << "Cut length for electron " << cut << " mm is too small!!! Minimum value is " << GGEMSProcessParams::ELECTRON_CUT << " mm!!!";
     GGEMSMisc::ThrowException("GGEMSRangeCuts", "SetElectronLengthCut", oss.str());
   }
 }
@@ -75,9 +77,9 @@ void GGEMSRangeCuts::SetElectronLengthCut(GGfloat const& cut)
 void GGEMSRangeCuts::SetPositronLengthCut(GGfloat const& cut)
 {
   length_cut_positron_ = cut;
-  if (length_cut_positron_ < GGEMSDefaultParams::POSITRON_CUT) {
+  if (length_cut_positron_ < GGEMSProcessParams::POSITRON_CUT) {
     std::ostringstream oss(std::ostringstream::out);
-    oss << "Cut length for positron " << cut << " mm is too small!!! Minimum value is " << GGEMSDefaultParams::POSITRON_CUT << " mm!!!";
+    oss << "Cut length for positron " << cut << " mm is too small!!! Minimum value is " << GGEMSProcessParams::POSITRON_CUT << " mm!!!";
     GGEMSMisc::ThrowException("GGEMSRangeCuts", "SetPositronLengthCut", oss.str());
   }
 }
@@ -117,7 +119,7 @@ GGfloat GGEMSRangeCuts::ConvertToEnergy(GGEMSMaterialTables* material_table, GGu
   GGfloat kinetic_energy_cut = 0.0f;
 
   // Build dE/dX loss table for each elements
-  BuildLossTableElements(material_table, index_mat, particle_name);
+  BuildElementsLossTable(material_table, index_mat, particle_name);
 
   // Absorption table for photon and loss table for electron/positron
   if (particle_name == "gamma") {
@@ -195,7 +197,6 @@ void GGEMSRangeCuts::BuildAbsorptionLengthTable(GGEMSMaterialTables* material_ta
 void GGEMSRangeCuts::BuildMaterialLossTable(GGEMSMaterialTables* material_table, GGuchar const& index_mat)
 {
   // calculate parameters of the low energy part first
-  std::size_t i = 0;
   std::vector<GGfloat> loss;
 
   // Allocation buffer for absorption length
@@ -219,7 +220,7 @@ void GGEMSRangeCuts::BuildMaterialLossTable(GGEMSMaterialTables* material_table,
   // Integrate with Simpson formula with logarithmic binning
   GGfloat dltau = 1.0f;
   if (min_energy_ > 0.f) {
-    GGfloat ltt = log(max_energy_/min_energy_);
+    GGfloat ltt = logf(max_energy_/min_energy_);
     dltau = ltt/number_of_bins_;
   }
 
@@ -250,7 +251,7 @@ void GGEMSRangeCuts::BuildMaterialLossTable(GGEMSMaterialTables* material_table,
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSRangeCuts::BuildLossTableElements(GGEMSMaterialTables* material_table, GGuchar const& index_mat, std::string const& particle_name)
+void GGEMSRangeCuts::BuildElementsLossTable(GGEMSMaterialTables* material_table, GGuchar const& index_mat, std::string const& particle_name)
 {
   // Getting number of elements in material
   GGuchar const kNumberOfElements = material_table->number_of_chemical_elements_[index_mat];
@@ -282,7 +283,7 @@ void GGEMSRangeCuts::BuildLossTableElements(GGEMSMaterialTables* material_table,
       log_energy_table_element->SetValue(j, value);
     }
 
-    // Storing the log table
+    // Storing the logf table
     loss_table_dedx_table_elements_.push_back(log_energy_table_element);
   }
 }
@@ -315,39 +316,39 @@ GGfloat GGEMSRangeCuts::ComputePhotonCrossSection(GGuchar const& atomic_number, 
   if (std::abs(atomic_number - gZ) > 0.1f) {
     gZ = atomic_number;
     GGfloat const kZsquare = gZ*gZ;
-    GGfloat const kZlog = log(gZ);
+    GGfloat const kZlog = logf(gZ);
     GGfloat const kZlogsquare = kZlog*kZlog;
 
     s200keV = (0.2651f - 0.1501f*kZlog + 0.02283f*kZlogsquare) * kZsquare;
     tmin = (0.552f + 218.5f/gZ + 557.17f/kZsquare) * GGEMSUnits::MeV;
-    smin = (0.01239f + 0.005585f*kZlog - 0.000923f*kZlogsquare) * exp(1.5f*kZlog);
-    cmin = log(s200keV/smin) / (log(tmin/kT200keV) * log(tmin/kT200keV));
-    tlow = 0.2f * exp(-7.355f/sqrt(gZ)) * GGEMSUnits::MeV;
-    slow = s200keV * exp(0.042f*gZ*log(kT200keV/tlow)*log(kT200keV/tlow));
+    smin = (0.01239f + 0.005585f*kZlog - 0.000923f*kZlogsquare) * expf(1.5f*kZlog);
+    cmin = logf(s200keV/smin) / (logf(tmin/kT200keV) * logf(tmin/kT200keV));
+    tlow = 0.2f * expf(-7.355f/sqrtf(gZ)) * GGEMSUnits::MeV;
+    slow = s200keV * expf(0.042f*gZ*logf(kT200keV/tlow)*logf(kT200keV/tlow));
     s1keV = 300.0f*kZsquare;
-    clow = log(s1keV/slow) / log(tlow/kT1keV);
+    clow = logf(s1keV/slow) / logf(tlow/kT1keV);
 
-    chigh = (7.55e-5f - 0.0542e-5f*gZ ) * kZsquare * gZ/log(kT100MeV/tmin);
+    chigh = (7.55e-5f - 0.0542e-5f*gZ ) * kZsquare * gZ/logf(kT100MeV/tmin);
   }
 
   // Calculate the cross section (using an approximate empirical formula)
   GGfloat xs = 0.0f;
   if (energy < tlow){
     if (energy < kT1keV) {
-      xs = slow * exp(clow*log(tlow/kT1keV));
+      xs = slow * expf(clow*logf(tlow/kT1keV));
     }
     else {
-      xs = slow * exp(clow*log(tlow/energy));
+      xs = slow * expf(clow*logf(tlow/energy));
     }
   }
   else if (energy < kT200keV) {
-    xs = s200keV * exp(0.042f*gZ*log(kT200keV/energy)*log(kT200keV/energy));
+    xs = s200keV * expf(0.042f*gZ*logf(kT200keV/energy)*logf(kT200keV/energy));
   }
   else if(energy < tmin) {
-    xs = smin * exp(cmin*log(tmin/energy)*log(tmin/energy));
+    xs = smin * expf(cmin*logf(tmin/energy)*logf(tmin/energy));
   }
   else {
-    xs = smin + chigh*log(energy/tmin);
+    xs = smin + chigh*logf(energy/tmin);
   }
 
   return xs * GGEMSUnits::b;
@@ -359,7 +360,61 @@ GGfloat GGEMSRangeCuts::ComputePhotonCrossSection(GGuchar const& atomic_number, 
 
 GGfloat GGEMSRangeCuts::ComputeLossElectron(GGuchar const& atomic_number, GGfloat const& energy) const
 {
-  return 0.0f;
+  constexpr GGfloat cbr1 = 0.02f;
+  constexpr GGfloat cbr2 = -5.7e-5f;
+  constexpr GGfloat cbr3 = 1.f;
+  constexpr GGfloat cbr4 = 0.072f;
+
+  constexpr GGfloat Tlow = 10.f*GGEMSUnits::keV;
+  constexpr GGfloat Thigh = 1.0f*GGEMSUnits::GeV;
+
+  constexpr GGfloat Mass = GGEMSPhysicalConstant::ELECTRON_MASS_C2;
+  constexpr GGfloat bremfactor = 0.1f;
+
+  GGfloat eZ = -1.f;
+  GGfloat taul = 0.0f;
+  GGfloat ionpot = 0.0f;
+  GGfloat ionpotlog = -1.0e-10f;
+
+  //  calculate dE/dx for electrons
+  if (fabs(atomic_number - eZ) > 0.1f) {
+    eZ = atomic_number;
+    taul = Tlow/Mass;
+    ionpot = 1.6e-5f*GGEMSUnits::MeV * expf(0.9f*logf(eZ)) / Mass;
+    ionpotlog = logf(ionpot);
+  }
+
+  GGfloat const tau = energy / Mass;
+  GGfloat dEdx = 0.0f;
+
+  if (tau < taul) {
+    GGfloat t1 = taul + 1.0f;
+    GGfloat t2 = taul + 2.0f;
+    GGfloat tsq = taul*taul;
+    GGfloat beta2 = taul*t2 / (t1*t1);
+    GGfloat f = 1.f - beta2 + logf(tsq/2.0f) + (0.5f + 0.25f*tsq + (1.f+2.f*taul) * logf(0.5f)) / (t1*t1);
+    dEdx = (logf(2.f*taul + 4.f) - 2.f*ionpotlog + f) / beta2;
+    dEdx = GGEMSPhysicalConstant::TWO_PI_MC2_RCL2 * eZ * dEdx;
+    GGfloat clow = dEdx * sqrtf(taul);
+    dEdx = clow / sqrtf(energy / Mass);
+  }
+  else {
+    GGfloat t1 = tau + 1.f;
+    GGfloat t2 = tau + 2.f;
+    GGfloat tsq = tau*tau;
+    GGfloat beta2 = tau*t2 / ( t1*t1 );
+    GGfloat f = 1.f - beta2 + logf(tsq/2.f) + (0.5f + 0.25f*tsq + (1.f + 2.f*tau)*logf(0.5f)) / (t1*t1);
+    dEdx = (logf(2.f*tau + 4.f) - 2.f*ionpotlog + f) / beta2;
+    dEdx = GGEMSPhysicalConstant::TWO_PI_MC2_RCL2 * eZ * dEdx;
+
+    // loss from bremsstrahlung follows
+    GGfloat cbrem = (cbr1 + cbr2*eZ) * (cbr3 + cbr4*logf(energy/Thigh));
+    cbrem = eZ * (eZ+1.f) * cbrem * tau / beta2;
+    cbrem *= bremfactor;
+    dEdx += GGEMSPhysicalConstant::TWO_PI_MC2_RCL2 * cbrem;
+  }
+
+  return dEdx;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -368,7 +423,60 @@ GGfloat GGEMSRangeCuts::ComputeLossElectron(GGuchar const& atomic_number, GGfloa
 
 GGfloat GGEMSRangeCuts::ComputeLossPositron(GGuchar const& atomic_number, GGfloat const& energy) const
 {
-  return 0.0f;
+  constexpr GGfloat cbr1 = 0.02f;
+  constexpr GGfloat cbr2 = -5.7e-5f;
+  constexpr GGfloat cbr3 = 1.f;
+  constexpr GGfloat cbr4 = 0.072f;
+
+  constexpr GGfloat Tlow = 10.f*GGEMSUnits::keV;
+  constexpr GGfloat Thigh = 1.0f*GGEMSUnits::GeV;
+
+  constexpr GGfloat Mass = GGEMSPhysicalConstant::POSITRON_MASS_C2;
+  constexpr GGfloat bremfactor = 0.1f;
+
+  GGfloat Z = -1.f;
+  GGfloat taul = 0.0f;
+  GGfloat ionpot = 0.0f;
+  GGfloat ionpotlog = -1.0e-10f;
+
+  //  calculate dE/dx for electrons
+  if (fabs(atomic_number-Z) > 0.1f) {
+    Z = atomic_number;
+    taul = Tlow/Mass;
+    ionpot = 1.6e-5f*GGEMSUnits::MeV * expf(0.9f*logf(Z))/Mass;
+    ionpotlog = logf(ionpot);
+  } 
+
+  GGfloat tau = energy / Mass;
+  GGfloat dEdx;
+
+  if (tau < taul) {
+    GGfloat t1 = taul + 1.f;
+    GGfloat t2 = taul + 2.f;
+    GGfloat tsq = taul*taul;
+    GGfloat beta2 = taul*t2 / (t1*t1);
+    GGfloat f = 2.f * logf(taul) -(6.f*taul+1.5f*tsq-taul*(1.f-tsq/3.f)/t2-tsq*(0.5f-tsq/12.f)/(t2*t2))/(t1*t1);
+    dEdx = (logf(2.f*taul+4.f)-2.f*ionpotlog+f)/beta2;
+    dEdx = GGEMSPhysicalConstant::TWO_PI_MC2_RCL2 * Z * dEdx;
+    GGfloat clow = dEdx * sqrtf(taul);
+    dEdx = clow/sqrtf(energy/Mass);
+  }
+  else {
+    GGfloat t1 = tau + 1.f;
+    GGfloat t2 = tau + 2.f;
+    GGfloat tsq = tau*tau;
+    GGfloat beta2 = tau*t2/(t1*t1);
+    GGfloat f = 2.f*logf(tau)-(6.f*tau+1.5f*tsq-tau*(1.f-tsq/3.f)/t2-tsq*(0.5f-tsq/12.f)/(t2*t2))/(t1*t1);
+    dEdx = (logf(2.f*tau+4.f)-2.f*ionpotlog+f)/beta2;
+    dEdx = GGEMSPhysicalConstant::TWO_PI_MC2_RCL2 * Z * dEdx;
+
+    // loss from bremsstrahlung follows
+    GGfloat cbrem = (cbr1+cbr2*Z)*(cbr3+cbr4*logf(energy/Thigh));
+    cbrem = Z*(Z+1.f)*cbrem*tau/beta2;
+    cbrem *= bremfactor;
+    dEdx += GGEMSPhysicalConstant::TWO_PI_MC2_RCL2 * cbrem;
+  }
+  return dEdx;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -409,7 +517,7 @@ GGfloat GGEMSRangeCuts::ConvertLengthToEnergyCut(std::shared_ptr<GGEMSLogEnergyT
   if (length_cut >= rmax) return max_energy_;
 
   // convert range to energy
-  GGfloat t3 = sqrt(t1*t2);
+  GGfloat t3 = sqrtf(t1*t2);
   GGfloat r3 = range_table->GetLossTableValue(t3);
 
   while (fabs(1.0f - r3/length_cut) > kEpsilon) {
@@ -420,7 +528,7 @@ GGfloat GGEMSRangeCuts::ConvertLengthToEnergyCut(std::shared_ptr<GGEMSLogEnergyT
       t1 = t3;
     }
 
-    t3 = sqrt(t1*t2);
+    t3 = sqrtf(t1*t2);
     r3 = range_table->GetLossTableValue(t3);
   }
 
@@ -431,7 +539,7 @@ GGfloat GGEMSRangeCuts::ConvertLengthToEnergyCut(std::shared_ptr<GGEMSLogEnergyT
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSRangeCuts::ConvertCutsFromLengthToEnergy(std::shared_ptr<GGEMSMaterials> materials)
+void GGEMSRangeCuts::ConvertCutsFromLengthToEnergy(GGEMSMaterials* materials)
 {
   // Getting the minimum for the loss/cross section table in process manager
   GGEMSProcessesManager& process_manager = GGEMSProcessesManager::GetInstance();
@@ -450,10 +558,15 @@ void GGEMSRangeCuts::ConvertCutsFromLengthToEnergy(std::shared_ptr<GGEMSMaterial
     GGfloat energy_cut_photon = ConvertToEnergy(material_table_host, i, "gamma");
 
     // Convert electron cuts
-    //ConvertElectron(material_table_host, i);
+    GGfloat energy_cut_electron = ConvertToEnergy(material_table_host, i, "e-");
+
+    // Convert electron cuts
+    GGfloat energy_cut_positron = ConvertToEnergy(material_table_host, i, "e+");
 
     // Storing the cuts in map
     energy_cuts_photon_.insert(std::make_pair(materials->GetMaterialName(i), energy_cut_photon));
+    energy_cuts_electron_.insert(std::make_pair(materials->GetMaterialName(i), energy_cut_electron));
+    energy_cuts_positron_.insert(std::make_pair(materials->GetMaterialName(i), energy_cut_positron));
   }
 
   // Release pointer
