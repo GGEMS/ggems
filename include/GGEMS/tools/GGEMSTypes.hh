@@ -97,7 +97,7 @@
 #include <CL/cl.hpp>
 #endif
 
-#define GGbool cl_bool /*!< define a new type for cl_bool */
+#define GGbool cl_bool /*!< define a new type for cl_bool, not used in OpenCL */
 
 #define GGchar cl_char /*!< define a new type for cl_char */
 #define GGchar2 cl_char2 /*!< define a new type for cl_char2 */

@@ -179,12 +179,6 @@ class GGEMS_EXPORT GGEMSManager
 
   private:
     /*!
-      \fn void PrintInfos() const
-      \brief print infos about the GGEMS simulation
-    */
-    void PrintInfos(void) const;
-
-    /*!
       \fn void PrintBanner(void) const
       \brief Print GGEMS banner
     */

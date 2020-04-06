@@ -14,7 +14,61 @@
 */
 
 #include "GGEMS/global/GGEMSExport.hh"
-#include "GGEMS/tools/GGEMSTypes.hh"
+#include "GGEMS/tools/GGEMSSystemOfUnits.hh"
+
+/*!
+  \namespace GGEMSProcessParams
+  \brief Namespace storing the default parameters
+*/
+#ifndef OPENCL_COMPILER
+namespace GGEMSProcessParams
+{
+#endif
+  __constant GGfloat KINETIC_ENERGY_MIN = 1.0f*
+  #ifndef OPENCL_COMPILER
+  GGEMSUnits::eV; /*!< Min kinetic energy */
+  #else
+  1.e-6f; /*!< Min kinetic energy */
+  #endif
+
+  __constant GGushort CROSS_SECTION_TABLE_NUMBER_BINS = 220; /*!< Number of bins in the cross section table */
+  __constant GGfloat CROSS_SECTION_TABLE_ENERGY_MIN = 990.0f*
+  #ifndef OPENCL_COMPILER
+  GGEMSUnits::eV; /*!< Min energy in the cross section table */
+  #else
+  1.e-6f; /*!< Min energy in the cross section table */
+  #endif
+
+  __constant GGfloat CROSS_SECTION_TABLE_ENERGY_MAX = 250.0f*
+  #ifndef OPENCL_COMPILER
+  GGEMSUnits::MeV; /*!< Max energy in the cross section table */
+  #else
+  1.f; /*!< Max energy in the cross section table */
+  #endif
+
+  __constant GGfloat PHOTON_CUT = 1.0f*
+  #ifndef OPENCL_COMPILER
+  GGEMSUnits::um; /*!< Photon cut */
+  #else
+  1.e-3f; /*!< Photon cut */
+  #endif
+
+  __constant GGfloat ELECTRON_CUT = 1.0f*
+  #ifndef OPENCL_COMPILER
+  GGEMSUnits::um; /*!< Electron cut */
+  #else
+  1.e-3f; /*!< Electron cut */
+  #endif
+
+  __constant GGfloat POSITRON_CUT = 1.0f*
+  #ifndef OPENCL_COMPILER
+  GGEMSUnits::um; /*!< Positron cut */
+  #else
+  1.e-3f; /*!< Positron cut */
+  #endif
+#ifndef OPENCL_COMPILER
+}
+#endif
 
 /*!
   \class GGEMSProcessesManager
@@ -118,10 +172,32 @@ class GGEMS_EXPORT GGEMSProcessesManager
     inline GGushort GetCrossSectionTableNumberOfBins(void) const {return cross_section_table_number_of_bins_;}
 
     /*!
+      \fn void AddProcess(std::string const& process_name, std::string const& particle_name, std::string const& phantom_name)
+      \param process_name - Name of the process
+      \param particle_name - Name of the particle
+      \param phantom_name - Name of the phantom
+      \brief add a process for a specific phantom or all the phantom
+    */
+    void AddProcess(std::string const& process_name, std::string const& particle_name, std::string const& phantom_name);
+
+    /*!
+      \fn void AddProcessRAM(GGulong const& size)
+      \param size - allocated RAM for processes in GGEMS
+      \brief add RAM memory size for processes
+    */
+    void AddProcessRAM(GGulong const& size);
+
+    /*!
       \fn void PrintInfos(void) const
       \brief Print all infos about processes
     */
     void PrintInfos(void) const;
+
+    /*!
+      \fn void PrintAllocatedRAM(void) const
+      \brief Print allocated RAM for processes
+    */
+    void PrintAllocatedRAM(void) const;
 
     /*!
       \fn void PrintAvailableProcesses(void) const
@@ -133,6 +209,7 @@ class GGEMS_EXPORT GGEMSProcessesManager
     GGushort cross_section_table_number_of_bins_; /*!< Number of bins in the cross section table */
     GGfloat cross_section_table_min_energy_; /*!< Minimum energy in the cross section table */
     GGfloat cross_section_table_max_energy_; /*!< Maximum energy in the cross section table */
+    GGulong allocated_RAM_for_processes_; /*!< Allocated RAM in bytes for processes in GGEMS */
 };
 
 /*!
@@ -141,6 +218,16 @@ class GGEMS_EXPORT GGEMSProcessesManager
   \brief Get the GGEMSProcessesManager pointer for python user.
 */
 extern "C" GGEMS_EXPORT GGEMSProcessesManager* get_instance_processes_manager(void);
+
+/*!
+  \fn void add_process_processes_manager(GGEMSProcessesManager* processes_manager, char const* process_name, char const* particle_name, char const* phantom_name)
+  \param processes_manager - pointer on the processes manager
+  \param process_name - Name of the process
+  \param particle_name - Name of the particle
+  \param phantom_name - Name of the phantom
+  \brief add a process for a specific phantom or all the phantom
+*/
+extern "C" GGEMS_EXPORT void add_process_processes_manager(GGEMSProcessesManager* processes_manager, char const* process_name, char const* particle_name, char const* phantom_name);
 
 /*!
   \fn void set_cross_section_table_number_of_bins_processes_manager(GGEMSProcessesManager* processes_manager, GGushort const number_of_bins)

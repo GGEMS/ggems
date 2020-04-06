@@ -24,13 +24,10 @@
 #endif
 
 #include "GGEMS/global/GGEMSManager.hh"
-
-#include "GGEMS/materials/GGEMSMaterialsDatabaseManager.hh"
 #include "GGEMS/physics/GGEMSProcessesManager.hh"
 #include "GGEMS/physics/GGEMSRangeCutsManager.hh"
 #include "GGEMS/sources/GGEMSSourceManager.hh"
 #include "GGEMS/navigators/GGEMSPhantomNavigatorManager.hh"
-
 #include "GGEMS/tools/GGEMSChrono.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -54,18 +51,8 @@ GGEMSManager::GGEMSManager(void)
   phantom_navigator_manager_(GGEMSPhantomNavigatorManager::GetInstance()),
   range_cuts_manager_(GGEMSRangeCutsManager::GetInstance()),
   processes_manager_(GGEMSProcessesManager::GetInstance())
-  //physics_list_(0),
-  //secondaries_list_(0),
-  //photon_level_secondaries_(0),
-  //electron_level_secondaries_(0)
 {
   GGcout("GGEMSManager", "GGEMSManager", 3) << "Allocation of GGEMS Manager..." << GGendl;
-
-  // Allocation of the memory for the physics list
-  //physics_list_.resize(GGEMSProcessName::NUMBER_PROCESSES, false);
-
-  // Allocation of the memory for the secondaries list
-  //secondaries_list_.resize(GGEMSProcessName::NUMBER_PARTICLES, false);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -195,91 +182,6 @@ void GGEMSManager::SetRandomVerbose(bool const& is_random_verbose)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-/*void GGEMSManager::SetProcess(char const* process_name)
-{
-  // Convert the process name in string
-  std::string process_name_str(process_name);
-
-  // Transform the string to lower character
-  std::transform(process_name_str.begin(), process_name_str.end(), process_name_str.begin(), ::tolower);
-
-  // Activate process
-  if (!process_name_str.compare("compton")) {
-    physics_list_.at(GGEMSProcessName::PHOTON_COMPTON) = 1;
-  }
-  else if (!process_name_str.compare("photoelectric")) {
-    physics_list_.at(GGEMSProcessName::PHOTON_PHOTOELECTRIC) = 1;
-  }
-  else if (!process_name_str.compare("rayleigh")) {
-    physics_list_.at(GGEMSProcessName::PHOTON_RAYLEIGH) = 1;
-  }
-  else if (!process_name_str.compare("eionisation")) {
-    physics_list_.at(GGEMSProcessName::ELECTRON_IONISATION) = 1;
-  }
-  else if (!process_name_str.compare("ebremsstrahlung")) {
-    physics_list_.at(GGEMSProcessName::ELECTRON_BREMSSTRAHLUNG) = 1;
-  }
-  else if (!process_name_str.compare("emultiplescattering")) {
-    physics_list_.at(GGEMSProcessName::ELECTRON_MSC) = 1;
-  }
-  else {
-    GGEMSMisc::ThrowException("GGEMSManager", "SetProcess", "Unknown process!!!");
-  }
-}*/
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-/*void GGEMSManager::SetParticleCut(char const* particle_name, GGdouble const& distance)
-{
-  // Convert the particle name in string
-  std::string particle_name_str(particle_name);
-
-  // Transform the string to lower character
-  std::transform(particle_name_str.begin(), particle_name_str.end(), particle_name_str.begin(), ::tolower);
-
-  if (!particle_name_str.compare("photon")) {
-    photon_distance_cut_ = distance;
-  }
-  else if (!particle_name_str.compare("electron")) {
-    electron_distance_cut_ = distance;
-  }
-  else {
-    GGEMSMisc::ThrowException("GGEMSManager", "SetParticleCut", "Unknown particle!!!");
-  }
-}*/
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-/*void GGEMSManager::SetParticleSecondaryAndLevel(char const* particle_name, GGuint const& level)
-{
-  // Convert the particle name in string
-  std::string particle_name_str(particle_name);
-
-  // Transform the string to lower character
-  std::transform(particle_name_str.begin(), particle_name_str.end(), particle_name_str.begin(), ::tolower);
-
-  if (!particle_name_str.compare("photon")) {
-    GGcout("GGEMSManager", "SetParticleSecondaryAndLevel",0) << "Warning!!! Photon as secondary is not available yet!!!" << GGendl;
-    secondaries_list_.at(GGEMSParticleName::PHOTON) = false;
-    photon_level_secondaries_ = 0;
-  }
-  else if (!particle_name_str.compare("electron")) {
-    secondaries_list_.at(GGEMSParticleName::ELECTRON) = true;
-    electron_level_secondaries_ = level;
-  }
-  else {
-    GGEMSMisc::ThrowException("GGEMSManager", "SetParticleSecondaryAndLevel", "Unknown particle!!!");
-  }
-}*/
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
 void GGEMSManager::CheckParameters(void)
 {
   GGcout("GGEMSManager", "CheckParameters", 1) << "Checking the mandatory parameters..." << GGendl;
@@ -351,7 +253,10 @@ void GGEMSManager::Initialize(void)
   if (is_random_verbose_) GGcout("GGEMSManager", "Initialize", 0) << "Seed: " << seed_ << GGendl;
 
   // Printing infos about RAM
-  if (is_memory_ram_verbose_) opencl_manager_.PrintRAMStatus();
+  if (is_memory_ram_verbose_) {
+    processes_manager_.PrintAllocatedRAM();
+    opencl_manager_.PrintRAMStatus();
+  }
 
   // Get the end time
   ChronoTime end_time = GGEMSChrono::Now();
@@ -394,28 +299,6 @@ void GGEMSManager::Run()
 
   // Display the elapsed time in GGEMS
   GGEMSChrono::DisplayTime(end_time - start_time, "GGEMS simulation");
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void GGEMSManager::PrintInfos(void) const
-{
-  /*GGcout("GGEMSManager", "PrintInfos", 0) << GGendl;
-  GGcout("GGEMSManager", "PrintInfos", 0) << "++++++++++++++++" << GGendl;
-  GGcout("GGEMSManager", "PrintInfos", 0) << "*Seed: " << seed_ << GGendl;
-  GGcout("GGEMSManager", "PrintInfos", 0) << "*Physics list:" << GGendl;
-  GGcout("GGEMSManager", "PrintInfos", 0) << "  --> Photon: " << (physics_list_.at(0) ? "Compton " : "") << (physics_list_.at(1) ? "Photoelectric " : "") << (physics_list_.at(2) ? "Rayleigh" : "") << GGendl;
-  GGcout("GGEMSManager", "PrintInfos", 0) << "  --> Electron: " << (physics_list_.at(4) ? "eIonisation " : "") << (physics_list_.at(5) ? "eMultipleScattering " : "") << (physics_list_.at(6) ? "eBremsstrahlung" : "") << GGendl;
-  GGcout("GGEMSManager", "PrintInfos", 0) << "  --> Tables Min: " << cross_section_table_energy_min_/GGEMSUnits::MeV << " MeV, Max: " << cross_section_table_energy_max_/GGEMSUnits::MeV << " MeV, energy bins: " << cross_section_table_number_of_bins_ << GGendl;
-  GGcout("GGEMSManager", "PrintInfos", 0) << "  --> Range cuts Photon: " << photon_distance_cut_/GGEMSUnits::mm << " mm, Electron: " << electron_distance_cut_/GGEMSUnits::mm << " mm" << GGendl;
-  GGcout("GGEMSManager", "PrintInfos", 0) << "*Secondary particles:" << GGendl;
-  GGcout("GGEMSManager", "PrintInfos", 0) << "  --> Photon level: " << photon_level_secondaries_  << " NOT ACTIVATED!!!" << GGendl;
-  GGcout("GGEMSManager", "PrintInfos", 0) << "  --> Electron level: " << electron_level_secondaries_ << GGendl;
-  GGcout("GGEMSManager", "PrintInfos", 0) << "*Geometry tolerance:" << GGendl;
-  GGcout("GGEMSManager", "PrintInfos", 0) << "++++++++++++++++" << GGendl;
-  GGcout("GGEMSManager", "PrintInfos", 0) << GGendl;*/
 }
 
 ////////////////////////////////////////////////////////////////////////////////

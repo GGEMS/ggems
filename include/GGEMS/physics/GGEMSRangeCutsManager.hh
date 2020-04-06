@@ -79,14 +79,14 @@ class GGEMS_EXPORT GGEMSRangeCutsManager
     GGEMSRangeCutsManager& operator=(GGEMSRangeCutsManager const&& range_cuts_manager) = delete;
 
     /*!
-      \fn void SetLengthCut(char const* phantom_name, char const* particle_name, GGfloat const& value, char const* unit)
+      \fn void SetLengthCut(std::string const& phantom_name, std::string const& particle_name, GGfloat const& value, std::string const& unit = "mm")
       \param phantom_name - name of the phantom
       \param particle_name - name of the particle
       \param value - value of the cut
       \param unit - unit of the cut in length
       \brief set the range cut length for a phantom and a particle
     */
-    void SetLengthCut(char const* phantom_name, char const* particle_name, GGfloat const& value, char const* unit = "mm");
+    void SetLengthCut(std::string const& phantom_name, std::string const& particle_name, GGfloat const& value, std::string const& unit = "mm");
 
     /*!
       \fn void PrintInfos(void) const

@@ -17,15 +17,32 @@
 #pragma warning(disable: 4251) // Deleting warning exporting STL members!!!
 #endif
 
-#include <string>
-#include <memory>
-
-#include "GGEMS/global/GGEMSExport.hh"
-#include "GGEMS/tools/GGEMSTypes.hh"
+#include "GGEMS/physics/GGEMSRangeCuts.hh"
 
 class GGEMSSolidPhantom;
 class GGEMSMaterials;
-class GGEMSRangeCuts;
+class GGEMSCrossSections;
+
+/*!
+  \namespace GGEMSTolerance
+  \brief Namespace storing the tolerance for the float computations
+*/
+#ifndef OPENCL_COMPILER
+namespace GGEMSTolerance
+{
+#endif
+  __constant GGfloat EPSILON2 = 1.0e-02f; /*!< Epsilon of 0.01 */
+  __constant GGfloat EPSILON3 = 1.0e-03f; /*!< Epsilon of 0.001 */
+  __constant GGfloat EPSILON6 = 1.0e-06f; /*!< Epsilon of 0.000001 */
+  __constant GGfloat GEOMETRY = 100.0f*
+  #ifndef OPENCL_COMPILER
+  GGEMSUnits::nm; /*!< Tolerance for the geometry navigation */
+  #else
+  1.e-6f; /*!< Tolerance for the geometry navigation */
+  #endif
+#ifndef OPENCL_COMPILER
+}
+#endif
 
 /*!
   \class GGEMSPhantomNavigator
@@ -127,11 +144,18 @@ class GGEMS_EXPORT GGEMSPhantomNavigator
     inline std::shared_ptr<GGEMSSolidPhantom> GetSolidPhantom(void) const {return solid_phantom_;}
 
     /*!
-      \fn inline std::shared_ptr<GGEMSRangeCuts> GetRangeCuts(void) const
-      \brief get the pointer on range cuts
-      \return the pointer on range cuts
+      \fn inline std::shared_ptr<GGEMSMaterials> GetMaterials(void) const
+      \brief get the pointer on materials
+      \return the pointer on materials
     */
-    inline std::shared_ptr<GGEMSRangeCuts> GetRangeCuts(void) const {return range_cuts_;}
+    inline std::shared_ptr<GGEMSMaterials> GetMaterials(void) const {return materials_;}
+
+    /*!
+      \fn inline std::shared_ptr<GGEMSCrossSections> GetCrossSections(void) const
+      \brief get the pointer on cross sections
+      \return the pointer on cross sections
+    */
+    inline std::shared_ptr<GGEMSCrossSections> GetCrossSections(void) const {return cross_sections_;}
 
     /*!
       \fn void PrintInfos(void) const
@@ -164,7 +188,7 @@ class GGEMS_EXPORT GGEMSPhantomNavigator
 
     std::shared_ptr<GGEMSSolidPhantom> solid_phantom_; /*!< Solid phantom with geometric infos and label */
     std::shared_ptr<GGEMSMaterials> materials_; /*!< Materials of phantom */
-    std::shared_ptr<GGEMSRangeCuts> range_cuts_; /*!< Cut for particles */
+    std::shared_ptr<GGEMSCrossSections> cross_sections_; /*!< Cross section table for process */
 };
 
 #endif // End of GUARD_GGEMS_NAVIGATORS_GGEMSPHANTOMNAVIGATOR_HH

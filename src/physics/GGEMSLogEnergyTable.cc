@@ -10,6 +10,8 @@
   \date Tuesday March 24, 2020
 */
 
+#include <cmath>
+
 #include "GGEMS/physics/GGEMSLogEnergyTable.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
 
@@ -21,8 +23,8 @@ GGEMSLogEnergyTable::GGEMSLogEnergyTable(GGfloat const& lowest_energy, GGfloat c
 {
   GGcout("GGEMSLogEnergyTable", "GGEMSLogEnergyTable", 3) << "Allocation of GGEMSLogEnergyTable..." << GGendl;
 
-  bin_width_ = log(highest_energy / lowest_energy) / number_of_bins;
-  base_bin_ = log(lowest_energy) / bin_width_;
+  bin_width_ = logf(highest_energy / lowest_energy) / static_cast<GGfloat>(number_of_bins);
+  base_bin_ = logf(lowest_energy) / bin_width_;
 
   number_of_nodes_ = number_of_bins + 1;
 
@@ -36,7 +38,7 @@ GGEMSLogEnergyTable::GGEMSLogEnergyTable(GGfloat const& lowest_energy, GGfloat c
   // Filling the vectors
   for (std::size_t i = 1; i < number_of_nodes_-1; ++i) {
     loss_table_data_.push_back(0.0f);
-    bins_.push_back(exp((base_bin_+i)*bin_width_));
+    bins_.push_back(expf((base_bin_+static_cast<GGfloat>(i))*bin_width_));
   }
 
   // End of vector

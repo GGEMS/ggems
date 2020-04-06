@@ -197,7 +197,7 @@ class GGEMSXRaySource(object):
 
 
 class GGEMSMaterialsManager(object):
-    """Class handling the materials in GGEMS
+    """Class handling the materials database in GGEMS
     """
     def __init__(self):
         ggems_lib.get_instance_materials_manager.restype = ctypes.c_void_p
@@ -221,6 +221,39 @@ class GGEMSMaterialsManager(object):
 
     def print_available_materials(self):
         ggems_lib.print_available_materials_ggems_materials_manager(self.obj)
+
+
+class GGEMSMaterials(object):
+    """ Class handling materials one by one in GGEMS
+    """
+    def __init__(self):
+        ggems_lib.create_ggems_materials.restype = ctypes.c_void_p
+
+        ggems_lib.add_material_ggems_materials.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
+        ggems_lib.add_material_ggems_materials.restype = ctypes.c_void_p
+
+        ggems_lib.set_cut_ggems_materials.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_float, ctypes.c_char_p]
+        ggems_lib.set_cut_ggems_materials.restype = ctypes.c_void_p
+
+        ggems_lib.initialize_ggems_materials.argtypes = [ctypes.c_void_p]
+        ggems_lib.initialize_ggems_materials.restype = ctypes.c_void_p
+
+        ggems_lib.print_material_properties_ggems_materials.argtypes = [ctypes.c_void_p]
+        ggems_lib.print_material_properties_ggems_materials.restype = ctypes.c_void_p
+
+        self.obj = ggems_lib.create_ggems_materials()
+
+    def add_material(self, material):
+        ggems_lib.add_material_ggems_materials(self.obj, material)
+
+    def set_cut(self, particle_type, cut, unit):
+        ggems_lib.set_cut_ggems_materials(self.obj, particle_type, cut, unit)
+
+    def initialize(self):
+        ggems_lib.initialize_ggems_materials(self.obj)
+
+    def print_material_properties(self):
+        ggems_lib.print_material_properties_ggems_materials(self.obj)
 
 
 class GGEMSManager(object):
@@ -334,6 +367,9 @@ class GGEMSProcessesManager(object):
         ggems_lib.print_available_processes_manager.argtypes = [ctypes.c_void_p]
         ggems_lib.print_available_processes_manager.restype = ctypes.c_void_p
 
+        ggems_lib.add_process_processes_manager.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_char_p, ctypes.c_char_p]
+        ggems_lib.add_process_processes_manager.restype = ctypes.c_void_p
+
         self.obj = ggems_lib.get_instance_processes_manager()
 
     def set_cross_section_table_number_of_bins(self, number_of_bins):
@@ -350,6 +386,9 @@ class GGEMSProcessesManager(object):
 
     def print_infos(self):
         ggems_lib.print_infos_processes_manager(self.obj)
+
+    def add_process(self, process_name, particle_name, phantom_name):
+        ggems_lib.add_process_processes_manager(self.obj, process_name, particle_name, phantom_name)
 
 
 class GGEMSPhantomCreatorManager(object):

@@ -43,11 +43,12 @@ void GGEMSRangeCutsManager::PrintInfos(void) const
 
   // Loop over the phantom and printing range cuts by materials in length and energy
   GGEMSPhantomNavigatorManager& phantom_navigator_manager = GGEMSPhantomNavigatorManager::GetInstance();
+
   for (size_t i = 0; i < phantom_navigator_manager.GetNumberOfPhantomNavigators(); ++i) {
     // Get pointer on phantom navigator
     std::string const kPhantomName = ((phantom_navigator_manager.GetPhantomNavigators()).at(i))->GetPhantomName();
     // Get the Range cut pointer
-    std::shared_ptr<GGEMSRangeCuts> range_cuts = ((phantom_navigator_manager.GetPhantomNavigators()).at(i))->GetRangeCuts();
+    std::shared_ptr<GGEMSRangeCuts> range_cuts = ((phantom_navigator_manager.GetPhantomNavigators()).at(i))->GetMaterials()->GetRangeCuts();
 
     GGcout("GGEMSRangeCutsManager", "PrintInfos", 0) << "Range cuts for phantom navigator: " << kPhantomName << GGendl;
     GGcout("GGEMSRangeCutsManager", "PrintInfos", 0) << "---------------------------------" << GGendl;
@@ -79,60 +80,20 @@ void GGEMSRangeCutsManager::PrintInfos(void) const
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSRangeCutsManager::SetLengthCut(char const* phantom_name, char const* particle_name, GGfloat const& value, char const* unit)
+void GGEMSRangeCutsManager::SetLengthCut(std::string const& phantom_name, std::string const& particle_name, GGfloat const& value, std::string const& unit)
 {
-  std::string const kParticleName(particle_name);
-  std::string const kPhantomCase(phantom_name);
-
   GGEMSPhantomNavigatorManager& phantom_navigator_manager = GGEMSPhantomNavigatorManager::GetInstance();
 
-  // Check the particle name  
-  if (!kParticleName.compare("gamma")) {
-    // Check if all phantoms in same time, or specific phantom
-    if (!kPhantomCase.compare("all")) {
-      for (size_t i = 0; i < phantom_navigator_manager.GetNumberOfPhantomNavigators(); ++i) {
-        std::shared_ptr<GGEMSRangeCuts> range_cuts = ((phantom_navigator_manager.GetPhantomNavigators()).at(i))->GetRangeCuts();
-        range_cuts->SetPhotonLengthCut(GGEMSUnits::DistanceUnit(value, unit));
-      }
-    }
-    else {
-      std::shared_ptr<GGEMSRangeCuts> range_cuts = phantom_navigator_manager.GetPhantomNavigator(kPhantomCase)->GetRangeCuts();
-      range_cuts->SetPhotonLengthCut(GGEMSUnits::DistanceUnit(value, unit));
-    }
-  }
-  else if (!kParticleName.compare("e-")) {
-    // Check if all phantoms in same time, or specific phantom
-    if (!kPhantomCase.compare("all")) {
-      for (size_t i = 0; i < phantom_navigator_manager.GetNumberOfPhantomNavigators(); ++i) {
-        std::shared_ptr<GGEMSRangeCuts> range_cuts = ((phantom_navigator_manager.GetPhantomNavigators()).at(i))->GetRangeCuts();
-        range_cuts->SetElectronLengthCut(GGEMSUnits::DistanceUnit(value, unit));
-      }
-    }
-    else {
-      std::shared_ptr<GGEMSRangeCuts> range_cuts = phantom_navigator_manager.GetPhantomNavigator(kPhantomCase)->GetRangeCuts();
-      range_cuts->SetElectronLengthCut(GGEMSUnits::DistanceUnit(value, unit));
-    }
-  }
-  else if (!kParticleName.compare("e+")) {
-    // Check if all phantoms in same time, or specific phantom
-    if (!kPhantomCase.compare("all")) {
-      for (size_t i = 0; i < phantom_navigator_manager.GetNumberOfPhantomNavigators(); ++i) {
-        std::shared_ptr<GGEMSRangeCuts> range_cuts = ((phantom_navigator_manager.GetPhantomNavigators()).at(i))->GetRangeCuts();
-        range_cuts->SetPositronLengthCut(GGEMSUnits::DistanceUnit(value, unit));
-      }
-    }
-    else {
-      std::shared_ptr<GGEMSRangeCuts> range_cuts = phantom_navigator_manager.GetPhantomNavigator(kPhantomCase)->GetRangeCuts();
-      range_cuts->SetPositronLengthCut(GGEMSUnits::DistanceUnit(value, unit));
+  if (phantom_name == "all") {
+    // Loop over phantom
+    for (size_t i = 0; i < phantom_navigator_manager.GetNumberOfPhantomNavigators(); ++i) {
+      std::shared_ptr<GGEMSMaterials> materials = ((phantom_navigator_manager.GetPhantomNavigators()).at(i))->GetMaterials();
+      materials->SetLengthCut(particle_name, value, unit);
     }
   }
   else {
-    std::ostringstream oss(std::ostringstream::out);
-    oss << "Particle name " << kParticleName << " unknown!!! The particles are:" << std::endl;
-    oss << "    - gamma" << std::endl;
-    oss << "    - e-" << std::endl;
-    oss << "    - e+";
-    GGEMSMisc::ThrowException("GGEMSRangeCutsManager", "SetLengthCut", oss.str());
+    std::shared_ptr<GGEMSMaterials> materials = phantom_navigator_manager.GetPhantomNavigator(phantom_name)->GetMaterials();
+    materials->SetLengthCut(particle_name, value, unit);
   }
 }
 

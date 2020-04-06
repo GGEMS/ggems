@@ -11,9 +11,8 @@
 */
 
 #include "GGEMS/navigators/GGEMSPhantomNavigatorManager.hh"
-
 #include "GGEMS/navigators/GGEMSSolidPhantom.hh"
-#include "GGEMS/physics/GGEMSRangeCuts.hh"
+#include "GGEMS/physics/GGEMSCrossSections.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -35,11 +34,11 @@ GGEMSPhantomNavigator::GGEMSPhantomNavigator(GGEMSPhantomNavigator* phantom_navi
   // Allocation of materials
   materials_.reset(new GGEMSMaterials());
 
-  // Allocation of cuts
-  range_cuts_.reset(new GGEMSRangeCuts());
-
   // Allocation of solid phantom
   solid_phantom_.reset(new GGEMSSolidPhantom());
+
+  // Allocation of cross sections including physics
+  cross_sections_.reset(new GGEMSCrossSections());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -146,11 +145,11 @@ void GGEMSPhantomNavigator::Initialize(void)
   // Apply offset
   if (is_offset_flag_) solid_phantom_->ApplyOffset(offset_xyz_);
 
-  // Loading the materials and building tables to OpenCL device
+  // Loading the materials and building tables to OpenCL device and converting cuts
   materials_->Initialize();
 
-  // Converting length cut to energy cut
-  range_cuts_->ConvertCutsFromLengthToEnergy(materials_);
+  // Initialization of electromagnetic process and building cross section tables for each particles and materials
+  cross_sections_->Initialize(materials_);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

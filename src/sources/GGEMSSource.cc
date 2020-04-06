@@ -19,6 +19,7 @@
 #include "GGEMS/tools/GGEMSTools.hh"
 #include "GGEMS/physics/GGEMSPrimaryParticlesStack.hh"
 #include "GGEMS/randoms/GGEMSRandomStack.hh"
+#include "GGEMS/physics/GGEMSParticles.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -103,10 +104,10 @@ void GGEMSSource::SetSourceParticleType(char const* particle_type)
   std::transform(particle_type_str.begin(), particle_type_str.end(), particle_type_str.begin(), ::tolower);
 
   if (!particle_type_str.compare("photon")) {
-    particle_type_ = GGEMSParticleName::PHOTON;
+    particle_type_ = GGEMSParticle::PHOTON;
   }
   else if (!particle_type_str.compare("electron")) {
-    particle_type_ = GGEMSParticleName::ELECTRON;
+    particle_type_ = GGEMSParticle::ELECTRON;
   }
   else
   {
