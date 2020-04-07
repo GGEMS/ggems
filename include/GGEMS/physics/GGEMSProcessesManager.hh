@@ -46,21 +46,21 @@ namespace GGEMSProcessParams
   1.f; /*!< Max energy in the cross section table */
   #endif
 
-  __constant GGfloat PHOTON_CUT = 1.0f*
+  __constant GGfloat PHOTON_DISTANCE_CUT = 1.0f*
   #ifndef OPENCL_COMPILER
   GGEMSUnits::um; /*!< Photon cut */
   #else
   1.e-3f; /*!< Photon cut */
   #endif
 
-  __constant GGfloat ELECTRON_CUT = 1.0f*
+  __constant GGfloat ELECTRON_DISTANCE_CUT = 1.0f*
   #ifndef OPENCL_COMPILER
   GGEMSUnits::um; /*!< Electron cut */
   #else
   1.e-3f; /*!< Electron cut */
   #endif
 
-  __constant GGfloat POSITRON_CUT = 1.0f*
+  __constant GGfloat POSITRON_DISTANCE_CUT = 1.0f*
   #ifndef OPENCL_COMPILER
   GGEMSUnits::um; /*!< Positron cut */
   #else

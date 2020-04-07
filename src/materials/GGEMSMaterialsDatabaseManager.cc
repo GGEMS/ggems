@@ -349,7 +349,7 @@ void GGEMSMaterialsDatabaseManager::PrintAvailableMaterials(void) const
   for (auto&& i : materials_) {
     GGcout("GGEMSMaterialsDatabaseManager", "PrintAvailableMaterials", 0) << "    * Material: \"" << i.first << "\"" << GGendl;
     GGcout("GGEMSMaterialsDatabaseManager", "PrintAvailableMaterials", 0) << "        - Density: " << i.second.density_ / (GGEMSUnits::g/GGEMSUnits::cm3) << " g/cm3" << GGendl;
-    GGcout("GGEMSMaterialsDatabaseManager", "PrintAvailableMaterials", 0) << "        - Number of elements: " << i.second.nb_elements_ << GGendl;
+    GGcout("GGEMSMaterialsDatabaseManager", "PrintAvailableMaterials", 0) << "        - Number of elements: " << static_cast<GGushort>(i.second.nb_elements_) << GGendl;
     for (GGushort j = 0; j < i.second.nb_elements_; ++j) {
       GGcout("GGEMSMaterialsDatabaseManager", "PrintAvailableMaterials", 0) << "            * Element: " << i.second.chemical_element_name_.at(j) << ", fraction: " << i.second.mixture_f_.at(j) << GGendl;
     }

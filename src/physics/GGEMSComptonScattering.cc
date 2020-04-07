@@ -62,7 +62,6 @@ void GGEMSComptonScattering::BuildCrossSectionTables(std::shared_ptr<cl::Buffer>
     for (GGushort i = 0; i < kNumberOfBins; ++i) {
       compton_cs_device->photon_cross_sections_[GGEMSProcess::COMPTON_SCATTERING][i + j*kNumberOfBins] =
         ComputeCrossSectionPerMaterial(materials_device, j, compton_cs_device->energy_bins_[i]);
-      std::cout << (int)j << " " << compton_cs_device->energy_bins_[i] / GGEMSUnits::MeV << " MeV, " << compton_cs_device->photon_cross_sections_[GGEMSProcess::COMPTON_SCATTERING][i + j*kNumberOfBins] / (GGEMSUnits::mol/GGEMSUnits::cm) << " mol.cm-1" << std::endl;
     }
   }
 
@@ -115,5 +114,5 @@ GGfloat GGEMSComptonScattering::ComputeCrossSectionPerAtom(GGfloat const& energy
     cross_section_by_atom *= expf(-d5 * (d3 + d4*d5));
   }
   
-  return cross_section_by_atom;
+  return cross_section_by_atom; // in mm2
 }

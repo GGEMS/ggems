@@ -128,15 +128,6 @@ class GGEMS_EXPORT GGEMSLogEnergyTable
     */
     std::size_t FindBin(GGfloat const& energy, std::size_t const& index) const;
 
-    /*!
-      \fn GGfloat Interpolation(std::size_t const& index, GGfloat const& energy) const
-      \param index - index of the bin
-      \param energy - energy of the bin
-      \return the interpolated energy
-      \brief get the interpolated energy
-    */
-    GGfloat Interpolation(std::size_t const& index, GGfloat const& energy) const;
-
   private:
     GGfloat edge_min_; /*!< Energy of first point */
     GGfloat edge_max_; /*!< Energy of the last point */

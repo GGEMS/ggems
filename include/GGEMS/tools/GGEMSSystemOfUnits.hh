@@ -182,7 +182,7 @@ namespace GGEMSUnits
 
   #ifndef OPENCL_COMPILER
   /*!
-    \fn T DistanceUnit(T const& value, char const* unit)
+    \fn T DistanceUnit(T const& value, std::string const& unit)
     \tparam T - type of the value to convert unit
     \param value - value to check
     \param unit - distance unit
@@ -190,7 +190,7 @@ namespace GGEMSUnits
     \return value in the good unit
   */
   template <typename T>
-  T DistanceUnit(T const& value, char const* unit)
+  T DistanceUnit(T const& value, std::string const& unit)
   {
     // Convert char* to string
     std::string unit_str = unit;
@@ -233,7 +233,7 @@ namespace GGEMSUnits
   }
 
   /*!
-    \fn T EnergyUnit(T const& value, char const* unit)
+    \fn T EnergyUnit(T const& value, std::string const& unit)
     \tparam T - type of the value to convert unit
     \param value - value to check
     \param unit - energy unit
@@ -241,7 +241,7 @@ namespace GGEMSUnits
     \return value in the good unit
   */
   template <typename T>
-  T EnergyUnit(T const& value, char const* unit)
+  T EnergyUnit(T const& value, std::string const& unit)
   {
     // Convert char* to string
     std::string unit_str = unit;
@@ -280,7 +280,7 @@ namespace GGEMSUnits
   }
 
   /*!
-    \fn T AngleUnit(T const& value, char const* unit)
+    \fn T AngleUnit(T const& value, std::string const& unit)
     \tparam T - type of the value to convert unit
     \param value - value to check
     \param unit - angle unit
@@ -288,7 +288,7 @@ namespace GGEMSUnits
     \return value in the good unit
   */
   template <typename T>
-  T AngleUnit(T const& value, char const* unit)
+  T AngleUnit(T const& value, std::string const& unit)
   {
     // Convert char* to string
     std::string unit_str = unit;

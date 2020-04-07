@@ -214,7 +214,7 @@ class GGEMSMaterialsManager(object):
         self.obj = ggems_lib.get_instance_materials_manager()
 
     def set_materials(self, filename):
-        ggems_lib.set_materials_ggems_materials_manager(self.obj, filename)
+        ggems_lib.set_materials_ggems_materials_manager(self.obj, filename.encode('ASCII'))
 
     def print_available_chemical_elements(self):
         ggems_lib.print_available_chemical_elements_ggems_materials_manager(self.obj)
@@ -232,22 +232,25 @@ class GGEMSMaterials(object):
         ggems_lib.add_material_ggems_materials.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
         ggems_lib.add_material_ggems_materials.restype = ctypes.c_void_p
 
-        ggems_lib.set_cut_ggems_materials.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_float, ctypes.c_char_p]
-        ggems_lib.set_cut_ggems_materials.restype = ctypes.c_void_p
-
         ggems_lib.initialize_ggems_materials.argtypes = [ctypes.c_void_p]
         ggems_lib.initialize_ggems_materials.restype = ctypes.c_void_p
 
         ggems_lib.print_material_properties_ggems_materials.argtypes = [ctypes.c_void_p]
         ggems_lib.print_material_properties_ggems_materials.restype = ctypes.c_void_p
 
+        ggems_lib.get_density_ggems_materials.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
+        ggems_lib.get_density_ggems_materials.restype = ctypes.c_float
+
+        ggems_lib.get_energy_cut_ggems_materials.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_char_p, ctypes.c_float, ctypes.c_char_p]
+        ggems_lib.get_energy_cut_ggems_materials.restype = ctypes.c_float
+
+        ggems_lib.get_atomic_number_density_ggems_materials.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
+        ggems_lib.get_atomic_number_density_ggems_materials.restype = ctypes.c_float
+
         self.obj = ggems_lib.create_ggems_materials()
 
     def add_material(self, material):
-        ggems_lib.add_material_ggems_materials(self.obj, material)
-
-    def set_cut(self, particle_type, cut, unit):
-        ggems_lib.set_cut_ggems_materials(self.obj, particle_type, cut, unit)
+        ggems_lib.add_material_ggems_materials(self.obj, material.encode('ASCII'))
 
     def initialize(self):
         ggems_lib.initialize_ggems_materials(self.obj)
@@ -255,6 +258,41 @@ class GGEMSMaterials(object):
     def print_material_properties(self):
         ggems_lib.print_material_properties_ggems_materials(self.obj)
 
+    def get_density(self, material_name):
+        return ggems_lib.get_density_ggems_materials(self.obj, material_name.encode('ASCII'))
+
+    def get_energy_cut(self, material_name, particle_name, value, unit):
+        return ggems_lib.get_energy_cut_ggems_materials(self.obj, material_name.encode('ASCII'), particle_name.encode('ASCII'), value, unit.encode('ASCII'))
+
+    def get_atomic_number_density(self, material_name):
+        return ggems_lib.get_atomic_number_density_ggems_materials(self.obj, material_name.encode('ASCII'))
+
+
+class GGEMSCrossSections(object):
+    """ Class handling cross sections in GGEMS
+    """
+    def __init__(self):
+        ggems_lib.create_ggems_cross_sections.restype = ctypes.c_void_p
+
+        ggems_lib.add_process_ggems_cross_sections.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_char_p]
+        ggems_lib.add_process_ggems_cross_sections.restype = ctypes.c_void_p
+
+        ggems_lib.initialize_ggems_cross_sections.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
+        ggems_lib.initialize_ggems_cross_sections.restype = ctypes.c_void_p
+
+        ggems_lib.get_cs_cross_sections.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_char_p, ctypes.c_float, ctypes.c_char_p]
+        ggems_lib.get_cs_cross_sections.restype = ctypes.c_float
+
+        self.obj = ggems_lib.create_ggems_cross_sections()
+
+    def add_process(self, process_name, particle_name):
+        ggems_lib.add_process_ggems_cross_sections(self.obj, process_name.encode('ASCII'), particle_name.encode('ASCII'))
+
+    def initialize(self, material_p):
+        ggems_lib.initialize_ggems_cross_sections(self.obj, material_p.obj)
+
+    def get_cs(self, process_name, material_name, energy, unit):
+        return ggems_lib.get_cs_cross_sections(self.obj, process_name.encode('ASCII'), material_name.encode('ASCII'), energy, unit.encode('ASCII'))
 
 class GGEMSManager(object):
     """GGEMS class managing the simulation
@@ -509,7 +547,7 @@ class GGEMSTube(object):
 # Setting global verbosity to 0 for initialization
 # 0 - minimum infos
 # 3 - max infos, maybe too much!!!
-GGEMSVerbosity(3)
+GGEMSVerbosity(0)
 
 # ------------------------------------------------------------------------------
 # Calling all C++ singleton managers

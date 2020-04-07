@@ -14,6 +14,7 @@
 
 #include "GGEMS/physics/GGEMSLogEnergyTable.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
+#include "GGEMS/maths/GGEMSMathAlgorithms.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -87,7 +88,11 @@ GGfloat GGEMSLogEnergyTable::GetLossTableValue(GGfloat const& energy) const
   }
   else {
     last_index = FindBin(energy, last_index);
-    y = Interpolation(last_index, energy);
+    y = LinearInterpolation(
+      bins_.at(last_index), loss_table_data_.at(last_index),
+      bins_.at(last_index+1), loss_table_data_.at(last_index+1),
+      energy
+    );
   }
 
   return y;
@@ -133,15 +138,4 @@ std::size_t GGEMSLogEnergyTable::FindBin(GGfloat const& energy, std::size_t cons
   }
 
   return id;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-GGfloat GGEMSLogEnergyTable::Interpolation(std::size_t const& index, GGfloat const& energy) const
-{
-  return loss_table_data_.at(index) +
-    (loss_table_data_.at(index+1) - loss_table_data_.at(index)) * (energy - bins_.at(index)) /
-    (bins_.at(index+1) - bins_.at(index));
 }

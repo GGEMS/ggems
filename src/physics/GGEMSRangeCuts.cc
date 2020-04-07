@@ -26,9 +26,9 @@ GGEMSRangeCuts::GGEMSRangeCuts(void)
 : min_energy_(0.0f),
   max_energy_(10.0f*GGEMSUnits::GeV),
   number_of_bins_(300),
-  length_cut_photon_(GGEMSProcessParams::PHOTON_CUT),
-  length_cut_electron_(GGEMSProcessParams::ELECTRON_CUT),
-  length_cut_positron_(GGEMSProcessParams::POSITRON_CUT)
+  distance_cut_photon_(GGEMSProcessParams::PHOTON_DISTANCE_CUT),
+  distance_cut_electron_(GGEMSProcessParams::ELECTRON_DISTANCE_CUT),
+  distance_cut_positron_(GGEMSProcessParams::POSITRON_DISTANCE_CUT)
 {
   GGcout("GGEMSRangeCuts", "GGEMSRangeCuts", 3) << "Allocation of GGEMSRangeCuts..." << GGendl;
 }
@@ -46,13 +46,13 @@ GGEMSRangeCuts::~GGEMSRangeCuts(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSRangeCuts::SetPhotonLengthCut(GGfloat const& cut)
+void GGEMSRangeCuts::SetPhotonDistanceCut(GGfloat const& cut)
 {
-  length_cut_photon_ = cut;
-  if (length_cut_photon_ < GGEMSProcessParams::PHOTON_CUT) {
+  distance_cut_photon_ = cut;
+  if (distance_cut_photon_ < GGEMSProcessParams::PHOTON_DISTANCE_CUT) {
     std::ostringstream oss(std::ostringstream::out);
-    oss << "Cut length for photon " << cut << " mm is too small!!! Minimum value is " << GGEMSProcessParams::PHOTON_CUT << " mm!!!";
-    GGEMSMisc::ThrowException("GGEMSRangeCuts", "SetPhotonLengthCut", oss.str());
+    oss << "Distance cut for photon " << cut << " mm is too small!!! Minimum value is " << GGEMSProcessParams::PHOTON_DISTANCE_CUT << " mm!!!";
+    GGEMSMisc::ThrowException("GGEMSRangeCuts", "SetPhotonDistanceCut", oss.str());
   }
 }
 
@@ -60,12 +60,12 @@ void GGEMSRangeCuts::SetPhotonLengthCut(GGfloat const& cut)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSRangeCuts::SetElectronLengthCut(GGfloat const& cut)
+void GGEMSRangeCuts::SetElectronDistanceCut(GGfloat const& cut)
 {
-  length_cut_electron_ = cut;
-  if (length_cut_electron_ < GGEMSProcessParams::ELECTRON_CUT) {
+  distance_cut_electron_ = cut;
+  if (distance_cut_electron_ < GGEMSProcessParams::ELECTRON_DISTANCE_CUT) {
     std::ostringstream oss(std::ostringstream::out);
-    oss << "Cut length for electron " << cut << " mm is too small!!! Minimum value is " << GGEMSProcessParams::ELECTRON_CUT << " mm!!!";
+    oss << "Distance cut for electron " << cut << " mm is too small!!! Minimum value is " << GGEMSProcessParams::ELECTRON_DISTANCE_CUT << " mm!!!";
     GGEMSMisc::ThrowException("GGEMSRangeCuts", "SetElectronLengthCut", oss.str());
   }
 }
@@ -74,12 +74,12 @@ void GGEMSRangeCuts::SetElectronLengthCut(GGfloat const& cut)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSRangeCuts::SetPositronLengthCut(GGfloat const& cut)
+void GGEMSRangeCuts::SetPositronDistanceCut(GGfloat const& cut)
 {
-  length_cut_positron_ = cut;
-  if (length_cut_positron_ < GGEMSProcessParams::POSITRON_CUT) {
+  distance_cut_positron_ = cut;
+  if (distance_cut_positron_ < GGEMSProcessParams::POSITRON_DISTANCE_CUT) {
     std::ostringstream oss(std::ostringstream::out);
-    oss << "Cut length for positron " << cut << " mm is too small!!! Minimum value is " << GGEMSProcessParams::POSITRON_CUT << " mm!!!";
+    oss << "Cut distance for positron " << cut << " mm is too small!!! Minimum value is " << GGEMSProcessParams::POSITRON_DISTANCE_CUT << " mm!!!";
     GGEMSMisc::ThrowException("GGEMSRangeCuts", "SetPositronLengthCut", oss.str());
   }
 }
@@ -103,13 +103,13 @@ GGfloat GGEMSRangeCuts::ConvertToEnergy(GGEMSMaterialTables* material_table, GGu
   // Set cut depending on particle
   GGfloat cut = 0.0f;
   if (particle_name == "gamma") {
-    cut = length_cut_photon_;
+    cut = distance_cut_photon_;
   }
   else if (particle_name == "e-") {
-    cut = length_cut_electron_;
+    cut = distance_cut_electron_;
   }
   else if (particle_name == "e+") {
-    cut = length_cut_positron_;
+    cut = distance_cut_positron_;
   }
 
   // Reset tables
@@ -539,7 +539,7 @@ GGfloat GGEMSRangeCuts::ConvertLengthToEnergyCut(std::shared_ptr<GGEMSLogEnergyT
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSRangeCuts::ConvertCutsFromLengthToEnergy(GGEMSMaterials* materials)
+void GGEMSRangeCuts::ConvertCutsFromDistanceToEnergy(GGEMSMaterials* materials)
 {
   // Getting the minimum for the loss/cross section table in process manager
   GGEMSProcessesManager& process_manager = GGEMSProcessesManager::GetInstance();
