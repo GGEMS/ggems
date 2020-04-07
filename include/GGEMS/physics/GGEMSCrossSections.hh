@@ -82,11 +82,11 @@ class GGEMS_EXPORT GGEMSCrossSections
     void AddProcess(std::string const& process_name, std::string const& particle_name);
 
     /*!
-      \fn void Initialize(std::shared_ptr<GGEMSMaterials> const materials)
+      \fn void Initialize(GGEMSMaterials const* materials)
       \param materials - activated materials for a specific phantom
       \brief Initialize all the activated processes computing tables on OpenCL device
     */
-    void Initialize(std::shared_ptr<GGEMSMaterials> const materials);
+    void Initialize(GGEMSMaterials const* materials);
 
     /*!
       \fn inline GGEMSEMProcessesList GetProcessesList(void) const
@@ -95,6 +95,17 @@ class GGEMS_EXPORT GGEMSCrossSections
     */
     inline GGEMSEMProcessesList GetProcessesList(void) const {return em_processes_list_;}
 
+    /*!
+      \fn GGfloat GetPhotonCrossSection(std::string const& process_name, std::string const& material_name, GGfloat const& energy, std::string const& unit) const
+      \param process_name - name of the process
+      \param material_name - name of the material
+      \param energy - energy of particle
+      \param unit - unit in energy
+      \return the cross section in cm-1 for a process and a material
+      \brief Get the cross section value for a process for a specific energy
+    */
+    GGfloat GetPhotonCrossSection(std::string const& process_name, std::string const& material_name, GGfloat const& energy, std::string const& unit) const;
+
   private:
     GGEMSEMProcessesList em_processes_list_; /*!< vector of electromagnetic processes */
     std::vector<bool> is_process_activated_; /*!< Boolean checking if the process is already activated */
@@ -102,5 +113,41 @@ class GGEMS_EXPORT GGEMSCrossSections
     GGEMSOpenCLManager& opencl_manager_; /*!< Reference to OpenCL manager singleton */
     GGEMSProcessesManager& process_manager_; /*!< Reference to process manager */
 };
+
+/*!
+  \fn GGEMSCrossSections* create_ggems_cross_sections(void)
+  \return the pointer on the singleton
+  \brief Get the GGEMSCrossSections pointer for python user.
+*/
+extern "C" GGEMS_EXPORT GGEMSCrossSections* create_ggems_cross_sections(void);
+
+/*!
+  \fn void add_process_ggems_cross_sections(GGEMSCrossSections* cross_sections, char const* process_name, char const* particle_name)
+  \param cross_sections - pointer on GGEMS cross sections
+  \param process_name - name of the process
+  \param particle_name - name of the particle
+  \brief Add a process to cross section table
+*/
+extern "C" GGEMS_EXPORT void add_process_ggems_cross_sections(GGEMSCrossSections* cross_sections, char const* process_name, char const* particle_name);
+
+/*!
+  \fn void initialize_ggems_cross_sections(GGEMSCrossSections* cross_sections, GGEMSMaterials* materials)
+  \param cross_sections - pointer on GGEMS cross sections
+  \param materials - pointer on GGEMS materials
+  \brief Intialize the cross section tables for process and materials
+*/
+extern "C" GGEMS_EXPORT void initialize_ggems_cross_sections(GGEMSCrossSections* cross_sections, GGEMSMaterials* materials);
+
+/*!
+  \fn GGfloat get_cs_cross_sections(GGEMSCrossSections* cross_sections, char const* process_name, char const* material_name, GGfloat const energy, char const* unit)
+  \param cross_sections - pointer on GGEMS cross sections
+  \param process_name - name of the process
+  \param material_name - name of the material
+  \param energy - energy of the particle
+  \param unit - unit in energy
+  \return cross section value in cm-1
+  \brief get the cross section value of process
+*/
+extern "C" GGEMS_EXPORT GGfloat get_cs_cross_sections(GGEMSCrossSections* cross_sections, char const* process_name, char const* material_name, GGfloat const energy, char const* unit);
 
 #endif // End of GUARD_GGEMS_PHYSICS_GGEMSCROSSSECTIONS_HH

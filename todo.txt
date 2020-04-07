@@ -34,3 +34,5 @@
 - Indiquer la memoire requise par OpenCL pour les phantoms, particles, processes etc...
 
 - Pour plus de clarté, faire distinction _host et _device  pointer
+
+- Splitter le ggems.py

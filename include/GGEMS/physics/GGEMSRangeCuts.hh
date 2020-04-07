@@ -70,32 +70,32 @@ class GGEMS_EXPORT GGEMSRangeCuts
     GGEMSRangeCuts& operator=(GGEMSRangeCuts const&& range_cuts) = delete;
 
     /*!
-      \fn void SetPhotonLengthCut(GGfloat const& cut)
+      \fn void SetPhotonDistanceCut(GGfloat const& cut)
       \param cut - cut in length (mm)
       \brief set the photon length cut by the range cut manager
     */
-    void SetPhotonLengthCut(GGfloat const& cut);
+    void SetPhotonDistanceCut(GGfloat const& cut);
 
     /*!
-      \fn void SetElectronLengthCut(GGfloat const& cut)
+      \fn void SetElectronDistanceCut(GGfloat const& cut)
       \param cut - cut in length (mm)
       \brief set the electron length cut by the range cut manager
     */
-    void SetElectronLengthCut(GGfloat const& cut);
+    void SetElectronDistanceCut(GGfloat const& cut);
 
     /*!
-      \fn void SetPositronLengthCut(GGfloat const& cut)
+      \fn void SetPositronDistanceCut(GGfloat const& cut)
       \param cut - cut in length (mm)
       \brief set the positron length cut by the range cut manager
     */
-    void SetPositronLengthCut(GGfloat const& cut);
+    void SetPositronDistanceCut(GGfloat const& cut);
 
     /*!
-      \fn inline GGfloat GetPhotonLengthCut(void) const
+      \fn inline GGfloat GetPhotonDistanceCut(void) const
       \return the photon length cut in mm
       \brief get the photon length cut
     */
-    inline GGfloat GetPhotonLengthCut(void) const {return length_cut_photon_;}
+    inline GGfloat GetPhotonDistanceCut(void) const {return distance_cut_photon_;}
 
     /*!
       \fn inline EnergyCutUMap GetPhotonEnergyCut(void) const
@@ -105,11 +105,11 @@ class GGEMS_EXPORT GGEMSRangeCuts
     inline EnergyCutUMap GetPhotonEnergyCut(void) const {return energy_cuts_photon_;}
 
     /*!
-      \fn inline GGfloat GetElectronLengthCut(void) const
+      \fn inline GGfloat GetElectronDistanceCut(void) const
       \return the electron length cut for photon
       \brief get the electron length cut for photon
     */
-    inline GGfloat GetElectronLengthCut(void) const {return length_cut_electron_;}
+    inline GGfloat GetElectronDistanceCut(void) const {return distance_cut_electron_;}
 
     /*!
       \fn inline EnergyCutUMap GetElectronEnergyCut(void) const
@@ -119,11 +119,11 @@ class GGEMS_EXPORT GGEMSRangeCuts
     inline EnergyCutUMap GetElectronEnergyCut(void) const {return energy_cuts_electron_;}
 
     /*!
-      \fn inline GGfloat GetPositronLengthCut(void) const
+      \fn inline GGfloat GetPositronDistanceCut(void) const
       \return the positron length cut in mm
       \brief get the positron length cut
     */
-    inline GGfloat GetPositronLengthCut(void) const {return length_cut_positron_;}
+    inline GGfloat GetPositronDistanceCut(void) const {return distance_cut_positron_;}
 
     /*!
       \fn inline EnergyCutUMap GetPositronEnergyCut(void) const
@@ -133,11 +133,11 @@ class GGEMS_EXPORT GGEMSRangeCuts
     inline EnergyCutUMap GetPositronEnergyCut(void) const {return energy_cuts_positron_;}
 
     /*!
-      \fn void ConvertCutsFromLengthToEnergy(GGEMSMaterials* materials)
+      \fn void ConvertCutsFromDistanceToEnergy(GGEMSMaterials* materials)
       \param materials - pointer on the list of activated materials
       \brief Convert cut from length to energy
     */
-    void ConvertCutsFromLengthToEnergy(GGEMSMaterials* materials);
+    void ConvertCutsFromDistanceToEnergy(GGEMSMaterials* materials);
 
   private:
     /*!
@@ -217,15 +217,15 @@ class GGEMS_EXPORT GGEMSRangeCuts
     GGushort number_of_bins_; /*!< Number of bins in cross section table */
 
     // Photon
-    GGfloat length_cut_photon_; /*!< Photon cut in length */
+    GGfloat distance_cut_photon_; /*!< Photon cut in length */
     EnergyCutUMap energy_cuts_photon_; /*!< List of energy cuts for photon a material */
 
     // Electron
-    GGfloat length_cut_electron_; /*!< Electron cut in length */
+    GGfloat distance_cut_electron_; /*!< Electron cut in length */
     EnergyCutUMap energy_cuts_electron_; /*!< List of energy cuts for electron a material */
 
     // Positron
-    GGfloat length_cut_positron_; /*!< Positron cut in length */
+    GGfloat distance_cut_positron_; /*!< Positron cut in length */
     EnergyCutUMap energy_cuts_positron_; /*!< List of energy cuts for Positron a material */
 
     std::shared_ptr<GGEMSLogEnergyTable> range_table_material_; /*!< Table of dE/dX for in material */

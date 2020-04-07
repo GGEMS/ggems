@@ -149,7 +149,7 @@ void GGEMSPhantomNavigator::Initialize(void)
   materials_->Initialize();
 
   // Initialization of electromagnetic process and building cross section tables for each particles and materials
-  cross_sections_->Initialize(materials_);
+  cross_sections_->Initialize(materials_.get());
 }
 
 ////////////////////////////////////////////////////////////////////////////////

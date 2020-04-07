@@ -32,7 +32,8 @@ typedef struct PACKED GGEMSParticleCrossSections_t
   // Variables for all particles
   GGushort number_of_bins_; /*!< Number of bins in the cross section tables */
   GGuchar number_of_materials_; /*!< Number of materials */
-  
+  GGuchar material_names_[256][32]; /*!< Name of the materials */
+
   GGfloat min_energy_; /*!< Min energy in the cross section table */
   GGfloat max_energy_; /*!< Max energy in the cross section table */
   GGfloat energy_bins_[1024]; /*!< Energy in bin (1024 max of bin, 220 by default) */
@@ -51,7 +52,7 @@ typedef struct PACKED GGEMSParticleCrossSections_t
   GGfloat photon_cross_sections_[NUMBER_PHOTON_PROCESSES][256*1024]; /*!< Photon cross sections */
   #else
   GGuchar index_photon_cs[GGEMSProcess::NUMBER_PHOTON_PROCESSES]; /*!< Index of activated photon process, ex: if only Rayleigh activate index_photon_cs[0] = 2 */
-  GGfloat photon_cross_sections_[GGEMSProcess::NUMBER_PHOTON_PROCESSES][256*1024]; /*!< Photon cross sections */
+  GGfloat photon_cross_sections_[GGEMSProcess::NUMBER_PHOTON_PROCESSES][256*1024]; /*!< Photon cross sections in mm-1 */
   #endif
 
   // Electron

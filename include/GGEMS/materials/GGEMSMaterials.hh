@@ -72,11 +72,38 @@ class GGEMS_EXPORT GGEMSMaterials
     GGEMSMaterials& operator=(GGEMSMaterials const&& materials) = delete;
 
     /*!
-      \fn void AddMaterial(std::string const& material)
-      \param material - name of the material
+      \fn void AddMaterial(std::string const& material_name)
+      \param material_name - name of the material
       \brief Add a material associated to a phantom
     */
-    void AddMaterial(std::string const& material);
+    void AddMaterial(std::string const& material_name);
+
+    /*!
+      \fn GGfloat GetDensity(std::string const& material_name) const
+      \param material_name - name of the material
+      \return density of material in g.cm-3
+      \brief get the density of material
+    */
+    GGfloat GetDensity(std::string const& material_name) const;
+
+    /*!
+      \fn GGfloat GetAtomicNumberDensity(std::string const& material_name) const
+      \param material_name - name of the material
+      \return atomic number density of material in atom.cm-3
+      \brief get the atomic number density of material
+    */
+    GGfloat GetAtomicNumberDensity(std::string const& material_name) const;
+
+    /*!
+      \fn GetEnergyCut(std::string const& material_name, std::string const& particle_type, GGfloat const& distance, std::string const& unit) const
+      \param material_name - name of the material
+      \param particle_type - type of particle
+      \param distance - distance cut
+      \param unit - unit of the distance
+      \return energy cut in keV
+      \brief Get the energy cut of material in keV
+    */
+    GGfloat GetEnergyCut(std::string const& material_name, std::string const& particle_type, GGfloat const& distance, std::string const& unit);
 
     /*!
       \fn inline std::string GetMaterialName(std::size_t i) const
@@ -85,6 +112,23 @@ class GGEMS_EXPORT GGEMSMaterials
       \brief get the name of the material at position i
     */
     inline std::string GetMaterialName(std::size_t i) const {return materials_.at(i);}
+
+    /*!
+      \fn inline ptrdiff_t GetMaterialIndex(std::string const& material_name) const
+      \param material_name - name of the material
+      \return index of material
+      \brief get the index of the material
+    */
+    inline ptrdiff_t GetMaterialIndex(std::string const& material_name) const
+    {
+      std::vector<std::string>::const_iterator iter_mat = std::find(materials_.begin(), materials_.end(), material_name);
+      if (iter_mat == materials_.end()) {
+        std::ostringstream oss(std::ostringstream::out);
+        oss << "Material '" << material_name << "' not found!!!" << std::endl;
+        GGEMSMisc::ThrowException("GGEMSMaterials", "GetMaterialIndex", oss.str());
+      }
+      return std::distance(materials_.begin(), iter_mat);
+    }
 
     /*!
       \fn inline std::size_t GetNumberOfMaterials(void) const
@@ -108,13 +152,13 @@ class GGEMS_EXPORT GGEMSMaterials
     inline std::shared_ptr<GGEMSRangeCuts> GetRangeCuts(void) const {return range_cuts_;}
 
     /*!
-      \fn void SetLengthCut(std::string const& particle_name, GGfloat const& value, std::string const& unit)
+      \fn void SetDistanceCut(std::string const& particle_name, GGfloat const& value, std::string const& unit)
       \param particle_name - type of particle gamma, e+, e-
       \param value - value of cut
       \param unit - length unit
-      \brief set the cut for a particle in length
+      \brief set the cut for a particle in distance
     */
-    void SetLengthCut(std::string const& particle_name, GGfloat const& value, std::string const& unit);
+    void SetDistanceCut(std::string const& particle_name, GGfloat const& value, std::string const& unit);
 
     /*!
       \fn void PrintInfos(void) const
@@ -161,16 +205,6 @@ extern "C" GGEMS_EXPORT GGEMSMaterials* create_ggems_materials(void);
 extern "C" GGEMS_EXPORT void add_material_ggems_materials(GGEMSMaterials* materials, char const* material_name);
 
 /*!
-  \fn void set_cut_ggems_materials(GGEMSMaterials* materials, char const* particle_type, GGfloat const cut, char const* unit)
-  \param materials - pointer on GGEMS materials
-  \param particle_type - type of particles : gamma, e+, e-
-  \param cut - cut of the particle
-  \param unit - length unit
-  \brief Setting a cut
-*/
-extern "C" GGEMS_EXPORT void set_cut_ggems_materials(GGEMSMaterials* materials, char const* particle_type, GGfloat const cut, char const* unit);
-
-/*!
   \fn void initialize_ggems_materials(GGEMSMaterials* materials)
   \param materials - pointer on GGEMS materials
   \brief Intialize the tables for the materials
@@ -183,5 +217,35 @@ extern "C" GGEMS_EXPORT void initialize_ggems_materials(GGEMSMaterials* material
   \brief Print tables
 */
 extern "C" GGEMS_EXPORT void print_material_properties_ggems_materials(GGEMSMaterials* materials);
+
+/*!
+  \fn GGfloat get_density_ggems_materials(GGEMSMaterials* materials, char const* material_name)
+  \param materials - pointer on GGEMS materials
+  \param material_name - name of the material
+  \return density in g.cm-3
+  \brief Get the density of material in g.cm-3
+*/
+extern "C" GGEMS_EXPORT GGfloat get_density_ggems_materials(GGEMSMaterials* materials, char const* material_name);
+
+/*!
+  \fn GGfloat get_energy_cut_ggems_materials(GGEMSMaterials* materials, char const* material_name, char const* particle_type, GGfloat const distance, char const* unit)
+  \param materials - pointer on GGEMS materials
+  \param material_name - name of the material
+  \param particle_type - type of particle
+  \param distance - distance cut
+  \param unit - unit of the distance
+  \return energy cut in keV
+  \brief Get the energy cut of material in keV
+*/
+extern "C" GGEMS_EXPORT GGfloat get_energy_cut_ggems_materials(GGEMSMaterials* materials, char const* material_name, char const* particle_type, GGfloat const distance, char const* unit);
+
+/*!
+  \fn GGfloat get_atomic_number_density_ggems_materials(GGEMSMaterials* materials, char const* material_name)
+  \param materials - pointer on GGEMS materials
+  \param material_name - name of the material
+  \return atomic number density in atom.cm-3
+  \brief Get the density of material in g.cm-3
+*/
+extern "C" GGEMS_EXPORT GGfloat get_atomic_number_density_ggems_materials(GGEMSMaterials* materials, char const* material_name);
 
 #endif // End of GUARD_GGEMS_PHYSICS_GGEMSMATERIALS_HH

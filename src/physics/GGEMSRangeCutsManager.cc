@@ -53,9 +53,9 @@ void GGEMSRangeCutsManager::PrintInfos(void) const
     GGcout("GGEMSRangeCutsManager", "PrintInfos", 0) << "Range cuts for phantom navigator: " << kPhantomName << GGendl;
     GGcout("GGEMSRangeCutsManager", "PrintInfos", 0) << "---------------------------------" << GGendl;
     GGcout("GGEMSRangeCutsManager", "PrintInfos", 0) << "Length cuts:" << GGendl;
-    GGcout("GGEMSRangeCutsManager", "PrintInfos", 0) << "    * Photon: " << range_cuts->GetPhotonLengthCut()/GGEMSUnits::mm << " mm"<< GGendl;
-    GGcout("GGEMSRangeCutsManager", "PrintInfos", 0) << "    * Electron: " << range_cuts->GetElectronLengthCut()/GGEMSUnits::mm << " mm" << GGendl;
-    GGcout("GGEMSRangeCutsManager", "PrintInfos", 0) << "    * Positron: " << range_cuts->GetPositronLengthCut()/GGEMSUnits::mm << " mm" << GGendl;
+    GGcout("GGEMSRangeCutsManager", "PrintInfos", 0) << "    * Photon: " << range_cuts->GetPhotonDistanceCut()/GGEMSUnits::mm << " mm"<< GGendl;
+    GGcout("GGEMSRangeCutsManager", "PrintInfos", 0) << "    * Electron: " << range_cuts->GetElectronDistanceCut()/GGEMSUnits::mm << " mm" << GGendl;
+    GGcout("GGEMSRangeCutsManager", "PrintInfos", 0) << "    * Positron: " << range_cuts->GetPositronDistanceCut()/GGEMSUnits::mm << " mm" << GGendl;
     GGcout("GGEMSRangeCutsManager", "PrintInfos", 0) << "Energy cuts:" << GGendl;
     GGcout("GGEMSRangeCutsManager", "PrintInfos", 0) << "    * Photon:" << GGendl;
     EnergyCutUMap const kEnergyCutsPhoton = range_cuts->GetPhotonEnergyCut();
@@ -88,12 +88,12 @@ void GGEMSRangeCutsManager::SetLengthCut(std::string const& phantom_name, std::s
     // Loop over phantom
     for (size_t i = 0; i < phantom_navigator_manager.GetNumberOfPhantomNavigators(); ++i) {
       std::shared_ptr<GGEMSMaterials> materials = ((phantom_navigator_manager.GetPhantomNavigators()).at(i))->GetMaterials();
-      materials->SetLengthCut(particle_name, value, unit);
+      materials->SetDistanceCut(particle_name, value, unit);
     }
   }
   else {
     std::shared_ptr<GGEMSMaterials> materials = phantom_navigator_manager.GetPhantomNavigator(phantom_name)->GetMaterials();
-    materials->SetLengthCut(particle_name, value, unit);
+    materials->SetDistanceCut(particle_name, value, unit);
   }
 }
 
