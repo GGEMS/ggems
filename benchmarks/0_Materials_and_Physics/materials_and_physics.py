@@ -2,13 +2,16 @@
 # Benchmark 0: Materials and Physics                                           #
 # In this benchmark, a list of different materials are set to GGEMS, and       #
 # different physical effets are used. This benchmark shows how to set a        #
-# material in GGEMS and how to call a physical effect applied to this material.#
-# 3 materials are set:
-#     - Uranium
-#     - Water
-#     - RibBone
-# Then ...
+# material in GGEMS and how to call physical effects.                          #
+# 3 materials:                                                                 #
+#     - Uranium                                                                #
+#     - Water                                                                  #
+#     - RibBone                                                                #
 ################################################################################
+
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
 
 from ggems import *
 
@@ -16,7 +19,7 @@ from ggems import *
 material_list = ('Uranium', 'Water', 'RibBone')
 
 # Sequence of physical effects
-process_list = ('Compton',)
+process_list = ('Compton', 'Photoelectric')
 
 # ------------------------------------------------------------------------------
 # STEP 1: Choosing an OpenCL context
@@ -60,10 +63,52 @@ for process_id in process_list:
 # Intialize cross section tables with previous materials
 cross_sections.initialize(materials)
 
-# Printing cross section value from 10 keV to 200 keV
-for i in range(10, 200):
-  cs = cross_sections.get_cs('Compton', 'Uranium', i, 'keV')
-  print (cs, ' cm2.g-1')
+# Defining 1D X-axis buffer (energy in keV, from 10 to 200 keV, and step of 5 keV)
+x = np.arange(10.0, 1000.0, 1.0)
+
+# Defining 3D Y-axis buffer (process, material, cross-section in cm2.g-1)
+nb_processes = len(process_list)
+nb_materials = len(material_list)
+nb_cs = len(x)
+
+y = np.zeros((nb_processes, nb_materials, nb_cs))
+
+# Computing cross section values for each physical processes and materials
+for p in range(nb_processes):
+  for m in range(nb_materials):
+    for i in range(nb_cs):
+      y[p][m][i] = cross_sections.get_cs(process_list[p], material_list[m], x[i], 'keV')
+
+# Plots
+plt.style.use('dark_background')
+linestyles = ['-', '--', '-.', ':']
+
+for m in range(nb_materials):
+  fig, axis = plt.subplots(1, 1)
+
+  for p in range(nb_processes):
+    axis.plot(x, y[p][m], linestyles[p], label='%s' % str(process_list[p]))
+
+  axis.set_title('Cross-sections %s' % str(material_list[m]))
+
+  axis.set_xscale("log")
+  axis.set_yscale("log")
+
+  axis.set_xlabel('Photon energy (keV)')
+  axis.set(xlim=(x[0], x[len(x)-1]))
+  axis.set_ylabel('(cm2.g-1)')
+
+  axis.legend()
+  axis.set_axisbelow(True)
+  axis.minorticks_on()
+  axis.grid(which='major', linestyle='-', linewidth='0.3')
+  axis.grid(which='minor', linestyle=':', linewidth='0.3')
+
+  legend = axis.legend(loc='best', shadow=True, fontsize='large')
+
+  fig.tight_layout()
+  plt.savefig('cross_section_%s.png' % str(material_list[m]), bbox_inches='tight', dpi=600)
+  plt.close()
 
 # ------------------------------------------------------------------------------
 # STEP 5: Exit safely

@@ -152,7 +152,7 @@ void GGEMSXRaySource::PrintInfos(void) const
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSXRaySource::SetMonoenergy(GGfloat const& monoenergy, char const* unit)
+void GGEMSXRaySource::SetMonoenergy(GGfloat const& monoenergy, std::string const& unit)
 {
   monoenergy_ = GGEMSUnits::EnergyUnit(monoenergy, unit);
   is_monoenergy_mode_ = true;
@@ -162,7 +162,7 @@ void GGEMSXRaySource::SetMonoenergy(GGfloat const& monoenergy, char const* unit)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSXRaySource::SetPolyenergy(char const* energy_spectrum_filename)
+void GGEMSXRaySource::SetPolyenergy(std::string const& energy_spectrum_filename)
 {
   energy_spectrum_filename_ = energy_spectrum_filename;
   is_monoenergy_mode_ = false;
@@ -340,7 +340,7 @@ void GGEMSXRaySource::Initialize(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSXRaySource::SetBeamAperture(GGfloat const& beam_aperture, char const* unit)
+void GGEMSXRaySource::SetBeamAperture(GGfloat const& beam_aperture, std::string const& unit)
 {
   beam_aperture_ = GGEMSUnits::AngleUnit(beam_aperture, unit);
 }
@@ -349,7 +349,7 @@ void GGEMSXRaySource::SetBeamAperture(GGfloat const& beam_aperture, char const* 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSXRaySource::SetFocalSpotSize(GGfloat const& width, GGfloat const& height, GGfloat const& depth, char const* unit)
+void GGEMSXRaySource::SetFocalSpotSize(GGfloat const& width, GGfloat const& height, GGfloat const& depth, std::string const& unit)
 {
   focal_spot_size_ = MakeFloat3(GGEMSUnits::DistanceUnit(width, unit), GGEMSUnits::DistanceUnit(height, unit), GGEMSUnits::DistanceUnit(depth, unit));
 }

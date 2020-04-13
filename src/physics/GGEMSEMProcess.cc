@@ -16,8 +16,12 @@
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSEMProcess::GGEMSEMProcess(std::string const& process_name)
-: process_name_(process_name),
+GGEMSEMProcess::GGEMSEMProcess()
+:
+  process_name_(""),
+  primary_particle_(""),
+  secondary_particle_(""),
+  is_secondaries_(false),
   opencl_manager_(GGEMSOpenCLManager::GetInstance())
 {
   GGcout("GGEMSEMProcess", "GGEMSEMProcess", 3) << "Allocation of GGEMSEMProcess..." << GGendl;

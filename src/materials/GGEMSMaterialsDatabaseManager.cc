@@ -214,24 +214,6 @@ void GGEMSMaterialsDatabaseManager::LoadChemicalElements(void)
   AddChemicalElements("Californium",    98, 251.00000000000000f,  966.0f, GGEMSState::SOLID, -1);
   AddChemicalElements("Einsteinium",    99, 252.00000000000000f,  980.0f, GGEMSState::SOLID, -1);
   AddChemicalElements("Fermium",       100, 257.00000000000000f,  994.0f, GGEMSState::SOLID, -1);
-  AddChemicalElements("Mendelevium",   101, 258.00000000000000f, 1007.0f, GGEMSState::SOLID, -1);
-  AddChemicalElements("Nobelium",      102, 259.00000000000000f, 1020.0f, GGEMSState::SOLID, -1);
-  AddChemicalElements("Lawrencium",    103, 266.00000000000000f, 1034.0f, GGEMSState::SOLID, -1);
-  AddChemicalElements("Rutherfordium", 104, 267.00000000000000f, 1047.0f, GGEMSState::SOLID, -1);
-  AddChemicalElements("Dubnium",       105, 268.00000000000000f, 1061.0f, GGEMSState::SOLID, -1);
-  AddChemicalElements("Seaborgium",    106, 269.00000000000000f, 1074.0f, GGEMSState::SOLID, -1);
-  AddChemicalElements("Bohrium",       107, 270.00000000000000f, 1087.0f, GGEMSState::SOLID, -1);
-  AddChemicalElements("Hassium",       108, 269.00000000000000f, 1102.0f, GGEMSState::SOLID, -1);
-  AddChemicalElements("Meitnerium",    109, 278.00000000000000f, 1115.0f, GGEMSState::SOLID, -1);
-  AddChemicalElements("Darmstadtium",  110, 281.00000000000000f, 1129.0f, GGEMSState::SOLID, -1);
-  AddChemicalElements("Roentgenium",   111, 282.00000000000000f, 1143.0f, GGEMSState::SOLID, -1);
-  AddChemicalElements("Copernicium",   112, 285.00000000000000f, 1156.0f, GGEMSState::SOLID, -1);
-  AddChemicalElements("Nihonium",      113, 286.00000000000000f, 1171.0f, GGEMSState::SOLID, -1);
-  AddChemicalElements("Flerovium",     114, 289.00000000000000f, 1185.0f, GGEMSState::SOLID, -1);
-  AddChemicalElements("Moscovium",     115, 290.00000000000000f, 1199.0f, GGEMSState::SOLID, -1);
-  AddChemicalElements("Livermorium",   116, 293.00000000000000f, 1213.0f, GGEMSState::SOLID, -1);
-  AddChemicalElements("Tennessine",    117, 294.00000000000000f, 1227.0f, GGEMSState::SOLID, -1);
-  AddChemicalElements("Oganesson",     118, 294.00000000000000f, 1242.0f, GGEMSState::SOLID, -1);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

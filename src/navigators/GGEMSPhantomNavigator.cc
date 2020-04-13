@@ -54,7 +54,7 @@ GGEMSPhantomNavigator::~GGEMSPhantomNavigator(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSPhantomNavigator::SetPhantomName(char const* phantom_navigator_name)
+void GGEMSPhantomNavigator::SetPhantomName(std::string const& phantom_navigator_name)
 {
   phantom_navigator_name_ = phantom_navigator_name;
 }
@@ -63,7 +63,7 @@ void GGEMSPhantomNavigator::SetPhantomName(char const* phantom_navigator_name)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSPhantomNavigator::SetPhantomFile(char const* phantom_filename)
+void GGEMSPhantomNavigator::SetPhantomFile(std::string const& phantom_filename)
 {
   phantom_mhd_header_filename_ = phantom_filename;
 }
@@ -72,7 +72,7 @@ void GGEMSPhantomNavigator::SetPhantomFile(char const* phantom_filename)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSPhantomNavigator::SetRangeToMaterialFile(char const* range_data_filename)
+void GGEMSPhantomNavigator::SetRangeToMaterialFile(std::string const& range_data_filename)
 {
   range_data_filename_ = range_data_filename;
 }
@@ -81,7 +81,7 @@ void GGEMSPhantomNavigator::SetRangeToMaterialFile(char const* range_data_filena
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSPhantomNavigator::SetGeometryTolerance(GGfloat const& distance, char const* unit)
+void GGEMSPhantomNavigator::SetGeometryTolerance(GGfloat const& distance, std::string const& unit)
 {
   geometry_tolerance_ = GGEMSUnits::DistanceUnit(distance, unit);
 }
@@ -90,7 +90,7 @@ void GGEMSPhantomNavigator::SetGeometryTolerance(GGfloat const& distance, char c
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSPhantomNavigator::SetOffset(GGfloat const offset_x, GGfloat const offset_y, GGfloat const offset_z, char const* unit)
+void GGEMSPhantomNavigator::SetOffset(GGfloat const offset_x, GGfloat const offset_y, GGfloat const offset_z, std::string const& unit)
 {
   offset_xyz_.s[0] = GGEMSUnits::DistanceUnit(offset_x, unit);
   offset_xyz_.s[1] = GGEMSUnits::DistanceUnit(offset_y, unit);

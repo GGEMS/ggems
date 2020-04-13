@@ -12,6 +12,7 @@
 
 #include "GGEMS/physics/GGEMSCrossSections.hh"
 #include "GGEMS/physics/GGEMSComptonScattering.hh"
+#include "GGEMS/physics/GGEMSPhotoElectricEffect.hh"
 #include "GGEMS/physics/GGEMSParticleCrossSectionsStack.hh"
 #include "GGEMS/tools/GGEMSTools.hh"
 #include "GGEMS/materials/GGEMSMaterials.hh"
@@ -50,24 +51,34 @@ GGEMSCrossSections::~GGEMSCrossSections(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSCrossSections::AddProcess(std::string const& process_name, std::string const& particle_name)
+void GGEMSCrossSections::AddProcess(std::string const& process_name, std::string const& particle_type, bool const& is_secondary)
 {
   GGcout("GGEMSCrossSections", "AddProcess", 0) << "Adding " << process_name << " scattering process..." << GGendl;
 
   if (process_name == "Compton") {
     if (!is_process_activated_.at(GGEMSProcess::COMPTON_SCATTERING)) {
-      em_processes_list_.push_back(std::make_shared<GGEMSComptonScattering>());
+      em_processes_list_.push_back(std::make_shared<GGEMSComptonScattering>(particle_type, is_secondary));
       is_process_activated_.at(GGEMSProcess::COMPTON_SCATTERING) = true;
     }
     else {
       GGwarn("GGEMSCrossSections", "AddProcess", 3) << "Compton scattering process already activated!!!" << GGendl;
     }
   }
+  else if (process_name == "Photoelectric") {
+    if (!is_process_activated_.at(GGEMSProcess::PHOTOELECTRIC_EFFECT)) {
+      em_processes_list_.push_back(std::make_shared<GGEMSPhotoElectricEffect>(particle_type, is_secondary));
+      is_process_activated_.at(GGEMSProcess::PHOTOELECTRIC_EFFECT) = true;
+    }
+    else {
+      GGwarn("GGEMSCrossSections", "AddProcess", 3) << "PhotoElectric effect process already activated!!!" << GGendl;
+    }
+  }
   else {
     std::ostringstream oss(std::ostringstream::out);
     oss << "Unknown process!!! The available processes in GGEMS are:" << std::endl;
     oss << "    * For incident gamma:" << std::endl;
-    oss << "        - 'Compton'";
+    oss << "        - 'Compton'" << std::endl;
+    oss << "        - 'Photoelectric'" << std::endl;
     GGEMSMisc::ThrowException("GGEMSCrossSections", "AddProcess", oss.str());
   }
 }
@@ -129,9 +140,12 @@ GGfloat GGEMSCrossSections::GetPhotonCrossSection(std::string const& process_nam
   GGushort const kNumberOfBins = particle_cross_sections_device->number_of_bins_;
   GGuchar const kNumberMaterials = particle_cross_sections_device->number_of_materials_;
 
-  if (energy < kMinEnergy || energy > kMaxEnergy) {
+  // Converting energy
+  GGfloat const kEnergyMeV = GGEMSUnits::EnergyUnit(energy, unit);
+
+  if (kEnergyMeV < kMinEnergy || kEnergyMeV > kMaxEnergy) {
     std::ostringstream oss(std::ostringstream::out);
-    oss << "Problem energy: " << GGEMSUnits::EnergyUnit(energy, unit) << " " << unit << " is not in the range [" << kMinEnergy << ", " << kMaxEnergy << "] MeV!!!" << std::endl;
+    oss << "Problem energy: " << kEnergyMeV << " " << unit << " is not in the range [" << kMinEnergy << ", " << kMaxEnergy << "] MeV!!!" << std::endl;
     GGEMSMisc::ThrowException("GGEMSCrossSections", "GetPhotonCrossSection", oss.str());
   }
 
@@ -140,15 +154,19 @@ GGfloat GGEMSCrossSections::GetPhotonCrossSection(std::string const& process_nam
   if (process_name == "Compton") {
     process_id = GGEMSProcess::COMPTON_SCATTERING;
   }
+  else if (process_name == "Photoelectric") {
+    process_id = GGEMSProcess::PHOTOELECTRIC_EFFECT;
+  }
   else {
     std::ostringstream oss(std::ostringstream::out);
     oss << "Unknown process!!! The available processes for photon in GGEMS are:" << std::endl;
-    oss << "    - 'Compton'";
+    oss << "    - 'Compton'" << std::endl;
+    oss << "    - 'Photoelectric'" << std::endl;
     GGEMSMisc::ThrowException("GGEMSCrossSections", "GetPhotonCrossSection", oss.str());
   }
 
   // Get id of material
-  GGint mat_id = 0;
+  GGuint mat_id = 0;
   for (GGuchar i = 0; i < kNumberMaterials; ++i) {
     if (strcmp(material_name.c_str(), reinterpret_cast<char*>(particle_cross_sections_device->material_names_[i])) == 0) {
       mat_id = i;
@@ -156,15 +174,12 @@ GGfloat GGEMSCrossSections::GetPhotonCrossSection(std::string const& process_nam
     }
   }
 
-  // Convert energy in correct format
-  GGfloat const kEnergy = GGEMSUnits::EnergyUnit(energy, unit);
-
   // Get density of material
   GGEMSMaterialsDatabaseManager& material_database_manager = GGEMSMaterialsDatabaseManager::GetInstance();
   GGfloat const kDensity = material_database_manager.GetMaterial(material_name).density_;
 
   // Computing the energy bin
-  GGuint const kEnergyBin = BinarySearchLeft(kEnergy, particle_cross_sections_device->energy_bins_, kNumberOfBins, 0, 0);
+  GGuint const kEnergyBin = BinarySearchLeft(kEnergyMeV, particle_cross_sections_device->energy_bins_, kNumberOfBins, 0, 0);
 
   // Compute cross section using linear interpolation
   GGfloat const kEnergyA = particle_cross_sections_device->energy_bins_[kEnergyBin];
@@ -175,7 +190,7 @@ GGfloat GGEMSCrossSections::GetPhotonCrossSection(std::string const& process_nam
   // Release pointer
   opencl_manager_.ReleaseDeviceBuffer(particle_cross_sections_, particle_cross_sections_device);
 
-  GGfloat const kCS = LinearInterpolation(kEnergyA, kCSA, kEnergyB, kCSB, kEnergy);
+  GGfloat const kCS = LinearInterpolation(kEnergyA, kCSA, kEnergyB, kCSB, kEnergyMeV);
 
   return (kCS/kDensity) / (GGEMSUnits::cm2/GGEMSUnits::g);
 }
@@ -193,9 +208,9 @@ GGEMSCrossSections* create_ggems_cross_sections(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void add_process_ggems_cross_sections(GGEMSCrossSections* cross_sections, char const* process_name, char const* particle_name)
+void add_process_ggems_cross_sections(GGEMSCrossSections* cross_sections, char const* process_name, char const* particle_name, bool const is_secondary)
 {
-  cross_sections->AddProcess(process_name, particle_name);
+  cross_sections->AddProcess(process_name, particle_name, is_secondary);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

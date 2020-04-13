@@ -305,60 +305,6 @@ Einsteinium: d=8.84 g/cm3; n=1;
 Fermium: d=8.84 g/cm3; n=1;
     +el: name=Fermium    ; f=1.0
 
-Mendelevium: d=10.3 g/cm3; n=1;
-    +el: name=Mendelevium    ; f=1.0
-
-Nobelium: d=9.9 g/cm3; n=1;
-    +el: name=Nobelium    ; f=1.0
-
-Lawrencium: d=16.1 g/cm3; n=1;
-    +el: name=Lawrencium    ; f=1.0
-
-Rutherfordium: d=23.2 g/cm3; n=1;
-    +el: name=Rutherfordium    ; f=1.0
-
-Dubnium: d=29.3 g/cm3; n=1;
-    +el: name=Dubnium    ; f=1.0
-
-Seaborgium: d=35.0 g/cm3; n=1;
-    +el: name=Seaborgium    ; f=1.0
-
-Bohrium: d=37.1 g/cm3; n=1;
-    +el: name=Bohrium    ; f=1.0
-
-Hassium: d=41.0 g/cm3; n=1;
-    +el: name=Hassium    ; f=1.0
-
-Meitnerium: d=37.4 g/cm3; n=1;
-    +el: name=Meitnerium    ; f=1.0
-
-Darmstadtium: d=34.8 g/cm3; n=1;
-    +el: name=Darmstadtium    ; f=1.0
-
-Roentgenium: d=28.7 g/cm3; n=1;
-    +el: name=Roentgenium    ; f=1.0
-
-Copernicium: d=14.0 g/cm3; n=1;
-    +el: name=Copernicium    ; f=1.0
-
-Nihonium: d=16.0 g/cm3; n=1;
-    +el: name=Nihonium    ; f=1.0
-
-Flerovium: d=14.0 g/cm3; n=1;
-    +el: name=Flerovium    ; f=1.0
-
-Moscovium: d=13.5 g/cm3; n=1;
-    +el: name=Moscovium    ; f=1.0
-
-Livermorium: d=12.9 g/cm3; n=1;
-    +el: name=Livermorium    ; f=1.0
-
-Tennessine: d=7.2 g/cm3; n=1;
-    +el: name=Tennessine    ; f=1.0
-
-Oganesson: d=5.0 g/cm3; n=1;
-    +el: name=Oganesson    ; f=1.0
-
 ################################################################################
 #                               COMPLEX MATERIAL                               #
 ################################################################################

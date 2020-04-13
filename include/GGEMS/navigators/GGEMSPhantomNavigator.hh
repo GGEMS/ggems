@@ -91,43 +91,43 @@ class GGEMS_EXPORT GGEMSPhantomNavigator
     GGEMSPhantomNavigator& operator=(GGEMSPhantomNavigator const&& phantom_navigator) = delete;
 
     /*!
-      \fn void SetPhantomName(char const* phantom_navigator_name)
+      \fn void SetPhantomName(std::string const& phantom_navigator_name)
       \param phantom_navigator_name - name of the navigator
       \brief save the name of the navigator
     */
-    void SetPhantomName(char const* phantom_navigator_name);
+    void SetPhantomName(std::string const& phantom_navigator_name);
 
     /*!
-      \fn void SetPhantomFile(char const* phantom_filename)
+      \fn void SetPhantomFile(std::string const& phantom_filename)
       \param phantom_filename - filename of MHD file for phantom
       \brief set the mhd filename for phantom
     */
-    void SetPhantomFile(char const* phantom_filename);
+    void SetPhantomFile(std::string const& phantom_filename);
 
     /*!
-      \fn void SetRangeToMaterialFile(char const* range_data_filename)
+      \fn void SetRangeToMaterialFile(std::string const& range_data_filename)
       \param range_data_filename - filename with range to material data
       \brief set the range to material filename
     */
-    void SetRangeToMaterialFile(char const* range_data_filename);
+    void SetRangeToMaterialFile(std::string const& range_data_filename);
 
     /*!
-      \fn void SetGeometryTolerance(GGfloat const& distance, char const* unit)
+      \fn void SetGeometryTolerance(GGfloat const& distance, std::string const& unit)
       \param distance - geometry distance
       \param unit - unit of the distance
       \brief Set the geometry tolerance in distance
     */
-    void SetGeometryTolerance(GGfloat const& distance, char const* unit = "mm");
+    void SetGeometryTolerance(GGfloat const& distance, std::string const& unit = "mm");
 
     /*!
-      \fn void SetOffset(GGfloat const offset_x, GGfloat const offset_y, GGfloat const offset_z, char const* unit = "mm")
+      \fn void SetOffset(GGfloat const offset_x, GGfloat const offset_y, GGfloat const offset_z, std::string const& unit = "mm")
       \param offset_x - offset in X
       \param offset_y - offset in Y
       \param offset_z - offset in Z
       \param unit - unit of the distance
       \brief set the offset of the phantom in X, Y and Z
     */
-    void SetOffset(GGfloat const offset_x, GGfloat const offset_y, GGfloat const offset_z, char const* unit = "mm");
+    void SetOffset(GGfloat const offset_x, GGfloat const offset_y, GGfloat const offset_z, std::string const& unit = "mm");
 
     /*!
       \fn inline std::string GetPhantomName(void) const
