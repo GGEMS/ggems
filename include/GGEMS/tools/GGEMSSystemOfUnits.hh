@@ -192,29 +192,26 @@ namespace GGEMSUnits
   template <typename T>
   T DistanceUnit(T const& value, std::string const& unit)
   {
-    // Convert char* to string
-    std::string unit_str = unit;
-
     T new_value = static_cast<T>(0);
-    if (unit_str == "nm") {
+    if (unit == "nm") {
       new_value = static_cast<T>(value * GGEMSUnits::nm);
     }
-    else if (unit_str == "um") {
+    else if (unit == "um") {
       new_value = static_cast<T>(value * GGEMSUnits::um);
     }
-    else if (unit_str == "mm") {
+    else if (unit == "mm") {
       new_value = static_cast<T>(value * GGEMSUnits::mm);
     }
-    else if (unit_str == "cm") {
+    else if (unit == "cm") {
       new_value = static_cast<T>(value * GGEMSUnits::cm);
     }
-    else if (unit_str == "m") {
+    else if (unit == "m") {
       new_value = static_cast<T>(value * GGEMSUnits::m);
     }
-    else if (unit_str == "km") {
+    else if (unit == "km") {
       new_value = static_cast<T>(value * GGEMSUnits::km);
     }
-    else if (unit_str == "pc") {
+    else if (unit == "pc") {
       new_value = static_cast<T>(value * GGEMSUnits::pc);
     }
     else {
@@ -243,26 +240,23 @@ namespace GGEMSUnits
   template <typename T>
   T EnergyUnit(T const& value, std::string const& unit)
   {
-    // Convert char* to string
-    std::string unit_str = unit;
-
     T new_value = static_cast<T>(0);
-    if (unit_str == "eV") {
+    if (unit == "eV") {
       new_value = static_cast<T>(value * GGEMSUnits::eV);
     }
-    else if (unit_str == "keV") {
+    else if (unit == "keV") {
       new_value = static_cast<T>(value * GGEMSUnits::keV);
     }
-    else if (unit_str == "MeV") {
+    else if (unit == "MeV") {
       new_value = static_cast<T>(value * GGEMSUnits::MeV);
     }
-    else if (unit_str == "GeV") {
+    else if (unit == "GeV") {
       new_value = static_cast<T>(value * GGEMSUnits::GeV);
     }
-    else if (unit_str == "TeV") {
+    else if (unit == "TeV") {
       new_value = static_cast<T>(value * GGEMSUnits::TeV);
     }
-    else if (unit_str == "PeV") {
+    else if (unit == "PeV") {
       new_value = static_cast<T>(value * GGEMSUnits::PeV);
     }
     else {
@@ -290,20 +284,17 @@ namespace GGEMSUnits
   template <typename T>
   T AngleUnit(T const& value, std::string const& unit)
   {
-    // Convert char* to string
-    std::string unit_str = unit;
-
     T new_value = static_cast<T>(0);
-    if (unit_str == "rad") {
+    if (unit == "rad") {
       new_value = static_cast<T>(value * GGEMSUnits::rad);
     }
-    else if (unit_str == "mrad") {
+    else if (unit == "mrad") {
       new_value = static_cast<T>(value * GGEMSUnits::mrad);
     }
-    else if (unit_str == "deg") {
+    else if (unit == "deg") {
       new_value = static_cast<T>(value * GGEMSUnits::deg);
     }
-    else if (unit_str == "sr") {
+    else if (unit == "sr") {
       new_value = static_cast<T>(value * GGEMSUnits::sr);
     }
     else {

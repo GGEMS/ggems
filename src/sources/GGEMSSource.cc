@@ -68,7 +68,7 @@ GGEMSSource::~GGEMSSource(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSSource::SetSourceName(char const* source_name)
+void GGEMSSource::SetSourceName(std::string const& source_name)
 {
   source_name_ = source_name;
 }
@@ -77,7 +77,7 @@ void GGEMSSource::SetSourceName(char const* source_name)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSSource::SetPosition(GGfloat const& pos_x, GGfloat const& pos_y, GGfloat const& pos_z, char const* unit)
+void GGEMSSource::SetPosition(GGfloat const& pos_x, GGfloat const& pos_y, GGfloat const& pos_z, std::string const& unit)
 {
   geometry_transformation_->SetTranslation(MakeFloat3(GGEMSUnits::DistanceUnit(pos_x, unit), GGEMSUnits::DistanceUnit(pos_y, unit), GGEMSUnits::DistanceUnit(pos_z, unit)));
 }
@@ -95,19 +95,16 @@ void GGEMSSource::SetNumberOfParticles(GGulong const& number_of_particles)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSSource::SetSourceParticleType(char const* particle_type)
+void GGEMSSource::SetSourceParticleType(std::string const& particle_type)
 {
-  // Convert the particle type in string
-  std::string particle_type_str(particle_type);
-
-  // Transform the string to lower character
-  std::transform(particle_type_str.begin(), particle_type_str.end(), particle_type_str.begin(), ::tolower);
-
-  if (!particle_type_str.compare("photon")) {
+  if (particle_type == "gamma") {
     particle_type_ = GGEMSParticle::PHOTON;
   }
-  else if (!particle_type_str.compare("electron")) {
+  else if (particle_type == "e-") {
     particle_type_ = GGEMSParticle::ELECTRON;
+  }
+  else if (particle_type == "e+") {
+    particle_type_ = GGEMSParticle::POSITRON;
   }
   else
   {
@@ -132,7 +129,7 @@ void GGEMSSource::SetLocalAxis(GGfloat const& m00, GGfloat const& m01, GGfloat c
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSSource::SetRotation(GGfloat const& rx, GGfloat const& ry, GGfloat const& rz, char const* unit)
+void GGEMSSource::SetRotation(GGfloat const& rx, GGfloat const& ry, GGfloat const& rz, std::string const& unit)
 {
   geometry_transformation_->SetRotation(MakeFloat3(
     GGEMSUnits::AngleUnit(rx, unit),

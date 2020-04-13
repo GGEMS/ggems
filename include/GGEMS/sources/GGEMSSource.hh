@@ -67,28 +67,28 @@ class GGEMS_EXPORT GGEMSSource
     GGEMSSource& operator=(GGEMSSource const&& source) = delete;
 
     /*!
-      \fn void SetSourceName(char const* source_name)
+      \fn void SetSourceName(std::string const& source_name)
       \param source_name - name of the source
       \brief save the name of the source
     */
-    void SetSourceName(char const* source_name);
+    void SetSourceName(std::string const& source_name);
 
     /*!
-      \fn void SetPosition(GGfloat const& pos_x, GGfloat const& pos_y, GGfloat const& pos_z, char const* unit = "mm")
+      \fn void SetPosition(GGfloat const& pos_x, GGfloat const& pos_y, GGfloat const& pos_z, std::string const& unit = "mm")
       \param pos_x - Position of the source in X
       \param pos_y - Position of the source in Y
       \param pos_z - Position of the source in Z
       \param unit - unit of the distance
       \brief Set the position of the source in the global coordinates
     */
-    void SetPosition(GGfloat const& pos_x, GGfloat const& pos_y, GGfloat const& pos_z, char const* unit = "mm");
+    void SetPosition(GGfloat const& pos_x, GGfloat const& pos_y, GGfloat const& pos_z, std::string const& unit = "mm");
 
     /*!
-      \fn void SetSourceParticleType(char const* particle_type)
+      \fn void SetSourceParticleType(std::string const& particle_type)
       \param particle_type - Type of the particle
       \brief Set the type of the particle: electron, positron or photon
     */
-    void SetSourceParticleType(char const* particle_type);
+    void SetSourceParticleType(std::string const& particle_type);
 
     /*!
       \fn void SetLocalAxis(GGfloat const& m00, GGfloat const& m01, GGfloat const& m02, GGfloat const& m10, GGfloat const& m11, GGfloat const& m12, GGfloat const& m20, GGfloat const& m21, GGfloat const& m22)
@@ -106,14 +106,14 @@ class GGEMS_EXPORT GGEMSSource
     void SetLocalAxis(GGfloat const& m00, GGfloat const& m01, GGfloat const& m02, GGfloat const& m10, GGfloat const& m11, GGfloat const& m12, GGfloat const& m20, GGfloat const& m21, GGfloat const& m22);
 
     /*!
-      \fn void SetRotation(GGfloat const& rx, GGfloat const& ry, GGfloat const& rz)
+      \fn void SetRotation(GGfloat const& rx, GGfloat const& ry, GGfloat const& rz, std::string const& unit)
       \param rx - Rotation around X along global axis
       \param ry - Rotation around Y along global axis
       \param rz - Rotation around Z along global axis
       \param unit - unit of the angle
       \brief Set the rotation of the source around global axis
     */
-    void SetRotation(GGfloat const& rx, GGfloat const& ry, GGfloat const& rz, char const* unit = "deg");
+    void SetRotation(GGfloat const& rx, GGfloat const& ry, GGfloat const& rz, std::string const& unit = "deg");
 
     /*!
       \fn void SetNumberOfParticles(GGulong const& number_of_particles)

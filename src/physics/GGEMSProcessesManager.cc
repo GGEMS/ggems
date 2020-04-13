@@ -146,8 +146,8 @@ void GGEMSProcessesManager::PrintInfos(void) const
     GGcout("GGEMSProcessesManager", "PrintInfos", 0) << "Activated processes in phantom: " << ((phantom_navigator_manager.GetPhantomNavigators()).at(i))->GetPhantomName() << GGendl;
     for (size_t j = 0; j < cross_sections->GetProcessesList().size(); ++j) {
       GGcout("GGEMSProcessesManager", "PrintInfos", 0) << "    * " << cross_sections->GetProcessesList().at(j)->GetProcessName() << GGendl;
-      GGcout("GGEMSProcessesManager", "PrintInfos", 0) << GGendl;
     }
+    GGcout("GGEMSProcessesManager", "PrintInfos", 0) << GGendl;
   }
 }
 
@@ -159,7 +159,11 @@ void GGEMSProcessesManager::PrintAvailableProcesses(void) const
 {
   GGcout("GGEMSProcessesManager", "PrintAvailableProcesses", 0) << "Available processes:" << GGendl;
   GGcout("GGEMSProcessesManager", "PrintAvailableProcesses", 0) << "--------------------" << GGendl;
-  GGcout("GGEMSProcessesManager", "PrintAvailableProcesses", 0) << "    * 'Compton' using Geant4 standard model (G4KleinNishinaCompton)" << GGendl;
+  GGcout("GGEMSProcessesManager", "PrintAvailableProcesses", 0) << "    * 'Compton' (Klein-Nishina model without atomic shell effect)" << GGendl;
+  GGcout("GGEMSProcessesManager", "PrintAvailableProcesses", 0) << "        - 'gamma' incident particle" << GGendl;
+  GGcout("GGEMSProcessesManager", "PrintAvailableProcesses", 0) << "        - 'e-' secondary particle" << GGendl;
+  GGcout("GGEMSProcessesManager", "PrintAvailableProcesses", 0) << GGendl;
+  GGcout("GGEMSProcessesManager", "PrintAvailableProcesses", 0) << "    * 'Photoelectric' (Sandia table)" << GGendl;
   GGcout("GGEMSProcessesManager", "PrintAvailableProcesses", 0) << "        - 'gamma' incident particle" << GGendl;
   GGcout("GGEMSProcessesManager", "PrintAvailableProcesses", 0) << "        - 'e-' secondary particle" << GGendl;
 }

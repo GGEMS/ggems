@@ -14,6 +14,8 @@
 #include "GGEMS/randoms/GGEMSKissEngine.hh"
 #include "GGEMS/maths/GGEMSMatrixOperations.hh"
 #include "GGEMS/maths/GGEMSMathAlgorithms.hh"
+#include "GGEMS/physics/GGEMSParticleConstants.hh"
+#include "GGEMS/physics/GGEMSEMProcessConstants.hh"
 
 __kernel void get_primaries_ggems_xray_source(
   __global GGEMSPrimaryParticles* primary_particle,

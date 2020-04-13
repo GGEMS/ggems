@@ -18,10 +18,23 @@
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSComptonScattering::GGEMSComptonScattering(void)
-: GGEMSEMProcess("Compton")
+GGEMSComptonScattering::GGEMSComptonScattering(std::string const& primary_particle, bool const& is_secondary)
+: GGEMSEMProcess()
 {
   GGcout("GGEMSComptonScattering", "GGEMSComptonScattering", 3) << "Allocation of GGEMSComptonScattering..." << GGendl;
+
+  process_name_ = "Compton";
+
+  // Check type of primary particle
+  if (primary_particle != "gamma") {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "For Compton scattering, incident particle has to be a 'gamma'";
+    GGEMSMisc::ThrowException("GGEMSComptonScattering", "GGEMSComptonScattering", oss.str());
+  }
+
+  primary_particle_ = "gamma";
+  secondary_particle_ = "e-";
+  is_secondaries_ = is_secondary;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

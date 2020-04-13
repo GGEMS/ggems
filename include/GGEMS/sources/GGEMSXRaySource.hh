@@ -61,37 +61,37 @@ class GGEMS_EXPORT GGEMSXRaySource : public GGEMSSource
     GGEMSXRaySource& operator=(GGEMSXRaySource const&& xray_source) = delete;
 
     /*!
-      \fn void SetBeamAperture(GGfloat const& beam_aperture, char const* unit)
+      \fn void SetBeamAperture(GGfloat const& beam_aperture, std::string const& unit)
       \param beam_aperture - beam aperture of the x-ray source
       \param unit - unit of the angle
       \brief Set the beam aperture of the source
     */
-    void SetBeamAperture(GGfloat const& beam_aperture, char const* unit = "deg");
+    void SetBeamAperture(GGfloat const& beam_aperture, std::string const& unit = "deg");
 
     /*!
-      \fn void SetFocalSpotSize(GGfloat const& width, GGfloat const& height, GGfloat const& depth)
+      \fn void SetFocalSpotSize(GGfloat const& width, GGfloat const& height, GGfloat const& depth, std::string const& unit)
       \param width - width of the focal spot size
       \param height - height of the focal spot size
       \param depth - depth of the focal spot size
       \param unit - unit of the distance
       \brief Set the focal spot size of the x-ray source
     */
-    void SetFocalSpotSize(GGfloat const& width, GGfloat const& height, GGfloat const& depth, char const* unit = "mm");
+    void SetFocalSpotSize(GGfloat const& width, GGfloat const& height, GGfloat const& depth, std::string const& unit = "mm");
 
     /*!
-      \fn void SetMonoenergy(GGfloat const& monoenergy)
+      \fn void SetMonoenergy(GGfloat const& monoenergy, std::string const& unit)
       \param monoenergy - Monoenergy value
       \param unit - unit of the energy
       \brief set the value of energy in monoenergy mode
     */
-    void SetMonoenergy(GGfloat const& monoenergy, char const* unit = "keV");
+    void SetMonoenergy(GGfloat const& monoenergy, std::string const& unit = "keV");
 
     /*!
-      \fn void SetPolyenergy(char const* energy_spectrum_filename)
+      \fn void SetPolyenergy(std::string const& energy_spectrum_filename)
       \param energy_spectrum_filename - filename containing the energy spectrum
       \brief set the energy spectrum file for polyenergy mode
     */
-    void SetPolyenergy(char const* energy_spectrum_filename);
+    void SetPolyenergy(std::string const& energy_spectrum_filename);
 
     /*!
       \fn void Initialize(void)

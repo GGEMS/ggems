@@ -52,7 +52,8 @@ typedef struct PACKED GGEMSParticleCrossSections_t
   GGfloat photon_cross_sections_[NUMBER_PHOTON_PROCESSES][256*1024]; /*!< Photon cross sections */
   #else
   GGuchar index_photon_cs[GGEMSProcess::NUMBER_PHOTON_PROCESSES]; /*!< Index of activated photon process, ex: if only Rayleigh activate index_photon_cs[0] = 2 */
-  GGfloat photon_cross_sections_[GGEMSProcess::NUMBER_PHOTON_PROCESSES][256*1024]; /*!< Photon cross sections in mm-1 */
+  GGfloat photon_cross_sections_[GGEMSProcess::NUMBER_PHOTON_PROCESSES][256*1024]; /*!< Photon cross sections per material in mm-1 */
+  GGfloat photon_cross_sections_per_atom_[GGEMSProcess::NUMBER_PHOTON_PROCESSES][118*1024]; /*!< Photon cross sections per atom in mm-1 */
   #endif
 
   // Electron

@@ -74,12 +74,13 @@ class GGEMS_EXPORT GGEMSCrossSections
     GGEMSCrossSections& operator=(GGEMSCrossSections const&& cross_sections) = delete;
 
     /*!
-      \fn void AddProcess(std::string const& process_name, std::string const& particle_name)
+      \fn void AddProcess(std::string const& process_name, std::string const& particle_type, bool const& is_secondary)
       \param process_name - name of the process
-      \param particle_name - name of the particle
+      \param particle_type - type of the particle
+      \param is_secondary - activate secondaries or not
       \brief add a process to the GGEMS simulation
     */
-    void AddProcess(std::string const& process_name, std::string const& particle_name);
+    void AddProcess(std::string const& process_name, std::string const& particle_type, bool const& is_secondary = false);
 
     /*!
       \fn void Initialize(GGEMSMaterials const* materials)
@@ -122,13 +123,14 @@ class GGEMS_EXPORT GGEMSCrossSections
 extern "C" GGEMS_EXPORT GGEMSCrossSections* create_ggems_cross_sections(void);
 
 /*!
-  \fn void add_process_ggems_cross_sections(GGEMSCrossSections* cross_sections, char const* process_name, char const* particle_name)
+  \fn void add_process_ggems_cross_sections(GGEMSCrossSections* cross_sections, char const* process_name, char const* particle_name, bool const is_secondary)
   \param cross_sections - pointer on GGEMS cross sections
   \param process_name - name of the process
   \param particle_name - name of the particle
+  \param is_secondary - activate secondaries or not
   \brief Add a process to cross section table
 */
-extern "C" GGEMS_EXPORT void add_process_ggems_cross_sections(GGEMSCrossSections* cross_sections, char const* process_name, char const* particle_name);
+extern "C" GGEMS_EXPORT void add_process_ggems_cross_sections(GGEMSCrossSections* cross_sections, char const* process_name, char const* particle_name, bool const is_secondary);
 
 /*!
   \fn void initialize_ggems_cross_sections(GGEMSCrossSections* cross_sections, GGEMSMaterials* materials)

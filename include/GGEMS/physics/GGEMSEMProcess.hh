@@ -19,36 +19,9 @@
 
 #include <string>
 
-#include "GGEMS/tools/GGEMSSystemOfUnits.hh"
 #include "GGEMS/materials/GGEMSMaterialsStack.hh"
 #include "GGEMS/global/GGEMSOpenCLManager.hh"
-
-/*!
-  \namespace GGEMSProcessName
-  \brief Namespace storing constants about processes
-*/
-#ifndef OPENCL_COMPILER
-namespace GGEMSProcess
-{
-#endif
-  __constant GGuchar NUMBER_PROCESSES = 1; /*!< Maximum number of processes */
-  __constant GGuchar NUMBER_PHOTON_PROCESSES = 3; /*!< Maximum number of photon processes */
-  //__constant GGuchar NUMBER_ELECTRON_PROCESSES = 3; /*!< Maximum number of electron processes */
-  //__constant GGuchar NUMBER_PARTICLES = 5; /*!< Maximum number of different particles for secondaries */
-
-  __constant GGuchar COMPTON_SCATTERING = 0; /*!< Compton process */
-  __constant GGuchar PHOTOELECTRIC_EFFECT = 1; /*!< Photoelectric process */
-  __constant GGuchar RAYLEIGH_SCATTERING = 2; /*!< Rayleigh process */
-  //__constant GGuchar PHOTON_BONDARY_VOXEL = 77; /*!< Photon on the boundaries */
-
-  //__constant GGuchar ELECTRON_IONISATION = 4; /*!< Electron ionisation process */
-  //__constant GGuchar ELECTRON_MSC = 5; /*!< Electron multiple scattering process */
-  //__constant GGuchar ELECTRON_BREMSSTRAHLUNG = 6; /*!< Bremsstralung electron process */
-
-  //__constant GGuchar NO_PROCESS = 99; /*!< No process */
-#ifndef OPENCL_COMPILER
-}
-#endif
+#include "GGEMS/physics/GGEMSEMProcessConstants.hh"
 
 /*!
   \class GGEMSEMProcess
@@ -58,10 +31,9 @@ class GGEMS_EXPORT GGEMSEMProcess
 {
   public:
     /*!
-      \param process_name - name of the process
       \brief GGEMSEMProcess constructor
     */
-    explicit GGEMSEMProcess(std::string const& process_name);
+    GGEMSEMProcess(void);
 
     /*!
       \brief GGEMSEMProcess destructor
@@ -134,6 +106,9 @@ class GGEMS_EXPORT GGEMSEMProcess
 
   protected:
     std::string process_name_; /*!< Name of the process */
+    std::string primary_particle_; /*!< Type of primary particle */
+    std::string secondary_particle_; /*!< Type of secondary particle */
+    bool is_secondaries_; /*!< Flag to activate secondaries */
     GGEMSOpenCLManager& opencl_manager_; /*!< Reference to OpenCL manager */
 };
 
