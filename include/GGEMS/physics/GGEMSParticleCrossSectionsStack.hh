@@ -43,18 +43,20 @@ typedef struct PACKED GGEMSParticleCrossSections_t
   /////////////////
 
   // Photon
-  // 3: N processes with 0 Compton, 1 Photoelectric and 2 Rayleigh [0...2]
+  // 3: N processes with 0 Compton, 1 Photoelectric and 2 Rayleigh
   // 256: Max number of materials [0...255]
   // 1024: Max number of bins [0...1023]
   GGuchar number_of_activated_photon_processes_; /*!< Number of activated photon processes */
   #ifdef OPENCL_COMPILER
   GGuchar index_photon_cs[NUMBER_PHOTON_PROCESSES]; /*!< Index of activated photon process, ex: if only Rayleigh activate index_photon_cs[0] = 2 */
   GGfloat photon_cross_sections_[NUMBER_PHOTON_PROCESSES][256*1024]; /*!< Photon cross sections */
+  GGfloat photon_cross_sections_per_atom_[NUMBER_PHOTON_PROCESSES][101*1024]; /*!< Photon cross sections per atom in mm-1, useful for Photoelectric effect and Rayleigh */
   #else
   GGuchar index_photon_cs[GGEMSProcess::NUMBER_PHOTON_PROCESSES]; /*!< Index of activated photon process, ex: if only Rayleigh activate index_photon_cs[0] = 2 */
   GGfloat photon_cross_sections_[GGEMSProcess::NUMBER_PHOTON_PROCESSES][256*1024]; /*!< Photon cross sections per material in mm-1 */
-  GGfloat photon_cross_sections_per_atom_[GGEMSProcess::NUMBER_PHOTON_PROCESSES][118*1024]; /*!< Photon cross sections per atom in mm-1 */
+  GGfloat photon_cross_sections_per_atom_[GGEMSProcess::NUMBER_PHOTON_PROCESSES][101*1024]; /*!< Photon cross sections per atom in mm-1, useful for Photoelectric effect and Rayleigh, 100 chemical elements + 1 first empty element */
   #endif
+  GGfloat rayleigh_scatter_factor_[101*1024]; /*!< For Rayleigh scattering a scatter factor by chemical element is necessary */
 
   // Electron
 

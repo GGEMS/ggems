@@ -55,32 +55,31 @@ void GGEMSComptonScattering::BuildCrossSectionTables(std::shared_ptr<cl::Buffer>
   GGcout("GGEMSComptonScattering", "BuildCrossSectionTables", 3) << "Building cross section table for Compton scattering..." << GGendl;
 
   // Set missing information in cross section table
-  GGEMSParticleCrossSections* compton_cs_device = opencl_manager_.GetDeviceBuffer<GGEMSParticleCrossSections>(particle_cross_sections, sizeof(GGEMSParticleCrossSections));
+  GGEMSParticleCrossSections* cross_section_device = opencl_manager_.GetDeviceBuffer<GGEMSParticleCrossSections>(particle_cross_sections, sizeof(GGEMSParticleCrossSections));
 
   // Store index of activated process
-  compton_cs_device->index_photon_cs[compton_cs_device->number_of_activated_photon_processes_] = GGEMSProcess::COMPTON_SCATTERING;
+  cross_section_device->index_photon_cs[cross_section_device->number_of_activated_photon_processes_] = GGEMSProcess::COMPTON_SCATTERING;
 
   // Increment number of activated photon process
-  compton_cs_device->number_of_activated_photon_processes_ += 1;
+  cross_section_device->number_of_activated_photon_processes_ += 1;
 
   // Get the material tables
   GGEMSMaterialTables* materials_device = opencl_manager_.GetDeviceBuffer<GGEMSMaterialTables>(material_tables, sizeof(GGEMSMaterialTables));
 
   // Compute Compton cross section par material
-  GGuchar const kNumberOfMaterials = compton_cs_device->number_of_materials_;
-  GGushort const kNumberOfBins = compton_cs_device->number_of_bins_;
+  GGushort const kNumberOfBins = cross_section_device->number_of_bins_;
   // Loop over the materials
-  for (GGuchar j = 0; j < kNumberOfMaterials; ++j) {
+  for (GGuchar j = 0; j < materials_device->number_of_materials_; ++j) {
     // Loop over the number of bins
     for (GGushort i = 0; i < kNumberOfBins; ++i) {
-      compton_cs_device->photon_cross_sections_[GGEMSProcess::COMPTON_SCATTERING][i + j*kNumberOfBins] =
-        ComputeCrossSectionPerMaterial(materials_device, j, compton_cs_device->energy_bins_[i]);
+      cross_section_device->photon_cross_sections_[GGEMSProcess::COMPTON_SCATTERING][i + j*kNumberOfBins] =
+        ComputeCrossSectionPerMaterial(materials_device, j, cross_section_device->energy_bins_[i]);
     }
   }
 
   // Release pointer
   opencl_manager_.ReleaseDeviceBuffer(material_tables, materials_device);
-  opencl_manager_.ReleaseDeviceBuffer(particle_cross_sections, compton_cs_device);
+  opencl_manager_.ReleaseDeviceBuffer(particle_cross_sections, cross_section_device);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

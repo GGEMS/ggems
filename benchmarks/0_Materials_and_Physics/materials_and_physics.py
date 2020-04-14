@@ -19,7 +19,7 @@ from ggems import *
 material_list = ('Uranium', 'Water', 'RibBone')
 
 # Sequence of physical effects
-process_list = ('Compton', 'Photoelectric')
+process_list = ('Compton', 'Photoelectric', 'Rayleigh')
 
 # ------------------------------------------------------------------------------
 # STEP 1: Choosing an OpenCL context
@@ -54,6 +54,12 @@ for mat_id in material_list:
   print('    Positron energy cut (for 2 mm distance):', positron_energy_cut, 'keV')
   print('    Atomic number density:', atomic_number_density, 'atoms.cm-3')
 
+#-------------------------------------------------------------------------------
+# STEP 4: Defining global parameters for cross-section building
+processes_manager.set_cross_section_table_number_of_bins(1024) # Not exceed 1024 bins
+processes_manager.set_cross_section_table_energy_min(1.0, 'keV')
+processes_manager.set_cross_section_table_energy_max(1.0, 'MeV')
+
 # ------------------------------------------------------------------------------
 # STEP 4: Add physical processes and initialize them
 cross_sections = GGEMSCrossSections()
@@ -63,8 +69,8 @@ for process_id in process_list:
 # Intialize cross section tables with previous materials
 cross_sections.initialize(materials)
 
-# Defining 1D X-axis buffer (energy in keV, from 10 to 200 keV, and step of 5 keV)
-x = np.arange(10.0, 1000.0, 1.0)
+# Defining 1D X-axis buffer (energy in keV, from 10 to 800 keV, and step of 1 keV)
+x = np.arange(10.0, 800.0, 1.0)
 
 # Defining 3D Y-axis buffer (process, material, cross-section in cm2.g-1)
 nb_processes = len(process_list)
@@ -72,22 +78,26 @@ nb_materials = len(material_list)
 nb_cs = len(x)
 
 y = np.zeros((nb_processes, nb_materials, nb_cs))
+total = np.zeros((nb_materials, nb_cs))
 
 # Computing cross section values for each physical processes and materials
 for p in range(nb_processes):
   for m in range(nb_materials):
     for i in range(nb_cs):
       y[p][m][i] = cross_sections.get_cs(process_list[p], material_list[m], x[i], 'keV')
+      total[m][i] = total[m][i] + y[p][m][i]
 
 # Plots
 plt.style.use('dark_background')
-linestyles = ['-', '--', '-.', ':']
+linestyles = ['--', '-.', ':']
 
 for m in range(nb_materials):
   fig, axis = plt.subplots(1, 1)
 
   for p in range(nb_processes):
     axis.plot(x, y[p][m], linestyles[p], label='%s' % str(process_list[p]))
+
+  axis.plot(x, total[m], '-', label='Total')
 
   axis.set_title('Cross-sections %s' % str(material_list[m]))
 

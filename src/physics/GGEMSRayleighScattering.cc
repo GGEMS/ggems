@@ -1,65 +1,69 @@
 /*!
-  \file GGEMSPhotoElectricEffect.cc
+  \file GGEMSRayleighScattering.cc
 
-  \brief Photoelectric Effect process using Sandia table
+  \brief Rayleigh scattering process using Livermore model
 
   \author Julien BERT <julien.bert@univ-brest.fr>
   \author Didier BENOIT <didier.benoit@inserm.fr>
   \author LaTIM, INSERM - U1101, Brest, FRANCE
   \version 1.0
-  \date Monday April 13, 2020
+  \date Tuesday April 14, 2020
 */
 
 #include "GGEMS/materials/GGEMSMaterials.hh"
-#include "GGEMS/physics/GGEMSPhotoElectricEffect.hh"
+#include "GGEMS/maths/GGEMSMathAlgorithms.hh"
+#include "GGEMS/physics/GGEMSRayleighScattering.hh"
 #include "GGEMS/physics/GGEMSParticleCrossSectionsStack.hh"
-#include "GGEMS/physics/GGEMSSandiaTable.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSPhotoElectricEffect::GGEMSPhotoElectricEffect(std::string const& primary_particle, bool const& is_secondary)
+GGEMSRayleighScattering::GGEMSRayleighScattering(std::string const& primary_particle, bool const& is_secondary)
 : GGEMSEMProcess()
 {
-  GGcout("GGEMSPhotoElectricEffect", "GGEMSPhotoElectricEffect", 3) << "Allocation of GGEMSPhotoElectricEffect..." << GGendl;
+  GGcout("GGEMSRayleighScattering", "GGEMSRayleighScattering", 3) << "Allocation of GGEMSRayleighScattering..." << GGendl;
 
-  process_name_ = "Photoelectric";
+  process_name_ = "Rayleigh";
 
   // Check type of primary particle
   if (primary_particle != "gamma") {
     std::ostringstream oss(std::ostringstream::out);
-    oss << "For PhotoElectric effect, incident particle has to be a 'gamma'";
-    GGEMSMisc::ThrowException("GGEMSPhotoElectricEffect", "GGEMSPhotoElectricEffect", oss.str());
+    oss << "For Rayleigh scattering, incident particle has to be a 'gamma'";
+    GGEMSMisc::ThrowException("GGEMSRayleighScattering", "GGEMSRayleighScattering", oss.str());
+  }
+
+  // Checking secondaries
+  if (is_secondary == true) {
+    GGwarn("GGEMSRayleighScattering", "GGEMSRayleighScattering", 0) << "There is no secondary during Rayleigh process!!! Secondary flag set to false" << GGendl;
   }
 
   primary_particle_ = "gamma";
-  secondary_particle_ = "e-";
-  is_secondaries_ = is_secondary;
+  is_secondaries_ = false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSPhotoElectricEffect::~GGEMSPhotoElectricEffect(void)
+GGEMSRayleighScattering::~GGEMSRayleighScattering(void)
 {
-  GGcout("GGEMSPhotoElectricEffect", "~GGEMSPhotoElectricEffect", 3) << "Deallocation of GGEMSPhotoElectricEffect..." << GGendl;
+  GGcout("GGEMSRayleighScattering", "~GGEMSRayleighScattering", 3) << "Deallocation of GGEMSRayleighScattering..." << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSPhotoElectricEffect::BuildCrossSectionTables(std::shared_ptr<cl::Buffer> particle_cross_sections, std::shared_ptr<cl::Buffer> material_tables)
+void GGEMSRayleighScattering::BuildCrossSectionTables(std::shared_ptr<cl::Buffer> particle_cross_sections, std::shared_ptr<cl::Buffer> material_tables)
 {
-  GGcout("GGEMSPhotoElectricEffect", "BuildCrossSectionTables", 3) << "Building cross section table for PhotoElectric effect..." << GGendl;
+  GGcout("GGEMSRayleighScattering", "BuildCrossSectionTables", 3) << "Building cross section table for Rayleigh scattering..." << GGendl;
 
   // Set missing information in cross section table
   GGEMSParticleCrossSections* cross_section_device = opencl_manager_.GetDeviceBuffer<GGEMSParticleCrossSections>(particle_cross_sections, sizeof(GGEMSParticleCrossSections));
 
   // Store index of activated process
-  cross_section_device->index_photon_cs[cross_section_device->number_of_activated_photon_processes_] = GGEMSProcess::PHOTOELECTRIC_EFFECT;
+  cross_section_device->index_photon_cs[cross_section_device->number_of_activated_photon_processes_] = GGEMSProcess::RAYLEIGH_SCATTERING;
 
   // Increment number of activated photon process
   cross_section_device->number_of_activated_photon_processes_ += 1;
@@ -73,13 +77,14 @@ void GGEMSPhotoElectricEffect::BuildCrossSectionTables(std::shared_ptr<cl::Buffe
   for (GGuchar j = 0; j < materials_device->number_of_materials_; ++j) {
     // Loop over the number of bins
     for (GGushort i = 0; i < kNumberOfBins; ++i) {
-      cross_section_device->photon_cross_sections_[GGEMSProcess::PHOTOELECTRIC_EFFECT][i + j*kNumberOfBins] =
+      cross_section_device->photon_cross_sections_[GGEMSProcess::RAYLEIGH_SCATTERING][i + j*kNumberOfBins] =
         ComputeCrossSectionPerMaterial(materials_device, j, cross_section_device->energy_bins_[i]);
     }
   }
 
+  // Computing scatter factors
   // Compute cross section per atom
-  for (GGuchar k = 0; k < materials_device->number_of_materials_; ++k) {
+  /*for (GGuchar k = 0; k < materials_device->number_of_materials_; ++k) {
     GGushort const kIndexOffset = materials_device->index_of_chemical_elements_[k];
     // Loop over the chemical elements
     for (GGuchar j = 0; j < materials_device->number_of_chemical_elements_[k]; ++j) {
@@ -91,7 +96,7 @@ void GGEMSPhotoElectricEffect::BuildCrossSectionTables(std::shared_ptr<cl::Buffe
           kAtomicNumberDensity * ComputeCrossSectionPerAtom(cross_section_device->energy_bins_[i], kAtomicNumber);
       }
     }
-  }
+  }*/
 
   // Release pointer
   opencl_manager_.ReleaseDeviceBuffer(material_tables, materials_device);
@@ -102,7 +107,7 @@ void GGEMSPhotoElectricEffect::BuildCrossSectionTables(std::shared_ptr<cl::Buffe
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGfloat GGEMSPhotoElectricEffect::ComputeCrossSectionPerMaterial(GGEMSMaterialTables const* material_tables, GGushort const& material_index, GGfloat const& energy)
+GGfloat GGEMSRayleighScattering::ComputeCrossSectionPerMaterial(GGEMSMaterialTables const* material_tables, GGushort const& material_index, GGfloat const& energy)
 {
   GGfloat cross_section_material = 0.0f;
   GGushort const kIndexOffset = material_tables->index_of_chemical_elements_[material_index];
@@ -117,26 +122,26 @@ GGfloat GGEMSPhotoElectricEffect::ComputeCrossSectionPerMaterial(GGEMSMaterialTa
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGfloat GGEMSPhotoElectricEffect::ComputeCrossSectionPerAtom(GGfloat const& energy, GGuchar const& atomic_number)
+GGfloat GGEMSRayleighScattering::ComputeCrossSectionPerAtom(GGfloat const& energy, GGuchar const& atomic_number)
 {
-  // Threshold at 10 eV
-  GGdouble const kEmin = fmax(GGEMSSandiaTable::kIonizationPotentials[atomic_number], 10.0)*GGEMSUnits::eV;
-  if (energy < kEmin) return 0.0f;
+  // Energy in range [250 eV; 100 GeV]
+  if (energy < 250e-6f || energy > 100e3f) return 0.0f;
 
-  GGushort const kStart = GGEMSSandiaTable::kCumulativeIntervals[atomic_number-1];
-  GGushort const kStop = kStart + GGEMSSandiaTable::kNumberOfIntervals[atomic_number];
+  GGuint const kStart = GGEMSRayleighTable::kCrossSectionCumulativeIntervals[atomic_number];
+  GGuint const kStop = kStart + 2 * (GGEMSRayleighTable::kCrossSectionNumberOfIntervals[atomic_number]-1);
 
-  GGushort pos = kStop;
-  while (energy < static_cast<GGfloat>(GGEMSSandiaTable::kSandiaTable[pos][0])*GGEMSUnits::keV) --pos;
+  GGuint pos = kStart;
+  for (; pos < kStop; pos += 2) {
+    if (GGEMSRayleighTable::kCrossSection[pos] >= static_cast<GGfloat>(energy)) break;
+  }
 
-  GGdouble const kAoverAvo = GGEMSPhysicalConstant::ATOMIC_MASS_UNIT * static_cast<GGdouble>(atomic_number) / GGEMSSandiaTable::kZtoARatio[atomic_number];
-
-  GGdouble const kREnergy = 1.0 / energy;
-  GGdouble const kREnergy2 = kREnergy * kREnergy;
-
-  return static_cast<GGfloat>(
-    kREnergy * GGEMSSandiaTable::kSandiaTable[pos][1] * kAoverAvo * 0.160217648e-22 +
-    kREnergy2 * GGEMSSandiaTable::kSandiaTable[pos][2] * kAoverAvo * 0.160217648e-25 +
-    kREnergy * kREnergy2 * GGEMSSandiaTable::kSandiaTable[pos][3] * kAoverAvo * 0.160217648e-28 +
-    kREnergy2 * kREnergy2 * GGEMSSandiaTable::kSandiaTable[pos][4] * kAoverAvo * 0.160217648e-31);
+  if (energy < 1e3f) { // 1 GeV
+    return static_cast<GGfloat>(1.0e-22 * LogLogInterpolation(
+      energy,
+      static_cast<GGfloat>(GGEMSRayleighTable::kCrossSection[pos-2]), static_cast<GGfloat>(GGEMSRayleighTable::kCrossSection[pos-1]),
+      static_cast<GGfloat>(GGEMSRayleighTable::kCrossSection[pos]), static_cast<GGfloat>(GGEMSRayleighTable::kCrossSection[pos+1])));
+  }
+  else {
+    return static_cast<GGfloat>(1.0e-22 * GGEMSRayleighTable::kCrossSection[pos-1]);
+  }
 }
