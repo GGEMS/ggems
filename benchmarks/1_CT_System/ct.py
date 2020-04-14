@@ -2,7 +2,7 @@ from ggems import *
 
 # ------------------------------------------------------------------------------
 # STEP 1: Choosing an OpenCL context
-opencl_manager.set_context_index(2)
+opencl_manager.set_context_index(0)
 
 # ------------------------------------------------------------------------------
 # STEP 2: Visualization
@@ -42,7 +42,7 @@ phantom_4.set_offset(0.0, 25.0, 50.0, 'mm')
 # STEP 5: Physics
 processes_manager.add_process('Compton', 'gamma', 'phantom_4')
 processes_manager.add_process('Photoelectric', 'gamma', 'phantom_4')
-# processes_manager.add_process(b"Rayleigh", b"gamma", b"all")
+processes_manager.add_process('Rayleigh', 'gamma', 'phantom_4')
 
 # Optional options, the following are by default
 processes_manager.set_cross_section_table_number_of_bins(220) # Not exceed 1000 bins

@@ -159,13 +159,16 @@ void GGEMSProcessesManager::PrintAvailableProcesses(void) const
 {
   GGcout("GGEMSProcessesManager", "PrintAvailableProcesses", 0) << "Available processes:" << GGendl;
   GGcout("GGEMSProcessesManager", "PrintAvailableProcesses", 0) << "--------------------" << GGendl;
-  GGcout("GGEMSProcessesManager", "PrintAvailableProcesses", 0) << "    * 'Compton' (Klein-Nishina model without atomic shell effect)" << GGendl;
+  GGcout("GGEMSProcessesManager", "PrintAvailableProcesses", 0) << "    * 'Compton' scattering (Klein-Nishina model without atomic shell effect)" << GGendl;
   GGcout("GGEMSProcessesManager", "PrintAvailableProcesses", 0) << "        - 'gamma' incident particle" << GGendl;
   GGcout("GGEMSProcessesManager", "PrintAvailableProcesses", 0) << "        - 'e-' secondary particle" << GGendl;
   GGcout("GGEMSProcessesManager", "PrintAvailableProcesses", 0) << GGendl;
-  GGcout("GGEMSProcessesManager", "PrintAvailableProcesses", 0) << "    * 'Photoelectric' (Sandia table)" << GGendl;
+  GGcout("GGEMSProcessesManager", "PrintAvailableProcesses", 0) << "    * 'Photoelectric' effect (Sandia table)" << GGendl;
   GGcout("GGEMSProcessesManager", "PrintAvailableProcesses", 0) << "        - 'gamma' incident particle" << GGendl;
   GGcout("GGEMSProcessesManager", "PrintAvailableProcesses", 0) << "        - 'e-' secondary particle" << GGendl;
+  GGcout("GGEMSProcessesManager", "PrintAvailableProcesses", 0) << GGendl;
+  GGcout("GGEMSProcessesManager", "PrintAvailableProcesses", 0) << "    * 'Rayleigh' scattering (Livermore model)" << GGendl;
+  GGcout("GGEMSProcessesManager", "PrintAvailableProcesses", 0) << "        - 'gamma' incident particle" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

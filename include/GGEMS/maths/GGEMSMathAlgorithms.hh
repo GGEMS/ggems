@@ -88,4 +88,24 @@ inline GGfloat LinearInterpolation(GGfloat const xa, GGfloat const ya, GGfloat c
   return ya + (x - xa)*(yb - ya)/(xb - xa);
 }
 
+/*!
+  \fn inline GGfloat LogLogInterpolation(GGfloat x, GGfloat x0, GGfloat y0, GGfloat x1, GGfloat y1)
+  \param x0 - Coordinate x0 of point A
+  \param y0 - Coordinate y0 of point A
+  \param x1 - Coordinate x1 of point B
+  \param y1 - Coordinate y1 of point B
+  \param x - value to interpolate
+  \return the loglog interpolated value
+  \brief log log interpolation of the x value between point (x0,y0) and (x1,y1)
+*/
+inline GGfloat LogLogInterpolation(GGfloat x, GGfloat x0, GGfloat y0, GGfloat x1, GGfloat y1)
+{
+  if (x < x0) return y0;
+  if (x > x1) return y1;
+
+  x0 = 1.0f / x0;
+
+  return pow(10.0f, log10(y0) + log10(y1/y0) * (log10(x*x0) / log10(x1*x0)));
+}
+
 #endif // GUARD_GGEMS_MATHS_GGEMSMATHALGORITHMS_HH

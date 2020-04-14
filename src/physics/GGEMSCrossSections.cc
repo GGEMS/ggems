@@ -13,6 +13,7 @@
 #include "GGEMS/physics/GGEMSCrossSections.hh"
 #include "GGEMS/physics/GGEMSComptonScattering.hh"
 #include "GGEMS/physics/GGEMSPhotoElectricEffect.hh"
+#include "GGEMS/physics/GGEMSRayleighScattering.hh"
 #include "GGEMS/physics/GGEMSParticleCrossSectionsStack.hh"
 #include "GGEMS/tools/GGEMSTools.hh"
 #include "GGEMS/materials/GGEMSMaterials.hh"
@@ -73,12 +74,22 @@ void GGEMSCrossSections::AddProcess(std::string const& process_name, std::string
       GGwarn("GGEMSCrossSections", "AddProcess", 3) << "PhotoElectric effect process already activated!!!" << GGendl;
     }
   }
+  else if (process_name == "Rayleigh") {
+    if (!is_process_activated_.at(GGEMSProcess::RAYLEIGH_SCATTERING)) {
+      em_processes_list_.push_back(std::make_shared<GGEMSRayleighScattering>(particle_type, is_secondary));
+      is_process_activated_.at(GGEMSProcess::RAYLEIGH_SCATTERING) = true;
+    }
+    else {
+      GGwarn("GGEMSCrossSections", "AddProcess", 3) << "PhotoElectric effect process already activated!!!" << GGendl;
+    }
+  }
   else {
     std::ostringstream oss(std::ostringstream::out);
     oss << "Unknown process!!! The available processes in GGEMS are:" << std::endl;
     oss << "    * For incident gamma:" << std::endl;
     oss << "        - 'Compton'" << std::endl;
     oss << "        - 'Photoelectric'" << std::endl;
+    oss << "        - 'Rayleigh'" << std::endl;
     GGEMSMisc::ThrowException("GGEMSCrossSections", "AddProcess", oss.str());
   }
 }
@@ -157,11 +168,15 @@ GGfloat GGEMSCrossSections::GetPhotonCrossSection(std::string const& process_nam
   else if (process_name == "Photoelectric") {
     process_id = GGEMSProcess::PHOTOELECTRIC_EFFECT;
   }
+  else if (process_name == "Rayleigh") {
+    process_id = GGEMSProcess::RAYLEIGH_SCATTERING;
+  }
   else {
     std::ostringstream oss(std::ostringstream::out);
     oss << "Unknown process!!! The available processes for photon in GGEMS are:" << std::endl;
     oss << "    - 'Compton'" << std::endl;
     oss << "    - 'Photoelectric'" << std::endl;
+    oss << "    - 'Rayleigh'" << std::endl;
     GGEMSMisc::ThrowException("GGEMSCrossSections", "GetPhotonCrossSection", oss.str());
   }
 
