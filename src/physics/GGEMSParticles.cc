@@ -11,6 +11,7 @@
 */
 
 #include "GGEMS/physics/GGEMSParticles.hh"
+#include "GGEMS/sources/GGEMSSourceManager.hh"
 #include "GGEMS/physics/GGEMSPrimaryParticlesStack.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -56,4 +57,5 @@ void GGEMSParticles::AllocatePrimaryParticles(void)
   // Allocation of memory on OpenCL device
   primary_particles_ = opencl_manager_.Allocate(nullptr, sizeof(GGEMSPrimaryParticles), CL_MEM_READ_WRITE);
   opencl_manager_.AddRAMMemory(sizeof(GGEMSPrimaryParticles));
+  GGEMSSourceManager::GetInstance().AddSourceRAM(sizeof(GGEMSPrimaryParticles));
 }

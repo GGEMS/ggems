@@ -20,6 +20,7 @@
 #include "GGEMS/io/GGEMSTextReader.hh"
 #include "GGEMS/materials/GGEMSMaterials.hh"
 #include "GGEMS/navigators/GGEMSSolidPhantomStack.hh"
+#include "GGEMS/navigators/GGEMSPhantomNavigatorManager.hh"
 
 /*!
   \class GGEMSSolidPhantom
@@ -145,6 +146,7 @@ void GGEMSSolidPhantom::ConvertImageToLabel(std::string const& raw_data_filename
   // Allocating memory on OpenCL device
   label_data_ = opencl_manager_.Allocate(nullptr, kNumberOfVoxels * sizeof(GGuchar), CL_MEM_READ_WRITE);
   opencl_manager_.AddRAMMemory(kNumberOfVoxels * sizeof(GGuchar));
+  GGEMSPhantomNavigatorManager::GetInstance().AddPhantomNavigatorRAM(kNumberOfVoxels * sizeof(GGuchar));
 
   // Get pointer on OpenCL device
   GGuchar* label_data = opencl_manager_.GetDeviceBuffer<GGuchar>(label_data_, kNumberOfVoxels * sizeof(GGuchar));

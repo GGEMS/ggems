@@ -27,6 +27,4 @@
 
 - Faire source indépendantes sans lancer la simulation complète -> phase space
 
-- Indiquer la memoire requise par OpenCL pour les phantoms, particles, processes etc...
-
 - Pour plus de clarté, faire distinction _host et _device  pointer

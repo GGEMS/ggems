@@ -82,7 +82,7 @@ class GGEMS_EXPORT GGEMSEMProcess
       \return a void pointer
       \brief build cross section tables and storing them in particle_cross_sections
     */
-    virtual void BuildCrossSectionTables(std::shared_ptr<cl::Buffer> particle_cross_sections, std::shared_ptr<cl::Buffer> material_tables) = 0;
+    virtual void BuildCrossSectionTables(std::shared_ptr<cl::Buffer> particle_cross_sections, std::shared_ptr<cl::Buffer> material_tables);
 
   protected:
     /*!
@@ -93,7 +93,7 @@ class GGEMS_EXPORT GGEMSEMProcess
       \return cross section for a process for a material
       \brief compute cross section for a process for a material
     */
-    virtual GGfloat ComputeCrossSectionPerMaterial(GGEMSMaterialTables const* material_tables, GGushort const& material_index, GGfloat const& energy) = 0;
+    GGfloat ComputeCrossSectionPerMaterial(GGEMSMaterialTables const* material_tables, GGushort const& material_index, GGfloat const& energy);
 
     /*!
       \fn GGfloat ComputeCrossSectionPerAtom(GGfloat const& energy, GGuchar const& atomic_number)
@@ -102,9 +102,10 @@ class GGEMS_EXPORT GGEMSEMProcess
       \return cross section by atom
       \brief compute a cross section for an atom
     */
-    virtual GGfloat ComputeCrossSectionPerAtom(GGfloat const& energy, GGuchar const& atomic_number) = 0;
+    virtual GGfloat ComputeCrossSectionPerAtom(GGfloat const& energy, GGuchar const& atomic_number) const = 0;
 
   protected:
+    GGuchar process_id_; /*!< Id of the process as defined in GGEMSEMProcessConstants.hh */
     std::string process_name_; /*!< Name of the process */
     std::string primary_particle_; /*!< Type of primary particle */
     std::string secondary_particle_; /*!< Type of secondary particle */

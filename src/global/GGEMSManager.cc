@@ -254,6 +254,8 @@ void GGEMSManager::Initialize(void)
 
   // Printing infos about RAM
   if (is_memory_ram_verbose_) {
+    phantom_navigator_manager_.PrintAllocatedRAM();
+    source_manager_.PrintAllocatedRAM();
     processes_manager_.PrintAllocatedRAM();
     opencl_manager_.PrintRAMStatus();
   }
