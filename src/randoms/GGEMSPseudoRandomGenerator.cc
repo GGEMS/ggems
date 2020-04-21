@@ -12,6 +12,7 @@
 
 #include "GGEMS/randoms/GGEMSPseudoRandomGenerator.hh"
 #include "GGEMS/randoms/GGEMSRandomStack.hh"
+#include "GGEMS/sources/GGEMSSourceManager.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -83,4 +84,5 @@ void GGEMSPseudoRandomGenerator::AllocateRandom(void)
   // Allocation of memory on OpenCL device
   pseudo_random_numbers_ = opencl_manager_.Allocate(nullptr, sizeof(GGEMSRandom), CL_MEM_READ_WRITE);
   opencl_manager_.AddRAMMemory(sizeof(GGEMSRandom));
+  GGEMSSourceManager::GetInstance().AddSourceRAM(sizeof(GGEMSRandom));
 }

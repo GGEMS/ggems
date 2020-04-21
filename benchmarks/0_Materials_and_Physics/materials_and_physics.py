@@ -57,11 +57,11 @@ for mat_id in material_list:
 #-------------------------------------------------------------------------------
 # STEP 4: Defining global parameters for cross-section building
 processes_manager.set_cross_section_table_number_of_bins(1024) # Not exceed 1024 bins
-processes_manager.set_cross_section_table_energy_min(1.0, 'keV')
+processes_manager.set_cross_section_table_energy_min(10.0, 'keV')
 processes_manager.set_cross_section_table_energy_max(1.0, 'MeV')
 
 # ------------------------------------------------------------------------------
-# STEP 4: Add physical processes and initialize them
+# STEP 5: Add physical processes and initialize them
 cross_sections = GGEMSCrossSections()
 for process_id in process_list:
   cross_sections.add_process(process_id, 'gamma')
@@ -70,7 +70,7 @@ for process_id in process_list:
 cross_sections.initialize(materials)
 
 # Defining 1D X-axis buffer (energy in keV, from 10 to 800 keV, and step of 1 keV)
-x = np.arange(10.0, 800.0, 1.0)
+x = np.arange(10.0, 1000.0, 1.0)
 
 # Defining 3D Y-axis buffer (process, material, cross-section in cm2.g-1)
 nb_processes = len(process_list)
@@ -121,6 +121,6 @@ for m in range(nb_materials):
   plt.close()
 
 # ------------------------------------------------------------------------------
-# STEP 5: Exit safely
+# STEP 6: Exit safely
 opencl_manager.clean()
 exit()

@@ -94,6 +94,19 @@ class GGEMS_EXPORT GGEMSPhantomNavigatorManager
     void PrintInfos(void) const;
 
     /*!
+      \fn void AddPhantomNavigatorRAM(GGulong const& size)
+      \param size - allocated RAM for phantom navigators in GGEMS
+      \brief add RAM memory size for phantom navigators
+    */
+    void AddPhantomNavigatorRAM(GGulong const& size);
+
+    /*!
+      \fn void PrintAllocatedRAM(void) const
+      \brief Print allocated RAM for phantom navigators
+    */
+    void PrintAllocatedRAM(void) const;
+
+    /*!
       \fn std::size_t GetNumberOfPhantomNavigators(void) const
       \brief Get the number of phantom navigators
       \return the number of phantom navigators
@@ -137,6 +150,7 @@ class GGEMS_EXPORT GGEMSPhantomNavigatorManager
 
   private:
     std::vector<std::shared_ptr<GGEMSPhantomNavigator>> phantom_navigators_; /*!< Pointer on the phantom navigators */
+    GGulong allocated_RAM_for_phantom_navigators_; /*!< Allocated RAM in bytes for phantom_navigators in GGEMS */
     GGEMSOpenCLManager& opencl_manager_; /*!< Reference to OpenCL manager singleton */
 };
 

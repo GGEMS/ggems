@@ -12,6 +12,7 @@
 
 #include <limits>
 
+#include "GGEMS/navigators/GGEMSPhantomNavigatorManager.hh"
 #include "GGEMS/materials/GGEMSIonizationParamsMaterial.hh"
 #include "GGEMS/physics/GGEMSRangeCuts.hh"
 #include "GGEMS/tools/GGEMSTools.hh"
@@ -147,6 +148,8 @@ void GGEMSMaterials::BuildMaterialTables(void)
 
   // Allocating memory for material tables in OpenCL device
   material_tables_ = opencl_manager_.Allocate(nullptr, sizeof(GGEMSMaterialTables), CL_MEM_READ_WRITE);
+  opencl_manager_.AddRAMMemory(sizeof(GGEMSMaterialTables));
+  GGEMSPhantomNavigatorManager::GetInstance().AddPhantomNavigatorRAM(sizeof(GGEMSMaterialTables));
 
   // Getting the OpenCL pointer on material tables
   GGEMSMaterialTables* material_table_device = opencl_manager_.GetDeviceBuffer<GGEMSMaterialTables>(material_tables_, sizeof(GGEMSMaterialTables));

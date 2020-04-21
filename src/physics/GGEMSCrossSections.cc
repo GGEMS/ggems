@@ -35,7 +35,6 @@ GGEMSCrossSections::GGEMSCrossSections(void)
   // Allocating memory for cross section tables
   particle_cross_sections_ = opencl_manager_.Allocate(nullptr, sizeof(GGEMSParticleCrossSections), CL_MEM_READ_WRITE);
   opencl_manager_.AddRAMMemory(sizeof(GGEMSParticleCrossSections));
-
   process_manager_.AddProcessRAM(sizeof(GGEMSParticleCrossSections));
 }
 
@@ -101,6 +100,14 @@ void GGEMSCrossSections::AddProcess(std::string const& process_name, std::string
 void GGEMSCrossSections::Initialize(GGEMSMaterials const* materials)
 {
   GGcout("GGEMSCrossSections", "Initialize", 0) << "Initializing cross section tables..." << GGendl;
+
+  // Checking there is a process activated
+  if (em_processes_list_.empty()) {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "You have to activate a process for a GGEMS simulations!!!";
+    process_manager_.PrintAvailableProcesses();
+    GGEMSMisc::ThrowException("GGEMSCrossSections", "Initialize", oss.str());
+  }
 
   GGEMSParticleCrossSections* particle_cross_sections_device = opencl_manager_.GetDeviceBuffer<GGEMSParticleCrossSections>(particle_cross_sections_, sizeof(GGEMSParticleCrossSections));
 

@@ -72,23 +72,13 @@ class GGEMS_EXPORT GGEMSPhotoElectricEffect : public GGEMSEMProcess
 
     private:
     /*!
-      \fn GGfloat ComputeCrossSectionPerMaterial(GGEMSMaterialTables const* material_tables, GGushort const& material_index, GGfloat const& energy)
-      \param material_tables - activated material for a phantom
-      \param material_index - index of the material
-      \param energy - energy of the bin
-      \return cross section for Compton for a material
-      \brief compute Compton cross section for a material
-    */
-    GGfloat ComputeCrossSectionPerMaterial(GGEMSMaterialTables const* material_tables, GGushort const& material_index, GGfloat const& energy) override;
-
-    /*!
-      \fn GGfloat ComputeCrossSectionPerAtom(GGfloat const& energy, GGuchar const& atomic_number)
+      \fn GGfloat ComputeCrossSectionPerAtom(GGfloat const& energy, GGuchar const& atomic_number) const
       \param energy - energy of the bin
       \param atomic_number - Z number of the chemical element
       \return Compton cross section by atom
       \brief compute Compton cross section for an atom with Klein-Nishina
     */
-    GGfloat ComputeCrossSectionPerAtom(GGfloat const& energy, GGuchar const& atomic_number) override;
+    GGfloat ComputeCrossSectionPerAtom(GGfloat const& energy, GGuchar const& atomic_number) const override;
 };
 
 #endif // End of GUARD_GGEMS_PHYSICS_GGEMSPHOTOELECTRICEFFECT_HH

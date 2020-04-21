@@ -26,6 +26,7 @@ GGEMSSolidPhantom::GGEMSSolidPhantom()
   // Allocation of memory on OpenCL device for header data
   solid_phantom_data_ = opencl_manager_.Allocate(nullptr, sizeof(GGEMSSolidPhantomData), CL_MEM_READ_WRITE);
   opencl_manager_.AddRAMMemory(sizeof(GGEMSSolidPhantomData));
+  GGEMSPhantomNavigatorManager::GetInstance().AddPhantomNavigatorRAM(sizeof(GGEMSSolidPhantomData));
 }
 
 ////////////////////////////////////////////////////////////////////////////////

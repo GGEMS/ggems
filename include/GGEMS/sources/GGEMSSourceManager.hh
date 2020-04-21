@@ -144,8 +144,22 @@ class GGEMS_EXPORT GGEMSSourceManager
     */
     inline void GetPrimaries(std::size_t const& source_index, GGulong const& number_of_particles) const {sources_[source_index]->GetPrimaries(number_of_particles);}
 
+    /*!
+      \fn void AddSourceRAM(GGulong const& size)
+      \param size - allocated RAM for sources in GGEMS
+      \brief add RAM memory size for sources
+    */
+    void AddSourceRAM(GGulong const& size);
+
+    /*!
+      \fn void PrintAllocatedRAM(void) const
+      \brief Print allocated RAM for sources
+    */
+    void PrintAllocatedRAM(void) const;
+
   private: // Source infos
     std::vector<std::shared_ptr<GGEMSSource>> sources_; /*!< Pointer on GGEMS sources */
+    GGulong allocated_RAM_for_sources_; /*!< Allocated RAM in bytes for sources in GGEMS */
 
   private: // Particle and random infos
     std::shared_ptr<GGEMSParticles> particles_; /*!< Pointer on particle management */

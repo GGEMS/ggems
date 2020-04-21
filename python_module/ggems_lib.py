@@ -26,4 +26,4 @@ class GGEMSVerbosity(object):
 # Setting global verbosity to 0 for initialization
 # 0 - minimum infos
 # 3 - max infos, maybe too much!!!
-GGEMSVerbosity(0)
+GGEMSVerbosity(3)

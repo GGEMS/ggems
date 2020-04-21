@@ -121,9 +121,7 @@ void GGEMSProcessesManager::AddProcessRAM(GGulong const& size)
 
 void GGEMSProcessesManager::PrintAllocatedRAM(void) const
 {
-  GGcout("GGEMSProcessesManager", "PrintAllocatedRAM", 0) << "########################################" << GGendl;
   GGcout("GGEMSProcessesManager", "PrintAllocatedRAM", 0) << "Allocated RAM memory for processes: " << allocated_RAM_for_processes_ << " bytes" << GGendl;
-  GGcout("GGEMSProcessesManager", "PrintAllocatedRAM", 0) << "########################################" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

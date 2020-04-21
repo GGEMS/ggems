@@ -21,6 +21,7 @@
 
 GGEMSPhantomNavigatorManager::GGEMSPhantomNavigatorManager(void)
 : phantom_navigators_(0),
+  allocated_RAM_for_phantom_navigators_(0),
   opencl_manager_(GGEMSOpenCLManager::GetInstance())
 {
   GGcout("GGEMSPhantomNavigatorManager", "GGEMSPhantomNavigatorManager", 3) << "Allocation of GGEMS phantom navigator manager..." << GGendl;
@@ -125,6 +126,24 @@ void GGEMSPhantomNavigatorManager::PrintInfos(void) const
 
   // Printing infos about each navigator
   for (auto&&i : phantom_navigators_) i->PrintInfos();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSPhantomNavigatorManager::AddPhantomNavigatorRAM(GGulong const& size)
+{
+  allocated_RAM_for_phantom_navigators_ += size;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSPhantomNavigatorManager::PrintAllocatedRAM(void) const
+{
+  GGcout("GGEMSPhantomNavigatorManager", "PrintAllocatedRAM", 0) << "Allocated RAM memory for phantom navigators: " << allocated_RAM_for_phantom_navigators_ << " bytes" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
