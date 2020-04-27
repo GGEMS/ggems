@@ -233,12 +233,12 @@ void GGEMSPhantomCreatorManager::AllocateImage(void)
   voxelized_phantom_ = opencl_manager_.Allocate(nullptr, number_elements_ * sizeof(T), CL_MEM_READ_WRITE);
 
   // Initialize the buffer to zero
-  T* voxelized_phantom = opencl_manager_.GetDeviceBuffer<T>(voxelized_phantom_, number_elements_ * sizeof(T));
+  T* voxelized_phantom_device = opencl_manager_.GetDeviceBuffer<T>(voxelized_phantom_, number_elements_ * sizeof(T));
 
-  for (GGulong i = 0; i < number_elements_; ++i) voxelized_phantom[i] = static_cast<T>(0);
+  for (GGulong i = 0; i < number_elements_; ++i) voxelized_phantom_device[i] = static_cast<T>(0);
 
   // Release the pointers
-  opencl_manager_.ReleaseDeviceBuffer(voxelized_phantom_, voxelized_phantom);
+  opencl_manager_.ReleaseDeviceBuffer(voxelized_phantom_, voxelized_phantom_device);
 }
 
 /*!

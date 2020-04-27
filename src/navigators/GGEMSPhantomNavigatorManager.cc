@@ -84,33 +84,33 @@ bool GGEMSPhantomNavigatorManager::CheckOverlap(std::shared_ptr<GGEMSPhantomNavi
   std::shared_ptr<cl::Buffer> solid_phantom_data_b = phantom_b->GetSolidPhantom()->GetSolidPhantomData();
 
   // Get data on OpenCL device for phantom A and B
-  GGEMSSolidPhantomData* header_data_a = opencl_manager_.GetDeviceBuffer<GGEMSSolidPhantomData>(solid_phantom_data_a, sizeof(GGEMSSolidPhantomData));
-  GGEMSSolidPhantomData* header_data_b = opencl_manager_.GetDeviceBuffer<GGEMSSolidPhantomData>(solid_phantom_data_b, sizeof(GGEMSSolidPhantomData));
+  GGEMSSolidPhantomData* header_data_a_device = opencl_manager_.GetDeviceBuffer<GGEMSSolidPhantomData>(solid_phantom_data_a, sizeof(GGEMSSolidPhantomData));
+  GGEMSSolidPhantomData* header_data_b_device = opencl_manager_.GetDeviceBuffer<GGEMSSolidPhantomData>(solid_phantom_data_b, sizeof(GGEMSSolidPhantomData));
 
   // Variable checking overlap
   bool is_overlap(false);
 
   // Get bounding boxes for A and B
-  GGdouble const x_min_a = header_data_a->border_min_xyz_.s[0];
-  GGdouble const x_max_a = header_data_a->border_max_xyz_.s[0];
-  GGdouble const x_min_b = header_data_b->border_min_xyz_.s[0];
-  GGdouble const x_max_b = header_data_b->border_max_xyz_.s[0];
+  GGdouble const x_min_a = header_data_a_device->border_min_xyz_.s[0];
+  GGdouble const x_max_a = header_data_a_device->border_max_xyz_.s[0];
+  GGdouble const x_min_b = header_data_b_device->border_min_xyz_.s[0];
+  GGdouble const x_max_b = header_data_b_device->border_max_xyz_.s[0];
 
-  GGdouble const y_min_a = header_data_a->border_min_xyz_.s[1];
-  GGdouble const y_max_a = header_data_a->border_max_xyz_.s[1];
-  GGdouble const y_min_b = header_data_b->border_min_xyz_.s[1];
-  GGdouble const y_max_b = header_data_b->border_max_xyz_.s[1];
+  GGdouble const y_min_a = header_data_a_device->border_min_xyz_.s[1];
+  GGdouble const y_max_a = header_data_a_device->border_max_xyz_.s[1];
+  GGdouble const y_min_b = header_data_b_device->border_min_xyz_.s[1];
+  GGdouble const y_max_b = header_data_b_device->border_max_xyz_.s[1];
 
-  GGdouble const z_min_a = header_data_a->border_min_xyz_.s[2];
-  GGdouble const z_max_a = header_data_a->border_max_xyz_.s[2];
-  GGdouble const z_min_b = header_data_b->border_min_xyz_.s[2];
-  GGdouble const z_max_b = header_data_b->border_max_xyz_.s[2];
+  GGdouble const z_min_a = header_data_a_device->border_min_xyz_.s[2];
+  GGdouble const z_max_a = header_data_a_device->border_max_xyz_.s[2];
+  GGdouble const z_min_b = header_data_b_device->border_min_xyz_.s[2];
+  GGdouble const z_max_b = header_data_b_device->border_max_xyz_.s[2];
 
   if (x_max_a > x_min_b && x_min_a < x_max_b && y_max_a > y_min_b && y_min_a < y_max_b && z_max_a > z_min_b && z_min_a < z_max_b) is_overlap = true;
 
   // Release the pointers
-  opencl_manager_.ReleaseDeviceBuffer(solid_phantom_data_a, header_data_a);
-  opencl_manager_.ReleaseDeviceBuffer(solid_phantom_data_b, header_data_b);
+  opencl_manager_.ReleaseDeviceBuffer(solid_phantom_data_a, header_data_a_device);
+  opencl_manager_.ReleaseDeviceBuffer(solid_phantom_data_b, header_data_b_device);
 
   return is_overlap;
 }
@@ -143,7 +143,7 @@ void GGEMSPhantomNavigatorManager::AddPhantomNavigatorRAM(GGulong const& size)
 
 void GGEMSPhantomNavigatorManager::PrintAllocatedRAM(void) const
 {
-  GGcout("GGEMSPhantomNavigatorManager", "PrintAllocatedRAM", 0) << "Allocated RAM memory for phantom navigators: " << allocated_RAM_for_phantom_navigators_ << " bytes" << GGendl;
+  GGcout("GGEMSPhantomNavigatorManager", "PrintAllocatedRAM", 0) << "Allocated memory for phantom navigator: " << allocated_RAM_for_phantom_navigators_ << " bytes" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -1,6 +1,6 @@
 div.line {
-	font-family: inconsolata, fixed;
-        font-size: 17px;
+	font-family: monospace, fixed;
+        font-size: 15px;
 	min-height: 13px;
 	line-height: 1.0;
 	text-wrap: unrestricted;

@@ -190,11 +190,10 @@ class GGEMS_EXPORT GGEMSSource
   protected:
     std::string source_name_; /*!< Name of the source */
     GGulong number_of_particles_; /*!< Number of particles */
-    std::vector<unsigned long long> number_of_particles_in_batch_; /*!< Number of particles in batch */
+    std::vector<GGulong> number_of_particles_in_batch_; /*!< Number of particles in batch */
     GGuchar particle_type_; /*!< Type of particle: photon, electron or positron */
     std::unique_ptr<GGEMSGeometryTransformation> geometry_transformation_; /*!< Pointer storing the geometry transformation */
     std::shared_ptr<cl::Kernel> kernel_get_primaries_; /*!< Kernel generating primaries on OpenCL device */
-    GGEMSOpenCLManager& opencl_manager_; /*!< Reference to opencl manager singleton */
 };
 
 #endif // End of GUARD_GGEMS_SOURCES_GGEMSSOURCE_HH

@@ -89,19 +89,19 @@ void GGEMSSolidPhantom::ApplyOffset(GGfloat3 const& offset_xyz)
   GGcout("GGEMSSolidPhantom", "ApplyOffset", 3) << "Applyng the offset defined by the user..." << GGendl;
 
   // Get pointer on OpenCL device
-  GGEMSSolidPhantomData* solid_data = opencl_manager_.GetDeviceBuffer<GGEMSSolidPhantomData>(solid_phantom_data_, sizeof(GGEMSSolidPhantomData));
+  GGEMSSolidPhantomData* solid_data_device = opencl_manager_.GetDeviceBuffer<GGEMSSolidPhantomData>(solid_phantom_data_, sizeof(GGEMSSolidPhantomData));
 
   for (GGuint i = 0; i < 3; ++i ) {
     // Offset
-    solid_data->offsets_xyz_.s[i] = offset_xyz.s[i];
+    solid_data_device->offsets_xyz_.s[i] = offset_xyz.s[i];
 
     // Bounding box
-    solid_data->border_min_xyz_.s[i] = -solid_data->offsets_xyz_.s[i];
-    solid_data->border_max_xyz_.s[i] = solid_data->border_min_xyz_.s[i] + solid_data->number_of_voxels_xyz_.s[i] * solid_data->voxel_sizes_xyz_.s[i];
+    solid_data_device->border_min_xyz_.s[i] = -solid_data_device->offsets_xyz_.s[i];
+    solid_data_device->border_max_xyz_.s[i] = solid_data_device->border_min_xyz_.s[i] + solid_data_device->number_of_voxels_xyz_.s[i] * solid_data_device->voxel_sizes_xyz_.s[i];
   }
 
   // Release the pointer
-  opencl_manager_.ReleaseDeviceBuffer(solid_phantom_data_, solid_data);
+  opencl_manager_.ReleaseDeviceBuffer(solid_phantom_data_, solid_data_device);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -111,21 +111,21 @@ void GGEMSSolidPhantom::ApplyOffset(GGfloat3 const& offset_xyz)
 void GGEMSSolidPhantom::PrintInfos(void) const
 {
   // Get pointer on OpenCL device
-  GGEMSSolidPhantomData* solid_data = opencl_manager_.GetDeviceBuffer<GGEMSSolidPhantomData>(solid_phantom_data_, sizeof(GGEMSSolidPhantomData));
+  GGEMSSolidPhantomData* solid_data_device = opencl_manager_.GetDeviceBuffer<GGEMSSolidPhantomData>(solid_phantom_data_, sizeof(GGEMSSolidPhantomData));
 
   GGcout("GGEMSSolidPhantom", "PrintInfos", 0) << GGendl;
   GGcout("GGEMSSolidPhantom", "PrintInfos", 0) << "GGEMSSolidPhantom Infos: " << GGendl;
   GGcout("GGEMSSolidPhantom", "PrintInfos", 0) << "--------------------------------------------" << GGendl;
-  GGcout("GGEMSSolidPhantom", "PrintInfos", 0) << "*Dimension: " << solid_data->number_of_voxels_xyz_.s[0] << " " << solid_data->number_of_voxels_xyz_.s[1] << " " << solid_data->number_of_voxels_xyz_.s[2] << GGendl;
-  GGcout("GGEMSSolidPhantom", "PrintInfos", 0) << "*Number of voxels: " << solid_data->number_of_voxels_ << GGendl;
-  GGcout("GGEMSSolidPhantom", "PrintInfos", 0) << "*Size of voxels: (" << solid_data->voxel_sizes_xyz_.s[0] << "x" << solid_data->voxel_sizes_xyz_.s[1] << "x" << solid_data->voxel_sizes_xyz_.s[2] << ") mm3" << GGendl;
-  GGcout("GGEMSSolidPhantom", "PrintInfos", 0) << "*Offset: (" << solid_data->offsets_xyz_.s[0] << "x" << solid_data->offsets_xyz_.s[1] << "x" << solid_data->offsets_xyz_.s[2] << ") mm3" << GGendl;
+  GGcout("GGEMSSolidPhantom", "PrintInfos", 0) << "*Dimension: " << solid_data_device->number_of_voxels_xyz_.s[0] << " " << solid_data_device->number_of_voxels_xyz_.s[1] << " " << solid_data_device->number_of_voxels_xyz_.s[2] << GGendl;
+  GGcout("GGEMSSolidPhantom", "PrintInfos", 0) << "*Number of voxels: " << solid_data_device->number_of_voxels_ << GGendl;
+  GGcout("GGEMSSolidPhantom", "PrintInfos", 0) << "*Size of voxels: (" << solid_data_device->voxel_sizes_xyz_.s[0] << "x" << solid_data_device->voxel_sizes_xyz_.s[1] << "x" << solid_data_device->voxel_sizes_xyz_.s[2] << ") mm3" << GGendl;
+  GGcout("GGEMSSolidPhantom", "PrintInfos", 0) << "*Offset: (" << solid_data_device->offsets_xyz_.s[0] << "x" << solid_data_device->offsets_xyz_.s[1] << "x" << solid_data_device->offsets_xyz_.s[2] << ") mm3" << GGendl;
   GGcout("GGEMSSolidPhantom", "PrintInfos", 0) << "*Bounding box:" << GGendl;
-  GGcout("GGEMSSolidPhantom", "PrintInfos", 0) << "    - X: " << solid_data->border_min_xyz_.s[0] << " <-> " << solid_data->border_max_xyz_.s[0] << GGendl;
-  GGcout("GGEMSSolidPhantom", "PrintInfos", 0) << "    - Y: " << solid_data->border_min_xyz_.s[1] << " <-> " << solid_data->border_max_xyz_.s[1] << GGendl;
-  GGcout("GGEMSSolidPhantom", "PrintInfos", 0) << "    - Z: " << solid_data->border_min_xyz_.s[2] << " <-> " << solid_data->border_max_xyz_.s[2] << GGendl;
+  GGcout("GGEMSSolidPhantom", "PrintInfos", 0) << "    - X: " << solid_data_device->border_min_xyz_.s[0] << " <-> " << solid_data_device->border_max_xyz_.s[0] << GGendl;
+  GGcout("GGEMSSolidPhantom", "PrintInfos", 0) << "    - Y: " << solid_data_device->border_min_xyz_.s[1] << " <-> " << solid_data_device->border_max_xyz_.s[1] << GGendl;
+  GGcout("GGEMSSolidPhantom", "PrintInfos", 0) << "    - Z: " << solid_data_device->border_min_xyz_.s[2] << " <-> " << solid_data_device->border_max_xyz_.s[2] << GGendl;
   GGcout("GGEMSSolidPhantom", "PrintInfos", 0) << GGendl;
 
   // Release the pointer
-  opencl_manager_.ReleaseDeviceBuffer(solid_phantom_data_, solid_data);
+  opencl_manager_.ReleaseDeviceBuffer(solid_phantom_data_, solid_data_device);
 }

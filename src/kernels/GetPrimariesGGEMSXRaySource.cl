@@ -90,5 +90,5 @@ __kernel void get_primaries_ggems_xray_source(
   primary_particle->geometry_id_[kGlobalIndex] = 0;
   primary_particle->next_discrete_process_[kGlobalIndex] = NO_PROCESS;
   primary_particle->next_interaction_distance_[kGlobalIndex] = 0.0f;
-  primary_particle->scatter_order_[ kGlobalIndex ] = 0;
+  primary_particle->scatter_order_[kGlobalIndex] = 0;
 }

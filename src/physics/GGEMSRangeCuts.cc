@@ -547,21 +547,21 @@ void GGEMSRangeCuts::ConvertCutsFromDistanceToEnergy(GGEMSMaterials* materials)
 
   // Get data from OpenCL device
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
-  std::shared_ptr<cl::Buffer> material_table_device = materials->GetMaterialTables();
-  GGEMSMaterialTables* material_table_host = opencl_manager.GetDeviceBuffer<GGEMSMaterialTables>(material_table_device, sizeof(GGEMSMaterialTables));
+  std::shared_ptr<cl::Buffer> material_table = materials->GetMaterialTables();
+  GGEMSMaterialTables* material_table_device = opencl_manager.GetDeviceBuffer<GGEMSMaterialTables>(material_table, sizeof(GGEMSMaterialTables));
 
   // Loop over materials
-  for (GGuchar i = 0; i < material_table_host->number_of_materials_; ++i) {
+  for (GGuchar i = 0; i < material_table_device->number_of_materials_; ++i) {
     // Get the name of material
 
     // Convert photon cuts
-    GGfloat energy_cut_photon = ConvertToEnergy(material_table_host, i, "gamma");
+    GGfloat energy_cut_photon = ConvertToEnergy(material_table_device, i, "gamma");
 
     // Convert electron cuts
-    GGfloat energy_cut_electron = ConvertToEnergy(material_table_host, i, "e-");
+    GGfloat energy_cut_electron = ConvertToEnergy(material_table_device, i, "e-");
 
     // Convert electron cuts
-    GGfloat energy_cut_positron = ConvertToEnergy(material_table_host, i, "e+");
+    GGfloat energy_cut_positron = ConvertToEnergy(material_table_device, i, "e+");
 
     // Storing the cuts in map
     energy_cuts_photon_.insert(std::make_pair(materials->GetMaterialName(i), energy_cut_photon));
@@ -570,5 +570,5 @@ void GGEMSRangeCuts::ConvertCutsFromDistanceToEnergy(GGEMSMaterials* materials)
   }
 
   // Release pointer
-  opencl_manager.ReleaseDeviceBuffer(material_table_device, material_table_host);
+  opencl_manager.ReleaseDeviceBuffer(material_table, material_table_device);
 }

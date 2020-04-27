@@ -58,19 +58,19 @@ void GGEMSPseudoRandomGenerator::InitializeSeeds(void)
   GGcout("GGEMSPseudoRandomGenerator", "InitializeSeeds", 1) << "Initialization of seeds for each particles..." << GGendl;
 
   // Get the pointer on device
-  GGEMSRandom* random = opencl_manager_.GetDeviceBuffer<GGEMSRandom>(pseudo_random_numbers_, sizeof(GGEMSRandom));
+  GGEMSRandom* random_device = opencl_manager_.GetDeviceBuffer<GGEMSRandom>(pseudo_random_numbers_, sizeof(GGEMSRandom));
 
   // For each particle a seed is generated
   for (std::size_t i = 0; i < MAXIMUM_PARTICLES; ++i) {
-    random->prng_state_1_[i] = static_cast<GGuint>(rand());
-    random->prng_state_2_[i] = static_cast<GGuint>(rand());
-    random->prng_state_3_[i] = static_cast<GGuint>(rand());
-    random->prng_state_4_[i] = static_cast<GGuint>(rand());
-    random->prng_state_5_[i] = static_cast<GGuint>(0);
+    random_device->prng_state_1_[i] = static_cast<GGuint>(rand());
+    random_device->prng_state_2_[i] = static_cast<GGuint>(rand());
+    random_device->prng_state_3_[i] = static_cast<GGuint>(rand());
+    random_device->prng_state_4_[i] = static_cast<GGuint>(rand());
+    random_device->prng_state_5_[i] = static_cast<GGuint>(0);
   }
 
   // Release the pointer, mandatory step!!!
-  opencl_manager_.ReleaseDeviceBuffer(pseudo_random_numbers_, random);
+  opencl_manager_.ReleaseDeviceBuffer(pseudo_random_numbers_, random_device);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

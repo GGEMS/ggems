@@ -94,7 +94,7 @@ void GGEMSMHDImage::Read(std::string const& image_mhd_header_filename, std::shar
   GGEMSFileStream::CheckInputStream(in_header_stream, image_mhd_header_filename);
 
   // Get pointer on OpenCL device
-  GGEMSSolidPhantomData* solid_data = opencl_manager_.GetDeviceBuffer<GGEMSSolidPhantomData>(solid_phantom_data, sizeof(GGEMSSolidPhantomData));
+  GGEMSSolidPhantomData* solid_data_device = opencl_manager_.GetDeviceBuffer<GGEMSSolidPhantomData>(solid_phantom_data, sizeof(GGEMSSolidPhantomData));
 
   // Read the file
   std::string line("");
@@ -115,12 +115,12 @@ void GGEMSMHDImage::Read(std::string const& image_mhd_header_filename, std::shar
       GGwarn("GGEMSMHDImage", "Read", 0) << "The key 'ObjectType' is useless in GGEMS." << GGendl;
     }
     else if (!kKey.compare("DimSize")) {
-      iss >> solid_data->number_of_voxels_xyz_.s[0] >> solid_data->number_of_voxels_xyz_.s[1] >> solid_data->number_of_voxels_xyz_.s[2];
+      iss >> solid_data_device->number_of_voxels_xyz_.s[0] >> solid_data_device->number_of_voxels_xyz_.s[1] >> solid_data_device->number_of_voxels_xyz_.s[2];
       // Computing number of voxels
-      solid_data->number_of_voxels_ = solid_data->number_of_voxels_xyz_.s[0] * solid_data->number_of_voxels_xyz_.s[1] * solid_data->number_of_voxels_xyz_.s[2];
+      solid_data_device->number_of_voxels_ = solid_data_device->number_of_voxels_xyz_.s[0] * solid_data_device->number_of_voxels_xyz_.s[1] * solid_data_device->number_of_voxels_xyz_.s[2];
     }
     else if (!kKey.compare("ElementSpacing")) {
-      iss >> solid_data->voxel_sizes_xyz_.s[0] >> solid_data->voxel_sizes_xyz_.s[1] >> solid_data->voxel_sizes_xyz_.s[2];
+      iss >> solid_data_device->voxel_sizes_xyz_.s[0] >> solid_data_device->voxel_sizes_xyz_.s[1] >> solid_data_device->voxel_sizes_xyz_.s[2];
     }
     else if (!kKey.compare("ElementType")) {
       iss >> mhd_data_type_;
@@ -157,13 +157,13 @@ void GGEMSMHDImage::Read(std::string const& image_mhd_header_filename, std::shar
   in_header_stream.close();
 
   // Checking the values
-  if (solid_data->number_of_voxels_xyz_.s[0] <= 0 || solid_data->number_of_voxels_xyz_.s[1] <= 0 || solid_data->number_of_voxels_xyz_.s[2] <= 0) {
+  if (solid_data_device->number_of_voxels_xyz_.s[0] <= 0 || solid_data_device->number_of_voxels_xyz_.s[1] <= 0 || solid_data_device->number_of_voxels_xyz_.s[2] <= 0) {
     std::ostringstream oss(std::ostringstream::out);
     oss << "Dimension invalid for the key 'DimSize'!!! The values have to be > 0";
     GGEMSMisc::ThrowException("GGEMSMHDImage", "Read", oss.str());
   }
 
-  if (GGEMSMisc::IsEqual(solid_data->voxel_sizes_xyz_.s[0], 0.0) || GGEMSMisc::IsEqual(solid_data->voxel_sizes_xyz_.s[1], 0.0) || GGEMSMisc::IsEqual(solid_data->voxel_sizes_xyz_.s[2], 0.0)) {
+  if (GGEMSMisc::IsEqual(solid_data_device->voxel_sizes_xyz_.s[0], 0.0) || GGEMSMisc::IsEqual(solid_data_device->voxel_sizes_xyz_.s[1], 0.0) || GGEMSMisc::IsEqual(solid_data_device->voxel_sizes_xyz_.s[2], 0.0)) {
     std::ostringstream oss(std::ostringstream::out);
     oss << "Voxel size invalid for the key 'ElementSpacing'!!! The values have to be > 0";
     GGEMSMisc::ThrowException("GGEMSMHDImage", "Read", oss.str());
@@ -183,14 +183,14 @@ void GGEMSMHDImage::Read(std::string const& image_mhd_header_filename, std::shar
 
   // Computing the offset and bounding box
   for (GGuint i = 0; i < 3; ++i) {
-    solid_data->offsets_xyz_.s[i] = solid_data->number_of_voxels_xyz_.s[i] * solid_data->voxel_sizes_xyz_.s[i] * 0.5;
+    solid_data_device->offsets_xyz_.s[i] = solid_data_device->number_of_voxels_xyz_.s[i] * solid_data_device->voxel_sizes_xyz_.s[i] * 0.5;
 
-    solid_data->border_min_xyz_.s[i] = -solid_data->offsets_xyz_.s[i];
-    solid_data->border_max_xyz_.s[i] = solid_data->offsets_xyz_.s[i];
+    solid_data_device->border_min_xyz_.s[i] = -solid_data_device->offsets_xyz_.s[i];
+    solid_data_device->border_max_xyz_.s[i] = solid_data_device->offsets_xyz_.s[i];
   }
 
   // Release the pointer
-  opencl_manager_.ReleaseDeviceBuffer(solid_phantom_data, solid_data);
+  opencl_manager_.ReleaseDeviceBuffer(solid_phantom_data, solid_data_device);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
