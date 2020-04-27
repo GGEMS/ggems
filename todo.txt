@@ -27,4 +27,8 @@
 
 - Faire source indépendantes sans lancer la simulation complète -> phase space
 
-- Pour plus de clarté, faire distinction _host et _device  pointer
+- Controler les pointers shared, unique, weak et pointer cyclique
+
+- Licence pour GGEMS
+
+- Enlever les singletons des membres privés

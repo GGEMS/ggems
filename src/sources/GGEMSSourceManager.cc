@@ -87,7 +87,7 @@ void GGEMSSourceManager::AddSourceRAM(GGulong const& size)
 
 void GGEMSSourceManager::PrintAllocatedRAM(void) const
 {
-  GGcout("GGEMSSourceManager", "PrintAllocatedRAM", 0) << "Allocated RAM memory for sources: " << allocated_RAM_for_sources_ << " bytes" << GGendl;
+  GGcout("GGEMSSourceManager", "PrintAllocatedRAM", 0) << "Allocated memory for source: " << allocated_RAM_for_sources_ << " bytes" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -128,17 +128,18 @@ void GGEMSSolidPhantom::ConvertImageToLabel(std::string const& raw_data_filename
   GGEMSFileStream::CheckInputStream(in_raw_stream, raw_data_filename);
 
   // Get pointer on OpenCL device
-  GGEMSSolidPhantomData* solid_data = opencl_manager_.GetDeviceBuffer<GGEMSSolidPhantomData>(solid_phantom_data_, sizeof(GGEMSSolidPhantomData));
+  GGEMSSolidPhantomData* solid_data_device = opencl_manager_.GetDeviceBuffer<GGEMSSolidPhantomData>(solid_phantom_data_, sizeof(GGEMSSolidPhantomData));
 
   // Get information about mhd file
-  GGuint const kNumberOfVoxels = solid_data->number_of_voxels_;
+  GGuint const kNumberOfVoxels = solid_data_device->number_of_voxels_;
 
   // Release the pointer
-  opencl_manager_.ReleaseDeviceBuffer(solid_phantom_data_, solid_data);
+  opencl_manager_.ReleaseDeviceBuffer(solid_phantom_data_, solid_data_device);
 
   // Reading data to a tmp buffer
-  std::unique_ptr<T[]> tmp_raw_data = std::make_unique<T[]>(kNumberOfVoxels);
-  in_raw_stream.read(reinterpret_cast<char*>(tmp_raw_data.get()), kNumberOfVoxels * sizeof(T));
+  std::vector<T> tmp_raw_data;
+  tmp_raw_data.resize(kNumberOfVoxels);
+  in_raw_stream.read(reinterpret_cast<char*>(&tmp_raw_data[0]), kNumberOfVoxels * sizeof(T));
 
   // Closing file
   in_raw_stream.close();
@@ -149,10 +150,10 @@ void GGEMSSolidPhantom::ConvertImageToLabel(std::string const& raw_data_filename
   GGEMSPhantomNavigatorManager::GetInstance().AddPhantomNavigatorRAM(kNumberOfVoxels * sizeof(GGuchar));
 
   // Get pointer on OpenCL device
-  GGuchar* label_data = opencl_manager_.GetDeviceBuffer<GGuchar>(label_data_, kNumberOfVoxels * sizeof(GGuchar));
+  GGuchar* label_data_device = opencl_manager_.GetDeviceBuffer<GGuchar>(label_data_, kNumberOfVoxels * sizeof(GGuchar));
 
   // Set value to max of GGuchar
-  std::fill(label_data, label_data + kNumberOfVoxels, std::numeric_limits<GGuchar>::max());
+  std::fill(label_data_device, label_data_device + kNumberOfVoxels, std::numeric_limits<GGuchar>::max());
 
   // Opening range data file
   std::ifstream in_range_stream(range_data_filename, std::ios::in);
@@ -182,7 +183,7 @@ void GGEMSSolidPhantom::ConvertImageToLabel(std::string const& raw_data_filename
       // Getting the value of phantom
       GGdouble const kValue = static_cast<GGdouble>(tmp_raw_data[i]);
       if (((kValue == first_label_value) && (kValue == last_label_value)) || ((kValue >= first_label_value) && (kValue < last_label_value))) {
-        label_data[i] = label_index;
+        label_data_device[i] = label_index;
       }
     }
 
@@ -193,14 +194,15 @@ void GGEMSSolidPhantom::ConvertImageToLabel(std::string const& raw_data_filename
   // Final loop checking if a value is still max of GGuchar
   bool all_converted = true;
   for (GGuint i = 0; i < kNumberOfVoxels; ++i) {
-    if (label_data[i] == std::numeric_limits<GGuchar>::max()) all_converted = false;
+    if (label_data_device[i] == std::numeric_limits<GGuchar>::max()) all_converted = false;
   }
 
   // Closing file
   in_range_stream.close();
+  tmp_raw_data.clear();
 
   // Release the pointer
-  opencl_manager_.ReleaseDeviceBuffer(label_data_, label_data);
+  opencl_manager_.ReleaseDeviceBuffer(label_data_, label_data_device);
 
   // Checking if all voxels converted
   if (all_converted) {

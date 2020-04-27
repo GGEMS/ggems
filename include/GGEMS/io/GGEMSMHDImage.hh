@@ -161,13 +161,13 @@ void GGEMSMHDImage::WriteRaw(std::shared_ptr<cl::Buffer> image) const
   std::ofstream out_raw_stream(mhd_raw_file_, std::ios::out | std::ios::binary);
 
   // Mapping data
-  T* data_image = opencl_manager_.GetDeviceBuffer<T>(image, dimensions_.s[0] * dimensions_.s[1] * dimensions_.s[2] * sizeof(T));
+  T* data_image_device = opencl_manager_.GetDeviceBuffer<T>(image, dimensions_.s[0] * dimensions_.s[1] * dimensions_.s[2] * sizeof(T));
 
   // Writing data on file
-  out_raw_stream.write(reinterpret_cast<char*>(data_image), dimensions_.s[0] * dimensions_.s[1] * dimensions_.s[2] * sizeof(T));
+  out_raw_stream.write(reinterpret_cast<char*>(data_image_device), dimensions_.s[0] * dimensions_.s[1] * dimensions_.s[2] * sizeof(T));
 
   // Release the pointers
-  opencl_manager_.ReleaseDeviceBuffer(image, data_image);
+  opencl_manager_.ReleaseDeviceBuffer(image, data_image_device);
   out_raw_stream.close();
 }
 

@@ -62,7 +62,8 @@ void GGEMSXRaySource::InitializeKernel(void)
   std::string const kFilename = kOpenCLKernelPath + "/GetPrimariesGGEMSXRaySource.cl";
 
   // Compiling the kernel
-  kernel_get_primaries_ = opencl_manager_.CompileKernel(kFilename, "get_primaries_ggems_xray_source");
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+  kernel_get_primaries_ = opencl_manager.CompileKernel(kFilename, "get_primaries_ggems_xray_source");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -74,8 +75,9 @@ void GGEMSXRaySource::GetPrimaries(GGulong const& number_of_particles)
   GGcout("GGEMSXRaySource", "GetPrimaries", 3) << "Generating " << number_of_particles << " new particles..." << GGendl;
 
   // Get command queue and event
-  cl::CommandQueue* queue = opencl_manager_.GetCommandQueue();
-  cl::Event* event = opencl_manager_.GetEvent();
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+  cl::CommandQueue* queue = opencl_manager.GetCommandQueue();
+  cl::Event* event = opencl_manager.GetEvent();
 
   // Get the OpenCL buffers
   GGEMSSourceManager& p_source_manager = GGEMSSourceManager::GetInstance();
@@ -100,11 +102,11 @@ void GGEMSXRaySource::GetPrimaries(GGulong const& number_of_particles)
 
   // Launching kernel
   cl_int kernel_status = queue->enqueueNDRangeKernel(*kernel_get_primaries_, offset, global, cl::NullRange, nullptr, event);
-  opencl_manager_.CheckOpenCLError(kernel_status, "GGEMSXRaySource", "GetPrimaries");
+  opencl_manager.CheckOpenCLError(kernel_status, "GGEMSXRaySource", "GetPrimaries");
   queue->finish(); // Wait until the kernel status is finish
 
   // Displaying time in kernel
-  opencl_manager_.DisplayElapsedTimeInKernel("GetPrimaries");
+  opencl_manager.DisplayElapsedTimeInKernel("GetPrimaries");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -124,10 +126,11 @@ void GGEMSXRaySource::PrintInfos(void) const
   else if (particle_type_ == GGEMSParticle::ELECTRON) {
     std::cout << "Electron" << std::endl;
   }
-  else {
-    std::cout << "Unknown" << std::endl;
+  else if (particle_type_ == GGEMSParticle::POSITRON) {
+    std::cout << "Positron" << std::endl;
   }
   GGcout("GGEMSXRaySource", "PrintInfos", 0) << "*Number of particles: " << number_of_particles_ << GGendl;
+  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "*Number of batches: " << GetNumberOfBatchs() << GGendl;
   GGcout("GGEMSXRaySource", "PrintInfos", 0) << "*Energy mode: ";
   if (is_monoenergy_mode_) {
     std::cout << "Monoenergy" << std::endl;
@@ -234,36 +237,38 @@ void GGEMSXRaySource::FillEnergy(void)
 {
   GGcout("GGEMSXRaySource", "FillEnergy", 3) << "Filling energy..." << GGendl;
 
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+
   // Monoenergy mode
   if (is_monoenergy_mode_) {
     number_of_energy_bins_ = 2;
 
     // Allocation of memory on OpenCL device
     // Energy
-    energy_spectrum_ = opencl_manager_.Allocate(nullptr, 2 * sizeof(GGfloat), CL_MEM_READ_WRITE);
-    opencl_manager_.AddRAMMemory(2 * sizeof(GGfloat));
+    energy_spectrum_ = opencl_manager.Allocate(nullptr, 2 * sizeof(GGfloat), CL_MEM_READ_WRITE);
+    opencl_manager.AddRAMMemory(2 * sizeof(GGfloat));
     GGEMSSourceManager::GetInstance().AddSourceRAM(2 * sizeof(GGfloat));
 
     // Cumulative distribution function
-    cdf_ = opencl_manager_.Allocate(nullptr, 2 * sizeof(GGfloat), CL_MEM_READ_WRITE);
-    opencl_manager_.AddRAMMemory(2 * sizeof(GGfloat));
+    cdf_ = opencl_manager.Allocate(nullptr, 2 * sizeof(GGfloat), CL_MEM_READ_WRITE);
+    opencl_manager.AddRAMMemory(2 * sizeof(GGfloat));
     GGEMSSourceManager::GetInstance().AddSourceRAM(2 * sizeof(GGfloat));
 
     // Get the energy pointer on OpenCL device
-    GGfloat* energy_spectrum = opencl_manager_.GetDeviceBuffer<GGfloat>(energy_spectrum_, 2 * sizeof(GGfloat));
+    GGfloat* energy_spectrum_device = opencl_manager.GetDeviceBuffer<GGfloat>(energy_spectrum_, 2 * sizeof(GGfloat));
 
     // Get the cdf pointer on OpenCL device
-    GGfloat* cdf = opencl_manager_.GetDeviceBuffer<GGfloat>(cdf_, 2 * sizeof(GGfloat));
+    GGfloat* cdf_device = opencl_manager.GetDeviceBuffer<GGfloat>(cdf_, 2 * sizeof(GGfloat));
 
-    energy_spectrum[0] = monoenergy_;
-    energy_spectrum[1] = monoenergy_;
+    energy_spectrum_device[0] = monoenergy_;
+    energy_spectrum_device[1] = monoenergy_;
 
-    cdf[0] = 1.0;
-    cdf[1] = 1.0;
+    cdf_device[0] = 1.0;
+    cdf_device[1] = 1.0;
 
     // Release the pointers
-    opencl_manager_.ReleaseDeviceBuffer(energy_spectrum_, energy_spectrum);
-    opencl_manager_.ReleaseDeviceBuffer(cdf_, cdf);
+    opencl_manager.ReleaseDeviceBuffer(energy_spectrum_, energy_spectrum_device);
+    opencl_manager.ReleaseDeviceBuffer(cdf_, cdf_device);
   }
   else { // Polyenergy mode 
     // Read a first time the spectrum file counting the number of lines
@@ -280,43 +285,43 @@ void GGEMSXRaySource::FillEnergy(void)
 
     // Allocation of memory on OpenCL device
     // Energy
-    energy_spectrum_ = opencl_manager_.Allocate(nullptr, number_of_energy_bins_ * sizeof(GGfloat), CL_MEM_READ_WRITE);
-    opencl_manager_.AddRAMMemory(number_of_energy_bins_ * sizeof(GGfloat));
+    energy_spectrum_ = opencl_manager.Allocate(nullptr, number_of_energy_bins_ * sizeof(GGfloat), CL_MEM_READ_WRITE);
+    opencl_manager.AddRAMMemory(number_of_energy_bins_ * sizeof(GGfloat));
     GGEMSSourceManager::GetInstance().AddSourceRAM(number_of_energy_bins_ * sizeof(GGfloat));
 
     // Cumulative distribution function
-    cdf_ = opencl_manager_.Allocate(nullptr, number_of_energy_bins_ * sizeof(GGfloat), CL_MEM_READ_WRITE);
-    opencl_manager_.AddRAMMemory(number_of_energy_bins_ * sizeof(GGfloat));
+    cdf_ = opencl_manager.Allocate(nullptr, number_of_energy_bins_ * sizeof(GGfloat), CL_MEM_READ_WRITE);
+    opencl_manager.AddRAMMemory(number_of_energy_bins_ * sizeof(GGfloat));
     GGEMSSourceManager::GetInstance().AddSourceRAM(number_of_energy_bins_ * sizeof(GGfloat));
 
     // Get the energy pointer on OpenCL device
-    GGfloat* energy_spectrum = opencl_manager_.GetDeviceBuffer<GGfloat>(energy_spectrum_, number_of_energy_bins_ * sizeof(GGfloat));
+    GGfloat* energy_spectrum_device = opencl_manager.GetDeviceBuffer<GGfloat>(energy_spectrum_, number_of_energy_bins_ * sizeof(GGfloat));
 
     // Get the cdf pointer on OpenCL device
-    GGfloat* cdf = opencl_manager_.GetDeviceBuffer<GGfloat>(cdf_, number_of_energy_bins_ * sizeof(GGfloat));
+    GGfloat* cdf_device = opencl_manager.GetDeviceBuffer<GGfloat>(cdf_, number_of_energy_bins_ * sizeof(GGfloat));
 
     // Read the input spectrum and computing the sum for the cdf
     GGint line_index = 0;
     GGfloat sum_cdf = 0.0;
     while (std::getline(spectrum_stream, line)) {
       std::istringstream iss(line);
-      iss >> energy_spectrum[line_index] >> cdf[line_index];
-      sum_cdf += cdf[line_index];
+      iss >> energy_spectrum_device[line_index] >> cdf_device[line_index];
+      sum_cdf += cdf_device[line_index];
       ++line_index;
     }
 
     // Compute CDF and normalized it
-    cdf[0] /= sum_cdf;
+    cdf_device[0] /= sum_cdf;
     for (GGuint i = 1; i < number_of_energy_bins_; ++i) {
-      cdf[i] = cdf[i]/sum_cdf + cdf[i-1];
+      cdf_device[i] = cdf_device[i]/sum_cdf + cdf_device[i-1];
     }
 
     // By security, final value of cdf must be 1 !!!
-    cdf[number_of_energy_bins_-1] = 1.0;
+    cdf_device[number_of_energy_bins_-1] = 1.0;
 
     // Release the pointers
-    opencl_manager_.ReleaseDeviceBuffer(energy_spectrum_, energy_spectrum);
-    opencl_manager_.ReleaseDeviceBuffer(cdf_, cdf);
+    opencl_manager.ReleaseDeviceBuffer(energy_spectrum_, energy_spectrum_device);
+    opencl_manager.ReleaseDeviceBuffer(cdf_, cdf_device);
 
     // Closing file
     spectrum_stream.close();

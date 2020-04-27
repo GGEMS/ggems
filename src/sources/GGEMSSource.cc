@@ -30,16 +30,9 @@ GGEMSSource::GGEMSSource(GGEMSSource* source)
   number_of_particles_(0),
   number_of_particles_in_batch_(0),
   particle_type_(99),
-  kernel_get_primaries_(nullptr),
-  opencl_manager_(GGEMSOpenCLManager::GetInstance())
+  kernel_get_primaries_(nullptr)
 {
   GGcout("GGEMSSource", "GGEMSSource", 3) << "Allocation of GGEMSSource..." << GGendl;
-
-  // Checking if a context is activated
-  if (!opencl_manager_.IsReady()) {
-    GGEMSMisc::ThrowException("GGEMSSource", "GGEMSSource",
-      "OpenCL Manager is not ready, you have to choose a context!!!");
-  }
 
   // Allocation of geometry transformation
   geometry_transformation_.reset(new GGEMSGeometryTransformation());
@@ -152,6 +145,7 @@ void GGEMSSource::CheckParameters(void) const
     oss << "You have to set a particle type for the source:" << std::endl;
     oss << "    - Photon" << std::endl;
     oss << "    - Electron" << std::endl;
+    oss << "    - Positron" << std::endl;
     GGEMSMisc::ThrowException("GGEMSSource", "CheckParameters", oss.str());
   }
 
@@ -199,7 +193,8 @@ void GGEMSSource::CheckMemoryForParticles(void) const
   GGdouble const kRAMParticles = static_cast<GGdouble>(sizeof(GGEMSPrimaryParticles)) + static_cast<GGdouble>(sizeof(GGEMSRandom));
 
   // Getting the RAM memory on activated device
-  GGdouble const kMaxRAMDevice = static_cast<GGdouble>(opencl_manager_.GetMaxRAMMemoryOnActivatedDevice());
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+  GGdouble const kMaxRAMDevice = static_cast<GGdouble>(opencl_manager.GetMaxRAMMemoryOnActivatedDevice());
 
   // Computing the ratio of used RAM memory on device
   GGdouble const kMaxRatioUsedRAM = kRAMParticles / kMaxRAMDevice;

@@ -215,34 +215,34 @@ void GGEMSGeometryTransformation::UpdateTransformationMatrix(void)
 
   // Update the transformation matrix on OpenCL device
   // Get the pointer on device
-  GGfloat44* matrix = opencl_manager_.GetDeviceBuffer<GGfloat44>(matrix_transformation_, sizeof(GGfloat44));
+  GGfloat44* matrix_device = opencl_manager_.GetDeviceBuffer<GGfloat44>(matrix_transformation_, sizeof(GGfloat44));
 
   // Compute a temporary matrix then copy it on OpenCL device
   GGfloat44 matrix_tmp = GGfloat44MultGGfloat44(matrix_rotation_, GGfloat44MultGGfloat44(matrix_translation_, matrix_orthographic_projection_));
 
   // Copy step
-  matrix->m00_ = matrix_tmp.m00_;
-  matrix->m01_ = matrix_tmp.m01_;
-  matrix->m02_ = matrix_tmp.m02_;
-  matrix->m03_ = matrix_tmp.m03_;
+  matrix_device->m00_ = matrix_tmp.m00_;
+  matrix_device->m01_ = matrix_tmp.m01_;
+  matrix_device->m02_ = matrix_tmp.m02_;
+  matrix_device->m03_ = matrix_tmp.m03_;
 
-  matrix->m10_ = matrix_tmp.m10_;
-  matrix->m11_ = matrix_tmp.m11_;
-  matrix->m12_ = matrix_tmp.m12_;
-  matrix->m13_ = matrix_tmp.m13_;
+  matrix_device->m10_ = matrix_tmp.m10_;
+  matrix_device->m11_ = matrix_tmp.m11_;
+  matrix_device->m12_ = matrix_tmp.m12_;
+  matrix_device->m13_ = matrix_tmp.m13_;
 
-  matrix->m20_ = matrix_tmp.m20_;
-  matrix->m21_ = matrix_tmp.m21_;
-  matrix->m22_ = matrix_tmp.m22_;
-  matrix->m23_ = matrix_tmp.m23_;
+  matrix_device->m20_ = matrix_tmp.m20_;
+  matrix_device->m21_ = matrix_tmp.m21_;
+  matrix_device->m22_ = matrix_tmp.m22_;
+  matrix_device->m23_ = matrix_tmp.m23_;
 
-  matrix->m30_ = matrix_tmp.m30_;
-  matrix->m31_ = matrix_tmp.m31_;
-  matrix->m32_ = matrix_tmp.m32_;
-  matrix->m33_ = matrix_tmp.m33_;
+  matrix_device->m30_ = matrix_tmp.m30_;
+  matrix_device->m31_ = matrix_tmp.m31_;
+  matrix_device->m32_ = matrix_tmp.m32_;
+  matrix_device->m33_ = matrix_tmp.m33_;
 
   // Release the pointer, mandatory step!!!
-  opencl_manager_.ReleaseDeviceBuffer(matrix_transformation_, matrix);
+  opencl_manager_.ReleaseDeviceBuffer(matrix_transformation_, matrix_device);
 
   // Update is done
   is_need_updated_ = false;
