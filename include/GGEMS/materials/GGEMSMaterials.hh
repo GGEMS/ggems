@@ -183,10 +183,6 @@ class GGEMS_EXPORT GGEMSMaterials
     std::vector<std::string> materials_; /*!< Defined material for a phantom */
     std::shared_ptr<cl::Buffer> material_tables_; /*!< Material tables on OpenCL device */
     std::shared_ptr<GGEMSRangeCuts> range_cuts_; /*!< Cut for particles */
-
-    // C++ singleton for OpenCL ang GGEMSMaterialsDatabase
-    GGEMSOpenCLManager& opencl_manager_; /*!< Reference to OpenCL manager */
-    GGEMSMaterialsDatabaseManager& material_manager_; /*!< Reference to material manager */
 };
 
 /*!

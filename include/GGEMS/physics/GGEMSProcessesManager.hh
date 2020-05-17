@@ -181,23 +181,10 @@ class GGEMS_EXPORT GGEMSProcessesManager
     void AddProcess(std::string const& process_name, std::string const& particle_name, std::string const& phantom_name);
 
     /*!
-      \fn void AddProcessRAM(GGulong const& size)
-      \param size - allocated RAM for processes in GGEMS
-      \brief add RAM memory size for processes
-    */
-    void AddProcessRAM(GGulong const& size);
-
-    /*!
       \fn void PrintInfos(void) const
       \brief Print all infos about processes
     */
     void PrintInfos(void) const;
-
-    /*!
-      \fn void PrintAllocatedRAM(void) const
-      \brief Print allocated RAM for processes
-    */
-    void PrintAllocatedRAM(void) const;
 
     /*!
       \fn void PrintAvailableProcesses(void) const
@@ -209,7 +196,6 @@ class GGEMS_EXPORT GGEMSProcessesManager
     GGushort cross_section_table_number_of_bins_; /*!< Number of bins in the cross section table */
     GGfloat cross_section_table_min_energy_; /*!< Minimum energy in the cross section table */
     GGfloat cross_section_table_max_energy_; /*!< Maximum energy in the cross section table */
-    GGulong allocated_RAM_for_processes_; /*!< Allocated RAM in bytes for processes in GGEMS */
 };
 
 /*!

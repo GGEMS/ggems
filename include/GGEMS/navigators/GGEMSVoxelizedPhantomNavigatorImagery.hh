@@ -13,13 +13,13 @@
   \date Tuesday February 11, 2020
 */
 
-#include "GGEMS/navigators/GGEMSPhantomNavigator.hh"
+#include "GGEMS/navigators/GGEMSNavigator.hh"
 
 /*!
   \class GGEMSVoxelizedPhantomNavigatorImagery
   \brief GGEMS class managing voxelized phantom navigator for imagery application
 */
-class GGEMS_EXPORT GGEMSVoxelizedPhantomNavigatorImagery : public GGEMSPhantomNavigator
+class GGEMS_EXPORT GGEMSVoxelizedPhantomNavigatorImagery : public GGEMSNavigator
 {
   public:
     /*!

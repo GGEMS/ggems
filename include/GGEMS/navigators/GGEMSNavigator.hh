@@ -1,10 +1,10 @@
-#ifndef GUARD_GGEMS_NAVIGATORS_GGEMSPHANTOMNAVIGATOR_HH
-#define GUARD_GGEMS_NAVIGATORS_GGEMSPHANTOMNAVIGATOR_HH
+#ifndef GUARD_GGEMS_NAVIGATORS_GGEMSNAVIGATOR_HH
+#define GUARD_GGEMS_NAVIGATORS_GGEMSNAVIGATOR_HH
 
 /*!
-  \file GGEMSPhantomNavigator.hh
+  \file GGEMSNavigator.hh
 
-  \brief GGEMS mother class for phantom navigation
+  \brief GGEMS mother class for navigation
 
   \author Julien BERT <julien.bert@univ-brest.fr>
   \author Didier BENOIT <didier.benoit@inserm.fr>
@@ -19,7 +19,7 @@
 
 #include "GGEMS/physics/GGEMSRangeCuts.hh"
 
-class GGEMSSolidPhantom;
+class GGEMSSolid;
 class GGEMSMaterials;
 class GGEMSCrossSections;
 
@@ -45,64 +45,64 @@ namespace GGEMSTolerance
 #endif
 
 /*!
-  \class GGEMSPhantomNavigator
-  \brief GGEMS mother class for phantom navigation
+  \class GGEMSNavigator
+  \brief GGEMS mother class for navigator
 */
-class GGEMS_EXPORT GGEMSPhantomNavigator
+class GGEMS_EXPORT GGEMSNavigator
 {
   public:
     /*!
-      \param phantom_navigator - pointer on daughter of GGEMSPhantomNavigator
-      \brief GGEMSPhantomNavigator constructor
+      \param navigator - pointer on daughter of GGEMSNavigator
+      \brief GGEMSNavigator constructor
     */
-    explicit GGEMSPhantomNavigator(GGEMSPhantomNavigator* phantom_navigator);
+    explicit GGEMSNavigator(GGEMSNavigator* navigator);
 
     /*!
-      \brief GGEMSPhantomNavigator destructor
+      \brief GGEMSNavigator destructor
     */
-    virtual ~GGEMSPhantomNavigator(void);
+    virtual ~GGEMSNavigator(void);
 
     /*!
-      \fn GGEMSPhantomNavigator(GGEMSPhantomNavigator const& phantom_navigator) = delete
-      \param phantom_navigator - reference on the GGEMS phantom navigator
+      \fn GGEMSNavigator(GGEMSNavigator const& navigator) = delete
+      \param navigator - reference on the GGEMS navigator
       \brief Avoid copy by reference
     */
-    GGEMSPhantomNavigator(GGEMSPhantomNavigator const& phantom_navigator) = delete;
+    GGEMSNavigator(GGEMSNavigator const& navigator) = delete;
 
     /*!
-      \fn GGEMSPhantomNavigator& operator=(GGEMSPhantomNavigator const& phantom_navigator) = delete
-      \param phantom_navigator - reference on the GGEMS phantom navigator
+      \fn GGEMSNavigator& operator=(GGEMSNavigator const& navigator) = delete
+      \param navigator - reference on the GGEMS navigator
       \brief Avoid assignement by reference
     */
-    GGEMSPhantomNavigator& operator=(GGEMSPhantomNavigator const& phantom_navigator) = delete;
+    GGEMSNavigator& operator=(GGEMSNavigator const& navigator) = delete;
 
     /*!
-      \fn GGEMSPhantomNavigator(GGEMSPhantomNavigator const&& phantom_navigator) = delete
-      \param phantom_navigator - rvalue reference on the GGEMS phantom navigator
+      \fn GGEMSNavigator(GGEMSNavigator const&& navigator) = delete
+      \param navigator - rvalue reference on the GGEMS navigator
       \brief Avoid copy by rvalue reference
     */
-    GGEMSPhantomNavigator(GGEMSPhantomNavigator const&& phantom_navigator) = delete;
+    GGEMSNavigator(GGEMSNavigator const&& navigator) = delete;
 
     /*!
-      \fn GGEMSPhantomNavigator& operator=(GGEMSPhantomNavigator const&& phantom_navigator) = delete
-      \param phantom_navigator - rvalue reference on the GGEMS phantom navigator
+      \fn GGEMSNavigator& operator=(GGEMSNavigator const&& navigator) = delete
+      \param navigator - rvalue reference on the GGEMS navigator
       \brief Avoid copy by rvalue reference
     */
-    GGEMSPhantomNavigator& operator=(GGEMSPhantomNavigator const&& phantom_navigator) = delete;
+    GGEMSNavigator& operator=(GGEMSNavigator const&& navigator) = delete;
 
     /*!
-      \fn void SetPhantomName(std::string const& phantom_navigator_name)
-      \param phantom_navigator_name - name of the navigator
+      \fn void SetNavigatorName(std::string const& navigator_name)
+      \param navigator_name - name of the navigator
       \brief save the name of the navigator
     */
-    void SetPhantomName(std::string const& phantom_navigator_name);
+    void SetNavigatorName(std::string const& navigator_name);
 
     /*!
-      \fn void SetPhantomFile(std::string const& phantom_filename)
-      \param phantom_filename - filename of MHD file for phantom
+      \fn void SetPhantomFile(std::string const& filename)
+      \param filename - filename of MHD file for phantom
       \brief set the mhd filename for phantom
     */
-    void SetPhantomFile(std::string const& phantom_filename);
+    void SetPhantomFile(std::string const& filename);
 
     /*!
       \fn void SetRangeToMaterialFile(std::string const& range_data_filename)
@@ -130,18 +130,18 @@ class GGEMS_EXPORT GGEMSPhantomNavigator
     void SetOffset(GGfloat const offset_x, GGfloat const offset_y, GGfloat const offset_z, std::string const& unit = "mm");
 
     /*!
-      \fn inline std::string GetPhantomName(void) const
-      \brief Get the name of the phantom
-      \return the name of the phantom
+      \fn inline std::string GetNavigatorName(void) const
+      \brief Get the name of the navigator
+      \return the name of the navigator
     */
-    inline std::string GetPhantomName(void) const {return phantom_navigator_name_;}
+    inline std::string GetNavigatorName(void) const {return navigator_name_;}
 
     /*!
-      \fn inline std::shared_ptr<GGEMSSolidPhantom> GetSolidPhantom(void) const
-      \brief get the pointer on solid phantom
-      \return the pointer on solid phantom
+      \fn inline std::shared_ptr<GGEMSSolid> GetSolid(void) const
+      \brief get the pointer on solid
+      \return the pointer on solid
     */
-    inline std::shared_ptr<GGEMSSolidPhantom> GetSolidPhantom(void) const {return solid_phantom_;}
+    inline std::shared_ptr<GGEMSSolid> GetSolid(void) const {return solid_;}
 
     /*!
       \fn inline std::shared_ptr<GGEMSMaterials> GetMaterials(void) const
@@ -156,6 +156,12 @@ class GGEMS_EXPORT GGEMSPhantomNavigator
       \return the pointer on cross sections
     */
     inline std::shared_ptr<GGEMSCrossSections> GetCrossSections(void) const {return cross_sections_;}
+
+    /*!
+      \fn void ComputeParticleNavigatorDistance(void) const
+      \brief Compute distance between particle and navigator (solid)
+    */
+    void ComputeParticleNavigatorDistance(void) const;
 
     /*!
       \fn void PrintInfos(void) const
@@ -179,16 +185,16 @@ class GGEMS_EXPORT GGEMSPhantomNavigator
     virtual void Initialize(void);
 
   protected:
-    std::string phantom_navigator_name_; /*!< Name of the phantom navigator name */
+    std::string navigator_name_; /*!< Name of the navigator */
     std::string phantom_mhd_header_filename_; /*!< Filename of MHD file for phantom */
     std::string range_data_filename_; /*!< Filename of file for range data */
     GGfloat geometry_tolerance_; /*!< Tolerance of geometry range [1mm;1nm] */
-    GGfloat3 offset_xyz_; /*!< Offset of the phantom in X, Y and Z */
+    GGfloat3 offset_xyz_; /*!< Offset of the navigator in X, Y and Z */
     bool is_offset_flag_; /*!< Apply offset */
 
-    std::shared_ptr<GGEMSSolidPhantom> solid_phantom_; /*!< Solid phantom with geometric infos and label */
+    std::shared_ptr<GGEMSSolid> solid_; /*!< Solid with geometric infos and label */
     std::shared_ptr<GGEMSMaterials> materials_; /*!< Materials of phantom */
     std::shared_ptr<GGEMSCrossSections> cross_sections_; /*!< Cross section table for process */
 };
 
-#endif // End of GUARD_GGEMS_NAVIGATORS_GGEMSPHANTOMNAVIGATOR_HH
+#endif // End of GUARD_GGEMS_NAVIGATORS_GGEMSNAVIGATOR_HH

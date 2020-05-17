@@ -146,31 +146,18 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     void ContextToActivate(GGuint const& context_id);
 
     /*!
-      \fn void PrintRAMStatus(void) const
-      \brief print the RAM memory status for each context
+      \fn GGulong GetMaxRAMMemoryOnActivatedContext(void) const
+      \return Max RAM memory on a context
+      \brief Get the maximum RAM memory on activated OpenCL context
     */
-    void PrintRAMStatus(void) const;
+    inline GGulong GetMaxRAMMemoryOnActivatedContext(void) const {return device_global_mem_size_[context_index_];}
 
     /*!
-      \fn void AddRAMMemory(GGulong const& size)
-      \param size - size of the allocated buffer in byte
-      \brief store the size of the allocated buffer
+      \fn std::string GetNameOfActivatedContext(void) const
+      \return name of activated context
+      \brief Get the name of the activated context
     */
-    void AddRAMMemory(GGulong const& size);
-
-    /*!
-      \fn SubRAMMemory(GGulong const& size)
-      \param size - size of the allocated buffer in byte
-      \brief substract the size of the allocated buffer
-    */
-    void SubRAMMemory(GGulong const& size);
-
-    /*!
-      \fn GGulong GetMaxRAMMemoryOnActivatedDevice(void) const
-      \return Max RAM memory on a device
-      \brief Get the maximum RAM memory on activated OpenCL device
-    */
-    inline GGulong GetMaxRAMMemoryOnActivatedDevice(void) const {return device_global_mem_size_[context_index_];}
+    inline std::string GetNameOfActivatedContext(void) const {return device_name_[context_index_];}
 
     /*!
       \fn cl::Context* GetContext(void) const
@@ -269,19 +256,6 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     void CreateEvent(void);
 
     /*!
-      \fn void InitializeRAMManager()
-      \brief initialization of the RAM manager by context
-    */
-    void InitializeRAMManager(void);
-
-    /*!
-      \fn void CheckRAMMemory(std::size_t const& size)
-      \param size - size in bytes to allocate
-      \brief Checking RAM memory allocation
-    */
-    void CheckRAMMemory(std::size_t const& size);
-
-    /*!
       \fn std::string ErrorType(GGint const& error) const
       \param error - error index from OpenCL library
       \return the message error
@@ -336,9 +310,6 @@ class GGEMS_EXPORT GGEMSOpenCLManager
 
     // Kernels
     std::vector<std::shared_ptr<cl::Kernel>> kernels_; /*!< List of pointer to OpenCL kernel */
-
-    // RAM handler
-    std::vector<GGulong> used_ram_; /*!< Memory RAM used by context */
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -382,13 +353,6 @@ extern "C" GGEMS_EXPORT GGEMSOpenCLManager* get_instance_ggems_opencl_manager(vo
   \brief Print information about OpenCL
 */
 extern "C" GGEMS_EXPORT void print_infos_opencl_manager(GGEMSOpenCLManager* opencl_manager);
-
-/*!
-  \fn void print_RAM_ggems_opencl_manager(GGEMSOpenCLManager* opencl_manager)
-  \param opencl_manager - pointer on the singleton
-  \brief Print information about RAM in OpenCL context
-*/
-extern "C" GGEMS_EXPORT void print_RAM_ggems_opencl_manager(GGEMSOpenCLManager* opencl_manager);
 
 /*!
   \fn void set_context_index_ggems_opencl_manager(GGEMSOpenCLManager* opencl_manager, GGuint const context_id)

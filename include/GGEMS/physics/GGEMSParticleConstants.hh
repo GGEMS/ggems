@@ -28,6 +28,7 @@ namespace GGEMSParticleState
   __constant GGuchar ALIVE = 0; /*!< Particle alive */
   __constant GGuchar DEAD = 1; /*!< Particle dead */
   __constant GGuchar FREEZE = 2; /*!< Particle freeze */
+  __constant GGfloat OUT_OF_WORLD = FLT_MAX; /*!< Particle out of world */
 #ifndef OPENCL_COMPILER
 }
 #endif

@@ -1,7 +1,7 @@
 /*!
-  \file GGEMSSolidVolume.cc
+  \file GGEMSVolume.cc
 
-  \brief Mother class handle solid volume
+  \brief Mother class handle volume
 
   \author Julien BERT <julien.bert@univ-brest.fr>
   \author Didier BENOIT <didier.benoit@inserm.fr>
@@ -10,52 +10,53 @@
   \date Monday January 13, 2020
 */
 
-#include "GGEMS/geometries/GGEMSSolidVolume.hh"
+#include "GGEMS/geometries/GGEMSVolume.hh"
 #include "GGEMS/tools/GGEMSSystemOfUnits.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSSolidVolume::GGEMSSolidVolume(void)
-: label_value_(1.0),
-  positions_(GGfloat3{{0.0, 0.0, 0.0}}),
-  kernel_draw_solid_(nullptr),
-  opencl_manager_(GGEMSOpenCLManager::GetInstance()),
-  phantom_creator_manager_(GGEMSPhantomCreatorManager::GetInstance())
+GGEMSVolume::GGEMSVolume(void)
+: label_value_(1.0f),
+  positions_(GGfloat3{{0.0f, 0.0f, 0.0f}}),
+  kernel_draw_volume_(nullptr)
 {
-  GGcout("GGEMSSolidVolume", "GGEMSSolidVolume", 3) << "Allocation of GGEMSSolidVolume..." << GGendl;
+  GGcout("GGEMSVolume", "GGEMSVolume", 3) << "Allocation of GGEMSVolume..." << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSSolidVolume::~GGEMSSolidVolume(void)
+GGEMSVolume::~GGEMSVolume(void)
 {
-  GGcout("GGEMSSolidVolume", "~GGEMSSolidVolume", 3) << "Deallocation of GGEMSSolidVolume..." << GGendl;
+  GGcout("GGEMSVolume", "~GGEMSVolume", 3) << "Deallocation of GGEMSVolume..." << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSSolidVolume::SetLabelValue(GGfloat const& label_value)
+void GGEMSVolume::SetLabelValue(GGfloat const& label_value)
 {
   label_value_ = label_value;
 }
 
-void GGEMSSolidVolume::SetMaterial(char const* material)
+void GGEMSVolume::SetMaterial(char const* material)
 {
+  // Get the volume creator manager
+  GGEMSVolumeCreatorManager& volume_creator_manager = GGEMSVolumeCreatorManager::GetInstance();
+
   // Adding the material to phantom creator manager
-  phantom_creator_manager_.AddLabelAndMaterial(label_value_, material);
+  volume_creator_manager.AddLabelAndMaterial(label_value_, material);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSSolidVolume::SetPosition(GGfloat const& pos_x, GGfloat const& pos_y, GGfloat const& pos_z, char const* unit)
+void GGEMSVolume::SetPosition(GGfloat const& pos_x, GGfloat const& pos_y, GGfloat const& pos_z, char const* unit)
 {
   positions_.s[0] = GGEMSUnits::DistanceUnit(pos_x, unit);
   positions_.s[1] = GGEMSUnits::DistanceUnit(pos_y, unit);

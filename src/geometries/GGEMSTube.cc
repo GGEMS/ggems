@@ -19,7 +19,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 GGEMSTube::GGEMSTube(void)
-: GGEMSSolidVolume(),
+: GGEMSVolume(),
   height_(0.0),
   radius_(0.0)
 {
@@ -87,9 +87,15 @@ void GGEMSTube::Initialize(void)
   std::string const kOpenCLKernelPath = OPENCL_KERNEL_PATH;
   std::string const kFilename = kOpenCLKernelPath + "/DrawGGEMSTube.cl";
 
+  // Get the volume creator manager
+  GGEMSVolumeCreatorManager& volume_creator_manager = GGEMSVolumeCreatorManager::GetInstance();
+
+  // Get the OpenCL manager
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+
   // Get the data type and compiling kernel
-  std::string const kDataType = "-D" + phantom_creator_manager_.GetDataType();
-  kernel_draw_solid_ = opencl_manager_.CompileKernel(kFilename, "draw_ggems_tube", nullptr, const_cast<char*>(kDataType.c_str()));
+  std::string const kDataType = "-D" + volume_creator_manager.GetDataType();
+  kernel_draw_volume_ = opencl_manager.CompileKernel(kFilename, "draw_ggems_tube", nullptr, const_cast<char*>(kDataType.c_str()));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -100,36 +106,42 @@ void GGEMSTube::Draw(void)
 {
   GGcout("GGEMSTube", "Draw", 3) << "Drawing Tube..." << GGendl;
 
+  // Get the OpenCL manager
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+
+  // Get the volume creator manager
+  GGEMSVolumeCreatorManager& volume_creator_manager = GGEMSVolumeCreatorManager::GetInstance();
+
   // Get command queue and event
-  cl::CommandQueue* p_queue = opencl_manager_.GetCommandQueue();
-  cl::Event* p_event = opencl_manager_.GetEvent();
+  cl::CommandQueue* p_queue = opencl_manager.GetCommandQueue();
+  cl::Event* p_event = opencl_manager.GetEvent();
 
   // Get parameters from phantom creator
-  GGfloat3 const kVoxelSizes = phantom_creator_manager_.GetElementsSizes();
-  GGuint3 const kPhantomDimensions = phantom_creator_manager_.GetPhantomDimensions();
-  GGulong const kNumberThreads = phantom_creator_manager_.GetNumberElements();
-  cl::Buffer* voxelized_phantom = phantom_creator_manager_.GetVoxelizedPhantom();
+  GGfloat3 const kVoxelSizes = volume_creator_manager.GetElementsSizes();
+  GGuint3 const kPhantomDimensions = volume_creator_manager.GetVolumeDimensions();
+  GGulong const kNumberThreads = volume_creator_manager.GetNumberElements();
+  cl::Buffer* voxelized_phantom = volume_creator_manager.GetVoxelizedVolume();
 
   // Set parameters for kernel
-  kernel_draw_solid_->setArg(0, kVoxelSizes);
-  kernel_draw_solid_->setArg(1, kPhantomDimensions);
-  kernel_draw_solid_->setArg(2, positions_);
-  kernel_draw_solid_->setArg(3, label_value_);
-  kernel_draw_solid_->setArg(4, height_);
-  kernel_draw_solid_->setArg(5, radius_);
-  kernel_draw_solid_->setArg(6, *voxelized_phantom);
+  kernel_draw_volume_->setArg(0, kVoxelSizes);
+  kernel_draw_volume_->setArg(1, kPhantomDimensions);
+  kernel_draw_volume_->setArg(2, positions_);
+  kernel_draw_volume_->setArg(3, label_value_);
+  kernel_draw_volume_->setArg(4, height_);
+  kernel_draw_volume_->setArg(5, radius_);
+  kernel_draw_volume_->setArg(6, *voxelized_phantom);
 
   // Define the number of work-item to launch
   cl::NDRange global(kNumberThreads);
   cl::NDRange offset(0);
 
   // Launching kernel
-  cl_int kernel_status = p_queue->enqueueNDRangeKernel(*kernel_draw_solid_, offset, global, cl::NullRange, nullptr, p_event);
-  opencl_manager_.CheckOpenCLError(kernel_status, "GGEMSTube", "Draw Tube");
+  cl_int kernel_status = p_queue->enqueueNDRangeKernel(*kernel_draw_volume_, offset, global, cl::NullRange, nullptr, p_event);
+  opencl_manager.CheckOpenCLError(kernel_status, "GGEMSTube", "Draw Tube");
   p_queue->finish(); // Wait until the kernel status is finish
 
   // Displaying time in kernel
-  opencl_manager_.DisplayElapsedTimeInKernel("Draw Tube");
+  opencl_manager.DisplayElapsedTimeInKernel("Draw Tube");
 }
 
 ////////////////////////////////////////////////////////////////////////////////

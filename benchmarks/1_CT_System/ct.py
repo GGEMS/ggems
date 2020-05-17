@@ -1,6 +1,10 @@
 from ggems import *
 
 # ------------------------------------------------------------------------------
+# STEP 0: Level of verbosity during computation
+GGEMSVerbosity(3)
+
+# ------------------------------------------------------------------------------
 # STEP 1: Choosing an OpenCL context
 opencl_manager.set_context_index(0)
 
@@ -10,7 +14,7 @@ opencl_manager.set_context_index(0)
 
 # ------------------------------------------------------------------------------
 # STEP 3: Setting GGEMS materials
-materials_manager.set_materials('data/materials.txt')
+materials_database_manager.set_materials('data/materials.txt')
 
 # ------------------------------------------------------------------------------
 # STEP 4: Phantoms, navigators and systems
@@ -60,7 +64,7 @@ xray_source_1 = GGEMSXRaySource()
 xray_source_1.set_source_name('xray_source_1')
 xray_source_1.set_source_particle_type('gamma')
 # xray_source_1.set_number_of_particles(8616350000)
-xray_source_1.set_number_of_particles(10)
+xray_source_1.set_number_of_particles(3)
 xray_source_1.set_position(-1000.0, 0.0, 0.0, 'mm')
 xray_source_1.set_rotation(0.0, 0.0, 0.0, 'deg')
 xray_source_1.set_beam_aperture(5.0, 'deg')
@@ -68,16 +72,16 @@ xray_source_1.set_focal_spot_size(0.6, 1.2, 0.0, 'mm')
 xray_source_1.set_polyenergy('data/spectrum_120kVp_2mmAl.dat')
 
 # Second source
-xray_source_2 = GGEMSXRaySource()
-xray_source_2.set_source_name('xray_source_2')
-xray_source_2.set_source_particle_type('gamma')
+#xray_source_2 = GGEMSXRaySource()
+#xray_source_2.set_source_name('xray_source_2')
+#xray_source_2.set_source_particle_type('gamma')
 # xray_source_2.set_number_of_particles(861635)
-xray_source_2.set_number_of_particles(15)
-xray_source_2.set_position(0.0, -1000.0, 0.0, 'mm')
-xray_source_2.set_rotation(0.0, 0.0, 0.0, 'deg')
-xray_source_2.set_beam_aperture(7.0, 'deg')
-xray_source_2.set_focal_spot_size(0.3, 0.5, 0.0, 'mm')
-xray_source_2.set_monoenergy(60.2, 'keV')
+#xray_source_2.set_number_of_particles(5)
+#xray_source_2.set_position(0.0, -1000.0, 0.0, 'mm')
+#xray_source_2.set_rotation(0.0, 0.0, 0.0, 'deg')
+#xray_source_2.set_beam_aperture(7.0, 'deg')
+#xray_source_2.set_focal_spot_size(0.3, 0.5, 0.0, 'mm')
+#xray_source_2.set_monoenergy(60.2, 'keV')
 
 # ------------------------------------------------------------------------------
 # STEP 8: Detector/Digitizer Declaration
@@ -87,14 +91,14 @@ xray_source_2.set_monoenergy(60.2, 'keV')
 # STEP 9: GGEMS simulation parameters
 ggems_manager.set_seed(777) # Optional, if not set, the seed is automatically computed
 
-ggems_manager.opencl_verbose(False)
-ggems_manager.material_verbose(False)
+#ggems_manager.opencl_verbose(False)
+ggems_manager.material_database_verbose(False)
 ggems_manager.phantom_verbose(True)
 ggems_manager.source_verbose(True)
 ggems_manager.memory_verbose(True)
 ggems_manager.processes_verbose(True)
-ggems_manager.range_cuts_verbose(False)
-ggems_manager.random_verbose(False)
+ggems_manager.range_cuts_verbose(True)
+ggems_manager.random_verbose(True)
 # ggems_manager.detector_verbose(true/false)
 # ggems_manager.tracking_verbose(true/false)
 
@@ -102,7 +106,7 @@ ggems_manager.random_verbose(False)
 ggems_manager.initialize()
 
 # Start GGEMS simulation
-ggems_manager.run()
+#ggems_manager.run()
 
 # ------------------------------------------------------------------------------
 # STEP 10: Exit GGEMS safely

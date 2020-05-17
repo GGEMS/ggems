@@ -1,18 +1,22 @@
 from ggems import *
 
 # ------------------------------------------------------------------------------
+# STEP 0: Level of verbosity during computation
+GGEMSVerbosity(0)
+
+# ------------------------------------------------------------------------------
 # STEP 1: OpenCL Initialization
 opencl_manager.set_context_index(0)  # Activate a context
 
 # ------------------------------------------------------------------------------
 # STEP 2: Initializing phantom creator manager and setting the informations about the global voxelized volume
-phantom_creator_manager.set_dimensions(200, 200, 200)
-phantom_creator_manager.set_element_sizes(0.25, 0.25, 0.25, 'mm')
-phantom_creator_manager.set_output('data/phantom_2')
-phantom_creator_manager.set_range_output('data/range_phantom_2')
-phantom_creator_manager.set_material('Air')
-phantom_creator_manager.set_data_type('MET_USHORT')
-phantom_creator_manager.initialize()
+volume_creator_manager.set_dimensions(200, 200, 200)
+volume_creator_manager.set_element_sizes(0.25, 0.25, 0.25, 'mm')
+volume_creator_manager.set_output('data/phantom_2')
+volume_creator_manager.set_range_output('data/range_phantom_2')
+volume_creator_manager.set_material('Air')
+volume_creator_manager.set_data_type('MET_USHORT')
+volume_creator_manager.initialize()
 
 # ------------------------------------------------------------------------------
 # STEP 3: Designing analytical volume(s)
@@ -38,7 +42,7 @@ cylinder.delete()
 
 # ------------------------------------------------------------------------------
 # STEP 4: Saving the final volume
-phantom_creator_manager.write()
+volume_creator_manager.write()
 
 # ------------------------------------------------------------------------------
 # STEP 5: Exit GGEMS safely

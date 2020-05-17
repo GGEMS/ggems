@@ -1,5 +1,5 @@
-#ifndef GUARD_GGEMS_GEOMETRY_GGEMSTUBE_HH
-#define GUARD_GGEMS_GEOMETRY_GGEMSTUBE_HH
+#ifndef GUARD_GGEMS_GEOMETRIES_GGEMSTUBE_HH
+#define GUARD_GGEMS_GEOMETRIES_GGEMSTUBE_HH
 
 /*!
   \file GGEMSTube.hh
@@ -13,13 +13,13 @@
   \date Monday January 13, 2020
 */
 
-#include "GGEMS/geometries/GGEMSSolidVolume.hh"
+#include "GGEMS/geometries/GGEMSVolume.hh"
 
 /*!
   \class GGEMSTube
-  \brief Class GGEMSTube inheriting from GGEMSVolumeSolid handling Tube solid
+  \brief Class GGEMSTube inheriting from GGEMSVolume handling Tube solid
 */
-class GGEMS_EXPORT GGEMSTube : public GGEMSSolidVolume
+class GGEMS_EXPORT GGEMSTube : public GGEMSVolume
 {
   public:
     /*!

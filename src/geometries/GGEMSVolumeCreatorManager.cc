@@ -1,7 +1,7 @@
 /*!
-  \file GGEMSPhantomCreatorManager.cc
+  \file GGEMSVolumeCreatorManager.cc
 
-  \brief Singleton class generating voxelized phantom from analytical volume
+  \brief Singleton class generating voxelized volume from analytical volume
 
   \author Julien BERT <julien.bert@univ-brest.fr>
   \author Didier BENOIT <didier.benoit@inserm.fr>
@@ -12,7 +12,7 @@
 
 #include <algorithm>
 
-#include "GGEMS/geometries/GGEMSPhantomCreatorManager.hh"
+#include "GGEMS/geometries/GGEMSVolumeCreatorManager.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
 #include "GGEMS/tools/GGEMSTools.hh"
 #include "GGEMS/tools/GGEMSSystemOfUnits.hh"
@@ -22,34 +22,33 @@
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSPhantomCreatorManager::GGEMSPhantomCreatorManager(void)
+GGEMSVolumeCreatorManager::GGEMSVolumeCreatorManager(void)
 : element_sizes_(GGfloat3{{0.0, 0.0, 0.0}}),
-  phantom_dimensions_(GGuint3{{0, 0, 0}}),
+  volume_dimensions_(GGuint3{{0, 0, 0}}),
   number_elements_(0),
   data_type_("MET_FLOAT"),
   material_("Air"),
   output_image_filename_(""),
   output_range_to_material_filename_(""),
-  voxelized_phantom_(nullptr),
-  opencl_manager_(GGEMSOpenCLManager::GetInstance())
+  voxelized_volume_(nullptr)
 {
-  GGcout("GGEMSPhantomCreatorManager", "GGEMSPhantomCreatorManager", 3) << "Allocation of Phantom Creator Manager singleton..." << GGendl;
+  GGcout("GGEMSVolumeCreatorManager", "GGEMSVolumeCreatorManager", 3) << "Allocation of Phantom Creator Manager singleton..." << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSPhantomCreatorManager::~GGEMSPhantomCreatorManager(void)
+GGEMSVolumeCreatorManager::~GGEMSVolumeCreatorManager(void)
 {
-  GGcout("GGEMSPhantomCreatorManager", "~GGEMSPhantomCreatorManager", 3) << "Deallocation of Phantom Creator Manager singleton..." << GGendl;
+  GGcout("GGEMSVolumeCreatorManager", "~GGEMSVolumeCreatorManager", 3) << "Deallocation of Phantom Creator Manager singleton..." << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSPhantomCreatorManager::SetElementSizes(GGfloat const& voxel_width, GGfloat const& voxel_height, GGfloat const& voxel_depth, char const* unit)
+void GGEMSVolumeCreatorManager::SetElementSizes(GGfloat const& voxel_width, GGfloat const& voxel_height, GGfloat const& voxel_depth, char const* unit)
 {
   element_sizes_.s[0] = GGEMSUnits::DistanceUnit(voxel_width, unit);
   element_sizes_.s[1] = GGEMSUnits::DistanceUnit(voxel_height, unit);
@@ -60,19 +59,19 @@ void GGEMSPhantomCreatorManager::SetElementSizes(GGfloat const& voxel_width, GGf
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSPhantomCreatorManager::SetPhantomDimensions(GGuint const& phantom_width, GGuint const& phantom_height, GGuint const& phantom_depth)
+void GGEMSVolumeCreatorManager::SetVolumeDimensions(GGuint const& volume_width, GGuint const& volume_height, GGuint const& volume_depth)
 {
-  phantom_dimensions_.s[0] = phantom_width;
-  phantom_dimensions_.s[1] = phantom_height;
-  phantom_dimensions_.s[2] = phantom_depth;
-  number_elements_ = phantom_width * phantom_height * phantom_depth;
+  volume_dimensions_.s[0] = volume_width;
+  volume_dimensions_.s[1] = volume_height;
+  volume_dimensions_.s[2] = volume_depth;
+  number_elements_ = volume_width * volume_height * volume_depth;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSPhantomCreatorManager::SetMaterial(char const* material)
+void GGEMSVolumeCreatorManager::SetMaterial(char const* material)
 {
   material_ = material;
 
@@ -84,7 +83,7 @@ void GGEMSPhantomCreatorManager::SetMaterial(char const* material)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSPhantomCreatorManager::SetDataType(std::string const& data_type)
+void GGEMSVolumeCreatorManager::SetDataType(std::string const& data_type)
 {
   data_type_ = data_type;
 
@@ -99,7 +98,7 @@ void GGEMSPhantomCreatorManager::SetDataType(std::string const& data_type)
     oss << "    - MET_INT" << std::endl;
     oss << "    - MET_UINT" << std::endl;
     oss << "    - MET_FLOAT" << std::endl;
-    GGEMSMisc::ThrowException("GGEMSPhantomCreatorManager", "SetDataType", oss.str());
+    GGEMSMisc::ThrowException("GGEMSVolumeCreatorManager", "SetDataType", oss.str());
   }
 }
 
@@ -107,16 +106,16 @@ void GGEMSPhantomCreatorManager::SetDataType(std::string const& data_type)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSPhantomCreatorManager::AddLabelAndMaterial(GGfloat const& label, std::string const& material)
+void GGEMSVolumeCreatorManager::AddLabelAndMaterial(GGfloat const& label, std::string const& material)
 {
-  GGcout("GGEMSPhantomCreatorManager", "AddLabelAndMaterial", 3) << "Adding new material and label..." << GGendl;
+  GGcout("GGEMSVolumeCreatorManager", "AddLabelAndMaterial", 3) << "Adding new material and label..." << GGendl;
 
   // Insert label and check if the label exists already
   auto const [iter, success] = label_to_material_.insert(std::make_pair(label, material));
   if (!success) {
     std::ostringstream oss(std::ostringstream::out);
     oss << "The label: " << iter->first << " already exists...";
-    GGEMSMisc::ThrowException("GGEMSPhantomCreatorManager", "AddLabelAndMaterial", oss.str());
+    GGEMSMisc::ThrowException("GGEMSVolumeCreatorManager", "AddLabelAndMaterial", oss.str());
   }
 }
 
@@ -124,7 +123,7 @@ void GGEMSPhantomCreatorManager::AddLabelAndMaterial(GGfloat const& label, std::
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSPhantomCreatorManager::SetOutputImageFilename(char const* output_image_filename)
+void GGEMSVolumeCreatorManager::SetOutputImageFilename(char const* output_image_filename)
 {
   output_image_filename_ = output_image_filename;
 }
@@ -133,7 +132,7 @@ void GGEMSPhantomCreatorManager::SetOutputImageFilename(char const* output_image
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSPhantomCreatorManager::SetRangeToMaterialDataFilename(char const* output_range_to_material_filename)
+void GGEMSVolumeCreatorManager::SetRangeToMaterialDataFilename(char const* output_range_to_material_filename)
 {
   output_range_to_material_filename_ = output_range_to_material_filename;
 
@@ -145,28 +144,28 @@ void GGEMSPhantomCreatorManager::SetRangeToMaterialDataFilename(char const* outp
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSPhantomCreatorManager::CheckParameters(void) const
+void GGEMSVolumeCreatorManager::CheckParameters(void) const
 {
-  GGcout("GGEMSPhantomCreatorManager", "CheckParameters", 3) << "Checking parameters for phantom creator manager..." << GGendl;
+  GGcout("GGEMSVolumeCreatorManager", "CheckParameters", 3) << "Checking parameters for phantom creator manager..." << GGendl;
 
   // Checking phantom dimensions
-  if (phantom_dimensions_.s[0] == 0 && phantom_dimensions_.s[1] == 0 && phantom_dimensions_.s[2] == 0) {
-    GGEMSMisc::ThrowException("GGEMSPhantomCreatorManager", "CheckParameters", "Phantom dimensions have to be > 0!!!");
+  if (volume_dimensions_.s[0] == 0 && volume_dimensions_.s[1] == 0 && volume_dimensions_.s[2] == 0) {
+    GGEMSMisc::ThrowException("GGEMSVolumeCreatorManager", "CheckParameters", "Phantom dimensions have to be > 0!!!");
   }
 
   // Checking size of voxels
   if (GGEMSMisc::IsEqual(element_sizes_.s[0], 0.0f) && GGEMSMisc::IsEqual(element_sizes_.s[1], 0.0f) && GGEMSMisc::IsEqual(element_sizes_.s[2], 0.0f)) {
-    GGEMSMisc::ThrowException("GGEMSPhantomCreatorManager", "CheckParameters", "Phantom voxel sizes have to be > 0.0!!!");
+    GGEMSMisc::ThrowException("GGEMSVolumeCreatorManager", "CheckParameters", "Phantom voxel sizes have to be > 0.0!!!");
     }
 
   // Checking output name
   if (output_image_filename_.empty()) {
-    GGEMSMisc::ThrowException("GGEMSPhantomCreatorManager", "CheckParameters", "A output image filename has to be done to phantom manager!!!");
+    GGEMSMisc::ThrowException("GGEMSVolumeCreatorManager", "CheckParameters", "A output image filename has to be done to phantom manager!!!");
   }
 
   // Checking range to material data name
   if (output_range_to_material_filename_.empty()) {
-    GGEMSMisc::ThrowException("GGEMSPhantomCreatorManager", "CheckParameters", "A output range to material data filename has to be done to phantom manager!!!");
+    GGEMSMisc::ThrowException("GGEMSVolumeCreatorManager", "CheckParameters", "A output range to material data filename has to be done to phantom manager!!!");
   }
 }
 
@@ -174,9 +173,9 @@ void GGEMSPhantomCreatorManager::CheckParameters(void) const
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSPhantomCreatorManager::Initialize(void)
+void GGEMSVolumeCreatorManager::Initialize(void)
 {
-  GGcout("GGEMSPhantomCreatorManager", "Initialize", 3) << "Initializing phantom creator manager..." << GGendl;
+  GGcout("GGEMSVolumeCreatorManager", "Initialize", 3) << "Initializing phantom creator manager..." << GGendl;
 
   // Check mandatory parameters
   CheckParameters();
@@ -194,7 +193,7 @@ void GGEMSPhantomCreatorManager::Initialize(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSPhantomCreatorManager::Write(void)
+void GGEMSVolumeCreatorManager::Write(void)
 {
   // Writing output image
   WriteMHDImage();
@@ -207,13 +206,13 @@ void GGEMSPhantomCreatorManager::Write(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSPhantomCreatorManager::WriteRangeToMaterialFile(void)
+void GGEMSVolumeCreatorManager::WriteRangeToMaterialFile(void)
 {
-  GGcout("GGEMSPhantomCreatorManager", "WriteRangeToMaterialFile", 3) << "Writing range to material text file..." << GGendl;
+  GGcout("GGEMSVolumeCreatorManager", "WriteRangeToMaterialFile", 3) << "Writing range to material text file..." << GGendl;
 
-  GGcout("GGEMSPhantomCreatorManager", "WriteRangeToMaterialFile", 0) << "List of label and material:" << GGendl;
+  GGcout("GGEMSVolumeCreatorManager", "WriteRangeToMaterialFile", 0) << "List of label and material:" << GGendl;
   for(auto&& i : label_to_material_) {
-    GGcout("GGEMSPhantomCreatorManager", "WriteRangeToMaterialFile", 0) << "    * Material: " << i.second << ", label: " << i.first << GGendl;
+    GGcout("GGEMSVolumeCreatorManager", "WriteRangeToMaterialFile", 0) << "    * Material: " << i.second << ", label: " << i.first << GGendl;
   }
 
   // Write file
@@ -228,96 +227,96 @@ void GGEMSPhantomCreatorManager::WriteRangeToMaterialFile(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSPhantomCreatorManager::WriteMHDImage(void) const
+void GGEMSVolumeCreatorManager::WriteMHDImage(void) const
 {
-  GGcout("GGEMSPhantomCreatorManager", "WriteMHDImage", 3) << "Writing MHD output file..." << GGendl;
+  GGcout("GGEMSVolumeCreatorManager", "WriteMHDImage", 3) << "Writing MHD output file..." << GGendl;
 
   // Write MHD file
   GGEMSMHDImage mhdImage;
   mhdImage.SetBaseName(output_image_filename_);
   mhdImage.SetDataType(data_type_);
-  mhdImage.SetDimensions(phantom_dimensions_);
+  mhdImage.SetDimensions(volume_dimensions_);
   mhdImage.SetElementSizes(element_sizes_);
-  mhdImage.Write(voxelized_phantom_);
+  mhdImage.Write(voxelized_volume_);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSPhantomCreatorManager* get_instance_phantom_creator_manager(void)
+GGEMSVolumeCreatorManager* get_instance_volume_creator_manager(void)
 {
-  return &GGEMSPhantomCreatorManager::GetInstance();
+  return &GGEMSVolumeCreatorManager::GetInstance();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_phantom_dimension_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager, GGuint const phantom_width, GGuint const phantom_height, GGuint const phantom_depth)
+void set_volume_dimension_volume_creator_manager(GGEMSVolumeCreatorManager* volume_creator_manager, GGuint const volume_width, GGuint const volume_height, GGuint const volume_depth)
 {
-  phantom_creator_manager->SetPhantomDimensions(phantom_width, phantom_height, phantom_depth);
+  volume_creator_manager->SetVolumeDimensions(volume_width, volume_height, volume_depth);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_element_sizes_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager, GGfloat const voxel_width, GGfloat const voxel_height, GGfloat const voxel_depth, char const* unit)
+void set_element_sizes_volume_creator_manager(GGEMSVolumeCreatorManager* volume_creator_manager, GGfloat const voxel_width, GGfloat const voxel_height, GGfloat const voxel_depth, char const* unit)
 {
-  phantom_creator_manager->SetElementSizes(voxel_width, voxel_height, voxel_depth, unit);
+  volume_creator_manager->SetElementSizes(voxel_width, voxel_height, voxel_depth, unit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_output_image_filename_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager, char const* output_image_filename)
+void set_output_image_filename_volume_creator_manager(GGEMSVolumeCreatorManager* volume_creator_manager, char const* output_image_filename)
 {
-  phantom_creator_manager->SetOutputImageFilename(output_image_filename);
+  volume_creator_manager->SetOutputImageFilename(output_image_filename);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_output_range_to_material_filename_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager,char const* output_range_to_material_filename)
+void set_output_range_to_material_filename_volume_creator_manager(GGEMSVolumeCreatorManager* volume_creator_manager,char const* output_range_to_material_filename)
 {
-  phantom_creator_manager->SetRangeToMaterialDataFilename(output_range_to_material_filename);
+  volume_creator_manager->SetRangeToMaterialDataFilename(output_range_to_material_filename);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void initialize_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager)
+void initialize_volume_creator_manager(GGEMSVolumeCreatorManager* volume_creator_manager)
 {
-  phantom_creator_manager->Initialize();
+  volume_creator_manager->Initialize();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void write_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager)
+void write_volume_creator_manager(GGEMSVolumeCreatorManager* volume_creator_manager)
 {
-  phantom_creator_manager->Write();
+  volume_creator_manager->Write();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_material_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager, char const* material)
+void set_material_volume_creator_manager(GGEMSVolumeCreatorManager* volume_creator_manager, char const* material)
 {
-  phantom_creator_manager->SetMaterial(material);
+  volume_creator_manager->SetMaterial(material);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_data_type_phantom_creator_manager(GGEMSPhantomCreatorManager* phantom_creator_manager, char const* data_type)
+void set_data_type_volume_creator_manager(GGEMSVolumeCreatorManager* volume_creator_manager, char const* data_type)
 {
-  phantom_creator_manager->SetDataType(data_type);
+  volume_creator_manager->SetDataType(data_type);
 }

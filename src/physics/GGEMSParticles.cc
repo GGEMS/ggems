@@ -12,6 +12,7 @@
 
 #include "GGEMS/physics/GGEMSParticles.hh"
 #include "GGEMS/sources/GGEMSSourceManager.hh"
+#include "GGEMS/tools/GGEMSRAMManager.hh"
 #include "GGEMS/physics/GGEMSPrimaryParticlesStack.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -19,8 +20,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 GGEMSParticles::GGEMSParticles(void)
-: primary_particles_(nullptr),
-  opencl_manager_(GGEMSOpenCLManager::GetInstance())
+: primary_particles_(nullptr)
 {
   GGcout("GGEMSParticles", "GGEMSParticles", 3) << "Allocation of GGEMSParticles..." << GGendl;
 }
@@ -54,8 +54,13 @@ void GGEMSParticles::AllocatePrimaryParticles(void)
 {
   GGcout("GGEMSParticles", "AllocatePrimaryParticles", 1) << "Allocation of primary particles..." << GGendl;
 
+  // Get the OpenCL manager
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+
+  // Get the RAM manager
+  GGEMSRAMManager& ram_manager = GGEMSRAMManager::GetInstance();
+
   // Allocation of memory on OpenCL device
-  primary_particles_ = opencl_manager_.Allocate(nullptr, sizeof(GGEMSPrimaryParticles), CL_MEM_READ_WRITE);
-  opencl_manager_.AddRAMMemory(sizeof(GGEMSPrimaryParticles));
-  GGEMSSourceManager::GetInstance().AddSourceRAM(sizeof(GGEMSPrimaryParticles));
+  primary_particles_ = opencl_manager.Allocate(nullptr, sizeof(GGEMSPrimaryParticles), CL_MEM_READ_WRITE);
+  ram_manager.AddParticleRAMMemory(sizeof(GGEMSPrimaryParticles));
 }

@@ -31,4 +31,16 @@
 
 - Licence pour GGEMS
 
+- Généraliser le OpenCL manager à plusieurs contexts (pour la reconstruction CT plus tard)
+
 - Enlever les singletons des membres privés
+
+- Complétion automatique python
+
+- Faire des exemples et benchmarks
+
+- Faire une class singleton qui gère la mémoire RAM et diviser la gestion de la mémoire en section:
+  * particules
+  * navigateur : fantome + detecteur
+  * source
+  * etc...

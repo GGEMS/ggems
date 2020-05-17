@@ -14,7 +14,7 @@
 #include <sstream>
 
 #include "GGEMS/global/GGEMSOpenCLManager.hh"
-
+#include "GGEMS/tools/GGEMSRAMManager.hh"
 #include "GGEMS/tools/GGEMSTools.hh"
 #include "GGEMS/tools/GGEMSChrono.hh"
 
@@ -55,8 +55,7 @@ GGEMSOpenCLManager::GGEMSOpenCLManager(void)
   queue_act_(nullptr),
   events_(0),
   event_act_(nullptr),
-  kernels_(0),
-  used_ram_(0)
+  kernels_(0)
 {
   GGcout("GGEMSOpenCLManager", "GGEMSOpenCLManager", 3) << "Allocation of GGEMS OpenCL manager..." << GGendl;
 
@@ -156,9 +155,6 @@ GGEMSOpenCLManager::GGEMSOpenCLManager(void)
 
   // Creating the events for each context
   CreateEvent();
-
-  // Initialization of the RAM manager
-  InitializeRAMManager();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -229,9 +225,6 @@ void GGEMSOpenCLManager::Clean(void)
   // Deleting kernel(s)
   GGcout("GGEMSOpenCLManager", "Clean", 1) << "Deleting OpenCL kernel(s)..." << GGendl;
   kernels_.clear();
-
-  // Freeing memory of RAM manager
-  used_ram_.clear();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -582,89 +575,6 @@ std::shared_ptr<cl::Kernel> GGEMSOpenCLManager::CompileKernel(std::string const&
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSOpenCLManager::InitializeRAMManager(void)
-{
-  GGcout("GGEMSOpenCLManager", "InitializeRAMManager", 3) << "Initializing a RAM handler for each context..." << GGendl;
-
-  // For each context we create a RAM handler
-  used_ram_.resize(contexts_.size());
-  for (auto&& i : used_ram_) i = 0;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void GGEMSOpenCLManager::PrintRAMStatus(void) const
-{
-  GGcout("GGEMSOpenCLManager", "PrintRAMStatus", 3) << "Printing infos about RAM memory on OpenCL context(s)..." << GGendl;
-  GGcout("GGEMSOpenCLManager", "PrintRAMStatus", 0) << "---------------------------" << GGendl;
-
-  // Loop over the contexts
-  for (std::size_t i = 0; i < contexts_.size(); ++i) {
-    // Get the max. RAM memory by context
-    GGulong const max_RAM = device_global_mem_size_[i];
-    GGfloat const percent_RAM = static_cast<GGfloat>(used_ram_[i]) * 100.0f / static_cast<GGfloat>(max_RAM);
-    GGcout("GGEMSOpenCLManager", "PrintRAMStatus", 0) << "Context " << i << ": " << used_ram_[i] << " / " << max_RAM << " bytes -> " << percent_RAM << " % used" << GGendl;
-  }
-  GGcout("GGEMSOpenCLManager", "PrintRAMStatus", 0) << "---------------------------" << GGendl;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void GGEMSOpenCLManager::CheckRAMMemory(std::size_t const& size)
-{
-  GGcout("GGEMSOpenCLManager","CheckRAMMemory", 3) << "Checking RAM memory usage..." << GGendl;
-
-  // Getting memory infos
-  GGulong const max_RAM = device_global_mem_size_[context_index_];
-  GGdouble const percent_RAM = static_cast<GGdouble>(used_ram_[context_index_] + size) * 100.0 / static_cast<GGdouble>(max_RAM);
-
-  if (percent_RAM >= 80.0f && percent_RAM < 95.0f) {
-    GGwarn("GGEMSOpenCLManager", "CheckRAMMemory", 0) << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << GGendl;
-    GGwarn("GGEMSOpenCLManager", "CheckRAMMemory", 0) << "!!!             MEMORY WARNING             !!!" << GGendl;
-    GGwarn("GGEMSOpenCLManager", "CheckRAMMemory", 0) << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << GGendl;
-    GGwarn("GGEMSOpenCLManager", "CheckRAMMemory", 0) << "RAM allocation (" << percent_RAM << "%) is superior to 80%, the simulation will be automatically killed whether RAM allocation is superior to 95%" << GGendl;
-  }
-  else if (percent_RAM >= 95.0f) {
-    GGcerr("GGEMSOpenCLManager", "CheckRAMMemory", 0) << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << GGendl;
-    GGcerr("GGEMSOpenCLManager", "CheckRAMMemory", 0) << "!!!             MEMORY ERROR             !!!" << GGendl;
-    GGcerr("GGEMSOpenCLManager", "CheckRAMMemory", 0) << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << GGendl;
-    GGcerr("GGEMSOpenCLManager", "CheckRAMMemory", 0) << "RAM allocation (" << percent_RAM << "%) is superior to 95%, the simulation is killed!!!" << GGendl;
-    GGEMSMisc::ThrowException("GGEMSOpenCLManager", "CheckRAMMemory", "Not enough RAM memory on OpenCL device!!!");
-  }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void GGEMSOpenCLManager::AddRAMMemory(GGulong const& size)
-{
-  GGcout("GGEMSOpenCLManager","AddRAMMemory", 3) << "Adding RAM memory on OpenCL activated context..." << GGendl;
-
-  // Increment size
-  used_ram_[context_index_] += size;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void GGEMSOpenCLManager::SubRAMMemory(GGulong const& size)
-{
-  GGcout("GGEMSOpenCLManager","SubRAMMemory", 3) << "Substracting RAM memory on OpenCL activated context..." << GGendl;
-
-  // Decrement size
-  used_ram_[context_index_] -= size;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
 void GGEMSOpenCLManager::DisplayElapsedTimeInKernel(std::string const& kernel_name) const
 {
   GGcout("GGEMSOpenCLManager","DisplayElapsedTimeInKernel", 3) << "Displaying elapsed time in the last OpenCL kernel..." << GGendl;
@@ -743,7 +653,9 @@ std::unique_ptr<cl::Buffer> GGEMSOpenCLManager::Allocate(void* host_ptr, std::si
 {
   GGcout("GGEMSOpenCLManager","Allocate", 3) << "Allocating memory on OpenCL device memory..." << GGendl;
 
-  CheckRAMMemory(size);
+  // Get the RAM manager and check memory
+  GGEMSRAMManager& ram_manager = GGEMSRAMManager::GetInstance();
+  ram_manager.CheckRAMMemory(size);
 
   GGint error = 0;
   std::unique_ptr<cl::Buffer> buffer(new cl::Buffer(*(context_act_.get()), flags, size, host_ptr, &error));
@@ -1158,15 +1070,6 @@ void print_infos_opencl_manager(GGEMSOpenCLManager* opencl_manager)
   opencl_manager->PrintContextInfos();
   opencl_manager->PrintCommandQueueInfos();
   opencl_manager->PrintActivatedContextInfos();
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void print_RAM_ggems_opencl_manager(GGEMSOpenCLManager* opencl_manager)
-{
-  opencl_manager->PrintRAMStatus();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

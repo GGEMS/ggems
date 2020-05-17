@@ -27,8 +27,9 @@
 #include "GGEMS/physics/GGEMSProcessesManager.hh"
 #include "GGEMS/physics/GGEMSRangeCutsManager.hh"
 #include "GGEMS/sources/GGEMSSourceManager.hh"
-#include "GGEMS/navigators/GGEMSPhantomNavigatorManager.hh"
+#include "GGEMS/navigators/GGEMSNavigatorManager.hh"
 #include "GGEMS/tools/GGEMSChrono.hh"
+#include "GGEMS/tools/GGEMSRAMManager.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -194,16 +195,16 @@ void GGEMSManager::Initialize(void)
 
   // Getting the GGEMS singletons
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
-  GGEMSMaterialsDatabaseManager& material_manager = GGEMSMaterialsDatabaseManager::GetInstance();
+  GGEMSMaterialsDatabaseManager& material_database_manager = GGEMSMaterialsDatabaseManager::GetInstance();
   GGEMSSourceManager& source_manager = GGEMSSourceManager::GetInstance();
-  GGEMSPhantomNavigatorManager& phantom_navigator_manager = GGEMSPhantomNavigatorManager::GetInstance();
+  GGEMSNavigatorManager& navigator_manager = GGEMSNavigatorManager::GetInstance();
   GGEMSProcessesManager& processes_manager = GGEMSProcessesManager::GetInstance();
   GGEMSRangeCutsManager& range_cuts_manager = GGEMSRangeCutsManager::GetInstance();
+  GGEMSRAMManager& ram_manager = GGEMSRAMManager::GetInstance();
 
   // Checking if a context is activated
   if (!opencl_manager.IsReady()) {
-    GGEMSMisc::ThrowException("GGEMSManager", "Initialize",
-      "OpenCL Manager is not ready, you have to choose a context!!!");
+    GGEMSMisc::ThrowException("GGEMSManager", "Initialize", "OpenCL Manager is not ready, you have to choose a context!!!");
   }
 
   // Get the start time
@@ -221,13 +222,13 @@ void GGEMSManager::Initialize(void)
   GGcout("GGEMSManager", "Initialize", 0) << "C++ Pseudo-random number generator seeded OK" << GGendl;
 
   // Checking if material manager is ready
-  if (!material_manager.IsReady()) GGEMSMisc::ThrowException("GGEMSManager", "Initialize", "Materials are not loaded in GGEMS!!!");
+  if (!material_database_manager.IsReady()) GGEMSMisc::ThrowException("GGEMSManager", "Initialize", "Materials are not loaded in GGEMS!!!");
 
   // Initialization of the source
   source_manager.Initialize();
 
   // Initialization of the phantom(s)
-  phantom_navigator_manager.Initialize();
+  navigator_manager.Initialize();
 
   // Printing infos about OpenCL
   if (is_opencl_verbose_) {
@@ -240,13 +241,13 @@ void GGEMSManager::Initialize(void)
   }
 
   // Printing infos about material database
-  if (is_material_database_verbose_) material_manager.PrintAvailableMaterials();
+  if (is_material_database_verbose_) material_database_manager.PrintAvailableMaterials();
 
   // Printing infos about source(s)
   if (is_source_verbose_) source_manager.PrintInfos();
 
-  // Printing infos about phantom(s)
-  if (is_phantom_verbose_) phantom_navigator_manager.PrintInfos();
+  // Printing infos about navigator(s)
+  if (is_phantom_verbose_) navigator_manager.PrintInfos();
 
   // Printing infos about processe(s)
   if (is_processes_verbose_) {
@@ -258,16 +259,10 @@ void GGEMSManager::Initialize(void)
   if (is_range_cuts_verbose_) range_cuts_manager.PrintInfos();
 
   // Printing infos about random in GGEMS
-  if (is_random_verbose_) GGcout("GGEMSManager", "Initialize", 0) << "Seed: " << seed_ << GGendl;
+  if (is_random_verbose_) GGcout("GGEMSManager", "Initialize", 0) << "GGEMS Seed: " << seed_ << GGendl;
 
   // Printing infos about RAM
-  if (is_memory_ram_verbose_) {
-    GGcout("GGEMSManager", "Initialize", 0) << "RAM Memory usage:" << GGendl;
-    phantom_navigator_manager.PrintAllocatedRAM();
-    source_manager.PrintAllocatedRAM();
-    processes_manager.PrintAllocatedRAM();
-    opencl_manager.PrintRAMStatus();
-  }
+  if (is_memory_ram_verbose_) ram_manager.PrintRAMStatus();
 
   // Get the end time
   ChronoTime end_time = GGEMSChrono::Now();
@@ -286,11 +281,14 @@ void GGEMSManager::Run()
 {
   GGcout("GGEMSManager", "Run", 0) << "GGEMS simulation started" << GGendl;
 
+  // Get singletons
+  GGEMSSourceManager& source_manager = GGEMSSourceManager::GetInstance();
+  GGEMSNavigatorManager& navigator_manager = GGEMSNavigatorManager::GetInstance();
+
   // Get the start time
   ChronoTime start_time = GGEMSChrono::Now();
 
   // Loop over the number of sources
-  GGEMSSourceManager& source_manager = GGEMSSourceManager::GetInstance();
   for (std::size_t j = 0; j < source_manager.GetNumberOfSources(); ++j) {
     // Loop over the number of batch for each sources
     for (std::size_t i = 0; i < source_manager.GetNumberOfBatchs(j); ++i) {
@@ -298,9 +296,12 @@ void GGEMSManager::Run()
 
       // Getting the number of particles
       GGulong const kNumberOfParticles = source_manager.GetNumberOfParticlesInBatch(j, i);
-      // Generating primaries from source
+      // Step 1: Generating primaries from source
       GGcout("GGEMSManager", "Run", 1) << "      + Generating " << kNumberOfParticles << " particles..." << GGendl;
       source_manager.GetPrimaries(j, kNumberOfParticles);
+
+      // Step 2: Find closest navigator (phantom and detector) before track to in (TTI) operation
+      navigator_manager.FindClosestNavigator();
     }
   }
 

@@ -22,12 +22,16 @@ material_list = ('Uranium', 'Water', 'RibBone')
 process_list = ('Compton', 'Photoelectric', 'Rayleigh')
 
 # ------------------------------------------------------------------------------
+# STEP 0: Level of verbosity during computation
+GGEMSVerbosity(0)
+
+# ------------------------------------------------------------------------------
 # STEP 1: Choosing an OpenCL context
 opencl_manager.set_context_index(0)
 
 # ------------------------------------------------------------------------------
 # STEP 2: Setting GGEMS materials
-materials_manager.set_materials('data/materials.txt')
+materials_database_manager.set_materials('data/materials.txt')
 
 # ------------------------------------------------------------------------------
 # STEP 3: Add materials and initialize them
@@ -37,8 +41,6 @@ for mat_id in material_list:
 
 # Initializing materials, and compute some parameters for each material
 materials.initialize()
-# Priting all informations (by default distance cuts are 1 um)
-# materials.print_material_properties()
 
 # Get some useful commands to get infos about material
 for mat_id in material_list:
@@ -49,9 +51,9 @@ for mat_id in material_list:
   atomic_number_density = materials.get_atomic_number_density(mat_id)
   print('Material:', mat_id)
   print('    Density:', density, ' g.cm-3')
-  print('    Photon energy cut (for 2 mm distance):', photon_energy_cut, 'keV')
-  print('    Electron energy cut (for 2 mm distance):', electron_energy_cut, 'keV')
-  print('    Positron energy cut (for 2 mm distance):', positron_energy_cut, 'keV')
+  print('    Photon energy cut (for 1 mm distance):', photon_energy_cut, 'keV')
+  print('    Electron energy cut (for 1 mm distance):', electron_energy_cut, 'keV')
+  print('    Positron energy cut (for 1 mm distance):', positron_energy_cut, 'keV')
   print('    Atomic number density:', atomic_number_density, 'atoms.cm-3')
 
 #-------------------------------------------------------------------------------
