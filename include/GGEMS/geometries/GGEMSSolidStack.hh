@@ -1,10 +1,10 @@
-#ifndef GUARD_GGEMS_NAVIGATORS_GGEMSSOLIDPHANTOMSTACK_HH
-#define GUARD_GGEMS_NAVIGATORS_GGEMSSOLIDPHANTOMSTACK_HH
+#ifndef GUARD_GGEMS_GEOMETRIES_GGEMSSOLIDSTACK_HH
+#define GUARD_GGEMS_GEOMETRIES_GGEMSSOLIDSTACK_HH
 
 /*!
-  \file GGEMSSolidPhantomStack.hh
+  \file GGEMSSolidStack.hh
 
-  \brief Structure storing the stack of data for solid phantom
+  \brief Structure storing the stack of data for voxelized and analytical solid
 
   \author Julien BERT <julien.bert@univ-brest.fr>
   \author Didier BENOIT <didier.benoit@inserm.fr>
@@ -17,16 +17,16 @@
 #include "GGEMS/tools/GGEMSTypes.hh"
 
 /*!
-  \struct GGEMSSolidPhantomData_t
-  \brief Structure storing the stack of data for solid phantom
+  \struct GGEMSVoxelizedSolidData_t
+  \brief Structure storing the stack of data for voxelized solid
 */
 #ifdef OPENCL_COMPILER
-typedef struct __attribute__((aligned (1))) GGEMSSolidPhantomData_t
+typedef struct __attribute__((aligned (1))) GGEMSVoxelizedSolidData_t
 #else
 #ifdef _MSC_VER
 #pragma pack(push, 1)
 #endif
-typedef struct PACKED GGEMSSolidPhantomData_t
+typedef struct PACKED GGEMSVoxelizedSolidData_t
 #endif
 {
   GGushort3 number_of_voxels_xyz_; /*!< Number of voxel in X, Y and Z [0, 65535] */
@@ -35,11 +35,11 @@ typedef struct PACKED GGEMSSolidPhantomData_t
   GGdouble3 offsets_xyz_; /*!< Offset of phantom in X, Y and Z */
   GGdouble3 border_min_xyz_; /*!< Min. of border in X, Y and Z */
   GGdouble3 border_max_xyz_; /*!< Max. of border in X, Y and Z */
-} GGEMSSolidPhantomData; /*!< Using C convention name of struct to C++ (_t deletion) */
+} GGEMSVoxelizedSolidData; /*!< Using C convention name of struct to C++ (_t deletion) */
 #ifndef OPENCL_COMPILER
 #ifdef _MSC_VER
 #pragma pack(pop)
 #endif
 #endif
 
-#endif // GUARD_GGEMS_NAVIGATORS_GGEMSSOLIDPHANTOMSTACK_HH
+#endif // GUARD_GGEMS_GEOMETRIES_GGEMSSOLIDSTACK_HH

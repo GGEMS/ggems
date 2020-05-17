@@ -85,7 +85,6 @@ class GGEMS_EXPORT GGEMSParticles
 
   private:
     std::shared_ptr<cl::Buffer> primary_particles_; /*!< Pointer storing info about primary particles in batch on OpenCL device */
-    GGEMSOpenCLManager& opencl_manager_; /*!< Reference to OpenCL manager singleton */
 };
 
 #endif // End of GUARD_GGEMS_PHYSICS_GGEMSPARTICLES_HH

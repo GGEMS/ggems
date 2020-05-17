@@ -24,7 +24,6 @@
 
 GGEMSSourceManager::GGEMSSourceManager(void)
 : sources_(0),
-  allocated_RAM_for_sources_(0),
   particles_(nullptr),
   pseudo_random_generator_(nullptr)
 {
@@ -76,27 +75,14 @@ void GGEMSSourceManager::PrintInfos(void) const
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSSourceManager::AddSourceRAM(GGulong const& size)
-{
-  allocated_RAM_for_sources_ += size;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void GGEMSSourceManager::PrintAllocatedRAM(void) const
-{
-  GGcout("GGEMSSourceManager", "PrintAllocatedRAM", 0) << "Allocated memory for source: " << allocated_RAM_for_sources_ << " bytes" << GGendl;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
 void GGEMSSourceManager::Initialize(void) const
 {
   GGcout("GGEMSSourceManager", "Initialize", 3) << "Initializing the GGEMS source(s)..." << GGendl;
+
+  // Checking number of source, if 0 kill the simulation
+  if (sources_.empty()) {
+    GGEMSMisc::ThrowException("GGEMSSourceManager", "Initialize", "You have to define a source before to run GGEMS!!!");
+  }
 
   // Initialization of particle stack and random stack
   particles_->Initialize();

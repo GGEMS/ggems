@@ -91,7 +91,6 @@ class GGEMS_EXPORT GGEMSPseudoRandomGenerator
 
   private:
     std::shared_ptr<cl::Buffer> pseudo_random_numbers_; /*!< Pointer storing the buffer about random numbers */
-    GGEMSOpenCLManager& opencl_manager_; /*!< Reference to OpenCL manager singleton */
 };
 
 #endif // End of GUARD_GGEMS_RANDOMS_PSEUDO_RANDOM_GENERATOR_HH

@@ -1,8 +1,8 @@
-#ifndef GUARD_GGEMS_GEOMETRY_GGEMSVOLUMESOLID_HH
-#define GUARD_GGEMS_GEOMETRY_GGEMSVOLUMESOLID_HH
+#ifndef GUARD_GGEMS_GEOMETRIES_GGEMSVOLUME_HH
+#define GUARD_GGEMS_GEOMETRIES_GGEMSVOLUME_HH
 
 /*!
-  \file GGEMSSolidVolume.hh
+  \file GGEMSVolume.hh
 
   \brief Mother class handle solid volume
 
@@ -13,52 +13,52 @@
   \date Monday January 13, 2020
 */
 
-#include "GGEMS/geometries/GGEMSPhantomCreatorManager.hh"
+#include "GGEMS/geometries/GGEMSVolumeCreatorManager.hh"
 
 /*!
-  \class GGEMSSolidVolume
-  \brief Mother class handle solid volume
+  \class GGEMSVolume
+  \brief Mother class handle volume
 */
-class GGEMS_EXPORT GGEMSSolidVolume
+class GGEMS_EXPORT GGEMSVolume
 {
   public:
     /*!
-      \brief GGEMSSolidVolume constructor
+      \brief GGEMSVolume constructor
     */
-    GGEMSSolidVolume(void);
+    GGEMSVolume(void);
 
     /*!
-      \brief GGEMSSolidVolume destructor
+      \brief GGEMSVolume destructor
     */
-    virtual ~GGEMSSolidVolume(void);
+    virtual ~GGEMSVolume(void);
 
     /*!
-      \fn GGEMSSolidVolume(GGEMSSolidVolume const& solid_volume) = delete
-      \param solid_volume - reference on the volume solid
+      \fn GGEMSVolume(GGEMSVolume const& volume) = delete
+      \param volume - reference on the volume
       \brief Avoid copy of the class by reference
     */
-    GGEMSSolidVolume(GGEMSSolidVolume const& solid_volume) = delete;
+    GGEMSVolume(GGEMSVolume const& volume) = delete;
 
     /*!
-      \fn GGEMSSolidVolume& operator=(GGEMSSolidVolume const& solid_volume) = delete
-      \param solid_volume - reference on the volume solid
+      \fn GGEMSVolume& operator=(GGEMSVolume const& volume) = delete
+      \param volume - reference on the volume
       \brief Avoid assignement of the class by reference
     */
-    GGEMSSolidVolume& operator=(GGEMSSolidVolume const& solid_volume) = delete;
+    GGEMSVolume& operator=(GGEMSVolume const& volume) = delete;
 
     /*!
-      \fn GGEMSSolidVolume(GGEMSSolidVolume const&& solid_volume) = delete
-      \param solid_volume - rvalue reference on the volume solid
+      \fn GGEMSVolume(GGEMSVolume const&& volume) = delete
+      \param volume - rvalue reference on the volume
       \brief Avoid copy of the class by rvalue reference
     */
-    GGEMSSolidVolume(GGEMSSolidVolume const&& solid_volume) = delete;
+    GGEMSVolume(GGEMSVolume const&& volume) = delete;
 
     /*!
-      \fn GGEMSSolidVolume& operator=(GGEMSSolidVolume const&& solid_volume) = delete
-      \param solid_volume - rvalue reference on the volume solid
+      \fn GGEMSVolume& operator=(GGEMSVolume const&& volume) = delete
+      \param volume - rvalue reference on the volume
       \brief Avoid copy of the class by rvalue reference
     */
-    GGEMSSolidVolume& operator=(GGEMSSolidVolume const&& solid_volume) = delete;
+    GGEMSVolume& operator=(GGEMSVolume const&& volume) = delete;
 
     /*!
       \fn void SetLabelValue(GGfloat const& label_value)
@@ -107,11 +107,9 @@ class GGEMS_EXPORT GGEMSSolidVolume
     virtual void CheckParameters(void) const = 0;
 
   protected:
-    GGfloat label_value_; /*!< Value of label in solid volume */
-    GGfloat3 positions_; /*!< Position of solid volume */
-    std::shared_ptr<cl::Kernel> kernel_draw_solid_; /*!< Kernel drawing solid using OpenCL */
-    GGEMSOpenCLManager& opencl_manager_; /*!< Reference to opencl manager singleton */
-    GGEMSPhantomCreatorManager& phantom_creator_manager_; /*!< Reference to phantom creator manager */
+    GGfloat label_value_; /*!< Value of label in volume */
+    GGfloat3 positions_; /*!< Position of volume */
+    std::shared_ptr<cl::Kernel> kernel_draw_volume_; /*!< Kernel drawing solid using OpenCL */
 };
 
-#endif // End of GUARD_GGEMS_GEOMETRY_GGEMSVOLUMESOLID_HH
+#endif // End of GUARD_GGEMS_GEOMETRIES_GGEMSVOLUME_HH

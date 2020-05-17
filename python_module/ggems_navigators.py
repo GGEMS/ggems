@@ -1,19 +1,5 @@
 from ggems_lib import *
 
-class GGEMSPhantomNavigatorManager(object):
-    """Class managing phantom navigator in GGEMS
-    """
-    def __init__(self):
-        ggems_lib.get_instance_ggems_phantom_navigator_manager.restype = ctypes.c_void_p
-
-        ggems_lib.print_infos_ggems_phantom_navigator_manager.argtypes = [ctypes.c_void_p]
-        ggems_lib.print_infos_ggems_phantom_navigator_manager.restype = ctypes.c_void_p
-
-        self.obj = ggems_lib.get_instance_ggems_phantom_navigator_manager()
-
-    def print_infos(self):
-        ggems_lib.print_infos_ggems_phantom_navigator_manager(self.obj)
-
 
 class GGEMSVoxelizedPhantomNavigatorImagery(object):
     """Class for the voxelized phantom navigator for imagery application

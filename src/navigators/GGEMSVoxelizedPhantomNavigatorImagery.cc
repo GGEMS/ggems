@@ -10,17 +10,16 @@
   \date Tuesday February 11, 2020
 */
 
-#include "GGEMS/navigators/GGEMSPhantomNavigatorManager.hh"
-
+#include "GGEMS/navigators/GGEMSNavigatorManager.hh"
 #include "GGEMS/navigators/GGEMSVoxelizedPhantomNavigatorImagery.hh"
-#include "GGEMS/navigators/GGEMSSolidPhantom.hh"
+#include "GGEMS/geometries/GGEMSSolid.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
 GGEMSVoxelizedPhantomNavigatorImagery::GGEMSVoxelizedPhantomNavigatorImagery(void)
-: GGEMSPhantomNavigator(this)
+: GGEMSNavigator(this)
 {
   GGcout("GGEMSVoxelizedPhantomNavigatorImagery", "GGEMSVoxelizedPhantomNavigatorImagery", 3) << "Allocation of GGEMSVoxelizedPhantomNavigatorImagery..." << GGendl;
 }
@@ -43,7 +42,7 @@ void GGEMSVoxelizedPhantomNavigatorImagery::Initialize(void)
   GGcout("GGEMSVoxelizedPhantomNavigatorImagery", "Initialize", 3) << "Initializing the voxelized phantom navigator..." << GGendl;
 
   // Initialize the phantom navigator
-  GGEMSPhantomNavigator::Initialize();
+  GGEMSNavigator::Initialize();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -56,14 +55,14 @@ void GGEMSVoxelizedPhantomNavigatorImagery::PrintInfos(void) const
   GGcout("GGEMSVoxelizedPhantomNavigatorImagery", "PrintInfos", 0) << GGendl;
   GGcout("GGEMSVoxelizedPhantomNavigatorImagery", "PrintInfos", 0) << "GGEMSVoxelizedPhantomNavigatorImagery Infos: " << GGendl;
   GGcout("GGEMSVoxelizedPhantomNavigatorImagery", "PrintInfos", 0) << "--------------------------------------------" << GGendl;
-  GGcout("GGEMSVoxelizedPhantomNavigatorImagery", "PrintInfos", 0) << "*Phantom navigator name: " << phantom_navigator_name_ << GGendl;
+  GGcout("GGEMSVoxelizedPhantomNavigatorImagery", "PrintInfos", 0) << "*Phantom navigator name: " << navigator_name_ << GGendl;
   GGcout("GGEMSVoxelizedPhantomNavigatorImagery", "PrintInfos", 0) << "*Phantom header filename: " << phantom_mhd_header_filename_ << GGendl;
   GGcout("GGEMSVoxelizedPhantomNavigatorImagery", "PrintInfos", 0) << "*Range label to material filename: " << range_data_filename_ << GGendl;
   GGcout("GGEMSVoxelizedPhantomNavigatorImagery", "PrintInfos", 0) << "*Geometry tolerance: " << geometry_tolerance_/GGEMSUnits::mm << " mm" << GGendl;
   GGcout("GGEMSVoxelizedPhantomNavigatorImagery", "PrintInfos", 0) << GGendl;
 
-  // Printing infos about GGEMSPhantomNavigator
-  GGEMSPhantomNavigator::PrintInfos();
+  // Printing infos about GGEMSNavigator
+  GGEMSNavigator::PrintInfos();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -81,7 +80,7 @@ GGEMSVoxelizedPhantomNavigatorImagery* create_ggems_voxelized_phantom_navigator_
 
 void set_phantom_name_ggems_voxelized_phantom_navigator_imagery(GGEMSVoxelizedPhantomNavigatorImagery* voxelized_phantom_navigator_imagery, char const* phantom_navigator_name)
 {
-  voxelized_phantom_navigator_imagery->SetPhantomName(phantom_navigator_name);
+  voxelized_phantom_navigator_imagery->SetNavigatorName(phantom_navigator_name);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

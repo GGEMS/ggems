@@ -14,7 +14,7 @@
 #include <vector>
 #include <sstream>
 
-#include "GGEMS/navigators/GGEMSSolidPhantomStack.hh"
+#include "GGEMS/geometries/GGEMSSolidStack.hh"
 #include "GGEMS/io/GGEMSMHDImage.hh"
 #include "GGEMS/tools/GGEMSTools.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
@@ -29,8 +29,7 @@ GGEMSMHDImage::GGEMSMHDImage(void)
   mhd_raw_file_(""),
   mhd_data_type_("MET_FLOAT"),
   element_sizes_(GGfloat3{{0.0, 0.0, 0.0}}),
-  dimensions_(GGuint3{{0, 0, 0}}),
-  opencl_manager_(GGEMSOpenCLManager::GetInstance())
+  dimensions_(GGuint3{{0, 0, 0}})
 {
   GGcout("GGEMSMHDImage", "GGEMSMHDImage", 3) << "Allocation of GGEMSMHDImage..." << GGendl;
 }
@@ -85,7 +84,7 @@ void GGEMSMHDImage::SetDimensions(GGuint3 const& dimensions)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSMHDImage::Read(std::string const& image_mhd_header_filename, std::shared_ptr<cl::Buffer> solid_phantom_data)
+void GGEMSMHDImage::Read(std::string const& image_mhd_header_filename, std::shared_ptr<cl::Buffer> solid_data)
 {
   GGcout("GGEMSMHDImage", "Read", 0) << "Reading MHD Image..." << GGendl;
 
@@ -93,8 +92,11 @@ void GGEMSMHDImage::Read(std::string const& image_mhd_header_filename, std::shar
   std::ifstream in_header_stream(image_mhd_header_filename, std::ios::in);
   GGEMSFileStream::CheckInputStream(in_header_stream, image_mhd_header_filename);
 
+  // Get the OpenCL manager
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+
   // Get pointer on OpenCL device
-  GGEMSSolidPhantomData* solid_data_device = opencl_manager_.GetDeviceBuffer<GGEMSSolidPhantomData>(solid_phantom_data, sizeof(GGEMSSolidPhantomData));
+  GGEMSVoxelizedSolidData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSVoxelizedSolidData>(solid_data, sizeof(GGEMSVoxelizedSolidData));
 
   // Read the file
   std::string line("");
@@ -190,7 +192,7 @@ void GGEMSMHDImage::Read(std::string const& image_mhd_header_filename, std::shar
   }
 
   // Release the pointer
-  opencl_manager_.ReleaseDeviceBuffer(solid_phantom_data, solid_data_device);
+  opencl_manager.ReleaseDeviceBuffer(solid_data, solid_data_device);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

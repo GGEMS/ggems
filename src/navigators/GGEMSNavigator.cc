@@ -1,7 +1,7 @@
 /*!
-  \file GGEMSPhantomNavigator.cc
+  \file GGEMSNavigator.cc
 
-  \brief GGEMS mother class for phantom navigation
+  \brief GGEMS mother class for navigation
 
   \author Julien BERT <julien.bert@univ-brest.fr>
   \author Didier BENOIT <didier.benoit@inserm.fr>
@@ -10,32 +10,32 @@
   \date Tuesday February 11, 2020
 */
 
-#include "GGEMS/navigators/GGEMSPhantomNavigatorManager.hh"
-#include "GGEMS/navigators/GGEMSSolidPhantom.hh"
+#include "GGEMS/navigators/GGEMSNavigatorManager.hh"
+#include "GGEMS/geometries/GGEMSSolid.hh"
 #include "GGEMS/physics/GGEMSCrossSections.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSPhantomNavigator::GGEMSPhantomNavigator(GGEMSPhantomNavigator* phantom_navigator)
-: phantom_navigator_name_(""),
+GGEMSNavigator::GGEMSNavigator(GGEMSNavigator* navigator)
+: navigator_name_(""),
   phantom_mhd_header_filename_(""),
   range_data_filename_(""),
   geometry_tolerance_(GGEMSTolerance::GEOMETRY),
   offset_xyz_(MakeFloat3Zeros()),
   is_offset_flag_(false)
 {
-  GGcout("GGEMSPhantomNavigator", "GGEMSPhantomNavigator", 3) << "Allocation of GGEMSPhantomNavigator..." << GGendl;
+  GGcout("GGEMSNavigator", "GGEMSNavigator", 3) << "Allocation of GGEMSNavigator..." << GGendl;
 
   // Store the phantom navigator in phantom navigator manager
-  GGEMSPhantomNavigatorManager::GetInstance().Store(phantom_navigator);
+  GGEMSNavigatorManager::GetInstance().Store(navigator);
 
   // Allocation of materials
   materials_.reset(new GGEMSMaterials());
 
   // Allocation of solid phantom
-  solid_phantom_.reset(new GGEMSSolidPhantom());
+  solid_.reset(new GGEMSSolid());
 
   // Allocation of cross sections including physics
   cross_sections_.reset(new GGEMSCrossSections());
@@ -45,25 +45,25 @@ GGEMSPhantomNavigator::GGEMSPhantomNavigator(GGEMSPhantomNavigator* phantom_navi
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSPhantomNavigator::~GGEMSPhantomNavigator(void)
+GGEMSNavigator::~GGEMSNavigator(void)
 {
-  GGcout("GGEMSPhantomNavigator", "~GGEMSPhantomNavigator", 3) << "Deallocation of GGEMSPhantomNavigator..." << GGendl;
+  GGcout("GGEMSNavigator", "~GGEMSNavigator", 3) << "Deallocation of GGEMSNavigator..." << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSPhantomNavigator::SetPhantomName(std::string const& phantom_navigator_name)
+void GGEMSNavigator::SetNavigatorName(std::string const& navigator_name)
 {
-  phantom_navigator_name_ = phantom_navigator_name;
+  navigator_name_ = navigator_name;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSPhantomNavigator::SetPhantomFile(std::string const& phantom_filename)
+void GGEMSNavigator::SetPhantomFile(std::string const& phantom_filename)
 {
   phantom_mhd_header_filename_ = phantom_filename;
 }
@@ -72,7 +72,7 @@ void GGEMSPhantomNavigator::SetPhantomFile(std::string const& phantom_filename)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSPhantomNavigator::SetRangeToMaterialFile(std::string const& range_data_filename)
+void GGEMSNavigator::SetRangeToMaterialFile(std::string const& range_data_filename)
 {
   range_data_filename_ = range_data_filename;
 }
@@ -81,7 +81,7 @@ void GGEMSPhantomNavigator::SetRangeToMaterialFile(std::string const& range_data
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSPhantomNavigator::SetGeometryTolerance(GGfloat const& distance, std::string const& unit)
+void GGEMSNavigator::SetGeometryTolerance(GGfloat const& distance, std::string const& unit)
 {
   geometry_tolerance_ = GGEMSUnits::DistanceUnit(distance, unit);
 }
@@ -90,7 +90,7 @@ void GGEMSPhantomNavigator::SetGeometryTolerance(GGfloat const& distance, std::s
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSPhantomNavigator::SetOffset(GGfloat const offset_x, GGfloat const offset_y, GGfloat const offset_z, std::string const& unit)
+void GGEMSNavigator::SetOffset(GGfloat const offset_x, GGfloat const offset_y, GGfloat const offset_z, std::string const& unit)
 {
   offset_xyz_.s[0] = GGEMSUnits::DistanceUnit(offset_x, unit);
   offset_xyz_.s[1] = GGEMSUnits::DistanceUnit(offset_y, unit);
@@ -102,29 +102,29 @@ void GGEMSPhantomNavigator::SetOffset(GGfloat const offset_x, GGfloat const offs
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSPhantomNavigator::CheckParameters(void) const
+void GGEMSNavigator::CheckParameters(void) const
 {
-  GGcout("GGEMSPhantomNavigator", "CheckParameters", 3) << "Checking the mandatory parameters..." << GGendl;
+  GGcout("GGEMSNavigator", "CheckParameters", 3) << "Checking the mandatory parameters..." << GGendl;
 
   // Checking the phantom name
-  if (phantom_navigator_name_.empty()) {
+  if (navigator_name_.empty()) {
     std::ostringstream oss(std::ostringstream::out);
     oss << "You have to set a name for the phantom!!!";
-    GGEMSMisc::ThrowException("GGEMSPhantomNavigator", "CheckParameters", oss.str());
+    GGEMSMisc::ThrowException("GGEMSNavigator", "CheckParameters", oss.str());
   }
 
   // Checking the phantom name
   if (phantom_mhd_header_filename_.empty()) {
     std::ostringstream oss(std::ostringstream::out);
     oss << "You have to set a mhd file containing the phantom!!!";
-    GGEMSMisc::ThrowException("GGEMSPhantomNavigator", "CheckParameters", oss.str());
+    GGEMSMisc::ThrowException("GGEMSNavigator", "CheckParameters", oss.str());
   }
 
   // Checking the phantom name
   if (range_data_filename_.empty()) {
     std::ostringstream oss(std::ostringstream::out);
     oss << "You have to set a file with the range to material data!!!";
-    GGEMSMisc::ThrowException("GGEMSPhantomNavigator", "CheckParameters", oss.str());
+    GGEMSMisc::ThrowException("GGEMSNavigator", "CheckParameters", oss.str());
   }
 }
 
@@ -132,18 +132,18 @@ void GGEMSPhantomNavigator::CheckParameters(void) const
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSPhantomNavigator::Initialize(void)
+void GGEMSNavigator::Initialize(void)
 {
-  GGcout("GGEMSPhantomNavigator", "Initialize", 3) << "Initializing a GGEMS phantom..." << GGendl;
+  GGcout("GGEMSNavigator", "Initialize", 3) << "Initializing a GGEMS phantom..." << GGendl;
 
   // Checking the parameters of phantom
   CheckParameters();
 
   // Loading the phantom and convert image to material data, and adding material to GGEMS
-  solid_phantom_->LoadPhantomImage(phantom_mhd_header_filename_, range_data_filename_, materials_);
+  solid_->LoadPhantomImage(phantom_mhd_header_filename_, range_data_filename_, materials_);
 
   // Apply offset
-  if (is_offset_flag_) solid_phantom_->ApplyOffset(offset_xyz_);
+  if (is_offset_flag_) solid_->ApplyOffset(offset_xyz_);
 
   // Loading the materials and building tables to OpenCL device and converting cuts
   materials_->Initialize();
@@ -156,12 +156,21 @@ void GGEMSPhantomNavigator::Initialize(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSPhantomNavigator::PrintInfos(void) const
+void GGEMSNavigator::ComputeParticleNavigatorDistance(void) const
 {
-  GGcout("GGEMSPhantomNavigator", "PrintInfos", 0) << GGendl;
-  GGcout("GGEMSPhantomNavigator", "PrintInfos", 0) << "GGEMSPhantomNavigator Infos: " << GGendl;
-  GGcout("GGEMSPhantomNavigator", "PrintInfos", 0) << "--------------------------------------------" << GGendl;
-  solid_phantom_->PrintInfos();
+  ;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSNavigator::PrintInfos(void) const
+{
+  GGcout("GGEMSNavigator", "PrintInfos", 0) << GGendl;
+  GGcout("GGEMSNavigator", "PrintInfos", 0) << "GGEMSNavigator Infos: " << GGendl;
+  GGcout("GGEMSNavigator", "PrintInfos", 0) << "--------------------------------------------" << GGendl;
+  solid_->PrintInfos();
   materials_->PrintInfos();
-  GGcout("GGEMSPhantomNavigator", "PrintInfos", 0) << GGendl;
+  GGcout("GGEMSNavigator", "PrintInfos", 0) << GGendl;
 }

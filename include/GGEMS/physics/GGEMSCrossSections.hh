@@ -111,8 +111,6 @@ class GGEMS_EXPORT GGEMSCrossSections
     GGEMSEMProcessesList em_processes_list_; /*!< vector of electromagnetic processes */
     std::vector<bool> is_process_activated_; /*!< Boolean checking if the process is already activated */
     std::shared_ptr<cl::Buffer> particle_cross_sections_; /*!< Pointer storing cross sections for each particles */
-    GGEMSOpenCLManager& opencl_manager_; /*!< Reference to OpenCL manager singleton */
-    GGEMSProcessesManager& process_manager_; /*!< Reference to process manager */
 };
 
 /*!

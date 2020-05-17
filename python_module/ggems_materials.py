@@ -1,6 +1,6 @@
 from ggems_lib import *
 
-class GGEMSMaterialsManager(object):
+class GGEMSMaterialsDatabaseManager(object):
     """Class handling the materials database in GGEMS
     """
     def __init__(self):

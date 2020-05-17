@@ -1,11 +1,11 @@
 # Import all GGEMS C++ singletons
 from ggems_lib import *
 from ggems_opencl import GGEMSOpenCLManager
-from ggems_materials import GGEMSMaterialsManager, GGEMSMaterials
-from ggems_navigators import GGEMSPhantomNavigatorManager, GGEMSVoxelizedPhantomNavigatorImagery
+from ggems_materials import GGEMSMaterialsDatabaseManager, GGEMSMaterials
+from ggems_navigators import GGEMSVoxelizedPhantomNavigatorImagery
 from ggems_sources import GGEMSSourceManager, GGEMSXRaySource
 from ggems_processes import GGEMSProcessesManager, GGEMSRangeCutsManager, GGEMSCrossSections
-from ggems_phantom_creator import GGEMSPhantomCreatorManager, GGEMSTube
+from ggems_volume_creator import GGEMSVolumeCreatorManager, GGEMSTube
 
 
 class GGEMSManager(object):
@@ -61,7 +61,7 @@ class GGEMSManager(object):
     def opencl_verbose(self, flag):
         ggems_lib.set_opencl_verbose_ggems_manager(self.obj, flag)
 
-    def material_verbose(self, flag):
+    def material_database_verbose(self, flag):
         ggems_lib.set_material_database_verbose_ggems_manager(self.obj, flag)
 
     def phantom_verbose(self, flag):
@@ -86,10 +86,9 @@ class GGEMSManager(object):
 # ------------------------------------------------------------------------------
 # Calling all C++ singleton managers
 opencl_manager = GGEMSOpenCLManager()
-materials_manager = GGEMSMaterialsManager()
-phantom_manager = GGEMSPhantomNavigatorManager()
+materials_database_manager = GGEMSMaterialsDatabaseManager()
 source_manager = GGEMSSourceManager()
 processes_manager = GGEMSProcessesManager()
 range_cuts_manager = GGEMSRangeCutsManager()
 ggems_manager = GGEMSManager()
-phantom_creator_manager = GGEMSPhantomCreatorManager()
+volume_creator_manager = GGEMSVolumeCreatorManager()

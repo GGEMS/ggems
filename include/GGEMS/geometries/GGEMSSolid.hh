@@ -1,10 +1,10 @@
-#ifndef GUARD_GGEMS_NAVIGATORS_GGEMSSOLIDPHANTOM_HH
-#define GUARD_GGEMS_NAVIGATORS_GGEMSSOLIDPHANTOM_HH
+#ifndef GUARD_GGEMS_GEOMETRIES_GGEMSSOLID_HH
+#define GUARD_GGEMS_GEOMETRIES_GGEMSSOLID_HH
 
 /*!
-  \file GGEMSSolidPhantom.hh
+  \file GGEMSSolid.hh
 
-  \brief GGEMS class for solid phantom. This class reads the phantom volume infos, the range data file
+  \brief GGEMS class for solid. This class store geometry about phantom or detector
 
   \author Julien BERT <julien.bert@univ-brest.fr>
   \author Didier BENOIT <didier.benoit@inserm.fr>
@@ -16,60 +16,59 @@
 #include <limits>
 #include <algorithm>
 
-#include "GGEMS/tools/GGEMSTools.hh"
 #include "GGEMS/io/GGEMSTextReader.hh"
-#include "GGEMS/materials/GGEMSMaterials.hh"
-#include "GGEMS/navigators/GGEMSSolidPhantomStack.hh"
-#include "GGEMS/navigators/GGEMSPhantomNavigatorManager.hh"
+#include "GGEMS/geometries/GGEMSSolidStack.hh"
+#include "GGEMS/tools/GGEMSRAMManager.hh"
+#include "GGEMS/navigators/GGEMSNavigatorManager.hh"
 
 /*!
-  \class GGEMSSolidPhantom
-  \brief GGEMS class for solid phantom informations
+  \class GGEMSSolid
+  \brief GGEMS class for solid (voxelized or analytical) informations
 */
-class GGEMS_EXPORT GGEMSSolidPhantom
+class GGEMS_EXPORT GGEMSSolid
 {
   public:
     /*!
-      \brief GGEMSSolidPhantom constructor
+      \brief GGEMSSolid constructor
     */
-  GGEMSSolidPhantom();
+    GGEMSSolid(void);
 
     /*!
-      \brief GGEMSSolidPhantom destructor
+      \brief GGEMSSolid destructor
     */
-    ~GGEMSSolidPhantom(void);
+    ~GGEMSSolid(void);
 
     /*!
-      \fn GGEMSSolidPhantom(GGEMSSolidPhantom const& solid_phantom) = delete
-      \param solid_phantom - reference on the GGEMS solid phantom
+      \fn GGEMSSolid(GGEMSSolid const& solid) = delete
+      \param solid - reference on the GGEMS solid
       \brief Avoid copy by reference
     */
-    GGEMSSolidPhantom(GGEMSSolidPhantom const& solid_phantom) = delete;
+    GGEMSSolid(GGEMSSolid const& solid) = delete;
 
     /*!
-      \fn GGEMSSolidPhantom& operator=(GGEMSSolidPhantom const& solid_phantom) = delete
-      \param solid_phantom - reference on the GGEMS solid phantom
+      \fn GGEMSSolid& operator=(GGEMSSolid const& solid) = delete
+      \param solid - reference on the GGEMS solid
       \brief Avoid assignement by reference
     */
-    GGEMSSolidPhantom& operator=(GGEMSSolidPhantom const& solid_phantom) = delete;
+    GGEMSSolid& operator=(GGEMSSolid const& solid) = delete;
 
     /*!
-      \fn GGEMSSolidPhantom(GGEMSSolidPhantom const&& solid_phantom) = delete
-      \param solid_phantom - rvalue reference on the GGEMS solid phantom
+      \fn GGEMSSolid(GGEMSSolid const&& solid) = delete
+      \param solid - rvalue reference on the GGEMS solid
       \brief Avoid copy by rvalue reference
     */
-    GGEMSSolidPhantom(GGEMSSolidPhantom const&& solid_phantom) = delete;
+    GGEMSSolid(GGEMSSolid const&& solid) = delete;
 
     /*!
-      \fn GGEMSSolidPhantom& operator=(GGEMSSolidPhantom const&& solid_phantom) = delete
-      \param solid_phantom - rvalue reference on the GGEMS solid phantom
+      \fn GGEMSSolid& operator=(GGEMSSolid const&& solid) = delete
+      \param solid - rvalue reference on the GGEMS solid
       \brief Avoid copy by rvalue reference
     */
-    GGEMSSolidPhantom& operator=(GGEMSSolidPhantom const&& solid_phantom) = delete;
+    GGEMSSolid& operator=(GGEMSSolid const&& solid) = delete;
 
     /*!
       \fn void LoadPhantomImage(std::string const& phantom_filename, std::string const& range_data_filename, std::shared_ptr<GGEMSMaterials> materials)
-      \param phantom_filename - name of the MHF file containing the phantom
+      \param phantom_filename - name of the MHD file containing the phantom
       \param range_data_filename - name of the file containing the range to material data
       \param materials - pointer on material for a phantom
       \brief load phantom image to GGEMS and create a volume of label in GGEMS
@@ -85,16 +84,16 @@ class GGEMS_EXPORT GGEMSSolidPhantom
 
     /*!
       \fn void PrintInfos(void) const
-      \brief printing infos about solid phantom
+      \brief printing infos about solid
     */
     void PrintInfos(void) const;
 
     /*!
-      \fn inline std::shared_ptr<cl::Buffer> GetSolidPhantomData(void) const
-      \brief get the informations about the solid phantom geometry
-      \return header data OpenCL pointer about solid phantom
+      \fn inline std::shared_ptr<cl::Buffer> GetSolidData(void) const
+      \brief get the informations about the solid geometry
+      \return header data OpenCL pointer about solid
     */
-    inline std::shared_ptr<cl::Buffer> GetSolidPhantomData(void) const {return solid_phantom_data_;};
+    inline std::shared_ptr<cl::Buffer> GetSolidData(void) const {return solid_data_;};
 
   private:
     /*!
@@ -109,9 +108,8 @@ class GGEMS_EXPORT GGEMSSolidPhantom
     void ConvertImageToLabel(std::string const& raw_data_filename, std::string const& range_data_filename, std::shared_ptr<GGEMSMaterials> materials);
 
   private:
-    std::shared_ptr<cl::Buffer> solid_phantom_data_; /*!< Data about solid phantom */
+    std::shared_ptr<cl::Buffer> solid_data_; /*!< Data about solid */
     std::shared_ptr<cl::Buffer> label_data_; /*!< Pointer storing the buffer about label data */
-    GGEMSOpenCLManager& opencl_manager_; /*!< Reference to OpenCL manager singleton */
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -119,22 +117,28 @@ class GGEMS_EXPORT GGEMSSolidPhantom
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
-void GGEMSSolidPhantom::ConvertImageToLabel(std::string const& raw_data_filename, std::string const& range_data_filename, std::shared_ptr<GGEMSMaterials> materials)
+void GGEMSSolid::ConvertImageToLabel(std::string const& raw_data_filename, std::string const& range_data_filename, std::shared_ptr<GGEMSMaterials> materials)
 {
-  GGcout("GGEMSSolidPhantom", "ConvertImageToLabel", 3) << "Converting image material data to label data..." << GGendl;
+  GGcout("GGEMSSolid", "ConvertImageToLabel", 3) << "Converting image material data to label data..." << GGendl;
+
+  // Get the OpenCL manager
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+
+  // Get the RAM manager
+  GGEMSRAMManager& ram_manager = GGEMSRAMManager::GetInstance();
 
   // Checking if file exists
   std::ifstream in_raw_stream(raw_data_filename, std::ios::in | std::ios::binary);
   GGEMSFileStream::CheckInputStream(in_raw_stream, raw_data_filename);
 
   // Get pointer on OpenCL device
-  GGEMSSolidPhantomData* solid_data_device = opencl_manager_.GetDeviceBuffer<GGEMSSolidPhantomData>(solid_phantom_data_, sizeof(GGEMSSolidPhantomData));
+  GGEMSVoxelizedSolidData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSVoxelizedSolidData>(solid_data_, sizeof(GGEMSVoxelizedSolidData));
 
   // Get information about mhd file
   GGuint const kNumberOfVoxels = solid_data_device->number_of_voxels_;
 
   // Release the pointer
-  opencl_manager_.ReleaseDeviceBuffer(solid_phantom_data_, solid_data_device);
+  opencl_manager.ReleaseDeviceBuffer(solid_data_, solid_data_device);
 
   // Reading data to a tmp buffer
   std::vector<T> tmp_raw_data;
@@ -145,12 +149,11 @@ void GGEMSSolidPhantom::ConvertImageToLabel(std::string const& raw_data_filename
   in_raw_stream.close();
 
   // Allocating memory on OpenCL device
-  label_data_ = opencl_manager_.Allocate(nullptr, kNumberOfVoxels * sizeof(GGuchar), CL_MEM_READ_WRITE);
-  opencl_manager_.AddRAMMemory(kNumberOfVoxels * sizeof(GGuchar));
-  GGEMSPhantomNavigatorManager::GetInstance().AddPhantomNavigatorRAM(kNumberOfVoxels * sizeof(GGuchar));
+  label_data_ = opencl_manager.Allocate(nullptr, kNumberOfVoxels * sizeof(GGuchar), CL_MEM_READ_WRITE);
+  ram_manager.AddGeometryRAMMemory(kNumberOfVoxels * sizeof(GGuchar));
 
   // Get pointer on OpenCL device
-  GGuchar* label_data_device = opencl_manager_.GetDeviceBuffer<GGuchar>(label_data_, kNumberOfVoxels * sizeof(GGuchar));
+  GGuchar* label_data_device = opencl_manager.GetDeviceBuffer<GGuchar>(label_data_, kNumberOfVoxels * sizeof(GGuchar));
 
   // Set value to max of GGuchar
   std::fill(label_data_device, label_data_device + kNumberOfVoxels, std::numeric_limits<GGuchar>::max());
@@ -202,15 +205,15 @@ void GGEMSSolidPhantom::ConvertImageToLabel(std::string const& raw_data_filename
   tmp_raw_data.clear();
 
   // Release the pointer
-  opencl_manager_.ReleaseDeviceBuffer(label_data_, label_data_device);
+  opencl_manager.ReleaseDeviceBuffer(label_data_, label_data_device);
 
   // Checking if all voxels converted
   if (all_converted) {
-    GGcout("GGEMSSolidPhantom", "ConvertImageToLabel", 0) << "All your voxels are converted to label..." << GGendl;
+    GGcout("GGEMSSolid", "ConvertImageToLabel", 0) << "All your voxels are converted to label..." << GGendl;
   }
   else {
-    GGEMSMisc::ThrowException("GGEMSSolidPhantom", "ConvertImageToLabel", "Errors(s) in the range data file!!!");
+    GGEMSMisc::ThrowException("GGEMSSolid", "ConvertImageToLabel", "Errors(s) in the range data file!!!");
   }
 }
 
-#endif // End of GUARD_GGEMS_NAVIGATORS_GGEMSSOLIDPHANTOM_HH
+#endif // End of GUARD_GGEMS_GEOMETRIES_GGEMSSOLID_HH

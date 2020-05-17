@@ -194,14 +194,14 @@ void GGEMSSource::CheckMemoryForParticles(void) const
 
   // Getting the RAM memory on activated device
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
-  GGdouble const kMaxRAMDevice = static_cast<GGdouble>(opencl_manager.GetMaxRAMMemoryOnActivatedDevice());
+  GGdouble const kMaxRAM = static_cast<GGdouble>(opencl_manager.GetMaxRAMMemoryOnActivatedContext());
 
   // Computing the ratio of used RAM memory on device
-  GGdouble const kMaxRatioUsedRAM = kRAMParticles / kMaxRAMDevice;
+  GGdouble const kMaxRatioUsedRAM = kRAMParticles / kMaxRAM;
 
   // Computing a theoric max. number of particles depending on activated
   // device and advice this number to the user. 10% of RAM memory for particles
-  GGulong const kTheoricMaxNumberOfParticles = static_cast<GGulong>(0.1 * kMaxRAMDevice / (kRAMParticles/MAXIMUM_PARTICLES));
+  GGulong const kTheoricMaxNumberOfParticles = static_cast<GGulong>(0.1 * kMaxRAM / (kRAMParticles/MAXIMUM_PARTICLES));
 
   if (kMaxRatioUsedRAM > 0.1) { // Printing warning
     GGwarn("GGEMSSourceManager", "CheckMemoryForParticles", 0) << "Warning!!! The number of particles in a batch defined during GGEMS compilation is maybe to high. We recommand to not use more than 10% of RAM memory for particles allocation. Your theoric number of particles is " << kTheoricMaxNumberOfParticles << ". Recompile GGEMS " << "with this number of particles is recommended." << GGendl;
