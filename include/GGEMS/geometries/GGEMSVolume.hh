@@ -86,14 +86,12 @@ class GGEMS_EXPORT GGEMSVolume
 
     /*!
       \fn void Initialize(void)
-      \return no returned value
       \brief Initialize the solid and store it in Phantom creator manager
     */
     virtual void Initialize(void) = 0;
 
     /*!
       \fn void Draw(void)
-      \return no returned value
       \brief Draw analytical volume in voxelized phantom
     */
     virtual void Draw(void) = 0;
@@ -101,7 +99,6 @@ class GGEMS_EXPORT GGEMSVolume
   protected:
     /*!
       \fn void CheckParameters(void) const
-      \return no returned value
       \brief check parameters for each type of volume
     */
     virtual void CheckParameters(void) const = 0;

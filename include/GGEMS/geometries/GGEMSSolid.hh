@@ -11,6 +11,8 @@
   \author LaTIM, INSERM - U1101, Brest, FRANCE
   \version 1.0
   \date Tuesday March 2, 2020
+
+  \todo Differenciate voxelized solid (GGEMSVoxelizedSolid) and analytical solid (GGEMSAnalyticalSolid or GGEMSBoxSolid etc...). GGEMSSolid will become a mother class
 */
 
 #include <limits>
@@ -107,9 +109,16 @@ class GGEMS_EXPORT GGEMSSolid
     template <typename T>
     void ConvertImageToLabel(std::string const& raw_data_filename, std::string const& range_data_filename, std::shared_ptr<GGEMSMaterials> materials);
 
+    /*!
+      \fn void InitializeKernel(void)
+      \brief Initialize kernel for particle solid distance
+    */
+    void InitializeKernel(void);
+
   private:
     std::shared_ptr<cl::Buffer> solid_data_; /*!< Data about solid */
     std::shared_ptr<cl::Buffer> label_data_; /*!< Pointer storing the buffer about label data */
+    std::shared_ptr<cl::Kernel> kernel_particle_solid_distance_; /*!< OpenCL kernel computing distance between particles and navigator(s) (solid(s)) */
 };
 
 ////////////////////////////////////////////////////////////////////////////////
