@@ -79,7 +79,6 @@ class GGEMS_EXPORT GGEMSEMProcess
       \fn void BuildCrossSectionTables(std::shared_ptr<cl::Buffer> particle_cross_sections, std::shared_ptr<cl::Buffer> material_tables)
       \param particle_cross_sections - OpenCL buffer storing all the cross section tables for each particles
       \param material_tables - material tables on OpenCL device
-      \return a void pointer
       \brief build cross section tables and storing them in particle_cross_sections
     */
     virtual void BuildCrossSectionTables(std::shared_ptr<cl::Buffer> particle_cross_sections, std::shared_ptr<cl::Buffer> material_tables);

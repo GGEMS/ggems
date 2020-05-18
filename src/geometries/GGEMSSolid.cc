@@ -19,7 +19,8 @@
 
 GGEMSSolid::GGEMSSolid(void)
 : solid_data_(nullptr),
-  label_data_(nullptr)
+  label_data_(nullptr),
+  kernel_particle_solid_distance_(nullptr)
 {
   GGcout("GGEMSSolid", "GGEMSSolid", 3) << "Allocation of GGEMSSolid..." << GGendl;
 

@@ -158,7 +158,7 @@ void GGEMSNavigator::Initialize(void)
 
 void GGEMSNavigator::ComputeParticleNavigatorDistance(void) const
 {
-  ;
+  // Compute the distance between particles and navigator using the solid information
 }
 
 ////////////////////////////////////////////////////////////////////////////////

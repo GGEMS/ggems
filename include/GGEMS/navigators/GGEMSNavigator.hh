@@ -166,21 +166,18 @@ class GGEMS_EXPORT GGEMSNavigator
     /*!
       \fn void PrintInfos(void) const
       \return no returned value
-      \brief Printing infos about the phantom navigator
     */
     virtual void PrintInfos(void) const;
 
     /*!
       \fn void CheckParameters(void) const
       \return no returned value
-      \brief Check mandatory parameters for a phantom
     */
     virtual void CheckParameters(void) const;
 
     /*!
       \fn void Initialize(void)
       \return no returned value
-      \brief Initialize a GGEMS phantom
     */
     virtual void Initialize(void);
 
