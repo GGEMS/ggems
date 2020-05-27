@@ -11,15 +11,13 @@
   \author LaTIM, INSERM - U1101, Brest, FRANCE
   \version 1.0
   \date Tuesday March 2, 2020
-
-  \todo Differenciate voxelized solid (GGEMSVoxelizedSolid) and analytical solid (GGEMSAnalyticalSolid or GGEMSBoxSolid etc...). GGEMSSolid will become a mother class
 */
 
 #include <limits>
 #include <algorithm>
 
 #include "GGEMS/io/GGEMSTextReader.hh"
-#include "GGEMS/geometries/GGEMSSolidStack.hh"
+#include "GGEMS/geometries/GGEMSVoxelizedSolidStack.hh"
 #include "GGEMS/tools/GGEMSRAMManager.hh"
 #include "GGEMS/navigators/GGEMSNavigatorManager.hh"
 
@@ -83,6 +81,26 @@ class GGEMS_EXPORT GGEMSSolid
       \brief apply an offset defined by the user
     */
     void ApplyOffset(GGfloat3 const& offset_xyz);
+
+    /*!
+      \fn void SetGeometryTolerance(GGfloat const& tolerance)
+      \param tolerance - geometry tolerance for computation
+      \brief set the geometry tolerance
+    */
+    void SetGeometryTolerance(GGfloat const& tolerance);
+
+    /*!
+      \fn void SetNavigatorID(std::size_t const& navigator_id)
+      \param navigator_id - index of the navigator
+      \brief set the navigator index in solid data
+    */
+    void SetNavigatorID(std::size_t const& navigator_id);
+
+    /*!
+      \fn void DistanceFromParticle(void)
+      \brief compute distance from particle position to solid and store this distance in OpenCL particle buffer
+    */
+    void DistanceFromParticle(void);
 
     /*!
       \fn void PrintInfos(void) const

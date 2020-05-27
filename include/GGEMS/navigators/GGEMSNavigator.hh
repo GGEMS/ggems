@@ -18,31 +18,11 @@
 #endif
 
 #include "GGEMS/physics/GGEMSRangeCuts.hh"
+#include "GGEMS/geometries/GGEMSGeometryConstants.hh"
 
 class GGEMSSolid;
 class GGEMSMaterials;
 class GGEMSCrossSections;
-
-/*!
-  \namespace GGEMSTolerance
-  \brief Namespace storing the tolerance for the float computations
-*/
-#ifndef OPENCL_COMPILER
-namespace GGEMSTolerance
-{
-#endif
-  __constant GGfloat EPSILON2 = 1.0e-02f; /*!< Epsilon of 0.01 */
-  __constant GGfloat EPSILON3 = 1.0e-03f; /*!< Epsilon of 0.001 */
-  __constant GGfloat EPSILON6 = 1.0e-06f; /*!< Epsilon of 0.000001 */
-  __constant GGfloat GEOMETRY = 100.0f*
-  #ifndef OPENCL_COMPILER
-  GGEMSUnits::nm; /*!< Tolerance for the geometry navigation */
-  #else
-  1.e-6f; /*!< Tolerance for the geometry navigation */
-  #endif
-#ifndef OPENCL_COMPILER
-}
-#endif
 
 /*!
   \class GGEMSNavigator
@@ -158,6 +138,13 @@ class GGEMS_EXPORT GGEMSNavigator
     inline std::shared_ptr<GGEMSCrossSections> GetCrossSections(void) const {return cross_sections_;}
 
     /*!
+      \fn void SetNavigatorID(std::size_t const& navigator_id)
+      \param navigator_id - index of the navigator
+      \brief set the navigator index
+    */
+    void SetNavigatorID(std::size_t const& navigator_id);
+
+    /*!
       \fn void ComputeParticleNavigatorDistance(void) const
       \brief Compute distance between particle and navigator (solid)
     */
@@ -188,6 +175,7 @@ class GGEMS_EXPORT GGEMSNavigator
     GGfloat geometry_tolerance_; /*!< Tolerance of geometry range [1mm;1nm] */
     GGfloat3 offset_xyz_; /*!< Offset of the navigator in X, Y and Z */
     bool is_offset_flag_; /*!< Apply offset */
+    std::size_t navigator_id_; /*!< Index of the navigator */
 
     std::shared_ptr<GGEMSSolid> solid_; /*!< Solid with geometric infos and label */
     std::shared_ptr<GGEMSMaterials> materials_; /*!< Materials of phantom */

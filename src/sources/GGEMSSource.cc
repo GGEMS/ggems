@@ -37,13 +37,6 @@ GGEMSSource::GGEMSSource(GGEMSSource* source)
   // Allocation of geometry transformation
   geometry_transformation_.reset(new GGEMSGeometryTransformation());
 
-  // Initialization of local axis
-  geometry_transformation_->SetAxisTransformation(
-    0.0f, 0.0f, -1.0f,
-    0.0f, 1.0f, 0.0f,
-    1.0f, 0.0f, 0.0f
-  );
-
   // Store the source in source manager
   GGEMSSourceManager::GetInstance().Store(source);
 }

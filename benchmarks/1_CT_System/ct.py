@@ -72,16 +72,17 @@ xray_source_1.set_focal_spot_size(0.6, 1.2, 0.0, 'mm')
 xray_source_1.set_polyenergy('data/spectrum_120kVp_2mmAl.dat')
 
 # Second source
-#xray_source_2 = GGEMSXRaySource()
-#xray_source_2.set_source_name('xray_source_2')
-#xray_source_2.set_source_particle_type('gamma')
+xray_source_2 = GGEMSXRaySource()
+xray_source_2.set_source_name('xray_source_2')
+xray_source_2.set_source_particle_type('gamma')
 # xray_source_2.set_number_of_particles(861635)
-#xray_source_2.set_number_of_particles(5)
-#xray_source_2.set_position(0.0, -1000.0, 0.0, 'mm')
-#xray_source_2.set_rotation(0.0, 0.0, 0.0, 'deg')
-#xray_source_2.set_beam_aperture(7.0, 'deg')
-#xray_source_2.set_focal_spot_size(0.3, 0.5, 0.0, 'mm')
-#xray_source_2.set_monoenergy(60.2, 'keV')
+xray_source_2.set_number_of_particles(5)
+# xray_source_2.set_position(-1000.0, 0.0, 0.0, 'mm')
+xray_source_2.set_position(0.0, 0.0, 0.0, 'mm')
+xray_source_2.set_rotation(0.0, 90.0, 0.0, 'deg')
+xray_source_2.set_beam_aperture(7.0, 'deg')
+xray_source_2.set_focal_spot_size(0.3, 0.5, 0.0, 'mm')
+xray_source_2.set_monoenergy(60.2, 'keV')
 
 # ------------------------------------------------------------------------------
 # STEP 8: Detector/Digitizer Declaration
@@ -106,7 +107,7 @@ ggems_manager.random_verbose(True)
 ggems_manager.initialize()
 
 # Start GGEMS simulation
-#ggems_manager.run()
+ggems_manager.run()
 
 # ------------------------------------------------------------------------------
 # STEP 10: Exit GGEMS safely

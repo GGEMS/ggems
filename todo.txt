@@ -27,7 +27,9 @@
 
 - Faire source indépendantes sans lancer la simulation complète -> phase space
 
-- Controler les pointers shared, unique, weak et pointer cyclique
+- Controler les pointers shared, unique, weak et pointer cyclique, et comprendre pourquoi les destructeurs ne sont plus appelés dans GGEMS avec Python
+
+- Traduire en C++ les benchmarks et exemples
 
 - Licence pour GGEMS
 
@@ -44,3 +46,5 @@
   * navigateur : fantome + detecteur
   * source
   * etc...
+
+- Faire diagramme avec Drawio pour clarifier code

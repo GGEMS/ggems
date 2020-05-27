@@ -76,6 +76,20 @@ class GGEMS_EXPORT GGEMSParticles
     */
     inline cl::Buffer* GetPrimaryParticles() const {return primary_particles_.get();};
 
+    /*!
+      \fn void SetNumberOfParticles(GGulong const& number_of_particles)
+      \param number_of_particles - number of activated particles in buffer
+      \brief Set the number of particles in buffer
+    */
+    void SetNumberOfParticles(GGulong const& number_of_particles);
+
+    /*!
+      \fn inline GGulong GetNumberOfParticles(void) const
+      \return number of particles currently activated in OpenCL buffer
+      \brief Get the number of particles
+    */
+    inline GGulong GetNumberOfParticles(void) const {return number_of_particles_;};
+
   private:
     /*!
       \fn void AllocatePrimaryParticles(void)
@@ -84,6 +98,7 @@ class GGEMS_EXPORT GGEMSParticles
     void AllocatePrimaryParticles(void);
 
   private:
+    GGulong number_of_particles_; /*!< Number of activated particles in buffer */
     std::shared_ptr<cl::Buffer> primary_particles_; /*!< Pointer storing info about primary particles in batch on OpenCL device */
 };
 

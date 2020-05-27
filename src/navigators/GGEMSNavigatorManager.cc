@@ -44,6 +44,9 @@ GGEMSNavigatorManager::~GGEMSNavigatorManager(void)
 void GGEMSNavigatorManager::Store(GGEMSNavigator* navigator)
 {
   GGcout("GGEMSNavigatorManager", "Store", 3) << "Storing new navigator in GGEMS..." << GGendl;
+
+  // Set index of navigator and store the pointer
+  navigator->SetNavigatorID(navigators_.size());
   navigators_.emplace_back(navigator);
 }
 
@@ -136,15 +139,4 @@ void GGEMSNavigatorManager::FindClosestNavigator(void) const
 {
   // Loop over all declared navigators and compute distance particle / navigator
   for (auto&& i : navigators_) i->ComputeParticleNavigatorDistance();
-
-  // Source manager
-  //GGEMSSourceManager& source_manager = GGEMSSourceManager::GetInstance();
-
-  // Get the primary particles
-  //cl::Buffer* primary_particle = source_manager.GetParticles()->GetPrimaryParticles();
-
-//GGfloat* energy_spectrum_device = opencl_manager.GetDeviceBuffer<GGfloat>(energy_spectrum_, number_of_energy_bins_ * sizeof(GGfloat));
-
-//primary_particles_ = opencl_manager.Allocate(nullptr, sizeof(GGEMSPrimaryParticles), CL_MEM_READ_WRITE);
-  // Loop over the navigator
 }
