@@ -37,6 +37,13 @@ GGEMSXRaySource::GGEMSXRaySource(void)
 {
   GGcout("GGEMSXRaySource", "GGEMSXRaySource", 3) << "Allocation of GGEMSXRaySource..." << GGendl;
 
+  // Initialization of local axis for X-ray source
+  geometry_transformation_->SetAxisTransformation(
+    0.0f, 0.0f, -1.0f,
+    0.0f, 1.0f, 0.0f,
+    1.0f, 0.0f, 0.0f
+  );
+
   // Initialization of parameters
   focal_spot_size_ = MakeFloat3(std::numeric_limits<float>::min(), std::numeric_limits<float>::min(), std::numeric_limits<float>::min());
 }
@@ -102,12 +109,12 @@ void GGEMSXRaySource::GetPrimaries(GGulong const& number_of_particles)
   cl::NDRange offset(0);
 
   // Launching kernel
-  cl_int kernel_status = queue->enqueueNDRangeKernel(*kernel_get_primaries_, offset, global, cl::NullRange, nullptr, event);
+  GGint kernel_status = queue->enqueueNDRangeKernel(*kernel_get_primaries_, offset, global, cl::NullRange, nullptr, event);
   opencl_manager.CheckOpenCLError(kernel_status, "GGEMSXRaySource", "GetPrimaries");
   queue->finish(); // Wait until the kernel status is finish
 
   // Displaying time in kernel
-  opencl_manager.DisplayElapsedTimeInKernel("GetPrimaries");
+  opencl_manager.DisplayElapsedTimeInKernel("GetPrimaries in GGEMSXRaySource");
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -30,12 +30,12 @@ typedef struct PACKED GGEMSPrimaryParticles_t
 #endif
 {
   GGfloat E_[MAXIMUM_PARTICLES]; /*!< Energies of particles */
-  GGfloat dx_[MAXIMUM_PARTICLES]; /*!< Position of the particle in x */
-  GGfloat dy_[MAXIMUM_PARTICLES]; /*!< Position of the particle in y */
-  GGfloat dz_[MAXIMUM_PARTICLES]; /*!< Position of the particle in z */
-  GGfloat px_[MAXIMUM_PARTICLES]; /*!< Momentum of the particle in x */
-  GGfloat py_[MAXIMUM_PARTICLES]; /*!< Momentum of the particle in y */
-  GGfloat pz_[MAXIMUM_PARTICLES]; /*!< Momentum of the particle in z */
+  GGfloat dx_[MAXIMUM_PARTICLES]; /*!< Direction of the particle in x */
+  GGfloat dy_[MAXIMUM_PARTICLES]; /*!< Direction of the particle in y */
+  GGfloat dz_[MAXIMUM_PARTICLES]; /*!< Direction of the particle in z */
+  GGfloat px_[MAXIMUM_PARTICLES]; /*!< Position of the particle in x */
+  GGfloat py_[MAXIMUM_PARTICLES]; /*!< Position of the particle in y */
+  GGfloat pz_[MAXIMUM_PARTICLES]; /*!< Position of the particle in z */
   GGfloat tof_[MAXIMUM_PARTICLES]; /*!< Time of flight */
 
   GGuint geometry_id_[MAXIMUM_PARTICLES]; /*!< current geometry crossed by the particle */

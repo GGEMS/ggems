@@ -147,6 +147,13 @@ GGEMSOpenCLManager::GGEMSOpenCLManager(void)
   GGEMSMisc::ThrowException("GGEMSOpenCLManager","GGEMSOpenCLManager", "OPENCL_KERNEL_PATH not defined or not find!!!");
   #endif
 
+  // Prevent cache kernel in OpenCL
+  #ifdef _MSC_VER
+  _putenv("CUDA_CACHE_DISABLE=1");
+  #else
+  putenv("CUDA_CACHE_DISABLE=1");
+  #endif
+
   // Creating a context for each device
   CreateContext();
 

@@ -20,7 +20,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 GGEMSParticles::GGEMSParticles(void)
-: primary_particles_(nullptr)
+: number_of_particles_(0),
+  primary_particles_(nullptr)
 {
   GGcout("GGEMSParticles", "GGEMSParticles", 3) << "Allocation of GGEMSParticles..." << GGendl;
 }
@@ -32,6 +33,15 @@ GGEMSParticles::GGEMSParticles(void)
 GGEMSParticles::~GGEMSParticles(void)
 {
   GGcout("GGEMSParticles", "~GGEMSParticles", 3) << "Deallocation of GGEMSParticles..." << GGendl;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSParticles::SetNumberOfParticles(GGulong const& number_of_particles)
+{
+  number_of_particles_ = number_of_particles;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

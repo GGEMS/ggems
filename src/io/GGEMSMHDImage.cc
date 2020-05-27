@@ -14,7 +14,7 @@
 #include <vector>
 #include <sstream>
 
-#include "GGEMS/geometries/GGEMSSolidStack.hh"
+#include "GGEMS/geometries/GGEMSVoxelizedSolidStack.hh"
 #include "GGEMS/io/GGEMSMHDImage.hh"
 #include "GGEMS/tools/GGEMSTools.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"

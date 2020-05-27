@@ -24,7 +24,8 @@ GGEMSNavigator::GGEMSNavigator(GGEMSNavigator* navigator)
   range_data_filename_(""),
   geometry_tolerance_(GGEMSTolerance::GEOMETRY),
   offset_xyz_(MakeFloat3Zeros()),
-  is_offset_flag_(false)
+  is_offset_flag_(false),
+  navigator_id_(-1)
 {
   GGcout("GGEMSNavigator", "GGEMSNavigator", 3) << "Allocation of GGEMSNavigator..." << GGendl;
 
@@ -102,6 +103,15 @@ void GGEMSNavigator::SetOffset(GGfloat const offset_x, GGfloat const offset_y, G
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+void GGEMSNavigator::SetNavigatorID(std::size_t const& navigator_id)
+{
+  navigator_id_ = navigator_id;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 void GGEMSNavigator::CheckParameters(void) const
 {
   GGcout("GGEMSNavigator", "CheckParameters", 3) << "Checking the mandatory parameters..." << GGendl;
@@ -145,6 +155,12 @@ void GGEMSNavigator::Initialize(void)
   // Apply offset
   if (is_offset_flag_) solid_->ApplyOffset(offset_xyz_);
 
+  // Set the geometry tolerance
+  solid_->SetGeometryTolerance(geometry_tolerance_);
+
+  // Store id of navigator in solid
+  solid_->SetNavigatorID(navigator_id_);
+
   // Loading the materials and building tables to OpenCL device and converting cuts
   materials_->Initialize();
 
@@ -158,7 +174,8 @@ void GGEMSNavigator::Initialize(void)
 
 void GGEMSNavigator::ComputeParticleNavigatorDistance(void) const
 {
-  // Compute the distance between particles and navigator using the solid information
+  // Compute the distance between particles and navigator using the solid informations
+  solid_->DistanceFromParticle();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

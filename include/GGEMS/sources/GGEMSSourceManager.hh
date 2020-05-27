@@ -18,8 +18,8 @@
 #endif
 
 #include "GGEMS/sources/GGEMSSource.hh"
+#include "GGEMS/physics/GGEMSParticles.hh"
 
-class GGEMSParticles;
 class GGEMSPseudoRandomGenerator;
 
 /*!
@@ -142,7 +142,11 @@ class GGEMS_EXPORT GGEMSSourceManager
       \param number_of_particles - number of particles to simulate
       \brief Generate primary particles for a specific source
     */
-    inline void GetPrimaries(std::size_t const& source_index, GGulong const& number_of_particles) const {sources_[source_index]->GetPrimaries(number_of_particles);}
+    inline void GetPrimaries(std::size_t const& source_index, GGulong const& number_of_particles) const
+    {
+      particles_->SetNumberOfParticles(number_of_particles);
+      sources_[source_index]->GetPrimaries(number_of_particles);
+    }
 
   private: // Source infos
     std::vector<std::shared_ptr<GGEMSSource>> sources_; /*!< Pointer on GGEMS sources */
