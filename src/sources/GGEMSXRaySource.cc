@@ -112,9 +112,6 @@ void GGEMSXRaySource::GetPrimaries(GGulong const& number_of_particles)
   GGint kernel_status = queue->enqueueNDRangeKernel(*kernel_get_primaries_, offset, global, cl::NullRange, nullptr, event);
   opencl_manager.CheckOpenCLError(kernel_status, "GGEMSXRaySource", "GetPrimaries");
   queue->finish(); // Wait until the kernel status is finish
-
-  // Displaying time in kernel
-  opencl_manager.DisplayElapsedTimeInKernel("GetPrimaries in GGEMSXRaySource");
 }
 
 ////////////////////////////////////////////////////////////////////////////////

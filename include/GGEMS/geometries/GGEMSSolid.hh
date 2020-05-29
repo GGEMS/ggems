@@ -103,6 +103,12 @@ class GGEMS_EXPORT GGEMSSolid
     void DistanceFromParticle(void);
 
     /*!
+      \fn void MoveParticle(void)
+      \brief Move particles at an entry of solid
+    */
+    void MoveParticle(void);
+
+    /*!
       \fn void PrintInfos(void) const
       \brief printing infos about solid
     */
@@ -136,7 +142,8 @@ class GGEMS_EXPORT GGEMSSolid
   private:
     std::shared_ptr<cl::Buffer> solid_data_; /*!< Data about solid */
     std::shared_ptr<cl::Buffer> label_data_; /*!< Pointer storing the buffer about label data */
-    std::shared_ptr<cl::Kernel> kernel_particle_solid_distance_; /*!< OpenCL kernel computing distance between particles and navigator(s) (solid(s)) */
+    std::shared_ptr<cl::Kernel> kernel_distance_to_voxelized_solid_; /*!< OpenCL kernel computing distance between particles and voxelized solid */
+    std::shared_ptr<cl::Kernel> kernel_move_to_voxelized_solid_; /*!< OpenCL kernel moving particles to voxelized solid */
 };
 
 ////////////////////////////////////////////////////////////////////////////////

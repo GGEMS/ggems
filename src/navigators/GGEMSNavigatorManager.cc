@@ -140,3 +140,13 @@ void GGEMSNavigatorManager::FindClosestNavigator(void) const
   // Loop over all declared navigators and compute distance particle / navigator
   for (auto&& i : navigators_) i->ComputeParticleNavigatorDistance();
 }
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSNavigatorManager::TrackToIn(void) const
+{
+  // Loop over all navigators and project particles
+  for (auto&& i : navigators_) i->ProjectParticleToNavigator();
+}

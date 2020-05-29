@@ -36,7 +36,7 @@ __kernel void get_primaries_ggems_xray_source(
   GGdouble theta = KissUniform(random, kGlobalIndex);
   GGdouble const kAperture = 1.0 - cos((GGdouble)aperture);
   phi += TWO_PI;
-  theta = acos((GGdouble)1.0 - kAperture*theta);
+  theta = acos(1.0 - kAperture*theta);
 
   // Compute rotation
   GGfloat3 rotation = {cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta)};
