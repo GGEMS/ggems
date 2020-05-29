@@ -146,9 +146,15 @@ class GGEMS_EXPORT GGEMSNavigator
 
     /*!
       \fn void ComputeParticleNavigatorDistance(void) const
-      \brief Compute distance between particle and navigator (solid)
+      \brief Compute distance between particle and navigator
     */
     void ComputeParticleNavigatorDistance(void) const;
+
+    /*!
+      \fn void ProjectParticleToNavigator(void) const
+      \brief Particle particle to entry of navigator
+    */
+    void ProjectParticleToNavigator(void) const;
 
     /*!
       \fn void PrintInfos(void) const

@@ -22,7 +22,8 @@
 GGEMSSolid::GGEMSSolid(void)
 : solid_data_(nullptr),
   label_data_(nullptr),
-  kernel_particle_solid_distance_(nullptr)
+  kernel_distance_to_voxelized_solid_(nullptr),
+  kernel_move_to_voxelized_solid_(nullptr)
 {
   GGcout("GGEMSSolid", "GGEMSSolid", 3) << "Allocation of GGEMSSolid..." << GGendl;
 
@@ -57,13 +58,17 @@ void GGEMSSolid::InitializeKernel(void)
 {
   GGcout("GGEMSSolid", "InitializeKernel", 3) << "Initializing kernel..." << GGendl;
 
+  // Getting OpenCL manager
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+
   // Getting the path to kernel
   std::string const kOpenCLKernelPath = OPENCL_KERNEL_PATH;
-  std::string const kFilename = kOpenCLKernelPath + "/ParticlesVoxelizedSolidDistance.cl";
+  std::string const kFilename1 = kOpenCLKernelPath + "/DistanceToVoxelizedSolid.cl";
+  std::string const kFilename2 = kOpenCLKernelPath + "/MoveToVoxelizedSolid.cl";
 
-  // Compiling the kernel
-  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
-  kernel_particle_solid_distance_ = opencl_manager.CompileKernel(kFilename, "particles_voxelized_solid_distance");
+  // Compiling the kernels
+  kernel_distance_to_voxelized_solid_ = opencl_manager.CompileKernel(kFilename1, "distance_to_voxelized_solid");
+  kernel_move_to_voxelized_solid_ = opencl_manager.CompileKernel(kFilename2, "move_to_voxelized_solid");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -86,20 +91,50 @@ void GGEMSSolid::DistanceFromParticle(void)
   GGulong const kNumberOfParticles = particles->GetNumberOfParticles();
 
   // Set parameters for kernel
-  kernel_particle_solid_distance_->setArg(0, *primary_particles);
-  kernel_particle_solid_distance_->setArg(1, *solid_data_);
+  kernel_distance_to_voxelized_solid_->setArg(0, *primary_particles);
+  kernel_distance_to_voxelized_solid_->setArg(1, *solid_data_);
 
   // Define the number of work-item to launch
   cl::NDRange global(kNumberOfParticles);
   cl::NDRange offset(0);
 
   // Launching kernel
-  cl_int kernel_status = queue->enqueueNDRangeKernel(*kernel_particle_solid_distance_, offset, global, cl::NullRange, nullptr, event);
+  cl_int kernel_status = queue->enqueueNDRangeKernel(*kernel_distance_to_voxelized_solid_, offset, global, cl::NullRange, nullptr, event);
   opencl_manager.CheckOpenCLError(kernel_status, "GGEMSSolid", "DistanceFromParticle");
   queue->finish(); // Wait until the kernel status is finish
+}
 
-  // Displaying time in kernel
-  opencl_manager.DisplayElapsedTimeInKernel("DistanceFromParticle in GGEMSSolid");
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSSolid::MoveParticle(void)
+{
+  // Getting the OpenCL manager
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+  cl::CommandQueue* queue = opencl_manager.GetCommandQueue();
+  cl::Event* event = opencl_manager.GetEvent();
+
+  // Getting the buffer of primary particles from source
+  GGEMSSourceManager& source_manager = GGEMSSourceManager::GetInstance();
+  GGEMSParticles* particles = source_manager.GetParticles();
+  cl::Buffer* primary_particles = particles->GetPrimaryParticles();
+
+  // Getting the number of particles
+  GGulong const kNumberOfParticles = particles->GetNumberOfParticles();
+
+  // Set parameters for kernel
+  kernel_move_to_voxelized_solid_->setArg(0, *primary_particles);
+  kernel_move_to_voxelized_solid_->setArg(1, *solid_data_);
+
+  // Define the number of work-item to launch
+  cl::NDRange global(kNumberOfParticles);
+  cl::NDRange offset(0);
+
+  // Launching kernel
+  cl_int kernel_status = queue->enqueueNDRangeKernel(*kernel_move_to_voxelized_solid_, offset, global, cl::NullRange, nullptr, event);
+  opencl_manager.CheckOpenCLError(kernel_status, "GGEMSSolid", "MoveParticle");
+  queue->finish(); // Wait until the kernel status is finish
 }
 
 ////////////////////////////////////////////////////////////////////////////////

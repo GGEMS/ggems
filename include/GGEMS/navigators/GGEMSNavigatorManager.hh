@@ -130,6 +130,12 @@ class GGEMS_EXPORT GGEMSNavigatorManager
     */
     void FindClosestNavigator(void) const;
 
+    /*!
+      \fn void TrackToIn(void) const
+      \brief Project particle to a navigator
+    */
+    void TrackToIn(void) const;
+
   private:
     /*!
       \fn bool CheckOverlap(std::shared_ptr<GGEMSNavigator> navigator_a, std::shared_ptr<GGEMSNavigator> navigator_b) const
