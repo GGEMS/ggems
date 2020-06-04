@@ -103,10 +103,10 @@ class GGEMS_EXPORT GGEMSSolid
     void DistanceFromParticle(void);
 
     /*!
-      \fn void MoveParticle(void)
+      \fn void MoveToIn(void)
       \brief Move particles at an entry of solid
     */
-    void MoveParticle(void);
+    void MoveToIn(void);
 
     /*!
       \fn void PrintInfos(void) const

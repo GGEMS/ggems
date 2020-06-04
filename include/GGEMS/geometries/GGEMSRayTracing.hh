@@ -24,6 +24,58 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 /*!
+  \fn GGfloat3 TransportGetSafetyInsideVoxelizedNavigator(GGfloat3 const* position, __global GGEMSVoxelizedSolidData* voxelized_solid_data)
+  \param position - pointer on primary particle
+  \param voxelized_solid_data - voxelized data infos
+  \return new postion of moved particle
+  \brief Moving particle slightly inside a voxelized navigator
+*/
+// Get a safety position inside an AABB geometry
+GGfloat3 TransportGetSafetyInsideVoxelizedNavigator(GGfloat3 const* position, __global GGEMSVoxelizedSolidData* voxelized_solid_data)
+{
+  // Getting positions
+  GGfloat3 new_position = {position->x, position->y, position->z};
+
+  // Borders of voxelized solid
+  GGfloat const x_min = voxelized_solid_data->border_min_xyz_.x;
+  GGfloat const x_max = voxelized_solid_data->border_max_xyz_.x;
+  GGfloat const y_min = voxelized_solid_data->border_min_xyz_.y;
+  GGfloat const y_max = voxelized_solid_data->border_max_xyz_.y;
+  GGfloat const z_min = voxelized_solid_data->border_min_xyz_.z;
+  GGfloat const z_max = voxelized_solid_data->border_max_xyz_.z;
+
+  // Tolerance
+  GGfloat const kTolerance = voxelized_solid_data->tolerance_;
+
+  // on x
+  GGfloat SafXmin = fabs(new_position.x - x_min);
+  GGfloat SafXmax = fabs(new_position.x - x_max);
+
+  new_position.x = (SafXmin < kTolerance) ? x_min + kTolerance : new_position.x;
+  new_position.x = (SafXmax < kTolerance) ? x_max - kTolerance : new_position.x;
+
+  // on y
+  GGfloat SafYmin = fabs(new_position.y - y_min);
+  GGfloat SafYmax = fabs(new_position.y - y_max);
+
+  new_position.y = (SafYmin < kTolerance) ? y_min + kTolerance : new_position.y;
+  new_position.y = (SafYmax < kTolerance) ? y_max - kTolerance : new_position.y;
+
+  // on z
+  GGfloat SafZmin = fabs(new_position.z - z_min);
+  GGfloat SafZmax = fabs(new_position.z - z_max);
+
+  new_position.z = (SafZmin < kTolerance) ? z_min + kTolerance : new_position.z;
+  new_position.z = (SafZmax < kTolerance) ? z_max - kTolerance : new_position.z;
+
+  return new_position;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+/*!
   \fn inline GGuchar IsParticleInVoxelizedNavigator(GGfloat3 const* position, __global GGEMSVoxelizedSolidData* voxelized_solid_data)
   \param position - pointer on primary particle
   \param voxelized_solid_data - voxelized data infos
@@ -139,6 +191,9 @@ inline GGfloat ComputeDistanceToVoxelizedNavigator(GGfloat3 const* position, GGf
 
   // Return the smaller positive value diff to zero
   if (tmin < 0.0f && (tmax < 0.0f || tmax == 0.0f)) return OUT_OF_WORLD;
+
+  // Checking if particle cross navigator sufficiently
+  if ((tmax-tmin) < (2.0*voxelized_solid_data->tolerance_)) return OUT_OF_WORLD;
 
   if (tmin <= 0.0f) return tmax;
   else return tmin;

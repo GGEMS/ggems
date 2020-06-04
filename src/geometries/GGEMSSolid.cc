@@ -108,7 +108,7 @@ void GGEMSSolid::DistanceFromParticle(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSSolid::MoveParticle(void)
+void GGEMSSolid::MoveToIn(void)
 {
   // Getting the OpenCL manager
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
@@ -238,7 +238,7 @@ void GGEMSSolid::SetNavigatorID(std::size_t const& navigator_id)
   GGEMSVoxelizedSolidData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSVoxelizedSolidData>(solid_data_, sizeof(GGEMSVoxelizedSolidData));
 
   // Storing the geometry tolerance
-  solid_data_device->navigator_id_ = static_cast<GGint>(navigator_id);
+  solid_data_device->navigator_id_ = static_cast<GGuchar>(navigator_id);
 
   // Release the pointer
   opencl_manager.ReleaseDeviceBuffer(solid_data_, solid_data_device);

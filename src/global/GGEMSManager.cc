@@ -307,6 +307,8 @@ void GGEMSManager::Run()
       // Step 3: Track to in step, particles are projected to navigator
       GGcout("GGEMSManager", "Run", 1) << "      + Moving particles to navigator..." << GGendl;
       navigator_manager.TrackToIn();
+
+      // Step X: Checking if all particles are dead
     }
   }
 

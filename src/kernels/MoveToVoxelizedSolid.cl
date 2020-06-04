@@ -14,6 +14,7 @@
 #include "GGEMS/tools/GGEMSTypes.hh"
 #include "GGEMS/geometries/GGEMSVoxelizedSolidStack.hh"
 #include "GGEMS/geometries/GGEMSRayTracing.hh"
+#include "GGEMS/maths/GGEMSMatrixOperations.hh"
 
 /*!
   \fn __kernel void move_to_voxelized_solid(__global GGEMSPrimaryParticles* primary_particle, __global GGEMSVoxelizedSolidData* voxelized_solid_data)
@@ -28,11 +29,17 @@ __kernel void move_to_voxelized_solid(
   // Getting index of thread
   GGint const kGlobalIndex = get_global_id(0);
 
-  // Checking particle status. If DEAD, the particle is not track
-  /*if (primary_particle->status_[kGlobalIndex] == DEAD) return;
+  // Checking if distance to navigator is OUT_OF_WORLD after computation distance
+  // If yes, the particle is OUT_OF_WORLD and DEAD, so no tracking
+  if (primary_particle->particle_navigator_distance_[kGlobalIndex] == OUT_OF_WORLD) {
+    primary_particle->status_[kGlobalIndex] = DEAD;
+  }
 
-  // Checking if the particle - navigator is 0. If yes the particle is already in another navigator
-  if (primary_particle->particle_navigator_distance_[kGlobalIndex] == 0.0f) return;
+  // Checking status of particle
+  if (primary_particle->status_[kGlobalIndex] == DEAD) return;
+
+  // Checking if the current navigator is the selected navigator
+  if (primary_particle->navigator_id_[kGlobalIndex] != voxelized_solid_data->navigator_id_) return;
 
   // Position of particle
   GGfloat3 position;
@@ -46,20 +53,27 @@ __kernel void move_to_voxelized_solid(
   direction.y = primary_particle->dy_[kGlobalIndex];
   direction.z = primary_particle->dz_[kGlobalIndex];
 
-  // Check if particle inside voxelized navigator, if yes distance is 0.0 and
-  // not need to compute particle - navigator distance
-  if (IsParticleInVoxelizedNavigator(&position, voxelized_solid_data)) {
-    primary_particle->particle_navigator_distance_[kGlobalIndex] = 0.0f;
-    primary_particle->navigator_id_[kGlobalIndex] = voxelized_solid_data->navigator_id_;
-    return;
-  }
+  // Distance to current navigator and geometry tolerance
+  GGfloat const kDistance = primary_particle->particle_navigator_distance_[kGlobalIndex];
+  GGfloat const kTolerance = voxelized_solid_data->tolerance_;
 
-  // Compute distance between particles and voxelized navigator
-  GGfloat const kDistance = ComputeDistanceToVoxelizedNavigator(&position, &direction, voxelized_solid_data);
+  // Moving the particle slightly inside the volume
+  position = GGfloat3Add(position, GGfloat3Scale(direction, kDistance + kTolerance));
 
-  // Check distance value with previous value. Store the minimum value
-  if (kDistance < primary_particle->particle_navigator_distance_[kGlobalIndex]) {
-    primary_particle->particle_navigator_distance_[kGlobalIndex] = kDistance;
-    primary_particle->navigator_id_[kGlobalIndex] = voxelized_solid_data->navigator_id_;
-  }*/
+  // Correcting the particle position if not totally inside due to float tolerance
+  position = TransportGetSafetyInsideVoxelizedNavigator(&position, voxelized_solid_data);
+
+  printf("Current navigator: %u\n", voxelized_solid_data->navigator_id_);
+  printf("Selected Navigator: %u\n", primary_particle->navigator_id_[kGlobalIndex]);
+  printf("Position:\n");
+  printf("    Before: %4.7f %4.7f %4.7f mm\n", primary_particle->px_[kGlobalIndex], primary_particle->py_[kGlobalIndex], primary_particle->pz_[kGlobalIndex]);
+  printf("    After: %4.7f %4.7f %4.7f mm\n", position.x, position.y, position.z);
+
+  // Set new value for particles
+  primary_particle->px_[kGlobalIndex] = position.x;
+  primary_particle->py_[kGlobalIndex] = position.y;
+  primary_particle->pz_[kGlobalIndex] = position.z;
+
+  //primary_particle->geometry_id_[kGlobalIndex] = 0;
+  //primary_particle->tof_[kGlobalIndex] += kDistance * C_LIGHT; true for gamma only, why inverse of time ?
 }
