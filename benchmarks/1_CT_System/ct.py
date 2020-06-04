@@ -67,8 +67,8 @@ xray_source_1.set_source_particle_type('gamma')
 xray_source_1.set_number_of_particles(1)
 xray_source_1.set_position(-1000.0, 0.0, 0.0, 'mm')
 xray_source_1.set_rotation(0.0, 0.0, 0.0, 'deg')
-xray_source_1.set_beam_aperture(1.0, 'deg')
-xray_source_1.set_focal_spot_size(0.6, 1.2, 0.0, 'mm')
+xray_source_1.set_beam_aperture(0.0, 'deg')
+xray_source_1.set_focal_spot_size(0.0, 0.0, 0.0, 'mm')
 xray_source_1.set_polyenergy('data/spectrum_120kVp_2mmAl.dat')
 
 # Second source
@@ -79,8 +79,8 @@ xray_source_2.set_source_particle_type('gamma')
 xray_source_2.set_number_of_particles(1)
 xray_source_2.set_position(-1000.0, 0.0, 0.0, 'mm')
 xray_source_2.set_rotation(0.0, 90.0, 0.0, 'deg')
-xray_source_2.set_beam_aperture(1.0, 'deg')
-xray_source_2.set_focal_spot_size(0.3, 0.5, 0.0, 'mm')
+xray_source_2.set_beam_aperture(0.0, 'deg')
+xray_source_2.set_focal_spot_size(0.0, 0.0, 0.0, 'mm')
 xray_source_2.set_monoenergy(60.2, 'keV')
 
 # ------------------------------------------------------------------------------

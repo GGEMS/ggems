@@ -148,5 +148,5 @@ void GGEMSNavigatorManager::FindClosestNavigator(void) const
 void GGEMSNavigatorManager::TrackToIn(void) const
 {
   // Loop over all navigators and project particles
-  for (auto&& i : navigators_) i->ProjectParticleToNavigator();
+  for (auto&& i : navigators_) i->MoveParticleToNavigator();
 }
