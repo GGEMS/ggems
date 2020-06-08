@@ -152,9 +152,15 @@ class GGEMS_EXPORT GGEMSNavigator
 
     /*!
       \fn void MoveParticleToNavigator(void) const
-      \brief Particle particle to entry of navigator
+      \brief Project particle to entry of navigator
     */
     void MoveParticleToNavigator(void) const;
+
+    /*!
+      \fn void TrackParticleInNavigator(void) const
+      \brief Track particle within navigator
+    */
+    void TrackParticleInNavigator(void) const;
 
     /*!
       \fn void PrintInfos(void) const

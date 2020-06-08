@@ -300,15 +300,24 @@ void GGEMSManager::Run()
       GGcout("GGEMSManager", "Run", 1) << "      + Generating " << kNumberOfParticles << " particles..." << GGendl;
       source_manager.GetPrimaries(j, kNumberOfParticles);
 
-      // Step 2: Find closest navigator (phantom and detector) before track to in operation
-      GGcout("GGEMSManager", "Run", 1) << "      + Finding closest navigator..." << GGendl;
-      navigator_manager.FindClosestNavigator();
+      ///////////////
+      // MAKE LOOP UNTIL ALL PARTICLES ARE OUT_OF_WORLD
+      ///////////////
+      // for() {
+        // Step 2: Find closest navigator (phantom and detector) before track to in operation
+        GGcout("GGEMSManager", "Run", 1) << "      + Finding closest navigator..." << GGendl;
+        navigator_manager.FindClosestNavigator();
 
-      // Step 3: Track to in step, particles are projected to navigator
-      GGcout("GGEMSManager", "Run", 1) << "      + Moving particles to navigator..." << GGendl;
-      navigator_manager.TrackToIn();
+        // Step 3: Track to in step, particles are projected to navigator
+        GGcout("GGEMSManager", "Run", 1) << "      + Moving particles to navigator..." << GGendl;
+        navigator_manager.TrackToIn();
 
-      // Step X: Checking if all particles are dead
+        // Step 4: Track to out step, particles are tracked in navigator
+        GGcout("GGEMSManager", "Run", 1) << "      + Tracking particles in navigator..." << GGendl;
+        navigator_manager.TrackToOut();
+
+        // Step X: Checking if all particles are dead
+      //}
     }
   }
 

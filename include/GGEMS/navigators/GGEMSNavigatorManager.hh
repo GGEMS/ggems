@@ -136,6 +136,12 @@ class GGEMS_EXPORT GGEMSNavigatorManager
     */
     void TrackToIn(void) const;
 
+    /*!
+      \fn void TrackToOut(void) const
+      \brief Track particles inside navigator
+    */
+    void TrackToOut(void) const;
+
   private:
     /*!
       \fn bool CheckOverlap(std::shared_ptr<GGEMSNavigator> navigator_a, std::shared_ptr<GGEMSNavigator> navigator_b) const

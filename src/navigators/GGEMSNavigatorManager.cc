@@ -150,3 +150,13 @@ void GGEMSNavigatorManager::TrackToIn(void) const
   // Loop over all navigators and project particles
   for (auto&& i : navigators_) i->MoveParticleToNavigator();
 }
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSNavigatorManager::TrackToOut(void) const
+{
+  // Loop over all navigators and track particles
+  for (auto&& i : navigators_) i->TrackParticleInNavigator();
+}
