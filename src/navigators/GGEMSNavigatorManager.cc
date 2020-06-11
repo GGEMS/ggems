@@ -138,7 +138,7 @@ void GGEMSNavigatorManager::PrintInfos(void) const
 void GGEMSNavigatorManager::FindClosestNavigator(void) const
 {
   // Loop over all declared navigators and compute distance particle / navigator
-  for (auto&& i : navigators_) i->ComputeParticleNavigatorDistance();
+  for (auto&& i : navigators_) i->ParticleNavigatorDistance();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -148,7 +148,7 @@ void GGEMSNavigatorManager::FindClosestNavigator(void) const
 void GGEMSNavigatorManager::TrackToIn(void) const
 {
   // Loop over all navigators and project particles
-  for (auto&& i : navigators_) i->MoveParticleToNavigator();
+  for (auto&& i : navigators_) i->ParticleToNavigator();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -158,5 +158,5 @@ void GGEMSNavigatorManager::TrackToIn(void) const
 void GGEMSNavigatorManager::TrackToOut(void) const
 {
   // Loop over all navigators and track particles
-  for (auto&& i : navigators_) i->TrackParticleInNavigator();
+  for (auto&& i : navigators_) i->ParticleThroughNavigator();
 }

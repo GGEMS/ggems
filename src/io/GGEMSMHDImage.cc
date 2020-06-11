@@ -185,10 +185,10 @@ void GGEMSMHDImage::Read(std::string const& image_mhd_header_filename, std::shar
 
   // Computing the offset and bounding box
   for (GGuint i = 0; i < 3; ++i) {
-    solid_data_device->offsets_xyz_.s[i] = solid_data_device->number_of_voxels_xyz_.s[i] * solid_data_device->voxel_sizes_xyz_.s[i] * 0.5;
+    solid_data_device->position_xyz_.s[i] = solid_data_device->number_of_voxels_xyz_.s[i] * solid_data_device->voxel_sizes_xyz_.s[i] * 0.5;
 
-    solid_data_device->border_min_xyz_.s[i] = -solid_data_device->offsets_xyz_.s[i];
-    solid_data_device->border_max_xyz_.s[i] = solid_data_device->offsets_xyz_.s[i];
+    solid_data_device->border_min_xyz_.s[i] = -solid_data_device->position_xyz_.s[i];
+    solid_data_device->border_max_xyz_.s[i] = solid_data_device->position_xyz_.s[i];
   }
 
   // Release the pointer

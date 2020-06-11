@@ -149,6 +149,7 @@ class GGEMS_EXPORT GGEMSNavigatorManager
       \param navigator_b - point on a navigator B
       \brief check the overlap between navigator A and B
       \return true if there is an overlap and stop simulation
+      \todo method only for voxelized navigator, generalize it!!!
     */
     bool CheckOverlap(std::shared_ptr<GGEMSNavigator> navigator_a, std::shared_ptr<GGEMSNavigator> navigator_b) const;
 

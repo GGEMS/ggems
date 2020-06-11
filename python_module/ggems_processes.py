@@ -1,5 +1,6 @@
 from ggems_lib import *
 
+
 class GGEMSCrossSections(object):
     """ Class handling cross sections in GGEMS
     """

@@ -17,12 +17,12 @@
 #include "GGEMS/maths/GGEMSMatrixOperations.hh"
 
 /*!
-  \fn __kernel void move_to_voxelized_solid(__global GGEMSPrimaryParticles* primary_particle, __global GGEMSVoxelizedSolidData* voxelized_solid_data)
+  \fn __kernel void project_to_voxelized_solid(__global GGEMSPrimaryParticles* primary_particle, __global GGEMSVoxelizedSolidData* voxelized_solid_data)
   \param primary_particle - pointer to primary particles on OpenCL memory
   \param voxelized_solid_data - pointer to voxelized solid data
   \brief OpenCL kernel moving particles to voxelized solid
 */
-__kernel void move_to_voxelized_solid(
+__kernel void project_to_voxelized_solid(
   __global GGEMSPrimaryParticles* primary_particle,
   __global GGEMSVoxelizedSolidData* voxelized_solid_data)
 {
@@ -33,6 +33,7 @@ __kernel void move_to_voxelized_solid(
   // If yes, the particle is OUT_OF_WORLD and DEAD, so no tracking
   if (primary_particle->particle_navigator_distance_[kGlobalIndex] == OUT_OF_WORLD) {
     primary_particle->status_[kGlobalIndex] = DEAD;
+    return;
   }
 
   // Checking status of particle

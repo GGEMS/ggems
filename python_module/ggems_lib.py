@@ -12,6 +12,7 @@ elif sys.platform == "darwin":
 elif sys.platform == "win32":
     ggems_lib = ctypes.cdll.LoadLibrary("C:\\Users\\dbenoit\\Workspace\\GGEMS_OpenCL_build\\libggems.dll")
 
+
 class GGEMSVerbosity(object):
     """Set the verbosity of infos in GGEMS
     """

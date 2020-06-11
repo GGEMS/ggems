@@ -78,20 +78,6 @@ class GGEMS_EXPORT GGEMSNavigator
     void SetNavigatorName(std::string const& navigator_name);
 
     /*!
-      \fn void SetPhantomFile(std::string const& filename)
-      \param filename - filename of MHD file for phantom
-      \brief set the mhd filename for phantom
-    */
-    void SetPhantomFile(std::string const& filename);
-
-    /*!
-      \fn void SetRangeToMaterialFile(std::string const& range_data_filename)
-      \param range_data_filename - filename with range to material data
-      \brief set the range to material filename
-    */
-    void SetRangeToMaterialFile(std::string const& range_data_filename);
-
-    /*!
       \fn void SetGeometryTolerance(GGfloat const& distance, std::string const& unit)
       \param distance - geometry distance
       \param unit - unit of the distance
@@ -100,14 +86,14 @@ class GGEMS_EXPORT GGEMSNavigator
     void SetGeometryTolerance(GGfloat const& distance, std::string const& unit = "mm");
 
     /*!
-      \fn void SetOffset(GGfloat const offset_x, GGfloat const offset_y, GGfloat const offset_z, std::string const& unit = "mm")
-      \param offset_x - offset in X
-      \param offset_y - offset in Y
-      \param offset_z - offset in Z
+      \fn void SetPosition(GGfloat const& position_x, GGfloat const& position_y, GGfloat const& position_z, std::string const& unit = "mm")
+      \param position_x - position in X
+      \param position_y - position in Y
+      \param position_z - position in Z
       \param unit - unit of the distance
-      \brief set the offset of the phantom in X, Y and Z
+      \brief set the position of the phantom in X, Y and Z
     */
-    void SetOffset(GGfloat const offset_x, GGfloat const offset_y, GGfloat const offset_z, std::string const& unit = "mm");
+    void SetPosition(GGfloat const& position_x, GGfloat const& position_y, GGfloat const& position_z, std::string const& unit = "mm");
 
     /*!
       \fn inline std::string GetNavigatorName(void) const
@@ -145,22 +131,22 @@ class GGEMS_EXPORT GGEMSNavigator
     void SetNavigatorID(std::size_t const& navigator_id);
 
     /*!
-      \fn void ComputeParticleNavigatorDistance(void) const
+      \fn void ParticleNavigatorDistance(void) const
       \brief Compute distance between particle and navigator
     */
-    void ComputeParticleNavigatorDistance(void) const;
+    void ParticleNavigatorDistance(void) const;
 
     /*!
-      \fn void MoveParticleToNavigator(void) const
+      \fn void ParticleToNavigator(void) const
       \brief Project particle to entry of navigator
     */
-    void MoveParticleToNavigator(void) const;
+    void ParticleToNavigator(void) const;
 
     /*!
-      \fn void TrackParticleInNavigator(void) const
-      \brief Track particle within navigator
+      \fn void ParticleThroughNavigator(void) const
+      \brief Move particle through navigator
     */
-    void TrackParticleInNavigator(void) const;
+    void ParticleThroughNavigator(void) const;
 
     /*!
       \fn void PrintInfos(void) const
@@ -182,11 +168,8 @@ class GGEMS_EXPORT GGEMSNavigator
 
   protected:
     std::string navigator_name_; /*!< Name of the navigator */
-    std::string phantom_mhd_header_filename_; /*!< Filename of MHD file for phantom */
-    std::string range_data_filename_; /*!< Filename of file for range data */
     GGfloat geometry_tolerance_; /*!< Tolerance of geometry range [1mm;1nm] */
-    GGfloat3 offset_xyz_; /*!< Offset of the navigator in X, Y and Z */
-    bool is_offset_flag_; /*!< Apply offset */
+    GGfloat3 position_xyz_; /*!< Position of the navigator in X, Y and Z */
     std::size_t navigator_id_; /*!< Index of the navigator */
 
     std::shared_ptr<GGEMSSolid> solid_; /*!< Solid with geometric infos and label */
