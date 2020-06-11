@@ -1,5 +1,6 @@
 from ggems_lib import *
 
+
 class GGEMSSourceManager(object):
     """Class managing source in GGEMS
     """

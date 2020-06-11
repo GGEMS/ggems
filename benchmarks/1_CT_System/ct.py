@@ -18,29 +18,29 @@ materials_database_manager.set_materials('data/materials.txt')
 
 # ------------------------------------------------------------------------------
 # STEP 4: Phantoms, navigators and systems
-phantom_1 = GGEMSVoxelizedPhantomNavigatorImagery()
+phantom_1 = GGEMSVoxelizedNavigator()
 phantom_1.set_phantom_name('phantom_1')
 phantom_1.set_phantom_image('data/phantom_1.mhd')
 phantom_1.set_range_to_material('data/range_phantom_1.txt')
-phantom_1.set_offset(50.0, 25.0, 0.0, 'mm')
+phantom_1.set_position(50.0, 25.0, 0.0, 'mm')
 
-phantom_2 = GGEMSVoxelizedPhantomNavigatorImagery()
+phantom_2 = GGEMSVoxelizedNavigator()
 phantom_2.set_phantom_name('phantom_2')
 phantom_2.set_phantom_image('data/phantom_2.mhd')
 phantom_2.set_range_to_material('data/range_phantom_2.txt')
-phantom_2.set_offset(0.0, 25.0, 0.0, 'mm')
+phantom_2.set_position(0.0, 25.0, 0.0, 'mm')
 
-phantom_3 = GGEMSVoxelizedPhantomNavigatorImagery()
+phantom_3 = GGEMSVoxelizedNavigator()
 phantom_3.set_phantom_name('phantom_3')
 phantom_3.set_phantom_image('data/phantom_3.mhd')
 phantom_3.set_range_to_material('data/range_phantom_3.txt')
-phantom_3.set_offset(50.0, 25.0, 50.0, 'mm')
+phantom_3.set_position(50.0, 25.0, 50.0, 'mm')
 
-phantom_4 = GGEMSVoxelizedPhantomNavigatorImagery()
+phantom_4 = GGEMSVoxelizedNavigator()
 phantom_4.set_phantom_name('phantom_4')
 phantom_4.set_phantom_image('data/phantom_4.mhd')
 phantom_4.set_range_to_material('data/range_phantom_4.txt')
-phantom_4.set_offset(0.0, 25.0, 50.0, 'mm')
+phantom_4.set_position(0.0, 25.0, 50.0, 'mm')
 
 # ------------------------------------------------------------------------------
 # STEP 5: Physics
@@ -67,7 +67,7 @@ xray_source_1.set_source_particle_type('gamma')
 xray_source_1.set_number_of_particles(1)
 xray_source_1.set_position(-1000.0, 0.0, 0.0, 'mm')
 xray_source_1.set_rotation(0.0, 0.0, 0.0, 'deg')
-xray_source_1.set_beam_aperture(0.0, 'deg')
+xray_source_1.set_beam_aperture(1.0, 'deg')
 xray_source_1.set_focal_spot_size(0.0, 0.0, 0.0, 'mm')
 xray_source_1.set_polyenergy('data/spectrum_120kVp_2mmAl.dat')
 
@@ -79,7 +79,7 @@ xray_source_2.set_source_particle_type('gamma')
 xray_source_2.set_number_of_particles(1)
 xray_source_2.set_position(-1000.0, 0.0, 0.0, 'mm')
 xray_source_2.set_rotation(0.0, 90.0, 0.0, 'deg')
-xray_source_2.set_beam_aperture(0.0, 'deg')
+xray_source_2.set_beam_aperture(2.0, 'deg')
 xray_source_2.set_focal_spot_size(0.0, 0.0, 0.0, 'mm')
 xray_source_2.set_monoenergy(60.2, 'keV')
 

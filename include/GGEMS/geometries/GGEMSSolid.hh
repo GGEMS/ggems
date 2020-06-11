@@ -67,52 +67,56 @@ class GGEMS_EXPORT GGEMSSolid
     GGEMSSolid& operator=(GGEMSSolid const&& solid) = delete;
 
     /*!
-      \fn void LoadPhantomImage(std::string const& phantom_filename, std::string const& range_data_filename, std::shared_ptr<GGEMSMaterials> materials)
-      \param phantom_filename - name of the MHD file containing the phantom
-      \param range_data_filename - name of the file containing the range to material data
-      \param materials - pointer on material for a phantom
-      \brief load phantom image to GGEMS and create a volume of label in GGEMS
+      \fn void Initialize(std::shared_ptr<GGEMSMaterials> materials)
+      \param materials - pointer on GGEMS materials
+      \brief Initialize solid for geometric navigation
     */
-    void LoadPhantomImage(std::string const& phantom_filename, std::string const& range_data_filename, std::shared_ptr<GGEMSMaterials> materials);
+    virtual void Initialize(std::shared_ptr<GGEMSMaterials> materials) = 0;
 
     /*!
-      \fn void ApplyOffset(GGfloat3 const& offset_xyz)
-      \param offset_xyz - offset in X, Y and Z
-      \brief apply an offset defined by the user
+      \fn void SetPosition(GGfloat3 const& position_xyz)
+      \param position_xyz - position in X, Y and Z
+      \brief set a position for solid
     */
-    void ApplyOffset(GGfloat3 const& offset_xyz);
+    virtual void SetPosition(GGfloat3 const& position_xyz) = 0;
 
     /*!
       \fn void SetGeometryTolerance(GGfloat const& tolerance)
       \param tolerance - geometry tolerance for computation
       \brief set the geometry tolerance
     */
-    void SetGeometryTolerance(GGfloat const& tolerance);
+    virtual void SetGeometryTolerance(GGfloat const& tolerance) = 0;
 
     /*!
       \fn void SetNavigatorID(std::size_t const& navigator_id)
       \param navigator_id - index of the navigator
       \brief set the navigator index in solid data
     */
-    void SetNavigatorID(std::size_t const& navigator_id);
-
-    /*!
-      \fn void DistanceFromParticle(void)
-      \brief compute distance from particle position to solid and store this distance in OpenCL particle buffer
-    */
-    void DistanceFromParticle(void);
-
-    /*!
-      \fn void MoveToIn(void)
-      \brief Move particles at an entry of solid
-    */
-    void MoveToIn(void);
+    virtual void SetNavigatorID(std::size_t const& navigator_id) = 0;
 
     /*!
       \fn void PrintInfos(void) const
       \brief printing infos about solid
     */
-    void PrintInfos(void) const;
+    virtual void PrintInfos(void) const = 0;
+
+    /*!
+      \fn void Distance(void)
+      \brief compute distance from particle position to solid and store this distance in OpenCL particle buffer
+    */
+    virtual void Distance(void) = 0;
+
+    /*!
+      \fn void ProjectTo(void)
+      \brief Move particles at an entry of solid
+    */
+    virtual void ProjectTo(void) = 0;
+
+    /*!
+      \fn void TrackThrough(void)
+      \brief Track particles through solid
+    */
+    virtual void TrackThrough(void) = 0;
 
     /*!
       \fn inline std::shared_ptr<cl::Buffer> GetSolidData(void) const
@@ -121,133 +125,18 @@ class GGEMS_EXPORT GGEMSSolid
     */
     inline std::shared_ptr<cl::Buffer> GetSolidData(void) const {return solid_data_;};
 
-  private:
-    /*!
-      \fn template <typename T> void ConvertImageToLabel(std::string const& raw_data_filename, std::string const& range_data_filename, std::shared_ptr<GGEMSMaterials> materials)
-      \tparam T - type of data
-      \param raw_data_filename - raw data filename from mhd
-      \param range_data_filename - name of the file containing the range to material data
-      \param materials - pointer on material for a phantom
-      \brief convert image data to label data
-    */
-    template <typename T>
-    void ConvertImageToLabel(std::string const& raw_data_filename, std::string const& range_data_filename, std::shared_ptr<GGEMSMaterials> materials);
-
+  protected:
     /*!
       \fn void InitializeKernel(void)
       \brief Initialize kernel for particle solid distance
     */
-    void InitializeKernel(void);
+    virtual void InitializeKernel(void) = 0;
 
-  private:
+  protected:
     std::shared_ptr<cl::Buffer> solid_data_; /*!< Data about solid */
     std::shared_ptr<cl::Buffer> label_data_; /*!< Pointer storing the buffer about label data */
-    std::shared_ptr<cl::Kernel> kernel_distance_to_voxelized_solid_; /*!< OpenCL kernel computing distance between particles and voxelized solid */
-    std::shared_ptr<cl::Kernel> kernel_move_to_voxelized_solid_; /*!< OpenCL kernel moving particles to voxelized solid */
+    std::shared_ptr<cl::Kernel> kernel_distance_; /*!< OpenCL kernel computing distance between particles and solid */
+    std::shared_ptr<cl::Kernel> kernel_project_to_; /*!< OpenCL kernel moving particles to solid */
 };
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-template <typename T>
-void GGEMSSolid::ConvertImageToLabel(std::string const& raw_data_filename, std::string const& range_data_filename, std::shared_ptr<GGEMSMaterials> materials)
-{
-  GGcout("GGEMSSolid", "ConvertImageToLabel", 3) << "Converting image material data to label data..." << GGendl;
-
-  // Get the OpenCL manager
-  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
-
-  // Get the RAM manager
-  GGEMSRAMManager& ram_manager = GGEMSRAMManager::GetInstance();
-
-  // Checking if file exists
-  std::ifstream in_raw_stream(raw_data_filename, std::ios::in | std::ios::binary);
-  GGEMSFileStream::CheckInputStream(in_raw_stream, raw_data_filename);
-
-  // Get pointer on OpenCL device
-  GGEMSVoxelizedSolidData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSVoxelizedSolidData>(solid_data_, sizeof(GGEMSVoxelizedSolidData));
-
-  // Get information about mhd file
-  GGuint const kNumberOfVoxels = solid_data_device->number_of_voxels_;
-
-  // Release the pointer
-  opencl_manager.ReleaseDeviceBuffer(solid_data_, solid_data_device);
-
-  // Reading data to a tmp buffer
-  std::vector<T> tmp_raw_data;
-  tmp_raw_data.resize(kNumberOfVoxels);
-  in_raw_stream.read(reinterpret_cast<char*>(&tmp_raw_data[0]), kNumberOfVoxels * sizeof(T));
-
-  // Closing file
-  in_raw_stream.close();
-
-  // Allocating memory on OpenCL device
-  label_data_ = opencl_manager.Allocate(nullptr, kNumberOfVoxels * sizeof(GGuchar), CL_MEM_READ_WRITE);
-  ram_manager.AddGeometryRAMMemory(kNumberOfVoxels * sizeof(GGuchar));
-
-  // Get pointer on OpenCL device
-  GGuchar* label_data_device = opencl_manager.GetDeviceBuffer<GGuchar>(label_data_, kNumberOfVoxels * sizeof(GGuchar));
-
-  // Set value to max of GGuchar
-  std::fill(label_data_device, label_data_device + kNumberOfVoxels, std::numeric_limits<GGuchar>::max());
-
-  // Opening range data file
-  std::ifstream in_range_stream(range_data_filename, std::ios::in);
-  GGEMSFileStream::CheckInputStream(in_range_stream, range_data_filename);
-
-  // Values in the range file
-  GGdouble first_label_value = 0.0;
-  GGdouble last_label_value = 0.0;
-  GGuchar label_index = 0;
-  std::string material_name("");
-
-  // Reading range file
-  std::string line("");
-  while (std::getline(in_range_stream, line)) {
-    // Check if blank line
-    if (GGEMSTextReader::IsBlankLine(line)) continue;
-
-    // Getting the value in string stream
-    std::istringstream iss = GGEMSRangeReader::ReadRangeMaterial(line);
-    iss >> first_label_value >> last_label_value >> material_name;
-
-    // Adding the material
-    materials->AddMaterial(material_name);
-
-    // Setting the label
-    for (GGuint i = 0; i < kNumberOfVoxels; ++i) {
-      // Getting the value of phantom
-      GGdouble const kValue = static_cast<GGdouble>(tmp_raw_data[i]);
-      if (((kValue == first_label_value) && (kValue == last_label_value)) || ((kValue >= first_label_value) && (kValue < last_label_value))) {
-        label_data_device[i] = label_index;
-      }
-    }
-
-    // Increment the label index
-    ++label_index;
-  }
-
-  // Final loop checking if a value is still max of GGuchar
-  bool all_converted = true;
-  for (GGuint i = 0; i < kNumberOfVoxels; ++i) {
-    if (label_data_device[i] == std::numeric_limits<GGuchar>::max()) all_converted = false;
-  }
-
-  // Closing file
-  in_range_stream.close();
-  tmp_raw_data.clear();
-
-  // Release the pointer
-  opencl_manager.ReleaseDeviceBuffer(label_data_, label_data_device);
-
-  // Checking if all voxels converted
-  if (all_converted) {
-    GGcout("GGEMSSolid", "ConvertImageToLabel", 0) << "All your voxels are converted to label..." << GGendl;
-  }
-  else {
-    GGEMSMisc::ThrowException("GGEMSSolid", "ConvertImageToLabel", "Errors(s) in the range data file!!!");
-  }
-}
 
 #endif // End of GUARD_GGEMS_GEOMETRIES_GGEMSSOLID_HH

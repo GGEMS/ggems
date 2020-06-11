@@ -21,8 +21,6 @@
 
 - Compilation des kernels OpenCL lors de l'installation
 
-- Prévoir place pour les kernel customs
-
 - Site internet GGEMS + mailing list
 
 - Faire source indépendantes sans lancer la simulation complète -> phase space
@@ -48,3 +46,7 @@
   * etc...
 
 - Faire diagramme avec Drawio pour clarifier code
+
+- Destructeur Windows disparus ?
+
+- Restructuration de GGEMSSolid, pour volumes voxelizés et analytiques

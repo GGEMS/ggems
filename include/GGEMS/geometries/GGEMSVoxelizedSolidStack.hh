@@ -32,7 +32,7 @@ typedef struct PACKED GGEMSVoxelizedSolidData_t
   GGushort3 number_of_voxels_xyz_; /*!< Number of voxel in X, Y and Z [0, 65535] */
   GGuint number_of_voxels_; /*!< Total number of voxels */
   GGdouble3 voxel_sizes_xyz_; /*!< Size of voxels in X, Y and Z */
-  GGdouble3 offsets_xyz_; /*!< Offset of phantom in X, Y and Z */
+  GGdouble3 position_xyz_; /*!< Position of phantom in X, Y and Z */
   GGdouble3 border_min_xyz_; /*!< Min. of border in X, Y and Z */
   GGdouble3 border_max_xyz_; /*!< Max. of border in X, Y and Z */
   GGdouble tolerance_; /*!< Geometry tolerance */
