@@ -316,7 +316,7 @@ void GGEMSManager::Run()
         GGcout("GGEMSManager", "Run", 1) << "      + Tracking particles in navigator..." << GGendl;
         navigator_manager.TrackToOut();
 
-        // Step X: Checking if all particles are dead
+        // Step X: Checking if all particles are dead, go back to step 2
       //}
     }
   }

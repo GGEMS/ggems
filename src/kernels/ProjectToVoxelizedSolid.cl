@@ -1,5 +1,5 @@
 /*!
-  \file MoveToVoxelizedSolid.cl
+  \file ProjectToVoxelizedSolid.cl
 
   \brief OpenCL kernel moving particles to voxelized solid
 
@@ -11,7 +11,6 @@
 */
 
 #include "GGEMS/physics/GGEMSPrimaryParticlesStack.hh"
-#include "GGEMS/tools/GGEMSTypes.hh"
 #include "GGEMS/geometries/GGEMSVoxelizedSolidStack.hh"
 #include "GGEMS/geometries/GGEMSRayTracing.hh"
 #include "GGEMS/maths/GGEMSMatrixOperations.hh"
@@ -21,6 +20,7 @@
   \param primary_particle - pointer to primary particles on OpenCL memory
   \param voxelized_solid_data - pointer to voxelized solid data
   \brief OpenCL kernel moving particles to voxelized solid
+  \return no returned value
 */
 __kernel void project_to_voxelized_solid(
   __global GGEMSPrimaryParticles* primary_particle,

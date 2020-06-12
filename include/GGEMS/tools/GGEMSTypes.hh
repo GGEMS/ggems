@@ -14,8 +14,8 @@
 */
 
 #ifdef OPENCL_COMPILER // On OpenCL device
-#define OPENCL_FALSE 0
-#define OPENCL_TRUE 1
+#define OPENCL_FALSE 0 /*!< False for OpenCL */
+#define OPENCL_TRUE 1 /*!< True for OpenCL */
 
 #define GGchar char /*!< define a new type for char */
 #define GGchar2 char2 /*!< define a new type for char2 */
