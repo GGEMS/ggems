@@ -17,6 +17,20 @@
 #include "GGEMS/physics/GGEMSParticleConstants.hh"
 #include "GGEMS/physics/GGEMSEMProcessConstants.hh"
 
+/*!
+  \fn __kernel void get_primaries_ggems_xray_source(__global GGEMSPrimaryParticles* primary_particle, __global GGEMSRandom* random, GGuchar const particle_name, __global GGfloat const* energy_spectrum, __global GGfloat const* cdf, GGuint const number_of_energy_bins, GGfloat const aperture, GGfloat3 const focal_spot_size, __global GGfloat44 const* matrix_transformation)
+  \param primary_particle - buffer of primary particles
+  \param random - buffer for random number
+  \param particle_name - name of particle
+  \param energy_spectrum - energy spectrum
+  \param cdf - cumulative derivative function
+  \param number_of_energy_bins - number of energy bins
+  \param aperture - source aperture
+  \param focal_spot_size - focal spot size of xray-source
+  \param matrix_transformation - matrix storing information about axis
+  \brief Generate primaries for xray source
+  \return no returned value
+*/
 __kernel void get_primaries_ggems_xray_source(
   __global GGEMSPrimaryParticles* primary_particle,
   __global GGEMSRandom* random,

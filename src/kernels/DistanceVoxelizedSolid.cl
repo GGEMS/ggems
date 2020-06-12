@@ -1,5 +1,5 @@
 /*!
-  \file DistanceToVoxelizedSolid.cl
+  \file DistanceVoxelizedSolid.cl
 
   \brief OpenCL kernel computing distance between voxelized solid and particles
 
@@ -11,7 +11,6 @@
 */
 
 #include "GGEMS/physics/GGEMSPrimaryParticlesStack.hh"
-#include "GGEMS/tools/GGEMSTypes.hh"
 #include "GGEMS/geometries/GGEMSVoxelizedSolidStack.hh"
 #include "GGEMS/geometries/GGEMSRayTracing.hh"
 
@@ -20,6 +19,7 @@
   \param primary_particle - pointer to primary particles on OpenCL memory
   \param voxelized_solid_data - pointer to voxelized solid data
   \brief OpenCL kernel computing distance between particle and solid in navigator
+  \return no returned value
 */
 __kernel void distance_voxelized_solid(
   __global GGEMSPrimaryParticles* primary_particle,

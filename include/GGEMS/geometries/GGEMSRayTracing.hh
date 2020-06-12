@@ -15,7 +15,6 @@
 
 #ifdef OPENCL_COMPILER
 
-#include "GGEMS/tools/GGEMSTypes.hh"
 #include "GGEMS/physics/GGEMSParticleConstants.hh"
 #include "GGEMS/geometries/GGEMSGeometryConstants.hh"
 

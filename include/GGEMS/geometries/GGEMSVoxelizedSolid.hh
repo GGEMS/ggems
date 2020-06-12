@@ -24,6 +24,8 @@ class GGEMS_EXPORT GGEMSVoxelizedSolid : public GGEMSSolid
 {
   public:
     /*!
+      \param volume_header_filename - header file for volume
+      \param range_filename - file with range value
       \brief GGEMSVoxelizedSolid constructor
     */
     GGEMSVoxelizedSolid(std::string const& volume_header_filename, std::string const& range_filename);
@@ -63,6 +65,7 @@ class GGEMS_EXPORT GGEMSVoxelizedSolid : public GGEMSSolid
 
     /*!
       \fn void Initialize(std::shared_ptr<GGEMSMaterials> materials)
+      \param materials - pointer on materials
       \brief Initialize solid for geometric navigation
     */
     void Initialize(std::shared_ptr<GGEMSMaterials> materials) override;

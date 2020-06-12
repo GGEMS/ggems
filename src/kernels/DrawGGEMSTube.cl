@@ -12,6 +12,17 @@
 
 #include "GGEMS/tools/GGEMSTypes.hh"
 
+/*!
+  \fn __kernel void draw_ggems_tube(GGfloat3 const element_sizes, GGuint3 const phantom_dimensions, GGfloat3 const positions, GGfloat const label_value, GGfloat const height, GGfloat const radius,  __global GGchar* voxelized_phantom)
+  \param element_sizes - size of voxels
+  \param phantom_dimensions - dimension of phantom
+  \param positions - position of volume
+  \param label_value - label of volume
+  \param height - height of tube
+  \param radius - radius of tube
+  \param voxelized_phantom - buffer storing voxelized phantom
+  \brief Draw tube solid in voxelized image
+*/
 __kernel void draw_ggems_tube(
   GGfloat3 const element_sizes,
   GGuint3 const phantom_dimensions,
