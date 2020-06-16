@@ -48,5 +48,3 @@
 - Faire diagramme avec Drawio pour clarifier code
 
 - Destructeur Windows disparus ?
-
-- Restructuration de GGEMSSolid, pour volumes voxelizés et analytiques
