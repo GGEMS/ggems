@@ -137,6 +137,7 @@ class GGEMS_EXPORT GGEMSSolid
     std::shared_ptr<cl::Buffer> label_data_; /*!< Pointer storing the buffer about label data */
     std::shared_ptr<cl::Kernel> kernel_distance_; /*!< OpenCL kernel computing distance between particles and solid */
     std::shared_ptr<cl::Kernel> kernel_project_to_; /*!< OpenCL kernel moving particles to solid */
+    std::shared_ptr<cl::Kernel> kernel_track_through_; /*!< OpenCL kernel tracking particles through a solid */
 };
 
 #endif // End of GUARD_GGEMS_GEOMETRIES_GGEMSSOLID_HH

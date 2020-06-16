@@ -18,7 +18,7 @@
   \fn __kernel void distance_voxelized_solid(__global GGEMSPrimaryParticles* primary_particle, __global GGEMSVoxelizedSolidData* voxelized_solid_data)
   \param primary_particle - pointer to primary particles on OpenCL memory
   \param voxelized_solid_data - pointer to voxelized solid data
-  \brief OpenCL kernel computing distance between particle and solid in navigator
+  \brief OpenCL kernel computing distance between voxelized solid and particles
   \return no returned value
 */
 __kernel void distance_voxelized_solid(
