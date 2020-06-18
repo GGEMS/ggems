@@ -138,18 +138,18 @@ class GGEMS_EXPORT GGEMSMaterials
     inline std::size_t GetNumberOfMaterials(void) const {return materials_.size();}
 
     /*!
-      \fn inline std::shared_ptr<cl::Buffer> GetMaterialTables(void) const
+      \fn inline std::weak_ptr<cl::Buffer> GetMaterialTables(void) const
       \return the pointer on material tables on OpenCL device
       \brief get the pointer on material tables on OpenCL device
     */
-    inline std::shared_ptr<cl::Buffer> GetMaterialTables(void) const {return material_tables_;}
+    inline std::weak_ptr<cl::Buffer> GetMaterialTables(void) const {return material_tables_cl_;}
 
     /*!
       \fn iinline std::shared_ptr<GGEMSRangeCuts> GetRangeCuts(void) const
       \brief get the pointer on range cuts
       \return the pointer on range cuts
     */
-    inline std::shared_ptr<GGEMSRangeCuts> GetRangeCuts(void) const {return range_cuts_;}
+    inline std::weak_ptr<GGEMSRangeCuts> GetRangeCuts(void) const {return range_cuts_cl_;}
 
     /*!
       \fn void SetDistanceCut(std::string const& particle_name, GGfloat const& value, std::string const& unit)
@@ -181,8 +181,8 @@ class GGEMS_EXPORT GGEMSMaterials
 
   private:
     std::vector<std::string> materials_; /*!< Defined material for a phantom */
-    std::shared_ptr<cl::Buffer> material_tables_; /*!< Material tables on OpenCL device */
-    std::shared_ptr<GGEMSRangeCuts> range_cuts_; /*!< Cut for particles */
+    std::shared_ptr<cl::Buffer> material_tables_cl_; /*!< Material tables on OpenCL device */
+    std::shared_ptr<GGEMSRangeCuts> range_cuts_cl_; /*!< Cut for particles */
 };
 
 /*!

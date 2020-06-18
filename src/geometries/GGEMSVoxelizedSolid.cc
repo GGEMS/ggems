@@ -14,6 +14,7 @@
 #include "GGEMS/io/GGEMSMHDImage.hh"
 #include "GGEMS/sources/GGEMSSourceManager.hh"
 #include "GGEMS/physics/GGEMSParticles.hh"
+#include "GGEMS/physics/GGEMSCrossSections.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -33,7 +34,7 @@ GGEMSVoxelizedSolid::GGEMSVoxelizedSolid(std::string const& volume_header_filena
   GGEMSRAMManager& ram_manager = GGEMSRAMManager::GetInstance();
 
   // Allocation of memory on OpenCL device for header data
-  solid_data_ = opencl_manager.Allocate(nullptr, sizeof(GGEMSVoxelizedSolidData), CL_MEM_READ_WRITE);
+  solid_data_cl_ = opencl_manager.Allocate(nullptr, sizeof(GGEMSVoxelizedSolidData), CL_MEM_READ_WRITE);
   ram_manager.AddGeometryRAMMemory(sizeof(GGEMSVoxelizedSolidData));
 
   // Initializing kernels
@@ -67,9 +68,9 @@ void GGEMSVoxelizedSolid::InitializeKernel(void)
   std::string const kFilename3 = kOpenCLKernelPath + "/TrackThroughVoxelizedSolid.cl";
 
   // Compiling the kernels
-  kernel_distance_ = opencl_manager.CompileKernel(kFilename1, "distance_voxelized_solid");
-  kernel_project_to_ = opencl_manager.CompileKernel(kFilename2, "project_to_voxelized_solid");
-  kernel_track_through_ = opencl_manager.CompileKernel(kFilename3, "track_through_voxelized_solid");
+  kernel_distance_cl_ = opencl_manager.CompileKernel(kFilename1, "distance_voxelized_solid");
+  kernel_project_to_cl_ = opencl_manager.CompileKernel(kFilename2, "project_to_voxelized_solid");
+  kernel_track_through_cl_ = opencl_manager.CompileKernel(kFilename3, "track_through_voxelized_solid");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -95,7 +96,7 @@ void GGEMSVoxelizedSolid::SetPosition(GGfloat3 const& position_xyz)
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
   // Get pointer on OpenCL device
-  GGEMSVoxelizedSolidData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSVoxelizedSolidData>(solid_data_, sizeof(GGEMSVoxelizedSolidData));
+  GGEMSVoxelizedSolidData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSVoxelizedSolidData>(solid_data_cl_.get(), sizeof(GGEMSVoxelizedSolidData));
 
   for (GGuint i = 0; i < 3; ++i ) {
     // Offset
@@ -107,7 +108,7 @@ void GGEMSVoxelizedSolid::SetPosition(GGfloat3 const& position_xyz)
   }
 
   // Release the pointer
-  opencl_manager.ReleaseDeviceBuffer(solid_data_, solid_data_device);
+  opencl_manager.ReleaseDeviceBuffer(solid_data_cl_.get(), solid_data_device);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -120,13 +121,13 @@ void GGEMSVoxelizedSolid::SetGeometryTolerance(GGfloat const& tolerance)
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
   // Get pointer on OpenCL device
-  GGEMSVoxelizedSolidData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSVoxelizedSolidData>(solid_data_, sizeof(GGEMSVoxelizedSolidData));
+  GGEMSVoxelizedSolidData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSVoxelizedSolidData>(solid_data_cl_.get(), sizeof(GGEMSVoxelizedSolidData));
 
   // Storing the geometry tolerance
   solid_data_device->tolerance_ = tolerance;
 
   // Release the pointer
-  opencl_manager.ReleaseDeviceBuffer(solid_data_, solid_data_device);
+  opencl_manager.ReleaseDeviceBuffer(solid_data_cl_.get(), solid_data_device);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -139,13 +140,13 @@ void GGEMSVoxelizedSolid::SetNavigatorID(std::size_t const& navigator_id)
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
   // Get pointer on OpenCL device
-  GGEMSVoxelizedSolidData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSVoxelizedSolidData>(solid_data_, sizeof(GGEMSVoxelizedSolidData));
+  GGEMSVoxelizedSolidData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSVoxelizedSolidData>(solid_data_cl_.get(), sizeof(GGEMSVoxelizedSolidData));
 
   // Storing the geometry tolerance
   solid_data_device->navigator_id_ = static_cast<GGuchar>(navigator_id);
 
   // Release the pointer
-  opencl_manager.ReleaseDeviceBuffer(solid_data_, solid_data_device);
+  opencl_manager.ReleaseDeviceBuffer(solid_data_cl_.get(), solid_data_device);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -158,7 +159,7 @@ void GGEMSVoxelizedSolid::PrintInfos(void) const
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
   // Get pointer on OpenCL device
-  GGEMSVoxelizedSolidData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSVoxelizedSolidData>(solid_data_, sizeof(GGEMSVoxelizedSolidData));
+  GGEMSVoxelizedSolidData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSVoxelizedSolidData>(solid_data_cl_.get(), sizeof(GGEMSVoxelizedSolidData));
 
   GGcout("GGEMSVoxelizedSolid", "PrintInfos", 0) << GGendl;
   GGcout("GGEMSVoxelizedSolid", "PrintInfos", 0) << "GGEMSVoxelizedSolid Infos:" << GGendl;
@@ -176,7 +177,7 @@ void GGEMSVoxelizedSolid::PrintInfos(void) const
   GGcout("GGEMSVoxelizedSolid", "PrintInfos", 0) << GGendl;
 
   // Release the pointer
-  opencl_manager.ReleaseDeviceBuffer(solid_data_, solid_data_device);
+  opencl_manager.ReleaseDeviceBuffer(solid_data_cl_.get(), solid_data_device);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -187,29 +188,30 @@ void GGEMSVoxelizedSolid::Distance(void)
 {
   // Getting the OpenCL manager
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
-  cl::CommandQueue* queue = opencl_manager.GetCommandQueue();
-  cl::Event* event = opencl_manager.GetEvent();
+  cl::CommandQueue* queue_cl = opencl_manager.GetCommandQueue();
+  cl::Event* event_cl = opencl_manager.GetEvent();
 
   // Getting the buffer of primary particles from source
   GGEMSSourceManager& source_manager = GGEMSSourceManager::GetInstance();
   GGEMSParticles* particles = source_manager.GetParticles();
-  cl::Buffer* primary_particles = particles->GetPrimaryParticles();
+  cl::Buffer* primary_particles_cl = particles->GetPrimaryParticles();
 
   // Getting the number of particles
   GGulong const kNumberOfParticles = particles->GetNumberOfParticles();
 
   // Set parameters for kernel
-  kernel_distance_->setArg(0, *primary_particles);
-  kernel_distance_->setArg(1, *solid_data_);
+  std::shared_ptr<cl::Kernel> kernel_cl = kernel_distance_cl_.lock();
+  kernel_cl->setArg(0, *primary_particles_cl);
+  kernel_cl->setArg(1, *solid_data_cl_);
 
   // Define the number of work-item to launch
   cl::NDRange global(kNumberOfParticles);
   cl::NDRange offset(0);
 
   // Launching kernel
-  cl_int kernel_status = queue->enqueueNDRangeKernel(*kernel_distance_, offset, global, cl::NullRange, nullptr, event);
+  cl_int kernel_status = queue_cl->enqueueNDRangeKernel(*kernel_cl, offset, global, cl::NullRange, nullptr, event_cl);
   opencl_manager.CheckOpenCLError(kernel_status, "GGEMSVoxelizedSolid", "Distance");
-  queue->finish(); // Wait until the kernel status is finish
+  queue_cl->finish(); // Wait until the kernel status is finish
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -220,51 +222,82 @@ void GGEMSVoxelizedSolid::ProjectTo(void)
 {
   // Getting the OpenCL manager
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
-  cl::CommandQueue* queue = opencl_manager.GetCommandQueue();
-  cl::Event* event = opencl_manager.GetEvent();
+  cl::CommandQueue* queue_cl = opencl_manager.GetCommandQueue();
+  cl::Event* event_cl = opencl_manager.GetEvent();
 
   // Getting the buffer of primary particles from source
   GGEMSSourceManager& source_manager = GGEMSSourceManager::GetInstance();
   GGEMSParticles* particles = source_manager.GetParticles();
-  cl::Buffer* primary_particles = particles->GetPrimaryParticles();
+  cl::Buffer* primary_particles_cl = particles->GetPrimaryParticles();
 
   // Getting the number of particles
   GGulong const kNumberOfParticles = particles->GetNumberOfParticles();
 
   // Set parameters for kernel
-  kernel_project_to_->setArg(0, *primary_particles);
-  kernel_project_to_->setArg(1, *solid_data_);
+  std::shared_ptr<cl::Kernel> kernel_cl = kernel_project_to_cl_.lock();
+  kernel_cl->setArg(0, *primary_particles_cl);
+  kernel_cl->setArg(1, *solid_data_cl_);
 
   // Define the number of work-item to launch
   cl::NDRange global(kNumberOfParticles);
   cl::NDRange offset(0);
 
   // Launching kernel
-  cl_int kernel_status = queue->enqueueNDRangeKernel(*kernel_project_to_, offset, global, cl::NullRange, nullptr, event);
+  cl_int kernel_status = queue_cl->enqueueNDRangeKernel(*kernel_cl, offset, global, cl::NullRange, nullptr, event_cl);
   opencl_manager.CheckOpenCLError(kernel_status, "GGEMSVoxelizedSolid", "ProjectTo");
-  queue->finish(); // Wait until the kernel status is finish
+  queue_cl->finish(); // Wait until the kernel status is finish
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSVoxelizedSolid::TrackThrough(void)
+void GGEMSVoxelizedSolid::TrackThrough(std::weak_ptr<GGEMSCrossSections> cross_sections, std::weak_ptr<GGEMSMaterials> materials)
 {
   // Getting the OpenCL manager
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+  cl::CommandQueue* queue_cl = opencl_manager.GetCommandQueue();
+  cl::Event* event_cl = opencl_manager.GetEvent();
+
+  // Getting the buffer of primary particles from source
+  GGEMSSourceManager& source_manager = GGEMSSourceManager::GetInstance();
+  GGEMSParticles* particles = source_manager.GetParticles();
+  cl::Buffer* primary_particles_cl = particles->GetPrimaryParticles();
+
+  // Getting OpenCL buffer for cross section
+  cl::Buffer* cross_sections_cl = cross_sections.lock()->GetCrossSections();
+
+  // Getting the number of particles
+  GGulong const kNumberOfParticles = particles->GetNumberOfParticles();
+
+  // Set parameters for kernel
+  std::shared_ptr<cl::Kernel> kernel_cl = kernel_track_through_cl_.lock();
+  kernel_cl->setArg(0, *primary_particles_cl);
+  kernel_cl->setArg(1, *solid_data_cl_);
+  //kernel_cl->setArg(2, *);
+  //kernel_cl->setArg(3, *);
+
+  // Define the number of work-item to launch
+  cl::NDRange global(kNumberOfParticles);
+  cl::NDRange offset(0);
+
+  // Launching kernel
+  //cl_int kernel_status = queue->enqueueNDRangeKernel(*kernel_cl, offset, global, cl::NullRange, nullptr, event_cl);
+  //opencl_manager.CheckOpenCLError(kernel_status, "GGEMSVoxelizedSolid", "TrackThrough");
+  //queue_cl->finish(); // Wait until the kernel status is finish
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSVoxelizedSolid::LoadVolumeImage(std::shared_ptr<GGEMSMaterials> materials)
+void GGEMSVoxelizedSolid::LoadVolumeImage(std::weak_ptr<GGEMSMaterials> materials)
 {
   GGcout("GGEMSVoxelizedSolid", "LoadVolumeImage", 3) << "Loading volume image from mhd file..." << GGendl;
 
   // Read MHD input file
   GGEMSMHDImage mhd_input_phantom;
-  mhd_input_phantom.Read(volume_header_filename_, solid_data_);
+  mhd_input_phantom.Read(volume_header_filename_, solid_data_cl_);
 
   // Get the name of raw file from mhd reader
   std::string const kRawFilename = mhd_input_phantom.GetRawMDHfilename();

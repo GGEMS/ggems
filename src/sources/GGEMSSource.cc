@@ -29,8 +29,7 @@ GGEMSSource::GGEMSSource(GGEMSSource* source)
 : source_name_(""),
   number_of_particles_(0),
   number_of_particles_in_batch_(0),
-  particle_type_(99),
-  kernel_get_primaries_(nullptr)
+  particle_type_(99)
 {
   GGcout("GGEMSSource", "GGEMSSource", 3) << "Allocation of GGEMSSource..." << GGendl;
 

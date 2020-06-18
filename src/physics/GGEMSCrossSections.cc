@@ -38,7 +38,7 @@ GGEMSCrossSections::GGEMSCrossSections(void)
   GGEMSRAMManager& ram_manager = GGEMSRAMManager::GetInstance();
 
   // Allocating memory for cross section tables
-  particle_cross_sections_ = opencl_manager.Allocate(nullptr, sizeof(GGEMSParticleCrossSections), CL_MEM_READ_WRITE);
+  particle_cross_sections_cl_ = opencl_manager.Allocate(nullptr, sizeof(GGEMSParticleCrossSections), CL_MEM_READ_WRITE);
   ram_manager.AddProcessRAMMemory(sizeof(GGEMSParticleCrossSections));
 }
 
@@ -119,7 +119,7 @@ void GGEMSCrossSections::Initialize(GGEMSMaterials const* materials)
     GGEMSMisc::ThrowException("GGEMSCrossSections", "Initialize", oss.str());
   }
 
-  GGEMSParticleCrossSections* particle_cross_sections_device = opencl_manager.GetDeviceBuffer<GGEMSParticleCrossSections>(particle_cross_sections_, sizeof(GGEMSParticleCrossSections));
+  GGEMSParticleCrossSections* particle_cross_sections_device = opencl_manager.GetDeviceBuffer<GGEMSParticleCrossSections>(particle_cross_sections_cl_.get(), sizeof(GGEMSParticleCrossSections));
 
   // Storing information for process manager
   GGushort const kNBins = process_manager.GetCrossSectionTableNumberOfBins();
@@ -147,11 +147,11 @@ void GGEMSCrossSections::Initialize(GGEMSMaterials const* materials)
   }
 
   // Release pointer
-  opencl_manager.ReleaseDeviceBuffer(particle_cross_sections_, particle_cross_sections_device);
+  opencl_manager.ReleaseDeviceBuffer(particle_cross_sections_cl_.get(), particle_cross_sections_device);
 
   // Loop over the activated physic processes and building tables
   for (auto&& i : em_processes_list_)
-    i->BuildCrossSectionTables(particle_cross_sections_, materials->GetMaterialTables());
+    i->BuildCrossSectionTables(particle_cross_sections_cl_, materials->GetMaterialTables());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -163,7 +163,7 @@ GGfloat GGEMSCrossSections::GetPhotonCrossSection(std::string const& process_nam
   // Get the OpenCL manager
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
-  GGEMSParticleCrossSections* particle_cross_sections_device = opencl_manager.GetDeviceBuffer<GGEMSParticleCrossSections>(particle_cross_sections_, sizeof(GGEMSParticleCrossSections));
+  GGEMSParticleCrossSections* particle_cross_sections_device = opencl_manager.GetDeviceBuffer<GGEMSParticleCrossSections>(particle_cross_sections_cl_.get(), sizeof(GGEMSParticleCrossSections));
 
   // Get min and max energy in the table, and number of bins
   GGfloat const kMinEnergy = particle_cross_sections_device->min_energy_;
@@ -223,7 +223,7 @@ GGfloat GGEMSCrossSections::GetPhotonCrossSection(std::string const& process_nam
   GGfloat const kCSB = particle_cross_sections_device->photon_cross_sections_[process_id][kEnergyBin+1 + kNumberOfBins*mat_id];
 
   // Release pointer
-  opencl_manager.ReleaseDeviceBuffer(particle_cross_sections_, particle_cross_sections_device);
+  opencl_manager.ReleaseDeviceBuffer(particle_cross_sections_cl_.get(), particle_cross_sections_device);
 
   GGfloat const kCS = LinearInterpolation(kEnergyA, kCSA, kEnergyB, kCSB, kEnergyMeV);
 

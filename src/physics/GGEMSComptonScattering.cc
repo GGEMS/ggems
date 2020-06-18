@@ -51,7 +51,7 @@ GGEMSComptonScattering::~GGEMSComptonScattering(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSComptonScattering::BuildCrossSectionTables(std::shared_ptr<cl::Buffer> particle_cross_sections, std::shared_ptr<cl::Buffer> material_tables)
+void GGEMSComptonScattering::BuildCrossSectionTables(std::weak_ptr<cl::Buffer> particle_cross_sections, std::weak_ptr<cl::Buffer> material_tables)
 {
   GGcout("GGEMSComptonScattering", "BuildCrossSectionTables", 3) << "Building cross section table for Compton scattering..." << GGendl;
 

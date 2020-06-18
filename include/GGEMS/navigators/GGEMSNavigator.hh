@@ -103,25 +103,25 @@ class GGEMS_EXPORT GGEMSNavigator
     inline std::string GetNavigatorName(void) const {return navigator_name_;}
 
     /*!
-      \fn inline std::shared_ptr<GGEMSSolid> GetSolid(void) const
+      \fn inline std::weak_ptr<GGEMSSolid> GetSolid(void) const
       \brief get the pointer on solid
       \return the pointer on solid
     */
-    inline std::shared_ptr<GGEMSSolid> GetSolid(void) const {return solid_;}
+    inline std::weak_ptr<GGEMSSolid> GetSolid(void) const {return solid_;}
 
     /*!
-      \fn inline std::shared_ptr<GGEMSMaterials> GetMaterials(void) const
+      \fn inline std::weak_ptr<GGEMSMaterials> GetMaterials(void) const
       \brief get the pointer on materials
       \return the pointer on materials
     */
-    inline std::shared_ptr<GGEMSMaterials> GetMaterials(void) const {return materials_;}
+    inline std::weak_ptr<GGEMSMaterials> GetMaterials(void) const {return materials_;}
 
     /*!
-      \fn inline std::shared_ptr<GGEMSCrossSections> GetCrossSections(void) const
+      \fn inline std::weak_ptr<GGEMSCrossSections> GetCrossSections(void) const
       \brief get the pointer on cross sections
       \return the pointer on cross sections
     */
-    inline std::shared_ptr<GGEMSCrossSections> GetCrossSections(void) const {return cross_sections_;}
+    inline std::weak_ptr<GGEMSCrossSections> GetCrossSections(void) const {return cross_sections_;}
 
     /*!
       \fn void SetNavigatorID(std::size_t const& navigator_id)

@@ -17,11 +17,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 GGEMSSolid::GGEMSSolid(void)
-: solid_data_(nullptr),
-  label_data_(nullptr),
-  kernel_distance_(nullptr),
-  kernel_project_to_(nullptr),
-  kernel_track_through_(nullptr)
+: solid_data_cl_(nullptr),
+  label_data_cl_(nullptr)
 {
   GGcout("GGEMSSolid", "GGEMSSolid", 3) << "Allocation of GGEMSSolid..." << GGendl;
 }

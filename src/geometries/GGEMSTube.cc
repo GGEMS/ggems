@@ -95,7 +95,7 @@ void GGEMSTube::Initialize(void)
 
   // Get the data type and compiling kernel
   std::string const kDataType = "-D" + volume_creator_manager.GetDataType();
-  kernel_draw_volume_ = opencl_manager.CompileKernel(kFilename, "draw_ggems_tube", nullptr, const_cast<char*>(kDataType.c_str()));
+  kernel_draw_volume_cl_ = opencl_manager.CompileKernel(kFilename, "draw_ggems_tube", nullptr, const_cast<char*>(kDataType.c_str()));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -113,8 +113,8 @@ void GGEMSTube::Draw(void)
   GGEMSVolumeCreatorManager& volume_creator_manager = GGEMSVolumeCreatorManager::GetInstance();
 
   // Get command queue and event
-  cl::CommandQueue* p_queue = opencl_manager.GetCommandQueue();
-  cl::Event* p_event = opencl_manager.GetEvent();
+  cl::CommandQueue* p_queue_cl = opencl_manager.GetCommandQueue();
+  cl::Event* p_event_cl = opencl_manager.GetEvent();
 
   // Get parameters from phantom creator
   GGfloat3 const kVoxelSizes = volume_creator_manager.GetElementsSizes();
@@ -123,22 +123,23 @@ void GGEMSTube::Draw(void)
   cl::Buffer* voxelized_phantom = volume_creator_manager.GetVoxelizedVolume();
 
   // Set parameters for kernel
-  kernel_draw_volume_->setArg(0, kVoxelSizes);
-  kernel_draw_volume_->setArg(1, kPhantomDimensions);
-  kernel_draw_volume_->setArg(2, positions_);
-  kernel_draw_volume_->setArg(3, label_value_);
-  kernel_draw_volume_->setArg(4, height_);
-  kernel_draw_volume_->setArg(5, radius_);
-  kernel_draw_volume_->setArg(6, *voxelized_phantom);
+  std::shared_ptr<cl::Kernel> kernel_cl = kernel_draw_volume_cl_.lock();
+  kernel_cl->setArg(0, kVoxelSizes);
+  kernel_cl->setArg(1, kPhantomDimensions);
+  kernel_cl->setArg(2, positions_);
+  kernel_cl->setArg(3, label_value_);
+  kernel_cl->setArg(4, height_);
+  kernel_cl->setArg(5, radius_);
+  kernel_cl->setArg(6, *voxelized_phantom);
 
   // Define the number of work-item to launch
   cl::NDRange global(kNumberThreads);
   cl::NDRange offset(0);
 
   // Launching kernel
-  cl_int kernel_status = p_queue->enqueueNDRangeKernel(*kernel_draw_volume_, offset, global, cl::NullRange, nullptr, p_event);
+  cl_int kernel_status = p_queue_cl->enqueueNDRangeKernel(*kernel_cl, offset, global, cl::NullRange, nullptr, p_event_cl);
   opencl_manager.CheckOpenCLError(kernel_status, "GGEMSTube", "Draw Tube");
-  p_queue->finish(); // Wait until the kernel status is finish
+  p_queue_cl->finish(); // Wait until the kernel status is finish
 
   // Displaying time in kernel
   opencl_manager.DisplayElapsedTimeInKernel("Draw Tube");

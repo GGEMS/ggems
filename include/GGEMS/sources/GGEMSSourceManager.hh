@@ -150,8 +150,6 @@ class GGEMS_EXPORT GGEMSSourceManager
 
   private: // Source infos
     std::vector<std::shared_ptr<GGEMSSource>> sources_; /*!< Pointer on GGEMS sources */
-
-  private: // Particle and random infos
     std::shared_ptr<GGEMSParticles> particles_; /*!< Pointer on particle management */
     std::shared_ptr<GGEMSPseudoRandomGenerator> pseudo_random_generator_; /*!< Pointer on pseudo random generator */
 };

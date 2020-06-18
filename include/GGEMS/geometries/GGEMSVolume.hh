@@ -106,7 +106,7 @@ class GGEMS_EXPORT GGEMSVolume
   protected:
     GGfloat label_value_; /*!< Value of label in volume */
     GGfloat3 positions_; /*!< Position of volume */
-    std::shared_ptr<cl::Kernel> kernel_draw_volume_; /*!< Kernel drawing solid using OpenCL */
+    std::weak_ptr<cl::Kernel> kernel_draw_volume_cl_; /*!< Kernel drawing solid using OpenCL */
 };
 
 #endif // End of GUARD_GGEMS_GEOMETRIES_GGEMSVOLUME_HH

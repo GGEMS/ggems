@@ -71,7 +71,7 @@ for process_id in process_list:
 # Intialize cross section tables with previous materials
 cross_sections.initialize(materials)
 
-# Defining 1D X-axis buffer (energy in keV, from 10 to 800 keV, and step of 1 keV)
+# Defining 1D X-axis buffer (energy in keV, from 10 to 1000 keV, and step of 1 keV)
 x = np.arange(10.0, 1000.0, 1.0)
 
 # Defining 3D Y-axis buffer (process, material, cross-section in cm2.g-1)

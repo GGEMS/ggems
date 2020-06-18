@@ -203,13 +203,12 @@ class GGEMS_EXPORT GGEMSRangeCuts
     GGfloat ComputeLossPositron(GGuchar const& atomic_number, GGfloat const& energy) const;
 
     /*!
-      \fn GGfloat ConvertLengthToEnergyCut(std::shared_ptr<GGEMSLogEnergyTable> range_table, GGfloat const& length_cut) const
-      \param range_table - cross section or loss pable of a particle
+      \fn GGfloat ConvertLengthToEnergyCut(GGfloat const& length_cut) const
       \param length_cut - length cut of the particle
       \return converted cut
       \brief convert length to energy cut
     */
-    GGfloat ConvertLengthToEnergyCut(std::shared_ptr<GGEMSLogEnergyTable> range_table, GGfloat const& length_cut) const;
+    GGfloat ConvertLengthToEnergyCut(GGfloat const& length_cut) const;
 
   private:
     GGfloat min_energy_; /*!< Minimum energy of cross section table */
@@ -228,7 +227,7 @@ class GGEMS_EXPORT GGEMSRangeCuts
     GGfloat distance_cut_positron_; /*!< Positron cut in length */
     EnergyCutUMap energy_cuts_positron_; /*!< List of energy cuts for Positron a material */
 
-    std::shared_ptr<GGEMSLogEnergyTable> range_table_material_; /*!< Table of dE/dX for in material */
+    std::unique_ptr<GGEMSLogEnergyTable> range_table_material_; /*!< Table of dE/dX for in material */
     std::vector<std::shared_ptr<GGEMSLogEnergyTable>> loss_table_dedx_table_elements_; /*!< Table of dE/dX for each element in materials */
 };
 
