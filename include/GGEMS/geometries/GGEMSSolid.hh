@@ -113,17 +113,19 @@ class GGEMS_EXPORT GGEMSSolid
     virtual void ProjectTo(void) = 0;
 
     /*!
-      \fn void TrackThrough(void)
+      \fn void TrackThrough(std::weak_ptr<GGEMSCrossSections> cross_sections, std::weak_ptr<GGEMSMaterials> materials)
+      \param cross_sections - pointer storing cross sections values
+      \param materials - pointer storing materials values
       \brief Track particles through solid
     */
-    virtual void TrackThrough(void) = 0;
+    virtual void TrackThrough(std::weak_ptr<GGEMSCrossSections> cross_sections, std::weak_ptr<GGEMSMaterials> materials) = 0;
 
     /*!
-      \fn inline std::shared_ptr<cl::Buffer> GetSolidData(void) const
+      \fn inline cl::Buffer* GetSolidData(void) const
       \brief get the informations about the solid geometry
       \return header data OpenCL pointer about solid
     */
-    inline std::shared_ptr<cl::Buffer> GetSolidData(void) const {return solid_data_;};
+    inline cl::Buffer* GetSolidData(void) const {return solid_data_cl_.get();};
 
   protected:
     /*!
@@ -133,11 +135,11 @@ class GGEMS_EXPORT GGEMSSolid
     virtual void InitializeKernel(void) = 0;
 
   protected:
-    std::shared_ptr<cl::Buffer> solid_data_; /*!< Data about solid */
-    std::shared_ptr<cl::Buffer> label_data_; /*!< Pointer storing the buffer about label data */
-    std::shared_ptr<cl::Kernel> kernel_distance_; /*!< OpenCL kernel computing distance between particles and solid */
-    std::shared_ptr<cl::Kernel> kernel_project_to_; /*!< OpenCL kernel moving particles to solid */
-    std::shared_ptr<cl::Kernel> kernel_track_through_; /*!< OpenCL kernel tracking particles through a solid */
+    std::shared_ptr<cl::Buffer> solid_data_cl_; /*!< Data about solid */
+    std::shared_ptr<cl::Buffer> label_data_cl_; /*!< Pointer storing the buffer about label data */
+    std::weak_ptr<cl::Kernel> kernel_distance_cl_; /*!< OpenCL kernel computing distance between particles and solid */
+    std::weak_ptr<cl::Kernel> kernel_project_to_cl_; /*!< OpenCL kernel moving particles to solid */
+    std::weak_ptr<cl::Kernel> kernel_track_through_cl_; /*!< OpenCL kernel tracking particles through a solid */
 };
 
 #endif // End of GUARD_GGEMS_GEOMETRIES_GGEMSSOLID_HH

@@ -97,6 +97,13 @@ class GGEMS_EXPORT GGEMSCrossSections
     inline GGEMSEMProcessesList GetProcessesList(void) const {return em_processes_list_;}
 
     /*!
+      \fn inline cl::Buffer* GetCrossSections(void) const
+      \return pointer to OpenCL buffer storing cross sections
+      \brief return the pointer to OpenCL buffer storing cross sections
+    */
+    inline cl::Buffer* GetCrossSections(void) const {return particle_cross_sections_cl_.get();};
+
+    /*!
       \fn GGfloat GetPhotonCrossSection(std::string const& process_name, std::string const& material_name, GGfloat const& energy, std::string const& unit) const
       \param process_name - name of the process
       \param material_name - name of the material
@@ -110,7 +117,7 @@ class GGEMS_EXPORT GGEMSCrossSections
   private:
     GGEMSEMProcessesList em_processes_list_; /*!< vector of electromagnetic processes */
     std::vector<bool> is_process_activated_; /*!< Boolean checking if the process is already activated */
-    std::shared_ptr<cl::Buffer> particle_cross_sections_; /*!< Pointer storing cross sections for each particles */
+    std::shared_ptr<cl::Buffer> particle_cross_sections_cl_; /*!< Pointer storing cross sections for each particles */
 };
 
 /*!

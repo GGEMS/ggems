@@ -188,7 +188,7 @@ class GGEMS_EXPORT GGEMSSource
     std::vector<GGulong> number_of_particles_in_batch_; /*!< Number of particles in batch */
     GGuchar particle_type_; /*!< Type of particle: photon, electron or positron */
     std::unique_ptr<GGEMSGeometryTransformation> geometry_transformation_; /*!< Pointer storing the geometry transformation */
-    std::shared_ptr<cl::Kernel> kernel_get_primaries_; /*!< Kernel generating primaries on OpenCL device */
+    std::weak_ptr<cl::Kernel> kernel_get_primaries_cl_; /*!< Kernel generating primaries on OpenCL device */
 };
 
 #endif // End of GUARD_GGEMS_SOURCES_GGEMSSOURCE_HH

@@ -15,6 +15,7 @@
 
 #include "GGEMS/global/GGEMSConfiguration.hh"
 #include "GGEMS/tools/GGEMSTypes.hh"
+#include "GGEMS/physics/GGEMSEMProcessConstants.hh"
 
 /*!
   \struct GGEMSParticleCrossSections_t

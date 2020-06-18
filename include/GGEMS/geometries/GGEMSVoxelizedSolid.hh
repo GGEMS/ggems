@@ -110,21 +110,23 @@ class GGEMS_EXPORT GGEMSVoxelizedSolid : public GGEMSSolid
     void ProjectTo(void);
 
     /*!
-      \fn void TrackThrough(void)
+      \fn void TrackThrough(std::weak_ptr<GGEMSCrossSections> cross_sections, std::weak_ptr<GGEMSMaterials> materials)
+      \param cross_sections - pointer storing cross sections values
+      \param materials - pointer storing materials values
       \brief Track particles through solid
     */
-    void TrackThrough(void);
+    void TrackThrough(std::weak_ptr<GGEMSCrossSections> cross_sections, std::weak_ptr<GGEMSMaterials> materials);
 
     /*!
-      \fn void LoadVolumeImage(std::shared_ptr<GGEMSMaterials> materials)
+      \fn void LoadVolumeImage(std::weak_ptr<GGEMSMaterials> materials)
       \param materials - pointer on material for a phantom
       \brief load volume image to GGEMS and create a volume of label in GGEMS for voxelized solid
     */
-    void LoadVolumeImage(std::shared_ptr<GGEMSMaterials> materials);
+    void LoadVolumeImage(std::weak_ptr<GGEMSMaterials> materials);
 
   private:
     /*!
-      \fn template <typename T> void ConvertImageToLabel(std::string const& raw_data_filename, std::string const& range_data_filename, std::shared_ptr<GGEMSMaterials> materials)
+      \fn template <typename T> void ConvertImageToLabel(std::string const& raw_data_filename, std::string const& range_data_filename, std::weak_ptr<GGEMSMaterials> materials)
       \tparam T - type of data
       \param raw_data_filename - raw data filename from mhd
       \param range_data_filename - name of the file containing the range to material data
@@ -132,7 +134,7 @@ class GGEMS_EXPORT GGEMSVoxelizedSolid : public GGEMSSolid
       \brief convert image data to label data
     */
     template <typename T>
-    void ConvertImageToLabel(std::string const& raw_data_filename, std::string const& range_data_filename, std::shared_ptr<GGEMSMaterials> materials);
+    void ConvertImageToLabel(std::string const& raw_data_filename, std::string const& range_data_filename, std::weak_ptr<GGEMSMaterials> materials);
 
     /*!
       \fn void InitializeKernel(void)
@@ -150,7 +152,7 @@ class GGEMS_EXPORT GGEMSVoxelizedSolid : public GGEMSSolid
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
-void GGEMSVoxelizedSolid::ConvertImageToLabel(std::string const& raw_data_filename, std::string const& range_data_filename, std::shared_ptr<GGEMSMaterials> materials)
+void GGEMSVoxelizedSolid::ConvertImageToLabel(std::string const& raw_data_filename, std::string const& range_data_filename, std::weak_ptr<GGEMSMaterials> materials)
 {
   GGcout("GGEMSVoxelizedSolid", "ConvertImageToLabel", 3) << "Converting image material data to label data..." << GGendl;
 
@@ -165,13 +167,13 @@ void GGEMSVoxelizedSolid::ConvertImageToLabel(std::string const& raw_data_filena
   GGEMSFileStream::CheckInputStream(in_raw_stream, raw_data_filename);
 
   // Get pointer on OpenCL device
-  GGEMSVoxelizedSolidData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSVoxelizedSolidData>(solid_data_, sizeof(GGEMSVoxelizedSolidData));
+  GGEMSVoxelizedSolidData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSVoxelizedSolidData>(solid_data_cl_.get(), sizeof(GGEMSVoxelizedSolidData));
 
   // Get information about mhd file
   GGuint const kNumberOfVoxels = solid_data_device->number_of_voxels_;
 
   // Release the pointer
-  opencl_manager.ReleaseDeviceBuffer(solid_data_, solid_data_device);
+  opencl_manager.ReleaseDeviceBuffer(solid_data_cl_.get(), solid_data_device);
 
   // Reading data to a tmp buffer
   std::vector<T> tmp_raw_data;
@@ -182,11 +184,11 @@ void GGEMSVoxelizedSolid::ConvertImageToLabel(std::string const& raw_data_filena
   in_raw_stream.close();
 
   // Allocating memory on OpenCL device
-  label_data_ = opencl_manager.Allocate(nullptr, kNumberOfVoxels * sizeof(GGuchar), CL_MEM_READ_WRITE);
+  label_data_cl_ = opencl_manager.Allocate(nullptr, kNumberOfVoxels * sizeof(GGuchar), CL_MEM_READ_WRITE);
   ram_manager.AddGeometryRAMMemory(kNumberOfVoxels * sizeof(GGuchar));
 
   // Get pointer on OpenCL device
-  GGuchar* label_data_device = opencl_manager.GetDeviceBuffer<GGuchar>(label_data_, kNumberOfVoxels * sizeof(GGuchar));
+  GGuchar* label_data_device = opencl_manager.GetDeviceBuffer<GGuchar>(label_data_cl_.get(), kNumberOfVoxels * sizeof(GGuchar));
 
   // Set value to max of GGuchar
   std::fill(label_data_device, label_data_device + kNumberOfVoxels, std::numeric_limits<GGuchar>::max());
@@ -212,7 +214,7 @@ void GGEMSVoxelizedSolid::ConvertImageToLabel(std::string const& raw_data_filena
     iss >> first_label_value >> last_label_value >> material_name;
 
     // Adding the material
-    materials->AddMaterial(material_name);
+    materials.lock()->AddMaterial(material_name);
 
     // Setting the label
     for (GGuint i = 0; i < kNumberOfVoxels; ++i) {
@@ -238,7 +240,7 @@ void GGEMSVoxelizedSolid::ConvertImageToLabel(std::string const& raw_data_filena
   tmp_raw_data.clear();
 
   // Release the pointer
-  opencl_manager.ReleaseDeviceBuffer(label_data_, label_data_device);
+  opencl_manager.ReleaseDeviceBuffer(label_data_cl_.get(), label_data_device);
 
   // Checking if all voxels converted
   if (all_converted) {

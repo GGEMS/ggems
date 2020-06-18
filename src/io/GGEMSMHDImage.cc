@@ -84,7 +84,7 @@ void GGEMSMHDImage::SetDimensions(GGuint3 const& dimensions)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSMHDImage::Read(std::string const& image_mhd_header_filename, std::shared_ptr<cl::Buffer> solid_data)
+void GGEMSMHDImage::Read(std::string const& image_mhd_header_filename, std::weak_ptr<cl::Buffer> solid_data_cl)
 {
   GGcout("GGEMSMHDImage", "Read", 0) << "Reading MHD Image..." << GGendl;
 
@@ -96,7 +96,7 @@ void GGEMSMHDImage::Read(std::string const& image_mhd_header_filename, std::shar
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
   // Get pointer on OpenCL device
-  GGEMSVoxelizedSolidData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSVoxelizedSolidData>(solid_data, sizeof(GGEMSVoxelizedSolidData));
+  GGEMSVoxelizedSolidData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSVoxelizedSolidData>(solid_data_cl.lock().get(), sizeof(GGEMSVoxelizedSolidData));
 
   // Read the file
   std::string line("");
@@ -192,7 +192,7 @@ void GGEMSMHDImage::Read(std::string const& image_mhd_header_filename, std::shar
   }
 
   // Release the pointer
-  opencl_manager.ReleaseDeviceBuffer(solid_data, solid_data_device);
+  opencl_manager.ReleaseDeviceBuffer(solid_data_cl.lock().get(), solid_data_device);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

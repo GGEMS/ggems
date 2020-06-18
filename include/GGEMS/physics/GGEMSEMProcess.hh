@@ -76,12 +76,12 @@ class GGEMS_EXPORT GGEMSEMProcess
     inline std::string GetProcessName(void) const {return process_name_;}
 
     /*!
-      \fn void BuildCrossSectionTables(std::shared_ptr<cl::Buffer> particle_cross_sections, std::shared_ptr<cl::Buffer> material_tables)
+      \fn void BuildCrossSectionTables(std::weak_ptr<cl::Buffer> particle_cross_sections_cl, std::weak_ptr<cl::Buffer> material_tables_cl)
       \param particle_cross_sections - OpenCL buffer storing all the cross section tables for each particles
       \param material_tables - material tables on OpenCL device
       \brief build cross section tables and storing them in particle_cross_sections
     */
-    virtual void BuildCrossSectionTables(std::shared_ptr<cl::Buffer> particle_cross_sections, std::shared_ptr<cl::Buffer> material_tables);
+    virtual void BuildCrossSectionTables(std::weak_ptr<cl::Buffer> particle_cross_sections_cl, std::weak_ptr<cl::Buffer> material_tables_cl);
 
   protected:
     /*!
@@ -109,7 +109,6 @@ class GGEMS_EXPORT GGEMSEMProcess
     std::string primary_particle_; /*!< Type of primary particle */
     std::string secondary_particle_; /*!< Type of secondary particle */
     bool is_secondaries_; /*!< Flag to activate secondaries */
-    GGEMSOpenCLManager& opencl_manager_; /*!< Reference to OpenCL manager */
 };
 
 #endif // End of GUARD_GGEMS_PHYSICS_GGEMSEMPROCESS_HH

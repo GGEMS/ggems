@@ -157,7 +157,7 @@ void GGEMSNavigator::ParticleToNavigator(void) const
 void GGEMSNavigator::ParticleThroughNavigator(void) const
 {
   // Particles are tracked through a solid
-  solid_->TrackThrough();
+  solid_->TrackThrough(cross_sections_, materials_);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

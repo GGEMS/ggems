@@ -22,7 +22,7 @@
 #ifndef OPENCL_COMPILER
 /*!
   \def __constant
-  \brief for __constant is known for OpenCL, but for C++ we define __constant as a constexpr
+  \brief __constant is known for OpenCL, but for C++ we define __constant as a constexpr
 */
 #define __constant inline static constexpr
 #include <algorithm>

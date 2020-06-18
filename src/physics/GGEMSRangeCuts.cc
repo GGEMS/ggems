@@ -130,7 +130,8 @@ GGfloat GGEMSRangeCuts::ConvertToEnergy(GGEMSMaterialTables* material_table, GGu
   }
 
   // Convert Range Cut ro Kinetic Energy Cut
-  kinetic_energy_cut = ConvertLengthToEnergyCut(range_table_material_, cut);
+  //kinetic_energy_cut = ConvertLengthToEnergyCut(range_table_material_, cut);
+  kinetic_energy_cut = ConvertLengthToEnergyCut(cut);
 
   if (particle_name == "e-" || particle_name == "e+" ) {
     GGfloat constexpr kTune = 0.025f * GGEMSUnits::mm * GGEMSUnits::g / GGEMSUnits::cm3;
@@ -483,14 +484,14 @@ GGfloat GGEMSRangeCuts::ComputeLossPositron(GGuchar const& atomic_number, GGfloa
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGfloat GGEMSRangeCuts::ConvertLengthToEnergyCut(std::shared_ptr<GGEMSLogEnergyTable> range_table, GGfloat const& length_cut) const
+GGfloat GGEMSRangeCuts::ConvertLengthToEnergyCut(GGfloat const& length_cut) const
 {
   GGfloat const kEpsilon = 0.01f;
 
   // Find max. range and the corresponding energy (rmax,Tmax)
   GGfloat rmax = -1.e10f * GGEMSUnits::mm;
   GGfloat t1 = min_energy_;
-  GGfloat r1 = range_table->GetLossTableData(0);
+  GGfloat r1 = range_table_material_->GetLossTableData(0);
   GGfloat t2 = max_energy_;
 
   // Check length_cut < r1
@@ -499,8 +500,8 @@ GGfloat GGEMSRangeCuts::ConvertLengthToEnergyCut(std::shared_ptr<GGEMSLogEnergyT
   // scan range vector to find nearest bin
   // suppose that r(ti) > r(tj) if ti >tj
   for (GGushort i = 0; i < number_of_bins_; ++i) {
-    GGfloat t = range_table->GetLowEdgeEnergy(i);
-    GGfloat r = range_table->GetLossTableData(i);
+    GGfloat t = range_table_material_->GetLowEdgeEnergy(i);
+    GGfloat r = range_table_material_->GetLossTableData(i);
 
     if (r > rmax) rmax = r;
     if (r < length_cut) {
@@ -518,7 +519,7 @@ GGfloat GGEMSRangeCuts::ConvertLengthToEnergyCut(std::shared_ptr<GGEMSLogEnergyT
 
   // convert range to energy
   GGfloat t3 = sqrtf(t1*t2);
-  GGfloat r3 = range_table->GetLossTableValue(t3);
+  GGfloat r3 = range_table_material_->GetLossTableValue(t3);
 
   while (fabs(1.0f - r3/length_cut) > kEpsilon) {
     if (length_cut <= r3) {
@@ -529,7 +530,7 @@ GGfloat GGEMSRangeCuts::ConvertLengthToEnergyCut(std::shared_ptr<GGEMSLogEnergyT
     }
 
     t3 = sqrtf(t1*t2);
-    r3 = range_table->GetLossTableValue(t3);
+    r3 = range_table_material_->GetLossTableValue(t3);
   }
 
   return t3;
@@ -547,8 +548,8 @@ void GGEMSRangeCuts::ConvertCutsFromDistanceToEnergy(GGEMSMaterials* materials)
 
   // Get data from OpenCL device
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
-  std::shared_ptr<cl::Buffer> material_table = materials->GetMaterialTables();
-  GGEMSMaterialTables* material_table_device = opencl_manager.GetDeviceBuffer<GGEMSMaterialTables>(material_table, sizeof(GGEMSMaterialTables));
+  std::shared_ptr<cl::Buffer> material_table_cl = materials->GetMaterialTables().lock();
+  GGEMSMaterialTables* material_table_device = opencl_manager.GetDeviceBuffer<GGEMSMaterialTables>(material_table_cl.get(), sizeof(GGEMSMaterialTables));
 
   // Loop over materials
   for (GGuchar i = 0; i < material_table_device->number_of_materials_; ++i) {
@@ -570,5 +571,5 @@ void GGEMSRangeCuts::ConvertCutsFromDistanceToEnergy(GGEMSMaterials* materials)
   }
 
   // Release pointer
-  opencl_manager.ReleaseDeviceBuffer(material_table, material_table_device);
+  opencl_manager.ReleaseDeviceBuffer(material_table_cl.get(), material_table_device);
 }

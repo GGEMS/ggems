@@ -98,7 +98,7 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     */
     inline GGbool IsReady(void) const
     {
-      if (context_act_) return true;
+      if (context_act_cl_) return true;
       else return false;
     }
 
@@ -164,24 +164,24 @@ class GGEMS_EXPORT GGEMSOpenCLManager
       \return the pointer on activated context
       \brief return the activated context
     */
-    inline cl::Context* GetContext(void) const {return context_act_.get();}
+    inline cl::Context* GetContext(void) const {return context_act_cl_.get();}
 
     /*!
       \fn cl::CommandQueue* GetCommandQueue(void) const
       \return the pointer on activated command queue
       \brief Return the command queue to activated context
     */
-    inline cl::CommandQueue* GetCommandQueue(void) const {return queue_act_.get();}
+    inline cl::CommandQueue* GetCommandQueue(void) const {return queue_act_cl_.get();}
 
     /*!
       \fn cl::Event* GetEvent(void) const
       \return the pointer on activated event
       \brief return an event to activated context
     */
-    inline cl::Event* GetEvent(void) const {return event_act_.get();}
+    inline cl::Event* GetEvent(void) const {return event_act_cl_.get();}
 
     /*!
-      \fn std::shared_ptr<cl::Kernel> CompileKernel(std::string const& kernel_filename, std::string const& kernel_name, char* const custom_options = nullptr, char* const additional_options = nullptr)
+      \fn std::weak_ptr<cl::Kernel> CompileKernel(std::string const& kernel_filename, std::string const& kernel_name, char* const custom_options = nullptr, char* const additional_options = nullptr)
       \param kernel_filename - filename where is declared the kernel
       \param kernel_name - name of the kernel
       \param custom_options - new compilation option for the kernel
@@ -189,7 +189,7 @@ class GGEMS_EXPORT GGEMSOpenCLManager
       \brief Compile the OpenCL kernel on the activated context
       \return the pointer on the OpenCL kernel
     */
-    std::shared_ptr<cl::Kernel> CompileKernel(std::string const& kernel_filename, std::string const& kernel_name, char* const custom_options = nullptr, char* const additional_options = nullptr);
+    std::weak_ptr<cl::Kernel> CompileKernel(std::string const& kernel_filename, std::string const& kernel_name, char* const custom_options = nullptr, char* const additional_options = nullptr);
 
     /*!
       \fn std::unique_ptr<cl::Buffer> Allocate(void* host_ptr, std::size_t size, cl_mem_flags flags)
@@ -209,7 +209,7 @@ class GGEMS_EXPORT GGEMSOpenCLManager
       \tparam T - type of the returned pointer on host memory
     */
     template <typename T>
-    T* GetDeviceBuffer(std::shared_ptr<cl::Buffer> device_ptr, std::size_t const size) const;
+    T* GetDeviceBuffer(cl::Buffer* device_ptr, std::size_t const size) const;
 
     /*!
       \brief Get the device pointer on host to write on it. Mandatory after a GetDeviceBufferWrite ou GetDeviceBufferRead!!!
@@ -218,7 +218,7 @@ class GGEMS_EXPORT GGEMSOpenCLManager
       \tparam T - type of host memory pointer to release
     */
     template <typename T>
-    void ReleaseDeviceBuffer(std::shared_ptr<cl::Buffer> const device_ptr, T* host_ptr) const;
+    void ReleaseDeviceBuffer(cl::Buffer* const device_ptr, T* host_ptr) const;
 
     /*!
       \fn void DisplayElapsedTimeInKernel(std::string const& kernel_name) const
@@ -265,11 +265,11 @@ class GGEMS_EXPORT GGEMSOpenCLManager
 
   private:
     // Platforms
-    std::vector<cl::Platform> platforms_; /*!< Vector of platforms */
+    std::vector<cl::Platform> platforms_cl_; /*!< Vector of platforms */
     std::vector<std::string> platform_vendor_; /*!< Vendor of the platform */
 
     // Devices
-    std::vector<std::unique_ptr<cl::Device>> devices_; /*!< Vector of devices */
+    std::vector<std::unique_ptr<cl::Device>> devices_cl_; /*!< Vector of devices */
     std::vector<cl_device_type> device_device_type_; /*!< Type of device */
     std::vector<std::string> device_vendor_; /*!< Vendor of the device */
     std::vector<std::string> device_version_; /*!< Version of the device */
@@ -295,21 +295,21 @@ class GGEMS_EXPORT GGEMSOpenCLManager
 
     // Context and informations about them
     GGuint context_index_; /*!< Index of the activated context */
-    std::vector<std::shared_ptr<cl::Context>> contexts_; /*!< Vector of context */
-    std::vector<std::shared_ptr<cl::Context>> contexts_cpu_; /*!< Vector of CPU context */
-    std::vector<std::shared_ptr<cl::Context>> contexts_gpu_; /*!< Vector of GPU context */
-    std::shared_ptr<cl::Context> context_act_; /*!< Activated context */
+    std::vector<std::shared_ptr<cl::Context>> contexts_cl_; /*!< Vector of context */
+    std::vector<std::shared_ptr<cl::Context>> contexts_cpu_cl_; /*!< Vector of CPU context */
+    std::vector<std::shared_ptr<cl::Context>> contexts_gpu_cl_; /*!< Vector of GPU context */
+    std::shared_ptr<cl::Context> context_act_cl_; /*!< Activated context */
 
     // Command queue informations
-    std::vector<std::shared_ptr<cl::CommandQueue>> queues_; /*!< Command queue for all the context */
-    std::shared_ptr<cl::CommandQueue> queue_act_; /*!< Activated command queue */
+    std::vector<std::shared_ptr<cl::CommandQueue>> queues_cl_; /*!< Command queue for all the context */
+    std::shared_ptr<cl::CommandQueue> queue_act_cl_; /*!< Activated command queue */
 
     // OpenCL event
-    std::vector<std::shared_ptr<cl::Event>> events_; /*!< List of pointer to OpenCL event, for profiling */
-    std::shared_ptr<cl::Event> event_act_; /*!< Activated event */
+    std::vector<std::shared_ptr<cl::Event>> events_cl_; /*!< List of pointer to OpenCL event, for profiling */
+    std::shared_ptr<cl::Event> event_act_cl_; /*!< Activated event */
 
     // Kernels
-    std::vector<std::shared_ptr<cl::Kernel>> kernels_; /*!< List of pointer to OpenCL kernel */
+    std::vector<std::shared_ptr<cl::Kernel>> kernels_cl_; /*!< List of pointer to OpenCL kernel */
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -317,12 +317,12 @@ class GGEMS_EXPORT GGEMSOpenCLManager
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
-T* GGEMSOpenCLManager::GetDeviceBuffer(std::shared_ptr<cl::Buffer> const device_ptr, std::size_t const size) const
+T* GGEMSOpenCLManager::GetDeviceBuffer(cl::Buffer* const device_ptr, std::size_t const size) const
 {
   GGcout("GGEMSOpenCLManager", "GetDeviceBuffer", 3) << "Getting mapped memory buffer on OpenCL device..." << GGendl;
 
   GGint err = 0;
-  T* ptr = static_cast<T*>(queue_act_.get()->enqueueMapBuffer(*device_ptr, CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, 0, size, nullptr, nullptr, &err));
+  T* ptr = static_cast<T*>(queue_act_cl_.get()->enqueueMapBuffer(*device_ptr, CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, 0, size, nullptr, nullptr, &err));
   CheckOpenCLError(err, "GGEMSOpenCLManager", "GetDeviceBuffer");
   return ptr;
 }
@@ -332,12 +332,12 @@ T* GGEMSOpenCLManager::GetDeviceBuffer(std::shared_ptr<cl::Buffer> const device_
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
-void GGEMSOpenCLManager::ReleaseDeviceBuffer(std::shared_ptr<cl::Buffer> const device_ptr, T* host_ptr) const
+void GGEMSOpenCLManager::ReleaseDeviceBuffer(cl::Buffer* const device_ptr, T* host_ptr) const
 {
   GGcout("GGEMSOpenCLManager", "ReleaseDeviceBuffer", 3) << "Releasing mapped memory buffer on OpenCL device..." << GGendl;
 
   // Unmap the memory
-  CheckOpenCLError(queue_act_.get()->enqueueUnmapMemObject(*device_ptr, host_ptr), "GGEMSOpenCLManager", "ReleaseDeviceBuffer");
+  CheckOpenCLError(queue_act_cl_.get()->enqueueUnmapMemObject(*device_ptr, host_ptr), "GGEMSOpenCLManager", "ReleaseDeviceBuffer");
 }
 
 /*!

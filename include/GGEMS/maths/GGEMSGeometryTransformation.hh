@@ -176,7 +176,7 @@ class GGEMS_EXPORT GGEMSGeometryTransformation
       if (is_need_updated_) UpdateTransformationMatrix();
 
       // Return the transformation matrix
-      return matrix_transformation_.get();
+      return matrix_transformation_cl_.get();
     }
 
   private:
@@ -190,7 +190,7 @@ class GGEMS_EXPORT GGEMSGeometryTransformation
     GGfloat44 matrix_translation_; /*!< Matrix of translation */
     GGfloat44 matrix_rotation_; /*!< Matrix of rotation */
     GGfloat44 matrix_orthographic_projection_; /*!< Matrix of orthographic projection */
-    std::shared_ptr<cl::Buffer> matrix_transformation_; /*!< OpenCL buffer storing the matrix transformation */
+    std::shared_ptr<cl::Buffer> matrix_transformation_cl_; /*!< OpenCL buffer storing the matrix transformation */
 };
 
 #endif // End of GUARD_GGEMS_MATHS_TRANSFORMATION_MATRIX_HH

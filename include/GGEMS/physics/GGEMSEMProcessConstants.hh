@@ -16,13 +16,22 @@
 #include "GGEMS/tools/GGEMSSystemOfUnits.hh"
 
 /*!
-  \namespace GGEMSProcessName
-  \brief Namespace storing constants about processes
+  \namespace GGEMSProcess
+  \brief Namespace storing constants about processes, using preprocessor for OpenCL
 */
-#ifndef OPENCL_COMPILER
+#ifdef OPENCL_COMPILER
+
+#define NUMBER_PROCESSES 3
+#define NUMBER_PHOTON_PROCESSES 3
+#define COMPTON_SCATTERING 0
+#define PHOTOELECTRIC_EFFECT 1
+#define RAYLEIGH_SCATTERING 2
+#define NO_PROCESS 99
+
+#else
+
 namespace GGEMSProcess
 {
-#endif
   __constant GGuchar NUMBER_PROCESSES = 3; /*!< Maximum number of processes */
   __constant GGuchar NUMBER_PHOTON_PROCESSES = 3; /*!< Maximum number of photon processes */
   //__constant GGuchar NUMBER_ELECTRON_PROCESSES = 3; /*!< Maximum number of electron processes */
@@ -38,7 +47,6 @@ namespace GGEMSProcess
   //__constant GGuchar ELECTRON_BREMSSTRAHLUNG = 6; /*!< Bremsstralung electron process */
 
   __constant GGuchar NO_PROCESS = 99; /*!< No process */
-#ifndef OPENCL_COMPILER
 }
 #endif
 

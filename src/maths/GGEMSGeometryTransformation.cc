@@ -64,7 +64,7 @@ GGEMSGeometryTransformation::GGEMSGeometryTransformation()
   );
 
   // Allocation of matrix transformation on OpenCL device
-  matrix_transformation_ = opencl_manager_.Allocate(nullptr, sizeof(GGfloat44), CL_MEM_READ_WRITE);
+  matrix_transformation_cl_ = opencl_manager_.Allocate(nullptr, sizeof(GGfloat44), CL_MEM_READ_WRITE);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -215,7 +215,7 @@ void GGEMSGeometryTransformation::UpdateTransformationMatrix(void)
 
   // Update the transformation matrix on OpenCL device
   // Get the pointer on device
-  GGfloat44* matrix_device = opencl_manager_.GetDeviceBuffer<GGfloat44>(matrix_transformation_, sizeof(GGfloat44));
+  GGfloat44* matrix_device = opencl_manager_.GetDeviceBuffer<GGfloat44>(matrix_transformation_cl_.get(), sizeof(GGfloat44));
 
   // Compute a temporary matrix then copy it on OpenCL device
   GGfloat44 matrix_tmp = GGfloat44MultGGfloat44(matrix_rotation_, GGfloat44MultGGfloat44(matrix_translation_, matrix_orthographic_projection_));
@@ -242,7 +242,7 @@ void GGEMSGeometryTransformation::UpdateTransformationMatrix(void)
   matrix_device->m33_ = matrix_tmp.m33_;
 
   // Release the pointer, mandatory step!!!
-  opencl_manager_.ReleaseDeviceBuffer(matrix_transformation_, matrix_device);
+  opencl_manager_.ReleaseDeviceBuffer(matrix_transformation_cl_.get(), matrix_device);
 
   // Update is done
   is_need_updated_ = false;

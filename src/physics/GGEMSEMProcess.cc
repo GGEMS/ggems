@@ -22,8 +22,7 @@ GGEMSEMProcess::GGEMSEMProcess()
   process_name_(""),
   primary_particle_(""),
   secondary_particle_(""),
-  is_secondaries_(false),
-  opencl_manager_(GGEMSOpenCLManager::GetInstance())
+  is_secondaries_(false)
 {
   GGcout("GGEMSEMProcess", "GGEMSEMProcess", 3) << "Allocation of GGEMSEMProcess..." << GGendl;
 }
@@ -41,12 +40,15 @@ GGEMSEMProcess::~GGEMSEMProcess(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSEMProcess::BuildCrossSectionTables(std::shared_ptr<cl::Buffer> particle_cross_sections, std::shared_ptr<cl::Buffer> material_tables)
+void GGEMSEMProcess::BuildCrossSectionTables(std::weak_ptr<cl::Buffer> particle_cross_sections_cl, std::weak_ptr<cl::Buffer> material_tables_cl)
 {
   GGcout("GGEMSEMProcess", "BuildCrossSectionTables", 3) << "Building cross section table..." << GGendl;
 
+  // Getting OpenCL manager
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+
   // Set missing information in cross section table
-  GGEMSParticleCrossSections* cross_section_device = opencl_manager_.GetDeviceBuffer<GGEMSParticleCrossSections>(particle_cross_sections, sizeof(GGEMSParticleCrossSections));
+  GGEMSParticleCrossSections* cross_section_device = opencl_manager.GetDeviceBuffer<GGEMSParticleCrossSections>(particle_cross_sections_cl.lock().get(), sizeof(GGEMSParticleCrossSections));
 
   // Store index of activated process
   cross_section_device->index_photon_cs[cross_section_device->number_of_activated_photon_processes_] = process_id_;
@@ -55,7 +57,7 @@ void GGEMSEMProcess::BuildCrossSectionTables(std::shared_ptr<cl::Buffer> particl
   cross_section_device->number_of_activated_photon_processes_ += 1;
 
   // Get the material tables
-  GGEMSMaterialTables* materials_device = opencl_manager_.GetDeviceBuffer<GGEMSMaterialTables>(material_tables, sizeof(GGEMSMaterialTables));
+  GGEMSMaterialTables* materials_device = opencl_manager.GetDeviceBuffer<GGEMSMaterialTables>(material_tables_cl.lock().get(), sizeof(GGEMSMaterialTables));
 
   // Compute Compton cross section par material
   GGushort const kNumberOfBins = cross_section_device->number_of_bins_;
@@ -69,8 +71,8 @@ void GGEMSEMProcess::BuildCrossSectionTables(std::shared_ptr<cl::Buffer> particl
   }
 
   // Release pointer
-  opencl_manager_.ReleaseDeviceBuffer(material_tables, materials_device);
-  opencl_manager_.ReleaseDeviceBuffer(particle_cross_sections, cross_section_device);
+  opencl_manager.ReleaseDeviceBuffer(material_tables_cl.lock().get(), materials_device);
+  opencl_manager.ReleaseDeviceBuffer(particle_cross_sections_cl.lock().get(), cross_section_device);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

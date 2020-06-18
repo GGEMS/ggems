@@ -20,7 +20,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 GGEMSPseudoRandomGenerator::GGEMSPseudoRandomGenerator(void)
-: pseudo_random_numbers_(nullptr)
+: pseudo_random_numbers_cl_(nullptr)
 {
   GGcout("GGEMSPseudoRandomGenerator", "GGEMSPseudoRandomGenerator", 3) << "Allocation of GGEMSPseudoRandomGenerator..." << GGendl;
 }
@@ -61,7 +61,7 @@ void GGEMSPseudoRandomGenerator::InitializeSeeds(void)
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
   // Get the pointer on device
-  GGEMSRandom* random_device = opencl_manager.GetDeviceBuffer<GGEMSRandom>(pseudo_random_numbers_, sizeof(GGEMSRandom));
+  GGEMSRandom* random_device = opencl_manager.GetDeviceBuffer<GGEMSRandom>(pseudo_random_numbers_cl_.get(), sizeof(GGEMSRandom));
 
   // For each particle a seed is generated
   for (std::size_t i = 0; i < MAXIMUM_PARTICLES; ++i) {
@@ -73,7 +73,7 @@ void GGEMSPseudoRandomGenerator::InitializeSeeds(void)
   }
 
   // Release the pointer, mandatory step!!!
-  opencl_manager.ReleaseDeviceBuffer(pseudo_random_numbers_, random_device);
+  opencl_manager.ReleaseDeviceBuffer(pseudo_random_numbers_cl_.get(), random_device);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -91,6 +91,6 @@ void GGEMSPseudoRandomGenerator::AllocateRandom(void)
   GGEMSRAMManager& ram_manager = GGEMSRAMManager::GetInstance();
 
   // Allocation of memory on OpenCL device
-  pseudo_random_numbers_ = opencl_manager.Allocate(nullptr, sizeof(GGEMSRandom), CL_MEM_READ_WRITE);
+  pseudo_random_numbers_cl_ = opencl_manager.Allocate(nullptr, sizeof(GGEMSRandom), CL_MEM_READ_WRITE);
   ram_manager.AddRandomRAMMemory(sizeof(GGEMSRandom));
 }

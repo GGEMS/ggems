@@ -56,18 +56,21 @@ GGEMSRayleighScattering::~GGEMSRayleighScattering(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSRayleighScattering::BuildCrossSectionTables(std::shared_ptr<cl::Buffer> particle_cross_sections, std::shared_ptr<cl::Buffer> material_tables)
+void GGEMSRayleighScattering::BuildCrossSectionTables(std::weak_ptr<cl::Buffer> particle_cross_sections_cl, std::weak_ptr<cl::Buffer> material_tables_cl)
 {
   GGcout("GGEMSRayleighScattering", "BuildCrossSectionTables", 3) << "Building cross section table for Rayleigh scattering..." << GGendl;
 
   // Call mother
-  GGEMSEMProcess::BuildCrossSectionTables(particle_cross_sections, material_tables);
+  GGEMSEMProcess::BuildCrossSectionTables(particle_cross_sections_cl, material_tables_cl);
+
+  // Get OpenCL manager
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
   // Set missing information in cross section table
-  GGEMSParticleCrossSections* cross_section_device = opencl_manager_.GetDeviceBuffer<GGEMSParticleCrossSections>(particle_cross_sections, sizeof(GGEMSParticleCrossSections));
+  GGEMSParticleCrossSections* cross_section_device = opencl_manager.GetDeviceBuffer<GGEMSParticleCrossSections>(particle_cross_sections_cl.lock().get(), sizeof(GGEMSParticleCrossSections));
 
   // Get the material tables
-  GGEMSMaterialTables* materials_device = opencl_manager_.GetDeviceBuffer<GGEMSMaterialTables>(material_tables, sizeof(GGEMSMaterialTables));
+  GGEMSMaterialTables* materials_device = opencl_manager.GetDeviceBuffer<GGEMSMaterialTables>(material_tables_cl.lock().get(), sizeof(GGEMSMaterialTables));
 
   // Compute Compton cross section par material
   GGushort const kNumberOfBins = cross_section_device->number_of_bins_;
@@ -92,8 +95,8 @@ void GGEMSRayleighScattering::BuildCrossSectionTables(std::shared_ptr<cl::Buffer
   }
 
   // Release pointer
-  opencl_manager_.ReleaseDeviceBuffer(material_tables, materials_device);
-  opencl_manager_.ReleaseDeviceBuffer(particle_cross_sections, cross_section_device);
+  opencl_manager.ReleaseDeviceBuffer(material_tables_cl.lock().get(), materials_device);
+  opencl_manager.ReleaseDeviceBuffer(particle_cross_sections_cl.lock().get(), cross_section_device);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
