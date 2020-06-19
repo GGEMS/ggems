@@ -76,5 +76,5 @@ __kernel void project_to_voxelized_solid(
   primary_particle->pz_[kGlobalIndex] = position.z;
 
   //primary_particle->geometry_id_[kGlobalIndex] = 0;
-  //primary_particle->tof_[kGlobalIndex] += kDistance * C_LIGHT; true for gamma only, why inverse of time ?
+  //primary_particle->tof_[kGlobalIndex] += kDistance * C_LIGHT;
 }

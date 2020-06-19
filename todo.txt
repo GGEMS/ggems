@@ -1,11 +1,3 @@
---------------------------------------------------------------------------------
-- Gestion des verboses:
-  * 0 Print demandé et info indispensable
-  * 1 Infos plus détaillées
-  * 2 Infos détaillées des résultats avec détails
-  * 3 Entrées et sorties des constructeurs, destructeurs et fonctions
---------------------------------------------------------------------------------
-
 - Améliorer le random Poisson et Gauss ?
 
 - Faire un installer pratique pour Windows, MAC et Linux
@@ -25,15 +17,11 @@
 
 - Faire source indépendantes sans lancer la simulation complète -> phase space
 
-- Controler les pointers shared, unique, weak et pointer cyclique, et comprendre pourquoi les destructeurs ne sont plus appelés dans GGEMS avec Python
-
 - Traduire en C++ les benchmarks et exemples
 
 - Licence pour GGEMS
 
 - Généraliser le OpenCL manager à plusieurs contexts (pour la reconstruction CT plus tard)
-
-- Enlever les singletons des membres privés
 
 - Complétion automatique python
 
@@ -51,5 +39,3 @@
 
 - Dans Benchmark 0, optimiser les accès mémoire GPU <-> CPU, faire une copie de 'particle_cross_sections_' sur la RAM à la fin de la méthode GGEMSCrossSections::Initialize
 Gain de temps de calcul pour python
-
-- Pour clarté du code ajouter suffixe '_cl' pour les types cl::Buffer* std::shared_ptr<cl::Buffer> cl:: etc...
