@@ -23,7 +23,7 @@
 */
 __kernel void distance_voxelized_solid(
   __global GGEMSPrimaryParticles* primary_particle,
-  __global GGEMSVoxelizedSolidData* voxelized_solid_data)
+  __global GGEMSVoxelizedSolidData const* voxelized_solid_data)
 {
   // Getting index of thread
   GGint const kGlobalIndex = get_global_id(0);

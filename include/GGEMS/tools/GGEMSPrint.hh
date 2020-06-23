@@ -97,7 +97,7 @@ namespace
   \class GGEMSStream
   \brief Generic class redefining standard output
 */
-class GGEMS_EXPORT GGEMSStream
+class GGEMSStream
 {
   public:
     /*!
