@@ -24,7 +24,7 @@
 */
 __kernel void project_to_voxelized_solid(
   __global GGEMSPrimaryParticles* primary_particle,
-  __global GGEMSVoxelizedSolidData* voxelized_solid_data)
+  __global GGEMSVoxelizedSolidData const* voxelized_solid_data)
 {
   // Getting index of thread
   GGint const kGlobalIndex = get_global_id(0);
@@ -64,6 +64,8 @@ __kernel void project_to_voxelized_solid(
   // Correcting the particle position if not totally inside due to float tolerance
   position = TransportGetSafetyInsideVoxelizedNavigator(&position, voxelized_solid_data);
 
+  printf("******\n");
+  printf("PROJECT TO\n");
   printf("Current navigator: %u\n", voxelized_solid_data->navigator_id_);
   printf("Selected Navigator: %u\n", primary_particle->navigator_id_[kGlobalIndex]);
   printf("Position:\n");
