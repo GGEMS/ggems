@@ -23,9 +23,6 @@
 #ifdef OPENCL_COMPILER
 typedef struct __attribute__((aligned (1))) GGEMSMaterialTables_t
 #else
-#ifdef _MSC_VER
-#pragma pack(push, 1)
-#endif
 typedef struct PACKED GGEMSMaterialTables_t
 #endif
 {
@@ -64,10 +61,5 @@ typedef struct PACKED GGEMSMaterialTables_t
   GGfloat atomic_number_density_[255*16]; /*!< Atomic number density : fraction of element in material * density * Avogadro / Atomic mass */
   GGfloat mass_fraction_[255*16]; /*!< Mass fraction of element in material */
 } GGEMSMaterialTables; /*!< Using C convention name of struct to C++ (_t deletion) */
-#ifndef OPENCL_COMPILER
-#ifdef _MSC_VER
-#pragma pack(pop)
-#endif
-#endif
 
 #endif // GUARD_GGEMS_PHYSICS_GGEMSMATERIALSSTACK_HH

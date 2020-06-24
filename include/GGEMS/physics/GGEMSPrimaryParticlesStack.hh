@@ -23,9 +23,6 @@
 #ifdef OPENCL_COMPILER
 typedef struct __attribute__((aligned (1))) GGEMSPrimaryParticles_t
 #else
-#ifdef _MSC_VER
-#pragma pack(push, 1)
-#endif
 typedef struct PACKED GGEMSPrimaryParticles_t
 #endif
 {
@@ -51,10 +48,5 @@ typedef struct PACKED GGEMSPrimaryParticles_t
   GGuchar level_[MAXIMUM_PARTICLES]; /*!< Level of the particle */
   GGuchar pname_[MAXIMUM_PARTICLES]; /*!< particle name (photon, electron, etc) */
 } GGEMSPrimaryParticles; /*!< Using C convention name of struct to C++ (_t deletion) */
-#ifndef OPENCL_COMPILER
-#ifdef _MSC_VER
-#pragma pack(pop)
-#endif
-#endif
 
 #endif // GUARD_GGEMS_PHYSICS_GGEMSPRIMARYPARTICLESSTACK_HH

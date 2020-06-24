@@ -24,9 +24,6 @@
 #ifdef OPENCL_COMPILER
 typedef struct __attribute__((aligned (1))) GGEMSParticleCrossSections_t
 #else
-#ifdef _MSC_VER
-#pragma pack(push, 1)
-#endif
 typedef struct PACKED GGEMSParticleCrossSections_t
 #endif
 {
@@ -63,10 +60,5 @@ typedef struct PACKED GGEMSParticleCrossSections_t
 
   // Positron
 } GGEMSParticleCrossSections; /*!< Using C convention name of struct to C++ (_t deletion) */
-#ifndef OPENCL_COMPILER
-#ifdef _MSC_VER
-#pragma pack(pop)
-#endif
-#endif
 
 #endif // GUARD_GGEMS_PHYSICS_GGEMSPARTICLECROSSSECTIONSSTACK_HH

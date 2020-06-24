@@ -50,7 +50,7 @@ __kernel void draw_ggems_tube(
 )
 {
   // Getting index of thread
-  GGint const kGlobalIndex = get_global_id(0);
+  GGint const kVoxelID = get_global_id(0);
 
   // Get dimension of voxelized phantom
   GGuint const kX = phantom_dimensions.x;
@@ -72,9 +72,9 @@ __kernel void draw_ggems_tube(
   GGfloat const kHalfHeight = height / 2.0;
 
   // Get index i, j and k of current voxel
-  GGuint const j = (kGlobalIndex % (kX * kY)) / kX;
-  GGuint const i = (kGlobalIndex % (kX * kY)) - j * kX;
-  GGuint const k = kGlobalIndex / (kX * kY);
+  GGuint const j = (kVoxelID % (kX * kY)) / kX;
+  GGuint const i = (kVoxelID % (kX * kY)) - j * kX;
+  GGuint const k = kVoxelID / (kX * kY);
 
   // Get the coordinates of the current voxel
   GGfloat x = (kSizeX / 2.0) * (1.0 - (GGfloat)kX + 2.0 * i);
@@ -90,19 +90,19 @@ __kernel void draw_ggems_tube(
   if (z <= kHalfHeight && z >= -kHalfHeight) {
     if (x * x + y * y <= kR2) {
       #ifdef MET_CHAR
-      voxelized_phantom[kGlobalIndex] = (GGchar)label_value;
+      voxelized_phantom[kVoxelID] = (GGchar)label_value;
       #elif MET_UCHAR
-      voxelized_phantom[kGlobalIndex] = (GGuchar)label_value;
+      voxelized_phantom[kVoxelID] = (GGuchar)label_value;
       #elif MET_SHORT
-      voxelized_phantom[kGlobalIndex] = (GGshort)label_value;
+      voxelized_phantom[kVoxelID] = (GGshort)label_value;
       #elif MET_USHORT
-      voxelized_phantom[kGlobalIndex] = (GGushort)label_value;
+      voxelized_phantom[kVoxelID] = (GGushort)label_value;
       #elif MET_INT
-      voxelized_phantom[kGlobalIndex] = (GGint)label_value;
+      voxelized_phantom[kVoxelID] = (GGint)label_value;
       #elif MET_UINT
-      voxelized_phantom[kGlobalIndex] = (GGuint)label_value;
+      voxelized_phantom[kVoxelID] = (GGuint)label_value;
       #elif MET_FLOAT
-      voxelized_phantom[kGlobalIndex] = (GGfloat)label_value;
+      voxelized_phantom[kVoxelID] = (GGfloat)label_value;
       #endif
     }
   }

@@ -23,9 +23,6 @@
 #ifdef OPENCL_COMPILER
 typedef struct __attribute__((aligned (1))) GGEMSRandom_t
 #else
-#ifdef _MSC_VER
-#pragma pack(push, 1)
-#endif
 typedef struct PACKED GGEMSRandom_t
 #endif
 {
@@ -35,10 +32,5 @@ typedef struct PACKED GGEMSRandom_t
   GGuint prng_state_4_[MAXIMUM_PARTICLES]; /*!< State 4 of the prng */
   GGuint prng_state_5_[MAXIMUM_PARTICLES]; /*!< State 5 of the prng */
 } GGEMSRandom; /*!< Using C convention name of struct to C++ (_t deletion) */
-#ifndef OPENCL_COMPILER
-#ifdef _MSC_VER
-#pragma pack(pop)
-#endif
-#endif
 
 #endif // End of GUARD_GGEMS_RANDOMS_GGEMSRANDOMSTACK_HH
