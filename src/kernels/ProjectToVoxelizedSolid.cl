@@ -27,35 +27,35 @@ __kernel void project_to_voxelized_solid(
   __global GGEMSVoxelizedSolidData const* voxelized_solid_data)
 {
   // Getting index of thread
-  GGint const kGlobalIndex = get_global_id(0);
+  GGint const kParticleID = get_global_id(0);
 
   // Checking if distance to navigator is OUT_OF_WORLD after computation distance
   // If yes, the particle is OUT_OF_WORLD and DEAD, so no tracking
-  if (primary_particle->particle_navigator_distance_[kGlobalIndex] == OUT_OF_WORLD) {
-    primary_particle->status_[kGlobalIndex] = DEAD;
+  if (primary_particle->particle_navigator_distance_[kParticleID] == OUT_OF_WORLD) {
+    primary_particle->status_[kParticleID] = DEAD;
     return;
   }
 
   // Checking status of particle
-  if (primary_particle->status_[kGlobalIndex] == DEAD) return;
+  if (primary_particle->status_[kParticleID] == DEAD) return;
 
   // Checking if the current navigator is the selected navigator
-  if (primary_particle->navigator_id_[kGlobalIndex] != voxelized_solid_data->navigator_id_) return;
+  if (primary_particle->navigator_id_[kParticleID] != voxelized_solid_data->navigator_id_) return;
 
   // Position of particle
   GGfloat3 position;
-  position.x = primary_particle->px_[kGlobalIndex];
-  position.y = primary_particle->py_[kGlobalIndex];
-  position.z = primary_particle->pz_[kGlobalIndex];
+  position.x = primary_particle->px_[kParticleID];
+  position.y = primary_particle->py_[kParticleID];
+  position.z = primary_particle->pz_[kParticleID];
 
   // Direction of particle
   GGfloat3 direction;
-  direction.x = primary_particle->dx_[kGlobalIndex];
-  direction.y = primary_particle->dy_[kGlobalIndex];
-  direction.z = primary_particle->dz_[kGlobalIndex];
+  direction.x = primary_particle->dx_[kParticleID];
+  direction.y = primary_particle->dy_[kParticleID];
+  direction.z = primary_particle->dz_[kParticleID];
 
   // Distance to current navigator and geometry tolerance
-  GGfloat const kDistance = primary_particle->particle_navigator_distance_[kGlobalIndex];
+  GGfloat const kDistance = primary_particle->particle_navigator_distance_[kParticleID];
   GGfloat const kTolerance = voxelized_solid_data->tolerance_;
 
   // Moving the particle slightly inside the volume
@@ -67,16 +67,16 @@ __kernel void project_to_voxelized_solid(
   printf("******\n");
   printf("PROJECT TO\n");
   printf("Current navigator: %u\n", voxelized_solid_data->navigator_id_);
-  printf("Selected Navigator: %u\n", primary_particle->navigator_id_[kGlobalIndex]);
+  printf("Selected Navigator: %u\n", primary_particle->navigator_id_[kParticleID]);
   printf("Position:\n");
-  printf("    Before: %4.7f %4.7f %4.7f mm\n", primary_particle->px_[kGlobalIndex], primary_particle->py_[kGlobalIndex], primary_particle->pz_[kGlobalIndex]);
+  printf("    Before: %4.7f %4.7f %4.7f mm\n", primary_particle->px_[kParticleID], primary_particle->py_[kParticleID], primary_particle->pz_[kParticleID]);
   printf("    After: %4.7f %4.7f %4.7f mm\n", position.x, position.y, position.z);
 
   // Set new value for particles
-  primary_particle->px_[kGlobalIndex] = position.x;
-  primary_particle->py_[kGlobalIndex] = position.y;
-  primary_particle->pz_[kGlobalIndex] = position.z;
+  primary_particle->px_[kParticleID] = position.x;
+  primary_particle->py_[kParticleID] = position.y;
+  primary_particle->pz_[kParticleID] = position.z;
 
-  //primary_particle->geometry_id_[kGlobalIndex] = 0;
-  //primary_particle->tof_[kGlobalIndex] += kDistance * C_LIGHT;
+  //primary_particle->geometry_id_[kParticleID] = 0;
+  //primary_particle->tof_[kParticleID] += kDistance * C_LIGHT;
 }

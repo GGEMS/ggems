@@ -273,16 +273,6 @@ void GGEMSVoxelizedSolid::TrackThrough(std::weak_ptr<GGEMSCrossSections> cross_s
   // Getting the number of particles
   GGulong const kNumberOfParticles = particles->GetNumberOfParticles();
 
-  // Get pointer on OpenCL device
-  GGEMSMaterialTables* material_device = opencl_manager.GetDeviceBuffer<GGEMSMaterialTables>(materials_cl, sizeof(GGEMSMaterialTables));
-
-  std::cout << "CHECK: " << (int)material_device->number_of_materials_ << std::endl;
-  std::cout << "CHECK n elements: " << material_device->total_number_of_chemical_elements_ << std::endl;
-  std::cout << "CHECK density: " << material_device->density_of_material_[0] << std::endl;
-
-  // Release the pointer
-  opencl_manager.ReleaseDeviceBuffer(materials_cl, material_device);
-
   // Set parameters for kernel
   std::shared_ptr<cl::Kernel> kernel_cl = kernel_track_through_cl_.lock();
   kernel_cl->setArg(0, *primary_particles_cl);

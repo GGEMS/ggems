@@ -23,9 +23,6 @@
 #ifdef OPENCL_COMPILER
 typedef struct __attribute__((aligned (1))) GGEMSVoxelizedSolidData_t
 #else
-#ifdef _MSC_VER
-#pragma pack(push, 1)
-#endif
 typedef struct PACKED GGEMSVoxelizedSolidData_t
 #endif
 {
@@ -38,10 +35,5 @@ typedef struct PACKED GGEMSVoxelizedSolidData_t
   GGdouble tolerance_; /*!< Geometry tolerance */
   GGuchar navigator_id_; /*!< Navigator index */
 } GGEMSVoxelizedSolidData; /*!< Using C convention name of struct to C++ (_t deletion) */
-#ifndef OPENCL_COMPILER
-#ifdef _MSC_VER
-#pragma pack(pop)
-#endif
-#endif
 
 #endif // GUARD_GGEMS_GEOMETRIES_GGEMSVOXELIZEDSOLIDSTACK_HH
