@@ -21,7 +21,7 @@
 
 #include "GGEMS/materials/GGEMSMaterialsStack.hh"
 #include "GGEMS/global/GGEMSOpenCLManager.hh"
-#include "GGEMS/physics/GGEMSEMProcessConstants.hh"
+#include "GGEMS/physics/GGEMSProcessConstants.hh"
 
 /*!
   \class GGEMSEMProcess

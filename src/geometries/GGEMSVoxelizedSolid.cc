@@ -15,6 +15,7 @@
 #include "GGEMS/sources/GGEMSSourceManager.hh"
 #include "GGEMS/physics/GGEMSParticles.hh"
 #include "GGEMS/physics/GGEMSCrossSections.hh"
+#include "GGEMS/randoms/GGEMSPseudoRandomGenerator.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -259,10 +260,11 @@ void GGEMSVoxelizedSolid::TrackThrough(std::weak_ptr<GGEMSCrossSections> cross_s
   cl::CommandQueue* queue_cl = opencl_manager.GetCommandQueue();
   cl::Event* event_cl = opencl_manager.GetEvent();
 
-  // Getting the buffer of primary particles from source
+  // Getting the buffer of primary particles and random from source
   GGEMSSourceManager& source_manager = GGEMSSourceManager::GetInstance();
   GGEMSParticles* particles = source_manager.GetParticles();
   cl::Buffer* primary_particles_cl = particles->GetPrimaryParticles();
+  cl::Buffer* randoms_cl = source_manager.GetPseudoRandomGenerator()->GetPseudoRandomNumbers();
 
   // Getting OpenCL buffer for cross section
   cl::Buffer* cross_sections_cl = cross_sections.lock()->GetCrossSections();
@@ -276,10 +278,11 @@ void GGEMSVoxelizedSolid::TrackThrough(std::weak_ptr<GGEMSCrossSections> cross_s
   // Set parameters for kernel
   std::shared_ptr<cl::Kernel> kernel_cl = kernel_track_through_cl_.lock();
   kernel_cl->setArg(0, *primary_particles_cl);
-  kernel_cl->setArg(1, *solid_data_cl_);
-  kernel_cl->setArg(2, *label_data_cl_);
-  kernel_cl->setArg(3, *cross_sections_cl);
-  kernel_cl->setArg(4, *materials_cl);
+  kernel_cl->setArg(1, *randoms_cl);
+  kernel_cl->setArg(2, *solid_data_cl_);
+  kernel_cl->setArg(3, *label_data_cl_);
+  kernel_cl->setArg(4, *cross_sections_cl);
+  kernel_cl->setArg(5, *materials_cl);
 
   // Define the number of work-item to launch
   cl::NDRange global(kNumberOfParticles);

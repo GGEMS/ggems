@@ -20,9 +20,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 GGEMSProcessesManager::GGEMSProcessesManager(void)
-: cross_section_table_number_of_bins_(GGEMSProcessParams::CROSS_SECTION_TABLE_NUMBER_BINS),
-  cross_section_table_min_energy_(GGEMSProcessParams::CROSS_SECTION_TABLE_ENERGY_MIN),
-  cross_section_table_max_energy_(GGEMSProcessParams::CROSS_SECTION_TABLE_ENERGY_MAX)
+: cross_section_table_number_of_bins_(GGEMSProcess::CROSS_SECTION_TABLE_NUMBER_BINS),
+  cross_section_table_min_energy_(GGEMSProcess::CROSS_SECTION_TABLE_ENERGY_MIN),
+  cross_section_table_max_energy_(GGEMSProcess::CROSS_SECTION_TABLE_ENERGY_MAX)
 {
   GGcout("GGEMSProcessesManager", "GGEMSProcessesManager", 3) << "Allocation of GGEMSProcessesManager..." << GGendl;
 }
@@ -44,10 +44,12 @@ void GGEMSProcessesManager::SetCrossSectionTableNumberOfBins(GGushort const& num
 {
   cross_section_table_number_of_bins_ = number_of_bins;
 
-  // Checking number of bins, not exceed 1024
-  if (cross_section_table_number_of_bins_ > 1024) {
-    GGwarn("GGEMSProcessesManager", "SetCrossSectionTableNumberOfBins", 0) << "Warning!!! Number of bins in the cross section table > 1024, the number of bins is reset to 1000." << GGendl;
-    cross_section_table_number_of_bins_ = 1024;
+  // Checking number of bins
+  if (cross_section_table_number_of_bins_ > GGEMSProcess::MAX_CROSS_SECTION_TABLE_NUMBER_BINS) {
+    GGwarn("GGEMSProcessesManager", "SetCrossSectionTableNumberOfBins", 0) << "Warning!!! Number of bins in the cross section table > "
+      << GGEMSProcess::MAX_CROSS_SECTION_TABLE_NUMBER_BINS << " the number of bins is set to "
+      << GGEMSProcess::MAX_CROSS_SECTION_TABLE_NUMBER_BINS << "." << GGendl;
+    cross_section_table_number_of_bins_ = GGEMSProcess::MAX_CROSS_SECTION_TABLE_NUMBER_BINS;
   }
 }
 
@@ -60,7 +62,7 @@ void GGEMSProcessesManager::SetCrossSectionTableMinimumEnergy(GGfloat const& ene
   cross_section_table_min_energy_ = GGEMSUnits::EnergyUnit(energy, unit);
 
   // Checking the min value
-  if (cross_section_table_min_energy_ < GGEMSProcessParams::CROSS_SECTION_TABLE_ENERGY_MIN) {
+  if (cross_section_table_min_energy_ < GGEMSProcess::CROSS_SECTION_TABLE_ENERGY_MIN) {
     std::ostringstream oss(std::ostringstream::out);
     oss << "The minimum of energy in the cross section table is 990 eV, yours is " << cross_section_table_min_energy_/GGEMSUnits::eV << " eV!!!";
     GGEMSMisc::ThrowException("GGEMSProcessesManager", "SetCrossSectionTableMinimumEnergy", oss.str());
@@ -76,7 +78,7 @@ void GGEMSProcessesManager::SetCrossSectionTableMaximumEnergy(GGfloat const& ene
   cross_section_table_max_energy_ = GGEMSUnits::EnergyUnit(energy, unit);
 
   // Checking the max value
-  if (cross_section_table_max_energy_ > GGEMSProcessParams::CROSS_SECTION_TABLE_ENERGY_MAX) {
+  if (cross_section_table_max_energy_ > GGEMSProcess::CROSS_SECTION_TABLE_ENERGY_MAX) {
     std::ostringstream oss(std::ostringstream::out);
     oss << "The maximum of energy in the cross section table is 250 MeV, yours is " << cross_section_table_max_energy_/GGEMSUnits::MeV << " MeV!!!";
     GGEMSMisc::ThrowException("GGEMSProcessesManager", "SetCrossSectionTableMaximumEnergy", oss.str());

@@ -51,7 +51,7 @@ void GGEMSEMProcess::BuildCrossSectionTables(std::weak_ptr<cl::Buffer> particle_
   GGEMSParticleCrossSections* cross_section_device = opencl_manager.GetDeviceBuffer<GGEMSParticleCrossSections>(particle_cross_sections_cl.lock().get(), sizeof(GGEMSParticleCrossSections));
 
   // Store index of activated process
-  cross_section_device->index_photon_cs[cross_section_device->number_of_activated_photon_processes_] = process_id_;
+  cross_section_device->index_photon_cs_[cross_section_device->number_of_activated_photon_processes_] = process_id_;
 
   // Increment number of activated photon process
   cross_section_device->number_of_activated_photon_processes_ += 1;

@@ -15,11 +15,13 @@
 #include "GGEMS/materials/GGEMSMaterialsStack.hh"
 #include "GGEMS/physics/GGEMSParticleCrossSectionsStack.hh"
 #include "GGEMS/geometries/GGEMSRayTracing.hh"
+#include "GGEMS/randoms/GGEMSRandomStack.hh"
 #include "GGEMS/navigators/GGEMSPhotonNavigator.hh"
 
 /*!
-  \fn __kernel void track_through_voxelized_solid(__global GGEMSPrimaryParticles* primary_particle, __global GGEMSVoxelizedSolidData* voxelized_solid_data, __global GGEMSParticleCrossSections* particle_cross_sections, __global GGEMSMaterialTables* materials)
+  \fn __kernel void track_through_voxelized_solid(__global GGEMSPrimaryParticles* primary_particle, __global GGEMSRandom* random, __global GGEMSVoxelizedSolidData* voxelized_solid_data, __global GGEMSParticleCrossSections* particle_cross_sections, __global GGEMSMaterialTables* materials)
   \param primary_particle - pointer to primary particles on OpenCL memory
+  \param random - pointer on random numbers
   \param voxelized_solid_data - pointer to voxelized solid data
   \param particle_cross_sections - pointer to cross sections activated in navigator
   \param materials - pointer on material in navigator
@@ -28,6 +30,7 @@
 */
 __kernel void track_through_voxelized_solid(
   __global GGEMSPrimaryParticles* primary_particle,
+  __global GGEMSRandom* random,
   __global GGEMSVoxelizedSolidData const* voxelized_solid_data,
   __global GGuchar const* label_data,
   __global GGEMSParticleCrossSections const* particle_cross_sections,
@@ -64,10 +67,12 @@ __kernel void track_through_voxelized_solid(
     + index_voxel.z * voxelized_solid_data->number_of_voxels_xyz_.x * voxelized_solid_data->number_of_voxels_xyz_.y;
 
   // Get the material that compose this volume
-  GGuchar index_label = label_data[index_voxel.w];
+  GGuchar const kIndexMaterial = label_data[index_voxel.w];
 
   // Find next discrete photon interaction
-  GetPhotonNextInteraction(primary_particle, particle_cross_sections, index_label, kParticleID);
+  GetPhotonNextInteraction(primary_particle, random, particle_cross_sections, kIndexMaterial, kParticleID);
+  GGfloat const kNextInteractionDistance = primary_particle->next_interaction_distance_[kParticleID];
+  GGuchar const kNextDiscreteProcess = primary_particle->next_discrete_process_[kParticleID];
 
   printf("******\n");
   printf("TRACK THROUGH\n");
@@ -83,6 +88,11 @@ __kernel void track_through_voxelized_solid(
   printf("  Direction: %e %e %e\n", direction.x, direction.y, direction.z);
   printf("-> Voxel infos <-\n");
   printf("Index voxel: %d %d %d %d\n", index_voxel.x, index_voxel.y, index_voxel.z, index_voxel.w);
-  printf("Label voxel: %d\n", index_label);
-  printf("Material name voxel: %s\n", particle_cross_sections->material_names_[index_label]);
+  printf("Label voxel: %d\n", kIndexMaterial);
+  printf("Material name voxel: %s\n", particle_cross_sections->material_names_[kIndexMaterial]);
+  printf("-> Process infos <-\n");
+  if (kNextDiscreteProcess == 0) printf("  Next discrete process name: COMPTON_SCATTERING\n");
+  if (kNextDiscreteProcess == 1) printf("  Next discrete process name: PHOTOELECTRIC_EFFECT\n");
+  if (kNextDiscreteProcess == 2) printf("  Next discrete process name: RAYLEIGH_SCATTERING\n");
+  printf("  Next interaction distance: %e mm\n", kNextInteractionDistance/mm);
 }
