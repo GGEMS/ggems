@@ -15,7 +15,7 @@
 #include "GGEMS/maths/GGEMSMatrixOperations.hh"
 #include "GGEMS/maths/GGEMSMathAlgorithms.hh"
 #include "GGEMS/physics/GGEMSParticleConstants.hh"
-#include "GGEMS/physics/GGEMSEMProcessConstants.hh"
+#include "GGEMS/physics/GGEMSProcessConstants.hh"
 
 /*!
   \fn __kernel void get_primaries_ggems_xray_source(__global GGEMSPrimaryParticles* primary_particle, __global GGEMSRandom* random, GGuchar const particle_name, __global GGfloat const* energy_spectrum, __global GGfloat const* cdf, GGuint const number_of_energy_bins, GGfloat const aperture, GGfloat3 const focal_spot_size, __global GGfloat44 const* matrix_transformation)

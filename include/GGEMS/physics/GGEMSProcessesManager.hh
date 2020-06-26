@@ -14,61 +14,7 @@
 */
 
 #include "GGEMS/global/GGEMSExport.hh"
-#include "GGEMS/tools/GGEMSSystemOfUnits.hh"
-
-/*!
-  \namespace GGEMSProcessParams
-  \brief Namespace storing the default parameters
-*/
-#ifndef OPENCL_COMPILER
-namespace GGEMSProcessParams
-{
-#endif
-  __constant GGfloat KINETIC_ENERGY_MIN = 1.0f*
-  #ifndef OPENCL_COMPILER
-  GGEMSUnits::eV; /*!< Min kinetic energy */
-  #else
-  1.e-6f; /*!< Min kinetic energy */
-  #endif
-
-  __constant GGushort CROSS_SECTION_TABLE_NUMBER_BINS = 220; /*!< Number of bins in the cross section table */
-  __constant GGfloat CROSS_SECTION_TABLE_ENERGY_MIN = 990.0f*
-  #ifndef OPENCL_COMPILER
-  GGEMSUnits::eV; /*!< Min energy in the cross section table */
-  #else
-  1.e-6f; /*!< Min energy in the cross section table */
-  #endif
-
-  __constant GGfloat CROSS_SECTION_TABLE_ENERGY_MAX = 250.0f*
-  #ifndef OPENCL_COMPILER
-  GGEMSUnits::MeV; /*!< Max energy in the cross section table */
-  #else
-  1.f; /*!< Max energy in the cross section table */
-  #endif
-
-  __constant GGfloat PHOTON_DISTANCE_CUT = 1.0f*
-  #ifndef OPENCL_COMPILER
-  GGEMSUnits::um; /*!< Photon cut */
-  #else
-  1.e-3f; /*!< Photon cut */
-  #endif
-
-  __constant GGfloat ELECTRON_DISTANCE_CUT = 1.0f*
-  #ifndef OPENCL_COMPILER
-  GGEMSUnits::um; /*!< Electron cut */
-  #else
-  1.e-3f; /*!< Electron cut */
-  #endif
-
-  __constant GGfloat POSITRON_DISTANCE_CUT = 1.0f*
-  #ifndef OPENCL_COMPILER
-  GGEMSUnits::um; /*!< Positron cut */
-  #else
-  1.e-3f; /*!< Positron cut */
-  #endif
-#ifndef OPENCL_COMPILER
-}
-#endif
+#include "GGEMS/physics/GGEMSProcessConstants.hh"
 
 /*!
   \class GGEMSProcessesManager

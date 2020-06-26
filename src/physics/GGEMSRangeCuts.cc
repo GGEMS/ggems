@@ -26,9 +26,9 @@ GGEMSRangeCuts::GGEMSRangeCuts(void)
 : min_energy_(0.0f),
   max_energy_(10.0f*GGEMSUnits::GeV),
   number_of_bins_(300),
-  distance_cut_photon_(GGEMSProcessParams::PHOTON_DISTANCE_CUT),
-  distance_cut_electron_(GGEMSProcessParams::ELECTRON_DISTANCE_CUT),
-  distance_cut_positron_(GGEMSProcessParams::POSITRON_DISTANCE_CUT)
+  distance_cut_photon_(GGEMSProcessCut::PHOTON_DISTANCE_CUT),
+  distance_cut_electron_(GGEMSProcessCut::ELECTRON_DISTANCE_CUT),
+  distance_cut_positron_(GGEMSProcessCut::POSITRON_DISTANCE_CUT)
 {
   GGcout("GGEMSRangeCuts", "GGEMSRangeCuts", 3) << "Allocation of GGEMSRangeCuts..." << GGendl;
 }
@@ -49,9 +49,9 @@ GGEMSRangeCuts::~GGEMSRangeCuts(void)
 void GGEMSRangeCuts::SetPhotonDistanceCut(GGfloat const& cut)
 {
   distance_cut_photon_ = cut;
-  if (distance_cut_photon_ < GGEMSProcessParams::PHOTON_DISTANCE_CUT) {
+  if (distance_cut_photon_ < GGEMSProcessCut::PHOTON_DISTANCE_CUT) {
     std::ostringstream oss(std::ostringstream::out);
-    oss << "Distance cut for photon " << cut << " mm is too small!!! Minimum value is " << GGEMSProcessParams::PHOTON_DISTANCE_CUT << " mm!!!";
+    oss << "Distance cut for photon " << cut << " mm is too small!!! Minimum value is " << GGEMSProcessCut::PHOTON_DISTANCE_CUT << " mm!!!";
     GGEMSMisc::ThrowException("GGEMSRangeCuts", "SetPhotonDistanceCut", oss.str());
   }
 }
@@ -63,9 +63,9 @@ void GGEMSRangeCuts::SetPhotonDistanceCut(GGfloat const& cut)
 void GGEMSRangeCuts::SetElectronDistanceCut(GGfloat const& cut)
 {
   distance_cut_electron_ = cut;
-  if (distance_cut_electron_ < GGEMSProcessParams::ELECTRON_DISTANCE_CUT) {
+  if (distance_cut_electron_ < GGEMSProcessCut::ELECTRON_DISTANCE_CUT) {
     std::ostringstream oss(std::ostringstream::out);
-    oss << "Distance cut for electron " << cut << " mm is too small!!! Minimum value is " << GGEMSProcessParams::ELECTRON_DISTANCE_CUT << " mm!!!";
+    oss << "Distance cut for electron " << cut << " mm is too small!!! Minimum value is " << GGEMSProcessCut::ELECTRON_DISTANCE_CUT << " mm!!!";
     GGEMSMisc::ThrowException("GGEMSRangeCuts", "SetElectronLengthCut", oss.str());
   }
 }
@@ -77,9 +77,9 @@ void GGEMSRangeCuts::SetElectronDistanceCut(GGfloat const& cut)
 void GGEMSRangeCuts::SetPositronDistanceCut(GGfloat const& cut)
 {
   distance_cut_positron_ = cut;
-  if (distance_cut_positron_ < GGEMSProcessParams::POSITRON_DISTANCE_CUT) {
+  if (distance_cut_positron_ < GGEMSProcessCut::POSITRON_DISTANCE_CUT) {
     std::ostringstream oss(std::ostringstream::out);
-    oss << "Cut distance for positron " << cut << " mm is too small!!! Minimum value is " << GGEMSProcessParams::POSITRON_DISTANCE_CUT << " mm!!!";
+    oss << "Cut distance for positron " << cut << " mm is too small!!! Minimum value is " << GGEMSProcessCut::POSITRON_DISTANCE_CUT << " mm!!!";
     GGEMSMisc::ThrowException("GGEMSRangeCuts", "SetPositronLengthCut", oss.str());
   }
 }
