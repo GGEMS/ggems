@@ -13,6 +13,7 @@
 #include "GGEMS/physics/GGEMSPrimaryParticlesStack.hh"
 #include "GGEMS/geometries/GGEMSVoxelizedSolidStack.hh"
 #include "GGEMS/geometries/GGEMSRayTracing.hh"
+#include "GGEMS/global/GGEMSConstants.hh"
 #include "GGEMS/maths/GGEMSMatrixOperations.hh"
 
 /*!
@@ -62,7 +63,7 @@ __kernel void project_to_voxelized_solid(
   position = GGfloat3Add(position, GGfloat3Scale(direction, kDistance + kTolerance));
 
   // Correcting the particle position if not totally inside due to float tolerance
-  position = TransportGetSafetyInsideVoxelizedNavigator(&position, voxelized_solid_data);
+  TransportGetSafetyInsideVoxelizedNavigator(&position, voxelized_solid_data);
 
   printf("******\n");
   printf("PROJECT TO\n");
@@ -78,5 +79,5 @@ __kernel void project_to_voxelized_solid(
   primary_particle->pz_[kParticleID] = position.z;
 
   //primary_particle->geometry_id_[kParticleID] = 0;
-  //primary_particle->tof_[kParticleID] += kDistance * C_LIGHT;
+  primary_particle->tof_[kParticleID] += kDistance * C_LIGHT; // True only for photons !!!
 }
