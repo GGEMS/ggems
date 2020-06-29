@@ -51,7 +51,9 @@ namespace GGEMSProcess
   __constant GGuchar COMPTON_SCATTERING = 0; /*!< Compton process */
   __constant GGuchar PHOTOELECTRIC_EFFECT = 1; /*!< Photoelectric process */
   __constant GGuchar RAYLEIGH_SCATTERING = 2; /*!< Rayleigh process */
+
   __constant GGuchar NO_PROCESS = 99; /*!< No process */
+  __constant GGuchar TRANSPORTATION = 99; /*!< Transportation process */
 
   //__constant GGuchar NUMBER_ELECTRON_PROCESSES = 3; /*!< Maximum number of electron processes */
   //__constant GGuchar NUMBER_PARTICLES = 5; /*!< Maximum number of different particles for secondaries */

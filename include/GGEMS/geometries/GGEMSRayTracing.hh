@@ -23,51 +23,132 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 /*!
-  \fn GGfloat3 TransportGetSafetyInsideVoxelizedNavigator(GGfloat3 const* position, __global GGEMSVoxelizedSolidData* voxelized_solid_data)
-  \param position - pointer on primary particle
-  \param voxelized_solid_data - voxelized data infos
-  \return new postion of moved particle
-  \brief Moving particle slightly inside a voxelized navigator
+  \fn inline void TransportGetSafetyInsideAABB(GGfloat3 const* position, GGfloat const xmin, GGfloat const xmax, GGfloat const ymin, GGfloat const ymax, GGfloat const zmin, GGfloat const zmax, GGfloat const tolerance)
+  \param position - pointer on primary particle position
+  \param xmin - min. border in x axis
+  \param xmax - max. border in x axis
+  \param ymin - min. border in y axis
+  \param ymax - max. border in y axis
+  \param zmin - min. border in z axis
+  \param zmax - max. border in z axis
+  \param tolerance - tolerance for geometry
+  \brief Get a safety position inside an AABB geometry
 */
-// Get a safety position inside an AABB geometry
-GGfloat3 TransportGetSafetyInsideVoxelizedNavigator(GGfloat3 const* position, __global GGEMSVoxelizedSolidData* voxelized_solid_data)
+inline void TransportGetSafetyInsideAABB(GGfloat3 const* position, GGfloat const xmin, GGfloat const xmax, GGfloat const ymin, GGfloat const ymax, GGfloat const zmin, GGfloat const zmax, GGfloat const tolerance)
 {
-  // Getting positions
-  GGfloat3 new_position = {position->x, position->y, position->z};
-
-  // Borders of voxelized solid
-  GGfloat const x_min = voxelized_solid_data->border_min_xyz_.x;
-  GGfloat const x_max = voxelized_solid_data->border_max_xyz_.x;
-  GGfloat const y_min = voxelized_solid_data->border_min_xyz_.y;
-  GGfloat const y_max = voxelized_solid_data->border_max_xyz_.y;
-  GGfloat const z_min = voxelized_solid_data->border_min_xyz_.z;
-  GGfloat const z_max = voxelized_solid_data->border_max_xyz_.z;
-
-  // Tolerance
-  GGfloat const kTolerance = voxelized_solid_data->tolerance_;
-
   // on x
-  GGfloat SafXmin = fabs(new_position.x - x_min);
-  GGfloat SafXmax = fabs(new_position.x - x_max);
+  GGfloat SafXmin = fabs(position->x - xmin);
+  GGfloat SafXmax = fabs(position->x - xmax);
 
-  new_position.x = (SafXmin < kTolerance) ? x_min + kTolerance : new_position.x;
-  new_position.x = (SafXmax < kTolerance) ? x_max - kTolerance : new_position.x;
+  position->x = (SafXmin < tolerance) ? xmin + tolerance : position->x;
+  position->x = (SafXmax < tolerance) ? xmax - tolerance : position->x;
 
   // on y
-  GGfloat SafYmin = fabs(new_position.y - y_min);
-  GGfloat SafYmax = fabs(new_position.y - y_max);
+  GGfloat SafYmin = fabs(position->y - ymin);
+  GGfloat SafYmax = fabs(position->y - ymax);
 
-  new_position.y = (SafYmin < kTolerance) ? y_min + kTolerance : new_position.y;
-  new_position.y = (SafYmax < kTolerance) ? y_max - kTolerance : new_position.y;
+  position->y = (SafYmin < tolerance) ? ymin + tolerance : position->y;
+  position->y = (SafYmax < tolerance) ? ymax - tolerance : position->y;
 
   // on z
-  GGfloat SafZmin = fabs(new_position.z - z_min);
-  GGfloat SafZmax = fabs(new_position.z - z_max);
+  GGfloat SafZmin = fabs(position->z - zmin);
+  GGfloat SafZmax = fabs(position->z - zmax);
 
-  new_position.z = (SafZmin < kTolerance) ? z_min + kTolerance : new_position.z;
-  new_position.z = (SafZmax < kTolerance) ? z_max - kTolerance : new_position.z;
+  position->z = (SafZmin < tolerance) ? zmin + tolerance : position->z;
+  position->z = (SafZmax < tolerance) ? zmax - tolerance : position->z;
+}
 
-  return new_position;
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+/*!
+  \fn inline void TransportGetSafetyInsideVoxelizedNavigator(GGfloat3 const* position, __global GGEMSVoxelizedSolidData* voxelized_solid_data)
+  \param position - pointer on primary particle position
+  \param voxelized_solid_data - voxelized data infos
+  \brief Moving particle slightly inside a voxelized navigator
+*/
+inline void TransportGetSafetyInsideVoxelizedNavigator(GGfloat3 const* position, __global GGEMSVoxelizedSolidData* voxelized_solid_data)
+{
+  // Borders of voxelized solid
+  GGfloat x_min = voxelized_solid_data->border_min_xyz_.x;
+  GGfloat x_max = voxelized_solid_data->border_max_xyz_.x;
+  GGfloat y_min = voxelized_solid_data->border_min_xyz_.y;
+  GGfloat y_max = voxelized_solid_data->border_max_xyz_.y;
+  GGfloat z_min = voxelized_solid_data->border_min_xyz_.z;
+  GGfloat z_max = voxelized_solid_data->border_max_xyz_.z;
+
+  // Tolerance
+  GGfloat tolerance = voxelized_solid_data->tolerance_;
+
+  TransportGetSafetyInsideAABB(position, x_min, x_max, y_min, y_max, z_min, z_max, tolerance);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+/*!
+  \fn inline void TransportGetSafetyOutsideAABB(GGfloat3 const* position, GGfloat const xmin, GGfloat const xmax, GGfloat const ymin, GGfloat const ymax, GGfloat const zmin, GGfloat const zmax, GGfloat const tolerance)
+  \param position - pointer on primary particle position
+  \param xmin - min. border in x axis
+  \param xmax - max. border in x axis
+  \param ymin - min. border in y axis
+  \param ymax - max. border in y axis
+  \param zmin - min. border in z axis
+  \param zmax - max. border in z axis
+  \param tolerance - tolerance for geometry
+  \return new position of moved particle
+  \brief Get a safety position outside an AABB geometry
+*/
+inline void TransportGetSafetyOutsideAABB(GGfloat3 const* position, GGfloat const xmin, GGfloat const xmax, GGfloat const ymin, GGfloat const ymax, GGfloat const zmin, GGfloat const zmax, GGfloat const tolerance)
+{
+  // on x
+  GGfloat SafXmin = fabs(position->x - xmin);
+  GGfloat SafXmax = fabs(position->x - xmax);
+
+  position->x = (SafXmin < tolerance) ? xmin - tolerance : position->x;
+  position->x = (SafXmax < tolerance) ? xmax + tolerance : position->x;
+
+  // on y
+  GGfloat SafYmin = fabs(position->y - ymin);
+  GGfloat SafYmax = fabs(position->y - ymax);
+
+  position->y = (SafYmin < tolerance) ? ymin - tolerance : position->y;
+  position->y = (SafYmax < tolerance) ? ymax + tolerance : position->y;
+
+  // on z
+  GGfloat SafZmin = fabs(position->z - zmin);
+  GGfloat SafZmax = fabs(position->z - zmax);
+
+  position->z = (SafZmin < tolerance) ? zmin - tolerance : position->z;
+  position->z = (SafZmax < tolerance) ? zmax + tolerance : position->z;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+/*!
+  \fn inline void TransportGetSafetyOutsideVoxelizedNavigator(GGfloat3 const* position, __global GGEMSVoxelizedSolidData* voxelized_solid_data)
+  \param position - pointer on primary particle position
+  \param voxelized_solid_data - voxelized data infos
+  \brief Moving particle slightly outside a voxelized navigator
+*/
+inline void TransportGetSafetyOutsideVoxelizedNavigator(GGfloat3 const* position, __global GGEMSVoxelizedSolidData* voxelized_solid_data)
+{
+  // Borders of voxelized solid
+  GGfloat x_min = voxelized_solid_data->border_min_xyz_.x;
+  GGfloat x_max = voxelized_solid_data->border_max_xyz_.x;
+  GGfloat y_min = voxelized_solid_data->border_min_xyz_.y;
+  GGfloat y_max = voxelized_solid_data->border_max_xyz_.y;
+  GGfloat z_min = voxelized_solid_data->border_min_xyz_.z;
+  GGfloat z_max = voxelized_solid_data->border_max_xyz_.z;
+
+  // Tolerance
+  GGfloat tolerance = voxelized_solid_data->tolerance_;
+
+  TransportGetSafetyOutsideAABB(position, x_min, x_max, y_min, y_max, z_min, z_max, tolerance);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -97,14 +178,20 @@ inline GGuchar IsParticleInVoxelizedNavigator(GGfloat3 const* position, __global
 ////////////////////////////////////////////////////////////////////////////////
 
 /*!
-  \fn inline GGfloat ComputeDistanceToVoxelizedNavigator(GGfloat3 const* position, GGfloat3 const* direction, __global GGEMSVoxelizedSolidData* voxelized_solid_data)
-  \param position - pointer on position of primary particle
-  \param direction - pointer on direction of primary particle
-  \param voxelized_solid_data - voxelized data infos
-  \return distance to navigator
-  \brief Compute the distance between particle and voxelized navigator using Smits algorithm
+  \fn inline GGfloat ComputeDistanceToAABB(GGfloat3 const* position, GGfloat3 const* direction, GGfloat const x_min, GGfloat const x_max, GGfloat const y_min, GGfloat const y_max, GGfloat const z_min, GGfloat const z_max, GGfloat const tolerance)
+  \param position - pointer on primary particle position
+  \param direction - pointer on primary particle direction
+  \param x_min - min. border in x axis
+  \param x_max - max. border in x axis
+  \param y_min - min. border in y axis
+  \param y_max - max. border in y axis
+  \param z_min - min. border in z axis
+  \param z_max - max. border in z axis
+  \param tolerance - tolerance for geometry
+  \return distance to AABB boundary
+  \brief Get the distance to AABB boundary
 */
-inline GGfloat ComputeDistanceToVoxelizedNavigator(GGfloat3 const* position, GGfloat3 const* direction, __global GGEMSVoxelizedSolidData* voxelized_solid_data)
+inline GGfloat ComputeDistanceToAABB(GGfloat3 const* position, GGfloat3 const* direction, GGfloat const x_min, GGfloat const x_max, GGfloat const y_min, GGfloat const y_max, GGfloat const z_min, GGfloat const z_max, GGfloat const tolerance)
 {
   // Variables for algorithm
   GGfloat idx = 0.0f;
@@ -127,14 +214,6 @@ inline GGfloat ComputeDistanceToVoxelizedNavigator(GGfloat3 const* position, GGf
   GGfloat const dir_x = direction->x;
   GGfloat const dir_y = direction->y;
   GGfloat const dir_z = direction->z;
-
-  // Borders of voxelized solid
-  GGfloat const x_min = voxelized_solid_data->border_min_xyz_.x;
-  GGfloat const x_max = voxelized_solid_data->border_max_xyz_.x;
-  GGfloat const y_min = voxelized_solid_data->border_min_xyz_.y;
-  GGfloat const y_max = voxelized_solid_data->border_max_xyz_.y;
-  GGfloat const z_min = voxelized_solid_data->border_min_xyz_.z;
-  GGfloat const z_max = voxelized_solid_data->border_max_xyz_.z;
 
   // On X axis
   if (fabs(dir_x) < EPSILON6) {
@@ -192,10 +271,38 @@ inline GGfloat ComputeDistanceToVoxelizedNavigator(GGfloat3 const* position, GGf
   if (tmin < 0.0f && (tmax < 0.0f || tmax == 0.0f)) return OUT_OF_WORLD;
 
   // Checking if particle cross navigator sufficiently
-  if ((tmax-tmin) < (2.0*voxelized_solid_data->tolerance_)) return OUT_OF_WORLD;
+  if ((tmax-tmin) < (2.0*tolerance)) return OUT_OF_WORLD;
 
   if (tmin <= 0.0f) return tmax;
   else return tmin;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+/*!
+  \fn inline GGfloat ComputeDistanceToVoxelizedNavigator(GGfloat3 const* position, GGfloat3 const* direction, __global GGEMSVoxelizedSolidData* voxelized_solid_data)
+  \param position - pointer on position of primary particle
+  \param direction - pointer on direction of primary particle
+  \param voxelized_solid_data - voxelized data infos
+  \return distance to navigator
+  \brief Compute the distance between particle and voxelized navigator using Smits algorithm
+*/
+inline GGfloat ComputeDistanceToVoxelizedNavigator(GGfloat3 const* position, GGfloat3 const* direction, __global GGEMSVoxelizedSolidData* voxelized_solid_data)
+{
+  // Borders of voxelized solid
+  GGfloat x_min = voxelized_solid_data->border_min_xyz_.x;
+  GGfloat x_max = voxelized_solid_data->border_max_xyz_.x;
+  GGfloat y_min = voxelized_solid_data->border_min_xyz_.y;
+  GGfloat y_max = voxelized_solid_data->border_max_xyz_.y;
+  GGfloat z_min = voxelized_solid_data->border_min_xyz_.z;
+  GGfloat z_max = voxelized_solid_data->border_max_xyz_.z;
+
+  // Tolerance
+  GGfloat tolerance = voxelized_solid_data->tolerance_;
+
+  return ComputeDistanceToAABB(position, direction, x_min, x_max, y_min, y_max, z_min, z_max, tolerance);
 }
 
 #endif
