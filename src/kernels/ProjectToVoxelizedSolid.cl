@@ -65,13 +65,13 @@ __kernel void project_to_voxelized_solid(
   // Correcting the particle position if not totally inside due to float tolerance
   TransportGetSafetyInsideVoxelizedNavigator(&position, voxelized_solid_data);
 
-  printf("******\n");
-  printf("PROJECT TO\n");
-  printf("Current navigator: %u\n", voxelized_solid_data->navigator_id_);
-  printf("Selected Navigator: %u\n", primary_particle->navigator_id_[kParticleID]);
-  printf("Position:\n");
-  printf("    Before: %4.7f %4.7f %4.7f mm\n", primary_particle->px_[kParticleID], primary_particle->py_[kParticleID], primary_particle->pz_[kParticleID]);
-  printf("    After: %4.7f %4.7f %4.7f mm\n", position.x, position.y, position.z);
+ // printf("******\n");
+ // printf("PROJECT TO\n");
+ // printf("Current navigator: %u\n", voxelized_solid_data->navigator_id_);
+ // printf("Selected Navigator: %u\n", primary_particle->navigator_id_[kParticleID]);
+ // printf("Position:\n");
+ // printf("    Before: %4.7f %4.7f %4.7f mm\n", primary_particle->px_[kParticleID], primary_particle->py_[kParticleID], primary_particle->pz_[kParticleID]);
+  //printf("    After: %4.7f %4.7f %4.7f mm\n", position.x, position.y, position.z);
 
   // Set new value for particles
   primary_particle->px_[kParticleID] = position.x;

@@ -74,6 +74,13 @@ class GGEMS_EXPORT GGEMSSource
     void SetSourceName(std::string const& source_name);
 
     /*!
+      \fn inline std::string GetNameOfSource(void) const
+      \return name of the source
+      \brief get the name of the source
+    */
+    inline std::string GetNameOfSource(void) const {return source_name_;}
+
+    /*!
       \fn void SetPosition(GGfloat const& pos_x, GGfloat const& pos_y, GGfloat const& pos_z, std::string const& unit = "mm")
       \param pos_x - Position of the source in X
       \param pos_y - Position of the source in Y
