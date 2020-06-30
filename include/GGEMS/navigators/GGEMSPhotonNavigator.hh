@@ -60,7 +60,7 @@ inline void GetPhotonNextInteraction(
     // Getting index of process
     index_photon_process = particle_cross_sections->index_photon_cs_[i];
     // Getting cross section
-    cross_section = particle_cross_sections->photon_cross_sections_[index_photon_process][kIndexEnergy + MAX_CROSS_SECTION_TABLE_NUMBER_BINS*index_material];
+    cross_section = particle_cross_sections->photon_cross_sections_[index_photon_process][kIndexEnergy + particle_cross_sections->number_of_bins_*index_material];
     // Getting the interaction distance
     interaction_distance = -log(KissUniform(random, index_particle))/cross_section;
 

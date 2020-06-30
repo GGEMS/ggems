@@ -106,6 +106,14 @@ class GGEMS_EXPORT GGEMSSourceManager
     void Initialize(void) const;
 
     /*!
+      \fn inline std::string GetNameOfSource(std::size_t const& source_index) const
+      \param source_index - index of the source
+      \return name of the source
+      \brief get the name of the source
+    */
+    inline std::string GetNameOfSource(std::size_t const& source_index) const {return sources_[source_index]->GetNameOfSource();}
+
+    /*!
       \fn inline std::size_t GetNumberOfBatchs(std::size_t const& source_index) const
       \param source_index - index of the source
       \return the number of batch of particle
@@ -147,6 +155,13 @@ class GGEMS_EXPORT GGEMSSourceManager
       particles_->SetNumberOfParticles(number_of_particles);
       sources_[source_index]->GetPrimaries(number_of_particles);
     }
+
+    /*!
+      \fn bool IsAlive(void) const
+      \return true if source is still alive, otherwize false
+      \brief check if some particles are alive in OpenCL particle buffer
+    */
+    bool IsAlive(void) const;
 
   private: // Source infos
     std::vector<std::shared_ptr<GGEMSSource>> sources_; /*!< Pointer on GGEMS sources */

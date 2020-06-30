@@ -74,7 +74,7 @@ class GGEMS_EXPORT GGEMSParticles
       \return pointer to OpenCL buffer storing particles
       \brief return the pointer to OpenCL buffer storing particles
     */
-    inline cl::Buffer* GetPrimaryParticles() const {return primary_particles_.get();};
+    inline cl::Buffer* GetPrimaryParticles() const {return primary_particles_cl_.get();};
 
     /*!
       \fn void SetNumberOfParticles(GGulong const& number_of_particles)
@@ -90,6 +90,13 @@ class GGEMS_EXPORT GGEMSParticles
     */
     inline GGulong GetNumberOfParticles(void) const {return number_of_particles_;};
 
+    /*!
+      \fn bool IsAlive(void) const
+      \return true if source is still alive, otherwize false
+      \brief check if some particles are alive in OpenCL particle buffer
+    */
+    bool IsAlive(void) const;
+
   private:
     /*!
       \fn void AllocatePrimaryParticles(void)
@@ -99,7 +106,7 @@ class GGEMS_EXPORT GGEMSParticles
 
   private:
     GGulong number_of_particles_; /*!< Number of activated particles in buffer */
-    std::shared_ptr<cl::Buffer> primary_particles_; /*!< Pointer storing info about primary particles in batch on OpenCL device */
+    std::shared_ptr<cl::Buffer> primary_particles_cl_; /*!< Pointer storing info about primary particles in batch on OpenCL device */
 };
 
 #endif // End of GUARD_GGEMS_PHYSICS_GGEMSPARTICLES_HH
