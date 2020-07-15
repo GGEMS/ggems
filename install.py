@@ -3,8 +3,7 @@ import shutil
 import sys
 
 # ------------------------------------------------------------------------------
-# Choose your compiler: 'CLANG', 'GCC', 'CL' (Visual Studio) depending on your
-# OS
+# Choose your compiler: 'CLANG', 'GCC', 'CL' (Visual Studio) depending on your OS
 if sys.platform == "linux" or sys.platform == "darwin":
     os.environ['COMPILER'] = 'CLANG'
     os.environ['CC'] = 'clang-9'
@@ -17,8 +16,17 @@ else:  # Unknown system
     print("Unknown architecture!!!", file=sys.stderr)
 
 # ------------------------------------------------------------------------------
-# Set the GGEMS folder (GGEMS source folder), the build folder (where GGEMS
-# will be compiled) and the install folder
+# Check if option 'clean' is given
+is_clean = False
+if len(sys.argv) > 1:
+    if sys.argv[1] != 'clean':
+        print('Error: argument has to be \'clean\'!!!')
+        sys.exit(2)
+    else:
+        is_clean = True
+
+# ------------------------------------------------------------------------------
+# Set the GGEMS folder (GGEMS source folder), the build folder (where GGEMS will be compiled) and the install folder
 GGEMS_FOLDER = os.path.abspath(os.path.dirname(sys.argv[0]))
 BUILD_FOLDER = os.path.join(os.path.dirname(GGEMS_FOLDER),"GGEMS_OpenCL_build")
 INSTALL_FOLDER = os.path.expanduser("~")
@@ -35,14 +43,15 @@ print('***********')
 print('')
 
 # ------------------------------------------------------------------------------
-# Delete CMAKE cache and file
-if os.path.exists(BUILD_FOLDER + "/CMakeCache.txt"):
-    print('Removing CMAKE cache...')
-    os.remove(BUILD_FOLDER + "/CMakeCache.txt")
+# Delete CMAKE cache and file if 'clean' option
+if is_clean:
+    if os.path.exists(BUILD_FOLDER + "/CMakeCache.txt"):
+        print('Removing CMAKE cache...')
+        os.remove(BUILD_FOLDER + "/CMakeCache.txt")
 
-if os.path.isdir(BUILD_FOLDER + "/CMakeFiles"):
-    print('Removing CMakeFiles...')
-    shutil.rmtree(BUILD_FOLDER + "/CMakeFiles")
+    if os.path.isdir(BUILD_FOLDER + "/CMakeFiles"):
+        print('Removing CMakeFiles...')
+        shutil.rmtree(BUILD_FOLDER + "/CMakeFiles")
 
 # ------------------------------------------------------------------------------
 # Launching CMAKE

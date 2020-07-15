@@ -124,7 +124,11 @@ __kernel void track_through_voxelized_solid(
 
     // Resolve process if different of TRANSPORTATION
     if (next_discrete_process != TRANSPORTATION) {
-      ;
+      printf("  Material name voxel: %s\n", particle_cross_sections->material_names_[kIndexMaterial]);
+      if (next_discrete_process == COMPTON_SCATTERING) printf("  Next discrete process name: COMPTON_SCATTERING\n");
+      if (next_discrete_process == PHOTOELECTRIC_EFFECT) printf("  Next discrete process name: PHOTOELECTRIC_EFFECT\n");
+      if (next_discrete_process == RAYLEIGH_SCATTERING) printf("  Next discrete process name: RAYLEIGH_SCATTERING\n");
+      primary_particle->status_[kParticleID] = DEAD;
     }
 
     //printf("******\n");
