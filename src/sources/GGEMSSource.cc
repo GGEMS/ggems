@@ -157,7 +157,7 @@ void GGEMSSource::CheckParameters(void) const
 
   // Checking the position of particles
   GGfloat3 const kPosition = geometry_transformation_->GetPosition();
-  if (GGEMSMisc::IsEqual(kPosition.s[0], std::numeric_limits<float>::min()) || GGEMSMisc::IsEqual(kPosition.s[1], std::numeric_limits<float>::min()) || GGEMSMisc::IsEqual(kPosition.s[2], std::numeric_limits<float>::min())) {
+  if (kPosition.s[0] == std::numeric_limits<float>::min() || kPosition.s[1] == std::numeric_limits<float>::min() || kPosition.s[2] == std::numeric_limits<float>::min()) {
     std::ostringstream oss(std::ostringstream::out);
     oss << "You have to set a position for the source!!!";
     GGEMSMisc::ThrowException("GGEMSSource", "CheckParameters", oss.str());
@@ -165,7 +165,7 @@ void GGEMSSource::CheckParameters(void) const
 
   // Checking the rotation of particles
   GGfloat3 const kRotation = geometry_transformation_->GetRotation();
-  if (GGEMSMisc::IsEqual(kRotation.s[0], std::numeric_limits<float>::min()) || GGEMSMisc::IsEqual(kRotation.s[1], std::numeric_limits<float>::min()) || GGEMSMisc::IsEqual(kRotation.s[2], std::numeric_limits<float>::min())) {
+  if (kRotation.s[0] == std::numeric_limits<float>::min() || kRotation.s[1] == std::numeric_limits<float>::min() || kRotation.s[2] == std::numeric_limits<float>::min()) {
     std::ostringstream oss(std::ostringstream::out);
     oss << "You have to set a rotation for the source!!!";
     GGEMSMisc::ThrowException("GGEMSSource", "CheckParameters", oss.str());

@@ -186,7 +186,7 @@ void GGEMSXRaySource::CheckParameters(void) const
   GGcout("GGEMSXRaySource", "CheckParameters", 3) << "Checking the mandatory parameters..." << GGendl;
 
   // Checking the beam aperture
-  if (GGEMSMisc::IsEqual(beam_aperture_, std::numeric_limits<float>::min())) {
+  if (beam_aperture_ == std::numeric_limits<float>::min()) {
     std::ostringstream oss(std::ostringstream::out);
     oss << "You have to set a beam aperture for the source!!!";
     GGEMSMisc::ThrowException("GGEMSXRaySource", "CheckParameters", oss.str());
@@ -198,7 +198,7 @@ void GGEMSXRaySource::CheckParameters(void) const
   }
 
   // Checking the focal spot size
-  if (GGEMSMisc::IsEqual(focal_spot_size_.s[0], std::numeric_limits<float>::min()) || GGEMSMisc::IsEqual(focal_spot_size_.s[1], std::numeric_limits<float>::min()) || GGEMSMisc::IsEqual(focal_spot_size_.s[2], std::numeric_limits<float>::min())) {
+  if (focal_spot_size_.s[0] == std::numeric_limits<float>::min() || focal_spot_size_.s[1] == std::numeric_limits<float>::min() || focal_spot_size_.s[2] == std::numeric_limits<float>::min()) {
     std::ostringstream oss(std::ostringstream::out);
     oss << "You have to set a focal spot size!!!";
     GGEMSMisc::ThrowException("GGEMSXRaySource", "CheckParameters", oss.str());
@@ -213,7 +213,7 @@ void GGEMSXRaySource::CheckParameters(void) const
 
   // Checking the energy
   if (is_monoenergy_mode_) {
-    if (GGEMSMisc::IsEqual(monoenergy_, -1.0f)) {
+    if (monoenergy_ == -1.0f) {
       std::ostringstream oss(std::ostringstream::out);
       oss << "You have to set an energy in monoenergetic mode!!!";
       GGEMSMisc::ThrowException("GGEMSXRaySource", "CheckParameters", oss.str());

@@ -1,16 +1,16 @@
 /*!
-  \file GGEMSTube.cc
+  \file GGEMSBox.cc
 
-  \brief Class GGEMSTube inheriting from GGEMSVolumeSolid handling Tube solid
+  \brief Class GGEMSBox inheriting from GGEMSVolume handling Box solid
 
   \author Julien BERT <julien.bert@univ-brest.fr>
   \author Didier BENOIT <didier.benoit@inserm.fr>
   \author LaTIM, INSERM - U1101, Brest, FRANCE
   \version 1.0
-  \date Monday January 13, 2020
+  \date Monday August 31, 2020
 */
 
-#include "GGEMS/geometries/GGEMSTube.hh"
+#include "GGEMS/geometries/GGEMSBox.hh"
 #include "GGEMS/tools/GGEMSTools.hh"
 #include "GGEMS/tools/GGEMSSystemOfUnits.hh"
 
@@ -18,28 +18,29 @@
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSTube::GGEMSTube(void)
+GGEMSBox::GGEMSBox(void)
 : GGEMSVolume(),
-  height_(0.0),
-  radius_(0.0)
+  height_(0.0f),
+  width_(0.0f),
+  depth_(0.0f)
 {
-  GGcout("GGEMSTube", "GGEMSTube", 3) << "Allocation of GGEMSTube..." << GGendl;
+  GGcout("GGEMSBox", "GGEMSBox", 3) << "Allocation of GGEMSBox..." << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSTube::~GGEMSTube(void)
+GGEMSBox::~GGEMSBox(void)
 {
-  GGcout("GGEMSTube", "~GGEMSTube", 3) << "Deallocation of GGEMSTube..." << GGendl;
+  GGcout("GGEMSBox", "~GGEMSBox", 3) << "Deallocation of GGEMSBox..." << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSTube::SetHeight(GGfloat const& height, char const* unit)
+void GGEMSBox::SetHeight(GGfloat const& height, char const* unit)
 {
   height_ = GGEMSUnits::DistanceUnit(height, unit);
 }
@@ -48,27 +49,41 @@ void GGEMSTube::SetHeight(GGfloat const& height, char const* unit)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSTube::SetRadius(GGfloat const& radius, char const* unit)
+void GGEMSBox::SetWidth(GGfloat const& width, char const* unit)
 {
-  radius_ = GGEMSUnits::DistanceUnit(radius, unit);
+  width_ = GGEMSUnits::DistanceUnit(width, unit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSTube::CheckParameters(void) const
+void GGEMSBox::SetDepth(GGfloat const& depth, char const* unit)
 {
-  GGcout("GGEMSTube", "CheckParameters", 3) << "Checking mandatory parameters..." << GGendl;
+  depth_ = GGEMSUnits::DistanceUnit(depth, unit);
+}
 
-  // Checking radius
-  if (radius_ == 0.0f) {
-    GGEMSMisc::ThrowException("GGEMSTube", "CheckParameters", "The tube radius has to be > 0!!!");
-  }
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSBox::CheckParameters(void) const
+{
+  GGcout("GGEMSBox", "CheckParameters", 3) << "Checking mandatory parameters..." << GGendl;
 
   // Checking height
   if (height_ == 0.0f) {
-    GGEMSMisc::ThrowException("GGEMSTube", "CheckParameters", "The tube height has to be > 0!!!");
+    GGEMSMisc::ThrowException("GGEMSBox", "CheckParameters", "The box height has to be > 0!!!");
+  }
+
+  // Checking width
+  if (width_ == 0.0f) {
+    GGEMSMisc::ThrowException("GGEMSBox", "CheckParameters", "The box width has to be > 0!!!");
+  }
+
+  // Checking depth
+  if (depth_ == 0.0f) {
+    GGEMSMisc::ThrowException("GGEMSBox", "CheckParameters", "The box depth has to be > 0!!!");
   }
 }
 
@@ -76,16 +91,16 @@ void GGEMSTube::CheckParameters(void) const
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSTube::Initialize(void)
+void GGEMSBox::Initialize(void)
 {
-  GGcout("GGEMSTube", "Initialize", 3) << "Initializing GGEMSTube solid volume..." << GGendl;
+  GGcout("GGEMSBox", "Initialize", 3) << "Initializing GGEMSBox solid volume..." << GGendl;
 
   // Check mandatory parameters
   CheckParameters();
 
   // Getting the path to kernel
   std::string const kOpenCLKernelPath = OPENCL_KERNEL_PATH;
-  std::string const kFilename = kOpenCLKernelPath + "/DrawGGEMSTube.cl";
+  std::string const kFilename = kOpenCLKernelPath + "/DrawGGEMSBox.cl";
 
   // Get the volume creator manager
   GGEMSVolumeCreatorManager& volume_creator_manager = GGEMSVolumeCreatorManager::GetInstance();
@@ -95,16 +110,16 @@ void GGEMSTube::Initialize(void)
 
   // Get the data type and compiling kernel
   std::string const kDataType = "-D" + volume_creator_manager.GetDataType();
-  kernel_draw_volume_cl_ = opencl_manager.CompileKernel(kFilename, "draw_ggems_tube", nullptr, const_cast<char*>(kDataType.c_str()));
+  kernel_draw_volume_cl_ = opencl_manager.CompileKernel(kFilename, "draw_ggems_box", nullptr, const_cast<char*>(kDataType.c_str()));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSTube::Draw(void)
+void GGEMSBox::Draw(void)
 {
-  GGcout("GGEMSTube", "Draw", 3) << "Drawing Tube..." << GGendl;
+  GGcout("GGEMSBox", "Draw", 3) << "Drawing Box..." << GGendl;
 
   // Get the OpenCL manager
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
@@ -129,8 +144,9 @@ void GGEMSTube::Draw(void)
   kernel_cl->setArg(2, positions_);
   kernel_cl->setArg(3, label_value_);
   kernel_cl->setArg(4, height_);
-  kernel_cl->setArg(5, radius_);
-  kernel_cl->setArg(6, *voxelized_phantom);
+  kernel_cl->setArg(5, width_);
+  kernel_cl->setArg(6, depth_);
+  kernel_cl->setArg(7, *voxelized_phantom);
 
   // Define the number of work-item to launch
   cl::NDRange global(kNumberThreads);
@@ -138,31 +154,31 @@ void GGEMSTube::Draw(void)
 
   // Launching kernel
   cl_int kernel_status = p_queue_cl->enqueueNDRangeKernel(*kernel_cl, offset, global, cl::NullRange, nullptr, p_event_cl);
-  opencl_manager.CheckOpenCLError(kernel_status, "GGEMSTube", "Draw Tube");
+  opencl_manager.CheckOpenCLError(kernel_status, "GGEMSBox", "Draw Box");
   p_queue_cl->finish(); // Wait until the kernel status is finish
 
   // Displaying time in kernel
-  opencl_manager.DisplayElapsedTimeInKernel("Draw Tube");
+  opencl_manager.DisplayElapsedTimeInKernel("Draw Box");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSTube* create_tube(void)
+GGEMSBox* create_box(void)
 {
-  return new(std::nothrow) GGEMSTube;
+  return new(std::nothrow) GGEMSBox;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void delete_tube(GGEMSTube* tube)
+void delete_box(GGEMSBox* box)
 {
-  if (tube) {
-    delete tube;
-    tube = nullptr;
+  if (box) {
+    delete box;
+    box = nullptr;
   }
 }
 
@@ -170,61 +186,70 @@ void delete_tube(GGEMSTube* tube)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_height_tube(GGEMSTube* tube, GGfloat const height, char const* unit)
+void set_height_box(GGEMSBox* box, GGfloat const height, char const* unit)
 {
-  tube->SetHeight(height, unit);
+  box->SetHeight(height, unit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_radius_tube(GGEMSTube* tube, GGfloat const radius, char const* unit)
+void set_width_box(GGEMSBox* box, GGfloat const width, char const* unit)
 {
-  tube->SetRadius(radius, unit);
+  box->SetWidth(width, unit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_position_tube(GGEMSTube* tube, GGfloat const pos_x, GGfloat const pos_y, GGfloat const pos_z, char const* unit)
+void set_depth_box(GGEMSBox* box, GGfloat const depth, char const* unit)
 {
-  tube->SetPosition(pos_x, pos_y, pos_z, unit);
+  box->SetDepth(depth, unit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_material_tube(GGEMSTube* tube, char const* material)
+void set_position_box(GGEMSBox* box, GGfloat const pos_x, GGfloat const pos_y, GGfloat const pos_z, char const* unit)
 {
-  tube->SetMaterial(material);
+  box->SetPosition(pos_x, pos_y, pos_z, unit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_label_value_tube(GGEMSTube* tube, GGfloat const label_value)
+void set_material_box(GGEMSBox* box, char const* material)
 {
-  tube->SetLabelValue(label_value);
+  box->SetMaterial(material);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void initialize_tube(GGEMSTube* tube)
+void set_label_value_box(GGEMSBox* box, GGfloat const label_value)
 {
-  tube->Initialize();
+  box->SetLabelValue(label_value);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void draw_tube(GGEMSTube* tube)
+void initialize_box(GGEMSBox* box)
 {
-  tube->Draw();
+  box->Initialize();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void draw_box(GGEMSBox* box)
+{
+  box->Draw();
 }

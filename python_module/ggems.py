@@ -5,7 +5,7 @@ from ggems_materials import GGEMSMaterialsDatabaseManager, GGEMSMaterials
 from ggems_navigators import GGEMSVoxelizedNavigator
 from ggems_sources import GGEMSSourceManager, GGEMSXRaySource
 from ggems_processes import GGEMSProcessesManager, GGEMSRangeCutsManager, GGEMSCrossSections
-from ggems_volume_creator import GGEMSVolumeCreatorManager, GGEMSTube
+from ggems_volume_creator import GGEMSVolumeCreatorManager, GGEMSTube, GGEMSBox
 
 
 class GGEMSManager(object):
