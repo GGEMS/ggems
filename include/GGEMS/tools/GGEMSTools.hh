@@ -41,20 +41,6 @@ namespace GGEMSFileStream
 namespace GGEMSMisc
 {
   /*!
-    \fn bool IsEqual(T const& a, T const& b)
-    \tparam T - float or double number
-    \param a - first value
-    \param b - second value
-    \return true if equal or false otherwize
-    \brief Check if 2 floats/doubles are equal (or almost equal)
-  */
-  template<typename T>
-  GGbool IsEqual(T const& a, T const& b)
-  {
-    return std::nextafter(a, std::numeric_limits<T>::lowest()) <= b && std::nextafter(a, std::numeric_limits<T>::max()) >= b;
-  }
-
-  /*!
     \fn void ThrowException(std::string const& class_name, std::string const& method_name, std::string const& message)
     \param class_name - Name of the class
     \param method_name - Name of the methode or function

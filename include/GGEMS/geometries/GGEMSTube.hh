@@ -4,7 +4,7 @@
 /*!
   \file GGEMSTube.hh
 
-  \brief Class GGEMSTube inheriting from GGEMSVolumeSolid handling Tube solid
+  \brief Class GGEMSTube inheriting from GGEMSVolume handling Tube solid
 
   \author Julien BERT <julien.bert@univ-brest.fr>
   \author Didier BENOIT <didier.benoit@inserm.fr>

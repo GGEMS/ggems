@@ -1,6 +1,8 @@
 import os
 import shutil
 import sys
+import glob
+import pathlib
 
 # ------------------------------------------------------------------------------
 # Choose your compiler: 'CLANG', 'GCC', 'CL' (Visual Studio) depending on your OS
@@ -52,6 +54,11 @@ if is_clean:
     if os.path.isdir(BUILD_FOLDER + "/CMakeFiles"):
         print('Removing CMakeFiles...')
         shutil.rmtree(BUILD_FOLDER + "/CMakeFiles")
+
+    # Remove all files
+    files = pathlib.Path(BUILD_FOLDER).glob("*.*")
+    for p in files:
+        p.unlink()
 
 # ------------------------------------------------------------------------------
 # Launching CMAKE

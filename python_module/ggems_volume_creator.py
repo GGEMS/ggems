@@ -113,3 +113,66 @@ class GGEMSTube(object):
 
     def draw(self):
         ggems_lib.draw_tube(self.obj)
+
+
+class GGEMSBox(object):
+    """Build a solid box analytical phantom
+    """
+    def __init__(self):
+        ggems_lib.create_box.restype = ctypes.c_void_p
+
+        ggems_lib.delete_box.argtypes = [ctypes.c_void_p]
+        ggems_lib.delete_box.restype = ctypes.c_void_p
+
+        ggems_lib.set_height_box.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_char_p]
+        ggems_lib.set_height_box.restype = ctypes.c_void_p
+
+        ggems_lib.set_width_box.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_char_p]
+        ggems_lib.set_width_box.restype = ctypes.c_void_p
+
+        ggems_lib.set_depth_box.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_char_p]
+        ggems_lib.set_depth_box.restype = ctypes.c_void_p
+
+        ggems_lib.set_position_box.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_char_p]
+        ggems_lib.set_position_box.restype = ctypes.c_void_p
+
+        ggems_lib.set_label_value_box.argtypes = [ctypes.c_void_p, ctypes.c_float]
+        ggems_lib.set_label_value_box.restype = ctypes.c_void_p
+
+        ggems_lib.set_material_box.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
+        ggems_lib.set_material_box.restype = ctypes.c_void_p
+
+        ggems_lib.initialize_box.argtypes = [ctypes.c_void_p]
+        ggems_lib.initialize_box.restype = ctypes.c_void_p
+
+        ggems_lib.draw_box.argtypes = [ctypes.c_void_p]
+        ggems_lib.draw_box.restype = ctypes.c_void_p
+
+        self.obj = ggems_lib.create_box()
+
+    def delete(self):
+        ggems_lib.delete_box(self.obj)
+
+    def set_height(self, height, unit):
+        ggems_lib.set_height_box(self.obj, height, unit.encode('ASCII'))
+
+    def set_width(self, width, unit):
+        ggems_lib.set_width_box(self.obj, width, unit.encode('ASCII'))
+
+    def set_depth(self, depth, unit):
+        ggems_lib.set_depth_box(self.obj, depth, unit.encode('ASCII'))
+
+    def set_label_value(self, label_value):
+        ggems_lib.set_label_value_box(self.obj, label_value)
+
+    def set_position(self, pos_x, pos_y, pos_z, unit):
+        ggems_lib.set_position_box(self.obj, pos_x, pos_y, pos_z, unit.encode('ASCII'))
+
+    def set_material(self, material):
+        ggems_lib.set_material_box(self.obj, material.encode('ASCII'))
+
+    def initialize(self):
+        ggems_lib.initialize_box(self.obj)
+
+    def draw(self):
+        ggems_lib.draw_box(self.obj)

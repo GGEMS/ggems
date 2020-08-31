@@ -165,7 +165,7 @@ void GGEMSMHDImage::Read(std::string const& image_mhd_header_filename, std::weak
     GGEMSMisc::ThrowException("GGEMSMHDImage", "Read", oss.str());
   }
 
-  if (GGEMSMisc::IsEqual(solid_data_device->voxel_sizes_xyz_.s[0], 0.0) || GGEMSMisc::IsEqual(solid_data_device->voxel_sizes_xyz_.s[1], 0.0) || GGEMSMisc::IsEqual(solid_data_device->voxel_sizes_xyz_.s[2], 0.0)) {
+  if (solid_data_device->voxel_sizes_xyz_.s[0] == 0.0 || solid_data_device->voxel_sizes_xyz_.s[1] == 0.0 || solid_data_device->voxel_sizes_xyz_.s[2] == 0.0) {
     std::ostringstream oss(std::ostringstream::out);
     oss << "Voxel size invalid for the key 'ElementSpacing'!!! The values have to be > 0";
     GGEMSMisc::ThrowException("GGEMSMHDImage", "Read", oss.str());
@@ -244,7 +244,7 @@ void GGEMSMHDImage::CheckParameters(void) const
   }
 
   // Checking size of voxels
-  if (GGEMSMisc::IsEqual(element_sizes_.s[0], 0.0f) && GGEMSMisc::IsEqual(element_sizes_.s[1], 0.0f) && GGEMSMisc::IsEqual(element_sizes_.s[2], 0.0f)) {
+  if (element_sizes_.s[0] == 0.0f && element_sizes_.s[1] == 0.0f && element_sizes_.s[2] == 0.0f) {
     GGEMSMisc::ThrowException("GGEMSMHDImage", "CheckParameters", "Phantom voxel sizes have to be > 0.0!!!");
   }
 }
