@@ -50,9 +50,9 @@ GGEMSVolumeCreatorManager::~GGEMSVolumeCreatorManager(void)
 
 void GGEMSVolumeCreatorManager::SetElementSizes(GGfloat const& voxel_width, GGfloat const& voxel_height, GGfloat const& voxel_depth, char const* unit)
 {
-  element_sizes_.s[0] = GGEMSUnits::DistanceUnit(voxel_width, unit);
-  element_sizes_.s[1] = GGEMSUnits::DistanceUnit(voxel_height, unit);
-  element_sizes_.s[2] = GGEMSUnits::DistanceUnit(voxel_depth, unit);
+  element_sizes_.s[0] = DistanceUnit(voxel_width, unit);
+  element_sizes_.s[1] = DistanceUnit(voxel_height, unit);
+  element_sizes_.s[2] = DistanceUnit(voxel_depth, unit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

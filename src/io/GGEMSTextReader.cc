@@ -50,10 +50,10 @@ GGfloat GGEMSMaterialReader::ReadMaterialDensity(std::string const& line)
   std::string unit_str = line.substr(first_pos, last_pos != std::string::npos ? last_pos - first_pos : last_pos);
 
   if (unit_str == "g/cm3") {
-    density *= GGEMSUnits::g / GGEMSUnits::cm3;
+    density *= g/cm3;
   }
   else if (unit_str == "mg/cm3") {
-    density *= GGEMSUnits::mg / GGEMSUnits::cm3;
+    density *= mg/cm3;
   }
   else {
     GGEMSMisc::ThrowException("GGEMSMaterialReader", "ReadMaterialDensity", "Unknown density unit in material database file!!!");

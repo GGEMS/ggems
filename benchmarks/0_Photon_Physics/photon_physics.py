@@ -18,70 +18,38 @@ materials_database_manager.set_materials('data/materials.txt')
 
 # ------------------------------------------------------------------------------
 # STEP 4: Phantoms, navigators and systems
-phantom_1 = GGEMSVoxelizedNavigator()
-phantom_1.set_phantom_name('phantom_1')
-phantom_1.set_phantom_image('data/phantom_1.mhd')
-phantom_1.set_range_to_material('data/range_phantom_1.txt')
-phantom_1.set_position(50.0, 25.0, 0.0, 'mm')
-
-phantom_2 = GGEMSVoxelizedNavigator()
-phantom_2.set_phantom_name('phantom_2')
-phantom_2.set_phantom_image('data/phantom_2.mhd')
-phantom_2.set_range_to_material('data/range_phantom_2.txt')
-phantom_2.set_position(0.0, 25.0, 0.0, 'mm')
-
-phantom_3 = GGEMSVoxelizedNavigator()
-phantom_3.set_phantom_name('phantom_3')
-phantom_3.set_phantom_image('data/phantom_3.mhd')
-phantom_3.set_range_to_material('data/range_phantom_3.txt')
-phantom_3.set_position(50.0, 25.0, 50.0, 'mm')
-
-phantom_4 = GGEMSVoxelizedNavigator()
-phantom_4.set_phantom_name('phantom_4')
-phantom_4.set_phantom_image('data/phantom_4.mhd')
-phantom_4.set_range_to_material('data/range_phantom_4.txt')
-phantom_4.set_position(0.0, 25.0, 50.0, 'mm')
+phantom = GGEMSVoxelizedNavigator()
+phantom.set_phantom_name('phantom')
+phantom.set_phantom_image('data/waterbox.mhd')
+phantom.set_range_to_material('data/range_waterbox.txt')
+phantom.set_position(0.0, 0.0, 0.0, 'mm')
 
 # ------------------------------------------------------------------------------
 # STEP 5: Physics
 processes_manager.add_process('Compton', 'gamma', 'all')
-processes_manager.add_process('Photoelectric', 'gamma', 'all')
-processes_manager.add_process('Rayleigh', 'gamma', 'all')
+#processes_manager.add_process('Photoelectric', 'gamma', 'all')
+#processes_manager.add_process('Rayleigh', 'gamma', 'all')
 
 # Optional options, the following are by default
-processes_manager.set_cross_section_table_number_of_bins(220) # Not exceed 1000 bins
-processes_manager.set_cross_section_table_energy_min(0.99, 'keV')
-processes_manager.set_cross_section_table_energy_max(250.0, 'MeV')
+processes_manager.set_cross_section_table_number_of_bins(220)
+processes_manager.set_cross_section_table_energy_min(0.990, 'keV')
+processes_manager.set_cross_section_table_energy_max(10.0, 'MeV')
 
 # ------------------------------------------------------------------------------
 # STEP 6: Cuts, by default but are 1 um
 range_cuts_manager.set_cut('gamma', 1.0, 'mm', 'all')
 
 # ------------------------------------------------------------------------------
-# STEP 7: Sources
-# First source
-xray_source_1 = GGEMSXRaySource()
-xray_source_1.set_source_name('xray_source_1')
-xray_source_1.set_source_particle_type('gamma')
-# xray_source_1.set_number_of_particles(8616350000)
-xray_source_1.set_number_of_particles(1)
-xray_source_1.set_position(-1000.0, 0.0, 0.0, 'mm')
-xray_source_1.set_rotation(0.0, 0.0, 0.0, 'deg')
-xray_source_1.set_beam_aperture(1.0, 'deg')
-xray_source_1.set_focal_spot_size(0.0, 0.0, 0.0, 'mm')
-xray_source_1.set_polyenergy('data/spectrum_120kVp_2mmAl.dat')
-
-# Second source
-#xray_source_2 = GGEMSXRaySource()
-#xray_source_2.set_source_name('xray_source_2')
-#xray_source_2.set_source_particle_type('gamma')
-# xray_source_2.set_number_of_particles(861635)
-#xray_source_2.set_number_of_particles(1)
-#xray_source_2.set_position(-1000.0, 0.0, 0.0, 'mm')
-#xray_source_2.set_rotation(0.0, 0.0, 90.0, 'deg')
-#xray_source_2.set_beam_aperture(1.0, 'deg')
-#xray_source_2.set_focal_spot_size(0.0, 0.0, 0.0, 'mm')
-#xray_source_2.set_monoenergy(60.2, 'keV')
+# STEP 7: Source
+point_source = GGEMSXRaySource()
+point_source.set_source_name('point_source')
+point_source.set_source_particle_type('gamma')
+point_source.set_number_of_particles(1)
+point_source.set_position(-595.0, 0.0, 0.0, 'mm')
+point_source.set_rotation(0.0, 0.0, 0.0, 'deg')
+point_source.set_beam_aperture(0.0, 'deg')
+point_source.set_focal_spot_size(0.0, 0.0, 0.0, 'mm')
+point_source.set_monoenergy(80.0, 'keV')
 
 # ------------------------------------------------------------------------------
 # STEP 8: Detector/Digitizer Declaration

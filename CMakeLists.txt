@@ -44,6 +44,14 @@ SET(GGEMS_PATH ${PROJECT_SOURCE_DIR} CACHE PATH "Path to the GGEMS project repos
 SET(MAXIMUM_PARTICLES "5000000" CACHE STRING "Maximum of particles simulated in a buffer")
 
 #-------------------------------------------------------------------------------
+# Add an option for using cache kernel compilation on OpenCL device
+# Set to OFF to be sure your own kernel modification are re-compiled
+OPTION(OPENCL_CACHE_KERNEL_COMPILATION "Using kernel cache compilation" ON)
+IF(OPENCL_CACHE_KERNEL_COMPILATION)
+  ADD_DEFINITIONS(-DOPENCL_CACHE_KERNEL_COMPILATION)
+ENDIF()
+
+#-------------------------------------------------------------------------------
 # Defining a configuration file
 CONFIGURE_FILE("${PROJECT_SOURCE_DIR}/cmake-config/GGEMSConfiguration.hh.in" "${PROJECT_SOURCE_DIR}/include/GGEMS/global/GGEMSConfiguration.hh" @ONLY)
 

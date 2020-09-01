@@ -20,7 +20,7 @@
 
 GGEMSNavigator::GGEMSNavigator(GGEMSNavigator* navigator)
 : navigator_name_(""),
-  geometry_tolerance_(GGEMSTolerance::GEOMETRY),
+  geometry_tolerance_(GEOMETRY_TOLERANCE),
   position_xyz_(MakeFloat3Zeros()),
   navigator_id_(-1)
 {
@@ -60,7 +60,7 @@ void GGEMSNavigator::SetNavigatorName(std::string const& navigator_name)
 
 void GGEMSNavigator::SetGeometryTolerance(GGfloat const& distance, std::string const& unit)
 {
-  geometry_tolerance_ = GGEMSUnits::DistanceUnit(distance, unit);
+  geometry_tolerance_ = DistanceUnit(distance, unit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -69,9 +69,9 @@ void GGEMSNavigator::SetGeometryTolerance(GGfloat const& distance, std::string c
 
 void GGEMSNavigator::SetPosition(GGfloat const& position_x, GGfloat const& position_y, GGfloat const& position_z, std::string const& unit)
 {
-  position_xyz_.s[0] = GGEMSUnits::DistanceUnit(position_x, unit);
-  position_xyz_.s[1] = GGEMSUnits::DistanceUnit(position_y, unit);
-  position_xyz_.s[2] = GGEMSUnits::DistanceUnit(position_z, unit);
+  position_xyz_.s[0] = DistanceUnit(position_x, unit);
+  position_xyz_.s[1] = DistanceUnit(position_y, unit);
+  position_xyz_.s[2] = DistanceUnit(position_z, unit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -170,7 +170,7 @@ void GGEMSNavigator::PrintInfos(void) const
   GGcout("GGEMSNavigator", "PrintInfos", 0) << "GGEMSNavigator Infos:" << GGendl;
   GGcout("GGEMSNavigator", "PrintInfos", 0) << "---------------------" << GGendl;
   GGcout("GGEMSNavigator", "PrintInfos", 0) << "*Phantom navigator name: " << navigator_name_ << GGendl;
-  GGcout("GGEMSNavigator", "PrintInfos", 0) << "*Geometry tolerance: " << geometry_tolerance_/GGEMSUnits::mm << " mm" << GGendl;
+  GGcout("GGEMSNavigator", "PrintInfos", 0) << "*Geometry tolerance: " << geometry_tolerance_/mm << " mm" << GGendl;
   solid_->PrintInfos();
   materials_->PrintInfos();
   GGcout("GGEMSNavigator", "PrintInfos", 0) << GGendl;

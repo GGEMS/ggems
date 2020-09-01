@@ -28,7 +28,7 @@
 GGEMSCrossSections::GGEMSCrossSections(void)
 {
   GGcout("GGEMSCrossSections", "GGEMSCrossSections", 3) << "Allocation of GGEMSCrossSections..." << GGendl;
-  is_process_activated_.resize(GGEMSProcess::NUMBER_PROCESSES);
+  is_process_activated_.resize(NUMBER_PROCESSES);
   for (auto&& i : is_process_activated_) i = false;
 
   // Get the OpenCL manager
@@ -60,27 +60,27 @@ void GGEMSCrossSections::AddProcess(std::string const& process_name, std::string
   GGcout("GGEMSCrossSections", "AddProcess", 0) << "Adding " << process_name << " scattering process..." << GGendl;
 
   if (process_name == "Compton") {
-    if (!is_process_activated_.at(GGEMSProcess::COMPTON_SCATTERING)) {
+    if (!is_process_activated_.at(COMPTON_SCATTERING)) {
       em_processes_list_.push_back(std::make_shared<GGEMSComptonScattering>(particle_type, is_secondary));
-      is_process_activated_.at(GGEMSProcess::COMPTON_SCATTERING) = true;
+      is_process_activated_.at(COMPTON_SCATTERING) = true;
     }
     else {
       GGwarn("GGEMSCrossSections", "AddProcess", 3) << "Compton scattering process already activated!!!" << GGendl;
     }
   }
   else if (process_name == "Photoelectric") {
-    if (!is_process_activated_.at(GGEMSProcess::PHOTOELECTRIC_EFFECT)) {
+    if (!is_process_activated_.at(PHOTOELECTRIC_EFFECT)) {
       em_processes_list_.push_back(std::make_shared<GGEMSPhotoElectricEffect>(particle_type, is_secondary));
-      is_process_activated_.at(GGEMSProcess::PHOTOELECTRIC_EFFECT) = true;
+      is_process_activated_.at(PHOTOELECTRIC_EFFECT) = true;
     }
     else {
       GGwarn("GGEMSCrossSections", "AddProcess", 3) << "PhotoElectric effect process already activated!!!" << GGendl;
     }
   }
   else if (process_name == "Rayleigh") {
-    if (!is_process_activated_.at(GGEMSProcess::RAYLEIGH_SCATTERING)) {
+    if (!is_process_activated_.at(RAYLEIGH_SCATTERING)) {
       em_processes_list_.push_back(std::make_shared<GGEMSRayleighScattering>(particle_type, is_secondary));
-      is_process_activated_.at(GGEMSProcess::RAYLEIGH_SCATTERING) = true;
+      is_process_activated_.at(RAYLEIGH_SCATTERING) = true;
     }
     else {
       GGwarn("GGEMSCrossSections", "AddProcess", 3) << "PhotoElectric effect process already activated!!!" << GGendl;
@@ -143,7 +143,7 @@ void GGEMSCrossSections::Initialize(GGEMSMaterials const* materials)
   // Filling energy table with log scale
   GGfloat const kSlope = logf(kMaxEnergy/kMinEnergy);
   for (GGushort i = 0; i < kNBins; ++i) {
-    particle_cross_sections_device->energy_bins_[i] = kMinEnergy * expf(kSlope * (static_cast<float>(i) / (kNBins-1.0f))) * GGEMSUnits::MeV;
+    particle_cross_sections_device->energy_bins_[i] = kMinEnergy * expf(kSlope * (static_cast<float>(i) / (kNBins-1.0f))) * MeV;
   }
 
   // Release pointer
@@ -172,7 +172,7 @@ GGfloat GGEMSCrossSections::GetPhotonCrossSection(std::string const& process_nam
   GGuchar const kNumberMaterials = particle_cross_sections_device->number_of_materials_;
 
   // Converting energy
-  GGfloat const kEnergyMeV = GGEMSUnits::EnergyUnit(energy, unit);
+  GGfloat const kEnergyMeV = EnergyUnit(energy, unit);
 
   if (kEnergyMeV < kMinEnergy || kEnergyMeV > kMaxEnergy) {
     std::ostringstream oss(std::ostringstream::out);
@@ -183,13 +183,13 @@ GGfloat GGEMSCrossSections::GetPhotonCrossSection(std::string const& process_nam
   // Get the process id
   GGuchar process_id = 0;
   if (process_name == "Compton") {
-    process_id = GGEMSProcess::COMPTON_SCATTERING;
+    process_id = COMPTON_SCATTERING;
   }
   else if (process_name == "Photoelectric") {
-    process_id = GGEMSProcess::PHOTOELECTRIC_EFFECT;
+    process_id = PHOTOELECTRIC_EFFECT;
   }
   else if (process_name == "Rayleigh") {
-    process_id = GGEMSProcess::RAYLEIGH_SCATTERING;
+    process_id = RAYLEIGH_SCATTERING;
   }
   else {
     std::ostringstream oss(std::ostringstream::out);
@@ -227,7 +227,7 @@ GGfloat GGEMSCrossSections::GetPhotonCrossSection(std::string const& process_nam
 
   GGfloat const kCS = LinearInterpolation(kEnergyA, kCSA, kEnergyB, kCSB, kEnergyMeV);
 
-  return (kCS/kDensity) / (GGEMSUnits::cm2/GGEMSUnits::g);
+  return (kCS/kDensity) / (cm2/g);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

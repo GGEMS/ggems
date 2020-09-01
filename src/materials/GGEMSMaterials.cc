@@ -59,7 +59,7 @@ void GGEMSMaterials::AddMaterial(std::string const& material_name)
 
 void GGEMSMaterials::SetDistanceCut(std::string const& particle_name, GGfloat const& value, std::string const& unit)
 {
-  GGfloat const kCut = GGEMSUnits::DistanceUnit(value, unit.c_str());
+  GGfloat const kCut = DistanceUnit(value, unit.c_str());
 
   if (particle_name == "gamma") {
     range_cuts_cl_->SetPhotonDistanceCut(kCut);
@@ -101,29 +101,29 @@ void GGEMSMaterials::PrintInfos(void) const
   for (std::size_t i = 0; i < material_table_device->number_of_materials_; ++i) {
     GGcout("GGEMSMaterials", "PrintInfos", 0) << "* " << materials_.at(i) << GGendl;
     GGcout("GGEMSMaterials", "PrintInfos", 0) << "    - Number of chemical elements: " << static_cast<GGushort>(material_table_device->number_of_chemical_elements_[i]) << GGendl;
-    GGcout("GGEMSMaterials", "PrintInfos", 0) << "    - Density: " << material_table_device->density_of_material_[i]/(GGEMSUnits::g/GGEMSUnits::cm3) << " g/cm3" << GGendl;
-    GGcout("GGEMSMaterials", "PrintInfos", 0) << "    - Photon cut: " << material_table_device->photon_energy_cut_[i]/GGEMSUnits::keV << " keV" << GGendl;
-    GGcout("GGEMSMaterials", "PrintInfos", 0) << "    - Electron cut: " << material_table_device->electron_energy_cut_[i]/GGEMSUnits::keV << " keV" << GGendl;
-    GGcout("GGEMSMaterials", "PrintInfos", 0) << "    - Positron cut: " << material_table_device->positron_energy_cut_[i]/GGEMSUnits::keV << " keV" << GGendl;
-    GGcout("GGEMSMaterials", "PrintInfos", 0) << "    - Radiation length: " << material_table_device->radiation_length_[i]/(GGEMSUnits::cm) << " cm" << GGendl;
-    GGcout("GGEMSMaterials", "PrintInfos", 0) << "    - Total atomic density: " << material_table_device->number_of_atoms_by_volume_[i]/(GGEMSUnits::mol/GGEMSUnits::cm3) << " atom/cm3" << GGendl;
-    GGcout("GGEMSMaterials", "PrintInfos", 0) << "    - Total electron density: " << material_table_device->number_of_electrons_by_volume_[i]/(GGEMSUnits::mol/GGEMSUnits::cm3) << " e-/cm3" << GGendl;
+    GGcout("GGEMSMaterials", "PrintInfos", 0) << "    - Density: " << material_table_device->density_of_material_[i]/(g/cm3) << " g/cm3" << GGendl;
+    GGcout("GGEMSMaterials", "PrintInfos", 0) << "    - Photon cut: " << material_table_device->photon_energy_cut_[i]/keV << " keV" << GGendl;
+    GGcout("GGEMSMaterials", "PrintInfos", 0) << "    - Electron cut: " << material_table_device->electron_energy_cut_[i]/keV << " keV" << GGendl;
+    GGcout("GGEMSMaterials", "PrintInfos", 0) << "    - Positron cut: " << material_table_device->positron_energy_cut_[i]/keV << " keV" << GGendl;
+    GGcout("GGEMSMaterials", "PrintInfos", 0) << "    - Radiation length: " << material_table_device->radiation_length_[i]/(cm) << " cm" << GGendl;
+    GGcout("GGEMSMaterials", "PrintInfos", 0) << "    - Total atomic density: " << material_table_device->number_of_atoms_by_volume_[i]/(mol/cm3) << " atom/cm3" << GGendl;
+    GGcout("GGEMSMaterials", "PrintInfos", 0) << "    - Total electron density: " << material_table_device->number_of_electrons_by_volume_[i]/(mol/cm3) << " e-/cm3" << GGendl;
     GGcout("GGEMSMaterials", "PrintInfos", 0) << "    - Chemical Elements:" << GGendl;
     for (GGuchar j = 0; j < material_table_device->number_of_chemical_elements_[i]; ++j) {
       GGushort const kIndexChemicalElement = material_table_device->index_of_chemical_elements_[i];
       GGcout("GGEMSMaterials", "PrintInfos", 0) << "        + Z = " << static_cast<GGushort>(material_table_device->atomic_number_Z_[j+kIndexChemicalElement]) << GGendl;
-      GGcout("GGEMSMaterials", "PrintInfos", 0) << "        + fraction of chemical element = " << material_table_device->mass_fraction_[j+kIndexChemicalElement]/GGEMSUnits::PERCENT << " %" << GGendl;
-      GGcout("GGEMSMaterials", "PrintInfos", 0) << "        + Atomic number density = " << material_table_device->atomic_number_density_[j+kIndexChemicalElement]/(GGEMSUnits::mol/GGEMSUnits::cm3) << " atom/cm3" << GGendl;
+      GGcout("GGEMSMaterials", "PrintInfos", 0) << "        + fraction of chemical element = " << material_table_device->mass_fraction_[j+kIndexChemicalElement]/percent << " %" << GGendl;
+      GGcout("GGEMSMaterials", "PrintInfos", 0) << "        + Atomic number density = " << material_table_device->atomic_number_density_[j+kIndexChemicalElement]/(mol/cm3) << " atom/cm3" << GGendl;
       GGcout("GGEMSMaterials", "PrintInfos", 0) << "        + Element abundance = " << 100.0*material_table_device->atomic_number_density_[j+kIndexChemicalElement]/material_table_device->number_of_atoms_by_volume_[i] << " %" << GGendl;
     }
     GGcout("GGEMSMaterials", "PrintInfos", 0) << "    - Energy loss fluctuation data:" << GGendl;
-    GGcout("GGEMSMaterials", "PrintInfos", 0) << "        + Mean electron excitation energy: " << material_table_device->mean_excitation_energy_[i]/GGEMSUnits::eV << " eV" << GGendl;
+    GGcout("GGEMSMaterials", "PrintInfos", 0) << "        + Mean electron excitation energy: " << material_table_device->mean_excitation_energy_[i]/eV << " eV" << GGendl;
     GGcout("GGEMSMaterials", "PrintInfos", 0) << "        + Log mean electron excitation energy: " << material_table_device->log_mean_excitation_energy_[i] << GGendl;
     GGcout("GGEMSMaterials", "PrintInfos", 0) << "        + f1: " << material_table_device->f1_fluct_[i] << GGendl;
     GGcout("GGEMSMaterials", "PrintInfos", 0) << "        + f2: " << material_table_device->f2_fluct_[i] << GGendl;
-    GGcout("GGEMSMaterials", "PrintInfos", 0) << "        + energy0: " << material_table_device->energy0_fluct_[i]/GGEMSUnits::eV << " eV" << GGendl;
-    GGcout("GGEMSMaterials", "PrintInfos", 0) << "        + energy1: " << material_table_device->energy1_fluct_[i]/GGEMSUnits::eV << " eV" << GGendl;
-    GGcout("GGEMSMaterials", "PrintInfos", 0) << "        + energy2: " << material_table_device->energy2_fluct_[i]/GGEMSUnits::eV << " eV" << GGendl;
+    GGcout("GGEMSMaterials", "PrintInfos", 0) << "        + energy0: " << material_table_device->energy0_fluct_[i]/eV << " eV" << GGendl;
+    GGcout("GGEMSMaterials", "PrintInfos", 0) << "        + energy1: " << material_table_device->energy1_fluct_[i]/eV << " eV" << GGendl;
+    GGcout("GGEMSMaterials", "PrintInfos", 0) << "        + energy2: " << material_table_device->energy2_fluct_[i]/eV << " eV" << GGendl;
     GGcout("GGEMSMaterials", "PrintInfos", 0) << "        + log energy 1: " << material_table_device->log_energy1_fluct_[i] << GGendl;
     GGcout("GGEMSMaterials", "PrintInfos", 0) << "        + log energy 2: " << material_table_device->log_energy2_fluct_[i] << GGendl;
     GGcout("GGEMSMaterials", "PrintInfos", 0) << "    - Density correction data:" << GGendl;
@@ -263,7 +263,7 @@ GGfloat GGEMSMaterials::GetDensity(std::string const& material_name) const
 
   opencl_manager.ReleaseDeviceBuffer(material_tables_cl_.get(), material_table_device);
 
-  return kDensity / GGEMSUnits::g * GGEMSUnits::cm3;
+  return kDensity / g * cm3;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -285,7 +285,7 @@ GGfloat GGEMSMaterials::GetAtomicNumberDensity(std::string const& material_name)
 
   opencl_manager.ReleaseDeviceBuffer(material_tables_cl_.get(), material_table_device);
 
-  return kAtomicNumberDensity /(GGEMSUnits::mol/GGEMSUnits::cm3);
+  return kAtomicNumberDensity /(mol/cm3);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -322,7 +322,7 @@ GGfloat GGEMSMaterials::GetEnergyCut(std::string const& material_name, std::stri
 
   opencl_manager.ReleaseDeviceBuffer(material_tables_cl_.get(), material_table_device);
 
-  return energy_cut / GGEMSUnits::keV;
+  return energy_cut / keV;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

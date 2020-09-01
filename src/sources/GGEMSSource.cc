@@ -64,7 +64,7 @@ void GGEMSSource::SetSourceName(std::string const& source_name)
 
 void GGEMSSource::SetPosition(GGfloat const& pos_x, GGfloat const& pos_y, GGfloat const& pos_z, std::string const& unit)
 {
-  geometry_transformation_->SetTranslation(MakeFloat3(GGEMSUnits::DistanceUnit(pos_x, unit), GGEMSUnits::DistanceUnit(pos_y, unit), GGEMSUnits::DistanceUnit(pos_z, unit)));
+  geometry_transformation_->SetTranslation(MakeFloat3(DistanceUnit(pos_x, unit), DistanceUnit(pos_y, unit), DistanceUnit(pos_z, unit)));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -83,13 +83,13 @@ void GGEMSSource::SetNumberOfParticles(GGulong const& number_of_particles)
 void GGEMSSource::SetSourceParticleType(std::string const& particle_type)
 {
   if (particle_type == "gamma") {
-    particle_type_ = GGEMSParticle::PHOTON;
+    particle_type_ = PHOTON;
   }
   else if (particle_type == "e-") {
-    particle_type_ = GGEMSParticle::ELECTRON;
+    particle_type_ = ELECTRON;
   }
   else if (particle_type == "e+") {
-    particle_type_ = GGEMSParticle::POSITRON;
+    particle_type_ = POSITRON;
   }
   else
   {
@@ -117,9 +117,9 @@ void GGEMSSource::SetLocalAxis(GGfloat const& m00, GGfloat const& m01, GGfloat c
 void GGEMSSource::SetRotation(GGfloat const& rx, GGfloat const& ry, GGfloat const& rz, std::string const& unit)
 {
   geometry_transformation_->SetRotation(MakeFloat3(
-    GGEMSUnits::AngleUnit(rx, unit),
-    GGEMSUnits::AngleUnit(ry, unit),
-    GGEMSUnits::AngleUnit(rz, unit))
+    AngleUnit(rx, unit),
+    AngleUnit(ry, unit),
+    AngleUnit(rz, unit))
   );
 }
 

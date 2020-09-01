@@ -64,6 +64,7 @@ void GGEMSEMProcess::BuildCrossSectionTables(std::weak_ptr<cl::Buffer> particle_
   // Loop over the materials
   for (GGuchar j = 0; j < materials_device->number_of_materials_; ++j) {
     // Loop over the number of bins
+    GGcout("GGEMSEMProcess", "BuildCrossSectionTables", 3) << "Material: " << cross_section_device->material_names_[j] << GGendl;
     for (GGushort i = 0; i < kNumberOfBins; ++i) {
       cross_section_device->photon_cross_sections_[process_id_][i + j*kNumberOfBins] =
         ComputeCrossSectionPerMaterial(materials_device, j, cross_section_device->energy_bins_[i]);

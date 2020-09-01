@@ -15,37 +15,15 @@
 
 #include "GGEMS/tools/GGEMSSystemOfUnits.hh"
 
-/*!
-  \namespace GGEMSParticleState
-  \brief Namespace storing the state of the particle
-*/
-#ifndef OPENCL_COMPILER
-namespace GGEMSParticleState
-{
-#endif
-  __constant GGuchar PRIMARY = 0; /*!< Primary particle */
-  __constant GGuchar GEOMETRY_BOUNDARY = 99; /*!< Particle on the boundary */
-  __constant GGuchar ALIVE = 0; /*!< Particle alive */
-  __constant GGuchar DEAD = 1; /*!< Particle dead */
-  __constant GGuchar FREEZE = 2; /*!< Particle freeze */
-  __constant GGfloat OUT_OF_WORLD = FLT_MAX; /*!< Particle out of world */
-#ifndef OPENCL_COMPILER
-}
-#endif
+__constant GGuchar PRIMARY = 0; /*!< Primary particle */
+__constant GGuchar GEOMETRY_BOUNDARY = 99; /*!< Particle on the boundary */
+__constant GGuchar ALIVE = 0; /*!< Particle alive */
+__constant GGuchar DEAD = 1; /*!< Particle dead */
+__constant GGuchar FREEZE = 2; /*!< Particle freeze */
+__constant GGfloat OUT_OF_WORLD = FLT_MAX; /*!< Particle out of world */
 
-/*!
-  \namespace GGEMSParticle
-  \brief Namespace storing particles handling by GGEMS
-*/
-#ifndef OPENCL_COMPILER
-namespace GGEMSParticle
-{
-#endif
-  __constant GGuchar PHOTON = 0; /*!< Photon particle */
-  __constant GGuchar ELECTRON = 1; /*!< Electron particle */
-  __constant GGuchar POSITRON = 2; /*!< Positron particle */
-#ifndef OPENCL_COMPILER
-}
-#endif
+__constant GGuchar PHOTON = 0; /*!< Photon particle */
+__constant GGuchar ELECTRON = 1; /*!< Electron particle */
+__constant GGuchar POSITRON = 2; /*!< Positron particle */
 
 #endif // End of GUARD_GGEMS_PHYSICS_GGEMSPARTICLECONSTANTS_HH

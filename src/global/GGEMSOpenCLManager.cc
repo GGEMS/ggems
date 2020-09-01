@@ -148,10 +148,12 @@ GGEMSOpenCLManager::GGEMSOpenCLManager(void)
   #endif
 
   // Prevent cache kernel in OpenCL
+  #ifndef OPENCL_CACHE_KERNEL_COMPILATION
   #ifdef _MSC_VER
   _putenv("CUDA_CACHE_DISABLE=1");
   #else
   putenv("CUDA_CACHE_DISABLE=1");
+  #endif
   #endif
 
   // Creating a context for each device
