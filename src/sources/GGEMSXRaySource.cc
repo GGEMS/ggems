@@ -126,13 +126,13 @@ void GGEMSXRaySource::PrintInfos(void) const
   GGcout("GGEMSXRaySource", "PrintInfos", 0) << "----------------------"  << GGendl;
   GGcout("GGEMSXRaySource", "PrintInfos", 0) << "*Source name: " << source_name_ << GGendl;
   GGcout("GGEMSXRaySource", "PrintInfos", 0) << "*Particle type: ";
-  if (particle_type_ == GGEMSParticle::PHOTON) {
+  if (particle_type_ == PHOTON) {
     std::cout << "Photon" << std::endl;
   }
-  else if (particle_type_ == GGEMSParticle::ELECTRON) {
+  else if (particle_type_ == ELECTRON) {
     std::cout << "Electron" << std::endl;
   }
-  else if (particle_type_ == GGEMSParticle::POSITRON) {
+  else if (particle_type_ == POSITRON) {
     std::cout << "Positron" << std::endl;
   }
   GGcout("GGEMSXRaySource", "PrintInfos", 0) << "*Number of particles: " << number_of_particles_ << GGendl;
@@ -144,10 +144,10 @@ void GGEMSXRaySource::PrintInfos(void) const
   else {
     std::cout << "Polyenergy" << std::endl;
   }
-  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "*Position: " << "(" << geometry_transformation_->GetPosition().s[0]/GGEMSUnits::mm << ", " << geometry_transformation_->GetPosition().s[1]/GGEMSUnits::mm << ", " << geometry_transformation_->GetPosition().s[2]/GGEMSUnits::mm << " ) mm3" << GGendl;
+  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "*Position: " << "(" << geometry_transformation_->GetPosition().s[0]/mm << ", " << geometry_transformation_->GetPosition().s[1]/mm << ", " << geometry_transformation_->GetPosition().s[2]/mm << " ) mm3" << GGendl;
   GGcout("GGEMSXRaySource", "PrintInfos", 0) << "*Rotation: " << "(" << geometry_transformation_->GetRotation().s[0] << ", " << geometry_transformation_->GetRotation().s[1] << ", " << geometry_transformation_->GetRotation().s[2] << ") degree" << GGendl;
-  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "*Beam aperture: " << beam_aperture_/GGEMSUnits::deg << " degrees" << GGendl;
-  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "*Focal spot size: " << "(" << focal_spot_size_.s[0]/GGEMSUnits::mm << ", " << focal_spot_size_.s[1]/GGEMSUnits::mm << ", " << focal_spot_size_.s[2]/GGEMSUnits::mm << ") mm3" << GGendl;
+  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "*Beam aperture: " << beam_aperture_/deg << " degrees" << GGendl;
+  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "*Focal spot size: " << "(" << focal_spot_size_.s[0]/mm << ", " << focal_spot_size_.s[1]/mm << ", " << focal_spot_size_.s[2]/mm << ") mm3" << GGendl;
   GGcout("GGEMSXRaySource", "PrintInfos", 0) << "*Local axis: " << GGendl;
   GGcout("GGEMSXRaySource", "PrintInfos", 0) << "[" << GGendl;
   GGcout("GGEMSXRaySource", "PrintInfos", 0) << "    " << geometry_transformation_->GetLocalAxis().m00_ << " " << geometry_transformation_->GetLocalAxis().m01_ << " " << geometry_transformation_->GetLocalAxis().m02_ << GGendl;
@@ -163,7 +163,7 @@ void GGEMSXRaySource::PrintInfos(void) const
 
 void GGEMSXRaySource::SetMonoenergy(GGfloat const& monoenergy, std::string const& unit)
 {
-  monoenergy_ = GGEMSUnits::EnergyUnit(monoenergy, unit);
+  monoenergy_ = EnergyUnit(monoenergy, unit);
   is_monoenergy_mode_ = true;
 }
 
@@ -361,7 +361,7 @@ void GGEMSXRaySource::Initialize(void)
 
 void GGEMSXRaySource::SetBeamAperture(GGfloat const& beam_aperture, std::string const& unit)
 {
-  beam_aperture_ = GGEMSUnits::AngleUnit(beam_aperture, unit);
+  beam_aperture_ = AngleUnit(beam_aperture, unit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -370,7 +370,7 @@ void GGEMSXRaySource::SetBeamAperture(GGfloat const& beam_aperture, std::string 
 
 void GGEMSXRaySource::SetFocalSpotSize(GGfloat const& width, GGfloat const& height, GGfloat const& depth, std::string const& unit)
 {
-  focal_spot_size_ = MakeFloat3(GGEMSUnits::DistanceUnit(width, unit), GGEMSUnits::DistanceUnit(height, unit), GGEMSUnits::DistanceUnit(depth, unit));
+  focal_spot_size_ = MakeFloat3(DistanceUnit(width, unit), DistanceUnit(height, unit), DistanceUnit(depth, unit));
 }
 
 ////////////////////////////////////////////////////////////////////////////////

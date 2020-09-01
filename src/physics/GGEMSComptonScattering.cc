@@ -32,7 +32,7 @@ GGEMSComptonScattering::GGEMSComptonScattering(std::string const& primary_partic
     GGEMSMisc::ThrowException("GGEMSComptonScattering", "GGEMSComptonScattering", oss.str());
   }
 
-  process_id_ = GGEMSProcess::COMPTON_SCATTERING;
+  process_id_ = COMPTON_SCATTERING;
   primary_particle_ = "gamma";
   secondary_particle_ = "e-";
   is_secondaries_ = is_secondary;
@@ -76,11 +76,11 @@ GGfloat GGEMSComptonScattering::ComputeCrossSectionPerAtom(GGfloat const& energy
   GGfloat T0 = (atomic_number < 1.5f)? 40.0e-3f : 15.0e-3f;
   GGfloat d1, d2, d3, d4, d5;
 
-  d1 = fmaxf(energy, T0) / GGEMSPhysicalConstant::ELECTRON_MASS_C2; 
+  d1 = fmaxf(energy, T0) / ELECTRON_MASS_C2; 
   cross_section_by_atom = p1Z*logf(1.0f+2.0f*d1)/d1+(p2Z+p3Z*d1+p4Z*d1*d1)/(1.0f+20.0f*d1+230.0f*d1*d1+440.0f*d1*d1*d1);
 
   if (energy < T0) {
-    d1 = (T0+1.0e-3f) / GGEMSPhysicalConstant::ELECTRON_MASS_C2;
+    d1 = (T0+1.0e-3f) / ELECTRON_MASS_C2;
     d2 = p1Z*logf(1.0f+2.0f*d1)/d1+(p2Z+p3Z*d1+p4Z*d1*d1)/(1.0f+20.0f*d1+230.0f*d1*d1+440.0f*d1*d1*d1);
     d3 = (-T0 * (d2 - cross_section_by_atom)) / (cross_section_by_atom*1.0e-3f);
     d4 = (atomic_number > 1.5f)? 0.375f-0.0556f*logf(atomic_number) : 0.15f;

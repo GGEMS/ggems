@@ -23,19 +23,8 @@
 
 #include "GGEMS/global/GGEMSConstants.hh"
 
-/*!
-  \namespace GGEMSState
-  \brief Namespace storing the state of the particle
-*/
-#ifndef OPENCL_COMPILER
-namespace GGEMSState
-{
-#endif
-  __constant GGuchar SOLID = 0; /*!< Solid state */
-  __constant GGuchar GAS = 1; /*!< Gas state */
-#ifndef OPENCL_COMPILER
-}
-#endif
+__constant GGuchar SOLID = 0; /*!< Solid state */
+__constant GGuchar GAS = 1; /*!< Gas state */
 
 /*!
   \struct GGEMSChemicalElement
@@ -218,7 +207,7 @@ class GGEMS_EXPORT GGEMSMaterialsDatabaseManager
       GGEMSChemicalElement const& kChemicalElement = GetChemicalElement(kSingleMaterial.chemical_element_name_[index]);
 
       // return the atomic number density, the number could be higher than float!!! Double is used
-      return static_cast<GGfloat>(static_cast<GGdouble>(GGEMSPhysicalConstant::AVOGADRO) / kChemicalElement.molar_mass_M_ * kSingleMaterial.density_ * kSingleMaterial.mixture_f_[index]);
+      return static_cast<GGfloat>(static_cast<GGdouble>(AVOGADRO) / kChemicalElement.molar_mass_M_ * kSingleMaterial.density_ * kSingleMaterial.mixture_f_[index]);
     }
 
   private:

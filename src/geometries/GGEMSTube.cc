@@ -41,7 +41,7 @@ GGEMSTube::~GGEMSTube(void)
 
 void GGEMSTube::SetHeight(GGfloat const& height, char const* unit)
 {
-  height_ = GGEMSUnits::DistanceUnit(height, unit);
+  height_ = DistanceUnit(height, unit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -50,7 +50,7 @@ void GGEMSTube::SetHeight(GGfloat const& height, char const* unit)
 
 void GGEMSTube::SetRadius(GGfloat const& radius, char const* unit)
 {
-  radius_ = GGEMSUnits::DistanceUnit(radius, unit);
+  radius_ = DistanceUnit(radius, unit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -20,9 +20,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 GGEMSProcessesManager::GGEMSProcessesManager(void)
-: cross_section_table_number_of_bins_(GGEMSProcess::CROSS_SECTION_TABLE_NUMBER_BINS),
-  cross_section_table_min_energy_(GGEMSProcess::CROSS_SECTION_TABLE_ENERGY_MIN),
-  cross_section_table_max_energy_(GGEMSProcess::CROSS_SECTION_TABLE_ENERGY_MAX)
+: cross_section_table_number_of_bins_(CROSS_SECTION_TABLE_NUMBER_BINS),
+  cross_section_table_min_energy_(CROSS_SECTION_TABLE_ENERGY_MIN),
+  cross_section_table_max_energy_(CROSS_SECTION_TABLE_ENERGY_MAX)
 {
   GGcout("GGEMSProcessesManager", "GGEMSProcessesManager", 3) << "Allocation of GGEMSProcessesManager..." << GGendl;
 }
@@ -45,11 +45,11 @@ void GGEMSProcessesManager::SetCrossSectionTableNumberOfBins(GGushort const& num
   cross_section_table_number_of_bins_ = number_of_bins;
 
   // Checking number of bins
-  if (cross_section_table_number_of_bins_ > GGEMSProcess::MAX_CROSS_SECTION_TABLE_NUMBER_BINS) {
+  if (cross_section_table_number_of_bins_ > MAX_CROSS_SECTION_TABLE_NUMBER_BINS) {
     GGwarn("GGEMSProcessesManager", "SetCrossSectionTableNumberOfBins", 0) << "Warning!!! Number of bins in the cross section table > "
-      << GGEMSProcess::MAX_CROSS_SECTION_TABLE_NUMBER_BINS << " the number of bins is set to "
-      << GGEMSProcess::MAX_CROSS_SECTION_TABLE_NUMBER_BINS << "." << GGendl;
-    cross_section_table_number_of_bins_ = GGEMSProcess::MAX_CROSS_SECTION_TABLE_NUMBER_BINS;
+      << MAX_CROSS_SECTION_TABLE_NUMBER_BINS << " the number of bins is set to "
+      << MAX_CROSS_SECTION_TABLE_NUMBER_BINS << "." << GGendl;
+    cross_section_table_number_of_bins_ = MAX_CROSS_SECTION_TABLE_NUMBER_BINS;
   }
 }
 
@@ -59,12 +59,12 @@ void GGEMSProcessesManager::SetCrossSectionTableNumberOfBins(GGushort const& num
 
 void GGEMSProcessesManager::SetCrossSectionTableMinimumEnergy(GGfloat const& energy, char const* unit)
 {
-  cross_section_table_min_energy_ = GGEMSUnits::EnergyUnit(energy, unit);
+  cross_section_table_min_energy_ = EnergyUnit(energy, unit);
 
   // Checking the min value
-  if (cross_section_table_min_energy_ < GGEMSProcess::CROSS_SECTION_TABLE_ENERGY_MIN) {
+  if (cross_section_table_min_energy_ < CROSS_SECTION_TABLE_ENERGY_MIN) {
     std::ostringstream oss(std::ostringstream::out);
-    oss << "The minimum of energy in the cross section table is 990 eV, yours is " << cross_section_table_min_energy_/GGEMSUnits::eV << " eV!!!";
+    oss << "The minimum of energy in the cross section table is 990 eV, yours is " << cross_section_table_min_energy_/eV << " eV!!!";
     GGEMSMisc::ThrowException("GGEMSProcessesManager", "SetCrossSectionTableMinimumEnergy", oss.str());
   }
 }
@@ -75,12 +75,12 @@ void GGEMSProcessesManager::SetCrossSectionTableMinimumEnergy(GGfloat const& ene
 
 void GGEMSProcessesManager::SetCrossSectionTableMaximumEnergy(GGfloat const& energy, char const* unit)
 {
-  cross_section_table_max_energy_ = GGEMSUnits::EnergyUnit(energy, unit);
+  cross_section_table_max_energy_ = EnergyUnit(energy, unit);
 
   // Checking the max value
-  if (cross_section_table_max_energy_ > GGEMSProcess::CROSS_SECTION_TABLE_ENERGY_MAX) {
+  if (cross_section_table_max_energy_ > CROSS_SECTION_TABLE_ENERGY_MAX) {
     std::ostringstream oss(std::ostringstream::out);
-    oss << "The maximum of energy in the cross section table is 250 MeV, yours is " << cross_section_table_max_energy_/GGEMSUnits::MeV << " MeV!!!";
+    oss << "The maximum of energy in the cross section table is 250 MeV, yours is " << cross_section_table_max_energy_/MeV << " MeV!!!";
     GGEMSMisc::ThrowException("GGEMSProcessesManager", "SetCrossSectionTableMaximumEnergy", oss.str());
   }
 }
@@ -119,7 +119,7 @@ void GGEMSProcessesManager::PrintInfos(void) const
   GGcout("GGEMSProcessesManager", "PrintInfos", 0) << "Cross section table parameters:" << GGendl;
   GGcout("GGEMSProcessesManager", "PrintInfos", 0) << "-------------------------------" << GGendl;
   GGcout("GGEMSProcessesManager", "PrintInfos", 0) << "    * Number of bins for the cross section table: " << cross_section_table_number_of_bins_ << GGendl;
-  GGcout("GGEMSProcessesManager", "PrintInfos", 0) << "    * Range in energy of cross section table: [" << cross_section_table_min_energy_/GGEMSUnits::keV << ", " << cross_section_table_max_energy_/GGEMSUnits::keV << "] keV" << GGendl;
+  GGcout("GGEMSProcessesManager", "PrintInfos", 0) << "    * Range in energy of cross section table: [" << cross_section_table_min_energy_/keV << ", " << cross_section_table_max_energy_/keV << "] keV" << GGendl;
   GGcout("GGEMSProcessesManager", "PrintInfos", 0) << GGendl;
   // Loop over all phantoms
   for (size_t i = 0; i < navigator_manager.GetNumberOfNavigators(); ++i) {

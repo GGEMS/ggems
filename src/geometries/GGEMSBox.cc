@@ -42,7 +42,7 @@ GGEMSBox::~GGEMSBox(void)
 
 void GGEMSBox::SetHeight(GGfloat const& height, char const* unit)
 {
-  height_ = GGEMSUnits::DistanceUnit(height, unit);
+  height_ = DistanceUnit(height, unit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -51,7 +51,7 @@ void GGEMSBox::SetHeight(GGfloat const& height, char const* unit)
 
 void GGEMSBox::SetWidth(GGfloat const& width, char const* unit)
 {
-  width_ = GGEMSUnits::DistanceUnit(width, unit);
+  width_ = DistanceUnit(width, unit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -60,7 +60,7 @@ void GGEMSBox::SetWidth(GGfloat const& width, char const* unit)
 
 void GGEMSBox::SetDepth(GGfloat const& depth, char const* unit)
 {
-  depth_ = GGEMSUnits::DistanceUnit(depth, unit);
+  depth_ = DistanceUnit(depth, unit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

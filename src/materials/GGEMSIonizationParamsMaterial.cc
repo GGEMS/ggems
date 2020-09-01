@@ -72,7 +72,7 @@ void GGEMSIonizationParamsMaterial::ComputeIonizationParameters(void)
   for (GGuchar i = 0; i < kNumberOfChemicalElements; ++i) {
     // Get element by element
     GGEMSChemicalElement const& kChemicalElement = material_manager.GetChemicalElement(material_->chemical_element_name_[i]);
-    axZ = static_cast<GGfloat>(static_cast<GGdouble>(GGEMSPhysicalConstant::AVOGADRO) / kChemicalElement.molar_mass_M_ * material_->density_ * material_->mixture_f_[i] * static_cast<GGdouble>(kChemicalElement.atomic_number_Z_));
+    axZ = static_cast<GGfloat>(static_cast<GGdouble>(AVOGADRO) / kChemicalElement.molar_mass_M_ * material_->density_ * material_->mixture_f_[i] * static_cast<GGdouble>(kChemicalElement.atomic_number_Z_));
     log_mean_excitation_energy_ += axZ * std::log(kChemicalElement.mean_excitation_energy_I_);
     total_number_of_electron_per_volume += axZ;
   }
@@ -82,8 +82,8 @@ void GGEMSIonizationParamsMaterial::ComputeIonizationParameters(void)
 
   // Compute density correction factor
   // define material state (approximation based on threshold)
-  GGuchar state = GGEMSState::GAS;
-  if (material_->density_ > GGEMSPhysicalConstant::GASTHRESHOLD) state = GGEMSState::SOLID;
+  GGuchar state = GAS;
+  if (material_->density_ > GASTHRESHOLD) state = SOLID;
 
   // Check if density effect data exist in the table
   // R.M. Sternheimer, Atomic Data and Nuclear Data Tables, 30: 261 (1984)
@@ -104,7 +104,7 @@ void GGEMSIonizationParamsMaterial::ComputeIonizationParameters(void)
     d0_density_ = GGEMSDensityParams::data[index_density_correction][7];
   }
   else { // Computing the density correction
-    static constexpr GGfloat kCd2 = 4.0f * GGEMSMathematicalConstant::PI * GGEMSPhysicalConstant::HBARC_SQUARED * GGEMSPhysicalConstant::CLASSIC_ELECTRON_RADIUS;
+    static constexpr GGfloat kCd2 = 4.0f * PI * HBARC_SQUARED * CLASSIC_ELECTRON_RADIUS;
 
     GGfloat const kPlasmaEnergy = std::sqrt(kCd2*total_number_of_electron_per_volume);
 
@@ -113,8 +113,8 @@ void GGEMSIonizationParamsMaterial::ComputeIonizationParameters(void)
     GGuchar icase = 0;
     c_density_ = 1.0f + 2.0f*std::log(mean_excitation_energy_/kPlasmaEnergy);
 
-    if (state == GGEMSState::SOLID) {
-      static constexpr GGfloat kE100eV  = 100.f*GGEMSUnits::eV;
+    if (state == SOLID) {
+      static constexpr GGfloat kE100eV  = 100.f*eV;
       static const GGfloat kClimiS[] = {3.681f, 5.215f};
       static const GGfloat kX0valS[] = {1.000f, 1.500f};
       static const GGfloat kX1valS[] = {2.000f, 3.000f};
@@ -129,7 +129,7 @@ void GGEMSIonizationParamsMaterial::ComputeIonizationParameters(void)
       m_density_ = 3.0f;
     }
 
-    if (state == GGEMSState::GAS) {
+    if (state == GAS) {
       m_density_ = 3.0f;
       x1_density_ = 4.0f;
 
@@ -172,9 +172,9 @@ void GGEMSIonizationParamsMaterial::ComputeIonizationParameters(void)
   else f2_fluct_ = 0.0f;
 
   f1_fluct_          = 1.0f - f2_fluct_;
-  energy2_fluct_     = 10.0f * zeff * zeff * GGEMSUnits::eV;
+  energy2_fluct_     = 10.0f * zeff * zeff * eV;
   log_energy2_fluct_ = std::log(energy2_fluct_);
   log_energy1_fluct_ = (log_mean_excitation_energy_ - f2_fluct_ * log_energy2_fluct_) / f1_fluct_;
   energy1_fluct_     = std::exp(log_energy1_fluct_);
-  energy0_fluct_     = 10.f*GGEMSUnits::eV;
+  energy0_fluct_     = 10.f*eV;
 }

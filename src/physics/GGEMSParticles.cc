@@ -73,7 +73,7 @@ bool GGEMSParticles::IsAlive(void) const
   // Loop over the number of particles
   bool status = false;
   for (GGulong i = 0; i < number_of_particles_; ++i) {
-    if (primary_particles_device->status_[i] == GGEMSParticleState::ALIVE) {
+    if (primary_particles_device->status_[i] == ALIVE) {
       status = true;
       break;
     }

@@ -57,7 +57,7 @@ void GGEMSVolume::SetMaterial(char const* material)
 
 void GGEMSVolume::SetPosition(GGfloat const& pos_x, GGfloat const& pos_y, GGfloat const& pos_z, char const* unit)
 {
-  positions_.s[0] = GGEMSUnits::DistanceUnit(pos_x, unit);
-  positions_.s[1] = GGEMSUnits::DistanceUnit(pos_y, unit);
-  positions_.s[2] = GGEMSUnits::DistanceUnit(pos_z, unit);
+  positions_.s[0] = DistanceUnit(pos_x, unit);
+  positions_.s[1] = DistanceUnit(pos_y, unit);
+  positions_.s[2] = DistanceUnit(pos_z, unit);
 }

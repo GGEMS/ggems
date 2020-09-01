@@ -30,286 +30,274 @@
 #include "GGEMS/tools/GGEMSTools.hh"
 #endif
 
-/*!
-  \namespace GGEMSUnits
-  \brief namespace storing all the usefull physical units
-*/
-#ifndef OPENCL_COMPILER
-namespace GGEMSUnits
-{
-#endif
-
   // Lengths [L] (mm)
-  __constant GGfloat nm  = 1.e-6f; /*!< Nanometer */
-  __constant GGfloat um  = 1.e-3f; /*!< Micrometer */
-  __constant GGfloat mm  = 1.0f; /*!< Millimeter (REFERENCE) */
-  __constant GGfloat mm2 = 1.0f; /*!< Squared millimeter (REFERENCE) */
-  __constant GGfloat mm3 = 1.0f; /*!< Cubic millimeter (REFERENCE) */
-  __constant GGfloat cm  = 10.f; /*!< Centimeter */
-  __constant GGfloat cm2 = 1.e2f; /*!< Squared centimeter */
-  __constant GGfloat cm3 = 1.e3f; /*!< Cubic centimeter */
-  __constant GGfloat m   = 1.e3f; /*!< Meter */
-  __constant GGfloat m2  = 1.e6f; /*!< Squared meter */
-  __constant GGfloat m3  = 1.e9f; /*!< Cubic meter */
-  __constant GGfloat km  = 1.e6f; /*!< Kilometer */
-  __constant GGfloat km2 = 1.e12f; /*!< Squared kilometer */
-  __constant GGfloat km3 = 1.e18f; /*!< Cubic kilometer */
-  __constant GGfloat pc  = 3.0856775807e+19f; /*!< Parsec */
+__constant GGfloat nm  = 1.e-6f; /*!< Nanometer */
+__constant GGfloat um  = 1.e-3f; /*!< Micrometer */
+__constant GGfloat mm  = 1.0f; /*!< Millimeter (REFERENCE) */
+__constant GGfloat mm2 = 1.0f; /*!< Squared millimeter (REFERENCE) */
+__constant GGfloat mm3 = 1.0f; /*!< Cubic millimeter (REFERENCE) */
+__constant GGfloat cm  = 10.f; /*!< Centimeter */
+__constant GGfloat cm2 = 1.e2f; /*!< Squared centimeter */
+__constant GGfloat cm3 = 1.e3f; /*!< Cubic centimeter */
+__constant GGfloat m   = 1.e3f; /*!< Meter */
+__constant GGfloat m2  = 1.e6f; /*!< Squared meter */
+__constant GGfloat m3  = 1.e9f; /*!< Cubic meter */
+__constant GGfloat km  = 1.e6f; /*!< Kilometer */
+__constant GGfloat km2 = 1.e12f; /*!< Squared kilometer */
+__constant GGfloat km3 = 1.e18f; /*!< Cubic kilometer */
+__constant GGfloat pc  = 3.0856775807e+19f; /*!< Parsec */
 
-  // Cross section unit (mm2)
-  __constant GGfloat b = 1.e-22f; /*!< Barn */
-  __constant GGfloat mb = 1.e-25f; /*!< millibarn */
-  __constant GGfloat ub = 1.e-28f; /*!< microbarn */
-  __constant GGfloat nb = 1.e-31f; /*!< nanobarn */
-  __constant GGfloat pb = 1.e-34f; /*!< picobarn */
+// Cross section unit (mm2)
+__constant GGfloat b = 1.e-22f; /*!< Barn */
+__constant GGfloat mb = 1.e-25f; /*!< millibarn */
+__constant GGfloat ub = 1.e-28f; /*!< microbarn */
+__constant GGfloat nb = 1.e-31f; /*!< nanobarn */
+__constant GGfloat pb = 1.e-34f; /*!< picobarn */
 
-  // Angles
-  __constant GGfloat rad  = 1.0f; /*!< Radian (REFERENCE) */
-  __constant GGfloat mrad = 1.e-3f; /*!< milliradian */
-  __constant GGfloat deg  = 3.141592653589793238463f/180.0f; /*!< Degree */
+// Angles
+__constant GGfloat rad  = 1.0f; /*!< Radian (REFERENCE) */
+__constant GGfloat mrad = 1.e-3f; /*!< milliradian */
+__constant GGfloat deg  = 3.141592653589793238463f/180.0f; /*!< Degree */
 
-  // Solid angle
-  __constant GGfloat sr   = 1.0f; /*!< Steradian (REFERENCE) */
+// Solid angle
+__constant GGfloat sr   = 1.0f; /*!< Steradian (REFERENCE) */
 
-  // Time [T] (ns)
-  __constant GGfloat ns = 1.f; /*!< Nanosecond (REFERENCE) */
-  __constant GGfloat s  = 1.e+9f; /*!< Second */
-  __constant GGfloat ms = 1.e+6f; /*!< Millisecond */
-  __constant GGfloat us = 1.e+3f; /*!< Microsecond */
-  __constant GGfloat ps = 1.e-3f; /*!< Picosecond */
+// Time [T] (ns)
+__constant GGfloat ns = 1.f; /*!< Nanosecond (REFERENCE) */
+__constant GGfloat s  = 1.e+9f; /*!< Second */
+__constant GGfloat ms = 1.e+6f; /*!< Millisecond */
+__constant GGfloat us = 1.e+3f; /*!< Microsecond */
+__constant GGfloat ps = 1.e-3f; /*!< Picosecond */
 
-  // Frequency [T^-1] (ns-1)
-  __constant GGfloat Hz  = 1.f/(1.e+9f); /*!< Hertz */
-  __constant GGfloat kHz = 1.e-6f; /*!< Kilohertz */
-  __constant GGfloat MHz = 1.e-3f; /*!< Megahertz */
+// Frequency [T^-1] (ns-1)
+__constant GGfloat Hz  = 1.f/(1.e+9f); /*!< Hertz */
+__constant GGfloat kHz = 1.e-6f; /*!< Kilohertz */
+__constant GGfloat MHz = 1.e-3f; /*!< Megahertz */
 
-  // Electric charge [Q] (eplus)
-  __constant GGfloat eplus = 1.f; /*!< Positron charge */
-  __constant GGfloat qe    = 1.602176487e-19f; /*!< elementary charge in coulomb (C) */
-  __constant GGfloat C     = 1.f/1.602176487e-19f; /*!< Coulomb = 6.24150e+18 * eplus */
+// Electric charge [Q] (eplus)
+__constant GGfloat eplus = 1.f; /*!< Positron charge */
+__constant GGfloat qe    = 1.602176487e-19f; /*!< elementary charge in coulomb (C) */
+__constant GGfloat C     = 1.f/1.602176487e-19f; /*!< Coulomb = 6.24150e+18 * eplus */
 
-  // Energy [E] (MeV)
-  __constant GGfloat eV    = 1.e-6f; /*!< Electronvolt */
-  __constant GGfloat keV   = 1.e-3f; /*!< kiloelectronvolt */
-  __constant GGfloat MeV   = 1.f; /*!< Megaelectronvolt (REFERENCE) */
-  __constant GGfloat GeV   = 1.e+3f; /*!< Gigaelectronvolt */
-  __constant GGfloat TeV   = 1.e+6f; /*!< Teraelectronvolt */
-  __constant GGfloat PeV   = 1.e+9f; /*!< Petaelectronvolt */
-  __constant GGfloat J     = 1.e-6f/1.602176487e-19f; /*!< Joule 6.24150 e+12 * MeV */
+// Energy [E] (MeV)
+__constant GGfloat eV    = 1.e-6f; /*!< Electronvolt */
+__constant GGfloat keV   = 1.e-3f; /*!< kiloelectronvolt */
+__constant GGfloat MeV   = 1.f; /*!< Megaelectronvolt (REFERENCE) */
+__constant GGfloat GeV   = 1.e+3f; /*!< Gigaelectronvolt */
+__constant GGfloat TeV   = 1.e+6f; /*!< Teraelectronvolt */
+__constant GGfloat PeV   = 1.e+9f; /*!< Petaelectronvolt */
+__constant GGfloat J     = 1.e-6f/1.602176487e-19f; /*!< Joule 6.24150 e+12 * MeV */
 
-  // Mass [E][T^2][L^-2] (MeV.ns2.mm-2)
-  __constant GGfloat kg = 6.241509704e+24f; /*!< Kilogram */
-  __constant GGfloat g  = 6.241509704e+21f; /*!< gram */
-  __constant GGfloat mg = 6.241509704e+18f; /*!< milligram */
+// Mass [E][T^2][L^-2] (MeV.ns2.mm-2)
+__constant GGfloat kg = 6.241509704e+24f; /*!< Kilogram */
+__constant GGfloat g  = 6.241509704e+21f; /*!< gram */
+__constant GGfloat mg = 6.241509704e+18f; /*!< milligram */
 
-  // Power [E][T^-1] (MeV.ns-1)
-  __constant GGfloat W = 6.241509766e+3f; /*!< Watt */
+// Power [E][T^-1] (MeV.ns-1)
+__constant GGfloat W = 6.241509766e+3f; /*!< Watt */
 
-  // Force [E][L^-1] (MeV.mm-1)
-  __constant GGfloat N = 6.241509766e+9f; /*!< Newton */
+// Force [E][L^-1] (MeV.mm-1)
+__constant GGfloat N = 6.241509766e+9f; /*!< Newton */
 
-  // Pressure [E][L^-3] (MeV.mm-3)
-  __constant GGfloat Pa = 6.241509766e+3f; /*!< Pascal */
-  __constant GGfloat bar = 100000.0f*6.241509766e+3f; /*!< Bar */
-  __constant GGfloat atm = 101325.0f*6.241509766e+3f; /*!< Atmosphere */
+// Pressure [E][L^-3] (MeV.mm-3)
+__constant GGfloat Pa = 6.241509766e+3f; /*!< Pascal */
+__constant GGfloat bar = 100000.0f*6.241509766e+3f; /*!< Bar */
+__constant GGfloat atm = 101325.0f*6.241509766e+3f; /*!< Atmosphere */
 
-  // Electric current [Q][T^-1] (C.ns-1)
-  __constant GGfloat A  = 6.241509696e+9f; /*!< Ampere */
-  __constant GGfloat mA = 6.241509696e+6f; /*!< Milliampere */
-  __constant GGfloat uA = 6.241509696e+3f; /*!< Microampere */
-  __constant GGfloat nA = 6.241509696f; /*!< Nanoampere */
+// Electric current [Q][T^-1] (C.ns-1)
+__constant GGfloat A  = 6.241509696e+9f; /*!< Ampere */
+__constant GGfloat mA = 6.241509696e+6f; /*!< Milliampere */
+__constant GGfloat uA = 6.241509696e+3f; /*!< Microampere */
+__constant GGfloat nA = 6.241509696f; /*!< Nanoampere */
 
-  // Electric potential [E][Q^-1] 
-  __constant GGfloat MV = 1.0f; /*!< Megavolt (REFERENCE) */
-  __constant GGfloat kV = 1.e-3f; /*!< Kilovolt */
-  __constant GGfloat V  = 1.e-6f; /*!< Volt */
+// Electric potential [E][Q^-1] 
+__constant GGfloat MV = 1.0f; /*!< Megavolt (REFERENCE) */
+__constant GGfloat kV = 1.e-3f; /*!< Kilovolt */
+__constant GGfloat V  = 1.e-6f; /*!< Volt */
 
-  // Electric resistance [E][T][Q^-2] (MeV.ns.C-2)
-  __constant GGfloat OHM = 1.602176452e-16f; /*!< OHM 1.60217e-16*(MeV/eplus)/(eplus/ns) */
+// Electric resistance [E][T][Q^-2] (MeV.ns.C-2)
+__constant GGfloat OHM = 1.602176452e-16f; /*!< OHM 1.60217e-16*(MeV/eplus)/(eplus/ns) */
 
-  // Electric capacitance [Q^2][E^-1] (C.MV-1)
-  __constant GGfloat F  = 6.241509468e+24f; /*!< Farad */
-  __constant GGfloat mF = 6.241509468e+21f; /*!< millifarad */
-  __constant GGfloat uF = 6.241509468e+18f; /*!< microfarad */
-  __constant GGfloat nF = 6.241509468e+15f; /*!< nanofarad */
-  __constant GGfloat pF = 6.241509468e+12f; /*!< picofarad */
+// Electric capacitance [Q^2][E^-1] (C.MV-1)
+__constant GGfloat F  = 6.241509468e+24f; /*!< Farad */
+__constant GGfloat mF = 6.241509468e+21f; /*!< millifarad */
+__constant GGfloat uF = 6.241509468e+18f; /*!< microfarad */
+__constant GGfloat nF = 6.241509468e+15f; /*!< nanofarad */
+__constant GGfloat pF = 6.241509468e+12f; /*!< picofarad */
 
-  // Magnetic Flux [T][E][Q^-1] (ns.MV)
-  __constant GGfloat Wb = 1000.0f; /*!< Weber 1000*megavolt*ns */
+// Magnetic Flux [T][E][Q^-1] (ns.MV)
+__constant GGfloat Wb = 1000.0f; /*!< Weber 1000*megavolt*ns */
 
-  // Magnetic Field [T][E][Q^-1][L^-2] (MV.ns.mm2)
-  __constant GGfloat T = 0.001f; /*!< Tesla 0.001*megavolt*ns/mm2 */
-  __constant GGfloat G = 1.e-7f; /*!< Gauss */
-  __constant GGfloat kG = 1.e-4f; /*!< Kilogauss */
+// Magnetic Field [T][E][Q^-1][L^-2] (MV.ns.mm2)
+__constant GGfloat T = 0.001f; /*!< Tesla 0.001*megavolt*ns/mm2 */
+__constant GGfloat G = 1.e-7f; /*!< Gauss */
+__constant GGfloat kG = 1.e-4f; /*!< Kilogauss */
 
-  // Inductance [T^2][E][Q^-2] (MeV.ns2.C-2)
-  __constant GGfloat H = 1.602176383e-07f; /*!< Henry 1.60217e-7*MeV*(ns/eplus)^2 */
+// Inductance [T^2][E][Q^-2] (MeV.ns2.C-2)
+__constant GGfloat H = 1.602176383e-07f; /*!< Henry 1.60217e-7*MeV*(ns/eplus)^2 */
 
-  // Temperature (K)
-  __constant GGfloat K = 1.0f; /*!< Kelvin (REFERENCE) */
+// Temperature (K)
+__constant GGfloat K = 1.0f; /*!< Kelvin (REFERENCE) */
 
-  // Amount of substance (mol)
-  __constant GGfloat mol = 1.0f; /*!< Mole (REFERENCE) */
+// Amount of substance (mol)
+__constant GGfloat mol = 1.0f; /*!< Mole (REFERENCE) */
 
-  // Activity [T^-1] (ns-1)
-  __constant GGfloat Bq  = 1.e-9f; /*!< Becquerel */
-  __constant GGfloat kBq = 1.e-6f; /*!< Kilobecquerel */
-  __constant GGfloat MBq = 1.e-3f; /*!< Megabecquerel */
-  __constant GGfloat GBq = 1.0f; /*!< Gigabecquerel (REFERENCE) */
-  __constant GGfloat Ci  = 3.7e+10f/1.e+9f; /*!< Curie (Bq.ns-1) */
-  __constant GGfloat mCi = 3.7e-2f; /*!< Millicurie */
-  __constant GGfloat uCi = 3.7e-5f; /*!< Microcurie */
+// Activity [T^-1] (ns-1)
+__constant GGfloat Bq  = 1.e-9f; /*!< Becquerel */
+__constant GGfloat kBq = 1.e-6f; /*!< Kilobecquerel */
+__constant GGfloat MBq = 1.e-3f; /*!< Megabecquerel */
+__constant GGfloat GBq = 1.0f; /*!< Gigabecquerel (REFERENCE) */
+__constant GGfloat Ci  = 3.7e+10f/1.e+9f; /*!< Curie (Bq.ns-1) */
+__constant GGfloat mCi = 3.7e-2f; /*!< Millicurie */
+__constant GGfloat uCi = 3.7e-5f; /*!< Microcurie */
 
-  // Absorbed dose [L^2][T^-2] (mm2.ns-2)
-  __constant GGfloat Gy  = 1.0e-12f; /*!< Gray */
-  __constant GGfloat kGy = 1.0e-9f; /*!< Kilogray */
-  __constant GGfloat mGy = 1.0e-15f; /*!< Milligray */
-  __constant GGfloat uGy = 1.0e-18f; /*!< Microgray */
+// Absorbed dose [L^2][T^-2] (mm2.ns-2)
+__constant GGfloat Gy  = 1.0e-12f; /*!< Gray */
+__constant GGfloat kGy = 1.0e-9f; /*!< Kilogray */
+__constant GGfloat mGy = 1.0e-15f; /*!< Milligray */
+__constant GGfloat uGy = 1.0e-18f; /*!< Microgray */
 
-  // Luminous intensity [I] (cd)
-  __constant GGfloat cd = 1.0f; /*!< Candela (REFERENCE) */
+// Luminous intensity [I] (cd)
+__constant GGfloat cd = 1.0f; /*!< Candela (REFERENCE) */
 
-  // Luminous flux [I] (cd.sr)
-  __constant GGfloat lm = 1.0f; /*!< Lumen (REFERENCE) */
+// Luminous flux [I] (cd.sr)
+__constant GGfloat lm = 1.0f; /*!< Lumen (REFERENCE) */
 
-  // Illuminance [I][L^-2] (cd.sr.mm-2)
-  __constant GGfloat lx = 1.e-6f; /*!< Lux */
+// Illuminance [I][L^-2] (cd.sr.mm-2)
+__constant GGfloat lx = 1.e-6f; /*!< Lux */
 
-  // Miscellaneous
-  __constant GGfloat PERCENT = 0.01f; /*!< Percent value */
-  __constant GGfloat PERTHOUSAND = 0.001f; /*!< Perthousand value */
-  __constant GGfloat PERMILLION  = 0.000001f; /*!< Permillion value */
+// Miscellaneous
+__constant GGfloat percent = 0.01f; /*!< Percent value */
+__constant GGfloat perthousant = 0.001f; /*!< Perthousand value */
+__constant GGfloat permillion  = 0.000001f; /*!< Permillion value */
 
-  #ifndef OPENCL_COMPILER
-  /*!
-    \fn T DistanceUnit(T const& value, std::string const& unit)
-    \tparam T - type of the value to convert unit
-    \param value - value to check
-    \param unit - distance unit
-    \brief Choose best distance unit
-    \return value in the good unit
-  */
-  template <typename T>
-  T DistanceUnit(T const& value, std::string const& unit)
-  {
-    T new_value = static_cast<T>(0);
-    if (unit == "nm") {
-      new_value = static_cast<T>(value * GGEMSUnits::nm);
-    }
-    else if (unit == "um") {
-      new_value = static_cast<T>(value * GGEMSUnits::um);
-    }
-    else if (unit == "mm") {
-      new_value = static_cast<T>(value * GGEMSUnits::mm);
-    }
-    else if (unit == "cm") {
-      new_value = static_cast<T>(value * GGEMSUnits::cm);
-    }
-    else if (unit == "m") {
-      new_value = static_cast<T>(value * GGEMSUnits::m);
-    }
-    else if (unit == "km") {
-      new_value = static_cast<T>(value * GGEMSUnits::km);
-    }
-    else if (unit == "pc") {
-      new_value = static_cast<T>(value * GGEMSUnits::pc);
-    }
-    else {
-      std::ostringstream oss(std::ostringstream::out);
-      oss << "Unknown unit!!! You have choice between:" << std::endl;
-      oss << "    - \"nm\": nanometer" << std::endl;
-      oss << "    - \"um\": micrometer" << std::endl;
-      oss << "    - \"mm\": millimeter" << std::endl;
-      oss << "    - \"cm\": centimeter" << std::endl;
-      oss << "    - \"m\": meter" << std::endl;
-      oss << "    - \"km\": kilometer" << std::endl;
-      oss << "    - \"pc\": parsec";
-      GGEMSMisc::ThrowException("GGEMSUnits", "BestDistanceUnit", oss.str());
-    }
-    return new_value;
-  }
-
-  /*!
-    \fn T EnergyUnit(T const& value, std::string const& unit)
-    \tparam T - type of the value to convert unit
-    \param value - value to check
-    \param unit - energy unit
-    \brief Choose best energy unit
-    \return value in the good unit
-  */
-  template <typename T>
-  T EnergyUnit(T const& value, std::string const& unit)
-  {
-    T new_value = static_cast<T>(0);
-    if (unit == "eV") {
-      new_value = static_cast<T>(value * GGEMSUnits::eV);
-    }
-    else if (unit == "keV") {
-      new_value = static_cast<T>(value * GGEMSUnits::keV);
-    }
-    else if (unit == "MeV") {
-      new_value = static_cast<T>(value * GGEMSUnits::MeV);
-    }
-    else if (unit == "GeV") {
-      new_value = static_cast<T>(value * GGEMSUnits::GeV);
-    }
-    else if (unit == "TeV") {
-      new_value = static_cast<T>(value * GGEMSUnits::TeV);
-    }
-    else if (unit == "PeV") {
-      new_value = static_cast<T>(value * GGEMSUnits::PeV);
-    }
-    else {
-      std::ostringstream oss(std::ostringstream::out);
-      oss << "Unknown unit!!! You have choice between:" << std::endl;
-      oss << "    - \"eV\": electronvolt" << std::endl;
-      oss << "    - \"keV\": kiloelectronvolt" << std::endl;
-      oss << "    - \"MeV\": megaelectronvolt" << std::endl;
-      oss << "    - \"GeV\": gigaelectronvolt" << std::endl;
-      oss << "    - \"TeV\": teraelectronvolt" << std::endl;
-      oss << "    - \"PeV\": petaelectronvolt" << std::endl;
-      GGEMSMisc::ThrowException("GGEMSUnits", "BestEnergyUnit", oss.str());
-    }
-    return new_value;
-  }
-
-  /*!
-    \fn T AngleUnit(T const& value, std::string const& unit)
-    \tparam T - type of the value to convert unit
-    \param value - value to check
-    \param unit - angle unit
-    \brief Choose best angle unit
-    \return value in the good unit
-  */
-  template <typename T>
-  T AngleUnit(T const& value, std::string const& unit)
-  {
-    T new_value = static_cast<T>(0);
-    if (unit == "rad") {
-      new_value = static_cast<T>(value * GGEMSUnits::rad);
-    }
-    else if (unit == "mrad") {
-      new_value = static_cast<T>(value * GGEMSUnits::mrad);
-    }
-    else if (unit == "deg") {
-      new_value = static_cast<T>(value * GGEMSUnits::deg);
-    }
-    else if (unit == "sr") {
-      new_value = static_cast<T>(value * GGEMSUnits::sr);
-    }
-    else {
-      std::ostringstream oss(std::ostringstream::out);
-      oss << "Unknown unit!!! You have choice between:" << std::endl;
-      oss << "    - \"rad\": radian" << std::endl;
-      oss << "    - \"mrad\": milliradian" << std::endl;
-      oss << "    - \"deg\": degree" << std::endl;
-      oss << "    - \"sr\": steradian" << std::endl;
-      GGEMSMisc::ThrowException("GGEMSUnits", "BestAngleUnit", oss.str());
-    }
-    return new_value;
-  }
-  #endif
 #ifndef OPENCL_COMPILER
+/*!
+  \fn T DistanceUnit(T const& value, std::string const& unit)
+  \tparam T - type of the value to convert unit
+  \param value - value to check
+  \param unit - distance unit
+  \brief Choose best distance unit
+  \return value in the good unit
+*/
+template <typename T>
+T DistanceUnit(T const& value, std::string const& unit)
+{
+  T new_value = static_cast<T>(0);
+  if (unit == "nm") {
+    new_value = static_cast<T>(value * nm);
+  }
+  else if (unit == "um") {
+    new_value = static_cast<T>(value * um);
+  }
+  else if (unit == "mm") {
+    new_value = static_cast<T>(value * mm);
+  }
+  else if (unit == "cm") {
+    new_value = static_cast<T>(value * cm);
+  }
+  else if (unit == "m") {
+    new_value = static_cast<T>(value * m);
+  }
+  else if (unit == "km") {
+    new_value = static_cast<T>(value * km);
+  }
+  else if (unit == "pc") {
+    new_value = static_cast<T>(value * pc);
+  }
+  else {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "Unknown unit!!! You have choice between:" << std::endl;
+    oss << "    - \"nm\": nanometer" << std::endl;
+    oss << "    - \"um\": micrometer" << std::endl;
+    oss << "    - \"mm\": millimeter" << std::endl;
+    oss << "    - \"cm\": centimeter" << std::endl;
+    oss << "    - \"m\": meter" << std::endl;
+    oss << "    - \"km\": kilometer" << std::endl;
+    oss << "    - \"pc\": parsec";
+    GGEMSMisc::ThrowException("", "DistanceUnit", oss.str());
+  }
+  return new_value;
+}
+
+/*!
+  \fn T EnergyUnit(T const& value, std::string const& unit)
+  \tparam T - type of the value to convert unit
+  \param value - value to check
+  \param unit - energy unit
+  \brief Choose best energy unit
+  \return value in the good unit
+*/
+template <typename T>
+T EnergyUnit(T const& value, std::string const& unit)
+{
+  T new_value = static_cast<T>(0);
+  if (unit == "eV") {
+    new_value = static_cast<T>(value * eV);
+  }
+  else if (unit == "keV") {
+    new_value = static_cast<T>(value * keV);
+  }
+  else if (unit == "MeV") {
+    new_value = static_cast<T>(value * MeV);
+  }
+  else if (unit == "GeV") {
+    new_value = static_cast<T>(value * GeV);
+  }
+  else if (unit == "TeV") {
+    new_value = static_cast<T>(value * TeV);
+  }
+  else if (unit == "PeV") {
+    new_value = static_cast<T>(value * PeV);
+  }
+  else {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "Unknown unit!!! You have choice between:" << std::endl;
+    oss << "    - \"eV\": electronvolt" << std::endl;
+    oss << "    - \"keV\": kiloelectronvolt" << std::endl;
+    oss << "    - \"MeV\": megaelectronvolt" << std::endl;
+    oss << "    - \"GeV\": gigaelectronvolt" << std::endl;
+    oss << "    - \"TeV\": teraelectronvolt" << std::endl;
+    oss << "    - \"PeV\": petaelectronvolt" << std::endl;
+    GGEMSMisc::ThrowException("", "EnergyUnit", oss.str());
+  }
+  return new_value;
+}
+
+/*!
+  \fn T AngleUnit(T const& value, std::string const& unit)
+  \tparam T - type of the value to convert unit
+  \param value - value to check
+  \param unit - angle unit
+  \brief Choose best angle unit
+  \return value in the good unit
+*/
+template <typename T>
+T AngleUnit(T const& value, std::string const& unit)
+{
+  T new_value = static_cast<T>(0);
+  if (unit == "rad") {
+    new_value = static_cast<T>(value * rad);
+  }
+  else if (unit == "mrad") {
+    new_value = static_cast<T>(value * mrad);
+  }
+  else if (unit == "deg") {
+    new_value = static_cast<T>(value * deg);
+  }
+  else if (unit == "sr") {
+    new_value = static_cast<T>(value * sr);
+  }
+  else {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "Unknown unit!!! You have choice between:" << std::endl;
+    oss << "    - \"rad\": radian" << std::endl;
+    oss << "    - \"mrad\": milliradian" << std::endl;
+    oss << "    - \"deg\": degree" << std::endl;
+    oss << "    - \"sr\": steradian" << std::endl;
+    GGEMSMisc::ThrowException("", "AngleUnit", oss.str());
+  }
+  return new_value;
 }
 #endif
 

@@ -38,7 +38,7 @@ GGEMSRayleighScattering::GGEMSRayleighScattering(std::string const& primary_part
     GGwarn("GGEMSRayleighScattering", "GGEMSRayleighScattering", 0) << "There is no secondary during Rayleigh process!!! Secondary flag set to false" << GGendl;
   }
 
-  process_id_ = GGEMSProcess::RAYLEIGH_SCATTERING;
+  process_id_ = RAYLEIGH_SCATTERING;
   primary_particle_ = "gamma";
   is_secondaries_ = false;
 }
@@ -141,7 +141,7 @@ GGfloat GGEMSRayleighScattering::ComputeScatterFactor(GGfloat const& energy, GGu
 
   GGuint pos = kStart;
   for (; pos < kStop; pos += 2) {
-    if (GGEMSRayleighTable::kScatterFactor[pos]*GGEMSUnits::eV >= energy) break; // SF data are in eV
+    if (GGEMSRayleighTable::kScatterFactor[pos]*eV >= energy) break; // SF data are in eV
   }
 
   // If the min bin of energy is equal to 0, loglog is not possible (return Inf)
@@ -150,7 +150,7 @@ GGfloat GGEMSRayleighScattering::ComputeScatterFactor(GGfloat const& energy, GGu
   }
   else {
     return LogLogInterpolation(energy,
-      static_cast<GGfloat>(GGEMSRayleighTable::kScatterFactor[pos-2])*GGEMSUnits::eV, static_cast<GGfloat>(GGEMSRayleighTable::kScatterFactor[pos-1]),
-      static_cast<GGfloat>(GGEMSRayleighTable::kScatterFactor[pos])*GGEMSUnits::eV, static_cast<GGfloat>(GGEMSRayleighTable::kScatterFactor[pos+1]));
+      static_cast<GGfloat>(GGEMSRayleighTable::kScatterFactor[pos-2])*eV, static_cast<GGfloat>(GGEMSRayleighTable::kScatterFactor[pos-1]),
+      static_cast<GGfloat>(GGEMSRayleighTable::kScatterFactor[pos])*eV, static_cast<GGfloat>(GGEMSRayleighTable::kScatterFactor[pos+1]));
   }
 }
