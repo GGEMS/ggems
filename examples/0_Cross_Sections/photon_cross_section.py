@@ -6,6 +6,7 @@
 # - a process                                                                  #
 ################################################################################
 import argparse
+
 from ggems import *
 
 # ------------------------------------------------------------------------------
@@ -28,7 +29,7 @@ process_name = args.process
 GGEMSVerbosity(0)
 
 # ------------------------------------------------------------------------------
-# Choosing an OpenCL context
+# STEP 1: Choosing an OpenCL context
 opencl_manager.set_context_index(0)
 
 # ------------------------------------------------------------------------------
@@ -53,8 +54,8 @@ print('    Atomic number density:', materials.get_atomic_number_density(material
 #-------------------------------------------------------------------------------
 # STEP 4: Defining global parameters for cross-section building
 processes_manager.set_cross_section_table_number_of_bins(220) # Not exceed 2048 bins
-processes_manager.set_cross_section_table_energy_min(10.0, 'keV')
-processes_manager.set_cross_section_table_energy_max(1.0, 'MeV')
+processes_manager.set_cross_section_table_energy_min(1.0, 'keV')
+processes_manager.set_cross_section_table_energy_max(10.0, 'MeV')
 
 # ------------------------------------------------------------------------------
 # STEP 5: Add physical process and initialize it

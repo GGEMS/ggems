@@ -28,7 +28,7 @@ typedef struct PACKED GGEMSParticleCrossSections_t
 #endif
 {
   // Variables for all particles
-  GGushort number_of_bins_; /*!< Number of bins in the cross section tables */
+  GGuint number_of_bins_; /*!< Number of bins in the cross section tables */
   GGuchar number_of_materials_; /*!< Number of materials */
   GGuchar material_names_[256][32]; /*!< Name of the materials */
 
