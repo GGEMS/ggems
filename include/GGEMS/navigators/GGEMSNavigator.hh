@@ -131,6 +131,13 @@ class GGEMS_EXPORT GGEMSNavigator
     void SetNavigatorID(std::size_t const& navigator_id);
 
     /*!
+      \fn void EnableTracking(bool const& is_tracking)
+      \param is_tracking - boolean enabling tracking infos for navigators
+      \brief Enabling tracking infos during simulation
+    */
+    void EnableTracking(bool const& is_tracking);
+
+    /*!
       \fn void ParticleNavigatorDistance(void) const
       \brief Compute distance between particle and navigator
     */
@@ -171,6 +178,7 @@ class GGEMS_EXPORT GGEMSNavigator
     GGfloat geometry_tolerance_; /*!< Tolerance of geometry range [1mm;1nm] */
     GGfloat3 position_xyz_; /*!< Position of the navigator in X, Y and Z */
     std::size_t navigator_id_; /*!< Index of the navigator */
+    bool is_tracking_; /*!< Boolean enabling tracking */
 
     std::shared_ptr<GGEMSSolid> solid_; /*!< Solid with geometric infos and label */
     std::shared_ptr<GGEMSMaterials> materials_; /*!< Materials of phantom */

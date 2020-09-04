@@ -67,8 +67,8 @@ ggems_manager.memory_verbose(True)
 ggems_manager.processes_verbose(True)
 ggems_manager.range_cuts_verbose(True)
 ggems_manager.random_verbose(True)
+ggems_manager.tracking_verbose(True)
 # ggems_manager.detector_verbose(true/false)
-# ggems_manager.tracking_verbose(true/false)
 
 # Initializing the GGEMS simulation
 ggems_manager.initialize()

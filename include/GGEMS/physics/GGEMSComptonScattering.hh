@@ -62,14 +62,6 @@ class GGEMS_EXPORT GGEMSComptonScattering : public GGEMSEMProcess
     */
     GGEMSComptonScattering& operator=(GGEMSComptonScattering const&& compton_scattering) = delete;
 
-    /*!
-      \fn void BuildCrossSectionTables(std::weak_ptr<cl::Buffer> particle_cross_sections, std::weak_ptr<cl::Buffer> material_tables)
-      \param particle_cross_sections - OpenCL buffer storing all the cross section tables for each particles
-      \param material_tables - material tables on OpenCL device
-      \brief build cross section tables and storing them in particle_cross_sections
-    */
-    void BuildCrossSectionTables(std::weak_ptr<cl::Buffer> particle_cross_sections, std::weak_ptr<cl::Buffer> material_tables) override;
-
     private:
     /*!
       \fn GGfloat ComputeCrossSectionPerAtom(GGfloat const& energy, GGuchar const& atomic_number) const

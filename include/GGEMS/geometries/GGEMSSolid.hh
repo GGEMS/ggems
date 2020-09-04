@@ -85,14 +85,20 @@ class GGEMS_EXPORT GGEMSSolid
       \param tolerance - geometry tolerance for computation
       \brief set the geometry tolerance
     */
-    virtual void SetGeometryTolerance(GGfloat const& tolerance) = 0;
+    void SetGeometryTolerance(GGfloat const& tolerance);
 
     /*!
       \fn void SetNavigatorID(std::size_t const& navigator_id)
       \param navigator_id - index of the navigator
       \brief set the navigator index in solid data
     */
-    virtual void SetNavigatorID(std::size_t const& navigator_id) = 0;
+    void SetNavigatorID(std::size_t const& navigator_id);
+
+    /*!
+      \fn void EnableTracking(void)
+      \brief Enabling tracking infos during simulation
+    */
+    void EnableTracking(void);
 
     /*!
       \fn void PrintInfos(void) const
@@ -140,6 +146,7 @@ class GGEMS_EXPORT GGEMSSolid
     std::weak_ptr<cl::Kernel> kernel_distance_cl_; /*!< OpenCL kernel computing distance between particles and solid */
     std::weak_ptr<cl::Kernel> kernel_project_to_cl_; /*!< OpenCL kernel moving particles to solid */
     std::weak_ptr<cl::Kernel> kernel_track_through_cl_; /*!< OpenCL kernel tracking particles through a solid */
+    std::string tracking_kernel_option_; /*!< Preprocessor option for tracking */
 };
 
 #endif // End of GUARD_GGEMS_GEOMETRIES_GGEMSSOLID_HH

@@ -41,3 +41,5 @@ Gain de temps de calcul pour python
 - Faire tracking particle en preprocessor
 
 - Tjs dans le preprocessor, faire un GGEMS FAST UNSAFE pour la navigation
+
+- Vérifier l'indexation pour le cross section buffer, peut etre pb de int et short

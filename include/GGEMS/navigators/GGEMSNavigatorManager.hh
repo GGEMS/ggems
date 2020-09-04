@@ -125,6 +125,13 @@ class GGEMS_EXPORT GGEMSNavigatorManager
     }
 
     /*!
+      \fn void EnableTracking(bool const& is_tracking) const
+      \param is_tracking - boolean enabling tracking infos for navigators
+      \brief Enabling tracking infos during simulation
+    */
+    void EnableTracking(bool const& is_tracking) const;
+
+    /*!
       \fn void FindClosestNavigator(void) const
       \brief Find closest navigator before track to in (TTI) operation
     */

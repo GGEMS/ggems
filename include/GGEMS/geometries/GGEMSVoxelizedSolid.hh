@@ -78,20 +78,6 @@ class GGEMS_EXPORT GGEMSVoxelizedSolid : public GGEMSSolid
     void SetPosition(GGfloat3 const& position_xyz) override;
 
     /*!
-      \fn void SetGeometryTolerance(GGfloat const& tolerance)
-      \param tolerance - geometry tolerance for computation
-      \brief set the geometry tolerance for voxelized solid
-    */
-    void SetGeometryTolerance(GGfloat const& tolerance) override;
-
-    /*!
-      \fn void SetNavigatorID(std::size_t const& navigator_id)
-      \param navigator_id - index of the navigator
-      \brief set the navigator index in voxelized solid data
-    */
-    void SetNavigatorID(std::size_t const& navigator_id) override;
-
-    /*!
       \fn void PrintInfos(void) const
       \brief printing infos about voxelized solid
     */
