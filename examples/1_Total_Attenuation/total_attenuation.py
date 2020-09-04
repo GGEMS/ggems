@@ -59,7 +59,7 @@ print('    Atomic number density:', atomic_number_density, 'atoms.cm-3')
 # STEP 4: Defining global parameters for cross-section building
 processes_manager.set_cross_section_table_number_of_bins(220) # Not exceed 2048 bins
 processes_manager.set_cross_section_table_energy_min(10.0, 'keV')
-processes_manager.set_cross_section_table_energy_max(10.0, 'MeV')
+processes_manager.set_cross_section_table_energy_max(1.0, 'MeV')
 
 # ------------------------------------------------------------------------------
 # STEP 5: Add physical processes and initialize them

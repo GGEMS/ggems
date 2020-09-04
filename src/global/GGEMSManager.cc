@@ -45,7 +45,8 @@ GGEMSManager::GGEMSManager(void)
   is_memory_ram_verbose_(false),
   is_processes_verbose_(false),
   is_range_cuts_verbose_(false),
-  is_random_verbose_(false)
+  is_random_verbose_(false),
+  is_tracking_verbose_(false)
 {
   GGcout("GGEMSManager", "GGEMSManager", 3) << "Allocation of GGEMS Manager..." << GGendl;
 }
@@ -177,6 +178,15 @@ void GGEMSManager::SetRandomVerbose(bool const& is_random_verbose)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+void GGEMSManager::SetTrackingVerbose(bool const& is_tracking_verbose)
+{
+  is_tracking_verbose_ = is_tracking_verbose;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 void GGEMSManager::CheckParameters(void)
 {
   GGcout("GGEMSManager", "CheckParameters", 1) << "Checking the mandatory parameters..." << GGendl;
@@ -228,6 +238,7 @@ void GGEMSManager::Initialize(void)
   source_manager.Initialize();
 
   // Initialization of the phantom(s)
+  if (is_tracking_verbose_) navigator_manager.EnableTracking(true);
   navigator_manager.Initialize();
 
   // Printing infos about OpenCL
@@ -526,6 +537,15 @@ void set_range_cuts_ggems_manager(GGEMSManager* ggems_manager, bool const is_ran
 void set_random_ggems_manager(GGEMSManager* ggems_manager, bool const is_random_verbose)
 {
   ggems_manager->SetRandomVerbose(is_random_verbose);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void set_tracking_ggems_manager(GGEMSManager* ggems_manager, bool const is_tracking_verbose)
+{
+  ggems_manager->SetTrackingVerbose(is_tracking_verbose);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

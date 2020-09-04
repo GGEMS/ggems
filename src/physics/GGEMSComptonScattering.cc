@@ -51,18 +51,6 @@ GGEMSComptonScattering::~GGEMSComptonScattering(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSComptonScattering::BuildCrossSectionTables(std::weak_ptr<cl::Buffer> particle_cross_sections, std::weak_ptr<cl::Buffer> material_tables)
-{
-  GGcout("GGEMSComptonScattering", "BuildCrossSectionTables", 3) << "Building cross section table for Compton scattering..." << GGendl;
-
-  // Call mother
-  GGEMSEMProcess::BuildCrossSectionTables(particle_cross_sections, material_tables);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
 GGfloat GGEMSComptonScattering::ComputeCrossSectionPerAtom(GGfloat const& energy, GGuchar const& atomic_number) const
 {
   GGfloat cross_section_by_atom = 0.0f;

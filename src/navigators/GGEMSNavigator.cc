@@ -22,7 +22,8 @@ GGEMSNavigator::GGEMSNavigator(GGEMSNavigator* navigator)
 : navigator_name_(""),
   geometry_tolerance_(GEOMETRY_TOLERANCE),
   position_xyz_(MakeFloat3Zeros()),
-  navigator_id_(-1)
+  navigator_id_(-1),
+  is_tracking_(false)
 {
   GGcout("GGEMSNavigator", "GGEMSNavigator", 3) << "Allocation of GGEMSNavigator..." << GGendl;
 
@@ -87,6 +88,15 @@ void GGEMSNavigator::SetNavigatorID(std::size_t const& navigator_id)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+void GGEMSNavigator::EnableTracking(bool const& is_tracking)
+{
+  is_tracking_ = is_tracking;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 void GGEMSNavigator::CheckParameters(void) const
 {
   GGcout("GGEMSNavigator", "CheckParameters", 3) << "Checking the mandatory parameters..." << GGendl;
@@ -118,6 +128,7 @@ void GGEMSNavigator::Initialize(void)
   CheckParameters();
 
   // Initializing Solid for geometric navigation
+  if(is_tracking_) solid_->EnableTracking();
   solid_->Initialize(materials_);
   solid_->SetGeometryTolerance(geometry_tolerance_);
   solid_->SetNavigatorID(navigator_id_);

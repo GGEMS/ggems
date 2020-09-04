@@ -170,6 +170,13 @@ class GGEMS_EXPORT GGEMSManager
     */
     void SetRandomVerbose(bool const& is_random_verbose);
 
+    /*!
+      \fn void SetTrackingVerbose(bool const& is_tracking_verbose)
+      \param is_tracking_verbose - flag for tracking verbosity
+      \brief set the flag for tracking verbosity
+    */
+    void SetTrackingVerbose(bool const& is_tracking_verbose);
+
   private:
     /*!
       \fn void PrintBanner(void) const
@@ -201,6 +208,7 @@ class GGEMS_EXPORT GGEMSManager
     bool is_processes_verbose_; /*!< Flag for processes verbosity */
     bool is_range_cuts_verbose_; /*!< Flag for range cuts verbosity */
     bool is_random_verbose_; /*!< Flag for random verbosity */
+    bool is_tracking_verbose_; /*!< Flag for tracking verbosity */
 };
 
 /*!
@@ -288,6 +296,14 @@ extern "C" GGEMS_EXPORT void set_range_cuts_ggems_manager(GGEMSManager* ggems_ma
   \brief Set the random verbosity
 */
 extern "C" GGEMS_EXPORT void set_random_ggems_manager(GGEMSManager* ggems_manager, bool const is_random_verbose);
+
+/*!
+  \fn void set_tracking_ggems_manager(GGEMSManager* ggems_manager, bool const is_tracking_verbose)
+  \param ggems_manager - pointer on the singleton
+  \param is_tracking_verbose - flag on tracking verbose
+  \brief Set the tracking verbosity
+*/
+extern "C" GGEMS_EXPORT void set_tracking_ggems_manager(GGEMSManager* ggems_manager, bool const is_tracking_verbose);
 
 /*!
   \fn void run_ggems_manager(GGEMSManager* ggems_manager)

@@ -38,8 +38,7 @@ GGEMSVoxelizedSolid::GGEMSVoxelizedSolid(std::string const& volume_header_filena
   solid_data_cl_ = opencl_manager.Allocate(nullptr, sizeof(GGEMSVoxelizedSolidData), CL_MEM_READ_WRITE);
   ram_manager.AddGeometryRAMMemory(sizeof(GGEMSVoxelizedSolidData));
 
-  // Initializing kernels
-  InitializeKernel();
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -69,9 +68,9 @@ void GGEMSVoxelizedSolid::InitializeKernel(void)
   std::string const kFilename3 = kOpenCLKernelPath + "/TrackThroughVoxelizedSolid.cl";
 
   // Compiling the kernels
-  kernel_distance_cl_ = opencl_manager.CompileKernel(kFilename1, "distance_voxelized_solid");
-  kernel_project_to_cl_ = opencl_manager.CompileKernel(kFilename2, "project_to_voxelized_solid");
-  kernel_track_through_cl_ = opencl_manager.CompileKernel(kFilename3, "track_through_voxelized_solid");
+  kernel_distance_cl_ = opencl_manager.CompileKernel(kFilename1, "distance_voxelized_solid", nullptr, const_cast<char*>(tracking_kernel_option_.c_str()));
+  kernel_project_to_cl_ = opencl_manager.CompileKernel(kFilename2, "project_to_voxelized_solid", nullptr, const_cast<char*>(tracking_kernel_option_.c_str()));
+  kernel_track_through_cl_ = opencl_manager.CompileKernel(kFilename3, "track_through_voxelized_solid", nullptr, const_cast<char*>(tracking_kernel_option_.c_str()));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -82,6 +81,8 @@ void GGEMSVoxelizedSolid::Initialize(std::shared_ptr<GGEMSMaterials> materials)
 {
   GGcout("GGEMSVoxelizedSolid", "Initialize", 3) << "Initializing voxelized solid..." << GGendl;
 
+  // Initializing kernels and loading image
+  InitializeKernel();
   LoadVolumeImage(materials);
 }
 
@@ -107,44 +108,6 @@ void GGEMSVoxelizedSolid::SetPosition(GGfloat3 const& position_xyz)
     solid_data_device->border_min_xyz_.s[i] = -solid_data_device->position_xyz_.s[i];
     solid_data_device->border_max_xyz_.s[i] = solid_data_device->border_min_xyz_.s[i] + solid_data_device->number_of_voxels_xyz_.s[i] * solid_data_device->voxel_sizes_xyz_.s[i];
   }
-
-  // Release the pointer
-  opencl_manager.ReleaseDeviceBuffer(solid_data_cl_.get(), solid_data_device);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void GGEMSVoxelizedSolid::SetGeometryTolerance(GGfloat const& tolerance)
-{
-  // Get the OpenCL manager
-  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
-
-  // Get pointer on OpenCL device
-  GGEMSVoxelizedSolidData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSVoxelizedSolidData>(solid_data_cl_.get(), sizeof(GGEMSVoxelizedSolidData));
-
-  // Storing the geometry tolerance
-  solid_data_device->tolerance_ = tolerance;
-
-  // Release the pointer
-  opencl_manager.ReleaseDeviceBuffer(solid_data_cl_.get(), solid_data_device);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void GGEMSVoxelizedSolid::SetNavigatorID(std::size_t const& navigator_id)
-{
-  // Get the OpenCL manager
-  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
-
-  // Get pointer on OpenCL device
-  GGEMSVoxelizedSolidData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSVoxelizedSolidData>(solid_data_cl_.get(), sizeof(GGEMSVoxelizedSolidData));
-
-  // Storing the geometry tolerance
-  solid_data_device->navigator_id_ = static_cast<GGuchar>(navigator_id);
 
   // Release the pointer
   opencl_manager.ReleaseDeviceBuffer(solid_data_cl_.get(), solid_data_device);
