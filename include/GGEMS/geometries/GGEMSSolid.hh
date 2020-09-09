@@ -67,20 +67,6 @@ class GGEMS_EXPORT GGEMSSolid
     GGEMSSolid& operator=(GGEMSSolid const&& solid) = delete;
 
     /*!
-      \fn void Initialize(std::shared_ptr<GGEMSMaterials> materials)
-      \param materials - pointer on GGEMS materials
-      \brief Initialize solid for geometric navigation
-    */
-    virtual void Initialize(std::shared_ptr<GGEMSMaterials> materials) = 0;
-
-    /*!
-      \fn void SetPosition(GGfloat3 const& position_xyz)
-      \param position_xyz - position in X, Y and Z
-      \brief set a position for solid
-    */
-    virtual void SetPosition(GGfloat3 const& position_xyz) = 0;
-
-    /*!
       \fn void SetGeometryTolerance(GGfloat const& tolerance)
       \param tolerance - geometry tolerance for computation
       \brief set the geometry tolerance
@@ -101,22 +87,23 @@ class GGEMS_EXPORT GGEMSSolid
     void EnableTracking(void);
 
     /*!
-      \fn void PrintInfos(void) const
-      \brief printing infos about solid
+      \fn inline cl::Buffer* GetSolidData(void) const
+      \brief get the informations about the solid geometry
+      \return header data OpenCL pointer about solid
     */
-    virtual void PrintInfos(void) const = 0;
+    inline cl::Buffer* GetSolidData(void) const {return solid_data_cl_.get();};
 
     /*!
       \fn void Distance(void)
       \brief compute distance from particle position to solid and store this distance in OpenCL particle buffer
     */
-    virtual void Distance(void) = 0;
+    void Distance(void);
 
     /*!
       \fn void ProjectTo(void)
       \brief Move particles at an entry of solid
     */
-    virtual void ProjectTo(void) = 0;
+    void ProjectTo(void);
 
     /*!
       \fn void TrackThrough(std::weak_ptr<GGEMSCrossSections> cross_sections, std::weak_ptr<GGEMSMaterials> materials)
@@ -124,14 +111,27 @@ class GGEMS_EXPORT GGEMSSolid
       \param materials - pointer storing materials values
       \brief Track particles through solid
     */
-    virtual void TrackThrough(std::weak_ptr<GGEMSCrossSections> cross_sections, std::weak_ptr<GGEMSMaterials> materials) = 0;
+    void TrackThrough(std::weak_ptr<GGEMSCrossSections> cross_sections, std::weak_ptr<GGEMSMaterials> materials);
 
     /*!
-      \fn inline cl::Buffer* GetSolidData(void) const
-      \brief get the informations about the solid geometry
-      \return header data OpenCL pointer about solid
+      \fn void Initialize(std::shared_ptr<GGEMSMaterials> materials)
+      \param materials - pointer on GGEMS materials
+      \brief Initialize solid for geometric navigation
     */
-    inline cl::Buffer* GetSolidData(void) const {return solid_data_cl_.get();};
+    virtual void Initialize(std::shared_ptr<GGEMSMaterials> materials) = 0;
+
+    /*!
+      \fn void SetPosition(GGfloat3 const& position_xyz)
+      \param position_xyz - position in X, Y and Z
+      \brief set a position for solid
+    */
+    virtual void SetPosition(GGfloat3 const& position_xyz) = 0;
+
+    /*!
+      \fn void PrintInfos(void) const
+      \brief printing infos about solid
+    */
+    virtual void PrintInfos(void) const = 0;
 
   protected:
     /*!
@@ -147,6 +147,7 @@ class GGEMS_EXPORT GGEMSSolid
     std::weak_ptr<cl::Kernel> kernel_project_to_cl_; /*!< OpenCL kernel moving particles to solid */
     std::weak_ptr<cl::Kernel> kernel_track_through_cl_; /*!< OpenCL kernel tracking particles through a solid */
     std::string tracking_kernel_option_; /*!< Preprocessor option for tracking */
+    bool is_tracking_; /*!< Boolean enabling tracking */
 };
 
 #endif // End of GUARD_GGEMS_GEOMETRIES_GGEMSSOLID_HH

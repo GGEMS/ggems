@@ -289,6 +289,7 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     std::vector<GGulong> device_constant_buffer_size_; /*!< Constant buffer size */
     std::vector<GGulong> device_mem_alloc_size_; /*!< Memory allocation size */
     std::vector<GGuint> device_native_vector_width_double_; /*!< Native size of double */
+    std::vector<std::size_t> device_printf_buffer_size_; /*!< Size of buffer for printf in kernel */
 
     // OpenCL compilation options
     std::string build_options_; /*!< list of option to OpenCL compiler */

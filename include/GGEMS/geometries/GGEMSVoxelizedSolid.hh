@@ -84,26 +84,6 @@ class GGEMS_EXPORT GGEMSVoxelizedSolid : public GGEMSSolid
     void PrintInfos(void) const override;
 
     /*!
-      \fn void Distance(void)
-      \brief compute distance from particle position to voxelized solid and store this distance in OpenCL particle buffer
-    */
-    void Distance(void) override;
-
-    /*!
-      \fn void ProjectTo(void)
-      \brief Move particles at an entry of solid
-    */
-    void ProjectTo(void);
-
-    /*!
-      \fn void TrackThrough(std::weak_ptr<GGEMSCrossSections> cross_sections, std::weak_ptr<GGEMSMaterials> materials)
-      \param cross_sections - pointer storing cross sections values
-      \param materials - pointer storing materials values
-      \brief Track particles through solid
-    */
-    void TrackThrough(std::weak_ptr<GGEMSCrossSections> cross_sections, std::weak_ptr<GGEMSMaterials> materials);
-
-    /*!
       \fn void LoadVolumeImage(std::weak_ptr<GGEMSMaterials> materials)
       \param materials - pointer on material for a phantom
       \brief load volume image to GGEMS and create a volume of label in GGEMS for voxelized solid
@@ -126,7 +106,7 @@ class GGEMS_EXPORT GGEMSVoxelizedSolid : public GGEMSSolid
       \fn void InitializeKernel(void)
       \brief Initialize kernel for particle solid distance
     */
-    void InitializeKernel(void);
+    void InitializeKernel(void) override;
 
   private:
     std::string volume_header_filename_; /*!< Filename of MHD file for phantom */

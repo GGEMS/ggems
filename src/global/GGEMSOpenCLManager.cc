@@ -45,6 +45,7 @@ GGEMSOpenCLManager::GGEMSOpenCLManager(void)
   device_constant_buffer_size_(0),
   device_mem_alloc_size_(0),
   device_native_vector_width_double_(0),
+  device_printf_buffer_size_(0),
   build_options_(""),
   context_index_(0),
   contexts_cl_(0),
@@ -99,6 +100,7 @@ GGEMSOpenCLManager::GGEMSOpenCLManager(void)
   device_constant_buffer_size_.resize(devices_cl_.size());
   device_mem_alloc_size_.resize(devices_cl_.size());
   device_native_vector_width_double_.resize(devices_cl_.size());
+  device_printf_buffer_size_.resize(devices_cl_.size());
 
   // Getting infos for device
   GGcout("GGEMSOpenCLManager", "GGEMSOpenCLManager", 1) << "Retrieving OpenCL device informations..." << GGendl;
@@ -123,6 +125,7 @@ GGEMSOpenCLManager::GGEMSOpenCLManager(void)
     CheckOpenCLError(devices_cl_[i]->getInfo(CL_DEVICE_MAX_CONSTANT_BUFFER_SIZE, &device_constant_buffer_size_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
     CheckOpenCLError(devices_cl_[i]->getInfo(CL_DEVICE_MAX_MEM_ALLOC_SIZE, &device_mem_alloc_size_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
     CheckOpenCLError(devices_cl_[i]->getInfo(CL_DEVICE_NATIVE_VECTOR_WIDTH_DOUBLE, &device_native_vector_width_double_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_cl_[i]->getInfo(CL_DEVICE_PRINTF_BUFFER_SIZE, &device_printf_buffer_size_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
 
     CheckOpenCLError(devices_cl_[i]->getInfo(CL_DEVICE_VERSION, &char_data), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
     device_version_[i] = std::string(char_data);
@@ -213,6 +216,7 @@ void GGEMSOpenCLManager::Clean(void)
   device_max_compute_units_.clear();
   device_constant_buffer_size_.clear();
   device_mem_alloc_size_.clear();
+  device_printf_buffer_size_.clear();
 
   // Deleting context(s)
   GGcout("GGEMSOpenCLManager", "Clean", 1) << "Deleting OpenCL context(s)..." << GGendl;
@@ -301,6 +305,7 @@ void GGEMSOpenCLManager::PrintDeviceInfos(void) const
     GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "+ Max Compute Units: " << device_max_compute_units_[i] << GGendl;
     GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "+ Constant Buffer Size: " << device_constant_buffer_size_[i] << " bytes" << GGendl;
     GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "+ Mem. Alloc. Size: " << device_mem_alloc_size_[i] << " bytes" << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "+ Printf Buffer Size: " << device_printf_buffer_size_[i] << " bytes" << GGendl;
   }
   GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << GGendl;
 }

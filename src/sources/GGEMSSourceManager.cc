@@ -17,6 +17,7 @@
 #include "GGEMS/tools/GGEMSTools.hh"
 #include "GGEMS/physics/GGEMSParticles.hh"
 #include "GGEMS/randoms/GGEMSPseudoRandomGenerator.hh"
+#include "GGEMS/physics/GGEMSPrimaryParticlesStack.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -103,6 +104,24 @@ bool GGEMSSourceManager::IsAlive(void) const
 {
   // Check if all particles are DEAD in OpenCL particle buffer
   return particles_->IsAlive();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSSourceManager::SetParticleTrackingID(GGint const& particle_id_tracking)
+{
+  // Get the OpenCL manager
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+
+  // Get pointer on OpenCL device for particles
+  GGEMSPrimaryParticles* primary_particles_device = opencl_manager.GetDeviceBuffer<GGEMSPrimaryParticles>(particles_->GetPrimaryParticles(), sizeof(GGEMSPrimaryParticles));
+
+  primary_particles_device->particle_tracking_id = particle_id_tracking;
+
+  // Release the pointer
+  opencl_manager.ReleaseDeviceBuffer(particles_->GetPrimaryParticles(), primary_particles_device);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

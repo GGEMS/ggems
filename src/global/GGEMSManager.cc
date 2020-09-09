@@ -46,7 +46,8 @@ GGEMSManager::GGEMSManager(void)
   is_processes_verbose_(false),
   is_range_cuts_verbose_(false),
   is_random_verbose_(false),
-  is_tracking_verbose_(false)
+  is_tracking_verbose_(false),
+  particle_tracking_id_(0)
 {
   GGcout("GGEMSManager", "GGEMSManager", 3) << "Allocation of GGEMS Manager..." << GGendl;
 }
@@ -178,9 +179,10 @@ void GGEMSManager::SetRandomVerbose(bool const& is_random_verbose)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSManager::SetTrackingVerbose(bool const& is_tracking_verbose)
+void GGEMSManager::SetTrackingVerbose(bool const& is_tracking_verbose, GGint const& particle_tracking_id)
 {
   is_tracking_verbose_ = is_tracking_verbose;
+  particle_tracking_id_ = particle_tracking_id;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -236,9 +238,10 @@ void GGEMSManager::Initialize(void)
 
   // Initialization of the source
   source_manager.Initialize();
+  source_manager.SetParticleTrackingID(particle_tracking_id_); // After source initialization
 
   // Initialization of the phantom(s)
-  if (is_tracking_verbose_) navigator_manager.EnableTracking(true);
+  if (is_tracking_verbose_) navigator_manager.EnableTracking(true); // Before navigator initialization
   navigator_manager.Initialize();
 
   // Printing infos about OpenCL
@@ -543,9 +546,9 @@ void set_random_ggems_manager(GGEMSManager* ggems_manager, bool const is_random_
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_tracking_ggems_manager(GGEMSManager* ggems_manager, bool const is_tracking_verbose)
+void set_tracking_ggems_manager(GGEMSManager* ggems_manager, bool const is_tracking_verbose, GGint const particle_id_tracking)
 {
-  ggems_manager->SetTrackingVerbose(is_tracking_verbose);
+  ggems_manager->SetTrackingVerbose(is_tracking_verbose, particle_id_tracking);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

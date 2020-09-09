@@ -20,7 +20,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 GGEMSNavigatorManager::GGEMSNavigatorManager(void)
-: navigators_(0)
+: navigators_(0),
+  is_tracking_(false)
 {
   GGcout("GGEMSNavigatorManager", "GGEMSNavigatorManager", 3) << "Allocation of GGEMS navigator manager..." << GGendl;
 }
@@ -135,10 +136,11 @@ void GGEMSNavigatorManager::PrintInfos(void) const
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSNavigatorManager::EnableTracking(bool const& is_tracking) const
+void GGEMSNavigatorManager::EnableTracking(bool const& is_tracking)
 {
   // Loop over all navigators and enable tracking
   for (auto&& i : navigators_) i->EnableTracking(is_tracking);
+  is_tracking_ = is_tracking;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -149,6 +151,12 @@ void GGEMSNavigatorManager::FindClosestNavigator(void) const
 {
   // Loop over all declared navigators and compute distance particle / navigator
   for (auto&& i : navigators_) i->ParticleNavigatorDistance();
+
+  if(is_tracking_)
+  {
+    GGcout("GGEMSNavigatorManager", "Distance", 0) << "Dumping particles after finding closest navigator" << GGendl;
+    GGEMSSourceManager::GetInstance().GetParticles()->Dump("Distance to next navigator");
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -159,6 +167,12 @@ void GGEMSNavigatorManager::TrackToIn(void) const
 {
   // Loop over all navigators and project particles
   for (auto&& i : navigators_) i->ParticleToNavigator();
+
+  if(is_tracking_)
+  {
+    GGcout("GGEMSNavigatorManager", "TrackToIn", 0) << "Dumping particles after track to in operation" << GGendl;
+    GGEMSSourceManager::GetInstance().GetParticles()->Dump("Track to in");
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////

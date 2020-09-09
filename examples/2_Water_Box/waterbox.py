@@ -22,7 +22,6 @@ phantom = GGEMSVoxelizedNavigator()
 phantom.set_phantom_name('phantom')
 phantom.set_phantom_image('data/waterbox.mhd')
 phantom.set_range_to_material('data/range_waterbox.txt')
-phantom.set_position(0.0, 0.0, 0.0, 'mm')
 
 # ------------------------------------------------------------------------------
 # STEP 5: Physics
@@ -67,7 +66,8 @@ ggems_manager.memory_verbose(True)
 ggems_manager.processes_verbose(True)
 ggems_manager.range_cuts_verbose(True)
 ggems_manager.random_verbose(True)
-ggems_manager.tracking_verbose(True)
+ggems_manager.tracking_verbose(True, 0) # Track particle and a specific particle id
+# ggems_manager.kernel_timing_verbose(True) # flag à mettre dans le OpenCL manager
 # ggems_manager.detector_verbose(true/false)
 
 # Initializing the GGEMS simulation
