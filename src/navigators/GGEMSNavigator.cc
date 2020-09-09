@@ -23,7 +23,8 @@ GGEMSNavigator::GGEMSNavigator(GGEMSNavigator* navigator)
   geometry_tolerance_(GEOMETRY_TOLERANCE),
   position_xyz_(MakeFloat3Zeros()),
   navigator_id_(-1),
-  is_tracking_(false)
+  is_tracking_(false),
+  is_update_pos_(false)
 {
   GGcout("GGEMSNavigator", "GGEMSNavigator", 3) << "Allocation of GGEMSNavigator..." << GGendl;
 
@@ -70,6 +71,7 @@ void GGEMSNavigator::SetGeometryTolerance(GGfloat const& distance, std::string c
 
 void GGEMSNavigator::SetPosition(GGfloat const& position_x, GGfloat const& position_y, GGfloat const& position_z, std::string const& unit)
 {
+  is_update_pos_ = true;
   position_xyz_.s[0] = DistanceUnit(position_x, unit);
   position_xyz_.s[1] = DistanceUnit(position_y, unit);
   position_xyz_.s[2] = DistanceUnit(position_z, unit);
@@ -132,7 +134,7 @@ void GGEMSNavigator::Initialize(void)
   solid_->Initialize(materials_);
   solid_->SetGeometryTolerance(geometry_tolerance_);
   solid_->SetNavigatorID(navigator_id_);
-  solid_->SetPosition(position_xyz_);
+  if (is_update_pos_) solid_->SetPosition(position_xyz_);
 
   // Loading the materials and building tables to OpenCL device and converting cuts
   materials_->Initialize();

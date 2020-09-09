@@ -171,11 +171,12 @@ class GGEMS_EXPORT GGEMSManager
     void SetRandomVerbose(bool const& is_random_verbose);
 
     /*!
-      \fn void SetTrackingVerbose(bool const& is_tracking_verbose)
+      \fn void SetTrackingVerbose(bool const& is_tracking_verbose, GGint const& particle_tracking_id)
       \param is_tracking_verbose - flag for tracking verbosity
-      \brief set the flag for tracking verbosity
+      \param particle_tracking_id - particle id for tracking
+      \brief set the flag for tracking verbosity and an index for particle tracking
     */
-    void SetTrackingVerbose(bool const& is_tracking_verbose);
+    void SetTrackingVerbose(bool const& is_tracking_verbose, GGint const& particle_tracking_id);
 
   private:
     /*!
@@ -209,6 +210,7 @@ class GGEMS_EXPORT GGEMSManager
     bool is_range_cuts_verbose_; /*!< Flag for range cuts verbosity */
     bool is_random_verbose_; /*!< Flag for random verbosity */
     bool is_tracking_verbose_; /*!< Flag for tracking verbosity */
+    GGint particle_tracking_id_; /*!< Particle if for tracking */
 };
 
 /*!
@@ -298,12 +300,13 @@ extern "C" GGEMS_EXPORT void set_range_cuts_ggems_manager(GGEMSManager* ggems_ma
 extern "C" GGEMS_EXPORT void set_random_ggems_manager(GGEMSManager* ggems_manager, bool const is_random_verbose);
 
 /*!
-  \fn void set_tracking_ggems_manager(GGEMSManager* ggems_manager, bool const is_tracking_verbose)
+  \fn void set_tracking_ggems_manager(GGEMSManager* ggems_manager, bool const is_tracking_verbose, GGint const particle_id_tracking)
   \param ggems_manager - pointer on the singleton
   \param is_tracking_verbose - flag on tracking verbose
+  \param particle_id_tracking - particle id for tracking
   \brief Set the tracking verbosity
 */
-extern "C" GGEMS_EXPORT void set_tracking_ggems_manager(GGEMSManager* ggems_manager, bool const is_tracking_verbose);
+extern "C" GGEMS_EXPORT void set_tracking_ggems_manager(GGEMSManager* ggems_manager, bool const is_tracking_verbose, GGint const particle_id_tracking);
 
 /*!
   \fn void run_ggems_manager(GGEMSManager* ggems_manager)

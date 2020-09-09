@@ -44,7 +44,7 @@ class GGEMSManager(object):
         ggems_lib.set_random_ggems_manager.argtypes = [ctypes.c_void_p, ctypes.c_bool]
         ggems_lib.set_random_ggems_manager.restype = ctypes.c_void_p
 
-        ggems_lib.set_tracking_ggems_manager.argtypes = [ctypes.c_void_p, ctypes.c_bool]
+        ggems_lib.set_tracking_ggems_manager.argtypes = [ctypes.c_void_p, ctypes.c_bool, ctypes.c_int]
         ggems_lib.set_tracking_ggems_manager.restype = ctypes.c_void_p
 
         ggems_lib.run_ggems_manager.argtypes = [ctypes.c_void_p]
@@ -85,8 +85,8 @@ class GGEMSManager(object):
     def random_verbose(self, flag):
         ggems_lib.set_random_ggems_manager(self.obj, flag)
 
-    def tracking_verbose(self, flag):
-        ggems_lib.set_tracking_ggems_manager(self.obj, flag)
+    def tracking_verbose(self, flag, particle_id):
+        ggems_lib.set_tracking_ggems_manager(self.obj, flag, particle_id)
 
 
 # ------------------------------------------------------------------------------

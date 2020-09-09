@@ -13,10 +13,16 @@
   \date Thrusday October 3, 2019
 */
 
+#include <map>
+
 #include "GGEMS/global/GGEMSConfiguration.hh"
 #include "GGEMS/global/GGEMSOpenCLManager.hh"
 #include "GGEMS/tools/GGEMSSystemOfUnits.hh"
 #include "GGEMS/physics/GGEMSParticleConstants.hh"
+
+typedef std::map<GGuchar, std::string> ParticleTypeMap; /*!< Map with key: particle index, element: name of particle */
+typedef std::map<GGuchar, std::string> ParticleStatusMap; /*!< Map with key: particle index, element: status */
+typedef std::map<GGuchar, std::string> ParticleLevelMap; /*!< Map with key: particle index, element: level (primary or secondary) */
 
 /*!
   \class GGEMSParticles
@@ -97,6 +103,13 @@ class GGEMS_EXPORT GGEMSParticles
     */
     bool IsAlive(void) const;
 
+    /*!
+      \fn void Dump(std::string const& message) const
+      \param message - message for dumping
+      \brief dump particle infos
+    */
+    void Dump(std::string const& message) const;
+
   private:
     /*!
       \fn void AllocatePrimaryParticles(void)
@@ -107,6 +120,9 @@ class GGEMS_EXPORT GGEMSParticles
   private:
     GGulong number_of_particles_; /*!< Number of activated particles in buffer */
     std::shared_ptr<cl::Buffer> primary_particles_cl_; /*!< Pointer storing info about primary particles in batch on OpenCL device */
+    ParticleTypeMap particle_type_; /*!< Map of particle type */
+    ParticleStatusMap particle_status_; /*!< Map of particle status */
+    ParticleLevelMap particle_level_; /*!< Map of particle level */
 };
 
 #endif // End of GUARD_GGEMS_PHYSICS_GGEMSPARTICLES_HH

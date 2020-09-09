@@ -182,7 +182,7 @@ void GGEMSSource::CheckMemoryForParticles(void) const
   // RAM memory
 
   // Compute the RAM memory percentage allocated for primary particles
-  GGdouble const kRAMParticles = static_cast<GGdouble>(sizeof(GGEMSPrimaryParticles)) + static_cast<GGdouble>(sizeof(GGEMSRandom));
+  GGdouble const kRAMParticles = static_cast<GGdouble>(sizeof(GGEMSPrimaryParticles)) + static_cast<GGdouble>(sizeof(GGEMSRandom)) + 4.0; // 4 bytes is for particle tracking id
 
   // Getting the RAM memory on activated device
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();

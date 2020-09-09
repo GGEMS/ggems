@@ -163,6 +163,13 @@ class GGEMS_EXPORT GGEMSSourceManager
     */
     bool IsAlive(void) const;
 
+    /*!
+      \fn void SetParticleTrackingID(GGint const& particle_id_tracking)
+      \param particle_id_tracking - particle id tracking
+      \brief set the particle id tracking
+    */
+    void SetParticleTrackingID(GGint const& particle_id_tracking);
+
   private: // Source infos
     std::vector<std::shared_ptr<GGEMSSource>> sources_; /*!< Pointer on GGEMS sources */
     std::shared_ptr<GGEMSParticles> particles_; /*!< Pointer on particle management */

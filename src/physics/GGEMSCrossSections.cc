@@ -221,7 +221,7 @@ GGfloat GGEMSCrossSections::GetPhotonCrossSection(std::string const& process_nam
   // Get min and max energy in the table, and number of bins
   GGfloat const kMinEnergy = particle_cross_sections_->min_energy_;
   GGfloat const kMaxEnergy = particle_cross_sections_->max_energy_;
-  GGushort const kNumberOfBins = particle_cross_sections_->number_of_bins_;
+  GGuint const kNumberOfBins = particle_cross_sections_->number_of_bins_;
   GGuchar const kNumberMaterials = particle_cross_sections_->number_of_materials_;
 
   // Converting energy

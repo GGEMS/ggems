@@ -101,9 +101,9 @@ __kernel void get_primaries_ggems_xray_source(
   primary_particle->level_[kParticleID] = PRIMARY;
   primary_particle->pname_[kParticleID] = particle_name;
 
-  primary_particle->geometry_id_[kParticleID] = 0;
+  //primary_particle->geometry_id_[kParticleID] = 0;
   primary_particle->particle_navigator_distance_[kParticleID] = OUT_OF_WORLD;
   primary_particle->next_discrete_process_[kParticleID] = NO_PROCESS;
   primary_particle->next_interaction_distance_[kParticleID] = 0.0f;
-  primary_particle->scatter_order_[kParticleID] = 0;
+  //primary_particle->scatter_order_[kParticleID] = 0;
 }

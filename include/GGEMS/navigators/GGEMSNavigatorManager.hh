@@ -125,11 +125,11 @@ class GGEMS_EXPORT GGEMSNavigatorManager
     }
 
     /*!
-      \fn void EnableTracking(bool const& is_tracking) const
+      \fn void EnableTracking(bool const& is_tracking)
       \param is_tracking - boolean enabling tracking infos for navigators
       \brief Enabling tracking infos during simulation
     */
-    void EnableTracking(bool const& is_tracking) const;
+    void EnableTracking(bool const& is_tracking);
 
     /*!
       \fn void FindClosestNavigator(void) const
@@ -162,6 +162,7 @@ class GGEMS_EXPORT GGEMSNavigatorManager
 
   private:
     std::vector<std::shared_ptr<GGEMSNavigator>> navigators_; /*!< Pointer on the navigators */
+    bool is_tracking_; /*!< Boolean enabling tracking */
 };
 
 #endif // End of GUARD_GGEMS_NAVIGATORS_GGEMSNAVIGATORMANAGER_HH

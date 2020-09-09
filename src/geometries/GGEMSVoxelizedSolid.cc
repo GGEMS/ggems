@@ -12,10 +12,6 @@
 
 #include "GGEMS/geometries/GGEMSVoxelizedSolid.hh"
 #include "GGEMS/io/GGEMSMHDImage.hh"
-#include "GGEMS/sources/GGEMSSourceManager.hh"
-#include "GGEMS/physics/GGEMSParticles.hh"
-#include "GGEMS/physics/GGEMSCrossSections.hh"
-#include "GGEMS/randoms/GGEMSPseudoRandomGenerator.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -37,8 +33,6 @@ GGEMSVoxelizedSolid::GGEMSVoxelizedSolid(std::string const& volume_header_filena
   // Allocation of memory on OpenCL device for header data
   solid_data_cl_ = opencl_manager.Allocate(nullptr, sizeof(GGEMSVoxelizedSolidData), CL_MEM_READ_WRITE);
   ram_manager.AddGeometryRAMMemory(sizeof(GGEMSVoxelizedSolidData));
-
-
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -68,8 +62,8 @@ void GGEMSVoxelizedSolid::InitializeKernel(void)
   std::string const kFilename3 = kOpenCLKernelPath + "/TrackThroughVoxelizedSolid.cl";
 
   // Compiling the kernels
-  kernel_distance_cl_ = opencl_manager.CompileKernel(kFilename1, "distance_voxelized_solid", nullptr, const_cast<char*>(tracking_kernel_option_.c_str()));
-  kernel_project_to_cl_ = opencl_manager.CompileKernel(kFilename2, "project_to_voxelized_solid", nullptr, const_cast<char*>(tracking_kernel_option_.c_str()));
+  kernel_distance_cl_ = opencl_manager.CompileKernel(kFilename1, "distance_voxelized_solid");
+  kernel_project_to_cl_ = opencl_manager.CompileKernel(kFilename2, "project_to_voxelized_solid");
   kernel_track_through_cl_ = opencl_manager.CompileKernel(kFilename3, "track_through_voxelized_solid", nullptr, const_cast<char*>(tracking_kernel_option_.c_str()));
 }
 
@@ -142,119 +136,6 @@ void GGEMSVoxelizedSolid::PrintInfos(void) const
 
   // Release the pointer
   opencl_manager.ReleaseDeviceBuffer(solid_data_cl_.get(), solid_data_device);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void GGEMSVoxelizedSolid::Distance(void)
-{
-  // Getting the OpenCL manager
-  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
-  cl::CommandQueue* queue_cl = opencl_manager.GetCommandQueue();
-  cl::Event* event_cl = opencl_manager.GetEvent();
-
-  // Getting the buffer of primary particles from source
-  GGEMSSourceManager& source_manager = GGEMSSourceManager::GetInstance();
-  GGEMSParticles* particles = source_manager.GetParticles();
-  cl::Buffer* primary_particles_cl = particles->GetPrimaryParticles();
-
-  // Getting the number of particles
-  GGulong const kNumberOfParticles = particles->GetNumberOfParticles();
-
-  // Set parameters for kernel
-  std::shared_ptr<cl::Kernel> kernel_cl = kernel_distance_cl_.lock();
-  kernel_cl->setArg(0, *primary_particles_cl);
-  kernel_cl->setArg(1, *solid_data_cl_);
-
-  // Define the number of work-item to launch
-  cl::NDRange global(kNumberOfParticles);
-  cl::NDRange offset(0);
-
-  // Launching kernel
-  cl_int kernel_status = queue_cl->enqueueNDRangeKernel(*kernel_cl, offset, global, cl::NullRange, nullptr, event_cl);
-  opencl_manager.CheckOpenCLError(kernel_status, "GGEMSVoxelizedSolid", "Distance");
-  queue_cl->finish(); // Wait until the kernel status is finish
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void GGEMSVoxelizedSolid::ProjectTo(void)
-{
-  // Getting the OpenCL manager
-  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
-  cl::CommandQueue* queue_cl = opencl_manager.GetCommandQueue();
-  cl::Event* event_cl = opencl_manager.GetEvent();
-
-  // Getting the buffer of primary particles from source
-  GGEMSSourceManager& source_manager = GGEMSSourceManager::GetInstance();
-  GGEMSParticles* particles = source_manager.GetParticles();
-  cl::Buffer* primary_particles_cl = particles->GetPrimaryParticles();
-
-  // Getting the number of particles
-  GGulong const kNumberOfParticles = particles->GetNumberOfParticles();
-
-  // Set parameters for kernel
-  std::shared_ptr<cl::Kernel> kernel_cl = kernel_project_to_cl_.lock();
-  kernel_cl->setArg(0, *primary_particles_cl);
-  kernel_cl->setArg(1, *solid_data_cl_);
-
-  // Define the number of work-item to launch
-  cl::NDRange global(kNumberOfParticles);
-  cl::NDRange offset(0);
-
-  // Launching kernel
-  cl_int kernel_status = queue_cl->enqueueNDRangeKernel(*kernel_cl, offset, global, cl::NullRange, nullptr, event_cl);
-  opencl_manager.CheckOpenCLError(kernel_status, "GGEMSVoxelizedSolid", "ProjectTo");
-  queue_cl->finish(); // Wait until the kernel status is finish
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void GGEMSVoxelizedSolid::TrackThrough(std::weak_ptr<GGEMSCrossSections> cross_sections, std::weak_ptr<GGEMSMaterials> materials)
-{
-  // Getting the OpenCL manager
-  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
-  cl::CommandQueue* queue_cl = opencl_manager.GetCommandQueue();
-  cl::Event* event_cl = opencl_manager.GetEvent();
-
-  // Getting the buffer of primary particles and random from source
-  GGEMSSourceManager& source_manager = GGEMSSourceManager::GetInstance();
-  GGEMSParticles* particles = source_manager.GetParticles();
-  cl::Buffer* primary_particles_cl = particles->GetPrimaryParticles();
-  cl::Buffer* randoms_cl = source_manager.GetPseudoRandomGenerator()->GetPseudoRandomNumbers();
-
-  // Getting OpenCL buffer for cross section
-  cl::Buffer* cross_sections_cl = cross_sections.lock()->GetCrossSections();
-
-  // Getting OpenCL buffer for materials
-  cl::Buffer* materials_cl = materials.lock()->GetMaterialTables().lock().get();
-
-  // Getting the number of particles
-  GGulong const kNumberOfParticles = particles->GetNumberOfParticles();
-
-  // Set parameters for kernel
-  std::shared_ptr<cl::Kernel> kernel_cl = kernel_track_through_cl_.lock();
-  kernel_cl->setArg(0, *primary_particles_cl);
-  kernel_cl->setArg(1, *randoms_cl);
-  kernel_cl->setArg(2, *solid_data_cl_);
-  kernel_cl->setArg(3, *label_data_cl_);
-  kernel_cl->setArg(4, *cross_sections_cl);
-  kernel_cl->setArg(5, *materials_cl);
-
-  // Define the number of work-item to launch
-  cl::NDRange global(kNumberOfParticles);
-  cl::NDRange offset(0);
-
-  // Launching kernel
-  cl_int kernel_status = queue_cl->enqueueNDRangeKernel(*kernel_cl, offset, global, cl::NullRange, nullptr, event_cl);
-  opencl_manager.CheckOpenCLError(kernel_status, "GGEMSVoxelizedSolid", "TrackThrough");
-  queue_cl->finish(); // Wait until the kernel status is finish
 }
 
 ////////////////////////////////////////////////////////////////////////////////

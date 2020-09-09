@@ -33,12 +33,12 @@ typedef struct PACKED GGEMSPrimaryParticles_t
   GGfloat px_[MAXIMUM_PARTICLES]; /*!< Position of the particle in x */
   GGfloat py_[MAXIMUM_PARTICLES]; /*!< Position of the particle in y */
   GGfloat pz_[MAXIMUM_PARTICLES]; /*!< Position of the particle in z */
-  GGfloat tof_[MAXIMUM_PARTICLES]; /*!< Time of flight */
+  GGfloat tof_[MAXIMUM_PARTICLES]; /*!< Time of flight for photon only */
 
-  GGuint geometry_id_[MAXIMUM_PARTICLES]; /*!< current geometry crossed by the particle */
-  GGushort E_index_[MAXIMUM_PARTICLES]; /*!< Energy index within CS and Mat tables */
-  GGuchar scatter_order_[MAXIMUM_PARTICLES]; /*!< Scatter order, usefull for the imagery */
-  GGuchar navigator_id_[MAXIMUM_PARTICLES]; /*!< current phantom crossed by the particle */
+  //GGuint geometry_id_[MAXIMUM_PARTICLES]; /*!< current geometry crossed by the particle */
+  GGuint E_index_[MAXIMUM_PARTICLES]; /*!< Energy index within CS and Mat tables */
+  //GGuchar scatter_order_[MAXIMUM_PARTICLES]; /*!< Scatter order, usefull for the imagery */
+  GGuchar navigator_id_[MAXIMUM_PARTICLES]; /*!< current navigator crossed by the particle */
 
   GGfloat particle_navigator_distance_[MAXIMUM_PARTICLES]; /*!< Distance from previous position to next position, OUT_OF_WORLD if no next position */
   GGfloat next_interaction_distance_[MAXIMUM_PARTICLES]; /*!< Distance to the next interaction */
@@ -47,6 +47,8 @@ typedef struct PACKED GGEMSPrimaryParticles_t
   GGuchar status_[MAXIMUM_PARTICLES]; /*!< Status of the particle */
   GGuchar level_[MAXIMUM_PARTICLES]; /*!< Level of the particle */
   GGuchar pname_[MAXIMUM_PARTICLES]; /*!< particle name (photon, electron, etc) */
+
+  GGint particle_tracking_id; /*!< Particle id for tracking */
 } GGEMSPrimaryParticles; /*!< Using C convention name of struct to C++ (_t deletion) */
 
 #endif // GUARD_GGEMS_PHYSICS_GGEMSPRIMARYPARTICLESSTACK_HH
