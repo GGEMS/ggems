@@ -110,35 +110,35 @@ __kernel void track_through_voxelized_solid(
 
     #ifdef GGEMS_TRACKING
     if (kParticleID == primary_particle->particle_tracking_id) {
-      printf("[GGEMS Kernel track_through_voxelized_solid] ################################################################################\n");
-      printf("[GGEMS Kernel track_through_voxelized_solid] Particle id: %d\n", kParticleID);
-      printf("[GGEMS Kernel track_through_voxelized_solid] Particle type: ");
+      printf("[GGEMS OpenCL kernel track_through_voxelized_solid] ################################################################################\n");
+      printf("[GGEMS OpenCL kernel track_through_voxelized_solid] Particle id: %d\n", kParticleID);
+      printf("[GGEMS OpenCL kernel track_through_voxelized_solid] Particle type: ");
       if (primary_particle->pname_[kParticleID] == PHOTON) printf("gamma\n");
       else if (primary_particle->pname_[kParticleID] == ELECTRON) printf("e-\n");
       else if (primary_particle->pname_[kParticleID] == POSITRON) printf("e+\n");
-      printf("[GGEMS Kernel track_through_voxelized_solid] Position (x, y, z): %e %e %e mm\n", position.x/mm, position.y/mm, position.z/mm);
-      printf("[GGEMS Kernel track_through_voxelized_solid] Direction (x, y, z): %e %e %e\n", direction.x, direction.y, direction.z);
-      printf("[GGEMS Kernel track_through_voxelized_solid] Energy: %e keV", primary_particle->E_[kParticleID]/keV);
+      printf("[GGEMS OpenCL kernel track_through_voxelized_solid] Position (x, y, z): %e %e %e mm\n", position.x/mm, position.y/mm, position.z/mm);
+      printf("[GGEMS OpenCL kernel track_through_voxelized_solid] Direction (x, y, z): %e %e %e\n", direction.x, direction.y, direction.z);
+      printf("[GGEMS OpenCL kernel track_through_voxelized_solid] Energy: %e keV\n", primary_particle->E_[kParticleID]/keV);
       printf("\n");
-      printf("[GGEMS Kernel track_through_voxelized_solid] Navigator id: %u\n", voxelized_solid_data->navigator_id_);
-      printf("[GGEMS Kernel track_through_voxelized_solid] Nb voxels: %u %u %u\n", voxelized_solid_data->number_of_voxels_xyz_.x, voxelized_solid_data->number_of_voxels_xyz_.y, voxelized_solid_data->number_of_voxels_xyz_.z);
-      printf("[GGEMS Kernel track_through_voxelized_solid] Voxel size: %e %e %e mm\n", voxelized_solid_data->voxel_sizes_xyz_.x/mm, voxelized_solid_data->voxel_sizes_xyz_.y/mm, voxelized_solid_data->voxel_sizes_xyz_.z/mm);
-      printf("[GGEMS Kernel track_through_voxelized_solid] Navigator X Borders: %e %e mm\n", voxelized_solid_data->border_min_xyz_.x/mm, voxelized_solid_data->border_max_xyz_.x/mm);
-      printf("[GGEMS Kernel track_through_voxelized_solid] Navigator Y Borders: %e %e mm\n", voxelized_solid_data->border_min_xyz_.y/mm, voxelized_solid_data->border_max_xyz_.y/mm);
-      printf("[GGEMS Kernel track_through_voxelized_solid] Navigator Z Borders: %e %e mm\n", voxelized_solid_data->border_min_xyz_.z/mm, voxelized_solid_data->border_max_xyz_.z/mm);
-      printf("[GGEMS Kernel track_through_voxelized_solid] Voxel X Borders: %e %e mm\n", kXMinVoxel/mm, kXMaxVoxel/mm);
-      printf("[GGEMS Kernel track_through_voxelized_solid] Voxel Y Borders: %e %e mm\n", kYMinVoxel/mm, kYMaxVoxel/mm);
-      printf("[GGEMS Kernel track_through_voxelized_solid] Voxel Z Borders: %e %e mm\n", kZMinVoxel/mm, kZMaxVoxel/mm);
-      printf("[GGEMS Kernel track_through_voxelized_solid] Index of current voxel (x, y, z): %d %d %d\n", kIndexVoxel.x, kIndexVoxel.y, kIndexVoxel.z);
-      printf("[GGEMS Kernel track_through_voxelized_solid] Global Index of current voxel: %d\n", kIndexVoxel.w);
-      printf("[GGEMS Kernel track_through_voxelized_solid] Material in voxel: %s\n", particle_cross_sections->material_names_[kIndexMaterial]);
+      printf("[GGEMS OpenCL kernel track_through_voxelized_solid] Navigator id: %u\n", voxelized_solid_data->navigator_id_);
+      printf("[GGEMS OpenCL kernel track_through_voxelized_solid] Nb voxels: %u %u %u\n", voxelized_solid_data->number_of_voxels_xyz_.x, voxelized_solid_data->number_of_voxels_xyz_.y, voxelized_solid_data->number_of_voxels_xyz_.z);
+      printf("[GGEMS OpenCL kernel track_through_voxelized_solid] Voxel size: %e %e %e mm\n", voxelized_solid_data->voxel_sizes_xyz_.x/mm, voxelized_solid_data->voxel_sizes_xyz_.y/mm, voxelized_solid_data->voxel_sizes_xyz_.z/mm);
+      printf("[GGEMS OpenCL kernel track_through_voxelized_solid] Navigator X Borders: %e %e mm\n", voxelized_solid_data->border_min_xyz_.x/mm, voxelized_solid_data->border_max_xyz_.x/mm);
+      printf("[GGEMS OpenCL kernel track_through_voxelized_solid] Navigator Y Borders: %e %e mm\n", voxelized_solid_data->border_min_xyz_.y/mm, voxelized_solid_data->border_max_xyz_.y/mm);
+      printf("[GGEMS OpenCL kernel track_through_voxelized_solid] Navigator Z Borders: %e %e mm\n", voxelized_solid_data->border_min_xyz_.z/mm, voxelized_solid_data->border_max_xyz_.z/mm);
+      printf("[GGEMS OpenCL kernel track_through_voxelized_solid] Voxel X Borders: %e %e mm\n", kXMinVoxel/mm, kXMaxVoxel/mm);
+      printf("[GGEMS OpenCL kernel track_through_voxelized_solid] Voxel Y Borders: %e %e mm\n", kYMinVoxel/mm, kYMaxVoxel/mm);
+      printf("[GGEMS OpenCL kernel track_through_voxelized_solid] Voxel Z Borders: %e %e mm\n", kZMinVoxel/mm, kZMaxVoxel/mm);
+      printf("[GGEMS OpenCL kernel track_through_voxelized_solid] Index of current voxel (x, y, z): %d %d %d\n", kIndexVoxel.x, kIndexVoxel.y, kIndexVoxel.z);
+      printf("[GGEMS OpenCL kernel track_through_voxelized_solid] Global Index of current voxel: %d\n", kIndexVoxel.w);
+      printf("[GGEMS OpenCL kernel track_through_voxelized_solid] Material in voxel: %s\n", particle_cross_sections->material_names_[kIndexMaterial]);
       printf("\n");
-      printf("[GGEMS Kernel track_through_voxelized_solid] Next process: ");
+      printf("[GGEMS OpenCL kernel track_through_voxelized_solid] Next process: ");
       if (next_discrete_process == COMPTON_SCATTERING) printf("COMPTON_SCATTERING\n");
       if (next_discrete_process == PHOTOELECTRIC_EFFECT) printf("PHOTOELECTRIC_EFFECT\n");
       if (next_discrete_process == RAYLEIGH_SCATTERING) printf("RAYLEIGH_SCATTERING\n");
       if (next_discrete_process == TRANSPORTATION) printf("TRANSPORTATION\n");
-      printf("[GGEMS Kernel track_through_voxelized_solid] Next interaction distance: %e mm\n", next_interaction_distance/mm);
+      printf("[GGEMS OpenCL kernel track_through_voxelized_solid] Next interaction distance: %e mm\n", next_interaction_distance/mm);
     }
     #endif
 
@@ -166,6 +166,7 @@ __kernel void track_through_voxelized_solid(
 
     // Resolve process if different of TRANSPORTATION
     if (next_discrete_process != TRANSPORTATION) {
+      PhotonDiscreteProcess(primary_particle, random, materials, kParticleID);
       primary_particle->status_[kParticleID] = DEAD;
     }
 
