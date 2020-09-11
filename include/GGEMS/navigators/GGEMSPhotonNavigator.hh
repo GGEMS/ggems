@@ -17,6 +17,7 @@
 
 #include "GGEMS/maths/GGEMSMathAlgorithms.hh"
 #include "GGEMS/randoms/GGEMSKissEngine.hh"
+#include "GGEMS/physics/GGEMSComptonScatteringModels.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -74,6 +75,40 @@ inline void GetPhotonNextInteraction(
   primary_particle->E_index_[index_particle] = kIndexEnergy;
   primary_particle->next_interaction_distance_[index_particle] = next_interaction_distance;
   primary_particle->next_discrete_process_[index_particle] = next_discrete_process;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+/*!
+  \fn inline void PhotonDiscreteProcess(__global GGEMSPrimaryParticles* primary_particle, __global GGEMSRandom* random, __global GGEMSMaterialTables const* materials, GGint const index_particle)
+  \param primary_particle - buffer of particles
+  \param random - pointer on random numbers
+  \param materials - buffer of materials
+  \param index_particle - index of the particle
+  \brief Launch sampling depending on photon process
+*/
+inline void PhotonDiscreteProcess(
+  __global GGEMSPrimaryParticles* primary_particle,
+  __global GGEMSRandom* random,
+  __global GGEMSMaterialTables const* materials,
+  GGint const index_particle
+)
+{
+  // Get photon process
+  GGuchar const kNextInteractionProcess = primary_particle->next_discrete_process_[index_particle];
+
+  // Select process
+  if (kNextInteractionProcess == COMPTON_SCATTERING) {
+    KleinNishinaComptonSampleSecondaries(primary_particle, random, materials, index_particle);
+  }
+  else if (kNextInteractionProcess == PHOTOELECTRIC_EFFECT) {
+    ;
+  }
+  else if (kNextInteractionProcess == RAYLEIGH_SCATTERING) {
+    ;
+  }
 }
 
 #endif
