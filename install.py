@@ -70,7 +70,7 @@ elif sys.platform == "win32":
 cmake_cmd += " -DCMAKE_BUILD_TYPE=Release"
 cmake_cmd += " -DOPENCL_KERNEL_PATH=" + GGEMS_FOLDER + "/src/kernels"
 cmake_cmd += " -DGGEMS_PATH=" + GGEMS_FOLDER
-cmake_cmd += " -DMAXIMUM_PARTICLES=5000000"
+cmake_cmd += " -DMAXIMUM_PARTICLES=2000000"
 cmake_cmd += " -DCMAKE_VERBOSE_MAKEFILE=OFF"
 cmake_cmd += " -DOPENCL_CACHE_KERNEL_COMPILATION=OFF"
 cmake_cmd += " -DCOMPILER=" + os.environ['COMPILER']

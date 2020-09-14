@@ -18,6 +18,7 @@
 #include "GGEMS/maths/GGEMSMathAlgorithms.hh"
 #include "GGEMS/randoms/GGEMSKissEngine.hh"
 #include "GGEMS/physics/GGEMSComptonScatteringModels.hh"
+#include "GGEMS/physics/GGEMSRayleighScatteringModels.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -60,14 +61,16 @@ inline void GetPhotonNextInteraction(
   for (GGuchar i = 0; i < particle_cross_sections->number_of_activated_photon_processes_; ++i) {
     // Getting index of process
     index_photon_process = particle_cross_sections->index_photon_cs_[i];
+
     // Getting cross section
     cross_section = particle_cross_sections->photon_cross_sections_[index_photon_process][kIndexEnergy + particle_cross_sections->number_of_bins_*index_material];
+
     // Getting the interaction distance
     interaction_distance = -log(KissUniform(random, index_particle))/cross_section;
 
     if (interaction_distance < next_interaction_distance) {
       next_interaction_distance = interaction_distance;
-      next_discrete_process = i;
+      next_discrete_process = index_photon_process;
     }
   }
 
@@ -82,10 +85,12 @@ inline void GetPhotonNextInteraction(
 ////////////////////////////////////////////////////////////////////////////////
 
 /*!
-  \fn inline void PhotonDiscreteProcess(__global GGEMSPrimaryParticles* primary_particle, __global GGEMSRandom* random, __global GGEMSMaterialTables const* materials, GGint const index_particle)
+  \fn inline void PhotonDiscreteProcess(__global GGEMSPrimaryParticles* primary_particle, __global GGEMSRandom* random, __global GGEMSMaterialTables const* materials, __global GGEMSParticleCrossSections const* particle_cross_sections, GGuchar const index_material, GGint const index_particle)
   \param primary_particle - buffer of particles
   \param random - pointer on random numbers
   \param materials - buffer of materials
+  \param particle_cross_sections - pointer to cross sections activated in navigator
+  \param index_material - index of the material
   \param index_particle - index of the particle
   \brief Launch sampling depending on photon process
 */
@@ -93,6 +98,8 @@ inline void PhotonDiscreteProcess(
   __global GGEMSPrimaryParticles* primary_particle,
   __global GGEMSRandom* random,
   __global GGEMSMaterialTables const* materials,
+  __global GGEMSParticleCrossSections const* particle_cross_sections,
+  GGuchar const index_material,
   GGint const index_particle
 )
 {
@@ -101,13 +108,13 @@ inline void PhotonDiscreteProcess(
 
   // Select process
   if (kNextInteractionProcess == COMPTON_SCATTERING) {
-    KleinNishinaComptonSampleSecondaries(primary_particle, random, materials, index_particle);
+    KleinNishinaComptonSampleSecondaries(primary_particle, random, index_particle);
   }
   else if (kNextInteractionProcess == PHOTOELECTRIC_EFFECT) {
     ;
   }
   else if (kNextInteractionProcess == RAYLEIGH_SCATTERING) {
-    ;
+    LivermoreRayleighSampleSecondarie(primary_particle, random, materials, particle_cross_sections, index_material, index_particle);
   }
 }
 

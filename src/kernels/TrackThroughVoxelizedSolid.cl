@@ -80,10 +80,10 @@ __kernel void track_through_voxelized_solid(
       + kIndexVoxel.z * voxelized_solid_data->number_of_voxels_xyz_.x * voxelized_solid_data->number_of_voxels_xyz_.y;
 
     // Get the material that compose this volume
-    GGuchar const kIndexMaterial = label_data[kIndexVoxel.w];
+    GGuchar const kMaterialID = label_data[kIndexVoxel.w];
 
     // Find next discrete photon interaction
-    GetPhotonNextInteraction(primary_particle, random, particle_cross_sections, kIndexMaterial, kParticleID);
+    GetPhotonNextInteraction(primary_particle, random, particle_cross_sections, kMaterialID, kParticleID);
     GGfloat next_interaction_distance = primary_particle->next_interaction_distance_[kParticleID];
     GGuchar next_discrete_process = primary_particle->next_discrete_process_[kParticleID];
 
@@ -131,7 +131,7 @@ __kernel void track_through_voxelized_solid(
       printf("[GGEMS OpenCL kernel track_through_voxelized_solid] Voxel Z Borders: %e %e mm\n", kZMinVoxel/mm, kZMaxVoxel/mm);
       printf("[GGEMS OpenCL kernel track_through_voxelized_solid] Index of current voxel (x, y, z): %d %d %d\n", kIndexVoxel.x, kIndexVoxel.y, kIndexVoxel.z);
       printf("[GGEMS OpenCL kernel track_through_voxelized_solid] Global Index of current voxel: %d\n", kIndexVoxel.w);
-      printf("[GGEMS OpenCL kernel track_through_voxelized_solid] Material in voxel: %s\n", particle_cross_sections->material_names_[kIndexMaterial]);
+      printf("[GGEMS OpenCL kernel track_through_voxelized_solid] Material in voxel: %s\n", particle_cross_sections->material_names_[kMaterialID]);
       printf("\n");
       printf("[GGEMS OpenCL kernel track_through_voxelized_solid] Next process: ");
       if (next_discrete_process == COMPTON_SCATTERING) printf("COMPTON_SCATTERING\n");
@@ -166,11 +166,8 @@ __kernel void track_through_voxelized_solid(
 
     // Resolve process if different of TRANSPORTATION
     if (next_discrete_process != TRANSPORTATION) {
-      PhotonDiscreteProcess(primary_particle, random, materials, kParticleID);
-      primary_particle->status_[kParticleID] = DEAD;
+      PhotonDiscreteProcess(primary_particle, random, materials, particle_cross_sections, kMaterialID, kParticleID);
     }
-
-    printf("\n");
   }
 
   // Reactivate freezed particle for next navigator tracking

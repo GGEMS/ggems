@@ -6,7 +6,7 @@ GGEMSVerbosity(3)
 
 # ------------------------------------------------------------------------------
 # STEP 1: Choosing an OpenCL context
-opencl_manager.set_context_index(0)
+opencl_manager.set_context_index(1)
 
 # ------------------------------------------------------------------------------
 # STEP 2: Visualization
@@ -27,11 +27,11 @@ phantom.set_range_to_material('data/range_waterbox.txt')
 # STEP 5: Physics
 processes_manager.add_process('Compton', 'gamma', 'all')
 #processes_manager.add_process('Photoelectric', 'gamma', 'all')
-#processes_manager.add_process('Rayleigh', 'gamma', 'all')
+processes_manager.add_process('Rayleigh', 'gamma', 'all')
 
 # Optional options, the following are by default
 processes_manager.set_cross_section_table_number_of_bins(220)
-processes_manager.set_cross_section_table_energy_min(0.990, 'keV')
+processes_manager.set_cross_section_table_energy_min(1.0, 'keV')
 processes_manager.set_cross_section_table_energy_max(10.0, 'MeV')
 
 # ------------------------------------------------------------------------------
@@ -48,7 +48,7 @@ point_source.set_position(-595.0, 0.0, 0.0, 'mm')
 point_source.set_rotation(0.0, 0.0, 0.0, 'deg')
 point_source.set_beam_aperture(0.0, 'deg')
 point_source.set_focal_spot_size(0.0, 0.0, 0.0, 'mm')
-point_source.set_monoenergy(80.0, 'keV')
+point_source.set_monoenergy(10.0, 'keV')
 
 # ------------------------------------------------------------------------------
 # STEP 8: Detector/Digitizer Declaration
@@ -58,7 +58,7 @@ point_source.set_monoenergy(80.0, 'keV')
 # STEP 9: GGEMS simulation parameters
 ggems_manager.set_seed(777) # Optional, if not set, the seed is automatically computed
 
-#ggems_manager.opencl_verbose(False)
+ggems_manager.opencl_verbose(False)
 ggems_manager.material_database_verbose(False)
 ggems_manager.phantom_verbose(True)
 ggems_manager.source_verbose(True)

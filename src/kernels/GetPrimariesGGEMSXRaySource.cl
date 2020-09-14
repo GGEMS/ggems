@@ -53,7 +53,11 @@ __kernel void get_primaries_ggems_xray_source(
   theta = acos(1.0 - kAperture*theta);
 
   // Compute rotation
-  GGfloat3 rotation = {cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta)};
+  GGfloat3 rotation = {
+    cos(phi) * sin(theta),
+    sin(phi) * sin(theta),
+    cos(theta)
+  };
 
   // Get direction of the cone beam. The beam is targeted to the isocenter, then
   // the direction is directly related to the position of the source.

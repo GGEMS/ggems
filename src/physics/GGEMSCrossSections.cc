@@ -112,14 +112,6 @@ void GGEMSCrossSections::Initialize(GGEMSMaterials const* materials)
   // Get the process manager
   GGEMSProcessesManager& process_manager = GGEMSProcessesManager::GetInstance();
 
-  // Checking there is a process activated
-  if (em_processes_list_.empty()) {
-    std::ostringstream oss(std::ostringstream::out);
-    oss << "You have to activate a process for a GGEMS simulations!!!";
-    process_manager.PrintAvailableProcesses();
-    GGEMSMisc::ThrowException("GGEMSCrossSections", "Initialize", oss.str());
-  }
-
   GGEMSParticleCrossSections* particle_cross_sections_device = opencl_manager.GetDeviceBuffer<GGEMSParticleCrossSections>(particle_cross_sections_cl_.get(), sizeof(GGEMSParticleCrossSections));
 
   // Storing information for process manager
