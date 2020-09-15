@@ -114,7 +114,7 @@ inline void PhotonDiscreteProcess(
     ;
   }
   else if (kNextInteractionProcess == RAYLEIGH_SCATTERING) {
-    LivermoreRayleighSampleSecondarie(primary_particle, random, materials, particle_cross_sections, index_material, index_particle);
+    LivermoreRayleighSampleSecondaries(primary_particle, random, materials, particle_cross_sections, index_material, index_particle);
   }
 }
 

@@ -29,7 +29,7 @@
   \param index_particle - index of the particle
   \brief Klein Nishina Compton model, Effects due to binding of atomic electrons are negliged.
 */
-inline void LivermoreRayleighSampleSecondarie(
+inline void LivermoreRayleighSampleSecondaries(
   __global GGEMSPrimaryParticles* primary_particle,
   __global GGEMSRandom* random,
   __global GGEMSMaterialTables const* materials,
@@ -44,32 +44,44 @@ inline void LivermoreRayleighSampleSecondarie(
     return;
   }
 
-  // Select randomly one element that composed the material
   GGuint const kNumberOfBins = particle_cross_sections->number_of_bins_;
-  GGuchar const kNElts = materials->number_of_chemical_elements_[index_material];
+  GGuchar const kNEltsMinusOne = materials->number_of_chemical_elements_[index_material]-1;
   GGushort const kMixtureID = materials->index_of_chemical_elements_[index_material];
-  GGuchar z = materials->atomic_number_Z_[kMixtureID];
-  GGuint index_energy = primary_particle->E_index_[index_particle];
+  GGuint const kEnergyID = primary_particle->E_index_[index_particle];
 
+  // Get last atom
+  GGuchar selected_atomic_number_z = materials->atomic_number_Z_[kMixtureID+kNEltsMinusOne];
+
+  // Select randomly one element that composed the material
   GGuchar i = 0;
-  if (kNElts > 0) {
-    GGfloat x = /*0.3/*KissUniform(random, index_particle)*/ LinearInterpolation(
-      particle_cross_sections->energy_bins_[index_energy],
-      particle_cross_sections->photon_cross_sections_[2][index_energy + kNumberOfBins*index_material],
-      particle_cross_sections->energy_bins_[index_energy+1],
-      particle_cross_sections->photon_cross_sections_[2][index_energy+1 + kNumberOfBins*index_material],
-      kE0 
+  if (kNEltsMinusOne > 0) {
+    // Get Cross Section of Livermore Rayleigh
+    GGfloat const kCS = LinearInterpolation(
+      particle_cross_sections->energy_bins_[kEnergyID],
+      particle_cross_sections->photon_cross_sections_[RAYLEIGH_SCATTERING][kEnergyID + kNumberOfBins*index_material],
+      particle_cross_sections->energy_bins_[kEnergyID+1],
+      particle_cross_sections->photon_cross_sections_[RAYLEIGH_SCATTERING][kEnergyID+1 + kNumberOfBins*index_material],
+      kE0
     );
 
-    GGfloat xsec = 0.0f;
+    // Get a random
+    GGfloat const x = KissUniform(random, index_particle) * kCS;
 
-    while (i < kNElts) {
-      z = materials->atomic_number_Z_[kMixtureID+i];
-      printf("next z: %u\n", z);
-      printf("x: %e\n", x);
-      xsec += particle_cross_sections->photon_cross_sections_per_atom_[2][index_energy + kNumberOfBins*z];
-      printf("xsec: %e\n", particle_cross_sections->photon_cross_sections_per_atom_[2][index_energy + kNumberOfBins*z]);
-      if (x <= xsec) break;
+    GGfloat cross_section = 0.0f;
+    while (i < kNEltsMinusOne) {
+      GGuchar atomic_number_z = materials->atomic_number_Z_[kMixtureID+i];
+      cross_section += materials->atomic_number_density_[kMixtureID+i] * LinearInterpolation(
+        particle_cross_sections->energy_bins_[kEnergyID],
+        particle_cross_sections->photon_cross_sections_per_atom_[RAYLEIGH_SCATTERING][kEnergyID + kNumberOfBins*atomic_number_z],
+        particle_cross_sections->energy_bins_[kEnergyID+1],
+        particle_cross_sections->photon_cross_sections_per_atom_[RAYLEIGH_SCATTERING][kEnergyID+1 + kNumberOfBins*atomic_number_z],
+        kE0
+      );
+
+      if (x < cross_section) {
+        selected_atomic_number_z = atomic_number_z;
+        break;
+      }
       ++i;
     }
   }
@@ -77,36 +89,12 @@ inline void LivermoreRayleighSampleSecondarie(
   #ifdef GGEMS_TRACKING
   if (index_particle == primary_particle->particle_tracking_id) {
     printf("\n");
-    printf("[GGEMS OpenCL function LivermoreRayleighSampleSecondarie]     Photon energy: %e keV\n", kE0/keV);
-    printf("[GGEMS OpenCL function LivermoreRayleighSampleSecondarie]     Direction: %e %e %e\n", primary_particle->dx_[index_particle], primary_particle->dy_[index_particle], primary_particle->dz_[index_particle]);
-    printf("[GGEMS OpenCL function LivermoreRayleighSampleSecondarie]     Number of element in material %s: %d\n", particle_cross_sections->material_names_[index_material], materials->number_of_chemical_elements_[index_material]);
-    printf("[GGEMS OpenCL function LivermoreRayleighSampleSecondarie]     Selected element: %u\n", z);
+    printf("[GGEMS OpenCL function LivermoreRayleighSampleSecondaries]     Photon energy: %e keV\n", kE0/keV);
+    printf("[GGEMS OpenCL function LivermoreRayleighSampleSecondaries]     Direction: %e %e %e\n", primary_particle->dx_[index_particle], primary_particle->dy_[index_particle], primary_particle->dz_[index_particle]);
+    printf("[GGEMS OpenCL function LivermoreRayleighSampleSecondaries]     Number of element in material %s: %d\n", particle_cross_sections->material_names_[index_material], materials->number_of_chemical_elements_[index_material]);
+    printf("[GGEMS OpenCL function LivermoreRayleighSampleSecondaries]     Selected element: %u\n", selected_atomic_number_z);
   }
   #endif
-
-    /*ui32 n = mat->nb_elements[matindex]-1;    
-    ui32 mixture_index = mat->index[matindex];
-    ui32 Z = mat->mixture[mixture_index];
-
-
-    ui32 i = 0;
-    if (n > 0) {
-
-        f32 x = prng_uniform( particles, id ) * linear_interpolation(photon_CS_table->E_bins[E_index-1],
-                                                                     photon_CS_table->Rayleigh_Lv_CS[E_index-1],
-                                                                     photon_CS_table->E_bins[E_index],
-                                                                     photon_CS_table->Rayleigh_Lv_CS[E_index],
-                                                                     particles->E[id]);
-        f32 xsec = 0.0f;
-        while (i < n) {
-            Z = mat->mixture[mixture_index+i];
-            xsec += photon_CS_table->Rayleigh_Lv_xCS[Z*photon_CS_table->nb_bins + E_index];
-            if (x <= xsec) break;
-            ++i;
-        }
-
-    }*/
-
 }
 
 #endif

@@ -84,10 +84,6 @@ void GGEMSRayleighScattering::BuildCrossSectionTables(std::weak_ptr<cl::Buffer> 
       GGuchar const kAtomicNumber = materials_device->atomic_number_Z_[j + kIndexOffset];
       // Loop over energy bins
       for (GGushort i = 0; i < kNumberOfBins; ++i) {
-        // Cross section per atom
-        cross_section_device->photon_cross_sections_per_atom_[process_id_][i + kAtomicNumber*kNumberOfBins] =
-          kAtomicNumberDensity * ComputeCrossSectionPerAtom(cross_section_device->energy_bins_[i], kAtomicNumber);
-
         // Scatter factor
         cross_section_device->rayleigh_scatter_factor_[i + kAtomicNumber*kNumberOfBins] = ComputeScatterFactor(cross_section_device->energy_bins_[i], kAtomicNumber);
       }

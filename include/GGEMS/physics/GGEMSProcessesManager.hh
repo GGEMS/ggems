@@ -138,10 +138,24 @@ class GGEMS_EXPORT GGEMSProcessesManager
     */
     void PrintAvailableProcesses(void) const;
 
+    /*!
+      \fn void PrintPhysicTables(bool const& is_processes_print_tables)
+      \param is_processes_print_tables - Flag for physic tables printing
+      \brief print physic tables to screen
+    */
+    void PrintPhysicTables(bool const& is_processes_print_tables);
+
+    /*!
+      \fn bool IsPrintPhysicTables(void) const
+      \brief check boolean value for physic tables printing
+    */
+    inline bool IsPrintPhysicTables(void) const {return is_processes_print_tables_;};
+
   private:
     GGushort cross_section_table_number_of_bins_; /*!< Number of bins in the cross section table */
     GGfloat cross_section_table_min_energy_; /*!< Minimum energy in the cross section table */
     GGfloat cross_section_table_max_energy_; /*!< Maximum energy in the cross section table */
+    bool is_processes_print_tables_; /*!< Flag for physic tables printing */
 };
 
 /*!
@@ -200,5 +214,13 @@ extern "C" GGEMS_EXPORT void print_infos_processes_manager(GGEMSProcessesManager
   \brief print infos about available processes
 */
 extern "C" GGEMS_EXPORT void print_available_processes_manager(GGEMSProcessesManager* processes_manager);
+
+/*!
+  \fn void print_available_processes_manager(GGEMSProcessesManager* processes_manager, bool const is_processes_print_tables)
+  \param processes_manager - pointer on the processes manager
+  \param is_processes_print_tables - flag printing physic tables
+  \brief print infos about physic tables
+*/
+extern "C" GGEMS_EXPORT void print_tables_processes_manager(GGEMSProcessesManager* processes_manager, bool const is_processes_print_tables);
 
 #endif // GUARD_GGEMS_PHYSICS_GGEMSRANGECUTSMANAGER_HH

@@ -22,7 +22,8 @@
 GGEMSProcessesManager::GGEMSProcessesManager(void)
 : cross_section_table_number_of_bins_(CROSS_SECTION_TABLE_NUMBER_BINS),
   cross_section_table_min_energy_(CROSS_SECTION_TABLE_ENERGY_MIN),
-  cross_section_table_max_energy_(CROSS_SECTION_TABLE_ENERGY_MAX)
+  cross_section_table_max_energy_(CROSS_SECTION_TABLE_ENERGY_MAX),
+  is_processes_print_tables_(false)
 {
   GGcout("GGEMSProcessesManager", "GGEMSProcessesManager", 3) << "Allocation of GGEMSProcessesManager..." << GGendl;
 }
@@ -156,6 +157,15 @@ void GGEMSProcessesManager::PrintAvailableProcesses(void) const
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+void GGEMSProcessesManager::PrintPhysicTables(bool const& is_processes_print_tables)
+{
+  is_processes_print_tables_ = is_processes_print_tables;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 GGEMSProcessesManager* get_instance_processes_manager(void)
 {
   return &GGEMSProcessesManager::GetInstance();
@@ -213,4 +223,13 @@ void print_infos_processes_manager(GGEMSProcessesManager* processes_manager)
 void print_available_processes_manager(GGEMSProcessesManager* processes_manager)
 {
   processes_manager->PrintAvailableProcesses();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void print_tables_processes_manager(GGEMSProcessesManager* processes_manager, bool const is_processes_print_tables)
+{
+  processes_manager->PrintPhysicTables(is_processes_print_tables);
 }

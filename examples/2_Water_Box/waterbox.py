@@ -33,6 +33,7 @@ processes_manager.add_process('Rayleigh', 'gamma', 'all')
 processes_manager.set_cross_section_table_number_of_bins(220)
 processes_manager.set_cross_section_table_energy_min(1.0, 'keV')
 processes_manager.set_cross_section_table_energy_max(10.0, 'MeV')
+processes_manager.print_tables(True)
 
 # ------------------------------------------------------------------------------
 # STEP 6: Cuts, by default but are 1 um
