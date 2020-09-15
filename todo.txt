@@ -38,8 +38,4 @@ Gain de temps de calcul pour python
 
 - Rendre plus propre les fichiers *.hh constant opencl <-> cpu
 
-- Faire tracking particle en preprocessor
-
-- Tjs dans le preprocessor, faire un GGEMS FAST UNSAFE pour la navigation
-
 - Vérifier l'indexation pour le cross section buffer, peut etre pb de int et short

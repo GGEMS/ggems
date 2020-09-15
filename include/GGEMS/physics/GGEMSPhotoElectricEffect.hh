@@ -62,14 +62,6 @@ class GGEMS_EXPORT GGEMSPhotoElectricEffect : public GGEMSEMProcess
     */
     GGEMSPhotoElectricEffect& operator=(GGEMSPhotoElectricEffect const&& photoelectric_effect) = delete;
 
-    /*!
-      \fn void BuildCrossSectionTables(std::weak_ptr<cl::Buffer> particle_cross_sections_cl, std::weak_ptr<cl::Buffer> material_tables_cl)
-      \param particle_cross_sections - OpenCL buffer storing all the cross section tables for each particles
-      \param material_tables - material tables on OpenCL device
-      \brief build cross section tables and storing them in particle_cross_sections
-    */
-    void BuildCrossSectionTables(std::weak_ptr<cl::Buffer> particle_cross_sections_cl, std::weak_ptr<cl::Buffer> material_tables_cl) override;
-
     private:
     /*!
       \fn GGfloat ComputeCrossSectionPerAtom(GGfloat const& energy, GGuchar const& atomic_number) const

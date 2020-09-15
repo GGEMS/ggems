@@ -22,6 +22,7 @@
 #include "GGEMS/materials/GGEMSMaterialsStack.hh"
 #include "GGEMS/global/GGEMSOpenCLManager.hh"
 #include "GGEMS/physics/GGEMSProcessConstants.hh"
+#include "GGEMS/physics/GGEMSParticleCrossSectionsStack.hh"
 
 /*!
   \class GGEMSEMProcess
@@ -85,14 +86,15 @@ class GGEMS_EXPORT GGEMSEMProcess
 
   protected:
     /*!
-      \fn GGfloat ComputeCrossSectionPerMaterial(GGEMSMaterialTables const* material_tables, GGushort const& material_index, GGfloat const& energy)
+      \fn GGfloat ComputeCrossSectionPerMaterial(GGEMSParticleCrossSections* cross_section, GGEMSMaterialTables const* material_tables, GGushort const& material_index, GGuint const& energy_index)
+      \param cross_section - cross section
       \param material_tables - activated material for a phantom
       \param material_index - index of the material
-      \param energy - energy of the bin
+      \param energy_index - index of the energy
       \return cross section for a process for a material
       \brief compute cross section for a process for a material
     */
-    GGfloat ComputeCrossSectionPerMaterial(GGEMSMaterialTables const* material_tables, GGushort const& material_index, GGfloat const& energy);
+    GGfloat ComputeCrossSectionPerMaterial(GGEMSParticleCrossSections* cross_section, GGEMSMaterialTables const* material_tables, GGushort const& material_index, GGuint const& energy_index);
 
     /*!
       \fn GGfloat ComputeCrossSectionPerAtom(GGfloat const& energy, GGuchar const& atomic_number)

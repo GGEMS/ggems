@@ -62,7 +62,7 @@ class GGEMS_EXPORT GGEMSComptonScattering : public GGEMSEMProcess
     */
     GGEMSComptonScattering& operator=(GGEMSComptonScattering const&& compton_scattering) = delete;
 
-    private:
+  private:
     /*!
       \fn GGfloat ComputeCrossSectionPerAtom(GGfloat const& energy, GGuchar const& atomic_number) const
       \param energy - energy of the bin

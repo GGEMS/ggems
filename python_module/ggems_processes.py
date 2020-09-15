@@ -67,6 +67,9 @@ class GGEMSProcessesManager(object):
         ggems_lib.add_process_processes_manager.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_char_p, ctypes.c_char_p, ctypes.c_bool]
         ggems_lib.add_process_processes_manager.restype = ctypes.c_void_p
 
+        ggems_lib.print_tables_processes_manager.argtypes = [ctypes.c_void_p, ctypes.c_bool]
+        ggems_lib.print_tables_processes_manager.restype = ctypes.c_void_p
+
         self.obj = ggems_lib.get_instance_processes_manager()
 
     def set_cross_section_table_number_of_bins(self, number_of_bins):
@@ -86,3 +89,6 @@ class GGEMSProcessesManager(object):
 
     def add_process(self, process_name, particle_name, phantom_name=b'all', is_secondary=False):
         ggems_lib.add_process_processes_manager(self.obj, process_name.encode('ASCII'), particle_name.encode('ASCII'), phantom_name.encode('ASCII'), is_secondary)
+
+    def print_tables(self, flag):
+        ggems_lib.print_tables_processes_manager(self.obj, flag)

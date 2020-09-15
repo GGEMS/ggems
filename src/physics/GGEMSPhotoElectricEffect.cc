@@ -52,49 +52,6 @@ GGEMSPhotoElectricEffect::~GGEMSPhotoElectricEffect(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSPhotoElectricEffect::BuildCrossSectionTables(std::weak_ptr<cl::Buffer> particle_cross_sections_cl, std::weak_ptr<cl::Buffer> material_tables_cl)
-{
-  GGcout("GGEMSPhotoElectricEffect", "BuildCrossSectionTables", 3) << "Building cross section table for PhotoElectric effect..." << GGendl;
-
-  // Call mother
-  GGEMSEMProcess::BuildCrossSectionTables(particle_cross_sections_cl, material_tables_cl);
-
-  // Get OpenCL manager
-  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
-
-  // Set missing information in cross section table
-  GGEMSParticleCrossSections* cross_section_device = opencl_manager.GetDeviceBuffer<GGEMSParticleCrossSections>(particle_cross_sections_cl.lock().get(), sizeof(GGEMSParticleCrossSections));
-
-  // Get the material tables
-  GGEMSMaterialTables* materials_device = opencl_manager.GetDeviceBuffer<GGEMSMaterialTables>(material_tables_cl.lock().get(), sizeof(GGEMSMaterialTables));
-
-  // Compute Compton cross section par material
-  GGushort const kNumberOfBins = cross_section_device->number_of_bins_;
-
-  // Compute cross section per atom
-  for (GGuchar k = 0; k < materials_device->number_of_materials_; ++k) {
-    GGushort const kIndexOffset = materials_device->index_of_chemical_elements_[k];
-    // Loop over the chemical elements
-    for (GGuchar j = 0; j < materials_device->number_of_chemical_elements_[k]; ++j) {
-      GGfloat const kAtomicNumberDensity = materials_device->atomic_number_density_[j + kIndexOffset];
-      GGuchar const kAtomicNumber = materials_device->atomic_number_Z_[j + kIndexOffset];
-      // Loop over energy bins
-      for (GGushort i = 0; i < kNumberOfBins; ++i) {
-        cross_section_device->photon_cross_sections_per_atom_[process_id_][i + kAtomicNumber*kNumberOfBins] =
-          kAtomicNumberDensity * ComputeCrossSectionPerAtom(cross_section_device->energy_bins_[i], kAtomicNumber);
-      }
-    }
-  }
-
-  // Release pointer
-  opencl_manager.ReleaseDeviceBuffer(material_tables_cl.lock().get(), materials_device);
-  opencl_manager.ReleaseDeviceBuffer(particle_cross_sections_cl.lock().get(), cross_section_device);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
 GGfloat GGEMSPhotoElectricEffect::ComputeCrossSectionPerAtom(GGfloat const& energy, GGuchar const& atomic_number) const
 {
   // Threshold at 10 eV
