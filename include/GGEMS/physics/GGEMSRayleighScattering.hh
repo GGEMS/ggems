@@ -62,14 +62,6 @@ class GGEMS_EXPORT GGEMSRayleighScattering : public GGEMSEMProcess
     */
     GGEMSRayleighScattering& operator=(GGEMSRayleighScattering const&& rayleigh_scattering) = delete;
 
-    /*!
-      \fn void BuildCrossSectionTables(std::weak_ptr<cl::Buffer> particle_cross_sections_cl, std::weak_ptr<cl::Buffer> material_tables_cl)
-      \param particle_cross_sections - OpenCL buffer storing all the cross section tables for each particles
-      \param material_tables - material tables on OpenCL device
-      \brief build cross section tables and storing them in particle_cross_sections
-    */
-    void BuildCrossSectionTables(std::weak_ptr<cl::Buffer> particle_cross_sections_cl, std::weak_ptr<cl::Buffer> material_tables_cl) override;
-
   private:
     /*!
       \fn GGfloat ComputeCrossSectionPerAtom(GGfloat const& energy, GGuchar const& atomic_number) const
@@ -79,15 +71,6 @@ class GGEMS_EXPORT GGEMSRayleighScattering : public GGEMSEMProcess
       \brief compute Compton cross section for an atom with Klein-Nishina
     */
     GGfloat ComputeCrossSectionPerAtom(GGfloat const& energy, GGuchar const& atomic_number) const override;
-
-    /*!
-      \fn GGfloat ComputeScatterFactor(GGfloat const& energy, GGuchar const& atomic_number) const
-      \param energy - energy of the bin
-      \param atomic_number - Z number of the chemical element
-      \return scatter factor for a chemical element for Rayleigh scattering
-      \brief compute scatter factor for Rayleigh scattering
-    */
-    GGfloat ComputeScatterFactor(GGfloat const& energy, GGuchar const& atomic_number) const;
 };
 
 /*!

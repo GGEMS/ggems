@@ -196,10 +196,6 @@ void GGEMSCrossSections::LoadPhysicTablesOnHost(void)
     }
   }
 
-  for(GGuint i = 0; i < 101*MAX_CROSS_SECTION_TABLE_NUMBER_BINS; ++i) {
-    particle_cross_sections_->rayleigh_scatter_factor_[i] = particle_cross_sections_device->rayleigh_scatter_factor_[i];
-  }
-
   // Release pointer
   opencl_manager.ReleaseDeviceBuffer(particle_cross_sections_cl_.get(), particle_cross_sections_device);
 }
