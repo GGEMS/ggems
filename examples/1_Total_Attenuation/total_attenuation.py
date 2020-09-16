@@ -57,9 +57,9 @@ print('    Atomic number density:', atomic_number_density, 'atoms.cm-3')
 
 #-------------------------------------------------------------------------------
 # STEP 4: Defining global parameters for cross-section building
-processes_manager.set_cross_section_table_number_of_bins(220) # Not exceed 2048 bins
+processes_manager.set_cross_section_table_number_of_bins(2048) # Not exceed 2048 bins
 processes_manager.set_cross_section_table_energy_min(10.0, 'keV')
-processes_manager.set_cross_section_table_energy_max(1.0, 'MeV')
+processes_manager.set_cross_section_table_energy_max(1000.0, 'keV')
 
 # ------------------------------------------------------------------------------
 # STEP 5: Add physical processes and initialize them
@@ -71,7 +71,7 @@ for process_id in process_list:
 cross_sections.initialize(materials)
 
 # Defining 1D X-axis buffer (energy in keV, from 10 keV to 1 MeV, and step of 1 keV)
-energy = np.arange(10, 1000, 1.0)
+energy = np.arange(10, 1000, 0.1)
 
 # Defining 3D Y-axis buffer (process, material, cross-section in cm2.g-1)
 nb_processes = len(process_list)

@@ -49,7 +49,6 @@ typedef struct PACKED GGEMSParticleCrossSections_t
   GGuchar index_photon_cs_[NUMBER_PHOTON_PROCESSES]; /*!< Index of activated photon process, ex: if only Rayleigh activate index_photon_cs[0] = 2 */
   GGfloat photon_cross_sections_[NUMBER_PHOTON_PROCESSES][256*MAX_CROSS_SECTION_TABLE_NUMBER_BINS]; /*!< Photon cross sections per material in mm-1 */
   GGfloat photon_cross_sections_per_atom_[NUMBER_PHOTON_PROCESSES][101*MAX_CROSS_SECTION_TABLE_NUMBER_BINS]; /*!< Photon cross sections per atom in mm-1, 100 chemical elements + 1 first empty element */
-  GGfloat rayleigh_scatter_factor_[101*MAX_CROSS_SECTION_TABLE_NUMBER_BINS]; /*!< For Rayleigh scattering a scatter factor by chemical element is necessary */
 
   // Electron
 

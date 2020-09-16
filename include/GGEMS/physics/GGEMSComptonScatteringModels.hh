@@ -53,13 +53,8 @@ inline void KleinNishinaComptonSampleSecondaries(
   if (index_particle == primary_particle->particle_tracking_id) {
     printf("\n");
     printf("[GGEMS OpenCL function KleinNishinaComptonSampleSecondaries]     Photon energy: %e keV\n", kE0/keV);
-    printf("[GGEMS OpenCL function KleinNishinaComptonSampleSecondaries]     Direction: %e %e %e\n", kGammaDirection.x, kGammaDirection.y, kGammaDirection.z);
+    printf("[GGEMS OpenCL function KleinNishinaComptonSampleSecondaries]     Photon direction: %e %e %e\n", kGammaDirection.x, kGammaDirection.y, kGammaDirection.z);
     printf("[GGEMS OpenCL function KleinNishinaComptonSampleSecondaries]     Min. photon energy (back scattering): %e keV\n", kE0*kEps0/keV);
-    printf("[GGEMS OpenCL function KleinNishinaComptonSampleSecondaries]     Epsilon0: %e\n", kEps0);
-    printf("[GGEMS OpenCL function KleinNishinaComptonSampleSecondaries]     Epsilon0^2: %e\n", kEps0Eps0);
-    printf("[GGEMS OpenCL function KleinNishinaComptonSampleSecondaries]     Alpha 1: %e\n", kAlpha1);
-    printf("[GGEMS OpenCL function KleinNishinaComptonSampleSecondaries]     Alpha 2: %e\n", kAlpha2);
-    printf("[GGEMS OpenCL function KleinNishinaComptonSampleSecondaries]     # LOOP\n");
   }
   #endif
 
@@ -90,24 +85,13 @@ inline void KleinNishinaComptonSampleSecondaries(
     onecost = (1.0f - epsilon)/(epsilon*kE0_MeC2);
     sint2 = onecost*(2.0f-onecost);
     greject = 1.0f - epsilon*sint2/(1.0f+ epsilonsq);
-
-    #ifdef GGEMS_TRACKING
-    if (index_particle == primary_particle->particle_tracking_id) {
-      printf("[GGEMS OpenCL function KleinNishinaComptonSampleSecondaries]         Interation: %d\n", nloop);
-      printf("[GGEMS OpenCL function KleinNishinaComptonSampleSecondaries]         Epsilon: %e\n", epsilon);
-      printf("[GGEMS OpenCL function KleinNishinaComptonSampleSecondaries]         Epsilon^2: %e\n", epsilonsq);
-      printf("[GGEMS OpenCL function KleinNishinaComptonSampleSecondaries]         Rejection: %e\n", greject);
-    }
-    #endif
-
   } while (greject < rndm.z);
 
-  GGfloat rndmphi = KissUniform(random, index_particle);
   // Scattered gamma angles
   if (sint2 < 0.0f) sint2 = 0.0f;
   costheta = 1.0f - onecost;
   sintheta = sqrt(sint2);
-  phi = rndmphi * TWO_PI;
+  phi = KissUniform(random, index_particle) * TWO_PI;
 
   // Update scattered gamma
   GGfloat3 gamma_direction = {sintheta*cos(phi), sintheta*sin(phi), costheta};
