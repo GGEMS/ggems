@@ -9,7 +9,7 @@
   * Positron -> rouge
   * Electron -> bleu
 
-- Documentation avec Sphinx + Doxygen + ou site .io avec doc
+- Documentation avec Sphinx + Doxygen + LXR ou site .io avec doc
 
 - Site internet GGEMS
 
@@ -31,11 +31,8 @@
 
 - Faire diagramme avec Drawio pour clarifier code
 
-- Dans Benchmark 0, optimiser les accès mémoire GPU <-> CPU, faire une copie de 'particle_cross_sections_' sur la RAM à la fin de la méthode GGEMSCrossSections::Initialize
-Gain de temps de calcul pour python
-
 - Exemples et benchmark C++
 
-- Rendre plus propre les fichiers *.hh constant opencl <-> cpu
-
 - Vérifier l'indexation pour le cross section buffer, peut etre pb de int et short
+
+- Fixer le nombre de particles à 2^21 (2097152) dans un buffer multiple de 32 ??? Controler la multiplicité des buffers OpenCL
