@@ -71,7 +71,7 @@ __kernel void track_through_voxelized_solid(
     direction.z = primary_particle->dz_[kParticleID];
 
     // Get index of voxelized phantom, x, y, z and w (global index)
-    GGint4 const kIndexVoxel;
+    GGint4 kIndexVoxel = {0, 0, 0, 0};
     kIndexVoxel.x = (GGint)((position.x + voxelized_solid_data->position_xyz_.x) / voxelized_solid_data->voxel_sizes_xyz_.x);
     kIndexVoxel.y = (GGint)((position.y + voxelized_solid_data->position_xyz_.y) / voxelized_solid_data->voxel_sizes_xyz_.y);
     kIndexVoxel.z = (GGint)((position.z + voxelized_solid_data->position_xyz_.z) / voxelized_solid_data->voxel_sizes_xyz_.z);
