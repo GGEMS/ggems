@@ -214,7 +214,7 @@ void GGEMSSource::OrganizeParticlesInBatch(void)
   // Computing the number of batch depending on the number of simulated
   // particles and the maximum simulated particles defined during GGEMS
   // compilation
-  std::size_t const kNumberOfBatchs = number_of_particles_ / MAXIMUM_PARTICLES + 1;
+  std::size_t const kNumberOfBatchs = static_cast<std::size_t>(std::ceil(static_cast<GGdouble>(number_of_particles_) / MAXIMUM_PARTICLES));
 
   // Resizing vector storing the number of particles in batch
   number_of_particles_in_batch_.resize(kNumberOfBatchs, 0);

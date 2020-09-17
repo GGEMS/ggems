@@ -114,7 +114,7 @@ void GGEMSSolid::Distance(void)
   cl::NDRange offset(0);
 
   // Launching kernel
-  cl_int kernel_status = queue_cl->enqueueNDRangeKernel(*kernel_cl, offset, global, cl::NullRange, nullptr, event_cl);
+  GGint kernel_status = queue_cl->enqueueNDRangeKernel(*kernel_cl, offset, global, cl::NullRange, nullptr, event_cl);
   opencl_manager.CheckOpenCLError(kernel_status, "GGEMSSolid", "Distance");
   queue_cl->finish(); // Wait until the kernel status is finish
 }
@@ -148,7 +148,7 @@ void GGEMSSolid::ProjectTo(void)
   cl::NDRange offset(0);
 
   // Launching kernel
-  cl_int kernel_status = queue_cl->enqueueNDRangeKernel(*kernel_cl, offset, global, cl::NullRange, nullptr, event_cl);
+  GGint kernel_status = queue_cl->enqueueNDRangeKernel(*kernel_cl, offset, global, cl::NullRange, nullptr, event_cl);
   opencl_manager.CheckOpenCLError(kernel_status, "GGEMSSolid", "ProjectTo");
   queue_cl->finish(); // Wait until the kernel status is finish
 }
@@ -193,7 +193,7 @@ void GGEMSSolid::TrackThrough(std::weak_ptr<GGEMSCrossSections> cross_sections, 
   cl::NDRange offset(0);
 
   // Launching kernel
-  cl_int kernel_status = queue_cl->enqueueNDRangeKernel(*kernel_cl, offset, global, cl::NullRange, nullptr, event_cl);
+  GGint kernel_status = queue_cl->enqueueNDRangeKernel(*kernel_cl, offset, global, cl::NullRange, nullptr, event_cl);
   opencl_manager.CheckOpenCLError(kernel_status, "GGEMSSolid", "TrackThrough");
   queue_cl->finish(); // Wait until the kernel status is finish
 }

@@ -277,6 +277,9 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     std::vector<GGuint> device_address_bits_; /*!< Address Bits */
     std::vector<GGbool> device_available_; /*!< Flag on device availability */
     std::vector<GGbool> device_compiler_available_; /*!< Flag on compiler availability */
+    std::vector<std::size_t> device_max_work_group_size_; /*< Maximum work group size */
+    std::vector<GGuint> device_max_work_item_dimensions_; /*!< Maximum work item dimensions */
+    std::vector<std::size_t> device_max_work_item_sizes_; /*!< Maximum work item sizes */
     std::vector<GGulong> device_global_mem_cache_size_; /*!< Global memory cache size */
     std::vector<GGuint> device_global_mem_cacheline_size_; /*!< Global memory cache line size */
     std::vector<GGulong> device_global_mem_size_; /*!< Global memory size */

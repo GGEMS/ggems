@@ -59,16 +59,18 @@ __kernel void track_through_voxelized_solid(
   // Track particle until out of navigator
   while (primary_particle->status_[kParticleID] == ALIVE) {
     // Position of particle
-    GGfloat3 position;
-    position.x = primary_particle->px_[kParticleID];
-    position.y = primary_particle->py_[kParticleID];
-    position.z = primary_particle->pz_[kParticleID];
+    GGfloat3 position = {
+      primary_particle->px_[kParticleID],
+      primary_particle->py_[kParticleID],
+      primary_particle->pz_[kParticleID]
+    };
 
     // Direction of particle
-    GGfloat3 direction;
-    direction.x = primary_particle->dx_[kParticleID];
-    direction.y = primary_particle->dy_[kParticleID];
-    direction.z = primary_particle->dz_[kParticleID];
+    GGfloat3 direction = {
+      primary_particle->dx_[kParticleID],
+      primary_particle->dy_[kParticleID],
+      primary_particle->dz_[kParticleID]
+    };
 
     // Get index of voxelized phantom, x, y, z and w (global index)
     GGint4 kIndexVoxel = {0, 0, 0, 0};
@@ -158,10 +160,9 @@ __kernel void track_through_voxelized_solid(
 
     // Checking if particle outside voxelized solid navigator
     if (!IsParticleInVoxelizedNavigator(&position, voxelized_solid_data)) {
-      primary_particle->status_[kParticleID] = FREEZE;
       primary_particle->particle_navigator_distance_[kParticleID] = OUT_OF_WORLD; // Reset to initiale value
       primary_particle->navigator_id_[kParticleID] = 255; // Out of world navigator
-      continue;
+      break;
     }
 
     // Resolve process if different of TRANSPORTATION
@@ -169,9 +170,4 @@ __kernel void track_through_voxelized_solid(
       PhotonDiscreteProcess(primary_particle, random, materials, particle_cross_sections, kMaterialID, kParticleID);
     }
   }
-
-  // Reactivate freezed particle for next navigator tracking
-  if (primary_particle->status_[kParticleID] == FREEZE) {
-    primary_particle->status_[kParticleID] = ALIVE;
-  } 
 }
