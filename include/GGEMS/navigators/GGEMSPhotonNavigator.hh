@@ -19,6 +19,7 @@
 #include "GGEMS/randoms/GGEMSKissEngine.hh"
 #include "GGEMS/physics/GGEMSComptonScatteringModels.hh"
 #include "GGEMS/physics/GGEMSRayleighScatteringModels.hh"
+#include "GGEMS/physics/GGEMSPhotoElectricEffectModels.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -111,7 +112,7 @@ inline void PhotonDiscreteProcess(
     KleinNishinaComptonSampleSecondaries(primary_particle, random, index_particle);
   }
   else if (kNextInteractionProcess == PHOTOELECTRIC_EFFECT) {
-    ;
+    StandardPhotoElectricSampleSecondaries(primary_particle, index_particle);
   }
   else if (kNextInteractionProcess == RAYLEIGH_SCATTERING) {
     LivermoreRayleighSampleSecondaries(primary_particle, random, materials, particle_cross_sections, index_material, index_particle);

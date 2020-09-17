@@ -107,17 +107,6 @@ inline void KleinNishinaComptonSampleSecondaries(
   #endif
 
   primary_particle->E_[index_particle] = kE1;
-
-  if (kE1 > 1.0e-06f) {
-    primary_particle->dx_[index_particle] = gamma_direction.x;
-    primary_particle->dy_[index_particle] = gamma_direction.y;
-    primary_particle->dz_[index_particle] = gamma_direction.z;
-  }
-  else {
-    primary_particle->status_[index_particle] = DEAD;
-  }
-
-  // Add kinematic of electron !!!!
 }
 
 #endif

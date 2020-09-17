@@ -2,11 +2,11 @@ from ggems import *
 
 # ------------------------------------------------------------------------------
 # STEP 0: Level of verbosity during computation
-GGEMSVerbosity(1)
+GGEMSVerbosity(0)
 
 # ------------------------------------------------------------------------------
 # STEP 1: Choosing an OpenCL context
-opencl_manager.set_context_index(0)
+opencl_manager.set_context_index(2)
 
 # ------------------------------------------------------------------------------
 # STEP 2: Visualization
@@ -26,7 +26,7 @@ phantom.set_range_to_material('data/range_waterbox.txt')
 # ------------------------------------------------------------------------------
 # STEP 5: Physics
 processes_manager.add_process('Compton', 'gamma', 'all')
-#processes_manager.add_process('Photoelectric', 'gamma', 'all')
+processes_manager.add_process('Photoelectric', 'gamma', 'all')
 processes_manager.add_process('Rayleigh', 'gamma', 'all')
 
 # Optional options, the following are by default
@@ -44,22 +44,22 @@ range_cuts_manager.set_cut('gamma', 1.0, 'mm', 'all')
 point_source = GGEMSXRaySource()
 point_source.set_source_name('point_source')
 point_source.set_source_particle_type('gamma')
-point_source.set_number_of_particles(10000000)
+point_source.set_number_of_particles(100000000)
 point_source.set_position(-595.0, 0.0, 0.0, 'mm')
 point_source.set_rotation(0.0, 0.0, 0.0, 'deg')
 point_source.set_beam_aperture(0.0, 'deg')
 point_source.set_focal_spot_size(0.0, 0.0, 0.0, 'mm')
-point_source.set_monoenergy(10.0, 'keV')
+point_source.set_monoenergy(60.0, 'keV')
 
 # ------------------------------------------------------------------------------
-# STEP 8: Detector/Digitizer Declaration
+# STEP 8: Digitizer Declaration
 
 
 # ------------------------------------------------------------------------------
 # STEP 9: GGEMS simulation parameters
 ggems_manager.set_seed(777) # Optional, if not set, the seed is automatically computed
 
-ggems_manager.opencl_verbose(False)
+ggems_manager.opencl_verbose(True)
 ggems_manager.material_database_verbose(False)
 ggems_manager.phantom_verbose(True)
 ggems_manager.source_verbose(True)
@@ -67,9 +67,9 @@ ggems_manager.memory_verbose(True)
 ggems_manager.processes_verbose(True)
 ggems_manager.range_cuts_verbose(True)
 ggems_manager.random_verbose(True)
-ggems_manager.tracking_verbose(False, 0) # Track particle and a specific particle id
-# ggems_manager.kernel_timing_verbose(True) # flag à mettre dans le OpenCL manager
-# ggems_manager.detector_verbose(true/false)
+ggems_manager.tracking_verbose(False, 0) # Track a specific particle
+# ggems_manager.kernel_timing_verbose(False) # flag à mettre dans le OpenCL manager
+# ggems_manager.digitizer_verbose(False)
 
 # Initializing the GGEMS simulation
 ggems_manager.initialize()

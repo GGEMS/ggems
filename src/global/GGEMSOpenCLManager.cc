@@ -88,6 +88,9 @@ GGEMSOpenCLManager::GGEMSOpenCLManager(void)
   device_address_bits_.resize(devices_cl_.size());
   device_available_.resize(devices_cl_.size());
   device_compiler_available_.resize(devices_cl_.size());
+  device_max_work_group_size_.resize(devices_cl_.size());
+  device_max_work_item_dimensions_.resize(devices_cl_.size());
+  device_max_work_item_sizes_.resize(devices_cl_.size()*3);
   device_global_mem_cache_size_.resize(devices_cl_.size());
   device_global_mem_cacheline_size_.resize(devices_cl_.size());
   device_global_mem_size_.resize(devices_cl_.size());
@@ -106,6 +109,7 @@ GGEMSOpenCLManager::GGEMSOpenCLManager(void)
   GGcout("GGEMSOpenCLManager", "GGEMSOpenCLManager", 1) << "Retrieving OpenCL device informations..." << GGendl;
 
   // Make a char buffer reading char* data
+  std::size_t test[3] = {0,0,0};
   char char_data[1024];
   for (std::size_t i = 0; i < devices_cl_.size(); ++i) {
     // Device Type
@@ -114,9 +118,15 @@ GGEMSOpenCLManager::GGEMSOpenCLManager(void)
     CheckOpenCLError(devices_cl_[i]->getInfo(CL_DEVICE_ADDRESS_BITS, &device_address_bits_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
     CheckOpenCLError(devices_cl_[i]->getInfo(CL_DEVICE_AVAILABLE, &device_available_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
     CheckOpenCLError(devices_cl_[i]->getInfo(CL_DEVICE_COMPILER_AVAILABLE, &device_compiler_available_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_cl_[i]->getInfo(CL_DEVICE_MAX_WORK_GROUP_SIZE, &device_max_work_group_size_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_cl_[i]->getInfo(CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS, &device_max_work_item_dimensions_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+
+    CheckOpenCLError(devices_cl_[i]->getInfo(CL_DEVICE_MAX_WORK_ITEM_SIZES, &test), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    for (std::size_t j = 0; j < 3; ++j) device_max_work_item_sizes_[j + i*3] = test[j];
+
     CheckOpenCLError(devices_cl_[i]->getInfo(CL_DEVICE_GLOBAL_MEM_CACHE_SIZE, &device_global_mem_cache_size_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
     CheckOpenCLError(devices_cl_[i]->getInfo(CL_DEVICE_GLOBAL_MEM_CACHELINE_SIZE, &device_global_mem_cacheline_size_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
-    CheckOpenCLError(devices_cl_[i]->getInfo( CL_DEVICE_GLOBAL_MEM_SIZE, &device_global_mem_size_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_cl_[i]->getInfo(CL_DEVICE_GLOBAL_MEM_SIZE, &device_global_mem_size_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
     CheckOpenCLError(devices_cl_[i]->getInfo(CL_DEVICE_LOCAL_MEM_SIZE, &device_local_mem_size_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
     CheckOpenCLError(devices_cl_[i]->getInfo(CL_DEVICE_MEM_BASE_ADDR_ALIGN, &device_mem_base_addr_align_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
     CheckOpenCLError(devices_cl_[i]->getInfo(CL_DEVICE_NAME, &device_name_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
@@ -138,8 +148,7 @@ GGEMSOpenCLManager::GGEMSOpenCLManager(void)
   }
 
   // Define the compilation options by default for OpenCL
-  build_options_ = "-cl-std=CL1.2 -w -Werror -DOPENCL_COMPILER";
-  //build_options_ += " -cl-fast-relaxed-math";
+  build_options_ = "-cl-std=CL1.2 -w -Werror -DOPENCL_COMPILER -cl-fast-relaxed-math";
 
   // Add auxiliary function path to OpenCL options
   #ifdef GGEMS_PATH
@@ -205,11 +214,14 @@ void GGEMSOpenCLManager::Clean(void)
   device_address_bits_.clear();
   device_available_.clear();
   device_compiler_available_.clear();
+  device_max_work_group_size_.clear();
+  device_max_work_item_sizes_.clear();
   device_global_mem_cache_size_.clear();
   device_global_mem_cacheline_size_.clear();
   device_global_mem_size_.clear();
   device_local_mem_size_.clear();
   device_mem_base_addr_align_.clear();
+  device_max_work_item_dimensions_.clear();
   device_name_.clear();
   device_opencl_c_version_.clear();
   device_max_clock_frequency_.clear();
@@ -303,6 +315,10 @@ void GGEMSOpenCLManager::PrintDeviceInfos(void) const
     GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "+ Native Vector Width Double: " << device_native_vector_width_double_[i] << GGendl;
     GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "+ Max Clock Frequency: " << device_max_clock_frequency_[i] << " MHz" << GGendl;
     GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "+ Max Compute Units: " << device_max_compute_units_[i] << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "+ Max Work Group Size: " << device_max_work_group_size_[i] << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "+ Max Work Item Dimensions: " << device_max_work_item_dimensions_[i] << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "+ Max Work Item Sizes: " << device_max_work_item_sizes_[0+i*3] << " " << device_max_work_item_sizes_[1+i*3]
+      << " " << device_max_work_item_sizes_[2+i*3] << GGendl;
     GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "+ Constant Buffer Size: " << device_constant_buffer_size_[i] << " bytes" << GGendl;
     GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "+ Mem. Alloc. Size: " << device_mem_alloc_size_[i] << " bytes" << GGendl;
     GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "+ Printf Buffer Size: " << device_printf_buffer_size_[i] << " bytes" << GGendl;

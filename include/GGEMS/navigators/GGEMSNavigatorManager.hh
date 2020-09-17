@@ -162,7 +162,6 @@ class GGEMS_EXPORT GGEMSNavigatorManager
 
   private:
     std::vector<std::shared_ptr<GGEMSNavigator>> navigators_; /*!< Pointer on the navigators */
-    bool is_tracking_; /*!< Boolean enabling tracking */
 };
 
 #endif // End of GUARD_GGEMS_NAVIGATORS_GGEMSNAVIGATORMANAGER_HH

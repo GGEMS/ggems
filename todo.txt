@@ -35,4 +35,4 @@
 
 - Vérifier l'indexation pour le cross section buffer, peut etre pb de int et short
 
-- Fixer le nombre de particles à 2^21 (2097152) dans un buffer multiple de 32 ??? Controler la multiplicité des buffers OpenCL
+- Revoir l'initialisation du solid dans le navigateur
