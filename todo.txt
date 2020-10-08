@@ -11,11 +11,7 @@
 
 - Documentation avec Sphinx + Doxygen + LXR ou site .io avec doc
 
-- Site internet GGEMS
-
 - Faire source indépendantes sans lancer la simulation complète -> phase space
-
-- Licence pour GGEMS
 
 - Généraliser le OpenCL manager à plusieurs contexts (pour la reconstruction CT plus tard)
 

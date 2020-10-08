@@ -1,3 +1,21 @@
+# ************************************************************************
+# * This file is part of GGEMS.                                          *
+# *                                                                      *
+# * GGEMS is free software: you can redistribute it and/or modify        *
+# * it under the terms of the GNU General Public License as published by *
+# * the Free Software Foundation, either version 3 of the License, or    *
+# * (at your option) any later version.                                  *
+# *                                                                      *
+# * GGEMS is distributed in the hope that it will be useful,             *
+# * but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+# * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+# * GNU General Public License for more details.                         *
+# *                                                                      *
+# * You should have received a copy of the GNU General Public License    *
+# * along with GGEMS.  If not, see <https://www.gnu.org/licenses/>.      *
+# *                                                                      *
+# ************************************************************************
+
 from ggems import *
 
 # ------------------------------------------------------------------------------
@@ -44,7 +62,7 @@ range_cuts_manager.set_cut('gamma', 1.0, 'mm', 'all')
 point_source = GGEMSXRaySource()
 point_source.set_source_name('point_source')
 point_source.set_source_particle_type('gamma')
-point_source.set_number_of_particles(100000000)
+point_source.set_number_of_particles(2)
 point_source.set_position(-595.0, 0.0, 0.0, 'mm')
 point_source.set_rotation(0.0, 0.0, 0.0, 'deg')
 point_source.set_beam_aperture(0.0, 'deg')
