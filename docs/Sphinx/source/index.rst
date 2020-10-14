@@ -3,18 +3,34 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to GGEMS's documentation!
-=================================
+GGEMS User's Guide for Users and Developers
+===========================================
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :hidden:
+   :caption: Preamble
 
+   introduction
+   getting_started
+   building_and_installing
 
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+   :caption: User Documentation
 
-Indices and tables
-==================
+   capabilities
+   running_ggems
+   benchmarks
+   examples_and_tools
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+   :caption: Developer Documentation
+
+   fundamentals
+   executable_program
+   python_interface
+   changelog
