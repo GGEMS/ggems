@@ -32,3 +32,13 @@
 - Vérifier l'indexation pour le cross section buffer, peut etre pb de int et short
 
 - Revoir l'initialisation du solid dans le navigateur
+
+- Enlever \version des fichiers
+
+- Faire un GGEMSVoxelizedPhantom qui appelle le GGEMSVoxelizedNavigator (classe transparente à l'utilisateur)
+
+- Banner GGEMS terminal
+
+- Stop simulation si aucun navigateur détecté
+
+- Controler le nom des navigateur dans le manager, si un nom identique --> ERROR

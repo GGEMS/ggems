@@ -44,7 +44,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 GGEMSXRaySource::GGEMSXRaySource(void)
-: GGEMSSource(this),
+: GGEMSSource(),
   beam_aperture_(std::numeric_limits<float>::min()),
   is_monoenergy_mode_(false),
   monoenergy_(-1.0f),

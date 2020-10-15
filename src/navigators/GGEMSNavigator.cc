@@ -15,7 +15,7 @@
 // * along with GGEMS.  If not, see <https://www.gnu.org/licenses/>.      *
 // *                                                                      *
 // ************************************************************************
-
+ 
 /*!
   \file GGEMSNavigator.cc
 
@@ -36,9 +36,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSNavigator::GGEMSNavigator(GGEMSNavigator* navigator)
+GGEMSNavigator::GGEMSNavigator(void)
 : navigator_name_(""),
-  geometry_tolerance_(GEOMETRY_TOLERANCE),
   position_xyz_(MakeFloat3Zeros()),
   navigator_id_(-1),
   is_tracking_(false),
@@ -47,7 +46,7 @@ GGEMSNavigator::GGEMSNavigator(GGEMSNavigator* navigator)
   GGcout("GGEMSNavigator", "GGEMSNavigator", 3) << "Allocation of GGEMSNavigator..." << GGendl;
 
   // Store the phantom navigator in phantom navigator manager
-  GGEMSNavigatorManager::GetInstance().Store(navigator);
+  GGEMSNavigatorManager::GetInstance().Store(this);
 
   // Allocation of materials
   materials_.reset(new GGEMSMaterials());
@@ -72,15 +71,6 @@ GGEMSNavigator::~GGEMSNavigator(void)
 void GGEMSNavigator::SetNavigatorName(std::string const& navigator_name)
 {
   navigator_name_ = navigator_name;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void GGEMSNavigator::SetGeometryTolerance(GGfloat const& distance, std::string const& unit)
-{
-  geometry_tolerance_ = DistanceUnit(distance, unit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -150,7 +140,7 @@ void GGEMSNavigator::Initialize(void)
   // Initializing Solid for geometric navigation
   if(is_tracking_) solid_->EnableTracking();
   solid_->Initialize(materials_);
-  solid_->SetGeometryTolerance(geometry_tolerance_);
+  solid_->SetGeometryTolerance(GEOMETRY_TOLERANCE);
   solid_->SetNavigatorID(navigator_id_);
   if (is_update_pos_) solid_->SetPosition(position_xyz_);
 
@@ -200,8 +190,7 @@ void GGEMSNavigator::PrintInfos(void) const
   GGcout("GGEMSNavigator", "PrintInfos", 0) << GGendl;
   GGcout("GGEMSNavigator", "PrintInfos", 0) << "GGEMSNavigator Infos:" << GGendl;
   GGcout("GGEMSNavigator", "PrintInfos", 0) << "---------------------" << GGendl;
-  GGcout("GGEMSNavigator", "PrintInfos", 0) << "*Phantom navigator name: " << navigator_name_ << GGendl;
-  GGcout("GGEMSNavigator", "PrintInfos", 0) << "*Geometry tolerance: " << geometry_tolerance_/mm << " mm" << GGendl;
+  GGcout("GGEMSNavigator", "PrintInfos", 0) << "* Phantom navigator name: " << navigator_name_ << GGendl;
   solid_->PrintInfos();
   materials_->PrintInfos();
   GGcout("GGEMSNavigator", "PrintInfos", 0) << GGendl;

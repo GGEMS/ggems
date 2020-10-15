@@ -342,7 +342,7 @@ void GGEMSManager::Run()
         navigator_manager.FindClosestNavigator();
 
         // Step 3: Track to in step, particles are projected to navigator
-        GGcout("GGEMSManager", "Run", 1) << "      + Moving particles to navigator..." << GGendl;
+        GGcout("GGEMSManager", "Run", 1) << "      + Moving particles to closest navigator..." << GGendl;
         navigator_manager.TrackToIn();
 
         // Step 4: Track to out step, particles are tracked in navigator

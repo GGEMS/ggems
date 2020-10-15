@@ -43,7 +43,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSSource::GGEMSSource(GGEMSSource* source)
+GGEMSSource::GGEMSSource(void)
 : source_name_(""),
   number_of_particles_(0),
   number_of_particles_in_batch_(0),
@@ -55,7 +55,7 @@ GGEMSSource::GGEMSSource(GGEMSSource* source)
   geometry_transformation_.reset(new GGEMSGeometryTransformation());
 
   // Store the source in source manager
-  GGEMSSourceManager::GetInstance().Store(source);
+  GGEMSSourceManager::GetInstance().Store(this);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
