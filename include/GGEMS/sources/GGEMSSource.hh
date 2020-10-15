@@ -45,10 +45,9 @@ class GGEMS_EXPORT GGEMSSource
 {
   public:
     /*!
-      \param source - pointer on the daughter source
       \brief GGEMSSource constructor
     */
-    explicit GGEMSSource(GGEMSSource* source);
+    GGEMSSource(void);
 
     /*!
       \brief GGEMSSource destructor

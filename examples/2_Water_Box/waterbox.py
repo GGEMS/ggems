@@ -20,7 +20,7 @@ from ggems import *
 
 # ------------------------------------------------------------------------------
 # STEP 0: Level of verbosity during computation
-GGEMSVerbosity(0)
+GGEMSVerbosity(3)
 
 # ------------------------------------------------------------------------------
 # STEP 1: Choosing an OpenCL context
@@ -35,11 +35,16 @@ opencl_manager.set_context_index(2)
 materials_database_manager.set_materials('data/materials.txt')
 
 # ------------------------------------------------------------------------------
-# STEP 4: Phantoms, navigators and systems
-phantom = GGEMSVoxelizedNavigator()
-phantom.set_phantom_name('phantom')
-phantom.set_phantom_image('data/waterbox.mhd')
-phantom.set_range_to_material('data/range_waterbox.txt')
+# STEP 4: Phantoms and systems
+# phantom = GGEMSVoxelizedNavigator()
+# phantom.set_phantom_name('phantom')
+# phantom.set_phantom_image('data/waterbox.mhd')
+# phantom.set_range_to_material('data/range_waterbox.txt')
+
+phantom = GGEMSPhantom()
+phantom.set_phantom_name('water_box')
+phantom.set_phantom_type('voxelized')
+
 
 # ------------------------------------------------------------------------------
 # STEP 5: Physics
@@ -51,7 +56,6 @@ processes_manager.add_process('Rayleigh', 'gamma', 'all')
 processes_manager.set_cross_section_table_number_of_bins(220)
 processes_manager.set_cross_section_table_energy_min(1.0, 'keV')
 processes_manager.set_cross_section_table_energy_max(10.0, 'MeV')
-#processes_manager.print_tables(True)
 
 # ------------------------------------------------------------------------------
 # STEP 6: Cuts, by default but are 1 um
@@ -62,7 +66,7 @@ range_cuts_manager.set_cut('gamma', 1.0, 'mm', 'all')
 point_source = GGEMSXRaySource()
 point_source.set_source_name('point_source')
 point_source.set_source_particle_type('gamma')
-point_source.set_number_of_particles(2)
+point_source.set_number_of_particles(1)
 point_source.set_position(-595.0, 0.0, 0.0, 'mm')
 point_source.set_rotation(0.0, 0.0, 0.0, 'deg')
 point_source.set_beam_aperture(0.0, 'deg')
@@ -90,10 +94,10 @@ ggems_manager.tracking_verbose(False, 0) # Track a specific particle
 # ggems_manager.digitizer_verbose(False)
 
 # Initializing the GGEMS simulation
-ggems_manager.initialize()
+#ggems_manager.initialize()
 
 # Start GGEMS simulation
-ggems_manager.run()
+#ggems_manager.run()
 
 # ------------------------------------------------------------------------------
 # STEP 10: Exit GGEMS safely

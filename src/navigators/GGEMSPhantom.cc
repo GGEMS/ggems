@@ -1,0 +1,100 @@
+// ************************************************************************
+// * This file is part of GGEMS.                                          *
+// *                                                                      *
+// * GGEMS is free software: you can redistribute it and/or modify        *
+// * it under the terms of the GNU General Public License as published by *
+// * the Free Software Foundation, either version 3 of the License, or    *
+// * (at your option) any later version.                                  *
+// *                                                                      *
+// * GGEMS is distributed in the hope that it will be useful,             *
+// * but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+// * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+// * GNU General Public License for more details.                         *
+// *                                                                      *
+// * You should have received a copy of the GNU General Public License    *
+// * along with GGEMS.  If not, see <https://www.gnu.org/licenses/>.      *
+// *                                                                      *
+// ************************************************************************
+
+/*!
+  \file GGEMSPhantom.cc
+
+  \brief GGEMS class initializing a phantom and setting type of navigator
+
+  \author Julien BERT <julien.bert@univ-brest.fr>
+  \author Didier BENOIT <didier.benoit@inserm.fr>
+  \author LaTIM, INSERM - U1101, Brest, FRANCE
+  \date Thrusday October 15, 2020
+*/
+
+#include "GGEMS/navigators/GGEMSPhantom.hh"
+#include "GGEMS/tools/GGEMSPrint.hh"
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+GGEMSPhantom::GGEMSPhantom(void)
+: navigator_(nullptr)
+{
+  GGcout("GGEMSPhantom", "GGEMSPhantom", 3) << "Allocation of GGEMSPhantom..." << GGendl;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+GGEMSPhantom::~GGEMSPhantom(void)
+{
+  GGcout("GGEMSPhantom", "~GGEMSPhantom", 3) << "Deallocation of GGEMSPhantom..." << GGendl;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSPhantom::SetNavigatorType(std::string const& navigator_type)
+{
+  if (navigator_type == "voxelized") {
+    ;
+  }
+  else {
+    ;
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSPhantom::SetPhantomName(std::string const& phantom_name)
+{
+  ;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+GGEMSPhantom* create_ggems_phantom(void)
+{
+  return new(std::nothrow) GGEMSPhantom;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void set_phantom_name_ggems_phantom(GGEMSPhantom* phantom, char const* phantom_name)
+{
+  phantom->SetPhantomName(phantom_name);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void set_phantom_type_ggems_phantom(GGEMSPhantom* phantom, char const* phantom_type)
+{
+  phantom->SetNavigatorType(phantom_type);
+}

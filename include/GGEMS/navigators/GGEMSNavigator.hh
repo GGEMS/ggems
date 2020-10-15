@@ -27,7 +27,6 @@
   \author Julien BERT <julien.bert@univ-brest.fr>
   \author Didier BENOIT <didier.benoit@inserm.fr>
   \author LaTIM, INSERM - U1101, Brest, FRANCE
-  \version 1.0
   \date Tuesday February 11, 2020
 */
 
@@ -50,10 +49,9 @@ class GGEMS_EXPORT GGEMSNavigator
 {
   public:
     /*!
-      \param navigator - pointer on daughter of GGEMSNavigator
       \brief GGEMSNavigator constructor
     */
-    explicit GGEMSNavigator(GGEMSNavigator* navigator);
+    GGEMSNavigator(void);
 
     /*!
       \brief GGEMSNavigator destructor
@@ -193,10 +191,9 @@ class GGEMS_EXPORT GGEMSNavigator
 
   protected:
     std::string navigator_name_; /*!< Name of the navigator */
-    GGfloat geometry_tolerance_; /*!< Tolerance of geometry range [1mm;1nm] */
     GGfloat3 position_xyz_; /*!< Position of the navigator in X, Y and Z */
     std::size_t navigator_id_; /*!< Index of the navigator */
-    bool is_tracking_; /*!< Boolean enabling tracking */
+    bool is_tracking_; /*!< Boolean enabling tracking for debugging */
     bool is_update_pos_; /*!< Updating navigator position */
 
     std::shared_ptr<GGEMSSolid> solid_; /*!< Solid with geometric infos and label */
