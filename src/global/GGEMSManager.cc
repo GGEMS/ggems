@@ -336,20 +336,20 @@ void GGEMSManager::Run()
       source_manager.GetPrimaries(j, kNumberOfParticles);
 
       // Loop until ALL particles are dead
-      do {
+     // do {
         // Step 2: Find closest navigator (phantom and detector) before track to in operation
         GGcout("GGEMSManager", "Run", 1) << "      + Finding closest navigator..." << GGendl;
         navigator_manager.FindClosestNavigator();
 
         // Step 3: Track to in step, particles are projected to navigator
-        GGcout("GGEMSManager", "Run", 1) << "      + Moving particles to closest navigator..." << GGendl;
-        navigator_manager.TrackToIn();
+     //   GGcout("GGEMSManager", "Run", 1) << "      + Moving particles to closest navigator..." << GGendl;
+    //    navigator_manager.TrackToIn();
 
         // Step 4: Track to out step, particles are tracked in navigator
-        GGcout("GGEMSManager", "Run", 1) << "      + Tracking particles in navigator..." << GGendl;
-        navigator_manager.TrackToOut();
+      //  GGcout("GGEMSManager", "Run", 1) << "      + Tracking particles in navigator..." << GGendl;
+     //   navigator_manager.TrackToOut();
 
-      } while (source_manager.IsAlive()); // Step 5: Checking if all particles are dead, otherwize go back to step 2
+     // } while (source_manager.IsAlive()); // Step 5: Checking if all particles are dead, otherwize go back to step 2
     }
   }
 

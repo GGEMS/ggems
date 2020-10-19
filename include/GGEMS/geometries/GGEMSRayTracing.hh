@@ -96,10 +96,7 @@ inline void TransportGetSafetyInsideVoxelizedNavigator(GGfloat3 const* position,
   GGfloat z_min = voxelized_solid_data->border_min_xyz_.z;
   GGfloat z_max = voxelized_solid_data->border_max_xyz_.z;
 
-  // Tolerance
-  GGfloat tolerance = voxelized_solid_data->tolerance_;
-
-  TransportGetSafetyInsideAABB(position, x_min, x_max, y_min, y_max, z_min, z_max, tolerance);
+  TransportGetSafetyInsideAABB(position, x_min, x_max, y_min, y_max, z_min, z_max, GEOMETRY_TOLERANCE);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -163,10 +160,7 @@ inline void TransportGetSafetyOutsideVoxelizedNavigator(GGfloat3 const* position
   GGfloat z_min = voxelized_solid_data->border_min_xyz_.z;
   GGfloat z_max = voxelized_solid_data->border_max_xyz_.z;
 
-  // Tolerance
-  GGfloat tolerance = voxelized_solid_data->tolerance_;
-
-  TransportGetSafetyOutsideAABB(position, x_min, x_max, y_min, y_max, z_min, z_max, tolerance);
+  TransportGetSafetyOutsideAABB(position, x_min, x_max, y_min, y_max, z_min, z_max, GEOMETRY_TOLERANCE);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -182,11 +176,9 @@ inline void TransportGetSafetyOutsideVoxelizedNavigator(GGfloat3 const* position
 */
 inline GGuchar IsParticleInVoxelizedNavigator(GGfloat3 const* position, __global GGEMSVoxelizedSolidData* voxelized_solid_data)
 {
-  // Getting tolerance
-  GGdouble const kTolerance = voxelized_solid_data->tolerance_;
-  if (position->x < (voxelized_solid_data->border_min_xyz_.x + kTolerance) || position->x > (voxelized_solid_data->border_max_xyz_.x - kTolerance)) return OPENCL_FALSE;
-  if (position->y < (voxelized_solid_data->border_min_xyz_.y + kTolerance) || position->y > (voxelized_solid_data->border_max_xyz_.y - kTolerance)) return OPENCL_FALSE;
-  if (position->z < (voxelized_solid_data->border_min_xyz_.z + kTolerance) || position->z > (voxelized_solid_data->border_max_xyz_.z - kTolerance)) return OPENCL_FALSE;
+  if (position->x < (voxelized_solid_data->border_min_xyz_.x + GEOMETRY_TOLERANCE) || position->x > (voxelized_solid_data->border_max_xyz_.x - GEOMETRY_TOLERANCE)) return OPENCL_FALSE;
+  if (position->y < (voxelized_solid_data->border_min_xyz_.y + GEOMETRY_TOLERANCE) || position->y > (voxelized_solid_data->border_max_xyz_.y - GEOMETRY_TOLERANCE)) return OPENCL_FALSE;
+  if (position->z < (voxelized_solid_data->border_min_xyz_.z + GEOMETRY_TOLERANCE) || position->z > (voxelized_solid_data->border_max_xyz_.z - GEOMETRY_TOLERANCE)) return OPENCL_FALSE;
 
   return OPENCL_TRUE;
 }
@@ -317,10 +309,7 @@ inline GGfloat ComputeDistanceToVoxelizedNavigator(GGfloat3 const* position, GGf
   GGfloat z_min = voxelized_solid_data->border_min_xyz_.z;
   GGfloat z_max = voxelized_solid_data->border_max_xyz_.z;
 
-  // Tolerance
-  GGfloat tolerance = voxelized_solid_data->tolerance_;
-
-  return ComputeDistanceToAABB(position, direction, x_min, x_max, y_min, y_max, z_min, z_max, tolerance);
+  return ComputeDistanceToAABB(position, direction, x_min, x_max, y_min, y_max, z_min, z_max, GEOMETRY_TOLERANCE);
 }
 
 #endif

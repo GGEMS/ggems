@@ -85,13 +85,6 @@ class GGEMS_EXPORT GGEMSSolid
     GGEMSSolid& operator=(GGEMSSolid const&& solid) = delete;
 
     /*!
-      \fn void SetGeometryTolerance(GGfloat const& tolerance)
-      \param tolerance - geometry tolerance for computation
-      \brief set the geometry tolerance
-    */
-    void SetGeometryTolerance(GGfloat const& tolerance);
-
-    /*!
       \fn void SetNavigatorID(std::size_t const& navigator_id)
       \param navigator_id - index of the navigator
       \brief set the navigator index in solid data

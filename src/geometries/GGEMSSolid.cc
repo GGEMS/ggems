@@ -69,25 +69,6 @@ void GGEMSSolid::EnableTracking(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSSolid::SetGeometryTolerance(GGfloat const& tolerance)
-{
-  // Get the OpenCL manager
-  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
-
-  // Get pointer on OpenCL device
-  GGEMSVoxelizedSolidData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSVoxelizedSolidData>(solid_data_cl_.get(), sizeof(GGEMSVoxelizedSolidData));
-
-  // Storing the geometry tolerance
-  solid_data_device->tolerance_ = tolerance;
-
-  // Release the pointer
-  opencl_manager.ReleaseDeviceBuffer(solid_data_cl_.get(), solid_data_device);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
 void GGEMSSolid::SetNavigatorID(std::size_t const& navigator_id)
 {
   // Get the OpenCL manager

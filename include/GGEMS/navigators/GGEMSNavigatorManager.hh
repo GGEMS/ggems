@@ -143,6 +143,13 @@ class GGEMS_EXPORT GGEMSNavigatorManager
     }
 
     /*!
+      \fn inline std::weak_ptr<GGEMSNavigator> GetLastNavigator(void) const
+      \return last created navigator
+      \brief get the last created navigators
+    */
+    inline std::weak_ptr<GGEMSNavigator> GetLastNavigator(void) const {return navigators_.back();}
+
+    /*!
       \fn void EnableTracking(bool const& is_tracking)
       \param is_tracking - boolean enabling tracking infos for navigators
       \brief Enabling tracking infos during simulation

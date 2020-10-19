@@ -31,9 +31,12 @@
 */
 
 #include <string>
+#include <memory>
 
-#include "GGEMS/navigators/GGEMSNavigator.hh"
 #include "GGEMS/global/GGEMSExport.hh"
+#include "GGEMS/tools/GGEMSTypes.hh"
+
+class GGEMSNavigator;
 
 /*!
   \class GGEMSPhantom
@@ -45,7 +48,7 @@ class GGEMSPhantom
     /*!
       \brief GGEMSPhantom constructor
     */
-    GGEMSPhantom(void);
+    GGEMSPhantom(std::string const& phantom_name, std::string const& phantom_type);
 
     /*!
       \brief GGEMSPhantom destructor
@@ -54,71 +57,81 @@ class GGEMSPhantom
 
     /*!
       \fn GGEMSPhantom(GGEMSPhantom const& phantom) = delete
-      \param phantom - reference on the GGEMS voxelized navigator
+      \param phantom - reference on the GGEMS phantom
       \brief Avoid copy by reference
     */
     GGEMSPhantom(GGEMSPhantom const& phantom) = delete;
 
     /*!
       \fn GGEMSPhantom& operator=(GGEMSPhantom const& phantom) = delete
-      \param phantom - reference on the GGEMS voxelized navigator
+      \param phantom - reference on the GGEMS phantom
       \brief Avoid assignement by reference
     */
     GGEMSPhantom& operator=(GGEMSPhantom const& phantom) = delete;
 
     /*!
       \fn GGEMSPhantom(GGEMSPhantom const&& phantom) = delete
-      \param phantom - rvalue reference on the GGEMS voxelized navigator
+      \param phantom - rvalue reference on the GGEMS phantom
       \brief Avoid copy by rvalue reference
     */
     GGEMSPhantom(GGEMSPhantom const&& phantom) = delete;
 
     /*!
       \fn GGEMSPhantom& operator=(GGEMSPhantom const&& phantom) = delete
-      \param phantom - rvalue reference on the GGEMS voxelized navigator
+      \param phantom - rvalue reference on the GGEMS phantom
       \brief Avoid copy by rvalue reference
     */
     GGEMSPhantom& operator=(GGEMSPhantom const&& phantom) = delete;
 
     /*!
-      \fn void SetNavigatorType(std::string const& navigator_type)
-      \param navigator_type - type of navigator
-      \brief set type of navigator: voxelized (only for moment)
+      \fn void SetPosition(GGfloat const& position_x, GGfloat const& position_y, GGfloat const& position_z, std::string const& unit = "mm")
+      \param position_x - position in X
+      \param position_y - position in Y
+      \param position_z - position in Z
+      \param unit - unit of the distance
+      \brief set the position of the phantom in X, Y and Z
     */
-    void SetNavigatorType(std::string const& navigator_type);
+    void SetPosition(GGfloat const& position_x, GGfloat const& position_y, GGfloat const& position_z, std::string const& unit = "mm");
 
     /*!
-      \fn void SetPhantomName(std::string const& phantom_name)
-      \param phantom_name - name of the phantom
-      \brief set name of phantom
+      \fn void SetVoxelizedPhantomFile(std::string const& filename, std::string const& range_data_filename)
+      \param filename - MHD filename for voxelized phantom
+      \param range_data_filename - text file with range to material data
+      \brief set the mhd filename for phantom and the range data file
     */
-    void SetPhantomName(std::string const& phantom_name);
+    void SetVoxelizedPhantomFile(std::string const& filename, std::string const& range_data_filename);
 
   private:
-    GGEMSNavigator* navigator_; /*!< Pointer on navigator, this pointer is stored and deleted by GGEMSNavigatorManager */
+    std::weak_ptr<GGEMSNavigator> navigator_; /*!< Pointer on navigator, this pointer is stored and deleted by GGEMSNavigatorManager */
 };
 
 /*!
-  \fn GGEMSPhantom* create_ggems_phantom(void)
+  \fn GGEMSPhantom* create_ggems_phantom(char const* phantom_name, char const* phantom_type)
+  \param phantom_name - name of phantom
+  \param phantom_type - type of phantom
   \return the pointer on the phantom
-  \brief Get the GGEMSVoxelizedNavigator pointer for python user.
+  \brief Get the GGEMSPhantom pointer for python user.
 */
-extern "C" GGEMS_EXPORT GGEMSPhantom* create_ggems_phantom(void);
+extern "C" GGEMS_EXPORT GGEMSPhantom* create_ggems_phantom(char const* phantom_name, char const* phantom_type);
 
 /*!
-  \fn void set_phantom_name_ggems_phantom(GGEMSPhantom* phantom, char const* phantom_name)
-  \param phantom - pointer on the phantom
-  \param phantom_name - name of the phantom
-  \brief set the name of phantom
+  \fn void set_phantom_file_ggems_phantom(GGEMSPhantom* phantom, char const* phantom_filename, char const* range_data_filename)
+  \param phantom - pointer on phantom
+  \param phantom_filename - filename of the phantom
+  \param range_data_filename - range to material filename
+  \brief set the filename of phantom and the range data file
 */
-extern "C" GGEMS_EXPORT void set_phantom_name_ggems_phantom(GGEMSPhantom* phantom, char const* phantom_name);
+extern "C" GGEMS_EXPORT void set_phantom_file_ggems_phantom(GGEMSPhantom* phantom, char const* phantom_filename, char const* range_data_filename);
 
 /*!
-  \fn void set_phantom_type_ggems_phantom(GGEMSPhantom* phantom, char const* phantom_type)
-  \param phantom - pointer on the phantom
-  \param phantom_type - type of the phantom
-  \brief set the type of phantom
+  \fn void set_position_ggems_phantom(GGEMSPhantom* phantom, GGfloat const position_x, GGfloat const position_y, GGfloat const position_z, char const* unit)
+  \param phantom - pointer on phantom
+  \param position_x - offset in X
+  \param position_y - offset in Y
+  \param position_z - offset in Z
+  \param unit - unit of the distance
+  \brief set the position of the phantom in X, Y and Z
 */
-extern "C" GGEMS_EXPORT void set_phantom_type_ggems_phantom(GGEMSPhantom* phantom, char const* phantom_type);
+extern "C" GGEMS_EXPORT void set_position_ggems_phantom(GGEMSPhantom* phantom, GGfloat const position_x, GGfloat const position_y, GGfloat const position_z, char const* unit);
 
 #endif // End of GUARD_GGEMS_NAVIGATORS_GGEMSPHANTOM_HH

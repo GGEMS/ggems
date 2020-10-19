@@ -50,7 +50,6 @@ typedef struct PACKED GGEMSVoxelizedSolidData_t
   GGdouble3 position_xyz_; /*!< Position of phantom in X, Y and Z */
   GGdouble3 border_min_xyz_; /*!< Min. of border in X, Y and Z */
   GGdouble3 border_max_xyz_; /*!< Max. of border in X, Y and Z */
-  GGdouble tolerance_; /*!< Geometry tolerance */
   GGuchar navigator_id_; /*!< Navigator index */
 } GGEMSVoxelizedSolidData; /*!< Using C convention name of struct to C++ (_t deletion) */
 

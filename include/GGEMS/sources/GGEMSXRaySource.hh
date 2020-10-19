@@ -118,7 +118,7 @@ class GGEMS_EXPORT GGEMSXRaySource : public GGEMSSource
     void Initialize(void) override;
 
     /*!
-      \fn void PrintInfos(void) const = 0
+      \fn void PrintInfos(void) const
       \brief Printing infos about the source
     */
     void PrintInfos(void) const override;
@@ -130,14 +130,13 @@ class GGEMS_EXPORT GGEMSXRaySource : public GGEMSSource
     */
     void GetPrimaries(GGulong const& number_of_particles) override;
 
-  protected:
+  private:
     /*!
       \fn void InitializeKernel(void)
       \brief Initialize kernel for specific source in OpenCL
     */
     void InitializeKernel(void) override;
 
-  private:
     /*!
       \fn void FillEnergy(void)
       \brief fill energy for poly or mono energy mode

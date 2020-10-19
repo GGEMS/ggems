@@ -76,10 +76,9 @@ __kernel void project_to_voxelized_solid(
 
   // Distance to current navigator and geometry tolerance
   GGfloat const kDistance = primary_particle->particle_navigator_distance_[kParticleID];
-  GGfloat const kTolerance = voxelized_solid_data->tolerance_;
 
   // Moving the particle slightly inside the volume
-  position = GGfloat3Add(position, GGfloat3Scale(direction, kDistance + kTolerance));
+  position = GGfloat3Add(position, GGfloat3Scale(direction, kDistance + GEOMETRY_TOLERANCE));
 
   // Correcting the particle position if not totally inside due to float tolerance
   TransportGetSafetyInsideVoxelizedNavigator(&position, voxelized_solid_data);
