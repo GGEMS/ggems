@@ -56,7 +56,7 @@ class GGEMS_EXPORT GGEMSNavigator
     /*!
       \brief GGEMSNavigator destructor
     */
-    virtual ~GGEMSNavigator(void);
+    ~GGEMSNavigator(void);
 
     /*!
       \fn GGEMSNavigator(GGEMSNavigator const& navigator) = delete
@@ -94,12 +94,11 @@ class GGEMS_EXPORT GGEMSNavigator
     void SetNavigatorName(std::string const& navigator_name);
 
     /*!
-      \fn void SetGeometryTolerance(GGfloat const& distance, std::string const& unit)
-      \param distance - geometry distance
-      \param unit - unit of the distance
-      \brief Set the geometry tolerance in distance
+      \fn void SetNavigatorType(std::string const& navigator_type)
+      \param navigator_type - type of the navigator
+      \brief set the type of navigator
     */
-    void SetGeometryTolerance(GGfloat const& distance, std::string const& unit = "mm");
+    void SetNavigatorType(std::string const& navigator_type);
 
     /*!
       \fn void SetPosition(GGfloat const& position_x, GGfloat const& position_y, GGfloat const& position_z, std::string const& unit = "mm")
@@ -110,6 +109,22 @@ class GGEMS_EXPORT GGEMSNavigator
       \brief set the position of the phantom in X, Y and Z
     */
     void SetPosition(GGfloat const& position_x, GGfloat const& position_y, GGfloat const& position_z, std::string const& unit = "mm");
+
+
+    /*!
+      \fn void SetNavigatorID(std::size_t const& navigator_id)
+      \param navigator_id - index of the navigator
+      \brief set the navigator index
+    */
+    void SetNavigatorID(std::size_t const& navigator_id);
+
+    /*!
+      \fn void SetVoxelizedNavigatorFile(std::string const& filename, std::string const& range_data_filename)
+      \param filename - MHD filename for voxelized navigator
+      \param range_data_filename - text file with range to material data
+      \brief set the mhd filename for navigator and the range data file
+    */
+    void SetVoxelizedNavigatorFile(std::string const& filename, std::string const& range_data_filename);
 
     /*!
       \fn inline std::string GetNavigatorName(void) const
@@ -138,13 +153,6 @@ class GGEMS_EXPORT GGEMSNavigator
       \return the pointer on cross sections
     */
     inline std::weak_ptr<GGEMSCrossSections> GetCrossSections(void) const {return cross_sections_;}
-
-    /*!
-      \fn void SetNavigatorID(std::size_t const& navigator_id)
-      \param navigator_id - index of the navigator
-      \brief set the navigator index
-    */
-    void SetNavigatorID(std::size_t const& navigator_id);
 
     /*!
       \fn void EnableTracking(bool const& is_tracking)
@@ -181,20 +189,27 @@ class GGEMS_EXPORT GGEMSNavigator
       \fn void CheckParameters(void) const
       \return no returned value
     */
-    virtual void CheckParameters(void) const;
+    void CheckParameters(void) const;
 
     /*!
       \fn void Initialize(void)
       \return no returned value
     */
-    virtual void Initialize(void);
+    void Initialize(void);
 
-  protected:
+  private:
     std::string navigator_name_; /*!< Name of the navigator */
+    std::string navigator_type_; /*!< Type of the navigator */
+
+    // Global navigation members
     GGfloat3 position_xyz_; /*!< Position of the navigator in X, Y and Z */
     std::size_t navigator_id_; /*!< Index of the navigator */
     bool is_tracking_; /*!< Boolean enabling tracking for debugging */
     bool is_update_pos_; /*!< Updating navigator position */
+
+    // Specific to voxelized navigators
+    std::string voxelized_nav_mhd_filename_; /*!< Filename of MHD file for voxelized navigator */
+    std::string voxelized_nav_range_data_filename_; /*!< Filename of file for range data for voxelized navigator */
 
     std::shared_ptr<GGEMSSolid> solid_; /*!< Solid with geometric infos and label */
     std::shared_ptr<GGEMSMaterials> materials_; /*!< Materials of phantom */

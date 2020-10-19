@@ -31,6 +31,7 @@
 #include "GGEMS/navigators/GGEMSNavigatorManager.hh"
 #include "GGEMS/geometries/GGEMSSolid.hh"
 #include "GGEMS/physics/GGEMSCrossSections.hh"
+#include "GGEMS/geometries/GGEMSVoxelizedSolid.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -38,10 +39,13 @@
 
 GGEMSNavigator::GGEMSNavigator(void)
 : navigator_name_(""),
+  navigator_type_(""),
   position_xyz_(MakeFloat3Zeros()),
   navigator_id_(-1),
   is_tracking_(false),
-  is_update_pos_(false)
+  is_update_pos_(false),
+  voxelized_nav_mhd_filename_(""),
+  voxelized_nav_range_data_filename_("")
 {
   GGcout("GGEMSNavigator", "GGEMSNavigator", 3) << "Allocation of GGEMSNavigator..." << GGendl;
 
@@ -77,6 +81,23 @@ void GGEMSNavigator::SetNavigatorName(std::string const& navigator_name)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+void GGEMSNavigator::SetNavigatorType(std::string const& navigator_type)
+{
+  // Check type
+  if (navigator_type != "voxelized") {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "Type of navigator '" << navigator_type << "' is incorrect!!!" << std::endl;
+    oss << "Available navigaotr type is:" << std::endl;
+    oss << "    * 'voxelized'" << std::endl;
+    GGEMSMisc::ThrowException("GGEMSNavigator", "SetNavigatorType", oss.str());
+  }
+  navigator_type_ = navigator_type;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 void GGEMSNavigator::SetPosition(GGfloat const& position_x, GGfloat const& position_y, GGfloat const& position_z, std::string const& unit)
 {
   is_update_pos_ = true;
@@ -98,6 +119,16 @@ void GGEMSNavigator::SetNavigatorID(std::size_t const& navigator_id)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+void GGEMSNavigator::SetVoxelizedNavigatorFile(std::string const& filename, std::string const& range_data_filename)
+{
+  voxelized_nav_mhd_filename_ = filename;
+  voxelized_nav_range_data_filename_ = range_data_filename;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 void GGEMSNavigator::EnableTracking(bool const& is_tracking)
 {
   is_tracking_ = is_tracking;
@@ -111,11 +142,21 @@ void GGEMSNavigator::CheckParameters(void) const
 {
   GGcout("GGEMSNavigator", "CheckParameters", 3) << "Checking the mandatory parameters..." << GGendl;
 
-  // Checking the navigator name
-  if (navigator_name_.empty()) {
-    std::ostringstream oss(std::ostringstream::out);
-    oss << "You have to set a name for the navigator!!!";
-    GGEMSMisc::ThrowException("GGEMSNavigator", "CheckParameters", oss.str());
+  // If voxelized navigator, check phantom file is set
+  if (navigator_type_ == "voxelized") {
+    // Checking the phantom name
+    if (voxelized_nav_mhd_filename_.empty()) {
+      std::ostringstream oss(std::ostringstream::out);
+      oss << "You have to set a mhd file containing the voxelized phantom!!!";
+      GGEMSMisc::ThrowException("GGEMSNavigator", "CheckParameters", oss.str());
+    }
+
+    // Checking the phantom name
+    if (voxelized_nav_range_data_filename_.empty()) {
+      std::ostringstream oss(std::ostringstream::out);
+      oss << "You have to set a file with the range to material data!!!";
+      GGEMSMisc::ThrowException("GGEMSNavigator", "CheckParameters", oss.str());
+    }
   }
 
   // Checking id of the navigator
@@ -137,10 +178,13 @@ void GGEMSNavigator::Initialize(void)
   // Checking the parameters of phantom
   CheckParameters();
 
-  // Initializing Solid for geometric navigation
+  // Initializing Solid for geometric navigation depending on type of navigator
+  if (navigator_type_ == "voxelized") {
+    solid_.reset(new GGEMSVoxelizedSolid(voxelized_nav_mhd_filename_, voxelized_nav_range_data_filename_));
+  }
+
   if(is_tracking_) solid_->EnableTracking();
   solid_->Initialize(materials_);
-  solid_->SetGeometryTolerance(GEOMETRY_TOLERANCE);
   solid_->SetNavigatorID(navigator_id_);
   if (is_update_pos_) solid_->SetPosition(position_xyz_);
 

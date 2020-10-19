@@ -29,15 +29,24 @@
 
 #include "GGEMS/navigators/GGEMSPhantom.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
+#include "GGEMS/navigators/GGEMSNavigator.hh"
+#include "GGEMS/navigators/GGEMSNavigatorManager.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSPhantom::GGEMSPhantom(void)
-: navigator_(nullptr)
+GGEMSPhantom::GGEMSPhantom(std::string const& phantom_name, std::string const& phantom_type)
 {
   GGcout("GGEMSPhantom", "GGEMSPhantom", 3) << "Allocation of GGEMSPhantom..." << GGendl;
+
+  // Allocation of navigator depending of type
+  new GGEMSNavigator();
+
+  // Get pointer on last created navigator
+  navigator_ = GGEMSNavigatorManager::GetInstance().GetLastNavigator();
+  navigator_.lock()->SetNavigatorName(phantom_name);
+  navigator_.lock()->SetNavigatorType(phantom_type);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -53,48 +62,43 @@ GGEMSPhantom::~GGEMSPhantom(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSPhantom::SetNavigatorType(std::string const& navigator_type)
+void GGEMSPhantom::SetPosition(GGfloat const& position_x, GGfloat const& position_y, GGfloat const& position_z, std::string const& unit)
 {
-  if (navigator_type == "voxelized") {
-    ;
-  }
-  else {
-    ;
-  }
+  navigator_.lock()->SetPosition(position_x, position_y, position_z, unit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSPhantom::SetPhantomName(std::string const& phantom_name)
+void GGEMSPhantom::SetVoxelizedPhantomFile(std::string const& filename, std::string const& range_data_filename)
 {
-  ;
+  navigator_.lock()->SetVoxelizedNavigatorFile(filename, range_data_filename);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSPhantom* create_ggems_phantom(void)
+GGEMSPhantom* create_ggems_phantom(char const* phantom_name, char const* phantom_type)
 {
-  return new(std::nothrow) GGEMSPhantom;
+  return new(std::nothrow) GGEMSPhantom(phantom_name, phantom_type);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_phantom_name_ggems_phantom(GGEMSPhantom* phantom, char const* phantom_name)
+void set_phantom_file_ggems_phantom(GGEMSPhantom* phantom, char const* phantom_filename, char const* range_data_filename)
 {
-  phantom->SetPhantomName(phantom_name);
+  phantom->SetVoxelizedPhantomFile(phantom_filename, range_data_filename);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_phantom_type_ggems_phantom(GGEMSPhantom* phantom, char const* phantom_type)
+void set_position_ggems_phantom(GGEMSPhantom* phantom, GGfloat const position_x, GGfloat const position_y, GGfloat const position_z, char const* unit)
 {
-  phantom->SetNavigatorType(phantom_type);
+  phantom->SetPosition(position_x, position_y, position_z, unit);
 }

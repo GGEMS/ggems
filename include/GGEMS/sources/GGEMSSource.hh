@@ -162,6 +162,18 @@ class GGEMS_EXPORT GGEMSSource
     inline GGulong GetNumberOfParticlesInBatch(std::size_t const& batch_index) {return number_of_particles_in_batch_.at(batch_index);}
 
     /*!
+      \fn void CheckParameters(void) const
+      \brief Check mandatory parameters for a source
+    */
+    virtual void CheckParameters(void) const;
+
+    /*!
+      \fn void Initialize(void)
+      \brief Initialize a GGEMS source
+    */
+    virtual void Initialize(void);
+
+    /*!
       \fn void GetPrimaries(GGulong const& number_of particles) = 0
       \param number_of_particles - number of particles to generate
       \brief Generate primary particles
@@ -173,18 +185,6 @@ class GGEMS_EXPORT GGEMSSource
       \brief Printing infos about the source
     */
     virtual void PrintInfos(void) const = 0;
-
-    /*!
-      \fn void CheckParameters(void) const
-      \brief Check mandatory parameters for a source
-    */
-    virtual void CheckParameters(void) const;
-
-    /*!
-      \fn void Initialize(void)
-      \brief Initialize a GGEMS source
-    */
-    virtual void Initialize(void);
 
   protected:
     /*!

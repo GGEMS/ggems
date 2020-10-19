@@ -71,9 +71,6 @@ __kernel void track_through_voxelized_solid(
     return;
   }
 
-  // Get tolerance of navigator
-  GGfloat const kTolerance = voxelized_solid_data->tolerance_;
-
   // Track particle until out of navigator
   while (primary_particle->status_[kParticleID] == ALIVE) {
     // Position of particle
@@ -116,15 +113,15 @@ __kernel void track_through_voxelized_solid(
     GGfloat const kZMaxVoxel = kZMinVoxel + voxelized_solid_data->voxel_sizes_xyz_.z;
 
     // Get safety position of particle to be sure particle is inside voxel
-    TransportGetSafetyInsideAABB(&position, kXMinVoxel, kXMaxVoxel, kYMinVoxel, kYMaxVoxel, kZMinVoxel, kZMaxVoxel, kTolerance);
+    TransportGetSafetyInsideAABB(&position, kXMinVoxel, kXMaxVoxel, kYMinVoxel, kYMaxVoxel, kZMinVoxel, kZMaxVoxel, GEOMETRY_TOLERANCE);
 
     // Get the distance to next boundary
-    GGfloat const distance_to_next_boundary = ComputeDistanceToAABB(&position, &direction, kXMinVoxel, kXMaxVoxel, kYMinVoxel, kYMaxVoxel, kZMinVoxel, kZMaxVoxel, kTolerance);
+    GGfloat const distance_to_next_boundary = ComputeDistanceToAABB(&position, &direction, kXMinVoxel, kXMaxVoxel, kYMinVoxel, kYMaxVoxel, kZMinVoxel, kZMaxVoxel, GEOMETRY_TOLERANCE);
 
     // If distance to next boundary is inferior to distance to next interaction
     // we move particle to boundary
     if (distance_to_next_boundary <= next_interaction_distance) {
-      next_interaction_distance = distance_to_next_boundary + kTolerance;
+      next_interaction_distance = distance_to_next_boundary + GEOMETRY_TOLERANCE;
       next_discrete_process = TRANSPORTATION;
     }
 
@@ -166,7 +163,7 @@ __kernel void track_through_voxelized_solid(
     position = GGfloat3Add(position, GGfloat3Scale(direction, next_interaction_distance));
 
     // Get safety position of particle to be sure particle is outside voxel
-    TransportGetSafetyOutsideAABB(&position, kXMinVoxel, kXMaxVoxel, kYMinVoxel, kYMaxVoxel, kZMinVoxel, kZMaxVoxel, kTolerance);
+    TransportGetSafetyOutsideAABB(&position, kXMinVoxel, kXMaxVoxel, kYMinVoxel, kYMaxVoxel, kZMinVoxel, kZMaxVoxel, GEOMETRY_TOLERANCE);
 
     // Update TOF, true for photon only
     primary_particle->tof_[kParticleID] += next_interaction_distance * C_LIGHT;

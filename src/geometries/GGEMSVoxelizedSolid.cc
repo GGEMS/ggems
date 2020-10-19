@@ -148,7 +148,6 @@ void GGEMSVoxelizedSolid::PrintInfos(void) const
   GGcout("GGEMSVoxelizedSolid", "PrintInfos", 0) << "    - X: " << solid_data_device->border_min_xyz_.s[0] << " <-> " << solid_data_device->border_max_xyz_.s[0] << GGendl;
   GGcout("GGEMSVoxelizedSolid", "PrintInfos", 0) << "    - Y: " << solid_data_device->border_min_xyz_.s[1] << " <-> " << solid_data_device->border_max_xyz_.s[1] << GGendl;
   GGcout("GGEMSVoxelizedSolid", "PrintInfos", 0) << "    - Z: " << solid_data_device->border_min_xyz_.s[2] << " <-> " << solid_data_device->border_max_xyz_.s[2] << GGendl;
-  GGcout("GGEMSVoxelizedSolid", "PrintInfos", 0) << "*Geometry tolerance: " << solid_data_device->tolerance_ << " mm" << GGendl;
   GGcout("GGEMSVoxelizedSolid", "PrintInfos", 0) << "*Navigator index: " << static_cast<GGint>(solid_data_device->navigator_id_) << GGendl;
   GGcout("GGEMSVoxelizedSolid", "PrintInfos", 0) << GGendl;
 
