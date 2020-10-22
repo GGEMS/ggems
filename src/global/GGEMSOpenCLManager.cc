@@ -166,7 +166,7 @@ GGEMSOpenCLManager::GGEMSOpenCLManager(void)
   }
 
   // Define the compilation options by default for OpenCL
-  build_options_ = "-cl-std=CL1.2 -w -Werror -DOPENCL_COMPILER -cl-fast-relaxed-math";
+  build_options_ = "-cl-std=CL1.2 -w -Werror -cl-fast-relaxed-math";
 
   // Add auxiliary function path to OpenCL options
   #ifdef GGEMS_PATH

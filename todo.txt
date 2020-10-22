@@ -46,3 +46,5 @@
 - Simplifier le module python
 
 - Text en minuscule tous le temps
+
+- Enlever warning sur le nombre de particles dans source

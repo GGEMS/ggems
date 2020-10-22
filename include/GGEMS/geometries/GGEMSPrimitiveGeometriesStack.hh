@@ -1,5 +1,5 @@
-#ifndef GUARD_GGEMS_RANDOMS_GGEMSRANDOMSTACK_HH
-#define GUARD_GGEMS_RANDOMS_GGEMSRANDOMSTACK_HH
+#ifndef GUARD_GGEMS_GEOMETRIES_GGEMSPRIMITIVEGEOMETRIES_HH
+#define GUARD_GGEMS_GEOMETRIES_GGEMSPRIMITIVEGEOMETRIES_HH
 
 // ************************************************************************
 // * This file is part of GGEMS.                                          *
@@ -20,35 +20,48 @@
 // ************************************************************************
 
 /*!
-  \file GGEMSRandomStack.hh
+  \file GGEMSPrimitiveGeometries.hh
 
-  \brief Structure storing the random buffers for both OpenCL and GGEMS
+  \brief Structure storing some primitive geometries
 
   \author Julien BERT <julien.bert@univ-brest.fr>
   \author Didier BENOIT <didier.benoit@inserm.fr>
   \author LaTIM, INSERM - U1101, Brest, FRANCE
   \version 1.0
-  \date Monday December 16, 2019
+  \date Tuesday October 22, 2020
 */
 
+#include "GGEMS/maths/GGEMSMatrixTypes.hh"
 #include "GGEMS/global/GGEMSConfiguration.hh"
 #include "GGEMS/tools/GGEMSTypes.hh"
 
 /*!
-  \struct GGEMSRandom_t
-  \brief Structure storing informations about random
+  \struct GGEMSOBB_t
+  \brief Structure storing OBB (Oriented Bounding Box) geometry
 */
 #ifdef __OPENCL_C_VERSION__
-typedef struct __attribute__((aligned (1))) GGEMSRandom_t
+typedef struct __attribute__((aligned (1))) GGEMSOBB_t
 #else
-typedef struct PACKED GGEMSRandom_t
+typedef struct PACKED GGEMSOBB_t
 #endif
 {
-  GGuint prng_state_1_[MAXIMUM_PARTICLES]; /*!< State 1 of the prng */
-  GGuint prng_state_2_[MAXIMUM_PARTICLES]; /*!< State 2 of the prng */
-  GGuint prng_state_3_[MAXIMUM_PARTICLES]; /*!< State 3 of the prng */
-  GGuint prng_state_4_[MAXIMUM_PARTICLES]; /*!< State 4 of the prng */
-  GGuint prng_state_5_[MAXIMUM_PARTICLES]; /*!< State 5 of the prng */
-} GGEMSRandom; /*!< Using C convention name of struct to C++ (_t deletion) */
+  GGfloat3 border_min_xyz_; /*!< Min. of border in X, Y and Z */
+  GGfloat3 border_max_xyz_; /*!< Max. of border in X, Y and Z */
+  GGfloat44 matrix_transformation_; /*!< Matrix of transformation including angle of rotation */
+} GGEMSOBB; /*!< Using C convention name of struct to C++ (_t deletion) */
 
-#endif // End of GUARD_GGEMS_RANDOMS_GGEMSRANDOMSTACK_HH
+/*!
+  \struct GGEMSAABB_t
+  \brief Structure storing AABB (Axis Aligned Bounding Box) geometry
+*/
+#ifdef __OPENCL_C_VERSION__
+typedef struct __attribute__((aligned (1))) GGEMSAABB_t
+#else
+typedef struct PACKED GGEMSAABB_t
+#endif
+{
+  GGfloat3 border_min_xyz_; /*!< Min. of border in X, Y and Z */
+  GGfloat3 border_max_xyz_; /*!< Max. of border in X, Y and Z */
+} GGEMSAABB; /*!< Using C convention name of struct to C++ (_t deletion) */
+
+#endif // GUARD_GGEMS_GEOMETRIES_GGEMSPRIMITIVEGEOMETRIES_HH

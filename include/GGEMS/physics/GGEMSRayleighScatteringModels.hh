@@ -31,7 +31,7 @@
   \date Monday September 14, 2020
 */
 
-#ifdef OPENCL_COMPILER
+#ifdef __OPENCL_C_VERSION__
 
 __constant GGfloat FACTOR = 32526509815670243328.0f; // 0.5*HC*HC -> HC = cm/(H_PLANCK*C_LIGHT)
 
@@ -296,7 +296,7 @@ inline void LivermoreRayleighSampleSecondaries(
 
   GGfloat3 gamma_direction = {sintheta*cos(phi), sintheta*sin(phi), costheta};
   gamma_direction = RotateUnitZ(gamma_direction, kGammaDirection);
-  gamma_direction = GGfloat3UnitVector(gamma_direction);
+  gamma_direction = normalize(gamma_direction);
 
   // Update direction
   primary_particle->dx_[index_particle] = gamma_direction.x;

@@ -27,7 +27,7 @@
   \date Monday October 19, 2020
 */
 
-#include "GGEMS/systems/GGEMSCTSystem.hh"
+#include "GGEMS/navigators/GGEMSCTSystem.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
 
 ////////////////////////////////////////////////////////////////////////////////

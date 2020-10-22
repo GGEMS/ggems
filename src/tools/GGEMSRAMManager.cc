@@ -225,7 +225,7 @@ void GGEMSRAMManager::CheckRAMMemory(std::size_t const& size)
 
   // Getting memory infos
   GGulong const kMaxRAM = opencl_manager.GetMaxRAMMemoryOnActivatedContext();
-  GGdouble const kPercentRAM = static_cast<GGdouble>(allocated_ram_[GGEMSRAMType::total] + size) * 100.0 / static_cast<GGdouble>(kMaxRAM);
+  GGfloat const kPercentRAM = static_cast<GGfloat>(allocated_ram_[GGEMSRAMType::total] + size) * 100.0f / static_cast<GGfloat>(kMaxRAM);
 
   if (kPercentRAM >= 80.0f && kPercentRAM < 95.0f) {
     GGwarn("GGEMSRAMManager", "CheckRAMMemory", 0) << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << GGendl;

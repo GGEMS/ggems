@@ -73,7 +73,7 @@ GGEMSPhotoElectricEffect::~GGEMSPhotoElectricEffect(void)
 GGfloat GGEMSPhotoElectricEffect::ComputeCrossSectionPerAtom(GGfloat const& energy, GGuchar const& atomic_number) const
 {
   // Threshold at 10 eV
-  GGdouble const kEmin = fmax(GGEMSSandiaTable::kIonizationPotentials[atomic_number], 10.0)*eV;
+  GGfloat const kEmin = fmax(GGEMSSandiaTable::kIonizationPotentials[atomic_number], 10.0f)*eV;
   if (energy < kEmin) return 0.0f;
 
   GGushort const kStart = GGEMSSandiaTable::kCumulativeIntervals[atomic_number-1];
@@ -82,10 +82,10 @@ GGfloat GGEMSPhotoElectricEffect::ComputeCrossSectionPerAtom(GGfloat const& ener
   GGushort pos = kStop;
   while (energy < static_cast<GGfloat>(GGEMSSandiaTable::kSandiaTable[pos][0])*keV) --pos;
 
-  GGdouble const kAoverAvo = ATOMIC_MASS_UNIT * static_cast<GGdouble>(atomic_number) / GGEMSSandiaTable::kZtoARatio[atomic_number];
+  GGfloat const kAoverAvo = ATOMIC_MASS_UNIT * static_cast<GGfloat>(atomic_number) / GGEMSSandiaTable::kZtoARatio[atomic_number];
 
-  GGdouble const kREnergy = 1.0 / energy;
-  GGdouble const kREnergy2 = kREnergy * kREnergy;
+  GGfloat const kREnergy = 1.0f / energy;
+  GGfloat const kREnergy2 = kREnergy * kREnergy;
 
   return static_cast<GGfloat>(
     kREnergy * GGEMSSandiaTable::kSandiaTable[pos][1] * kAoverAvo * 0.160217648e-22 +

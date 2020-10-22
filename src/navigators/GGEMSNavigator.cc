@@ -37,15 +37,15 @@
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSNavigator::GGEMSNavigator(void)
-: navigator_name_(""),
-  navigator_type_(""),
+GGEMSNavigator::GGEMSNavigator(std::string const& navigator_name)
+: navigator_name_(navigator_name),
+  //navigator_type_(""),
   position_xyz_(MakeFloat3Zeros()),
   navigator_id_(-1),
   is_tracking_(false),
-  is_update_pos_(false),
-  voxelized_nav_mhd_filename_(""),
-  voxelized_nav_range_data_filename_("")
+  is_update_pos_(false)
+  //voxelized_nav_mhd_filename_(""),
+  //voxelized_nav_range_data_filename_("")
 {
   GGcout("GGEMSNavigator", "GGEMSNavigator", 3) << "Allocation of GGEMSNavigator..." << GGendl;
 
@@ -66,32 +66,6 @@ GGEMSNavigator::GGEMSNavigator(void)
 GGEMSNavigator::~GGEMSNavigator(void)
 {
   GGcout("GGEMSNavigator", "~GGEMSNavigator", 3) << "Deallocation of GGEMSNavigator..." << GGendl;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void GGEMSNavigator::SetNavigatorName(std::string const& navigator_name)
-{
-  navigator_name_ = navigator_name;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void GGEMSNavigator::SetNavigatorType(std::string const& navigator_type)
-{
-  // Check type
-  if (navigator_type != "voxelized") {
-    std::ostringstream oss(std::ostringstream::out);
-    oss << "Type of navigator '" << navigator_type << "' is incorrect!!!" << std::endl;
-    oss << "Available navigaotr type is:" << std::endl;
-    oss << "    * 'voxelized'" << std::endl;
-    GGEMSMisc::ThrowException("GGEMSNavigator", "SetNavigatorType", oss.str());
-  }
-  navigator_type_ = navigator_type;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -119,16 +93,6 @@ void GGEMSNavigator::SetNavigatorID(std::size_t const& navigator_id)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSNavigator::SetVoxelizedNavigatorFile(std::string const& filename, std::string const& range_data_filename)
-{
-  voxelized_nav_mhd_filename_ = filename;
-  voxelized_nav_range_data_filename_ = range_data_filename;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
 void GGEMSNavigator::EnableTracking(bool const& is_tracking)
 {
   is_tracking_ = is_tracking;
@@ -141,23 +105,6 @@ void GGEMSNavigator::EnableTracking(bool const& is_tracking)
 void GGEMSNavigator::CheckParameters(void) const
 {
   GGcout("GGEMSNavigator", "CheckParameters", 3) << "Checking the mandatory parameters..." << GGendl;
-
-  // If voxelized navigator, check phantom file is set
-  if (navigator_type_ == "voxelized") {
-    // Checking the phantom name
-    if (voxelized_nav_mhd_filename_.empty()) {
-      std::ostringstream oss(std::ostringstream::out);
-      oss << "You have to set a mhd file containing the voxelized phantom!!!";
-      GGEMSMisc::ThrowException("GGEMSNavigator", "CheckParameters", oss.str());
-    }
-
-    // Checking the phantom name
-    if (voxelized_nav_range_data_filename_.empty()) {
-      std::ostringstream oss(std::ostringstream::out);
-      oss << "You have to set a file with the range to material data!!!";
-      GGEMSMisc::ThrowException("GGEMSNavigator", "CheckParameters", oss.str());
-    }
-  }
 
   // Checking id of the navigator
   if (navigator_id_ == -1) {
@@ -173,20 +120,10 @@ void GGEMSNavigator::CheckParameters(void) const
 
 void GGEMSNavigator::Initialize(void)
 {
-  GGcout("GGEMSNavigator", "Initialize", 3) << "Initializing a GGEMS phantom..." << GGendl;
+  GGcout("GGEMSNavigator", "Initialize", 3) << "Initializing a GGEMS navigator..." << GGendl;
 
   // Checking the parameters of phantom
   CheckParameters();
-
-  // Initializing Solid for geometric navigation depending on type of navigator
-  if (navigator_type_ == "voxelized") {
-    solid_.reset(new GGEMSVoxelizedSolid(voxelized_nav_mhd_filename_, voxelized_nav_range_data_filename_));
-  }
-
-  if(is_tracking_) solid_->EnableTracking();
-  solid_->Initialize(materials_);
-  solid_->SetNavigatorID(navigator_id_);
-  if (is_update_pos_) solid_->SetPosition(position_xyz_);
 
   // Loading the materials and building tables to OpenCL device and converting cuts
   materials_->Initialize();
@@ -202,7 +139,7 @@ void GGEMSNavigator::Initialize(void)
 void GGEMSNavigator::ParticleNavigatorDistance(void) const
 {
   // Compute the distance between particles and navigator using the solid informations
-  solid_->Distance();
+  //solid_->Distance();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -212,7 +149,7 @@ void GGEMSNavigator::ParticleNavigatorDistance(void) const
 void GGEMSNavigator::ParticleToNavigator(void) const
 {
   // Particles are projected to entry of solid
-  solid_->ProjectTo();
+  //solid_->ProjectTo();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -222,7 +159,7 @@ void GGEMSNavigator::ParticleToNavigator(void) const
 void GGEMSNavigator::ParticleThroughNavigator(void) const
 {
   // Particles are tracked through a solid
-  solid_->TrackThrough(cross_sections_, materials_);
+  //solid_->TrackThrough(cross_sections_, materials_);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -234,8 +171,10 @@ void GGEMSNavigator::PrintInfos(void) const
   GGcout("GGEMSNavigator", "PrintInfos", 0) << GGendl;
   GGcout("GGEMSNavigator", "PrintInfos", 0) << "GGEMSNavigator Infos:" << GGendl;
   GGcout("GGEMSNavigator", "PrintInfos", 0) << "---------------------" << GGendl;
-  GGcout("GGEMSNavigator", "PrintInfos", 0) << "* Phantom navigator name: " << navigator_name_ << GGendl;
-  solid_->PrintInfos();
+  GGcout("GGEMSNavigator", "PrintInfos", 0) << "* Navigator name: " << navigator_name_ << GGendl;
+  for (std::size_t i = 0; i < solid_.size(); ++i) {
+    solid_.at(0)->PrintInfos();
+  }
   materials_->PrintInfos();
   GGcout("GGEMSNavigator", "PrintInfos", 0) << GGendl;
 }

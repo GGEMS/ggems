@@ -57,9 +57,9 @@ GGEMSXRaySource::GGEMSXRaySource(void)
 
   // Initialization of local axis for X-ray source
   geometry_transformation_->SetAxisTransformation(
-    0.0f, 0.0f, -1.0f,
-    0.0f, 1.0f, 0.0f,
-    1.0f, 0.0f, 0.0f
+    {0.0f, 0.0f, -1.0f},
+    {0.0f, 1.0f, 0.0f},
+    {1.0f, 0.0f, 0.0f}
   );
 
   // Initialization of parameters
@@ -168,9 +168,9 @@ void GGEMSXRaySource::PrintInfos(void) const
   GGcout("GGEMSXRaySource", "PrintInfos", 0) << "*Focal spot size: " << "(" << focal_spot_size_.s[0]/mm << ", " << focal_spot_size_.s[1]/mm << ", " << focal_spot_size_.s[2]/mm << ") mm3" << GGendl;
   GGcout("GGEMSXRaySource", "PrintInfos", 0) << "*Local axis: " << GGendl;
   GGcout("GGEMSXRaySource", "PrintInfos", 0) << "[" << GGendl;
-  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "    " << geometry_transformation_->GetLocalAxis().m00_ << " " << geometry_transformation_->GetLocalAxis().m01_ << " " << geometry_transformation_->GetLocalAxis().m02_ << GGendl;
-  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "    " << geometry_transformation_->GetLocalAxis().m10_ << " " << geometry_transformation_->GetLocalAxis().m11_ << " " << geometry_transformation_->GetLocalAxis().m12_ << GGendl;
-  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "    " << geometry_transformation_->GetLocalAxis().m20_ << " " << geometry_transformation_->GetLocalAxis().m21_ << " " << geometry_transformation_->GetLocalAxis().m22_ << GGendl;
+  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "    " << geometry_transformation_->GetLocalAxis().m0_.s[0] << " " << geometry_transformation_->GetLocalAxis().m0_.s[1] << " " << geometry_transformation_->GetLocalAxis().m0_.s[2] << GGendl;
+  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "    " << geometry_transformation_->GetLocalAxis().m1_.s[0] << " " << geometry_transformation_->GetLocalAxis().m1_.s[1] << " " << geometry_transformation_->GetLocalAxis().m2_.s[2] << GGendl;
+  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "    " << geometry_transformation_->GetLocalAxis().m2_.s[0] << " " << geometry_transformation_->GetLocalAxis().m2_.s[1] << " " << geometry_transformation_->GetLocalAxis().m2_.s[2] << GGendl;
   GGcout("GGEMSXRaySource", "PrintInfos", 0) << "]" << GGendl;
   GGcout("GGEMSXRaySource", "PrintInfos", 0) << GGendl;
 }
@@ -469,7 +469,7 @@ void set_focal_spot_size_ggems_xray_source(GGEMSXRaySource* xray_source, GGfloat
 
 void set_local_axis_ggems_xray_source(GGEMSXRaySource* xray_source, GGfloat const m00, GGfloat const m01, GGfloat const m02,GGfloat const m10, GGfloat const m11, GGfloat const m12, GGfloat const m20, GGfloat const m21, GGfloat const m22)
 {
-  xray_source->SetLocalAxis(m00, m01, m02, m10, m11, m12, m20, m21, m22);
+  xray_source->SetLocalAxis({m00, m01, m02}, {m10, m11, m12}, {m20, m21, m22});
 }
 
 ////////////////////////////////////////////////////////////////////////////////

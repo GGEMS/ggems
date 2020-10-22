@@ -79,12 +79,13 @@ __kernel void get_primaries_ggems_xray_source(
 
   // Get direction of the cone beam. The beam is targeted to the isocenter, then
   // the direction is directly related to the position of the source.
-  GGfloat3 global_position = LocalToGlobalPosition(matrix_transformation, MakeFloat3Zeros());
-  GGfloat3 direction = GGfloat3UnitVector(GGfloat3Sub(MakeFloat3Zeros(), global_position));
+  // Local position of xray source is 0 0 0
+  GGfloat3 global_position = LocalToGlobalPosition(matrix_transformation, (GGfloat3)(0.0f, 0.0f, 0.0f));
+  GGfloat3 direction = normalize((GGfloat3)(0.0f, 0.0f, 0.0f) - global_position);
 
   // Apply deflection (global coordinate)
   direction = RotateUnitZ(rotation, direction);
-  direction = GGfloat3UnitVector(direction);
+  direction = normalize(direction);
 
   // Postition with focal (local)
   global_position.x = focal_spot_size.x * (KissUniform(random, kParticleID) - 0.5f);

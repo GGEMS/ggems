@@ -338,8 +338,8 @@ void GGEMSManager::Run()
       // Loop until ALL particles are dead
      // do {
         // Step 2: Find closest navigator (phantom and detector) before track to in operation
-        GGcout("GGEMSManager", "Run", 1) << "      + Finding closest navigator..." << GGendl;
-        navigator_manager.FindClosestNavigator();
+       // GGcout("GGEMSManager", "Run", 1) << "      + Finding closest navigator..." << GGendl;
+       // navigator_manager.FindClosestNavigator();
 
         // Step 3: Track to in step, particles are projected to navigator
      //   GGcout("GGEMSManager", "Run", 1) << "      + Moving particles to closest navigator..." << GGendl;
@@ -369,95 +369,10 @@ void GGEMSManager::Run()
 void GGEMSManager::PrintBanner(void) const
 {
   std::cout << std::endl;
-  #ifdef _WIN32
-  CONSOLE_SCREEN_BUFFER_INFO info;
-  GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &info);
-  HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-  FlushConsoleInputBuffer(hConsole);
-  SetConsoleTextAttribute(hConsole, 0x02);
-  std::cout << "      ____" << std::endl;
-  SetConsoleTextAttribute(hConsole, 0x01);
-  std::cout << ".--. ";
-  SetConsoleTextAttribute(hConsole, 0x02);
-  std::cout << "/\\__/\\ ";
-  SetConsoleTextAttribute(hConsole, 0x01);
-  std::cout << ".--." << std::endl;
-  SetConsoleTextAttribute(hConsole, 0x01);
-  std::cout << "`";
-  SetConsoleTextAttribute(hConsole, 0x06);
-  std::cout << "O  ";
-  SetConsoleTextAttribute(hConsole, 0x02);
-  std::cout << "/ /  \\ \\  ";
-  SetConsoleTextAttribute(hConsole, 0x01);
-  std::cout << ".`     ";
-  SetConsoleTextAttribute(hConsole, info.wAttributes);
-  std::cout << "GGEMS ";
-  SetConsoleTextAttribute(hConsole, 0x04);
-  std::cout << version_ << std::endl;
-  SetConsoleTextAttribute(hConsole, 0x01);
-  std::cout << "  `-";
-  SetConsoleTextAttribute(hConsole, 0x02);
-  std::cout << "| |  | |";
-  SetConsoleTextAttribute(hConsole, 0x06);
-  std::cout << "O";
-  SetConsoleTextAttribute(hConsole, 0x01);
-  std::cout << "`" << std::endl;
-  SetConsoleTextAttribute(hConsole, 0x01);
-  std::cout << "   -";
-  SetConsoleTextAttribute(hConsole, 0x02);
-  std::cout << "|";
-  SetConsoleTextAttribute(hConsole, 0x01);
-  std::cout << "`";
-  SetConsoleTextAttribute(hConsole, 0x02);
-  std::cout << "|";
-  SetConsoleTextAttribute(hConsole, 0x01);
-  std::cout << "..";
-  SetConsoleTextAttribute(hConsole, 0x02);
-  std::cout << "|";
-  SetConsoleTextAttribute(hConsole, 0x01);
-  std::cout << "`";
-  SetConsoleTextAttribute(hConsole, 0x02);
-  std::cout << "|";
-  SetConsoleTextAttribute(hConsole, 0x01);
-  std::cout << "-" << std::endl;
-  SetConsoleTextAttribute(hConsole, 0x01);
-  std::cout << " .` ";
-  SetConsoleTextAttribute(hConsole, 0x02);
-  std::cout << "\\";
-  SetConsoleTextAttribute(hConsole, 0x01);
-  std::cout << ".";
-  SetConsoleTextAttribute(hConsole, 0x02);
-  std::cout << "\\__/";
-  SetConsoleTextAttribute(hConsole, 0x01);
-  std::cout << ".";
-  SetConsoleTextAttribute(hConsole, 0x02);
-  std::cout << "/ ";
-  SetConsoleTextAttribute(hConsole, 0x01);
-  std::cout << "`." << std::endl;
-  SetConsoleTextAttribute(hConsole, 0x01);
-  std::cout << "'.-` ";
-  SetConsoleTextAttribute(hConsole, 0x02);
-  std::cout << "\\/__\\/ ";
-  SetConsoleTextAttribute(hConsole, 0x01);
-  std::cout << "`-.'" << std::endl;
-  SetConsoleTextAttribute(hConsole, info.wAttributes);
-  #else
-  std::cout << "      \033[32m____\033[0m" << std::endl;
-  std::cout << "\033[34m.--.\033[0m \033[32m/\\__/\\\033[0m ";
-  std::cout << "\033[34m.--.\033[0m" << std::endl;
-  std::cout << "\033[34m`\033[0m\033[33mO\033[0m  \033[32m/ /  \\ \\\033[0m  ";
-  std::cout << "\033[34m.`\033[0m     GGEMS \033[31m" << version_ << "\033[0m" << std::endl;
-  std::cout << "  \033[34m`-\033[0m\033[32m| |  | |\033[0m\033[33mO\033[0m";
-  std::cout << "\033[34m`\033[0m" << std::endl;
-  std::cout << "   \033[34m-\033[0m\033[32m|\033[0m\033[34m`\033[0m";
-  std::cout << "\033[32m|\033[0m\033[34m..\033[0m\033[32m|\033[0m";
-  std::cout << "\033[34m`\033[0m\033[32m|\033[0m\033[34m-\033[0m" << std::endl;
-  std::cout << " \033[34m.`\033[0m \033[32m\\\033[0m\033[34m.\033[0m";
-  std::cout << "\033[32m\\__/\033[0m\033[34m.\033[0m\033[32m/\033[0m ";
-  std::cout << "\033[34m`.\033[0m" << std::endl;
-  std::cout << "\033[34m'.-`\033[0m \033[32m\\/__\\/\033[0m ";
-  std::cout << "\033[34m`-.'\033[0m" << std::endl;
-  #endif
+  std::cout << " ___   ___   ___  __ __  ___          _ " << std::endl;
+  std::cout << "/  _> /  _> | __>|  \\  \\/ __>    _ _ / |" << std::endl;
+  std::cout << "| <_/\\| <_/\\| _> |     |\\__ \\   | | || |" << std::endl;
+  std::cout << "`____/`____/|___>|_|_|_|<___/   |__/ |_|" << std::endl;
   std::cout << std::endl;
 }
 

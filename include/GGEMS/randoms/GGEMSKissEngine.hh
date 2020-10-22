@@ -31,7 +31,7 @@
   \date Monday December 16, 2019
 */
 
-#ifdef OPENCL_COMPILER
+#ifdef __OPENCL_C_VERSION__
 
 #include "GGEMS/randoms/GGEMSRandomStack.hh"
 #include "GGEMS/global/GGEMSConstants.hh"

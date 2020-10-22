@@ -110,7 +110,7 @@ class GGEMS_EXPORT GGEMSVolumeCreatorManager
 
     /*!
       \fn GGfloat3 GetElementsSizes(void) const
-      \return a 3d double with the size of voxel in voxelized volume
+      \return a 3d float with the size of voxel in voxelized volume
       \brief size of voxels in the voxelized volume
     */
     inline GGfloat3 GetElementsSizes(void) const {return element_sizes_;}

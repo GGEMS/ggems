@@ -82,11 +82,11 @@ class GGEMS_EXPORT GGEMSVoxelizedSolid : public GGEMSSolid
     GGEMSVoxelizedSolid& operator=(GGEMSVoxelizedSolid const&& voxelized_solid) = delete;
 
     /*!
-      \fn void Initialize(std::shared_ptr<GGEMSMaterials> materials)
+      \fn void Initialize(std::weak_ptr<GGEMSMaterials> materials)
       \param materials - pointer on materials
       \brief Initialize solid for geometric navigation
     */
-    void Initialize(std::shared_ptr<GGEMSMaterials> materials) override;
+    void Initialize(std::weak_ptr<GGEMSMaterials> materials) override;
 
     /*!
       \fn void SetPosition(GGfloat3 const& position_xyz)
@@ -182,8 +182,8 @@ void GGEMSVoxelizedSolid::ConvertImageToLabel(std::string const& raw_data_filena
   GGEMSFileStream::CheckInputStream(in_range_stream, range_data_filename);
 
   // Values in the range file
-  GGdouble first_label_value = 0.0;
-  GGdouble last_label_value = 0.0;
+  GGfloat first_label_value = 0.0f;
+  GGfloat last_label_value = 0.0f;
   GGuchar label_index = 0;
   std::string material_name("");
 
@@ -203,7 +203,7 @@ void GGEMSVoxelizedSolid::ConvertImageToLabel(std::string const& raw_data_filena
     // Setting the label
     for (GGuint i = 0; i < kNumberOfVoxels; ++i) {
       // Getting the value of phantom
-      GGdouble const kValue = static_cast<GGdouble>(tmp_raw_data[i]);
+      GGfloat const kValue = static_cast<GGfloat>(tmp_raw_data[i]);
       if (((kValue == first_label_value) && (kValue == last_label_value)) || ((kValue >= first_label_value) && (kValue < last_label_value))) {
         label_data_device[i] = label_index;
       }

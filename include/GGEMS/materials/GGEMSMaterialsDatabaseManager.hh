@@ -225,7 +225,7 @@ class GGEMS_EXPORT GGEMSMaterialsDatabaseManager
       GGEMSChemicalElement const& kChemicalElement = GetChemicalElement(kSingleMaterial.chemical_element_name_[index]);
 
       // return the atomic number density, the number could be higher than float!!! Double is used
-      return static_cast<GGfloat>(static_cast<GGdouble>(AVOGADRO) / kChemicalElement.molar_mass_M_ * kSingleMaterial.density_ * kSingleMaterial.mixture_f_[index]);
+      return static_cast<GGfloat>(AVOGADRO / kChemicalElement.molar_mass_M_ * kSingleMaterial.density_ * kSingleMaterial.mixture_f_[index]);
     }
 
   private:

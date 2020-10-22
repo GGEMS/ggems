@@ -85,11 +85,11 @@ class GGEMS_EXPORT GGEMSSolid
     GGEMSSolid& operator=(GGEMSSolid const&& solid) = delete;
 
     /*!
-      \fn void SetNavigatorID(std::size_t const& navigator_id)
-      \param navigator_id - index of the navigator
-      \brief set the navigator index in solid data
+      \fn void SetSolidID(std::size_t const& solid_id)
+      \param solid_id - index of the solid
+      \brief set the global solid index
     */
-    void SetNavigatorID(std::size_t const& navigator_id);
+    void SetSolidID(std::size_t const& solid_id);
 
     /*!
       \fn void EnableTracking(void)
@@ -125,11 +125,11 @@ class GGEMS_EXPORT GGEMSSolid
     void TrackThrough(std::weak_ptr<GGEMSCrossSections> cross_sections, std::weak_ptr<GGEMSMaterials> materials);
 
     /*!
-      \fn void Initialize(std::shared_ptr<GGEMSMaterials> materials)
+      \fn void Initialize(std::weak_ptr<GGEMSMaterials> materials)
       \param materials - pointer on GGEMS materials
       \brief Initialize solid for geometric navigation
     */
-    virtual void Initialize(std::shared_ptr<GGEMSMaterials> materials) = 0;
+    virtual void Initialize(std::weak_ptr<GGEMSMaterials> materials) = 0;
 
     /*!
       \fn void SetPosition(GGfloat3 const& position_xyz)

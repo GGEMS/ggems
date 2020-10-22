@@ -31,7 +31,7 @@
   \date Monday May 25, 2020
 */
 
-#ifdef OPENCL_COMPILER
+#ifdef __OPENCL_C_VERSION__
 
 #include "GGEMS/physics/GGEMSParticleConstants.hh"
 #include "GGEMS/geometries/GGEMSGeometryConstants.hh"
