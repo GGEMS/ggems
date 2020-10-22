@@ -18,10 +18,19 @@
 
 from ggems_lib import *
 
-class GGEMSCTSystem(object):
-    """Class for CT/CBCT for GGEMS simulation
+class GGEMSVoxelizedPhantom(object):
+    """Class for voxelized phantom for GGEMS simulation
     """
-    def __init__(self, ct_system_name):
-        ggems_lib.create_ggems_ct_system.restype = ctypes.c_void_p
+    def __init__(self, voxelized_phantom_name):
+        ggems_lib.create_ggems_voxelized_phantom.restype = ctypes.c_void_p
 
-        self.obj = ggems_lib.create_ggems_ct_system(ct_system_name.encode('ASCII'))
+        ggems_lib.set_voxelized_phantom_file_ggems_phantom.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_char_p]
+        ggems_lib.set_voxelized_phantom_file_ggems_phantom.restype = ctypes.c_void_p
+
+        # ggems_lib.set_position_ggems_phantom.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_char_p]
+        # ggems_lib.set_position_ggems_phantom.restype = ctypes.c_void_p
+
+        self.obj = ggems_lib.create_ggems_voxelized_phantom(voxelized_phantom_name.encode('ASCII'))
+
+    def set_voxelized_phantom(self, phantom_filename, range_data_filename):
+        ggems_lib.set_voxelized_phantom_file_ggems_phantom(self.obj, phantom_filename.encode('ASCII'), range_data_filename.encode('ASCII'))

@@ -37,7 +37,7 @@
 #undef PASCAL
 #endif
 
-#ifndef OPENCL_COMPILER
+#ifndef __OPENCL_C_VERSION__
 /*!
   \def __constant
   \brief __constant is known for OpenCL, but for C++ we define __constant as a constexpr
@@ -189,7 +189,7 @@ __constant GGfloat percent = 0.01f; /*!< Percent value */
 __constant GGfloat perthousant = 0.001f; /*!< Perthousand value */
 __constant GGfloat permillion  = 0.000001f; /*!< Permillion value */
 
-#ifndef OPENCL_COMPILER
+#ifndef __OPENCL_C_VERSION__
 /*!
   \fn T DistanceUnit(T const& value, std::string const& unit)
   \tparam T - type of the value to convert unit

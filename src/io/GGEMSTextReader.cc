@@ -58,7 +58,7 @@ GGfloat GGEMSMaterialReader::ReadMaterialDensity(std::string const& line)
   std::size_t last_pos = line.find_first_not_of("0123456789.", first_pos);
   std::string density_str = line.substr(first_pos, last_pos != std::string::npos ? last_pos - first_pos : last_pos);
 
-  // Convert string to double
+  // Convert string to float
   GGfloat density = 0.0f;
   std::stringstream(density_str) >> density;
 
@@ -122,7 +122,7 @@ GGfloat GGEMSMaterialReader::ReadMaterialElementFraction(std::string const& line
   std::size_t last_pos = line.find_last_of(";");
   std::string fraction_str = line.substr(first_pos, last_pos != std::string::npos ? last_pos - first_pos : last_pos);
 
-  // Convert string to double
+  // Convert string to float
   GGfloat fraction = 0.0f;
   std::stringstream(fraction_str) >> fraction;
 

@@ -38,7 +38,7 @@
   \struct GGEMSMaterialTables_t
   \brief Structure storing the material tables on OpenCL device
 */
-#ifdef OPENCL_COMPILER
+#ifdef __OPENCL_C_VERSION__
 typedef struct __attribute__((aligned (1))) GGEMSMaterialTables_t
 #else
 typedef struct PACKED GGEMSMaterialTables_t

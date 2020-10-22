@@ -22,7 +22,7 @@
 /*!
   \file GGEMSNavigator.hh
 
-  \brief GGEMS mother class for navigation
+  \brief Parent GGEMS class for navigation
 
   \author Julien BERT <julien.bert@univ-brest.fr>
   \author Didier BENOIT <didier.benoit@inserm.fr>
@@ -43,20 +43,21 @@ class GGEMSCrossSections;
 
 /*!
   \class GGEMSNavigator
-  \brief GGEMS mother class for navigator
+  \brief Parent GGEMS class for navigator
 */
 class GGEMS_EXPORT GGEMSNavigator
 {
   public:
     /*!
+      \param navigator_name - name of the navigator
       \brief GGEMSNavigator constructor
     */
-    GGEMSNavigator(void);
+    explicit GGEMSNavigator(std::string const& navigator_name);
 
     /*!
       \brief GGEMSNavigator destructor
     */
-    ~GGEMSNavigator(void);
+    virtual ~GGEMSNavigator(void);
 
     /*!
       \fn GGEMSNavigator(GGEMSNavigator const& navigator) = delete
@@ -87,20 +88,6 @@ class GGEMS_EXPORT GGEMSNavigator
     GGEMSNavigator& operator=(GGEMSNavigator const&& navigator) = delete;
 
     /*!
-      \fn void SetNavigatorName(std::string const& navigator_name)
-      \param navigator_name - name of the navigator
-      \brief save the name of the navigator
-    */
-    void SetNavigatorName(std::string const& navigator_name);
-
-    /*!
-      \fn void SetNavigatorType(std::string const& navigator_type)
-      \param navigator_type - type of the navigator
-      \brief set the type of navigator
-    */
-    void SetNavigatorType(std::string const& navigator_type);
-
-    /*!
       \fn void SetPosition(GGfloat const& position_x, GGfloat const& position_y, GGfloat const& position_z, std::string const& unit = "mm")
       \param position_x - position in X
       \param position_y - position in Y
@@ -110,21 +97,12 @@ class GGEMS_EXPORT GGEMSNavigator
     */
     void SetPosition(GGfloat const& position_x, GGfloat const& position_y, GGfloat const& position_z, std::string const& unit = "mm");
 
-
     /*!
       \fn void SetNavigatorID(std::size_t const& navigator_id)
       \param navigator_id - index of the navigator
       \brief set the navigator index
     */
     void SetNavigatorID(std::size_t const& navigator_id);
-
-    /*!
-      \fn void SetVoxelizedNavigatorFile(std::string const& filename, std::string const& range_data_filename)
-      \param filename - MHD filename for voxelized navigator
-      \param range_data_filename - text file with range to material data
-      \brief set the mhd filename for navigator and the range data file
-    */
-    void SetVoxelizedNavigatorFile(std::string const& filename, std::string const& range_data_filename);
 
     /*!
       \fn inline std::string GetNavigatorName(void) const
@@ -138,7 +116,14 @@ class GGEMS_EXPORT GGEMSNavigator
       \brief get the pointer on solid
       \return the pointer on solid
     */
-    inline std::weak_ptr<GGEMSSolid> GetSolid(void) const {return solid_;}
+    //inline std::weak_ptr<GGEMSSolid> GetSolid(void) const {return solid_;}
+
+    /*!
+      \fn inline std::size_t GetNumberOfSolids(void) const
+      \brief get the number of solids inside the navigator
+      \return the number of solids
+    */
+    inline std::size_t GetNumberOfSolids(void) const {return solid_.size();}
 
     /*!
       \fn inline std::weak_ptr<GGEMSMaterials> GetMaterials(void) const
@@ -186,20 +171,20 @@ class GGEMS_EXPORT GGEMSNavigator
     virtual void PrintInfos(void) const;
 
     /*!
-      \fn void CheckParameters(void) const
-      \return no returned value
-    */
-    void CheckParameters(void) const;
-
-    /*!
       \fn void Initialize(void)
       \return no returned value
     */
-    void Initialize(void);
+    virtual void Initialize(void);
 
-  private:
+  protected:
+    /*!
+      \fn void CheckParameters(void) const
+      \return no returned value
+    */
+    virtual void CheckParameters(void) const;
+
+  protected:
     std::string navigator_name_; /*!< Name of the navigator */
-    std::string navigator_type_; /*!< Type of the navigator */
 
     // Global navigation members
     GGfloat3 position_xyz_; /*!< Position of the navigator in X, Y and Z */
@@ -207,11 +192,7 @@ class GGEMS_EXPORT GGEMSNavigator
     bool is_tracking_; /*!< Boolean enabling tracking for debugging */
     bool is_update_pos_; /*!< Updating navigator position */
 
-    // Specific to voxelized navigators
-    std::string voxelized_nav_mhd_filename_; /*!< Filename of MHD file for voxelized navigator */
-    std::string voxelized_nav_range_data_filename_; /*!< Filename of file for range data for voxelized navigator */
-
-    std::shared_ptr<GGEMSSolid> solid_; /*!< Solid with geometric infos and label */
+    std::vector<std::shared_ptr<GGEMSSolid>> solid_; /*!< Solid with geometric infos and label */
     std::shared_ptr<GGEMSMaterials> materials_; /*!< Materials of phantom */
     std::shared_ptr<GGEMSCrossSections> cross_sections_; /*!< Cross section table for process */
 };

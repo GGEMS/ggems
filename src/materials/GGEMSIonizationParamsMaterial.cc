@@ -90,7 +90,7 @@ void GGEMSIonizationParamsMaterial::ComputeIonizationParameters(void)
   for (GGuchar i = 0; i < kNumberOfChemicalElements; ++i) {
     // Get element by element
     GGEMSChemicalElement const& kChemicalElement = material_manager.GetChemicalElement(material_->chemical_element_name_[i]);
-    axZ = static_cast<GGfloat>(static_cast<GGdouble>(AVOGADRO) / kChemicalElement.molar_mass_M_ * material_->density_ * material_->mixture_f_[i] * static_cast<GGdouble>(kChemicalElement.atomic_number_Z_));
+    axZ = static_cast<GGfloat>(AVOGADRO/ kChemicalElement.molar_mass_M_ * material_->density_ * material_->mixture_f_[i] * static_cast<GGfloat>(kChemicalElement.atomic_number_Z_));
     log_mean_excitation_energy_ += axZ * std::log(kChemicalElement.mean_excitation_energy_I_);
     total_number_of_electron_per_volume += axZ;
   }

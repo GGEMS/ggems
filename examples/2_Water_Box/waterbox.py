@@ -36,10 +36,10 @@ materials_database_manager.set_materials('data/materials.txt')
 
 # ------------------------------------------------------------------------------
 # STEP 4: Phantoms and systems
-phantom = GGEMSPhantom('water_box', 'voxelized')
-phantom.set_phantom_image('data/waterbox.mhd', 'data/range_waterbox.txt')
+phantom = GGEMSVoxelizedPhantom('water_box')
+phantom.set_voxelized_phantom('data/waterbox.mhd', 'data/range_waterbox.txt')
 
-ct_detector = GGEMSCTSystem('pixium_RAD_4343_GE')
+# ct_detector = GGEMSCTSystem('pixium_RAD_4343_GE')
 
 # ------------------------------------------------------------------------------
 # STEP 5: Physics
@@ -58,35 +58,35 @@ ct_detector = GGEMSCTSystem('pixium_RAD_4343_GE')
 
 # # ------------------------------------------------------------------------------
 # # STEP 7: Source
-# point_source = GGEMSXRaySource()
-# point_source.set_source_name('point_source')
-# point_source.set_source_particle_type('gamma')
-# point_source.set_number_of_particles(1)
-# point_source.set_position(-595.0, 0.0, 0.0, 'mm')
-# point_source.set_rotation(0.0, 0.0, 0.0, 'deg')
-# point_source.set_beam_aperture(0.0, 'deg')
-# point_source.set_focal_spot_size(0.0, 0.0, 0.0, 'mm')
-# point_source.set_monoenergy(60.0, 'keV')
+point_source = GGEMSXRaySource() # METTRE LE NOM DE LA SOURCE DANS LE CONSTRUCTEUR
+point_source.set_source_name('point_source')
+point_source.set_source_particle_type('gamma')
+point_source.set_number_of_particles(1)
+point_source.set_position(-595.0, 0.0, 0.0, 'mm')
+point_source.set_rotation(0.0, 0.0, 0.0, 'deg')
+point_source.set_beam_aperture(0.0, 'deg')
+point_source.set_focal_spot_size(0.0, 0.0, 0.0, 'mm')
+point_source.set_monoenergy(60.0, 'keV')
 
 # # ------------------------------------------------------------------------------
 # # STEP 8: GGEMS simulation parameters
-# ggems_manager.set_seed(777) # Optional, if not set, the seed is automatically computed
+ggems_manager.set_seed(777) # Optional, if not set, the seed is automatically computed
 
-# ggems_manager.opencl_verbose(True)
-# ggems_manager.material_database_verbose(False)
-# ggems_manager.phantom_verbose(True)
-# ggems_manager.source_verbose(True)
-# ggems_manager.memory_verbose(True)
-# ggems_manager.processes_verbose(True)
-# ggems_manager.range_cuts_verbose(True)
-# ggems_manager.random_verbose(True)
-# ggems_manager.tracking_verbose(False, 0) # Track a specific particle
+ggems_manager.opencl_verbose(False)
+ggems_manager.material_database_verbose(False)
+ggems_manager.phantom_verbose(True)
+ggems_manager.source_verbose(True)
+ggems_manager.memory_verbose(True)
+ggems_manager.processes_verbose(True)
+ggems_manager.range_cuts_verbose(True)
+ggems_manager.random_verbose(True)
+ggems_manager.tracking_verbose(False, 0) # Track a specific particle
 
 # # Initializing the GGEMS simulation
-# ggems_manager.initialize()
+ggems_manager.initialize()
 
 # # Start GGEMS simulation
-# ggems_manager.run()
+ggems_manager.run()
 
 # ------------------------------------------------------------------------------
 # STEP 10: Exit GGEMS safely

@@ -31,7 +31,7 @@
   \date Friday September 11, 2020
 */
 
-#ifdef OPENCL_COMPILER
+#ifdef __OPENCL_C_VERSION__
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -114,7 +114,7 @@ inline void KleinNishinaComptonSampleSecondaries(
   // Update scattered gamma
   GGfloat3 gamma_direction = {sintheta*cos(phi), sintheta*sin(phi), costheta};
   gamma_direction = RotateUnitZ(gamma_direction, kGammaDirection);
-  gamma_direction = GGfloat3UnitVector(gamma_direction);
+  gamma_direction = normalize(gamma_direction);
   GGfloat const kE1 = kE0*epsilon;
 
   #ifdef GGEMS_TRACKING

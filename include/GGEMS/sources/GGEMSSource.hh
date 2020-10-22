@@ -54,7 +54,6 @@ class GGEMS_EXPORT GGEMSSource
     */
     virtual ~GGEMSSource(void);
 
-  public:
     /*!
       \fn GGEMSSource(GGEMSSource const& source) = delete
       \param source - reference on the GGEMS source
@@ -115,19 +114,13 @@ class GGEMS_EXPORT GGEMSSource
     void SetSourceParticleType(std::string const& particle_type);
 
     /*!
-      \fn void SetLocalAxis(GGfloat const& m00, GGfloat const& m01, GGfloat const& m02, GGfloat const& m10, GGfloat const& m11, GGfloat const& m12, GGfloat const& m20, GGfloat const& m21, GGfloat const& m22)
-      \param m00 - Element 0,0 in the matrix 3x3 for local axis
-      \param m01 - Element 0,1 in the matrix 3x3 for local axis
-      \param m02 - Element 0,2 in the matrix 3x3 for local axis
-      \param m10 - Element 1,0 in the matrix 3x3 for local axis
-      \param m11 - Element 1,1 in the matrix 3x3 for local axis
-      \param m12 - Element 1,2 in the matrix 3x3 for local axis
-      \param m20 - Element 2,0 in the matrix 3x3 for local axis
-      \param m21 - Element 2,1 in the matrix 3x3 for local axis
-      \param m22 - Element 2,2 in the matrix 3x3 for local axis
+      \fn void SetLocalAxis(GGfloat3 const& m0, GGfloat3 const& m1, GGfloat3 const& m2)
+      \param m0 - Row 0 in the matrix 3x3 for local axis
+      \param m1 - Row 1 in the matrix 3x3 for local axis
+      \param m2 - Row 2 in the matrix 3x3 for local axis
       \brief Set the local axis element describing the source compared to global axis (center of world)
     */
-    void SetLocalAxis(GGfloat const& m00, GGfloat const& m01, GGfloat const& m02, GGfloat const& m10, GGfloat const& m11, GGfloat const& m12, GGfloat const& m20, GGfloat const& m21, GGfloat const& m22);
+    void SetLocalAxis(GGfloat3 const& m0, GGfloat3 const& m1, GGfloat3 const& m2);
 
     /*!
       \fn void SetRotation(GGfloat const& rx, GGfloat const& ry, GGfloat const& rz, std::string const& unit)

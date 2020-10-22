@@ -22,7 +22,7 @@
 /*!
   \file GGEMSCTSystem.hh
 
-  \brief GGEMS class managing CT/CBCT detector ct_system_name in GGEMS
+  \brief Child GGEMS class managing CT/CBCT detector in GGEMS
 
   \author Julien BERT <julien.bert@univ-brest.fr>
   \author Didier BENOIT <didier.benoit@inserm.fr>
@@ -35,19 +35,20 @@
 
 #include "GGEMS/global/GGEMSExport.hh"
 #include "GGEMS/tools/GGEMSTypes.hh"
-#include "GGEMS/systems/GGEMSSystem.hh"
+#include "GGEMS/navigators/GGEMSSystem.hh"
 
 /*!
   \class GGEMSCTSystem
-  \brief GGEMS class initializing a phantom and setting type of navigator
+  \brief Child GGEMS class managing CT/CBCT detector in GGEMS
 */
 class GGEMS_EXPORT GGEMSCTSystem : public GGEMSSystem
 {
   public:
     /*!
+      \param ct_system_name - name of the CT system
       \brief GGEMSCTSystem constructor
     */
-    GGEMSCTSystem(std::string const& ct_system_name);
+    explicit GGEMSCTSystem(std::string const& ct_system_name);
 
     /*!
       \brief GGEMSCTSystem destructor

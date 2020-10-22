@@ -22,7 +22,7 @@
 /*!
   \file GGEMSSystem.hh
 
-  \brief GGEMS class managing detector system in GGEMS
+  \brief Child GGEMS class managing detector system in GGEMS
 
   \author Julien BERT <julien.bert@univ-brest.fr>
   \author Didier BENOIT <didier.benoit@inserm.fr>
@@ -40,19 +40,20 @@
 #include "GGEMS/global/GGEMSExport.hh"
 #include "GGEMS/tools/GGEMSTypes.hh"
 
-class GGEMSNavigator;
+#include "GGEMS/navigators/GGEMSNavigator.hh"
 
 /*!
   \class GGEMSSystem
-  \brief GGEMS class initializing a phantom and setting type of navigator
+  \brief Child GGEMS class managing detector system in GGEMS
 */
-class GGEMS_EXPORT GGEMSSystem
+class GGEMS_EXPORT GGEMSSystem : public GGEMSNavigator
 {
   public:
     /*!
+      \param system_name - name of the system
       \brief GGEMSSystem constructor
     */
-    GGEMSSystem(std::string const& system_name);
+    explicit GGEMSSystem(std::string const& system_name);
 
     /*!
       \brief GGEMSSystem destructor
@@ -97,8 +98,14 @@ class GGEMS_EXPORT GGEMSSystem
     */
     //void SetPosition(GGfloat const& position_x, GGfloat const& position_y, GGfloat const& position_z, std::string const& unit = "mm");
 
-  protected:
-    std::weak_ptr<GGEMSNavigator> navigator_; /*!< Pointer on navigator, this pointer is stored and deleted by GGEMSNavigatorManager */
+    /*!
+      \fn void PrintInfos(void) const
+      \return no returned value
+    */
+    void PrintInfos(void) const {;};
+
+ // protected:
+   // std::weak_ptr<GGEMSNavigator> navigator_; /*!< Pointer on navigator, this pointer is stored and deleted by GGEMSNavigatorManager */
 };
 
 #endif // End of GUARD_GGEMS_SYSTEMS_GGEMSSYSTEM_HH

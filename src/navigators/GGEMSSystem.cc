@@ -27,9 +27,8 @@
   \date Monday October 19, 2020
 */
 
-#include "GGEMS/systems/GGEMSSystem.hh"
+#include "GGEMS/navigators/GGEMSSystem.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
-#include "GGEMS/navigators/GGEMSNavigator.hh"
 #include "GGEMS/navigators/GGEMSNavigatorManager.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -37,16 +36,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 GGEMSSystem::GGEMSSystem(std::string const& system_name)
+: GGEMSNavigator(system_name)
 {
   GGcout("GGEMSSystem", "GGEMSSystem", 3) << "Allocation of GGEMSSystem..." << GGendl;
-
-  // Allocation of navigator depending of type
-  new GGEMSNavigator();
-
-  // Get pointer on last created navigator
-  navigator_ = GGEMSNavigatorManager::GetInstance().GetLastNavigator();
-  navigator_.lock()->SetNavigatorName(system_name);
-  //navigator_.lock()->SetNavigatorType("voxelized");
 }
 
 ////////////////////////////////////////////////////////////////////////////////

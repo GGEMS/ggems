@@ -119,13 +119,9 @@ void GGEMSSource::SetSourceParticleType(std::string const& particle_type)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSSource::SetLocalAxis(GGfloat const& m00, GGfloat const& m01, GGfloat const& m02, GGfloat const& m10, GGfloat const& m11, GGfloat const& m12, GGfloat const& m20, GGfloat const& m21, GGfloat const& m22)
+void GGEMSSource::SetLocalAxis(GGfloat3 const& m0, GGfloat3 const& m1, GGfloat3 const& m2)
 {
-  geometry_transformation_->SetAxisTransformation(
-    m00, m01, m02,
-    m10, m11, m12,
-    m20, m21, m22
-  );
+  geometry_transformation_->SetAxisTransformation(m0, m1, m2);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -200,14 +196,14 @@ void GGEMSSource::CheckMemoryForParticles(void) const
   // RAM memory
 
   // Compute the RAM memory percentage allocated for primary particles
-  GGdouble const kRAMParticles = static_cast<GGdouble>(sizeof(GGEMSPrimaryParticles)) + static_cast<GGdouble>(sizeof(GGEMSRandom)) + 4.0; // 4 bytes is for particle tracking id
+  GGfloat const kRAMParticles = static_cast<GGfloat>(sizeof(GGEMSPrimaryParticles)) + static_cast<GGfloat>(sizeof(GGEMSRandom)) + 4.0f; // 4 bytes is for particle tracking id
 
   // Getting the RAM memory on activated device
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
-  GGdouble const kMaxRAM = static_cast<GGdouble>(opencl_manager.GetMaxRAMMemoryOnActivatedContext());
+  GGfloat const kMaxRAM = static_cast<GGfloat>(opencl_manager.GetMaxRAMMemoryOnActivatedContext());
 
   // Computing the ratio of used RAM memory on device
-  GGdouble const kMaxRatioUsedRAM = kRAMParticles / kMaxRAM;
+  GGfloat const kMaxRatioUsedRAM = kRAMParticles / kMaxRAM;
 
   // Computing a theoric max. number of particles depending on activated
   // device and advice this number to the user. 10% of RAM memory for particles
@@ -232,7 +228,7 @@ void GGEMSSource::OrganizeParticlesInBatch(void)
   // Computing the number of batch depending on the number of simulated
   // particles and the maximum simulated particles defined during GGEMS
   // compilation
-  std::size_t const kNumberOfBatchs = static_cast<std::size_t>(std::ceil(static_cast<GGdouble>(number_of_particles_) / MAXIMUM_PARTICLES));
+  std::size_t const kNumberOfBatchs = static_cast<std::size_t>(std::ceil(static_cast<GGfloat>(number_of_particles_) / MAXIMUM_PARTICLES));
 
   // Resizing vector storing the number of particles in batch
   number_of_particles_in_batch_.resize(kNumberOfBatchs, 0);

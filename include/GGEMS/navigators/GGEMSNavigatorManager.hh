@@ -143,11 +143,20 @@ class GGEMS_EXPORT GGEMSNavigatorManager
     }
 
     /*!
-      \fn inline std::weak_ptr<GGEMSNavigator> GetLastNavigator(void) const
-      \return last created navigator
-      \brief get the last created navigators
+      \fn inline std::size_t GetNumberOfRegisteredSolids(void) const
+      \brief get the number of current registered solid
+      \return number of current registered solid
     */
-    inline std::weak_ptr<GGEMSNavigator> GetLastNavigator(void) const {return navigators_.back();}
+    inline std::size_t GetNumberOfRegisteredSolids(void) const
+    {
+      std::size_t number_of_registered_solid = 0;
+      // Loop over number of navigator
+      for (std::size_t i = 0; i < navigators_.size(); ++i) {
+        number_of_registered_solid += (navigators_.at(i))->GetNumberOfSolids();
+      }
+
+      return number_of_registered_solid;
+    }
 
     /*!
       \fn void EnableTracking(bool const& is_tracking)

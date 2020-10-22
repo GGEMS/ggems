@@ -34,7 +34,7 @@
 #include "GGEMS/tools/GGEMSTypes.hh"
 
 
-#ifdef OPENCL_COMPILER
+#ifdef __OPENCL_C_VERSION__
 /*!
   \fn inline GGuint BinarySearchLeft(GGfloat const key, __global GGfloat const* array, GGuint const size, GGuint const offset, GGuint min)
   \param key - value in p_array to find

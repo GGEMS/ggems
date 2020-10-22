@@ -31,7 +31,7 @@
   \date Monday December 16, 2019
 */
 
-#ifdef OPENCL_COMPILER // On OpenCL device
+#ifdef __OPENCL_C_VERSION__ // On OpenCL device
 #define OPENCL_FALSE 0 /*!< False for OpenCL */
 #define OPENCL_TRUE 1 /*!< True for OpenCL */
 
@@ -202,7 +202,7 @@
 inline GGfloat3 MakeFloat3(GGfloat const x, GGfloat const y, GGfloat const z)
 {
   GGfloat3 tmp;
-  #ifdef OPENCL_COMPILER
+  #ifdef __OPENCL_C_VERSION__
   tmp.x = x; tmp.y = y; tmp.z = z;
   #else
   tmp.s[0] = x; tmp.s[1] = y; tmp.s[2] = z;
@@ -218,7 +218,7 @@ inline GGfloat3 MakeFloat3(GGfloat const x, GGfloat const y, GGfloat const z)
 inline GGfloat3 MakeFloat3Zeros()
 {
   GGfloat3 tmp;
-  #ifdef OPENCL_COMPILER
+  #ifdef __OPENCL_C_VERSION__
   tmp.x = 0.0f; tmp.y = 0.0f; tmp.z = 0.0f;
   #else
   tmp.s[0] = 0.0f; tmp.s[1] = 0.0f; tmp.s[2] = 0.0f;
@@ -237,7 +237,7 @@ inline GGfloat3 MakeFloat3Zeros()
 inline GGdouble3 MakeDouble3(GGdouble const x, GGdouble const y, GGdouble const z)
 {
   GGdouble3 tmp;
-  #ifdef OPENCL_COMPILER
+  #ifdef __OPENCL_C_VERSION__
   tmp.x = x; tmp.y = y; tmp.z = z;
   #else
   tmp.s[0] = x; tmp.s[1] = y; tmp.s[2] = z;
@@ -253,7 +253,7 @@ inline GGdouble3 MakeDouble3(GGdouble const x, GGdouble const y, GGdouble const 
 inline GGdouble3 MakeDouble3Zeros()
 {
   GGdouble3 tmp;
-  #ifdef OPENCL_COMPILER
+  #ifdef __OPENCL_C_VERSION__
   tmp.x = 0.0f; tmp.y = 0.0f; tmp.z = 0.0f;
   #else
   tmp.s[0] = 0.0f; tmp.s[1] = 0.0f; tmp.s[2] = 0.0f;

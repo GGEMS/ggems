@@ -31,7 +31,7 @@
   \date Wednesday June 24, 2020
 */
 
-#ifdef OPENCL_COMPILER
+#ifdef __OPENCL_C_VERSION__
 
 #include "GGEMS/maths/GGEMSMathAlgorithms.hh"
 #include "GGEMS/randoms/GGEMSKissEngine.hh"
