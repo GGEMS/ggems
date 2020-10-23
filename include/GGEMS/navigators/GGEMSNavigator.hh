@@ -36,6 +36,7 @@
 
 #include "GGEMS/physics/GGEMSRangeCuts.hh"
 #include "GGEMS/geometries/GGEMSGeometryConstants.hh"
+#include "GGEMS/maths/GGEMSMatrixTypes.hh"
 
 class GGEMSSolid;
 class GGEMSMaterials;
@@ -88,14 +89,33 @@ class GGEMS_EXPORT GGEMSNavigator
     GGEMSNavigator& operator=(GGEMSNavigator const&& navigator) = delete;
 
     /*!
+      \fn void SetLocalAxis(GGfloat3 const& m0, GGfloat3 const& m1, GGfloat3 const& m2)
+      \param m0 - Row 0 in the matrix 3x3 for local axis
+      \param m1 - Row 1 in the matrix 3x3 for local axis
+      \param m2 - Row 2 in the matrix 3x3 for local axis
+      \brief Set the local axis element describing the navigator compared to global axis (center of world)
+    */
+    void SetLocalAxis(GGfloat3 const& m0, GGfloat3 const& m1, GGfloat3 const& m2);
+
+    /*!
       \fn void SetPosition(GGfloat const& position_x, GGfloat const& position_y, GGfloat const& position_z, std::string const& unit = "mm")
       \param position_x - position in X
       \param position_y - position in Y
       \param position_z - position in Z
       \param unit - unit of the distance
-      \brief set the position of the phantom in X, Y and Z
+      \brief set the position of the global navigator in X, Y and Z
     */
     void SetPosition(GGfloat const& position_x, GGfloat const& position_y, GGfloat const& position_z, std::string const& unit = "mm");
+
+    /*!
+      \fn void SetRotation(GGfloat const& rx, GGfloat const& ry, GGfloat const& rz, std::string const& unit)
+      \param rx - Rotation around X along global axis
+      \param ry - Rotation around Y along global axis
+      \param rz - Rotation around Z along global axis
+      \param unit - unit of the angle
+      \brief Set the rotation of the global navigator around global axis
+    */
+    void SetRotation(GGfloat const& rx, GGfloat const& ry, GGfloat const& rz, std::string const& unit = "deg");
 
     /*!
       \fn void SetNavigatorID(std::size_t const& navigator_id)
@@ -166,9 +186,9 @@ class GGEMS_EXPORT GGEMSNavigator
 
     /*!
       \fn void PrintInfos(void) const
-      \return no returned value
+      \brief Print infos about navigator
     */
-    virtual void PrintInfos(void) const;
+    void PrintInfos(void) const;
 
     /*!
       \fn void Initialize(void)
@@ -188,9 +208,13 @@ class GGEMS_EXPORT GGEMSNavigator
 
     // Global navigation members
     GGfloat3 position_xyz_; /*!< Position of the navigator in X, Y and Z */
+    GGfloat3 rotation_xyz_; /*!< Rotation of the navigator in X, Y and Z */
+    GGfloat33 local_axis_; /*!< Local axis for navigator */
     std::size_t navigator_id_; /*!< Index of the navigator */
     bool is_tracking_; /*!< Boolean enabling tracking for debugging */
     bool is_update_pos_; /*!< Updating navigator position */
+    bool is_update_rot_; /*!< Updating navigator rotation */
+    bool is_update_axis_; /*!< Updating navigator local axis */
 
     std::vector<std::shared_ptr<GGEMSSolid>> solid_; /*!< Solid with geometric infos and label */
     std::shared_ptr<GGEMSMaterials> materials_; /*!< Materials of phantom */

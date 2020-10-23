@@ -39,7 +39,8 @@ materials_database_manager.set_materials('data/materials.txt')
 phantom = GGEMSVoxelizedPhantom('water_box')
 phantom.set_voxelized_phantom('data/waterbox.mhd', 'data/range_waterbox.txt')
 
-# ct_detector = GGEMSCTSystem('pixium_RAD_4343_GE')
+ct_detector = GGEMSCTSystem('SOMATOM_Definition_EDGE') 
+ct_detector.set_number_of_modules(1, 46)
 
 # ------------------------------------------------------------------------------
 # STEP 5: Physics
@@ -58,8 +59,7 @@ phantom.set_voxelized_phantom('data/waterbox.mhd', 'data/range_waterbox.txt')
 
 # # ------------------------------------------------------------------------------
 # # STEP 7: Source
-point_source = GGEMSXRaySource() # METTRE LE NOM DE LA SOURCE DANS LE CONSTRUCTEUR
-point_source.set_source_name('point_source')
+point_source = GGEMSXRaySource('point_source')
 point_source.set_source_particle_type('gamma')
 point_source.set_number_of_particles(1)
 point_source.set_position(-595.0, 0.0, 0.0, 'mm')

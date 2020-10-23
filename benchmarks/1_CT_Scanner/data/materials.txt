@@ -505,6 +505,11 @@ LSO: d=7.4 g/cm3; n=3;
     +el: name=Oxygen; f=0.174
     +el: name=Silicon; f=0.062
 
+GOS: d=7.44 g/cm3; n=3;
+    +el: name=Sulfur; f=0.084704
+    +el: name=Oxygen; f=0.084527
+    +el: name=Gadolinium; f=0.830769
+
 NaI: d=3.67 g/cm3; n=2;
     +el: name=Sodium; f=0.153
     +el: name=Iodine; f=0.847

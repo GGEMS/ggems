@@ -54,7 +54,8 @@ GGEMSSystem::~GGEMSSystem(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-/*void GGEMSSystem::SetPosition(GGfloat const& position_x, GGfloat const& position_y, GGfloat const& position_z, std::string const& unit)
+void GGEMSSystem::SetNumberOfModules(GGuint const& module_x, GGuint const& module_y)
 {
-  ;//navigator_.lock()->SetPosition(position_x, position_y, position_z, unit);
-}*/
+  number_of_modules_.s[0] = module_x;
+  number_of_modules_.s[1] = module_y;
+}

@@ -82,6 +82,9 @@ class GGEMS_EXPORT GGEMSCTSystem : public GGEMSSystem
       \brief Avoid copy by rvalue reference
     */
     GGEMSCTSystem& operator=(GGEMSCTSystem const&& ct_system_name) = delete;
+
+  private:
+    std::string ct_scanner_type_; /*!< Type of CT scanner, here: flat or curved */
 };
 
 /*!
@@ -91,5 +94,14 @@ class GGEMS_EXPORT GGEMSCTSystem : public GGEMSSystem
   \brief Get the GGEMSCTSystem pointer for python user.
 */
 extern "C" GGEMS_EXPORT GGEMSCTSystem* create_ggems_ct_system(char const* ct_system_name);
+
+/*!
+  \fn void set_number_of_modules_ggems_ct_system(GGEMSCTSystem* ct_system, GGuint const module_x, GGuint const module_y)
+  \param ct_system - pointer on voxelized phantom
+  \param module_x - Number of module in X (local axis of detector)
+  \param module_y - Number of module in Y (local axis of detector)
+  \brief set the number of module in X, Y of local axis of detector
+*/
+extern "C" GGEMS_EXPORT void set_number_of_modules_ggems_ct_system(GGEMSCTSystem* ct_system, GGuint const module_x, GGuint const module_y);
 
 #endif // End of GUARD_GGEMS_SYSTEMS_GGEMSSYSTEM_HH

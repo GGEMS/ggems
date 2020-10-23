@@ -369,10 +369,15 @@ void GGEMSManager::Run()
 void GGEMSManager::PrintBanner(void) const
 {
   std::cout << std::endl;
-  std::cout << " ___   ___   ___  __ __  ___          _ " << std::endl;
-  std::cout << "/  _> /  _> | __>|  \\  \\/ __>    _ _ / |" << std::endl;
-  std::cout << "| <_/\\| <_/\\| _> |     |\\__ \\   | | || |" << std::endl;
-  std::cout << "`____/`____/|___>|_|_|_|<___/   |__/ |_|" << std::endl;
+  std::cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << std::endl;
+  std::cout << "$  ___   ___   ___  __ __  ___          _  $" << std::endl;
+  std::cout << "$ /  _> /  _> | __>|  \\  \\/ __>    _ _ / | $" << std::endl;
+  std::cout << "$ | <_/\\| <_/\\| _> |     |\\__ \\   | | || | $" << std::endl;
+  std::cout << "$ `____/`____/|___>|_|_|_|<___/   |__/ |_| $" << std::endl;
+  std::cout << "$                                          $" << std::endl;
+  std::cout << "$ Welcome to GGEMS v1.0   https://ggems.fr $" << std::endl;
+  std::cout << "$ Copyright (c) GGEMS Team 2020            $" << std::endl;
+  std::cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << std::endl;
   std::cout << std::endl;
 }
 

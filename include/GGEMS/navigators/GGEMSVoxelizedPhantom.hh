@@ -126,17 +126,44 @@ extern "C" GGEMS_EXPORT GGEMSVoxelizedPhantom* create_ggems_voxelized_phantom(ch
   \param range_data_filename - range to material filename
   \brief set the filename of voxelized phantom and the range data file
 */
-extern "C" GGEMS_EXPORT void set_voxelized_phantom_file_ggems_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, char const* phantom_filename, char const* range_data_filename);
+extern "C" GGEMS_EXPORT void set_voxelized_phantom_file_ggems_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, char const* phantom_filename, char const* range_data_filename);
 
-// /*!
-//   \fn void set_position_ggems_phantom(GGEMSVoxelizedPhantom* phantom, GGfloat const position_x, GGfloat const position_y, GGfloat const position_z, char const* unit)
-//   \param phantom - pointer on phantom
-//   \param position_x - offset in X
-//   \param position_y - offset in Y
-//   \param position_z - offset in Z
-//   \param unit - unit of the distance
-//   \brief set the position of the phantom in X, Y and Z
-// */
-extern "C" GGEMS_EXPORT void set_position_ggems_phantom(GGEMSVoxelizedPhantom* phantom, GGfloat const position_x, GGfloat const position_y, GGfloat const position_z, char const* unit);
+/*!
+  \fn void set_position_ggems_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, GGfloat const position_x, GGfloat const position_y, GGfloat const position_z, char const* unit)
+  \param voxelized_phantom - pointer on voxelized phantom
+  \param position_x - offset in X
+  \param position_y - offset in Y
+  \param position_z - offset in Z
+  \param unit - unit of the distance
+  \brief set the position of the voxelized phantom in X, Y and Z
+*/
+extern "C" GGEMS_EXPORT void set_position_ggems_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, GGfloat const position_x, GGfloat const position_y, GGfloat const position_z, char const* unit);
+
+/*!
+  \fn void set_local_axis_ggems_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, GGfloat const m00, GGfloat const m01, GGfloat const m02, GGfloat const m10, GGfloat const m11, GGfloat const m12, GGfloat const m20, GGfloat const m21, GGfloat const m22)
+  \param voxelized_phantom - pointer on voxelized phantom
+  \param m00 - Element 0,0 in the matrix 3x3 for local axis
+  \param m01 - Element 0,1 in the matrix 3x3 for local axis
+  \param m02 - Element 0,2 in the matrix 3x3 for local axis
+  \param m10 - Element 1,0 in the matrix 3x3 for local axis
+  \param m11 - Element 1,1 in the matrix 3x3 for local axis
+  \param m12 - Element 1,2 in the matrix 3x3 for local axis
+  \param m20 - Element 2,0 in the matrix 3x3 for local axis
+  \param m21 - Element 2,1 in the matrix 3x3 for local axis
+  \param m22 - Element 2,2 in the matrix 3x3 for local axis
+  \brief Set the local axis element describing the voxelized phantom compared to global axis (center of world)
+*/
+extern "C" GGEMS_EXPORT void set_local_axis_ggems_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, GGfloat const m00, GGfloat const m01, GGfloat const m02, GGfloat const m10, GGfloat const m11, GGfloat const m12, GGfloat const m20, GGfloat const m21, GGfloat const m22);
+
+/*!
+  \fn void set_rotation_ggems_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, GGfloat const rx, GGfloat const ry, GGfloat const rz, char const* unit)
+  \paramvoxelized_phantom - pointer on voxelized phantom
+  \param rx - Rotation around X along global axis
+  \param ry - Rotation around Y along global axis
+  \param rz - Rotation around Z along global axis
+  \param unit - unit of the degree
+  \brief Set the rotation of the voxelized phantom around global axis
+*/
+extern "C" GGEMS_EXPORT void set_rotation_ggems_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, GGfloat const rx, GGfloat const ry, GGfloat const rz, char const* unit);
 
 #endif // End of GUARD_GGEMS_NAVIGATORS_GGEMSVOXELIZEDPHANTOM_HH
