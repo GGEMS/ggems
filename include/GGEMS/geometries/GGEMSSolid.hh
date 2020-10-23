@@ -39,6 +39,8 @@
 #include "GGEMS/tools/GGEMSRAMManager.hh"
 #include "GGEMS/navigators/GGEMSNavigatorManager.hh"
 
+class GGEMSGeometryTransformation;
+
 /*!
   \class GGEMSSolid
   \brief GGEMS class for solid (voxelized or analytical) informations
@@ -125,6 +127,26 @@ class GGEMS_EXPORT GGEMSSolid
     void TrackThrough(std::weak_ptr<GGEMSCrossSections> cross_sections, std::weak_ptr<GGEMSMaterials> materials);
 
     /*!
+      \fn void SetRotation(GGfloat3 const& rotation_xyz)
+      \param rotation_xyz - rotation in X, Y and Z
+      \brief set a rotation for solid
+    */
+    void SetRotation(GGfloat3 const& rotation_xyz);
+
+    /*!
+      \fn void SetLocalAxis(GGfloat33 const& local_axis_xyz)
+      \param local_axis_xyz - new axis basis
+      \brief set a local axis for solid
+    */
+    void SetLocalAxis(GGfloat33 const& local_axis_xyz);
+
+    /*!
+      \fn void UpdateTransformationMatrix(void)
+      \brief Update the transformation matrix for solid object
+    */
+    virtual void UpdateTransformationMatrix(void) = 0;
+
+    /*!
       \fn void Initialize(std::weak_ptr<GGEMSMaterials> materials)
       \param materials - pointer on GGEMS materials
       \brief Initialize solid for geometric navigation
@@ -159,6 +181,7 @@ class GGEMS_EXPORT GGEMSSolid
     std::weak_ptr<cl::Kernel> kernel_track_through_cl_; /*!< OpenCL kernel tracking particles through a solid */
     std::string tracking_kernel_option_; /*!< Preprocessor option for tracking */
     bool is_tracking_; /*!< Boolean enabling tracking */
+    std::unique_ptr<GGEMSGeometryTransformation> geometry_transformation_; /*!< Pointer storing the geometry transformation */
 };
 
 #endif // End of GUARD_GGEMS_GEOMETRIES_GGEMSSOLID_HH

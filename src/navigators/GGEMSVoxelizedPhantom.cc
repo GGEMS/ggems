@@ -100,7 +100,14 @@ void GGEMSVoxelizedPhantom::Initialize(void)
   solid_.at(0)->SetSolidID(0+kNumberOfAlreadyRegisteredSolids); // Only 1 solid!!!
  
   solid_.at(0)->Initialize(materials_); // Load voxelized phantom from MHD file
+
+  // Updating or setting a position, rotation, or local axis for each solid
   if (is_update_pos_) solid_.at(0)->SetPosition(position_xyz_);
+  if (is_update_rot_) solid_.at(0)->SetRotation(rotation_xyz_);
+  if (is_update_axis_) solid_.at(0)->SetLocalAxis(local_axis_);
+
+  // Update the transformation matrix
+  solid_.at(0)->UpdateTransformationMatrix();
 
   // Initialize parent class
   GGEMSNavigator::Initialize();
@@ -129,7 +136,7 @@ GGEMSVoxelizedPhantom* create_ggems_voxelized_phantom(char const* voxelized_phan
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_voxelized_phantom_file_ggems_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, char const* phantom_filename, char const* range_data_filename)
+void set_voxelized_phantom_file_ggems_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, char const* phantom_filename, char const* range_data_filename)
 {
   voxelized_phantom->SetVoxelizedPhantomFile(phantom_filename, range_data_filename);
 }
@@ -138,7 +145,26 @@ void set_voxelized_phantom_file_ggems_phantom(GGEMSVoxelizedPhantom* voxelized_p
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_position_ggems_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, GGfloat const position_x, GGfloat const position_y, GGfloat const position_z, char const* unit)
+void set_position_ggems_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, GGfloat const position_x, GGfloat const position_y, GGfloat const position_z, char const* unit)
 {
   voxelized_phantom->SetPosition(position_x, position_y, position_z, unit);
 }
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void set_local_axis_ggems_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, GGfloat const m00, GGfloat const m01, GGfloat const m02, GGfloat const m10, GGfloat const m11, GGfloat const m12, GGfloat const m20, GGfloat const m21, GGfloat const m22)
+{
+  voxelized_phantom->SetLocalAxis({m00, m01, m02}, {m10, m11, m12}, {m20, m21, m22});
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void set_rotation_ggems_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, GGfloat const rx, GGfloat const ry, GGfloat const rz, char const* unit)
+{
+  voxelized_phantom->SetRotation(rx, ry, rz, unit);
+}
+

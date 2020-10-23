@@ -89,23 +89,17 @@ class GGEMS_EXPORT GGEMSSystem : public GGEMSNavigator
     GGEMSSystem& operator=(GGEMSSystem const&& system) = delete;
 
     /*!
-      \fn void SetPosition(GGfloat const& position_x, GGfloat const& position_y, GGfloat const& position_z, std::string const& unit = "mm")
-      \param position_x - position in X
-      \param position_y - position in Y
-      \param position_z - position in Z
-      \param unit - unit of the distance
-      \brief set the position of the system in X, Y and Z
+      \fn void SetNumberOfModules(GGuint const& module_x, GGuint const& module_y)
+      \param module_x - Number of module in X (local axis of detector)
+      \param module_y - Number of module in Y (local axis of detector)
+      \brief set the number of module in X, Y of local axis of detector
     */
-    //void SetPosition(GGfloat const& position_x, GGfloat const& position_y, GGfloat const& position_z, std::string const& unit = "mm");
+    void SetNumberOfModules(GGuint const& module_x, GGuint const& module_y);
 
-    /*!
-      \fn void PrintInfos(void) const
-      \return no returned value
-    */
-    void PrintInfos(void) const {;};
-
- // protected:
-   // std::weak_ptr<GGEMSNavigator> navigator_; /*!< Pointer on navigator, this pointer is stored and deleted by GGEMSNavigatorManager */
+  protected:
+    GGuint2 number_of_modules_; /*!< Number of the detection modules */
+    GGuint2 number_of_pixels_in_modules_; /*!< Number of pixels (X,Y) in a modules */
+    GGfloat3 size_of_pixels_; /*!< Size of pixel in each direction */
 };
 
 #endif // End of GUARD_GGEMS_SYSTEMS_GGEMSSYSTEM_HH

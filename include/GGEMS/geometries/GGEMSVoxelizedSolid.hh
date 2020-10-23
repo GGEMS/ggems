@@ -108,6 +108,12 @@ class GGEMS_EXPORT GGEMSVoxelizedSolid : public GGEMSSolid
     */
     void LoadVolumeImage(std::weak_ptr<GGEMSMaterials> materials);
 
+    /*!
+      \fn void UpdateTransformationMatrix(void)
+      \brief Update the transformation matrix for solid object
+    */
+    void UpdateTransformationMatrix(void);
+
   private:
     /*!
       \fn template <typename T> void ConvertImageToLabel(std::string const& raw_data_filename, std::string const& range_data_filename, std::weak_ptr<GGEMSMaterials> materials)

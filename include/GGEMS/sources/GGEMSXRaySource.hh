@@ -43,7 +43,7 @@ class GGEMS_EXPORT GGEMSXRaySource : public GGEMSSource
     /*!
       \brief GGEMSXRaySource constructor
     */
-    GGEMSXRaySource(void);
+    explicit GGEMSXRaySource(std::string const& source_name);
 
     /*!
       \brief GGEMSXRaySource destructor
@@ -161,19 +161,12 @@ class GGEMS_EXPORT GGEMSXRaySource : public GGEMSSource
 };
 
 /*!
-  \fn GGEMSXRaySource* create_ggems_xray_source(void)
+  \fn GGEMSXRaySource* create_ggems_xray_source(char const* source_name)
   \return the pointer on the singleton
+  \param source_name - name of the source
   \brief Get the GGEMSXRaySource pointer for python user.
 */
-extern "C" GGEMS_EXPORT GGEMSXRaySource* create_ggems_xray_source(void);
-
-/*!
-  \fn void set_source_name_ggems_xray_source(GGEMSXRaySource* xray_source, char const* source_name)
-  \param xray_source - pointer on the source
-  \param source_name - name of the source
-  \brief set the name of source
-*/
-extern "C" GGEMS_EXPORT void set_source_name_ggems_xray_source(GGEMSXRaySource* xray_source, char const* source_name);
+extern "C" GGEMS_EXPORT GGEMSXRaySource* create_ggems_xray_source(char const* source_name);
 
 /*!
   \fn void initialize_ggems_xray_source(GGEMSXRaySource* xray_source)

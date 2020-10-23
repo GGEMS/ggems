@@ -47,7 +47,7 @@ class GGEMS_EXPORT GGEMSSource
     /*!
       \brief GGEMSSource constructor
     */
-    GGEMSSource(void);
+    explicit GGEMSSource(std::string const& source_name);
 
     /*!
       \brief GGEMSSource destructor
@@ -81,13 +81,6 @@ class GGEMS_EXPORT GGEMSSource
       \brief Avoid copy by rvalue reference
     */
     GGEMSSource& operator=(GGEMSSource const&& source) = delete;
-
-    /*!
-      \fn void SetSourceName(std::string const& source_name)
-      \param source_name - name of the source
-      \brief save the name of the source
-    */
-    void SetSourceName(std::string const& source_name);
 
     /*!
       \fn inline std::string GetNameOfSource(void) const

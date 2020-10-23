@@ -43,8 +43,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSXRaySource::GGEMSXRaySource(void)
-: GGEMSSource(),
+GGEMSXRaySource::GGEMSXRaySource(std::string const& source_name)
+: GGEMSSource(source_name),
   beam_aperture_(std::numeric_limits<float>::min()),
   is_monoenergy_mode_(false),
   monoenergy_(-1.0f),
@@ -139,11 +139,17 @@ void GGEMSXRaySource::GetPrimaries(GGulong const& number_of_particles)
 
 void GGEMSXRaySource::PrintInfos(void) const
 {
+  // Get the OpenCL manager
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+
+  // Get pointer on OpenCL device
+  GGfloat44* transformation_matrix_device = opencl_manager.GetDeviceBuffer<GGfloat44>(geometry_transformation_->GetTransformationMatrix(), sizeof(GGfloat44));
+
   GGcout("GGEMSXRaySource", "PrintInfos", 0) << GGendl;
   GGcout("GGEMSXRaySource", "PrintInfos", 0) << "GGEMSXRaySource Infos: " << GGendl;
   GGcout("GGEMSXRaySource", "PrintInfos", 0) << "----------------------"  << GGendl;
-  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "*Source name: " << source_name_ << GGendl;
-  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "*Particle type: ";
+  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "* Source name: " << source_name_ << GGendl;
+  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "* Particle type: ";
   if (particle_type_ == PHOTON) {
     std::cout << "Photon" << std::endl;
   }
@@ -153,26 +159,30 @@ void GGEMSXRaySource::PrintInfos(void) const
   else if (particle_type_ == POSITRON) {
     std::cout << "Positron" << std::endl;
   }
-  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "*Number of particles: " << number_of_particles_ << GGendl;
-  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "*Number of batches: " << GetNumberOfBatchs() << GGendl;
-  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "*Energy mode: ";
+  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "* Number of particles: " << number_of_particles_ << GGendl;
+  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "* Number of batches: " << GetNumberOfBatchs() << GGendl;
+  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "* Energy mode: ";
   if (is_monoenergy_mode_) {
     std::cout << "Monoenergy" << std::endl;
   }
   else {
     std::cout << "Polyenergy" << std::endl;
   }
-  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "*Position: " << "(" << geometry_transformation_->GetPosition().s[0]/mm << ", " << geometry_transformation_->GetPosition().s[1]/mm << ", " << geometry_transformation_->GetPosition().s[2]/mm << " ) mm3" << GGendl;
-  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "*Rotation: " << "(" << geometry_transformation_->GetRotation().s[0] << ", " << geometry_transformation_->GetRotation().s[1] << ", " << geometry_transformation_->GetRotation().s[2] << ") degree" << GGendl;
-  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "*Beam aperture: " << beam_aperture_/deg << " degrees" << GGendl;
-  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "*Focal spot size: " << "(" << focal_spot_size_.s[0]/mm << ", " << focal_spot_size_.s[1]/mm << ", " << focal_spot_size_.s[2]/mm << ") mm3" << GGendl;
-  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "*Local axis: " << GGendl;
+  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "* Position: " << "(" << geometry_transformation_->GetPosition().s[0]/mm << ", " << geometry_transformation_->GetPosition().s[1]/mm << ", " << geometry_transformation_->GetPosition().s[2]/mm << " ) mm3" << GGendl;
+  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "* Rotation: " << "(" << geometry_transformation_->GetRotation().s[0] << ", " << geometry_transformation_->GetRotation().s[1] << ", " << geometry_transformation_->GetRotation().s[2] << ") degree" << GGendl;
+  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "* Beam aperture: " << beam_aperture_/deg << " degrees" << GGendl;
+  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "* Focal spot size: " << "(" << focal_spot_size_.s[0]/mm << ", " << focal_spot_size_.s[1]/mm << ", " << focal_spot_size_.s[2]/mm << ") mm3" << GGendl;
+  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "* Transformation matrix: " << GGendl;
   GGcout("GGEMSXRaySource", "PrintInfos", 0) << "[" << GGendl;
-  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "    " << geometry_transformation_->GetLocalAxis().m0_.s[0] << " " << geometry_transformation_->GetLocalAxis().m0_.s[1] << " " << geometry_transformation_->GetLocalAxis().m0_.s[2] << GGendl;
-  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "    " << geometry_transformation_->GetLocalAxis().m1_.s[0] << " " << geometry_transformation_->GetLocalAxis().m1_.s[1] << " " << geometry_transformation_->GetLocalAxis().m2_.s[2] << GGendl;
-  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "    " << geometry_transformation_->GetLocalAxis().m2_.s[0] << " " << geometry_transformation_->GetLocalAxis().m2_.s[1] << " " << geometry_transformation_->GetLocalAxis().m2_.s[2] << GGendl;
+  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "    " << transformation_matrix_device->m0_.s[0] << " " << transformation_matrix_device->m0_.s[1] << " " << transformation_matrix_device->m0_.s[2] << " " << transformation_matrix_device->m0_.s[3] << GGendl;
+  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "    " << transformation_matrix_device->m1_.s[0] << " " << transformation_matrix_device->m1_.s[1] << " " << transformation_matrix_device->m1_.s[2] << " " << transformation_matrix_device->m1_.s[3] << GGendl;
+  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "    " << transformation_matrix_device->m2_.s[0] << " " << transformation_matrix_device->m2_.s[1] << " " << transformation_matrix_device->m2_.s[2] << " " << transformation_matrix_device->m2_.s[3] << GGendl;
+  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "    " << transformation_matrix_device->m3_.s[0] << " " << transformation_matrix_device->m3_.s[1] << " " << transformation_matrix_device->m3_.s[2] << " " << transformation_matrix_device->m3_.s[3] << GGendl;
   GGcout("GGEMSXRaySource", "PrintInfos", 0) << "]" << GGendl;
   GGcout("GGEMSXRaySource", "PrintInfos", 0) << GGendl;
+
+  // Release the pointer
+  opencl_manager.ReleaseDeviceBuffer(geometry_transformation_->GetTransformationMatrix(), transformation_matrix_device);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -395,9 +405,9 @@ void GGEMSXRaySource::SetFocalSpotSize(GGfloat const& width, GGfloat const& heig
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSXRaySource* create_ggems_xray_source(void)
+GGEMSXRaySource* create_ggems_xray_source(char const* source_name)
 {
-  return new(std::nothrow) GGEMSXRaySource;
+  return new(std::nothrow) GGEMSXRaySource(source_name);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -407,15 +417,6 @@ GGEMSXRaySource* create_ggems_xray_source(void)
 void initialize_ggems_xray_source(GGEMSXRaySource* xray_source)
 {
   xray_source->Initialize();
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void set_source_name_ggems_xray_source(GGEMSXRaySource* xray_source, char const* source_name)
-{
-  xray_source->SetSourceName(source_name);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

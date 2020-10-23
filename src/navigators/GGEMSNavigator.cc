@@ -39,13 +39,13 @@
 
 GGEMSNavigator::GGEMSNavigator(std::string const& navigator_name)
 : navigator_name_(navigator_name),
-  //navigator_type_(""),
   position_xyz_(MakeFloat3Zeros()),
+  rotation_xyz_(MakeFloat3Zeros()),
   navigator_id_(-1),
   is_tracking_(false),
-  is_update_pos_(false)
-  //voxelized_nav_mhd_filename_(""),
-  //voxelized_nav_range_data_filename_("")
+  is_update_pos_(false),
+  is_update_rot_(false),
+  is_update_axis_(false)
 {
   GGcout("GGEMSNavigator", "GGEMSNavigator", 3) << "Allocation of GGEMSNavigator..." << GGendl;
 
@@ -72,12 +72,36 @@ GGEMSNavigator::~GGEMSNavigator(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+void GGEMSNavigator::SetLocalAxis(GGfloat3 const& m0, GGfloat3 const& m1, GGfloat3 const& m2)
+{
+  is_update_axis_ = true;
+  local_axis_.m0_ = m0;
+  local_axis_.m1_ = m1;
+  local_axis_.m2_ = m2;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 void GGEMSNavigator::SetPosition(GGfloat const& position_x, GGfloat const& position_y, GGfloat const& position_z, std::string const& unit)
 {
   is_update_pos_ = true;
   position_xyz_.s[0] = DistanceUnit(position_x, unit);
   position_xyz_.s[1] = DistanceUnit(position_y, unit);
   position_xyz_.s[2] = DistanceUnit(position_z, unit);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSNavigator::SetRotation(GGfloat const& rx, GGfloat const& ry, GGfloat const& rz, std::string const& unit)
+{
+  is_update_rot_ = true;
+  rotation_xyz_.s[0] = AngleUnit(rx, unit);
+  rotation_xyz_.s[1] = AngleUnit(ry, unit);
+  rotation_xyz_.s[2] = AngleUnit(rz, unit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
