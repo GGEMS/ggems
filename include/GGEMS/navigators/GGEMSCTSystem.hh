@@ -83,8 +83,46 @@ class GGEMS_EXPORT GGEMSCTSystem : public GGEMSSystem
     */
     GGEMSCTSystem& operator=(GGEMSCTSystem const&& ct_system_name) = delete;
 
+    /*!
+      \fn void Initialize(void)
+      \brief Initialize CT system
+    */
+    void Initialize(void);
+
+    /*!
+      \fn void SetCTSystemType(std::string const& ct_system_type)
+      \param ct_system_type - type of CT system
+      \brief type of CT system: flat or curved
+    */
+    void SetCTSystemType(std::string const& ct_system_type);
+
+    /*!
+      \fn void SetSourceIsocenterDistance(GGfloat const& source_isocenter_distance, std::string const& unit)
+      \param source_isocenter_distance - source isocenter distance
+      \param unit - distance unit
+      \brief set the source isocenter distance
+    */
+    void SetSourceIsocenterDistance(GGfloat const& source_isocenter_distance, std::string const& unit = "mm");
+
+    /*!
+      \fn void SetSourceDetectorDistance(GGfloat const& source_detector_distance, std::string const& unit)
+      \param source_detector_distance - source detector distance
+      \param unit - distance unit
+      \brief set the source detector distance
+    */
+    void SetSourceDetectorDistance(GGfloat const& source_detector_distance, std::string const& unit = "mm");
+
   private:
-    std::string ct_scanner_type_; /*!< Type of CT scanner, here: flat or curved */
+    /*!
+      \fn void CheckParameters(void) const
+      \return no returned value
+    */
+    void CheckParameters(void) const;
+
+  private:
+    std::string ct_system_type_; /*!< Type of CT scanner, here: flat or curved */
+    GGfloat source_isocenter_distance_; /*!< Distance from source to isocenter (SID) */
+    GGfloat source_detector_distance_; /*!< Distance from source to detector (SDD) */
 };
 
 /*!
@@ -97,11 +135,76 @@ extern "C" GGEMS_EXPORT GGEMSCTSystem* create_ggems_ct_system(char const* ct_sys
 
 /*!
   \fn void set_number_of_modules_ggems_ct_system(GGEMSCTSystem* ct_system, GGuint const module_x, GGuint const module_y)
-  \param ct_system - pointer on voxelized phantom
+  \param ct_system - pointer on ct system
   \param module_x - Number of module in X (local axis of detector)
   \param module_y - Number of module in Y (local axis of detector)
   \brief set the number of module in X, Y of local axis of detector
 */
 extern "C" GGEMS_EXPORT void set_number_of_modules_ggems_ct_system(GGEMSCTSystem* ct_system, GGuint const module_x, GGuint const module_y);
+
+/*!
+  \fn void set_ct_system_type_ggems_ct_system(GGEMSCTSystem* ct_system, char const* ct_system_type)
+  \param ct_system - pointer on ct system
+  \param ct_system_type - type of CT system
+  \brief set the type of CT system
+*/
+extern "C" GGEMS_EXPORT void set_ct_system_type_ggems_ct_system(GGEMSCTSystem* ct_system, char const* ct_system_type);
+
+/*!
+  \fn void set_number_of_detection_elements_ggems_ct_system(GGEMSCTSystem* ct_system, GGuint const n_detection_element_x, GGuint const n_detection_element_y)
+  \param ct_system - pointer on ct system
+  \param n_detection_element_x - Number of detection element inside a module in X (local axis of detector)
+  \param n_detection_element_y - Number of detection element inside a module in Y (local axis of detector)
+  \brief set the number of detection element inside a module
+*/
+extern "C" GGEMS_EXPORT void set_number_of_detection_elements_ggems_ct_system(GGEMSCTSystem* ct_system, GGuint const n_detection_element_x, GGuint const n_detection_element_y);
+
+/*!
+  \fn void set_size_of_detection_elements_ggems_ct_system(GGEMSCTSystem* ct_system, GGfloat const size_of_detection_element_x, GGfloat const size_of_detection_element_y, GGfloat const size_of_detection_element_z, char const* unit)
+  \param ct_system - pointer on ct system
+  \param size_of_detection_element_x - Size of detection element in X
+  \param size_of_detection_element_y - Size of detection element in Y
+  \param size_of_detection_element_z - Size of detection element in Z
+  \param unit - unit of the distance
+  \brief set the size of detection element in X, Y, Z
+*/
+extern "C" GGEMS_EXPORT void set_size_of_detection_elements_ggems_ct_system(GGEMSCTSystem* ct_system, GGfloat const size_of_detection_element_x, GGfloat const size_of_detection_element_y, GGfloat const size_of_detection_element_z, char const* unit);
+
+/*!
+  \fn void set_material_name_ggems_ct_system(GGEMSCTSystem* ct_system, char const* material_name)
+  \param ct_system - pointer on ct system
+  \param material_name - name of the material
+  \brief set the material name for detection element
+*/
+extern "C" GGEMS_EXPORT void set_material_name_ggems_ct_system(GGEMSCTSystem* ct_system, char const* material_name);
+
+/*!
+  \fn void set_global_position_ggems_ct_system(GGEMSCTSystem* ct_system, GGfloat global_position_x, GGfloat const global_position_y, GGfloat const global_position_z, char const* unit)
+  \param ct_system - pointer on ct system
+  \param global_position_x - Global position of system in X
+  \param global_position_y - Global position of system in Y
+  \param global_position_z - Global position of system in Z
+  \param unit - unit of the distance
+  \brief set global position of system in X, Y, Z
+*/
+extern "C" GGEMS_EXPORT void set_global_position_ggems_ct_system(GGEMSCTSystem* ct_system, GGfloat global_position_x, GGfloat const global_position_y, GGfloat const global_position_z, char const* unit);
+
+/*!
+  \fn void set_source_isocenter_distance_ggems_ct_system(GGEMSCTSystem* ct_system, GGfloat const source_isocenter_distance, char const* unit)
+  \param ct_system - pointer on ct system
+  \param source_isocenter_distance - Source isocenter distance
+  \param unit - unit of the distance
+  \brief set source isocenter distance (SID)
+*/
+extern "C" GGEMS_EXPORT void set_source_isocenter_distance_ggems_ct_system(GGEMSCTSystem* ct_system, GGfloat const source_isocenter_distance, char const* unit);
+
+/*!
+  \fn void set_source_detector_distance_ggems_ct_system(GGEMSCTSystem* ct_system, GGfloat const source_detector_distance, char const* unit)
+  \param ct_system - pointer on ct system
+  \param source_detector_distance - Source detector distance
+  \param unit - unit of the distance
+  \brief set source detector distance (SDD)
+*/
+extern "C" GGEMS_EXPORT void set_source_detector_distance_ggems_ct_system(GGEMSCTSystem* ct_system, GGfloat const source_detector_distance, char const* unit);
 
 #endif // End of GUARD_GGEMS_SYSTEMS_GGEMSSYSTEM_HH

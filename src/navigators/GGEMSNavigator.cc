@@ -197,7 +197,7 @@ void GGEMSNavigator::PrintInfos(void) const
   GGcout("GGEMSNavigator", "PrintInfos", 0) << "---------------------" << GGendl;
   GGcout("GGEMSNavigator", "PrintInfos", 0) << "* Navigator name: " << navigator_name_ << GGendl;
   for (std::size_t i = 0; i < solid_.size(); ++i) {
-    solid_.at(0)->PrintInfos();
+    solid_.at(i)->PrintInfos();
   }
   materials_->PrintInfos();
   GGcout("GGEMSNavigator", "PrintInfos", 0) << GGendl;
