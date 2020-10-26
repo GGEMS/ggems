@@ -89,17 +89,61 @@ class GGEMS_EXPORT GGEMSSystem : public GGEMSNavigator
     GGEMSSystem& operator=(GGEMSSystem const&& system) = delete;
 
     /*!
-      \fn void SetNumberOfModules(GGuint const& module_x, GGuint const& module_y)
-      \param module_x - Number of module in X (local axis of detector)
-      \param module_y - Number of module in Y (local axis of detector)
+      \fn void SetNumberOfModules(GGuint const& n_module_x, GGuint const& n_module_y)
+      \param n_module_x - Number of module in X (local axis of detector)
+      \param n_module_y - Number of module in Y (local axis of detector)
       \brief set the number of module in X, Y of local axis of detector
     */
-    void SetNumberOfModules(GGuint const& module_x, GGuint const& module_y);
+    void SetNumberOfModules(GGuint const& n_module_x, GGuint const& n_module_y);
+
+    /*!
+      \fn void SetNumberOfDetectionElementsInsideModule(GGuint const& n_detection_element_x, GGuint const& n_detection_element_y)
+      \param n_detection_element_x - Detection element in X
+      \param n_detection_element_y - Detection element in Y
+      \brief set the number of detection elements in X and Y
+    */
+    void SetNumberOfDetectionElementsInsideModule(GGuint const& n_detection_element_x, GGuint const& n_detection_element_y);
+
+    /*!
+      \fn void SetSizeOfDetectionElements(GGfloat const& detection_element_x, GGfloat const& detection_element_y, GGfloat const& detection_element_z, std::string const& unit)
+      \param detection_element_x - Detection element in X axis
+      \param detection_element_y - Detection element in Y axis
+      \param detection_element_z - Detection element in Z axis
+      \param unit - unit of detection element
+      \brief set the detection elements in each direction
+    */
+    void SetSizeOfDetectionElements(GGfloat const& size_of_detection_element_x, GGfloat const& size_of_detection_element_y, GGfloat const& size_of_detection_element_z, std::string const& unit = "mm");
+
+    /*!
+      \fn void SetGlobalPosition(GGfloat const& global_position_x, GGfloat const& global_position_y, GGfloat const& global_position_z, std::string const& unit = "mm")
+      \param global_position_x - global position of the system in X (global axis)
+      \param global_position_y - global position of the system in Y (global axis)
+      \param global_position_z - global position of the system in Z (global axis)
+      \param unit - distance unit
+      \brief set the global position of the system
+    */
+    void SetGlobalPosition(GGfloat const& global_position_x, GGfloat const& global_position_y, GGfloat const& global_position_z, std::string const& unit = "mm");
+
+    /*!
+      \fn void SetMaterialName(std::string const& material_name)
+      \param material_name - name of the material for detection element
+      \brief set the name of the material
+    */
+    void SetMaterialName(std::string const& material_name);
 
   protected:
-    GGuint2 number_of_modules_; /*!< Number of the detection modules */
-    GGuint2 number_of_pixels_in_modules_; /*!< Number of pixels (X,Y) in a modules */
-    GGfloat3 size_of_pixels_; /*!< Size of pixel in each direction */
+    /*!
+      \fn void CheckParameters(void) const
+      \return no returned value
+    */
+    virtual void CheckParameters(void) const;
+
+  protected:
+    GGuint2 number_of_modules_xy_; /*!< Number of the detection modules */
+    GGuint2 number_of_detection_elements_inside_module_xy_; /*!< Number of pixels (X,Y) in a module */
+    GGfloat3 size_of_detection_elements_xyz_; /*!< Size of pixel in each direction */
+    std::string material_name_; /*!< Name of material for detection elements */
+    GGfloat3 position_; /*!< Position of system in global world */
 };
 
 #endif // End of GUARD_GGEMS_SYSTEMS_GGEMSSYSTEM_HH

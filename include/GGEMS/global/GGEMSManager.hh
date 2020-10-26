@@ -154,11 +154,11 @@ class GGEMS_EXPORT GGEMSManager
     void SetSourceVerbose(bool const& is_source_verbose);
 
     /*!
-      \fn void SetPhantomVerbose(bool const is_phantom_verbose)
-      \param is_phantom_verbose - flag for phantom verbosity
-      \brief set the flag for phantom verbosity
+      \fn void SetNavigatorVerbose(bool const is_navigator_verbose)
+      \param is_navigator_verbose - flag for navigator verbosity
+      \brief set the flag for navigator verbosity
     */
-    void SetPhantomVerbose(bool const& is_phantom_verbose);
+    void SetNavigatorVerbose(bool const& is_navigator_verbose);
 
     /*!
       \fn void SetMemoryRAMVerbose(bool const& is_memory_ram_verbose)
@@ -168,11 +168,11 @@ class GGEMS_EXPORT GGEMSManager
     void SetMemoryRAMVerbose(bool const& is_memory_ram_verbose);
 
     /*!
-      \fn void SetProcessesVerbose(bool const& is_processes_verbose)
-      \param is_processes_verbose - flag for processes verbosity
-      \brief set the flag for processes verbosity
+      \fn void SetProcessVerbose(bool const& is_process_verbose)
+      \param is_process_verbose - flag for process verbosity
+      \brief set the flag for process verbosity
     */
-    void SetProcessesVerbose(bool const& is_processes_verbose);
+    void SetProcessVerbose(bool const& is_process_verbose);
 
     /*!
       \fn void SetRangeCutsVerbose(bool const& is_range_cuts_verbose)
@@ -222,9 +222,9 @@ class GGEMS_EXPORT GGEMSManager
     bool is_opencl_verbose_; /*!< Flag for OpenCL verbosity */
     bool is_material_database_verbose_; /*!< Flag for material database verbosity */
     bool is_source_verbose_; /*!< Flag for source verbosity */
-    bool is_phantom_verbose_; /*!< Flag for phantom verbosity */
+    bool is_navigator_verbose_; /*!< Flag for navigator verbosity */
     bool is_memory_ram_verbose_; /*!< Flag for memory RAM verbosity */
-    bool is_processes_verbose_; /*!< Flag for processes verbosity */
+    bool is_process_verbose_; /*!< Flag for processes verbosity */
     bool is_range_cuts_verbose_; /*!< Flag for range cuts verbosity */
     bool is_random_verbose_; /*!< Flag for random verbosity */
     bool is_tracking_verbose_; /*!< Flag for tracking verbosity */
@@ -278,12 +278,12 @@ extern "C" GGEMS_EXPORT void set_material_database_verbose_ggems_manager(GGEMSMa
 extern "C" GGEMS_EXPORT void set_source_ggems_manager(GGEMSManager* ggems_manager, bool const is_source_verbose);
 
 /*!
-  \fn void set_phantom_ggems_manager(GGEMSManager* ggems_manager, bool const is_phantom_verbose)
+  \fn void set_navigator_ggems_manager(GGEMSManager* ggems_manager, bool const is_navigator_verbose)
   \param ggems_manager - pointer on the singleton
-  \param is_phantom_verbose - flag on phantom verbose
-  \brief Set the phantom verbosity
+  \param is_phantom_verbose - flag on navigator verbose
+  \brief Set the navigator verbosity
 */
-extern "C" GGEMS_EXPORT void set_phantom_ggems_manager(GGEMSManager* ggems_manager, bool const is_phantom_verbose);
+extern "C" GGEMS_EXPORT void set_navigator_ggems_manager(GGEMSManager* ggems_manager, bool const is_navigator_verbose);
 
 /*!
   \fn void set_memory_ram_ggems_manager(GGEMSManager* ggems_manager, bool const is_memory_ram_verbose)
@@ -294,12 +294,12 @@ extern "C" GGEMS_EXPORT void set_phantom_ggems_manager(GGEMSManager* ggems_manag
 extern "C" GGEMS_EXPORT void set_memory_ram_ggems_manager(GGEMSManager* ggems_manager, bool const is_memory_ram_verbose);
 
 /*!
-  \fn void set_processes_ggems_manager(GGEMSManager* ggems_manager, bool const is_processes_verbose)
+  \fn void set_process_ggems_manager(GGEMSManager* ggems_manager, bool const is_process_verbose)
   \param ggems_manager - pointer on the singleton
-  \param is_processes_verbose - flag on processes verbose
+  \param is_process_verbose - flag on processes verbose
   \brief Set the processes verbosity
 */
-extern "C" GGEMS_EXPORT void set_processes_ggems_manager(GGEMSManager* ggems_manager, bool const is_processes_verbose);
+extern "C" GGEMS_EXPORT void set_process_ggems_manager(GGEMSManager* ggems_manager, bool const is_process_verbose);
 
 /*!
   \fn void set_range_cuts_ggems_manager(GGEMSManager* ggems_manager, bool const is_range_cuts_verbose)

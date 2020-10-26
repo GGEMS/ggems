@@ -39,8 +39,15 @@ materials_database_manager.set_materials('data/materials.txt')
 phantom = GGEMSVoxelizedPhantom('water_box')
 phantom.set_voxelized_phantom('data/waterbox.mhd', 'data/range_waterbox.txt')
 
-ct_detector = GGEMSCTSystem('SOMATOM_Definition_EDGE') 
+ct_detector = GGEMSCTSystem('SOMATOM_Definition_EDGE')
+ct_detector.set_ct_type('curved')
 ct_detector.set_number_of_modules(1, 46)
+ct_detector.set_number_of_detection_elements(736, 64)
+ct_detector.set_size_of_detection_elements(0.6, 0.6, 0.6, 'mm')
+ct_detector.set_position(490.0, 0.0, 0.0, 'mm')
+ct_detector.set_material('GOS')
+ct_detector.set_source_detector_distance(1085.6, 'mm')
+ct_detector.set_source_isocenter_distance(595.0, 'mm')
 
 # ------------------------------------------------------------------------------
 # STEP 5: Physics
@@ -74,10 +81,10 @@ ggems_manager.set_seed(777) # Optional, if not set, the seed is automatically co
 
 ggems_manager.opencl_verbose(False)
 ggems_manager.material_database_verbose(False)
-ggems_manager.phantom_verbose(True)
+ggems_manager.navigator_verbose(True)
 ggems_manager.source_verbose(True)
 ggems_manager.memory_verbose(True)
-ggems_manager.processes_verbose(True)
+ggems_manager.process_verbose(True)
 ggems_manager.range_cuts_verbose(True)
 ggems_manager.random_verbose(True)
 ggems_manager.tracking_verbose(False, 0) # Track a specific particle

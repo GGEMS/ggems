@@ -59,9 +59,9 @@ GGEMSManager::GGEMSManager(void)
   is_opencl_verbose_(false),
   is_material_database_verbose_(false),
   is_source_verbose_(false),
-  is_phantom_verbose_(false),
+  is_navigator_verbose_(false),
   is_memory_ram_verbose_(false),
-  is_processes_verbose_(false),
+  is_process_verbose_(false),
   is_range_cuts_verbose_(false),
   is_random_verbose_(false),
   is_tracking_verbose_(false),
@@ -152,9 +152,9 @@ void GGEMSManager::SetSourceVerbose(bool const& is_source_verbose)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSManager::SetPhantomVerbose(bool const& is_phantom_verbose)
+void GGEMSManager::SetNavigatorVerbose(bool const& is_navigator_verbose)
 {
-  is_phantom_verbose_ = is_phantom_verbose;
+  is_navigator_verbose_ = is_navigator_verbose;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -170,9 +170,9 @@ void GGEMSManager::SetMemoryRAMVerbose(bool const& is_memory_ram_verbose)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSManager::SetProcessesVerbose(bool const& is_processes_verbose)
+void GGEMSManager::SetProcessVerbose(bool const& is_process_verbose)
 {
-  is_processes_verbose_ = is_processes_verbose;
+  is_process_verbose_ = is_process_verbose;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -279,10 +279,10 @@ void GGEMSManager::Initialize(void)
   if (is_source_verbose_) source_manager.PrintInfos();
 
   // Printing infos about navigator(s)
-  if (is_phantom_verbose_) navigator_manager.PrintInfos();
+  if (is_navigator_verbose_) navigator_manager.PrintInfos();
 
   // Printing infos about processe(s)
-  if (is_processes_verbose_) {
+  if (is_process_verbose_) {
     processes_manager.PrintAvailableProcesses();
     processes_manager.PrintInfos();
   }
@@ -439,9 +439,9 @@ void set_source_ggems_manager(GGEMSManager* ggems_manager, bool const is_source_
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_phantom_ggems_manager(GGEMSManager* ggems_manager, bool const is_phantom_verbose)
+void set_navigator_ggems_manager(GGEMSManager* ggems_manager, bool const is_navigator_verbose)
 {
-  ggems_manager->SetPhantomVerbose(is_phantom_verbose);
+  ggems_manager->SetNavigatorVerbose(is_navigator_verbose);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -457,9 +457,9 @@ void set_memory_ram_ggems_manager(GGEMSManager* ggems_manager, bool const is_mem
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_processes_ggems_manager(GGEMSManager* ggems_manager, bool const is_processes_verbose)
+void set_process_ggems_manager(GGEMSManager* ggems_manager, bool const is_process_verbose)
 {
-  ggems_manager->SetProcessesVerbose(is_processes_verbose);
+  ggems_manager->SetProcessVerbose(is_process_verbose);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -47,14 +47,14 @@ class GGEMSManager(object):
         ggems_lib.set_source_ggems_manager.argtypes = [ctypes.c_void_p, ctypes.c_bool]
         ggems_lib.set_source_ggems_manager.restype = ctypes.c_void_p
 
-        ggems_lib.set_phantom_ggems_manager.argtypes = [ctypes.c_void_p, ctypes.c_bool]
-        ggems_lib.set_phantom_ggems_manager.restype = ctypes.c_void_p
+        ggems_lib.set_navigator_ggems_manager.argtypes = [ctypes.c_void_p, ctypes.c_bool]
+        ggems_lib.set_navigator_ggems_manager.restype = ctypes.c_void_p
 
         ggems_lib.set_memory_ram_ggems_manager.argtypes = [ctypes.c_void_p, ctypes.c_bool]
         ggems_lib.set_memory_ram_ggems_manager.restype = ctypes.c_void_p
 
-        ggems_lib.set_processes_ggems_manager.argtypes = [ctypes.c_void_p, ctypes.c_bool]
-        ggems_lib.set_processes_ggems_manager.restype = ctypes.c_void_p
+        ggems_lib.set_process_ggems_manager.argtypes = [ctypes.c_void_p, ctypes.c_bool]
+        ggems_lib.set_process_ggems_manager.restype = ctypes.c_void_p
 
         ggems_lib.set_range_cuts_ggems_manager.argtypes = [ctypes.c_void_p, ctypes.c_bool]
         ggems_lib.set_range_cuts_ggems_manager.restype = ctypes.c_void_p
@@ -85,8 +85,8 @@ class GGEMSManager(object):
     def material_database_verbose(self, flag):
         ggems_lib.set_material_database_verbose_ggems_manager(self.obj, flag)
 
-    def phantom_verbose(self, flag):
-        ggems_lib.set_phantom_ggems_manager(self.obj, flag)
+    def navigator_verbose(self, flag):
+        ggems_lib.set_navigator_ggems_manager(self.obj, flag)
 
     def source_verbose(self, flag):
         ggems_lib.set_source_ggems_manager(self.obj, flag)
@@ -94,8 +94,8 @@ class GGEMSManager(object):
     def memory_verbose(self, flag):
         ggems_lib.set_memory_ram_ggems_manager(self.obj, flag)
 
-    def processes_verbose(self, flag):
-        ggems_lib.set_processes_ggems_manager(self.obj, flag)
+    def process_verbose(self, flag):
+        ggems_lib.set_process_ggems_manager(self.obj, flag)
 
     def range_cuts_verbose(self, flag):
         ggems_lib.set_range_cuts_ggems_manager(self.obj, flag)
