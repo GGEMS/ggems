@@ -112,7 +112,14 @@ class GGEMS_EXPORT GGEMSVoxelizedSolid : public GGEMSSolid
       \fn void UpdateTransformationMatrix(void)
       \brief Update the transformation matrix for solid object
     */
-    void UpdateTransformationMatrix(void);
+    void UpdateTransformationMatrix(void) override;
+
+    /*!
+      \fn void SetSolidID(std::size_t const& solid_id)
+      \param solid_id - index of the solid
+      \brief set the global solid index
+    */
+    void SetSolidID(std::size_t const& solid_id) override;
 
   private:
     /*!

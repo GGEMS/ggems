@@ -35,7 +35,6 @@
 #include <algorithm>
 
 #include "GGEMS/io/GGEMSTextReader.hh"
-#include "GGEMS/geometries/GGEMSVoxelizedSolidStack.hh"
 #include "GGEMS/tools/GGEMSRAMManager.hh"
 #include "GGEMS/navigators/GGEMSNavigatorManager.hh"
 
@@ -43,7 +42,7 @@ class GGEMSGeometryTransformation;
 
 /*!
   \class GGEMSSolid
-  \brief GGEMS class for solid (voxelized or analytical) informations
+  \brief GGEMS class for solid informations
 */
 class GGEMS_EXPORT GGEMSSolid
 {
@@ -85,13 +84,6 @@ class GGEMS_EXPORT GGEMSSolid
       \brief Avoid copy by rvalue reference
     */
     GGEMSSolid& operator=(GGEMSSolid const&& solid) = delete;
-
-    /*!
-      \fn void SetSolidID(std::size_t const& solid_id)
-      \param solid_id - index of the solid
-      \brief set the global solid index
-    */
-    void SetSolidID(std::size_t const& solid_id);
 
     /*!
       \fn void EnableTracking(void)
@@ -139,6 +131,13 @@ class GGEMS_EXPORT GGEMSSolid
       \brief set a local axis for solid
     */
     void SetLocalAxis(GGfloat33 const& local_axis_xyz);
+
+    /*!
+      \fn void SetSolidID(std::size_t const& solid_id)
+      \param solid_id - index of the solid
+      \brief set the global solid index
+    */
+    virtual void SetSolidID(std::size_t const& solid_id) = 0;
 
     /*!
       \fn void UpdateTransformationMatrix(void)

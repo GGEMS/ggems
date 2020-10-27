@@ -41,10 +41,10 @@ phantom.set_voxelized_phantom('data/waterbox.mhd', 'data/range_waterbox.txt')
 
 ct_detector = GGEMSCTSystem('SOMATOM_Definition_EDGE')
 ct_detector.set_ct_type('curved')
-ct_detector.set_number_of_modules(1, 46)
-ct_detector.set_number_of_detection_elements(736, 64)
+# ct_detector.set_number_of_modules(1, 46)
+ct_detector.set_number_of_modules(1, 3)
+ct_detector.set_number_of_detection_elements(64, 16)
 ct_detector.set_size_of_detection_elements(0.6, 0.6, 0.6, 'mm')
-ct_detector.set_position(490.0, 0.0, 0.0, 'mm')
 ct_detector.set_material('GOS')
 ct_detector.set_source_detector_distance(1085.6, 'mm')
 ct_detector.set_source_isocenter_distance(595.0, 'mm')
@@ -87,13 +87,14 @@ ggems_manager.memory_verbose(True)
 ggems_manager.process_verbose(True)
 ggems_manager.range_cuts_verbose(True)
 ggems_manager.random_verbose(True)
+#ggems_manager.kernel_verbose(True) # Timer kernel et état du kernel si possible (pending, finish etc...)
 ggems_manager.tracking_verbose(False, 0) # Track a specific particle
 
 # # Initializing the GGEMS simulation
 ggems_manager.initialize()
 
 # # Start GGEMS simulation
-ggems_manager.run()
+#ggems_manager.run()
 
 # ------------------------------------------------------------------------------
 # STEP 10: Exit GGEMS safely
