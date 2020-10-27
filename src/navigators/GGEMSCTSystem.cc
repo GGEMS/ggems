@@ -29,6 +29,7 @@
 
 #include "GGEMS/navigators/GGEMSCTSystem.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
+#include "GGEMS/geometries/GGEMSSolidBox.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -122,6 +123,43 @@ void GGEMSCTSystem::CheckParameters(void) const
   GGEMSSystem::CheckParameters();
 }
 
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSCTSystem::InitializeCurvedGeometry(void)
+{
+  // In global space, position along X depending on source/detector and source/isocenter distance
+  position_xyz_.x = source_detector_distance_ - source_isocenter_distance_;
+  position_xyz_.y = 0.0f;
+  position_xyz_.z = 0.0f;
+
+  // Loop over module X, Y
+  for (GGuint j = 0; j < number_of_modules_xy_.y; ++j) {
+    for (GGuint i = 0; i < number_of_modules_xy_.x; ++i) {
+      solid_.at(i + j*number_of_modules_xy_.x)->SetPosition(position_xyz_);
+
+      // Update transformation matrix
+      solid_.at(i + j*number_of_modules_xy_.x)->UpdateTransformationMatrix();
+    }
+  }
+
+  // // Updating or setting a position, rotation, or local axis for each solid
+  // if (is_update_pos_) solid_.at(0)->SetPosition(position_xyz_);
+  // if (is_update_rot_) solid_.at(0)->SetRotation(rotation_xyz_);
+
+  // // Update the transformation matrix
+  // solid_.at(0)->UpdateTransformationMatrix();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSCTSystem::InitializeFlatGeometry(void)
+{
+  ;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -134,33 +172,48 @@ void GGEMSCTSystem::Initialize(void)
   // Checking the parameters
   CheckParameters();
 
-  // Build CT system depending on input parameters
-  // A CT system is composed by solid boxes
+  // Build CT system depending on input parameters  
+  // Getting the current number of registered solid
+  GGEMSNavigatorManager& navigator_manager = GGEMSNavigatorManager::GetInstance();
+  std::size_t const kNumberOfAlreadyRegisteredSolids = navigator_manager.GetNumberOfRegisteredSolids() - solid_.size();
 
-  // // Initializing Solid for geometric navigation depending on type of navigator
-  // solid_.emplace_back(new GGEMSVoxelizedSolid(voxelized_phantom_filename_, range_data_filename_));
+  // Get number of solid to create
+  GGuint const kNSolids = number_of_modules_xy_.x * number_of_modules_xy_.y;
+  for (GGuint i = 0; i < kNSolids; ++i) {
+    solid_.emplace_back(new GGEMSSolidBox(
+      number_of_detection_elements_inside_module_xy_.x * size_of_detection_elements_xyz_.x,
+      number_of_detection_elements_inside_module_xy_.y * size_of_detection_elements_xyz_.y,
+      1.0f * size_of_detection_elements_xyz_.z
+    ));
 
-  // // Enabling tracking if necessary
-  // if (is_tracking_) solid_.at(0)->EnableTracking();
+    // Enabling tracking if necessary
+    solid_.at(i)->EnableTracking();
 
-  // // Getting the current number of registered solid
-  // GGEMSNavigatorManager& navigator_manager = GGEMSNavigatorManager::GetInstance();
-  // // Get the number of already registered buffer, we take the total number of solids (including the all current solids)
-  // // minus all current solids
-  // std::size_t const kNumberOfAlreadyRegisteredSolids = navigator_manager.GetNumberOfRegisteredSolids() - solid_.size();
-  // solid_.at(0)->SetSolidID(0+kNumberOfAlreadyRegisteredSolids); // Only 1 solid!!!
- 
-  // solid_.at(0)->Initialize(materials_); // Load voxelized phantom from MHD file
+    // Set local axis in detector space
+    solid_.at(i)->SetLocalAxis(
+      {
+         0.0f, 0.0f, 1.0f, 0.0f,
+         0.0f, 1.0f, 0.0f, 0.0f,
+        -1.0f, 0.0f, 0.0f, 0.0f
+      }
+    );
 
-  // // Updating or setting a position, rotation, or local axis for each solid
-  // if (is_update_pos_) solid_.at(0)->SetPosition(position_xyz_);
-  // if (is_update_rot_) solid_.at(0)->SetRotation(rotation_xyz_);
-  // if (is_update_axis_) solid_.at(0)->SetLocalAxis(local_axis_);
+    // Set solid id
+    solid_.at(i)->SetSolidID(i+kNumberOfAlreadyRegisteredSolids);
 
-  // // Update the transformation matrix
-  // solid_.at(0)->UpdateTransformationMatrix();
+    // Initialize kernels
+    solid_.at(i)->Initialize(std::weak_ptr<GGEMSMaterials>());
+  }
 
-  // Adding material
+  // Initialize of the geometry depending on type of CT system
+  if (ct_system_type_ == "curved") {
+    InitializeCurvedGeometry();
+  }
+  else if (ct_system_type_ == "flat") {
+    InitializeFlatGeometry();
+  }
+
+  // Adding material to the system
   materials_->AddMaterial(material_name_);
 
   // Initialize parent class
@@ -219,15 +272,6 @@ void set_size_of_detection_elements_ggems_ct_system(GGEMSCTSystem* ct_system, GG
 void set_material_name_ggems_ct_system(GGEMSCTSystem* ct_system, char const* material_name)
 {
   ct_system->SetMaterialName(material_name);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void set_global_position_ggems_ct_system(GGEMSCTSystem* ct_system, GGfloat global_position_x, GGfloat const global_position_y, GGfloat const global_position_z, char const* unit)
-{
-  ct_system->SetGlobalPosition(global_position_x, global_position_y, global_position_z, unit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

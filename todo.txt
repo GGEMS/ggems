@@ -48,3 +48,9 @@
 - Text en minuscule tous le temps
 
 - Enlever warning sur le nombre de particles dans source
+
+- Améliore le global et local work size et améliorer le local memory
+
+- Faire un timer sur les kernels avec verbose activé ou désactivé
+
+- Dans CT ajouter le gap angulaire

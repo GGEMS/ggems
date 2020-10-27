@@ -87,7 +87,7 @@ __kernel void get_primaries_ggems_xray_source(
   direction = RotateUnitZ(rotation, direction);
   direction = normalize(direction);
 
-  // Postition with focal (local)
+  // Position with focal (local)
   global_position.x = focal_spot_size.x * (KissUniform(random, kParticleID) - 0.5f);
   global_position.y = focal_spot_size.y * (KissUniform(random, kParticleID) - 0.5f);
   global_position.z = focal_spot_size.z * (KissUniform(random, kParticleID) - 0.5f);

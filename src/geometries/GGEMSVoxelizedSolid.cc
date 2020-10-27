@@ -31,6 +31,7 @@
 #include "GGEMS/geometries/GGEMSVoxelizedSolid.hh"
 #include "GGEMS/io/GGEMSMHDImage.hh"
 #include "GGEMS/maths/GGEMSGeometryTransformation.hh"
+#include "GGEMS/geometries/GGEMSVoxelizedSolidStack.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -61,6 +62,24 @@ GGEMSVoxelizedSolid::GGEMSVoxelizedSolid(std::string const& volume_header_filena
 GGEMSVoxelizedSolid::~GGEMSVoxelizedSolid(void)
 {
   GGcout("GGEMSVoxelizedSolid", "~GGEMSVoxelizedSolid", 3) << "Deallocation of GGEMSVoxelizedSolid..." << GGendl;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSVoxelizedSolid::SetSolidID(std::size_t const& solid_id)
+{
+  // Get the OpenCL manager
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+
+  // Get pointer on OpenCL device
+  GGEMSVoxelizedSolidData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSVoxelizedSolidData>(solid_data_cl_.get(), sizeof(GGEMSVoxelizedSolidData));
+
+  solid_data_device->solid_id_ = static_cast<GGint>(solid_id);
+
+  // Release the pointer
+  opencl_manager.ReleaseDeviceBuffer(solid_data_cl_.get(), solid_data_device);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

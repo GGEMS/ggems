@@ -119,6 +119,18 @@ class GGEMS_EXPORT GGEMSCTSystem : public GGEMSSystem
     */
     void CheckParameters(void) const;
 
+    /*!
+      \fn void InitializeCurvedGeometry(void)
+      \brief Initialize the curved CT geometry
+    */
+    void InitializeCurvedGeometry(void);
+
+    /*!
+      \fn void InitializeFlatGeometry(void)
+      \brief Initialize the flat CT geometry
+    */
+    void InitializeFlatGeometry(void);
+
   private:
     std::string ct_system_type_; /*!< Type of CT scanner, here: flat or curved */
     GGfloat source_isocenter_distance_; /*!< Distance from source to isocenter (SID) */
@@ -177,17 +189,6 @@ extern "C" GGEMS_EXPORT void set_size_of_detection_elements_ggems_ct_system(GGEM
   \brief set the material name for detection element
 */
 extern "C" GGEMS_EXPORT void set_material_name_ggems_ct_system(GGEMSCTSystem* ct_system, char const* material_name);
-
-/*!
-  \fn void set_global_position_ggems_ct_system(GGEMSCTSystem* ct_system, GGfloat global_position_x, GGfloat const global_position_y, GGfloat const global_position_z, char const* unit)
-  \param ct_system - pointer on ct system
-  \param global_position_x - Global position of system in X
-  \param global_position_y - Global position of system in Y
-  \param global_position_z - Global position of system in Z
-  \param unit - unit of the distance
-  \brief set global position of system in X, Y, Z
-*/
-extern "C" GGEMS_EXPORT void set_global_position_ggems_ct_system(GGEMSCTSystem* ct_system, GGfloat global_position_x, GGfloat const global_position_y, GGfloat const global_position_z, char const* unit);
 
 /*!
   \fn void set_source_isocenter_distance_ggems_ct_system(GGEMSCTSystem* ct_system, GGfloat const source_isocenter_distance, char const* unit)

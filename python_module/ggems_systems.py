@@ -39,9 +39,6 @@ class GGEMSCTSystem(object):
         ggems_lib.set_material_name_ggems_ct_system.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
         ggems_lib.set_material_name_ggems_ct_system.restype = ctypes.c_void_p
 
-        ggems_lib.set_global_position_ggems_ct_system.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_char_p]
-        ggems_lib.set_global_position_ggems_ct_system.restype = ctypes.c_void_p
-
         ggems_lib.set_source_isocenter_distance_ggems_ct_system.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_char_p]
         ggems_lib.set_source_isocenter_distance_ggems_ct_system.restype = ctypes.c_void_p
 
@@ -61,9 +58,6 @@ class GGEMSCTSystem(object):
 
     def set_size_of_detection_elements(self, size_x, size_y, size_z, unit):
         ggems_lib.set_size_of_detection_elements_ggems_ct_system(self.obj, size_x, size_y, size_z, unit.encode('ASCII'))
-
-    def set_position(self, pos_x, pos_y, pos_z, unit):
-        ggems_lib.set_global_position_ggems_ct_system(self.obj, pos_x, pos_y, pos_z, unit.encode('ASCII'))
 
     def set_material(self, material_name):
         ggems_lib.set_material_name_ggems_ct_system(self.obj, material_name.encode('ASCII'))

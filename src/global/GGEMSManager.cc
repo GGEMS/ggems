@@ -333,7 +333,7 @@ void GGEMSManager::Run()
 
       // Step 1: Generating primaries from source
       GGcout("GGEMSManager", "Run", 1) << "      + Generating " << kNumberOfParticles << " particles..." << GGendl;
-      source_manager.GetPrimaries(j, kNumberOfParticles);
+      //source_manager.GetPrimaries(j, kNumberOfParticles);
 
       // Loop until ALL particles are dead
      // do {
