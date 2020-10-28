@@ -130,7 +130,7 @@ void GGEMSCTSystem::CheckParameters(void) const
 void GGEMSCTSystem::InitializeCurvedGeometry(void)
 {
   // In global space, position along X depending on source/detector and source/isocenter distance
-  position_xyz_.x = source_detector_distance_ - source_isocenter_distance_;
+  /*position_xyz_.x = source_detector_distance_ - source_isocenter_distance_;
   position_xyz_.y = 0.0f;
   position_xyz_.z = 0.0f;
 
@@ -142,7 +142,7 @@ void GGEMSCTSystem::InitializeCurvedGeometry(void)
       // Update transformation matrix
       solid_.at(i + j*number_of_modules_xy_.x)->UpdateTransformationMatrix();
     }
-  }
+  }*/
 
   // // Updating or setting a position, rotation, or local axis for each solid
   // if (is_update_pos_) solid_.at(0)->SetPosition(position_xyz_);
@@ -174,7 +174,7 @@ void GGEMSCTSystem::Initialize(void)
 
   // Build CT system depending on input parameters  
   // Getting the current number of registered solid
-  GGEMSNavigatorManager& navigator_manager = GGEMSNavigatorManager::GetInstance();
+  /*GGEMSNavigatorManager& navigator_manager = GGEMSNavigatorManager::GetInstance();
   std::size_t const kNumberOfAlreadyRegisteredSolids = navigator_manager.GetNumberOfRegisteredSolids() - solid_.size();
 
   // Get number of solid to create
@@ -214,7 +214,7 @@ void GGEMSCTSystem::Initialize(void)
   }
 
   // Adding material to the system
-  materials_->AddMaterial(material_name_);
+  materials_->AddMaterial(material_name_);*/
 
   // Initialize parent class
   GGEMSNavigator::Initialize();

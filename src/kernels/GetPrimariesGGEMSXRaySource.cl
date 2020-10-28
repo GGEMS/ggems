@@ -124,9 +124,21 @@ __kernel void get_primaries_ggems_xray_source(
   primary_particle->level_[kParticleID] = PRIMARY;
   primary_particle->pname_[kParticleID] = particle_name;
 
-  //primary_particle->geometry_id_[kParticleID] = 0;
   primary_particle->particle_navigator_distance_[kParticleID] = OUT_OF_WORLD;
   primary_particle->next_discrete_process_[kParticleID] = NO_PROCESS;
   primary_particle->next_interaction_distance_[kParticleID] = 0.0f;
-  //primary_particle->scatter_order_[kParticleID] = 0;
+
+  #ifdef GGEMS_TRACKING
+  if (kParticleID == primary_particle->particle_tracking_id) {
+    printf("[GGEMS OpenCL kernel get_primaries_ggems_xray_source] ################################################################################\n");
+    printf("[GGEMS OpenCL kernel get_primaries_ggems_xray_source] Particle id: %d\n", kParticleID);
+    printf("[GGEMS OpenCL kernel get_primaries_ggems_xray_source] Particle type: ");
+    if (primary_particle->pname_[kParticleID] == PHOTON) printf("gamma\n");
+    else if (primary_particle->pname_[kParticleID] == ELECTRON) printf("e-\n");
+    else if (primary_particle->pname_[kParticleID] == POSITRON) printf("e+\n");
+    printf("[GGEMS OpenCL kernel get_primaries_ggems_xray_source] Position (x, y, z): %e %e %e mm\n", global_position.x/mm, global_position.y/mm, global_position.z/mm);
+    printf("[GGEMS OpenCL kernel get_primaries_ggems_xray_source] Direction (x, y, z): %e %e %e\n", direction.x, direction.y, direction.z);
+    printf("[GGEMS OpenCL kernel get_primaries_ggems_xray_source] Energy: %e keV\n", primary_particle->E_[kParticleID]/keV);
+  }
+  #endif
 }

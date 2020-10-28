@@ -83,13 +83,6 @@ class GGEMS_EXPORT GGEMSSolidBox : public GGEMSSolid
     GGEMSSolidBox& operator=(GGEMSSolidBox const&& solid_box) = delete;
 
     /*!
-      \fn void SetSolidID(std::size_t const& solid_id)
-      \param solid_id - index of the solid
-      \brief set the global solid index
-    */
-    void SetSolidID(std::size_t const& solid_id) override;
-
-    /*!
       \fn void Initialize(std::weak_ptr<GGEMSMaterials> materials)
       \param materials - pointer on materials
       \brief Initialize solid for geometric navigation

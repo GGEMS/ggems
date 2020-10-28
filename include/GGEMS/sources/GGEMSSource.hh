@@ -133,6 +133,12 @@ class GGEMS_EXPORT GGEMSSource
     void SetNumberOfParticles(GGulong const& number_of_particles);
 
     /*!
+      \fn void EnableTracking(void)
+      \brief Enabling tracking infos during simulation
+    */
+    void EnableTracking(void);
+
+    /*!
       \fn inline std::size_t GetNumberOfBatchs(void) const
       \return the number of batch of particle
       \brief method returning the number of particles by batch
@@ -186,17 +192,12 @@ class GGEMS_EXPORT GGEMSSource
     */
     void OrganizeParticlesInBatch(void);
 
-    /*!
-      \fn void CheckMemoryForParticles(void) const
-      \brief Check the memory for particles and propose an optimized MAXIMUM_NUMBER of particles if necessary
-    */
-    void CheckMemoryForParticles(void) const;
-
   protected:
     std::string source_name_; /*!< Name of the source */
     GGulong number_of_particles_; /*!< Number of particles */
     std::vector<GGulong> number_of_particles_in_batch_; /*!< Number of particles in batch */
     GGuchar particle_type_; /*!< Type of particle: photon, electron or positron */
+    std::string tracking_kernel_option_; /*!< Preprocessor option for tracking */
     std::unique_ptr<GGEMSGeometryTransformation> geometry_transformation_; /*!< Pointer storing the geometry transformation */
     std::weak_ptr<cl::Kernel> kernel_get_primaries_cl_; /*!< Kernel generating primaries on OpenCL device */
 };

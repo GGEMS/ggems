@@ -114,13 +114,6 @@ class GGEMS_EXPORT GGEMSVoxelizedSolid : public GGEMSSolid
     */
     void UpdateTransformationMatrix(void) override;
 
-    /*!
-      \fn void SetSolidID(std::size_t const& solid_id)
-      \param solid_id - index of the solid
-      \brief set the global solid index
-    */
-    void SetSolidID(std::size_t const& solid_id) override;
-
   private:
     /*!
       \fn template <typename T> void ConvertImageToLabel(std::string const& raw_data_filename, std::string const& range_data_filename, std::weak_ptr<GGEMSMaterials> materials)
