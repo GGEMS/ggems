@@ -75,36 +75,18 @@ GGEMSSolidBox::~GGEMSSolidBox(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSSolidBox::SetSolidID(std::size_t const& solid_id)
-{
-  // Get the OpenCL manager
-  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
-
-  // Get pointer on OpenCL device
-  GGEMSSolidBoxData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSSolidBoxData>(solid_data_cl_.get(), sizeof(GGEMSSolidBoxData));
-
-  solid_data_device->solid_id_ = static_cast<GGint>(solid_id);
-
-  // Release the pointer
-  opencl_manager.ReleaseDeviceBuffer(solid_data_cl_.get(), solid_data_device);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
 void GGEMSSolidBox::InitializeKernel(void)
 {
   GGcout("GGEMSSolidBox", "InitializeKernel", 3) << "Initializing kernel for solid box..." << GGendl;
 
-  // Getting OpenCL manager
-  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+  // // Getting OpenCL manager
+  // GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
-  // Getting the path to kernel
-  std::string const kOpenCLKernelPath = OPENCL_KERNEL_PATH;
-  std::string const kFilename1 = kOpenCLKernelPath + "/DistanceSolidBox.cl";
-  std::string const kFilename2 = kOpenCLKernelPath + "/ProjectToSolidBox.cl";
-  std::string const kFilename3 = kOpenCLKernelPath + "/TrackThroughSolidBox.cl";
+  // // Getting the path to kernel
+  // std::string const kOpenCLKernelPath = OPENCL_KERNEL_PATH;
+  // std::string const kFilename1 = kOpenCLKernelPath + "/DistanceSolidBox.cl";
+  // std::string const kFilename2 = kOpenCLKernelPath + "/ProjectToSolidBox.cl";
+  // std::string const kFilename3 = kOpenCLKernelPath + "/TrackThroughSolidBox.cl";
 
   // Compiling the kernels
   //kernel_distance_cl_ = opencl_manager.CompileKernel(kFilename1, "distance_voxelized_solid");

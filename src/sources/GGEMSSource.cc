@@ -38,6 +38,7 @@
 #include "GGEMS/physics/GGEMSPrimaryParticlesStack.hh"
 #include "GGEMS/randoms/GGEMSRandomStack.hh"
 #include "GGEMS/physics/GGEMSParticles.hh"
+#include "GGEMS/global/GGEMSManager.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -47,7 +48,8 @@ GGEMSSource::GGEMSSource(std::string const& source_name)
 : source_name_(source_name),
   number_of_particles_(0),
   number_of_particles_in_batch_(0),
-  particle_type_(99)
+  particle_type_(99),
+  tracking_kernel_option_("")
 {
   GGcout("GGEMSSource", "GGEMSSource", 3) << "Allocation of GGEMSSource..." << GGendl;
 
@@ -65,6 +67,15 @@ GGEMSSource::GGEMSSource(std::string const& source_name)
 GGEMSSource::~GGEMSSource(void)
 {
   GGcout("GGEMSSource", "~GGEMSSource", 3) << "Deallocation of GGEMSSource..." << GGendl;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSSource::EnableTracking(void)
+{
+  tracking_kernel_option_ = "-DGGEMS_TRACKING";
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -181,37 +192,6 @@ void GGEMSSource::CheckParameters(void) const
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSSource::CheckMemoryForParticles(void) const
-{
-  // By security the particle allocation by batch should not exceed 10% of
-  // RAM memory
-
-  // Compute the RAM memory percentage allocated for primary particles
-  GGfloat const kRAMParticles = static_cast<GGfloat>(sizeof(GGEMSPrimaryParticles)) + static_cast<GGfloat>(sizeof(GGEMSRandom)) + 4.0f; // 4 bytes is for particle tracking id
-
-  // Getting the RAM memory on activated device
-  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
-  GGfloat const kMaxRAM = static_cast<GGfloat>(opencl_manager.GetMaxRAMMemoryOnActivatedContext());
-
-  // Computing the ratio of used RAM memory on device
-  GGfloat const kMaxRatioUsedRAM = kRAMParticles / kMaxRAM;
-
-  // Computing a theoric max. number of particles depending on activated
-  // device and advice this number to the user. 10% of RAM memory for particles
-  GGulong const kTheoricMaxNumberOfParticles = static_cast<GGulong>(0.1 * kMaxRAM / (kRAMParticles/MAXIMUM_PARTICLES));
-
-  if (kMaxRatioUsedRAM > 0.1) { // Printing warning
-    GGwarn("GGEMSSourceManager", "CheckMemoryForParticles", 0) << "Warning!!! The number of particles in a batch defined during GGEMS compilation is maybe to high. We recommand to not use more than 10% of RAM memory for particles allocation. Your theoric number of particles is " << kTheoricMaxNumberOfParticles << ". Recompile GGEMS " << "with this number of particles is recommended." << GGendl;
-  }
-  else { // Printing theoric number of particle
-    GGcout("GGEMSSourceManager", "CheckMemoryForParticles", 0) << "The number of particles in a batch defined during the compilation is correct. We recommend to not used more than 10% of memory for particle allocation. Your theoric number of particles is " << kTheoricMaxNumberOfParticles << ". Recompile GGEMS with this number of particles is recommended" << GGendl;
-  }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
 void GGEMSSource::OrganizeParticlesInBatch(void)
 {
   GGcout("GGEMSSource", "OrganizeParticlesInBatch", 3) << "Organizing the number of particles in batch..." << GGendl;
@@ -251,8 +231,8 @@ void GGEMSSource::Initialize(void)
   // Checking the parameters of Source
   CheckParameters();
 
-  // Checking the RAM memory for particle and propose a new MAXIMUM_PARTICLE number
-  CheckMemoryForParticles();
+  // Activate tracking
+  if (GGEMSManager::GetInstance().IsTrackingVerbose()) EnableTracking();
 
   // Organize the particles in batch
   OrganizeParticlesInBatch();

@@ -137,7 +137,8 @@ class GGEMS_EXPORT GGEMSSolid
       \param solid_id - index of the solid
       \brief set the global solid index
     */
-    virtual void SetSolidID(std::size_t const& solid_id) = 0;
+    template<typename T>
+    void SetSolidID(std::size_t const& solid_id);
 
     /*!
       \fn void UpdateTransformationMatrix(void)
@@ -174,13 +175,31 @@ class GGEMS_EXPORT GGEMSSolid
 
   protected:
     std::shared_ptr<cl::Buffer> solid_data_cl_; /*!< Data about solid */
-    std::shared_ptr<cl::Buffer> label_data_cl_; /*!< Pointer storing the buffer about label data */
+    std::shared_ptr<cl::Buffer> label_data_cl_; /*!< Pointer storing the buffer about label data, useful for voxelized solid only */
     std::weak_ptr<cl::Kernel> kernel_distance_cl_; /*!< OpenCL kernel computing distance between particles and solid */
     std::weak_ptr<cl::Kernel> kernel_project_to_cl_; /*!< OpenCL kernel moving particles to solid */
     std::weak_ptr<cl::Kernel> kernel_track_through_cl_; /*!< OpenCL kernel tracking particles through a solid */
     std::string tracking_kernel_option_; /*!< Preprocessor option for tracking */
-    bool is_tracking_; /*!< Boolean enabling tracking */
     std::unique_ptr<GGEMSGeometryTransformation> geometry_transformation_; /*!< Pointer storing the geometry transformation */
 };
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+template<typename T>
+void GGEMSSolid::SetSolidID(std::size_t const& solid_id)
+{
+  // Get the OpenCL manager
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+
+  // Get pointer on OpenCL device
+  T* solid_data_device = opencl_manager.GetDeviceBuffer<T>(solid_data_cl_.get(), sizeof(T));
+
+  solid_data_device->solid_id_ = static_cast<GGint>(solid_id);
+
+  // Release the pointer
+  opencl_manager.ReleaseDeviceBuffer(solid_data_cl_.get(), solid_data_device);
+}
 
 #endif // End of GUARD_GGEMS_GEOMETRIES_GGEMSSOLID_HH

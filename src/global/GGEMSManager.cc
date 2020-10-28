@@ -65,6 +65,7 @@ GGEMSManager::GGEMSManager(void)
   is_range_cuts_verbose_(false),
   is_random_verbose_(false),
   is_tracking_verbose_(false),
+  is_kernel_verbose_(false),
   particle_tracking_id_(0)
 {
   GGcout("GGEMSManager", "GGEMSManager", 3) << "Allocation of GGEMS Manager..." << GGendl;
@@ -179,6 +180,15 @@ void GGEMSManager::SetProcessVerbose(bool const& is_process_verbose)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+void GGEMSManager::SetKernelVerbose(bool const& is_kernel_verbose)
+{
+  is_kernel_verbose_ = is_kernel_verbose;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 void GGEMSManager::SetRangeCutsVerbose(bool const& is_range_cuts_verbose)
 {
   is_range_cuts_verbose_ = is_range_cuts_verbose;
@@ -256,10 +266,8 @@ void GGEMSManager::Initialize(void)
 
   // Initialization of the source
   source_manager.Initialize();
-  source_manager.SetParticleTrackingID(particle_tracking_id_); // After source initialization
 
-  // Initialization of the phantom(s)
-  if (is_tracking_verbose_) navigator_manager.EnableTracking(true); // Before navigator initialization
+  // Initialization of the navigators (phantom + system)
   navigator_manager.Initialize();
 
   // Printing infos about OpenCL
@@ -333,7 +341,7 @@ void GGEMSManager::Run()
 
       // Step 1: Generating primaries from source
       GGcout("GGEMSManager", "Run", 1) << "      + Generating " << kNumberOfParticles << " particles..." << GGendl;
-      //source_manager.GetPrimaries(j, kNumberOfParticles);
+      source_manager.GetPrimaries(j, kNumberOfParticles);
 
       // Loop until ALL particles are dead
      // do {
@@ -478,6 +486,15 @@ void set_range_cuts_ggems_manager(GGEMSManager* ggems_manager, bool const is_ran
 void set_random_ggems_manager(GGEMSManager* ggems_manager, bool const is_random_verbose)
 {
   ggems_manager->SetRandomVerbose(is_random_verbose);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void set_kernel_ggems_manager(GGEMSManager* ggems_manager, bool const is_kernel_verbose)
+{
+  ggems_manager->SetKernelVerbose(is_kernel_verbose);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

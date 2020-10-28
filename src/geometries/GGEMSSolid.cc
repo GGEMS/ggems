@@ -41,8 +41,7 @@
 GGEMSSolid::GGEMSSolid(void)
 : solid_data_cl_(nullptr),
   label_data_cl_(nullptr),
-  tracking_kernel_option_(""),
-  is_tracking_(false)
+  tracking_kernel_option_("")
 {
   GGcout("GGEMSSolid", "GGEMSSolid", 3) << "Allocation of GGEMSSolid..." << GGendl;
 
@@ -66,7 +65,6 @@ GGEMSSolid::~GGEMSSolid(void)
 void GGEMSSolid::EnableTracking(void)
 {
   tracking_kernel_option_ = "-DGGEMS_TRACKING";
-  is_tracking_ = true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

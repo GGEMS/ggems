@@ -48,7 +48,7 @@ typedef struct PACKED GGEMSVoxelizedSolidData_t
   GGushort3 number_of_voxels_xyz_; /*!< Number of voxel in X, Y and Z [0, 65535] */
   GGuint number_of_voxels_; /*!< Total number of voxels */
   GGfloat3 voxel_sizes_xyz_; /*!< Size of voxels in X, Y and Z */
-  GGfloat3 position_xyz_; /*!< Position of phantom in X, Y and Z */
+  //GGfloat3 position_xyz_; /*!< Position of phantom in X, Y and Z */
   GGEMSOBB obb_geometry_; /*!< OBB storing border of voxelized solid and matrix of transformation */
   GGint solid_id_; /*!< Navigator index */
 } GGEMSVoxelizedSolidData; /*!< Using C convention name of struct to C++ (_t deletion) */

@@ -29,7 +29,9 @@
 
 #include "GGEMS/navigators/GGEMSVoxelizedPhantom.hh"
 #include "GGEMS/geometries/GGEMSVoxelizedSolid.hh"
+#include "GGEMS/geometries/GGEMSVoxelizedSolidStack.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
+#include "GGEMS/global/GGEMSManager.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -86,20 +88,21 @@ void GGEMSVoxelizedPhantom::Initialize(void)
   // Checking the parameters of phantom
   CheckParameters();
 
-  // Initializing Solid for geometric navigation depending on type of navigator
+  // Initializing voxelized solid for geometric navigation
   solid_.emplace_back(new GGEMSVoxelizedSolid(voxelized_phantom_filename_, range_data_filename_));
 
   // Enabling tracking if necessary
-  if (is_tracking_) solid_.at(0)->EnableTracking();
+  if (GGEMSManager::GetInstance().IsTrackingVerbose()) solid_.at(0)->EnableTracking();
 
   // Getting the current number of registered solid
   GGEMSNavigatorManager& navigator_manager = GGEMSNavigatorManager::GetInstance();
   // Get the number of already registered buffer, we take the total number of solids (including the all current solids)
   // minus all current solids
   std::size_t const kNumberOfAlreadyRegisteredSolids = navigator_manager.GetNumberOfRegisteredSolids() - solid_.size();
-  solid_.at(0)->SetSolidID(0+kNumberOfAlreadyRegisteredSolids); // Only 1 solid!!!
- 
-  solid_.at(0)->Initialize(materials_); // Load voxelized phantom from MHD file
+  solid_.at(0)->SetSolidID<GGEMSVoxelizedSolidData>(0+kNumberOfAlreadyRegisteredSolids); // Only 1 solid!!!
+
+  // Load voxelized phantom from MHD file and storing materials
+  solid_.at(0)->Initialize(materials_);
 
   // Updating or setting a position, rotation, or local axis for each solid
   if (is_update_pos_) solid_.at(0)->SetPosition(position_xyz_);

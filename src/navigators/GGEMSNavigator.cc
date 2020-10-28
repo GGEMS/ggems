@@ -42,7 +42,6 @@ GGEMSNavigator::GGEMSNavigator(std::string const& navigator_name)
   position_xyz_(MakeFloat3Zeros()),
   rotation_xyz_(MakeFloat3Zeros()),
   navigator_id_(-1),
-  is_tracking_(false),
   is_update_pos_(false),
   is_update_rot_(false),
   is_update_axis_(false)
@@ -111,15 +110,6 @@ void GGEMSNavigator::SetRotation(GGfloat const& rx, GGfloat const& ry, GGfloat c
 void GGEMSNavigator::SetNavigatorID(std::size_t const& navigator_id)
 {
   navigator_id_ = navigator_id;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void GGEMSNavigator::EnableTracking(bool const& is_tracking)
-{
-  is_tracking_ = is_tracking;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

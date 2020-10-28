@@ -59,6 +59,9 @@ class GGEMSManager(object):
         ggems_lib.set_range_cuts_ggems_manager.argtypes = [ctypes.c_void_p, ctypes.c_bool]
         ggems_lib.set_range_cuts_ggems_manager.restype = ctypes.c_void_p
 
+        ggems_lib.set_kernel_ggems_manager.argtypes = [ctypes.c_void_p, ctypes.c_bool]
+        ggems_lib.set_kernel_ggems_manager.restype = ctypes.c_void_p
+
         ggems_lib.set_random_ggems_manager.argtypes = [ctypes.c_void_p, ctypes.c_bool]
         ggems_lib.set_random_ggems_manager.restype = ctypes.c_void_p
 
@@ -96,6 +99,9 @@ class GGEMSManager(object):
 
     def process_verbose(self, flag):
         ggems_lib.set_process_ggems_manager(self.obj, flag)
+
+    def kernel_verbose(self, flag):
+        ggems_lib.set_kernel_ggems_manager(self.obj, flag)
 
     def range_cuts_verbose(self, flag):
         ggems_lib.set_range_cuts_ggems_manager(self.obj, flag)

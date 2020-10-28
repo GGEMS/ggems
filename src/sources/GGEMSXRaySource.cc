@@ -35,6 +35,7 @@
 #include "GGEMS/maths/GGEMSGeometryTransformation.hh"
 #include "GGEMS/global/GGEMSConstants.hh"
 #include "GGEMS/tools/GGEMSTools.hh"
+#include "GGEMS/global/GGEMSManager.hh"
 #include "GGEMS/physics/GGEMSParticles.hh"
 #include "GGEMS/randoms/GGEMSPseudoRandomGenerator.hh"
 #include "GGEMS/tools/GGEMSRAMManager.hh"
@@ -89,7 +90,7 @@ void GGEMSXRaySource::InitializeKernel(void)
 
   // Compiling the kernel
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
-  kernel_get_primaries_cl_ = opencl_manager.CompileKernel(kFilename, "get_primaries_ggems_xray_source");
+  kernel_get_primaries_cl_ = opencl_manager.CompileKernel(kFilename, "get_primaries_ggems_xray_source", nullptr, const_cast<char*>(tracking_kernel_option_.c_str()));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -131,6 +132,11 @@ void GGEMSXRaySource::GetPrimaries(GGulong const& number_of_particles)
   GGint kernel_status = queue_cl->enqueueNDRangeKernel(*kernel_cl, offset, global, cl::NullRange, nullptr, event_cl);
   opencl_manager.CheckOpenCLError(kernel_status, "GGEMSXRaySource", "GetPrimaries");
   queue_cl->finish(); // Wait until the kernel status is finish
+
+  // Checking if kernel verbosity is activated
+  if (GGEMSManager::GetInstance().IsKernelVerbose()) {
+    opencl_manager.DisplayElapsedTimeInKernel("get_primaries_ggems_xray_source");
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////

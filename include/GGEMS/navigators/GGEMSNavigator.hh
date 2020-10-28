@@ -160,13 +160,6 @@ class GGEMS_EXPORT GGEMSNavigator
     inline std::weak_ptr<GGEMSCrossSections> GetCrossSections(void) const {return cross_sections_;}
 
     /*!
-      \fn void EnableTracking(bool const& is_tracking)
-      \param is_tracking - boolean enabling tracking infos for navigators
-      \brief Enabling tracking infos during simulation
-    */
-    void EnableTracking(bool const& is_tracking);
-
-    /*!
       \fn void ParticleNavigatorDistance(void) const
       \brief Compute distance between particle and navigator
     */
@@ -211,7 +204,6 @@ class GGEMS_EXPORT GGEMSNavigator
     GGfloat3 rotation_xyz_; /*!< Rotation of the navigator in X, Y and Z */
     GGfloat33 local_axis_; /*!< Local axis for navigator */
     std::size_t navigator_id_; /*!< Index of the navigator */
-    bool is_tracking_; /*!< Boolean enabling tracking for debugging */
     bool is_update_pos_; /*!< Updating navigator position */
     bool is_update_rot_; /*!< Updating navigator rotation */
     bool is_update_axis_; /*!< Updating navigator local axis */

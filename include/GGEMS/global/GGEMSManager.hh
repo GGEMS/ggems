@@ -189,12 +189,40 @@ class GGEMS_EXPORT GGEMSManager
     void SetRandomVerbose(bool const& is_random_verbose);
 
     /*!
+      \fn void SetKernelVerbose(bool const& is_kernel_verbose)
+      \param is_kernel_verbose - flag for kernel timer verbosity
+      \brief set the flag for kernel timer verbosity
+    */
+    void SetKernelVerbose(bool const& is_kernel_verbose);
+
+    /*!
+      \fn bool IsKernelVerbose(void) const
+      \return state of kernel verbosity flag
+      \brief get the kernel verbosity flag
+    */
+    inline bool IsKernelVerbose(void) const {return is_kernel_verbose_;};
+
+    /*!
       \fn void SetTrackingVerbose(bool const& is_tracking_verbose, GGint const& particle_tracking_id)
       \param is_tracking_verbose - flag for tracking verbosity
       \param particle_tracking_id - particle id for tracking
       \brief set the flag for tracking verbosity and an index for particle tracking
     */
     void SetTrackingVerbose(bool const& is_tracking_verbose, GGint const& particle_tracking_id);
+
+    /*!
+      \fn bool IsTrackingVerbose(void) const
+      \return state of tracking verbosity flag
+      \brief get the tracking verbosity flag
+    */
+    inline bool IsTrackingVerbose(void) const {return is_tracking_verbose_;};
+
+    /*!
+      \fn GGint GetParticleTrackingID(void) const
+      \return id of the particle to track
+      \brief get the id of the particle to track
+    */
+    inline GGint GetParticleTrackingID(void) const {return particle_tracking_id_;};
 
   private:
     /*!
@@ -228,6 +256,7 @@ class GGEMS_EXPORT GGEMSManager
     bool is_range_cuts_verbose_; /*!< Flag for range cuts verbosity */
     bool is_random_verbose_; /*!< Flag for random verbosity */
     bool is_tracking_verbose_; /*!< Flag for tracking verbosity */
+    bool is_kernel_verbose_; /*!< Flag for kernel time verbosity */
     GGint particle_tracking_id_; /*!< Particle if for tracking */
 };
 
@@ -316,6 +345,14 @@ extern "C" GGEMS_EXPORT void set_range_cuts_ggems_manager(GGEMSManager* ggems_ma
   \brief Set the random verbosity
 */
 extern "C" GGEMS_EXPORT void set_random_ggems_manager(GGEMSManager* ggems_manager, bool const is_random_verbose);
+
+/*!
+  \fn void set_random_ggems_manager(GGEMSManager* ggems_manager, bool const is_kernel_verbose)
+  \param ggems_manager - pointer on the singleton
+  \param is_kernel_verbose - flag on kernel timer verbose
+  \brief Set the kernel timer verbosity
+*/
+extern "C" GGEMS_EXPORT void set_kernel_ggems_manager(GGEMSManager* ggems_manager, bool const is_kernel_verbose);
 
 /*!
   \fn void set_tracking_ggems_manager(GGEMSManager* ggems_manager, bool const is_tracking_verbose, GGint const particle_id_tracking)
