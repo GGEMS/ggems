@@ -17,7 +17,7 @@
 // ************************************************************************
 
 /*!
-  \file DistanceVoxelizedSolid.cl
+  \file ParticleSolidDistanceGGEMSVoxelizedSolid.cl
 
   \brief OpenCL kernel computing distance between voxelized solid and particles
 
@@ -33,13 +33,13 @@
 #include "GGEMS/geometries/GGEMSRayTracing.hh"
 
 /*!
-  \fn __kernel void distance_voxelized_solid(__global GGEMSPrimaryParticles* primary_particle, __global GGEMSVoxelizedSolidData* voxelized_solid_data)
+  \fn __kernel void particle_solid_distance_ggems_voxelized_solid(__global GGEMSPrimaryParticles* primary_particle, __global GGEMSVoxelizedSolidData* voxelized_solid_data)
   \param primary_particle - pointer to primary particles on OpenCL memory
   \param voxelized_solid_data - pointer to voxelized solid data
   \brief OpenCL kernel computing distance between voxelized solid and particles
   \return no returned value
 */
-__kernel void distance_voxelized_solid(
+__kernel void particle_solid_distance_ggems_voxelized_solid(
   __global GGEMSPrimaryParticles* primary_particle,
   __global GGEMSVoxelizedSolidData const* voxelized_solid_data)
 {
@@ -49,8 +49,8 @@ __kernel void distance_voxelized_solid(
   // Checking particle status. If DEAD, the particle is not track
   if (primary_particle->status_[kParticleID] == DEAD) return;
 
-  // Checking if the particle - navigator is 0. If yes the particle is already in another navigator
-  if (primary_particle->particle_navigator_distance_[kParticleID] == 0.0f) return;
+  // Checking if the particle - solid is 0. If yes the particle is already in another navigator
+  if (primary_particle->particle_solid_distance_[kParticleID] == 0.0f) return;
 
   // Position of particle
   GGfloat3 position;
@@ -64,20 +64,26 @@ __kernel void distance_voxelized_solid(
   direction.y = primary_particle->dy_[kParticleID];
   direction.z = primary_particle->dz_[kParticleID];
 
-  // Check if particle inside voxelized navigator, if yes distance is 0.0 and
-  // not need to compute particle - navigator distance
-  if (IsParticleInVoxelizedNavigator(&position, voxelized_solid_data)) {
-    primary_particle->particle_navigator_distance_[kParticleID] = 0.0f;
-    primary_particle->navigator_id_[kParticleID] = voxelized_solid_data->navigator_id_;
+  printf("TEST0: %e %e %e %e\n",
+    voxelized_solid_data->obb_geometry_.matrix_transformation_.m0_.s0,
+    voxelized_solid_data->obb_geometry_.matrix_transformation_.m0_.s1,
+    voxelized_solid_data->obb_geometry_.matrix_transformation_.m0_.s2,
+    voxelized_solid_data->obb_geometry_.matrix_transformation_.m0_.s3
+  );
+
+  // Check if particle inside voxelized navigator, if yes distance is 0.0 and not need to compute particle - solid distance
+  if (IsParticleInVoxelizedSolid(&position, voxelized_solid_data)) {
+    primary_particle->particle_solid_distance_[kParticleID] = 0.0f;
+    primary_particle->solid_id_[kParticleID] = voxelized_solid_data->solid_id_;
     return;
   }
 
-  // Compute distance between particles and voxelized navigator
-  GGfloat const kDistance = ComputeDistanceToVoxelizedNavigator(&position, &direction, voxelized_solid_data);
+  // // Compute distance between particles and voxelized navigator
+  // GGfloat const kDistance = ComputeDistanceToVoxelizedNavigator(&position, &direction, voxelized_solid_data);
 
-  // Check distance value with previous value. Store the minimum value
-  if (kDistance < primary_particle->particle_navigator_distance_[kParticleID]) {
-    primary_particle->particle_navigator_distance_[kParticleID] = kDistance;
-    primary_particle->navigator_id_[kParticleID] = voxelized_solid_data->navigator_id_;
-  }
+  // // Check distance value with previous value. Store the minimum value
+  // if (kDistance < primary_particle->particle_solid_distance_[kParticleID]) {
+  //   primary_particle->particle_solid_distance_[kParticleID] = kDistance;
+  //   primary_particle->solid_id_[kParticleID] = voxelized_solid_data->solid_id_;
+  // }
 }

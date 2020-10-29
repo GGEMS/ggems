@@ -120,6 +120,8 @@ inline GGfloat44 MakeFloat44Zeros(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+#ifdef __OPENCL_C_VERSION__
+
 /*!
   \fn inline GGfloat3 RotateUnitZ(GGfloat3 vector, GGfloat3 const new_uz)
   \param vector - vector to change
@@ -127,7 +129,6 @@ inline GGfloat44 MakeFloat44Zeros(void)
   \return a vector of 3x1 float
   \brief rotateUz, function from CLHEP
 */
-#ifdef __OPENCL_C_VERSION__
 inline GGfloat3 RotateUnitZ(GGfloat3 vector, GGfloat3 const new_uz)
 {
   GGfloat const u1 = new_uz.x;
@@ -149,7 +150,6 @@ inline GGfloat3 RotateUnitZ(GGfloat3 vector, GGfloat3 const new_uz)
 
   return MakeFloat3(vector.x, vector.y, vector.z);
 }
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -162,17 +162,17 @@ inline GGfloat3 RotateUnitZ(GGfloat3 vector, GGfloat3 const new_uz)
   \return the 3D vector u - v
   \brief Substract the vector v to vector u
 */
-inline GGfloat3 GGfloat3Sub(GGfloat3 const u, GGfloat3 const v)
-{
-  GGfloat3 vector = {
-    #ifdef __OPENCL_C_VERSION__
-    u.x-v.x, u.y-v.y, u.z-v.z
-    #else
-    {u.s[0]-v.s[0], u.s[1]-v.s[1], u.s[2]-v.s[2]}
-    #endif
-  };
-  return vector;
-}
+// inline GGfloat3 GGfloat3Sub(GGfloat3 const u, GGfloat3 const v)
+// {
+//   GGfloat3 vector = {
+//     #ifdef __OPENCL_C_VERSION__
+//     u.x-v.x, u.y-v.y, u.z-v.z
+//     #else
+//     {u.s[0]-v.s[0], u.s[1]-v.s[1], u.s[2]-v.s[2]}
+//     #endif
+//   };
+//   return vector;
+// }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -185,17 +185,17 @@ inline GGfloat3 GGfloat3Sub(GGfloat3 const u, GGfloat3 const v)
   \return the 3D vector u + v
   \brief Add the vector v to vector u
 */
-inline GGfloat3 GGfloat3Add(GGfloat3 const u, GGfloat3 const v)
-{
-  GGfloat3 vector = {
-    #ifdef __OPENCL_C_VERSION__
-    u.x+v.x, u.y+v.y, u.z+v.z
-    #else
-    {u.s[0]+v.s[0], u.s[1]+v.s[1], u.s[2]+v.s[2]}
-    #endif
-  };
-  return vector;
-}
+// inline GGfloat3 GGfloat3Add(GGfloat3 const u, GGfloat3 const v)
+// {
+//   GGfloat3 vector = {
+//     #ifdef __OPENCL_C_VERSION__
+//     u.x+v.x, u.y+v.y, u.z+v.z
+//     #else
+//     {u.s[0]+v.s[0], u.s[1]+v.s[1], u.s[2]+v.s[2]}
+//     #endif
+//   };
+//   return vector;
+// }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -208,23 +208,22 @@ inline GGfloat3 GGfloat3Add(GGfloat3 const u, GGfloat3 const v)
   \return a 3D vector u * s
   \brief Scale vector u with scalar s
 */
-inline GGfloat3 GGfloat3Scale(GGfloat3 const u, GGfloat const s)
-{
-  GGfloat3 vector = {
-    #ifdef __OPENCL_C_VERSION__
-    u.x*s, u.y*s, u.z*s
-    #else
-    {u.s[0]*s, u.s[1]*s, u.s[2]*s}
-    #endif
-  };
-  return vector;
-}
+// inline GGfloat3 GGfloat3Scale(GGfloat3 const u, GGfloat const s)
+// {
+//   GGfloat3 vector = {
+//     #ifdef __OPENCL_C_VERSION__
+//     u.x*s, u.y*s, u.z*s
+//     #else
+//     {u.s[0]*s, u.s[1]*s, u.s[2]*s}
+//     #endif
+//   };
+//   return vector;
+// }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifdef __OPENCL_C_VERSION__
 /*!
   \fn inline GGfloat3 GGfloat44MultGGfloat3(__global GGfloat44 const* matrix, GGfloat3 const point)
   \param matrix - A matrix (4x4)
@@ -244,13 +243,41 @@ inline GGfloat3 GGfloat44MultGGfloat3(__global GGfloat44 const* matrix, GGfloat3
 
   return vector;
 }
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifdef __OPENCL_C_VERSION__
+inline GGfloat3 GlobalToLocalPosition(__global GGfloat44 const* matrix, GGfloat3 const point)
+{
+  // Extract translation
+  GGfloat3 translation;
+  translation.x = matrix->m0_.x;
+  //= {matrix->m0_.w, matrix->m1_.w, matrix->m2_.w};
+
+  return translation;
+}
+
+/*__host__ __device__ f32xyz fxyz_global_to_local_position( const f32matrix44 &G, f32xyz u)
+{
+    // first, extract the translation
+    f32xyz T = { G.m03, G.m13, G.m23 };
+    // Then the sub matrix (R and P)
+    f32matrix33 g = { G.m00, G.m01, G.m02,
+                      G.m10, G.m11, G.m12,
+                      G.m20, G.m21, G.m22 };
+    // Inverse transform
+    f32matrix33 ginv = fmatrix_trans( g );
+    u = fxyz_sub( u, T );
+    u = fmatrix_mul_fxyz( ginv, u );
+
+    return u;
+}*/
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 /*!
  \fn inline GGfloat3 LocalToGlobalPosition(__global GGfloat44 const* matrix, GGfloat3 const point)
  \param matrix - A matrix (4x4)

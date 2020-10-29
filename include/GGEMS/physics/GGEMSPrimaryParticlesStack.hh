@@ -58,7 +58,7 @@ typedef struct PACKED GGEMSPrimaryParticles_t
   //GGuchar scatter_order_[MAXIMUM_PARTICLES]; /*!< Scatter order, usefull for the imagery */
   GGuchar solid_id_[MAXIMUM_PARTICLES]; /*!< current solid crossed by the particle */
 
-  GGfloat particle_navigator_distance_[MAXIMUM_PARTICLES]; /*!< Distance from previous position to next position, OUT_OF_WORLD if no next position */
+  GGfloat particle_solid_distance_[MAXIMUM_PARTICLES]; /*!< Distance from previous position to next position, OUT_OF_WORLD if no next position */
   GGfloat next_interaction_distance_[MAXIMUM_PARTICLES]; /*!< Distance to the next interaction */
   GGuchar next_discrete_process_[MAXIMUM_PARTICLES]; /*!< Next process */
 

@@ -77,12 +77,12 @@ void GGEMSVoxelizedSolid::InitializeKernel(void)
 
   // Getting the path to kernel
   std::string const kOpenCLKernelPath = OPENCL_KERNEL_PATH;
-  std::string const kFilename1 = kOpenCLKernelPath + "/DistanceVoxelizedSolid.cl";
+  std::string const kFilename1 = kOpenCLKernelPath + "/ParticleSolidDistanceGGEMSVoxelizedSolid.cl";
   std::string const kFilename2 = kOpenCLKernelPath + "/ProjectToVoxelizedSolid.cl";
   std::string const kFilename3 = kOpenCLKernelPath + "/TrackThroughVoxelizedSolid.cl";
 
   // Compiling the kernels
-  //kernel_distance_cl_ = opencl_manager.CompileKernel(kFilename1, "distance_voxelized_solid");
+  kernel_distance_cl_ = opencl_manager.CompileKernel(kFilename1, "particle_solid_distance_ggems_voxelized_solid", nullptr, const_cast<char*>(tracking_kernel_option_.c_str()));
   //kernel_project_to_cl_ = opencl_manager.CompileKernel(kFilename2, "project_to_voxelized_solid");
   //kernel_track_through_cl_ = opencl_manager.CompileKernel(kFilename3, "track_through_voxelized_solid", nullptr, const_cast<char*>(tracking_kernel_option_.c_str()));
 }

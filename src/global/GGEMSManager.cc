@@ -346,8 +346,8 @@ void GGEMSManager::Run()
       // Loop until ALL particles are dead
      // do {
         // Step 2: Find closest navigator (phantom and detector) before track to in operation
-       // GGcout("GGEMSManager", "Run", 1) << "      + Finding closest navigator..." << GGendl;
-       // navigator_manager.FindClosestNavigator();
+        GGcout("GGEMSManager", "Run", 1) << "      + Finding closest navigator..." << GGendl;
+        navigator_manager.FindClosestSolid();
 
         // Step 3: Track to in step, particles are projected to navigator
      //   GGcout("GGEMSManager", "Run", 1) << "      + Moving particles to closest navigator..." << GGendl;

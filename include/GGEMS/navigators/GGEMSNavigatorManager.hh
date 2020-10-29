@@ -159,10 +159,10 @@ class GGEMS_EXPORT GGEMSNavigatorManager
     }
 
     /*!
-      \fn void FindClosestNavigator(void) const
-      \brief Find closest navigator before track to in (TTI) operation
+      \fn void FindClosestSolid(void) const
+      \brief Find closest solid before project particle to it
     */
-    void FindClosestNavigator(void) const;
+    void FindClosestSolid(void) const;
 
     /*!
       \fn void TrackToIn(void) const

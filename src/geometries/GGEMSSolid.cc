@@ -33,6 +33,7 @@
 #include "GGEMS/physics/GGEMSCrossSections.hh"
 #include "GGEMS/randoms/GGEMSPseudoRandomGenerator.hh"
 #include "GGEMS/maths/GGEMSGeometryTransformation.hh"
+#include "GGEMS/global/GGEMSManager.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -89,7 +90,7 @@ void GGEMSSolid::SetLocalAxis(GGfloat33 const& local_axis_xyz)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSSolid::Distance(void)
+void GGEMSSolid::ParticleSolidDistance(void)
 {
   // Getting the OpenCL manager
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
@@ -115,8 +116,13 @@ void GGEMSSolid::Distance(void)
 
   // Launching kernel
   GGint kernel_status = queue_cl->enqueueNDRangeKernel(*kernel_cl, offset, global, cl::NullRange, nullptr, event_cl);
-  opencl_manager.CheckOpenCLError(kernel_status, "GGEMSSolid", "Distance");
+  opencl_manager.CheckOpenCLError(kernel_status, "GGEMSSolid", "ParticleSolidDistance");
   queue_cl->finish(); // Wait until the kernel status is finish
+
+  // Checking if kernel verbosity is activated
+  if (GGEMSManager::GetInstance().IsKernelVerbose()) {
+    opencl_manager.DisplayElapsedTimeInKernel("distance");
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////

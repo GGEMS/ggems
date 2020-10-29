@@ -38,7 +38,7 @@ materials_database_manager.set_materials('data/materials.txt')
 # STEP 4: Phantoms and systems
 phantom = GGEMSVoxelizedPhantom('water_box')
 phantom.set_voxelized_phantom('data/waterbox.mhd', 'data/range_waterbox.txt')
-phantom.set_position(10.0, 0.0, 0.0, 'mm')
+phantom.set_position(10.0, -20.0, 0.0, 'mm')
 phantom.set_rotation(0.0, 0.0, 0.0, 'deg')
 phantom.set_local_axis(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0)
 

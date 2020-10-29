@@ -99,10 +99,10 @@ class GGEMS_EXPORT GGEMSSolid
     inline cl::Buffer* GetSolidData(void) const {return solid_data_cl_.get();};
 
     /*!
-      \fn void Distance(void)
+      \fn void ParticleSolidDistance(void)
       \brief compute distance from particle position to solid and store this distance in OpenCL particle buffer
     */
-    void Distance(void);
+    void ParticleSolidDistance(void);
 
     /*!
       \fn void ProjectTo(void)
