@@ -135,7 +135,7 @@ void GGEMSXRaySource::GetPrimaries(GGulong const& number_of_particles)
 
   // Checking if kernel verbosity is activated
   if (GGEMSManager::GetInstance().IsKernelVerbose()) {
-    opencl_manager.DisplayElapsedTimeInKernel("get_primaries_ggems_xray_source");
+    opencl_manager.DisplayElapsedTimeInKernel("get_primaries");
   }
 }
 

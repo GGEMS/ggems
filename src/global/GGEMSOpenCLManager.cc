@@ -625,8 +625,6 @@ std::weak_ptr<cl::Kernel> GGEMSOpenCLManager::CompileKernel(std::string const& k
 
 void GGEMSOpenCLManager::DisplayElapsedTimeInKernel(std::string const& kernel_name) const
 {
-  GGcout("GGEMSOpenCLManager","DisplayElapsedTimeInKernel", 3) << "Displaying elapsed time in the last OpenCL kernel..." << GGendl;
-
   // Get the start and end of the activated event
   GGulong start = 0, end = 0;
 

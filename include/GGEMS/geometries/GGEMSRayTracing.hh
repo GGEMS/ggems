@@ -35,6 +35,7 @@
 
 #include "GGEMS/physics/GGEMSParticleConstants.hh"
 #include "GGEMS/geometries/GGEMSGeometryConstants.hh"
+#include "GGEMS/maths/GGEMSMatrixOperations.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -52,29 +53,29 @@
   \param tolerance - tolerance for geometry
   \brief Get a safety position inside an AABB geometry
 */
-inline void TransportGetSafetyInsideAABB(GGfloat3 const* position, GGfloat const xmin, GGfloat const xmax, GGfloat const ymin, GGfloat const ymax, GGfloat const zmin, GGfloat const zmax, GGfloat const tolerance)
-{
-  // on x
-  GGfloat SafXmin = fabs(position->x - xmin);
-  GGfloat SafXmax = fabs(position->x - xmax);
+// inline void TransportGetSafetyInsideAABB(GGfloat3 const* position, GGfloat const xmin, GGfloat const xmax, GGfloat const ymin, GGfloat const ymax, GGfloat const zmin, GGfloat const zmax, GGfloat const tolerance)
+// {
+//   // on x
+//   GGfloat SafXmin = fabs(position->x - xmin);
+//   GGfloat SafXmax = fabs(position->x - xmax);
 
-  position->x = (SafXmin < tolerance) ? xmin + tolerance : position->x;
-  position->x = (SafXmax < tolerance) ? xmax - tolerance : position->x;
+//   position->x = (SafXmin < tolerance) ? xmin + tolerance : position->x;
+//   position->x = (SafXmax < tolerance) ? xmax - tolerance : position->x;
 
-  // on y
-  GGfloat SafYmin = fabs(position->y - ymin);
-  GGfloat SafYmax = fabs(position->y - ymax);
+//   // on y
+//   GGfloat SafYmin = fabs(position->y - ymin);
+//   GGfloat SafYmax = fabs(position->y - ymax);
 
-  position->y = (SafYmin < tolerance) ? ymin + tolerance : position->y;
-  position->y = (SafYmax < tolerance) ? ymax - tolerance : position->y;
+//   position->y = (SafYmin < tolerance) ? ymin + tolerance : position->y;
+//   position->y = (SafYmax < tolerance) ? ymax - tolerance : position->y;
 
-  // on z
-  GGfloat SafZmin = fabs(position->z - zmin);
-  GGfloat SafZmax = fabs(position->z - zmax);
+//   // on z
+//   GGfloat SafZmin = fabs(position->z - zmin);
+//   GGfloat SafZmax = fabs(position->z - zmax);
 
-  position->z = (SafZmin < tolerance) ? zmin + tolerance : position->z;
-  position->z = (SafZmax < tolerance) ? zmax - tolerance : position->z;
-}
+//   position->z = (SafZmin < tolerance) ? zmin + tolerance : position->z;
+//   position->z = (SafZmax < tolerance) ? zmax - tolerance : position->z;
+// }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -86,18 +87,18 @@ inline void TransportGetSafetyInsideAABB(GGfloat3 const* position, GGfloat const
   \param voxelized_solid_data - voxelized data infos
   \brief Moving particle slightly inside a voxelized navigator
 */
-inline void TransportGetSafetyInsideVoxelizedNavigator(GGfloat3 const* position, __global GGEMSVoxelizedSolidData* voxelized_solid_data)
-{
-  // Borders of voxelized solid
-  GGfloat x_min = voxelized_solid_data->border_min_xyz_.x;
-  GGfloat x_max = voxelized_solid_data->border_max_xyz_.x;
-  GGfloat y_min = voxelized_solid_data->border_min_xyz_.y;
-  GGfloat y_max = voxelized_solid_data->border_max_xyz_.y;
-  GGfloat z_min = voxelized_solid_data->border_min_xyz_.z;
-  GGfloat z_max = voxelized_solid_data->border_max_xyz_.z;
+// inline void TransportGetSafetyInsideVoxelizedNavigator(GGfloat3 const* position, __global GGEMSVoxelizedSolidData* voxelized_solid_data)
+// {
+//   // Borders of voxelized solid
+//   GGfloat x_min = voxelized_solid_data->border_min_xyz_.x;
+//   GGfloat x_max = voxelized_solid_data->border_max_xyz_.x;
+//   GGfloat y_min = voxelized_solid_data->border_min_xyz_.y;
+//   GGfloat y_max = voxelized_solid_data->border_max_xyz_.y;
+//   GGfloat z_min = voxelized_solid_data->border_min_xyz_.z;
+//   GGfloat z_max = voxelized_solid_data->border_max_xyz_.z;
 
-  TransportGetSafetyInsideAABB(position, x_min, x_max, y_min, y_max, z_min, z_max, GEOMETRY_TOLERANCE);
-}
+//   TransportGetSafetyInsideAABB(position, x_min, x_max, y_min, y_max, z_min, z_max, GEOMETRY_TOLERANCE);
+// }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -116,29 +117,29 @@ inline void TransportGetSafetyInsideVoxelizedNavigator(GGfloat3 const* position,
   \return new position of moved particle
   \brief Get a safety position outside an AABB geometry
 */
-inline void TransportGetSafetyOutsideAABB(GGfloat3 const* position, GGfloat const xmin, GGfloat const xmax, GGfloat const ymin, GGfloat const ymax, GGfloat const zmin, GGfloat const zmax, GGfloat const tolerance)
-{
-  // on x
-  GGfloat SafXmin = fabs(position->x - xmin);
-  GGfloat SafXmax = fabs(position->x - xmax);
+// inline void TransportGetSafetyOutsideAABB(GGfloat3 const* position, GGfloat const xmin, GGfloat const xmax, GGfloat const ymin, GGfloat const ymax, GGfloat const zmin, GGfloat const zmax, GGfloat const tolerance)
+// {
+//   // on x
+//   GGfloat SafXmin = fabs(position->x - xmin);
+//   GGfloat SafXmax = fabs(position->x - xmax);
 
-  position->x = (SafXmin < tolerance) ? xmin - tolerance : position->x;
-  position->x = (SafXmax < tolerance) ? xmax + tolerance : position->x;
+//   position->x = (SafXmin < tolerance) ? xmin - tolerance : position->x;
+//   position->x = (SafXmax < tolerance) ? xmax + tolerance : position->x;
 
-  // on y
-  GGfloat SafYmin = fabs(position->y - ymin);
-  GGfloat SafYmax = fabs(position->y - ymax);
+//   // on y
+//   GGfloat SafYmin = fabs(position->y - ymin);
+//   GGfloat SafYmax = fabs(position->y - ymax);
 
-  position->y = (SafYmin < tolerance) ? ymin - tolerance : position->y;
-  position->y = (SafYmax < tolerance) ? ymax + tolerance : position->y;
+//   position->y = (SafYmin < tolerance) ? ymin - tolerance : position->y;
+//   position->y = (SafYmax < tolerance) ? ymax + tolerance : position->y;
 
-  // on z
-  GGfloat SafZmin = fabs(position->z - zmin);
-  GGfloat SafZmax = fabs(position->z - zmax);
+//   // on z
+//   GGfloat SafZmin = fabs(position->z - zmin);
+//   GGfloat SafZmax = fabs(position->z - zmax);
 
-  position->z = (SafZmin < tolerance) ? zmin - tolerance : position->z;
-  position->z = (SafZmax < tolerance) ? zmax + tolerance : position->z;
-}
+//   position->z = (SafZmin < tolerance) ? zmin - tolerance : position->z;
+//   position->z = (SafZmax < tolerance) ? zmax + tolerance : position->z;
+// }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -150,35 +151,68 @@ inline void TransportGetSafetyOutsideAABB(GGfloat3 const* position, GGfloat cons
   \param voxelized_solid_data - voxelized data infos
   \brief Moving particle slightly outside a voxelized navigator
 */
-inline void TransportGetSafetyOutsideVoxelizedNavigator(GGfloat3 const* position, __global GGEMSVoxelizedSolidData* voxelized_solid_data)
-{
-  // Borders of voxelized solid
-  GGfloat x_min = voxelized_solid_data->border_min_xyz_.x;
-  GGfloat x_max = voxelized_solid_data->border_max_xyz_.x;
-  GGfloat y_min = voxelized_solid_data->border_min_xyz_.y;
-  GGfloat y_max = voxelized_solid_data->border_max_xyz_.y;
-  GGfloat z_min = voxelized_solid_data->border_min_xyz_.z;
-  GGfloat z_max = voxelized_solid_data->border_max_xyz_.z;
+// inline void TransportGetSafetyOutsideVoxelizedNavigator(GGfloat3 const* position, __global GGEMSVoxelizedSolidData* voxelized_solid_data)
+// {
+//   // Borders of voxelized solid
+//   GGfloat x_min = voxelized_solid_data->border_min_xyz_.x;
+//   GGfloat x_max = voxelized_solid_data->border_max_xyz_.x;
+//   GGfloat y_min = voxelized_solid_data->border_min_xyz_.y;
+//   GGfloat y_max = voxelized_solid_data->border_max_xyz_.y;
+//   GGfloat z_min = voxelized_solid_data->border_min_xyz_.z;
+//   GGfloat z_max = voxelized_solid_data->border_max_xyz_.z;
 
-  TransportGetSafetyOutsideAABB(position, x_min, x_max, y_min, y_max, z_min, z_max, GEOMETRY_TOLERANCE);
-}
+//   TransportGetSafetyOutsideAABB(position, x_min, x_max, y_min, y_max, z_min, z_max, GEOMETRY_TOLERANCE);
+// }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
 /*!
-  \fn inline GGuchar IsParticleInVoxelizedNavigator(GGfloat3 const* position, __global GGEMSVoxelizedSolidData* voxelized_solid_data)
+  \fn inline GGuchar IsParticleInVoxelizedSolid(GGfloat3 const* position, __global GGEMSVoxelizedSolidData* voxelized_solid_data)
   \param position - pointer on primary particle
   \param voxelized_solid_data - voxelized data infos
   \return false if particle outside voxelized navigator, and true if particle inside voxelized navigator
   \brief Check if particle is inside or outside voxelized navigator
 */
-inline GGuchar IsParticleInVoxelizedNavigator(GGfloat3 const* position, __global GGEMSVoxelizedSolidData* voxelized_solid_data)
+inline GGuchar IsParticleInVoxelizedSolid(GGfloat3 const* position, __global GGEMSVoxelizedSolidData* voxelized_solid_data)
 {
-  if (position->x < (voxelized_solid_data->border_min_xyz_.x + GEOMETRY_TOLERANCE) || position->x > (voxelized_solid_data->border_max_xyz_.x - GEOMETRY_TOLERANCE)) return OPENCL_FALSE;
-  if (position->y < (voxelized_solid_data->border_min_xyz_.y + GEOMETRY_TOLERANCE) || position->y > (voxelized_solid_data->border_max_xyz_.y - GEOMETRY_TOLERANCE)) return OPENCL_FALSE;
-  if (position->z < (voxelized_solid_data->border_min_xyz_.z + GEOMETRY_TOLERANCE) || position->z > (voxelized_solid_data->border_max_xyz_.z - GEOMETRY_TOLERANCE)) return OPENCL_FALSE;
+//   if (position->x < (voxelized_solid_data->border_min_xyz_.x + GEOMETRY_TOLERANCE) || position->x > (voxelized_solid_data->border_max_xyz_.x - GEOMETRY_TOLERANCE)) return OPENCL_FALSE;
+//   if (position->y < (voxelized_solid_data->border_min_xyz_.y + GEOMETRY_TOLERANCE) || position->y > (voxelized_solid_data->border_max_xyz_.y - GEOMETRY_TOLERANCE)) return OPENCL_FALSE;
+//   if (position->z < (voxelized_solid_data->border_min_xyz_.z + GEOMETRY_TOLERANCE) || position->z > (voxelized_solid_data->border_max_xyz_.z - GEOMETRY_TOLERANCE)) return OPENCL_FALSE;
+
+  printf("BEFORE: %e %e %e mm\n", position->x/mm, position->y/mm, position->z/mm);
+  // Position of particle in OBB local coordinate
+  //GGfloat3 local_position = GlobalToLocalPosition(&voxelized_solid_data->obb_geometry_.matrix_transformation_, *position);
+
+  printf("TEST: %e %e %e %e\n",
+    voxelized_solid_data->obb_geometry_.matrix_transformation_.m0_.s0,
+    voxelized_solid_data->obb_geometry_.matrix_transformation_.m0_.s1,
+    voxelized_solid_data->obb_geometry_.matrix_transformation_.m0_.s2,
+    voxelized_solid_data->obb_geometry_.matrix_transformation_.m0_.s3
+  );
+
+  printf("TEST: %e %e %e %e\n",
+    voxelized_solid_data->obb_geometry_.matrix_transformation_.m1_.s0,
+    voxelized_solid_data->obb_geometry_.matrix_transformation_.m1_.s1,
+    voxelized_solid_data->obb_geometry_.matrix_transformation_.m1_.s2,
+    voxelized_solid_data->obb_geometry_.matrix_transformation_.m1_.s3
+  );
+
+  printf("TEST: %e %e %e %e\n",
+    voxelized_solid_data->obb_geometry_.matrix_transformation_.m2_.s0,
+    voxelized_solid_data->obb_geometry_.matrix_transformation_.m2_.s1,
+    voxelized_solid_data->obb_geometry_.matrix_transformation_.m2_.s2,
+    voxelized_solid_data->obb_geometry_.matrix_transformation_.m2_.s3
+  );
+
+  printf("TEST: %e %e %e %e\n",
+    voxelized_solid_data->obb_geometry_.matrix_transformation_.m3_.s0,
+    voxelized_solid_data->obb_geometry_.matrix_transformation_.m3_.s1,
+    voxelized_solid_data->obb_geometry_.matrix_transformation_.m3_.s2,
+    voxelized_solid_data->obb_geometry_.matrix_transformation_.m3_.s3
+  );
+ // printf("AFTER: %e %e %e mm\n", local_position.x/mm, local_position.y/mm, local_position.z/mm);
 
   return OPENCL_TRUE;
 }
@@ -201,91 +235,91 @@ inline GGuchar IsParticleInVoxelizedNavigator(GGfloat3 const* position, __global
   \return distance to AABB boundary
   \brief Get the distance to AABB boundary
 */
-inline GGfloat ComputeDistanceToAABB(GGfloat3 const* position, GGfloat3 const* direction, GGfloat const x_min, GGfloat const x_max, GGfloat const y_min, GGfloat const y_max, GGfloat const z_min, GGfloat const z_max, GGfloat const tolerance)
-{
-  // Variables for algorithm
-  GGfloat idx = 0.0f;
-  GGfloat idy = 0.0f;
-  GGfloat idz = 0.0f;
-  GGfloat tmp = 0.0f;
-  GGfloat tmin = FLT_MIN;
-  GGfloat tmax = FLT_MAX;
-  GGfloat tymin = 0.0f;
-  GGfloat tymax = 0.0f;
-  GGfloat tzmin = 0.0f;
-  GGfloat tzmax = 0.0f;
+// inline GGfloat ComputeDistanceToAABB(GGfloat3 const* position, GGfloat3 const* direction, GGfloat const x_min, GGfloat const x_max, GGfloat const y_min, GGfloat const y_max, GGfloat const z_min, GGfloat const z_max, GGfloat const tolerance)
+// {
+//   // Variables for algorithm
+//   GGfloat idx = 0.0f;
+//   GGfloat idy = 0.0f;
+//   GGfloat idz = 0.0f;
+//   GGfloat tmp = 0.0f;
+//   GGfloat tmin = FLT_MIN;
+//   GGfloat tmax = FLT_MAX;
+//   GGfloat tymin = 0.0f;
+//   GGfloat tymax = 0.0f;
+//   GGfloat tzmin = 0.0f;
+//   GGfloat tzmax = 0.0f;
 
-  // Getting positions
-  GGfloat const pos_x = position->x;
-  GGfloat const pos_y = position->y;
-  GGfloat const pos_z = position->z;
+//   // Getting positions
+//   GGfloat const pos_x = position->x;
+//   GGfloat const pos_y = position->y;
+//   GGfloat const pos_z = position->z;
 
-  // Getting directions
-  GGfloat const dir_x = direction->x;
-  GGfloat const dir_y = direction->y;
-  GGfloat const dir_z = direction->z;
+//   // Getting directions
+//   GGfloat const dir_x = direction->x;
+//   GGfloat const dir_y = direction->y;
+//   GGfloat const dir_z = direction->z;
 
-  // On X axis
-  if (fabs(dir_x) < EPSILON6) {
-    if (pos_x < x_min || pos_x > x_max) return OUT_OF_WORLD;
-  }
-  else {
-    idx = 1.0f / dir_x;
-    tmin = (x_min - pos_x) * idx;
-    tmax = (x_max - pos_x) * idx;
-    if (tmin > tmax) {
-      tmp = tmin;
-      tmin = tmax;
-      tmax = tmp;
-    }
-    if (tmin > tmax) return OUT_OF_WORLD;
-  }
+//   // On X axis
+//   if (fabs(dir_x) < EPSILON6) {
+//     if (pos_x < x_min || pos_x > x_max) return OUT_OF_WORLD;
+//   }
+//   else {
+//     idx = 1.0f / dir_x;
+//     tmin = (x_min - pos_x) * idx;
+//     tmax = (x_max - pos_x) * idx;
+//     if (tmin > tmax) {
+//       tmp = tmin;
+//       tmin = tmax;
+//       tmax = tmp;
+//     }
+//     if (tmin > tmax) return OUT_OF_WORLD;
+//   }
 
-  // On Y axis
-  if (fabs(dir_y) < EPSILON6) {
-    if (pos_y < y_min || pos_y > y_max) return OUT_OF_WORLD;
-  }
-  else {
-    idy = 1.0f / dir_y;
-    tymin = (y_min - pos_y) * idy;
-    tymax = (y_max - pos_y) * idy;
-    if (tymin > tymax) {
-      tmp = tymin;
-      tymin = tymax;
-      tymax = tmp;
-    }
-    if (tymin > tmin) tmin = tymin;
-    if (tymax < tmax) tmax = tymax;
-    if (tmin > tmax) return OUT_OF_WORLD;
-  }
+//   // On Y axis
+//   if (fabs(dir_y) < EPSILON6) {
+//     if (pos_y < y_min || pos_y > y_max) return OUT_OF_WORLD;
+//   }
+//   else {
+//     idy = 1.0f / dir_y;
+//     tymin = (y_min - pos_y) * idy;
+//     tymax = (y_max - pos_y) * idy;
+//     if (tymin > tymax) {
+//       tmp = tymin;
+//       tymin = tymax;
+//       tymax = tmp;
+//     }
+//     if (tymin > tmin) tmin = tymin;
+//     if (tymax < tmax) tmax = tymax;
+//     if (tmin > tmax) return OUT_OF_WORLD;
+//   }
 
-  // On Z axis
-  if (fabs(dir_z) < EPSILON6) {
-    if (pos_z < z_min || pos_z > z_max) return OUT_OF_WORLD;
-  }
-  else {
-    idz = 1.0f / dir_z;
-    tzmin = (z_min - pos_z) * idz;
-    tzmax = (z_max - pos_z) * idz;
-    if (tzmin > tzmax) {
-      tmp = tzmin;
-      tzmin = tzmax;
-      tzmax = tmp;
-    }
-    if (tzmin > tmin) tmin = tzmin;
-    if (tzmax < tmax) tmax = tzmax;
-    if (tmin > tmax) return OUT_OF_WORLD;
-  }
+//   // On Z axis
+//   if (fabs(dir_z) < EPSILON6) {
+//     if (pos_z < z_min || pos_z > z_max) return OUT_OF_WORLD;
+//   }
+//   else {
+//     idz = 1.0f / dir_z;
+//     tzmin = (z_min - pos_z) * idz;
+//     tzmax = (z_max - pos_z) * idz;
+//     if (tzmin > tzmax) {
+//       tmp = tzmin;
+//       tzmin = tzmax;
+//       tzmax = tmp;
+//     }
+//     if (tzmin > tmin) tmin = tzmin;
+//     if (tzmax < tmax) tmax = tzmax;
+//     if (tmin > tmax) return OUT_OF_WORLD;
+//   }
 
-  // Return the smaller positive value diff to zero
-  if (tmin < 0.0f && (tmax < 0.0f || tmax == 0.0f)) return OUT_OF_WORLD;
+//   // Return the smaller positive value diff to zero
+//   if (tmin < 0.0f && (tmax < 0.0f || tmax == 0.0f)) return OUT_OF_WORLD;
 
-  // Checking if particle cross navigator sufficiently
-  if ((tmax-tmin) < (2.0*tolerance)) return OUT_OF_WORLD;
+//   // Checking if particle cross navigator sufficiently
+//   if ((tmax-tmin) < (2.0*tolerance)) return OUT_OF_WORLD;
 
-  if (tmin <= 0.0f) return tmax;
-  else return tmin;
-}
+//   if (tmin <= 0.0f) return tmax;
+//   else return tmin;
+// }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -299,18 +333,18 @@ inline GGfloat ComputeDistanceToAABB(GGfloat3 const* position, GGfloat3 const* d
   \return distance to navigator
   \brief Compute the distance between particle and voxelized navigator using Smits algorithm
 */
-inline GGfloat ComputeDistanceToVoxelizedNavigator(GGfloat3 const* position, GGfloat3 const* direction, __global GGEMSVoxelizedSolidData* voxelized_solid_data)
-{
-  // Borders of voxelized solid
-  GGfloat x_min = voxelized_solid_data->border_min_xyz_.x;
-  GGfloat x_max = voxelized_solid_data->border_max_xyz_.x;
-  GGfloat y_min = voxelized_solid_data->border_min_xyz_.y;
-  GGfloat y_max = voxelized_solid_data->border_max_xyz_.y;
-  GGfloat z_min = voxelized_solid_data->border_min_xyz_.z;
-  GGfloat z_max = voxelized_solid_data->border_max_xyz_.z;
+// inline GGfloat ComputeDistanceToVoxelizedNavigator(GGfloat3 const* position, GGfloat3 const* direction, __global GGEMSVoxelizedSolidData* voxelized_solid_data)
+// {
+//   // Borders of voxelized solid
+//   GGfloat x_min = voxelized_solid_data->border_min_xyz_.x;
+//   GGfloat x_max = voxelized_solid_data->border_max_xyz_.x;
+//   GGfloat y_min = voxelized_solid_data->border_min_xyz_.y;
+//   GGfloat y_max = voxelized_solid_data->border_max_xyz_.y;
+//   GGfloat z_min = voxelized_solid_data->border_min_xyz_.z;
+//   GGfloat z_max = voxelized_solid_data->border_max_xyz_.z;
 
-  return ComputeDistanceToAABB(position, direction, x_min, x_max, y_min, y_max, z_min, z_max, GEOMETRY_TOLERANCE);
-}
+//   return ComputeDistanceToAABB(position, direction, x_min, x_max, y_min, y_max, z_min, z_max, GEOMETRY_TOLERANCE);
+// }
 
 #endif
 

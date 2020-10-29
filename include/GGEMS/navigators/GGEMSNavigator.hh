@@ -160,10 +160,10 @@ class GGEMS_EXPORT GGEMSNavigator
     inline std::weak_ptr<GGEMSCrossSections> GetCrossSections(void) const {return cross_sections_;}
 
     /*!
-      \fn void ParticleNavigatorDistance(void) const
-      \brief Compute distance between particle and navigator
+      \fn void ParticleSolidDistance(void) const
+      \brief Compute distance between particle and solid
     */
-    void ParticleNavigatorDistance(void) const;
+    void ParticleSolidDistance(void) const;
 
     /*!
       \fn void ParticleToNavigator(void) const

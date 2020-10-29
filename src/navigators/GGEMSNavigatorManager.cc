@@ -154,10 +154,10 @@ void GGEMSNavigatorManager::PrintInfos(void) const
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSNavigatorManager::FindClosestNavigator(void) const
+void GGEMSNavigatorManager::FindClosestSolid(void) const
 {
-  // Loop over all declared navigators and compute distance particle / navigator
-  for (auto&& i : navigators_) i->ParticleNavigatorDistance();
+  // Loop over all declared navigators and compute distance particle / solid
+  for (auto&& i : navigators_) i->ParticleSolidDistance();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
