@@ -38,11 +38,7 @@
   \struct GGEMSRandom_t
   \brief Structure storing informations about random
 */
-#ifdef __OPENCL_C_VERSION__
-typedef struct __attribute__((aligned (1))) GGEMSRandom_t
-#else
-typedef struct PACKED GGEMSRandom_t
-#endif
+typedef struct GGEMSRandom_t
 {
   GGuint prng_state_1_[MAXIMUM_PARTICLES]; /*!< State 1 of the prng */
   GGuint prng_state_2_[MAXIMUM_PARTICLES]; /*!< State 2 of the prng */

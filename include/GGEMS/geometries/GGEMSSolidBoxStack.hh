@@ -39,11 +39,7 @@
   \struct GGEMSSolidBoxData_t
   \brief Structure storing the stack of data for solid box
 */
-#ifdef __OPENCL_C_VERSION__
-typedef struct __attribute__((aligned (1))) GGEMSSolidBoxData_t
-#else
-typedef struct PACKED GGEMSSolidBoxData_t
-#endif
+typedef struct GGEMSSolidBoxData_t
 {
   GGfloat3 length_xyz_; /*!< Length of box in X, Y and Z */
   GGfloat3 position_xyz_; /*!< Position of phantom in X, Y and Z */

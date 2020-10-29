@@ -31,7 +31,6 @@
   \date Monday March 2, 2020
 */
 
-#include "GGEMS/global/GGEMSConfiguration.hh"
 #include "GGEMS/tools/GGEMSTypes.hh"
 #include "GGEMS/geometries/GGEMSPrimitiveGeometriesStack.hh"
 
@@ -39,18 +38,13 @@
   \struct GGEMSVoxelizedSolidData_t
   \brief Structure storing the stack of data for voxelized solid
 */
-#ifdef __OPENCL_C_VERSION__
-typedef struct __attribute__((aligned (1))) GGEMSVoxelizedSolidData_t
-#else
-typedef struct PACKED GGEMSVoxelizedSolidData_t
-#endif
+typedef struct GGEMSVoxelizedSolidData_t
 {
-  GGushort3 number_of_voxels_xyz_; /*!< Number of voxel in X, Y and Z [0, 65535] */
-  GGuint number_of_voxels_; /*!< Total number of voxels */
-  GGfloat3 voxel_sizes_xyz_; /*!< Size of voxels in X, Y and Z */
-  //GGfloat3 position_xyz_; /*!< Position of phantom in X, Y and Z */
-  GGEMSOBB obb_geometry_; /*!< OBB storing border of voxelized solid and matrix of transformation */
   GGint solid_id_; /*!< Navigator index */
+  GGint number_of_voxels_; /*!< Total number of voxels */
+  GGint number_of_voxels_xyz_[3]; /*!< Number of voxel in X, Y and Z */
+  GGfloat voxel_sizes_xyz_[3]; /*!< Size of voxels in X, Y and Z */
+  GGEMSOBB obb_geometry_; /*!< OBB storing border of voxelized solid and matrix of transformation */
 } GGEMSVoxelizedSolidData; /*!< Using C convention name of struct to C++ (_t deletion) */
 
 #endif // GUARD_GGEMS_GEOMETRIES_GGEMSVOXELIZEDSOLIDSTACK_HH

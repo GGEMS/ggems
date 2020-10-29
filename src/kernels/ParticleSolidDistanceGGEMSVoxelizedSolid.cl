@@ -64,13 +64,6 @@ __kernel void particle_solid_distance_ggems_voxelized_solid(
   direction.y = primary_particle->dy_[kParticleID];
   direction.z = primary_particle->dz_[kParticleID];
 
-  printf("TEST0: %e %e %e %e\n",
-    voxelized_solid_data->obb_geometry_.matrix_transformation_.m0_.s0,
-    voxelized_solid_data->obb_geometry_.matrix_transformation_.m0_.s1,
-    voxelized_solid_data->obb_geometry_.matrix_transformation_.m0_.s2,
-    voxelized_solid_data->obb_geometry_.matrix_transformation_.m0_.s3
-  );
-
   // Check if particle inside voxelized navigator, if yes distance is 0.0 and not need to compute particle - solid distance
   if (IsParticleInVoxelizedSolid(&position, voxelized_solid_data)) {
     primary_particle->particle_solid_distance_[kParticleID] = 0.0f;

@@ -135,7 +135,7 @@ void GGEMSXRaySource::GetPrimaries(GGulong const& number_of_particles)
 
   // Checking if kernel verbosity is activated
   if (GGEMSManager::GetInstance().IsKernelVerbose()) {
-    opencl_manager.DisplayElapsedTimeInKernel("get_primaries");
+    opencl_manager.DisplayElapsedTimeInKernel("get primaries");
   }
 }
 
@@ -180,10 +180,10 @@ void GGEMSXRaySource::PrintInfos(void) const
   GGcout("GGEMSXRaySource", "PrintInfos", 0) << "* Focal spot size: " << "(" << focal_spot_size_.s[0]/mm << ", " << focal_spot_size_.s[1]/mm << ", " << focal_spot_size_.s[2]/mm << ") mm3" << GGendl;
   GGcout("GGEMSXRaySource", "PrintInfos", 0) << "* Transformation matrix: " << GGendl;
   GGcout("GGEMSXRaySource", "PrintInfos", 0) << "[" << GGendl;
-  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "    " << transformation_matrix_device->m0_.s[0] << " " << transformation_matrix_device->m0_.s[1] << " " << transformation_matrix_device->m0_.s[2] << " " << transformation_matrix_device->m0_.s[3] << GGendl;
-  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "    " << transformation_matrix_device->m1_.s[0] << " " << transformation_matrix_device->m1_.s[1] << " " << transformation_matrix_device->m1_.s[2] << " " << transformation_matrix_device->m1_.s[3] << GGendl;
-  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "    " << transformation_matrix_device->m2_.s[0] << " " << transformation_matrix_device->m2_.s[1] << " " << transformation_matrix_device->m2_.s[2] << " " << transformation_matrix_device->m2_.s[3] << GGendl;
-  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "    " << transformation_matrix_device->m3_.s[0] << " " << transformation_matrix_device->m3_.s[1] << " " << transformation_matrix_device->m3_.s[2] << " " << transformation_matrix_device->m3_.s[3] << GGendl;
+  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "    " << transformation_matrix_device->m0_[0] << " " << transformation_matrix_device->m0_[1] << " " << transformation_matrix_device->m0_[2] << " " << transformation_matrix_device->m0_[3] << GGendl;
+  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "    " << transformation_matrix_device->m1_[0] << " " << transformation_matrix_device->m1_[1] << " " << transformation_matrix_device->m1_[2] << " " << transformation_matrix_device->m1_[3] << GGendl;
+  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "    " << transformation_matrix_device->m2_[0] << " " << transformation_matrix_device->m2_[1] << " " << transformation_matrix_device->m2_[2] << " " << transformation_matrix_device->m2_[3] << GGendl;
+  GGcout("GGEMSXRaySource", "PrintInfos", 0) << "    " << transformation_matrix_device->m3_[0] << " " << transformation_matrix_device->m3_[1] << " " << transformation_matrix_device->m3_[2] << " " << transformation_matrix_device->m3_[3] << GGendl;
   GGcout("GGEMSXRaySource", "PrintInfos", 0) << "]" << GGendl;
   GGcout("GGEMSXRaySource", "PrintInfos", 0) << GGendl;
 

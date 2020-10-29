@@ -39,29 +39,11 @@
   \struct GGEMSOBB_t
   \brief Structure storing OBB (Oriented Bounding Box) geometry
 */
-#ifdef __OPENCL_C_VERSION__
-typedef struct __attribute__((aligned (1))) GGEMSOBB_t
-#else
-typedef struct PACKED GGEMSOBB_t
-#endif
+typedef struct GGEMSOBB_t
 {
-  GGfloat3 border_min_xyz_; /*!< Min. of border in X, Y and Z */
-  GGfloat3 border_max_xyz_; /*!< Max. of border in X, Y and Z */
+  GGfloat border_min_xyz_[3]; /*!< Min. of border in X, Y and Z */
+  GGfloat border_max_xyz_[3]; /*!< Max. of border in X, Y and Z */
   GGfloat44 matrix_transformation_; /*!< Matrix of transformation including angle of rotation */
 } GGEMSOBB; /*!< Using C convention name of struct to C++ (_t deletion) */
-
-/*!
-  \struct GGEMSAABB_t
-  \brief Structure storing AABB (Axis Aligned Bounding Box) geometry
-*/
-#ifdef __OPENCL_C_VERSION__
-typedef struct __attribute__((aligned (1))) GGEMSAABB_t
-#else
-typedef struct PACKED GGEMSAABB_t
-#endif
-{
-  GGfloat3 border_min_xyz_; /*!< Min. of border in X, Y and Z */
-  GGfloat3 border_max_xyz_; /*!< Max. of border in X, Y and Z */
-} GGEMSAABB; /*!< Using C convention name of struct to C++ (_t deletion) */
 
 #endif // GUARD_GGEMS_GEOMETRIES_GGEMSPRIMITIVEGEOMETRIES_HH

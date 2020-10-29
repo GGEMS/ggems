@@ -74,9 +74,9 @@ GGEMSNavigator::~GGEMSNavigator(void)
 void GGEMSNavigator::SetLocalAxis(GGfloat3 const& m0, GGfloat3 const& m1, GGfloat3 const& m2)
 {
   is_update_axis_ = true;
-  local_axis_.m0_ = m0;
-  local_axis_.m1_ = m1;
-  local_axis_.m2_ = m2;
+  local_axis_.m0_[0] = m0.s0; local_axis_.m0_[1] = m0.s1; local_axis_.m0_[2] = m0.s2;
+  local_axis_.m1_[0] = m1.s0; local_axis_.m1_[1] = m1.s1; local_axis_.m1_[2] = m1.s2;
+  local_axis_.m2_[0] = m2.s0; local_axis_.m2_[1] = m2.s1; local_axis_.m2_[2] = m2.s2;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

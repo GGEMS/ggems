@@ -39,11 +39,7 @@
   \struct GGEMSParticleCrossSections_t
   \brief Structure storing the photon cross sections for OpenCL device
 */
-#ifdef __OPENCL_C_VERSION__
-typedef struct __attribute__((aligned (1))) GGEMSParticleCrossSections_t
-#else
-typedef struct PACKED GGEMSParticleCrossSections_t
-#endif
+typedef struct GGEMSParticleCrossSections_t
 {
   // Variables for all particles
   GGuint number_of_bins_; /*!< Number of bins in the cross section tables */

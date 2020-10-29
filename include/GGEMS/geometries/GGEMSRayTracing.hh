@@ -185,33 +185,33 @@ inline GGuchar IsParticleInVoxelizedSolid(GGfloat3 const* position, __global GGE
   // Position of particle in OBB local coordinate
   //GGfloat3 local_position = GlobalToLocalPosition(&voxelized_solid_data->obb_geometry_.matrix_transformation_, *position);
 
-  printf("TEST: %e %e %e %e\n",
-    voxelized_solid_data->obb_geometry_.matrix_transformation_.m0_.s0,
-    voxelized_solid_data->obb_geometry_.matrix_transformation_.m0_.s1,
-    voxelized_solid_data->obb_geometry_.matrix_transformation_.m0_.s2,
-    voxelized_solid_data->obb_geometry_.matrix_transformation_.m0_.s3
-  );
+  // printf("TEST: %e %e %e %e\n",
+  //   voxelized_solid_data->obb_geometry_.matrix_transformation_.m0_.s0,
+  //   voxelized_solid_data->obb_geometry_.matrix_transformation_.m0_.s1,
+  //   voxelized_solid_data->obb_geometry_.matrix_transformation_.m0_.s2,
+  //   voxelized_solid_data->obb_geometry_.matrix_transformation_.m0_.s3
+  // );
 
-  printf("TEST: %e %e %e %e\n",
-    voxelized_solid_data->obb_geometry_.matrix_transformation_.m1_.s0,
-    voxelized_solid_data->obb_geometry_.matrix_transformation_.m1_.s1,
-    voxelized_solid_data->obb_geometry_.matrix_transformation_.m1_.s2,
-    voxelized_solid_data->obb_geometry_.matrix_transformation_.m1_.s3
-  );
+  // printf("TEST: %e %e %e %e\n",
+  //   voxelized_solid_data->obb_geometry_.matrix_transformation_.m1_.s0,
+  //   voxelized_solid_data->obb_geometry_.matrix_transformation_.m1_.s1,
+  //   voxelized_solid_data->obb_geometry_.matrix_transformation_.m1_.s2,
+  //   voxelized_solid_data->obb_geometry_.matrix_transformation_.m1_.s3
+  // );
 
-  printf("TEST: %e %e %e %e\n",
-    voxelized_solid_data->obb_geometry_.matrix_transformation_.m2_.s0,
-    voxelized_solid_data->obb_geometry_.matrix_transformation_.m2_.s1,
-    voxelized_solid_data->obb_geometry_.matrix_transformation_.m2_.s2,
-    voxelized_solid_data->obb_geometry_.matrix_transformation_.m2_.s3
-  );
+  // printf("TEST: %e %e %e %e\n",
+  //   voxelized_solid_data->obb_geometry_.matrix_transformation_.m2_.s0,
+  //   voxelized_solid_data->obb_geometry_.matrix_transformation_.m2_.s1,
+  //   voxelized_solid_data->obb_geometry_.matrix_transformation_.m2_.s2,
+  //   voxelized_solid_data->obb_geometry_.matrix_transformation_.m2_.s3
+  // );
 
-  printf("TEST: %e %e %e %e\n",
-    voxelized_solid_data->obb_geometry_.matrix_transformation_.m3_.s0,
-    voxelized_solid_data->obb_geometry_.matrix_transformation_.m3_.s1,
-    voxelized_solid_data->obb_geometry_.matrix_transformation_.m3_.s2,
-    voxelized_solid_data->obb_geometry_.matrix_transformation_.m3_.s3
-  );
+  // printf("TEST: %e %e %e %e\n",
+  //   voxelized_solid_data->obb_geometry_.matrix_transformation_.m3_.s0,
+  //   voxelized_solid_data->obb_geometry_.matrix_transformation_.m3_.s1,
+  //   voxelized_solid_data->obb_geometry_.matrix_transformation_.m3_.s2,
+  //   voxelized_solid_data->obb_geometry_.matrix_transformation_.m3_.s3
+  // );
  // printf("AFTER: %e %e %e mm\n", local_position.x/mm, local_position.y/mm, local_position.z/mm);
 
   return OPENCL_TRUE;

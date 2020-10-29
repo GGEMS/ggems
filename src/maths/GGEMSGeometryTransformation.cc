@@ -203,12 +203,16 @@ void GGEMSGeometryTransformation::SetAxisTransformation(GGfloat3 const& m0, GGfl
 void GGEMSGeometryTransformation::SetAxisTransformation(GGfloat33 const& axis)
 {
   // Filling the local axis buffer first
-  local_axis_ = MakeFloat33(axis.m0_, axis.m1_, axis.m2_);
+  local_axis_ = MakeFloat33(
+    {axis.m0_[0], axis.m0_[1], axis.m0_[2]},
+    {axis.m1_[0], axis.m1_[1], axis.m1_[2]},
+    {axis.m2_[0], axis.m2_[1], axis.m2_[2]}
+  );
 
   matrix_orthographic_projection_ = MakeFloat44(
-    {axis.m0_.s[0], axis.m0_.s[1], axis.m0_.s[2], 0.0f},
-    {axis.m1_.s[0], axis.m1_.s[1], axis.m1_.s[2], 0.0f},
-    {axis.m2_.s[0], axis.m2_.s[1], axis.m2_.s[2], 0.0f},
+    {axis.m0_[0], axis.m0_[1], axis.m0_[2], 0.0f},
+    {axis.m1_[0], axis.m1_[1], axis.m1_[2], 0.0f},
+    {axis.m2_[0], axis.m2_[1], axis.m2_[2], 0.0f},
     {0.0f, 0.0f, 0.0f, 1.0f}
   );
 
@@ -232,10 +236,10 @@ void GGEMSGeometryTransformation::UpdateTransformationMatrix(void)
   GGfloat44 matrix_tmp = GGfloat44MultGGfloat44(matrix_rotation_, GGfloat44MultGGfloat44(matrix_translation_, matrix_orthographic_projection_));
 
   // Copy step
-  matrix_device->m0_ = matrix_tmp.m0_;
-  matrix_device->m1_ = matrix_tmp.m1_;
-  matrix_device->m2_ = matrix_tmp.m2_;
-  matrix_device->m3_ = matrix_tmp.m3_;
+  matrix_device->m0_[0] = matrix_tmp.m0_[0]; matrix_device->m0_[1] = matrix_tmp.m0_[1]; matrix_device->m0_[2] = matrix_tmp.m0_[2]; matrix_device->m0_[3] = matrix_tmp.m0_[3];
+  matrix_device->m1_[0] = matrix_tmp.m1_[0]; matrix_device->m1_[1] = matrix_tmp.m1_[1]; matrix_device->m1_[2] = matrix_tmp.m1_[2]; matrix_device->m1_[3] = matrix_tmp.m1_[3];
+  matrix_device->m2_[0] = matrix_tmp.m2_[0]; matrix_device->m2_[1] = matrix_tmp.m2_[1]; matrix_device->m2_[2] = matrix_tmp.m2_[2]; matrix_device->m2_[3] = matrix_tmp.m2_[3];
+  matrix_device->m3_[0] = matrix_tmp.m3_[0]; matrix_device->m3_[1] = matrix_tmp.m3_[1]; matrix_device->m3_[2] = matrix_tmp.m3_[2]; matrix_device->m3_[3] = matrix_tmp.m3_[3];
 
   // Release the pointer, mandatory step!!!
   opencl_manager_.ReleaseDeviceBuffer(matrix_transformation_cl_.get(), matrix_device);
