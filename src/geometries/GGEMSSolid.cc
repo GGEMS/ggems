@@ -89,7 +89,7 @@ void GGEMSSolid::SetLocalAxis(GGfloat33 const& local_axis_xyz)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-
+#include "GGEMS/geometries/GGEMSVoxelizedSolidStack.hh"
 void GGEMSSolid::ParticleSolidDistance(void)
 {
   // Getting the OpenCL manager
@@ -121,7 +121,7 @@ void GGEMSSolid::ParticleSolidDistance(void)
 
   // Checking if kernel verbosity is activated
   if (GGEMSManager::GetInstance().IsKernelVerbose()) {
-    opencl_manager.DisplayElapsedTimeInKernel("distance");
+    opencl_manager.DisplayElapsedTimeInKernel("particle solid distance");
   }
 }
 

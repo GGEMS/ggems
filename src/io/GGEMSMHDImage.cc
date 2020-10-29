@@ -135,12 +135,12 @@ void GGEMSMHDImage::Read(std::string const& image_mhd_header_filename, std::weak
       GGwarn("GGEMSMHDImage", "Read", 0) << "The key 'ObjectType' is useless in GGEMS." << GGendl;
     }
     else if (!kKey.compare("DimSize")) {
-      iss >> solid_data_device->number_of_voxels_xyz_.s[0] >> solid_data_device->number_of_voxels_xyz_.s[1] >> solid_data_device->number_of_voxels_xyz_.s[2];
+      iss >> solid_data_device->number_of_voxels_xyz_[0] >> solid_data_device->number_of_voxels_xyz_[1] >> solid_data_device->number_of_voxels_xyz_[2];
       // Computing number of voxels
-      solid_data_device->number_of_voxels_ = solid_data_device->number_of_voxels_xyz_.s[0] * solid_data_device->number_of_voxels_xyz_.s[1] * solid_data_device->number_of_voxels_xyz_.s[2];
+      solid_data_device->number_of_voxels_ = solid_data_device->number_of_voxels_xyz_[0] * solid_data_device->number_of_voxels_xyz_[1] * solid_data_device->number_of_voxels_xyz_[2];
     }
     else if (!kKey.compare("ElementSpacing")) {
-      iss >> solid_data_device->voxel_sizes_xyz_.s[0] >> solid_data_device->voxel_sizes_xyz_.s[1] >> solid_data_device->voxel_sizes_xyz_.s[2];
+      iss >> solid_data_device->voxel_sizes_xyz_[0] >> solid_data_device->voxel_sizes_xyz_[1] >> solid_data_device->voxel_sizes_xyz_[2];
     }
     else if (!kKey.compare("ElementType")) {
       iss >> mhd_data_type_;
@@ -177,13 +177,13 @@ void GGEMSMHDImage::Read(std::string const& image_mhd_header_filename, std::weak
   in_header_stream.close();
 
   // Checking the values
-  if (solid_data_device->number_of_voxels_xyz_.s[0] <= 0 || solid_data_device->number_of_voxels_xyz_.s[1] <= 0 || solid_data_device->number_of_voxels_xyz_.s[2] <= 0) {
+  if (solid_data_device->number_of_voxels_xyz_[0] <= 0 || solid_data_device->number_of_voxels_xyz_[1] <= 0 || solid_data_device->number_of_voxels_xyz_[2] <= 0) {
     std::ostringstream oss(std::ostringstream::out);
     oss << "Dimension invalid for the key 'DimSize'!!! The values have to be > 0";
     GGEMSMisc::ThrowException("GGEMSMHDImage", "Read", oss.str());
   }
 
-  if (solid_data_device->voxel_sizes_xyz_.s[0] == 0.0 || solid_data_device->voxel_sizes_xyz_.s[1] == 0.0 || solid_data_device->voxel_sizes_xyz_.s[2] == 0.0) {
+  if (solid_data_device->voxel_sizes_xyz_[0] == 0.0 || solid_data_device->voxel_sizes_xyz_[1] == 0.0 || solid_data_device->voxel_sizes_xyz_[2] == 0.0) {
     std::ostringstream oss(std::ostringstream::out);
     oss << "Voxel size invalid for the key 'ElementSpacing'!!! The values have to be > 0";
     GGEMSMisc::ThrowException("GGEMSMHDImage", "Read", oss.str());
@@ -201,11 +201,11 @@ void GGEMSMHDImage::Read(std::string const& image_mhd_header_filename, std::weak
     GGEMSMisc::ThrowException("GGEMSMHDImage", "Read", oss.str());
   }
 
-  // Computing bounding box borders automatically at isocenter
-  for (GGuint i = 0; i < 3; ++i) {
-    solid_data_device->obb_geometry_.border_min_xyz_.s[i] = -solid_data_device->number_of_voxels_xyz_.s[i] * solid_data_device->voxel_sizes_xyz_.s[i] * 0.5f;
-    solid_data_device->obb_geometry_.border_max_xyz_.s[i] = solid_data_device->number_of_voxels_xyz_.s[i] * solid_data_device->voxel_sizes_xyz_.s[i] * 0.5f;
-  }
+  // // Computing bounding box borders automatically at isocenter
+  // for (GGuint i = 0; i < 3; ++i) {
+  //   solid_data_device->obb_geometry_.border_min_xyz_.s[i] = -solid_data_device->number_of_voxels_xyz_.s[i] * solid_data_device->voxel_sizes_xyz_.s[i] * 0.5f;
+  //   solid_data_device->obb_geometry_.border_max_xyz_.s[i] = solid_data_device->number_of_voxels_xyz_.s[i] * solid_data_device->voxel_sizes_xyz_.s[i] * 0.5f;
+  // }
 
   // Release the pointer
   opencl_manager.ReleaseDeviceBuffer(solid_data_cl.lock().get(), solid_data_device);

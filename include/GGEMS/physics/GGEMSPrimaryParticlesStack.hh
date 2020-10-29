@@ -38,11 +38,7 @@
   \struct GGEMSPrimaryParticles_t
   \brief Structure storing informations about primary particles
 */
-#ifdef __OPENCL_C_VERSION__
-typedef struct __attribute__((aligned (1))) GGEMSPrimaryParticles_t
-#else
-typedef struct PACKED GGEMSPrimaryParticles_t
-#endif
+typedef struct GGEMSPrimaryParticles_t
 {
   GGfloat E_[MAXIMUM_PARTICLES]; /*!< Energies of particles */
   GGfloat dx_[MAXIMUM_PARTICLES]; /*!< Direction of the particle in x */

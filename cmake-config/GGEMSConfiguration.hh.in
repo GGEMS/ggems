@@ -36,10 +36,4 @@
 
 #cmakedefine MAXIMUM_PARTICLES @MAXIMUM_PARTICLES@
 
-#if defined _MSC_VER
-#define PACKED
-#else
-#define PACKED __attribute__ ((__packed__))
-#endif
-
 #endif // GUARD_GGEMS_GLOBAL_GGEMSCONFIGURATION_HH

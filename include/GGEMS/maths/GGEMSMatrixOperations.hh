@@ -48,9 +48,9 @@
 inline GGfloat33 MakeFloat33(GGfloat3 const m0, GGfloat3 const m1, GGfloat3 const m2)
 {
   GGfloat33 tmp;
-  tmp.m0_ = m0;
-  tmp.m1_ = m1;
-  tmp.m2_ = m2;
+  tmp.m0_[0] = m0.s0; tmp.m0_[1] = m0.s1; tmp.m0_[2] = m0.s2;
+  tmp.m1_[0] = m1.s0; tmp.m1_[1] = m1.s1; tmp.m1_[2] = m1.s2;
+  tmp.m2_[0] = m2.s0; tmp.m2_[1] = m2.s1; tmp.m2_[2] = m2.s2;
   return tmp;
 }
 
@@ -66,10 +66,9 @@ inline GGfloat33 MakeFloat33(GGfloat3 const m0, GGfloat3 const m1, GGfloat3 cons
 inline GGfloat33 MakeFloat33Zeros(void)
 {
   GGfloat33 tmp;
-  GGfloat3 zero = {0.0f, 0.0f, 0.0f};
-  tmp.m0_ = zero;
-  tmp.m1_ = zero;
-  tmp.m2_ = zero;
+  tmp.m0_[0] = 0.0f; tmp.m0_[1] = 0.0f; tmp.m0_[2] = 0.0f;
+  tmp.m1_[0] = 0.0f; tmp.m1_[1] = 0.0f; tmp.m1_[2] = 0.0f;
+  tmp.m2_[0] = 0.0f; tmp.m2_[1] = 0.0f; tmp.m2_[2] = 0.0f;
   return tmp;
 }
 
@@ -89,10 +88,10 @@ inline GGfloat33 MakeFloat33Zeros(void)
 inline GGfloat44 MakeFloat44(GGfloat4 const m0, GGfloat4 const m1, GGfloat4 const m2, GGfloat4 const m3)
 {
   GGfloat44 tmp;
-  tmp.m0_ = m0;
-  tmp.m1_ = m1;
-  tmp.m2_ = m2;
-  tmp.m3_ = m3;
+  tmp.m0_[0] = m0.s0; tmp.m0_[1] = m0.s1; tmp.m0_[2] = m0.s2; tmp.m0_[3] = m0.s3;
+  tmp.m1_[0] = m1.s0; tmp.m1_[1] = m1.s1; tmp.m1_[2] = m1.s2; tmp.m1_[3] = m1.s3;
+  tmp.m2_[0] = m2.s0; tmp.m2_[1] = m2.s1; tmp.m2_[2] = m2.s2; tmp.m2_[3] = m2.s3;
+  tmp.m3_[0] = m3.s0; tmp.m3_[1] = m3.s1; tmp.m3_[2] = m3.s2; tmp.m3_[3] = m3.s3;
   return tmp;
 }
 
@@ -108,11 +107,10 @@ inline GGfloat44 MakeFloat44(GGfloat4 const m0, GGfloat4 const m1, GGfloat4 cons
 inline GGfloat44 MakeFloat44Zeros(void)
 {
   GGfloat44 tmp;
-  GGfloat4 zero = {0.0f, 0.0f, 0.0f, 0.0f};
-  tmp.m0_ = zero;
-  tmp.m1_ = zero;
-  tmp.m2_ = zero; 
-  tmp.m3_ = zero;
+  tmp.m0_[0] = 0.0f; tmp.m0_[1] = 0.0f; tmp.m0_[2] = 0.0f; tmp.m0_[3] = 0.0f;
+  tmp.m1_[0] = 0.0f; tmp.m1_[1] = 0.0f; tmp.m1_[2] = 0.0f; tmp.m1_[3] = 0.0f;
+  tmp.m2_[0] = 0.0f; tmp.m2_[1] = 0.0f; tmp.m2_[2] = 0.0f; tmp.m2_[3] = 0.0f;
+  tmp.m3_[0] = 0.0f; tmp.m3_[1] = 0.0f; tmp.m3_[2] = 0.0f; tmp.m3_[3] = 0.0f;
   return tmp;
 }
 
@@ -234,11 +232,14 @@ inline GGfloat3 RotateUnitZ(GGfloat3 vector, GGfloat3 const new_uz)
 inline GGfloat3 GGfloat44MultGGfloat3(__global GGfloat44 const* matrix, GGfloat3 const point)
 {
   GGfloat4 point4D = {point.x, point.y, point.z, 1.0f};
+  GGfloat4 row0 = {matrix->m0_[0], matrix->m0_[1], matrix->m0_[2], matrix->m0_[3]};
+  GGfloat4 row1 = {matrix->m1_[0], matrix->m1_[1], matrix->m1_[2], matrix->m1_[3]};
+  GGfloat4 row2 = {matrix->m2_[0], matrix->m2_[1], matrix->m2_[2], matrix->m2_[3]};
 
   GGfloat3 vector = {
-    dot(matrix->m0_, point4D),
-    dot(matrix->m1_, point4D),
-    dot(matrix->m2_, point4D)
+    dot(row0, point4D),
+    dot(row1, point4D),
+    dot(row2, point4D)
   };
 
   return vector;
@@ -252,7 +253,7 @@ inline GGfloat3 GlobalToLocalPosition(__global GGfloat44 const* matrix, GGfloat3
 {
   // Extract translation
   GGfloat3 translation;
-  translation.x = matrix->m0_.x;
+  //translation.x = matrix->m0_.x;
   //= {matrix->m0_.w, matrix->m1_.w, matrix->m2_.w};
 
   return translation;
@@ -308,28 +309,28 @@ inline GGfloat44 GGfloat44MultGGfloat44(GGfloat44 const A, GGfloat44 const B)
   GGfloat44 tmp = MakeFloat44Zeros();
 
   // Row 1
-  tmp.m0_.s[0] = A.m0_.s[0]*B.m0_.s[0] + A.m0_.s[1]*B.m1_.s[0] + A.m0_.s[2]*B.m2_.s[0] + A.m0_.s[3]*B.m3_.s[0];
-  tmp.m0_.s[1] = A.m0_.s[0]*B.m0_.s[1] + A.m0_.s[1]*B.m1_.s[1] + A.m0_.s[2]*B.m2_.s[1] + A.m0_.s[3]*B.m3_.s[1];
-  tmp.m0_.s[2] = A.m0_.s[0]*B.m0_.s[2] + A.m0_.s[1]*B.m1_.s[2] + A.m0_.s[2]*B.m2_.s[2] + A.m0_.s[3]*B.m3_.s[2];
-  tmp.m0_.s[3] = A.m0_.s[0]*B.m0_.s[3] + A.m0_.s[1]*B.m1_.s[3] + A.m0_.s[2]*B.m2_.s[3] + A.m0_.s[3]*B.m3_.s[3];
+  tmp.m0_[0] = A.m0_[0]*B.m0_[0] + A.m0_[1]*B.m1_[0] + A.m0_[2]*B.m2_[0] + A.m0_[3]*B.m3_[0];
+  tmp.m0_[1] = A.m0_[0]*B.m0_[1] + A.m0_[1]*B.m1_[1] + A.m0_[2]*B.m2_[1] + A.m0_[3]*B.m3_[1];
+  tmp.m0_[2] = A.m0_[0]*B.m0_[2] + A.m0_[1]*B.m1_[2] + A.m0_[2]*B.m2_[2] + A.m0_[3]*B.m3_[2];
+  tmp.m0_[3] = A.m0_[0]*B.m0_[3] + A.m0_[1]*B.m1_[3] + A.m0_[2]*B.m2_[3] + A.m0_[3]*B.m3_[3];
 
   // Row 2
-  tmp.m1_.s[0] = A.m1_.s[0]*B.m0_.s[0] + A.m1_.s[1]*B.m1_.s[0] + A.m1_.s[2]*B.m2_.s[0] + A.m1_.s[3]*B.m3_.s[0];
-  tmp.m1_.s[1] = A.m1_.s[0]*B.m0_.s[1] + A.m1_.s[1]*B.m1_.s[1] + A.m1_.s[2]*B.m2_.s[1] + A.m1_.s[3]*B.m3_.s[1];
-  tmp.m1_.s[2] = A.m1_.s[0]*B.m0_.s[2] + A.m1_.s[1]*B.m1_.s[2] + A.m1_.s[2]*B.m2_.s[2] + A.m1_.s[3]*B.m3_.s[2];
-  tmp.m1_.s[3] = A.m1_.s[0]*B.m0_.s[3] + A.m1_.s[1]*B.m1_.s[3] + A.m1_.s[2]*B.m2_.s[3] + A.m1_.s[3]*B.m3_.s[3];
+  tmp.m1_[0] = A.m1_[0]*B.m0_[0] + A.m1_[1]*B.m1_[0] + A.m1_[2]*B.m2_[0] + A.m1_[3]*B.m3_[0];
+  tmp.m1_[1] = A.m1_[0]*B.m0_[1] + A.m1_[1]*B.m1_[1] + A.m1_[2]*B.m2_[1] + A.m1_[3]*B.m3_[1];
+  tmp.m1_[2] = A.m1_[0]*B.m0_[2] + A.m1_[1]*B.m1_[2] + A.m1_[2]*B.m2_[2] + A.m1_[3]*B.m3_[2];
+  tmp.m1_[3] = A.m1_[0]*B.m0_[3] + A.m1_[1]*B.m1_[3] + A.m1_[2]*B.m2_[3] + A.m1_[3]*B.m3_[3];
 
   // Row 3
-  tmp.m2_.s[0] = A.m2_.s[0]*B.m0_.s[0] + A.m2_.s[1]*B.m1_.s[0] + A.m2_.s[2]*B.m2_.s[0] + A.m2_.s[3]*B.m3_.s[0];
-  tmp.m2_.s[1] = A.m2_.s[0]*B.m0_.s[1] + A.m2_.s[1]*B.m1_.s[1] + A.m2_.s[2]*B.m2_.s[1] + A.m2_.s[3]*B.m3_.s[1];
-  tmp.m2_.s[2] = A.m2_.s[0]*B.m0_.s[2] + A.m2_.s[1]*B.m1_.s[2] + A.m2_.s[2]*B.m2_.s[2] + A.m2_.s[3]*B.m3_.s[2];
-  tmp.m2_.s[3] = A.m2_.s[0]*B.m0_.s[3] + A.m2_.s[1]*B.m1_.s[3] + A.m2_.s[2]*B.m2_.s[3] + A.m2_.s[3]*B.m3_.s[3];
+  tmp.m2_[0] = A.m2_[0]*B.m0_[0] + A.m2_[1]*B.m1_[0] + A.m2_[2]*B.m2_[0] + A.m2_[3]*B.m3_[0];
+  tmp.m2_[1] = A.m2_[0]*B.m0_[1] + A.m2_[1]*B.m1_[1] + A.m2_[2]*B.m2_[1] + A.m2_[3]*B.m3_[1];
+  tmp.m2_[2] = A.m2_[0]*B.m0_[2] + A.m2_[1]*B.m1_[2] + A.m2_[2]*B.m2_[2] + A.m2_[3]*B.m3_[2];
+  tmp.m2_[3] = A.m2_[0]*B.m0_[3] + A.m2_[1]*B.m1_[3] + A.m2_[2]*B.m2_[3] + A.m2_[3]*B.m3_[3];
 
   // Row 4
-  tmp.m3_.s[0] = A.m3_.s[0]*B.m0_.s[0] + A.m3_.s[1]*B.m1_.s[0] + A.m3_.s[2]*B.m2_.s[0] + A.m3_.s[3]*B.m3_.s[0];
-  tmp.m3_.s[1] = A.m3_.s[0]*B.m0_.s[1] + A.m3_.s[1]*B.m1_.s[1] + A.m3_.s[2]*B.m2_.s[1] + A.m3_.s[3]*B.m3_.s[1];
-  tmp.m3_.s[2] = A.m3_.s[0]*B.m0_.s[2] + A.m3_.s[1]*B.m1_.s[2] + A.m3_.s[2]*B.m2_.s[2] + A.m3_.s[3]*B.m3_.s[2];
-  tmp.m3_.s[3] = A.m3_.s[0]*B.m0_.s[3] + A.m3_.s[1]*B.m1_.s[3] + A.m3_.s[2]*B.m2_.s[3] + A.m3_.s[3]*B.m3_.s[3];
+  tmp.m3_[0] = A.m3_[0]*B.m0_[0] + A.m3_[1]*B.m1_[0] + A.m3_[2]*B.m2_[0] + A.m3_[3]*B.m3_[0];
+  tmp.m3_[1] = A.m3_[0]*B.m0_[1] + A.m3_[1]*B.m1_[1] + A.m3_[2]*B.m2_[1] + A.m3_[3]*B.m3_[1];
+  tmp.m3_[2] = A.m3_[0]*B.m0_[2] + A.m3_[1]*B.m1_[2] + A.m3_[2]*B.m2_[2] + A.m3_[3]*B.m3_[2];
+  tmp.m3_[3] = A.m3_[0]*B.m0_[3] + A.m3_[1]*B.m1_[3] + A.m3_[2]*B.m2_[3] + A.m3_[3]*B.m3_[3];
 
   return tmp;
 }

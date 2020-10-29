@@ -38,31 +38,23 @@
   \struct GGfloat33_t
   \brief Structure storing float 3 x 3 matrix
 */
-#ifdef __OPENCL_C_VERSION__
-typedef struct __attribute__((aligned (1))) GGfloat33_t
-#else
-typedef struct PACKED GGfloat33_t
-#endif
+typedef struct GGfloat33_t
 {
-  GGfloat3 m0_; /*!< Row 0 of matrix */
-  GGfloat3 m1_; /*!< Row 1 of matrix */
-  GGfloat3 m2_; /*!< Row 2 of matrix */
+  GGfloat m0_[3]; /*!< Row 0 of matrix */
+  GGfloat m1_[3]; /*!< Row 1 of matrix */
+  GGfloat m2_[3]; /*!< Row 2 of matrix */
 } GGfloat33; /*!< Using C convention name of struct to C++ (_t deletion) */
 
 /*!
   \struct GGfloat44_t
   \brief Structure storing float 4 x 4 matrix
 */
-#ifdef __OPENCL_C_VERSION__
-typedef struct __attribute__((aligned (1))) GGfloat44_t
-#else
-typedef struct PACKED GGfloat44_t
-#endif
+typedef struct GGfloat44_t
 {
-  GGfloat4 m0_; /*!< Row 0 of matrix */
-  GGfloat4 m1_; /*!< Row 1 of matrix */
-  GGfloat4 m2_; /*!< Row 2 of matrix */
-  GGfloat4 m3_; /*!< Row 3 of matrix */
+  GGfloat m0_[4]; /*!< Row 0 of matrix */
+  GGfloat m1_[4]; /*!< Row 1 of matrix */
+  GGfloat m2_[4]; /*!< Row 2 of matrix */
+  GGfloat m3_[4]; /*!< Row 3 of matrix */
 } GGfloat44; /*!< Using C convention name of struct to C++ (_t deletion) */
 
 #endif // End of GUARD_GGEMS_MATHS_GGEMSMATRIXTYPES_HH
