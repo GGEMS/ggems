@@ -39,7 +39,7 @@
 
 #include "GGEMS/global/GGEMSOpenCLManager.hh"
 
-typedef std::map<float, std::string> LabelToMaterialMap; /*!< Map of label value to material */
+typedef std::map<GGfloat, std::string> LabelToMaterialMap; /*!< Map of label value to material */
 
 /*!
   \class GGEMSVolumeCreatorManager

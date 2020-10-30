@@ -47,4 +47,14 @@ typedef struct GGEMSVoxelizedSolidData_t
   GGEMSOBB obb_geometry_; /*!< OBB storing border of voxelized solid and matrix of transformation */
 } GGEMSVoxelizedSolidData; /*!< Using C convention name of struct to C++ (_t deletion) */
 
+// #pragma pack(push, 1)
+// typedef struct TestStruct_t
+// {
+//   GGfloat toto0[4];
+//   GGfloat3 toto1;
+//   GGushort3 toto2;
+//   GGuchar3 toto3;
+// } TestStruct;
+// #pragma pack(pop)
+
 #endif // GUARD_GGEMS_GEOMETRIES_GGEMSVOXELIZEDSOLIDSTACK_HH
