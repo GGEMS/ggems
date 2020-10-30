@@ -39,9 +39,10 @@
   \brief OpenCL kernel computing distance between voxelized solid and particles
   \return no returned value
 */
-__kernel void particle_solid_distance_ggems_voxelized_solid(
-  __global GGEMSPrimaryParticles* primary_particle,
-  __global GGEMSVoxelizedSolidData const* voxelized_solid_data)
+kernel void particle_solid_distance_ggems_voxelized_solid(
+  global GGEMSPrimaryParticles* primary_particle,
+  global GGEMSVoxelizedSolidData const* voxelized_solid_data
+)
 {
   // Getting index of thread
   GGint const kParticleID = get_global_id(0);

@@ -58,10 +58,6 @@ SET(OPENCL_KERNEL_PATH ${PROJECT_SOURCE_DIR}/src CACHE PATH "Path to the OpenCL 
 SET(GGEMS_PATH ${PROJECT_SOURCE_DIR} CACHE PATH "Path to the GGEMS project repository")
 
 #-------------------------------------------------------------------------------
-# Set a maximum of particle in a buffer
-SET(MAXIMUM_PARTICLES "5000000" CACHE STRING "Maximum of particles simulated in a buffer")
-
-#-------------------------------------------------------------------------------
 # Add an option for using cache kernel compilation on OpenCL device
 # Set to OFF to be sure your own kernel modification are re-compiled
 OPTION(OPENCL_CACHE_KERNEL_COMPILATION "Using kernel cache compilation" ON)

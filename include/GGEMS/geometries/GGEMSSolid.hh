@@ -181,6 +181,8 @@ class GGEMS_EXPORT GGEMSSolid
     std::weak_ptr<cl::Kernel> kernel_track_through_cl_; /*!< OpenCL kernel tracking particles through a solid */
     std::string tracking_kernel_option_; /*!< Preprocessor option for tracking */
     std::unique_ptr<GGEMSGeometryTransformation> geometry_transformation_; /*!< Pointer storing the geometry transformation */
+
+    std::shared_ptr<cl::Buffer> test_cl_;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
