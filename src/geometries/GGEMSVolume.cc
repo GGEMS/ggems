@@ -60,7 +60,7 @@ void GGEMSVolume::SetLabelValue(GGfloat const& label_value)
   label_value_ = label_value;
 }
 
-void GGEMSVolume::SetMaterial(char const* material)
+void GGEMSVolume::SetMaterial(std::string const& material)
 {
   // Get the volume creator manager
   GGEMSVolumeCreatorManager& volume_creator_manager = GGEMSVolumeCreatorManager::GetInstance();
@@ -73,7 +73,7 @@ void GGEMSVolume::SetMaterial(char const* material)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSVolume::SetPosition(GGfloat const& pos_x, GGfloat const& pos_y, GGfloat const& pos_z, char const* unit)
+void GGEMSVolume::SetPosition(GGfloat const& pos_x, GGfloat const& pos_y, GGfloat const& pos_z, std::string const& unit)
 {
   positions_.s[0] = DistanceUnit(pos_x, unit);
   positions_.s[1] = DistanceUnit(pos_y, unit);

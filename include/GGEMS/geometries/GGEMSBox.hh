@@ -41,9 +41,13 @@ class GGEMS_EXPORT GGEMSBox : public GGEMSVolume
 {
   public:
     /*!
+      \param width - Width of the box
+      \param height - Height of the box
+      \param depth - Depth of the box
+      \param unit - Unit of distance
       \brief GGEMSBox constructor
     */
-    GGEMSBox(void);
+    GGEMSBox(GGfloat const& width, GGfloat const& height, GGfloat const& depth, std::string const& unit = "mm");
 
     /*!
       \brief GGEMSBox destructor
@@ -79,30 +83,6 @@ class GGEMS_EXPORT GGEMSBox : public GGEMSVolume
     GGEMSBox& operator=(GGEMSBox const&& box) = delete;
 
     /*!
-      \fn void SetHeight(GGfloat const& height, char const* unit = "mm")
-      \param height - height of the box
-      \param unit - unit of the distance
-      \brief set the height of the box
-    */
-    void SetHeight(GGfloat const& height, char const* unit = "mm");
-
-    /*!
-      \fn void SetWidth(GGfloat const& width, char const* unit = "mm")
-      \param width - width of the box
-      \param unit - unit of the distance
-      \brief set the width of the box
-    */
-    void SetWidth(GGfloat const& width, char const* unit = "mm");
-
-    /*!
-      \fn void SetDepth(GGfloat const& depth, char const* unit = "mm")
-      \param depth - depth of the box
-      \param unit - unit of the distance
-      \brief set the depth of the box
-    */
-    void SetDepth(GGfloat const& depth, char const* unit = "mm");
-
-    /*!
       \fn void Initialize(void) override
       \brief Initialize the solid and store it in Phantom creator manager
     */
@@ -128,11 +108,15 @@ class GGEMS_EXPORT GGEMSBox : public GGEMSVolume
 };
 
 /*!
-  \fn GGEMSBox* create_box(void)
+  \fn GGEMSBox* create_box(GGfloat const width, GGfloat const height, GGfloat const depth)
+  \param width - Width of the box
+  \param height - Height of the box
+  \param depth - Depth of the box
+  \param unit - unit of the distance
   \return the pointer on the singleton
   \brief Create instance of GGEMSBox
 */
-extern "C" GGEMS_EXPORT GGEMSBox* create_box(void);
+extern "C" GGEMS_EXPORT GGEMSBox* create_box(GGfloat const width, GGfloat const height, GGfloat const depth, char const* unit = "mm");
 
 /*!
   \fn GGEMSBox* delete_tube(GGEMSBox* box)
@@ -142,43 +126,7 @@ extern "C" GGEMS_EXPORT GGEMSBox* create_box(void);
 extern "C" GGEMS_EXPORT void delete_box(GGEMSBox* box);
 
 /*!
-  \fn void set_height_box(GGEMSBox* box, GGfloat const height, char const* unit)
-  \param box - pointer on the solid box
-  \param height - height of the box
-  \param unit - unit of the distance
-  \brief Set the height of the box
-*/
-extern "C" GGEMS_EXPORT void set_height_box(GGEMSBox* box, GGfloat const height, char const* unit);
-
-/*!
-  \fn void set_width_box(GGEMSBox* box, GGfloat const width, char const* unit)
-  \param box - pointer on the solid box
-  \param width - width of the box
-  \param unit - unit of the distance
-  \brief Set the width of the box
-*/
-extern "C" GGEMS_EXPORT void set_width_box(GGEMSBox* box, GGfloat const width, char const* unit);
-
-/*!
-  \fn void set_depth_box(GGEMSBox* box, GGfloat const depth, char const* unit)
-  \param box - pointer on the solid box
-  \param depth - depth of the box
-  \param unit - unit of the distance
-  \brief Set the depth of the box
-*/
-extern "C" GGEMS_EXPORT void set_depth_box(GGEMSBox* box, GGfloat const depth, char const* unit);
-
-/*!
-  \fn void set_height_box(GGEMSBox* box, GGfloat const height, char const* unit)
-  \param box - pointer on the solid box
-  \param height - height of the box
-  \param unit - unit of the distance
-  \brief Set the height of the box
-*/
-extern "C" GGEMS_EXPORT void set_height_box(GGEMSBox* box, GGfloat const height, char const* unit);
-
-/*!
-  \fn void set_position_box(GGEMSBox* box, GGfloat const pos_x, GGfloat const pos_y, GGfloat const pos_z, char const* unit)
+  \fn void set_position_box(GGEMSBox* box, GGfloat const pos_x, GGfloat const pos_y, GGfloat const pos_z, char const* unit = "mm")
   \param box - pointer on the solid box
   \param pos_x - radius of the box
   \param pos_y - radius of the box
@@ -186,7 +134,7 @@ extern "C" GGEMS_EXPORT void set_height_box(GGEMSBox* box, GGfloat const height,
   \param unit - unit of the distance
   \brief Set the position of the box
 */
-extern "C" GGEMS_EXPORT void set_position_box(GGEMSBox* box, GGfloat const pos_x, GGfloat const pos_y, GGfloat const pos_z, char const* unit);
+extern "C" GGEMS_EXPORT void set_position_box(GGEMSBox* box, GGfloat const pos_x, GGfloat const pos_y, GGfloat const pos_z, char const* unit = "mm");
 
 /*!
   \fn void set_material_box(GGEMSBox* box, char const* material)

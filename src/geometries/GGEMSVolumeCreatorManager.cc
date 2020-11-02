@@ -45,7 +45,6 @@ GGEMSVolumeCreatorManager::GGEMSVolumeCreatorManager(void)
   volume_dimensions_(GGuint3{{0, 0, 0}}),
   number_elements_(0),
   data_type_("MET_FLOAT"),
-  material_("Air"),
   output_image_filename_(""),
   output_range_to_material_filename_(""),
   voxelized_volume_cl_(nullptr)
@@ -66,7 +65,7 @@ GGEMSVolumeCreatorManager::~GGEMSVolumeCreatorManager(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSVolumeCreatorManager::SetElementSizes(GGfloat const& voxel_width, GGfloat const& voxel_height, GGfloat const& voxel_depth, char const* unit)
+void GGEMSVolumeCreatorManager::SetElementSizes(GGfloat const& voxel_width, GGfloat const& voxel_height, GGfloat const& voxel_depth, std::string const& unit)
 {
   element_sizes_.s[0] = DistanceUnit(voxel_width, unit);
   element_sizes_.s[1] = DistanceUnit(voxel_height, unit);
@@ -89,12 +88,10 @@ void GGEMSVolumeCreatorManager::SetVolumeDimensions(GGuint const& volume_width, 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSVolumeCreatorManager::SetMaterial(char const* material)
+void GGEMSVolumeCreatorManager::SetMaterial(std::string const& material)
 {
-  material_ = material;
-
   // Store the material in map
-  label_to_material_.insert(std::make_pair(0.0f, material_));
+  label_to_material_.insert(std::make_pair(0.0f, material));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -141,7 +138,7 @@ void GGEMSVolumeCreatorManager::AddLabelAndMaterial(GGfloat const& label, std::s
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSVolumeCreatorManager::SetOutputImageFilename(char const* output_image_filename)
+void GGEMSVolumeCreatorManager::SetOutputImageFilename(std::string const& output_image_filename)
 {
   output_image_filename_ = output_image_filename;
 }
@@ -150,7 +147,7 @@ void GGEMSVolumeCreatorManager::SetOutputImageFilename(char const* output_image_
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSVolumeCreatorManager::SetRangeToMaterialDataFilename(char const* output_range_to_material_filename)
+void GGEMSVolumeCreatorManager::SetRangeToMaterialDataFilename(std::string const& output_range_to_material_filename)
 {
   output_range_to_material_filename_ = output_range_to_material_filename;
 

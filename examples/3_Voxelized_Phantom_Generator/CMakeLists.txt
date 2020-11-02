@@ -16,41 +16,27 @@
 # *                                                                      *
 # ************************************************************************
 
-import ctypes
-import sys
-import os
+#-------------------------------------------------------------------------------
+# CMakeLists.txt
+#
+# CMakeLists.txt - Compile and build the 3_Voxelized_Phantom_Generator example
+#
+# Authors :
+#   - Julien Bert <julien.bert@univ-brest.fr>
+#   - Didier Benoit <didier.benoit@inserm.fr>
+#
+# Generated on : 2/11/2020
+#-------------------------------------------------------------------------------
 
-def ggems_lib_file_path(filename):
-    """ Search for GGEMS lib in PYTHONPATH
-    """
-    pythonpath = os.environ.get("PYTHONPATH")
-    if pythonpath:
-        for d in pythonpath.split(os.pathsep):
-            filepath = os.path.join(d, filename)
-            if os.path.isfile(filepath):
-                return filepath
-    return None
+#-------------------------------------------------------------------------------
+# Defining the project
+PROJECT(GenerateVolume)
 
-# ------------------------------------------------------------------------------
-# Get the location of ggems library and set verbosity
-if sys.platform == "linux":
-    ggems_lib = ctypes.cdll.LoadLibrary(ggems_lib_file_path('libggems.so'))
-elif sys.platform == "darwin":
-    ggems_lib = ctypes.cdll.LoadLibrary(ggems_lib_file_path('libggems.dylib'))
-elif sys.platform == "win32":
-    ggems_lib = ctypes.cdll.LoadLibrary(ggems_lib_file_path('libggems.dll'))
+#-------------------------------------------------------------------------------
+# Creating the executable
+ADD_EXECUTABLE(generate_volume generate_volume.cc)
+TARGET_LINK_LIBRARIES(generate_volume ggems)
 
-
-class GGEMSVerbosity(object):
-    """Set the verbosity of infos in GGEMS
-    """
-    def __init__(self, val):
-        ggems_lib.set_ggems_verbose.argtypes = [ctypes.c_int]
-        ggems_lib.set_ggems_verbose.restype = ctypes.c_void_p
-
-        ggems_lib.set_ggems_verbose(val)
-
-
-# ------------------------------------------------------------------------------
-# Setting global verbosity to 0
-GGEMSVerbosity(0)
+#-------------------------------------------------------------------------------
+# Copy executable to ggems bin folder
+INSTALL(TARGETS generate_volume DESTINATION ${PROJECT_SOURCE_DIR})

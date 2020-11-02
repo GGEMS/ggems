@@ -99,14 +99,14 @@ class GGEMS_EXPORT GGEMSVolumeCreatorManager
     GGEMSVolumeCreatorManager& operator=(GGEMSVolumeCreatorManager const&& volume_creator_manager) = delete;
 
     /*!
-      \fn void SetElementSizes(GGfloat const& voxel_width, GGfloat const& voxel_height, GGfloat const& voxel_depth, char const* unit = "mm")
+      \fn void SetElementSizes(GGfloat const& voxel_width, GGfloat const& voxel_height, GGfloat const& voxel_depth, std::string const& unit = "mm")
       \param voxel_width - voxel width
       \param voxel_height - voxel height
       \param voxel_depth - voxel depth
       \param unit - unit of the distance
       \brief Set the size of the elements for the voxelized volume
     */
-    void SetElementSizes(GGfloat const& voxel_width, GGfloat const& voxel_height, GGfloat const& voxel_depth, char const* unit = "mm");
+    void SetElementSizes(GGfloat const& voxel_width, GGfloat const& voxel_height, GGfloat const& voxel_depth, std::string const& unit = "mm");
 
     /*!
       \fn GGfloat3 GetElementsSizes(void) const
@@ -132,11 +132,11 @@ class GGEMS_EXPORT GGEMSVolumeCreatorManager
     inline GGuint3 GetVolumeDimensions(void) const {return volume_dimensions_;};
 
     /*!
-      \fn void SetMaterial(char const* material)
+      \fn void SetMaterial(std::string const& material)
       \param material - name of the material
       \brief set the material, Air by default
     */
-    void SetMaterial(char const* material = "Air");
+    void SetMaterial(std::string const& material = "Air");
 
     /*!
       \fn GGulong GetNumberElements(void) const
@@ -160,18 +160,18 @@ class GGEMS_EXPORT GGEMSVolumeCreatorManager
     inline cl::Buffer* GetVoxelizedVolume(void) const {return voxelized_volume_cl_.get();}
 
     /*!
-      \fn void SetOutputImageFilename(char const* output_image_filename)
+      \fn void SetOutputImageFilename(std::string const& output_image_filename)
       \param output_image_filename - output image filename
       \brief Set the filename of MHD output
     */
-    void SetOutputImageFilename(char const* output_image_filename);
+    void SetOutputImageFilename(std::string const& output_image_filename);
 
     /*!
-      \fn void SetRangeToMaterialDataFilename(char const* output_range_to_material_filename)
+      \fn void SetRangeToMaterialDataFilename(std::string const& output_range_to_material_filename)
       \param output_range_to_material_filename - output range to material filename
       \brief Set the filename of range to material data
     */
-    void SetRangeToMaterialDataFilename(char const* output_range_to_material_filename);
+    void SetRangeToMaterialDataFilename(std::string const& output_range_to_material_filename);
 
     /*!
       \fn void AddLabelAndMaterial(GGfloat const& label, std::string const& material)
@@ -232,7 +232,6 @@ class GGEMS_EXPORT GGEMSVolumeCreatorManager
     GGuint3 volume_dimensions_; /*!< Dimension of volume X, Y, Z */
     GGulong number_elements_; /*!< Total number of elements */
     std::string data_type_; /*!< Type of data */
-    std::string material_; /*!< Material for background, air by default */
     std::string output_image_filename_; /*!< Output MHD where is stored the voxelized volume */
     std::string output_range_to_material_filename_; /*!< Output text file with range to material data */
     std::shared_ptr<cl::Buffer> voxelized_volume_cl_; /*!< Voxelized volume on OpenCL device */

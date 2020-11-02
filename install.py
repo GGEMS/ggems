@@ -49,7 +49,7 @@ if len(sys.argv) > 1:
 # Set the GGEMS folder (GGEMS source folder), the build folder (where GGEMS will be compiled) and the install folder
 GGEMS_FOLDER = os.path.abspath(os.path.dirname(sys.argv[0]))
 BUILD_FOLDER = os.path.join(os.path.dirname(GGEMS_FOLDER),"GGEMS_OpenCL_build")
-INSTALL_FOLDER = os.path.expanduser("~")
+INSTALL_FOLDER = os.path.expanduser("~\\bin")
 
 # ------------------------------------------------------------------------------
 # Print infos
@@ -89,6 +89,7 @@ cmake_cmd += " -DCMAKE_BUILD_TYPE=Release"
 cmake_cmd += " -DOPENCL_KERNEL_PATH=" + GGEMS_FOLDER + "/src/kernels"
 cmake_cmd += " -DGGEMS_PATH=" + GGEMS_FOLDER
 cmake_cmd += " -DCMAKE_VERBOSE_MAKEFILE=OFF"
+cmake_cmd += " -DBUILD_EXAMPLES=ON"
 cmake_cmd += " -DOPENCL_CACHE_KERNEL_COMPILATION=OFF"
 cmake_cmd += " -DCOMPILER=" + os.environ['COMPILER']
 cmake_cmd += " -DCMAKE_INSTALL_PREFIX=" + INSTALL_FOLDER
