@@ -86,21 +86,21 @@ class GGEMS_EXPORT GGEMSVolume
     void SetLabelValue(GGfloat const& label_value);
 
     /*!
-      \fn void SetPosition(GGfloat const& pos_x, GGfloat const& pos_y, GGfloat const& pos_z, char const* unit = "mm")
+      \fn void SetPosition(GGfloat const& pos_x, GGfloat const& pos_y, GGfloat const& pos_z, std::string const& unit = "mm")
       \param pos_x - position of analytical phantom in X
       \param pos_y - position of analytical phantom in Y
       \param pos_z - position of analytical phantom in Z
       \param unit - unit of the distance
       \brief Set the solid phantom position
     */
-    void SetPosition(GGfloat const& pos_x, GGfloat const& pos_y, GGfloat const& pos_z, char const* unit = "mm");
+    void SetPosition(GGfloat const& pos_x, GGfloat const& pos_y, GGfloat const& pos_z, std::string const& unit = "mm");
 
     /*!
-      \fn void SetMaterial(char const* material)
+      \fn void SetMaterial(std::string const& material)
       \param material - name of the material
       \brief set the material, Air by default
     */
-    void SetMaterial(char const* material);
+    void SetMaterial(std::string const& material);
 
     /*!
       \fn void Initialize(void)

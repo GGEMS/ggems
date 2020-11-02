@@ -58,6 +58,10 @@ SET(OPENCL_KERNEL_PATH ${PROJECT_SOURCE_DIR}/src CACHE PATH "Path to the OpenCL 
 SET(GGEMS_PATH ${PROJECT_SOURCE_DIR} CACHE PATH "Path to the GGEMS project repository")
 
 #-------------------------------------------------------------------------------
+# Setting the GGEMSHOME_PATH variable
+SET(PYTHON_MODULE_PATH ${PROJECT_SOURCE_DIR}/python_module CACHE PATH "Path to the python module repository")
+
+#-------------------------------------------------------------------------------
 # Add an option for using cache kernel compilation on OpenCL device
 # Set to OFF to be sure your own kernel modification are re-compiled
 OPTION(OPENCL_CACHE_KERNEL_COMPILATION "Using kernel cache compilation" ON)
@@ -68,6 +72,11 @@ ENDIF()
 #-------------------------------------------------------------------------------
 # Defining a configuration file
 CONFIGURE_FILE("${PROJECT_SOURCE_DIR}/cmake-config/GGEMSConfiguration.hh.in" "${PROJECT_SOURCE_DIR}/include/GGEMS/global/GGEMSConfiguration.hh" @ONLY)
+
+#-------------------------------------------------------------------------------
+# Add an option for examples and benchmark building
+OPTION(BUILD_EXAMPLES "Build GGEMS examples" OFF)
+#OPTION( BUILD_BENCHMARKS "Build TORASET benchmarks" OFF )
 
 #-------------------------------------------------------------------------------
 # Compilation options Windows
@@ -180,7 +189,14 @@ SET_TARGET_PROPERTIES(ggems PROPERTIES PREFIX "lib")
 # DLL export for windows
 GENERATE_EXPORT_HEADER(ggems EXPORT_FILE_NAME ${PROJECT_SOURCE_DIR}/include/GGEMS/global/GGEMSExport.hh)
 
+#------------------------------------------------------------------------------
+# Building examples
+IF(BUILD_EXAMPLES )
+  ADD_SUBDIRECTORY(examples)
+ENDIF()
+
 #-------------------------------------------------------------------------------
 # Installing GGEMS library
-INSTALL(TARGETS ggems DESTINATION lib)
-INSTALL(DIRECTORY include/GGEMS DESTINATION include)
+INSTALL(TARGETS ggems DESTINATION ggems/lib)
+INSTALL(DIRECTORY include/GGEMS DESTINATION ggems/include)
+INSTALL(DIRECTORY python_module DESTINATION ggems FILES_MATCHING PATTERN "*.py")

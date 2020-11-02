@@ -129,7 +129,7 @@ void GGEMSMaterialsDatabaseManager::LoadMaterialsDatabase(std::string const& fil
 
 void GGEMSMaterialsDatabaseManager::LoadChemicalElements(void)
 {
-  GGcout("GGEMSMaterialsDatabaseManager", "LoadChemicalElements", 0) << "Loading chemical elements in GGEMS..." << GGendl;
+  GGcout("GGEMSMaterialsDatabaseManager", "LoadChemicalElements", 1) << "Loading chemical elements in GGEMS..." << GGendl;
 
   // Name, Z (atomic number), M (molar mass g/mol), I (mean excitation energy eV), state, index for density correction
   AddChemicalElements("Hydrogen",        1,   1.00794258759021f,   19.2f,   GAS,  1);

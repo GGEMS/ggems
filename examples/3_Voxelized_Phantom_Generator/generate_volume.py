@@ -28,20 +28,18 @@ opencl_manager.set_context_index(0)  # Activate a context
 
 # ------------------------------------------------------------------------------
 # STEP 2: Initializing volume creator manager and setting the informations about the global voxelized volume
-volume_creator_manager.set_dimensions(120, 120, 120)
-volume_creator_manager.set_element_sizes(1.0, 1.0, 1.0, 'mm')
-volume_creator_manager.set_output('data/waterbox')
-volume_creator_manager.set_range_output('data/range_waterbox')
+volume_creator_manager.set_dimensions(500, 500, 128)
+volume_creator_manager.set_element_sizes(0.5, 0.5, 0.5, "mm")
+volume_creator_manager.set_output('data/volume')
+volume_creator_manager.set_range_output('data/range_volume')
 volume_creator_manager.set_material('Air')
 volume_creator_manager.set_data_type('MET_INT')
 volume_creator_manager.initialize()
 
 # ------------------------------------------------------------------------------
-# STEP 3: Designing analytical volume(s)
-box = GGEMSBox()
-box.set_height(100.0, 'mm')
-box.set_width(100.0, 'mm')
-box.set_depth(100.0, 'mm')
+# STEP 3: Designing volume(s)
+# Creating a box
+box = GGEMSBox(24.0, 36.0, 12.0, "mm")
 box.set_position(0.0, 0.0, 0.0, 'mm')
 box.set_label_value(1)
 box.set_material('Water')
