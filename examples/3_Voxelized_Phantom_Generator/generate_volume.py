@@ -28,7 +28,7 @@ opencl_manager.set_context_index(0)  # Activate a context
 
 # ------------------------------------------------------------------------------
 # STEP 2: Initializing volume creator manager and setting the informations about the global voxelized volume
-volume_creator_manager.set_dimensions(500, 500, 128)
+volume_creator_manager.set_dimensions(800, 800, 324)
 volume_creator_manager.set_element_sizes(0.5, 0.5, 0.5, "mm")
 volume_creator_manager.set_output('data/volume')
 volume_creator_manager.set_range_output('data/range_volume')

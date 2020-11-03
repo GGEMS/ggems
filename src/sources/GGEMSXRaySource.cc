@@ -280,9 +280,6 @@ void GGEMSXRaySource::FillEnergy(void)
   // Get the OpenCL manager
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
-  // Get the RAM manager
-  GGEMSRAMManager& ram_manager = GGEMSRAMManager::GetInstance();
-
   // Monoenergy mode
   if (is_monoenergy_mode_) {
     number_of_energy_bins_ = 2;
@@ -290,11 +287,9 @@ void GGEMSXRaySource::FillEnergy(void)
     // Allocation of memory on OpenCL device
     // Energy
     energy_spectrum_cl_ = opencl_manager.Allocate(nullptr, 2 * sizeof(GGfloat), CL_MEM_READ_WRITE);
-    ram_manager.AddSourceRAMMemory(2 * sizeof(GGfloat));
 
     // Cumulative distribution function
     cdf_cl_ = opencl_manager.Allocate(nullptr, 2 * sizeof(GGfloat), CL_MEM_READ_WRITE);
-    ram_manager.AddSourceRAMMemory(2 * sizeof(GGfloat));
 
     // Get the energy pointer on OpenCL device
     GGfloat* energy_spectrum_device = opencl_manager.GetDeviceBuffer<GGfloat>(energy_spectrum_cl_.get(), 2 * sizeof(GGfloat));
@@ -328,11 +323,9 @@ void GGEMSXRaySource::FillEnergy(void)
     // Allocation of memory on OpenCL device
     // Energy
     energy_spectrum_cl_ = opencl_manager.Allocate(nullptr, number_of_energy_bins_ * sizeof(GGfloat), CL_MEM_READ_WRITE);
-    ram_manager.AddSourceRAMMemory(number_of_energy_bins_ * sizeof(GGfloat));
 
     // Cumulative distribution function
     cdf_cl_ = opencl_manager.Allocate(nullptr, number_of_energy_bins_ * sizeof(GGfloat), CL_MEM_READ_WRITE);
-    ram_manager.AddSourceRAMMemory(number_of_energy_bins_ * sizeof(GGfloat));
 
     // Get the energy pointer on OpenCL device
     GGfloat* energy_spectrum_device = opencl_manager.GetDeviceBuffer<GGfloat>(energy_spectrum_cl_.get(), number_of_energy_bins_ * sizeof(GGfloat));

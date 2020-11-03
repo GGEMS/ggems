@@ -125,10 +125,6 @@ void GGEMSParticles::AllocatePrimaryParticles(void)
   // Get the OpenCL manager
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
-  // Get the RAM manager
-  GGEMSRAMManager& ram_manager = GGEMSRAMManager::GetInstance();
-
   // Allocation of memory on OpenCL device
   primary_particles_cl_ = opencl_manager.Allocate(nullptr, sizeof(GGEMSPrimaryParticles), CL_MEM_READ_WRITE);
-  ram_manager.AddParticleRAMMemory(sizeof(GGEMSPrimaryParticles));
 }

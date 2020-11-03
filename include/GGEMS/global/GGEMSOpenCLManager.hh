@@ -171,6 +171,20 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     inline GGulong GetMaxRAMMemoryOnActivatedContext(void) const {return device_global_mem_size_[context_index_];}
 
     /*!
+      \fn inline GGulong GetMaxBufferAllocationSize(void) const
+      \return Max buffer allocation size
+      \brief Get the max buffer size in bytes on activated OpenCL context
+    */
+    inline GGulong GetMaxBufferAllocationSize(void) const {return device_mem_alloc_size_[context_index_];}
+
+    /*!
+      \fn inline std::size_t GetMaxWorkGroupSize(void) const
+      \return Max work group size
+      \brief Get the max work group size on activated OpenCL context
+    */
+    inline std::size_t GetMaxWorkGroupSize(void) const { return device_max_work_group_size_[context_index_];}
+
+    /*!
       \fn std::string GetNameOfActivatedContext(void) const
       \return name of activated context
       \brief Get the name of the activated context
@@ -218,6 +232,14 @@ class GGEMS_EXPORT GGEMSOpenCLManager
       \return an unique pointer to an OpenCL buffer
     */
     std::unique_ptr<cl::Buffer> Allocate(void* host_ptr, std::size_t size, cl_mem_flags flags);
+
+    /*!
+      \fn std::unique_ptr<cl::Buffer> Allocate(void* host_ptr, std::size_t size, cl_mem_flags flags)
+      \param host_ptr - pointer to buffer in host memory
+      \param size - size of the buffer in bytes
+      \brief Deallocation of OpenCL memory
+    */
+    void Deallocate(std::shared_ptr<cl::Buffer> buffer, std::size_t size);
 
     /*!
       \return the pointer on host memory on write/read mode
@@ -309,7 +331,6 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     std::vector<GGuint> device_max_compute_units_; /*!< Max compute units */
     std::vector<GGulong> device_constant_buffer_size_; /*!< Constant buffer size */
     std::vector<GGulong> device_mem_alloc_size_; /*!< Memory allocation size */
-    std::vector<GGuint> device_native_vector_width_double_; /*!< Native size of double */
     std::vector<std::size_t> device_printf_buffer_size_; /*!< Size of buffer for printf in kernel */
 
     // OpenCL compilation options

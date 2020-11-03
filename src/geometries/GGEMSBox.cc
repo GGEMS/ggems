@@ -126,31 +126,38 @@ void GGEMSBox::Draw(void)
   // Get parameters from phantom creator
   GGfloat3 const kVoxelSizes = volume_creator_manager.GetElementsSizes();
   GGuint3 const kPhantomDimensions = volume_creator_manager.GetVolumeDimensions();
-  GGulong const kNumberThreads = volume_creator_manager.GetNumberElements();
+  GGuint const kNumberThreads = volume_creator_manager.GetNumberElements();
   cl::Buffer* voxelized_phantom = volume_creator_manager.GetVoxelizedVolume();
 
   // Set parameters for kernel
   std::shared_ptr<cl::Kernel> kernel_cl = kernel_draw_volume_cl_.lock();
-  kernel_cl->setArg(0, kVoxelSizes);
-  kernel_cl->setArg(1, kPhantomDimensions);
-  kernel_cl->setArg(2, positions_);
-  kernel_cl->setArg(3, label_value_);
-  kernel_cl->setArg(4, height_);
-  kernel_cl->setArg(5, width_);
-  kernel_cl->setArg(6, depth_);
-  kernel_cl->setArg(7, *voxelized_phantom);
+  kernel_cl->setArg(0, kNumberThreads);
+  kernel_cl->setArg(1, kVoxelSizes);
+  kernel_cl->setArg(2, kPhantomDimensions);
+  kernel_cl->setArg(3, positions_);
+  kernel_cl->setArg(4, label_value_);
+  kernel_cl->setArg(5, height_);
+  kernel_cl->setArg(6, width_);
+  kernel_cl->setArg(7, depth_);
+  kernel_cl->setArg(8, *voxelized_phantom);
 
-  // Define the number of work-item to launch
-  cl::NDRange global(kNumberThreads);
+  // Get number of max work group size
+  std::size_t const kMaxWorkGroupSize = opencl_manager.GetMaxWorkGroupSize();
+
+  // Compute work item number
+  std::size_t const kWorkItem = kNumberThreads + (kMaxWorkGroupSize - kNumberThreads%kMaxWorkGroupSize);
+
+  cl::NDRange global(kWorkItem);
   cl::NDRange offset(0);
+  cl::NDRange local(kMaxWorkGroupSize);
 
   // Launching kernel
-  cl_int kernel_status = p_queue_cl->enqueueNDRangeKernel(*kernel_cl, offset, global, cl::NullRange, nullptr, p_event_cl);
+  cl_int kernel_status = p_queue_cl->enqueueNDRangeKernel(*kernel_cl, offset, global, local, nullptr, p_event_cl);
   opencl_manager.CheckOpenCLError(kernel_status, "GGEMSBox", "Draw Box");
   p_queue_cl->finish(); // Wait until the kernel status is finish
 
   // Displaying time in kernel
-  opencl_manager.DisplayElapsedTimeInKernel("Draw Box");
+  opencl_manager.DisplayElapsedTimeInKernel("draw_ggems_box");
 }
 
 ////////////////////////////////////////////////////////////////////////////////

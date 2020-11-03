@@ -42,7 +42,8 @@
   \param voxelized_phantom - buffer storing voxelized phantom
   \brief Draw box solid in voxelized image
 */
-__kernel void draw_ggems_box(
+kernel void draw_ggems_box(
+  GGuint const thread_id_limit,
   GGfloat3 const element_sizes,
   GGuint3 const phantom_dimensions,
   GGfloat3 const positions,
@@ -51,26 +52,29 @@ __kernel void draw_ggems_box(
   GGfloat const width,
   GGfloat const depth,
   #ifdef MET_CHAR
-  __global GGchar* voxelized_phantom
+  global GGchar* voxelized_phantom
   #elif MET_UCHAR
-  __global GGuchar* voxelized_phantom
+  global GGuchar* voxelized_phantom
   #elif MET_SHORT
-  __global GGshort* voxelized_phantom
+  global GGshort* voxelized_phantom
   #elif MET_USHORT
-  __global GGushort* voxelized_phantom
+  global GGushort* voxelized_phantom
   #elif MET_INT
-  __global GGint* voxelized_phantom
+  global GGint* voxelized_phantom
   #elif MET_UINT
-  __global GGuint* voxelized_phantom
+  global GGuint* voxelized_phantom
   #elif MET_FLOAT
-  __global GGfloat* voxelized_phantom
+  global GGfloat* voxelized_phantom
   #else
   #warning "Type Unknown, please specified a type by compiling!!!"
   #endif
 )
 {
   // Getting index of thread
-  GGint const kVoxelID = get_global_id(0);
+  GGint const kGlobalVoxelID = get_global_id(0);
+
+  // Return if index > to thread limit
+  if (kGlobalVoxelID >= thread_id_limit) return;
 
   // Get dimension of voxelized phantom
   GGuint const kX = phantom_dimensions.x;
@@ -88,19 +92,19 @@ __kernel void draw_ggems_box(
   GGfloat const kPosIsoZ = positions.z;
 
   // Radius square and half of height
-  GGfloat const kHalfHeight = height / 2.0;
-  GGfloat const kHalfWidth = width / 2.0;
-  GGfloat const kHalfDepth = depth / 2.0;
+  GGfloat const kHalfHeight = height / 2.0f;
+  GGfloat const kHalfWidth = width / 2.0f;
+  GGfloat const kHalfDepth = depth / 2.0f;
 
   // Get index i, j and k of current voxel
-  GGuint const j = (kVoxelID % (kX * kY)) / kX;
-  GGuint const i = (kVoxelID % (kX * kY)) - j * kX;
-  GGuint const k = kVoxelID / (kX * kY);
+  GGuint const j = (kGlobalVoxelID % (kX * kY)) / kX;
+  GGuint const i = (kGlobalVoxelID % (kX * kY)) - j * kX;
+  GGuint const k = kGlobalVoxelID / (kX * kY);
 
   // Get the coordinates of the current voxel
-  GGfloat x = (kSizeX / 2.0) * (1.0 - (GGfloat)kX + 2.0 * i);
-  GGfloat y = (kSizeY / 2.0) * (1.0 - (GGfloat)kY + 2.0 * j);
-  GGfloat z = (kSizeZ / 2.0) * (1.0 - (GGfloat)kZ + 2.0 * k);
+  GGfloat x = (kSizeX / 2.0f) * (1.0f - (GGfloat)kX + 2.0f * i);
+  GGfloat y = (kSizeY / 2.0f) * (1.0f - (GGfloat)kY + 2.0f * j);
+  GGfloat z = (kSizeZ / 2.0f) * (1.0f - (GGfloat)kZ + 2.0f * k);
 
   // Apply solid isocenter
   x -= kPosIsoX;
@@ -112,19 +116,19 @@ __kernel void draw_ggems_box(
     if (y <= kHalfHeight && y >= -kHalfHeight) {
       if (x <= kHalfWidth && x >= -kHalfWidth) {
         #ifdef MET_CHAR
-        voxelized_phantom[kVoxelID] = (GGchar)label_value;
+        voxelized_phantom[kGlobalVoxelID] = (GGchar)label_value;
         #elif MET_UCHAR
-        voxelized_phantom[kVoxelID] = (GGuchar)label_value;
+        voxelized_phantom[kGlobalVoxelID] = (GGuchar)label_value;
         #elif MET_SHORT
-        voxelized_phantom[kVoxelID] = (GGshort)label_value;
+        voxelized_phantom[kGlobalVoxelID] = (GGshort)label_value;
         #elif MET_USHORT
-        voxelized_phantom[kVoxelID] = (GGushort)label_value;
+        voxelized_phantom[kGlobalVoxelID] = (GGushort)label_value;
         #elif MET_INT
-        voxelized_phantom[kVoxelID] = (GGint)label_value;
+        voxelized_phantom[kGlobalVoxelID] = (GGint)label_value;
         #elif MET_UINT
-        voxelized_phantom[kVoxelID] = (GGuint)label_value;
+        voxelized_phantom[kGlobalVoxelID] = (GGuint)label_value;
         #elif MET_FLOAT
-        voxelized_phantom[kVoxelID] = (GGfloat)label_value;
+        voxelized_phantom[kGlobalVoxelID] = (GGfloat)label_value;
         #endif
       }
     }

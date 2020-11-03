@@ -62,7 +62,6 @@ GGEMSOpenCLManager::GGEMSOpenCLManager(void)
   device_max_compute_units_(0),
   device_constant_buffer_size_(0),
   device_mem_alloc_size_(0),
-  device_native_vector_width_double_(0),
   device_printf_buffer_size_(0),
   build_options_(""),
   context_index_(0),
@@ -120,7 +119,6 @@ GGEMSOpenCLManager::GGEMSOpenCLManager(void)
   device_max_compute_units_.resize(devices_cl_.size());
   device_constant_buffer_size_.resize(devices_cl_.size());
   device_mem_alloc_size_.resize(devices_cl_.size());
-  device_native_vector_width_double_.resize(devices_cl_.size());
   device_printf_buffer_size_.resize(devices_cl_.size());
 
   // Getting infos for device
@@ -152,7 +150,6 @@ GGEMSOpenCLManager::GGEMSOpenCLManager(void)
     CheckOpenCLError(devices_cl_[i]->getInfo(CL_DEVICE_MAX_COMPUTE_UNITS, &device_max_compute_units_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
     CheckOpenCLError(devices_cl_[i]->getInfo(CL_DEVICE_MAX_CONSTANT_BUFFER_SIZE, &device_constant_buffer_size_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
     CheckOpenCLError(devices_cl_[i]->getInfo(CL_DEVICE_MAX_MEM_ALLOC_SIZE, &device_mem_alloc_size_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
-    CheckOpenCLError(devices_cl_[i]->getInfo(CL_DEVICE_NATIVE_VECTOR_WIDTH_DOUBLE, &device_native_vector_width_double_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
     CheckOpenCLError(devices_cl_[i]->getInfo(CL_DEVICE_PRINTF_BUFFER_SIZE, &device_printf_buffer_size_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
 
     CheckOpenCLError(devices_cl_[i]->getInfo(CL_DEVICE_VERSION, &char_data), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
@@ -330,7 +327,6 @@ void GGEMSOpenCLManager::PrintDeviceInfos(void) const
     GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "+ Global Mem. Size: " << device_global_mem_size_[i] << " bytes" << GGendl;
     GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "+ Local Mem. Size: " << device_local_mem_size_[i] << " bytes" << GGendl;
     GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "+ Mem. Base Addr. Align.: " << device_mem_base_addr_align_[i] << " bytes" << GGendl;
-    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "+ Native Vector Width Double: " << device_native_vector_width_double_[i] << GGendl;
     GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "+ Max Clock Frequency: " << device_max_clock_frequency_[i] << " MHz" << GGendl;
     GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "+ Max Compute Units: " << device_max_compute_units_[i] << GGendl;
     GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "+ Max Work Group Size: " << device_max_work_group_size_[i] << GGendl;
@@ -405,20 +401,6 @@ void GGEMSOpenCLManager::ContextToActivate(GGuint const& context_id)
 
   // Storing the index of activated context
   context_index_ = context_id;
-
-  // Checking if an Intel HD Graphics has been selected and send a warning
-  std::size_t found_device = device_name_[context_id].find("HD Graphics");
-  if (found_device != std::string::npos) {
-    GGwarn("GGEMSOpenCLManager", "ContextToActivate", 0) << "##########################################" << GGendl;
-    GGwarn("GGEMSOpenCLManager", "ContextToActivate", 0) << "#                WARNING!!!              #" << GGendl;
-    GGwarn("GGEMSOpenCLManager", "ContextToActivate", 0) << "##########################################" << GGendl;
-    GGwarn("GGEMSOpenCLManager", "ContextToActivate", 0) << "You are using a HD Graphics architecture, GGEMS could work on this device, but the computation is very slow and the result could be" << " hazardous. Please use a CPU architecture or a GPU." << GGendl;
-  }
-
-  // Checking if the double precision is activated on OpenCL device
-  if (device_native_vector_width_double_[context_id] == 0) {
-    GGEMSMisc::ThrowException("GGEMSOpenCLManager", "ContextToActivate", "Your OpenCL device does not support double precision!!!");
-  }
 
   // Activate the command queue
   queue_act_cl_ = queues_cl_.at(context_id);
@@ -701,12 +683,44 @@ std::unique_ptr<cl::Buffer> GGEMSOpenCLManager::Allocate(void* host_ptr, std::si
 
   // Get the RAM manager and check memory
   GGEMSRAMManager& ram_manager = GGEMSRAMManager::GetInstance();
-  ram_manager.CheckRAMMemory(size);
+
+  // Check if buffer size depending on device parameters
+  if (!ram_manager.IsBufferSizeCorrect(size)) {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "Size of buffer: " << size << " bytes, is too big!!! The maximum size is " << GetMaxBufferAllocationSize() << " bytes";
+    GGEMSMisc::ThrowException("GGEMSOpenCLManager", "Allocate", oss.str());
+  }
+
+  // Check if enough space on device
+  if (!ram_manager.IsEnoughAvailableAMMemory(size)) {
+    GGEMSMisc::ThrowException("GGEMSOpenCLManager", "Allocate", "Not enough RAM memory for buffer allocation!!!");
+  }
 
   GGint error = 0;
   std::unique_ptr<cl::Buffer> buffer(new cl::Buffer(*(context_act_cl_.get()), flags, size, host_ptr, &error));
   CheckOpenCLError(error, "GGEMSOpenCLManager", "Allocate");
+
+  // Increment RAM memory
+  ram_manager.IncrementRAMMemory(size);
+
   return buffer;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSOpenCLManager::Deallocate(std::shared_ptr<cl::Buffer> buffer, std::size_t size)
+{
+  GGcout("GGEMSOpenCLManager","Allocate", 3) << "Deallocating memory on OpenCL device memory..." << GGendl;
+
+  // Get the RAM manager and check memory
+  GGEMSRAMManager& ram_manager = GGEMSRAMManager::GetInstance();
+
+  // Decrement RAM memory
+  ram_manager.DecrementRAMMemory(size);
+
+  buffer.reset();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

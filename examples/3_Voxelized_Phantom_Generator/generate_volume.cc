@@ -34,13 +34,14 @@
 #include "GGEMS/geometries/GGEMSVolumeCreatorManager.hh"
 #include "GGEMS/geometries/GGEMSBox.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
+#include "GGEMS/tools/GGEMSRAMManager.hh"
 
 int main()
 {
   // Set verbosity at lower value
-  GGcout.SetVerbosity(0);
-  GGwarn.SetVerbosity(0);
-  GGcerr.SetVerbosity(0);
+  GGcout.SetVerbosity(3);
+  GGwarn.SetVerbosity(3);
+  GGcerr.SetVerbosity(3);
 
   // Initialization of singletons
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
@@ -50,7 +51,7 @@ int main()
   opencl_manager.ContextToActivate(0);
 
   // Initializing a global voxelized volume
-  volume_creator_manager.SetVolumeDimensions(500, 500, 128);
+  volume_creator_manager.SetVolumeDimensions(450, 450, 450);
   volume_creator_manager.SetElementSizes(0.5f, 0.5f, 0.5f, "mm");
   volume_creator_manager.SetOutputImageFilename("data/volume");
   volume_creator_manager.SetRangeToMaterialDataFilename("data/range_volume");
@@ -61,7 +62,7 @@ int main()
   // Creating a tube
 
   // Creating a box
-  GGEMSBox* box = new GGEMSBox(24.0f, 36.0f, 12.0f, "mm");
+  GGEMSBox* box = new GGEMSBox(24.0f, 36.0f, 56.0f, "mm");
   box->SetPosition(0.0f, 0.0f, 0.0f, "mm");
   box->SetLabelValue(1);
   box->SetMaterial("Water");
@@ -77,6 +78,10 @@ int main()
 
   // Writing volume
   volume_creator_manager.Write();
+
+  // Printing status of RAM
+  GGEMSRAMManager& ram_manager = GGEMSRAMManager::GetInstance();
+  ram_manager.PrintRAMStatus();
 
   // Cleaning OpenCL manager
   opencl_manager.Clean();
