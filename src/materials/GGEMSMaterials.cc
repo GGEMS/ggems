@@ -169,15 +169,11 @@ void GGEMSMaterials::BuildMaterialTables(void)
   // Get the OpenCL manager
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
-  // Get the RAM manager
-  GGEMSRAMManager& ram_manager = GGEMSRAMManager::GetInstance();
-
   // Get the material database manager
   GGEMSMaterialsDatabaseManager& material_database_manager = GGEMSMaterialsDatabaseManager::GetInstance();
   
   // Allocating memory for material tables in OpenCL device
   material_tables_cl_ = opencl_manager.Allocate(nullptr, sizeof(GGEMSMaterialTables), CL_MEM_READ_WRITE);
-  ram_manager.AddMaterialRAMMemory(sizeof(GGEMSMaterialTables));
 
   // Getting the OpenCL pointer on material tables
   GGEMSMaterialTables* material_table_device = opencl_manager.GetDeviceBuffer<GGEMSMaterialTables>(material_tables_cl_.get(), sizeof(GGEMSMaterialTables));

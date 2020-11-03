@@ -102,14 +102,26 @@
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 #elif defined(cl_amd_fp64)  // AMD extension available?
 #pragma OPENCL EXTENSION cl_amd_fp64 : enable
+#else
+#define DOUBLE_DISABLED
 #endif
 
+#ifndef DOUBLE_DISABLED
 #define GGdouble double /*!< define a new type for double */
 #define GGdouble2 double2 /*!< define a new type for double2 */
 #define GGdouble3 double3 /*!< define a new type for double3 */
 #define GGdouble4 double4 /*!< define a new type for double4 */
 #define GGdouble8 double8 /*!< define a new type for double8 */
 #define GGdouble16 double16 /*!< define a new type for double16 */
+#else
+#define GGdouble float /*!< define a new type for float */
+#define GGdouble2 float2 /*!< define a new type for float2 */
+#define GGdouble3 float3 /*!< define a new type for float3 */
+#define GGdouble4 float4 /*!< define a new type for float4 */
+#define GGdouble8 float8 /*!< define a new type for float8 */
+#define GGdouble16 float16 /*!< define a new type for float16 */
+#endif
+
 #else
 
 #ifdef __APPLE__
@@ -189,6 +201,7 @@
 #define GGdouble4 cl_double4 /*!< define a new type for cl_double4 */
 #define GGdouble8 cl_double8 /*!< define a new type for cl_double8 */
 #define GGdouble16 cl_double16 /*!< define a new type for cl_double16 */
+
 #endif
 
 /*!

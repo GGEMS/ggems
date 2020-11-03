@@ -51,12 +51,8 @@ GGEMSCrossSections::GGEMSCrossSections(void)
   // Get the OpenCL manager
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
-  // Get the RAM manager
-  GGEMSRAMManager& ram_manager = GGEMSRAMManager::GetInstance();
-
   // Allocating memory for cross section tables on host and device
   particle_cross_sections_cl_ = opencl_manager.Allocate(nullptr, sizeof(GGEMSParticleCrossSections), CL_MEM_READ_WRITE);
-  ram_manager.AddProcessRAMMemory(sizeof(GGEMSParticleCrossSections));
 
   particle_cross_sections_.reset(new GGEMSParticleCrossSections());
 }

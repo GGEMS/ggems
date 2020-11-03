@@ -149,9 +149,6 @@ void GGEMSVoxelizedSolid::ConvertImageToLabel(std::string const& raw_data_filena
   // Get the OpenCL manager
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
-  // Get the RAM manager
-  GGEMSRAMManager& ram_manager = GGEMSRAMManager::GetInstance();
-
   // Checking if file exists
   std::ifstream in_raw_stream(raw_data_filename, std::ios::in | std::ios::binary);
   GGEMSFileStream::CheckInputStream(in_raw_stream, raw_data_filename);
@@ -175,7 +172,6 @@ void GGEMSVoxelizedSolid::ConvertImageToLabel(std::string const& raw_data_filena
 
   // Allocating memory on OpenCL device
   label_data_cl_ = opencl_manager.Allocate(nullptr, kNumberOfVoxels * sizeof(GGuchar), CL_MEM_READ_WRITE);
-  ram_manager.AddGeometryRAMMemory(kNumberOfVoxels * sizeof(GGuchar));
 
   // Get pointer on OpenCL device
   GGuchar* label_data_device = opencl_manager.GetDeviceBuffer<GGuchar>(label_data_cl_.get(), kNumberOfVoxels * sizeof(GGuchar));

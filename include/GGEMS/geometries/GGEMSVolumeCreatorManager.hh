@@ -139,11 +139,11 @@ class GGEMS_EXPORT GGEMSVolumeCreatorManager
     void SetMaterial(std::string const& material = "Air");
 
     /*!
-      \fn GGulong GetNumberElements(void) const
+      \fn GGuint GetNumberElements(void) const
       \return number of voxel in the voxelized volume
       \brief Return the total number of voxels
     */
-    inline GGulong GetNumberElements(void) const {return number_elements_;}
+    inline GGuint GetNumberElements(void) const {return number_elements_;}
 
     /*!
       \fn std::string GetDataType(void) const
@@ -230,7 +230,7 @@ class GGEMS_EXPORT GGEMSVolumeCreatorManager
   private:
     GGfloat3 element_sizes_; /*!< Size of voxels of voxelized volume */
     GGuint3 volume_dimensions_; /*!< Dimension of volume X, Y, Z */
-    GGulong number_elements_; /*!< Total number of elements */
+    GGuint number_elements_; /*!< Total number of elements */
     std::string data_type_; /*!< Type of data */
     std::string output_image_filename_; /*!< Output MHD where is stored the voxelized volume */
     std::string output_range_to_material_filename_; /*!< Output text file with range to material data */

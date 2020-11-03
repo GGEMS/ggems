@@ -38,22 +38,8 @@
 #include <vector>
 
 #include "GGEMS/tools/GGEMSTypes.hh"
-#include "GGEMS/global/GGEMSExport.hh"
 
-/*!
-  \enum GGEMSRAMType
-  \brief define a type of RAM allocation
-*/
-enum GGEMSRAMType : GGuchar
-{
-  total = 0,
-  material,
-  geometry,
-  process,
-  particle,
-  random,
-  source
-};
+#include "GGEMS/global/GGEMSExport.hh"
 
 /*!
   \class GGEMSRAMManager
@@ -119,65 +105,45 @@ class GGEMS_EXPORT GGEMSRAMManager
     void PrintRAMStatus(void) const;
 
     /*!
-      \fn void CheckRAMMemory(std::size_t const& size)
+      \fn inline bool IsEnoughAvailableAMMemory(GGulong const& size) const
       \param size - size in bytes to allocate
-      \brief Checking RAM memory allocation
+      \brief Checking available RAM memory on device
     */
-    void CheckRAMMemory(std::size_t const& size);
+    inline bool IsEnoughAvailableAMMemory(GGulong const& size) const
+    {
+      if (size + allocated_ram_ < max_available_ram_) return true;
+      else return false;
+    }
 
     /*!
-      \fn void AddMaterialRAMMemory(GGulong const& size)
-      \param size - size of the allocated buffer in byte
-      \brief store the size of the material allocated buffer
+      \fn inline bool IsBufferSizeCorrect(GGulong const& size) const
+      \param size - size in bytes of buffer
+      \brief Check the size of buffer depending on device limit, false if buffer size if too big
     */
-    void AddMaterialRAMMemory(GGulong const& size);
+    inline bool IsBufferSizeCorrect(GGulong const& size) const
+    {
+      if (size < max_buffer_size_) return true;
+      else return false;
+    }
 
     /*!
-      \fn void AddGeometryRAMMemory(GGulong const& size)
+      \fn void IncrementRAMMemory(GGulong const& size)
       \param size - size of the allocated buffer in byte
-      \brief store the size of the geometry allocated buffer
+      \brief increment the size of the global allocated buffer
     */
-    void AddGeometryRAMMemory(GGulong const& size);
+    void IncrementRAMMemory(GGulong const& size);
 
     /*!
-      \fn void AddProcessRAMMemory(GGulong const& size)
+      \fn void DecrementRAMMemory(GGulong const& size)
       \param size - size of the allocated buffer in byte
-      \brief store the size of the process allocated buffer
+      \brief decrement the size of the global allocated buffer
     */
-    void AddProcessRAMMemory(GGulong const& size);
-
-    /*!
-      \fn void AddParticleRAMMemory(GGulong const& size)
-      \param size - size of the allocated buffer in byte
-      \brief store the size of the particle allocated buffer
-    */
-    void AddParticleRAMMemory(GGulong const& size);
-
-    /*!
-      \fn void AddRandomRAMMemory(GGulong const& size)
-      \param size - size of the allocated buffer in byte
-      \brief store the size of the random allocated buffer
-    */
-    void AddRandomRAMMemory(GGulong const& size);
-
-    /*!
-      \fn void AddSourceRAMMemory(GGulong const& size)
-      \param size - size of the allocated buffer in byte
-      \brief store the size of the source allocated buffer
-    */
-    void AddSourceRAMMemory(GGulong const& size);
+    void DecrementRAMMemory(GGulong const& size);
 
   private:
-    /*!
-      \fn void AddTotalRAMMemory(GGulong const& size)
-      \param size - size of the allocated buffer in byte
-      \brief store the size of the global allocated buffer
-    */
-    void AddTotalRAMMemory(GGulong const& size);
-
-  private:
-    std::vector<GGulong> allocated_ram_; /*!< Allocated RAM on OpenCL device */
-    std::vector<std::string> name_of_allocated_memory_; /*!< Name of allocated memory */
+    GGulong allocated_ram_; /*!< Allocated RAM on OpenCL device */
+    GGulong max_available_ram_; /*!< Max available RAM on OpenCL device */
+    GGulong max_buffer_size_; /*!< Max of buffer size of OpenCL device */
 };
 
 #endif // End of GUARD_GGEMS_TOOLS_GGEMSRAMMANAGER_HH

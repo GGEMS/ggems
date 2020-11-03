@@ -44,12 +44,8 @@ GGEMSSolidBox::GGEMSSolidBox(GGfloat const& length_x, GGfloat const& length_y, G
   // Get the OpenCL manager
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
-  // Get the RAM manager
-  GGEMSRAMManager& ram_manager = GGEMSRAMManager::GetInstance();
-
   // Allocation of memory on OpenCL device for header data
   solid_data_cl_ = opencl_manager.Allocate(nullptr, sizeof(GGEMSSolidBoxData), CL_MEM_READ_WRITE);
-  ram_manager.AddGeometryRAMMemory(sizeof(GGEMSSolidBoxData));
 
   // Fill the lengths in OpenCL device
   GGEMSSolidBoxData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSSolidBoxData>(solid_data_cl_.get(), sizeof(GGEMSSolidBoxData));

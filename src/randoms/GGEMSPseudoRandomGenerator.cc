@@ -105,10 +105,6 @@ void GGEMSPseudoRandomGenerator::AllocateRandom(void)
   // Get the OpenCL manager
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
-  // Get the RAM manager
-  GGEMSRAMManager& ram_manager = GGEMSRAMManager::GetInstance();
-
   // Allocation of memory on OpenCL device
   pseudo_random_numbers_cl_ = opencl_manager.Allocate(nullptr, sizeof(GGEMSRandom), CL_MEM_READ_WRITE);
-  ram_manager.AddRandomRAMMemory(sizeof(GGEMSRandom));
 }

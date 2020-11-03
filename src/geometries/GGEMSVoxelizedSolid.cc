@@ -47,12 +47,8 @@ GGEMSVoxelizedSolid::GGEMSVoxelizedSolid(std::string const& volume_header_filena
   // Get the OpenCL manager
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
-  // Get the RAM manager
-  GGEMSRAMManager& ram_manager = GGEMSRAMManager::GetInstance();
-
   // Allocation of memory on OpenCL device for header data
   solid_data_cl_ = opencl_manager.Allocate(nullptr, sizeof(GGEMSVoxelizedSolidData), CL_MEM_READ_WRITE);
-  ram_manager.AddGeometryRAMMemory(sizeof(GGEMSVoxelizedSolidData));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
