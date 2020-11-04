@@ -17,41 +17,37 @@
 // ************************************************************************
 
 /*!
-  \file DrawGGEMSBox.cl
+  \file DrawGGEMSSphere.cl
 
-  \brief OpenCL kernel drawing a box in voxelized image
+  \brief OpenCL kernel drawing a sphere in voxelized image
 
   \author Julien BERT <julien.bert@univ-brest.fr>
   \author Didier BENOIT <didier.benoit@inserm.fr>
   \author LaTIM, INSERM - U1101, Brest, FRANCE
   \version 1.0
-  \date Monday August 31, 2020
+  \date Wednesday November 4, 2020
 */
 
 #include "GGEMS/tools/GGEMSTypes.hh"
 
 /*!
-  \fn __kernel void draw_ggems_box(GGuint const voxel_id_limit, GGfloat3 const element_sizes, GGuint3 const phantom_dimensions, GGfloat3 const positions, GGfloat const label_value, GGfloat const height, GGfloat const width, GGfloat const depth, global GGchar* voxelized_phantom)
+  \fn __kernel void draw_ggems_sphere(GGuint const voxel_id_limit, GGfloat3 const element_sizes, GGuint3 const phantom_dimensions, GGfloat3 const positions, GGfloat const label_value, GGfloat const radius,  global GGchar* voxelized_phantom)
   \param voxel_id_limit - voxel id limit
   \param element_sizes - size of voxels
   \param phantom_dimensions - dimension of phantom
   \param positions - position of volume
   \param label_value - label of volume
-  \param height - height of box
-  \param width - width of box
-  \param depth - depth of box
+  \param radius - radius of tube
   \param voxelized_phantom - buffer storing voxelized phantom
-  \brief Draw box solid in voxelized image
+  \brief Draw sphere solid in voxelized image
 */
-kernel void draw_ggems_box(
+kernel void draw_ggems_sphere(
   GGuint const voxel_id_limit,
   GGfloat3 const element_sizes,
   GGuint3 const phantom_dimensions,
   GGfloat3 const positions,
   GGfloat const label_value,
-  GGfloat const height,
-  GGfloat const width,
-  GGfloat const depth,
+  GGfloat const radius,
   #ifdef MET_CHAR
   global GGchar* voxelized_phantom
   #elif MET_UCHAR
@@ -93,9 +89,7 @@ kernel void draw_ggems_box(
   GGfloat isocenter_z = positions.z;
 
   // Radius square and half of height
-  GGfloat half_height = height / 2.0f;
-  GGfloat half_width = width / 2.0f;
-  GGfloat half_depth = depth / 2.0f;
+  GGfloat radius2 = radius * radius;
 
   // Get index i, j and k of current voxel
   GGuint j = (kGlobalVoxelID % (n_x * n_y)) / n_x;
@@ -113,25 +107,21 @@ kernel void draw_ggems_box(
   z -= isocenter_z;
 
   // Check if voxel is outside/inside analytical volume
-  if (z <= half_depth && z >= -half_depth) {
-    if (y <= half_height && y >= -half_height) {
-      if (x <= half_width && x >= -half_width) {
-        #ifdef MET_CHAR
-        voxelized_phantom[kGlobalVoxelID] = (GGchar)label_value;
-        #elif MET_UCHAR
-        voxelized_phantom[kGlobalVoxelID] = (GGuchar)label_value;
-        #elif MET_SHORT
-        voxelized_phantom[kGlobalVoxelID] = (GGshort)label_value;
-        #elif MET_USHORT
-        voxelized_phantom[kGlobalVoxelID] = (GGushort)label_value;
-        #elif MET_INT
-        voxelized_phantom[kGlobalVoxelID] = (GGint)label_value;
-        #elif MET_UINT
-        voxelized_phantom[kGlobalVoxelID] = (GGuint)label_value;
-        #elif MET_FLOAT
-        voxelized_phantom[kGlobalVoxelID] = (GGfloat)label_value;
-        #endif
-      }
-    }
+  if (x*x + y*y + z*z <= radius2) {
+    #ifdef MET_CHAR
+    voxelized_phantom[kGlobalVoxelID] = (GGchar)label_value;
+    #elif MET_UCHAR
+    voxelized_phantom[kGlobalVoxelID] = (GGuchar)label_value;
+    #elif MET_SHORT
+    voxelized_phantom[kGlobalVoxelID] = (GGshort)label_value;
+    #elif MET_USHORT
+    voxelized_phantom[kGlobalVoxelID] = (GGushort)label_value;
+    #elif MET_INT
+    voxelized_phantom[kGlobalVoxelID] = (GGint)label_value;
+    #elif MET_UINT
+    voxelized_phantom[kGlobalVoxelID] = (GGuint)label_value;
+    #elif MET_FLOAT
+    voxelized_phantom[kGlobalVoxelID] = (GGfloat)label_value;
+    #endif
   }
 }

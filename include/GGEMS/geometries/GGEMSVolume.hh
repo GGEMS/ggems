@@ -115,13 +115,6 @@ class GGEMS_EXPORT GGEMSVolume
     virtual void Draw(void) = 0;
 
   protected:
-    /*!
-      \fn void CheckParameters(void) const
-      \brief check parameters for each type of volume
-    */
-    virtual void CheckParameters(void) const = 0;
-
-  protected:
     GGfloat label_value_; /*!< Value of label in volume */
     GGfloat3 positions_; /*!< Position of volume */
     std::weak_ptr<cl::Kernel> kernel_draw_volume_cl_; /*!< Kernel drawing solid using OpenCL */

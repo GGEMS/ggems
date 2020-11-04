@@ -41,9 +41,13 @@ class GGEMS_EXPORT GGEMSTube : public GGEMSVolume
 {
   public:
     /*!
+      \param radius_x - Radius of the tube in X axis
+      \param radius_y - Radius of the tube in Y axis
+      \param height - Height of the tube
+      \param unit - Unit of distance
       \brief GGEMSTube constructor
     */
-    GGEMSTube(void);
+    GGEMSTube(GGfloat const& radius_x, GGfloat const& radius_y, GGfloat const& height, std::string const& unit = "mm");
 
     /*!
       \brief GGEMSTube destructor
@@ -79,22 +83,6 @@ class GGEMS_EXPORT GGEMSTube : public GGEMSVolume
     GGEMSTube& operator=(GGEMSTube const&& tube) = delete;
 
     /*!
-      \fn void SetHeight(GGfloat const& height, char const* unit = "mm")
-      \param height - height of the tube
-      \param unit - unit of the distance
-      \brief set the height of the tube
-    */
-    void SetHeight(GGfloat const& height, char const* unit = "mm");
-
-    /*!
-      \fn void SetRadius(GGfloat const& radius, char const* unit = "mm")
-      \param radius - radius of the tube
-      \param unit - unit of the distance
-      \brief set the radius of the tube
-    */
-    void SetRadius(GGfloat const& radius, char const* unit = "mm");
-
-    /*!
       \fn void Initialize(void) override
       \brief Initialize the solid and store it in Phantom creator manager
     */
@@ -106,24 +94,22 @@ class GGEMS_EXPORT GGEMSTube : public GGEMSVolume
     */
     void Draw(void) override;
 
-  protected:
-    /*!
-      \fn void CheckParameters(void) const
-      \brief check parameters for each type of volume
-    */
-    void CheckParameters(void) const override;
-
   private:
     GGfloat height_; /*!< Height of the cylinder */
-    GGfloat radius_; /*!< Radius of the cylinder */
+    GGfloat radius_x_; /*!< Radius of the cylinder in X axis */
+    GGfloat radius_y_; /*!< Radius of the cylinder in X axis */
 };
 
 /*!
-  \fn GGEMSTube* create_tube(void)
+  \fn GGEMSTube* create_tube(GGfloat const radius_x, GGfloat const radius_y, GGfloat const height, char const* unit)
+  \param radius_x - Radius of the tube in X axis
+  \param radius_y - Radius of the tube in Y axis
+  \param height - Height of the tube
+  \param unit - unit of the distance
   \return the pointer on the singleton
   \brief Create instance of GGEMSTube
 */
-extern "C" GGEMS_EXPORT GGEMSTube* create_tube(void);
+extern "C" GGEMS_EXPORT GGEMSTube* create_tube(GGfloat const radius_x, GGfloat const radius_y, GGfloat const height, char const* unit = "mm");
 
 /*!
   \fn GGEMSTube* delete_tube(GGEMSTube* tube)
@@ -131,24 +117,6 @@ extern "C" GGEMS_EXPORT GGEMSTube* create_tube(void);
   \brief Delete instance of GGEMSTube
 */
 extern "C" GGEMS_EXPORT void delete_tube(GGEMSTube* tube);
-
-/*!
-  \fn void set_height_tube(GGEMSTube* tube, GGfloat const height, char const* unit)
-  \param tube - pointer on the solid tube
-  \param height - height of the tube
-  \param unit - unit of the distance
-  \brief Set the height of the tube
-*/
-extern "C" GGEMS_EXPORT void set_height_tube(GGEMSTube* tube, GGfloat const height, char const* unit);
-
-/*!
-  \fn void set_radius_tube(GGEMSTube* tube, GGfloat const radius, char const* unit)
-  \param tube - pointer on the solid tube
-  \param radius - radius of the tube
-  \param unit - unit of the distance
-  \brief Set the radius of the tube
-*/
-extern "C" GGEMS_EXPORT void set_radius_tube(GGEMSTube* tube, GGfloat const radius, char const* unit);
 
 /*!
   \fn void set_position_tube(GGEMSTube* tube, GGfloat const pos_x, GGfloat const pos_y, GGfloat const pos_z, char const* unit)
@@ -159,7 +127,7 @@ extern "C" GGEMS_EXPORT void set_radius_tube(GGEMSTube* tube, GGfloat const radi
   \param unit - unit of the distance
   \brief Set the position of the tube
 */
-extern "C" GGEMS_EXPORT void set_position_tube(GGEMSTube* tube, GGfloat const pos_x, GGfloat const pos_y, GGfloat const pos_z, char const* unit);
+extern "C" GGEMS_EXPORT void set_position_tube(GGEMSTube* tube, GGfloat const pos_x, GGfloat const pos_y, GGfloat const pos_z, char const* unit = "mm");
 
 /*!
   \fn void set_material_tube(GGEMSTube* tube, char const* material)

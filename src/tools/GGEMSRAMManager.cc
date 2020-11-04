@@ -95,5 +95,5 @@ void GGEMSRAMManager::PrintRAMStatus(void) const
   GGfloat const kPercentAllocatedRAM = static_cast<GGfloat>(allocated_ram_) * 100.0f / static_cast<GGfloat>(max_available_ram_);
 
   GGcout("GGEMSRAMManager", "PrintRAMStatus", 0) << "Device: " << kContextName << GGendl;
-  GGcout("GGEMSRAMManager", "PrintRAMStatus", 0) << "RAM memory usage: " << allocated_ram_ << " / " << max_available_ram_ << " (" << kPercentAllocatedRAM << "%)" << GGendl;
+  GGcout("GGEMSRAMManager", "PrintRAMStatus", 0) << "RAM memory usage: " << allocated_ram_ << " / " << max_available_ram_ << " bytes (" << kPercentAllocatedRAM << "%)" << GGendl;
 }

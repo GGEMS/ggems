@@ -94,13 +94,6 @@ class GGEMS_EXPORT GGEMSBox : public GGEMSVolume
     */
     void Draw(void) override;
 
-  protected:
-    /*!
-      \fn void CheckParameters(void) const
-      \brief check parameters for each type of volume
-    */
-    void CheckParameters(void) const override;
-
   private:
     GGfloat height_; /*!< Height of the box */
     GGfloat width_; /*!< Width of the box */
@@ -108,7 +101,7 @@ class GGEMS_EXPORT GGEMSBox : public GGEMSVolume
 };
 
 /*!
-  \fn GGEMSBox* create_box(GGfloat const width, GGfloat const height, GGfloat const depth)
+  \fn GGEMSBox* create_box(GGfloat const width, GGfloat const height, GGfloat const depth, char const* unit = "mm")
   \param width - Width of the box
   \param height - Height of the box
   \param depth - Depth of the box
@@ -119,7 +112,7 @@ class GGEMS_EXPORT GGEMSBox : public GGEMSVolume
 extern "C" GGEMS_EXPORT GGEMSBox* create_box(GGfloat const width, GGfloat const height, GGfloat const depth, char const* unit = "mm");
 
 /*!
-  \fn GGEMSBox* delete_tube(GGEMSBox* box)
+  \fn GGEMSBox* delete_box(GGEMSBox* box)
   \param box - pointer on the solid box
   \brief Delete instance of GGEMSBox
 */
@@ -166,4 +159,4 @@ extern "C" GGEMS_EXPORT void initialize_box(GGEMSBox* box);
 */
 extern "C" GGEMS_EXPORT void draw_box(GGEMSBox* box);
 
-#endif // End of GUARD_GGEMS_GEOMETRY_GGEMSTUBE_HH
+#endif // End of GUARD_GGEMS_GEOMETRY_GGEMSBOX_HH
