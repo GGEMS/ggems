@@ -17,18 +17,18 @@
 // ************************************************************************
 
 /*!
-  \file GGEMSTube.cc
+  \file GGEMSSphere.cc
 
-  \brief Class GGEMSTube inheriting from GGEMSVolumeSolid handling Tube solid
+  \brief Class GGEMSSphere inheriting from GGEMSVolume handling Sphere solid
 
   \author Julien BERT <julien.bert@univ-brest.fr>
   \author Didier BENOIT <didier.benoit@inserm.fr>
   \author LaTIM, INSERM - U1101, Brest, FRANCE
   \version 1.0
-  \date Monday January 13, 2020
+  \date Wednesday November 4, 2020
 */
 
-#include "GGEMS/geometries/GGEMSTube.hh"
+#include "GGEMS/geometries/GGEMSSphere.hh"
 
 #include "GGEMS/tools/GGEMSTools.hh"
 #include "GGEMS/tools/GGEMSSystemOfUnits.hh"
@@ -37,36 +37,34 @@
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSTube::GGEMSTube(GGfloat const& radius_x, GGfloat const& radius_y, GGfloat const& height, std::string const& unit)
+GGEMSSphere::GGEMSSphere(GGfloat const& radius, std::string const& unit)
 : GGEMSVolume()
 {
-  GGcout("GGEMSTube", "GGEMSTube", 3) << "Allocation of GGEMSTube..." << GGendl;
+  GGcout("GGEMSSphere", "GGEMSSphere", 3) << "Allocation of GGEMSSphere..." << GGendl;
 
-  height_ = DistanceUnit(height, unit);
-  radius_x_ = DistanceUnit(radius_x, unit);
-  radius_y_ = DistanceUnit(radius_y, unit);
+  radius_ = DistanceUnit(radius, unit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSTube::~GGEMSTube(void)
+GGEMSSphere::~GGEMSSphere(void)
 {
-  GGcout("GGEMSTube", "~GGEMSTube", 3) << "Deallocation of GGEMSTube..." << GGendl;
+  GGcout("GGEMSSphere", "~GGEMSSphere", 3) << "Deallocation of GGEMSSphere..." << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSTube::Initialize(void)
+void GGEMSSphere::Initialize(void)
 {
-  GGcout("GGEMSTube", "Initialize", 3) << "Initializing GGEMSTube solid volume..." << GGendl;
+  GGcout("GGEMSSphere", "Initialize", 3) << "Initializing GGEMSSphere solid volume..." << GGendl;
 
   // Getting the path to kernel
   std::string const kOpenCLKernelPath = OPENCL_KERNEL_PATH;
-  std::string const kFilename = kOpenCLKernelPath + "/DrawGGEMSTube.cl";
+  std::string const kFilename = kOpenCLKernelPath + "/DrawGGEMSSphere.cl";
 
   // Get the volume creator manager
   GGEMSVolumeCreatorManager& volume_creator_manager = GGEMSVolumeCreatorManager::GetInstance();
@@ -76,16 +74,16 @@ void GGEMSTube::Initialize(void)
 
   // Get the data type and compiling kernel
   std::string const kDataType = "-D" + volume_creator_manager.GetDataType();
-  kernel_draw_volume_cl_ = opencl_manager.CompileKernel(kFilename, "draw_ggems_tube", nullptr, const_cast<char*>(kDataType.c_str()));
+  kernel_draw_volume_cl_ = opencl_manager.CompileKernel(kFilename, "draw_ggems_sphere", nullptr, const_cast<char*>(kDataType.c_str()));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSTube::Draw(void)
+void GGEMSSphere::Draw(void)
 {
-  GGcout("GGEMSTube", "Draw", 3) << "Drawing Tube..." << GGendl;
+  GGcout("GGEMSSphere", "Draw", 3) << "Drawing Sphere..." << GGendl;
 
   // Get the OpenCL manager
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
@@ -110,10 +108,8 @@ void GGEMSTube::Draw(void)
   kernel_cl->setArg(2, kPhantomDimensions);
   kernel_cl->setArg(3, positions_);
   kernel_cl->setArg(4, label_value_);
-  kernel_cl->setArg(5, height_);
-  kernel_cl->setArg(6, radius_x_);
-  kernel_cl->setArg(7, radius_y_);
-  kernel_cl->setArg(8, *voxelized_phantom);
+  kernel_cl->setArg(5, radius_);
+  kernel_cl->setArg(6, *voxelized_phantom);
 
   // Get number of max work group size
   std::size_t const kMaxWorkGroupSize = opencl_manager.GetMaxWorkGroupSize();
@@ -127,31 +123,31 @@ void GGEMSTube::Draw(void)
 
   // Launching kernel
   cl_int kernel_status = p_queue_cl->enqueueNDRangeKernel(*kernel_cl, offset, global, local, nullptr, p_event_cl);
-  opencl_manager.CheckOpenCLError(kernel_status, "GGEMSTube", "Draw");
+  opencl_manager.CheckOpenCLError(kernel_status, "GGEMSSphere", "Draw");
   p_queue_cl->finish(); // Wait until the kernel status is finish
 
   // Displaying time in kernel
-  opencl_manager.DisplayElapsedTimeInKernel("draw_ggems_tube");
+  opencl_manager.DisplayElapsedTimeInKernel("draw_ggems_sphere");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSTube* create_tube(GGfloat const radius_x, GGfloat const radius_y, GGfloat const height, char const* unit)
+GGEMSSphere* create_sphere(GGfloat const radius, char const* unit)
 {
-  return new(std::nothrow) GGEMSTube(radius_x, radius_y, height, unit);
+  return new(std::nothrow) GGEMSSphere(radius, unit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void delete_tube(GGEMSTube* tube)
+void delete_sphere(GGEMSSphere* sphere)
 {
-  if (tube) {
-    delete tube;
-    tube = nullptr;
+  if (sphere) {
+    delete sphere;
+    sphere = nullptr;
   }
 }
 
@@ -159,43 +155,43 @@ void delete_tube(GGEMSTube* tube)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_position_tube(GGEMSTube* tube, GGfloat const pos_x, GGfloat const pos_y, GGfloat const pos_z, char const* unit)
+void set_position_sphere(GGEMSSphere* sphere, GGfloat const pos_x, GGfloat const pos_y, GGfloat const pos_z, char const* unit)
 {
-  tube->SetPosition(pos_x, pos_y, pos_z, unit);
+  sphere->SetPosition(pos_x, pos_y, pos_z, unit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_material_tube(GGEMSTube* tube, char const* material)
+void set_material_sphere(GGEMSSphere* sphere, char const* material)
 {
-  tube->SetMaterial(material);
+  sphere->SetMaterial(material);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_label_value_tube(GGEMSTube* tube, GGfloat const label_value)
+void set_label_value_sphere(GGEMSSphere* sphere, GGfloat const label_value)
 {
-  tube->SetLabelValue(label_value);
+  sphere->SetLabelValue(label_value);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void initialize_tube(GGEMSTube* tube)
+void initialize_sphere(GGEMSSphere* sphere)
 {
-  tube->Initialize();
+  sphere->Initialize();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void draw_tube(GGEMSTube* tube)
+void draw_sphere(GGEMSSphere* sphere)
 {
-  tube->Draw();
+  sphere->Draw();
 }

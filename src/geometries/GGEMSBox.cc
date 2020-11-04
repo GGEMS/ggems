@@ -29,6 +29,7 @@
 */
 
 #include "GGEMS/geometries/GGEMSBox.hh"
+
 #include "GGEMS/tools/GGEMSTools.hh"
 #include "GGEMS/tools/GGEMSSystemOfUnits.hh"
 
@@ -59,36 +60,9 @@ GGEMSBox::~GGEMSBox(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSBox::CheckParameters(void) const
-{
-  GGcout("GGEMSBox", "CheckParameters", 3) << "Checking mandatory parameters..." << GGendl;
-
-  // Checking height
-  if (height_ == 0.0f) {
-    GGEMSMisc::ThrowException("GGEMSBox", "CheckParameters", "The box height has to be > 0!!!");
-  }
-
-  // Checking width
-  if (width_ == 0.0f) {
-    GGEMSMisc::ThrowException("GGEMSBox", "CheckParameters", "The box width has to be > 0!!!");
-  }
-
-  // Checking depth
-  if (depth_ == 0.0f) {
-    GGEMSMisc::ThrowException("GGEMSBox", "CheckParameters", "The box depth has to be > 0!!!");
-  }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
 void GGEMSBox::Initialize(void)
 {
   GGcout("GGEMSBox", "Initialize", 3) << "Initializing GGEMSBox solid volume..." << GGendl;
-
-  // Check mandatory parameters
-  CheckParameters();
 
   // Getting the path to kernel
   std::string const kOpenCLKernelPath = OPENCL_KERNEL_PATH;
@@ -153,7 +127,7 @@ void GGEMSBox::Draw(void)
 
   // Launching kernel
   cl_int kernel_status = p_queue_cl->enqueueNDRangeKernel(*kernel_cl, offset, global, local, nullptr, p_event_cl);
-  opencl_manager.CheckOpenCLError(kernel_status, "GGEMSBox", "Draw Box");
+  opencl_manager.CheckOpenCLError(kernel_status, "GGEMSBox", "Draw");
   p_queue_cl->finish(); // Wait until the kernel status is finish
 
   // Displaying time in kernel

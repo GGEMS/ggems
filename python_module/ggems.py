@@ -24,7 +24,7 @@ from ggems_systems import GGEMSCTSystem
 from ggems_phantoms import GGEMSVoxelizedPhantom
 from ggems_sources import GGEMSSourceManager, GGEMSXRaySource
 from ggems_processes import GGEMSProcessesManager, GGEMSRangeCutsManager, GGEMSCrossSections
-from ggems_volume_creator import GGEMSVolumeCreatorManager, GGEMSTube, GGEMSBox
+from ggems_volume_creator import GGEMSVolumeCreatorManager, GGEMSTube, GGEMSBox, GGEMSSphere
 
 class GGEMSManager(object):
     """GGEMS class managing the simulation

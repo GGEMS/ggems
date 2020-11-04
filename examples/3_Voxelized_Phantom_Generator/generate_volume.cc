@@ -31,17 +31,20 @@
 #include <cstdlib>
 
 #include "GGEMS/global/GGEMSOpenCLManager.hh"
+
 #include "GGEMS/geometries/GGEMSVolumeCreatorManager.hh"
 #include "GGEMS/geometries/GGEMSBox.hh"
+#include "GGEMS/geometries/GGEMSTube.hh"
+#include "GGEMS/geometries/GGEMSSphere.hh"
+
 #include "GGEMS/tools/GGEMSPrint.hh"
-#include "GGEMS/tools/GGEMSRAMManager.hh"
 
 int main()
 {
   // Set verbosity at lower value
-  GGcout.SetVerbosity(3);
-  GGwarn.SetVerbosity(3);
-  GGcerr.SetVerbosity(3);
+  GGcout.SetVerbosity(0);
+  GGwarn.SetVerbosity(0);
+  GGcerr.SetVerbosity(0);
 
   // Initialization of singletons
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
@@ -59,29 +62,35 @@ int main()
   volume_creator_manager.SetDataType("MET_INT");
   volume_creator_manager.Initialize();
 
-  // Creating a tube
-
   // Creating a box
   GGEMSBox* box = new GGEMSBox(24.0f, 36.0f, 56.0f, "mm");
-  box->SetPosition(0.0f, 0.0f, 0.0f, "mm");
+  box->SetPosition(-70.0f, -30.0f, 10.0f, "mm");
   box->SetLabelValue(1);
   box->SetMaterial("Water");
   box->Initialize();
   box->Draw();
   delete box;
 
+  // Creating a tube
+  GGEMSTube* tube = new GGEMSTube(13.0f, 8.0f, 50.0f, "mm");
+  tube->SetPosition(20.0f, 10.0f, -2.0f, "mm");
+  tube->SetLabelValue(2);
+  tube->SetMaterial("Calcium");
+  tube->Initialize();
+  tube->Draw();
+  delete tube;
+
   // Creating a sphere
-
-  // Creating a triangle
-
-  // Creating an ellipse
+  GGEMSSphere* sphere = new GGEMSSphere(14.0f, "mm");
+  sphere->SetPosition(30.0f, -30.0f, 8.0f, "mm");
+  sphere->SetLabelValue(3);
+  sphere->SetMaterial("Lung");
+  sphere->Initialize();
+  sphere->Draw();
+  delete sphere;
 
   // Writing volume
   volume_creator_manager.Write();
-
-  // Printing status of RAM
-  GGEMSRAMManager& ram_manager = GGEMSRAMManager::GetInstance();
-  ram_manager.PrintRAMStatus();
 
   // Cleaning OpenCL manager
   opencl_manager.Clean();

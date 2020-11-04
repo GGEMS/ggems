@@ -78,17 +78,12 @@ class GGEMSVolumeCreatorManager(object):
 class GGEMSTube(object):
     """Build a solid tube analytical phantom
     """
-    def __init__(self):
+    def __init__(self, radius_x, radius_y, height, unit):
+        ggems_lib.create_tube.argtypes = [ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_char_p]
         ggems_lib.create_tube.restype = ctypes.c_void_p
 
         ggems_lib.delete_tube.argtypes = [ctypes.c_void_p]
         ggems_lib.delete_tube.restype = ctypes.c_void_p
-
-        ggems_lib.set_height_tube.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_char_p]
-        ggems_lib.set_height_tube.restype = ctypes.c_void_p
-
-        ggems_lib.set_radius_tube.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_char_p]
-        ggems_lib.set_radius_tube.restype = ctypes.c_void_p
 
         ggems_lib.set_position_tube.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_char_p]
         ggems_lib.set_position_tube.restype = ctypes.c_void_p
@@ -105,16 +100,10 @@ class GGEMSTube(object):
         ggems_lib.draw_tube.argtypes = [ctypes.c_void_p]
         ggems_lib.draw_tube.restype = ctypes.c_void_p
 
-        self.obj = ggems_lib.create_tube()
+        self.obj = ggems_lib.create_tube(radius_x, radius_y, height, unit.encode('ASCII'))
 
     def delete(self):
         ggems_lib.delete_tube(self.obj)
-
-    def set_height(self, height, unit):
-        ggems_lib.set_height_tube(self.obj, height, unit.encode('ASCII'))
-
-    def set_radius(self, radius, unit):
-        ggems_lib.set_radius_tube(self.obj, radius, unit.encode('ASCII'))
 
     def set_label_value(self, label_value):
         ggems_lib.set_label_value_tube(self.obj, label_value)
@@ -176,3 +165,49 @@ class GGEMSBox(object):
 
     def draw(self):
         ggems_lib.draw_box(self.obj)
+
+
+class GGEMSSphere(object):
+    """Build a solid sphere analytical phantom
+    """
+    def __init__(self, radius, unit):
+        ggems_lib.create_sphere.argtypes = [ctypes.c_float, ctypes.c_char_p]
+        ggems_lib.create_sphere.restype = ctypes.c_void_p
+
+        ggems_lib.delete_sphere.argtypes = [ctypes.c_void_p]
+        ggems_lib.delete_sphere.restype = ctypes.c_void_p
+
+        ggems_lib.set_position_sphere.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_char_p]
+        ggems_lib.set_position_sphere.restype = ctypes.c_void_p
+
+        ggems_lib.set_label_value_sphere.argtypes = [ctypes.c_void_p, ctypes.c_float]
+        ggems_lib.set_label_value_sphere.restype = ctypes.c_void_p
+
+        ggems_lib.set_material_sphere.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
+        ggems_lib.set_material_sphere.restype = ctypes.c_void_p
+
+        ggems_lib.initialize_sphere.argtypes = [ctypes.c_void_p]
+        ggems_lib.initialize_sphere.restype = ctypes.c_void_p
+
+        ggems_lib.draw_sphere.argtypes = [ctypes.c_void_p]
+        ggems_lib.draw_sphere.restype = ctypes.c_void_p
+
+        self.obj = ggems_lib.create_sphere(radius, unit.encode('ASCII'))
+
+    def delete(self):
+        ggems_lib.delete_sphere(self.obj)
+
+    def set_label_value(self, label_value):
+        ggems_lib.set_label_value_sphere(self.obj, label_value)
+
+    def set_position(self, pos_x, pos_y, pos_z, unit):
+        ggems_lib.set_position_sphere(self.obj, pos_x, pos_y, pos_z, unit.encode('ASCII'))
+
+    def set_material(self, material):
+        ggems_lib.set_material_sphere(self.obj, material.encode('ASCII'))
+
+    def initialize(self):
+        ggems_lib.initialize_sphere(self.obj)
+
+    def draw(self):
+        ggems_lib.draw_sphere(self.obj)
