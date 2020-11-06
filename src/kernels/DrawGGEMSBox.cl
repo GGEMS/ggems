@@ -31,7 +31,7 @@
 #include "GGEMS/tools/GGEMSTypes.hh"
 
 /*!
-  \fn __kernel void draw_ggems_box(GGuint const voxel_id_limit, GGfloat3 const element_sizes, GGuint3 const phantom_dimensions, GGfloat3 const positions, GGfloat const label_value, GGfloat const height, GGfloat const width, GGfloat const depth, global GGchar* voxelized_phantom)
+  \fn __kernel void draw_ggems_box(GGint const voxel_id_limit, GGfloat3 const element_sizes, GGuint3 const phantom_dimensions, GGfloat3 const positions, GGfloat const label_value, GGfloat const height, GGfloat const width, GGfloat const depth, global GGchar* voxelized_phantom)
   \param voxel_id_limit - voxel id limit
   \param element_sizes - size of voxels
   \param phantom_dimensions - dimension of phantom

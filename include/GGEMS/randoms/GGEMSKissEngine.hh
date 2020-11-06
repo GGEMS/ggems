@@ -33,7 +33,7 @@
 
 #ifdef __OPENCL_C_VERSION__
 
-#include "GGEMS/randoms/GGEMSRandomStack.hh"
+#include "GGEMS/randoms/GGEMSRandom.hh"
 #include "GGEMS/global/GGEMSConstants.hh"
 
 ////////////////////////////////////////////////////////////////////////////////

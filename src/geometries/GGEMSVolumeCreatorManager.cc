@@ -41,8 +41,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 GGEMSVolumeCreatorManager::GGEMSVolumeCreatorManager(void)
-: element_sizes_(GGfloat3{{0.0, 0.0, 0.0}}),
-  volume_dimensions_(GGuint3{{0, 0, 0}}),
+: element_sizes_({0.0f, 0.0f, 0.0f}),
+  volume_dimensions_({0, 0, 0}),
   number_elements_(0),
   data_type_("MET_FLOAT"),
   output_image_filename_(""),
@@ -76,7 +76,7 @@ void GGEMSVolumeCreatorManager::SetElementSizes(GGfloat const& voxel_width, GGfl
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSVolumeCreatorManager::SetVolumeDimensions(GGuint const& volume_width, GGuint const& volume_height, GGuint const& volume_depth)
+void GGEMSVolumeCreatorManager::SetVolumeDimensions(GGint const& volume_width, GGint const& volume_height, GGint const& volume_depth)
 {
   volume_dimensions_.s[0] = volume_width;
   volume_dimensions_.s[1] = volume_height;
@@ -268,7 +268,7 @@ GGEMSVolumeCreatorManager* get_instance_volume_creator_manager(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_volume_dimension_volume_creator_manager(GGEMSVolumeCreatorManager* volume_creator_manager, GGuint const volume_width, GGuint const volume_height, GGuint const volume_depth)
+void set_volume_dimension_volume_creator_manager(GGEMSVolumeCreatorManager* volume_creator_manager, GGint const volume_width, GGint const volume_height, GGint const volume_depth)
 {
   volume_creator_manager->SetVolumeDimensions(volume_width, volume_height, volume_depth);
 }

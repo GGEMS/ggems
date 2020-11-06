@@ -116,20 +116,20 @@ class GGEMS_EXPORT GGEMSVolumeCreatorManager
     inline GGfloat3 GetElementsSizes(void) const {return element_sizes_;}
 
     /*!
-      \fn void SetVolumeDimensions(GGuint const& volume_width, GGuint const& volume_height, GGuint const& volume_depth)
+      \fn void SetVolumeDimensions(GGint const& volume_width, GGint const& volume_height, GGint const& volume_depth)
       \param volume_width - volume width
       \param volume_height - volume height
       \param volume_depth - volume depth
       \brief Set the dimension of the volume for the voxelized volume
     */
-    void SetVolumeDimensions(GGuint const& volume_width, GGuint const& volume_height, GGuint const& volume_depth);
+    void SetVolumeDimensions(GGint const& volume_width, GGint const& volume_height, GGint const& volume_depth);
 
     /*!
-      \fn GGuint3 GetVolumeDimensions(void) const
+      \fn GGint3 GetVolumeDimensions(void) const
       \return a 3d int with the dimenstion of the voxelized volume
       \brief dimensions of volume
     */
-    inline GGuint3 GetVolumeDimensions(void) const {return volume_dimensions_;};
+    inline GGint3 GetVolumeDimensions(void) const {return volume_dimensions_;};
 
     /*!
       \fn void SetMaterial(std::string const& material)
@@ -139,11 +139,11 @@ class GGEMS_EXPORT GGEMSVolumeCreatorManager
     void SetMaterial(std::string const& material = "Air");
 
     /*!
-      \fn GGuint GetNumberElements(void) const
+      \fn GGint GetNumberElements(void) const
       \return number of voxel in the voxelized volume
       \brief Return the total number of voxels
     */
-    inline GGuint GetNumberElements(void) const {return number_elements_;}
+    inline GGint GetNumberElements(void) const {return number_elements_;}
 
     /*!
       \fn std::string GetDataType(void) const
@@ -229,8 +229,8 @@ class GGEMS_EXPORT GGEMSVolumeCreatorManager
 
   private:
     GGfloat3 element_sizes_; /*!< Size of voxels of voxelized volume */
-    GGuint3 volume_dimensions_; /*!< Dimension of volume X, Y, Z */
-    GGuint number_elements_; /*!< Total number of elements */
+    GGint3 volume_dimensions_; /*!< Dimension of volume X, Y, Z */
+    GGint number_elements_; /*!< Total number of elements */
     std::string data_type_; /*!< Type of data */
     std::string output_image_filename_; /*!< Output MHD where is stored the voxelized volume */
     std::string output_range_to_material_filename_; /*!< Output text file with range to material data */
@@ -268,14 +268,14 @@ void GGEMSVolumeCreatorManager::AllocateImage(void)
 extern "C" GGEMS_EXPORT GGEMSVolumeCreatorManager* get_instance_volume_creator_manager(void);
 
 /*!
-  \fn void set_volume_dimension_volume_creator_manager(GGEMSVolumeCreatorManager* volume_creator_manager, GGuint const volume_width, GGuint const volume_height, GGuint const volume_depth)
+  \fn void set_volume_dimension_volume_creator_manager(GGEMSVolumeCreatorManager* volume_creator_manager, GGint const volume_width, GGint const volume_height, GGint const volume_depth)
   \param volume_creator_manager - pointer on the singleton
   \param volume_width - volume width
   \param volume_height - volume height
   \param volume_depth - volume depth
   \brief Set the dimension of the volume for the voxelized volume
 */
-extern "C" GGEMS_EXPORT void set_volume_dimension_volume_creator_manager(GGEMSVolumeCreatorManager* volume_creator_manager, GGuint const volume_width, GGuint const volume_height, GGuint const volume_depth);
+extern "C" GGEMS_EXPORT void set_volume_dimension_volume_creator_manager(GGEMSVolumeCreatorManager* volume_creator_manager, GGint const volume_width, GGint const volume_height, GGint const volume_depth);
 
 /*!
   \fn void set_element_sizes_volume_creator_manager(GGEMSVolumeCreatorManager* volume_creator_manager, GGfloat const voxel_width, GGfloat const voxel_height, GGfloat const voxel_depth, char const* unit)

@@ -98,16 +98,16 @@ void GGEMSTube::Draw(void)
   cl::Event* p_event_cl = opencl_manager.GetEvent();
 
   // Get parameters from phantom creator
-  GGfloat3 const kVoxelSizes = volume_creator_manager.GetElementsSizes();
-  GGuint3 const kPhantomDimensions = volume_creator_manager.GetVolumeDimensions();
-  GGuint const kNumberThreads = volume_creator_manager.GetNumberElements();
+  GGfloat3 voxel_sizes = volume_creator_manager.GetElementsSizes();
+  GGint3 phantom_dimensions = volume_creator_manager.GetVolumeDimensions();
+  GGint number_of_elements = volume_creator_manager.GetNumberElements();
   cl::Buffer* voxelized_phantom = volume_creator_manager.GetVoxelizedVolume();
 
   // Set parameters for kernel
   std::shared_ptr<cl::Kernel> kernel_cl = kernel_draw_volume_cl_.lock();
-  kernel_cl->setArg(0, kNumberThreads);
-  kernel_cl->setArg(1, kVoxelSizes);
-  kernel_cl->setArg(2, kPhantomDimensions);
+  kernel_cl->setArg(0, number_of_elements);
+  kernel_cl->setArg(1, voxel_sizes);
+  kernel_cl->setArg(2, phantom_dimensions);
   kernel_cl->setArg(3, positions_);
   kernel_cl->setArg(4, label_value_);
   kernel_cl->setArg(5, height_);
@@ -116,14 +116,14 @@ void GGEMSTube::Draw(void)
   kernel_cl->setArg(8, *voxelized_phantom);
 
   // Get number of max work group size
-  std::size_t const kMaxWorkGroupSize = opencl_manager.GetMaxWorkGroupSize();
+  std::size_t max_work_group_size = opencl_manager.GetMaxWorkGroupSize();
 
   // Compute work item number
-  std::size_t const kWorkItem = kNumberThreads + (kMaxWorkGroupSize - kNumberThreads%kMaxWorkGroupSize);
+  std::size_t number_of_work_items = number_of_elements + (max_work_group_size - number_of_elements%max_work_group_size);
 
-  cl::NDRange global(kWorkItem);
+  cl::NDRange global(number_of_work_items);
   cl::NDRange offset(0);
-  cl::NDRange local(kMaxWorkGroupSize);
+  cl::NDRange local(max_work_group_size);
 
   // Launching kernel
   cl_int kernel_status = p_queue_cl->enqueueNDRangeKernel(*kernel_cl, offset, global, local, nullptr, p_event_cl);

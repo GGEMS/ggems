@@ -36,7 +36,7 @@
 #include "GGEMS/physics/GGEMSParticles.hh"
 #include "GGEMS/randoms/GGEMSPseudoRandomGenerator.hh"
 #include "GGEMS/global/GGEMSManager.hh"
-#include "GGEMS/physics/GGEMSPrimaryParticlesStack.hh"
+#include "GGEMS/physics/GGEMSPrimaryParticles.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////

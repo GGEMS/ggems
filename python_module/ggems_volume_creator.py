@@ -24,7 +24,7 @@ class GGEMSVolumeCreatorManager(object):
     def __init__(self):
         ggems_lib.get_instance_volume_creator_manager.restype = ctypes.c_void_p
 
-        ggems_lib.set_volume_dimension_volume_creator_manager.argtypes = [ctypes.c_void_p, ctypes.c_uint32, ctypes.c_uint32, ctypes.c_uint32]
+        ggems_lib.set_volume_dimension_volume_creator_manager.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_int, ctypes.c_int]
         ggems_lib.set_volume_dimension_volume_creator_manager.restype = ctypes.c_void_p
 
         ggems_lib.set_element_sizes_volume_creator_manager.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_char_p]

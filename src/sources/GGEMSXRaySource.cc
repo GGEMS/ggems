@@ -114,28 +114,35 @@ void GGEMSXRaySource::GetPrimaries(GGlong const& number_of_particles)
 
   // Set parameters for kernel
   std::shared_ptr<cl::Kernel> kernel_cl = kernel_get_primaries_cl_.lock();
-  kernel_cl->setArg(0, *particles);
-  kernel_cl->setArg(1, *randoms);
-  kernel_cl->setArg(2, particle_type_);
-  kernel_cl->setArg(3, *energy_spectrum_cl_);
-  kernel_cl->setArg(4, *cdf_cl_);
-  kernel_cl->setArg(5, number_of_energy_bins_);
-  kernel_cl->setArg(6, beam_aperture_);
-  kernel_cl->setArg(7, focal_spot_size_);
-  kernel_cl->setArg(8, *matrix_transformation);
+  kernel_cl->setArg(0, number_of_particles);
+  kernel_cl->setArg(1, *particles);
+  kernel_cl->setArg(2, *randoms);
+  kernel_cl->setArg(3, particle_type_);
+  kernel_cl->setArg(4, *energy_spectrum_cl_);
+  kernel_cl->setArg(5, *cdf_cl_);
+  kernel_cl->setArg(6, number_of_energy_bins_);
+  kernel_cl->setArg(7, beam_aperture_);
+  kernel_cl->setArg(8, focal_spot_size_);
+  kernel_cl->setArg(9, *matrix_transformation);
 
-  // Define the number of work-item to launch
-  cl::NDRange global(number_of_particles);
+  // Get number of max work group size
+  std::size_t max_work_group_size = opencl_manager.GetMaxWorkGroupSize();
+
+  // Compute work item number
+  std::size_t number_of_work_items = number_of_particles + (max_work_group_size - number_of_particles%max_work_group_size);
+
+  cl::NDRange global(number_of_work_items);
   cl::NDRange offset(0);
+  cl::NDRange local(max_work_group_size);
 
   // Launching kernel
-  GGint kernel_status = queue_cl->enqueueNDRangeKernel(*kernel_cl, offset, global, cl::NullRange, nullptr, event_cl);
+  GGint kernel_status = queue_cl->enqueueNDRangeKernel(*kernel_cl, offset, global, local, nullptr, event_cl);
   opencl_manager.CheckOpenCLError(kernel_status, "GGEMSXRaySource", "GetPrimaries");
   queue_cl->finish(); // Wait until the kernel status is finish
 
   // Checking if kernel verbosity is activated
   if (GGEMSManager::GetInstance().IsKernelVerbose()) {
-    opencl_manager.DisplayElapsedTimeInKernel("get primaries");
+    opencl_manager.DisplayElapsedTimeInKernel("get_primaries_ggems_xray_source");
   }
 }
 

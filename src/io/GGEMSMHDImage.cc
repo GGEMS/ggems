@@ -46,8 +46,8 @@ GGEMSMHDImage::GGEMSMHDImage(void)
 : mhd_header_file_(""),
   mhd_raw_file_(""),
   mhd_data_type_("MET_FLOAT"),
-  element_sizes_(GGfloat3{{0.0, 0.0, 0.0}}),
-  dimensions_(GGuint3{{0, 0, 0}})
+  element_sizes_({0.0f, 0.0f, 0.0f}),
+  dimensions_({0, 0, 0})
 {
   GGcout("GGEMSMHDImage", "GGEMSMHDImage", 3) << "Allocation of GGEMSMHDImage..." << GGendl;
 }
@@ -93,7 +93,7 @@ void GGEMSMHDImage::SetDataType(std::string const& data_type)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSMHDImage::SetDimensions(GGuint3 const& dimensions)
+void GGEMSMHDImage::SetDimensions(GGint3 const& dimensions)
 {
   dimensions_ = dimensions;
 }
