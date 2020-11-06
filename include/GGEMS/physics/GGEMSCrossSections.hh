@@ -39,7 +39,7 @@
 #include <string>
 
 #include "GGEMS/global/GGEMSOpenCLManager.hh"
-#include "GGEMS/physics/GGEMSParticleCrossSectionsStack.hh"
+#include "GGEMS/physics/GGEMSParticleCrossSections.hh"
 
 class GGEMSEMProcess;
 class GGEMSMaterials;

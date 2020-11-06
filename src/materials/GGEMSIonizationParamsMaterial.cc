@@ -82,16 +82,16 @@ void GGEMSIonizationParamsMaterial::ComputeIonizationParameters(void)
   GGEMSMaterialsDatabaseManager& material_manager = GGEMSMaterialsDatabaseManager::GetInstance();
 
   // Number of chemical elements in material
-  GGuchar const kNumberOfChemicalElements = material_->nb_elements_;
+  GGchar number_of_chemical_elements = material_->nb_elements_;
 
   // Loop over the number of chemical elements
   GGfloat axZ = 0.0f;
   GGfloat total_number_of_electron_per_volume = 0.0f;
-  for (GGuchar i = 0; i < kNumberOfChemicalElements; ++i) {
+  for (GGchar i = 0; i < number_of_chemical_elements; ++i) {
     // Get element by element
-    GGEMSChemicalElement const& kChemicalElement = material_manager.GetChemicalElement(material_->chemical_element_name_[i]);
-    axZ = static_cast<GGfloat>(AVOGADRO/ kChemicalElement.molar_mass_M_ * material_->density_ * material_->mixture_f_[i] * static_cast<GGfloat>(kChemicalElement.atomic_number_Z_));
-    log_mean_excitation_energy_ += axZ * std::log(kChemicalElement.mean_excitation_energy_I_);
+    GGEMSChemicalElement const& chemical_element = material_manager.GetChemicalElement(material_->chemical_element_name_[i]);
+    axZ = static_cast<GGfloat>(AVOGADRO/ chemical_element.molar_mass_M_ * material_->density_ * material_->mixture_f_[i] * static_cast<GGfloat>(chemical_element.atomic_number_Z_));
+    log_mean_excitation_energy_ += axZ * std::log(chemical_element.mean_excitation_energy_I_);
     total_number_of_electron_per_volume += axZ;
   }
 
@@ -100,16 +100,15 @@ void GGEMSIonizationParamsMaterial::ComputeIonizationParameters(void)
 
   // Compute density correction factor
   // define material state (approximation based on threshold)
-  GGuchar state = GAS;
+  GGchar state = GAS;
   if (material_->density_ > GASTHRESHOLD) state = SOLID;
 
   // Check if density effect data exist in the table
   // R.M. Sternheimer, Atomic Data and Nuclear Data Tables, 30: 261 (1984)
-  //GGuchar const z0 = material_manager.GetChemicalElement(material_->chemical_element_name_[0]).atomic_number_Z_;
-  GGshort index_density_correction = material_manager.GetChemicalElement(material_->chemical_element_name_[0]).index_density_correction_;
+  GGchar index_density_correction = material_manager.GetChemicalElement(material_->chemical_element_name_[0]).index_density_correction_;
 
   // Checking material with only one element, and checking the index of density correction
-  if(kNumberOfChemicalElements == 1 && index_density_correction > 0) {
+  if(number_of_chemical_elements == 1 && index_density_correction > 0) {
     // Take parameters for the density effect correction from
     // R.M. Sternheimer et al. Density Effect For The Ionization Loss
     // of Charged Particles in Various Substances.
@@ -124,26 +123,26 @@ void GGEMSIonizationParamsMaterial::ComputeIonizationParameters(void)
   else { // Computing the density correction
     static constexpr GGfloat kCd2 = 4.0f * PI * HBARC_SQUARED * CLASSIC_ELECTRON_RADIUS;
 
-    GGfloat const kPlasmaEnergy = std::sqrt(kCd2*total_number_of_electron_per_volume);
+    GGfloat plasma_energy = std::sqrt(kCd2*total_number_of_electron_per_volume);
 
     // Compute parameters for the density effect correction in DE/Dx formula.
     // The parametrization is from R.M. Sternheimer, Phys. Rev.B,3:3681 (1971)
-    GGuchar icase = 0;
-    c_density_ = 1.0f + 2.0f*std::log(mean_excitation_energy_/kPlasmaEnergy);
+    GGchar icase = 0;
+    c_density_ = 1.0f + 2.0f*std::log(mean_excitation_energy_/plasma_energy);
 
     if (state == SOLID) {
-      static constexpr GGfloat kE100eV  = 100.f*eV;
-      static const GGfloat kClimiS[] = {3.681f, 5.215f};
-      static const GGfloat kX0valS[] = {1.000f, 1.500f};
-      static const GGfloat kX1valS[] = {2.000f, 3.000f};
+      GGfloat e100eV  = 100.f*eV;
+      GGfloat climiS[] = {3.681f, 5.215f};
+      GGfloat x0valS[] = {1.000f, 1.500f};
+      GGfloat x1valS[] = {2.000f, 3.000f};
 
-      if (mean_excitation_energy_ < kE100eV) icase = 0;
+      if (mean_excitation_energy_ < e100eV) icase = 0;
       else icase = 1;
 
-      if (c_density_ < kClimiS[icase]) x0_density_ = 0.2f;
-      else x0_density_ = 0.326f * c_density_ - kX0valS[icase];
+      if (c_density_ < climiS[icase]) x0_density_ = 0.2f;
+      else x0_density_ = 0.326f * c_density_ - x0valS[icase];
 
-      x1_density_ = kX1valS[icase];
+      x1_density_ = x1valS[icase];
       m_density_ = 3.0f;
     }
 
@@ -173,15 +172,15 @@ void GGEMSIonizationParamsMaterial::ComputeIonizationParameters(void)
 
   // a density parameter can be fixed for not conductive materials
   if (d0_density_ == 0.0f) {
-    static const GGfloat kTwoln10 = 2.0f * std::log(10.0f);
-    GGfloat const kXa = c_density_ / kTwoln10;
-    a_density_ = kTwoln10 * (kXa - x0_density_) / std::pow((x1_density_ - x0_density_), m_density_);
+    GGfloat twoln10 = 2.0f * std::log(10.0f);
+    GGfloat xa = c_density_ / twoln10;
+    a_density_ = twoln10 * (xa - x0_density_) / std::pow((x1_density_ - x0_density_), m_density_);
  }
 
   // needs an 'effective Z'
   GGfloat zeff = 0.0f;
 
-  for (GGuchar i = 0; i < kNumberOfChemicalElements; ++i) {
+  for (GGchar i = 0; i < number_of_chemical_elements; ++i) {
     GGEMSChemicalElement const& kChemicalElement = material_manager.GetChemicalElement(material_->chemical_element_name_[i]);
     zeff += (material_->mixture_f_[i] * static_cast<GGfloat>(kChemicalElement.atomic_number_Z_));
   }

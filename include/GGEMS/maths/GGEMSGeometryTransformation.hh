@@ -192,9 +192,6 @@ class GGEMS_EXPORT GGEMSGeometryTransformation
     }
 
   private:
-    GGEMSOpenCLManager& opencl_manager_; /*!< Reference to opencl manager singleton */
-
-  private:
     GGbool is_need_updated_; /*!< Check if the transformation matrix need to be updated */
     GGfloat3 position_; /*!< Position of the source/detector */
     GGfloat3 rotation_; /*!< Rotation of the source/detector */

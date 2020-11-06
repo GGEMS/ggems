@@ -106,7 +106,7 @@ void GGEMSRangeCuts::SetPositronDistanceCut(GGfloat const& cut)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGfloat GGEMSRangeCuts::ConvertToEnergy(GGEMSMaterialTables* material_table, GGuchar const& index_mat, std::string const& particle_name)
+GGfloat GGEMSRangeCuts::ConvertToEnergy(GGEMSMaterialTables* material_table, GGshort const& index_mat, std::string const& particle_name)
 {
   // Checking the particle_name
   if (particle_name != "gamma" && particle_name != "e+" && particle_name != "e-") {
@@ -184,24 +184,24 @@ GGfloat GGEMSRangeCuts::ConvertToEnergy(GGEMSMaterialTables* material_table, GGu
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSRangeCuts::BuildAbsorptionLengthTable(GGEMSMaterialTables* material_table, GGuchar const& index_mat)
+void GGEMSRangeCuts::BuildAbsorptionLengthTable(GGEMSMaterialTables* material_table, GGshort const& index_mat)
 {
   // Allocation buffer for absorption length
   range_table_material_.reset(new GGEMSLogEnergyTable(min_energy_, max_energy_, number_of_bins_));
 
   // Get the number of elements in material
-  GGuchar const kNumberOfElements = material_table->number_of_chemical_elements_[index_mat];
+  GGchar number_of_elements = material_table->number_of_chemical_elements_[index_mat];
 
   // Get index offset to element
-  GGushort const kIndexOffset = material_table->index_of_chemical_elements_[index_mat];
+  GGshort index_of_offset = material_table->index_of_chemical_elements_[index_mat];
 
   // Loop over the bins in the table
-  for (GGushort i = 0; i < number_of_bins_; ++i) {
+  for (GGshort i = 0; i < number_of_bins_; ++i) {
     GGfloat sigma = 0.0f;
 
     // Loop over the number of elements in material
-    for (GGuchar j = 0; j < kNumberOfElements; ++j) {
-      sigma += material_table->atomic_number_density_[j+kIndexOffset] * loss_table_dedx_table_elements_.at(j)->GetLossTableData(i);
+    for (GGuchar j = 0; j < number_of_elements; ++j) {
+      sigma += material_table->atomic_number_density_[j+index_of_offset] * loss_table_dedx_table_elements_.at(j)->GetLossTableData(i);
     }
 
     // Storing value
@@ -213,7 +213,7 @@ void GGEMSRangeCuts::BuildAbsorptionLengthTable(GGEMSMaterialTables* material_ta
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSRangeCuts::BuildMaterialLossTable(GGEMSMaterialTables* material_table, GGuchar const& index_mat)
+void GGEMSRangeCuts::BuildMaterialLossTable(GGEMSMaterialTables* material_table, GGshort const& index_mat)
 {
   // calculate parameters of the low energy part first
   std::vector<GGfloat> loss;
@@ -222,16 +222,16 @@ void GGEMSRangeCuts::BuildMaterialLossTable(GGEMSMaterialTables* material_table,
   range_table_material_.reset(new GGEMSLogEnergyTable(min_energy_, max_energy_, number_of_bins_));
 
   // Get the number of elements in material
-  GGuchar const kNumberOfElements = material_table->number_of_chemical_elements_[index_mat];
+  GGuchar number_of_elements = material_table->number_of_chemical_elements_[index_mat];
 
   // Get index offset to element
-  GGushort const kIndexOffset = material_table->index_of_chemical_elements_[index_mat];
+  GGshort index_of_offset = material_table->index_of_chemical_elements_[index_mat];
 
-  for (GGushort i = 0; i <= number_of_bins_; ++i) {
+  for (GGshort i = 0; i <= number_of_bins_; ++i) {
     GGfloat value = 0.0f;
 
-    for (GGuchar j = 0; j < kNumberOfElements; ++j) {
-      value += material_table->atomic_number_density_[j+kIndexOffset] * loss_table_dedx_table_elements_.at(j)->GetLossTableData(i);
+    for (GGuchar j = 0; j < number_of_elements; ++j) {
+      value += material_table->atomic_number_density_[j+index_of_offset] * loss_table_dedx_table_elements_.at(j)->GetLossTableData(i);
     }
     loss.push_back(value);
   }
@@ -270,26 +270,26 @@ void GGEMSRangeCuts::BuildMaterialLossTable(GGEMSMaterialTables* material_table,
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSRangeCuts::BuildElementsLossTable(GGEMSMaterialTables* material_table, GGuchar const& index_mat, std::string const& particle_name)
+void GGEMSRangeCuts::BuildElementsLossTable(GGEMSMaterialTables* material_table, GGshort const& index_mat, std::string const& particle_name)
 {
   // Getting number of elements in material
-  GGuchar const kNumberOfElements = material_table->number_of_chemical_elements_[index_mat];
+  GGshort number_of_elements = material_table->number_of_chemical_elements_[index_mat];
 
   // Building cross section tables for each elements in material
-  loss_table_dedx_table_elements_.reserve(kNumberOfElements);
+  loss_table_dedx_table_elements_.reserve(number_of_elements);
 
   // Get index offset to element
-  GGushort const kIndexOffset = material_table->index_of_chemical_elements_[index_mat];
+  GGshort index_of_offset = material_table->index_of_chemical_elements_[index_mat];
 
   // Filling cross section table
-  for (GGuchar i = 0; i < kNumberOfElements; ++i) {
+  for (GGshort i = 0; i < number_of_elements; ++i) {
     GGfloat value = 0.0f;
     std::shared_ptr<GGEMSLogEnergyTable> log_energy_table_element(new GGEMSLogEnergyTable(min_energy_, max_energy_, number_of_bins_));
 
     // Getting atomic number
-    GGuchar const kZ = material_table->atomic_number_Z_[i+kIndexOffset];
+    GGchar const kZ = material_table->atomic_number_Z_[i+index_of_offset];
 
-    for (GGushort j = 0; j < number_of_bins_; ++j) {
+    for (GGshort j = 0; j < number_of_bins_; ++j) {
       if (particle_name == "gamma") {
         value = ComputePhotonCrossSection(kZ, log_energy_table_element->GetEnergy(j));
       }
@@ -311,14 +311,14 @@ void GGEMSRangeCuts::BuildElementsLossTable(GGEMSMaterialTables* material_table,
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGfloat GGEMSRangeCuts::ComputePhotonCrossSection(GGuchar const& atomic_number, GGfloat const& energy) const
+GGfloat GGEMSRangeCuts::ComputePhotonCrossSection(GGchar const& atomic_number, GGfloat const& energy) const
 {
   // Compute the "absorption" cross section of the photon "absorption"
   // cross section means here the sum of the cross sections of the
   // pair production, Compton scattering and photoelectric processes
-  constexpr GGfloat kT1keV = 1.0f*keV;
-  constexpr GGfloat kT200keV = 200.f*keV;
-  constexpr GGfloat kT100MeV = 100.f*MeV;
+  GGfloat t1keV = 1.0f*keV;
+  GGfloat t200keV = 200.f*keV;
+  GGfloat t100MeV = 100.f*MeV;
 
   GGfloat gZ = -1.0f;
   GGfloat s200keV = 0.0f;
@@ -341,27 +341,27 @@ GGfloat GGEMSRangeCuts::ComputePhotonCrossSection(GGuchar const& atomic_number, 
     s200keV = (0.2651f - 0.1501f*kZlog + 0.02283f*kZlogsquare) * kZsquare;
     tmin = (0.552f + 218.5f/gZ + 557.17f/kZsquare) * MeV;
     smin = (0.01239f + 0.005585f*kZlog - 0.000923f*kZlogsquare) * expf(1.5f*kZlog);
-    cmin = logf(s200keV/smin) / (logf(tmin/kT200keV) * logf(tmin/kT200keV));
+    cmin = logf(s200keV/smin) / (logf(tmin/t200keV) * logf(tmin/t200keV));
     tlow = 0.2f * expf(-7.355f/sqrtf(gZ)) * MeV;
-    slow = s200keV * expf(0.042f*gZ*logf(kT200keV/tlow)*logf(kT200keV/tlow));
+    slow = s200keV * expf(0.042f*gZ*logf(t200keV/tlow)*logf(t200keV/tlow));
     s1keV = 300.0f*kZsquare;
-    clow = logf(s1keV/slow) / logf(tlow/kT1keV);
+    clow = logf(s1keV/slow) / logf(tlow/t1keV);
 
-    chigh = (7.55e-5f - 0.0542e-5f*gZ ) * kZsquare * gZ/logf(kT100MeV/tmin);
+    chigh = (7.55e-5f - 0.0542e-5f*gZ ) * kZsquare * gZ/logf(t100MeV/tmin);
   }
 
   // Calculate the cross section (using an approximate empirical formula)
   GGfloat xs = 0.0f;
   if (energy < tlow){
-    if (energy < kT1keV) {
-      xs = slow * expf(clow*logf(tlow/kT1keV));
+    if (energy < t1keV) {
+      xs = slow * expf(clow*logf(tlow/t1keV));
     }
     else {
       xs = slow * expf(clow*logf(tlow/energy));
     }
   }
-  else if (energy < kT200keV) {
-    xs = s200keV * expf(0.042f*gZ*logf(kT200keV/energy)*logf(kT200keV/energy));
+  else if (energy < t200keV) {
+    xs = s200keV * expf(0.042f*gZ*logf(t200keV/energy)*logf(t200keV/energy));
   }
   else if(energy < tmin) {
     xs = smin * expf(cmin*logf(tmin/energy)*logf(tmin/energy));
@@ -377,18 +377,18 @@ GGfloat GGEMSRangeCuts::ComputePhotonCrossSection(GGuchar const& atomic_number, 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGfloat GGEMSRangeCuts::ComputeLossElectron(GGuchar const& atomic_number, GGfloat const& energy) const
+GGfloat GGEMSRangeCuts::ComputeLossElectron(GGchar const& atomic_number, GGfloat const& energy) const
 {
-  constexpr GGfloat cbr1 = 0.02f;
-  constexpr GGfloat cbr2 = -5.7e-5f;
-  constexpr GGfloat cbr3 = 1.f;
-  constexpr GGfloat cbr4 = 0.072f;
+  GGfloat cbr1 = 0.02f;
+  GGfloat cbr2 = -5.7e-5f;
+  GGfloat cbr3 = 1.f;
+  GGfloat cbr4 = 0.072f;
 
-  constexpr GGfloat Tlow = 10.f*keV;
-  constexpr GGfloat Thigh = 1.0f*GeV;
+  GGfloat Tlow = 10.f*keV;
+  GGfloat Thigh = 1.0f*GeV;
 
-  constexpr GGfloat Mass = ELECTRON_MASS_C2;
-  constexpr GGfloat bremfactor = 0.1f;
+  GGfloat Mass = ELECTRON_MASS_C2;
+  GGfloat bremfactor = 0.1f;
 
   GGfloat eZ = -1.f;
   GGfloat taul = 0.0f;
@@ -403,7 +403,7 @@ GGfloat GGEMSRangeCuts::ComputeLossElectron(GGuchar const& atomic_number, GGfloa
     ionpotlog = logf(ionpot);
   }
 
-  GGfloat const tau = energy / Mass;
+  GGfloat tau = energy / Mass;
   GGfloat dEdx = 0.0f;
 
   if (tau < taul) {
@@ -440,18 +440,18 @@ GGfloat GGEMSRangeCuts::ComputeLossElectron(GGuchar const& atomic_number, GGfloa
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGfloat GGEMSRangeCuts::ComputeLossPositron(GGuchar const& atomic_number, GGfloat const& energy) const
+GGfloat GGEMSRangeCuts::ComputeLossPositron(GGchar const& atomic_number, GGfloat const& energy) const
 {
-  constexpr GGfloat cbr1 = 0.02f;
-  constexpr GGfloat cbr2 = -5.7e-5f;
-  constexpr GGfloat cbr3 = 1.f;
-  constexpr GGfloat cbr4 = 0.072f;
+  GGfloat cbr1 = 0.02f;
+  GGfloat cbr2 = -5.7e-5f;
+  GGfloat cbr3 = 1.f;
+  GGfloat cbr4 = 0.072f;
 
-  constexpr GGfloat Tlow = 10.f*keV;
-  constexpr GGfloat Thigh = 1.0f*GeV;
+  GGfloat Tlow = 10.f*keV;
+  GGfloat Thigh = 1.0f*GeV;
 
-  constexpr GGfloat Mass = POSITRON_MASS_C2;
-  constexpr GGfloat bremfactor = 0.1f;
+  GGfloat Mass = POSITRON_MASS_C2;
+  GGfloat bremfactor = 0.1f;
 
   GGfloat Z = -1.f;
   GGfloat taul = 0.0f;
@@ -504,7 +504,7 @@ GGfloat GGEMSRangeCuts::ComputeLossPositron(GGuchar const& atomic_number, GGfloa
 
 GGfloat GGEMSRangeCuts::ConvertLengthToEnergyCut(GGfloat const& length_cut) const
 {
-  GGfloat const kEpsilon = 0.01f;
+  GGfloat epsilon = 0.01f;
 
   // Find max. range and the corresponding energy (rmax,Tmax)
   GGfloat rmax = -1.e10f * mm;
@@ -539,7 +539,7 @@ GGfloat GGEMSRangeCuts::ConvertLengthToEnergyCut(GGfloat const& length_cut) cons
   GGfloat t3 = sqrtf(t1*t2);
   GGfloat r3 = range_table_material_->GetLossTableValue(t3);
 
-  while (fabs(1.0f - r3/length_cut) > kEpsilon) {
+  while (fabs(1.0f - r3/length_cut) > epsilon) {
     if (length_cut <= r3) {
       t2 = t3;
     }
@@ -570,7 +570,7 @@ void GGEMSRangeCuts::ConvertCutsFromDistanceToEnergy(GGEMSMaterials* materials)
   GGEMSMaterialTables* material_table_device = opencl_manager.GetDeviceBuffer<GGEMSMaterialTables>(material_table_cl.get(), sizeof(GGEMSMaterialTables));
 
   // Loop over materials
-  for (GGuchar i = 0; i < material_table_device->number_of_materials_; ++i) {
+  for (GGshort i = 0; i < material_table_device->number_of_materials_; ++i) {
     // Get the name of material
 
     // Convert photon cuts

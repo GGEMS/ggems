@@ -63,7 +63,7 @@ GGEMSRAMManager::~GGEMSRAMManager(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSRAMManager::IncrementRAMMemory(GGulong const& size)
+void GGEMSRAMManager::IncrementRAMMemory(GGlong const& size)
 {
   // Increment size
   allocated_ram_ += size;
@@ -73,7 +73,7 @@ void GGEMSRAMManager::IncrementRAMMemory(GGulong const& size)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSRAMManager::DecrementRAMMemory(GGulong const& size)
+void GGEMSRAMManager::DecrementRAMMemory(GGlong const& size)
 {
   // Increment size
   allocated_ram_ -= size;
@@ -89,11 +89,11 @@ void GGEMSRAMManager::PrintRAMStatus(void) const
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
   // Get the name of the activated context
-  std::string const kContextName = opencl_manager.GetNameOfActivatedContext();
+  std::string context_name = opencl_manager.GetNameOfActivatedContext();
 
   // Compute allocated percent RAM
-  GGfloat const kPercentAllocatedRAM = static_cast<GGfloat>(allocated_ram_) * 100.0f / static_cast<GGfloat>(max_available_ram_);
+  GGfloat percent_allocated_RAM = static_cast<GGfloat>(allocated_ram_) * 100.0f / static_cast<GGfloat>(max_available_ram_);
 
-  GGcout("GGEMSRAMManager", "PrintRAMStatus", 0) << "Device: " << kContextName << GGendl;
-  GGcout("GGEMSRAMManager", "PrintRAMStatus", 0) << "RAM memory usage: " << allocated_ram_ << " / " << max_available_ram_ << " bytes (" << kPercentAllocatedRAM << "%)" << GGendl;
+  GGcout("GGEMSRAMManager", "PrintRAMStatus", 0) << "Device: " << context_name << GGendl;
+  GGcout("GGEMSRAMManager", "PrintRAMStatus", 0) << "RAM memory usage: " << allocated_ram_ << " / " << max_available_ram_ << " bytes (" << percent_allocated_RAM << "%)" << GGendl;
 }

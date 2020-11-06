@@ -126,11 +126,11 @@ class GGEMS_EXPORT GGEMSSource
     void SetRotation(GGfloat const& rx, GGfloat const& ry, GGfloat const& rz, std::string const& unit = "deg");
 
     /*!
-      \fn void SetNumberOfParticles(GGulong const& number_of_particles)
+      \fn void SetNumberOfParticles(GGlong const& number_of_particles)
       \param number_of_particles - number of particles to simulate
       \brief Set the number of particles to simulate during the simulation
     */
-    void SetNumberOfParticles(GGulong const& number_of_particles);
+    void SetNumberOfParticles(GGlong const& number_of_particles);
 
     /*!
       \fn void EnableTracking(void)
@@ -151,7 +151,7 @@ class GGEMS_EXPORT GGEMSSource
       \return the number of particle for a specific batch
       \brief method returning the number of particles in a specific batch
     */
-    inline GGulong GetNumberOfParticlesInBatch(std::size_t const& batch_index) {return number_of_particles_in_batch_.at(batch_index);}
+    inline GGlong GetNumberOfParticlesInBatch(std::size_t const& batch_index) {return number_of_particles_in_batch_.at(batch_index);}
 
     /*!
       \fn void CheckParameters(void) const
@@ -166,11 +166,11 @@ class GGEMS_EXPORT GGEMSSource
     virtual void Initialize(void);
 
     /*!
-      \fn void GetPrimaries(GGulong const& number_of particles) = 0
+      \fn void GetPrimaries(GGlong const& number_of particles) = 0
       \param number_of_particles - number of particles to generate
       \brief Generate primary particles
     */
-    virtual void GetPrimaries(GGulong const& number_of_particles) = 0;
+    virtual void GetPrimaries(GGlong const& number_of_particles) = 0;
 
     /*!
       \fn void PrintInfos(void) const = 0
@@ -194,9 +194,9 @@ class GGEMS_EXPORT GGEMSSource
 
   protected:
     std::string source_name_; /*!< Name of the source */
-    GGulong number_of_particles_; /*!< Number of particles */
-    std::vector<GGulong> number_of_particles_in_batch_; /*!< Number of particles in batch */
-    GGuchar particle_type_; /*!< Type of particle: photon, electron or positron */
+    GGlong number_of_particles_; /*!< Number of particles */
+    std::vector<GGlong> number_of_particles_in_batch_; /*!< Number of particles in batch */
+    GGchar particle_type_; /*!< Type of particle: photon, electron or positron */
     std::string tracking_kernel_option_; /*!< Preprocessor option for tracking */
     std::unique_ptr<GGEMSGeometryTransformation> geometry_transformation_; /*!< Pointer storing the geometry transformation */
     std::weak_ptr<cl::Kernel> kernel_get_primaries_cl_; /*!< Kernel generating primaries on OpenCL device */

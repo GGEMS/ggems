@@ -58,7 +58,7 @@ GGEMSMaterialsDatabaseManager::~GGEMSMaterialsDatabaseManager(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSMaterialsDatabaseManager::SetMaterialsDatabase(char const* filename)
+void GGEMSMaterialsDatabaseManager::SetMaterialsDatabase(std::string const& filename)
 {
   // Converting char* to string
   std::string filename_str(filename);
@@ -98,7 +98,7 @@ void GGEMSMaterialsDatabaseManager::LoadMaterialsDatabase(std::string const& fil
 
     // Creating a material and filling infos
     GGEMSSingleMaterial material;
-    std::string const kMaterialName = GGEMSMaterialReader::ReadMaterialName(line);
+    std::string material_name = GGEMSMaterialReader::ReadMaterialName(line);
     material.density_ = GGEMSMaterialReader::ReadMaterialDensity(line);
     material.nb_elements_ = static_cast<GGuchar>(GGEMSMaterialReader::ReadMaterialNumberOfElements(line));
 
@@ -115,8 +115,8 @@ void GGEMSMaterialsDatabaseManager::LoadMaterialsDatabase(std::string const& fil
     }
 
     // Storing the material
-    GGcout("GGEMSMaterialsDatabaseManager", "LoadMaterialsDatabase", 3) << "Adding material: " << kMaterialName << "..." << GGendl;
-    materials_.insert(std::make_pair(kMaterialName, material));
+    GGcout("GGEMSMaterialsDatabaseManager", "LoadMaterialsDatabase", 3) << "Adding material: " << material_name << "..." << GGendl;
+    materials_.insert(std::make_pair(material_name, material));
   }
 
   // Closing file stream
@@ -238,7 +238,7 @@ void GGEMSMaterialsDatabaseManager::LoadChemicalElements(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSMaterialsDatabaseManager::AddChemicalElements(std::string const& element_name, GGuchar const& element_Z, GGfloat const& element_M, GGfloat const& element_I, GGuchar const& state, GGshort const& index_density_correction)
+void GGEMSMaterialsDatabaseManager::AddChemicalElements(std::string const& element_name, GGchar const& element_Z, GGfloat const& element_M, GGfloat const& element_I, GGchar const& state, GGchar const& index_density_correction)
 {
   GGcout("GGEMSMaterialsDatabaseManager", "AddChemicalElements", 3) << "Adding element: " << element_name << "..." << GGendl;
 
@@ -265,20 +265,20 @@ GGfloat GGEMSMaterialsDatabaseManager::GetRadiationLength(std::string const& mat
   GGfloat zeff = 0.0f;
   GGfloat coulomb = 0.0f;
 
-  static constexpr GGfloat l_rad_light[]  = {5.310f , 4.790f , 4.740f, 4.710f};
-  static constexpr GGfloat lp_rad_light[] = {6.144f , 5.621f , 5.805f, 5.924f};
-  static constexpr GGfloat k1 = 0.00830f;
-  static constexpr GGfloat k2 = 0.20206f;
-  static constexpr GGfloat k3 = 0.00200f;
-  static constexpr GGfloat k4 = 0.03690f;
+  GGfloat l_rad_light[]  = {5.310f , 4.790f , 4.740f, 4.710f};
+  GGfloat lp_rad_light[] = {6.144f , 5.621f , 5.805f, 5.924f};
+  GGfloat k1 = 0.00830f;
+  GGfloat k2 = 0.20206f;
+  GGfloat k3 = 0.00200f;
+  GGfloat k4 = 0.03690f;
 
   // Getting the material infos from database
-  GGEMSSingleMaterial const& kSingleMaterial = GetMaterial(material);
+  GGEMSSingleMaterial const& single_material = GetMaterial(material);
 
   // Loop over the chemical elements by material
-  for (GGuchar i = 0; i < kSingleMaterial.nb_elements_; ++i) {
+  for (GGuchar i = 0; i < single_material.nb_elements_; ++i) {
     // Getting the chemical element
-    GGEMSChemicalElement const& kChemicalElement = GetChemicalElement(kSingleMaterial.chemical_element_name_[i]);
+    GGEMSChemicalElement const& kChemicalElement = GetChemicalElement(single_material.chemical_element_name_[i]);
 
     // Z effective
     zeff = static_cast<GGfloat>(kChemicalElement.atomic_number_Z_);
@@ -290,7 +290,7 @@ GGfloat GGEMSMaterialsDatabaseManager::GetRadiationLength(std::string const& mat
 
     //  Compute Tsai's Expression for the Radiation Length
     //  (Phys Rev. D50 3-1 (1994) page 1254)
-    GGfloat const logZ3 = std::log(zeff) / 3.0f;
+    GGfloat logZ3 = std::log(zeff) / 3.0f;
 
     GGfloat l_rad = 0.0f;
     GGfloat lp_rad = 0.0f;

@@ -82,13 +82,13 @@ class GGEMS_EXPORT GGEMSPhotoElectricEffect : public GGEMSEMProcess
 
     private:
     /*!
-      \fn GGfloat ComputeCrossSectionPerAtom(GGfloat const& energy, GGuchar const& atomic_number) const
+      \fn GGfloat ComputeCrossSectionPerAtom(GGfloat const& energy, GGchar const& atomic_number) const
       \param energy - energy of the bin
       \param atomic_number - Z number of the chemical element
       \return Compton cross section by atom
       \brief compute Compton cross section for an atom with Klein-Nishina
     */
-    GGfloat ComputeCrossSectionPerAtom(GGfloat const& energy, GGuchar const& atomic_number) const override;
+    GGfloat ComputeCrossSectionPerAtom(GGfloat const& energy, GGchar const& atomic_number) const override;
 };
 
 #endif // End of GUARD_GGEMS_PHYSICS_GGEMSPHOTOELECTRICEFFECT_HH

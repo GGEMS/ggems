@@ -30,7 +30,7 @@
 
 #include "GGEMS/materials/GGEMSMaterials.hh"
 #include "GGEMS/physics/GGEMSPhotoElectricEffect.hh"
-#include "GGEMS/physics/GGEMSParticleCrossSectionsStack.hh"
+#include "GGEMS/physics/GGEMSParticleCrossSections.hh"
 #include "GGEMS/physics/GGEMSSandiaTable.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -70,26 +70,26 @@ GGEMSPhotoElectricEffect::~GGEMSPhotoElectricEffect(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGfloat GGEMSPhotoElectricEffect::ComputeCrossSectionPerAtom(GGfloat const& energy, GGuchar const& atomic_number) const
+GGfloat GGEMSPhotoElectricEffect::ComputeCrossSectionPerAtom(GGfloat const& energy, GGchar const& atomic_number) const
 {
   // Threshold at 10 eV
-  GGfloat const kEmin = fmax(GGEMSSandiaTable::kIonizationPotentials[atomic_number], 10.0f)*eV;
-  if (energy < kEmin) return 0.0f;
+  GGfloat e_min = fmax(GGEMSSandiaTable::kIonizationPotentials[atomic_number], 10.0f)*eV;
+  if (energy < e_min) return 0.0f;
 
-  GGushort const kStart = GGEMSSandiaTable::kCumulativeIntervals[atomic_number-1];
-  GGushort const kStop = kStart + GGEMSSandiaTable::kNumberOfIntervals[atomic_number];
+  GGshort start = GGEMSSandiaTable::kCumulativeIntervals[atomic_number-1];
+  GGshort stop = start + GGEMSSandiaTable::kNumberOfIntervals[atomic_number];
 
-  GGushort pos = kStop;
+  GGshort pos = stop;
   while (energy < static_cast<GGfloat>(GGEMSSandiaTable::kSandiaTable[pos][0])*keV) --pos;
 
-  GGfloat const kAoverAvo = ATOMIC_MASS_UNIT * static_cast<GGfloat>(atomic_number) / GGEMSSandiaTable::kZtoARatio[atomic_number];
+  GGfloat aover_avo = ATOMIC_MASS_UNIT * static_cast<GGfloat>(atomic_number) / GGEMSSandiaTable::kZtoARatio[atomic_number];
 
-  GGfloat const kREnergy = 1.0f / energy;
-  GGfloat const kREnergy2 = kREnergy * kREnergy;
+  GGfloat energy_inv = 1.0f / energy;
+  GGfloat energy_inv2 = energy_inv * energy_inv;
 
   return static_cast<GGfloat>(
-    kREnergy * GGEMSSandiaTable::kSandiaTable[pos][1] * kAoverAvo * 0.160217648e-22 +
-    kREnergy2 * GGEMSSandiaTable::kSandiaTable[pos][2] * kAoverAvo * 0.160217648e-25 +
-    kREnergy * kREnergy2 * GGEMSSandiaTable::kSandiaTable[pos][3] * kAoverAvo * 0.160217648e-28 +
-    kREnergy2 * kREnergy2 * GGEMSSandiaTable::kSandiaTable[pos][4] * kAoverAvo * 0.160217648e-31);
+    energy_inv * GGEMSSandiaTable::kSandiaTable[pos][1] * aover_avo * 0.160217648e-22 +
+    energy_inv2 * GGEMSSandiaTable::kSandiaTable[pos][2] * aover_avo * 0.160217648e-25 +
+    energy_inv * energy_inv2 * GGEMSSandiaTable::kSandiaTable[pos][3] * aover_avo * 0.160217648e-28 +
+    energy_inv2 * energy_inv2 * GGEMSSandiaTable::kSandiaTable[pos][4] * aover_avo * 0.160217648e-31);
 }

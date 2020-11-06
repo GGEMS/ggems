@@ -126,13 +126,6 @@ class GGEMS_EXPORT GGEMSManager
     inline GGuint GetSeed(void) const {return seed_;};
 
     /*!
-      \fn inline std::string GetVersion(void) const
-      \return string of GGEMS version
-      \brief Get the version of GGEMS
-    */
-    inline std::string GetVersion(void) const {return version_;};
-
-    /*!
       \fn void SetOpenCLVerbose(bool const& is_opencl_verbose)
       \param is_opencl_verbose - flag for opencl verbosity
       \brief set the flag for OpenCL verbosity
@@ -246,7 +239,6 @@ class GGEMS_EXPORT GGEMSManager
 
   private: // Global simulation parameters
     GGuint seed_; /*!< Seed for the random generator */
-    std::string version_; /*!< Version of GGEMS */
     bool is_opencl_verbose_; /*!< Flag for OpenCL verbosity */
     bool is_material_database_verbose_; /*!< Flag for material database verbosity */
     bool is_source_verbose_; /*!< Flag for source verbosity */

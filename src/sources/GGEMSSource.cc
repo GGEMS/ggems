@@ -36,7 +36,7 @@
 #include "GGEMS/maths/GGEMSGeometryTransformation.hh"
 #include "GGEMS/tools/GGEMSTools.hh"
 #include "GGEMS/physics/GGEMSPrimaryParticlesStack.hh"
-#include "GGEMS/randoms/GGEMSRandomStack.hh"
+#include "GGEMS/randoms/GGEMSRandom.hh"
 #include "GGEMS/physics/GGEMSParticles.hh"
 #include "GGEMS/global/GGEMSManager.hh"
 
@@ -84,14 +84,14 @@ void GGEMSSource::EnableTracking(void)
 
 void GGEMSSource::SetPosition(GGfloat const& pos_x, GGfloat const& pos_y, GGfloat const& pos_z, std::string const& unit)
 {
-  geometry_transformation_->SetTranslation(MakeFloat3(DistanceUnit(pos_x, unit), DistanceUnit(pos_y, unit), DistanceUnit(pos_z, unit)));
+  geometry_transformation_->SetTranslation({DistanceUnit(pos_x, unit), DistanceUnit(pos_y, unit), DistanceUnit(pos_z, unit)});
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSSource::SetNumberOfParticles(GGulong const& number_of_particles)
+void GGEMSSource::SetNumberOfParticles(GGlong const& number_of_particles)
 {
   number_of_particles_ = number_of_particles;
 }
@@ -132,11 +132,7 @@ void GGEMSSource::SetLocalAxis(GGfloat3 const& m0, GGfloat3 const& m1, GGfloat3 
 
 void GGEMSSource::SetRotation(GGfloat const& rx, GGfloat const& ry, GGfloat const& rz, std::string const& unit)
 {
-  geometry_transformation_->SetRotation(MakeFloat3(
-    AngleUnit(rx, unit),
-    AngleUnit(ry, unit),
-    AngleUnit(rz, unit))
-  );
+  geometry_transformation_->SetRotation({AngleUnit(rx, unit), AngleUnit(ry, unit), AngleUnit(rz, unit)});
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -199,22 +195,22 @@ void GGEMSSource::OrganizeParticlesInBatch(void)
   // Computing the number of batch depending on the number of simulated
   // particles and the maximum simulated particles defined during GGEMS
   // compilation
-  std::size_t const kNumberOfBatchs = static_cast<std::size_t>(std::ceil(static_cast<GGfloat>(number_of_particles_) / MAXIMUM_PARTICLES));
+  std::size_t number_of_batchs = static_cast<std::size_t>(std::ceil(static_cast<GGfloat>(number_of_particles_) / MAXIMUM_PARTICLES));
 
   // Resizing vector storing the number of particles in batch
-  number_of_particles_in_batch_.resize(kNumberOfBatchs, 0);
+  number_of_particles_in_batch_.resize(number_of_batchs, 0);
 
   // Computing the number of simulated particles in batch
-  if (kNumberOfBatchs == 1) {
+  if (number_of_batchs == 1) {
     number_of_particles_in_batch_[0] = number_of_particles_;
   }
   else {
     for (auto&& i : number_of_particles_in_batch_) {
-      i = number_of_particles_ / kNumberOfBatchs;
+      i = number_of_particles_ / number_of_batchs;
     }
 
     // Adding the remaing particles
-    for (std::size_t i = 0; i < number_of_particles_ % kNumberOfBatchs; ++i) {
+    for (std::size_t i = 0; i < number_of_particles_ % number_of_batchs; ++i) {
       number_of_particles_in_batch_[i]++;
     }
   }

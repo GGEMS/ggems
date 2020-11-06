@@ -140,13 +140,13 @@ class GGEMS_EXPORT GGEMSSourceManager
     inline std::size_t GetNumberOfBatchs(std::size_t const& source_index) const {return sources_[source_index]->GetNumberOfBatchs();}
 
     /*!
-      \fn inline GGulong GetNumberOfParticlesInBatch(std::size_t const& source_index, std::size_t const& batch_index)
+      \fn inline GGlong GetNumberOfParticlesInBatch(std::size_t const& source_index, std::size_t const& batch_index)
       \param source_index - index of the source
       \param batch_index - index of the source
       \return the number of particle for a specific batch
       \brief method returning the number of particles in a specific batch
     */
-    inline GGulong GetNumberOfParticlesInBatch(std::size_t const& source_index, std::size_t const& batch_index) {return sources_[source_index]->GetNumberOfParticlesInBatch(batch_index);}
+    inline GGlong GetNumberOfParticlesInBatch(std::size_t const& source_index, std::size_t const& batch_index) {return sources_[source_index]->GetNumberOfParticlesInBatch(batch_index);}
 
     /*!
       \fn GGEMSParticles* GetParticles(void) const

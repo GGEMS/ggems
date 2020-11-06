@@ -42,7 +42,7 @@ GGEMSStream GGwarn = GGEMSStream(std::cout, GGEMSConsoleColor::yellow);
 GGEMSStream::GGEMSStream(std::ostream& stream, GGEMSConsoleColor const& color)
 : class_name_(""),
   method_name_(""),
-  verbosity_limit_(3),
+  verbosity_limit_(0),
   verbosity_level_(0),
   stream_counter_(0),
   stream_(stream),

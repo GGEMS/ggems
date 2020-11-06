@@ -30,7 +30,7 @@
 
 #include "GGEMS/materials/GGEMSMaterials.hh"
 #include "GGEMS/physics/GGEMSComptonScattering.hh"
-#include "GGEMS/physics/GGEMSParticleCrossSectionsStack.hh"
+#include "GGEMS/physics/GGEMSParticleCrossSections.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -69,7 +69,7 @@ GGEMSComptonScattering::~GGEMSComptonScattering(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGfloat GGEMSComptonScattering::ComputeCrossSectionPerAtom(GGfloat const& energy, GGuchar const& atomic_number) const
+GGfloat GGEMSComptonScattering::ComputeCrossSectionPerAtom(GGfloat const& energy, GGchar const& atomic_number) const
 {
   GGfloat cross_section_by_atom = 0.0f;
 

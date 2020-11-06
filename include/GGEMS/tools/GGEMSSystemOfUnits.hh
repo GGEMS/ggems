@@ -42,152 +42,152 @@
   \def __constant
   \brief __constant is known for OpenCL, but for C++ we define __constant as a constexpr
 */
-#define __constant inline static constexpr
+#define constant inline static constexpr
 #include <algorithm>
 #include <sstream>
 #include "GGEMS/tools/GGEMSTools.hh"
 #endif
 
   // Lengths [L] (mm)
-__constant GGfloat nm  = 1.e-6f; /*!< Nanometer */
-__constant GGfloat um  = 1.e-3f; /*!< Micrometer */
-__constant GGfloat mm  = 1.0f; /*!< Millimeter (REFERENCE) */
-__constant GGfloat mm2 = 1.0f; /*!< Squared millimeter (REFERENCE) */
-__constant GGfloat mm3 = 1.0f; /*!< Cubic millimeter (REFERENCE) */
-__constant GGfloat cm  = 10.f; /*!< Centimeter */
-__constant GGfloat cm2 = 1.e2f; /*!< Squared centimeter */
-__constant GGfloat cm3 = 1.e3f; /*!< Cubic centimeter */
-__constant GGfloat m   = 1.e3f; /*!< Meter */
-__constant GGfloat m2  = 1.e6f; /*!< Squared meter */
-__constant GGfloat m3  = 1.e9f; /*!< Cubic meter */
-__constant GGfloat km  = 1.e6f; /*!< Kilometer */
-__constant GGfloat km2 = 1.e12f; /*!< Squared kilometer */
-__constant GGfloat km3 = 1.e18f; /*!< Cubic kilometer */
-__constant GGfloat pc  = 3.0856775807e+19f; /*!< Parsec */
+constant GGfloat nm  = 1.e-6f; /*!< Nanometer */
+constant GGfloat um  = 1.e-3f; /*!< Micrometer */
+constant GGfloat mm  = 1.0f; /*!< Millimeter (REFERENCE) */
+constant GGfloat mm2 = 1.0f; /*!< Squared millimeter (REFERENCE) */
+constant GGfloat mm3 = 1.0f; /*!< Cubic millimeter (REFERENCE) */
+constant GGfloat cm  = 10.f; /*!< Centimeter */
+constant GGfloat cm2 = 1.e2f; /*!< Squared centimeter */
+constant GGfloat cm3 = 1.e3f; /*!< Cubic centimeter */
+constant GGfloat m   = 1.e3f; /*!< Meter */
+constant GGfloat m2  = 1.e6f; /*!< Squared meter */
+constant GGfloat m3  = 1.e9f; /*!< Cubic meter */
+constant GGfloat km  = 1.e6f; /*!< Kilometer */
+constant GGfloat km2 = 1.e12f; /*!< Squared kilometer */
+constant GGfloat km3 = 1.e18f; /*!< Cubic kilometer */
+constant GGfloat pc  = 3.0856775807e+19f; /*!< Parsec */
 
 // Cross section unit (mm2)
-__constant GGfloat b = 1.e-22f; /*!< Barn */
-__constant GGfloat mb = 1.e-25f; /*!< millibarn */
-__constant GGfloat ub = 1.e-28f; /*!< microbarn */
-__constant GGfloat nb = 1.e-31f; /*!< nanobarn */
-__constant GGfloat pb = 1.e-34f; /*!< picobarn */
+constant GGfloat b = 1.e-22f; /*!< Barn */
+constant GGfloat mb = 1.e-25f; /*!< millibarn */
+constant GGfloat ub = 1.e-28f; /*!< microbarn */
+constant GGfloat nb = 1.e-31f; /*!< nanobarn */
+constant GGfloat pb = 1.e-34f; /*!< picobarn */
 
 // Angles
-__constant GGfloat rad  = 1.0f; /*!< Radian (REFERENCE) */
-__constant GGfloat mrad = 1.e-3f; /*!< milliradian */
-__constant GGfloat deg  = 3.141592653589793238463f/180.0f; /*!< Degree */
+constant GGfloat rad  = 1.0f; /*!< Radian (REFERENCE) */
+constant GGfloat mrad = 1.e-3f; /*!< milliradian */
+constant GGfloat deg  = 3.141592653589793238463f/180.0f; /*!< Degree */
 
 // Solid angle
-__constant GGfloat sr   = 1.0f; /*!< Steradian (REFERENCE) */
+constant GGfloat sr   = 1.0f; /*!< Steradian (REFERENCE) */
 
 // Time [T] (ns)
-__constant GGfloat ns = 1.f; /*!< Nanosecond (REFERENCE) */
-__constant GGfloat s  = 1.e+9f; /*!< Second */
-__constant GGfloat ms = 1.e+6f; /*!< Millisecond */
-__constant GGfloat us = 1.e+3f; /*!< Microsecond */
-__constant GGfloat ps = 1.e-3f; /*!< Picosecond */
+constant GGfloat ns = 1.f; /*!< Nanosecond (REFERENCE) */
+constant GGfloat s  = 1.e+9f; /*!< Second */
+constant GGfloat ms = 1.e+6f; /*!< Millisecond */
+constant GGfloat us = 1.e+3f; /*!< Microsecond */
+constant GGfloat ps = 1.e-3f; /*!< Picosecond */
 
 // Frequency [T^-1] (ns-1)
-__constant GGfloat Hz  = 1.f/(1.e+9f); /*!< Hertz */
-__constant GGfloat kHz = 1.e-6f; /*!< Kilohertz */
-__constant GGfloat MHz = 1.e-3f; /*!< Megahertz */
+constant GGfloat Hz  = 1.f/(1.e+9f); /*!< Hertz */
+constant GGfloat kHz = 1.e-6f; /*!< Kilohertz */
+constant GGfloat MHz = 1.e-3f; /*!< Megahertz */
 
 // Electric charge [Q] (eplus)
-__constant GGfloat eplus = 1.f; /*!< Positron charge */
-__constant GGfloat qe    = 1.602176487e-19f; /*!< elementary charge in coulomb (C) */
-__constant GGfloat C     = 1.f/1.602176487e-19f; /*!< Coulomb = 6.24150e+18 * eplus */
+constant GGfloat eplus = 1.f; /*!< Positron charge */
+constant GGfloat qe    = 1.602176487e-19f; /*!< elementary charge in coulomb (C) */
+constant GGfloat C     = 1.f/1.602176487e-19f; /*!< Coulomb = 6.24150e+18 * eplus */
 
 // Energy [E] (MeV)
-__constant GGfloat eV    = 1.e-6f; /*!< Electronvolt */
-__constant GGfloat keV   = 1.e-3f; /*!< kiloelectronvolt */
-__constant GGfloat MeV   = 1.f; /*!< Megaelectronvolt (REFERENCE) */
-__constant GGfloat GeV   = 1.e+3f; /*!< Gigaelectronvolt */
-__constant GGfloat TeV   = 1.e+6f; /*!< Teraelectronvolt */
-__constant GGfloat PeV   = 1.e+9f; /*!< Petaelectronvolt */
-__constant GGfloat J     = 1.e-6f/1.602176487e-19f; /*!< Joule 6.24150 e+12 * MeV */
+constant GGfloat eV    = 1.e-6f; /*!< Electronvolt */
+constant GGfloat keV   = 1.e-3f; /*!< kiloelectronvolt */
+constant GGfloat MeV   = 1.f; /*!< Megaelectronvolt (REFERENCE) */
+constant GGfloat GeV   = 1.e+3f; /*!< Gigaelectronvolt */
+constant GGfloat TeV   = 1.e+6f; /*!< Teraelectronvolt */
+constant GGfloat PeV   = 1.e+9f; /*!< Petaelectronvolt */
+constant GGfloat J     = 1.e-6f/1.602176487e-19f; /*!< Joule 6.24150 e+12 * MeV */
 
 // Mass [E][T^2][L^-2] (MeV.ns2.mm-2)
-__constant GGfloat kg = 6.241509704e+24f; /*!< Kilogram */
-__constant GGfloat g  = 6.241509704e+21f; /*!< gram */
-__constant GGfloat mg = 6.241509704e+18f; /*!< milligram */
+constant GGfloat kg = 6.241509704e+24f; /*!< Kilogram */
+constant GGfloat g  = 6.241509704e+21f; /*!< gram */
+constant GGfloat mg = 6.241509704e+18f; /*!< milligram */
 
 // Power [E][T^-1] (MeV.ns-1)
-__constant GGfloat W = 6.241509766e+3f; /*!< Watt */
+constant GGfloat W = 6.241509766e+3f; /*!< Watt */
 
 // Force [E][L^-1] (MeV.mm-1)
-__constant GGfloat N = 6.241509766e+9f; /*!< Newton */
+constant GGfloat N = 6.241509766e+9f; /*!< Newton */
 
 // Pressure [E][L^-3] (MeV.mm-3)
-__constant GGfloat Pa = 6.241509766e+3f; /*!< Pascal */
-__constant GGfloat bar = 100000.0f*6.241509766e+3f; /*!< Bar */
-__constant GGfloat atm = 101325.0f*6.241509766e+3f; /*!< Atmosphere */
+constant GGfloat Pa = 6.241509766e+3f; /*!< Pascal */
+constant GGfloat bar = 100000.0f*6.241509766e+3f; /*!< Bar */
+constant GGfloat atm = 101325.0f*6.241509766e+3f; /*!< Atmosphere */
 
 // Electric current [Q][T^-1] (C.ns-1)
-__constant GGfloat A  = 6.241509696e+9f; /*!< Ampere */
-__constant GGfloat mA = 6.241509696e+6f; /*!< Milliampere */
-__constant GGfloat uA = 6.241509696e+3f; /*!< Microampere */
-__constant GGfloat nA = 6.241509696f; /*!< Nanoampere */
+constant GGfloat A  = 6.241509696e+9f; /*!< Ampere */
+constant GGfloat mA = 6.241509696e+6f; /*!< Milliampere */
+constant GGfloat uA = 6.241509696e+3f; /*!< Microampere */
+constant GGfloat nA = 6.241509696f; /*!< Nanoampere */
 
 // Electric potential [E][Q^-1] 
-__constant GGfloat MV = 1.0f; /*!< Megavolt (REFERENCE) */
-__constant GGfloat kV = 1.e-3f; /*!< Kilovolt */
-__constant GGfloat V  = 1.e-6f; /*!< Volt */
+constant GGfloat MV = 1.0f; /*!< Megavolt (REFERENCE) */
+constant GGfloat kV = 1.e-3f; /*!< Kilovolt */
+constant GGfloat V  = 1.e-6f; /*!< Volt */
 
 // Electric resistance [E][T][Q^-2] (MeV.ns.C-2)
-__constant GGfloat OHM = 1.602176452e-16f; /*!< OHM 1.60217e-16*(MeV/eplus)/(eplus/ns) */
+constant GGfloat OHM = 1.602176452e-16f; /*!< OHM 1.60217e-16*(MeV/eplus)/(eplus/ns) */
 
 // Electric capacitance [Q^2][E^-1] (C.MV-1)
-__constant GGfloat F  = 6.241509468e+24f; /*!< Farad */
-__constant GGfloat mF = 6.241509468e+21f; /*!< millifarad */
-__constant GGfloat uF = 6.241509468e+18f; /*!< microfarad */
-__constant GGfloat nF = 6.241509468e+15f; /*!< nanofarad */
-__constant GGfloat pF = 6.241509468e+12f; /*!< picofarad */
+constant GGfloat F  = 6.241509468e+24f; /*!< Farad */
+constant GGfloat mF = 6.241509468e+21f; /*!< millifarad */
+constant GGfloat uF = 6.241509468e+18f; /*!< microfarad */
+constant GGfloat nF = 6.241509468e+15f; /*!< nanofarad */
+constant GGfloat pF = 6.241509468e+12f; /*!< picofarad */
 
 // Magnetic Flux [T][E][Q^-1] (ns.MV)
-__constant GGfloat Wb = 1000.0f; /*!< Weber 1000*megavolt*ns */
+constant GGfloat Wb = 1000.0f; /*!< Weber 1000*megavolt*ns */
 
 // Magnetic Field [T][E][Q^-1][L^-2] (MV.ns.mm2)
-__constant GGfloat T = 0.001f; /*!< Tesla 0.001*megavolt*ns/mm2 */
-__constant GGfloat G = 1.e-7f; /*!< Gauss */
-__constant GGfloat kG = 1.e-4f; /*!< Kilogauss */
+constant GGfloat T = 0.001f; /*!< Tesla 0.001*megavolt*ns/mm2 */
+constant GGfloat G = 1.e-7f; /*!< Gauss */
+constant GGfloat kG = 1.e-4f; /*!< Kilogauss */
 
 // Inductance [T^2][E][Q^-2] (MeV.ns2.C-2)
-__constant GGfloat H = 1.602176383e-07f; /*!< Henry 1.60217e-7*MeV*(ns/eplus)^2 */
+constant GGfloat H = 1.602176383e-07f; /*!< Henry 1.60217e-7*MeV*(ns/eplus)^2 */
 
 // Temperature (K)
-__constant GGfloat K = 1.0f; /*!< Kelvin (REFERENCE) */
+constant GGfloat K = 1.0f; /*!< Kelvin (REFERENCE) */
 
 // Amount of substance (mol)
-__constant GGfloat mol = 1.0f; /*!< Mole (REFERENCE) */
+constant GGfloat mol = 1.0f; /*!< Mole (REFERENCE) */
 
 // Activity [T^-1] (ns-1)
-__constant GGfloat Bq  = 1.e-9f; /*!< Becquerel */
-__constant GGfloat kBq = 1.e-6f; /*!< Kilobecquerel */
-__constant GGfloat MBq = 1.e-3f; /*!< Megabecquerel */
-__constant GGfloat GBq = 1.0f; /*!< Gigabecquerel (REFERENCE) */
-__constant GGfloat Ci  = 3.7e+10f/1.e+9f; /*!< Curie (Bq.ns-1) */
-__constant GGfloat mCi = 3.7e-2f; /*!< Millicurie */
-__constant GGfloat uCi = 3.7e-5f; /*!< Microcurie */
+constant GGfloat Bq  = 1.e-9f; /*!< Becquerel */
+constant GGfloat kBq = 1.e-6f; /*!< Kilobecquerel */
+constant GGfloat MBq = 1.e-3f; /*!< Megabecquerel */
+constant GGfloat GBq = 1.0f; /*!< Gigabecquerel (REFERENCE) */
+constant GGfloat Ci  = 3.7e+10f/1.e+9f; /*!< Curie (Bq.ns-1) */
+constant GGfloat mCi = 3.7e-2f; /*!< Millicurie */
+constant GGfloat uCi = 3.7e-5f; /*!< Microcurie */
 
 // Absorbed dose [L^2][T^-2] (mm2.ns-2)
-__constant GGfloat Gy  = 1.0e-12f; /*!< Gray */
-__constant GGfloat kGy = 1.0e-9f; /*!< Kilogray */
-__constant GGfloat mGy = 1.0e-15f; /*!< Milligray */
-__constant GGfloat uGy = 1.0e-18f; /*!< Microgray */
+constant GGfloat Gy  = 1.0e-12f; /*!< Gray */
+constant GGfloat kGy = 1.0e-9f; /*!< Kilogray */
+constant GGfloat mGy = 1.0e-15f; /*!< Milligray */
+constant GGfloat uGy = 1.0e-18f; /*!< Microgray */
 
 // Luminous intensity [I] (cd)
-__constant GGfloat cd = 1.0f; /*!< Candela (REFERENCE) */
+constant GGfloat cd = 1.0f; /*!< Candela (REFERENCE) */
 
 // Luminous flux [I] (cd.sr)
-__constant GGfloat lm = 1.0f; /*!< Lumen (REFERENCE) */
+constant GGfloat lm = 1.0f; /*!< Lumen (REFERENCE) */
 
 // Illuminance [I][L^-2] (cd.sr.mm-2)
-__constant GGfloat lx = 1.e-6f; /*!< Lux */
+constant GGfloat lx = 1.e-6f; /*!< Lux */
 
 // Miscellaneous
-__constant GGfloat percent = 0.01f; /*!< Percent value */
-__constant GGfloat perthousant = 0.001f; /*!< Perthousand value */
-__constant GGfloat permillion  = 0.000001f; /*!< Permillion value */
+constant GGfloat percent = 0.01f; /*!< Percent value */
+constant GGfloat perthousant = 0.001f; /*!< Perthousand value */
+constant GGfloat permillion  = 0.000001f; /*!< Permillion value */
 
 #ifndef __OPENCL_C_VERSION__
 /*!

@@ -64,7 +64,7 @@ GGEMSXRaySource::GGEMSXRaySource(std::string const& source_name)
   );
 
   // Initialization of parameters
-  focal_spot_size_ = MakeFloat3(std::numeric_limits<float>::min(), std::numeric_limits<float>::min(), std::numeric_limits<float>::min());
+  focal_spot_size_ = {std::numeric_limits<float>::min(), std::numeric_limits<float>::min(), std::numeric_limits<float>::min()};
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -85,19 +85,19 @@ void GGEMSXRaySource::InitializeKernel(void)
   GGcout("GGEMSXRaySource", "InitializeKernel", 3) << "Initializing kernel..." << GGendl;
 
   // Getting the path to kernel
-  std::string const kOpenCLKernelPath = OPENCL_KERNEL_PATH;
-  std::string const kFilename = kOpenCLKernelPath + "/GetPrimariesGGEMSXRaySource.cl";
+  std::string openCL_kernel_path = OPENCL_KERNEL_PATH;
+  std::string filename = openCL_kernel_path + "/GetPrimariesGGEMSXRaySource.cl";
 
   // Compiling the kernel
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
-  kernel_get_primaries_cl_ = opencl_manager.CompileKernel(kFilename, "get_primaries_ggems_xray_source", nullptr, const_cast<char*>(tracking_kernel_option_.c_str()));
+  kernel_get_primaries_cl_ = opencl_manager.CompileKernel(filename, "get_primaries_ggems_xray_source", nullptr, const_cast<char*>(tracking_kernel_option_.c_str()));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSXRaySource::GetPrimaries(GGulong const& number_of_particles)
+void GGEMSXRaySource::GetPrimaries(GGlong const& number_of_particles)
 {
   GGcout("GGEMSXRaySource", "GetPrimaries", 3) << "Generating " << number_of_particles << " new particles..." << GGendl;
 
@@ -345,7 +345,7 @@ void GGEMSXRaySource::FillEnergy(void)
 
     // Compute CDF and normalized it
     cdf_device[0] /= sum_cdf;
-    for (GGuint i = 1; i < number_of_energy_bins_; ++i) {
+    for (GGint i = 1; i < number_of_energy_bins_; ++i) {
       cdf_device[i] = cdf_device[i]/sum_cdf + cdf_device[i-1];
     }
 
@@ -397,7 +397,7 @@ void GGEMSXRaySource::SetBeamAperture(GGfloat const& beam_aperture, std::string 
 
 void GGEMSXRaySource::SetFocalSpotSize(GGfloat const& width, GGfloat const& height, GGfloat const& depth, std::string const& unit)
 {
-  focal_spot_size_ = MakeFloat3(DistanceUnit(width, unit), DistanceUnit(height, unit), DistanceUnit(depth, unit));
+  focal_spot_size_ = {DistanceUnit(width, unit), DistanceUnit(height, unit), DistanceUnit(depth, unit)};
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -431,7 +431,7 @@ void set_position_ggems_xray_source(GGEMSXRaySource* xray_source, GGfloat const 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_number_of_particles_xray_source(GGEMSXRaySource* xray_source, GGulong const number_of_particles)
+void set_number_of_particles_xray_source(GGEMSXRaySource* xray_source, GGlong const number_of_particles)
 {
   xray_source->SetNumberOfParticles(number_of_particles);
 }
