@@ -65,7 +65,8 @@ inline GGfloat3 RotateUnitZ(GGfloat3 vector, GGfloat3 const new_uz)
     vector.z = -vector.z;
   }
 
-  return {vector.x, vector.y, vector.z};
+  GGfloat3 tmp = {vector.x, vector.y, vector.z};
+  return tmp;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

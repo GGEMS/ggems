@@ -35,7 +35,7 @@
 #include "GGEMS/sources/GGEMSSourceManager.hh"
 #include "GGEMS/maths/GGEMSGeometryTransformation.hh"
 #include "GGEMS/tools/GGEMSTools.hh"
-#include "GGEMS/physics/GGEMSPrimaryParticlesStack.hh"
+#include "GGEMS/physics/GGEMSPrimaryParticles.hh"
 #include "GGEMS/randoms/GGEMSRandom.hh"
 #include "GGEMS/physics/GGEMSParticles.hh"
 #include "GGEMS/global/GGEMSManager.hh"

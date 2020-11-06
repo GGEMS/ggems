@@ -31,7 +31,7 @@
 #include "GGEMS/physics/GGEMSParticles.hh"
 #include "GGEMS/sources/GGEMSSourceManager.hh"
 #include "GGEMS/tools/GGEMSRAMManager.hh"
-#include "GGEMS/physics/GGEMSPrimaryParticlesStack.hh"
+#include "GGEMS/physics/GGEMSPrimaryParticles.hh"
 #include "GGEMS/navigators/GGEMSNavigatorManager.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -69,7 +69,7 @@ GGEMSParticles::~GGEMSParticles(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSParticles::SetNumberOfParticles(GGulong const& number_of_particles)
+void GGEMSParticles::SetNumberOfParticles(GGlong const& number_of_particles)
 {
   number_of_particles_ = number_of_particles;
 }
@@ -102,7 +102,7 @@ bool GGEMSParticles::IsAlive(void) const
 
   // Loop over the number of particles
   bool status = false;
-  for (GGulong i = 0; i < number_of_particles_; ++i) {
+  for (GGlong i = 0; i < number_of_particles_; ++i) {
     if (primary_particles_device->status_[i] == ALIVE) {
       status = true;
       break;

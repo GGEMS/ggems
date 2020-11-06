@@ -116,11 +116,11 @@ class GGEMS_EXPORT GGEMSMHDImage
     void SetElementSizes(GGfloat3 const& element_sizes);
 
     /*!
-      \fn void SetDimensions(GGuint3 const& dimensions)
+      \fn void SetDimensions(GGint3 const& dimensions)
       \param dimensions - dimensions of image in X, Y, Z
       \brief set the dimensions of the image
     */
-    void SetDimensions(GGuint3 const& dimensions);
+    void SetDimensions(GGint3 const& dimensions);
 
     /*!
       \fn void SetDataType(std::string const& data_type)
@@ -164,7 +164,7 @@ class GGEMS_EXPORT GGEMSMHDImage
     std::string mhd_raw_file_; /*!< Name of the MHD raw file */
     std::string mhd_data_type_; /*!< Type of data */
     GGfloat3 element_sizes_; /*!< Size of elements */
-    GGuint3 dimensions_; /*!< Dimension volume X, Y, Z */
+    GGint3 dimensions_; /*!< Dimension volume X, Y, Z */
 };
 
 ////////////////////////////////////////////////////////////////////////////////

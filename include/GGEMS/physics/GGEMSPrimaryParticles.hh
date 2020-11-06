@@ -1,5 +1,5 @@
-#ifndef GUARD_GGEMS_PHYSICS_GGEMSPRIMARYPARTICLESSTACK_HH
-#define GUARD_GGEMS_PHYSICS_GGEMSPRIMARYPARTICLESSTACK_HH
+#ifndef GUARD_GGEMS_PHYSICS_GGEMSPRIMARYPARTICLES_HH
+#define GUARD_GGEMS_PHYSICS_GGEMSPRIMARYPARTICLES_HH
 
 // ************************************************************************
 // * This file is part of GGEMS.                                          *
@@ -50,17 +50,17 @@ typedef struct GGEMSPrimaryParticles_t
   GGfloat tof_[MAXIMUM_PARTICLES]; /*!< Time of flight for photon only */
 
   //GGuint geometry_id_[MAXIMUM_PARTICLES]; /*!< current geometry crossed by the particle */
-  GGuint E_index_[MAXIMUM_PARTICLES]; /*!< Energy index within CS and Mat tables */
+  GGint E_index_[MAXIMUM_PARTICLES]; /*!< Energy index within CS and Mat tables */
   //GGuchar scatter_order_[MAXIMUM_PARTICLES]; /*!< Scatter order, usefull for the imagery */
-  GGuchar solid_id_[MAXIMUM_PARTICLES]; /*!< current solid crossed by the particle */
+  GGchar solid_id_[MAXIMUM_PARTICLES]; /*!< current solid crossed by the particle */
 
   GGfloat particle_solid_distance_[MAXIMUM_PARTICLES]; /*!< Distance from previous position to next position, OUT_OF_WORLD if no next position */
   GGfloat next_interaction_distance_[MAXIMUM_PARTICLES]; /*!< Distance to the next interaction */
-  GGuchar next_discrete_process_[MAXIMUM_PARTICLES]; /*!< Next process */
+  GGchar next_discrete_process_[MAXIMUM_PARTICLES]; /*!< Next process */
 
-  GGuchar status_[MAXIMUM_PARTICLES]; /*!< Status of the particle */
-  GGuchar level_[MAXIMUM_PARTICLES]; /*!< Level of the particle */
-  GGuchar pname_[MAXIMUM_PARTICLES]; /*!< particle name (photon, electron, etc) */
+  GGchar status_[MAXIMUM_PARTICLES]; /*!< Status of the particle */
+  GGchar level_[MAXIMUM_PARTICLES]; /*!< Level of the particle */
+  GGchar pname_[MAXIMUM_PARTICLES]; /*!< particle name (photon, electron, etc) */
 
   GGint particle_tracking_id; /*!< Particle id for tracking */
 } GGEMSPrimaryParticles; /*!< Using C convention name of struct to C++ (_t deletion) */
