@@ -19,14 +19,24 @@
 #-------------------------------------------------------------------------------
 # CMakeLists.txt
 #
-# CMakeLists.txt - Compile and build the GGEMS examples
+# CMakeLists.txt - Compile and build the 0_Cross_Sections example
 #
 # Authors :
 #   - Julien Bert <julien.bert@univ-brest.fr>
 #   - Didier Benoit <didier.benoit@inserm.fr>
 #
-# Generated on : 2/11/2020
+# Generated on : 6/11/2020
 #-------------------------------------------------------------------------------
 
-ADD_SUBDIRECTORY(0_Cross_Sections)
-ADD_SUBDIRECTORY(3_Voxelized_Phantom_Generator)
+#-------------------------------------------------------------------------------
+# Defining the project
+PROJECT(CrossSections)
+
+#-------------------------------------------------------------------------------
+# Creating the executable
+ADD_EXECUTABLE(cross_sections cross_sections.cc)
+TARGET_LINK_LIBRARIES(cross_sections ggems)
+
+#-------------------------------------------------------------------------------
+# Copy executable to ggems bin folder
+INSTALL(TARGETS cross_sections DESTINATION ${PROJECT_SOURCE_DIR})

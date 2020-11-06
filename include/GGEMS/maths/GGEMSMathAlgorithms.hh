@@ -36,7 +36,7 @@
 
 #ifdef __OPENCL_C_VERSION__
 /*!
-  \fn inline GGuint BinarySearchLeft(GGfloat const key, __global GGfloat const* array, GGuint const size, GGuint const offset, GGuint min)
+  \fn inline GGuint BinarySearchLeft(GGfloat const key, global GGfloat const* array, GGuint const size, GGuint const offset, GGuint min)
   \param key - value in p_array to find
   \param array - p_array where is the key value
   \param size - size of p_array, number of elements
@@ -45,7 +45,7 @@
   \return index of key value in p_array buffer
   \brief Find the index of the key value in the p_array buffer
 */
-inline GGuint BinarySearchLeft(GGfloat const key, __global GGfloat const* array, GGuint const size, GGuint const offset, GGuint min)
+inline GGuint BinarySearchLeft(GGfloat const key, global GGfloat const* array, GGuint const size, GGuint const offset, GGuint min)
 #else
 /*!
   \fn inline GGuint BinarySearchLeft(GGfloat const key, GGfloat const* array, GGuint const size, GGuint const offset, GGuint min)

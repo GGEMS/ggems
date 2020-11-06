@@ -31,7 +31,7 @@
 #include "GGEMS/tools/GGEMSTypes.hh"
 
 /*!
-  \fn __kernel void draw_ggems_sphere(GGuint const voxel_id_limit, GGfloat3 const element_sizes, GGuint3 const phantom_dimensions, GGfloat3 const positions, GGfloat const label_value, GGfloat const radius,  global GGchar* voxelized_phantom)
+  \fn __kernel void draw_ggems_sphere(GGint const voxel_id_limit, GGfloat3 const element_sizes, GGint3 const phantom_dimensions, GGfloat3 const positions, GGfloat const label_value, GGfloat const radius,  global GGchar* voxelized_phantom)
   \param voxel_id_limit - voxel id limit
   \param element_sizes - size of voxels
   \param phantom_dimensions - dimension of phantom
@@ -42,9 +42,9 @@
   \brief Draw sphere solid in voxelized image
 */
 kernel void draw_ggems_sphere(
-  GGuint const voxel_id_limit,
+  GGint const voxel_id_limit,
   GGfloat3 const element_sizes,
-  GGuint3 const phantom_dimensions,
+  GGint3 const phantom_dimensions,
   GGfloat3 const positions,
   GGfloat const label_value,
   GGfloat const radius,
@@ -68,15 +68,15 @@ kernel void draw_ggems_sphere(
 )
 {
   // Getting index of thread
-  GGint kGlobalVoxelID = get_global_id(0);
+  GGint global_id = get_global_id(0);
 
   // Return if index > to voxel limit
-  if (kGlobalVoxelID >= voxel_id_limit) return;
+  if (global_id >= voxel_id_limit) return;
 
   // Get dimension of voxelized phantom
-  GGuint n_x = phantom_dimensions.x;
-  GGuint n_y = phantom_dimensions.y;
-  GGuint n_z = phantom_dimensions.z;
+  GGint n_x = phantom_dimensions.x;
+  GGint n_y = phantom_dimensions.y;
+  GGint n_z = phantom_dimensions.z;
 
   // Get size of voxels
   GGfloat size_x = element_sizes.x;
@@ -92,14 +92,14 @@ kernel void draw_ggems_sphere(
   GGfloat radius2 = radius * radius;
 
   // Get index i, j and k of current voxel
-  GGuint j = (kGlobalVoxelID % (n_x * n_y)) / n_x;
-  GGuint i = (kGlobalVoxelID % (n_x * n_y)) - j * n_x;
-  GGuint k = kGlobalVoxelID / (n_x * n_y);
+  GGint j = (global_id % (n_x*n_y)) / n_x;
+  GGint i = (global_id % (n_x*n_y)) - j*n_x;
+  GGint k = global_id / (n_x*n_y);
 
   // Get the coordinates of the current voxel
-  GGfloat x = (size_x / 2.0f) * (1.0f - (GGfloat)n_x + 2.0f * i);
-  GGfloat y = (size_y / 2.0f) * (1.0f - (GGfloat)n_y + 2.0f * j);
-  GGfloat z = (size_z / 2.0f) * (1.0f - (GGfloat)n_z + 2.0f * k);
+  GGfloat x = (size_x/2.0f) * (1.0f - (GGfloat)n_x + 2.0f*i);
+  GGfloat y = (size_y/2.0f) * (1.0f - (GGfloat)n_y + 2.0f*j);
+  GGfloat z = (size_z/2.0f) * (1.0f - (GGfloat)n_z + 2.0f*k);
 
   // Apply solid isocenter
   x -= isocenter_x;
@@ -109,19 +109,19 @@ kernel void draw_ggems_sphere(
   // Check if voxel is outside/inside analytical volume
   if (x*x + y*y + z*z <= radius2) {
     #ifdef MET_CHAR
-    voxelized_phantom[kGlobalVoxelID] = (GGchar)label_value;
+    voxelized_phantom[global_id] = (GGchar)label_value;
     #elif MET_UCHAR
-    voxelized_phantom[kGlobalVoxelID] = (GGuchar)label_value;
+    voxelized_phantom[global_id] = (GGuchar)label_value;
     #elif MET_SHORT
-    voxelized_phantom[kGlobalVoxelID] = (GGshort)label_value;
+    voxelized_phantom[global_id] = (GGshort)label_value;
     #elif MET_USHORT
-    voxelized_phantom[kGlobalVoxelID] = (GGushort)label_value;
+    voxelized_phantom[global_id] = (GGushort)label_value;
     #elif MET_INT
-    voxelized_phantom[kGlobalVoxelID] = (GGint)label_value;
+    voxelized_phantom[global_id] = (GGint)label_value;
     #elif MET_UINT
-    voxelized_phantom[kGlobalVoxelID] = (GGuint)label_value;
+    voxelized_phantom[global_id] = (GGuint)label_value;
     #elif MET_FLOAT
-    voxelized_phantom[kGlobalVoxelID] = (GGfloat)label_value;
+    voxelized_phantom[global_id] = (GGfloat)label_value;
     #endif
   }
 }

@@ -31,7 +31,7 @@
 #include "GGEMS/materials/GGEMSMaterials.hh"
 #include "GGEMS/maths/GGEMSMathAlgorithms.hh"
 #include "GGEMS/physics/GGEMSRayleighScattering.hh"
-#include "GGEMS/physics/GGEMSParticleCrossSectionsStack.hh"
+#include "GGEMS/physics/GGEMSParticleCrossSections.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -74,15 +74,15 @@ GGEMSRayleighScattering::~GGEMSRayleighScattering(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGfloat GGEMSRayleighScattering::ComputeCrossSectionPerAtom(GGfloat const& energy, GGuchar const& atomic_number) const
+GGfloat GGEMSRayleighScattering::ComputeCrossSectionPerAtom(GGfloat const& energy, GGchar const& atomic_number) const
 {
   // Energy in range [250 eV; 100 GeV]
   if (energy < 250e-6f || energy > 100e3f) return 0.0f;
 
-  GGuint const kStart = GGEMSRayleighTable::kCrossSectionCumulativeIntervals[atomic_number];
-  GGuint const kStop = kStart + 2 * (GGEMSRayleighTable::kCrossSectionNumberOfIntervals[atomic_number]-1);
+  GGint const kStart = GGEMSRayleighTable::kCrossSectionCumulativeIntervals[atomic_number];
+  GGint const kStop = kStart + 2 * (GGEMSRayleighTable::kCrossSectionNumberOfIntervals[atomic_number]-1);
 
-  GGuint pos = kStart;
+  GGint pos = kStart;
   for (; pos < kStop; pos += 2) {
     if (GGEMSRayleighTable::kCrossSection[pos] >= static_cast<GGfloat>(energy)) break;
   }
@@ -90,10 +90,10 @@ GGfloat GGEMSRayleighScattering::ComputeCrossSectionPerAtom(GGfloat const& energ
   if (energy < 1e3f) { // 1 GeV
     return static_cast<GGfloat>(1.0e-22 * LogLogInterpolation(
       energy,
-      static_cast<GGfloat>(GGEMSRayleighTable::kCrossSection[pos-2]), static_cast<GGfloat>(GGEMSRayleighTable::kCrossSection[pos-1]),
-      static_cast<GGfloat>(GGEMSRayleighTable::kCrossSection[pos]), static_cast<GGfloat>(GGEMSRayleighTable::kCrossSection[pos+1])));
+      GGEMSRayleighTable::kCrossSection[pos-2], GGEMSRayleighTable::kCrossSection[pos-1],
+      GGEMSRayleighTable::kCrossSection[pos], GGEMSRayleighTable::kCrossSection[pos+1]));
   }
   else {
-    return static_cast<GGfloat>(1.0e-22 * GGEMSRayleighTable::kCrossSection[pos-1]);
+    return 1.0e-22f * GGEMSRayleighTable::kCrossSection[pos-1];
   }
 }

@@ -39,8 +39,8 @@
 
 GGEMSNavigator::GGEMSNavigator(std::string const& navigator_name)
 : navigator_name_(navigator_name),
-  position_xyz_(MakeFloat3Zeros()),
-  rotation_xyz_(MakeFloat3Zeros()),
+  position_xyz_({0.0f, 0.0f, 0.0f}),
+  rotation_xyz_({0.0f, 0.0f, 0.0f}),
   navigator_id_(-1),
   is_update_pos_(false),
   is_update_rot_(false),
@@ -86,9 +86,9 @@ void GGEMSNavigator::SetLocalAxis(GGfloat3 const& m0, GGfloat3 const& m1, GGfloa
 void GGEMSNavigator::SetPosition(GGfloat const& position_x, GGfloat const& position_y, GGfloat const& position_z, std::string const& unit)
 {
   is_update_pos_ = true;
-  position_xyz_.s[0] = DistanceUnit(position_x, unit);
-  position_xyz_.s[1] = DistanceUnit(position_y, unit);
-  position_xyz_.s[2] = DistanceUnit(position_z, unit);
+  position_xyz_.s0 = DistanceUnit(position_x, unit);
+  position_xyz_.s1 = DistanceUnit(position_y, unit);
+  position_xyz_.s2 = DistanceUnit(position_z, unit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -98,9 +98,9 @@ void GGEMSNavigator::SetPosition(GGfloat const& position_x, GGfloat const& posit
 void GGEMSNavigator::SetRotation(GGfloat const& rx, GGfloat const& ry, GGfloat const& rz, std::string const& unit)
 {
   is_update_rot_ = true;
-  rotation_xyz_.s[0] = AngleUnit(rx, unit);
-  rotation_xyz_.s[1] = AngleUnit(ry, unit);
-  rotation_xyz_.s[2] = AngleUnit(rz, unit);
+  rotation_xyz_.s0 = AngleUnit(rx, unit);
+  rotation_xyz_.s1 = AngleUnit(ry, unit);
+  rotation_xyz_.s2 = AngleUnit(rz, unit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

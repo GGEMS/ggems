@@ -398,12 +398,12 @@ extern "C" GGEMS_EXPORT GGEMSOpenCLManager* get_instance_ggems_opencl_manager(vo
 extern "C" GGEMS_EXPORT void print_infos_opencl_manager(GGEMSOpenCLManager* opencl_manager);
 
 /*!
-  \fn void set_context_index_ggems_opencl_manager(GGEMSOpenCLManager* opencl_manager, GGuint const context_id)
+  \fn void set_context_index_ggems_opencl_manager(GGEMSOpenCLManager* opencl_manager, GGint const context_id)
   \param opencl_manager - pointer on the singleton
   \param context_id - index of the context
   \brief Set the context index to activate
 */
-extern "C" GGEMS_EXPORT void set_context_index_ggems_opencl_manager(GGEMSOpenCLManager* opencl_manager, GGuint const context_id);
+extern "C" GGEMS_EXPORT void set_context_index_ggems_opencl_manager(GGEMSOpenCLManager* opencl_manager, GGint const context_id);
 
 /*!
   \fn void clean_opencl_manager(GGEMSOpenCLManager* opencl_manager)

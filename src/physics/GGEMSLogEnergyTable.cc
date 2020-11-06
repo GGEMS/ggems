@@ -38,7 +38,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSLogEnergyTable::GGEMSLogEnergyTable(GGfloat const& lowest_energy, GGfloat const& highest_energy, GGushort const& number_of_bins)
+GGEMSLogEnergyTable::GGEMSLogEnergyTable(GGfloat const& lowest_energy, GGfloat const& highest_energy, GGshort const& number_of_bins)
 {
   GGcout("GGEMSLogEnergyTable", "GGEMSLogEnergyTable", 3) << "Allocation of GGEMSLogEnergyTable..." << GGendl;
 

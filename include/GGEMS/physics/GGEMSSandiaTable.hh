@@ -39,7 +39,7 @@
 */
 namespace GGEMSSandiaTable
 {
-  __constant GGfloat kIonizationPotentials[101] = {
+  constant GGfloat kIonizationPotentials[101] = {
         0.0f,  // nonexisting 'zero' element
 
     //   Hf,                                                     Hef,         (2)
@@ -79,7 +79,7 @@ namespace GGEMSSandiaTable
       5.99f,  6.02f,  6.23f,  6.30f,  6.42f,  6.50f
 }; /*!< Ionization potentials of chemical elements in eV */
 
-  __constant GGuchar kNumberOfIntervals [101] = {
+  constant GGshort kNumberOfIntervals [101] = {
       0,  // nonexisting 'zero' element
 
 //    H,                                                     He,         (2)
@@ -119,7 +119,7 @@ namespace GGEMSSandiaTable
      11,    11,    11,    11,    12,    12
 }; /*!< Number of intervals for each chemical elements */
 
-  __constant GGushort kCumulativeIntervals [101] = {
+  constant GGshort kCumulativeIntervals [101] = {
       0,  // nonexisting 'zero' element
 
 //    H,                                                     He,         (2)
@@ -160,7 +160,7 @@ namespace GGEMSSandiaTable
 }; /*!< Cumulative intervals, useful to find element in Sandia table */
 
   // The ration of atomic number to atomic mass for first 100 elements
-  __constant GGfloat kZtoARatio[101] =
+  constant GGfloat kZtoARatio[101] =
   {
       0.0f,  // nonexisting 'zero' element
 
@@ -201,7 +201,7 @@ namespace GGEMSSandiaTable
     0.3909f, 0.3887f, 0.3927f, 0.3904f, 0.3929f, 0.3891f
 }; /*!< ratio of atomic number to atomic mass */
 
-  __constant GGfloat kSandiaTable[981][5] = {
+  constant GGfloat kSandiaTable[981][5] = {
     { 0.0f,          0.0f,         0.0f,         0.0f,         0.0f},  // 'zero' row
 
     // Z - Element - Elm - Number of intervals   new   (for corrected element)

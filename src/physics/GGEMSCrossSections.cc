@@ -129,13 +129,13 @@ void GGEMSCrossSections::Initialize(GGEMSMaterials const* materials)
   GGEMSParticleCrossSections* particle_cross_sections_device = opencl_manager.GetDeviceBuffer<GGEMSParticleCrossSections>(particle_cross_sections_cl_.get(), sizeof(GGEMSParticleCrossSections));
 
   // Storing information for process manager
-  GGushort const kNBins = process_manager.GetCrossSectionTableNumberOfBins();
-  GGfloat const kMinEnergy = process_manager.GetCrossSectionTableMinEnergy();
-  GGfloat const kMaxEnergy = process_manager.GetCrossSectionTableMaxEnergy();
+  GGshort number_of_bins = process_manager.GetCrossSectionTableNumberOfBins();
+  GGfloat min_energy = process_manager.GetCrossSectionTableMinEnergy();
+  GGfloat max_energy = process_manager.GetCrossSectionTableMaxEnergy();
 
-  particle_cross_sections_device->number_of_bins_ = kNBins;
-  particle_cross_sections_device->min_energy_ = kMinEnergy;
-  particle_cross_sections_device->max_energy_ = kMaxEnergy;
+  particle_cross_sections_device->number_of_bins_ = number_of_bins;
+  particle_cross_sections_device->min_energy_ = min_energy;
+  particle_cross_sections_device->max_energy_ = max_energy;
   for (std::size_t i = 0; i < materials->GetNumberOfMaterials(); ++i) {
     #ifdef _WIN32
     strcpy_s(reinterpret_cast<char*>(particle_cross_sections_device->material_names_[i]), 32, (materials->GetMaterialName(i)).c_str());
@@ -148,9 +148,9 @@ void GGEMSCrossSections::Initialize(GGEMSMaterials const* materials)
   particle_cross_sections_device->number_of_materials_ = static_cast<GGuchar>(materials->GetNumberOfMaterials());
 
   // Filling energy table with log scale
-  GGfloat const kSlope = logf(kMaxEnergy/kMinEnergy);
-  for (GGushort i = 0; i < kNBins; ++i) {
-    particle_cross_sections_device->energy_bins_[i] = kMinEnergy * expf(kSlope * (static_cast<float>(i) / (kNBins-1.0f))) * MeV;
+  GGfloat slope = logf(max_energy/min_energy);
+  for (GGshort i = 0; i < number_of_bins; ++i) {
+    particle_cross_sections_device->energy_bins_[i] = min_energy * expf(slope * (static_cast<float>(i) / (number_of_bins-1.0f))) * MeV;
   }
 
   // Release pointer
@@ -221,17 +221,17 @@ void GGEMSCrossSections::LoadPhysicTablesOnHost(void)
 GGfloat GGEMSCrossSections::GetPhotonCrossSection(std::string const& process_name, std::string const& material_name, GGfloat const& energy, std::string const& unit) const
 {
   // Get min and max energy in the table, and number of bins
-  GGfloat const kMinEnergy = particle_cross_sections_->min_energy_;
-  GGfloat const kMaxEnergy = particle_cross_sections_->max_energy_;
-  GGuint const kNumberOfBins = particle_cross_sections_->number_of_bins_;
-  GGuchar const kNumberMaterials = particle_cross_sections_->number_of_materials_;
+  GGfloat min_energy = particle_cross_sections_->min_energy_;
+  GGfloat max_energy = particle_cross_sections_->max_energy_;
+  GGshort number_of_bins = particle_cross_sections_->number_of_bins_;
+  GGshort number_of_materials = particle_cross_sections_->number_of_materials_;
 
   // Converting energy
-  GGfloat const kEnergyMeV = EnergyUnit(energy, unit);
+  GGfloat e_MeV = EnergyUnit(energy, unit);
 
-  if (kEnergyMeV < kMinEnergy || kEnergyMeV > kMaxEnergy) {
+  if (e_MeV < min_energy || e_MeV > max_energy) {
     std::ostringstream oss(std::ostringstream::out);
-    oss << "Problem energy: " << kEnergyMeV << " " << unit << " is not in the range [" << kMinEnergy << ", " << kMaxEnergy << "] MeV!!!" << std::endl;
+    oss << "Problem energy: " << e_MeV << " " << unit << " is not in the range [" << min_energy << ", " << max_energy << "] MeV!!!" << std::endl;
     GGEMSMisc::ThrowException("GGEMSCrossSections", "GetPhotonCrossSection", oss.str());
   }
 
@@ -257,7 +257,7 @@ GGfloat GGEMSCrossSections::GetPhotonCrossSection(std::string const& process_nam
 
   // Get id of material
   GGuint mat_id = 0;
-  for (GGuchar i = 0; i < kNumberMaterials; ++i) {
+  for (GGuchar i = 0; i < number_of_materials; ++i) {
     if (strcmp(material_name.c_str(), reinterpret_cast<char*>(particle_cross_sections_->material_names_[i])) == 0) {
       mat_id = i;
       break;
@@ -266,20 +266,20 @@ GGfloat GGEMSCrossSections::GetPhotonCrossSection(std::string const& process_nam
 
   // Get density of material
   GGEMSMaterialsDatabaseManager& material_database_manager = GGEMSMaterialsDatabaseManager::GetInstance();
-  GGfloat const kDensity = material_database_manager.GetMaterial(material_name).density_;
+  GGfloat density = material_database_manager.GetMaterial(material_name).density_;
 
   // Computing the energy bin
-  GGuint const kEnergyBin = BinarySearchLeft(kEnergyMeV, particle_cross_sections_->energy_bins_, kNumberOfBins, 0, 0);
+  GGuint energy_bin = BinarySearchLeft(e_MeV, particle_cross_sections_->energy_bins_, number_of_bins, 0, 0);
 
   // Compute cross section using linear interpolation
-  GGfloat const kEnergyA = particle_cross_sections_->energy_bins_[kEnergyBin];
-  GGfloat const kEnergyB = particle_cross_sections_->energy_bins_[kEnergyBin+1];
-  GGfloat const kCSA = particle_cross_sections_->photon_cross_sections_[process_id][kEnergyBin + kNumberOfBins*mat_id];
-  GGfloat const kCSB = particle_cross_sections_->photon_cross_sections_[process_id][kEnergyBin+1 + kNumberOfBins*mat_id];
+  GGfloat energy_a = particle_cross_sections_->energy_bins_[energy_bin];
+  GGfloat energy_b = particle_cross_sections_->energy_bins_[energy_bin+1];
+  GGfloat cross_section_a = particle_cross_sections_->photon_cross_sections_[process_id][energy_bin + number_of_bins*mat_id];
+  GGfloat cross_section_b = particle_cross_sections_->photon_cross_sections_[process_id][energy_bin+1 + number_of_bins*mat_id];
 
-  GGfloat const kCS = LinearInterpolation(kEnergyA, kCSA, kEnergyB, kCSB, kEnergyMeV);
+  GGfloat cross_section = LinearInterpolation(energy_a, cross_section_a, energy_b, cross_section_b, e_MeV);
 
-  return (kCS/kDensity) / (cm2/g);
+  return (cross_section/density) / (cm2/g);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

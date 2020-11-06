@@ -346,11 +346,9 @@ void GGEMSOpenCLManager::PrintDeviceInfos(void) const
 
 void GGEMSOpenCLManager::PrintBuildOptions(void) const
 {
-  GGcout("GGEMSOpenCLManager", "PrintBuildOptions", 3)
-    << "Printing infos about OpenCL compilation options..." << GGendl;
+  GGcout("GGEMSOpenCLManager", "PrintBuildOptions", 3) << "Printing infos about OpenCL compilation options..." << GGendl;
 
-  GGcout("GGEMSOpenCLManager", "PrintBuildOptions", 0)
-    << "OpenCL building options: " << build_options_ << GGendl;
+  GGcout("GGEMSOpenCLManager", "PrintBuildOptions", 0) << "OpenCL building options: " << build_options_ << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -359,8 +357,7 @@ void GGEMSOpenCLManager::PrintBuildOptions(void) const
 
 void GGEMSOpenCLManager::CreateContext(void)
 {
-  GGcout("GGEMSOpenCLManager", "CreateContext", 3)
-    << "Creating context for CPU and/or GPU..." << GGendl;
+  GGcout("GGEMSOpenCLManager", "CreateContext", 3) << "Creating context for CPU and/or GPU..." << GGendl;
 
   // Loop over the devices
   for (std::size_t i = 0; i < devices_cl_.size(); ++i) {
@@ -1136,7 +1133,7 @@ void print_infos_opencl_manager(GGEMSOpenCLManager* opencl_manager)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_context_index_ggems_opencl_manager(GGEMSOpenCLManager* opencl_manager, GGuint const context_id)
+void set_context_index_ggems_opencl_manager(GGEMSOpenCLManager* opencl_manager, GGint const context_id)
 {
   opencl_manager->ContextToActivate(context_id);
 }

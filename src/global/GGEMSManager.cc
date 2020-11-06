@@ -55,7 +55,6 @@
 
 GGEMSManager::GGEMSManager(void)
 : seed_(0),
-  version_("1.0"),
   is_opencl_verbose_(false),
   is_material_database_verbose_(false),
   is_source_verbose_(false),
@@ -337,11 +336,11 @@ void GGEMSManager::Run()
       GGcout("GGEMSManager", "Run", 1) << "----> Launching batch " << i+1 << "/" << source_manager.GetNumberOfBatchs(j) << GGendl;
 
       // Getting the number of particles
-      GGulong const kNumberOfParticles = source_manager.GetNumberOfParticlesInBatch(j, i);
+      GGlong number_of_particles = source_manager.GetNumberOfParticlesInBatch(j, i);
 
       // Step 1: Generating primaries from source
-      GGcout("GGEMSManager", "Run", 1) << "      + Generating " << kNumberOfParticles << " particles..." << GGendl;
-      source_manager.GetPrimaries(j, kNumberOfParticles);
+      GGcout("GGEMSManager", "Run", 1) << "      + Generating " << number_of_particles << " particles..." << GGendl;
+      source_manager.GetPrimaries(j, number_of_particles);
 
       // Loop until ALL particles are dead
      // do {

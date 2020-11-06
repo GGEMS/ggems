@@ -29,7 +29,7 @@
 */
 
 #include "GGEMS/randoms/GGEMSPseudoRandomGenerator.hh"
-#include "GGEMS/randoms/GGEMSRandomStack.hh"
+#include "GGEMS/randoms/GGEMSRandom.hh"
 #include "GGEMS/tools/GGEMSRAMManager.hh"
 #include "GGEMS/sources/GGEMSSourceManager.hh"
 

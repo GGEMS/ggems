@@ -45,7 +45,7 @@ GGEMSMaterials::GGEMSMaterials(void)
   GGcout("GGEMSMaterials", "GGEMSMaterials", 3) << "Allocation of GGEMSMaterials..." << GGendl;
 
   // Allocation of cuts
-  range_cuts_cl_.reset(new GGEMSRangeCuts());
+  range_cuts_.reset(new GGEMSRangeCuts());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -63,7 +63,7 @@ GGEMSMaterials::~GGEMSMaterials(void)
 
 void GGEMSMaterials::AddMaterial(std::string const& material_name)
 {
-  // Checking the number of material (maximum is 255)
+  // Checking the number of material
   if (materials_.size() == 256) {
     GGEMSMisc::ThrowException("GGEMSMaterials", "AddMaterial", "Limit of material reached. The limit is 256 materials!!!");
   }
@@ -80,13 +80,13 @@ void GGEMSMaterials::SetDistanceCut(std::string const& particle_name, GGfloat co
   GGfloat const kCut = DistanceUnit(value, unit.c_str());
 
   if (particle_name == "gamma") {
-    range_cuts_cl_->SetPhotonDistanceCut(kCut);
+    range_cuts_->SetPhotonDistanceCut(kCut);
   }
   else if (particle_name == "e+") {
-    range_cuts_cl_->SetPositronDistanceCut(kCut);
+    range_cuts_->SetPositronDistanceCut(kCut);
   }
   else if (particle_name == "e-") {
-    range_cuts_cl_->SetElectronDistanceCut(kCut);
+    range_cuts_->SetElectronDistanceCut(kCut);
   }
   else {
     std::ostringstream oss(std::ostringstream::out);
@@ -185,37 +185,37 @@ void GGEMSMaterials::BuildMaterialTables(void)
   GGushort index_to_chemical_element = 0;
   for (std::size_t i = 0; i < materials_.size(); ++i) {
     // Getting the material infos from database
-    GGEMSSingleMaterial const& kSingleMaterial = material_database_manager.GetMaterial(materials_.at(i));
+    GGEMSSingleMaterial const& single_material = material_database_manager.GetMaterial(materials_.at(i));
 
     // Storing infos about material
-    material_table_device->number_of_chemical_elements_[i] = kSingleMaterial.nb_elements_;
-    material_table_device->density_of_material_[i] = kSingleMaterial.density_;
+    material_table_device->number_of_chemical_elements_[i] = single_material.nb_elements_;
+    material_table_device->density_of_material_[i] = single_material.density_;
 
     // Initialize some counters
     material_table_device->number_of_atoms_by_volume_[i] = 0.0f;
     material_table_device->number_of_electrons_by_volume_[i] = 0.0f;
 
     // Loop over the chemical elements by material
-    for (GGuchar j = 0; j < kSingleMaterial.nb_elements_; ++j) {
+    for (GGuchar j = 0; j < single_material.nb_elements_; ++j) {
       // Getting the chemical element
-      GGEMSChemicalElement const& kChemicalElement = material_database_manager.GetChemicalElement(kSingleMaterial.chemical_element_name_[j]);
+      GGEMSChemicalElement const& chemical_element = material_database_manager.GetChemicalElement(single_material.chemical_element_name_[j]);
 
       // Atomic number Z
-      material_table_device->atomic_number_Z_[j+index_to_chemical_element] = kChemicalElement.atomic_number_Z_;
+      material_table_device->atomic_number_Z_[j+index_to_chemical_element] = chemical_element.atomic_number_Z_;
 
       // Mass fraction of element by material
-      material_table_device->mass_fraction_[j+index_to_chemical_element] = kSingleMaterial.mixture_f_[j];
+      material_table_device->mass_fraction_[j+index_to_chemical_element] = single_material.mixture_f_[j];
 
       // Atomic number density
       material_table_device->atomic_number_density_[j+index_to_chemical_element] = material_database_manager.GetAtomicNumberDensity(materials_.at(i), j);
 
       // Increment density of atoms and electrons
       material_table_device->number_of_atoms_by_volume_[i] += material_table_device->atomic_number_density_[j+index_to_chemical_element];
-      material_table_device->number_of_electrons_by_volume_[i] += material_table_device->atomic_number_density_[j+index_to_chemical_element] * kChemicalElement.atomic_number_Z_;
+      material_table_device->number_of_electrons_by_volume_[i] += material_table_device->atomic_number_density_[j+index_to_chemical_element] * chemical_element.atomic_number_Z_;
     }
 
     // Computing ionization params for a material
-    GGEMSIonizationParamsMaterial ionization_params(&kSingleMaterial);
+    GGEMSIonizationParamsMaterial ionization_params(&single_material);
     material_table_device->mean_excitation_energy_[i] = ionization_params.GetMeanExcitationEnergy();
     material_table_device->log_mean_excitation_energy_[i] = ionization_params.GetLogMeanExcitationEnergy();
     material_table_device->x0_density_[i] = ionization_params.GetX0Density();
@@ -249,7 +249,7 @@ void GGEMSMaterials::BuildMaterialTables(void)
   opencl_manager.ReleaseDeviceBuffer(material_tables_cl_.get(), material_table_device);
 
   // Converting length cut to energy cut
-  range_cuts_cl_->ConvertCutsFromDistanceToEnergy(this);
+  range_cuts_->ConvertCutsFromDistanceToEnergy(this);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -271,13 +271,13 @@ GGfloat GGEMSMaterials::GetDensity(std::string const& material_name) const
     oss << "Material '" << material_name << "' not found!!!" << std::endl;
     GGEMSMisc::ThrowException("GGEMSMaterials", "GetDensity", oss.str());
   }
-  ptrdiff_t const kIndex = std::distance(materials_.begin(), iter_mat);
+  ptrdiff_t index = std::distance(materials_.begin(), iter_mat);
 
-  GGfloat const kDensity = material_table_device->density_of_material_[kIndex];
+  GGfloat density = material_table_device->density_of_material_[index];
 
   opencl_manager.ReleaseDeviceBuffer(material_tables_cl_.get(), material_table_device);
 
-  return kDensity / g * cm3;
+  return density / g * cm3;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -293,13 +293,13 @@ GGfloat GGEMSMaterials::GetAtomicNumberDensity(std::string const& material_name)
   GGEMSMaterialTables* material_table_device = opencl_manager.GetDeviceBuffer<GGEMSMaterialTables>(material_tables_cl_.get(), sizeof(GGEMSMaterialTables));
 
   // Get index of material
-  ptrdiff_t const kIndex = GetMaterialIndex(material_name);
+  ptrdiff_t index = GetMaterialIndex(material_name);
 
-  GGfloat const kAtomicNumberDensity = material_table_device->atomic_number_density_[kIndex];
+  GGfloat atomic_number_density = material_table_device->atomic_number_density_[index];
 
   opencl_manager.ReleaseDeviceBuffer(material_tables_cl_.get(), material_table_device);
 
-  return kAtomicNumberDensity /(mol/cm3);
+  return atomic_number_density / (mol/cm3);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -315,23 +315,23 @@ GGfloat GGEMSMaterials::GetEnergyCut(std::string const& material_name, std::stri
   SetDistanceCut(particle_type, distance, unit);
 
   // Convert cut
-  range_cuts_cl_->ConvertCutsFromDistanceToEnergy(this);
+  range_cuts_->ConvertCutsFromDistanceToEnergy(this);
 
   // Getting the OpenCL pointer on material tables
   GGEMSMaterialTables* material_table_device = opencl_manager.GetDeviceBuffer<GGEMSMaterialTables>(material_tables_cl_.get(), sizeof(GGEMSMaterialTables));
 
   // Get index of material
-  ptrdiff_t const kIndex = GetMaterialIndex(material_name);
+  ptrdiff_t index = GetMaterialIndex(material_name);
 
   GGfloat energy_cut = 0.0f;
   if (particle_type == "gamma") {
-    energy_cut = material_table_device->photon_energy_cut_[kIndex];
+    energy_cut = material_table_device->photon_energy_cut_[index];
   }
   else if (particle_type == "e+") {
-    energy_cut = material_table_device->positron_energy_cut_[kIndex];
+    energy_cut = material_table_device->positron_energy_cut_[index];
   }
   else if (particle_type == "e-") {
-    energy_cut = material_table_device->electron_energy_cut_[kIndex];
+    energy_cut = material_table_device->electron_energy_cut_[index];
   }
 
   opencl_manager.ReleaseDeviceBuffer(material_tables_cl_.get(), material_table_device);

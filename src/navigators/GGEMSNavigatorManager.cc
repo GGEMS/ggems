@@ -80,23 +80,23 @@ void GGEMSNavigatorManager::Initialize(void) const
   for (auto&& i : navigators_) i->Initialize();
 
   // Checking overlap between phantoms
-  for (std::size_t i = 0; i < navigators_.size(); ++i) {
-    for (std::size_t j = i + 1; j < navigators_.size(); ++j) {
-      if (CheckOverlap(navigators_[i], navigators_[j])) {
-        std::ostringstream oss(std::ostringstream::out);
-        oss << "There is an overlap between the navigator '" << navigators_[i]->GetNavigatorName() << "' and '" << navigators_[j]->GetNavigatorName() << "'!!! Please check your simulation parameters about navigator.";
-        GGEMSMisc::ThrowException("GGEMSNavigatorManager", "Initialize", oss.str());
-      }
-    }
-  }
+  // for (std::size_t i = 0; i < navigators_.size(); ++i) {
+  //   for (std::size_t j = i + 1; j < navigators_.size(); ++j) {
+  //     if (CheckOverlap(navigators_[i], navigators_[j])) {
+  //       std::ostringstream oss(std::ostringstream::out);
+  //       oss << "There is an overlap between the navigator '" << navigators_[i]->GetNavigatorName() << "' and '" << navigators_[j]->GetNavigatorName() << "'!!! Please check your simulation parameters about navigator.";
+  //       GGEMSMisc::ThrowException("GGEMSNavigatorManager", "Initialize", oss.str());
+  //     }
+  //   }
+  // }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-bool GGEMSNavigatorManager::CheckOverlap(std::weak_ptr<GGEMSNavigator> navigator_a, std::weak_ptr<GGEMSNavigator> navigator_b) const
-{
+// bool GGEMSNavigatorManager::CheckOverlap(std::weak_ptr<GGEMSNavigator> navigator_a, std::weak_ptr<GGEMSNavigator> navigator_b) const
+// {
   // // Get OpenCL singleton
   // GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
@@ -134,8 +134,8 @@ bool GGEMSNavigatorManager::CheckOverlap(std::weak_ptr<GGEMSNavigator> navigator
   // opencl_manager.ReleaseDeviceBuffer(solid_phantom_data_b_cl, header_data_b_device);
 
   // return is_overlap;
-  return false;
-}
+//   return false;
+// }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////

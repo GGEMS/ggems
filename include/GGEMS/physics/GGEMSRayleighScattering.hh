@@ -82,13 +82,13 @@ class GGEMS_EXPORT GGEMSRayleighScattering : public GGEMSEMProcess
 
   private:
     /*!
-      \fn GGfloat ComputeCrossSectionPerAtom(GGfloat const& energy, GGuchar const& atomic_number) const
+      \fn GGfloat ComputeCrossSectionPerAtom(GGfloat const& energy, GGchar const& atomic_number) const
       \param energy - energy of the bin
       \param atomic_number - Z number of the chemical element
       \return Compton cross section by atom
       \brief compute Compton cross section for an atom with Klein-Nishina
     */
-    GGfloat ComputeCrossSectionPerAtom(GGfloat const& energy, GGuchar const& atomic_number) const override;
+    GGfloat ComputeCrossSectionPerAtom(GGfloat const& energy, GGchar const& atomic_number) const override;
 };
 
 /*!
@@ -97,7 +97,7 @@ class GGEMS_EXPORT GGEMSRayleighScattering : public GGEMSEMProcess
 */
 namespace GGEMSRayleighTable
 {
-  __constant GGuint kCrossSectionCumulativeIntervals[101] = {
+  constant GGint kCrossSectionCumulativeIntervals[101] = {
         0, // nonexisting 'zero' element
 
     //      H,                                                              He,          (2)
@@ -137,7 +137,7 @@ namespace GGEMSRayleighTable
     194904, 197808, 201370, 204620, 207702, 210732
   }; /*!< Cumulative intervals for cross section */
 
-  __constant GGuint kCrossSectionNumberOfIntervals[101] = {
+  constant GGint kCrossSectionNumberOfIntervals[101] = {
         0, // nonexisting 'zero' element
 
   //     H,                                             He,                (2)
@@ -177,7 +177,7 @@ namespace GGEMSRayleighTable
     1452, 1781, 1625, 1541, 1515, 1542
   }; /*!< Number of intervals for cross section */
 
-  __constant GGuint kScatterFactorCumulativeIntervals[101] = {
+  constant GGint kScatterFactorCumulativeIntervals[101] = {
       0, // nonexisting 'zero' element
 
 //      H,                                                              He,          (2)
@@ -217,7 +217,7 @@ namespace GGEMSRayleighTable
     27216,  27484,  27752,  28018,  28288,  28558
   }; /*!< Cumulative intervals for scatter factor */
 
-  __constant GGuint kScatterFactorNumberOfIntervals[101] = {
+  constant GGint kScatterFactorNumberOfIntervals[101] = {
       0, // nonexisting 'zero' element
 
 //     H,                                             He,                (2)
@@ -257,7 +257,7 @@ namespace GGEMSRayleighTable
     134,  134,  133,  135,  135,  133
   }; /*!< Number of intervals for scatter factor */
 
-  __constant GGfloat kCrossSection[213816] = {
+  constant GGfloat kCrossSection[213816] = {
     1.000000e-06f, 9.887553e-06f, 1.059784e-06f, 1.235246e-05f, 1.126020e-06f, 1.538627e-05f, 1.196396e-06f, 1.933495e-05f, 1.271171e-06f, 2.449127e-05f, 
     1.350619e-06f, 3.121326e-05f, 1.392826e-06f, 3.537646e-05f, 1.481238e-06f, 4.569015e-05f, 1.575262e-06f, 5.929956e-05f, 1.727606e-06f, 8.834929e-05f, 
     1.894683e-06f, 1.326150e-04f, 2.048000e-06f, 1.873294e-04f, 2.209817e-06f, 2.535444e-04f, 2.278874e-06f, 2.875153e-04f, 2.423529e-06f, 3.719583e-04f, 
@@ -21642,7 +21642,7 @@ namespace GGEMSRayleighTable
     1.995262e+04f, 4.137537e-09f, 6.309573e+04f, 4.137540e-10f, 1.000000e+05f, 1.647180e-10f
   }; /*!< Cross section values for 100 first chemical elements */
 
-  __constant GGfloat kScatterFactor[28824] = {
+  constant GGfloat kScatterFactor[28824] = {
     0.000000e+00f, 1.000000e+00f, 1.000000e+05f, 1.000000e+00f, 5.000000e+05f, 9.994500e-01f, 1.000000e+06f, 9.977900e-01f, 1.500000e+06f, 9.950400e-01f, 
     2.000000e+06f, 9.912100e-01f, 2.500000e+06f, 9.863200e-01f, 3.000000e+06f, 9.803900e-01f, 3.750000e+06f, 9.695910e-01f, 4.000000e+06f, 9.655400e-01f, 
     4.750000e+06f, 9.518880e-01f, 5.000000e+06f, 9.469400e-01f, 5.875000e+06f, 9.278400e-01f, 6.625000e+06f, 9.096010e-01f, 7.000000e+06f, 8.998700e-01f, 

@@ -16,11 +16,6 @@
 # *                                                                      *
 # ************************************************************************
 
-################################################################################
-# Example 1: Total Attenuation                                                 #
-# The total attenuation in computed in GGEMS. The user has to give a material. #
-# The range of total attenuation is [0.01;10] MeV                              #
-################################################################################
 import argparse
 import numpy as np
 import matplotlib.pyplot as plt
@@ -75,7 +70,7 @@ print('    Atomic number density:', atomic_number_density, 'atoms.cm-3')
 
 #-------------------------------------------------------------------------------
 # STEP 4: Defining global parameters for cross-section building
-processes_manager.set_cross_section_table_number_of_bins(2048) # Not exceed 2048 bins
+processes_manager.set_cross_section_table_number_of_bins(2048)
 processes_manager.set_cross_section_table_energy_min(10.0, 'keV')
 processes_manager.set_cross_section_table_energy_max(1000.0, 'keV')
 

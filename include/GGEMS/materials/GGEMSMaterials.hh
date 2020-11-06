@@ -40,7 +40,7 @@
 #include "GGEMS/global/GGEMSOpenCLManager.hh"
 #include "GGEMS/materials/GGEMSMaterialsDatabaseManager.hh"
 
-#include "GGEMS/materials/GGEMSMaterialsStack.hh"
+#include "GGEMS/materials/GGEMSMaterialTables.hh"
 
 class GGEMSRangeCuts;
 
@@ -163,11 +163,11 @@ class GGEMS_EXPORT GGEMSMaterials
     inline std::weak_ptr<cl::Buffer> GetMaterialTables(void) const {return material_tables_cl_;}
 
     /*!
-      \fn iinline std::shared_ptr<GGEMSRangeCuts> GetRangeCuts(void) const
+      \fn inline std::shared_ptr<GGEMSRangeCuts> GetRangeCuts(void) const
       \brief get the pointer on range cuts
       \return the pointer on range cuts
     */
-    inline std::weak_ptr<GGEMSRangeCuts> GetRangeCuts(void) const {return range_cuts_cl_;}
+    inline std::weak_ptr<GGEMSRangeCuts> GetRangeCuts(void) const {return range_cuts_;}
 
     /*!
       \fn void SetDistanceCut(std::string const& particle_name, GGfloat const& value, std::string const& unit)
@@ -200,7 +200,7 @@ class GGEMS_EXPORT GGEMSMaterials
   private:
     std::vector<std::string> materials_; /*!< Defined material for a phantom */
     std::shared_ptr<cl::Buffer> material_tables_cl_; /*!< Material tables on OpenCL device */
-    std::shared_ptr<GGEMSRangeCuts> range_cuts_cl_; /*!< Cut for particles */
+    std::shared_ptr<GGEMSRangeCuts> range_cuts_; /*!< Cut for particles */
 };
 
 /*!

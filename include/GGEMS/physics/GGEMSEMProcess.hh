@@ -37,10 +37,10 @@
 
 #include <string>
 
-#include "GGEMS/materials/GGEMSMaterialsStack.hh"
+#include "GGEMS/materials/GGEMSMaterialTables.hh"
 #include "GGEMS/global/GGEMSOpenCLManager.hh"
 #include "GGEMS/physics/GGEMSProcessConstants.hh"
-#include "GGEMS/physics/GGEMSParticleCrossSectionsStack.hh"
+#include "GGEMS/physics/GGEMSParticleCrossSections.hh"
 
 /*!
   \class GGEMSEMProcess
@@ -104,7 +104,7 @@ class GGEMS_EXPORT GGEMSEMProcess
 
   protected:
     /*!
-      \fn GGfloat ComputeCrossSectionPerMaterial(GGEMSParticleCrossSections* cross_section, GGEMSMaterialTables const* material_tables, GGushort const& material_index, GGuint const& energy_index)
+      \fn GGfloat ComputeCrossSectionPerMaterial(GGEMSParticleCrossSections* cross_section, GGEMSMaterialTables const* material_tables, GGshort const& material_index, GGshort const& energy_index)
       \param cross_section - cross section
       \param material_tables - activated material for a phantom
       \param material_index - index of the material
@@ -112,7 +112,7 @@ class GGEMS_EXPORT GGEMSEMProcess
       \return cross section for a process for a material
       \brief compute cross section for a process for a material
     */
-    GGfloat ComputeCrossSectionPerMaterial(GGEMSParticleCrossSections* cross_section, GGEMSMaterialTables const* material_tables, GGushort const& material_index, GGuint const& energy_index);
+    GGfloat ComputeCrossSectionPerMaterial(GGEMSParticleCrossSections* cross_section, GGEMSMaterialTables const* material_tables, GGshort const& material_index, GGshort const& energy_index);
 
     /*!
       \fn GGfloat ComputeCrossSectionPerAtom(GGfloat const& energy, GGuchar const& atomic_number)
@@ -121,10 +121,10 @@ class GGEMS_EXPORT GGEMSEMProcess
       \return cross section by atom
       \brief compute a cross section for an atom
     */
-    virtual GGfloat ComputeCrossSectionPerAtom(GGfloat const& energy, GGuchar const& atomic_number) const = 0;
+    virtual GGfloat ComputeCrossSectionPerAtom(GGfloat const& energy, GGchar const& atomic_number) const = 0;
 
   protected:
-    GGuchar process_id_; /*!< Id of the process as defined in GGEMSEMProcessConstants.hh */
+    GGchar process_id_; /*!< Id of the process as defined in GGEMSEMProcessConstants.hh */
     std::string process_name_; /*!< Name of the process */
     std::string primary_particle_; /*!< Type of primary particle */
     std::string secondary_particle_; /*!< Type of secondary particle */

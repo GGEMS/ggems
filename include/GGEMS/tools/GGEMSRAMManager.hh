@@ -105,45 +105,45 @@ class GGEMS_EXPORT GGEMSRAMManager
     void PrintRAMStatus(void) const;
 
     /*!
-      \fn inline bool IsEnoughAvailableAMMemory(GGulong const& size) const
+      \fn inline bool IsEnoughAvailableAMMemory(GGlong const& size) const
       \param size - size in bytes to allocate
       \brief Checking available RAM memory on device
     */
-    inline bool IsEnoughAvailableAMMemory(GGulong const& size) const
+    inline bool IsEnoughAvailableAMMemory(GGlong const& size) const
     {
       if (size + allocated_ram_ < max_available_ram_) return true;
       else return false;
     }
 
     /*!
-      \fn inline bool IsBufferSizeCorrect(GGulong const& size) const
+      \fn inline bool IsBufferSizeCorrect(GGlong const& size) const
       \param size - size in bytes of buffer
       \brief Check the size of buffer depending on device limit, false if buffer size if too big
     */
-    inline bool IsBufferSizeCorrect(GGulong const& size) const
+    inline bool IsBufferSizeCorrect(GGlong const& size) const
     {
       if (size < max_buffer_size_) return true;
       else return false;
     }
 
     /*!
-      \fn void IncrementRAMMemory(GGulong const& size)
+      \fn void IncrementRAMMemory(GGlong const& size)
       \param size - size of the allocated buffer in byte
       \brief increment the size of the global allocated buffer
     */
-    void IncrementRAMMemory(GGulong const& size);
+    void IncrementRAMMemory(GGlong const& size);
 
     /*!
-      \fn void DecrementRAMMemory(GGulong const& size)
+      \fn void DecrementRAMMemory(GGlong const& size)
       \param size - size of the allocated buffer in byte
       \brief decrement the size of the global allocated buffer
     */
-    void DecrementRAMMemory(GGulong const& size);
+    void DecrementRAMMemory(GGlong const& size);
 
   private:
-    GGulong allocated_ram_; /*!< Allocated RAM on OpenCL device */
-    GGulong max_available_ram_; /*!< Max available RAM on OpenCL device */
-    GGulong max_buffer_size_; /*!< Max of buffer size of OpenCL device */
+    GGlong allocated_ram_; /*!< Allocated RAM on OpenCL device */
+    GGlong max_available_ram_; /*!< Max available RAM on OpenCL device */
+    GGlong max_buffer_size_; /*!< Max of buffer size of OpenCL device */
 };
 
 #endif // End of GUARD_GGEMS_TOOLS_GGEMSRAMMANAGER_HH

@@ -39,13 +39,13 @@
 
 #include "GGEMS/tools/GGEMSPrint.hh"
 
-int main()
+/*!
+  \fn int main(void)
+  \return status of program
+  \brief main function of program
+*/
+int main(void)
 {
-  // Set verbosity at lower value
-  GGcout.SetVerbosity(0);
-  GGwarn.SetVerbosity(0);
-  GGcerr.SetVerbosity(0);
-
   // Initialization of singletons
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
   GGEMSVolumeCreatorManager& volume_creator_manager = GGEMSVolumeCreatorManager::GetInstance();

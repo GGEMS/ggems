@@ -41,8 +41,8 @@
 
 #include "GGEMS/global/GGEMSConstants.hh"
 
-__constant GGuchar SOLID = 0; /*!< Solid state */
-__constant GGuchar GAS = 1; /*!< Gas state */
+constant GGchar SOLID = 0; /*!< Solid state */
+constant GGchar GAS = 1; /*!< Gas state */
 
 /*!
   \struct GGEMSChemicalElement
@@ -50,11 +50,11 @@ __constant GGuchar GAS = 1; /*!< Gas state */
 */
 struct GGEMS_EXPORT GGEMSChemicalElement
 {
-  GGuchar atomic_number_Z_; /*!< Atomic number Z */
+  GGchar atomic_number_Z_; /*!< Atomic number Z */
   GGfloat molar_mass_M_; /*!< Molar mass */
   GGfloat mean_excitation_energy_I_; /*!< Mean excitation energy */
-  GGuchar state_; /*!< state of element GAS or SOLID */
-  GGshort index_density_correction_; /*!< Index for density correction */
+  GGchar state_; /*!< state of element GAS or SOLID */
+  GGchar index_density_correction_; /*!< Index for density correction */
 };
 
 /*!
@@ -66,7 +66,7 @@ struct GGEMS_EXPORT GGEMSSingleMaterial
   std::vector<std::string> chemical_element_name_; /*!< Name of the chemical elements */
   std::vector<GGfloat> mixture_f_; /*!< Fraction of element in material */
   GGfloat density_; /*!< Density of material */
-  GGuchar nb_elements_; /*!< Number of elements in material */
+  GGchar nb_elements_; /*!< Number of elements in material */
 };
 
 typedef std::unordered_map<std::string, GGEMSChemicalElement> ChemicalElementUMap; /*!< Unordered map with key : name of element, value the chemical element structure */
@@ -130,11 +130,11 @@ class GGEMS_EXPORT GGEMSMaterialsDatabaseManager
     GGEMSMaterialsDatabaseManager& operator=(GGEMSMaterialsDatabaseManager const&& material_manager) = delete;
 
     /*!
-      \fn void SetMaterialsDatabase(char const* filename)
+      \fn void SetMaterialsDatabase(std::string const* filename)
       \param filename - name of the file containing material database
       \brief set the material filename
     */
-    void SetMaterialsDatabase(char const* filename);
+    void SetMaterialsDatabase(std::string const& filename);
 
     /*!
       \fn void PrintAvailableChemicalElements(void) const
@@ -219,13 +219,13 @@ class GGEMS_EXPORT GGEMSMaterialsDatabaseManager
     inline GGfloat GetAtomicNumberDensity(std::string const& material, GGuchar const& index) const
     {
       // Getting the material
-      GGEMSSingleMaterial const& kSingleMaterial = GetMaterial(material);
+      GGEMSSingleMaterial const& single_material = GetMaterial(material);
 
       // Getting the specific chemical element
-      GGEMSChemicalElement const& kChemicalElement = GetChemicalElement(kSingleMaterial.chemical_element_name_[index]);
+      GGEMSChemicalElement const& chemical_element = GetChemicalElement(single_material.chemical_element_name_[index]);
 
       // return the atomic number density, the number could be higher than float!!! Double is used
-      return static_cast<GGfloat>(AVOGADRO / kChemicalElement.molar_mass_M_ * kSingleMaterial.density_ * kSingleMaterial.mixture_f_[index]);
+      return static_cast<GGfloat>(AVOGADRO / chemical_element.molar_mass_M_ * single_material.density_ * single_material.mixture_f_[index]);
     }
 
   private:
@@ -252,7 +252,7 @@ class GGEMS_EXPORT GGEMSMaterialsDatabaseManager
       \param index_density_correction - index for the density correction
       \brief Adding a chemical element in GGEMS
     */
-    void AddChemicalElements(std::string const& element_name, GGuchar const& element_Z, GGfloat const& element_M, GGfloat const& element_I, GGuchar const& state, GGshort const& index_density_correction);
+    void AddChemicalElements(std::string const& element_name, GGchar const& element_Z, GGfloat const& element_M, GGfloat const& element_I, GGchar const& state, GGchar const& index_density_correction);
 
   private:
     MaterialUMap materials_; /*!< Map storing the GGEMS materials */
