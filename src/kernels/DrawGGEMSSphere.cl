@@ -31,7 +31,7 @@
 #include "GGEMS/tools/GGEMSTypes.hh"
 
 /*!
-  \fn __kernel void draw_ggems_sphere(GGint const voxel_id_limit, GGfloat3 const element_sizes, GGint3 const phantom_dimensions, GGfloat3 const positions, GGfloat const label_value, GGfloat const radius,  global GGchar* voxelized_phantom)
+  \fn __kernel void draw_ggems_sphere(GGint const voxel_id_limit, GGfloat3 const element_sizes, GGint3 const phantom_dimensions, GGfloat3 const positions, GGfloat const label_value, GGfloat const radius, __global GGchar* voxelized_phantom)
   \param voxel_id_limit - voxel id limit
   \param element_sizes - size of voxels
   \param phantom_dimensions - dimension of phantom
@@ -41,7 +41,7 @@
   \param voxelized_phantom - buffer storing voxelized phantom
   \brief Draw sphere solid in voxelized image
 */
-kernel void draw_ggems_sphere(
+__kernel void draw_ggems_sphere(
   GGint const voxel_id_limit,
   GGfloat3 const element_sizes,
   GGint3 const phantom_dimensions,
@@ -49,19 +49,19 @@ kernel void draw_ggems_sphere(
   GGfloat const label_value,
   GGfloat const radius,
   #ifdef MET_CHAR
-  global GGchar* voxelized_phantom
+  __global GGchar* voxelized_phantom
   #elif MET_UCHAR
-  global GGuchar* voxelized_phantom
+  __global GGuchar* voxelized_phantom
   #elif MET_SHORT
-  global GGshort* voxelized_phantom
+  __global GGshort* voxelized_phantom
   #elif MET_USHORT
-  global GGushort* voxelized_phantom
+  __global GGushort* voxelized_phantom
   #elif MET_INT
-  global GGint* voxelized_phantom
+  __global GGint* voxelized_phantom
   #elif MET_UINT
-  global GGuint* voxelized_phantom
+  __global GGuint* voxelized_phantom
   #elif MET_FLOAT
-  global GGfloat* voxelized_phantom
+  __global GGfloat* voxelized_phantom
   #else
   #warning "Type Unknown, please specified a type by compiling!!!"
   #endif

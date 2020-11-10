@@ -89,13 +89,6 @@ class GGEMS_EXPORT GGEMSVoxelizedSolid : public GGEMSSolid
     void Initialize(std::weak_ptr<GGEMSMaterials> materials) override;
 
     /*!
-      \fn void SetPosition(GGfloat3 const& position_xyz)
-      \param position_xyz - position in X, Y and Z
-      \brief set a position for solid
-    */
-    void SetPosition(GGfloat3 const& position_xyz) override;
-
-    /*!
       \fn void PrintInfos(void) const
       \brief printing infos about voxelized solid
     */
@@ -109,10 +102,10 @@ class GGEMS_EXPORT GGEMSVoxelizedSolid : public GGEMSSolid
     void LoadVolumeImage(std::weak_ptr<GGEMSMaterials> materials);
 
     /*!
-      \fn void UpdateTransformationMatrix(void)
-      \brief Update the transformation matrix for solid object
+      \fn void GetTransformationMatrix(void)
+      \brief Get the transformation matrix for voxelized solid object
     */
-    void UpdateTransformationMatrix(void) override;
+    void GetTransformationMatrix(void) override;
 
   private:
     /*!

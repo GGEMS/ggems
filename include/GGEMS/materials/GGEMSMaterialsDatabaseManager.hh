@@ -41,8 +41,8 @@
 
 #include "GGEMS/global/GGEMSConstants.hh"
 
-constant GGchar SOLID = 0; /*!< Solid state */
-constant GGchar GAS = 1; /*!< Gas state */
+__constant GGchar SOLID = 0; /*!< Solid state */
+__constant GGchar GAS = 1; /*!< Gas state */
 
 /*!
   \struct GGEMSChemicalElement

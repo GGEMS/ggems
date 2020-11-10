@@ -223,22 +223,6 @@ extern "C" GGEMS_EXPORT void set_beam_aperture_ggems_xray_source(GGEMSXRaySource
 extern "C" GGEMS_EXPORT void set_focal_spot_size_ggems_xray_source(GGEMSXRaySource* xray_source, GGfloat const width, GGfloat const height, GGfloat const depth, char const* unit);
 
 /*!
-  \fn void set_local_axis_ggems_xray_source(GGEMSXRaySource* xray_source, GGfloat const m00, GGfloat const m01, GGfloat const m02, GGfloat const m10, GGfloat const m11, GGfloat const m12, GGfloat const m20, GGfloat const m21, GGfloat const m22)
-  \param xray_source - pointer on the source
-  \param m00 - Element 0,0 in the matrix 3x3 for local axis
-  \param m01 - Element 0,1 in the matrix 3x3 for local axis
-  \param m02 - Element 0,2 in the matrix 3x3 for local axis
-  \param m10 - Element 1,0 in the matrix 3x3 for local axis
-  \param m11 - Element 1,1 in the matrix 3x3 for local axis
-  \param m12 - Element 1,2 in the matrix 3x3 for local axis
-  \param m20 - Element 2,0 in the matrix 3x3 for local axis
-  \param m21 - Element 2,1 in the matrix 3x3 for local axis
-  \param m22 - Element 2,2 in the matrix 3x3 for local axis
-  \brief Set the local axis element describing the source compared to global axis (center of world)
-*/
-extern "C" GGEMS_EXPORT void set_local_axis_ggems_xray_source(GGEMSXRaySource* xray_source, GGfloat const m00, GGfloat const m01, GGfloat const m02, GGfloat const m10, GGfloat const m11, GGfloat const m12, GGfloat const m20, GGfloat const m21, GGfloat const m22);
-
-/*!
   \fn void set_rotation_ggems_xray_source(GGEMSXRaySource* xray_source, GGfloat const rx, GGfloat const ry, GGfloat const rz, char const* unit)
   \param xray_source - pointer on the source
   \param rx - Rotation around X along global axis

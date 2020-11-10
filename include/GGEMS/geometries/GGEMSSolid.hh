@@ -126,11 +126,11 @@ class GGEMS_EXPORT GGEMSSolid
     void SetRotation(GGfloat3 const& rotation_xyz);
 
     /*!
-      \fn void SetLocalAxis(GGfloat33 const& local_axis_xyz)
-      \param local_axis_xyz - new axis basis
-      \brief set a local axis for solid
+      \fn void SetPosition(GGfloat3 const& position_xyz)
+      \param position_xyz - position in X, Y and Z
+      \brief set a position for solid
     */
-    void SetLocalAxis(GGfloat33 const& local_axis_xyz);
+    void SetPosition(GGfloat3 const& position_xyz);
 
     /*!
       \fn void SetSolidID(std::size_t const& solid_id)
@@ -141,10 +141,10 @@ class GGEMS_EXPORT GGEMSSolid
     void SetSolidID(std::size_t const& solid_id);
 
     /*!
-      \fn void UpdateTransformationMatrix(void)
-      \brief Update the transformation matrix for solid object
+      \fn void GetTransformationMatrix(void)
+      \brief Get the transformation matrix for solid object
     */
-    virtual void UpdateTransformationMatrix(void) = 0;
+    virtual void GetTransformationMatrix(void) = 0;
 
     /*!
       \fn void Initialize(std::weak_ptr<GGEMSMaterials> materials)
@@ -152,13 +152,6 @@ class GGEMS_EXPORT GGEMSSolid
       \brief Initialize solid for geometric navigation
     */
     virtual void Initialize(std::weak_ptr<GGEMSMaterials> materials) = 0;
-
-    /*!
-      \fn void SetPosition(GGfloat3 const& position_xyz)
-      \param position_xyz - position in X, Y and Z
-      \brief set a position for solid
-    */
-    virtual void SetPosition(GGfloat3 const& position_xyz) = 0;
 
     /*!
       \fn void PrintInfos(void) const

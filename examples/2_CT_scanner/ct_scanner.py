@@ -20,7 +20,7 @@ from ggems import *
 
 # ------------------------------------------------------------------------------
 # STEP 0: Level of verbosity during computation
-GGEMSVerbosity(3)
+GGEMSVerbosity(0)
 
 # ------------------------------------------------------------------------------
 # STEP 1: Choosing an OpenCL context
@@ -35,11 +35,10 @@ materials_database_manager.set_materials('data/materials.txt')
 
 # ------------------------------------------------------------------------------
 # STEP 4: Phantoms and systems
-# phantom = GGEMSVoxelizedPhantom('water_box')
-# phantom.set_voxelized_phantom('data/waterbox.mhd', 'data/range_waterbox.txt')
-# phantom.set_position(10.0, -20.0, 0.0, 'mm')
-# phantom.set_rotation(0.0, 0.0, 0.0, 'deg')
-# phantom.set_local_axis(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0)
+phantom = GGEMSVoxelizedPhantom('phantom')
+phantom.set_phantom('data/phantom.mhd', 'data/range_phantom.txt')
+phantom.set_position(0.0, 0.0, 0.0, 'mm')
+phantom.set_rotation(0.0, 0.0, 0.0, 'deg')
 
 # ct_detector = GGEMSCTSystem('SOMATOM_Definition_EDGE')
 # ct_detector.set_ct_type('curved')
@@ -75,7 +74,7 @@ point_source.set_position(-595.0, 0.0, 0.0, 'mm')
 point_source.set_rotation(0.0, 0.0, 0.0, 'deg')
 point_source.set_beam_aperture(0.0, 'deg')
 point_source.set_focal_spot_size(0.0, 0.0, 0.0, 'mm')
-point_source.set_monoenergy(60.0, 'keV')
+point_source.set_polyenergy('data/spectrum_120kVp_2mmAl.dat')
 
 # # ------------------------------------------------------------------------------
 # # STEP 8: GGEMS simulation parameters
@@ -89,7 +88,7 @@ ggems_manager.memory_verbose(True)
 ggems_manager.process_verbose(True)
 ggems_manager.range_cuts_verbose(True)
 ggems_manager.random_verbose(True)
-ggems_manager.kernel_verbose(True)
+ggems_manager.kernel_verbose(False)
 ggems_manager.tracking_verbose(False, 0) # Track a specific particle a utiliser avec le singleton de façon plus efficace!!!
 
 # # Initializing the GGEMS simulation

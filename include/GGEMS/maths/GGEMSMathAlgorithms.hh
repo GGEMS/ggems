@@ -31,37 +31,27 @@
   \date Thrusday December 18, 2019
 */
 
+#include "GGEMS/tools/GGEMSSystemOfUnits.hh"
 #include "GGEMS/tools/GGEMSTypes.hh"
 
-
+/*!
+  \fn inline GGint BinarySearchLeft(GGfloat const key, constant GGfloat* array, GGuint const size, GGuint const offset, GGuint min)
+  \param key - value in p_array to find
+  \param array - p_array where is the key value
+  \param size - size of p_array, number of elements
+  \param offset - apply offset when searching index (optionnal)
+  \param min - apply a min index (optionnal)
+  \return index of key value in p_array buffer
+  \brief Find the index of the key value in the p_array buffer
+*/
 #ifdef __OPENCL_C_VERSION__
-/*!
-  \fn inline GGuint BinarySearchLeft(GGfloat const key, global GGfloat const* array, GGuint const size, GGuint const offset, GGuint min)
-  \param key - value in p_array to find
-  \param array - p_array where is the key value
-  \param size - size of p_array, number of elements
-  \param offset - apply offset when searching index (optionnal)
-  \param min - apply a min index (optionnal)
-  \return index of key value in p_array buffer
-  \brief Find the index of the key value in the p_array buffer
-*/
-inline GGuint BinarySearchLeft(GGfloat const key, global GGfloat const* array, GGuint const size, GGuint const offset, GGuint min)
+inline GGint BinarySearchLeft(GGfloat const key, global GGfloat* array, GGint const size, GGint const offset, GGint min)
 #else
-/*!
-  \fn inline GGuint BinarySearchLeft(GGfloat const key, GGfloat const* array, GGuint const size, GGuint const offset, GGuint min)
-  \param key - value in p_array to find
-  \param array - p_array where is the key value
-  \param size - size of p_array, number of elements
-  \param offset - apply offset when searching index (optionnal)
-  \param min - apply a min index (optionnal)
-  \return index of key value in p_array buffer
-  \brief Find the index of the key value in the p_array buffer
-*/
-inline GGuint BinarySearchLeft(GGfloat const key, GGfloat const* array, GGuint const size, GGuint const offset, GGuint min)
+inline GGint BinarySearchLeft(GGfloat const key, GGfloat* array, GGint const size, GGint const offset, GGint min)
 #endif
 {
-  GGuint max = size - 1, mid = 0; // Max element, and median element
-  GGuint const kMinCheck = min; // Min element
+  GGint max = size - 1, mid = 0; // Max element, and median element
+  GGint min_check = min; // Min element
 
   while (min < max) {
     // Computing median index
@@ -78,7 +68,7 @@ inline GGuint BinarySearchLeft(GGfloat const key, GGfloat const* array, GGuint c
   }
 
   // Checking the min elements
-  if (min > kMinCheck) min--;
+  if (min > min_check) min--;
 
   // Return the min element
   return min;

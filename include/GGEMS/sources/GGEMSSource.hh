@@ -107,15 +107,6 @@ class GGEMS_EXPORT GGEMSSource
     void SetSourceParticleType(std::string const& particle_type);
 
     /*!
-      \fn void SetLocalAxis(GGfloat3 const& m0, GGfloat3 const& m1, GGfloat3 const& m2)
-      \param m0 - Row 0 in the matrix 3x3 for local axis
-      \param m1 - Row 1 in the matrix 3x3 for local axis
-      \param m2 - Row 2 in the matrix 3x3 for local axis
-      \brief Set the local axis element describing the source compared to global axis (center of world)
-    */
-    void SetLocalAxis(GGfloat3 const& m0, GGfloat3 const& m1, GGfloat3 const& m2);
-
-    /*!
       \fn void SetRotation(GGfloat const& rx, GGfloat const& ry, GGfloat const& rz, std::string const& unit)
       \param rx - Rotation around X along global axis
       \param ry - Rotation around Y along global axis

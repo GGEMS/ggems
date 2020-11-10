@@ -121,12 +121,12 @@ void GGEMSBox::Draw(void)
   // Compute work item number
   std::size_t number_of_work_items = number_of_elements + (max_work_group_size - number_of_elements%max_work_group_size);
 
-  cl::NDRange global(number_of_work_items);
-  cl::NDRange offset(0);
-  cl::NDRange local(max_work_group_size);
+  cl::NDRange global_wi(number_of_work_items);
+  cl::NDRange offset_wi(0);
+  cl::NDRange local_wi(max_work_group_size);
 
   // Launching kernel
-  cl_int kernel_status = p_queue_cl->enqueueNDRangeKernel(*kernel_cl, offset, global, local, nullptr, p_event_cl);
+  cl_int kernel_status = p_queue_cl->enqueueNDRangeKernel(*kernel_cl, offset_wi, global_wi, local_wi, nullptr, p_event_cl);
   opencl_manager.CheckOpenCLError(kernel_status, "GGEMSBox", "Draw");
   p_queue_cl->finish(); // Wait until the kernel status is finish
 

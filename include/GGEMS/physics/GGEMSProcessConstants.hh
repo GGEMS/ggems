@@ -22,7 +22,7 @@
 /*!
   \file GGEMSEMProcessConstants.hh
 
-  \brief Storing some constant variables for process
+  \brief Storing some __constant variables for process
 
   \author Julien BERT <julien.bert@univ-brest.fr>
   \author Didier BENOIT <didier.benoit@inserm.fr>
@@ -33,34 +33,34 @@
 
 #include "GGEMS/tools/GGEMSSystemOfUnits.hh"
 
-constant GGchar NUMBER_PROCESSES = 3; /*!< Maximum number of processes */
+__constant GGchar NUMBER_PROCESSES = 3; /*!< Maximum number of processes */
 
-constant GGchar NO_PROCESS = 99; /*!< No process */
-constant GGchar TRANSPORTATION = 99; /*!< Transportation process */
+__constant GGchar NO_PROCESS = 99; /*!< No process */
+__constant GGchar TRANSPORTATION = 99; /*!< Transportation process */
 
 // PHOTON PROCESSES
 #define NUMBER_PHOTON_PROCESSES 3 // Number of photon processes
-constant GGchar COMPTON_SCATTERING = 0; /*!< Compton process */
-constant GGchar PHOTOELECTRIC_EFFECT = 1; /*!< Photoelectric process */
-constant GGchar RAYLEIGH_SCATTERING = 2; /*!< Rayleigh process */
+__constant GGchar COMPTON_SCATTERING = 0; /*!< Compton process */
+__constant GGchar PHOTOELECTRIC_EFFECT = 1; /*!< Photoelectric process */
+__constant GGchar RAYLEIGH_SCATTERING = 2; /*!< Rayleigh process */
 
-//constant GGuchar NUMBER_ELECTRON_PROCESSES = 3; /*!< Maximum number of electron processes */
-//constant GGuchar NUMBER_PARTICLES = 5; /*!< Maximum number of different particles for secondaries */
-//constant GGuchar PHOTON_BONDARY_VOXEL = 77; /*!< Photon on the boundaries */
-//constant GGuchar ELECTRON_IONISATION = 4; /*!< Electron ionisation process */
-//constant GGuchar ELECTRON_MSC = 5; /*!< Electron multiple scattering process */
-//constant GGuchar ELECTRON_BREMSSTRAHLUNG = 6; /*!< Bremsstralung electron process */
+//__constant GGuchar NUMBER_ELECTRON_PROCESSES = 3; /*!< Maximum number of electron processes */
+//__constant GGuchar NUMBER_PARTICLES = 5; /*!< Maximum number of different particles for secondaries */
+//__constant GGuchar PHOTON_BONDARY_VOXEL = 77; /*!< Photon on the boundaries */
+//__constant GGuchar ELECTRON_IONISATION = 4; /*!< Electron ionisation process */
+//__constant GGuchar ELECTRON_MSC = 5; /*!< Electron multiple scattering process */
+//__constant GGuchar ELECTRON_BREMSSTRAHLUNG = 6; /*!< Bremsstralung electron process */
 
 // CROSS SECTIONS
-constant GGfloat KINETIC_ENERGY_MIN = 1.e-6f; /*!< Min kinetic energy, 1eV */
-constant GGfloat CROSS_SECTION_TABLE_ENERGY_MIN = 990.0f*1.e-6f; /*!< Min energy in the cross section table, 990 eV */
-constant GGfloat CROSS_SECTION_TABLE_ENERGY_MAX = 250.0f*1.0f; /*!< Max energy in the cross section table, 250 MeV */
+__constant GGfloat KINETIC_ENERGY_MIN = 1.e-6f; /*!< Min kinetic energy, 1eV */
+__constant GGfloat CROSS_SECTION_TABLE_ENERGY_MIN = 990.0f*1.e-6f; /*!< Min energy in the cross section table, 990 eV */
+__constant GGfloat CROSS_SECTION_TABLE_ENERGY_MAX = 250.0f*1.0f; /*!< Max energy in the cross section table, 250 MeV */
 #define MAX_CROSS_SECTION_TABLE_NUMBER_BINS 2048
-constant GGshort CROSS_SECTION_TABLE_NUMBER_BINS = 220; /*!< Number of bins in the cross section table */
+__constant GGshort CROSS_SECTION_TABLE_NUMBER_BINS = 220; /*!< Number of bins in the cross section table */
 
 // CUTS
-constant GGfloat PHOTON_DISTANCE_CUT = 1.e-3f; /*!< Photon cut, 1 um */
-constant GGfloat ELECTRON_DISTANCE_CUT = 1.e-3f; /*!< Electron cut, 1 um */
-constant GGfloat POSITRON_DISTANCE_CUT = 1.e-3f; /*!< Positron cut, 1 um */
+__constant GGfloat PHOTON_DISTANCE_CUT = 1.e-3f; /*!< Photon cut, 1 um */
+__constant GGfloat ELECTRON_DISTANCE_CUT = 1.e-3f; /*!< Electron cut, 1 um */
+__constant GGfloat POSITRON_DISTANCE_CUT = 1.e-3f; /*!< Positron cut, 1 um */
 
 #endif // End of GUARD_GGEMS_PHYSICS_GGEMSEMPROCESSCONSTANTS_HH

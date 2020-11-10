@@ -31,41 +31,44 @@
   \date Tuesday November 5, 2020
 */
 
-#include "GGEMS/maths/GGEMSMatrixTypes.hh"
+#include "GGEMS/tools/GGEMSSystemOfUnits.hh"
 
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
+#include "GGEMS/maths/GGEMSMatrixTypes.hh"
+#include "GGEMS/maths/GGEMSMatrixOperations.hh"
 
 #ifdef __OPENCL_C_VERSION__
 
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 /*!
-  \fn inline GGfloat3 RotateUnitZ(GGfloat3 vector, GGfloat3 const new_uz)
+  \fn inline GGfloat3 RotateUnitZ(GGfloat3* vector, GGfloat3 const* new_uz)
   \param vector - vector to change
   \param new_uz - new direction
   \return a vector of 3x1 float
   \brief rotateUz, function from CLHEP
 */
-inline GGfloat3 RotateUnitZ(GGfloat3 vector, GGfloat3 const new_uz)
+inline GGfloat3 RotateUnitZ(GGfloat3* vector, GGfloat3 const* new_uz)
 {
-  GGfloat u1 = new_uz.x;
-  GGfloat u2 = new_uz.y;
-  GGfloat u3 = new_uz.z;
+  GGfloat u1 = new_uz->x;
+  GGfloat u2 = new_uz->y;
+  GGfloat u3 = new_uz->z;
 
   GGfloat up = u1*u1 + u2*u2;
   if (up > 0) {
     up = sqrt(up);
-    GGfloat px = vector.x,  py = vector.y, pz = vector.z;
-    vector.x = (u1*u3*px - u2*py) /up + u1*pz;
-    vector.y = (u2*u3*px + u1*py) /up + u2*pz;
-    vector.z =    -up*px +             u3*pz;
+    GGfloat px = vector->x,  py = vector->y, pz = vector->z;
+    vector->x = (u1*u3*px - u2*py) /up + u1*pz;
+    vector->y = (u2*u3*px + u1*py) /up + u2*pz;
+    vector->z =    -up*px +             u3*pz;
   }
   else if (u3 < 0.) {
-    vector.x = -vector.x;    // phi=0  theta=gpu_pi
-    vector.z = -vector.z;
+    vector->x = -vector->x;    // phi=0  theta=gpu_pi
+    vector->z = -vector->z;
   }
 
-  GGfloat3 tmp = {vector.x, vector.y, vector.z};
+  GGfloat3 tmp = {vector->x, vector->y, vector->z};
   return tmp;
 }
 
@@ -73,46 +76,67 @@ inline GGfloat3 RotateUnitZ(GGfloat3 vector, GGfloat3 const new_uz)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-inline GGfloat3 GlobalToLocalPosition(global GGfloat44 const* matrix, GGfloat3 const point)
+/*!
+ \fn inline GGfloat3 GlobalToLocalPosition(GGfloat44 const* matrix, GGfloat3 const* point)
+ \param matrix - A matrix (4x4)
+ \param point - Point in 3D (x, y, z)
+ \return The point expresses in the local frame
+ \brief Transform a 3D point from local to global frame
+*/
+inline GGfloat3 GlobalToLocalPosition(GGfloat44 const* matrix, GGfloat3 const* point)
 {
-  // Extract translation
-  GGfloat3 translation;
-  //translation.x = matrix->m0_.x;
-  //= {matrix->m0_.w, matrix->m1_.w, matrix->m2_.w};
+  // Get the translation vector
+  GGfloat3 translation = {matrix->m0_[3], matrix->m1_[3], matrix->m2_[3]};
 
-  return translation;
+  // Extract transpose sub-matrix for rotation
+  GGfloat33 rotation_transpose = {
+    {matrix->m0_[0], matrix->m1_[0], matrix->m2_[0]},
+    {matrix->m0_[1], matrix->m1_[1], matrix->m2_[1]},
+    {matrix->m0_[2], matrix->m1_[2], matrix->m2_[2]}
+  };
+
+  GGfloat3 new_point = *point - translation;
+
+  return GGfloat33MultGGfloat3(&rotation_transpose, &new_point);
 }
-
-/*__host__ __device__ f32xyz fxyz_global_to_local_position( const f32matrix44 &G, f32xyz u)
-{
-    // first, extract the translation
-    f32xyz T = { G.m03, G.m13, G.m23 };
-    // Then the sub matrix (R and P)
-    f32matrix33 g = { G.m00, G.m01, G.m02,
-                      G.m10, G.m11, G.m12,
-                      G.m20, G.m21, G.m22 };
-    // Inverse transform
-    f32matrix33 ginv = fmatrix_trans( g );
-    u = fxyz_sub( u, T );
-    u = fmatrix_mul_fxyz( ginv, u );
-
-    return u;
-}*/
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
 /*!
- \fn inline GGfloat3 LocalToGlobalPosition(global GGfloat44 const* matrix, GGfloat3 const point)
+ \fn inline GGfloat3 LocalToGlobalPosition(GGfloat44* matrix, GGfloat3 const* point)
  \param matrix - A matrix (4x4)
  \param point - Point in 3D (x, y, z)
  \return The point expresses in the global frame
  \brief Transform a 3D point from local to global frame
 */
-inline GGfloat3 LocalToGlobalPosition(global GGfloat44 const* matrix, GGfloat3 const point)
+inline GGfloat3 LocalToGlobalPosition(GGfloat44* matrix, GGfloat3 const* point)
 {
   return GGfloat44MultGGfloat3(matrix, point);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+/*!
+ \fn inline GGfloat3 GlobalToLocalDirection(GGfloat44 const* matrix, GGfloat3 const* point)
+ \param matrix - A matrix (4x4)
+ \param point - Point in 3D (x, y, z)
+ \return The direction expresses in the local frame
+ \brief Transform a 3D direction from local to global frame
+*/
+inline GGfloat3 GlobalToLocalDirection(GGfloat44 const* matrix, GGfloat3 const* point)
+{
+  // Extract transpose sub-matrix for rotation
+  GGfloat33 rotation_transpose = {
+    {matrix->m0_[0], matrix->m1_[0], matrix->m2_[0]},
+    {matrix->m0_[1], matrix->m1_[1], matrix->m2_[1]},
+    {matrix->m0_[2], matrix->m1_[2], matrix->m2_[2]}
+  };
+
+  return normalize(GGfloat33MultGGfloat3(&rotation_transpose, point));
 }
 
 #endif

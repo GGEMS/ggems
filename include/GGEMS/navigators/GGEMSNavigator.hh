@@ -35,7 +35,9 @@
 #endif
 
 #include "GGEMS/physics/GGEMSRangeCuts.hh"
+
 #include "GGEMS/geometries/GGEMSGeometryConstants.hh"
+
 #include "GGEMS/maths/GGEMSMatrixTypes.hh"
 
 class GGEMSSolid;
@@ -87,15 +89,6 @@ class GGEMS_EXPORT GGEMSNavigator
       \brief Avoid copy by rvalue reference
     */
     GGEMSNavigator& operator=(GGEMSNavigator const&& navigator) = delete;
-
-    /*!
-      \fn void SetLocalAxis(GGfloat3 const& m0, GGfloat3 const& m1, GGfloat3 const& m2)
-      \param m0 - Row 0 in the matrix 3x3 for local axis
-      \param m1 - Row 1 in the matrix 3x3 for local axis
-      \param m2 - Row 2 in the matrix 3x3 for local axis
-      \brief Set the local axis element describing the navigator compared to global axis (center of world)
-    */
-    void SetLocalAxis(GGfloat3 const& m0, GGfloat3 const& m1, GGfloat3 const& m2);
 
     /*!
       \fn void SetPosition(GGfloat const& position_x, GGfloat const& position_y, GGfloat const& position_z, std::string const& unit = "mm")
@@ -204,9 +197,8 @@ class GGEMS_EXPORT GGEMSNavigator
     GGfloat3 rotation_xyz_; /*!< Rotation of the navigator in X, Y and Z */
     GGfloat33 local_axis_; /*!< Local axis for navigator */
     std::size_t navigator_id_; /*!< Index of the navigator */
-    bool is_update_pos_; /*!< Updating navigator position */
-    bool is_update_rot_; /*!< Updating navigator rotation */
-    bool is_update_axis_; /*!< Updating navigator local axis */
+    GGint update_pos_; /*!< Updating navigator position */
+    GGint update_rot_; /*!< Updating navigator rotation */
 
     std::vector<std::shared_ptr<GGEMSSolid>> solid_; /*!< Solid with geometric infos and label */
     std::shared_ptr<GGEMSMaterials> materials_; /*!< Materials of phantom */

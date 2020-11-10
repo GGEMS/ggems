@@ -29,7 +29,9 @@
 */
 
 #include "GGEMS/materials/GGEMSMaterials.hh"
+
 #include "GGEMS/maths/GGEMSMathAlgorithms.hh"
+
 #include "GGEMS/physics/GGEMSRayleighScattering.hh"
 #include "GGEMS/physics/GGEMSParticleCrossSections.hh"
 

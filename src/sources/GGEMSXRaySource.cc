@@ -32,13 +32,17 @@
 
 #include "GGEMS/sources/GGEMSXRaySource.hh"
 #include "GGEMS/sources/GGEMSSourceManager.hh"
+
 #include "GGEMS/maths/GGEMSGeometryTransformation.hh"
-#include "GGEMS/global/GGEMSConstants.hh"
-#include "GGEMS/tools/GGEMSTools.hh"
+
 #include "GGEMS/global/GGEMSManager.hh"
+#include "GGEMS/global/GGEMSConstants.hh"
+
+#include "GGEMS/tools/GGEMSTools.hh"
+#include "GGEMS/tools/GGEMSRAMManager.hh"
+
 #include "GGEMS/physics/GGEMSParticles.hh"
 #include "GGEMS/randoms/GGEMSPseudoRandomGenerator.hh"
-#include "GGEMS/tools/GGEMSRAMManager.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -131,12 +135,12 @@ void GGEMSXRaySource::GetPrimaries(GGlong const& number_of_particles)
   // Compute work item number
   std::size_t number_of_work_items = number_of_particles + (max_work_group_size - number_of_particles%max_work_group_size);
 
-  cl::NDRange global(number_of_work_items);
-  cl::NDRange offset(0);
-  cl::NDRange local(max_work_group_size);
+  cl::NDRange global_wi(number_of_work_items);
+  cl::NDRange offset_wi(0);
+  cl::NDRange local_wi(max_work_group_size);
 
   // Launching kernel
-  GGint kernel_status = queue_cl->enqueueNDRangeKernel(*kernel_cl, offset, global, local, nullptr, event_cl);
+  GGint kernel_status = queue_cl->enqueueNDRangeKernel(*kernel_cl, offset_wi, global_wi, local_wi, nullptr, event_cl);
   opencl_manager.CheckOpenCLError(kernel_status, "GGEMSXRaySource", "GetPrimaries");
   queue_cl->finish(); // Wait until the kernel status is finish
 
@@ -468,15 +472,6 @@ void set_beam_aperture_ggems_xray_source(GGEMSXRaySource* xray_source, GGfloat c
 void set_focal_spot_size_ggems_xray_source(GGEMSXRaySource* xray_source, GGfloat const width, GGfloat const height, GGfloat const depth, char const* unit)
 {
   xray_source->SetFocalSpotSize(width, height, depth, unit);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void set_local_axis_ggems_xray_source(GGEMSXRaySource* xray_source, GGfloat const m00, GGfloat const m01, GGfloat const m02,GGfloat const m10, GGfloat const m11, GGfloat const m12, GGfloat const m20, GGfloat const m21, GGfloat const m22)
-{
-  xray_source->SetLocalAxis({m00, m01, m02}, {m10, m11, m12}, {m20, m21, m22});
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -24,28 +24,22 @@ class GGEMSVoxelizedPhantom(object):
     def __init__(self, voxelized_phantom_name):
         ggems_lib.create_ggems_voxelized_phantom.restype = ctypes.c_void_p
 
-        ggems_lib.set_voxelized_phantom_file_ggems_voxelized_phantom.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_char_p]
-        ggems_lib.set_voxelized_phantom_file_ggems_voxelized_phantom.restype = ctypes.c_void_p
+        ggems_lib.set_phantom_file_ggems_voxelized_phantom.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_char_p]
+        ggems_lib.set_phantom_file_ggems_voxelized_phantom.restype = ctypes.c_void_p
 
         ggems_lib.set_position_ggems_voxelized_phantom.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_char_p]
         ggems_lib.set_position_ggems_voxelized_phantom.restype = ctypes.c_void_p
-
-        ggems_lib.set_local_axis_ggems_voxelized_phantom.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_float]
-        ggems_lib.set_local_axis_ggems_voxelized_phantom.restype = ctypes.c_void_p
 
         ggems_lib.set_rotation_ggems_voxelized_phantom.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_char_p]
         ggems_lib.set_rotation_ggems_voxelized_phantom.restype = ctypes.c_void_p
 
         self.obj = ggems_lib.create_ggems_voxelized_phantom(voxelized_phantom_name.encode('ASCII'))
 
-    def set_voxelized_phantom(self, phantom_filename, range_data_filename):
-        ggems_lib.set_voxelized_phantom_file_ggems_voxelized_phantom(self.obj, phantom_filename.encode('ASCII'), range_data_filename.encode('ASCII'))
+    def set_phantom(self, phantom_filename, range_data_filename):
+        ggems_lib.set_phantom_file_ggems_voxelized_phantom(self.obj, phantom_filename.encode('ASCII'), range_data_filename.encode('ASCII'))
 
     def set_position(self, pos_x, pos_y, pos_z, unit):
         ggems_lib.set_position_ggems_voxelized_phantom(self.obj, pos_x, pos_y, pos_z, unit.encode('ASCII'))
-
-    def set_local_axis(self, m00, m01, m02, m10, m11, m12, m20, m21, m22):
-        ggems_lib.set_local_axis_ggems_voxelized_phantom(self.obj, m00, m01, m02, m10, m11, m12, m20, m21, m22)
 
     def set_rotation(self, rx, ry, rz, unit):
         ggems_lib.set_rotation_ggems_voxelized_phantom(self.obj, rx, ry, rz, unit.encode('ASCII'))

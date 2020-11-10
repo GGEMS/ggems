@@ -33,15 +33,15 @@
 
 #include "GGEMS/tools/GGEMSSystemOfUnits.hh"
 
-constant GGchar PRIMARY = 0; /*!< Primary particle */
-constant GGchar GEOMETRY_BOUNDARY = 99; /*!< Particle on the boundary */
-constant GGchar ALIVE = 0; /*!< Particle alive */
-constant GGchar DEAD = 1; /*!< Particle dead */
-constant GGchar FREEZE = 2; /*!< Particle freeze */
-constant GGfloat OUT_OF_WORLD = FLT_MAX; /*!< Particle out of world */
+__constant GGchar PRIMARY = 0; /*!< Primary particle */
+__constant GGchar GEOMETRY_BOUNDARY = 99; /*!< Particle on the boundary */
+__constant GGchar ALIVE = 0; /*!< Particle alive */
+__constant GGchar DEAD = 1; /*!< Particle dead */
+__constant GGchar FREEZE = 2; /*!< Particle freeze */
+__constant GGfloat OUT_OF_WORLD = FLT_MAX; /*!< Particle out of world */
 
-constant GGchar PHOTON = 0; /*!< Photon particle */
-constant GGchar ELECTRON = 1; /*!< Electron particle */
-constant GGchar POSITRON = 2; /*!< Positron particle */
+__constant GGchar PHOTON = 0; /*!< Photon particle */
+__constant GGchar ELECTRON = 1; /*!< Electron particle */
+__constant GGchar POSITRON = 2; /*!< Positron particle */
 
 #endif // End of GUARD_GGEMS_PHYSICS_GGEMSPARTICLECONSTANTS_HH
