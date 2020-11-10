@@ -32,6 +32,7 @@
 */
 
 #include "GGEMS/tools/GGEMSTools.hh"
+
 #include "GGEMS/navigators/GGEMSNavigator.hh"
 
 /*!

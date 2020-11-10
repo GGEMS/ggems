@@ -47,11 +47,12 @@ void GGEMSFileStream::CheckInputStream(std::ifstream const& input_stream, std::s
     std::ostringstream oss(std::ostringstream::out);
     #ifdef _WIN32
     char buffer_error[ 256 ];
-    oss << "Problem reading filename '" << filename << "': " << strerror_s(buffer_error, 256, errno);
+    strerror_s(buffer_error, 256, errno);
+    oss << "Problem reading filename '" << filename << "': " << buffer_error;
     #else
     oss << "Problem reading filename '" << filename << "': " << strerror(errno);
     #endif
-    throw std::runtime_error(oss.str());
+    GGEMSMisc::ThrowException("", "", oss.str());
   }
 }
 

@@ -32,8 +32,10 @@
 */
 
 #include "GGEMS/global/GGEMSConfiguration.hh"
+
 #include "GGEMS/tools/GGEMSTypes.hh"
-#include "GGEMS/geometries/GGEMSPrimitiveGeometriesStack.hh"
+
+#include "GGEMS/geometries/GGEMSPrimitiveGeometries.hh"
 
 /*!
   \struct GGEMSSolidBoxData_t

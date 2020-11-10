@@ -40,7 +40,7 @@
 #include "GGEMS/physics/GGEMSProcessConstants.hh"
 
 /*!
-  \fn kernel void get_primaries_ggems_xray_source(GGlong const particle_id_limit, global GGEMSPrimaryParticles* primary_particle, global GGEMSRandom* random, GGchar const particle_name, global GGfloat const* energy_spectrum, global GGfloat const* cdf, GGint const number_of_energy_bins, GGfloat const aperture, GGfloat3 const focal_spot_size, global GGfloat44 const* matrix_transformation)
+  \fn kernel void get_primaries_ggems_xray_source(GGlong const particle_id_limit, global GGEMSPrimaryParticles* primary_particle, global GGEMSRandom* random, GGchar const particle_name, constant GGfloat* energy_spectrum, constant GGfloat* cdf, GGint const number_of_energy_bins, GGfloat const aperture, GGfloat3 const focal_spot_size, global GGfloat44 const* matrix_transformation)
   \param particle_id_limit - particle id limit
   \param primary_particle - buffer of primary particles
   \param random - buffer for random number
@@ -86,14 +86,23 @@ kernel void get_primaries_ggems_xray_source(
     cos(theta)
   };
 
+  // Copy matrix transformation to private memory
+  GGfloat44 tmp_matrix_transformation = {
+    {matrix_transformation->m0_[0], matrix_transformation->m0_[1], matrix_transformation->m0_[2], matrix_transformation->m0_[3]},
+    {matrix_transformation->m1_[0], matrix_transformation->m1_[1], matrix_transformation->m1_[2], matrix_transformation->m1_[3]},
+    {matrix_transformation->m2_[0], matrix_transformation->m2_[1], matrix_transformation->m2_[2], matrix_transformation->m2_[3]},
+    {matrix_transformation->m3_[0], matrix_transformation->m3_[1], matrix_transformation->m3_[2], matrix_transformation->m3_[3]}
+  };
+
   // Get direction of the cone beam. The beam is targeted to the isocenter, then
   // the direction is directly related to the position of the source.
   // Local position of xray source is 0 0 0
-  GGfloat3 global_position = LocalToGlobalPosition(matrix_transformation, (GGfloat3)(0.0f, 0.0f, 0.0f));
+  GGfloat3 global_position = {0.0f, 0.0f, 0.0f};
+  global_position = LocalToGlobalPosition(&tmp_matrix_transformation, &global_position);
   GGfloat3 direction = normalize((GGfloat3)(0.0f, 0.0f, 0.0f) - global_position);
 
   // Apply deflection (global coordinate)
-  direction = RotateUnitZ(rotation, direction);
+  direction = RotateUnitZ(&rotation, &direction);
   direction = normalize(direction);
 
   // Position with focal (local)
@@ -102,13 +111,13 @@ kernel void get_primaries_ggems_xray_source(
   global_position.z = focal_spot_size.z * (KissUniform(random, global_id) - 0.5f);
 
   // Apply transformation (local to global frame)
-  global_position = LocalToGlobalPosition(matrix_transformation, global_position);
+  global_position = LocalToGlobalPosition(&tmp_matrix_transformation, &global_position);
 
   // Getting a random energy
   GGfloat rndm_for_energy = KissUniform(random, global_id);
 
   // Get index in cdf
-  GGuint index_for_energy = BinarySearchLeft(rndm_for_energy, cdf, number_of_energy_bins, 0, 0);
+  GGint index_for_energy = BinarySearchLeft(rndm_for_energy, cdf, number_of_energy_bins, 0, 0);
 
   // Setting the energy for particles
   if (index_for_energy == number_of_energy_bins - 1) {

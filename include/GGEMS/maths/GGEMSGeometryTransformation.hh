@@ -51,7 +51,6 @@ class GGEMS_EXPORT GGEMSGeometryTransformation
     */
     ~GGEMSGeometryTransformation(void);
 
-  public:
     /*!
       \fn GGEMSGeometryTransformation(GGEMSGeometryTransformation const& geometry_transformation) = delete
       \param geometry_transformation - reference on the geometry transformation
@@ -80,7 +79,6 @@ class GGEMS_EXPORT GGEMSGeometryTransformation
     */
     GGEMSGeometryTransformation& operator=(GGEMSGeometryTransformation const&& geometry_transformation) = delete;
 
-  public:
     /*!
       \fn void SetTranslation(GGfloat const& tx, GGfloat const& ty, GGfloat const& tz)
       \param tx - Translation in X
@@ -172,27 +170,13 @@ class GGEMS_EXPORT GGEMSGeometryTransformation
     inline GGfloat33 GetLocalAxis(void) const {return local_axis_;}
 
     /*!
-      \fn void UpdateTransformationMatrix(void)
-      \brief update the transformation matrix
-    */
-    void UpdateTransformationMatrix(void);
-
-    /*!
       \fn Matrix::float4x4 GetTransformationMatrix(void) const
       \return the transformation matrix
       \brief return the transformation matrix
     */
-    inline cl::Buffer* GetTransformationMatrix(void)
-    {
-      // Check if we need to update
-      if (is_need_updated_) UpdateTransformationMatrix();
-
-      // Return the transformation matrix
-      return matrix_transformation_cl_.get();
-    }
+    inline cl::Buffer* GetTransformationMatrix(void) const {return matrix_transformation_cl_.get();}
 
   private:
-    GGbool is_need_updated_; /*!< Check if the transformation matrix need to be updated */
     GGfloat3 position_; /*!< Position of the source/detector */
     GGfloat3 rotation_; /*!< Rotation of the source/detector */
     GGfloat33 local_axis_; /*!< Matrix of local axis */

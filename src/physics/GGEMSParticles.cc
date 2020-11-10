@@ -29,9 +29,12 @@
 */
 
 #include "GGEMS/physics/GGEMSParticles.hh"
-#include "GGEMS/sources/GGEMSSourceManager.hh"
-#include "GGEMS/tools/GGEMSRAMManager.hh"
 #include "GGEMS/physics/GGEMSPrimaryParticles.hh"
+
+#include "GGEMS/sources/GGEMSSourceManager.hh"
+
+#include "GGEMS/tools/GGEMSRAMManager.hh"
+
 #include "GGEMS/navigators/GGEMSNavigatorManager.hh"
 
 ////////////////////////////////////////////////////////////////////////////////

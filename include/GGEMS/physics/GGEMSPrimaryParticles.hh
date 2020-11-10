@@ -38,6 +38,7 @@
   \struct GGEMSPrimaryParticles_t
   \brief Structure storing informations about primary particles
 */
+#pragma pack(push, 1)
 typedef struct GGEMSPrimaryParticles_t
 {
   GGfloat E_[MAXIMUM_PARTICLES]; /*!< Energies of particles */
@@ -64,5 +65,6 @@ typedef struct GGEMSPrimaryParticles_t
 
   GGint particle_tracking_id; /*!< Particle id for tracking */
 } GGEMSPrimaryParticles; /*!< Using C convention name of struct to C++ (_t deletion) */
+#pragma pack(pop)
 
 #endif // GUARD_GGEMS_PHYSICS_GGEMSPRIMARYPARTICLESSTACK_HH

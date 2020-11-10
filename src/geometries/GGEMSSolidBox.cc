@@ -141,42 +141,40 @@ void GGEMSSolidBox::PrintInfos(void) const
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSSolidBox::SetPosition(GGfloat3 const& position_xyz)
+// void GGEMSSolidBox::SetPosition(GGfloat3 const& position_xyz)
+// {
+//   GGcout("GGEMSSolidBox", "SetPosition", 3) << "Setting position of solid box..." << GGendl;
+
+//   // Set position in geometric transformation
+//   geometry_transformation_->SetTranslation(position_xyz);
+
+//   // Get the OpenCL manager
+//   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+
+//   // Get pointer on OpenCL device
+//   GGEMSSolidBoxData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSSolidBoxData>(solid_data_cl_.get(), sizeof(GGEMSSolidBoxData));
+//   GGfloat44* transformation_matrix_device = opencl_manager.GetDeviceBuffer<GGfloat44>(geometry_transformation_->GetTransformationMatrix(), sizeof(GGfloat44));
+
+//   for (GGuint i = 0; i < 3; ++i ) {
+//     // Offset
+//     solid_data_device->position_xyz_.s[i] = position_xyz.s[i];
+
+//     // Bounding box
+//     //solid_data_device->obb_geometry_.border_min_xyz_.s[i] = -solid_data_device->position_xyz_.s[i];
+//     //solid_data_device->obb_geometry_.border_max_xyz_.s[i] = solid_data_device->obb_geometry_.border_min_xyz_.s[i] + solid_data_device->number_of_voxels_xyz_.s[i] * solid_data_device->voxel_sizes_xyz_.s[i];
+//   }
+
+//   // Release the pointer
+//   opencl_manager.ReleaseDeviceBuffer(solid_data_cl_.get(), solid_data_device);
+//   opencl_manager.ReleaseDeviceBuffer(geometry_transformation_->GetTransformationMatrix(), transformation_matrix_device);
+// }
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSSolidBox::GetTransformationMatrix(void)
 {
-  GGcout("GGEMSSolidBox", "SetPosition", 3) << "Setting position of solid box..." << GGendl;
-
-  // Set position in geometric transformation
-  geometry_transformation_->SetTranslation(position_xyz);
-
-  // Get the OpenCL manager
-  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
-
-  // Get pointer on OpenCL device
-  GGEMSSolidBoxData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSSolidBoxData>(solid_data_cl_.get(), sizeof(GGEMSSolidBoxData));
-  GGfloat44* transformation_matrix_device = opencl_manager.GetDeviceBuffer<GGfloat44>(geometry_transformation_->GetTransformationMatrix(), sizeof(GGfloat44));
-
-  for (GGuint i = 0; i < 3; ++i ) {
-    // Offset
-    solid_data_device->position_xyz_.s[i] = position_xyz.s[i];
-
-    // Bounding box
-    //solid_data_device->obb_geometry_.border_min_xyz_.s[i] = -solid_data_device->position_xyz_.s[i];
-    //solid_data_device->obb_geometry_.border_max_xyz_.s[i] = solid_data_device->obb_geometry_.border_min_xyz_.s[i] + solid_data_device->number_of_voxels_xyz_.s[i] * solid_data_device->voxel_sizes_xyz_.s[i];
-  }
-
-  // Release the pointer
-  opencl_manager.ReleaseDeviceBuffer(solid_data_cl_.get(), solid_data_device);
-  opencl_manager.ReleaseDeviceBuffer(geometry_transformation_->GetTransformationMatrix(), transformation_matrix_device);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void GGEMSSolidBox::UpdateTransformationMatrix(void)
-{
-  geometry_transformation_->UpdateTransformationMatrix();
-
   // Get the OpenCL manager
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 

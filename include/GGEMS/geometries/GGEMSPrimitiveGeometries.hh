@@ -1,5 +1,5 @@
-#ifndef GUARD_GGEMS_GEOMETRIES_GGEMSVOXELIZEDSOLIDSTACK_HH
-#define GUARD_GGEMS_GEOMETRIES_GGEMSVOXELIZEDSOLIDSTACK_HH
+#ifndef GUARD_GGEMS_GEOMETRIES_GGEMSPRIMITIVEGEOMETRIES_HH
+#define GUARD_GGEMS_GEOMETRIES_GGEMSPRIMITIVEGEOMETRIES_HH
 
 // ************************************************************************
 // * This file is part of GGEMS.                                          *
@@ -20,41 +20,34 @@
 // ************************************************************************
 
 /*!
-  \file GGEMSVoxelizedSolidStack.hh
+  \file GGEMSPrimitiveGeometries.hh
 
-  \brief Structure storing the stack of data for voxelized and analytical solid
+  \brief Structure storing some primitive geometries
 
   \author Julien BERT <julien.bert@univ-brest.fr>
   \author Didier BENOIT <didier.benoit@inserm.fr>
   \author LaTIM, INSERM - U1101, Brest, FRANCE
   \version 1.0
-  \date Monday March 2, 2020
+  \date Tuesday October 22, 2020
 */
+
+#include "GGEMS/maths/GGEMSMatrixTypes.hh"
+
+#include "GGEMS/global/GGEMSConfiguration.hh"
 
 #include "GGEMS/tools/GGEMSTypes.hh"
-#include "GGEMS/geometries/GGEMSPrimitiveGeometriesStack.hh"
 
 /*!
-  \struct GGEMSVoxelizedSolidData_t
-  \brief Structure storing the stack of data for voxelized solid
+  \struct GGEMSOBB_t
+  \brief Structure storing OBB (Oriented Bounding Box) geometry
 */
-typedef struct GGEMSVoxelizedSolidData_t
+#pragma pack(push, 1)
+typedef struct GGEMSOBB_t
 {
-  GGint solid_id_; /*!< Navigator index */
-  GGint number_of_voxels_; /*!< Total number of voxels */
-  GGint number_of_voxels_xyz_[3]; /*!< Number of voxel in X, Y and Z */
-  GGfloat voxel_sizes_xyz_[3]; /*!< Size of voxels in X, Y and Z */
-  GGEMSOBB obb_geometry_; /*!< OBB storing border of voxelized solid and matrix of transformation */
-} GGEMSVoxelizedSolidData; /*!< Using C convention name of struct to C++ (_t deletion) */
+  GGfloat border_min_xyz_[3]; /*!< Min. of border in X, Y and Z */
+  GGfloat border_max_xyz_[3]; /*!< Max. of border in X, Y and Z */
+  GGfloat44 matrix_transformation_; /*!< Matrix of transformation including angle of rotation */
+} GGEMSOBB; /*!< Using C convention name of struct to C++ (_t deletion) */
+#pragma pack(pop)
 
-// #pragma pack(push, 1)
-// typedef struct TestStruct_t
-// {
-//   GGfloat toto0[4];
-//   GGfloat3 toto1;
-//   GGushort3 toto2;
-//   GGuchar3 toto3;
-// } TestStruct;
-// #pragma pack(pop)
-
-#endif // GUARD_GGEMS_GEOMETRIES_GGEMSVOXELIZEDSOLIDSTACK_HH
+#endif // GUARD_GGEMS_GEOMETRIES_GGEMSPRIMITIVEGEOMETRIES_HH

@@ -32,11 +32,13 @@
 #include <vector>
 #include <sstream>
 
-#include "GGEMS/geometries/GGEMSVoxelizedSolidStack.hh"
+#include "GGEMS/geometries/GGEMSVoxelizedSolidData.hh"
+
 #include "GGEMS/io/GGEMSMHDImage.hh"
+#include "GGEMS/io/GGEMSTextReader.hh"
+
 #include "GGEMS/tools/GGEMSTools.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
-#include "GGEMS/io/GGEMSTextReader.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -108,6 +110,7 @@ void GGEMSMHDImage::Read(std::string const& image_mhd_header_filename, std::weak
 
   // Checking if file exists
   std::ifstream in_header_stream(image_mhd_header_filename, std::ios::in);
+
   GGEMSFileStream::CheckInputStream(in_header_stream, image_mhd_header_filename);
 
   // Get the OpenCL manager
@@ -201,11 +204,11 @@ void GGEMSMHDImage::Read(std::string const& image_mhd_header_filename, std::weak
     GGEMSMisc::ThrowException("GGEMSMHDImage", "Read", oss.str());
   }
 
-  // // Computing bounding box borders automatically at isocenter
-  // for (GGuint i = 0; i < 3; ++i) {
-  //   solid_data_device->obb_geometry_.border_min_xyz_.s[i] = -solid_data_device->number_of_voxels_xyz_.s[i] * solid_data_device->voxel_sizes_xyz_.s[i] * 0.5f;
-  //   solid_data_device->obb_geometry_.border_max_xyz_.s[i] = solid_data_device->number_of_voxels_xyz_.s[i] * solid_data_device->voxel_sizes_xyz_.s[i] * 0.5f;
-  // }
+  // Computing bounding box borders automatically at isocenter
+  for (GGuint i = 0; i < 3; ++i) {
+    solid_data_device->obb_geometry_.border_min_xyz_[i] = -solid_data_device->number_of_voxels_xyz_[i] * solid_data_device->voxel_sizes_xyz_[i] * 0.5f;
+    solid_data_device->obb_geometry_.border_max_xyz_[i] = solid_data_device->number_of_voxels_xyz_[i] * solid_data_device->voxel_sizes_xyz_[i] * 0.5f;
+  }
 
   // Release the pointer
   opencl_manager.ReleaseDeviceBuffer(solid_data_cl.lock().get(), solid_data_device);

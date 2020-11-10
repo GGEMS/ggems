@@ -42,9 +42,8 @@ GGEMSNavigator::GGEMSNavigator(std::string const& navigator_name)
   position_xyz_({0.0f, 0.0f, 0.0f}),
   rotation_xyz_({0.0f, 0.0f, 0.0f}),
   navigator_id_(-1),
-  is_update_pos_(false),
-  is_update_rot_(false),
-  is_update_axis_(false)
+  update_pos_(-1),
+  update_rot_(-1)
 {
   GGcout("GGEMSNavigator", "GGEMSNavigator", 3) << "Allocation of GGEMSNavigator..." << GGendl;
 
@@ -71,21 +70,15 @@ GGEMSNavigator::~GGEMSNavigator(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSNavigator::SetLocalAxis(GGfloat3 const& m0, GGfloat3 const& m1, GGfloat3 const& m2)
-{
-  is_update_axis_ = true;
-  local_axis_.m0_[0] = m0.s0; local_axis_.m0_[1] = m0.s1; local_axis_.m0_[2] = m0.s2;
-  local_axis_.m1_[0] = m1.s0; local_axis_.m1_[1] = m1.s1; local_axis_.m1_[2] = m1.s2;
-  local_axis_.m2_[0] = m2.s0; local_axis_.m2_[1] = m2.s1; local_axis_.m2_[2] = m2.s2;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
 void GGEMSNavigator::SetPosition(GGfloat const& position_x, GGfloat const& position_y, GGfloat const& position_z, std::string const& unit)
 {
-  is_update_pos_ = true;
+  if (update_pos_ != -1) {
+    GGEMSMisc::ThrowException("GGEMSNavigator", "SetPosition", "Position for navigator already set!!!");
+  }
+
+  if (update_rot_ == -1) update_pos_ = 0;
+  else update_pos_ = 1;
+
   position_xyz_.s0 = DistanceUnit(position_x, unit);
   position_xyz_.s1 = DistanceUnit(position_y, unit);
   position_xyz_.s2 = DistanceUnit(position_z, unit);
@@ -97,7 +90,13 @@ void GGEMSNavigator::SetPosition(GGfloat const& position_x, GGfloat const& posit
 
 void GGEMSNavigator::SetRotation(GGfloat const& rx, GGfloat const& ry, GGfloat const& rz, std::string const& unit)
 {
-  is_update_rot_ = true;
+  if (update_rot_ != -1) {
+    GGEMSMisc::ThrowException("GGEMSNavigator", "SetRotation", "Rotation for navigator already set!!!");
+  }
+
+  if (update_pos_ == -1) update_rot_ = 0;
+  else update_rot_ = 1;
+
   rotation_xyz_.s0 = AngleUnit(rx, unit);
   rotation_xyz_.s1 = AngleUnit(ry, unit);
   rotation_xyz_.s2 = AngleUnit(rz, unit);

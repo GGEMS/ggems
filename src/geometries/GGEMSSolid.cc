@@ -29,10 +29,15 @@
 */
 
 #include "GGEMS/geometries/GGEMSSolid.hh"
+
 #include "GGEMS/sources/GGEMSSourceManager.hh"
+
 #include "GGEMS/physics/GGEMSCrossSections.hh"
+
 #include "GGEMS/randoms/GGEMSPseudoRandomGenerator.hh"
+
 #include "GGEMS/maths/GGEMSGeometryTransformation.hh"
+
 #include "GGEMS/global/GGEMSManager.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -81,15 +86,15 @@ void GGEMSSolid::SetRotation(GGfloat3 const& rotation_xyz)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSSolid::SetLocalAxis(GGfloat33 const& local_axis_xyz)
+void GGEMSSolid::SetPosition(GGfloat3 const& position_xyz)
 {
-  geometry_transformation_->SetAxisTransformation(local_axis_xyz);
+  geometry_transformation_->SetTranslation(position_xyz);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-#include "GGEMS/geometries/GGEMSVoxelizedSolidStack.hh"
+
 void GGEMSSolid::ParticleSolidDistance(void)
 {
   // Getting the OpenCL manager
@@ -103,25 +108,32 @@ void GGEMSSolid::ParticleSolidDistance(void)
   cl::Buffer* primary_particles_cl = particles->GetPrimaryParticles();
 
   // Getting the number of particles
-  GGulong const kNumberOfParticles = particles->GetNumberOfParticles();
+  GGlong number_of_particles = static_cast<GGint>(particles->GetNumberOfParticles());
 
   // Set parameters for kernel
   std::shared_ptr<cl::Kernel> kernel_cl = kernel_distance_cl_.lock();
-  kernel_cl->setArg(0, *primary_particles_cl);
-  kernel_cl->setArg(1, *solid_data_cl_);
+  kernel_cl->setArg(0, number_of_particles);
+  kernel_cl->setArg(1, *primary_particles_cl);
+  kernel_cl->setArg(2, *solid_data_cl_);
 
-  // Define the number of work-item to launch
-  cl::NDRange global(kNumberOfParticles);
-  cl::NDRange offset(0);
+  // Get number of max work group size
+  std::size_t max_work_group_size = opencl_manager.GetMaxWorkGroupSize();
+
+  // Compute work item number
+  std::size_t number_of_work_items = number_of_particles + (max_work_group_size - number_of_particles%max_work_group_size);
+
+  cl::NDRange global_wi(number_of_work_items);
+  cl::NDRange offset_wi(0);
+  cl::NDRange local_wi(max_work_group_size);
 
   // Launching kernel
-  GGint kernel_status = queue_cl->enqueueNDRangeKernel(*kernel_cl, offset, global, cl::NullRange, nullptr, event_cl);
+  GGint kernel_status = queue_cl->enqueueNDRangeKernel(*kernel_cl, offset_wi, global_wi, local_wi, nullptr, event_cl);
   opencl_manager.CheckOpenCLError(kernel_status, "GGEMSSolid", "ParticleSolidDistance");
   queue_cl->finish(); // Wait until the kernel status is finish
 
   // Checking if kernel verbosity is activated
   if (GGEMSManager::GetInstance().IsKernelVerbose()) {
-    opencl_manager.DisplayElapsedTimeInKernel("particle solid distance");
+    opencl_manager.DisplayElapsedTimeInKernel("particle_solid_distance");
   }
 }
 
@@ -150,11 +162,11 @@ void GGEMSSolid::ProjectTo(void)
   kernel_cl->setArg(1, *solid_data_cl_);
 
   // Define the number of work-item to launch
-  cl::NDRange global(kNumberOfParticles);
-  cl::NDRange offset(0);
+  cl::NDRange global_wi(kNumberOfParticles);
+  cl::NDRange offset_wi(0);
 
   // Launching kernel
-  GGint kernel_status = queue_cl->enqueueNDRangeKernel(*kernel_cl, offset, global, cl::NullRange, nullptr, event_cl);
+  GGint kernel_status = queue_cl->enqueueNDRangeKernel(*kernel_cl, offset_wi, global_wi, cl::NullRange, nullptr, event_cl);
   opencl_manager.CheckOpenCLError(kernel_status, "GGEMSSolid", "ProjectTo");
   queue_cl->finish(); // Wait until the kernel status is finish
 }
@@ -195,11 +207,11 @@ void GGEMSSolid::TrackThrough(std::weak_ptr<GGEMSCrossSections> cross_sections, 
   kernel_cl->setArg(5, *materials_cl);
 
   // Define the number of work-item to launch
-  cl::NDRange global(kNumberOfParticles);
-  cl::NDRange offset(0);
+  cl::NDRange global_wi(kNumberOfParticles);
+  cl::NDRange offset_wi(0);
 
   // Launching kernel
-  GGint kernel_status = queue_cl->enqueueNDRangeKernel(*kernel_cl, offset, global, cl::NullRange, nullptr, event_cl);
+  GGint kernel_status = queue_cl->enqueueNDRangeKernel(*kernel_cl, offset_wi, global_wi, cl::NullRange, nullptr, event_cl);
   opencl_manager.CheckOpenCLError(kernel_status, "GGEMSSolid", "TrackThrough");
   queue_cl->finish(); // Wait until the kernel status is finish
 }

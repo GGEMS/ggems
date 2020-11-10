@@ -29,8 +29,10 @@
 */
 
 #include "GGEMS/physics/GGEMSRangeCutsManager.hh"
-#include "GGEMS/geometries/GGEMSSolid.hh"
 #include "GGEMS/physics/GGEMSParticles.hh"
+
+#include "GGEMS/geometries/GGEMSSolid.hh"
+
 #include "GGEMS/sources/GGEMSSourceManager.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
