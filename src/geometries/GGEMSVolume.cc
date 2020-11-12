@@ -37,7 +37,8 @@
 
 GGEMSVolume::GGEMSVolume(void)
 : label_value_(1.0f),
-  positions_(GGfloat3{{0.0f, 0.0f, 0.0f}})
+  positions_(GGfloat3{{0.0f, 0.0f, 0.0f}}),
+  kernel_draw_volume_timer_(GGEMSChrono::Zero())
 {
   GGcout("GGEMSVolume", "GGEMSVolume", 3) << "Allocation of GGEMSVolume..." << GGendl;
 }

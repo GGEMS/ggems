@@ -131,7 +131,8 @@ void GGEMSBox::Draw(void)
   p_queue_cl->finish(); // Wait until the kernel status is finish
 
   // Displaying time in kernel
-  opencl_manager.DisplayElapsedTimeInKernel("draw_ggems_box");
+  kernel_draw_volume_timer_ += opencl_manager.GetElapsedTimeInKernel();
+  GGEMSChrono::DisplayTime(kernel_draw_volume_timer_, "draw_ggems_box");
 }
 
 ////////////////////////////////////////////////////////////////////////////////

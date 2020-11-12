@@ -32,6 +32,8 @@
 */
 
 #include "GGEMS/global/GGEMSExport.hh"
+
+#include "GGEMS/geometries/GGEMSVoxelizedSolidData.hh"
 #include "GGEMS/geometries/GGEMSSolid.hh"
 
 /*!
@@ -164,13 +166,13 @@ void GGEMSVoxelizedSolid::ConvertImageToLabel(std::string const& raw_data_filena
   in_raw_stream.close();
 
   // Allocating memory on OpenCL device
-  label_data_cl_ = opencl_manager.Allocate(nullptr, kNumberOfVoxels * sizeof(GGuchar), CL_MEM_READ_WRITE);
+  label_data_cl_ = opencl_manager.Allocate(nullptr, kNumberOfVoxels * sizeof(GGshort), CL_MEM_READ_WRITE);
 
   // Get pointer on OpenCL device
-  GGuchar* label_data_device = opencl_manager.GetDeviceBuffer<GGuchar>(label_data_cl_.get(), kNumberOfVoxels * sizeof(GGuchar));
+  GGshort* label_data_device = opencl_manager.GetDeviceBuffer<GGshort>(label_data_cl_.get(), kNumberOfVoxels * sizeof(GGshort));
 
-  // Set value to max of GGuchar
-  std::fill(label_data_device, label_data_device + kNumberOfVoxels, std::numeric_limits<GGuchar>::max());
+  // Set value to max of GGshort
+  std::fill(label_data_device, label_data_device + kNumberOfVoxels, std::numeric_limits<GGshort>::max());
 
   // Opening range data file
   std::ifstream in_range_stream(range_data_filename, std::ios::in);
@@ -179,7 +181,7 @@ void GGEMSVoxelizedSolid::ConvertImageToLabel(std::string const& raw_data_filena
   // Values in the range file
   GGfloat first_label_value = 0.0f;
   GGfloat last_label_value = 0.0f;
-  GGuchar label_index = 0;
+  GGshort label_index = 0;
   std::string material_name("");
 
   // Reading range file

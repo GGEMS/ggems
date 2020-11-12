@@ -120,12 +120,9 @@ kernel void get_primaries_ggems_xray_source(
   GGint index_for_energy = BinarySearchLeft(rndm_for_energy, cdf, number_of_energy_bins, 0, 0);
 
   // Setting the energy for particles
-  if (index_for_energy == number_of_energy_bins - 1) {
-    primary_particle->E_[global_id] = energy_spectrum[index_for_energy];
-  }
-  else {
-    primary_particle->E_[global_id] = LinearInterpolation(cdf[index_for_energy], energy_spectrum[index_for_energy], cdf[index_for_energy + 1], energy_spectrum[index_for_energy + 1], rndm_for_energy);
-  }
+  primary_particle->E_[global_id] = (index_for_energy == number_of_energy_bins - 1) ?
+    energy_spectrum[index_for_energy] :
+    LinearInterpolation(cdf[index_for_energy], energy_spectrum[index_for_energy], cdf[index_for_energy + 1], energy_spectrum[index_for_energy + 1], rndm_for_energy);
 
   // Then set the mandatory field to create a new particle
   primary_particle->px_[global_id] = global_position.x;

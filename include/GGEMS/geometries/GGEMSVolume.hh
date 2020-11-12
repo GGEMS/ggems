@@ -32,6 +32,7 @@
 */
 
 #include "GGEMS/geometries/GGEMSVolumeCreatorManager.hh"
+#include "GGEMS/tools/GGEMSChrono.hh"
 
 /*!
   \class GGEMSVolume
@@ -118,6 +119,7 @@ class GGEMS_EXPORT GGEMSVolume
     GGfloat label_value_; /*!< Value of label in volume */
     GGfloat3 positions_; /*!< Position of volume */
     std::weak_ptr<cl::Kernel> kernel_draw_volume_cl_; /*!< Kernel drawing solid using OpenCL */
+    DurationNano kernel_draw_volume_timer_;
 };
 
 #endif // End of GUARD_GGEMS_GEOMETRIES_GGEMSVOLUME_HH

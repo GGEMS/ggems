@@ -159,16 +159,16 @@ class GGEMS_EXPORT GGEMSNavigator
     void ParticleSolidDistance(void) const;
 
     /*!
-      \fn void ParticleToNavigator(void) const
-      \brief Project particle to entry of navigator
+      \fn void ProjectToSolid(void) const
+      \brief Project particle to entry of closest solid
     */
-    void ParticleToNavigator(void) const;
+    void ProjectToSolid(void) const;
 
     /*!
-      \fn void ParticleThroughNavigator(void) const
-      \brief Move particle through navigator
+      \fn void TrackThroughSolid(void) const
+      \brief Move particle through solid
     */
-    void ParticleThroughNavigator(void) const;
+    void TrackThroughSolid(void) const;
 
     /*!
       \fn void PrintInfos(void) const
@@ -181,6 +181,27 @@ class GGEMS_EXPORT GGEMSNavigator
       \return no returned value
     */
     virtual void Initialize(void);
+
+    /*
+      \fn DurationNano GetAllKernelParticleSolidDistanceTimer(void) const
+      \return elapsed time in particle solid distance kernel in all solids
+      \brief get the elapsed time in particle solid distance kernel in all solids
+    */
+    DurationNano GetAllKernelParticleSolidDistanceTimer(void) const;
+
+    /*
+      \fn DurationNano GetAllKernelProjectToSolidTimer(void) const
+      \return elapsed time in kernel computing projection to closest solid
+      \brief get the elapsed time in kernel computing projection to closest solid
+    */
+    DurationNano GetAllKernelProjectToSolidTimer(void) const;
+
+    /*
+      \fn DurationNano GetAllKernelTrackThroughSolidTimer(void) const
+      \return elapsed time in kernel tracking particle inside solid
+      \brief get the elapsed time in kernel tracking particle inside solid
+    */
+    DurationNano GetAllKernelTrackThroughSolidTimer(void) const;
 
   protected:
     /*!

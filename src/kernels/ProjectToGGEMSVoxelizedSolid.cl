@@ -28,67 +28,85 @@
   \date Friday May 29, 2020
 */
 
-#include "GGEMS/physics/GGEMSPrimaryParticlesStack.hh"
-#include "GGEMS/geometries/GGEMSVoxelizedSolidStack.hh"
+#include "GGEMS/physics/GGEMSPrimaryParticles.hh"
+
+#include "GGEMS/geometries/GGEMSVoxelizedSolidData.hh"
 #include "GGEMS/geometries/GGEMSRayTracing.hh"
+
 #include "GGEMS/global/GGEMSConstants.hh"
+
 #include "GGEMS/maths/GGEMSMatrixOperations.hh"
 
 /*!
-  \fn __kernel void project_to_voxelized_solid(__global GGEMSPrimaryParticles* primary_particle, __global GGEMSVoxelizedSolidData* voxelized_solid_data)
+  \fn kernel void project_to_ggems_voxelized_solid(GGlong const particle_id_limit, global GGEMSPrimaryParticles* primary_particle, global GGEMSVoxelizedSolidData* voxelized_solid_data)
+  \param particle_id_limit - particle id limit
   \param primary_particle - pointer to primary particles on OpenCL memory
   \param voxelized_solid_data - pointer to voxelized solid data
   \brief OpenCL kernel moving particles to voxelized solid
   \return no returned value
 */
-__kernel void project_to_voxelized_solid(
-  __global GGEMSPrimaryParticles* primary_particle,
-  __global GGEMSVoxelizedSolidData const* voxelized_solid_data)
+kernel void project_to_ggems_voxelized_solid(
+  GGlong const particle_id_limit,
+  global GGEMSPrimaryParticles* primary_particle,
+  global GGEMSVoxelizedSolidData const* voxelized_solid_data)
 {
   // Getting index of thread
-  GGint const kParticleID = get_global_id(0);
+  GGint global_id = get_global_id(0);
+
+  // Return if index > to particle limit
+  if (global_id >= particle_id_limit) return;
+
+  // Checking if the current navigator is the selected navigator
+  if (primary_particle->solid_id_[global_id] != voxelized_solid_data->solid_id_) return;
 
   // Checking if distance to navigator is OUT_OF_WORLD after computation distance
   // If yes, the particle is OUT_OF_WORLD and DEAD, so no tracking
-  if (primary_particle->particle_navigator_distance_[kParticleID] == OUT_OF_WORLD) {
-    primary_particle->navigator_id_[kParticleID] = 255; // 255 is out_of_world, using for debugging
-    primary_particle->status_[kParticleID] = DEAD;
+  if (primary_particle->particle_solid_distance_[global_id] == OUT_OF_WORLD) {
+    primary_particle->solid_id_[global_id] = -1; // -1 is out_of_world, using for debugging
+    primary_particle->status_[global_id] = DEAD;
     return;
   }
 
   // Checking status of particle
-  if (primary_particle->status_[kParticleID] == DEAD) return;
-
-  // Checking if the current navigator is the selected navigator
-  if (primary_particle->navigator_id_[kParticleID] != voxelized_solid_data->navigator_id_) return;
+  if (primary_particle->status_[global_id] == DEAD) return;
 
   // Position of particle
-  GGfloat3 position;
-  position.x = primary_particle->px_[kParticleID];
-  position.y = primary_particle->py_[kParticleID];
-  position.z = primary_particle->pz_[kParticleID];
+  GGfloat3 position = {
+    primary_particle->px_[global_id],
+    primary_particle->py_[global_id],
+    primary_particle->pz_[global_id]
+  };
 
   // Direction of particle
-  GGfloat3 direction;
-  direction.x = primary_particle->dx_[kParticleID];
-  direction.y = primary_particle->dy_[kParticleID];
-  direction.z = primary_particle->dz_[kParticleID];
+  GGfloat3 direction = {
+    primary_particle->dx_[global_id],
+    primary_particle->dy_[global_id],
+    primary_particle->dz_[global_id]
+  };
 
   // Distance to current navigator and geometry tolerance
-  GGfloat const kDistance = primary_particle->particle_navigator_distance_[kParticleID];
+  GGfloat distance = primary_particle->particle_solid_distance_[global_id];
 
   // Moving the particle slightly inside the volume
-  position = GGfloat3Add(position, GGfloat3Scale(direction, kDistance + GEOMETRY_TOLERANCE));
+  position += direction*(distance+GEOMETRY_TOLERANCE);
 
   // Correcting the particle position if not totally inside due to float tolerance
-  TransportGetSafetyInsideVoxelizedNavigator(&position, voxelized_solid_data);
+  TransportGetSafetyInsideOBB(&position, &voxelized_solid_data->obb_geometry_);
 
   // Set new value for particles
-  primary_particle->px_[kParticleID] = position.x;
-  primary_particle->py_[kParticleID] = position.y;
-  primary_particle->pz_[kParticleID] = position.z;
+  primary_particle->px_[global_id] = position.x;
+  primary_particle->py_[global_id] = position.y;
+  primary_particle->pz_[global_id] = position.z;
 
-  //primary_particle->geometry_id_[kParticleID] = 0;
-  primary_particle->tof_[kParticleID] += kDistance * C_LIGHT; // True only for photons !!!
-  primary_particle->particle_navigator_distance_[kParticleID] = 0.0f;
+  primary_particle->tof_[global_id] += distance * C_LIGHT; // True only for photons
+  primary_particle->particle_solid_distance_[global_id] = 0.0f;
+
+  #ifdef GGEMS_TRACKING
+  if (global_id == primary_particle->particle_tracking_id) {
+    printf("[GGEMS OpenCL kernel project_to_ggems_voxelized_solid] ################################################################################\n");
+    printf("[GGEMS OpenCL kernel project_to_ggems_voxelized_solid] Project to closest solid\n");
+    printf("[GGEMS OpenCL kernel project_to_ggems_voxelized_solid] Particle id: %d\n", global_id);
+    printf("[GGEMS OpenCL kernel project_to_ggems_voxelized_solid] Position (x, y, z): %e %e %e mm\n", position.x/mm, position.y/mm, position.z/mm);
+  }
+  #endif
 }

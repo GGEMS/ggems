@@ -20,7 +20,7 @@ from ggems import *
 
 # ------------------------------------------------------------------------------
 # STEP 0: Level of verbosity during computation
-GGEMSVerbosity(0)
+GGEMSVerbosity(3)
 
 # ------------------------------------------------------------------------------
 # STEP 1: Choosing an OpenCL context
@@ -88,8 +88,8 @@ ggems_manager.memory_verbose(True)
 ggems_manager.process_verbose(True)
 ggems_manager.range_cuts_verbose(True)
 ggems_manager.random_verbose(True)
-ggems_manager.kernel_verbose(False)
-ggems_manager.tracking_verbose(False, 0) # Track a specific particle a utiliser avec le singleton de façon plus efficace!!!
+ggems_manager.kernel_verbose(True)
+ggems_manager.tracking_verbose(True, 0) # Track a specific particle a utiliser avec le singleton de façon plus efficace!!!
 
 # # Initializing the GGEMS simulation
 ggems_manager.initialize()

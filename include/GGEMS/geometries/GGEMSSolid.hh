@@ -105,18 +105,18 @@ class GGEMS_EXPORT GGEMSSolid
     void ParticleSolidDistance(void);
 
     /*!
-      \fn void ProjectTo(void)
-      \brief Move particles at an entry of solid
+      \fn void ProjectToSolid(void)
+      \brief Projector particles to entry of solid
     */
-    void ProjectTo(void);
+    void ProjectToSolid(void);
 
     /*!
-      \fn void TrackThrough(std::weak_ptr<GGEMSCrossSections> cross_sections, std::weak_ptr<GGEMSMaterials> materials)
+      \fn void TrackThroughSolid(std::weak_ptr<GGEMSCrossSections> cross_sections, std::weak_ptr<GGEMSMaterials> materials)
       \param cross_sections - pointer storing cross sections values
       \param materials - pointer storing materials values
       \brief Track particles through solid
     */
-    void TrackThrough(std::weak_ptr<GGEMSCrossSections> cross_sections, std::weak_ptr<GGEMSMaterials> materials);
+    void TrackThroughSolid(std::weak_ptr<GGEMSCrossSections> cross_sections, std::weak_ptr<GGEMSMaterials> materials);
 
     /*!
       \fn void SetRotation(GGfloat3 const& rotation_xyz)
@@ -159,6 +159,27 @@ class GGEMS_EXPORT GGEMSSolid
     */
     virtual void PrintInfos(void) const = 0;
 
+    /*
+      \fn inline DurationNano GetKernelParticleSolidDistanceTimer(void) const
+      \return elapsed time in particle solid distance kernel
+      \brief get the elapsed time in particle solid distance kernel
+    */
+    inline DurationNano GetKernelParticleSolidDistanceTimer(void) const {return kernel_particle_solid_distance_timer_;}
+
+    /*
+      \fn inline DurationNano GetKernelProjectToSolidTimer(void) const
+      \return elapsed time in kernel computing projection to closest solid
+      \brief get the elapsed time in kernel computing projection to closest solid
+    */
+    inline DurationNano GetKernelProjectToSolidTimer(void) const {return kernel_project_to_solid_timer_;}
+
+    /*
+      \fn inline DurationNano GetKernelTrackThroughSolidTimer(void) const
+      \return elapsed time in kernel tracking particle through closest solid
+      \brief get the elapsed time in kernel tracking particle through closest solid
+    */
+    inline DurationNano GetKernelTrackThroughSolidTimer(void) const {return kernel_track_through_solid_timer_;}
+
   protected:
     /*!
       \fn void InitializeKernel(void)
@@ -169,10 +190,18 @@ class GGEMS_EXPORT GGEMSSolid
   protected:
     std::shared_ptr<cl::Buffer> solid_data_cl_; /*!< Data about solid */
     std::shared_ptr<cl::Buffer> label_data_cl_; /*!< Pointer storing the buffer about label data, useful for voxelized solid only */
-    std::weak_ptr<cl::Kernel> kernel_distance_cl_; /*!< OpenCL kernel computing distance between particles and solid */
-    std::weak_ptr<cl::Kernel> kernel_project_to_cl_; /*!< OpenCL kernel moving particles to solid */
-    std::weak_ptr<cl::Kernel> kernel_track_through_cl_; /*!< OpenCL kernel tracking particles through a solid */
+
+    std::weak_ptr<cl::Kernel> kernel_particle_solid_distance_cl_; /*!< OpenCL kernel computing distance between particles and solid */
+    DurationNano kernel_particle_solid_distance_timer_; /*!< Timer for kernel computing particle solid distance */
+
+    std::weak_ptr<cl::Kernel> kernel_project_to_solid_cl_; /*!< OpenCL kernel moving particles to solid */
+    DurationNano kernel_project_to_solid_timer_; /*!< Timer for kernel computing projection to closest solid */
+
+    std::weak_ptr<cl::Kernel> kernel_track_through_solid_cl_; /*!< OpenCL kernel tracking particles through a solid */
+    DurationNano kernel_track_through_solid_timer_; /*!< Timer for kernel computing tracking through closest solid */
+
     std::string tracking_kernel_option_; /*!< Preprocessor option for tracking */
+
     std::unique_ptr<GGEMSGeometryTransformation> geometry_transformation_; /*!< Pointer storing the geometry transformation */
 
     std::shared_ptr<cl::Buffer> test_cl_;
