@@ -46,14 +46,14 @@
   \return a vector 3x1
   \brief Compute the multiplication of matrix 4x4 and a point 3x1
 */
-inline GGfloat3 GGfloat44MultGGfloat3(GGfloat44* matrix, GGfloat3 const* point)
+inline GGfloat3 GGfloat44MultGGfloat3(GGfloat44 const* matrix, GGfloat3 const* point)
 {
   GGfloat4 point4D = {point->x, point->y, point->z, 1.0f};
   GGfloat4 row0 = {matrix->m0_[0], matrix->m0_[1], matrix->m0_[2], matrix->m0_[3]};
   GGfloat4 row1 = {matrix->m1_[0], matrix->m1_[1], matrix->m1_[2], matrix->m1_[3]};
   GGfloat4 row2 = {matrix->m2_[0], matrix->m2_[1], matrix->m2_[2], matrix->m2_[3]};
 
-  #ifdef __OPENCL_C_VERSION
+  #ifdef __OPENCL_C_VERSION__
   GGfloat3 vector = {
     dot(row0, point4D),
     dot(row1, point4D),
@@ -88,7 +88,7 @@ inline GGfloat3 GGfloat33MultGGfloat3(GGfloat33 const* matrix, GGfloat3 const* p
   GGfloat3 row1 = {matrix->m1_[0], matrix->m1_[1], matrix->m1_[2]};
   GGfloat3 row2 = {matrix->m2_[0], matrix->m2_[1], matrix->m2_[2]};
 
-  #ifdef __OPENCL_C_VERSION
+  #ifdef __OPENCL_C_VERSION__
   GGfloat3 vector = {
     dot(row0, point3D),
     dot(row1, point3D),

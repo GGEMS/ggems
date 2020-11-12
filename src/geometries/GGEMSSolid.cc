@@ -47,7 +47,10 @@
 GGEMSSolid::GGEMSSolid(void)
 : solid_data_cl_(nullptr),
   label_data_cl_(nullptr),
-  tracking_kernel_option_("")
+  tracking_kernel_option_(""),
+  kernel_particle_solid_distance_timer_(GGEMSChrono::Zero()),
+  kernel_project_to_solid_timer_(GGEMSChrono::Zero()),
+  kernel_track_through_solid_timer_(GGEMSChrono::Zero())
 {
   GGcout("GGEMSSolid", "GGEMSSolid", 3) << "Allocation of GGEMSSolid..." << GGendl;
 
@@ -108,10 +111,10 @@ void GGEMSSolid::ParticleSolidDistance(void)
   cl::Buffer* primary_particles_cl = particles->GetPrimaryParticles();
 
   // Getting the number of particles
-  GGlong number_of_particles = static_cast<GGint>(particles->GetNumberOfParticles());
+  GGlong number_of_particles = particles->GetNumberOfParticles();
 
   // Set parameters for kernel
-  std::shared_ptr<cl::Kernel> kernel_cl = kernel_distance_cl_.lock();
+  std::shared_ptr<cl::Kernel> kernel_cl = kernel_particle_solid_distance_cl_.lock();
   kernel_cl->setArg(0, number_of_particles);
   kernel_cl->setArg(1, *primary_particles_cl);
   kernel_cl->setArg(2, *solid_data_cl_);
@@ -131,17 +134,15 @@ void GGEMSSolid::ParticleSolidDistance(void)
   opencl_manager.CheckOpenCLError(kernel_status, "GGEMSSolid", "ParticleSolidDistance");
   queue_cl->finish(); // Wait until the kernel status is finish
 
-  // Checking if kernel verbosity is activated
-  if (GGEMSManager::GetInstance().IsKernelVerbose()) {
-    opencl_manager.DisplayElapsedTimeInKernel("particle_solid_distance");
-  }
+  // Storing elapsed time in kernel
+  kernel_particle_solid_distance_timer_ += opencl_manager.GetElapsedTimeInKernel();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSSolid::ProjectTo(void)
+void GGEMSSolid::ProjectToSolid(void)
 {
   // Getting the OpenCL manager
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
@@ -154,28 +155,38 @@ void GGEMSSolid::ProjectTo(void)
   cl::Buffer* primary_particles_cl = particles->GetPrimaryParticles();
 
   // Getting the number of particles
-  GGulong const kNumberOfParticles = particles->GetNumberOfParticles();
+  GGlong number_of_particles = particles->GetNumberOfParticles();
 
-  // Set parameters for kernel
-  std::shared_ptr<cl::Kernel> kernel_cl = kernel_project_to_cl_.lock();
-  kernel_cl->setArg(0, *primary_particles_cl);
-  kernel_cl->setArg(1, *solid_data_cl_);
+  // // Set parameters for kernel
+  std::shared_ptr<cl::Kernel> kernel_cl = kernel_project_to_solid_cl_.lock();
+  kernel_cl->setArg(0, number_of_particles);
+  kernel_cl->setArg(1, *primary_particles_cl);
+  kernel_cl->setArg(2, *solid_data_cl_);
 
-  // Define the number of work-item to launch
-  cl::NDRange global_wi(kNumberOfParticles);
+  // Get number of max work group size
+  std::size_t max_work_group_size = opencl_manager.GetMaxWorkGroupSize();
+
+  // Compute work item number
+  std::size_t number_of_work_items = number_of_particles + (max_work_group_size - number_of_particles%max_work_group_size);
+
+  cl::NDRange global_wi(number_of_work_items);
   cl::NDRange offset_wi(0);
+  cl::NDRange local_wi(max_work_group_size);
 
   // Launching kernel
-  GGint kernel_status = queue_cl->enqueueNDRangeKernel(*kernel_cl, offset_wi, global_wi, cl::NullRange, nullptr, event_cl);
-  opencl_manager.CheckOpenCLError(kernel_status, "GGEMSSolid", "ProjectTo");
+  GGint kernel_status = queue_cl->enqueueNDRangeKernel(*kernel_cl, offset_wi, global_wi, local_wi, nullptr, event_cl);
+  opencl_manager.CheckOpenCLError(kernel_status, "GGEMSSolid", "ProjectToSolid");
   queue_cl->finish(); // Wait until the kernel status is finish
+
+  // Storing elapsed time in kernel
+  kernel_project_to_solid_timer_ += opencl_manager.GetElapsedTimeInKernel();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSSolid::TrackThrough(std::weak_ptr<GGEMSCrossSections> cross_sections, std::weak_ptr<GGEMSMaterials> materials)
+void GGEMSSolid::TrackThroughSolid(std::weak_ptr<GGEMSCrossSections> cross_sections, std::weak_ptr<GGEMSMaterials> materials)
 {
   // Getting the OpenCL manager
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
@@ -195,23 +206,33 @@ void GGEMSSolid::TrackThrough(std::weak_ptr<GGEMSCrossSections> cross_sections, 
   cl::Buffer* materials_cl = materials.lock()->GetMaterialTables().lock().get();
 
   // Getting the number of particles
-  GGulong const kNumberOfParticles = particles->GetNumberOfParticles();
+  GGlong number_of_particles = particles->GetNumberOfParticles();
 
-  // Set parameters for kernel
-  std::shared_ptr<cl::Kernel> kernel_cl = kernel_track_through_cl_.lock();
-  kernel_cl->setArg(0, *primary_particles_cl);
-  kernel_cl->setArg(1, *randoms_cl);
-  kernel_cl->setArg(2, *solid_data_cl_);
-  kernel_cl->setArg(3, *label_data_cl_);
-  kernel_cl->setArg(4, *cross_sections_cl);
-  kernel_cl->setArg(5, *materials_cl);
+  // // Set parameters for kernel
+  std::shared_ptr<cl::Kernel> kernel_cl = kernel_track_through_solid_cl_.lock();
+  kernel_cl->setArg(0, number_of_particles);
+  kernel_cl->setArg(1, *primary_particles_cl);
+  kernel_cl->setArg(2, *randoms_cl);
+  kernel_cl->setArg(3, *solid_data_cl_);
+  kernel_cl->setArg(4, *label_data_cl_);
+  kernel_cl->setArg(5, *cross_sections_cl);
+  kernel_cl->setArg(6, *materials_cl);
 
-  // Define the number of work-item to launch
-  cl::NDRange global_wi(kNumberOfParticles);
+  // Get number of max work group size
+  std::size_t max_work_group_size = opencl_manager.GetMaxWorkGroupSize();
+
+  // Compute work item number
+  std::size_t number_of_work_items = number_of_particles + (max_work_group_size - number_of_particles%max_work_group_size);
+
+  cl::NDRange global_wi(number_of_work_items);
   cl::NDRange offset_wi(0);
+  cl::NDRange local_wi(max_work_group_size);
 
   // Launching kernel
-  GGint kernel_status = queue_cl->enqueueNDRangeKernel(*kernel_cl, offset_wi, global_wi, cl::NullRange, nullptr, event_cl);
-  opencl_manager.CheckOpenCLError(kernel_status, "GGEMSSolid", "TrackThrough");
+  GGint kernel_status = queue_cl->enqueueNDRangeKernel(*kernel_cl, offset_wi, global_wi, local_wi, nullptr, event_cl);
+  opencl_manager.CheckOpenCLError(kernel_status, "GGEMSSolid", "TrackThroughSolid");
   queue_cl->finish(); // Wait until the kernel status is finish
+
+  // Storing elapsed time in kernel
+  kernel_track_through_solid_timer_ += opencl_manager.GetElapsedTimeInKernel();
 }

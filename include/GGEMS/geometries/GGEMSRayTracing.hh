@@ -57,52 +57,63 @@
   \param tolerance - tolerance for geometry
   \brief Get a safety position inside an AABB geometry
 */
-// inline void TransportGetSafetyInsideAABB(GGfloat3 const* position, GGfloat const xmin, GGfloat const xmax, GGfloat const ymin, GGfloat const ymax, GGfloat const zmin, GGfloat const zmax, GGfloat const tolerance)
-// {
-//   // on x
-//   GGfloat SafXmin = fabs(position->x - xmin);
-//   GGfloat SafXmax = fabs(position->x - xmax);
+inline void TransportGetSafetyInsideAABB(GGfloat3 const* position, GGfloat const xmin, GGfloat const xmax, GGfloat const ymin, GGfloat const ymax, GGfloat const zmin, GGfloat const zmax, GGfloat const tolerance)
+{
+  // on x
+  GGfloat SafXmin = fabs(position->x - xmin);
+  GGfloat SafXmax = fabs(position->x - xmax);
 
-//   position->x = (SafXmin < tolerance) ? xmin + tolerance : position->x;
-//   position->x = (SafXmax < tolerance) ? xmax - tolerance : position->x;
+  position->x = (SafXmin < tolerance) ? xmin + tolerance : position->x;
+  position->x = (SafXmax < tolerance) ? xmax - tolerance : position->x;
 
-//   // on y
-//   GGfloat SafYmin = fabs(position->y - ymin);
-//   GGfloat SafYmax = fabs(position->y - ymax);
+  // on y
+  GGfloat SafYmin = fabs(position->y - ymin);
+  GGfloat SafYmax = fabs(position->y - ymax);
 
-//   position->y = (SafYmin < tolerance) ? ymin + tolerance : position->y;
-//   position->y = (SafYmax < tolerance) ? ymax - tolerance : position->y;
+  position->y = (SafYmin < tolerance) ? ymin + tolerance : position->y;
+  position->y = (SafYmax < tolerance) ? ymax - tolerance : position->y;
 
-//   // on z
-//   GGfloat SafZmin = fabs(position->z - zmin);
-//   GGfloat SafZmax = fabs(position->z - zmax);
+  // on z
+  GGfloat SafZmin = fabs(position->z - zmin);
+  GGfloat SafZmax = fabs(position->z - zmax);
 
-//   position->z = (SafZmin < tolerance) ? zmin + tolerance : position->z;
-//   position->z = (SafZmax < tolerance) ? zmax - tolerance : position->z;
-// }
+  position->z = (SafZmin < tolerance) ? zmin + tolerance : position->z;
+  position->z = (SafZmax < tolerance) ? zmax - tolerance : position->z;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
 /*!
-  \fn inline void TransportGetSafetyInsideVoxelizedNavigator(GGfloat3 const* position, __global GGEMSVoxelizedSolidData* voxelized_solid_data)
+  \fn inline void TransportGetSafetyInsideOBB(GGfloat3 const* position, global GGEMSOBB* obb_data)
   \param position - pointer on primary particle position
-  \param voxelized_solid_data - voxelized data infos
-  \brief Moving particle slightly inside a voxelized navigator
+  \param obb_data - OBB data infos
+  \brief Moving particle slightly inside a OBB solid
 */
-// inline void TransportGetSafetyInsideVoxelizedNavigator(GGfloat3 const* position, __global GGEMSVoxelizedSolidData* voxelized_solid_data)
-// {
-//   // Borders of voxelized solid
-//   GGfloat x_min = voxelized_solid_data->border_min_xyz_.x;
-//   GGfloat x_max = voxelized_solid_data->border_max_xyz_.x;
-//   GGfloat y_min = voxelized_solid_data->border_min_xyz_.y;
-//   GGfloat y_max = voxelized_solid_data->border_max_xyz_.y;
-//   GGfloat z_min = voxelized_solid_data->border_min_xyz_.z;
-//   GGfloat z_max = voxelized_solid_data->border_max_xyz_.z;
+inline void TransportGetSafetyInsideOBB(GGfloat3 const* position, global GGEMSOBB* obb_data)
+{
+  // Copy matrix transformation to private memory
+  GGfloat44 tmp_matrix_transformation = {
+    {obb_data->matrix_transformation_.m0_[0], obb_data->matrix_transformation_.m0_[1], obb_data->matrix_transformation_.m0_[2], obb_data->matrix_transformation_.m0_[3]},
+    {obb_data->matrix_transformation_.m1_[0], obb_data->matrix_transformation_.m1_[1], obb_data->matrix_transformation_.m1_[2], obb_data->matrix_transformation_.m1_[3]},
+    {obb_data->matrix_transformation_.m2_[0], obb_data->matrix_transformation_.m2_[1], obb_data->matrix_transformation_.m2_[2], obb_data->matrix_transformation_.m2_[3]},
+    {obb_data->matrix_transformation_.m3_[0], obb_data->matrix_transformation_.m3_[1], obb_data->matrix_transformation_.m3_[2], obb_data->matrix_transformation_.m3_[3]}
+  };
 
-//   TransportGetSafetyInsideAABB(position, x_min, x_max, y_min, y_max, z_min, z_max, GEOMETRY_TOLERANCE);
-// }
+  // Get the position in local position
+  GGfloat3 local_position = GlobalToLocalPosition(&tmp_matrix_transformation, position);
+
+  // Borders of 0BB
+  GGfloat x_min = obb_data->border_min_xyz_[0];
+  GGfloat x_max = obb_data->border_max_xyz_[0];
+  GGfloat y_min = obb_data->border_min_xyz_[1];
+  GGfloat y_max = obb_data->border_max_xyz_[1];
+  GGfloat z_min = obb_data->border_min_xyz_[2];
+  GGfloat z_max = obb_data->border_max_xyz_[2];
+
+  TransportGetSafetyInsideAABB(&local_position, x_min, x_max, y_min, y_max, z_min, z_max, GEOMETRY_TOLERANCE);
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -173,13 +184,13 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 /*!
-  \fn inline GGuchar IsParticleInOBB(GGfloat3 const* position, __global GGEMSOBB* obb_data)
+  \fn inline GGuchar IsParticleInOBB(GGfloat3 const* position, global GGEMSOBB* obb_data)
   \param position - pointer on primary particle
   \param obb_data - OBB data infos
   \return false if particle outside OBB object, and true if particle inside OBB object
   \brief Check if particle is inside or outside OBB object
 */
-inline GGuchar IsParticleInOBB(GGfloat3 const* position, __global GGEMSOBB* obb_data)
+inline GGuchar IsParticleInOBB(GGfloat3 const* position, global GGEMSOBB* obb_data)
 {
   // Copy matrix transformation to private memory
   GGfloat44 tmp_matrix_transformation = {
@@ -232,14 +243,14 @@ inline GGfloat ComputeDistanceToAABB(GGfloat3 const* position, GGfloat3 const* d
   GGfloat tzmax = 0.0f;
 
   // Getting positions
-  GGfloat const pos_x = position->x;
-  GGfloat const pos_y = position->y;
-  GGfloat const pos_z = position->z;
+  GGfloat pos_x = position->x;
+  GGfloat pos_y = position->y;
+  GGfloat pos_z = position->z;
 
   // Getting directions
-  GGfloat const dir_x = direction->x;
-  GGfloat const dir_y = direction->y;
-  GGfloat const dir_z = direction->z;
+  GGfloat dir_x = direction->x;
+  GGfloat dir_y = direction->y;
+  GGfloat dir_z = direction->z;
 
   // On X axis
   if (fabs(dir_x) < EPSILON6) {
@@ -308,14 +319,14 @@ inline GGfloat ComputeDistanceToAABB(GGfloat3 const* position, GGfloat3 const* d
 ////////////////////////////////////////////////////////////////////////////////
 
 /*!
-  \fn inline GGfloat ComputeDistanceToOBB(GGfloat3 const* position, GGfloat3 const* direction, __global GGEMSOBB* obb_data)
+  \fn inline GGfloat ComputeDistanceToOBB(GGfloat3 const* position, GGfloat3 const* direction, global GGEMSOBB const* obb_data)
   \param position - pointer on position of primary particle
   \param direction - pointer on direction of primary particle
   \param obb_data - OBB data infos
   \return distance to OBB solid
   \brief Compute the distance between particle and OBB using Smits algorithm
 */
-inline GGfloat ComputeDistanceToOBB(GGfloat3 const* position, GGfloat3 const* direction, __global GGEMSOBB* obb_data)
+inline GGfloat ComputeDistanceToOBB(GGfloat3 const* position, GGfloat3 const* direction, global GGEMSOBB const* obb_data)
 {
   // Copy matrix transformation to private memory
   GGfloat44 tmp_matrix_transformation = {

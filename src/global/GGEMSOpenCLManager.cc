@@ -34,7 +34,6 @@
 #include "GGEMS/global/GGEMSOpenCLManager.hh"
 #include "GGEMS/tools/GGEMSRAMManager.hh"
 #include "GGEMS/tools/GGEMSTools.hh"
-#include "GGEMS/tools/GGEMSChrono.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -602,7 +601,7 @@ std::weak_ptr<cl::Kernel> GGEMSOpenCLManager::CompileKernel(std::string const& k
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSOpenCLManager::DisplayElapsedTimeInKernel(std::string const& kernel_name) const
+DurationNano GGEMSOpenCLManager::GetElapsedTimeInKernel(void) const
 {
   // Get the start and end of the activated event
   GGulong start = 0, end = 0;
@@ -613,10 +612,7 @@ void GGEMSOpenCLManager::DisplayElapsedTimeInKernel(std::string const& kernel_na
   // End
   CheckOpenCLError(event_act_cl_.get()->getProfilingInfo(CL_PROFILING_COMMAND_END, &end), "GGEMSOpenCLManager", "DisplayElapsedTimeInKernel");
 
-  DurationNano duration = static_cast<std::chrono::nanoseconds>((end-start));
-
-  // Display time in kernel
-  GGEMSChrono::DisplayTime(duration, kernel_name);
+  return static_cast<std::chrono::nanoseconds>((end-start));
 }
 
 ////////////////////////////////////////////////////////////////////////////////

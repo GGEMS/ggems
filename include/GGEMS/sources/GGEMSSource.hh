@@ -145,6 +145,13 @@ class GGEMS_EXPORT GGEMSSource
     inline GGlong GetNumberOfParticlesInBatch(std::size_t const& batch_index) {return number_of_particles_in_batch_.at(batch_index);}
 
     /*!
+      \fn inline DurationNano GetKernelGetPrimariesTimer(void) const
+      \return the elapsed time in kernel
+      \brief Get the elapsed time in kernel for particle generation
+    */
+    inline DurationNano GetKernelGetPrimariesTimer(void) const {return kernel_get_primaries_timer_;}
+
+    /*!
       \fn void CheckParameters(void) const
       \brief Check mandatory parameters for a source
     */
@@ -190,7 +197,9 @@ class GGEMS_EXPORT GGEMSSource
     GGchar particle_type_; /*!< Type of particle: photon, electron or positron */
     std::string tracking_kernel_option_; /*!< Preprocessor option for tracking */
     std::unique_ptr<GGEMSGeometryTransformation> geometry_transformation_; /*!< Pointer storing the geometry transformation */
+
     std::weak_ptr<cl::Kernel> kernel_get_primaries_cl_; /*!< Kernel generating primaries on OpenCL device */
+    DurationNano kernel_get_primaries_timer_; /*!< Timer for particle generation */
 };
 
 #endif // End of GUARD_GGEMS_SOURCES_GGEMSSOURCE_HH

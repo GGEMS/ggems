@@ -40,6 +40,7 @@
 #include <vector>
 
 #include "GGEMS/global/GGEMSExport.hh"
+
 #include "GGEMS/tools/GGEMSTypes.hh"
 
 /*!

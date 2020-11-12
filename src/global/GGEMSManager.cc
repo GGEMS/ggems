@@ -324,22 +324,17 @@ void GGEMSManager::Run()
 {
   GGcout("GGEMSManager", "Run", 0) << "GGEMS simulation started" << GGendl;
 
-  // Get singletons
   GGEMSSourceManager& source_manager = GGEMSSourceManager::GetInstance();
   GGEMSNavigatorManager& navigator_manager = GGEMSNavigatorManager::GetInstance();
 
-  // Get the start time
   ChronoTime start_time = GGEMSChrono::Now();
 
-  // Loop over the number of sources
   for (std::size_t j = 0; j < source_manager.GetNumberOfSources(); ++j) {
     GGcout("GGEMSManager", "Run", 0) << "## Source " << source_manager.GetNameOfSource(j) << GGendl;
 
-    // Loop over the number of batch for each sources
     for (std::size_t i = 0; i < source_manager.GetNumberOfBatchs(j); ++i) {
       GGcout("GGEMSManager", "Run", 1) << "----> Launching batch " << i+1 << "/" << source_manager.GetNumberOfBatchs(j) << GGendl;
 
-      // Getting the number of particles
       GGlong number_of_particles = source_manager.GetNumberOfParticlesInBatch(j, i);
 
       // Step 1: Generating primaries from source
@@ -349,27 +344,31 @@ void GGEMSManager::Run()
       // Loop until ALL particles are dead
      // do {
         // Step 2: Find closest navigator (phantom and detector) before track to in operation
-        GGcout("GGEMSManager", "Run", 1) << "      + Finding closest navigator..." << GGendl;
+        GGcout("GGEMSManager", "Run", 1) << "      + Finding closest solid..." << GGendl;
         navigator_manager.FindClosestSolid();
 
-        // Step 3: Track to in step, particles are projected to navigator
-     //   GGcout("GGEMSManager", "Run", 1) << "      + Moving particles to closest navigator..." << GGendl;
-    //    navigator_manager.TrackToIn();
+        // Step 3: Project particles to closest solid
+        GGcout("GGEMSManager", "Run", 1) << "      + Project particles to closest solid..." << GGendl;
+        navigator_manager.ProjectToClosestSolid();
 
         // Step 4: Track to out step, particles are tracked in navigator
-      //  GGcout("GGEMSManager", "Run", 1) << "      + Tracking particles in navigator..." << GGendl;
-     //   navigator_manager.TrackToOut();
+        GGcout("GGEMSManager", "Run", 1) << "      + Tracking particles through closest solid..." << GGendl;
+        navigator_manager.TrackThroughClosestSolid();
 
      // } while (source_manager.IsAlive()); // Step 5: Checking if all particles are dead, otherwize go back to step 2
     }
   }
 
-  // Get the end time
+  // Printing elapsed time in kernels
+  if (is_kernel_verbose_) {
+    source_manager.PrintKernelElapsedTime();
+    navigator_manager.PrintKernelElapsedTime();
+  }
+
   ChronoTime end_time = GGEMSChrono::Now();
 
   GGcout("GGEMSManager", "Run", 0) << "GGEMS simulation succeeded" << GGendl;
 
-  // Display the elapsed time in GGEMS
   GGEMSChrono::DisplayTime(end_time - start_time, "GGEMS simulation");
 }
 

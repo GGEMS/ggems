@@ -111,7 +111,7 @@ inline GGfloat3 GlobalToLocalPosition(GGfloat44 const* matrix, GGfloat3 const* p
  \return The point expresses in the global frame
  \brief Transform a 3D point from local to global frame
 */
-inline GGfloat3 LocalToGlobalPosition(GGfloat44* matrix, GGfloat3 const* point)
+inline GGfloat3 LocalToGlobalPosition(GGfloat44 const* matrix, GGfloat3 const* point)
 {
   return GGfloat44MultGGfloat3(matrix, point);
 }

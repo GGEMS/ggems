@@ -144,10 +144,13 @@ void GGEMSXRaySource::GetPrimaries(GGlong const& number_of_particles)
   opencl_manager.CheckOpenCLError(kernel_status, "GGEMSXRaySource", "GetPrimaries");
   queue_cl->finish(); // Wait until the kernel status is finish
 
-  // Checking if kernel verbosity is activated
-  if (GGEMSManager::GetInstance().IsKernelVerbose()) {
-    opencl_manager.DisplayElapsedTimeInKernel("get_primaries_ggems_xray_source");
-  }
+  // Storing elapsed time in kernel
+  kernel_get_primaries_timer_ += opencl_manager.GetElapsedTimeInKernel();
+
+  // // Checking if kernel verbosity is activated
+  // if (GGEMSManager::GetInstance().IsKernelVerbose()) {
+  //   opencl_manager.DisplayElapsedTimeInKernel("get_primaries_ggems_xray_source");
+  // }
 }
 
 ////////////////////////////////////////////////////////////////////////////////

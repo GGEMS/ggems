@@ -45,6 +45,7 @@
 #endif
 
 #include "GGEMS/tools/GGEMSPrint.hh"
+#include "GGEMS/tools/GGEMSChrono.hh"
 
 /*!
   \class GGEMSOpenCLManager
@@ -260,12 +261,12 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     template <typename T>
     void ReleaseDeviceBuffer(cl::Buffer* const device_ptr, T* host_ptr) const;
 
-    /*!
-      \fn void DisplayElapsedTimeInKernel(std::string const& kernel_name) const
-      \param kernel_name - name of the kernel for time displaying
-      \brief Compute and display elapsed time in kernel for an activated context
+    /*
+      \fn DurationNano GetElapsedTimeInKernel(void) const
+      \return elapsed time in kernel
+      \brief Get the elapsed time in the last used kernel
     */
-    void DisplayElapsedTimeInKernel(std::string const& kernel_name) const;
+    DurationNano GetElapsedTimeInKernel(void) const;
 
     /*!
       \fn void CheckOpenCLError(GGint const& error, std::string const& class_name, std::string const& method_name) const

@@ -41,7 +41,7 @@
   \param voxelized_phantom - buffer storing voxelized phantom
   \brief Draw sphere solid in voxelized image
 */
-__kernel void draw_ggems_sphere(
+kernel void draw_ggems_sphere(
   GGint const voxel_id_limit,
   GGfloat3 const element_sizes,
   GGint3 const phantom_dimensions,
@@ -49,19 +49,19 @@ __kernel void draw_ggems_sphere(
   GGfloat const label_value,
   GGfloat const radius,
   #ifdef MET_CHAR
-  __global GGchar* voxelized_phantom
+  global GGchar* voxelized_phantom
   #elif MET_UCHAR
-  __global GGuchar* voxelized_phantom
+  global GGuchar* voxelized_phantom
   #elif MET_SHORT
-  __global GGshort* voxelized_phantom
+  global GGshort* voxelized_phantom
   #elif MET_USHORT
-  __global GGushort* voxelized_phantom
+  global GGushort* voxelized_phantom
   #elif MET_INT
-  __global GGint* voxelized_phantom
+  global GGint* voxelized_phantom
   #elif MET_UINT
-  __global GGuint* voxelized_phantom
+  global GGuint* voxelized_phantom
   #elif MET_FLOAT
-  __global GGfloat* voxelized_phantom
+  global GGfloat* voxelized_phantom
   #else
   #warning "Type Unknown, please specified a type by compiling!!!"
   #endif

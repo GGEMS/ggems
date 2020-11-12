@@ -148,7 +148,6 @@ void GGEMSNavigatorManager::PrintInfos(void) const
   GGcout("GGEMSNavigatorManager", "PrintInfos", 0) << "Printing infos about phantom navigators" << GGendl;
   GGcout("GGEMSNavigatorManager", "PrintInfos", 0) << "Number of navigator(s): " << navigators_.size() << GGendl;
 
-  // Printing infos about each navigator
   for (auto&&i : navigators_) i->PrintInfos();
 }
 
@@ -158,7 +157,6 @@ void GGEMSNavigatorManager::PrintInfos(void) const
 
 void GGEMSNavigatorManager::FindClosestSolid(void) const
 {
-  // Loop over all declared navigators and compute distance particle / solid
   for (auto&& i : navigators_) i->ParticleSolidDistance();
 }
 
@@ -166,18 +164,35 @@ void GGEMSNavigatorManager::FindClosestSolid(void) const
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSNavigatorManager::TrackToIn(void) const
+void GGEMSNavigatorManager::ProjectToClosestSolid(void) const
 {
-  // Loop over all navigators and project particles
-  for (auto&& i : navigators_) i->ParticleToNavigator();
+  for (auto&& i : navigators_) i->ProjectToSolid();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSNavigatorManager::TrackToOut(void) const
+void GGEMSNavigatorManager::TrackThroughClosestSolid(void) const
 {
-  // Loop over all navigators and track particles
-  for (auto&& i : navigators_) i->ParticleThroughNavigator();
+  for (auto&& i : navigators_) i->TrackThroughSolid();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSNavigatorManager::PrintKernelElapsedTime(void) const
+{
+  DurationNano total_duration = GGEMSChrono::Zero();
+  for (auto&& i : navigators_) total_duration += i->GetAllKernelParticleSolidDistanceTimer();
+  GGEMSChrono::DisplayTime(total_duration, "Particle Solid Distance");
+
+  total_duration = GGEMSChrono::Zero();
+  for (auto&& i : navigators_) total_duration += i->GetAllKernelProjectToSolidTimer();
+  GGEMSChrono::DisplayTime(total_duration, "Project To Solid");
+
+  total_duration = GGEMSChrono::Zero();
+  for (auto&& i : navigators_) total_duration += i->GetAllKernelTrackThroughSolidTimer();
+  GGEMSChrono::DisplayTime(total_duration, "Track Through Solid");
 }
