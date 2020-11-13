@@ -39,7 +39,7 @@
 
 #include "GGEMS/randoms/GGEMSRandom.hh"
 #include "GGEMS/maths/GGEMSMatrixOperations.hh"
-//#include "GGEMS/navigators/GGEMSPhotonNavigator.hh"
+#include "GGEMS/navigators/GGEMSPhotonNavigator.hh"
 
 /*!
   \fn kernel void track_through_ggems_voxelized_solid(GGlong const particle_id_limit, global GGEMSPrimaryParticles* primary_particle, global GGEMSRandom* random, global GGEMSVoxelizedSolidData* voxelized_solid_data, global GGshort const* label_data, global GGEMSParticleCrossSections* particle_cross_sections, global GGEMSMaterialTables* materials)
@@ -96,33 +96,75 @@ kernel void track_through_ggems_voxelized_solid(
   GGfloat3 local_direction = GlobalToLocalDirection(&tmp_matrix_transformation, &global_direction);
 
   // Get borders of OBB
-  GGfloat border_min_x = voxelized_solid_data->obb_geometry_.border_min_xyz_[0];
-  GGfloat border_min_y = voxelized_solid_data->obb_geometry_.border_min_xyz_[1];
-  GGfloat border_min_z = voxelized_solid_data->obb_geometry_.border_min_xyz_[2];
+  GGfloat3 border_min = {
+    voxelized_solid_data->obb_geometry_.border_min_xyz_[0],
+    voxelized_solid_data->obb_geometry_.border_min_xyz_[1],
+    voxelized_solid_data->obb_geometry_.border_min_xyz_[2]
+  };
+
+  GGfloat3 border_max = {
+    voxelized_solid_data->obb_geometry_.border_max_xyz_[0],
+    voxelized_solid_data->obb_geometry_.border_max_xyz_[1],
+    voxelized_solid_data->obb_geometry_.border_max_xyz_[2]
+  };
 
   // Get voxel size of voxelized solid
-  GGfloat voxel_size_x = voxelized_solid_data->voxel_sizes_xyz_[0];
-  GGfloat voxel_size_y = voxelized_solid_data->voxel_sizes_xyz_[1];
-  GGfloat voxel_size_z = voxelized_solid_data->voxel_sizes_xyz_[2];
+  GGfloat3 voxel_size = {
+    voxelized_solid_data->voxel_sizes_xyz_[0],
+    voxelized_solid_data->voxel_sizes_xyz_[1],
+    voxelized_solid_data->voxel_sizes_xyz_[2]
+  };
 
   // Get number of voxel of voxelized solid
-  GGint number_of_voxels_x = voxelized_solid_data->number_of_voxels_xyz_[0];
-  GGint number_of_voxels_y = voxelized_solid_data->number_of_voxels_xyz_[1];
-  GGint number_of_voxels_z = voxelized_solid_data->number_of_voxels_xyz_[2];
+  GGint3 number_of_voxels = {
+    voxelized_solid_data->number_of_voxels_xyz_[0],
+    voxelized_solid_data->number_of_voxels_xyz_[1],
+    voxelized_solid_data->number_of_voxels_xyz_[2]
+  };
 
-  GGint4 index_voxel = {0, 0, 0, 0};
-  GGshort material_id = 0;
+  // TOF of photon
+  GGfloat tof = 0.0;
 
   // Track particle until out of solid
   do {
-    // Get index of voxelized phantom, x, y, z and w
-    index_voxel.x = (GGint)((local_position.x - border_min_x) / voxel_size_x);
-    index_voxel.y = (GGint)((local_position.y - border_min_y) / voxel_size_y);
-    index_voxel.z = (GGint)((local_position.z - border_min_z) / voxel_size_z);
-    index_voxel.w = index_voxel.x + index_voxel.y * voxel_size_x + index_voxel.z * voxel_size_x * voxel_size_y;
+    // Get index of voxelized phantom, x, y, z
+    GGint3 voxel_id = convert_int3((local_position - border_min) / voxel_size);
 
     // Get the material that compose this volume
-    material_id = label_data[index_voxel.w];
+    GGshort material_id = label_data[voxel_id.x + voxel_id.y * number_of_voxels.x + voxel_id.z * number_of_voxels.x * number_of_voxels.y];
+
+    // Find next discrete photon interaction
+    GetPhotonNextInteraction(primary_particle, random, particle_cross_sections, material_id, global_id);
+    GGfloat next_interaction_distance = primary_particle->next_interaction_distance_[global_id];
+    GGchar next_discrete_process = primary_particle->next_discrete_process_[global_id];
+
+    // Get the borders of the current voxel
+    GGfloat3 voxel_border_min = border_min +  convert_float3(voxel_id)*voxel_size;
+    GGfloat3 voxel_border_max = voxel_border_min + voxel_size;
+
+    // Get safety position of particle to be sure particle is inside voxel
+    TransportGetSafetyInsideAABB(
+      &local_position,
+      voxel_border_min.x, voxel_border_max.x,
+      voxel_border_min.y, voxel_border_max.y,
+      voxel_border_min.z, voxel_border_max.z,
+      GEOMETRY_TOLERANCE
+    );
+
+    // Get the distance to next boundary
+    GGfloat distance_to_next_boundary = ComputeDistanceToAABB(
+      &local_position, &local_direction,
+      voxel_border_min.x, voxel_border_max.x,
+      voxel_border_min.y, voxel_border_max.y,
+      voxel_border_min.z, voxel_border_max.z,
+      GEOMETRY_TOLERANCE
+    );
+
+    // If distance to next boundary is inferior to distance to next interaction we move particle to boundary
+    if (distance_to_next_boundary <= next_interaction_distance) {
+      next_interaction_distance = distance_to_next_boundary + GEOMETRY_TOLERANCE;
+      next_discrete_process = TRANSPORTATION;
+    }
 
     #ifdef GGEMS_TRACKING
     if (global_id == primary_particle->particle_tracking_id) {
@@ -132,34 +174,86 @@ kernel void track_through_ggems_voxelized_solid(
       if (primary_particle->pname_[global_id] == PHOTON) printf("gamma\n");
       else if (primary_particle->pname_[global_id] == ELECTRON) printf("e-\n");
       else if (primary_particle->pname_[global_id] == POSITRON) printf("e+\n");
-  //     printf("[GGEMS OpenCL kernel track_through_ggems_voxelized_solid] Position (x, y, z): %e %e %e mm\n", position.x/mm, position.y/mm, position.z/mm);
-  //     printf("[GGEMS OpenCL kernel track_through_ggems_voxelized_solid] Direction (x, y, z): %e %e %e\n", direction.x, direction.y, direction.z);
-  //    printf("[GGEMS OpenCL kernel track_through_ggems_voxelized_solid] Energy: %e keV\n", primary_particle->E_[global_id]/keV);
-//      printf("\n");
-//      printf("[GGEMS OpenCL kernel track_through_ggems_voxelized_solid] Solid id: %u\n", voxelized_solid_data->solid_id_);
-//      printf("[GGEMS OpenCL kernel track_through_ggems_voxelized_solid] Nb voxels: %u %u %u\n", number_of_voxels_x, number_of_voxels_y, number_of_voxels_z);
-//      printf("[GGEMS OpenCL kernel track_through_ggems_voxelized_solid] Voxel size: %e %e %e mm\n", voxel_size_x/mm, voxel_size_y/mm, voxel_size_z/mm);
-  //     printf("[GGEMS OpenCL kernel track_through_ggems_voxelized_solid] Navigator X Borders: %e %e mm\n", voxelized_solid_data->border_min_xyz_.x/mm, voxelized_solid_data->border_max_xyz_.x/mm);
-  //     printf("[GGEMS OpenCL kernel track_through_ggems_voxelized_solid] Navigator Y Borders: %e %e mm\n", voxelized_solid_data->border_min_xyz_.y/mm, voxelized_solid_data->border_max_xyz_.y/mm);
-  //     printf("[GGEMS OpenCL kernel track_through_ggems_voxelized_solid] Navigator Z Borders: %e %e mm\n", voxelized_solid_data->border_min_xyz_.z/mm, voxelized_solid_data->border_max_xyz_.z/mm);
-  //     printf("[GGEMS OpenCL kernel track_through_ggems_voxelized_solid] Voxel X Borders: %e %e mm\n", kXMinVoxel/mm, kXMaxVoxel/mm);
-  //     printf("[GGEMS OpenCL kernel track_through_ggems_voxelized_solid] Voxel Y Borders: %e %e mm\n", kYMinVoxel/mm, kYMaxVoxel/mm);
-  //     printf("[GGEMS OpenCL kernel track_through_ggems_voxelized_solid] Voxel Z Borders: %e %e mm\n", kZMinVoxel/mm, kZMaxVoxel/mm);
-      printf("[GGEMS OpenCL kernel track_through_ggems_voxelized_solid] Index of current voxel (x, y, z): %d %d %d\n", index_voxel.x, index_voxel.y, index_voxel.z);
-      //printf("[GGEMS OpenCL kernel track_through_ggems_voxelized_solid] Global Index of current voxel: %d\n", index_voxel.w);
-     // printf("[GGEMS OpenCL kernel track_through_ggems_voxelized_solid] Material in voxel: %s\n", particle_cross_sections->material_names_[material_id]);
-  //     printf("\n");
-  //     printf("[GGEMS OpenCL kernel track_through_ggems_voxelized_solid] Next process: ");
-  //     if (next_discrete_process == COMPTON_SCATTERING) printf("COMPTON_SCATTERING\n");
-  //     if (next_discrete_process == PHOTOELECTRIC_EFFECT) printf("PHOTOELECTRIC_EFFECT\n");
-  //     if (next_discrete_process == RAYLEIGH_SCATTERING) printf("RAYLEIGH_SCATTERING\n");
-  //     if (next_discrete_process == TRANSPORTATION) printf("TRANSPORTATION\n");
-  //     printf("[GGEMS OpenCL kernel track_through_ggems_voxelized_solid] Next interaction distance: %e mm\n", next_interaction_distance/mm);
+      printf("[GGEMS OpenCL kernel track_through_ggems_voxelized_solid] Local position (x, y, z): %e %e %e mm\n", local_position.x/mm, local_position.y/mm, local_position.z/mm);
+      printf("[GGEMS OpenCL kernel track_through_ggems_voxelized_solid] Local direction (x, y, z): %e %e %e\n", local_direction.x, local_direction.y, local_direction.z);
+      printf("[GGEMS OpenCL kernel track_through_ggems_voxelized_solid] Energy: %e keV\n", primary_particle->E_[global_id]/keV);
+      printf("\n");
+      printf("[GGEMS OpenCL kernel track_through_ggems_voxelized_solid] Solid id: %u\n", voxelized_solid_data->solid_id_);
+      printf("[GGEMS OpenCL kernel track_through_ggems_voxelized_solid] Nb voxels: %u %u %u\n", number_of_voxels.x, number_of_voxels.y, number_of_voxels.z);
+      printf("[GGEMS OpenCL kernel track_through_ggems_voxelized_solid] Voxel size: %e %e %e mm\n", voxel_size.x/mm, voxel_size.y/mm, voxel_size.z/mm);
+      printf("[GGEMS OpenCL kernel track_through_ggems_voxelized_solid] Solid X Borders: %e %e mm\n", border_min.x/mm, border_max.x/mm);
+      printf("[GGEMS OpenCL kernel track_through_ggems_voxelized_solid] Solid Y Borders: %e %e mm\n", border_min.y/mm, border_max.y/mm);
+      printf("[GGEMS OpenCL kernel track_through_ggems_voxelized_solid] Solid Z Borders: %e %e mm\n", border_min.z/mm, border_max.z/mm);
+      printf("[GGEMS OpenCL kernel track_through_ggems_voxelized_solid] Voxel X Borders: %e %e mm\n", voxel_border_min.x/mm, voxel_border_max.x/mm);
+      printf("[GGEMS OpenCL kernel track_through_ggems_voxelized_solid] Voxel Y Borders: %e %e mm\n", voxel_border_min.y/mm, voxel_border_max.y/mm);
+      printf("[GGEMS OpenCL kernel track_through_ggems_voxelized_solid] Voxel Z Borders: %e %e mm\n", voxel_border_min.z/mm, voxel_border_max.z/mm);
+      printf("[GGEMS OpenCL kernel track_through_ggems_voxelized_solid] Index of current voxel (x, y, z): %d %d %d\n", voxel_id.x, voxel_id.y, voxel_id.z);
+      printf("[GGEMS OpenCL kernel track_through_ggems_voxelized_solid] Material in voxel: %s\n", particle_cross_sections->material_names_[material_id]);
+      printf("\n");
+      printf("[GGEMS OpenCL kernel track_through_ggems_voxelized_solid] Next process: ");
+      if (next_discrete_process == COMPTON_SCATTERING) printf("COMPTON_SCATTERING\n");
+      if (next_discrete_process == PHOTOELECTRIC_EFFECT) printf("PHOTOELECTRIC_EFFECT\n");
+      if (next_discrete_process == RAYLEIGH_SCATTERING) printf("RAYLEIGH_SCATTERING\n");
+      if (next_discrete_process == TRANSPORTATION) printf("TRANSPORTATION\n");
+      printf("[GGEMS OpenCL kernel track_through_ggems_voxelized_solid] Next interaction distance: %e mm\n", next_interaction_distance/mm);
     }
     #endif
 
-    primary_particle->status_[global_id] = DEAD;
+    // Moving particle to next postion
+    local_position = local_position + local_direction*next_interaction_distance;
+
+    // Get safety position of particle to be sure particle is outside voxel
+    TransportGetSafetyOutsideAABB(
+      &local_position,
+      voxel_border_min.x, voxel_border_max.x,
+      voxel_border_min.y, voxel_border_max.y,
+      voxel_border_min.z, voxel_border_max.z,
+      GEOMETRY_TOLERANCE
+    );
+
+    // Update TOF, true for photon only
+    tof += next_interaction_distance * C_LIGHT;
+
+  //   primary_particle->tof_[kParticleID] += next_interaction_distance * C_LIGHT;
+
+  //  Checking if particle outside solid, still in local
+    if (!IsParticleInAABB(&local_position, border_min.x, border_max.x, border_min.y, border_max.y, border_min.z, border_max.z, GEOMETRY_TOLERANCE)) {
+      primary_particle->particle_solid_distance_[global_id] = OUT_OF_WORLD; // Reset to initiale value
+      primary_particle->solid_id_[global_id] = -1; // Out of world
+      break;
+    }
+
+    // Storing new position in local
+    primary_particle->px_[global_id] = local_position.x;
+    primary_particle->py_[global_id] = local_position.y;
+    primary_particle->pz_[global_id] = local_position.z;
+
+    // Storing direction in local
+    primary_particle->dx_[global_id] = local_direction.x;
+    primary_particle->dy_[global_id] = local_direction.y;
+    primary_particle->dz_[global_id] = local_direction.z;
+
+    // Resolve process if different of TRANSPORTATION
+    if (next_discrete_process != TRANSPORTATION) {
+      PhotonDiscreteProcess(primary_particle, random, materials, particle_cross_sections, material_id, global_id);
+    }
   } while (primary_particle->status_[global_id] == ALIVE);
+
+  // Storing final state
+  primary_particle->tof_[global_id] += tof;
+
+  // Convert to global position
+  global_position = LocalToGlobalPosition(&tmp_matrix_transformation, &local_position);
+  primary_particle->px_[global_id] = global_position.x;
+  primary_particle->py_[global_id] = global_position.y;
+  primary_particle->pz_[global_id] = global_position.z;
+
+  // Convert to global direction
+  global_direction = LocalToGlobalDirection(&tmp_matrix_transformation, &local_direction);
+  primary_particle->dx_[global_id] = global_direction.x;
+  primary_particle->dy_[global_id] = global_direction.y;
+  primary_particle->dz_[global_id] = global_direction.z;
+
   //while (primary_particle->status_[global_id] == ALIVE) {
     // Position of particle
     // GGfloat3 position = {
@@ -272,6 +366,5 @@ kernel void track_through_ggems_voxelized_solid(
   //   if (next_discrete_process != TRANSPORTATION) {
   //     PhotonDiscreteProcess(primary_particle, random, materials, particle_cross_sections, kMaterialID, kParticleID);
   //   }
-  //   primary_particle->status_[global_id] = DEAD;
   // }
 }

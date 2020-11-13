@@ -132,29 +132,29 @@ inline void TransportGetSafetyInsideOBB(GGfloat3 const* position, global GGEMSOB
   \return new position of moved particle
   \brief Get a safety position outside an AABB geometry
 */
-// inline void TransportGetSafetyOutsideAABB(GGfloat3 const* position, GGfloat const xmin, GGfloat const xmax, GGfloat const ymin, GGfloat const ymax, GGfloat const zmin, GGfloat const zmax, GGfloat const tolerance)
-// {
-//   // on x
-//   GGfloat SafXmin = fabs(position->x - xmin);
-//   GGfloat SafXmax = fabs(position->x - xmax);
+inline void TransportGetSafetyOutsideAABB(GGfloat3 const* position, GGfloat const xmin, GGfloat const xmax, GGfloat const ymin, GGfloat const ymax, GGfloat const zmin, GGfloat const zmax, GGfloat const tolerance)
+{
+  // on x
+  GGfloat SafXmin = fabs(position->x - xmin);
+  GGfloat SafXmax = fabs(position->x - xmax);
 
-//   position->x = (SafXmin < tolerance) ? xmin - tolerance : position->x;
-//   position->x = (SafXmax < tolerance) ? xmax + tolerance : position->x;
+  position->x = (SafXmin < tolerance) ? xmin - tolerance : position->x;
+  position->x = (SafXmax < tolerance) ? xmax + tolerance : position->x;
 
-//   // on y
-//   GGfloat SafYmin = fabs(position->y - ymin);
-//   GGfloat SafYmax = fabs(position->y - ymax);
+  // on y
+  GGfloat SafYmin = fabs(position->y - ymin);
+  GGfloat SafYmax = fabs(position->y - ymax);
 
-//   position->y = (SafYmin < tolerance) ? ymin - tolerance : position->y;
-//   position->y = (SafYmax < tolerance) ? ymax + tolerance : position->y;
+  position->y = (SafYmin < tolerance) ? ymin - tolerance : position->y;
+  position->y = (SafYmax < tolerance) ? ymax + tolerance : position->y;
 
-//   // on z
-//   GGfloat SafZmin = fabs(position->z - zmin);
-//   GGfloat SafZmax = fabs(position->z - zmax);
+  // on z
+  GGfloat SafZmin = fabs(position->z - zmin);
+  GGfloat SafZmax = fabs(position->z - zmax);
 
-//   position->z = (SafZmin < tolerance) ? zmin - tolerance : position->z;
-//   position->z = (SafZmax < tolerance) ? zmax + tolerance : position->z;
-// }
+  position->z = (SafZmin < tolerance) ? zmin - tolerance : position->z;
+  position->z = (SafZmax < tolerance) ? zmax + tolerance : position->z;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -184,6 +184,32 @@ inline void TransportGetSafetyInsideOBB(GGfloat3 const* position, global GGEMSOB
 ////////////////////////////////////////////////////////////////////////////////
 
 /*!
+  \fn inline GGuchar IsParticleInAABB(GGfloat3 const* position, GGfloat const x_min, GGfloat const x_max, GGfloat const y_min, GGfloat const y_max, GGfloat const z_min, GGfloat const z_max, GGfloat const tolerance)
+  \param position - pointer on primary particle
+  \param x_min - min. border in x axis
+  \param x_max - max. border in x axis
+  \param y_min - min. border in y axis
+  \param y_max - max. border in y axis
+  \param z_min - min. border in z axis
+  \param z_max - max. border in z axis
+  \param tolerance - tolerance for geometry
+  \return false if particle outside AABB object, and true if particle inside AABB object
+  \brief Check if particle is inside or outside AABB object
+*/
+inline GGuchar IsParticleInAABB(GGfloat3 const* position, GGfloat const x_min, GGfloat const x_max, GGfloat const y_min, GGfloat const y_max, GGfloat const z_min, GGfloat const z_max, GGfloat const tolerance)
+{
+  if (position->s0 < (x_min + GEOMETRY_TOLERANCE) || position->s0 > (x_max - GEOMETRY_TOLERANCE)) return FALSE;
+  if (position->s1 < (y_min + GEOMETRY_TOLERANCE) || position->s1 > (y_max - GEOMETRY_TOLERANCE)) return FALSE;
+  if (position->s2 < (z_min + GEOMETRY_TOLERANCE) || position->s2 > (z_max - GEOMETRY_TOLERANCE)) return FALSE;
+
+  return TRUE;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+/*!
   \fn inline GGuchar IsParticleInOBB(GGfloat3 const* position, global GGEMSOBB* obb_data)
   \param position - pointer on primary particle
   \param obb_data - OBB data infos
@@ -203,11 +229,14 @@ inline GGuchar IsParticleInOBB(GGfloat3 const* position, global GGEMSOBB* obb_da
   // Get the position in local position
   GGfloat3 local_position = GlobalToLocalPosition(&tmp_matrix_transformation, position);
 
-  if (local_position.s0 < (obb_data->border_min_xyz_[0] + GEOMETRY_TOLERANCE) || local_position.s0 > (obb_data->border_max_xyz_[0] - GEOMETRY_TOLERANCE)) return FALSE;
-  if (local_position.s1 < (obb_data->border_min_xyz_[1] + GEOMETRY_TOLERANCE) || local_position.s1 > (obb_data->border_max_xyz_[1] - GEOMETRY_TOLERANCE)) return FALSE;
-  if (local_position.s2 < (obb_data->border_min_xyz_[2] + GEOMETRY_TOLERANCE) || local_position.s2 > (obb_data->border_max_xyz_[2] - GEOMETRY_TOLERANCE)) return FALSE;
+  GGfloat x_min = obb_data->border_min_xyz_[0];
+  GGfloat x_max = obb_data->border_max_xyz_[0];
+  GGfloat y_min = obb_data->border_min_xyz_[1];
+  GGfloat y_max = obb_data->border_max_xyz_[1];
+  GGfloat z_min = obb_data->border_min_xyz_[2];
+  GGfloat z_max = obb_data->border_max_xyz_[2];
 
-  return TRUE;
+  return IsParticleInAABB(&local_position, x_min, x_max, y_min, y_max, z_min, z_max, GEOMETRY_TOLERANCE);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

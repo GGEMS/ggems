@@ -116,7 +116,7 @@ void GGEMSBox::Draw(void)
   kernel_cl->setArg(8, *voxelized_phantom);
 
   // Get number of max work group size
-  std::size_t max_work_group_size = opencl_manager.GetMaxWorkGroupSize();
+  std::size_t max_work_group_size = opencl_manager.GetWorkGroupSize();
 
   // Compute work item number
   std::size_t number_of_work_items = number_of_elements + (max_work_group_size - number_of_elements%max_work_group_size);

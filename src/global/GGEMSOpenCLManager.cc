@@ -50,6 +50,8 @@ GGEMSOpenCLManager::GGEMSOpenCLManager(void)
   device_address_bits_(0),
   device_available_(0),
   device_compiler_available_(0),
+  device_max_work_group_size_(0),
+  device_work_group_size_(0),
   device_global_mem_cache_size_(0),
   device_global_mem_cacheline_size_(0),
   device_global_mem_size_(0),
@@ -105,6 +107,7 @@ GGEMSOpenCLManager::GGEMSOpenCLManager(void)
   device_available_.resize(devices_cl_.size());
   device_compiler_available_.resize(devices_cl_.size());
   device_max_work_group_size_.resize(devices_cl_.size());
+  device_work_group_size_.resize(devices_cl_.size());
   device_max_work_item_dimensions_.resize(devices_cl_.size());
   device_max_work_item_sizes_.resize(devices_cl_.size()*3);
   device_global_mem_cache_size_.resize(devices_cl_.size());
@@ -134,6 +137,7 @@ GGEMSOpenCLManager::GGEMSOpenCLManager(void)
     CheckOpenCLError(devices_cl_[i]->getInfo(CL_DEVICE_AVAILABLE, &device_available_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
     CheckOpenCLError(devices_cl_[i]->getInfo(CL_DEVICE_COMPILER_AVAILABLE, &device_compiler_available_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
     CheckOpenCLError(devices_cl_[i]->getInfo(CL_DEVICE_MAX_WORK_GROUP_SIZE, &device_max_work_group_size_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    device_work_group_size_[i] = 64;
     CheckOpenCLError(devices_cl_[i]->getInfo(CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS, &device_max_work_item_dimensions_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
 
     CheckOpenCLError(devices_cl_[i]->getInfo(CL_DEVICE_MAX_WORK_ITEM_SIZES, &test), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
