@@ -56,8 +56,14 @@ kernel void project_to_ggems_voxelized_solid(
   // Return if index > to particle limit
   if (global_id >= particle_id_limit) return;
 
+  // No solid detected, consider particle as dead
+  if(primary_particle->solid_id_[global_id] == -1) primary_particle->status_[global_id] = DEAD;
+
   // Checking if the current navigator is the selected navigator
   if (primary_particle->solid_id_[global_id] != voxelized_solid_data->solid_id_) return;
+
+  // Checking status of particle
+  if (primary_particle->status_[global_id] == DEAD) return;
 
   // Checking if distance to navigator is OUT_OF_WORLD after computation distance
   // If yes, the particle is OUT_OF_WORLD and DEAD, so no tracking
@@ -66,9 +72,6 @@ kernel void project_to_ggems_voxelized_solid(
     primary_particle->status_[global_id] = DEAD;
     return;
   }
-
-  // Checking status of particle
-  if (primary_particle->status_[global_id] == DEAD) return;
 
   // Position of particle
   GGfloat3 position = {

@@ -195,7 +195,7 @@ void GGEMSCrossSections::LoadPhysicTablesOnHost(void)
   particle_cross_sections_->number_of_activated_photon_processes_ = particle_cross_sections_device->number_of_activated_photon_processes_;
 
   for(GGuchar i = 0; i < NUMBER_PHOTON_PROCESSES; ++i) {
-    particle_cross_sections_->index_photon_cs_[i] = particle_cross_sections_device->index_photon_cs_[i];
+    particle_cross_sections_->photon_cs_id_[i] = particle_cross_sections_device->photon_cs_id_[i];
   }
 
   for(GGuchar j = 0; j < NUMBER_PHOTON_PROCESSES; ++j) {

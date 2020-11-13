@@ -33,9 +33,9 @@
 
 #ifdef __OPENCL_C_VERSION__
 
-__constant GGfloat FACTOR = 32526509815670243328.0f; // 0.5*HC*HC -> HC = cm/(H_PLANCK*C_LIGHT)
+constant GGfloat FACTOR = 32526509815670243328.0f; // 0.5*HC*HC -> HC = cm/(H_PLANCK*C_LIGHT)
 
-__constant GGfloat PP0[101] = { 0.0f, 
+constant GGfloat PP0[101] = { 0.0f, 
   0.0f, 2.0f, 5.21459f, 10.2817f, 3.66207f, 3.63903f, 3.71155f, 36.5165f, 3.43548f, 3.40045f,     // 1-10 
   2.87811f, 3.35541f, 3.21141f, 2.95234f, 3.02524f, 126.146f, 175.044f, 162.0f, 296.833f, 300.994f,     // 11-20 
   373.186f, 397.823f, 430.071f, 483.293f, 2.14885f, 335.553f, 505.422f, 644.739f, 737.017f, 707.575f,     // 21-30 
@@ -48,7 +48,7 @@ __constant GGfloat PP0[101] = { 0.0f,
   930.184f, 887.945f, 3490.96f, 4058.6f, 3068.1f, 3898.32f, 1398.34f, 5285.18f, 1, 872.368f     // 91-100 
 };
 
-__constant GGfloat PP1[101] = { 0.0f, 
+constant GGfloat PP1[101] = { 0.0f, 
   1.f, 2.f, 3.7724f, 2.17924f, 11.9967f, 17.7772f, 23.5265f, 23.797f, 39.9937f, 46.7748f,     // 1-10 
   60.0f, 68.6446f, 81.7887f, 98.0f, 112.0f, 128.0f, 96.7939f, 162.0f, 61.5575f, 96.4218f,     // 11-20 
   65.4084f, 83.3079f, 96.2889f, 90.123f, 312.0f, 338.0f, 181.943f, 94.3868f, 54.5084f, 132.819f,     // 21-30 
@@ -61,7 +61,7 @@ __constant GGfloat PP1[101] = { 0.0f,
   3428.87f, 3681.22f, 1143.31f, 1647.17f, 1444.9f, 1894.33f, 3309.12f, 2338.59f, 4900.0f, 4856.61f     // 91-100 
 };
 
-__constant GGfloat PP2[101] = { 0.0f, 
+constant GGfloat PP2[101] = { 0.0f, 
   0.0f, 0.0f, 0.0130091f, 3.53906f, 9.34125f, 14.5838f, 21.7619f, 3.68644f, 37.5709f, 49.8248f,     // 1-10 
   58.1219f, 72.0f, 83.9999f, 95.0477f, 109.975f, 1.85351f, 17.1623f, 0.0f, 2.60927f, 2.58422f,     // 11-20 
   2.4053f, 2.86948f, 2.63999f, 2.58417f, 310.851f, 2.44683f, 41.6348f, 44.8739f, 49.4746f, 59.6053f,     // 21-30 
@@ -74,7 +74,7 @@ __constant GGfloat PP2[101] = { 0.0f,
   3921.95f, 3894.83f, 4014.73f, 3130.23f, 4512.0f, 3423.35f, 4701.53f, 1980.23f, 4900.0f, 4271.02f     // 91-100 
 };
 
-__constant GGfloat PP3[101] = { 0.0f, 
+constant GGfloat PP3[101] = { 0.0f, 
   1.53728e-16f, 2.95909e-16f, 1.95042e-15f, 6.24521e-16f, 4.69459e-17f, 3.1394e-17f, 2.38808e-17f, 3.59428e-16f, 1.2947e-17f, 1.01182e-17f,     // 1-10 
   6.99543e-18f, 6.5138e-18f, 5.24063e-18f, 4.12831e-18f, 4.22067e-18f, 2.12802e-16f, 3.27035e-16f, 2.27705e-16f, 1.86943e-15f, 8.10577e-16f,     // 11-20 
   1.80541e-15f, 9.32266e-16f, 5.93459e-16f, 4.93049e-16f, 5.03211e-19f, 2.38223e-16f, 4.5181e-16f, 5.34468e-16f, 5.16504e-16f, 3.0641e-16f,     // 21-30 
@@ -87,7 +87,7 @@ __constant GGfloat PP3[101] = { 0.0f,
   4.18953e-17f, 4.03182e-17f, 1.11553e-16f, 9.51125e-16f, 2.57569e-15f, 1.14294e-15f, 2.98597e-15f, 5.88714e-16f, 1.46196e-20f, 1.53226e-15f     // 91-100 
 };
 
-__constant GGfloat PP4[101] = { 0.0f, 
+constant GGfloat PP4[101] = { 0.0f, 
   1.10561e-15f, 3.50254e-16f, 1.56836e-16f, 7.86286e-15f, 2.2706e-16f, 7.28454e-16f, 4.54123e-16f, 8.03792e-17f, 4.91833e-16f, 1.45891e-16f,     // 1-10 
   1.71829e-16f, 3.90707e-15f, 2.76487e-15f, 4.345e-16f, 6.80131e-16f, 4.04186e-16f, 8.95703e-17f, 3.32136e-16f, 1.3847e-17f, 4.16869e-17f,     // 11-20 
   1.37963e-17f, 1.96187e-17f, 2.93852e-17f, 2.46581e-17f, 4.49944e-16f, 3.80311e-16f, 1.62925e-15f, 7.52449e-16f, 9.45445e-16f, 5.47652e-16f,     // 21-30 
@@ -100,7 +100,7 @@ __constant GGfloat PP4[101] = { 0.0f,
   1.4089e-15f, 1.2819e-15f, 4.96925e-17f, 6.04886e-17f, 7.39507e-17f, 6.6832e-17f, 1.09433e-16f, 9.61804e-17f, 1.38525e-16f, 2.49104e-16f     // 91-100 
 };
 
-__constant GGfloat PP5[101] = { 0.0f, 
+constant GGfloat PP5[101] = { 0.0f, 
   6.89413e-17f, 2.11456e-17f, 2.47782e-17f, 7.01557e-17f, 1.01544e-15f, 1.76177e-16f, 1.28191e-16f, 1.80511e-17f, 1.96803e-16f, 3.16753e-16f,     // 1-10 
   1.21362e-15f, 6.6366e-17f, 8.42625e-17f, 1.01935e-16f, 1.34162e-16f, 1.87076e-18f, 2.76259e-17f, 1.2217e-16f, 1.66059e-18f, 1.76249e-18f,     // 11-20 
   1.13734e-18f, 1.58963e-18f, 1.33987e-18f, 1.18496e-18f, 2.44536e-16f, 6.69957e-19f, 2.5667e-17f, 2.62482e-17f, 2.55816e-17f, 2.6574e-17f,     // 21-30 
@@ -113,7 +113,7 @@ __constant GGfloat PP5[101] = { 0.0f,
   1.18382e-16f, 1.111e-16f, 1.56996e-15f, 8.45221e-17f, 3.6783e-16f, 1.20652e-16f, 3.91104e-16f, 3.52282e-15f, 4.29979e-16f, 1.28308e-16f     // 91-100 
 };
 
-__constant GGfloat PP6[101] = { 0.0f, 
+constant GGfloat PP6[101] = { 0.0f, 
   6.57834f, 3.91446f, 7.59547f, 10.707f, 3.97317f, 4.00593f, 3.93206f, 8.10644f, 3.97743f, 4.04641f,     // 1-10 
   4.30202f, 4.19399f, 4.27399f, 4.4169f, 4.04829f, 2.21745f, 11.3523f, 1.84976f, 1.61905f, 3.68297f,     // 11-20 
   1.5704f, 2.58852f, 3.59827f, 3.61633f, 9.07174f, 1.76738f, 1.97272f, 1.91032f, 1.9838f, 2.64286f,     // 21-30 
@@ -126,7 +126,7 @@ __constant GGfloat PP6[101] = { 0.0f,
   1.38559f, 1.37575f, 2.53155f, 2.51924f, 1.32386f, 2.31791f, 2.47722f, 1.33584f, 9.60979f, 6.84949f     // 91-100 
 };
 
-__constant GGfloat PP7[101] = { 0.0f, 
+constant GGfloat PP7[101] = { 0.0f, 
   3.99983f, 6.63093f, 3.85593f, 1.69342f, 14.7911f, 7.03995f, 8.89527f, 13.1929f, 4.93354f, 5.59461f,     // 1-10 
   3.98033f, 1.74578f, 2.67629f, 14.184f, 8.88775f, 13.1809f, 4.51627f, 13.7677f, 9.53727f, 4.04257f,     // 11-20 
   7.88725f, 5.78566f, 4.08148f, 4.18194f, 7.96292f, 8.38322f, 3.31429f, 13.106f, 13.0857f, 13.1053f,     // 21-30 
@@ -139,7 +139,7 @@ __constant GGfloat PP7[101] = { 0.0f,
   2.26339f, 2.26838f, 1.35877f, 1.37826f, 1.3499f, 1.36574f, 1.33654f, 1.33001f, 1.37648f, 4.28173f     // 91-100 
 };
 
-__constant GGfloat PP8[101] = { 0.0f, 
+constant GGfloat PP8[101] = { 0.0f, 
   4.0f, 4.0f, 5.94686f, 4.10265f, 7.87177f, 12.0509f, 12.0472f, 3.90597f, 5.34338f, 6.33072f,     // 1-10 
   2.76777f, 7.90099f, 5.58323f, 4.26372f, 3.3005f, 5.69179f, 2.3698f, 3.68167f, 5.2807f, 4.61212f,     // 11-20 
   5.87809f, 4.46207f, 4.59278f, 4.67584f, 1.75212f, 7.00575f, 2.05428f, 2.00415f, 2.02048f, 1.98413f,     // 21-30 
@@ -157,60 +157,60 @@ __constant GGfloat PP8[101] = { 0.0f,
 ////////////////////////////////////////////////////////////////////////////////
 
 /*!
-  \fn inline void KleinNishinaComptonSampleSecondaries(__global GGEMSPrimaryParticles* primary_particle, __global GGEMSRandom* random, __global GGEMSMaterialTables const* materials, __global GGEMSParticleCrossSections const* particle_cross_sections, GGuchar const index_material, GGint const index_particle)
+  \fn inline void KleinNishinaComptonSampleSecondaries(global GGEMSPrimaryParticles* primary_particle, global GGEMSRandom* random, global GGEMSMaterialTables const* materials, global GGEMSParticleCrossSections const* particle_cross_sections, GGshort const material_id, GGint const particle_id)
   \param primary_particle - buffer of particles
   \param random - pointer on random numbers
   \param materials - buffer of materials
   \param particle_cross_sections - pointer to cross sections activated in navigator
-  \param index_material - index of the material
-  \param index_particle - index of the particle
+  \param material_id - index of the material
+  \param particle_id - index of the particle
   \brief Klein Nishina Compton model, Effects due to binding of atomic electrons are negliged.
 */
 inline void LivermoreRayleighSampleSecondaries(
-  __global GGEMSPrimaryParticles* primary_particle,
-  __global GGEMSRandom* random,
-  __global GGEMSMaterialTables const* materials,
-  __global GGEMSParticleCrossSections const* particle_cross_sections,
-  GGuchar const index_material,
-  GGint const index_particle
+  global GGEMSPrimaryParticles* primary_particle,
+  global GGEMSRandom* random,
+  global GGEMSMaterialTables const* materials,
+  global GGEMSParticleCrossSections const* particle_cross_sections,
+  GGuchar const material_id,
+  GGint const particle_id
 )
 {
-  GGfloat const kE0 = 0.009952493733686183f; //primary_particle->E_[index_particle];
+  GGfloat kE0 = 0.009952493733686183f; //primary_particle->E_[particle_id];
 
   if (kE0 <= 250.0e-6f) { // 250 eV
-    primary_particle->status_[index_particle] = DEAD;
+    primary_particle->status_[particle_id] = DEAD;
     return;
   }
 
   // Current Direction
-  GGfloat3 const kGammaDirection = {
-    primary_particle->dx_[index_particle],
-    primary_particle->dy_[index_particle],
-    primary_particle->dz_[index_particle]
+  GGfloat3 kGammaDirection = {
+    primary_particle->dx_[particle_id],
+    primary_particle->dy_[particle_id],
+    primary_particle->dz_[particle_id]
   };
 
-  GGuint const kNumberOfBins = particle_cross_sections->number_of_bins_;
-  GGuchar const kNEltsMinusOne = materials->number_of_chemical_elements_[index_material]-1;
-  GGushort const kMixtureID = materials->index_of_chemical_elements_[index_material];
-  GGuint const kEnergyID = primary_particle->E_index_[index_particle];
+  GGshort kNumberOfBins = particle_cross_sections->number_of_bins_;
+  GGchar kNEltsMinusOne = materials->number_of_chemical_elements_[material_id]-1;
+  GGshort kMixtureID = materials->index_of_chemical_elements_[material_id];
+  GGint kEnergyID = primary_particle->E_index_[particle_id];
 
   // Get last atom
-  GGuchar selected_atomic_number_z = materials->atomic_number_Z_[kMixtureID+kNEltsMinusOne];
+  GGchar selected_atomic_number_z = materials->atomic_number_Z_[kMixtureID+kNEltsMinusOne];
 
   // Select randomly one element that composed the material
   GGuchar i = 0;
   if (kNEltsMinusOne > 0) {
     // Get Cross Section of Livermore Rayleigh
-    GGfloat const kCS = LinearInterpolation(
+    GGfloat kCS = LinearInterpolation(
       particle_cross_sections->energy_bins_[kEnergyID],
-      particle_cross_sections->photon_cross_sections_[RAYLEIGH_SCATTERING][kEnergyID + kNumberOfBins*index_material],
+      particle_cross_sections->photon_cross_sections_[RAYLEIGH_SCATTERING][kEnergyID + kNumberOfBins*material_id],
       particle_cross_sections->energy_bins_[kEnergyID+1],
-      particle_cross_sections->photon_cross_sections_[RAYLEIGH_SCATTERING][kEnergyID+1 + kNumberOfBins*index_material],
+      particle_cross_sections->photon_cross_sections_[RAYLEIGH_SCATTERING][kEnergyID+1 + kNumberOfBins*material_id],
       kE0
     );
 
     // Get a random
-    GGfloat const x = KissUniform(random, index_particle) * kCS;
+    GGfloat x = KissUniform(random, particle_id) * kCS;
 
     GGfloat cross_section = 0.0f;
     while (i < kNEltsMinusOne) {
@@ -232,30 +232,30 @@ inline void LivermoreRayleighSampleSecondaries(
   }
 
   // Sample the angle of the scattered photon
-  GGfloat const kXX = FACTOR*kE0*kE0;
+  GGfloat kXX = FACTOR*kE0*kE0;
 
-  GGfloat const kN0 = PP6[selected_atomic_number_z] - 1.0f;
-  GGfloat const kN1 = PP7[selected_atomic_number_z] - 1.0f;
-  GGfloat const kN2 = PP8[selected_atomic_number_z] - 1.0f;
-  GGfloat const kB0 = PP3[selected_atomic_number_z];
-  GGfloat const kB1 = PP4[selected_atomic_number_z];
-  GGfloat const kB2 = PP5[selected_atomic_number_z];
+  GGfloat kN0 = PP6[selected_atomic_number_z] - 1.0f;
+  GGfloat kN1 = PP7[selected_atomic_number_z] - 1.0f;
+  GGfloat kN2 = PP8[selected_atomic_number_z] - 1.0f;
+  GGfloat kB0 = PP3[selected_atomic_number_z];
+  GGfloat kB1 = PP4[selected_atomic_number_z];
+  GGfloat kB2 = PP5[selected_atomic_number_z];
 
   GGfloat x = 2.0f*kXX*kB0;
-  GGfloat const kW0 = (x < 0.02f) ? kN0*x*(1.0f - 0.5f*(kN0 - 1.0f)*x*(1.0f - (kN0 - 2.0f)*x/3.0f))
+  GGfloat kW0 = (x < 0.02f) ? kN0*x*(1.0f - 0.5f*(kN0 - 1.0f)*x*(1.0f - (kN0 - 2.0f)*x/3.0f))
     : 1.0f - exp(-kN0*log(1.0f + x)); 
 
   x = 2.0f*kXX*kB1;
-  GGfloat const kW1 = (x < 0.02f) ? kN1*x*(1.0f - 0.5f*(kN1 - 1.0f)*x*(1.0f - (kN1 - 2.0f)*x/3.0f))
+  GGfloat kW1 = (x < 0.02f) ? kN1*x*(1.0f - 0.5f*(kN1 - 1.0f)*x*(1.0f - (kN1 - 2.0f)*x/3.0f))
     : 1.0f - exp(-kN1*log(1.0f + x));
  
   x = 2.0f*kXX*kB2;
-  GGfloat const kW2 = (x < 0.02f) ? kN2*x*(1.0f - 0.5f*(kN2 - 1.0f)*x*(1.0f - (kN2 - 2.0f)*x/3.0f))
+  GGfloat kW2 = (x < 0.02f) ? kN2*x*(1.0f - 0.5f*(kN2 - 1.0f)*x*(1.0f - (kN2 - 2.0f)*x/3.0f))
     : 1.0f - exp(-kN2*log(1.0f + x));
 
-  GGfloat const kX0 = kW0*PP0[selected_atomic_number_z]/(kB0*kN0);
-  GGfloat const kX1 = kW1*PP1[selected_atomic_number_z]/(kB1*kN1);
-  GGfloat const kX2 = kW2*PP2[selected_atomic_number_z]/(kB2*kN2);
+  GGfloat kX0 = kW0*PP0[selected_atomic_number_z]/(kB0*kN0);
+  GGfloat kX1 = kW1*PP1[selected_atomic_number_z]/(kB1*kN1);
+  GGfloat kX2 = kW2*PP2[selected_atomic_number_z]/(kB2*kN2);
 
   GGfloat costheta = 0.0f;
   do {
@@ -263,7 +263,7 @@ inline void LivermoreRayleighSampleSecondaries(
     GGfloat n = kN0;
     GGfloat b = kB0;
 
-    x = KissUniform(random, index_particle)*(kX0+kX1+kX2);
+    x = KissUniform(random, particle_id)*(kX0+kX1+kX2);
     if (x > kX0) {
       x -= kX0;
       if (x <= kX1) {
@@ -280,7 +280,7 @@ inline void LivermoreRayleighSampleSecondaries(
     n = 1.0f/n;
 
     // sampling of angle
-    GGfloat y = KissUniform(random, index_particle)*w;
+    GGfloat y = KissUniform(random, particle_id)*w;
     if (y < 0.02f) {
       x = y*n*(1.0f + 0.5f*(n + 1.0f)*y*(1.0f - (n + 2.0f)*y/3.0f));
     }
@@ -289,28 +289,28 @@ inline void LivermoreRayleighSampleSecondaries(
     }
 
     costheta = 1.0f - x/(b*kXX);
-  } while (2.0f*KissUniform(random, index_particle) > 1.0f + costheta*costheta || costheta < -1.0f);
+  } while (2.0f*KissUniform(random, particle_id) > 1.0f + costheta*costheta || costheta < -1.0f);
 
-  GGfloat phi  = TWO_PI * KissUniform(random, index_particle);
+  GGfloat phi  = TWO_PI * KissUniform(random, particle_id);
   GGfloat sintheta = sqrt((1.0f - costheta)*(1.0f + costheta));
 
   GGfloat3 gamma_direction = {sintheta*cos(phi), sintheta*sin(phi), costheta};
-  gamma_direction = RotateUnitZ(gamma_direction, kGammaDirection);
+  gamma_direction = RotateUnitZ(&gamma_direction, &kGammaDirection);
   gamma_direction = normalize(gamma_direction);
 
   // Update direction
-  primary_particle->dx_[index_particle] = gamma_direction.x;
-  primary_particle->dy_[index_particle] = gamma_direction.y;
-  primary_particle->dz_[index_particle] = gamma_direction.z;
+  primary_particle->dx_[particle_id] = gamma_direction.x;
+  primary_particle->dy_[particle_id] = gamma_direction.y;
+  primary_particle->dz_[particle_id] = gamma_direction.z;
 
   #ifdef GGEMS_TRACKING
-  if (index_particle == primary_particle->particle_tracking_id) {
+  if (particle_id == primary_particle->particle_tracking_id) {
     printf("\n");
     printf("[GGEMS OpenCL function LivermoreRayleighSampleSecondaries]     Photon energy: %e keV\n", kE0/keV);
     printf("[GGEMS OpenCL function LivermoreRayleighSampleSecondaries]     Photon direction: %e %e %e\n", kGammaDirection.x, kGammaDirection.y, kGammaDirection.z);
-    printf("[GGEMS OpenCL function LivermoreRayleighSampleSecondaries]     Number of element in material %s: %d\n", particle_cross_sections->material_names_[index_material], materials->number_of_chemical_elements_[index_material]);
+    printf("[GGEMS OpenCL function LivermoreRayleighSampleSecondaries]     Number of element in material %s: %d\n", particle_cross_sections->material_names_[material_id], materials->number_of_chemical_elements_[material_id]);
     printf("[GGEMS OpenCL function LivermoreRayleighSampleSecondaries]     Selected element: %u\n", selected_atomic_number_z);
-    printf("[GGEMS OpenCL function LivermoreRayleighSampleSecondaries]     Scattered photon direction: %e %e %e\n", primary_particle->dx_[index_particle], primary_particle->dy_[index_particle], primary_particle->dz_[index_particle]);
+    printf("[GGEMS OpenCL function LivermoreRayleighSampleSecondaries]     Scattered photon direction: %e %e %e\n", primary_particle->dx_[particle_id], primary_particle->dy_[particle_id], primary_particle->dz_[particle_id]);
   }
   #endif
 }

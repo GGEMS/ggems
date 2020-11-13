@@ -61,7 +61,7 @@ typedef struct GGEMSParticleCrossSections_t
   // 256: Max number of materials [0...255]
   // MAX_CROSS_SECTION_TABLE_NUMBER_BINS: Max number of bins [0...2047]
   GGchar number_of_activated_photon_processes_; /*!< Number of activated photon processes */
-  GGchar index_photon_cs_[NUMBER_PHOTON_PROCESSES]; /*!< Index of activated photon process, ex: if only Rayleigh activate index_photon_cs[0] = 2 */
+  GGchar photon_cs_id_[NUMBER_PHOTON_PROCESSES]; /*!< Index of activated photon process, ex: if only Rayleigh activate index_photon_cs[0] = 2 */
   GGfloat photon_cross_sections_[NUMBER_PHOTON_PROCESSES][256*MAX_CROSS_SECTION_TABLE_NUMBER_BINS]; /*!< Photon cross sections per material in mm-1 */
   GGfloat photon_cross_sections_per_atom_[NUMBER_PHOTON_PROCESSES][101*MAX_CROSS_SECTION_TABLE_NUMBER_BINS]; /*!< Photon cross sections per atom in mm-1, 100 chemical elements + 1 first empty element */
 

@@ -186,6 +186,13 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     inline std::size_t GetMaxWorkGroupSize(void) const { return device_max_work_group_size_[context_index_];}
 
     /*!
+      \fn inline std::size_t GetWorkGroupSize(void) const
+      \return Work group size
+      \brief Get the work group size on activated OpenCL context
+    */
+    inline std::size_t GetWorkGroupSize(void) const { return device_work_group_size_[context_index_];}
+
+    /*!
       \fn std::string GetNameOfActivatedContext(void) const
       \return name of activated context
       \brief Get the name of the activated context
@@ -319,6 +326,7 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     std::vector<GGbool> device_available_; /*!< Flag on device availability */
     std::vector<GGbool> device_compiler_available_; /*!< Flag on compiler availability */
     std::vector<std::size_t> device_max_work_group_size_; /*< Maximum work group size */
+    std::vector<std::size_t> device_work_group_size_; /*< Work group size */
     std::vector<GGuint> device_max_work_item_dimensions_; /*!< Maximum work item dimensions */
     std::vector<std::size_t> device_max_work_item_sizes_; /*!< Maximum work item sizes */
     std::vector<GGulong> device_global_mem_cache_size_; /*!< Global memory cache size */

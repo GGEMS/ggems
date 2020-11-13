@@ -124,8 +124,8 @@ inline GGfloat3 LocalToGlobalPosition(GGfloat44 const* matrix, GGfloat3 const* p
  \fn inline GGfloat3 GlobalToLocalDirection(GGfloat44 const* matrix, GGfloat3 const* point)
  \param matrix - A matrix (4x4)
  \param point - Point in 3D (x, y, z)
- \return The direction expresses in the local frame
- \brief Transform a 3D direction from local to global frame
+ \return The direction expresses in the global frame
+ \brief Transform a 3D direction from global to local frame
 */
 inline GGfloat3 GlobalToLocalDirection(GGfloat44 const* matrix, GGfloat3 const* point)
 {
@@ -137,6 +137,29 @@ inline GGfloat3 GlobalToLocalDirection(GGfloat44 const* matrix, GGfloat3 const* 
   };
 
   return normalize(GGfloat33MultGGfloat3(&rotation_transpose, point));
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+/*!
+ \fn inline GGfloat3 LocalToGlobalDirection(GGfloat44 const* matrix, GGfloat3 const* point)
+ \param matrix - A matrix (4x4)
+ \param point - Point in 3D (x, y, z)
+ \return The direction expresses in the local frame
+ \brief Transform a 3D direction from local to global frame
+*/
+inline GGfloat3 LocalToGlobalDirection(GGfloat44 const* matrix, GGfloat3 const* point)
+{
+  // Extract transpose sub-matrix for rotation
+  GGfloat33 rotation = {
+    {matrix->m0_[0], matrix->m0_[1], matrix->m0_[2]},
+    {matrix->m1_[0], matrix->m1_[1], matrix->m1_[2]},
+    {matrix->m2_[0], matrix->m2_[1], matrix->m2_[2]}
+  };
+
+  return normalize(GGfloat33MultGGfloat3(&rotation, point));
 }
 
 #endif

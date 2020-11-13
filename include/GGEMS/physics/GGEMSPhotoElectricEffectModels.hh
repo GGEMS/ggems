@@ -38,17 +38,17 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 /*!
-  \fn inline void StandardPhotoElectricSampleSecondaries(__global GGEMSPrimaryParticles* primary_particle, GGint const index_particle)
+  \fn inline void StandardPhotoElectricSampleSecondaries(global GGEMSPrimaryParticles* primary_particle, GGint const particle_id)
   \param primary_particle - buffer of particles
-  \param index_particle - index of the particle
+  \param particle_id - index of the particle
   \brief Standard Photoelectric model
 */
 inline void StandardPhotoElectricSampleSecondaries(
-  __global GGEMSPrimaryParticles* primary_particle,
-  GGint const index_particle
+  global GGEMSPrimaryParticles* primary_particle,
+  GGint const particle_id
 )
 {
-  primary_particle->status_[index_particle] = DEAD;
+  primary_particle->status_[particle_id] = DEAD;
 }
 
 #endif
