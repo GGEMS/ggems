@@ -104,23 +104,9 @@ void GGEMSVoxelizedPhantom::Initialize(void)
   // Load voxelized phantom from MHD file and storing materials
   solid_.at(0)->Initialize(materials_);
 
-  // Perform translation and/or rotation depending on the order declaration
-  if (update_pos_ >= 0 && update_rot_ >= 0) {
-    if (update_pos_ < update_rot_) {
-      solid_.at(0)->SetPosition(position_xyz_);
-      solid_.at(0)->SetRotation(rotation_xyz_);
-    }
-    else {
-      solid_.at(0)->SetRotation(rotation_xyz_);
-      solid_.at(0)->SetPosition(position_xyz_);
-    }
-  }
-  else if (update_pos_ == 0) {
-    solid_.at(0)->SetPosition(position_xyz_);
-  }
-  else if (update_rot_ == 0) {
-    solid_.at(0)->SetRotation(rotation_xyz_);
-  }
+  // Perform rotation before position
+  if (is_update_rot_) solid_.at(0)->SetRotation(rotation_xyz_);
+  if (is_update_pos_) solid_.at(0)->SetPosition(position_xyz_);
 
   // Store the transformation matrix in solid object
   solid_.at(0)->GetTransformationMatrix();
