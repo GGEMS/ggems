@@ -89,20 +89,20 @@ class GGEMS_EXPORT GGEMSSystem : public GGEMSNavigator
     GGEMSSystem& operator=(GGEMSSystem const&& system) = delete;
 
     /*!
-      \fn void SetNumberOfModules(GGuint const& n_module_x, GGuint const& n_module_y)
+      \fn void SetNumberOfModules(GGint const& n_module_x, GGint const& n_module_y)
       \param n_module_x - Number of module in X (local axis of detector)
       \param n_module_y - Number of module in Y (local axis of detector)
       \brief set the number of module in X, Y of local axis of detector
     */
-    void SetNumberOfModules(GGuint const& n_module_x, GGuint const& n_module_y);
+    void SetNumberOfModules(GGint const& n_module_x, GGint const& n_module_y);
 
     /*!
-      \fn void SetNumberOfDetectionElementsInsideModule(GGuint const& n_detection_element_x, GGuint const& n_detection_element_y)
+      \fn void SetNumberOfDetectionElementsInsideModule(GGint const& n_detection_element_x, GGint const& n_detection_element_y)
       \param n_detection_element_x - Detection element in X
       \param n_detection_element_y - Detection element in Y
       \brief set the number of detection elements in X and Y
     */
-    void SetNumberOfDetectionElementsInsideModule(GGuint const& n_detection_element_x, GGuint const& n_detection_element_y);
+    void SetNumberOfDetectionElementsInsideModule(GGint const& n_detection_element_x, GGint const& n_detection_element_y);
 
     /*!
       \fn void SetSizeOfDetectionElements(GGfloat const& detection_element_x, GGfloat const& detection_element_y, GGfloat const& detection_element_z, std::string const& unit)
@@ -139,11 +139,10 @@ class GGEMS_EXPORT GGEMSSystem : public GGEMSNavigator
     virtual void CheckParameters(void) const;
 
   protected:
-    GGuint2 number_of_modules_xy_; /*!< Number of the detection modules */
-    GGuint2 number_of_detection_elements_inside_module_xy_; /*!< Number of pixels (X,Y) in a module */
+    GGint2 number_of_modules_xy_; /*!< Number of the detection modules */
+    GGint2 number_of_detection_elements_inside_module_xy_; /*!< Number of pixels (X,Y) in a module */
     GGfloat3 size_of_detection_elements_xyz_; /*!< Size of pixel in each direction */
-    std::string material_name_; /*!< Name of material for detection elements */
-    GGfloat3 position_; /*!< Position of system in global world */
+    //std::string material_name_; /*!< Name of material for detection elements */
 };
 
 #endif // End of GUARD_GGEMS_SYSTEMS_GGEMSSYSTEM_HH

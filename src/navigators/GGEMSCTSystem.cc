@@ -99,25 +99,25 @@ void GGEMSCTSystem::CheckParameters(void) const
   GGcout("GGEMSCTSystem", "CheckParameters", 3) << "Checking the mandatory parameters..." << GGendl;
 
   // Checking the CT type
-  if (ct_system_type_ != "curved" && ct_system_type_ != "flat") {
-    std::ostringstream oss(std::ostringstream::out);
-    oss << "Available CT system types: 'curved' or 'flat'";
-    GGEMSMisc::ThrowException("GGEMSCTSystem", "CheckParameters", oss.str());
-  }
+  // if (ct_system_type_ != "curved" && ct_system_type_ != "flat") {
+  //   std::ostringstream oss(std::ostringstream::out);
+  //   oss << "Available CT system types: 'curved' or 'flat'";
+  //   GGEMSMisc::ThrowException("GGEMSCTSystem", "CheckParameters", oss.str());
+  // }
 
   // Checking Source Isocenter Distance (SID)
-  if (source_isocenter_distance_ == 0.0f) {
-    std::ostringstream oss(std::ostringstream::out);
-    oss << "For CT system, source isocenter distance (SID) has to be > 0.0 mm!!!";
-    GGEMSMisc::ThrowException("GGEMSCTSystem", "CheckParameters", oss.str());
-  }
+  // if (source_isocenter_distance_ == 0.0f) {
+  //   std::ostringstream oss(std::ostringstream::out);
+  //   oss << "For CT system, source isocenter distance (SID) has to be > 0.0 mm!!!";
+  //   GGEMSMisc::ThrowException("GGEMSCTSystem", "CheckParameters", oss.str());
+  // }
 
   // Checking Source Detector Distance (SDD)
-  if (source_detector_distance_ == 0.0f) {
-    std::ostringstream oss(std::ostringstream::out);
-    oss << "For CT system, source detector distance (SDD) has to be > 0.0 mm!!!";
-    GGEMSMisc::ThrowException("GGEMSCTSystem", "CheckParameters", oss.str());
-  }
+  // if (source_detector_distance_ == 0.0f) {
+  //   std::ostringstream oss(std::ostringstream::out);
+  //   oss << "For CT system, source detector distance (SDD) has to be > 0.0 mm!!!";
+  //   GGEMSMisc::ThrowException("GGEMSCTSystem", "CheckParameters", oss.str());
+  // }
 
   // Call parent class
   GGEMSSystem::CheckParameters();
@@ -212,9 +212,7 @@ void GGEMSCTSystem::Initialize(void)
   else if (ct_system_type_ == "flat") {
     InitializeFlatGeometry();
   }
-
-  // Adding material to the system
-  materials_->AddMaterial(material_name_);*/
+*/
 
   // Initialize parent class
   GGEMSNavigator::Initialize();
@@ -233,7 +231,7 @@ GGEMSCTSystem* create_ggems_ct_system(char const* ct_system_name)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_number_of_modules_ggems_ct_system(GGEMSCTSystem* ct_system, GGuint const module_x, GGuint const module_y)
+void set_number_of_modules_ggems_ct_system(GGEMSCTSystem* ct_system, GGint const module_x, GGint const module_y)
 {
   ct_system->SetNumberOfModules(module_x, module_y);
 }
@@ -251,7 +249,7 @@ void set_ct_system_type_ggems_ct_system(GGEMSCTSystem* ct_system, char const* ct
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_number_of_detection_elements_ggems_ct_system(GGEMSCTSystem* ct_system, GGuint const n_detection_element_x, GGuint const n_detection_element_y)
+void set_number_of_detection_elements_ggems_ct_system(GGEMSCTSystem* ct_system, GGint const n_detection_element_x, GGint const n_detection_element_y)
 {
   ct_system->SetNumberOfDetectionElementsInsideModule(n_detection_element_x, n_detection_element_y);
 }

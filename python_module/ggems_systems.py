@@ -24,13 +24,13 @@ class GGEMSCTSystem(object):
     def __init__(self, ct_system_name):
         ggems_lib.create_ggems_ct_system.restype = ctypes.c_void_p
 
-        ggems_lib.set_number_of_modules_ggems_ct_system.argtypes = [ctypes.c_void_p, ctypes.c_uint, ctypes.c_uint]
+        ggems_lib.set_number_of_modules_ggems_ct_system.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_int]
         ggems_lib.set_number_of_modules_ggems_ct_system.restype = ctypes.c_void_p
 
         ggems_lib.set_ct_system_type_ggems_ct_system.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
         ggems_lib.set_ct_system_type_ggems_ct_system.restype = ctypes.c_void_p
 
-        ggems_lib.set_number_of_detection_elements_ggems_ct_system.argtypes = [ctypes.c_void_p, ctypes.c_uint, ctypes.c_uint]
+        ggems_lib.set_number_of_detection_elements_ggems_ct_system.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_int]
         ggems_lib.set_number_of_detection_elements_ggems_ct_system.restype = ctypes.c_void_p
 
         ggems_lib.set_size_of_detection_elements_ggems_ct_system.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_char_p]

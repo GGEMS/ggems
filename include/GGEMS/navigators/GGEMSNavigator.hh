@@ -218,8 +218,8 @@ class GGEMS_EXPORT GGEMSNavigator
     GGfloat3 rotation_xyz_; /*!< Rotation of the navigator in X, Y and Z */
     GGfloat33 local_axis_; /*!< Local axis for navigator */
     std::size_t navigator_id_; /*!< Index of the navigator */
-    GGint update_pos_; /*!< Updating navigator position */
-    GGint update_rot_; /*!< Updating navigator rotation */
+    bool is_update_pos_; /*!< Updating navigator position */
+    bool is_update_rot_; /*!< Updating navigator rotation */
 
     std::vector<std::shared_ptr<GGEMSSolid>> solid_; /*!< Solid with geometric infos and label */
     std::shared_ptr<GGEMSMaterials> materials_; /*!< Materials of phantom */
