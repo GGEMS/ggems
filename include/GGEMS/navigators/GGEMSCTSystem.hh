@@ -208,4 +208,15 @@ extern "C" GGEMS_EXPORT void set_source_isocenter_distance_ggems_ct_system(GGEMS
 */
 extern "C" GGEMS_EXPORT void set_source_detector_distance_ggems_ct_system(GGEMSCTSystem* ct_system, GGfloat const source_detector_distance, char const* unit);
 
+/*!
+  \fn void set_rotation_ggems_ct_system(GGEMSCTSystem* ct_system, GGfloat const rx, GGfloat const ry, GGfloat const rz, char const* unit)
+  \param ct_system - pointer on ct system
+  \param rx - Rotation around X along local axis
+  \param ry - Rotation around Y along local axis
+  \param rz - Rotation around Z along local axis
+  \param unit - unit of the angle
+  \brief Set the rotation of the voxelized phantom around local axis
+*/
+extern "C" GGEMS_EXPORT void set_rotation_ggems_ct_system(GGEMSCTSystem* ct_system, GGfloat const rx, GGfloat const ry, GGfloat const rz, char const* unit);
+
 #endif // End of GUARD_GGEMS_SYSTEMS_GGEMSSYSTEM_HH

@@ -101,23 +101,23 @@ void GGEMSSystem::CheckParameters(void) const
 {
   GGcout("GGEMSSystem", "CheckParameters", 3) << "Checking the mandatory parameters..." << GGendl;
 
-  // if (number_of_modules_xy_.s0 == 0 || number_of_modules_xy_.s1 == 0) {
-  //   std::ostringstream oss(std::ostringstream::out);
-  //   oss << "In system parameters, number of module in x and y axis (local axis) has to be > 0!!!";
-  //   GGEMSMisc::ThrowException("GGEMSSystem", "CheckParameters", oss.str());
-  // }
+  if (number_of_modules_xy_.s0 == 0 || number_of_modules_xy_.s1 == 0) {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "In system parameters, number of module in x and y axis (local axis) has to be > 0!!!";
+    GGEMSMisc::ThrowException("GGEMSSystem", "CheckParameters", oss.str());
+  }
 
-  // if (number_of_detection_elements_inside_module_xy_.s0 == 0 || number_of_detection_elements_inside_module_xy_.s1 == 0) {
-  //   std::ostringstream oss(std::ostringstream::out);
-  //   oss << "In system parameters, number of detection elements in x and y axis (local axis) has to be > 0!!!";
-  //   GGEMSMisc::ThrowException("GGEMSSystem", "CheckParameters", oss.str());
-  // }
+  if (number_of_detection_elements_inside_module_xy_.s0 == 0 || number_of_detection_elements_inside_module_xy_.s1 == 0) {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "In system parameters, number of detection elements in x and y axis (local axis) has to be > 0!!!";
+    GGEMSMisc::ThrowException("GGEMSSystem", "CheckParameters", oss.str());
+  }
 
-  // if (size_of_detection_elements_xyz_.s0 == 0.0f || size_of_detection_elements_xyz_.s1 == 0.0f || size_of_detection_elements_xyz_.s2 == 0.0f) {
-  //   std::ostringstream oss(std::ostringstream::out);
-  //   oss << "In system parameters, size of detection elements (local axis) has to be > 0.0 mm!!!";
-  //   GGEMSMisc::ThrowException("GGEMSSystem", "CheckParameters", oss.str());
-  // }
+  if (size_of_detection_elements_xyz_.s0 == 0.0f || size_of_detection_elements_xyz_.s1 == 0.0f || size_of_detection_elements_xyz_.s2 == 0.0f) {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "In system parameters, size of detection elements (local axis) has to be > 0.0 mm!!!";
+    GGEMSMisc::ThrowException("GGEMSSystem", "CheckParameters", oss.str());
+  }
 
   if (materials_->GetNumberOfMaterials() == 0) {
     std::ostringstream oss(std::ostringstream::out);

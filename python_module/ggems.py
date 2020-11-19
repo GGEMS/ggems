@@ -22,7 +22,7 @@ from ggems_opencl import GGEMSOpenCLManager
 from ggems_materials import GGEMSMaterialsDatabaseManager, GGEMSMaterials
 from ggems_systems import GGEMSCTSystem
 from ggems_phantoms import GGEMSVoxelizedPhantom
-from ggems_sources import GGEMSSourceManager, GGEMSXRaySource
+from ggems_sources import GGEMSXRaySource
 from ggems_processes import GGEMSProcessesManager, GGEMSRangeCutsManager, GGEMSCrossSections
 from ggems_volume_creator import GGEMSVolumeCreatorManager, GGEMSTube, GGEMSBox, GGEMSSphere
 
@@ -117,7 +117,6 @@ class GGEMSManager(object):
 # Calling all C++ singleton managers
 opencl_manager = GGEMSOpenCLManager()
 materials_database_manager = GGEMSMaterialsDatabaseManager()
-source_manager = GGEMSSourceManager()
 processes_manager = GGEMSProcessesManager()
 range_cuts_manager = GGEMSRangeCutsManager()
 ggems_manager = GGEMSManager()

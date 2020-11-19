@@ -142,7 +142,6 @@ class GGEMS_EXPORT GGEMSSystem : public GGEMSNavigator
     GGint2 number_of_modules_xy_; /*!< Number of the detection modules */
     GGint2 number_of_detection_elements_inside_module_xy_; /*!< Number of pixels (X,Y) in a module */
     GGfloat3 size_of_detection_elements_xyz_; /*!< Size of pixel in each direction */
-    //std::string material_name_; /*!< Name of material for detection elements */
 };
 
 #endif // End of GUARD_GGEMS_SYSTEMS_GGEMSSYSTEM_HH

@@ -78,6 +78,13 @@ void GGEMSNavigatorManager::Initialize(void) const
 {
   GGcout("GGEMSNavigatorManager", "Initialize", 3) << "Initializing the GGEMS navigator(s)..." << GGendl;
 
+  // A navigator must be declared
+  if (navigators_.empty()) {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "A navigator (detector or phantom) has to be declared!!!";
+    GGEMSMisc::ThrowException("GGEMSNavigatorManager", "Initialize", oss.str());
+  }
+
   // Initialization of phantoms
   for (auto&& i : navigators_) i->Initialize();
 

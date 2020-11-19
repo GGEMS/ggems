@@ -85,31 +85,30 @@ void GGEMSVoxelizedPhantom::Initialize(void)
 {
   GGcout("GGEMSVoxelizedPhantom", "Initialize", 3) << "Initializing a GGEMS voxelized phantom..." << GGendl;
 
-  // Checking the parameters of phantom
   CheckParameters();
 
   // Initializing voxelized solid for geometric navigation
-  solid_.emplace_back(new GGEMSVoxelizedSolid(voxelized_phantom_filename_, range_data_filename_));
+  solids_.emplace_back(new GGEMSVoxelizedSolid(voxelized_phantom_filename_, range_data_filename_));
 
   // Enabling tracking if necessary
-  if (GGEMSManager::GetInstance().IsTrackingVerbose()) solid_.at(0)->EnableTracking();
+  if (GGEMSManager::GetInstance().IsTrackingVerbose()) solids_.at(0)->EnableTracking();
 
   // Getting the current number of registered solid
   GGEMSNavigatorManager& navigator_manager = GGEMSNavigatorManager::GetInstance();
   // Get the number of already registered buffer, we take the total number of solids (including the all current solids)
   // minus all current solids
-  std::size_t number_of_registered_solids = navigator_manager.GetNumberOfRegisteredSolids() - solid_.size();
-  solid_.at(0)->SetSolidID<GGEMSVoxelizedSolidData>(number_of_registered_solids);
+  std::size_t number_of_registered_solids = navigator_manager.GetNumberOfRegisteredSolids() - solids_.size();
+  solids_.at(0)->SetSolidID<GGEMSVoxelizedSolidData>(number_of_registered_solids);
 
   // Load voxelized phantom from MHD file and storing materials
-  solid_.at(0)->Initialize(materials_);
+  solids_.at(0)->Initialize(materials_);
 
   // Perform rotation before position
-  if (is_update_rot_) solid_.at(0)->SetRotation(rotation_xyz_);
-  if (is_update_pos_) solid_.at(0)->SetPosition(position_xyz_);
+  if (is_update_rot_) solids_.at(0)->SetRotation(rotation_xyz_);
+  if (is_update_pos_) solids_.at(0)->SetPosition(position_xyz_);
 
   // Store the transformation matrix in solid object
-  solid_.at(0)->GetTransformationMatrix();
+  solids_.at(0)->GetTransformationMatrix();
 
   // Initialize parent class
   GGEMSNavigator::Initialize();
@@ -160,4 +159,3 @@ void set_rotation_ggems_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phant
 {
   voxelized_phantom->SetRotation(rx, ry, rz, unit);
 }
-
