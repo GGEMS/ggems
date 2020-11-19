@@ -136,7 +136,7 @@ class GGEMS_EXPORT GGEMSNavigator
       \brief get the number of solids inside the navigator
       \return the number of solids
     */
-    inline std::size_t GetNumberOfSolids(void) const {return solid_.size();}
+    inline std::size_t GetNumberOfSolids(void) const {return solids_.size();}
 
     /*!
       \fn inline std::weak_ptr<GGEMSMaterials> GetMaterials(void) const
@@ -221,7 +221,7 @@ class GGEMS_EXPORT GGEMSNavigator
     bool is_update_pos_; /*!< Updating navigator position */
     bool is_update_rot_; /*!< Updating navigator rotation */
 
-    std::vector<std::shared_ptr<GGEMSSolid>> solid_; /*!< Solid with geometric infos and label */
+    std::vector<std::shared_ptr<GGEMSSolid>> solids_; /*!< Solid with geometric infos and label */
     std::shared_ptr<GGEMSMaterials> materials_; /*!< Materials of phantom */
     std::shared_ptr<GGEMSCrossSections> cross_sections_; /*!< Cross section table for process */
 };

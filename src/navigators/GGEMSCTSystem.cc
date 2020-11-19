@@ -98,28 +98,25 @@ void GGEMSCTSystem::CheckParameters(void) const
 {
   GGcout("GGEMSCTSystem", "CheckParameters", 3) << "Checking the mandatory parameters..." << GGendl;
 
-  // Checking the CT type
-  // if (ct_system_type_ != "curved" && ct_system_type_ != "flat") {
-  //   std::ostringstream oss(std::ostringstream::out);
-  //   oss << "Available CT system types: 'curved' or 'flat'";
-  //   GGEMSMisc::ThrowException("GGEMSCTSystem", "CheckParameters", oss.str());
-  // }
+  if (ct_system_type_ != "curved" && ct_system_type_ != "flat") {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "Available CT system types: 'curved' or 'flat'";
+    GGEMSMisc::ThrowException("GGEMSCTSystem", "CheckParameters", oss.str());
+  }
 
-  // Checking Source Isocenter Distance (SID)
-  // if (source_isocenter_distance_ == 0.0f) {
-  //   std::ostringstream oss(std::ostringstream::out);
-  //   oss << "For CT system, source isocenter distance (SID) has to be > 0.0 mm!!!";
-  //   GGEMSMisc::ThrowException("GGEMSCTSystem", "CheckParameters", oss.str());
-  // }
+  if (source_isocenter_distance_ == 0.0f) {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "For CT system, source isocenter distance (SID) has to be > 0.0 mm!!!";
+    GGEMSMisc::ThrowException("GGEMSCTSystem", "CheckParameters", oss.str());
+  }
 
-  // Checking Source Detector Distance (SDD)
-  // if (source_detector_distance_ == 0.0f) {
-  //   std::ostringstream oss(std::ostringstream::out);
-  //   oss << "For CT system, source detector distance (SDD) has to be > 0.0 mm!!!";
-  //   GGEMSMisc::ThrowException("GGEMSCTSystem", "CheckParameters", oss.str());
-  // }
+  if (source_detector_distance_ == 0.0f) {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "For CT system, source detector distance (SDD) has to be > 0.0 mm!!!";
+    GGEMSMisc::ThrowException("GGEMSCTSystem", "CheckParameters", oss.str());
+  }
 
-  // Call parent class
+  // Call parent parameters
   GGEMSSystem::CheckParameters();
 }
 
@@ -288,4 +285,13 @@ void set_source_isocenter_distance_ggems_ct_system(GGEMSCTSystem* ct_system, GGf
 void set_source_detector_distance_ggems_ct_system(GGEMSCTSystem* ct_system, GGfloat const source_detector_distance, char const* unit)
 {
   ct_system->SetSourceDetectorDistance(source_detector_distance, unit);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void set_rotation_ggems_ct_system(GGEMSCTSystem* ct_system, GGfloat const rx, GGfloat const ry, GGfloat const rz, char const* unit)
+{
+  ct_system->SetRotation(rx, ry, rz, unit);
 }

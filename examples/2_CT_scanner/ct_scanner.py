@@ -35,21 +35,21 @@ materials_database_manager.set_materials('data/materials.txt')
 
 # ------------------------------------------------------------------------------
 # STEP 4: Phantoms and systems
-phantom = GGEMSVoxelizedPhantom('phantom')
-phantom.set_phantom('data/phantom.mhd', 'data/range_phantom.txt')
-phantom.set_rotation(0.0, 0.0, 0.0, 'deg')
-phantom.set_position(0.0, 0.0, 0.0, 'mm')
+# phantom = GGEMSVoxelizedPhantom('phantom')
+# phantom.set_phantom('data/phantom.mhd', 'data/range_phantom.txt')
+# phantom.set_rotation(0.0, 0.0, 0.0, 'deg')
+# phantom.set_position(0.0, 0.0, 0.0, 'mm')
 
 # TODO bien gérer les materiaux et introduire la rotation, position et gap angulaire entre module!!!!
 ct_detector = GGEMSCTSystem('SOMATOM_Definition_EDGE') 
-# ct_detector.set_ct_type('curved')
-# # ct_detector.set_number_of_modules(1, 46)
-# ct_detector.set_number_of_modules(1, 3)
-# ct_detector.set_number_of_detection_elements(64, 16)
-# ct_detector.set_size_of_detection_elements(0.6, 0.6, 0.6, 'mm')
+ct_detector.set_ct_type('curved')
+ct_detector.set_number_of_modules(1, 46)
+ct_detector.set_number_of_detection_elements(64, 16)
+ct_detector.set_size_of_detection_elements(0.6, 0.6, 0.6, 'mm')
 ct_detector.set_material('GOS')
-# ct_detector.set_source_detector_distance(1085.6, 'mm')
-# ct_detector.set_source_isocenter_distance(595.0, 'mm')
+ct_detector.set_source_detector_distance(1085.6, 'mm')
+ct_detector.set_source_isocenter_distance(595.0, 'mm')
+ct_detector.set_rotation(0.0, 0.0, 0.0, 'deg')
 
 # ------------------------------------------------------------------------------
 # STEP 5: Physics
@@ -64,7 +64,7 @@ processes_manager.set_cross_section_table_energy_max(1.0, 'MeV')
 
 # ------------------------------------------------------------------------------
 # STEP 6: Cuts, by default but are 1 um
-# range_cuts_manager.set_cut('gamma', 1.0, 'mm', 'all')
+range_cuts_manager.set_cut('gamma', 1.0, 'mm', 'all')
 
 # # ------------------------------------------------------------------------------
 # # STEP 7: Source

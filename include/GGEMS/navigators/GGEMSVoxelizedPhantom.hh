@@ -141,12 +141,12 @@ extern "C" GGEMS_EXPORT void set_position_ggems_voxelized_phantom(GGEMSVoxelized
 
 /*!
   \fn void set_rotation_ggems_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, GGfloat const rx, GGfloat const ry, GGfloat const rz, char const* unit)
-  \paramvoxelized_phantom - pointer on voxelized phantom
-  \param rx - Rotation around X along global axis
-  \param ry - Rotation around Y along global axis
-  \param rz - Rotation around Z along global axis
-  \param unit - unit of the degree
-  \brief Set the rotation of the voxelized phantom around global axis
+  \param voxelized_phantom - pointer on voxelized phantom
+  \param rx - Rotation around X along local axis
+  \param ry - Rotation around Y along local axis
+  \param rz - Rotation around Z along local axis
+  \param unit - unit of the angle
+  \brief Set the rotation of the voxelized phantom around local axis
 */
 extern "C" GGEMS_EXPORT void set_rotation_ggems_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, GGfloat const rx, GGfloat const ry, GGfloat const rz, char const* unit);
 

@@ -142,7 +142,7 @@ void GGEMSNavigator::Initialize(void)
 DurationNano GGEMSNavigator::GetAllKernelParticleSolidDistanceTimer(void) const
 {
   DurationNano total_duration = GGEMSChrono::Zero();
-  for (auto&& i : solid_) total_duration += i->GetKernelParticleSolidDistanceTimer();
+  for (auto&& i : solids_) total_duration += i->GetKernelParticleSolidDistanceTimer();
   return total_duration;
 }
 
@@ -153,7 +153,7 @@ DurationNano GGEMSNavigator::GetAllKernelParticleSolidDistanceTimer(void) const
 DurationNano GGEMSNavigator::GetAllKernelProjectToSolidTimer(void) const
 {
   DurationNano total_duration = GGEMSChrono::Zero();
-  for (auto&& i : solid_) total_duration += i->GetKernelProjectToSolidTimer();
+  for (auto&& i : solids_) total_duration += i->GetKernelProjectToSolidTimer();
   return total_duration;
 }
 
@@ -164,7 +164,7 @@ DurationNano GGEMSNavigator::GetAllKernelProjectToSolidTimer(void) const
 DurationNano GGEMSNavigator::GetAllKernelTrackThroughSolidTimer(void) const
 {
   DurationNano total_duration = GGEMSChrono::Zero();
-  for (auto&& i : solid_) total_duration += i->GetKernelTrackThroughSolidTimer();
+  for (auto&& i : solids_) total_duration += i->GetKernelTrackThroughSolidTimer();
   return total_duration;
 }
 
@@ -174,7 +174,7 @@ DurationNano GGEMSNavigator::GetAllKernelTrackThroughSolidTimer(void) const
 
 void GGEMSNavigator::ParticleSolidDistance(void) const
 {
-  for (auto&& i : solid_) i->ParticleSolidDistance();
+  for (auto&& i : solids_) i->ParticleSolidDistance();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -183,7 +183,7 @@ void GGEMSNavigator::ParticleSolidDistance(void) const
 
 void GGEMSNavigator::ProjectToSolid(void) const
 {
-  for (auto&& i : solid_) i->ProjectToSolid();
+  for (auto&& i : solids_) i->ProjectToSolid();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -192,7 +192,7 @@ void GGEMSNavigator::ProjectToSolid(void) const
 
 void GGEMSNavigator::TrackThroughSolid(void) const
 {
-  for (auto&& i : solid_) i->TrackThroughSolid(cross_sections_, materials_);
+  for (auto&& i : solids_) i->TrackThroughSolid(cross_sections_, materials_);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -205,8 +205,8 @@ void GGEMSNavigator::PrintInfos(void) const
   GGcout("GGEMSNavigator", "PrintInfos", 0) << "GGEMSNavigator Infos:" << GGendl;
   GGcout("GGEMSNavigator", "PrintInfos", 0) << "---------------------" << GGendl;
   GGcout("GGEMSNavigator", "PrintInfos", 0) << "* Navigator name: " << navigator_name_ << GGendl;
-  for (std::size_t i = 0; i < solid_.size(); ++i) {
-    solid_.at(i)->PrintInfos();
+  for (std::size_t i = 0; i < solids_.size(); ++i) {
+    solids_.at(i)->PrintInfos();
   }
   materials_->PrintInfos();
   GGcout("GGEMSNavigator", "PrintInfos", 0) << GGendl;

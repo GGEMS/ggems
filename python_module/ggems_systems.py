@@ -19,51 +19,57 @@
 from ggems_lib import *
 
 class GGEMSCTSystem(object):
-    """Class for CT/CBCT for GGEMS simulation
-    """
-    def __init__(self, ct_system_name):
-        ggems_lib.create_ggems_ct_system.restype = ctypes.c_void_p
+  """Class for CT/CBCT for GGEMS simulation
+  """
+  def __init__(self, ct_system_name):
+      ggems_lib.create_ggems_ct_system.restype = ctypes.c_void_p
 
-        ggems_lib.set_number_of_modules_ggems_ct_system.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_int]
-        ggems_lib.set_number_of_modules_ggems_ct_system.restype = ctypes.c_void_p
+      ggems_lib.set_number_of_modules_ggems_ct_system.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_int]
+      ggems_lib.set_number_of_modules_ggems_ct_system.restype = ctypes.c_void_p
 
-        ggems_lib.set_ct_system_type_ggems_ct_system.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
-        ggems_lib.set_ct_system_type_ggems_ct_system.restype = ctypes.c_void_p
+      ggems_lib.set_ct_system_type_ggems_ct_system.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
+      ggems_lib.set_ct_system_type_ggems_ct_system.restype = ctypes.c_void_p
 
-        ggems_lib.set_number_of_detection_elements_ggems_ct_system.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_int]
-        ggems_lib.set_number_of_detection_elements_ggems_ct_system.restype = ctypes.c_void_p
+      ggems_lib.set_number_of_detection_elements_ggems_ct_system.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_int]
+      ggems_lib.set_number_of_detection_elements_ggems_ct_system.restype = ctypes.c_void_p
 
-        ggems_lib.set_size_of_detection_elements_ggems_ct_system.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_char_p]
-        ggems_lib.set_size_of_detection_elements_ggems_ct_system.restype = ctypes.c_void_p
+      ggems_lib.set_size_of_detection_elements_ggems_ct_system.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_char_p]
+      ggems_lib.set_size_of_detection_elements_ggems_ct_system.restype = ctypes.c_void_p
 
-        ggems_lib.set_material_name_ggems_ct_system.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
-        ggems_lib.set_material_name_ggems_ct_system.restype = ctypes.c_void_p
+      ggems_lib.set_material_name_ggems_ct_system.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
+      ggems_lib.set_material_name_ggems_ct_system.restype = ctypes.c_void_p
 
-        ggems_lib.set_source_isocenter_distance_ggems_ct_system.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_char_p]
-        ggems_lib.set_source_isocenter_distance_ggems_ct_system.restype = ctypes.c_void_p
+      ggems_lib.set_source_isocenter_distance_ggems_ct_system.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_char_p]
+      ggems_lib.set_source_isocenter_distance_ggems_ct_system.restype = ctypes.c_void_p
 
-        ggems_lib.set_source_detector_distance_ggems_ct_system.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_char_p]
-        ggems_lib.set_source_detector_distance_ggems_ct_system.restype = ctypes.c_void_p
+      ggems_lib.set_source_detector_distance_ggems_ct_system.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_char_p]
+      ggems_lib.set_source_detector_distance_ggems_ct_system.restype = ctypes.c_void_p
 
-        self.obj = ggems_lib.create_ggems_ct_system(ct_system_name.encode('ASCII'))
+      ggems_lib.set_rotation_ggems_ct_system.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_char_p]
+      ggems_lib.set_rotation_ggems_ct_system.restype = ctypes.c_void_p
 
-    def set_number_of_modules(self, module_x, module_y):
-        ggems_lib.set_number_of_modules_ggems_ct_system(self.obj, module_x, module_y)
+      self.obj = ggems_lib.create_ggems_ct_system(ct_system_name.encode('ASCII'))
 
-    def set_ct_type(self, ct_system_type):
-        ggems_lib.set_ct_system_type_ggems_ct_system(self.obj, ct_system_type.encode('ASCII'))
+  def set_number_of_modules(self, module_x, module_y):
+      ggems_lib.set_number_of_modules_ggems_ct_system(self.obj, module_x, module_y)
 
-    def set_number_of_detection_elements(self, element_x, element_y):
-        ggems_lib.set_number_of_detection_elements_ggems_ct_system(self.obj, element_x, element_y)
+  def set_ct_type(self, ct_system_type):
+      ggems_lib.set_ct_system_type_ggems_ct_system(self.obj, ct_system_type.encode('ASCII'))
 
-    def set_size_of_detection_elements(self, size_x, size_y, size_z, unit):
-        ggems_lib.set_size_of_detection_elements_ggems_ct_system(self.obj, size_x, size_y, size_z, unit.encode('ASCII'))
+  def set_number_of_detection_elements(self, element_x, element_y):
+      ggems_lib.set_number_of_detection_elements_ggems_ct_system(self.obj, element_x, element_y)
 
-    def set_material(self, material_name):
-        ggems_lib.set_material_name_ggems_ct_system(self.obj, material_name.encode('ASCII'))
+  def set_size_of_detection_elements(self, size_x, size_y, size_z, unit):
+      ggems_lib.set_size_of_detection_elements_ggems_ct_system(self.obj, size_x, size_y, size_z, unit.encode('ASCII'))
 
-    def set_source_detector_distance(self, sdd, unit):
-        ggems_lib.set_source_detector_distance_ggems_ct_system(self.obj, sdd, unit.encode('ASCII'))
+  def set_material(self, material_name):
+      ggems_lib.set_material_name_ggems_ct_system(self.obj, material_name.encode('ASCII'))
 
-    def set_source_isocenter_distance(self, sid, unit):
-        ggems_lib.set_source_isocenter_distance_ggems_ct_system(self.obj, sid, unit.encode('ASCII'))
+  def set_source_detector_distance(self, sdd, unit):
+      ggems_lib.set_source_detector_distance_ggems_ct_system(self.obj, sdd, unit.encode('ASCII'))
+
+  def set_source_isocenter_distance(self, sid, unit):
+      ggems_lib.set_source_isocenter_distance_ggems_ct_system(self.obj, sid, unit.encode('ASCII'))
+
+  def set_rotation(self, rx, ry, rz, unit):
+      ggems_lib.set_rotation_ggems_ct_system(self.obj, rx, ry, rz, unit.encode('ASCII'))

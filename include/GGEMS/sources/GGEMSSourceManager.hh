@@ -194,18 +194,4 @@ class GGEMS_EXPORT GGEMSSourceManager
     std::shared_ptr<GGEMSPseudoRandomGenerator> pseudo_random_generator_; /*!< Pointer on pseudo random generator */
 };
 
-/*!
-  \fn GGEMSSourceManager* get_instance_ggems_source_manager(void)
-  \return the pointer on the singleton
-  \brief Get the GGEMSSourceManager pointer for python user.
-*/
-extern "C" GGEMS_EXPORT GGEMSSourceManager* get_instance_ggems_source_manager(void);
-
-/*!
-  \fn void print_infos_ggems_source_manager(GGEMSSourceManager* source_manager)
-  \param source_manager - pointer on the source manager
-  \brief print infos about all declared sources
-*/
-extern "C" void GGEMS_EXPORT print_infos_ggems_source_manager(GGEMSSourceManager* source_manager);
-
 #endif // End of GUARD_GGEMS_SOURCES_GGEMSSOURCEMANAGER
