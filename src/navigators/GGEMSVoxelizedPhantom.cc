@@ -28,9 +28,12 @@
 */
 
 #include "GGEMS/navigators/GGEMSVoxelizedPhantom.hh"
+
 #include "GGEMS/geometries/GGEMSVoxelizedSolid.hh"
 #include "GGEMS/geometries/GGEMSVoxelizedSolidData.hh"
+
 #include "GGEMS/tools/GGEMSPrint.hh"
+
 #include "GGEMS/global/GGEMSManager.hh"
 
 ////////////////////////////////////////////////////////////////////////////////

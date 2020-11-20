@@ -62,9 +62,11 @@ GGEMSXRaySource::GGEMSXRaySource(std::string const& source_name)
 
   // Initialization of local axis for X-ray source
   geometry_transformation_->SetAxisTransformation(
-    {0.0f, 0.0f, -1.0f},
-    {0.0f, 1.0f, 0.0f},
-    {1.0f, 0.0f, 0.0f}
+    {
+      {0.0f, 0.0f, -1.0f},
+      {0.0f, 1.0f, 0.0f},
+      {1.0f, 0.0f, 0.0f}
+    }
   );
 
   // Initialization of parameters

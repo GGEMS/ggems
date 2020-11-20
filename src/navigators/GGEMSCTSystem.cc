@@ -28,8 +28,13 @@
 */
 
 #include "GGEMS/navigators/GGEMSCTSystem.hh"
+
 #include "GGEMS/tools/GGEMSPrint.hh"
+
 #include "GGEMS/geometries/GGEMSSolidBox.hh"
+#include "GGEMS/geometries/GGEMSSolidBoxData.hh"
+
+#include "GGEMS/global/GGEMSManager.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -171,45 +176,34 @@ void GGEMSCTSystem::Initialize(void)
 
   // Build CT system depending on input parameters  
   // Getting the current number of registered solid
-  /*GGEMSNavigatorManager& navigator_manager = GGEMSNavigatorManager::GetInstance();
-  std::size_t const kNumberOfAlreadyRegisteredSolids = navigator_manager.GetNumberOfRegisteredSolids() - solid_.size();
+  GGEMSNavigatorManager& navigator_manager = GGEMSNavigatorManager::GetInstance();
+  std::size_t number_of_registered_solids = navigator_manager.GetNumberOfRegisteredSolids() - solids_.size();
 
-  // Get number of solid to create
-  GGuint const kNSolids = number_of_modules_xy_.x * number_of_modules_xy_.y;
-  for (GGuint i = 0; i < kNSolids; ++i) {
-    solid_.emplace_back(new GGEMSSolidBox(
-      number_of_detection_elements_inside_module_xy_.x * size_of_detection_elements_xyz_.x,
-      number_of_detection_elements_inside_module_xy_.y * size_of_detection_elements_xyz_.y,
-      1.0f * size_of_detection_elements_xyz_.z
-    ));
-
-    // Enabling tracking if necessary
-    solid_.at(i)->EnableTracking();
-
-    // Set local axis in detector space
-    solid_.at(i)->SetLocalAxis(
-      {
-         0.0f, 0.0f, 1.0f, 0.0f,
-         0.0f, 1.0f, 0.0f, 0.0f,
-        -1.0f, 0.0f, 0.0f, 0.0f
-      }
+  // Creating all solids, solid box for CT
+  GGint number_of_solids = number_of_modules_xy_.x * number_of_modules_xy_.y;
+  for (GGint i = 0; i < number_of_solids; ++i) {
+    solids_.emplace_back(new GGEMSSolidBox(
+      number_of_detection_elements_inside_module_xyz_.x,
+      number_of_detection_elements_inside_module_xyz_.y,
+      number_of_detection_elements_inside_module_xyz_.z,
+      number_of_detection_elements_inside_module_xyz_.x * size_of_detection_elements_xyz_.x,
+      number_of_detection_elements_inside_module_xyz_.y * size_of_detection_elements_xyz_.y,
+      number_of_detection_elements_inside_module_xyz_.z * size_of_detection_elements_xyz_.z)
     );
 
+    // Enabling tracking if necessary
+    if (GGEMSManager::GetInstance().IsTrackingVerbose()) solids_.at(i)->EnableTracking();
+
     // Set solid id
-    solid_.at(i)->SetSolidID(i+kNumberOfAlreadyRegisteredSolids);
+    solids_.at(i)->SetSolidID<GGEMSSolidBoxData>(number_of_registered_solids+i);
 
     // Initialize kernels
-    solid_.at(i)->Initialize(std::weak_ptr<GGEMSMaterials>());
+    solids_.at(i)->Initialize(std::weak_ptr<GGEMSMaterials>());
   }
 
   // Initialize of the geometry depending on type of CT system
-  if (ct_system_type_ == "curved") {
-    InitializeCurvedGeometry();
-  }
-  else if (ct_system_type_ == "flat") {
-    InitializeFlatGeometry();
-  }
-*/
+  if (ct_system_type_ == "curved") InitializeCurvedGeometry();
+  else if (ct_system_type_ == "flat") InitializeFlatGeometry();
 
   // Initialize parent class
   GGEMSNavigator::Initialize();
@@ -246,9 +240,9 @@ void set_ct_system_type_ggems_ct_system(GGEMSCTSystem* ct_system, char const* ct
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_number_of_detection_elements_ggems_ct_system(GGEMSCTSystem* ct_system, GGint const n_detection_element_x, GGint const n_detection_element_y)
+void set_number_of_detection_elements_ggems_ct_system(GGEMSCTSystem* ct_system, GGint const n_detection_element_x, GGint const n_detection_element_y, GGint const n_detection_element_z)
 {
-  ct_system->SetNumberOfDetectionElementsInsideModule(n_detection_element_x, n_detection_element_y);
+  ct_system->SetNumberOfDetectionElementsInsideModule(n_detection_element_x, n_detection_element_y, n_detection_element_z);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

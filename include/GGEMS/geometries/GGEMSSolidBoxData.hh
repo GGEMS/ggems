@@ -1,5 +1,5 @@
-#ifndef GUARD_GGEMS_GEOMETRIES_GGEMSSOLIDBOXSTACK_HH
-#define GUARD_GGEMS_GEOMETRIES_GGEMSSOLIDBOXSTACK_HH
+#ifndef GUARD_GGEMS_GEOMETRIES_GGEMSSOLIDBOXDATA_HH
+#define GUARD_GGEMS_GEOMETRIES_GGEMSSOLIDBOXDATA_HH
 
 // ************************************************************************
 // * This file is part of GGEMS.                                          *
@@ -20,9 +20,9 @@
 // ************************************************************************
 
 /*!
-  \file GGEMSSolidBoxStack.hh
+  \file GGEMSSolidBoxData.hh
 
-  \brief Structure storing the stack of data for solid box
+  \brief Structure storing the data for solid box
 
   \author Julien BERT <julien.bert@univ-brest.fr>
   \author Didier BENOIT <didier.benoit@inserm.fr>
@@ -43,10 +43,10 @@
 */
 typedef struct GGEMSSolidBoxData_t
 {
-  GGfloat3 length_xyz_; /*!< Length of box in X, Y and Z */
-  GGfloat3 position_xyz_; /*!< Position of phantom in X, Y and Z */
-  GGEMSOBB obb_geometry_; /*!< OBB storing border of voxelized solid and matrix of transformation */
   GGint solid_id_; /*!< Navigator index */
+  GGint virtual_element_number_xyz_[3]; /*!< Number of virtual element in box */
+  GGfloat box_size_xyz_[3]; /*!< Length of box in X, Y and Z */
+  GGEMSOBB obb_geometry_; /*!< OBB storing border of voxelized solid and matrix of transformation */
 } GGEMSSolidBoxData; /*!< Using C convention name of struct to C++ (_t deletion) */
 
-#endif // GUARD_GGEMS_GEOMETRIES_GGEMSSOLIDBOXSTACK_HH
+#endif // GUARD_GGEMS_GEOMETRIES_GGEMSSOLIDBOXDATA_HH

@@ -28,10 +28,12 @@
   \date Wednesday June 10, 2020
 */
 
-#include "GGEMS/geometries/GGEMSVoxelizedSolid.hh"
-#include "GGEMS/io/GGEMSMHDImage.hh"
-#include "GGEMS/maths/GGEMSGeometryTransformation.hh"
 #include "GGEMS/geometries/GGEMSVoxelizedSolidData.hh"
+#include "GGEMS/geometries/GGEMSVoxelizedSolid.hh"
+
+#include "GGEMS/io/GGEMSMHDImage.hh"
+
+#include "GGEMS/maths/GGEMSGeometryTransformation.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -44,11 +46,19 @@ GGEMSVoxelizedSolid::GGEMSVoxelizedSolid(std::string const& volume_header_filena
 {
   GGcout("GGEMSVoxelizedSolid", "GGEMSVoxelizedSolid", 3) << "Allocation of GGEMSVoxelizedSolid..." << GGendl;
 
-  // Get the OpenCL manager
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
-  // Allocation of memory on OpenCL device for header data
+  // Allocating memory on OpenCL device
   solid_data_cl_ = opencl_manager.Allocate(nullptr, sizeof(GGEMSVoxelizedSolidData), CL_MEM_READ_WRITE);
+
+  // Local axis for phantom. Voxelized solid used only for phantom
+  geometry_transformation_->SetAxisTransformation(
+    {
+      {1.0f, 0.0f, 0.0f},
+      {0.0f, 1.0f, 0.0f},
+      {0.0f, 0.0f, 1.0f}
+    }
+  );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -72,15 +82,15 @@ void GGEMSVoxelizedSolid::InitializeKernel(void)
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
   // Getting the path to kernel
-  std::string const kOpenCLKernelPath = OPENCL_KERNEL_PATH;
-  std::string const kFilename1 = kOpenCLKernelPath + "/ParticleSolidDistanceGGEMSVoxelizedSolid.cl";
-  std::string const kFilename2 = kOpenCLKernelPath + "/ProjectToGGEMSVoxelizedSolid.cl";
-  std::string const kFilename3 = kOpenCLKernelPath + "/TrackThroughGGEMSVoxelizedSolid.cl";
+  std::string openCL_kernel_path = OPENCL_KERNEL_PATH;
+  std::string particle_solid_distance_filename = openCL_kernel_path + "/ParticleSolidDistanceGGEMSVoxelizedSolid.cl";
+  std::string project_to_filename = openCL_kernel_path + "/ProjectToGGEMSVoxelizedSolid.cl";
+  std::string track_through_filename = openCL_kernel_path + "/TrackThroughGGEMSVoxelizedSolid.cl";
 
   // Compiling the kernels
-  kernel_particle_solid_distance_cl_ = opencl_manager.CompileKernel(kFilename1, "particle_solid_distance_ggems_voxelized_solid", nullptr, const_cast<char*>(tracking_kernel_option_.c_str()));
-  kernel_project_to_solid_cl_ = opencl_manager.CompileKernel(kFilename2, "project_to_ggems_voxelized_solid", nullptr, const_cast<char*>(tracking_kernel_option_.c_str()));
-  kernel_track_through_solid_cl_ = opencl_manager.CompileKernel(kFilename3, "track_through_ggems_voxelized_solid", nullptr, const_cast<char*>(tracking_kernel_option_.c_str()));
+  kernel_particle_solid_distance_cl_ = opencl_manager.CompileKernel(particle_solid_distance_filename, "particle_solid_distance_ggems_voxelized_solid", nullptr, const_cast<char*>(tracking_kernel_option_.c_str()));
+  kernel_project_to_solid_cl_ = opencl_manager.CompileKernel(project_to_filename, "project_to_ggems_voxelized_solid", nullptr, const_cast<char*>(tracking_kernel_option_.c_str()));
+  kernel_track_through_solid_cl_ = opencl_manager.CompileKernel(track_through_filename, "track_through_ggems_voxelized_solid", nullptr, const_cast<char*>(tracking_kernel_option_.c_str()));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
