@@ -203,8 +203,6 @@ class GGEMS_EXPORT GGEMSSolid
     std::string tracking_kernel_option_; /*!< Preprocessor option for tracking */
 
     std::unique_ptr<GGEMSGeometryTransformation> geometry_transformation_; /*!< Pointer storing the geometry transformation */
-
-    std::shared_ptr<cl::Buffer> test_cl_;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -220,7 +218,7 @@ void GGEMSSolid::SetSolidID(std::size_t const& solid_id)
   // Get pointer on OpenCL device
   T* solid_data_device = opencl_manager.GetDeviceBuffer<T>(solid_data_cl_.get(), sizeof(T));
 
-  // solid_data_device->solid_id_ = static_cast<GGint>(solid_id);
+  solid_data_device->solid_id_ = static_cast<GGint>(solid_id);
 
   // Release the pointer
   opencl_manager.ReleaseDeviceBuffer(solid_data_cl_.get(), solid_data_device);

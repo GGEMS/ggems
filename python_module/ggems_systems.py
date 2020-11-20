@@ -30,7 +30,7 @@ class GGEMSCTSystem(object):
       ggems_lib.set_ct_system_type_ggems_ct_system.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
       ggems_lib.set_ct_system_type_ggems_ct_system.restype = ctypes.c_void_p
 
-      ggems_lib.set_number_of_detection_elements_ggems_ct_system.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_int]
+      ggems_lib.set_number_of_detection_elements_ggems_ct_system.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_int, ctypes.c_int]
       ggems_lib.set_number_of_detection_elements_ggems_ct_system.restype = ctypes.c_void_p
 
       ggems_lib.set_size_of_detection_elements_ggems_ct_system.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_char_p]
@@ -56,8 +56,8 @@ class GGEMSCTSystem(object):
   def set_ct_type(self, ct_system_type):
       ggems_lib.set_ct_system_type_ggems_ct_system(self.obj, ct_system_type.encode('ASCII'))
 
-  def set_number_of_detection_elements(self, element_x, element_y):
-      ggems_lib.set_number_of_detection_elements_ggems_ct_system(self.obj, element_x, element_y)
+  def set_number_of_detection_elements(self, element_x, element_y, element_z):
+      ggems_lib.set_number_of_detection_elements_ggems_ct_system(self.obj, element_x, element_y, element_z)
 
   def set_size_of_detection_elements(self, size_x, size_y, size_z, unit):
       ggems_lib.set_size_of_detection_elements_ggems_ct_system(self.obj, size_x, size_y, size_z, unit.encode('ASCII'))

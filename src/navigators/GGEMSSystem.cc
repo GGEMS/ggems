@@ -38,7 +38,7 @@
 GGEMSSystem::GGEMSSystem(std::string const& system_name)
 : GGEMSNavigator(system_name),
   number_of_modules_xy_({0, 0}),
-  number_of_detection_elements_inside_module_xy_({0, 0}),
+  number_of_detection_elements_inside_module_xyz_({0, 0, 0}),
   size_of_detection_elements_xyz_({0.0f, 0.0f, 0.0f})
 {
   GGcout("GGEMSSystem", "GGEMSSystem", 3) << "Allocation of GGEMSSystem..." << GGendl;
@@ -67,10 +67,11 @@ void GGEMSSystem::SetNumberOfModules(GGint const& n_module_x, GGint const& n_mod
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSSystem::SetNumberOfDetectionElementsInsideModule(GGint const& n_detection_element_x, GGint const& n_detection_element_y)
+void GGEMSSystem::SetNumberOfDetectionElementsInsideModule(GGint const& n_detection_element_x, GGint const& n_detection_element_y, GGint const& n_detection_element_z)
 {
-  number_of_detection_elements_inside_module_xy_.s0 = n_detection_element_x;
-  number_of_detection_elements_inside_module_xy_.s1 = n_detection_element_y;
+  number_of_detection_elements_inside_module_xyz_.s0 = n_detection_element_x;
+  number_of_detection_elements_inside_module_xyz_.s1 = n_detection_element_y;
+  number_of_detection_elements_inside_module_xyz_.s2 = n_detection_element_z;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -107,9 +108,9 @@ void GGEMSSystem::CheckParameters(void) const
     GGEMSMisc::ThrowException("GGEMSSystem", "CheckParameters", oss.str());
   }
 
-  if (number_of_detection_elements_inside_module_xy_.s0 == 0 || number_of_detection_elements_inside_module_xy_.s1 == 0) {
+  if (number_of_detection_elements_inside_module_xyz_.s0 == 0 || number_of_detection_elements_inside_module_xyz_.s1 == 0 || number_of_detection_elements_inside_module_xyz_.s2 == 0) {
     std::ostringstream oss(std::ostringstream::out);
-    oss << "In system parameters, number of detection elements in x and y axis (local axis) has to be > 0!!!";
+    oss << "In system parameters, number of detection elements in x, y and z axis (local axis) has to be > 0!!!";
     GGEMSMisc::ThrowException("GGEMSSystem", "CheckParameters", oss.str());
   }
 

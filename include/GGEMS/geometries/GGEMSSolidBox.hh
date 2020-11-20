@@ -42,12 +42,15 @@ class GGEMS_EXPORT GGEMSSolidBox : public GGEMSSolid
 {
   public:
     /*!
-      \param length_x - length along X for the solid box
-      \param length_y - length along Y for the solid box
-      \param length_z - length along Z for the solid box
+      \param virtual_element_number_x - virtual element number in X (local axis)
+      \param virtual_element_number_y - virtual element number in Y (local axis)
+      \param virtual_element_number_z - virtual element number in Z (local axis)
+      \param element_size_x - element size along X
+      \param element_size_y - element size along Y
+      \param element_size_z - element size along Z
       \brief GGEMSSolidBox constructor
     */
-    GGEMSSolidBox(GGfloat const& length_x, GGfloat const& length_y, GGfloat const& length_z);
+    GGEMSSolidBox(GGint const& virtual_element_number_x, GGint const& virtual_element_number_y, GGint const& virtual_element_number_z, GGfloat const& element_size_x, GGfloat const& element_size_y, GGfloat const& element_size_z);
 
     /*!
       \brief GGEMSSolidBox destructor
