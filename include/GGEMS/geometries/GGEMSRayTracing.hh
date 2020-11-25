@@ -339,7 +339,7 @@ inline GGfloat ComputeDistanceToAABB(GGfloat3 const* position, GGfloat3 const* d
   // Checking if particle cross navigator sufficiently
   if ((tmax-tmin) < (2.0*tolerance)) return OUT_OF_WORLD;
 
-  if (tmin <= 0.0f) return tmax;
+  if (tmin <= EPSILON6) return tmax;
   else return tmin;
 }
 

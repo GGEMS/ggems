@@ -563,7 +563,7 @@ std::weak_ptr<cl::Kernel> GGEMSOpenCLManager::CompileKernel(std::string const& k
     #endif
   }
 
-  GGcout("GGEMSOpenCLManager", "CompileKernel", 1) << "Compile a new kernel '" << kernel_name << "' from file: " << kernel_filename << " on context: " << context_index_ << " with options: " << kernel_compilation_option << GGendl;
+  GGcout("GGEMSOpenCLManager", "CompileKernel", 2) << "Compile a new kernel '" << kernel_name << "' from file: " << kernel_filename << " on context: " << context_index_ << " with options: " << kernel_compilation_option << GGendl;
 
   // Store kernel in a std::string buffer
   std::string source_code(std::istreambuf_iterator<char>(source_file_stream), (std::istreambuf_iterator<char>()));
@@ -591,8 +591,6 @@ std::weak_ptr<cl::Kernel> GGEMSOpenCLManager::CompileKernel(std::string const& k
     oss << log;
     GGEMSMisc::ThrowException("GGEMSOpenCLManager", "CompileKernel", oss.str());
   }
-
-  GGcout("GGEMSOpenCLManager", "CompileKernel", 0) << "Compilation OK" << GGendl;
 
   // Storing the kernel in the singleton
   kernels_cl_.emplace_back(new cl::Kernel(program, kernel_name.c_str(), &build_status));

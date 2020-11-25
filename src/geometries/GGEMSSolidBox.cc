@@ -56,10 +56,13 @@ GGEMSSolidBox::GGEMSSolidBox(GGint const& virtual_element_number_x, GGint const&
   solid_data_device->box_size_xyz_[1] = box_size_y;
   solid_data_device->box_size_xyz_[2] = box_size_z;
 
-  for (GGuint i = 0; i < 3; ++i) {
-    solid_data_device->obb_geometry_.border_min_xyz_[i] = -solid_data_device->box_size_xyz_[i]*0.5f;
-    solid_data_device->obb_geometry_.border_max_xyz_[i] = solid_data_device->box_size_xyz_[i]*0.5f;
-  }
+  solid_data_device->obb_geometry_.border_min_xyz_[0] = -box_size_x*0.5f;
+  solid_data_device->obb_geometry_.border_min_xyz_[1] = -box_size_y*0.5f;
+  solid_data_device->obb_geometry_.border_min_xyz_[2] = -box_size_z*0.5f;
+
+  solid_data_device->obb_geometry_.border_max_xyz_[0] = box_size_x*0.5f;
+  solid_data_device->obb_geometry_.border_max_xyz_[1] = box_size_y*0.5f;
+  solid_data_device->obb_geometry_.border_max_xyz_[2] = box_size_z*0.5f;
 
   // Releasing pointer
   opencl_manager.ReleaseDeviceBuffer(solid_data_cl_.get(), solid_data_device);
@@ -101,8 +104,8 @@ void GGEMSSolidBox::InitializeKernel(void)
 
   // Compiling the kernels
   kernel_particle_solid_distance_cl_ = opencl_manager.CompileKernel(particle_solid_distance_filename, "particle_solid_distance_ggems_solid_box", nullptr, const_cast<char*>(tracking_kernel_option_.c_str()));
-  //kernel_project_to_solid_cl_ = opencl_manager.CompileKernel(project_to_filename, "project_to_voxelized_solid");
-  //kernel_track_through_solid_cl_ = opencl_manager.CompileKernel(track_through_filename, "track_through_voxelized_solid", nullptr, const_cast<char*>(tracking_kernel_option_.c_str()));
+  kernel_project_to_solid_cl_ = opencl_manager.CompileKernel(project_to_filename, "project_to_ggems_solid_box", nullptr, const_cast<char*>(tracking_kernel_option_.c_str()));
+  kernel_track_through_solid_cl_ = opencl_manager.CompileKernel(track_through_filename, "track_through_ggems_solid_box", nullptr, const_cast<char*>(tracking_kernel_option_.c_str()));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -150,38 +153,6 @@ void GGEMSSolidBox::PrintInfos(void) const
   // Releasing the pointer
   opencl_manager.ReleaseDeviceBuffer(solid_data_cl_.get(), solid_data_device);
 }
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-// void GGEMSSolidBox::SetPosition(GGfloat3 const& position_xyz)
-// {
-//   GGcout("GGEMSSolidBox", "SetPosition", 3) << "Setting position of solid box..." << GGendl;
-
-//   // Set position in geometric transformation
-//   geometry_transformation_->SetTranslation(position_xyz);
-
-//   // Get the OpenCL manager
-//   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
-
-//   // Get pointer on OpenCL device
-//   GGEMSSolidBoxData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSSolidBoxData>(solid_data_cl_.get(), sizeof(GGEMSSolidBoxData));
-//   GGfloat44* transformation_matrix_device = opencl_manager.GetDeviceBuffer<GGfloat44>(geometry_transformation_->GetTransformationMatrix(), sizeof(GGfloat44));
-
-//   for (GGuint i = 0; i < 3; ++i ) {
-//     // Offset
-//     solid_data_device->position_xyz_.s[i] = position_xyz.s[i];
-
-//     // Bounding box
-//     //solid_data_device->obb_geometry_.border_min_xyz_.s[i] = -solid_data_device->position_xyz_.s[i];
-//     //solid_data_device->obb_geometry_.border_max_xyz_.s[i] = solid_data_device->obb_geometry_.border_min_xyz_.s[i] + solid_data_device->number_of_voxels_xyz_.s[i] * solid_data_device->voxel_sizes_xyz_.s[i];
-//   }
-
-//   // Release the pointer
-//   opencl_manager.ReleaseDeviceBuffer(solid_data_cl_.get(), solid_data_device);
-//   opencl_manager.ReleaseDeviceBuffer(geometry_transformation_->GetTransformationMatrix(), transformation_matrix_device);
-// }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////

@@ -98,9 +98,9 @@ void GGEMSVoxelizedPhantom::Initialize(void)
 
   // Getting the current number of registered solid
   GGEMSNavigatorManager& navigator_manager = GGEMSNavigatorManager::GetInstance();
-  // Get the number of already registered buffer, we take the total number of solids (including the all current solids)
-  // minus all current solids
+  // Get the number of already registered buffer, we take the total number of solids (including the all current solids) minus all current solids
   std::size_t number_of_registered_solids = navigator_manager.GetNumberOfRegisteredSolids() - solids_.size();
+
   solids_.at(0)->SetSolidID<GGEMSVoxelizedSolidData>(number_of_registered_solids);
 
   // Load voxelized phantom from MHD file and storing materials
