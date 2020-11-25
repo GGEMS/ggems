@@ -29,7 +29,7 @@ opencl_manager.set_context_index(0)
 # ------------------------------------------------------------------------------
 # STEP 2: Initializing volume creator manager and setting the informations about the global voxelized volume
 volume_creator_manager.set_dimensions(120, 120, 120)
-volume_creator_manager.set_element_sizes(1.0, 1.0, 1.0, 'mm')
+volume_creator_manager.set_element_sizes(0.1, 0.1, 0.1, 'mm')
 volume_creator_manager.set_output('data/phantom')
 volume_creator_manager.set_range_output('data/range_phantom')
 volume_creator_manager.set_material('Air')
@@ -38,7 +38,7 @@ volume_creator_manager.initialize()
 
 # ------------------------------------------------------------------------------
 # STEP 3: Designing analytical volume(s)
-phantom = GGEMSBox(100.0, 100.0, 100.0, 'mm')
+phantom = GGEMSBox(10.0, 10.0, 10.0, 'mm')
 phantom.set_position(0.0, 0.0, 0.0, 'mm')
 phantom.set_label_value(1)
 phantom.set_material('Water')

@@ -131,27 +131,39 @@ void GGEMSCTSystem::CheckParameters(void) const
 
 void GGEMSCTSystem::InitializeCurvedGeometry(void)
 {
-  // In global space, position along X depending on source/detector and source/isocenter distance
-  /*position_xyz_.x = source_detector_distance_ - source_isocenter_distance_;
-  position_xyz_.y = 0.0f;
-  position_xyz_.z = 0.0f;
+  // Computing the angle 'alpha' between x-ray source and Y borders of a module
+  // Using Pythagore algorithm in a regular polygone
+  // rho = Hypotenuse
+  // h = Apothem or source detector distance in our case
+  // c = Half-distance of module in Y
+  GGfloat c = (number_of_detection_elements_inside_module_xyz_.s1*size_of_detection_elements_xyz_.s1)*0.5f;
+  GGfloat rho = std::sqrt(source_detector_distance_*source_detector_distance_ + c*c);
+  GGfloat alpha = 2.0f*std::asin(c/rho);
 
-  // Loop over module X, Y
-  for (GGuint j = 0; j < number_of_modules_xy_.y; ++j) {
-    for (GGuint i = 0; i < number_of_modules_xy_.x; ++i) {
-      solid_.at(i + j*number_of_modules_xy_.x)->SetPosition(position_xyz_);
+  // Center of rotation O (ox, oy) is the source
+  GGfloat ox = -source_isocenter_distance_;
+  GGfloat oy = 0.0f;
 
-      // Update transformation matrix
-      solid_.at(i + j*number_of_modules_xy_.x)->UpdateTransformationMatrix();
+  // Center of module P (px, py) is source detector distance minus source isocenter distance plus half size of module in Z (module referential)
+  GGfloat px = source_detector_distance_ - source_isocenter_distance_ + 0.5f*number_of_detection_elements_inside_module_xyz_.s2*size_of_detection_elements_xyz_.s2;
+  GGfloat py = 0.0f;
+
+  // Loop over each module in X and Y, and compute angle of each module in around Z
+  for (GGint j = 0; j < number_of_modules_xy_.s1; ++j) { // for Y modules
+    GGfloat step_angle = alpha * (j + 0.5f*(1-number_of_modules_xy_.s1));
+
+    // Computing the X and Y positions in global position (isocenter)
+    GGfloat global_position_x = (px-ox)*std::cos(step_angle) - (py-oy)*std::sin(step_angle) + ox;
+    GGfloat global_position_y = (px-ox)*std::sin(step_angle) + (py-oy)*std::cos(step_angle) + oy;
+
+    for (GGint i = 0; i < number_of_modules_xy_.s0; ++i) { // for X modules
+      // Computing the Z position in global position (isocenter)
+      GGfloat global_position_z = number_of_detection_elements_inside_module_xyz_.s0*size_of_detection_elements_xyz_.s0*(i+0.5f*(1-number_of_modules_xy_.s0));
+
+      solids_.at(i+j*number_of_modules_xy_.s0)->SetRotation({0.0f, 0.0f, step_angle});
+      solids_.at(i+j*number_of_modules_xy_.s0)->SetPosition({global_position_x, global_position_y, global_position_z});
     }
-  }*/
-
-  // // Updating or setting a position, rotation, or local axis for each solid
-  // if (is_update_pos_) solid_.at(0)->SetPosition(position_xyz_);
-  // if (is_update_rot_) solid_.at(0)->SetRotation(rotation_xyz_);
-
-  // // Update the transformation matrix
-  // solid_.at(0)->UpdateTransformationMatrix();
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -197,13 +209,25 @@ void GGEMSCTSystem::Initialize(void)
     // Set solid id
     solids_.at(i)->SetSolidID<GGEMSSolidBoxData>(number_of_registered_solids+i);
 
-    // Initialize kernels
+    // // Initialize kernels
     solids_.at(i)->Initialize(std::weak_ptr<GGEMSMaterials>());
   }
 
   // Initialize of the geometry depending on type of CT system
-  if (ct_system_type_ == "curved") InitializeCurvedGeometry();
-  else if (ct_system_type_ == "flat") InitializeFlatGeometry();
+  if (ct_system_type_ == "curved") {
+    InitializeCurvedGeometry();
+  }
+  else if (ct_system_type_ == "flat") {
+    InitializeFlatGeometry();
+  }
+
+  // Performing a global rotation when source and system rotate
+  if (is_update_rot_) {
+    for (auto&& i : solids_) i->SetRotation(rotation_xyz_);
+  }
+
+  // Get the final transformation matrix
+  for (auto&& i : solids_) i->GetTransformationMatrix();
 
   // Initialize parent class
   GGEMSNavigator::Initialize();
