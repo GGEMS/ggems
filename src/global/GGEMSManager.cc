@@ -338,21 +338,21 @@ void GGEMSManager::Run()
       GGlong number_of_particles = source_manager.GetNumberOfParticlesInBatch(j, i);
 
       // Step 1: Generating primaries from source
-      GGcout("GGEMSManager", "Run", 1) << "      + Generating " << number_of_particles << " particles..." << GGendl;
+      GGcout("GGEMSManager", "Run", 2) << "      + Generating " << number_of_particles << " particles..." << GGendl;
       source_manager.GetPrimaries(j, number_of_particles);
 
       // Loop until ALL particles are dead
       do {
         // Step 2: Find closest navigator (phantom and detector) before track to in operation
-        GGcout("GGEMSManager", "Run", 1) << "      + Finding closest solid..." << GGendl;
+        GGcout("GGEMSManager", "Run", 2) << "      + Finding closest solid..." << GGendl;
         navigator_manager.FindClosestSolid();
 
         // Step 3: Project particles to closest solid
-        GGcout("GGEMSManager", "Run", 1) << "      + Project particles to closest solid..." << GGendl;
+        GGcout("GGEMSManager", "Run", 2) << "      + Project particles to closest solid..." << GGendl;
         navigator_manager.ProjectToClosestSolid();
 
         // Step 4: Track to out step, particles are tracked in navigator
-        GGcout("GGEMSManager", "Run", 1) << "      + Tracking particles through closest solid..." << GGendl;
+        GGcout("GGEMSManager", "Run", 2) << "      + Tracking particles through closest solid..." << GGendl;
         navigator_manager.TrackThroughClosestSolid();
 
       } while (source_manager.IsAlive()); // Step 5: Checking if all particles are dead, otherwize go back to step 2

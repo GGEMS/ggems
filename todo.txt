@@ -33,22 +33,16 @@
 
 - Enlever \version des fichiers
 
-- Faire un GGEMSVoxelizedPhantom qui appelle le GGEMSVoxelizedNavigator (classe transparente à l'utilisateur)
-
-- Stop simulation si aucun navigateur détecté
-
 - Controler le nom des navigateur dans le manager, si un nom identique --> ERROR
-
-- Faire les Structure AABB et OBB distinctement dans le code
 
 - Simplifier le module python
 
 - Text en minuscule tous le temps
 
-- Enlever warning sur le nombre de particles dans source
-
-- Améliore le global et local work size et améliorer le local memory
-
-- Faire un timer sur les kernels avec verbose activé ou désactivé
+- Eviter la recompilation du kernel
 
 - Dans CT ajouter le gap angulaire
+
+- Faire en sorte que les kernels soient compilé une seule fois
+
+- Revoir le OpenCL manager concernant les context/device et aussi une facon plus simple pour faire le multi-Architecture

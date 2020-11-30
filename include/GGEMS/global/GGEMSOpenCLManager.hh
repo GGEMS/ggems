@@ -176,7 +176,7 @@ class GGEMS_EXPORT GGEMSOpenCLManager
       \return Max buffer allocation size
       \brief Get the max buffer size in bytes on activated OpenCL context
     */
-    inline GGulong GetMaxBufferAllocationSize(void) const {return device_mem_alloc_size_[context_index_];}
+    inline GGulong GetMaxBufferAllocationSize(void) const {return device_max_mem_alloc_size_[context_index_];}
 
     /*!
       \fn inline std::size_t GetMaxWorkGroupSize(void) const
@@ -187,8 +187,8 @@ class GGEMS_EXPORT GGEMSOpenCLManager
 
     /*!
       \fn inline std::size_t GetWorkGroupSize(void) const
-      \return Work group size
-      \brief Get the work group size on activated OpenCL context
+      \return Xork group size
+      \brief Get the work group size defined in GGEMS on activated OpenCL context
     */
     inline std::size_t GetWorkGroupSize(void) const { return device_work_group_size_[context_index_];}
 
@@ -313,34 +313,80 @@ class GGEMS_EXPORT GGEMSOpenCLManager
 
   private:
     // Platforms
-    std::vector<cl::Platform> platforms_cl_; /*!< Vector of platforms */
+    std::vector<cl::Platform> platforms_; /*!< List of detected platforms */
+    std::vector<std::string> platform_profile_; /*!< OpenCL profile */
+    std::vector<std::string> platform_version_; /*!< OpenCL version supported by the implementation */
+    std::vector<std::string> platform_name_; /*!< Platform name */
     std::vector<std::string> platform_vendor_; /*!< Vendor of the platform */
+    std::vector<std::string> platform_extensions_; /*!< List of the extension names */
 
     // Devices
-    std::vector<std::unique_ptr<cl::Device>> devices_cl_; /*!< Vector of devices */
-    std::vector<cl_device_type> device_device_type_; /*!< Type of device */
+    std::vector<std::unique_ptr<cl::Device>> devices_; /*!< Vector of devices */
+    std::vector<cl_device_type> device_type_; /*!< Type of device */
+    std::vector<std::string> device_name_; /*!< Name of the device */
     std::vector<std::string> device_vendor_; /*!< Vendor of the device */
+    std::vector<GGuint> device_vendor_id_; /*!< Vendor ID of the device */
+    std::vector<std::string> device_profile_; /*!< Profile of the device */
     std::vector<std::string> device_version_; /*!< Version of the device */
     std::vector<std::string> device_driver_version_; /*!< Driver version of the device */
+    std::vector<std::string> device_opencl_c_version_; /*!< OpenCL C version */
+    std::vector<GGuint> device_native_vector_width_char_; /*!< Native vector for char integer */
+    std::vector<GGuint> device_native_vector_width_short_; /*!< Native vector for short integer */
+    std::vector<GGuint> device_native_vector_width_int_; /*!< Native vector for int integer */
+    std::vector<GGuint> device_native_vector_width_long_; /*!< Native vector for long integer */
+    std::vector<GGuint> device_native_vector_width_half_; /*!< Native vector for half precision */
+    std::vector<GGuint> device_native_vector_width_float_; /*!< Native vector for single precision */
+    std::vector<GGuint> device_native_vector_width_double_; /*!< Native vector for double precision */
+    std::vector<GGuint> device_preferred_vector_width_char_; /*!< Preferred vector for char integer */
+    std::vector<GGuint> device_preferred_vector_width_short_; /*!< Preferred vector for short integer */
+    std::vector<GGuint> device_preferred_vector_width_int_; /*!< Preferred vector for int integer */
+    std::vector<GGuint> device_preferred_vector_width_long_; /*!< Preferred vector for long integer */
+    std::vector<GGuint> device_preferred_vector_width_half_; /*!< Preferred vector for half precision */
+    std::vector<GGuint> device_preferred_vector_width_float_; /*!< Preferred vector for single precision */
+    std::vector<GGuint> device_preferred_vector_width_double_; /*!< Preferred vector for double precision */
     std::vector<GGuint> device_address_bits_; /*!< Address Bits */
     std::vector<GGbool> device_available_; /*!< Flag on device availability */
     std::vector<GGbool> device_compiler_available_; /*!< Flag on compiler availability */
-    std::vector<std::size_t> device_max_work_group_size_; /*< Maximum work group size */
-    std::vector<std::size_t> device_work_group_size_; /*< Work group size */
-    std::vector<GGuint> device_max_work_item_dimensions_; /*!< Maximum work item dimensions */
-    std::vector<std::size_t> device_max_work_item_sizes_; /*!< Maximum work item sizes */
+    std::vector<cl_device_fp_config> device_half_fp_config_; /*!< Half precision capability */
+    std::vector<cl_device_fp_config> device_single_fp_config_; /*!< Single precision capability */
+    std::vector<cl_device_fp_config> device_double_fp_config_; /*!< Double precision capability */
+    std::vector<GGbool> device_endian_little_; /*!< Endian little */
+    std::vector<std::string> device_extensions_; /*!< Extensions */
+    std::vector<GGbool> device_error_correction_support_; /*!< Error correction support */
+    std::vector<cl_device_exec_capabilities> device_execution_capabilities_; /*!< Execution capabilities */
     std::vector<GGulong> device_global_mem_cache_size_; /*!< Global memory cache size */
+    std::vector<cl_device_mem_cache_type> device_global_mem_cache_type_; /*!< Global memory cache type */
     std::vector<GGuint> device_global_mem_cacheline_size_; /*!< Global memory cache line size */
     std::vector<GGulong> device_global_mem_size_; /*!< Global memory size */
     std::vector<GGulong> device_local_mem_size_; /*!< Local memory size */
-    std::vector<GGuint> device_mem_base_addr_align_; /*!< Alignment memory */
-    std::vector<std::string> device_name_; /*!< Name of the device */
-    std::vector<std::string> device_opencl_c_version_; /*!< OpenCL C version */
+    std::vector<cl_device_local_mem_type> device_local_mem_type_; /*!< Local memory type */
+    std::vector<GGbool> device_host_unified_memory_; /*!< Host unified memory */
+    std::vector<std::size_t> device_image_max_array_size_; /*!< Max size of image array */
+    std::vector<std::size_t> device_image_max_buffer_size_; /*!< Max size of image buffer */
+    std::vector<GGbool> device_image_support_; /*!< Image support */
+    std::vector<std::size_t> device_image2D_max_width_; /*!< Max width of image 2D */
+    std::vector<std::size_t> device_image2D_max_height_; /*!< Max height of image 2D */
+    std::vector<std::size_t> device_image3D_max_width_; /*!< Max width of image 3D */
+    std::vector<std::size_t> device_image3D_max_height_; /*!< Max height of image 3D */
+    std::vector<std::size_t> device_image3D_max_depth_; /*!< Max depth of image 3D */
+    std::vector<GGuint> device_max_read_image_args_; /*!< Max read image read by kernel in same time */
+    std::vector<GGuint> device_max_write_image_args_; /*!< Max write image read by kernel in same time */
     std::vector<GGuint> device_max_clock_frequency_; /*!< Max frequency of device */
     std::vector<GGuint> device_max_compute_units_; /*!< Max compute units */
-    std::vector<GGulong> device_constant_buffer_size_; /*!< Constant buffer size */
-    std::vector<GGulong> device_mem_alloc_size_; /*!< Memory allocation size */
+    std::vector<GGuint> device_max_constant_args_; /*!< Max constant arguments in kernel */
+    std::vector<GGulong> device_max_constant_buffer_size_; /*!< Max constant buffer size */
+    std::vector<GGulong> device_max_mem_alloc_size_; /*!< Max memory allocation size */
+    std::vector<std::size_t> device_max_parameter_size_; /*!< Max Parameter size in kernel */
+    std::vector<GGuint> device_max_samplers_; /*!< Max number of samplers in kernel */
+    std::vector<std::size_t> device_max_work_group_size_; /*< Max Work group size */
+    std::vector<std::size_t> device_work_group_size_; /*< Work group size */
+    std::vector<GGuint> device_max_work_item_dimensions_; /*!< Maximum work item dimensions */
+    std::vector<std::size_t> device_max_work_item_sizes_; /*!< Maximum work item sizes */
+    std::vector<GGuint> device_mem_base_addr_align_; /*!< Alignment memory */
     std::vector<std::size_t> device_printf_buffer_size_; /*!< Size of buffer for printf in kernel */
+    std::vector<cl_device_affinity_domain> device_partition_affinity_domain_; /*!< Partition affinity domain */
+    std::vector<GGuint> device_partition_max_sub_devices_; /*!< Partition affinity domain */
+    std::vector<std::size_t> device_profiling_timer_resolution_; /*<! Timer resolution */
 
     // OpenCL compilation options
     std::string build_options_; /*!< list of option to OpenCL compiler */
