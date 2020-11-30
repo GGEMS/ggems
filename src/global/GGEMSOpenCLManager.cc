@@ -40,31 +40,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 GGEMSOpenCLManager::GGEMSOpenCLManager(void)
-: platforms_cl_(0),
-  platform_vendor_(0),
-  devices_cl_(0),
-  device_device_type_(0),
-  device_vendor_(0),
-  device_version_(0),
-  device_driver_version_(0),
-  device_address_bits_(0),
-  device_available_(0),
-  device_compiler_available_(0),
-  device_max_work_group_size_(0),
-  device_work_group_size_(0),
-  device_global_mem_cache_size_(0),
-  device_global_mem_cacheline_size_(0),
-  device_global_mem_size_(0),
-  device_local_mem_size_(0),
-  device_mem_base_addr_align_(0),
-  device_name_(0),
-  device_opencl_c_version_(0),
-  device_max_clock_frequency_(0),
-  device_max_compute_units_(0),
-  device_constant_buffer_size_(0),
-  device_mem_alloc_size_(0),
-  device_printf_buffer_size_(0),
-  build_options_(""),
+: build_options_(""),
   context_index_(0),
   contexts_cl_(0),
   contexts_cpu_cl_(0),
@@ -79,90 +55,180 @@ GGEMSOpenCLManager::GGEMSOpenCLManager(void)
   GGcout("GGEMSOpenCLManager", "GGEMSOpenCLManager", 3) << "Allocation of GGEMS OpenCL manager..." << GGendl;
 
   GGcout("GGEMSOpenCLManager", "GGEMSOpenCLManager", 1) << "Retrieving OpenCL platform(s)..." << GGendl;
-  CheckOpenCLError(cl::Platform::get(&platforms_cl_), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+  CheckOpenCLError(cl::Platform::get(&platforms_), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
 
   // Getting infos about platform(s)
-  for (auto&& i : platforms_cl_) {
-    std::string platform_vendor("");
-    CheckOpenCLError(i.getInfo(CL_PLATFORM_VENDOR, &platform_vendor), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
-    platform_vendor_.push_back(platform_vendor);
+  for (auto&& i : platforms_) {
+    std::string plaform_infos("");
+    CheckOpenCLError(i.getInfo(CL_PLATFORM_PROFILE, &plaform_infos), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    platform_profile_.push_back(plaform_infos);
+    CheckOpenCLError(i.getInfo(CL_PLATFORM_VERSION, &plaform_infos), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    platform_version_.push_back(plaform_infos);
+    CheckOpenCLError(i.getInfo(CL_PLATFORM_NAME, &plaform_infos), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    platform_name_.push_back(plaform_infos);
+    CheckOpenCLError(i.getInfo(CL_PLATFORM_VENDOR, &plaform_infos), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    platform_vendor_.push_back(plaform_infos);
+    CheckOpenCLError(i.getInfo(CL_PLATFORM_EXTENSIONS, &plaform_infos), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    platform_extensions_.push_back(plaform_infos);
   }
 
   // Retrieve all the available devices
   GGcout("GGEMSOpenCLManager", "GGEMSOpenCLManager", 1) << "Retrieving OpenCL device(s)..." << GGendl;
-  for (auto&& p : platforms_cl_) {
+  for (auto&& p : platforms_) {
     std::vector<cl::Device> v_current_device;
     CheckOpenCLError(p.getDevices(CL_DEVICE_TYPE_ALL, &v_current_device), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
 
     // Storing device of each platform
-    for (auto&& d : v_current_device) devices_cl_.emplace_back(new cl::Device(d));
+    for (auto&& d : v_current_device) devices_.emplace_back(new cl::Device(d));
   }
 
   // Resizing vector storing infos for devices
-  device_device_type_.resize(devices_cl_.size());
-  device_vendor_.resize(devices_cl_.size());
-  device_version_.resize(devices_cl_.size());
-  device_driver_version_.resize(devices_cl_.size());
-  device_address_bits_.resize(devices_cl_.size());
-  device_available_.resize(devices_cl_.size());
-  device_compiler_available_.resize(devices_cl_.size());
-  device_max_work_group_size_.resize(devices_cl_.size());
-  device_work_group_size_.resize(devices_cl_.size());
-  device_max_work_item_dimensions_.resize(devices_cl_.size());
-  device_max_work_item_sizes_.resize(devices_cl_.size()*3);
-  device_global_mem_cache_size_.resize(devices_cl_.size());
-  device_global_mem_cacheline_size_.resize(devices_cl_.size());
-  device_global_mem_size_.resize(devices_cl_.size());
-  device_local_mem_size_.resize(devices_cl_.size());
-  device_mem_base_addr_align_.resize(devices_cl_.size());
-  device_name_.resize(devices_cl_.size());
-  device_opencl_c_version_.resize(devices_cl_.size());
-  device_max_clock_frequency_.resize(devices_cl_.size());
-  device_max_compute_units_.resize(devices_cl_.size());
-  device_constant_buffer_size_.resize(devices_cl_.size());
-  device_mem_alloc_size_.resize(devices_cl_.size());
-  device_printf_buffer_size_.resize(devices_cl_.size());
-
-  // Getting infos for device
-  GGcout("GGEMSOpenCLManager", "GGEMSOpenCLManager", 1) << "Retrieving OpenCL device informations..." << GGendl;
+  device_type_.resize(devices_.size());
+  device_name_.resize(devices_.size());
+  device_vendor_.resize(devices_.size());
+  device_vendor_id_.resize(devices_.size());
+  device_profile_.resize(devices_.size());
+  device_version_.resize(devices_.size());
+  device_driver_version_.resize(devices_.size());
+  device_opencl_c_version_.resize(devices_.size());
+  device_native_vector_width_char_.resize(devices_.size());
+  device_native_vector_width_short_.resize(devices_.size());
+  device_native_vector_width_int_.resize(devices_.size());
+  device_native_vector_width_long_.resize(devices_.size());
+  device_native_vector_width_half_.resize(devices_.size());
+  device_native_vector_width_float_.resize(devices_.size());
+  device_native_vector_width_double_.resize(devices_.size());
+  device_preferred_vector_width_char_.resize(devices_.size());
+  device_preferred_vector_width_short_.resize(devices_.size());
+  device_preferred_vector_width_int_.resize(devices_.size());
+  device_preferred_vector_width_long_.resize(devices_.size());
+  device_preferred_vector_width_half_.resize(devices_.size());
+  device_preferred_vector_width_float_.resize(devices_.size()); 
+  device_preferred_vector_width_double_.resize(devices_.size());
+  device_address_bits_.resize(devices_.size());
+  device_available_.resize(devices_.size());
+  device_compiler_available_.resize(devices_.size());
+  device_half_fp_config_.resize(devices_.size());
+  device_single_fp_config_.resize(devices_.size());
+  device_double_fp_config_.resize(devices_.size());
+  device_endian_little_.resize(devices_.size());
+  device_extensions_.resize(devices_.size());
+  device_error_correction_support_.resize(devices_.size());
+  device_execution_capabilities_.resize(devices_.size());
+  device_global_mem_cache_size_.resize(devices_.size());
+  device_global_mem_cache_type_.resize(devices_.size());
+  device_global_mem_cacheline_size_.resize(devices_.size());
+  device_global_mem_size_.resize(devices_.size());
+  device_local_mem_size_.resize(devices_.size());
+  device_local_mem_type_.resize(devices_.size()); 
+  device_host_unified_memory_.resize(devices_.size());
+  device_image_max_array_size_.resize(devices_.size());
+  device_image_max_buffer_size_.resize(devices_.size());
+  device_image_support_.resize(devices_.size());
+  device_image2D_max_width_.resize(devices_.size());
+  device_image2D_max_height_.resize(devices_.size());
+  device_image3D_max_width_.resize(devices_.size());
+  device_image3D_max_height_.resize(devices_.size());
+  device_image3D_max_depth_.resize(devices_.size());
+  device_max_read_image_args_.resize(devices_.size());
+  device_max_write_image_args_.resize(devices_.size());
+  device_max_clock_frequency_.resize(devices_.size());
+  device_max_compute_units_.resize(devices_.size());
+  device_max_constant_args_.resize(devices_.size());
+  device_max_constant_buffer_size_.resize(devices_.size());
+  device_max_mem_alloc_size_.resize(devices_.size());
+  device_max_parameter_size_.resize(devices_.size());
+  device_max_samplers_.resize(devices_.size());
+  device_max_work_group_size_.resize(devices_.size());
+  device_max_work_item_dimensions_.resize(devices_.size());
+  device_max_work_item_sizes_.resize(devices_.size()*3);
+  device_mem_base_addr_align_.resize(devices_.size());
+  device_printf_buffer_size_.resize(devices_.size());
+  device_work_group_size_.resize(devices_.size());
+  device_partition_affinity_domain_.resize(devices_.size());
+  device_partition_max_sub_devices_.resize(devices_.size());
+  device_profiling_timer_resolution_.resize(devices_.size());
 
   // Make a char buffer reading char* data
-  std::size_t test[3] = {0,0,0};
+  std::size_t buffer[3] = {0,0,0};
   char char_data[1024];
-  for (std::size_t i = 0; i < devices_cl_.size(); ++i) {
-    // Device Type
-    CheckOpenCLError(devices_cl_[i]->getInfo(CL_DEVICE_TYPE, &device_device_type_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
-    CheckOpenCLError(devices_cl_[i]->getInfo(CL_DEVICE_VENDOR, &device_vendor_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
-    CheckOpenCLError(devices_cl_[i]->getInfo(CL_DEVICE_ADDRESS_BITS, &device_address_bits_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
-    CheckOpenCLError(devices_cl_[i]->getInfo(CL_DEVICE_AVAILABLE, &device_available_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
-    CheckOpenCLError(devices_cl_[i]->getInfo(CL_DEVICE_COMPILER_AVAILABLE, &device_compiler_available_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
-    CheckOpenCLError(devices_cl_[i]->getInfo(CL_DEVICE_MAX_WORK_GROUP_SIZE, &device_max_work_group_size_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
-    device_work_group_size_[i] = 64;
-    CheckOpenCLError(devices_cl_[i]->getInfo(CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS, &device_max_work_item_dimensions_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
 
-    CheckOpenCLError(devices_cl_[i]->getInfo(CL_DEVICE_MAX_WORK_ITEM_SIZES, &test), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
-    for (std::size_t j = 0; j < 3; ++j) device_max_work_item_sizes_[j + i*3] = test[j];
-
-    CheckOpenCLError(devices_cl_[i]->getInfo(CL_DEVICE_GLOBAL_MEM_CACHE_SIZE, &device_global_mem_cache_size_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
-    CheckOpenCLError(devices_cl_[i]->getInfo(CL_DEVICE_GLOBAL_MEM_CACHELINE_SIZE, &device_global_mem_cacheline_size_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
-    CheckOpenCLError(devices_cl_[i]->getInfo(CL_DEVICE_GLOBAL_MEM_SIZE, &device_global_mem_size_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
-    CheckOpenCLError(devices_cl_[i]->getInfo(CL_DEVICE_LOCAL_MEM_SIZE, &device_local_mem_size_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
-    CheckOpenCLError(devices_cl_[i]->getInfo(CL_DEVICE_MEM_BASE_ADDR_ALIGN, &device_mem_base_addr_align_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
-    CheckOpenCLError(devices_cl_[i]->getInfo(CL_DEVICE_NAME, &device_name_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
-    CheckOpenCLError(devices_cl_[i]->getInfo(CL_DEVICE_MAX_CLOCK_FREQUENCY, &device_max_clock_frequency_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
-    CheckOpenCLError(devices_cl_[i]->getInfo(CL_DEVICE_MAX_COMPUTE_UNITS, &device_max_compute_units_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
-    CheckOpenCLError(devices_cl_[i]->getInfo(CL_DEVICE_MAX_CONSTANT_BUFFER_SIZE, &device_constant_buffer_size_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
-    CheckOpenCLError(devices_cl_[i]->getInfo(CL_DEVICE_MAX_MEM_ALLOC_SIZE, &device_mem_alloc_size_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
-    CheckOpenCLError(devices_cl_[i]->getInfo(CL_DEVICE_PRINTF_BUFFER_SIZE, &device_printf_buffer_size_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
-
-    CheckOpenCLError(devices_cl_[i]->getInfo(CL_DEVICE_VERSION, &char_data), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+  // Getting infos for device
+  for (std::size_t i = 0; i < devices_.size(); ++i) {
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_TYPE, &device_type_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_NAME, &device_name_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_VENDOR, &device_vendor_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_VENDOR_ID, &device_vendor_id_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_PROFILE, &device_profile_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_VERSION, &char_data), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
     device_version_[i] = std::string(char_data);
-
-    CheckOpenCLError(devices_cl_[i]->getInfo(CL_DRIVER_VERSION, &char_data), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DRIVER_VERSION, &char_data), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
     device_driver_version_[i] = std::string(char_data);
-
-    CheckOpenCLError(devices_cl_[i]->getInfo(CL_DEVICE_OPENCL_C_VERSION, &char_data), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_OPENCL_C_VERSION, &char_data), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
     device_opencl_c_version_[i] = std::string(char_data);
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_NATIVE_VECTOR_WIDTH_CHAR, &device_native_vector_width_char_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_NATIVE_VECTOR_WIDTH_SHORT, &device_native_vector_width_short_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_NATIVE_VECTOR_WIDTH_INT, &device_native_vector_width_int_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_NATIVE_VECTOR_WIDTH_LONG, &device_native_vector_width_long_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_NATIVE_VECTOR_WIDTH_HALF, &device_native_vector_width_half_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_NATIVE_VECTOR_WIDTH_FLOAT, &device_native_vector_width_float_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_NATIVE_VECTOR_WIDTH_DOUBLE, &device_native_vector_width_double_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_PREFERRED_VECTOR_WIDTH_CHAR, &device_preferred_vector_width_char_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_PREFERRED_VECTOR_WIDTH_SHORT, &device_preferred_vector_width_short_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_PREFERRED_VECTOR_WIDTH_INT, &device_preferred_vector_width_int_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_PREFERRED_VECTOR_WIDTH_LONG, &device_preferred_vector_width_long_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_PREFERRED_VECTOR_WIDTH_HALF, &device_preferred_vector_width_half_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_PREFERRED_VECTOR_WIDTH_FLOAT, &device_preferred_vector_width_float_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_PREFERRED_VECTOR_WIDTH_DOUBLE, &device_preferred_vector_width_double_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_ADDRESS_BITS, &device_address_bits_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_AVAILABLE, &device_available_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_COMPILER_AVAILABLE, &device_compiler_available_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    if (device_native_vector_width_half_[i] != 0) {
+      CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_HALF_FP_CONFIG, &device_half_fp_config_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    }
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_SINGLE_FP_CONFIG, &device_single_fp_config_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    if (device_native_vector_width_double_[i] != 0) {
+      CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_DOUBLE_FP_CONFIG, &device_double_fp_config_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    }
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_ENDIAN_LITTLE, &device_endian_little_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_EXTENSIONS, &device_extensions_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_ERROR_CORRECTION_SUPPORT, &device_error_correction_support_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_EXECUTION_CAPABILITIES, &device_execution_capabilities_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_GLOBAL_MEM_CACHE_SIZE, &device_global_mem_cache_size_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_GLOBAL_MEM_CACHE_TYPE, &device_global_mem_cache_type_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_GLOBAL_MEM_CACHELINE_SIZE, &device_global_mem_cacheline_size_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_GLOBAL_MEM_SIZE, &device_global_mem_size_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_LOCAL_MEM_SIZE, &device_local_mem_size_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_LOCAL_MEM_TYPE, &device_local_mem_type_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_HOST_UNIFIED_MEMORY, &device_host_unified_memory_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_IMAGE_MAX_ARRAY_SIZE, &device_image_max_array_size_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_IMAGE_MAX_BUFFER_SIZE, &device_image_max_buffer_size_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_IMAGE_SUPPORT, &device_image_support_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_IMAGE2D_MAX_WIDTH, &device_image2D_max_width_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_IMAGE2D_MAX_HEIGHT, &device_image2D_max_height_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_IMAGE3D_MAX_WIDTH, &device_image3D_max_width_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_IMAGE3D_MAX_HEIGHT, &device_image3D_max_height_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_IMAGE3D_MAX_DEPTH, &device_image3D_max_depth_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_MAX_READ_IMAGE_ARGS, &device_max_read_image_args_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_MAX_WRITE_IMAGE_ARGS, &device_max_write_image_args_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_MAX_CLOCK_FREQUENCY, &device_max_clock_frequency_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_MAX_COMPUTE_UNITS, &device_max_compute_units_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_MAX_CONSTANT_ARGS, &device_max_constant_args_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_MAX_CONSTANT_BUFFER_SIZE, &device_max_constant_buffer_size_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_MAX_MEM_ALLOC_SIZE, &device_max_mem_alloc_size_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_MAX_PARAMETER_SIZE, &device_max_parameter_size_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_MAX_WORK_GROUP_SIZE, &device_max_work_group_size_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    // Custom work group size
+    device_work_group_size_[i] = 128;
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS, &device_max_work_item_dimensions_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_MAX_WORK_ITEM_SIZES, &buffer), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    for (std::size_t j = 0; j < 3; ++j) device_max_work_item_sizes_[j + i*3] = buffer[j];
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_MEM_BASE_ADDR_ALIGN, &device_mem_base_addr_align_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_PRINTF_BUFFER_SIZE, &device_printf_buffer_size_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_MAX_SAMPLERS, &device_max_samplers_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_PARTITION_AFFINITY_DOMAIN, &device_partition_affinity_domain_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_PARTITION_MAX_SUB_DEVICES, &device_partition_max_sub_devices_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_PROFILING_TIMER_RESOLUTION, &device_profiling_timer_resolution_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
   }
 
   // Define the compilation options by default for OpenCL
@@ -211,62 +277,93 @@ GGEMSOpenCLManager::~GGEMSOpenCLManager(void)
 
 void GGEMSOpenCLManager::Clean(void)
 {
-  GGcout("GGEMSOpenCLManager", "Clean", 3) << "Cleaning OpenCL platform, device, context, queue, event and kernel..." << GGendl;
+  GGcout("GGEMSOpenCLManager", "Clean", 3) << "Cleaning OpenCL" << GGendl;
 
-  // Deleting platform(s) and infos
-  GGcout("GGEMSOpenCLManager", "Clean", 1) << "Deleting OpenCL platform(s)..." << GGendl;
-
-  // Freeing platforms
-  platforms_cl_.clear();
+  platforms_.clear();
+  platform_profile_.clear();
+  platform_version_.clear();
+  platform_name_.clear();
   platform_vendor_.clear();
+  platform_extensions_.clear();
 
-  // Deleting devices(s) and infos
-  GGcout("GGEMSOpenCLManager", "Clean", 1) << "Deleting OpenCL device(s)..." << GGendl;
-
-  // Freeing devices
-  devices_cl_.clear();
-  device_device_type_.clear();
+  devices_.clear();
+  device_type_.clear();
+  device_name_.clear();
   device_vendor_.clear();
+  device_vendor_id_.clear();
+  device_profile_.clear();
   device_version_.clear();
   device_driver_version_.clear();
+  device_opencl_c_version_.clear();
+  device_native_vector_width_char_.clear();
+  device_native_vector_width_short_.clear();
+  device_native_vector_width_int_.clear();
+  device_native_vector_width_long_.clear();
+  device_native_vector_width_half_.clear();
+  device_native_vector_width_float_.clear();
+  device_native_vector_width_double_.clear();
+  device_preferred_vector_width_char_.clear();
+  device_preferred_vector_width_short_.clear();
+  device_preferred_vector_width_int_.clear();
+  device_preferred_vector_width_long_.clear();
+  device_preferred_vector_width_half_.clear();
+  device_preferred_vector_width_float_.clear(); 
+  device_preferred_vector_width_double_.clear();
   device_address_bits_.clear();
   device_available_.clear();
   device_compiler_available_.clear();
-  device_max_work_group_size_.clear();
-  device_max_work_item_sizes_.clear();
+  device_half_fp_config_.clear();
+  device_single_fp_config_.clear();
+  device_double_fp_config_.clear();
+  device_endian_little_.clear();
+  device_extensions_.clear();
+  device_error_correction_support_.clear();
+  device_execution_capabilities_.clear();
   device_global_mem_cache_size_.clear();
+  device_global_mem_cache_type_.clear();
   device_global_mem_cacheline_size_.clear();
   device_global_mem_size_.clear();
   device_local_mem_size_.clear();
-  device_mem_base_addr_align_.clear();
-  device_max_work_item_dimensions_.clear();
-  device_name_.clear();
-  device_opencl_c_version_.clear();
+  device_local_mem_type_.clear(); 
+  device_host_unified_memory_.clear();
+  device_image_max_array_size_.clear();
+  device_image_max_buffer_size_.clear();
+  device_image_support_.clear();
+  device_image2D_max_width_.clear();
+  device_image2D_max_height_.clear();
+  device_image3D_max_width_.clear();
+  device_image3D_max_height_.clear();
+  device_image3D_max_depth_.clear();
+  device_max_read_image_args_.clear();
+  device_max_write_image_args_.clear();
   device_max_clock_frequency_.clear();
   device_max_compute_units_.clear();
-  device_constant_buffer_size_.clear();
-  device_mem_alloc_size_.clear();
+  device_max_constant_args_.clear();
+  device_max_constant_buffer_size_.clear();
+  device_max_mem_alloc_size_.clear();
+  device_max_parameter_size_.clear();
+  device_max_samplers_.clear();
+  device_max_work_group_size_.clear();
+  device_max_work_item_sizes_.clear();
+  device_mem_base_addr_align_.clear();
+  device_max_work_item_dimensions_.clear();
   device_printf_buffer_size_.clear();
+  device_work_group_size_.clear();
+  device_partition_affinity_domain_.clear();
+  device_partition_max_sub_devices_.clear();
+  device_profiling_timer_resolution_.clear();
 
-  // Deleting context(s)
-  GGcout("GGEMSOpenCLManager", "Clean", 1) << "Deleting OpenCL context(s)..." << GGendl;
   contexts_cl_.clear();
   contexts_cpu_cl_.clear();
   contexts_gpu_cl_.clear();
   context_act_cl_.reset(); 
 
-  // Deleting command queue(s)
-  GGcout("GGEMSOpenCLManager", "Clean", 1) << "Deleting OpenCL command queue(s)..." << GGendl;
   queues_cl_.clear();
   queue_act_cl_.reset();
 
-  // Deleting event(s)
-  GGcout("GGEMSOpenCLManager", "Clean", 1) << "Deleting OpenCL event(s)..." << GGendl;
   events_cl_.clear();
   event_act_cl_.reset();
 
-  // Deleting kernel(s)
-  GGcout("GGEMSOpenCLManager", "Clean", 1) << "Deleting OpenCL kernel(s)..." << GGendl;
   kernels_cl_.clear();
 }
 
@@ -276,13 +373,14 @@ void GGEMSOpenCLManager::Clean(void)
 
 void GGEMSOpenCLManager::PrintPlatformInfos(void) const
 {
-  GGcout("GGEMSOpenCLManager", "PrintPlatformInfos", 3) << "Printing infos about OpenCL platform(s)..." << GGendl;
-
-  // Loop over the platforms
-  for (std::size_t i = 0; i < platforms_cl_.size(); ++i) {
+  for (std::size_t i = 0; i < platforms_.size(); ++i) {
     GGcout("GGEMSOpenCLManager", "PrintPlatformInfos", 0) << GGendl;
     GGcout("GGEMSOpenCLManager", "PrintPlatformInfos", 0) << "#### PLATFORM: " << i << " ####" << GGendl;
-    GGcout("GGEMSOpenCLManager", "PrintPlatformInfos", 0) << "+ Vendor: " << platform_vendor_[i] << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintPlatformInfos", 0) << "    + Platform: " << platform_profile_[i] << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintPlatformInfos", 0) << "    + Version: " << platform_version_[i] << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintPlatformInfos", 0) << "    + Name: " << platform_name_[i] << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintPlatformInfos", 0) << "    + Vendor: " << platform_vendor_[i] << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintPlatformInfos", 0) << "    + Extensions: " << platform_extensions_[i] << GGendl;
   }
   GGcout("GGEMSOpenCLManager", "PrintPlatformInfos", 0) << GGendl;
 }
@@ -293,52 +391,172 @@ void GGEMSOpenCLManager::PrintPlatformInfos(void) const
 
 void GGEMSOpenCLManager::PrintDeviceInfos(void) const
 {
-  GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 3) << "Printing infos about OpenCL device(s)..." << GGendl;
-
-  for (std::size_t i = 0; i < devices_cl_.size(); ++i) {
+  for (std::size_t i = 0; i < devices_.size(); ++i) {
     GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << GGendl;
     GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "#### DEVICE: " << i << " ####" << GGendl;
-    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "+ Name: " << device_name_[i] << GGendl;
-    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "+ Vendor: " << device_vendor_[i] << GGendl;
-    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "+ Version: " << device_version_[i] << GGendl;
-    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "+ Driver Version: " << device_driver_version_[i] << GGendl;
-    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "+ OpenCL C Version: " << device_opencl_c_version_[i] << GGendl;
-    if (device_device_type_[i] == CL_DEVICE_TYPE_CPU) {
-      GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "+ Device Type: " << "+ Device Type: CL_DEVICE_TYPE_CPU" << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Name: " << device_name_[i] << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Vendor: " << device_vendor_[i] << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Vendor ID: " << device_vendor_id_[i] << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Version: " << device_version_[i] << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Driver Version: " << device_driver_version_[i] << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + OpenCL C Version: " << device_opencl_c_version_[i] << GGendl;
+    if (device_type_[i] == CL_DEVICE_TYPE_CPU) {
+      GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Device Type: " << "CL_DEVICE_TYPE_CPU" << GGendl;
     }
-    else if (device_device_type_[i] == CL_DEVICE_TYPE_GPU) {
-      GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "+ Device Type: " << "CL_DEVICE_TYPE_GPU" << GGendl;
+    else if (device_type_[i] == CL_DEVICE_TYPE_GPU) {
+      GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Device Type: " << "CL_DEVICE_TYPE_GPU" << GGendl;
     }
-    else {
-      GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "+ Device Type: " << "Unknown device type!!!" << GGendl;
+    else if (device_type_[i] == CL_DEVICE_TYPE_CUSTOM) {
+      GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Device Type: " << "CL_DEVICE_TYPE_CUSTOM" << GGendl;
     }
-    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "+ Address Bits: " << device_address_bits_[i] << " bits" << GGendl;
+    else if (device_type_[i] == CL_DEVICE_TYPE_ACCELERATOR) {
+      GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Device Type: " << "CL_DEVICE_TYPE_ACCELERATOR" << GGendl;
+    }
+    else if (device_type_[i] == CL_DEVICE_TYPE_DEFAULT) {
+      GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Device Type: " << "CL_DEVICE_TYPE_DEFAULT" << GGendl;
+    }
+    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Profile: " << device_profile_[i] << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Native Vector Width Char: " << device_native_vector_width_char_[i] << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Native Vector Width Short: " << device_native_vector_width_short_[i] << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Native Vector Width Int: " << device_native_vector_width_int_[i] << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Native Vector Width Long: " << device_native_vector_width_long_[i] << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Native Vector Width Half: " << device_native_vector_width_half_[i] << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Native Vector Width Float: " << device_native_vector_width_float_[i] << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Native Vector Width Double: " << device_native_vector_width_double_[i] << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Preferred Vector Width Char: " << device_preferred_vector_width_char_[i] << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Preferred Vector Width Short: " << device_preferred_vector_width_short_[i] << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Preferred Vector Width Int: " << device_preferred_vector_width_int_[i] << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Preferred Vector Width Long: " << device_preferred_vector_width_long_[i] << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Preferred Vector Width Half: " << device_preferred_vector_width_half_[i] << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Preferred Vector Width Float: " << device_preferred_vector_width_float_[i] << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Preferred Vector Width Double: " << device_preferred_vector_width_double_[i] << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Address Bits: " << device_address_bits_[i] << " bits" << GGendl;
     if (device_available_[i] == static_cast<GGbool>(true)) {
-      GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "+ Device Available: ON" << GGendl;
+      GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Device Available: ON" << GGendl;
     }
     else {
-      GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "+ Device Available: OFF" << GGendl;
+      GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Device Available: OFF" << GGendl;
     }
+    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Address Bits: " << device_address_bits_[i] << " bits" << GGendl;
     if (device_compiler_available_[i] == static_cast<GGbool>(true)) {
-      GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "+ Compiler Available: ON" << GGendl;
+      GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Compiler Available: ON" << GGendl;
     }
     else {
-      GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "+ Compiler Available: OFF" << GGendl;
+      GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Compiler Available: OFF" << GGendl;
     }
-    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "+ Global Mem. Cache Size: " << device_global_mem_cache_size_[i] << " bytes" << GGendl;
-    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "+ Global Mem. Line Cache Size: " << device_global_mem_cacheline_size_[i] << " bytes" << GGendl;
-    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "+ Global Mem. Size: " << device_global_mem_size_[i] << " bytes" << GGendl;
-    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "+ Local Mem. Size: " << device_local_mem_size_[i] << " bytes" << GGendl;
-    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "+ Mem. Base Addr. Align.: " << device_mem_base_addr_align_[i] << " bytes" << GGendl;
-    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "+ Max Clock Frequency: " << device_max_clock_frequency_[i] << " MHz" << GGendl;
-    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "+ Max Compute Units: " << device_max_compute_units_[i] << GGendl;
-    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "+ Max Work Group Size: " << device_max_work_group_size_[i] << GGendl;
-    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "+ Max Work Item Dimensions: " << device_max_work_item_dimensions_[i] << GGendl;
-    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "+ Max Work Item Sizes: " << device_max_work_item_sizes_[0+i*3] << " " << device_max_work_item_sizes_[1+i*3]
-      << " " << device_max_work_item_sizes_[2+i*3] << GGendl;
-    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "+ Constant Buffer Size: " << device_constant_buffer_size_[i] << " bytes" << GGendl;
-    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "+ Mem. Alloc. Size: " << device_mem_alloc_size_[i] << " bytes" << GGendl;
-    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "+ Printf Buffer Size: " << device_printf_buffer_size_[i] << " bytes" << GGendl;
+    if (device_native_vector_width_half_[i] != 0) {
+      std::string half_fp_capability("");
+      half_fp_capability += device_half_fp_config_[i] & CL_FP_DENORM ? "DENORM " : "";
+      half_fp_capability += device_half_fp_config_[i] & CL_FP_INF_NAN ? "INF_NAN " : "";
+      half_fp_capability += device_half_fp_config_[i] & CL_FP_ROUND_TO_NEAREST ? "ROUND_TO_NEAREST " : "";
+      half_fp_capability += device_half_fp_config_[i] & CL_FP_ROUND_TO_ZERO ? "ROUND_TO_ZERO " : "";
+      half_fp_capability += device_half_fp_config_[i] & CL_FP_ROUND_TO_INF ? "ROUND_TO_INF " : "";
+      half_fp_capability += device_half_fp_config_[i] & CL_FP_FMA ? "FMA " : "";
+      half_fp_capability += device_half_fp_config_[i] & CL_FP_SOFT_FLOAT ? "SOFT_FLOAT " : "";
+      half_fp_capability += device_half_fp_config_[i] & CL_FP_CORRECTLY_ROUNDED_DIVIDE_SQRT ? "CORRECTLY_ROUNDED_DIVIDE_SQRT" : "";
+      GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Half Precision Capability: " << half_fp_capability << GGendl;
+    }
+    std::string single_fp_capability("");
+    single_fp_capability += device_single_fp_config_[i] & CL_FP_DENORM ? "DENORM " : "";
+    single_fp_capability += device_single_fp_config_[i] & CL_FP_INF_NAN ? "INF_NAN " : "";
+    single_fp_capability += device_single_fp_config_[i] & CL_FP_ROUND_TO_NEAREST ? "ROUND_TO_NEAREST " : "";
+    single_fp_capability += device_single_fp_config_[i] & CL_FP_ROUND_TO_ZERO ? "ROUND_TO_ZERO " : "";
+    single_fp_capability += device_single_fp_config_[i] & CL_FP_ROUND_TO_INF ? "ROUND_TO_INF " : "";
+    single_fp_capability += device_single_fp_config_[i] & CL_FP_FMA ? "FMA " : "";
+    single_fp_capability += device_single_fp_config_[i] & CL_FP_SOFT_FLOAT ? "SOFT_FLOAT " : "";
+    single_fp_capability += device_single_fp_config_[i] & CL_FP_CORRECTLY_ROUNDED_DIVIDE_SQRT ? "CORRECTLY_ROUNDED_DIVIDE_SQRT" : "";
+    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Single Precision Capability: " << single_fp_capability << GGendl;
+    if (device_native_vector_width_double_[i] != 0) {
+      std::string double_fp_capability("");
+      double_fp_capability += device_double_fp_config_[i] & CL_FP_DENORM ? "DENORM " : "";
+      double_fp_capability += device_double_fp_config_[i] & CL_FP_INF_NAN ? "INF_NAN " : "";
+      double_fp_capability += device_double_fp_config_[i] & CL_FP_ROUND_TO_NEAREST ? "ROUND_TO_NEAREST " : "";
+      double_fp_capability += device_double_fp_config_[i] & CL_FP_ROUND_TO_ZERO ? "ROUND_TO_ZERO " : "";
+      double_fp_capability += device_double_fp_config_[i] & CL_FP_ROUND_TO_INF ? "ROUND_TO_INF " : "";
+      double_fp_capability += device_double_fp_config_[i] & CL_FP_FMA ? "FMA " : "";
+      double_fp_capability += device_double_fp_config_[i] & CL_FP_SOFT_FLOAT ? "SOFT_FLOAT " : "";
+      double_fp_capability += device_double_fp_config_[i] & CL_FP_CORRECTLY_ROUNDED_DIVIDE_SQRT ? "CORRECTLY_ROUNDED_DIVIDE_SQRT" : "";
+      GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Double Precision Capability: " << double_fp_capability << GGendl;
+    }
+    if (device_endian_little_[i] == static_cast<GGbool>(true)) {
+      GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Endian Little: ON" << GGendl;
+    }
+    else {
+      GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Endian Little: OFF" << GGendl;
+    }
+    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Extensions: " << device_extensions_[i] << GGendl;
+    if (device_error_correction_support_[i] == static_cast<GGbool>(true)) {
+      GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Error Correction Support: ON" << GGendl;
+    }
+    else {
+      GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Error Correction Support: OFF" << GGendl;
+    }
+    std::string execution_capabilities("");
+    execution_capabilities += device_execution_capabilities_[i] & CL_EXEC_KERNEL ? "KERNEL " : "";
+    execution_capabilities += device_execution_capabilities_[i] & CL_EXEC_NATIVE_KERNEL ? "NATIVE_KERNEL " : "";
+    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Execution Capabilities: " << execution_capabilities << GGendl;
+    if (device_global_mem_cache_type_[i] == CL_NONE) {
+      GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Global Mem. Cache Type: " << "CL_NONE" << GGendl;
+    }
+    else if (device_global_mem_cache_type_[i] == CL_READ_ONLY_CACHE) {
+      GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Global Mem. Cache Type: " << "CL_READ_ONLY_CACHE" << GGendl;
+    }
+    else if (device_global_mem_cache_type_[i] == CL_READ_WRITE_CACHE) {
+      GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Global Mem. Cache Type: " << "CL_READ_WRITE_CACHE" << GGendl;
+    }
+    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Global Mem. Cache Size: " << device_global_mem_cache_size_[i] << " bytes" << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Global Mem. Line Cache Size: " << device_global_mem_cacheline_size_[i] << " bytes" << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Global Mem. Size: " << device_global_mem_size_[i] << " bytes" << GGendl;
+    if (device_local_mem_type_[i] == CL_LOCAL) {
+      GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Local Mem. Type: " << "CL_LOCAL" << GGendl;
+    }
+    else if (device_local_mem_type_[i] == CL_GLOBAL) {
+      GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Local Mem. Type: " << "CL_GLOBAL" << GGendl;
+    }
+    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Local Mem. Size: " << device_local_mem_size_[i] << " bytes" << GGendl;
+    if (device_host_unified_memory_[i] == static_cast<GGbool>(true)) {
+      GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Host Unified Memory: ON" << GGendl;
+    }
+    else {
+      GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Host Unified Memory: OFF" << GGendl;
+    }
+    if (device_image_support_[i] == static_cast<GGbool>(true)) {
+      GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Image Support: ON" << GGendl;
+    }
+    else {
+      GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Image Support: OFF" << GGendl;
+    }
+    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Image Max Array Size: " << device_image_max_array_size_[i] << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Image Max Buffer Size: " << device_image_max_buffer_size_[i] << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Image 2D Max Width: " << device_image2D_max_width_[i] << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Image 2D Max Height: " << device_image2D_max_height_[i] << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Image 3D Max Width: " << device_image3D_max_width_[i] << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Image 3D Max Height: " << device_image3D_max_height_[i] << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Image 3D Max Depth: " << device_image3D_max_depth_[i] << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Max Simultaneous Read Image: " << device_max_read_image_args_[i] << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Max Simultaneous Write Image: " << device_max_write_image_args_[i] << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Max Clock Frequency: " << device_max_clock_frequency_[i] << " MHz" << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Max Compute Units: " << device_max_compute_units_[i] << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Max Constant Argument In Kernel: " << device_max_constant_args_[i] << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Max Constant Buffer Size: " << device_max_constant_buffer_size_[i] << " bytes" << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Mem. Alloc. Size: " << device_max_mem_alloc_size_[i] << " bytes" << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Max Parameters Size In Kernel: " << device_max_parameter_size_[i] << " bytes" << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Mem. Base Addr. Align.: " << device_mem_base_addr_align_[i] << " bytes" << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Max Work Group Size: " << device_max_work_group_size_[i] << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Max Work Item Dimensions: " << device_max_work_item_dimensions_[i] << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Max Work Item Sizes: " << device_max_work_item_sizes_[0+i*3] << " " << device_max_work_item_sizes_[1+i*3] << " " << device_max_work_item_sizes_[2+i*3] << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Printf Buffer Size: " << device_printf_buffer_size_[i] << " bytes" << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Max Samplers: " << device_max_samplers_[i] << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Partition Max Sub-Devices: " << device_partition_max_sub_devices_[i] << GGendl;
+    std::string partition_affinity("");
+    partition_affinity += device_single_fp_config_[i] & CL_DEVICE_AFFINITY_DOMAIN_NUMA ? "NUMA " : "";
+    partition_affinity += device_single_fp_config_[i] & CL_DEVICE_AFFINITY_DOMAIN_L4_CACHE ? "L4_CACHE " : "";
+    partition_affinity += device_single_fp_config_[i] & CL_DEVICE_AFFINITY_DOMAIN_L3_CACHE ? "L3_CACHE " : "";
+    partition_affinity += device_single_fp_config_[i] & CL_DEVICE_AFFINITY_DOMAIN_L2_CACHE ? "L2_CACHE " : "";
+    partition_affinity += device_single_fp_config_[i] & CL_DEVICE_AFFINITY_DOMAIN_L1_CACHE ? "L1_CACHE " : "";
+    partition_affinity += device_single_fp_config_[i] & CL_DEVICE_AFFINITY_DOMAIN_NEXT_PARTITIONABLE ? "NEXT_PARTITIONABLE " : "";
+    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Partition Affinity: " << partition_affinity << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Timer Resolution: " << device_profiling_timer_resolution_[i] << " ns" << GGendl;
   }
   GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << GGendl;
 }
@@ -349,8 +567,6 @@ void GGEMSOpenCLManager::PrintDeviceInfos(void) const
 
 void GGEMSOpenCLManager::PrintBuildOptions(void) const
 {
-  GGcout("GGEMSOpenCLManager", "PrintBuildOptions", 3) << "Printing infos about OpenCL compilation options..." << GGendl;
-
   GGcout("GGEMSOpenCLManager", "PrintBuildOptions", 0) << "OpenCL building options: " << build_options_ << GGendl;
 }
 
@@ -363,15 +579,15 @@ void GGEMSOpenCLManager::CreateContext(void)
   GGcout("GGEMSOpenCLManager", "CreateContext", 3) << "Creating context for CPU and/or GPU..." << GGendl;
 
   // Loop over the devices
-  for (std::size_t i = 0; i < devices_cl_.size(); ++i) {
+  for (std::size_t i = 0; i < devices_.size(); ++i) {
     // Get GPU type
-    if (device_device_type_[i] == CL_DEVICE_TYPE_GPU) {
-      contexts_cl_.emplace_back(new cl::Context(*devices_cl_[i]));
+    if (device_type_[i] == CL_DEVICE_TYPE_GPU) {
+      contexts_cl_.emplace_back(new cl::Context(*devices_[i]));
       contexts_gpu_cl_.emplace_back(contexts_cl_.back());
     }
 
-    if (device_device_type_[i] == CL_DEVICE_TYPE_CPU) {
-      contexts_cl_.emplace_back(new cl::Context(*devices_cl_[i]));
+    if (device_type_[i] == CL_DEVICE_TYPE_CPU) {
+      contexts_cl_.emplace_back(new cl::Context(*devices_[i]));
       contexts_cpu_cl_.emplace_back(contexts_cl_.back());
     }
   }

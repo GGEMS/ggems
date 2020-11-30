@@ -235,6 +235,10 @@ kernel void track_through_ggems_voxelized_solid(
     if (next_discrete_process != TRANSPORTATION) {
       PhotonDiscreteProcess(primary_particle, random, materials, particle_cross_sections, material_id, global_id);
     }
+
+    // Apply threshold
+    printf("Energy: %e, threshold: %e\n", primary_particle->E_[global_id], materials->photon_energy_cut_[material_id]);
+
   } while (primary_particle->status_[global_id] == ALIVE);
 
   // Storing final state
