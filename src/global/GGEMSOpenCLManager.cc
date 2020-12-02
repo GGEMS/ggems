@@ -144,10 +144,10 @@ GGEMSOpenCLManager::GGEMSOpenCLManager(void)
   device_max_work_item_sizes_.resize(devices_.size()*3);
   device_mem_base_addr_align_.resize(devices_.size());
   device_printf_buffer_size_.resize(devices_.size());
-  device_work_group_size_.resize(devices_.size());
   device_partition_affinity_domain_.resize(devices_.size());
   device_partition_max_sub_devices_.resize(devices_.size());
   device_profiling_timer_resolution_.resize(devices_.size());
+  work_group_size_.resize(devices_.size());
 
   // Make a char buffer reading char* data
   std::size_t buffer[3] = {0,0,0};
@@ -219,7 +219,7 @@ GGEMSOpenCLManager::GGEMSOpenCLManager(void)
     CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_MAX_PARAMETER_SIZE, &device_max_parameter_size_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
     CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_MAX_WORK_GROUP_SIZE, &device_max_work_group_size_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
     // Custom work group size
-    device_work_group_size_[i] = 128;
+    work_group_size_[i] = 128;
     CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS, &device_max_work_item_dimensions_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
     CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_MAX_WORK_ITEM_SIZES, &buffer), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
     for (std::size_t j = 0; j < 3; ++j) device_max_work_item_sizes_[j + i*3] = buffer[j];
@@ -348,10 +348,10 @@ void GGEMSOpenCLManager::Clean(void)
   device_mem_base_addr_align_.clear();
   device_max_work_item_dimensions_.clear();
   device_printf_buffer_size_.clear();
-  device_work_group_size_.clear();
   device_partition_affinity_domain_.clear();
   device_partition_max_sub_devices_.clear();
   device_profiling_timer_resolution_.clear();
+  work_group_size_.clear();
 
   contexts_cl_.clear();
   contexts_cpu_cl_.clear();

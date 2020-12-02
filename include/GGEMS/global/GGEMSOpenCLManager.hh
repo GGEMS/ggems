@@ -187,10 +187,10 @@ class GGEMS_EXPORT GGEMSOpenCLManager
 
     /*!
       \fn inline std::size_t GetWorkGroupSize(void) const
-      \return Xork group size
+      \return Work group size
       \brief Get the work group size defined in GGEMS on activated OpenCL context
     */
-    inline std::size_t GetWorkGroupSize(void) const { return device_work_group_size_[context_index_];}
+    inline std::size_t GetWorkGroupSize(void) const { return work_group_size_[context_index_];}
 
     /*!
       \fn std::string GetNameOfActivatedContext(void) const
@@ -379,7 +379,6 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     std::vector<std::size_t> device_max_parameter_size_; /*!< Max Parameter size in kernel */
     std::vector<GGuint> device_max_samplers_; /*!< Max number of samplers in kernel */
     std::vector<std::size_t> device_max_work_group_size_; /*< Max Work group size */
-    std::vector<std::size_t> device_work_group_size_; /*< Work group size */
     std::vector<GGuint> device_max_work_item_dimensions_; /*!< Maximum work item dimensions */
     std::vector<std::size_t> device_max_work_item_sizes_; /*!< Maximum work item sizes */
     std::vector<GGuint> device_mem_base_addr_align_; /*!< Alignment memory */
@@ -387,6 +386,9 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     std::vector<cl_device_affinity_domain> device_partition_affinity_domain_; /*!< Partition affinity domain */
     std::vector<GGuint> device_partition_max_sub_devices_; /*!< Partition affinity domain */
     std::vector<std::size_t> device_profiling_timer_resolution_; /*<! Timer resolution */
+
+    // Custom work group size
+    std::vector<std::size_t> work_group_size_; /*< Work group size by GGEMS, here 128 */
 
     // OpenCL compilation options
     std::string build_options_; /*!< list of option to OpenCL compiler */
