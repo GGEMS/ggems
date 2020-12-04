@@ -85,7 +85,6 @@ class GGEMS_EXPORT GGEMSMHDImage
     */
     GGEMSMHDImage& operator=(GGEMSMHDImage const&& mhd) = delete;
 
-  public:
     /*!
       \fn void SetBaseName(std::string const& basename)
       \param basename - basename of the mhd file

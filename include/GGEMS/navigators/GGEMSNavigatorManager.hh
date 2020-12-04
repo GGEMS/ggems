@@ -183,6 +183,12 @@ class GGEMS_EXPORT GGEMSNavigatorManager
     */
     void PrintKernelElapsedTime(void) const;
 
+    /*!
+      \fn void SaveResults(void) const
+      \brief save all results from navigator in files
+    */
+    void SaveResults(void) const;
+
   private:
     /*!
       \fn bool CheckOverlap(std::weak_ptr<GGEMSNavigator> navigator_a, std::weak_ptr<GGEMSNavigator> navigator_b) const

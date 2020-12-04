@@ -48,9 +48,10 @@ class GGEMS_EXPORT GGEMSSolidBox : public GGEMSSolid
       \param element_size_x - element size along X
       \param element_size_y - element size along Y
       \param element_size_z - element size along Z
+      \param data_reg_type - type of registration "HIT", "SINGLE", "DOSE"
       \brief GGEMSSolidBox constructor
     */
-    GGEMSSolidBox(GGint const& virtual_element_number_x, GGint const& virtual_element_number_y, GGint const& virtual_element_number_z, GGfloat const& element_size_x, GGfloat const& element_size_y, GGfloat const& element_size_z);
+    GGEMSSolidBox(GGint const& virtual_element_number_x, GGint const& virtual_element_number_y, GGint const& virtual_element_number_z, GGfloat const& element_size_x, GGfloat const& element_size_y, GGfloat const& element_size_z, std::string const& data_reg_type);
 
     /*!
       \brief GGEMSSolidBox destructor
@@ -103,6 +104,14 @@ class GGEMS_EXPORT GGEMSSolidBox : public GGEMSSolid
       \brief Get the transformation matrix for solid box object
     */
     void GetTransformationMatrix(void) override;
+
+    /*!
+      \fn void TrackThroughSolid(std::weak_ptr<GGEMSCrossSections> cross_sections, std::weak_ptr<GGEMSMaterials> materials)
+      \param cross_sections - pointer storing cross sections values
+      \param materials - pointer storing materials values
+      \brief Track particles through solid
+    */
+    void TrackThroughSolid(std::weak_ptr<GGEMSCrossSections> cross_sections, std::weak_ptr<GGEMSMaterials> materials);
 
   private:
     /*!

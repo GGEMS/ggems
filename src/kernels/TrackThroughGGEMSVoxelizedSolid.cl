@@ -237,7 +237,7 @@ kernel void track_through_ggems_voxelized_solid(
     }
 
     // Apply threshold
-    printf("Energy: %e, threshold: %e\n", primary_particle->E_[global_id], materials->photon_energy_cut_[material_id]);
+    //printf("Energy: %e, threshold: %e\n", primary_particle->E_[global_id], materials->photon_energy_cut_[material_id]);
 
   } while (primary_particle->status_[global_id] == ALIVE);
 

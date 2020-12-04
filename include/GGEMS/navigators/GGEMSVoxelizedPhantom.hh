@@ -99,6 +99,12 @@ class GGEMS_EXPORT GGEMSVoxelizedPhantom : public GGEMSNavigator
     */
     void Initialize(void) override;
 
+    /*!
+      \fn void SaveResults
+      \brief save all results from solid
+    */
+    void SaveResults(void) {;};
+
   private:
     /*!
       \fn void CheckParameters(void) const

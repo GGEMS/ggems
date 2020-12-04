@@ -359,6 +359,10 @@ void GGEMSManager::Run()
     }
   }
 
+  // End of simulation, storing output
+  GGcout("GGEMSManager", "Run", 2) << "Saving results..." << GGendl;
+  navigator_manager.SaveResults();
+
   // Printing elapsed time in kernels
   if (is_kernel_verbose_) {
     source_manager.PrintKernelElapsedTime();
