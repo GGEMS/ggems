@@ -109,6 +109,14 @@ class GGEMS_EXPORT GGEMSVoxelizedSolid : public GGEMSSolid
     */
     void GetTransformationMatrix(void) override;
 
+    /*!
+      \fn void TrackThroughSolid(std::weak_ptr<GGEMSCrossSections> cross_sections, std::weak_ptr<GGEMSMaterials> materials)
+      \param cross_sections - pointer storing cross sections values
+      \param materials - pointer storing materials values
+      \brief Track particles through solid
+    */
+    void TrackThroughSolid(std::weak_ptr<GGEMSCrossSections> cross_sections, std::weak_ptr<GGEMSMaterials> materials);
+
   private:
     /*!
       \fn template <typename T> void ConvertImageToLabel(std::string const& raw_data_filename, std::string const& range_data_filename, std::weak_ptr<GGEMSMaterials> materials)

@@ -203,6 +203,12 @@ class GGEMS_EXPORT GGEMSNavigator
     */
     DurationNano GetAllKernelTrackThroughSolidTimer(void) const;
 
+    /*!
+      \fn void SaveResults(void)
+      \brief save all results from solid
+    */
+    virtual void SaveResults(void) = 0;
+
   protected:
     /*!
       \fn void CheckParameters(void) const

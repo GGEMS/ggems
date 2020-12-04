@@ -59,7 +59,11 @@ kernel void track_through_ggems_solid_box(
   global GGEMSSolidBoxData const* solid_box_data,
   global GGshort const* label_data,
   global GGEMSParticleCrossSections const* particle_cross_sections,
-  global GGEMSMaterialTables const* materials)
+  global GGEMSMaterialTables const* materials,
+  #ifdef HIT
+  global GGint* hit
+  #endif
+  )
 {
   // Getting index of thread
   GGint global_id = get_global_id(0);
@@ -113,6 +117,13 @@ kernel void track_through_ggems_solid_box(
     solid_box_data->box_size_xyz_[0],
     solid_box_data->box_size_xyz_[1],
     solid_box_data->box_size_xyz_[2]
+  };
+
+  // Get virtual element size
+  GGint3 virtual_element_number = {
+    solid_box_data->virtual_element_number_xyz_[0],
+    solid_box_data->virtual_element_number_xyz_[1],
+    solid_box_data->virtual_element_number_xyz_[2]
   };
 
   // TOF of photon
@@ -211,6 +222,15 @@ kernel void track_through_ggems_solid_box(
     // Resolve process if different of TRANSPORTATION
     if (next_discrete_process != TRANSPORTATION) {
       PhotonDiscreteProcess(primary_particle, random, materials, particle_cross_sections, 0, global_id);
+
+      #ifdef HIT
+      if (next_discrete_process == PHOTOELECTRIC_EFFECT || next_discrete_process == COMPTON_SCATTERING) {
+        GGfloat3 element_size = box_size / convert_float3(virtual_element_number);
+        GGint3 voxel_id = convert_int3((local_position - border_min) / element_size);
+
+        atomic_add(&hit[voxel_id.x + voxel_id.y * virtual_element_number.x + voxel_id.z * virtual_element_number.x * virtual_element_number.y], 1);
+      }
+      #endif
     }
   } while (primary_particle->status_[global_id] == ALIVE);
 

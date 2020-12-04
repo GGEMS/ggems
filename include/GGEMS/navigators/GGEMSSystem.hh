@@ -132,6 +132,12 @@ class GGEMS_EXPORT GGEMSSystem : public GGEMSNavigator
     */
     void SetMaterialName(std::string const& material_name);
 
+    /*!
+      \fn void SaveResults(void)
+      \brief save all results from solid
+    */
+    virtual void SaveResults(void) = 0;
+
   protected:
     /*!
       \fn void CheckParameters(void) const

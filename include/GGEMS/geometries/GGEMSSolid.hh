@@ -35,6 +35,7 @@
 #include <algorithm>
 
 #include "GGEMS/io/GGEMSTextReader.hh"
+#include "GGEMS/io/GGEMSHitCollection.hh"
 #include "GGEMS/tools/GGEMSRAMManager.hh"
 #include "GGEMS/navigators/GGEMSNavigatorManager.hh"
 
@@ -116,7 +117,7 @@ class GGEMS_EXPORT GGEMSSolid
       \param materials - pointer storing materials values
       \brief Track particles through solid
     */
-    void TrackThroughSolid(std::weak_ptr<GGEMSCrossSections> cross_sections, std::weak_ptr<GGEMSMaterials> materials);
+    virtual void TrackThroughSolid(std::weak_ptr<GGEMSCrossSections> cross_sections, std::weak_ptr<GGEMSMaterials> materials) = 0;
 
     /*!
       \fn void SetRotation(GGfloat3 const& rotation_xyz)
@@ -200,9 +201,12 @@ class GGEMS_EXPORT GGEMSSolid
     std::weak_ptr<cl::Kernel> kernel_track_through_solid_cl_; /*!< OpenCL kernel tracking particles through a solid */
     DurationNano kernel_track_through_solid_timer_; /*!< Timer for kernel computing tracking through closest solid */
 
-    std::string tracking_kernel_option_; /*!< Preprocessor option for tracking */
+    std::string kernel_option_; /*!< Preprocessor option for kernel */
 
     std::unique_ptr<GGEMSGeometryTransformation> geometry_transformation_; /*!< Pointer storing the geometry transformation */
+
+    std::string data_reg_type_; /*!< Type of registering data */
+    GGEMSHitCollection hit_; /*!< Storing hit counting during navigation process */
 };
 
 ////////////////////////////////////////////////////////////////////////////////

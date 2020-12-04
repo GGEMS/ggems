@@ -112,6 +112,12 @@ class GGEMS_EXPORT GGEMSCTSystem : public GGEMSSystem
     */
     void SetSourceDetectorDistance(GGfloat const& source_detector_distance, std::string const& unit = "mm");
 
+    /*!
+      \fn void SaveResults(void)
+      \brief save all results from solid
+    */
+    void SaveResults(void);
+
   private:
     /*!
       \fn void CheckParameters(void) const
