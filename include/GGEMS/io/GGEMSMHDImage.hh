@@ -108,6 +108,16 @@ class GGEMS_EXPORT GGEMSMHDImage
     void Write(std::shared_ptr<cl::Buffer> image) const;
 
     /*!
+      \fn template <typename T> void Write(T* image, GGint const& elements)
+      \tparam T - type of the data
+      \param image - image to write on output file
+      \param elements - number of elements in image
+      \brief write the raw data to file
+    */
+    template<typename T>
+    void Write(T* image, GGint const& elements);
+
+    /*!
       \fn void SetElementSizes(GGfloat3 const& element_sizes)
       \param element_sizes - size of elements in X, Y, Z
       \brief set the size of the elements
@@ -165,6 +175,35 @@ class GGEMS_EXPORT GGEMSMHDImage
     GGfloat3 element_sizes_; /*!< Size of elements */
     GGint3 dimensions_; /*!< Dimension volume X, Y, Z */
 };
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename T>
+void GGEMSMHDImage::Write(T* image, GGint const& elements)
+{
+  GGcout("GGEMSMHDImage", "Write", 0) << "Writing MHD Image..." << GGendl;
+
+  // Checking parameters before to write
+  CheckParameters();
+
+  // header data
+  std::ofstream out_header_stream(mhd_header_file_, std::ios::out);
+  out_header_stream << "ElementSpacing = " << element_sizes_.s[0] << " " << element_sizes_.s[1] << " " << element_sizes_.s[2] << std::endl;
+  out_header_stream << "DimSize = " << dimensions_.s[0] << " " << dimensions_.s[1] << " " << dimensions_.s[2] << std::endl;
+  out_header_stream << "ElementType = " << mhd_data_type_ << std::endl;
+  out_header_stream << "ElementDataFile = " << mhd_raw_file_ << std::endl;
+  out_header_stream.close();
+
+  // raw data
+  std::ofstream out_raw_stream(mhd_raw_file_, std::ios::out | std::ios::binary);
+
+  // Writing data on file
+  out_raw_stream.write(reinterpret_cast<char*>(image), elements * sizeof(T));
+
+  out_raw_stream.close();
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////

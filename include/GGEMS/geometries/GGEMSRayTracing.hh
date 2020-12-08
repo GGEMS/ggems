@@ -305,6 +305,7 @@ inline GGfloat ComputeDistanceToAABB(GGfloat3 const* position, GGfloat3 const* d
     idy = 1.0f / dir_y;
     tymin = (y_min - pos_y) * idy;
     tymax = (y_max - pos_y) * idy;
+
     if (tymin > tymax) {
       tmp = tymin;
       tymin = tymax;

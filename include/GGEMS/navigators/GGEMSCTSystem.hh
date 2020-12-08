@@ -112,12 +112,6 @@ class GGEMS_EXPORT GGEMSCTSystem : public GGEMSSystem
     */
     void SetSourceDetectorDistance(GGfloat const& source_detector_distance, std::string const& unit = "mm");
 
-    /*!
-      \fn void SaveResults(void)
-      \brief save all results from solid
-    */
-    void SaveResults(void);
-
   private:
     /*!
       \fn void CheckParameters(void) const
@@ -225,5 +219,14 @@ extern "C" GGEMS_EXPORT void set_source_detector_distance_ggems_ct_system(GGEMSC
   \brief Set the rotation of the voxelized phantom around local axis
 */
 extern "C" GGEMS_EXPORT void set_rotation_ggems_ct_system(GGEMSCTSystem* ct_system, GGfloat const rx, GGfloat const ry, GGfloat const rz, char const* unit);
+
+/*!
+  \fn void set_save_ggems_ct_system(GGEMSCTSystem* ct_system, char const* format, char const* basename)
+  \param ct_system - pointer on ct system
+  \param format - format of file, mhd or castor
+  \param basename - basename (without suffix) or output file
+  \brief Set the output file and format
+*/
+extern "C" GGEMS_EXPORT void set_save_ggems_ct_system(GGEMSCTSystem* ct_system, char const* format, char const* basename);
 
 #endif // End of GUARD_GGEMS_SYSTEMS_GGEMSSYSTEM_HH

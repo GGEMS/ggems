@@ -209,6 +209,14 @@ class GGEMS_EXPORT GGEMSNavigator
     */
     virtual void SaveResults(void) = 0;
 
+    /*!
+      \fn void StoreOutput(std::string const& format, std::string basename)
+      \param format - format of the output file
+      \param basename - basename of the output file
+      \brief Storing the basename and format of the output file
+    */
+    void StoreOutput(std::string const& format, std::string basename);
+
   protected:
     /*!
       \fn void CheckParameters(void) const
@@ -226,6 +234,10 @@ class GGEMS_EXPORT GGEMSNavigator
     std::size_t navigator_id_; /*!< Index of the navigator */
     bool is_update_pos_; /*!< Updating navigator position */
     bool is_update_rot_; /*!< Updating navigator rotation */
+
+    // Output
+    std::vector<std::string> formats_; /*!< Format of output files */
+    std::vector<std::string> basenames_; /*<! Basename of output files */
 
     std::vector<std::shared_ptr<GGEMSSolid>> solids_; /*!< Solid with geometric infos and label */
     std::shared_ptr<GGEMSMaterials> materials_; /*!< Materials of phantom */
