@@ -75,8 +75,9 @@ kernel void get_primaries_ggems_xray_source(
   // Get random angles
   GGdouble phi = KissUniform(random, global_id);
   GGdouble theta = KissUniform(random, global_id);
+
   GGdouble new_aperture = 1.0 - cos((GGdouble)aperture);
-  phi += TWO_PI;
+  phi *= (GGdouble)TWO_PI;
   theta = acos(1.0 - new_aperture*theta);
 
   // Compute rotation

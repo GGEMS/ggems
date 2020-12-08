@@ -61,7 +61,7 @@ void GGEMSPseudoRandomGenerator::Initialize(void)
   GGcout("GGEMSPseudoRandomGenerator", "Initialize", 1) << "Initialization of GGEMSPseudoRandomGenerator..." << GGendl;
 
   // Allocation of the Random structure
-  AllocateRandom();
+  if (!pseudo_random_numbers_cl_) AllocateRandom();
 
   // Generate seeds for each particle
   InitializeSeeds();

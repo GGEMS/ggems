@@ -228,7 +228,7 @@ kernel void track_through_ggems_solid_box(
         GGfloat3 element_size = box_size / convert_float3(virtual_element_number);
         GGint3 voxel_id = convert_int3((local_position - border_min) / element_size);
 
-        atomic_add(&hit[voxel_id.x + voxel_id.y * virtual_element_number.x + voxel_id.z * virtual_element_number.x * virtual_element_number.y], 1);
+        atomic_add(&hit[voxel_id.x + voxel_id.y * virtual_element_number.x], 1);
       }
       #endif
     }

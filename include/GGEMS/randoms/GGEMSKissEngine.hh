@@ -58,9 +58,9 @@ inline GGfloat KissUniform(__global GGEMSRandom* random, GGint const index)
   // w = t & 2147483647;
   // x += 1411392427;
 
-  random->prng_state_2_[index] ^= random->prng_state_2_[index] << 5;
-  random->prng_state_2_[index] ^= random->prng_state_2_[index] >> 7;
-  random->prng_state_2_[index] ^= random->prng_state_2_[index] << 22;
+  random->prng_state_2_[index] ^= (random->prng_state_2_[index] << 5);
+  random->prng_state_2_[index] ^= (random->prng_state_2_[index] >> 7);
+  random->prng_state_2_[index] ^= (random->prng_state_2_[index] << 22);
 
   GGint t = random->prng_state_3_[index] + random->prng_state_4_[index] + random->prng_state_5_[index];
 

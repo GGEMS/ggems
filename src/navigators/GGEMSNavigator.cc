@@ -172,6 +172,27 @@ DurationNano GGEMSNavigator::GetAllKernelTrackThroughSolidTimer(void) const
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+void GGEMSNavigator::StoreOutput(std::string const& format, std::string basename)
+{
+  std::string format_str = format;
+  std::string basename_str = basename;
+  std::transform(format_str.begin(), format_str.end(), format_str.begin(), ::tolower);
+  std::transform(basename_str.begin(), basename_str.end(), basename_str.begin(), ::tolower);
+
+  if (format_str != "mhd" && format_str != "castor") {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "Available output are: 'mhd' or 'castor'";
+    GGEMSMisc::ThrowException("GGEMSNavigator", "StoreOutput", oss.str());
+  }
+
+  formats_.push_back(format_str);
+  basenames_.push_back(basename_str);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 void GGEMSNavigator::ParticleSolidDistance(void) const
 {
   for (auto&& i : solids_) i->ParticleSolidDistance();
@@ -209,5 +230,9 @@ void GGEMSNavigator::PrintInfos(void) const
     solids_.at(i)->PrintInfos();
   }
   materials_->PrintInfos();
+  for (std::size_t i = 0; i < formats_.size(); ++i) {
+    GGcout("GGEMSNavigator", "PrintInfos", 0) << "* Output:" << GGendl;
+    GGcout("GGEMSNavigator", "PrintInfos", 0) << "    -> " << formats_.at(i) << ", " << basenames_.at(i) << GGendl;
+  }
   GGcout("GGEMSNavigator", "PrintInfos", 0) << GGendl;
 }

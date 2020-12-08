@@ -20,7 +20,7 @@ from ggems import *
 
 # ------------------------------------------------------------------------------
 # STEP 0: Level of verbosity during computation
-GGEMSVerbosity(2)
+GGEMSVerbosity(0)
 
 # ------------------------------------------------------------------------------
 # STEP 1: Choosing an OpenCL context
@@ -43,7 +43,7 @@ phantom.set_position(0.0, 0.0, 0.0, 'mm')
 
 ct_detector = GGEMSCTSystem('SOMATOM_Definition_EDGE') 
 ct_detector.set_ct_type('curved')
-ct_detector.set_number_of_modules(1, 1) #(1, 46)
+ct_detector.set_number_of_modules(1, 1)
 ct_detector.set_number_of_detection_elements(64, 16, 1)
 ct_detector.set_size_of_detection_elements(0.6, 0.6, 0.6, 'mm')
 ct_detector.set_material('GOS')
@@ -51,7 +51,7 @@ ct_detector.set_source_detector_distance(1085.6, 'mm')
 ct_detector.set_source_isocenter_distance(595.0, 'mm')
 ct_detector.set_rotation(0.0, 0.0, 0.0, 'deg')
 #ct_detector.set_threshold(10.0, 'keV')
-#ct_detector.save('mhd', 'data/xxxxxx')
+ct_detector.save('mhd', 'data/projection')
 #ct_detector.save('castor', 'data/xxxxxx')
 
 # ------------------------------------------------------------------------------
@@ -73,10 +73,10 @@ range_cuts_manager.set_cut('gamma', 0.1, 'mm', 'all')
 # STEP 7: Source
 point_source = GGEMSXRaySource('point_source')
 point_source.set_source_particle_type('gamma')
-point_source.set_number_of_particles(1)
+point_source.set_number_of_particles(100)
 point_source.set_position(-595.0, 0.0, 0.0, 'mm')
 point_source.set_rotation(0.0, 0.0, 0.0, 'deg')
-point_source.set_beam_aperture(0.0, 'deg')
+point_source.set_beam_aperture(1.55, 'deg')
 point_source.set_focal_spot_size(0.0, 0.0, 0.0, 'mm')
 point_source.set_polyenergy('data/spectrum_120kVp_2mmAl.dat')
 

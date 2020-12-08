@@ -92,7 +92,7 @@ GGEMSSolidBox::GGEMSSolidBox(GGint const& virtual_element_number_x, GGint const&
 
     GGint* hit_device = opencl_manager.GetDeviceBuffer<GGint>(hit_.hit_cl_.get(), hit_.number_of_elements_*sizeof(GGint));
 
-    for (GGint i = 0; i < hit_.number_of_elements_; ++i) hit_device[i] = 1;
+    for (GGint i = 0; i < hit_.number_of_elements_; ++i) hit_device[i] = 0;
 
     opencl_manager.ReleaseDeviceBuffer(hit_.hit_cl_ .get(), hit_device);
   }

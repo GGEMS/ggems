@@ -136,7 +136,7 @@ class GGEMS_EXPORT GGEMSSystem : public GGEMSNavigator
       \fn void SaveResults(void)
       \brief save all results from solid
     */
-    virtual void SaveResults(void) = 0;
+    void SaveResults(void);
 
   protected:
     /*!

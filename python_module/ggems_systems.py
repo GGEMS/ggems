@@ -48,6 +48,9 @@ class GGEMSCTSystem(object):
       ggems_lib.set_rotation_ggems_ct_system.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_char_p]
       ggems_lib.set_rotation_ggems_ct_system.restype = ctypes.c_void_p
 
+      ggems_lib.set_save_ggems_ct_system.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_char_p]
+      ggems_lib.set_save_ggems_ct_system.restype = ctypes.c_void_p
+
       self.obj = ggems_lib.create_ggems_ct_system(ct_system_name.encode('ASCII'))
 
   def set_number_of_modules(self, module_x, module_y):
@@ -73,3 +76,6 @@ class GGEMSCTSystem(object):
 
   def set_rotation(self, rx, ry, rz, unit):
       ggems_lib.set_rotation_ggems_ct_system(self.obj, rx, ry, rz, unit.encode('ASCII'))
+
+  def save(self, format, basename):
+      ggems_lib.set_save_ggems_ct_system(self.obj, format.encode('ASCII'), basename.encode('ASCII'))

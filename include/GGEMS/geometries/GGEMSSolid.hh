@@ -181,6 +181,13 @@ class GGEMS_EXPORT GGEMSSolid
     */
     inline DurationNano GetKernelTrackThroughSolidTimer(void) const {return kernel_track_through_solid_timer_;}
 
+    /*!
+      \fn GGEMSHitCollection* GetHitCollection(void)
+      \return pointer on hit
+      \brief return the point on hit collection
+    */
+    inline GGEMSHitCollection* GetHitCollection(void) {return &hit_;};
+
   protected:
     /*!
       \fn void InitializeKernel(void)
