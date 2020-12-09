@@ -28,9 +28,13 @@
   \date Monday December 16, 2019
 */
 
+#include <random>
+
 #include "GGEMS/randoms/GGEMSPseudoRandomGenerator.hh"
 #include "GGEMS/randoms/GGEMSRandom.hh"
+
 #include "GGEMS/tools/GGEMSRAMManager.hh"
+
 #include "GGEMS/sources/GGEMSSourceManager.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -38,7 +42,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 GGEMSPseudoRandomGenerator::GGEMSPseudoRandomGenerator(void)
-: pseudo_random_numbers_cl_(nullptr)
+: pseudo_random_numbers_cl_(nullptr),
+  seed_(0)
 {
   GGcout("GGEMSPseudoRandomGenerator", "GGEMSPseudoRandomGenerator", 3) << "Allocation of GGEMSPseudoRandomGenerator..." << GGendl;
 }
@@ -56,9 +61,44 @@ GGEMSPseudoRandomGenerator::~GGEMSPseudoRandomGenerator(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSPseudoRandomGenerator::Initialize(void)
+GGuint GGEMSPseudoRandomGenerator::GenerateSeed(void) const
+{
+  #ifdef _WIN32
+  HCRYPTPROV seedWin32;
+  if (CryptAcquireContext(&seedWin32, NULL, NULL, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT ) == FALSE) {
+    std::ostringstream oss(std::ostringstream::out);
+    char buffer_error[256];
+    oss << "Error finding a seed: " << strerror_s(buffer_error, 256, errno) << std::endl;
+    GGEMSMisc::ThrowException("GGEMSManager", "GenerateSeed", oss.str());
+  }
+  return static_cast<uint32_t>(seedWin32);
+  #else
+  // Open a system random file
+  GGint file_descriptor = ::open("/dev/urandom", O_RDONLY | O_NONBLOCK);
+  if (file_descriptor < 0) {
+    std::ostringstream oss( std::ostringstream::out );
+    oss << "Error opening the file '/dev/urandom': " << strerror(errno) << std::endl;
+    GGEMSMisc::ThrowException("GGEMSManager", "GenerateSeed", oss.str());
+  }
+
+  // Buffer storing 8 characters
+  char seedArray[sizeof(GGuint)];
+  ::read(file_descriptor, reinterpret_cast<GGuint*>(seedArray), sizeof(GGuint));
+  ::close(file_descriptor);
+  GGuint *seedUInt = reinterpret_cast<GGuint*>(seedArray);
+  return *seedUInt;
+  #endif
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSPseudoRandomGenerator::Initialize(GGuint const& seed)
 {
   GGcout("GGEMSPseudoRandomGenerator", "Initialize", 1) << "Initialization of GGEMSPseudoRandomGenerator..." << GGendl;
+
+  seed_ = seed == 0 ? GenerateSeed() : seed;
 
   // Allocation of the Random structure
   if (!pseudo_random_numbers_cl_) AllocateRandom();
@@ -75,6 +115,9 @@ void GGEMSPseudoRandomGenerator::InitializeSeeds(void)
 {
   GGcout("GGEMSPseudoRandomGenerator", "InitializeSeeds", 1) << "Initialization of seeds for each particles..." << GGendl;
 
+  // Initialize the Mersenne Twister engine
+  std::mt19937 mt_gen(seed_);
+
   // Get the OpenCL manager
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
@@ -83,11 +126,11 @@ void GGEMSPseudoRandomGenerator::InitializeSeeds(void)
 
   // For each particle a seed is generated
   for (std::size_t i = 0; i < MAXIMUM_PARTICLES; ++i) {
-    random_device->prng_state_1_[i] = static_cast<GGuint>(rand());
-    random_device->prng_state_2_[i] = static_cast<GGuint>(rand());
-    random_device->prng_state_3_[i] = static_cast<GGuint>(rand());
-    random_device->prng_state_4_[i] = static_cast<GGuint>(rand());
-    random_device->prng_state_5_[i] = static_cast<GGuint>(0);
+    random_device->prng_state_1_[i] = mt_gen();
+    random_device->prng_state_2_[i] = mt_gen();
+    random_device->prng_state_3_[i] = mt_gen();
+    random_device->prng_state_4_[i] = mt_gen();
+    random_device->prng_state_5_[i] = 0;
   }
 
   // Release the pointer, mandatory step!!!
@@ -107,4 +150,44 @@ void GGEMSPseudoRandomGenerator::AllocateRandom(void)
 
   // Allocation of memory on OpenCL device
   pseudo_random_numbers_cl_ = opencl_manager.Allocate(nullptr, sizeof(GGEMSRandom), CL_MEM_READ_WRITE);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSPseudoRandomGenerator::PrintInfos(void) const
+{
+  GGcout("GGEMSPseudoRandomGenerator", "PrintInfos", 0) << "Printing infos about random" << GGendl;
+  GGcout("GGEMSPseudoRandomGenerator", "PrintInfos", 0) << "Seed: " << seed_ << GGendl;
+
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+  GGEMSRandom* random_device = opencl_manager.GetDeviceBuffer<GGEMSRandom>(pseudo_random_numbers_cl_.get(), sizeof(GGEMSRandom));
+
+  GGuint state[2][5] = {
+    {
+      random_device->prng_state_1_[0],
+      random_device->prng_state_2_[0],
+      random_device->prng_state_3_[0],
+      random_device->prng_state_4_[0],
+      random_device->prng_state_5_[0]
+    },
+    {
+      random_device->prng_state_1_[1],
+      random_device->prng_state_2_[1],
+      random_device->prng_state_3_[1],
+      random_device->prng_state_4_[1],
+      random_device->prng_state_5_[1]
+    }
+  };
+
+  // Release the pointer, mandatory step!!!
+  opencl_manager.ReleaseDeviceBuffer(pseudo_random_numbers_cl_.get(), random_device);
+
+  GGcout("GGEMSPseudoRandomGenerator", "PrintInfos", 0) << "Random state of two first particles for JKISS engine:" << GGendl;
+  GGcout("GGEMSPseudoRandomGenerator", "PrintInfos", 0) << "    * state 0: " << state[0][0] << " " << state[1][0] << GGendl;
+  GGcout("GGEMSPseudoRandomGenerator", "PrintInfos", 0) << "    * state 1: " << state[0][1] << " " << state[1][1] << GGendl;
+  GGcout("GGEMSPseudoRandomGenerator", "PrintInfos", 0) << "    * state 2: " << state[0][2] << " " << state[1][2] << GGendl;
+  GGcout("GGEMSPseudoRandomGenerator", "PrintInfos", 0) << "    * state 3: " << state[0][3] << " " << state[1][3] << GGendl;
+  GGcout("GGEMSPseudoRandomGenerator", "PrintInfos", 0) << "    * state 4: " << state[0][4] << " " << state[1][4] << GGendl;
 }

@@ -81,12 +81,25 @@ class GGEMS_EXPORT GGEMSPseudoRandomGenerator
     GGEMSPseudoRandomGenerator& operator=(GGEMSPseudoRandomGenerator const&& random) = delete;
 
     /*!
-      \fn void Initialize(void)
+      \fn void Initialize(GGuint const& seed)
+      \param seed - seed of the random
       \brief Initialize the Random object
     */
-    void Initialize(void);
+    void Initialize(GGuint const& seed);
 
-  public:
+    /*!
+      \fn void SetSeed(GGuint const& seed)
+      \param seed - seed of random
+      \brief set the initial seed
+    */
+    void SetSeed(GGuint const& seed);
+
+    /*!
+      \fn void PrintInfos(void) const
+      \brief printing infos about random
+    */
+    void PrintInfos(void) const;
+
     /*!
       \fn inline cl::Buffer* GetPseudoRandomNumbers() const
       \return pointer to OpenCL buffer storing random numbers
@@ -107,8 +120,16 @@ class GGEMS_EXPORT GGEMSPseudoRandomGenerator
     */
     void InitializeSeeds(void);
 
+    /*!
+      \fn GGuint GenerateSeed(void) const
+      \return the seed computed by GGEMS
+      \brief generate a seed by GGEMS and return it
+    */
+    GGuint GenerateSeed(void) const;
+
   private:
     std::shared_ptr<cl::Buffer> pseudo_random_numbers_cl_; /*!< Pointer storing the buffer about random numbers */
+    GGuint seed_; /*!< Initial seed generating state of GGEMS random */
 };
 
 #endif // End of GUARD_GGEMS_RANDOMS_PSEUDO_RANDOM_GENERATOR_HH

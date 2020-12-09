@@ -221,12 +221,11 @@ extern "C" GGEMS_EXPORT void set_source_detector_distance_ggems_ct_system(GGEMSC
 extern "C" GGEMS_EXPORT void set_rotation_ggems_ct_system(GGEMSCTSystem* ct_system, GGfloat const rx, GGfloat const ry, GGfloat const rz, char const* unit);
 
 /*!
-  \fn void set_save_ggems_ct_system(GGEMSCTSystem* ct_system, char const* format, char const* basename)
+  \fn void set_save_ggems_ct_system(GGEMSCTSystem* ct_system, char const* basename)
   \param ct_system - pointer on ct system
-  \param format - format of file, mhd or castor
   \param basename - basename (without suffix) or output file
   \brief Set the output file and format
 */
-extern "C" GGEMS_EXPORT void set_save_ggems_ct_system(GGEMSCTSystem* ct_system, char const* format, char const* basename);
+extern "C" GGEMS_EXPORT void set_save_ggems_ct_system(GGEMSCTSystem* ct_system, char const* basename);
 
 #endif // End of GUARD_GGEMS_SYSTEMS_GGEMSSYSTEM_HH
