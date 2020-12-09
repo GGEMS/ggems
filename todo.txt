@@ -1,29 +1,12 @@
-- Améliorer le random Poisson et Gauss ?
-
-- Faire un installer pratique pour Windows, MAC et Linux
-
-- Faire la visu avec Qt (Qt Quick) et activer l'option Qt à partir du CMAKE. Si possible, faire la visualization sur carte graphique avec OpenCL
-
-- Dessiner les particules :
-  * Photon -> vert
-  * Positron -> rouge
-  * Electron -> bleu
+- Faire la visu, Vulkan ?
 
 - Documentation avec Sphinx + Doxygen + LXR ou site .io avec doc
-
-- Faire source indépendantes sans lancer la simulation complète -> phase space
 
 - Généraliser le OpenCL manager à plusieurs contexts (pour la reconstruction CT plus tard)
 
 - Complétion automatique python
 
 - Faire des exemples et benchmarks
-
-- Faire une class singleton qui gère la mémoire RAM et diviser la gestion de la mémoire en section:
-  * particules
-  * navigateur : fantome + detecteur
-  * source
-  * etc...
 
 - Faire diagramme avec Drawio pour clarifier code
 

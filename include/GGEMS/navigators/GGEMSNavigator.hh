@@ -125,13 +125,6 @@ class GGEMS_EXPORT GGEMSNavigator
     inline std::string GetNavigatorName(void) const {return navigator_name_;}
 
     /*!
-      \fn inline std::weak_ptr<GGEMSSolid> GetSolid(void) const
-      \brief get the pointer on solid
-      \return the pointer on solid
-    */
-    //inline std::weak_ptr<GGEMSSolid> GetSolid(void) const {return solid_;}
-
-    /*!
       \fn inline std::size_t GetNumberOfSolids(void) const
       \brief get the number of solids inside the navigator
       \return the number of solids
@@ -210,12 +203,12 @@ class GGEMS_EXPORT GGEMSNavigator
     virtual void SaveResults(void) = 0;
 
     /*!
-      \fn void StoreOutput(std::string const& format, std::string basename)
+      \fn void StoreOutput(std::string basename)
       \param format - format of the output file
       \param basename - basename of the output file
       \brief Storing the basename and format of the output file
     */
-    void StoreOutput(std::string const& format, std::string basename);
+    void StoreOutput(std::string basename);
 
   protected:
     /*!
@@ -236,8 +229,7 @@ class GGEMS_EXPORT GGEMSNavigator
     bool is_update_rot_; /*!< Updating navigator rotation */
 
     // Output
-    std::vector<std::string> formats_; /*!< Format of output files */
-    std::vector<std::string> basenames_; /*<! Basename of output files */
+    std::string output_basename_; /*<! Basename of output file */
 
     std::vector<std::shared_ptr<GGEMSSolid>> solids_; /*!< Solid with geometric infos and label */
     std::shared_ptr<GGEMSMaterials> materials_; /*!< Materials of phantom */

@@ -59,8 +59,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 GGEMSManager::GGEMSManager(void)
-: seed_(0),
-  is_opencl_verbose_(false),
+: is_opencl_verbose_(false),
   is_material_database_verbose_(false),
   is_source_verbose_(false),
   is_navigator_verbose_(false),
@@ -82,48 +81,6 @@ GGEMSManager::GGEMSManager(void)
 GGEMSManager::~GGEMSManager(void)
 {
   GGcout("GGEMSManager", "~GGEMSManager", 3) << "Deallocation of GGEMS Manager..." << GGendl;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void GGEMSManager::SetSeed(uint32_t const& seed)
-{
-  seed_ = seed;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-GGuint GGEMSManager::GenerateSeed(void) const
-{
-  #ifdef _WIN32
-  HCRYPTPROV seedWin32;
-  if (CryptAcquireContext(&seedWin32, NULL, NULL, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT ) == FALSE) {
-    std::ostringstream oss(std::ostringstream::out);
-    char buffer_error[256];
-    oss << "Error finding a seed: " << strerror_s(buffer_error, 256, errno) << std::endl;
-    GGEMSMisc::ThrowException("GGEMSManager", "GenerateSeed", oss.str());
-  }
-  return static_cast<uint32_t>(seedWin32);
-  #else
-  // Open a system random file
-  GGint file_descriptor = ::open("/dev/urandom", O_RDONLY | O_NONBLOCK);
-  if (file_descriptor < 0) {
-    std::ostringstream oss( std::ostringstream::out );
-    oss << "Error opening the file '/dev/urandom': " << strerror(errno) << std::endl;
-    GGEMSMisc::ThrowException("GGEMSManager", "GenerateSeed", oss.str());
-  }
-
-  // Buffer storing 8 characters
-  char seedArray[sizeof(GGuint)];
-  ::read(file_descriptor, reinterpret_cast<GGuint*>(seedArray), sizeof(GGuint));
-  ::close(file_descriptor);
-  GGuint *seedUInt = reinterpret_cast<GGuint*>(seedArray);
-  return *seedUInt;
-  #endif
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -221,19 +178,7 @@ void GGEMSManager::SetTrackingVerbose(bool const& is_tracking_verbose, GGint con
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSManager::CheckParameters(void)
-{
-  GGcout("GGEMSManager", "CheckParameters", 1) << "Checking the mandatory parameters..." << GGendl;
-
-  // Checking the seed of the random generator
-  if (seed_ == 0) seed_ = GenerateSeed();
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void GGEMSManager::Initialize(void)
+void GGEMSManager::Initialize(GGuint const& seed)
 {
   GGcout("GGEMSManager", "Initialize", 1) << "Initialization of GGEMS Manager singleton..." << GGendl;
 
@@ -257,19 +202,11 @@ void GGEMSManager::Initialize(void)
   // Printing the banner with the GGEMS version
   PrintBanner();
 
-  // Checking the mandatory parameters
-  CheckParameters();
-  GGcout("GGEMSManager", "Initialize", 0) << "Parameters OK" << GGendl;
-
-  // Initialize the pseudo random number generator
-  srand(seed_);
-  GGcout("GGEMSManager", "Initialize", 0) << "C++ Pseudo-random number generator seeded OK" << GGendl;
-
   // Checking if material manager is ready
   if (!material_database_manager.IsReady()) GGEMSMisc::ThrowException("GGEMSManager", "Initialize", "Materials are not loaded in GGEMS!!!");
 
   // Initialization of the source
-  source_manager.Initialize();
+  source_manager.Initialize(seed);
 
   // Initialization of the navigators (phantom + system)
   navigator_manager.Initialize();
@@ -303,7 +240,7 @@ void GGEMSManager::Initialize(void)
   if (is_range_cuts_verbose_) range_cuts_manager.PrintInfos();
 
   // Printing infos about random in GGEMS
-  if (is_random_verbose_) GGcout("GGEMSManager", "Initialize", 0) << "GGEMS Seed: " << seed_ << GGendl;
+  if (is_random_verbose_) source_manager.GetPseudoRandomGenerator()->PrintInfos();
 
   // Printing infos about RAM
   if (is_memory_ram_verbose_) ram_manager.PrintRAMStatus();
@@ -409,18 +346,9 @@ GGEMSManager* get_instance_ggems_manager(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_seed_ggems_manager(GGEMSManager* ggems_manager, GGuint const seed)
+void initialize_ggems_manager(GGEMSManager* ggems_manager, GGuint const seed)
 {
-  ggems_manager->SetSeed(seed);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void initialize_ggems_manager(GGEMSManager* ggems_manager)
-{
-  ggems_manager->Initialize();
+  ggems_manager->Initialize(seed);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

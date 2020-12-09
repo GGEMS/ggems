@@ -20,12 +20,11 @@ from ggems import *
 
 # ------------------------------------------------------------------------------
 # STEP 0: Level of verbosity during computation
-GGEMSVerbosity(0)
+GGEMSVerbosity(1)
 
 # ------------------------------------------------------------------------------
 # STEP 1: Choosing an OpenCL context
-opencl_manager.set_context_index(0)
-opencl_manager.print_infos()
+opencl_manager.set_context_index(2)
 
 # ------------------------------------------------------------------------------
 # STEP 2: Visualization
@@ -43,7 +42,7 @@ phantom.set_position(0.0, 0.0, 0.0, 'mm')
 
 ct_detector = GGEMSCTSystem('SOMATOM_Definition_EDGE') 
 ct_detector.set_ct_type('curved')
-ct_detector.set_number_of_modules(1, 1)
+ct_detector.set_number_of_modules(1, 46)
 ct_detector.set_number_of_detection_elements(64, 16, 1)
 ct_detector.set_size_of_detection_elements(0.6, 0.6, 0.6, 'mm')
 ct_detector.set_material('GOS')
@@ -51,8 +50,7 @@ ct_detector.set_source_detector_distance(1085.6, 'mm')
 ct_detector.set_source_isocenter_distance(595.0, 'mm')
 ct_detector.set_rotation(0.0, 0.0, 0.0, 'deg')
 #ct_detector.set_threshold(10.0, 'keV')
-ct_detector.save('mhd', 'data/projection')
-#ct_detector.save('castor', 'data/xxxxxx')
+ct_detector.save('data/projection')
 
 # ------------------------------------------------------------------------------
 # STEP 5: Physics
@@ -76,15 +74,12 @@ point_source.set_source_particle_type('gamma')
 point_source.set_number_of_particles(100)
 point_source.set_position(-595.0, 0.0, 0.0, 'mm')
 point_source.set_rotation(0.0, 0.0, 0.0, 'deg')
-point_source.set_beam_aperture(1.55, 'deg')
+point_source.set_beam_aperture(12.0, 'deg')
 point_source.set_focal_spot_size(0.0, 0.0, 0.0, 'mm')
 point_source.set_polyenergy('data/spectrum_120kVp_2mmAl.dat')
 
 # ------------------------------------------------------------------------------
-# STEP 8: GGEMS simulation parameters
-ggems_manager.set_seed(777) # Optional, if not set, the seed is automatically computed
-
-ggems_manager.opencl_verbose(False)
+ggems_manager.opencl_verbose(True)
 ggems_manager.material_database_verbose(False)
 ggems_manager.navigator_verbose(True)
 ggems_manager.source_verbose(True)
@@ -93,12 +88,12 @@ ggems_manager.process_verbose(True)
 ggems_manager.range_cuts_verbose(True)
 ggems_manager.random_verbose(True)
 ggems_manager.kernel_verbose(True)
-ggems_manager.tracking_verbose(False, 0) # Track a specific particle a utiliser avec le singleton de façon plus efficace!!!
+ggems_manager.tracking_verbose(False, 0)
 
-# # Initializing the GGEMS simulation
-ggems_manager.initialize()
+# Initializing the GGEMS simulation
+ggems_manager.initialize(777)
 
-# # Start GGEMS simulation
+# Start GGEMS simulation
 ggems_manager.run()
 
 # ------------------------------------------------------------------------------

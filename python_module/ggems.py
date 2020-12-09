@@ -32,10 +32,7 @@ class GGEMSManager(object):
     def __init__(self):
         ggems_lib.get_instance_ggems_manager.restype = ctypes.c_void_p
 
-        ggems_lib.set_seed_ggems_manager.argtypes = [ctypes.c_void_p, ctypes.c_uint32]
-        ggems_lib.set_seed_ggems_manager.restype = ctypes.c_void_p
-
-        ggems_lib.initialize_ggems_manager.argtypes = [ctypes.c_void_p]
+        ggems_lib.initialize_ggems_manager.argtypes = [ctypes.c_void_p, ctypes.c_uint32]
         ggems_lib.initialize_ggems_manager.restype = ctypes.c_void_p
 
         ggems_lib.set_opencl_verbose_ggems_manager.argtypes = [ctypes.c_void_p, ctypes.c_bool]
@@ -73,11 +70,8 @@ class GGEMSManager(object):
 
         self.obj = ggems_lib.get_instance_ggems_manager()
 
-    def set_seed(self, seed):
-        ggems_lib.set_seed_ggems_manager(self.obj, seed)
-
-    def initialize(self):
-        ggems_lib.initialize_ggems_manager(self.obj)
+    def initialize(self, seed = 0):
+        ggems_lib.initialize_ggems_manager(self.obj, seed)
 
     def run(self):
         ggems_lib.run_ggems_manager(self.obj)

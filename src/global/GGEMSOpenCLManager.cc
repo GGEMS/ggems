@@ -219,7 +219,7 @@ GGEMSOpenCLManager::GGEMSOpenCLManager(void)
     CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_MAX_PARAMETER_SIZE, &device_max_parameter_size_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
     CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_MAX_WORK_GROUP_SIZE, &device_max_work_group_size_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
     // Custom work group size
-    work_group_size_[i] = 128;
+    work_group_size_[i] = 64;
     CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS, &device_max_work_item_dimensions_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
     CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_MAX_WORK_ITEM_SIZES, &buffer), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
     for (std::size_t j = 0; j < 3; ++j) device_max_work_item_sizes_[j + i*3] = buffer[j];

@@ -119,10 +119,11 @@ class GGEMS_EXPORT GGEMSSourceManager
     inline std::size_t GetNumberOfSources(void) const {return sources_.size();}
 
     /*!
-      \fn void Initialize(void) const
+      \fn void Initialize(GGuint const& seed) const
+      \param seed - seed of the random
       \brief Initialize a GGEMS source
     */
-    void Initialize(void) const;
+    void Initialize(GGuint const& seed) const;
 
     /*!
       \fn inline std::string GetNameOfSource(std::size_t const& source_index) const

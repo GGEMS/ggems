@@ -138,52 +138,43 @@ void GGEMSSystem::CheckParameters(void) const
 
 void GGEMSSystem::SaveResults(void)
 {
-  for (std::size_t i = 0; i < formats_.size(); ++i) {
-    if (formats_.at(i) == "mhd") {
-      GGcout("GGEMSSystem", "SaveResults", 2) << "Saving results in MHD format..." << GGendl;
+  GGcout("GGEMSSystem", "SaveResults", 2) << "Saving results in MHD format..." << GGendl;
 
-      GGint3 total_dim = {
-        number_of_modules_xy_.s0*number_of_detection_elements_inside_module_xyz_.s0,
-        number_of_modules_xy_.s1*number_of_detection_elements_inside_module_xyz_.s1,
-        number_of_detection_elements_inside_module_xyz_.s2
-      };
+  GGint3 total_dim = {
+    number_of_modules_xy_.s0*number_of_detection_elements_inside_module_xyz_.s0,
+    number_of_modules_xy_.s1*number_of_detection_elements_inside_module_xyz_.s1,
+    number_of_detection_elements_inside_module_xyz_.s2
+  };
 
-      GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
-      GGint* output = new GGint[total_dim.s0*total_dim.s1*total_dim.s2];
-      std::memset(output, 0, total_dim.s0*total_dim.s1*total_dim.s2*sizeof(GGint));
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+  GGint* output = new GGint[total_dim.s0*total_dim.s1*total_dim.s2];
+  std::memset(output, 0, total_dim.s0*total_dim.s1*total_dim.s2*sizeof(GGint));
 
-      GGEMSMHDImage mhdImage;
-      mhdImage.SetBaseName(basenames_.at(i));
-      mhdImage.SetDataType("MET_INT");
-      mhdImage.SetDimensions(total_dim);
-      mhdImage.SetElementSizes(size_of_detection_elements_xyz_);
+  GGEMSMHDImage mhdImage;
+  mhdImage.SetBaseName(output_basename_);
+  mhdImage.SetDataType("MET_INT");
+  mhdImage.SetDimensions(total_dim);
+  mhdImage.SetElementSizes(size_of_detection_elements_xyz_);
 
-      // Getting all the counts from solid on OpenCL device
-      for (std::size_t jj = 0; jj < number_of_modules_xy_.s1; ++jj) {
-        for (std::size_t ii = 0; ii < number_of_modules_xy_.s0; ++ii) {
-            cl::Buffer* hit = solids_.at(ii + jj* number_of_modules_xy_.s0)->GetHitCollection()->hit_cl_.get();
+  // Getting all the counts from solid on OpenCL device
+  for (std::size_t jj = 0; jj < number_of_modules_xy_.s1; ++jj) {
+    for (std::size_t ii = 0; ii < number_of_modules_xy_.s0; ++ii) {
+      cl::Buffer* hit = solids_.at(ii + jj* number_of_modules_xy_.s0)->GetHitCollection()->hit_cl_.get();
 
-            GGint* hit_device = opencl_manager.GetDeviceBuffer<GGint>(hit, number_of_detection_elements_inside_module_xyz_.s0*number_of_detection_elements_inside_module_xyz_.s1*sizeof(GGint));
+      GGint* hit_device = opencl_manager.GetDeviceBuffer<GGint>(hit, number_of_detection_elements_inside_module_xyz_.s0*number_of_detection_elements_inside_module_xyz_.s1*sizeof(GGint));
 
-            // Storing data on host
-            for (GGint jjj = 0; jjj < number_of_detection_elements_inside_module_xyz_.s1; ++jjj) {
-              for (GGint iii = 0; iii < number_of_detection_elements_inside_module_xyz_.s0; ++iii) {
-                output[(iii+ii*number_of_detection_elements_inside_module_xyz_.s0) + (jjj+jj*number_of_detection_elements_inside_module_xyz_.s1)*total_dim.s0] =
-                  hit_device[iii + jjj*number_of_detection_elements_inside_module_xyz_.s0];
-              }
-            }
-
-            // Release the pointers
-            opencl_manager.ReleaseDeviceBuffer(hit, hit_device);
+      // Storing data on host
+      for (GGint jjj = 0; jjj < number_of_detection_elements_inside_module_xyz_.s1; ++jjj) {
+        for (GGint iii = 0; iii < number_of_detection_elements_inside_module_xyz_.s0; ++iii) {
+          output[(iii+ii*number_of_detection_elements_inside_module_xyz_.s0) + (jjj+jj*number_of_detection_elements_inside_module_xyz_.s1)*total_dim.s0] =
+            hit_device[iii + jjj*number_of_detection_elements_inside_module_xyz_.s0];
         }
       }
 
-      mhdImage.Write<GGint>(output, total_dim.s0*total_dim.s1*total_dim.s2);
-
-      delete[] output;
-    }
-    else if (formats_.at(i) == "castor") {
-      GGcout("GGEMSSystem", "SaveResults", 2) << "Saving results in CASToR format..." << GGendl;
+      opencl_manager.ReleaseDeviceBuffer(hit, hit_device);
     }
   }
+
+  mhdImage.Write<GGint>(output, total_dim.s0*total_dim.s1*total_dim.s2);
+  delete[] output;
 }

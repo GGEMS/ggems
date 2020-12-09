@@ -320,7 +320,7 @@ void set_rotation_ggems_ct_system(GGEMSCTSystem* ct_system, GGfloat const rx, GG
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_save_ggems_ct_system(GGEMSCTSystem* ct_system, char const* format, char const* basename)
+void set_save_ggems_ct_system(GGEMSCTSystem* ct_system, char const* basename)
 {
-  ct_system->StoreOutput(format, basename);
+  ct_system->StoreOutput(basename);
 }

@@ -99,7 +99,7 @@ void GGEMSSourceManager::PrintInfos(void) const
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSSourceManager::Initialize(void) const
+void GGEMSSourceManager::Initialize(GGuint const& seed) const
 {
   GGcout("GGEMSSourceManager", "Initialize", 3) << "Initializing the GGEMS source(s)..." << GGendl;
 
@@ -112,7 +112,7 @@ void GGEMSSourceManager::Initialize(void) const
   particles_->Initialize();
   GGcout("GGEMSSourceManager", "Initialize", 0) << "Initialization of particles OK" << GGendl;
 
-  pseudo_random_generator_->Initialize();
+  pseudo_random_generator_->Initialize(seed);
   GGcout("GGEMSSourceManager", "Initialize", 0) << "Initialization of GGEMS pseudo random generator OK" << GGendl;
 
   // Initialization of sources
