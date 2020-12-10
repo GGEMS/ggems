@@ -194,7 +194,7 @@ void GGEMSCTSystem::Initialize(void)
   // Creating all solids, solid box for CT
   GGint number_of_solids = number_of_modules_xy_.x * number_of_modules_xy_.y;
   for (GGint i = 0; i < number_of_solids; ++i) {
-    // In CT system only "HIT" count registrating in allowed
+    // In CT system only "HISTOGRAM"
     solids_.emplace_back(new GGEMSSolidBox(
       number_of_detection_elements_inside_module_xyz_.x,
       number_of_detection_elements_inside_module_xyz_.y,
@@ -202,7 +202,7 @@ void GGEMSCTSystem::Initialize(void)
       number_of_detection_elements_inside_module_xyz_.x * size_of_detection_elements_xyz_.x,
       number_of_detection_elements_inside_module_xyz_.y * size_of_detection_elements_xyz_.y,
       number_of_detection_elements_inside_module_xyz_.z * size_of_detection_elements_xyz_.z,
-      "HIT")
+      "HISTOGRAM")
     );
 
     // Enabling tracking if necessary
@@ -323,4 +323,13 @@ void set_rotation_ggems_ct_system(GGEMSCTSystem* ct_system, GGfloat const rx, GG
 void set_save_ggems_ct_system(GGEMSCTSystem* ct_system, char const* basename)
 {
   ct_system->StoreOutput(basename);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void set_threshold_ggems_ct_system(GGEMSCTSystem* ct_system, GGfloat const threshold, char const* unit)
+{
+  ct_system->SetThreshold(threshold, unit);
 }

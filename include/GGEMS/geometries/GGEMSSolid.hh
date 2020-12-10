@@ -35,7 +35,7 @@
 #include <algorithm>
 
 #include "GGEMS/io/GGEMSTextReader.hh"
-#include "GGEMS/io/GGEMSHitCollection.hh"
+#include "GGEMS/io/GGEMSHistogramMode.hh"
 #include "GGEMS/tools/GGEMSRAMManager.hh"
 #include "GGEMS/navigators/GGEMSNavigatorManager.hh"
 
@@ -100,24 +100,11 @@ class GGEMS_EXPORT GGEMSSolid
     inline cl::Buffer* GetSolidData(void) const {return solid_data_cl_.get();};
 
     /*!
-      \fn void ParticleSolidDistance(void)
-      \brief compute distance from particle position to solid and store this distance in OpenCL particle buffer
+      \fn inline cl::Buffer* GetLabelData(void) const
+      \brief get buffer to label buffer
+      \return data on label infos
     */
-    void ParticleSolidDistance(void);
-
-    /*!
-      \fn void ProjectToSolid(void)
-      \brief Projector particles to entry of solid
-    */
-    void ProjectToSolid(void);
-
-    /*!
-      \fn void TrackThroughSolid(std::weak_ptr<GGEMSCrossSections> cross_sections, std::weak_ptr<GGEMSMaterials> materials)
-      \param cross_sections - pointer storing cross sections values
-      \param materials - pointer storing materials values
-      \brief Track particles through solid
-    */
-    virtual void TrackThroughSolid(std::weak_ptr<GGEMSCrossSections> cross_sections, std::weak_ptr<GGEMSMaterials> materials) = 0;
+    inline cl::Buffer* GetLabelData(void) const {return label_data_cl_.get();};
 
     /*!
       \fn void SetRotation(GGfloat3 const& rotation_xyz)
@@ -160,33 +147,40 @@ class GGEMS_EXPORT GGEMSSolid
     */
     virtual void PrintInfos(void) const = 0;
 
-    /*
-      \fn inline DurationNano GetKernelParticleSolidDistanceTimer(void) const
-      \return elapsed time in particle solid distance kernel
-      \brief get the elapsed time in particle solid distance kernel
+    /*!
+      \fn std::weak_ptr<cl::Kernel> GetKernelParticleSolidDistance(void) const
+      \return pointer on kernel computing particle solid distance
+      \brief OpenCL kernel computing particle solid distance
     */
-    inline DurationNano GetKernelParticleSolidDistanceTimer(void) const {return kernel_particle_solid_distance_timer_;}
-
-    /*
-      \fn inline DurationNano GetKernelProjectToSolidTimer(void) const
-      \return elapsed time in kernel computing projection to closest solid
-      \brief get the elapsed time in kernel computing projection to closest solid
-    */
-    inline DurationNano GetKernelProjectToSolidTimer(void) const {return kernel_project_to_solid_timer_;}
-
-    /*
-      \fn inline DurationNano GetKernelTrackThroughSolidTimer(void) const
-      \return elapsed time in kernel tracking particle through closest solid
-      \brief get the elapsed time in kernel tracking particle through closest solid
-    */
-    inline DurationNano GetKernelTrackThroughSolidTimer(void) const {return kernel_track_through_solid_timer_;}
+    inline std::weak_ptr<cl::Kernel> GetKernelParticleSolidDistance(void) const {return kernel_particle_solid_distance_cl_;}
 
     /*!
-      \fn GGEMSHitCollection* GetHitCollection(void)
-      \return pointer on hit
-      \brief return the point on hit collection
+      \fn std::weak_ptr<cl::Kernel> GetKernelProjectToSolid(void) const
+      \return pointer on kernel computing projection to solid
+      \brief OpenCL kernel computing projection to solid
     */
-    inline GGEMSHitCollection* GetHitCollection(void) {return &hit_;};
+    inline std::weak_ptr<cl::Kernel> GetKernelProjectToSolid(void) const {return kernel_project_to_solid_cl_;}
+
+    /*!
+      \fn std::weak_ptr<cl::Kernel> GetKernelTrackThroughSolid(void) const
+      \return pointer on kernel computing tracking through solid
+      \brief OpenCL kernel computing tracking through solid
+    */
+    inline std::weak_ptr<cl::Kernel> GetKernelTrackThroughSolid(void) const {return kernel_track_through_solid_cl_;}
+
+    /*!
+      \fn GGEMSHistogramMode* GetHistogram(void)
+      \return pointer on hit
+      \brief return the point on histogram
+    */
+    inline GGEMSHistogramMode* GetHistogram(void) {return &histogram_;};
+
+    /*!
+      \fn std::string GetRegisteredDataType(void) const
+      \return the type of registered data
+      \brief get the type of registered data
+    */
+    inline std::string GetRegisteredDataType(void) const {return data_reg_type_;};
 
   protected:
     /*!
@@ -196,24 +190,22 @@ class GGEMS_EXPORT GGEMSSolid
     virtual void InitializeKernel(void) = 0;
 
   protected:
+    // Solid data infos and label (for voxelized solid)
     std::shared_ptr<cl::Buffer> solid_data_cl_; /*!< Data about solid */
     std::shared_ptr<cl::Buffer> label_data_cl_; /*!< Pointer storing the buffer about label data, useful for voxelized solid only */
 
-    std::weak_ptr<cl::Kernel> kernel_particle_solid_distance_cl_; /*!< OpenCL kernel computing distance between particles and solid */
-    DurationNano kernel_particle_solid_distance_timer_; /*!< Timer for kernel computing particle solid distance */
-
-    std::weak_ptr<cl::Kernel> kernel_project_to_solid_cl_; /*!< OpenCL kernel moving particles to solid */
-    DurationNano kernel_project_to_solid_timer_; /*!< Timer for kernel computing projection to closest solid */
-
-    std::weak_ptr<cl::Kernel> kernel_track_through_solid_cl_; /*!< OpenCL kernel tracking particles through a solid */
-    DurationNano kernel_track_through_solid_timer_; /*!< Timer for kernel computing tracking through closest solid */
-
-    std::string kernel_option_; /*!< Preprocessor option for kernel */
-
+    // Geometric transformation applyied to solid
     std::unique_ptr<GGEMSGeometryTransformation> geometry_transformation_; /*!< Pointer storing the geometry transformation */
 
+    // OpenCL kernels and options for kernel
+    std::weak_ptr<cl::Kernel> kernel_particle_solid_distance_cl_; /*!< OpenCL kernel computing distance between particles and solid */
+    std::weak_ptr<cl::Kernel> kernel_project_to_solid_cl_; /*!< OpenCL kernel moving particles to solid */
+    std::weak_ptr<cl::Kernel> kernel_track_through_solid_cl_; /*!< OpenCL kernel tracking particles through a solid */
+    std::string kernel_option_; /*!< Preprocessor option for kernel */
+
+    // Output data
     std::string data_reg_type_; /*!< Type of registering data */
-    GGEMSHitCollection hit_; /*!< Storing hit counting during navigation process */
+    GGEMSHistogramMode histogram_; /*!< Storing histogram useful for GGEMSSystem only */
 };
 
 ////////////////////////////////////////////////////////////////////////////////

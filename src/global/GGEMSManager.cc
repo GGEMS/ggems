@@ -281,17 +281,17 @@ void GGEMSManager::Run()
 
       // Loop until ALL particles are dead
       do {
-        // Step 2: Find closest navigator (phantom and detector) before track to in operation
-        GGcout("GGEMSManager", "Run", 2) << "      + Finding closest solid..." << GGendl;
-        navigator_manager.FindClosestSolid();
+        // Step 2: Find closest navigator (phantom, detector) before projection and track operation
+        GGcout("GGEMSManager", "Run", 2) << "      + Finding solid..." << GGendl;
+        navigator_manager.FindSolid();
 
-        // Step 3: Project particles to closest solid
-        GGcout("GGEMSManager", "Run", 2) << "      + Project particles to closest solid..." << GGendl;
-        navigator_manager.ProjectToClosestSolid();
+        // Step 3: Project particles to solid
+        GGcout("GGEMSManager", "Run", 2) << "      + Projecting particles to solid..." << GGendl;
+        navigator_manager.ProjectToSolid();
 
-        // Step 4: Track to out step, particles are tracked in navigator
-        GGcout("GGEMSManager", "Run", 2) << "      + Tracking particles through closest solid..." << GGendl;
-        navigator_manager.TrackThroughClosestSolid();
+        // Step 4: Track through step, particles are tracked in selected solid
+        // GGcout("GGEMSManager", "Run", 2) << "      + Tracking particles through solid..." << GGendl;
+        navigator_manager.TrackThroughSolid();
 
       } while (source_manager.IsAlive()); // Step 5: Checking if all particles are dead, otherwize go back to step 2
     }

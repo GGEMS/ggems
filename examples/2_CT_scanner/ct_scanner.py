@@ -24,7 +24,7 @@ GGEMSVerbosity(1)
 
 # ------------------------------------------------------------------------------
 # STEP 1: Choosing an OpenCL context
-opencl_manager.set_context_index(2)
+opencl_manager.set_context_index(0)
 
 # ------------------------------------------------------------------------------
 # STEP 2: Visualization
@@ -49,7 +49,7 @@ ct_detector.set_material('GOS')
 ct_detector.set_source_detector_distance(1085.6, 'mm')
 ct_detector.set_source_isocenter_distance(595.0, 'mm')
 ct_detector.set_rotation(0.0, 0.0, 0.0, 'deg')
-#ct_detector.set_threshold(10.0, 'keV')
+ct_detector.set_threshold(10.0, 'keV')
 ct_detector.save('data/projection')
 
 # ------------------------------------------------------------------------------
@@ -71,10 +71,10 @@ range_cuts_manager.set_cut('gamma', 0.1, 'mm', 'all')
 # STEP 7: Source
 point_source = GGEMSXRaySource('point_source')
 point_source.set_source_particle_type('gamma')
-point_source.set_number_of_particles(100)
+point_source.set_number_of_particles(100000000)
 point_source.set_position(-595.0, 0.0, 0.0, 'mm')
 point_source.set_rotation(0.0, 0.0, 0.0, 'deg')
-point_source.set_beam_aperture(12.0, 'deg')
+point_source.set_beam_aperture(10, 'deg')
 point_source.set_focal_spot_size(0.0, 0.0, 0.0, 'mm')
 point_source.set_polyenergy('data/spectrum_120kVp_2mmAl.dat')
 

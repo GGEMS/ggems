@@ -30,16 +30,8 @@
 
 #include "GGEMS/geometries/GGEMSVoxelizedSolidData.hh"
 #include "GGEMS/geometries/GGEMSVoxelizedSolid.hh"
-
 #include "GGEMS/io/GGEMSMHDImage.hh"
-
-#include "GGEMS/randoms/GGEMSPseudoRandomGenerator.hh"
-
-#include "GGEMS/physics/GGEMSCrossSections.hh"
-
 #include "GGEMS/maths/GGEMSGeometryTransformation.hh"
-
-#include "GGEMS/sources/GGEMSSourceManager.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -141,56 +133,56 @@ void GGEMSVoxelizedSolid::GetTransformationMatrix(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSVoxelizedSolid::TrackThroughSolid(std::weak_ptr<GGEMSCrossSections> cross_sections, std::weak_ptr<GGEMSMaterials> materials)
-{
+// void GGEMSVoxelizedSolid::TrackThroughSolid(std::weak_ptr<GGEMSCrossSections> cross_sections, std::weak_ptr<GGEMSMaterials> materials)
+// {
   // Getting the OpenCL manager
-  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
-  cl::CommandQueue* queue_cl = opencl_manager.GetCommandQueue();
-  cl::Event* event_cl = opencl_manager.GetEvent();
+  // GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+  // cl::CommandQueue* queue_cl = opencl_manager.GetCommandQueue();
+  // cl::Event* event_cl = opencl_manager.GetEvent();
 
-  // Getting the buffer of primary particles and random from source
-  GGEMSSourceManager& source_manager = GGEMSSourceManager::GetInstance();
-  GGEMSParticles* particles = source_manager.GetParticles();
-  cl::Buffer* primary_particles_cl = particles->GetPrimaryParticles();
-  cl::Buffer* randoms_cl = source_manager.GetPseudoRandomGenerator()->GetPseudoRandomNumbers();
+  // // Getting the buffer of primary particles and random from source
+  // GGEMSSourceManager& source_manager = GGEMSSourceManager::GetInstance();
+  // GGEMSParticles* particles = source_manager.GetParticles();
+  // cl::Buffer* primary_particles_cl = particles->GetPrimaryParticles();
+  // cl::Buffer* randoms_cl = source_manager.GetPseudoRandomGenerator()->GetPseudoRandomNumbers();
 
-  // Getting OpenCL buffer for cross section
-  cl::Buffer* cross_sections_cl = cross_sections.lock()->GetCrossSections();
+  // // Getting OpenCL buffer for cross section
+  // cl::Buffer* cross_sections_cl = cross_sections.lock()->GetCrossSections();
 
-  // Getting OpenCL buffer for materials
-  cl::Buffer* materials_cl = materials.lock()->GetMaterialTables().lock().get();
+  // // Getting OpenCL buffer for materials
+  // cl::Buffer* materials_cl = materials.lock()->GetMaterialTables().lock().get();
 
-  // Getting the number of particles
-  GGlong number_of_particles = particles->GetNumberOfParticles();
+  // // Getting the number of particles
+  // GGlong number_of_particles = particles->GetNumberOfParticles();
 
-  // // Set parameters for kernel
-  std::shared_ptr<cl::Kernel> kernel_cl = kernel_track_through_solid_cl_.lock();
-  kernel_cl->setArg(0, number_of_particles);
-  kernel_cl->setArg(1, *primary_particles_cl);
-  kernel_cl->setArg(2, *randoms_cl);
-  kernel_cl->setArg(3, *solid_data_cl_);
-  kernel_cl->setArg(4, *label_data_cl_);
-  kernel_cl->setArg(5, *cross_sections_cl);
-  kernel_cl->setArg(6, *materials_cl);
+  // // // Set parameters for kernel
+  // std::shared_ptr<cl::Kernel> kernel_cl = kernel_track_through_solid_cl_.lock();
+  // kernel_cl->setArg(0, number_of_particles);
+  // kernel_cl->setArg(1, *primary_particles_cl);
+  // kernel_cl->setArg(2, *randoms_cl);
+  // kernel_cl->setArg(3, *solid_data_cl_);
+  // kernel_cl->setArg(4, *label_data_cl_);
+  // kernel_cl->setArg(5, *cross_sections_cl);
+  // kernel_cl->setArg(6, *materials_cl);
 
-  // Get number of max work group size
-  std::size_t max_work_group_size = opencl_manager.GetWorkGroupSize();
+  // // Get number of max work group size
+  // std::size_t max_work_group_size = opencl_manager.GetWorkGroupSize();
 
-  // Compute work item number
-  std::size_t number_of_work_items = number_of_particles + (max_work_group_size - number_of_particles%max_work_group_size);
+  // // Compute work item number
+  // std::size_t number_of_work_items = number_of_particles + (max_work_group_size - number_of_particles%max_work_group_size);
 
-  cl::NDRange global_wi(number_of_work_items);
-  cl::NDRange offset_wi(0);
-  cl::NDRange local_wi(max_work_group_size);
+  // cl::NDRange global_wi(number_of_work_items);
+  // cl::NDRange offset_wi(0);
+  // cl::NDRange local_wi(max_work_group_size);
 
-  // Launching kernel
-  GGint kernel_status = queue_cl->enqueueNDRangeKernel(*kernel_cl, offset_wi, global_wi, local_wi, nullptr, event_cl);
-  opencl_manager.CheckOpenCLError(kernel_status, "GGEMSSolid", "TrackThroughSolid");
-  queue_cl->finish(); // Wait until the kernel status is finish
+  // // Launching kernel
+  // GGint kernel_status = queue_cl->enqueueNDRangeKernel(*kernel_cl, offset_wi, global_wi, local_wi, nullptr, event_cl);
+  // opencl_manager.CheckOpenCLError(kernel_status, "GGEMSSolid", "TrackThroughSolid");
+  // queue_cl->finish(); // Wait until the kernel status is finish
 
-  // Storing elapsed time in kernel
-  kernel_track_through_solid_timer_ += opencl_manager.GetElapsedTimeInKernel();
-}
+  // // Storing elapsed time in kernel
+  // kernel_track_through_solid_timer_ += opencl_manager.GetElapsedTimeInKernel();
+//}
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
