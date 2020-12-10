@@ -111,6 +111,14 @@ class GGEMS_EXPORT GGEMSNavigator
     void SetRotation(GGfloat const& rx, GGfloat const& ry, GGfloat const& rz, std::string const& unit = "deg");
 
     /*!
+      \fn void SetThreshold(GGfloat const& threshold, std::string const& unit = "keV")
+      \param threshold - threshold applyied to the navigator
+      \param unit - unit of the energy
+      \brief Set the energy threshold to navigator
+    */
+    void SetThreshold(GGfloat const& threshold, std::string const& unit = "keV");
+
+    /*!
       \fn void SetNavigatorID(std::size_t const& navigator_id)
       \param navigator_id - index of the navigator
       \brief set the navigator index
@@ -146,22 +154,22 @@ class GGEMS_EXPORT GGEMSNavigator
     inline std::weak_ptr<GGEMSCrossSections> GetCrossSections(void) const {return cross_sections_;}
 
     /*!
-      \fn void ParticleSolidDistance(void) const
+      \fn void ParticleSolidDistance(void)
       \brief Compute distance between particle and solid
     */
-    void ParticleSolidDistance(void) const;
+    void ParticleSolidDistance(void);
 
     /*!
-      \fn void ProjectToSolid(void) const
+      \fn void ProjectToSolid(void)
       \brief Project particle to entry of closest solid
     */
-    void ProjectToSolid(void) const;
+    void ProjectToSolid(void);
 
     /*!
-      \fn void TrackThroughSolid(void) const
+      \fn void TrackThroughSolid(void)
       \brief Move particle through solid
     */
-    void TrackThroughSolid(void) const;
+    void TrackThroughSolid(void);
 
     /*!
       \fn void PrintInfos(void) const
@@ -176,25 +184,25 @@ class GGEMS_EXPORT GGEMSNavigator
     virtual void Initialize(void);
 
     /*
-      \fn DurationNano GetAllKernelParticleSolidDistanceTimer(void) const
+      \fn DurationNano GetKernelParticleSolidDistanceTimer(void) const
       \return elapsed time in particle solid distance kernel in all solids
       \brief get the elapsed time in particle solid distance kernel in all solids
     */
-    DurationNano GetAllKernelParticleSolidDistanceTimer(void) const;
+    inline DurationNano GetKernelParticleSolidDistanceTimer(void) const {return kernel_particle_solid_distance_timer_;};
 
     /*
-      \fn DurationNano GetAllKernelProjectToSolidTimer(void) const
+      \fn DurationNano GetKernelProjectToSolidTimer(void) const
       \return elapsed time in kernel computing projection to closest solid
       \brief get the elapsed time in kernel computing projection to closest solid
     */
-    DurationNano GetAllKernelProjectToSolidTimer(void) const;
+    inline DurationNano GetKernelProjectToSolidTimer(void) const {return kernel_particle_solid_distance_timer_;};
 
     /*
-      \fn DurationNano GetAllKernelTrackThroughSolidTimer(void) const
+      \fn DurationNano GetKernelTrackThroughSolidTimer(void) const
       \return elapsed time in kernel tracking particle inside solid
       \brief get the elapsed time in kernel tracking particle inside solid
     */
-    DurationNano GetAllKernelTrackThroughSolidTimer(void) const;
+    inline DurationNano GetKernelTrackThroughSolidTimer(void) const {return kernel_particle_solid_distance_timer_;};
 
     /*!
       \fn void SaveResults(void)
@@ -223,10 +231,10 @@ class GGEMS_EXPORT GGEMSNavigator
     // Global navigation members
     GGfloat3 position_xyz_; /*!< Position of the navigator in X, Y and Z */
     GGfloat3 rotation_xyz_; /*!< Rotation of the navigator in X, Y and Z */
-    GGfloat33 local_axis_; /*!< Local axis for navigator */
     std::size_t navigator_id_; /*!< Index of the navigator */
     bool is_update_pos_; /*!< Updating navigator position */
     bool is_update_rot_; /*!< Updating navigator rotation */
+    GGfloat threshold_; /*!< Threshold in energy applyied to navigator */
 
     // Output
     std::string output_basename_; /*<! Basename of output file */
@@ -234,6 +242,11 @@ class GGEMS_EXPORT GGEMSNavigator
     std::vector<std::shared_ptr<GGEMSSolid>> solids_; /*!< Solid with geometric infos and label */
     std::shared_ptr<GGEMSMaterials> materials_; /*!< Materials of phantom */
     std::shared_ptr<GGEMSCrossSections> cross_sections_; /*!< Cross section table for process */
+
+    // Timers for kernel computation
+    DurationNano kernel_particle_solid_distance_timer_; /*!< Timer for kernel computing particle solid distance */
+    DurationNano kernel_project_to_solid_timer_; /*!< Timer for kernel computing projection to closest solid */
+    DurationNano kernel_track_through_solid_timer_; /*!< Timer for kernel computing tracking through closest solid */
 };
 
 #endif // End of GUARD_GGEMS_NAVIGATORS_GGEMSNAVIGATOR_HH

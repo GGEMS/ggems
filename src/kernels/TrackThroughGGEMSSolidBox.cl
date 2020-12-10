@@ -42,13 +42,14 @@
 #include "GGEMS/navigators/GGEMSPhotonNavigator.hh"
 
 /*!
-  \fn kernel void track_through_ggems_solid_box(GGlong const particle_id_limit, global GGEMSPrimaryParticles* primary_particle, global GGEMSRandom* random, global GGEMSSolidBoxData* solid_box_data, global GGshort const* label_data, global GGEMSParticleCrossSections* particle_cross_sections, global GGEMSMaterialTables* materials)
+  \fn kernel void track_through_ggems_solid_box(GGlong const particle_id_limit, global GGEMSPrimaryParticles* primary_particle, global GGEMSRandom* random, global GGEMSSolidBoxData* solid_box_data, global GGshort const* label_data, global GGEMSParticleCrossSections* particle_cross_sections, global GGEMSMaterialTables* materials, GGfloat const threshold)
   \param particle_id_limit - particle id limit
   \param primary_particle - pointer to primary particles on OpenCL memory
   \param random - pointer on random numbers
   \param solid_box_data - pointer to solid box data
   \param particle_cross_sections - pointer to cross sections activated in navigator
   \param materials - pointer on material in navigator
+  \param threshold - energy threshold
   \brief OpenCL kernel tracking particles within voxelized solid
   \return no returned value
 */
@@ -60,8 +61,9 @@ kernel void track_through_ggems_solid_box(
   global GGshort const* label_data,
   global GGEMSParticleCrossSections const* particle_cross_sections,
   global GGEMSMaterialTables const* materials,
-  #ifdef HIT
-  global GGint* hit
+  GGfloat const threshold,
+  #ifdef HISTOGRAM
+  global GGint* histogram
   #endif
   )
 {
@@ -219,16 +221,19 @@ kernel void track_through_ggems_solid_box(
     primary_particle->dy_[global_id] = local_direction.y;
     primary_particle->dz_[global_id] = local_direction.z;
 
+    // Check thresold
+    if (primary_particle->E_[global_id] < threshold) primary_particle->status_[global_id] = DEAD;
+
     // Resolve process if different of TRANSPORTATION
     if (next_discrete_process != TRANSPORTATION) {
       PhotonDiscreteProcess(primary_particle, random, materials, particle_cross_sections, 0, global_id);
 
-      #ifdef HIT
+      #ifdef HISTOGRAM
       if (next_discrete_process == PHOTOELECTRIC_EFFECT || next_discrete_process == COMPTON_SCATTERING) {
         GGfloat3 element_size = box_size / convert_float3(virtual_element_number);
         GGint3 voxel_id = convert_int3((local_position - border_min) / element_size);
 
-        atomic_add(&hit[voxel_id.x + voxel_id.y * virtual_element_number.x], 1);
+        atomic_add(&histogram[voxel_id.x + voxel_id.y * virtual_element_number.x], 1);
       }
       #endif
     }

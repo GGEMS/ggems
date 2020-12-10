@@ -31,7 +31,7 @@
 #include "GGEMS/tools/GGEMSPrint.hh"
 #include "GGEMS/geometries/GGEMSSolid.hh"
 #include "GGEMS/io/GGEMSMHDImage.hh"
-#include "GGEMS/io/GGEMSHitCollection.hh"
+#include "GGEMS/io/GGEMSHistogramMode.hh"
 #include "GGEMS/navigators/GGEMSNavigatorManager.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -159,19 +159,19 @@ void GGEMSSystem::SaveResults(void)
   // Getting all the counts from solid on OpenCL device
   for (std::size_t jj = 0; jj < number_of_modules_xy_.s1; ++jj) {
     for (std::size_t ii = 0; ii < number_of_modules_xy_.s0; ++ii) {
-      cl::Buffer* hit = solids_.at(ii + jj* number_of_modules_xy_.s0)->GetHitCollection()->hit_cl_.get();
+      cl::Buffer* histogram_cl = solids_.at(ii + jj* number_of_modules_xy_.s0)->GetHistogram()->histogram_cl_.get();
 
-      GGint* hit_device = opencl_manager.GetDeviceBuffer<GGint>(hit, number_of_detection_elements_inside_module_xyz_.s0*number_of_detection_elements_inside_module_xyz_.s1*sizeof(GGint));
+      GGint* histogram_device = opencl_manager.GetDeviceBuffer<GGint>(histogram_cl, number_of_detection_elements_inside_module_xyz_.s0*number_of_detection_elements_inside_module_xyz_.s1*sizeof(GGint));
 
       // Storing data on host
       for (GGint jjj = 0; jjj < number_of_detection_elements_inside_module_xyz_.s1; ++jjj) {
         for (GGint iii = 0; iii < number_of_detection_elements_inside_module_xyz_.s0; ++iii) {
           output[(iii+ii*number_of_detection_elements_inside_module_xyz_.s0) + (jjj+jj*number_of_detection_elements_inside_module_xyz_.s1)*total_dim.s0] =
-            hit_device[iii + jjj*number_of_detection_elements_inside_module_xyz_.s0];
+            histogram_device[iii + jjj*number_of_detection_elements_inside_module_xyz_.s0];
         }
       }
 
-      opencl_manager.ReleaseDeviceBuffer(hit, hit_device);
+      opencl_manager.ReleaseDeviceBuffer(histogram_cl, histogram_device);
     }
   }
 

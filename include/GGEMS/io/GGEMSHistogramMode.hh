@@ -1,5 +1,5 @@
-#ifndef GUARD_GGEMS_IO_GGEMSHITCOLLECTION_HH
-#define GUARD_GGEMS_IO_GGEMSHITCOLLECTION_HH
+#ifndef GUARD_GGEMS_IO_GGEMSHISTOGRAMMODE_HH
+#define GUARD_GGEMS_IO_GGEMSHISTOGRAMMODE_HH
 
 // ************************************************************************
 // * This file is part of GGEMS.                                          *
@@ -20,9 +20,9 @@
 // ************************************************************************
 
 /*!
-  \file GGEMSHitCollection.hh
+  \file GGEMSHistogramMode.hh
 
-  \brief Structure storing hit information for counting
+  \brief Structure storing histogram infos
 
   \author Julien BERT <julien.bert@univ-brest.fr>
   \author Didier BENOIT <didier.benoit@inserm.fr>
@@ -39,14 +39,16 @@
 #include <CL/cl.hpp>
 #endif
 
-/*!
-  \struct GGEMSHitCollection_t
-  \brief Structure storing hit information for counting
-*/
-typedef struct GGEMSHitCollection_t
-{
-  std::shared_ptr<cl::Buffer> hit_cl_; /*!< Buffer storing counts */
-  GGint number_of_elements_; /*!< Number of elements in hit buffer */
-} GGEMSHitCollection; /*!< Using C convention name of struct to C++ (_t deletion) */
+#include "GGEMS/tools/GGEMSTypes.hh"
 
-#endif // End of GUARD_GGEMS_IO_GGEMSHITCOLLECTION_HH
+/*!
+  \struct GGEMSHistogramMode_t
+  \brief Structure storing histogram infos
+*/
+typedef struct GGEMSHistogramMode_t
+{
+  std::shared_ptr<cl::Buffer> histogram_cl_; /*!< Buffer storing histogram on OpenCL device */
+  GGint number_of_elements_; /*!< Number of elements in hit buffer */
+} GGEMSHistogramMode; /*!< Using C convention name of struct to C++ (_t deletion) */
+
+#endif // End of GUARD_GGEMS_IO_GGEMSHISTOGRAMMODE_HH

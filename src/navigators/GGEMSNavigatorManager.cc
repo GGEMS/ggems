@@ -171,27 +171,27 @@ void GGEMSNavigatorManager::PrintInfos(void) const
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSNavigatorManager::FindClosestSolid(void) const
+void GGEMSNavigatorManager::FindSolid(void) const
 {
-  for (auto&& i : navigators_) i->ParticleSolidDistance();
+  for (auto&& n : navigators_) n->ParticleSolidDistance();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSNavigatorManager::ProjectToClosestSolid(void) const
+void GGEMSNavigatorManager::ProjectToSolid(void) const
 {
-  for (auto&& i : navigators_) i->ProjectToSolid();
+  for (auto&& n : navigators_) n->ProjectToSolid();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSNavigatorManager::TrackThroughClosestSolid(void) const
+void GGEMSNavigatorManager::TrackThroughSolid(void) const
 {
-  for (auto&& i : navigators_) i->TrackThroughSolid();
+  for (auto&& n : navigators_) n->TrackThroughSolid();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -201,14 +201,14 @@ void GGEMSNavigatorManager::TrackThroughClosestSolid(void) const
 void GGEMSNavigatorManager::PrintKernelElapsedTime(void) const
 {
   DurationNano total_duration = GGEMSChrono::Zero();
-  for (auto&& i : navigators_) total_duration += i->GetAllKernelParticleSolidDistanceTimer();
+  for (auto&& n : navigators_) total_duration += n->GetKernelParticleSolidDistanceTimer();
   GGEMSChrono::DisplayTime(total_duration, "Particle Solid Distance");
 
   total_duration = GGEMSChrono::Zero();
-  for (auto&& i : navigators_) total_duration += i->GetAllKernelProjectToSolidTimer();
+  for (auto&& n : navigators_) total_duration += n->GetKernelProjectToSolidTimer();
   GGEMSChrono::DisplayTime(total_duration, "Project To Solid");
 
   total_duration = GGEMSChrono::Zero();
-  for (auto&& i : navigators_) total_duration += i->GetAllKernelTrackThroughSolidTimer();
+  for (auto&& n : navigators_) total_duration += n->GetKernelTrackThroughSolidTimer();
   GGEMSChrono::DisplayTime(total_duration, "Track Through Solid");
 }

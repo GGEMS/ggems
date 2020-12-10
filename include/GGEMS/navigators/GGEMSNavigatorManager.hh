@@ -160,22 +160,22 @@ class GGEMS_EXPORT GGEMSNavigatorManager
     }
 
     /*!
-      \fn void FindClosestSolid(void) const
+      \fn void FindSolid(void) const
       \brief Find closest solid before project particle to it
     */
-    void FindClosestSolid(void) const;
+    void FindSolid(void) const;
 
     /*!
-      \fn void ProjectToClosestSolid(void) const
-      \brief Project particle to closest solid
+      \fn void ProjectToSolid(void) const
+      \brief Project particle to selected solid
     */
-    void ProjectToClosestSolid(void) const;
+    void ProjectToSolid(void) const;
 
     /*!
-      \fn void TrackThroughClosestSolid(void) const
-      \brief Track particles through closest solid
+      \fn void TrackThroughSolid(void) const
+      \brief Track particles through selected solid
     */
-    void TrackThroughClosestSolid(void) const;
+    void TrackThroughSolid(void) const;
 
     /*!
       \fn void PrintKernelElapsedTime(void) const
