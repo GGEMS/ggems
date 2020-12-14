@@ -923,7 +923,7 @@ std::unique_ptr<cl::Buffer> GGEMSOpenCLManager::Allocate(void* host_ptr, std::si
 
 void GGEMSOpenCLManager::Deallocate(std::shared_ptr<cl::Buffer> buffer, std::size_t size)
 {
-  GGcout("GGEMSOpenCLManager","Allocate", 3) << "Deallocating memory on OpenCL device memory..." << GGendl;
+  GGcout("GGEMSOpenCLManager","Deallocate", 3) << "Deallocating memory on OpenCL device memory..." << GGendl;
 
   // Get the RAM manager and check memory
   GGEMSRAMManager& ram_manager = GGEMSRAMManager::GetInstance();

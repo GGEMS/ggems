@@ -76,7 +76,7 @@ GGEMSSource::~GGEMSSource(void)
 
 void GGEMSSource::EnableTracking(void)
 {
-  tracking_kernel_option_ = "-DGGEMS_TRACKING";
+  tracking_kernel_option_ = " -DGGEMS_TRACKING";
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -55,6 +55,8 @@ GGEMSPseudoRandomGenerator::GGEMSPseudoRandomGenerator(void)
 GGEMSPseudoRandomGenerator::~GGEMSPseudoRandomGenerator(void)
 {
   GGcout("GGEMSPseudoRandomGenerator", "~GGEMSPseudoRandomGenerator", 3) << "Deallocation of GGEMSPseudoRandomGenerator..." << GGendl;
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+  opencl_manager.Deallocate(pseudo_random_numbers_cl_, sizeof(GGEMSRandom));
 }
 
 ////////////////////////////////////////////////////////////////////////////////

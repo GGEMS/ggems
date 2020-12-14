@@ -66,9 +66,6 @@ GGEMSSourceManager::GGEMSSourceManager(void)
 
 GGEMSSourceManager::~GGEMSSourceManager(void)
 {
-  // Deleting source
-  sources_.clear();
-
   GGcout("GGEMSSourceManager", "~GGEMSSourceManager", 3) << "Deallocation of GGEMSSourceManager..." << GGendl;
 }
 
