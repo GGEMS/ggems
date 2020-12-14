@@ -19,15 +19,24 @@
 #-------------------------------------------------------------------------------
 # CMakeLists.txt
 #
-# CMakeLists.txt - Compile and build the GGEMS examples
+# CMakeLists.txt - Compile and build the 2_CT_scanner example
 #
 # Authors :
 #   - Julien Bert <julien.bert@univ-brest.fr>
 #   - Didier Benoit <didier.benoit@inserm.fr>
 #
-# Generated on : 2/11/2020
+# Generated on : 14/12/2020
 #-------------------------------------------------------------------------------
 
-ADD_SUBDIRECTORY(0_Cross_Sections)
-ADD_SUBDIRECTORY(2_CT_scanner)
-ADD_SUBDIRECTORY(3_Voxelized_Phantom_Generator)
+#-------------------------------------------------------------------------------
+# Defining the project
+PROJECT(CTScanner)
+
+#-------------------------------------------------------------------------------
+# Creating the executable
+ADD_EXECUTABLE(ct_scanner ct_scanner.cc)
+TARGET_LINK_LIBRARIES(ct_scanner ggems)
+
+#-------------------------------------------------------------------------------
+# Copy executable to ggems bin folder
+INSTALL(TARGETS ct_scanner DESTINATION ${PROJECT_SOURCE_DIR})

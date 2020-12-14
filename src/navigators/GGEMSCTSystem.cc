@@ -172,7 +172,21 @@ void GGEMSCTSystem::InitializeCurvedGeometry(void)
 
 void GGEMSCTSystem::InitializeFlatGeometry(void)
 {
-  ;
+    // Computing the X, Y and Z positions in global position (isocenter)
+  GGfloat global_position_x = source_detector_distance_ - source_isocenter_distance_ + 0.5f*number_of_detection_elements_inside_module_xyz_.s2*size_of_detection_elements_xyz_.s2;
+  GGfloat global_position_y = 0.0f;
+  GGfloat global_position_z = 0.0f;
+
+  // Consider flat geometry for CBCT configuration
+  for (GGint j = 0; j < number_of_modules_xy_.s1; ++j) { // Y modules
+    global_position_y = number_of_detection_elements_inside_module_xyz_.s1*size_of_detection_elements_xyz_.s1*(j+0.5f*(1-number_of_modules_xy_.s1));
+    for (GGint i = 0; i < number_of_modules_xy_.s0; ++i) { // X modules
+      global_position_z = number_of_detection_elements_inside_module_xyz_.s0*size_of_detection_elements_xyz_.s0*(i+0.5f*(1-number_of_modules_xy_.s0));
+      // No rotation of module
+      solids_.at(i+j*number_of_modules_xy_.s0)->SetRotation({0.0f, 0.0f, 0.0f});
+      solids_.at(i+j*number_of_modules_xy_.s0)->SetPosition({global_position_x, global_position_y, global_position_z});
+    }
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
