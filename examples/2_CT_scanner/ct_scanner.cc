@@ -54,7 +54,7 @@ int main(void)
   GGEMSManager& ggems_manager = GGEMSManager::GetInstance();
 
   // Set the context id
-  opencl_manager.ContextToActivate(2);
+  opencl_manager.ContextToActivate(0);
 
   // Enter material database
   material_manager.SetMaterialsDatabase("data/materials.txt");
@@ -65,12 +65,12 @@ int main(void)
   phantom.SetRotation(0.0f, 0.0f, 0.0f, "deg");
   phantom.SetPosition(0.0f, 0.0f, 0.0f, "mm");
 
-  GGEMSCTSystem ct_detector("Pixium_3030");
-  ct_detector.SetCTSystemType("flat");
-  ct_detector.SetNumberOfModules(1, 1);
-  ct_detector.SetNumberOfDetectionElementsInsideModule(1956, 1956, 1);
-  ct_detector.SetSizeOfDetectionElements(0.154f, 0.154f, 0.6f, "mm");
-  ct_detector.SetMaterialName("CsI");
+  GGEMSCTSystem ct_detector("Stellar");
+  ct_detector.SetCTSystemType("curved");
+  ct_detector.SetNumberOfModules(1, 46);
+  ct_detector.SetNumberOfDetectionElementsInsideModule(64, 16, 1);
+  ct_detector.SetSizeOfDetectionElements(0.6f, 0.6f, 0.6f, "mm");
+  ct_detector.SetMaterialName("GOS");
   ct_detector.SetSourceDetectorDistance(1085.6f, "mm");
   ct_detector.SetSourceIsocenterDistance(595.0f, "mm");
   ct_detector.SetRotation(0.0f, 0.0f, 0.0f, "deg");
@@ -93,22 +93,22 @@ int main(void)
   // Source
   GGEMSXRaySource point_source("point_source");
   point_source.SetSourceParticleType("gamma");
-  point_source.SetNumberOfParticles(1000000);
+  point_source.SetNumberOfParticles(1000000000);
   point_source.SetPosition(-595.0f, 0.0f, 0.0f, "mm");
   point_source.SetRotation(0.0f, 0.0f, 0.0f, "deg");
-  point_source.SetBeamAperture(11.5f, "deg");
+  point_source.SetBeamAperture(12.5f, "deg");
   point_source.SetFocalSpotSize(0.0f, 0.0f, 0.0f, "mm");
   point_source.SetPolyenergy("data/spectrum_120kVp_2mmAl.dat");
 
   // GGEMS simulation
-  ggems_manager.SetOpenCLVerbose(true);
+  ggems_manager.SetOpenCLVerbose(false);
   ggems_manager.SetOpenCLVerbose(false);
   ggems_manager.SetNavigatorVerbose(true);
   ggems_manager.SetSourceVerbose(true);
   ggems_manager.SetMemoryRAMVerbose(true);
   ggems_manager.SetProcessVerbose(true);
   ggems_manager.SetRangeCutsVerbose(true);
-  ggems_manager.SetRandomVerbose(true);
+  ggems_manager.SetRandomVerbose(false);
   ggems_manager.SetKernelVerbose(true);
   ggems_manager.SetTrackingVerbose(false, 0);
 

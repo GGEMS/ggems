@@ -514,6 +514,10 @@ NaI: d=3.67 g/cm3; n=2;
     +el: name=Sodium; f=0.153
     +el: name=Iodine; f=0.847
 
+CsI: d=3.67 g/cm3; n=2;
+    +el: name=Caesium; f=0.511549
+    +el: name=Iodine; f=0.488451
+
 # STM125I_Caps    
 STM125I_Caps: d=4.54 g/cm3; n=1;
     +el: name=Titanium  ; f=1.00
