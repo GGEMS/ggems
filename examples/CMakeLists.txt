@@ -29,5 +29,5 @@
 #-------------------------------------------------------------------------------
 
 ADD_SUBDIRECTORY(0_Cross_Sections)
-ADD_SUBDIRECTORY(2_CT_scanner)
+ADD_SUBDIRECTORY(2_CT_Scanner)
 ADD_SUBDIRECTORY(3_Voxelized_Phantom_Generator)
