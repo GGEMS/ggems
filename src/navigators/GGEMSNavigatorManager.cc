@@ -96,64 +96,7 @@ void GGEMSNavigatorManager::Initialize(void) const
 
   // Initialization of phantoms
   for (auto&& i : navigators_) i->Initialize();
-
-  // Checking overlap between phantoms
-  // for (std::size_t i = 0; i < navigators_.size(); ++i) {
-  //   for (std::size_t j = i + 1; j < navigators_.size(); ++j) {
-  //     if (CheckOverlap(navigators_[i], navigators_[j])) {
-  //       std::ostringstream oss(std::ostringstream::out);
-  //       oss << "There is an overlap between the navigator '" << navigators_[i]->GetNavigatorName() << "' and '" << navigators_[j]->GetNavigatorName() << "'!!! Please check your simulation parameters about navigator.";
-  //       GGEMSMisc::ThrowException("GGEMSNavigatorManager", "Initialize", oss.str());
-  //     }
-  //   }
-  // }
 }
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-// bool GGEMSNavigatorManager::CheckOverlap(std::weak_ptr<GGEMSNavigator> navigator_a, std::weak_ptr<GGEMSNavigator> navigator_b) const
-// {
-  // // Get OpenCL singleton
-  // GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
-
-  // // Get OpenCL buffer on navigator A and B
-  // cl::Buffer* solid_phantom_data_a_cl = navigator_a.lock()->GetSolid().lock()->GetSolidData();
-  // cl::Buffer* solid_phantom_data_b_cl = navigator_b.lock()->GetSolid().lock()->GetSolidData();
-
-  // // Get data on OpenCL device for navigator A and B
-  // GGEMSVoxelizedSolidData* header_data_a_device = opencl_manager.GetDeviceBuffer<GGEMSVoxelizedSolidData>(solid_phantom_data_a_cl, sizeof(GGEMSVoxelizedSolidData));
-  // GGEMSVoxelizedSolidData* header_data_b_device = opencl_manager.GetDeviceBuffer<GGEMSVoxelizedSolidData>(solid_phantom_data_b_cl, sizeof(GGEMSVoxelizedSolidData));
-
-  // // Variable checking overlap
-  // bool is_overlap(false);
-
-  // // Get bounding boxes for A and B
-  // GGfloat const x_min_a = header_data_a_device->border_min_xyz_.s[0];
-  // GGfloat const x_max_a = header_data_a_device->border_max_xyz_.s[0];
-  // GGfloat const x_min_b = header_data_b_device->border_min_xyz_.s[0];
-  // GGfloat const x_max_b = header_data_b_device->border_max_xyz_.s[0];
-
-  // GGfloat const y_min_a = header_data_a_device->border_min_xyz_.s[1];
-  // GGfloat const y_max_a = header_data_a_device->border_max_xyz_.s[1];
-  // GGfloat const y_min_b = header_data_b_device->border_min_xyz_.s[1];
-  // GGfloat const y_max_b = header_data_b_device->border_max_xyz_.s[1];
-
-  // GGfloat const z_min_a = header_data_a_device->border_min_xyz_.s[2];
-  // GGfloat const z_max_a = header_data_a_device->border_max_xyz_.s[2];
-  // GGfloat const z_min_b = header_data_b_device->border_min_xyz_.s[2];
-  // GGfloat const z_max_b = header_data_b_device->border_max_xyz_.s[2];
-
-  // if (x_max_a > x_min_b && x_min_a < x_max_b && y_max_a > y_min_b && y_min_a < y_max_b && z_max_a > z_min_b && z_min_a < z_max_b) is_overlap = true;
-
-  // // Release the pointers
-  // opencl_manager.ReleaseDeviceBuffer(solid_phantom_data_a_cl, header_data_a_device);
-  // opencl_manager.ReleaseDeviceBuffer(solid_phantom_data_b_cl, header_data_b_device);
-
-  // return is_overlap;
-//   return false;
-// }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////

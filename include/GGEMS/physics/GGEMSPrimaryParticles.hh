@@ -20,7 +20,7 @@
 // ************************************************************************
 
 /*!
-  \file GGEMSPrimaryParticlesStack.hh
+  \file GGEMSPrimaryParticles.hh
 
   \brief Structure storing the primary particle buffers for both OpenCL and GGEMS
 

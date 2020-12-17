@@ -28,7 +28,6 @@
   \date Wednesday November 13, 2019
 */
 
-#include <cmath>
 #include <limits>
 
 #include "GGEMS/maths/GGEMSGeometryTransformation.hh"

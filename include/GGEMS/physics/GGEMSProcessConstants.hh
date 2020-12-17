@@ -20,7 +20,7 @@
 // ************************************************************************
 
 /*!
-  \file GGEMSEMProcessConstants.hh
+  \file GGEMSProcessConstants.hh
 
   \brief Storing some __constant variables for process
 
@@ -39,7 +39,7 @@ __constant GGchar NO_PROCESS = 99; /*!< No process */
 __constant GGchar TRANSPORTATION = 99; /*!< Transportation process */
 
 // PHOTON PROCESSES
-#define NUMBER_PHOTON_PROCESSES 3 // Number of photon processes
+#define NUMBER_PHOTON_PROCESSES 3 /*!< Number of photon processes */
 __constant GGchar COMPTON_SCATTERING = 0; /*!< Compton process */
 __constant GGchar PHOTOELECTRIC_EFFECT = 1; /*!< Photoelectric process */
 __constant GGchar RAYLEIGH_SCATTERING = 2; /*!< Rayleigh process */
@@ -55,7 +55,7 @@ __constant GGchar RAYLEIGH_SCATTERING = 2; /*!< Rayleigh process */
 __constant GGfloat KINETIC_ENERGY_MIN = 1.e-6f; /*!< Min kinetic energy, 1eV */
 __constant GGfloat CROSS_SECTION_TABLE_ENERGY_MIN = 990.0f*1.e-6f; /*!< Min energy in the cross section table, 990 eV */
 __constant GGfloat CROSS_SECTION_TABLE_ENERGY_MAX = 250.0f*1.0f; /*!< Max energy in the cross section table, 250 MeV */
-#define MAX_CROSS_SECTION_TABLE_NUMBER_BINS 2048
+#define MAX_CROSS_SECTION_TABLE_NUMBER_BINS 2048 /*!< Number of maximum bins in cross section table */
 __constant GGshort CROSS_SECTION_TABLE_NUMBER_BINS = 220; /*!< Number of bins in the cross section table */
 
 // CUTS

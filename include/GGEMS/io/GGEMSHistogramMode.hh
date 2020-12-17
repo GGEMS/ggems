@@ -33,12 +33,6 @@
 
 #include <memory>
 
-#ifdef __APPLE__
-#include <OpenCL/opencl.hpp>
-#else
-#include <CL/cl.hpp>
-#endif
-
 #include "GGEMS/tools/GGEMSTypes.hh"
 
 /*!

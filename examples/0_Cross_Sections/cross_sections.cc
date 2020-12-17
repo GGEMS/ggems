@@ -111,8 +111,5 @@ int main(int argc, char** argv)
 
   std::cout << "At " << energy_MeV << " MeV, cross section is " << cross_sections.GetPhotonCrossSection(process_name, material_name, energy_MeV, "MeV") << " cm2.g-1" << std::endl;
 
-  // Cleaning OpenCL manager
-  opencl_manager.Clean();
-
   exit(EXIT_SUCCESS);
 }

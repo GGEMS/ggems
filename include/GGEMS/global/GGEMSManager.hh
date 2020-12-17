@@ -268,7 +268,7 @@ extern "C" GGEMS_EXPORT void set_source_ggems_manager(GGEMSManager* ggems_manage
 /*!
   \fn void set_navigator_ggems_manager(GGEMSManager* ggems_manager, bool const is_navigator_verbose)
   \param ggems_manager - pointer on the singleton
-  \param is_phantom_verbose - flag on navigator verbose
+  \param is_navigator_verbose - flag on navigator verbose
   \brief Set the navigator verbosity
 */
 extern "C" GGEMS_EXPORT void set_navigator_ggems_manager(GGEMSManager* ggems_manager, bool const is_navigator_verbose);
@@ -306,7 +306,7 @@ extern "C" GGEMS_EXPORT void set_range_cuts_ggems_manager(GGEMSManager* ggems_ma
 extern "C" GGEMS_EXPORT void set_random_ggems_manager(GGEMSManager* ggems_manager, bool const is_random_verbose);
 
 /*!
-  \fn void set_random_ggems_manager(GGEMSManager* ggems_manager, bool const is_kernel_verbose)
+  \fn void set_kernel_ggems_manager(GGEMSManager* ggems_manager, bool const is_kernel_verbose)
   \param ggems_manager - pointer on the singleton
   \param is_kernel_verbose - flag on kernel timer verbose
   \brief Set the kernel timer verbosity

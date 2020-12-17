@@ -37,7 +37,6 @@
 
 #include <vector>
 #include <unordered_map>
-#include <sstream>
 
 #include "GGEMS/global/GGEMSConstants.hh"
 

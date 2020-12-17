@@ -42,26 +42,18 @@
 #include "GGEMS/navigators/GGEMSPhotonNavigator.hh"
 
 /*!
-  \fn kernel void track_through_ggems_voxelized_solid(GGlong const particle_id_limit, global GGEMSPrimaryParticles* primary_particle, global GGEMSRandom* random, global GGEMSVoxelizedSolidData* voxelized_solid_data, global GGshort const* label_data, global GGEMSParticleCrossSections* particle_cross_sections, global GGEMSMaterialTables* materials, GGfloat const threshold)
+  \fn kernel void track_through_ggems_voxelized_solid(GGlong const particle_id_limit, global GGEMSPrimaryParticles* primary_particle, global GGEMSRandom* random, global GGEMSVoxelizedSolidData const* voxelized_solid_data, global GGshort const* label_data, global GGEMSParticleCrossSections const* particle_cross_sections, global GGEMSMaterialTables const* materials, GGfloat const threshold)
   \param particle_id_limit - particle id limit
   \param primary_particle - pointer to primary particles on OpenCL memory
   \param random - pointer on random numbers
   \param voxelized_solid_data - pointer to voxelized solid data
+  \param label_data - pointer storing label of material
   \param particle_cross_sections - pointer to cross sections activated in navigator
   \param materials - pointer on material in navigator
   \param threshold - energy threshold
   \brief OpenCL kernel tracking particles within voxelized solid
-  \return no returned value
 */
-kernel void track_through_ggems_voxelized_solid(
-  GGlong const particle_id_limit,
-  global GGEMSPrimaryParticles* primary_particle,
-  global GGEMSRandom* random,
-  global GGEMSVoxelizedSolidData const* voxelized_solid_data,
-  global GGshort const* label_data,
-  global GGEMSParticleCrossSections const* particle_cross_sections,
-  global GGEMSMaterialTables const* materials,
-  GGfloat const threshold)
+kernel void track_through_ggems_voxelized_solid(GGlong const particle_id_limit, global GGEMSPrimaryParticles* primary_particle, global GGEMSRandom* random, global GGEMSVoxelizedSolidData const* voxelized_solid_data, global GGshort const* label_data, global GGEMSParticleCrossSections const* particle_cross_sections, global GGEMSMaterialTables const* materials, GGfloat const threshold)
 {
   // Getting index of thread
   GGint global_id = get_global_id(0);

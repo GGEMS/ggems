@@ -31,8 +31,6 @@
   \date Wednesday June 10, 2020
 */
 
-#include "GGEMS/global/GGEMSExport.hh"
-
 #include "GGEMS/geometries/GGEMSVoxelizedSolidData.hh"
 #include "GGEMS/geometries/GGEMSSolid.hh"
 

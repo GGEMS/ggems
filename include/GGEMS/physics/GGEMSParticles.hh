@@ -33,11 +33,7 @@
 
 #include <map>
 
-#include "GGEMS/global/GGEMSConfiguration.hh"
 #include "GGEMS/global/GGEMSOpenCLManager.hh"
-
-#include "GGEMS/tools/GGEMSSystemOfUnits.hh"
-
 #include "GGEMS/physics/GGEMSParticleConstants.hh"
 
 typedef std::map<GGchar, std::string> ParticleTypeMap; /*!< Map with key: particle index, element: name of particle */

@@ -28,18 +28,9 @@
   \date Thursday January 16, 2020
 */
 
-#include <algorithm>
-#include <sstream>
-
 #include "GGEMS/sources/GGEMSSourceManager.hh"
-
-#include "GGEMS/tools/GGEMSTools.hh"
-
-#include "GGEMS/physics/GGEMSParticles.hh"
 #include "GGEMS/physics/GGEMSPrimaryParticles.hh"
-
 #include "GGEMS/randoms/GGEMSPseudoRandomGenerator.hh"
-
 #include "GGEMS/global/GGEMSManager.hh"
 
 ////////////////////////////////////////////////////////////////////////////////

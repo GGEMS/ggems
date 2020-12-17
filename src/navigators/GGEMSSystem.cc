@@ -17,7 +17,7 @@
 // ************************************************************************
 
 /*!
-  \file GGEMSSystem.hh
+  \file GGEMSSystem.cc
 
   \brief GGEMS class managing detector system in GGEMS
 
@@ -28,11 +28,8 @@
 */
 
 #include "GGEMS/navigators/GGEMSSystem.hh"
-#include "GGEMS/tools/GGEMSPrint.hh"
 #include "GGEMS/geometries/GGEMSSolid.hh"
 #include "GGEMS/io/GGEMSMHDImage.hh"
-#include "GGEMS/io/GGEMSHistogramMode.hh"
-#include "GGEMS/navigators/GGEMSNavigatorManager.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////

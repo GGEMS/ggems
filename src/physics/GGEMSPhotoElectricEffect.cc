@@ -30,7 +30,6 @@
 
 #include "GGEMS/materials/GGEMSMaterials.hh"
 #include "GGEMS/physics/GGEMSPhotoElectricEffect.hh"
-#include "GGEMS/physics/GGEMSParticleCrossSections.hh"
 #include "GGEMS/physics/GGEMSSandiaTable.hh"
 
 ////////////////////////////////////////////////////////////////////////////////

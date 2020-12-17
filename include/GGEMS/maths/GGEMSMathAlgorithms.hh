@@ -32,10 +32,9 @@
 */
 
 #include "GGEMS/tools/GGEMSSystemOfUnits.hh"
-#include "GGEMS/tools/GGEMSTypes.hh"
 
 /*!
-  \fn inline GGint BinarySearchLeft(GGfloat const key, global GGfloat const* array, GGuint const size, GGuint const offset, GGuint min)
+  \fn inline GGint BinarySearchLeft(GGfloat const key, GGfloat const* array, GGint const size, GGint const offset, GGint min)
   \param key - value in p_array to find
   \param array - p_array where is the key value
   \param size - size of p_array, number of elements

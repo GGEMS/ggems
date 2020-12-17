@@ -164,7 +164,8 @@ class GGEMS_EXPORT GGEMSProcessesManager
     void PrintPhysicTables(bool const& is_processes_print_tables);
 
     /*!
-      \fn bool IsPrintPhysicTables(void) const
+      \fn inline bool IsPrintPhysicTables(void) const
+      \return true if physics tables is printed
       \brief check boolean value for physic tables printing
     */
     inline bool IsPrintPhysicTables(void) const {return is_processes_print_tables_;};
@@ -234,7 +235,7 @@ extern "C" GGEMS_EXPORT void print_infos_processes_manager(GGEMSProcessesManager
 extern "C" GGEMS_EXPORT void print_available_processes_manager(GGEMSProcessesManager* processes_manager);
 
 /*!
-  \fn void print_available_processes_manager(GGEMSProcessesManager* processes_manager, bool const is_processes_print_tables)
+  \fn void print_tables_processes_manager(GGEMSProcessesManager* processes_manager, bool const is_processes_print_tables)
   \param processes_manager - pointer on the processes manager
   \param is_processes_print_tables - flag printing physic tables
   \brief print infos about physic tables

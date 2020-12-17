@@ -30,12 +30,9 @@
 */
 
 #include <string>
-#include <algorithm>
-
 #include <iostream>
 
 #include "GGEMS/io/GGEMSTextReader.hh"
-#include "GGEMS/tools/GGEMSTools.hh"
 #include "GGEMS/tools/GGEMSSystemOfUnits.hh"
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -31,7 +31,6 @@
 #include "GGEMS/global/GGEMSOpenCLManager.hh"
 
 #include "GGEMS/tools/GGEMSRAMManager.hh"
-#include "GGEMS/tools/GGEMSPrint.hh"
 #include "GGEMS/tools/GGEMSTools.hh"
 
 ////////////////////////////////////////////////////////////////////////////////

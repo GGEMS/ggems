@@ -31,7 +31,6 @@
   \date Tuesday October 27, 2020
 */
 
-#include "GGEMS/global/GGEMSExport.hh"
 #include "GGEMS/geometries/GGEMSSolid.hh"
 
 /*!

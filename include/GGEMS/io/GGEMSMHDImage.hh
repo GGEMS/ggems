@@ -95,7 +95,7 @@ class GGEMS_EXPORT GGEMSMHDImage
     /*!
       \fn void Read(std::string const& image_mhd_header_filename, std::weak_ptr<cl::Buffer> solid_data_cl)
       \param image_mhd_header_filename - input mhd filename
-      \param solid_data - pointer on solid data
+      \param solid_data_cl - pointer on solid data
       \brief read the mhd header
     */
     void Read(std::string const& image_mhd_header_filename, std::weak_ptr<cl::Buffer> solid_data_cl);

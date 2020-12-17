@@ -28,8 +28,6 @@
   \date Tuesday March 24, 2020
 */
 
-#include <cmath>
-
 #include "GGEMS/physics/GGEMSLogEnergyTable.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
 #include "GGEMS/maths/GGEMSMathAlgorithms.hh"

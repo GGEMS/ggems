@@ -30,13 +30,10 @@
 
 #include <fstream>
 #include <vector>
-#include <sstream>
 
 #include "GGEMS/geometries/GGEMSVoxelizedSolidData.hh"
-
 #include "GGEMS/io/GGEMSMHDImage.hh"
 #include "GGEMS/io/GGEMSTextReader.hh"
-
 #include "GGEMS/tools/GGEMSTools.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
 

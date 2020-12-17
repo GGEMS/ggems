@@ -29,7 +29,6 @@
 */
 
 #include "GGEMS/navigators/GGEMSNavigatorManager.hh"
-#include "GGEMS/geometries/GGEMSSolid.hh"
 #include "GGEMS/geometries/GGEMSVoxelizedSolid.hh"
 #include "GGEMS/physics/GGEMSCrossSections.hh"
 #include "GGEMS/sources/GGEMSSourceManager.hh"

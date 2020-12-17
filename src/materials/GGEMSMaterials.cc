@@ -33,7 +33,6 @@
 #include "GGEMS/navigators/GGEMSNavigatorManager.hh"
 #include "GGEMS/materials/GGEMSIonizationParamsMaterial.hh"
 #include "GGEMS/physics/GGEMSRangeCuts.hh"
-#include "GGEMS/tools/GGEMSTools.hh"
 #include "GGEMS/tools/GGEMSRAMManager.hh"
 
 ////////////////////////////////////////////////////////////////////////////////

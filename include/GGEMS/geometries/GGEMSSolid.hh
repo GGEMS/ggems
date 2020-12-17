@@ -32,7 +32,6 @@
 */
 
 #include <limits>
-#include <algorithm>
 
 #include "GGEMS/io/GGEMSTextReader.hh"
 #include "GGEMS/io/GGEMSHistogramMode.hh"

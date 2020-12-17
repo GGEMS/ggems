@@ -161,29 +161,6 @@ inline void TransportGetSafetyOutsideAABB(GGfloat3 const* position, GGfloat cons
 ////////////////////////////////////////////////////////////////////////////////
 
 /*!
-  \fn inline void TransportGetSafetyOutsideVoxelizedNavigator(GGfloat3 const* position, __global GGEMSVoxelizedSolidData* voxelized_solid_data)
-  \param position - pointer on primary particle position
-  \param voxelized_solid_data - voxelized data infos
-  \brief Moving particle slightly outside a voxelized navigator
-*/
-// inline void TransportGetSafetyOutsideVoxelizedNavigator(GGfloat3 const* position, __global GGEMSVoxelizedSolidData* voxelized_solid_data)
-// {
-//   // Borders of voxelized solid
-//   GGfloat x_min = voxelized_solid_data->border_min_xyz_.x;
-//   GGfloat x_max = voxelized_solid_data->border_max_xyz_.x;
-//   GGfloat y_min = voxelized_solid_data->border_min_xyz_.y;
-//   GGfloat y_max = voxelized_solid_data->border_max_xyz_.y;
-//   GGfloat z_min = voxelized_solid_data->border_min_xyz_.z;
-//   GGfloat z_max = voxelized_solid_data->border_max_xyz_.z;
-
-//   TransportGetSafetyOutsideAABB(position, x_min, x_max, y_min, y_max, z_min, z_max, GEOMETRY_TOLERANCE);
-// }
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-/*!
   \fn inline GGuchar IsParticleInAABB(GGfloat3 const* position, GGfloat const x_min, GGfloat const x_max, GGfloat const y_min, GGfloat const y_max, GGfloat const z_min, GGfloat const z_max, GGfloat const tolerance)
   \param position - pointer on primary particle
   \param x_min - min. border in x axis

@@ -24,7 +24,7 @@ GGEMSVerbosity(1)
 
 # ------------------------------------------------------------------------------
 # STEP 1: Choosing an OpenCL context
-opencl_manager.set_context_index(0)
+opencl_manager.set_context_index(2)
 
 # ------------------------------------------------------------------------------
 # STEP 2: Visualization
@@ -97,7 +97,4 @@ ggems_manager.initialize(777)
 # Start GGEMS simulation
 ggems_manager.run()
 
-# ------------------------------------------------------------------------------
-# STEP 9: Exit GGEMS safely
-opencl_manager.clean()
 exit()

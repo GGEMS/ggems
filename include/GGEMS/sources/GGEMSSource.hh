@@ -45,6 +45,7 @@ class GGEMS_EXPORT GGEMSSource
 {
   public:
     /*!
+      \param source_name - name of the source
       \brief GGEMSSource constructor
     */
     explicit GGEMSSource(std::string const& source_name);

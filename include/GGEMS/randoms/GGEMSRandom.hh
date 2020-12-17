@@ -1,5 +1,5 @@
-#ifndef GUARD_GGEMS_RANDOMS_GGEMSRANDOMSTACK_HH
-#define GUARD_GGEMS_RANDOMS_GGEMSRANDOMSTACK_HH
+#ifndef GUARD_GGEMS_RANDOMS_GGEMSRANDOM_HH
+#define GUARD_GGEMS_RANDOMS_GGEMSRANDOM_HH
 
 // ************************************************************************
 // * This file is part of GGEMS.                                          *
@@ -20,7 +20,7 @@
 // ************************************************************************
 
 /*!
-  \file GGEMSRandomStack.hh
+  \file GGEMSRandom.hh
 
   \brief Structure storing the random buffers for both OpenCL and GGEMS
 
@@ -49,4 +49,4 @@ typedef struct GGEMSRandom_t
 } GGEMSRandom; /*!< Using C convention name of struct to C++ (_t deletion) */
 #pragma pack(pop)
 
-#endif // End of GUARD_GGEMS_RANDOMS_GGEMSRANDOMSTACK_HH
+#endif // End of GUARD_GGEMS_RANDOMS_GGEMSRANDOM_HH
