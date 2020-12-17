@@ -40,17 +40,10 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 GGEMSOpenCLManager::GGEMSOpenCLManager(void)
-: build_options_(""),
-  context_index_(0),
-  contexts_cl_(0),
-  contexts_cpu_cl_(0),
-  contexts_gpu_cl_(0),
-  context_act_cl_(nullptr),
-  queues_cl_(0),
-  queue_act_cl_(nullptr),
-  events_cl_(0),
-  event_act_cl_(nullptr),
-  kernels_cl_(0)
+: context_index_(0),
+  is_context_activated_(false),
+  kernels_(0),
+  kernel_compilation_options_(0)
 {
   GGcout("GGEMSOpenCLManager", "GGEMSOpenCLManager", 3) << "Allocation of GGEMS OpenCL manager..." << GGendl;
 
@@ -58,31 +51,41 @@ GGEMSOpenCLManager::GGEMSOpenCLManager(void)
   CheckOpenCLError(cl::Platform::get(&platforms_), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
 
   // Getting infos about platform(s)
-  for (auto&& i : platforms_) {
+  for (auto&& p : platforms_) {
     std::string plaform_infos("");
-    CheckOpenCLError(i.getInfo(CL_PLATFORM_PROFILE, &plaform_infos), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(p.getInfo(CL_PLATFORM_PROFILE, &plaform_infos), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
     platform_profile_.push_back(plaform_infos);
-    CheckOpenCLError(i.getInfo(CL_PLATFORM_VERSION, &plaform_infos), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(p.getInfo(CL_PLATFORM_VERSION, &plaform_infos), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
     platform_version_.push_back(plaform_infos);
-    CheckOpenCLError(i.getInfo(CL_PLATFORM_NAME, &plaform_infos), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(p.getInfo(CL_PLATFORM_NAME, &plaform_infos), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
     platform_name_.push_back(plaform_infos);
-    CheckOpenCLError(i.getInfo(CL_PLATFORM_VENDOR, &plaform_infos), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(p.getInfo(CL_PLATFORM_VENDOR, &plaform_infos), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
     platform_vendor_.push_back(plaform_infos);
-    CheckOpenCLError(i.getInfo(CL_PLATFORM_EXTENSIONS, &plaform_infos), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(p.getInfo(CL_PLATFORM_EXTENSIONS, &plaform_infos), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
     platform_extensions_.push_back(plaform_infos);
   }
 
   // Retrieve all the available devices
-  GGcout("GGEMSOpenCLManager", "GGEMSOpenCLManager", 1) << "Retrieving OpenCL device(s)..." << GGendl;
+  GGcout("GGEMSOpenCLManager", "GGEMSOpenCLManager", 1) << "Retrieving OpenCL device(s), context(s), queue(s) and event(s)..." << GGendl;
   for (auto&& p : platforms_) {
     std::vector<cl::Device> v_current_device;
     CheckOpenCLError(p.getDevices(CL_DEVICE_TYPE_ALL, &v_current_device), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
 
-    // Storing device of each platform
-    for (auto&& d : v_current_device) devices_.emplace_back(new cl::Device(d));
+    // Storing devices of each platform, and contexts
+    for (auto&& d : v_current_device) {
+      // Creating a device
+      devices_.emplace_back(new cl::Device(d));
+      // Creating a context associated to device
+      contexts_.emplace_back(new cl::Context(d));
+      // Creating a command queue associated to a context and a command queue
+      queues_.emplace_back(new cl::CommandQueue(*contexts_.back().get(), d, CL_QUEUE_PROFILING_ENABLE));
+
+      // Create a new event
+      events_.emplace_back(new cl::Event());
+    }
   }
 
-  // Resizing vector storing infos for devices
+  // Resizing vector storing infos for devices, useful if program depends on hardware limitation
   device_type_.resize(devices_.size());
   device_name_.resize(devices_.size());
   device_vendor_.resize(devices_.size());
@@ -147,7 +150,9 @@ GGEMSOpenCLManager::GGEMSOpenCLManager(void)
   device_partition_affinity_domain_.resize(devices_.size());
   device_partition_max_sub_devices_.resize(devices_.size());
   device_profiling_timer_resolution_.resize(devices_.size());
-  work_group_size_.resize(devices_.size());
+
+  // Custom work group size, 64 seems a good trade-off
+  work_group_size_.resize(devices_.size(), 64);
 
   // Make a char buffer reading char* data
   std::size_t buffer[3] = {0,0,0};
@@ -218,8 +223,6 @@ GGEMSOpenCLManager::GGEMSOpenCLManager(void)
     CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_MAX_MEM_ALLOC_SIZE, &device_max_mem_alloc_size_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
     CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_MAX_PARAMETER_SIZE, &device_max_parameter_size_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
     CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_MAX_WORK_GROUP_SIZE, &device_max_work_group_size_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
-    // Custom work group size
-    work_group_size_[i] = 64;
     CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS, &device_max_work_item_dimensions_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
     CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_MAX_WORK_ITEM_SIZES, &buffer), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
     for (std::size_t j = 0; j < 3; ++j) device_max_work_item_sizes_[j + i*3] = buffer[j];
@@ -251,15 +254,6 @@ GGEMSOpenCLManager::GGEMSOpenCLManager(void)
   putenv("CUDA_CACHE_DISABLE=1");
   #endif
   #endif
-
-  // Creating a context for each device
-  CreateContext();
-
-  // Creating the command queue for CPU and GPU
-  CreateCommandQueue();
-
-  // Creating the events for each context
-  CreateEvent();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -269,16 +263,8 @@ GGEMSOpenCLManager::GGEMSOpenCLManager(void)
 GGEMSOpenCLManager::~GGEMSOpenCLManager(void)
 {
   GGcout("GGEMSOpenCLManager", "~GGEMSOpenCLManager", 3) << "Deallocation of GGEMS OpenCL manager..." << GGendl;
-}
 
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void GGEMSOpenCLManager::Clean(void)
-{
-  GGcout("GGEMSOpenCLManager", "Clean", 3) << "Cleaning OpenCL" << GGendl;
-
+  // Freeing platforms, and platform infos
   platforms_.clear();
   platform_profile_.clear();
   platform_version_.clear();
@@ -286,6 +272,7 @@ void GGEMSOpenCLManager::Clean(void)
   platform_vendor_.clear();
   platform_extensions_.clear();
 
+  // Freeing devices, and device infos
   devices_.clear();
   device_type_.clear();
   device_name_.clear();
@@ -353,18 +340,13 @@ void GGEMSOpenCLManager::Clean(void)
   device_profiling_timer_resolution_.clear();
   work_group_size_.clear();
 
-  contexts_cl_.clear();
-  contexts_cpu_cl_.clear();
-  contexts_gpu_cl_.clear();
-  context_act_cl_.reset(); 
+  // Freeing contexts
+  contexts_.clear();
 
-  queues_cl_.clear();
-  queue_act_cl_.reset();
-
-  events_cl_.clear();
-  event_act_cl_.reset();
-
-  kernels_cl_.clear();
+  // Freeing queues, events and kernels
+  queues_.clear();
+  events_.clear();
+  kernels_.clear();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -557,6 +539,7 @@ void GGEMSOpenCLManager::PrintDeviceInfos(void) const
     partition_affinity += device_single_fp_config_[i] & CL_DEVICE_AFFINITY_DOMAIN_NEXT_PARTITIONABLE ? "NEXT_PARTITIONABLE " : "";
     GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Partition Affinity: " << partition_affinity << GGendl;
     GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Timer Resolution: " << device_profiling_timer_resolution_[i] << " ns" << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + GGEMS Custom Work Group Size: " << work_group_size_[i] << GGendl;
   }
   GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << GGendl;
 }
@@ -574,55 +557,31 @@ void GGEMSOpenCLManager::PrintBuildOptions(void) const
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSOpenCLManager::CreateContext(void)
-{
-  GGcout("GGEMSOpenCLManager", "CreateContext", 3) << "Creating context for CPU and/or GPU..." << GGendl;
-
-  // Loop over the devices
-  for (std::size_t i = 0; i < devices_.size(); ++i) {
-    // Get GPU type
-    if (device_type_[i] == CL_DEVICE_TYPE_GPU) {
-      contexts_cl_.emplace_back(new cl::Context(*devices_[i]));
-      contexts_gpu_cl_.emplace_back(contexts_cl_.back());
-    }
-
-    if (device_type_[i] == CL_DEVICE_TYPE_CPU) {
-      contexts_cl_.emplace_back(new cl::Context(*devices_[i]));
-      contexts_cpu_cl_.emplace_back(contexts_cl_.back());
-    }
-  }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void GGEMSOpenCLManager::ContextToActivate(GGuint const& context_id)
+void GGEMSOpenCLManager::ContextToActivate(GGint const& context_id)
 {
   GGcout("GGEMSOpenCLManager", "ContextToActivate", 3) << "Activating a context for GGEMS..." << GGendl;
 
   // Checking if a context has already been activated
-  if (context_act_cl_)
-    GGEMSMisc::ThrowException("GGEMSOpenCLManager", "ContextToActivate", "A context has already been activated!!!");
+  if (is_context_activated_) GGEMSMisc::ThrowException("GGEMSOpenCLManager", "ContextToActivate", "A context has already been activated!!!");
 
   // Checking the index of the context
-  if (context_id >= contexts_cl_.size()) {
+  if (context_id >= contexts_.size()) {
     std::ostringstream oss(std::ostringstream::out);
-    oss << "Your context index is out of range!!! " << contexts_cl_.size() << " context(s) detected. Index must be in the range [" << 0 << ";" << contexts_cl_.size() - 1 << "]!!!";
+    oss << "Your context index is out of range!!! " << contexts_.size() << " context(s) detected. Index must be in the range [" << 0 << ";" << contexts_.size() - 1 << "]!!!";
     GGEMSMisc::ThrowException("GGEMSOpenCLManager", "ContextToActivate", oss.str());
   }
 
-  // Activate the context
-  context_act_cl_ = contexts_cl_.at(context_id);
+  // context is activated now
+  is_context_activated_ = true;
 
   // Storing the index of activated context
   context_index_ = context_id;
 
   // Activate the command queue
-  queue_act_cl_ = queues_cl_.at(context_id);
+  queue_act_ = queues_.at(context_id);
 
   // Activate the event
-  event_act_cl_ = events_cl_.at(context_id);
+  event_act_ = events_.at(context_id);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -632,8 +591,7 @@ void GGEMSOpenCLManager::ContextToActivate(GGuint const& context_id)
 void GGEMSOpenCLManager::PrintActivatedContextInfos(void) const
 {
   // Checking if activated context
-  if (context_act_cl_) {
-
+  if (is_context_activated_) {
     GGcout("GGEMSOpenCLManager", "PrintActivatedContextInfos", 3) << "Printing activated context for GGEMS..." << GGendl;
 
     GGuint context_num_devices = 0;
@@ -649,8 +607,8 @@ void GGEMSOpenCLManager::PrintActivatedContextInfos(void) const
     GGcout("GGEMSOpenCLManager", "PrintActivatedContextInfos", 0) << GGendl;
     GGcout("GGEMSOpenCLManager", "PrintActivatedContextInfos", 0) << "#### CONTEXT: " << context_index_ << " ####" << GGendl;
 
-    CheckOpenCLError(context_act_cl_->getInfo(CL_CONTEXT_NUM_DEVICES, &context_num_devices), "GGEMSOpenCLManager", "PrintActivatedContextInfos");
-    CheckOpenCLError(context_act_cl_->getInfo(CL_CONTEXT_DEVICES, &device), "GGEMSOpenCLManager", "PrintActivatedContextInfos");
+    CheckOpenCLError(contexts_.at(context_index_)->getInfo(CL_CONTEXT_NUM_DEVICES, &context_num_devices), "GGEMSOpenCLManager", "PrintActivatedContextInfos");
+    CheckOpenCLError(contexts_.at(context_index_)->getInfo(CL_CONTEXT_DEVICES, &device), "GGEMSOpenCLManager", "PrintActivatedContextInfos");
 
     GGcout("GGEMSOpenCLManager", "PrintActivatedContextInfos", 0) << "+ Type of device(s): " << GGendl;
 
@@ -679,25 +637,6 @@ void GGEMSOpenCLManager::PrintActivatedContextInfos(void) const
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSOpenCLManager::CreateCommandQueue(void)
-{
-  GGcout("GGEMSOpenCLManager","CreateCommandQueue", 3) << "Creating command queue for CPU and/or GPU..." << GGendl;
-
-  // Vector of devices in the context
-  std::vector<cl::Device> device;
-  // Loop over the contexts
-  for (std::size_t i = 0; i < contexts_cl_.size(); ++i) {
-    // Get the vector of devices include in the context
-    CheckOpenCLError(contexts_cl_[i]->getInfo(CL_CONTEXT_DEVICES, &device), "GGEMSOpenCLManager", "CreateCommandQueue");
-    queues_cl_.emplace_back(new cl::CommandQueue(*contexts_cl_[i], device[0], CL_QUEUE_PROFILING_ENABLE));
-  }
-  device.clear();
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
 void GGEMSOpenCLManager::PrintCommandQueueInfos(void) const
 {
   GGcout("GGEMSOpenCLManager","PrintCommandQueueInfos", 3) << "Printing infos about OpenCL command queue(s)..." << GGendl;
@@ -706,11 +645,11 @@ void GGEMSOpenCLManager::PrintCommandQueueInfos(void) const
   std::string device_name;
 
   // Loop over the queues
-  for (std::size_t i = 0; i < queues_cl_.size(); ++i) {
+  for (std::size_t i = 0; i < queues_.size(); ++i) {
     GGcout("GGEMSOpenCLManager","PrintCommandQueueInfos", 0) << GGendl;
     GGcout("GGEMSOpenCLManager","PrintCommandQueueInfos", 0) << "#### COMMAND QUEUE: " << i << " ####" << GGendl;
 
-    CheckOpenCLError(queues_cl_[i]->getInfo(CL_QUEUE_DEVICE, &device), "GGEMSOpenCLManager", "PrintCommandQueueInfos");
+    CheckOpenCLError(queues_[i]->getInfo(CL_QUEUE_DEVICE, &device), "GGEMSOpenCLManager", "PrintCommandQueueInfos");
     CheckOpenCLError(device.getInfo(CL_DEVICE_NAME, &device_name), "GGEMSOpenCLManager", "PrintCommandQueueInfos");
 
     GGcout("GGEMSOpenCLManager","PrintCommandQueueInfos", 0) << "+ Device Name: " << device_name << GGendl;
@@ -723,13 +662,22 @@ void GGEMSOpenCLManager::PrintCommandQueueInfos(void) const
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSOpenCLManager::CreateEvent(void)
+std::size_t GGEMSOpenCLManager::CheckKernel(std::string const& kernel_name, std::string const& compilation_options) const
 {
-  GGcout("GGEMSOpenCLManager","CreateEvent", 3) << "Creating event for CPU and/or GPU..." << GGendl;
+  GGcout("GGEMSOpenCLManager","CheckKernel", 3) << "Checking if kernel has already been compiled..." << GGendl;
 
-  for (std::size_t i = 0; i < contexts_cl_.size(); ++i) {
-    events_cl_.emplace_back(new cl::Event());
+  // Parameters for kernel infos
+  std::string registered_kernel_name("");
+
+  // Loop over registered kernels
+  for (std::size_t i = 0; i < kernels_.size(); ++i) {
+    CheckOpenCLError(kernels_.at(i)->getInfo(CL_KERNEL_FUNCTION_NAME, &registered_kernel_name), "GGEMSOpenCLManager", "CheckKernel");
+    registered_kernel_name.erase(registered_kernel_name.end()-1); // Remove '\0' char from previous function
+
+    if (kernel_name == registered_kernel_name && compilation_options == kernel_compilation_options_.at(i)) return i;
   }
+
+  return -1; // kernel not compiled yet
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -746,10 +694,6 @@ std::weak_ptr<cl::Kernel> GGEMSOpenCLManager::CompileKernel(std::string const& k
     oss << "Custom and additional options can not by set in same time!!!";
     GGEMSMisc::ThrowException("GGEMSOpenCLManager", "CompileKernel", oss.str());
   }
-
-  // Check if the source kernel file exists
-  std::ifstream source_file_stream(kernel_filename.c_str(), std::ios::in);
-  GGEMSFileStream::CheckInputStream(source_file_stream, kernel_filename);
 
   // Handling options to OpenCL compilation kernel
   char kernel_compilation_option[512];
@@ -779,40 +723,56 @@ std::weak_ptr<cl::Kernel> GGEMSOpenCLManager::CompileKernel(std::string const& k
     #endif
   }
 
-  GGcout("GGEMSOpenCLManager", "CompileKernel", 2) << "Compile a new kernel '" << kernel_name << "' from file: " << kernel_filename << " on context: " << context_index_ << " with options: " << kernel_compilation_option << GGendl;
+  // Checking if kernel already compiled
+  std::size_t kernel_index = CheckKernel(kernel_name, kernel_compilation_option);
 
-  // Store kernel in a std::string buffer
-  std::string source_code(std::istreambuf_iterator<char>(source_file_stream), (std::istreambuf_iterator<char>()));
-
-  // Creating an OpenCL program
-  cl::Program::Sources program_source(1, std::make_pair(source_code.c_str(), source_code.length() + 1));
-
-  // Make program from source code in specific context
-  cl::Program program = cl::Program(*(context_act_cl_.get()), program_source);
-
-  // Vector storing all the devices from a context
-  // In GGEMS a device is associated to a context
-  std::vector<cl::Device> devices;
-
-  // Get the vector of devices
-  CheckOpenCLError(context_act_cl_.get()->getInfo(CL_CONTEXT_DEVICES, &devices), "GGEMSOpenCLManager", "CompileKernel");
-
-  // Compile source code on devices
-  GGint build_status = program.build(devices, kernel_compilation_option);
-  if (build_status != CL_SUCCESS) {
-    std::ostringstream oss(std::ostringstream::out);
-    std::string log;
-    program.getBuildInfo(devices[0], CL_PROGRAM_BUILD_LOG, &log);
-    oss << ErrorType(build_status) << std::endl;
-    oss << log;
-    GGEMSMisc::ThrowException("GGEMSOpenCLManager", "CompileKernel", oss.str());
+  // if kernel already compiled return it
+  if (kernel_index != -1) {
+    return kernels_.at(kernel_index);
   }
+  else {
+    // Check if the source kernel file exists
+    std::ifstream source_file_stream(kernel_filename.c_str(), std::ios::in);
+    GGEMSFileStream::CheckInputStream(source_file_stream, kernel_filename);
 
-  // Storing the kernel in the singleton
-  kernels_cl_.emplace_back(new cl::Kernel(program, kernel_name.c_str(), &build_status));
-  CheckOpenCLError(build_status, "GGEMSOpenCLManager", "CompileKernel");
+    GGcout("GGEMSOpenCLManager", "CompileKernel", 2) << "Compile a new kernel '" << kernel_name << "' from file: " << kernel_filename << " on context: " << context_index_ << " with options: " << kernel_compilation_option << GGendl;
 
-  return kernels_cl_.back();
+    // Store kernel in a std::string buffer
+    std::string source_code(std::istreambuf_iterator<char>(source_file_stream), (std::istreambuf_iterator<char>()));
+
+    // Creating an OpenCL program
+    cl::Program::Sources program_source(1, std::make_pair(source_code.c_str(), source_code.length() + 1));
+
+    // Make program from source code in specific context
+    cl::Program program = cl::Program(*(contexts_.at(context_index_).get()), program_source);
+
+    // Vector storing all the devices from a context
+    // In GGEMS a device is associated to a context
+    std::vector<cl::Device> devices;
+
+    // Get the vector of devices
+    CheckOpenCLError(contexts_.at(context_index_).get()->getInfo(CL_CONTEXT_DEVICES, &devices), "GGEMSOpenCLManager", "CompileKernel");
+
+    // Storing the compilation options
+    kernel_compilation_options_.push_back(kernel_compilation_option);
+
+    // Compile source code on devices
+    GGint build_status = program.build(devices, kernel_compilation_option);
+    if (build_status != CL_SUCCESS) {
+      std::ostringstream oss(std::ostringstream::out);
+      std::string log;
+      program.getBuildInfo(devices[0], CL_PROGRAM_BUILD_LOG, &log);
+      oss << ErrorType(build_status) << std::endl;
+      oss << log;
+      GGEMSMisc::ThrowException("GGEMSOpenCLManager", "CompileKernel", oss.str());
+    }
+
+    // Storing the kernel in the singleton
+    kernels_.emplace_back(new cl::Kernel(program, kernel_name.c_str(), &build_status));
+    CheckOpenCLError(build_status, "GGEMSOpenCLManager", "CompileKernel");
+
+    return kernels_.back();
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -825,10 +785,10 @@ DurationNano GGEMSOpenCLManager::GetElapsedTimeInKernel(void) const
   GGulong start = 0, end = 0;
 
   // Start
-  CheckOpenCLError(event_act_cl_.get()->getProfilingInfo(CL_PROFILING_COMMAND_START, &start), "GGEMSOpenCLManager", "DisplayElapsedTimeInKernel");
+  CheckOpenCLError(event_act_.get()->getProfilingInfo(CL_PROFILING_COMMAND_START, &start), "GGEMSOpenCLManager", "DisplayElapsedTimeInKernel");
 
   // End
-  CheckOpenCLError(event_act_cl_.get()->getProfilingInfo(CL_PROFILING_COMMAND_END, &end), "GGEMSOpenCLManager", "DisplayElapsedTimeInKernel");
+  CheckOpenCLError(event_act_.get()->getProfilingInfo(CL_PROFILING_COMMAND_END, &end), "GGEMSOpenCLManager", "DisplayElapsedTimeInKernel");
 
   return static_cast<std::chrono::nanoseconds>((end-start));
 }
@@ -850,17 +810,17 @@ void GGEMSOpenCLManager::PrintContextInfos(void) const
   GGcout("GGEMSOpenCLManager", "PrintContextInfos", 0) << GGendl;
 
   // Loop over all the context
-  for (std::size_t i = 0; i < contexts_cl_.size(); ++i) {
+  for (std::size_t i = 0; i < contexts_.size(); ++i) {
     GGcout("GGEMSOpenCLManager", "PrintContextInfos", 0) << "#### CONTEXT: " << i << " ####" << GGendl;
 
-    CheckOpenCLError(contexts_cl_[i]->getInfo(CL_CONTEXT_NUM_DEVICES, &context_number_devices), "GGEMSOpenCLManager", "PrintContextInfos");
+    CheckOpenCLError(contexts_[i]->getInfo(CL_CONTEXT_NUM_DEVICES, &context_number_devices), "GGEMSOpenCLManager", "PrintContextInfos");
 
     if (context_number_devices > 1) {
       GGEMSMisc::ThrowException("GGEMSOpenCLManager", "PrintContextInfos", "One device by context only!!!");
     }
 
-    CheckOpenCLError(contexts_cl_[i]->getInfo(CL_CONTEXT_REFERENCE_COUNT, &reference_count), "GGEMSOpenCLManager", "PrintContextInfos");
-    CheckOpenCLError(contexts_cl_[i]->getInfo(CL_CONTEXT_DEVICES, &device), "GGEMSOpenCLManager", "PrintContextInfos");
+    CheckOpenCLError(contexts_[i]->getInfo(CL_CONTEXT_REFERENCE_COUNT, &reference_count), "GGEMSOpenCLManager", "PrintContextInfos");
+    CheckOpenCLError(contexts_[i]->getInfo(CL_CONTEXT_DEVICES, &device), "GGEMSOpenCLManager", "PrintContextInfos");
 
     GGcout("GGEMSOpenCLManager", "PrintContextInfos", 0) << "+ Type of device(s): " << GGendl;
 
@@ -903,12 +863,12 @@ std::unique_ptr<cl::Buffer> GGEMSOpenCLManager::Allocate(void* host_ptr, std::si
   }
 
   // Check if enough space on device
-  if (!ram_manager.IsEnoughAvailableAMMemory(size)) {
+  if (!ram_manager.IsEnoughAvailableRAMMemory(size)) {
     GGEMSMisc::ThrowException("GGEMSOpenCLManager", "Allocate", "Not enough RAM memory for buffer allocation!!!");
   }
 
   GGint error = 0;
-  std::unique_ptr<cl::Buffer> buffer(new cl::Buffer(*(context_act_cl_.get()), flags, size, host_ptr, &error));
+  std::unique_ptr<cl::Buffer> buffer(new cl::Buffer(*(contexts_.at(context_index_).get()), flags, size, host_ptr, &error));
   CheckOpenCLError(error, "GGEMSOpenCLManager", "Allocate");
 
   // Increment RAM memory
@@ -1350,13 +1310,4 @@ void print_infos_opencl_manager(GGEMSOpenCLManager* opencl_manager)
 void set_context_index_ggems_opencl_manager(GGEMSOpenCLManager* opencl_manager, GGint const context_id)
 {
   opencl_manager->ContextToActivate(context_id);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void clean_opencl_manager(GGEMSOpenCLManager* opencl_manager)
-{
-  opencl_manager->Clean();
 }

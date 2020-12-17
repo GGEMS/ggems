@@ -33,10 +33,6 @@
 
 #include "GGEMS/maths/GGEMSMatrixTypes.hh"
 
-#include "GGEMS/global/GGEMSConfiguration.hh"
-
-#include "GGEMS/tools/GGEMSTypes.hh"
-
 /*!
   \struct GGEMSOBB_t
   \brief Structure storing OBB (Oriented Bounding Box) geometry

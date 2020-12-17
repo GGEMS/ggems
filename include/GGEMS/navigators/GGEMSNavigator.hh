@@ -183,26 +183,26 @@ class GGEMS_EXPORT GGEMSNavigator
     */
     virtual void Initialize(void);
 
-    /*
-      \fn DurationNano GetKernelParticleSolidDistanceTimer(void) const
+    /*!
+      \fn inline DurationNano GetKernelParticleSolidDistanceTimer(void) const
       \return elapsed time in particle solid distance kernel in all solids
       \brief get the elapsed time in particle solid distance kernel in all solids
     */
     inline DurationNano GetKernelParticleSolidDistanceTimer(void) const {return kernel_particle_solid_distance_timer_;};
 
-    /*
-      \fn DurationNano GetKernelProjectToSolidTimer(void) const
+    /*!
+      \fn inline DurationNano GetKernelProjectToSolidTimer(void) const
       \return elapsed time in kernel computing projection to closest solid
       \brief get the elapsed time in kernel computing projection to closest solid
     */
-    inline DurationNano GetKernelProjectToSolidTimer(void) const {return kernel_particle_solid_distance_timer_;};
+    inline DurationNano GetKernelProjectToSolidTimer(void) const {return kernel_project_to_solid_timer_;};
 
-    /*
-      \fn DurationNano GetKernelTrackThroughSolidTimer(void) const
+    /*!
+      \fn inline DurationNano GetKernelTrackThroughSolidTimer(void) const
       \return elapsed time in kernel tracking particle inside solid
       \brief get the elapsed time in kernel tracking particle inside solid
     */
-    inline DurationNano GetKernelTrackThroughSolidTimer(void) const {return kernel_particle_solid_distance_timer_;};
+    inline DurationNano GetKernelTrackThroughSolidTimer(void) const {return kernel_track_through_solid_timer_;};
 
     /*!
       \fn void SaveResults(void)
@@ -212,7 +212,6 @@ class GGEMS_EXPORT GGEMSNavigator
 
     /*!
       \fn void StoreOutput(std::string basename)
-      \param format - format of the output file
       \param basename - basename of the output file
       \brief Storing the basename and format of the output file
     */
@@ -237,7 +236,7 @@ class GGEMS_EXPORT GGEMSNavigator
     GGfloat threshold_; /*!< Threshold in energy applyied to navigator */
 
     // Output
-    std::string output_basename_; /*<! Basename of output file */
+    std::string output_basename_; /*!< Basename of output file */
 
     std::vector<std::shared_ptr<GGEMSSolid>> solids_; /*!< Solid with geometric infos and label */
     std::shared_ptr<GGEMSMaterials> materials_; /*!< Materials of phantom */

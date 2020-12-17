@@ -30,12 +30,6 @@
   \date Tuesday October 20, 2020
 */
 
-#include <string>
-#include <memory>
-
-#include "GGEMS/global/GGEMSExport.hh"
-#include "GGEMS/tools/GGEMSTypes.hh"
-
 #include "GGEMS/navigators/GGEMSNavigator.hh"
 
 /*!
@@ -78,7 +72,7 @@ class GGEMS_EXPORT GGEMSVoxelizedPhantom : public GGEMSNavigator
     GGEMSVoxelizedPhantom(GGEMSVoxelizedPhantom const&& voxelized_phantom) = delete;
 
     /*!
-      \fn GGEMSPhantom& operator=(GGEMSPhantom const&& voxelized_phantom) = delete
+      \fn GGEMSVoxelizedPhantom& operator=(GGEMSVoxelizedPhantom const&& voxelized_phantom) = delete
       \param voxelized_phantom - rvalue reference on the GGEMS voxelized phantom
       \brief Avoid copy by rvalue reference
     */
@@ -95,7 +89,6 @@ class GGEMS_EXPORT GGEMSVoxelizedPhantom : public GGEMSNavigator
     /*!
       \fn void Initialize(void)
       \brief Initialize the voxelized phantom
-      \return no returned value
     */
     void Initialize(void) override;
 
@@ -126,7 +119,7 @@ class GGEMS_EXPORT GGEMSVoxelizedPhantom : public GGEMSNavigator
 extern "C" GGEMS_EXPORT GGEMSVoxelizedPhantom* create_ggems_voxelized_phantom(char const* voxelized_phantom_name);
 
 /*!
-  \fn void set_phantom_file_ggems_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, char const* phantom_filename, char const* range_data_filename)
+  \fn void set_phantom_file_ggems_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, char const* phantom_filename, char const* range_data_filename)
   \param voxelized_phantom - pointer on voxelized_phantom
   \param phantom_filename - filename of the voxelized phantom
   \param range_data_filename - range to material filename
@@ -135,7 +128,7 @@ extern "C" GGEMS_EXPORT GGEMSVoxelizedPhantom* create_ggems_voxelized_phantom(ch
 extern "C" GGEMS_EXPORT void set_phantom_file_ggems_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, char const* phantom_filename, char const* range_data_filename);
 
 /*!
-  \fn void set_position_ggems_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, GGfloat const position_x, GGfloat const position_y, GGfloat const position_z, char const* unit)
+  \fn void set_position_ggems_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, GGfloat const position_x, GGfloat const position_y, GGfloat const position_z, char const* unit)
   \param voxelized_phantom - pointer on voxelized phantom
   \param position_x - offset in X
   \param position_y - offset in Y

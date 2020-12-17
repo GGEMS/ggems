@@ -20,7 +20,7 @@
 // ************************************************************************
 
 /*!
-  \file GGEMSVoxelizedSolidStack.hh
+  \file GGEMSVoxelizedSolidData.hh
 
   \brief Structure storing the stack of data for voxelized and analytical solid
 
@@ -31,7 +31,6 @@
   \date Monday March 2, 2020
 */
 
-#include "GGEMS/tools/GGEMSTypes.hh"
 #include "GGEMS/geometries/GGEMSPrimitiveGeometries.hh"
 
 /*!

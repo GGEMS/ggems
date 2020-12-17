@@ -22,8 +22,7 @@
 /*!
   \file GGEMSOpenCLManager.hh
 
-  \brief Singleton class storing all informations about OpenCL and managing GPU/CPU contexts and kernels for GGEMS
-  IMPORTANT: Only 1 context has to be activated.
+  \brief Singleton class storing all informations about OpenCL and managing GPU/CPU contexts and kernels, and 1 context is associated to 1 device
 
   \author Julien BERT <julien.bert@univ-brest.fr>
   \author Didier BENOIT <didier.benoit@inserm.fr>
@@ -37,12 +36,6 @@
 #endif
 
 #include <memory>
-
-#ifdef __APPLE__
-#include <OpenCL/opencl.hpp>
-#else
-#include <CL/cl.hpp>
-#endif
 
 #include "GGEMS/tools/GGEMSPrint.hh"
 #include "GGEMS/tools/GGEMSChrono.hh"
@@ -105,19 +98,13 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     GGEMSOpenCLManager& operator=(GGEMSOpenCLManager const&& opencl_manager) = delete;
 
     /*!
-      \fn void Clean(void)
-      \brief Clean correctly OpenCL platform, device, context, command queue, event and kernel
-    */
-    void Clean(void);
-
-    /*!
       \fn GGbool IsReady(void) const
       \return true if OpenCL manager is ready, otherwize false
       \brief Checking if the OpenCL manager is ready, it means if a context is set
     */
     inline GGbool IsReady(void) const
     {
-      if (context_act_cl_) return true;
+      if (is_context_activated_) return true;
       else return false;
     }
 
@@ -158,11 +145,11 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     void PrintBuildOptions(void) const;
 
     /*!
-      \fn void ContextToActivate(GGuint const& context_id)
+      \fn void ContextToActivate(GGint const& context_id)
       \param context_id - context index
       \brief set the index of the context to activate
     */
-    void ContextToActivate(GGuint const& context_id);
+    void ContextToActivate(GGint const& context_id);
 
     /*!
       \fn GGulong GetMaxRAMMemoryOnActivatedContext(void) const
@@ -204,21 +191,21 @@ class GGEMS_EXPORT GGEMSOpenCLManager
       \return the pointer on activated context
       \brief return the activated context
     */
-    inline cl::Context* GetContext(void) const {return context_act_cl_.get();}
+    inline cl::Context* GetContext(void) const {return contexts_.at(context_index_).get();}
 
     /*!
       \fn cl::CommandQueue* GetCommandQueue(void) const
       \return the pointer on activated command queue
       \brief Return the command queue to activated context
     */
-    inline cl::CommandQueue* GetCommandQueue(void) const {return queue_act_cl_.get();}
+    inline cl::CommandQueue* GetCommandQueue(void) const {return queue_act_.get();}
 
     /*!
       \fn cl::Event* GetEvent(void) const
       \return the pointer on activated event
       \brief return an event to activated context
     */
-    inline cl::Event* GetEvent(void) const {return event_act_cl_.get();}
+    inline cl::Event* GetEvent(void) const {return event_act_.get();}
 
     /*!
       \fn std::weak_ptr<cl::Kernel> CompileKernel(std::string const& kernel_filename, std::string const& kernel_name, char* const custom_options = nullptr, char* const additional_options = nullptr)
@@ -242,8 +229,8 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     std::unique_ptr<cl::Buffer> Allocate(void* host_ptr, std::size_t size, cl_mem_flags flags);
 
     /*!
-      \fn std::unique_ptr<cl::Buffer> Allocate(void* host_ptr, std::size_t size, cl_mem_flags flags)
-      \param host_ptr - pointer to buffer in host memory
+      \fn void Deallocate(std::shared_ptr<cl::Buffer> buffer, std::size_t size)
+      \param buffer - pointer to buffer in host memory
       \param size - size of the buffer in bytes
       \brief Deallocation of OpenCL memory
     */
@@ -268,7 +255,7 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     template <typename T>
     void ReleaseDeviceBuffer(cl::Buffer* const device_ptr, T* host_ptr) const;
 
-    /*
+    /*!
       \fn DurationNano GetElapsedTimeInKernel(void) const
       \return elapsed time in kernel
       \brief Get the elapsed time in the last used kernel
@@ -286,30 +273,21 @@ class GGEMS_EXPORT GGEMSOpenCLManager
 
   private:
     /*!
-      \fn void CreateContext(void)
-      \brief Create a context for GPU or CPU
-    */
-    void CreateContext(void);
-
-    /*!
-      \fn void CreateCommandQueue(void)
-      \brief create a command queue for each context
-    */
-    void CreateCommandQueue(void);
-
-    /*!
-      \fn void CreateEvent(void)
-      \brief creating an event for each context
-    */
-    void CreateEvent(void);
-
-    /*!
       \fn std::string ErrorType(GGint const& error) const
       \param error - error index from OpenCL library
       \return the message error
       \brief get the error description
     */
     std::string ErrorType(GGint const& error) const;
+
+    /*!
+      \fn std::size_t CheckKernel(std::string const& kernel_name, std::string const& compilation_options) const
+      \param kernel_name - name of the kernel
+      \param compilation_options - arguments of compilation
+      \brief check if a kernel has been already compiled
+      \return index of kernel if already compiled
+    */
+    std::size_t CheckKernel(std::string const& kernel_name, std::string const& compilation_options) const;
 
   private:
     // Platforms
@@ -378,38 +356,37 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     std::vector<GGulong> device_max_mem_alloc_size_; /*!< Max memory allocation size */
     std::vector<std::size_t> device_max_parameter_size_; /*!< Max Parameter size in kernel */
     std::vector<GGuint> device_max_samplers_; /*!< Max number of samplers in kernel */
-    std::vector<std::size_t> device_max_work_group_size_; /*< Max Work group size */
+    std::vector<std::size_t> device_max_work_group_size_; /*!< Max Work group size */
     std::vector<GGuint> device_max_work_item_dimensions_; /*!< Maximum work item dimensions */
     std::vector<std::size_t> device_max_work_item_sizes_; /*!< Maximum work item sizes */
     std::vector<GGuint> device_mem_base_addr_align_; /*!< Alignment memory */
     std::vector<std::size_t> device_printf_buffer_size_; /*!< Size of buffer for printf in kernel */
     std::vector<cl_device_affinity_domain> device_partition_affinity_domain_; /*!< Partition affinity domain */
     std::vector<GGuint> device_partition_max_sub_devices_; /*!< Partition affinity domain */
-    std::vector<std::size_t> device_profiling_timer_resolution_; /*<! Timer resolution */
+    std::vector<std::size_t> device_profiling_timer_resolution_; /*!< Timer resolution */
 
     // Custom work group size
-    std::vector<std::size_t> work_group_size_; /*< Work group size by GGEMS, here 128 */
+    std::vector<std::size_t> work_group_size_; /*!< Work group size by GGEMS, here 64 */
 
     // OpenCL compilation options
     std::string build_options_; /*!< list of option to OpenCL compiler */
 
     // Context and informations about them
-    GGuint context_index_; /*!< Index of the activated context */
-    std::vector<std::shared_ptr<cl::Context>> contexts_cl_; /*!< Vector of context */
-    std::vector<std::shared_ptr<cl::Context>> contexts_cpu_cl_; /*!< Vector of CPU context */
-    std::vector<std::shared_ptr<cl::Context>> contexts_gpu_cl_; /*!< Vector of GPU context */
-    std::shared_ptr<cl::Context> context_act_cl_; /*!< Activated context */
+    bool is_context_activated_; /*!< Check if context already activated */
+    GGint context_index_; /*!< Index of the activated context */
+    std::vector<std::shared_ptr<cl::Context>> contexts_; /*!< Vector of context */
 
     // Command queue informations
-    std::vector<std::shared_ptr<cl::CommandQueue>> queues_cl_; /*!< Command queue for all the context */
-    std::shared_ptr<cl::CommandQueue> queue_act_cl_; /*!< Activated command queue */
+    std::vector<std::shared_ptr<cl::CommandQueue>> queues_; /*!< Command queue for all the context */
+    std::shared_ptr<cl::CommandQueue> queue_act_; /*!< Activated command queue */
 
     // OpenCL event
-    std::vector<std::shared_ptr<cl::Event>> events_cl_; /*!< List of pointer to OpenCL event, for profiling */
-    std::shared_ptr<cl::Event> event_act_cl_; /*!< Activated event */
+    std::vector<std::shared_ptr<cl::Event>> events_; /*!< List of pointer to OpenCL event, for profiling */
+    std::shared_ptr<cl::Event> event_act_; /*!< Activated event */
 
     // Kernels
-    std::vector<std::shared_ptr<cl::Kernel>> kernels_cl_; /*!< List of pointer to OpenCL kernel */
+    std::vector<std::shared_ptr<cl::Kernel>> kernels_; /*!< List of pointer to OpenCL kernel */
+    std::vector<std::string> kernel_compilation_options_; /*!< List of compilation options for kernel */
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -422,7 +399,7 @@ T* GGEMSOpenCLManager::GetDeviceBuffer(cl::Buffer* const device_ptr, std::size_t
   GGcout("GGEMSOpenCLManager", "GetDeviceBuffer", 3) << "Getting mapped memory buffer on OpenCL device..." << GGendl;
 
   GGint err = 0;
-  T* ptr = static_cast<T*>(queue_act_cl_.get()->enqueueMapBuffer(*device_ptr, CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, 0, size, nullptr, nullptr, &err));
+  T* ptr = static_cast<T*>(queue_act_.get()->enqueueMapBuffer(*device_ptr, CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, 0, size, nullptr, nullptr, &err));
   CheckOpenCLError(err, "GGEMSOpenCLManager", "GetDeviceBuffer");
   return ptr;
 }
@@ -437,7 +414,7 @@ void GGEMSOpenCLManager::ReleaseDeviceBuffer(cl::Buffer* const device_ptr, T* ho
   GGcout("GGEMSOpenCLManager", "ReleaseDeviceBuffer", 3) << "Releasing mapped memory buffer on OpenCL device..." << GGendl;
 
   // Unmap the memory
-  CheckOpenCLError(queue_act_cl_.get()->enqueueUnmapMemObject(*device_ptr, host_ptr), "GGEMSOpenCLManager", "ReleaseDeviceBuffer");
+  CheckOpenCLError(queue_act_.get()->enqueueUnmapMemObject(*device_ptr, host_ptr), "GGEMSOpenCLManager", "ReleaseDeviceBuffer");
 }
 
 /*!
@@ -461,12 +438,5 @@ extern "C" GGEMS_EXPORT void print_infos_opencl_manager(GGEMSOpenCLManager* open
   \brief Set the context index to activate
 */
 extern "C" GGEMS_EXPORT void set_context_index_ggems_opencl_manager(GGEMSOpenCLManager* opencl_manager, GGint const context_id);
-
-/*!
-  \fn void clean_opencl_manager(GGEMSOpenCLManager* opencl_manager)
-  \param opencl_manager - pointer on the singleton
-  \brief Clean OpenCL manager safely with python
-*/
-extern "C" GGEMS_EXPORT void clean_opencl_manager(GGEMSOpenCLManager* opencl_manager);
 
 #endif // GUARD_GGEMS_GLOBAL_GGEMSOPENCLMANAGER_HH

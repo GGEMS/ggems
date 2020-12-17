@@ -46,6 +46,11 @@
 */
 int main(void)
 {
+  // Setting verbosity
+  GGcout.SetVerbosity(1);
+  GGcerr.SetVerbosity(1);
+  GGwarn.SetVerbosity(1);
+
   // Initialization of singletons
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
   GGEMSMaterialsDatabaseManager& material_manager = GGEMSMaterialsDatabaseManager::GetInstance();
@@ -117,9 +122,6 @@ int main(void)
 
   // Start GGEMS simulation
   ggems_manager.Run();
-
-  // Cleaning OpenCL manager
-  opencl_manager.Clean();
 
   exit(EXIT_SUCCESS);
 }

@@ -31,8 +31,6 @@
   \date Tuesday February 11, 2020
 */
 
-#include "GGEMS/tools/GGEMSTools.hh"
-
 #include "GGEMS/navigators/GGEMSNavigator.hh"
 
 /*!
@@ -188,17 +186,6 @@ class GGEMS_EXPORT GGEMSNavigatorManager
       \brief save all results from navigator in files
     */
     void SaveResults(void) const;
-
-  private:
-    /*!
-      \fn bool CheckOverlap(std::weak_ptr<GGEMSNavigator> navigator_a, std::weak_ptr<GGEMSNavigator> navigator_b) const
-      \param navigator_a - point on a navigator A
-      \param navigator_b - point on a navigator B
-      \brief check the overlap between navigator A and B
-      \return true if there is an overlap and stop simulation
-      \todo method only for voxelized navigator, generalize it!!!
-    */
-    //bool CheckOverlap(std::weak_ptr<GGEMSNavigator> navigator_a, std::weak_ptr<GGEMSNavigator> navigator_b) const;
 
   private:
     std::vector<std::shared_ptr<GGEMSNavigator>> navigators_; /*!< Pointer on the navigators */

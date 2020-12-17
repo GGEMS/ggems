@@ -31,10 +31,6 @@
   \date Tuesday October 27, 2020
 */
 
-#include "GGEMS/global/GGEMSConfiguration.hh"
-
-#include "GGEMS/tools/GGEMSTypes.hh"
-
 #include "GGEMS/geometries/GGEMSPrimitiveGeometries.hh"
 
 /*!

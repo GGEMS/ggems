@@ -34,12 +34,6 @@
 #pragma warning(disable: 4251) // Deleting warning exporting STL members!!!
 #endif
 
-#include <string>
-#include <memory>
-
-#include "GGEMS/global/GGEMSExport.hh"
-#include "GGEMS/tools/GGEMSTypes.hh"
-
 #include "GGEMS/navigators/GGEMSNavigator.hh"
 
 /*!

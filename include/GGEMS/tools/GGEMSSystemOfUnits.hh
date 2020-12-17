@@ -31,8 +31,6 @@
   \date Tuesday October 1, 2019
 */
 
-#include "GGEMS/tools/GGEMSTypes.hh"
-
 #ifdef PASCAL
 #undef PASCAL
 #endif

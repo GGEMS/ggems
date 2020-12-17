@@ -29,8 +29,6 @@
 */
 
 #include "GGEMS/geometries/GGEMSSphere.hh"
-
-#include "GGEMS/tools/GGEMSTools.hh"
 #include "GGEMS/tools/GGEMSSystemOfUnits.hh"
 
 ////////////////////////////////////////////////////////////////////////////////

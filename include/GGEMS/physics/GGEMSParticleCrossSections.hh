@@ -1,5 +1,5 @@
-#ifndef GUARD_GGEMS_PHYSICS_GGEMSPARTICLECROSSSECTIONSSTACK_HH
-#define GUARD_GGEMS_PHYSICS_GGEMSPARTICLECROSSSECTIONSSTACK_HH
+#ifndef GUARD_GGEMS_PHYSICS_GGEMSPARTICLECROSSSECTIONS_HH
+#define GUARD_GGEMS_PHYSICS_GGEMSPARTICLECROSSSECTIONS_HH
 
 // ************************************************************************
 // * This file is part of GGEMS.                                          *
@@ -20,7 +20,7 @@
 // ************************************************************************
 
 /*!
-  \file GGEMSParticleCrossSectionsStack.hh
+  \file GGEMSParticleCrossSections.hh
 
   \brief Structure storing the particle (photon, electron, positron) cross sections for OpenCL device
 
@@ -31,8 +31,6 @@
   \date Friday April 3, 2020
 */
 
-#include "GGEMS/global/GGEMSConfiguration.hh"
-#include "GGEMS/tools/GGEMSTypes.hh"
 #include "GGEMS/physics/GGEMSProcessConstants.hh"
 
 /*!
@@ -71,4 +69,4 @@ typedef struct GGEMSParticleCrossSections_t
 } GGEMSParticleCrossSections; /*!< Using C convention name of struct to C++ (_t deletion) */
 #pragma pack(pop)
 
-#endif // GUARD_GGEMS_PHYSICS_GGEMSPARTICLECROSSSECTIONSSTACK_HH
+#endif // GUARD_GGEMS_PHYSICS_GGEMSPARTICLECROSSSECTIONS_HH

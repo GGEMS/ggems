@@ -31,9 +31,6 @@
   \date Tuesday November 5, 2020
 */
 
-#include "GGEMS/tools/GGEMSSystemOfUnits.hh"
-
-#include "GGEMS/maths/GGEMSMatrixTypes.hh"
 #include "GGEMS/maths/GGEMSMatrixOperations.hh"
 
 #ifdef __OPENCL_C_VERSION__

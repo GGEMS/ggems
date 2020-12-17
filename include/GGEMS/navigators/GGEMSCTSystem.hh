@@ -33,7 +33,6 @@
 #include <string>
 #include <memory>
 
-#include "GGEMS/global/GGEMSExport.hh"
 #include "GGEMS/tools/GGEMSTypes.hh"
 #include "GGEMS/navigators/GGEMSSystem.hh"
 

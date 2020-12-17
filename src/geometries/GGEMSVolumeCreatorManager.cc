@@ -28,14 +28,8 @@
   \date Thursday January 9, 2020
 */
 
-#include <algorithm>
-
 #include "GGEMS/geometries/GGEMSVolumeCreatorManager.hh"
-
-#include "GGEMS/tools/GGEMSPrint.hh"
-#include "GGEMS/tools/GGEMSTools.hh"
 #include "GGEMS/tools/GGEMSSystemOfUnits.hh"
-
 #include "GGEMS/io/GGEMSMHDImage.hh"
 
 ////////////////////////////////////////////////////////////////////////////////

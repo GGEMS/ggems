@@ -42,14 +42,10 @@
 #endif
 
 #include "GGEMS/global/GGEMSManager.hh"
-
 #include "GGEMS/physics/GGEMSProcessesManager.hh"
 #include "GGEMS/physics/GGEMSRangeCutsManager.hh"
-
 #include "GGEMS/sources/GGEMSSourceManager.hh"
-
 #include "GGEMS/navigators/GGEMSNavigatorManager.hh"
-
 #include "GGEMS/tools/GGEMSChrono.hh"
 #include "GGEMS/tools/GGEMSRAMManager.hh"
 #include "GGEMS/randoms/GGEMSPseudoRandomGenerator.hh"

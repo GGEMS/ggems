@@ -28,12 +28,8 @@
 */
 
 #include "GGEMS/navigators/GGEMSCTSystem.hh"
-
-#include "GGEMS/tools/GGEMSPrint.hh"
-
 #include "GGEMS/geometries/GGEMSSolidBox.hh"
 #include "GGEMS/geometries/GGEMSSolidBoxData.hh"
-
 #include "GGEMS/global/GGEMSManager.hh"
 
 ////////////////////////////////////////////////////////////////////////////////

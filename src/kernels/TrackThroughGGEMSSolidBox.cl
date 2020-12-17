@@ -42,30 +42,23 @@
 #include "GGEMS/navigators/GGEMSPhotonNavigator.hh"
 
 /*!
-  \fn kernel void track_through_ggems_solid_box(GGlong const particle_id_limit, global GGEMSPrimaryParticles* primary_particle, global GGEMSRandom* random, global GGEMSSolidBoxData* solid_box_data, global GGshort const* label_data, global GGEMSParticleCrossSections* particle_cross_sections, global GGEMSMaterialTables* materials, GGfloat const threshold)
+  \fn kernel void track_through_ggems_solid_box(GGlong const particle_id_limit, global GGEMSPrimaryParticles* primary_particle, global GGEMSRandom* random, global GGEMSSolidBoxData const* solid_box_data, global GGshort const* label_data, global GGEMSParticleCrossSections const* particle_cross_sections, global GGEMSMaterialTables const* materials, GGfloat const threshold, global GGint* histogram)
   \param particle_id_limit - particle id limit
   \param primary_particle - pointer to primary particles on OpenCL memory
   \param random - pointer on random numbers
   \param solid_box_data - pointer to solid box data
+  \param label_data - pointer storing label of material (empty buffer here, 1 material only)
   \param particle_cross_sections - pointer to cross sections activated in navigator
   \param materials - pointer on material in navigator
   \param threshold - energy threshold
+  \param histogram - pointer to buffer storing histogram
   \brief OpenCL kernel tracking particles within voxelized solid
-  \return no returned value
 */
-kernel void track_through_ggems_solid_box(
-  GGlong const particle_id_limit,
-  global GGEMSPrimaryParticles* primary_particle,
-  global GGEMSRandom* random,
-  global GGEMSSolidBoxData const* solid_box_data,
-  global GGshort const* label_data,
-  global GGEMSParticleCrossSections const* particle_cross_sections,
-  global GGEMSMaterialTables const* materials,
-  GGfloat const threshold,
+kernel void track_through_ggems_solid_box(GGlong const particle_id_limit, global GGEMSPrimaryParticles* primary_particle, global GGEMSRandom* random, global GGEMSSolidBoxData const* solid_box_data, global GGshort const* label_data, global GGEMSParticleCrossSections const* particle_cross_sections, global GGEMSMaterialTables const* materials, GGfloat const threshold,
   #ifdef HISTOGRAM
   global GGint* histogram
   #endif
-  )
+)
 {
   // Getting index of thread
   GGint global_id = get_global_id(0);

@@ -38,17 +38,13 @@
 #include "GGEMS/maths/GGEMSMatrixOperations.hh"
 
 /*!
-  \fn kernel void project_to_ggems_solid_box(GGlong const particle_id_limit, global GGEMSPrimaryParticles* primary_particle, global GGEMSSolidBoxData* solid_box_data)
+  \fn kernel void project_to_ggems_solid_box(GGlong const particle_id_limit, global GGEMSPrimaryParticles* primary_particle, global GGEMSSolidBoxData const* solid_box_data)
   \param particle_id_limit - particle id limit
   \param primary_particle - pointer to primary particles on OpenCL memory
   \param solid_box_data - pointer to solid box data
   \brief OpenCL kernel moving particles to solid box
-  \return no returned value
 */
-kernel void project_to_ggems_solid_box(
-  GGlong const particle_id_limit,
-  global GGEMSPrimaryParticles* primary_particle,
-  global GGEMSSolidBoxData const* solid_box_data)
+kernel void project_to_ggems_solid_box(GGlong const particle_id_limit, global GGEMSPrimaryParticles* primary_particle, global GGEMSSolidBoxData const* solid_box_data)
 {
   // Getting index of thread
   GGint global_id = get_global_id(0);

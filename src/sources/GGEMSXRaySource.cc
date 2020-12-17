@@ -28,20 +28,12 @@
   \date Tuesday October 22, 2019
 */
 
-#include <sstream>
-
 #include "GGEMS/sources/GGEMSXRaySource.hh"
 #include "GGEMS/sources/GGEMSSourceManager.hh"
-
 #include "GGEMS/maths/GGEMSGeometryTransformation.hh"
-
 #include "GGEMS/global/GGEMSManager.hh"
 #include "GGEMS/global/GGEMSConstants.hh"
-
-#include "GGEMS/tools/GGEMSTools.hh"
 #include "GGEMS/tools/GGEMSRAMManager.hh"
-
-#include "GGEMS/physics/GGEMSParticles.hh"
 #include "GGEMS/randoms/GGEMSPseudoRandomGenerator.hh"
 
 ////////////////////////////////////////////////////////////////////////////////

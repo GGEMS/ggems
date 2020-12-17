@@ -17,7 +17,7 @@
 // ************************************************************************
 
 /*!
-  \file GGEMSSolidBox.hh
+  \file GGEMSSolidBox.cc
 
   \brief GGEMS class for solid box
 

@@ -28,8 +28,6 @@
   \date Wednesday March 18, 2020
 */
 
-#include <cmath>
-
 #include "GGEMS/physics/GGEMSRangeCuts.hh"
 
 #include "GGEMS/physics/GGEMSRangeCutsManager.hh"

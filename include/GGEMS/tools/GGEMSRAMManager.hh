@@ -105,11 +105,12 @@ class GGEMS_EXPORT GGEMSRAMManager
     void PrintRAMStatus(void) const;
 
     /*!
-      \fn inline bool IsEnoughAvailableAMMemory(GGlong const& size) const
+      \fn inline bool IsEnoughAvailableRAMMemory(GGlong const& size) const
       \param size - size in bytes to allocate
+      \return true if enough available RAM memory
       \brief Checking available RAM memory on device
     */
-    inline bool IsEnoughAvailableAMMemory(GGlong const& size) const
+    inline bool IsEnoughAvailableRAMMemory(GGlong const& size) const
     {
       if (size + allocated_ram_ < max_available_ram_) return true;
       else return false;
@@ -118,6 +119,7 @@ class GGEMS_EXPORT GGEMSRAMManager
     /*!
       \fn inline bool IsBufferSizeCorrect(GGlong const& size) const
       \param size - size in bytes of buffer
+      \return true if buffer size is correct
       \brief Check the size of buffer depending on device limit, false if buffer size if too big
     */
     inline bool IsBufferSizeCorrect(GGlong const& size) const

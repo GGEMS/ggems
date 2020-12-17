@@ -41,6 +41,7 @@ class GGEMS_EXPORT GGEMSXRaySource : public GGEMSSource
 {
   public:
     /*!
+      \param source_name - name of the source
       \brief GGEMSXRaySource constructor
     */
     explicit GGEMSXRaySource(std::string const& source_name);
