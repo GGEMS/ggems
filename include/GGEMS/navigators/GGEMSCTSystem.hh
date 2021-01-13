@@ -1,5 +1,5 @@
-#ifndef GUARD_GGEMS_SYSTEMS_GGEMSCTSYSTEM_HH
-#define GUARD_GGEMS_SYSTEMS_GGEMSCTSYSTEM_HH
+#ifndef GUARD_GGEMS_NAVIGATORS_GGEMSCTSYSTEM_HH
+#define GUARD_GGEMS_NAVIGATORS_GGEMSCTSYSTEM_HH
 
 // ************************************************************************
 // * This file is part of GGEMS.                                          *
@@ -236,4 +236,4 @@ extern "C" GGEMS_EXPORT void set_threshold_ggems_ct_system(GGEMSCTSystem* ct_sys
 */
 extern "C" GGEMS_EXPORT void set_save_ggems_ct_system(GGEMSCTSystem* ct_system, char const* basename);
 
-#endif // End of GUARD_GGEMS_SYSTEMS_GGEMSSYSTEM_HH
+#endif // End of GUARD_GGEMS_NAVIGATORS_GGEMSSYSTEM_HH
