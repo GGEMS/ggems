@@ -30,4 +30,65 @@
   \date Wednesday January 13, 2021
 */
 
+#include "GGEMS/global/GGEMSExport.hh"
+
+/*!
+  \class GGEMSDosimetryCalculator
+  \brief Class providing tools storing and computing dose in phantom
+*/
+class GGEMS_EXPORT GGEMSDosimetryCalculator
+{
+  public:
+    /*!
+      \brief GGEMSDosimetryCalculator constructor
+    */
+    GGEMSDosimetryCalculator(void);
+
+    /*!
+      \brief GGEMSDosimetryCalculator destructor
+    */
+    ~GGEMSDosimetryCalculator(void);
+
+    /*!
+      \fn GGEMSDosimetryCalculator(GGEMSDosimetryCalculator const& dose_calculator) = delete
+      \param dose_calculator - reference on the GGEMS dose calculator
+      \brief Avoid copy by reference
+    */
+    GGEMSDosimetryCalculator(GGEMSDosimetryCalculator const& dose_calculator) = delete;
+
+    /*!
+      \fn GGEMSDosimetryCalculator& operator=(GGEMSDosimetryCalculator const& dose_calculator) = delete
+      \param dose_calculator - reference on the GGEMS dose calculator
+      \brief Avoid assignement by reference
+    */
+    GGEMSDosimetryCalculator& operator=(GGEMSDosimetryCalculator const& dose_calculator) = delete;
+
+    /*!
+      \fn GGEMSDosimetryCalculator(GGEMSDosimetryCalculator const&& dose_calculator) = delete
+      \param dose_calculator - rvalue reference on the GGEMS dose calculator
+      \brief Avoid copy by rvalue reference
+    */
+    GGEMSDosimetryCalculator(GGEMSDosimetryCalculator const&& dose_calculator) = delete;
+
+    /*!
+      \fn GGEMSDosimetryCalculator& operator=(GGEMSDosimetryCalculator const&& dose_calculator) = delete
+      \param dose_calculator - rvalue reference on the GGEMS dose calculator
+      \brief Avoid copy by rvalue reference
+    */
+    GGEMSDosimetryCalculator& operator=(GGEMSDosimetryCalculator const&& dose_calculator) = delete;
+
+    /*!
+      \fn void Initialize(void)
+      \brief Initialize dosimetry calculator class
+    */
+    void Initialize(void);
+
+    private:
+      /*!
+        \fn void CheckParameters(void) const
+        \return no returned value
+      */
+      void CheckParameters(void) const;
+};
+
 #endif // End of GUARD_GGEMS_NAVIGATORS_GGEMSDOSIMETRYCALCULATOR_HH
