@@ -28,6 +28,7 @@
 */
 
 #include "GGEMS/navigators/GGEMSVoxelizedPhantom.hh"
+#include "GGEMS/navigators/GGEMSDosimetryCalculator.hh"
 #include "GGEMS/geometries/GGEMSVoxelizedSolid.hh"
 #include "GGEMS/global/GGEMSManager.hh"
 
@@ -38,7 +39,10 @@
 GGEMSVoxelizedPhantom::GGEMSVoxelizedPhantom(std::string const& voxelized_phantom_name)
 : GGEMSNavigator(voxelized_phantom_name),
   voxelized_phantom_filename_(""),
-  range_data_filename_("")
+  range_data_filename_(""),
+  is_dosimetry_mode_(false),
+  dosel_sizes_({-1.0f, -1.0f, -1.0f}),
+  dosimetry_output_filename("dosimetry_output.mhd")
 {
   GGcout("GGEMSVoxelizedPhantom", "GGEMSVoxelizedPhantom", 3) << "Allocation of GGEMSVoxelizedPhantom..." << GGendl;
 }
@@ -50,6 +54,35 @@ GGEMSVoxelizedPhantom::GGEMSVoxelizedPhantom(std::string const& voxelized_phanto
 GGEMSVoxelizedPhantom::~GGEMSVoxelizedPhantom(void)
 {
   GGcout("GGEMSVoxelizedPhantom", "~GGEMSVoxelizedPhantom", 3) << "Deallocation of GGEMSVoxelizedPhantom..." << GGendl;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSVoxelizedPhantom::SetDosimetryMode(bool const& dosimetry_mode)
+{
+  is_dosimetry_mode_ = dosimetry_mode;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSVoxelizedPhantom::SetDoselSizes(float const& dosel_x, float const& dosel_y, float const& dosel_z, std::string const& unit)
+{
+  dosel_sizes_.s[0] = DistanceUnit(dosel_x, unit);
+  dosel_sizes_.s[1] = DistanceUnit(dosel_y, unit);
+  dosel_sizes_.s[2] = DistanceUnit(dosel_z, unit);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSVoxelizedPhantom::SetOutputDosimetryFilename(std::string const& output_filename)
+{
+  dosimetry_output_filename = output_filename;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -108,6 +141,12 @@ void GGEMSVoxelizedPhantom::Initialize(void)
   // Store the transformation matrix in solid object
   solids_.at(0)->GetTransformationMatrix();
 
+  // Checking if dosimetry mode activated
+  if (is_dosimetry_mode_) {
+    dose_calculator_.reset(new GGEMSDosimetryCalculator());
+    dose_calculator_->Initialize();
+  }
+
   // Initialize parent class
   GGEMSNavigator::Initialize();
 }
@@ -156,4 +195,31 @@ void set_position_ggems_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phant
 void set_rotation_ggems_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, GGfloat const rx, GGfloat const ry, GGfloat const rz, char const* unit)
 {
   voxelized_phantom->SetRotation(rx, ry, rz, unit);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void set_dosimetry_mode_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, bool const is_dosimetry_mode)
+{
+  voxelized_phantom->SetDosimetryMode(is_dosimetry_mode);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void set_dosel_size_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, GGfloat const dose_x, GGfloat const dose_y, GGfloat const dose_z, char const* unit)
+{
+  voxelized_phantom->SetDoselSizes(dose_x, dose_y, dose_z, unit);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void set_dose_output_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, char const* dose_output_filename)
+{
+  voxelized_phantom->SetOutputDosimetryFilename(dose_output_filename);
 }
