@@ -83,12 +83,12 @@ class GGEMS_EXPORT GGEMSDosimetryCalculator
     */
     void Initialize(void);
 
-    private:
+  private:
       /*!
         \fn void CheckParameters(void) const
         \return no returned value
       */
-      void CheckParameters(void) const;
+    void CheckParameters(void) const;
 };
 
 #endif // End of GUARD_GGEMS_NAVIGATORS_GGEMSDOSIMETRYCALCULATOR_HH

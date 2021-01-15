@@ -34,11 +34,15 @@ opencl_manager.set_context_index(2)
 materials_database_manager.set_materials('data/materials.txt')
 
 # ------------------------------------------------------------------------------
-# STEP 4: Phantoms and systems
+# STEP 4: Phantoms and activating dose registration
 phantom = GGEMSVoxelizedPhantom('phantom')
 phantom.set_phantom('data/phantom.mhd', 'data/range_phantom.txt')
 phantom.set_rotation(0.0, 0.0, 0.0, 'deg')
 phantom.set_position(0.0, 0.0, 0.0, 'mm')
+
+# phantom.set_dosimetry_mode(True)
+# phantom.set_dosel_size(0.5, 0.5, 0.5, 'mm')
+# phantom.set_dose_output('data/phantom_dosi.mhd')
 
 # ------------------------------------------------------------------------------
 # STEP 5: Physics

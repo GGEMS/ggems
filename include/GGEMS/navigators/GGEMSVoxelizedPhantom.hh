@@ -32,6 +32,8 @@
 
 #include "GGEMS/navigators/GGEMSNavigator.hh"
 
+class GGEMSDosimetryCalculator;
+
 /*!
   \class GGEMSVoxelizedPhantom
   \brief Child GGEMS class handling voxelized phantom
@@ -98,6 +100,30 @@ class GGEMS_EXPORT GGEMSVoxelizedPhantom : public GGEMSNavigator
     */
     void SaveResults(void) {;};
 
+    /*!
+      \fn void SetDosimetryMode(bool const& dosimetry_mode)
+      \param dosimetry_mode - boolean activating the dosimetry mode
+      \brief activating dosimetry mode for voxelized phantom
+    */
+    void SetDosimetryMode(bool const& dosimetry_mode);
+
+    /*!
+      \fn void SetDoselSizes(float const& dosel_x, float const& dosel_y, float const& dosel_z, std::string const& unit = "mm")
+      \param dosel_x - size of dosel in X global axis
+      \param dosel_y - size of dosel in Y global axis
+      \param dosel_z - size of dosel in Z global axis
+      \param unit - unit of the distance
+      \brief set size of dosels
+    */
+    void SetDoselSizes(float const& dosel_x, float const& dosel_y, float const& dosel_z, std::string const& unit = "mm");
+
+    /*!
+      \fn void SetOutputDosimetryFilename(std::string const& output_filename)
+      \param output_filename - name of output dosimetry file storing dosimetry
+      \brief set output filename storing dosimetry
+    */
+    void SetOutputDosimetryFilename(std::string const& output_filename);
+
   private:
     /*!
       \fn void CheckParameters(void) const
@@ -108,6 +134,12 @@ class GGEMS_EXPORT GGEMSVoxelizedPhantom : public GGEMSNavigator
   private:
     std::string voxelized_phantom_filename_; /*!< MHD file storing the voxelized phantom */
     std::string range_data_filename_; /*!< File for label to material matching */
+
+    // Dosimetry for voxelized phantom
+    std::unique_ptr<GGEMSDosimetryCalculator> dose_calculator_; /*!< Dose calculator pointer */
+    bool is_dosimetry_mode_; /*! Boolean checking if dosimetry mode is activated */
+    GGfloat3 dosel_sizes_; /*!< Sizes of dosel */
+    std::string dosimetry_output_filename; /*!< Output filename for dosimetry results */
 };
 
 /*!
@@ -148,5 +180,32 @@ extern "C" GGEMS_EXPORT void set_position_ggems_voxelized_phantom(GGEMSVoxelized
   \brief Set the rotation of the voxelized phantom around local axis
 */
 extern "C" GGEMS_EXPORT void set_rotation_ggems_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, GGfloat const rx, GGfloat const ry, GGfloat const rz, char const* unit);
+
+/*!
+  \fn void set_dosimetry_mode_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, bool const is_dosimetry_mode)
+  \param voxelized_phantom - pointer on voxelized phantom
+  \param is_dosimetry_mode - boolean activating the dosimetry mode
+  \brief activating dosimetry mode for voxelized phantom
+*/
+extern "C" GGEMS_EXPORT void set_dosimetry_mode_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, bool const is_dosimetry_mode);
+
+/*!
+  \fn void set_dosel_size_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, GGfloat const dose_x, GGfloat const dose_y, GGfloat const dose_z, char const* unit)
+  \param voxelized_phantom - pointer on voxelized phantom
+  \param dose_x - size of dosel in X global axis
+  \param dose_y - size of dosel in Z global axis
+  \param dose_z - size of dosel in Y global axis
+  \param unit - unit of the distance
+  \brief set size of dosels
+*/
+extern "C" GGEMS_EXPORT void set_dosel_size_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, GGfloat const dose_x, GGfloat const dose_y, GGfloat const dose_z, char const* unit);
+
+/*!
+  \fn void set_dose_output_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, char const* dose_output_filename)
+  \param voxelized_phantom - pointer on voxelized phantom
+  \param dose_output_filename - name of output dosimetry file storing dosimetry
+  \brief set output filename storing dosimetry
+*/
+extern "C" GGEMS_EXPORT void set_dose_output_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, char const* dose_output_filename);
 
 #endif // End of GUARD_GGEMS_NAVIGATORS_GGEMSVOXELIZEDPHANTOM_HH
