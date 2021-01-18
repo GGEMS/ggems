@@ -57,7 +57,7 @@ class GGEMSVoxelizedPhantom(object):
         ggems_lib.set_dosimetry_mode_voxelized_phantom(self.obj, mode)
 
     def set_dosel_size(self, dose_x, dose_y, dose_z, unit):
-        ggems_lib.set_dosel_size_voxelized_phantom(self.obj, rx, ry, rz, unit.encode('ASCII'))
+        ggems_lib.set_dosel_size_voxelized_phantom(self.obj, dose_x, dose_y, dose_z, unit.encode('ASCII'))
 
     def set_dose_output(self, output):
-        ggems_lib.set_dose_output_voxelized_phantom(self.obj, output)
+        ggems_lib.set_dose_output_voxelized_phantom(self.obj, output.encode('ASCII'))

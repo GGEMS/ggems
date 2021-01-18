@@ -30,7 +30,14 @@
   \date Wednesday January 13, 2021
 */
 
+#ifdef _MSC_VER
+#pragma warning(disable: 4251) // Deleting warning exporting STL members!!!
+#endif
+
 #include "GGEMS/global/GGEMSExport.hh"
+#include "GGEMS/tools/GGEMSTypes.hh"
+
+class GGEMSNavigator;
 
 /*!
   \class GGEMSDosimetryCalculator
@@ -42,7 +49,7 @@ class GGEMS_EXPORT GGEMSDosimetryCalculator
     /*!
       \brief GGEMSDosimetryCalculator constructor
     */
-    GGEMSDosimetryCalculator(void);
+    GGEMSDosimetryCalculator();
 
     /*!
       \brief GGEMSDosimetryCalculator destructor
@@ -83,12 +90,39 @@ class GGEMS_EXPORT GGEMSDosimetryCalculator
     */
     void Initialize(void);
 
+    /*!
+      \fn void SetDoselSizes(GGfloat3 const& dosel_sizes)
+      \param dosel_sizes - size of dosels in X, Y and Z in global axis
+      \brief set size of dosels
+    */
+    void SetDoselSizes(GGfloat3 const& dosel_sizes);
+
+    /*!
+      \fn void SetOutputDosimetryFilename(std::string const& output_filename)
+      \param output_filename - name of output dosimetry file storing dosimetry
+      \brief set output filename storing dosimetry
+    */
+    void SetOutputDosimetryFilename(std::string const& output_filename);
+
+    /*!
+      \fn void SetNavigator(std::string const& navigator_name)
+      \param navigator_name - name of navigator associated to dosimetry object
+      \brief set navigator associated to dosimetry object
+    */
+    void SetNavigator(std::string const& navigator_name);
+
   private:
       /*!
         \fn void CheckParameters(void) const
         \return no returned value
       */
     void CheckParameters(void) const;
+
+  private:
+    GGfloat3 dosel_sizes_; /*!< Sizes of dosel */
+    std::string dosimetry_output_filename; /*!< Output filename for dosimetry results */
+    std::unique_ptr<cl::Buffer> dose_params_; /*!< Buffer storing dose parameters in OpenCL device */
+    std::shared_ptr<GGEMSNavigator> navigator_; /*!< Navigator pointer associated to dosimetry object */
 };
 
 #endif // End of GUARD_GGEMS_NAVIGATORS_GGEMSDOSIMETRYCALCULATOR_HH

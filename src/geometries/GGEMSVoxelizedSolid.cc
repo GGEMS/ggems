@@ -132,6 +132,28 @@ void GGEMSVoxelizedSolid::GetTransformationMatrix(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+GGfloat3 GGEMSVoxelizedSolid::GetVoxelSizes(void) const
+{
+  // Get the OpenCL manager
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+
+  GGEMSVoxelizedSolidData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSVoxelizedSolidData>(solid_data_cl_.get(), sizeof(GGEMSVoxelizedSolidData));
+
+  GGfloat3 voxel_sizes = {
+    solid_data_device->voxel_sizes_xyz_[0],
+    solid_data_device->voxel_sizes_xyz_[1],
+    solid_data_device->voxel_sizes_xyz_[2]
+  };
+
+  opencl_manager.ReleaseDeviceBuffer(solid_data_cl_.get(), solid_data_device);
+
+  return voxel_sizes;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 // void GGEMSVoxelizedSolid::TrackThroughSolid(std::weak_ptr<GGEMSCrossSections> cross_sections, std::weak_ptr<GGEMSMaterials> materials)
 // {
   // Getting the OpenCL manager

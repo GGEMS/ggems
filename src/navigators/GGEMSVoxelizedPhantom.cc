@@ -141,14 +141,17 @@ void GGEMSVoxelizedPhantom::Initialize(void)
   // Store the transformation matrix in solid object
   solids_.at(0)->GetTransformationMatrix();
 
+  // Initialize parent class
+  GGEMSNavigator::Initialize();
+
   // Checking if dosimetry mode activated
   if (is_dosimetry_mode_) {
     dose_calculator_.reset(new GGEMSDosimetryCalculator());
+    dose_calculator_->SetOutputDosimetryFilename(dosimetry_output_filename);
+    dose_calculator_->SetDoselSizes(dosel_sizes_);
+    dose_calculator_->SetNavigator(navigator_name_);
     dose_calculator_->Initialize();
   }
-
-  // Initialize parent class
-  GGEMSNavigator::Initialize();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
