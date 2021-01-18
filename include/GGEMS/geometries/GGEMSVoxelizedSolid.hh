@@ -107,6 +107,13 @@ class GGEMS_EXPORT GGEMSVoxelizedSolid : public GGEMSSolid
     */
     void GetTransformationMatrix(void) override;
 
+    /*!
+      \fn GGfloat3 GetVoxelSizes(void) const
+      \return size of voxels in voxelized solid
+      \brief get the size of voxels in voxelized solid
+    */
+    GGfloat3 GetVoxelSizes(void) const;
+
   private:
     /*!
       \fn template <typename T> void ConvertImageToLabel(std::string const& raw_data_filename, std::string const& range_data_filename, std::weak_ptr<GGEMSMaterials> materials)

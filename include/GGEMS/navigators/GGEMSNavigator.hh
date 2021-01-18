@@ -140,6 +140,13 @@ class GGEMS_EXPORT GGEMSNavigator
     inline std::size_t GetNumberOfSolids(void) const {return solids_.size();}
 
     /*!
+      \fn inline std::vector<std::shared_ptr<GGEMSSolid>> GetSolids(void) const
+      \brief get the list of solids
+      \return the list of solids
+    */
+    inline std::vector<std::shared_ptr<GGEMSSolid>> GetSolids(void) const {return solids_;}
+
+    /*!
       \fn inline std::weak_ptr<GGEMSMaterials> GetMaterials(void) const
       \brief get the pointer on materials
       \return the pointer on materials

@@ -20,11 +20,11 @@ from ggems import *
 
 # ------------------------------------------------------------------------------
 # STEP 0: Level of verbosity during computation
-GGEMSVerbosity(1)
+GGEMSVerbosity(3)
 
 # ------------------------------------------------------------------------------
 # STEP 1: Choosing an OpenCL context
-opencl_manager.set_context_index(2)
+opencl_manager.set_context_index(0)
 
 # ------------------------------------------------------------------------------
 # STEP 2: Visualization
@@ -40,9 +40,11 @@ phantom.set_phantom('data/phantom.mhd', 'data/range_phantom.txt')
 phantom.set_rotation(0.0, 0.0, 0.0, 'deg')
 phantom.set_position(0.0, 0.0, 0.0, 'mm')
 
-# phantom.set_dosimetry_mode(True)
-# phantom.set_dosel_size(0.5, 0.5, 0.5, 'mm')
-# phantom.set_dose_output('data/phantom_dosi.mhd')
+
+# FAIRE UNE DOSIMETRY A PART !!! et la transmettre au phantom
+phantom.set_dosimetry_mode(True)
+#phantom.set_dosel_size(0.5, 0.5, 0.5, 'mm')
+phantom.set_dose_output('data/phantom_dosi')
 
 # ------------------------------------------------------------------------------
 # STEP 5: Physics
