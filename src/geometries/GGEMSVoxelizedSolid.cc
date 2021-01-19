@@ -36,7 +36,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSVoxelizedSolid::GGEMSVoxelizedSolid(std::string const& volume_header_filename, std::string const& range_filename)
+GGEMSVoxelizedSolid::GGEMSVoxelizedSolid(std::string const& volume_header_filename, std::string const& range_filename, std::string const& data_reg_type)
 : GGEMSSolid(),
   volume_header_filename_(volume_header_filename),
   range_filename_(range_filename)
@@ -56,6 +56,21 @@ GGEMSVoxelizedSolid::GGEMSVoxelizedSolid(std::string const& volume_header_filena
       {0.0f, 0.0f, 1.0f}
     }
   );
+
+  // Checking format registration
+  data_reg_type_ = data_reg_type;
+  if (data_reg_type == "DOSIMETRY") {
+    kernel_option_ += " -DDOSIMETRY";
+  }
+  else {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "False registration type name!!!" << std::endl;
+    oss << "Registration type is :" << std::endl;
+    oss << "    - DOSIMETRY" << std::endl;
+    //oss << "    - LISTMODE" << std::endl;
+    //oss << "    - HISTOGRAM" << std::endl;
+    GGEMSMisc::ThrowException("GGEMSVoxelizedSolid", "GGEMSVoxelizedSolid", oss.str());
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -148,6 +163,24 @@ GGfloat3 GGEMSVoxelizedSolid::GetVoxelSizes(void) const
   opencl_manager.ReleaseDeviceBuffer(solid_data_cl_.get(), solid_data_device);
 
   return voxel_sizes;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+GGEMSOBB GGEMSVoxelizedSolid::GetOBBGeometry(void) const
+{
+  // Get the OpenCL manager
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+
+  GGEMSVoxelizedSolidData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSVoxelizedSolidData>(solid_data_cl_.get(), sizeof(GGEMSVoxelizedSolidData));
+
+  GGEMSOBB obb_geometry = solid_data_device->obb_geometry_;
+
+  opencl_manager.ReleaseDeviceBuffer(solid_data_cl_.get(), solid_data_device);
+
+  return obb_geometry;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

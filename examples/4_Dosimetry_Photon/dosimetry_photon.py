@@ -43,7 +43,7 @@ phantom.set_position(0.0, 0.0, 0.0, 'mm')
 
 # FAIRE UNE DOSIMETRY A PART !!! et la transmettre au phantom
 phantom.set_dosimetry_mode(True)
-#phantom.set_dosel_size(0.5, 0.5, 0.5, 'mm')
+phantom.set_dosel_size(1.0, 1.0, 1.0, 'mm')
 phantom.set_dose_output('data/phantom_dosi')
 
 # ------------------------------------------------------------------------------

@@ -36,6 +36,7 @@
 
 #include "GGEMS/global/GGEMSExport.hh"
 #include "GGEMS/tools/GGEMSTypes.hh"
+#include "GGEMS/navigators/GGEMSDoseRecording.hh"
 
 class GGEMSNavigator;
 
@@ -121,8 +122,13 @@ class GGEMS_EXPORT GGEMSDosimetryCalculator
   private:
     GGfloat3 dosel_sizes_; /*!< Sizes of dosel */
     std::string dosimetry_output_filename; /*!< Output filename for dosimetry results */
-    std::unique_ptr<cl::Buffer> dose_params_; /*!< Buffer storing dose parameters in OpenCL device */
     std::shared_ptr<GGEMSNavigator> navigator_; /*!< Navigator pointer associated to dosimetry object */
+
+    // Buffer storing dose data on OpenCL device and host
+    std::unique_ptr<cl::Buffer> dose_params_; /*!< Buffer storing dose parameters in OpenCL device */
+    GGEMSDoseRecording dose_recording_; /*!< Structure storing dose data on OpenCL device */
+    std::vector<GGfloat> dose_values_; /*!< Buffer storing dose value */
+    std::vector<GGfloat> uncertainty_values_; /*!< Buffer storing uncertainty values */
 };
 
 #endif // End of GUARD_GGEMS_NAVIGATORS_GGEMSDOSIMETRYCALCULATOR_HH

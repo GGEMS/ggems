@@ -45,13 +45,8 @@ typedef struct GGEMSDoseParams_t
   GGfloat3 inv_size_of_dosels_; /*!< Inverse of dosel sizes */
   GGint total_number_of_dosels_; /*!< Total number of dosels */
   GGint slice_number_of_dosels_; /*!< Number of dosels per slice */
-
-  // // Offset
-  // f32xyz offset;
-  // // Volume Of Interest
-  // f32 xmin, xmax;
-  // f32 ymin, ymax;
-  // f32 zmin, zmax;
+  GGfloat3 border_min_xyz_; /*!< Border min. of matrix of dosels */
+  GGfloat3 border_max_xyz_; /*!< Border max. of matrix of dosels */
 } GGEMSDoseParams; /*!< Using C convention name of struct to C++ (_t deletion) */
 #pragma pack(pop)
 

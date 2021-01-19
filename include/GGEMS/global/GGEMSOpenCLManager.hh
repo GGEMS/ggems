@@ -237,6 +237,14 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     void Deallocate(std::shared_ptr<cl::Buffer> buffer, std::size_t size);
 
     /*!
+      \fn void Clean(std::shared_ptr<cl::Buffer> buffer, std::size_t size)
+      \param buffer - pointer to buffer in host memory
+      \param size - size of the buffer in bytes
+      \brief Cleaning buffer on OpenCL device
+    */
+    void Clean(std::shared_ptr<cl::Buffer> buffer, std::size_t size);
+
+    /*!
       \return the pointer on host memory on write/read mode
       \brief Get the device pointer on host to write on it. ReleaseDeviceBuffer must be used after this method!!!
       \param device_ptr - pointer on device memory

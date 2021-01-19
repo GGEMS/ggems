@@ -203,8 +203,7 @@ void GGEMSCTSystem::Initialize(void)
 
   // Creating all solids, solid box for CT
   GGint number_of_solids = number_of_modules_xy_.x * number_of_modules_xy_.y;
-  for (GGint i = 0; i < number_of_solids; ++i) {
-    // In CT system only "HISTOGRAM"
+  for (GGint i = 0; i < number_of_solids; ++i) { // In CT system only "HISTOGRAM"
     solids_.emplace_back(new GGEMSSolidBox(
       number_of_detection_elements_inside_module_xyz_.x,
       number_of_detection_elements_inside_module_xyz_.y,

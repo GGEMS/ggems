@@ -46,7 +46,7 @@ class GGEMS_EXPORT GGEMSVoxelizedSolid : public GGEMSSolid
       \param range_filename - file with range value
       \brief GGEMSVoxelizedSolid constructor
     */
-    GGEMSVoxelizedSolid(std::string const& volume_header_filename, std::string const& range_filename);
+    GGEMSVoxelizedSolid(std::string const& volume_header_filename, std::string const& range_filename, std::string const& data_reg_type = "");
 
     /*!
       \brief GGEMSVoxelizedSolid destructor
@@ -113,6 +113,13 @@ class GGEMS_EXPORT GGEMSVoxelizedSolid : public GGEMSSolid
       \brief get the size of voxels in voxelized solid
     */
     GGfloat3 GetVoxelSizes(void) const;
+
+    /*!
+      \fn GGEMSOBB GetOBBGeometry(void) const
+      \return OBB params for the object
+      \brief return the parameters about OBB geometry
+    */
+    GGEMSOBB GetOBBGeometry(void) const;
 
   private:
     /*!
