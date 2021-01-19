@@ -57,6 +57,9 @@ GGEMSDosimetryCalculator::GGEMSDosimetryCalculator(void)
 GGEMSDosimetryCalculator::~GGEMSDosimetryCalculator(void)
 {
   GGcout("GGEMSDosimetryCalculator", "~GGEMSDosimetryCalculator", 3) << "Deallocation of GGEMSDosimetryCalculator..." << GGendl;
+
+  dose_values_.clear();
+  uncertainty_values_.clear();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -119,137 +122,74 @@ void GGEMSDosimetryCalculator::Initialize(void)
   // Get pointer on OpenCL device for dose parameters
   GGEMSDoseParams* dose_params_device = opencl_manager.GetDeviceBuffer<GGEMSDoseParams>(dose_params_.get(), sizeof(GGEMSDoseParams));
 
+  // Get the voxels size
+  GGfloat3 voxel_sizes = dosel_sizes_;
   if (dosel_sizes_.x < 0.0f && dosel_sizes_.y < 0.0f && dosel_sizes_.z < 0.0f) { // Custom dosel size
-    GGfloat3 voxel_sizes = dynamic_cast<GGEMSVoxelizedSolid*>(navigator_->GetSolids().at(0).get())->GetVoxelSizes();
-    dose_params_device->size_of_dosels_ = voxel_sizes;
-    dose_params_device->inv_size_of_dosels_ = {
-      1.0f / voxel_sizes.x,
-      1.0f / voxel_sizes.y,
-      1.0f / voxel_sizes.z
-    };
+    voxel_sizes = dynamic_cast<GGEMSVoxelizedSolid*>(navigator_->GetSolids().at(0).get())->GetVoxelSizes();
   }
-  else { // Dosel size = voxel size
-    dose_params_device->size_of_dosels_ = dosel_sizes_;
-    dose_params_device->inv_size_of_dosels_ = {
-      1.0f / dosel_sizes_.x,
-      1.0f / dosel_sizes_.y,
-      1.0f / dosel_sizes_.z
-    };
-  }
+
+  // Storing voxel size
+  dose_params_device->size_of_dosels_ = voxel_sizes;
+
+  // Take inverse of size
+  dose_params_device->inv_size_of_dosels_ = {
+    1.0f / voxel_sizes.x,
+    1.0f / voxel_sizes.y,
+    1.0f / voxel_sizes.z
+  };
+
+  // Get border of volumes from phantom
+  GGEMSOBB obb_geometry = dynamic_cast<GGEMSVoxelizedSolid*>(navigator_->GetSolids().at(0).get())->GetOBBGeometry();
+  dose_params_device->border_min_xyz_ = {
+    obb_geometry.border_min_xyz_[0],
+    obb_geometry.border_min_xyz_[1],
+    obb_geometry.border_min_xyz_[2]
+  };
+  dose_params_device->border_max_xyz_ = {
+    obb_geometry.border_max_xyz_[0],
+    obb_geometry.border_max_xyz_[1],
+    obb_geometry.border_max_xyz_[2]
+  };
+
+  // Get the size of the dose map
+  GGfloat3 dosemap_size = {
+    obb_geometry.border_max_xyz_[0] - obb_geometry.border_min_xyz_[0],
+    obb_geometry.border_max_xyz_[1] - obb_geometry.border_min_xyz_[1],
+    obb_geometry.border_max_xyz_[2] - obb_geometry.border_min_xyz_[2],
+  };
+
+  // Get the number of voxels
+  GGint3 number_of_dosels = {
+    static_cast<int>(floor(dosemap_size.x / voxel_sizes.x)),
+    static_cast<int>(floor(dosemap_size.y / voxel_sizes.y)),
+    static_cast<int>(floor(dosemap_size.z / voxel_sizes.z))
+  };
+
+  dose_params_device->number_of_dosels_ = number_of_dosels;
+  dose_params_device->slice_number_of_dosels_ = number_of_dosels.x * number_of_dosels.y;
+  GGint total_number_of_dosels = number_of_dosels.x * number_of_dosels.y * number_of_dosels.z;
+  dose_params_device->total_number_of_dosels_ = number_of_dosels.x * number_of_dosels.y * number_of_dosels.z;
 
   // Release the pointer
   opencl_manager.ReleaseDeviceBuffer(dose_params_.get(), dose_params_device);
 
-  //std::cout << dosel_sizes_.x << " " << dosel_sizes_.y << " " << dosel_sizes_.z << std::endl;
+  // Allocated buffers storing dose on OpenCL device
+  dose_recording_.edep_ = opencl_manager.Allocate(nullptr, total_number_of_dosels*sizeof(GGdouble), CL_MEM_READ_WRITE);
+  dose_recording_.edep_squared_ = opencl_manager.Allocate(nullptr, total_number_of_dosels*sizeof(GGdouble), CL_MEM_READ_WRITE);
+  dose_recording_.hit_ = opencl_manager.Allocate(nullptr, total_number_of_dosels*sizeof(GGint), CL_MEM_READ_WRITE);
+  dose_recording_.photon_tracking_ = opencl_manager.Allocate(nullptr, total_number_of_dosels*sizeof(GGint), CL_MEM_READ_WRITE);
 
-/*
-    /// Compute dosemap parameters /////////////////////////////
+  // Set buffer to zero
+  opencl_manager.Clean(dose_recording_.edep_, total_number_of_dosels*sizeof(GGdouble));
+  opencl_manager.Clean(dose_recording_.edep_squared_, total_number_of_dosels*sizeof(GGdouble));
+  opencl_manager.Clean(dose_recording_.hit_, total_number_of_dosels*sizeof(GGint));
+  opencl_manager.Clean(dose_recording_.photon_tracking_, total_number_of_dosels*sizeof(GGint));
 
-    // Select a doxel size
-    if ( m_dosel_size.x > 0.0 && m_dosel_size.y > 0.0 && m_dosel_size.z > 0.0 )
-    {
-        h_dose->dosel_size = m_dosel_size;
-        h_dose->inv_dosel_size = fxyz_inv( m_dosel_size );
-    }
-    else
-    {
-        h_dose->dosel_size = make_f32xyz( m_phantom.h_volume->spacing_x,
-                                       m_phantom.h_volume->spacing_y,
-                                       m_phantom.h_volume->spacing_z );
-        h_dose->inv_dosel_size = fxyz_inv( h_dose->dosel_size );
-    }*/
+  // Allocating vectors
+  dose_values_.resize(total_number_of_dosels);
+  uncertainty_values_.resize(total_number_of_dosels);
 
-/*
-    // Compute min-max volume of interest
-    f32xyz phan_size = make_f32xyz( m_phantom.h_volume->nb_vox_x * m_phantom.h_volume->spacing_x,
-                                    m_phantom.h_volume->nb_vox_y * m_phantom.h_volume->spacing_y,
-                                    m_phantom.h_volume->nb_vox_z * m_phantom.h_volume->spacing_z );
-    f32xyz half_phan_size = fxyz_scale( phan_size, 0.5f );
-    f32 phan_xmin = -half_phan_size.x; f32 phan_xmax = half_phan_size.x;
-    f32 phan_ymin = -half_phan_size.y; f32 phan_ymax = half_phan_size.y;
-    f32 phan_zmin = -half_phan_size.z; f32 phan_zmax = half_phan_size.z;
-    */
-
-    // Select a min-max VOI
- /*   if ( !m_xmin && !m_xmax && !m_ymin && !m_ymax && !m_zmin && !m_zmax )
-    {
-        h_dose->xmin = m_phantom.h_volume->xmin;
-        h_dose->xmax = m_phantom.h_volume->xmax;
-        h_dose->ymin = m_phantom.h_volume->ymin;
-        h_dose->ymax = m_phantom.h_volume->ymax;
-        h_dose->zmin = m_phantom.h_volume->zmin;
-        h_dose->zmax = m_phantom.h_volume->zmax;
-    }
-    else
-    {
-        h_dose->xmin = m_xmin;
-        h_dose->xmax = m_xmax;
-        h_dose->ymin = m_ymin;
-        h_dose->ymax = m_ymax;
-        h_dose->zmin = m_zmin;
-        h_dose->zmax = m_zmax;
-    }
-
-    // Get the current dimension of the dose map
-    f32xyz cur_dose_size = make_f32xyz( h_dose->xmax - h_dose->xmin,
-                                        h_dose->ymax - h_dose->ymin,
-                                        h_dose->zmax - h_dose->zmin );
-
-    // New nb of voxels
-    h_dose->nb_dosels.x = floor( cur_dose_size.x / h_dose->dosel_size.x );
-    h_dose->nb_dosels.y = floor( cur_dose_size.y / h_dose->dosel_size.y );
-    h_dose->nb_dosels.z = floor( cur_dose_size.z / h_dose->dosel_size.z );
-    h_dose->slice_nb_dosels = h_dose->nb_dosels.x * h_dose->nb_dosels.y;
-    h_dose->tot_nb_dosels = h_dose->slice_nb_dosels * h_dose->nb_dosels.z;
-
-    // Compute the new size (due to integer nb of doxels)
-    f32xyz new_dose_size = fxyz_mul( h_dose->dosel_size, cast_ui32xyz_to_f32xyz( h_dose->nb_dosels ) );
-
-    if ( new_dose_size.x <= 0.0 || new_dose_size.y <= 0.0 || new_dose_size.z <= 0.0 )
-    {
-        GGcerr << "Dosemap dimension: "
-               << new_dose_size.x << " "
-               << new_dose_size.y << " "
-               << new_dose_size.z << GGendl;
-        exit_simulation();
-    }
-
-    // Compute new min and max after voxel alignment // TODO: Check here, offset is not considered? - JB
-    f32xyz half_delta_size = fxyz_scale( fxyz_sub( cur_dose_size, new_dose_size ), 0.5f );
-
-    h_dose->xmin += half_delta_size.x;
-    h_dose->xmax -= half_delta_size.x;
-
-    h_dose->ymin += half_delta_size.y;
-    h_dose->ymax -= half_delta_size.y;
-
-    h_dose->zmin += half_delta_size.z;
-    h_dose->zmax -= half_delta_size.z;
-
-    // Get the new offset
-    h_dose->offset.x = m_phantom.h_volume->off_x - ( h_dose->xmin - m_phantom.h_volume->xmin );
-    h_dose->offset.y = m_phantom.h_volume->off_y - ( h_dose->ymin - m_phantom.h_volume->ymin );
-    h_dose->offset.z = m_phantom.h_volume->off_z - ( h_dose->zmin - m_phantom.h_volume->zmin );
-
-    // Init dose map
-    h_dose->edep = (f64*)malloc( h_dose->tot_nb_dosels*sizeof(f64) );
-    h_dose->edep_squared = (f64*)malloc( h_dose->tot_nb_dosels*sizeof(f64) );
-    h_dose->number_of_hits = (ui32*)malloc( h_dose->tot_nb_dosels*sizeof(ui32) );
-    ui32 i=0; while (i < h_dose->tot_nb_dosels)
-    {
-        h_dose->edep[i] = 0.0;
-        h_dose->edep_squared[i] = 0.0;
-        h_dose->number_of_hits[i] = 0;
-        ++i;
-    }
-
-    //////////////////////////////////////////////////////////
-
-    // Host allocation
-    m_dose_values = (f32*)malloc( h_dose->tot_nb_dosels * sizeof(f32) );
-    m_uncertainty_values = (f32*)malloc( h_dose->tot_nb_dosels * sizeof(f32) );
-
-    // Device allocation and copy
-    m_copy_dosemap_to_gpu();
-*/
+  // Set vector to zero
+  std::fill(dose_values_.begin(), dose_values_.end(), 0.0f);
+  std::fill(uncertainty_values_.begin(), uncertainty_values_.end(), 0.0f);
 }

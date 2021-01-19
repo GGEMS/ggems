@@ -898,6 +898,18 @@ void GGEMSOpenCLManager::Deallocate(std::shared_ptr<cl::Buffer> buffer, std::siz
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+void GGEMSOpenCLManager::Clean(std::shared_ptr<cl::Buffer> buffer, std::size_t size)
+{
+  GGcout("GGEMSOpenCLManager","Clean", 3) << "Cleaning OpenCL device memory..." << GGendl;
+
+  GGint error = queue_act_->enqueueFillBuffer(*buffer.get(), 0, 0, size, nullptr, nullptr);
+  CheckOpenCLError(error, "GGEMSOpenCLManager", "Clean");
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 void GGEMSOpenCLManager::CheckOpenCLError(GGint const& error, std::string const& class_name, std::string const& method_name) const
 {
   if (error != CL_SUCCESS) GGEMSMisc::ThrowException(class_name, method_name, ErrorType(error));

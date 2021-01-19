@@ -119,7 +119,12 @@ void GGEMSVoxelizedPhantom::Initialize(void)
   CheckParameters();
 
   // Initializing voxelized solid for geometric navigation
-  solids_.emplace_back(new GGEMSVoxelizedSolid(voxelized_phantom_filename_, range_data_filename_));
+  if (is_dosimetry_mode_) {
+    solids_.emplace_back(new GGEMSVoxelizedSolid(voxelized_phantom_filename_, range_data_filename_, "DOSIMETRY"));
+  }
+  else {
+    solids_.emplace_back(new GGEMSVoxelizedSolid(voxelized_phantom_filename_, range_data_filename_));
+  }
 
   // Enabling tracking if necessary
   if (GGEMSManager::GetInstance().IsTrackingVerbose()) solids_.at(0)->EnableTracking();

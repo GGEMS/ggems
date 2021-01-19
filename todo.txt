@@ -26,6 +26,6 @@
 
 - Dans CT ajouter le gap angulaire
 
-- Faire en sorte que les kernels soient compilé une seule fois
-
 - Revoir le OpenCL manager concernant les context/device et aussi une facon plus simple pour faire le multi-Architecture
+
+- Vérifier le double
