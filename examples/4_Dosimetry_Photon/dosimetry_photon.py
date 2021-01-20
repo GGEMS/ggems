@@ -20,7 +20,7 @@ from ggems import *
 
 # ------------------------------------------------------------------------------
 # STEP 0: Level of verbosity during computation
-GGEMSVerbosity(3)
+GGEMSVerbosity(1)
 
 # ------------------------------------------------------------------------------
 # STEP 1: Choosing an OpenCL context
@@ -43,8 +43,9 @@ phantom.set_position(0.0, 0.0, 0.0, 'mm')
 
 # FAIRE UNE DOSIMETRY A PART !!! et la transmettre au phantom
 phantom.set_dosimetry_mode(True)
-phantom.set_dosel_size(1.0, 1.0, 1.0, 'mm')
+phantom.set_dosel_size(0.5, 0.5, 0.5, 'mm')
 phantom.set_dose_output('data/phantom_dosi')
+phantom.dose_photon_tracking(True)
 
 # ------------------------------------------------------------------------------
 # STEP 5: Physics
@@ -65,10 +66,10 @@ range_cuts_manager.set_cut('gamma', 0.1, 'mm', 'all')
 # STEP 7: Source
 point_source = GGEMSXRaySource('point_source')
 point_source.set_source_particle_type('gamma')
-point_source.set_number_of_particles(10)
+point_source.set_number_of_particles(100000000)
 point_source.set_position(-595.0, 0.0, 0.0, 'mm')
 point_source.set_rotation(0.0, 0.0, 0.0, 'deg')
-point_source.set_beam_aperture(12.5, 'deg')
+point_source.set_beam_aperture(10.0, 'deg')
 point_source.set_focal_spot_size(0.0, 0.0, 0.0, 'mm')
 point_source.set_polyenergy('data/spectrum_120kVp_2mmAl.dat')
 

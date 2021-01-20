@@ -54,9 +54,9 @@
   \param histogram - pointer to buffer storing histogram
   \brief OpenCL kernel tracking particles within voxelized solid
 */
-kernel void track_through_ggems_solid_box(GGlong const particle_id_limit, global GGEMSPrimaryParticles* primary_particle, global GGEMSRandom* random, global GGEMSSolidBoxData const* solid_box_data, global GGshort const* label_data, global GGEMSParticleCrossSections const* particle_cross_sections, global GGEMSMaterialTables const* materials, GGfloat const threshold,
+kernel void track_through_ggems_solid_box(GGlong const particle_id_limit, global GGEMSPrimaryParticles* primary_particle, global GGEMSRandom* random, global GGEMSSolidBoxData const* solid_box_data, global GGshort const* label_data, global GGEMSParticleCrossSections const* particle_cross_sections, global GGEMSMaterialTables const* materials, GGfloat const threshold
   #ifdef HISTOGRAM
-  global GGint* histogram
+  ,global GGint* histogram
   #endif
 )
 {
@@ -209,17 +209,16 @@ kernel void track_through_ggems_solid_box(GGlong const particle_id_limit, global
     primary_particle->py_[global_id] = local_position.y;
     primary_particle->pz_[global_id] = local_position.z;
 
-    // Storing direction in local
-    primary_particle->dx_[global_id] = local_direction.x;
-    primary_particle->dy_[global_id] = local_direction.y;
-    primary_particle->dz_[global_id] = local_direction.z;
-
     // Check thresold
     if (primary_particle->E_[global_id] < threshold) primary_particle->status_[global_id] = DEAD;
 
     // Resolve process if different of TRANSPORTATION
     if (next_discrete_process != TRANSPORTATION) {
       PhotonDiscreteProcess(primary_particle, random, materials, particle_cross_sections, 0, global_id);
+
+      local_direction.x = primary_particle->dx_[global_id];
+      local_direction.y = primary_particle->dy_[global_id];
+      local_direction.z = primary_particle->dz_[global_id];
 
       #ifdef HISTOGRAM
       if (next_discrete_process == PHOTOELECTRIC_EFFECT || next_discrete_process == COMPTON_SCATTERING) {

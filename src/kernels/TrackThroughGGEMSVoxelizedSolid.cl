@@ -41,6 +41,10 @@
 #include "GGEMS/maths/GGEMSMatrixOperations.hh"
 #include "GGEMS/navigators/GGEMSPhotonNavigator.hh"
 
+#ifdef DOSIMETRY
+#include "GGEMS/navigators/GGEMSDoseRecording.hh"
+#endif
+
 /*!
   \fn kernel void track_through_ggems_voxelized_solid(GGlong const particle_id_limit, global GGEMSPrimaryParticles* primary_particle, global GGEMSRandom* random, global GGEMSVoxelizedSolidData const* voxelized_solid_data, global GGshort const* label_data, global GGEMSParticleCrossSections const* particle_cross_sections, global GGEMSMaterialTables const* materials, GGfloat const threshold)
   \param particle_id_limit - particle id limit
@@ -53,7 +57,12 @@
   \param threshold - energy threshold
   \brief OpenCL kernel tracking particles within voxelized solid
 */
-kernel void track_through_ggems_voxelized_solid(GGlong const particle_id_limit, global GGEMSPrimaryParticles* primary_particle, global GGEMSRandom* random, global GGEMSVoxelizedSolidData const* voxelized_solid_data, global GGshort const* label_data, global GGEMSParticleCrossSections const* particle_cross_sections, global GGEMSMaterialTables const* materials, GGfloat const threshold)
+kernel void track_through_ggems_voxelized_solid(GGlong const particle_id_limit, global GGEMSPrimaryParticles* primary_particle, global GGEMSRandom* random, global GGEMSVoxelizedSolidData const* voxelized_solid_data, global GGshort const* label_data, global GGEMSParticleCrossSections const* particle_cross_sections, global GGEMSMaterialTables const* materials, GGfloat const threshold
+  #ifdef DOSIMETRY
+  ,global GGEMSDoseParams* dose_params,
+  global GGint* photon_tracking
+  #endif
+)
 {
   // Getting index of thread
   GGint global_id = get_global_id(0);
@@ -158,6 +167,9 @@ kernel void track_through_ggems_voxelized_solid(GGlong const particle_id_limit, 
     if (distance_to_next_boundary <= next_interaction_distance) {
       next_interaction_distance = distance_to_next_boundary + GEOMETRY_TOLERANCE;
       next_discrete_process = TRANSPORTATION;
+      #ifdef DOSIMETRY
+      dose_photon_tracking(dose_params, photon_tracking, &local_position);
+      #endif
     }
 
     #ifdef GGEMS_TRACKING
@@ -193,7 +205,7 @@ kernel void track_through_ggems_voxelized_solid(GGlong const particle_id_limit, 
     }
     #endif
 
-    // Moving particle to next postion
+    // Moving particle to next position
     local_position = local_position + local_direction*next_interaction_distance;
 
     // Get safety position of particle to be sure particle is outside voxel
@@ -220,19 +232,19 @@ kernel void track_through_ggems_voxelized_solid(GGlong const particle_id_limit, 
     primary_particle->py_[global_id] = local_position.y;
     primary_particle->pz_[global_id] = local_position.z;
 
-    // Storing direction in local
-    primary_particle->dx_[global_id] = local_direction.x;
-    primary_particle->dy_[global_id] = local_direction.y;
-    primary_particle->dz_[global_id] = local_direction.z;
-
     // Resolve process if different of TRANSPORTATION
     if (next_discrete_process != TRANSPORTATION) {
       PhotonDiscreteProcess(primary_particle, random, materials, particle_cross_sections, material_id, global_id);
+
+      local_direction.x = primary_particle->dx_[global_id];
+      local_direction.y = primary_particle->dy_[global_id];
+      local_direction.z = primary_particle->dz_[global_id];
     }
 
     // Apply threshold
-    //printf("Energy: %e, threshold: %e\n", primary_particle->E_[global_id], materials->photon_energy_cut_[material_id]);
-
+    if (primary_particle->E_[global_id] <= materials->photon_energy_cut_[material_id]) {
+      primary_particle->status_[global_id] = DEAD;
+    }
   } while (primary_particle->status_[global_id] == ALIVE);
 
   // Storing final state
