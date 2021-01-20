@@ -32,8 +32,6 @@
 
 #include "GGEMS/navigators/GGEMSNavigator.hh"
 
-class GGEMSDosimetryCalculator;
-
 /*!
   \class GGEMSVoxelizedPhantom
   \brief Child GGEMS class handling voxelized phantom
@@ -98,7 +96,7 @@ class GGEMS_EXPORT GGEMSVoxelizedPhantom : public GGEMSNavigator
       \fn void SaveResults
       \brief save all results from solid
     */
-    void SaveResults(void) {;};
+    void SaveResults(void) override;
 
     /*!
       \fn void SetDosimetryMode(bool const& dosimetry_mode)
@@ -124,6 +122,13 @@ class GGEMS_EXPORT GGEMSVoxelizedPhantom : public GGEMSNavigator
     */
     void SetOutputDosimetryFilename(std::string const& output_filename);
 
+    /*!
+      \fn void SetPhotonTracking(bool const& is_activated)
+      \param dosimetry_mode - boolean activating photon tracking
+      \brief activating photon tracking during dosimetry mode
+    */
+    void SetPhotonTracking(bool const& is_activated);
+
   private:
     /*!
       \fn void CheckParameters(void) const
@@ -135,11 +140,8 @@ class GGEMS_EXPORT GGEMSVoxelizedPhantom : public GGEMSNavigator
     std::string voxelized_phantom_filename_; /*!< MHD file storing the voxelized phantom */
     std::string range_data_filename_; /*!< File for label to material matching */
 
-    // Dosimetry for voxelized phantom
-    std::unique_ptr<GGEMSDosimetryCalculator> dose_calculator_; /*!< Dose calculator pointer */
-    bool is_dosimetry_mode_; /*! Boolean checking if dosimetry mode is activated */
-    GGfloat3 dosel_sizes_; /*!< Sizes of dosel */
-    std::string dosimetry_output_filename; /*!< Output filename for dosimetry results */
+    // infos to store for dosimetry
+    bool is_photon_tracking_; /*!< Boolean for photon tracking */
 };
 
 /*!
@@ -207,5 +209,13 @@ extern "C" GGEMS_EXPORT void set_dosel_size_voxelized_phantom(GGEMSVoxelizedPhan
   \brief set output filename storing dosimetry
 */
 extern "C" GGEMS_EXPORT void set_dose_output_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, char const* dose_output_filename);
+
+/*!
+  \fn void dose_photon_tracking_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, bool const is_activated)
+  \param voxelized_phantom - pointer on voxelized phantom
+  \param is_dosimetry_mode - boolean activating the photon tracking output
+  \brief storing results about photon tracking
+*/
+extern "C" GGEMS_EXPORT void dose_photon_tracking_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, bool const is_activated);
 
 #endif // End of GUARD_GGEMS_NAVIGATORS_GGEMSVOXELIZEDPHANTOM_HH

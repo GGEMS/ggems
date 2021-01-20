@@ -41,13 +41,13 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 /*!
-  \fn inline GGfloat KissUniform(__global GGEMSRandom* random, GGint const index)
+  \fn inline GGfloat KissUniform(global GGEMSRandom* random, GGint const index)
   \param random - pointer on random buffer on OpenCL device
   \param index - index of thread
   \return Uniform random float number
   \brief JKISS 32-bit (period ~2^121=2.6x10^36), passes all of the Dieharder and the BigCrunch tests in TestU01
 */
-inline GGfloat KissUniform(__global GGEMSRandom* random, GGint const index)
+inline GGfloat KissUniform(global GGEMSRandom* random, GGint const index)
 {
   // y ^= (y<<5);
   // y ^= (y>>7);
@@ -79,14 +79,14 @@ inline GGfloat KissUniform(__global GGEMSRandom* random, GGint const index)
 ////////////////////////////////////////////////////////////////////////////////
 
 /*!
-  \fn GGuint KissPoisson(__global GGEMSRandom* random, GGint const index, GGfloat const mean)
+  \fn GGuint KissPoisson(global GGEMSRandom* random, GGint const index, GGfloat const mean)
   \param random - pointer on random buffer on OpenCL device
   \param index - index of thread
   \param mean - mean of the Poisson distribution
   \return Poisson random uint number
   \brief Poisson random from G4Poisson in Geant4
 */
-inline GGint KissPoisson(__global GGEMSRandom* random, GGint const index, GGfloat const mean)
+inline GGint KissPoisson(global GGEMSRandom* random, GGint const index, GGfloat const mean)
 {
   // Initialization of parameters
   GGint number = 0;
@@ -128,14 +128,14 @@ inline GGint KissPoisson(__global GGEMSRandom* random, GGint const index, GGfloa
 ////////////////////////////////////////////////////////////////////////////////
 
 /*!
-  \fn inline GGfloat KissGauss(__global GGEMSRandom* random, GGint const index, GGfloat const sigma)
+  \fn inline GGfloat KissGauss(global GGEMSRandom* random, GGint const index, GGfloat const sigma)
   \param random - pointer on random buffer on OpenCL device
   \param index - index of thread
   \param sigma - standard deviation
   \return Gaussian random float number
   \brief Gaussian random
 */
-inline GGfloat KissGauss(__global GGEMSRandom* random, GGint const index, GGfloat const sigma)
+inline GGfloat KissGauss(global GGEMSRandom* random, GGint const index, GGfloat const sigma)
 {
   // Box-Muller transformation
   GGfloat u1 = KissUniform(random, index);

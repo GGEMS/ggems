@@ -33,6 +33,7 @@
 #include "GGEMS/physics/GGEMSCrossSections.hh"
 #include "GGEMS/sources/GGEMSSourceManager.hh"
 #include "GGEMS/randoms/GGEMSPseudoRandomGenerator.hh"
+#include "GGEMS/navigators/GGEMSDosimetryCalculator.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -46,6 +47,9 @@ GGEMSNavigator::GGEMSNavigator(std::string const& navigator_name)
   is_update_pos_(false),
   is_update_rot_(false),
   output_basename_(""),
+  is_dosimetry_mode_(false),
+  dosel_sizes_({-1.0f, -1.0f, -1.0f}),
+  dosimetry_output_filename("dosimetry_output.mhd"),
   kernel_particle_solid_distance_timer_(GGEMSChrono::Zero()),
   kernel_project_to_solid_timer_(GGEMSChrono::Zero()),
   kernel_track_through_solid_timer_(GGEMSChrono::Zero())
@@ -294,9 +298,17 @@ void GGEMSNavigator::TrackThroughSolid(void)
 
     // Get type of registered data and OpenCL buffer to data
     std::string data_reg_type = s->GetRegisteredDataType();
+
+    // Get buffers depending on mode of simulation
     cl::Buffer* histogram_cl = nullptr;
+    cl::Buffer* photon_tracking_dosimetry_cl = nullptr;
+    cl::Buffer* dosimetry_params_cl = nullptr;
     if (data_reg_type == "HISTOGRAM") {
       histogram_cl = s->GetHistogram()->histogram_cl_.get();
+    }
+    else if (data_reg_type == "DOSIMETRY") {
+      dosimetry_params_cl = dose_calculator_->GetDoseParams().get();
+      photon_tracking_dosimetry_cl = dose_calculator_->GetPhotonTrackingBuffer().get();
     }
 
     // Getting kernel, and setting parameters
@@ -311,6 +323,10 @@ void GGEMSNavigator::TrackThroughSolid(void)
     kernel_cl->setArg(7, threshold_);
     if (data_reg_type == "HISTOGRAM") {
       kernel_cl->setArg(8, *histogram_cl);
+    }
+    else if (data_reg_type == "DOSIMETRY") {
+      kernel_cl->setArg(8, *dosimetry_params_cl);
+      kernel_cl->setArg(9, *photon_tracking_dosimetry_cl);
     }
 
     // Launching kernel

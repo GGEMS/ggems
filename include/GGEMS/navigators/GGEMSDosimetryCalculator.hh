@@ -112,6 +112,26 @@ class GGEMS_EXPORT GGEMSDosimetryCalculator
     */
     void SetNavigator(std::string const& navigator_name);
 
+    /*!
+      \fn inline std::shared_ptr<cl::Buffer> GetPhotonTrackingBuffer(void) const
+      \return OpenCL buffer for photon tracking in dosimetry mode
+      \brief get the buffer for photon tracking in dosimetry mode
+    */
+    inline std::shared_ptr<cl::Buffer> GetPhotonTrackingBuffer(void) const
+    {
+      return dose_recording_.photon_tracking_;
+    }
+
+    /*!
+      \fn inline std::shared_ptr<cl::Buffer> GetDoseParams(void) const
+      \return OpenCL buffer storing dosimetry params
+      \brief get the buffer storing dosimetry params
+    */
+    inline std::shared_ptr<cl::Buffer> GetDoseParams(void) const
+    {
+      return dose_params_;
+    }
+
   private:
       /*!
         \fn void CheckParameters(void) const
@@ -125,7 +145,7 @@ class GGEMS_EXPORT GGEMSDosimetryCalculator
     std::shared_ptr<GGEMSNavigator> navigator_; /*!< Navigator pointer associated to dosimetry object */
 
     // Buffer storing dose data on OpenCL device and host
-    std::unique_ptr<cl::Buffer> dose_params_; /*!< Buffer storing dose parameters in OpenCL device */
+    std::shared_ptr<cl::Buffer> dose_params_; /*!< Buffer storing dose parameters in OpenCL device */
     GGEMSDoseRecording dose_recording_; /*!< Structure storing dose data on OpenCL device */
     std::vector<GGfloat> dose_values_; /*!< Buffer storing dose value */
     std::vector<GGfloat> uncertainty_values_; /*!< Buffer storing uncertainty values */

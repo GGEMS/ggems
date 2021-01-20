@@ -42,6 +42,9 @@ class GGEMSVoxelizedPhantom(object):
         ggems_lib.set_dose_output_voxelized_phantom.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
         ggems_lib.set_dose_output_voxelized_phantom.restype = ctypes.c_void_p
 
+        ggems_lib.dose_photon_tracking_voxelized_phantom.argtypes = [ctypes.c_void_p, ctypes.c_bool]
+        ggems_lib.dose_photon_tracking_voxelized_phantom.restype = ctypes.c_void_p
+
         self.obj = ggems_lib.create_ggems_voxelized_phantom(voxelized_phantom_name.encode('ASCII'))
 
     def set_phantom(self, phantom_filename, range_data_filename):
@@ -61,3 +64,6 @@ class GGEMSVoxelizedPhantom(object):
 
     def set_dose_output(self, output):
         ggems_lib.set_dose_output_voxelized_phantom(self.obj, output.encode('ASCII'))
+
+    def dose_photon_tracking(self, activate):
+        ggems_lib.dose_photon_tracking_voxelized_phantom(self.obj, activate)

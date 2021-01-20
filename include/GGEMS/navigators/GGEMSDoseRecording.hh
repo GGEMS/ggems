@@ -31,9 +31,9 @@
   \date Tuesday January 19, 2021
 */
 
-#include <memory>
+#ifndef __OPENCL_C_VERSION__
 
-#include "GGEMS/tools/GGEMSTypes.hh"
+#include <memory>
 
 /*!
   \struct GGEMSDoseRecording_t
@@ -46,5 +46,59 @@ typedef struct GGEMSDoseRecording_t
   std::shared_ptr<cl::Buffer> hit_; /*!< Buffer storing hit on OpenCL device */
   std::shared_ptr<cl::Buffer> photon_tracking_; /*!< Buffer storing photon tracking on OpenCL device */
 } GGEMSDoseRecording; /*!< Using C convention name of struct to C++ (_t deletion) */
+
+#endif
+
+#ifdef __OPENCL_C_VERSION__
+
+#include "GGEMS/navigators/GGEMSDoseParams.hh"
+#include "GGEMS/geometries/GGEMSGeometryConstants.hh"
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+inline void dose_photon_tracking(global GGEMSDoseParams* dose_params, global GGint* photon_tracking, GGfloat3 const* position)
+{
+  // Check position of photon inside dosemap limits
+  if (position->x < dose_params->border_min_xyz_.x + EPSILON6 || position->x > dose_params->border_max_xyz_.x - EPSILON6) return;
+  if (position->y < dose_params->border_min_xyz_.y + EPSILON6 || position->y > dose_params->border_max_xyz_.y - EPSILON6) return;
+  if (position->z < dose_params->border_min_xyz_.z + EPSILON6 || position->z > dose_params->border_max_xyz_.z - EPSILON6) return;
+
+  // Get index in dose map
+  GGint3 dosel_id = convert_int3((*position - dose_params->border_min_xyz_) * dose_params->inv_size_of_dosels_);
+  GGint global_dosel_id = dosel_id.x + dosel_id.y * dose_params->number_of_dosels_.x + dosel_id.z * dose_params->number_of_dosels_.x * dose_params->number_of_dosels_.y;
+  atomic_add(&photon_tracking[global_dosel_id], 1);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+/*!
+  \fn
+  \param
+  \param
+  \brief
+*/
+inline void dose_record_standard(global GGEMSDoseParams* dose_params, global GGint* photon_tracking, GGfloat edep, GGfloat3 const* position)
+{
+  // if (px < dose->xmin + EPSILON3 || px > dose->xmax - EPSILON3) return;
+  // if (py < dose->ymin + EPSILON3 || py > dose->ymax - EPSILON3) return;
+  // if (pz < dose->zmin + EPSILON3 || pz > dose->zmax - EPSILON3) return;
+
+  // // Defined index phantom    
+  // ui32xyzw index_phantom;
+  // index_phantom.x = ui32 ( ( px + dose->offset.x ) * dose->inv_dosel_size.x );
+  // index_phantom.y = ui32 ( ( py + dose->offset.y ) * dose->inv_dosel_size.y );
+  // index_phantom.z = ui32 ( ( pz + dose->offset.z ) * dose->inv_dosel_size.z );
+  // index_phantom.w = index_phantom.z * dose->slice_nb_dosels + index_phantom.y * dose->nb_dosels.x + index_phantom.x;
+
+  // ggems_atomic_add_f64( dose->edep, index_phantom.w, f64( Edep ) );
+  // ggems_atomic_add_f64( dose->edep_squared, index_phantom.w, f64( Edep) * f64( Edep ) );
+  // ggems_atomic_add( dose->number_of_hits, index_phantom.w, ui32 ( 1 ) );
+}
+
+#endif
 
 #endif // End of GUARD_GGEMS_NAVIGATORS_GGEMSDOSERECORDING_HH
