@@ -77,26 +77,25 @@ inline void dose_photon_tracking(global GGEMSDoseParams* dose_params, global GGi
 
 /*!
   \fn
+  \param dose_params - params associated to dosemap
   \param
-  \param
-  \brief
+  \brief Recording data for dosimetry
 */
-inline void dose_record_standard(global GGEMSDoseParams* dose_params, global GGint* photon_tracking, GGfloat edep, GGfloat3 const* position)
+inline void dose_record_standard(global GGEMSDoseParams* dose_params, global GGdouble* edep_tracking, global GGdouble* edep_squared_tracking, global GGint* hit_tracking, GGfloat edep, GGfloat3 const* position)
 {
-  // if (px < dose->xmin + EPSILON3 || px > dose->xmax - EPSILON3) return;
-  // if (py < dose->ymin + EPSILON3 || py > dose->ymax - EPSILON3) return;
-  // if (pz < dose->zmin + EPSILON3 || pz > dose->zmax - EPSILON3) return;
+  // Check position of photon inside dosemap limits
+  if (position->x < dose_params->border_min_xyz_.x + EPSILON6 || position->x > dose_params->border_max_xyz_.x - EPSILON6) return;
+  if (position->y < dose_params->border_min_xyz_.y + EPSILON6 || position->y > dose_params->border_max_xyz_.y - EPSILON6) return;
+  if (position->z < dose_params->border_min_xyz_.z + EPSILON6 || position->z > dose_params->border_max_xyz_.z - EPSILON6) return;
 
-  // // Defined index phantom    
-  // ui32xyzw index_phantom;
-  // index_phantom.x = ui32 ( ( px + dose->offset.x ) * dose->inv_dosel_size.x );
-  // index_phantom.y = ui32 ( ( py + dose->offset.y ) * dose->inv_dosel_size.y );
-  // index_phantom.z = ui32 ( ( pz + dose->offset.z ) * dose->inv_dosel_size.z );
-  // index_phantom.w = index_phantom.z * dose->slice_nb_dosels + index_phantom.y * dose->nb_dosels.x + index_phantom.x;
+  // Get index in dose map
+  GGint3 dosel_id = convert_int3((*position - dose_params->border_min_xyz_) * dose_params->inv_size_of_dosels_);
+  GGint global_dosel_id = dosel_id.x + dosel_id.y * dose_params->number_of_dosels_.x + dosel_id.z * dose_params->number_of_dosels_.x * dose_params->number_of_dosels_.y;
+
+  atomic_add(&hit_tracking[global_dosel_id], 1);
 
   // ggems_atomic_add_f64( dose->edep, index_phantom.w, f64( Edep ) );
   // ggems_atomic_add_f64( dose->edep_squared, index_phantom.w, f64( Edep) * f64( Edep ) );
-  // ggems_atomic_add( dose->number_of_hits, index_phantom.w, ui32 ( 1 ) );
 }
 
 #endif

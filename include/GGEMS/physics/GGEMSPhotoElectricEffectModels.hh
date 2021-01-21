@@ -49,6 +49,7 @@ inline void StandardPhotoElectricSampleSecondaries(
 )
 {
   primary_particle->status_[particle_id] = DEAD;
+  primary_particle->E_[particle_id] = 0.0f;
 }
 
 #endif

@@ -302,6 +302,9 @@ void GGEMSNavigator::TrackThroughSolid(void)
     // Get buffers depending on mode of simulation
     cl::Buffer* histogram_cl = nullptr;
     cl::Buffer* photon_tracking_dosimetry_cl = nullptr;
+    cl::Buffer* hit_tracking_dosimetry_cl = nullptr;
+    cl::Buffer* edep_tracking_dosimetry_cl = nullptr;
+    cl::Buffer* edep_squared_tracking_dosimetry_cl = nullptr;
     cl::Buffer* dosimetry_params_cl = nullptr;
     if (data_reg_type == "HISTOGRAM") {
       histogram_cl = s->GetHistogram()->histogram_cl_.get();
@@ -309,6 +312,9 @@ void GGEMSNavigator::TrackThroughSolid(void)
     else if (data_reg_type == "DOSIMETRY") {
       dosimetry_params_cl = dose_calculator_->GetDoseParams().get();
       photon_tracking_dosimetry_cl = dose_calculator_->GetPhotonTrackingBuffer().get();
+      hit_tracking_dosimetry_cl = dose_calculator_->GetHitTrackingBuffer().get();
+      edep_tracking_dosimetry_cl = dose_calculator_->GetEdepBuffer().get();
+      edep_squared_tracking_dosimetry_cl = dose_calculator_->GetEdepSquaredBuffer().get();
     }
 
     // Getting kernel, and setting parameters
@@ -326,7 +332,10 @@ void GGEMSNavigator::TrackThroughSolid(void)
     }
     else if (data_reg_type == "DOSIMETRY") {
       kernel_cl->setArg(8, *dosimetry_params_cl);
-      kernel_cl->setArg(9, *photon_tracking_dosimetry_cl);
+      kernel_cl->setArg(9, *edep_tracking_dosimetry_cl);
+      kernel_cl->setArg(10, *edep_squared_tracking_dosimetry_cl);
+      kernel_cl->setArg(11, *hit_tracking_dosimetry_cl);
+      kernel_cl->setArg(12, *photon_tracking_dosimetry_cl);
     }
 
     // Launching kernel

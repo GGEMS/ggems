@@ -98,6 +98,8 @@
 #define GGfloat8 float8 /*!< define a new type for float8 */
 #define GGfloat16 float16 /*!< define a new type for float16 */
 
+#pragma OPENCL EXTENSION cl_khr_int64_base_atomics : enable
+
 #if defined(cl_khr_fp64)  // Khronos extension available?
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 #elif defined(cl_amd_fp64)  // AMD extension available?
@@ -121,6 +123,26 @@
 #define GGdouble8 float8 /*!< define a new type for float8 */
 #define GGdouble16 float16 /*!< define a new type for float16 */
 #endif
+
+/*
+Verfier les doubles au lancement du code et activer les double
+inline void AtomicAdd(volatile __global float* p_address, float val)
+{
+  union
+  {
+    unsigned int u32;
+    float        f32;
+  } next, expected, current;
+
+  current.f32 = *p_address;
+
+  do {
+    expected.f32 = current.f32;
+    next.f32     = expected.f32 + val;
+    current.u32  = atomic_cmpxchg((volatile __global unsigned int*)p_address, 
+      expected.u32, next.u32);
+  } while(current.u32 != expected.u32);
+}*/
 
 #else
 

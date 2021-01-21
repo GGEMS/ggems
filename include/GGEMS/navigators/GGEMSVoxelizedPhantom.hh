@@ -124,10 +124,31 @@ class GGEMS_EXPORT GGEMSVoxelizedPhantom : public GGEMSNavigator
 
     /*!
       \fn void SetPhotonTracking(bool const& is_activated)
-      \param dosimetry_mode - boolean activating photon tracking
+      \param is_activated - boolean activating photon tracking
       \brief activating photon tracking during dosimetry mode
     */
     void SetPhotonTracking(bool const& is_activated);
+
+    /*!
+      \fn void SetHitTracking(bool const& is_activated)
+      \param is_activated - boolean activating hit tracking
+      \brief activating hit tracking during dosimetry mode
+    */
+    void SetHitTracking(bool const& is_activated);
+
+    /*!
+      \fn void SetEdep(bool const& is_activated)
+      \param is_activated - boolean activating energy deposit registration
+      \brief activating energy deposit registration during dosimetry mode
+    */
+    void SetEdep(bool const& is_activated);
+
+    /*!
+      \fn void SetEdepSquared(bool const& is_activated)
+      \param is_activated - boolean activating energy squared deposit registration
+      \brief activating energy squared deposit registration during dosimetry mode
+    */
+    void SetEdepSquared(bool const& is_activated);
 
   private:
     /*!
@@ -142,6 +163,9 @@ class GGEMS_EXPORT GGEMSVoxelizedPhantom : public GGEMSNavigator
 
     // infos to store for dosimetry
     bool is_photon_tracking_; /*!< Boolean for photon tracking */
+    bool is_hit_tracking_; /*!< Boolean for hit tracking */
+    bool is_edep_; /*!< Boolean for energy deposit */
+    bool is_edep_squared_; /*!< Boolean for energy squared deposit */
 };
 
 /*!
@@ -217,5 +241,29 @@ extern "C" GGEMS_EXPORT void set_dose_output_voxelized_phantom(GGEMSVoxelizedPha
   \brief storing results about photon tracking
 */
 extern "C" GGEMS_EXPORT void dose_photon_tracking_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, bool const is_activated);
+
+/*!
+  \fn void dose_hit_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, bool const is_activated)
+  \param voxelized_phantom - pointer on voxelized phantom
+  \param is_dosimetry_mode - boolean activating the hit tracking output
+  \brief storing results about hit tracking
+*/
+extern "C" GGEMS_EXPORT void dose_hit_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, bool const is_activated);
+
+/*!
+  \fn void dose_edep_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, bool const is_activated)
+  \param voxelized_phantom - pointer on voxelized phantom
+  \param is_dosimetry_mode - boolean activating energy deposit output
+  \brief storing results about energy deposit
+*/
+extern "C" GGEMS_EXPORT void dose_edep_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, bool const is_activated);
+
+/*!
+  \fn void dose_edep_squared_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, bool const is_activated)
+  \param voxelized_phantom - pointer on voxelized phantom
+  \param is_dosimetry_mode - boolean activating energy squared deposit output
+  \brief storing results about energy squared deposit
+*/
+extern "C" GGEMS_EXPORT void dose_edep_squared_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, bool const is_activated);
 
 #endif // End of GUARD_GGEMS_NAVIGATORS_GGEMSVOXELIZEDPHANTOM_HH
