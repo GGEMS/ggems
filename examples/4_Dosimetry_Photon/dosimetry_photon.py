@@ -40,12 +40,16 @@ phantom.set_phantom('data/phantom.mhd', 'data/range_phantom.txt')
 phantom.set_rotation(0.0, 0.0, 0.0, 'deg')
 phantom.set_position(0.0, 0.0, 0.0, 'mm')
 
-
-# FAIRE UNE DOSIMETRY A PART !!! et la transmettre au phantom
-phantom.set_dosimetry_mode(True)
+# Dosimetry
+phantom.set_dosimetry_mode(True) # Activate the dosimetry mode
 phantom.set_dosel_size(0.5, 0.5, 0.5, 'mm')
+
+# Output
 phantom.set_dose_output('data/phantom_dosi')
-phantom.dose_photon_tracking(True)
+phantom.dose_photon_tracking(True) # Register photon tracking results
+phantom.dose_hit(True) # Register hit tracking results
+phantom.dose_edep(True) # Register energy deposit results
+phantom.dose_edep_squared(True) # Register energy squared deposit results
 
 # ------------------------------------------------------------------------------
 # STEP 5: Physics
@@ -66,7 +70,7 @@ range_cuts_manager.set_cut('gamma', 0.1, 'mm', 'all')
 # STEP 7: Source
 point_source = GGEMSXRaySource('point_source')
 point_source.set_source_particle_type('gamma')
-point_source.set_number_of_particles(100000000)
+point_source.set_number_of_particles(100)
 point_source.set_position(-595.0, 0.0, 0.0, 'mm')
 point_source.set_rotation(0.0, 0.0, 0.0, 'deg')
 point_source.set_beam_aperture(10.0, 'deg')

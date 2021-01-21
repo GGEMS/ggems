@@ -117,20 +117,35 @@ class GGEMS_EXPORT GGEMSDosimetryCalculator
       \return OpenCL buffer for photon tracking in dosimetry mode
       \brief get the buffer for photon tracking in dosimetry mode
     */
-    inline std::shared_ptr<cl::Buffer> GetPhotonTrackingBuffer(void) const
-    {
-      return dose_recording_.photon_tracking_;
-    }
+    inline std::shared_ptr<cl::Buffer> GetPhotonTrackingBuffer(void) const {return dose_recording_.photon_tracking_;}
+
+    /*!
+      \fn inline std::shared_ptr<cl::Buffer> GetHitTrackingBuffer(void) const
+      \return OpenCL buffer for hit tracking in dosimetry mode
+      \brief get the buffer for hit tracking in dosimetry mode
+    */
+    inline std::shared_ptr<cl::Buffer> GetHitTrackingBuffer(void) const {return dose_recording_.hit_;}
+
+    /*!
+      \fn inline std::shared_ptr<cl::Buffer> GetEdepBuffer(void) const
+      \return OpenCL buffer for edep in dosimetry mode
+      \brief get the buffer for edep in dosimetry mode
+    */
+    inline std::shared_ptr<cl::Buffer> GetEdepBuffer(void) const {return dose_recording_.edep_;}
+
+    /*!
+      \fn inline std::shared_ptr<cl::Buffer> GetEdepSquaredBuffer(void) const
+      \return OpenCL buffer for edep squared in dosimetry mode
+      \brief get the buffer for edep squared in dosimetry mode
+    */
+    inline std::shared_ptr<cl::Buffer> GetEdepSquaredBuffer(void) const {return dose_recording_.edep_squared_;}
 
     /*!
       \fn inline std::shared_ptr<cl::Buffer> GetDoseParams(void) const
       \return OpenCL buffer storing dosimetry params
       \brief get the buffer storing dosimetry params
     */
-    inline std::shared_ptr<cl::Buffer> GetDoseParams(void) const
-    {
-      return dose_params_;
-    }
+    inline std::shared_ptr<cl::Buffer> GetDoseParams(void) const {return dose_params_;}
 
   private:
       /*!

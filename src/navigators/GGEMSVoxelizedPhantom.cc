@@ -42,7 +42,10 @@ GGEMSVoxelizedPhantom::GGEMSVoxelizedPhantom(std::string const& voxelized_phanto
 : GGEMSNavigator(voxelized_phantom_name),
   voxelized_phantom_filename_(""),
   range_data_filename_(""),
-  is_photon_tracking_(false)
+  is_photon_tracking_(false),
+  is_hit_tracking_(false),
+  is_edep_(false),
+  is_edep_squared_(false)
 {
   GGcout("GGEMSVoxelizedPhantom", "GGEMSVoxelizedPhantom", 3) << "Allocation of GGEMSVoxelizedPhantom..." << GGendl;
 }
@@ -72,6 +75,33 @@ void GGEMSVoxelizedPhantom::SetDosimetryMode(bool const& dosimetry_mode)
 void GGEMSVoxelizedPhantom::SetPhotonTracking(bool const& is_activated)
 {
   is_photon_tracking_ = is_activated;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSVoxelizedPhantom::SetHitTracking(bool const& is_activated)
+{
+  is_hit_tracking_ = is_activated;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSVoxelizedPhantom::SetEdep(bool const& is_activated)
+{
+  is_edep_ = is_activated;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSVoxelizedPhantom::SetEdepSquared(bool const& is_activated)
+{
+  is_edep_squared_ = is_activated;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -188,7 +218,7 @@ void GGEMSVoxelizedPhantom::SaveResults(void)
     GGint3 number_of_dosels = dose_params_device->number_of_dosels_;
     GGfloat3 size_of_dosels = dose_params_device->size_of_dosels_;
 
-    if(is_photon_tracking_) {
+    if (is_photon_tracking_) {
       GGint* photon_tracking = new GGint[total_number_of_dosels];
       std::memset(photon_tracking, 0, total_number_of_dosels*sizeof(GGint));
 
@@ -201,9 +231,7 @@ void GGEMSVoxelizedPhantom::SaveResults(void)
       cl::Buffer* photon_tracking_dosimetry_cl = dose_calculator_->GetPhotonTrackingBuffer().get();
       GGint* photon_tracking_device = opencl_manager.GetDeviceBuffer<GGint>(photon_tracking_dosimetry_cl, total_number_of_dosels*sizeof(GGint));
 
-      for (GGint i = 0; i < total_number_of_dosels; ++i) {
-        photon_tracking[i] = photon_tracking_device[i];
-      }
+      for (GGint i = 0; i < total_number_of_dosels; ++i) photon_tracking[i] = photon_tracking_device[i];
 
       // Writing data
       mhdImage.Write<GGint>(photon_tracking, total_number_of_dosels);
@@ -211,47 +239,30 @@ void GGEMSVoxelizedPhantom::SaveResults(void)
       delete[] photon_tracking;
     }
 
+    if (is_hit_tracking_) {
+      GGint* hit_tracking = new GGint[total_number_of_dosels];
+      std::memset(hit_tracking, 0, total_number_of_dosels*sizeof(GGint));
+
+      GGEMSMHDImage mhdImage;
+      mhdImage.SetBaseName(dosimetry_output_filename + "_hit");
+      mhdImage.SetDataType("MET_INT");
+      mhdImage.SetDimensions(number_of_dosels);
+      mhdImage.SetElementSizes(size_of_dosels);
+
+      cl::Buffer* hit_dosimetry_cl = dose_calculator_->GetHitTrackingBuffer().get();
+      GGint* hit_device = opencl_manager.GetDeviceBuffer<GGint>(hit_dosimetry_cl, total_number_of_dosels*sizeof(GGint));
+
+      for (GGint i = 0; i < total_number_of_dosels; ++i) hit_tracking[i] = hit_device[i];
+
+      // Writing data
+      mhdImage.Write<GGint>(hit_tracking, total_number_of_dosels);
+      opencl_manager.ReleaseDeviceBuffer(hit_dosimetry_cl, hit_device);
+      delete[] hit_tracking;
+    }
+
     // Release the pointer
     opencl_manager.ReleaseDeviceBuffer(dose_calculator_->GetDoseParams().get(), dose_params_device);
   }
-
-  // GGint3 total_dim = {
-  //   number_of_modules_xy_.s0*number_of_detection_elements_inside_module_xyz_.s0,
-  //   number_of_modules_xy_.s1*number_of_detection_elements_inside_module_xyz_.s1,
-  //   number_of_detection_elements_inside_module_xyz_.s2
-  // };
-
-  // GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
-  // GGint* output = new GGint[total_dim.s0*total_dim.s1*total_dim.s2];
-  // std::memset(output, 0, total_dim.s0*total_dim.s1*total_dim.s2*sizeof(GGint));
-
-  // GGEMSMHDImage mhdImage;
-  // mhdImage.SetBaseName(output_basename_);
-  // mhdImage.SetDataType("MET_INT");
-  // mhdImage.SetDimensions(total_dim);
-  // mhdImage.SetElementSizes(size_of_detection_elements_xyz_);
-
-  // // Getting all the counts from solid on OpenCL device
-  // for (std::size_t jj = 0; jj < number_of_modules_xy_.s1; ++jj) {
-  //   for (std::size_t ii = 0; ii < number_of_modules_xy_.s0; ++ii) {
-  //     cl::Buffer* histogram_cl = solids_.at(ii + jj* number_of_modules_xy_.s0)->GetHistogram()->histogram_cl_.get();
-
-  //     GGint* histogram_device = opencl_manager.GetDeviceBuffer<GGint>(histogram_cl, number_of_detection_elements_inside_module_xyz_.s0*number_of_detection_elements_inside_module_xyz_.s1*sizeof(GGint));
-
-  //     // Storing data on host
-  //     for (GGint jjj = 0; jjj < number_of_detection_elements_inside_module_xyz_.s1; ++jjj) {
-  //       for (GGint iii = 0; iii < number_of_detection_elements_inside_module_xyz_.s0; ++iii) {
-  //         output[(iii+ii*number_of_detection_elements_inside_module_xyz_.s0) + (jjj+jj*number_of_detection_elements_inside_module_xyz_.s1)*total_dim.s0] =
-  //           histogram_device[iii + jjj*number_of_detection_elements_inside_module_xyz_.s0];
-  //       }
-  //     }
-
-  //     opencl_manager.ReleaseDeviceBuffer(histogram_cl, histogram_device);
-  //   }
-  // }
-
-  // mhdImage.Write<GGint>(output, total_dim.s0*total_dim.s1*total_dim.s2);
-  // delete[] output;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -334,4 +345,31 @@ void set_dose_output_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom,
 void dose_photon_tracking_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, bool const is_activated)
 {
   voxelized_phantom->SetPhotonTracking(is_activated);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void dose_hit_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, bool const is_activated)
+{
+  voxelized_phantom->SetHitTracking(is_activated);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void dose_edep_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, bool const is_activated)
+{
+  voxelized_phantom->SetEdep(is_activated);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void dose_edep_squared_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, bool const is_activated)
+{
+  voxelized_phantom->SetEdepSquared(is_activated);
 }
