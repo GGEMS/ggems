@@ -60,8 +60,8 @@
 kernel void track_through_ggems_voxelized_solid(GGlong const particle_id_limit, global GGEMSPrimaryParticles* primary_particle, global GGEMSRandom* random, global GGEMSVoxelizedSolidData const* voxelized_solid_data, global GGshort const* label_data, global GGEMSParticleCrossSections const* particle_cross_sections, global GGEMSMaterialTables const* materials, GGfloat const threshold
   #ifdef DOSIMETRY
   ,global GGEMSDoseParams* dose_params,
-  global GGdouble* edep_tracking,
-  global GGdouble* edep_squared_tracking,
+  global GGDosiType* edep_tracking,
+  global GGDosiType* edep_squared_tracking,
   global GGint* hit_tracking,
   global GGint* photon_tracking
   #endif

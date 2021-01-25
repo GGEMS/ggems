@@ -91,6 +91,7 @@ cmake_cmd += " -DGGEMS_PATH=" + GGEMS_FOLDER
 cmake_cmd += " -DCMAKE_VERBOSE_MAKEFILE=OFF"
 cmake_cmd += " -DBUILD_EXAMPLES=ON"
 cmake_cmd += " -DOPENCL_CACHE_KERNEL_COMPILATION=OFF"
+cmake_cmd += " -DDOSIMETRY_DOUBLE_PRECISION=ON"
 cmake_cmd += " -DCOMPILER=" + os.environ['COMPILER']
 cmake_cmd += " -DCMAKE_INSTALL_PREFIX=" + INSTALL_FOLDER
 cmake_cmd += " -S " + GGEMS_FOLDER + " -B " + BUILD_FOLDER

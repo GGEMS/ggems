@@ -45,6 +45,8 @@ typedef struct GGEMSDoseRecording_t
   std::shared_ptr<cl::Buffer> edep_squared_; /*!< Buffer storing energy deposit squared on OpenCL device */
   std::shared_ptr<cl::Buffer> hit_; /*!< Buffer storing hit on OpenCL device */
   std::shared_ptr<cl::Buffer> photon_tracking_; /*!< Buffer storing photon tracking on OpenCL device */
+  std::shared_ptr<cl::Buffer> dose_; /*!< Buffer storing dose in gray (Gy) */
+  std::shared_ptr<cl::Buffer> uncertainty_dose_; /*!< Buffer storing uncertainty dose */
 } GGEMSDoseRecording; /*!< Using C convention name of struct to C++ (_t deletion) */
 
 #endif
@@ -81,7 +83,7 @@ inline void dose_photon_tracking(global GGEMSDoseParams* dose_params, global GGi
   \param
   \brief Recording data for dosimetry
 */
-inline void dose_record_standard(global GGEMSDoseParams* dose_params, global GGdouble* edep_tracking, global GGdouble* edep_squared_tracking, global GGint* hit_tracking, GGfloat edep, GGfloat3 const* position)
+inline void dose_record_standard(global GGEMSDoseParams* dose_params, global GGDosiType* edep_tracking, global GGDosiType* edep_squared_tracking, global GGint* hit_tracking, GGfloat edep, GGfloat3 const* position)
 {
   // Check position of photon inside dosemap limits
   if (position->x < dose_params->border_min_xyz_.x + EPSILON6 || position->x > dose_params->border_max_xyz_.x - EPSILON6) return;
@@ -93,9 +95,13 @@ inline void dose_record_standard(global GGEMSDoseParams* dose_params, global GGd
   GGint global_dosel_id = dosel_id.x + dosel_id.y * dose_params->number_of_dosels_.x + dosel_id.z * dose_params->number_of_dosels_.x * dose_params->number_of_dosels_.y;
 
   atomic_add(&hit_tracking[global_dosel_id], 1);
-
-  // ggems_atomic_add_f64( dose->edep, index_phantom.w, f64( Edep ) );
-  // ggems_atomic_add_f64( dose->edep_squared, index_phantom.w, f64( Edep) * f64( Edep ) );
+  #ifdef DOSIMETRY_DOUBLE_PRECISION
+  AtomicAddDouble(&edep_tracking[global_dosel_id], (GGDosiType)edep);
+  AtomicAddDouble(&edep_squared_tracking[global_dosel_id], (GGDosiType)edep*(GGDosiType)edep);
+  #else
+  AtomicAddFloat(&edep_tracking[global_dosel_id], (GGDosiType)edep);
+  AtomicAddFloat(&edep_squared_tracking[global_dosel_id], (GGDosiType)edep*(GGDosiType)edep);
+  #endif
 }
 
 #endif

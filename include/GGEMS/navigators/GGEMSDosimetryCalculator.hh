@@ -147,12 +147,52 @@ class GGEMS_EXPORT GGEMSDosimetryCalculator
     */
     inline std::shared_ptr<cl::Buffer> GetDoseParams(void) const {return dose_params_;}
 
+    /*!
+      \fn void SavePhotonTracking(std::string const& basename) const
+      \param basename - basename of the output file
+      \brief save photon tracking in dose map
+    */
+    void SavePhotonTracking(std::string const& basename) const;
+
+    /*!
+      \fn void SaveHit(std::string const& basename) const
+      \param basename - basename of the output file
+      \brief save hits in dose map
+    */
+    void SaveHit(std::string const& basename) const;
+
+    /*!
+      \fn void SaveEdep(std::string const& basename) const
+      \param basename - basename of the output file
+      \brief save energy deposit in dose map
+    */
+    void SaveEdep(std::string const& basename) const;
+
+    /*!
+      \fn void SaveEdepSquared(std::string const& basename) const
+      \param basename - basename of the output file
+      \brief save energy deposit squared in dose map
+    */
+    void SaveEdepSquared(std::string const& basename) const;
+
+    /*!
+      \fn void ComputeDose(void)
+      \brief compute dose in voxelized solid
+    */
+    void ComputeDose(void);
+
   private:
       /*!
         \fn void CheckParameters(void) const
         \return no returned value
       */
     void CheckParameters(void) const;
+
+    /*!
+      \fn void InitializeKernel(void)
+      \brief Initialize kernel for dose computation
+    */
+    void InitializeKernel(void);
 
   private:
     GGfloat3 dosel_sizes_; /*!< Sizes of dosel */
@@ -162,8 +202,9 @@ class GGEMS_EXPORT GGEMSDosimetryCalculator
     // Buffer storing dose data on OpenCL device and host
     std::shared_ptr<cl::Buffer> dose_params_; /*!< Buffer storing dose parameters in OpenCL device */
     GGEMSDoseRecording dose_recording_; /*!< Structure storing dose data on OpenCL device */
-    std::vector<GGfloat> dose_values_; /*!< Buffer storing dose value */
-    std::vector<GGfloat> uncertainty_values_; /*!< Buffer storing uncertainty values */
+
+    std::weak_ptr<cl::Kernel> kernel_compute_dose_; /*!< OpenCL kernel computing dose in voxelized solid */
+    DurationNano kernel_compute_dose_timer_; /*!< Timer for kernel computing dose */
 };
 
 #endif // End of GUARD_GGEMS_NAVIGATORS_GGEMSDOSIMETRYCALCULATOR_HH

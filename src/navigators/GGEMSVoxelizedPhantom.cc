@@ -207,61 +207,13 @@ void GGEMSVoxelizedPhantom::SaveResults(void)
   if (is_dosimetry_mode_) {
     GGcout("GGEMSSystem", "GGEMSVoxelizedPhantom", 2) << "Saving dosimetry results in MHD format..." << GGendl;
 
-    // Get the OpenCL manager
-    GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+    // Compute dose
+    dose_calculator_->ComputeDose();
 
-    // Get pointer on OpenCL device for dose parameters
-    GGEMSDoseParams* dose_params_device = opencl_manager.GetDeviceBuffer<GGEMSDoseParams>(dose_calculator_->GetDoseParams().get(), sizeof(GGEMSDoseParams));
-
-    // Params
-    GGint total_number_of_dosels = dose_params_device->total_number_of_dosels_;
-    GGint3 number_of_dosels = dose_params_device->number_of_dosels_;
-    GGfloat3 size_of_dosels = dose_params_device->size_of_dosels_;
-
-    if (is_photon_tracking_) {
-      GGint* photon_tracking = new GGint[total_number_of_dosels];
-      std::memset(photon_tracking, 0, total_number_of_dosels*sizeof(GGint));
-
-      GGEMSMHDImage mhdImage;
-      mhdImage.SetBaseName(dosimetry_output_filename + "_photon_tracking");
-      mhdImage.SetDataType("MET_INT");
-      mhdImage.SetDimensions(number_of_dosels);
-      mhdImage.SetElementSizes(size_of_dosels);
-
-      cl::Buffer* photon_tracking_dosimetry_cl = dose_calculator_->GetPhotonTrackingBuffer().get();
-      GGint* photon_tracking_device = opencl_manager.GetDeviceBuffer<GGint>(photon_tracking_dosimetry_cl, total_number_of_dosels*sizeof(GGint));
-
-      for (GGint i = 0; i < total_number_of_dosels; ++i) photon_tracking[i] = photon_tracking_device[i];
-
-      // Writing data
-      mhdImage.Write<GGint>(photon_tracking, total_number_of_dosels);
-      opencl_manager.ReleaseDeviceBuffer(photon_tracking_dosimetry_cl, photon_tracking_device);
-      delete[] photon_tracking;
-    }
-
-    if (is_hit_tracking_) {
-      GGint* hit_tracking = new GGint[total_number_of_dosels];
-      std::memset(hit_tracking, 0, total_number_of_dosels*sizeof(GGint));
-
-      GGEMSMHDImage mhdImage;
-      mhdImage.SetBaseName(dosimetry_output_filename + "_hit");
-      mhdImage.SetDataType("MET_INT");
-      mhdImage.SetDimensions(number_of_dosels);
-      mhdImage.SetElementSizes(size_of_dosels);
-
-      cl::Buffer* hit_dosimetry_cl = dose_calculator_->GetHitTrackingBuffer().get();
-      GGint* hit_device = opencl_manager.GetDeviceBuffer<GGint>(hit_dosimetry_cl, total_number_of_dosels*sizeof(GGint));
-
-      for (GGint i = 0; i < total_number_of_dosels; ++i) hit_tracking[i] = hit_device[i];
-
-      // Writing data
-      mhdImage.Write<GGint>(hit_tracking, total_number_of_dosels);
-      opencl_manager.ReleaseDeviceBuffer(hit_dosimetry_cl, hit_device);
-      delete[] hit_tracking;
-    }
-
-    // Release the pointer
-    opencl_manager.ReleaseDeviceBuffer(dose_calculator_->GetDoseParams().get(), dose_params_device);
+    if (is_photon_tracking_) dose_calculator_->SavePhotonTracking(dosimetry_output_filename);
+    if (is_hit_tracking_) dose_calculator_->SaveHit(dosimetry_output_filename);
+    if (is_edep_) dose_calculator_->SaveEdep(dosimetry_output_filename);
+    if (is_edep_squared_) dose_calculator_->SaveEdepSquared(dosimetry_output_filename);
   }
 }
 
