@@ -98,51 +98,82 @@
 #define GGfloat8 float8 /*!< define a new type for float8 */
 #define GGfloat16 float16 /*!< define a new type for float16 */
 
+#if defined(cl_khr_int64_base_atomics)
 #pragma OPENCL EXTENSION cl_khr_int64_base_atomics : enable
+#else
+#pragma message("int64 atomic operation are not supported!!!")
+#endif
 
 #if defined(cl_khr_fp64)  // Khronos extension available?
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 #elif defined(cl_amd_fp64)  // AMD extension available?
 #pragma OPENCL EXTENSION cl_amd_fp64 : enable
-#else
-#define DOUBLE_DISABLED
 #endif
 
-#ifndef DOUBLE_DISABLED
 #define GGdouble double /*!< define a new type for double */
 #define GGdouble2 double2 /*!< define a new type for double2 */
 #define GGdouble3 double3 /*!< define a new type for double3 */
 #define GGdouble4 double4 /*!< define a new type for double4 */
 #define GGdouble8 double8 /*!< define a new type for double8 */
 #define GGdouble16 double16 /*!< define a new type for double16 */
+
+#ifdef DOSIMETRY_DOUBLE_PRECISION
+#define GGDosiType GGdouble
 #else
-#define GGdouble float /*!< define a new type for float */
-#define GGdouble2 float2 /*!< define a new type for float2 */
-#define GGdouble3 float3 /*!< define a new type for float3 */
-#define GGdouble4 float4 /*!< define a new type for float4 */
-#define GGdouble8 float8 /*!< define a new type for float8 */
-#define GGdouble16 float16 /*!< define a new type for float16 */
+#define GGDosiType GGfloat
 #endif
 
-/*
-Verfier les doubles au lancement du code et activer les double
-inline void AtomicAdd(volatile __global float* p_address, float val)
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+/*!
+  \fn inline void AtomicAddFloat(volatile global GGDosiType* address, GGfloat val)
+  \param address - address of pointer where the value is added
+  \param val - double value to add
+  \brief atomic addition for float precision
+*/
+inline void AtomicAddFloat(volatile global GGDosiType* address, GGfloat val)
 {
-  union
-  {
-    unsigned int u32;
-    float        f32;
+  union {
+    GGuint  u32;
+    GGfloat f32;
   } next, expected, current;
 
-  current.f32 = *p_address;
+  current.f32 = *address;
 
   do {
     expected.f32 = current.f32;
     next.f32     = expected.f32 + val;
-    current.u32  = atomic_cmpxchg((volatile __global unsigned int*)p_address, 
-      expected.u32, next.u32);
+    current.u32  = atomic_cmpxchg((volatile global GGuint*)address, expected.u32, next.u32);
   } while(current.u32 != expected.u32);
-}*/
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+/*!
+  \fn inline void AtomicAddDouble(volatile global GGDosiType* address, GGdouble val)
+  \param address - address of pointer where the value is added
+  \param val - double value to add
+  \brief atomic addition for double precision
+*/
+inline void AtomicAddDouble(volatile global GGDosiType* address, GGdouble val)
+{
+  union {
+    GGulong  u64;
+    GGdouble f64;
+  } next, expected, current;
+
+  current.f64 = *address;
+
+  do {
+    expected.f64 = current.f64;
+    next.f64     = expected.f64 + val;
+    current.u64  = atom_cmpxchg((volatile global GGulong*)address, expected.u64, next.u64);
+  } while(current.u64 != expected.u64);
+}
 
 #else
 
@@ -223,6 +254,12 @@ inline void AtomicAdd(volatile __global float* p_address, float val)
 #define GGdouble4 cl_double4 /*!< define a new type for cl_double4 */
 #define GGdouble8 cl_double8 /*!< define a new type for cl_double8 */
 #define GGdouble16 cl_double16 /*!< define a new type for cl_double16 */
+
+#ifdef DOSIMETRY_DOUBLE_PRECISION
+#define GGDosiType GGdouble
+#else
+#define GGDosiType GGfloat
+#endif
 
 #endif
 

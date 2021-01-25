@@ -70,6 +70,14 @@ IF(OPENCL_CACHE_KERNEL_COMPILATION)
 ENDIF()
 
 #-------------------------------------------------------------------------------
+# Add an option for using cache kernel compilation on OpenCL device
+# Set to OFF to be sure your own kernel modification are re-compiled
+OPTION(DOSIMETRY_DOUBLE_PRECISION "Double precision for dosimetry" ON)
+IF(DOSIMETRY_DOUBLE_PRECISION)
+  ADD_DEFINITIONS(-DDOSIMETRY_DOUBLE_PRECISION)
+ENDIF()
+
+#-------------------------------------------------------------------------------
 # Defining a configuration file
 CONFIGURE_FILE("${PROJECT_SOURCE_DIR}/cmake-config/GGEMSConfiguration.hh.in" "${PROJECT_SOURCE_DIR}/include/GGEMS/global/GGEMSConfiguration.hh" @ONLY)
 

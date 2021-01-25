@@ -297,6 +297,20 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     */
     std::size_t CheckKernel(std::string const& kernel_name, std::string const& compilation_options) const;
 
+    /*!
+      \fn bool IsDoublePrecisionAtomicAddition(void) const
+      \return true if double precision atomic addition is supported by OpenCL device, otherwize false
+      \brief checking double precision atomic addition on OpenCL device
+    */
+    bool IsDoublePrecisionAtomicAddition(void) const;
+
+    /*!
+      \fn bool CheckDoublePrecision(void) const
+      \return true if double precision is supported by OpenCL device, otherwize false
+      \brief checking double precision on OpenCL device
+    */
+    bool IsDoublePrecision(void) const;
+
   private:
     // Platforms
     std::vector<cl::Platform> platforms_; /*!< List of detected platforms */

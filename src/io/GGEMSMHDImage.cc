@@ -189,9 +189,9 @@ void GGEMSMHDImage::Read(std::string const& image_mhd_header_filename, std::weak
     GGEMSMisc::ThrowException("GGEMSMHDImage", "Read", oss.str());
   }
 
-  if (mhd_data_type_.empty() && mhd_data_type_.compare("MET_FLOAT") && mhd_data_type_.compare("MET_SHORT") && mhd_data_type_.compare("MET_USHORT") && mhd_data_type_.compare("MET_UCHAR") && mhd_data_type_.compare("MET_CHAR") && mhd_data_type_.compare("MET_UINT") && mhd_data_type_.compare("MET_INT")) {
+  if (mhd_data_type_.empty() && mhd_data_type_.compare("MET_DOUBLE") && mhd_data_type_.compare("MET_FLOAT") && mhd_data_type_.compare("MET_SHORT") && mhd_data_type_.compare("MET_USHORT") && mhd_data_type_.compare("MET_UCHAR") && mhd_data_type_.compare("MET_CHAR") && mhd_data_type_.compare("MET_UINT") && mhd_data_type_.compare("MET_INT")) {
     std::ostringstream oss(std::ostringstream::out);
-    oss << "Value invalid for the key 'ElementType'!!! The value have to be 'MET_FLOAT' or 'MET_SHORT' or 'MET_USHORT' or 'MET_UCHAR' or 'MET_CHAR' or 'MET_UINT' or 'MET_INT'";
+    oss << "Value invalid for the key 'ElementType'!!! The value have to be 'MET_DOUBLE' or 'MET_FLOAT' or 'MET_SHORT' or 'MET_USHORT' or 'MET_UCHAR' or 'MET_CHAR' or 'MET_UINT' or 'MET_INT'";
     GGEMSMisc::ThrowException("GGEMSMHDImage", "Read", oss.str());
   }
 
@@ -238,6 +238,7 @@ void GGEMSMHDImage::Write(std::shared_ptr<cl::Buffer> image) const
   else if (!mhd_data_type_.compare("MET_INT")) WriteRaw<GGint>(image);
   else if (!mhd_data_type_.compare("MET_UINT")) WriteRaw<GGuint>(image);
   else if (!mhd_data_type_.compare("MET_FLOAT")) WriteRaw<GGfloat>(image);
+  else if (!mhd_data_type_.compare("MET_DOUBLE")) WriteRaw<GGfloat>(image);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

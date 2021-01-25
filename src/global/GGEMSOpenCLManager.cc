@@ -50,6 +50,15 @@ GGEMSOpenCLManager::GGEMSOpenCLManager(void)
   GGcout("GGEMSOpenCLManager", "GGEMSOpenCLManager", 1) << "Retrieving OpenCL platform(s)..." << GGendl;
   CheckOpenCLError(cl::Platform::get(&platforms_), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
 
+  // Prevent cache kernel in OpenCL
+  #ifndef OPENCL_CACHE_KERNEL_COMPILATION
+  #ifdef _MSC_VER
+  _putenv("CUDA_CACHE_DISABLE=1");
+  #else
+  putenv("CUDA_CACHE_DISABLE=1");
+  #endif
+  #endif
+
   // Getting infos about platform(s)
   for (auto&& p : platforms_) {
     std::string plaform_infos("");
@@ -237,6 +246,11 @@ GGEMSOpenCLManager::GGEMSOpenCLManager(void)
   // Define the compilation options by default for OpenCL
   build_options_ = "-cl-std=CL1.2 -w -Werror -cl-fast-relaxed-math";
 
+  // Give precision for dosimetry
+  #ifdef DOSIMETRY_DOUBLE_PRECISION
+  build_options_ += " -DDOSIMETRY_DOUBLE_PRECISION";
+  #endif
+
   // Add auxiliary function path to OpenCL options
   #ifdef GGEMS_PATH
   build_options_ += " -I";
@@ -244,15 +258,6 @@ GGEMSOpenCLManager::GGEMSOpenCLManager(void)
   build_options_ += "/include";
   #elif
   GGEMSMisc::ThrowException("GGEMSOpenCLManager","GGEMSOpenCLManager", "OPENCL_KERNEL_PATH not defined or not find!!!");
-  #endif
-
-  // Prevent cache kernel in OpenCL
-  #ifndef OPENCL_CACHE_KERNEL_COMPILATION
-  #ifdef _MSC_VER
-  _putenv("CUDA_CACHE_DISABLE=1");
-  #else
-  putenv("CUDA_CACHE_DISABLE=1");
-  #endif
   #endif
 }
 
@@ -577,11 +582,46 @@ void GGEMSOpenCLManager::ContextToActivate(GGint const& context_id)
   // Storing the index of activated context
   context_index_ = context_id;
 
+  // Checking double precision
+  if (!IsDoublePrecision()) {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "Your OpenCL device does not support double precision!!!";
+    GGEMSMisc::ThrowException("GGEMSOpenCLManager", "ContextToActivate", oss.str());
+  }
+
+  #ifdef DOSIMETRY_DOUBLE_PRECISION
+  if (!IsDoublePrecisionAtomicAddition()) {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "Your OpenCL device does not support double precision for atomic operation!!!";
+    GGEMSMisc::ThrowException("GGEMSOpenCLManager", "ContextToActivate", oss.str());
+  }
+  #endif
+
   // Activate the command queue
   queue_act_ = queues_.at(context_id);
 
   // Activate the event
   event_act_ = events_.at(context_id);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+bool GGEMSOpenCLManager::IsDoublePrecision(void) const
+{
+  if (device_extensions_[context_index_].find("cl_khr_fp64") == std::string::npos) return false;
+  else return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+bool GGEMSOpenCLManager::IsDoublePrecisionAtomicAddition(void) const
+{
+  if (device_extensions_[context_index_].find("cl_khr_int64_base_atomics") == std::string::npos) return false;
+  else return true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
