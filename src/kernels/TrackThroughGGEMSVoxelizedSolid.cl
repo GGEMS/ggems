@@ -171,7 +171,7 @@ kernel void track_through_ggems_voxelized_solid(GGlong const particle_id_limit, 
       next_interaction_distance = distance_to_next_boundary + GEOMETRY_TOLERANCE;
       next_discrete_process = TRANSPORTATION;
       #ifdef DOSIMETRY
-      dose_photon_tracking(dose_params, photon_tracking, &local_position);
+      if (photon_tracking) dose_photon_tracking(dose_params, photon_tracking, &local_position);
       #endif
     }
 

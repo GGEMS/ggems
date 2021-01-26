@@ -177,7 +177,7 @@ class GGEMS_EXPORT GGEMSOpenCLManager
       \return Work group size
       \brief Get the work group size defined in GGEMS on activated OpenCL context
     */
-    inline std::size_t GetWorkGroupSize(void) const { return work_group_size_[context_index_];}
+    inline std::size_t GetWorkGroupSize(void) const { return work_group_size_;}
 
     /*!
       \fn std::string GetNameOfActivatedContext(void) const
@@ -278,6 +278,14 @@ class GGEMS_EXPORT GGEMSOpenCLManager
       \brief check the OpenCL error
     */
     void CheckOpenCLError(GGint const& error, std::string const& class_name, std::string const& method_name) const;
+
+    /*!
+      \fn std::size_t GetBestWorkItem(GGulong const& number_of_elements) const
+      \param number_of_elements - number of elements for the kernel computation
+      \return best number of work item
+      \brief get the best number of work item
+    */
+    std::size_t GetBestWorkItem(GGulong const& number_of_elements) const;
 
   private:
     /*!
@@ -388,7 +396,7 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     std::vector<std::size_t> device_profiling_timer_resolution_; /*!< Timer resolution */
 
     // Custom work group size
-    std::vector<std::size_t> work_group_size_; /*!< Work group size by GGEMS, here 64 */
+    std::size_t work_group_size_; /*!< Work group size by GGEMS, here 64 */
 
     // OpenCL compilation options
     std::string build_options_; /*!< list of option to OpenCL compiler */

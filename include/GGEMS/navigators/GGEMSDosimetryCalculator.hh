@@ -48,9 +48,10 @@ class GGEMS_EXPORT GGEMSDosimetryCalculator
 {
   public:
     /*!
+      \param navigator_name - name of the navigator associated to dosimetry
       \brief GGEMSDosimetryCalculator constructor
     */
-    GGEMSDosimetryCalculator();
+    explicit GGEMSDosimetryCalculator(std::string const& navigator_name);
 
     /*!
       \brief GGEMSDosimetryCalculator destructor
@@ -92,11 +93,14 @@ class GGEMS_EXPORT GGEMSDosimetryCalculator
     void Initialize(void);
 
     /*!
-      \fn void SetDoselSizes(GGfloat3 const& dosel_sizes)
-      \param dosel_sizes - size of dosels in X, Y and Z in global axis
+      \fn void SetDoselSizes(float const& dosel_x, float const& dosel_y, float const& dosel_z, std::string const& unit = "mm")
+      \param dosel_x - size of dosel in X global axis
+      \param dosel_y - size of dosel in Y global axis
+      \param dosel_z - size of dosel in Z global axis
+      \param unit - unit of the distance
       \brief set size of dosels
     */
-    void SetDoselSizes(GGfloat3 const& dosel_sizes);
+    void SetDoselSizes(float const& dosel_x, float const& dosel_y, float const& dosel_z, std::string const& unit = "mm");
 
     /*!
       \fn void SetOutputDosimetryFilename(std::string const& output_filename)
@@ -106,11 +110,39 @@ class GGEMS_EXPORT GGEMSDosimetryCalculator
     void SetOutputDosimetryFilename(std::string const& output_filename);
 
     /*!
-      \fn void SetNavigator(std::string const& navigator_name)
-      \param navigator_name - name of navigator associated to dosimetry object
-      \brief set navigator associated to dosimetry object
+      \fn void SetPhotonTracking(bool const& is_activated)
+      \param is_activated - boolean activating photon tracking
+      \brief activating photon tracking during dosimetry mode
     */
-    void SetNavigator(std::string const& navigator_name);
+    void SetPhotonTracking(bool const& is_activated);
+
+    /*!
+      \fn void SetEdep(bool const& is_activated)
+      \param is_activated - boolean activating energy deposit registration
+      \brief activating energy deposit registration during dosimetry mode
+    */
+    void SetEdep(bool const& is_activated);
+
+    /*!
+      \fn void SetHitTracking(bool const& is_activated)
+      \param is_activated - boolean activating hit tracking
+      \brief activating hit tracking during dosimetry mode
+    */
+    void SetHitTracking(bool const& is_activated);
+
+    /*!
+      \fn void SetEdepSquared(bool const& is_activated)
+      \param is_activated - boolean activating energy squared deposit registration
+      \brief activating energy squared deposit registration during dosimetry mode
+    */
+    void SetEdepSquared(bool const& is_activated);
+
+    /*!
+      \fn void SetUncertainty(bool const& is_activated)
+      \param is_activated - boolean activating uncertainty registration
+      \brief activating uncertainty registration during dosimetry mode
+    */
+    void SetUncertainty(bool const& is_activated);
 
     /*!
       \fn inline std::shared_ptr<cl::Buffer> GetPhotonTrackingBuffer(void) const
@@ -148,38 +180,10 @@ class GGEMS_EXPORT GGEMSDosimetryCalculator
     inline std::shared_ptr<cl::Buffer> GetDoseParams(void) const {return dose_params_;}
 
     /*!
-      \fn void SavePhotonTracking(std::string const& basename) const
-      \param basename - basename of the output file
-      \brief save photon tracking in dose map
-    */
-    void SavePhotonTracking(std::string const& basename) const;
-
-    /*!
-      \fn void SaveHit(std::string const& basename) const
-      \param basename - basename of the output file
-      \brief save hits in dose map
-    */
-    void SaveHit(std::string const& basename) const;
-
-    /*!
-      \fn void SaveEdep(std::string const& basename) const
-      \param basename - basename of the output file
-      \brief save energy deposit in dose map
-    */
-    void SaveEdep(std::string const& basename) const;
-
-    /*!
-      \fn void SaveEdepSquared(std::string const& basename) const
-      \param basename - basename of the output file
-      \brief save energy deposit squared in dose map
-    */
-    void SaveEdepSquared(std::string const& basename) const;
-
-    /*!
       \fn void ComputeDose(void)
       \brief compute dose in voxelized solid
     */
-    void ComputeDose(void);
+    void ComputeDoseAndSaveResults(void);
 
   private:
       /*!
@@ -194,17 +198,118 @@ class GGEMS_EXPORT GGEMSDosimetryCalculator
     */
     void InitializeKernel(void);
 
+    /*!
+      \fn void SavePhotonTracking(void) const
+      \brief save photon tracking in dose map
+    */
+    void SavePhotonTracking(void) const;
+
+    /*!
+      \fn void SaveHit(void) const
+      \brief save hits in dose map
+    */
+    void SaveHit(void) const;
+
+    /*!
+      \fn void SaveEdep(void) const
+      \brief save energy deposit in dose map
+    */
+    void SaveEdep(void) const;
+
+    /*!
+      \fn void SaveDose(void) const
+      \brief save dose in dose map
+    */
+    void SaveDose(void) const;
+
+    /*!
+      \fn void SaveEdepSquared(void) const
+      \brief save energy deposit squared in dose map
+    */
+    void SaveEdepSquared(void) const;
+
   private:
     GGfloat3 dosel_sizes_; /*!< Sizes of dosel */
-    std::string dosimetry_output_filename; /*!< Output filename for dosimetry results */
+    std::string dosimetry_output_filename_; /*!< Output filename for dosimetry results */
     std::shared_ptr<GGEMSNavigator> navigator_; /*!< Navigator pointer associated to dosimetry object */
 
     // Buffer storing dose data on OpenCL device and host
     std::shared_ptr<cl::Buffer> dose_params_; /*!< Buffer storing dose parameters in OpenCL device */
     GGEMSDoseRecording dose_recording_; /*!< Structure storing dose data on OpenCL device */
+    bool is_photon_tracking_; /*!< Boolean for photon tracking */
+    bool is_edep_; /*!< Boolean for energy deposit */
+    bool is_hit_tracking_; /*!< Boolean for hit tracking */
+    bool is_edep_squared_; /*!< Boolean for energy squared deposit */
+    bool is_uncertainty_; /*!< Boolean for uncertainty computation */
 
     std::weak_ptr<cl::Kernel> kernel_compute_dose_; /*!< OpenCL kernel computing dose in voxelized solid */
-    DurationNano kernel_compute_dose_timer_; /*!< Timer for kernel computing dose */
 };
+
+/*!
+  \fn GGEMSDosimetryCalculator* create_ggems_dosimetry_calculator(char const* voxelized_phantom_name)
+  \param voxelized_phantom_name - name of voxelized phantom
+  \return the pointer on the dosimetry calculator
+  \brief Get the GGEMSDosimetryCalculator pointer for python user.
+*/
+extern "C" GGEMS_EXPORT GGEMSDosimetryCalculator* create_ggems_dosimetry_calculator(char const* voxelized_phantom_name);
+
+/*!
+  \fn void set_dosel_size_dosimetry_calculator(GGEMSDosimetryCalculator* dose_calculator, GGfloat const dose_x, GGfloat const dose_y, GGfloat const dose_z, char const* unit)
+  \param dose_calculator - pointer on dose calculator
+  \param dose_x - size of dosel in X global axis
+  \param dose_y - size of dosel in Z global axis
+  \param dose_z - size of dosel in Y global axis
+  \param unit - unit of the distance
+  \brief set size of dosels
+*/
+extern "C" GGEMS_EXPORT void set_dosel_size_dosimetry_calculator(GGEMSDosimetryCalculator* dose_calculator, GGfloat const dose_x, GGfloat const dose_y, GGfloat const dose_z, char const* unit);
+
+/*!
+  \fn void set_dose_output_dosimetry_calculator(GGEMSDosimetryCalculator* dose_calculator, char const* dose_output_filename)
+  \param voxelized_phantom - pointer on dose calculator
+  \param dose_output_filename - name of output dosimetry file storing dosimetry
+  \brief set output filename storing dosimetry
+*/
+extern "C" GGEMS_EXPORT void set_dose_output_dosimetry_calculator(GGEMSDosimetryCalculator* dose_calculator, char const* dose_output_filename);
+
+/*!
+  \fn void dose_photon_tracking_dosimetry_calculator(GGEMSDosimetryCalculator* dose_calculator, bool const is_activated)
+  \param dose_calculator - pointer on dose calculator
+  \param is_dosimetry_mode - boolean activating the photon tracking output
+  \brief storing results about photon tracking
+*/
+extern "C" GGEMS_EXPORT void dose_photon_tracking_dosimetry_calculator(GGEMSDosimetryCalculator* dose_calculator, bool const is_activated);
+
+/*!
+  \fn void dose_edep_dosimetry_calculator(GGEMSDosimetryCalculator* dose_calculator, bool const is_activated)
+  \param dose_calculator - pointer on dose calculator
+  \param is_dosimetry_mode - boolean activating energy deposit output
+  \brief storing results about energy deposit
+*/
+extern "C" GGEMS_EXPORT void dose_edep_dosimetry_calculator(GGEMSDosimetryCalculator* dose_calculator, bool const is_activated);
+
+/*!
+  \fn void dose_hit_dosimetry_calculator(GGEMSDosimetryCalculator* dose_calculator, bool const is_activated)
+  \param dose_calculator - pointer on dose calculator
+  \param is_dosimetry_mode - boolean activating the hit tracking output
+  \brief storing results about hit tracking
+*/
+extern "C" GGEMS_EXPORT void dose_hit_dosimetry_calculator(GGEMSDosimetryCalculator* dose_calculator, bool const is_activated);
+
+/*!
+  \fn void dose_edep_squared_dosimetry_calculator(GGEMSDosimetryCalculator* dose_calculator, bool const is_activated)
+  \param dose_calculator - pointer on dose calculator
+  \param is_dosimetry_mode - boolean activating energy squared deposit output
+  \brief storing results about energy squared deposit
+*/
+extern "C" GGEMS_EXPORT void dose_edep_squared_dosimetry_calculator(GGEMSDosimetryCalculator* dose_calculator, bool const is_activated);
+
+/*!
+  \fn void dose_uncertainty_dosimetry_calculator(GGEMSDosimetryCalculator* dose_calculator, bool const is_activated)
+  \param dose_calculator - pointer on dose calculator
+  \param is_dosimetry_mode - boolean activating uncertainty output
+  \brief storing results about uncertainty
+*/
+extern "C" GGEMS_EXPORT void dose_uncertainty_dosimetry_calculator(GGEMSDosimetryCalculator* dose_calculator, bool const is_activated);
 
 #endif // End of GUARD_GGEMS_NAVIGATORS_GGEMSDOSIMETRYCALCULATOR_HH

@@ -225,6 +225,13 @@ class GGEMS_EXPORT GGEMSNavigator
     */
     void StoreOutput(std::string basename);
 
+    /*!
+      \fn void SetDosimetryCalculator(GGEMSDosimetryCalculator* dosimetry_calculator)
+      \param dosimetry_calculator - pointer on dosimetry calculator
+      \brief give adress of dosimetry calculator to navigator
+    */
+    void SetDosimetryCalculator(GGEMSDosimetryCalculator* dosimetry_calculator);
+
   protected:
     /*!
       \fn void CheckParameters(void) const
@@ -250,11 +257,9 @@ class GGEMS_EXPORT GGEMSNavigator
     std::shared_ptr<GGEMSMaterials> materials_; /*!< Materials of phantom */
     std::shared_ptr<GGEMSCrossSections> cross_sections_; /*!< Cross section table for process */
 
-    // Dosimetry for voxelized phantom
-    std::unique_ptr<GGEMSDosimetryCalculator> dose_calculator_; /*!< Dose calculator pointer */
+    // Dosimetry
+    GGEMSDosimetryCalculator* dose_calculator_; /*!< Dose calculator pointer */
     bool is_dosimetry_mode_; /*! Boolean checking if dosimetry mode is activated */
-    GGfloat3 dosel_sizes_; /*!< Sizes of dosel */
-    std::string dosimetry_output_filename; /*!< Output filename for dosimetry results */
 
     // Timers for kernel computation
     DurationNano kernel_particle_solid_distance_timer_; /*!< Timer for kernel computing particle solid distance */
