@@ -48,8 +48,6 @@ GGEMSNavigator::GGEMSNavigator(std::string const& navigator_name)
   is_update_rot_(false),
   output_basename_(""),
   is_dosimetry_mode_(false),
-  dosel_sizes_({-1.0f, -1.0f, -1.0f}),
-  dosimetry_output_filename("dosimetry_output.mhd"),
   kernel_particle_solid_distance_timer_(GGEMSChrono::Zero()),
   kernel_project_to_solid_timer_(GGEMSChrono::Zero()),
   kernel_track_through_solid_timer_(GGEMSChrono::Zero())
@@ -73,6 +71,16 @@ GGEMSNavigator::GGEMSNavigator(std::string const& navigator_name)
 GGEMSNavigator::~GGEMSNavigator(void)
 {
   GGcout("GGEMSNavigator", "~GGEMSNavigator", 3) << "Deallocation of GGEMSNavigator..." << GGendl;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSNavigator::SetDosimetryCalculator(GGEMSDosimetryCalculator* dosimetry_calculator)
+{
+  dose_calculator_ = dosimetry_calculator;
+  is_dosimetry_mode_ = true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

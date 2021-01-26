@@ -33,27 +33,6 @@ class GGEMSVoxelizedPhantom(object):
         ggems_lib.set_rotation_ggems_voxelized_phantom.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_char_p]
         ggems_lib.set_rotation_ggems_voxelized_phantom.restype = ctypes.c_void_p
 
-        ggems_lib.set_dosimetry_mode_voxelized_phantom.argtypes = [ctypes.c_void_p, ctypes.c_bool]
-        ggems_lib.set_dosimetry_mode_voxelized_phantom.restype = ctypes.c_void_p
-
-        ggems_lib.set_dosel_size_voxelized_phantom.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_char_p]
-        ggems_lib.set_dosel_size_voxelized_phantom.restype = ctypes.c_void_p
-
-        ggems_lib.set_dose_output_voxelized_phantom.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
-        ggems_lib.set_dose_output_voxelized_phantom.restype = ctypes.c_void_p
-
-        ggems_lib.dose_photon_tracking_voxelized_phantom.argtypes = [ctypes.c_void_p, ctypes.c_bool]
-        ggems_lib.dose_photon_tracking_voxelized_phantom.restype = ctypes.c_void_p
-
-        ggems_lib.dose_hit_voxelized_phantom.argtypes = [ctypes.c_void_p, ctypes.c_bool]
-        ggems_lib.dose_hit_voxelized_phantom.restype = ctypes.c_void_p
-
-        ggems_lib.dose_edep_voxelized_phantom.argtypes = [ctypes.c_void_p, ctypes.c_bool]
-        ggems_lib.dose_edep_voxelized_phantom.restype = ctypes.c_void_p
-
-        ggems_lib.dose_edep_squared_voxelized_phantom.argtypes = [ctypes.c_void_p, ctypes.c_bool]
-        ggems_lib.dose_edep_squared_voxelized_phantom.restype = ctypes.c_void_p
-
         self.obj = ggems_lib.create_ggems_voxelized_phantom(voxelized_phantom_name.encode('ASCII'))
 
     def set_phantom(self, phantom_filename, range_data_filename):
@@ -64,24 +43,3 @@ class GGEMSVoxelizedPhantom(object):
 
     def set_rotation(self, rx, ry, rz, unit):
         ggems_lib.set_rotation_ggems_voxelized_phantom(self.obj, rx, ry, rz, unit.encode('ASCII'))
-
-    def set_dosimetry_mode(self, mode):
-        ggems_lib.set_dosimetry_mode_voxelized_phantom(self.obj, mode)
-
-    def set_dosel_size(self, dose_x, dose_y, dose_z, unit):
-        ggems_lib.set_dosel_size_voxelized_phantom(self.obj, dose_x, dose_y, dose_z, unit.encode('ASCII'))
-
-    def set_dose_output(self, output):
-        ggems_lib.set_dose_output_voxelized_phantom(self.obj, output.encode('ASCII'))
-
-    def dose_photon_tracking(self, activate):
-        ggems_lib.dose_photon_tracking_voxelized_phantom(self.obj, activate)
-
-    def dose_hit(self, activate):
-        ggems_lib.dose_hit_voxelized_phantom(self.obj, activate)
-
-    def dose_edep(self, activate):
-        ggems_lib.dose_edep_voxelized_phantom(self.obj, activate)
-
-    def dose_edep_squared(self, activate):
-        ggems_lib.dose_edep_squared_voxelized_phantom(self.obj, activate)

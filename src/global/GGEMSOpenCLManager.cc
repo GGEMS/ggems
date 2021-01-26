@@ -151,9 +151,9 @@ GGEMSOpenCLManager::GGEMSOpenCLManager(void)
   device_max_mem_alloc_size_.resize(devices_.size());
   device_max_parameter_size_.resize(devices_.size());
   device_max_samplers_.resize(devices_.size());
-  device_max_work_group_size_.resize(devices_.size());
   device_max_work_item_dimensions_.resize(devices_.size());
   device_max_work_item_sizes_.resize(devices_.size()*3);
+  device_max_work_group_size_.resize(devices_.size());
   device_mem_base_addr_align_.resize(devices_.size());
   device_printf_buffer_size_.resize(devices_.size());
   device_partition_affinity_domain_.resize(devices_.size());
@@ -161,7 +161,7 @@ GGEMSOpenCLManager::GGEMSOpenCLManager(void)
   device_profiling_timer_resolution_.resize(devices_.size());
 
   // Custom work group size, 64 seems a good trade-off
-  work_group_size_.resize(devices_.size(), 64);
+  work_group_size_ = 64;
 
   // Make a char buffer reading char* data
   std::size_t buffer[3] = {0,0,0};
@@ -343,7 +343,6 @@ GGEMSOpenCLManager::~GGEMSOpenCLManager(void)
   device_partition_affinity_domain_.clear();
   device_partition_max_sub_devices_.clear();
   device_profiling_timer_resolution_.clear();
-  work_group_size_.clear();
 
   // Freeing contexts
   contexts_.clear();
@@ -544,7 +543,7 @@ void GGEMSOpenCLManager::PrintDeviceInfos(void) const
     partition_affinity += device_single_fp_config_[i] & CL_DEVICE_AFFINITY_DOMAIN_NEXT_PARTITIONABLE ? "NEXT_PARTITIONABLE " : "";
     GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Partition Affinity: " << partition_affinity << GGendl;
     GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + Timer Resolution: " << device_profiling_timer_resolution_[i] << " ns" << GGendl;
-    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + GGEMS Custom Work Group Size: " << work_group_size_[i] << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << "    + GGEMS Custom Work Group Size: " << work_group_size_ << GGendl;
   }
   GGcout("GGEMSOpenCLManager", "PrintDeviceInfos", 0) << GGendl;
 }
@@ -944,6 +943,24 @@ void GGEMSOpenCLManager::Clean(std::shared_ptr<cl::Buffer> buffer, std::size_t s
 
   GGint error = queue_act_->enqueueFillBuffer(*buffer.get(), 0, 0, size, nullptr, nullptr);
   CheckOpenCLError(error, "GGEMSOpenCLManager", "Clean");
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+std::size_t GGEMSOpenCLManager::GetBestWorkItem(GGulong const& number_of_elements) const
+{
+  if (number_of_elements%work_group_size_ == 0) {
+    return number_of_elements;
+  }
+  else if (number_of_elements <= work_group_size_) {
+    return work_group_size_;
+  }
+  else {
+    return number_of_elements + (work_group_size_ - number_of_elements%work_group_size_);
+  }
+  return 0;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

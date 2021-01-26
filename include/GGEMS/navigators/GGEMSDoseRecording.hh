@@ -94,13 +94,13 @@ inline void dose_record_standard(global GGEMSDoseParams* dose_params, global GGD
   GGint3 dosel_id = convert_int3((*position - dose_params->border_min_xyz_) * dose_params->inv_size_of_dosels_);
   GGint global_dosel_id = dosel_id.x + dosel_id.y * dose_params->number_of_dosels_.x + dosel_id.z * dose_params->number_of_dosels_.x * dose_params->number_of_dosels_.y;
 
-  atomic_add(&hit_tracking[global_dosel_id], 1);
+  if (hit_tracking) atomic_add(&hit_tracking[global_dosel_id], 1);
   #ifdef DOSIMETRY_DOUBLE_PRECISION
   AtomicAddDouble(&edep_tracking[global_dosel_id], (GGDosiType)edep);
-  AtomicAddDouble(&edep_squared_tracking[global_dosel_id], (GGDosiType)edep*(GGDosiType)edep);
+  if (edep_squared_tracking) AtomicAddDouble(&edep_squared_tracking[global_dosel_id], (GGDosiType)edep*(GGDosiType)edep);
   #else
   AtomicAddFloat(&edep_tracking[global_dosel_id], (GGDosiType)edep);
-  AtomicAddFloat(&edep_squared_tracking[global_dosel_id], (GGDosiType)edep*(GGDosiType)edep);
+  if (edep_squared_tracking) AtomicAddFloat(&edep_squared_tracking[global_dosel_id], (GGDosiType)edep*(GGDosiType)edep);
   #endif
 }
 

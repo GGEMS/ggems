@@ -98,58 +98,6 @@ class GGEMS_EXPORT GGEMSVoxelizedPhantom : public GGEMSNavigator
     */
     void SaveResults(void) override;
 
-    /*!
-      \fn void SetDosimetryMode(bool const& dosimetry_mode)
-      \param dosimetry_mode - boolean activating the dosimetry mode
-      \brief activating dosimetry mode for voxelized phantom
-    */
-    void SetDosimetryMode(bool const& dosimetry_mode);
-
-    /*!
-      \fn void SetDoselSizes(float const& dosel_x, float const& dosel_y, float const& dosel_z, std::string const& unit = "mm")
-      \param dosel_x - size of dosel in X global axis
-      \param dosel_y - size of dosel in Y global axis
-      \param dosel_z - size of dosel in Z global axis
-      \param unit - unit of the distance
-      \brief set size of dosels
-    */
-    void SetDoselSizes(float const& dosel_x, float const& dosel_y, float const& dosel_z, std::string const& unit = "mm");
-
-    /*!
-      \fn void SetOutputDosimetryFilename(std::string const& output_filename)
-      \param output_filename - name of output dosimetry file storing dosimetry
-      \brief set output filename storing dosimetry
-    */
-    void SetOutputDosimetryFilename(std::string const& output_filename);
-
-    /*!
-      \fn void SetPhotonTracking(bool const& is_activated)
-      \param is_activated - boolean activating photon tracking
-      \brief activating photon tracking during dosimetry mode
-    */
-    void SetPhotonTracking(bool const& is_activated);
-
-    /*!
-      \fn void SetHitTracking(bool const& is_activated)
-      \param is_activated - boolean activating hit tracking
-      \brief activating hit tracking during dosimetry mode
-    */
-    void SetHitTracking(bool const& is_activated);
-
-    /*!
-      \fn void SetEdep(bool const& is_activated)
-      \param is_activated - boolean activating energy deposit registration
-      \brief activating energy deposit registration during dosimetry mode
-    */
-    void SetEdep(bool const& is_activated);
-
-    /*!
-      \fn void SetEdepSquared(bool const& is_activated)
-      \param is_activated - boolean activating energy squared deposit registration
-      \brief activating energy squared deposit registration during dosimetry mode
-    */
-    void SetEdepSquared(bool const& is_activated);
-
   private:
     /*!
       \fn void CheckParameters(void) const
@@ -160,12 +108,6 @@ class GGEMS_EXPORT GGEMSVoxelizedPhantom : public GGEMSNavigator
   private:
     std::string voxelized_phantom_filename_; /*!< MHD file storing the voxelized phantom */
     std::string range_data_filename_; /*!< File for label to material matching */
-
-    // infos to store for dosimetry
-    bool is_photon_tracking_; /*!< Boolean for photon tracking */
-    bool is_hit_tracking_; /*!< Boolean for hit tracking */
-    bool is_edep_; /*!< Boolean for energy deposit */
-    bool is_edep_squared_; /*!< Boolean for energy squared deposit */
 };
 
 /*!
@@ -206,64 +148,5 @@ extern "C" GGEMS_EXPORT void set_position_ggems_voxelized_phantom(GGEMSVoxelized
   \brief Set the rotation of the voxelized phantom around local axis
 */
 extern "C" GGEMS_EXPORT void set_rotation_ggems_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, GGfloat const rx, GGfloat const ry, GGfloat const rz, char const* unit);
-
-/*!
-  \fn void set_dosimetry_mode_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, bool const is_dosimetry_mode)
-  \param voxelized_phantom - pointer on voxelized phantom
-  \param is_dosimetry_mode - boolean activating the dosimetry mode
-  \brief activating dosimetry mode for voxelized phantom
-*/
-extern "C" GGEMS_EXPORT void set_dosimetry_mode_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, bool const is_dosimetry_mode);
-
-/*!
-  \fn void set_dosel_size_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, GGfloat const dose_x, GGfloat const dose_y, GGfloat const dose_z, char const* unit)
-  \param voxelized_phantom - pointer on voxelized phantom
-  \param dose_x - size of dosel in X global axis
-  \param dose_y - size of dosel in Z global axis
-  \param dose_z - size of dosel in Y global axis
-  \param unit - unit of the distance
-  \brief set size of dosels
-*/
-extern "C" GGEMS_EXPORT void set_dosel_size_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, GGfloat const dose_x, GGfloat const dose_y, GGfloat const dose_z, char const* unit);
-
-/*!
-  \fn void set_dose_output_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, char const* dose_output_filename)
-  \param voxelized_phantom - pointer on voxelized phantom
-  \param dose_output_filename - name of output dosimetry file storing dosimetry
-  \brief set output filename storing dosimetry
-*/
-extern "C" GGEMS_EXPORT void set_dose_output_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, char const* dose_output_filename);
-
-/*!
-  \fn void dose_photon_tracking_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, bool const is_activated)
-  \param voxelized_phantom - pointer on voxelized phantom
-  \param is_dosimetry_mode - boolean activating the photon tracking output
-  \brief storing results about photon tracking
-*/
-extern "C" GGEMS_EXPORT void dose_photon_tracking_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, bool const is_activated);
-
-/*!
-  \fn void dose_hit_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, bool const is_activated)
-  \param voxelized_phantom - pointer on voxelized phantom
-  \param is_dosimetry_mode - boolean activating the hit tracking output
-  \brief storing results about hit tracking
-*/
-extern "C" GGEMS_EXPORT void dose_hit_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, bool const is_activated);
-
-/*!
-  \fn void dose_edep_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, bool const is_activated)
-  \param voxelized_phantom - pointer on voxelized phantom
-  \param is_dosimetry_mode - boolean activating energy deposit output
-  \brief storing results about energy deposit
-*/
-extern "C" GGEMS_EXPORT void dose_edep_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, bool const is_activated);
-
-/*!
-  \fn void dose_edep_squared_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, bool const is_activated)
-  \param voxelized_phantom - pointer on voxelized phantom
-  \param is_dosimetry_mode - boolean activating energy squared deposit output
-  \brief storing results about energy squared deposit
-*/
-extern "C" GGEMS_EXPORT void dose_edep_squared_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, bool const is_activated);
 
 #endif // End of GUARD_GGEMS_NAVIGATORS_GGEMSVOXELIZEDPHANTOM_HH

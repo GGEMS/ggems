@@ -20,36 +20,34 @@ from ggems import *
 
 # ------------------------------------------------------------------------------
 # STEP 0: Level of verbosity during computation
-GGEMSVerbosity(1)
+GGEMSVerbosity(3)
 
 # ------------------------------------------------------------------------------
 # STEP 1: Choosing an OpenCL context
 opencl_manager.set_context_index(0)
 
 # ------------------------------------------------------------------------------
-# STEP 2: Visualization
-
-# ------------------------------------------------------------------------------
-# STEP 3: Setting GGEMS materials
+# STEP 2: Setting GGEMS materials
 materials_database_manager.set_materials('data/materials.txt')
 
 # ------------------------------------------------------------------------------
-# STEP 4: Phantoms and activating dose registration
+# STEP 3: Phantoms
 phantom = GGEMSVoxelizedPhantom('phantom')
 phantom.set_phantom('data/phantom.mhd', 'data/range_phantom.txt')
 phantom.set_rotation(0.0, 0.0, 0.0, 'deg')
 phantom.set_position(0.0, 0.0, 0.0, 'mm')
 
-# Dosimetry
-phantom.set_dosimetry_mode(True) # Activate the dosimetry mode
-phantom.set_dosel_size(0.5, 0.5, 0.5, 'mm')
+# ------------------------------------------------------------------------------
+# STEP 4: Dosimetry
+dosimetry = GGEMSDosimetryCalculator('phantom')
+dosimetry.set_output('data/dosimetry')
+dosimetry.set_dosel_size(0.5, 0.5, 0.5, 'mm')
+dosimetry.photon_tracking(True) # Register photon tracking results
+dosimetry.edep(True) # Register energy deposit results
 
-# Output
-phantom.set_dose_output('data/phantom_dosi')
-phantom.dose_photon_tracking(True) # Register photon tracking results
-phantom.dose_hit(True) # Register hit tracking results
-phantom.dose_edep(True) # Register energy deposit results
-phantom.dose_edep_squared(True) # Register energy squared deposit results
+# dosimetry.hit(True) # Register hit tracking results
+# dosimetry.edep_squared(True) # Register energy squared deposit results
+# dosimetry.uncertainty(True) # Register uncertainty map
 
 # ------------------------------------------------------------------------------
 # STEP 5: Physics
@@ -73,7 +71,7 @@ point_source.set_source_particle_type('gamma')
 point_source.set_number_of_particles(1000000)
 point_source.set_position(-595.0, 0.0, 0.0, 'mm')
 point_source.set_rotation(0.0, 0.0, 0.0, 'deg')
-point_source.set_beam_aperture(10.0, 'deg')
+point_source.set_beam_aperture(5.0, 'deg')
 point_source.set_focal_spot_size(0.0, 0.0, 0.0, 'mm')
 point_source.set_polyenergy('data/spectrum_120kVp_2mmAl.dat')
 
