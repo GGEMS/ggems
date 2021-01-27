@@ -286,7 +286,7 @@ void GGEMSManager::Run()
         navigator_manager.ProjectToSolid();
 
         // Step 4: Track through step, particles are tracked in selected solid
-        // GGcout("GGEMSManager", "Run", 2) << "      + Tracking particles through solid..." << GGendl;
+        GGcout("GGEMSManager", "Run", 2) << "      + Tracking particles through solid..." << GGendl;
         navigator_manager.TrackThroughSolid();
 
       } while (source_manager.IsAlive()); // Step 5: Checking if all particles are dead, otherwize go back to step 2

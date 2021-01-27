@@ -110,6 +110,13 @@ class GGEMS_EXPORT GGEMSDosimetryCalculator
     void SetOutputDosimetryFilename(std::string const& output_filename);
 
     /*!
+      \fn void SetScaleFactor(GGfloat const& scale_factor)
+      \param scale_factor - scale factor applied to dose value
+      \brief set the scale factor applied to dose value
+    */
+    void SetScaleFactor(GGfloat const& scale_factor);
+
+    /*!
       \fn void SetPhotonTracking(bool const& is_activated)
       \param is_activated - boolean activating photon tracking
       \brief activating photon tracking during dosimetry mode
@@ -143,6 +150,21 @@ class GGEMS_EXPORT GGEMSDosimetryCalculator
       \brief activating uncertainty registration during dosimetry mode
     */
     void SetUncertainty(bool const& is_activated);
+
+    /*!
+      \fn void SetWaterReference(bool const& is_activated)
+      \param is_activated - boolean activating water reference
+      \brief activating water reference during dose computation
+    */
+    void SetWaterReference(bool const& is_activated);
+
+    /*!
+      \fn void SetMinimumDensity(float const& minimum_density, std::string const& unit = "g/cm3")
+      \param minimum_density - minimum of density
+      \param unit - unit of the density
+      \brief set minimum of density for dose computation
+    */
+    void SetMinimumDensity(float const& minimum_density, std::string const& unit = "g/cm3");
 
     /*!
       \fn inline std::shared_ptr<cl::Buffer> GetPhotonTrackingBuffer(void) const
@@ -180,8 +202,8 @@ class GGEMS_EXPORT GGEMSDosimetryCalculator
     inline std::shared_ptr<cl::Buffer> GetDoseParams(void) const {return dose_params_;}
 
     /*!
-      \fn void ComputeDose(void)
-      \brief compute dose in voxelized solid
+      \fn void ComputeDoseAndSaveResults(void)
+      \brief compute dose and save results into output files
     */
     void ComputeDoseAndSaveResults(void);
 
@@ -200,7 +222,7 @@ class GGEMS_EXPORT GGEMSDosimetryCalculator
 
     /*!
       \fn void SavePhotonTracking(void) const
-      \brief save photon tracking in dose map
+      \brief save photon tracking
     */
     void SavePhotonTracking(void) const;
 
@@ -212,21 +234,27 @@ class GGEMS_EXPORT GGEMSDosimetryCalculator
 
     /*!
       \fn void SaveEdep(void) const
-      \brief save energy deposit in dose map
+      \brief save energy deposit
     */
     void SaveEdep(void) const;
 
     /*!
       \fn void SaveDose(void) const
-      \brief save dose in dose map
+      \brief save dose
     */
     void SaveDose(void) const;
 
     /*!
       \fn void SaveEdepSquared(void) const
-      \brief save energy deposit squared in dose map
+      \brief save energy squared deposit
     */
     void SaveEdepSquared(void) const;
+
+    /*!
+      \fn void SaveUncertainty(void) const
+      \brief save uncertainty values
+    */
+    void SaveUncertainty(void) const;
 
   private:
     GGfloat3 dosel_sizes_; /*!< Sizes of dosel */
@@ -241,6 +269,9 @@ class GGEMS_EXPORT GGEMSDosimetryCalculator
     bool is_hit_tracking_; /*!< Boolean for hit tracking */
     bool is_edep_squared_; /*!< Boolean for energy squared deposit */
     bool is_uncertainty_; /*!< Boolean for uncertainty computation */
+    GGfloat scale_factor_; /*!< Scale factor */
+    GGchar is_water_reference_; /*<! Water reference for dose computation */
+    GGfloat minimum_density_; /*!< Minimum density value for dose computation */
 
     std::weak_ptr<cl::Kernel> kernel_compute_dose_; /*!< OpenCL kernel computing dose in voxelized solid */
 };
@@ -252,6 +283,38 @@ class GGEMS_EXPORT GGEMSDosimetryCalculator
   \brief Get the GGEMSDosimetryCalculator pointer for python user.
 */
 extern "C" GGEMS_EXPORT GGEMSDosimetryCalculator* create_ggems_dosimetry_calculator(char const* voxelized_phantom_name);
+
+/*!
+  \fn GGEMSTube* delete_dosimetry_calculator(GGEMSDosimetryCalculator* dose_calculator)
+  \param dose_calculator - pointer on dose calculator
+  \brief Delete instance of GGEMSDosimetryCalculator
+*/
+extern "C" GGEMS_EXPORT void delete_dosimetry_calculator(GGEMSDosimetryCalculator* dose_calculator);
+
+/*!
+  \fn void scale_factor_dosimetry_calculator(GGEMSDosimetryCalculator* dose_calculator, GGfloat const scale_factor)
+  \param dose_calculator - pointer on dose calculator
+  \param scale_factor - scale factor applied to dose value
+  \brief set the scale factor applied to dose value
+*/
+extern "C" GGEMS_EXPORT void scale_factor_dosimetry_calculator(GGEMSDosimetryCalculator* dose_calculator, GGfloat const scale_factor);
+
+/*!
+  \fn void water_reference_dosimetry_calculator(GGEMSDosimetryCalculator* dose_calculator, bool const is_activated)
+  \param dose_calculator - pointer on dose calculator
+  \param is_activated - boolean activating water reference mode for dose computation
+  \brief set water reference mode
+*/
+extern "C" GGEMS_EXPORT void water_reference_dosimetry_calculator(GGEMSDosimetryCalculator* dose_calculator, bool const is_activated);
+
+/*!
+  \fn void minimum_density_dosimetry_calculator(GGEMSDosimetryCalculator* dose_calculator, GGfloat const minimum_density, char const* unit)
+  \param dose_calculator - pointer on dose calculator
+  \param minimum_density - minimum of density
+  \param unit - unit of the density
+  \brief set minimum of density for dose computation
+*/
+extern "C" GGEMS_EXPORT void minimum_density_dosimetry_calculator(GGEMSDosimetryCalculator* dose_calculator, GGfloat const minimum_density, char const* unit);
 
 /*!
   \fn void set_dosel_size_dosimetry_calculator(GGEMSDosimetryCalculator* dose_calculator, GGfloat const dose_x, GGfloat const dose_y, GGfloat const dose_z, char const* unit)
@@ -275,7 +338,7 @@ extern "C" GGEMS_EXPORT void set_dose_output_dosimetry_calculator(GGEMSDosimetry
 /*!
   \fn void dose_photon_tracking_dosimetry_calculator(GGEMSDosimetryCalculator* dose_calculator, bool const is_activated)
   \param dose_calculator - pointer on dose calculator
-  \param is_dosimetry_mode - boolean activating the photon tracking output
+  \param is_activated - boolean activating the photon tracking output
   \brief storing results about photon tracking
 */
 extern "C" GGEMS_EXPORT void dose_photon_tracking_dosimetry_calculator(GGEMSDosimetryCalculator* dose_calculator, bool const is_activated);
@@ -283,7 +346,7 @@ extern "C" GGEMS_EXPORT void dose_photon_tracking_dosimetry_calculator(GGEMSDosi
 /*!
   \fn void dose_edep_dosimetry_calculator(GGEMSDosimetryCalculator* dose_calculator, bool const is_activated)
   \param dose_calculator - pointer on dose calculator
-  \param is_dosimetry_mode - boolean activating energy deposit output
+  \param is_activated - boolean activating energy deposit output
   \brief storing results about energy deposit
 */
 extern "C" GGEMS_EXPORT void dose_edep_dosimetry_calculator(GGEMSDosimetryCalculator* dose_calculator, bool const is_activated);
@@ -291,7 +354,7 @@ extern "C" GGEMS_EXPORT void dose_edep_dosimetry_calculator(GGEMSDosimetryCalcul
 /*!
   \fn void dose_hit_dosimetry_calculator(GGEMSDosimetryCalculator* dose_calculator, bool const is_activated)
   \param dose_calculator - pointer on dose calculator
-  \param is_dosimetry_mode - boolean activating the hit tracking output
+  \param is_activated - boolean activating the hit tracking output
   \brief storing results about hit tracking
 */
 extern "C" GGEMS_EXPORT void dose_hit_dosimetry_calculator(GGEMSDosimetryCalculator* dose_calculator, bool const is_activated);
@@ -299,7 +362,7 @@ extern "C" GGEMS_EXPORT void dose_hit_dosimetry_calculator(GGEMSDosimetryCalcula
 /*!
   \fn void dose_edep_squared_dosimetry_calculator(GGEMSDosimetryCalculator* dose_calculator, bool const is_activated)
   \param dose_calculator - pointer on dose calculator
-  \param is_dosimetry_mode - boolean activating energy squared deposit output
+  \param is_activated - boolean activating energy squared deposit output
   \brief storing results about energy squared deposit
 */
 extern "C" GGEMS_EXPORT void dose_edep_squared_dosimetry_calculator(GGEMSDosimetryCalculator* dose_calculator, bool const is_activated);
@@ -307,7 +370,7 @@ extern "C" GGEMS_EXPORT void dose_edep_squared_dosimetry_calculator(GGEMSDosimet
 /*!
   \fn void dose_uncertainty_dosimetry_calculator(GGEMSDosimetryCalculator* dose_calculator, bool const is_activated)
   \param dose_calculator - pointer on dose calculator
-  \param is_dosimetry_mode - boolean activating uncertainty output
+  \param is_activated - boolean activating uncertainty output
   \brief storing results about uncertainty
 */
 extern "C" GGEMS_EXPORT void dose_uncertainty_dosimetry_calculator(GGEMSDosimetryCalculator* dose_calculator, bool const is_activated);
