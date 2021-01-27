@@ -315,6 +315,38 @@ T AngleUnit(T const& value, std::string const& unit)
   }
   return new_value;
 }
+#include <iostream>
+/*!
+  \fn T DensityUnit(T const& value, std::string const& unit)
+  \tparam T - type of the value to convert unit
+  \param value - value to check
+  \param unit - density unit
+  \brief Choose best density unit
+  \return value in the good unit
+*/
+template <typename T>
+T DensityUnit(T const& value, std::string const& unit)
+{
+  T new_value = static_cast<T>(0);
+  if (unit == "g/cm3") {
+    new_value = static_cast<T>(value * g/cm3);
+  }
+  else if (unit == "kg/m3") {
+    new_value = static_cast<T>(value * kg/m3);
+  }
+  else if (unit == "mg/cm3") {
+    new_value = static_cast<T>(value * mg/cm3);
+  }
+  else {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "Unknown unit!!! You have choice between:" << std::endl;
+    oss << "    - \"g/cm3\": gram per cubic centimeter" << std::endl;
+    oss << "    - \"kg/m3\": kilogram per cubic meter" << std::endl;
+    oss << "    - \"mg/cm3\": milligram per cubic centimeter" << std::endl;
+    GGEMSMisc::ThrowException("", "DensityUnit", oss.str());
+  }
+  return new_value;
+}
 #endif
 
 #endif // End of GUARD_GGEMS_TOOLS_GGEMSSYSTEMOFUNITS_HH

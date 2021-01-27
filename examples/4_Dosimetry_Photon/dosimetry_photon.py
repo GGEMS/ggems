@@ -20,7 +20,7 @@ from ggems import *
 
 # ------------------------------------------------------------------------------
 # STEP 0: Level of verbosity during computation
-GGEMSVerbosity(3)
+GGEMSVerbosity(1)
 
 # ------------------------------------------------------------------------------
 # STEP 1: Choosing an OpenCL context
@@ -41,13 +41,15 @@ phantom.set_position(0.0, 0.0, 0.0, 'mm')
 # STEP 4: Dosimetry
 dosimetry = GGEMSDosimetryCalculator('phantom')
 dosimetry.set_output('data/dosimetry')
-dosimetry.set_dosel_size(0.5, 0.5, 0.5, 'mm')
-dosimetry.photon_tracking(True) # Register photon tracking results
-dosimetry.edep(True) # Register energy deposit results
+dosimetry.set_dosel_size(1.0, 1.0, 1.0, 'mm')
+dosimetry.water_reference(False)
+dosimetry.minimum_density(0.1, 'g/cm3')
 
-# dosimetry.hit(True) # Register hit tracking results
-# dosimetry.edep_squared(True) # Register energy squared deposit results
-# dosimetry.uncertainty(True) # Register uncertainty map
+dosimetry.uncertainty(True)
+dosimetry.photon_tracking(True)
+dosimetry.edep(True)
+dosimetry.hit(True)
+dosimetry.edep_squared(True)
 
 # ------------------------------------------------------------------------------
 # STEP 5: Physics
@@ -68,7 +70,7 @@ range_cuts_manager.set_cut('gamma', 0.1, 'mm', 'all')
 # STEP 7: Source
 point_source = GGEMSXRaySource('point_source')
 point_source.set_source_particle_type('gamma')
-point_source.set_number_of_particles(1000000)
+point_source.set_number_of_particles(100000000)
 point_source.set_position(-595.0, 0.0, 0.0, 'mm')
 point_source.set_rotation(0.0, 0.0, 0.0, 'deg')
 point_source.set_beam_aperture(5.0, 'deg')
@@ -94,4 +96,7 @@ ggems_manager.initialize(777)
 # Start GGEMS simulation
 ggems_manager.run()
 
+# ------------------------------------------------------------------------------
+# STEP 9: Exit code
+dosimetry.delete()
 exit()

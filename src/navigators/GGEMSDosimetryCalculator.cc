@@ -51,7 +51,10 @@ GGEMSDosimetryCalculator::GGEMSDosimetryCalculator(std::string const& navigator_
   is_edep_(false),
   is_edep_squared_(false),
   is_hit_tracking_(false),
-  is_uncertainty_(false)
+  is_uncertainty_(false),
+  scale_factor_(1.0f),
+  is_water_reference_(FALSE),
+  minimum_density_(0.0f)
 {
   GGcout("GGEMSDosimetryCalculator", "GGEMSDosimetryCalculator", 3) << "Allocation of GGEMSDosimetryCalculator..." << GGendl;
 
@@ -82,13 +85,22 @@ void GGEMSDosimetryCalculator::SetDoselSizes(float const& dosel_x, float const& 
   dosel_sizes_.s[2] = DistanceUnit(dosel_z, unit);
 }
 
-// ////////////////////////////////////////////////////////////////////////////////
-// ////////////////////////////////////////////////////////////////////////////////
-// ////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 void GGEMSDosimetryCalculator::SetOutputDosimetryFilename(std::string const& output_filename)
 {
   dosimetry_output_filename_ = output_filename;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSDosimetryCalculator::SetScaleFactor(GGfloat const& scale_factor)
+{
+  scale_factor_ = scale_factor;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -134,6 +146,25 @@ void GGEMSDosimetryCalculator::SetEdepSquared(bool const& is_activated)
 void GGEMSDosimetryCalculator::SetUncertainty(bool const& is_activated)
 {
   is_uncertainty_ = is_activated;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSDosimetryCalculator::SetWaterReference(bool const& is_activated)
+{
+  if (is_activated) is_water_reference_ = TRUE;
+  else is_water_reference_ = FALSE;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSDosimetryCalculator::SetMinimumDensity(float const& minimum_density, std::string const& unit)
+{
+  minimum_density_ = DensityUnit(minimum_density, unit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -203,10 +234,16 @@ void GGEMSDosimetryCalculator::ComputeDoseAndSaveResults(void)
   kernel->setArg(0, number_of_dosels);
   kernel->setArg(1, *dose_params_.get());
   kernel->setArg(2, *dose_recording_.edep_.get());
-  kernel->setArg(3, *navigator_->GetSolids().at(0)->GetSolidData()); // 1 solid in voxelized phantom
-  kernel->setArg(4, *navigator_->GetSolids().at(0)->GetLabelData());
-  kernel->setArg(5, *navigator_->GetMaterials().lock()->GetMaterialTables().lock().get());
-  kernel->setArg(6, *dose_recording_.dose_.get());
+  kernel->setArg(3, *dose_recording_.hit_.get());
+  kernel->setArg(4, *dose_recording_.edep_squared_.get());
+  kernel->setArg(5, *navigator_->GetSolids().at(0)->GetSolidData()); // 1 solid in voxelized phantom
+  kernel->setArg(6, *navigator_->GetSolids().at(0)->GetLabelData());
+  kernel->setArg(7, *navigator_->GetMaterials().lock()->GetMaterialTables().lock().get());
+  kernel->setArg(8, *dose_recording_.dose_.get());
+  kernel->setArg(9, *dose_recording_.uncertainty_dose_.get());
+  kernel->setArg(10, scale_factor_);
+  kernel->setArg(11, is_water_reference_);
+  kernel->setArg(12, minimum_density_);
 
   // Launching kernel
   GGint kernel_status = queue->enqueueNDRangeKernel(*kernel, 0, global_wi, local_wi, nullptr, event);
@@ -223,6 +260,9 @@ void GGEMSDosimetryCalculator::ComputeDoseAndSaveResults(void)
   SaveDose();
   if (is_photon_tracking_) SavePhotonTracking();
   if (is_edep_) SaveEdep();
+  if (is_hit_tracking_) SaveHit();
+  if (is_edep_squared_) SaveEdepSquared();
+  if (is_uncertainty_) SaveUncertainty();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -298,22 +338,22 @@ void GGEMSDosimetryCalculator::Initialize(void)
   // Allocated buffers storing dose on OpenCL device
   dose_recording_.edep_ = opencl_manager.Allocate(nullptr, total_number_of_dosels*sizeof(GGDosiType), CL_MEM_READ_WRITE);
   dose_recording_.dose_ = opencl_manager.Allocate(nullptr, total_number_of_dosels*sizeof(GGfloat), CL_MEM_READ_WRITE);
-  dose_recording_.edep_squared_ = nullptr;
-  dose_recording_.hit_ = nullptr;
-  dose_recording_.photon_tracking_ = is_photon_tracking_ ? opencl_manager.Allocate(nullptr, total_number_of_dosels*sizeof(GGint), CL_MEM_READ_WRITE) : nullptr;
 
-  //dose_recording_.edep_squared_ = opencl_manager.Allocate(nullptr, total_number_of_dosels*sizeof(GGDosiType), CL_MEM_READ_WRITE);
-  //dose_recording_.hit_ = opencl_manager.Allocate(nullptr, total_number_of_dosels*sizeof(GGint), CL_MEM_READ_WRITE);
-  //dose_recording_.uncertainty_dose_ = opencl_manager.Allocate(nullptr, total_number_of_dosels*sizeof(GGfloat), CL_MEM_READ_WRITE);
+  dose_recording_.uncertainty_dose_ = is_uncertainty_ ? opencl_manager.Allocate(nullptr, total_number_of_dosels*sizeof(GGfloat), CL_MEM_READ_WRITE) : nullptr;
+  dose_recording_.edep_squared_ = (is_edep_squared_||is_uncertainty_) ? opencl_manager.Allocate(nullptr, total_number_of_dosels*sizeof(GGDosiType), CL_MEM_READ_WRITE) : nullptr;
+  dose_recording_.hit_ = (is_hit_tracking_||is_uncertainty_) ? opencl_manager.Allocate(nullptr, total_number_of_dosels*sizeof(GGint), CL_MEM_READ_WRITE) : nullptr;
+
+  dose_recording_.photon_tracking_ = is_photon_tracking_ ? opencl_manager.Allocate(nullptr, total_number_of_dosels*sizeof(GGint), CL_MEM_READ_WRITE) : nullptr;
 
   // Set buffer to zero
   opencl_manager.Clean(dose_recording_.edep_, total_number_of_dosels*sizeof(GGDosiType));
   opencl_manager.Clean(dose_recording_.dose_, total_number_of_dosels*sizeof(GGfloat));
-  if (is_photon_tracking_) opencl_manager.Clean(dose_recording_.photon_tracking_, total_number_of_dosels*sizeof(GGint));
 
-  //opencl_manager.Clean(dose_recording_.edep_squared_, total_number_of_dosels*sizeof(GGDosiType));
-  //opencl_manager.Clean(dose_recording_.hit_, total_number_of_dosels*sizeof(GGint));
-  //opencl_manager.Clean(dose_recording_.uncertainty_dose_, total_number_of_dosels*sizeof(GGfloat));
+  if (is_uncertainty_) opencl_manager.Clean(dose_recording_.uncertainty_dose_, total_number_of_dosels*sizeof(GGfloat));
+  if (is_edep_squared_||is_uncertainty_) opencl_manager.Clean(dose_recording_.edep_squared_, total_number_of_dosels*sizeof(GGDosiType));
+  if (is_hit_tracking_||is_uncertainty_) opencl_manager.Clean(dose_recording_.hit_, total_number_of_dosels*sizeof(GGint));
+
+  if (is_photon_tracking_) opencl_manager.Clean(dose_recording_.photon_tracking_, total_number_of_dosels*sizeof(GGint));
 
   InitializeKernel();
 }
@@ -494,9 +534,64 @@ void GGEMSDosimetryCalculator::SaveDose(void) const
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+void GGEMSDosimetryCalculator::SaveUncertainty(void) const
+{
+  // Get the OpenCL manager
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+
+  // Get pointer on OpenCL device for dose parameters
+  GGEMSDoseParams* dose_params_device = opencl_manager.GetDeviceBuffer<GGEMSDoseParams>(dose_params_.get(), sizeof(GGEMSDoseParams));
+
+  GGfloat* uncertainty = new GGfloat[dose_params_device->total_number_of_dosels_];
+  std::memset(uncertainty, 0, dose_params_device->total_number_of_dosels_*sizeof(GGfloat));
+
+  GGEMSMHDImage mhdImage;
+  mhdImage.SetBaseName(dosimetry_output_filename_ + "_uncertainty");
+  mhdImage.SetDataType("MET_FLOAT");
+  mhdImage.SetDimensions(dose_params_device->number_of_dosels_);
+  mhdImage.SetElementSizes(dose_params_device->size_of_dosels_);
+
+  GGfloat* uncertainty_device = opencl_manager.GetDeviceBuffer<GGfloat>(dose_recording_.uncertainty_dose_.get(), dose_params_device->total_number_of_dosels_*sizeof(GGfloat));
+
+  for (GGint i = 0; i < dose_params_device->total_number_of_dosels_; ++i) uncertainty[i] = uncertainty_device[i];
+
+  // Writing data
+  mhdImage.Write<GGfloat>(uncertainty, dose_params_device->total_number_of_dosels_);
+  opencl_manager.ReleaseDeviceBuffer(dose_recording_.uncertainty_dose_.get(), uncertainty_device);
+  delete[] uncertainty;
+
+  // Release the pointer
+  opencl_manager.ReleaseDeviceBuffer(dose_params_.get(), dose_params_device);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 GGEMSDosimetryCalculator* create_ggems_dosimetry_calculator(char const* voxelized_phantom_name)
 {
   return new(std::nothrow) GGEMSDosimetryCalculator(voxelized_phantom_name);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void delete_dosimetry_calculator(GGEMSDosimetryCalculator* dose_calculator)
+{
+  if (dose_calculator) {
+    delete dose_calculator;
+    dose_calculator = nullptr;
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void scale_factor_dosimetry_calculator(GGEMSDosimetryCalculator* dose_calculator, GGfloat const scale_factor)
+{
+  dose_calculator->SetScaleFactor(scale_factor);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -560,4 +655,22 @@ void dose_edep_squared_dosimetry_calculator(GGEMSDosimetryCalculator* dose_calcu
 void dose_uncertainty_dosimetry_calculator(GGEMSDosimetryCalculator* dose_calculator, bool const is_activated)
 {
   dose_calculator->SetUncertainty(is_activated);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void water_reference_dosimetry_calculator(GGEMSDosimetryCalculator* dose_calculator, bool const is_activated)
+{
+  dose_calculator->SetWaterReference(is_activated);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void minimum_density_dosimetry_calculator(GGEMSDosimetryCalculator* dose_calculator, GGfloat const minimum_density, char const* unit)
+{
+  dose_calculator->SetMinimumDensity(minimum_density, unit);
 }
