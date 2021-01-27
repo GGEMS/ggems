@@ -322,9 +322,9 @@ void GGEMSDosimetryCalculator::Initialize(void)
 
   // Get the number of voxels
   GGint3 number_of_dosels = {
-    static_cast<int>(floor(dosemap_size.x / voxel_sizes.x)),
-    static_cast<int>(floor(dosemap_size.y / voxel_sizes.y)),
-    static_cast<int>(floor(dosemap_size.z / voxel_sizes.z))
+    static_cast<int>(ceil(dosemap_size.x / voxel_sizes.x)),
+    static_cast<int>(ceil(dosemap_size.y / voxel_sizes.y)),
+    static_cast<int>(ceil(dosemap_size.z / voxel_sizes.z))
   };
 
   dose_params_device->number_of_dosels_ = number_of_dosels;
