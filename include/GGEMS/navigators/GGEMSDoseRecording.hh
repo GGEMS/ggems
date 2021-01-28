@@ -71,6 +71,10 @@ inline void dose_photon_tracking(global GGEMSDoseParams* dose_params, global GGi
   GGint3 dosel_id = convert_int3((*position - dose_params->border_min_xyz_) * dose_params->inv_size_of_dosels_);
   GGint global_dosel_id = dosel_id.x + dosel_id.y * dose_params->number_of_dosels_.x + dosel_id.z * dose_params->number_of_dosels_.x * dose_params->number_of_dosels_.y;
 
+  if (dosel_id.x < 0 || dosel_id.x >= dose_params->number_of_dosels_.x) return;
+  if (dosel_id.y < 0 || dosel_id.y >= dose_params->number_of_dosels_.y) return;
+  if (dosel_id.z < 0 || dosel_id.z >= dose_params->number_of_dosels_.z) return;
+
   atomic_add(&photon_tracking[global_dosel_id], 1);
 }
 
@@ -94,6 +98,10 @@ inline void dose_record_standard(global GGEMSDoseParams* dose_params, global GGD
   // Get index in dose map
   GGint3 dosel_id = convert_int3((*position - dose_params->border_min_xyz_) * dose_params->inv_size_of_dosels_);
   GGint global_dosel_id = dosel_id.x + dosel_id.y * dose_params->number_of_dosels_.x + dosel_id.z * dose_params->number_of_dosels_.x * dose_params->number_of_dosels_.y;
+
+  if (dosel_id.x < 0 || dosel_id.x >= dose_params->number_of_dosels_.x) return;
+  if (dosel_id.y < 0 || dosel_id.y >= dose_params->number_of_dosels_.y) return;
+  if (dosel_id.z < 0 || dosel_id.z >= dose_params->number_of_dosels_.z) return;
 
   if (hit_tracking) atomic_add(&hit_tracking[global_dosel_id], 1);
   #ifdef DOSIMETRY_DOUBLE_PRECISION
