@@ -290,6 +290,17 @@ void GGEMSDosimetryCalculator::Initialize(void)
     voxel_sizes = dynamic_cast<GGEMSVoxelizedSolid*>(navigator_->GetSolids().at(0).get())->GetVoxelSizes();
   }
 
+  // If photon tracking activated, voxel sizes of phantom and dosels size should be the same, otherwise artefacts!!!
+  if (is_photon_tracking_) {
+    if (voxel_sizes.x != dynamic_cast<GGEMSVoxelizedSolid*>(navigator_->GetSolids().at(0).get())->GetVoxelSizes().x ||
+        voxel_sizes.y != dynamic_cast<GGEMSVoxelizedSolid*>(navigator_->GetSolids().at(0).get())->GetVoxelSizes().y ||
+        voxel_sizes.z != dynamic_cast<GGEMSVoxelizedSolid*>(navigator_->GetSolids().at(0).get())->GetVoxelSizes().z) {
+      std::ostringstream oss(std::ostringstream::out);
+      oss << "Dosel size and voxel size in voxelized phantom have to be the same when photon tracking is activated!!!";
+      GGEMSMisc::ThrowException("GGEMSDosimetryCalculator", "Initialize", oss.str());
+    }
+  }
+
   // Storing voxel size
   dose_params_device->size_of_dosels_ = voxel_sizes;
 
@@ -322,9 +333,9 @@ void GGEMSDosimetryCalculator::Initialize(void)
 
   // Get the number of voxels
   GGint3 number_of_dosels = {
-    static_cast<int>(ceil(dosemap_size.x / voxel_sizes.x)),
-    static_cast<int>(ceil(dosemap_size.y / voxel_sizes.y)),
-    static_cast<int>(ceil(dosemap_size.z / voxel_sizes.z))
+    static_cast<int>(dosemap_size.x / voxel_sizes.x),
+    static_cast<int>(dosemap_size.y / voxel_sizes.y),
+    static_cast<int>(dosemap_size.z / voxel_sizes.z)
   };
 
   dose_params_device->number_of_dosels_ = number_of_dosels;
