@@ -20,11 +20,11 @@ from ggems import *
 
 # ------------------------------------------------------------------------------
 # STEP 0: Level of verbosity during computation
-GGEMSVerbosity(0)
+GGEMSVerbosity(1)
 
 # ------------------------------------------------------------------------------
 # STEP 1: OpenCL Initialization
-opencl_manager.set_context_index(0)
+opencl_manager.set_context_index(1)
 
 # ------------------------------------------------------------------------------
 # STEP 2: Initializing volume creator manager and setting the informations about the global voxelized volume
@@ -71,5 +71,4 @@ volume_creator_manager.write()
 
 # ------------------------------------------------------------------------------
 # STEP 5: Exit GGEMS safely
-opencl_manager.clean()
 exit()

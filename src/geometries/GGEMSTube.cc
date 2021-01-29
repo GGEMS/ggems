@@ -74,7 +74,7 @@ void GGEMSTube::Initialize(void)
 
   // Get the data type and compiling kernel
   std::string const kDataType = "-D" + volume_creator_manager.GetDataType();
-  kernel_draw_volume_cl_ = opencl_manager.CompileKernel(kFilename, "draw_ggems_tube", nullptr, const_cast<char*>(kDataType.c_str()));
+  kernel_draw_volume_ = opencl_manager.CompileKernel(kFilename, "draw_ggems_tube", nullptr, const_cast<char*>(kDataType.c_str()));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -102,7 +102,7 @@ void GGEMSTube::Draw(void)
   cl::Buffer* voxelized_phantom = volume_creator_manager.GetVoxelizedVolume();
 
   // Set parameters for kernel
-  std::shared_ptr<cl::Kernel> kernel_cl = kernel_draw_volume_cl_.lock();
+  std::shared_ptr<cl::Kernel> kernel_cl = kernel_draw_volume_.lock();
   kernel_cl->setArg(0, number_of_elements);
   kernel_cl->setArg(1, voxel_sizes);
   kernel_cl->setArg(2, phantom_dimensions);

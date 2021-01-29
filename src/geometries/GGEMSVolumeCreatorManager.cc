@@ -43,7 +43,7 @@ GGEMSVolumeCreatorManager::GGEMSVolumeCreatorManager(void)
   data_type_("MET_FLOAT"),
   output_image_filename_(""),
   output_range_to_material_filename_(""),
-  voxelized_volume_cl_(nullptr)
+  voxelized_volume_(nullptr)
 {
   GGcout("GGEMSVolumeCreatorManager", "GGEMSVolumeCreatorManager", 3) << "Allocation of Phantom Creator Manager singleton..." << GGendl;
 }
@@ -248,7 +248,7 @@ void GGEMSVolumeCreatorManager::WriteMHDImage(void) const
   mhdImage.SetDataType(data_type_);
   mhdImage.SetDimensions(volume_dimensions_);
   mhdImage.SetElementSizes(element_sizes_);
-  mhdImage.Write(voxelized_volume_cl_);
+  mhdImage.Write(voxelized_volume_);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

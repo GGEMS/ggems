@@ -17,27 +17,28 @@
 // ************************************************************************
 
 /*!
-  \file ct_scanner.cc
+  \file generate_volume.cc
 
-  \brief Example of ct/cbct scanner simulation
+  \brief Example of volume creation
 
   \author Julien BERT <julien.bert@univ-brest.fr>
   \author Didier BENOIT <didier.benoit@inserm.fr>
   \author LaTIM, INSERM - U1101, Brest, FRANCE
   \version 1.0
-  \date Monday December 14, 2020
+  \date Monday November 2, 2020
 */
 
 #include <cstdlib>
+
 #include "GGEMS/global/GGEMSOpenCLManager.hh"
-#include "GGEMS/global/GGEMSManager.hh"
 #include "GGEMS/materials/GGEMSMaterialsDatabaseManager.hh"
 #include "GGEMS/navigators/GGEMSVoxelizedPhantom.hh"
-#include "GGEMS/navigators/GGEMSSystem.hh"
-#include "GGEMS/navigators/GGEMSCTSystem.hh"
-#include "GGEMS/physics/GGEMSRangeCutsManager.hh"
+#include "GGEMS/navigators/GGEMSDosimetryCalculator.hh"
 #include "GGEMS/physics/GGEMSProcessesManager.hh"
+#include "GGEMS/physics/GGEMSRangeCutsManager.hh"
 #include "GGEMS/sources/GGEMSXRaySource.hh"
+#include "GGEMS/global/GGEMSManager.hh"
+#include "GGEMS/tools/GGEMSPrint.hh"
 
 /*!
   \fn int main(void)
@@ -70,17 +71,18 @@ int main(void)
   phantom.SetRotation(0.0f, 0.0f, 0.0f, "deg");
   phantom.SetPosition(0.0f, 0.0f, 0.0f, "mm");
 
-  GGEMSCTSystem ct_detector("Stellar");
-  ct_detector.SetCTSystemType("curved");
-  ct_detector.SetNumberOfModules(1, 46);
-  ct_detector.SetNumberOfDetectionElementsInsideModule(64, 16, 1);
-  ct_detector.SetSizeOfDetectionElements(0.6f, 0.6f, 0.6f, "mm");
-  ct_detector.SetMaterialName("GOS");
-  ct_detector.SetSourceDetectorDistance(1085.6f, "mm");
-  ct_detector.SetSourceIsocenterDistance(595.0f, "mm");
-  ct_detector.SetRotation(0.0f, 0.0f, 0.0f, "deg");
-  ct_detector.SetThreshold(10.0f, "keV");
-  ct_detector.StoreOutput("data/projection");
+  // Dosimetry
+  GGEMSDosimetryCalculator dosimetry("phantom");
+  dosimetry.SetOutputDosimetryFilename("data/dosimetry");
+  dosimetry.SetDoselSizes(0.5f, 0.5f, 0.5f, "mm");
+  dosimetry.SetWaterReference(true);
+  dosimetry.SetMinimumDensity(0.1f, "g/cm3");
+
+  dosimetry.SetUncertainty(true);
+  dosimetry.SetPhotonTracking(true);
+  dosimetry.SetEdep(true);
+  dosimetry.SetEdepSquared(true);
+  dosimetry.SetHitTracking(true);
 
   // Physics
   processes_manager.AddProcess("Compton", "gamma", "all");
@@ -101,7 +103,7 @@ int main(void)
   point_source.SetNumberOfParticles(1000000000);
   point_source.SetPosition(-595.0f, 0.0f, 0.0f, "mm");
   point_source.SetRotation(0.0f, 0.0f, 0.0f, "deg");
-  point_source.SetBeamAperture(12.5f, "deg");
+  point_source.SetBeamAperture(5.0f, "deg");
   point_source.SetFocalSpotSize(0.0f, 0.0f, 0.0f, "mm");
   point_source.SetPolyenergy("data/spectrum_120kVp_2mmAl.dat");
 
