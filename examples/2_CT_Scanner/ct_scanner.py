@@ -31,7 +31,7 @@ opencl_manager.set_context_index(0)
 
 # ------------------------------------------------------------------------------
 # STEP 3: Setting GGEMS materials
-materials_database_manager.set_materials('data/materials.txt')
+materials_database_manager.set_materials('../../data/materials.txt')
 
 # ------------------------------------------------------------------------------
 # STEP 4: Phantoms and systems
@@ -80,14 +80,14 @@ point_source.set_polyenergy('data/spectrum_120kVp_2mmAl.dat')
 
 # ------------------------------------------------------------------------------
 # STEP 8: GGEMS simulation
-ggems_manager.opencl_verbose(False)
-ggems_manager.material_database_verbose(False)
+ggems_manager.opencl_verbose(True)
+ggems_manager.material_database_verbose(True)
 ggems_manager.navigator_verbose(True)
 ggems_manager.source_verbose(True)
 ggems_manager.memory_verbose(True)
 ggems_manager.process_verbose(True)
 ggems_manager.range_cuts_verbose(True)
-ggems_manager.random_verbose(False)
+ggems_manager.random_verbose(True)
 ggems_manager.kernel_verbose(True)
 ggems_manager.tracking_verbose(False, 0)
 

@@ -67,41 +67,21 @@ kernel void draw_ggems_sphere(GGint const voxel_id_limit, GGfloat3 const element
   // Return if index > to voxel limit
   if (global_id >= voxel_id_limit) return;
 
-  // Get dimension of voxelized phantom
-  GGint n_x = phantom_dimensions.x;
-  GGint n_y = phantom_dimensions.y;
-  GGint n_z = phantom_dimensions.z;
-
-  // Get size of voxels
-  GGfloat size_x = element_sizes.x;
-  GGfloat size_y = element_sizes.y;
-  GGfloat size_z = element_sizes.z;
-
-  // Get the isocenter position of solid
-  GGfloat isocenter_x = positions.x;
-  GGfloat isocenter_y = positions.y;
-  GGfloat isocenter_z = positions.z;
-
   // Radius square and half of height
   GGfloat radius2 = radius * radius;
 
   // Get index i, j and k of current voxel
-  GGint j = (global_id % (n_x*n_y)) / n_x;
-  GGint i = (global_id % (n_x*n_y)) - j*n_x;
-  GGint k = global_id / (n_x*n_y);
+  GGint3 indices;
+  indices.y = (global_id % (phantom_dimensions.x*phantom_dimensions.y)) / phantom_dimensions.x;
+  indices.x = (global_id % (phantom_dimensions.x*phantom_dimensions.y)) - indices.y*phantom_dimensions.x;
+  indices.z = global_id / (phantom_dimensions.x*phantom_dimensions.y);
 
   // Get the coordinates of the current voxel
-  GGfloat x = (size_x/2.0f) * (1.0f - (GGfloat)n_x + 2.0f*i);
-  GGfloat y = (size_y/2.0f) * (1.0f - (GGfloat)n_y + 2.0f*j);
-  GGfloat z = (size_z/2.0f) * (1.0f - (GGfloat)n_z + 2.0f*k);
-
-  // Apply solid isocenter
-  x -= isocenter_x;
-  y -= isocenter_y;
-  z -= isocenter_z;
+  GGfloat3 voxel_pos = (element_sizes/2.0f) * (1.0f - convert_float3(phantom_dimensions) + 2.0f*convert_float3(indices));
+  voxel_pos -= positions;
 
   // Check if voxel is outside/inside analytical volume
-  if (x*x + y*y + z*z <= radius2) {
+  if (voxel_pos.x*voxel_pos.x + voxel_pos.y*voxel_pos.y + voxel_pos.z*voxel_pos.z <= radius2) {
     #ifdef MET_CHAR
     voxelized_phantom[global_id] = (GGchar)label_value;
     #elif MET_UCHAR

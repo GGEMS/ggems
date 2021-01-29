@@ -36,7 +36,7 @@ process_name = args.process
 
 # ------------------------------------------------------------------------------
 # Level of verbosity during GGEMS execution
-GGEMSVerbosity(0)
+GGEMSVerbosity(1)
 
 # ------------------------------------------------------------------------------
 # STEP 1: Choosing an OpenCL context
@@ -44,7 +44,7 @@ opencl_manager.set_context_index(0)
 
 # ------------------------------------------------------------------------------
 # STEP 2: Setting GGEMS materials
-materials_database_manager.set_materials('data/materials.txt')
+materials_database_manager.set_materials('../../data/materials.txt')
 
 # ------------------------------------------------------------------------------
 # STEP 3: Add material and initialize it
@@ -78,5 +78,4 @@ print('At ', energy_MeV, ' MeV, cross section is ', cross_sections.get_cs(proces
 
 # ------------------------------------------------------------------------------
 # STEP 6: Exit safely
-opencl_manager.clean()
 exit()

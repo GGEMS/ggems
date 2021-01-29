@@ -28,7 +28,7 @@ opencl_manager.set_context_index(0)
 
 # ------------------------------------------------------------------------------
 # STEP 2: Setting GGEMS materials
-materials_database_manager.set_materials('data/materials.txt')
+materials_database_manager.set_materials('../../data/materials.txt')
 
 # ------------------------------------------------------------------------------
 # STEP 3: Phantoms
@@ -41,7 +41,7 @@ phantom.set_position(0.0, 0.0, 0.0, 'mm')
 # STEP 4: Dosimetry
 dosimetry = GGEMSDosimetryCalculator('phantom')
 dosimetry.set_output('data/dosimetry')
-dosimetry.set_dosel_size(1.0, 1.0, 1.0, 'mm')
+dosimetry.set_dosel_size(0.5, 0.5, 0.5, 'mm')
 dosimetry.water_reference(False)
 dosimetry.minimum_density(0.1, 'g/cm3')
 
@@ -70,7 +70,7 @@ range_cuts_manager.set_cut('gamma', 0.1, 'mm', 'all')
 # STEP 7: Source
 point_source = GGEMSXRaySource('point_source')
 point_source.set_source_particle_type('gamma')
-point_source.set_number_of_particles(100000000)
+point_source.set_number_of_particles(200000000)
 point_source.set_position(-595.0, 0.0, 0.0, 'mm')
 point_source.set_rotation(0.0, 0.0, 0.0, 'deg')
 point_source.set_beam_aperture(5.0, 'deg')
@@ -79,14 +79,14 @@ point_source.set_polyenergy('data/spectrum_120kVp_2mmAl.dat')
 
 # ------------------------------------------------------------------------------
 # STEP 8: GGEMS simulation
-ggems_manager.opencl_verbose(False)
-ggems_manager.material_database_verbose(False)
+ggems_manager.opencl_verbose(True)
+ggems_manager.material_database_verbose(True)
 ggems_manager.navigator_verbose(True)
 ggems_manager.source_verbose(True)
 ggems_manager.memory_verbose(True)
 ggems_manager.process_verbose(True)
 ggems_manager.range_cuts_verbose(True)
-ggems_manager.random_verbose(False)
+ggems_manager.random_verbose(True)
 ggems_manager.kernel_verbose(True)
 ggems_manager.tracking_verbose(False, 0)
 

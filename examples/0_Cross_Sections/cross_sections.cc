@@ -84,7 +84,7 @@ int main(int argc, char** argv)
   opencl_manager.ContextToActivate(0);
 
   // Enter material database
-  material_manager.SetMaterialsDatabase("data/materials.txt");
+  material_manager.SetMaterialsDatabase("../../data/materials.txt");
 
   // Initializing material
   GGEMSMaterials materials;
