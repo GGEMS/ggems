@@ -82,12 +82,12 @@ void GGEMSIonizationParamsMaterial::ComputeIonizationParameters(void)
   GGEMSMaterialsDatabaseManager& material_manager = GGEMSMaterialsDatabaseManager::GetInstance();
 
   // Number of chemical elements in material
-  GGchar number_of_chemical_elements = material_->nb_elements_;
+  GGsize number_of_chemical_elements = static_cast<GGsize>(material_->nb_elements_);
 
   // Loop over the number of chemical elements
   GGfloat axZ = 0.0f;
   GGfloat total_number_of_electron_per_volume = 0.0f;
-  for (GGchar i = 0; i < number_of_chemical_elements; ++i) {
+  for (GGsize i = 0; i < number_of_chemical_elements; ++i) {
     // Get element by element
     GGEMSChemicalElement const& chemical_element = material_manager.GetChemicalElement(material_->chemical_element_name_[i]);
     axZ = static_cast<GGfloat>(AVOGADRO/ chemical_element.molar_mass_M_ * material_->density_ * material_->mixture_f_[i] * static_cast<GGfloat>(chemical_element.atomic_number_Z_));
@@ -180,7 +180,7 @@ void GGEMSIonizationParamsMaterial::ComputeIonizationParameters(void)
   // needs an 'effective Z'
   GGfloat zeff = 0.0f;
 
-  for (GGchar i = 0; i < number_of_chemical_elements; ++i) {
+  for (GGsize i = 0; i < number_of_chemical_elements; ++i) {
     GGEMSChemicalElement const& kChemicalElement = material_manager.GetChemicalElement(material_->chemical_element_name_[i]);
     zeff += (material_->mixture_f_[i] * static_cast<GGfloat>(kChemicalElement.atomic_number_Z_));
   }

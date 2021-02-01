@@ -62,7 +62,7 @@ GGEMSRAMManager::~GGEMSRAMManager(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSRAMManager::IncrementRAMMemory(GGlong const& size)
+void GGEMSRAMManager::IncrementRAMMemory(GGsize const& size)
 {
   // Increment size
   allocated_ram_ += size;
@@ -72,7 +72,7 @@ void GGEMSRAMManager::IncrementRAMMemory(GGlong const& size)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSRAMManager::DecrementRAMMemory(GGlong const& size)
+void GGEMSRAMManager::DecrementRAMMemory(GGsize const& size)
 {
   // Increment size
   allocated_ram_ -= size;
