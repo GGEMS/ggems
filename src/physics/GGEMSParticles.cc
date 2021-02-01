@@ -68,7 +68,7 @@ GGEMSParticles::~GGEMSParticles(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSParticles::SetNumberOfParticles(GGlong const& number_of_particles)
+void GGEMSParticles::SetNumberOfParticles(GGsize const& number_of_particles)
 {
   number_of_particles_ = number_of_particles;
 }
@@ -101,7 +101,7 @@ bool GGEMSParticles::IsAlive(void) const
 
   // Loop over the number of particles
   bool status = false;
-  for (GGlong i = 0; i < number_of_particles_; ++i) {
+  for (GGsize i = 0; i < number_of_particles_; ++i) {
     if (primary_particles_device->status_[i] == ALIVE) {
       status = true;
       break;

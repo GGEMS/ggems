@@ -37,15 +37,21 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 GGEMSVolumeCreatorManager::GGEMSVolumeCreatorManager(void)
-: element_sizes_({0.0f, 0.0f, 0.0f}),
-  volume_dimensions_({0, 0, 0}),
-  number_elements_(0),
+: number_elements_(0),
   data_type_("MET_FLOAT"),
   output_image_filename_(""),
   output_range_to_material_filename_(""),
   voxelized_volume_(nullptr)
 {
   GGcout("GGEMSVolumeCreatorManager", "GGEMSVolumeCreatorManager", 3) << "Allocation of Phantom Creator Manager singleton..." << GGendl;
+
+  element_sizes_.x = 0.0f;
+  element_sizes_.y = 0.0f;
+  element_sizes_.z = 0.0f;
+
+  volume_dimensions_.x = 0;
+  volume_dimensions_.y = 0;
+  volume_dimensions_.z = 0;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -63,20 +69,20 @@ GGEMSVolumeCreatorManager::~GGEMSVolumeCreatorManager(void)
 
 void GGEMSVolumeCreatorManager::SetElementSizes(GGfloat const& voxel_width, GGfloat const& voxel_height, GGfloat const& voxel_depth, std::string const& unit)
 {
-  element_sizes_.s[0] = DistanceUnit(voxel_width, unit);
-  element_sizes_.s[1] = DistanceUnit(voxel_height, unit);
-  element_sizes_.s[2] = DistanceUnit(voxel_depth, unit);
+  element_sizes_.x = DistanceUnit(voxel_width, unit);
+  element_sizes_.y = DistanceUnit(voxel_height, unit);
+  element_sizes_.z = DistanceUnit(voxel_depth, unit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSVolumeCreatorManager::SetVolumeDimensions(GGint const& volume_width, GGint const& volume_height, GGint const& volume_depth)
+void GGEMSVolumeCreatorManager::SetVolumeDimensions(GGsize const& volume_width, GGsize const& volume_height, GGsize const& volume_depth)
 {
-  volume_dimensions_.s[0] = volume_width;
-  volume_dimensions_.s[1] = volume_height;
-  volume_dimensions_.s[2] = volume_depth;
+  volume_dimensions_.x = volume_width;
+  volume_dimensions_.y = volume_height;
+  volume_dimensions_.z = volume_depth;
   number_elements_ = volume_width * volume_height * volume_depth;
 }
 
@@ -160,14 +166,14 @@ void GGEMSVolumeCreatorManager::CheckParameters(void) const
   GGcout("GGEMSVolumeCreatorManager", "CheckParameters", 3) << "Checking parameters for phantom creator manager..." << GGendl;
 
   // Checking phantom dimensions
-  if (volume_dimensions_.s[0] == 0 && volume_dimensions_.s[1] == 0 && volume_dimensions_.s[2] == 0) {
+  if (volume_dimensions_.x == 0 && volume_dimensions_.y == 0 && volume_dimensions_.z == 0) {
     GGEMSMisc::ThrowException("GGEMSVolumeCreatorManager", "CheckParameters", "Phantom dimensions have to be > 0!!!");
   }
 
   // Checking size of voxels
-  if (element_sizes_.s[0] == 0.0f && element_sizes_.s[1] == 0.0f && element_sizes_.s[2] == 0.0f) {
+  if (element_sizes_.x == 0.0f && element_sizes_.y == 0.0f && element_sizes_.z == 0.0f) {
     GGEMSMisc::ThrowException("GGEMSVolumeCreatorManager", "CheckParameters", "Phantom voxel sizes have to be > 0.0!!!");
-    }
+  }
 
   // Checking output name
   if (output_image_filename_.empty()) {
@@ -264,7 +270,7 @@ GGEMSVolumeCreatorManager* get_instance_volume_creator_manager(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_volume_dimension_volume_creator_manager(GGEMSVolumeCreatorManager* volume_creator_manager, GGint const volume_width, GGint const volume_height, GGint const volume_depth)
+void set_volume_dimension_volume_creator_manager(GGEMSVolumeCreatorManager* volume_creator_manager, GGsize const volume_width, GGsize const volume_height, GGsize const volume_depth)
 {
   volume_creator_manager->SetVolumeDimensions(volume_width, volume_height, volume_depth);
 }

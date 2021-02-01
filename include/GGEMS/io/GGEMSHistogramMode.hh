@@ -42,7 +42,7 @@
 typedef struct GGEMSHistogramMode_t
 {
   std::shared_ptr<cl::Buffer> histogram_cl_; /*!< Buffer storing histogram on OpenCL device */
-  GGint number_of_elements_; /*!< Number of elements in hit buffer */
+  GGsize number_of_elements_; /*!< Number of elements in hit buffer */
 } GGEMSHistogramMode; /*!< Using C convention name of struct to C++ (_t deletion) */
 
 #endif // End of GUARD_GGEMS_IO_GGEMSHISTOGRAMMODE_HH

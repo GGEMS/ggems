@@ -55,7 +55,7 @@ class GGEMS_EXPORT GGEMSSolid
     /*!
       \brief GGEMSSolid destructor
     */
-    ~GGEMSSolid(void);
+    virtual ~GGEMSSolid(void);
 
     /*!
       \fn GGEMSSolid(GGEMSSolid const& solid) = delete

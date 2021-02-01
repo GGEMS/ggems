@@ -34,16 +34,20 @@
 #include "GGEMS/geometries/GGEMSRayTracing.hh"
 
 /*!
-  \fn kernel void particle_solid_distance_ggems_solid_box(GGlong const particle_id_limit, global GGEMSPrimaryParticles* primary_particle, global GGEMSSolidBoxData const* solid_box_data)
+  \fn kernel void particle_solid_distance_ggems_solid_box(GGsize const particle_id_limit, global GGEMSPrimaryParticles* primary_particle, global GGEMSSolidBoxData const* solid_box_data)
   \param particle_id_limit - particle id limit
   \param primary_particle - pointer to primary particles on OpenCL memory
   \param solid_box_data - pointer to solid box data
   \brief OpenCL kernel computing distance between solid box and particles
 */
-kernel void particle_solid_distance_ggems_solid_box(GGlong const particle_id_limit, global GGEMSPrimaryParticles* primary_particle, global GGEMSSolidBoxData const* solid_box_data)
+kernel void particle_solid_distance_ggems_solid_box(
+  GGsize const particle_id_limit,
+  global GGEMSPrimaryParticles* primary_particle,
+  global GGEMSSolidBoxData const* solid_box_data
+)
 {
   // Getting index of thread
-  GGint global_id = get_global_id(0);
+  GGsize global_id = get_global_id(0);
 
   // Return if index > to particle limit
   if (global_id >= particle_id_limit) return;

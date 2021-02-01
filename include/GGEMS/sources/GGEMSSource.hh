@@ -118,11 +118,11 @@ class GGEMS_EXPORT GGEMSSource
     void SetRotation(GGfloat const& rx, GGfloat const& ry, GGfloat const& rz, std::string const& unit = "deg");
 
     /*!
-      \fn void SetNumberOfParticles(GGlong const& number_of_particles)
+      \fn void SetNumberOfParticles(GGsize const& number_of_particles)
       \param number_of_particles - number of particles to simulate
       \brief Set the number of particles to simulate during the simulation
     */
-    void SetNumberOfParticles(GGlong const& number_of_particles);
+    void SetNumberOfParticles(GGsize const& number_of_particles);
 
     /*!
       \fn void EnableTracking(void)
@@ -131,19 +131,19 @@ class GGEMS_EXPORT GGEMSSource
     void EnableTracking(void);
 
     /*!
-      \fn inline std::size_t GetNumberOfBatchs(void) const
+      \fn inline GGsize GetNumberOfBatchs(void) const
       \return the number of batch of particle
       \brief method returning the number of particles by batch
     */
-    inline std::size_t GetNumberOfBatchs(void) const {return number_of_particles_in_batch_.size();}
+    inline GGsize GetNumberOfBatchs(void) const {return number_of_particles_in_batch_.size();}
 
     /*!
-      \fn inline GGulong GetNumberOfParticlesInBatch(std::size_t const& batch_index)
+      \fn inline GGulong GetNumberOfParticlesInBatch(GGsize const& batch_index)
       \param batch_index - index of the batch
       \return the number of particle for a specific batch
       \brief method returning the number of particles in a specific batch
     */
-    inline GGlong GetNumberOfParticlesInBatch(std::size_t const& batch_index) {return number_of_particles_in_batch_.at(batch_index);}
+    inline GGsize GetNumberOfParticlesInBatch(GGsize const& batch_index) {return number_of_particles_in_batch_.at(batch_index);}
 
     /*!
       \fn inline DurationNano GetKernelGetPrimariesTimer(void) const
@@ -165,11 +165,11 @@ class GGEMS_EXPORT GGEMSSource
     virtual void Initialize(void);
 
     /*!
-      \fn void GetPrimaries(GGlong const& number_of particles) = 0
+      \fn void GetPrimaries(GGsize const& number_of particles) = 0
       \param number_of_particles - number of particles to generate
       \brief Generate primary particles
     */
-    virtual void GetPrimaries(GGlong const& number_of_particles) = 0;
+    virtual void GetPrimaries(GGsize const& number_of_particles) = 0;
 
     /*!
       \fn void PrintInfos(void) const = 0
@@ -193,8 +193,8 @@ class GGEMS_EXPORT GGEMSSource
 
   protected:
     std::string source_name_; /*!< Name of the source */
-    GGlong number_of_particles_; /*!< Number of particles */
-    std::vector<GGlong> number_of_particles_in_batch_; /*!< Number of particles in batch */
+    GGsize number_of_particles_; /*!< Number of particles */
+    std::vector<GGsize> number_of_particles_in_batch_; /*!< Number of particles in batch */
     GGchar particle_type_; /*!< Type of particle: photon, electron or positron */
     std::string tracking_kernel_option_; /*!< Preprocessor option for tracking */
     std::unique_ptr<GGEMSGeometryTransformation> geometry_transformation_; /*!< Pointer storing the geometry transformation */

@@ -105,12 +105,12 @@ inline void TransportGetSafetyInsideOBB(GGfloat3 const* position, global GGEMSOB
   GGfloat3 local_position = GlobalToLocalPosition(&tmp_matrix_transformation, position);
 
   // Borders of 0BB
-  GGfloat x_min = obb_data->border_min_xyz_[0];
-  GGfloat x_max = obb_data->border_max_xyz_[0];
-  GGfloat y_min = obb_data->border_min_xyz_[1];
-  GGfloat y_max = obb_data->border_max_xyz_[1];
-  GGfloat z_min = obb_data->border_min_xyz_[2];
-  GGfloat z_max = obb_data->border_max_xyz_[2];
+  GGfloat x_min = obb_data->border_min_xyz_.x;
+  GGfloat x_max = obb_data->border_max_xyz_.x;
+  GGfloat y_min = obb_data->border_min_xyz_.y;
+  GGfloat y_max = obb_data->border_max_xyz_.y;
+  GGfloat z_min = obb_data->border_min_xyz_.z;
+  GGfloat z_max = obb_data->border_max_xyz_.z;
 
   TransportGetSafetyInsideAABB(&local_position, x_min, x_max, y_min, y_max, z_min, z_max, GEOMETRY_TOLERANCE);
 }
@@ -206,12 +206,12 @@ inline GGuchar IsParticleInOBB(GGfloat3 const* position, global GGEMSOBB* obb_da
   // Get the position in local position
   GGfloat3 local_position = GlobalToLocalPosition(&tmp_matrix_transformation, position);
 
-  GGfloat x_min = obb_data->border_min_xyz_[0];
-  GGfloat x_max = obb_data->border_max_xyz_[0];
-  GGfloat y_min = obb_data->border_min_xyz_[1];
-  GGfloat y_max = obb_data->border_max_xyz_[1];
-  GGfloat z_min = obb_data->border_min_xyz_[2];
-  GGfloat z_max = obb_data->border_max_xyz_[2];
+  GGfloat x_min = obb_data->border_min_xyz_.x;
+  GGfloat x_max = obb_data->border_max_xyz_.x;
+  GGfloat y_min = obb_data->border_min_xyz_.y;
+  GGfloat y_max = obb_data->border_max_xyz_.y;
+  GGfloat z_min = obb_data->border_min_xyz_.z;
+  GGfloat z_max = obb_data->border_max_xyz_.z;
 
   return IsParticleInAABB(&local_position, x_min, x_max, y_min, y_max, z_min, z_max, GEOMETRY_TOLERANCE);
 }
@@ -348,12 +348,12 @@ inline GGfloat ComputeDistanceToOBB(GGfloat3 const* position, GGfloat3 const* di
   GGfloat3 local_direction = GlobalToLocalDirection(&tmp_matrix_transformation, direction);
 
   // Borders of 0BB
-  GGfloat x_min = obb_data->border_min_xyz_[0];
-  GGfloat x_max = obb_data->border_max_xyz_[0];
-  GGfloat y_min = obb_data->border_min_xyz_[1];
-  GGfloat y_max = obb_data->border_max_xyz_[1];
-  GGfloat z_min = obb_data->border_min_xyz_[2];
-  GGfloat z_max = obb_data->border_max_xyz_[2];
+  GGfloat x_min = obb_data->border_min_xyz_.x;
+  GGfloat x_max = obb_data->border_max_xyz_.x;
+  GGfloat y_min = obb_data->border_min_xyz_.y;
+  GGfloat y_max = obb_data->border_max_xyz_.y;
+  GGfloat z_min = obb_data->border_min_xyz_.z;
+  GGfloat z_max = obb_data->border_max_xyz_.z;
 
   return ComputeDistanceToAABB(&local_position, &local_direction, x_min, x_max, y_min, y_max, z_min, z_max, GEOMETRY_TOLERANCE);
 }

@@ -112,11 +112,11 @@ class GGEMS_EXPORT GGEMSSourceManager
     void PrintInfos(void) const;
 
     /*!
-      \fn std::size_t GetNumberOfSources(void) const
+      \fn GGsize GetNumberOfSources(void) const
       \brief Get the number of sources
       \return the number of sources
     */
-    inline std::size_t GetNumberOfSources(void) const {return sources_.size();}
+    inline GGsize GetNumberOfSources(void) const {return sources_.size();}
 
     /*!
       \fn void Initialize(GGuint const& seed) const
@@ -126,29 +126,29 @@ class GGEMS_EXPORT GGEMSSourceManager
     void Initialize(GGuint const& seed) const;
 
     /*!
-      \fn inline std::string GetNameOfSource(std::size_t const& source_index) const
+      \fn inline std::string GetNameOfSource(GGsize const& source_index) const
       \param source_index - index of the source
       \return name of the source
       \brief get the name of the source
     */
-    inline std::string GetNameOfSource(std::size_t const& source_index) const {return sources_[source_index]->GetNameOfSource();}
+    inline std::string GetNameOfSource(GGsize const& source_index) const {return sources_[source_index]->GetNameOfSource();}
 
     /*!
-      \fn inline std::size_t GetNumberOfBatchs(std::size_t const& source_index) const
+      \fn inline GGsize GetNumberOfBatchs(GGsize const& source_index) const
       \param source_index - index of the source
       \return the number of batch of particle
       \brief method returning the number of particles by batch
     */
-    inline std::size_t GetNumberOfBatchs(std::size_t const& source_index) const {return sources_[source_index]->GetNumberOfBatchs();}
+    inline GGsize GetNumberOfBatchs(GGsize const& source_index) const {return sources_[source_index]->GetNumberOfBatchs();}
 
     /*!
-      \fn inline GGlong GetNumberOfParticlesInBatch(std::size_t const& source_index, std::size_t const& batch_index)
+      \fn inline GGsize GetNumberOfParticlesInBatch(GGsize const& source_index, GGsize const& batch_index)
       \param source_index - index of the source
       \param batch_index - index of the source
       \return the number of particle for a specific batch
       \brief method returning the number of particles in a specific batch
     */
-    inline GGlong GetNumberOfParticlesInBatch(std::size_t const& source_index, std::size_t const& batch_index) {return sources_[source_index]->GetNumberOfParticlesInBatch(batch_index);}
+    inline GGsize GetNumberOfParticlesInBatch(GGsize const& source_index, GGsize const& batch_index) {return sources_[source_index]->GetNumberOfParticlesInBatch(batch_index);}
 
     /*!
       \fn GGEMSParticles* GetParticles(void) const
@@ -165,12 +165,12 @@ class GGEMS_EXPORT GGEMSSourceManager
     inline GGEMSPseudoRandomGenerator* GetPseudoRandomGenerator(void) const {return pseudo_random_generator_.get();}
 
     /*!
-      \fn void GetPrimaries(std::size_t const& source_index, GGulong const& number_of_particles) const
+      \fn void GetPrimaries(GGsize const& source_index, GGsize const& number_of_particles) const
       \param source_index - index of the source
       \param number_of_particles - number of particles to simulate
       \brief Generate primary particles for a specific source
     */
-    inline void GetPrimaries(std::size_t const& source_index, GGulong const& number_of_particles) const
+    inline void GetPrimaries(GGsize const& source_index, GGsize const& number_of_particles) const
     {
       particles_->SetNumberOfParticles(number_of_particles);
       sources_[source_index]->GetPrimaries(number_of_particles);

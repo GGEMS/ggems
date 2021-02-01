@@ -132,7 +132,7 @@ void GGEMSCTSystem::InitializeCurvedGeometry(void)
   // rho = Hypotenuse
   // h = Apothem or source detector distance in our case
   // c = Half-distance of module in Y
-  GGfloat c = (number_of_detection_elements_inside_module_xyz_.s1*size_of_detection_elements_xyz_.s1)*0.5f;
+  GGfloat c = (number_of_detection_elements_inside_module_xyz_.y*size_of_detection_elements_xyz_.y)*0.5f;
   GGfloat rho = std::sqrt(source_detector_distance_*source_detector_distance_ + c*c);
   GGfloat alpha = 2.0f*std::asin(c/rho);
 
@@ -141,23 +141,23 @@ void GGEMSCTSystem::InitializeCurvedGeometry(void)
   GGfloat oy = 0.0f;
 
   // Center of module P (px, py) is source detector distance minus source isocenter distance plus half size of module in Z (module referential)
-  GGfloat px = source_detector_distance_ - source_isocenter_distance_ + 0.5f*number_of_detection_elements_inside_module_xyz_.s2*size_of_detection_elements_xyz_.s2;
+  GGfloat px = source_detector_distance_ - source_isocenter_distance_ + 0.5f*number_of_detection_elements_inside_module_xyz_.z*size_of_detection_elements_xyz_.z;
   GGfloat py = 0.0f;
 
   // Loop over each module in X and Y, and compute angle of each module in around Z
-  for (GGint j = 0; j < number_of_modules_xy_.s1; ++j) { // for Y modules
-    GGfloat step_angle = alpha * (j + 0.5f*(1-number_of_modules_xy_.s1));
+  for (GGint j = 0; j < number_of_modules_xy_.y; ++j) { // for Y modules
+    GGfloat step_angle = alpha * (j + 0.5f*(1-number_of_modules_xy_.y));
 
     // Computing the X and Y positions in global position (isocenter)
     GGfloat global_position_x = (px-ox)*std::cos(step_angle) - (py-oy)*std::sin(step_angle) + ox;
     GGfloat global_position_y = (px-ox)*std::sin(step_angle) + (py-oy)*std::cos(step_angle) + oy;
 
-    for (GGint i = 0; i < number_of_modules_xy_.s0; ++i) { // for X modules
+    for (GGint i = 0; i < number_of_modules_xy_.x; ++i) { // for X modules
       // Computing the Z position in global position (isocenter)
-      GGfloat global_position_z = number_of_detection_elements_inside_module_xyz_.s0*size_of_detection_elements_xyz_.s0*(i+0.5f*(1-number_of_modules_xy_.s0));
+      GGfloat global_position_z = number_of_detection_elements_inside_module_xyz_.x*size_of_detection_elements_xyz_.x*(i+0.5f*(1-number_of_modules_xy_.x));
 
-      solids_.at(i+j*number_of_modules_xy_.s0)->SetRotation({0.0f, 0.0f, step_angle});
-      solids_.at(i+j*number_of_modules_xy_.s0)->SetPosition({global_position_x, global_position_y, global_position_z});
+      solids_.at(i+j*number_of_modules_xy_.x)->SetRotation({0.0f, 0.0f, step_angle});
+      solids_.at(i+j*number_of_modules_xy_.x)->SetPosition({global_position_x, global_position_y, global_position_z});
     }
   }
 }
@@ -169,18 +169,18 @@ void GGEMSCTSystem::InitializeCurvedGeometry(void)
 void GGEMSCTSystem::InitializeFlatGeometry(void)
 {
     // Computing the X, Y and Z positions in global position (isocenter)
-  GGfloat global_position_x = source_detector_distance_ - source_isocenter_distance_ + 0.5f*number_of_detection_elements_inside_module_xyz_.s2*size_of_detection_elements_xyz_.s2;
+  GGfloat global_position_x = source_detector_distance_ - source_isocenter_distance_ + 0.5f*number_of_detection_elements_inside_module_xyz_.z*size_of_detection_elements_xyz_.z;
   GGfloat global_position_y = 0.0f;
   GGfloat global_position_z = 0.0f;
 
   // Consider flat geometry for CBCT configuration
-  for (GGint j = 0; j < number_of_modules_xy_.s1; ++j) { // Y modules
-    global_position_y = number_of_detection_elements_inside_module_xyz_.s1*size_of_detection_elements_xyz_.s1*(j+0.5f*(1-number_of_modules_xy_.s1));
-    for (GGint i = 0; i < number_of_modules_xy_.s0; ++i) { // X modules
-      global_position_z = number_of_detection_elements_inside_module_xyz_.s0*size_of_detection_elements_xyz_.s0*(i+0.5f*(1-number_of_modules_xy_.s0));
+  for (GGint j = 0; j < number_of_modules_xy_.y; ++j) { // Y modules
+    global_position_y = number_of_detection_elements_inside_module_xyz_.y*size_of_detection_elements_xyz_.y*(j+0.5f*(1-number_of_modules_xy_.y));
+    for (GGint i = 0; i < number_of_modules_xy_.x; ++i) { // X modules
+      global_position_z = number_of_detection_elements_inside_module_xyz_.x*size_of_detection_elements_xyz_.x*(i+0.5f*(1-number_of_modules_xy_.x));
       // No rotation of module
-      solids_.at(i+j*number_of_modules_xy_.s0)->SetRotation({0.0f, 0.0f, 0.0f});
-      solids_.at(i+j*number_of_modules_xy_.s0)->SetPosition({global_position_x, global_position_y, global_position_z});
+      solids_.at(i+j*number_of_modules_xy_.x)->SetRotation({0.0f, 0.0f, 0.0f});
+      solids_.at(i+j*number_of_modules_xy_.x)->SetPosition({global_position_x, global_position_y, global_position_z});
     }
   }
 }
@@ -202,7 +202,7 @@ void GGEMSCTSystem::Initialize(void)
   std::size_t number_of_registered_solids = navigator_manager.GetNumberOfRegisteredSolids() - solids_.size();
 
   // Creating all solids, solid box for CT
-  GGint number_of_solids = number_of_modules_xy_.x * number_of_modules_xy_.y;
+  GGsize number_of_solids = number_of_modules_xy_.x * number_of_modules_xy_.y;
   for (GGint i = 0; i < number_of_solids; ++i) { // In CT system only "HISTOGRAM"
     solids_.emplace_back(new GGEMSSolidBox(
       number_of_detection_elements_inside_module_xyz_.x,

@@ -45,8 +45,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 GGEMSDosimetryCalculator::GGEMSDosimetryCalculator(std::string const& navigator_name)
-: dosel_sizes_({-1.0f, -1.0f, -1.0f}),
-  dosimetry_output_filename_("dosi"),
+: dosimetry_output_filename_("dosi"),
   is_photon_tracking_(false),
   is_edep_(false),
   is_edep_squared_(false),
@@ -57,6 +56,10 @@ GGEMSDosimetryCalculator::GGEMSDosimetryCalculator(std::string const& navigator_
   minimum_density_(0.0f)
 {
   GGcout("GGEMSDosimetryCalculator", "GGEMSDosimetryCalculator", 3) << "Allocation of GGEMSDosimetryCalculator..." << GGendl;
+
+  dosel_sizes_.x = -1.0f;
+  dosel_sizes_.y = -1.0f;
+  dosel_sizes_.z = -1.0f;
 
   GGEMSNavigatorManager& navigator_manager = GGEMSNavigatorManager::GetInstance();
   navigator_ = navigator_manager.GetNavigator(navigator_name);
@@ -80,9 +83,9 @@ GGEMSDosimetryCalculator::~GGEMSDosimetryCalculator(void)
 
 void GGEMSDosimetryCalculator::SetDoselSizes(float const& dosel_x, float const& dosel_y, float const& dosel_z, std::string const& unit)
 {
-  dosel_sizes_.s[0] = DistanceUnit(dosel_x, unit);
-  dosel_sizes_.s[1] = DistanceUnit(dosel_y, unit);
-  dosel_sizes_.s[2] = DistanceUnit(dosel_z, unit);
+  dosel_sizes_.x = DistanceUnit(dosel_x, unit);
+  dosel_sizes_.y = DistanceUnit(dosel_y, unit);
+  dosel_sizes_.z = DistanceUnit(dosel_z, unit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -305,43 +308,34 @@ void GGEMSDosimetryCalculator::Initialize(void)
   dose_params_device->size_of_dosels_ = voxel_sizes;
 
   // Take inverse of size
-  dose_params_device->inv_size_of_dosels_ = {
-    1.0f / voxel_sizes.x,
-    1.0f / voxel_sizes.y,
-    1.0f / voxel_sizes.z
-  };
+  dose_params_device->inv_size_of_dosels_.x = 1.0f / voxel_sizes.x;
+  dose_params_device->inv_size_of_dosels_.y = 1.0f / voxel_sizes.y;
+  dose_params_device->inv_size_of_dosels_.z = 1.0f / voxel_sizes.z;
 
   // Get border of volumes from phantom
   GGEMSOBB obb_geometry = dynamic_cast<GGEMSVoxelizedSolid*>(navigator_->GetSolids().at(0).get())->GetOBBGeometry();
-  dose_params_device->border_min_xyz_ = {
-    obb_geometry.border_min_xyz_[0],
-    obb_geometry.border_min_xyz_[1],
-    obb_geometry.border_min_xyz_[2]
-  };
-  dose_params_device->border_max_xyz_ = {
-    obb_geometry.border_max_xyz_[0],
-    obb_geometry.border_max_xyz_[1],
-    obb_geometry.border_max_xyz_[2]
-  };
+  dose_params_device->border_min_xyz_ = obb_geometry.border_min_xyz_;
+  dose_params_device->border_max_xyz_ = obb_geometry.border_max_xyz_;
 
   // Get the size of the dose map
-  GGfloat3 dosemap_size = {
-    obb_geometry.border_max_xyz_[0] - obb_geometry.border_min_xyz_[0],
-    obb_geometry.border_max_xyz_[1] - obb_geometry.border_min_xyz_[1],
-    obb_geometry.border_max_xyz_[2] - obb_geometry.border_min_xyz_[2],
-  };
+  GGfloat3 dosemap_size;
+  for (GGsize i = 0; i < 3; ++i) {
+    dosemap_size.s[i] = obb_geometry.border_max_xyz_.s[i] - obb_geometry.border_min_xyz_.s[i];
+  }
 
   // Get the number of voxels
-  GGint3 number_of_dosels = {
-    static_cast<int>(dosemap_size.x / voxel_sizes.x),
-    static_cast<int>(dosemap_size.y / voxel_sizes.y),
-    static_cast<int>(dosemap_size.z / voxel_sizes.z)
-  };
+  GGsize3 number_of_dosels;
+  number_of_dosels.x = static_cast<GGsize>(dosemap_size.x / voxel_sizes.x);
+  number_of_dosels.y = static_cast<GGsize>(dosemap_size.y / voxel_sizes.y);
+  number_of_dosels.z = static_cast<GGsize>(dosemap_size.z / voxel_sizes.z);
 
-  dose_params_device->number_of_dosels_ = number_of_dosels;
-  dose_params_device->slice_number_of_dosels_ = number_of_dosels.x * number_of_dosels.y;
-  GGint total_number_of_dosels = number_of_dosels.x * number_of_dosels.y * number_of_dosels.z;
-  dose_params_device->total_number_of_dosels_ = number_of_dosels.x * number_of_dosels.y * number_of_dosels.z;
+  dose_params_device->number_of_dosels_.x = static_cast<GGint>(number_of_dosels.x);
+  dose_params_device->number_of_dosels_.y = static_cast<GGint>(number_of_dosels.y);
+  dose_params_device->number_of_dosels_.z = static_cast<GGint>(number_of_dosels.z);
+
+  dose_params_device->slice_number_of_dosels_ = static_cast<GGint>(number_of_dosels.x * number_of_dosels.y);
+  GGsize total_number_of_dosels = number_of_dosels.x * number_of_dosels.y * number_of_dosels.z;
+  dose_params_device->total_number_of_dosels_ = static_cast<GGint>(total_number_of_dosels);
 
   // Release the pointer
   opencl_manager.ReleaseDeviceBuffer(dose_params_.get(), dose_params_device);
@@ -384,15 +378,20 @@ void GGEMSDosimetryCalculator::SavePhotonTracking(void) const
   GGint* photon_tracking = new GGint[dose_params_device->total_number_of_dosels_];
   std::memset(photon_tracking, 0, dose_params_device->total_number_of_dosels_*sizeof(GGint));
 
+  GGsize3 dimensions;
+  dimensions.x = static_cast<GGsize>(dose_params_device->number_of_dosels_.x);
+  dimensions.y = static_cast<GGsize>(dose_params_device->number_of_dosels_.y);
+  dimensions.z = static_cast<GGsize>(dose_params_device->number_of_dosels_.z);
+
   GGEMSMHDImage mhdImage;
   mhdImage.SetBaseName(dosimetry_output_filename_ + "_photon_tracking");
   mhdImage.SetDataType("MET_INT");
-  mhdImage.SetDimensions(dose_params_device->number_of_dosels_);
+  mhdImage.SetDimensions(dimensions);
   mhdImage.SetElementSizes(dose_params_device->size_of_dosels_);
 
   GGint* photon_tracking_device = opencl_manager.GetDeviceBuffer<GGint>(dose_recording_.photon_tracking_.get(), dose_params_device->total_number_of_dosels_*sizeof(GGint));
 
-  for (GGint i = 0; i < dose_params_device->total_number_of_dosels_; ++i) photon_tracking[i] = photon_tracking_device[i];
+  for (GGsize i = 0; i < dose_params_device->total_number_of_dosels_; ++i) photon_tracking[i] = photon_tracking_device[i];
 
   // Writing data
   mhdImage.Write<GGint>(photon_tracking, dose_params_device->total_number_of_dosels_);
@@ -418,10 +417,15 @@ void GGEMSDosimetryCalculator::SaveHit(void) const
   GGint* hit_tracking = new GGint[dose_params_device->total_number_of_dosels_];
   std::memset(hit_tracking, 0, dose_params_device->total_number_of_dosels_*sizeof(GGint));
 
+  GGsize3 dimensions;
+  dimensions.x = static_cast<GGsize>(dose_params_device->number_of_dosels_.x);
+  dimensions.y = static_cast<GGsize>(dose_params_device->number_of_dosels_.y);
+  dimensions.z = static_cast<GGsize>(dose_params_device->number_of_dosels_.z);
+
   GGEMSMHDImage mhdImage;
   mhdImage.SetBaseName(dosimetry_output_filename_ + "_hit");
   mhdImage.SetDataType("MET_INT");
-  mhdImage.SetDimensions(dose_params_device->number_of_dosels_);
+  mhdImage.SetDimensions(dimensions);
   mhdImage.SetElementSizes(dose_params_device->size_of_dosels_);
 
   GGint* hit_device = opencl_manager.GetDeviceBuffer<GGint>(dose_recording_.hit_.get(), dose_params_device->total_number_of_dosels_*sizeof(GGint));
@@ -452,11 +456,16 @@ void GGEMSDosimetryCalculator::SaveEdep(void) const
   GGDosiType* edep_tracking = new GGDosiType[dose_params_device->total_number_of_dosels_];
   std::memset(edep_tracking, 0, dose_params_device->total_number_of_dosels_*sizeof(GGDosiType));
 
+  GGsize3 dimensions;
+  dimensions.x = static_cast<GGsize>(dose_params_device->number_of_dosels_.x);
+  dimensions.y = static_cast<GGsize>(dose_params_device->number_of_dosels_.y);
+  dimensions.z = static_cast<GGsize>(dose_params_device->number_of_dosels_.z);
+
   GGEMSMHDImage mhdImage;
   mhdImage.SetBaseName(dosimetry_output_filename_ + "_edep");
   if (sizeof(GGDosiType) == 4) mhdImage.SetDataType("MET_FLOAT");
   else if (sizeof(GGDosiType) == 8) mhdImage.SetDataType("MET_DOUBLE");
-  mhdImage.SetDimensions(dose_params_device->number_of_dosels_);
+  mhdImage.SetDimensions(dimensions);
   mhdImage.SetElementSizes(dose_params_device->size_of_dosels_);
 
   GGDosiType* edep_device = opencl_manager.GetDeviceBuffer<GGDosiType>(dose_recording_.edep_.get(), dose_params_device->total_number_of_dosels_*sizeof(GGDosiType));
@@ -487,11 +496,16 @@ void GGEMSDosimetryCalculator::SaveEdepSquared(void) const
   GGDosiType* edep_squared_tracking = new GGDosiType[dose_params_device->total_number_of_dosels_];
   std::memset(edep_squared_tracking, 0, dose_params_device->total_number_of_dosels_*sizeof(GGDosiType));
 
+  GGsize3 dimensions;
+  dimensions.x = static_cast<GGsize>(dose_params_device->number_of_dosels_.x);
+  dimensions.y = static_cast<GGsize>(dose_params_device->number_of_dosels_.y);
+  dimensions.z = static_cast<GGsize>(dose_params_device->number_of_dosels_.z);
+
   GGEMSMHDImage mhdImage;
   mhdImage.SetBaseName(dosimetry_output_filename_ + "_edep_squared");
   if (sizeof(GGDosiType) == 4) mhdImage.SetDataType("MET_FLOAT");
   else if (sizeof(GGDosiType) == 8) mhdImage.SetDataType("MET_DOUBLE");
-  mhdImage.SetDimensions(dose_params_device->number_of_dosels_);
+  mhdImage.SetDimensions(dimensions);
   mhdImage.SetElementSizes(dose_params_device->size_of_dosels_);
 
   GGDosiType* edep_squared_device = opencl_manager.GetDeviceBuffer<GGDosiType>(dose_recording_.edep_squared_.get(), dose_params_device->total_number_of_dosels_*sizeof(GGDosiType));
@@ -522,10 +536,15 @@ void GGEMSDosimetryCalculator::SaveDose(void) const
   GGfloat* dose = new GGfloat[dose_params_device->total_number_of_dosels_];
   std::memset(dose, 0, dose_params_device->total_number_of_dosels_*sizeof(GGfloat));
 
+  GGsize3 dimensions;
+  dimensions.x = static_cast<GGsize>(dose_params_device->number_of_dosels_.x);
+  dimensions.y = static_cast<GGsize>(dose_params_device->number_of_dosels_.y);
+  dimensions.z = static_cast<GGsize>(dose_params_device->number_of_dosels_.z);
+
   GGEMSMHDImage mhdImage;
   mhdImage.SetBaseName(dosimetry_output_filename_ + "_dose");
   mhdImage.SetDataType("MET_FLOAT");
-  mhdImage.SetDimensions(dose_params_device->number_of_dosels_);
+  mhdImage.SetDimensions(dimensions);
   mhdImage.SetElementSizes(dose_params_device->size_of_dosels_);
 
   GGfloat* dose_device = opencl_manager.GetDeviceBuffer<GGfloat>(dose_recording_.dose_.get(), dose_params_device->total_number_of_dosels_*sizeof(GGfloat));
@@ -556,10 +575,15 @@ void GGEMSDosimetryCalculator::SaveUncertainty(void) const
   GGfloat* uncertainty = new GGfloat[dose_params_device->total_number_of_dosels_];
   std::memset(uncertainty, 0, dose_params_device->total_number_of_dosels_*sizeof(GGfloat));
 
+  GGsize3 dimensions;
+  dimensions.x = static_cast<GGsize>(dose_params_device->number_of_dosels_.x);
+  dimensions.y = static_cast<GGsize>(dose_params_device->number_of_dosels_.y);
+  dimensions.z = static_cast<GGsize>(dose_params_device->number_of_dosels_.z);
+
   GGEMSMHDImage mhdImage;
   mhdImage.SetBaseName(dosimetry_output_filename_ + "_uncertainty");
   mhdImage.SetDataType("MET_FLOAT");
-  mhdImage.SetDimensions(dose_params_device->number_of_dosels_);
+  mhdImage.SetDimensions(dimensions);
   mhdImage.SetElementSizes(dose_params_device->size_of_dosels_);
 
   GGfloat* uncertainty_device = opencl_manager.GetDeviceBuffer<GGfloat>(dose_recording_.uncertainty_dose_.get(), dose_params_device->total_number_of_dosels_*sizeof(GGfloat));

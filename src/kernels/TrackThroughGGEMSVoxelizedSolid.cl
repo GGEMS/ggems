@@ -46,7 +46,7 @@
 #endif
 
 /*!
-  \fn kernel void track_through_ggems_voxelized_solid(GGlong const particle_id_limit, global GGEMSPrimaryParticles* primary_particle, global GGEMSRandom* random, global GGEMSVoxelizedSolidData const* voxelized_solid_data, global GGshort const* label_data, global GGEMSParticleCrossSections const* particle_cross_sections, global GGEMSMaterialTables const* materials, GGfloat const threshold)
+  \fn kernel void track_through_ggems_voxelized_solid(GGsize const particle_id_limit, global GGEMSPrimaryParticles* primary_particle, global GGEMSRandom* random, global GGEMSVoxelizedSolidData const* voxelized_solid_data, global GGshort const* label_data, global GGEMSParticleCrossSections const* particle_cross_sections, global GGEMSMaterialTables const* materials, GGfloat const threshold)
   \param particle_id_limit - particle id limit
   \param primary_particle - pointer to primary particles on OpenCL memory
   \param random - pointer on random numbers
@@ -57,7 +57,15 @@
   \param threshold - energy threshold
   \brief OpenCL kernel tracking particles within voxelized solid
 */
-kernel void track_through_ggems_voxelized_solid(GGlong const particle_id_limit, global GGEMSPrimaryParticles* primary_particle, global GGEMSRandom* random, global GGEMSVoxelizedSolidData const* voxelized_solid_data, global GGshort const* label_data, global GGEMSParticleCrossSections const* particle_cross_sections, global GGEMSMaterialTables const* materials, GGfloat const threshold
+kernel void track_through_ggems_voxelized_solid(
+  GGsize const particle_id_limit,
+  global GGEMSPrimaryParticles* primary_particle,
+  global GGEMSRandom* random,
+  global GGEMSVoxelizedSolidData const* voxelized_solid_data,
+  global GGshort const* label_data,
+  global GGEMSParticleCrossSections const* particle_cross_sections,
+  global GGEMSMaterialTables const* materials,
+  GGfloat const threshold
   #ifdef DOSIMETRY
   ,global GGEMSDoseParams* dose_params,
   global GGDosiType* edep_tracking,
@@ -68,7 +76,7 @@ kernel void track_through_ggems_voxelized_solid(GGlong const particle_id_limit, 
 )
 {
   // Getting index of thread
-  GGint global_id = get_global_id(0);
+  GGsize global_id = get_global_id(0);
 
   // Return if index > to particle limit
   if (global_id >= particle_id_limit) return;
@@ -102,31 +110,11 @@ kernel void track_through_ggems_voxelized_solid(GGlong const particle_id_limit, 
   GGfloat3 local_direction = GlobalToLocalDirection(&tmp_matrix_transformation, &global_direction);
 
   // Get borders of OBB
-  GGfloat3 border_min = {
-    voxelized_solid_data->obb_geometry_.border_min_xyz_[0],
-    voxelized_solid_data->obb_geometry_.border_min_xyz_[1],
-    voxelized_solid_data->obb_geometry_.border_min_xyz_[2]
-  };
+  GGfloat3 border_min = voxelized_solid_data->obb_geometry_.border_min_xyz_;
+  GGfloat3 border_max = voxelized_solid_data->obb_geometry_.border_max_xyz_;
 
-  GGfloat3 border_max = {
-    voxelized_solid_data->obb_geometry_.border_max_xyz_[0],
-    voxelized_solid_data->obb_geometry_.border_max_xyz_[1],
-    voxelized_solid_data->obb_geometry_.border_max_xyz_[2]
-  };
-
-  // Get voxel size of voxelized solid
-  GGfloat3 voxel_size = {
-    voxelized_solid_data->voxel_sizes_xyz_[0],
-    voxelized_solid_data->voxel_sizes_xyz_[1],
-    voxelized_solid_data->voxel_sizes_xyz_[2]
-  };
-
-  // Get number of voxel of voxelized solid
-  GGint3 number_of_voxels = {
-    voxelized_solid_data->number_of_voxels_xyz_[0],
-    voxelized_solid_data->number_of_voxels_xyz_[1],
-    voxelized_solid_data->number_of_voxels_xyz_[2]
-  };
+  GGfloat3 voxel_size = voxelized_solid_data->voxel_sizes_xyz_;
+  GGint3 number_of_voxels = voxelized_solid_data->number_of_voxels_xyz_;
 
   // TOF of photon
   GGfloat tof = 0.0f;
