@@ -40,8 +40,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 GGEMSOpenCLManager::GGEMSOpenCLManager(void)
-: context_index_(0),
-  is_context_activated_(false),
+: is_context_activated_(false),
+  context_index_(0),
   kernels_(0),
   kernel_compilation_options_(0)
 {

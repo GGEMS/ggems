@@ -210,8 +210,8 @@ void GGEMSMHDImage::Read(std::string const& image_mhd_header_filename, std::weak
   // Computing bounding box borders automatically at isocenter
 
   for (GGsize i = 0; i < 3; ++i) {
-    solid_data_device->obb_geometry_.border_min_xyz_.s[i] = -solid_data_device->number_of_voxels_xyz_.s[i] * solid_data_device->voxel_sizes_xyz_.s[i] * 0.5f;
-    solid_data_device->obb_geometry_.border_max_xyz_.s[i] = solid_data_device->number_of_voxels_xyz_.s[i] * solid_data_device->voxel_sizes_xyz_.s[i] * 0.5f;
+    solid_data_device->obb_geometry_.border_min_xyz_.s[i] = -static_cast<GGfloat>(solid_data_device->number_of_voxels_xyz_.s[i]) * solid_data_device->voxel_sizes_xyz_.s[i] * 0.5f;
+    solid_data_device->obb_geometry_.border_max_xyz_.s[i] = static_cast<GGfloat>(solid_data_device->number_of_voxels_xyz_.s[i]) * solid_data_device->voxel_sizes_xyz_.s[i] * 0.5f;
   }
 
   // Release the pointer

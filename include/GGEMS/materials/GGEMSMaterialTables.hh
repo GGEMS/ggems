@@ -42,8 +42,8 @@
 typedef struct GGEMSMaterialTables_t
 {
   // Global parameters
-  GGshort number_of_materials_; /*!< Number of the materials */
-  GGshort total_number_of_chemical_elements_; /*!< Total number of chemical elements */
+  GGushort number_of_materials_; /*!< Number of the materials */
+  GGushort total_number_of_chemical_elements_; /*!< Total number of chemical elements */
 
   // Infos by materials
   GGchar number_of_chemical_elements_[256]; /*!< Number of chemical elements in a single material */
@@ -71,7 +71,7 @@ typedef struct GGEMSMaterialTables_t
   GGfloat positron_energy_cut_[256]; /*!< Positron energy cut */
 
   // Infos by chemical elements by materials
-  GGshort index_of_chemical_elements_[256]; /*!< Index to chemical element by material */
+  GGushort index_of_chemical_elements_[256]; /*!< Index to chemical element by material */
   GGchar atomic_number_Z_[256*32]; /*!< Atomic number Z by chemical elements */
   GGfloat atomic_number_density_[256*32]; /*!< Atomic number density : fraction of element in material * density * Avogadro / Atomic mass */
   GGfloat mass_fraction_[256*32]; /*!< Mass fraction of element in material */

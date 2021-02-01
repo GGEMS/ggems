@@ -222,7 +222,7 @@ void GGEMSMHDImage::WriteRaw(std::weak_ptr<cl::Buffer> image_cl) const
   T* data_image_device = opencl_manager.GetDeviceBuffer<T>(image_cl.lock().get(), dimensions_.x * dimensions_.y * dimensions_.z * sizeof(T));
 
   // Writing data on file
-  out_raw_stream.write(reinterpret_cast<char*>(data_image_device), dimensions_.x * dimensions_.y * dimensions_.z * sizeof(T));
+  out_raw_stream.write(reinterpret_cast<char*>(data_image_device), static_cast<std::streamsize>(dimensions_.x * dimensions_.y * dimensions_.z * sizeof(T)));
 
   // Release the pointers
   opencl_manager.ReleaseDeviceBuffer(image_cl.lock().get(), data_image_device);

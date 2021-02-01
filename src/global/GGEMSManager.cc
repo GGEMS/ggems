@@ -269,7 +269,7 @@ void GGEMSManager::Run()
     for (std::size_t i = 0; i < source_manager.GetNumberOfBatchs(j); ++i) {
       GGcout("GGEMSManager", "Run", 1) << "----> Launching batch " << i+1 << "/" << source_manager.GetNumberOfBatchs(j) << GGendl;
 
-      GGlong number_of_particles = source_manager.GetNumberOfParticlesInBatch(j, i);
+      GGsize number_of_particles = source_manager.GetNumberOfParticlesInBatch(j, i);
 
       // Step 1: Generating primaries from source
       GGcout("GGEMSManager", "Run", 2) << "      + Generating " << number_of_particles << " particles..." << GGendl;

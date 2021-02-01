@@ -126,12 +126,12 @@ void GGEMSMaterials::PrintInfos(void) const
     GGcout("GGEMSMaterials", "PrintInfos", 0) << "    - Total atomic density: " << material_table_device->number_of_atoms_by_volume_[i]/(mol/cm3) << " atom/cm3" << GGendl;
     GGcout("GGEMSMaterials", "PrintInfos", 0) << "    - Total electron density: " << material_table_device->number_of_electrons_by_volume_[i]/(mol/cm3) << " e-/cm3" << GGendl;
     GGcout("GGEMSMaterials", "PrintInfos", 0) << "    - Chemical Elements:" << GGendl;
-    for (GGuchar j = 0; j < material_table_device->number_of_chemical_elements_[i]; ++j) {
-      GGushort const kIndexChemicalElement = material_table_device->index_of_chemical_elements_[i];
-      GGcout("GGEMSMaterials", "PrintInfos", 0) << "        + Z = " << static_cast<GGushort>(material_table_device->atomic_number_Z_[j+kIndexChemicalElement]) << GGendl;
-      GGcout("GGEMSMaterials", "PrintInfos", 0) << "        + fraction of chemical element = " << material_table_device->mass_fraction_[j+kIndexChemicalElement]/percent << " %" << GGendl;
-      GGcout("GGEMSMaterials", "PrintInfos", 0) << "        + Atomic number density = " << material_table_device->atomic_number_density_[j+kIndexChemicalElement]/(mol/cm3) << " atom/cm3" << GGendl;
-      GGcout("GGEMSMaterials", "PrintInfos", 0) << "        + Element abundance = " << 100.0*material_table_device->atomic_number_density_[j+kIndexChemicalElement]/material_table_device->number_of_atoms_by_volume_[i] << " %" << GGendl;
+    for (GGchar j = 0; j < material_table_device->number_of_chemical_elements_[i]; ++j) {
+      GGushort chemical_element_id = material_table_device->index_of_chemical_elements_[i];
+      GGcout("GGEMSMaterials", "PrintInfos", 0) << "        + Z = " << static_cast<GGushort>(material_table_device->atomic_number_Z_[j+chemical_element_id]) << GGendl;
+      GGcout("GGEMSMaterials", "PrintInfos", 0) << "        + fraction of chemical element = " << material_table_device->mass_fraction_[j+chemical_element_id]/percent << " %" << GGendl;
+      GGcout("GGEMSMaterials", "PrintInfos", 0) << "        + Atomic number density = " << material_table_device->atomic_number_density_[j+chemical_element_id]/(mol/cm3) << " atom/cm3" << GGendl;
+      GGcout("GGEMSMaterials", "PrintInfos", 0) << "        + Element abundance = " << 100.0*material_table_device->atomic_number_density_[j+chemical_element_id]/material_table_device->number_of_atoms_by_volume_[i] << " %" << GGendl;
     }
     GGcout("GGEMSMaterials", "PrintInfos", 0) << "    - Energy loss fluctuation data:" << GGendl;
     GGcout("GGEMSMaterials", "PrintInfos", 0) << "        + Mean electron excitation energy: " << material_table_device->mean_excitation_energy_[i]/eV << " eV" << GGendl;
