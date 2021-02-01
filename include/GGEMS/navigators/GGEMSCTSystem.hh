@@ -162,14 +162,14 @@ extern "C" GGEMS_EXPORT void set_number_of_modules_ggems_ct_system(GGEMSCTSystem
 extern "C" GGEMS_EXPORT void set_ct_system_type_ggems_ct_system(GGEMSCTSystem* ct_system, char const* ct_system_type);
 
 /*!
-  \fn void set_number_of_detection_elements_ggems_ct_system(GGEMSCTSystem* ct_system, GGint const n_detection_element_x, GGint const n_detection_element_y, GGint const n_detection_element_z)
+  \fn void set_number_of_detection_elements_ggems_ct_system(GGEMSCTSystem* ct_system, GGsize const n_detection_element_x, GGsize const n_detection_element_y, GGsize const n_detection_element_z)
   \param ct_system - pointer on ct system
   \param n_detection_element_x - Number of detection element inside a module in X (local axis of detector)
   \param n_detection_element_y - Number of detection element inside a module in Y (local axis of detector)
   \param n_detection_element_z - Number of detection element inside a module in Z (local axis of detector)
   \brief set the number of detection element inside a module
 */
-extern "C" GGEMS_EXPORT void set_number_of_detection_elements_ggems_ct_system(GGEMSCTSystem* ct_system, GGint const n_detection_element_x, GGint const n_detection_element_y, GGint const n_detection_element_z);
+extern "C" GGEMS_EXPORT void set_number_of_detection_elements_ggems_ct_system(GGEMSCTSystem* ct_system, GGsize const n_detection_element_x, GGsize const n_detection_element_y, GGsize const n_detection_element_z);
 
 /*!
   \fn void set_size_of_detection_elements_ggems_ct_system(GGEMSCTSystem* ct_system, GGfloat const size_of_detection_element_x, GGfloat const size_of_detection_element_y, GGfloat const size_of_detection_element_z, char const* unit)

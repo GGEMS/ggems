@@ -159,39 +159,39 @@ class GGEMS_EXPORT GGEMSRangeCuts
 
   private:
     /*!
-      \fn GGfloat ConvertToEnergy(GGEMSMaterialTables* material_table, GGshort const& index_mat, std::string const& particle_name)
+      \fn GGfloat ConvertToEnergy(GGEMSMaterialTables* material_table, GGushort const& index_mat, std::string const& particle_name)
       \param material_table - material table on OpenCL device
       \param index_mat - index of the material
       \param particle_name - name of the particle
       \return energy cut of photon
       \brief Convert length cut to energy cut for gamma, e- and e+
     */
-    GGfloat ConvertToEnergy(GGEMSMaterialTables* material_table, GGshort const& index_mat, std::string const& particle_name);
+    GGfloat ConvertToEnergy(GGEMSMaterialTables* material_table, GGushort const& index_mat, std::string const& particle_name);
 
     /*!
-      \fn void BuildElementsLossTable(GGEMSMaterialTables* material_table, GGshort const& index_mat, std::string const& particle_name)
+      \fn void BuildElementsLossTable(GGEMSMaterialTables* material_table, GGushort const& index_mat, std::string const& particle_name)
       \param material_table - material table on OpenCL device
       \param index_mat - index of the material
       \param particle_name - name of the particle
       \brief Build loss table for elements in material
     */
-    void BuildElementsLossTable(GGEMSMaterialTables* material_table, GGshort const& index_mat, std::string const& particle_name);
+    void BuildElementsLossTable(GGEMSMaterialTables* material_table, GGushort const& index_mat, std::string const& particle_name);
 
     /*!
-      \fn void BuildAbsorptionLengthTable(GGEMSMaterialTables* material_table, GGshort const& index_mat)
+      \fn void BuildAbsorptionLengthTable(GGEMSMaterialTables* material_table, GGushort const& index_mat)
       \param material_table - material table on OpenCL device
       \param index_mat - index of the material
       \brief Build absorption length table for photon
     */
-    void BuildAbsorptionLengthTable(GGEMSMaterialTables* material_table, GGshort const& index_mat);
+    void BuildAbsorptionLengthTable(GGEMSMaterialTables* material_table, GGushort const& index_mat);
 
     /*!
-      \fn void BuildMaterialLossTable(GGEMSMaterialTables* material_table, GGshort const& index_mat)
+      \fn void BuildMaterialLossTable(GGEMSMaterialTables* material_table, GGushort const& index_mat)
       \param material_table - material table on OpenCL device
       \param index_mat - index of the material
       \brief Build loss table for material in case of electron and positron
     */
-    void BuildMaterialLossTable(GGEMSMaterialTables* material_table, GGshort const& index_mat);
+    void BuildMaterialLossTable(GGEMSMaterialTables* material_table, GGushort const& index_mat);
 
     /*!
       \fn GGfloat ComputePhotonCrossSection(GGchar const& atomic_number, GGfloat const& energy) const
@@ -231,7 +231,7 @@ class GGEMS_EXPORT GGEMSRangeCuts
   private:
     GGfloat min_energy_; /*!< Minimum energy of cross section table */
     GGfloat max_energy_; /*!< Maximum energy of cross section table */
-    GGshort number_of_bins_; /*!< Number of bins in cross section table */
+    GGsize number_of_bins_; /*!< Number of bins in cross section table */
 
     // Photon
     GGfloat distance_cut_photon_; /*!< Photon cut in length */

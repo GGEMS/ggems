@@ -53,7 +53,7 @@ class GGEMS_EXPORT GGEMSLogEnergyTable
       \param number_of_bins - number of bins in the loss table
       \brief GGEMSLogEnergyTable constructor
     */
-    GGEMSLogEnergyTable(GGfloat const& lowest_energy, GGfloat const& highest_energy, GGshort const& number_of_bins);
+    GGEMSLogEnergyTable(GGfloat const& lowest_energy, GGfloat const& highest_energy, GGsize const& number_of_bins);
 
     /*!
       \brief GGEMSLogEnergyTable destructor

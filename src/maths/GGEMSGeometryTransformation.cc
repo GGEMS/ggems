@@ -42,10 +42,14 @@ GGEMSGeometryTransformation::GGEMSGeometryTransformation(void)
   GGcout("GGEMSGeometryTransformation", "GGEMSGeometryTransformation", 3) << "Allocation of GGEMSGeometryTransformation..." << GGendl;
 
   // Initialize the position with min. float
-  position_ = {std::numeric_limits<float>::min(), std::numeric_limits<float>::min(), std::numeric_limits<float>::min()};
+  position_.x = std::numeric_limits<float>::min();
+  position_.y = std::numeric_limits<float>::min();
+  position_.z = std::numeric_limits<float>::min();
 
   // Initialize the rotation with min. float
-  rotation_ = {std::numeric_limits<float>::min(), std::numeric_limits<float>::min(), std::numeric_limits<float>::min()};
+  rotation_.x = std::numeric_limits<float>::min();
+  rotation_.y = std::numeric_limits<float>::min();
+  rotation_.z = std::numeric_limits<float>::min();
 
   // Initialize the local axis
   local_axis_ =
@@ -119,7 +123,9 @@ GGEMSGeometryTransformation::~GGEMSGeometryTransformation()
 void GGEMSGeometryTransformation::SetTranslation(GGfloat const& tx, GGfloat const& ty, GGfloat const& tz)
 {
   // Fill the position buffer first
-  position_ = {tx, ty, tz};
+  position_.x = tx;
+  position_.y = ty;
+  position_.z = tz;
 
   // Filling the translation matrix
   matrix_translation_ =
@@ -168,7 +174,9 @@ void GGEMSGeometryTransformation::SetTranslation(GGfloat3 const& txyz)
 void GGEMSGeometryTransformation::SetRotation(GGfloat const& rx, GGfloat const& ry, GGfloat const& rz)
 {
   // Filling the rotation buffer
-  rotation_ = {rx, ry, rz};
+  rotation_.x = rx;
+  rotation_.y = ry;
+  rotation_.z = rz;
 
   // Definition of cosinus and sinus
   GGfloat cosinus = 0.0, sinus = 0.0;

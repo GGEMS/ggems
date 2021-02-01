@@ -34,6 +34,8 @@
 #pragma warning(disable: 4251) // Deleting warning exporting STL members!!!
 #endif
 
+#define NAVIGATOR_NOT_INITIALIZED 0x100000000 /*!< value if OpenCL kernel is not compiled */
+
 #include "GGEMS/physics/GGEMSRangeCuts.hh"
 
 #include "GGEMS/geometries/GGEMSGeometryConstants.hh"

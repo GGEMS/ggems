@@ -48,10 +48,17 @@
 */
 inline GGfloat3 GGfloat44MultGGfloat3(GGfloat44 const* matrix, GGfloat3 const* point)
 {
-  GGfloat4 point4D = {point->x, point->y, point->z, 1.0f};
-  GGfloat4 row0 = {matrix->m0_[0], matrix->m0_[1], matrix->m0_[2], matrix->m0_[3]};
-  GGfloat4 row1 = {matrix->m1_[0], matrix->m1_[1], matrix->m1_[2], matrix->m1_[3]};
-  GGfloat4 row2 = {matrix->m2_[0], matrix->m2_[1], matrix->m2_[2], matrix->m2_[3]};
+  GGfloat4 point4D;
+  point4D.x = point->x; point4D.y = point->y; point4D.z = point->z; point4D.w = 1.0f;
+
+  GGfloat4 row0;
+  row0.x = matrix->m0_[0]; row0.y = matrix->m0_[1]; row0.z = matrix->m0_[2]; row0.w = matrix->m0_[3];
+
+  GGfloat4 row1;
+  row1.x = matrix->m1_[0]; row1.y = matrix->m1_[1]; row1.z = matrix->m1_[2]; row1.w = matrix->m1_[3];
+
+  GGfloat4 row2;
+  row2.x = matrix->m2_[0]; row2.y = matrix->m2_[1]; row2.z = matrix->m2_[2]; row2.w = matrix->m2_[3];
 
   #ifdef __OPENCL_C_VERSION__
   GGfloat3 vector = {
@@ -60,11 +67,10 @@ inline GGfloat3 GGfloat44MultGGfloat3(GGfloat44 const* matrix, GGfloat3 const* p
     dot(row2, point4D)
   };
   #else
-  GGfloat3 vector = {
-    row0.s0*point4D.s0 + row0.s1*point4D.s1 + row0.s2*point4D.s2 + row0.s3*point4D.s3,
-    row1.s0*point4D.s0 + row1.s1*point4D.s1 + row1.s2*point4D.s2 + row1.s3*point4D.s3,
-    row2.s0*point4D.s0 + row2.s1*point4D.s1 + row2.s2*point4D.s2 + row2.s3*point4D.s3
-  };
+  GGfloat3 vector;
+  vector.x = row0.s0*point4D.s0 + row0.s1*point4D.s1 + row0.s2*point4D.s2 + row0.s3*point4D.s3;
+  vector.y = row1.s0*point4D.s0 + row1.s1*point4D.s1 + row1.s2*point4D.s2 + row1.s3*point4D.s3;
+  vector.z = row2.s0*point4D.s0 + row2.s1*point4D.s1 + row2.s2*point4D.s2 + row2.s3*point4D.s3;
   #endif
 
   return vector;
@@ -83,10 +89,17 @@ inline GGfloat3 GGfloat44MultGGfloat3(GGfloat44 const* matrix, GGfloat3 const* p
 */
 inline GGfloat3 GGfloat33MultGGfloat3(GGfloat33 const* matrix, GGfloat3 const* point)
 {
-  GGfloat3 point3D = {point->x, point->y, point->z};
-  GGfloat3 row0 = {matrix->m0_[0], matrix->m0_[1], matrix->m0_[2]};
-  GGfloat3 row1 = {matrix->m1_[0], matrix->m1_[1], matrix->m1_[2]};
-  GGfloat3 row2 = {matrix->m2_[0], matrix->m2_[1], matrix->m2_[2]};
+  GGfloat3 point3D;
+  point3D.x = point->x; point3D.y = point->y; point3D.z = point->z;
+
+  GGfloat3 row0;
+  row0.x = matrix->m0_[0]; row0.y = matrix->m0_[1]; row0.z = matrix->m0_[2];
+
+  GGfloat3 row1;
+  row1.x = matrix->m1_[0]; row1.y = matrix->m1_[1]; row1.z = matrix->m1_[2];
+
+  GGfloat3 row2;
+  row2.x = matrix->m2_[0]; row2.y = matrix->m2_[1]; row2.z = matrix->m2_[2];
 
   #ifdef __OPENCL_C_VERSION__
   GGfloat3 vector = {
@@ -95,11 +108,10 @@ inline GGfloat3 GGfloat33MultGGfloat3(GGfloat33 const* matrix, GGfloat3 const* p
     dot(row2, point3D)
   };
   #else
-  GGfloat3 vector = {
-    row0.s0*point3D.s0 + row0.s1*point3D.s1 + row0.s2*point3D.s2,
-    row1.s0*point3D.s0 + row1.s1*point3D.s1 + row1.s2*point3D.s2,
-    row2.s0*point3D.s0 + row2.s1*point3D.s1 + row2.s2*point3D.s2
-  };
+  GGfloat3 vector;
+  vector.x = row0.s0*point3D.s0 + row0.s1*point3D.s1 + row0.s2*point3D.s2;
+  vector.y = row1.s0*point3D.s0 + row1.s1*point3D.s1 + row1.s2*point3D.s2;
+  vector.z = row2.s0*point3D.s0 + row2.s1*point3D.s1 + row2.s2*point3D.s2;
   #endif
 
   return vector;

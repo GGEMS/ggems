@@ -104,7 +104,7 @@ void GGEMSRangeCuts::SetPositronDistanceCut(GGfloat const& cut)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGfloat GGEMSRangeCuts::ConvertToEnergy(GGEMSMaterialTables* material_table, GGshort const& index_mat, std::string const& particle_name)
+GGfloat GGEMSRangeCuts::ConvertToEnergy(GGEMSMaterialTables* material_table, GGushort const& index_mat, std::string const& particle_name)
 {
   // Checking the particle_name
   if (particle_name != "gamma" && particle_name != "e+" && particle_name != "e-") {
@@ -182,7 +182,7 @@ GGfloat GGEMSRangeCuts::ConvertToEnergy(GGEMSMaterialTables* material_table, GGs
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSRangeCuts::BuildAbsorptionLengthTable(GGEMSMaterialTables* material_table, GGshort const& index_mat)
+void GGEMSRangeCuts::BuildAbsorptionLengthTable(GGEMSMaterialTables* material_table, GGushort const& index_mat)
 {
   // Allocation buffer for absorption length
   range_table_material_.reset(new GGEMSLogEnergyTable(min_energy_, max_energy_, number_of_bins_));
@@ -191,10 +191,10 @@ void GGEMSRangeCuts::BuildAbsorptionLengthTable(GGEMSMaterialTables* material_ta
   GGchar number_of_elements = material_table->number_of_chemical_elements_[index_mat];
 
   // Get index offset to element
-  GGshort index_of_offset = material_table->index_of_chemical_elements_[index_mat];
+  GGushort index_of_offset = material_table->index_of_chemical_elements_[index_mat];
 
   // Loop over the bins in the table
-  for (GGshort i = 0; i < number_of_bins_; ++i) {
+  for (GGsize i = 0; i < number_of_bins_; ++i) {
     GGfloat sigma = 0.0f;
 
     // Loop over the number of elements in material
@@ -211,7 +211,7 @@ void GGEMSRangeCuts::BuildAbsorptionLengthTable(GGEMSMaterialTables* material_ta
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSRangeCuts::BuildMaterialLossTable(GGEMSMaterialTables* material_table, GGshort const& index_mat)
+void GGEMSRangeCuts::BuildMaterialLossTable(GGEMSMaterialTables* material_table, GGushort const& index_mat)
 {
   // calculate parameters of the low energy part first
   std::vector<GGfloat> loss;
@@ -220,15 +220,15 @@ void GGEMSRangeCuts::BuildMaterialLossTable(GGEMSMaterialTables* material_table,
   range_table_material_.reset(new GGEMSLogEnergyTable(min_energy_, max_energy_, number_of_bins_));
 
   // Get the number of elements in material
-  GGuchar number_of_elements = material_table->number_of_chemical_elements_[index_mat];
+  GGsize number_of_elements = static_cast<GGsize>(material_table->number_of_chemical_elements_[index_mat]);
 
   // Get index offset to element
-  GGshort index_of_offset = material_table->index_of_chemical_elements_[index_mat];
+  GGushort index_of_offset = material_table->index_of_chemical_elements_[index_mat];
 
-  for (GGshort i = 0; i <= number_of_bins_; ++i) {
+  for (GGsize i = 0; i <= number_of_bins_; ++i) {
     GGfloat value = 0.0f;
 
-    for (GGuchar j = 0; j < number_of_elements; ++j) {
+    for (GGsize j = 0; j < number_of_elements; ++j) {
       value += material_table->atomic_number_density_[j+index_of_offset] * loss_table_dedx_table_elements_.at(j)->GetLossTableData(i);
     }
     loss.push_back(value);
@@ -238,12 +238,12 @@ void GGEMSRangeCuts::BuildMaterialLossTable(GGEMSMaterialTables* material_table,
   GGfloat dltau = 1.0f;
   if (min_energy_ > 0.f) {
     GGfloat ltt = logf(max_energy_/min_energy_);
-    dltau = ltt/number_of_bins_;
+    dltau = ltt/static_cast<GGfloat>(number_of_bins_);
   }
 
   GGfloat s0 = 0.0f;
   GGfloat value = 0.0f;
-  for (GGushort i = 0; i <= number_of_bins_; ++i) {
+  for (GGsize i = 0; i <= number_of_bins_; ++i) {
     GGfloat t = range_table_material_->GetLowEdgeEnergy(i);
     GGfloat q = t / loss.at(i);
 
@@ -268,26 +268,26 @@ void GGEMSRangeCuts::BuildMaterialLossTable(GGEMSMaterialTables* material_table,
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSRangeCuts::BuildElementsLossTable(GGEMSMaterialTables* material_table, GGshort const& index_mat, std::string const& particle_name)
+void GGEMSRangeCuts::BuildElementsLossTable(GGEMSMaterialTables* material_table, GGushort const& index_mat, std::string const& particle_name)
 {
   // Getting number of elements in material
-  GGshort number_of_elements = material_table->number_of_chemical_elements_[index_mat];
+  GGsize number_of_elements = static_cast<GGsize>(material_table->number_of_chemical_elements_[index_mat]);
 
   // Building cross section tables for each elements in material
   loss_table_dedx_table_elements_.reserve(number_of_elements);
 
   // Get index offset to element
-  GGshort index_of_offset = material_table->index_of_chemical_elements_[index_mat];
+  GGushort index_of_offset = material_table->index_of_chemical_elements_[index_mat];
 
   // Filling cross section table
-  for (GGshort i = 0; i < number_of_elements; ++i) {
+  for (GGsize i = 0; i < number_of_elements; ++i) {
     GGfloat value = 0.0f;
     std::shared_ptr<GGEMSLogEnergyTable> log_energy_table_element(new GGEMSLogEnergyTable(min_energy_, max_energy_, number_of_bins_));
 
     // Getting atomic number
     GGchar const kZ = material_table->atomic_number_Z_[i+index_of_offset];
 
-    for (GGshort j = 0; j < number_of_bins_; ++j) {
+    for (GGsize j = 0; j < number_of_bins_; ++j) {
       if (particle_name == "gamma") {
         value = ComputePhotonCrossSection(kZ, log_energy_table_element->GetEnergy(j));
       }
@@ -568,7 +568,7 @@ void GGEMSRangeCuts::ConvertCutsFromDistanceToEnergy(GGEMSMaterials* materials)
   GGEMSMaterialTables* material_table_device = opencl_manager.GetDeviceBuffer<GGEMSMaterialTables>(material_table_cl.get(), sizeof(GGEMSMaterialTables));
 
   // Loop over materials
-  for (GGshort i = 0; i < material_table_device->number_of_materials_; ++i) {
+  for (GGushort i = 0; i < material_table_device->number_of_materials_; ++i) {
     // Get the name of material
 
     // Convert photon cuts

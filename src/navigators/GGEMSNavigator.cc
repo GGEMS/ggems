@@ -41,9 +41,7 @@
 
 GGEMSNavigator::GGEMSNavigator(std::string const& navigator_name)
 : navigator_name_(navigator_name),
-  position_xyz_({0.0f, 0.0f, 0.0f}),
-  rotation_xyz_({0.0f, 0.0f, 0.0f}),
-  navigator_id_(-1),
+  navigator_id_(NAVIGATOR_NOT_INITIALIZED),
   is_update_pos_(false),
   is_update_rot_(false),
   output_basename_(""),
@@ -53,6 +51,14 @@ GGEMSNavigator::GGEMSNavigator(std::string const& navigator_name)
   kernel_track_through_solid_timer_(GGEMSChrono::Zero())
 {
   GGcout("GGEMSNavigator", "GGEMSNavigator", 3) << "Allocation of GGEMSNavigator..." << GGendl;
+
+  position_xyz_.x = 0.0f;
+  position_xyz_.y = 0.0f;
+  position_xyz_.z = 0.0f;
+
+  rotation_xyz_.x = 0.0f;
+  rotation_xyz_.y = 0.0f;
+  rotation_xyz_.z = 0.0f;
 
   // Store the phantom navigator in phantom navigator manager
   GGEMSNavigatorManager::GetInstance().Store(this);
@@ -134,7 +140,7 @@ void GGEMSNavigator::CheckParameters(void) const
   GGcout("GGEMSNavigator", "CheckParameters", 3) << "Checking the mandatory parameters..." << GGendl;
 
   // Checking id of the navigator
-  if (navigator_id_ == -1) {
+  if (navigator_id_ == NAVIGATOR_NOT_INITIALIZED) {
     std::ostringstream oss(std::ostringstream::out);
     oss << "Id of the navigator is not set!!!";
     GGEMSMisc::ThrowException("GGEMSNavigator", "CheckParameters", oss.str());
@@ -189,11 +195,11 @@ void GGEMSNavigator::ParticleSolidDistance(void)
   // Pointer to primary particles, and number to particles in buffer
   GGEMSSourceManager& source_manager = GGEMSSourceManager::GetInstance();
   cl::Buffer* primary_particles_cl = source_manager.GetParticles()->GetPrimaryParticles();
-  GGlong number_of_particles = source_manager.GetParticles()->GetNumberOfParticles();
+  GGsize number_of_particles = source_manager.GetParticles()->GetNumberOfParticles();
 
   // Getting work group size, and work-item number
-  std::size_t work_group_size = opencl_manager.GetWorkGroupSize();
-  std::size_t number_of_work_items = number_of_particles + (work_group_size - number_of_particles%work_group_size);
+  GGsize work_group_size = opencl_manager.GetWorkGroupSize();
+  GGsize number_of_work_items = number_of_particles + (work_group_size - number_of_particles%work_group_size);
 
   // Parameters for work-item in kernel
   cl::NDRange global_wi(number_of_work_items);
@@ -234,11 +240,11 @@ void GGEMSNavigator::ProjectToSolid(void)
   // Pointer to primary particles, and number to particles in buffer
   GGEMSSourceManager& source_manager = GGEMSSourceManager::GetInstance();
   cl::Buffer* primary_particles_cl = source_manager.GetParticles()->GetPrimaryParticles();
-  GGlong number_of_particles = source_manager.GetParticles()->GetNumberOfParticles();
+  GGsize number_of_particles = source_manager.GetParticles()->GetNumberOfParticles();
 
   // Getting work group size, and work-item number
-  std::size_t work_group_size = opencl_manager.GetWorkGroupSize();
-  std::size_t number_of_work_items = number_of_particles + (work_group_size - number_of_particles%work_group_size);
+  GGsize work_group_size = opencl_manager.GetWorkGroupSize();
+  GGsize number_of_work_items = number_of_particles + (work_group_size - number_of_particles%work_group_size);
 
   // Parameters for work-item in kernel
   cl::NDRange global_wi(number_of_work_items);
@@ -279,7 +285,7 @@ void GGEMSNavigator::TrackThroughSolid(void)
   // Pointer to primary particles, and number to particles in buffer
   GGEMSSourceManager& source_manager = GGEMSSourceManager::GetInstance();
   cl::Buffer* primary_particles_cl = source_manager.GetParticles()->GetPrimaryParticles();
-  GGlong number_of_particles = source_manager.GetParticles()->GetNumberOfParticles();
+  GGsize number_of_particles = source_manager.GetParticles()->GetNumberOfParticles();
 
   // Getting OpenCL pointer to random number
   cl::Buffer* randoms_cl = source_manager.GetPseudoRandomGenerator()->GetPseudoRandomNumbers();
@@ -291,8 +297,8 @@ void GGEMSNavigator::TrackThroughSolid(void)
   cl::Buffer* materials_cl = materials_->GetMaterialTables().lock().get();
 
   // Getting work group size, and work-item number
-  std::size_t work_group_size = opencl_manager.GetWorkGroupSize();
-  std::size_t number_of_work_items = number_of_particles + (work_group_size - number_of_particles%work_group_size);
+  GGsize work_group_size = opencl_manager.GetWorkGroupSize();
+  GGsize number_of_work_items = number_of_particles + (work_group_size - number_of_particles%work_group_size);
 
   // Parameters for work-item in kernel
   cl::NDRange global_wi(number_of_work_items);

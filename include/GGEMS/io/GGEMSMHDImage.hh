@@ -200,7 +200,7 @@ void GGEMSMHDImage::Write(T* image, GGsize const& elements)
   std::ofstream out_raw_stream(mhd_raw_file_, std::ios::out | std::ios::binary);
 
   // Writing data on file
-  out_raw_stream.write(reinterpret_cast<char*>(image), elements * sizeof(T));
+  out_raw_stream.write(reinterpret_cast<char*>(image), static_cast<std::streamsize>(elements * sizeof(T)));
 
   out_raw_stream.close();
 }

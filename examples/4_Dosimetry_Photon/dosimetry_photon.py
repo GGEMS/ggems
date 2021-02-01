@@ -20,7 +20,7 @@ from ggems import *
 
 # ------------------------------------------------------------------------------
 # STEP 0: Level of verbosity during computation
-GGEMSVerbosity(1)
+GGEMSVerbosity(2)
 
 # ------------------------------------------------------------------------------
 # STEP 1: Choosing an OpenCL context
@@ -70,10 +70,10 @@ range_cuts_manager.set_cut('gamma', 0.1, 'mm', 'all')
 # STEP 7: Source
 point_source = GGEMSXRaySource('point_source')
 point_source.set_source_particle_type('gamma')
-point_source.set_number_of_particles(10000000)
+point_source.set_number_of_particles(1)
 point_source.set_position(-595.0, 0.0, 0.0, 'mm')
 point_source.set_rotation(0.0, 0.0, 0.0, 'deg')
-point_source.set_beam_aperture(5.0, 'deg')
+point_source.set_beam_aperture(0.0, 'deg')
 point_source.set_focal_spot_size(0.0, 0.0, 0.0, 'mm')
 point_source.set_polyenergy('data/spectrum_120kVp_2mmAl.dat')
 
@@ -88,7 +88,7 @@ ggems_manager.process_verbose(True)
 ggems_manager.range_cuts_verbose(True)
 ggems_manager.random_verbose(True)
 ggems_manager.kernel_verbose(True)
-ggems_manager.tracking_verbose(False, 0)
+ggems_manager.tracking_verbose(True, 0)
 
 # Initializing the GGEMS simulation
 ggems_manager.initialize(777)
