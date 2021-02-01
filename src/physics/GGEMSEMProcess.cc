@@ -93,8 +93,8 @@ void GGEMSEMProcess::BuildCrossSectionTables(std::weak_ptr<cl::Buffer> particle_
     GGcout("GGEMSEMProcess", "BuildCrossSectionTables", 0) << "* PROCESS " << process_name_ << GGendl;
 
     // Loop over material
-    for (GGshort j = 0; j < materials_device->number_of_materials_; ++j) {
-      GGshort id_elt = materials_device->index_of_chemical_elements_[j];
+    for (GGushort j = 0; j < materials_device->number_of_materials_; ++j) {
+      GGushort id_elt = materials_device->index_of_chemical_elements_[j];
       GGcout("GGEMSEMProcess", "BuildCrossSectionTables", 0) << "    - Material: " << cross_section_device->material_names_[j]
         << ", density: " << materials_device->density_of_material_[j]/(g/cm3) << " g.cm-3" << GGendl;
       // Loop over number of bins (energy)
@@ -125,7 +125,7 @@ GGfloat GGEMSEMProcess::ComputeCrossSectionPerMaterial(GGEMSParticleCrossSection
 {
   GGfloat energy = cross_section_device->energy_bins_[energy_index];
   GGfloat cross_section_material = 0.0f;
-  GGshort index_of_offset = material_tables->index_of_chemical_elements_[material_index];
+  GGushort index_of_offset = material_tables->index_of_chemical_elements_[material_index];
 
   // Loop over all the chemical elements
   for (GGuchar i = 0; i < material_tables->number_of_chemical_elements_[material_index]; ++i) {

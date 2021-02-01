@@ -63,7 +63,7 @@ kernel void get_primaries_ggems_xray_source(
 )
 {
   // Get the index of thread
-  GGsize global_id = get_global_id(0);
+  GGint global_id = get_global_id(0);
 
   // Return if index > to particle limit
   if (global_id >= particle_id_limit) return;

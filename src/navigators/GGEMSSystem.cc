@@ -65,7 +65,7 @@ GGEMSSystem::~GGEMSSystem(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSSystem::SetNumberOfModules(GGint const& n_module_x, GGint const& n_module_y)
+void GGEMSSystem::SetNumberOfModules(GGsize const& n_module_x, GGsize const& n_module_y)
 {
   number_of_modules_xy_.x = n_module_x;
   number_of_modules_xy_.y = n_module_y;
@@ -168,8 +168,8 @@ void GGEMSSystem::SaveResults(void)
       GGint* histogram_device = opencl_manager.GetDeviceBuffer<GGint>(histogram_cl, number_of_detection_elements_inside_module_xyz_.x*number_of_detection_elements_inside_module_xyz_.y*sizeof(GGint));
 
       // Storing data on host
-      for (GGint jjj = 0; jjj < number_of_detection_elements_inside_module_xyz_.y; ++jjj) {
-        for (GGint iii = 0; iii < number_of_detection_elements_inside_module_xyz_.x; ++iii) {
+      for (GGsize jjj = 0; jjj < number_of_detection_elements_inside_module_xyz_.y; ++jjj) {
+        for (GGsize iii = 0; iii < number_of_detection_elements_inside_module_xyz_.x; ++iii) {
           output[(iii+ii*number_of_detection_elements_inside_module_xyz_.x) + (jjj+jj*number_of_detection_elements_inside_module_xyz_.y)*total_dim.x] =
             histogram_device[iii + jjj*number_of_detection_elements_inside_module_xyz_.x];
         }

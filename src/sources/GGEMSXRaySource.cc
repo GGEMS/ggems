@@ -62,7 +62,9 @@ GGEMSXRaySource::GGEMSXRaySource(std::string const& source_name)
   );
 
   // Initialization of parameters
-  focal_spot_size_ = {std::numeric_limits<float>::min(), std::numeric_limits<float>::min(), std::numeric_limits<float>::min()};
+  focal_spot_size_.x = std::numeric_limits<float>::min();
+  focal_spot_size_.y = std::numeric_limits<float>::min();
+  focal_spot_size_.z = std::numeric_limits<float>::min();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -110,6 +112,14 @@ void GGEMSXRaySource::GetPrimaries(GGsize const& number_of_particles)
   cl::Buffer* randoms = p_source_manager.GetPseudoRandomGenerator()->GetPseudoRandomNumbers();
   cl::Buffer* matrix_transformation = geometry_transformation_->GetTransformationMatrix();
 
+  // Getting work group size, and work-item number
+  std::size_t work_group_size = opencl_manager.GetWorkGroupSize();
+  std::size_t number_of_work_items = opencl_manager.GetBestWorkItem(number_of_particles);
+
+  // Parameters for work-item in kernel
+  cl::NDRange global_wi(number_of_work_items);
+  cl::NDRange local_wi(work_group_size);
+
   // Set parameters for kernel
   std::shared_ptr<cl::Kernel> kernel_cl = kernel_get_primaries_cl_.lock();
   kernel_cl->setArg(0, number_of_particles);
@@ -118,23 +128,13 @@ void GGEMSXRaySource::GetPrimaries(GGsize const& number_of_particles)
   kernel_cl->setArg(3, particle_type_);
   kernel_cl->setArg(4, *energy_spectrum_cl_);
   kernel_cl->setArg(5, *cdf_cl_);
-  kernel_cl->setArg(6, number_of_energy_bins_);
+  kernel_cl->setArg(6, static_cast<GGint>(number_of_energy_bins_));
   kernel_cl->setArg(7, beam_aperture_);
   kernel_cl->setArg(8, focal_spot_size_);
   kernel_cl->setArg(9, *matrix_transformation);
 
-  // Get number of max work group size
-  std::size_t max_work_group_size = opencl_manager.GetMaxWorkGroupSize();
-
-  // Compute work item number
-  std::size_t number_of_work_items = number_of_particles + (max_work_group_size - number_of_particles%max_work_group_size);
-
-  cl::NDRange global_wi(number_of_work_items);
-  cl::NDRange offset_wi(0);
-  cl::NDRange local_wi(max_work_group_size);
-
   // Launching kernel
-  GGint kernel_status = queue_cl->enqueueNDRangeKernel(*kernel_cl, offset_wi, global_wi, local_wi, nullptr, event_cl);
+  GGint kernel_status = queue_cl->enqueueNDRangeKernel(*kernel_cl, 0, global_wi, local_wi, nullptr, event_cl);
   opencl_manager.CheckOpenCLError(kernel_status, "GGEMSXRaySource", "GetPrimaries");
   queue_cl->finish(); // Wait until the kernel status is finish
 
@@ -348,7 +348,7 @@ void GGEMSXRaySource::FillEnergy(void)
 
     // Compute CDF and normalized it
     cdf_device[0] /= sum_cdf;
-    for (GGint i = 1; i < number_of_energy_bins_; ++i) {
+    for (GGsize i = 1; i < number_of_energy_bins_; ++i) {
       cdf_device[i] = cdf_device[i]/sum_cdf + cdf_device[i-1];
     }
 
@@ -400,7 +400,9 @@ void GGEMSXRaySource::SetBeamAperture(GGfloat const& beam_aperture, std::string 
 
 void GGEMSXRaySource::SetFocalSpotSize(GGfloat const& width, GGfloat const& height, GGfloat const& depth, std::string const& unit)
 {
-  focal_spot_size_ = {DistanceUnit(width, unit), DistanceUnit(height, unit), DistanceUnit(depth, unit)};
+  focal_spot_size_.x = DistanceUnit(width, unit);
+  focal_spot_size_.y = DistanceUnit(height, unit);
+  focal_spot_size_.z = DistanceUnit(depth, unit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

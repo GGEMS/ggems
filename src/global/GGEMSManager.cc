@@ -276,26 +276,26 @@ void GGEMSManager::Run()
       source_manager.GetPrimaries(j, number_of_particles);
 
       // Loop until ALL particles are dead
-      do {
+     // do {
         // Step 2: Find closest navigator (phantom, detector) before projection and track operation
         GGcout("GGEMSManager", "Run", 2) << "      + Finding solid..." << GGendl;
         navigator_manager.FindSolid();
 
         // Step 3: Project particles to solid
         GGcout("GGEMSManager", "Run", 2) << "      + Projecting particles to solid..." << GGendl;
-        navigator_manager.ProjectToSolid();
+        //navigator_manager.ProjectToSolid();
 
         // Step 4: Track through step, particles are tracked in selected solid
         GGcout("GGEMSManager", "Run", 2) << "      + Tracking particles through solid..." << GGendl;
-        navigator_manager.TrackThroughSolid();
+        //navigator_manager.TrackThroughSolid();
 
-      } while (source_manager.IsAlive()); // Step 5: Checking if all particles are dead, otherwize go back to step 2
+      //} while (source_manager.IsAlive()); // Step 5: Checking if all particles are dead, otherwize go back to step 2
     }
   }
 
   // End of simulation, storing output
   GGcout("GGEMSManager", "Run", 2) << "Saving results..." << GGendl;
-  navigator_manager.SaveResults();
+  //navigator_manager.SaveResults();
 
   // Printing elapsed time in kernels
   if (is_kernel_verbose_) {

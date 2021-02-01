@@ -80,7 +80,11 @@ void GGEMSSource::EnableTracking(void)
 
 void GGEMSSource::SetPosition(GGfloat const& pos_x, GGfloat const& pos_y, GGfloat const& pos_z, std::string const& unit)
 {
-  geometry_transformation_->SetTranslation({DistanceUnit(pos_x, unit), DistanceUnit(pos_y, unit), DistanceUnit(pos_z, unit)});
+  GGfloat3 translation;
+  translation.x = DistanceUnit(pos_x, unit);
+  translation.y = DistanceUnit(pos_y, unit);
+  translation.z = DistanceUnit(pos_z, unit);
+  geometry_transformation_->SetTranslation(translation);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -119,7 +123,11 @@ void GGEMSSource::SetSourceParticleType(std::string const& particle_type)
 
 void GGEMSSource::SetRotation(GGfloat const& rx, GGfloat const& ry, GGfloat const& rz, std::string const& unit)
 {
-  geometry_transformation_->SetRotation({AngleUnit(rx, unit), AngleUnit(ry, unit), AngleUnit(rz, unit)});
+  GGfloat3 rotation;
+  rotation.x = AngleUnit(rx, unit);
+  rotation.y = AngleUnit(ry, unit);
+  rotation.z = AngleUnit(rz, unit);
+  geometry_transformation_->SetRotation(rotation);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

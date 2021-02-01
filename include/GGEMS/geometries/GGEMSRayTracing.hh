@@ -355,6 +355,12 @@ inline GGfloat ComputeDistanceToOBB(GGfloat3 const* position, GGfloat3 const* di
   GGfloat z_min = obb_data->border_min_xyz_.z;
   GGfloat z_max = obb_data->border_max_xyz_.z;
 
+  printf("pos: %4.12f %4.12f %4.12f mm\n", local_position.x/mm, local_position.y/mm, local_position.z/mm);
+  printf("dir: %4.12f %4.12f %4.12f\n", local_direction.x, local_direction.y, local_direction.z);
+  printf("x_min_max: %4.12f %4.12f\n", x_min/mm, x_max/mm);
+  printf("y_min_max: %4.12f %4.12f\n", y_min/mm, y_max/mm);
+  printf("z_min_max: %4.12f %4.12f\n", z_min/mm, z_max/mm);
+
   return ComputeDistanceToAABB(&local_position, &local_direction, x_min, x_max, y_min, y_max, z_min, z_max, GEOMETRY_TOLERANCE);
 }
 

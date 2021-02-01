@@ -37,6 +37,14 @@
   \struct GGEMSOBB_t
   \brief Structure storing OBB (Oriented Bounding Box) geometry
 */
+// #if defined(_MSC_VER)
+// #pragma pack(push, 1)
+// typedef struct GGEMSOBB_t
+// #elif defined(__clang__ ) https://blog.kowalczyk.info/article/j/guide-to-predefined-macros-in-c-compilers-gcc-clang-msvc-etc..html
+// typedef struct __attribute__ ((packed)) GGEMSOBB_t
+// #else
+// typedef struct GGEMSOBB_t
+// #endif
 #pragma pack(push, 1)
 typedef struct GGEMSOBB_t
 {

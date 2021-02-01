@@ -824,10 +824,10 @@ DurationNano GGEMSOpenCLManager::GetElapsedTimeInKernel(void) const
   GGulong start = 0, end = 0;
 
   // Start
-  CheckOpenCLError(event_act_.get()->getProfilingInfo(CL_PROFILING_COMMAND_START, &start), "GGEMSOpenCLManager", "DisplayElapsedTimeInKernel");
+  CheckOpenCLError(event_act_.get()->getProfilingInfo(CL_PROFILING_COMMAND_START, &start), "GGEMSOpenCLManager", "GetElapsedTimeInKernel");
 
   // End
-  CheckOpenCLError(event_act_.get()->getProfilingInfo(CL_PROFILING_COMMAND_END, &end), "GGEMSOpenCLManager", "DisplayElapsedTimeInKernel");
+  CheckOpenCLError(event_act_.get()->getProfilingInfo(CL_PROFILING_COMMAND_END, &end), "GGEMSOpenCLManager", "GetElapsedTimeInKernel");
 
   return static_cast<std::chrono::nanoseconds>((end-start));
 }

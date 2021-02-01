@@ -31,7 +31,7 @@ class GGEMSXRaySource(object):
       ggems_lib.set_position_ggems_xray_source.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_char_p]
       ggems_lib.set_position_ggems_xray_source.restype = ctypes.c_void_p
 
-      ggems_lib.set_number_of_particles_xray_source.argtypes = [ctypes.c_void_p, ctypes.c_longlong]
+      ggems_lib.set_number_of_particles_xray_source.argtypes = [ctypes.c_void_p, ctypes.c_size_t]
       ggems_lib.set_number_of_particles_xray_source.restype = ctypes.c_void_p
 
       ggems_lib.set_source_particle_type_ggems_xray_source.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
