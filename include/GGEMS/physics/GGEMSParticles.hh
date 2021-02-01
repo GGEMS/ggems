@@ -99,18 +99,18 @@ class GGEMS_EXPORT GGEMSParticles
     inline cl::Buffer* GetPrimaryParticles() const {return primary_particles_cl_.get();};
 
     /*!
-      \fn void SetNumberOfParticles(GGlong const& number_of_particles)
+      \fn void SetNumberOfParticles(GGsize const& number_of_particles)
       \param number_of_particles - number of activated particles in buffer
       \brief Set the number of particles in buffer
     */
-    void SetNumberOfParticles(GGlong const& number_of_particles);
+    void SetNumberOfParticles(GGsize const& number_of_particles);
 
     /*!
-      \fn inline GGlong GetNumberOfParticles(void) const
+      \fn inline GGsize GetNumberOfParticles(void) const
       \return number of particles currently activated in OpenCL buffer
       \brief Get the number of particles
     */
-    inline GGlong GetNumberOfParticles(void) const {return number_of_particles_;};
+    inline GGsize GetNumberOfParticles(void) const {return number_of_particles_;};
 
     /*!
       \fn bool IsAlive(void) const
@@ -134,7 +134,7 @@ class GGEMS_EXPORT GGEMSParticles
     void AllocatePrimaryParticles(void);
 
   private:
-    GGlong number_of_particles_; /*!< Number of activated particles in buffer */
+    GGsize number_of_particles_; /*!< Number of activated particles in buffer */
     std::shared_ptr<cl::Buffer> primary_particles_cl_; /*!< Pointer storing info about primary particles in batch on OpenCL device */
     ParticleTypeMap particle_type_; /*!< Map of particle type */
     ParticleStatusMap particle_status_; /*!< Map of particle status */

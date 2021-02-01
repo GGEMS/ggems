@@ -36,7 +36,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSSolidBox::GGEMSSolidBox(GGint const& virtual_element_number_x, GGint const& virtual_element_number_y, GGint const& virtual_element_number_z, GGfloat const& box_size_x, GGfloat const& box_size_y, GGfloat const& box_size_z, std::string const& data_reg_type)
+GGEMSSolidBox::GGEMSSolidBox(GGsize const& virtual_element_number_x, GGsize const& virtual_element_number_y, GGsize const& virtual_element_number_z, GGfloat const& box_size_x, GGfloat const& box_size_y, GGfloat const& box_size_z, std::string const& data_reg_type)
 : GGEMSSolid()
 {
   GGcout("GGEMSSolidBox", "GGEMSSolidBox", 3) << "Allocation of GGEMSSolidBox..." << GGendl;
@@ -55,13 +55,13 @@ GGEMSSolidBox::GGEMSSolidBox(GGint const& virtual_element_number_x, GGint const&
   solid_data_device->box_size_xyz_[1] = box_size_y;
   solid_data_device->box_size_xyz_[2] = box_size_z;
 
-  solid_data_device->obb_geometry_.border_min_xyz_[0] = -box_size_x*0.5f;
-  solid_data_device->obb_geometry_.border_min_xyz_[1] = -box_size_y*0.5f;
-  solid_data_device->obb_geometry_.border_min_xyz_[2] = -box_size_z*0.5f;
+  solid_data_device->obb_geometry_.border_min_xyz_.x = -box_size_x*0.5f;
+  solid_data_device->obb_geometry_.border_min_xyz_.y = -box_size_y*0.5f;
+  solid_data_device->obb_geometry_.border_min_xyz_.z = -box_size_z*0.5f;
 
-  solid_data_device->obb_geometry_.border_max_xyz_[0] = box_size_x*0.5f;
-  solid_data_device->obb_geometry_.border_max_xyz_[1] = box_size_y*0.5f;
-  solid_data_device->obb_geometry_.border_max_xyz_[2] = box_size_z*0.5f;
+  solid_data_device->obb_geometry_.border_max_xyz_.x = box_size_x*0.5f;
+  solid_data_device->obb_geometry_.border_max_xyz_.y = box_size_y*0.5f;
+  solid_data_device->obb_geometry_.border_max_xyz_.z = box_size_z*0.5f;
 
   // Releasing pointer
   opencl_manager.ReleaseDeviceBuffer(solid_data_cl_.get(), solid_data_device);
@@ -85,7 +85,7 @@ GGEMSSolidBox::GGEMSSolidBox(GGint const& virtual_element_number_x, GGint const&
 
     GGint* histogram_device = opencl_manager.GetDeviceBuffer<GGint>(histogram_.histogram_cl_.get(), histogram_.number_of_elements_*sizeof(GGint));
 
-    for (GGint i = 0; i < histogram_.number_of_elements_; ++i) histogram_device[i] = 0;
+    for (GGsize i = 0; i < histogram_.number_of_elements_; ++i) histogram_device[i] = 0;
 
     opencl_manager.ReleaseDeviceBuffer(histogram_.histogram_cl_ .get(), histogram_device);
   }
@@ -135,7 +135,7 @@ void GGEMSSolidBox::InitializeKernel(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSSolidBox::Initialize(std::weak_ptr<GGEMSMaterials> materials)
+void GGEMSSolidBox::Initialize(std::weak_ptr<GGEMSMaterials>)
 {
   GGcout("GGEMSSolidBox", "Initialize", 3) << "Initializing voxelized solid..." << GGendl;
 
@@ -160,9 +160,9 @@ void GGEMSSolidBox::PrintInfos(void) const
   GGcout("GGEMSSolidBox", "PrintInfos", 0) << "* Virtual elements: " << solid_data_device->virtual_element_number_xyz_[0] << "x" << solid_data_device->virtual_element_number_xyz_[1] << "x" << solid_data_device->virtual_element_number_xyz_[2] << GGendl;
   GGcout("GGEMSSolidBox", "PrintInfos", 0) << "* Lengths: (" << solid_data_device->box_size_xyz_[0] << "x" << solid_data_device->box_size_xyz_[1] << "x" << solid_data_device->box_size_xyz_[2] << ") mm3" << GGendl;
   GGcout("GGEMSVoxelizedSolid", "PrintInfos", 0) << "* Oriented bounding box (OBB) in local position:" << GGendl;
-  GGcout("GGEMSVoxelizedSolid", "PrintInfos", 0) << "    - X: " << solid_data_device->obb_geometry_.border_min_xyz_[0] << " <-> " << solid_data_device->obb_geometry_.border_max_xyz_[0] << GGendl;
-  GGcout("GGEMSVoxelizedSolid", "PrintInfos", 0) << "    - Y: " << solid_data_device->obb_geometry_.border_min_xyz_[1] << " <-> " << solid_data_device->obb_geometry_.border_max_xyz_[1] << GGendl;
-  GGcout("GGEMSVoxelizedSolid", "PrintInfos", 0) << "    - Z: " << solid_data_device->obb_geometry_.border_min_xyz_[2] << " <-> " << solid_data_device->obb_geometry_.border_max_xyz_[2] << GGendl;
+  GGcout("GGEMSVoxelizedSolid", "PrintInfos", 0) << "    - X: " << solid_data_device->obb_geometry_.border_min_xyz_.x << " <-> " << solid_data_device->obb_geometry_.border_max_xyz_.x << GGendl;
+  GGcout("GGEMSVoxelizedSolid", "PrintInfos", 0) << "    - Y: " << solid_data_device->obb_geometry_.border_min_xyz_.y << " <-> " << solid_data_device->obb_geometry_.border_max_xyz_.y << GGendl;
+  GGcout("GGEMSVoxelizedSolid", "PrintInfos", 0) << "    - Z: " << solid_data_device->obb_geometry_.border_min_xyz_.z << " <-> " << solid_data_device->obb_geometry_.border_max_xyz_.z << GGendl;
   GGcout("GGEMSSolidBox", "PrintInfos", 0) << "    - Transformation matrix:" << GGendl;
   GGcout("GGEMSSolidBox", "PrintInfos", 0) << "    [" << GGendl;
   GGcout("GGEMSSolidBox", "PrintInfos", 0) << "        " << solid_data_device->obb_geometry_.matrix_transformation_.m0_[0] << " " << solid_data_device->obb_geometry_.matrix_transformation_.m0_[1] << " " << solid_data_device->obb_geometry_.matrix_transformation_.m0_[2] << " " << solid_data_device->obb_geometry_.matrix_transformation_.m0_[3] << GGendl;

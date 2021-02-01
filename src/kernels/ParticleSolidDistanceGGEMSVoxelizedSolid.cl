@@ -34,16 +34,20 @@
 #include "GGEMS/geometries/GGEMSRayTracing.hh"
 
 /*!
-  \fn kernel void particle_solid_distance_ggems_voxelized_solid(GGlong const particle_id_limit, global GGEMSPrimaryParticles* primary_particle, global GGEMSVoxelizedSolidData const* voxelized_solid_data)
+  \fn kernel void particle_solid_distance_ggems_voxelized_solid(GGsize const particle_id_limit, global GGEMSPrimaryParticles* primary_particle, global GGEMSVoxelizedSolidData const* voxelized_solid_data)
   \param particle_id_limit - particle id limit
   \param primary_particle - pointer to primary particles on OpenCL memory
   \param voxelized_solid_data - pointer to voxelized solid data
   \brief OpenCL kernel computing distance between voxelized solid and particles
 */
-kernel void particle_solid_distance_ggems_voxelized_solid(GGlong const particle_id_limit, global GGEMSPrimaryParticles* primary_particle, global GGEMSVoxelizedSolidData const* voxelized_solid_data)
+kernel void particle_solid_distance_ggems_voxelized_solid(
+  GGsize const particle_id_limit,
+  global GGEMSPrimaryParticles* primary_particle,
+  global GGEMSVoxelizedSolidData const* voxelized_solid_data
+)
 {
   // Getting index of thread
-  GGint global_id = get_global_id(0);
+  GGsize global_id = get_global_id(0);
 
   // Return if index > to particle limit
   if (global_id >= particle_id_limit) return;

@@ -43,7 +43,15 @@
   \param voxelized_phantom - buffer storing voxelized phantom
   \brief Draw tube solid in voxelized image
 */
-kernel void draw_ggems_tube(GGint const voxel_id_limit, GGfloat3 const element_sizes, GGint3 const phantom_dimensions, GGfloat3 const positions, GGfloat const label_value, GGfloat const height, GGfloat const radius_x, GGfloat const radius_y,
+kernel void draw_ggems_tube(
+  GGsize const voxel_id_limit,
+  GGfloat3 const element_sizes,
+  GGint3 const phantom_dimensions,
+  GGfloat3 const positions,
+  GGfloat const label_value,
+  GGfloat const height,
+  GGfloat const radius_x,
+  GGfloat const radius_y,
   #ifdef MET_CHAR
   global GGchar* voxelized_phantom
   #elif MET_UCHAR
@@ -76,7 +84,7 @@ kernel void draw_ggems_tube(GGint const voxel_id_limit, GGfloat3 const element_s
 
   // Get index i, j and k of current voxel
   GGint3 indices;
-  indices.y = (global_id % (phantom_dimensions.x*phantom_dimensions.y)) / phantom_dimensions.x;
+  indices.y = (global_id % (phantom_dimensions.x*phantom_dimensions.x)) / phantom_dimensions.x;
   indices.x = (global_id % (phantom_dimensions.x*phantom_dimensions.y)) - indices.y*phantom_dimensions.x;
   indices.z = global_id / (phantom_dimensions.x*phantom_dimensions.y);
 

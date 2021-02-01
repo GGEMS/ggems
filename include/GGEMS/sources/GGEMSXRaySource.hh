@@ -125,11 +125,11 @@ class GGEMS_EXPORT GGEMSXRaySource : public GGEMSSource
     void PrintInfos(void) const override;
 
     /*!
-      \fn void GetPrimaries(GGlong const& number_of particles) = 0
+      \fn void GetPrimaries(GGsize const& number_of particles) = 0
       \param number_of_particles - number of particles to generate
       \brief Generate primary particles
     */
-    void GetPrimaries(GGlong const& number_of_particles) override;
+    void GetPrimaries(GGsize const& number_of_particles) override;
 
   private:
     /*!
@@ -188,12 +188,12 @@ extern "C" GGEMS_EXPORT void initialize_ggems_xray_source(GGEMSXRaySource* xray_
 extern "C" GGEMS_EXPORT void set_position_ggems_xray_source(GGEMSXRaySource* xray_source, GGfloat const pos_x, GGfloat const pos_y, GGfloat const pos_z, char const* unit);
 
 /*!
-  \fn void set_number_of_particles_xray_source(GGEMSXRaySource* xray_source, GGlong const number_of_particles)
+  \fn void set_number_of_particles_xray_source(GGEMSXRaySource* xray_source, GGsize const number_of_particles)
   \param xray_source - pointer on the source
   \param number_of_particles - number of particles to simulate
   \brief Set the number of particles to simulate during the simulation
 */
-extern "C" GGEMS_EXPORT void set_number_of_particles_xray_source(GGEMSXRaySource* xray_source, GGlong const number_of_particles);
+extern "C" GGEMS_EXPORT void set_number_of_particles_xray_source(GGEMSXRaySource* xray_source, GGsize const number_of_particles);
 
 /*!
   \fn void set_source_particle_type_ggems_xray_source(GGEMSXRaySource* xray_source, char const* particle_name)

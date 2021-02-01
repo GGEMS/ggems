@@ -40,6 +40,8 @@
 #include "GGEMS/tools/GGEMSPrint.hh"
 #include "GGEMS/tools/GGEMSChrono.hh"
 
+#define KERNEL_NOT_COMPILED 0x100000000 /*!< value if OpenCL kernel is not compiled */
+
 /*!
   \class GGEMSOpenCLManager
   \brief Singleton class storing all information about OpenCL in GGEMS
@@ -145,39 +147,39 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     void PrintBuildOptions(void) const;
 
     /*!
-      \fn void ContextToActivate(GGint const& context_id)
+      \fn void ContextToActivate(GGsize const& context_id)
       \param context_id - context index
       \brief set the index of the context to activate
     */
-    void ContextToActivate(GGint const& context_id);
+    void ContextToActivate(GGsize const& context_id);
 
     /*!
-      \fn GGulong GetMaxRAMMemoryOnActivatedContext(void) const
+      \fn inline GGsize GetMaxRAMMemoryOnActivatedContext(void) const
       \return Max RAM memory on a context
       \brief Get the maximum RAM memory on activated OpenCL context
     */
-    inline GGulong GetMaxRAMMemoryOnActivatedContext(void) const {return device_global_mem_size_[context_index_];}
+    inline GGsize GetMaxRAMMemoryOnActivatedContext(void) const {return static_cast<GGsize>(device_global_mem_size_[context_index_]);}
 
     /*!
-      \fn inline GGulong GetMaxBufferAllocationSize(void) const
+      \fn inline GGsize GetMaxBufferAllocationSize(void) const
       \return Max buffer allocation size
       \brief Get the max buffer size in bytes on activated OpenCL context
     */
-    inline GGulong GetMaxBufferAllocationSize(void) const {return device_max_mem_alloc_size_[context_index_];}
+    inline GGsize GetMaxBufferAllocationSize(void) const {return static_cast<GGsize>(device_max_mem_alloc_size_[context_index_]);}
 
     /*!
-      \fn inline std::size_t GetMaxWorkGroupSize(void) const
+      \fn inline GGsize GetMaxWorkGroupSize(void) const
       \return Max work group size
       \brief Get the max work group size on activated OpenCL context
     */
-    inline std::size_t GetMaxWorkGroupSize(void) const { return device_max_work_group_size_[context_index_];}
+    inline GGsize GetMaxWorkGroupSize(void) const { return device_max_work_group_size_[context_index_];}
 
     /*!
-      \fn inline std::size_t GetWorkGroupSize(void) const
+      \fn inline GGsize GetWorkGroupSize(void) const
       \return Work group size
       \brief Get the work group size defined in GGEMS on activated OpenCL context
     */
-    inline std::size_t GetWorkGroupSize(void) const { return work_group_size_;}
+    inline GGsize GetWorkGroupSize(void) const { return work_group_size_;}
 
     /*!
       \fn std::string GetNameOfActivatedContext(void) const
@@ -219,30 +221,30 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     std::weak_ptr<cl::Kernel> CompileKernel(std::string const& kernel_filename, std::string const& kernel_name, char* const custom_options = nullptr, char* const additional_options = nullptr);
 
     /*!
-      \fn std::unique_ptr<cl::Buffer> Allocate(void* host_ptr, std::size_t size, cl_mem_flags flags)
+      \fn std::unique_ptr<cl::Buffer> Allocate(void* host_ptr, GGsize size, cl_mem_flags flags)
       \param host_ptr - pointer to buffer in host memory
       \param size - size of the buffer in bytes
       \param flags - mode to open the buffer
       \brief Allocation of OpenCL memory
       \return an unique pointer to an OpenCL buffer
     */
-    std::unique_ptr<cl::Buffer> Allocate(void* host_ptr, std::size_t size, cl_mem_flags flags);
+    std::unique_ptr<cl::Buffer> Allocate(void* host_ptr, GGsize size, cl_mem_flags flags);
 
     /*!
-      \fn void Deallocate(std::shared_ptr<cl::Buffer> buffer, std::size_t size)
+      \fn void Deallocate(std::shared_ptr<cl::Buffer> buffer, GGsize size)
       \param buffer - pointer to buffer in host memory
       \param size - size of the buffer in bytes
       \brief Deallocation of OpenCL memory
     */
-    void Deallocate(std::shared_ptr<cl::Buffer> buffer, std::size_t size);
+    void Deallocate(std::shared_ptr<cl::Buffer> buffer, GGsize size);
 
     /*!
-      \fn void Clean(std::shared_ptr<cl::Buffer> buffer, std::size_t size)
+      \fn void Clean(std::shared_ptr<cl::Buffer> buffer, GGsize size)
       \param buffer - pointer to buffer in host memory
       \param size - size of the buffer in bytes
       \brief Cleaning buffer on OpenCL device
     */
-    void Clean(std::shared_ptr<cl::Buffer> buffer, std::size_t size);
+    void Clean(std::shared_ptr<cl::Buffer> buffer, GGsize size);
 
     /*!
       \return the pointer on host memory on write/read mode
@@ -252,7 +254,7 @@ class GGEMS_EXPORT GGEMSOpenCLManager
       \tparam T - type of the returned pointer on host memory
     */
     template <typename T>
-    T* GetDeviceBuffer(cl::Buffer* device_ptr, std::size_t const size) const;
+    T* GetDeviceBuffer(cl::Buffer* device_ptr, GGsize const size) const;
 
     /*!
       \brief Get the device pointer on host to write on it. Mandatory after a GetDeviceBufferWrite ou GetDeviceBufferRead!!!
@@ -280,12 +282,12 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     void CheckOpenCLError(GGint const& error, std::string const& class_name, std::string const& method_name) const;
 
     /*!
-      \fn std::size_t GetBestWorkItem(GGulong const& number_of_elements) const
+      \fn GGsize GetBestWorkItem(GGsize const& number_of_elements) const
       \param number_of_elements - number of elements for the kernel computation
       \return best number of work item
       \brief get the best number of work item
     */
-    std::size_t GetBestWorkItem(GGulong const& number_of_elements) const;
+    GGsize GetBestWorkItem(GGsize const& number_of_elements) const;
 
   private:
     /*!
@@ -297,13 +299,13 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     std::string ErrorType(GGint const& error) const;
 
     /*!
-      \fn std::size_t CheckKernel(std::string const& kernel_name, std::string const& compilation_options) const
+      \fn std::GGsize CheckKernel(std::string const& kernel_name, std::string const& compilation_options) const
       \param kernel_name - name of the kernel
       \param compilation_options - arguments of compilation
       \brief check if a kernel has been already compiled
       \return index of kernel if already compiled
     */
-    std::size_t CheckKernel(std::string const& kernel_name, std::string const& compilation_options) const;
+    GGsize CheckKernel(std::string const& kernel_name, std::string const& compilation_options) const;
 
     /*!
       \fn bool IsDoublePrecisionAtomicAddition(void) const
@@ -369,14 +371,14 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     std::vector<GGulong> device_local_mem_size_; /*!< Local memory size */
     std::vector<cl_device_local_mem_type> device_local_mem_type_; /*!< Local memory type */
     std::vector<GGbool> device_host_unified_memory_; /*!< Host unified memory */
-    std::vector<std::size_t> device_image_max_array_size_; /*!< Max size of image array */
-    std::vector<std::size_t> device_image_max_buffer_size_; /*!< Max size of image buffer */
+    std::vector<GGsize> device_image_max_array_size_; /*!< Max size of image array */
+    std::vector<GGsize> device_image_max_buffer_size_; /*!< Max size of image buffer */
     std::vector<GGbool> device_image_support_; /*!< Image support */
-    std::vector<std::size_t> device_image2D_max_width_; /*!< Max width of image 2D */
-    std::vector<std::size_t> device_image2D_max_height_; /*!< Max height of image 2D */
-    std::vector<std::size_t> device_image3D_max_width_; /*!< Max width of image 3D */
-    std::vector<std::size_t> device_image3D_max_height_; /*!< Max height of image 3D */
-    std::vector<std::size_t> device_image3D_max_depth_; /*!< Max depth of image 3D */
+    std::vector<GGsize> device_image2D_max_width_; /*!< Max width of image 2D */
+    std::vector<GGsize> device_image2D_max_height_; /*!< Max height of image 2D */
+    std::vector<GGsize> device_image3D_max_width_; /*!< Max width of image 3D */
+    std::vector<GGsize> device_image3D_max_height_; /*!< Max height of image 3D */
+    std::vector<GGsize> device_image3D_max_depth_; /*!< Max depth of image 3D */
     std::vector<GGuint> device_max_read_image_args_; /*!< Max read image read by kernel in same time */
     std::vector<GGuint> device_max_write_image_args_; /*!< Max write image read by kernel in same time */
     std::vector<GGuint> device_max_clock_frequency_; /*!< Max frequency of device */
@@ -384,26 +386,26 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     std::vector<GGuint> device_max_constant_args_; /*!< Max constant arguments in kernel */
     std::vector<GGulong> device_max_constant_buffer_size_; /*!< Max constant buffer size */
     std::vector<GGulong> device_max_mem_alloc_size_; /*!< Max memory allocation size */
-    std::vector<std::size_t> device_max_parameter_size_; /*!< Max Parameter size in kernel */
+    std::vector<GGsize> device_max_parameter_size_; /*!< Max Parameter size in kernel */
     std::vector<GGuint> device_max_samplers_; /*!< Max number of samplers in kernel */
-    std::vector<std::size_t> device_max_work_group_size_; /*!< Max Work group size */
+    std::vector<GGsize> device_max_work_group_size_; /*!< Max Work group size */
     std::vector<GGuint> device_max_work_item_dimensions_; /*!< Maximum work item dimensions */
-    std::vector<std::size_t> device_max_work_item_sizes_; /*!< Maximum work item sizes */
+    std::vector<GGsize> device_max_work_item_sizes_; /*!< Maximum work item sizes */
     std::vector<GGuint> device_mem_base_addr_align_; /*!< Alignment memory */
-    std::vector<std::size_t> device_printf_buffer_size_; /*!< Size of buffer for printf in kernel */
+    std::vector<GGsize> device_printf_buffer_size_; /*!< Size of buffer for printf in kernel */
     std::vector<cl_device_affinity_domain> device_partition_affinity_domain_; /*!< Partition affinity domain */
     std::vector<GGuint> device_partition_max_sub_devices_; /*!< Partition affinity domain */
-    std::vector<std::size_t> device_profiling_timer_resolution_; /*!< Timer resolution */
+    std::vector<GGsize> device_profiling_timer_resolution_; /*!< Timer resolution */
 
     // Custom work group size
-    std::size_t work_group_size_; /*!< Work group size by GGEMS, here 64 */
+    GGsize work_group_size_; /*!< Work group size by GGEMS, here 64 */
 
     // OpenCL compilation options
     std::string build_options_; /*!< list of option to OpenCL compiler */
 
     // Context and informations about them
     bool is_context_activated_; /*!< Check if context already activated */
-    GGint context_index_; /*!< Index of the activated context */
+    GGsize context_index_; /*!< Index of the activated context */
     std::vector<std::shared_ptr<cl::Context>> contexts_; /*!< Vector of context */
 
     // Command queue informations
@@ -424,7 +426,7 @@ class GGEMS_EXPORT GGEMSOpenCLManager
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
-T* GGEMSOpenCLManager::GetDeviceBuffer(cl::Buffer* const device_ptr, std::size_t const size) const
+T* GGEMSOpenCLManager::GetDeviceBuffer(cl::Buffer* const device_ptr, GGsize const size) const
 {
   GGcout("GGEMSOpenCLManager", "GetDeviceBuffer", 3) << "Getting mapped memory buffer on OpenCL device..." << GGendl;
 
@@ -462,11 +464,11 @@ extern "C" GGEMS_EXPORT GGEMSOpenCLManager* get_instance_ggems_opencl_manager(vo
 extern "C" GGEMS_EXPORT void print_infos_opencl_manager(GGEMSOpenCLManager* opencl_manager);
 
 /*!
-  \fn void set_context_index_ggems_opencl_manager(GGEMSOpenCLManager* opencl_manager, GGint const context_id)
+  \fn void set_context_index_ggems_opencl_manager(GGEMSOpenCLManager* opencl_manager, GGsize const context_id)
   \param opencl_manager - pointer on the singleton
   \param context_id - index of the context
   \brief Set the context index to activate
 */
-extern "C" GGEMS_EXPORT void set_context_index_ggems_opencl_manager(GGEMSOpenCLManager* opencl_manager, GGint const context_id);
+extern "C" GGEMS_EXPORT void set_context_index_ggems_opencl_manager(GGEMSOpenCLManager* opencl_manager, GGsize const context_id);
 
 #endif // GUARD_GGEMS_GLOBAL_GGEMSOPENCLMANAGER_HH

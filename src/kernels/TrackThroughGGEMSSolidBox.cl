@@ -42,7 +42,7 @@
 #include "GGEMS/navigators/GGEMSPhotonNavigator.hh"
 
 /*!
-  \fn kernel void track_through_ggems_solid_box(GGlong const particle_id_limit, global GGEMSPrimaryParticles* primary_particle, global GGEMSRandom* random, global GGEMSSolidBoxData const* solid_box_data, global GGshort const* label_data, global GGEMSParticleCrossSections const* particle_cross_sections, global GGEMSMaterialTables const* materials, GGfloat const threshold, global GGint* histogram)
+  \fn kernel void track_through_ggems_solid_box(GGsize const particle_id_limit, global GGEMSPrimaryParticles* primary_particle, global GGEMSRandom* random, global GGEMSSolidBoxData const* solid_box_data, global GGshort const* label_data, global GGEMSParticleCrossSections const* particle_cross_sections, global GGEMSMaterialTables const* materials, GGfloat const threshold, global GGint* histogram)
   \param particle_id_limit - particle id limit
   \param primary_particle - pointer to primary particles on OpenCL memory
   \param random - pointer on random numbers
@@ -54,14 +54,22 @@
   \param histogram - pointer to buffer storing histogram
   \brief OpenCL kernel tracking particles within voxelized solid
 */
-kernel void track_through_ggems_solid_box(GGlong const particle_id_limit, global GGEMSPrimaryParticles* primary_particle, global GGEMSRandom* random, global GGEMSSolidBoxData const* solid_box_data, global GGshort const* label_data, global GGEMSParticleCrossSections const* particle_cross_sections, global GGEMSMaterialTables const* materials, GGfloat const threshold
+kernel void track_through_ggems_solid_box(
+  GGsize const particle_id_limit,
+  global GGEMSPrimaryParticles* primary_particle,
+  global GGEMSRandom* random,
+  global GGEMSSolidBoxData const* solid_box_data,
+  global GGshort const* label_data,
+  global GGEMSParticleCrossSections const* particle_cross_sections,
+  global GGEMSMaterialTables const* materials,
+  GGfloat const threshold
   #ifdef HISTOGRAM
   ,global GGint* histogram
   #endif
 )
 {
   // Getting index of thread
-  GGint global_id = get_global_id(0);
+  GGsize global_id = get_global_id(0);
 
   // Return if index > to particle limit
   if (global_id >= particle_id_limit) return;

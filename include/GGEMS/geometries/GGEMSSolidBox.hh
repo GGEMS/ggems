@@ -50,7 +50,7 @@ class GGEMS_EXPORT GGEMSSolidBox : public GGEMSSolid
       \param data_reg_type - type of registration "HIT", "SINGLE", "DOSE"
       \brief GGEMSSolidBox constructor
     */
-    GGEMSSolidBox(GGint const& virtual_element_number_x, GGint const& virtual_element_number_y, GGint const& virtual_element_number_z, GGfloat const& element_size_x, GGfloat const& element_size_y, GGfloat const& element_size_z, std::string const& data_reg_type);
+    GGEMSSolidBox(GGsize const& virtual_element_number_x, GGsize const& virtual_element_number_y, GGsize const& virtual_element_number_z, GGfloat const& element_size_x, GGfloat const& element_size_y, GGfloat const& element_size_z, std::string const& data_reg_type);
 
     /*!
       \brief GGEMSSolidBox destructor

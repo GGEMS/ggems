@@ -40,8 +40,8 @@
 #pragma pack(push, 1)
 typedef struct GGEMSOBB_t
 {
-  GGfloat border_min_xyz_[3]; /*!< Min. of border in X, Y and Z */
-  GGfloat border_max_xyz_[3]; /*!< Max. of border in X, Y and Z */
+  GGfloat3 border_min_xyz_; /*!< Min. of border in X, Y and Z */
+  GGfloat3 border_max_xyz_; /*!< Max. of border in X, Y and Z */
   GGfloat44 matrix_transformation_; /*!< Matrix of transformation including angle of rotation */
 } GGEMSOBB; /*!< Using C convention name of struct to C++ (_t deletion) */
 #pragma pack(pop)

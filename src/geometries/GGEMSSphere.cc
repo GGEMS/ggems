@@ -90,14 +90,27 @@ void GGEMSSphere::Draw(void)
   GGEMSVolumeCreatorManager& volume_creator_manager = GGEMSVolumeCreatorManager::GetInstance();
 
   // Get command queue and event
-  cl::CommandQueue* p_queue_cl = opencl_manager.GetCommandQueue();
-  cl::Event* p_event_cl = opencl_manager.GetEvent();
+  cl::CommandQueue* p_queue = opencl_manager.GetCommandQueue();
+  cl::Event* p_event = opencl_manager.GetEvent();
 
   // Get parameters from phantom creator
   GGfloat3 voxel_sizes = volume_creator_manager.GetElementsSizes();
-  GGint3 phantom_dimensions = volume_creator_manager.GetVolumeDimensions();
-  GGint number_of_elements = volume_creator_manager.GetNumberElements();
+
+  GGint3 phantom_dimensions;
+  phantom_dimensions.x = static_cast<GGint>(volume_creator_manager.GetVolumeDimensions().x);
+  phantom_dimensions.y = static_cast<GGint>(volume_creator_manager.GetVolumeDimensions().y);
+  phantom_dimensions.z = static_cast<GGint>(volume_creator_manager.GetVolumeDimensions().z);
+
+  GGsize number_of_elements = volume_creator_manager.GetNumberElements();
   cl::Buffer* voxelized_phantom = volume_creator_manager.GetVoxelizedVolume();
+
+  // Getting work group size, and work-item number
+  std::size_t work_group_size = opencl_manager.GetWorkGroupSize();
+  std::size_t number_of_work_items = opencl_manager.GetBestWorkItem(number_of_elements);
+
+  // Parameters for work-item in kernel
+  cl::NDRange global_wi(number_of_work_items);
+  cl::NDRange local_wi(work_group_size);
 
   // Set parameters for kernel
   std::shared_ptr<cl::Kernel> kernel_cl = kernel_draw_volume_.lock();
@@ -109,20 +122,10 @@ void GGEMSSphere::Draw(void)
   kernel_cl->setArg(5, radius_);
   kernel_cl->setArg(6, *voxelized_phantom);
 
-  // Get number of max work group size
-  std::size_t max_work_group_size = opencl_manager.GetWorkGroupSize();
-
-  // Compute work item number
-  std::size_t number_of_work_items = number_of_elements + (max_work_group_size - number_of_elements%max_work_group_size);
-
-  cl::NDRange global_wi(number_of_work_items);
-  cl::NDRange offset_wi(0);
-  cl::NDRange local_wi(max_work_group_size);
-
   // Launching kernel
-  cl_int kernel_status = p_queue_cl->enqueueNDRangeKernel(*kernel_cl, offset_wi, global_wi, local_wi, nullptr, p_event_cl);
+  cl_int kernel_status = p_queue->enqueueNDRangeKernel(*kernel_cl, 0, global_wi, local_wi, nullptr, p_event);
   opencl_manager.CheckOpenCLError(kernel_status, "GGEMSSphere", "Draw");
-  p_queue_cl->finish(); // Wait until the kernel status is finish
+  p_queue->finish(); // Wait until the kernel status is finish
 
   // Displaying time in kernel
   kernel_draw_volume_timer_ += opencl_manager.GetElapsedTimeInKernel();

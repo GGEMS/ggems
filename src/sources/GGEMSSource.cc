@@ -87,7 +87,7 @@ void GGEMSSource::SetPosition(GGfloat const& pos_x, GGfloat const& pos_y, GGfloa
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSSource::SetNumberOfParticles(GGlong const& number_of_particles)
+void GGEMSSource::SetNumberOfParticles(GGsize const& number_of_particles)
 {
   number_of_particles_ = number_of_particles;
 }
@@ -182,7 +182,7 @@ void GGEMSSource::OrganizeParticlesInBatch(void)
   // Computing the number of batch depending on the number of simulated
   // particles and the maximum simulated particles defined during GGEMS
   // compilation
-  std::size_t number_of_batchs = static_cast<std::size_t>(std::ceil(static_cast<GGfloat>(number_of_particles_) / MAXIMUM_PARTICLES));
+  GGsize number_of_batchs = static_cast<GGsize>(std::ceil(static_cast<GGfloat>(number_of_particles_) / MAXIMUM_PARTICLES));
 
   // Resizing vector storing the number of particles in batch
   number_of_particles_in_batch_.resize(number_of_batchs, 0);
@@ -197,7 +197,7 @@ void GGEMSSource::OrganizeParticlesInBatch(void)
     }
 
     // Adding the remaing particles
-    for (std::size_t i = 0; i < number_of_particles_ % number_of_batchs; ++i) {
+    for (GGsize i = 0; i < number_of_particles_ % number_of_batchs; ++i) {
       number_of_particles_in_batch_[i]++;
     }
   }

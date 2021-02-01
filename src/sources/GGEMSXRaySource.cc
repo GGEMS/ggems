@@ -95,7 +95,7 @@ void GGEMSXRaySource::InitializeKernel(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSXRaySource::GetPrimaries(GGlong const& number_of_particles)
+void GGEMSXRaySource::GetPrimaries(GGsize const& number_of_particles)
 {
   GGcout("GGEMSXRaySource", "GetPrimaries", 3) << "Generating " << number_of_particles << " new particles..." << GGendl;
 
@@ -434,7 +434,7 @@ void set_position_ggems_xray_source(GGEMSXRaySource* xray_source, GGfloat const 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_number_of_particles_xray_source(GGEMSXRaySource* xray_source, GGlong const number_of_particles)
+void set_number_of_particles_xray_source(GGEMSXRaySource* xray_source, GGsize const number_of_particles)
 {
   xray_source->SetNumberOfParticles(number_of_particles);
 }

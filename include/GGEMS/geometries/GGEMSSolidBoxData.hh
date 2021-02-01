@@ -40,7 +40,7 @@
 typedef struct GGEMSSolidBoxData_t
 {
   GGint solid_id_; /*!< Navigator index */
-  GGint virtual_element_number_xyz_[3]; /*!< Number of virtual element in box */
+  GGsize virtual_element_number_xyz_[3]; /*!< Number of virtual element in box */
   GGfloat box_size_xyz_[3]; /*!< Length of box in X, Y and Z */
   GGEMSOBB obb_geometry_; /*!< OBB storing border of voxelized solid and matrix of transformation */
 } GGEMSSolidBoxData; /*!< Using C convention name of struct to C++ (_t deletion) */

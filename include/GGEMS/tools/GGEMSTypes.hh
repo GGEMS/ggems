@@ -91,18 +91,14 @@
 #define GGulong8 ulong8 /*!< define a new type for ulong8 */
 #define GGulong16 ulong16 /*!< define a new type for ulong16 */
 
+#define GGsize GGulong /*!< define size for OpenCL, size_t is forbidden as kernel parameters */
+
 #define GGfloat float /*!< define a new type for float */
 #define GGfloat2 float2 /*!< define a new type for float2 */
 #define GGfloat3 float3 /*!< define a new type for float3 */
 #define GGfloat4 float4 /*!< define a new type for float4 */
 #define GGfloat8 float8 /*!< define a new type for float8 */
 #define GGfloat16 float16 /*!< define a new type for float16 */
-
-#if defined(cl_khr_int64_base_atomics)
-#pragma OPENCL EXTENSION cl_khr_int64_base_atomics : enable
-#else
-#pragma message("int64 atomic operation are not supported!!!")
-#endif
 
 #if defined(cl_khr_fp64)  // Khronos extension available?
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
@@ -119,6 +115,13 @@
 
 #ifdef DOSIMETRY_DOUBLE_PRECISION
 #define GGDosiType GGdouble
+
+#if defined(cl_khr_int64_base_atomics)
+#pragma OPENCL EXTENSION cl_khr_int64_base_atomics : enable
+#else
+#error "int64 atomic operation are not supported!!!"
+#endif
+
 #else
 #define GGDosiType GGfloat
 #endif
@@ -159,6 +162,7 @@ inline void AtomicAddFloat(volatile global GGDosiType* address, GGfloat val)
   \param val - double value to add
   \brief atomic addition for double precision
 */
+#ifdef DOSIMETRY_DOUBLE_PRECISION
 inline void AtomicAddDouble(volatile global GGDosiType* address, GGdouble val)
 {
   union {
@@ -174,6 +178,7 @@ inline void AtomicAddDouble(volatile global GGDosiType* address, GGdouble val)
     current.u64  = atom_cmpxchg((volatile global GGulong*)address, expected.u64, next.u64);
   } while(current.u64 != expected.u64);
 }
+#endif
 
 #else
 
@@ -240,6 +245,11 @@ inline void AtomicAddDouble(volatile global GGDosiType* address, GGdouble val)
 #define GGulong4 cl_ulong4 /*!< define a new type for cl_ulong4 */
 #define GGulong8 cl_ulong8 /*!< define a new type for cl_ulong8 */
 #define GGulong16 cl_ulong16 /*!< define a new type for cl_ulong16 */
+
+#define GGsize std::size_t /*!< define size for OpenCL, size_t is forbidden as kernel parameters */
+typedef struct GGsize3_t {
+  std::size_t x, y, z;
+} GGsize3;
 
 #define GGfloat cl_float /*!< define a new type for cl_float */
 #define GGfloat2 cl_float2 /*!< define a new type for cl_float2 */

@@ -24,7 +24,7 @@ GGEMSVerbosity(1)
 
 # ------------------------------------------------------------------------------
 # STEP 1: OpenCL Initialization
-opencl_manager.set_context_index(1)
+opencl_manager.set_context_index(0)
 
 # ------------------------------------------------------------------------------
 # STEP 2: Initializing volume creator manager and setting the informations about the global voxelized volume

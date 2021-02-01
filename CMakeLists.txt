@@ -95,8 +95,7 @@ IF(WIN32)
     STRING(REPLACE "-O3" "" CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
     STRING(REPLACE "-DNDEBUG" "" CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
 
-    #-Wextra -Werror  -Wall
-    SET(CXX_FLAGS -std=c++2a -pedantic  -m64 -march=native -Wconversion -Wold-style-cast -pedantic-errors -ftree-vectorize -Wno-ignored-attributes -mtune=native -mavx2)
+    SET(CXX_FLAGS -std=c++2a -pedantic -Wextra -Werror -Wall -m64 -march=native -Wconversion -Wold-style-cast -pedantic-errors -ftree-vectorize -Wno-ignored-attributes -mtune=native -mavx2)
     SET(CXX_FLAGS_RELEASE -Ofast ${CXX_FLAGS})
     SET(CXX_FLAGS_DEBUG -O0 -g3 ${CXX_FLAGS})
 
@@ -106,9 +105,7 @@ IF(WIN32)
     STRING(REPLACE "-O3" "" CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
     STRING(REPLACE "-DNDEBUG" "" CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
 
-
-    #-Wextra -Werror  -Wall
-    SET(CXX_FLAGS -std=c++2a -mavx2  -pedantic -m64 -march=native -Wconversion -Weffc++ -Wold-style-cast -pedantic-errors -mtune=native -ftree-vectorize)
+    SET(CXX_FLAGS -std=c++17 -mavx2 -Wextra -Werror -Wall -pedantic -m64 -march=native -Wconversion -Weffc++ -Wold-style-cast -pedantic-errors -mtune=native -ftree-vectorize)
     SET(CXX_FLAGS_RELEASE -Ofast ${CXX_FLAGS})
     SET(CXX_FLAGS_DEBUG -O0 -g3 ${CXX_FLAGS})
   
@@ -119,7 +116,7 @@ IF(WIN32)
     STRING(REPLACE "/D NDEBUG" "" CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
 
     #/WX /Wall
-    SET(CXX_FLAGS /MP /EHsc /nologo /W3 /std:c++latest /favor:INTEL64)
+    SET(CXX_FLAGS /MP /EHsc /nologo /W3 /std:c++17 /favor:INTEL64)
     SET(CXX_FLAGS_RELEASE /Ox /Qpar /arch:AVX2 ${CXX_FLAGS})
     SET(CXX_FLAGS_DEBUG /Od /DEBUG /Zi ${CXX_FLAGS})
 

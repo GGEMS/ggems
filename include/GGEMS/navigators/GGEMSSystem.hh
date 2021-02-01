@@ -91,13 +91,13 @@ class GGEMS_EXPORT GGEMSSystem : public GGEMSNavigator
     void SetNumberOfModules(GGint const& n_module_x, GGint const& n_module_y);
 
     /*!
-      \fn void SetNumberOfDetectionElementsInsideModule(GGint const& n_detection_element_x, GGint const& n_detection_element_y, GGint const& n_detection_element_z)
+      \fn void SetNumberOfDetectionElementsInsideModule(GGsize const& n_detection_element_x, GGsize const& n_detection_element_y, GGsize const& n_detection_element_z)
       \param n_detection_element_x - Detection element in X
       \param n_detection_element_y - Detection element in Y
       \param n_detection_element_z - Detection element in Z
       \brief set the number of detection elements in X and Y and Z
     */
-    void SetNumberOfDetectionElementsInsideModule(GGint const& n_detection_element_x, GGint const& n_detection_element_y, GGint const& n_detection_element_z);
+    void SetNumberOfDetectionElementsInsideModule(GGsize const& n_detection_element_x, GGsize const& n_detection_element_y, GGsize const& n_detection_element_z);
 
     /*!
       \fn void SetSizeOfDetectionElements(GGfloat const& detection_element_x, GGfloat const& detection_element_y, GGfloat const& detection_element_z, std::string const& unit)
@@ -141,7 +141,7 @@ class GGEMS_EXPORT GGEMSSystem : public GGEMSNavigator
 
   protected:
     GGint2 number_of_modules_xy_; /*!< Number of the detection modules */
-    GGint3 number_of_detection_elements_inside_module_xyz_; /*!< Number of virtual elements (X,Y,Z) in a module */
+    GGsize3 number_of_detection_elements_inside_module_xyz_; /*!< Number of virtual elements (X,Y,Z) in a module */
     GGfloat3 size_of_detection_elements_xyz_; /*!< Size of pixel in each direction */
 };
 

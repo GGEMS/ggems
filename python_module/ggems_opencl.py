@@ -27,7 +27,7 @@ class GGEMSOpenCLManager(object):
         ggems_lib.print_infos_opencl_manager.argtypes = [ctypes.c_void_p]
         ggems_lib.print_infos_opencl_manager.restype = ctypes.c_void_p
 
-        ggems_lib.set_context_index_ggems_opencl_manager.argtypes = [ctypes.c_void_p, ctypes.c_int]
+        ggems_lib.set_context_index_ggems_opencl_manager.argtypes = [ctypes.c_void_p, ctypes.c_size_t]
         ggems_lib.set_context_index_ggems_opencl_manager.restype = ctypes.c_void_p
 
         self.obj = ggems_lib.get_instance_ggems_opencl_manager()

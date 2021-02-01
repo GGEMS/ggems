@@ -108,14 +108,14 @@ class GGEMS_EXPORT GGEMSMHDImage
     void Write(std::shared_ptr<cl::Buffer> image) const;
 
     /*!
-      \fn template <typename T> void Write(T* image, GGint const& elements)
+      \fn template <typename T> void Write(T* image, GGsize const& elements)
       \tparam T - type of the data
       \param image - image to write on output file
       \param elements - number of elements in image
       \brief write the raw data to file
     */
     template<typename T>
-    void Write(T* image, GGint const& elements);
+    void Write(T* image, GGsize const& elements);
 
     /*!
       \fn void SetElementSizes(GGfloat3 const& element_sizes)
@@ -125,11 +125,11 @@ class GGEMS_EXPORT GGEMSMHDImage
     void SetElementSizes(GGfloat3 const& element_sizes);
 
     /*!
-      \fn void SetDimensions(GGint3 const& dimensions)
+      \fn void SetDimensions(GGsize3 const& dimensions)
       \param dimensions - dimensions of image in X, Y, Z
       \brief set the dimensions of the image
     */
-    void SetDimensions(GGint3 const& dimensions);
+    void SetDimensions(GGsize3 const& dimensions);
 
     /*!
       \fn void SetDataType(std::string const& data_type)
@@ -173,7 +173,7 @@ class GGEMS_EXPORT GGEMSMHDImage
     std::string mhd_raw_file_; /*!< Name of the MHD raw file */
     std::string mhd_data_type_; /*!< Type of data */
     GGfloat3 element_sizes_; /*!< Size of elements */
-    GGint3 dimensions_; /*!< Dimension volume X, Y, Z */
+    GGsize3 dimensions_; /*!< Dimension volume X, Y, Z */
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -181,7 +181,7 @@ class GGEMS_EXPORT GGEMSMHDImage
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
-void GGEMSMHDImage::Write(T* image, GGint const& elements)
+void GGEMSMHDImage::Write(T* image, GGsize const& elements)
 {
   GGcout("GGEMSMHDImage", "Write", 0) << "Writing MHD Image..." << GGendl;
 
@@ -190,8 +190,8 @@ void GGEMSMHDImage::Write(T* image, GGint const& elements)
 
   // header data
   std::ofstream out_header_stream(mhd_header_file_, std::ios::out);
-  out_header_stream << "ElementSpacing = " << element_sizes_.s[0] << " " << element_sizes_.s[1] << " " << element_sizes_.s[2] << std::endl;
-  out_header_stream << "DimSize = " << dimensions_.s[0] << " " << dimensions_.s[1] << " " << dimensions_.s[2] << std::endl;
+  out_header_stream << "ElementSpacing = " << element_sizes_.x << " " << element_sizes_.y << " " << element_sizes_.z << std::endl;
+  out_header_stream << "DimSize = " << dimensions_.x << " " << dimensions_.y << " " << dimensions_.z << std::endl;
   out_header_stream << "ElementType = " << mhd_data_type_ << std::endl;
   out_header_stream << "ElementDataFile = " << mhd_raw_file_ << std::endl;
   out_header_stream.close();
@@ -219,10 +219,10 @@ void GGEMSMHDImage::WriteRaw(std::weak_ptr<cl::Buffer> image_cl) const
   std::ofstream out_raw_stream(mhd_raw_file_, std::ios::out | std::ios::binary);
 
   // Mapping data
-  T* data_image_device = opencl_manager.GetDeviceBuffer<T>(image_cl.lock().get(), dimensions_.s[0] * dimensions_.s[1] * dimensions_.s[2] * sizeof(T));
+  T* data_image_device = opencl_manager.GetDeviceBuffer<T>(image_cl.lock().get(), dimensions_.x * dimensions_.y * dimensions_.z * sizeof(T));
 
   // Writing data on file
-  out_raw_stream.write(reinterpret_cast<char*>(data_image_device), dimensions_.s[0] * dimensions_.s[1] * dimensions_.s[2] * sizeof(T));
+  out_raw_stream.write(reinterpret_cast<char*>(data_image_device), dimensions_.x * dimensions_.y * dimensions_.z * sizeof(T));
 
   // Release the pointers
   opencl_manager.ReleaseDeviceBuffer(image_cl.lock().get(), data_image_device);
