@@ -92,11 +92,11 @@ class GGEMS_EXPORT GGEMSProcessesManager
     GGEMSProcessesManager& operator=(GGEMSProcessesManager const&& processes_manager) = delete;
 
     /*!
-      \fn void SetCrossSectionTableNumberOfBins(GGshort const& number_of_bins)
+      \fn void SetCrossSectionTableNumberOfBins(GGsize const& number_of_bins)
       \param number_of_bins - number of bins in cross section table
       \brief set the number of bins in the cross section table
     */
-    void SetCrossSectionTableNumberOfBins(GGshort const& number_of_bins);
+    void SetCrossSectionTableNumberOfBins(GGsize const& number_of_bins);
 
     /*!
       \fn void SetCrossSectionTableMinimumEnergy(GGfloat const& energy, char const* unit = "keV")
@@ -129,11 +129,11 @@ class GGEMS_EXPORT GGEMSProcessesManager
     inline GGfloat GetCrossSectionTableMaxEnergy(void) const {return cross_section_table_max_energy_;}
 
     /*!
-      \fn inline GGshort GetCrossSectionTableNumberOfBins(void) const
+      \fn inline GGsize GetCrossSectionTableNumberOfBins(void) const
       \return the number of bins in the cross section table
       \brief get the number of bins in the cross section table
     */
-    inline GGshort GetCrossSectionTableNumberOfBins(void) const {return cross_section_table_number_of_bins_;}
+    inline GGsize GetCrossSectionTableNumberOfBins(void) const {return cross_section_table_number_of_bins_;}
 
     /*!
       \fn void AddProcess(std::string const& process_name, std::string const& particle_name, std::string const& phantom_name)
@@ -171,7 +171,7 @@ class GGEMS_EXPORT GGEMSProcessesManager
     inline bool IsPrintPhysicTables(void) const {return is_processes_print_tables_;};
 
   private:
-    GGshort cross_section_table_number_of_bins_; /*!< Number of bins in the cross section table */
+    GGsize cross_section_table_number_of_bins_; /*!< Number of bins in the cross section table */
     GGfloat cross_section_table_min_energy_; /*!< Minimum energy in the cross section table */
     GGfloat cross_section_table_max_energy_; /*!< Maximum energy in the cross section table */
     bool is_processes_print_tables_; /*!< Flag for physic tables printing */
@@ -195,12 +195,12 @@ extern "C" GGEMS_EXPORT GGEMSProcessesManager* get_instance_processes_manager(vo
 extern "C" GGEMS_EXPORT void add_process_processes_manager(GGEMSProcessesManager* processes_manager, char const* process_name, char const* particle_name, char const* phantom_name);
 
 /*!
-  \fn void set_cross_section_table_number_of_bins_processes_manager(GGEMSProcessesManager* processes_manager, GGshort const number_of_bins)
+  \fn void set_cross_section_table_number_of_bins_processes_manager(GGEMSProcessesManager* processes_manager, GGsize const number_of_bins)
   \param processes_manager - pointer on the processes manager
   \param number_of_bins - number of the bins for the cross section table
   \brief set the number of the bins in the cross section table
 */
-extern "C" GGEMS_EXPORT void set_cross_section_table_number_of_bins_processes_manager(GGEMSProcessesManager* processes_manager, GGshort const number_of_bins);
+extern "C" GGEMS_EXPORT void set_cross_section_table_number_of_bins_processes_manager(GGEMSProcessesManager* processes_manager, GGsize const number_of_bins);
 
 /*!
   \fn void set_cross_section_table_minimum_energy_processes_manager(GGEMSProcessesManager* processes_manager, GGfloat const energy, char const* unit)

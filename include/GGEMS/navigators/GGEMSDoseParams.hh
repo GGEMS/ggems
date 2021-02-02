@@ -37,17 +37,15 @@
   \struct GGEMSDoseParams_t
   \brief Structure storing dosimetry infos
 */
-#pragma pack(push, 1)
 typedef struct GGEMSDoseParams_t
 {
-  GGint3 number_of_dosels_; /*!< Number of dosels per dimension */
   GGfloat3 size_of_dosels_; /*!< Size of dosels per dimension */
   GGfloat3 inv_size_of_dosels_; /*!< Inverse of dosel sizes */
-  GGint total_number_of_dosels_; /*!< Total number of dosels */
-  GGint slice_number_of_dosels_; /*!< Number of dosels per slice */
   GGfloat3 border_min_xyz_; /*!< Border min. of matrix of dosels */
   GGfloat3 border_max_xyz_; /*!< Border max. of matrix of dosels */
+  GGint3 number_of_dosels_; /*!< Number of dosels per dimension */
+  GGint total_number_of_dosels_; /*!< Total number of dosels */
+  GGint slice_number_of_dosels_; /*!< Number of dosels per slice */
 } GGEMSDoseParams; /*!< Using C convention name of struct to C++ (_t deletion) */
-#pragma pack(pop)
 
 #endif // End of GUARD_GGEMS_NAVIGATORS_GGEMSDOSEPARAMS_HH

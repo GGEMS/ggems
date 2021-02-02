@@ -69,16 +69,16 @@ GGEMSPhotoElectricEffect::~GGEMSPhotoElectricEffect(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGfloat GGEMSPhotoElectricEffect::ComputeCrossSectionPerAtom(GGfloat const& energy, GGchar const& atomic_number) const
+GGfloat GGEMSPhotoElectricEffect::ComputeCrossSectionPerAtom(GGfloat const& energy, GGuchar const& atomic_number) const
 {
   // Threshold at 10 eV
-  GGfloat e_min = fmax(GGEMSSandiaTable::kIonizationPotentials[atomic_number], 10.0f)*eV;
+  GGfloat e_min = std::fmax(GGEMSSandiaTable::kIonizationPotentials[atomic_number], 10.0f)*eV;
   if (energy < e_min) return 0.0f;
 
-  GGshort start = GGEMSSandiaTable::kCumulativeIntervals[atomic_number-1];
-  GGshort stop = start + GGEMSSandiaTable::kNumberOfIntervals[atomic_number];
+  GGint start = GGEMSSandiaTable::kCumulativeIntervals[atomic_number-1];
+  GGint stop = start + GGEMSSandiaTable::kNumberOfIntervals[atomic_number];
 
-  GGshort pos = stop;
+  GGint pos = stop;
   while (energy < static_cast<GGfloat>(GGEMSSandiaTable::kSandiaTable[pos][0])*keV) --pos;
 
   GGfloat aover_avo = ATOMIC_MASS_UNIT * static_cast<GGfloat>(atomic_number) / GGEMSSandiaTable::kZtoARatio[atomic_number];

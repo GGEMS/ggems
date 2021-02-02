@@ -38,9 +38,10 @@
   \struct GGEMSPrimaryParticles_t
   \brief Structure storing informations about primary particles
 */
-#pragma pack(push, 1)
 typedef struct GGEMSPrimaryParticles_t
 {
+  GGint particle_tracking_id; /*!< Particle id for tracking */
+
   GGfloat E_[MAXIMUM_PARTICLES]; /*!< Energies of particles */
   GGfloat dx_[MAXIMUM_PARTICLES]; /*!< Direction of the particle in x */
   GGfloat dy_[MAXIMUM_PARTICLES]; /*!< Direction of the particle in y */
@@ -50,7 +51,6 @@ typedef struct GGEMSPrimaryParticles_t
   GGfloat pz_[MAXIMUM_PARTICLES]; /*!< Position of the particle in z */
   GGfloat tof_[MAXIMUM_PARTICLES]; /*!< Time of flight for photon only, it time since generation of photon */
 
-  //GGuint geometry_id_[MAXIMUM_PARTICLES]; /*!< current geometry crossed by the particle */
   GGint E_index_[MAXIMUM_PARTICLES]; /*!< Energy index within CS and Mat tables */
   GGint solid_id_[MAXIMUM_PARTICLES]; /*!< current solid crossed by the particle */
 
@@ -61,9 +61,6 @@ typedef struct GGEMSPrimaryParticles_t
   GGchar status_[MAXIMUM_PARTICLES]; /*!< Status of the particle */
   GGchar level_[MAXIMUM_PARTICLES]; /*!< Level of the particle */
   GGchar pname_[MAXIMUM_PARTICLES]; /*!< particle name (photon, electron, etc) */
-
-  GGint particle_tracking_id; /*!< Particle id for tracking */
 } GGEMSPrimaryParticles; /*!< Using C convention name of struct to C++ (_t deletion) */
-#pragma pack(pop)
 
 #endif // GUARD_GGEMS_PHYSICS_GGEMSPRIMARYPARTICLESSTACK_HH

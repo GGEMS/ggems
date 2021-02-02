@@ -103,7 +103,7 @@ class GGEMS_EXPORT GGEMSEMProcess
 
   protected:
     /*!
-      \fn GGfloat ComputeCrossSectionPerMaterial(GGEMSParticleCrossSections* cross_section, GGEMSMaterialTables const* material_tables, GGshort const& material_index, GGshort const& energy_index)
+      \fn GGfloat ComputeCrossSectionPerMaterial(GGEMSParticleCrossSections* cross_section, GGEMSMaterialTables const* material_tables, GGsize const& material_index, GGsize const& energy_index)
       \param cross_section - cross section
       \param material_tables - activated material for a phantom
       \param material_index - index of the material
@@ -111,7 +111,7 @@ class GGEMS_EXPORT GGEMSEMProcess
       \return cross section for a process for a material
       \brief compute cross section for a process for a material
     */
-    GGfloat ComputeCrossSectionPerMaterial(GGEMSParticleCrossSections* cross_section, GGEMSMaterialTables const* material_tables, GGshort const& material_index, GGshort const& energy_index);
+    GGfloat ComputeCrossSectionPerMaterial(GGEMSParticleCrossSections* cross_section, GGEMSMaterialTables const* material_tables, GGsize const& material_index, GGsize const& energy_index);
 
     /*!
       \fn GGfloat ComputeCrossSectionPerAtom(GGfloat const& energy, GGuchar const& atomic_number)
@@ -120,7 +120,7 @@ class GGEMS_EXPORT GGEMSEMProcess
       \return cross section by atom
       \brief compute a cross section for an atom
     */
-    virtual GGfloat ComputeCrossSectionPerAtom(GGfloat const& energy, GGchar const& atomic_number) const = 0;
+    virtual GGfloat ComputeCrossSectionPerAtom(GGfloat const& energy, GGuchar const& atomic_number) const = 0;
 
   protected:
     GGchar process_id_; /*!< Id of the process as defined in GGEMSEMProcessConstants.hh */

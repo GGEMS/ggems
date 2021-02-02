@@ -182,8 +182,8 @@ void GGEMSGeometryTransformation::SetRotation(GGfloat const& rx, GGfloat const& 
   GGfloat cosinus = 0.0, sinus = 0.0;
 
   // X axis
-  cosinus = cos(rx);
-  sinus = sin(rx);
+  cosinus = std::cos(rx);
+  sinus = std::sin(rx);
 
   GGfloat44 rotation_x =
     {
@@ -194,8 +194,8 @@ void GGEMSGeometryTransformation::SetRotation(GGfloat const& rx, GGfloat const& 
     };
 
   // Y axis
-  cosinus = cos(ry);
-  sinus = sin(ry);
+  cosinus = std::cos(ry);
+  sinus = std::sin(ry);
 
   GGfloat44 rotation_y =
     {
@@ -206,8 +206,8 @@ void GGEMSGeometryTransformation::SetRotation(GGfloat const& rx, GGfloat const& 
     };
 
   // Z axis
-  cosinus = cos(rz);
-  sinus = sin(rz);
+  cosinus = std::cos(rz);
+  sinus = std::sin(rz);
 
   GGfloat44 rotation_z =
    {

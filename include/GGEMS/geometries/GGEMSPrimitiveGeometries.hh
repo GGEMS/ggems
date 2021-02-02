@@ -37,21 +37,11 @@
   \struct GGEMSOBB_t
   \brief Structure storing OBB (Oriented Bounding Box) geometry
 */
-// #if defined(_MSC_VER)
-// #pragma pack(push, 1)
-// typedef struct GGEMSOBB_t
-// #elif defined(__clang__ ) https://blog.kowalczyk.info/article/j/guide-to-predefined-macros-in-c-compilers-gcc-clang-msvc-etc..html
-// typedef struct __attribute__ ((packed)) GGEMSOBB_t
-// #else
-// typedef struct GGEMSOBB_t
-// #endif
-#pragma pack(push, 1)
 typedef struct GGEMSOBB_t
 {
+  GGfloat44 matrix_transformation_; /*!< Matrix of transformation including angle of rotation */
   GGfloat3 border_min_xyz_; /*!< Min. of border in X, Y and Z */
   GGfloat3 border_max_xyz_; /*!< Max. of border in X, Y and Z */
-  GGfloat44 matrix_transformation_; /*!< Matrix of transformation including angle of rotation */
 } GGEMSOBB; /*!< Using C convention name of struct to C++ (_t deletion) */
-#pragma pack(pop)
 
 #endif // GUARD_GGEMS_GEOMETRIES_GGEMSPRIMITIVEGEOMETRIES_HH

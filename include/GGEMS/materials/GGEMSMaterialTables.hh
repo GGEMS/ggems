@@ -38,15 +38,14 @@
   \struct GGEMSMaterialTables_t
   \brief Structure storing the material tables on OpenCL device
 */
-#pragma pack(push, 1)
 typedef struct GGEMSMaterialTables_t
 {
   // Global parameters
-  GGushort number_of_materials_; /*!< Number of the materials */
-  GGushort total_number_of_chemical_elements_; /*!< Total number of chemical elements */
+  GGsize number_of_materials_; /*!< Number of the materials */
+  GGsize total_number_of_chemical_elements_; /*!< Total number of chemical elements */
 
   // Infos by materials
-  GGchar number_of_chemical_elements_[256]; /*!< Number of chemical elements in a single material */
+  GGsize number_of_chemical_elements_[256]; /*!< Number of chemical elements in a single material */
   GGfloat density_of_material_[256]; /*!< Density of material in g/cm3 */
   GGfloat number_of_atoms_by_volume_[256]; /*!< Number of atoms by volume */
   GGfloat number_of_electrons_by_volume_[256]; /*!< Number of electrons by volume */
@@ -71,11 +70,10 @@ typedef struct GGEMSMaterialTables_t
   GGfloat positron_energy_cut_[256]; /*!< Positron energy cut */
 
   // Infos by chemical elements by materials
-  GGushort index_of_chemical_elements_[256]; /*!< Index to chemical element by material */
-  GGchar atomic_number_Z_[256*32]; /*!< Atomic number Z by chemical elements */
+  GGsize index_of_chemical_elements_[256]; /*!< Index to chemical element by material */
+  GGuchar atomic_number_Z_[256*32]; /*!< Atomic number Z by chemical elements */
   GGfloat atomic_number_density_[256*32]; /*!< Atomic number density : fraction of element in material * density * Avogadro / Atomic mass */
   GGfloat mass_fraction_[256*32]; /*!< Mass fraction of element in material */
 } GGEMSMaterialTables; /*!< Using C convention name of struct to C++ (_t deletion) */
-#pragma pack(pop)
 
 #endif // GUARD_GGEMS_MATERIALS_GGEMSMATERIALSTABLE_HH

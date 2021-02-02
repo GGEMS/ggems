@@ -126,8 +126,8 @@ void GGEMSMaterials::PrintInfos(void) const
     GGcout("GGEMSMaterials", "PrintInfos", 0) << "    - Total atomic density: " << material_table_device->number_of_atoms_by_volume_[i]/(mol/cm3) << " atom/cm3" << GGendl;
     GGcout("GGEMSMaterials", "PrintInfos", 0) << "    - Total electron density: " << material_table_device->number_of_electrons_by_volume_[i]/(mol/cm3) << " e-/cm3" << GGendl;
     GGcout("GGEMSMaterials", "PrintInfos", 0) << "    - Chemical Elements:" << GGendl;
-    for (GGchar j = 0; j < material_table_device->number_of_chemical_elements_[i]; ++j) {
-      GGushort chemical_element_id = material_table_device->index_of_chemical_elements_[i];
+    for (GGsize j = 0; j < material_table_device->number_of_chemical_elements_[i]; ++j) {
+      GGsize chemical_element_id = material_table_device->index_of_chemical_elements_[i];
       GGcout("GGEMSMaterials", "PrintInfos", 0) << "        + Z = " << static_cast<GGushort>(material_table_device->atomic_number_Z_[j+chemical_element_id]) << GGendl;
       GGcout("GGEMSMaterials", "PrintInfos", 0) << "        + fraction of chemical element = " << material_table_device->mass_fraction_[j+chemical_element_id]/percent << " %" << GGendl;
       GGcout("GGEMSMaterials", "PrintInfos", 0) << "        + Atomic number density = " << material_table_device->atomic_number_density_[j+chemical_element_id]/(mol/cm3) << " atom/cm3" << GGendl;
@@ -181,8 +181,8 @@ void GGEMSMaterials::BuildMaterialTables(void)
   material_table_device->number_of_materials_ = static_cast<GGuchar>(materials_.size());
 
   // Loop over the materials
-  GGushort index_to_chemical_element = 0;
-  for (std::size_t i = 0; i < materials_.size(); ++i) {
+  GGsize index_to_chemical_element = 0;
+  for (GGsize i = 0; i < materials_.size(); ++i) {
     // Getting the material infos from database
     GGEMSSingleMaterial const& single_material = material_database_manager.GetMaterial(materials_.at(i));
 
@@ -238,7 +238,7 @@ void GGEMSMaterials::BuildMaterialTables(void)
 
     // Computing the access to chemical element by material
     material_table_device->index_of_chemical_elements_[i] = index_to_chemical_element;
-    index_to_chemical_element += static_cast<GGushort>(material_table_device->number_of_chemical_elements_[i]);
+    index_to_chemical_element += material_table_device->number_of_chemical_elements_[i];
   }
 
   // Storing number total of chemical elements

@@ -81,7 +81,7 @@ GGfloat GGEMSMaterialReader::ReadMaterialDensity(std::string const& line)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGushort GGEMSMaterialReader::ReadMaterialNumberOfElements(std::string const& line)
+GGsize GGEMSMaterialReader::ReadMaterialNumberOfElements(std::string const& line)
 {
   // Get the position of the first and last number of density
   std::size_t first_pos = line.find_first_of("0123456789", line.find("n="));
@@ -89,7 +89,7 @@ GGushort GGEMSMaterialReader::ReadMaterialNumberOfElements(std::string const& li
   std::string element_str = line.substr(first_pos,last_pos != std::string::npos ? last_pos - first_pos : last_pos);
 
   // Convert string to unsigned char
-  GGushort number_elements = 0;
+  GGsize number_elements = 0;
   std::stringstream(element_str) >> number_elements;
 
   return number_elements;
@@ -99,8 +99,7 @@ GGushort GGEMSMaterialReader::ReadMaterialNumberOfElements(std::string const& li
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-std::string GGEMSMaterialReader::ReadMaterialElementName(
-  std::string const& line)
+std::string GGEMSMaterialReader::ReadMaterialElementName(std::string const& line)
 {
   std::size_t first_pos = line.find("name=")+5;
   std::size_t last_pos = line.find_first_of(";");

@@ -43,6 +43,7 @@
 #define __constant inline static constexpr
 #include <algorithm>
 #include <sstream>
+#include <cfloat>
 #include "GGEMS/tools/GGEMSTools.hh"
 #endif
 

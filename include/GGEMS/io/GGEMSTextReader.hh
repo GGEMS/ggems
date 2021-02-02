@@ -60,12 +60,12 @@ namespace GGEMSMaterialReader
   GGfloat ReadMaterialDensity(std::string const& line);
 
   /*!
-    \fn GGushort ReadMaterialNumberOfElements(std::string const& line)
+    \fn GGsize ReadMaterialNumberOfElements(std::string const& line)
     \param line - string to analyze
     \return number of elements in material
     \brief return the number of elements in material
   */
-  GGushort ReadMaterialNumberOfElements(std::string const& line);
+  GGsize ReadMaterialNumberOfElements(std::string const& line);
 
   /*!
     \fn std::string ReadMaterialElementName(std::string const& line)

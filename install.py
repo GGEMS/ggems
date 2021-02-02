@@ -24,12 +24,12 @@ import pathlib
 
 # ------------------------------------------------------------------------------
 # Choose your compiler: 'CLANG', 'GCC', 'CL' (Visual Studio) depending on your OS
-if sys.platform == "linux" or sys.platform == "darwin":
+if sys.platform == "linux" or sys.platform == "darwin": # Only GCC or CLANG
     os.environ['COMPILER'] = 'CLANG'
     os.environ['CC'] = 'clang-9'
     os.environ['CXX'] = 'clang++-9'
-elif sys.platform == "win32":
-    os.environ['COMPILER'] = 'CLANG'
+elif sys.platform == "win32": # Only CLANG or CL
+    os.environ['COMPILER'] = 'GCC'
     os.environ['CC'] = 'clang.exe'
     os.environ['CXX'] = 'clang++.exe'
 else:  # Unknown system
@@ -88,7 +88,7 @@ elif sys.platform == "win32":
 cmake_cmd += " -DCMAKE_BUILD_TYPE=Release"
 cmake_cmd += " -DOPENCL_KERNEL_PATH=" + GGEMS_FOLDER + "/src/kernels"
 cmake_cmd += " -DGGEMS_PATH=" + GGEMS_FOLDER
-cmake_cmd += " -DCMAKE_VERBOSE_MAKEFILE=OFF"
+cmake_cmd += " -DCMAKE_VERBOSE_MAKEFILE=ON"
 cmake_cmd += " -DBUILD_EXAMPLES=ON"
 cmake_cmd += " -DOPENCL_CACHE_KERNEL_COMPILATION=OFF"
 cmake_cmd += " -DDOSIMETRY_DOUBLE_PRECISION=OFF"

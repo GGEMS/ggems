@@ -34,7 +34,7 @@
 #include "GGEMS/tools/GGEMSSystemOfUnits.hh"
 
 /*!
-  \fn inline GGint BinarySearchLeft(GGfloat const key, GGfloat const* array, GGint const size, GGint const offset, GGint min)
+  \fn inline GGint BinarySearchLeft(GGfloat const key, GGfloat const* array, GGsize const size, GGint const offset, GGint min)
   \param key - value in p_array to find
   \param array - p_array where is the key value
   \param size - size of p_array, number of elements
@@ -112,7 +112,11 @@ inline GGfloat LogLogInterpolation(GGfloat x, GGfloat x0, GGfloat y0, GGfloat x1
 
   x0 = 1.0f / x0;
 
+  #ifdef __OPENCL_C_VERSION__
   return pow(10.0f, log10(y0) + log10(y1/y0) * (log10(x*x0) / log10(x1*x0)));
+  #else
+  return std::pow(10.0f, std::log10(y0) + std::log10(y1/y0) * (std::log10(x*x0) / std::log10(x1*x0)));
+  #endif
 }
 
 #endif // GUARD_GGEMS_MATHS_GGEMSMATHALGORITHMS_HH
