@@ -59,7 +59,7 @@ GGEMSProcessesManager::~GGEMSProcessesManager(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSProcessesManager::SetCrossSectionTableNumberOfBins(GGshort const& number_of_bins)
+void GGEMSProcessesManager::SetCrossSectionTableNumberOfBins(GGsize const& number_of_bins)
 {
   cross_section_table_number_of_bins_ = number_of_bins;
 
@@ -202,7 +202,7 @@ void add_process_processes_manager(GGEMSProcessesManager* processes_manager, cha
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_cross_section_table_number_of_bins_processes_manager(GGEMSProcessesManager* processes_manager, GGshort const number_of_bins)
+void set_cross_section_table_number_of_bins_processes_manager(GGEMSProcessesManager* processes_manager, GGsize const number_of_bins)
 {
   processes_manager->SetCrossSectionTableNumberOfBins(number_of_bins);
 }

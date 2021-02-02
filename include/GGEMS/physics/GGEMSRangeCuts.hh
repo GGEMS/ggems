@@ -194,31 +194,31 @@ class GGEMS_EXPORT GGEMSRangeCuts
     void BuildMaterialLossTable(GGEMSMaterialTables* material_table, GGushort const& index_mat);
 
     /*!
-      \fn GGfloat ComputePhotonCrossSection(GGchar const& atomic_number, GGfloat const& energy) const
+      \fn GGfloat ComputePhotonCrossSection(GGuchar const& atomic_number, GGfloat const& energy) const
       \param atomic_number - atomic number of the elements
       \param energy - energy of the bin
       \return cross secton value
       \brief compute cross secton value for photon depending on Z and energy
     */
-    GGfloat ComputePhotonCrossSection(GGchar const& atomic_number, GGfloat const& energy) const;
+    GGfloat ComputePhotonCrossSection(GGuchar const& atomic_number, GGfloat const& energy) const;
 
     /*!
-      \fn GGfloat ComputeLossElectron(GGchar const& atomic_number, GGfloat const& energy) const
+      \fn GGfloat ComputeLossElectron(GGuchar const& atomic_number, GGfloat const& energy) const
       \param atomic_number - atomic number of the elements
       \param energy - energy of the bin
       \return loss energy, dE/dX
       \brief compute the loss de/dx for electron
     */
-    GGfloat ComputeLossElectron(GGchar const& atomic_number, GGfloat const& energy) const;
+    GGfloat ComputeLossElectron(GGuchar const& atomic_number, GGfloat const& energy) const;
 
     /*!
-      \fn GGfloat ComputeLossPositron(GGchar const& atomic_number, GGfloat const& energy) const
+      \fn GGfloat ComputeLossPositron(GGuchar const& atomic_number, GGfloat const& energy) const
       \param atomic_number - atomic number of the elements
       \param energy - energy of the bin
       \return loss energy, dE/dX
       \brief compute the loss de/dx for positron
     */
-    GGfloat ComputeLossPositron(GGchar const& atomic_number, GGfloat const& energy) const;
+    GGfloat ComputeLossPositron(GGuchar const& atomic_number, GGfloat const& energy) const;
 
     /*!
       \fn GGfloat ConvertLengthToEnergyCut(GGfloat const& length_cut) const

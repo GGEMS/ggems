@@ -85,14 +85,14 @@ void GGEMSIonizationParamsMaterial::ComputeIonizationParameters(void)
   GGsize number_of_chemical_elements = static_cast<GGsize>(material_->nb_elements_);
 
   // Loop over the number of chemical elements
-  GGfloat axZ = 0.0f;
+  GGdouble axZ = 0.0f;
   GGfloat total_number_of_electron_per_volume = 0.0f;
   for (GGsize i = 0; i < number_of_chemical_elements; ++i) {
     // Get element by element
     GGEMSChemicalElement const& chemical_element = material_manager.GetChemicalElement(material_->chemical_element_name_[i]);
-    axZ = static_cast<GGfloat>(AVOGADRO/ chemical_element.molar_mass_M_ * material_->density_ * material_->mixture_f_[i] * static_cast<GGfloat>(chemical_element.atomic_number_Z_));
-    log_mean_excitation_energy_ += axZ * std::log(chemical_element.mean_excitation_energy_I_);
-    total_number_of_electron_per_volume += axZ;
+    axZ = static_cast<GGdouble>(AVOGADRO)/ chemical_element.molar_mass_M_ * material_->density_ * material_->mixture_f_[i] * static_cast<GGdouble>(chemical_element.atomic_number_Z_);
+    log_mean_excitation_energy_ += static_cast<GGfloat>(axZ) * std::log(chemical_element.mean_excitation_energy_I_);
+    total_number_of_electron_per_volume += static_cast<GGfloat>(axZ);
   }
 
   log_mean_excitation_energy_ /= total_number_of_electron_per_volume;
@@ -105,7 +105,7 @@ void GGEMSIonizationParamsMaterial::ComputeIonizationParameters(void)
 
   // Check if density effect data exist in the table
   // R.M. Sternheimer, Atomic Data and Nuclear Data Tables, 30: 261 (1984)
-  GGchar index_density_correction = material_manager.GetChemicalElement(material_->chemical_element_name_[0]).index_density_correction_;
+  GGint index_density_correction = material_manager.GetChemicalElement(material_->chemical_element_name_[0]).index_density_correction_;
 
   // Checking material with only one element, and checking the index of density correction
   if(number_of_chemical_elements == 1 && index_density_correction > 0) {

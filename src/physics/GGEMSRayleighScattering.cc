@@ -73,7 +73,7 @@ GGEMSRayleighScattering::~GGEMSRayleighScattering(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGfloat GGEMSRayleighScattering::ComputeCrossSectionPerAtom(GGfloat const& energy, GGchar const& atomic_number) const
+GGfloat GGEMSRayleighScattering::ComputeCrossSectionPerAtom(GGfloat const& energy, GGuchar const& atomic_number) const
 {
   // Energy in range [250 eV; 100 GeV]
   if (energy < 250e-6f || energy > 100e3f) return 0.0f;

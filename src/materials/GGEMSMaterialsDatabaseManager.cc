@@ -100,7 +100,7 @@ void GGEMSMaterialsDatabaseManager::LoadMaterialsDatabase(std::string const& fil
     GGEMSSingleMaterial material;
     std::string material_name = GGEMSMaterialReader::ReadMaterialName(line);
     material.density_ = GGEMSMaterialReader::ReadMaterialDensity(line);
-    material.nb_elements_ = static_cast<GGchar>(GGEMSMaterialReader::ReadMaterialNumberOfElements(line));
+    material.nb_elements_ = GGEMSMaterialReader::ReadMaterialNumberOfElements(line);
 
     // Loop over number of elements
     for (GGushort i = 0; i < material.nb_elements_; ++i) {
@@ -238,7 +238,7 @@ void GGEMSMaterialsDatabaseManager::LoadChemicalElements(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSMaterialsDatabaseManager::AddChemicalElements(std::string const& element_name, GGchar const& element_Z, GGfloat const& element_M, GGfloat const& element_I, GGchar const& state, GGchar const& index_density_correction)
+void GGEMSMaterialsDatabaseManager::AddChemicalElements(std::string const& element_name, GGuchar const& element_Z, GGfloat const& element_M, GGfloat const& element_I, GGchar const& state, GGint const& index_density_correction)
 {
   GGcout("GGEMSMaterialsDatabaseManager", "AddChemicalElements", 3) << "Adding element: " << element_name << "..." << GGendl;
 

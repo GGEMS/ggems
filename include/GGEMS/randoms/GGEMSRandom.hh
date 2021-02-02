@@ -38,7 +38,6 @@
   \struct GGEMSRandom_t
   \brief Structure storing informations about random
 */
-#pragma pack(push, 1)
 typedef struct GGEMSRandom_t
 {
   GGuint prng_state_1_[MAXIMUM_PARTICLES]; /*!< State 1 of the prng */
@@ -47,6 +46,5 @@ typedef struct GGEMSRandom_t
   GGuint prng_state_4_[MAXIMUM_PARTICLES]; /*!< State 4 of the prng */
   GGuint prng_state_5_[MAXIMUM_PARTICLES]; /*!< State 5 of the prng */
 } GGEMSRandom; /*!< Using C convention name of struct to C++ (_t deletion) */
-#pragma pack(pop)
 
 #endif // End of GUARD_GGEMS_RANDOMS_GGEMSRANDOM_HH

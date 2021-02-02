@@ -66,7 +66,7 @@ class GGEMSProcessesManager(object):
     def __init__(self):
         ggems_lib.get_instance_processes_manager.restype = ctypes.c_void_p
 
-        ggems_lib.set_cross_section_table_number_of_bins_processes_manager.argtypes = [ctypes.c_void_p, ctypes.c_short]
+        ggems_lib.set_cross_section_table_number_of_bins_processes_manager.argtypes = [ctypes.c_void_p, ctypes.c_size_t]
         ggems_lib.set_cross_section_table_number_of_bins_processes_manager.restype = ctypes.c_void_p
 
         ggems_lib.set_cross_section_table_minimum_energy_processes_manager.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_char_p]

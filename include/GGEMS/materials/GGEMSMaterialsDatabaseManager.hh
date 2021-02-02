@@ -49,11 +49,11 @@ __constant GGchar GAS = 1; /*!< Gas state */
 */
 struct GGEMS_EXPORT GGEMSChemicalElement
 {
-  GGchar atomic_number_Z_; /*!< Atomic number Z */
+  GGint index_density_correction_; /*!< Index for density correction */
   GGfloat molar_mass_M_; /*!< Molar mass */
   GGfloat mean_excitation_energy_I_; /*!< Mean excitation energy */
   GGchar state_; /*!< state of element GAS or SOLID */
-  GGchar index_density_correction_; /*!< Index for density correction */
+  GGuchar atomic_number_Z_; /*!< Atomic number Z */
 };
 
 /*!
@@ -65,7 +65,7 @@ struct GGEMS_EXPORT GGEMSSingleMaterial
   std::vector<std::string> chemical_element_name_; /*!< Name of the chemical elements */
   std::vector<GGfloat> mixture_f_; /*!< Fraction of element in material */
   GGfloat density_; /*!< Density of material */
-  GGchar nb_elements_; /*!< Number of elements in material */
+  GGsize nb_elements_; /*!< Number of elements in material */
 };
 
 typedef std::unordered_map<std::string, GGEMSChemicalElement> ChemicalElementUMap; /*!< Unordered map with key : name of element, value the chemical element structure */
@@ -169,8 +169,7 @@ class GGEMS_EXPORT GGEMSMaterialsDatabaseManager
       MaterialUMap::const_iterator iter = materials_.find(material_name);
 
       // Checking if the material exists
-      if (iter == materials_.end())
-      {
+      if (iter == materials_.end()) {
         std::ostringstream oss(std::ostringstream::out);
         oss << "Material '" << material_name << "' not found in the database!!!" << std::endl;
         GGEMSMisc::ThrowException("GGEMSMaterialsDatabaseManager", "GetMaterial", oss.str());
@@ -190,8 +189,7 @@ class GGEMS_EXPORT GGEMSMaterialsDatabaseManager
       ChemicalElementUMap::const_iterator iter = chemical_elements_.find(chemical_element_name);
 
       // Checking if the material exists
-      if (iter == chemical_elements_.end())
-      {
+      if (iter == chemical_elements_.end()) {
         std::ostringstream oss(std::ostringstream::out);
         oss << "Chemical element '" << chemical_element_name << "' not found in the database!!!" << std::endl;
         GGEMSMisc::ThrowException("GGEMSMaterialsDatabaseManager", "GetChemicalElement", oss.str());
@@ -224,7 +222,8 @@ class GGEMS_EXPORT GGEMSMaterialsDatabaseManager
       GGEMSChemicalElement const& chemical_element = GetChemicalElement(single_material.chemical_element_name_[index]);
 
       // return the atomic number density, the number could be higher than float!!! Double is used
-      return static_cast<GGfloat>(AVOGADRO / chemical_element.molar_mass_M_ * single_material.density_ * single_material.mixture_f_[index]);
+      GGdouble tmp_value_double = static_cast<GGdouble>(AVOGADRO) / chemical_element.molar_mass_M_ * single_material.density_ * single_material.mixture_f_[index];
+      return static_cast<GGfloat>(tmp_value_double);
     }
 
   private:
@@ -242,7 +241,7 @@ class GGEMS_EXPORT GGEMSMaterialsDatabaseManager
     void LoadChemicalElements(void);
 
     /*!
-      \fn void AddChemicalElements(std::string const& element_name, GGuchar const& element_Z, GGfloat const& element_M, GGfloat const& element_I, GGuchar const& state, GGshort const& index_density_correction)
+      \fn void AddChemicalElements(std::string const& element_name, GGuchar const& element_Z, GGfloat const& element_M, GGfloat const& element_I, GGuchar const& state, GGint const& index_density_correction)
       \param element_name - Name of the element
       \param element_Z - Atomic number of the element
       \param element_M - Molar mass of the element
@@ -251,7 +250,7 @@ class GGEMS_EXPORT GGEMSMaterialsDatabaseManager
       \param index_density_correction - index for the density correction
       \brief Adding a chemical element in GGEMS
     */
-    void AddChemicalElements(std::string const& element_name, GGchar const& element_Z, GGfloat const& element_M, GGfloat const& element_I, GGchar const& state, GGchar const& index_density_correction);
+    void AddChemicalElements(std::string const& element_name, GGuchar const& element_Z, GGfloat const& element_M, GGfloat const& element_I, GGchar const& state, GGint const& index_density_correction);
 
   private:
     MaterialUMap materials_; /*!< Map storing the GGEMS materials */

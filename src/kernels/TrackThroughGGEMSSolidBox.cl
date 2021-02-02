@@ -103,17 +103,8 @@ kernel void track_through_ggems_solid_box(
   GGfloat3 local_direction = GlobalToLocalDirection(&tmp_matrix_transformation, &global_direction);
 
   // Get borders of OBB
-  GGfloat3 border_min = {
-    solid_box_data->obb_geometry_.border_min_xyz_[0],
-    solid_box_data->obb_geometry_.border_min_xyz_[1],
-    solid_box_data->obb_geometry_.border_min_xyz_[2]
-  };
-
-  GGfloat3 border_max = {
-    solid_box_data->obb_geometry_.border_max_xyz_[0],
-    solid_box_data->obb_geometry_.border_max_xyz_[1],
-    solid_box_data->obb_geometry_.border_max_xyz_[2]
-  };
+  GGfloat3 border_min = solid_box_data->obb_geometry_.border_min_xyz_;
+  GGfloat3 border_max = solid_box_data->obb_geometry_.border_max_xyz_;
 
   // Get box size of solid box
   GGfloat3 box_size = {

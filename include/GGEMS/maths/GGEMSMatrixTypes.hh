@@ -38,20 +38,17 @@
   \struct GGfloat33_t
   \brief Structure storing float 3 x 3 matrix
 */
-#pragma pack(push, 1)
 typedef struct GGfloat33_t
 {
   GGfloat m0_[3]; /*!< Row 0 of matrix */
   GGfloat m1_[3]; /*!< Row 1 of matrix */
   GGfloat m2_[3]; /*!< Row 2 of matrix */
 } GGfloat33; /*!< Using C convention name of struct to C++ (_t deletion) */
-#pragma pack(pop)
 
 /*!
   \struct GGfloat44_t
   \brief Structure storing float 4 x 4 matrix
 */
-#pragma pack(push, 1)
 typedef struct GGfloat44_t
 {
   GGfloat m0_[4]; /*!< Row 0 of matrix */
@@ -59,6 +56,5 @@ typedef struct GGfloat44_t
   GGfloat m2_[4]; /*!< Row 2 of matrix */
   GGfloat m3_[4]; /*!< Row 3 of matrix */
 } GGfloat44; /*!< Using C convention name of struct to C++ (_t deletion) */
-#pragma pack(pop)
 
 #endif // End of GUARD_GGEMS_MATHS_GGEMSMATRIXTYPES_HH

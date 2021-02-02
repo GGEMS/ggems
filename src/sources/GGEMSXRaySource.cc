@@ -93,6 +93,8 @@ void GGEMSXRaySource::InitializeKernel(void)
   kernel_get_primaries_cl_ = opencl_manager.CompileKernel(filename, "get_primaries_ggems_xray_source", nullptr, const_cast<char*>(tracking_kernel_option_.c_str()));
 }
 
+#include "GGEMS/physics/GGEMSPrimaryParticles.hh"
+
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -113,8 +115,8 @@ void GGEMSXRaySource::GetPrimaries(GGsize const& number_of_particles)
   cl::Buffer* matrix_transformation = geometry_transformation_->GetTransformationMatrix();
 
   // Getting work group size, and work-item number
-  std::size_t work_group_size = opencl_manager.GetWorkGroupSize();
-  std::size_t number_of_work_items = opencl_manager.GetBestWorkItem(number_of_particles);
+  GGsize work_group_size = opencl_manager.GetWorkGroupSize();
+  GGsize number_of_work_items = opencl_manager.GetBestWorkItem(number_of_particles);
 
   // Parameters for work-item in kernel
   cl::NDRange global_wi(number_of_work_items);

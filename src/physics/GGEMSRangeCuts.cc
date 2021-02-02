@@ -188,17 +188,17 @@ void GGEMSRangeCuts::BuildAbsorptionLengthTable(GGEMSMaterialTables* material_ta
   range_table_material_.reset(new GGEMSLogEnergyTable(min_energy_, max_energy_, number_of_bins_));
 
   // Get the number of elements in material
-  GGchar number_of_elements = material_table->number_of_chemical_elements_[index_mat];
+  GGsize number_of_elements = material_table->number_of_chemical_elements_[index_mat];
 
   // Get index offset to element
-  GGushort index_of_offset = material_table->index_of_chemical_elements_[index_mat];
+  GGsize index_of_offset = material_table->index_of_chemical_elements_[index_mat];
 
   // Loop over the bins in the table
   for (GGsize i = 0; i < number_of_bins_; ++i) {
     GGfloat sigma = 0.0f;
 
     // Loop over the number of elements in material
-    for (GGuchar j = 0; j < number_of_elements; ++j) {
+    for (GGsize j = 0; j < number_of_elements; ++j) {
       sigma += material_table->atomic_number_density_[j+index_of_offset] * loss_table_dedx_table_elements_.at(j)->GetLossTableData(i);
     }
 
@@ -223,7 +223,7 @@ void GGEMSRangeCuts::BuildMaterialLossTable(GGEMSMaterialTables* material_table,
   GGsize number_of_elements = static_cast<GGsize>(material_table->number_of_chemical_elements_[index_mat]);
 
   // Get index offset to element
-  GGushort index_of_offset = material_table->index_of_chemical_elements_[index_mat];
+  GGsize index_of_offset = material_table->index_of_chemical_elements_[index_mat];
 
   for (GGsize i = 0; i <= number_of_bins_; ++i) {
     GGfloat value = 0.0f;
@@ -277,7 +277,7 @@ void GGEMSRangeCuts::BuildElementsLossTable(GGEMSMaterialTables* material_table,
   loss_table_dedx_table_elements_.reserve(number_of_elements);
 
   // Get index offset to element
-  GGushort index_of_offset = material_table->index_of_chemical_elements_[index_mat];
+  GGsize index_of_offset = material_table->index_of_chemical_elements_[index_mat];
 
   // Filling cross section table
   for (GGsize i = 0; i < number_of_elements; ++i) {
@@ -285,7 +285,7 @@ void GGEMSRangeCuts::BuildElementsLossTable(GGEMSMaterialTables* material_table,
     std::shared_ptr<GGEMSLogEnergyTable> log_energy_table_element(new GGEMSLogEnergyTable(min_energy_, max_energy_, number_of_bins_));
 
     // Getting atomic number
-    GGchar const kZ = material_table->atomic_number_Z_[i+index_of_offset];
+    GGuchar const kZ = material_table->atomic_number_Z_[i+index_of_offset];
 
     for (GGsize j = 0; j < number_of_bins_; ++j) {
       if (particle_name == "gamma") {
@@ -309,7 +309,7 @@ void GGEMSRangeCuts::BuildElementsLossTable(GGEMSMaterialTables* material_table,
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGfloat GGEMSRangeCuts::ComputePhotonCrossSection(GGchar const& atomic_number, GGfloat const& energy) const
+GGfloat GGEMSRangeCuts::ComputePhotonCrossSection(GGuchar const& atomic_number, GGfloat const& energy) const
 {
   // Compute the "absorption" cross section of the photon "absorption"
   // cross section means here the sum of the cross sections of the
@@ -375,7 +375,7 @@ GGfloat GGEMSRangeCuts::ComputePhotonCrossSection(GGchar const& atomic_number, G
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGfloat GGEMSRangeCuts::ComputeLossElectron(GGchar const& atomic_number, GGfloat const& energy) const
+GGfloat GGEMSRangeCuts::ComputeLossElectron(GGuchar const& atomic_number, GGfloat const& energy) const
 {
   GGfloat cbr1 = 0.02f;
   GGfloat cbr2 = -5.7e-5f;
@@ -438,7 +438,7 @@ GGfloat GGEMSRangeCuts::ComputeLossElectron(GGchar const& atomic_number, GGfloat
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGfloat GGEMSRangeCuts::ComputeLossPositron(GGchar const& atomic_number, GGfloat const& energy) const
+GGfloat GGEMSRangeCuts::ComputeLossPositron(GGuchar const& atomic_number, GGfloat const& energy) const
 {
   GGfloat cbr1 = 0.02f;
   GGfloat cbr2 = -5.7e-5f;
