@@ -25,9 +25,9 @@ import pathlib
 # ------------------------------------------------------------------------------
 # Choose your compiler: 'CLANG', 'GCC', 'CL' (Visual Studio) depending on your OS
 if sys.platform == "linux" or sys.platform == "darwin": # Only GCC or CLANG
-    os.environ['COMPILER'] = 'CLANG'
-    os.environ['CC'] = 'clang-9'
-    os.environ['CXX'] = 'clang++-9'
+    os.environ['COMPILER'] = 'GCC'
+    os.environ['CC'] = 'gcc'
+    os.environ['CXX'] = 'g++'
 elif sys.platform == "win32": # Only CLANG or CL
     os.environ['COMPILER'] = 'GCC'
     os.environ['CC'] = 'clang.exe'

@@ -55,7 +55,8 @@ GGEMSOpenCLManager::GGEMSOpenCLManager(void)
   #ifdef _MSC_VER
   _putenv("CUDA_CACHE_DISABLE=1");
   #else
-  putenv("CUDA_CACHE_DISABLE=1");
+  std::string disable_cache("CUDA_CACHE_DISABLE=1");
+  putenv(&disable_cache[0]);
   #endif
   #endif
 
