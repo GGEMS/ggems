@@ -37,6 +37,13 @@
 
 #include "GGEMS/sources/GGEMSSourceManager.hh"
 
+#ifdef __linux__
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#endif
+
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -85,7 +92,12 @@ GGuint GGEMSPseudoRandomGenerator::GenerateSeed(void) const
 
   // Buffer storing 8 characters
   char seedArray[sizeof(GGuint)];
-  ::read(file_descriptor, reinterpret_cast<GGuint*>(seedArray), sizeof(GGuint));
+  ssize_t bytes_read = ::read(file_descriptor, reinterpret_cast<GGuint*>(seedArray), sizeof(GGuint));
+  if (bytes_read == -1) {
+    std::ostringstream oss( std::ostringstream::out );
+    oss << "Error reading the file '/dev/urandom': " << strerror(errno) << std::endl;
+    GGEMSMisc::ThrowException("GGEMSManager", "GenerateSeed", oss.str());
+  }
   ::close(file_descriptor);
   GGuint *seedUInt = reinterpret_cast<GGuint*>(seedArray);
   return *seedUInt;
@@ -128,10 +140,10 @@ void GGEMSPseudoRandomGenerator::InitializeSeeds(void)
 
   // For each particle a seed is generated
   for (std::size_t i = 0; i < MAXIMUM_PARTICLES; ++i) {
-    random_device->prng_state_1_[i] = mt_gen();
-    random_device->prng_state_2_[i] = mt_gen();
-    random_device->prng_state_3_[i] = mt_gen();
-    random_device->prng_state_4_[i] = mt_gen();
+    random_device->prng_state_1_[i] = static_cast<GGuint>(mt_gen());
+    random_device->prng_state_2_[i] = static_cast<GGuint>(mt_gen());
+    random_device->prng_state_3_[i] = static_cast<GGuint>(mt_gen());
+    random_device->prng_state_4_[i] = static_cast<GGuint>(mt_gen());
     random_device->prng_state_5_[i] = 0;
   }
 

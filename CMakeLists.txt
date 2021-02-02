@@ -142,11 +142,11 @@ ELSE()
 
   # Checking compiler for LLVM/CLANG
   IF(COMPILER STREQUAL "CLANG")
-    SET(CXX_FLAGS -std=c++2a -Wall -mavx2 -Werror  -Wextra -pedantic -m64 -march=native -Wconversion -Weffc++ -Wold-style-cast -pedantic-errors -mtune=native -ftree-vectorize)
+    SET(CXX_FLAGS -std=c++17 -std=gnu++17 -Wall -mavx2 -Werror  -Wextra -pedantic -m64 -march=native -Wconversion -Wold-style-cast -pedantic-errors -mtune=native -ftree-vectorize)
 
   # Checking compiler for GNU/GCC
   ELSEIF(COMPILER STREQUAL "GCC")
-    SET(CXX_FLAGS -std=c++17 -Wall -Wextra -Werror  -pedantic -m64 -march=native -Wconversion -Weffc++ -Wold-style-cast -pedantic-errors -ftree-vectorize -mtune=native -mavx2)
+	  SET(CXX_FLAGS -std=c++17 -std=gnu++17 -Wall -Wextra -Werror -pedantic -m64 -march=native -Wno-ignored-attributes -Wconversion -Wold-style-cast -pedantic-errors -ftree-vectorize -mtune=native -mavx2)
 
   # Otherwize error
   ELSE()
