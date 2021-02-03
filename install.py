@@ -29,9 +29,9 @@ if sys.platform == "linux" or sys.platform == "darwin": # Only GCC or CLANG
     os.environ['CC'] = 'gcc'
     os.environ['CXX'] = 'g++'
 elif sys.platform == "win32": # Only CLANG or CL
-    os.environ['COMPILER'] = 'GCC'
-    os.environ['CC'] = 'clang.exe'
-    os.environ['CXX'] = 'clang++.exe'
+    os.environ['COMPILER'] = 'CL'
+    os.environ['CC'] = 'cl.exe'
+    os.environ['CXX'] = 'cl.exe'
 else:  # Unknown system
     print("Unknown architecture!!!", file=sys.stderr)
 
@@ -49,7 +49,10 @@ if len(sys.argv) > 1:
 # Set the GGEMS folder (GGEMS source folder), the build folder (where GGEMS will be compiled) and the install folder
 GGEMS_FOLDER = os.path.abspath(os.path.dirname(sys.argv[0]))
 BUILD_FOLDER = os.path.join(os.path.dirname(GGEMS_FOLDER),"GGEMS_OpenCL_build")
-INSTALL_FOLDER = os.path.expanduser("~\\bin")
+if sys.platform == "linux" or sys.platform == "darwin":
+    INSTALL_FOLDER = os.path.expanduser("~/bin")
+elif sys.platform == "win32":
+    INSTALL_FOLDER = os.path.expanduser("~\\bin")
 
 # ------------------------------------------------------------------------------
 # Print infos

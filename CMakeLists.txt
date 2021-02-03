@@ -30,7 +30,7 @@
 
 #-------------------------------------------------------------------------------
 # Checking CMAKE version
-CMAKE_MINIMUM_REQUIRED(VERSION 3.8 FATAL_ERROR)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.13 FATAL_ERROR)
 
 #-------------------------------------------------------------------------------
 # Name of the project and define the language
