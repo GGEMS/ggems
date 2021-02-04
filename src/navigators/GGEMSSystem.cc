@@ -40,12 +40,12 @@ GGEMSSystem::GGEMSSystem(std::string const& system_name)
 {
   GGcout("GGEMSSystem", "GGEMSSystem", 3) << "Allocation of GGEMSSystem..." << GGendl;
 
-  number_of_modules_xy_.x = 0;
-  number_of_modules_xy_.y = 0;
+  number_of_modules_xy_.x_ = 0;
+  number_of_modules_xy_.y_ = 0;
 
- number_of_detection_elements_inside_module_xyz_.x = 0;
- number_of_detection_elements_inside_module_xyz_.y = 0;
- number_of_detection_elements_inside_module_xyz_.z = 0;
+ number_of_detection_elements_inside_module_xyz_.x_ = 0;
+ number_of_detection_elements_inside_module_xyz_.y_ = 0;
+ number_of_detection_elements_inside_module_xyz_.z_ = 0;
 
   size_of_detection_elements_xyz_.x = 0.0f;
   size_of_detection_elements_xyz_.y = 0.0f;
@@ -67,8 +67,8 @@ GGEMSSystem::~GGEMSSystem(void)
 
 void GGEMSSystem::SetNumberOfModules(GGsize const& n_module_x, GGsize const& n_module_y)
 {
-  number_of_modules_xy_.x = n_module_x;
-  number_of_modules_xy_.y = n_module_y;
+  number_of_modules_xy_.x_ = n_module_x;
+  number_of_modules_xy_.y_ = n_module_y;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -77,9 +77,9 @@ void GGEMSSystem::SetNumberOfModules(GGsize const& n_module_x, GGsize const& n_m
 
 void GGEMSSystem::SetNumberOfDetectionElementsInsideModule(GGsize const& n_detection_element_x, GGsize const& n_detection_element_y, GGsize const& n_detection_element_z)
 {
-  number_of_detection_elements_inside_module_xyz_.x = n_detection_element_x;
-  number_of_detection_elements_inside_module_xyz_.y = n_detection_element_y;
-  number_of_detection_elements_inside_module_xyz_.z = n_detection_element_z;
+  number_of_detection_elements_inside_module_xyz_.x_ = n_detection_element_x;
+  number_of_detection_elements_inside_module_xyz_.y_ = n_detection_element_y;
+  number_of_detection_elements_inside_module_xyz_.z_ = n_detection_element_z;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -110,13 +110,13 @@ void GGEMSSystem::CheckParameters(void) const
 {
   GGcout("GGEMSSystem", "CheckParameters", 3) << "Checking the mandatory parameters..." << GGendl;
 
-  if (number_of_modules_xy_.x == 0 || number_of_modules_xy_.y == 0) {
+  if (number_of_modules_xy_.x_ == 0 || number_of_modules_xy_.y_ == 0) {
     std::ostringstream oss(std::ostringstream::out);
     oss << "In system parameters, number of module in x and y axis (local axis) has to be > 0!!!";
     GGEMSMisc::ThrowException("GGEMSSystem", "CheckParameters", oss.str());
   }
 
-  if (number_of_detection_elements_inside_module_xyz_.x == 0 || number_of_detection_elements_inside_module_xyz_.y == 0 || number_of_detection_elements_inside_module_xyz_.z == 0) {
+  if (number_of_detection_elements_inside_module_xyz_.x_ == 0 || number_of_detection_elements_inside_module_xyz_.y_ == 0 || number_of_detection_elements_inside_module_xyz_.z_ == 0) {
     std::ostringstream oss(std::ostringstream::out);
     oss << "In system parameters, number of detection elements in x, y and z axis (local axis) has to be > 0!!!";
     GGEMSMisc::ThrowException("GGEMSSystem", "CheckParameters", oss.str());
@@ -146,13 +146,13 @@ void GGEMSSystem::SaveResults(void)
   GGcout("GGEMSSystem", "SaveResults", 2) << "Saving results in MHD format..." << GGendl;
 
   GGsize3 total_dim;
-  total_dim.x = number_of_modules_xy_.x*number_of_detection_elements_inside_module_xyz_.x;
-  total_dim.y = number_of_modules_xy_.y*number_of_detection_elements_inside_module_xyz_.y;
-  total_dim.z = number_of_detection_elements_inside_module_xyz_.z;
+  total_dim.x_ = number_of_modules_xy_.x_*number_of_detection_elements_inside_module_xyz_.x_;
+  total_dim.y_ = number_of_modules_xy_.y_*number_of_detection_elements_inside_module_xyz_.y_;
+  total_dim.z_ = number_of_detection_elements_inside_module_xyz_.z_;
 
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
-  GGint* output = new GGint[total_dim.x*total_dim.y*total_dim.z];
-  std::memset(output, 0, total_dim.x*total_dim.y*total_dim.z*sizeof(GGint));
+  GGint* output = new GGint[total_dim.x_*total_dim.y_*total_dim.z_];
+  std::memset(output, 0, total_dim.x_*total_dim.y_*total_dim.z_*sizeof(GGint));
 
   GGEMSMHDImage mhdImage;
   mhdImage.SetBaseName(output_basename_);
@@ -161,17 +161,17 @@ void GGEMSSystem::SaveResults(void)
   mhdImage.SetElementSizes(size_of_detection_elements_xyz_);
 
   // Getting all the counts from solid on OpenCL device
-  for (GGsize jj = 0; jj < number_of_modules_xy_.y; ++jj) {
-    for (GGsize ii = 0; ii < number_of_modules_xy_.x; ++ii) {
-      cl::Buffer* histogram = solids_.at(ii + jj* number_of_modules_xy_.x)->GetHistogram()->histogram_.get();
+  for (GGsize jj = 0; jj < number_of_modules_xy_.y_; ++jj) {
+    for (GGsize ii = 0; ii < number_of_modules_xy_.x_; ++ii) {
+      cl::Buffer* histogram = solids_.at(ii + jj* number_of_modules_xy_.x_)->GetHistogram()->histogram_.get();
 
-      GGint* histogram_device = opencl_manager.GetDeviceBuffer<GGint>(histogram, number_of_detection_elements_inside_module_xyz_.x*number_of_detection_elements_inside_module_xyz_.y*sizeof(GGint));
+      GGint* histogram_device = opencl_manager.GetDeviceBuffer<GGint>(histogram, number_of_detection_elements_inside_module_xyz_.x_*number_of_detection_elements_inside_module_xyz_.y_*sizeof(GGint));
 
       // Storing data on host
-      for (GGsize jjj = 0; jjj < number_of_detection_elements_inside_module_xyz_.y; ++jjj) {
-        for (GGsize iii = 0; iii < number_of_detection_elements_inside_module_xyz_.x; ++iii) {
-          output[(iii+ii*number_of_detection_elements_inside_module_xyz_.x) + (jjj+jj*number_of_detection_elements_inside_module_xyz_.y)*total_dim.x] =
-            histogram_device[iii + jjj*number_of_detection_elements_inside_module_xyz_.x];
+      for (GGsize jjj = 0; jjj < number_of_detection_elements_inside_module_xyz_.y_; ++jjj) {
+        for (GGsize iii = 0; iii < number_of_detection_elements_inside_module_xyz_.x_; ++iii) {
+          output[(iii+ii*number_of_detection_elements_inside_module_xyz_.x_) + (jjj+jj*number_of_detection_elements_inside_module_xyz_.y_)*total_dim.x_] =
+            histogram_device[iii + jjj*number_of_detection_elements_inside_module_xyz_.x_];
         }
       }
 
@@ -179,6 +179,6 @@ void GGEMSSystem::SaveResults(void)
     }
   }
 
-  mhdImage.Write<GGint>(output, total_dim.x*total_dim.y*total_dim.z);
+  mhdImage.Write<GGint>(output, total_dim.x_*total_dim.y_*total_dim.z_);
   delete[] output;
 }

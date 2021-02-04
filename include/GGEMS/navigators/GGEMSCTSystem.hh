@@ -30,10 +30,6 @@
   \date Monday October 19, 2020
 */
 
-#include <string>
-#include <memory>
-
-#include "GGEMS/tools/GGEMSTypes.hh"
 #include "GGEMS/navigators/GGEMSSystem.hh"
 
 /*!

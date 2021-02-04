@@ -270,7 +270,7 @@ class GGEMS_EXPORT GGEMSDosimetryCalculator
     bool is_edep_squared_; /*!< Boolean for energy squared deposit */
     bool is_uncertainty_; /*!< Boolean for uncertainty computation */
     GGfloat scale_factor_; /*!< Scale factor */
-    GGchar is_water_reference_; /*<! Water reference for dose computation */
+    GGchar is_water_reference_; /*!< Water reference for dose computation */
     GGfloat minimum_density_; /*!< Minimum density value for dose computation */
 
     std::weak_ptr<cl::Kernel> kernel_compute_dose_; /*!< OpenCL kernel computing dose in voxelized solid */
@@ -329,7 +329,7 @@ extern "C" GGEMS_EXPORT void set_dosel_size_dosimetry_calculator(GGEMSDosimetryC
 
 /*!
   \fn void set_dose_output_dosimetry_calculator(GGEMSDosimetryCalculator* dose_calculator, char const* dose_output_filename)
-  \param voxelized_phantom - pointer on dose calculator
+  \param dose_calculator - pointer on dose calculator
   \param dose_output_filename - name of output dosimetry file storing dosimetry
   \brief set output filename storing dosimetry
 */

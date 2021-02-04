@@ -36,7 +36,7 @@
 #include "GGEMS/physics/GGEMSProcessConstants.hh"
 
 /*!
-  \fn kernel void get_primaries_ggems_xray_source(GGlong const particle_id_limit, global GGEMSPrimaryParticles* primary_particle, global GGEMSRandom* random, GGchar const particle_name, global GGfloat const* energy_spectrum, global GGfloat const* cdf, GGint const number_of_energy_bins, GGfloat const aperture, GGfloat3 const focal_spot_size, global GGfloat44 const* matrix_transformation)
+  \fn kernel void get_primaries_ggems_xray_source(GGsize const particle_id_limit, global GGEMSPrimaryParticles* primary_particle, global GGEMSRandom* random, GGchar const particle_name, global GGfloat const* energy_spectrum, global GGfloat const* cdf, GGint const number_of_energy_bins, GGfloat const aperture, GGfloat3 const focal_spot_size, global GGfloat44 const* matrix_transformation)
   \param particle_id_limit - particle id limit
   \param primary_particle - buffer of primary particles
   \param random - buffer for random number

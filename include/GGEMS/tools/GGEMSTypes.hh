@@ -114,7 +114,7 @@
 #define GGdouble16 double16 /*!< define a new type for double16 */
 
 #ifdef DOSIMETRY_DOUBLE_PRECISION
-#define GGDosiType GGdouble
+#define GGDosiType GGdouble /*!< define GGDositype as a double, useful for dosimetry computation */
 
 #if defined(cl_khr_int64_base_atomics)
 #pragma OPENCL EXTENSION cl_khr_int64_base_atomics : enable
@@ -123,7 +123,7 @@
 #endif
 
 #else
-#define GGDosiType GGfloat
+#define GGDosiType GGfloat /*!< define GGDositype as a float, useful for dosimetry computation */
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -247,12 +247,25 @@ inline void AtomicAddDouble(volatile global GGDosiType* address, GGdouble val)
 #define GGulong16 cl_ulong16 /*!< define a new type for cl_ulong16 */
 
 #define GGsize std::size_t /*!< define size for OpenCL, size_t is forbidden as kernel parameters */
+
+/*!
+  \struct GGsize2_t
+  \brief Structure storing 2 GGsize values
+*/
 typedef struct GGsize2_t {
-  GGsize x, y;
-} GGsize2;
+  GGsize x_; /*!< First parameter of Gize2 */
+  GGsize y_; /*!< Second parameter of Gize2 */
+} GGsize2; /*!< Using C convention name of struct to C++ (_t deletion) */
+
+/*!
+  \struct GGsize3_t
+  \brief Structure storing 3 GGsize values
+*/
 typedef struct GGsize3_t {
-  GGsize x, y, z;
-} GGsize3;
+  GGsize x_; /*!< First parameter of Gize3 */
+  GGsize y_; /*!< Second parameter of Gize3 */
+  GGsize z_; /*!< Third parameter of Gize3 */
+} GGsize3; /*!< Using C convention name of struct to C++ (_t deletion) */
 
 #define GGfloat cl_float /*!< define a new type for cl_float */
 #define GGfloat2 cl_float2 /*!< define a new type for cl_float2 */
@@ -269,9 +282,9 @@ typedef struct GGsize3_t {
 #define GGdouble16 cl_double16 /*!< define a new type for cl_double16 */
 
 #ifdef DOSIMETRY_DOUBLE_PRECISION
-#define GGDosiType GGdouble
+#define GGDosiType GGdouble /*!< define GGDositype as a double, useful for dosimetry computation */
 #else
-#define GGDosiType GGfloat
+#define GGDosiType GGfloat /*!< define GGDositype as a float, useful for dosimetry computation */
 #endif
 
 #endif

@@ -35,8 +35,6 @@
 #pragma warning(disable: 4251) // Deleting warning exporting STL members!!!
 #endif
 
-#include <string>
-
 #include "GGEMS/global/GGEMSOpenCLManager.hh"
 
 /*!
@@ -191,7 +189,7 @@ void GGEMSMHDImage::Write(T* image, GGsize const& elements)
   // header data
   std::ofstream out_header_stream(mhd_header_file_, std::ios::out);
   out_header_stream << "ElementSpacing = " << element_sizes_.x << " " << element_sizes_.y << " " << element_sizes_.z << std::endl;
-  out_header_stream << "DimSize = " << dimensions_.x << " " << dimensions_.y << " " << dimensions_.z << std::endl;
+  out_header_stream << "DimSize = " << dimensions_.x_ << " " << dimensions_.y_ << " " << dimensions_.z_ << std::endl;
   out_header_stream << "ElementType = " << mhd_data_type_ << std::endl;
   out_header_stream << "ElementDataFile = " << mhd_raw_file_ << std::endl;
   out_header_stream.close();
@@ -219,10 +217,10 @@ void GGEMSMHDImage::WriteRaw(std::weak_ptr<cl::Buffer> image) const
   std::ofstream out_raw_stream(mhd_raw_file_, std::ios::out | std::ios::binary);
 
   // Mapping data
-  T* data_image_device = opencl_manager.GetDeviceBuffer<T>(image.lock().get(), dimensions_.x * dimensions_.y * dimensions_.z * sizeof(T));
+  T* data_image_device = opencl_manager.GetDeviceBuffer<T>(image.lock().get(), dimensions_.x_ * dimensions_.y_ * dimensions_.z_ * sizeof(T));
 
   // Writing data on file
-  out_raw_stream.write(reinterpret_cast<char*>(data_image_device), static_cast<std::streamsize>(dimensions_.x * dimensions_.y * dimensions_.z * sizeof(T)));
+  out_raw_stream.write(reinterpret_cast<char*>(data_image_device), static_cast<std::streamsize>(dimensions_.x_ * dimensions_.y_* dimensions_.z_ * sizeof(T)));
 
   // Release the pointers
   opencl_manager.ReleaseDeviceBuffer(image.lock().get(), data_image_device);

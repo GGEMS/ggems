@@ -32,7 +32,6 @@
 #include "GGEMS/physics/GGEMSComptonScattering.hh"
 #include "GGEMS/physics/GGEMSPhotoElectricEffect.hh"
 #include "GGEMS/physics/GGEMSRayleighScattering.hh"
-#include "GGEMS/tools/GGEMSTools.hh"
 #include "GGEMS/materials/GGEMSMaterials.hh"
 #include "GGEMS/physics/GGEMSProcessesManager.hh"
 #include "GGEMS/tools/GGEMSRAMManager.hh"

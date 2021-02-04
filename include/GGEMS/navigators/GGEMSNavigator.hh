@@ -143,11 +143,11 @@ class GGEMS_EXPORT GGEMSNavigator
     inline GGsize GetNumberOfSolids(void) const {return solids_.size();}
 
     /*!
-      \fn inline std::vector<std::shared_ptr<GGEMSSolid>> GetSolids(void) const
+      \fn inline std::vector< std::shared_ptr<GGEMSSolid> > GetSolids(void) const
       \brief get the list of solids
       \return the list of solids
     */
-    inline std::vector<std::shared_ptr<GGEMSSolid>> GetSolids(void) const {return solids_;}
+    inline std::vector< std::shared_ptr<GGEMSSolid> > GetSolids(void) const {return solids_;}
 
     /*!
       \fn inline std::weak_ptr<GGEMSMaterials> GetMaterials(void) const
@@ -261,7 +261,7 @@ class GGEMS_EXPORT GGEMSNavigator
 
     // Dosimetry
     GGEMSDosimetryCalculator* dose_calculator_; /*!< Dose calculator pointer */
-    bool is_dosimetry_mode_; /*! Boolean checking if dosimetry mode is activated */
+    bool is_dosimetry_mode_; /*!< Boolean checking if dosimetry mode is activated */
 
     // Timers for kernel computation
     DurationNano kernel_particle_solid_distance_timer_; /*!< Timer for kernel computing particle solid distance */

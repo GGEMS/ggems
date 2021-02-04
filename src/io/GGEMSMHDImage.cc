@@ -28,14 +28,12 @@
   \date Tuesday January 14, 2020
 */
 
-#include <fstream>
 #include <vector>
 
 #include "GGEMS/geometries/GGEMSVoxelizedSolidData.hh"
 #include "GGEMS/io/GGEMSMHDImage.hh"
 #include "GGEMS/io/GGEMSTextReader.hh"
 #include "GGEMS/tools/GGEMSTools.hh"
-#include "GGEMS/tools/GGEMSPrint.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -52,9 +50,9 @@ GGEMSMHDImage::GGEMSMHDImage(void)
   element_sizes_.y = 0.0f;
   element_sizes_.z = 0.0f;
 
-  dimensions_.x = 0;
-  dimensions_.y = 0;
-  dimensions_.z = 0;
+  dimensions_.x_ = 0;
+  dimensions_.y_ = 0;
+  dimensions_.z_ = 0;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -232,7 +230,7 @@ void GGEMSMHDImage::Write(std::shared_ptr<cl::Buffer> image) const
   // header data
   std::ofstream out_header_stream(mhd_header_file_, std::ios::out);
   out_header_stream << "ElementSpacing = " << element_sizes_.x << " " << element_sizes_.y << " " << element_sizes_.z << std::endl;
-  out_header_stream << "DimSize = " << dimensions_.x << " " << dimensions_.y << " " << dimensions_.z << std::endl;
+  out_header_stream << "DimSize = " << dimensions_.x_ << " " << dimensions_.y_ << " " << dimensions_.z_ << std::endl;
   out_header_stream << "ElementType = " << mhd_data_type_ << std::endl;
   out_header_stream << "ElementDataFile = " << mhd_raw_file_ << std::endl;
   out_header_stream.close();
@@ -263,7 +261,7 @@ void GGEMSMHDImage::CheckParameters(void) const
   }
 
   // Checking phantom dimensions
-  if (dimensions_.x == 0 && dimensions_.y == 0 && dimensions_.z == 0) {
+  if (dimensions_.x_ == 0 && dimensions_.y_ == 0 && dimensions_.z_ == 0) {
     GGEMSMisc::ThrowException("GGEMSMHDImage", "CheckParameters", "Phantom dimensions have to be > 0!!!");
   }
 
