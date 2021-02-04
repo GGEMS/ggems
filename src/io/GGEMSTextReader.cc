@@ -51,8 +51,8 @@ std::string GGEMSMaterialReader::ReadMaterialName(std::string const& line)
 GGfloat GGEMSMaterialReader::ReadMaterialDensity(std::string const& line)
 {
   // Get the position of the first and last number of density
-  std::size_t first_pos = line.find_first_of("0123456789", line.find("d="));
-  std::size_t last_pos = line.find_first_not_of("0123456789.", first_pos);
+  GGsize first_pos = line.find_first_of("0123456789", line.find("d="));
+  GGsize last_pos = line.find_first_not_of("0123456789.", first_pos);
   std::string density_str = line.substr(first_pos, last_pos != std::string::npos ? last_pos - first_pos : last_pos);
 
   // Convert string to float
@@ -84,8 +84,8 @@ GGfloat GGEMSMaterialReader::ReadMaterialDensity(std::string const& line)
 GGsize GGEMSMaterialReader::ReadMaterialNumberOfElements(std::string const& line)
 {
   // Get the position of the first and last number of density
-  std::size_t first_pos = line.find_first_of("0123456789", line.find("n="));
-  std::size_t last_pos = line.find_last_of(";");
+  GGsize first_pos = line.find_first_of("0123456789", line.find("n="));
+  GGsize last_pos = line.find_last_of(";");
   std::string element_str = line.substr(first_pos,last_pos != std::string::npos ? last_pos - first_pos : last_pos);
 
   // Convert string to unsigned char
@@ -101,8 +101,8 @@ GGsize GGEMSMaterialReader::ReadMaterialNumberOfElements(std::string const& line
 
 std::string GGEMSMaterialReader::ReadMaterialElementName(std::string const& line)
 {
-  std::size_t first_pos = line.find("name=")+5;
-  std::size_t last_pos = line.find_first_of(";");
+  GGsize first_pos = line.find("name=")+5;
+  GGsize last_pos = line.find_first_of(";");
   std::string element_name_str = line.substr(first_pos, last_pos != std::string::npos ? last_pos - first_pos : last_pos);
 
   return element_name_str;
@@ -114,8 +114,8 @@ std::string GGEMSMaterialReader::ReadMaterialElementName(std::string const& line
 
 GGfloat GGEMSMaterialReader::ReadMaterialElementFraction(std::string const& line)
 {
-  std::size_t first_pos = line.find_first_of("0123456789", line.find("f="));
-  std::size_t last_pos = line.find_last_of(";");
+  GGsize first_pos = line.find_first_of("0123456789", line.find("f="));
+  GGsize last_pos = line.find_last_of(";");
   std::string fraction_str = line.substr(first_pos, last_pos != std::string::npos ? last_pos - first_pos : last_pos);
 
   // Convert string to float

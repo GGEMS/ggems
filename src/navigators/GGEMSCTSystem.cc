@@ -214,7 +214,7 @@ void GGEMSCTSystem::Initialize(void)
   // Build CT system depending on input parameters  
   // Getting the current number of registered solid
   GGEMSNavigatorManager& navigator_manager = GGEMSNavigatorManager::GetInstance();
-  std::size_t number_of_registered_solids = navigator_manager.GetNumberOfRegisteredSolids() - solids_.size();
+  GGsize number_of_registered_solids = navigator_manager.GetNumberOfRegisteredSolids() - solids_.size();
 
   // Creating all solids, solid box for CT
   GGsize number_of_solids = static_cast<GGsize>(number_of_modules_xy_.x * number_of_modules_xy_.y);

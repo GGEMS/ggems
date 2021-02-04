@@ -93,12 +93,12 @@ class GGEMS_EXPORT GGEMSMHDImage
     void SetBaseName(std::string const& basename);
 
     /*!
-      \fn void Read(std::string const& image_mhd_header_filename, std::weak_ptr<cl::Buffer> solid_data_cl)
+      \fn void Read(std::string const& image_mhd_header_filename, std::weak_ptr<cl::Buffer> solid_data)
       \param image_mhd_header_filename - input mhd filename
-      \param solid_data_cl - pointer on solid data
+      \param solid_data - pointer on solid data
       \brief read the mhd header
     */
-    void Read(std::string const& image_mhd_header_filename, std::weak_ptr<cl::Buffer> solid_data_cl);
+    void Read(std::string const& image_mhd_header_filename, std::weak_ptr<cl::Buffer> solid_data);
 
     /*!
       \fn void Write(std::shared_ptr<cl::Buffer> image) const
@@ -166,7 +166,7 @@ class GGEMS_EXPORT GGEMSMHDImage
       \brief write the raw data to file
     */
     template <typename T>
-    void WriteRaw(std::weak_ptr<cl::Buffer> image_cl) const;
+    void WriteRaw(std::weak_ptr<cl::Buffer> image) const;
 
   private:
     std::string mhd_header_file_; /*!< Name of the MHD header file */
@@ -210,7 +210,7 @@ void GGEMSMHDImage::Write(T* image, GGsize const& elements)
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
-void GGEMSMHDImage::WriteRaw(std::weak_ptr<cl::Buffer> image_cl) const
+void GGEMSMHDImage::WriteRaw(std::weak_ptr<cl::Buffer> image) const
 {
   // Get the OpenCL manager
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
@@ -219,13 +219,13 @@ void GGEMSMHDImage::WriteRaw(std::weak_ptr<cl::Buffer> image_cl) const
   std::ofstream out_raw_stream(mhd_raw_file_, std::ios::out | std::ios::binary);
 
   // Mapping data
-  T* data_image_device = opencl_manager.GetDeviceBuffer<T>(image_cl.lock().get(), dimensions_.x * dimensions_.y * dimensions_.z * sizeof(T));
+  T* data_image_device = opencl_manager.GetDeviceBuffer<T>(image.lock().get(), dimensions_.x * dimensions_.y * dimensions_.z * sizeof(T));
 
   // Writing data on file
   out_raw_stream.write(reinterpret_cast<char*>(data_image_device), static_cast<std::streamsize>(dimensions_.x * dimensions_.y * dimensions_.z * sizeof(T)));
 
   // Release the pointers
-  opencl_manager.ReleaseDeviceBuffer(image_cl.lock().get(), data_image_device);
+  opencl_manager.ReleaseDeviceBuffer(image.lock().get(), data_image_device);
   out_raw_stream.close();
 }
 

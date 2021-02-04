@@ -263,10 +263,10 @@ void GGEMSManager::Run()
 
   ChronoTime start_time = GGEMSChrono::Now();
 
-  for (std::size_t j = 0; j < source_manager.GetNumberOfSources(); ++j) {
+  for (GGsize j = 0; j < source_manager.GetNumberOfSources(); ++j) {
     GGcout("GGEMSManager", "Run", 0) << "## Source " << source_manager.GetNameOfSource(j) << GGendl;
 
-    for (std::size_t i = 0; i < source_manager.GetNumberOfBatchs(j); ++i) {
+    for (GGsize i = 0; i < source_manager.GetNumberOfBatchs(j); ++i) {
       GGcout("GGEMSManager", "Run", 1) << "----> Launching batch " << i+1 << "/" << source_manager.GetNumberOfBatchs(j) << GGendl;
 
       GGsize number_of_particles = source_manager.GetNumberOfParticlesInBatch(j, i);
@@ -324,7 +324,7 @@ void GGEMSManager::PrintBanner(void) const
   std::cout << "$ `____/`____/|___>|_|_|_|<___/   |__/ |_| $" << std::endl;
   std::cout << "$                                          $" << std::endl;
   std::cout << "$ Welcome to GGEMS v1.0   https://ggems.fr $" << std::endl;
-  std::cout << "$ Copyright (c) GGEMS Team 2020            $" << std::endl;
+  std::cout << "$ Copyright (c) GGEMS Team 2021            $" << std::endl;
   std::cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << std::endl;
   std::cout << std::endl;
 }

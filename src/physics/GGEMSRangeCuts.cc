@@ -564,8 +564,8 @@ void GGEMSRangeCuts::ConvertCutsFromDistanceToEnergy(GGEMSMaterials* materials)
 
   // Get data from OpenCL device
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
-  std::shared_ptr<cl::Buffer> material_table_cl = materials->GetMaterialTables().lock();
-  GGEMSMaterialTables* material_table_device = opencl_manager.GetDeviceBuffer<GGEMSMaterialTables>(material_table_cl.get(), sizeof(GGEMSMaterialTables));
+  std::shared_ptr<cl::Buffer> material_table = materials->GetMaterialTables().lock();
+  GGEMSMaterialTables* material_table_device = opencl_manager.GetDeviceBuffer<GGEMSMaterialTables>(material_table.get(), sizeof(GGEMSMaterialTables));
 
   // Loop over materials
   for (GGushort i = 0; i < material_table_device->number_of_materials_; ++i) {
@@ -587,5 +587,5 @@ void GGEMSRangeCuts::ConvertCutsFromDistanceToEnergy(GGEMSMaterials* materials)
   }
 
   // Release pointer
-  opencl_manager.ReleaseDeviceBuffer(material_table_cl.get(), material_table_device);
+  opencl_manager.ReleaseDeviceBuffer(material_table.get(), material_table_device);
 }

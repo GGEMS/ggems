@@ -122,11 +122,11 @@ class GGEMS_EXPORT GGEMSNavigator
     void SetThreshold(GGfloat const& threshold, std::string const& unit = "keV");
 
     /*!
-      \fn void SetNavigatorID(std::size_t const& navigator_id)
+      \fn void SetNavigatorID(GGsize const& navigator_id)
       \param navigator_id - index of the navigator
       \brief set the navigator index
     */
-    void SetNavigatorID(std::size_t const& navigator_id);
+    void SetNavigatorID(GGsize const& navigator_id);
 
     /*!
       \fn inline std::string GetNavigatorName(void) const
@@ -136,11 +136,11 @@ class GGEMS_EXPORT GGEMSNavigator
     inline std::string GetNavigatorName(void) const {return navigator_name_;}
 
     /*!
-      \fn inline std::size_t GetNumberOfSolids(void) const
+      \fn inline GGsize GetNumberOfSolids(void) const
       \brief get the number of solids inside the navigator
       \return the number of solids
     */
-    inline std::size_t GetNumberOfSolids(void) const {return solids_.size();}
+    inline GGsize GetNumberOfSolids(void) const {return solids_.size();}
 
     /*!
       \fn inline std::vector<std::shared_ptr<GGEMSSolid>> GetSolids(void) const
@@ -247,7 +247,7 @@ class GGEMS_EXPORT GGEMSNavigator
     // Global navigation members
     GGfloat3 position_xyz_; /*!< Position of the navigator in X, Y and Z */
     GGfloat3 rotation_xyz_; /*!< Rotation of the navigator in X, Y and Z */
-    std::size_t navigator_id_; /*!< Index of the navigator */
+    GGsize navigator_id_; /*!< Index of the navigator */
     bool is_update_pos_; /*!< Updating navigator position */
     bool is_update_rot_; /*!< Updating navigator rotation */
     GGfloat threshold_; /*!< Threshold in energy applyied to navigator */

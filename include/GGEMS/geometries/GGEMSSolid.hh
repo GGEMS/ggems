@@ -96,14 +96,14 @@ class GGEMS_EXPORT GGEMSSolid
       \brief get the informations about the solid geometry
       \return header data OpenCL pointer about solid
     */
-    inline cl::Buffer* GetSolidData(void) const {return solid_data_cl_.get();};
+    inline cl::Buffer* GetSolidData(void) const {return solid_data_.get();};
 
     /*!
       \fn inline cl::Buffer* GetLabelData(void) const
       \brief get buffer to label buffer
       \return data on label infos
     */
-    inline cl::Buffer* GetLabelData(void) const {return label_data_cl_.get();};
+    inline cl::Buffer* GetLabelData(void) const {return label_data_.get();};
 
     /*!
       \fn void SetRotation(GGfloat3 const& rotation_xyz)
@@ -120,12 +120,12 @@ class GGEMS_EXPORT GGEMSSolid
     void SetPosition(GGfloat3 const& position_xyz);
 
     /*!
-      \fn void SetSolidID(std::size_t const& solid_id)
+      \fn void SetSolidID(GGsize const& solid_id)
       \param solid_id - index of the solid
       \brief set the global solid index
     */
     template<typename T>
-    void SetSolidID(std::size_t const& solid_id);
+    void SetSolidID(GGsize const& solid_id);
 
     /*!
       \fn void GetTransformationMatrix(void)
@@ -151,21 +151,21 @@ class GGEMS_EXPORT GGEMSSolid
       \return pointer on kernel computing particle solid distance
       \brief OpenCL kernel computing particle solid distance
     */
-    inline std::weak_ptr<cl::Kernel> GetKernelParticleSolidDistance(void) const {return kernel_particle_solid_distance_cl_;}
+    inline std::weak_ptr<cl::Kernel> GetKernelParticleSolidDistance(void) const {return kernel_particle_solid_distance_;}
 
     /*!
       \fn std::weak_ptr<cl::Kernel> GetKernelProjectToSolid(void) const
       \return pointer on kernel computing projection to solid
       \brief OpenCL kernel computing projection to solid
     */
-    inline std::weak_ptr<cl::Kernel> GetKernelProjectToSolid(void) const {return kernel_project_to_solid_cl_;}
+    inline std::weak_ptr<cl::Kernel> GetKernelProjectToSolid(void) const {return kernel_project_to_solid_;}
 
     /*!
       \fn std::weak_ptr<cl::Kernel> GetKernelTrackThroughSolid(void) const
       \return pointer on kernel computing tracking through solid
       \brief OpenCL kernel computing tracking through solid
     */
-    inline std::weak_ptr<cl::Kernel> GetKernelTrackThroughSolid(void) const {return kernel_track_through_solid_cl_;}
+    inline std::weak_ptr<cl::Kernel> GetKernelTrackThroughSolid(void) const {return kernel_track_through_solid_;}
 
     /*!
       \fn GGEMSHistogramMode* GetHistogram(void)
@@ -190,16 +190,16 @@ class GGEMS_EXPORT GGEMSSolid
 
   protected:
     // Solid data infos and label (for voxelized solid)
-    std::shared_ptr<cl::Buffer> solid_data_cl_; /*!< Data about solid */
-    std::shared_ptr<cl::Buffer> label_data_cl_; /*!< Pointer storing the buffer about label data, useful for voxelized solid only */
+    std::shared_ptr<cl::Buffer> solid_data_; /*!< Data about solid */
+    std::shared_ptr<cl::Buffer> label_data_; /*!< Pointer storing the buffer about label data, useful for voxelized solid only */
 
     // Geometric transformation applyied to solid
     std::unique_ptr<GGEMSGeometryTransformation> geometry_transformation_; /*!< Pointer storing the geometry transformation */
 
     // OpenCL kernels and options for kernel
-    std::weak_ptr<cl::Kernel> kernel_particle_solid_distance_cl_; /*!< OpenCL kernel computing distance between particles and solid */
-    std::weak_ptr<cl::Kernel> kernel_project_to_solid_cl_; /*!< OpenCL kernel moving particles to solid */
-    std::weak_ptr<cl::Kernel> kernel_track_through_solid_cl_; /*!< OpenCL kernel tracking particles through a solid */
+    std::weak_ptr<cl::Kernel> kernel_particle_solid_distance_; /*!< OpenCL kernel computing distance between particles and solid */
+    std::weak_ptr<cl::Kernel> kernel_project_to_solid_; /*!< OpenCL kernel moving particles to solid */
+    std::weak_ptr<cl::Kernel> kernel_track_through_solid_; /*!< OpenCL kernel tracking particles through a solid */
     std::string kernel_option_; /*!< Preprocessor option for kernel */
 
     // Output data
@@ -212,18 +212,18 @@ class GGEMS_EXPORT GGEMSSolid
 ////////////////////////////////////////////////////////////////////////////////
 
 template<typename T>
-void GGEMSSolid::SetSolidID(std::size_t const& solid_id)
+void GGEMSSolid::SetSolidID(GGsize const& solid_id)
 {
   // Get the OpenCL manager
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
   // Get pointer on OpenCL device
-  T* solid_data_device = opencl_manager.GetDeviceBuffer<T>(solid_data_cl_.get(), sizeof(T));
+  T* solid_data_device = opencl_manager.GetDeviceBuffer<T>(solid_data_.get(), sizeof(T));
 
   solid_data_device->solid_id_ = static_cast<GGint>(solid_id);
 
   // Release the pointer
-  opencl_manager.ReleaseDeviceBuffer(solid_data_cl_.get(), solid_data_device);
+  opencl_manager.ReleaseDeviceBuffer(solid_data_.get(), solid_data_device);
 }
 
 #endif // End of GUARD_GGEMS_GEOMETRIES_GGEMSSOLID_HH

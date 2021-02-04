@@ -105,25 +105,25 @@ void GGEMSSphere::Draw(void)
   cl::Buffer* voxelized_phantom = volume_creator_manager.GetVoxelizedVolume();
 
   // Getting work group size, and work-item number
-  std::size_t work_group_size = opencl_manager.GetWorkGroupSize();
-  std::size_t number_of_work_items = opencl_manager.GetBestWorkItem(number_of_elements);
+  GGsize work_group_size = opencl_manager.GetWorkGroupSize();
+  GGsize number_of_work_items = opencl_manager.GetBestWorkItem(number_of_elements);
 
   // Parameters for work-item in kernel
   cl::NDRange global_wi(number_of_work_items);
   cl::NDRange local_wi(work_group_size);
 
   // Set parameters for kernel
-  std::shared_ptr<cl::Kernel> kernel_cl = kernel_draw_volume_.lock();
-  kernel_cl->setArg(0, number_of_elements);
-  kernel_cl->setArg(1, voxel_sizes);
-  kernel_cl->setArg(2, phantom_dimensions);
-  kernel_cl->setArg(3, positions_);
-  kernel_cl->setArg(4, label_value_);
-  kernel_cl->setArg(5, radius_);
-  kernel_cl->setArg(6, *voxelized_phantom);
+  std::shared_ptr<cl::Kernel> kernel = kernel_draw_volume_.lock();
+  kernel->setArg(0, number_of_elements);
+  kernel->setArg(1, voxel_sizes);
+  kernel->setArg(2, phantom_dimensions);
+  kernel->setArg(3, positions_);
+  kernel->setArg(4, label_value_);
+  kernel->setArg(5, radius_);
+  kernel->setArg(6, *voxelized_phantom);
 
   // Launching kernel
-  cl_int kernel_status = p_queue->enqueueNDRangeKernel(*kernel_cl, 0, global_wi, local_wi, nullptr, p_event);
+  cl_int kernel_status = p_queue->enqueueNDRangeKernel(*kernel, 0, global_wi, local_wi, nullptr, p_event);
   opencl_manager.CheckOpenCLError(kernel_status, "GGEMSSphere", "Draw");
   p_queue->finish(); // Wait until the kernel status is finish
 

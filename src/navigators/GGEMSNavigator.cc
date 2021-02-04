@@ -126,7 +126,7 @@ void GGEMSNavigator::SetThreshold(GGfloat const& threshold, std::string const& u
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSNavigator::SetNavigatorID(std::size_t const& navigator_id)
+void GGEMSNavigator::SetNavigatorID(GGsize const& navigator_id)
 {
   navigator_id_ = navigator_id;
 }
@@ -189,12 +189,12 @@ void GGEMSNavigator::ParticleSolidDistance(void)
 {
   // Getting the OpenCL manager and infos for work-item launching
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
-  cl::CommandQueue* queue_cl = opencl_manager.GetCommandQueue();
-  cl::Event* event_cl = opencl_manager.GetEvent();
+  cl::CommandQueue* queue = opencl_manager.GetCommandQueue();
+  cl::Event* event = opencl_manager.GetEvent();
 
   // Pointer to primary particles, and number to particles in buffer
   GGEMSSourceManager& source_manager = GGEMSSourceManager::GetInstance();
-  cl::Buffer* primary_particles_cl = source_manager.GetParticles()->GetPrimaryParticles();
+  cl::Buffer* primary_particles = source_manager.GetParticles()->GetPrimaryParticles();
   GGsize number_of_particles = source_manager.GetParticles()->GetNumberOfParticles();
 
   // Getting work group size, and work-item number
@@ -208,18 +208,18 @@ void GGEMSNavigator::ParticleSolidDistance(void)
   // Loop over all the solids
   for (auto&& s : solids_) {
     // Getting solid data infos
-    cl::Buffer* solid_data_cl = s->GetSolidData();
+    cl::Buffer* solid_data = s->GetSolidData();
 
     // Getting kernel, and setting parameters
-    std::shared_ptr<cl::Kernel> kernel_cl = s->GetKernelParticleSolidDistance().lock();
-    kernel_cl->setArg(0, number_of_particles);
-    kernel_cl->setArg(1, *primary_particles_cl);
-    kernel_cl->setArg(2, *solid_data_cl);
+    std::shared_ptr<cl::Kernel> kernel = s->GetKernelParticleSolidDistance().lock();
+    kernel->setArg(0, number_of_particles);
+    kernel->setArg(1, *primary_particles);
+    kernel->setArg(2, *solid_data);
 
     // Launching kernel
-    GGint kernel_status = queue_cl->enqueueNDRangeKernel(*kernel_cl, 0, global_wi, local_wi, nullptr, event_cl);
+    GGint kernel_status = queue->enqueueNDRangeKernel(*kernel, 0, global_wi, local_wi, nullptr, event);
     opencl_manager.CheckOpenCLError(kernel_status, "GGEMSNavigator", "ParticleSolidDistance");
-    queue_cl->finish(); // Wait until the kernel status is finish
+    queue->finish(); // Wait until the kernel status is finish
 
     // Incrementing elapsed time in kernel
     kernel_particle_solid_distance_timer_ += opencl_manager.GetElapsedTimeInKernel();
@@ -234,12 +234,12 @@ void GGEMSNavigator::ProjectToSolid(void)
 {
   // Getting the OpenCL manager and infos for work-item launching
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
-  cl::CommandQueue* queue_cl = opencl_manager.GetCommandQueue();
-  cl::Event* event_cl = opencl_manager.GetEvent();
+  cl::CommandQueue* queue = opencl_manager.GetCommandQueue();
+  cl::Event* event = opencl_manager.GetEvent();
 
   // Pointer to primary particles, and number to particles in buffer
   GGEMSSourceManager& source_manager = GGEMSSourceManager::GetInstance();
-  cl::Buffer* primary_particles_cl = source_manager.GetParticles()->GetPrimaryParticles();
+  cl::Buffer* primary_particles = source_manager.GetParticles()->GetPrimaryParticles();
   GGsize number_of_particles = source_manager.GetParticles()->GetNumberOfParticles();
 
   // Getting work group size, and work-item number
@@ -253,18 +253,18 @@ void GGEMSNavigator::ProjectToSolid(void)
   // Loop over all the solids
   for (auto&& s : solids_) {
     // Getting solid data infos
-    cl::Buffer* solid_data_cl = s->GetSolidData();
+    cl::Buffer* solid_data = s->GetSolidData();
 
     // Getting kernel, and setting parameters
-    std::shared_ptr<cl::Kernel> kernel_cl = s->GetKernelProjectToSolid().lock();
-    kernel_cl->setArg(0, number_of_particles);
-    kernel_cl->setArg(1, *primary_particles_cl);
-    kernel_cl->setArg(2, *solid_data_cl);
+    std::shared_ptr<cl::Kernel> kernel = s->GetKernelProjectToSolid().lock();
+    kernel->setArg(0, number_of_particles);
+    kernel->setArg(1, *primary_particles);
+    kernel->setArg(2, *solid_data);
 
     // Launching kernel
-    GGint kernel_status = queue_cl->enqueueNDRangeKernel(*kernel_cl, 0, global_wi, local_wi, nullptr, event_cl);
+    GGint kernel_status = queue->enqueueNDRangeKernel(*kernel, 0, global_wi, local_wi, nullptr, event);
     opencl_manager.CheckOpenCLError(kernel_status, "GGEMSNavigator", "ProjectToSolid");
-    queue_cl->finish(); // Wait until the kernel status is finish
+    queue->finish(); // Wait until the kernel status is finish
 
     // Incrementing elapsed time in kernel
     kernel_project_to_solid_timer_ += opencl_manager.GetElapsedTimeInKernel();
@@ -279,22 +279,22 @@ void GGEMSNavigator::TrackThroughSolid(void)
 {
   // Getting the OpenCL manager and infos for work-item launching
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
-  cl::CommandQueue* queue_cl = opencl_manager.GetCommandQueue();
-  cl::Event* event_cl = opencl_manager.GetEvent();
+  cl::CommandQueue* queue = opencl_manager.GetCommandQueue();
+  cl::Event* event = opencl_manager.GetEvent();
 
   // Pointer to primary particles, and number to particles in buffer
   GGEMSSourceManager& source_manager = GGEMSSourceManager::GetInstance();
-  cl::Buffer* primary_particles_cl = source_manager.GetParticles()->GetPrimaryParticles();
+  cl::Buffer* primary_particles = source_manager.GetParticles()->GetPrimaryParticles();
   GGsize number_of_particles = source_manager.GetParticles()->GetNumberOfParticles();
 
   // Getting OpenCL pointer to random number
-  cl::Buffer* randoms_cl = source_manager.GetPseudoRandomGenerator()->GetPseudoRandomNumbers();
+  cl::Buffer* randoms = source_manager.GetPseudoRandomGenerator()->GetPseudoRandomNumbers();
 
   // Getting OpenCL buffer for cross section
-  cl::Buffer* cross_sections_cl = cross_sections_->GetCrossSections();
+  cl::Buffer* cross_sections = cross_sections_->GetCrossSections();
 
   // Getting OpenCL buffer for materials
-  cl::Buffer* materials_cl = materials_->GetMaterialTables().lock().get();
+  cl::Buffer* materials = materials_->GetMaterialTables().lock().get();
 
   // Getting work group size, and work-item number
   GGsize work_group_size = opencl_manager.GetWorkGroupSize();
@@ -307,55 +307,55 @@ void GGEMSNavigator::TrackThroughSolid(void)
   // Loop over all the solids
   for (auto&& s : solids_) {
     // Getting solid  and label (for GGEMSVoxelizedSolid) data infos
-    cl::Buffer* solid_data_cl = s->GetSolidData();
-    cl::Buffer* label_data_cl = s->GetLabelData();
+    cl::Buffer* solid_data = s->GetSolidData();
+    cl::Buffer* label_data = s->GetLabelData();
 
     // Get type of registered data and OpenCL buffer to data
     std::string data_reg_type = s->GetRegisteredDataType();
 
     // Get buffers depending on mode of simulation
-    cl::Buffer* histogram_cl = nullptr;
-    cl::Buffer* photon_tracking_dosimetry_cl = nullptr;
-    cl::Buffer* hit_tracking_dosimetry_cl = nullptr;
-    cl::Buffer* edep_tracking_dosimetry_cl = nullptr;
-    cl::Buffer* edep_squared_tracking_dosimetry_cl = nullptr;
-    cl::Buffer* dosimetry_params_cl = nullptr;
+    cl::Buffer* histogram = nullptr;
+    cl::Buffer* photon_tracking_dosimetry = nullptr;
+    cl::Buffer* hit_tracking_dosimetry = nullptr;
+    cl::Buffer* edep_tracking_dosimetry = nullptr;
+    cl::Buffer* edep_squared_tracking_dosimetry = nullptr;
+    cl::Buffer* dosimetry_params = nullptr;
     if (data_reg_type == "HISTOGRAM") {
-      histogram_cl = s->GetHistogram()->histogram_cl_.get();
+      histogram = s->GetHistogram()->histogram_.get();
     }
     else if (data_reg_type == "DOSIMETRY") {
-      dosimetry_params_cl = dose_calculator_->GetDoseParams().get();
-      photon_tracking_dosimetry_cl = dose_calculator_->GetPhotonTrackingBuffer().get();
-      hit_tracking_dosimetry_cl = dose_calculator_->GetHitTrackingBuffer().get();
-      edep_tracking_dosimetry_cl = dose_calculator_->GetEdepBuffer().get();
-      edep_squared_tracking_dosimetry_cl = dose_calculator_->GetEdepSquaredBuffer().get();
+      dosimetry_params = dose_calculator_->GetDoseParams().get();
+      photon_tracking_dosimetry = dose_calculator_->GetPhotonTrackingBuffer().get();
+      hit_tracking_dosimetry = dose_calculator_->GetHitTrackingBuffer().get();
+      edep_tracking_dosimetry = dose_calculator_->GetEdepBuffer().get();
+      edep_squared_tracking_dosimetry = dose_calculator_->GetEdepSquaredBuffer().get();
     }
 
     // Getting kernel, and setting parameters
-    std::shared_ptr<cl::Kernel> kernel_cl = s->GetKernelTrackThroughSolid().lock();
-    kernel_cl->setArg(0, number_of_particles);
-    kernel_cl->setArg(1, *primary_particles_cl);
-    kernel_cl->setArg(2, *randoms_cl);
-    kernel_cl->setArg(3, *solid_data_cl);
-    kernel_cl->setArg(4, *label_data_cl); // Useful only for GGEMSVoxelizedSolid
-    kernel_cl->setArg(5, *cross_sections_cl);
-    kernel_cl->setArg(6, *materials_cl);
-    kernel_cl->setArg(7, threshold_);
+    std::shared_ptr<cl::Kernel> kernel = s->GetKernelTrackThroughSolid().lock();
+    kernel->setArg(0, number_of_particles);
+    kernel->setArg(1, *primary_particles);
+    kernel->setArg(2, *randoms);
+    kernel->setArg(3, *solid_data);
+    kernel->setArg(4, *label_data); // Useful only for GGEMSVoxelizedSolid
+    kernel->setArg(5, *cross_sections);
+    kernel->setArg(6, *materials);
+    kernel->setArg(7, threshold_);
     if (data_reg_type == "HISTOGRAM") {
-      kernel_cl->setArg(8, *histogram_cl);
+      kernel->setArg(8, *histogram);
     }
     else if (data_reg_type == "DOSIMETRY") {
-      kernel_cl->setArg(8, *dosimetry_params_cl);
-      kernel_cl->setArg(9, *edep_tracking_dosimetry_cl);
-      kernel_cl->setArg(10, *edep_squared_tracking_dosimetry_cl);
-      kernel_cl->setArg(11, *hit_tracking_dosimetry_cl);
-      kernel_cl->setArg(12, *photon_tracking_dosimetry_cl);
+      kernel->setArg(8, *dosimetry_params);
+      kernel->setArg(9, *edep_tracking_dosimetry);
+      kernel->setArg(10, *edep_squared_tracking_dosimetry);
+      kernel->setArg(11, *hit_tracking_dosimetry);
+      kernel->setArg(12, *photon_tracking_dosimetry);
     }
 
     // Launching kernel
-    GGint kernel_status = queue_cl->enqueueNDRangeKernel(*kernel_cl, 0, global_wi, local_wi, nullptr, event_cl);
+    GGint kernel_status = queue->enqueueNDRangeKernel(*kernel, 0, global_wi, local_wi, nullptr, event);
     opencl_manager.CheckOpenCLError(kernel_status, "GGEMSNavigator", "TrackThroughSolid");
-    queue_cl->finish(); // Wait until the kernel status is finish
+    queue->finish(); // Wait until the kernel status is finish
 
     // Incrementing elapsed time in kernel
     kernel_track_through_solid_timer_ += opencl_manager.GetElapsedTimeInKernel();

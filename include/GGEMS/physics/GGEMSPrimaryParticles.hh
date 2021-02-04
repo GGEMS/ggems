@@ -49,7 +49,6 @@ typedef struct GGEMSPrimaryParticles_t
   GGfloat px_[MAXIMUM_PARTICLES]; /*!< Position of the particle in x */
   GGfloat py_[MAXIMUM_PARTICLES]; /*!< Position of the particle in y */
   GGfloat pz_[MAXIMUM_PARTICLES]; /*!< Position of the particle in z */
-  GGfloat tof_[MAXIMUM_PARTICLES]; /*!< Time of flight for photon only, it time since generation of photon */
 
   GGint E_index_[MAXIMUM_PARTICLES]; /*!< Energy index within CS and Mat tables */
   GGint solid_id_[MAXIMUM_PARTICLES]; /*!< current solid crossed by the particle */

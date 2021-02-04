@@ -96,7 +96,7 @@ class GGEMS_EXPORT GGEMSParticles
       \return pointer to OpenCL buffer storing particles
       \brief return the pointer to OpenCL buffer storing particles
     */
-    inline cl::Buffer* GetPrimaryParticles() const {return primary_particles_cl_.get();};
+    inline cl::Buffer* GetPrimaryParticles() const {return primary_particles_.get();};
 
     /*!
       \fn void SetNumberOfParticles(GGsize const& number_of_particles)
@@ -135,7 +135,7 @@ class GGEMS_EXPORT GGEMSParticles
 
   private:
     GGsize number_of_particles_; /*!< Number of activated particles in buffer */
-    std::shared_ptr<cl::Buffer> primary_particles_cl_; /*!< Pointer storing info about primary particles in batch on OpenCL device */
+    std::shared_ptr<cl::Buffer> primary_particles_; /*!< Pointer storing info about primary particles in batch on OpenCL device */
     ParticleTypeMap particle_type_; /*!< Map of particle type */
     ParticleStatusMap particle_status_; /*!< Map of particle status */
     ParticleLevelMap particle_level_; /*!< Map of particle level */

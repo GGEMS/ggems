@@ -174,7 +174,7 @@ class GGEMS_EXPORT GGEMSGeometryTransformation
       \return the transformation matrix
       \brief return the transformation matrix
     */
-    inline cl::Buffer* GetTransformationMatrix(void) const {return matrix_transformation_cl_.get();}
+    inline cl::Buffer* GetTransformationMatrix(void) const {return matrix_transformation_.get();}
 
   private:
     GGfloat3 position_; /*!< Position of the source/detector */
@@ -183,7 +183,7 @@ class GGEMS_EXPORT GGEMSGeometryTransformation
     GGfloat44 matrix_translation_; /*!< Matrix of translation */
     GGfloat44 matrix_rotation_; /*!< Matrix of rotation */
     GGfloat44 matrix_orthographic_projection_; /*!< Matrix of orthographic projection */
-    std::shared_ptr<cl::Buffer> matrix_transformation_cl_; /*!< OpenCL buffer storing the matrix transformation */
+    std::shared_ptr<cl::Buffer> matrix_transformation_; /*!< OpenCL buffer storing the matrix transformation */
 };
 
 #endif // End of GUARD_GGEMS_MATHS_TRANSFORMATION_MATRIX_HH

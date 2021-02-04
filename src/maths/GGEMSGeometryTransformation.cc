@@ -90,10 +90,10 @@ GGEMSGeometryTransformation::GGEMSGeometryTransformation(void)
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
   // Allocation of matrix transformation on OpenCL device
-  matrix_transformation_cl_ = opencl_manager.Allocate(nullptr, sizeof(GGfloat44), CL_MEM_READ_WRITE);
+  matrix_transformation_ = opencl_manager.Allocate(nullptr, sizeof(GGfloat44), CL_MEM_READ_WRITE);
 
   // Initialize to 0
-  GGfloat44* matrix_transformation_device = opencl_manager.GetDeviceBuffer<GGfloat44>(matrix_transformation_cl_.get(), sizeof(GGfloat44));
+  GGfloat44* matrix_transformation_device = opencl_manager.GetDeviceBuffer<GGfloat44>(matrix_transformation_.get(), sizeof(GGfloat44));
 
   // Copy step
   for (GGint i = 0; i < 4; ++i) {
@@ -104,7 +104,7 @@ GGEMSGeometryTransformation::GGEMSGeometryTransformation(void)
   }
 
   // Release the pointer, mandatory step!!!
-  opencl_manager.ReleaseDeviceBuffer(matrix_transformation_cl_.get(), matrix_transformation_device);
+  opencl_manager.ReleaseDeviceBuffer(matrix_transformation_.get(), matrix_transformation_device);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -141,7 +141,7 @@ void GGEMSGeometryTransformation::SetTranslation(GGfloat const& tx, GGfloat cons
 
   // Update the transformation matrix on OpenCL device
   // Get the pointer on device
-  GGfloat44* matrix_transformation_device = opencl_manager.GetDeviceBuffer<GGfloat44>(matrix_transformation_cl_.get(), sizeof(GGfloat44));
+  GGfloat44* matrix_transformation_device = opencl_manager.GetDeviceBuffer<GGfloat44>(matrix_transformation_.get(), sizeof(GGfloat44));
 
   // // Compute a temporary matrix then copy it on OpenCL device
   GGfloat44 matrix_tmp = GGfloat44MultGGfloat44(&matrix_translation_, matrix_transformation_device);
@@ -155,7 +155,7 @@ void GGEMSGeometryTransformation::SetTranslation(GGfloat const& tx, GGfloat cons
   }
 
   // Release the pointer, mandatory step!!!
-  opencl_manager.ReleaseDeviceBuffer(matrix_transformation_cl_.get(), matrix_transformation_device);
+  opencl_manager.ReleaseDeviceBuffer(matrix_transformation_.get(), matrix_transformation_device);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -226,7 +226,7 @@ void GGEMSGeometryTransformation::SetRotation(GGfloat const& rx, GGfloat const& 
 
   // Update the transformation matrix on OpenCL device
   // Get the pointer on device
-  GGfloat44* matrix_transformation_device = opencl_manager.GetDeviceBuffer<GGfloat44>(matrix_transformation_cl_.get(), sizeof(GGfloat44));
+  GGfloat44* matrix_transformation_device = opencl_manager.GetDeviceBuffer<GGfloat44>(matrix_transformation_.get(), sizeof(GGfloat44));
 
   // // Compute a temporary matrix then copy it on OpenCL device
   GGfloat44 matrix_tmp = GGfloat44MultGGfloat44(&matrix_rotation_, matrix_transformation_device);
@@ -240,7 +240,7 @@ void GGEMSGeometryTransformation::SetRotation(GGfloat const& rx, GGfloat const& 
   }
 
   // Release the pointer, mandatory step!!!
-  opencl_manager.ReleaseDeviceBuffer(matrix_transformation_cl_.get(), matrix_transformation_device);
+  opencl_manager.ReleaseDeviceBuffer(matrix_transformation_.get(), matrix_transformation_device);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -293,7 +293,7 @@ void GGEMSGeometryTransformation::SetAxisTransformation(GGfloat33 const& axis)
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
   // Initialize to 0
-  GGfloat44* matrix_transformation_device = opencl_manager.GetDeviceBuffer<GGfloat44>(matrix_transformation_cl_.get(), sizeof(GGfloat44));
+  GGfloat44* matrix_transformation_device = opencl_manager.GetDeviceBuffer<GGfloat44>(matrix_transformation_.get(), sizeof(GGfloat44));
 
   // Copy step
   for (GGint i = 0; i < 4; ++i) {
@@ -304,5 +304,5 @@ void GGEMSGeometryTransformation::SetAxisTransformation(GGfloat33 const& axis)
   }
 
   // Release the pointer, mandatory step!!!
-  opencl_manager.ReleaseDeviceBuffer(matrix_transformation_cl_.get(), matrix_transformation_device);
+  opencl_manager.ReleaseDeviceBuffer(matrix_transformation_.get(), matrix_transformation_device);
 }

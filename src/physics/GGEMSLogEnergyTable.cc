@@ -53,7 +53,7 @@ GGEMSLogEnergyTable::GGEMSLogEnergyTable(GGfloat const& lowest_energy, GGfloat c
   bins_.push_back(lowest_energy);
 
   // Filling the vectors
-  for (std::size_t i = 1; i < number_of_nodes_-1; ++i) {
+  for (GGsize i = 1; i < number_of_nodes_-1; ++i) {
     loss_table_data_.push_back(0.0f);
     bins_.push_back(expf((base_bin_+static_cast<GGfloat>(i))*bin_width_));
   }
@@ -80,7 +80,7 @@ GGEMSLogEnergyTable::~GGEMSLogEnergyTable(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSLogEnergyTable::SetValue(std::size_t const& index, GGfloat const& value)
+void GGEMSLogEnergyTable::SetValue(GGsize const& index, GGfloat const& value)
 {
   loss_table_data_.at(index) = value;
 }
@@ -91,7 +91,7 @@ void GGEMSLogEnergyTable::SetValue(std::size_t const& index, GGfloat const& valu
 
 GGfloat GGEMSLogEnergyTable::GetLossTableValue(GGfloat const& energy) const
 {
-  std::size_t last_index = 0;
+  GGsize last_index = 0;
   GGfloat y = 0.0f;
 
   if (energy <= edge_min_) {
@@ -118,9 +118,9 @@ GGfloat GGEMSLogEnergyTable::GetLossTableValue(GGfloat const& energy) const
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-std::size_t GGEMSLogEnergyTable::FindBinLocation(GGfloat const& energy) const
+GGsize GGEMSLogEnergyTable::FindBinLocation(GGfloat const& energy) const
 {
-  std::size_t bin = static_cast<std::size_t>(log(energy) / bin_width_ - base_bin_);
+  GGsize bin = static_cast<GGsize>(log(energy) / bin_width_ - base_bin_);
 
   if (bin + 2 > number_of_nodes_) {
     bin = number_of_nodes_ - 2;
@@ -139,9 +139,9 @@ std::size_t GGEMSLogEnergyTable::FindBinLocation(GGfloat const& energy) const
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-std::size_t GGEMSLogEnergyTable::FindBin(GGfloat const& energy, std::size_t const& index) const
+GGsize GGEMSLogEnergyTable::FindBin(GGfloat const& energy, GGsize const& index) const
 {
-  std::size_t id = index;
+  GGsize id = index;
 
   if (energy < bins_.at(1)) {
     id = 0;

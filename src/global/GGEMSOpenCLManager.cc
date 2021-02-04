@@ -592,7 +592,8 @@ void GGEMSOpenCLManager::ContextToActivate(GGsize const& context_id)
   #ifdef DOSIMETRY_DOUBLE_PRECISION
   if (!IsDoublePrecisionAtomicAddition()) {
     std::ostringstream oss(std::ostringstream::out);
-    oss << "Your OpenCL device does not support double precision for atomic operation!!!";
+    oss << "Your OpenCL device does not support double precision for atomic operation!!!" << std::endl;
+    oss << "Please, recompile with DOSIMETRY_DOUBLE_PRECISION to OFF. Precision will be lost only for dosimetry application" << std::endl;
     GGEMSMisc::ThrowException("GGEMSOpenCLManager", "ContextToActivate", oss.str());
   }
   #endif
