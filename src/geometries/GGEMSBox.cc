@@ -94,8 +94,8 @@ void GGEMSBox::Draw(void)
   GGEMSVolumeCreatorManager& volume_creator_manager = GGEMSVolumeCreatorManager::GetInstance();
 
   // Get command queue and event
-  cl::CommandQueue* p_queue_cl = opencl_manager.GetCommandQueue();
-  cl::Event* p_event_cl = opencl_manager.GetEvent();
+  cl::CommandQueue* p_queue = opencl_manager.GetCommandQueue();
+  cl::Event* p_event = opencl_manager.GetEvent();
 
   // Get parameters from phantom creator
   GGfloat3 voxel_sizes = volume_creator_manager.GetElementsSizes();
@@ -109,29 +109,29 @@ void GGEMSBox::Draw(void)
   cl::Buffer* voxelized_phantom = volume_creator_manager.GetVoxelizedVolume();
 
   // Getting work group size, and work-item number
-  std::size_t work_group_size = opencl_manager.GetWorkGroupSize();
-  std::size_t number_of_work_items = opencl_manager.GetBestWorkItem(number_of_elements);
+  GGsize work_group_size = opencl_manager.GetWorkGroupSize();
+  GGsize number_of_work_items = opencl_manager.GetBestWorkItem(number_of_elements);
 
   // Parameters for work-item in kernel
   cl::NDRange global_wi(number_of_work_items);
   cl::NDRange local_wi(work_group_size);
 
   // Set parameters for kernel
-  std::shared_ptr<cl::Kernel> kernel_cl = kernel_draw_volume_.lock();
-  kernel_cl->setArg(0, number_of_elements);
-  kernel_cl->setArg(1, voxel_sizes);
-  kernel_cl->setArg(2, phantom_dimensions);
-  kernel_cl->setArg(3, positions_);
-  kernel_cl->setArg(4, label_value_);
-  kernel_cl->setArg(5, height_);
-  kernel_cl->setArg(6, width_);
-  kernel_cl->setArg(7, depth_);
-  kernel_cl->setArg(8, *voxelized_phantom);
+  std::shared_ptr<cl::Kernel> kernel = kernel_draw_volume_.lock();
+  kernel->setArg(0, number_of_elements);
+  kernel->setArg(1, voxel_sizes);
+  kernel->setArg(2, phantom_dimensions);
+  kernel->setArg(3, positions_);
+  kernel->setArg(4, label_value_);
+  kernel->setArg(5, height_);
+  kernel->setArg(6, width_);
+  kernel->setArg(7, depth_);
+  kernel->setArg(8, *voxelized_phantom);
 
   // Launching kernel
-  cl_int kernel_status = p_queue_cl->enqueueNDRangeKernel(*kernel_cl, 0, global_wi, local_wi, nullptr, p_event_cl);
+  cl_int kernel_status = p_queue->enqueueNDRangeKernel(*kernel, 0, global_wi, local_wi, nullptr, p_event);
   opencl_manager.CheckOpenCLError(kernel_status, "GGEMSBox", "Draw");
-  p_queue_cl->finish(); // Wait until the kernel status is finish
+  p_queue->finish(); // Wait until the kernel status is finish
 
   // Displaying time in kernel
   kernel_draw_volume_timer_ += opencl_manager.GetElapsedTimeInKernel();

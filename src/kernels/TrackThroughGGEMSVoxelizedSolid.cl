@@ -116,9 +116,6 @@ kernel void track_through_ggems_voxelized_solid(
   GGfloat3 voxel_size = voxelized_solid_data->voxel_sizes_xyz_;
   GGint3 number_of_voxels = voxelized_solid_data->number_of_voxels_xyz_;
 
-  // TOF of photon
-  GGfloat tof = 0.0f;
-
   // Track particle until out of solid
   do {
     // Get index of voxelized phantom, x, y, z
@@ -208,9 +205,6 @@ kernel void track_through_ggems_voxelized_solid(
       GEOMETRY_TOLERANCE
     );
 
-    // Update TOF, true for photon only
-    tof += next_interaction_distance * C_LIGHT;
-
     //  Checking if particle outside solid, still in local
     if (!IsParticleInAABB(&local_position, border_min.x, border_max.x, border_min.y, border_max.y, border_min.z, border_max.z, GEOMETRY_TOLERANCE)) {
       primary_particle->particle_solid_distance_[global_id] = OUT_OF_WORLD; // Reset to initiale value
@@ -249,9 +243,6 @@ kernel void track_through_ggems_voxelized_solid(
       primary_particle->status_[global_id] = DEAD;
     }
   } while (primary_particle->status_[global_id] == ALIVE);
-
-  // Storing final state
-  primary_particle->tof_[global_id] += tof;
 
   // Convert to global position
   global_position = LocalToGlobalPosition(&tmp_matrix_transformation, &local_position);

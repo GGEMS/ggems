@@ -105,7 +105,7 @@ class GGEMS_EXPORT GGEMSPseudoRandomGenerator
       \return pointer to OpenCL buffer storing random numbers
       \brief return the pointer to OpenCL buffer storing random numbers
     */
-    inline cl::Buffer* GetPseudoRandomNumbers() const {return pseudo_random_numbers_cl_.get();};
+    inline cl::Buffer* GetPseudoRandomNumbers() const {return pseudo_random_numbers_.get();};
 
   private:
     /*!
@@ -128,7 +128,7 @@ class GGEMS_EXPORT GGEMSPseudoRandomGenerator
     GGuint GenerateSeed(void) const;
 
   private:
-    std::shared_ptr<cl::Buffer> pseudo_random_numbers_cl_; /*!< Pointer storing the buffer about random numbers */
+    std::shared_ptr<cl::Buffer> pseudo_random_numbers_; /*!< Pointer storing the buffer about random numbers */
     GGuint seed_; /*!< Initial seed generating state of GGEMS random */
 };
 

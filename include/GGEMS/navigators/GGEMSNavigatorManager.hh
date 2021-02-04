@@ -110,11 +110,11 @@ class GGEMS_EXPORT GGEMSNavigatorManager
     void PrintInfos(void) const;
 
     /*!
-      \fn std::size_t GetNumberOfNavigators(void) const
+      \fn GGsize GetNumberOfNavigators(void) const
       \brief Get the number of navigators
       \return the number of navigators
     */
-    inline std::size_t GetNumberOfNavigators(void) const {return navigators_.size();}
+    inline GGsize GetNumberOfNavigators(void) const {return navigators_.size();}
 
     /*!
       \fn inline std::vector< std::shared_ptr<GGEMSNavigator> > GetNavigators(void) const
@@ -132,7 +132,7 @@ class GGEMS_EXPORT GGEMSNavigatorManager
     inline std::shared_ptr<GGEMSNavigator> GetNavigator(std::string const& navigator_name) const
     {
       // Loop over the navigator
-      for (std::size_t i = 0; i < navigators_.size(); ++i) {
+      for (GGsize i = 0; i < navigators_.size(); ++i) {
         if (navigator_name == (navigators_.at(i))->GetNavigatorName()) {
           return navigators_.at(i);
         }
@@ -142,15 +142,15 @@ class GGEMS_EXPORT GGEMSNavigatorManager
     }
 
     /*!
-      \fn inline std::size_t GetNumberOfRegisteredSolids(void) const
+      \fn inline GGsize GetNumberOfRegisteredSolids(void) const
       \brief get the number of current registered solid
       \return number of current registered solid
     */
-    inline std::size_t GetNumberOfRegisteredSolids(void) const
+    inline GGsize GetNumberOfRegisteredSolids(void) const
     {
-      std::size_t number_of_registered_solid = 0;
+      GGsize number_of_registered_solid = 0;
       // Loop over number of navigator
-      for (std::size_t i = 0; i < navigators_.size(); ++i) {
+      for (GGsize i = 0; i < navigators_.size(); ++i) {
         number_of_registered_solid += (navigators_.at(i))->GetNumberOfSolids();
       }
 

@@ -100,7 +100,7 @@ int main(void)
   // Source
   GGEMSXRaySource point_source("point_source");
   point_source.SetSourceParticleType("gamma");
-  point_source.SetNumberOfParticles(1000000000);
+  point_source.SetNumberOfParticles(100000000);
   point_source.SetPosition(-595.0f, 0.0f, 0.0f, "mm");
   point_source.SetRotation(0.0f, 0.0f, 0.0f, "deg");
   point_source.SetBeamAperture(5.0f, "deg");

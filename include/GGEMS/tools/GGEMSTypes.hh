@@ -248,10 +248,10 @@ inline void AtomicAddDouble(volatile global GGDosiType* address, GGdouble val)
 
 #define GGsize std::size_t /*!< define size for OpenCL, size_t is forbidden as kernel parameters */
 typedef struct GGsize2_t {
-  std::size_t x, y;
+  GGsize x, y;
 } GGsize2;
 typedef struct GGsize3_t {
-  std::size_t x, y, z;
+  GGsize x, y, z;
 } GGsize3;
 
 #define GGfloat cl_float /*!< define a new type for cl_float */

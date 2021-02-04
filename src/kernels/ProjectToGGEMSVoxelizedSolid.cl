@@ -101,7 +101,6 @@ kernel void project_to_ggems_voxelized_solid(
   primary_particle->py_[global_id] = position.y;
   primary_particle->pz_[global_id] = position.z;
 
-  primary_particle->tof_[global_id] += distance * C_LIGHT; // True only for photons
   primary_particle->particle_solid_distance_[global_id] = 0.0f;
 
   #ifdef GGEMS_TRACKING

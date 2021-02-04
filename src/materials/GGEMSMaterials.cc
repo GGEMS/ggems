@@ -107,7 +107,7 @@ void GGEMSMaterials::PrintInfos(void) const
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
   // Getting the OpenCL pointer on material tables
-  GGEMSMaterialTables* material_table_device = opencl_manager.GetDeviceBuffer<GGEMSMaterialTables>(material_tables_cl_.get(), sizeof(GGEMSMaterialTables));
+  GGEMSMaterialTables* material_table_device = opencl_manager.GetDeviceBuffer<GGEMSMaterialTables>(material_tables_.get(), sizeof(GGEMSMaterialTables));
 
   // Getting list of activated materials
   GGcout("GGEMSMaterials", "PrintInfos", 0) << GGendl;
@@ -115,7 +115,7 @@ void GGEMSMaterials::PrintInfos(void) const
   GGcout("GGEMSMaterials", "PrintInfos", 0) << "Total number of chemical elements: " << material_table_device->total_number_of_chemical_elements_ << GGendl;
   GGcout("GGEMSMaterials", "PrintInfos", 0) << "Activated Materials: " << GGendl;
   GGcout("GGEMSMaterials", "PrintInfos", 0) << "-----------------------------------" << GGendl;
-  for (std::size_t i = 0; i < material_table_device->number_of_materials_; ++i) {
+  for (GGsize i = 0; i < material_table_device->number_of_materials_; ++i) {
     GGcout("GGEMSMaterials", "PrintInfos", 0) << "* " << materials_.at(i) << GGendl;
     GGcout("GGEMSMaterials", "PrintInfos", 0) << "    - Number of chemical elements: " << static_cast<GGushort>(material_table_device->number_of_chemical_elements_[i]) << GGendl;
     GGcout("GGEMSMaterials", "PrintInfos", 0) << "    - Density: " << material_table_device->density_of_material_[i]/(g/cm3) << " g/cm3" << GGendl;
@@ -154,7 +154,7 @@ void GGEMSMaterials::PrintInfos(void) const
   GGcout("GGEMSMaterials", "PrintInfos", 0) << GGendl;
 
   // Release the pointer, mandatory step!!!
-  opencl_manager.ReleaseDeviceBuffer(material_tables_cl_.get(), material_table_device);
+  opencl_manager.ReleaseDeviceBuffer(material_tables_.get(), material_table_device);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -172,10 +172,10 @@ void GGEMSMaterials::BuildMaterialTables(void)
   GGEMSMaterialsDatabaseManager& material_database_manager = GGEMSMaterialsDatabaseManager::GetInstance();
   
   // Allocating memory for material tables in OpenCL device
-  material_tables_cl_ = opencl_manager.Allocate(nullptr, sizeof(GGEMSMaterialTables), CL_MEM_READ_WRITE);
+  material_tables_ = opencl_manager.Allocate(nullptr, sizeof(GGEMSMaterialTables), CL_MEM_READ_WRITE);
 
   // Getting the OpenCL pointer on material tables
-  GGEMSMaterialTables* material_table_device = opencl_manager.GetDeviceBuffer<GGEMSMaterialTables>(material_tables_cl_.get(), sizeof(GGEMSMaterialTables));
+  GGEMSMaterialTables* material_table_device = opencl_manager.GetDeviceBuffer<GGEMSMaterialTables>(material_tables_.get(), sizeof(GGEMSMaterialTables));
 
   // Get the number of activated materials
   material_table_device->number_of_materials_ = static_cast<GGuchar>(materials_.size());
@@ -245,7 +245,7 @@ void GGEMSMaterials::BuildMaterialTables(void)
   material_table_device->total_number_of_chemical_elements_ = index_to_chemical_element;
 
   // Release the pointer, mandatory step!!!
-  opencl_manager.ReleaseDeviceBuffer(material_tables_cl_.get(), material_table_device);
+  opencl_manager.ReleaseDeviceBuffer(material_tables_.get(), material_table_device);
 
   // Converting length cut to energy cut
   range_cuts_->ConvertCutsFromDistanceToEnergy(this);
@@ -261,7 +261,7 @@ GGfloat GGEMSMaterials::GetDensity(std::string const& material_name) const
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
   // Getting the OpenCL pointer on material tables
-  GGEMSMaterialTables* material_table_device = opencl_manager.GetDeviceBuffer<GGEMSMaterialTables>(material_tables_cl_.get(), sizeof(GGEMSMaterialTables));
+  GGEMSMaterialTables* material_table_device = opencl_manager.GetDeviceBuffer<GGEMSMaterialTables>(material_tables_.get(), sizeof(GGEMSMaterialTables));
 
   // Get index of material
   std::vector<std::string>::const_iterator iter_mat = std::find(materials_.begin(), materials_.end(), material_name);
@@ -274,7 +274,7 @@ GGfloat GGEMSMaterials::GetDensity(std::string const& material_name) const
 
   GGfloat density = material_table_device->density_of_material_[index];
 
-  opencl_manager.ReleaseDeviceBuffer(material_tables_cl_.get(), material_table_device);
+  opencl_manager.ReleaseDeviceBuffer(material_tables_.get(), material_table_device);
 
   return density / g * cm3;
 }
@@ -289,14 +289,14 @@ GGfloat GGEMSMaterials::GetAtomicNumberDensity(std::string const& material_name)
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
   // Getting the OpenCL pointer on material tables
-  GGEMSMaterialTables* material_table_device = opencl_manager.GetDeviceBuffer<GGEMSMaterialTables>(material_tables_cl_.get(), sizeof(GGEMSMaterialTables));
+  GGEMSMaterialTables* material_table_device = opencl_manager.GetDeviceBuffer<GGEMSMaterialTables>(material_tables_.get(), sizeof(GGEMSMaterialTables));
 
   // Get index of material
   ptrdiff_t index = GetMaterialIndex(material_name);
 
   GGfloat atomic_number_density = material_table_device->atomic_number_density_[index];
 
-  opencl_manager.ReleaseDeviceBuffer(material_tables_cl_.get(), material_table_device);
+  opencl_manager.ReleaseDeviceBuffer(material_tables_.get(), material_table_device);
 
   return atomic_number_density / (mol/cm3);
 }
@@ -317,7 +317,7 @@ GGfloat GGEMSMaterials::GetEnergyCut(std::string const& material_name, std::stri
   range_cuts_->ConvertCutsFromDistanceToEnergy(this);
 
   // Getting the OpenCL pointer on material tables
-  GGEMSMaterialTables* material_table_device = opencl_manager.GetDeviceBuffer<GGEMSMaterialTables>(material_tables_cl_.get(), sizeof(GGEMSMaterialTables));
+  GGEMSMaterialTables* material_table_device = opencl_manager.GetDeviceBuffer<GGEMSMaterialTables>(material_tables_.get(), sizeof(GGEMSMaterialTables));
 
   // Get index of material
   ptrdiff_t index = GetMaterialIndex(material_name);
@@ -333,7 +333,7 @@ GGfloat GGEMSMaterials::GetEnergyCut(std::string const& material_name, std::stri
     energy_cut = material_table_device->electron_energy_cut_[index];
   }
 
-  opencl_manager.ReleaseDeviceBuffer(material_tables_cl_.get(), material_table_device);
+  opencl_manager.ReleaseDeviceBuffer(material_tables_.get(), material_table_device);
 
   return energy_cut / keV;
 }

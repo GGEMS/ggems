@@ -199,7 +199,7 @@ class GGEMS_EXPORT GGEMSSource
     std::string tracking_kernel_option_; /*!< Preprocessor option for tracking */
     std::unique_ptr<GGEMSGeometryTransformation> geometry_transformation_; /*!< Pointer storing the geometry transformation */
 
-    std::weak_ptr<cl::Kernel> kernel_get_primaries_cl_; /*!< Kernel generating primaries on OpenCL device */
+    std::weak_ptr<cl::Kernel> kernel_get_primaries_; /*!< Kernel generating primaries on OpenCL device */
     DurationNano kernel_get_primaries_timer_; /*!< Timer for particle generation */
 };
 

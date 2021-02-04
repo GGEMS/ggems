@@ -52,9 +52,9 @@ GGEMSCrossSections::GGEMSCrossSections(void)
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
   // Allocating memory for cross section tables on host and device
-  particle_cross_sections_cl_ = opencl_manager.Allocate(nullptr, sizeof(GGEMSParticleCrossSections), CL_MEM_READ_WRITE);
+  particle_cross_sections_ = opencl_manager.Allocate(nullptr, sizeof(GGEMSParticleCrossSections), CL_MEM_READ_WRITE);
 
-  particle_cross_sections_.reset(new GGEMSParticleCrossSections());
+  particle_cross_sections_host_.reset(new GGEMSParticleCrossSections());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -126,7 +126,7 @@ void GGEMSCrossSections::Initialize(GGEMSMaterials const* materials)
   // Get the process manager
   GGEMSProcessesManager& process_manager = GGEMSProcessesManager::GetInstance();
 
-  GGEMSParticleCrossSections* particle_cross_sections_device = opencl_manager.GetDeviceBuffer<GGEMSParticleCrossSections>(particle_cross_sections_cl_.get(), sizeof(GGEMSParticleCrossSections));
+  GGEMSParticleCrossSections* particle_cross_sections_device = opencl_manager.GetDeviceBuffer<GGEMSParticleCrossSections>(particle_cross_sections_.get(), sizeof(GGEMSParticleCrossSections));
 
   // Storing information for process manager
   GGsize number_of_bins = process_manager.GetCrossSectionTableNumberOfBins();
@@ -136,7 +136,7 @@ void GGEMSCrossSections::Initialize(GGEMSMaterials const* materials)
   particle_cross_sections_device->number_of_bins_ = number_of_bins;
   particle_cross_sections_device->min_energy_ = min_energy;
   particle_cross_sections_device->max_energy_ = max_energy;
-  for (std::size_t i = 0; i < materials->GetNumberOfMaterials(); ++i) {
+  for (GGsize i = 0; i < materials->GetNumberOfMaterials(); ++i) {
     #ifdef _WIN32
     strcpy_s(reinterpret_cast<char*>(particle_cross_sections_device->material_names_[i]), 32, (materials->GetMaterialName(i)).c_str());
     #else
@@ -154,11 +154,11 @@ void GGEMSCrossSections::Initialize(GGEMSMaterials const* materials)
   }
 
   // Release pointer
-  opencl_manager.ReleaseDeviceBuffer(particle_cross_sections_cl_.get(), particle_cross_sections_device);
+  opencl_manager.ReleaseDeviceBuffer(particle_cross_sections_.get(), particle_cross_sections_device);
 
   // Loop over the activated physic processes and building tables
   for (auto&& i : em_processes_list_)
-    i->BuildCrossSectionTables(particle_cross_sections_cl_, materials->GetMaterialTables());
+    i->BuildCrossSectionTables(particle_cross_sections_, materials->GetMaterialTables());
 
   // Copy data from device to RAM memory (optimization for python users)
   LoadPhysicTablesOnHost();
@@ -175,43 +175,43 @@ void GGEMSCrossSections::LoadPhysicTablesOnHost(void)
   // Get the OpenCL manager
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
-  GGEMSParticleCrossSections* particle_cross_sections_device = opencl_manager.GetDeviceBuffer<GGEMSParticleCrossSections>(particle_cross_sections_cl_.get(), sizeof(GGEMSParticleCrossSections));
+  GGEMSParticleCrossSections* particle_cross_sections_device = opencl_manager.GetDeviceBuffer<GGEMSParticleCrossSections>(particle_cross_sections_.get(), sizeof(GGEMSParticleCrossSections));
 
-  particle_cross_sections_->number_of_bins_ = particle_cross_sections_device->number_of_bins_;
-  particle_cross_sections_->number_of_materials_ = particle_cross_sections_device->number_of_materials_;
-  particle_cross_sections_->min_energy_ = particle_cross_sections_device->min_energy_;
-  particle_cross_sections_->max_energy_ = particle_cross_sections_device->max_energy_;
+  particle_cross_sections_host_->number_of_bins_ = particle_cross_sections_device->number_of_bins_;
+  particle_cross_sections_host_->number_of_materials_ = particle_cross_sections_device->number_of_materials_;
+  particle_cross_sections_host_->min_energy_ = particle_cross_sections_device->min_energy_;
+  particle_cross_sections_host_->max_energy_ = particle_cross_sections_device->max_energy_;
 
-  for(GGuchar i = 0; i < particle_cross_sections_->number_of_materials_; ++i) {
+  for(GGuchar i = 0; i < particle_cross_sections_host_->number_of_materials_; ++i) {
     for(GGuchar j = 0; j < 32; ++j) {
-      particle_cross_sections_->material_names_[i][j] = particle_cross_sections_device->material_names_[i][j];
+      particle_cross_sections_host_->material_names_[i][j] = particle_cross_sections_device->material_names_[i][j];
     }
   }
 
-  for(GGushort i = 0; i < particle_cross_sections_->number_of_bins_; ++i) {
-    particle_cross_sections_->energy_bins_[i] = particle_cross_sections_device->energy_bins_[i];
+  for(GGushort i = 0; i < particle_cross_sections_host_->number_of_bins_; ++i) {
+    particle_cross_sections_host_->energy_bins_[i] = particle_cross_sections_device->energy_bins_[i];
   }
 
-  particle_cross_sections_->number_of_activated_photon_processes_ = particle_cross_sections_device->number_of_activated_photon_processes_;
+  particle_cross_sections_host_->number_of_activated_photon_processes_ = particle_cross_sections_device->number_of_activated_photon_processes_;
 
   for(GGuchar i = 0; i < NUMBER_PHOTON_PROCESSES; ++i) {
-    particle_cross_sections_->photon_cs_id_[i] = particle_cross_sections_device->photon_cs_id_[i];
+    particle_cross_sections_host_->photon_cs_id_[i] = particle_cross_sections_device->photon_cs_id_[i];
   }
 
   for(GGuchar j = 0; j < NUMBER_PHOTON_PROCESSES; ++j) {
     for(GGuint i = 0; i < 256*MAX_CROSS_SECTION_TABLE_NUMBER_BINS; ++i) {
-      particle_cross_sections_->photon_cross_sections_[j][i] = particle_cross_sections_device->photon_cross_sections_[j][i];
+      particle_cross_sections_host_->photon_cross_sections_[j][i] = particle_cross_sections_device->photon_cross_sections_[j][i];
     }
   }
 
   for(GGuchar j = 0; j < NUMBER_PHOTON_PROCESSES; ++j) {
     for(GGuint i = 0; i < 101*MAX_CROSS_SECTION_TABLE_NUMBER_BINS; ++i) {
-      particle_cross_sections_->photon_cross_sections_per_atom_[j][i] = particle_cross_sections_device->photon_cross_sections_per_atom_[j][i];
+      particle_cross_sections_host_->photon_cross_sections_per_atom_[j][i] = particle_cross_sections_device->photon_cross_sections_per_atom_[j][i];
     }
   }
 
   // Release pointer
-  opencl_manager.ReleaseDeviceBuffer(particle_cross_sections_cl_.get(), particle_cross_sections_device);
+  opencl_manager.ReleaseDeviceBuffer(particle_cross_sections_.get(), particle_cross_sections_device);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -221,10 +221,10 @@ void GGEMSCrossSections::LoadPhysicTablesOnHost(void)
 GGfloat GGEMSCrossSections::GetPhotonCrossSection(std::string const& process_name, std::string const& material_name, GGfloat const& energy, std::string const& unit) const
 {
   // Get min and max energy in the table, and number of bins
-  GGfloat min_energy = particle_cross_sections_->min_energy_;
-  GGfloat max_energy = particle_cross_sections_->max_energy_;
-  GGsize number_of_bins = particle_cross_sections_->number_of_bins_;
-  GGsize number_of_materials = particle_cross_sections_->number_of_materials_;
+  GGfloat min_energy = particle_cross_sections_host_->min_energy_;
+  GGfloat max_energy = particle_cross_sections_host_->max_energy_;
+  GGsize number_of_bins = particle_cross_sections_host_->number_of_bins_;
+  GGsize number_of_materials = particle_cross_sections_host_->number_of_materials_;
 
   // Converting energy
   GGfloat e_MeV = EnergyUnit(energy, unit);
@@ -258,7 +258,7 @@ GGfloat GGEMSCrossSections::GetPhotonCrossSection(std::string const& process_nam
   // Get id of material
   GGsize mat_id = 0;
   for (GGsize i = 0; i < number_of_materials; ++i) {
-    if (strcmp(material_name.c_str(), reinterpret_cast<char*>(particle_cross_sections_->material_names_[i])) == 0) {
+    if (strcmp(material_name.c_str(), reinterpret_cast<char*>(particle_cross_sections_host_->material_names_[i])) == 0) {
       mat_id = i;
       break;
     }
@@ -269,13 +269,13 @@ GGfloat GGEMSCrossSections::GetPhotonCrossSection(std::string const& process_nam
   GGfloat density = material_database_manager.GetMaterial(material_name).density_;
 
   // Computing the energy bin
-  GGsize energy_bin = static_cast<GGsize>(BinarySearchLeft(e_MeV, particle_cross_sections_->energy_bins_, static_cast<GGint>(number_of_bins), 0, 0));
+  GGsize energy_bin = static_cast<GGsize>(BinarySearchLeft(e_MeV, particle_cross_sections_host_->energy_bins_, static_cast<GGint>(number_of_bins), 0, 0));
 
   // Compute cross section using linear interpolation
-  GGfloat energy_a = particle_cross_sections_->energy_bins_[energy_bin];
-  GGfloat energy_b = particle_cross_sections_->energy_bins_[energy_bin+1];
-  GGfloat cross_section_a = particle_cross_sections_->photon_cross_sections_[process_id][energy_bin + number_of_bins*mat_id];
-  GGfloat cross_section_b = particle_cross_sections_->photon_cross_sections_[process_id][energy_bin+1 + number_of_bins*mat_id];
+  GGfloat energy_a = particle_cross_sections_host_->energy_bins_[energy_bin];
+  GGfloat energy_b = particle_cross_sections_host_->energy_bins_[energy_bin+1];
+  GGfloat cross_section_a = particle_cross_sections_host_->photon_cross_sections_[process_id][energy_bin + number_of_bins*mat_id];
+  GGfloat cross_section_b = particle_cross_sections_host_->photon_cross_sections_[process_id][energy_bin+1 + number_of_bins*mat_id];
 
   GGfloat cross_section = LinearInterpolation(energy_a, cross_section_a, energy_b, cross_section_b, e_MeV);
 

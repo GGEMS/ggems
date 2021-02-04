@@ -120,9 +120,6 @@ kernel void track_through_ggems_solid_box(
     solid_box_data->virtual_element_number_xyz_[2]
   };
 
-  // TOF of photon
-  GGfloat tof = 0.0f;
-
   // Track particle until out of solid
   do {
     // Find next discrete photon interaction
@@ -193,9 +190,6 @@ kernel void track_through_ggems_solid_box(
       GEOMETRY_TOLERANCE
     );
 
-    // Update TOF, true for photon only
-    tof += next_interaction_distance * C_LIGHT;
-
     //  Checking if particle outside solid, still in local
     if (!IsParticleInAABB(&local_position, border_min.x, border_max.x, border_min.y, border_max.y, border_min.z, border_max.z, GEOMETRY_TOLERANCE)) {
       primary_particle->particle_solid_distance_[global_id] = OUT_OF_WORLD; // Reset to initiale value
@@ -229,9 +223,6 @@ kernel void track_through_ggems_solid_box(
       #endif
     }
   } while (primary_particle->status_[global_id] == ALIVE);
-
-  // Storing final state
-  primary_particle->tof_[global_id] += tof;
 
   // Convert to global position
   global_position = LocalToGlobalPosition(&tmp_matrix_transformation, &local_position);

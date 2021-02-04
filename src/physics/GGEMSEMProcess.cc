@@ -58,7 +58,7 @@ GGEMSEMProcess::~GGEMSEMProcess(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSEMProcess::BuildCrossSectionTables(std::weak_ptr<cl::Buffer> particle_cross_sections_cl, std::weak_ptr<cl::Buffer> material_tables_cl)
+void GGEMSEMProcess::BuildCrossSectionTables(std::weak_ptr<cl::Buffer> particle_cross_sections, std::weak_ptr<cl::Buffer> material_tables)
 {
   GGcout("GGEMSEMProcess", "BuildCrossSectionTables", 3) << "Building cross section table for process " << process_name_ << "..." << GGendl;
 
@@ -66,7 +66,7 @@ void GGEMSEMProcess::BuildCrossSectionTables(std::weak_ptr<cl::Buffer> particle_
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
   // Set missing information in cross section table
-  GGEMSParticleCrossSections* cross_section_device = opencl_manager.GetDeviceBuffer<GGEMSParticleCrossSections>(particle_cross_sections_cl.lock().get(), sizeof(GGEMSParticleCrossSections));
+  GGEMSParticleCrossSections* cross_section_device = opencl_manager.GetDeviceBuffer<GGEMSParticleCrossSections>(particle_cross_sections.lock().get(), sizeof(GGEMSParticleCrossSections));
 
   // Store index of activated process
   cross_section_device->photon_cs_id_[cross_section_device->number_of_activated_photon_processes_] = process_id_;
@@ -75,7 +75,7 @@ void GGEMSEMProcess::BuildCrossSectionTables(std::weak_ptr<cl::Buffer> particle_
   cross_section_device->number_of_activated_photon_processes_ += 1;
 
   // Get the material tables
-  GGEMSMaterialTables* materials_device = opencl_manager.GetDeviceBuffer<GGEMSMaterialTables>(material_tables_cl.lock().get(), sizeof(GGEMSMaterialTables));
+  GGEMSMaterialTables* materials_device = opencl_manager.GetDeviceBuffer<GGEMSMaterialTables>(material_tables.lock().get(), sizeof(GGEMSMaterialTables));
 
   // Compute Compton cross section par material
   GGsize number_of_bins = cross_section_device->number_of_bins_;
@@ -113,8 +113,8 @@ void GGEMSEMProcess::BuildCrossSectionTables(std::weak_ptr<cl::Buffer> particle_
   }
 
   // Release pointer
-  opencl_manager.ReleaseDeviceBuffer(material_tables_cl.lock().get(), materials_device);
-  opencl_manager.ReleaseDeviceBuffer(particle_cross_sections_cl.lock().get(), cross_section_device);
+  opencl_manager.ReleaseDeviceBuffer(material_tables.lock().get(), materials_device);
+  opencl_manager.ReleaseDeviceBuffer(particle_cross_sections.lock().get(), cross_section_device);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

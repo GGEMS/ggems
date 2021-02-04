@@ -44,8 +44,8 @@ GGEMSSolidBox::GGEMSSolidBox(GGsize const& virtual_element_number_x, GGsize cons
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
   // Allocating memory on OpenCL device and getting pointer on it
-  solid_data_cl_ = opencl_manager.Allocate(nullptr, sizeof(GGEMSSolidBoxData), CL_MEM_READ_WRITE);
-  GGEMSSolidBoxData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSSolidBoxData>(solid_data_cl_.get(), sizeof(GGEMSSolidBoxData));
+  solid_data_ = opencl_manager.Allocate(nullptr, sizeof(GGEMSSolidBoxData), CL_MEM_READ_WRITE);
+  GGEMSSolidBoxData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSSolidBoxData>(solid_data_.get(), sizeof(GGEMSSolidBoxData));
 
   solid_data_device->virtual_element_number_xyz_[0] = virtual_element_number_x;
   solid_data_device->virtual_element_number_xyz_[1] = virtual_element_number_y;
@@ -64,7 +64,7 @@ GGEMSSolidBox::GGEMSSolidBox(GGsize const& virtual_element_number_x, GGsize cons
   solid_data_device->obb_geometry_.border_max_xyz_.z = box_size_z*0.5f;
 
   // Releasing pointer
-  opencl_manager.ReleaseDeviceBuffer(solid_data_cl_.get(), solid_data_device);
+  opencl_manager.ReleaseDeviceBuffer(solid_data_.get(), solid_data_device);
 
   // Local axis definition for system
   geometry_transformation_->SetAxisTransformation(
@@ -79,15 +79,15 @@ GGEMSSolidBox::GGEMSSolidBox(GGsize const& virtual_element_number_x, GGsize cons
   data_reg_type_ = data_reg_type;
   if (data_reg_type == "HISTOGRAM") {
     histogram_.number_of_elements_ = virtual_element_number_x*virtual_element_number_y*virtual_element_number_z;
-    histogram_.histogram_cl_ = opencl_manager.Allocate(nullptr, histogram_.number_of_elements_*sizeof(GGint), CL_MEM_READ_WRITE);
+    histogram_.histogram_ = opencl_manager.Allocate(nullptr, histogram_.number_of_elements_*sizeof(GGint), CL_MEM_READ_WRITE);
 
     kernel_option_ += " -DHISTOGRAM";
 
-    GGint* histogram_device = opencl_manager.GetDeviceBuffer<GGint>(histogram_.histogram_cl_.get(), histogram_.number_of_elements_*sizeof(GGint));
+    GGint* histogram_device = opencl_manager.GetDeviceBuffer<GGint>(histogram_.histogram_.get(), histogram_.number_of_elements_*sizeof(GGint));
 
     for (GGsize i = 0; i < histogram_.number_of_elements_; ++i) histogram_device[i] = 0;
 
-    opencl_manager.ReleaseDeviceBuffer(histogram_.histogram_cl_ .get(), histogram_device);
+    opencl_manager.ReleaseDeviceBuffer(histogram_.histogram_ .get(), histogram_device);
   }
   else {
     std::ostringstream oss(std::ostringstream::out);
@@ -126,9 +126,9 @@ void GGEMSSolidBox::InitializeKernel(void)
   std::string track_through_filename = openCL_kernel_path + "/TrackThroughGGEMSSolidBox.cl";
 
   // Compiling the kernels
-  kernel_particle_solid_distance_cl_ = opencl_manager.CompileKernel(particle_solid_distance_filename, "particle_solid_distance_ggems_solid_box", nullptr, const_cast<char*>(kernel_option_.c_str()));
-  kernel_project_to_solid_cl_ = opencl_manager.CompileKernel(project_to_filename, "project_to_ggems_solid_box", nullptr, const_cast<char*>(kernel_option_.c_str()));
-  kernel_track_through_solid_cl_ = opencl_manager.CompileKernel(track_through_filename, "track_through_ggems_solid_box", nullptr, const_cast<char*>(kernel_option_.c_str()));
+  kernel_particle_solid_distance_ = opencl_manager.CompileKernel(particle_solid_distance_filename, "particle_solid_distance_ggems_solid_box", nullptr, const_cast<char*>(kernel_option_.c_str()));
+  kernel_project_to_solid_ = opencl_manager.CompileKernel(project_to_filename, "project_to_ggems_solid_box", nullptr, const_cast<char*>(kernel_option_.c_str()));
+  kernel_track_through_solid_ = opencl_manager.CompileKernel(track_through_filename, "track_through_ggems_solid_box", nullptr, const_cast<char*>(kernel_option_.c_str()));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -152,7 +152,7 @@ void GGEMSSolidBox::PrintInfos(void) const
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
   // Getting pointer on OpenCL device
-  GGEMSSolidBoxData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSSolidBoxData>(solid_data_cl_.get(), sizeof(GGEMSSolidBoxData));
+  GGEMSSolidBoxData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSSolidBoxData>(solid_data_.get(), sizeof(GGEMSSolidBoxData));
 
   GGcout("GGEMSSolidBox", "PrintInfos", 0) << GGendl;
   GGcout("GGEMSSolidBox", "PrintInfos", 0) << "GGEMSSolidBox Infos:" << GGendl;
@@ -174,7 +174,7 @@ void GGEMSSolidBox::PrintInfos(void) const
   GGcout("GGEMSSolidBox", "PrintInfos", 0) << GGendl;
 
   // Releasing the pointer
-  opencl_manager.ReleaseDeviceBuffer(solid_data_cl_.get(), solid_data_device);
+  opencl_manager.ReleaseDeviceBuffer(solid_data_.get(), solid_data_device);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -187,7 +187,7 @@ void GGEMSSolidBox::GetTransformationMatrix(void)
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
   // Copy information to OBB
-  GGEMSSolidBoxData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSSolidBoxData>(solid_data_cl_.get(), sizeof(GGEMSSolidBoxData));
+  GGEMSSolidBoxData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSSolidBoxData>(solid_data_.get(), sizeof(GGEMSSolidBoxData));
   GGfloat44* transformation_matrix_device = opencl_manager.GetDeviceBuffer<GGfloat44>(geometry_transformation_->GetTransformationMatrix(), sizeof(GGfloat44));
 
   for (GGint i = 0; i < 4; ++i) {
@@ -198,6 +198,6 @@ void GGEMSSolidBox::GetTransformationMatrix(void)
   }
 
   // Release the pointer
-  opencl_manager.ReleaseDeviceBuffer(solid_data_cl_.get(), solid_data_device);
+  opencl_manager.ReleaseDeviceBuffer(solid_data_.get(), solid_data_device);
   opencl_manager.ReleaseDeviceBuffer(geometry_transformation_->GetTransformationMatrix(), transformation_matrix_device);
 }

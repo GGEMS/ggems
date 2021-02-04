@@ -130,7 +130,6 @@ kernel void get_primaries_ggems_xray_source(
   primary_particle->dy_[global_id] = direction.y;
   primary_particle->dz_[global_id] = direction.z;
 
-  primary_particle->tof_[global_id] = 0.0f;
   primary_particle->status_[global_id] = ALIVE;
 
   primary_particle->level_[global_id] = PRIMARY;

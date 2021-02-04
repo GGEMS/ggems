@@ -49,7 +49,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 GGEMSPseudoRandomGenerator::GGEMSPseudoRandomGenerator(void)
-: pseudo_random_numbers_cl_(nullptr),
+: pseudo_random_numbers_(nullptr),
   seed_(0)
 {
   GGcout("GGEMSPseudoRandomGenerator", "GGEMSPseudoRandomGenerator", 3) << "Allocation of GGEMSPseudoRandomGenerator..." << GGendl;
@@ -63,7 +63,7 @@ GGEMSPseudoRandomGenerator::~GGEMSPseudoRandomGenerator(void)
 {
   GGcout("GGEMSPseudoRandomGenerator", "~GGEMSPseudoRandomGenerator", 3) << "Deallocation of GGEMSPseudoRandomGenerator..." << GGendl;
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
-  opencl_manager.Deallocate(pseudo_random_numbers_cl_, sizeof(GGEMSRandom));
+  opencl_manager.Deallocate(pseudo_random_numbers_, sizeof(GGEMSRandom));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -115,7 +115,7 @@ void GGEMSPseudoRandomGenerator::Initialize(GGuint const& seed)
   seed_ = seed == 0 ? GenerateSeed() : seed;
 
   // Allocation of the Random structure
-  if (!pseudo_random_numbers_cl_) AllocateRandom();
+  if (!pseudo_random_numbers_) AllocateRandom();
 
   // Generate seeds for each particle
   InitializeSeeds();
@@ -136,10 +136,10 @@ void GGEMSPseudoRandomGenerator::InitializeSeeds(void)
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
   // Get the pointer on device
-  GGEMSRandom* random_device = opencl_manager.GetDeviceBuffer<GGEMSRandom>(pseudo_random_numbers_cl_.get(), sizeof(GGEMSRandom));
+  GGEMSRandom* random_device = opencl_manager.GetDeviceBuffer<GGEMSRandom>(pseudo_random_numbers_.get(), sizeof(GGEMSRandom));
 
   // For each particle a seed is generated
-  for (std::size_t i = 0; i < MAXIMUM_PARTICLES; ++i) {
+  for (GGsize i = 0; i < MAXIMUM_PARTICLES; ++i) {
     random_device->prng_state_1_[i] = static_cast<GGuint>(mt_gen());
     random_device->prng_state_2_[i] = static_cast<GGuint>(mt_gen());
     random_device->prng_state_3_[i] = static_cast<GGuint>(mt_gen());
@@ -148,7 +148,7 @@ void GGEMSPseudoRandomGenerator::InitializeSeeds(void)
   }
 
   // Release the pointer, mandatory step!!!
-  opencl_manager.ReleaseDeviceBuffer(pseudo_random_numbers_cl_.get(), random_device);
+  opencl_manager.ReleaseDeviceBuffer(pseudo_random_numbers_.get(), random_device);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -163,7 +163,7 @@ void GGEMSPseudoRandomGenerator::AllocateRandom(void)
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
   // Allocation of memory on OpenCL device
-  pseudo_random_numbers_cl_ = opencl_manager.Allocate(nullptr, sizeof(GGEMSRandom), CL_MEM_READ_WRITE);
+  pseudo_random_numbers_ = opencl_manager.Allocate(nullptr, sizeof(GGEMSRandom), CL_MEM_READ_WRITE);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -176,7 +176,7 @@ void GGEMSPseudoRandomGenerator::PrintInfos(void) const
   GGcout("GGEMSPseudoRandomGenerator", "PrintInfos", 0) << "Seed: " << seed_ << GGendl;
 
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
-  GGEMSRandom* random_device = opencl_manager.GetDeviceBuffer<GGEMSRandom>(pseudo_random_numbers_cl_.get(), sizeof(GGEMSRandom));
+  GGEMSRandom* random_device = opencl_manager.GetDeviceBuffer<GGEMSRandom>(pseudo_random_numbers_.get(), sizeof(GGEMSRandom));
 
   GGuint state[2][5] = {
     {
@@ -196,7 +196,7 @@ void GGEMSPseudoRandomGenerator::PrintInfos(void) const
   };
 
   // Release the pointer, mandatory step!!!
-  opencl_manager.ReleaseDeviceBuffer(pseudo_random_numbers_cl_.get(), random_device);
+  opencl_manager.ReleaseDeviceBuffer(pseudo_random_numbers_.get(), random_device);
 
   GGcout("GGEMSPseudoRandomGenerator", "PrintInfos", 0) << "Random state of two first particles for JKISS engine:" << GGendl;
   GGcout("GGEMSPseudoRandomGenerator", "PrintInfos", 0) << "    * state 0: " << state[0][0] << " " << state[1][0] << GGendl;

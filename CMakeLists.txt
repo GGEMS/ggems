@@ -33,6 +33,36 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.13 FATAL_ERROR)
 
 #-------------------------------------------------------------------------------
+# Setting the compiler type: 'CLANG' 'GCC' or 'CL'
+# Visual Studio: CL (Only on Windows) and by default on Windows
+# CC=cl
+# CXX=cl
+# GNU GCC: GCC (Only validated on Unix)
+# CC=gcc
+# CXX=g++
+# LLVM CLANG: CLANG (Validated on Unix and Windows) and by default on Windows
+# CC=clang
+# CXX=clang++
+IF(WIN32)
+  SET(COMPILER CLANG CACHE INTERNAL "Compiler name: CLANG, CL")
+ELSE()
+  SET(COMPILER CLANG CACHE INTERNAL "Compiler name: CLANG, GCC")
+ENDIF()
+
+IF(COMPILER STREQUAL "CLANG")
+  SET(ENV{CC} "clang")
+  SET(ENV{CXX} "clang++")
+ELSEIF(COMPILER STREQUAL "CL")
+  SET(ENV{CC} "cl")
+  SET(ENV{CXX} "cl")
+ELSEIF(COMPILER STREQUAL "GCC")
+  SET(ENV{CC} "gcc")
+  SET(ENV{CXX} "g++")
+ELSE()
+  MESSAGE(FATAL_ERROR "Compiler name unknown!!! Options are CLANG, GCC or CL")
+ENDIF()
+
+#-------------------------------------------------------------------------------
 # Name of the project and define the language
 PROJECT(GGEMS VERSION 1.0 HOMEPAGE_URL ggems.fr LANGUAGES CXX)
 
@@ -42,24 +72,28 @@ FIND_PACKAGE(OpenCL REQUIRED)
 
 #-------------------------------------------------------------------------------
 # Force the build type to Release
-SET(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build, options are: Debug Release")
+SET(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build, options are: Debug Release" FORCE)
 SET_PROPERTY(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release")
 
 #-------------------------------------------------------------------------------
-# Setting the compiler type: 'CLANG' 'GCC' or 'CL'
-SET(COMPILER ${COMPILER})
-
-#-------------------------------------------------------------------------------
 # Setting the OPENCL_KERNEL_PATH variable
-SET(OPENCL_KERNEL_PATH ${PROJECT_SOURCE_DIR}/src CACHE PATH "Path to the OpenCL kernel repository")
+SET(OPENCL_KERNEL_PATH ${PROJECT_SOURCE_DIR}/src/kernels CACHE PATH "Path to the OpenCL kernel repository")
 
 #-------------------------------------------------------------------------------
 # Setting the GGEMSHOME_PATH variable
 SET(GGEMS_PATH ${PROJECT_SOURCE_DIR} CACHE PATH "Path to the GGEMS project repository")
 
 #-------------------------------------------------------------------------------
-# Setting the GGEMSHOME_PATH variable
+# Setting the PYTHON_MODULE_PATH variable
 SET(PYTHON_MODULE_PATH ${PROJECT_SOURCE_DIR}/python_module CACHE PATH "Path to the python module repository")
+
+#-------------------------------------------------------------------------------
+# Setting the maximum particles in OpenCL buffer
+IF(DEFINED MAXIMUM_PARTICLES)
+  SET(MAXIMUM_PARTICLES ${MAXIMUM_PARTICLES} CACHE STRING "Number of particles in OpenCL buffer")
+ELSE()
+  SET(MAXIMUM_PARTICLES 1048576 CACHE STRING "Number of particles in OpenCL buffer") # Validated on old graphic card as GTX 980 Ti
+ENDIF()
 
 #-------------------------------------------------------------------------------
 # Add an option for using cache kernel compilation on OpenCL device
@@ -72,7 +106,7 @@ ENDIF()
 #-------------------------------------------------------------------------------
 # Add an option for using cache kernel compilation on OpenCL device
 # Set to OFF to be sure your own kernel modification are re-compiled
-OPTION(DOSIMETRY_DOUBLE_PRECISION "Double precision for dosimetry" ON)
+OPTION(DOSIMETRY_DOUBLE_PRECISION "Double precision for dosimetry" OFF)
 IF(DOSIMETRY_DOUBLE_PRECISION)
   ADD_DEFINITIONS(-DDOSIMETRY_DOUBLE_PRECISION)
 ENDIF()
@@ -83,24 +117,13 @@ CONFIGURE_FILE("${PROJECT_SOURCE_DIR}/cmake-config/GGEMSConfiguration.hh.in" "${
 
 #-------------------------------------------------------------------------------
 # Add an option for examples and benchmark building
-OPTION(BUILD_EXAMPLES "Build GGEMS examples" OFF)
-#OPTION( BUILD_BENCHMARKS "Build TORASET benchmarks" OFF )
+OPTION(BUILD_EXAMPLES "Build GGEMS examples" ON)
 
 #-------------------------------------------------------------------------------
 # Compilation options Windows
 IF(WIN32)
-  # Checking compiler for GNU/GCC
-  IF(COMPILER STREQUAL "GCC")
-    # Delete some flags by default provided by CMAKE
-    STRING(REPLACE "-O3" "" CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
-    STRING(REPLACE "-DNDEBUG" "" CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
-
-    SET(CXX_FLAGS -std=c++17 -std=gnu++17 -m64 -Wconversion -ftree-vectorize -mavx2 -pedantic -Wextra -Werror -Wall -Wno-ignored-attributes -Wold-style-cast -pedantic-errors)
-    SET(CXX_FLAGS_RELEASE -Ofast ${CXX_FLAGS})
-    SET(CXX_FLAGS_DEBUG -O0 -g3 ${CXX_FLAGS})
-
   # Checking compiler for LLVM/CLANG
-  ELSEIF(COMPILER STREQUAL "CLANG")
+  IF(COMPILER STREQUAL "CLANG")
     # Delete some flags by default provided by CMAKE
     STRING(REPLACE "-O3" "" CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
     STRING(REPLACE "-DNDEBUG" "" CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
@@ -122,7 +145,7 @@ IF(WIN32)
 
   # Otherwize error
   ELSE()
-    MESSAGE(FATAL_ERROR "Only 'CL', 'CLANG' and 'GCC' are available for Windows")
+    MESSAGE(FATAL_ERROR "Only 'CL' and 'CLANG' are available for Windows")
   ENDIF()
 
   ADD_COMPILE_OPTIONS("$<$<CONFIG:RELEASE>:${CXX_FLAGS_RELEASE}>" "$<$<CONFIG:DEBUG>:${CXX_FLAGS_DEBUG}>")

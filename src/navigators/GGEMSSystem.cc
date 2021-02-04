@@ -161,11 +161,11 @@ void GGEMSSystem::SaveResults(void)
   mhdImage.SetElementSizes(size_of_detection_elements_xyz_);
 
   // Getting all the counts from solid on OpenCL device
-  for (std::size_t jj = 0; jj < number_of_modules_xy_.y; ++jj) {
-    for (std::size_t ii = 0; ii < number_of_modules_xy_.x; ++ii) {
-      cl::Buffer* histogram_cl = solids_.at(ii + jj* number_of_modules_xy_.x)->GetHistogram()->histogram_cl_.get();
+  for (GGsize jj = 0; jj < number_of_modules_xy_.y; ++jj) {
+    for (GGsize ii = 0; ii < number_of_modules_xy_.x; ++ii) {
+      cl::Buffer* histogram = solids_.at(ii + jj* number_of_modules_xy_.x)->GetHistogram()->histogram_.get();
 
-      GGint* histogram_device = opencl_manager.GetDeviceBuffer<GGint>(histogram_cl, number_of_detection_elements_inside_module_xyz_.x*number_of_detection_elements_inside_module_xyz_.y*sizeof(GGint));
+      GGint* histogram_device = opencl_manager.GetDeviceBuffer<GGint>(histogram, number_of_detection_elements_inside_module_xyz_.x*number_of_detection_elements_inside_module_xyz_.y*sizeof(GGint));
 
       // Storing data on host
       for (GGsize jjj = 0; jjj < number_of_detection_elements_inside_module_xyz_.y; ++jjj) {
@@ -175,7 +175,7 @@ void GGEMSSystem::SaveResults(void)
         }
       }
 
-      opencl_manager.ReleaseDeviceBuffer(histogram_cl, histogram_device);
+      opencl_manager.ReleaseDeviceBuffer(histogram, histogram_device);
     }
   }
 

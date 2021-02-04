@@ -89,36 +89,36 @@ class GGEMS_EXPORT GGEMSLogEnergyTable
     GGEMSLogEnergyTable& operator=(GGEMSLogEnergyTable const&& log_energy_table) = delete;
 
     /*!
-      \fn void SetValue(std::size_t const& index, GGfloat const& value)
+      \fn void SetValue(GGsize const& index, GGfloat const& value)
       \param index - index of the bin
       \param value - value to put in data vector
       \brief Set the data vector at index
     */
-    void SetValue(std::size_t const& index, GGfloat const& value);
+    void SetValue(GGsize const& index, GGfloat const& value);
 
     /*!
-      \fn inline GGfloat GetEnergy(std::size_t const& index) const
+      \fn inline GGfloat GetEnergy(GGsize const& index) const
       \param index - index of the bin
       \return energy at index
       \brief get the energy at the bin index
     */
-    inline GGfloat GetEnergy(std::size_t const& index) const {return bins_.at(index);}
+    inline GGfloat GetEnergy(GGsize const& index) const {return bins_.at(index);}
 
     /*!
-      \fn inline GGfloat GetLossTableData(std::size_t const& index) const
+      \fn inline GGfloat GetLossTableData(GGsize const& index) const
       \param index - index of the bin
       \return loss table data value at index
       \brief get the loss table data value at the bin index
     */
-    inline GGfloat GetLossTableData(std::size_t const& index) const {return loss_table_data_.at(index);}
+    inline GGfloat GetLossTableData(GGsize const& index) const {return loss_table_data_.at(index);}
 
     /*!
-      \fn inline GGfloat GetLowEdgeEnergy(std::size_t const& index) const
+      \fn inline GGfloat GetLowEdgeEnergy(GGsize const& index) const
       \param index - index of the bin
       \return energy at index
       \brief get the energy at the bin index similar to GGEMSLogEnergyTable::GetEnergy
     */
-    inline GGfloat GetLowEdgeEnergy(std::size_t const& index) const {return bins_.at(index);}
+    inline GGfloat GetLowEdgeEnergy(GGsize const& index) const {return bins_.at(index);}
 
     /*!
       \fn GGfloat GetLossTableValue(GGfloat const& energy) const
@@ -130,26 +130,26 @@ class GGEMS_EXPORT GGEMSLogEnergyTable
 
   private:
     /*!
-      \fn std::size_t FindBinLocation(GGfloat const& energy) const
+      \fn GGsize FindBinLocation(GGfloat const& energy) const
       \param energy - energy of the bin
       \return the bin where is the energy
       \brief get the bin where is the energy
     */
-    std::size_t FindBinLocation(GGfloat const& energy) const;
+    GGsize FindBinLocation(GGfloat const& energy) const;
 
     /*!
-      \fn std::size_t FindBin(GGfloat const& energy, std::size_t const& index) const
+      \fn GGsize FindBin(GGfloat const& energy, GGsize const& index) const
       \param energy - energy of the bin
       \param index - index of the bin
       \return the bin where is the energy depending on a index
       \brief get the bin where is the energy depending on a index
     */
-    std::size_t FindBin(GGfloat const& energy, std::size_t const& index) const;
+    GGsize FindBin(GGfloat const& energy, GGsize const& index) const;
 
   private:
     GGfloat edge_min_; /*!< Energy of first point */
     GGfloat edge_max_; /*!< Energy of the last point */
-    std::size_t number_of_nodes_; /*!< Number of the nodes */
+    GGsize number_of_nodes_; /*!< Number of the nodes */
     std::vector<GGfloat> loss_table_data_; /*!< Vector keeping the crossection/energyloss */
     std::vector<GGfloat> bins_; /*!< Vector keeping energy */
     GGfloat bin_width_; /*!< Bin width - useful only for fixed binning */

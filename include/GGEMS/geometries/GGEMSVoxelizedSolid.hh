@@ -161,13 +161,13 @@ void GGEMSVoxelizedSolid::ConvertImageToLabel(std::string const& raw_data_filena
   GGEMSFileStream::CheckInputStream(in_raw_stream, raw_data_filename);
 
   // Get pointer on OpenCL device
-  GGEMSVoxelizedSolidData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSVoxelizedSolidData>(solid_data_cl_.get(), sizeof(GGEMSVoxelizedSolidData));
+  GGEMSVoxelizedSolidData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSVoxelizedSolidData>(solid_data_.get(), sizeof(GGEMSVoxelizedSolidData));
 
   // Get information about mhd file
   GGsize number_of_voxels = static_cast<GGsize>(solid_data_device->number_of_voxels_);
 
   // Release the pointer
-  opencl_manager.ReleaseDeviceBuffer(solid_data_cl_.get(), solid_data_device);
+  opencl_manager.ReleaseDeviceBuffer(solid_data_.get(), solid_data_device);
 
   // Reading data to a tmp buffer
   std::vector<T> tmp_raw_data;
@@ -178,10 +178,10 @@ void GGEMSVoxelizedSolid::ConvertImageToLabel(std::string const& raw_data_filena
   in_raw_stream.close();
 
   // Allocating memory on OpenCL device
-  label_data_cl_ = opencl_manager.Allocate(nullptr, number_of_voxels * sizeof(GGshort), CL_MEM_READ_WRITE);
+  label_data_ = opencl_manager.Allocate(nullptr, number_of_voxels * sizeof(GGshort), CL_MEM_READ_WRITE);
 
   // Get pointer on OpenCL device
-  GGshort* label_data_device = opencl_manager.GetDeviceBuffer<GGshort>(label_data_cl_.get(), number_of_voxels * sizeof(GGshort));
+  GGshort* label_data_device = opencl_manager.GetDeviceBuffer<GGshort>(label_data_.get(), number_of_voxels * sizeof(GGshort));
 
   // Set value to max of GGshort
   std::fill(label_data_device, label_data_device + number_of_voxels, std::numeric_limits<GGshort>::max());
@@ -233,7 +233,7 @@ void GGEMSVoxelizedSolid::ConvertImageToLabel(std::string const& raw_data_filena
   tmp_raw_data.clear();
 
   // Release the pointer
-  opencl_manager.ReleaseDeviceBuffer(label_data_cl_.get(), label_data_device);
+  opencl_manager.ReleaseDeviceBuffer(label_data_.get(), label_data_device);
 
   // Checking if all voxels converted
   if (all_converted) {

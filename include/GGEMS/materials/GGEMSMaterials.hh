@@ -124,12 +124,12 @@ class GGEMS_EXPORT GGEMSMaterials
     GGfloat GetEnergyCut(std::string const& material_name, std::string const& particle_type, GGfloat const& distance, std::string const& unit);
 
     /*!
-      \fn inline std::string GetMaterialName(std::size_t i) const
+      \fn inline std::string GetMaterialName(GGsize i) const
       \param i - index of the material
       \return name of the material
       \brief get the name of the material at position i
     */
-    inline std::string GetMaterialName(std::size_t i) const {return materials_.at(i);}
+    inline std::string GetMaterialName(GGsize i) const {return materials_.at(i);}
 
     /*!
       \fn inline ptrdiff_t GetMaterialIndex(std::string const& material_name) const
@@ -149,18 +149,18 @@ class GGEMS_EXPORT GGEMSMaterials
     }
 
     /*!
-      \fn inline std::size_t GetNumberOfMaterials(void) const
+      \fn inline GGsize GetNumberOfMaterials(void) const
       \return the number of materials in the phantom
       \brief Get the number of materials in the phantom
     */
-    inline std::size_t GetNumberOfMaterials(void) const {return materials_.size();}
+    inline GGsize GetNumberOfMaterials(void) const {return materials_.size();}
 
     /*!
       \fn inline std::weak_ptr<cl::Buffer> GetMaterialTables(void) const
       \return the pointer on material tables on OpenCL device
       \brief get the pointer on material tables on OpenCL device
     */
-    inline std::weak_ptr<cl::Buffer> GetMaterialTables(void) const {return material_tables_cl_;}
+    inline std::weak_ptr<cl::Buffer> GetMaterialTables(void) const {return material_tables_;}
 
     /*!
       \fn inline std::shared_ptr<GGEMSRangeCuts> GetRangeCuts(void) const
@@ -199,7 +199,7 @@ class GGEMS_EXPORT GGEMSMaterials
 
   private:
     std::vector<std::string> materials_; /*!< Defined material for a phantom */
-    std::shared_ptr<cl::Buffer> material_tables_cl_; /*!< Material tables on OpenCL device */
+    std::shared_ptr<cl::Buffer> material_tables_; /*!< Material tables on OpenCL device */
     std::shared_ptr<GGEMSRangeCuts> range_cuts_; /*!< Cut for particles */
 };
 
