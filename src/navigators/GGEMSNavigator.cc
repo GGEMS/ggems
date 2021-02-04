@@ -28,7 +28,6 @@
   \date Tuesday February 11, 2020
 */
 
-#include "GGEMS/navigators/GGEMSNavigatorManager.hh"
 #include "GGEMS/geometries/GGEMSVoxelizedSolid.hh"
 #include "GGEMS/physics/GGEMSCrossSections.hh"
 #include "GGEMS/sources/GGEMSSourceManager.hh"

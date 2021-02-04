@@ -49,9 +49,9 @@ GGEMSVolumeCreatorManager::GGEMSVolumeCreatorManager(void)
   element_sizes_.y = 0.0f;
   element_sizes_.z = 0.0f;
 
-  volume_dimensions_.x = 0;
-  volume_dimensions_.y = 0;
-  volume_dimensions_.z = 0;
+  volume_dimensions_.x_ = 0;
+  volume_dimensions_.y_ = 0;
+  volume_dimensions_.z_ = 0;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -80,9 +80,9 @@ void GGEMSVolumeCreatorManager::SetElementSizes(GGfloat const& voxel_width, GGfl
 
 void GGEMSVolumeCreatorManager::SetVolumeDimensions(GGsize const& volume_width, GGsize const& volume_height, GGsize const& volume_depth)
 {
-  volume_dimensions_.x = volume_width;
-  volume_dimensions_.y = volume_height;
-  volume_dimensions_.z = volume_depth;
+  volume_dimensions_.x_ = volume_width;
+  volume_dimensions_.y_ = volume_height;
+  volume_dimensions_.z_ = volume_depth;
   number_elements_ = volume_width * volume_height * volume_depth;
 }
 
@@ -166,7 +166,7 @@ void GGEMSVolumeCreatorManager::CheckParameters(void) const
   GGcout("GGEMSVolumeCreatorManager", "CheckParameters", 3) << "Checking parameters for phantom creator manager..." << GGendl;
 
   // Checking phantom dimensions
-  if (volume_dimensions_.x == 0 && volume_dimensions_.y == 0 && volume_dimensions_.z == 0) {
+  if (volume_dimensions_.x_ == 0 && volume_dimensions_.y_ == 0 && volume_dimensions_.z_ == 0) {
     GGEMSMisc::ThrowException("GGEMSVolumeCreatorManager", "CheckParameters", "Phantom dimensions have to be > 0!!!");
   }
 

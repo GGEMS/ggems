@@ -28,7 +28,6 @@
   \date Monday September 30, 2019
 */
 
-#include <algorithm>
 #include <fcntl.h>
 
 #ifdef _WIN32

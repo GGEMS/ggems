@@ -31,7 +31,7 @@
 #include "GGEMS/tools/GGEMSTypes.hh"
 
 /*!
-  \fn kernel void draw_ggems_tube(GGint const voxel_id_limit, GGfloat3 const element_sizes, GGint3 const phantom_dimensions, GGfloat3 const positions, GGfloat const label_value, GGfloat const height, GGfloat const radius_x, GGfloat const radius_y, global GGchar* voxelized_phantom)
+  \fn kernel void draw_ggems_tube(GGsize const voxel_id_limit, GGfloat3 const element_sizes, GGint3 const phantom_dimensions, GGfloat3 const positions, GGfloat const label_value, GGfloat const height, GGfloat const radius_x, GGfloat const radius_y, global GGchar* voxelized_phantom)
   \param voxel_id_limit - voxel id limit
   \param element_sizes - size of voxels
   \param phantom_dimensions - dimension of phantom

@@ -315,7 +315,7 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     bool IsDoublePrecisionAtomicAddition(void) const;
 
     /*!
-      \fn bool CheckDoublePrecision(void) const
+      \fn bool IsDoublePrecision(void) const
       \return true if double precision is supported by OpenCL device, otherwize false
       \brief checking double precision on OpenCL device
     */

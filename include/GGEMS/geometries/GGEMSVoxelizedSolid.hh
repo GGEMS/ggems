@@ -44,6 +44,7 @@ class GGEMS_EXPORT GGEMSVoxelizedSolid : public GGEMSSolid
     /*!
       \param volume_header_filename - header file for volume
       \param range_filename - file with range value
+      \param data_reg_type - type of registration for voxelized solid
       \brief GGEMSVoxelizedSolid constructor
     */
     GGEMSVoxelizedSolid(std::string const& volume_header_filename, std::string const& range_filename, std::string const& data_reg_type = "");

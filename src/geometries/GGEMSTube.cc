@@ -99,9 +99,9 @@ void GGEMSTube::Draw(void)
   GGfloat3 voxel_sizes = volume_creator_manager.GetElementsSizes();
 
   GGint3 phantom_dimensions;
-  phantom_dimensions.x = static_cast<GGint>(volume_creator_manager.GetVolumeDimensions().x);
-  phantom_dimensions.y = static_cast<GGint>(volume_creator_manager.GetVolumeDimensions().y);
-  phantom_dimensions.z = static_cast<GGint>(volume_creator_manager.GetVolumeDimensions().z);
+  phantom_dimensions.x = static_cast<GGint>(volume_creator_manager.GetVolumeDimensions().x_);
+  phantom_dimensions.y = static_cast<GGint>(volume_creator_manager.GetVolumeDimensions().y_);
+  phantom_dimensions.z = static_cast<GGint>(volume_creator_manager.GetVolumeDimensions().z_);
 
   GGsize number_of_elements = volume_creator_manager.GetNumberElements();
   cl::Buffer* voxelized_phantom = volume_creator_manager.GetVoxelizedVolume();
