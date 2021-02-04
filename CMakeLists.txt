@@ -106,7 +106,7 @@ ENDIF()
 #-------------------------------------------------------------------------------
 # Add an option for using cache kernel compilation on OpenCL device
 # Set to OFF to be sure your own kernel modification are re-compiled
-OPTION(DOSIMETRY_DOUBLE_PRECISION "Double precision for dosimetry" OFF)
+OPTION(DOSIMETRY_DOUBLE_PRECISION "Double precision for dosimetry" ON)
 IF(DOSIMETRY_DOUBLE_PRECISION)
   ADD_DEFINITIONS(-DDOSIMETRY_DOUBLE_PRECISION)
 ENDIF()
