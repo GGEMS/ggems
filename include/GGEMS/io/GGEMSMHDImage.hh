@@ -35,6 +35,8 @@
 #pragma warning(disable: 4251) // Deleting warning exporting STL members!!!
 #endif
 
+#include <fstream>
+
 #include "GGEMS/global/GGEMSOpenCLManager.hh"
 
 /*!
