@@ -30,7 +30,7 @@
 
 #-------------------------------------------------------------------------------
 # Checking CMAKE version
-CMAKE_MINIMUM_REQUIRED(VERSION 3.13 FATAL_ERROR)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.8 FATAL_ERROR)
 
 #-------------------------------------------------------------------------------
 # Setting the compiler type: 'CLANG' 'GCC' or 'CL'
@@ -46,7 +46,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.13 FATAL_ERROR)
 IF(WIN32)
   SET(COMPILER CL CACHE INTERNAL "Compiler name: CLANG, CL")
 ELSE()
-  SET(COMPILER CLANG CACHE INTERNAL "Compiler name: CLANG, GCC")
+  SET(COMPILER GCC CACHE INTERNAL "Compiler name: CLANG, GCC")
 ENDIF()
 
 IF(COMPILER STREQUAL "CLANG")
@@ -169,7 +169,7 @@ ELSE()
 
   # Checking compiler for GNU/GCC
   ELSEIF(COMPILER STREQUAL "GCC")
-	  SET(CXX_FLAGS -std=c++17 -std=gnu++17 -Wall -Wextra -Werror -pedantic -m64 -march=native -Wno-ignored-attributes -Wconversion -Wold-style-cast -pedantic-errors -ftree-vectorize -mtune=native -mavx2)
+    SET(CXX_FLAGS -std=c++17 -std=gnu++17 -Wall -pedantic -m64 -Wconversion -Wold-style-cast -pedantic-errors -ftree-vectorize -mavx2)
 
   # Otherwize error
   ELSE()

@@ -35,6 +35,10 @@
 #pragma warning(disable: 4251) // Deleting warning exporting STL members!!!
 #endif
 
+#if __GNUC__ >= 6 
+#pragma GCC diagnostic ignored "-Wignored-attributes"
+#endif
+
 #include <memory>
 
 #include "GGEMS/tools/GGEMSPrint.hh"
