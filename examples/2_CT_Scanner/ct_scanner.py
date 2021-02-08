@@ -20,7 +20,7 @@ from ggems import *
 
 # ------------------------------------------------------------------------------
 # STEP 0: Level of verbosity during computation
-GGEMSVerbosity(1)
+GGEMSVerbosity(0)
 
 # ------------------------------------------------------------------------------
 # STEP 1: Choosing an OpenCL context
@@ -92,7 +92,7 @@ ggems_manager.kernel_verbose(True)
 ggems_manager.tracking_verbose(False, 0)
 
 # Initializing the GGEMS simulation
-ggems_manager.initialize()
+ggems_manager.initialize(777)
 
 # Start GGEMS simulation
 ggems_manager.run()
