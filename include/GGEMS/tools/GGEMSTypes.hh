@@ -182,6 +182,9 @@ inline void AtomicAddDouble(volatile global GGDosiType* address, GGdouble val)
 
 #else
 
+#define CL_HPP_TARGET_OPENCL_VERSION 120 /*!< C++ OpenCL version 1.2 only */
+#define CL_HPP_MINIMUM_OPENCL_VERSION 100 /*!< Minimum version of OpenCL */
+
 #ifdef __APPLE__
 #include <OpenCL/opencl.hpp>
 #else

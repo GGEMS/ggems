@@ -71,4 +71,5 @@ volume_creator_manager.write()
 
 # ------------------------------------------------------------------------------
 # STEP 5: Exit GGEMS safely
+opencl_manager.clean()
 exit()

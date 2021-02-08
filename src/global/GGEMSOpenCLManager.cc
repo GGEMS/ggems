@@ -269,6 +269,15 @@ GGEMSOpenCLManager::GGEMSOpenCLManager(void)
 GGEMSOpenCLManager::~GGEMSOpenCLManager(void)
 {
   GGcout("GGEMSOpenCLManager", "~GGEMSOpenCLManager", 3) << "Deallocation of GGEMS OpenCL manager..." << GGendl;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSOpenCLManager::Clean(void)
+{
+  GGcout("GGEMSOpenCLManager", "~Clean", 3) << "Clean GGEMS OpenCL manager..." << GGendl;
 
   // Freeing platforms, and platform infos
   platforms_.clear();
@@ -588,15 +597,6 @@ void GGEMSOpenCLManager::ContextToActivate(GGsize const& context_id)
     oss << "Your OpenCL device does not support double precision!!!";
     GGEMSMisc::ThrowException("GGEMSOpenCLManager", "ContextToActivate", oss.str());
   }
-
-  #ifdef DOSIMETRY_DOUBLE_PRECISION
-  if (!IsDoublePrecisionAtomicAddition()) {
-    std::ostringstream oss(std::ostringstream::out);
-    oss << "Your OpenCL device does not support double precision for atomic operation!!!" << std::endl;
-    oss << "Please, recompile with DOSIMETRY_DOUBLE_PRECISION to OFF. Precision will be lost only for dosimetry application" << std::endl;
-    GGEMSMisc::ThrowException("GGEMSOpenCLManager", "ContextToActivate", oss.str());
-  }
-  #endif
 
   // Activate the command queue
   queue_act_ = queues_.at(context_id);
@@ -1381,4 +1381,13 @@ void print_infos_opencl_manager(GGEMSOpenCLManager* opencl_manager)
 void set_context_index_ggems_opencl_manager(GGEMSOpenCLManager* opencl_manager, GGsize const context_id)
 {
   opencl_manager->ContextToActivate(context_id);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void clean_opencl_manager(GGEMSOpenCLManager* opencl_manager)
+{
+  opencl_manager->Clean();
 }

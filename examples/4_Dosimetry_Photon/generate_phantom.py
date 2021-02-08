@@ -50,4 +50,7 @@ phantom.delete()
 # STEP 4: Saving the final volume
 volume_creator_manager.write()
 
+# ------------------------------------------------------------------------------
+# STEP 5: Exit code
+opencl_manager.clean()
 exit()
