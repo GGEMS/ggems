@@ -34,6 +34,9 @@
 #define FALSE 0 /*!< False for OpenCL */
 #define TRUE 1 /*!< True for OpenCL */
 
+#define CL_HPP_TARGET_OPENCL_VERSION 120 /*!< C++ OpenCL version 1.2 only */
+#define CL_HPP_MINIMUM_OPENCL_VERSION 100 /*!< Minimum version of OpenCL */
+
 #ifdef __OPENCL_C_VERSION__ // On OpenCL device
 #define GGchar char /*!< define a new type for char */
 #define GGchar2 char2 /*!< define a new type for char2 */
@@ -118,8 +121,6 @@
 
 #if defined(cl_khr_int64_base_atomics)
 #pragma OPENCL EXTENSION cl_khr_int64_base_atomics : enable
-#else
-#error "int64 atomic operation are not supported!!!"
 #endif
 
 #else
@@ -181,9 +182,6 @@ inline void AtomicAddDouble(volatile global GGDosiType* address, GGdouble val)
 #endif
 
 #else
-
-#define CL_HPP_TARGET_OPENCL_VERSION 120 /*!< C++ OpenCL version 1.2 only */
-#define CL_HPP_MINIMUM_OPENCL_VERSION 100 /*!< Minimum version of OpenCL */
 
 #ifdef __APPLE__
 #include <OpenCL/opencl.hpp>

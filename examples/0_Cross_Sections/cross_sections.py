@@ -23,6 +23,7 @@ from ggems import *
 # Read arguments
 parser = argparse.ArgumentParser()
 
+parser.add_argument('-c', '--context', required=False, type=int, default=0, help="OpenCL context id")
 parser.add_argument('-m', '--material', required=True, type=str, help="Set a material name")
 parser.add_argument('-p', '--process', required=True, type=str, help="Set a physical process", choices=['Compton', 'Photoelectric', 'Rayleigh'])
 parser.add_argument('-e', '--energy', required=True, type=float, help="Set an energy in MeV")
@@ -33,6 +34,7 @@ args = parser.parse_args()
 material_name = args.material
 energy_MeV = args.energy
 process_name = args.process
+context_id = args.context
 
 # ------------------------------------------------------------------------------
 # Level of verbosity during GGEMS execution
@@ -40,7 +42,7 @@ GGEMSVerbosity(1)
 
 # ------------------------------------------------------------------------------
 # STEP 1: Choosing an OpenCL context
-opencl_manager.set_context_index(0)
+opencl_manager.set_context_index(context_id)
 
 # ------------------------------------------------------------------------------
 # STEP 2: Setting GGEMS materials
