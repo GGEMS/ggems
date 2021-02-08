@@ -293,6 +293,19 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     */
     GGsize GetBestWorkItem(GGsize const& number_of_elements) const;
 
+    /*!
+      \fn bool IsDoublePrecisionAtomicAddition(void) const
+      \return true if double precision atomic addition is supported by OpenCL device, otherwize false
+      \brief checking double precision atomic addition on OpenCL device
+    */
+    bool IsDoublePrecisionAtomicAddition(void) const;
+
+    /*!
+      \fn void Clean(void)
+      \brief Clean OpenCL manager
+    */
+    void Clean(void);
+
   private:
     /*!
       \fn std::string ErrorType(GGint const& error) const
@@ -310,13 +323,6 @@ class GGEMS_EXPORT GGEMSOpenCLManager
       \return index of kernel if already compiled
     */
     GGsize CheckKernel(std::string const& kernel_name, std::string const& compilation_options) const;
-
-    /*!
-      \fn bool IsDoublePrecisionAtomicAddition(void) const
-      \return true if double precision atomic addition is supported by OpenCL device, otherwize false
-      \brief checking double precision atomic addition on OpenCL device
-    */
-    bool IsDoublePrecisionAtomicAddition(void) const;
 
     /*!
       \fn bool IsDoublePrecision(void) const
@@ -474,5 +480,12 @@ extern "C" GGEMS_EXPORT void print_infos_opencl_manager(GGEMSOpenCLManager* open
   \brief Set the context index to activate
 */
 extern "C" GGEMS_EXPORT void set_context_index_ggems_opencl_manager(GGEMSOpenCLManager* opencl_manager, GGsize const context_id);
+
+/*!
+  \fn void clean_opencl_manager(GGEMSOpenCLManager* opencl_manager)
+  \param opencl_manager - pointer on the singleton
+  \brief Clean OpenCL manager for python user
+*/
+extern "C" GGEMS_EXPORT void clean_opencl_manager(GGEMSOpenCLManager* opencl_manager);
 
 #endif // GUARD_GGEMS_GLOBAL_GGEMSOPENCLMANAGER_HH

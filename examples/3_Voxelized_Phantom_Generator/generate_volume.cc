@@ -92,5 +92,6 @@ int main(void)
   // Writing volume
   volume_creator_manager.Write();
 
+  opencl_manager.Clean();
   exit(EXIT_SUCCESS);
 }

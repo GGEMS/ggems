@@ -122,5 +122,6 @@ int main(void)
   // Start GGEMS simulation
   ggems_manager.Run();
 
+  opencl_manager.Clean();
   exit(EXIT_SUCCESS);
 }

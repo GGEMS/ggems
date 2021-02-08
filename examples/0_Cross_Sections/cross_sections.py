@@ -40,7 +40,7 @@ GGEMSVerbosity(1)
 
 # ------------------------------------------------------------------------------
 # STEP 1: Choosing an OpenCL context
-opencl_manager.set_context_index(0)
+opencl_manager.set_context_index(2)
 
 # ------------------------------------------------------------------------------
 # STEP 2: Setting GGEMS materials
@@ -78,4 +78,5 @@ print('At ', energy_MeV, ' MeV, cross section is ', cross_sections.get_cs(proces
 
 # ------------------------------------------------------------------------------
 # STEP 6: Exit safely
+opencl_manager.clean()
 exit()

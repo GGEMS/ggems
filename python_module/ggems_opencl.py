@@ -27,6 +27,9 @@ class GGEMSOpenCLManager(object):
         ggems_lib.print_infos_opencl_manager.argtypes = [ctypes.c_void_p]
         ggems_lib.print_infos_opencl_manager.restype = ctypes.c_void_p
 
+        ggems_lib.clean_opencl_manager.argtypes = [ctypes.c_void_p]
+        ggems_lib.clean_opencl_manager.restype = ctypes.c_void_p
+
         ggems_lib.set_context_index_ggems_opencl_manager.argtypes = [ctypes.c_void_p, ctypes.c_size_t]
         ggems_lib.set_context_index_ggems_opencl_manager.restype = ctypes.c_void_p
 
@@ -37,3 +40,6 @@ class GGEMSOpenCLManager(object):
 
     def set_context_index(self, context_id):
         ggems_lib.set_context_index_ggems_opencl_manager(self.obj, context_id)
+
+    def clean(self):
+        ggems_lib.clean_opencl_manager(self.obj)

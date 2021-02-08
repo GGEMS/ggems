@@ -54,6 +54,18 @@ GGEMSDosimetryCalculator::GGEMSDosimetryCalculator(std::string const& navigator_
   dosel_sizes_.y = -1.0f;
   dosel_sizes_.z = -1.0f;
 
+  // Checking double precision computation
+  #ifdef DOSIMETRY_DOUBLE_PRECISION
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+
+  if (!opencl_manager.IsDoublePrecisionAtomicAddition()) {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "Your OpenCL device does not support double precision for atomic operation!!!" << std::endl;
+    oss << "Please, recompile with DOSIMETRY_DOUBLE_PRECISION to OFF. Precision will be lost only for dosimetry application" << std::endl;
+    GGEMSMisc::ThrowException("GGEMSDosimetryCalculator", "GGEMSDosimetryCalculator", oss.str());
+  }
+  #endif
+
   GGEMSNavigatorManager& navigator_manager = GGEMSNavigatorManager::GetInstance();
   navigator_ = navigator_manager.GetNavigator(navigator_name);
 

@@ -99,4 +99,5 @@ ggems_manager.run()
 # ------------------------------------------------------------------------------
 # STEP 9: Exit code
 dosimetry.delete()
+opencl_manager.clean()
 exit()

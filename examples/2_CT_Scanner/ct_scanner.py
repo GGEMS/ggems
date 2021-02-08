@@ -97,4 +97,7 @@ ggems_manager.initialize(777)
 # Start GGEMS simulation
 ggems_manager.run()
 
+# ------------------------------------------------------------------------------
+# STEP 9: Exit safely
+opencl_manager.clean()
 exit()
