@@ -41,12 +41,35 @@
 #include "GGEMS/tools/GGEMSPrint.hh"
 
 /*!
-  \fn int main(void)
+  \fn void PrintHelpAndQuit(void)
+  \brief Print help to terminal and quit
+*/
+void PrintHelpAndQuit(void)
+{
+  std::cerr << "Usage: dosimetry_photon <ContextID>" << std::endl;
+  std::cerr << std::endl;
+  std::cerr << "<ContextID>: OpenCL Context id" << std::endl;
+  exit(EXIT_FAILURE);
+}
+
+/*!
+  \fn int main(int argc, char** argv)
+  \param argc - number of arguments
+  \param argv - list of arguments
   \return status of program
   \brief main function of program
 */
-int main(void)
+int main(int argc, char** argv)
 {
+  // Checking parameters
+  if (argc != 2) {
+    std::cerr << "Invalid number of arguments!!!" << std::endl;
+    PrintHelpAndQuit();
+  }
+
+  // Getting parameters
+  GGint context_id = atoi(argv[1]);
+
   // Setting verbosity
   GGcout.SetVerbosity(1);
   GGcerr.SetVerbosity(1);
@@ -60,7 +83,7 @@ int main(void)
   GGEMSManager& ggems_manager = GGEMSManager::GetInstance();
 
   // Set the context id
-  opencl_manager.ContextToActivate(0);
+  opencl_manager.ContextToActivate(context_id);
 
   // Enter material database
   material_manager.SetMaterialsDatabase("../../data/materials.txt");

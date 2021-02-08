@@ -16,15 +16,27 @@
 # *                                                                      *
 # ************************************************************************
 
+import argparse
 from ggems import *
 
 # ------------------------------------------------------------------------------
+# Read arguments
+parser = argparse.ArgumentParser()
+
+parser.add_argument('-c', '--context', required=False, type=int, default=0, help="OpenCL context id")
+
+args = parser.parse_args()
+
+# Get argument
+context_id = args.context
+
+# ------------------------------------------------------------------------------
 # STEP 0: Level of verbosity during computation
-GGEMSVerbosity(1)
+GGEMSVerbosity(0)
 
 # ------------------------------------------------------------------------------
 # STEP 1: OpenCL Initialization
-opencl_manager.set_context_index(0)
+opencl_manager.set_context_index(context_id)
 
 # ------------------------------------------------------------------------------
 # STEP 2: Initializing volume creator manager and setting the informations about the global voxelized volume

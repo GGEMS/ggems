@@ -18,7 +18,7 @@
 # -- Project information -----------------------------------------------------
 
 project = 'GGEMS'
-copyright = '2020, GGEMS Team'
+copyright = '2021, GGEMS Team'
 author = 'Didier BENOIT'
 
 # The full version, including alpha/beta/rc tags

@@ -71,7 +71,7 @@ GGEMSCrossSections::~GGEMSCrossSections(void)
 
 void GGEMSCrossSections::AddProcess(std::string const& process_name, std::string const& particle_type, bool const& is_secondary)
 {
-  GGcout("GGEMSCrossSections", "AddProcess", 0) << "Adding " << process_name << " scattering process..." << GGendl;
+  GGcout("GGEMSCrossSections", "AddProcess", 1) << "Adding " << process_name << " scattering process..." << GGendl;
 
   if (process_name == "Compton") {
     if (!is_process_activated_.at(COMPTON_SCATTERING)) {
@@ -117,7 +117,7 @@ void GGEMSCrossSections::AddProcess(std::string const& process_name, std::string
 
 void GGEMSCrossSections::Initialize(GGEMSMaterials const* materials)
 {
-  GGcout("GGEMSCrossSections", "Initialize", 0) << "Initializing cross section tables..." << GGendl;
+  GGcout("GGEMSCrossSections", "Initialize", 1) << "Initializing cross section tables..." << GGendl;
 
   // Get the OpenCL manager
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();

@@ -222,7 +222,7 @@ void GGEMSMHDImage::Read(std::string const& image_mhd_header_filename, std::weak
 
 void GGEMSMHDImage::Write(std::shared_ptr<cl::Buffer> image) const
 {
-  GGcout("GGEMSMHDImage", "Write", 0) << "Writing MHD Image..." << GGendl;
+  GGcout("GGEMSMHDImage", "Write", 1) << "Writing MHD Image..." << GGendl;
 
   // Checking parameters before to write
   CheckParameters();

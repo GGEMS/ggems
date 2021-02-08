@@ -40,18 +40,41 @@
 #include "GGEMS/tools/GGEMSPrint.hh"
 
 /*!
-  \fn int main(void)
+  \fn void PrintHelpAndQuit(void)
+  \brief Print help to terminal and quit
+*/
+void PrintHelpAndQuit(void)
+{
+  std::cerr << "Usage: generate_volume <ContextID>" << std::endl;
+  std::cerr << std::endl;
+  std::cerr << "<ContextID>: OpenCL Context id" << std::endl;
+  exit(EXIT_FAILURE);
+}
+
+/*!
+  \fn int main(int argc, char** argv)
+  \param argc - number of arguments
+  \param argv - list of arguments
   \return status of program
   \brief main function of program
 */
-int main(void)
+int main(int argc, char** argv)
 {
+  // Checking parameters
+  if (argc != 2) {
+    std::cerr << "Invalid number of arguments!!!" << std::endl;
+    PrintHelpAndQuit();
+  }
+
+  // Getting parameters
+  GGint context_id = atoi(argv[1]);
+
   // Initialization of singletons
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
   GGEMSVolumeCreatorManager& volume_creator_manager = GGEMSVolumeCreatorManager::GetInstance();
 
   // Set the context id
-  opencl_manager.ContextToActivate(0);
+  opencl_manager.ContextToActivate(context_id);
 
   // Initializing a global voxelized volume
   volume_creator_manager.SetVolumeDimensions(450, 450, 450);

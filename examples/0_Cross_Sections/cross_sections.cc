@@ -44,8 +44,9 @@
 */
 void PrintHelpAndQuit(void)
 {
-  std::cerr << "Usage: cross_sections <Material> <Process> <Energy>" << std::endl;
+  std::cerr << "Usage: cross_sections <ContextID> <Material> <Process> <Energy>" << std::endl;
   std::cerr << std::endl;
+  std::cerr << "<ContextID>: OpenCL Context id" << std::endl;
   std::cerr << "<Material> : Material defined in data/materials. Example: Water" << std::endl;
   std::cerr << "<Process>  : Process available:" << std::endl;
   std::cerr << "                 * Compton" << std::endl;
@@ -65,15 +66,16 @@ void PrintHelpAndQuit(void)
 int main(int argc, char** argv)
 {
   // Checking parameters
-  if (argc < 4) {
-    std::cerr << "Missing arguments!!!" << std::endl;
+  if (argc != 5) {
+    std::cerr << "Invalid number of arguments!!!" << std::endl;
     PrintHelpAndQuit();
   }
 
   // Getting parameters
-  std::string material_name = argv[1];
-  std::string process_name = argv[2];
-  GGfloat energy_MeV = strtof(argv[3], NULL);
+  GGint context_id = atoi(argv[1]);
+  std::string material_name = argv[2];
+  std::string process_name = argv[3];
+  GGfloat energy_MeV = strtof(argv[4], NULL);
 
   // Initialization of singletons
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
@@ -81,7 +83,7 @@ int main(int argc, char** argv)
   GGEMSProcessesManager& processes_manager = GGEMSProcessesManager::GetInstance();
 
   // Set the context id
-  opencl_manager.ContextToActivate(0);
+  opencl_manager.ContextToActivate(context_id);
 
   // Enter material database
   material_manager.SetMaterialsDatabase("../../data/materials.txt");
@@ -94,9 +96,9 @@ int main(int argc, char** argv)
   // Printing useful infos
   std::cout << "Material: " << material_name << std::endl;
   std::cout << "    Density: " << materials.GetDensity(material_name) << " g.cm-3" << std::endl;
-  std::cout << "    Photon energy cut (for 1 mm distance): " << materials.GetEnergyCut(material_name, "gamma", 1.0, "mm") << " g.cm-3" << std::endl;
-  std::cout << "    Electron energy cut (for 1 mm distance): " << materials.GetEnergyCut(material_name, "e-", 1.0, "mm") << " g.cm-3" << std::endl;
-  std::cout << "    Positron energy cut (for 1 mm distance): " << materials.GetEnergyCut(material_name, "e+", 1.0, "mm")<< " g.cm-3" << std::endl;
+  std::cout << "    Photon energy cut (for 1 mm distance): " << materials.GetEnergyCut(material_name, "gamma", 1.0, "mm") << " keV" << std::endl;
+  std::cout << "    Electron energy cut (for 1 mm distance): " << materials.GetEnergyCut(material_name, "e-", 1.0, "mm") << " keV" << std::endl;
+  std::cout << "    Positron energy cut (for 1 mm distance): " << materials.GetEnergyCut(material_name, "e+", 1.0, "mm")<< " keV" << std::endl;
   std::cout << "    Atomic number density: " << materials.GetAtomicNumberDensity(material_name) << " atoms.cm-3" << std::endl;
 
   // Defining global parameters for cross-section building
