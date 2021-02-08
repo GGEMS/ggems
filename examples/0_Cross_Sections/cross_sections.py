@@ -38,7 +38,7 @@ context_id = args.context
 
 # ------------------------------------------------------------------------------
 # Level of verbosity during GGEMS execution
-GGEMSVerbosity(1)
+GGEMSVerbosity(0)
 
 # ------------------------------------------------------------------------------
 # STEP 1: Choosing an OpenCL context

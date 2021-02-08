@@ -79,7 +79,7 @@ void GGEMSMaterialsDatabaseManager::SetMaterialsDatabase(std::string const& file
 
 void GGEMSMaterialsDatabaseManager::LoadMaterialsDatabase(std::string const& filename)
 {
-  GGcout("GGEMSMaterialsDatabaseManager", "LoadMaterialsDatabase", 0) << "Loading materials database in GGEMS..." << GGendl;
+  GGcout("GGEMSMaterialsDatabaseManager", "LoadMaterialsDatabase", 1) << "Loading materials database in GGEMS..." << GGendl;
 
   // Opening the input file containing materials
   std::ifstream database_stream(filename, std::ios::in);

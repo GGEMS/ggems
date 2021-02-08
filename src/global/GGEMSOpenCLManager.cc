@@ -598,6 +598,9 @@ void GGEMSOpenCLManager::ContextToActivate(GGsize const& context_id)
     GGEMSMisc::ThrowException("GGEMSOpenCLManager", "ContextToActivate", oss.str());
   }
 
+  // Printing name of activated context
+  GGcout("GGEMSOpenCLManager", "ContextToActivate", 0) << "Activated context: " << GetNameOfActivatedContext() << GGendl;
+
   // Activate the command queue
   queue_act_ = queues_.at(context_id);
 

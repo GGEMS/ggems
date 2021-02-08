@@ -183,7 +183,7 @@ class GGEMS_EXPORT GGEMSMHDImage
 template <typename T>
 void GGEMSMHDImage::Write(T* image, GGsize const& elements)
 {
-  GGcout("GGEMSMHDImage", "Write", 0) << "Writing MHD Image..." << GGendl;
+  GGcout("GGEMSMHDImage", "Write", 1) << "Writing MHD Image..." << GGendl;
 
   // Checking parameters before to write
   CheckParameters();

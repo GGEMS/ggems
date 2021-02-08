@@ -16,7 +16,19 @@
 # *                                                                      *
 # ************************************************************************
 
+import argparse
 from ggems import *
+
+# ------------------------------------------------------------------------------
+# Read arguments
+parser = argparse.ArgumentParser()
+
+parser.add_argument('-c', '--context', required=False, type=int, default=0, help="OpenCL context id")
+
+args = parser.parse_args()
+
+# Get argument
+context_id = args.context
 
 # ------------------------------------------------------------------------------
 # STEP 0: Level of verbosity during computation
@@ -24,7 +36,7 @@ GGEMSVerbosity(1)
 
 # ------------------------------------------------------------------------------
 # STEP 1: Choosing an OpenCL context
-opencl_manager.set_context_index(0)
+opencl_manager.set_context_index(context_id)
 
 # ------------------------------------------------------------------------------
 # STEP 2: Setting GGEMS materials
@@ -79,7 +91,7 @@ point_source.set_polyenergy('data/spectrum_120kVp_2mmAl.dat')
 
 # ------------------------------------------------------------------------------
 # STEP 8: GGEMS simulation
-ggems_manager.opencl_verbose(True)
+ggems_manager.opencl_verbose(False)
 ggems_manager.material_database_verbose(False)
 ggems_manager.navigator_verbose(True)
 ggems_manager.source_verbose(True)
