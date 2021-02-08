@@ -40,7 +40,7 @@ GGEMSVerbosity(1)
 
 # ------------------------------------------------------------------------------
 # STEP 1: Choosing an OpenCL context
-opencl_manager.set_context_index(2)
+opencl_manager.set_context_index(0)
 
 # ------------------------------------------------------------------------------
 # STEP 2: Setting GGEMS materials

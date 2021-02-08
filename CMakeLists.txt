@@ -128,8 +128,8 @@ IF(WIN32)
     STRING(REPLACE "-O3" "" CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
     STRING(REPLACE "-DNDEBUG" "" CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
 
-    SET(CXX_FLAGS -std=c++17 -mavx2 -Wextra -Werror -Wall -pedantic -m64 -march=native -Wconversion -Weffc++ -Wold-style-cast -pedantic-errors -mtune=native -ftree-vectorize)
-    SET(CXX_FLAGS_RELEASE -Ofast ${CXX_FLAGS})
+    SET(CXX_FLAGS -std=c++17 -Wextra -Werror -Wall -pedantic -m64 -Wconversion -Weffc++ -Wold-style-cast -pedantic-errors)
+    SET(CXX_FLAGS_RELEASE -O3 ${CXX_FLAGS})
     SET(CXX_FLAGS_DEBUG -O0 -g3 ${CXX_FLAGS})
   
   # Checking compiler for Visual Studio
@@ -139,8 +139,8 @@ IF(WIN32)
     STRING(REPLACE "/D NDEBUG" "" CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
 
     #/WX /Wall
-    SET(CXX_FLAGS /MP /EHsc /nologo /W3 /std:c++17 /favor:INTEL64)
-    SET(CXX_FLAGS_RELEASE /Ox /Qpar /arch:AVX2 ${CXX_FLAGS})
+    SET(CXX_FLAGS /MP /EHsc /nologo /W3 /std:c++17)
+    SET(CXX_FLAGS_RELEASE /O2 ${CXX_FLAGS})
     SET(CXX_FLAGS_DEBUG /Od /DEBUG /Zi ${CXX_FLAGS})
 
   # Otherwize error
@@ -165,11 +165,11 @@ ELSE()
 
   # Checking compiler for LLVM/CLANG
   IF(COMPILER STREQUAL "CLANG")
-    SET(CXX_FLAGS -std=c++17 -std=gnu++17 -Wall -mavx2 -Werror  -Wextra -pedantic -m64 -march=native -Wconversion -Wold-style-cast -pedantic-errors -mtune=native -ftree-vectorize)
+    SET(CXX_FLAGS -std=c++17 -std=gnu++17 -Wall -Werror -Wextra -pedantic -m64 -Wconversion -Wold-style-cast -pedantic-errors)
 
   # Checking compiler for GNU/GCC
   ELSEIF(COMPILER STREQUAL "GCC")
-    SET(CXX_FLAGS -std=c++17 -std=gnu++17 -Wall -pedantic -m64 -Wconversion -Wold-style-cast -pedantic-errors -ftree-vectorize -mavx2)
+    SET(CXX_FLAGS -std=c++17 -std=gnu++17 -Wall -pedantic -m64 -Wconversion -Wold-style-cast -pedantic-errors)
 
   # Otherwize error
   ELSE()

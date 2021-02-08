@@ -117,7 +117,7 @@ int main(void)
   ggems_manager.SetTrackingVerbose(false, 0);
 
   // Initializing the GGEMS simulation
-  ggems_manager.Initialize(777);
+  ggems_manager.Initialize();
 
   // Start GGEMS simulation
   ggems_manager.Run();
