@@ -101,11 +101,11 @@ class GGEMS_EXPORT GGEMSManager
     GGEMSManager& operator=(GGEMSManager const&& ggems_manager) = delete;
 
     /*!
-      \fn void Initialize(GGuint const& seed)
+      \fn void Initialize(GGuint const& seed = 0)
       \param seed - seed of the simulation
       \brief Initialization of the GGEMS simulation
     */
-    void Initialize(GGuint const& seed);
+    void Initialize(GGuint const& seed = 0);
 
     /*!
       \fn void Run(void)
