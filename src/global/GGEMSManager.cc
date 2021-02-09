@@ -210,9 +210,7 @@ void GGEMSManager::Initialize(GGuint const& seed)
   if (is_opencl_verbose_) {
     opencl_manager.PrintPlatformInfos();
     opencl_manager.PrintDeviceInfos();
-    opencl_manager.PrintContextInfos();
-    opencl_manager.PrintCommandQueueInfos();
-    opencl_manager.PrintActivatedContextInfos();
+    opencl_manager.PrintActivatedDevice();
     opencl_manager.PrintBuildOptions();
   }
 

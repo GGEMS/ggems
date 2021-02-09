@@ -23,12 +23,12 @@ from ggems import *
 # Read arguments
 parser = argparse.ArgumentParser()
 
-parser.add_argument('-c', '--context', required=False, type=int, default=0, help="OpenCL context id")
+parser.add_argument('-d', '--device', required=False, type=int, default=0, help="OpenCL device id")
 
 args = parser.parse_args()
 
 # Get argument
-context_id = args.context
+device_id = args.device
 
 # ------------------------------------------------------------------------------
 # STEP 0: Level of verbosity during computation
@@ -36,7 +36,7 @@ GGEMSVerbosity(0)
 
 # ------------------------------------------------------------------------------
 # STEP 1: OpenCL Initialization
-opencl_manager.set_context_index(context_id)
+opencl_manager.set_device_index(device_id)
 
 # ------------------------------------------------------------------------------
 # STEP 2: Initializing volume creator manager and setting the informations about the global voxelized volume

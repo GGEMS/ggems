@@ -106,11 +106,11 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     /*!
       \fn GGbool IsReady(void) const
       \return true if OpenCL manager is ready, otherwize false
-      \brief Checking if the OpenCL manager is ready, it means if a context is set
+      \brief Checking if the OpenCL manager is ready, it means if a device is selected
     */
     inline GGbool IsReady(void) const
     {
-      if (is_context_activated_) return true;
+      if (is_device_activated_) return true;
       else return false;
     }
 
@@ -127,22 +127,10 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     void PrintDeviceInfos(void) const;
 
     /*!
-      \fn void PrintContextInfos(void) const
-      \brief print infos about each context
+      \fn void PrintActivatedDevice(void) const
+      \brief print infos about activated device
     */
-    void PrintContextInfos(void) const;
-
-    /*!
-      \fn void PrintActivatedContextInfos(void) const
-      \brief print infos about each activated context
-    */
-    void PrintActivatedContextInfos(void) const;
-
-    /*!
-      \fn void PrintCommandQueueInfos(void) const
-      \brief print the informations about the command queue
-    */
-    void PrintCommandQueueInfos(void) const;
+    void PrintActivatedDevice(void) const;
 
     /*!
       \fn void PrintBuildOptions(void) const
@@ -151,32 +139,32 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     void PrintBuildOptions(void) const;
 
     /*!
-      \fn void ContextToActivate(GGsize const& context_id)
-      \param context_id - context index
-      \brief set the index of the context to activate
+      \fn void DeviceToActivate(GGsize const& device_id)
+      \param device_id - device index
+      \brief set the index of the device to activate
     */
-    void ContextToActivate(GGsize const& context_id);
+    void DeviceToActivate(GGsize const& device_id);
 
     /*!
       \fn inline GGsize GetMaxRAMMemoryOnActivatedContext(void) const
       \return Max RAM memory on a context
       \brief Get the maximum RAM memory on activated OpenCL context
     */
-    inline GGsize GetMaxRAMMemoryOnActivatedContext(void) const {return static_cast<GGsize>(device_global_mem_size_[context_index_]);}
+    inline GGsize GetMaxRAMMemoryOnActivatedContext(void) const {return static_cast<GGsize>(device_global_mem_size_[device_index_]);}
 
     /*!
       \fn inline GGsize GetMaxBufferAllocationSize(void) const
       \return Max buffer allocation size
       \brief Get the max buffer size in bytes on activated OpenCL context
     */
-    inline GGsize GetMaxBufferAllocationSize(void) const {return static_cast<GGsize>(device_max_mem_alloc_size_[context_index_]);}
+    inline GGsize GetMaxBufferAllocationSize(void) const {return static_cast<GGsize>(device_max_mem_alloc_size_[device_index_]);}
 
     /*!
       \fn inline GGsize GetMaxWorkGroupSize(void) const
       \return Max work group size
       \brief Get the max work group size on activated OpenCL context
     */
-    inline GGsize GetMaxWorkGroupSize(void) const { return device_max_work_group_size_[context_index_];}
+    inline GGsize GetMaxWorkGroupSize(void) const { return device_max_work_group_size_[device_index_];}
 
     /*!
       \fn inline GGsize GetWorkGroupSize(void) const
@@ -186,32 +174,32 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     inline GGsize GetWorkGroupSize(void) const { return work_group_size_;}
 
     /*!
-      \fn std::string GetNameOfActivatedContext(void) const
-      \return name of activated context
-      \brief Get the name of the activated context
+      \fn std::string GetNameOfActivatedDevice(void) const
+      \return name of activated device
+      \brief Get the name of the activated device
     */
-    inline std::string GetNameOfActivatedContext(void) const {return device_name_[context_index_];}
+    inline std::string GetNameOfActivatedDevice(void) const {return device_name_[device_index_];}
 
     /*!
       \fn cl::Context* GetContext(void) const
       \return the pointer on activated context
       \brief return the activated context
     */
-    inline cl::Context* GetContext(void) const {return contexts_.at(context_index_).get();}
+    inline cl::Context* GetContext(void) const {return context_.get();}
 
     /*!
       \fn cl::CommandQueue* GetCommandQueue(void) const
       \return the pointer on activated command queue
       \brief Return the command queue to activated context
     */
-    inline cl::CommandQueue* GetCommandQueue(void) const {return queue_act_.get();}
+    inline cl::CommandQueue* GetCommandQueue(void) const {return queue_.get();}
 
     /*!
       \fn cl::Event* GetEvent(void) const
       \return the pointer on activated event
       \brief return an event to activated context
     */
-    inline cl::Event* GetEvent(void) const {return event_act_.get();}
+    inline cl::Event* GetEvent(void) const {return event_.get();}
 
     /*!
       \fn std::weak_ptr<cl::Kernel> CompileKernel(std::string const& kernel_filename, std::string const& kernel_name, char* const custom_options = nullptr, char* const additional_options = nullptr)
@@ -342,6 +330,8 @@ class GGEMS_EXPORT GGEMSOpenCLManager
 
     // Devices
     std::vector<std::unique_ptr<cl::Device>> devices_; /*!< Vector of devices */
+    GGsize device_index_; /*!< Index of the activated device */
+    bool is_device_activated_; /*!< Check if context already activated */
     std::vector<cl_device_type> device_type_; /*!< Type of device */
     std::vector<std::string> device_name_; /*!< Name of the device */
     std::vector<std::string> device_vendor_; /*!< Vendor of the device */
@@ -413,18 +403,9 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     // OpenCL compilation options
     std::string build_options_; /*!< list of option to OpenCL compiler */
 
-    // Context and informations about them
-    bool is_context_activated_; /*!< Check if context already activated */
-    GGsize context_index_; /*!< Index of the activated context */
-    std::vector<std::shared_ptr<cl::Context>> contexts_; /*!< Vector of context */
-
-    // Command queue informations
-    std::vector<std::shared_ptr<cl::CommandQueue>> queues_; /*!< Command queue for all the context */
-    std::shared_ptr<cl::CommandQueue> queue_act_; /*!< Activated command queue */
-
-    // OpenCL event
-    std::vector<std::shared_ptr<cl::Event>> events_; /*!< List of pointer to OpenCL event, for profiling */
-    std::shared_ptr<cl::Event> event_act_; /*!< Activated event */
+    std::shared_ptr<cl::Context> context_; /*!< OpenCL context  */
+    std::shared_ptr<cl::CommandQueue> queue_; /*!< OpenCL command queue */
+    std::shared_ptr<cl::Event> event_; /*!< OpenCL event */
 
     // Kernels
     std::vector<std::shared_ptr<cl::Kernel>> kernels_; /*!< List of pointer to OpenCL kernel */
@@ -441,7 +422,7 @@ T* GGEMSOpenCLManager::GetDeviceBuffer(cl::Buffer* const device_ptr, GGsize cons
   GGcout("GGEMSOpenCLManager", "GetDeviceBuffer", 3) << "Getting mapped memory buffer on OpenCL device..." << GGendl;
 
   GGint err = 0;
-  T* ptr = static_cast<T*>(queue_act_.get()->enqueueMapBuffer(*device_ptr, CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, 0, size, nullptr, nullptr, &err));
+  T* ptr = static_cast<T*>(queue_.get()->enqueueMapBuffer(*device_ptr, CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, 0, size, nullptr, nullptr, &err));
   CheckOpenCLError(err, "GGEMSOpenCLManager", "GetDeviceBuffer");
   return ptr;
 }
@@ -456,7 +437,7 @@ void GGEMSOpenCLManager::ReleaseDeviceBuffer(cl::Buffer* const device_ptr, T* ho
   GGcout("GGEMSOpenCLManager", "ReleaseDeviceBuffer", 3) << "Releasing mapped memory buffer on OpenCL device..." << GGendl;
 
   // Unmap the memory
-  CheckOpenCLError(queue_act_.get()->enqueueUnmapMemObject(*device_ptr, host_ptr), "GGEMSOpenCLManager", "ReleaseDeviceBuffer");
+  CheckOpenCLError(queue_.get()->enqueueUnmapMemObject(*device_ptr, host_ptr), "GGEMSOpenCLManager", "ReleaseDeviceBuffer");
 }
 
 /*!
@@ -474,12 +455,12 @@ extern "C" GGEMS_EXPORT GGEMSOpenCLManager* get_instance_ggems_opencl_manager(vo
 extern "C" GGEMS_EXPORT void print_infos_opencl_manager(GGEMSOpenCLManager* opencl_manager);
 
 /*!
-  \fn void set_context_index_ggems_opencl_manager(GGEMSOpenCLManager* opencl_manager, GGsize const context_id)
+  \fn void set_device_index_ggems_opencl_manager(GGEMSOpenCLManager* opencl_manager, GGsize const device_id)
   \param opencl_manager - pointer on the singleton
-  \param context_id - index of the context
-  \brief Set the context index to activate
+  \param device_id - index of the device
+  \brief Set the device index to activate
 */
-extern "C" GGEMS_EXPORT void set_context_index_ggems_opencl_manager(GGEMSOpenCLManager* opencl_manager, GGsize const context_id);
+extern "C" GGEMS_EXPORT void set_device_index_ggems_opencl_manager(GGEMSOpenCLManager* opencl_manager, GGsize const device_id);
 
 /*!
   \fn void clean_opencl_manager(GGEMSOpenCLManager* opencl_manager)

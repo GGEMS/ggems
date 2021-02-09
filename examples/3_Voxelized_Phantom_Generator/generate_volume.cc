@@ -45,9 +45,9 @@
 */
 void PrintHelpAndQuit(void)
 {
-  std::cerr << "Usage: generate_volume <ContextID>" << std::endl;
+  std::cerr << "Usage: generate_volume <DeviceID>" << std::endl;
   std::cerr << std::endl;
-  std::cerr << "<ContextID>: OpenCL Context id" << std::endl;
+  std::cerr << "<DeviceID>: OpenCL device id" << std::endl;
   exit(EXIT_FAILURE);
 }
 
@@ -72,7 +72,7 @@ int main(int argc, char** argv)
   GGwarn.SetVerbosity(0);
 
   // Getting parameters
-  GGsize context_id = static_cast<GGsize>(atoi(argv[1]));
+  GGsize device_id = static_cast<GGsize>(atoi(argv[1]));
 
   // Initialization of singletons
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
@@ -80,7 +80,7 @@ int main(int argc, char** argv)
 
   try {
     // Set the context id
-    opencl_manager.ContextToActivate(context_id);
+    opencl_manager.DeviceToActivate(device_id);
 
     // Initializing a global voxelized volume
     volume_creator_manager.SetVolumeDimensions(450, 450, 450);
