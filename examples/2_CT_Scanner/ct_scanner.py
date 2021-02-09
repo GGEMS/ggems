@@ -101,7 +101,7 @@ ggems_manager.kernel_verbose(True)
 ggems_manager.tracking_verbose(False, 0)
 
 # Initializing the GGEMS simulation
-ggems_manager.initialize()
+ggems_manager.initialize(3081603856)
 
 # Start GGEMS simulation
 ggems_manager.run()

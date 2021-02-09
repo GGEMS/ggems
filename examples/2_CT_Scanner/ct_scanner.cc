@@ -67,7 +67,7 @@ int main(int argc, char** argv)
   }
 
   // Getting parameters
-  GGint context_id = atoi(argv[1]);
+  GGsize context_id = static_cast<GGsize>(atoi(argv[1]));
 
   // Setting verbosity
   GGcout.SetVerbosity(1);
