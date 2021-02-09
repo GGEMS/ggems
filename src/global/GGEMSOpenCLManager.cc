@@ -40,8 +40,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 GGEMSOpenCLManager::GGEMSOpenCLManager(void)
-: is_device_activated_(false),
-  device_index_(0),
+: device_index_(0),
+  is_device_activated_(false),
   kernels_(0),
   kernel_compilation_options_(0)
 {
