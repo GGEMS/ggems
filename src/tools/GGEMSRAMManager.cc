@@ -88,11 +88,11 @@ void GGEMSRAMManager::PrintRAMStatus(void) const
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
   // Get the name of the activated context
-  std::string context_name = opencl_manager.GetNameOfActivatedContext();
+  std::string device_name = opencl_manager.GetNameOfActivatedDevice();
 
   // Compute allocated percent RAM
   GGfloat percent_allocated_RAM = static_cast<GGfloat>(allocated_ram_) * 100.0f / static_cast<GGfloat>(max_available_ram_);
 
-  GGcout("GGEMSRAMManager", "PrintRAMStatus", 0) << "Device: " << context_name << GGendl;
+  GGcout("GGEMSRAMManager", "PrintRAMStatus", 0) << "Device: " << device_name << GGendl;
   GGcout("GGEMSRAMManager", "PrintRAMStatus", 0) << "RAM memory usage: " << allocated_ram_ << " / " << max_available_ram_ << " bytes (" << percent_allocated_RAM << "%)" << GGendl;
 }

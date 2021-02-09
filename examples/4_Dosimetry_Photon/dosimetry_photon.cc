@@ -46,9 +46,9 @@
 */
 void PrintHelpAndQuit(void)
 {
-  std::cerr << "Usage: dosimetry_photon <ContextID>" << std::endl;
+  std::cerr << "Usage: dosimetry_photon <DeviceID>" << std::endl;
   std::cerr << std::endl;
-  std::cerr << "<ContextID>: OpenCL Context id" << std::endl;
+  std::cerr << "<DeviceID>: OpenCL device id" << std::endl;
   exit(EXIT_FAILURE);
 }
 
@@ -68,7 +68,7 @@ int main(int argc, char** argv)
   }
 
   // Getting parameters
-  GGsize context_id = static_cast<GGsize>(atoi(argv[1]));
+  GGsize device_id = static_cast<GGsize>(atoi(argv[1]));
 
   // Setting verbosity
   GGcout.SetVerbosity(1);
@@ -84,7 +84,7 @@ int main(int argc, char** argv)
 
   try {
     // Set the context id
-    opencl_manager.ContextToActivate(context_id);
+    opencl_manager.DeviceToActivate(device_id);
 
     // Enter material database
     material_manager.SetMaterialsDatabase("../../data/materials.txt");

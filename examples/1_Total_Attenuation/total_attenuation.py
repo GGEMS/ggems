@@ -27,14 +27,14 @@ from ggems import *
 # Read arguments
 parser = argparse.ArgumentParser()
 
-parser.add_argument('-c', '--context', required=False, type=int, default=0, help="OpenCL context id")
+parser.add_argument('-d', '--device', required=False, type=int, default=0, help="OpenCL device id")
 parser.add_argument('-m', '--material', required=True, type=str, help="Set a material name")
 
 args = parser.parse_args()
 
 # Get arguments
 material_name = args.material
-context_id = args.context
+device_id = args.device
 
 # Sequence of physical effects in GGEMS for total attenuation
 process_list = ('Compton', 'Photoelectric', 'Rayleigh')
@@ -44,8 +44,8 @@ process_list = ('Compton', 'Photoelectric', 'Rayleigh')
 GGEMSVerbosity(0)
 
 # ------------------------------------------------------------------------------
-# STEP 1: Choosing an OpenCL context
-opencl_manager.set_context_index(context_id)
+# STEP 1: Choosing an OpenCL device
+opencl_manager.set_device_index(device_id)
 
 # ------------------------------------------------------------------------------
 # STEP 2: Setting GGEMS materials

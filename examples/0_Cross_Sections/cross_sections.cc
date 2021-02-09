@@ -44,9 +44,9 @@
 */
 void PrintHelpAndQuit(void)
 {
-  std::cerr << "Usage: cross_sections <ContextID> <Material> <Process> <Energy>" << std::endl;
+  std::cerr << "Usage: cross_sections <DeviceID> <Material> <Process> <Energy>" << std::endl;
   std::cerr << std::endl;
-  std::cerr << "<ContextID>: OpenCL Context id" << std::endl;
+  std::cerr << "<DeviceID>: OpenCL device id" << std::endl;
   std::cerr << "<Material> : Material defined in data/materials. Example: Water" << std::endl;
   std::cerr << "<Process>  : Process available:" << std::endl;
   std::cerr << "                 * Compton" << std::endl;
@@ -72,7 +72,7 @@ int main(int argc, char** argv)
   }
 
   // Getting parameters
-  GGsize context_id = static_cast<GGsize>(atoi(argv[1]));
+  GGsize device_id = static_cast<GGsize>(atoi(argv[1]));
   std::string material_name = argv[2];
   std::string process_name = argv[3];
   GGfloat energy_MeV = strtof(argv[4], NULL);
@@ -89,7 +89,7 @@ int main(int argc, char** argv)
 
   try {
     // Set the context id
-    opencl_manager.ContextToActivate(context_id);
+    opencl_manager.DeviceToActivate(device_id);
 
     // Enter material database
     material_manager.SetMaterialsDatabase("../../data/materials.txt");

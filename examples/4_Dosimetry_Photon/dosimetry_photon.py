@@ -23,20 +23,20 @@ from ggems import *
 # Read arguments
 parser = argparse.ArgumentParser()
 
-parser.add_argument('-c', '--context', required=False, type=int, default=0, help="OpenCL context id")
+parser.add_argument('-d', '--device', required=False, type=int, default=0, help="OpenCL device id")
 
 args = parser.parse_args()
 
 # Get argument
-context_id = args.context
+device_id = args.device
 
 # ------------------------------------------------------------------------------
 # STEP 0: Level of verbosity during computation
 GGEMSVerbosity(1)
 
 # ------------------------------------------------------------------------------
-# STEP 1: Choosing an OpenCL context
-opencl_manager.set_context_index(context_id)
+# STEP 1: Choosing an OpenCL device
+opencl_manager.set_device_index(device_id)
 
 # ------------------------------------------------------------------------------
 # STEP 2: Setting GGEMS materials
