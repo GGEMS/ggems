@@ -353,14 +353,14 @@ void GGEMSDosimetryCalculator::Initialize(void)
   dose_recording_.photon_tracking_ = is_photon_tracking_ ? opencl_manager.Allocate(nullptr, total_number_of_dosels*sizeof(GGint), CL_MEM_READ_WRITE) : nullptr;
 
   // Set buffer to zero
-  opencl_manager.Clean(dose_recording_.edep_, total_number_of_dosels*sizeof(GGDosiType));
-  opencl_manager.Clean(dose_recording_.dose_, total_number_of_dosels*sizeof(GGfloat));
+  opencl_manager.CleanBuffer(dose_recording_.edep_, total_number_of_dosels*sizeof(GGDosiType));
+  opencl_manager.CleanBuffer(dose_recording_.dose_, total_number_of_dosels*sizeof(GGfloat));
 
-  if (is_uncertainty_) opencl_manager.Clean(dose_recording_.uncertainty_dose_, total_number_of_dosels*sizeof(GGfloat));
-  if (is_edep_squared_||is_uncertainty_) opencl_manager.Clean(dose_recording_.edep_squared_, total_number_of_dosels*sizeof(GGDosiType));
-  if (is_hit_tracking_||is_uncertainty_) opencl_manager.Clean(dose_recording_.hit_, total_number_of_dosels*sizeof(GGint));
+  if (is_uncertainty_) opencl_manager.CleanBuffer(dose_recording_.uncertainty_dose_, total_number_of_dosels*sizeof(GGfloat));
+  if (is_edep_squared_||is_uncertainty_) opencl_manager.CleanBuffer(dose_recording_.edep_squared_, total_number_of_dosels*sizeof(GGDosiType));
+  if (is_hit_tracking_||is_uncertainty_) opencl_manager.CleanBuffer(dose_recording_.hit_, total_number_of_dosels*sizeof(GGint));
 
-  if (is_photon_tracking_) opencl_manager.Clean(dose_recording_.photon_tracking_, total_number_of_dosels*sizeof(GGint));
+  if (is_photon_tracking_) opencl_manager.CleanBuffer(dose_recording_.photon_tracking_, total_number_of_dosels*sizeof(GGint));
 
   InitializeKernel();
 }

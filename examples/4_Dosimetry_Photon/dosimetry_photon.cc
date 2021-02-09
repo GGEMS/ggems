@@ -82,70 +82,78 @@ int main(int argc, char** argv)
   GGEMSRangeCutsManager& range_cuts_manager = GGEMSRangeCutsManager::GetInstance();
   GGEMSManager& ggems_manager = GGEMSManager::GetInstance();
 
-  // Set the context id
-  opencl_manager.ContextToActivate(context_id);
+  try {
+    // Set the context id
+    opencl_manager.ContextToActivate(context_id);
 
-  // Enter material database
-  material_manager.SetMaterialsDatabase("../../data/materials.txt");
+    // Enter material database
+    material_manager.SetMaterialsDatabase("../../data/materials.txt");
 
-  // Phantoms and systems
-  GGEMSVoxelizedPhantom phantom("phantom");
-  phantom.SetPhantomFile("data/phantom.mhd", "data/range_phantom.txt");
-  phantom.SetRotation(0.0f, 0.0f, 0.0f, "deg");
-  phantom.SetPosition(0.0f, 0.0f, 0.0f, "mm");
+    // Phantoms and systems
+    GGEMSVoxelizedPhantom phantom("phantom");
+    phantom.SetPhantomFile("data/phantom.mhd", "data/range_phantom.txt");
+    phantom.SetRotation(0.0f, 0.0f, 0.0f, "deg");
+    phantom.SetPosition(0.0f, 0.0f, 0.0f, "mm");
 
-  // Dosimetry
-  GGEMSDosimetryCalculator dosimetry("phantom");
-  dosimetry.SetOutputDosimetryFilename("data/dosimetry");
-  dosimetry.SetDoselSizes(0.5f, 0.5f, 0.5f, "mm");
-  dosimetry.SetWaterReference(true);
-  dosimetry.SetMinimumDensity(0.1f, "g/cm3");
+    // Dosimetry
+    GGEMSDosimetryCalculator dosimetry("phantom");
+    dosimetry.SetOutputDosimetryFilename("data/dosimetry");
+    dosimetry.SetDoselSizes(0.5f, 0.5f, 0.5f, "mm");
+    dosimetry.SetWaterReference(true);
+    dosimetry.SetMinimumDensity(0.1f, "g/cm3");
 
-  dosimetry.SetUncertainty(true);
-  dosimetry.SetPhotonTracking(true);
-  dosimetry.SetEdep(true);
-  dosimetry.SetEdepSquared(true);
-  dosimetry.SetHitTracking(true);
+    dosimetry.SetUncertainty(true);
+    dosimetry.SetPhotonTracking(true);
+    dosimetry.SetEdep(true);
+    dosimetry.SetEdepSquared(true);
+    dosimetry.SetHitTracking(true);
 
-  // Physics
-  processes_manager.AddProcess("Compton", "gamma", "all");
-  processes_manager.AddProcess("Photoelectric", "gamma", "all");
-  processes_manager.AddProcess("Rayleigh", "gamma", "all");
+    // Physics
+    processes_manager.AddProcess("Compton", "gamma", "all");
+    processes_manager.AddProcess("Photoelectric", "gamma", "all");
+    processes_manager.AddProcess("Rayleigh", "gamma", "all");
 
-  // Optional options, the following are by default
-  processes_manager.SetCrossSectionTableNumberOfBins(220);
-  processes_manager.SetCrossSectionTableMinimumEnergy(1.0f, "keV");
-  processes_manager.SetCrossSectionTableMaximumEnergy(1.0f, "MeV");
+    // Optional options, the following are by default
+    processes_manager.SetCrossSectionTableNumberOfBins(220);
+    processes_manager.SetCrossSectionTableMinimumEnergy(1.0f, "keV");
+    processes_manager.SetCrossSectionTableMaximumEnergy(1.0f, "MeV");
 
-  // Cuts, by default but are 1 um
-  range_cuts_manager.SetLengthCut("all", "gamma", 0.1f, "mm");
+    // Cuts, by default but are 1 um
+    range_cuts_manager.SetLengthCut("all", "gamma", 0.1f, "mm");
 
-  // Source
-  GGEMSXRaySource point_source("point_source");
-  point_source.SetSourceParticleType("gamma");
-  point_source.SetNumberOfParticles(100000000);
-  point_source.SetPosition(-595.0f, 0.0f, 0.0f, "mm");
-  point_source.SetRotation(0.0f, 0.0f, 0.0f, "deg");
-  point_source.SetBeamAperture(5.0f, "deg");
-  point_source.SetFocalSpotSize(0.0f, 0.0f, 0.0f, "mm");
-  point_source.SetPolyenergy("data/spectrum_120kVp_2mmAl.dat");
+    // Source
+    GGEMSXRaySource point_source("point_source");
+    point_source.SetSourceParticleType("gamma");
+    point_source.SetNumberOfParticles(100000000);
+    point_source.SetPosition(-595.0f, 0.0f, 0.0f, "mm");
+    point_source.SetRotation(0.0f, 0.0f, 0.0f, "deg");
+    point_source.SetBeamAperture(5.0f, "deg");
+    point_source.SetFocalSpotSize(0.0f, 0.0f, 0.0f, "mm");
+    point_source.SetPolyenergy("data/spectrum_120kVp_2mmAl.dat");
 
-  // GGEMS simulation
-  ggems_manager.SetOpenCLVerbose(true);
-  ggems_manager.SetNavigatorVerbose(true);
-  ggems_manager.SetSourceVerbose(true);
-  ggems_manager.SetMemoryRAMVerbose(true);
-  ggems_manager.SetProcessVerbose(true);
-  ggems_manager.SetRangeCutsVerbose(true);
-  ggems_manager.SetRandomVerbose(true);
-  ggems_manager.SetKernelVerbose(true);
-  ggems_manager.SetTrackingVerbose(false, 0);
+    // GGEMS simulation
+    ggems_manager.SetOpenCLVerbose(true);
+    ggems_manager.SetNavigatorVerbose(true);
+    ggems_manager.SetSourceVerbose(true);
+    ggems_manager.SetMemoryRAMVerbose(true);
+    ggems_manager.SetProcessVerbose(true);
+    ggems_manager.SetRangeCutsVerbose(true);
+    ggems_manager.SetRandomVerbose(true);
+    ggems_manager.SetKernelVerbose(true);
+    ggems_manager.SetTrackingVerbose(false, 0);
 
-  // Initializing the GGEMS simulation
-  ggems_manager.Initialize();
+    // Initializing the GGEMS simulation
+    ggems_manager.Initialize();
 
-  // Start GGEMS simulation
-  ggems_manager.Run();
+    // Start GGEMS simulation
+    ggems_manager.Run();
+  }
+  catch (std::exception& e) {
+    std::cerr << e.what() << std::endl;
+  }
+  catch (...) {
+    std::cerr << "Unknown exception!!!" << std::endl;
+  }
 
   opencl_manager.Clean();
   exit(EXIT_SUCCESS);

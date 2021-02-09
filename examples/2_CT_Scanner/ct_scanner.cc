@@ -81,69 +81,77 @@ int main(int argc, char** argv)
   GGEMSRangeCutsManager& range_cuts_manager = GGEMSRangeCutsManager::GetInstance();
   GGEMSManager& ggems_manager = GGEMSManager::GetInstance();
 
-  // Set the context id
-  opencl_manager.ContextToActivate(context_id);
+  try {
+    // Set the context id
+    opencl_manager.ContextToActivate(context_id);
 
-  // Enter material database
-  material_manager.SetMaterialsDatabase("../../data/materials.txt");
+    // Enter material database
+    material_manager.SetMaterialsDatabase("../../data/materials.txt");
 
-  // Phantoms and systems
-  GGEMSVoxelizedPhantom phantom("phantom");
-  phantom.SetPhantomFile("data/phantom.mhd", "data/range_phantom.txt");
-  phantom.SetRotation(0.0f, 0.0f, 0.0f, "deg");
-  phantom.SetPosition(0.0f, 0.0f, 0.0f, "mm");
+    // Phantoms and systems
+    GGEMSVoxelizedPhantom phantom("phantom");
+    phantom.SetPhantomFile("data/phantom.mhd", "data/range_phantom.txt");
+    phantom.SetRotation(0.0f, 0.0f, 0.0f, "deg");
+    phantom.SetPosition(0.0f, 0.0f, 0.0f, "mm");
 
-  GGEMSCTSystem ct_detector("Stellar");
-  ct_detector.SetCTSystemType("curved");
-  ct_detector.SetNumberOfModules(1, 46);
-  ct_detector.SetNumberOfDetectionElementsInsideModule(64, 16, 1);
-  ct_detector.SetSizeOfDetectionElements(0.6f, 0.6f, 0.6f, "mm");
-  ct_detector.SetMaterialName("GOS");
-  ct_detector.SetSourceDetectorDistance(1085.6f, "mm");
-  ct_detector.SetSourceIsocenterDistance(595.0f, "mm");
-  ct_detector.SetRotation(0.0f, 0.0f, 0.0f, "deg");
-  ct_detector.SetThreshold(10.0f, "keV");
-  ct_detector.StoreOutput("data/projection");
+    GGEMSCTSystem ct_detector("Stellar");
+    ct_detector.SetCTSystemType("curved");
+    ct_detector.SetNumberOfModules(1, 46);
+    ct_detector.SetNumberOfDetectionElementsInsideModule(64, 16, 1);
+    ct_detector.SetSizeOfDetectionElements(0.6f, 0.6f, 0.6f, "mm");
+    ct_detector.SetMaterialName("GOS");
+    ct_detector.SetSourceDetectorDistance(1085.6f, "mm");
+    ct_detector.SetSourceIsocenterDistance(595.0f, "mm");
+    ct_detector.SetRotation(0.0f, 0.0f, 0.0f, "deg");
+    ct_detector.SetThreshold(10.0f, "keV");
+    ct_detector.StoreOutput("data/projection");
 
-  // Physics
-  processes_manager.AddProcess("Compton", "gamma", "all");
-  processes_manager.AddProcess("Photoelectric", "gamma", "all");
-  processes_manager.AddProcess("Rayleigh", "gamma", "all");
+    // Physics
+    processes_manager.AddProcess("Compton", "gamma", "all");
+    processes_manager.AddProcess("Photoelectric", "gamma", "all");
+    processes_manager.AddProcess("Rayleigh", "gamma", "all");
 
-  // Optional options, the following are by default
-  processes_manager.SetCrossSectionTableNumberOfBins(220);
-  processes_manager.SetCrossSectionTableMinimumEnergy(1.0f, "keV");
-  processes_manager.SetCrossSectionTableMaximumEnergy(1.0f, "MeV");
+    // Optional options, the following are by default
+    processes_manager.SetCrossSectionTableNumberOfBins(220);
+    processes_manager.SetCrossSectionTableMinimumEnergy(1.0f, "keV");
+    processes_manager.SetCrossSectionTableMaximumEnergy(1.0f, "MeV");
 
-  // Cuts, by default but are 1 um
-  range_cuts_manager.SetLengthCut("all", "gamma", 0.1f, "mm");
+    // Cuts, by default but are 1 um
+    range_cuts_manager.SetLengthCut("all", "gamma", 0.1f, "mm");
 
-  // Source
-  GGEMSXRaySource point_source("point_source");
-  point_source.SetSourceParticleType("gamma");
-  point_source.SetNumberOfParticles(100000000);
-  point_source.SetPosition(-595.0f, 0.0f, 0.0f, "mm");
-  point_source.SetRotation(0.0f, 0.0f, 0.0f, "deg");
-  point_source.SetBeamAperture(12.5f, "deg");
-  point_source.SetFocalSpotSize(0.0f, 0.0f, 0.0f, "mm");
-  point_source.SetPolyenergy("data/spectrum_120kVp_2mmAl.dat");
+    // Source
+    GGEMSXRaySource point_source("point_source");
+    point_source.SetSourceParticleType("gamma");
+    point_source.SetNumberOfParticles(100000000);
+    point_source.SetPosition(-595.0f, 0.0f, 0.0f, "mm");
+    point_source.SetRotation(0.0f, 0.0f, 0.0f, "deg");
+    point_source.SetBeamAperture(12.5f, "deg");
+    point_source.SetFocalSpotSize(0.0f, 0.0f, 0.0f, "mm");
+    point_source.SetPolyenergy("data/spectrum_120kVp_2mmAl.dat");
 
-  // GGEMS simulation
-  ggems_manager.SetOpenCLVerbose(true);
-  ggems_manager.SetNavigatorVerbose(true);
-  ggems_manager.SetSourceVerbose(true);
-  ggems_manager.SetMemoryRAMVerbose(true);
-  ggems_manager.SetProcessVerbose(true);
-  ggems_manager.SetRangeCutsVerbose(true);
-  ggems_manager.SetRandomVerbose(true);
-  ggems_manager.SetKernelVerbose(true);
-  ggems_manager.SetTrackingVerbose(false, 0);
+    // GGEMS simulation
+    ggems_manager.SetOpenCLVerbose(true);
+    ggems_manager.SetNavigatorVerbose(true);
+    ggems_manager.SetSourceVerbose(true);
+    ggems_manager.SetMemoryRAMVerbose(true);
+    ggems_manager.SetProcessVerbose(true);
+    ggems_manager.SetRangeCutsVerbose(true);
+    ggems_manager.SetRandomVerbose(true);
+    ggems_manager.SetKernelVerbose(true);
+    ggems_manager.SetTrackingVerbose(false, 0);
 
-  // Initializing the GGEMS simulation
-  ggems_manager.Initialize();
+    // Initializing the GGEMS simulation
+    ggems_manager.Initialize();
 
-  // Start GGEMS simulation
-  ggems_manager.Run();
+    // Start GGEMS simulation
+    ggems_manager.Run();
+  }
+  catch (std::exception& e) {
+    std::cerr << e.what() << std::endl;
+  }
+  catch (...) {
+    std::cerr << "Unknown exception!!!" << std::endl;
+  }
 
   opencl_manager.Clean();
   exit(EXIT_SUCCESS);
