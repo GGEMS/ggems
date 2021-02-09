@@ -37,6 +37,10 @@
 #define CL_HPP_TARGET_OPENCL_VERSION 120 /*!< C++ OpenCL version 1.2 only */
 #define CL_HPP_MINIMUM_OPENCL_VERSION 100 /*!< Minimum version of OpenCL */
 
+#if __GNUC__ >= 6 
+#pragma GCC diagnostic ignored "-Wignored-attributes"
+#endif
+
 #ifdef __OPENCL_C_VERSION__ // On OpenCL device
 #define GGchar char /*!< define a new type for char */
 #define GGchar2 char2 /*!< define a new type for char2 */
