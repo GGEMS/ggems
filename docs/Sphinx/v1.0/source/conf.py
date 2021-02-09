@@ -23,15 +23,14 @@ author = 'Didier BENOIT'
 
 # The full version, including alpha/beta/rc tags
 release = '1.0'
-
+version = '1.0'
 
 # -- General configuration ---------------------------------------------------
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = [
-]
+extensions = ['rst2pdf.pdfbuilder']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -41,6 +40,10 @@ templates_path = ['_templates']
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = []
 
+# Grouping the document tree into PDF files. List of tuples
+# (source start file, target name, title, author, options).
+pdf_documents = [('index', u'ggems_v1.0', u'GGEMS', u'GGEMS Collaboration'),]
+pdf_version=1.0
 
 # -- Options for HTML output -------------------------------------------------
 

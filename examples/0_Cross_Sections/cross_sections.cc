@@ -72,7 +72,7 @@ int main(int argc, char** argv)
   }
 
   // Getting parameters
-  GGint context_id = atoi(argv[1]);
+  GGsize context_id = static_cast<GGsize>(atoi(argv[1]));
   std::string material_name = argv[2];
   std::string process_name = argv[3];
   GGfloat energy_MeV = strtof(argv[4], NULL);

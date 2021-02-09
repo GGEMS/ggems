@@ -72,7 +72,7 @@ int main(int argc, char** argv)
   GGwarn.SetVerbosity(0);
 
   // Getting parameters
-  GGint context_id = atoi(argv[1]);
+  GGsize context_id = static_cast<GGsize>(atoi(argv[1]));
 
   // Initialization of singletons
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();

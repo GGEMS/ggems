@@ -3,21 +3,21 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-GGEMS User's Guide for Users and Developers
-===========================================
+Welcome to GGEMS Documentation
+==============================
+GGEMS is an advanced Monte Carlo simulation platform using CPU and GPU architecture targeting medical applications (imaging and particle therapy). This code is based on the well-validated Geant4 physics model and capable to be executed in both CPU and GPU devices using the OpenCL library.
 
 .. toctree::
    :maxdepth: 2
-   :hidden:
    :caption: Preamble
 
+   requirements
    introduction
    getting_started
    building_and_installing
 
 .. toctree::
    :maxdepth: 2
-   :hidden:
    :caption: User Documentation
 
    capabilities
@@ -27,10 +27,11 @@ GGEMS User's Guide for Users and Developers
 
 .. toctree::
    :maxdepth: 2
-   :hidden:
    :caption: Developer Documentation
 
    fundamentals
    executable_program
    python_interface
    changelog
+
+.. _contents:
