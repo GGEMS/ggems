@@ -243,12 +243,12 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     void Deallocate(std::shared_ptr<cl::Buffer> buffer, GGsize size);
 
     /*!
-      \fn void Clean(std::shared_ptr<cl::Buffer> buffer, GGsize size)
+      \fn void CleanBuffer(std::shared_ptr<cl::Buffer> buffer, GGsize size)
       \param buffer - pointer to buffer in host memory
       \param size - size of the buffer in bytes
       \brief Cleaning buffer on OpenCL device
     */
-    void Clean(std::shared_ptr<cl::Buffer> buffer, GGsize size);
+    void CleanBuffer(std::shared_ptr<cl::Buffer> buffer, GGsize size);
 
     /*!
       \return the pointer on host memory on write/read mode
@@ -258,7 +258,7 @@ class GGEMS_EXPORT GGEMSOpenCLManager
       \tparam T - type of the returned pointer on host memory
     */
     template <typename T>
-    T* GetDeviceBuffer(cl::Buffer* device_ptr, GGsize const size) const;
+    T* GetDeviceBuffer(cl::Buffer* device_ptr, GGsize const size);
 
     /*!
       \brief Get the device pointer on host to write on it. Mandatory after a GetDeviceBufferWrite ou GetDeviceBufferRead!!!
@@ -267,7 +267,7 @@ class GGEMS_EXPORT GGEMSOpenCLManager
       \tparam T - type of host memory pointer to release
     */
     template <typename T>
-    void ReleaseDeviceBuffer(cl::Buffer* const device_ptr, T* host_ptr) const;
+    void ReleaseDeviceBuffer(cl::Buffer* const device_ptr, T* host_ptr);
 
     /*!
       \fn DurationNano GetElapsedTimeInKernel(void) const
@@ -436,7 +436,7 @@ class GGEMS_EXPORT GGEMSOpenCLManager
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
-T* GGEMSOpenCLManager::GetDeviceBuffer(cl::Buffer* const device_ptr, GGsize const size) const
+T* GGEMSOpenCLManager::GetDeviceBuffer(cl::Buffer* const device_ptr, GGsize const size)
 {
   GGcout("GGEMSOpenCLManager", "GetDeviceBuffer", 3) << "Getting mapped memory buffer on OpenCL device..." << GGendl;
 
@@ -451,7 +451,7 @@ T* GGEMSOpenCLManager::GetDeviceBuffer(cl::Buffer* const device_ptr, GGsize cons
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
-void GGEMSOpenCLManager::ReleaseDeviceBuffer(cl::Buffer* const device_ptr, T* host_ptr) const
+void GGEMSOpenCLManager::ReleaseDeviceBuffer(cl::Buffer* const device_ptr, T* host_ptr)
 {
   GGcout("GGEMSOpenCLManager", "ReleaseDeviceBuffer", 3) << "Releasing mapped memory buffer on OpenCL device..." << GGendl;
 

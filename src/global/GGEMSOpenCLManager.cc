@@ -277,7 +277,7 @@ GGEMSOpenCLManager::~GGEMSOpenCLManager(void)
 
 void GGEMSOpenCLManager::Clean(void)
 {
-  GGcout("GGEMSOpenCLManager", "~Clean", 3) << "Clean GGEMS OpenCL manager..." << GGendl;
+  GGcout("GGEMSOpenCLManager", "Clean", 3) << "Clean GGEMS OpenCL manager..." << GGendl;
 
   // Freeing platforms, and platform infos
   platforms_.clear();
@@ -942,7 +942,7 @@ void GGEMSOpenCLManager::Deallocate(std::shared_ptr<cl::Buffer> buffer, GGsize s
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSOpenCLManager::Clean(std::shared_ptr<cl::Buffer> buffer, GGsize size)
+void GGEMSOpenCLManager::CleanBuffer(std::shared_ptr<cl::Buffer> buffer, GGsize size)
 {
   GGcout("GGEMSOpenCLManager","Clean", 3) << "Cleaning OpenCL device memory..." << GGendl;
 
@@ -974,7 +974,9 @@ GGsize GGEMSOpenCLManager::GetBestWorkItem(GGsize const& number_of_elements) con
 
 void GGEMSOpenCLManager::CheckOpenCLError(GGint const& error, std::string const& class_name, std::string const& method_name) const
 {
-  if (error != CL_SUCCESS) GGEMSMisc::ThrowException(class_name, method_name, ErrorType(error));
+  if (error != CL_SUCCESS) {
+    GGEMSMisc::ThrowException(class_name, method_name, ErrorType(error));
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////

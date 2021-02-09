@@ -121,6 +121,12 @@ kernel void track_through_ggems_voxelized_solid(
     // Get index of voxelized phantom, x, y, z
     GGint3 voxel_id = convert_int3((local_position - border_min) / voxel_size);
 
+    if (voxel_id.x >= number_of_voxels.x || voxel_id.y >= number_of_voxels.y || voxel_id.z >= number_of_voxels.z) {
+      primary_particle->particle_solid_distance_[global_id] = OUT_OF_WORLD; // Reset to initiale value
+      primary_particle->solid_id_[global_id] = -1; // Out of world
+      break;
+    }
+
     // Get the material that compose this volume
     GGshort material_id = label_data[voxel_id.x + voxel_id.y * number_of_voxels.x + voxel_id.z * number_of_voxels.x * number_of_voxels.y];
 

@@ -77,41 +77,54 @@ int main(int argc, char** argv)
   std::string process_name = argv[3];
   GGfloat energy_MeV = strtof(argv[4], NULL);
 
+  // Setting verbosity
+  GGcout.SetVerbosity(0);
+  GGcerr.SetVerbosity(0);
+  GGwarn.SetVerbosity(0);
+
   // Initialization of singletons
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
   GGEMSMaterialsDatabaseManager& material_manager = GGEMSMaterialsDatabaseManager::GetInstance();
   GGEMSProcessesManager& processes_manager = GGEMSProcessesManager::GetInstance();
 
-  // Set the context id
-  opencl_manager.ContextToActivate(context_id);
+  try {
+    // Set the context id
+    opencl_manager.ContextToActivate(context_id);
 
-  // Enter material database
-  material_manager.SetMaterialsDatabase("../../data/materials.txt");
+    // Enter material database
+    material_manager.SetMaterialsDatabase("../../data/materials.txt");
 
-  // Initializing material
-  GGEMSMaterials materials;
-  materials.AddMaterial(material_name);
-  materials.Initialize();
+    // Initializing material
+    GGEMSMaterials materials;
+    materials.AddMaterial(material_name);
+    materials.Initialize();
 
-  // Printing useful infos
-  std::cout << "Material: " << material_name << std::endl;
-  std::cout << "    Density: " << materials.GetDensity(material_name) << " g.cm-3" << std::endl;
-  std::cout << "    Photon energy cut (for 1 mm distance): " << materials.GetEnergyCut(material_name, "gamma", 1.0, "mm") << " keV" << std::endl;
-  std::cout << "    Electron energy cut (for 1 mm distance): " << materials.GetEnergyCut(material_name, "e-", 1.0, "mm") << " keV" << std::endl;
-  std::cout << "    Positron energy cut (for 1 mm distance): " << materials.GetEnergyCut(material_name, "e+", 1.0, "mm")<< " keV" << std::endl;
-  std::cout << "    Atomic number density: " << materials.GetAtomicNumberDensity(material_name) << " atoms.cm-3" << std::endl;
+    // Printing useful infos
+    std::cout << "Material: " << material_name << std::endl;
+    std::cout << "    Density: " << materials.GetDensity(material_name) << " g.cm-3" << std::endl;
+    std::cout << "    Photon energy cut (for 1 mm distance): " << materials.GetEnergyCut(material_name, "gamma", 1.0, "mm") << " keV" << std::endl;
+    std::cout << "    Electron energy cut (for 1 mm distance): " << materials.GetEnergyCut(material_name, "e-", 1.0, "mm") << " keV" << std::endl;
+    std::cout << "    Positron energy cut (for 1 mm distance): " << materials.GetEnergyCut(material_name, "e+", 1.0, "mm")<< " keV" << std::endl;
+    std::cout << "    Atomic number density: " << materials.GetAtomicNumberDensity(material_name) << " atoms.cm-3" << std::endl;
 
-  // Defining global parameters for cross-section building
-  processes_manager.SetCrossSectionTableNumberOfBins(220); // Not exceed 2048 bins
-  processes_manager.SetCrossSectionTableMinimumEnergy(1.0f, "keV");
-  processes_manager.SetCrossSectionTableMaximumEnergy(10.0f, "MeV");
+    // Defining global parameters for cross-section building
+    processes_manager.SetCrossSectionTableNumberOfBins(220); // Not exceed 2048 bins
+    processes_manager.SetCrossSectionTableMinimumEnergy(1.0f, "keV");
+    processes_manager.SetCrossSectionTableMaximumEnergy(10.0f, "MeV");
 
-  // Add physical process and initialize it
-  GGEMSCrossSections cross_sections;
-  cross_sections.AddProcess(process_name, "gamma");
-  cross_sections.Initialize(&materials);
+    // Add physical process and initialize it
+    GGEMSCrossSections cross_sections;
+    cross_sections.AddProcess(process_name, "gamma");
+    cross_sections.Initialize(&materials);
 
-  std::cout << "At " << energy_MeV << " MeV, cross section is " << cross_sections.GetPhotonCrossSection(process_name, material_name, energy_MeV, "MeV") << " cm2.g-1" << std::endl;
+    std::cout << "At " << energy_MeV << " MeV, cross section is " << cross_sections.GetPhotonCrossSection(process_name, material_name, energy_MeV, "MeV") << " cm2.g-1" << std::endl;
+  }
+  catch (std::exception& e) {
+    std::cerr << e.what() << std::endl;
+  }
+  catch (...) {
+    std::cerr << "Unknown exception!!!" << std::endl;
+  }
 
   opencl_manager.Clean();
   exit(EXIT_SUCCESS);
