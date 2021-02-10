@@ -7,7 +7,7 @@
 }
 
 .wy-nav-content {
-    max-width: 50% !important;
+  max-width: 50% !important;
 }
 
 .wy-menu > .caption > span.caption-text {
@@ -16,4 +16,8 @@
 
 .wy-menu-vertical a {
   color: #000000;
+}
+
+.wy-side-nav-search > div.version {
+  color: #679267;
 }

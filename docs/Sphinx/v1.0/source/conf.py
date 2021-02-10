@@ -51,12 +51,12 @@ pdf_version=1.0
 # a list of builtin themes.
 #
 html_theme = 'sphinx_rtd_theme'
-html_baseurl = 'https://doc.ggems.fr'
+html_baseurl = 'https://doc.ggems.fr/v1.0'
 html_logo = '_static/images/banner.png'
 html_favicon = '_static/images/ggems_logo_32_32.png'
 html_theme_options = {
   'logo_only': True,
-  'display_version': True,
+  'display_version': True
 }
 html_show_sphinx = False
 html_search_language = 'en'
