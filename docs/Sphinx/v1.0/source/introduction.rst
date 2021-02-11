@@ -2,7 +2,7 @@
 Introduction
 ************
 
-GGEMS (GPU Geant4-based Monte Carlo Simulations) is an advanced Monte Carlo simulation platform using the OpenCL library managing CPU and GPU architecture. GGEMS is written in C++, and can be used using Python commands. The reader is assumed to have a basic knowledge of object-oriented programming using C++.
+GGEMS (GPU Geant4-based Monte Carlo Simulations) is an advanced Monte Carlo simulation platform using the OpenCL library managing CPU and GPU architecture. GGEMS is written in C++, and can be used using python commands. The reader is assumed to have a basic knowledge of object-oriented programming using C++.
 
 Well-validated `Geant4 <https://geant4.web.cern.ch>`_ physic models are used in GGEMS and implemented using OpenCL.
 

@@ -37,7 +37,7 @@ And finally, in the last part of this documentation, a more detailed description
    :maxdepth: 2
    :caption: Developer Documentation
 
+   release_notes
    fundamentals
    executable_program
    python_interface
-   changelog
