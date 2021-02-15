@@ -22,22 +22,3 @@ And finally, in the last part of this documentation, a more detailed description
    introduction
    requirements
    building_and_installing
-   getting_started
-
-.. toctree::
-   :maxdepth: 2
-   :caption: User Documentation
-
-   capabilities
-   running_ggems
-   benchmarks
-   examples_and_tools
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Developer Documentation
-
-   release_notes
-   fundamentals
-   executable_program
-   python_interface
