@@ -22,3 +22,10 @@ And finally, in the last part of this documentation, a more detailed description
    introduction
    requirements
    building_and_installing
+   getting_started
+
+.. toctree::
+   :maxdepth: 2
+   :caption: User Documentation
+
+   examples_and_tools
