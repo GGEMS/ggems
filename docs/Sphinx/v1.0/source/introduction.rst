@@ -34,3 +34,6 @@ In the next GGEMS releases, the aim is to implement the following applications a
 * SPECT imaging
 * Intra-operative radiotherapy (brachytherapy and intrabeam)
 * Upgrade OpenCL 1.2 to OpenCL 3.0+
+* Multi-GPU approach
+* AMD architecture validation
+* MacOS systeme validation

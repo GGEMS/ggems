@@ -29,3 +29,10 @@ And finally, in the last part of this documentation, a more detailed description
    :caption: User Documentation
 
    examples_and_tools
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Developer Documentation
+
+   release_notes
+   executable_program

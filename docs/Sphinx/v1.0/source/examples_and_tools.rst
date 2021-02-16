@@ -25,7 +25,7 @@ The purpose of this example is to provide a tool computing cross section for a s
   -p/--process        Setting photon physical process (Compton, Rayleigh, Photoelectric)
   -e/--energy         Setting photon energy in MeV
 
-The macro is defined in the file 'cross_section.py'. The most important line are explained for the user.
+The macro is defined in the file 'cross_section.py'. The most important lines are explained there.
 
 .. code-block:: python
 
@@ -42,6 +42,35 @@ The verbosity level is defined in the range [0;3]. For a silent GGEMS execution,
   materials.add_material(material_name)
   materials.initialize()
 
-In GGEMS, all materials have to be loaded at the beginning of the execution. All materials are defined in 'data/materials.txt' in the GGEMS source folder. A new material can be defined by the user.
+In GGEMS, all materials have to be loaded at the beginning of the execution. All materials are defined in 'data/materials.txt' in the data source folder. A new material can be defined by the user.
 
-Once all materials are loaded, a GGEMSMaterial is created, and each new necessary material can be added. The initialization step is mandatory and computate all physical tables, and store them on OpenCL device.
+Once all materials are loaded, a GGEMSMaterial is created, and each new necessary material can be added. The initialization step is mandatory and compute all physical tables, and store them on an OpenCL device.
+
+Then, the physical tables can be customized by changing the number of bins and the energy range.
+
+.. code-block:: python
+
+  processes_manager.set_cross_section_table_number_of_bins(220)
+  processes_manager.set_cross_section_table_energy_min(1.0, 'keV')
+  processes_manager.set_cross_section_table_energy_max(10.0, 'MeV')
+
+Before using a physical process, GGEMSCrossSection object has to be created. Then each process can be added individually. And finally the cross sections are computing by giving the list of materials.
+
+.. code-block:: python
+
+  cross_sections = GGEMSCrossSections()
+  cross_sections.add_process(process_name, 'gamma')
+  cross_sections.initialize(materials)
+
+Getting the cross section value (in cm2.g-1) for a specific energy (in MeV) is done by the following command:
+
+.. code-block:: python
+
+  cross_sections.get_cs(process_name, material_name, energy_MeV, 'MeV')
+
+And finally to exit the code properly
+
+.. code-block:: python
+
+  opencl_manager.clean()
+  exit()
