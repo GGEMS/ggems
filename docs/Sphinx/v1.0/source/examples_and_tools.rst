@@ -27,32 +27,20 @@ The purpose of this example is to provide a tool computing cross section for a s
 
 The macro is defined in the file 'cross_section.py'. The most important lines are explained there.
 
+The verbosity level is defined in the range [0;3]. For a silent GGEMS execution, the level has to be set to 0, otherwise 3 for maximum information.
+
 .. code-block:: python
 
   GGEMSVerbosity(0)
   opencl_manager.set_device_index(device_id)
 
-The verbosity level is defined in the range [0;3]. For a silent GGEMS execution, the level has to be set to 0, otherwise 3 for maximum information.
+A GGEMSMaterial is created, and each new material can be selected. The initialization step is mandatory and compute all physical tables, and store them on an OpenCL device.
 
 .. code-block:: python
-
-  materials_database_manager.set_materials('../../data/materials.txt')
 
   materials = GGEMSMaterials()
   materials.add_material(material_name)
   materials.initialize()
-
-In GGEMS, all materials have to be loaded at the beginning of the execution. All materials are defined in 'data/materials.txt' in the data source folder. A new material can be defined by the user.
-
-Once all materials are loaded, a GGEMSMaterial is created, and each new necessary material can be added. The initialization step is mandatory and compute all physical tables, and store them on an OpenCL device.
-
-Then, the physical tables can be customized by changing the number of bins and the energy range.
-
-.. code-block:: python
-
-  processes_manager.set_cross_section_table_number_of_bins(220)
-  processes_manager.set_cross_section_table_energy_min(1.0, 'keV')
-  processes_manager.set_cross_section_table_energy_max(10.0, 'MeV')
 
 Before using a physical process, GGEMSCrossSection object has to be created. Then each process can be added individually. And finally the cross sections are computing by giving the list of materials.
 

@@ -125,8 +125,7 @@ Visual Studio is assumed well configured. The command 'cl.exe' should be recogni
 
   echo --- Setting Microsoft Visual C++ Toolkit 2019 environment variables... ---
 
-  call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC \
-  \Auxiliary\Build\vcvarsall.bat" x86_amd64
+  call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" x86_amd64
 
   set PATH="%VCToolkitInstallDir%"\bin;%PATH%
   set INCLUDE="%VCToolkitInstallDir%"\include;%INCLUDE%

@@ -26,6 +26,7 @@ GGEMS medical applications:
 
 In the next GGEMS releases, the aim is to implement the following applications and features:
 
+* Visualization
 * Positron particle tracking
 * Electron particle tracking
 * Mesh volume
