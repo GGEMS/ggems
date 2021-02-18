@@ -36,3 +36,9 @@ And finally, in the last part of this documentation, a more detailed description
 
    release_notes
    executable_program
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Electronic Version
+
+   electronic_format

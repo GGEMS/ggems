@@ -19,7 +19,7 @@
 
 project = 'GGEMS'
 copyright = '2021, GGEMS Team'
-author = 'Didier BENOIT'
+author = 'GGEMS Developers'
 
 # The full version, including alpha/beta/rc tags
 release = '1.0'
