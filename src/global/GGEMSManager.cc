@@ -188,7 +188,7 @@ void GGEMSManager::Initialize(GGuint const& seed)
 
   // Checking if a context is activated
   if (!opencl_manager.IsReady()) {
-    GGEMSMisc::ThrowException("GGEMSManager", "Initialize", "OpenCL Manager is not ready, you have to choose a context!!!");
+    GGEMSMisc::ThrowException("GGEMSManager", "Initialize", "OpenCL Manager is not ready, you have to choose a device!!!");
   }
 
   // Get the start time

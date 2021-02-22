@@ -28,6 +28,7 @@ And finally, in the last part of this documentation, a more detailed description
    :maxdepth: 2
    :caption: User Documentation
 
+   processes_cuts
    examples_and_tools
 
 .. toctree::
@@ -35,10 +36,12 @@ And finally, in the last part of this documentation, a more detailed description
    :caption: Developer Documentation
 
    release_notes
+   ggems_design
+   world_and_axis
    executable_program
 
 .. toctree::
    :maxdepth: 1
-   :caption: Electronic Version
+   :caption: Printable Document
 
-   electronic_format
+   ggems_pdf

@@ -2,7 +2,7 @@
 Release Notes
 *************
 
-Supported and Tested Platforms
+Supported and tested platforms
 ==============================
 
 GGEMS has been tested only on 64 bits architecture.
@@ -65,11 +65,11 @@ Output:
 
   MHD file
 
-Compilation Warnings
+Compilation warnings
 ====================
 
 There may be a few compilation warnings on some platforms, particularly on MacOS, where GGEMS has not been tested.
 
-GGEMS Software License
+GGEMS software license
 ======================
 A Software License applies to the GGEMS code. Users must accept this license in order to use it. The details and the list of copyright holders is available at https://ggems.fr/about and also in the text file LICENSE distributed with the source code. 
