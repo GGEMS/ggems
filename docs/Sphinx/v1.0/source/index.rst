@@ -28,7 +28,9 @@ And finally, in the last part of this documentation, a more detailed description
    :maxdepth: 2
    :caption: User Documentation
 
+   dosimetry
    processes_cuts
+   ggems_commands
    examples_and_tools
 
 .. toctree::
