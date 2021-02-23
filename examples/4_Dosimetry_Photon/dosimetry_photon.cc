@@ -39,6 +39,8 @@
 #include "GGEMS/sources/GGEMSXRaySource.hh"
 #include "GGEMS/global/GGEMSManager.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
+#include "GGEMS/geometries/GGEMSVolumeCreatorManager.hh"
+#include "GGEMS/geometries/GGEMSTube.hh"
 
 /*!
   \fn void PrintHelpAndQuit(void)
@@ -78,6 +80,7 @@ int main(int argc, char** argv)
   // Initialization of singletons
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
   GGEMSMaterialsDatabaseManager& material_manager = GGEMSMaterialsDatabaseManager::GetInstance();
+  GGEMSVolumeCreatorManager& volume_creator_manager = GGEMSVolumeCreatorManager::GetInstance();
   GGEMSProcessesManager& processes_manager = GGEMSProcessesManager::GetInstance();
   GGEMSRangeCutsManager& range_cuts_manager = GGEMSRangeCutsManager::GetInstance();
   GGEMSManager& ggems_manager = GGEMSManager::GetInstance();
@@ -88,6 +91,27 @@ int main(int argc, char** argv)
 
     // Enter material database
     material_manager.SetMaterialsDatabase("../../data/materials.txt");
+
+    // Initializing a global voxelized volume
+    volume_creator_manager.SetVolumeDimensions(240, 240, 640);
+    volume_creator_manager.SetElementSizes(0.5f, 0.5f, 0.5f, "mm");
+    volume_creator_manager.SetOutputImageFilename("data/phantom");
+    volume_creator_manager.SetRangeToMaterialDataFilename("data/range_phantom");
+    volume_creator_manager.SetMaterial("Air");
+    volume_creator_manager.SetDataType("MET_INT");
+    volume_creator_manager.Initialize();
+
+    // Creating a box
+    GGEMSTube* tube_phantom = new GGEMSTube(50.0f, 50.0f, 300.0f, "mm");
+    tube_phantom->SetPosition(0.0f, 0.0f, 0.0f, "mm");
+    tube_phantom->SetLabelValue(1);
+    tube_phantom->SetMaterial("Water");
+    tube_phantom->Initialize();
+    tube_phantom->Draw();
+    delete tube_phantom;
+
+    // Writing volume
+    volume_creator_manager.Write();
 
     // Phantoms and systems
     GGEMSVoxelizedPhantom phantom("phantom");
@@ -124,7 +148,7 @@ int main(int argc, char** argv)
     // Source
     GGEMSXRaySource point_source("point_source");
     point_source.SetSourceParticleType("gamma");
-    point_source.SetNumberOfParticles(100000000);
+    point_source.SetNumberOfParticles(200000000);
     point_source.SetPosition(-595.0f, 0.0f, 0.0f, "mm");
     point_source.SetRotation(0.0f, 0.0f, 0.0f, "deg");
     point_source.SetBeamAperture(5.0f, "deg");
