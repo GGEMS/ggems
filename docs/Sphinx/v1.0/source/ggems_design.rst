@@ -2,7 +2,7 @@
 GGEMS Design
 ************
 
-The GGEMSManager class has to important steps:
+The GGEMSManager class has two important steps:
 
   * Initialization
   * Running

@@ -2,16 +2,12 @@
 Make a GGEMS Project
 ********************
 
-GGEMS is designed as a library, and can be called using either python or C++. The performance are the same, it depends only which language the user is familiar. In this part, only GGEMS commands shared between all examples are explained. For more explanations for other commands please read example documentation.
-
-.. NOTE::
-
-  On Windows or Unix operating system all the following steps are the same.
+GGEMS is designed as a library, and can be called using either python or C++. The performance are the same.
 
 Template
 ========
 
-GGEMS (C++ or python) macros as the same following template:
+GGEMS (C++ or python) macros are writting following this template:
 
 .. image:: ../images/template.png
   :width: 700
@@ -20,7 +16,7 @@ GGEMS (C++ or python) macros as the same following template:
 Python
 ======
 
-Before using python and GGEMS, check GGEMS 'python_module' is in PYTHONPATH variale. PYTHONPATH has to point to the GGEMS library too.
+Before using python and GGEMS, check GGEMS 'python_module' is in your PYTHONPATH variable. PYTHONPATH has to point to the GGEMS library too.
 
 Using GGEMS with python is very simple. A folder storing the project should be created. Inside this folder, write a python file importing GGEMS.
 
@@ -28,13 +24,13 @@ Using GGEMS with python is very simple. A folder storing the project should be c
 
   from ggems import *
 
-The verbosity level is defined in the range [0;3]. For a silent GGEMS execution, the level has to be set to 0, otherwise 3 for maximum information.
+Verbosity level is defined in the range [0;3]. For a silent GGEMS execution, the level is set to 0, otherwise 3 for lot of informations.
 
 .. code-block:: python
 
   GGEMSVerbosity(0)
 
-Next step, an OpenCL device has to be selected. Device is set by its index. If the user wants the first found device by OpenCL so index is 0
+Next step, an OpenCL device is selected.
 
 .. code-block:: python
 
@@ -62,13 +58,13 @@ The photon physical processes are selecting using the process name, the concerni
   processes_manager.add_process('Photoelectric', 'gamma', 'all')
   processes_manager.add_process('Rayleigh', 'gamma', 'all')
 
-In GGEMS, range cuts are defined in distance, particle type has to be specified and cuts are associated to a phantom (or 'all' for all defined phantoms). The distance is converted in energy during the initialization step. During the particle tracking, if the energy particle is inferior to the cut, then the particle is killed and the energy is stored.
+Range cuts are defined in distance, particle type has to be specified and cuts are associated to a phantom (or 'all' for all defined phantoms). The distance is converted in energy during the initialization step. During the particle tracking, if the energy particle is below to the cut the particle is killed and the energy is locally deposited.
 
 .. code-block:: python
 
   range_cuts_manager.set_cut('gamma', 0.1, 'mm', 'all')
 
-GGEMS C++ singleton is called in python with 'ggems_manager' variable. All verboses can be set to 'True' or 'False' depending on the amount of details the user needs. In 'tracking_verbose', the second parameters in the index of particle to track. All objects in GGEMS are initialized with the method 'initialize'. The GGEMS simulations starts with the method 'run'.
+GGEMS is called in python using the 'ggems_manager' variable. All verboses can be set to 'True' or 'False' depending on the amount of details the user needs. In 'tracking_verbose', the second parameters is the index of particle to track. All objects in GGEMS are initialized with the method 'initialize'. The GGEMS simulations starts with the method 'run'.
 
 .. code-block:: python
 
@@ -86,18 +82,19 @@ GGEMS C++ singleton is called in python with 'ggems_manager' variable. All verbo
   ggems_manager.initialize()
   ggems_manager.run()
 
-The last step, exit GGEMS properly by cleaning OpenCL C++ singleton
+The last step, exit GGEMS properly by cleaning OpenCL:
 
 .. code-block:: python
 
   opencl_manager.clean()
+  exit()
 
 C++
 ===
 
 Building a project from scratch using GGEMS library in C++ is a little more difficult. A small example is given using CMake.
 
-First create your project folder (named 'my_project'), then inside it 'include' and 'src' folder can be created if your own classes are compiled with the GGEMS library. A file named 'main.cc' is created for this example and 'CMakeLists.txt' file is also created. At this stage, the folder structure is:
+Create a project folder (named 'my_project' for instance), then 'include' and 'src' folder can be created if custom C++ classes are written. A file named 'main.cc' is created for this example and 'CMakeLists.txt' file is also created. At this stage, the folder structure is:
 
 .. code-block:: text
 
@@ -133,9 +130,7 @@ Compiling this project can be done using the following 'CMakeLists.txt' example:
   ADD_EXECUTABLE(my_project main.cc ${source})
   TARGET_LINK_LIBRARIES(my_project ${OpenCL_LIBRARY} ${GGEMS_LIBRARY})
 
-All previous python commands can be written in C++.
-
-including some GGEMS files:
+In main.cc file, GGEMS files are included:
 
 .. code-block:: c++
 
@@ -145,7 +140,7 @@ including some GGEMS files:
   #include "GGEMS/physics/GGEMSRangeCutsManager.hh"
   #include "GGEMS/physics/GGEMSProcessesManager.hh"
 
-The verbosity level is defined in the range [0;3]. For a silent GGEMS execution, the level has to be set to 0, otherwise 3 for maximum information.
+For silent GGEMS execution, the level is set to 0, otherwize 3 for maximum information.
 
 .. code-block:: c++
 
@@ -153,7 +148,7 @@ The verbosity level is defined in the range [0;3]. For a silent GGEMS execution,
   GGcerr.SetVerbosity(0);
   GGwarn.SetVerbosity(0);
 
-Next step, an OpenCL device has to be selected. Device is set by its index. If the user wants the first found device by OpenCL so index is 0
+Next step, an OpenCL device is selected. Here, device 0 is selected:
 
 .. code-block:: c++
 
@@ -184,7 +179,7 @@ The photon physical processes are selecting using the process name, the concerni
   processes_manager.AddProcess("Photoelectric", "gamma", "all");
   processes_manager.AddProcess("Rayleigh", "gamma", "all");
 
-In GGEMS, range cuts are defined in distance, particle type has to be specified and cuts are associated to a phantom (or 'all' for all defined phantoms). The distance is converted in energy during the initialization step. During the particle tracking, if the energy particle is inferior to the cut, then the particle is killed and the energy is stored.
+In GGEMS, range cuts are defined in distance, particle type has to be specified and cuts are associated to a phantom (or 'all' for all defined phantoms). The distance is converted in energy during the initialization step. During the particle tracking, if the energy particle is below to the cut, then the particle is killed and the energy is locally deposited.
 
 .. code-block:: c++
 

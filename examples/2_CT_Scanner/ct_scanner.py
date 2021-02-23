@@ -44,6 +44,27 @@ materials_database_manager.set_materials('../../data/materials.txt')
 
 # ------------------------------------------------------------------------------
 # STEP 3: Phantoms and systems
+
+# Generating phantom
+volume_creator_manager.set_dimensions(120, 120, 120)
+volume_creator_manager.set_element_sizes(0.1, 0.1, 0.1, 'mm')
+volume_creator_manager.set_output('data/phantom')
+volume_creator_manager.set_range_output('data/range_phantom')
+volume_creator_manager.set_material('Air')
+volume_creator_manager.set_data_type('MET_INT')
+volume_creator_manager.initialize()
+
+box_phantom = GGEMSBox(10.0, 10.0, 10.0, 'mm')
+box_phantom.set_position(0.0, 0.0, 0.0, 'mm')
+box_phantom.set_label_value(1)
+box_phantom.set_material('Water')
+box_phantom.initialize()
+box_phantom.draw()
+box_phantom.delete()
+
+volume_creator_manager.write()
+
+# Loading phantom in GGEMS
 phantom = GGEMSVoxelizedPhantom('phantom')
 phantom.set_phantom('data/phantom.mhd', 'data/range_phantom.txt')
 phantom.set_rotation(0.0, 0.0, 0.0, 'deg')

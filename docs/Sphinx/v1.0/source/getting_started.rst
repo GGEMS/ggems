@@ -1,7 +1,7 @@
 ***************
 Getting Started
 ***************
-Once the installation is finished, the easiest way trying GGEMS is using the python console and call the OpenCL C++ singleton.
+GGEMS can be called using a python console
 
 .. code-block:: console
 
@@ -14,10 +14,10 @@ Once the installation is finished, the easiest way trying GGEMS is using the pyt
   >>> opencl_manager.clean()
   >>> exit()
 
-With the previous command lines, the user has the possibility checking which device is recognized by GGEMS and the first found OpenCL device is selected. 
+With the previous command lines, the user has the possibility checking which device is recognized by GGEMS. And the device 0 is selected.
 
 .. IMPORTANT::
 
   If an OpenCL device is missing, please check your installation driver for the missing device.
 
-The best way learing how GGEMS is working, is to try each example available in the examples folder. Each examples is detailed for the user in the respective part of this manual. Using GGEMS, for a personnal project, from scratch, using python or C++ is explained in the developer part.
+The best way learning how GGEMS is working, is to try each example available in the example folders. Using GGEMS, for a personnal project, from scratch, using python or C++ is explained in the developer part.

@@ -5,13 +5,13 @@ Physical Processes & Range cuts
 Physical Processes
 ==================
 
-In GGEMS, the photon processed impletemented are:
+The photon processes impletemented are:
 
   * Compton scattering
   * Photoelectric effect
   * Rayleigh scattering
 
-Each of these processed are extracted for Geant4 version 10.6. For more information about physics, please read the documentation on the Geant4 website.
+Each of these processes are extracted from Geant4 version 10.6. For more information about physics, please read the documentation on the Geant4 website.
 
 By using python, the variable 'processes_manager' can be called to manage processes.
 
@@ -22,58 +22,58 @@ By using python, the variable 'processes_manager' can be called to manage proces
 Compton scattering
 ------------------
 
-The Geant4 model extracted for the Compton scattering model is the 'G4KleinNishinaCompton' standard model. It is the fastest way to simulate this process. Compton scattering is activated for all the navigators, or for a specific navigator.
+The Geant4 model extracted is the 'G4KleinNishinaCompton' standard model. It is the fastest algorithm to simulate this process. Compton scattering is activated for all the navigators, or for a specific navigator.
 
 .. code-block:: python
 
   processes_manager.add_process('Compton', 'gamma', 'all')
 
-In the previous line, Compton is activated for all the navigators.
+In the previous line, Compton scattering is activated for all the navigators.
 
 .. code-block:: python
 
   processes_manager.add_process('Compton', 'gamma', 'my_phantom')
 
-In the previous line, Compton is activated only for the navigator named 'my_phantom'
+In the previous line, Compton scattering is activated only for a navigator named 'my_phantom'.
 
 Photoelectric effect
 --------------------
 
-The Geant4 model extracted for the Photoelectric effect model is the 'G4PhotoElectricEffect' standard model using the Sandia table. Photoelectric effect is activated for all the navigators, or for a specific navigator.
+The Geant4 model extracted is the 'G4PhotoElectricEffect' standard model using Sandia tables. Photoelectric effect is activated for all the navigators, or for a specific navigator.
 
 .. code-block:: python
 
   processes_manager.add_process('Photoelectric', 'gamma', 'all')
 
-In the previous line, Photoelectric is activated for all the navigators.
+In the previous line, Photoelectric effect is activated for all the navigators.
 
 .. code-block:: python
 
   processes_manager.add_process('Photoelectric', 'gamma', 'my_phantom')
 
-In the previous line, Photoelectric is activated only for the navigator named 'my_phantom'
+In the previous line, Photoelectric effect is activated only for a navigator named 'my_phantom'
 
 Rayleigh scattering
 -------------------
 
-The Geant4 model extracted for the Rayleigh scattering model is the 'G4LivermoreRayleighModel' livermore model. Rayleigh scattering is activated for all the navigators, or for a specific navigator.
+The Geant4 model extracted is the 'G4LivermoreRayleighModel' livermore model. Rayleigh scattering is activated for all the navigators, or for a specific navigator.
 
 .. code-block:: python
 
   processes_manager.add_process('Rayleigh', 'gamma', 'all')
 
-In the previous line, Rayleigh is activated for all the navigators.
+In the previous line, Rayleigh scattering is activated for all the navigators.
 
 .. code-block:: python
 
   processes_manager.add_process('Rayleigh', 'gamma', 'my_phantom')
 
-In the previous line, Rayleigh is activated only for the navigator named 'my_phantom'
+In the previous line, Rayleigh scattering is activated only for a navigator named 'my_phantom'
 
 Process parameters building
 ---------------------------
 
-The cross-sections are computing during the initialization step. The parameters used for the cross-sections building can be customized by the user, however it is recommanded to use the default parameters. The customizable parameters are:
+The cross-sections are computed during the GGEMS initialization step. The parameters used for the cross-sections building can be customized by the user, however it is recommanded to use the default parameters. The customizable parameters are:
 
   * Minimum energy of cross-section table
   * Maximum energy of cross-section table
@@ -107,7 +107,7 @@ The list of commands are:
 Range Cuts
 ==========
 
-In GGEMS, the cuts are defined for each particle in distance unit in all navigator or a specific navigator. During the GGEMS initialization the cuts are converted in energy for each defined material. If the particle energy is below the cut, then the particle is killed and the energy locally deposited. By default the cuts are 1 micron.
+The cuts are defined for each particle in distance unit in all navigator or a specific navigator. During the GGEMS initialization the cuts are converted in energy for each defined material in navigator. If the particle energy is below the cut, then the particle is killed and the energy locally deposited. By default the cuts are 1 micron.
 
 .. code-block:: python
 
@@ -119,4 +119,4 @@ In the previous line, cuts are activated for photon for all navigators.
 
   range_cuts_manager.set_cut('gamma', 0.1, 'mm', 'my_phantom')
 
-In the previous line, cuts are activated for photon for the navigator named 'my_phantom'.
+In the previous line, cuts are activated for photon for a navigator named 'my_phantom'.

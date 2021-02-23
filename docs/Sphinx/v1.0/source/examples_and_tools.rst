@@ -2,19 +2,16 @@
 Examples & Tools
 ****************
 
-A list of examples and tools are provided for GGEMS users. Each time, when it is possible, C++ and python macros are given. For C++ macros, a CMakeLists.txt file is mandatory for compilation.
+A list of examples and tools are provided for GGEMS users. C++ and python instructions are given. For C++, a CMakeLists.txt file is mandatory for compilation.
 
 .. NOTE::
 
-  Examples are compiled and installed when the compilation option 'BUILD_EXAMPLES' is set to ON. C++ macro executables are installed in the same location than example folders.
+  Examples are compiled and installed when the compilation option 'BUILD_EXAMPLES' is set to ON. C++ executables are installed in example folders.
 
-
-All provided examples are explained in details in the following parts. Only python macros are explained. C++ macros are very similar and not need more explanations.
-
-Example 0: Cross section computation
+Example 0: Cross-section computation
 ====================================
 
-The purpose of this example is to provide a tool computing cross section for a specific material and a specific photon physical process. The energy (in MeV) and the OpenCL device have to be set by the user.
+The purpose of this example is to provide a tool computing cross-section for a specific material and a specific photon physical process. The energy (in MeV) and the OpenCL device are set by the user.
 
 .. code-block:: console
 
@@ -25,16 +22,16 @@ The purpose of this example is to provide a tool computing cross section for a s
   -p/--process        Setting photon physical process (Compton, Rayleigh, Photoelectric)
   -e/--energy         Setting photon energy in MeV
 
-The macro is defined in the file 'cross_section.py'. The most important lines are explained there.
+The macro is in the file 'cross_section.py'.
 
-The verbosity level is defined in the range [0;3]. For a silent GGEMS execution, the level has to be set to 0, otherwise 3 for maximum information.
+Verbosity level is defined in the range [0;3]. For a silent GGEMS execution, the level is set to 0, otherwise 3 for lot of informations.
 
 .. code-block:: python
 
   GGEMSVerbosity(0)
   opencl_manager.set_device_index(device_id)
 
-A GGEMSMaterial is created, and each new material can be selected. The initialization step is mandatory and compute all physical tables, and store them on an OpenCL device.
+GGEMSMaterial object is created, and each new material can be added. The initialization step is mandatory and compute all physical tables, and store them on an OpenCL device.
 
 .. code-block:: python
 
@@ -42,7 +39,7 @@ A GGEMSMaterial is created, and each new material can be selected. The initializ
   materials.add_material(material_name)
   materials.initialize()
 
-Before using a physical process, GGEMSCrossSection object has to be created. Then each process can be added individually. And finally the cross sections are computing by giving the list of materials.
+Before using a physical process, GGEMSCrossSection object is created. Then each process can be added individually. And finally cross sections are computing by giving the list of materials.
 
 .. code-block:: python
 
@@ -61,9 +58,9 @@ Example 1: Total attenuation
 
 .. WARNING::
 
-  This example is only available using python and matplotlib library is mandatory.
+  This example is only available using python and the matplotlib library is mandatory.
 
-This example is a tool for plotting the total attenuation of a material for energy between 0.01 MeV and 1 MeV. The commands are similar to example 0, with the difference that all physical processes are activated.
+This example is a tool for plotting the total attenuation of a material for energy between 0.01 MeV and 1 MeV. The commands are similar to example 0, and all physical processes are activated.
 
 .. code-block:: console
 
@@ -72,7 +69,7 @@ This example is a tool for plotting the total attenuation of a material for ener
   -d/--device         Setting OpenCL id
   -m/--material       Setting one of material defined in GGEMS (Water, Air, ...)
 
-As example, total attenuations for Water and LSO are shown below:
+Total attenuations for Water and LSO are shown below:
 
 .. image:: ../images/Water_Total_Attenuation.png
   :width: 800
@@ -85,7 +82,7 @@ As example, total attenuations for Water and LSO are shown below:
 Example 2: CT scanner
 ======================
 
-In this CT scanner example, a box a water is simulated with a CT curved detector. Only one projection is computed simulating 1e9 particles.
+In this CT scanner example, a water box is simulated associated to a CT curved detector. Only one projection is computed simulating 1e9 particles.
 
 .. code-block:: console
 
@@ -93,7 +90,7 @@ In this CT scanner example, a box a water is simulated with a CT curved detector
   -h/--help           Printing help into the screen
   -d/--device         Setting OpenCL id
 
-First, a phantom build with 'generate_phantom.py' is loaded
+The water box phantom is loaded:
 
 .. code-block:: python
 
@@ -102,7 +99,7 @@ First, a phantom build with 'generate_phantom.py' is loaded
   phantom.set_rotation(0.0, 0.0, 0.0, 'deg')
   phantom.set_position(0.0, 0.0, 0.0, 'mm')
 
-Then CT curved detector is built
+Then CT curved detector is built:
 
 .. code-block:: python
 
@@ -118,7 +115,7 @@ Then CT curved detector is built
   ct_detector.set_threshold(10.0, 'keV')
   ct_detector.save('data/projection')
 
-And finally a cone-beam X-ray source is initialized
+Initialization of cone-beam X-ray source:
 
 .. code-block:: python
 
@@ -150,7 +147,7 @@ Performance:
 Example 3: Voxelized phantom generator
 ======================================
 
-In GGEMS, a tool creating voxelized phantom is provided. Only basic shapes are available such as tube, box and sphere. The output format is MHD, and the range material data file is created in same time than the voxelized volume.
+A tool creating voxelized phantom is provided by GGEMS. Only basic shapes are available such as tube, box and sphere. The output format is MHD, and the range material data file is created in same time than the voxelized volume.
 
 .. code-block:: console
 
@@ -158,7 +155,7 @@ In GGEMS, a tool creating voxelized phantom is provided. Only basic shapes are a
   -h/--help           Printing help into the screen
   -d/--device         Setting OpenCL id
 
-In python macro file, first step is to create global volume storing all other voxelized objets. Dimension, voxel size, name of output volume, format data type and material are defined.
+First step is to create global volume storing all other voxelized objets. Dimension, voxel size, name of output volume, format data type and material are defined.
 
 .. code-block:: python
 
@@ -170,7 +167,7 @@ In python macro file, first step is to create global volume storing all other vo
   volume_creator_manager.set_data_type('MET_INT')
   volume_creator_manager.initialize()
 
-Then a voxelized volume can be drawn in the global volume. A box object is built in the command lines below:
+Then a voxelized volume can be drawn in the global volume. A box object is built with the command lines below:
 
 .. code-block:: python
 
@@ -185,9 +182,9 @@ Then a voxelized volume can be drawn in the global volume. A box object is built
 Example 4: Dosimetry
 ====================
 
-In dosimetry example, a cylinder is simulated computing absorbed dose inside it. Different results such as dose, energy deposited... can be plotted. An external source, using GGEMS X-ray source, is simulated generating 2 uncertainthis CT scanner example, a box a water is simulated with a CT curved detector. Only one projection is computed simulating 2e8 particles.
+In dosimetry example, a cylinder is simulated computing absorbed dose inside it. Different results such as dose, energy deposited... can be plotted. An external source, using GGEMS X-ray source is simulated generating 2e8 particles.
 
-First, a phantom build with 'generate_phantom.py' is loaded
+First, the cylinder phantom is loaded:
 
 .. code-block:: python
 
@@ -196,7 +193,7 @@ First, a phantom build with 'generate_phantom.py' is loaded
   phantom.set_rotation(0.0, 0.0, 0.0, 'deg')
   phantom.set_position(0.0, 0.0, 0.0, 'mm')
 
-Then dosimetry object is associated to the previous phantom, storing all data during particle tracking
+Then dosimetry object is associated to the previous phantom, storing all data during particle tracking:
 
 .. code-block:: python
 
@@ -211,7 +208,7 @@ Then dosimetry object is associated to the previous phantom, storing all data du
   dosimetry.hit(True)
   dosimetry.edep_squared(True)
 
-And finally an external source is initialized
+And finally an external source using GGEMSXRaySource is created:
 
 .. code-block:: python
 

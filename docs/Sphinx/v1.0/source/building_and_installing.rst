@@ -4,7 +4,7 @@ Building & Installing
 
 .. NOTE::
 
-  GGEMS is written in C++ and using the OpenCL C++ API. However, the most useful GGEMS functions have been wrapped to be called in pure python version 3. Python is not mandatory, GGEMS can be used in pure C++ too. Lot of C++ and python examples are given in this manual.
+  GGEMS is written in C++ and using the OpenCL C++ API. However, the most useful GGEMS functions have been wrapped to be called in python version 3. Python is not mandatory, GGEMS can be used only in C++ too. Lot of C++ and python examples are given in this manual.
 
 Prerequisites
 =============
@@ -14,9 +14,9 @@ NVIDIA
 ------
 Linux & Windows
 ~~~~~~~~~~~~~~~
-CUDA and NVIDIA driver have to be installed if you want to use GGEMS on a NVIDIA architecture. The easiest way to install OpenCL on NVIDIA platform is to install CUDA and NVIDIA driver in the same time from the following link: https://developer.nvidia.com/cuda-downloads.
+CUDA and NVIDIA driver have to be installed if you want to use GGEMS on a NVIDIA architecture. The easiest way to install OpenCL on NVIDIA platform is to download CUDA and NVIDIA driver in the same time from the following link: https://developer.nvidia.com/cuda-downloads.
 
-GGEMS has be tested on the lastest CUDA and NVIDIA versions, and also older versions.
+GGEMS has been tested on the lastest CUDA and NVIDIA versions, and also some older versions.
 
 .. WARNING::
 
@@ -24,7 +24,7 @@ GGEMS has be tested on the lastest CUDA and NVIDIA versions, and also older vers
 
 .. WARNING::
 
-  It is recommanded to install CUDA and the NVIDIA driver directly from the NVIDIA website. Using packaging tool (as apt for instance) is very convenient but can produce some troubles during GGEMS executation, for instance mismatch CUDA version and NVIDIA driver.
+  It is recommanded to install CUDA and the NVIDIA driver directly from the NVIDIA website. Using packaging tool (as apt) is very convenient but can produce some troubles during GGEMS executation.
 
 INTEL
 -----
@@ -40,7 +40,7 @@ AMD platform has not be tested, but surely with few modifications GGEMS will run
 
 .. IMPORTANT::
 
-  All previous drivers have to be installed before to install GGEMS. Install NVIDIA driver before Intel driver is recommanded, if the user wants to use GGEMS on both architecture.
+  All previous drivers have to be installed before to install GGEMS. Install NVIDIA driver before Intel driver is recommanded, if using GGEMS on both architecture is required.
 
 GGEMS Installation
 ==================
@@ -54,7 +54,7 @@ Intel and/or NVIDIA drivers are supposed to be installed. Download GGEMS from th
 
   $ wget https://ggems.fr/download/ggems_v1.0.zip
 
-Unzip the downloaded file, create a folder named GGEMS_build (or another name), and launch the command 'ccmake'. We recommand also to create an install folder.
+Unzip the downloaded file, create a folder named GGEMS_build (or another name), and launch the command 'ccmake'. Create an install folder is recommanded.
 
 .. code-block:: console
 
@@ -74,9 +74,9 @@ Unzip the downloaded file, create a folder named GGEMS_build (or another name), 
 
 .. NOTE::
 
-  By default, the GNU compiler is used by GGEMS on Linux. CLANG can be also used. To change the compiler you have to open the CMakeLists.txt file and change the compiler. Empty the CMAKE cache before to launch the compilation.
+  By default, the GNU compiler is used on Linux. CLANG can also be used. The compiler can be modify in the CMakeLists.txt file and empty the CMAKE cache.
 
-In the previous images 'YOUR_PATH' is automatically found by CMAKE. The CMAKE parameters shown previously are explained :ref:`here <CMAKE Params>`. Last step, compile and install GGEMS.
+In the previous images 'YOUR_PATH' is automatically found by CMAKE. CMAKE parameters shown previously are explained :ref:`here <CMAKE Params>`. Last step, compile and install GGEMS.
 
 .. code-block:: console
 
@@ -96,7 +96,7 @@ To load permanently the GGEMS python module, we also recommand to add the follow
   export PYTHONPATH=$PYTHONPATH:YOUR_PATH/GGEMS_install/ggems/python_module
   export PYTHONPATH=$PYTHONPATH:YOUR_PATH/GGEMS_install/ggems/lib
 
-GGEMS is now installed on your system. To test the installation, you can try to launch GGEMS examples or load the GGEMS python module from python console.
+GGEMS is now installed on your system. To test the installation, try to launch GGEMS examples or load the GGEMS python module from python console.
 
 .. code-block:: python
 
@@ -110,7 +110,7 @@ Windows
 
 .. NOTE::
 
-  The following installation process for Windows is done using the classical Windows command prompt. Visual Studio is the compiler by default. CLANG can be selected by modifying the CMakeLists.txt.
+  The following installation process for Windows is done using the classical Windows command prompt. Visual Studio is the compiler by default. CLANG can be selected by modifying the CMakeLists.txt file.
 
 .. IMPORTANT::
 
@@ -135,7 +135,7 @@ Visual Studio is assumed well configured. The command 'cl.exe' should be recogni
   echo Done.
   :done
 
-Launch the previous script by writing its name on the command terminal.
+Calling the previous script typing the following command:
 
 .. code-block:: console
 
@@ -169,9 +169,9 @@ Go to the build folder and launch CMAKE.
 
 .. IMPORTANT::
 
-  Order during installation of NVIDIA and Intel driver could be important. To check that, go to your environment variables in PATH variable and check which OpenCL library is call first. NVIDIA OpenCL library has to be call first.
+  Order during installation of NVIDIA and Intel driver could be important. To check that, go to your environment variables in PATH variable and check which OpenCL library is call first. NVIDIA OpenCL library should be called first.
 
-Final step, launch the compilation and installation using nmake or ninja.
+Final step, compilation and installation using nmake or ninja.
 
 .. code-block:: console
 
@@ -199,7 +199,7 @@ GGEMS have to be set in your environment variables by creating (or add an entry)
   echo Done.
   :done
 
-GGEMS is now installed on your system. To test the installation, you can try to launch GGEMS examples or load the GGEMS python module from python console.
+GGEMS is now installed on your system. To test the installation, try to launch GGEMS examples or load the GGEMS python module from python console.
 
 .. code-block:: python
 
@@ -214,7 +214,7 @@ CMAKE parameters
 ----------------
 BUILD_EXAMPLES
 ~~~~~~~~~~~~~~
-By default this option is set to ON. During the installation all examples are copied to the respective example folder.
+By default this option is set to ON. During the installation all C++ executables are copied to the respective example folder.
 
 CMAKE_INSTALL_PREFIX
 ~~~~~~~~~~~~~~~~~~~~
@@ -222,11 +222,11 @@ Path to your installation folder
 
 DOSIMETRY_DOUBLE_PRECISION
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
-By default this option is set to ON. For dosimetry computation the computation are in double float precision. It's the only part of code of GGEMS to do that.
+By default this option is set to ON. For dosimetry the computation are in double float precision.
 
 GGEMS_PATH
 ~~~~~~~~~~
-Path found automatically by CMAKE. It corresponds to source folder for CMAKE.
+Path found automatically by CMAKE. It corresponds to GGEMS source folder.
 
 MAXIMUM_PARTICLES
 ~~~~~~~~~~~~~~~~~

@@ -19,20 +19,14 @@ More verified and tested configurations:
 
 OpenCL devices:
   Intel
-    Xeon E5-2680
-
-    Xeon W-2245
+    Xeon E5-2680, Xeon W-2245
 
     HD Graphics 530
 
   NVIDIA
     Quadro P400
 
-    GeForce GTX 980 Ti
-
-    GeForce GTX 1050 Ti
-
-    GeForce GTX 1080 Ti
+    GeForce GTX 980 Ti, 1050 Ti, 1080 Ti
 
 What you can do in GGEMS
 ========================
