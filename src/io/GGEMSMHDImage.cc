@@ -156,7 +156,7 @@ void GGEMSMHDImage::Read(std::string const& image_mhd_header_filename, std::weak
       GGwarn("GGEMSMHDImage", "Read", 0) << "The key 'Offset' is useless in GGEMS." << GGendl;
     }
     else if (!kKey.compare("NDims")) {
-      GGwarn("GGEMSMHDImage", "Read", 0) << "The key 'NDims' is useless in GGEMS." << GGendl;
+      continue;
     }
     else if (!kKey.compare("BinaryData")) {
       GGwarn("GGEMSMHDImage", "Read", 0) << "The key 'BinaryData' is useless in GGEMS." << GGendl;
@@ -229,6 +229,7 @@ void GGEMSMHDImage::Write(std::shared_ptr<cl::Buffer> image) const
 
   // header data
   std::ofstream out_header_stream(mhd_header_file_, std::ios::out);
+  out_header_stream << "NDims = 3" << std::endl;
   out_header_stream << "ElementSpacing = " << element_sizes_.x << " " << element_sizes_.y << " " << element_sizes_.z << std::endl;
   out_header_stream << "DimSize = " << dimensions_.x_ << " " << dimensions_.y_ << " " << dimensions_.z_ << std::endl;
   out_header_stream << "ElementType = " << mhd_data_type_ << std::endl;

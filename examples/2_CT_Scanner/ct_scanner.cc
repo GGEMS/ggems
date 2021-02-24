@@ -95,7 +95,7 @@ int main(int argc, char** argv)
     volume_creator_manager.SetVolumeDimensions(120, 120, 120);
     volume_creator_manager.SetElementSizes(0.1f, 0.1f, 0.1f, "mm");
     volume_creator_manager.SetOutputImageFilename("data/phantom");
-    volume_creator_manager.SetRangeToMaterialDataFilename("data/range_phantom");
+    volume_creator_manager.SetRangeToMaterialDataFilename("data/range_phantom.txt");
     volume_creator_manager.SetMaterial("Air");
     volume_creator_manager.SetDataType("MET_INT");
     volume_creator_manager.Initialize();
