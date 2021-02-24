@@ -8,7 +8,7 @@ A list of examples and tools are provided for GGEMS users. C++ and python instru
 
   Examples are compiled and installed when the compilation option 'BUILD_EXAMPLES' is set to ON. C++ executables are installed in example folders.
 
-Example 0: Cross-section computation
+Example 0: Cross-Section Computation
 ====================================
 
 The purpose of this example is to provide a tool computing cross-section for a specific material and a specific photon physical process. The energy (in MeV) and the OpenCL device are set by the user.
@@ -53,7 +53,7 @@ Getting the cross section value (in cm2.g-1) for a specific energy (in MeV) is d
 
   cross_sections.get_cs(process_name, material_name, energy_MeV, 'MeV')
 
-Example 1: Total attenuation
+Example 1: Total Attenuation
 ============================
 
 .. WARNING::
@@ -79,7 +79,7 @@ Total attenuations for Water and LSO are shown below:
   :width: 800
   :align: center
 
-Example 2: CT scanner
+Example 2: CT Scanner
 ======================
 
 In this CT scanner example, a water box is simulated associated to a CT curved detector. Only one projection is computed simulating 1e9 particles.
@@ -144,7 +144,7 @@ Performance:
 |  Xeon X-2245 8 cores / 16 threads  | 132                    |
 +------------------------------------+------------------------+
 
-Example 3: Voxelized phantom generator
+Example 3: Voxelized Phantom Generator
 ======================================
 
 A tool creating voxelized phantom is provided by GGEMS. Only basic shapes are available such as tube, box and sphere. The output format is MHD, and the range material data file is created in same time than the voxelized volume.

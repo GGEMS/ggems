@@ -19,7 +19,7 @@ By using python, the variable 'processes_manager' can be called to manage proces
 
   Secondary particles (photon and electron) are not simulated yet. For Photoelectric effect, the photon is killed during the interaction and the energy is locally deposited, and the fluorescence photon is not emitted.
 
-Compton scattering
+Compton Scattering
 ------------------
 
 The Geant4 model extracted is the 'G4KleinNishinaCompton' standard model. It is the fastest algorithm to simulate this process. Compton scattering is activated for all the navigators, or for a specific navigator.
@@ -36,7 +36,7 @@ In the previous line, Compton scattering is activated for all the navigators.
 
 In the previous line, Compton scattering is activated only for a navigator named 'my_phantom'.
 
-Photoelectric effect
+Photoelectric Effect
 --------------------
 
 The Geant4 model extracted is the 'G4PhotoElectricEffect' standard model using Sandia tables. Photoelectric effect is activated for all the navigators, or for a specific navigator.
@@ -53,7 +53,7 @@ In the previous line, Photoelectric effect is activated for all the navigators.
 
 In the previous line, Photoelectric effect is activated only for a navigator named 'my_phantom'
 
-Rayleigh scattering
+Rayleigh Scattering
 -------------------
 
 The Geant4 model extracted is the 'G4LivermoreRayleighModel' livermore model. Rayleigh scattering is activated for all the navigators, or for a specific navigator.
@@ -70,7 +70,7 @@ In the previous line, Rayleigh scattering is activated for all the navigators.
 
 In the previous line, Rayleigh scattering is activated only for a navigator named 'my_phantom'
 
-Process parameters building
+Process Parameters Building
 ---------------------------
 
 The cross-sections are computed during the GGEMS initialization step. The parameters used for the cross-sections building can be customized by the user, however it is recommanded to use the default parameters. The customizable parameters are:
@@ -87,7 +87,7 @@ The default parameters are defined as following:
   processes_manager.set_cross_section_table_energy_min(1.0, 'keV')
   processes_manager.set_cross_section_table_energy_max(1.0, 'MeV')
 
-Process verbosity
+Process Verbosity
 -----------------
 
 Informations about processes can be printed by GGEMS:

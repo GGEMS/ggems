@@ -30,6 +30,7 @@ And finally, in the last part of this documentation, a more detailed description
 
    dosimetry
    processes_cuts
+   sources
    ggems_commands
    examples_and_tools
 
@@ -39,7 +40,6 @@ And finally, in the last part of this documentation, a more detailed description
 
    release_notes
    ggems_design
-   world_and_axis
    executable_program
 
 .. toctree::

@@ -210,7 +210,7 @@ GGEMS is now installed on your system. To test the installation, try to launch G
 
 .. _CMAKE Params:
 
-CMAKE parameters
+CMAKE Parameters
 ----------------
 BUILD_EXAMPLES
 ~~~~~~~~~~~~~~

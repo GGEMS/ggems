@@ -152,9 +152,6 @@ void GGEMSVolumeCreatorManager::SetOutputImageFilename(std::string const& output
 void GGEMSVolumeCreatorManager::SetRangeToMaterialDataFilename(std::string const& output_range_to_material_filename)
 {
   output_range_to_material_filename_ = output_range_to_material_filename;
-
-  // Adding suffix
-  output_range_to_material_filename_ += ".txt";
 }
 
 ////////////////////////////////////////////////////////////////////////////////

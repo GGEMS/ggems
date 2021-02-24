@@ -2,7 +2,7 @@
 Release Notes
 *************
 
-Supported and tested platforms
+Supported and Tested Platforms
 ==============================
 
 GGEMS has been tested only on 64 bits architecture.
@@ -28,7 +28,7 @@ OpenCL devices:
 
     GeForce GTX 980 Ti, 1050 Ti, 1080 Ti
 
-What you can do in GGEMS
+What You Can Do in GGEMS
 ========================
 
 Applications:
@@ -59,11 +59,11 @@ Output:
 
   MHD file
 
-Compilation warnings
+Compilation Warnings
 ====================
 
 There may be a few compilation warnings on some platforms, particularly on MacOS, where GGEMS has not been tested.
 
-GGEMS software license
+GGEMS Software License
 ======================
 A Software License applies to the GGEMS code. Users must accept this license in order to use it. The details and the list of copyright holders is available at https://ggems.fr/about and also in the text file LICENSE distributed with the source code. 
