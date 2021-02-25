@@ -230,31 +230,32 @@ void GGEMSVoxelizedSolid::LoadVolumeImage(std::weak_ptr<GGEMSMaterials> material
   mhd_input_phantom.Read(volume_header_filename_, solid_data_);
 
   // Get the name of raw file from mhd reader
-  std::string const kRawFilename = mhd_input_phantom.GetRawMDHfilename();
+  std::string output_dir = mhd_input_phantom.GetOutputDirectory();
+  std::string raw_filename = output_dir + mhd_input_phantom.GetRawMDHfilename();
 
   // Get the type
   std::string const kDataType = mhd_input_phantom.GetDataMHDType();
 
   // Convert raw data to material id data
   if (!kDataType.compare("MET_CHAR")) {
-    ConvertImageToLabel<char>(kRawFilename, range_filename_, materials);
+    ConvertImageToLabel<char>(raw_filename, range_filename_, materials);
   }
   else if (!kDataType.compare("MET_UCHAR")) {
-    ConvertImageToLabel<unsigned char>(kRawFilename, range_filename_, materials);
+    ConvertImageToLabel<unsigned char>(raw_filename, range_filename_, materials);
   }
   else if (!kDataType.compare("MET_SHORT")) {
-    ConvertImageToLabel<GGshort>(kRawFilename, range_filename_, materials);
+    ConvertImageToLabel<GGshort>(raw_filename, range_filename_, materials);
   }
   else if (!kDataType.compare("MET_USHORT")) {
-    ConvertImageToLabel<GGushort>(kRawFilename, range_filename_, materials);
+    ConvertImageToLabel<GGushort>(raw_filename, range_filename_, materials);
   }
   else if (!kDataType.compare("MET_INT")) {
-    ConvertImageToLabel<GGint>(kRawFilename, range_filename_, materials);
+    ConvertImageToLabel<GGint>(raw_filename, range_filename_, materials);
   }
   else if (!kDataType.compare("MET_UINT")) {
-    ConvertImageToLabel<GGuint>(kRawFilename, range_filename_, materials);
+    ConvertImageToLabel<GGuint>(raw_filename, range_filename_, materials);
   }
   else if (!kDataType.compare("MET_FLOAT")) {
-    ConvertImageToLabel<GGfloat>(kRawFilename, range_filename_, materials);
+    ConvertImageToLabel<GGfloat>(raw_filename, range_filename_, materials);
   }
 }

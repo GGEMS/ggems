@@ -103,11 +103,11 @@ class GGEMS_EXPORT GGEMSDosimetryCalculator
     void SetDoselSizes(float const& dosel_x, float const& dosel_y, float const& dosel_z, std::string const& unit = "mm");
 
     /*!
-      \fn void SetOutputDosimetryFilename(std::string const& output_filename)
-      \param output_filename - name of output dosimetry file storing dosimetry
-      \brief set output filename storing dosimetry
+      \fn void SetOutputDosimetryBasename(std::string const& output_filename)
+      \param output_filename - name of output dosimetry basename storing dosimetry results
+      \brief set output basename storing dosimetry
     */
-    void SetOutputDosimetryFilename(std::string const& output_filename);
+    void SetOutputDosimetryBasename(std::string const& output_filename);
 
     /*!
       \fn void SetScaleFactor(GGfloat const& scale_factor)

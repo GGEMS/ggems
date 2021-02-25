@@ -94,7 +94,7 @@ int main(int argc, char** argv)
     // Initializing a global voxelized volume
     volume_creator_manager.SetVolumeDimensions(120, 120, 120);
     volume_creator_manager.SetElementSizes(0.1f, 0.1f, 0.1f, "mm");
-    volume_creator_manager.SetOutputImageFilename("data/phantom");
+    volume_creator_manager.SetOutputImageFilename("data/phantom.mhd");
     volume_creator_manager.SetRangeToMaterialDataFilename("data/range_phantom.txt");
     volume_creator_manager.SetMaterial("Air");
     volume_creator_manager.SetDataType("MET_INT");
@@ -128,7 +128,7 @@ int main(int argc, char** argv)
     ct_detector.SetSourceIsocenterDistance(595.0f, "mm");
     ct_detector.SetRotation(0.0f, 0.0f, 0.0f, "deg");
     ct_detector.SetThreshold(10.0f, "keV");
-    ct_detector.StoreOutput("data/projection");
+    ct_detector.StoreOutput("data/projection.mhd");
 
     // Physics
     processes_manager.AddProcess("Compton", "gamma", "all");

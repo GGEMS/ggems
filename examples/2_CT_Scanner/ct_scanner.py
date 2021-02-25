@@ -48,7 +48,7 @@ materials_database_manager.set_materials('../../data/materials.txt')
 # Generating phantom
 volume_creator_manager.set_dimensions(120, 120, 120)
 volume_creator_manager.set_element_sizes(0.1, 0.1, 0.1, 'mm')
-volume_creator_manager.set_output('data/phantom')
+volume_creator_manager.set_output('data/phantom.mhd')
 volume_creator_manager.set_range_output('data/range_phantom.txt')
 volume_creator_manager.set_material('Air')
 volume_creator_manager.set_data_type('MET_INT')
@@ -80,7 +80,7 @@ ct_detector.set_source_detector_distance(1085.6, 'mm')
 ct_detector.set_source_isocenter_distance(595.0, 'mm')
 ct_detector.set_rotation(0.0, 0.0, 0.0, 'deg')
 ct_detector.set_threshold(10.0, 'keV')
-ct_detector.save('data/projection')
+ct_detector.save('data/projection.mhd')
 
 # ------------------------------------------------------------------------------
 # STEP 4: Physics
@@ -101,7 +101,7 @@ range_cuts_manager.set_cut('gamma', 0.1, 'mm', 'all')
 # STEP 6: Source
 point_source = GGEMSXRaySource('point_source')
 point_source.set_source_particle_type('gamma')
-point_source.set_number_of_particles(100)
+point_source.set_number_of_particles(1000000000)
 point_source.set_position(-595.0, 0.0, 0.0, 'mm')
 point_source.set_rotation(0.0, 0.0, 0.0, 'deg')
 point_source.set_beam_aperture(12.5, 'deg')

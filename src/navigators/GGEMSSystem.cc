@@ -155,7 +155,7 @@ void GGEMSSystem::SaveResults(void)
   std::memset(output, 0, total_dim.x_*total_dim.y_*total_dim.z_*sizeof(GGint));
 
   GGEMSMHDImage mhdImage;
-  mhdImage.SetBaseName(output_basename_);
+  mhdImage.SetOutputFileName(output_basename_);
   mhdImage.SetDataType("MET_INT");
   mhdImage.SetDimensions(total_dim);
   mhdImage.SetElementSizes(size_of_detection_elements_xyz_);

@@ -48,7 +48,7 @@ materials_database_manager.set_materials('../../data/materials.txt')
 # Generating phantom
 volume_creator_manager.set_dimensions(240, 240, 640)
 volume_creator_manager.set_element_sizes(0.5, 0.5, 0.5, 'mm')
-volume_creator_manager.set_output('data/phantom')
+volume_creator_manager.set_output('data/phantom.mhd')
 volume_creator_manager.set_range_output('data/range_phantom.txt')
 volume_creator_manager.set_material('Air')
 volume_creator_manager.set_data_type('MET_INT')
@@ -73,7 +73,7 @@ phantom.set_position(0.0, 0.0, 0.0, 'mm')
 # ------------------------------------------------------------------------------
 # STEP 4: Dosimetry
 dosimetry = GGEMSDosimetryCalculator('phantom')
-dosimetry.set_output('data/dosimetry')
+dosimetry.set_output_basename('data/dosimetry')
 dosimetry.set_dosel_size(0.5, 0.5, 0.5, 'mm')
 dosimetry.water_reference(False)
 dosimetry.minimum_density(0.1, 'g/cm3')
