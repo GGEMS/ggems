@@ -247,7 +247,7 @@ void GGEMSVolumeCreatorManager::WriteMHDImage(void) const
 
   // Write MHD file
   GGEMSMHDImage mhdImage;
-  mhdImage.SetBaseName(output_image_filename_);
+  mhdImage.SetOutputFileName(output_image_filename_);
   mhdImage.SetDataType(data_type_);
   mhdImage.SetDimensions(volume_dimensions_);
   mhdImage.SetElementSizes(element_sizes_);

@@ -97,7 +97,7 @@ void GGEMSDosimetryCalculator::SetDoselSizes(float const& dosel_x, float const& 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSDosimetryCalculator::SetOutputDosimetryFilename(std::string const& output_filename)
+void GGEMSDosimetryCalculator::SetOutputDosimetryBasename(std::string const& output_filename)
 {
   dosimetry_output_filename_ = output_filename;
 }
@@ -387,7 +387,7 @@ void GGEMSDosimetryCalculator::SavePhotonTracking(void) const
   dimensions.z_ = static_cast<GGsize>(dose_params_device->number_of_dosels_.z);
 
   GGEMSMHDImage mhdImage;
-  mhdImage.SetBaseName(dosimetry_output_filename_ + "_photon_tracking");
+  mhdImage.SetOutputFileName(dosimetry_output_filename_ + "_photon_tracking.mhd");
   mhdImage.SetDataType("MET_INT");
   mhdImage.SetDimensions(dimensions);
   mhdImage.SetElementSizes(dose_params_device->size_of_dosels_);
@@ -427,7 +427,7 @@ void GGEMSDosimetryCalculator::SaveHit(void) const
   dimensions.z_ = static_cast<GGsize>(dose_params_device->number_of_dosels_.z);
 
   GGEMSMHDImage mhdImage;
-  mhdImage.SetBaseName(dosimetry_output_filename_ + "_hit");
+  mhdImage.SetOutputFileName(dosimetry_output_filename_ + "_hit.mhd");
   mhdImage.SetDataType("MET_INT");
   mhdImage.SetDimensions(dimensions);
   mhdImage.SetElementSizes(dose_params_device->size_of_dosels_);
@@ -467,7 +467,7 @@ void GGEMSDosimetryCalculator::SaveEdep(void) const
   dimensions.z_ = static_cast<GGsize>(dose_params_device->number_of_dosels_.z);
 
   GGEMSMHDImage mhdImage;
-  mhdImage.SetBaseName(dosimetry_output_filename_ + "_edep");
+  mhdImage.SetOutputFileName(dosimetry_output_filename_ + "_edep.mhd");
   if (sizeof(GGDosiType) == 4) mhdImage.SetDataType("MET_FLOAT");
   else if (sizeof(GGDosiType) == 8) mhdImage.SetDataType("MET_DOUBLE");
   mhdImage.SetDimensions(dimensions);
@@ -508,7 +508,7 @@ void GGEMSDosimetryCalculator::SaveEdepSquared(void) const
   dimensions.z_ = static_cast<GGsize>(dose_params_device->number_of_dosels_.z);
 
   GGEMSMHDImage mhdImage;
-  mhdImage.SetBaseName(dosimetry_output_filename_ + "_edep_squared");
+  mhdImage.SetOutputFileName(dosimetry_output_filename_ + "_edep_squared.mhd");
   if (sizeof(GGDosiType) == 4) mhdImage.SetDataType("MET_FLOAT");
   else if (sizeof(GGDosiType) == 8) mhdImage.SetDataType("MET_DOUBLE");
   mhdImage.SetDimensions(dimensions);
@@ -549,7 +549,7 @@ void GGEMSDosimetryCalculator::SaveDose(void) const
   dimensions.z_ = static_cast<GGsize>(dose_params_device->number_of_dosels_.z);
 
   GGEMSMHDImage mhdImage;
-  mhdImage.SetBaseName(dosimetry_output_filename_ + "_dose");
+  mhdImage.SetOutputFileName(dosimetry_output_filename_ + "_dose.mhd");
   mhdImage.SetDataType("MET_FLOAT");
   mhdImage.SetDimensions(dimensions);
   mhdImage.SetElementSizes(dose_params_device->size_of_dosels_);
@@ -589,7 +589,7 @@ void GGEMSDosimetryCalculator::SaveUncertainty(void) const
   dimensions.z_ = static_cast<GGsize>(dose_params_device->number_of_dosels_.z);
 
   GGEMSMHDImage mhdImage;
-  mhdImage.SetBaseName(dosimetry_output_filename_ + "_uncertainty");
+  mhdImage.SetOutputFileName(dosimetry_output_filename_ + "_uncertainty.mhd");
   mhdImage.SetDataType("MET_FLOAT");
   mhdImage.SetDimensions(dimensions);
   mhdImage.SetElementSizes(dose_params_device->size_of_dosels_);
@@ -652,7 +652,7 @@ void set_dosel_size_dosimetry_calculator(GGEMSDosimetryCalculator* dose_calculat
 
 void set_dose_output_dosimetry_calculator(GGEMSDosimetryCalculator* dose_calculator, char const* dose_output_filename)
 {
-  dose_calculator->SetOutputDosimetryFilename(dose_output_filename);
+  dose_calculator->SetOutputDosimetryBasename(dose_output_filename);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

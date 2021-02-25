@@ -42,6 +42,7 @@
 GGEMSMHDImage::GGEMSMHDImage(void)
 : mhd_header_file_(""),
   mhd_raw_file_(""),
+  output_dir_(""),
   mhd_data_type_("MET_FLOAT")
 {
   GGcout("GGEMSMHDImage", "GGEMSMHDImage", 3) << "Allocation of GGEMSMHDImage..." << GGendl;
@@ -68,10 +69,27 @@ GGEMSMHDImage::~GGEMSMHDImage(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSMHDImage::SetBaseName(std::string const& basename)
+void GGEMSMHDImage::SetOutputFileName(std::string const& filename)
 {
-  mhd_header_file_ = basename + ".mhd";
-  mhd_raw_file_ = basename + ".raw";
+  // Checking *.mhd suffixe
+  std::size_t found_mhd = filename.find(".mhd");
+  if (found_mhd == std::string::npos) {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "Suffix filename is not *.mhd!!!";
+    GGEMSMisc::ThrowException("GGEMSMHDImage", "SetOutputFilename", oss.str());
+  }
+
+  mhd_header_file_ = filename;
+
+  std::size_t found_dir = filename.find_last_of("/\\");
+  if (found_dir != std::string::npos) {
+    output_dir_ = filename.substr(0, found_dir+1);
+    mhd_raw_file_ = filename.substr(found_dir+1, found_mhd-found_dir-1) + ".raw";
+  }
+  else {
+    ;//mhd_header_file_ = filename;
+    mhd_raw_file_ = filename.substr(0, found_mhd) + ".raw";
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -119,6 +137,12 @@ void GGEMSMHDImage::Read(std::string const& image_mhd_header_filename, std::weak
 
   // Get pointer on OpenCL device
   GGEMSVoxelizedSolidData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSVoxelizedSolidData>(solid_data.lock().get(), sizeof(GGEMSVoxelizedSolidData));
+
+  // Getting output directory
+  std::size_t found_dir = image_mhd_header_filename.find_last_of("/\\");
+  if (found_dir != std::string::npos) {
+    output_dir_ = image_mhd_header_filename.substr(0, found_dir+1);
+  }
 
   // Read the file
   std::string line("");

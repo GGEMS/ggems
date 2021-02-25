@@ -95,7 +95,7 @@ int main(int argc, char** argv)
     // Initializing a global voxelized volume
     volume_creator_manager.SetVolumeDimensions(240, 240, 640);
     volume_creator_manager.SetElementSizes(0.5f, 0.5f, 0.5f, "mm");
-    volume_creator_manager.SetOutputImageFilename("data/phantom");
+    volume_creator_manager.SetOutputImageFilename("data/phantom.mhd");
     volume_creator_manager.SetRangeToMaterialDataFilename("data/range_phantom.txt");
     volume_creator_manager.SetMaterial("Air");
     volume_creator_manager.SetDataType("MET_INT");
@@ -121,7 +121,7 @@ int main(int argc, char** argv)
 
     // Dosimetry
     GGEMSDosimetryCalculator dosimetry("phantom");
-    dosimetry.SetOutputDosimetryFilename("data/dosimetry");
+    dosimetry.SetOutputDosimetryBasename("data/dosimetry");
     dosimetry.SetDoselSizes(0.5f, 0.5f, 0.5f, "mm");
     dosimetry.SetWaterReference(true);
     dosimetry.SetMinimumDensity(0.1f, "g/cm3");

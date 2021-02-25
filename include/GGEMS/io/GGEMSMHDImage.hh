@@ -86,11 +86,11 @@ class GGEMS_EXPORT GGEMSMHDImage
     GGEMSMHDImage& operator=(GGEMSMHDImage const&& mhd) = delete;
 
     /*!
-      \fn void SetBaseName(std::string const& basename)
-      \param basename - basename of the mhd file
-      \brief set the basename for mhd header/raw file
+      \fn void SetOutputFileName(std::string const& basename)
+      \param basename - mhd file name
+      \brief set the output filename (*.mhd)
     */
-    void SetBaseName(std::string const& basename);
+    void SetOutputFileName(std::string const& basename);
 
     /*!
       \fn void Read(std::string const& image_mhd_header_filename, std::weak_ptr<cl::Buffer> solid_data)
@@ -152,6 +152,13 @@ class GGEMS_EXPORT GGEMSMHDImage
     */
     inline std::string GetRawMDHfilename(void) const {return mhd_raw_file_;};
 
+    /*!
+      \fn std::string GetOutputDirectory(void) const
+      \brief get the output directory
+      \return the name of output directory
+    */
+    inline std::string GetOutputDirectory(void) const {return output_dir_;};
+
   private:
     /*!
       \fn void CheckParameters(void) const
@@ -171,6 +178,7 @@ class GGEMS_EXPORT GGEMSMHDImage
   private:
     std::string mhd_header_file_; /*!< Name of the MHD header file */
     std::string mhd_raw_file_; /*!< Name of the MHD raw file */
+    std::string output_dir_; /*!< Output directory */
     std::string mhd_data_type_; /*!< Type of data */
     GGfloat3 element_sizes_; /*!< Size of elements */
     GGsize3 dimensions_; /*!< Dimension volume X, Y, Z */
@@ -198,7 +206,7 @@ void GGEMSMHDImage::Write(T* image, GGsize const& elements)
   out_header_stream.close();
 
   // raw data
-  std::ofstream out_raw_stream(mhd_raw_file_, std::ios::out | std::ios::binary);
+  std::ofstream out_raw_stream(output_dir_+mhd_raw_file_, std::ios::out | std::ios::binary);
 
   // Writing data on file
   out_raw_stream.write(reinterpret_cast<char*>(image), static_cast<std::streamsize>(elements * sizeof(T)));
@@ -217,7 +225,7 @@ void GGEMSMHDImage::WriteRaw(std::weak_ptr<cl::Buffer> image) const
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
   // raw data
-  std::ofstream out_raw_stream(mhd_raw_file_, std::ios::out | std::ios::binary);
+  std::ofstream out_raw_stream(output_dir_+mhd_raw_file_, std::ios::out | std::ios::binary);
 
   // Mapping data
   T* data_image_device = opencl_manager.GetDeviceBuffer<T>(image.lock().get(), dimensions_.x_ * dimensions_.y_ * dimensions_.z_ * sizeof(T));

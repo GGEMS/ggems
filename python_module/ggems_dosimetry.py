@@ -65,7 +65,7 @@ class GGEMSDosimetryCalculator(object):
     def delete(self):
         ggems_lib.delete_dosimetry_calculator(self.obj)
 
-    def set_output(self, output):
+    def set_output_basename(self, output):
         ggems_lib.set_dose_output_dosimetry_calculator(self.obj, output.encode('ASCII'))
 
     def photon_tracking(self, activate):
