@@ -28,6 +28,7 @@ And finally, in the last part of this documentation, a more detailed description
    :maxdepth: 2
    :caption: User Documentation
 
+   navigators
    dosimetry
    processes_cuts
    sources
