@@ -18,7 +18,7 @@ data file:
   phantom = GGEMSVoxelizedPhantom('phantom')
   phantom.set_phantom('phantom.mhd', 'range_phantom.txt')
 
-The user can set a position and a set_rotation of the phantom using the following
+The user can set a position and a rotation applyied to the phantom using the following
 commands:
 
 .. code-block:: python
