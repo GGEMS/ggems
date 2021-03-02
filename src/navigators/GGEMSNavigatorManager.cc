@@ -39,7 +39,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 GGEMSNavigatorManager::GGEMSNavigatorManager(void)
-: navigators_(0)
+: navigators_(0),
+  world_(nullptr)
 {
   GGcout("GGEMSNavigatorManager", "GGEMSNavigatorManager", 3) << "Allocation of GGEMS navigator manager..." << GGendl;
 }
@@ -54,6 +55,11 @@ GGEMSNavigatorManager::~GGEMSNavigatorManager(void)
   navigators_.clear();
 
   GGcout("GGEMSNavigatorManager", "~GGEMSNavigatorManager", 3) << "Deallocation of GGEMS navigator manager..." << GGendl;
+
+  if (world_) {
+    delete world_;
+    world_ = nullptr;
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -67,6 +73,16 @@ void GGEMSNavigatorManager::Store(GGEMSNavigator* navigator)
   // Set index of navigator and store the pointer
   navigator->SetNavigatorID(navigators_.size());
   navigators_.emplace_back(navigator);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSNavigatorManager::StoreWorld(GGEMSWorld* world)
+{
+  GGcout("GGEMSNavigatorManager", "StoreWorld", 3) << "Storing world in GGEMS..." << GGendl;
+  world_ = world;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -92,6 +108,9 @@ void GGEMSNavigatorManager::Initialize(void) const
     oss << "A navigator (detector or phantom) has to be declared!!!";
     GGEMSMisc::ThrowException("GGEMSNavigatorManager", "Initialize", oss.str());
   }
+
+  // Initialization of world
+  if (world_) world_->Initialize();
 
   // Initialization of phantoms
   for (auto&& i : navigators_) i->Initialize();

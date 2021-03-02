@@ -19,17 +19,24 @@
 #-------------------------------------------------------------------------------
 # CMakeLists.txt
 #
-# CMakeLists.txt - Compile and build the GGEMS examples
+# CMakeLists.txt - Compile and build world tracking project
 #
 # Authors :
 #   - Julien Bert <julien.bert@univ-brest.fr>
 #   - Didier Benoit <didier.benoit@inserm.fr>
 #
-# Generated on : 2/11/2020
+# Generated on : 02/03/2021
 #-------------------------------------------------------------------------------
 
-ADD_SUBDIRECTORY(0_Cross_Sections)
-ADD_SUBDIRECTORY(2_CT_Scanner)
-ADD_SUBDIRECTORY(3_Voxelized_Phantom_Generator)
-ADD_SUBDIRECTORY(4_Dosimetry_Photon)
-ADD_SUBDIRECTORY(5_World_Tracking)
+#-------------------------------------------------------------------------------
+# Defining the project
+PROJECT(WorldTracking)
+
+#-------------------------------------------------------------------------------
+# Creating the executable
+ADD_EXECUTABLE(world_tracking world_tracking.cc)
+TARGET_LINK_LIBRARIES(world_tracking ggems)
+
+#-------------------------------------------------------------------------------
+# Copy executable to ggems bin folder
+INSTALL(TARGETS world_tracking DESTINATION ${PROJECT_SOURCE_DIR})
