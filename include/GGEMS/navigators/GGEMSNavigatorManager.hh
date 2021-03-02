@@ -32,6 +32,7 @@
 */
 
 #include "GGEMS/navigators/GGEMSNavigator.hh"
+#include "GGEMS/navigators/GGEMSWorld.hh"
 
 /*!
   \class GGEMSNavigatorManager
@@ -96,6 +97,13 @@ class GGEMS_EXPORT GGEMSNavigatorManager
       \brief storing the navigator pointer to navigator manager
     */
     void Store(GGEMSNavigator* navigator);
+
+    /*!
+      \fn void StoreWorld(GGEMSWorld* world)
+      \param world - pointer to GGEMS world
+      \brief storing the world pointer
+    */
+    void StoreWorld(GGEMSWorld* world);
 
     /*!
       \fn void Initialize(void) const
@@ -189,6 +197,7 @@ class GGEMS_EXPORT GGEMSNavigatorManager
 
   private:
     std::vector<std::shared_ptr<GGEMSNavigator>> navigators_; /*!< Pointer on the navigators */
+    GGEMSWorld* world_; /*!< Pointer on world volume */
 };
 
 #endif // End of GUARD_GGEMS_NAVIGATORS_GGEMSNAVIGATORMANAGER_HH

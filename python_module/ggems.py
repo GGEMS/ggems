@@ -21,7 +21,7 @@ from ggems_lib import *
 from ggems_opencl import GGEMSOpenCLManager
 from ggems_materials import GGEMSMaterialsDatabaseManager, GGEMSMaterials
 from ggems_systems import GGEMSCTSystem
-from ggems_phantoms import GGEMSVoxelizedPhantom
+from ggems_phantoms import GGEMSVoxelizedPhantom, GGEMSWorld
 from ggems_sources import GGEMSXRaySource
 from ggems_processes import GGEMSProcessesManager, GGEMSRangeCutsManager, GGEMSCrossSections
 from ggems_volume_creator import GGEMSVolumeCreatorManager, GGEMSTube, GGEMSBox, GGEMSSphere
