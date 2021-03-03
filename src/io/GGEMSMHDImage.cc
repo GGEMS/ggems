@@ -253,6 +253,8 @@ void GGEMSMHDImage::Write(std::shared_ptr<cl::Buffer> image) const
 
   // header data
   std::ofstream out_header_stream(mhd_header_file_, std::ios::out);
+  out_header_stream << "ObjectType = Image" << std::endl;
+  out_header_stream << "BinaryDataByteOrderMSB = False" << std::endl;
   out_header_stream << "NDims = 3" << std::endl;
   out_header_stream << "ElementSpacing = " << element_sizes_.x << " " << element_sizes_.y << " " << element_sizes_.z << std::endl;
   out_header_stream << "DimSize = " << dimensions_.x_ << " " << dimensions_.y_ << " " << dimensions_.z_ << std::endl;
