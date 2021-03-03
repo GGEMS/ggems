@@ -86,7 +86,7 @@ GGEMSDosimetryCalculator::~GGEMSDosimetryCalculator(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSDosimetryCalculator::SetDoselSizes(float const& dosel_x, float const& dosel_y, float const& dosel_z, std::string const& unit)
+void GGEMSDosimetryCalculator::SetDoselSizes(GGfloat const& dosel_x, GGfloat const& dosel_y, GGfloat const& dosel_z, std::string const& unit)
 {
   dosel_sizes_.x = DistanceUnit(dosel_x, unit);
   dosel_sizes_.y = DistanceUnit(dosel_y, unit);

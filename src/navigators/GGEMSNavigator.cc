@@ -198,7 +198,7 @@ void GGEMSNavigator::ParticleSolidDistance(void)
 
   // Getting work group size, and work-item number
   GGsize work_group_size = opencl_manager.GetWorkGroupSize();
-  GGsize number_of_work_items = number_of_particles + (work_group_size - number_of_particles%work_group_size);
+  GGsize number_of_work_items = opencl_manager.GetBestWorkItem(number_of_particles);
 
   // Parameters for work-item in kernel
   cl::NDRange global_wi(number_of_work_items);
@@ -243,7 +243,7 @@ void GGEMSNavigator::ProjectToSolid(void)
 
   // Getting work group size, and work-item number
   GGsize work_group_size = opencl_manager.GetWorkGroupSize();
-  GGsize number_of_work_items = number_of_particles + (work_group_size - number_of_particles%work_group_size);
+  GGsize number_of_work_items = opencl_manager.GetBestWorkItem(number_of_particles);
 
   // Parameters for work-item in kernel
   cl::NDRange global_wi(number_of_work_items);
@@ -297,7 +297,7 @@ void GGEMSNavigator::TrackThroughSolid(void)
 
   // Getting work group size, and work-item number
   GGsize work_group_size = opencl_manager.GetWorkGroupSize();
-  GGsize number_of_work_items = number_of_particles + (work_group_size - number_of_particles%work_group_size);
+  GGsize number_of_work_items = opencl_manager.GetBestWorkItem(number_of_particles);
 
   // Parameters for work-item in kernel
   cl::NDRange global_wi(number_of_work_items);

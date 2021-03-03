@@ -93,14 +93,14 @@ class GGEMS_EXPORT GGEMSDosimetryCalculator
     void Initialize(void);
 
     /*!
-      \fn void SetDoselSizes(float const& dosel_x, float const& dosel_y, float const& dosel_z, std::string const& unit = "mm")
+      \fn void SetDoselSizes(GGfloat const& dosel_x, GGfloat const& dosel_y, GGfloat const& dosel_z, std::string const& unit = "mm")
       \param dosel_x - size of dosel in X global axis
       \param dosel_y - size of dosel in Y global axis
       \param dosel_z - size of dosel in Z global axis
       \param unit - unit of the distance
       \brief set size of dosels
     */
-    void SetDoselSizes(float const& dosel_x, float const& dosel_y, float const& dosel_z, std::string const& unit = "mm");
+    void SetDoselSizes(GGfloat const& dosel_x, GGfloat const& dosel_y, GGfloat const& dosel_z, std::string const& unit = "mm");
 
     /*!
       \fn void SetOutputDosimetryBasename(std::string const& output_filename)
@@ -159,12 +159,12 @@ class GGEMS_EXPORT GGEMSDosimetryCalculator
     void SetWaterReference(bool const& is_activated);
 
     /*!
-      \fn void SetMinimumDensity(float const& minimum_density, std::string const& unit = "g/cm3")
+      \fn void SetMinimumDensity(GGfloat const& minimum_density, std::string const& unit = "g/cm3")
       \param minimum_density - minimum of density
       \param unit - unit of the density
       \brief set minimum of density for dose computation
     */
-    void SetMinimumDensity(float const& minimum_density, std::string const& unit = "g/cm3");
+    void SetMinimumDensity(GGfloat const& minimum_density, std::string const& unit = "g/cm3");
 
     /*!
       \fn inline std::shared_ptr<cl::Buffer> GetPhotonTrackingBuffer(void) const

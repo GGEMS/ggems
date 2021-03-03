@@ -278,7 +278,8 @@ void GGEMSManager::Run()
         GGcout("GGEMSManager", "Run", 2) << "      + Finding solid..." << GGendl;
         navigator_manager.FindSolid();
 
-        // Add "tracking" into world space
+        // Optional step: World tracking
+        navigator_manager.WorldTracking();
 
         // Step 3: Project particles to solid
         GGcout("GGEMSManager", "Run", 2) << "      + Projecting particles to solid..." << GGendl;
