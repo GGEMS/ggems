@@ -105,7 +105,7 @@ kernel void project_to_ggems_voxelized_solid(
 
   #ifdef GGEMS_TRACKING
   if (global_id == primary_particle->particle_tracking_id) {
-    printf("[GGEMS OpenCL kernel project_to_ggems_voxelized_solid] ################################################################################\n");
+    printf("[GGEMS OpenCL kernel project_to_ggems_voxelized_solid] ********************************************************************************\n");
     printf("[GGEMS OpenCL kernel project_to_ggems_voxelized_solid] Project to closest solid\n");
     printf("[GGEMS OpenCL kernel project_to_ggems_voxelized_solid] Particle id: %d\n", global_id);
     printf("[GGEMS OpenCL kernel project_to_ggems_voxelized_solid] Position (x, y, z): %e %e %e mm\n", position.x/mm, position.y/mm, position.z/mm);

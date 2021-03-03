@@ -35,6 +35,17 @@
 #include "GGEMS/tools/GGEMSTypes.hh"
 
 /*!
+  \struct GGEMSWorldRecording_t
+  \brief Structure storing data for world data recording
+*/
+typedef struct GGEMSWorldRecording_t
+{
+  std::shared_ptr<cl::Buffer> edep_; /*!< Buffer storing energy deposit on OpenCL device */
+  std::shared_ptr<cl::Buffer> photon_tracking_; /*!< Buffer storing photon tracking on OpenCL device */
+  //std::shared_ptr<cl::Buffer> momentum_; /*!< Buffer storing dose in gray (Gy) */
+} GGEMSWorldRecording; /*!< Using C convention name of struct to C++ (_t deletion) */
+
+/*!
   \class GGEMSWorld
   \brief GGEMS class handling global world (space between navigators) in GGEMS
 */
@@ -80,13 +91,13 @@ class GGEMS_EXPORT GGEMSWorld
     GGEMSWorld& operator=(GGEMSWorld const&& world) = delete;
 
     /*!
-      \fn void SetDimension(GGint const& dimension_x, GGfloat const& dimension_y, GGfloat const& dimension_z)
+      \fn void SetDimension(GGsize const& dimension_x, GGsize const& dimension_y, GGsize const& dimension_z)
       \param dimension_x - dimension in X
       \param dimension_y - dimension in Y
       \param dimension_z - dimension in Z
       \brief set the dimension of the world in X, Y and Z
     */
-    void SetDimension(GGint const& dimension_x, GGint const& dimension_y, GGint const& dimension_z);
+    void SetDimension(GGsize const& dimension_x, GGsize const& dimension_y, GGsize const& dimension_z);
 
     /*!
       \fn void SetElementSize(GGfloat const& size_x, GGfloat const& size_y, GGfloat const& size_z, std::string const& unit = "mm")
@@ -99,10 +110,23 @@ class GGEMS_EXPORT GGEMSWorld
     void SetElementSize(GGfloat const& size_x, GGfloat const& size_y, GGfloat const& size_z, std::string const& unit = "mm");
 
     /*!
+      \fn void SetPhotonTracking(bool const& is_activated)
+      \param is_activated - boolean activating photon tracking
+      \brief activating photon tracking in world
+    */
+    void SetPhotonTracking(bool const& is_activated);
+
+    /*!
       \fn void Initialize(void)
       \brief initialize and check parameters for world
     */
     void Initialize(void);
+
+    /*!
+      \fn void Tracking(void)
+      \brief track particles through world
+    */
+    void Tracking(void);
 
   private:
     /*!
@@ -111,9 +135,18 @@ class GGEMS_EXPORT GGEMSWorld
     */
     void CheckParameters(void) const;
 
+    /*!
+      \fn void InitializeKernel(void)
+      \brief Initialize kernel for world tracking
+    */
+    void InitializeKernel(void);
+
   private:
-    GGint3 dimensions_; /*!< Dimensions of world */
+    GGsize3 dimensions_; /*!< Dimensions of world */
     GGfloat3 sizes_; /*!< Sizes of elements in world */
+    bool is_photon_tracking_; /*!< Boolean for photon tracking */
+    GGEMSWorldRecording world_recording_; /*!< Structure storing OpenCL pointer */
+    std::weak_ptr<cl::Kernel> kernel_world_tracking_; /*!< OpenCL kernel computing world tracking */
 };
 
 /*!
@@ -124,14 +157,14 @@ class GGEMS_EXPORT GGEMSWorld
 extern "C" GGEMS_EXPORT GGEMSWorld* create_ggems_world(void);
 
 /*!
-  \fn void set_dimension_ggems_world(GGEMSWorld* world, GGint const dimension_x, GGint const dimension_y, GGint const dimension_z)
+  \fn void set_dimension_ggems_world(GGEMSWorld* world, GGsize const dimension_x, GGsize const dimension_y, GGsize const dimension_z)
   \param world - pointer on world volume
   \param dimension_x - dimension in X
   \param dimension_y - dimension in Y
   \param dimension_z - dimension in Z
   \brief set the dimenstions of the world in X, Y and Z
 */
-extern "C" GGEMS_EXPORT void set_dimension_ggems_world(GGEMSWorld* world, GGint const dimension_x, GGint const dimension_y, GGint const dimension_z);
+extern "C" GGEMS_EXPORT void set_dimension_ggems_world(GGEMSWorld* world, GGsize const dimension_x, GGsize const dimension_y, GGsize const dimension_z);
 
 /*!
   \fn void set_size_ggems_world(GGEMSWorld* world, GGfloat const size_x, GGfloat const size_y, GGfloat const size_z, char const* unit)
@@ -143,5 +176,13 @@ extern "C" GGEMS_EXPORT void set_dimension_ggems_world(GGEMSWorld* world, GGint 
   \brief set the element sizes of the world
 */
 extern "C" GGEMS_EXPORT void set_size_ggems_world(GGEMSWorld* world, GGfloat const size_x, GGfloat const size_y, GGfloat const size_z, char const* unit);
+
+/*!
+  \fn void photon_tracking_ggems_world(GGEMSWorld* world, bool const is_activated)
+  \param world - pointer on world volume
+  \param is_activated - boolean activating the photon tracking output
+  \brief storing results about photon tracking
+*/
+extern "C" GGEMS_EXPORT void photon_tracking_ggems_world(GGEMSWorld* world, bool const is_activated);
 
 #endif // End of GUARD_GGEMS_NAVIGATORS_GGEMSWORLD_HH

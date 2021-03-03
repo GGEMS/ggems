@@ -76,7 +76,7 @@ kernel void particle_solid_distance_ggems_solid_box(
   if (IsParticleInOBB(&position, &solid_box_data->obb_geometry_)) {
     #ifdef GGEMS_TRACKING
     if (global_id == primary_particle->particle_tracking_id) {
-      printf("[GGEMS OpenCL kernel particle_solid_distance_ggems_solid_box] ################################################################################\n");
+      printf("[GGEMS OpenCL kernel particle_solid_distance_ggems_solid_box] --------------------------------------------------------------------------------\n");
       printf("[GGEMS OpenCL kernel particle_solid_distance_ggems_solid_box] Find a closest solid\n");
       printf("[GGEMS OpenCL kernel particle_solid_distance_ggems_solid_box] Particle id: %d\n", global_id);
       printf("[GGEMS OpenCL kernel particle_solid_distance_ggems_solid_box] Particle in voxelized solid, id: %d\n", solid_box_data->solid_id_);
@@ -95,7 +95,7 @@ kernel void particle_solid_distance_ggems_solid_box(
   if (distance < primary_particle->particle_solid_distance_[global_id]) {
     #ifdef GGEMS_TRACKING
     if (global_id == primary_particle->particle_tracking_id) {
-      printf("[GGEMS OpenCL kernel particle_solid_distance_ggems_solid_box] ################################################################################\n");
+      printf("[GGEMS OpenCL kernel particle_solid_distance_ggems_solid_box] --------------------------------------------------------------------------------\n");
       printf("[GGEMS OpenCL kernel particle_solid_distance_ggems_solid_box] Find a closest solid\n");
       printf("[GGEMS OpenCL kernel particle_solid_distance_ggems_solid_box] Particle id: %d\n", global_id);
       printf("[GGEMS OpenCL kernel particle_solid_distance_ggems_solid_box] Particle in voxelized solid, id: %d\n", solid_box_data->solid_id_);

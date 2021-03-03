@@ -195,6 +195,12 @@ class GGEMS_EXPORT GGEMSNavigatorManager
     */
     void SaveResults(void) const;
 
+    /*!
+      \fn void WorldTracking(void) const
+      \brief Tracking particles through world
+    */
+    void WorldTracking(void) const;
+
   private:
     std::vector<std::shared_ptr<GGEMSNavigator>> navigators_; /*!< Pointer on the navigators */
     GGEMSWorld* world_; /*!< Pointer on world volume */

@@ -105,7 +105,7 @@ kernel void project_to_ggems_solid_box(
 
   #ifdef GGEMS_TRACKING
   if (global_id == primary_particle->particle_tracking_id) {
-    printf("[GGEMS OpenCL kernel project_to_ggems_solid_box] ################################################################################\n");
+    printf("[GGEMS OpenCL kernel project_to_ggems_solid_box] ********************************************************************************\n");
     printf("[GGEMS OpenCL kernel project_to_ggems_solid_box] Project to closest solid\n");
     printf("[GGEMS OpenCL kernel project_to_ggems_solid_box] Particle id: %d\n", global_id);
     printf("[GGEMS OpenCL kernel project_to_ggems_solid_box] Position (x, y, z): %e %e %e mm\n", position.x/mm, position.y/mm, position.z/mm);
