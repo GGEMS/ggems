@@ -60,6 +60,9 @@ class GGEMSWorld(object):
         ggems_lib.photon_tracking_ggems_world.argtypes = [ctypes.c_void_p, ctypes.c_bool]
         ggems_lib.photon_tracking_ggems_world.restype = ctypes.c_void_p
 
+        ggems_lib.set_output_ggems_world.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
+        ggems_lib.set_output_ggems_world.restype = ctypes.c_void_p
+
         self.obj = ggems_lib.create_ggems_world()
 
     def set_dimensions(self, dim_x, dim_y, dim_z):
@@ -70,3 +73,6 @@ class GGEMSWorld(object):
 
     def photon_tracking(self, activate):
         ggems_lib.photon_tracking_ggems_world(self.obj, activate)
+
+    def set_output_basename(self, output):
+        ggems_lib.set_output_ggems_world(self.obj, output.encode('ASCII'))

@@ -92,6 +92,9 @@ void GGEMSNavigatorManager::StoreWorld(GGEMSWorld* world)
 void GGEMSNavigatorManager::SaveResults(void) const
 {
   for (auto&& i : navigators_) i->SaveResults();
+
+  // Checking if world exists
+  if (world_) world_->SaveResults();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -161,7 +164,8 @@ void GGEMSNavigatorManager::TrackThroughSolid(void) const
 
 void GGEMSNavigatorManager::WorldTracking(void) const
 {
-  world_->Tracking();
+  // Checking if world exists
+  if (world_) world_->Tracking();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
