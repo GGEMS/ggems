@@ -42,6 +42,7 @@
 kernel void world_tracking(
   GGsize const particle_id_limit,
   global GGEMSPrimaryParticles* primary_particle,
+  global GGint* photon_tracking,
   GGsize width,
   GGsize height,
   GGsize depth,
@@ -56,62 +57,61 @@ kernel void world_tracking(
   // Return if index > to particle limit
   if (global_id >= particle_id_limit) return;
 
-  // In world, the particles in tracked using a DDA algorithm
-  // Get direction od particle
+  if (primary_particle->status_[global_id] == DEAD) return;
+
+  // In world, the particles is tracked using a DDA algorithm
+  // Get direction of particle
   GGfloat3 direction = {primary_particle->dx_[global_id], primary_particle->dy_[global_id], primary_particle->dz_[global_id]};
   // Get point x1, y1 and z1
   GGfloat3 p1 = {primary_particle->px_[global_id], primary_particle->py_[global_id], primary_particle->pz_[global_id]};
+  // Get voxel size
+  GGfloat3 size = {size_x, size_y, size_z};
 
   // Computing point x2, y2, z2
   GGfloat distance = primary_particle->particle_solid_distance_[global_id] == OUT_OF_WORLD ? 10000.0f : primary_particle->particle_solid_distance_[global_id];
-  GGfloat3 p2 = p1 + distance * direction;
+  GGfloat3 p2 = p1 + distance*direction;
 
   // Start index
-  int i_start_index = (p1.x - size_x*(GGfloat)width*-0.5f)/size_x;
-  int j_start_index = (p1.y - size_y*(GGfloat)height*-0.5f)/size_y;
-  int k_start_index = (p1.z - size_z*(GGfloat)depth*-0.5f)/size_z;
-
-  // Stop index
-  int i_stop_index = (p2.x - size_x*(GGfloat)width*-0.5f)/size_x;
-  int j_stop_index = (p2.y - size_y*(GGfloat)height*-0.5f)/size_y;
-  int k_stop_index = (p2.z - size_z*(GGfloat)depth*-0.5f)/size_z;
+  GGint3 dim = {width, height, depth};
+  GGint3 index = convert_int3((p1 - (size*convert_float3(dim)*-0.5f))/size);
 
   // Computing difference between p1 and p2 and length for each axis
   GGfloat3 diff_p1_p2 = p2 - p1;
   GGfloat3 len_p1_p2 = fabs(diff_p1_p2);
 
-  // Getting main direction
-  GGint length = (GGint)fmax(fmax(len_p1_p2.x, len_p1_p2.y), len_p1_p2.z);
-  GGfloat inv_length = 1.0f / (GGfloat)length;
+  // Getting main direction and size
+  GGfloat length = len_p1_p2.x;
+  GGfloat main_size = size.x;
+  if (len_p1_p2.y > length) {
+    length = len_p1_p2.y;
+    main_size = size.y;
+  }
+  else if (len_p1_p2.z > length) {
+    length = len_p1_p2.z;
+    main_size = size.z;
+  }
 
-  // Floating points with a maximum value of 2^(32-1-18)=8192
-  GGint3 f = convert_int3(p1 * 262144.0f); // 262144 = 2^18
-  GGint3 incr_f = convert_int3(diff_p1_p2 * inv_length * 262144.0f);
+  GGfloat inv_length = 1.0f / length;
 
-  printf("p1: %e %e %e mm\n", p1.x/mm, p1.y/mm, p1.z/mm);
-  printf("p2: %e %e %e mm\n", p2.x/mm, p2.y/mm, p2.z/mm);
-  printf("%d %d %d\n", i_start_index, j_start_index, k_start_index);
-  printf("%d %d %d\n", i_stop_index, j_stop_index, k_stop_index);
+  // Computing incrementation
+  GGfloat3 increment = inv_length*diff_p1_p2;
 
-  // printf("f: %d %d %d\n", f.x, f.y, f.z);
-  printf("incr f: %d %d %d\n", incr_f.x, incr_f.y, incr_f.z);
-  printf("incr f: %d %d %d\n", incr_f.x >> 18, incr_f.y  >> 18, incr_f.z  >> 18);
-  // printf("diff_p1_p2: %e %e %e mm\n", diff_p1_p2.x/mm, diff_p1_p2.y/mm, diff_p1_p2.z/mm);
-  // printf("len_p1_p2: %e %e %e mm\n", len_p1_p2.x/mm, len_p1_p2.y/mm, len_p1_p2.z/mm);
-  // printf("length: %d\n", length);
-  // printf("inv. length: %e\n", inv_length);
+  // Computing number of step
+  GGint step = (GGint)(1.0f + (length/main_size));
+  GGint global_index_world = 0;
 
-  printf("%d %d %d\n", f.x >> 18, f.y >> 18, f.z >> 18);
+  for (GGint i = 0; i < step; ++i) {
+    // Checking index
+    if (index.x < 0 || index.x >= dim.x || index.y < 0 || index.y >= dim.y || index.z < 0 || index.z >= dim.z) {
+      break;
+    }
 
-  f += incr_f;
-  f += incr_f;
-  f += incr_f;
+    global_index_world = index.x + index.y * dim.x + index.z * dim.x * dim.y;
+    if (photon_tracking) atomic_add(&photon_tracking[global_index_world], 1);
 
-  printf("%d %d %d\n", f.x >> 18, f.y >> 18, f.z >> 18);
-  //  printf("%d\n", f.x >> 18);
-  //  f += incr_f;
-  //  printf("%d\n", f.x >> 18);
-  //  f += incr_f;
+    p1 += increment*main_size;
+    index = convert_int3((p1 - (size*convert_float3(dim)*-0.5f))/size);
+  }
 
   #ifdef GGEMS_TRACKING
   if (global_id == primary_particle->particle_tracking_id) {
@@ -125,74 +125,3 @@ kernel void world_tracking(
   }
   #endif
 }
-
-/*
-#define pi  3.141592653589
-// Floating points with a maximum value of 2^(32-1-18)=8192
-#define CONST (int) 262144 //2^18
-#define float2fixed(X) ((int) (X * CONST))
-#define intfixed(X) (X >> 18)
-
-__device__ float ct_dda_raytracing(float z1, float y1, float x1, float z2, float y2, float x2, float* volume, int depth, int height, int width)
-{
-    float value = 0.0f;
-
-    float diffx, diffy, diffz;
-    unsigned short int lx, ly, lz, length;
-    float invlength;
-    int fxinc, fyinc, fzinc;
-    int fx, fy, fz;
-    unsigned int ind;;
-
-    fx = float2fixed(x1);
-    fy = float2fixed(y1);
-    fz = float2fixed(z1);
-
-    diffx = x2 - x1;
-    diffy = y2 - y1;
-    diffz = z2 - z1;
-    lx = abs(diffx);
-    ly = abs(diffy);
-    lz = abs(diffz);
-    length = (unsigned short int) (max(max(lx, ly), lz));
-    invlength = 1.0f / (float) length;
-    fxinc = float2fixed(diffx*invlength);
-    fyinc = float2fixed(diffy*invlength);
-    fzinc = float2fixed(diffz*invlength);
-
-    unsigned short int i = 0;
-    while (true)
-    {
-        if (intfixed(fz) >= 0 && intfixed(fy) >= 0 && intfixed(fx) >= 0
-                && intfixed(fz) < depth && intfixed(fy) < height
-                && intfixed(fx) < width)
-            break;
-        else if (i >= length)
-            return 0.0f;
-        ++i;
-        fx += fxinc;
-        fy += fyinc;
-        fz += fzinc;
-    }
-
-    while (true)
-    {
-        if (intfixed(fz) >= 0 && intfixed(fy) >= 0 && intfixed(fx) >= 0
-                && intfixed(fz) < depth && intfixed(fy) < height
-                && intfixed(fx) < width && i < length)
-        {
-            ind = intfixed(fx) + intfixed(fy)*width + intfixed(fz)*width*height;
-            value += volume[ind];
-        }
-        else
-            break;
-
-        ++i;
-        fx += fxinc;
-        fy += fyinc;
-        fz += fzinc;
-    }
-
-    return value;
-}
-*/

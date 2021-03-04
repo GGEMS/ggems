@@ -180,7 +180,7 @@ void GGEMSMHDImage::Read(std::string const& image_mhd_header_filename, std::weak
       GGwarn("GGEMSMHDImage", "Read", 0) << "The key 'Offset' is useless in GGEMS." << GGendl;
     }
     else if (!kKey.compare("NDims")) {
-      continue;
+      GGwarn("GGEMSMHDImage", "Read", 0) << "The key 'NDims' is useless in GGEMS." << GGendl;
     }
     else if (!kKey.compare("BinaryData")) {
       GGwarn("GGEMSMHDImage", "Read", 0) << "The key 'BinaryData' is useless in GGEMS." << GGendl;
@@ -246,7 +246,7 @@ void GGEMSMHDImage::Read(std::string const& image_mhd_header_filename, std::weak
 
 void GGEMSMHDImage::Write(std::shared_ptr<cl::Buffer> image) const
 {
-  GGcout("GGEMSMHDImage", "Write", 1) << "Writing MHD Image..." << GGendl;
+  GGcout("GGEMSMHDImage", "Write", 1) << "Writing MHD Image: " <<  mhd_header_file_ << "..." << GGendl;
 
   // Checking parameters before to write
   CheckParameters();

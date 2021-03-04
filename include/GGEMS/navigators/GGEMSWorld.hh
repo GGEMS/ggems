@@ -40,7 +40,7 @@
 */
 typedef struct GGEMSWorldRecording_t
 {
-  std::shared_ptr<cl::Buffer> edep_; /*!< Buffer storing energy deposit on OpenCL device */
+  //std::shared_ptr<cl::Buffer> edep_; /*!< Buffer storing energy deposit on OpenCL device */
   std::shared_ptr<cl::Buffer> photon_tracking_; /*!< Buffer storing photon tracking on OpenCL device */
   //std::shared_ptr<cl::Buffer> momentum_; /*!< Buffer storing dose in gray (Gy) */
 } GGEMSWorldRecording; /*!< Using C convention name of struct to C++ (_t deletion) */
@@ -91,6 +91,13 @@ class GGEMS_EXPORT GGEMSWorld
     GGEMSWorld& operator=(GGEMSWorld const&& world) = delete;
 
     /*!
+      \fn void SetOutputWorldBasename(std::string const& output_basename)
+      \param output_basename - name of output world basename
+      \brief set output basename storing world tracking
+    */
+    void SetOutputWorldBasename(std::string const& output_basename);
+
+    /*!
       \fn void SetDimension(GGsize const& dimension_x, GGsize const& dimension_y, GGsize const& dimension_z)
       \param dimension_x - dimension in X
       \param dimension_y - dimension in Y
@@ -128,6 +135,12 @@ class GGEMS_EXPORT GGEMSWorld
     */
     void Tracking(void);
 
+    /*!
+      \fn void SaveResults(void) const
+      \brief save all results from world
+    */
+    void SaveResults(void) const;
+
   private:
     /*!
       \fn void CheckParameters(void) const
@@ -141,7 +154,14 @@ class GGEMS_EXPORT GGEMSWorld
     */
     void InitializeKernel(void);
 
+    /*!
+      \fn void SavePhotonTracking(void) const
+      \brief save photon tracking from world
+    */
+    void SavePhotonTracking(void) const;
+
   private:
+    std::string world_output_basename_; /*!< Output basename for world results */
     GGsize3 dimensions_; /*!< Dimensions of world */
     GGfloat3 sizes_; /*!< Sizes of elements in world */
     bool is_photon_tracking_; /*!< Boolean for photon tracking */
@@ -184,5 +204,13 @@ extern "C" GGEMS_EXPORT void set_size_ggems_world(GGEMSWorld* world, GGfloat con
   \brief storing results about photon tracking
 */
 extern "C" GGEMS_EXPORT void photon_tracking_ggems_world(GGEMSWorld* world, bool const is_activated);
+
+/*!
+  \fn void set_output_ggems_world(GGEMSWorld* world, char const* world_output_basename)
+  \param world - pointer on world
+  \param world_output_basename - name of basename storing all results
+  \brief set output basename storing world tracking results
+*/
+extern "C" GGEMS_EXPORT void set_output_ggems_world(GGEMSWorld* world, char const* world_output_basename);
 
 #endif // End of GUARD_GGEMS_NAVIGATORS_GGEMSWORLD_HH

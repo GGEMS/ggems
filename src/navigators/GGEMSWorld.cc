@@ -33,12 +33,14 @@
 #include "GGEMS/tools/GGEMSPrint.hh"
 #include "GGEMS/sources/GGEMSSourceManager.hh"
 #include "GGEMS/global/GGEMSManager.hh"
+#include "GGEMS/io/GGEMSMHDImage.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
 GGEMSWorld::GGEMSWorld()
+: world_output_basename_("world")
 {
   GGcout("GGEMSWorld", "GGEMSWorld", 3) << "Allocation of GGEMSWorld..." << GGendl;
 
@@ -62,6 +64,15 @@ GGEMSWorld::GGEMSWorld()
 GGEMSWorld::~GGEMSWorld(void)
 {
   GGcout("GGEMSWorld", "~GGEMSWorld", 3) << "Deallocation of GGEMSWorld..." << GGendl;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSWorld::SetOutputWorldBasename(std::string const& output_basename)
+{
+  world_output_basename_ = output_basename;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -194,23 +205,56 @@ void GGEMSWorld::Tracking(void)
   std::shared_ptr<cl::Kernel> kernel = kernel_world_tracking_.lock();
   kernel->setArg(0, number_of_particles);
   kernel->setArg(1, *primary_particles);
-  kernel->setArg(2, dimensions_.x_);
-  kernel->setArg(3, dimensions_.y_);
-  kernel->setArg(4, dimensions_.z_);
-  kernel->setArg(5, sizes_.x);
-  kernel->setArg(6, sizes_.y);
-  kernel->setArg(7, sizes_.z);
+  kernel->setArg(2, *world_recording_.photon_tracking_.get());
+  kernel->setArg(3, dimensions_.x_);
+  kernel->setArg(4, dimensions_.y_);
+  kernel->setArg(5, dimensions_.z_);
+  kernel->setArg(6, sizes_.x);
+  kernel->setArg(7, sizes_.y);
+  kernel->setArg(8, sizes_.z);
 
   // Launching kernel
   GGint kernel_status = queue->enqueueNDRangeKernel(*kernel, 0, global_wi, local_wi, nullptr, event);
   opencl_manager.CheckOpenCLError(kernel_status, "GGEMSWorld", "Tracking");
   queue->finish(); // Wait until the kernel status is finish
+}
 
-  // Get GGEMS Manager
-  GGEMSManager& ggems_manager = GGEMSManager::GetInstance();
-  if (ggems_manager.IsKernelVerbose()) {
-    GGEMSChrono::DisplayTime(opencl_manager.GetElapsedTimeInKernel(), "World Tracking");
-  }
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSWorld::SaveResults(void) const
+{
+  if (is_photon_tracking_) SavePhotonTracking();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSWorld::SavePhotonTracking(void) const
+{
+  // Get the OpenCL manager
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+
+  GGsize total_number_of_voxels = dimensions_.x_ * dimensions_.y_ * dimensions_.z_;
+  GGint* photon_tracking = new GGint[total_number_of_voxels];
+  std::memset(photon_tracking, 0, total_number_of_voxels*sizeof(GGint));
+
+  GGEMSMHDImage mhdImage;
+  mhdImage.SetOutputFileName(world_output_basename_ + "_photon_tracking.mhd");
+  mhdImage.SetDataType("MET_INT");
+  mhdImage.SetDimensions(dimensions_);
+  mhdImage.SetElementSizes(sizes_);
+
+  GGint* photon_tracking_device = opencl_manager.GetDeviceBuffer<GGint>(world_recording_.photon_tracking_.get(), total_number_of_voxels*sizeof(GGint));
+
+  for (GGsize i = 0; i < total_number_of_voxels; ++i) photon_tracking[i] = photon_tracking_device[i];
+
+  // Writing data
+  mhdImage.Write<GGint>(photon_tracking, total_number_of_voxels);
+  opencl_manager.ReleaseDeviceBuffer(world_recording_.photon_tracking_.get(), photon_tracking_device);
+  delete[] photon_tracking;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -247,4 +291,13 @@ void set_size_ggems_world(GGEMSWorld* world, GGfloat const size_x, GGfloat const
 void photon_tracking_ggems_world(GGEMSWorld* world, bool const is_activated)
 {
   world->SetPhotonTracking(is_activated);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void set_output_ggems_world(GGEMSWorld* world, char const* world_output_basename)
+{
+  world->SetOutputWorldBasename(world_output_basename);
 }
