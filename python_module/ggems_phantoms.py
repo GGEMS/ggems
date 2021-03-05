@@ -60,6 +60,9 @@ class GGEMSWorld(object):
         ggems_lib.photon_tracking_ggems_world.argtypes = [ctypes.c_void_p, ctypes.c_bool]
         ggems_lib.photon_tracking_ggems_world.restype = ctypes.c_void_p
 
+        ggems_lib.edep_ggems_world.argtypes = [ctypes.c_void_p, ctypes.c_bool]
+        ggems_lib.edep_ggems_world.restype = ctypes.c_void_p
+
         ggems_lib.set_output_ggems_world.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
         ggems_lib.set_output_ggems_world.restype = ctypes.c_void_p
 
@@ -76,3 +79,6 @@ class GGEMSWorld(object):
 
     def set_output_basename(self, output):
         ggems_lib.set_output_ggems_world(self.obj, output.encode('ASCII'))
+
+    def edep(self, activate):
+        ggems_lib.edep_ggems_world(self.obj, activate)

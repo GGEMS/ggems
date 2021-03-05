@@ -55,6 +55,7 @@ GGEMSWorld::GGEMSWorld()
   sizes_.z = -1.0f;
 
   is_photon_tracking_ = false;
+  is_edep_ = false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -133,6 +134,15 @@ void GGEMSWorld::SetPhotonTracking(bool const& is_activated)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+void GGEMSWorld::SetEdep(bool const& is_activated)
+{
+  is_edep_ = is_activated;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 void GGEMSWorld::InitializeKernel(void)
 {
   GGcout("GGEMSWorld", "InitializeKernel", 3) << "Initializing kernel for world tracking..." << GGendl;
@@ -173,6 +183,9 @@ void GGEMSWorld::Initialize(void)
   world_recording_.photon_tracking_ = is_photon_tracking_ ? opencl_manager.Allocate(nullptr, total_number_voxel_world * sizeof(GGint), CL_MEM_READ_WRITE) : nullptr;
   if (is_photon_tracking_) opencl_manager.CleanBuffer(world_recording_.photon_tracking_, total_number_voxel_world * sizeof(GGint));
 
+  world_recording_.edep_ = is_edep_ ? opencl_manager.Allocate(nullptr, total_number_voxel_world*sizeof(GGDosiType), CL_MEM_READ_WRITE) : nullptr;
+  if (is_edep_) opencl_manager.CleanBuffer(world_recording_.edep_, total_number_voxel_world*sizeof(GGDosiType));
+
   // Initialize OpenCL kernel tracking particles in world
   InitializeKernel();
 }
@@ -206,12 +219,13 @@ void GGEMSWorld::Tracking(void)
   kernel->setArg(0, number_of_particles);
   kernel->setArg(1, *primary_particles);
   kernel->setArg(2, *world_recording_.photon_tracking_.get());
-  kernel->setArg(3, dimensions_.x_);
-  kernel->setArg(4, dimensions_.y_);
-  kernel->setArg(5, dimensions_.z_);
-  kernel->setArg(6, sizes_.x);
-  kernel->setArg(7, sizes_.y);
-  kernel->setArg(8, sizes_.z);
+  kernel->setArg(3, *world_recording_.edep_.get());
+  kernel->setArg(4, dimensions_.x_);
+  kernel->setArg(5, dimensions_.y_);
+  kernel->setArg(6, dimensions_.z_);
+  kernel->setArg(7, sizes_.x);
+  kernel->setArg(8, sizes_.y);
+  kernel->setArg(9, sizes_.z);
 
   // Launching kernel
   GGint kernel_status = queue->enqueueNDRangeKernel(*kernel, 0, global_wi, local_wi, nullptr, event);
@@ -226,6 +240,7 @@ void GGEMSWorld::Tracking(void)
 void GGEMSWorld::SaveResults(void) const
 {
   if (is_photon_tracking_) SavePhotonTracking();
+  if (is_edep_) SaveEdep();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -242,7 +257,7 @@ void GGEMSWorld::SavePhotonTracking(void) const
   std::memset(photon_tracking, 0, total_number_of_voxels*sizeof(GGint));
 
   GGEMSMHDImage mhdImage;
-  mhdImage.SetOutputFileName(world_output_basename_ + "_photon_tracking.mhd");
+  mhdImage.SetOutputFileName(world_output_basename_ + "_world_photon_tracking.mhd");
   mhdImage.SetDataType("MET_INT");
   mhdImage.SetDimensions(dimensions_);
   mhdImage.SetElementSizes(sizes_);
@@ -255,6 +270,36 @@ void GGEMSWorld::SavePhotonTracking(void) const
   mhdImage.Write<GGint>(photon_tracking, total_number_of_voxels);
   opencl_manager.ReleaseDeviceBuffer(world_recording_.photon_tracking_.get(), photon_tracking_device);
   delete[] photon_tracking;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSWorld::SaveEdep(void) const
+{
+  // Get the OpenCL manager
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+
+  GGsize total_number_of_voxels = dimensions_.x_ * dimensions_.y_ * dimensions_.z_;
+  GGDosiType* edep_tracking = new GGDosiType[total_number_of_voxels];
+  std::memset(edep_tracking, 0, total_number_of_voxels*sizeof(GGDosiType));
+
+  GGEMSMHDImage mhdImage;
+  mhdImage.SetOutputFileName(world_output_basename_ + "_world_edep.mhd");
+  if (sizeof(GGDosiType) == 4) mhdImage.SetDataType("MET_FLOAT");
+  else if (sizeof(GGDosiType) == 8) mhdImage.SetDataType("MET_DOUBLE");
+  mhdImage.SetDimensions(dimensions_);
+  mhdImage.SetElementSizes(sizes_);
+
+  GGDosiType* edep_device = opencl_manager.GetDeviceBuffer<GGDosiType>(world_recording_.edep_.get(), total_number_of_voxels*sizeof(GGDosiType));
+
+  for (GGsize i = 0; i < total_number_of_voxels; ++i) edep_tracking[i] = edep_device[i];
+
+  // Writing data
+  mhdImage.Write<GGDosiType>(edep_tracking, total_number_of_voxels);
+  opencl_manager.ReleaseDeviceBuffer(world_recording_.edep_.get(), edep_device);
+  delete[] edep_tracking;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -300,4 +345,13 @@ void photon_tracking_ggems_world(GGEMSWorld* world, bool const is_activated)
 void set_output_ggems_world(GGEMSWorld* world, char const* world_output_basename)
 {
   world->SetOutputWorldBasename(world_output_basename);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void edep_ggems_world(GGEMSWorld* world, bool const is_activated)
+{
+  world->SetEdep(is_activated);
 }

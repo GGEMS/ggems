@@ -43,6 +43,7 @@ kernel void world_tracking(
   GGsize const particle_id_limit,
   global GGEMSPrimaryParticles* primary_particle,
   global GGint* photon_tracking,
+  global GGDosiType* edep_tracking,
   GGsize width,
   GGsize height,
   GGsize depth,
@@ -108,6 +109,12 @@ kernel void world_tracking(
 
     global_index_world = index.x + index.y * dim.x + index.z * dim.x * dim.y;
     if (photon_tracking) atomic_add(&photon_tracking[global_index_world], 1);
+
+    #ifdef DOSIMETRY_DOUBLE_PRECISION
+    if (edep_tracking) AtomicAddDouble(&edep_tracking[global_index_world], (GGDosiType)primary_particle->E_[global_id]);
+    #else
+    if (edep_tracking) AtomicAddFloat(&edep_tracking[global_index_world], (GGDosiType)primary_particle->E_[global_id]);
+    #endif
 
     p1 += increment*main_size;
     index = convert_int3((p1 - (size*convert_float3(dim)*-0.5f))/size);
