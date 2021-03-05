@@ -84,7 +84,7 @@ inline void dose_photon_tracking(global GGEMSDoseParams* dose_params, global GGi
 ////////////////////////////////////////////////////////////////////////////////
 
 /*!
-  \fn
+  \fn void dose_record_standard(global GGEMSDoseParams* dose_params, global GGDosiType* edep_tracking, global GGDosiType* edep_squared_tracking, global GGint* hit_tracking, GGfloat edep, GGfloat3 const* position)
   \param dose_params - params associated to dosemap
   \param
   \brief Recording data for dosimetry

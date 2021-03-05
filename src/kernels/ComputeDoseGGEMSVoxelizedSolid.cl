@@ -79,15 +79,9 @@ kernel void compute_dose_ggems_voxelized_solid(
 
   // Convert doxel_id into position
   GGfloat3 dosel_pos = convert_float3(dosel_id) * dose_params->size_of_dosels_ + convert_float3((dose_params->number_of_dosels_-1)) * (-0.5f*dose_params->size_of_dosels_);
-  // GGfloat dosel_pos_x = dosel_id_x * dose_params->size_of_dosels_.x + (dose_params->number_of_dosels_.x-1) * (-0.5f*dose_params->size_of_dosels_.x);
-  // GGfloat dosel_pos_y = dosel_id_y * dose_params->size_of_dosels_.y + (dose_params->number_of_dosels_.y-1) * (-0.5f*dose_params->size_of_dosels_.y);
-  // GGfloat dosel_pos_z = dosel_id_z * dose_params->size_of_dosels_.z + (dose_params->number_of_dosels_.z-1) * (-0.5f*dose_params->size_of_dosels_.z);
 
   // Get index of voxelized phantom, x, y, z
   GGint3 voxel_id = convert_int3((dosel_pos - voxelized_solid_data->obb_geometry_.border_min_xyz_) / voxelized_solid_data->voxel_sizes_xyz_);
-  // GGint voxel_id_x = (dosel_pos_x - voxelized_solid_data->obb_geometry_.border_min_xyz_.x) / voxelized_solid_data->voxel_sizes_xyz_.x;
-  // GGint voxel_id_y = (dosel_pos_y - voxelized_solid_data->obb_geometry_.border_min_xyz_.y) / voxelized_solid_data->voxel_sizes_xyz_.y;
-  // GGint voxel_id_z = (dosel_pos_z - voxelized_solid_data->obb_geometry_.border_min_xyz_.z) / voxelized_solid_data->voxel_sizes_xyz_.z;
 
   // Get the material that compose this volume
   GGshort material_id = label_data[
