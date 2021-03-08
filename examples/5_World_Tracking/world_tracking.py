@@ -79,7 +79,8 @@ phantom.set_rotation(0.0, 0.0, 0.0, 'deg')
 phantom.set_position(0.0, 0.0, 0.0, 'mm')
 
 # Linking dosimetry to phantom
-dosimetry = GGEMSDosimetryCalculator('phantom')
+dosimetry = GGEMSDosimetryCalculator()
+dosimetry.attach_to_navigator('phantom')
 dosimetry.set_output_basename('data/dosimetry')
 dosimetry.water_reference(False)
 dosimetry.minimum_density(0.1, 'g/cm3')

@@ -120,7 +120,8 @@ int main(int argc, char** argv)
     phantom.SetPosition(0.0f, 0.0f, 0.0f, "mm");
 
     // Dosimetry
-    GGEMSDosimetryCalculator dosimetry("phantom");
+    GGEMSDosimetryCalculator dosimetry;
+    dosimetry.AttachToNavigator("phantom");
     dosimetry.SetOutputDosimetryBasename("data/dosimetry");
     dosimetry.SetDoselSizes(0.5f, 0.5f, 0.5f, "mm");
     dosimetry.SetWaterReference(true);

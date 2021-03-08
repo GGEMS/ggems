@@ -160,7 +160,7 @@ void GGEMSMHDImage::Read(std::string const& image_mhd_header_filename, std::weak
 
     // Compare key and store data if valid
     if (!kKey.compare("ObjectType")) {
-      GGwarn("GGEMSMHDImage", "Read", 0) << "The key 'ObjectType' is useless in GGEMS." << GGendl;
+      continue;
     }
     else if (!kKey.compare("DimSize")) {
       iss >> solid_data_device->number_of_voxels_xyz_.x >> solid_data_device->number_of_voxels_xyz_.y >> solid_data_device->number_of_voxels_xyz_.z;
@@ -177,22 +177,22 @@ void GGEMSMHDImage::Read(std::string const& image_mhd_header_filename, std::weak
       iss >> mhd_raw_file_;
     }
     else if (!kKey.compare("Offset")) {
-      GGwarn("GGEMSMHDImage", "Read", 0) << "The key 'Offset' is useless in GGEMS." << GGendl;
+      continue;
     }
     else if (!kKey.compare("NDims")) {
-      GGwarn("GGEMSMHDImage", "Read", 0) << "The key 'NDims' is useless in GGEMS." << GGendl;
+      continue;
     }
     else if (!kKey.compare("BinaryData")) {
-      GGwarn("GGEMSMHDImage", "Read", 0) << "The key 'BinaryData' is useless in GGEMS." << GGendl;
+      continue;
     }
     else if (!kKey.compare("CompressedData")) {
-      GGwarn("GGEMSMHDImage", "Read", 0) << "The key 'CompressedData' is useless in GGEMS." << GGendl;
+      continue;
     }
     else if (!kKey.compare("BinaryDataByteOrderMSB")) {
-      GGwarn("GGEMSMHDImage", "Read", 0) << "The key 'BinaryDataByteOrderMSB' is useless in GGEMS." << GGendl;
+      continue;
     }
     else if (!kKey.compare("BinaryDataByteOrderMSB")) {
-      GGwarn("GGEMSMHDImage", "Read", 0) << "The key 'BinaryDataByteOrderMSB' is useless in GGEMS." << GGendl;
+      continue;
     }
     else {
       std::ostringstream oss(std::ostringstream::out);

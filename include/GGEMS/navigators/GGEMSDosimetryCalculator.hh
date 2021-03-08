@@ -48,10 +48,9 @@ class GGEMS_EXPORT GGEMSDosimetryCalculator
 {
   public:
     /*!
-      \param navigator_name - name of the navigator associated to dosimetry
       \brief GGEMSDosimetryCalculator constructor
     */
-    explicit GGEMSDosimetryCalculator(std::string const& navigator_name);
+    GGEMSDosimetryCalculator(void);
 
     /*!
       \brief GGEMSDosimetryCalculator destructor
@@ -85,6 +84,13 @@ class GGEMS_EXPORT GGEMSDosimetryCalculator
       \brief Avoid copy by rvalue reference
     */
     GGEMSDosimetryCalculator& operator=(GGEMSDosimetryCalculator const&& dose_calculator) = delete;
+
+    /*!
+      \fn void AttachToNavigator(std::string const& navigator_name)
+      \param navigator_name - name of the navigator to attach
+      \brief attach a navigator to dosimetry module
+    */
+    void AttachToNavigator(std::string const& navigator_name);
 
     /*!
       \fn void Initialize(void)
@@ -277,12 +283,11 @@ class GGEMS_EXPORT GGEMSDosimetryCalculator
 };
 
 /*!
-  \fn GGEMSDosimetryCalculator* create_ggems_dosimetry_calculator(char const* voxelized_phantom_name)
-  \param voxelized_phantom_name - name of voxelized phantom
+  \fn GGEMSDosimetryCalculator* create_ggems_dosimetry_calculator(void)
   \return the pointer on the dosimetry calculator
   \brief Get the GGEMSDosimetryCalculator pointer for python user.
 */
-extern "C" GGEMS_EXPORT GGEMSDosimetryCalculator* create_ggems_dosimetry_calculator(char const* voxelized_phantom_name);
+extern "C" GGEMS_EXPORT GGEMSDosimetryCalculator* create_ggems_dosimetry_calculator(void);
 
 /*!
   \fn GGEMSTube* delete_dosimetry_calculator(GGEMSDosimetryCalculator* dose_calculator)
@@ -374,5 +379,13 @@ extern "C" GGEMS_EXPORT void dose_edep_squared_dosimetry_calculator(GGEMSDosimet
   \brief storing results about uncertainty
 */
 extern "C" GGEMS_EXPORT void dose_uncertainty_dosimetry_calculator(GGEMSDosimetryCalculator* dose_calculator, bool const is_activated);
+
+/*!
+  \fn void attach_to_navigator_dosimetry_calculator(GGEMSDosimetryCalculator* dose_calculator, char const* navigator)
+  \param dose_calculator - pointer on dose calculator
+  \param navigator - name of the navigator to attach
+  \brief attach dosimetry module to a navigator
+*/
+extern "C" GGEMS_EXPORT void attach_to_navigator_dosimetry_calculator(GGEMSDosimetryCalculator* dose_calculator, char const* navigator);
 
 #endif // End of GUARD_GGEMS_NAVIGATORS_GGEMSDOSIMETRYCALCULATOR_HH
