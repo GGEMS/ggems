@@ -72,7 +72,8 @@ phantom.set_position(0.0, 0.0, 0.0, 'mm')
 
 # ------------------------------------------------------------------------------
 # STEP 4: Dosimetry
-dosimetry = GGEMSDosimetryCalculator('phantom')
+dosimetry = GGEMSDosimetryCalculator()
+dosimetry.attach_to_navigator('phantom')
 dosimetry.set_output_basename('data/dosimetry')
 dosimetry.set_dosel_size(0.5, 0.5, 0.5, 'mm')
 dosimetry.water_reference(False)

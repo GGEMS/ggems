@@ -21,7 +21,7 @@ from ggems_lib import *
 class GGEMSDosimetryCalculator(object):
     """Class for dosimetry computation
     """
-    def __init__(self, voxelized_phantom_name):
+    def __init__(self):
         ggems_lib.create_ggems_dosimetry_calculator.restype = ctypes.c_void_p
 
         ggems_lib.set_dosel_size_dosimetry_calculator.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_char_p]
@@ -57,7 +57,10 @@ class GGEMSDosimetryCalculator(object):
         ggems_lib.water_reference_dosimetry_calculator.argtypes = [ctypes.c_void_p, ctypes.c_bool]
         ggems_lib.water_reference_dosimetry_calculator.restype = ctypes.c_void_p
 
-        self.obj = ggems_lib.create_ggems_dosimetry_calculator(voxelized_phantom_name.encode('ASCII'))
+        ggems_lib.attach_to_navigator_dosimetry_calculator.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
+        ggems_lib.attach_to_navigator_dosimetry_calculator.restype = ctypes.c_void_p
+
+        self.obj = ggems_lib.create_ggems_dosimetry_calculator()
 
     def set_dosel_size(self, dose_x, dose_y, dose_z, unit):
         ggems_lib.set_dosel_size_dosimetry_calculator(self.obj, dose_x, dose_y, dose_z, unit.encode('ASCII'))
@@ -91,3 +94,6 @@ class GGEMSDosimetryCalculator(object):
 
     def minimum_density(self, density, unit):
         ggems_lib.minimum_density_dosimetry_calculator(self.obj, density, unit.encode('ASCII'))
+
+    def attach_to_navigator(self, name):
+        ggems_lib.attach_to_navigator_dosimetry_calculator(self.obj, name.encode('ASCII'))

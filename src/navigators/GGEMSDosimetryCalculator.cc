@@ -37,8 +37,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSDosimetryCalculator::GGEMSDosimetryCalculator(std::string const& navigator_name)
+GGEMSDosimetryCalculator::GGEMSDosimetryCalculator(void)
 : dosimetry_output_filename_("dosi"),
+  navigator_(nullptr),
   is_photon_tracking_(false),
   is_edep_(false),
   is_hit_tracking_(false),
@@ -65,12 +66,6 @@ GGEMSDosimetryCalculator::GGEMSDosimetryCalculator(std::string const& navigator_
     GGEMSMisc::ThrowException("GGEMSDosimetryCalculator", "GGEMSDosimetryCalculator", oss.str());
   }
   #endif
-
-  GGEMSNavigatorManager& navigator_manager = GGEMSNavigatorManager::GetInstance();
-  navigator_ = navigator_manager.GetNavigator(navigator_name);
-
-  // Activate dosimetry mode in navigator
-  navigator_->SetDosimetryCalculator(this);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -80,6 +75,19 @@ GGEMSDosimetryCalculator::GGEMSDosimetryCalculator(std::string const& navigator_
 GGEMSDosimetryCalculator::~GGEMSDosimetryCalculator(void)
 {
   GGcout("GGEMSDosimetryCalculator", "~GGEMSDosimetryCalculator", 3) << "Deallocation of GGEMSDosimetryCalculator..." << GGendl;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSDosimetryCalculator::AttachToNavigator(std::string const& navigator_name)
+{
+  GGEMSNavigatorManager& navigator_manager = GGEMSNavigatorManager::GetInstance();
+  navigator_ = navigator_manager.GetNavigator(navigator_name);
+
+  // Activate dosimetry mode in navigator
+  navigator_->SetDosimetryCalculator(this);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -611,9 +619,9 @@ void GGEMSDosimetryCalculator::SaveUncertainty(void) const
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSDosimetryCalculator* create_ggems_dosimetry_calculator(char const* voxelized_phantom_name)
+GGEMSDosimetryCalculator* create_ggems_dosimetry_calculator(void)
 {
-  return new(std::nothrow) GGEMSDosimetryCalculator(voxelized_phantom_name);
+  return new(std::nothrow) GGEMSDosimetryCalculator();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -716,4 +724,13 @@ void water_reference_dosimetry_calculator(GGEMSDosimetryCalculator* dose_calcula
 void minimum_density_dosimetry_calculator(GGEMSDosimetryCalculator* dose_calculator, GGfloat const minimum_density, char const* unit)
 {
   dose_calculator->SetMinimumDensity(minimum_density, unit);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void attach_to_navigator_dosimetry_calculator(GGEMSDosimetryCalculator* dose_calculator, char const* navigator)
+{
+  dose_calculator->AttachToNavigator(navigator);
 }
