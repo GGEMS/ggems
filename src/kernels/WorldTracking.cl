@@ -34,9 +34,20 @@
 #include "GGEMS/physics/GGEMSParticleConstants.hh"
 
 /*!
-  \fn kernel void world_tracking(GGsize const particle_id_limit, global GGEMSPrimaryParticles* primary_particle)
+  \fn kernel void world_tracking(GGsize const particle_id_limit, global GGEMSPrimaryParticles* primary_particle, global GGint* photon_tracking, global GGDosiType* edep_tracking, global GGDosiType* momentum_x, global GGDosiType* momentum_y, global GGDosiType* momentum_z, GGsize width, GGsize height, GGsize depth, GGfloat size_x, GGfloat size_y, GGfloat size_z)
   \param particle_id_limit - particle id limit
   \param primary_particle - pointer to primary particles on OpenCL memory
+  \param photon_tracking - photon tracking counter in world
+  \param edep_tracking - energy tracking in world
+  \param momentum_x - sum of momentum along X
+  \param momentum_y - sum of momentum along Y
+  \param momentum_z - sum of momentum along Z
+  \param width - number of elements in world along X
+  \param height - number of elements in world along Y
+  \param depth - number of elements in world along Z
+  \param size_x - size of world voxel along X
+  \param size_y - size of world voxel along Y
+  \param size_z - size of world voxel along Z
   \brief tracking particles through world volume
 */
 kernel void world_tracking(
@@ -44,6 +55,9 @@ kernel void world_tracking(
   global GGEMSPrimaryParticles* primary_particle,
   global GGint* photon_tracking,
   global GGDosiType* edep_tracking,
+  global GGDosiType* momentum_x,
+  global GGDosiType* momentum_y,
+  global GGDosiType* momentum_z,
   GGsize width,
   GGsize height,
   GGsize depth,
@@ -112,8 +126,14 @@ kernel void world_tracking(
 
     #ifdef DOSIMETRY_DOUBLE_PRECISION
     if (edep_tracking) AtomicAddDouble(&edep_tracking[global_index_world], (GGDosiType)primary_particle->E_[global_id]);
+    if (momentum_x) AtomicAddDouble(&momentum_x[global_index_world], (GGDosiType)primary_particle->dx_[global_id]);
+    if (momentum_y) AtomicAddDouble(&momentum_y[global_index_world], (GGDosiType)primary_particle->dy_[global_id]);
+    if (momentum_z) AtomicAddDouble(&momentum_z[global_index_world], (GGDosiType)primary_particle->dz_[global_id]);
     #else
     if (edep_tracking) AtomicAddFloat(&edep_tracking[global_index_world], (GGDosiType)primary_particle->E_[global_id]);
+    if (momentum_x) AtomicAddFloat(&momentum_x[global_index_world], (GGDosiType)primary_particle->dx_[global_id]);
+    if (momentum_y) AtomicAddFloat(&momentum_y[global_index_world], (GGDosiType)primary_particle->dy_[global_id]);
+    if (momentum_z) AtomicAddFloat(&momentum_z[global_index_world], (GGDosiType)primary_particle->dz_[global_id]);
     #endif
 
     p1 += increment*main_size;

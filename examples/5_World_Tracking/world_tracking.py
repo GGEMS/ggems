@@ -68,8 +68,8 @@ world = GGEMSWorld()
 world.set_dimensions(400, 400, 400)
 world.set_element_sizes(5.0, 5.0, 5.0, 'mm')
 world.set_output_basename('data/world')
-world.edep(True)
-#world.momentum(True)
+world.energy_tracking(True)
+world.momentum(True)
 world.photon_tracking(True)
 
 # Loading phantom in GGEMS

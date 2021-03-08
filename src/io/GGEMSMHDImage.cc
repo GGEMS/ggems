@@ -159,10 +159,7 @@ void GGEMSMHDImage::Read(std::string const& image_mhd_header_filename, std::weak
     std::istringstream iss = GGEMSMHDReader::ReadValue(line);
 
     // Compare key and store data if valid
-    if (!kKey.compare("ObjectType")) {
-      continue;
-    }
-    else if (!kKey.compare("DimSize")) {
+    if (!kKey.compare("DimSize")) {
       iss >> solid_data_device->number_of_voxels_xyz_.x >> solid_data_device->number_of_voxels_xyz_.y >> solid_data_device->number_of_voxels_xyz_.z;
       // Computing number of voxels
       solid_data_device->number_of_voxels_ = solid_data_device->number_of_voxels_xyz_.x * solid_data_device->number_of_voxels_xyz_.y * solid_data_device->number_of_voxels_xyz_.z;
@@ -175,29 +172,6 @@ void GGEMSMHDImage::Read(std::string const& image_mhd_header_filename, std::weak
     }
     else if (!kKey.compare("ElementDataFile")) {
       iss >> mhd_raw_file_;
-    }
-    else if (!kKey.compare("Offset")) {
-      continue;
-    }
-    else if (!kKey.compare("NDims")) {
-      continue;
-    }
-    else if (!kKey.compare("BinaryData")) {
-      continue;
-    }
-    else if (!kKey.compare("CompressedData")) {
-      continue;
-    }
-    else if (!kKey.compare("BinaryDataByteOrderMSB")) {
-      continue;
-    }
-    else if (!kKey.compare("BinaryDataByteOrderMSB")) {
-      continue;
-    }
-    else {
-      std::ostringstream oss(std::ostringstream::out);
-      oss << "Unknown MHD key: " << kKey << "'!!!";
-      GGEMSMisc::ThrowException("GGEMSMHDImage", "Read", oss.str());
     }
   }
 
