@@ -40,9 +40,11 @@
 */
 typedef struct GGEMSWorldRecording_t
 {
-  std::shared_ptr<cl::Buffer> edep_; /*!< Buffer storing energy deposit on OpenCL device */
+  std::shared_ptr<cl::Buffer> energy_tracking_; /*!< Buffer storing energy tracking on OpenCL device */
   std::shared_ptr<cl::Buffer> photon_tracking_; /*!< Buffer storing photon tracking on OpenCL device */
-  //std::shared_ptr<cl::Buffer> momentum_; /*!< Buffer storing dose in gray (Gy) */
+  std::shared_ptr<cl::Buffer> momentum_x_; /*!< Sum of particle momemtum along X */
+  std::shared_ptr<cl::Buffer> momentum_y_; /*!< Sum of particle momemtum along Y */
+  std::shared_ptr<cl::Buffer> momentum_z_; /*!< Sum of particle momemtum along Z */
 } GGEMSWorldRecording; /*!< Using C convention name of struct to C++ (_t deletion) */
 
 /*!
@@ -124,11 +126,18 @@ class GGEMS_EXPORT GGEMSWorld
     void SetPhotonTracking(bool const& is_activated);
 
     /*!
-      \fn void SetEdep(bool const& is_activated)
-      \param is_activated - boolean activating energy deposit registration
-      \brief activating energy deposit in world
+      \fn void SetEnergyTracking(bool const& is_activated)
+      \param is_activated - boolean activating energy tracking
+      \brief activating energy tracking in world
     */
-    void SetEdep(bool const& is_activated);
+    void SetEnergyTracking(bool const& is_activated);
+
+    /*!
+      \fn void SetMomentum(bool const& is_activated)
+      \param is_activated - boolean activating sum of momentum in world
+      \brief activating sum of momentum in world
+    */
+    void SetMomentum(bool const& is_activated);
 
     /*!
       \fn void Initialize(void)
@@ -168,17 +177,24 @@ class GGEMS_EXPORT GGEMSWorld
     void SavePhotonTracking(void) const;
 
     /*!
-      \fn void SaveEdep(void) const
-      \brief save energy deposit
+      \fn void SaveEnergyTracking(void) const
+      \brief save energy tracking
     */
-    void SaveEdep(void) const;
+    void SaveEnergyTracking(void) const;
+
+    /*!
+      \fn void SaveMomentum(void) const
+      \brief save sum of momentum
+    */
+    void SaveMomentum(void) const;
 
   private:
     std::string world_output_basename_; /*!< Output basename for world results */
     GGsize3 dimensions_; /*!< Dimensions of world */
     GGfloat3 sizes_; /*!< Sizes of elements in world */
     bool is_photon_tracking_; /*!< Boolean for photon tracking */
-    bool is_edep_; /*!< Boolean for energy deposit */
+    bool is_energy_tracking_; /*!< Boolean for energy deposit */
+    bool is_momentum_; /*!< Boolean for sum of momentum */
     GGEMSWorldRecording world_recording_; /*!< Structure storing OpenCL pointer */
     std::weak_ptr<cl::Kernel> kernel_world_tracking_; /*!< OpenCL kernel computing world tracking */
 };
@@ -220,12 +236,12 @@ extern "C" GGEMS_EXPORT void set_size_ggems_world(GGEMSWorld* world, GGfloat con
 extern "C" GGEMS_EXPORT void photon_tracking_ggems_world(GGEMSWorld* world, bool const is_activated);
 
 /*!
-  \fn void edep_ggems_world(GGEMSWorld* world, bool const is_activated)
+  \fn void energy_tracking_ggems_world(GGEMSWorld* world, bool const is_activated)
   \param world - pointer on world volume
-  \param is_activated - boolean activating deposited energy tracking
-  \brief storing results about deposited energy
+  \param is_activated - boolean activating energy tracking
+  \brief storing results about energy tracking
 */
-extern "C" GGEMS_EXPORT void edep_ggems_world(GGEMSWorld* world, bool const is_activated);
+extern "C" GGEMS_EXPORT void energy_tracking_ggems_world(GGEMSWorld* world, bool const is_activated);
 
 /*!
   \fn void set_output_ggems_world(GGEMSWorld* world, char const* world_output_basename)
@@ -234,5 +250,13 @@ extern "C" GGEMS_EXPORT void edep_ggems_world(GGEMSWorld* world, bool const is_a
   \brief set output basename storing world tracking results
 */
 extern "C" GGEMS_EXPORT void set_output_ggems_world(GGEMSWorld* world, char const* world_output_basename);
+
+/*!
+  \fn void momentum_ggems_world(GGEMSWorld* world, bool const is_activated)
+  \param world - pointer on world volume
+  \param is_activated - boolean activating sum of momentum in world
+  \brief storing sum of momentum in world
+*/
+extern "C" GGEMS_EXPORT void momentum_ggems_world(GGEMSWorld* world, bool const is_activated);
 
 #endif // End of GUARD_GGEMS_NAVIGATORS_GGEMSWORLD_HH
