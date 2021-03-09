@@ -179,13 +179,13 @@ void GGEMSVoxelizedSolid::ConvertImageToLabel(std::string const& raw_data_filena
   in_raw_stream.close();
 
   // Allocating memory on OpenCL device
-  label_data_ = opencl_manager.Allocate(nullptr, number_of_voxels * sizeof(GGshort), CL_MEM_READ_WRITE);
+  label_data_ = opencl_manager.Allocate(nullptr, number_of_voxels * sizeof(GGuchar), CL_MEM_READ_WRITE);
 
   // Get pointer on OpenCL device
-  GGshort* label_data_device = opencl_manager.GetDeviceBuffer<GGshort>(label_data_.get(), number_of_voxels * sizeof(GGshort));
+  GGuchar* label_data_device = opencl_manager.GetDeviceBuffer<GGuchar>(label_data_.get(), number_of_voxels * sizeof(GGuchar));
 
-  // Set value to max of GGshort
-  std::fill(label_data_device, label_data_device + number_of_voxels, std::numeric_limits<GGshort>::max());
+  // Set value to max of GGuchar
+  std::fill(label_data_device, label_data_device + number_of_voxels, std::numeric_limits<GGuchar>::max());
 
   // Opening range data file
   std::ifstream in_range_stream(range_data_filename, std::ios::in);
@@ -194,7 +194,7 @@ void GGEMSVoxelizedSolid::ConvertImageToLabel(std::string const& raw_data_filena
   // Values in the range file
   GGfloat first_label_value = 0.0f;
   GGfloat last_label_value = 0.0f;
-  GGshort label_index = 0;
+  GGuchar label_index = 0;
   std::string material_name("");
 
   // Reading range file

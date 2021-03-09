@@ -56,6 +56,7 @@ GGEMSWorld::GGEMSWorld()
 
   is_photon_tracking_ = false;
   is_energy_tracking_ = false;
+  is_energy_squared_tracking_ = false;
   is_momentum_ = false;
 }
 
@@ -144,6 +145,15 @@ void GGEMSWorld::SetEnergyTracking(bool const& is_activated)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+void GGEMSWorld::SetEnergySquaredTracking(bool const& is_activated)
+{
+  is_energy_squared_tracking_ = is_activated;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 void GGEMSWorld::SetMomentum(bool const& is_activated)
 {
   is_momentum_ = is_activated;
@@ -196,6 +206,9 @@ void GGEMSWorld::Initialize(void)
   world_recording_.energy_tracking_ = is_energy_tracking_ ? opencl_manager.Allocate(nullptr, total_number_voxel_world*sizeof(GGDosiType), CL_MEM_READ_WRITE) : nullptr;
   if (is_energy_tracking_) opencl_manager.CleanBuffer(world_recording_.energy_tracking_, total_number_voxel_world*sizeof(GGDosiType));
 
+  world_recording_.energy_squared_tracking_ = is_energy_squared_tracking_ ? opencl_manager.Allocate(nullptr, total_number_voxel_world*sizeof(GGDosiType), CL_MEM_READ_WRITE) : nullptr;
+  if (is_energy_squared_tracking_) opencl_manager.CleanBuffer(world_recording_.energy_squared_tracking_, total_number_voxel_world*sizeof(GGDosiType));
+
   world_recording_.momentum_x_ = is_momentum_ ? opencl_manager.Allocate(nullptr, total_number_voxel_world*sizeof(GGDosiType), CL_MEM_READ_WRITE) : nullptr;
   if (is_momentum_) opencl_manager.CleanBuffer(world_recording_.momentum_x_, total_number_voxel_world*sizeof(GGDosiType));
 
@@ -239,15 +252,16 @@ void GGEMSWorld::Tracking(void)
   kernel->setArg(1, *primary_particles);
   kernel->setArg(2, *world_recording_.photon_tracking_.get());
   kernel->setArg(3, *world_recording_.energy_tracking_.get());
-  kernel->setArg(4, *world_recording_.momentum_x_.get());
-  kernel->setArg(5, *world_recording_.momentum_y_.get());
-  kernel->setArg(6, *world_recording_.momentum_z_.get());
-  kernel->setArg(7, dimensions_.x_);
-  kernel->setArg(8, dimensions_.y_);
-  kernel->setArg(9, dimensions_.z_);
-  kernel->setArg(10, sizes_.x);
-  kernel->setArg(11, sizes_.y);
-  kernel->setArg(12, sizes_.z);
+  kernel->setArg(4, *world_recording_.energy_squared_tracking_.get());
+  kernel->setArg(5, *world_recording_.momentum_x_.get());
+  kernel->setArg(6, *world_recording_.momentum_y_.get());
+  kernel->setArg(7, *world_recording_.momentum_z_.get());
+  kernel->setArg(8, dimensions_.x_);
+  kernel->setArg(9, dimensions_.y_);
+  kernel->setArg(10, dimensions_.z_);
+  kernel->setArg(11, sizes_.x);
+  kernel->setArg(12, sizes_.y);
+  kernel->setArg(13, sizes_.z);
 
   // Launching kernel
   GGint kernel_status = queue->enqueueNDRangeKernel(*kernel, 0, global_wi, local_wi, nullptr, event);
@@ -263,6 +277,7 @@ void GGEMSWorld::SaveResults(void) const
 {
   if (is_photon_tracking_) SavePhotonTracking();
   if (is_energy_tracking_) SaveEnergyTracking();
+  if (is_energy_squared_tracking_) SaveEnergySquaredTracking();
   if (is_momentum_) SaveMomentum();
 }
 
@@ -323,6 +338,36 @@ void GGEMSWorld::SaveEnergyTracking(void) const
   mhdImage.Write<GGDosiType>(edep_tracking, total_number_of_voxels);
   opencl_manager.ReleaseDeviceBuffer(world_recording_.energy_tracking_.get(), edep_device);
   delete[] edep_tracking;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSWorld::SaveEnergySquaredTracking(void) const
+{
+  // Get the OpenCL manager
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+
+  GGsize total_number_of_voxels = dimensions_.x_ * dimensions_.y_ * dimensions_.z_;
+  GGDosiType* edep_squared_tracking = new GGDosiType[total_number_of_voxels];
+  std::memset(edep_squared_tracking, 0, total_number_of_voxels*sizeof(GGDosiType));
+
+  GGEMSMHDImage mhdImage;
+  mhdImage.SetOutputFileName(world_output_basename_ + "_world_edep_squared.mhd");
+  if (sizeof(GGDosiType) == 4) mhdImage.SetDataType("MET_FLOAT");
+  else if (sizeof(GGDosiType) == 8) mhdImage.SetDataType("MET_DOUBLE");
+  mhdImage.SetDimensions(dimensions_);
+  mhdImage.SetElementSizes(sizes_);
+
+  GGDosiType* edep_squared_device = opencl_manager.GetDeviceBuffer<GGDosiType>(world_recording_.energy_squared_tracking_.get(), total_number_of_voxels*sizeof(GGDosiType));
+
+  for (GGsize i = 0; i < total_number_of_voxels; ++i) edep_squared_tracking[i] = edep_squared_device[i];
+
+  // Writing data
+  mhdImage.Write<GGDosiType>(edep_squared_tracking, total_number_of_voxels);
+  opencl_manager.ReleaseDeviceBuffer(world_recording_.energy_squared_tracking_.get(), edep_squared_device);
+  delete[] edep_squared_tracking;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -447,6 +492,15 @@ void set_output_ggems_world(GGEMSWorld* world, char const* world_output_basename
 void energy_tracking_ggems_world(GGEMSWorld* world, bool const is_activated)
 {
   world->SetEnergyTracking(is_activated);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void energy_squared_tracking_ggems_world(GGEMSWorld* world, bool const is_activated)
+{
+  world->SetEnergySquaredTracking(is_activated);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -66,6 +66,9 @@ class GGEMSWorld(object):
         ggems_lib.set_output_ggems_world.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
         ggems_lib.set_output_ggems_world.restype = ctypes.c_void_p
 
+        ggems_lib.energy_squared_tracking_ggems_world.argtypes = [ctypes.c_void_p, ctypes.c_bool]
+        ggems_lib.energy_squared_tracking_ggems_world.restype = ctypes.c_void_p
+
         ggems_lib.momentum_ggems_world.argtypes = [ctypes.c_void_p, ctypes.c_bool]
         ggems_lib.momentum_ggems_world.restype = ctypes.c_void_p
 
@@ -85,6 +88,9 @@ class GGEMSWorld(object):
 
     def energy_tracking(self, activate):
         ggems_lib.energy_tracking_ggems_world(self.obj, activate)
+
+    def energy_squared_tracking(self, activate):
+        ggems_lib.energy_squared_tracking_ggems_world(self.obj, activate)
 
     def momentum(self, activate):
         ggems_lib.momentum_ggems_world(self.obj, activate)

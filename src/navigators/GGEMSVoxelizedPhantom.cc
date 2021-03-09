@@ -130,7 +130,7 @@ void GGEMSVoxelizedPhantom::Initialize(void)
 void GGEMSVoxelizedPhantom::SaveResults(void)
 {
   if (is_dosimetry_mode_) {
-    GGcout("GGEMSSystem", "GGEMSVoxelizedPhantom", 2) << "Saving dosimetry results in MHD format..." << GGendl;
+    GGcout("GGEMSVoxelizedPhantom", "SaveResults", 2) << "Saving dosimetry results in MHD format..." << GGendl;
 
     // Compute dose and save results
     dose_calculator_->ComputeDoseAndSaveResults();

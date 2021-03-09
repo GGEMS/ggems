@@ -41,6 +41,7 @@
 typedef struct GGEMSWorldRecording_t
 {
   std::shared_ptr<cl::Buffer> energy_tracking_; /*!< Buffer storing energy tracking on OpenCL device */
+  std::shared_ptr<cl::Buffer> energy_squared_tracking_; /*!< Buffer storing energy squared tracking on OpenCL device */
   std::shared_ptr<cl::Buffer> photon_tracking_; /*!< Buffer storing photon tracking on OpenCL device */
   std::shared_ptr<cl::Buffer> momentum_x_; /*!< Sum of particle momemtum along X */
   std::shared_ptr<cl::Buffer> momentum_y_; /*!< Sum of particle momemtum along Y */
@@ -133,6 +134,13 @@ class GGEMS_EXPORT GGEMSWorld
     void SetEnergyTracking(bool const& is_activated);
 
     /*!
+      \fn void SetEnergySquaredTracking(bool const& is_activated)
+      \param is_activated - boolean activating energy squared tracking
+      \brief activating energy squared tracking in world
+    */
+    void SetEnergySquaredTracking(bool const& is_activated);
+
+    /*!
       \fn void SetMomentum(bool const& is_activated)
       \param is_activated - boolean activating sum of momentum in world
       \brief activating sum of momentum in world
@@ -183,6 +191,12 @@ class GGEMS_EXPORT GGEMSWorld
     void SaveEnergyTracking(void) const;
 
     /*!
+      \fn void SaveEnergySquaredTracking(void) const
+      \brief save energy squared tracking
+    */
+    void SaveEnergySquaredTracking(void) const;
+
+    /*!
       \fn void SaveMomentum(void) const
       \brief save sum of momentum
     */
@@ -194,6 +208,7 @@ class GGEMS_EXPORT GGEMSWorld
     GGfloat3 sizes_; /*!< Sizes of elements in world */
     bool is_photon_tracking_; /*!< Boolean for photon tracking */
     bool is_energy_tracking_; /*!< Boolean for energy deposit */
+    bool is_energy_squared_tracking_; /*!< Boolean for energy squared deposit */
     bool is_momentum_; /*!< Boolean for sum of momentum */
     GGEMSWorldRecording world_recording_; /*!< Structure storing OpenCL pointer */
     std::weak_ptr<cl::Kernel> kernel_world_tracking_; /*!< OpenCL kernel computing world tracking */
@@ -242,6 +257,14 @@ extern "C" GGEMS_EXPORT void photon_tracking_ggems_world(GGEMSWorld* world, bool
   \brief storing results about energy tracking
 */
 extern "C" GGEMS_EXPORT void energy_tracking_ggems_world(GGEMSWorld* world, bool const is_activated);
+
+/*!
+  \fn void energy_squared_tracking_ggems_world(GGEMSWorld* world, bool const is_activated)
+  \param world - pointer on world volume
+  \param is_activated - boolean activating energy tracking
+  \brief storing results about energy squared tracking
+*/
+extern "C" GGEMS_EXPORT void energy_squared_tracking_ggems_world(GGEMSWorld* world, bool const is_activated);
 
 /*!
   \fn void set_output_ggems_world(GGEMSWorld* world, char const* world_output_basename)

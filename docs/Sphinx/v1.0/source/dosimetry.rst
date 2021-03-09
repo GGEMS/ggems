@@ -6,11 +6,17 @@ During GGEMS simulation, a photon dosimetry module can be activated to compute a
 
 .. NOTE:: Only photon are simulated in the current version of GGEMS. In next releases electron will be implemented.
 
-The dosimetry module is 'GGEMSDosimetryCalculator' and take the name of the phantom as a parameter:
+The dosimetry module is 'GGEMSDosimetryCalculator':
 
 .. code-block:: python
 
-  dosimetry = GGEMSDosimetryCalculator('phantom')
+  dosimetry = GGEMSDosimetryCalculator()
+
+After creating the GGEMSDosimetryCalculator object, a navigator is attached:
+
+.. code-block:: python
+
+  dosimetry.attach_to_navigator('phantom')
 
 The size of voxel in dosimetry image (dosel) can be set. If not set the dosel size is the same than voxel phantom size:
 

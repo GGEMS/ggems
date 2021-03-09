@@ -32,13 +32,15 @@
 #include "GGEMS/physics/GGEMSPrimaryParticles.hh"
 #include "GGEMS/tools/GGEMSTypes.hh"
 #include "GGEMS/physics/GGEMSParticleConstants.hh"
+#include "GGEMS/geometries/GGEMSGeometryConstants.hh"
 
 /*!
-  \fn kernel void world_tracking(GGsize const particle_id_limit, global GGEMSPrimaryParticles* primary_particle, global GGint* photon_tracking, global GGDosiType* edep_tracking, global GGDosiType* momentum_x, global GGDosiType* momentum_y, global GGDosiType* momentum_z, GGsize width, GGsize height, GGsize depth, GGfloat size_x, GGfloat size_y, GGfloat size_z)
+  \fn kernel void world_tracking(GGsize const particle_id_limit, global GGEMSPrimaryParticles* primary_particle, global GGint* photon_tracking, global GGDosiType* edep_tracking, global GGDosiType* edep_squared_tracking, global GGDosiType* momentum_x, global GGDosiType* momentum_y, global GGDosiType* momentum_z, GGsize width, GGsize height, GGsize depth, GGfloat size_x, GGfloat size_y, GGfloat size_z)
   \param particle_id_limit - particle id limit
   \param primary_particle - pointer to primary particles on OpenCL memory
   \param photon_tracking - photon tracking counter in world
   \param edep_tracking - energy tracking in world
+  \param edep_squared_tracking - energy tracking in world
   \param momentum_x - sum of momentum along X
   \param momentum_y - sum of momentum along Y
   \param momentum_z - sum of momentum along Z
@@ -55,6 +57,7 @@ kernel void world_tracking(
   global GGEMSPrimaryParticles* primary_particle,
   global GGint* photon_tracking,
   global GGDosiType* edep_tracking,
+  global GGDosiType* edep_squared_tracking,
   global GGDosiType* momentum_x,
   global GGDosiType* momentum_y,
   global GGDosiType* momentum_z,
@@ -84,6 +87,9 @@ kernel void world_tracking(
 
   // Computing point x2, y2, z2
   GGfloat distance = primary_particle->particle_solid_distance_[global_id] == OUT_OF_WORLD ? 10000.0f : primary_particle->particle_solid_distance_[global_id];
+
+  if (distance <= GEOMETRY_TOLERANCE) return;
+
   GGfloat3 p2 = p1 + distance*direction;
 
   // Start index
@@ -126,11 +132,13 @@ kernel void world_tracking(
 
     #ifdef DOSIMETRY_DOUBLE_PRECISION
     if (edep_tracking) AtomicAddDouble(&edep_tracking[global_index_world], (GGDosiType)primary_particle->E_[global_id]);
+    if (edep_squared_tracking) AtomicAddDouble(&edep_squared_tracking[global_index_world], (GGDosiType)primary_particle->E_[global_id]*(GGDosiType)primary_particle->E_[global_id]);
     if (momentum_x) AtomicAddDouble(&momentum_x[global_index_world], (GGDosiType)primary_particle->dx_[global_id]);
     if (momentum_y) AtomicAddDouble(&momentum_y[global_index_world], (GGDosiType)primary_particle->dy_[global_id]);
     if (momentum_z) AtomicAddDouble(&momentum_z[global_index_world], (GGDosiType)primary_particle->dz_[global_id]);
     #else
     if (edep_tracking) AtomicAddFloat(&edep_tracking[global_index_world], (GGDosiType)primary_particle->E_[global_id]);
+    if (edep_squared_tracking) AtomicAddFloat(&edep_squared_tracking[global_index_world], (GGDosiType)primary_particle->E_[global_id]*(GGDosiType)primary_particle->E_[global_id]);
     if (momentum_x) AtomicAddFloat(&momentum_x[global_index_world], (GGDosiType)primary_particle->dx_[global_id]);
     if (momentum_y) AtomicAddFloat(&momentum_y[global_index_world], (GGDosiType)primary_particle->dy_[global_id]);
     if (momentum_z) AtomicAddFloat(&momentum_z[global_index_world], (GGDosiType)primary_particle->dz_[global_id]);
