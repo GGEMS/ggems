@@ -32,7 +32,7 @@ device_id = args.device
 
 # ------------------------------------------------------------------------------
 # STEP 0: Level of verbosity during computation
-GGEMSVerbosity(3)
+GGEMSVerbosity(1)
 
 # ------------------------------------------------------------------------------
 # STEP 1: Choosing an OpenCL device
@@ -80,17 +80,17 @@ phantom.set_rotation(0.0, 0.0, 0.0, 'deg')
 phantom.set_position(0.0, 0.0, 0.0, 'mm')
 
 # Linking dosimetry to phantom
-dosimetry = GGEMSDosimetryCalculator()
-dosimetry.attach_to_navigator('phantom')
-dosimetry.set_output_basename('data/dosimetry')
-dosimetry.water_reference(False)
-dosimetry.minimum_density(0.1, 'g/cm3')
+# dosimetry = GGEMSDosimetryCalculator()
+# dosimetry.attach_to_navigator('phantom')
+# dosimetry.set_output_basename('data/dosimetry')
+# dosimetry.water_reference(False)
+# dosimetry.minimum_density(0.1, 'g/cm3')
 
-dosimetry.uncertainty(True)
-dosimetry.photon_tracking(True)
-dosimetry.edep(True)
-dosimetry.hit(True)
-dosimetry.edep_squared(True)
+# dosimetry.uncertainty(True)
+# dosimetry.photon_tracking(True)
+# dosimetry.edep(True)
+# dosimetry.hit(True)
+# dosimetry.edep_squared(True)
 
 # Creating detector
 cbct_detector = GGEMSCTSystem('custom')
@@ -124,7 +124,7 @@ range_cuts_manager.set_cut('gamma', 0.1, 'mm', 'all')
 # STEP 6: Source
 point_source = GGEMSXRaySource('point_source')
 point_source.set_source_particle_type('gamma')
-point_source.set_number_of_particles(10000000)
+point_source.set_number_of_particles(100000000)
 point_source.set_position(-900.0, 0.0, 0.0, 'mm')
 point_source.set_rotation(0.0, 0.0, 0.0, 'deg')
 point_source.set_beam_aperture(12.0, 'deg')
