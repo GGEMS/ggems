@@ -58,7 +58,7 @@ inline void GetPhotonNextInteraction(
   global GGEMSPrimaryParticles* primary_particle,
   global GGEMSRandom* random,
   global GGEMSParticleCrossSections const* particle_cross_sections,
-  GGshort const index_material,
+  GGuchar const index_material,
   GGint const particle_id)
 {
   // Getting energy of the particle and the index of energy in cross section table

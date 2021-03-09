@@ -46,7 +46,7 @@
 #endif
 
 /*!
-  \fn kernel void track_through_ggems_voxelized_solid(GGsize const particle_id_limit, global GGEMSPrimaryParticles* primary_particle, global GGEMSRandom* random, global GGEMSVoxelizedSolidData const* voxelized_solid_data, global GGshort const* label_data, global GGEMSParticleCrossSections const* particle_cross_sections, global GGEMSMaterialTables const* materials, GGfloat const threshold)
+  \fn kernel void track_through_ggems_voxelized_solid(GGsize const particle_id_limit, global GGEMSPrimaryParticles* primary_particle, global GGEMSRandom* random, global GGEMSVoxelizedSolidData const* voxelized_solid_data, global GGuchar const* label_data, global GGEMSParticleCrossSections const* particle_cross_sections, global GGEMSMaterialTables const* materials, GGfloat const threshold)
   \param particle_id_limit - particle id limit
   \param primary_particle - pointer to primary particles on OpenCL memory
   \param random - pointer on random numbers
@@ -62,7 +62,7 @@ kernel void track_through_ggems_voxelized_solid(
   global GGEMSPrimaryParticles* primary_particle,
   global GGEMSRandom* random,
   global GGEMSVoxelizedSolidData const* voxelized_solid_data,
-  global GGshort const* label_data,
+  global GGuchar const* label_data,
   global GGEMSParticleCrossSections const* particle_cross_sections,
   global GGEMSMaterialTables const* materials,
   GGfloat const threshold
@@ -128,7 +128,7 @@ kernel void track_through_ggems_voxelized_solid(
     }
 
     // Get the material that compose this volume
-    GGshort material_id = label_data[voxel_id.x + voxel_id.y * number_of_voxels.x + voxel_id.z * number_of_voxels.x * number_of_voxels.y];
+    GGuchar material_id = label_data[voxel_id.x + voxel_id.y * number_of_voxels.x + voxel_id.z * number_of_voxels.x * number_of_voxels.y];
 
     // Find next discrete photon interaction
     GetPhotonNextInteraction(primary_particle, random, particle_cross_sections, material_id, global_id);

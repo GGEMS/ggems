@@ -32,7 +32,7 @@ device_id = args.device
 
 # ------------------------------------------------------------------------------
 # STEP 0: Level of verbosity during computation
-GGEMSVerbosity(1)
+GGEMSVerbosity(3)
 
 # ------------------------------------------------------------------------------
 # STEP 1: Choosing an OpenCL device
@@ -69,6 +69,7 @@ world.set_dimensions(400, 400, 400)
 world.set_element_sizes(5.0, 5.0, 5.0, 'mm')
 world.set_output_basename('data/world')
 world.energy_tracking(True)
+world.energy_squared_tracking(True)
 world.momentum(True)
 world.photon_tracking(True)
 
@@ -84,6 +85,7 @@ dosimetry.attach_to_navigator('phantom')
 dosimetry.set_output_basename('data/dosimetry')
 dosimetry.water_reference(False)
 dosimetry.minimum_density(0.1, 'g/cm3')
+
 dosimetry.uncertainty(True)
 dosimetry.photon_tracking(True)
 dosimetry.edep(True)
@@ -122,7 +124,7 @@ range_cuts_manager.set_cut('gamma', 0.1, 'mm', 'all')
 # STEP 6: Source
 point_source = GGEMSXRaySource('point_source')
 point_source.set_source_particle_type('gamma')
-point_source.set_number_of_particles(1000000)
+point_source.set_number_of_particles(10000000)
 point_source.set_position(-900.0, 0.0, 0.0, 'mm')
 point_source.set_rotation(0.0, 0.0, 0.0, 'deg')
 point_source.set_beam_aperture(12.0, 'deg')
@@ -150,5 +152,6 @@ ggems_manager.run()
 
 # ------------------------------------------------------------------------------
 # STEP 8: Exit safely
+#dosimetry.delete()
 opencl_manager.clean()
 exit()

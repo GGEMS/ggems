@@ -63,8 +63,8 @@ GGEMSMaterials::~GGEMSMaterials(void)
 void GGEMSMaterials::AddMaterial(std::string const& material_name)
 {
   // Checking the number of material
-  if (materials_.size() == 256) {
-    GGEMSMisc::ThrowException("GGEMSMaterials", "AddMaterial", "Limit of material reached. The limit is 256 materials!!!");
+  if (materials_.size() == 255) {
+    GGEMSMisc::ThrowException("GGEMSMaterials", "AddMaterial", "Limit of material reached. The limit is 255 materials!!!");
   }
 
   // Add material and check if the material already exists
