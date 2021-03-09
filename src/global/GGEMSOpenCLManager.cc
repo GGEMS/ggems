@@ -155,7 +155,7 @@ GGEMSOpenCLManager::GGEMSOpenCLManager(void)
   device_profiling_timer_resolution_.resize(devices_.size());
 
   // Custom work group size, 64 seems a good trade-off
-  work_group_size_ = 64;
+  work_group_size_ = 1;
 
   // Make a char buffer reading char* data
   GGsize buffer[3] = {0,0,0};
