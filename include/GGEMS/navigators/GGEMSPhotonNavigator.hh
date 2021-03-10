@@ -111,7 +111,7 @@ inline void PhotonDiscreteProcess(
   global GGEMSRandom* random,
   global GGEMSMaterialTables const* materials,
   global GGEMSParticleCrossSections const* particle_cross_sections,
-  GGshort const material_id,
+  GGuchar const material_id,
   GGint const particle_id
 )
 {

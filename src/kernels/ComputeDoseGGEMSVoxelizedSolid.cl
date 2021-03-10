@@ -57,7 +57,7 @@ kernel void compute_dose_ggems_voxelized_solid(
   global GGint const* hit,
   global GGDosiType const* edep_squared,
   global GGEMSVoxelizedSolidData const* voxelized_solid_data,
-  global GGshort const* label_data,
+  global GGuchar const* label_data,
   global GGEMSMaterialTables const* materials,
   global GGfloat* dose,
   global GGfloat* uncertainty,
@@ -84,7 +84,7 @@ kernel void compute_dose_ggems_voxelized_solid(
   GGint3 voxel_id = convert_int3((dosel_pos - voxelized_solid_data->obb_geometry_.border_min_xyz_) / voxelized_solid_data->voxel_sizes_xyz_);
 
   // Get the material that compose this volume
-  GGshort material_id = label_data[
+  GGuchar material_id = label_data[
     voxel_id.x +
     voxel_id.y * voxelized_solid_data->number_of_voxels_xyz_.x +
     voxel_id.z * voxelized_solid_data->number_of_voxels_xyz_.x * voxelized_solid_data->number_of_voxels_xyz_.y
