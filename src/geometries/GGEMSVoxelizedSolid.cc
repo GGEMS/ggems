@@ -238,10 +238,10 @@ void GGEMSVoxelizedSolid::LoadVolumeImage(std::weak_ptr<GGEMSMaterials> material
 
   // Convert raw data to material id data
   if (!kDataType.compare("MET_CHAR")) {
-    ConvertImageToLabel<char>(raw_filename, range_filename_, materials);
+    ConvertImageToLabel<GGchar>(raw_filename, range_filename_, materials);
   }
   else if (!kDataType.compare("MET_UCHAR")) {
-    ConvertImageToLabel<unsigned char>(raw_filename, range_filename_, materials);
+    ConvertImageToLabel<GGuchar>(raw_filename, range_filename_, materials);
   }
   else if (!kDataType.compare("MET_SHORT")) {
     ConvertImageToLabel<GGshort>(raw_filename, range_filename_, materials);
