@@ -125,6 +125,8 @@
 
 #if defined(cl_khr_int64_base_atomics)
 #pragma OPENCL EXTENSION cl_khr_int64_base_atomics : enable
+#else
+#error "Int64 atomic operation not available on your OpenCL device!!! Please recompile GGEMS setting DOSIMETRY_DOUBLE_PRECISION to OFF."
 #endif
 
 #else
