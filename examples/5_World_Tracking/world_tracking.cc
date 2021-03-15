@@ -30,16 +30,17 @@
 
 #include <cstdlib>
 #include "GGEMS/global/GGEMSOpenCLManager.hh"
-// #include "GGEMS/global/GGEMSManager.hh"
-// #include "GGEMS/materials/GGEMSMaterialsDatabaseManager.hh"
-// #include "GGEMS/navigators/GGEMSVoxelizedPhantom.hh"
-// #include "GGEMS/navigators/GGEMSSystem.hh"
-// #include "GGEMS/navigators/GGEMSCTSystem.hh"
-// #include "GGEMS/physics/GGEMSRangeCutsManager.hh"
-// #include "GGEMS/physics/GGEMSProcessesManager.hh"
-// #include "GGEMS/sources/GGEMSXRaySource.hh"
-// #include "GGEMS/geometries/GGEMSVolumeCreatorManager.hh"
-// #include "GGEMS/geometries/GGEMSBox.hh"
+#include "GGEMS/global/GGEMSManager.hh"
+#include "GGEMS/materials/GGEMSMaterialsDatabaseManager.hh"
+#include "GGEMS/navigators/GGEMSVoxelizedPhantom.hh"
+#include "GGEMS/navigators/GGEMSCTSystem.hh"
+#include "GGEMS/physics/GGEMSRangeCutsManager.hh"
+#include "GGEMS/physics/GGEMSProcessesManager.hh"
+#include "GGEMS/sources/GGEMSXRaySource.hh"
+#include "GGEMS/navigators/GGEMSDosimetryCalculator.hh"
+#include "GGEMS/geometries/GGEMSVolumeCreatorManager.hh"
+#include "GGEMS/geometries/GGEMSTube.hh"
+#include "GGEMS/navigators/GGEMSWorld.hh"
 
 /*!
   \fn void PrintHelpAndQuit(void)
@@ -78,97 +79,120 @@ int main(int argc, char** argv)
 
   // Initialization of singletons
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
-  // GGEMSMaterialsDatabaseManager& material_manager = GGEMSMaterialsDatabaseManager::GetInstance();
-  // GGEMSVolumeCreatorManager& volume_creator_manager = GGEMSVolumeCreatorManager::GetInstance();
-  // GGEMSProcessesManager& processes_manager = GGEMSProcessesManager::GetInstance();
-  // GGEMSRangeCutsManager& range_cuts_manager = GGEMSRangeCutsManager::GetInstance();
-  // GGEMSManager& ggems_manager = GGEMSManager::GetInstance();
+  GGEMSMaterialsDatabaseManager& material_manager = GGEMSMaterialsDatabaseManager::GetInstance();
+  GGEMSVolumeCreatorManager& volume_creator_manager = GGEMSVolumeCreatorManager::GetInstance();
+  GGEMSProcessesManager& processes_manager = GGEMSProcessesManager::GetInstance();
+  GGEMSRangeCutsManager& range_cuts_manager = GGEMSRangeCutsManager::GetInstance();
+  GGEMSManager& ggems_manager = GGEMSManager::GetInstance();
 
   try {
     // Set the context id
     opencl_manager.DeviceToActivate(device_id);
 
-    // // Enter material database
-    // material_manager.SetMaterialsDatabase("../../data/materials.txt");
+    // Enter material database
+    material_manager.SetMaterialsDatabase("../../data/materials.txt");
 
-    // // Initializing a global voxelized volume
-    // volume_creator_manager.SetVolumeDimensions(120, 120, 120);
-    // volume_creator_manager.SetElementSizes(0.1f, 0.1f, 0.1f, "mm");
-    // volume_creator_manager.SetOutputImageFilename("data/phantom.mhd");
-    // volume_creator_manager.SetRangeToMaterialDataFilename("data/range_phantom.txt");
-    // volume_creator_manager.SetMaterial("Air");
-    // volume_creator_manager.SetDataType("MET_INT");
-    // volume_creator_manager.Initialize();
+    // Initializing a global voxelized volume
+    volume_creator_manager.SetVolumeDimensions(240, 240, 240);
+    volume_creator_manager.SetElementSizes(1.0f, 1.0f, 1.0f, "mm");
+    volume_creator_manager.SetOutputImageFilename("data/phantom.mhd");
+    volume_creator_manager.SetRangeToMaterialDataFilename("data/range_phantom.txt");
+    volume_creator_manager.SetMaterial("Air");
+    volume_creator_manager.SetDataType("MET_INT");
+    volume_creator_manager.Initialize();
 
-    // // Creating a box
-    // GGEMSBox* box_phantom = new GGEMSBox(10.0f, 10.0f, 10.0f, "mm");
-    // box_phantom->SetPosition(0.0f, 0.0f, 0.0f, "mm");
-    // box_phantom->SetLabelValue(1);
-    // box_phantom->SetMaterial("Water");
-    // box_phantom->Initialize();
-    // box_phantom->Draw();
-    // delete box_phantom;
+    // Creating a box
+    GGEMSTube* tube_phantom = new GGEMSTube(50.0f, 50.0f, 200.0f, "mm");
+    tube_phantom->SetPosition(0.0f, 0.0f, 0.0f, "mm");
+    tube_phantom->SetLabelValue(1);
+    tube_phantom->SetMaterial("Water");
+    tube_phantom->Initialize();
+    tube_phantom->Draw();
+    delete tube_phantom;
 
-    // // Writing volume
-    // volume_creator_manager.Write();
+    // Writing volume
+    volume_creator_manager.Write();
 
-    // // Phantoms and systems
-    // GGEMSVoxelizedPhantom phantom("phantom");
-    // phantom.SetPhantomFile("data/phantom.mhd", "data/range_phantom.txt");
-    // phantom.SetRotation(0.0f, 0.0f, 0.0f, "deg");
-    // phantom.SetPosition(0.0f, 0.0f, 0.0f, "mm");
+    // Creating a world
+    GGEMSWorld* world = new GGEMSWorld();
+    world->SetDimension(400, 400, 400);
+    world->SetElementSize(5.0f, 5.0f, 5.0f, "mm");
+    world->SetOutputWorldBasename("data/world");
+    world->SetEnergyTracking(true);
+    world->SetEnergySquaredTracking(true);
+    world->SetMomentum(true);
+    world->SetPhotonTracking(true);
 
-    // GGEMSCTSystem ct_detector("Stellar");
-    // ct_detector.SetCTSystemType("curved");
-    // ct_detector.SetNumberOfModules(1, 46);
-    // ct_detector.SetNumberOfDetectionElementsInsideModule(64, 16, 1);
-    // ct_detector.SetSizeOfDetectionElements(0.6f, 0.6f, 0.6f, "mm");
-    // ct_detector.SetMaterialName("GOS");
-    // ct_detector.SetSourceDetectorDistance(1085.6f, "mm");
-    // ct_detector.SetSourceIsocenterDistance(595.0f, "mm");
-    // ct_detector.SetRotation(0.0f, 0.0f, 0.0f, "deg");
-    // ct_detector.SetThreshold(10.0f, "keV");
-    // ct_detector.StoreOutput("data/projection.mhd");
+    // Phantoms and systems
+    GGEMSVoxelizedPhantom phantom("phantom");
+    phantom.SetPhantomFile("data/phantom.mhd", "data/range_phantom.txt");
+    phantom.SetRotation(0.0f, 0.0f, 0.0f, "deg");
+    phantom.SetPosition(0.0f, 0.0f, 0.0f, "mm");
 
-    // // Physics
-    // processes_manager.AddProcess("Compton", "gamma", "all");
-    // processes_manager.AddProcess("Photoelectric", "gamma", "all");
-    // processes_manager.AddProcess("Rayleigh", "gamma", "all");
+    // Dosimetry
+    GGEMSDosimetryCalculator dosimetry;
+    dosimetry.AttachToNavigator("phantom");
+    dosimetry.SetOutputDosimetryBasename("data/dosimetry");
+    dosimetry.SetWaterReference(false);
+    dosimetry.SetMinimumDensity(0.1f, "g/cm3");
+    dosimetry.SetUncertainty(true);
+    dosimetry.SetPhotonTracking(true);
+    dosimetry.SetEdep(true);
+    dosimetry.SetEdepSquared(true);
+    dosimetry.SetHitTracking(true);
 
-    // // Optional options, the following are by default
-    // processes_manager.SetCrossSectionTableNumberOfBins(220);
-    // processes_manager.SetCrossSectionTableMinimumEnergy(1.0f, "keV");
-    // processes_manager.SetCrossSectionTableMaximumEnergy(1.0f, "MeV");
+    GGEMSCTSystem ct_detector("custom");
+    ct_detector.SetCTSystemType("flat");
+    ct_detector.SetNumberOfModules(1, 1);
+    ct_detector.SetNumberOfDetectionElementsInsideModule(400, 400, 1);
+    ct_detector.SetSizeOfDetectionElements(1.0f, 1.0f, 10.0f, "mm");
+    ct_detector.SetMaterialName("Silicon");
+    ct_detector.SetSourceDetectorDistance(1500.0f, "mm");
+    ct_detector.SetSourceIsocenterDistance(900.0f, "mm");
+    ct_detector.SetRotation(0.0f, 0.0f, 0.0f, "deg");
+    ct_detector.SetThreshold(10.0f, "keV");
+    ct_detector.StoreOutput("data/projection.mhd");
 
-    // // Cuts, by default but are 1 um
-    // range_cuts_manager.SetLengthCut("all", "gamma", 0.1f, "mm");
+    // Physics
+    processes_manager.AddProcess("Compton", "gamma", "all");
+    processes_manager.AddProcess("Photoelectric", "gamma", "all");
+    processes_manager.AddProcess("Rayleigh", "gamma", "all");
 
-    // // Source
-    // GGEMSXRaySource point_source("point_source");
-    // point_source.SetSourceParticleType("gamma");
-    // point_source.SetNumberOfParticles(1000000000);
-    // point_source.SetPosition(-595.0f, 0.0f, 0.0f, "mm");
-    // point_source.SetRotation(0.0f, 0.0f, 0.0f, "deg");
-    // point_source.SetBeamAperture(12.5f, "deg");
-    // point_source.SetFocalSpotSize(0.0f, 0.0f, 0.0f, "mm");
-    // point_source.SetPolyenergy("data/spectrum_120kVp_2mmAl.dat");
+    // Optional options, the following are by default
+    processes_manager.SetCrossSectionTableNumberOfBins(220);
+    processes_manager.SetCrossSectionTableMinimumEnergy(1.0f, "keV");
+    processes_manager.SetCrossSectionTableMaximumEnergy(1.0f, "MeV");
 
-    // // GGEMS simulation
-    // ggems_manager.SetOpenCLVerbose(true);
-    // ggems_manager.SetNavigatorVerbose(true);
-    // ggems_manager.SetSourceVerbose(true);
-    // ggems_manager.SetMemoryRAMVerbose(true);
-    // ggems_manager.SetProcessVerbose(true);
-    // ggems_manager.SetRangeCutsVerbose(true);
-    // ggems_manager.SetRandomVerbose(true);
-    // ggems_manager.SetKernelVerbose(true);
-    // ggems_manager.SetTrackingVerbose(false, 0);
+    // Cuts, by default but are 1 um
+    range_cuts_manager.SetLengthCut("all", "gamma", 0.1f, "mm");
 
-    // // Initializing the GGEMS simulation
-    // ggems_manager.Initialize();
+    // Source
+    GGEMSXRaySource point_source("point_source");
+    point_source.SetSourceParticleType("gamma");
+    point_source.SetNumberOfParticles(1000000);
+    point_source.SetPosition(-900.0f, 0.0f, 0.0f, "mm");
+    point_source.SetRotation(0.0f, 0.0f, 0.0f, "deg");
+    point_source.SetBeamAperture(12.0f, "deg");
+    point_source.SetFocalSpotSize(0.0f, 0.0f, 0.0f, "mm");
+    point_source.SetMonoenergy(60.0f, "keV");
 
-    // // Start GGEMS simulation
-    // ggems_manager.Run();
+    // GGEMS simulation
+    ggems_manager.SetOpenCLVerbose(false);
+    ggems_manager.SetMaterialDatabaseVerbose(false);
+    ggems_manager.SetNavigatorVerbose(true);
+    ggems_manager.SetSourceVerbose(true);
+    ggems_manager.SetMemoryRAMVerbose(true);
+    ggems_manager.SetProcessVerbose(true);
+    ggems_manager.SetRangeCutsVerbose(true);
+    ggems_manager.SetRandomVerbose(true);
+    ggems_manager.SetKernelVerbose(true);
+    ggems_manager.SetTrackingVerbose(false, 0);
+
+    // Initializing the GGEMS simulation
+    ggems_manager.Initialize();
+
+    // Start GGEMS simulation
+    ggems_manager.Run();
   }
   catch (std::exception& e) {
     std::cerr << e.what() << std::endl;

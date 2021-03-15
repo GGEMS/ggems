@@ -123,10 +123,8 @@ int main(int argc, char** argv)
     GGEMSDosimetryCalculator dosimetry;
     dosimetry.AttachToNavigator("phantom");
     dosimetry.SetOutputDosimetryBasename("data/dosimetry");
-    dosimetry.SetDoselSizes(0.5f, 0.5f, 0.5f, "mm");
-    dosimetry.SetWaterReference(true);
+    dosimetry.SetWaterReference(false);
     dosimetry.SetMinimumDensity(0.1f, "g/cm3");
-
     dosimetry.SetUncertainty(true);
     dosimetry.SetPhotonTracking(true);
     dosimetry.SetEdep(true);
