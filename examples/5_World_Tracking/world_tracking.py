@@ -85,7 +85,6 @@ dosimetry.attach_to_navigator('phantom')
 dosimetry.set_output_basename('data/dosimetry')
 dosimetry.water_reference(False)
 dosimetry.minimum_density(0.1, 'g/cm3')
-
 dosimetry.uncertainty(True)
 dosimetry.photon_tracking(True)
 dosimetry.edep(True)
@@ -152,6 +151,6 @@ ggems_manager.run()
 
 # ------------------------------------------------------------------------------
 # STEP 8: Exit safely
-#dosimetry.delete()
+dosimetry.delete()
 opencl_manager.clean()
 exit()
