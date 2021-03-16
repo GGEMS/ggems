@@ -35,6 +35,8 @@
 #include "GGEMS/global/GGEMSConstants.hh"
 #include "GGEMS/tools/GGEMSRAMManager.hh"
 #include "GGEMS/randoms/GGEMSPseudoRandomGenerator.hh"
+#include "GGEMS/tools/GGEMSProfilerItem.hh"
+#include "GGEMS/tools/GGEMSProfilerManager.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -137,6 +139,14 @@ void GGEMSXRaySource::GetPrimaries(GGsize const& number_of_particles)
   GGint kernel_status = queue->enqueueNDRangeKernel(*kernel, 0, global_wi, local_wi, nullptr, event);
   opencl_manager.CheckOpenCLError(kernel_status, "GGEMSXRaySource", "GetPrimaries");
   queue->finish(); // Wait until the kernel status is finish
+  event->wait();
+
+  // GGEMS Profiling
+  GGEMSProfilerManager& profiler_manager = GGEMSProfilerManager::GetInstance();
+  profiler_manager.HandleEvent(*event, "kernel_get_primaries");
+
+  // GGEMSProfilingItem profiling_item(*event);
+  // profiling_item.PrintInfos();
 
   // Storing elapsed time in kernel
   kernel_get_primaries_timer_ += opencl_manager.GetElapsedTimeInKernel();

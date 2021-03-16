@@ -63,7 +63,7 @@ GGEMSManager::GGEMSManager(void)
   is_range_cuts_verbose_(false),
   is_random_verbose_(false),
   is_tracking_verbose_(false),
-  is_kernel_verbose_(false),
+  is_profiling_verbose_(false),
   particle_tracking_id_(0)
 {
   GGcout("GGEMSManager", "GGEMSManager", 3) << "Allocation of GGEMS Manager..." << GGendl;
@@ -136,9 +136,9 @@ void GGEMSManager::SetProcessVerbose(bool const& is_process_verbose)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSManager::SetKernelVerbose(bool const& is_kernel_verbose)
+void GGEMSManager::SetProfilingVerbose(bool const& is_profiling_verbose)
 {
-  is_kernel_verbose_ = is_kernel_verbose;
+  is_profiling_verbose_ = is_profiling_verbose;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -298,7 +298,7 @@ void GGEMSManager::Run()
   navigator_manager.SaveResults();
 
   // Printing elapsed time in kernels
-  if (is_kernel_verbose_) {
+  if (is_profiling_verbose_) {
     source_manager.PrintKernelElapsedTime();
     navigator_manager.PrintKernelElapsedTime();
   }
@@ -423,9 +423,9 @@ void set_random_ggems_manager(GGEMSManager* ggems_manager, bool const is_random_
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_kernel_ggems_manager(GGEMSManager* ggems_manager, bool const is_kernel_verbose)
+void set_profiling_ggems_manager(GGEMSManager* ggems_manager, bool const is_profiling_verbose)
 {
-  ggems_manager->SetKernelVerbose(is_kernel_verbose);
+  ggems_manager->SetProfilingVerbose(is_profiling_verbose);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

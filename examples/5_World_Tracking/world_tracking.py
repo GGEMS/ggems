@@ -140,7 +140,7 @@ ggems_manager.memory_verbose(True)
 ggems_manager.process_verbose(True)
 ggems_manager.range_cuts_verbose(True)
 ggems_manager.random_verbose(True)
-ggems_manager.kernel_verbose(True)
+ggems_manager.profiling_verbose(True)
 ggems_manager.tracking_verbose(False, 0)
 
 # Initializing the GGEMS simulation

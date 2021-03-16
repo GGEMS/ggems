@@ -265,7 +265,7 @@ void GGEMSDosimetryCalculator::ComputeDoseAndSaveResults(void)
 
   // Get GGEMS Manager
   GGEMSManager& ggems_manager = GGEMSManager::GetInstance();
-  if (ggems_manager.IsKernelVerbose()) {
+  if (ggems_manager.IsProfilingVerbose()) {
     GGEMSChrono::DisplayTime(opencl_manager.GetElapsedTimeInKernel(), "Dose Computation");
   }
 

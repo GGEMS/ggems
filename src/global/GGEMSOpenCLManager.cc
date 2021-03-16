@@ -796,7 +796,7 @@ DurationNano GGEMSOpenCLManager::GetElapsedTimeInKernel(void) const
   // End
   CheckOpenCLError(event_.get()->getProfilingInfo(CL_PROFILING_COMMAND_END, &end), "GGEMSOpenCLManager", "GetElapsedTimeInKernel");
 
-  return static_cast<std::chrono::nanoseconds>((end-start));
+  return static_cast<DurationNano>((end-start));
 }
 
 ////////////////////////////////////////////////////////////////////////////////

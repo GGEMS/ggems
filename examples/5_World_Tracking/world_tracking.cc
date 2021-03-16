@@ -185,7 +185,7 @@ int main(int argc, char** argv)
     ggems_manager.SetProcessVerbose(true);
     ggems_manager.SetRangeCutsVerbose(true);
     ggems_manager.SetRandomVerbose(true);
-    ggems_manager.SetKernelVerbose(true);
+    ggems_manager.SetProfilingVerbose(true);
     ggems_manager.SetTrackingVerbose(false, 0);
 
     // Initializing the GGEMS simulation
