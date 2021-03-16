@@ -101,7 +101,7 @@ range_cuts_manager.set_cut('gamma', 0.1, 'mm', 'all')
 # STEP 6: Source
 point_source = GGEMSXRaySource('point_source')
 point_source.set_source_particle_type('gamma')
-point_source.set_number_of_particles(1000000000)
+point_source.set_number_of_particles(1000)
 point_source.set_position(-595.0, 0.0, 0.0, 'mm')
 point_source.set_rotation(0.0, 0.0, 0.0, 'deg')
 point_source.set_beam_aperture(12.5, 'deg')
@@ -118,7 +118,7 @@ ggems_manager.memory_verbose(True)
 ggems_manager.process_verbose(True)
 ggems_manager.range_cuts_verbose(True)
 ggems_manager.random_verbose(True)
-ggems_manager.kernel_verbose(True)
+ggems_manager.profiling_verbose(True)
 ggems_manager.tracking_verbose(False, 0)
 
 # Initializing the GGEMS simulation
