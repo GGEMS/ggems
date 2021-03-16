@@ -44,7 +44,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.8 FATAL_ERROR)
 # CC=clang
 # CXX=clang++
 IF(WIN32)
-  SET(COMPILER CLANG CACHE INTERNAL "Compiler name: CLANG, CL")
+  SET(COMPILER CL CACHE INTERNAL "Compiler name: CLANG, CL")
 ELSE()
   SET(COMPILER GCC CACHE INTERNAL "Compiler name: CLANG, GCC")
 ENDIF()
@@ -128,7 +128,7 @@ IF(WIN32)
     STRING(REPLACE "-O3" "" CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
     STRING(REPLACE "-DNDEBUG" "" CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
 
-    SET(CXX_FLAGS -std=c++17 -Wextra -Werror -Wall -pedantic -m64 -Wconversion -Weffc++ -Wold-style-cast -pedantic-errors)
+    SET(CXX_FLAGS -std=c++17 -Wextra -Wall -pedantic -m64 -Wconversion -Weffc++ -Wold-style-cast -pedantic-errors)
     SET(CXX_FLAGS_RELEASE -O3 ${CXX_FLAGS})
     SET(CXX_FLAGS_DEBUG -O0 -g3 ${CXX_FLAGS})
   

@@ -31,6 +31,10 @@
   \date Tuesday March 16, 2021
 */
 
+#ifdef _MSC_VER
+#pragma warning(disable: 4251) // Deleting warning exporting STL members!!!
+#endif
+
 #include <unordered_map>
 
 #include "GGEMS/global/GGEMSExport.hh"
@@ -96,12 +100,24 @@ class GGEMS_EXPORT GGEMSProfilerManager
     GGEMSProfilerManager& operator=(GGEMSProfilerManager const&& profiler_manager) = delete;
 
     /*!
-      \fn void HandleEvent(cl::Event const& event, std::string const& profile_name)
+      \fn void HandleEvent(cl::Event event, std::string const& profile_name)
       \param event - OpenCL event
       \param profile_name - type of profile
       \brief handle an OpenCL event in profile_name type
     */
-    void HandleEvent(cl::Event const& event, std::string const& profile_name);
+    void HandleEvent(cl::Event event, std::string const& profile_name);
+
+    /*!
+      \fn void PrintSummaryProfile(void) const
+      \brief print summary profile
+    */
+    void PrintSummaryProfile(void) const;
+
+    /*!
+      \fn void Reset(void)
+      \brief reset all profile already registered
+    */
+    void Reset(void);
 
   private:
     ProfilerUMap profilers_; /*!< Map storing all types of profiles */
