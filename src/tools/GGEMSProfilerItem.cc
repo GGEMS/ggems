@@ -36,17 +36,17 @@
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSProfilerItem::GGEMSProfilerItem(cl::Event const& event)
+GGEMSProfilerItem::GGEMSProfilerItem(cl_event event)
 {
   GGcout("GGEMSProfilerItem", "GGEMSProfilerItem", 3) << "Allocation of GGEMSProfilerItem..." << GGendl;
 
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
   // Get time infos from event
-  opencl_manager.CheckOpenCLError(event.getProfilingInfo(CL_PROFILING_COMMAND_QUEUED, &times_[0]), "GGEMSProfilerItem", "GGEMSProfilerItem");
-  opencl_manager.CheckOpenCLError(event.getProfilingInfo(CL_PROFILING_COMMAND_SUBMIT, &times_[1]), "GGEMSProfilerItem", "GGEMSProfilerItem");
-  opencl_manager.CheckOpenCLError(event.getProfilingInfo(CL_PROFILING_COMMAND_START, &times_[2]), "GGEMSProfilerItem", "GGEMSProfilerItem");
-  opencl_manager.CheckOpenCLError(event.getProfilingInfo(CL_PROFILING_COMMAND_END, &times_[3]), "GGEMSProfilerItem", "GGEMSProfilerItem");
+  opencl_manager.CheckOpenCLError(clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_QUEUED, sizeof(GGulong), &times_[0], nullptr), "GGEMSProfilerItem", "GGEMSProfilerItem");
+  opencl_manager.CheckOpenCLError(clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_SUBMIT, sizeof(GGulong), &times_[1], nullptr), "GGEMSProfilerItem", "GGEMSProfilerItem");
+  opencl_manager.CheckOpenCLError(clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_START, sizeof(GGulong), &times_[2], nullptr), "GGEMSProfilerItem", "GGEMSProfilerItem");
+  opencl_manager.CheckOpenCLError(clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END, sizeof(GGulong), &times_[3], nullptr), "GGEMSProfilerItem", "GGEMSProfilerItem");
 }
 
 ////////////////////////////////////////////////////////////////////////////////

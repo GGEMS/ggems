@@ -36,6 +36,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 GGEMSProfiler::GGEMSProfiler(void)
+: profiler_items_(nullptr),
+  number_of_data_(0)
 {
   GGcout("GGEMSProfiler", "GGEMSProfiler", 3) << "Allocation of GGEMS Profiler..." << GGendl;
 }
@@ -47,4 +49,62 @@ GGEMSProfiler::GGEMSProfiler(void)
 GGEMSProfiler::~GGEMSProfiler(void)
 {
   GGcout("GGEMSProfiler", "~GGEMSProfiler", 3) << "Deallocation of GGEMS Profiler..." << GGendl;
+
+  if (profiler_items_) {
+    for (std::size_t i = 0; i < number_of_data_; ++i) {
+      delete profiler_items_[i];
+      profiler_items_[i] = nullptr;
+    }
+    delete[] profiler_items_;
+    profiler_items_ = nullptr;
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSProfiler::CallBackFunction(cl_event event, GGint event_command_exec_status, void* user_data)
+{
+  if (event_command_exec_status == CL_COMPLETE) {
+    GGEMSProfiler* p = reinterpret_cast<GGEMSProfiler*>(user_data);
+    p->AddProfilerItem(event);
+    clReleaseEvent(event);
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSProfiler::AddProfilerItem(cl_event event)
+{
+  if (number_of_data_ == 0) { // First profiler item
+    profiler_items_ = new GGEMSProfilerItem*[1];
+    profiler_items_[0] = new GGEMSProfilerItem(event);
+  }
+  else {
+    GGEMSProfilerItem** tmp = new GGEMSProfilerItem*[number_of_data_+1];
+    for (std::size_t i = 0; i < number_of_data_; ++i) {
+      tmp[i] = profiler_items_[i];
+    }
+
+    tmp[number_of_data_] = new GGEMSProfilerItem(event);
+
+    delete[] profiler_items_;
+    profiler_items_ = tmp;
+  }
+
+  // increment profiler item
+  number_of_data_++;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSProfiler::HandleEvent(cl::Event event)
+{
+  clRetainEvent(event());
+  event.setCallback(CL_COMPLETE, reinterpret_cast<void (CL_CALLBACK*)(cl_event, GGint, void*)>(GGEMSProfiler::CallBackFunction), this);
 }

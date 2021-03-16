@@ -58,7 +58,7 @@ class GGEMS_EXPORT GGEMSProfilerItem
       \param event - OpenCL event
       \brief GGEMSProfilerItem constructor
     */
-    explicit GGEMSProfilerItem(cl::Event const& event);
+    explicit GGEMSProfilerItem(cl_event event);
 
     /*!
       \brief GGEMSProfilerItem destructor

@@ -29,7 +29,9 @@
 */
 
 #include "GGEMS/tools/GGEMSProfilerManager.hh"
+#include "GGEMS/tools/GGEMSProfiler.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
+#include "GGEMS/tools/GGEMSChrono.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -47,25 +49,44 @@ GGEMSProfilerManager::GGEMSProfilerManager(void)
 GGEMSProfilerManager::~GGEMSProfilerManager(void)
 {
   GGcout("GGEMSProfilerManager", "~GGEMSProfilerManager", 3) << "Deallocation of GGEMS Profiler Manager..." << GGendl;
+
+  profilers_.clear();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSProfilerManager::HandleEvent(cl::Event const&, std::string const& profile_name)
+void GGEMSProfilerManager::HandleEvent(cl::Event event, std::string const& profile_name)
 {
   // Checking if profile exists already
   if (profilers_.find(profile_name) == profilers_.end()) { // Profile does not exist, creating one
     GGEMSProfiler profiler;
     profilers_.insert(std::make_pair(profile_name, profiler));
   }
-/*
-  // Insert label and check if the label exists already
-  auto const [iter, success] = label_to_material_.insert(std::make_pair(label, material));
-  if (!success) {
-    std::ostringstream oss(std::ostringstream::out);
-    oss << "The label: " << iter->first << " already exists...";
-    GGEMSMisc::ThrowException("GGEMSVolumeCreatorManager", "AddLabelAndMaterial", oss.str());
-  }*/
+
+  // Storing event data in correct profiler
+  profilers_[profile_name].HandleEvent(event);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSProfilerManager::PrintSummaryProfile(void) const
+{
+  // Loop over registered profile
+  for (auto&& p: profilers_) {
+    std::cout << p.first << std::endl;
+    GGEMSChrono::DisplayTime(p.second.GetSummaryTime(), p.first);
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSProfilerManager::Reset(void)
+{
+  profilers_.clear();
 }

@@ -143,10 +143,10 @@ void GGEMSXRaySource::GetPrimaries(GGsize const& number_of_particles)
 
   // GGEMS Profiling
   GGEMSProfilerManager& profiler_manager = GGEMSProfilerManager::GetInstance();
-  profiler_manager.HandleEvent(*event, "kernel_get_primaries");
+  profiler_manager.HandleEvent(*event, "GGEMSXRaySource::GetPrimaries");
 
-  // GGEMSProfilingItem profiling_item(*event);
-  // profiling_item.PrintInfos();
+  //profiler_manager.Reset();
+  //profiler_manager.PrintSummaryProfile();
 
   // Storing elapsed time in kernel
   kernel_get_primaries_timer_ += opencl_manager.GetElapsedTimeInKernel();
