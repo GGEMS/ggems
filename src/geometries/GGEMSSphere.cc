@@ -30,6 +30,7 @@
 
 #include "GGEMS/geometries/GGEMSSphere.hh"
 #include "GGEMS/tools/GGEMSSystemOfUnits.hh"
+#include "GGEMS/tools/GGEMSProfilerManager.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -90,8 +91,8 @@ void GGEMSSphere::Draw(void)
   GGEMSVolumeCreatorManager& volume_creator_manager = GGEMSVolumeCreatorManager::GetInstance();
 
   // Get command queue and event
-  cl::CommandQueue* p_queue = opencl_manager.GetCommandQueue();
-  cl::Event* p_event = opencl_manager.GetEvent();
+  cl::CommandQueue* queue = opencl_manager.GetCommandQueue();
+  cl::Event* event = opencl_manager.GetEvent();
 
   // Get parameters from phantom creator
   GGfloat3 voxel_sizes = volume_creator_manager.GetElementsSizes();
@@ -123,13 +124,13 @@ void GGEMSSphere::Draw(void)
   kernel->setArg(6, *voxelized_phantom);
 
   // Launching kernel
-  cl_int kernel_status = p_queue->enqueueNDRangeKernel(*kernel, 0, global_wi, local_wi, nullptr, p_event);
+  cl_int kernel_status = queue->enqueueNDRangeKernel(*kernel, 0, global_wi, local_wi, nullptr, event);
   opencl_manager.CheckOpenCLError(kernel_status, "GGEMSSphere", "Draw");
-  p_queue->finish(); // Wait until the kernel status is finish
+  queue->finish();
 
-  // Displaying time in kernel
-  kernel_draw_volume_timer_ += opencl_manager.GetElapsedTimeInKernel();
-  GGEMSChrono::DisplayTime(kernel_draw_volume_timer_, "draw_ggems_sphere");
+  // GGEMS Profiling
+  GGEMSProfilerManager& profiler_manager = GGEMSProfilerManager::GetInstance();
+  profiler_manager.HandleEvent(*event, "GGEMSSphere::Draw");
 }
 
 ////////////////////////////////////////////////////////////////////////////////

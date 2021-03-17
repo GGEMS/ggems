@@ -184,12 +184,6 @@ class GGEMS_EXPORT GGEMSNavigatorManager
     void TrackThroughSolid(void) const;
 
     /*!
-      \fn void PrintKernelElapsedTime(void) const
-      \brief Print elapsed time in kernel generating primaries for all the source
-    */
-    void PrintKernelElapsedTime(void) const;
-
-    /*!
       \fn void SaveResults(void) const
       \brief save all results from navigator in files
     */

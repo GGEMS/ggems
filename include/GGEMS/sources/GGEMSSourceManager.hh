@@ -183,12 +183,6 @@ class GGEMS_EXPORT GGEMSSourceManager
     */
     bool IsAlive(void) const;
 
-    /*!
-      \fn void PrintKernelElapsedTime(void) const
-      \brief Print elapsed time in kernel generating primaries for all the source
-    */
-    void PrintKernelElapsedTime(void) const;
-
   private: // Source infos
     std::vector<std::shared_ptr<GGEMSSource>> sources_; /*!< Pointer on GGEMS sources */
     std::shared_ptr<GGEMSParticles> particles_; /*!< Pointer on particle management */

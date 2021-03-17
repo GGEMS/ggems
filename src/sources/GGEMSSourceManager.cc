@@ -130,17 +130,3 @@ bool GGEMSSourceManager::IsAlive(void) const
   // Check if all particles are DEAD in OpenCL particle buffer
   return particles_->IsAlive();
 }
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void GGEMSSourceManager::PrintKernelElapsedTime(void) const
-{
-  DurationNano total_duration = GGEMSChrono::Zero();
-  for (auto&& i : sources_) {
-    total_duration += i->GetKernelGetPrimariesTimer();
-  }
-
-  GGEMSChrono::DisplayTime(total_duration, "Get Primaries");
-}

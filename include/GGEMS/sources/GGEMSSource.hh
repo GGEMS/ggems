@@ -146,13 +146,6 @@ class GGEMS_EXPORT GGEMSSource
     inline GGsize GetNumberOfParticlesInBatch(GGsize const& batch_index) {return number_of_particles_in_batch_.at(batch_index);}
 
     /*!
-      \fn inline DurationNano GetKernelGetPrimariesTimer(void) const
-      \return the elapsed time in kernel
-      \brief Get the elapsed time in kernel for particle generation
-    */
-    inline DurationNano GetKernelGetPrimariesTimer(void) const {return kernel_get_primaries_timer_;}
-
-    /*!
       \fn void CheckParameters(void) const
       \brief Check mandatory parameters for a source
     */
@@ -200,7 +193,6 @@ class GGEMS_EXPORT GGEMSSource
     std::unique_ptr<GGEMSGeometryTransformation> geometry_transformation_; /*!< Pointer storing the geometry transformation */
 
     std::weak_ptr<cl::Kernel> kernel_get_primaries_; /*!< Kernel generating primaries on OpenCL device */
-    DurationNano kernel_get_primaries_timer_; /*!< Timer for particle generation */
 };
 
 #endif // End of GUARD_GGEMS_SOURCES_GGEMSSOURCE_HH

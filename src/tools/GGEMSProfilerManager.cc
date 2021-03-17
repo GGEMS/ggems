@@ -40,6 +40,8 @@
 GGEMSProfilerManager::GGEMSProfilerManager(void)
 {
   GGcout("GGEMSProfilerManager", "GGEMSProfilerManager", 3) << "Allocation of GGEMS Profiler Manager..." << GGendl;
+
+  profilers_.clear();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -59,8 +61,8 @@ GGEMSProfilerManager::~GGEMSProfilerManager(void)
 
 void GGEMSProfilerManager::HandleEvent(cl::Event event, std::string const& profile_name)
 {
-  // Checking if profile exists already
-  if (profilers_.find(profile_name) == profilers_.end()) { // Profile does not exist, creating one
+  // Checking if profile exists already, if not, creating one
+  if (profilers_.find(profile_name) == profilers_.end()) {
     GGEMSProfiler profiler;
     profilers_.insert(std::make_pair(profile_name, profiler));
   }
@@ -75,11 +77,7 @@ void GGEMSProfilerManager::HandleEvent(cl::Event event, std::string const& profi
 
 void GGEMSProfilerManager::PrintSummaryProfile(void) const
 {
-  // Loop over registered profile
-  for (auto&& p: profilers_) {
-    std::cout << p.first << std::endl;
-    GGEMSChrono::DisplayTime(p.second.GetSummaryTime(), p.first);
-  }
+  for (auto&& p: profilers_) GGEMSChrono::DisplayTime(p.second.GetSummaryTime(), p.first);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

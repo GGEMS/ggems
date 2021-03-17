@@ -118,7 +118,6 @@ class GGEMS_EXPORT GGEMSVolume
     GGfloat label_value_; /*!< Value of label in volume */
     GGfloat3 positions_; /*!< Position of volume */
     std::weak_ptr<cl::Kernel> kernel_draw_volume_; /*!< Kernel drawing solid using OpenCL */
-    DurationNano kernel_draw_volume_timer_; /*!< timer for kernel drawing volume */
 };
 
 #endif // End of GUARD_GGEMS_GEOMETRIES_GGEMSVOLUME_HH

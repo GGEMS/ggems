@@ -28,16 +28,23 @@
   \date Tuesday March 16, 2021
 */
 
+#include <mutex>
 #include "GGEMS/tools/GGEMSPrint.hh"
 #include "GGEMS/tools/GGEMSProfiler.hh"
+
+/*!
+  \brief namespace storing mutex
+*/
+namespace {
+  std::mutex mutex;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
 GGEMSProfiler::GGEMSProfiler(void)
-: profiler_items_(nullptr),
-  number_of_data_(0)
+: profiler_item_(nullptr)
 {
   GGcout("GGEMSProfiler", "GGEMSProfiler", 3) << "Allocation of GGEMS Profiler..." << GGendl;
 }
@@ -50,13 +57,9 @@ GGEMSProfiler::~GGEMSProfiler(void)
 {
   GGcout("GGEMSProfiler", "~GGEMSProfiler", 3) << "Deallocation of GGEMS Profiler..." << GGendl;
 
-  if (profiler_items_) {
-    for (std::size_t i = 0; i < number_of_data_; ++i) {
-      delete profiler_items_[i];
-      profiler_items_[i] = nullptr;
-    }
-    delete[] profiler_items_;
-    profiler_items_ = nullptr;
+  if (profiler_item_) {
+    delete profiler_item_;
+    profiler_item_ = nullptr;
   }
 }
 
@@ -68,7 +71,10 @@ void GGEMSProfiler::CallBackFunction(cl_event event, GGint event_command_exec_st
 {
   if (event_command_exec_status == CL_COMPLETE) {
     GGEMSProfiler* p = reinterpret_cast<GGEMSProfiler*>(user_data);
+    // Call back Function has to be thread safe!!!
+    mutex.lock();
     p->AddProfilerItem(event);
+    mutex.unlock();
     clReleaseEvent(event);
   }
 }
@@ -79,24 +85,12 @@ void GGEMSProfiler::CallBackFunction(cl_event event, GGint event_command_exec_st
 
 void GGEMSProfiler::AddProfilerItem(cl_event event)
 {
-  if (number_of_data_ == 0) { // First profiler item
-    profiler_items_ = new GGEMSProfilerItem*[1];
-    profiler_items_[0] = new GGEMSProfilerItem(event);
+  if (!profiler_item_) {
+    profiler_item_ = new GGEMSProfilerItem(event);
   }
   else {
-    GGEMSProfilerItem** tmp = new GGEMSProfilerItem*[number_of_data_+1];
-    for (std::size_t i = 0; i < number_of_data_; ++i) {
-      tmp[i] = profiler_items_[i];
-    }
-
-    tmp[number_of_data_] = new GGEMSProfilerItem(event);
-
-    delete[] profiler_items_;
-    profiler_items_ = tmp;
+    profiler_item_->UpdateEvent(event);
   }
-
-  // increment profiler item
-  number_of_data_++;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

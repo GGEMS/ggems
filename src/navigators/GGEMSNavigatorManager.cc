@@ -167,22 +167,3 @@ void GGEMSNavigatorManager::WorldTracking(void) const
   // Checking if world exists
   if (world_) world_->Tracking();
 }
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void GGEMSNavigatorManager::PrintKernelElapsedTime(void) const
-{
-  DurationNano total_duration = GGEMSChrono::Zero();
-  for (auto&& n : navigators_) total_duration += n->GetKernelParticleSolidDistanceTimer();
-  GGEMSChrono::DisplayTime(total_duration, "Particle Solid Distance");
-
-  total_duration = GGEMSChrono::Zero();
-  for (auto&& n : navigators_) total_duration += n->GetKernelProjectToSolidTimer();
-  GGEMSChrono::DisplayTime(total_duration, "Project To Solid");
-
-  total_duration = GGEMSChrono::Zero();
-  for (auto&& n : navigators_) total_duration += n->GetKernelTrackThroughSolidTimer();
-  GGEMSChrono::DisplayTime(total_duration, "Track Through Solid");
-}

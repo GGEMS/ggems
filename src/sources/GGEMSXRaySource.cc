@@ -109,9 +109,9 @@ void GGEMSXRaySource::GetPrimaries(GGsize const& number_of_particles)
   cl::Event* event = opencl_manager.GetEvent();
 
   // Get the OpenCL buffers
-  GGEMSSourceManager& p_source_manager = GGEMSSourceManager::GetInstance();
-  cl::Buffer* particles = p_source_manager.GetParticles()->GetPrimaryParticles();
-  cl::Buffer* randoms = p_source_manager.GetPseudoRandomGenerator()->GetPseudoRandomNumbers();
+  GGEMSSourceManager& source_manager = GGEMSSourceManager::GetInstance();
+  cl::Buffer* particles = source_manager.GetParticles()->GetPrimaryParticles();
+  cl::Buffer* randoms = source_manager.GetPseudoRandomGenerator()->GetPseudoRandomNumbers();
   cl::Buffer* matrix_transformation = geometry_transformation_->GetTransformationMatrix();
 
   // Getting work group size, and work-item number
@@ -138,18 +138,11 @@ void GGEMSXRaySource::GetPrimaries(GGsize const& number_of_particles)
   // Launching kernel
   GGint kernel_status = queue->enqueueNDRangeKernel(*kernel, 0, global_wi, local_wi, nullptr, event);
   opencl_manager.CheckOpenCLError(kernel_status, "GGEMSXRaySource", "GetPrimaries");
-  queue->finish(); // Wait until the kernel status is finish
-  event->wait();
+  queue->finish();
 
   // GGEMS Profiling
   GGEMSProfilerManager& profiler_manager = GGEMSProfilerManager::GetInstance();
   profiler_manager.HandleEvent(*event, "GGEMSXRaySource::GetPrimaries");
-
-  //profiler_manager.Reset();
-  //profiler_manager.PrintSummaryProfile();
-
-  // Storing elapsed time in kernel
-  kernel_get_primaries_timer_ += opencl_manager.GetElapsedTimeInKernel();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

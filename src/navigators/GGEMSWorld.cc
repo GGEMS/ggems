@@ -34,6 +34,7 @@
 #include "GGEMS/sources/GGEMSSourceManager.hh"
 #include "GGEMS/global/GGEMSManager.hh"
 #include "GGEMS/io/GGEMSMHDImage.hh"
+#include "GGEMS/tools/GGEMSProfilerManager.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -266,7 +267,12 @@ void GGEMSWorld::Tracking(void)
   // Launching kernel
   GGint kernel_status = queue->enqueueNDRangeKernel(*kernel, 0, global_wi, local_wi, nullptr, event);
   opencl_manager.CheckOpenCLError(kernel_status, "GGEMSWorld", "Tracking");
-  queue->finish(); // Wait until the kernel status is finish
+  queue->finish();
+  event->wait();
+
+  // GGEMS Profiling
+  GGEMSProfilerManager& profiler_manager = GGEMSProfilerManager::GetInstance();
+  profiler_manager.HandleEvent(*event, "GGEMSWorld::Tracking");
 }
 
 ////////////////////////////////////////////////////////////////////////////////

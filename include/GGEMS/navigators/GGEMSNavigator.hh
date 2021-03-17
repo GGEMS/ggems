@@ -194,27 +194,6 @@ class GGEMS_EXPORT GGEMSNavigator
     virtual void Initialize(void);
 
     /*!
-      \fn inline DurationNano GetKernelParticleSolidDistanceTimer(void) const
-      \return elapsed time in particle solid distance kernel in all solids
-      \brief get the elapsed time in particle solid distance kernel in all solids
-    */
-    inline DurationNano GetKernelParticleSolidDistanceTimer(void) const {return kernel_particle_solid_distance_timer_;};
-
-    /*!
-      \fn inline DurationNano GetKernelProjectToSolidTimer(void) const
-      \return elapsed time in kernel computing projection to closest solid
-      \brief get the elapsed time in kernel computing projection to closest solid
-    */
-    inline DurationNano GetKernelProjectToSolidTimer(void) const {return kernel_project_to_solid_timer_;};
-
-    /*!
-      \fn inline DurationNano GetKernelTrackThroughSolidTimer(void) const
-      \return elapsed time in kernel tracking particle inside solid
-      \brief get the elapsed time in kernel tracking particle inside solid
-    */
-    inline DurationNano GetKernelTrackThroughSolidTimer(void) const {return kernel_track_through_solid_timer_;};
-
-    /*!
       \fn void SaveResults(void)
       \brief save all results from solid
     */
@@ -262,11 +241,6 @@ class GGEMS_EXPORT GGEMSNavigator
     // Dosimetry
     GGEMSDosimetryCalculator* dose_calculator_; /*!< Dose calculator pointer */
     bool is_dosimetry_mode_; /*!< Boolean checking if dosimetry mode is activated */
-
-    // Timers for kernel computation
-    DurationNano kernel_particle_solid_distance_timer_; /*!< Timer for kernel computing particle solid distance */
-    DurationNano kernel_project_to_solid_timer_; /*!< Timer for kernel computing projection to closest solid */
-    DurationNano kernel_track_through_solid_timer_; /*!< Timer for kernel computing tracking through closest solid */
 };
 
 #endif // End of GUARD_GGEMS_NAVIGATORS_GGEMSNAVIGATOR_HH

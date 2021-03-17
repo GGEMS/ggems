@@ -44,8 +44,7 @@ GGEMSSource::GGEMSSource(std::string const& source_name)
   number_of_particles_(0),
   number_of_particles_in_batch_(0),
   particle_type_(99),
-  tracking_kernel_option_(""),
-  kernel_get_primaries_timer_(GGEMSChrono::Zero())
+  tracking_kernel_option_("")
 {
   GGcout("GGEMSSource", "GGEMSSource", 3) << "Allocation of GGEMSSource..." << GGendl;
 
