@@ -33,6 +33,7 @@
 #include "GGEMS/sources/GGEMSSourceManager.hh"
 #include "GGEMS/randoms/GGEMSPseudoRandomGenerator.hh"
 #include "GGEMS/navigators/GGEMSDosimetryCalculator.hh"
+#include "GGEMS/tools/GGEMSProfilerManager.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -44,10 +45,7 @@ GGEMSNavigator::GGEMSNavigator(std::string const& navigator_name)
   is_update_pos_(false),
   is_update_rot_(false),
   output_basename_(""),
-  is_dosimetry_mode_(false),
-  kernel_particle_solid_distance_timer_(GGEMSChrono::Zero()),
-  kernel_project_to_solid_timer_(GGEMSChrono::Zero()),
-  kernel_track_through_solid_timer_(GGEMSChrono::Zero())
+  is_dosimetry_mode_(false)
 {
   GGcout("GGEMSNavigator", "GGEMSNavigator", 3) << "Allocation of GGEMSNavigator..." << GGendl;
 
@@ -218,10 +216,11 @@ void GGEMSNavigator::ParticleSolidDistance(void)
     // Launching kernel
     GGint kernel_status = queue->enqueueNDRangeKernel(*kernel, 0, global_wi, local_wi, nullptr, event);
     opencl_manager.CheckOpenCLError(kernel_status, "GGEMSNavigator", "ParticleSolidDistance");
-    queue->finish(); // Wait until the kernel status is finish
+    queue->finish();
 
-    // Incrementing elapsed time in kernel
-    kernel_particle_solid_distance_timer_ += opencl_manager.GetElapsedTimeInKernel();
+    // GGEMS Profiling
+    GGEMSProfilerManager& profiler_manager = GGEMSProfilerManager::GetInstance();
+    profiler_manager.HandleEvent(*event, "GGEMSNavigator::ParticleSolidDistance");
   }
 }
 
@@ -263,10 +262,11 @@ void GGEMSNavigator::ProjectToSolid(void)
     // Launching kernel
     GGint kernel_status = queue->enqueueNDRangeKernel(*kernel, 0, global_wi, local_wi, nullptr, event);
     opencl_manager.CheckOpenCLError(kernel_status, "GGEMSNavigator", "ProjectToSolid");
-    queue->finish(); // Wait until the kernel status is finish
+    queue->finish();
 
-    // Incrementing elapsed time in kernel
-    kernel_project_to_solid_timer_ += opencl_manager.GetElapsedTimeInKernel();
+    // GGEMS Profiling
+    GGEMSProfilerManager& profiler_manager = GGEMSProfilerManager::GetInstance();
+    profiler_manager.HandleEvent(*event, "GGEMSNavigator::ProjectToSolid");
   }
 }
 
@@ -354,10 +354,11 @@ void GGEMSNavigator::TrackThroughSolid(void)
     // Launching kernel
     GGint kernel_status = queue->enqueueNDRangeKernel(*kernel, 0, global_wi, local_wi, nullptr, event);
     opencl_manager.CheckOpenCLError(kernel_status, "GGEMSNavigator", "TrackThroughSolid");
-    queue->finish(); // Wait until the kernel status is finish
+    queue->finish();
 
-    // Incrementing elapsed time in kernel
-    kernel_track_through_solid_timer_ += opencl_manager.GetElapsedTimeInKernel();
+    // GGEMS Profiling
+    GGEMSProfilerManager& profiler_manager = GGEMSProfilerManager::GetInstance();
+    profiler_manager.HandleEvent(*event, "GGEMSNavigator::TrackThroughSolid");
   }
 }
 

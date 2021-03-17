@@ -32,6 +32,7 @@
 #include "GGEMS/navigators/GGEMSDoseParams.hh"
 #include "GGEMS/geometries/GGEMSVoxelizedSolid.hh"
 #include "GGEMS/io/GGEMSMHDImage.hh"
+#include "GGEMS/tools/GGEMSProfilerManager.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -261,13 +262,11 @@ void GGEMSDosimetryCalculator::ComputeDoseAndSaveResults(void)
   // Launching kernel
   GGint kernel_status = queue->enqueueNDRangeKernel(*kernel, 0, global_wi, local_wi, nullptr, event);
   opencl_manager.CheckOpenCLError(kernel_status, "GGEMSDosimetryCalculator", "ComputeDose");
-  queue->finish(); // Wait until the kernel status is finish
+  queue->finish();
 
-  // Get GGEMS Manager
-  GGEMSManager& ggems_manager = GGEMSManager::GetInstance();
-  if (ggems_manager.IsProfilingVerbose()) {
-    GGEMSChrono::DisplayTime(opencl_manager.GetElapsedTimeInKernel(), "Dose Computation");
-  }
+  // GGEMS Profiling
+  GGEMSProfilerManager& profiler_manager = GGEMSProfilerManager::GetInstance();
+  profiler_manager.HandleEvent(*event, "GGEMSDosimetryCalculator::ComputeDoseAndSaveResults");
 
   // Saving results
   SaveDose();

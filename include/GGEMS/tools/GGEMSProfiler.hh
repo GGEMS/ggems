@@ -64,15 +64,7 @@ class GGEMS_EXPORT GGEMSProfiler
       \fn inline DurationNano GetSummaryTime(void) const
       \brief get elapsed time in ns in OpenCL operation
     */
-    inline DurationNano GetSummaryTime(void) const
-    {
-      DurationNano time = GGEMSChrono::Zero();
-      for (std::size_t i = 0; i < number_of_data_; ++i) {
-        time += profiler_items_[i]->GetEndFromStartTime();
-      }
-
-      return time;
-    }
+    inline DurationNano GetSummaryTime(void) const {return profiler_item_->GetElapsedTime();}
 
   private:
     /*!
@@ -92,8 +84,7 @@ class GGEMS_EXPORT GGEMSProfiler
     void AddProfilerItem(cl_event event);
 
   private:
-    GGEMSProfilerItem** profiler_items_; /*!< Buffer storing profiling data of same type */
-    std::size_t number_of_data_; /*!< Number of profiler data */
+    GGEMSProfilerItem* profiler_item_; /*!< Buffer storing profiling data of same type */
 };
 
 #endif // End of GUARD_GGEMS_TOOLS_GGEMSPROFILER_HH

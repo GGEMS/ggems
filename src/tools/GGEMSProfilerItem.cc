@@ -43,10 +43,10 @@ GGEMSProfilerItem::GGEMSProfilerItem(cl_event event)
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
   // Get time infos from event
-  opencl_manager.CheckOpenCLError(clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_QUEUED, sizeof(GGulong), &times_[0], nullptr), "GGEMSProfilerItem", "GGEMSProfilerItem");
-  opencl_manager.CheckOpenCLError(clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_SUBMIT, sizeof(GGulong), &times_[1], nullptr), "GGEMSProfilerItem", "GGEMSProfilerItem");
-  opencl_manager.CheckOpenCLError(clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_START, sizeof(GGulong), &times_[2], nullptr), "GGEMSProfilerItem", "GGEMSProfilerItem");
-  opencl_manager.CheckOpenCLError(clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END, sizeof(GGulong), &times_[3], nullptr), "GGEMSProfilerItem", "GGEMSProfilerItem");
+  opencl_manager.CheckOpenCLError(clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_START, sizeof(GGulong), &times_[GGEMSEventInfo::START], nullptr), "GGEMSProfilerItem", "GGEMSProfilerItem");
+  opencl_manager.CheckOpenCLError(clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END, sizeof(GGulong), &times_[GGEMSEventInfo::END], nullptr), "GGEMSProfilerItem", "GGEMSProfilerItem");
+
+  times_[GGEMSEventInfo::ELAPSED] = times_[GGEMSEventInfo::END] - times_[GGEMSEventInfo::START];
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -62,22 +62,11 @@ GGEMSProfilerItem::~GGEMSProfilerItem(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSProfilerItem::PrintInfos(void) const
+void GGEMSProfilerItem::UpdateEvent(cl_event event)
 {
-  // Getting moment in time of enqueueing command
-  DurationNano queue_time = static_cast<DurationNano>(times_[GGEMSEventInfo::QUEUE]);
-
-  // Getting submission time from queue to execution
-  DurationNano submit_time = static_cast<DurationNano>(times_[GGEMSEventInfo::SUBMIT] - times_[GGEMSEventInfo::QUEUE]);
-
-  // Getting the start time of execution
-  DurationNano start_time = static_cast<DurationNano>(times_[GGEMSEventInfo::START] - times_[GGEMSEventInfo::SUBMIT]);
-
-  // Getting the command time of execution
-  DurationNano end_time = static_cast<DurationNano>(times_[GGEMSEventInfo::END] - times_[GGEMSEventInfo::START]);
-
-  GGcout("GGEMSProfilerItem", "PrintInfos", 0) << "Time of enqueueing command: " << queue_time.count() << " ns" << GGendl;
-  GGcout("GGEMSProfilerItem", "PrintInfos", 0) << "Time of submit command from queue: " << submit_time.count() << " ns" << GGendl;
-  GGcout("GGEMSProfilerItem", "PrintInfos", 0) << "Time of start command from submit: " << start_time.count() << " ns" << GGendl;
-  GGcout("GGEMSProfilerItem", "PrintInfos", 0) << "Time of execution command finish: " << end_time.count() << " ns" << GGendl;
+  // Get time infos from event
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+  opencl_manager.CheckOpenCLError(clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_START, sizeof(GGulong), &times_[GGEMSEventInfo::START], nullptr), "GGEMSProfilerItem", "UpdateEvent");
+  opencl_manager.CheckOpenCLError(clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END, sizeof(GGulong), &times_[GGEMSEventInfo::END], nullptr), "GGEMSProfilerItem", "UpdateEvent");
+  times_[GGEMSEventInfo::ELAPSED] += times_[GGEMSEventInfo::END] - times_[GGEMSEventInfo::START];
 }

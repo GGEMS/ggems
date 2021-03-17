@@ -48,6 +48,7 @@
 #include "GGEMS/tools/GGEMSChrono.hh"
 #include "GGEMS/tools/GGEMSRAMManager.hh"
 #include "GGEMS/randoms/GGEMSPseudoRandomGenerator.hh"
+#include "GGEMS/tools/GGEMSProfilerManager.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -257,6 +258,7 @@ void GGEMSManager::Run()
 
   GGEMSSourceManager& source_manager = GGEMSSourceManager::GetInstance();
   GGEMSNavigatorManager& navigator_manager = GGEMSNavigatorManager::GetInstance();
+  GGEMSProfilerManager& profiler_manager = GGEMSProfilerManager::GetInstance();
 
   ChronoTime start_time = GGEMSChrono::Now();
 
@@ -298,10 +300,7 @@ void GGEMSManager::Run()
   navigator_manager.SaveResults();
 
   // Printing elapsed time in kernels
-  if (is_profiling_verbose_) {
-    source_manager.PrintKernelElapsedTime();
-    navigator_manager.PrintKernelElapsedTime();
-  }
+  if (is_profiling_verbose_) profiler_manager.PrintSummaryProfile();
 
   ChronoTime end_time = GGEMSChrono::Now();
 

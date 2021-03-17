@@ -41,10 +41,9 @@
 */
 enum GGEMSEventInfo : GGint
 {
-  QUEUE = 0,
-  SUBMIT,
-  START,
-  END
+  START = 0,
+  END,
+  ELAPSED
 };
 
 /*!
@@ -94,41 +93,21 @@ class GGEMS_EXPORT GGEMSProfilerItem
     GGEMSProfilerItem& operator=(GGEMSProfilerItem const&& profiler_item) = delete;
 
     /*!
-      \fn void PrintInfos(void) const
-      \brief print infos about timing for event
+      \fn inline DurationNano GetElapsedTime(void) const
+      \return time in ns
+      \brief Get elapsed time
     */
-    void PrintInfos(void) const;
+    inline DurationNano GetElapsedTime(void) const {return static_cast<DurationNano>(times_[GGEMSEventInfo::ELAPSED]);}
 
     /*!
-      \fn inline DurationNano GetQueueTime(void) const
-      \return time in ns
-      \brief Get moment in time of enqueueing command
+      \fn void UpdateEvent(cl_event event)
+      \param event - OpenCL event
+      \brief Update elapsed time in OpenCL command
     */
-    inline DurationNano GetQueueTime(void) const {return static_cast<DurationNano>(times_[GGEMSEventInfo::QUEUE]);}
-
-    /*!
-      \fn inline DurationNano GetSubmitFromQueueTime(void) const
-      \return time in ns
-      \brief Get submission time from queue
-    */
-    inline DurationNano GetSubmitFromQueueTime(void) const {return static_cast<DurationNano>(times_[GGEMSEventInfo::SUBMIT] - times_[GGEMSEventInfo::QUEUE]);}
-
-    /*!
-      \fn inline DurationNano GetStartFromSubmitTime(void) const
-      \return time in ns
-      \brief Get start time from submit
-    */
-    inline DurationNano GetStartFromSubmitTime(void) const {return static_cast<DurationNano>(times_[GGEMSEventInfo::START] - times_[GGEMSEventInfo::SUBMIT]);}
-
-    /*!
-      \fn inline DurationNano GetEndFromStartTime(void) const
-      \return time in ns
-      \brief Get end time from start
-    */
-    inline DurationNano GetEndFromStartTime(void) const {return static_cast<DurationNano>(times_[GGEMSEventInfo::END] - times_[GGEMSEventInfo::START]);}
+    void UpdateEvent(cl_event event);
 
   private:
-    GGulong times_[4]; /*!< Buffer storing times from event */
+    GGulong times_[3]; /*!< Variables storing start and end of computation time in OpenCL command */
 };
 
 #endif // End of GUARD_GGEMS_TOOLS_GGEMSPROFILERITEM_HH
