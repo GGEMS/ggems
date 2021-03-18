@@ -36,6 +36,7 @@ GGEMSVerbosity(1)
 
 # ------------------------------------------------------------------------------
 # STEP 1: Choosing an OpenCL device
+opencl_manager = GGEMSOpenCLManager()
 opencl_manager.set_device_index(device_id)
 
 # ------------------------------------------------------------------------------
@@ -110,14 +111,14 @@ point_source.set_polyenergy('data/spectrum_120kVp_2mmAl.dat')
 
 # ------------------------------------------------------------------------------
 # STEP 7: GGEMS simulation
-ggems_manager.opencl_verbose(False)
+ggems_manager.opencl_verbose(True)
 ggems_manager.material_database_verbose(False)
-ggems_manager.navigator_verbose(True)
-ggems_manager.source_verbose(True)
-ggems_manager.memory_verbose(True)
-ggems_manager.process_verbose(True)
-ggems_manager.range_cuts_verbose(True)
-ggems_manager.random_verbose(True)
+ggems_manager.navigator_verbose(False)
+ggems_manager.source_verbose(False)
+ggems_manager.memory_verbose(False)
+ggems_manager.process_verbose(False)
+ggems_manager.range_cuts_verbose(False)
+ggems_manager.random_verbose(False)
 ggems_manager.profiling_verbose(True)
 ggems_manager.tracking_verbose(False, 0)
 

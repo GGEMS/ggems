@@ -104,17 +104,6 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     GGEMSOpenCLManager& operator=(GGEMSOpenCLManager const&& opencl_manager) = delete;
 
     /*!
-      \fn GGbool IsReady(void) const
-      \return true if OpenCL manager is ready, otherwize false
-      \brief Checking if the OpenCL manager is ready, it means if a device is selected
-    */
-    inline GGbool IsReady(void) const
-    {
-      if (is_device_activated_) return true;
-      else return false;
-    }
-
-    /*!
       \fn void PrintPlatformInfos(void) const
       \brief print all the informations about the platform
     */
@@ -331,7 +320,6 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     // Devices
     std::vector<std::unique_ptr<cl::Device>> devices_; /*!< Vector of devices */
     GGsize device_index_; /*!< Index of the activated device */
-    bool is_device_activated_; /*!< Check if context already activated */
     std::vector<cl_device_type> device_type_; /*!< Type of device */
     std::vector<std::string> device_name_; /*!< Name of the device */
     std::vector<std::string> device_vendor_; /*!< Vendor of the device */

@@ -354,11 +354,11 @@ void GGEMSNavigator::TrackThroughSolid(void)
     // Launching kernel
     GGint kernel_status = queue->enqueueNDRangeKernel(*kernel, 0, global_wi, local_wi, nullptr, event);
     opencl_manager.CheckOpenCLError(kernel_status, "GGEMSNavigator", "TrackThroughSolid");
-    queue->finish();
 
     // GGEMS Profiling
     GGEMSProfilerManager& profiler_manager = GGEMSProfilerManager::GetInstance();
     profiler_manager.HandleEvent(*event, "GGEMSNavigator::TrackThroughSolid");
+    queue->finish();
   }
 }
 

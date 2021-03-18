@@ -40,9 +40,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 GGEMSOpenCLManager::GGEMSOpenCLManager(void)
-: device_index_(0),
-  is_device_activated_(false),
-  kernels_(0),
+: kernels_(0),
   kernel_compilation_options_(0)
 {
   GGcout("GGEMSOpenCLManager", "GGEMSOpenCLManager", 3) << "Allocation of GGEMS OpenCL manager..." << GGendl;
@@ -236,6 +234,19 @@ GGEMSOpenCLManager::GGEMSOpenCLManager(void)
     CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_PARTITION_MAX_SUB_DEVICES, &device_partition_max_sub_devices_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
     CheckOpenCLError(devices_[i]->getInfo(CL_DEVICE_PROFILING_TIMER_RESOLUTION, &device_profiling_timer_resolution_[i]), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
   }
+
+  // Selecting fastest (estimated) available device
+  GGuint flops_max = 0;
+  device_index_ = 0;
+  for (GGsize i = 0; i < devices_.size(); ++i) {
+    GGuint frequency = device_max_clock_frequency_[i];
+    GGuint number_computed_units = device_max_compute_units_[i];
+    if (frequency*number_computed_units > flops_max) {
+      flops_max = frequency*number_computed_units;
+      device_index_ = i;
+    }
+  }
+  GGcout("GGEMSOpenCLManager", "GGEMSOpenCLManager", 1) << "By default, the activated device is: " << GetNameOfActivatedDevice() << GGendl;
 
   // Define the compilation options by default for OpenCL
   build_options_ = "-cl-std=CL1.2 -w -Werror -cl-fast-relaxed-math";
@@ -563,18 +574,12 @@ void GGEMSOpenCLManager::DeviceToActivate(GGsize const& device_id)
 {
   GGcout("GGEMSOpenCLManager", "DeviceToActivate", 3) << "Activating a device for GGEMS..." << GGendl;
 
-  // Checking if a context has already been activated
-  if (is_device_activated_) GGEMSMisc::ThrowException("GGEMSOpenCLManager", "DeviceToActivate", "A device has already been activated!!!");
-
   // Checking the index of the device
   if (device_id >= devices_.size()) {
     std::ostringstream oss(std::ostringstream::out);
     oss << "Your device index is out of range!!! " << devices_.size() << " device(s) detected. Index must be in the range [" << 0 << ";" << devices_.size() - 1 << "]!!!";
     GGEMSMisc::ThrowException("GGEMSOpenCLManager", "DeviceToActivate", oss.str());
   }
-
-  // context is activated now
-  is_device_activated_ = true;
 
   // Storing the index of activated context
   device_index_ = device_id;
@@ -622,46 +627,44 @@ bool GGEMSOpenCLManager::IsDoublePrecisionAtomicAddition(void) const
 void GGEMSOpenCLManager::PrintActivatedDevice(void) const
 {
   // Checking if activated context
-  if (is_device_activated_) {
-    GGcout("GGEMSOpenCLManager", "PrintActivatedDevice", 3) << "Printing activated device for GGEMS..." << GGendl;
+  GGcout("GGEMSOpenCLManager", "PrintActivatedDevice", 3) << "Printing activated device for GGEMS..." << GGendl;
 
-    GGuint context_num_devices = 0;
-    std::vector<cl::Device> device;
-    cl_device_type device_type = 0;
-    std::string device_name;
+  GGuint context_num_devices = 0;
+  std::vector<cl::Device> device;
+  cl_device_type device_type = 0;
+  std::string device_name;
 
-    GGcout("GGEMSOpenCLManager", "PrintActivatedDevice", 0) << GGendl;
-    GGcout("GGEMSOpenCLManager", "PrintActivatedDevice", 0) << "ACTIVATED DEVICE:" << GGendl;
-    GGcout("GGEMSOpenCLManager", "PrintActivatedDevice", 0) << "-----------------" << GGendl;
+  GGcout("GGEMSOpenCLManager", "PrintActivatedDevice", 0) << GGendl;
+  GGcout("GGEMSOpenCLManager", "PrintActivatedDevice", 0) << "ACTIVATED DEVICE:" << GGendl;
+  GGcout("GGEMSOpenCLManager", "PrintActivatedDevice", 0) << "-----------------" << GGendl;
 
-    // Loop over all the context
-    GGcout("GGEMSOpenCLManager", "PrintActivatedDevice", 0) << GGendl;
-    GGcout("GGEMSOpenCLManager", "PrintActivatedDevice", 0) << "#### DEVICE: " << device_index_ << " ####" << GGendl;
+  // Loop over all the context
+  GGcout("GGEMSOpenCLManager", "PrintActivatedDevice", 0) << GGendl;
+  GGcout("GGEMSOpenCLManager", "PrintActivatedDevice", 0) << "#### DEVICE: " << device_index_ << " ####" << GGendl;
 
-    CheckOpenCLError(context_->getInfo(CL_CONTEXT_NUM_DEVICES, &context_num_devices), "GGEMSOpenCLManager", "PrintActivatedDevice");
-    CheckOpenCLError(context_->getInfo(CL_CONTEXT_DEVICES, &device), "GGEMSOpenCLManager", "PrintActivatedDevice");
+  CheckOpenCLError(context_->getInfo(CL_CONTEXT_NUM_DEVICES, &context_num_devices), "GGEMSOpenCLManager", "PrintActivatedDevice");
+  CheckOpenCLError(context_->getInfo(CL_CONTEXT_DEVICES, &device), "GGEMSOpenCLManager", "PrintActivatedDevice");
 
-    GGcout("GGEMSOpenCLManager", "PrintActivatedDevice", 0) << "+ Type of device(s): " << GGendl;
+  GGcout("GGEMSOpenCLManager", "PrintActivatedDevice", 0) << "+ Type of device(s): " << GGendl;
 
-    for (GGuint j = 0; j < context_num_devices; ++j) {
-      CheckOpenCLError(device[ j ].getInfo(CL_DEVICE_NAME, &device_name), "GGEMSOpenCLManager", "PrintActivatedDevice");
+  for (GGuint j = 0; j < context_num_devices; ++j) {
+    CheckOpenCLError(device[ j ].getInfo(CL_DEVICE_NAME, &device_name), "GGEMSOpenCLManager", "PrintActivatedDevice");
 
-      GGcout("GGEMSOpenCLManager", "PrintActivatedDevice", 0) << "    -> Name: " << device_name << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintActivatedDevice", 0) << "    -> Name: " << device_name << GGendl;
 
-      CheckOpenCLError(device[j].getInfo(CL_DEVICE_TYPE, &device_type), "GGEMSOpenCLManager", "PrintActivatedDevice");
+    CheckOpenCLError(device[j].getInfo(CL_DEVICE_TYPE, &device_type), "GGEMSOpenCLManager", "PrintActivatedDevice");
 
-      if (device_type == CL_DEVICE_TYPE_CPU) {
-        GGcout("GGEMSOpenCLManager", "PrintActivatedDevice", 0) << "    -> Device [" << j << "]: CL_DEVICE_TYPE_CPU" << GGendl;
-      }
-      else if (device_type == CL_DEVICE_TYPE_GPU) {
-        GGcout("GGEMSOpenCLManager", "PrintActivatedDevice", 0) << "    -> Device [" << j << "]: CL_DEVICE_TYPE_GPU" << GGendl;
-      }
-      else {
-        GGcout("GGEMSOpenCLManager", "PrintActivatedDevice", 0) << "    -> Device [" << j << "]: Unknown device type!!!" << GGendl;
-      }
+    if (device_type == CL_DEVICE_TYPE_CPU) {
+      GGcout("GGEMSOpenCLManager", "PrintActivatedDevice", 0) << "    -> Device [" << j << "]: CL_DEVICE_TYPE_CPU" << GGendl;
     }
-    GGcout("GGEMSOpenCLManager", "PrintActivatedDevice", 0) << GGendl;
+    else if (device_type == CL_DEVICE_TYPE_GPU) {
+      GGcout("GGEMSOpenCLManager", "PrintActivatedDevice", 0) << "    -> Device [" << j << "]: CL_DEVICE_TYPE_GPU" << GGendl;
+    }
+    else {
+      GGcout("GGEMSOpenCLManager", "PrintActivatedDevice", 0) << "    -> Device [" << j << "]: Unknown device type!!!" << GGendl;
+    }
   }
+  GGcout("GGEMSOpenCLManager", "PrintActivatedDevice", 0) << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

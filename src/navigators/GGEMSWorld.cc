@@ -267,12 +267,11 @@ void GGEMSWorld::Tracking(void)
   // Launching kernel
   GGint kernel_status = queue->enqueueNDRangeKernel(*kernel, 0, global_wi, local_wi, nullptr, event);
   opencl_manager.CheckOpenCLError(kernel_status, "GGEMSWorld", "Tracking");
-  queue->finish();
-  event->wait();
 
   // GGEMS Profiling
   GGEMSProfilerManager& profiler_manager = GGEMSProfilerManager::GetInstance();
   profiler_manager.HandleEvent(*event, "GGEMSWorld::Tracking");
+  queue->finish();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
