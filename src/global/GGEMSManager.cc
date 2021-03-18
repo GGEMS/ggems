@@ -187,11 +187,6 @@ void GGEMSManager::Initialize(GGuint const& seed)
   GGEMSRangeCutsManager& range_cuts_manager = GGEMSRangeCutsManager::GetInstance();
   GGEMSRAMManager& ram_manager = GGEMSRAMManager::GetInstance();
 
-  // Checking if a context is activated
-  if (!opencl_manager.IsReady()) {
-    GGEMSMisc::ThrowException("GGEMSManager", "Initialize", "OpenCL Manager is not ready, you have to choose a device!!!");
-  }
-
   // Get the start time
   ChronoTime start_time = GGEMSChrono::Now();
 

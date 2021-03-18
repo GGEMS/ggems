@@ -130,11 +130,11 @@ void GGEMSTube::Draw(void)
   // Launching kernel
   GGint kernel_status = queue->enqueueNDRangeKernel(*kernel, 0, global_wi, local_wi, nullptr, event);
   opencl_manager.CheckOpenCLError(kernel_status, "GGEMSTube", "Draw");
-  queue->finish();
 
   // GGEMS Profiling
   GGEMSProfilerManager& profiler_manager = GGEMSProfilerManager::GetInstance();
   profiler_manager.HandleEvent(*event, "GGEMSBox::Draw");
+  queue->finish();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

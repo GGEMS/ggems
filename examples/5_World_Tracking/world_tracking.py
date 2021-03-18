@@ -36,6 +36,7 @@ GGEMSVerbosity(1)
 
 # ------------------------------------------------------------------------------
 # STEP 1: Choosing an OpenCL device
+opencl_manager = GGEMSOpenCLManager()
 opencl_manager.set_device_index(device_id)
 
 # ------------------------------------------------------------------------------

@@ -126,11 +126,11 @@ void GGEMSSphere::Draw(void)
   // Launching kernel
   cl_int kernel_status = queue->enqueueNDRangeKernel(*kernel, 0, global_wi, local_wi, nullptr, event);
   opencl_manager.CheckOpenCLError(kernel_status, "GGEMSSphere", "Draw");
-  queue->finish();
 
   // GGEMS Profiling
   GGEMSProfilerManager& profiler_manager = GGEMSProfilerManager::GetInstance();
   profiler_manager.HandleEvent(*event, "GGEMSSphere::Draw");
+  queue->finish();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -138,11 +138,11 @@ void GGEMSXRaySource::GetPrimaries(GGsize const& number_of_particles)
   // Launching kernel
   GGint kernel_status = queue->enqueueNDRangeKernel(*kernel, 0, global_wi, local_wi, nullptr, event);
   opencl_manager.CheckOpenCLError(kernel_status, "GGEMSXRaySource", "GetPrimaries");
-  queue->finish();
 
   // GGEMS Profiling
   GGEMSProfilerManager& profiler_manager = GGEMSProfilerManager::GetInstance();
   profiler_manager.HandleEvent(*event, "GGEMSXRaySource::GetPrimaries");
+  queue->finish();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
