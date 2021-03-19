@@ -46,7 +46,7 @@ GGEMSVoxelizedSolid::GGEMSVoxelizedSolid(std::string const& volume_header_filena
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
   // Allocating memory on OpenCL device
-  solid_data_ = opencl_manager.Allocate(nullptr, sizeof(GGEMSVoxelizedSolidData), CL_MEM_READ_WRITE);
+  solid_data_ = opencl_manager.Allocate(nullptr, sizeof(GGEMSVoxelizedSolidData), CL_MEM_READ_WRITE, "GGEMSVoxelizedSolid");
 
   // Local axis for phantom. Voxelized solid used only for phantom
   geometry_transformation_->SetAxisTransformation(

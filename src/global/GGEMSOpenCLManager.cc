@@ -152,8 +152,8 @@ GGEMSOpenCLManager::GGEMSOpenCLManager(void)
   device_partition_max_sub_devices_.resize(devices_.size());
   device_profiling_timer_resolution_.resize(devices_.size());
 
-  // Custom work group size, 64 seems a good trade-off
-  work_group_size_ = 64;
+  // Custom work group size, 32 seems a good trade-off
+  work_group_size_ = 32;
 
   // Make a char buffer reading char* data
   GGsize buffer[3] = {0,0,0};
@@ -247,6 +247,7 @@ GGEMSOpenCLManager::GGEMSOpenCLManager(void)
     }
   }
   GGcout("GGEMSOpenCLManager", "GGEMSOpenCLManager", 1) << "By default, the activated device is: " << GetNameOfActivatedDevice() << GGendl;
+  DeviceToActivate(device_index_);
 
   // Define the compilation options by default for OpenCL
   build_options_ = "-cl-std=CL1.2 -w -Werror -cl-fast-relaxed-math";
@@ -587,12 +588,12 @@ void GGEMSOpenCLManager::DeviceToActivate(GGsize const& device_id)
   // Checking double precision
   if (!IsDoublePrecision()) {
     std::ostringstream oss(std::ostringstream::out);
-    oss << "Your OpenCL device does not support double precision!!!";
+    oss << "Your OpenCL device does not support double precision!!! Please recompile GGEMS setting DOSIMETRY_DOUBLE_PRECISION to OFF.";
     GGEMSMisc::ThrowException("GGEMSOpenCLManager", "ContextToActivate", oss.str());
   }
 
   // Printing name of activated device
-  GGcout("GGEMSOpenCLManager", "DeviceToActivate", 0) << "Activated device: " << GetNameOfActivatedDevice() << GGendl;
+  GGcout("GGEMSOpenCLManager", "DeviceToActivate", 2) << "Activated device: " << GetNameOfActivatedDevice() << GGendl;
 
   // Creating context, command queue and event
   context_.reset(new cl::Context(*devices_.at(device_index_).get()));
@@ -806,7 +807,7 @@ DurationNano GGEMSOpenCLManager::GetElapsedTimeInKernel(void) const
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-std::unique_ptr<cl::Buffer> GGEMSOpenCLManager::Allocate(void* host_ptr, GGsize size, cl_mem_flags flags)
+std::unique_ptr<cl::Buffer> GGEMSOpenCLManager::Allocate(void* host_ptr, GGsize size, cl_mem_flags flags, std::string const& class_name)
 {
   GGcout("GGEMSOpenCLManager","Allocate", 3) << "Allocating memory on OpenCL device memory..." << GGendl;
 
@@ -830,7 +831,7 @@ std::unique_ptr<cl::Buffer> GGEMSOpenCLManager::Allocate(void* host_ptr, GGsize 
   CheckOpenCLError(error, "GGEMSOpenCLManager", "Allocate");
 
   // Increment RAM memory
-  ram_manager.IncrementRAMMemory(size);
+  ram_manager.IncrementRAMMemory(class_name, size);
 
   return buffer;
 }

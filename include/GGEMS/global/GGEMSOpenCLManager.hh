@@ -202,14 +202,15 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     std::weak_ptr<cl::Kernel> CompileKernel(std::string const& kernel_filename, std::string const& kernel_name, char* const custom_options = nullptr, char* const additional_options = nullptr);
 
     /*!
-      \fn std::unique_ptr<cl::Buffer> Allocate(void* host_ptr, GGsize size, cl_mem_flags flags)
+      \fn std::unique_ptr<cl::Buffer> Allocate(void* host_ptr, GGsize size, cl_mem_flags flags, std::string const& class_name = "Undefined")
       \param host_ptr - pointer to buffer in host memory
       \param size - size of the buffer in bytes
       \param flags - mode to open the buffer
+      \param class_name - name of class allocating memory
       \brief Allocation of OpenCL memory
       \return an unique pointer to an OpenCL buffer
     */
-    std::unique_ptr<cl::Buffer> Allocate(void* host_ptr, GGsize size, cl_mem_flags flags);
+    std::unique_ptr<cl::Buffer> Allocate(void* host_ptr, GGsize size, cl_mem_flags flags, std::string const& class_name = "Undefined");
 
     /*!
       \fn void Deallocate(std::shared_ptr<cl::Buffer> buffer, GGsize size)

@@ -38,8 +38,6 @@
 
 GGEMSProfilerItem::GGEMSProfilerItem(cl_event event)
 {
-  GGcout("GGEMSProfilerItem", "GGEMSProfilerItem", 3) << "Allocation of GGEMSProfilerItem..." << GGendl;
-
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
   // Get time infos from event
@@ -47,15 +45,6 @@ GGEMSProfilerItem::GGEMSProfilerItem(cl_event event)
   opencl_manager.CheckOpenCLError(clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END, sizeof(GGulong), &times_[GGEMSEventInfo::END], nullptr), "GGEMSProfilerItem", "GGEMSProfilerItem");
 
   times_[GGEMSEventInfo::ELAPSED] = times_[GGEMSEventInfo::END] - times_[GGEMSEventInfo::START];
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-GGEMSProfilerItem::~GGEMSProfilerItem(void)
-{
-  GGcout("GGEMSProfilerItem", "~GGEMSProfilerItem", 3) << "Deallocation of GGEMSProfilerItem..." << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -179,7 +179,7 @@ void GGEMSVoxelizedSolid::ConvertImageToLabel(std::string const& raw_data_filena
   in_raw_stream.close();
 
   // Allocating memory on OpenCL device
-  label_data_ = opencl_manager.Allocate(nullptr, number_of_voxels * sizeof(GGuchar), CL_MEM_READ_WRITE);
+  label_data_ = opencl_manager.Allocate(nullptr, number_of_voxels * sizeof(GGuchar), CL_MEM_READ_WRITE, "GGEMSVoxelizedSolid");
 
   // Get pointer on OpenCL device
   GGuchar* label_data_device = opencl_manager.GetDeviceBuffer<GGuchar>(label_data_.get(), number_of_voxels * sizeof(GGuchar));

@@ -36,7 +36,6 @@
 #endif
 
 #include <unordered_map>
-
 #include "GGEMS/global/GGEMSExport.hh"
 #include "GGEMS/tools/GGEMSProfiler.hh"
 

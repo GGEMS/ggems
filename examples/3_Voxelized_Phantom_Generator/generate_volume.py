@@ -36,7 +36,6 @@ GGEMSVerbosity(0)
 
 # ------------------------------------------------------------------------------
 # STEP 1: OpenCL Initialization
-opencl_manager = GGEMSOpenCLManager()
 opencl_manager.set_device_index(device_id)
 
 # ------------------------------------------------------------------------------

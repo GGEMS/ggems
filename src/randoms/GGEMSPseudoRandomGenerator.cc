@@ -163,7 +163,7 @@ void GGEMSPseudoRandomGenerator::AllocateRandom(void)
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
   // Allocation of memory on OpenCL device
-  pseudo_random_numbers_ = opencl_manager.Allocate(nullptr, sizeof(GGEMSRandom), CL_MEM_READ_WRITE);
+  pseudo_random_numbers_ = opencl_manager.Allocate(nullptr, sizeof(GGEMSRandom), CL_MEM_READ_WRITE, "GGEMSPseudoRandomGenerator");
 }
 
 ////////////////////////////////////////////////////////////////////////////////

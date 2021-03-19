@@ -291,7 +291,7 @@ void GGEMSDosimetryCalculator::Initialize(void)
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
   // Allocate dosemetry params on OpenCL device
-  dose_params_ = opencl_manager.Allocate(nullptr, sizeof(GGEMSDoseParams), CL_MEM_READ_WRITE);
+  dose_params_ = opencl_manager.Allocate(nullptr, sizeof(GGEMSDoseParams), CL_MEM_READ_WRITE, "GGEMSDosimetryCalculator");
 
   // Get pointer on OpenCL device for dose parameters
   GGEMSDoseParams* dose_params_device = opencl_manager.GetDeviceBuffer<GGEMSDoseParams>(dose_params_.get(), sizeof(GGEMSDoseParams));
@@ -350,14 +350,14 @@ void GGEMSDosimetryCalculator::Initialize(void)
   opencl_manager.ReleaseDeviceBuffer(dose_params_.get(), dose_params_device);
 
   // Allocated buffers storing dose on OpenCL device
-  dose_recording_.edep_ = opencl_manager.Allocate(nullptr, total_number_of_dosels*sizeof(GGDosiType), CL_MEM_READ_WRITE);
-  dose_recording_.dose_ = opencl_manager.Allocate(nullptr, total_number_of_dosels*sizeof(GGfloat), CL_MEM_READ_WRITE);
+  dose_recording_.edep_ = opencl_manager.Allocate(nullptr, total_number_of_dosels*sizeof(GGDosiType), CL_MEM_READ_WRITE, "GGEMSDosimetryCalculator");
+  dose_recording_.dose_ = opencl_manager.Allocate(nullptr, total_number_of_dosels*sizeof(GGfloat), CL_MEM_READ_WRITE, "GGEMSDosimetryCalculator");
 
-  dose_recording_.uncertainty_dose_ = is_uncertainty_ ? opencl_manager.Allocate(nullptr, total_number_of_dosels*sizeof(GGfloat), CL_MEM_READ_WRITE) : nullptr;
-  dose_recording_.edep_squared_ = (is_edep_squared_||is_uncertainty_) ? opencl_manager.Allocate(nullptr, total_number_of_dosels*sizeof(GGDosiType), CL_MEM_READ_WRITE) : nullptr;
-  dose_recording_.hit_ = (is_hit_tracking_||is_uncertainty_) ? opencl_manager.Allocate(nullptr, total_number_of_dosels*sizeof(GGint), CL_MEM_READ_WRITE) : nullptr;
+  dose_recording_.uncertainty_dose_ = is_uncertainty_ ? opencl_manager.Allocate(nullptr, total_number_of_dosels*sizeof(GGfloat), CL_MEM_READ_WRITE, "GGEMSDosimetryCalculator") : nullptr;
+  dose_recording_.edep_squared_ = (is_edep_squared_||is_uncertainty_) ? opencl_manager.Allocate(nullptr, total_number_of_dosels*sizeof(GGDosiType), CL_MEM_READ_WRITE, "GGEMSDosimetryCalculator") : nullptr;
+  dose_recording_.hit_ = (is_hit_tracking_||is_uncertainty_) ? opencl_manager.Allocate(nullptr, total_number_of_dosels*sizeof(GGint), CL_MEM_READ_WRITE, "GGEMSDosimetryCalculator") : nullptr;
 
-  dose_recording_.photon_tracking_ = is_photon_tracking_ ? opencl_manager.Allocate(nullptr, total_number_of_dosels*sizeof(GGint), CL_MEM_READ_WRITE) : nullptr;
+  dose_recording_.photon_tracking_ = is_photon_tracking_ ? opencl_manager.Allocate(nullptr, total_number_of_dosels*sizeof(GGint), CL_MEM_READ_WRITE, "GGEMSDosimetryCalculator") : nullptr;
 
   // Set buffer to zero
   opencl_manager.CleanBuffer(dose_recording_.edep_, total_number_of_dosels*sizeof(GGDosiType));
