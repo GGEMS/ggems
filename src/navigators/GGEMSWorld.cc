@@ -201,22 +201,22 @@ void GGEMSWorld::Initialize(void)
   // Initializing OpenCL buffers
   GGsize total_number_voxel_world = dimensions_.x_ * dimensions_.y_ * dimensions_.z_;
 
-  world_recording_.photon_tracking_ = is_photon_tracking_ ? opencl_manager.Allocate(nullptr, total_number_voxel_world * sizeof(GGint), CL_MEM_READ_WRITE) : nullptr;
+  world_recording_.photon_tracking_ = is_photon_tracking_ ? opencl_manager.Allocate(nullptr, total_number_voxel_world * sizeof(GGint), CL_MEM_READ_WRITE, "GGEMSWorld") : nullptr;
   if (is_photon_tracking_) opencl_manager.CleanBuffer(world_recording_.photon_tracking_, total_number_voxel_world * sizeof(GGint));
 
-  world_recording_.energy_tracking_ = is_energy_tracking_ ? opencl_manager.Allocate(nullptr, total_number_voxel_world*sizeof(GGDosiType), CL_MEM_READ_WRITE) : nullptr;
+  world_recording_.energy_tracking_ = is_energy_tracking_ ? opencl_manager.Allocate(nullptr, total_number_voxel_world*sizeof(GGDosiType), CL_MEM_READ_WRITE, "GGEMSWorld") : nullptr;
   if (is_energy_tracking_) opencl_manager.CleanBuffer(world_recording_.energy_tracking_, total_number_voxel_world*sizeof(GGDosiType));
 
-  world_recording_.energy_squared_tracking_ = is_energy_squared_tracking_ ? opencl_manager.Allocate(nullptr, total_number_voxel_world*sizeof(GGDosiType), CL_MEM_READ_WRITE) : nullptr;
+  world_recording_.energy_squared_tracking_ = is_energy_squared_tracking_ ? opencl_manager.Allocate(nullptr, total_number_voxel_world*sizeof(GGDosiType), CL_MEM_READ_WRITE, "GGEMSWorld") : nullptr;
   if (is_energy_squared_tracking_) opencl_manager.CleanBuffer(world_recording_.energy_squared_tracking_, total_number_voxel_world*sizeof(GGDosiType));
 
-  world_recording_.momentum_x_ = is_momentum_ ? opencl_manager.Allocate(nullptr, total_number_voxel_world*sizeof(GGDosiType), CL_MEM_READ_WRITE) : nullptr;
+  world_recording_.momentum_x_ = is_momentum_ ? opencl_manager.Allocate(nullptr, total_number_voxel_world*sizeof(GGDosiType), CL_MEM_READ_WRITE, "GGEMSWorld") : nullptr;
   if (is_momentum_) opencl_manager.CleanBuffer(world_recording_.momentum_x_, total_number_voxel_world*sizeof(GGDosiType));
 
-  world_recording_.momentum_y_ = is_momentum_ ? opencl_manager.Allocate(nullptr, total_number_voxel_world*sizeof(GGDosiType), CL_MEM_READ_WRITE) : nullptr;
+  world_recording_.momentum_y_ = is_momentum_ ? opencl_manager.Allocate(nullptr, total_number_voxel_world*sizeof(GGDosiType), CL_MEM_READ_WRITE, "GGEMSWorld") : nullptr;
   if (is_momentum_) opencl_manager.CleanBuffer(world_recording_.momentum_y_, total_number_voxel_world*sizeof(GGDosiType));
 
-  world_recording_.momentum_z_ = is_momentum_ ? opencl_manager.Allocate(nullptr, total_number_voxel_world*sizeof(GGDosiType), CL_MEM_READ_WRITE) : nullptr;
+  world_recording_.momentum_z_ = is_momentum_ ? opencl_manager.Allocate(nullptr, total_number_voxel_world*sizeof(GGDosiType), CL_MEM_READ_WRITE, "GGEMSWorld") : nullptr;
   if (is_momentum_) opencl_manager.CleanBuffer(world_recording_.momentum_z_, total_number_voxel_world*sizeof(GGDosiType));
 
   // Initialize OpenCL kernel tracking particles in world

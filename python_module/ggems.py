@@ -110,6 +110,7 @@ class GGEMSManager(object):
 
 # ------------------------------------------------------------------------------
 # Calling all C++ singleton managers
+opencl_manager = GGEMSOpenCLManager()
 materials_database_manager = GGEMSMaterialsDatabaseManager()
 processes_manager = GGEMSProcessesManager()
 range_cuts_manager = GGEMSRangeCutsManager()

@@ -47,6 +47,8 @@ GGEMSRAMManager::GGEMSRAMManager(void)
 
   max_available_ram_ = opencl_manager.GetMaxRAMMemoryOnActivatedContext();
   max_buffer_size_ = opencl_manager.GetMaxBufferAllocationSize();
+
+  allocated_memories_.clear();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -56,14 +58,24 @@ GGEMSRAMManager::GGEMSRAMManager(void)
 GGEMSRAMManager::~GGEMSRAMManager(void)
 {
   GGcout("GGEMSRAMManager", "~GGEMSRAMManager", 3) << "Deallocation of GGEMS RAM Manager..." << GGendl;
+
+  allocated_memories_.clear();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSRAMManager::IncrementRAMMemory(GGsize const& size)
+void GGEMSRAMManager::IncrementRAMMemory(std::string const& class_name, GGsize const& size)
 {
+  // Checking if class has already allocated memory, if not, creating one
+  if (allocated_memories_.find(class_name) == allocated_memories_.end()) {
+    allocated_memories_.insert(std::make_pair(class_name, size));
+  }
+  else {
+    allocated_memories_[class_name] += size;
+  }
+
   // Increment size
   allocated_ram_ += size;
 }
@@ -94,5 +106,9 @@ void GGEMSRAMManager::PrintRAMStatus(void) const
   GGfloat percent_allocated_RAM = static_cast<GGfloat>(allocated_ram_) * 100.0f / static_cast<GGfloat>(max_available_ram_);
 
   GGcout("GGEMSRAMManager", "PrintRAMStatus", 0) << "Device: " << device_name << GGendl;
-  GGcout("GGEMSRAMManager", "PrintRAMStatus", 0) << "RAM memory usage: " << allocated_ram_ << " / " << max_available_ram_ << " bytes (" << percent_allocated_RAM << "%)" << GGendl;
+  GGcout("GGEMSRAMManager", "PrintRAMStatus", 0) << "Total RAM memory allocated on OpenCL device: " << allocated_ram_ << " / " << max_available_ram_ << " bytes (" << percent_allocated_RAM << "%)" << GGendl;
+  GGcout("GGEMSRAMManager", "PrintRAMStatus", 0) << "Details: " << GGendl;
+  for (auto&& i : allocated_memories_) {
+    GGcout("GGEMSRAMManager", "PrintRAMStatus", 0) << "    + In '" << i.first << "': " << i.second << " bytes allocated (" << i.second * 100.0f /  allocated_ram_<< "%)" << GGendl;
+  }
 }

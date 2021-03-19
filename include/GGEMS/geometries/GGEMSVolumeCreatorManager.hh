@@ -250,7 +250,7 @@ void GGEMSVolumeCreatorManager::AllocateImage(void)
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
   // Allocation of memory on OpenCL device depending of type
-  voxelized_volume_ = opencl_manager.Allocate(nullptr, number_elements_ * sizeof(T), CL_MEM_READ_WRITE);
+  voxelized_volume_ = opencl_manager.Allocate(nullptr, number_elements_ * sizeof(T), CL_MEM_READ_WRITE, "GGEMSVolumeCreatorManager");
 
   // Initialize the buffer to zero
   T* voxelized_volume_device = opencl_manager.GetDeviceBuffer<T>(voxelized_volume_.get(), number_elements_ * sizeof(T));

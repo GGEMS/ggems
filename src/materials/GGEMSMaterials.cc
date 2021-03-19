@@ -172,7 +172,7 @@ void GGEMSMaterials::BuildMaterialTables(void)
   GGEMSMaterialsDatabaseManager& material_database_manager = GGEMSMaterialsDatabaseManager::GetInstance();
   
   // Allocating memory for material tables in OpenCL device
-  material_tables_ = opencl_manager.Allocate(nullptr, sizeof(GGEMSMaterialTables), CL_MEM_READ_WRITE);
+  material_tables_ = opencl_manager.Allocate(nullptr, sizeof(GGEMSMaterialTables), CL_MEM_READ_WRITE, "GGEMSMaterials");
 
   // Getting the OpenCL pointer on material tables
   GGEMSMaterialTables* material_table_device = opencl_manager.GetDeviceBuffer<GGEMSMaterialTables>(material_tables_.get(), sizeof(GGEMSMaterialTables));

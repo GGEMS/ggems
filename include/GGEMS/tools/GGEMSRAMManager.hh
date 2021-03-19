@@ -36,10 +36,12 @@
 #endif
 
 #include <vector>
+#include <unordered_map>
 
 #include "GGEMS/tools/GGEMSTypes.hh"
-
 #include "GGEMS/global/GGEMSExport.hh"
+
+typedef std::unordered_map<std::string, GGsize> AllocatedMemoryUMap; /*!< Unordered map with key : name of class, amount of allocated memory on OpenCL device */
 
 /*!
   \class GGEMSRAMManager
@@ -129,11 +131,12 @@ class GGEMS_EXPORT GGEMSRAMManager
     }
 
     /*!
-      \fn void IncrementRAMMemory(GGsize const& size)
+      \fn void IncrementRAMMemory(std::string const& class_name, GGsize const& size)
+      \param class_name - name of class allocating memory
       \param size - size of the allocated buffer in byte
       \brief increment the size of the global allocated buffer
     */
-    void IncrementRAMMemory(GGsize const& size);
+    void IncrementRAMMemory(std::string const& class_name, GGsize const& size);
 
     /*!
       \fn void DecrementRAMMemory(GGsize const& size)
@@ -146,6 +149,7 @@ class GGEMS_EXPORT GGEMSRAMManager
     GGsize allocated_ram_; /*!< Allocated RAM on OpenCL device */
     GGsize max_available_ram_; /*!< Max available RAM on OpenCL device */
     GGsize max_buffer_size_; /*!< Max of buffer size of OpenCL device */
+    AllocatedMemoryUMap allocated_memories_; /*!< Allocated memory on OpenCL device by GGEMS class */
 };
 
 #endif // End of GUARD_GGEMS_TOOLS_GGEMSRAMMANAGER_HH

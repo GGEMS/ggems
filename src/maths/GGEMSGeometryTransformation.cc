@@ -90,7 +90,7 @@ GGEMSGeometryTransformation::GGEMSGeometryTransformation(void)
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
   // Allocation of matrix transformation on OpenCL device
-  matrix_transformation_ = opencl_manager.Allocate(nullptr, sizeof(GGfloat44), CL_MEM_READ_WRITE);
+  matrix_transformation_ = opencl_manager.Allocate(nullptr, sizeof(GGfloat44), CL_MEM_READ_WRITE, "GGEMSGeometryTransformation");
 
   // Initialize to 0
   GGfloat44* matrix_transformation_device = opencl_manager.GetDeviceBuffer<GGfloat44>(matrix_transformation_.get(), sizeof(GGfloat44));
