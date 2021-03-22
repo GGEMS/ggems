@@ -63,7 +63,7 @@ kernel void get_primaries_ggems_xray_source(
 )
 {
   // Get the index of thread
-  GGint global_id = get_global_id(0);
+  GGsize global_id = get_global_id(0);
 
   // Return if index > to particle limit
   if (global_id >= particle_id_limit) return;
@@ -83,19 +83,11 @@ kernel void get_primaries_ggems_xray_source(
     cos(theta)
   };
 
-  // Copy matrix transformation to private memory
-  GGfloat44 tmp_matrix_transformation = {
-    {matrix_transformation->m0_[0], matrix_transformation->m0_[1], matrix_transformation->m0_[2], matrix_transformation->m0_[3]},
-    {matrix_transformation->m1_[0], matrix_transformation->m1_[1], matrix_transformation->m1_[2], matrix_transformation->m1_[3]},
-    {matrix_transformation->m2_[0], matrix_transformation->m2_[1], matrix_transformation->m2_[2], matrix_transformation->m2_[3]},
-    {matrix_transformation->m3_[0], matrix_transformation->m3_[1], matrix_transformation->m3_[2], matrix_transformation->m3_[3]}
-  };
-
   // Get direction of the cone beam. The beam is targeted to the isocenter, then
   // the direction is directly related to the position of the source.
   // Local position of xray source is 0 0 0
   GGfloat3 global_position = {0.0f, 0.0f, 0.0f};
-  global_position = LocalToGlobalPosition(&tmp_matrix_transformation, &global_position);
+  global_position = LocalToGlobalPosition(matrix_transformation, &global_position);
   GGfloat3 direction = normalize((GGfloat3)(0.0f, 0.0f, 0.0f) - global_position);
 
   // Apply deflection (global coordinate)
@@ -108,7 +100,7 @@ kernel void get_primaries_ggems_xray_source(
   global_position.z = focal_spot_size.z * (KissUniform(random, global_id) - 0.5f);
 
   // Apply transformation (local to global frame)
-  global_position = LocalToGlobalPosition(&tmp_matrix_transformation, &global_position);
+  global_position = LocalToGlobalPosition(matrix_transformation, &global_position);
 
   // Getting a random energy
   GGfloat rndm_for_energy = KissUniform(random, global_id);

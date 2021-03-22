@@ -72,7 +72,7 @@ kernel void draw_ggems_box(
 )
 {
   // Getting index of thread
-  GGint global_id = get_global_id(0);
+  GGsize global_id = get_global_id(0);
 
   // Return if index > to voxel limit
   if (global_id >= voxel_id_limit) return;

@@ -152,8 +152,8 @@ GGEMSOpenCLManager::GGEMSOpenCLManager(void)
   device_partition_max_sub_devices_.resize(devices_.size());
   device_profiling_timer_resolution_.resize(devices_.size());
 
-  // Custom work group size, 32 seems a good trade-off
-  work_group_size_ = 32;
+  // Custom work group size, 64 seems a good trade-off
+  work_group_size_ = 64;
 
   // Make a char buffer reading char* data
   GGsize buffer[3] = {0,0,0};
