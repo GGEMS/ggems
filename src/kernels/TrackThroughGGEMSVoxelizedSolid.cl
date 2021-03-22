@@ -95,19 +95,11 @@ kernel void track_through_ggems_voxelized_solid(
     return;
   }
 
-  // Get position and direction in OBB coordinate (local)
-  GGfloat44 tmp_matrix_transformation = {
-    {voxelized_solid_data->obb_geometry_.matrix_transformation_.m0_[0], voxelized_solid_data->obb_geometry_.matrix_transformation_.m0_[1], voxelized_solid_data->obb_geometry_.matrix_transformation_.m0_[2], voxelized_solid_data->obb_geometry_.matrix_transformation_.m0_[3]},
-    {voxelized_solid_data->obb_geometry_.matrix_transformation_.m1_[0], voxelized_solid_data->obb_geometry_.matrix_transformation_.m1_[1], voxelized_solid_data->obb_geometry_.matrix_transformation_.m1_[2], voxelized_solid_data->obb_geometry_.matrix_transformation_.m1_[3]},
-    {voxelized_solid_data->obb_geometry_.matrix_transformation_.m2_[0], voxelized_solid_data->obb_geometry_.matrix_transformation_.m2_[1], voxelized_solid_data->obb_geometry_.matrix_transformation_.m2_[2], voxelized_solid_data->obb_geometry_.matrix_transformation_.m2_[3]},
-    {voxelized_solid_data->obb_geometry_.matrix_transformation_.m3_[0], voxelized_solid_data->obb_geometry_.matrix_transformation_.m3_[1], voxelized_solid_data->obb_geometry_.matrix_transformation_.m3_[2], voxelized_solid_data->obb_geometry_.matrix_transformation_.m3_[3]}
-  };
-
   // Get the position and direction in local OBB coordinate
   GGfloat3 global_position = {primary_particle->px_[global_id], primary_particle->py_[global_id], primary_particle->pz_[global_id]};
   GGfloat3 global_direction = {primary_particle->dx_[global_id], primary_particle->dy_[global_id], primary_particle->dz_[global_id]};
-  GGfloat3 local_position = GlobalToLocalPosition(&tmp_matrix_transformation, &global_position);
-  GGfloat3 local_direction = GlobalToLocalDirection(&tmp_matrix_transformation, &global_direction);
+  GGfloat3 local_position = GlobalToLocalPosition(&voxelized_solid_data->obb_geometry_.matrix_transformation_, &global_position);
+  GGfloat3 local_direction = GlobalToLocalDirection(&voxelized_solid_data->obb_geometry_.matrix_transformation_, &global_direction);
 
   // Get borders of OBB
   GGfloat3 border_min = voxelized_solid_data->obb_geometry_.border_min_xyz_;
@@ -251,13 +243,13 @@ kernel void track_through_ggems_voxelized_solid(
   } while (primary_particle->status_[global_id] == ALIVE);
 
   // Convert to global position
-  global_position = LocalToGlobalPosition(&tmp_matrix_transformation, &local_position);
+  global_position = LocalToGlobalPosition(&voxelized_solid_data->obb_geometry_.matrix_transformation_, &local_position);
   primary_particle->px_[global_id] = global_position.x;
   primary_particle->py_[global_id] = global_position.y;
   primary_particle->pz_[global_id] = global_position.z;
 
   // Convert to global direction
-  global_direction = LocalToGlobalDirection(&tmp_matrix_transformation, &local_direction);
+  global_direction = LocalToGlobalDirection(&voxelized_solid_data->obb_geometry_.matrix_transformation_, &local_direction);
   primary_particle->dx_[global_id] = global_direction.x;
   primary_particle->dy_[global_id] = global_direction.y;
   primary_particle->dz_[global_id] = global_direction.z;

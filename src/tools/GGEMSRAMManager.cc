@@ -109,6 +109,6 @@ void GGEMSRAMManager::PrintRAMStatus(void) const
   GGcout("GGEMSRAMManager", "PrintRAMStatus", 0) << "Total RAM memory allocated on OpenCL device: " << allocated_ram_ << " / " << max_available_ram_ << " bytes (" << percent_allocated_RAM << "%)" << GGendl;
   GGcout("GGEMSRAMManager", "PrintRAMStatus", 0) << "Details: " << GGendl;
   for (auto&& i : allocated_memories_) {
-    GGcout("GGEMSRAMManager", "PrintRAMStatus", 0) << "    + In '" << i.first << "': " << i.second << " bytes allocated (" << i.second * 100.0f /  allocated_ram_<< "%)" << GGendl;
+    GGcout("GGEMSRAMManager", "PrintRAMStatus", 0) << "    + In '" << i.first << "': " << i.second << " bytes allocated (" << static_cast<GGfloat>(i.second) * 100.0f /  static_cast<GGfloat>(allocated_ram_) << "%)" << GGendl;
   }
 }

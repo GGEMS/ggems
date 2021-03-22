@@ -68,13 +68,10 @@ kernel void draw_ggems_sphere(
 )
 {
   // Getting index of thread
-  GGint global_id = get_global_id(0);
+  GGsize global_id = get_global_id(0);
 
   // Return if index > to voxel limit
   if (global_id >= voxel_id_limit) return;
-
-  // Radius square and half of height
-  GGfloat radius2 = radius * radius;
 
   // Get index i, j and k of current voxel
   GGint3 indices;
@@ -87,7 +84,7 @@ kernel void draw_ggems_sphere(
   voxel_pos -= positions;
 
   // Check if voxel is outside/inside analytical volume
-  if (voxel_pos.x*voxel_pos.x + voxel_pos.y*voxel_pos.y + voxel_pos.z*voxel_pos.z <= radius2) {
+  if (voxel_pos.x*voxel_pos.x + voxel_pos.y*voxel_pos.y + voxel_pos.z*voxel_pos.z <= radius*radius) {
     #ifdef MET_CHAR
     voxelized_phantom[global_id] = (GGchar)label_value;
     #elif MET_UCHAR

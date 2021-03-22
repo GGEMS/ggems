@@ -67,9 +67,9 @@ int main(int argc, char** argv)
   }
 
   // Setting verbosity
-  GGcout.SetVerbosity(0);
-  GGcerr.SetVerbosity(0);
-  GGwarn.SetVerbosity(0);
+  GGcout.SetVerbosity(1);
+  GGcerr.SetVerbosity(1);
+  GGwarn.SetVerbosity(1);
 
   // Getting parameters
   GGsize device_id = static_cast<GGsize>(atoi(argv[1]));

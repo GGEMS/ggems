@@ -32,7 +32,7 @@ device_id = args.device
 
 # ------------------------------------------------------------------------------
 # STEP 0: Level of verbosity during computation
-GGEMSVerbosity(0)
+GGEMSVerbosity(1)
 
 # ------------------------------------------------------------------------------
 # STEP 1: OpenCL Initialization
