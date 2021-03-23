@@ -83,7 +83,7 @@ void GGEMSProcessesManager::SetCrossSectionTableMinimumEnergy(GGfloat const& ene
   // Checking the min value
   if (cross_section_table_min_energy_ < CROSS_SECTION_TABLE_ENERGY_MIN) {
     std::ostringstream oss(std::ostringstream::out);
-    oss << "The minimum of energy in the cross section table is 990 eV, yours is " << cross_section_table_min_energy_/eV << " eV!!!";
+    oss << "The minimum of energy in the cross section table is 990 eV, yours is " << BestEnergyUnit(cross_section_table_min_energy_);
     GGEMSMisc::ThrowException("GGEMSProcessesManager", "SetCrossSectionTableMinimumEnergy", oss.str());
   }
 }
@@ -99,7 +99,7 @@ void GGEMSProcessesManager::SetCrossSectionTableMaximumEnergy(GGfloat const& ene
   // Checking the max value
   if (cross_section_table_max_energy_ > CROSS_SECTION_TABLE_ENERGY_MAX) {
     std::ostringstream oss(std::ostringstream::out);
-    oss << "The maximum of energy in the cross section table is 250 MeV, yours is " << cross_section_table_max_energy_/MeV << " MeV!!!";
+    oss << "The maximum of energy in the cross section table is 250 MeV, yours is " << BestEnergyUnit(cross_section_table_max_energy_);
     GGEMSMisc::ThrowException("GGEMSProcessesManager", "SetCrossSectionTableMaximumEnergy", oss.str());
   }
 }
@@ -138,7 +138,7 @@ void GGEMSProcessesManager::PrintInfos(void) const
   GGcout("GGEMSProcessesManager", "PrintInfos", 0) << "Cross section table parameters:" << GGendl;
   GGcout("GGEMSProcessesManager", "PrintInfos", 0) << "-------------------------------" << GGendl;
   GGcout("GGEMSProcessesManager", "PrintInfos", 0) << "    * Number of bins for the cross section table: " << cross_section_table_number_of_bins_ << GGendl;
-  GGcout("GGEMSProcessesManager", "PrintInfos", 0) << "    * Range in energy of cross section table: [" << cross_section_table_min_energy_/keV << ", " << cross_section_table_max_energy_/keV << "] keV" << GGendl;
+  GGcout("GGEMSProcessesManager", "PrintInfos", 0) << "    * Range in energy of cross section table: [" << BestEnergyUnit(cross_section_table_min_energy_) << ", " << BestEnergyUnit(cross_section_table_max_energy_) << "]" << GGendl;
   GGcout("GGEMSProcessesManager", "PrintInfos", 0) << GGendl;
   // Loop over all phantoms
   for (size_t i = 0; i < navigator_manager.GetNumberOfNavigators(); ++i) {

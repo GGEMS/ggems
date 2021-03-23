@@ -44,6 +44,7 @@
 #include <algorithm>
 #include <sstream>
 #include <cfloat>
+#include <iostream>
 #include "GGEMS/tools/GGEMSTools.hh"
 #endif
 
@@ -189,8 +190,50 @@ __constant GGfloat perthousant = 0.001f; /*!< Perthousand value */
 __constant GGfloat permillion  = 0.000001f; /*!< Permillion value */
 
 #ifndef __OPENCL_C_VERSION__
+
 /*!
-  \fn T DistanceUnit(T const& value, std::string const& unit)
+  \namespace
+  \brief empty namespace storing prefix unit
+*/
+namespace
+{
+  std::string prefix_unit[17] = {
+    // yocto, zepto, atto, femto, pico, nano, micro, milli,
+          "y",   "z",  "a",   "f",  "p",  "n",   "u",   "m",
+    // N/A,
+         "",
+    // kilo, mega, giga, tera, peta, exa, zetta, yotta
+         "k",  "M",  "G",  "T",  "P", "E",   "Z",   "Y"
+  }; /*!< prefix units */
+}
+
+/*!
+  \fn inline std::string BestDistanceUnit(T const& value)
+  \tparam T - type of the value
+  \param value - value to convert to best unit
+  \brief Choose best distance unit
+  \return string value and distance unit
+*/
+template <typename T>
+inline std::string BestDistanceUnit(T const& value)
+{
+  std::string base_unit = "m"; // Base unit is meter (m)
+
+  // Find index of prefix, milli is the reference
+  GGint index = static_cast<GGint>(std::log(std::fabs(static_cast<GGdouble>(value)))/std::log(1000.0)) + 7;
+  index = (index < 0) ? 0 : index;
+  index = (index > 16) ? 16 : index;
+
+  if (static_cast<GGdouble>(value) == 0.0) index = 7;
+
+  std::ostringstream oss(std::stringstream::out);
+  oss << static_cast<GGdouble>(value)/std::pow(1000, index - 7) << " " << ::prefix_unit[index]+base_unit;
+
+  return oss.str();
+}
+
+/*!
+  \fn inline T DistanceUnit(T const& value, std::string const& unit)
   \tparam T - type of the value to convert unit
   \param value - value to check
   \param unit - distance unit
@@ -198,7 +241,7 @@ __constant GGfloat permillion  = 0.000001f; /*!< Permillion value */
   \return value in the good unit
 */
 template <typename T>
-T DistanceUnit(T const& value, std::string const& unit)
+inline T DistanceUnit(T const& value, std::string const& unit)
 {
   T new_value = static_cast<T>(0);
   if (unit == "nm") {
@@ -238,7 +281,32 @@ T DistanceUnit(T const& value, std::string const& unit)
 }
 
 /*!
-  \fn T EnergyUnit(T const& value, std::string const& unit)
+  \fn inline std::string BestEnergyUnit(T const& value)
+  \tparam T - type of the value
+  \param value - value to convert to best unit
+  \brief Choose best energy unit, mega is the reference
+  \return string value and energy unit
+*/
+template <typename T>
+inline std::string BestEnergyUnit(T const& value)
+{
+  std::string base_unit = "eV"; // Base unit is electron volt (eV)
+
+  // Find index of prefix
+  GGint index = static_cast<GGint>(std::log(std::fabs(static_cast<GGdouble>(value)))/std::log(1000.0)) + 10;
+  index = (index < 0) ? 0 : index;
+  index = (index > 16) ? 16 : index;
+
+  if (static_cast<GGdouble>(value) == 0.0) index = 8;
+
+  std::ostringstream oss(std::stringstream::out);
+  oss << static_cast<GGdouble>(value)/std::pow(1000, index - 10) << " " << ::prefix_unit[index]+base_unit;
+
+  return oss.str();
+}
+
+/*!
+  \fn inline T EnergyUnit(T const& value, std::string const& unit)
   \tparam T - type of the value to convert unit
   \param value - value to check
   \param unit - energy unit
@@ -246,7 +314,7 @@ T DistanceUnit(T const& value, std::string const& unit)
   \return value in the good unit
 */
 template <typename T>
-T EnergyUnit(T const& value, std::string const& unit)
+inline T EnergyUnit(T const& value, std::string const& unit)
 {
   T new_value = static_cast<T>(0);
   if (unit == "eV") {
@@ -282,7 +350,7 @@ T EnergyUnit(T const& value, std::string const& unit)
 }
 
 /*!
-  \fn T AngleUnit(T const& value, std::string const& unit)
+  \fn inline T AngleUnit(T const& value, std::string const& unit)
   \tparam T - type of the value to convert unit
   \param value - value to check
   \param unit - angle unit
@@ -290,7 +358,7 @@ T EnergyUnit(T const& value, std::string const& unit)
   \return value in the good unit
 */
 template <typename T>
-T AngleUnit(T const& value, std::string const& unit)
+inline T AngleUnit(T const& value, std::string const& unit)
 {
   T new_value = static_cast<T>(0);
   if (unit == "rad") {
@@ -316,9 +384,9 @@ T AngleUnit(T const& value, std::string const& unit)
   }
   return new_value;
 }
-#include <iostream>
+
 /*!
-  \fn T DensityUnit(T const& value, std::string const& unit)
+  \fn inline T DensityUnit(T const& value, std::string const& unit)
   \tparam T - type of the value to convert unit
   \param value - value to check
   \param unit - density unit
@@ -326,7 +394,7 @@ T AngleUnit(T const& value, std::string const& unit)
   \return value in the good unit
 */
 template <typename T>
-T DensityUnit(T const& value, std::string const& unit)
+inline T DensityUnit(T const& value, std::string const& unit)
 {
   T new_value = static_cast<T>(0);
   if (unit == "g/cm3") {
@@ -347,6 +415,29 @@ T DensityUnit(T const& value, std::string const& unit)
     GGEMSMisc::ThrowException("", "DensityUnit", oss.str());
   }
   return new_value;
+}
+
+/*!
+  \fn inline std::string BestDigitalUnit(GGulong const& value)
+  \param value - value to convert to best unit
+  \brief Choose best digital unit
+  \return string value and energy unit
+*/
+inline std::string BestDigitalUnit(GGulong const& value)
+{
+  std::string base_unit = "B"; // Base unit is byte(B)
+
+  // Find index of prefix
+  GGint index = static_cast<GGint>(std::log(static_cast<GGdouble>(value))/std::log(1000.0)) + 8;
+  index = (index < 8) ? 8 : index;
+  index = (index > 16) ? 16 : index;
+
+  if (value == 0) index = 8;
+
+  std::ostringstream oss(std::stringstream::out);
+  oss << static_cast<GGdouble>(value)/std::pow(1000, index - 8) << " " << ::prefix_unit[index]+base_unit;
+
+  return oss.str();
 }
 #endif
 

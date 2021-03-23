@@ -32,6 +32,7 @@
 
 #include "GGEMS/tools/GGEMSRAMManager.hh"
 #include "GGEMS/tools/GGEMSTools.hh"
+#include "GGEMS/tools/GGEMSSystemOfUnits.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -106,9 +107,9 @@ void GGEMSRAMManager::PrintRAMStatus(void) const
   GGfloat percent_allocated_RAM = static_cast<GGfloat>(allocated_ram_) * 100.0f / static_cast<GGfloat>(max_available_ram_);
 
   GGcout("GGEMSRAMManager", "PrintRAMStatus", 0) << "Device: " << device_name << GGendl;
-  GGcout("GGEMSRAMManager", "PrintRAMStatus", 0) << "Total RAM memory allocated on OpenCL device: " << allocated_ram_ << " / " << max_available_ram_ << " bytes (" << percent_allocated_RAM << "%)" << GGendl;
+  GGcout("GGEMSRAMManager", "PrintRAMStatus", 0) << "Total RAM memory allocated on OpenCL device: " << BestDigitalUnit(allocated_ram_) << " / " << BestDigitalUnit(max_available_ram_) << " (" << percent_allocated_RAM << "%)" << GGendl;
   GGcout("GGEMSRAMManager", "PrintRAMStatus", 0) << "Details: " << GGendl;
   for (auto&& i : allocated_memories_) {
-    GGcout("GGEMSRAMManager", "PrintRAMStatus", 0) << "    + In '" << i.first << "': " << i.second << " bytes allocated (" << static_cast<GGfloat>(i.second) * 100.0f /  static_cast<GGfloat>(allocated_ram_) << "%)" << GGendl;
+    GGcout("GGEMSRAMManager", "PrintRAMStatus", 0) << "    + In '" << i.first << "': " << BestDigitalUnit(i.second) << " allocated (" << static_cast<GGfloat>(i.second) * 100.0f /  static_cast<GGfloat>(allocated_ram_) << "%)" << GGendl;
   }
 }
