@@ -70,24 +70,24 @@ void GGEMSRangeCutsManager::PrintInfos(void) const
     GGcout("GGEMSRangeCutsManager", "PrintInfos", 0) << "Range cuts for phantom navigator: " << name_of_phantom << GGendl;
     GGcout("GGEMSRangeCutsManager", "PrintInfos", 0) << "---------------------------------" << GGendl;
     GGcout("GGEMSRangeCutsManager", "PrintInfos", 0) << "Length cuts:" << GGendl;
-    GGcout("GGEMSRangeCutsManager", "PrintInfos", 0) << "    * Photon: " << range_cuts->GetPhotonDistanceCut()/mm << " mm"<< GGendl;
-    GGcout("GGEMSRangeCutsManager", "PrintInfos", 0) << "    * Electron: " << range_cuts->GetElectronDistanceCut()/mm << " mm" << GGendl;
-    GGcout("GGEMSRangeCutsManager", "PrintInfos", 0) << "    * Positron: " << range_cuts->GetPositronDistanceCut()/mm << " mm" << GGendl;
+    GGcout("GGEMSRangeCutsManager", "PrintInfos", 0) << "    * Photon: " << BestDistanceUnit(range_cuts->GetPhotonDistanceCut()) << GGendl;
+    GGcout("GGEMSRangeCutsManager", "PrintInfos", 0) << "    * Electron: " << BestDistanceUnit(range_cuts->GetElectronDistanceCut()) << GGendl;
+    GGcout("GGEMSRangeCutsManager", "PrintInfos", 0) << "    * Positron: " << BestDistanceUnit(range_cuts->GetPositronDistanceCut()) << GGendl;
     GGcout("GGEMSRangeCutsManager", "PrintInfos", 0) << "Energy cuts:" << GGendl;
     GGcout("GGEMSRangeCutsManager", "PrintInfos", 0) << "    * Photon:" << GGendl;
     EnergyCutUMap energy_cut_of_photon = range_cuts->GetPhotonEnergyCut();
     for (auto&& j : energy_cut_of_photon) {
-      GGcout("GGEMSRangeCutsManager", "PrintInfos", 0) << "        - " << j.first << ": " << j.second/keV << " keV" << GGendl;
+      GGcout("GGEMSRangeCutsManager", "PrintInfos", 0) << "        - " << j.first << ": " << BestEnergyUnit(j.second) << GGendl;
     }
     GGcout("GGEMSRangeCutsManager", "PrintInfos", 0) << "    * Electron:" << GGendl;
     EnergyCutUMap energy_cut_of_electron = range_cuts->GetElectronEnergyCut();
     for (auto&& j : energy_cut_of_electron) {
-      GGcout("GGEMSRangeCutsManager", "PrintInfos", 0) << "        - " << j.first << ": " << j.second/keV << " keV" << GGendl;
+      GGcout("GGEMSRangeCutsManager", "PrintInfos", 0) << "        - " << j.first << ": " << BestEnergyUnit(j.second)<< GGendl;
     }
     GGcout("GGEMSRangeCutsManager", "PrintInfos", 0) << "    * Positron:" << GGendl;
     EnergyCutUMap const energy_cut_of_positron = range_cuts->GetPositronEnergyCut();
     for (auto&& j : energy_cut_of_positron) {
-      GGcout("GGEMSRangeCutsManager", "PrintInfos", 0) << "        - " << j.first << ": " << j.second/keV << " keV" << GGendl;
+      GGcout("GGEMSRangeCutsManager", "PrintInfos", 0) << "        - " << j.first << ": " << BestEnergyUnit(j.second) << GGendl;
     }
     GGcout("GGEMSRangeCutsManager", "PrintInfos", 0) << GGendl;
   }
