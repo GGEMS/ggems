@@ -16,21 +16,30 @@
 # *                                                                      *
 # ************************************************************************
 
-#-------------------------------------------------------------------------------
-# CMakeLists.txt
-#
-# CMakeLists.txt - Compile and build the GGEMS examples
-#
-# Authors :
-#   - Julien Bert <julien.bert@univ-brest.fr>
-#   - Didier Benoit <didier.benoit@inserm.fr>
-#
-# Generated on : 2/11/2020
-#-------------------------------------------------------------------------------
+from ggems_lib import *
 
-# ADD_SUBDIRECTORY(0_Cross_Sections)
-# ADD_SUBDIRECTORY(2_CT_Scanner)
-# ADD_SUBDIRECTORY(3_Voxelized_Phantom_Generator)
-# ADD_SUBDIRECTORY(4_Dosimetry_Photon)
-# ADD_SUBDIRECTORY(5_World_Tracking)
-ADD_SUBDIRECTORY(6_Multi_Platform)
+class GGEMSOpenCLManager(object):
+    """Get the OpenCL C++ singleton and print infos or managing it
+    """
+    def __init__(self):
+        ggems_lib.get_instance_ggems_opencl_manager.restype = ctypes.c_void_p
+
+        ggems_lib.print_infos_opencl_manager.argtypes = [ctypes.c_void_p]
+        ggems_lib.print_infos_opencl_manager.restype = ctypes.c_void_p
+
+        ggems_lib.clean_opencl_manager.argtypes = [ctypes.c_void_p]
+        ggems_lib.clean_opencl_manager.restype = ctypes.c_void_p
+
+        ggems_lib.set_device_index_ggems_opencl_manager.argtypes = [ctypes.c_void_p, ctypes.c_size_t]
+        ggems_lib.set_device_index_ggems_opencl_manager.restype = ctypes.c_void_p
+
+        self.obj = ggems_lib.get_instance_ggems_opencl_manager()
+
+    def print_infos(self):
+        ggems_lib.print_infos_opencl_manager(self.obj)
+
+    def set_device_index(self, device_id):
+        ggems_lib.set_device_index_ggems_opencl_manager(self.obj, device_id)
+
+    def clean(self):
+        ggems_lib.clean_opencl_manager(self.obj)

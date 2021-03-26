@@ -35,7 +35,7 @@
 #define TRUE 1 /*!< True for OpenCL */
 
 #define CL_HPP_TARGET_OPENCL_VERSION 120 /*!< C++ OpenCL version 1.2 only */
-#define CL_HPP_MINIMUM_OPENCL_VERSION 120 /*!< Minimum version of OpenCL */
+#define CL_HPP_MINIMUM_OPENCL_VERSION 100 /*!< Minimum version of OpenCL */
 
 #if __GNUC__ >= 6 
 #pragma GCC diagnostic ignored "-Wignored-attributes"

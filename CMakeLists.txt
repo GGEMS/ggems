@@ -44,7 +44,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.8 FATAL_ERROR)
 # CC=clang
 # CXX=clang++
 IF(WIN32)
-  SET(COMPILER CLANG CACHE INTERNAL "Compiler name: CLANG, CL")
+  SET(COMPILER CL CACHE INTERNAL "Compiler name: CLANG, CL")
 ELSE()
   SET(COMPILER GCC CACHE INTERNAL "Compiler name: CLANG, GCC")
 ENDIF()
@@ -138,10 +138,17 @@ IF(WIN32)
     STRING(REPLACE "/O2" "" CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
     STRING(REPLACE "/D NDEBUG" "" CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
 
-    #/WX /Wall
     SET(CXX_FLAGS /MP /EHsc /nologo /W3 /std:c++17)
     SET(CXX_FLAGS_RELEASE /Ox ${CXX_FLAGS})
     SET(CXX_FLAGS_DEBUG /Od /DEBUG /Zi ${CXX_FLAGS})
+
+    ELSEIF(COMPILER STREQUAL "GCC")
+    STRING(REPLACE "-O3" "" CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
+    STRING(REPLACE "-DNDEBUG" "" CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
+
+    SET(CXX_FLAGS -std=c++17 -std=gnu++17 -Wextra -Wall -pedantic -m64 -Wconversion -Wold-style-cast -pedantic-errors)
+    SET(CXX_FLAGS_RELEASE -O3 ${CXX_FLAGS})
+    SET(CXX_FLAGS_DEBUG -O0 -g3 ${CXX_FLAGS})
 
   # Otherwize error
   ELSE()
@@ -194,17 +201,17 @@ LINK_DIRECTORIES(${OpenCL_LIBRARY})
 #-------------------------------------------------------------------------------
 # Locate source files for GGEMS
 FILE(GLOB source_ggems
-  ${PROJECT_SOURCE_DIR}/src/detectors/*.cc
+  # ${PROJECT_SOURCE_DIR}/src/detectors/*.cc
   ${PROJECT_SOURCE_DIR}/src/global/*.cc
-  ${PROJECT_SOURCE_DIR}/src/geometries/*.cc
+  # ${PROJECT_SOURCE_DIR}/src/geometries/*.cc
   ${PROJECT_SOURCE_DIR}/src/tools/*.cc
-  ${PROJECT_SOURCE_DIR}/src/navigators/*.cc
-  ${PROJECT_SOURCE_DIR}/src/physics/*.cc
-  ${PROJECT_SOURCE_DIR}/src/sources/*.cc
-  ${PROJECT_SOURCE_DIR}/src/randoms/*.cc
-  ${PROJECT_SOURCE_DIR}/src/maths/*.cc
-  ${PROJECT_SOURCE_DIR}/src/materials/*.cc
-  ${PROJECT_SOURCE_DIR}/src/io/*.cc
+  # ${PROJECT_SOURCE_DIR}/src/navigators/*.cc
+  # ${PROJECT_SOURCE_DIR}/src/physics/*.cc
+  # ${PROJECT_SOURCE_DIR}/src/sources/*.cc
+  # ${PROJECT_SOURCE_DIR}/src/randoms/*.cc
+  # ${PROJECT_SOURCE_DIR}/src/maths/*.cc
+  # ${PROJECT_SOURCE_DIR}/src/materials/*.cc
+  # ${PROJECT_SOURCE_DIR}/src/io/*.cc
 )
 
 #-------------------------------------------------------------------------------

@@ -1,3 +1,6 @@
+#ifndef GUARD_GGEMS_TOOLS_GGEMSTOOLS_HH
+#define GUARD_GGEMS_TOOLS_GGEMSTOOLS_HH
+
 // ************************************************************************
 // * This file is part of GGEMS.                                          *
 // *                                                                      *
@@ -17,7 +20,7 @@
 // ************************************************************************
 
 /*!
-  \file GGEMSTools.cc
+  \file GGEMSTools.hh
 
   \brief Namespaces for different useful fonctions
 
@@ -25,43 +28,44 @@
   \author Didier BENOIT <didier.benoit@inserm.fr>
   \author LaTIM, Brest, FRANCE
   \version 1.0
-  \date Wednesday October 10, 2018
+  \date Monday September 30, 2019
 */
 
-#include <sstream>
-#include <cerrno>
-#include <cstring>
+#include <fstream>
+#include <cmath>
 
-#include "GGEMS/tools/GGEMSTools.hh"
-#include "GGEMS/tools/GGEMSPrint.hh"
+#include "GGEMS/global/GGEMSConfiguration.hh"
+#include "GGEMS/tools/GGEMSTypes.hh"
 
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void GGEMSFileStream::CheckInputStream(std::ifstream const& input_stream, std::string const& filename)
+/*!
+  \namespace GGEMSFileStream
+  \brief namespace checking file stream in input and output
+*/
+namespace GGEMSFileStream
 {
-  if (!input_stream) {
-    std::ostringstream oss(std::ostringstream::out);
-    #ifdef _WIN32
-    char buffer_error[ 256 ];
-    strerror_s(buffer_error, 256, errno);
-    oss << "Problem reading filename '" << filename << "': " << buffer_error;
-    #else
-    oss << "Problem reading filename '" << filename << "': " << strerror(errno);
-    #endif
-    GGEMSMisc::ThrowException("", "", oss.str());
-  }
+  /*!
+    \fn void CheckInputStream(std::ifstream const& input_stream, std::string const& filename)
+    \param input_stream - the input stream
+    \param filename - filename associated to the input stream
+    \brief check the input stream during the opening
+  */
+  void CheckInputStream(std::ifstream const& input_stream, std::string const& filename);
 }
 
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void GGEMSMisc::ThrowException(std::string const& class_name, std::string const& method_name, std::string const& message)
+/*!
+  \namespace GGEMSMisc
+  \brief namespace storing miscellaneous functions
+*/
+namespace GGEMSMisc
 {
-  std::ostringstream oss(std::ostringstream::out);
-  oss << message;
-  GGcerr(class_name, method_name, 0) << oss.str() << GGendl;
-  throw std::runtime_error("");
+  /*!
+    \fn void ThrowException(std::string const& class_name, std::string const& method_name, std::string const& message)
+    \param class_name - Name of the class
+    \param method_name - Name of the methode or function
+    \param message - Message to print for the exception
+    \brief Throw a C++ exception
+  */
+  void ThrowException(std::string const& class_name, std::string const& method_name, std::string const& message);
 }
+
+#endif // End of GUARD_GGEMS_TOOLS_GGEMSTOOLS_HH
