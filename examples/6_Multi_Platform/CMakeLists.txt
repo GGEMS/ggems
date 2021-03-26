@@ -19,18 +19,24 @@
 #-------------------------------------------------------------------------------
 # CMakeLists.txt
 #
-# CMakeLists.txt - Compile and build the GGEMS examples
+# CMakeLists.txt - Compile and build multi platform project
 #
 # Authors :
 #   - Julien Bert <julien.bert@univ-brest.fr>
 #   - Didier Benoit <didier.benoit@inserm.fr>
 #
-# Generated on : 2/11/2020
+# Generated on : 02/03/2021
 #-------------------------------------------------------------------------------
 
-# ADD_SUBDIRECTORY(0_Cross_Sections)
-# ADD_SUBDIRECTORY(2_CT_Scanner)
-# ADD_SUBDIRECTORY(3_Voxelized_Phantom_Generator)
-# ADD_SUBDIRECTORY(4_Dosimetry_Photon)
-# ADD_SUBDIRECTORY(5_World_Tracking)
-ADD_SUBDIRECTORY(6_Multi_Platform)
+#-------------------------------------------------------------------------------
+# Defining the project
+PROJECT(MultiPlatform)
+
+#-------------------------------------------------------------------------------
+# Creating the executable
+ADD_EXECUTABLE(multi_platform multi_platform.cc)
+TARGET_LINK_LIBRARIES(multi_platform ggems)
+
+#-------------------------------------------------------------------------------
+# Copy executable to ggems bin folder
+INSTALL(TARGETS multi_platform DESTINATION ${PROJECT_SOURCE_DIR})

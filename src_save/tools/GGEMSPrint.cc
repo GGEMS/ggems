@@ -17,51 +17,70 @@
 // ************************************************************************
 
 /*!
-  \file GGEMSTools.cc
+  \file GGEMSPrint.cc
 
-  \brief Namespaces for different useful fonctions
+  \brief Print a custom std::cout end std::cerr handling verbosity
 
   \author Julien BERT <julien.bert@univ-brest.fr>
   \author Didier BENOIT <didier.benoit@inserm.fr>
   \author LaTIM, Brest, FRANCE
   \version 1.0
-  \date Wednesday October 10, 2018
+  \date Monday September 23, 2019
 */
 
-#include <sstream>
-#include <cerrno>
-#include <cstring>
-
-#include "GGEMS/tools/GGEMSTools.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
 
+// Initializations
+GGEMSStream GGcout = GGEMSStream(std::cout, GGEMSConsoleColor::green);
+GGEMSStream GGcerr = GGEMSStream(std::cerr, GGEMSConsoleColor::red);
+GGEMSStream GGwarn = GGEMSStream(std::cout, GGEMSConsoleColor::yellow);
+
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSFileStream::CheckInputStream(std::ifstream const& input_stream, std::string const& filename)
+GGEMSStream::GGEMSStream(std::ostream& stream, GGEMSConsoleColor const& color)
+: class_name_(""),
+  method_name_(""),
+  verbosity_limit_(0),
+  verbosity_level_(0),
+  stream_counter_(0),
+  stream_(stream),
+  color_index_(color)
 {
-  if (!input_stream) {
-    std::ostringstream oss(std::ostringstream::out);
-    #ifdef _WIN32
-    char buffer_error[ 256 ];
-    strerror_s(buffer_error, 256, errno);
-    oss << "Problem reading filename '" << filename << "': " << buffer_error;
-    #else
-    oss << "Problem reading filename '" << filename << "': " << strerror(errno);
-    #endif
-    GGEMSMisc::ThrowException("", "", oss.str());
-  }
+  ;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSMisc::ThrowException(std::string const& class_name, std::string const& method_name, std::string const& message)
+void GGEMSStream::SetVerbosity(GGint const& verbosity_limit)
 {
-  std::ostringstream oss(std::ostringstream::out);
-  oss << message;
-  GGcerr(class_name, method_name, 0) << oss.str() << GGendl;
-  throw std::runtime_error("");
+  verbosity_limit_ = verbosity_limit;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+GGEMSStream& GGEMSStream::operator()(std::string const& class_name,
+  std::string const& method_name, GGint const& verbosity_level)
+{
+  class_name_ = class_name;
+  method_name_ = method_name;
+  verbosity_level_ = verbosity_level;
+  stream_counter_ = 0;
+  return *this;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void set_ggems_verbose(GGint verbosity)
+{
+  GGcout.SetVerbosity(verbosity);
+  GGcerr.SetVerbosity(verbosity);
+  GGwarn.SetVerbosity(verbosity);
 }

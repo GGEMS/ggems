@@ -16,21 +16,41 @@
 # *                                                                      *
 # ************************************************************************
 
-#-------------------------------------------------------------------------------
-# CMakeLists.txt
-#
-# CMakeLists.txt - Compile and build the GGEMS examples
-#
-# Authors :
-#   - Julien Bert <julien.bert@univ-brest.fr>
-#   - Didier Benoit <didier.benoit@inserm.fr>
-#
-# Generated on : 2/11/2020
-#-------------------------------------------------------------------------------
+import ctypes
+import sys
+import os
 
-# ADD_SUBDIRECTORY(0_Cross_Sections)
-# ADD_SUBDIRECTORY(2_CT_Scanner)
-# ADD_SUBDIRECTORY(3_Voxelized_Phantom_Generator)
-# ADD_SUBDIRECTORY(4_Dosimetry_Photon)
-# ADD_SUBDIRECTORY(5_World_Tracking)
-ADD_SUBDIRECTORY(6_Multi_Platform)
+def ggems_lib_file_path(filename):
+    """ Search for GGEMS lib in PYTHONPATH
+    """
+    pythonpath = os.environ.get("PYTHONPATH")
+    if pythonpath:
+        for d in pythonpath.split(os.pathsep):
+            filepath = os.path.join(d, filename)
+            if os.path.isfile(filepath):
+                return filepath
+    return None
+
+# ------------------------------------------------------------------------------
+# Get the location of ggems library and set verbosity
+if sys.platform == "linux":
+    ggems_lib = ctypes.cdll.LoadLibrary(ggems_lib_file_path('libggems.so'))
+elif sys.platform == "darwin":
+    ggems_lib = ctypes.cdll.LoadLibrary(ggems_lib_file_path('libggems.dylib'))
+elif sys.platform == "win32":
+    ggems_lib = ctypes.cdll.LoadLibrary(ggems_lib_file_path('libggems.dll'))
+
+
+class GGEMSVerbosity(object):
+    """Set the verbosity of infos in GGEMS
+    """
+    def __init__(self, val):
+        ggems_lib.set_ggems_verbose.argtypes = [ctypes.c_int]
+        ggems_lib.set_ggems_verbose.restype = ctypes.c_void_p
+
+        ggems_lib.set_ggems_verbose(val)
+
+
+# ------------------------------------------------------------------------------
+# Setting global verbosity to 0
+GGEMSVerbosity(0)
