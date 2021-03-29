@@ -30,6 +30,7 @@
 
 #include <cstdlib>
 #include "GGEMS/global/GGEMSOpenCLManager.hh"
+#include "GGEMS/global/GGEMSConfiguration.hh"
 
 /*!
   \fn void PrintHelpAndQuit(void)
@@ -62,9 +63,9 @@ int main(int argc, char** argv)
   std::string device = argv[1];
 
   // Setting verbosity
-  GGcout.SetVerbosity(1);
-  GGcerr.SetVerbosity(1);
-  GGwarn.SetVerbosity(1);
+  GGcout.SetVerbosity(3);
+  GGcerr.SetVerbosity(3);
+  GGwarn.SetVerbosity(3);
 
   // Initialization of singletons
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();

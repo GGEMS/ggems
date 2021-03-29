@@ -35,7 +35,7 @@
 #include "GGEMS/materials/GGEMSMaterialsDatabaseManager.hh"
 #include "GGEMS/materials/GGEMSMaterials.hh"
 
-#include "GGEMS/physics/GGEMSProcessesManager.hh"
+// #include "GGEMS/physics/GGEMSProcessesManager.hh"
 #include "GGEMS/physics/GGEMSCrossSections.hh"
 
 /*!
@@ -85,7 +85,7 @@ int main(int argc, char** argv)
   // Initialization of singletons
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
   GGEMSMaterialsDatabaseManager& material_manager = GGEMSMaterialsDatabaseManager::GetInstance();
-  GGEMSProcessesManager& processes_manager = GGEMSProcessesManager::GetInstance();
+  // GGEMSProcessesManager& processes_manager = GGEMSProcessesManager::GetInstance();
 
   try {
     // Set the context id
@@ -96,28 +96,28 @@ int main(int argc, char** argv)
 
     // Initializing material
     GGEMSMaterials materials;
-    materials.AddMaterial(material_name);
-    materials.Initialize();
+    // materials.AddMaterial(material_name);
+    // materials.Initialize();
 
     // Printing useful infos
-    std::cout << "Material: " << material_name << std::endl;
-    std::cout << "    Density: " << materials.GetDensity(material_name) << " g.cm-3" << std::endl;
-    std::cout << "    Photon energy cut (for 1 mm distance): " << materials.GetEnergyCut(material_name, "gamma", 1.0, "mm") << " keV" << std::endl;
-    std::cout << "    Electron energy cut (for 1 mm distance): " << materials.GetEnergyCut(material_name, "e-", 1.0, "mm") << " keV" << std::endl;
-    std::cout << "    Positron energy cut (for 1 mm distance): " << materials.GetEnergyCut(material_name, "e+", 1.0, "mm")<< " keV" << std::endl;
-    std::cout << "    Atomic number density: " << materials.GetAtomicNumberDensity(material_name) << " atoms.cm-3" << std::endl;
+    // std::cout << "Material: " << material_name << std::endl;
+    // std::cout << "    Density: " << materials.GetDensity(material_name) << " g.cm-3" << std::endl;
+    // std::cout << "    Photon energy cut (for 1 mm distance): " << materials.GetEnergyCut(material_name, "gamma", 1.0, "mm") << " keV" << std::endl;
+    // std::cout << "    Electron energy cut (for 1 mm distance): " << materials.GetEnergyCut(material_name, "e-", 1.0, "mm") << " keV" << std::endl;
+    // std::cout << "    Positron energy cut (for 1 mm distance): " << materials.GetEnergyCut(material_name, "e+", 1.0, "mm")<< " keV" << std::endl;
+    // std::cout << "    Atomic number density: " << materials.GetAtomicNumberDensity(material_name) << " atoms.cm-3" << std::endl;
 
-    // Defining global parameters for cross-section building
-    processes_manager.SetCrossSectionTableNumberOfBins(220); // Not exceed 2048 bins
-    processes_manager.SetCrossSectionTableMinimumEnergy(1.0f, "keV");
-    processes_manager.SetCrossSectionTableMaximumEnergy(10.0f, "MeV");
+    // // Defining global parameters for cross-section building
+    // processes_manager.SetCrossSectionTableNumberOfBins(220); // Not exceed 2048 bins
+    // processes_manager.SetCrossSectionTableMinimumEnergy(1.0f, "keV");
+    // processes_manager.SetCrossSectionTableMaximumEnergy(10.0f, "MeV");
 
-    // Add physical process and initialize it
-    GGEMSCrossSections cross_sections;
-    cross_sections.AddProcess(process_name, "gamma");
-    cross_sections.Initialize(&materials);
+    // // Add physical process and initialize it
+    // GGEMSCrossSections cross_sections;
+    // cross_sections.AddProcess(process_name, "gamma");
+    // cross_sections.Initialize(&materials);
 
-    std::cout << "At " << energy_MeV << " MeV, cross section is " << cross_sections.GetPhotonCrossSection(process_name, material_name, energy_MeV, "MeV") << " cm2.g-1" << std::endl;
+    // std::cout << "At " << energy_MeV << " MeV, cross section is " << cross_sections.GetPhotonCrossSection(process_name, material_name, energy_MeV, "MeV") << " cm2.g-1" << std::endl;
   }
   catch (std::exception& e) {
     std::cerr << e.what() << std::endl;
