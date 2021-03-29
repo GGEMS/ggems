@@ -30,7 +30,9 @@
 
 #include <sstream>
 #include <algorithm>
+
 #include "GGEMS/global/GGEMSOpenCLManager.hh"
+#include "GGEMS/tools/GGEMSRAMManager.hh"
 #include "GGEMS/tools/GGEMSTools.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -38,8 +40,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 GGEMSOpenCLManager::GGEMSOpenCLManager(void)
-// : kernels_(0),
-//   kernel_compilation_options_(0)
 {
   GGcout("GGEMSOpenCLManager", "GGEMSOpenCLManager", 3) << "Allocation of GGEMS OpenCL manager..." << GGendl;
 
@@ -323,6 +323,10 @@ GGEMSOpenCLManager::GGEMSOpenCLManager(void)
   vendors_.insert(std::make_pair("nvidia", "NVIDIA Corporation"));
   vendors_.insert(std::make_pair("intel", "Intel(R) Corporation"));
   vendors_.insert(std::make_pair("amd", "Advanced Micro Devices, Inc."));
+
+  // Create buffer of kernels for all devices
+  kernels_.clear();
+  kernel_compilation_options_.clear();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -332,91 +336,101 @@ GGEMSOpenCLManager::GGEMSOpenCLManager(void)
 GGEMSOpenCLManager::~GGEMSOpenCLManager(void)
 {
   GGcout("GGEMSOpenCLManager", "~GGEMSOpenCLManager", 3) << "Deallocation of GGEMS OpenCL manager..." << GGendl;
+}
 
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSOpenCLManager::Clean(void)
+{
   // Freeing platforms, and platform infos
-  // platform_profile_.clear();
-  // platform_version_.clear();
-  // platform_name_.clear(); 
-  // platform_vendor_.clear();
-  // platform_extensions_.clear();
-  // platforms_.clear();
+  platform_profile_.clear();
+  platform_version_.clear();
+  platform_name_.clear(); 
+  platform_vendor_.clear();
+  platform_extensions_.clear();
+  platforms_.clear();
 
-  // // Freeing devices
-  // for (auto d : devices_) delete d;
-  // devices_.clear();
-  // device_indices_.clear();
-  // device_type_.clear();
-  // device_name_.clear();
-  // device_vendor_.clear();
-  // device_vendor_id_.clear();
-  // device_profile_.clear();
-  // device_version_.clear();
-  // device_driver_version_.clear();
-  // device_opencl_c_version_.clear();
-  // device_native_vector_width_char_.clear();
-  // device_native_vector_width_short_.clear();
-  // device_native_vector_width_int_.clear();
-  // device_native_vector_width_long_.clear();
-  // device_native_vector_width_half_.clear();
-  // device_native_vector_width_float_.clear();
-  // device_native_vector_width_double_.clear();
-  // device_preferred_vector_width_char_.clear();
-  // device_preferred_vector_width_short_.clear();
-  // device_preferred_vector_width_int_.clear();
-  // device_preferred_vector_width_long_.clear();
-  // device_preferred_vector_width_half_.clear();
-  // device_preferred_vector_width_float_.clear(); 
-  // device_preferred_vector_width_double_.clear();
-  // device_address_bits_.clear();
-  // device_available_.clear();
-  // device_compiler_available_.clear();
-  // device_half_fp_config_.clear();
-  // device_single_fp_config_.clear();
-  // device_double_fp_config_.clear();
-  // device_endian_little_.clear();
-  // device_extensions_.clear();
-  // device_error_correction_support_.clear();
-  // device_execution_capabilities_.clear();
-  // device_global_mem_cache_size_.clear();
-  // device_global_mem_cache_type_.clear();
-  // device_global_mem_cacheline_size_.clear();
-  // device_global_mem_size_.clear();
-  // device_local_mem_size_.clear();
-  // device_local_mem_type_.clear(); 
-  // device_host_unified_memory_.clear();
-  // device_image_max_array_size_.clear();
-  // device_image_max_buffer_size_.clear();
-  // device_image_support_.clear();
-  // device_image2D_max_width_.clear();
-  // device_image2D_max_height_.clear();
-  // device_image3D_max_width_.clear();
-  // device_image3D_max_height_.clear();
-  // device_image3D_max_depth_.clear();
-  // device_max_read_image_args_.clear();
-  // device_max_write_image_args_.clear();
-  // device_max_clock_frequency_.clear();
-  // device_max_compute_units_.clear();
-  // device_max_constant_args_.clear();
-  // device_max_constant_buffer_size_.clear();
-  // device_max_mem_alloc_size_.clear();
-  // device_max_parameter_size_.clear();
-  // device_max_samplers_.clear();
-  // device_max_work_group_size_.clear();
-  // device_max_work_item_sizes_.clear();
-  // device_mem_base_addr_align_.clear();
-  // device_max_work_item_dimensions_.clear();
-  // device_printf_buffer_size_.clear();
-  // device_partition_affinity_domain_.clear();
-  // device_partition_max_sub_devices_.clear();
-  // device_profiling_timer_resolution_.clear();
+  // Freeing devices
+  for (auto d : devices_) delete d;
+  devices_.clear();
+  device_indices_.clear();
+  device_type_.clear();
+  device_name_.clear();
+  device_vendor_.clear();
+  device_vendor_id_.clear();
+  device_profile_.clear();
+  device_version_.clear();
+  device_driver_version_.clear();
+  device_opencl_c_version_.clear();
+  device_native_vector_width_char_.clear();
+  device_native_vector_width_short_.clear();
+  device_native_vector_width_int_.clear();
+  device_native_vector_width_long_.clear();
+  device_native_vector_width_half_.clear();
+  device_native_vector_width_float_.clear();
+  device_native_vector_width_double_.clear();
+  device_preferred_vector_width_char_.clear();
+  device_preferred_vector_width_short_.clear();
+  device_preferred_vector_width_int_.clear();
+  device_preferred_vector_width_long_.clear();
+  device_preferred_vector_width_half_.clear();
+  device_preferred_vector_width_float_.clear(); 
+  device_preferred_vector_width_double_.clear();
+  device_address_bits_.clear();
+  device_available_.clear();
+  device_compiler_available_.clear();
+  device_half_fp_config_.clear();
+  device_single_fp_config_.clear();
+  device_double_fp_config_.clear();
+  device_endian_little_.clear();
+  device_extensions_.clear();
+  device_error_correction_support_.clear();
+  device_execution_capabilities_.clear();
+  device_global_mem_cache_size_.clear();
+  device_global_mem_cache_type_.clear();
+  device_global_mem_cacheline_size_.clear();
+  device_global_mem_size_.clear();
+  device_local_mem_size_.clear();
+  device_local_mem_type_.clear(); 
+  device_host_unified_memory_.clear();
+  device_image_max_array_size_.clear();
+  device_image_max_buffer_size_.clear();
+  device_image_support_.clear();
+  device_image2D_max_width_.clear();
+  device_image2D_max_height_.clear();
+  device_image3D_max_width_.clear();
+  device_image3D_max_height_.clear();
+  device_image3D_max_depth_.clear();
+  device_max_read_image_args_.clear();
+  device_max_write_image_args_.clear();
+  device_max_clock_frequency_.clear();
+  device_max_compute_units_.clear();
+  device_max_constant_args_.clear();
+  device_max_constant_buffer_size_.clear();
+  device_max_mem_alloc_size_.clear();
+  device_max_parameter_size_.clear();
+  device_max_samplers_.clear();
+  device_max_work_group_size_.clear();
+  device_max_work_item_sizes_.clear();
+  device_mem_base_addr_align_.clear();
+  device_max_work_item_dimensions_.clear();
+  device_printf_buffer_size_.clear();
+  device_partition_affinity_domain_.clear();
+  device_partition_max_sub_devices_.clear();
+  device_profiling_timer_resolution_.clear();
 
-  // // Freeing contexts, queues and events
-  // for (auto c : contexts_) delete c;
-  // contexts_.clear();
-  // for (auto q : queues_) delete q;
-  // queues_.clear();
-  // for (auto e : events_) delete e;
-  // events_.clear();
+  // Freeing contexts, queues and events
+  for (auto c : contexts_) delete c;
+  contexts_.clear();
+  for (auto q : queues_) delete q;
+  queues_.clear();
+  for (auto e : events_) delete e;
+  events_.clear();
+
+  // Deleting kernel
+  for (auto k : kernels_) delete k;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -715,6 +729,172 @@ void GGEMSOpenCLManager::DeviceToActivate(GGsize const& device_id)
   contexts_.push_back(new cl::Context(*devices_.at(device_id)));
   queues_.push_back(new cl::CommandQueue(*contexts_.back(), *devices_.at(device_id), CL_QUEUE_PROFILING_ENABLE));
   events_.push_back(new cl::Event());
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+GGsize GGEMSOpenCLManager::CheckKernel(std::string const& kernel_name, std::string const& compilation_options) const
+{
+  GGcout("GGEMSOpenCLManager","CheckKernel", 3) << "Checking if kernel has already been compiled..." << GGendl;
+
+  // Parameters for kernel infos
+  std::string registered_kernel_name("");
+
+  // Loop over registered kernels
+  for (GGsize i = 0; i < kernels_.size(); ++i) {
+    CheckOpenCLError(kernels_.at(i)->getInfo(CL_KERNEL_FUNCTION_NAME, &registered_kernel_name), "GGEMSOpenCLManager", "CheckKernel");
+    registered_kernel_name.erase(registered_kernel_name.end()-1); // Remove '\0' char from previous function
+    if (kernel_name == registered_kernel_name && compilation_options == kernel_compilation_options_.at(i)) return i;
+  }
+
+  return KERNEL_NOT_COMPILED;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+cl::Kernel* GGEMSOpenCLManager::CompileKernel(std::string const& kernel_filename, std::string const& kernel_name, char* const p_custom_options, char* const p_additional_options)
+{
+  GGcout("GGEMSOpenCLManager","CompileKernel", 3) << "Compiling a kernel on OpenCL activated context..." << GGendl;
+
+  // Checking the compilation options
+  if (p_custom_options && p_additional_options) {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "Custom and additional options can not by set in same time!!!";
+    GGEMSMisc::ThrowException("GGEMSOpenCLManager", "CompileKernel", oss.str());
+  }
+
+  // Handling options to OpenCL compilation kernel
+  char kernel_compilation_option[1024];
+  if (p_custom_options) {
+    #if defined _MSC_VER
+    ::strcpy_s(kernel_compilation_option, p_custom_options);
+    #else
+    ::strcpy(kernel_compilation_option, p_custom_options);
+    #endif
+  }
+  else if (p_additional_options) {
+    #if defined _MSC_VER
+    ::strcpy_s(kernel_compilation_option, build_options_.c_str());
+    ::strcat_s(kernel_compilation_option, " ");
+    ::strcat_s(kernel_compilation_option, p_additional_options);
+    #else
+    ::strcpy(kernel_compilation_option, build_options_.c_str());
+    ::strcat(kernel_compilation_option, " ");
+    ::strcat(kernel_compilation_option, p_additional_options);
+    #endif
+  }
+  else {
+    #if defined _MSC_VER
+    ::strcpy_s(kernel_compilation_option, build_options_.c_str());
+    #else
+    ::strcpy(kernel_compilation_option, build_options_.c_str());
+    #endif
+  }
+
+  // Checking if kernel already compiled
+  GGsize kernel_index = CheckKernel(kernel_name, kernel_compilation_option);
+
+  // if kernel already compiled return it
+  if (kernel_index != KERNEL_NOT_COMPILED) {
+    return kernels_[kernel_index];
+  }
+  else {
+    // Check if the source kernel file exists
+    std::ifstream source_file_stream(kernel_filename.c_str(), std::ios::in);
+    GGEMSFileStream::CheckInputStream(source_file_stream, kernel_filename);
+
+    // Store kernel in a std::string buffer
+    std::string source_code(std::istreambuf_iterator<char>(source_file_stream), (std::istreambuf_iterator<char>()));
+
+    // Creating an OpenCL program
+    cl::Program::Sources program_source(1, std::make_pair(source_code.c_str(), source_code.length() + 1));
+
+    // Loop over activated device
+    for (GGsize i = 0; i < device_indices_.size(); ++i) {
+      // Make program from source code in context
+      cl::Program program = cl::Program(*contexts_[i], program_source);
+
+      // Get device associated to context, in our case 1 context = 1 device
+      std::vector<cl::Device> device;
+      CheckOpenCLError(contexts_[i]->getInfo(CL_CONTEXT_DEVICES, &device), "GGEMSOpenCLManager", "CompileKernel");
+
+      GGcout("GGEMSOpenCLManager", "CompileKernel", 2) << "Compile a new kernel '" << kernel_name << "' from file: " << kernel_filename << " on device: " << device_indices_[i] << " with options: " << kernel_compilation_option << GGendl;
+
+      // Compile source code on device
+      GGint build_status = program.build(device, kernel_compilation_option);
+      if (build_status != CL_SUCCESS) {
+        std::ostringstream oss(std::ostringstream::out);
+        std::string log;
+        program.getBuildInfo(device[0], CL_PROGRAM_BUILD_LOG, &log);
+        oss << ErrorType(build_status) << std::endl;
+        oss << log;
+        GGEMSMisc::ThrowException("GGEMSOpenCLManager", "CompileKernel", oss.str());
+      }
+
+      // Storing the kernel in the singleton
+      kernels_.push_back(new cl::Kernel(program, kernel_name.c_str(), &build_status));
+      CheckOpenCLError(build_status, "GGEMSOpenCLManager", "CompileKernel");
+
+      // Storing the compilation options
+      kernel_compilation_options_.push_back(kernel_compilation_option);
+    }
+  }
+
+  return kernels_[kernels_.size()-device_indices_.size()];
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+cl::Buffer* GGEMSOpenCLManager::Allocate(GGsize const& index, void* host_ptr, GGsize const& size, cl_mem_flags flags, std::string const& class_name)
+{
+  GGcout("GGEMSOpenCLManager","Allocate", 3) << "Allocating memory on OpenCL device memory..." << GGendl;
+
+  // Get the RAM manager and check memory
+  GGEMSRAMManager& ram_manager = GGEMSRAMManager::GetInstance();
+
+  // Check if buffer size depending on device parameters
+  if (!ram_manager.IsBufferSizeCorrect(size)) {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "Size of buffer: " << size << " bytes, is too big!!! The maximum size is " << GetMaxBufferAllocationSize(index) << " bytes";
+    GGEMSMisc::ThrowException("GGEMSOpenCLManager", "Allocate", oss.str());
+  }
+
+  // Check if enough space on device
+  if (!ram_manager.IsEnoughAvailableRAMMemory(size)) {
+    GGEMSMisc::ThrowException("GGEMSOpenCLManager", "Allocate", "Not enough RAM memory for buffer allocation!!!");
+  }
+
+  GGint error = 0;
+  cl::Buffer* buffer = new cl::Buffer(*contexts_[index], flags, size, host_ptr, &error);
+  CheckOpenCLError(error, "GGEMSOpenCLManager", "Allocate");
+
+  // Increment RAM memory
+  ram_manager.IncrementRAMMemory(class_name, size);
+
+  return buffer;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSOpenCLManager::Deallocate(cl::Buffer* buffer, GGsize size)
+{
+  GGcout("GGEMSOpenCLManager","Deallocate", 3) << "Deallocating memory on OpenCL device memory..." << GGendl;
+
+  // Get the RAM manager and check memory
+  GGEMSRAMManager& ram_manager = GGEMSRAMManager::GetInstance();
+
+  // Decrement RAM memory
+  ram_manager.DecrementRAMMemory(size);
+
+  delete buffer;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1140,16 +1320,25 @@ void print_infos_opencl_manager(GGEMSOpenCLManager* opencl_manager)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-// void set_device_index_ggems_opencl_manager(GGEMSOpenCLManager* opencl_manager, GGsize const device_id)
-// {
-//   opencl_manager->DeviceToActivate(device_id);
-// }
+void set_device_index_ggems_opencl_manager(GGEMSOpenCLManager* opencl_manager, GGsize const device_id)
+{
+  opencl_manager->DeviceToActivate(device_id);
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-// void clean_opencl_manager(GGEMSOpenCLManager* opencl_manager)
-// {
-//   opencl_manager->Clean();
-// }
+void set_device_to_activate_opencl_manager(GGEMSOpenCLManager* opencl_manager, char const* device_type, char const* device_vendor)
+{
+  opencl_manager->DeviceToActivate(device_type, device_vendor);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void clean_opencl_manager(GGEMSOpenCLManager* opencl_manager)
+{
+  opencl_manager->Clean();
+}

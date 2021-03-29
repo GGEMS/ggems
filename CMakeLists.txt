@@ -37,14 +37,14 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.8 FATAL_ERROR)
 # Visual Studio: CL (Only on Windows) and by default on Windows
 # CC=cl
 # CXX=cl
-# GNU GCC: GCC (Only validated on Unix)
+# GNU GCC: GCC (Validated on Unix and Windows) and by default on Unix
 # CC=gcc
 # CXX=g++
-# LLVM CLANG: CLANG (Validated on Unix and Windows) and by default on Windows
+# LLVM CLANG: CLANG (Validated on Unix and Windows)
 # CC=clang
 # CXX=clang++
 IF(WIN32)
-  SET(COMPILER CL CACHE INTERNAL "Compiler name: CLANG, CL")
+  SET(COMPILER GCC CACHE INTERNAL "Compiler name: CLANG, CL, GCC")
 ELSE()
   SET(COMPILER GCC CACHE INTERNAL "Compiler name: CLANG, GCC")
 ENDIF()
@@ -206,11 +206,11 @@ FILE(GLOB source_ggems
   # ${PROJECT_SOURCE_DIR}/src/geometries/*.cc
   ${PROJECT_SOURCE_DIR}/src/tools/*.cc
   # ${PROJECT_SOURCE_DIR}/src/navigators/*.cc
-  # ${PROJECT_SOURCE_DIR}/src/physics/*.cc
+  #${PROJECT_SOURCE_DIR}/src/physics/*.cc
   # ${PROJECT_SOURCE_DIR}/src/sources/*.cc
   # ${PROJECT_SOURCE_DIR}/src/randoms/*.cc
   # ${PROJECT_SOURCE_DIR}/src/maths/*.cc
-  # ${PROJECT_SOURCE_DIR}/src/materials/*.cc
+  ${PROJECT_SOURCE_DIR}/src/materials/*.cc
   # ${PROJECT_SOURCE_DIR}/src/io/*.cc
 )
 
