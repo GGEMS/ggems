@@ -851,22 +851,25 @@ cl::Kernel* GGEMSOpenCLManager::CompileKernel(std::string const& kernel_filename
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-cl::Buffer* GGEMSOpenCLManager::Allocate(GGsize const& index, void* host_ptr, GGsize const& size, cl_mem_flags flags, std::string const& class_name)
+cl::Buffer* GGEMSOpenCLManager::Allocate(void* host_ptr, GGsize const& size, GGsize const& index, cl_mem_flags flags, std::string const& class_name)
 {
   GGcout("GGEMSOpenCLManager","Allocate", 3) << "Allocating memory on OpenCL device memory..." << GGendl;
 
   // Get the RAM manager and check memory
   GGEMSRAMManager& ram_manager = GGEMSRAMManager::GetInstance();
 
+  // Get index of the device
+  GGsize device_index = GetIndexOfActivatedDevice(index);
+
   // Check if buffer size depending on device parameters
-  if (!ram_manager.IsBufferSizeCorrect(size)) {
+  if (!ram_manager.IsBufferSizeCorrect(device_index, size)) {
     std::ostringstream oss(std::ostringstream::out);
-    oss << "Size of buffer: " << size << " bytes, is too big!!! The maximum size is " << GetMaxBufferAllocationSize(index) << " bytes";
+    oss << "Size of buffer: " << size << " bytes, is too big!!! The maximum size is " << GetMaxBufferAllocationSize(device_index) << " bytes";
     GGEMSMisc::ThrowException("GGEMSOpenCLManager", "Allocate", oss.str());
   }
 
   // Check if enough space on device
-  if (!ram_manager.IsEnoughAvailableRAMMemory(size)) {
+  if (!ram_manager.IsEnoughAvailableRAMMemory(device_index, size)) {
     GGEMSMisc::ThrowException("GGEMSOpenCLManager", "Allocate", "Not enough RAM memory for buffer allocation!!!");
   }
 
@@ -875,7 +878,7 @@ cl::Buffer* GGEMSOpenCLManager::Allocate(GGsize const& index, void* host_ptr, GG
   CheckOpenCLError(error, "GGEMSOpenCLManager", "Allocate");
 
   // Increment RAM memory
-  ram_manager.IncrementRAMMemory(class_name, size);
+  ram_manager.IncrementRAMMemory(class_name, index, size);
 
   return buffer;
 }
@@ -884,7 +887,7 @@ cl::Buffer* GGEMSOpenCLManager::Allocate(GGsize const& index, void* host_ptr, GG
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSOpenCLManager::Deallocate(cl::Buffer* buffer, GGsize size)
+void GGEMSOpenCLManager::Deallocate(cl::Buffer* buffer, GGsize size, GGsize const& index, std::string const& class_name)
 {
   GGcout("GGEMSOpenCLManager","Deallocate", 3) << "Deallocating memory on OpenCL device memory..." << GGendl;
 
@@ -892,7 +895,7 @@ void GGEMSOpenCLManager::Deallocate(cl::Buffer* buffer, GGsize size)
   GGEMSRAMManager& ram_manager = GGEMSRAMManager::GetInstance();
 
   // Decrement RAM memory
-  ram_manager.DecrementRAMMemory(size);
+  ram_manager.DecrementRAMMemory(class_name, index, size);
 
   delete buffer;
 }

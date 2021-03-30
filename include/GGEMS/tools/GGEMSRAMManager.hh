@@ -107,49 +107,55 @@ class GGEMS_EXPORT GGEMSRAMManager
     void PrintRAMStatus(void) const;
 
     /*!
-      \fn inline bool IsEnoughAvailableRAMMemory(GGsize const& size) const
+      \fn inline bool IsEnoughAvailableRAMMemory(GGsize const& index, GGsize const& size) const
+      \param index - index of device
       \param size - size in bytes to allocate
       \return true if enough available RAM memory
       \brief Checking available RAM memory on device
     */
-    inline bool IsEnoughAvailableRAMMemory(GGsize const& size) const
+    inline bool IsEnoughAvailableRAMMemory(GGsize const& index, GGsize const& size) const
     {
-      if (size + allocated_ram_ < max_available_ram_) return true;
+      if (size + allocated_ram_[index] < max_available_ram_[index]) return true;
       else return false;
     }
 
     /*!
-      \fn inline bool IsBufferSizeCorrect(GGsize const& size) const
+      \fn inline bool IsBufferSizeCorrect(GGsize const& index, GGsize const& size) const
+      \param index - index of device
       \param size - size in bytes of buffer
       \return true if buffer size is correct
       \brief Check the size of buffer depending on device limit, false if buffer size if too big
     */
-    inline bool IsBufferSizeCorrect(GGsize const& size) const
+    inline bool IsBufferSizeCorrect(GGsize const& index, GGsize const& size) const
     {
-      if (size < max_buffer_size_) return true;
+      if (size < max_buffer_size_[index]) return true;
       else return false;
     }
 
     /*!
-      \fn void IncrementRAMMemory(std::string const& class_name, GGsize const& size)
+      \fn void IncrementRAMMemory(std::string const& class_name, GGsize const& index, GGsize const& size)
       \param class_name - name of class allocating memory
+      \param index - index of device
       \param size - size of the allocated buffer in byte
       \brief increment the size of the global allocated buffer
     */
-    void IncrementRAMMemory(std::string const& class_name, GGsize const& size);
+    void IncrementRAMMemory(std::string const& class_name, GGsize const& index, GGsize const& size);
 
     /*!
-      \fn void DecrementRAMMemory(GGsize const& size)
+      \fn void DecrementRAMMemory(std::string const& class_name, GGsize const& index, GGsize const& size)
+      \param class_name - name of class deallocating memory
+      \param index - index of device
       \param size - size of the allocated buffer in byte
       \brief decrement the size of the global allocated buffer
     */
-    void DecrementRAMMemory(GGsize const& size);
+    void DecrementRAMMemory(std::string const& class_name, GGsize const& index, GGsize const& size);
 
   private:
-    GGsize allocated_ram_; /*!< Allocated RAM on OpenCL device */
-    GGsize max_available_ram_; /*!< Max available RAM on OpenCL device */
-    GGsize max_buffer_size_; /*!< Max of buffer size of OpenCL device */
-    AllocatedMemoryUMap allocated_memories_; /*!< Allocated memory on OpenCL device by GGEMS class */
+    GGsize number_detected_devices_; /*!< Number of detected device */
+    GGsize* allocated_ram_; /*!< Allocated RAM on OpenCL device */
+    GGsize* max_available_ram_; /*!< Max available RAM on OpenCL device */
+    GGsize* max_buffer_size_; /*!< Max of buffer size of OpenCL device */
+    AllocatedMemoryUMap* allocated_memories_; /*!< Allocated memory on OpenCL device by GGEMS class */
 };
 
 #endif // End of GUARD_GGEMS_TOOLS_GGEMSRAMMANAGER_HH

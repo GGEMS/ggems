@@ -28,7 +28,7 @@
 # Generated on : 2/11/2020
 #-------------------------------------------------------------------------------
 
-ADD_SUBDIRECTORY(0_Cross_Sections)
+#ADD_SUBDIRECTORY(0_Cross_Sections)
 # ADD_SUBDIRECTORY(2_CT_Scanner)
 # ADD_SUBDIRECTORY(3_Voxelized_Phantom_Generator)
 # ADD_SUBDIRECTORY(4_Dosimetry_Photon)
