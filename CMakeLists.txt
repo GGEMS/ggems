@@ -44,7 +44,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.8 FATAL_ERROR)
 # CC=clang
 # CXX=clang++
 IF(WIN32)
-  SET(COMPILER GCC CACHE INTERNAL "Compiler name: CLANG, CL, GCC")
+  SET(COMPILER CLANG CACHE INTERNAL "Compiler name: CLANG, CL, GCC")
 ELSE()
   SET(COMPILER GCC CACHE INTERNAL "Compiler name: CLANG, GCC")
 ENDIF()
@@ -201,16 +201,15 @@ LINK_DIRECTORIES(${OpenCL_LIBRARY})
 #-------------------------------------------------------------------------------
 # Locate source files for GGEMS
 FILE(GLOB source_ggems
-  # ${PROJECT_SOURCE_DIR}/src/detectors/*.cc
   ${PROJECT_SOURCE_DIR}/src/global/*.cc
   # ${PROJECT_SOURCE_DIR}/src/geometries/*.cc
   ${PROJECT_SOURCE_DIR}/src/tools/*.cc
   # ${PROJECT_SOURCE_DIR}/src/navigators/*.cc
-  #${PROJECT_SOURCE_DIR}/src/physics/*.cc
-  # ${PROJECT_SOURCE_DIR}/src/sources/*.cc
-  # ${PROJECT_SOURCE_DIR}/src/randoms/*.cc
-  # ${PROJECT_SOURCE_DIR}/src/maths/*.cc
-  ${PROJECT_SOURCE_DIR}/src/materials/*.cc
+  ${PROJECT_SOURCE_DIR}/src/physics/*.cc
+  ${PROJECT_SOURCE_DIR}/src/sources/*.cc
+  ${PROJECT_SOURCE_DIR}/src/randoms/*.cc
+  ${PROJECT_SOURCE_DIR}/src/maths/*.cc
+  #${PROJECT_SOURCE_DIR}/src/materials/*.cc
   # ${PROJECT_SOURCE_DIR}/src/io/*.cc
 )
 

@@ -153,13 +153,6 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     inline cl_device_type GetDeviceType(GGsize const& index) const {return device_type_[index];}
 
     /*!
-      \fn inline GGsize GetNumberOfDetectedDevice(void) const
-      \return number of detected device
-      \brief get the number of detected devices
-    */
-    inline GGsize GetNumberOfDetectedDevice(void) const {return devices_.size();}
-
-    /*!
       \fn inline GGsize GetNumberOfActivatedDevice(void) const
       \return number of activated device
       \brief get the number of activated devices
@@ -181,14 +174,6 @@ class GGEMS_EXPORT GGEMSOpenCLManager
       \brief Get the max buffer size in bytes on activated OpenCL device
     */
     inline GGsize GetMaxBufferAllocationSize(GGsize const& index) const {return static_cast<GGsize>(device_max_mem_alloc_size_[index]);}
-
-    /*!
-      \fn inline GGsize GetRAMMemory(GGsize const& index) const
-      \param index - index of activated devices
-      \return RAM memory on a specific device
-      \brief Get the RAM in bytes on OpenCL device
-    */
-    inline GGsize GetRAMMemory(GGsize const& index) const {return static_cast<GGsize>(device_global_mem_size_[index]);}
 
     /*!
       \fn void DeviceToActivate(GGsize const& device_id)
@@ -263,14 +248,12 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     cl::Buffer* Allocate(void* host_ptr, GGsize const& size, GGsize const& index, cl_mem_flags flags, std::string const& class_name = "Undefined");
 
     /*!
-      \fn void Deallocate(cl::Buffer* buffer, GGsize size, GGsize const& index)
+      \fn void Deallocate(cl::Buffer* buffer, GGsize size)
       \param buffer - pointer to buffer in host memory
       \param size - size of the buffer in bytes
-      \param index - index of activated device
-      \param class_name - name of class deallocating memory
       \brief Deallocation of OpenCL memory
     */
-    void Deallocate(cl::Buffer* buffer, GGsize size, GGsize const& index, std::string const& class_name = "Undefined");
+    void Deallocate(cl::Buffer* buffer, GGsize size);
 
   private:
     /*!

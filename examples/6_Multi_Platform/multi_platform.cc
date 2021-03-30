@@ -31,6 +31,8 @@
 #include <cstdlib>
 #include "GGEMS/global/GGEMSOpenCLManager.hh"
 #include "GGEMS/global/GGEMSConfiguration.hh"
+#include "GGEMS/tools/GGEMSRAMManager.hh"
+#include "GGEMS/physics/GGEMSParticles.hh"
 
 /*!
   \fn void PrintHelpAndQuit(void)
@@ -69,6 +71,7 @@ int main(int argc, char** argv)
 
   // Initialization of singletons
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+  GGEMSRAMManager& ram_manager = GGEMSRAMManager::GetInstance();
 
   try {
     // Print infos about platform and device
@@ -81,7 +84,20 @@ int main(int argc, char** argv)
     else if (device == "gpu_intel") opencl_manager.DeviceToActivate("gpu", "intel");
     else opencl_manager.DeviceToActivate(device);
 
-    opencl_manager.PrintActivatedDevices();
+    GGEMSParticles particle;
+    particle.Initialize();
+
+    ram_manager.PrintRAMStatus();
+
+    // Source
+    // GGEMSXRaySource point_source("point_source");
+    // point_source.SetSourceParticleType("gamma");
+    // point_source.SetNumberOfParticles(1000000000);
+    // point_source.SetPosition(-595.0f, 0.0f, 0.0f, "mm");
+    // point_source.SetRotation(0.0f, 0.0f, 0.0f, "deg");
+    // point_source.SetBeamAperture(12.5f, "deg");
+    // point_source.SetFocalSpotSize(0.0f, 0.0f, 0.0f, "mm");
+    // point_source.SetPolyenergy("data/spectrum_120kVp_2mmAl.dat");
   }
   catch (std::exception& e) {
     std::cerr << e.what() << std::endl;
@@ -90,6 +106,7 @@ int main(int argc, char** argv)
     std::cerr << "Unknown exception!!!" << std::endl;
   }
 
-  // opencl_manager.Clean();
+  // Cleaning OpenCL manager
+  opencl_manager.Clean();
   exit(EXIT_SUCCESS);
 }
