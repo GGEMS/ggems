@@ -58,7 +58,6 @@ GGEMSParticles::~GGEMSParticles(void)
   for (GGsize i = 0; i < number_activated_devices_; ++i) {
     opencl_manager.Deallocate(primary_particles_[i], sizeof(GGEMSPrimaryParticles), i);
   }
-
   delete[] primary_particles_;
 }
 

@@ -31,24 +31,22 @@
 #include "GGEMS/sources/GGEMSSourceManager.hh"
 #include "GGEMS/physics/GGEMSPrimaryParticles.hh"
 #include "GGEMS/randoms/GGEMSPseudoRandomGenerator.hh"
-//#include "GGEMS/global/GGEMSManager.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
 GGEMSSourceManager::GGEMSSourceManager(void)
-: sources_(0),
-  particles_(nullptr),
-  pseudo_random_generator_(nullptr)
+: sources_(nullptr),
+  number_of_sources_(0)
 {
   GGcout("GGEMSSourceManager", "GGEMSSourceManager", 3) << "Allocation of GGEMSSourceManager..." << GGendl;
 
   // Allocation of Particle object
-  particles_.reset(new GGEMSParticles());
+  particles_ = new GGEMSParticles;
 
   // Allocation of pseudo random generator object
-  pseudo_random_generator_.reset(new GGEMSPseudoRandomGenerator());
+  pseudo_random_generator_ = new GGEMSPseudoRandomGenerator;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -58,6 +56,10 @@ GGEMSSourceManager::GGEMSSourceManager(void)
 GGEMSSourceManager::~GGEMSSourceManager(void)
 {
   GGcout("GGEMSSourceManager", "~GGEMSSourceManager", 3) << "Deallocation of GGEMSSourceManager..." << GGendl;
+
+  // Freeing memory
+  delete particles_;
+  delete pseudo_random_generator_;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -67,7 +69,24 @@ GGEMSSourceManager::~GGEMSSourceManager(void)
 void GGEMSSourceManager::Store(GGEMSSource* source)
 {
   GGcout("GGEMSSourceManager", "Store", 3) << "Storing new source in GGEMS source manager..." << GGendl;
-  sources_.emplace_back(source);
+
+  if (number_of_sources_ == 0) {
+    sources_ = new GGEMSSource*[1];
+    sources_[0] = source;
+  }
+  else {
+    GGEMSSource** tmp = new GGEMSSource*[number_of_sources_+1];
+    for (std::size_t i = 0; i < number_of_sources_; ++i) {
+      tmp[i] = sources_[i];
+    }
+
+    tmp[number_of_sources_] = source;
+
+    delete[] sources_;
+    sources_ = tmp;
+  }
+
+  number_of_sources_++;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -77,22 +96,24 @@ void GGEMSSourceManager::Store(GGEMSSource* source)
 void GGEMSSourceManager::PrintInfos(void) const
 {
   GGcout("GGEMSSourceManager", "PrintInfos", 0) << "Printing infos about sources" << GGendl;
-  GGcout("GGEMSSourceManager", "PrintInfos", 0) << "Number of source(s): " << sources_.size() << GGendl;
+  GGcout("GGEMSSourceManager", "PrintInfos", 0) << "Number of source(s): " << number_of_sources_ << GGendl;
 
-  // Printing infos about each navigator
-  for (auto&& i : sources_) i->PrintInfos();
+  // Printing infos about each source
+  for (GGsize i = 0; i < number_of_sources_; ++i ) {
+    sources_[i]->PrintInfos();
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSSourceManager::Initialize(GGuint const& seed) const
+void GGEMSSourceManager::Initialize(GGuint const& seed, bool const& is_tracking, GGint const& particle_tracking_id) const
 {
   GGcout("GGEMSSourceManager", "Initialize", 3) << "Initializing the GGEMS source(s)..." << GGendl;
 
   // Checking number of source, if 0 kill the simulation
-  if (sources_.empty()) {
+  if (number_of_sources_ == 0) {
     GGEMSMisc::ThrowException("GGEMSSourceManager", "Initialize", "You have to define a source before to run GGEMS!!!");
   }
 
@@ -104,21 +125,26 @@ void GGEMSSourceManager::Initialize(GGuint const& seed) const
   GGcout("GGEMSSourceManager", "Initialize", 0) << "Initialization of GGEMS pseudo random generator OK" << GGendl;
 
   // Initialization of sources
-  for (auto&& i : sources_) i->Initialize();
+  for (GGsize i = 0; i < number_of_sources_; ++i) {
+    sources_[i]->Initialize();
+  }
 
   // If tracking activated, set the particle id to track
-  // if (GGEMSManager::GetInstance().IsTrackingVerbose()) {
-  //   // Get the OpenCL manager
-  //   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+  if (is_tracking) {
+    // Get the OpenCL manager
+    GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
-  //   // Get pointer on OpenCL device for particles
-  //   GGEMSPrimaryParticles* primary_particles_device = opencl_manager.GetDeviceBuffer<GGEMSPrimaryParticles>(particles_->GetPrimaryParticles(), sizeof(GGEMSPrimaryParticles));
+    // Loop over activated device
+    for (GGsize i = 0; i < opencl_manager.GetNumberOfActivatedDevice(); ++i) {
+      // Get pointer on OpenCL device for particles
+      GGEMSPrimaryParticles* primary_particles_device = opencl_manager.GetDeviceBuffer<GGEMSPrimaryParticles>(particles_->GetPrimaryParticles(i), sizeof(GGEMSPrimaryParticles), i);
 
-  //   primary_particles_device->particle_tracking_id = GGEMSManager::GetInstance().GetParticleTrackingID();
+      primary_particles_device->particle_tracking_id = particle_tracking_id;
 
-  //   // Release the pointer
-  //   opencl_manager.ReleaseDeviceBuffer(particles_->GetPrimaryParticles(), primary_particles_device);
-  // }
+      // Release the pointer
+      opencl_manager.ReleaseDeviceBuffer(particles_->GetPrimaryParticles(i), primary_particles_device, i);
+    }
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////

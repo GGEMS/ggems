@@ -116,14 +116,16 @@ class GGEMS_EXPORT GGEMSSourceManager
       \brief Get the number of sources
       \return the number of sources
     */
-    inline GGsize GetNumberOfSources(void) const {return sources_.size();}
+    inline GGsize GetNumberOfSources(void) const {return number_of_sources_;}
 
     /*!
-      \fn void Initialize(GGuint const& seed) const
+      \fn void Initialize(GGuint const& seed, bool const& is_tracking = false, GGint const& particle_tracking_id = 0) const
       \param seed - seed of the random
+      \param is_tracking - boolean value for tracking
+      \param particle_tracking_id - id of particle to track
       \brief Initialize a GGEMS source
     */
-    void Initialize(GGuint const& seed) const;
+    void Initialize(GGuint const& seed, bool const& is_tracking = false, GGint const& particle_tracking_id = 0) const;
 
     /*!
       \fn inline std::string GetNameOfSource(GGsize const& source_index) const
@@ -155,14 +157,14 @@ class GGEMS_EXPORT GGEMSSourceManager
       \return pointer on particle stack
       \brief method returning the OpenCL stack on particles
     */
-    inline GGEMSParticles* GetParticles(void) const {return particles_.get();}
+    inline GGEMSParticles* GetParticles(void) const {return nullptr;/*particles_.get();*/}
 
     /*!
       \fn GGEMSPseudoRandomGenerator* GetPseudoRandomGenerator(void) const
       \return pointer on pseudo random stack
       \brief method returning the OpenCL stack on pseudo random numbers
     */
-    inline GGEMSPseudoRandomGenerator* GetPseudoRandomGenerator(void) const {return pseudo_random_generator_.get();}
+    inline GGEMSPseudoRandomGenerator* GetPseudoRandomGenerator(void) const {return nullptr;/*pseudo_random_generator_.get();*/}
 
     /*!
       \fn void GetPrimaries(GGsize const& source_index, GGsize const& number_of_particles) const
@@ -172,8 +174,8 @@ class GGEMS_EXPORT GGEMSSourceManager
     */
     inline void GetPrimaries(GGsize const& source_index, GGsize const& number_of_particles) const
     {
-      particles_->SetNumberOfParticles(number_of_particles);
-      sources_[source_index]->GetPrimaries(number_of_particles);
+      //particles_->SetNumberOfParticles(number_of_particles);
+      //sources_[source_index]->GetPrimaries(number_of_particles);
     }
 
     /*!
@@ -185,9 +187,10 @@ class GGEMS_EXPORT GGEMSSourceManager
     bool IsAlive(GGsize const& index) const;
 
   private: // Source infos
-    std::vector<std::shared_ptr<GGEMSSource>> sources_; /*!< Pointer on GGEMS sources */
-    std::shared_ptr<GGEMSParticles> particles_; /*!< Pointer on particle management */
-    std::shared_ptr<GGEMSPseudoRandomGenerator> pseudo_random_generator_; /*!< Pointer on pseudo random generator */
+    GGEMSSource** sources_; /*!< Pointer on GGEMS sources */
+    GGsize number_of_sources_; /*!< Number of sources */
+    GGEMSParticles* particles_; /*!< Pointer on particle management */
+    GGEMSPseudoRandomGenerator* pseudo_random_generator_; /*!< Pointer on pseudo random generator */
 };
 
 #endif // End of GUARD_GGEMS_SOURCES_GGEMSSOURCEMANAGER

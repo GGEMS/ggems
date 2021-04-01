@@ -157,8 +157,8 @@ class GGEMS_EXPORT GGEMSXRaySource : public GGEMSSource
     GGfloat monoenergy_; /*!< Monoenergy mode */
     std::string energy_spectrum_filename_; /*!< The energy spectrum filename for polyenergetic mode */
     GGsize number_of_energy_bins_; /*!< Number of energy bins for the polyenergetic mode */
-    std::shared_ptr<cl::Buffer> energy_spectrum_; /*!< Energy spectrum for OpenCL device */
-    std::shared_ptr<cl::Buffer> cdf_; /*!< Cumulative distribution function to generate a random energy */
+    cl::Buffer** energy_spectrum_; /*!< Energy spectrum for OpenCL device */
+    cl::Buffer** cdf_; /*!< Cumulative distribution function to generate a random energy */
 };
 
 /*!
