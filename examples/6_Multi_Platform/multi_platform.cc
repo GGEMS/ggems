@@ -32,7 +32,8 @@
 #include "GGEMS/global/GGEMSOpenCLManager.hh"
 #include "GGEMS/global/GGEMSConfiguration.hh"
 #include "GGEMS/tools/GGEMSRAMManager.hh"
-#include "GGEMS/physics/GGEMSParticles.hh"
+#include "GGEMS/sources/GGEMSSourceManager.hh"
+#include "GGEMS/sources/GGEMSXRaySource.hh"
 
 /*!
   \fn void PrintHelpAndQuit(void)
@@ -72,6 +73,7 @@ int main(int argc, char** argv)
   // Initialization of singletons
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
   GGEMSRAMManager& ram_manager = GGEMSRAMManager::GetInstance();
+  GGEMSSourceManager& source_manager = GGEMSSourceManager::GetInstance();
 
   try {
     // Print infos about platform and device
@@ -84,8 +86,26 @@ int main(int argc, char** argv)
     else if (device == "gpu_intel") opencl_manager.DeviceToActivate("gpu", "intel");
     else opencl_manager.DeviceToActivate(device);
 
-    GGEMSParticles particle;
-    particle.Initialize();
+    GGEMSXRaySource point_source("point_source");
+    point_source.SetSourceParticleType("gamma");
+    point_source.SetNumberOfParticles(100);
+    point_source.SetPosition(-595.0f, 0.0f, 0.0f, "mm");
+    point_source.SetRotation(0.0f, 0.0f, 0.0f, "deg");
+    point_source.SetBeamAperture(12.5f, "deg");
+    point_source.SetFocalSpotSize(0.0f, 0.0f, 0.0f, "mm");
+    point_source.SetMonoenergy(60.0f, "keV");
+
+    GGEMSXRaySource point_source2("point_source2");
+    point_source2.SetSourceParticleType("gamma");
+    point_source2.SetNumberOfParticles(100);
+    point_source2.SetPosition(-595.0f, 0.0f, 0.0f, "mm");
+    point_source2.SetRotation(0.0f, 0.0f, 90.0f, "deg");
+    point_source2.SetBeamAperture(12.5f, "deg");
+    point_source2.SetFocalSpotSize(0.0f, 0.0f, 0.0f, "mm");
+    point_source2.SetPolyenergy("spectrum_120kVp_2mmAl.dat");
+
+    source_manager.Initialize(777);
+    source_manager.PrintInfos();
 
     ram_manager.PrintRAMStatus();
 

@@ -33,7 +33,6 @@
 #include "GGEMS/maths/GGEMSGeometryTransformation.hh"
 #include "GGEMS/physics/GGEMSPrimaryParticles.hh"
 #include "GGEMS/randoms/GGEMSRandom.hh"
-//#include "GGEMS/global/GGEMSManager.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -49,7 +48,11 @@ GGEMSSource::GGEMSSource(std::string const& source_name)
   GGcout("GGEMSSource", "GGEMSSource", 3) << "Allocation of GGEMSSource..." << GGendl;
 
   // Allocation of geometry transformation
-  geometry_transformation_.reset(new GGEMSGeometryTransformation());
+  geometry_transformation_ = new GGEMSGeometryTransformation();
+
+  // Get the number of activated device
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+  number_activated_devices_ = opencl_manager.GetNumberOfActivatedDevice();
 
   // Store the source in source manager
   GGEMSSourceManager::GetInstance().Store(this);
@@ -62,6 +65,8 @@ GGEMSSource::GGEMSSource(std::string const& source_name)
 GGEMSSource::~GGEMSSource(void)
 {
   GGcout("GGEMSSource", "~GGEMSSource", 3) << "Deallocation of GGEMSSource..." << GGendl;
+
+  delete geometry_transformation_;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -221,10 +226,7 @@ void GGEMSSource::Initialize(void)
   // Checking the parameters of Source
   CheckParameters();
 
-  // Activate tracking
-  //if (GGEMSManager::GetInstance().IsTrackingVerbose()) EnableTracking();
-
   // Organize the particles in batch
-  OrganizeParticlesInBatch();
+  //OrganizeParticlesInBatch();
   GGcout("GGEMSSource", "Initialize", 0) << "Particles arranged in batch OK" << GGendl;
 }

@@ -31,7 +31,6 @@
 #include "GGEMS/sources/GGEMSXRaySource.hh"
 #include "GGEMS/sources/GGEMSSourceManager.hh"
 #include "GGEMS/maths/GGEMSGeometryTransformation.hh"
-//#include "GGEMS/global/GGEMSManager.hh"
 #include "GGEMS/global/GGEMSConstants.hh"
 #include "GGEMS/tools/GGEMSRAMManager.hh"
 #include "GGEMS/randoms/GGEMSPseudoRandomGenerator.hh"
@@ -67,6 +66,10 @@ GGEMSXRaySource::GGEMSXRaySource(std::string const& source_name)
   focal_spot_size_.x = std::numeric_limits<float>::min();
   focal_spot_size_.y = std::numeric_limits<float>::min();
   focal_spot_size_.z = std::numeric_limits<float>::min();
+
+  // Allocating memory for cdf and energy spectrum
+  energy_spectrum_ = new cl::Buffer*[number_activated_devices_];
+  cdf_ = new cl::Buffer*[number_activated_devices_];
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -76,6 +79,22 @@ GGEMSXRaySource::GGEMSXRaySource(std::string const& source_name)
 GGEMSXRaySource::~GGEMSXRaySource(void)
 {
   GGcout("GGEMSXRaySource", "~GGEMSXRaySource", 3) << "Deallocation of GGEMSXRaySource..." << GGendl;
+
+  // Get the OpenCL manager
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+
+  for (GGsize i = 0; i < number_activated_devices_; ++i) {
+    if (is_monoenergy_mode_) {
+      opencl_manager.Deallocate(energy_spectrum_[i], 2*sizeof(GGfloat), i);
+      opencl_manager.Deallocate(cdf_[i], 2*sizeof(GGfloat), i);
+    }
+    else {
+      opencl_manager.Deallocate(energy_spectrum_[i], number_of_energy_bins_*sizeof(GGfloat), i);
+      opencl_manager.Deallocate(cdf_[i], number_of_energy_bins_*sizeof(GGfloat), i);
+    }
+  }
+  delete[] energy_spectrum_;
+  delete[] cdf_;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -154,47 +173,54 @@ void GGEMSXRaySource::PrintInfos(void) const
   // Get the OpenCL manager
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
-  // // Get pointer on OpenCL device
-  // GGfloat44* transformation_matrix_device = opencl_manager.GetDeviceBuffer<GGfloat44>(geometry_transformation_->GetTransformationMatrix(), sizeof(GGfloat44));
+  // Loop over each device
+  for (GGsize j = 0; j < number_activated_devices_; ++j) {
+    // Get pointer on OpenCL device
+    GGfloat44* transformation_matrix_device = opencl_manager.GetDeviceBuffer<GGfloat44>(geometry_transformation_->GetTransformationMatrix(j), sizeof(GGfloat44), j);
 
-  // GGcout("GGEMSXRaySource", "PrintInfos", 0) << GGendl;
-  // GGcout("GGEMSXRaySource", "PrintInfos", 0) << "GGEMSXRaySource Infos: " << GGendl;
-  // GGcout("GGEMSXRaySource", "PrintInfos", 0) << "----------------------"  << GGendl;
-  // GGcout("GGEMSXRaySource", "PrintInfos", 0) << "* Source name: " << source_name_ << GGendl;
-  // GGcout("GGEMSXRaySource", "PrintInfos", 0) << "* Particle type: ";
-  // if (particle_type_ == PHOTON) {
-  //   std::cout << "Photon" << std::endl;
-  // }
-  // else if (particle_type_ == ELECTRON) {
-  //   std::cout << "Electron" << std::endl;
-  // }
-  // else if (particle_type_ == POSITRON) {
-  //   std::cout << "Positron" << std::endl;
-  // }
-  // GGcout("GGEMSXRaySource", "PrintInfos", 0) << "* Number of particles: " << number_of_particles_ << GGendl;
-  // GGcout("GGEMSXRaySource", "PrintInfos", 0) << "* Number of batches: " << GetNumberOfBatchs() << GGendl;
-  // GGcout("GGEMSXRaySource", "PrintInfos", 0) << "* Energy mode: ";
-  // if (is_monoenergy_mode_) {
-  //   std::cout << "Monoenergy" << std::endl;
-  // }
-  // else {
-  //   std::cout << "Polyenergy" << std::endl;
-  // }
-  // GGcout("GGEMSXRaySource", "PrintInfos", 0) << "* Position: " << "(" << geometry_transformation_->GetPosition().s[0]/mm << ", " << geometry_transformation_->GetPosition().s[1]/mm << ", " << geometry_transformation_->GetPosition().s[2]/mm << " ) mm3" << GGendl;
-  // GGcout("GGEMSXRaySource", "PrintInfos", 0) << "* Rotation: " << "(" << geometry_transformation_->GetRotation().s[0] << ", " << geometry_transformation_->GetRotation().s[1] << ", " << geometry_transformation_->GetRotation().s[2] << ") degree" << GGendl;
-  // GGcout("GGEMSXRaySource", "PrintInfos", 0) << "* Beam aperture: " << beam_aperture_/deg << " degrees" << GGendl;
-  // GGcout("GGEMSXRaySource", "PrintInfos", 0) << "* Focal spot size: " << "(" << focal_spot_size_.s[0]/mm << ", " << focal_spot_size_.s[1]/mm << ", " << focal_spot_size_.s[2]/mm << ") mm3" << GGendl;
-  // GGcout("GGEMSXRaySource", "PrintInfos", 0) << "* Transformation matrix: " << GGendl;
-  // GGcout("GGEMSXRaySource", "PrintInfos", 0) << "[" << GGendl;
-  // GGcout("GGEMSXRaySource", "PrintInfos", 0) << "    " << transformation_matrix_device->m0_[0] << " " << transformation_matrix_device->m0_[1] << " " << transformation_matrix_device->m0_[2] << " " << transformation_matrix_device->m0_[3] << GGendl;
-  // GGcout("GGEMSXRaySource", "PrintInfos", 0) << "    " << transformation_matrix_device->m1_[0] << " " << transformation_matrix_device->m1_[1] << " " << transformation_matrix_device->m1_[2] << " " << transformation_matrix_device->m1_[3] << GGendl;
-  // GGcout("GGEMSXRaySource", "PrintInfos", 0) << "    " << transformation_matrix_device->m2_[0] << " " << transformation_matrix_device->m2_[1] << " " << transformation_matrix_device->m2_[2] << " " << transformation_matrix_device->m2_[3] << GGendl;
-  // GGcout("GGEMSXRaySource", "PrintInfos", 0) << "    " << transformation_matrix_device->m3_[0] << " " << transformation_matrix_device->m3_[1] << " " << transformation_matrix_device->m3_[2] << " " << transformation_matrix_device->m3_[3] << GGendl;
-  // GGcout("GGEMSXRaySource", "PrintInfos", 0) << "]" << GGendl;
-  // GGcout("GGEMSXRaySource", "PrintInfos", 0) << GGendl;
+    // Getting index of the device
+    GGsize device_index = opencl_manager.GetIndexOfActivatedDevice(j);
 
-  // // Release the pointer
-  // opencl_manager.ReleaseDeviceBuffer(geometry_transformation_->GetTransformationMatrix(), transformation_matrix_device);
+    GGcout("GGEMSXRaySource", "PrintInfos", 0) << GGendl;
+    GGcout("GGEMSXRaySource", "PrintInfos", 0) << "GGEMSXRaySource Infos: " << GGendl;
+    GGcout("GGEMSXRaySource", "PrintInfos", 0) << "----------------------"  << GGendl;
+    GGcout("GGEMSXRaySource", "PrintInfos", 0) << "* Device: " << opencl_manager.GetDeviceName(device_index) << GGendl;
+    GGcout("GGEMSXRaySource", "PrintInfos", 0) << "* Source name: " << source_name_ << GGendl;
+    GGcout("GGEMSXRaySource", "PrintInfos", 0) << "* Particle type: ";
+    if (particle_type_ == PHOTON) {
+      std::cout << "Photon" << std::endl;
+    }
+    else if (particle_type_ == ELECTRON) {
+      std::cout << "Electron" << std::endl;
+    }
+    else if (particle_type_ == POSITRON) {
+      std::cout << "Positron" << std::endl;
+    }
+    //GGcout("GGEMSXRaySource", "PrintInfos", 0) << "* Number of particles: " << number_of_particles_ << GGendl;
+    //GGcout("GGEMSXRaySource", "PrintInfos", 0) << "* Number of batches: " << GetNumberOfBatchs() << GGendl;
+    GGcout("GGEMSXRaySource", "PrintInfos", 0) << "* Energy mode: ";
+    if (is_monoenergy_mode_) {
+      std::cout << "Monoenergy" << std::endl;
+    }
+    else {
+      std::cout << "Polyenergy" << std::endl;
+    }
+    GGcout("GGEMSXRaySource", "PrintInfos", 0) << "* Position: " << "(" << geometry_transformation_->GetPosition().s[0]/mm << ", " << geometry_transformation_->GetPosition().s[1]/mm << ", " << geometry_transformation_->GetPosition().s[2]/mm << " ) mm3" << GGendl;
+    GGcout("GGEMSXRaySource", "PrintInfos", 0) << "* Rotation: " << "(" << geometry_transformation_->GetRotation().s[0] << ", " << geometry_transformation_->GetRotation().s[1] << ", " << geometry_transformation_->GetRotation().s[2] << ") degree" << GGendl;
+    GGcout("GGEMSXRaySource", "PrintInfos", 0) << "* Beam aperture: " << beam_aperture_/deg << " degrees" << GGendl;
+    GGcout("GGEMSXRaySource", "PrintInfos", 0) << "* Focal spot size: " << "(" << focal_spot_size_.s[0]/mm << ", " << focal_spot_size_.s[1]/mm << ", " << focal_spot_size_.s[2]/mm << ") mm3" << GGendl;
+    GGcout("GGEMSXRaySource", "PrintInfos", 0) << "* Transformation matrix: " << GGendl;
+    GGcout("GGEMSXRaySource", "PrintInfos", 0) << "[" << GGendl;
+    GGcout("GGEMSXRaySource", "PrintInfos", 0) << "    " << transformation_matrix_device->m0_[0] << " " << transformation_matrix_device->m0_[1] << " " << transformation_matrix_device->m0_[2] << " " << transformation_matrix_device->m0_[3] << GGendl;
+    GGcout("GGEMSXRaySource", "PrintInfos", 0) << "    " << transformation_matrix_device->m1_[0] << " " << transformation_matrix_device->m1_[1] << " " << transformation_matrix_device->m1_[2] << " " << transformation_matrix_device->m1_[3] << GGendl;
+    GGcout("GGEMSXRaySource", "PrintInfos", 0) << "    " << transformation_matrix_device->m2_[0] << " " << transformation_matrix_device->m2_[1] << " " << transformation_matrix_device->m2_[2] << " " << transformation_matrix_device->m2_[3] << GGendl;
+    GGcout("GGEMSXRaySource", "PrintInfos", 0) << "    " << transformation_matrix_device->m3_[0] << " " << transformation_matrix_device->m3_[1] << " " << transformation_matrix_device->m3_[2] << " " << transformation_matrix_device->m3_[3] << GGendl;
+    GGcout("GGEMSXRaySource", "PrintInfos", 0) << "]" << GGendl;
+    GGcout("GGEMSXRaySource", "PrintInfos", 0) << GGendl;
+
+    // Release the pointer
+    opencl_manager.ReleaseDeviceBuffer(geometry_transformation_->GetTransformationMatrix(j), transformation_matrix_device, j);
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -284,87 +310,89 @@ void GGEMSXRaySource::FillEnergy(void)
   GGcout("GGEMSXRaySource", "FillEnergy", 3) << "Filling energy..." << GGendl;
 
   // Get the OpenCL manager
-  // GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
-  // // Monoenergy mode
-  // if (is_monoenergy_mode_) {
-  //   number_of_energy_bins_ = 2;
+  for (GGsize j = 0; j < number_activated_devices_; ++j) {
+    // Monoenergy mode
+    if (is_monoenergy_mode_) {
+      number_of_energy_bins_ = 2;
 
-  //   // Allocation of memory on OpenCL device
-  //   // Energy
-  //   energy_spectrum_ = opencl_manager.Allocate(nullptr, 2 * sizeof(GGfloat), CL_MEM_READ_WRITE, "GGEMSXRaySource");
+      // Allocation of memory on OpenCL device
+      // Energy
+      energy_spectrum_[j] = opencl_manager.Allocate(nullptr, 2*sizeof(GGfloat), j, CL_MEM_READ_WRITE, "GGEMSXRaySource");
 
-  //   // Cumulative distribution function
-  //   cdf_ = opencl_manager.Allocate(nullptr, 2 * sizeof(GGfloat), CL_MEM_READ_WRITE, "GGEMSXRaySource");
+      // Cumulative distribution function
+      cdf_[j] = opencl_manager.Allocate(nullptr, 2*sizeof(GGfloat), j, CL_MEM_READ_WRITE, "GGEMSXRaySource");
 
-  //   // Get the energy pointer on OpenCL device
-  //   GGfloat* energy_spectrum_device = opencl_manager.GetDeviceBuffer<GGfloat>(energy_spectrum_.get(), 2 * sizeof(GGfloat));
+      // Get the energy pointer on OpenCL device
+      GGfloat* energy_spectrum_device = opencl_manager.GetDeviceBuffer<GGfloat>(energy_spectrum_[j], 2*sizeof(GGfloat), j);
 
-  //   // Get the cdf pointer on OpenCL device
-  //   GGfloat* cdf_device = opencl_manager.GetDeviceBuffer<GGfloat>(cdf_.get(), 2 * sizeof(GGfloat));
+      // Get the cdf pointer on OpenCL device
+      GGfloat* cdf_device = opencl_manager.GetDeviceBuffer<GGfloat>(cdf_[j], 2*sizeof(GGfloat), j);
 
-  //   energy_spectrum_device[0] = monoenergy_;
-  //   energy_spectrum_device[1] = monoenergy_;
+      energy_spectrum_device[0] = monoenergy_;
+      energy_spectrum_device[1] = monoenergy_;
 
-  //   cdf_device[0] = 1.0;
-  //   cdf_device[1] = 1.0;
+      cdf_device[0] = 1.0f;
+      cdf_device[1] = 1.0f;
 
-  //   // Release the pointers
-  //   opencl_manager.ReleaseDeviceBuffer(energy_spectrum_.get(), energy_spectrum_device);
-  //   opencl_manager.ReleaseDeviceBuffer(cdf_.get(), cdf_device);
-  // }
-  // else { // Polyenergy mode 
-  //   // Read a first time the spectrum file counting the number of lines
-  //   std::ifstream spectrum_stream(energy_spectrum_filename_, std::ios::in);
-  //   GGEMSFileStream::CheckInputStream(spectrum_stream, energy_spectrum_filename_);
+      // Release the pointers
+      opencl_manager.ReleaseDeviceBuffer(energy_spectrum_[j], energy_spectrum_device, j);
+      opencl_manager.ReleaseDeviceBuffer(cdf_[j], cdf_device, j);
+    }
+    else { // Polyenergy mode 
+      // Read a first time the spectrum file counting the number of lines
+      std::ifstream spectrum_stream(energy_spectrum_filename_, std::ios::in);
+      GGEMSFileStream::CheckInputStream(spectrum_stream, energy_spectrum_filename_);
 
-  //   // Compute number of energy bins
-  //   std::string line;
-  //   while (std::getline(spectrum_stream, line)) ++number_of_energy_bins_;
+      // Compute number of energy bins
+      std::string line;
+      while (std::getline(spectrum_stream, line)) ++number_of_energy_bins_;
 
-  //   // Returning to beginning of the file to read it again
-  //   spectrum_stream.clear();
-  //   spectrum_stream.seekg(0, std::ios::beg);
+      // Returning to beginning of the file to read it again
+      spectrum_stream.clear();
+      spectrum_stream.seekg(0, std::ios::beg);
 
-  //   // Allocation of memory on OpenCL device
-  //   // Energy
-  //   energy_spectrum_ = opencl_manager.Allocate(nullptr, number_of_energy_bins_ * sizeof(GGfloat), CL_MEM_READ_WRITE, "GGEMSXRaySource");
+      // Allocation of memory on OpenCL device
+      // Energy
+      energy_spectrum_[j] = opencl_manager.Allocate(nullptr, number_of_energy_bins_*sizeof(GGfloat), j, CL_MEM_READ_WRITE, "GGEMSXRaySource");
 
-  //   // Cumulative distribution function
-  //   cdf_ = opencl_manager.Allocate(nullptr, number_of_energy_bins_ * sizeof(GGfloat), CL_MEM_READ_WRITE, "GGEMSXRaySource");
+      // Cumulative distribution function
+      cdf_[j] = opencl_manager.Allocate(nullptr, number_of_energy_bins_*sizeof(GGfloat), j, CL_MEM_READ_WRITE, "GGEMSXRaySource");
 
-  //   // Get the energy pointer on OpenCL device
-  //   GGfloat* energy_spectrum_device = opencl_manager.GetDeviceBuffer<GGfloat>(energy_spectrum_.get(), number_of_energy_bins_ * sizeof(GGfloat));
+      // Get the energy pointer on OpenCL device
+      GGfloat* energy_spectrum_device = opencl_manager.GetDeviceBuffer<GGfloat>(energy_spectrum_[j], number_of_energy_bins_*sizeof(GGfloat), j);
 
-  //   // Get the cdf pointer on OpenCL device
-  //   GGfloat* cdf_device = opencl_manager.GetDeviceBuffer<GGfloat>(cdf_.get(), number_of_energy_bins_ * sizeof(GGfloat));
+      // Get the cdf pointer on OpenCL device
+      GGfloat* cdf_device = opencl_manager.GetDeviceBuffer<GGfloat>(cdf_[j], number_of_energy_bins_*sizeof(GGfloat), j);
 
-  //   // Read the input spectrum and computing the sum for the cdf
-  //   GGint line_index = 0;
-  //   GGfloat sum_cdf = 0.0;
-  //   while (std::getline(spectrum_stream, line)) {
-  //     std::istringstream iss(line);
-  //     iss >> energy_spectrum_device[line_index] >> cdf_device[line_index];
-  //     sum_cdf += cdf_device[line_index];
-  //     ++line_index;
-  //   }
+      // Read the input spectrum and computing the sum for the cdf
+      GGint line_index = 0;
+      GGfloat sum_cdf = 0.0;
+      while (std::getline(spectrum_stream, line)) {
+        std::istringstream iss(line);
+        iss >> energy_spectrum_device[line_index] >> cdf_device[line_index];
+        sum_cdf += cdf_device[line_index];
+        ++line_index;
+      }
 
-  //   // Compute CDF and normalized it
-  //   cdf_device[0] /= sum_cdf;
-  //   for (GGsize i = 1; i < number_of_energy_bins_; ++i) {
-  //     cdf_device[i] = cdf_device[i]/sum_cdf + cdf_device[i-1];
-  //   }
+      // Compute CDF and normalized it
+      cdf_device[0] /= sum_cdf;
+      for (GGsize i = 1; i < number_of_energy_bins_; ++i) {
+        cdf_device[i] = cdf_device[i]/sum_cdf + cdf_device[i-1];
+      }
 
-  //   // By security, final value of cdf must be 1 !!!
-  //   cdf_device[number_of_energy_bins_-1] = 1.0;
+      // By security, final value of cdf must be 1 !!!
+      cdf_device[number_of_energy_bins_-1] = 1.0;
 
-  //   // Release the pointers
-  //   opencl_manager.ReleaseDeviceBuffer(energy_spectrum_.get(), energy_spectrum_device);
-  //   opencl_manager.ReleaseDeviceBuffer(cdf_.get(), cdf_device);
+      // Release the pointers
+      opencl_manager.ReleaseDeviceBuffer(energy_spectrum_[j], energy_spectrum_device, j);
+      opencl_manager.ReleaseDeviceBuffer(cdf_[j], cdf_device, j);
 
-  //   // Closing file
-  //   spectrum_stream.close();
-  // }
+      // Closing file
+      spectrum_stream.close();
+    }
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////

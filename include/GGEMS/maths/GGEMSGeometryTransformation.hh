@@ -170,11 +170,12 @@ class GGEMS_EXPORT GGEMSGeometryTransformation
     inline GGfloat33 GetLocalAxis(void) const {return local_axis_;}
 
     /*!
-      \fn Matrix::float4x4 GetTransformationMatrix(void) const
+      \fn Matrix::float4x4 GetTransformationMatrix(GGsize const& index) const
+      \param index - index of device
       \return the transformation matrix
       \brief return the transformation matrix
     */
-    inline cl::Buffer* GetTransformationMatrix(void) const {return matrix_transformation_.get();}
+    inline cl::Buffer* GetTransformationMatrix(GGsize const& index) const {return matrix_transformation_[index];}
 
   private:
     GGfloat3 position_; /*!< Position of the source/detector */
@@ -183,7 +184,8 @@ class GGEMS_EXPORT GGEMSGeometryTransformation
     GGfloat44 matrix_translation_; /*!< Matrix of translation */
     GGfloat44 matrix_rotation_; /*!< Matrix of rotation */
     GGfloat44 matrix_orthographic_projection_; /*!< Matrix of orthographic projection */
-    std::shared_ptr<cl::Buffer> matrix_transformation_; /*!< OpenCL buffer storing the matrix transformation */
+    cl::Buffer** matrix_transformation_; /*!< OpenCL buffer storing the matrix transformation */
+    GGsize number_activated_devices_; /*!< Number of activated device */
 };
 
 #endif // End of GUARD_GGEMS_MATHS_TRANSFORMATION_MATRIX_HH

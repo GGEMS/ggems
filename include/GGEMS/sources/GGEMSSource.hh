@@ -190,9 +190,10 @@ class GGEMS_EXPORT GGEMSSource
     std::vector<GGsize> number_of_particles_in_batch_; /*!< Number of particles in batch */
     GGchar particle_type_; /*!< Type of particle: photon, electron or positron */
     std::string tracking_kernel_option_; /*!< Preprocessor option for tracking */
-    std::unique_ptr<GGEMSGeometryTransformation> geometry_transformation_; /*!< Pointer storing the geometry transformation */
+    GGEMSGeometryTransformation* geometry_transformation_; /*!< Pointer storing the geometry transformation */
 
     std::weak_ptr<cl::Kernel> kernel_get_primaries_; /*!< Kernel generating primaries on OpenCL device */
+    GGsize number_activated_devices_; /*!< Number of activated device */
 };
 
 #endif // End of GUARD_GGEMS_SOURCES_GGEMSSOURCE_HH
