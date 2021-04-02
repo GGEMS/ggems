@@ -18,15 +18,27 @@
 
 from ggems_lib import *
 
+# class GGEMSSourceManager(object):
+#     """Get the C++ singleton and initialize source
+#     """
+#     def __init__(self):
+#         ggems_lib.get_instance_ggems_source_manager.restype = ctypes.c_void_p
+
+#         ggems_lib.initialize_source_manager.argtypes = [ctypes.c_void_p, ctypes.c_uint]
+#         ggems_lib.initialize_source_manager.restype = ctypes.c_void_p
+
+#         self.obj = ggems_lib.get_instance_ggems_source_manager()
+
+#     def initialize(self, seed):
+#         ggems_lib.initialize_source_manager(self.obj, seed)
+
+
 class GGEMSXRaySource(object):
   """GGEMS XRay source class managing source for CT/CBCT simulation
   """
   def __init__(self, source_name):
       ggems_lib.create_ggems_xray_source.argtypes = [ctypes.c_char_p]
       ggems_lib.create_ggems_xray_source.restype = ctypes.c_void_p
-
-      ggems_lib.initialize_ggems_xray_source.argtypes = [ctypes.c_void_p]
-      ggems_lib.initialize_ggems_xray_source.restype = ctypes.c_void_p
     
       ggems_lib.set_position_ggems_xray_source.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_char_p]
       ggems_lib.set_position_ggems_xray_source.restype = ctypes.c_void_p
@@ -53,9 +65,6 @@ class GGEMSXRaySource(object):
       ggems_lib.set_polyenergy_ggems_xray_source.restype = ctypes.c_void_p
 
       self.obj = ggems_lib.create_ggems_xray_source(source_name.encode('ASCII'))
-
-  def initialize(self):
-      ggems_lib.initialize_ggems_xray_source(self.obj)
 
   def set_position(self, x, y, z, unit):
       ggems_lib.set_position_ggems_xray_source(self.obj, x, y, z, unit.encode('ASCII'))

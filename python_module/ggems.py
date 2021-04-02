@@ -19,10 +19,11 @@
 # Import all GGEMS C++ singletons
 from ggems_lib import *
 from ggems_opencl import GGEMSOpenCLManager
+from ggems_ram import GGEMSRAMManager
 # from ggems_materials import GGEMSMaterialsDatabaseManager, GGEMSMaterials
 # from ggems_systems import GGEMSCTSystem
 # from ggems_phantoms import GGEMSVoxelizedPhantom, GGEMSWorld
-# from ggems_sources import GGEMSXRaySource
+from ggems_sources import GGEMSXRaySource
 # from ggems_processes import GGEMSProcessesManager, GGEMSRangeCutsManager, GGEMSCrossSections
 # from ggems_volume_creator import GGEMSVolumeCreatorManager, GGEMSTube, GGEMSBox, GGEMSSphere
 # from ggems_dosimetry import GGEMSDosimetryCalculator
@@ -111,6 +112,8 @@ from ggems_opencl import GGEMSOpenCLManager
 # ------------------------------------------------------------------------------
 # Calling all C++ singleton managers
 opencl_manager = GGEMSOpenCLManager()
+ram_manager = GGEMSRAMManager()
+#source_manager = GGEMSSourceManager()
 # materials_database_manager = GGEMSMaterialsDatabaseManager()
 # processes_manager = GGEMSProcessesManager()
 # range_cuts_manager = GGEMSRangeCutsManager()

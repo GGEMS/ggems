@@ -141,7 +141,7 @@ class GGEMS_EXPORT GGEMSSourceManager
       \return the number of batch of particle
       \brief method returning the number of particles by batch
     */
-    inline GGsize GetNumberOfBatchs(GGsize const& source_index) const {return sources_[source_index]->GetNumberOfBatchs();}
+    //inline GGsize GetNumberOfBatchs(GGsize const& source_index) const {return sources_[source_index]->GetNumberOfBatchs();}
 
     /*!
       \fn inline GGsize GetNumberOfParticlesInBatch(GGsize const& source_index, GGsize const& batch_index)
@@ -150,7 +150,7 @@ class GGEMS_EXPORT GGEMSSourceManager
       \return the number of particle for a specific batch
       \brief method returning the number of particles in a specific batch
     */
-    inline GGsize GetNumberOfParticlesInBatch(GGsize const& source_index, GGsize const& batch_index) {return sources_[source_index]->GetNumberOfParticlesInBatch(batch_index);}
+    //inline GGsize GetNumberOfParticlesInBatch(GGsize const& source_index, GGsize const& batch_index) {return sources_[source_index]->GetNumberOfParticlesInBatch(batch_index);}
 
     /*!
       \fn GGEMSParticles* GetParticles(void) const
@@ -192,5 +192,20 @@ class GGEMS_EXPORT GGEMSSourceManager
     GGEMSParticles* particles_; /*!< Pointer on particle management */
     GGEMSPseudoRandomGenerator* pseudo_random_generator_; /*!< Pointer on pseudo random generator */
 };
+
+/*!
+  \fn GGEMSSourceManager* get_instance_ggems_source_manager(void)
+  \return the pointer on the singleton
+  \brief Get the GGEMSSourceManager pointer for python user.
+*/
+extern "C" GGEMS_EXPORT GGEMSSourceManager* get_instance_ggems_source_manager(void);
+
+/*!
+  \fn void initialize_source_manager(GGEMSSourceManager* source_manager, GGuint const& seed)
+  \param source_manager - pointer on the singleton
+  \param seed - seed of random
+  \brief Initialize source
+*/
+extern "C" GGEMS_EXPORT void initialize_source_manager(GGEMSSourceManager* source_manager, GGuint const& seed);
 
 #endif // End of GUARD_GGEMS_SOURCES_GGEMSSOURCEMANAGER

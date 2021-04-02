@@ -158,4 +158,18 @@ class GGEMS_EXPORT GGEMSRAMManager
     AllocatedMemoryUMap* allocated_memories_; /*!< Allocated memory on OpenCL device by GGEMS class */
 };
 
+/*!
+  \fn GGEMSRAMManager* get_instance_ggems_ram_manager(void)
+  \return the pointer on the singleton
+  \brief Get the GGEMSRAMManager pointer for python user.
+*/
+extern "C" GGEMS_EXPORT GGEMSRAMManager* get_instance_ggems_ram_manager(void);
+
+/*!
+  \fn void print_infos_ram_manager(GGEMSRAMManager* ram_manager)
+  \param ram_manager - pointer on the singleton
+  \brief Print information about RAM memory
+*/
+extern "C" GGEMS_EXPORT void print_infos_ram_manager(GGEMSRAMManager* ram_manager);
+
 #endif // End of GUARD_GGEMS_TOOLS_GGEMSRAMMANAGER_HH

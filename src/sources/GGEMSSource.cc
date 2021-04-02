@@ -41,7 +41,9 @@
 GGEMSSource::GGEMSSource(std::string const& source_name)
 : source_name_(source_name),
   number_of_particles_(0),
-  number_of_particles_in_batch_(0),
+  number_of_particles_by_device_(nullptr),
+  number_of_particles_in_batch_(nullptr),
+  number_of_batchs_(nullptr),
   particle_type_(99),
   tracking_kernel_option_("")
 {
@@ -67,6 +69,13 @@ GGEMSSource::~GGEMSSource(void)
   GGcout("GGEMSSource", "~GGEMSSource", 3) << "Deallocation of GGEMSSource..." << GGendl;
 
   delete geometry_transformation_;
+  delete number_of_batchs_;
+  delete number_of_particles_by_device_;
+  for (GGsize i = 0; i < number_activated_devices_; ++i) {
+    delete number_of_particles_in_batch_[i];
+    number_of_particles_in_batch_[i] = nullptr;
+  }
+  delete[] number_of_particles_in_batch_;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -191,26 +200,38 @@ void GGEMSSource::OrganizeParticlesInBatch(void)
 {
   GGcout("GGEMSSource", "OrganizeParticlesInBatch", 3) << "Organizing the number of particles in batch..." << GGendl;
 
-  // Computing the number of batch depending on the number of simulated
-  // particles and the maximum simulated particles defined during GGEMS
-  // compilation
-  GGsize number_of_batchs = static_cast<GGsize>(std::ceil(static_cast<GGfloat>(number_of_particles_) / MAXIMUM_PARTICLES));
-
-  // Resizing vector storing the number of particles in batch
-  number_of_particles_in_batch_.resize(number_of_batchs, 0);
-
-  // Computing the number of simulated particles in batch
-  if (number_of_batchs == 1) {
-    number_of_particles_in_batch_[0] = number_of_particles_;
+  // Computing number of particles to simulate for each device
+  number_of_particles_by_device_ = new GGsize[number_activated_devices_];
+  for (GGsize i = 0; i < number_activated_devices_; ++i) {
+    number_of_particles_by_device_[i] = number_of_particles_ / number_activated_devices_;
   }
-  else {
-    for (auto&& i : number_of_particles_in_batch_) {
-      i = number_of_particles_ / number_of_batchs;
-    }
 
-    // Adding the remaing particles
-    for (GGsize i = 0; i < number_of_particles_ % number_of_batchs; ++i) {
-      number_of_particles_in_batch_[i]++;
+  // Adding the remaing particles
+  for (GGsize i = 0; i < number_of_particles_ % number_activated_devices_; ++i) {
+    number_of_particles_by_device_[i]++;
+  }
+
+  // Computing number of batch for each device
+  number_of_particles_in_batch_ = new GGsize*[number_activated_devices_];
+  number_of_batchs_ = new GGsize[number_activated_devices_];
+  for (GGsize i = 0; i < number_activated_devices_; ++i) {
+    number_of_batchs_[i] = static_cast<GGsize>(std::ceil(static_cast<GGfloat>(number_of_particles_by_device_[i]) / MAXIMUM_PARTICLES));
+
+    number_of_particles_in_batch_[i] = new GGsize[number_of_batchs_[i]];
+
+    // Computing the number of simulated particles in batch
+    if (number_of_batchs_[i] == 1) {
+      number_of_particles_in_batch_[i][0] = number_of_particles_by_device_[i];
+    }
+    else {
+      for (GGsize j = 0; j < number_of_batchs_[i]; ++j) {
+        number_of_particles_in_batch_[i][j] = number_of_particles_by_device_[i] / number_of_batchs_[i];
+      }
+
+      // Adding the remaing particles
+      for (GGsize j = 0; j < number_of_particles_by_device_[i] % number_of_batchs_[i]; ++j) {
+        number_of_particles_in_batch_[i][j]++;
+      }
     }
   }
 }
@@ -227,6 +248,6 @@ void GGEMSSource::Initialize(void)
   CheckParameters();
 
   // Organize the particles in batch
-  //OrganizeParticlesInBatch();
+  OrganizeParticlesInBatch();
   GGcout("GGEMSSource", "Initialize", 0) << "Particles arranged in batch OK" << GGendl;
 }
