@@ -135,7 +135,7 @@ class GGEMS_EXPORT GGEMSSource
       \return the number of batch of particle
       \brief method returning the number of particles by batch
     */
-    inline GGsize GetNumberOfBatchs(void) const {return number_of_particles_in_batch_.size();}
+    //inline GGsize GetNumberOfBatchs(void) const {return number_of_particles_in_batch_.size();}
 
     /*!
       \fn inline GGulong GetNumberOfParticlesInBatch(GGsize const& batch_index)
@@ -143,7 +143,7 @@ class GGEMS_EXPORT GGEMSSource
       \return the number of particle for a specific batch
       \brief method returning the number of particles in a specific batch
     */
-    inline GGsize GetNumberOfParticlesInBatch(GGsize const& batch_index) {return number_of_particles_in_batch_.at(batch_index);}
+    //inline GGsize GetNumberOfParticlesInBatch(GGsize const& batch_index) {return number_of_particles_in_batch_.at(batch_index);}
 
     /*!
       \fn void CheckParameters(void) const
@@ -187,12 +187,16 @@ class GGEMS_EXPORT GGEMSSource
   protected:
     std::string source_name_; /*!< Name of the source */
     GGsize number_of_particles_; /*!< Number of particles */
-    std::vector<GGsize> number_of_particles_in_batch_; /*!< Number of particles in batch */
+    GGsize* number_of_particles_by_device_; /*!< Number of particles by device */
+
+    GGsize** number_of_particles_in_batch_; /*!< Number of particles in batch for each device */
+    GGsize* number_of_batchs_; /*!< Number of batchs for each device */
+
     GGchar particle_type_; /*!< Type of particle: photon, electron or positron */
     std::string tracking_kernel_option_; /*!< Preprocessor option for tracking */
     GGEMSGeometryTransformation* geometry_transformation_; /*!< Pointer storing the geometry transformation */
 
-    std::weak_ptr<cl::Kernel> kernel_get_primaries_; /*!< Kernel generating primaries on OpenCL device */
+    cl::Kernel* kernel_get_primaries_; /*!< Kernel generating primaries on OpenCL device */
     GGsize number_activated_devices_; /*!< Number of activated device */
 };
 

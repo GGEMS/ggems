@@ -103,15 +103,15 @@ GGEMSXRaySource::~GGEMSXRaySource(void)
 
 void GGEMSXRaySource::InitializeKernel(void)
 {
-  // GGcout("GGEMSXRaySource", "InitializeKernel", 3) << "Initializing kernel..." << GGendl;
+  GGcout("GGEMSXRaySource", "InitializeKernel", 3) << "Initializing kernel..." << GGendl;
 
-  // // Getting the path to kernel
-  // std::string openCL_kernel_path = OPENCL_KERNEL_PATH;
-  // std::string filename = openCL_kernel_path + "/GetPrimariesGGEMSXRaySource.cl";
+  // Getting the path to kernel
+  std::string openCL_kernel_path = OPENCL_KERNEL_PATH;
+  std::string filename = openCL_kernel_path + "/GetPrimariesGGEMSXRaySource.cl";
 
-  // // Compiling the kernel
-  // GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
-  // kernel_get_primaries_ = opencl_manager.CompileKernel(filename, "get_primaries_ggems_xray_source", nullptr, const_cast<char*>(tracking_kernel_option_.c_str()));
+  // Compiling the kernel
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+  kernel_get_primaries_ = opencl_manager.CompileKernel(filename, "get_primaries_ggems_xray_source", nullptr, const_cast<char*>(tracking_kernel_option_.c_str()));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -196,8 +196,8 @@ void GGEMSXRaySource::PrintInfos(void) const
     else if (particle_type_ == POSITRON) {
       std::cout << "Positron" << std::endl;
     }
-    //GGcout("GGEMSXRaySource", "PrintInfos", 0) << "* Number of particles: " << number_of_particles_ << GGendl;
-    //GGcout("GGEMSXRaySource", "PrintInfos", 0) << "* Number of batches: " << GetNumberOfBatchs() << GGendl;
+    GGcout("GGEMSXRaySource", "PrintInfos", 0) << "* Number of particles: " << number_of_particles_by_device_[j] << GGendl;
+    GGcout("GGEMSXRaySource", "PrintInfos", 0) << "* Number of batches: " << number_of_batchs_[j] << GGendl;
     GGcout("GGEMSXRaySource", "PrintInfos", 0) << "* Energy mode: ";
     if (is_monoenergy_mode_) {
       std::cout << "Monoenergy" << std::endl;
@@ -443,15 +443,6 @@ void GGEMSXRaySource::SetFocalSpotSize(GGfloat const& width, GGfloat const& heig
 GGEMSXRaySource* create_ggems_xray_source(char const* source_name)
 {
   return new(std::nothrow) GGEMSXRaySource(source_name);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void initialize_ggems_xray_source(GGEMSXRaySource* xray_source)
-{
-  xray_source->Initialize();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

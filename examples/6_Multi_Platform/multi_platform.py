@@ -32,7 +32,7 @@ device = args.device
 
 # ------------------------------------------------------------------------------
 # STEP 0: Level of verbosity during computation
-GGEMSVerbosity(1)
+GGEMSVerbosity(3)
 
 # ------------------------------------------------------------------------------
 # STEP 1: Selecting an OpenCL device
@@ -45,8 +45,18 @@ elif device == "gpu_intel":
 else:
   opencl_manager.set_device_to_activate(device);
 
-#opencl_manager.set_device_to_activate("", "")
+point_source = GGEMSXRaySource('point_source')
+point_source.set_source_particle_type('gamma')
+point_source.set_number_of_particles(10000000)
+point_source.set_position(-595.0, 0.0, 0.0, 'mm')
+point_source.set_rotation(0.0, 0.0, 0.0, 'deg')
+point_source.set_beam_aperture(12.5, 'deg')
+point_source.set_focal_spot_size(0.0, 0.0, 0.0, 'mm')
+point_source.set_monoenergy(60.0, 'keV')
+
 opencl_manager.print_infos()
+#source_manager.initialize(123)
+#ram_manager.print_infos()
 
 # ------------------------------------------------------------------------------
 # STEP 2: Exit safely

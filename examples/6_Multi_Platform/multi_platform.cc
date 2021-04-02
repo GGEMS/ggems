@@ -88,24 +88,24 @@ int main(int argc, char** argv)
 
     GGEMSXRaySource point_source("point_source");
     point_source.SetSourceParticleType("gamma");
-    point_source.SetNumberOfParticles(100);
+    point_source.SetNumberOfParticles(10000000);
     point_source.SetPosition(-595.0f, 0.0f, 0.0f, "mm");
     point_source.SetRotation(0.0f, 0.0f, 0.0f, "deg");
     point_source.SetBeamAperture(12.5f, "deg");
     point_source.SetFocalSpotSize(0.0f, 0.0f, 0.0f, "mm");
     point_source.SetMonoenergy(60.0f, "keV");
 
-    GGEMSXRaySource point_source2("point_source2");
-    point_source2.SetSourceParticleType("gamma");
-    point_source2.SetNumberOfParticles(100);
-    point_source2.SetPosition(-595.0f, 0.0f, 0.0f, "mm");
-    point_source2.SetRotation(0.0f, 0.0f, 90.0f, "deg");
-    point_source2.SetBeamAperture(12.5f, "deg");
-    point_source2.SetFocalSpotSize(0.0f, 0.0f, 0.0f, "mm");
-    point_source2.SetPolyenergy("spectrum_120kVp_2mmAl.dat");
+    // GGEMSXRaySource point_source2("point_source2");
+    // point_source2.SetSourceParticleType("gamma");
+    // point_source2.SetNumberOfParticles(25000000);
+    // point_source2.SetPosition(-595.0f, 0.0f, 0.0f, "mm");
+    // point_source2.SetRotation(0.0f, 0.0f, 90.0f, "deg");
+    // point_source2.SetBeamAperture(12.5f, "deg");
+    // point_source2.SetFocalSpotSize(0.0f, 0.0f, 0.0f, "mm");
+    // point_source2.SetPolyenergy("spectrum_120kVp_2mmAl.dat");
 
-    source_manager.Initialize(777);
-    source_manager.PrintInfos();
+    // source_manager.Initialize(777);
+    // source_manager.PrintInfos();
 
     ram_manager.PrintRAMStatus();
 

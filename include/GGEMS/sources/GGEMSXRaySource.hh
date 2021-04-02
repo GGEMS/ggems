@@ -170,13 +170,6 @@ class GGEMS_EXPORT GGEMSXRaySource : public GGEMSSource
 extern "C" GGEMS_EXPORT GGEMSXRaySource* create_ggems_xray_source(char const* source_name);
 
 /*!
-  \fn void initialize_ggems_xray_source(GGEMSXRaySource* xray_source)
-  \param xray_source - pointer on the source
-  \brief Initialize the X-Ray source
-*/
-extern "C" GGEMS_EXPORT void initialize_ggems_xray_source(GGEMSXRaySource* xray_source);
-
-/*!
   \fn void set_position_ggems_xray_source(GGEMSXRaySource* xray_source, GGfloat const pos_x, GGfloat const pos_y, GGfloat const pos_z, char const* unit)
   \param xray_source - pointer on the source
   \param pos_x - Position of the source in X
