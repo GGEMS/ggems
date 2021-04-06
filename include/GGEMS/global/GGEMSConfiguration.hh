@@ -34,6 +34,6 @@
 #define OPENCL_KERNEL_PATH "C:/Users/dbenoit/Workspace/GGEMS_OpenCL/src/kernels"
 #define GGEMS_PATH "C:/Users/dbenoit/Workspace/GGEMS_OpenCL"
 
-#define MAXIMUM_PARTICLES 4194304
+#define MAXIMUM_PARTICLES 1048576
 
 #endif // GUARD_GGEMS_GLOBAL_GGEMSCONFIGURATION_HH

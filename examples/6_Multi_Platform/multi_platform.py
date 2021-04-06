@@ -54,9 +54,9 @@ point_source.set_beam_aperture(12.5, 'deg')
 point_source.set_focal_spot_size(0.0, 0.0, 0.0, 'mm')
 point_source.set_monoenergy(60.0, 'keV')
 
-opencl_manager.print_infos()
+#opencl_manager.print_infos()
 #source_manager.initialize(123)
-#ram_manager.print_infos()
+ram_manager.print_infos()
 
 # ------------------------------------------------------------------------------
 # STEP 2: Exit safely
