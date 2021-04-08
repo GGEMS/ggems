@@ -40,13 +40,15 @@ GGEMSSourceManager::GGEMSSourceManager(void)
 : sources_(nullptr),
   number_of_sources_(0)
 {
-  GGcout("GGEMSSourceManager", "GGEMSSourceManager", 3) << "Allocation of GGEMSSourceManager..." << GGendl;
+  GGcout("GGEMSSourceManager", "GGEMSSourceManager", 3) << "GGEMSSourceManager creating..." << GGendl;
 
   // Allocation of Particle object
   particles_ = new GGEMSParticles;
 
   // Allocation of pseudo random generator object
   pseudo_random_generator_ = new GGEMSPseudoRandomGenerator;
+
+  GGcout("GGEMSSourceManager", "GGEMSSourceManager", 3) << "GGEMSSourceManager created!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -55,11 +57,30 @@ GGEMSSourceManager::GGEMSSourceManager(void)
 
 GGEMSSourceManager::~GGEMSSourceManager(void)
 {
-  GGcout("GGEMSSourceManager", "~GGEMSSourceManager", 3) << "Deallocation of GGEMSSourceManager..." << GGendl;
+  GGcout("GGEMSSourceManager", "~GGEMSSourceManager", 3) << "GGEMSSourceManager erasing..." << GGendl;
 
-  // Freeing memory
-  delete particles_;
-  delete pseudo_random_generator_;
+  GGcout("GGEMSSourceManager", "~GGEMSSourceManager", 3) << "GGEMSSourceManager erased!!!" << GGendl;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSSourceManager::Clean(void)
+{
+  GGcout("GGEMSSourceManager", "Clean", 3) << "GGEMSSourceManager cleaning..." << GGendl;
+
+  if (particles_) {
+    delete particles_;
+    particles_ = nullptr;
+  }
+
+  if (pseudo_random_generator_) {
+    delete pseudo_random_generator_;
+    pseudo_random_generator_ = nullptr;
+  }
+
+  GGcout("GGEMSSourceManager", "Clean", 3) << "GGEMSSourceManager cleaned!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -151,10 +172,10 @@ void GGEMSSourceManager::Initialize(GGuint const& seed, bool const& is_tracking,
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-bool GGEMSSourceManager::IsAlive(GGsize const& index) const
+bool GGEMSSourceManager::IsAlive(GGsize const& device_index) const
 {
   // Check if all particles are DEAD in OpenCL particle buffer
-  return particles_->IsAlive(index);
+  return particles_->IsAlive(device_index);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -170,7 +191,25 @@ GGEMSSourceManager* get_instance_ggems_source_manager(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void initialize_source_manager(GGEMSSourceManager* source_manager, GGuint const& seed)
+void initialize_source_manager(GGEMSSourceManager* source_manager, GGuint const seed)
 {
   source_manager->Initialize(seed);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void print_infos_source_manager(GGEMSSourceManager* source_manager)
+{
+  source_manager->PrintInfos();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void clean_source_manager(GGEMSSourceManager* source_manager)
+{
+  source_manager->Clean();
 }

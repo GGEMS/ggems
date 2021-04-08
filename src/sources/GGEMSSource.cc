@@ -47,7 +47,7 @@ GGEMSSource::GGEMSSource(std::string const& source_name)
   particle_type_(99),
   tracking_kernel_option_("")
 {
-  GGcout("GGEMSSource", "GGEMSSource", 3) << "Allocation of GGEMSSource..." << GGendl;
+  GGcout("GGEMSSource", "GGEMSSource", 3) << "GGEMSSource creating..." << GGendl;
 
   // Allocation of geometry transformation
   geometry_transformation_ = new GGEMSGeometryTransformation();
@@ -56,8 +56,13 @@ GGEMSSource::GGEMSSource(std::string const& source_name)
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
   number_activated_devices_ = opencl_manager.GetNumberOfActivatedDevice();
 
+  // Storing a kernel for each device
+  kernel_get_primaries_ = new cl::Kernel*[number_activated_devices_];
+
   // Store the source in source manager
   GGEMSSourceManager::GetInstance().Store(this);
+
+  GGcout("GGEMSSource", "GGEMSSource", 3) << "GGEMSSource created!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -66,16 +71,38 @@ GGEMSSource::GGEMSSource(std::string const& source_name)
 
 GGEMSSource::~GGEMSSource(void)
 {
-  GGcout("GGEMSSource", "~GGEMSSource", 3) << "Deallocation of GGEMSSource..." << GGendl;
+  GGcout("GGEMSSource", "~GGEMSSource", 3) << "GGEMSSource erasing..." << GGendl;
 
-  delete geometry_transformation_;
-  delete number_of_batchs_;
-  delete number_of_particles_by_device_;
-  for (GGsize i = 0; i < number_activated_devices_; ++i) {
-    delete number_of_particles_in_batch_[i];
-    number_of_particles_in_batch_[i] = nullptr;
+  if (geometry_transformation_) {
+    delete geometry_transformation_;
+    geometry_transformation_ = nullptr;
   }
-  delete[] number_of_particles_in_batch_;
+
+  if (number_of_batchs_) {
+    delete number_of_batchs_;
+    number_of_batchs_ = nullptr;
+  }
+
+  if (number_of_particles_by_device_) {
+    delete number_of_particles_by_device_;
+    number_of_particles_by_device_ = nullptr;
+  }
+
+  if (kernel_get_primaries_) {
+    delete[] kernel_get_primaries_;
+    kernel_get_primaries_ = nullptr;
+  }
+
+  if (number_of_particles_in_batch_) {
+    for (GGsize i = 0; i < number_activated_devices_; ++i) {
+      delete number_of_particles_in_batch_[i];
+      number_of_particles_in_batch_[i] = nullptr;
+    }
+    delete[] number_of_particles_in_batch_;
+    number_of_particles_in_batch_ = nullptr;
+  }
+
+  GGcout("GGEMSSource", "~GGEMSSource", 3) << "GGEMSSource erased!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

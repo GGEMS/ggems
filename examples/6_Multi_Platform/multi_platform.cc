@@ -29,11 +29,19 @@
 */
 
 #include <cstdlib>
+#include <thread>
+#include <mutex>
+
 #include "GGEMS/global/GGEMSOpenCLManager.hh"
 #include "GGEMS/global/GGEMSConfiguration.hh"
 #include "GGEMS/tools/GGEMSRAMManager.hh"
 #include "GGEMS/sources/GGEMSSourceManager.hh"
 #include "GGEMS/sources/GGEMSXRaySource.hh"
+#include "GGEMS/tools/GGEMSProfilerManager.hh"
+
+namespace {
+  std::mutex mutex;
+}
 
 /*!
   \fn void PrintHelpAndQuit(void)
@@ -45,6 +53,35 @@ void PrintHelpAndQuit(void)
   std::cerr << std::endl;
   std::cerr << "<Device>: \"all\", \"cpu\", \"gpu\", \"gpu_nvidia\", \"gpu_amd\", \"gpu_intel\"" << std::endl;
   exit(EXIT_FAILURE);
+}
+
+void Run(GGsize const& thread_index)
+{
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+  GGEMSSourceManager& source_manager = GGEMSSourceManager::GetInstance();
+
+  // Loop over sources
+  for (GGsize i = 0; i < source_manager.GetNumberOfSources(); ++i) {
+    GGsize device_index = opencl_manager.GetIndexOfActivatedDevice(thread_index);
+
+    mutex.lock();
+    GGcout("", "Run", 0) << "## Source " << source_manager.GetNameOfSource(i) << " on " << opencl_manager.GetDeviceName(device_index) << GGendl;
+    mutex.unlock();
+
+    // Loop over batch
+    GGsize number_of_batchs = source_manager.GetNumberOfBatchs(i, thread_index);
+    for (GGsize j = 0; j < number_of_batchs; ++j) {
+      GGsize number_of_particles = source_manager.GetNumberOfParticlesInBatch(i, thread_index, j);
+
+      mutex.lock();
+      GGcout("", "Run", 0) << "----> Launching batch " << j+1 << "/" << number_of_batchs << GGendl;
+      GGcout("", "Run", 0) << "      + Generating " << number_of_particles << " particles..." << GGendl;
+      mutex.unlock();
+
+      // Generating particles
+      source_manager.GetPrimaries(i, thread_index, number_of_particles);
+    }
+  }
 }
 
 /*!
@@ -74,6 +111,7 @@ int main(int argc, char** argv)
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
   GGEMSRAMManager& ram_manager = GGEMSRAMManager::GetInstance();
   GGEMSSourceManager& source_manager = GGEMSSourceManager::GetInstance();
+  GGEMSProfilerManager& profiler_manager = GGEMSProfilerManager::GetInstance();
 
   try {
     // Print infos about platform and device
@@ -86,6 +124,8 @@ int main(int argc, char** argv)
     else if (device == "gpu_intel") opencl_manager.DeviceToActivate("gpu", "intel");
     else opencl_manager.DeviceToActivate(device);
 
+    opencl_manager.PrintActivatedDevices();
+
     GGEMSXRaySource point_source("point_source");
     point_source.SetSourceParticleType("gamma");
     point_source.SetNumberOfParticles(10000000);
@@ -95,29 +135,32 @@ int main(int argc, char** argv)
     point_source.SetFocalSpotSize(0.0f, 0.0f, 0.0f, "mm");
     point_source.SetMonoenergy(60.0f, "keV");
 
-    // GGEMSXRaySource point_source2("point_source2");
-    // point_source2.SetSourceParticleType("gamma");
-    // point_source2.SetNumberOfParticles(25000000);
-    // point_source2.SetPosition(-595.0f, 0.0f, 0.0f, "mm");
-    // point_source2.SetRotation(0.0f, 0.0f, 90.0f, "deg");
-    // point_source2.SetBeamAperture(12.5f, "deg");
-    // point_source2.SetFocalSpotSize(0.0f, 0.0f, 0.0f, "mm");
-    // point_source2.SetPolyenergy("spectrum_120kVp_2mmAl.dat");
+    GGEMSXRaySource point_source2("point_source2");
+    point_source2.SetSourceParticleType("gamma");
+    point_source2.SetNumberOfParticles(25000000);
+    point_source2.SetPosition(-595.0f, 0.0f, 0.0f, "mm");
+    point_source2.SetRotation(0.0f, 0.0f, 90.0f, "deg");
+    point_source2.SetBeamAperture(12.5f, "deg");
+    point_source2.SetFocalSpotSize(0.0f, 0.0f, 0.0f, "mm");
+    point_source2.SetPolyenergy("spectrum_120kVp_2mmAl.dat");
 
-    // source_manager.Initialize(777);
-    // source_manager.PrintInfos();
+    source_manager.Initialize(777);
+    source_manager.PrintInfos();
 
     ram_manager.PrintRAMStatus();
 
-    // Source
-    // GGEMSXRaySource point_source("point_source");
-    // point_source.SetSourceParticleType("gamma");
-    // point_source.SetNumberOfParticles(1000000000);
-    // point_source.SetPosition(-595.0f, 0.0f, 0.0f, "mm");
-    // point_source.SetRotation(0.0f, 0.0f, 0.0f, "deg");
-    // point_source.SetBeamAperture(12.5f, "deg");
-    // point_source.SetFocalSpotSize(0.0f, 0.0f, 0.0f, "mm");
-    // point_source.SetPolyenergy("data/spectrum_120kVp_2mmAl.dat");
+    GGsize number_of_activated_devices = opencl_manager.GetNumberOfActivatedDevice();
+    std::thread* thread_device = new std::thread[number_of_activated_devices];
+
+    for (GGsize i = 0; i < number_of_activated_devices; ++i) {
+      thread_device[i] = std::thread(Run, i);
+    }
+
+    for (GGsize i = 0; i < number_of_activated_devices; ++i) thread_device[i].join();
+
+    delete[] thread_device;
+
+    profiler_manager.PrintSummaryProfile();
   }
   catch (std::exception& e) {
     std::cerr << e.what() << std::endl;
@@ -127,6 +170,7 @@ int main(int argc, char** argv)
   }
 
   // Cleaning OpenCL manager
+  source_manager.Clean();
   opencl_manager.Clean();
   exit(EXIT_SUCCESS);
 }

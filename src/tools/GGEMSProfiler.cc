@@ -46,7 +46,7 @@ namespace {
 GGEMSProfiler::GGEMSProfiler(void)
 : profiler_item_(nullptr)
 {
-  GGcout("GGEMSProfiler", "GGEMSProfiler", 3) << "Allocation of GGEMS Profiler..." << GGendl;
+  ;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -55,8 +55,6 @@ GGEMSProfiler::GGEMSProfiler(void)
 
 GGEMSProfiler::~GGEMSProfiler(void)
 {
-  GGcout("GGEMSProfiler", "~GGEMSProfiler", 3) << "Deallocation of GGEMS Profiler..." << GGendl;
-
   if (profiler_item_) {
     delete profiler_item_;
     profiler_item_ = nullptr;

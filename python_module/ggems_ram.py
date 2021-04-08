@@ -27,7 +27,8 @@ class GGEMSRAMManager(object):
         ggems_lib.print_infos_ram_manager.argtypes = [ctypes.c_void_p]
         ggems_lib.print_infos_ram_manager.restype = ctypes.c_void_p
 
-        self.obj = ggems_lib.get_instance_ggems_opencl_manager()
+        self.obj = ggems_lib.get_instance_ggems_ram_manager()
 
     def print_infos(self):
         ggems_lib.print_infos_ram_manager(self.obj)
+

@@ -125,11 +125,12 @@ class GGEMS_EXPORT GGEMSXRaySource : public GGEMSSource
     void PrintInfos(void) const override;
 
     /*!
-      \fn void GetPrimaries(GGsize const& number_of particles) = 0
+      \fn void GetPrimaries(GGsize const& thread_index, GGsize const& number_of particles)
+      \param thread_index - index of activated device (thread index)
       \param number_of_particles - number of particles to generate
       \brief Generate primary particles
     */
-    void GetPrimaries(GGsize const& number_of_particles) override;
+    void GetPrimaries(GGsize const& thread_index, GGsize const& number_of_particles) override;
 
   private:
     /*!

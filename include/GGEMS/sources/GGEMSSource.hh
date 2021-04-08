@@ -131,19 +131,21 @@ class GGEMS_EXPORT GGEMSSource
     void EnableTracking(void);
 
     /*!
-      \fn inline GGsize GetNumberOfBatchs(void) const
+      \fn inline GGsize GetNumberOfBatchs(GGsize const& device_index) const
+      \param device_index - index of activated device
       \return the number of batch of particle
       \brief method returning the number of particles by batch
     */
-    //inline GGsize GetNumberOfBatchs(void) const {return number_of_particles_in_batch_.size();}
+    inline GGsize GetNumberOfBatchs(GGsize const& device_index) const {return number_of_batchs_[device_index];}
 
     /*!
-      \fn inline GGulong GetNumberOfParticlesInBatch(GGsize const& batch_index)
+      \fn inline GGulong GetNumberOfParticlesInBatch(GGsize const& device_index, GGsize const& batch_index)
+      \param device_index - index of activated device
       \param batch_index - index of the batch
       \return the number of particle for a specific batch
       \brief method returning the number of particles in a specific batch
     */
-    //inline GGsize GetNumberOfParticlesInBatch(GGsize const& batch_index) {return number_of_particles_in_batch_.at(batch_index);}
+    inline GGsize GetNumberOfParticlesInBatch(GGsize const& device_index, GGsize const& batch_index) {return number_of_particles_in_batch_[device_index][batch_index];}
 
     /*!
       \fn void CheckParameters(void) const
@@ -158,11 +160,12 @@ class GGEMS_EXPORT GGEMSSource
     virtual void Initialize(void);
 
     /*!
-      \fn void GetPrimaries(GGsize const& number_of particles) = 0
+      \fn void GetPrimaries(GGsize const& thread_index, GGsize const& number_of particles) = 0
+      \param thread_index - index of activated device (thread index)
       \param number_of_particles - number of particles to generate
       \brief Generate primary particles
     */
-    virtual void GetPrimaries(GGsize const& number_of_particles) = 0;
+    virtual void GetPrimaries(GGsize const& thread_index, GGsize const& number_of_particles) = 0;
 
     /*!
       \fn void PrintInfos(void) const = 0
@@ -196,7 +199,7 @@ class GGEMS_EXPORT GGEMSSource
     std::string tracking_kernel_option_; /*!< Preprocessor option for tracking */
     GGEMSGeometryTransformation* geometry_transformation_; /*!< Pointer storing the geometry transformation */
 
-    cl::Kernel* kernel_get_primaries_; /*!< Kernel generating primaries on OpenCL device */
+    cl::Kernel** kernel_get_primaries_; /*!< Kernel generating primaries on OpenCL device */
     GGsize number_activated_devices_; /*!< Number of activated device */
 };
 

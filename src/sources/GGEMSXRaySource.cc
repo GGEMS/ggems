@@ -51,7 +51,7 @@ GGEMSXRaySource::GGEMSXRaySource(std::string const& source_name)
   energy_spectrum_(nullptr),
   cdf_(nullptr)
 {
-  GGcout("GGEMSXRaySource", "GGEMSXRaySource", 3) << "Allocation of GGEMSXRaySource..." << GGendl;
+  GGcout("GGEMSXRaySource", "GGEMSXRaySource", 3) << "GGEMSXRaySource creating..." << GGendl;
 
   // Initialization of local axis for X-ray source
   geometry_transformation_->SetAxisTransformation(
@@ -70,6 +70,8 @@ GGEMSXRaySource::GGEMSXRaySource(std::string const& source_name)
   // Allocating memory for cdf and energy spectrum
   energy_spectrum_ = new cl::Buffer*[number_activated_devices_];
   cdf_ = new cl::Buffer*[number_activated_devices_];
+
+  GGcout("GGEMSXRaySource", "GGEMSXRaySource", 3) << "GGEMSXRaySource created!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -78,23 +80,38 @@ GGEMSXRaySource::GGEMSXRaySource(std::string const& source_name)
 
 GGEMSXRaySource::~GGEMSXRaySource(void)
 {
-  GGcout("GGEMSXRaySource", "~GGEMSXRaySource", 3) << "Deallocation of GGEMSXRaySource..." << GGendl;
+  GGcout("GGEMSXRaySource", "~GGEMSXRaySource", 3) << "GGEMSXRaySource erasing..." << GGendl;
 
   // Get the OpenCL manager
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
-  for (GGsize i = 0; i < number_activated_devices_; ++i) {
-    if (is_monoenergy_mode_) {
-      opencl_manager.Deallocate(energy_spectrum_[i], 2*sizeof(GGfloat), i);
-      opencl_manager.Deallocate(cdf_[i], 2*sizeof(GGfloat), i);
+  if (energy_spectrum_) {
+    for (GGsize i = 0; i < number_activated_devices_; ++i) {
+      if (is_monoenergy_mode_) {
+        opencl_manager.Deallocate(energy_spectrum_[i], 2*sizeof(GGfloat), i);
+      }
+      else {
+        opencl_manager.Deallocate(energy_spectrum_[i], number_of_energy_bins_*sizeof(GGfloat), i);
+      }
     }
-    else {
-      opencl_manager.Deallocate(energy_spectrum_[i], number_of_energy_bins_*sizeof(GGfloat), i);
-      opencl_manager.Deallocate(cdf_[i], number_of_energy_bins_*sizeof(GGfloat), i);
-    }
+    delete[] energy_spectrum_;
+    energy_spectrum_ = nullptr;
   }
-  delete[] energy_spectrum_;
-  delete[] cdf_;
+
+  if (cdf_) {
+    for (GGsize i = 0; i < number_activated_devices_; ++i) {
+      if (is_monoenergy_mode_) {
+        opencl_manager.Deallocate(cdf_[i], 2*sizeof(GGfloat), i);
+      }
+      else {
+        opencl_manager.Deallocate(cdf_[i], number_of_energy_bins_*sizeof(GGfloat), i);
+      }
+    }
+    delete[] cdf_;
+    cdf_ = nullptr;
+  }
+
+  GGcout("GGEMSXRaySource", "~GGEMSXRaySource", 3) << "GGEMSXRaySource erased!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -111,57 +128,62 @@ void GGEMSXRaySource::InitializeKernel(void)
 
   // Compiling the kernel
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
-  kernel_get_primaries_ = opencl_manager.CompileKernel(filename, "get_primaries_ggems_xray_source", nullptr, const_cast<char*>(tracking_kernel_option_.c_str()));
+
+  // Compiling kernel on each device
+  opencl_manager.CompileKernel(filename, "get_primaries_ggems_xray_source", kernel_get_primaries_, nullptr, const_cast<char*>(tracking_kernel_option_.c_str()));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSXRaySource::GetPrimaries(GGsize const& number_of_particles)
+void GGEMSXRaySource::GetPrimaries(GGsize const& thread_index, GGsize const& number_of_particles)
 {
-  GGcout("GGEMSXRaySource", "GetPrimaries", 3) << "Generating " << number_of_particles << " new particles..." << GGendl;
+  // Get command queue and event
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+  cl::CommandQueue* queue = opencl_manager.GetCommandQueue(thread_index);
+  cl::Event* event = opencl_manager.GetEvent(thread_index);
 
-  // // Get command queue and event
-  // GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
-  // cl::CommandQueue* queue = opencl_manager.GetCommandQueue();
-  // cl::Event* event = opencl_manager.GetEvent();
+  // Get Device name and storing methode name + device
+  GGsize device_index = opencl_manager.GetIndexOfActivatedDevice(thread_index);
+  std::string device_name = opencl_manager.GetDeviceName(device_index);
+  std::ostringstream oss(std::ostringstream::out);
+  oss << "GGEMSXRaySource::GetPrimaries in " << device_name;
 
-  // // Get the OpenCL buffers
-  // GGEMSSourceManager& source_manager = GGEMSSourceManager::GetInstance();
-  // cl::Buffer* particles = source_manager.GetParticles()->GetPrimaryParticles();
-  // cl::Buffer* randoms = source_manager.GetPseudoRandomGenerator()->GetPseudoRandomNumbers();
-  // cl::Buffer* matrix_transformation = geometry_transformation_->GetTransformationMatrix();
+  // Get the OpenCL buffers
+  GGEMSSourceManager& source_manager = GGEMSSourceManager::GetInstance();
+  cl::Buffer* particles = source_manager.GetParticles()->GetPrimaryParticles(thread_index);
+  cl::Buffer* randoms = source_manager.GetPseudoRandomGenerator()->GetPseudoRandomNumbers(thread_index);
+  cl::Buffer* matrix_transformation = geometry_transformation_->GetTransformationMatrix(thread_index);
 
-  // // Getting work group size, and work-item number
-  // GGsize work_group_size = opencl_manager.GetWorkGroupSize();
-  // GGsize number_of_work_items = opencl_manager.GetBestWorkItem(number_of_particles);
+  // Getting work group size, and work-item number
+  GGsize work_group_size = opencl_manager.GetWorkGroupSize();
+  GGsize number_of_work_items = opencl_manager.GetBestWorkItem(number_of_particles);
 
-  // // Parameters for work-item in kernel
-  // cl::NDRange global_wi(number_of_work_items);
-  // cl::NDRange local_wi(work_group_size);
+  // Parameters for work-item in kernel
+  cl::NDRange global_wi(number_of_work_items);
+  cl::NDRange local_wi(work_group_size);
 
-  // // Set parameters for kernel
-  // std::shared_ptr<cl::Kernel> kernel = kernel_get_primaries_.lock();
-  // kernel->setArg(0, number_of_particles);
-  // kernel->setArg(1, *particles);
-  // kernel->setArg(2, *randoms);
-  // kernel->setArg(3, particle_type_);
-  // kernel->setArg(4, *energy_spectrum_);
-  // kernel->setArg(5, *cdf_);
-  // kernel->setArg(6, static_cast<GGint>(number_of_energy_bins_));
-  // kernel->setArg(7, beam_aperture_);
-  // kernel->setArg(8, focal_spot_size_);
-  // kernel->setArg(9, *matrix_transformation);
+  // Set parameters for kernel
+  kernel_get_primaries_[thread_index]->setArg(0, number_of_particles);
+  kernel_get_primaries_[thread_index]->setArg(1, *particles);
+  kernel_get_primaries_[thread_index]->setArg(2, *randoms);
+  kernel_get_primaries_[thread_index]->setArg(3, particle_type_);
+  kernel_get_primaries_[thread_index]->setArg(4, *energy_spectrum_[thread_index]);
+  kernel_get_primaries_[thread_index]->setArg(5, *cdf_[thread_index]);
+  kernel_get_primaries_[thread_index]->setArg(6, static_cast<GGint>(number_of_energy_bins_));
+  kernel_get_primaries_[thread_index]->setArg(7, beam_aperture_);
+  kernel_get_primaries_[thread_index]->setArg(8, focal_spot_size_);
+  kernel_get_primaries_[thread_index]->setArg(9, *matrix_transformation);
 
-  // // Launching kernel
-  // GGint kernel_status = queue->enqueueNDRangeKernel(*kernel, 0, global_wi, local_wi, nullptr, event);
-  // opencl_manager.CheckOpenCLError(kernel_status, "GGEMSXRaySource", "GetPrimaries");
+  // Launching kernel
+  GGint kernel_status = queue->enqueueNDRangeKernel(*kernel_get_primaries_[thread_index], 0, global_wi, local_wi, nullptr, event);
+  opencl_manager.CheckOpenCLError(kernel_status, "GGEMSXRaySource", "GetPrimaries");
 
-  // // GGEMS Profiling
-  // GGEMSProfilerManager& profiler_manager = GGEMSProfilerManager::GetInstance();
-  // profiler_manager.HandleEvent(*event, "GGEMSXRaySource::GetPrimaries");
-  // queue->finish();
+  // GGEMS Profiling
+  GGEMSProfilerManager& profiler_manager = GGEMSProfilerManager::GetInstance();
+  profiler_manager.HandleEvent(*event, oss.str());
+  queue->finish();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

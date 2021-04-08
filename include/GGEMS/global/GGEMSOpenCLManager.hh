@@ -191,6 +191,45 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     inline GGsize GetRAMMemory(GGsize const& index) const {return static_cast<GGsize>(device_global_mem_size_[index]);}
 
     /*!
+      \fn inline GGsize GetWorkGroupSize(void) const
+      \return Work group size
+      \brief Get the work group size defined in GGEMS on activated OpenCL context
+    */
+    inline GGsize GetWorkGroupSize(void) const { return work_group_size_;}
+
+    /*!
+      \fn GGsize GetBestWorkItem(GGsize const& number_of_elements) const
+      \param number_of_elements - number of elements for the kernel computation
+      \return best number of work item
+      \brief get the best number of work item
+    */
+    GGsize GetBestWorkItem(GGsize const& number_of_elements) const;
+
+    /*!
+      \fn cl::Context* GetContext(GGsize const& index) const
+      \param index - index of activated device
+      \return the pointer on activated context
+      \brief return the activated context
+    */
+    inline cl::Context* GetContext(GGsize const& index) const {return contexts_[index];}
+
+    /*!
+      \fn cl::CommandQueue* GetCommandQueue(GGsize const& index) const
+      \param index - index of activated device
+      \return the pointer on activated command queue
+      \brief Return the command queue to activated context
+    */
+    inline cl::CommandQueue* GetCommandQueue(GGsize const& index) const {return queues_[index];}
+
+    /*!
+      \fn cl::Event* GetEvent(GGsize const& index) const
+      \param index - index of activated device
+      \return the pointer on activated event
+      \brief return an event to activated context
+    */
+    inline cl::Event* GetEvent(GGsize const& index) const {return events_[index];}
+
+    /*!
       \fn void DeviceToActivate(GGsize const& device_id)
       \param device_id - device index
       \brief set the index of the device to activate
@@ -219,15 +258,16 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     void Clean(void);
 
     /*!
-      \fn cl::Kernel* CompileKernel(std::string const& kernel_filename, std::string const& kernel_name, char* const custom_options = nullptr, char* const additional_options = nullptr)
+      \fn void CompileKernel(std::string const& kernel_filename, std::string const& kernel_name, cl::Kernel** kernel_list, char* const custom_options = nullptr, char* const additional_options = nullptr)
       \param kernel_filename - filename where is declared the kernel
       \param kernel_name - name of the kernel
+      \param kernel_list - list of kernel by device
       \param custom_options - new compilation option for the kernel
       \param additional_options - additionnal compilation option
       \brief Compile the OpenCL kernel on the activated device
       \return the pointer on the OpenCL kernel
     */
-    cl::Kernel* CompileKernel(std::string const& kernel_filename, std::string const& kernel_name, char* const custom_options = nullptr, char* const additional_options = nullptr);
+    void CompileKernel(std::string const& kernel_filename, std::string const& kernel_name, cl::Kernel** kernel_list, char* const custom_options = nullptr, char* const additional_options = nullptr);
 
     /*!
       \return the pointer on host memory on write/read mode

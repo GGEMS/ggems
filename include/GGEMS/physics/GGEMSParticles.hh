@@ -100,26 +100,28 @@ class GGEMS_EXPORT GGEMSParticles
     inline cl::Buffer* GetPrimaryParticles(GGsize const& index) const {return primary_particles_[index];};
 
     /*!
-      \fn void SetNumberOfParticles(GGsize const& number_of_particles)
+      \fn void SetNumberOfParticles(GGsize const& device_index, GGsize const& number_of_particles)
+      \param device_index - index of activated device
       \param number_of_particles - number of activated particles in buffer
       \brief Set the number of particles in buffer
     */
-    void SetNumberOfParticles(GGsize const& number_of_particles);
+    void SetNumberOfParticles(GGsize const& device_index, GGsize const& number_of_particles);
 
     /*!
-      \fn inline GGsize GetNumberOfParticles(void) const
+      \fn inline GGsize GetNumberOfParticles(GGsize const& device_index) const
+      \param device_index - index of activated device
       \return number of particles currently activated in OpenCL buffer
-      \brief Get the number of particles
+      \brief Get the number of particles on activated device
     */
-    inline GGsize GetNumberOfParticles(void) const {return number_of_particles_;};
+    inline GGsize GetNumberOfParticles(GGsize const& device_index) const {return number_of_particles_[device_index];};
 
     /*!
-      \fn bool IsAlive(GGsize const& index) const
-      \param index - index of activated device
+      \fn bool IsAlive(GGsize const& device_index) const
+      \param device_index - index of activated device
       \return true if source is still alive, otherwize false
       \brief check if some particles are alive in OpenCL particle buffer
     */
-    bool IsAlive(GGsize const& index) const;
+    bool IsAlive(GGsize const& device_index) const;
 
     /*!
       \fn void Dump(std::string const& message) const
@@ -136,7 +138,7 @@ class GGEMS_EXPORT GGEMSParticles
     void AllocatePrimaryParticles(void);
 
   private:
-    GGsize number_of_particles_; /*!< Number of activated particles in buffer */
+    GGsize* number_of_particles_; /*!< Number of activated particles in buffer */
     cl::Buffer** primary_particles_; /*!< Pointer storing info about primary particles in batch on OpenCL device */
     GGsize number_activated_devices_; /*!< Number of activated device */
 };
