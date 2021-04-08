@@ -39,9 +39,11 @@
 
 GGEMSProfilerManager::GGEMSProfilerManager(void)
 {
-  GGcout("GGEMSProfilerManager", "GGEMSProfilerManager", 3) << "Allocation of GGEMS Profiler Manager..." << GGendl;
+  GGcout("GGEMSProfilerManager", "GGEMSProfilerManager", 3) << "GGEMSProfilerManager creating..." << GGendl;
 
   profilers_.clear();
+
+  GGcout("GGEMSProfilerManager", "GGEMSProfilerManager", 3) << "GGEMSProfilerManager created!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -50,9 +52,11 @@ GGEMSProfilerManager::GGEMSProfilerManager(void)
 
 GGEMSProfilerManager::~GGEMSProfilerManager(void)
 {
-  GGcout("GGEMSProfilerManager", "~GGEMSProfilerManager", 3) << "Deallocation of GGEMS Profiler Manager..." << GGendl;
+  GGcout("GGEMSProfilerManager", "~GGEMSProfilerManager", 3) << "GGEMSProfilerManager erasing!!!" << GGendl;
 
   profilers_.clear();
+
+  GGcout("GGEMSProfilerManager", "~GGEMSProfilerManager", 3) << "GGEMSProfilerManager erased!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

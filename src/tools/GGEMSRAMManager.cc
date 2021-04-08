@@ -40,7 +40,7 @@
 
 GGEMSRAMManager::GGEMSRAMManager(void)
 {
-  GGcout("GGEMSRAMManager", "GGEMSRAMManager", 3) << "Allocation of GGEMS RAM Manager..." << GGendl;
+  GGcout("GGEMSRAMManager", "GGEMSRAMManager", 3) << "GGEMSRAMManager creating..." << GGendl;
 
   // Get the OpenCL manager and number of detected device
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
@@ -59,6 +59,8 @@ GGEMSRAMManager::GGEMSRAMManager(void)
     max_buffer_size_[i] = opencl_manager.GetMaxBufferAllocationSize(i);
     allocated_memories_[i].clear();
   }
+
+  GGcout("GGEMSRAMManager", "GGEMSRAMManager", 3) << "GGEMSRAMManager created!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -67,12 +69,28 @@ GGEMSRAMManager::GGEMSRAMManager(void)
 
 GGEMSRAMManager::~GGEMSRAMManager(void)
 {
-  GGcout("GGEMSRAMManager", "~GGEMSRAMManager", 3) << "Deallocation of GGEMS RAM Manager..." << GGendl;
+  GGcout("GGEMSRAMManager", "~GGEMSRAMManager", 3) << "GGEMSRAMManager erasing..." << GGendl;
 
-  delete allocated_ram_;
-  delete max_available_ram_;
-  delete max_buffer_size_;
-  for (GGsize i = 0; i < number_detected_devices_; ++i) allocated_memories_[i].clear();
+  if (allocated_ram_) {
+    delete allocated_ram_;
+    allocated_ram_ = nullptr;
+  }
+
+  if (max_available_ram_) {
+    delete max_available_ram_;
+    max_available_ram_ = nullptr;
+  }
+
+  if (max_buffer_size_) {
+    delete max_buffer_size_;
+    max_buffer_size_ = nullptr;
+  }
+
+  if (allocated_memories_) {
+    for (GGsize i = 0; i < number_detected_devices_; ++i) allocated_memories_[i].clear();
+  }
+
+  GGcout("GGEMSRAMManager", "~GGEMSRAMManager", 3) << "GGEMSRAMManager erased!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -128,8 +146,6 @@ void GGEMSRAMManager::PrintRAMStatus(void) const
 
   GGcout("GGEMSRAMManager", "PrintRAMStatus", 0) << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << GGendl;
 
-  std::cout << max_available_ram_[0] << " " << max_buffer_size_[0] << " " << number_detected_devices_ << std::endl;
-
   // Loop over activated device
   for (GGsize i = 0; i < number_activated_device; ++i) {
     GGsize device_index = opencl_manager.GetIndexOfActivatedDevice(i);
@@ -141,11 +157,11 @@ void GGEMSRAMManager::PrintRAMStatus(void) const
     GGcout("GGEMSRAMManager", "PrintRAMStatus", 0) << "-------" << GGendl;
     GGcout("GGEMSRAMManager", "PrintRAMStatus", 0) << "Total RAM memory allocated: " << BestDigitalUnit(allocated_ram_[device_index]) << " / " << BestDigitalUnit(max_available_ram_[device_index]) << " (" << percent_allocated_RAM << "%)" << GGendl;
     GGcout("GGEMSRAMManager", "PrintRAMStatus", 0) << "Details: " << GGendl;
-    // for (auto&& i : allocated_memories_[device_index]) {
-    //   float usage = static_cast<GGfloat>(i.second) * 100.0f / static_cast<GGfloat>(allocated_ram_[device_index]);
-    //   if (allocated_ram_[device_index] == 0) usage = 0.0f;
-    //   GGcout("GGEMSRAMManager", "PrintRAMStatus", 0) << "    + In '" << i.first << "': " << BestDigitalUnit(i.second) << " allocated (" << usage << "%)" << GGendl;
-    // }
+    for (auto&& i : allocated_memories_[device_index]) {
+      float usage = static_cast<GGfloat>(i.second) * 100.0f / static_cast<GGfloat>(allocated_ram_[device_index]);
+      if (allocated_ram_[device_index] == 0) usage = 0.0f;
+      GGcout("GGEMSRAMManager", "PrintRAMStatus", 0) << "    + In '" << i.first << "': " << BestDigitalUnit(i.second) << " allocated (" << usage << "%)" << GGendl;
+    }
   }
 
   GGcout("GGEMSRAMManager", "PrintRAMStatus", 0) << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << GGendl;

@@ -39,7 +39,7 @@
 
 GGEMSGeometryTransformation::GGEMSGeometryTransformation(void)
 {
-  GGcout("GGEMSGeometryTransformation", "GGEMSGeometryTransformation", 3) << "Allocation of GGEMSGeometryTransformation..." << GGendl;
+  GGcout("GGEMSGeometryTransformation", "GGEMSGeometryTransformation", 3) << "GGEMSGeometryTransformation creating..." << GGendl;
 
   // Initialize the position with min. float
   position_.x = std::numeric_limits<float>::min();
@@ -111,6 +111,8 @@ GGEMSGeometryTransformation::GGEMSGeometryTransformation(void)
     // Release the pointer, mandatory step!!!
     opencl_manager.ReleaseDeviceBuffer(matrix_transformation_[i], matrix_transformation_device, i);
   }
+
+  GGcout("GGEMSGeometryTransformation", "GGEMSGeometryTransformation", 3) << "GGEMSGeometryTransformation created!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -119,14 +121,19 @@ GGEMSGeometryTransformation::GGEMSGeometryTransformation(void)
 
 GGEMSGeometryTransformation::~GGEMSGeometryTransformation()
 {
-  GGcout("GGEMSGeometryTransformation", "~GGEMSGeometryTransformation", 3) << "Deallocation of GGEMSGeometryTransformation..." << GGendl;
+  GGcout("GGEMSGeometryTransformation", "~GGEMSGeometryTransformation", 3) << "GGEMSGeometryTransformation erasing..." << GGendl;
 
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
-  for (GGsize i = 0; i < number_activated_devices_; ++i) {
-    opencl_manager.Deallocate(matrix_transformation_[i], sizeof(GGfloat44), i);
+  if (matrix_transformation_) {
+    for (GGsize i = 0; i < number_activated_devices_; ++i) {
+      opencl_manager.Deallocate(matrix_transformation_[i], sizeof(GGfloat44), i);
+    }
+    delete[] matrix_transformation_;
+    matrix_transformation_ = nullptr;
   }
-  delete[] matrix_transformation_;
+
+  GGcout("GGEMSGeometryTransformation", "~GGEMSGeometryTransformation", 3) << "GGEMSGeometryTransformation erased!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -136,55 +136,64 @@ class GGEMS_EXPORT GGEMSSourceManager
     inline std::string GetNameOfSource(GGsize const& source_index) const {return sources_[source_index]->GetNameOfSource();}
 
     /*!
-      \fn inline GGsize GetNumberOfBatchs(GGsize const& source_index) const
+      \fn inline GGsize GetNumberOfBatchs(GGsize const& source_index, GGsize const& device_index) const
       \param source_index - index of the source
+      \param device_index - index of activated device
       \return the number of batch of particle
       \brief method returning the number of particles by batch
     */
-    //inline GGsize GetNumberOfBatchs(GGsize const& source_index) const {return sources_[source_index]->GetNumberOfBatchs();}
+    inline GGsize GetNumberOfBatchs(GGsize const& source_index, GGsize const& device_index) const {return sources_[source_index]->GetNumberOfBatchs(device_index);}
 
     /*!
-      \fn inline GGsize GetNumberOfParticlesInBatch(GGsize const& source_index, GGsize const& batch_index)
+      \fn inline GGsize GetNumberOfParticlesInBatch(GGsize const& source_index, GGsize const& device_index, GGsize const& batch_index)
       \param source_index - index of the source
+      \param device_index - index of activated device
       \param batch_index - index of the source
       \return the number of particle for a specific batch
       \brief method returning the number of particles in a specific batch
     */
-    //inline GGsize GetNumberOfParticlesInBatch(GGsize const& source_index, GGsize const& batch_index) {return sources_[source_index]->GetNumberOfParticlesInBatch(batch_index);}
+    inline GGsize GetNumberOfParticlesInBatch(GGsize const& source_index, GGsize const& device_index, GGsize const& batch_index) {return sources_[source_index]->GetNumberOfParticlesInBatch(device_index, batch_index);}
 
     /*!
       \fn GGEMSParticles* GetParticles(void) const
       \return pointer on particle stack
       \brief method returning the OpenCL stack on particles
     */
-    inline GGEMSParticles* GetParticles(void) const {return nullptr;/*particles_.get();*/}
+    inline GGEMSParticles* GetParticles(void) const {return particles_;}
 
     /*!
       \fn GGEMSPseudoRandomGenerator* GetPseudoRandomGenerator(void) const
       \return pointer on pseudo random stack
       \brief method returning the OpenCL stack on pseudo random numbers
     */
-    inline GGEMSPseudoRandomGenerator* GetPseudoRandomGenerator(void) const {return nullptr;/*pseudo_random_generator_.get();*/}
+    inline GGEMSPseudoRandomGenerator* GetPseudoRandomGenerator(void) const {return pseudo_random_generator_;}
 
     /*!
-      \fn void GetPrimaries(GGsize const& source_index, GGsize const& number_of_particles) const
+      \fn void GetPrimaries(GGsize const& source_index, GGsize const& thread_index, GGsize const& number_of_particles) const
       \param source_index - index of the source
+      \param thread_index - index of activated device (thread index)
       \param number_of_particles - number of particles to simulate
       \brief Generate primary particles for a specific source
     */
-    inline void GetPrimaries(GGsize const& source_index, GGsize const& number_of_particles) const
+    inline void GetPrimaries(GGsize const& source_index, GGsize const& thread_index, GGsize const& number_of_particles) const
     {
-      //particles_->SetNumberOfParticles(number_of_particles);
-      //sources_[source_index]->GetPrimaries(number_of_particles);
+      particles_->SetNumberOfParticles(thread_index, number_of_particles);
+      sources_[source_index]->GetPrimaries(thread_index, number_of_particles);
     }
 
     /*!
-      \fn bool IsAlive(GGsize const& index) const
-      \param index - index of activated device
+      \fn bool IsAlive(GGsize const& device_index) const
+      \param device_index - index of activated device
       \return true if source is still alive, otherwize false
       \brief check if some particles are alive in OpenCL particle buffer
     */
-    bool IsAlive(GGsize const& index) const;
+    bool IsAlive(GGsize const& device_index) const;
+
+    /*!
+      \fn void Clean(void)
+      \brief clean OpenCL data
+    */
+    void Clean(void);
 
   private: // Source infos
     GGEMSSource** sources_; /*!< Pointer on GGEMS sources */
@@ -206,6 +215,20 @@ extern "C" GGEMS_EXPORT GGEMSSourceManager* get_instance_ggems_source_manager(vo
   \param seed - seed of random
   \brief Initialize source
 */
-extern "C" GGEMS_EXPORT void initialize_source_manager(GGEMSSourceManager* source_manager, GGuint const& seed);
+extern "C" GGEMS_EXPORT void initialize_source_manager(GGEMSSourceManager* source_manager, GGuint const seed);
+
+/*!
+  \fn void print_infos_source_manager(GGEMSSourceManager* source_manager)
+  \param source_manager - pointer on the singleton
+  \brief Print information about source
+*/
+extern "C" GGEMS_EXPORT void print_infos_source_manager(GGEMSSourceManager* source_manager);
+
+/*!
+  \fn void clean_source_manager(GGEMSSourceManager* source_manager)
+  \param source_manager - pointer on the singleton
+  \brief Cleaning buffer
+*/
+extern "C" GGEMS_EXPORT void clean_source_manager(GGEMSSourceManager* source_manager);
 
 #endif // End of GUARD_GGEMS_SOURCES_GGEMSSOURCEMANAGER

@@ -52,7 +52,8 @@ GGEMSPseudoRandomGenerator::GGEMSPseudoRandomGenerator(void)
 : pseudo_random_numbers_(nullptr),
   seed_(0)
 {
-  GGcout("GGEMSPseudoRandomGenerator", "GGEMSPseudoRandomGenerator", 3) << "Allocation of GGEMSPseudoRandomGenerator..." << GGendl;
+  GGcout("GGEMSPseudoRandomGenerator", "GGEMSPseudoRandomGenerator", 3) << "GGEMSPseudoRandomGenerator creating..." << GGendl;
+  GGcout("GGEMSPseudoRandomGenerator", "GGEMSPseudoRandomGenerator", 3) << "GGEMSPseudoRandomGenerator created!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -61,14 +62,19 @@ GGEMSPseudoRandomGenerator::GGEMSPseudoRandomGenerator(void)
 
 GGEMSPseudoRandomGenerator::~GGEMSPseudoRandomGenerator(void)
 {
-  GGcout("GGEMSPseudoRandomGenerator", "~GGEMSPseudoRandomGenerator", 3) << "Deallocation of GGEMSPseudoRandomGenerator..." << GGendl;
+  GGcout("GGEMSPseudoRandomGenerator", "~GGEMSPseudoRandomGenerator", 3) << "GGEMSPseudoRandomGenerator erasing..." << GGendl;
 
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
-  // for (GGsize i = 0; i < number_activated_devices_; ++i) {
-  //   opencl_manager.Deallocate(pseudo_random_numbers_[i], sizeof(GGEMSRandom), i);
-  // }
-  // delete[] pseudo_random_numbers_;
+  if (pseudo_random_numbers_) {
+    for (GGsize i = 0; i < number_activated_devices_; ++i) {
+      opencl_manager.Deallocate(pseudo_random_numbers_[i], sizeof(GGEMSRandom), i);
+    }
+    delete[] pseudo_random_numbers_;
+    pseudo_random_numbers_ = nullptr;
+  }
+
+  GGcout("GGEMSPseudoRandomGenerator", "~GGEMSPseudoRandomGenerator", 3) << "GGEMSPseudoRandomGenerator erased!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

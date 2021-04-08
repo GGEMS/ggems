@@ -38,11 +38,12 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 GGEMSParticles::GGEMSParticles(void)
-: number_of_particles_(0),
+: number_of_particles_(nullptr),
   primary_particles_(nullptr),
   number_activated_devices_(0)
 {
-  GGcout("GGEMSParticles", "GGEMSParticles", 3) << "Allocation of GGEMSParticles..." << GGendl;
+  GGcout("GGEMSParticles", "GGEMSParticles", 3) << "GGEMSParticles creating..." << GGendl;
+  GGcout("GGEMSParticles", "GGEMSParticles", 3) << "GGEMSParticles created!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -51,23 +52,33 @@ GGEMSParticles::GGEMSParticles(void)
 
 GGEMSParticles::~GGEMSParticles(void)
 {
-  GGcout("GGEMSParticles", "~GGEMSParticles", 3) << "Deallocation of GGEMSParticles..." << GGendl;
+  GGcout("GGEMSParticles", "~GGEMSParticles", 3) << "GGEMSParticles erasing..." << GGendl;
 
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
-  for (GGsize i = 0; i < number_activated_devices_; ++i) {
-    opencl_manager.Deallocate(primary_particles_[i], sizeof(GGEMSPrimaryParticles), i);
+  if (number_of_particles_) {
+    delete[] number_of_particles_;
+    number_of_particles_ = nullptr;
   }
-  delete[] primary_particles_;
+
+  if (primary_particles_) {
+    for (GGsize i = 0; i < number_activated_devices_; ++i) {
+      opencl_manager.Deallocate(primary_particles_[i], sizeof(GGEMSPrimaryParticles), i);
+    }
+    delete[] primary_particles_;
+    primary_particles_ = nullptr;
+  }
+
+  GGcout("GGEMSParticles", "~GGEMSParticles", 3) << "GGEMSParticles erased!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSParticles::SetNumberOfParticles(GGsize const& number_of_particles)
+void GGEMSParticles::SetNumberOfParticles(GGsize const& device_index, GGsize const& number_of_particles)
 {
-  number_of_particles_ = number_of_particles;
+  number_of_particles_[device_index] = number_of_particles;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -78,6 +89,9 @@ void GGEMSParticles::Initialize(void)
 {
   GGcout("GGEMSParticles", "Initialize", 1) << "Initialization of GGEMSParticles..." << GGendl;
 
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+  number_of_particles_ = new GGsize[opencl_manager.GetNumberOfActivatedDevice()];
+
   // Allocation of the PrimaryParticle structure
   AllocatePrimaryParticles();
 }
@@ -86,7 +100,7 @@ void GGEMSParticles::Initialize(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-bool GGEMSParticles::IsAlive(GGsize const& index) const
+bool GGEMSParticles::IsAlive(GGsize const& device_index) const
 {
   GGcout("GGEMSParticles", "AllocatePrimaryParticles", 3) << "Checking if some particles are still alive..." << GGendl;
 
@@ -94,11 +108,11 @@ bool GGEMSParticles::IsAlive(GGsize const& index) const
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
   // Get pointer on OpenCL device for particles
-  GGEMSPrimaryParticles* primary_particles_device = opencl_manager.GetDeviceBuffer<GGEMSPrimaryParticles>(primary_particles_[index], sizeof(GGEMSPrimaryParticles), index);
+  GGEMSPrimaryParticles* primary_particles_device = opencl_manager.GetDeviceBuffer<GGEMSPrimaryParticles>(primary_particles_[device_index], sizeof(GGEMSPrimaryParticles), device_index);
 
   // Loop over the number of particles
   bool status = false;
-  for (GGsize i = 0; i < number_of_particles_; ++i) {
+  for (GGsize i = 0; i < number_of_particles_[device_index]; ++i) {
     if (primary_particles_device->status_[i] == ALIVE) {
       status = true;
       break;
@@ -106,7 +120,7 @@ bool GGEMSParticles::IsAlive(GGsize const& index) const
   }
 
   // Release the pointer
-  opencl_manager.ReleaseDeviceBuffer(primary_particles_[index], primary_particles_device, index);
+  opencl_manager.ReleaseDeviceBuffer(primary_particles_[device_index], primary_particles_device, device_index);
   return status;
 }
 

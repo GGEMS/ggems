@@ -41,7 +41,7 @@
 
 GGEMSOpenCLManager::GGEMSOpenCLManager(void)
 {
-  GGcout("GGEMSOpenCLManager", "GGEMSOpenCLManager", 3) << "Allocation of GGEMS OpenCL manager..." << GGendl;
+  GGcout("GGEMSOpenCLManager", "GGEMSOpenCLManager", 3) << "GGEMSOpenCLManager creating..." << GGendl;
 
   GGcout("GGEMSOpenCLManager", "GGEMSOpenCLManager", 1) << "Retrieving OpenCL platform(s)..." << GGendl;
   CheckOpenCLError(cl::Platform::get(&platforms_), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
@@ -327,6 +327,8 @@ GGEMSOpenCLManager::GGEMSOpenCLManager(void)
   // Create buffer of kernels for all devices
   kernels_.clear();
   kernel_compilation_options_.clear();
+
+  GGcout("GGEMSOpenCLManager", "GGEMSOpenCLManager", 3) << "GGEMSOpenCLManager created!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -335,7 +337,8 @@ GGEMSOpenCLManager::GGEMSOpenCLManager(void)
 
 GGEMSOpenCLManager::~GGEMSOpenCLManager(void)
 {
-  GGcout("GGEMSOpenCLManager", "~GGEMSOpenCLManager", 3) << "Deallocation of GGEMS OpenCL manager..." << GGendl;
+  GGcout("GGEMSOpenCLManager", "~GGEMSOpenCLManager", 3) << "GGEMSOpenCLManager erasing..." << GGendl;
+  GGcout("GGEMSOpenCLManager", "~GGEMSOpenCLManager", 3) << "GGEMSOpenCLManager erased!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -344,6 +347,8 @@ GGEMSOpenCLManager::~GGEMSOpenCLManager(void)
 
 void GGEMSOpenCLManager::Clean(void)
 {
+  GGcout("GGEMSOpenCLManager", "Clean", 3) << "GGEMSOpenCLManager cleaning..." << GGendl;
+
   // Freeing platforms, and platform infos
   platform_profile_.clear();
   platform_version_.clear();
@@ -431,6 +436,9 @@ void GGEMSOpenCLManager::Clean(void)
 
   // Deleting kernel
   for (auto k : kernels_) delete k;
+  kernels_.clear();
+
+  GGcout("GGEMSOpenCLManager", "Clean", 3) << "GGEMSOpenCLManager cleaned!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -756,7 +764,7 @@ GGsize GGEMSOpenCLManager::CheckKernel(std::string const& kernel_name, std::stri
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-cl::Kernel* GGEMSOpenCLManager::CompileKernel(std::string const& kernel_filename, std::string const& kernel_name, char* const p_custom_options, char* const p_additional_options)
+void GGEMSOpenCLManager::CompileKernel(std::string const& kernel_filename, std::string const& kernel_name, cl::Kernel** kernel_list, char* const p_custom_options, char* const p_additional_options)
 {
   GGcout("GGEMSOpenCLManager","CompileKernel", 3) << "Compiling a kernel on OpenCL activated context..." << GGendl;
 
@@ -800,7 +808,9 @@ cl::Kernel* GGEMSOpenCLManager::CompileKernel(std::string const& kernel_filename
 
   // if kernel already compiled return it
   if (kernel_index != KERNEL_NOT_COMPILED) {
-    return kernels_[kernel_index];
+    for (GGsize i = 0; i < device_indices_.size(); ++i) {
+      kernel_list[i] = kernels_[kernel_index+i];
+    }
   }
   else {
     // Check if the source kernel file exists
@@ -837,14 +847,13 @@ cl::Kernel* GGEMSOpenCLManager::CompileKernel(std::string const& kernel_filename
 
       // Storing the kernel in the singleton
       kernels_.push_back(new cl::Kernel(program, kernel_name.c_str(), &build_status));
+      kernel_list[i] = kernels_.back();
       CheckOpenCLError(build_status, "GGEMSOpenCLManager", "CompileKernel");
 
       // Storing the compilation options
       kernel_compilation_options_.push_back(kernel_compilation_option);
     }
   }
-
-  return kernels_[kernels_.size()-device_indices_.size()];
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -908,6 +917,24 @@ bool GGEMSOpenCLManager::IsDoublePrecision(GGsize const& index) const
 {
   if (device_extensions_[index].find("cl_khr_fp64") == std::string::npos) return false;
   else return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+GGsize GGEMSOpenCLManager::GetBestWorkItem(GGsize const& number_of_elements) const
+{
+  if (number_of_elements%work_group_size_ == 0) {
+    return number_of_elements;
+  }
+  else if (number_of_elements <= work_group_size_) {
+    return work_group_size_;
+  }
+  else {
+    return number_of_elements + (work_group_size_ - number_of_elements%work_group_size_);
+  }
+  return 0;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -53,4 +53,4 @@ class GGEMSVerbosity(object):
 
 # ------------------------------------------------------------------------------
 # Setting global verbosity to 0
-GGEMSVerbosity(0)
+GGEMSVerbosity(3)
