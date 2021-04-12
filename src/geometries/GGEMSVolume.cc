@@ -39,7 +39,12 @@ GGEMSVolume::GGEMSVolume(void)
 : label_value_(1.0f),
   positions_(GGfloat3{{0.0f, 0.0f, 0.0f}})
 {
-  GGcout("GGEMSVolume", "GGEMSVolume", 3) << "Allocation of GGEMSVolume..." << GGendl;
+  GGcout("GGEMSVolume", "GGEMSVolume", 3) << "GGEMSVolume creating..." << GGendl;
+
+  // Storing a kernel for 1 device
+  kernel_draw_volume_ = new cl::Kernel*[1];
+
+  GGcout("GGEMSVolume", "GGEMSVolume", 3) << "GGEMSVolume created!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -48,7 +53,14 @@ GGEMSVolume::GGEMSVolume(void)
 
 GGEMSVolume::~GGEMSVolume(void)
 {
-  GGcout("GGEMSVolume", "~GGEMSVolume", 3) << "Deallocation of GGEMSVolume..." << GGendl;
+  GGcout("GGEMSVolume", "~GGEMSVolume", 3) << "GGEMSVolume erasing..." << GGendl;
+
+  if (kernel_draw_volume_) {
+    delete[] kernel_draw_volume_;
+    kernel_draw_volume_ = nullptr;
+  }
+
+  GGcout("GGEMSVolume", "~GGEMSVolume", 3) << "GGEMSVolume erased!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

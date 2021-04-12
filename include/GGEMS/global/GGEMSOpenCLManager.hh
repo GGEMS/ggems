@@ -274,43 +274,52 @@ class GGEMS_EXPORT GGEMSOpenCLManager
       \brief Get the device pointer on host to write on it. ReleaseDeviceBuffer must be used after this method!!!
       \param device_ptr - pointer on device memory
       \param size - size of region to map
-      \param index - index of activated device
+      \param thread_index - index of the thread (= activated device index)
       \tparam T - type of the returned pointer on host memory
     */
     template <typename T>
-    T* GetDeviceBuffer(cl::Buffer* device_ptr, GGsize const& size, GGsize const& index);
+    T* GetDeviceBuffer(cl::Buffer* device_ptr, GGsize const& size, GGsize const& thread_index);
 
     /*!
       \brief Get the device pointer on host to write on it. Mandatory after a GetDeviceBufferWrite ou GetDeviceBufferRead!!!
       \param device_ptr - pointer on device memory
       \param host_ptr - pointer on host memory mapped on device memory
-      \param index - index of activated device
+      \param thread_index - index of the thread (= activated device index)
       \tparam T - type of host memory pointer to release
     */
     template <typename T>
-    void ReleaseDeviceBuffer(cl::Buffer* const device_ptr, T* host_ptr, GGsize const& index);
+    void ReleaseDeviceBuffer(cl::Buffer* const device_ptr, T* host_ptr, GGsize const& thread_index);
 
     /*!
-      \fn cl::Buffer* Allocate(void* host_ptr, GGsize const& size, GGsize const& index, cl_mem_flags flags, std::string const& class_name = "Undefined")
+      \fn cl::Buffer* Allocate(void* host_ptr, GGsize const& size, GGsize const& thread_index, cl_mem_flags flags, std::string const& class_name = "Undefined")
       \param host_ptr - pointer to buffer in host memory
       \param size - size of the buffer in bytes
-      \param index - index of activated device
+      \param thread_index - index of the thread (= activated device index)
       \param flags - mode to open the buffer
       \param class_name - name of class allocating memory
       \brief Allocation of OpenCL memory
       \return an unique pointer to an OpenCL buffer
     */
-    cl::Buffer* Allocate(void* host_ptr, GGsize const& size, GGsize const& index, cl_mem_flags flags, std::string const& class_name = "Undefined");
+    cl::Buffer* Allocate(void* host_ptr, GGsize const& size, GGsize const& thread_index, cl_mem_flags flags, std::string const& class_name = "Undefined");
 
     /*!
-      \fn void Deallocate(cl::Buffer* buffer, GGsize size, GGsize const& index)
+      \fn void Deallocate(cl::Buffer* buffer, GGsize size, GGsize const& thread_index)
       \param buffer - pointer to buffer in host memory
       \param size - size of the buffer in bytes
-      \param index - index of activated device
+      \param thread_index - index of the thread (= activated device index)
       \param class_name - name of class deallocating memory
       \brief Deallocation of OpenCL memory
     */
-    void Deallocate(cl::Buffer* buffer, GGsize size, GGsize const& index, std::string const& class_name = "Undefined");
+    void Deallocate(cl::Buffer* buffer, GGsize size, GGsize const& thread_index, std::string const& class_name = "Undefined");
+
+    /*!
+      \fn void CleanBuffer(cl::Buffer* buffer, GGsize const& size, GGsize const& thread_index)
+      \param buffer - pointer to buffer in host memory
+      \param size - size of the buffer in bytes
+      \param thread_index - index of the thread (= activated device index)
+      \brief Cleaning buffer on OpenCL device
+    */
+    void CleanBuffer(cl::Buffer* buffer, GGsize const& size, GGsize const& thread_index);
 
   private:
     /*!
@@ -437,12 +446,12 @@ class GGEMS_EXPORT GGEMSOpenCLManager
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
-T* GGEMSOpenCLManager::GetDeviceBuffer(cl::Buffer* const device_ptr, GGsize const& size, GGsize const& index)
+T* GGEMSOpenCLManager::GetDeviceBuffer(cl::Buffer* const device_ptr, GGsize const& size, GGsize const& thread_index)
 {
   GGcout("GGEMSOpenCLManager", "GetDeviceBuffer", 3) << "Getting mapped memory buffer on OpenCL device..." << GGendl;
 
   GGint err = 0;
-  T* ptr = static_cast<T*>(queues_[index]->enqueueMapBuffer(*device_ptr, CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, 0, size, nullptr, nullptr, &err));
+  T* ptr = static_cast<T*>(queues_[thread_index]->enqueueMapBuffer(*device_ptr, CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, 0, size, nullptr, nullptr, &err));
   CheckOpenCLError(err, "GGEMSOpenCLManager", "GetDeviceBuffer");
   return ptr;
 }
@@ -452,12 +461,12 @@ T* GGEMSOpenCLManager::GetDeviceBuffer(cl::Buffer* const device_ptr, GGsize cons
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
-void GGEMSOpenCLManager::ReleaseDeviceBuffer(cl::Buffer* const device_ptr, T* host_ptr, GGsize const& index)
+void GGEMSOpenCLManager::ReleaseDeviceBuffer(cl::Buffer* const device_ptr, T* host_ptr, GGsize const& thread_index)
 {
   GGcout("GGEMSOpenCLManager", "ReleaseDeviceBuffer", 3) << "Releasing mapped memory buffer on OpenCL device..." << GGendl;
 
   // Unmap the memory
-  CheckOpenCLError(queues_[index]->enqueueUnmapMemObject(*device_ptr, host_ptr), "GGEMSOpenCLManager", "ReleaseDeviceBuffer");
+  CheckOpenCLError(queues_[thread_index]->enqueueUnmapMemObject(*device_ptr, host_ptr), "GGEMSOpenCLManager", "ReleaseDeviceBuffer");
 }
 
 /*!

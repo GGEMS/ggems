@@ -28,10 +28,18 @@
   \date Tuesday March 16, 2021
 */
 
+#include <mutex>
 #include "GGEMS/tools/GGEMSProfilerManager.hh"
 #include "GGEMS/tools/GGEMSProfiler.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
 #include "GGEMS/tools/GGEMSChrono.hh"
+
+/*!
+  \brief namespace storing mutex
+*/
+namespace {
+  std::mutex mutex;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -65,14 +73,18 @@ GGEMSProfilerManager::~GGEMSProfilerManager(void)
 
 void GGEMSProfilerManager::HandleEvent(cl::Event event, std::string const& profile_name)
 {
+  mutex.lock();
+
   // Checking if profile exists already, if not, creating one
   if (profilers_.find(profile_name) == profilers_.end()) {
     GGEMSProfiler profiler;
     profilers_.insert(std::make_pair(profile_name, profiler));
   }
-
+std::cout << profile_name << std::endl;
   // Storing event data in correct profiler
   profilers_[profile_name].HandleEvent(event);
+
+  mutex.unlock();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

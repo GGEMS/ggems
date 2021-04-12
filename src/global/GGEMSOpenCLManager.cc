@@ -832,7 +832,7 @@ void GGEMSOpenCLManager::CompileKernel(std::string const& kernel_filename, std::
       std::vector<cl::Device> device;
       CheckOpenCLError(contexts_[i]->getInfo(CL_CONTEXT_DEVICES, &device), "GGEMSOpenCLManager", "CompileKernel");
 
-      GGcout("GGEMSOpenCLManager", "CompileKernel", 2) << "Compile a new kernel '" << kernel_name << "' from file: " << kernel_filename << " on device: " << device_indices_[i] << " with options: " << kernel_compilation_option << GGendl;
+      GGcout("GGEMSOpenCLManager", "CompileKernel", 2) << "Compile a new kernel '" << kernel_name << "' from file: " << kernel_filename << " on device: " << GetDeviceName(device_indices_[i]) << " with options: " << kernel_compilation_option << GGendl;
 
       // Compile source code on device
       GGint build_status = program.build(device, kernel_compilation_option);
@@ -860,7 +860,7 @@ void GGEMSOpenCLManager::CompileKernel(std::string const& kernel_filename, std::
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-cl::Buffer* GGEMSOpenCLManager::Allocate(void* host_ptr, GGsize const& size, GGsize const& index, cl_mem_flags flags, std::string const& class_name)
+cl::Buffer* GGEMSOpenCLManager::Allocate(void* host_ptr, GGsize const& size, GGsize const& thread_index, cl_mem_flags flags, std::string const& class_name)
 {
   GGcout("GGEMSOpenCLManager","Allocate", 3) << "Allocating memory on OpenCL device memory..." << GGendl;
 
@@ -868,7 +868,7 @@ cl::Buffer* GGEMSOpenCLManager::Allocate(void* host_ptr, GGsize const& size, GGs
   GGEMSRAMManager& ram_manager = GGEMSRAMManager::GetInstance();
 
   // Get index of the device
-  GGsize device_index = GetIndexOfActivatedDevice(index);
+  GGsize device_index = GetIndexOfActivatedDevice(thread_index);
 
   // Check if buffer size depending on device parameters
   if (!ram_manager.IsBufferSizeCorrect(device_index, size)) {
@@ -883,11 +883,11 @@ cl::Buffer* GGEMSOpenCLManager::Allocate(void* host_ptr, GGsize const& size, GGs
   }
 
   GGint error = 0;
-  cl::Buffer* buffer = new cl::Buffer(*contexts_[index], flags, size, host_ptr, &error);
+  cl::Buffer* buffer = new cl::Buffer(*contexts_[thread_index], flags, size, host_ptr, &error);
   CheckOpenCLError(error, "GGEMSOpenCLManager", "Allocate");
 
   // Increment RAM memory
-  ram_manager.IncrementRAMMemory(class_name, index, size);
+  ram_manager.IncrementRAMMemory(class_name, thread_index, size);
 
   return buffer;
 }
@@ -896,7 +896,7 @@ cl::Buffer* GGEMSOpenCLManager::Allocate(void* host_ptr, GGsize const& size, GGs
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSOpenCLManager::Deallocate(cl::Buffer* buffer, GGsize size, GGsize const& index, std::string const& class_name)
+void GGEMSOpenCLManager::Deallocate(cl::Buffer* buffer, GGsize size, GGsize const& thread_index, std::string const& class_name)
 {
   GGcout("GGEMSOpenCLManager","Deallocate", 3) << "Deallocating memory on OpenCL device memory..." << GGendl;
 
@@ -904,9 +904,21 @@ void GGEMSOpenCLManager::Deallocate(cl::Buffer* buffer, GGsize size, GGsize cons
   GGEMSRAMManager& ram_manager = GGEMSRAMManager::GetInstance();
 
   // Decrement RAM memory
-  ram_manager.DecrementRAMMemory(class_name, index, size);
+  ram_manager.DecrementRAMMemory(class_name, thread_index, size);
 
   delete buffer;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSOpenCLManager::CleanBuffer(cl::Buffer* buffer, GGsize const& size, GGsize const& thread_index)
+{
+  GGcout("GGEMSOpenCLManager","CleanBuffer", 3) << "Cleaning OpenCL buffer..." << GGendl;
+
+  GGint error = queues_[thread_index]->enqueueFillBuffer(*buffer, 0, 0, size, nullptr, nullptr);
+  CheckOpenCLError(error, "GGEMSOpenCLManager", "CleanBuffer");
 }
 
 ////////////////////////////////////////////////////////////////////////////////

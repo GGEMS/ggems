@@ -45,7 +45,8 @@ GGEMSMHDImage::GGEMSMHDImage(void)
   output_dir_(""),
   mhd_data_type_("MET_FLOAT")
 {
-  GGcout("GGEMSMHDImage", "GGEMSMHDImage", 3) << "Allocation of GGEMSMHDImage..." << GGendl;
+  GGcout("GGEMSMHDImage", "GGEMSMHDImage", 3) << "GGEMSMHDImage creating..." << GGendl;
+
 
   element_sizes_.x = 0.0f;
   element_sizes_.y = 0.0f;
@@ -54,6 +55,8 @@ GGEMSMHDImage::GGEMSMHDImage(void)
   dimensions_.x_ = 0;
   dimensions_.y_ = 0;
   dimensions_.z_ = 0;
+
+  GGcout("GGEMSMHDImage", "GGEMSMHDImage", 3) << "GGEMSMHDImage created!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -62,7 +65,9 @@ GGEMSMHDImage::GGEMSMHDImage(void)
 
 GGEMSMHDImage::~GGEMSMHDImage(void)
 {
-  GGcout("GGEMSMHDImage", "~GGEMSMHDImage", 3) << "Deallocation of GGEMSMHDImage..." << GGendl;
+  GGcout("GGEMSMHDImage", "~GGEMSMHDImage", 3) << "GGEMSMHDImage erasing!!!" << GGendl;
+
+  GGcout("GGEMSMHDImage", "~GGEMSMHDImage", 3) << "GGEMSMHDImage erased!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -123,7 +128,7 @@ void GGEMSMHDImage::SetDimensions(GGsize3 const& dimensions)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSMHDImage::Read(std::string const& image_mhd_header_filename, std::weak_ptr<cl::Buffer> solid_data)
+void GGEMSMHDImage::Read(std::string const& image_mhd_header_filename, cl::Buffer* solid_data, GGsize const& thread_index)
 {
   GGcout("GGEMSMHDImage", "Read", 0) << "Reading MHD Image..." << GGendl;
 
@@ -136,7 +141,7 @@ void GGEMSMHDImage::Read(std::string const& image_mhd_header_filename, std::weak
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
   // Get pointer on OpenCL device
-  GGEMSVoxelizedSolidData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSVoxelizedSolidData>(solid_data.lock().get(), sizeof(GGEMSVoxelizedSolidData));
+  GGEMSVoxelizedSolidData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSVoxelizedSolidData>(solid_data, sizeof(GGEMSVoxelizedSolidData), thread_index);
 
   // Getting output directory
   std::size_t found_dir = image_mhd_header_filename.find_last_of("/\\");
@@ -211,14 +216,14 @@ void GGEMSMHDImage::Read(std::string const& image_mhd_header_filename, std::weak
   }
 
   // Release the pointer
-  opencl_manager.ReleaseDeviceBuffer(solid_data.lock().get(), solid_data_device);
+  opencl_manager.ReleaseDeviceBuffer(solid_data, solid_data_device, thread_index);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSMHDImage::Write(std::shared_ptr<cl::Buffer> image) const
+void GGEMSMHDImage::Write(cl::Buffer* image, GGsize const& thread_index) const
 {
   GGcout("GGEMSMHDImage", "Write", 1) << "Writing MHD Image: " <<  mhd_header_file_ << "..." << GGendl;
 
@@ -237,14 +242,14 @@ void GGEMSMHDImage::Write(std::shared_ptr<cl::Buffer> image) const
   out_header_stream.close();
 
   // Writing raw data to file
-  if (!mhd_data_type_.compare("MET_CHAR")) WriteRaw<char>(image);
-  else if (!mhd_data_type_.compare("MET_UCHAR")) WriteRaw<unsigned char>(image);
-  else if (!mhd_data_type_.compare("MET_SHORT")) WriteRaw<GGshort>(image);
-  else if (!mhd_data_type_.compare("MET_USHORT")) WriteRaw<GGushort>(image);
-  else if (!mhd_data_type_.compare("MET_INT")) WriteRaw<GGint>(image);
-  else if (!mhd_data_type_.compare("MET_UINT")) WriteRaw<GGuint>(image);
-  else if (!mhd_data_type_.compare("MET_FLOAT")) WriteRaw<GGfloat>(image);
-  else if (!mhd_data_type_.compare("MET_DOUBLE")) WriteRaw<GGfloat>(image);
+  if (!mhd_data_type_.compare("MET_CHAR")) WriteRaw<char>(image, thread_index);
+  else if (!mhd_data_type_.compare("MET_UCHAR")) WriteRaw<unsigned char>(image, thread_index);
+  else if (!mhd_data_type_.compare("MET_SHORT")) WriteRaw<GGshort>(image, thread_index);
+  else if (!mhd_data_type_.compare("MET_USHORT")) WriteRaw<GGushort>(image, thread_index);
+  else if (!mhd_data_type_.compare("MET_INT")) WriteRaw<GGint>(image, thread_index);
+  else if (!mhd_data_type_.compare("MET_UINT")) WriteRaw<GGuint>(image, thread_index);
+  else if (!mhd_data_type_.compare("MET_FLOAT")) WriteRaw<GGfloat>(image, thread_index);
+  else if (!mhd_data_type_.compare("MET_DOUBLE")) WriteRaw<GGfloat>(image, thread_index);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

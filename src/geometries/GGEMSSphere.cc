@@ -39,9 +39,11 @@
 GGEMSSphere::GGEMSSphere(GGfloat const& radius, std::string const& unit)
 : GGEMSVolume()
 {
-  GGcout("GGEMSSphere", "GGEMSSphere", 3) << "Allocation of GGEMSSphere..." << GGendl;
+  GGcout("GGEMSSphere", "GGEMSSphere", 3) << "GGEMSSphere creating..." << GGendl;
 
   radius_ = DistanceUnit(radius, unit);
+
+  GGcout("GGEMSSphere", "GGEMSSphere", 3) << "GGEMSSphere created!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -50,7 +52,9 @@ GGEMSSphere::GGEMSSphere(GGfloat const& radius, std::string const& unit)
 
 GGEMSSphere::~GGEMSSphere(void)
 {
-  GGcout("GGEMSSphere", "~GGEMSSphere", 3) << "Deallocation of GGEMSSphere..." << GGendl;
+  GGcout("GGEMSSphere", "~GGEMSSphere", 3) << "GGEMSSphere erasing..." << GGendl;
+
+  GGcout("GGEMSSphere", "~GGEMSSphere", 3) << "GGEMSSphere erased!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -73,7 +77,7 @@ void GGEMSSphere::Initialize(void)
 
   // Get the data type and compiling kernel
   std::string const kDataType = "-D" + volume_creator_manager.GetDataType();
-  kernel_draw_volume_ = opencl_manager.CompileKernel(kFilename, "draw_ggems_sphere", nullptr, const_cast<char*>(kDataType.c_str()));
+  opencl_manager.CompileKernel(kFilename, "draw_ggems_sphere", kernel_draw_volume_, nullptr, const_cast<char*>(kDataType.c_str()));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -91,8 +95,8 @@ void GGEMSSphere::Draw(void)
   GGEMSVolumeCreatorManager& volume_creator_manager = GGEMSVolumeCreatorManager::GetInstance();
 
   // Get command queue and event
-  cl::CommandQueue* queue = opencl_manager.GetCommandQueue();
-  cl::Event* event = opencl_manager.GetEvent();
+  cl::CommandQueue* queue = opencl_manager.GetCommandQueue(0);
+  cl::Event* event = opencl_manager.GetEvent(0);
 
   // Get parameters from phantom creator
   GGfloat3 voxel_sizes = volume_creator_manager.GetElementsSizes();
@@ -114,22 +118,22 @@ void GGEMSSphere::Draw(void)
   cl::NDRange local_wi(work_group_size);
 
   // Set parameters for kernel
-  std::shared_ptr<cl::Kernel> kernel = kernel_draw_volume_.lock();
-  kernel->setArg(0, number_of_elements);
-  kernel->setArg(1, voxel_sizes);
-  kernel->setArg(2, phantom_dimensions);
-  kernel->setArg(3, positions_);
-  kernel->setArg(4, label_value_);
-  kernel->setArg(5, radius_);
-  kernel->setArg(6, *voxelized_phantom);
+  kernel_draw_volume_[0]->setArg(0, number_of_elements);
+  kernel_draw_volume_[0]->setArg(1, voxel_sizes);
+  kernel_draw_volume_[0]->setArg(2, phantom_dimensions);
+  kernel_draw_volume_[0]->setArg(3, positions_);
+  kernel_draw_volume_[0]->setArg(4, label_value_);
+  kernel_draw_volume_[0]->setArg(5, radius_);
+  kernel_draw_volume_[0]->setArg(6, *voxelized_phantom);
 
   // Launching kernel
-  cl_int kernel_status = queue->enqueueNDRangeKernel(*kernel, 0, global_wi, local_wi, nullptr, event);
+  cl_int kernel_status = queue->enqueueNDRangeKernel(*kernel_draw_volume_[0], 0, global_wi, local_wi, nullptr, event);
   opencl_manager.CheckOpenCLError(kernel_status, "GGEMSSphere", "Draw");
 
   // GGEMS Profiling
   GGEMSProfilerManager& profiler_manager = GGEMSProfilerManager::GetInstance();
   profiler_manager.HandleEvent(*event, "GGEMSSphere::Draw");
+
   queue->finish();
 }
 
