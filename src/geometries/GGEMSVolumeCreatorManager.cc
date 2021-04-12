@@ -43,7 +43,7 @@ GGEMSVolumeCreatorManager::GGEMSVolumeCreatorManager(void)
   output_range_to_material_filename_(""),
   voxelized_volume_(nullptr)
 {
-  GGcout("GGEMSVolumeCreatorManager", "GGEMSVolumeCreatorManager", 3) << "Allocation of Phantom Creator Manager singleton..." << GGendl;
+  GGcout("GGEMSVolumeCreatorManager", "GGEMSVolumeCreatorManager", 3) << "GGEMSVolumeCreatorManager creating..." << GGendl;
 
   element_sizes_.x = 0.0f;
   element_sizes_.y = 0.0f;
@@ -52,6 +52,8 @@ GGEMSVolumeCreatorManager::GGEMSVolumeCreatorManager(void)
   volume_dimensions_.x_ = 0;
   volume_dimensions_.y_ = 0;
   volume_dimensions_.z_ = 0;
+
+  GGcout("GGEMSVolumeCreatorManager", "GGEMSVolumeCreatorManager", 3) << "GGEMSVolumeCreatorManager created!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -60,7 +62,27 @@ GGEMSVolumeCreatorManager::GGEMSVolumeCreatorManager(void)
 
 GGEMSVolumeCreatorManager::~GGEMSVolumeCreatorManager(void)
 {
-  GGcout("GGEMSVolumeCreatorManager", "~GGEMSVolumeCreatorManager", 3) << "Deallocation of Phantom Creator Manager singleton..." << GGendl;
+  GGcout("GGEMSVolumeCreatorManager", "~GGEMSVolumeCreatorManager", 3) << "GGEMSVolumeCreatorManager erasing..." << GGendl;
+
+  GGcout("GGEMSVolumeCreatorManager", "~GGEMSVolumeCreatorManager", 3) << "GGEMSVolumeCreatorManager erased!!!" << GGendl;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSVolumeCreatorManager::Clean(void)
+{
+  GGcout("GGEMSVolumeCreatorManager", "Clean", 3) << "GGEMSVolumeCreatorManager cleaning..." << GGendl;
+
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+
+  if (voxelized_volume_) {
+    opencl_manager.Deallocate(voxelized_volume_, number_elements_ * sizeof(T), 0);
+    voxelized_volume_ = nullptr;
+  }
+
+  GGcout("GGEMSVolumeCreatorManager", "Clean", 3) << "GGEMSVolumeCreatorManager cleaned!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -251,7 +273,7 @@ void GGEMSVolumeCreatorManager::WriteMHDImage(void) const
   mhdImage.SetDataType(data_type_);
   mhdImage.SetDimensions(volume_dimensions_);
   mhdImage.SetElementSizes(element_sizes_);
-  mhdImage.Write(voxelized_volume_);
+  mhdImage.Write(voxelized_volume_, 0);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

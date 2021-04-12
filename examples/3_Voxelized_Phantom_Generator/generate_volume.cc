@@ -36,7 +36,8 @@
 #include "GGEMS/geometries/GGEMSBox.hh"
 #include "GGEMS/geometries/GGEMSTube.hh"
 #include "GGEMS/geometries/GGEMSSphere.hh"
-
+#include "GGEMS/tools/GGEMSRAMManager.hh"
+#include "GGEMS/tools/GGEMSProfilerManager.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
 
 /*!
@@ -67,9 +68,9 @@ int main(int argc, char** argv)
   }
 
   // Setting verbosity
-  GGcout.SetVerbosity(1);
-  GGcerr.SetVerbosity(1);
-  GGwarn.SetVerbosity(1);
+  GGcout.SetVerbosity(3);
+  GGcerr.SetVerbosity(3);
+  GGwarn.SetVerbosity(3);
 
   // Getting parameters
   GGsize device_id = static_cast<GGsize>(atoi(argv[1]));
@@ -77,6 +78,8 @@ int main(int argc, char** argv)
   // Initialization of singletons
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
   GGEMSVolumeCreatorManager& volume_creator_manager = GGEMSVolumeCreatorManager::GetInstance();
+  GGEMSProfilerManager& profiler_manager = GGEMSProfilerManager::GetInstance();
+  GGEMSRAMManager& ram_manager = GGEMSRAMManager::GetInstance();
 
   try {
     // Set the context id
@@ -118,8 +121,12 @@ int main(int argc, char** argv)
     sphere->Draw();
     delete sphere;
 
+    ram_manager.PrintRAMStatus();
+
     // Writing volume
     volume_creator_manager.Write();
+
+    profiler_manager.PrintSummaryProfile();
   }
   catch (std::exception& e) {
     std::cerr << e.what() << std::endl;
@@ -128,6 +135,7 @@ int main(int argc, char** argv)
     std::cerr << "Unknown exception!!!" << std::endl;
   }
 
+  volume_creator_manager.Clean();
   opencl_manager.Clean();
   exit(EXIT_SUCCESS);
 }

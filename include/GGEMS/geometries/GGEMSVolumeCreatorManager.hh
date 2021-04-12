@@ -158,7 +158,7 @@ class GGEMS_EXPORT GGEMSVolumeCreatorManager
       \return pointer on OpenCL device storing voxelized volume
       \brief Return the voxelized volume on OpenCL device
     */
-    inline cl::Buffer* GetVoxelizedVolume(void) const {return voxelized_volume_.get();}
+    inline cl::Buffer* GetVoxelizedVolume(void) const {return voxelized_volume_;}
 
     /*!
       \fn void SetOutputImageFilename(std::string const& output_image_filename)
@@ -201,6 +201,12 @@ class GGEMS_EXPORT GGEMSVolumeCreatorManager
     */
     void Write(void);
 
+    /*!
+      \fn void Clean(void)
+      \brief clean OpenCL data
+    */
+    void Clean(void);
+
   private:
     /*!
       \fn void CheckParameters(void) const
@@ -235,7 +241,7 @@ class GGEMS_EXPORT GGEMSVolumeCreatorManager
     std::string data_type_; /*!< Type of data */
     std::string output_image_filename_; /*!< Output MHD where is stored the voxelized volume */
     std::string output_range_to_material_filename_; /*!< Output text file with range to material data */
-    std::shared_ptr<cl::Buffer> voxelized_volume_; /*!< Voxelized volume on OpenCL device */
+    cl::Buffer* voxelized_volume_; /*!< Voxelized volume on OpenCL device */
     LabelToMaterialMap label_to_material_; /*!< Map of label to material */
 };
 
@@ -250,15 +256,10 @@ void GGEMSVolumeCreatorManager::AllocateImage(void)
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
   // Allocation of memory on OpenCL device depending of type
-  voxelized_volume_ = opencl_manager.Allocate(nullptr, number_elements_ * sizeof(T), CL_MEM_READ_WRITE, "GGEMSVolumeCreatorManager");
+  voxelized_volume_ = opencl_manager.Allocate(nullptr, number_elements_ * sizeof(T), 0, CL_MEM_READ_WRITE, "GGEMSVolumeCreatorManager");
 
   // Initialize the buffer to zero
-  T* voxelized_volume_device = opencl_manager.GetDeviceBuffer<T>(voxelized_volume_.get(), number_elements_ * sizeof(T));
-
-  for (GGulong i = 0; i < number_elements_; ++i) voxelized_volume_device[i] = static_cast<T>(0);
-
-  // Release the pointers
-  opencl_manager.ReleaseDeviceBuffer(voxelized_volume_.get(), voxelized_volume_device);
+  opencl_manager.CleanBuffer(voxelized_volume_, number_elements_ * sizeof(T), 0);
 }
 
 /*!
