@@ -204,12 +204,12 @@ FILE(GLOB source_ggems
   ${PROJECT_SOURCE_DIR}/src/global/*.cc
   ${PROJECT_SOURCE_DIR}/src/geometries/*.cc
   ${PROJECT_SOURCE_DIR}/src/tools/*.cc
-  # ${PROJECT_SOURCE_DIR}/src/navigators/*.cc
+  ${PROJECT_SOURCE_DIR}/src/navigators/*.cc
   ${PROJECT_SOURCE_DIR}/src/physics/*.cc
   ${PROJECT_SOURCE_DIR}/src/sources/*.cc
   ${PROJECT_SOURCE_DIR}/src/randoms/*.cc
   ${PROJECT_SOURCE_DIR}/src/maths/*.cc
-  #${PROJECT_SOURCE_DIR}/src/materials/*.cc
+  ${PROJECT_SOURCE_DIR}/src/materials/*.cc
   ${PROJECT_SOURCE_DIR}/src/io/*.cc
 )
 

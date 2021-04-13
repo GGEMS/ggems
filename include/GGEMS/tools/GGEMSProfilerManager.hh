@@ -122,4 +122,18 @@ class GGEMS_EXPORT GGEMSProfilerManager
     ProfilerUMap profilers_; /*!< Map storing all types of profiles */
 };
 
+/*!
+  \fn GGEMSProfilerManager* get_instance_profiler_manager(void)
+  \return the pointer on the singleton
+  \brief Get the GGEMSProfilerManager pointer for python user.
+*/
+extern "C" GGEMS_EXPORT GGEMSProfilerManager* get_instance_profiler_manager(void);
+
+/*!
+  \fn void print_summary_profiler_manager(GGEMSProfilerManager* profiler_manager)
+  \param profiler_manager - pointer on the singleton
+  \brief Print summary of profiler
+*/
+extern "C" GGEMS_EXPORT void print_summary_profiler_manager(GGEMSProfilerManager* profiler_manager);
+
 #endif // End of GUARD_GGEMS_TOOLS_GGEMSPROFILERMANAGER_HH

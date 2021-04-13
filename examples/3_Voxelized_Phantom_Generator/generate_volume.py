@@ -81,7 +81,14 @@ sphere.delete()
 # STEP 4: Saving the final volume
 volume_creator_manager.write()
 
+# Printin RAM status
+ram_manager.print_infos()
+
+# Printing profiler summary
+profiler_manager.print_summary_profile()
+
 # ------------------------------------------------------------------------------
 # STEP 5: Exit GGEMS safely
+volume_creator_manager.clean()
 opencl_manager.clean()
 exit()
