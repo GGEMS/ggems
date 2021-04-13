@@ -67,7 +67,7 @@ point_source2.set_polyenergy('spectrum_120kVp_2mmAl.dat')
 
 source_manager.initialize(777)
 
-source_manager.print_infos();
+source_manager.print_infos()
 ram_manager.print_infos()
 
 # ------------------------------------------------------------------------------

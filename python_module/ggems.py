@@ -25,8 +25,9 @@ from ggems_ram import GGEMSRAMManager
 # from ggems_phantoms import GGEMSVoxelizedPhantom, GGEMSWorld
 from ggems_sources import GGEMSXRaySource, GGEMSSourceManager
 # from ggems_processes import GGEMSProcessesManager, GGEMSRangeCutsManager, GGEMSCrossSections
-# from ggems_volume_creator import GGEMSVolumeCreatorManager, GGEMSTube, GGEMSBox, GGEMSSphere
+from ggems_volume_creator import GGEMSVolumeCreatorManager, GGEMSTube, GGEMSBox, GGEMSSphere
 # from ggems_dosimetry import GGEMSDosimetryCalculator
+from ggems_profiler import GGEMSProfilerManager
 
 # class GGEMSManager(object):
 #     """GGEMS class managing the simulation
@@ -118,4 +119,5 @@ source_manager = GGEMSSourceManager()
 # processes_manager = GGEMSProcessesManager()
 # range_cuts_manager = GGEMSRangeCutsManager()
 # ggems_manager = GGEMSManager()
-# volume_creator_manager = GGEMSVolumeCreatorManager()
+volume_creator_manager = GGEMSVolumeCreatorManager()
+profiler_manager = GGEMSProfilerManager()

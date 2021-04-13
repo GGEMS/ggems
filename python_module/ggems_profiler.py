@@ -16,21 +16,19 @@
 # *                                                                      *
 # ************************************************************************
 
-#-------------------------------------------------------------------------------
-# CMakeLists.txt
-#
-# CMakeLists.txt - Compile and build the GGEMS examples
-#
-# Authors :
-#   - Julien Bert <julien.bert@univ-brest.fr>
-#   - Didier Benoit <didier.benoit@inserm.fr>
-#
-# Generated on : 2/11/2020
-#-------------------------------------------------------------------------------
+from ggems_lib import *
 
-ADD_SUBDIRECTORY(0_Cross_Sections)
-#ADD_SUBDIRECTORY(2_CT_Scanner)
-ADD_SUBDIRECTORY(3_Voxelized_Phantom_Generator)
-#ADD_SUBDIRECTORY(4_Dosimetry_Photon)
-#ADD_SUBDIRECTORY(5_World_Tracking)
-ADD_SUBDIRECTORY(6_Multi_Platform)
+class GGEMSProfilerManager(object):
+    """Get the C++ singleton and print summary about profiler
+    """
+    def __init__(self):
+        ggems_lib.get_instance_profiler_manager.restype = ctypes.c_void_p
+
+        ggems_lib.print_summary_profiler_manager.argtypes = [ctypes.c_void_p]
+        ggems_lib.print_summary_profiler_manager.restype = ctypes.c_void_p
+
+        self.obj = ggems_lib.get_instance_profiler_manager()
+
+    def print_summary_profile(self):
+        ggems_lib.print_summary_profiler_manager(self.obj)
+

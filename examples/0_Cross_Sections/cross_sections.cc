@@ -29,14 +29,11 @@
 */
 
 #include <cstdlib>
-
 #include "GGEMS/global/GGEMSOpenCLManager.hh"
-
-#include "GGEMS/materials/GGEMSMaterialsDatabaseManager.hh"
-#include "GGEMS/materials/GGEMSMaterials.hh"
-
+// #include "GGEMS/materials/GGEMSMaterialsDatabaseManager.hh"
+// #include "GGEMS/materials/GGEMSMaterials.hh"
 // #include "GGEMS/physics/GGEMSProcessesManager.hh"
-#include "GGEMS/physics/GGEMSCrossSections.hh"
+// #include "GGEMS/physics/GGEMSCrossSections.hh"
 
 /*!
   \fn void PrintHelpAndQuit(void)
@@ -78,24 +75,24 @@ int main(int argc, char** argv)
   GGfloat energy_MeV = strtof(argv[4], NULL);
 
   // Setting verbosity
-  GGcout.SetVerbosity(0);
-  GGcerr.SetVerbosity(0);
-  GGwarn.SetVerbosity(0);
+  GGcout.SetVerbosity(3);
+  GGcerr.SetVerbosity(3);
+  GGwarn.SetVerbosity(3);
 
   // Initialization of singletons
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
-  GGEMSMaterialsDatabaseManager& material_manager = GGEMSMaterialsDatabaseManager::GetInstance();
+  // GGEMSMaterialsDatabaseManager& material_manager = GGEMSMaterialsDatabaseManager::GetInstance();
   // GGEMSProcessesManager& processes_manager = GGEMSProcessesManager::GetInstance();
 
   try {
     // Set the context id
-    opencl_manager.DeviceToActivate(device_id);
+    //opencl_manager.DeviceToActivate(device_id);
 
     // Enter material database
-    material_manager.SetMaterialsDatabase("../../data/materials.txt");
+    //material_manager.SetMaterialsDatabase("../../data/materials.txt");
 
     // Initializing material
-    GGEMSMaterials materials;
+    //GGEMSMaterials materials;
     // materials.AddMaterial(material_name);
     // materials.Initialize();
 

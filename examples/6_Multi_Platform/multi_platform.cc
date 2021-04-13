@@ -103,9 +103,9 @@ int main(int argc, char** argv)
   std::string device = argv[1];
 
   // Setting verbosity
-  GGcout.SetVerbosity(3);
-  GGcerr.SetVerbosity(3);
-  GGwarn.SetVerbosity(3);
+  GGcout.SetVerbosity(1);
+  GGcerr.SetVerbosity(1);
+  GGwarn.SetVerbosity(1);
 
   // Initialization of singletons
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
@@ -147,6 +147,7 @@ int main(int argc, char** argv)
     source_manager.Initialize(777);
     source_manager.PrintInfos();
 
+    // Printing RAM status
     ram_manager.PrintRAMStatus();
 
     GGsize number_of_activated_devices = opencl_manager.GetNumberOfActivatedDevice();
@@ -160,6 +161,7 @@ int main(int argc, char** argv)
 
     delete[] thread_device;
 
+    // Printing profiler summary
     profiler_manager.PrintSummaryProfile();
   }
   catch (std::exception& e) {

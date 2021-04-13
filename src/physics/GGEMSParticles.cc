@@ -43,6 +43,7 @@ GGEMSParticles::GGEMSParticles(void)
   number_activated_devices_(0)
 {
   GGcout("GGEMSParticles", "GGEMSParticles", 3) << "GGEMSParticles creating..." << GGendl;
+
   GGcout("GGEMSParticles", "GGEMSParticles", 3) << "GGEMSParticles created!!!" << GGendl;
 }
 

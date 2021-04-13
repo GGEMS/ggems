@@ -80,7 +80,7 @@ void GGEMSProfilerManager::HandleEvent(cl::Event event, std::string const& profi
     GGEMSProfiler profiler;
     profilers_.insert(std::make_pair(profile_name, profiler));
   }
-std::cout << profile_name << std::endl;
+
   // Storing event data in correct profiler
   profilers_[profile_name].HandleEvent(event);
 
@@ -103,4 +103,22 @@ void GGEMSProfilerManager::PrintSummaryProfile(void) const
 void GGEMSProfilerManager::Reset(void)
 {
   profilers_.clear();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+GGEMSProfilerManager* get_instance_profiler_manager(void)
+{
+  return &GGEMSProfilerManager::GetInstance();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void print_summary_profiler_manager(GGEMSProfilerManager* profiler_manager)
+{
+  profiler_manager->PrintSummaryProfile();
 }

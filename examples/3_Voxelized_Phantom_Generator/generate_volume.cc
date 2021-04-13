@@ -68,9 +68,9 @@ int main(int argc, char** argv)
   }
 
   // Setting verbosity
-  GGcout.SetVerbosity(3);
-  GGcerr.SetVerbosity(3);
-  GGwarn.SetVerbosity(3);
+  GGcout.SetVerbosity(1);
+  GGcerr.SetVerbosity(1);
+  GGwarn.SetVerbosity(1);
 
   // Getting parameters
   GGsize device_id = static_cast<GGsize>(atoi(argv[1]));
@@ -121,11 +121,13 @@ int main(int argc, char** argv)
     sphere->Draw();
     delete sphere;
 
+    // Printing RAM status
     ram_manager.PrintRAMStatus();
 
     // Writing volume
     volume_creator_manager.Write();
 
+    // Printing profiler summary
     profiler_manager.PrintSummaryProfile();
   }
   catch (std::exception& e) {

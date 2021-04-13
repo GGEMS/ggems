@@ -167,28 +167,28 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     inline GGsize GetNumberOfActivatedDevice(void) const {return device_indices_.size();}
 
     /*!
-      \fn inline GGsize GetIndexOfActivatedDevice(GGsize const& index) const
-      \param index - index of device
+      \fn inline GGsize GetIndexOfActivatedDevice(GGsize const& device_index) const
+      \param device_index - index of device
       \return index of activated device
       \brief get the index of activated device
     */
-    inline GGsize GetIndexOfActivatedDevice(GGsize const& index) const {return device_indices_[index];}
+    inline GGsize GetIndexOfActivatedDevice(GGsize const& device_index) const {return device_indices_[device_index];}
 
     /*!
-      \fn inline GGsize GetMaxBufferAllocationSize(GGsize const& index) const
-      \param index - index of activated devices
+      \fn inline GGsize GetMaxBufferAllocationSize(GGsize const& device_index) const
+      \param device_index - index of activated devices
       \return Max buffer allocation size
       \brief Get the max buffer size in bytes on activated OpenCL device
     */
-    inline GGsize GetMaxBufferAllocationSize(GGsize const& index) const {return static_cast<GGsize>(device_max_mem_alloc_size_[index]);}
+    inline GGsize GetMaxBufferAllocationSize(GGsize const& device_index) const {return static_cast<GGsize>(device_max_mem_alloc_size_[device_index]);}
 
     /*!
-      \fn inline GGsize GetRAMMemory(GGsize const& index) const
-      \param index - index of activated devices
+      \fn inline GGsize GetRAMMemory(GGsize const& device_index) const
+      \param device_index - index of activated devices
       \return RAM memory on a specific device
       \brief Get the RAM in bytes on OpenCL device
     */
-    inline GGsize GetRAMMemory(GGsize const& index) const {return static_cast<GGsize>(device_global_mem_size_[index]);}
+    inline GGsize GetRAMMemory(GGsize const& device_index) const {return static_cast<GGsize>(device_global_mem_size_[device_index]);}
 
     /*!
       \fn inline GGsize GetWorkGroupSize(void) const
@@ -206,28 +206,28 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     GGsize GetBestWorkItem(GGsize const& number_of_elements) const;
 
     /*!
-      \fn cl::Context* GetContext(GGsize const& index) const
-      \param index - index of activated device
+      \fn cl::Context* GetContext(GGsize const& thread_index) const
+      \param thread_index - index of the thread (= activated device index)
       \return the pointer on activated context
       \brief return the activated context
     */
-    inline cl::Context* GetContext(GGsize const& index) const {return contexts_[index];}
+    inline cl::Context* GetContext(GGsize const& thread_index) const {return contexts_[thread_index];}
 
     /*!
-      \fn cl::CommandQueue* GetCommandQueue(GGsize const& index) const
-      \param index - index of activated device
+      \fn cl::CommandQueue* GetCommandQueue(GGsize const& thread_index) const
+      \param thread_index - index of the thread (= activated device index)
       \return the pointer on activated command queue
       \brief Return the command queue to activated context
     */
-    inline cl::CommandQueue* GetCommandQueue(GGsize const& index) const {return queues_[index];}
+    inline cl::CommandQueue* GetCommandQueue(GGsize const& thread_index) const {return queues_[thread_index];}
 
     /*!
-      \fn cl::Event* GetEvent(GGsize const& index) const
-      \param index - index of activated device
+      \fn cl::Event* GetEvent(GGsize const& thread_index) const
+      \param thread_index - index of the thread (= activated device index)
       \return the pointer on activated event
       \brief return an event to activated context
     */
-    inline cl::Event* GetEvent(GGsize const& index) const {return events_[index];}
+    inline cl::Event* GetEvent(GGsize const& thread_index) const {return events_[thread_index];}
 
     /*!
       \fn void DeviceToActivate(GGsize const& device_id)
