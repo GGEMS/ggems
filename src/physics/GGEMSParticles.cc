@@ -77,9 +77,9 @@ GGEMSParticles::~GGEMSParticles(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSParticles::SetNumberOfParticles(GGsize const& device_index, GGsize const& number_of_particles)
+void GGEMSParticles::SetNumberOfParticles(GGsize const& thread_index, GGsize const& number_of_particles)
 {
-  number_of_particles_[device_index] = number_of_particles;
+  number_of_particles_[thread_index] = number_of_particles;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -101,7 +101,7 @@ void GGEMSParticles::Initialize(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-bool GGEMSParticles::IsAlive(GGsize const& device_index) const
+bool GGEMSParticles::IsAlive(GGsize const& thread_index) const
 {
   GGcout("GGEMSParticles", "AllocatePrimaryParticles", 3) << "Checking if some particles are still alive..." << GGendl;
 
@@ -109,11 +109,11 @@ bool GGEMSParticles::IsAlive(GGsize const& device_index) const
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
   // Get pointer on OpenCL device for particles
-  GGEMSPrimaryParticles* primary_particles_device = opencl_manager.GetDeviceBuffer<GGEMSPrimaryParticles>(primary_particles_[device_index], sizeof(GGEMSPrimaryParticles), device_index);
+  GGEMSPrimaryParticles* primary_particles_device = opencl_manager.GetDeviceBuffer<GGEMSPrimaryParticles>(primary_particles_[thread_index], sizeof(GGEMSPrimaryParticles), thread_index);
 
   // Loop over the number of particles
   bool status = false;
-  for (GGsize i = 0; i < number_of_particles_[device_index]; ++i) {
+  for (GGsize i = 0; i < number_of_particles_[thread_index]; ++i) {
     if (primary_particles_device->status_[i] == ALIVE) {
       status = true;
       break;
@@ -121,7 +121,7 @@ bool GGEMSParticles::IsAlive(GGsize const& device_index) const
   }
 
   // Release the pointer
-  opencl_manager.ReleaseDeviceBuffer(primary_particles_[device_index], primary_particles_device, device_index);
+  opencl_manager.ReleaseDeviceBuffer(primary_particles_[thread_index], primary_particles_device, thread_index);
   return status;
 }
 

@@ -40,12 +40,12 @@
 */
 typedef struct GGEMSWorldRecording_t
 {
-  std::shared_ptr<cl::Buffer> energy_tracking_; /*!< Buffer storing energy tracking on OpenCL device */
-  std::shared_ptr<cl::Buffer> energy_squared_tracking_; /*!< Buffer storing energy squared tracking on OpenCL device */
-  std::shared_ptr<cl::Buffer> photon_tracking_; /*!< Buffer storing photon tracking on OpenCL device */
-  std::shared_ptr<cl::Buffer> momentum_x_; /*!< Sum of particle momemtum along X */
-  std::shared_ptr<cl::Buffer> momentum_y_; /*!< Sum of particle momemtum along Y */
-  std::shared_ptr<cl::Buffer> momentum_z_; /*!< Sum of particle momemtum along Z */
+  cl::Buffer** energy_tracking_; /*!< Buffer storing energy tracking on OpenCL device */
+  cl::Buffer** energy_squared_tracking_; /*!< Buffer storing energy squared tracking on OpenCL device */
+  cl::Buffer** photon_tracking_; /*!< Buffer storing photon tracking on OpenCL device */
+  cl::Buffer** momentum_x_; /*!< Sum of particle momemtum along X */
+  cl::Buffer** momentum_y_; /*!< Sum of particle momemtum along Y */
+  cl::Buffer** momentum_z_; /*!< Sum of particle momemtum along Z */
 } GGEMSWorldRecording; /*!< Using C convention name of struct to C++ (_t deletion) */
 
 /*!
@@ -154,10 +154,11 @@ class GGEMS_EXPORT GGEMSWorld
     void Initialize(void);
 
     /*!
-      \fn void Tracking(void)
+      \fn void Tracking(GGsize const& thread_index)
+      \param thread_index - index of activated device (thread index)
       \brief track particles through world
     */
-    void Tracking(void);
+    void Tracking(GGsize const& thread_index);
 
     /*!
       \fn void SaveResults(void) const
@@ -211,7 +212,8 @@ class GGEMS_EXPORT GGEMSWorld
     bool is_energy_squared_tracking_; /*!< Boolean for energy squared deposit */
     bool is_momentum_; /*!< Boolean for sum of momentum */
     GGEMSWorldRecording world_recording_; /*!< Structure storing OpenCL pointer */
-    std::weak_ptr<cl::Kernel> kernel_world_tracking_; /*!< OpenCL kernel computing world tracking */
+    cl::Kernel** kernel_world_tracking_; /*!< OpenCL kernel computing world tracking */
+    GGsize number_activated_devices_; /*!< Number of activated device */
 };
 
 /*!

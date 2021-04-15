@@ -29,9 +29,7 @@
 */
 
 #include "GGEMS/physics/GGEMSRangeCutsManager.hh"
-
 #include "GGEMS/geometries/GGEMSSolid.hh"
-
 #include "GGEMS/sources/GGEMSSourceManager.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -39,10 +37,13 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 GGEMSNavigatorManager::GGEMSNavigatorManager(void)
-: navigators_(0),
+: navigators_(nullptr),
+  number_of_navigators_(0),
   world_(nullptr)
 {
-  GGcout("GGEMSNavigatorManager", "GGEMSNavigatorManager", 3) << "Allocation of GGEMS navigator manager..." << GGendl;
+  GGcout("GGEMSNavigatorManager", "GGEMSNavigatorManager", 3) << "GGEMSNavigatorManager creating..." << GGendl;
+
+  GGcout("GGEMSNavigatorManager", "GGEMSNavigatorManager", 3) << "GGEMSNavigatorManager created!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -51,15 +52,19 @@ GGEMSNavigatorManager::GGEMSNavigatorManager(void)
 
 GGEMSNavigatorManager::~GGEMSNavigatorManager(void)
 {
-  // Freeing memory
-  navigators_.clear();
-
   GGcout("GGEMSNavigatorManager", "~GGEMSNavigatorManager", 3) << "Deallocation of GGEMS navigator manager..." << GGendl;
+
+  if (navigators_) {
+    delete[] navigators_;
+    navigators_ = nullptr;
+  }
 
   if (world_) {
     delete world_;
     world_ = nullptr;
   }
+
+  GGcout("GGEMSNavigatorManager", "~GGEMSNavigatorManager", 3) << "GGEMSNavigatorManager erased!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -71,8 +76,25 @@ void GGEMSNavigatorManager::Store(GGEMSNavigator* navigator)
   GGcout("GGEMSNavigatorManager", "Store", 3) << "Storing new navigator in GGEMS..." << GGendl;
 
   // Set index of navigator and store the pointer
-  navigator->SetNavigatorID(navigators_.size());
-  navigators_.emplace_back(navigator);
+  navigator->SetNavigatorID(number_of_navigators_);
+
+  if (number_of_navigators_ == 0) {
+    navigators_ = new GGEMSNavigator*[1];
+    navigators_[0] = navigator;
+  }
+  else {
+    GGEMSNavigator** tmp = new GGEMSNavigator*[number_of_navigators_+1];
+    for (GGsize i = 0; i < number_of_navigators_; ++i) {
+      tmp[i] = navigators_[i];
+    }
+
+    tmp[number_of_navigators_] = navigator;
+
+    delete[] navigators_;
+    navigators_ = tmp;
+  }
+
+  number_of_navigators_++;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -91,7 +113,9 @@ void GGEMSNavigatorManager::StoreWorld(GGEMSWorld* world)
 
 void GGEMSNavigatorManager::SaveResults(void) const
 {
-  for (auto&& i : navigators_) i->SaveResults();
+  for (GGsize i = 0; i < number_of_navigators_; ++i) {
+    navigators_[i]->SaveResults();
+  }
 
   // Checking if world exists
   if (world_) world_->SaveResults();
@@ -106,7 +130,7 @@ void GGEMSNavigatorManager::Initialize(void) const
   GGcout("GGEMSNavigatorManager", "Initialize", 3) << "Initializing the GGEMS navigator(s)..." << GGendl;
 
   // A navigator must be declared
-  if (navigators_.empty()) {
+  if (number_of_navigators_ == 0) {
     std::ostringstream oss(std::ostringstream::out);
     oss << "A navigator (detector or phantom) has to be declared!!!";
     GGEMSMisc::ThrowException("GGEMSNavigatorManager", "Initialize", oss.str());
@@ -116,7 +140,9 @@ void GGEMSNavigatorManager::Initialize(void) const
   if (world_) world_->Initialize();
 
   // Initialization of phantoms
-  for (auto&& i : navigators_) i->Initialize();
+  for (GGsize i = 0; i < number_of_navigators_; ++i) {
+    navigators_[i]->Initialize();
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -126,44 +152,52 @@ void GGEMSNavigatorManager::Initialize(void) const
 void GGEMSNavigatorManager::PrintInfos(void) const
 {
   GGcout("GGEMSNavigatorManager", "PrintInfos", 0) << "Printing infos about phantom navigators" << GGendl;
-  GGcout("GGEMSNavigatorManager", "PrintInfos", 0) << "Number of navigator(s): " << navigators_.size() << GGendl;
+  GGcout("GGEMSNavigatorManager", "PrintInfos", 0) << "Number of navigator(s): " << number_of_navigators_ << GGendl;
 
-  for (auto&&i : navigators_) i->PrintInfos();
+  for (GGsize i = 0; i < number_of_navigators_; ++i) {
+    navigators_[i]->PrintInfos();
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSNavigatorManager::FindSolid(void) const
+void GGEMSNavigatorManager::FindSolid(GGsize const& thread_index) const
 {
-  for (auto&& n : navigators_) n->ParticleSolidDistance();
+  for (GGsize i = 0; i < number_of_navigators_; ++i) {
+    navigators_[i]->ParticleSolidDistance(thread_index);
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSNavigatorManager::ProjectToSolid(void) const
+void GGEMSNavigatorManager::ProjectToSolid(GGsize const& thread_index) const
 {
-  for (auto&& n : navigators_) n->ProjectToSolid();
+  for (GGsize i = 0; i < number_of_navigators_; ++i) {
+    navigators_[i]->ProjectToSolid(thread_index);
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSNavigatorManager::TrackThroughSolid(void) const
+void GGEMSNavigatorManager::TrackThroughSolid(GGsize const& thread_index) const
 {
-  for (auto&& n : navigators_) n->TrackThroughSolid();
+  for (GGsize i = 0; i < number_of_navigators_; ++i) {
+    navigators_[i]->TrackThroughSolid(thread_index);
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSNavigatorManager::WorldTracking(void) const
+void GGEMSNavigatorManager::WorldTracking(GGsize const& thread_index) const
 {
   // Checking if world exists
-  if (world_) world_->Tracking();
+  if (world_) world_->Tracking(thread_index);
 }

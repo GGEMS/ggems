@@ -203,12 +203,12 @@ void GGEMSManager::Initialize(GGuint const& seed)
   navigator_manager.Initialize();
 
   // Printing infos about OpenCL
-  if (is_opencl_verbose_) {
-    opencl_manager.PrintPlatformInfos();
-    opencl_manager.PrintDeviceInfos();
-    opencl_manager.PrintActivatedDevice();
-    opencl_manager.PrintBuildOptions();
-  }
+  // if (is_opencl_verbose_) {
+  //   opencl_manager.PrintPlatformInfos();
+  //   opencl_manager.PrintDeviceInfos();
+  //   opencl_manager.PrintActivatedDevice();
+  //   opencl_manager.PrintBuildOptions();
+  // }
 
   // Printing infos about material database
   if (is_material_database_verbose_) material_database_manager.PrintAvailableMaterials();
@@ -251,57 +251,57 @@ void GGEMSManager::Run()
 {
   GGcout("GGEMSManager", "Run", 0) << "GGEMS simulation started" << GGendl;
 
-  GGEMSSourceManager& source_manager = GGEMSSourceManager::GetInstance();
-  GGEMSNavigatorManager& navigator_manager = GGEMSNavigatorManager::GetInstance();
-  GGEMSProfilerManager& profiler_manager = GGEMSProfilerManager::GetInstance();
+  // GGEMSSourceManager& source_manager = GGEMSSourceManager::GetInstance();
+  // GGEMSNavigatorManager& navigator_manager = GGEMSNavigatorManager::GetInstance();
+  // GGEMSProfilerManager& profiler_manager = GGEMSProfilerManager::GetInstance();
 
-  ChronoTime start_time = GGEMSChrono::Now();
+  // ChronoTime start_time = GGEMSChrono::Now();
 
-  for (GGsize j = 0; j < source_manager.GetNumberOfSources(); ++j) {
-    GGcout("GGEMSManager", "Run", 0) << "## Source " << source_manager.GetNameOfSource(j) << GGendl;
+  // for (GGsize j = 0; j < source_manager.GetNumberOfSources(); ++j) {
+  //   GGcout("GGEMSManager", "Run", 0) << "## Source " << source_manager.GetNameOfSource(j) << GGendl;
 
-    for (GGsize i = 0; i < source_manager.GetNumberOfBatchs(j); ++i) {
-      GGcout("GGEMSManager", "Run", 1) << "----> Launching batch " << i+1 << "/" << source_manager.GetNumberOfBatchs(j) << GGendl;
+  //   for (GGsize i = 0; i < source_manager.GetNumberOfBatchs(j); ++i) {
+  //     GGcout("GGEMSManager", "Run", 1) << "----> Launching batch " << i+1 << "/" << source_manager.GetNumberOfBatchs(j) << GGendl;
 
-      GGsize number_of_particles = source_manager.GetNumberOfParticlesInBatch(j, i);
+  //     GGsize number_of_particles = source_manager.GetNumberOfParticlesInBatch(j, i);
 
-      // Step 1: Generating primaries from source
-      GGcout("GGEMSManager", "Run", 2) << "      + Generating " << number_of_particles << " particles..." << GGendl;
-      source_manager.GetPrimaries(j, number_of_particles);
+  //     // Step 1: Generating primaries from source
+  //     GGcout("GGEMSManager", "Run", 2) << "      + Generating " << number_of_particles << " particles..." << GGendl;
+  //     source_manager.GetPrimaries(j, number_of_particles);
 
-      // Loop until ALL particles are dead
-      do {
-        // Step 2: Find closest navigator (phantom, detector) before projection and track operation
-        GGcout("GGEMSManager", "Run", 2) << "      + Finding solid..." << GGendl;
-        navigator_manager.FindSolid();
+  //     // Loop until ALL particles are dead
+  //     do {
+  //       // Step 2: Find closest navigator (phantom, detector) before projection and track operation
+  //       GGcout("GGEMSManager", "Run", 2) << "      + Finding solid..." << GGendl;
+  //       navigator_manager.FindSolid();
 
-        // Optional step: World tracking
-        navigator_manager.WorldTracking();
+  //       // Optional step: World tracking
+  //       navigator_manager.WorldTracking();
 
-        // Step 3: Project particles to solid
-        GGcout("GGEMSManager", "Run", 2) << "      + Projecting particles to solid..." << GGendl;
-        navigator_manager.ProjectToSolid();
+  //       // Step 3: Project particles to solid
+  //       GGcout("GGEMSManager", "Run", 2) << "      + Projecting particles to solid..." << GGendl;
+  //       navigator_manager.ProjectToSolid();
 
-        // Step 4: Track through step, particles are tracked in selected solid
-        GGcout("GGEMSManager", "Run", 2) << "      + Tracking particles through solid..." << GGendl;
-        navigator_manager.TrackThroughSolid();
+  //       // Step 4: Track through step, particles are tracked in selected solid
+  //       GGcout("GGEMSManager", "Run", 2) << "      + Tracking particles through solid..." << GGendl;
+  //       navigator_manager.TrackThroughSolid();
 
-      } while (source_manager.IsAlive()); // Step 5: Checking if all particles are dead, otherwize go back to step 2
-    }
-  }
+  //     } while (source_manager.IsAlive()); // Step 5: Checking if all particles are dead, otherwize go back to step 2
+  //   }
+  // }
 
-  // End of simulation, storing output
-  GGcout("GGEMSManager", "Run", 2) << "Saving results..." << GGendl;
-  navigator_manager.SaveResults();
+  // // End of simulation, storing output
+  // GGcout("GGEMSManager", "Run", 2) << "Saving results..." << GGendl;
+  // navigator_manager.SaveResults();
 
-  // Printing elapsed time in kernels
-  if (is_profiling_verbose_) profiler_manager.PrintSummaryProfile();
+  // // Printing elapsed time in kernels
+  // if (is_profiling_verbose_) profiler_manager.PrintSummaryProfile();
 
-  ChronoTime end_time = GGEMSChrono::Now();
+  // ChronoTime end_time = GGEMSChrono::Now();
 
-  GGcout("GGEMSManager", "Run", 0) << "GGEMS simulation succeeded" << GGendl;
+  // GGcout("GGEMSManager", "Run", 0) << "GGEMS simulation succeeded" << GGendl;
 
-  GGEMSChrono::DisplayTime(end_time - start_time, "GGEMS simulation");
+  // GGEMSChrono::DisplayTime(end_time - start_time, "GGEMS simulation");
 }
 
 ////////////////////////////////////////////////////////////////////////////////

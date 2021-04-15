@@ -43,7 +43,7 @@
 GGEMSWorld::GGEMSWorld()
 : world_output_basename_("world")
 {
-  GGcout("GGEMSWorld", "GGEMSWorld", 3) << "Allocation of GGEMSWorld..." << GGendl;
+  GGcout("GGEMSWorld", "GGEMSWorld", 3) << "GGEMSWorld creating..." << GGendl;
 
   GGEMSNavigatorManager::GetInstance().StoreWorld(this);
 
@@ -59,6 +59,23 @@ GGEMSWorld::GGEMSWorld()
   is_energy_tracking_ = false;
   is_energy_squared_tracking_ = false;
   is_momentum_ = false;
+
+  // Get the number of activated device
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+  number_activated_devices_ = opencl_manager.GetNumberOfActivatedDevice();
+
+  // Allocating buffer for each activated device
+  world_recording_.energy_squared_tracking_ = new cl::Buffer*[number_activated_devices_];
+  world_recording_.energy_tracking_ = new cl::Buffer*[number_activated_devices_];
+  world_recording_.momentum_x_ = new cl::Buffer*[number_activated_devices_];
+  world_recording_.momentum_y_ = new cl::Buffer*[number_activated_devices_];
+  world_recording_.momentum_z_ = new cl::Buffer*[number_activated_devices_];
+  world_recording_.photon_tracking_ = new cl::Buffer*[number_activated_devices_];
+
+  // Storing a kernel for each device
+  kernel_world_tracking_ = new cl::Kernel*[number_activated_devices_];
+
+  GGcout("GGEMSWorld", "GGEMSWorld", 3) << "GGEMSWorld created!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -67,7 +84,71 @@ GGEMSWorld::GGEMSWorld()
 
 GGEMSWorld::~GGEMSWorld(void)
 {
-  GGcout("GGEMSWorld", "~GGEMSWorld", 3) << "Deallocation of GGEMSWorld..." << GGendl;
+  GGcout("GGEMSWorld", "~GGEMSWorld", 3) << "GGEMSWorld erasing..." << GGendl;
+
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+
+  if (world_recording_.photon_tracking_) {
+    if (is_photon_tracking_) {
+      for (GGsize i = 0; i < number_activated_devices_; ++i) {
+        opencl_manager.Deallocate(world_recording_.photon_tracking_[i], dimensions_.x_ * dimensions_.y_ * dimensions_.z_*sizeof(GGint), i);
+      }
+    }
+    delete[] world_recording_.photon_tracking_;
+    world_recording_.photon_tracking_ = nullptr;
+  }
+
+  if (world_recording_.energy_tracking_) {
+    if (is_energy_tracking_) {
+      for (GGsize i = 0; i < number_activated_devices_; ++i) {
+        opencl_manager.Deallocate(world_recording_.energy_tracking_[i], dimensions_.x_ * dimensions_.y_ * dimensions_.z_*sizeof(GGDosiType), i);
+      }
+    }
+    delete[] world_recording_.energy_tracking_;
+    world_recording_.energy_tracking_ = nullptr;
+  }
+
+  if (world_recording_.energy_squared_tracking_) {
+    if (is_energy_squared_tracking_) {
+      for (GGsize i = 0; i < number_activated_devices_; ++i) {
+        opencl_manager.Deallocate(world_recording_.energy_squared_tracking_[i], dimensions_.x_ * dimensions_.y_ * dimensions_.z_*sizeof(GGDosiType), i);
+      }
+    }
+    delete[] world_recording_.energy_squared_tracking_;
+    world_recording_.energy_squared_tracking_ = nullptr;
+  }
+
+  if (world_recording_.momentum_x_) {
+    if (is_momentum_) {
+      for (GGsize i = 0; i < number_activated_devices_; ++i) {
+        opencl_manager.Deallocate(world_recording_.momentum_x_[i], dimensions_.x_ * dimensions_.y_ * dimensions_.z_*sizeof(GGDosiType), i);
+      }
+    }
+    delete[] world_recording_.momentum_x_;
+    world_recording_.momentum_x_ = nullptr;
+  }
+
+  if (world_recording_.momentum_y_) {
+    if (is_momentum_) {
+      for (GGsize i = 0; i < number_activated_devices_; ++i) {
+        opencl_manager.Deallocate(world_recording_.momentum_x_[i], dimensions_.x_ * dimensions_.y_ * dimensions_.z_*sizeof(GGDosiType), i);
+      }
+    }
+    delete[] world_recording_.momentum_y_;
+    world_recording_.momentum_y_ = nullptr;
+  }
+
+  if (world_recording_.momentum_z_) {
+    if (is_momentum_) {
+      for (GGsize i = 0; i < number_activated_devices_; ++i) {
+        opencl_manager.Deallocate(world_recording_.momentum_x_[i], dimensions_.x_ * dimensions_.y_ * dimensions_.z_*sizeof(GGDosiType), i);
+      }
+    }
+    delete[] world_recording_.momentum_z_;
+    world_recording_.momentum_z_ = nullptr;
+  }
+
+  GGcout("GGEMSWorld", "~GGEMSWorld", 3) << "GGEMSWorld erased!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -181,7 +262,7 @@ void GGEMSWorld::InitializeKernel(void)
   }
 
   // Compiling the kernels
-  kernel_world_tracking_ = opencl_manager.CompileKernel(world_tracking_filename, "world_tracking", nullptr, const_cast<char*>(kernel_option.c_str()));
+  opencl_manager.CompileKernel(world_tracking_filename, "world_tracking", kernel_world_tracking_, nullptr, const_cast<char*>(kernel_option.c_str()));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -201,23 +282,26 @@ void GGEMSWorld::Initialize(void)
   // Initializing OpenCL buffers
   GGsize total_number_voxel_world = dimensions_.x_ * dimensions_.y_ * dimensions_.z_;
 
-  world_recording_.photon_tracking_ = is_photon_tracking_ ? opencl_manager.Allocate(nullptr, total_number_voxel_world * sizeof(GGint), CL_MEM_READ_WRITE, "GGEMSWorld") : nullptr;
-  if (is_photon_tracking_) opencl_manager.CleanBuffer(world_recording_.photon_tracking_, total_number_voxel_world * sizeof(GGint));
+  // Loop over the activated device
+  for (GGsize j = 0; j < number_activated_devices_; ++j) {
+    world_recording_.photon_tracking_[j] = is_photon_tracking_ ? opencl_manager.Allocate(nullptr, total_number_voxel_world * sizeof(GGint), j, CL_MEM_READ_WRITE, "GGEMSWorld") : nullptr;
+    if (is_photon_tracking_) opencl_manager.CleanBuffer(world_recording_.photon_tracking_[j], total_number_voxel_world * sizeof(GGint), j);
 
-  world_recording_.energy_tracking_ = is_energy_tracking_ ? opencl_manager.Allocate(nullptr, total_number_voxel_world*sizeof(GGDosiType), CL_MEM_READ_WRITE, "GGEMSWorld") : nullptr;
-  if (is_energy_tracking_) opencl_manager.CleanBuffer(world_recording_.energy_tracking_, total_number_voxel_world*sizeof(GGDosiType));
+    world_recording_.energy_tracking_[j] = is_energy_tracking_ ? opencl_manager.Allocate(nullptr, total_number_voxel_world*sizeof(GGDosiType), j, CL_MEM_READ_WRITE, "GGEMSWorld") : nullptr;
+    if (is_energy_tracking_) opencl_manager.CleanBuffer(world_recording_.energy_tracking_[j], total_number_voxel_world*sizeof(GGDosiType), j);
 
-  world_recording_.energy_squared_tracking_ = is_energy_squared_tracking_ ? opencl_manager.Allocate(nullptr, total_number_voxel_world*sizeof(GGDosiType), CL_MEM_READ_WRITE, "GGEMSWorld") : nullptr;
-  if (is_energy_squared_tracking_) opencl_manager.CleanBuffer(world_recording_.energy_squared_tracking_, total_number_voxel_world*sizeof(GGDosiType));
+    world_recording_.energy_squared_tracking_[j] = is_energy_squared_tracking_ ? opencl_manager.Allocate(nullptr, total_number_voxel_world*sizeof(GGDosiType), j, CL_MEM_READ_WRITE, "GGEMSWorld") : nullptr;
+    if (is_energy_squared_tracking_) opencl_manager.CleanBuffer(world_recording_.energy_squared_tracking_[j], total_number_voxel_world*sizeof(GGDosiType), j);
 
-  world_recording_.momentum_x_ = is_momentum_ ? opencl_manager.Allocate(nullptr, total_number_voxel_world*sizeof(GGDosiType), CL_MEM_READ_WRITE, "GGEMSWorld") : nullptr;
-  if (is_momentum_) opencl_manager.CleanBuffer(world_recording_.momentum_x_, total_number_voxel_world*sizeof(GGDosiType));
+    world_recording_.momentum_x_[j] = is_momentum_ ? opencl_manager.Allocate(nullptr, total_number_voxel_world*sizeof(GGDosiType), j, CL_MEM_READ_WRITE, "GGEMSWorld") : nullptr;
+    if (is_momentum_) opencl_manager.CleanBuffer(world_recording_.momentum_x_[j], total_number_voxel_world*sizeof(GGDosiType), j);
 
-  world_recording_.momentum_y_ = is_momentum_ ? opencl_manager.Allocate(nullptr, total_number_voxel_world*sizeof(GGDosiType), CL_MEM_READ_WRITE, "GGEMSWorld") : nullptr;
-  if (is_momentum_) opencl_manager.CleanBuffer(world_recording_.momentum_y_, total_number_voxel_world*sizeof(GGDosiType));
+    world_recording_.momentum_y_[j] = is_momentum_ ? opencl_manager.Allocate(nullptr, total_number_voxel_world*sizeof(GGDosiType), j, CL_MEM_READ_WRITE, "GGEMSWorld") : nullptr;
+    if (is_momentum_) opencl_manager.CleanBuffer(world_recording_.momentum_y_[j], total_number_voxel_world*sizeof(GGDosiType), j);
 
-  world_recording_.momentum_z_ = is_momentum_ ? opencl_manager.Allocate(nullptr, total_number_voxel_world*sizeof(GGDosiType), CL_MEM_READ_WRITE, "GGEMSWorld") : nullptr;
-  if (is_momentum_) opencl_manager.CleanBuffer(world_recording_.momentum_z_, total_number_voxel_world*sizeof(GGDosiType));
+    world_recording_.momentum_z_[j] = is_momentum_ ? opencl_manager.Allocate(nullptr, total_number_voxel_world*sizeof(GGDosiType), j, CL_MEM_READ_WRITE, "GGEMSWorld") : nullptr;
+    if (is_momentum_) opencl_manager.CleanBuffer(world_recording_.momentum_z_[j], total_number_voxel_world*sizeof(GGDosiType), j);
+  }
 
   // Initialize OpenCL kernel tracking particles in world
   InitializeKernel();
@@ -227,17 +311,23 @@ void GGEMSWorld::Initialize(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSWorld::Tracking(void)
+void GGEMSWorld::Tracking(GGsize const& thread_index)
 {
   // Getting the OpenCL manager and infos for work-item launching
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
-  cl::CommandQueue* queue = opencl_manager.GetCommandQueue();
-  cl::Event* event = opencl_manager.GetEvent();
+  cl::CommandQueue* queue = opencl_manager.GetCommandQueue(thread_index);
+  cl::Event* event = opencl_manager.GetEvent(thread_index);
+
+  // Get Device name and storing methode name + device
+  GGsize device_index = opencl_manager.GetIndexOfActivatedDevice(thread_index);
+  std::string device_name = opencl_manager.GetDeviceName(device_index);
+  std::ostringstream oss(std::ostringstream::out);
+  oss << "GGEMSWorld::Tracking in " << device_name;
 
   // Pointer to primary particles, and number to particles in buffer
   GGEMSSourceManager& source_manager = GGEMSSourceManager::GetInstance();
-  cl::Buffer* primary_particles = source_manager.GetParticles()->GetPrimaryParticles();
-  GGsize number_of_particles = source_manager.GetParticles()->GetNumberOfParticles();
+  cl::Buffer* primary_particles = source_manager.GetParticles()->GetPrimaryParticles(thread_index);
+  GGsize number_of_particles = source_manager.GetParticles()->GetNumberOfParticles(thread_index);
 
   // Getting work group size, and work-item number
   GGsize work_group_size = opencl_manager.GetWorkGroupSize();
@@ -248,29 +338,29 @@ void GGEMSWorld::Tracking(void)
   cl::NDRange local_wi(work_group_size);
 
   // Getting kernel, and setting parameters
-  std::shared_ptr<cl::Kernel> kernel = kernel_world_tracking_.lock();
-  kernel->setArg(0, number_of_particles);
-  kernel->setArg(1, *primary_particles);
-  kernel->setArg(2, *world_recording_.photon_tracking_.get());
-  kernel->setArg(3, *world_recording_.energy_tracking_.get());
-  kernel->setArg(4, *world_recording_.energy_squared_tracking_.get());
-  kernel->setArg(5, *world_recording_.momentum_x_.get());
-  kernel->setArg(6, *world_recording_.momentum_y_.get());
-  kernel->setArg(7, *world_recording_.momentum_z_.get());
-  kernel->setArg(8, dimensions_.x_);
-  kernel->setArg(9, dimensions_.y_);
-  kernel->setArg(10, dimensions_.z_);
-  kernel->setArg(11, sizes_.x);
-  kernel->setArg(12, sizes_.y);
-  kernel->setArg(13, sizes_.z);
+  kernel_world_tracking_[thread_index]->setArg(0, number_of_particles);
+  kernel_world_tracking_[thread_index]->setArg(0, number_of_particles);
+  kernel_world_tracking_[thread_index]->setArg(1, *primary_particles);
+  kernel_world_tracking_[thread_index]->setArg(2, *world_recording_.photon_tracking_[thread_index]);
+  kernel_world_tracking_[thread_index]->setArg(3, *world_recording_.energy_tracking_[thread_index]);
+  kernel_world_tracking_[thread_index]->setArg(4, *world_recording_.energy_squared_tracking_[thread_index]);
+  kernel_world_tracking_[thread_index]->setArg(5, *world_recording_.momentum_x_[thread_index]);
+  kernel_world_tracking_[thread_index]->setArg(6, *world_recording_.momentum_y_[thread_index]);
+  kernel_world_tracking_[thread_index]->setArg(7, *world_recording_.momentum_z_[thread_index]);
+  kernel_world_tracking_[thread_index]->setArg(8, dimensions_.x_);
+  kernel_world_tracking_[thread_index]->setArg(9, dimensions_.y_);
+  kernel_world_tracking_[thread_index]->setArg(10, dimensions_.z_);
+  kernel_world_tracking_[thread_index]->setArg(11, sizes_.x);
+  kernel_world_tracking_[thread_index]->setArg(12, sizes_.y);
+  kernel_world_tracking_[thread_index]->setArg(13, sizes_.z);
 
   // Launching kernel
-  GGint kernel_status = queue->enqueueNDRangeKernel(*kernel, 0, global_wi, local_wi, nullptr, event);
+  GGint kernel_status = queue->enqueueNDRangeKernel(*kernel_world_tracking_[thread_index], 0, global_wi, local_wi, nullptr, event);
   opencl_manager.CheckOpenCLError(kernel_status, "GGEMSWorld", "Tracking");
 
   // GGEMS Profiling
   GGEMSProfilerManager& profiler_manager = GGEMSProfilerManager::GetInstance();
-  profiler_manager.HandleEvent(*event, "GGEMSWorld::Tracking");
+  profiler_manager.HandleEvent(*event, oss.str());
   queue->finish();
 }
 
@@ -280,10 +370,10 @@ void GGEMSWorld::Tracking(void)
 
 void GGEMSWorld::SaveResults(void) const
 {
-  if (is_photon_tracking_) SavePhotonTracking();
-  if (is_energy_tracking_) SaveEnergyTracking();
-  if (is_energy_squared_tracking_) SaveEnergySquaredTracking();
-  if (is_momentum_) SaveMomentum();
+  // if (is_photon_tracking_) SavePhotonTracking();
+  // if (is_energy_tracking_) SaveEnergyTracking();
+  // if (is_energy_squared_tracking_) SaveEnergySquaredTracking();
+  // if (is_momentum_) SaveMomentum();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -292,27 +382,27 @@ void GGEMSWorld::SaveResults(void) const
 
 void GGEMSWorld::SavePhotonTracking(void) const
 {
-  // Get the OpenCL manager
-  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+  // // Get the OpenCL manager
+  // GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
-  GGsize total_number_of_voxels = dimensions_.x_ * dimensions_.y_ * dimensions_.z_;
-  GGint* photon_tracking = new GGint[total_number_of_voxels];
-  std::memset(photon_tracking, 0, total_number_of_voxels*sizeof(GGint));
+  // GGsize total_number_of_voxels = dimensions_.x_ * dimensions_.y_ * dimensions_.z_;
+  // GGint* photon_tracking = new GGint[total_number_of_voxels];
+  // std::memset(photon_tracking, 0, total_number_of_voxels*sizeof(GGint));
 
-  GGEMSMHDImage mhdImage;
-  mhdImage.SetOutputFileName(world_output_basename_ + "_world_photon_tracking.mhd");
-  mhdImage.SetDataType("MET_INT");
-  mhdImage.SetDimensions(dimensions_);
-  mhdImage.SetElementSizes(sizes_);
+  // GGEMSMHDImage mhdImage;
+  // mhdImage.SetOutputFileName(world_output_basename_ + "_world_photon_tracking.mhd");
+  // mhdImage.SetDataType("MET_INT");
+  // mhdImage.SetDimensions(dimensions_);
+  // mhdImage.SetElementSizes(sizes_);
 
-  GGint* photon_tracking_device = opencl_manager.GetDeviceBuffer<GGint>(world_recording_.photon_tracking_.get(), total_number_of_voxels*sizeof(GGint));
+  // GGint* photon_tracking_device = opencl_manager.GetDeviceBuffer<GGint>(world_recording_.photon_tracking_.get(), total_number_of_voxels*sizeof(GGint));
 
-  for (GGsize i = 0; i < total_number_of_voxels; ++i) photon_tracking[i] = photon_tracking_device[i];
+  // for (GGsize i = 0; i < total_number_of_voxels; ++i) photon_tracking[i] = photon_tracking_device[i];
 
-  // Writing data
-  mhdImage.Write<GGint>(photon_tracking, total_number_of_voxels);
-  opencl_manager.ReleaseDeviceBuffer(world_recording_.photon_tracking_.get(), photon_tracking_device);
-  delete[] photon_tracking;
+  // // Writing data
+  // mhdImage.Write<GGint>(photon_tracking, total_number_of_voxels);
+  // opencl_manager.ReleaseDeviceBuffer(world_recording_.photon_tracking_.get(), photon_tracking_device);
+  // delete[] photon_tracking;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -321,28 +411,28 @@ void GGEMSWorld::SavePhotonTracking(void) const
 
 void GGEMSWorld::SaveEnergyTracking(void) const
 {
-  // Get the OpenCL manager
-  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+  // // Get the OpenCL manager
+  // GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
-  GGsize total_number_of_voxels = dimensions_.x_ * dimensions_.y_ * dimensions_.z_;
-  GGDosiType* edep_tracking = new GGDosiType[total_number_of_voxels];
-  std::memset(edep_tracking, 0, total_number_of_voxels*sizeof(GGDosiType));
+  // GGsize total_number_of_voxels = dimensions_.x_ * dimensions_.y_ * dimensions_.z_;
+  // GGDosiType* edep_tracking = new GGDosiType[total_number_of_voxels];
+  // std::memset(edep_tracking, 0, total_number_of_voxels*sizeof(GGDosiType));
 
-  GGEMSMHDImage mhdImage;
-  mhdImage.SetOutputFileName(world_output_basename_ + "_world_edep.mhd");
-  if (sizeof(GGDosiType) == 4) mhdImage.SetDataType("MET_FLOAT");
-  else if (sizeof(GGDosiType) == 8) mhdImage.SetDataType("MET_DOUBLE");
-  mhdImage.SetDimensions(dimensions_);
-  mhdImage.SetElementSizes(sizes_);
+  // GGEMSMHDImage mhdImage;
+  // mhdImage.SetOutputFileName(world_output_basename_ + "_world_edep.mhd");
+  // if (sizeof(GGDosiType) == 4) mhdImage.SetDataType("MET_FLOAT");
+  // else if (sizeof(GGDosiType) == 8) mhdImage.SetDataType("MET_DOUBLE");
+  // mhdImage.SetDimensions(dimensions_);
+  // mhdImage.SetElementSizes(sizes_);
 
-  GGDosiType* edep_device = opencl_manager.GetDeviceBuffer<GGDosiType>(world_recording_.energy_tracking_.get(), total_number_of_voxels*sizeof(GGDosiType));
+  // GGDosiType* edep_device = opencl_manager.GetDeviceBuffer<GGDosiType>(world_recording_.energy_tracking_.get(), total_number_of_voxels*sizeof(GGDosiType));
 
-  for (GGsize i = 0; i < total_number_of_voxels; ++i) edep_tracking[i] = edep_device[i];
+  // for (GGsize i = 0; i < total_number_of_voxels; ++i) edep_tracking[i] = edep_device[i];
 
-  // Writing data
-  mhdImage.Write<GGDosiType>(edep_tracking, total_number_of_voxels);
-  opencl_manager.ReleaseDeviceBuffer(world_recording_.energy_tracking_.get(), edep_device);
-  delete[] edep_tracking;
+  // // Writing data
+  // mhdImage.Write<GGDosiType>(edep_tracking, total_number_of_voxels);
+  // opencl_manager.ReleaseDeviceBuffer(world_recording_.energy_tracking_.get(), edep_device);
+  // delete[] edep_tracking;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -351,28 +441,28 @@ void GGEMSWorld::SaveEnergyTracking(void) const
 
 void GGEMSWorld::SaveEnergySquaredTracking(void) const
 {
-  // Get the OpenCL manager
-  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+  // // Get the OpenCL manager
+  // GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
-  GGsize total_number_of_voxels = dimensions_.x_ * dimensions_.y_ * dimensions_.z_;
-  GGDosiType* edep_squared_tracking = new GGDosiType[total_number_of_voxels];
-  std::memset(edep_squared_tracking, 0, total_number_of_voxels*sizeof(GGDosiType));
+  // GGsize total_number_of_voxels = dimensions_.x_ * dimensions_.y_ * dimensions_.z_;
+  // GGDosiType* edep_squared_tracking = new GGDosiType[total_number_of_voxels];
+  // std::memset(edep_squared_tracking, 0, total_number_of_voxels*sizeof(GGDosiType));
 
-  GGEMSMHDImage mhdImage;
-  mhdImage.SetOutputFileName(world_output_basename_ + "_world_edep_squared.mhd");
-  if (sizeof(GGDosiType) == 4) mhdImage.SetDataType("MET_FLOAT");
-  else if (sizeof(GGDosiType) == 8) mhdImage.SetDataType("MET_DOUBLE");
-  mhdImage.SetDimensions(dimensions_);
-  mhdImage.SetElementSizes(sizes_);
+  // GGEMSMHDImage mhdImage;
+  // mhdImage.SetOutputFileName(world_output_basename_ + "_world_edep_squared.mhd");
+  // if (sizeof(GGDosiType) == 4) mhdImage.SetDataType("MET_FLOAT");
+  // else if (sizeof(GGDosiType) == 8) mhdImage.SetDataType("MET_DOUBLE");
+  // mhdImage.SetDimensions(dimensions_);
+  // mhdImage.SetElementSizes(sizes_);
 
-  GGDosiType* edep_squared_device = opencl_manager.GetDeviceBuffer<GGDosiType>(world_recording_.energy_squared_tracking_.get(), total_number_of_voxels*sizeof(GGDosiType));
+  // GGDosiType* edep_squared_device = opencl_manager.GetDeviceBuffer<GGDosiType>(world_recording_.energy_squared_tracking_.get(), total_number_of_voxels*sizeof(GGDosiType));
 
-  for (GGsize i = 0; i < total_number_of_voxels; ++i) edep_squared_tracking[i] = edep_squared_device[i];
+  // for (GGsize i = 0; i < total_number_of_voxels; ++i) edep_squared_tracking[i] = edep_squared_device[i];
 
-  // Writing data
-  mhdImage.Write<GGDosiType>(edep_squared_tracking, total_number_of_voxels);
-  opencl_manager.ReleaseDeviceBuffer(world_recording_.energy_squared_tracking_.get(), edep_squared_device);
-  delete[] edep_squared_tracking;
+  // // Writing data
+  // mhdImage.Write<GGDosiType>(edep_squared_tracking, total_number_of_voxels);
+  // opencl_manager.ReleaseDeviceBuffer(world_recording_.energy_squared_tracking_.get(), edep_squared_device);
+  // delete[] edep_squared_tracking;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -381,68 +471,68 @@ void GGEMSWorld::SaveEnergySquaredTracking(void) const
 
 void GGEMSWorld::SaveMomentum(void) const
 {
-  // Get the OpenCL manager
-  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+  // // Get the OpenCL manager
+  // GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
-  GGsize total_number_of_voxels = dimensions_.x_ * dimensions_.y_ * dimensions_.z_;
+  // GGsize total_number_of_voxels = dimensions_.x_ * dimensions_.y_ * dimensions_.z_;
 
-  GGDosiType* momentum_x = new GGDosiType[total_number_of_voxels];
-  std::memset(momentum_x, 0, total_number_of_voxels*sizeof(GGDosiType));
+  // GGDosiType* momentum_x = new GGDosiType[total_number_of_voxels];
+  // std::memset(momentum_x, 0, total_number_of_voxels*sizeof(GGDosiType));
 
-  GGDosiType* momentum_y = new GGDosiType[total_number_of_voxels];
-  std::memset(momentum_y, 0, total_number_of_voxels*sizeof(GGDosiType));
+  // GGDosiType* momentum_y = new GGDosiType[total_number_of_voxels];
+  // std::memset(momentum_y, 0, total_number_of_voxels*sizeof(GGDosiType));
 
-  GGDosiType* momentum_z = new GGDosiType[total_number_of_voxels];
-  std::memset(momentum_z, 0, total_number_of_voxels*sizeof(GGDosiType));
+  // GGDosiType* momentum_z = new GGDosiType[total_number_of_voxels];
+  // std::memset(momentum_z, 0, total_number_of_voxels*sizeof(GGDosiType));
 
-  GGEMSMHDImage mhdImage_momentum_x;
-  mhdImage_momentum_x.SetOutputFileName(world_output_basename_ + "_world_momentum_x.mhd");
-  if (sizeof(GGDosiType) == 4) mhdImage_momentum_x.SetDataType("MET_FLOAT");
-  else if (sizeof(GGDosiType) == 8) mhdImage_momentum_x.SetDataType("MET_DOUBLE");
-  mhdImage_momentum_x.SetDimensions(dimensions_);
-  mhdImage_momentum_x.SetElementSizes(sizes_);
+  // GGEMSMHDImage mhdImage_momentum_x;
+  // mhdImage_momentum_x.SetOutputFileName(world_output_basename_ + "_world_momentum_x.mhd");
+  // if (sizeof(GGDosiType) == 4) mhdImage_momentum_x.SetDataType("MET_FLOAT");
+  // else if (sizeof(GGDosiType) == 8) mhdImage_momentum_x.SetDataType("MET_DOUBLE");
+  // mhdImage_momentum_x.SetDimensions(dimensions_);
+  // mhdImage_momentum_x.SetElementSizes(sizes_);
 
-  GGEMSMHDImage mhdImage_momentum_y;
-  mhdImage_momentum_y.SetOutputFileName(world_output_basename_ + "_world_momentum_y.mhd");
-  if (sizeof(GGDosiType) == 4) mhdImage_momentum_y.SetDataType("MET_FLOAT");
-  else if (sizeof(GGDosiType) == 8) mhdImage_momentum_y.SetDataType("MET_DOUBLE");
-  mhdImage_momentum_y.SetDimensions(dimensions_);
-  mhdImage_momentum_y.SetElementSizes(sizes_);
+  // GGEMSMHDImage mhdImage_momentum_y;
+  // mhdImage_momentum_y.SetOutputFileName(world_output_basename_ + "_world_momentum_y.mhd");
+  // if (sizeof(GGDosiType) == 4) mhdImage_momentum_y.SetDataType("MET_FLOAT");
+  // else if (sizeof(GGDosiType) == 8) mhdImage_momentum_y.SetDataType("MET_DOUBLE");
+  // mhdImage_momentum_y.SetDimensions(dimensions_);
+  // mhdImage_momentum_y.SetElementSizes(sizes_);
 
-  GGEMSMHDImage mhdImage_momentum_z;
-  mhdImage_momentum_z.SetOutputFileName(world_output_basename_ + "_world_momentum_z.mhd");
-  if (sizeof(GGDosiType) == 4) mhdImage_momentum_z.SetDataType("MET_FLOAT");
-  else if (sizeof(GGDosiType) == 8) mhdImage_momentum_z.SetDataType("MET_DOUBLE");
-  mhdImage_momentum_z.SetDimensions(dimensions_);
-  mhdImage_momentum_z.SetElementSizes(sizes_);
+  // GGEMSMHDImage mhdImage_momentum_z;
+  // mhdImage_momentum_z.SetOutputFileName(world_output_basename_ + "_world_momentum_z.mhd");
+  // if (sizeof(GGDosiType) == 4) mhdImage_momentum_z.SetDataType("MET_FLOAT");
+  // else if (sizeof(GGDosiType) == 8) mhdImage_momentum_z.SetDataType("MET_DOUBLE");
+  // mhdImage_momentum_z.SetDimensions(dimensions_);
+  // mhdImage_momentum_z.SetElementSizes(sizes_);
 
-  GGDosiType* momentum_x_device = opencl_manager.GetDeviceBuffer<GGDosiType>(world_recording_.momentum_x_.get(), total_number_of_voxels*sizeof(GGDosiType));
+  // GGDosiType* momentum_x_device = opencl_manager.GetDeviceBuffer<GGDosiType>(world_recording_.momentum_x_.get(), total_number_of_voxels*sizeof(GGDosiType));
 
-  for (GGsize i = 0; i < total_number_of_voxels; ++i) momentum_x[i] = momentum_x_device[i];
+  // for (GGsize i = 0; i < total_number_of_voxels; ++i) momentum_x[i] = momentum_x_device[i];
 
-  // Writing data
-  mhdImage_momentum_x.Write<GGDosiType>(momentum_x, total_number_of_voxels);
-  opencl_manager.ReleaseDeviceBuffer(world_recording_.momentum_x_.get(), momentum_x_device);
+  // // Writing data
+  // mhdImage_momentum_x.Write<GGDosiType>(momentum_x, total_number_of_voxels);
+  // opencl_manager.ReleaseDeviceBuffer(world_recording_.momentum_x_.get(), momentum_x_device);
 
-  GGDosiType* momentum_y_device = opencl_manager.GetDeviceBuffer<GGDosiType>(world_recording_.momentum_y_.get(), total_number_of_voxels*sizeof(GGDosiType));
+  // GGDosiType* momentum_y_device = opencl_manager.GetDeviceBuffer<GGDosiType>(world_recording_.momentum_y_.get(), total_number_of_voxels*sizeof(GGDosiType));
 
-  for (GGsize i = 0; i < total_number_of_voxels; ++i) momentum_y[i] = momentum_y_device[i];
+  // for (GGsize i = 0; i < total_number_of_voxels; ++i) momentum_y[i] = momentum_y_device[i];
 
-  // Writing data
-  mhdImage_momentum_y.Write<GGDosiType>(momentum_y, total_number_of_voxels);
-  opencl_manager.ReleaseDeviceBuffer(world_recording_.momentum_y_.get(), momentum_y_device);
+  // // Writing data
+  // mhdImage_momentum_y.Write<GGDosiType>(momentum_y, total_number_of_voxels);
+  // opencl_manager.ReleaseDeviceBuffer(world_recording_.momentum_y_.get(), momentum_y_device);
 
-  GGDosiType* momentum_z_device = opencl_manager.GetDeviceBuffer<GGDosiType>(world_recording_.momentum_z_.get(), total_number_of_voxels*sizeof(GGDosiType));
+  // GGDosiType* momentum_z_device = opencl_manager.GetDeviceBuffer<GGDosiType>(world_recording_.momentum_z_.get(), total_number_of_voxels*sizeof(GGDosiType));
 
-  for (GGsize i = 0; i < total_number_of_voxels; ++i) momentum_z[i] = momentum_z_device[i];
+  // for (GGsize i = 0; i < total_number_of_voxels; ++i) momentum_z[i] = momentum_z_device[i];
 
-  // Writing data
-  mhdImage_momentum_z.Write<GGDosiType>(momentum_z, total_number_of_voxels);
-  opencl_manager.ReleaseDeviceBuffer(world_recording_.momentum_z_.get(), momentum_z_device);
+  // // Writing data
+  // mhdImage_momentum_z.Write<GGDosiType>(momentum_z, total_number_of_voxels);
+  // opencl_manager.ReleaseDeviceBuffer(world_recording_.momentum_z_.get(), momentum_z_device);
 
-  delete[] momentum_x;
-  delete[] momentum_y;
-  delete[] momentum_z;
+  // delete[] momentum_x;
+  // delete[] momentum_y;
+  // delete[] momentum_z;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

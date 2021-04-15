@@ -41,12 +41,12 @@
 */
 typedef struct GGEMSDoseRecording_t
 {
-  std::shared_ptr<cl::Buffer> edep_; /*!< Buffer storing energy deposit on OpenCL device */
-  std::shared_ptr<cl::Buffer> edep_squared_; /*!< Buffer storing energy deposit squared on OpenCL device */
-  std::shared_ptr<cl::Buffer> hit_; /*!< Buffer storing hit on OpenCL device */
-  std::shared_ptr<cl::Buffer> photon_tracking_; /*!< Buffer storing photon tracking on OpenCL device */
-  std::shared_ptr<cl::Buffer> dose_; /*!< Buffer storing dose in gray (Gy) */
-  std::shared_ptr<cl::Buffer> uncertainty_dose_; /*!< Buffer storing uncertainty dose */
+  cl::Buffer** edep_; /*!< Buffer storing energy deposit on OpenCL device */
+  cl::Buffer** edep_squared_; /*!< Buffer storing energy deposit squared on OpenCL device */
+  cl::Buffer** hit_; /*!< Buffer storing hit on OpenCL device */
+  cl::Buffer** photon_tracking_; /*!< Buffer storing photon tracking on OpenCL device */
+  cl::Buffer** dose_; /*!< Buffer storing dose in gray (Gy) */
+  cl::Buffer** uncertainty_dose_; /*!< Buffer storing uncertainty dose */
 } GGEMSDoseRecording; /*!< Using C convention name of struct to C++ (_t deletion) */
 
 #endif
