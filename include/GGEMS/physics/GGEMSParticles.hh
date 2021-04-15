@@ -92,36 +92,36 @@ class GGEMS_EXPORT GGEMSParticles
     void Initialize(void);
 
     /*!
-      \fn inline cl::Buffer* GetPrimaryParticles(GGsize const& index) const
-      \param index - index of activated device
+      \fn inline cl::Buffer* GetPrimaryParticles(GGsize const& thread_index) const
+      \param thread_index - index of activated device (thread index)
       \return pointer to OpenCL buffer storing particles
       \brief return the pointer to OpenCL buffer storing particles
     */
-    inline cl::Buffer* GetPrimaryParticles(GGsize const& index) const {return primary_particles_[index];};
+    inline cl::Buffer* GetPrimaryParticles(GGsize const& thread_index) const {return primary_particles_[thread_index];};
 
     /*!
-      \fn void SetNumberOfParticles(GGsize const& device_index, GGsize const& number_of_particles)
-      \param device_index - index of activated device
+      \fn void SetNumberOfParticles(GGsize const& thread_index, GGsize const& number_of_particles)
+      \param thread_index - index of activated device (thread index)
       \param number_of_particles - number of activated particles in buffer
       \brief Set the number of particles in buffer
     */
-    void SetNumberOfParticles(GGsize const& device_index, GGsize const& number_of_particles);
+    void SetNumberOfParticles(GGsize const& thread_index, GGsize const& number_of_particles);
 
     /*!
-      \fn inline GGsize GetNumberOfParticles(GGsize const& device_index) const
-      \param device_index - index of activated device
+      \fn inline GGsize GetNumberOfParticles(GGsize const& thread_index) const
+      \param thread_index - index of activated device (thread index)
       \return number of particles currently activated in OpenCL buffer
       \brief Get the number of particles on activated device
     */
-    inline GGsize GetNumberOfParticles(GGsize const& device_index) const {return number_of_particles_[device_index];};
+    inline GGsize GetNumberOfParticles(GGsize const& thread_index) const {return number_of_particles_[thread_index];};
 
     /*!
-      \fn bool IsAlive(GGsize const& device_index) const
-      \param device_index - index of activated device
+      \fn bool IsAlive(GGsize const& thread_index) const
+      \param thread_index - index of activated device (thread index)
       \return true if source is still alive, otherwize false
       \brief check if some particles are alive in OpenCL particle buffer
     */
-    bool IsAlive(GGsize const& device_index) const;
+    bool IsAlive(GGsize const& thread_index) const;
 
     /*!
       \fn void Dump(std::string const& message) const

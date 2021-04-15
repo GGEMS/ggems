@@ -101,12 +101,12 @@ class GGEMS_EXPORT GGEMSPseudoRandomGenerator
     void PrintInfos(void) const;
 
     /*!
-      \fn inline cl::Buffer* GetPseudoRandomNumbers(GGsize const& index) const
-      \param index - index of activated device
+      \fn inline cl::Buffer* GetPseudoRandomNumbers(GGsize const& thread_index) const
+      \param thread_index - index of activated device (thread index)
       \return pointer to OpenCL buffer storing random numbers
       \brief return the pointer to OpenCL buffer storing random numbers
     */
-    inline cl::Buffer* GetPseudoRandomNumbers(GGsize const& index) const {return pseudo_random_numbers_[index];};
+    inline cl::Buffer* GetPseudoRandomNumbers(GGsize const& thread_index) const {return pseudo_random_numbers_[thread_index];};
 
   private:
     /*!

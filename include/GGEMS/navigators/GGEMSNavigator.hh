@@ -140,46 +140,50 @@ class GGEMS_EXPORT GGEMSNavigator
       \brief get the number of solids inside the navigator
       \return the number of solids
     */
-    inline GGsize GetNumberOfSolids(void) const {return solids_.size();}
+    inline GGsize GetNumberOfSolids(void) const {return number_of_solids_;}
 
     /*!
-      \fn inline std::vector< std::shared_ptr<GGEMSSolid> > GetSolids(void) const
+      \fn inline GGEMSSolid* GetSolids(GGsize const& solid_index) const
+      \param solid_index - index of solid
       \brief get the list of solids
       \return the list of solids
     */
-    inline std::vector< std::shared_ptr<GGEMSSolid> > GetSolids(void) const {return solids_;}
+    inline GGEMSSolid* GetSolids(GGsize const& solid_index) const {return solids_[solid_index];}
 
     /*!
-      \fn inline std::weak_ptr<GGEMSMaterials> GetMaterials(void) const
+      \fn inline GGEMSMaterials* GetMaterials(void) const
       \brief get the pointer on materials
       \return the pointer on materials
     */
-    inline std::weak_ptr<GGEMSMaterials> GetMaterials(void) const {return materials_;}
+    inline GGEMSMaterials* GetMaterials(void) const {return materials_;}
 
     /*!
-      \fn inline std::weak_ptr<GGEMSCrossSections> GetCrossSections(void) const
+      \fn inline GGEMSCrossSections* GetCrossSections(void) const
       \brief get the pointer on cross sections
       \return the pointer on cross sections
     */
-    inline std::weak_ptr<GGEMSCrossSections> GetCrossSections(void) const {return cross_sections_;}
+    inline GGEMSCrossSections* GetCrossSections(void) const {return cross_sections_;}
 
     /*!
-      \fn void ParticleSolidDistance(void)
+      \fn void ParticleSolidDistance(GGsize const& thread_index)
+      \param thread_index - index of activated device (thread index)
       \brief Compute distance between particle and solid
     */
-    void ParticleSolidDistance(void);
+    void ParticleSolidDistance(GGsize const& thread_index);
 
     /*!
-      \fn void ProjectToSolid(void)
+      \fn void ProjectToSolid(GGsize const& thread_index)
+      \param thread_index - index of activated device (thread index)
       \brief Project particle to entry of closest solid
     */
-    void ProjectToSolid(void);
+    void ProjectToSolid(GGsize const& thread_index);
 
     /*!
-      \fn void TrackThroughSolid(void)
+      \fn void TrackThroughSolid(GGsize const& thread_index)
+      \param thread_index - index of activated device (thread index)
       \brief Move particle through solid
     */
-    void TrackThroughSolid(void);
+    void TrackThroughSolid(GGsize const& thread_index);
 
     /*!
       \fn void PrintInfos(void) const
@@ -234,9 +238,10 @@ class GGEMS_EXPORT GGEMSNavigator
     // Output
     std::string output_basename_; /*!< Basename of output file */
 
-    std::vector<std::shared_ptr<GGEMSSolid>> solids_; /*!< Solid with geometric infos and label */
-    std::shared_ptr<GGEMSMaterials> materials_; /*!< Materials of phantom */
-    std::shared_ptr<GGEMSCrossSections> cross_sections_; /*!< Cross section table for process */
+    GGEMSSolid** solids_; /*!< Solid with geometric infos and label */
+    GGsize number_of_solids_; /*!< Number of solids in navigator */
+    GGEMSMaterials* materials_; /*!< Materials of phantom */
+    GGEMSCrossSections* cross_sections_; /*!< Cross section table for process */
 
     // Dosimetry
     GGEMSDosimetryCalculator* dose_calculator_; /*!< Dose calculator pointer */

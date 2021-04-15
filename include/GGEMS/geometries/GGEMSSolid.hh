@@ -151,18 +151,43 @@ class GGEMS_EXPORT GGEMSSolid
     virtual void PrintInfos(void) const = 0;
 
     /*!
-      \fn GGEMSHistogramMode* GetHistogram(void)
-      \return pointer on hit
-      \brief return the point on histogram
-    */
-    inline GGEMSHistogramMode* GetHistogram(void) {return &histogram_;};
-
-    /*!
       \fn std::string GetRegisteredDataType(void) const
       \return the type of registered data
       \brief get the type of registered data
     */
     inline std::string GetRegisteredDataType(void) const {return data_reg_type_;};
+
+    /*!
+      \fn cl::Kernel* GetKernelParticleSolidDistance(GGsize const& thread_index) const
+      \param thread_index - index of activated device (thread index)
+      \return pointer to kernel associated to a device
+      \brief get the pointer to kernel associated to a device
+    */
+    inline cl::Kernel* GetKernelParticleSolidDistance(GGsize const& thread_index) const {return kernel_particle_solid_distance_[thread_index];}
+
+    /*!
+      \fn cl::Kernel* GetKernelProjectToSolid(GGsize const& thread_index) const
+      \param thread_index - index of activated device (thread index)
+      \return pointer to kernel associated to a device
+      \brief get the pointer to kernel associated to a device
+    */
+    inline cl::Kernel* GetKernelProjectToSolid(GGsize const& thread_index) const {return kernel_project_to_solid_[thread_index];}
+
+    /*!
+      \fn cl::Kernel* GetKernelTrackThroughSolid(GGsize const& thread_index) const
+      \param thread_index - index of activated device (thread index)
+      \return pointer to kernel associated to a device
+      \brief get the pointer to kernel associated to a device
+    */
+    inline cl::Kernel* GetKernelTrackThroughSolid(GGsize const& thread_index) const {return kernel_track_through_solid_[thread_index];}
+
+    /*!
+      \fn GGEMSHistogramMode* GetHistogram(GGsize const& thread_index)
+      \param thread_index - index of activated device (thread index)
+      \return pointer on histogram
+      \brief return the point on histogram
+    */
+    inline cl::Buffer* GetHistogram(GGsize const& thread_index) const {return histogram_.histogram_[thread_index];}
 
   protected:
     /*!

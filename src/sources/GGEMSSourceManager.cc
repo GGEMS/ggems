@@ -97,7 +97,7 @@ void GGEMSSourceManager::Store(GGEMSSource* source)
   }
   else {
     GGEMSSource** tmp = new GGEMSSource*[number_of_sources_+1];
-    for (std::size_t i = 0; i < number_of_sources_; ++i) {
+    for (GGsize i = 0; i < number_of_sources_; ++i) {
       tmp[i] = sources_[i];
     }
 

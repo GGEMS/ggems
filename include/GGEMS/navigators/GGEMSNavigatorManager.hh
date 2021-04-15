@@ -122,27 +122,27 @@ class GGEMS_EXPORT GGEMSNavigatorManager
       \brief Get the number of navigators
       \return the number of navigators
     */
-    inline GGsize GetNumberOfNavigators(void) const {return navigators_.size();}
+    inline GGsize GetNumberOfNavigators(void) const {return number_of_navigators_;}
 
     /*!
-      \fn inline std::vector< std::shared_ptr<GGEMSNavigator> > GetNavigators(void) const
+      \fn inline GGEMSNavigator** GetNavigators(void) const
       \return the list of navigators
       \brief get the list of navigators
     */
-    inline std::vector<std::shared_ptr<GGEMSNavigator>> GetNavigators(void) const {return navigators_;}
+    inline GGEMSNavigator** GetNavigators(void) const {return navigators_;}
 
     /*!
-      \fn inline std::shared_ptr<GGEMSNavigator> GetNavigator(std::string const& navigator_name) const
+      \fn inline GGEMSNavigator* GetNavigator(std::string const& navigator_name) const
       \param navigator_name - name of the navigator
       \return the navigator by the name
       \brief get the navigator by the name
     */
-    inline std::shared_ptr<GGEMSNavigator> GetNavigator(std::string const& navigator_name) const
+    inline GGEMSNavigator* GetNavigator(std::string const& navigator_name) const
     {
       // Loop over the navigator
-      for (GGsize i = 0; i < navigators_.size(); ++i) {
-        if (navigator_name == (navigators_.at(i))->GetNavigatorName()) {
-          return navigators_.at(i);
+      for (GGsize i = 0; i < number_of_navigators_; ++i) {
+        if (navigator_name == navigators_[i]->GetNavigatorName()) {
+          return navigators_[i];
         }
       }
       GGEMSMisc::ThrowException("GGEMSNavigatorManager", "GetNavigator", "Name of the navigator unknown!!!");
@@ -158,30 +158,33 @@ class GGEMS_EXPORT GGEMSNavigatorManager
     {
       GGsize number_of_registered_solid = 0;
       // Loop over number of navigator
-      for (GGsize i = 0; i < navigators_.size(); ++i) {
-        number_of_registered_solid += (navigators_.at(i))->GetNumberOfSolids();
+      for (GGsize i = 0; i < number_of_navigators_; ++i) {
+        number_of_registered_solid += navigators_[i]->GetNumberOfSolids();
       }
 
       return number_of_registered_solid;
     }
 
     /*!
-      \fn void FindSolid(void) const
+      \fn void FindSolid(GGsize const& thread_index) const
+      \param thread_index - index of activated device (thread index)
       \brief Find closest solid before project particle to it
     */
-    void FindSolid(void) const;
+    void FindSolid(GGsize const& thread_index) const;
 
     /*!
-      \fn void ProjectToSolid(void) const
+      \fn void ProjectToSolid(GGsize const& thread_index) const
+      \param thread_index - index of activated device (thread index)
       \brief Project particle to selected solid
     */
-    void ProjectToSolid(void) const;
+    void ProjectToSolid(GGsize const& thread_index) const;
 
     /*!
-      \fn void TrackThroughSolid(void) const
+      \fn void TrackThroughSolid(GGsize const& thread_index) const
+      \param thread_index - index of activated device (thread index)
       \brief Track particles through selected solid
     */
-    void TrackThroughSolid(void) const;
+    void TrackThroughSolid(GGsize const& thread_index) const;
 
     /*!
       \fn void SaveResults(void) const
@@ -190,13 +193,15 @@ class GGEMS_EXPORT GGEMSNavigatorManager
     void SaveResults(void) const;
 
     /*!
-      \fn void WorldTracking(void) const
+      \fn void WorldTracking(GGsize const& thread_index) const
+      \param thread_index - index of activated device (thread index)
       \brief Tracking particles through world
     */
-    void WorldTracking(void) const;
+    void WorldTracking(GGsize const& thread_index) const;
 
   private:
-    std::vector<std::shared_ptr<GGEMSNavigator>> navigators_; /*!< Pointer on the navigators */
+    GGEMSNavigator** navigators_; /*!< Pointer on the navigators */
+    GGsize number_of_navigators_; /*!< Number of navigators */
     GGEMSWorld* world_; /*!< Pointer on world volume */
 };
 

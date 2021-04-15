@@ -173,45 +173,51 @@ class GGEMS_EXPORT GGEMSDosimetryCalculator
     void SetMinimumDensity(GGfloat const& minimum_density, std::string const& unit = "g/cm3");
 
     /*!
-      \fn inline std::shared_ptr<cl::Buffer> GetPhotonTrackingBuffer(void) const
+      \fn inline cl::Buffer* GetPhotonTrackingBuffer(GGsize const& thread_index) const
+      \param thread_index - index of activated device (thread index)
       \return OpenCL buffer for photon tracking in dosimetry mode
       \brief get the buffer for photon tracking in dosimetry mode
     */
-    inline std::shared_ptr<cl::Buffer> GetPhotonTrackingBuffer(void) const {return dose_recording_.photon_tracking_;}
+    inline cl::Buffer* GetPhotonTrackingBuffer(GGsize const& thread_index) const {return dose_recording_.photon_tracking_[thread_index];}
 
     /*!
-      \fn inline std::shared_ptr<cl::Buffer> GetHitTrackingBuffer(void) const
+      \fn inline cl::Buffer* GetHitTrackingBuffer(GGsize const& thread_index) const
+      \param thread_index - index of activated device (thread index)
       \return OpenCL buffer for hit tracking in dosimetry mode
       \brief get the buffer for hit tracking in dosimetry mode
     */
-    inline std::shared_ptr<cl::Buffer> GetHitTrackingBuffer(void) const {return dose_recording_.hit_;}
+    inline cl::Buffer* GetHitTrackingBuffer(GGsize const& thread_index) const {return dose_recording_.hit_[thread_index];}
 
     /*!
-      \fn inline std::shared_ptr<cl::Buffer> GetEdepBuffer(void) const
+      \fn inline cl::Buffer* GetEdepBuffer(void) const
+      \param thread_index - index of activated device (thread index)
       \return OpenCL buffer for edep in dosimetry mode
       \brief get the buffer for edep in dosimetry mode
     */
-    inline std::shared_ptr<cl::Buffer> GetEdepBuffer(void) const {return dose_recording_.edep_;}
+    inline cl::Buffer* GetEdepBuffer(GGsize const& thread_index) const {return dose_recording_.edep_[thread_index];}
 
     /*!
-      \fn inline std::shared_ptr<cl::Buffer> GetEdepSquaredBuffer(void) const
+      \fn inline cl::Buffer* GetEdepSquaredBuffer(GGsize const& thread_index) const
+      \param thread_index - index of activated device (thread index)
       \return OpenCL buffer for edep squared in dosimetry mode
       \brief get the buffer for edep squared in dosimetry mode
     */
-    inline std::shared_ptr<cl::Buffer> GetEdepSquaredBuffer(void) const {return dose_recording_.edep_squared_;}
+    inline cl::Buffer* GetEdepSquaredBuffer(GGsize const& thread_index) const {return dose_recording_.edep_squared_[thread_index];}
 
     /*!
-      \fn inline std::shared_ptr<cl::Buffer> GetDoseParams(void) const
+      \fn inline cl::Buffer* GetDoseParams(GGsize const& thread_index) const
+      \param thread_index - index of activated device (thread index)
       \return OpenCL buffer storing dosimetry params
       \brief get the buffer storing dosimetry params
     */
-    inline std::shared_ptr<cl::Buffer> GetDoseParams(void) const {return dose_params_;}
+    inline cl::Buffer* GetDoseParams(GGsize const& thread_index) const {return dose_params_[thread_index];}
 
     /*!
-      \fn void ComputeDoseAndSaveResults(void)
-      \brief compute dose and save results into output files
+      \fn void ComputeDose(GGsize const& thread_index)
+      \param thread_index - index of activated device (thread index)
+      \brief computing dose
     */
-    void ComputeDoseAndSaveResults(void);
+    void ComputeDose(GGsize const& thread_index);
 
   private:
       /*!
@@ -265,10 +271,10 @@ class GGEMS_EXPORT GGEMSDosimetryCalculator
   private:
     GGfloat3 dosel_sizes_; /*!< Sizes of dosel */
     std::string dosimetry_output_filename_; /*!< Output filename for dosimetry results */
-    std::shared_ptr<GGEMSNavigator> navigator_; /*!< Navigator pointer associated to dosimetry object */
+    GGEMSNavigator* navigator_; /*!< Navigator pointer associated to dosimetry object */
 
     // Buffer storing dose data on OpenCL device and host
-    std::shared_ptr<cl::Buffer> dose_params_; /*!< Buffer storing dose parameters in OpenCL device */
+    cl::Buffer** dose_params_; /*!< Buffer storing dose parameters in OpenCL device */
     GGEMSDoseRecording dose_recording_; /*!< Structure storing dose data on OpenCL device */
     bool is_photon_tracking_; /*!< Boolean for photon tracking */
     bool is_edep_; /*!< Boolean for energy deposit */
@@ -279,7 +285,8 @@ class GGEMS_EXPORT GGEMSDosimetryCalculator
     GGchar is_water_reference_; /*!< Water reference for dose computation */
     GGfloat minimum_density_; /*!< Minimum density value for dose computation */
 
-    std::weak_ptr<cl::Kernel> kernel_compute_dose_; /*!< OpenCL kernel computing dose in voxelized solid */
+    cl::Kernel** kernel_compute_dose_; /*!< OpenCL kernel computing dose in voxelized solid */
+    GGsize number_activated_devices_; /*!< Number of activated device */
 };
 
 /*!
