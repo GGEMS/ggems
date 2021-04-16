@@ -199,7 +199,7 @@ void GGEMSSolidBox::PrintInfos(void) const
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSSolidBox::GetTransformationMatrix(GGsize const& thread_index)
+void GGEMSSolidBox::UpdateTransformationMatrix(GGsize const& thread_index)
 {
   // Get the OpenCL manager
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();

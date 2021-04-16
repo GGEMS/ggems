@@ -44,9 +44,15 @@ GGEMSRangeCuts::GGEMSRangeCuts(void)
   number_of_bins_(300),
   distance_cut_photon_(PHOTON_DISTANCE_CUT),
   distance_cut_electron_(ELECTRON_DISTANCE_CUT),
-  distance_cut_positron_(POSITRON_DISTANCE_CUT)
+  distance_cut_positron_(POSITRON_DISTANCE_CUT),
+  number_of_tables_(0)
 {
-  GGcout("GGEMSRangeCuts", "GGEMSRangeCuts", 3) << "Allocation of GGEMSRangeCuts..." << GGendl;
+  GGcout("GGEMSRangeCuts", "GGEMSRangeCuts", 3) << "GGEMSRangeCuts creating..." << GGendl;
+
+  range_table_material_ = nullptr;
+  loss_table_dedx_table_elements_ = nullptr;
+
+  GGcout("GGEMSRangeCuts", "GGEMSRangeCuts", 3) << "GGEMSRangeCuts created!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -55,7 +61,23 @@ GGEMSRangeCuts::GGEMSRangeCuts(void)
 
 GGEMSRangeCuts::~GGEMSRangeCuts(void)
 {
-  GGcout("GGEMSRangeCuts", "~GGEMSRangeCuts", 3) << "Deallocation of GGEMSRangeCuts..." << GGendl;
+  GGcout("GGEMSRangeCuts", "~GGEMSRangeCuts", 3) << "GGEMSRangeCuts erasing..." << GGendl;
+
+  if (range_table_material_) {
+    delete range_table_material_;
+    range_table_material_ = nullptr;
+  }
+
+  if (loss_table_dedx_table_elements_) {
+    for (GGsize i = 0; i < number_of_tables_; ++i) {
+      delete loss_table_dedx_table_elements_[i];
+      loss_table_dedx_table_elements_[i] = nullptr;
+    }
+    delete[] loss_table_dedx_table_elements_;
+    loss_table_dedx_table_elements_ = nullptr;
+  }
+
+  GGcout("GGEMSRangeCuts", "~GGEMSRangeCuts", 3) << "GGEMSRangeCuts erased!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -129,7 +151,14 @@ GGfloat GGEMSRangeCuts::ConvertToEnergy(GGEMSMaterialTables* material_table, GGu
   }
 
   // Reset tables
-  loss_table_dedx_table_elements_.clear();
+  if (loss_table_dedx_table_elements_) {
+    for (GGsize i = 0; i < number_of_tables_; ++i) {
+      delete loss_table_dedx_table_elements_[i];
+      loss_table_dedx_table_elements_[i] = nullptr;
+    }
+    delete[] loss_table_dedx_table_elements_;
+    loss_table_dedx_table_elements_ = nullptr;
+  }
 
   // init vars
   GGfloat kinetic_energy_cut = 0.0f;
@@ -185,7 +214,8 @@ GGfloat GGEMSRangeCuts::ConvertToEnergy(GGEMSMaterialTables* material_table, GGu
 void GGEMSRangeCuts::BuildAbsorptionLengthTable(GGEMSMaterialTables* material_table, GGushort const& index_mat)
 {
   // Allocation buffer for absorption length
-  range_table_material_.reset(new GGEMSLogEnergyTable(min_energy_, max_energy_, number_of_bins_));
+  if (range_table_material_) delete range_table_material_;
+  range_table_material_ = new GGEMSLogEnergyTable(min_energy_, max_energy_, number_of_bins_);
 
   // Get the number of elements in material
   GGsize number_of_elements = material_table->number_of_chemical_elements_[index_mat];
@@ -199,7 +229,7 @@ void GGEMSRangeCuts::BuildAbsorptionLengthTable(GGEMSMaterialTables* material_ta
 
     // Loop over the number of elements in material
     for (GGsize j = 0; j < number_of_elements; ++j) {
-      sigma += material_table->atomic_number_density_[j+index_of_offset] * loss_table_dedx_table_elements_.at(j)->GetLossTableData(i);
+      sigma += material_table->atomic_number_density_[j+index_of_offset] * loss_table_dedx_table_elements_[j]->GetLossTableData(i);
     }
 
     // Storing value
@@ -217,7 +247,8 @@ void GGEMSRangeCuts::BuildMaterialLossTable(GGEMSMaterialTables* material_table,
   std::vector<GGfloat> loss;
 
   // Allocation buffer for absorption length
-  range_table_material_.reset(new GGEMSLogEnergyTable(min_energy_, max_energy_, number_of_bins_));
+  if (range_table_material_) delete range_table_material_;
+  range_table_material_ = new GGEMSLogEnergyTable(min_energy_, max_energy_, number_of_bins_);
 
   // Get the number of elements in material
   GGsize number_of_elements = static_cast<GGsize>(material_table->number_of_chemical_elements_[index_mat]);
@@ -229,7 +260,7 @@ void GGEMSRangeCuts::BuildMaterialLossTable(GGEMSMaterialTables* material_table,
     GGfloat value = 0.0f;
 
     for (GGsize j = 0; j < number_of_elements; ++j) {
-      value += material_table->atomic_number_density_[j+index_of_offset] * loss_table_dedx_table_elements_.at(j)->GetLossTableData(i);
+      value += material_table->atomic_number_density_[j+index_of_offset] * loss_table_dedx_table_elements_[j]->GetLossTableData(i);
     }
     loss.push_back(value);
   }
@@ -271,18 +302,18 @@ void GGEMSRangeCuts::BuildMaterialLossTable(GGEMSMaterialTables* material_table,
 void GGEMSRangeCuts::BuildElementsLossTable(GGEMSMaterialTables* material_table, GGushort const& index_mat, std::string const& particle_name)
 {
   // Getting number of elements in material
-  GGsize number_of_elements = static_cast<GGsize>(material_table->number_of_chemical_elements_[index_mat]);
+  number_of_tables_ = static_cast<GGsize>(material_table->number_of_chemical_elements_[index_mat]);
 
   // Building cross section tables for each elements in material
-  loss_table_dedx_table_elements_.reserve(number_of_elements);
+  loss_table_dedx_table_elements_ = new GGEMSLogEnergyTable*[number_of_tables_];
 
   // Get index offset to element
   GGsize index_of_offset = material_table->index_of_chemical_elements_[index_mat];
 
   // Filling cross section table
-  for (GGsize i = 0; i < number_of_elements; ++i) {
+  for (GGsize i = 0; i < number_of_tables_; ++i) {
     GGfloat value = 0.0f;
-    std::shared_ptr<GGEMSLogEnergyTable> log_energy_table_element(new GGEMSLogEnergyTable(min_energy_, max_energy_, number_of_bins_));
+    GGEMSLogEnergyTable* log_energy_table_element = new GGEMSLogEnergyTable(min_energy_, max_energy_, number_of_bins_);
 
     // Getting atomic number
     GGuchar const kZ = material_table->atomic_number_Z_[i+index_of_offset];
@@ -301,7 +332,7 @@ void GGEMSRangeCuts::BuildElementsLossTable(GGEMSMaterialTables* material_table,
     }
 
     // Storing the logf table
-    loss_table_dedx_table_elements_.push_back(log_energy_table_element);
+    loss_table_dedx_table_elements_[i] = log_energy_table_element;
   }
 }
 
@@ -564,28 +595,34 @@ void GGEMSRangeCuts::ConvertCutsFromDistanceToEnergy(GGEMSMaterials* materials)
 
   // Get data from OpenCL device
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
-  std::shared_ptr<cl::Buffer> material_table = materials->GetMaterialTables().lock();
-  GGEMSMaterialTables* material_table_device = opencl_manager.GetDeviceBuffer<GGEMSMaterialTables>(material_table.get(), sizeof(GGEMSMaterialTables));
 
-  // Loop over materials
-  for (GGushort i = 0; i < material_table_device->number_of_materials_; ++i) {
-    // Get the name of material
+  // Get number of activated device
+  GGsize number_activated_devices = opencl_manager.GetNumberOfActivatedDevice();
 
-    // Convert photon cuts
-    GGfloat energy_cut_photon = ConvertToEnergy(material_table_device, i, "gamma");
+  for (GGsize j = 0; j < number_activated_devices; ++j) {
+    cl::Buffer* material_table = materials->GetMaterialTables(j);
+    GGEMSMaterialTables* material_table_device = opencl_manager.GetDeviceBuffer<GGEMSMaterialTables>(material_table, sizeof(GGEMSMaterialTables), j);
 
-    // Convert electron cuts
-    GGfloat energy_cut_electron = ConvertToEnergy(material_table_device, i, "e-");
+    // Loop over materials
+    for (GGushort i = 0; i < material_table_device->number_of_materials_; ++i) {
+      // Get the name of material
 
-    // Convert electron cuts
-    GGfloat energy_cut_positron = ConvertToEnergy(material_table_device, i, "e+");
+      // Convert photon cuts
+      GGfloat energy_cut_photon = ConvertToEnergy(material_table_device, i, "gamma");
 
-    // Storing the cuts in map
-    energy_cuts_photon_.insert(std::make_pair(materials->GetMaterialName(i), energy_cut_photon));
-    energy_cuts_electron_.insert(std::make_pair(materials->GetMaterialName(i), energy_cut_electron));
-    energy_cuts_positron_.insert(std::make_pair(materials->GetMaterialName(i), energy_cut_positron));
+      // Convert electron cuts
+      GGfloat energy_cut_electron = ConvertToEnergy(material_table_device, i, "e-");
+
+      // Convert electron cuts
+      GGfloat energy_cut_positron = ConvertToEnergy(material_table_device, i, "e+");
+
+      // Storing the cuts in map
+      energy_cuts_photon_.insert(std::make_pair(materials->GetMaterialName(i), energy_cut_photon));
+      energy_cuts_electron_.insert(std::make_pair(materials->GetMaterialName(i), energy_cut_electron));
+      energy_cuts_positron_.insert(std::make_pair(materials->GetMaterialName(i), energy_cut_positron));
+    }
+
+    // Release pointer
+    opencl_manager.ReleaseDeviceBuffer(material_table, material_table_device, j);
   }
-
-  // Release pointer
-  opencl_manager.ReleaseDeviceBuffer(material_table.get(), material_table_device);
 }

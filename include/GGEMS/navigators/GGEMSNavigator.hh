@@ -246,6 +246,8 @@ class GGEMS_EXPORT GGEMSNavigator
     // Dosimetry
     GGEMSDosimetryCalculator* dose_calculator_; /*!< Dose calculator pointer */
     bool is_dosimetry_mode_; /*!< Boolean checking if dosimetry mode is activated */
+
+    GGsize number_activated_devices_; /*!< Number of activated device */
 };
 
 #endif // End of GUARD_GGEMS_NAVIGATORS_GGEMSNAVIGATOR_HH

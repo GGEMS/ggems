@@ -39,7 +39,7 @@
 GGEMSPhotoElectricEffect::GGEMSPhotoElectricEffect(std::string const& primary_particle, bool const& is_secondary)
 : GGEMSEMProcess()
 {
-  GGcout("GGEMSPhotoElectricEffect", "GGEMSPhotoElectricEffect", 3) << "Allocation of GGEMSPhotoElectricEffect..." << GGendl;
+  GGcout("GGEMSPhotoElectricEffect", "GGEMSPhotoElectricEffect", 3) << "GGEMSPhotoElectricEffect creating..." << GGendl;
 
   process_name_ = "Photoelectric";
 
@@ -54,6 +54,8 @@ GGEMSPhotoElectricEffect::GGEMSPhotoElectricEffect(std::string const& primary_pa
   primary_particle_ = "gamma";
   secondary_particle_ = "e-";
   is_secondaries_ = is_secondary;
+
+  GGcout("GGEMSPhotoElectricEffect", "GGEMSPhotoElectricEffect", 3) << "GGEMSPhotoElectricEffect created!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -62,7 +64,9 @@ GGEMSPhotoElectricEffect::GGEMSPhotoElectricEffect(std::string const& primary_pa
 
 GGEMSPhotoElectricEffect::~GGEMSPhotoElectricEffect(void)
 {
-  GGcout("GGEMSPhotoElectricEffect", "~GGEMSPhotoElectricEffect", 3) << "Deallocation of GGEMSPhotoElectricEffect..." << GGendl;
+  GGcout("GGEMSPhotoElectricEffect", "~GGEMSPhotoElectricEffect", 3) << "GGEMSPhotoElectricEffect erasing..." << GGendl;
+
+  GGcout("GGEMSPhotoElectricEffect", "~GGEMSPhotoElectricEffect", 3) << "GGEMSPhotoElectricEffect erased!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

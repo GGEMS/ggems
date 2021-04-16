@@ -38,18 +38,20 @@
 GGEMSSystem::GGEMSSystem(std::string const& system_name)
 : GGEMSNavigator(system_name)
 {
-  GGcout("GGEMSSystem", "GGEMSSystem", 3) << "Allocation of GGEMSSystem..." << GGendl;
+  GGcout("GGEMSSystem", "GGEMSSystem", 3) << "GGEMSSystem creating..." << GGendl;
 
   number_of_modules_xy_.x_ = 0;
   number_of_modules_xy_.y_ = 0;
 
- number_of_detection_elements_inside_module_xyz_.x_ = 0;
- number_of_detection_elements_inside_module_xyz_.y_ = 0;
- number_of_detection_elements_inside_module_xyz_.z_ = 0;
+  number_of_detection_elements_inside_module_xyz_.x_ = 0;
+  number_of_detection_elements_inside_module_xyz_.y_ = 0;
+  number_of_detection_elements_inside_module_xyz_.z_ = 0;
 
   size_of_detection_elements_xyz_.x = 0.0f;
   size_of_detection_elements_xyz_.y = 0.0f;
   size_of_detection_elements_xyz_.z = 0.0f;
+
+  GGcout("GGEMSSystem", "GGEMSSystem", 3) << "GGEMSSystem created!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -58,7 +60,9 @@ GGEMSSystem::GGEMSSystem(std::string const& system_name)
 
 GGEMSSystem::~GGEMSSystem(void)
 {
-  GGcout("GGEMSSystem", "~GGEMSSystem", 3) << "Deallocation of GGEMSSystem..." << GGendl;
+  GGcout("GGEMSSystem", "~GGEMSSystem", 3) << "GGEMSSystem erasing..." << GGendl;
+
+  GGcout("GGEMSSystem", "~GGEMSSystem", 3) << "GGEMSSystem erased!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -145,40 +149,40 @@ void GGEMSSystem::SaveResults(void)
 {
   GGcout("GGEMSSystem", "SaveResults", 2) << "Saving results in MHD format..." << GGendl;
 
-  GGsize3 total_dim;
-  total_dim.x_ = number_of_modules_xy_.x_*number_of_detection_elements_inside_module_xyz_.x_;
-  total_dim.y_ = number_of_modules_xy_.y_*number_of_detection_elements_inside_module_xyz_.y_;
-  total_dim.z_ = number_of_detection_elements_inside_module_xyz_.z_;
+  // GGsize3 total_dim;
+  // total_dim.x_ = number_of_modules_xy_.x_*number_of_detection_elements_inside_module_xyz_.x_;
+  // total_dim.y_ = number_of_modules_xy_.y_*number_of_detection_elements_inside_module_xyz_.y_;
+  // total_dim.z_ = number_of_detection_elements_inside_module_xyz_.z_;
 
-  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
-  GGint* output = new GGint[total_dim.x_*total_dim.y_*total_dim.z_];
-  std::memset(output, 0, total_dim.x_*total_dim.y_*total_dim.z_*sizeof(GGint));
+  // GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+  // GGint* output = new GGint[total_dim.x_*total_dim.y_*total_dim.z_];
+  // std::memset(output, 0, total_dim.x_*total_dim.y_*total_dim.z_*sizeof(GGint));
 
-  GGEMSMHDImage mhdImage;
-  mhdImage.SetOutputFileName(output_basename_);
-  mhdImage.SetDataType("MET_INT");
-  mhdImage.SetDimensions(total_dim);
-  mhdImage.SetElementSizes(size_of_detection_elements_xyz_);
+  // GGEMSMHDImage mhdImage;
+  // mhdImage.SetOutputFileName(output_basename_);
+  // mhdImage.SetDataType("MET_INT");
+  // mhdImage.SetDimensions(total_dim);
+  // mhdImage.SetElementSizes(size_of_detection_elements_xyz_);
 
-  // Getting all the counts from solid on OpenCL device
-  for (GGsize jj = 0; jj < number_of_modules_xy_.y_; ++jj) {
-    for (GGsize ii = 0; ii < number_of_modules_xy_.x_; ++ii) {
-      cl::Buffer* histogram = solids_.at(ii + jj* number_of_modules_xy_.x_)->GetHistogram()->histogram_.get();
+  // // Getting all the counts from solid on OpenCL device
+  // for (GGsize jj = 0; jj < number_of_modules_xy_.y_; ++jj) {
+  //   for (GGsize ii = 0; ii < number_of_modules_xy_.x_; ++ii) {
+  //     cl::Buffer* histogram = solids_.at(ii + jj* number_of_modules_xy_.x_)->GetHistogram()->histogram_.get();
 
-      GGint* histogram_device = opencl_manager.GetDeviceBuffer<GGint>(histogram, number_of_detection_elements_inside_module_xyz_.x_*number_of_detection_elements_inside_module_xyz_.y_*sizeof(GGint));
+  //     GGint* histogram_device = opencl_manager.GetDeviceBuffer<GGint>(histogram, number_of_detection_elements_inside_module_xyz_.x_*number_of_detection_elements_inside_module_xyz_.y_*sizeof(GGint));
 
-      // Storing data on host
-      for (GGsize jjj = 0; jjj < number_of_detection_elements_inside_module_xyz_.y_; ++jjj) {
-        for (GGsize iii = 0; iii < number_of_detection_elements_inside_module_xyz_.x_; ++iii) {
-          output[(iii+ii*number_of_detection_elements_inside_module_xyz_.x_) + (jjj+jj*number_of_detection_elements_inside_module_xyz_.y_)*total_dim.x_] =
-            histogram_device[iii + jjj*number_of_detection_elements_inside_module_xyz_.x_];
-        }
-      }
+  //     // Storing data on host
+  //     for (GGsize jjj = 0; jjj < number_of_detection_elements_inside_module_xyz_.y_; ++jjj) {
+  //       for (GGsize iii = 0; iii < number_of_detection_elements_inside_module_xyz_.x_; ++iii) {
+  //         output[(iii+ii*number_of_detection_elements_inside_module_xyz_.x_) + (jjj+jj*number_of_detection_elements_inside_module_xyz_.y_)*total_dim.x_] =
+  //           histogram_device[iii + jjj*number_of_detection_elements_inside_module_xyz_.x_];
+  //       }
+  //     }
 
-      opencl_manager.ReleaseDeviceBuffer(histogram, histogram_device);
-    }
-  }
+  //     opencl_manager.ReleaseDeviceBuffer(histogram, histogram_device);
+  //   }
+  // }
 
-  mhdImage.Write<GGint>(output, total_dim.x_*total_dim.y_*total_dim.z_);
-  delete[] output;
+  // mhdImage.Write<GGint>(output, total_dim.x_*total_dim.y_*total_dim.z_);
+  // delete[] output;
 }

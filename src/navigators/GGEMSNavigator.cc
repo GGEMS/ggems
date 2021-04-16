@@ -69,6 +69,10 @@ GGEMSNavigator::GGEMSNavigator(std::string const& navigator_name)
   // Allocation of cross sections including physics
   cross_sections_ = new GGEMSCrossSections();
 
+  // Get the number of activated device
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+  number_activated_devices_ = opencl_manager.GetNumberOfActivatedDevice();
+
   GGcout("GGEMSNavigator", "GGEMSNavigator", 3) << "GGEMSNavigator created!!!" << GGendl;
 }
 
@@ -79,6 +83,15 @@ GGEMSNavigator::GGEMSNavigator(std::string const& navigator_name)
 GGEMSNavigator::~GGEMSNavigator(void)
 {
   GGcout("GGEMSNavigator", "~GGEMSNavigator", 3) << "GGEMSNavigator erasing..." << GGendl;
+
+  if (solids_) {
+    for (GGsize i = 0; i < number_of_solids_; ++i) {
+      delete solids_[i];
+      solids_[i] = nullptr;
+    }
+    delete[] solids_;
+    solids_ = nullptr;
+  }
 
   if (materials_) {
     delete materials_;

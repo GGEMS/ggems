@@ -130,7 +130,7 @@ void GGEMSVoxelizedSolid::Initialize(GGEMSMaterials* materials)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSVoxelizedSolid::GetTransformationMatrix(GGsize const& thread_index)
+void GGEMSVoxelizedSolid::UpdateTransformationMatrix(GGsize const& thread_index)
 {
   // Get the OpenCL manager
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();

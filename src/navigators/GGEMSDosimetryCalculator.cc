@@ -56,24 +56,32 @@ GGEMSDosimetryCalculator::GGEMSDosimetryCalculator(void)
   dosel_sizes_.y = -1.0f;
   dosel_sizes_.z = -1.0f;
 
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+  // Get the number of activated device
+  number_activated_devices_ = opencl_manager.GetNumberOfActivatedDevice();
+
   // Checking double precision computation
   #ifdef DOSIMETRY_DOUBLE_PRECISION
-  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
-
-  if (!opencl_manager.IsDoublePrecisionAtomicAddition()) {
-    std::ostringstream oss(std::ostringstream::out);
-    oss << "Your OpenCL device does not support double precision for atomic operation!!!" << std::endl;
-    oss << "Please, recompile with DOSIMETRY_DOUBLE_PRECISION to OFF. Precision will be lost only for dosimetry application" << std::endl;
-    GGEMSMisc::ThrowException("GGEMSDosimetryCalculator", "GGEMSDosimetryCalculator", oss.str());
+  // Get device index
+  for (GGsize i = 0; i < number_activated_devices_; ++i) {
+    GGsize device_index = opencl_manager.GetIndexOfActivatedDevice(i);
+    if (!opencl_manager.IsDoublePrecisionAtomicAddition(device_index)) {
+      std::ostringstream oss(std::ostringstream::out);
+      oss << "Your OpenCL device: " << opencl_manager.GetDeviceName(device_index) << ", does not support double precision for atomic operation!!!" << std::endl;
+      oss << "Please, recompile with DOSIMETRY_DOUBLE_PRECISION to OFF. Precision will be lost only for dosimetry application" << std::endl;
+      GGEMSMisc::ThrowException("GGEMSDosimetryCalculator", "GGEMSDosimetryCalculator", oss.str());
+    }
   }
   #endif
 
-  // Get the number of activated device
-  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
-  number_activated_devices_ = opencl_manager.GetNumberOfActivatedDevice();
-
   // Allocating buffer on each OpenCL device for dose params
   dose_params_ = new cl::Buffer*[number_activated_devices_];
+  dose_recording_.edep_ = new cl::Buffer*[number_activated_devices_];
+  dose_recording_.dose_ = new cl::Buffer*[number_activated_devices_];
+  dose_recording_.uncertainty_dose_ = new cl::Buffer*[number_activated_devices_];
+  dose_recording_.edep_squared_ = new cl::Buffer*[number_activated_devices_];
+  dose_recording_.hit_ = new cl::Buffer*[number_activated_devices_];
+  dose_recording_.photon_tracking_ = new cl::Buffer*[number_activated_devices_];
 
   // Storing a kernel for each device
   kernel_compute_dose_ = new cl::Kernel*[number_activated_devices_];
@@ -89,9 +97,70 @@ GGEMSDosimetryCalculator::~GGEMSDosimetryCalculator(void)
 {
   GGcout("GGEMSDosimetryCalculator", "~GGEMSDosimetryCalculator", 3) << "GGEMSSourceManager erasing..." << GGendl;
 
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+
   if (dose_params_) {
+    for (GGsize i = 0; i < number_activated_devices_; ++i) {
+      opencl_manager.Deallocate(dose_params_[i], sizeof(GGEMSDoseParams ), i);
+    }
     delete[] dose_params_;
     dose_params_ = nullptr;
+  }
+
+  if (dose_recording_.edep_) {
+    for (GGsize i = 0; i < number_activated_devices_; ++i) {
+      opencl_manager.Deallocate(dose_recording_.edep_[i], total_number_of_dosels_*sizeof(GGDosiType), i);
+    }
+    delete[] dose_recording_.edep_;
+    dose_recording_.edep_ = nullptr;
+  }
+
+  if (dose_recording_.dose_) {
+    for (GGsize i = 0; i < number_activated_devices_; ++i) {
+      opencl_manager.Deallocate(dose_recording_.dose_[i], total_number_of_dosels_*sizeof(GGfloat), i);
+    }
+    delete[] dose_recording_.dose_;
+    dose_recording_.dose_ = nullptr;
+  }
+
+  if (dose_recording_.uncertainty_dose_) {
+    if (is_uncertainty_) {
+      for (GGsize i = 0; i < number_activated_devices_; ++i) {
+        opencl_manager.Deallocate(dose_recording_.uncertainty_dose_[i], total_number_of_dosels_*sizeof(GGfloat), i);
+      }
+    }
+    delete[] dose_recording_.uncertainty_dose_;
+    dose_recording_.uncertainty_dose_ = nullptr;
+  }
+
+  if (dose_recording_.edep_squared_) {
+    if (is_edep_squared_||is_uncertainty_) {
+      for (GGsize i = 0; i < number_activated_devices_; ++i) {
+        opencl_manager.Deallocate(dose_recording_.edep_squared_[i], total_number_of_dosels_*sizeof(GGDosiType), i);
+      }
+    }
+    delete[] dose_recording_.edep_squared_;
+    dose_recording_.edep_squared_ = nullptr;
+  }
+
+  if (dose_recording_.hit_) {
+    if (is_hit_tracking_||is_uncertainty_) {
+      for (GGsize i = 0; i < number_activated_devices_; ++i) {
+        opencl_manager.Deallocate(dose_recording_.hit_[i], total_number_of_dosels_*sizeof(GGint), i);
+      }
+    }
+    delete[] dose_recording_.hit_;
+    dose_recording_.hit_ = nullptr;
+  }
+
+  if (dose_recording_.photon_tracking_) {
+    if (is_photon_tracking_) {
+      for (GGsize i = 0; i < number_activated_devices_; ++i) {
+        opencl_manager.Deallocate(dose_recording_.photon_tracking_[i], total_number_of_dosels_*sizeof(GGint), i);
+      }
+    }
+    delete[] dose_recording_.photon_tracking_;
+    dose_recording_.photon_tracking_ = nullptr;
   }
 
   if (kernel_compute_dose_) {
@@ -319,84 +388,87 @@ void GGEMSDosimetryCalculator::Initialize(void)
   // Get the OpenCL manager
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
-  // Allocate dosemetry params on OpenCL device
-  dose_params_ = opencl_manager.Allocate(nullptr, sizeof(GGEMSDoseParams), CL_MEM_READ_WRITE, "GGEMSDosimetryCalculator");
+  // Allocating dosimetry parameters on each device
+  for (GGsize j = 0; j < number_activated_devices_; ++j) {
+    // Allocate dosemetry params on OpenCL device
+    dose_params_[j] = opencl_manager.Allocate(nullptr, sizeof(GGEMSDoseParams), j, CL_MEM_READ_WRITE, "GGEMSDosimetryCalculator");
 
-  // Get pointer on OpenCL device for dose parameters
-  GGEMSDoseParams* dose_params_device = opencl_manager.GetDeviceBuffer<GGEMSDoseParams>(dose_params_.get(), sizeof(GGEMSDoseParams));
+    // Get pointer on OpenCL device for dose parameters
+    GGEMSDoseParams* dose_params_device = opencl_manager.GetDeviceBuffer<GGEMSDoseParams>(dose_params_[j], sizeof(GGEMSDoseParams), j);
 
-  // Get the voxels size
-  GGfloat3 voxel_sizes = dosel_sizes_;
-  if (dosel_sizes_.x < 0.0f && dosel_sizes_.y < 0.0f && dosel_sizes_.z < 0.0f) { // Custom dosel size
-    voxel_sizes = dynamic_cast<GGEMSVoxelizedSolid*>(navigator_->GetSolids().at(0).get())->GetVoxelSizes();
-  }
-
-  // If photon tracking activated, voxel sizes of phantom and dosels size should be the same, otherwise artefacts!!!
-  if (is_photon_tracking_) {
-    if (voxel_sizes.x != dynamic_cast<GGEMSVoxelizedSolid*>(navigator_->GetSolids().at(0).get())->GetVoxelSizes().x ||
-        voxel_sizes.y != dynamic_cast<GGEMSVoxelizedSolid*>(navigator_->GetSolids().at(0).get())->GetVoxelSizes().y ||
-        voxel_sizes.z != dynamic_cast<GGEMSVoxelizedSolid*>(navigator_->GetSolids().at(0).get())->GetVoxelSizes().z) {
-      std::ostringstream oss(std::ostringstream::out);
-      oss << "Dosel size and voxel size in voxelized phantom have to be the same when photon tracking is activated!!!";
-      GGEMSMisc::ThrowException("GGEMSDosimetryCalculator", "Initialize", oss.str());
+    // Get the voxels size
+    GGfloat3 voxel_sizes = dosel_sizes_;
+    if (dosel_sizes_.x < 0.0f && dosel_sizes_.y < 0.0f && dosel_sizes_.z < 0.0f) { // Custom dosel size
+      voxel_sizes = dynamic_cast<GGEMSVoxelizedSolid*>(navigator_->GetSolids(0))->GetVoxelSizes(j);
     }
+
+    // If photon tracking activated, voxel sizes of phantom and dosels size should be the same, otherwise artefacts!!!
+    if (is_photon_tracking_) {
+      if (voxel_sizes.x != dynamic_cast<GGEMSVoxelizedSolid*>(navigator_->GetSolids(0))->GetVoxelSizes(j).x ||
+          voxel_sizes.y != dynamic_cast<GGEMSVoxelizedSolid*>(navigator_->GetSolids(0))->GetVoxelSizes(j).y ||
+          voxel_sizes.z != dynamic_cast<GGEMSVoxelizedSolid*>(navigator_->GetSolids(0))->GetVoxelSizes(j).z) {
+        std::ostringstream oss(std::ostringstream::out);
+        oss << "Dosel size and voxel size in voxelized phantom have to be the same when photon tracking is activated!!!";
+        GGEMSMisc::ThrowException("GGEMSDosimetryCalculator", "Initialize", oss.str());
+      }
+    }
+
+    // Storing voxel size
+    dose_params_device->size_of_dosels_ = voxel_sizes;
+
+    // Take inverse of size
+    dose_params_device->inv_size_of_dosels_.x = 1.0f / voxel_sizes.x;
+    dose_params_device->inv_size_of_dosels_.y = 1.0f / voxel_sizes.y;
+    dose_params_device->inv_size_of_dosels_.z = 1.0f / voxel_sizes.z;
+
+    // Get border of volumes from phantom
+    GGEMSOBB obb_geometry = dynamic_cast<GGEMSVoxelizedSolid*>(navigator_->GetSolids(0))->GetOBBGeometry(j);
+    dose_params_device->border_min_xyz_ = obb_geometry.border_min_xyz_;
+    dose_params_device->border_max_xyz_ = obb_geometry.border_max_xyz_;
+
+    // Get the size of the dose map
+    GGfloat3 dosemap_size;
+    for (GGsize i = 0; i < 3; ++i) {
+      dosemap_size.s[i] = obb_geometry.border_max_xyz_.s[i] - obb_geometry.border_min_xyz_.s[i];
+    }
+
+    // Get the number of voxels
+    GGsize3 number_of_dosels;
+    number_of_dosels.x_ = static_cast<GGsize>(dosemap_size.x / voxel_sizes.x);
+    number_of_dosels.y_ = static_cast<GGsize>(dosemap_size.y / voxel_sizes.y);
+    number_of_dosels.z_ = static_cast<GGsize>(dosemap_size.z / voxel_sizes.z);
+
+    dose_params_device->number_of_dosels_.x = static_cast<GGint>(number_of_dosels.x_);
+    dose_params_device->number_of_dosels_.y = static_cast<GGint>(number_of_dosels.y_);
+    dose_params_device->number_of_dosels_.z = static_cast<GGint>(number_of_dosels.z_);
+
+    dose_params_device->slice_number_of_dosels_ = static_cast<GGint>(number_of_dosels.x_ * number_of_dosels.y_);
+    total_number_of_dosels_ = number_of_dosels.x_ * number_of_dosels.y_ * number_of_dosels.z_;
+    dose_params_device->total_number_of_dosels_ = static_cast<GGint>(total_number_of_dosels_);
+
+    // Release the pointer
+    opencl_manager.ReleaseDeviceBuffer(dose_params_[j], dose_params_device, j);
+
+    // Allocated buffers storing dose on OpenCL device
+    dose_recording_.edep_[j] = opencl_manager.Allocate(nullptr, total_number_of_dosels_*sizeof(GGDosiType), j, CL_MEM_READ_WRITE, "GGEMSDosimetryCalculator");
+    dose_recording_.dose_[j] = opencl_manager.Allocate(nullptr, total_number_of_dosels_*sizeof(GGfloat), j, CL_MEM_READ_WRITE, "GGEMSDosimetryCalculator");
+
+    dose_recording_.uncertainty_dose_[j] = is_uncertainty_ ? opencl_manager.Allocate(nullptr, total_number_of_dosels_*sizeof(GGfloat), j, CL_MEM_READ_WRITE, "GGEMSDosimetryCalculator") : nullptr;
+    dose_recording_.edep_squared_[j] = (is_edep_squared_||is_uncertainty_) ? opencl_manager.Allocate(nullptr, total_number_of_dosels_*sizeof(GGDosiType), j, CL_MEM_READ_WRITE, "GGEMSDosimetryCalculator") : nullptr;
+    dose_recording_.hit_[j] = (is_hit_tracking_||is_uncertainty_) ? opencl_manager.Allocate(nullptr, total_number_of_dosels_*sizeof(GGint), j, CL_MEM_READ_WRITE, "GGEMSDosimetryCalculator") : nullptr;
+
+    dose_recording_.photon_tracking_[j] = is_photon_tracking_ ? opencl_manager.Allocate(nullptr, total_number_of_dosels_*sizeof(GGint), j, CL_MEM_READ_WRITE, "GGEMSDosimetryCalculator") : nullptr;
+
+    // Set buffer to zero
+    opencl_manager.CleanBuffer(dose_recording_.edep_[j], total_number_of_dosels_*sizeof(GGDosiType), j);
+    opencl_manager.CleanBuffer(dose_recording_.dose_[j], total_number_of_dosels_*sizeof(GGfloat), j);
+
+    if (is_uncertainty_) opencl_manager.CleanBuffer(dose_recording_.uncertainty_dose_[j], total_number_of_dosels_*sizeof(GGfloat), j);
+    if (is_edep_squared_||is_uncertainty_) opencl_manager.CleanBuffer(dose_recording_.edep_squared_[j], total_number_of_dosels_*sizeof(GGDosiType), j);
+    if (is_hit_tracking_||is_uncertainty_) opencl_manager.CleanBuffer(dose_recording_.hit_[j], total_number_of_dosels_*sizeof(GGint), j);
+
+    if (is_photon_tracking_) opencl_manager.CleanBuffer(dose_recording_.photon_tracking_[j], total_number_of_dosels_*sizeof(GGint), j);
   }
-
-  // Storing voxel size
-  dose_params_device->size_of_dosels_ = voxel_sizes;
-
-  // Take inverse of size
-  dose_params_device->inv_size_of_dosels_.x = 1.0f / voxel_sizes.x;
-  dose_params_device->inv_size_of_dosels_.y = 1.0f / voxel_sizes.y;
-  dose_params_device->inv_size_of_dosels_.z = 1.0f / voxel_sizes.z;
-
-  // Get border of volumes from phantom
-  GGEMSOBB obb_geometry = dynamic_cast<GGEMSVoxelizedSolid*>(navigator_->GetSolids().at(0).get())->GetOBBGeometry();
-  dose_params_device->border_min_xyz_ = obb_geometry.border_min_xyz_;
-  dose_params_device->border_max_xyz_ = obb_geometry.border_max_xyz_;
-
-  // Get the size of the dose map
-  GGfloat3 dosemap_size;
-  for (GGsize i = 0; i < 3; ++i) {
-    dosemap_size.s[i] = obb_geometry.border_max_xyz_.s[i] - obb_geometry.border_min_xyz_.s[i];
-  }
-
-  // Get the number of voxels
-  GGsize3 number_of_dosels;
-  number_of_dosels.x_ = static_cast<GGsize>(dosemap_size.x / voxel_sizes.x);
-  number_of_dosels.y_ = static_cast<GGsize>(dosemap_size.y / voxel_sizes.y);
-  number_of_dosels.z_ = static_cast<GGsize>(dosemap_size.z / voxel_sizes.z);
-
-  dose_params_device->number_of_dosels_.x = static_cast<GGint>(number_of_dosels.x_);
-  dose_params_device->number_of_dosels_.y = static_cast<GGint>(number_of_dosels.y_);
-  dose_params_device->number_of_dosels_.z = static_cast<GGint>(number_of_dosels.z_);
-
-  dose_params_device->slice_number_of_dosels_ = static_cast<GGint>(number_of_dosels.x_ * number_of_dosels.y_);
-  GGsize total_number_of_dosels = number_of_dosels.x_ * number_of_dosels.y_ * number_of_dosels.z_;
-  dose_params_device->total_number_of_dosels_ = static_cast<GGint>(total_number_of_dosels);
-
-  // Release the pointer
-  opencl_manager.ReleaseDeviceBuffer(dose_params_.get(), dose_params_device);
-
-  // Allocated buffers storing dose on OpenCL device
-  dose_recording_.edep_ = opencl_manager.Allocate(nullptr, total_number_of_dosels*sizeof(GGDosiType), CL_MEM_READ_WRITE, "GGEMSDosimetryCalculator");
-  dose_recording_.dose_ = opencl_manager.Allocate(nullptr, total_number_of_dosels*sizeof(GGfloat), CL_MEM_READ_WRITE, "GGEMSDosimetryCalculator");
-
-  dose_recording_.uncertainty_dose_ = is_uncertainty_ ? opencl_manager.Allocate(nullptr, total_number_of_dosels*sizeof(GGfloat), CL_MEM_READ_WRITE, "GGEMSDosimetryCalculator") : nullptr;
-  dose_recording_.edep_squared_ = (is_edep_squared_||is_uncertainty_) ? opencl_manager.Allocate(nullptr, total_number_of_dosels*sizeof(GGDosiType), CL_MEM_READ_WRITE, "GGEMSDosimetryCalculator") : nullptr;
-  dose_recording_.hit_ = (is_hit_tracking_||is_uncertainty_) ? opencl_manager.Allocate(nullptr, total_number_of_dosels*sizeof(GGint), CL_MEM_READ_WRITE, "GGEMSDosimetryCalculator") : nullptr;
-
-  dose_recording_.photon_tracking_ = is_photon_tracking_ ? opencl_manager.Allocate(nullptr, total_number_of_dosels*sizeof(GGint), CL_MEM_READ_WRITE, "GGEMSDosimetryCalculator") : nullptr;
-
-  // Set buffer to zero
-  opencl_manager.CleanBuffer(dose_recording_.edep_, total_number_of_dosels*sizeof(GGDosiType));
-  opencl_manager.CleanBuffer(dose_recording_.dose_, total_number_of_dosels*sizeof(GGfloat));
-
-  if (is_uncertainty_) opencl_manager.CleanBuffer(dose_recording_.uncertainty_dose_, total_number_of_dosels*sizeof(GGfloat));
-  if (is_edep_squared_||is_uncertainty_) opencl_manager.CleanBuffer(dose_recording_.edep_squared_, total_number_of_dosels*sizeof(GGDosiType));
-  if (is_hit_tracking_||is_uncertainty_) opencl_manager.CleanBuffer(dose_recording_.hit_, total_number_of_dosels*sizeof(GGint));
-
-  if (is_photon_tracking_) opencl_manager.CleanBuffer(dose_recording_.photon_tracking_, total_number_of_dosels*sizeof(GGint));
 
   InitializeKernel();
 }

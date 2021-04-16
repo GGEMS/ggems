@@ -46,7 +46,14 @@ GGEMSMaterials::GGEMSMaterials(void)
   // Allocation of cuts
   range_cuts_ = new GGEMSRangeCuts();
 
-  number_activated_devices_ = 0;
+  // Get the OpenCL manager
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+
+  // Get number of activated device
+  number_activated_devices_ = opencl_manager.GetNumberOfActivatedDevice();
+
+  material_tables_ = new cl::Buffer*[number_activated_devices_];
+
 
   GGcout("GGEMSMaterials", "GGEMSMaterials", 3) << "GGEMSMaterials created!!!" << GGendl;
 }
@@ -199,11 +206,6 @@ void GGEMSMaterials::BuildMaterialTables(void)
   // Get the material database manager
   GGEMSMaterialsDatabaseManager& material_database_manager = GGEMSMaterialsDatabaseManager::GetInstance();
 
-    // Get number of activated device
-  number_activated_devices_ = opencl_manager.GetNumberOfActivatedDevice();
-
-  material_tables_ = new cl::Buffer*[number_activated_devices_];
-
   // Loop over activated device and allocate particle buffer on each device
   for (GGsize d = 0; d < number_activated_devices_; ++d) {
     // Allocating memory for material tables in OpenCL device
@@ -341,7 +343,7 @@ GGfloat GGEMSMaterials::GetAtomicNumberDensity(std::string const& material_name,
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGfloat GGEMSMaterials::GetEnergyCut(std::string const& material_name, std::string const& particle_type, GGsize const& thread_index, GGfloat const& distance, std::string const& unit)
+GGfloat GGEMSMaterials::GetEnergyCut(std::string const& material_name, std::string const& particle_type, GGfloat const& distance, std::string const& unit, GGsize const& thread_index)
 {
   // Get the OpenCL manager
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
@@ -437,7 +439,7 @@ GGfloat get_density_ggems_materials(GGEMSMaterials* materials, char const* mater
 
 GGfloat get_energy_cut_ggems_materials(GGEMSMaterials* materials, char const* material_name, char const* particle_type, GGfloat const distance, char const* unit)
 {
-  return materials->GetEnergyCut(material_name, particle_type, 0, distance, unit);
+  return materials->GetEnergyCut(material_name, particle_type, distance, unit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

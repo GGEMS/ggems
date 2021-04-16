@@ -38,7 +38,7 @@
 
 GGEMSLogEnergyTable::GGEMSLogEnergyTable(GGfloat const& lowest_energy, GGfloat const& highest_energy, GGsize const& number_of_bins)
 {
-  GGcout("GGEMSLogEnergyTable", "GGEMSLogEnergyTable", 3) << "Allocation of GGEMSLogEnergyTable..." << GGendl;
+  GGcout("GGEMSLogEnergyTable", "GGEMSLogEnergyTable", 3) << "GGEMSLogEnergyTable creating..." << GGendl;
 
   bin_width_ = logf(highest_energy / lowest_energy) / static_cast<GGfloat>(number_of_bins);
   base_bin_ = logf(lowest_energy) / bin_width_;
@@ -65,6 +65,8 @@ GGEMSLogEnergyTable::GGEMSLogEnergyTable(GGfloat const& lowest_energy, GGfloat c
   // Storing edges
   edge_min_ = bins_.front();
   edge_max_ = bins_.back();
+
+  GGcout("GGEMSLogEnergyTable", "GGEMSLogEnergyTable", 3) << "GGEMSLogEnergyTable created!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -73,7 +75,9 @@ GGEMSLogEnergyTable::GGEMSLogEnergyTable(GGfloat const& lowest_energy, GGfloat c
 
 GGEMSLogEnergyTable::~GGEMSLogEnergyTable(void)
 {
-  GGcout("GGEMSLogEnergyTable", "~GGEMSLogEnergyTable", 3) << "Deallocation of GGEMSLogEnergyTable..." << GGendl;
+  GGcout("GGEMSLogEnergyTable", "~GGEMSLogEnergyTable", 3) << "GGEMSLogEnergyTable erasing..." << GGendl;
+
+  GGcout("GGEMSLogEnergyTable", "~GGEMSLogEnergyTable", 3) << "GGEMSLogEnergyTable erased!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -94,25 +94,25 @@ class GGEMS_EXPORT GGEMSMaterials
     void AddMaterial(std::string const& material_name);
 
     /*!
-      \fn GGfloat GetDensity(std::string const& material_name, GGsize const& thread_index) const
+      \fn GGfloat GetDensity(std::string const& material_name, GGsize const& thread_index = 0) const
       \param material_name - name of the material
       \param thread_index - index of activated device (thread index)
       \return density of material in g.cm-3
       \brief get the density of material
     */
-    GGfloat GetDensity(std::string const& material_name, GGsize const& thread_index) const;
+    GGfloat GetDensity(std::string const& material_name, GGsize const& thread_index = 0) const;
 
     /*!
-      \fn GGfloat GetAtomicNumberDensity(std::string const& material_name, GGsize const& thread_index) const
+      \fn GGfloat GetAtomicNumberDensity(std::string const& material_name, GGsize const& thread_index = 0) const
       \param material_name - name of the material
       \param thread_index - index of activated device (thread index)
       \return atomic number density of material in atom.cm-3
       \brief get the atomic number density of material
     */
-    GGfloat GetAtomicNumberDensity(std::string const& material_name, GGsize const& thread_index) const;
+    GGfloat GetAtomicNumberDensity(std::string const& material_name, GGsize const& thread_index = 0) const;
 
     /*!
-      \fn GetEnergyCut(std::string const& material_name, std::string const& particle_type, GGsize const& thread_index, GGfloat const& distance, std::string const& unit) const
+      \fn GetEnergyCut(std::string const& material_name, std::string const& particle_type, GGfloat const& distance, std::string const& unit, GGsize const& thread_index = 0) const
       \param material_name - name of the material
       \param particle_type - type of particle
       \param thread_index - index of activated device (thread index)
@@ -121,7 +121,7 @@ class GGEMS_EXPORT GGEMSMaterials
       \return energy cut in keV
       \brief Get the energy cut of material in keV
     */
-    GGfloat GetEnergyCut(std::string const& material_name, std::string const& particle_type, GGsize const& thread_index, GGfloat const& distance, std::string const& unit);
+    GGfloat GetEnergyCut(std::string const& material_name, std::string const& particle_type, GGfloat const& distance, std::string const& unit, GGsize const& thread_index = 0);
 
     /*!
       \fn inline std::string GetMaterialName(GGsize i) const

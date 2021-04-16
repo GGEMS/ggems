@@ -103,11 +103,11 @@ class GGEMS_EXPORT GGEMSVoxelizedSolid : public GGEMSSolid
     void LoadVolumeImage(GGEMSMaterials* materials);
 
     /*!
-      \fn void GetTransformationMatrix(GGsize const& thread_index)
+      \fn void UpdateTransformationMatrix(GGsize const& thread_index)
       \param thread_index - index of the thread (= activated device index)
-      \brief Get the transformation matrix for solid box object
+      \brief Update transformation matrix for solid box object
     */
-    void GetTransformationMatrix(GGsize const& thread_index) override;
+    void UpdateTransformationMatrix(GGsize const& thread_index) override;
 
     /*!
       \fn GGfloat3 GetVoxelSizes(GGsize const& thread_index) const

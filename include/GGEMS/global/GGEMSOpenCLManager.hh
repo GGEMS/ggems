@@ -137,20 +137,20 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     void PrintActivatedDevices(void) const;
 
     /*!
-      \fn std::string GetNameOfDevice(GGsize const& index) const
-      \param index - index of device
+      \fn std::string GetNameOfDevice(GGsize const& device_index) const
+      \param device_index - index of device
       \return name of activated device
       \brief Get the name of the activated device
     */
-    inline std::string GetDeviceName(GGsize const& index) const {return device_name_[index];}
+    inline std::string GetDeviceName(GGsize const& device_index) const {return device_name_[device_index];}
 
     /*!
-      \fn cl_device_type GetDeviceType(GGsize const& index) const
-      \param index - index of device
+      \fn cl_device_type GetDeviceType(GGsize const& device_index) const
+      \param device_index - index of device
       \return name of activated device
       \brief Get the type of the activated device
     */
-    inline cl_device_type GetDeviceType(GGsize const& index) const {return device_type_[index];}
+    inline cl_device_type GetDeviceType(GGsize const& device_index) const {return device_type_[device_index];}
 
     /*!
       \fn inline GGsize GetNumberOfDetectedDevice(void) const
@@ -167,12 +167,12 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     inline GGsize GetNumberOfActivatedDevice(void) const {return device_indices_.size();}
 
     /*!
-      \fn inline GGsize GetIndexOfActivatedDevice(GGsize const& device_index) const
-      \param device_index - index of device
+      \fn inline GGsize GetIndexOfActivatedDevice(GGsize const& thread_index) const
+      \param thread_index - index of the thread (= activated device index)
       \return index of activated device
       \brief get the index of activated device
     */
-    inline GGsize GetIndexOfActivatedDevice(GGsize const& device_index) const {return device_indices_[device_index];}
+    inline GGsize GetIndexOfActivatedDevice(GGsize const& thread_index) const {return device_indices_[thread_index];}
 
     /*!
       \fn inline GGsize GetMaxBufferAllocationSize(GGsize const& device_index) const
@@ -321,6 +321,14 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     */
     void CleanBuffer(cl::Buffer* buffer, GGsize const& size, GGsize const& thread_index);
 
+    /*!
+      \fn bool IsDoublePrecisionAtomicAddition(GGsize const& device_index) const
+      \param device_index - index of device
+      \return true if double precision atomic addition is supported by OpenCL device, otherwize false
+      \brief checking double precision atomic addition on OpenCL device
+    */
+    bool IsDoublePrecisionAtomicAddition(GGsize const& device_index) const;
+
   private:
     /*!
       \fn std::string ErrorType(GGint const& error) const
@@ -340,12 +348,12 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     GGsize CheckKernel(std::string const& kernel_name, std::string const& compilation_options) const;
 
     /*!
-      \fn bool IsDoublePrecision(GGsize const& index) const
-      \param index - index of device
+      \fn bool IsDoublePrecision(GGsize const& device_index) const
+      \param device_index - index of the device
       \return true if double precision is supported by OpenCL device, otherwize false
       \brief checking double precision on OpenCL device
     */
-    bool IsDoublePrecision(GGsize const& index) const;
+    bool IsDoublePrecision(GGsize const& device_index) const;
 
   private:
     // OpenCL platform

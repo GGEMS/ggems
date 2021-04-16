@@ -43,7 +43,9 @@ GGEMSProcessesManager::GGEMSProcessesManager(void)
   cross_section_table_max_energy_(CROSS_SECTION_TABLE_ENERGY_MAX),
   is_processes_print_tables_(false)
 {
-  GGcout("GGEMSProcessesManager", "GGEMSProcessesManager", 3) << "Allocation of GGEMSProcessesManager..." << GGendl;
+  GGcout("GGEMSProcessesManager", "GGEMSProcessesManager", 3) << "GGEMSProcessesManager creating..." << GGendl;
+
+  GGcout("GGEMSProcessesManager", "GGEMSProcessesManager", 3) << "GGEMSProcessesManager created!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -52,7 +54,9 @@ GGEMSProcessesManager::GGEMSProcessesManager(void)
 
 GGEMSProcessesManager::~GGEMSProcessesManager(void)
 {
-  GGcout("GGEMSProcessesManager", "~GGEMSProcessesManager", 3) << "Deallocation of GGEMSProcessesManager..." << GGendl;
+  GGcout("GGEMSProcessesManager", "~GGEMSProcessesManager", 3) << "GGEMSProcessesManager erasing..." << GGendl;
+
+  GGcout("GGEMSProcessesManager", "~GGEMSProcessesManager", 3) << "GGEMSProcessesManager erased!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -116,13 +120,11 @@ void GGEMSProcessesManager::AddProcess(std::string const& process_name, std::str
   if (phantom_name == "all") {
     // Loop over phantom
     for (size_t i = 0; i < navigator_manager.GetNumberOfNavigators(); ++i) {
-      std::shared_ptr<GGEMSCrossSections> cross_sections = ((navigator_manager.GetNavigators()).at(i))->GetCrossSections().lock();
-      cross_sections->AddProcess(process_name, particle_name);
+      ((navigator_manager.GetNavigators())[i])->GetCrossSections()->AddProcess(process_name, particle_name);
     }
   }
   else {
-    std::shared_ptr<GGEMSCrossSections> cross_sections = navigator_manager.GetNavigator(phantom_name)->GetCrossSections().lock();
-    cross_sections->AddProcess(process_name, particle_name);
+    navigator_manager.GetNavigator(phantom_name)->GetCrossSections()->AddProcess(process_name, particle_name);
   }
 }
 
@@ -142,8 +144,8 @@ void GGEMSProcessesManager::PrintInfos(void) const
   GGcout("GGEMSProcessesManager", "PrintInfos", 0) << GGendl;
   // Loop over all phantoms
   for (size_t i = 0; i < navigator_manager.GetNumberOfNavigators(); ++i) {
-    std::shared_ptr<GGEMSCrossSections> cross_sections = ((navigator_manager.GetNavigators()).at(i))->GetCrossSections().lock();
-    GGcout("GGEMSProcessesManager", "PrintInfos", 0) << "Activated processes in phantom: " << ((navigator_manager.GetNavigators()).at(i))->GetNavigatorName() << GGendl;
+    GGEMSCrossSections* cross_sections = ((navigator_manager.GetNavigators())[i])->GetCrossSections();
+    GGcout("GGEMSProcessesManager", "PrintInfos", 0) << "Activated processes in phantom: " << ((navigator_manager.GetNavigators())[i])->GetNavigatorName() << GGendl;
     for (size_t j = 0; j < cross_sections->GetProcessesList().size(); ++j) {
       GGcout("GGEMSProcessesManager", "PrintInfos", 0) << "    * " << cross_sections->GetProcessesList().at(j)->GetProcessName() << GGendl;
     }

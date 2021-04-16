@@ -42,7 +42,9 @@ GGEMSEMProcess::GGEMSEMProcess()
   secondary_particle_(""),
   is_secondaries_(false)
 {
-  GGcout("GGEMSEMProcess", "GGEMSEMProcess", 3) << "Allocation of GGEMSEMProcess..." << GGendl;
+  GGcout("GGEMSEMProcess", "GGEMSEMProcess", 3) << "GGEMSEMProcess creating..." << GGendl;
+
+  GGcout("GGEMSEMProcess", "GGEMSEMProcess", 3) << "GGEMSEMProcess created!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -51,22 +53,25 @@ GGEMSEMProcess::GGEMSEMProcess()
 
 GGEMSEMProcess::~GGEMSEMProcess(void)
 {
-  GGcout("GGEMSEMProcess", "~GGEMSEMProcess", 3) << "Deallocation of GGEMSEMProcess..." << GGendl;
+  GGcout("GGEMSEMProcess", "~GGEMSEMProcess", 3) << "GGEMSEMProcess erasing..." << GGendl;
+
+  GGcout("GGEMSEMProcess", "~GGEMSEMProcess", 3) << "GGEMSEMProcess erased!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSEMProcess::BuildCrossSectionTables(std::weak_ptr<cl::Buffer> particle_cross_sections, std::weak_ptr<cl::Buffer> material_tables)
+void GGEMSEMProcess::BuildCrossSectionTables(cl::Buffer* particle_cross_sections, cl::Buffer* material_tables, GGsize const& thread_index)
 {
-  GGcout("GGEMSEMProcess", "BuildCrossSectionTables", 3) << "Building cross section table for process " << process_name_ << "..." << GGendl;
-
   // Getting OpenCL manager
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+  GGsize device_index = opencl_manager.GetIndexOfActivatedDevice(thread_index);
+
+  GGcout("GGEMSEMProcess", "BuildCrossSectionTables", 3) << "Building cross section table for process " << process_name_ << " on device: " << opencl_manager.GetDeviceName(device_index) << GGendl;
 
   // Set missing information in cross section table
-  GGEMSParticleCrossSections* cross_section_device = opencl_manager.GetDeviceBuffer<GGEMSParticleCrossSections>(particle_cross_sections.lock().get(), sizeof(GGEMSParticleCrossSections));
+  GGEMSParticleCrossSections* cross_section_device = opencl_manager.GetDeviceBuffer<GGEMSParticleCrossSections>(particle_cross_sections, sizeof(GGEMSParticleCrossSections), thread_index);
 
   // Store index of activated process
   cross_section_device->photon_cs_id_[cross_section_device->number_of_activated_photon_processes_] = process_id_;
@@ -75,7 +80,7 @@ void GGEMSEMProcess::BuildCrossSectionTables(std::weak_ptr<cl::Buffer> particle_
   cross_section_device->number_of_activated_photon_processes_ += 1;
 
   // Get the material tables
-  GGEMSMaterialTables* materials_device = opencl_manager.GetDeviceBuffer<GGEMSMaterialTables>(material_tables.lock().get(), sizeof(GGEMSMaterialTables));
+  GGEMSMaterialTables* materials_device = opencl_manager.GetDeviceBuffer<GGEMSMaterialTables>(material_tables, sizeof(GGEMSMaterialTables), thread_index);
 
   // Compute Compton cross section par material
   GGsize number_of_bins = cross_section_device->number_of_bins_;
@@ -90,7 +95,7 @@ void GGEMSEMProcess::BuildCrossSectionTables(std::weak_ptr<cl::Buffer> particle_
   // If flag activate print tables
   GGEMSProcessesManager& process_manager = GGEMSProcessesManager::GetInstance();
   if (process_manager.IsPrintPhysicTables()) {
-    GGcout("GGEMSEMProcess", "BuildCrossSectionTables", 0) << "* PROCESS " << process_name_ << GGendl;
+    GGcout("GGEMSEMProcess", "BuildCrossSectionTables", 0) << "* PROCESS " << process_name_ << " on device: " << opencl_manager.GetDeviceName(device_index) << GGendl;
 
     // Loop over material
     for (GGsize j = 0; j < materials_device->number_of_materials_; ++j) {
@@ -113,8 +118,8 @@ void GGEMSEMProcess::BuildCrossSectionTables(std::weak_ptr<cl::Buffer> particle_
   }
 
   // Release pointer
-  opencl_manager.ReleaseDeviceBuffer(material_tables.lock().get(), materials_device);
-  opencl_manager.ReleaseDeviceBuffer(particle_cross_sections.lock().get(), cross_section_device);
+  opencl_manager.ReleaseDeviceBuffer(material_tables, materials_device, thread_index);
+  opencl_manager.ReleaseDeviceBuffer(particle_cross_sections, cross_section_device, thread_index);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
