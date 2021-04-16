@@ -67,6 +67,7 @@ GGEMSRayleighScattering::GGEMSRayleighScattering(std::string const& primary_part
 GGEMSRayleighScattering::~GGEMSRayleighScattering(void)
 {
   GGcout("GGEMSRayleighScattering", "~GGEMSRayleighScattering", 3) << "Deallocation of GGEMSRayleighScattering..." << GGendl;
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////

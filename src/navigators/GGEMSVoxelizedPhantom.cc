@@ -43,7 +43,9 @@ GGEMSVoxelizedPhantom::GGEMSVoxelizedPhantom(std::string const& voxelized_phanto
   voxelized_phantom_filename_(""),
   range_data_filename_("")
 {
-  GGcout("GGEMSVoxelizedPhantom", "GGEMSVoxelizedPhantom", 3) << "Allocation of GGEMSVoxelizedPhantom..." << GGendl;
+  GGcout("GGEMSVoxelizedPhantom", "GGEMSVoxelizedPhantom", 3) << "GGEMSVoxelizedPhantom creating..." << GGendl;
+
+  GGcout("GGEMSVoxelizedPhantom", "GGEMSVoxelizedPhantom", 3) << "GGEMSVoxelizedPhantom created!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -52,7 +54,9 @@ GGEMSVoxelizedPhantom::GGEMSVoxelizedPhantom(std::string const& voxelized_phanto
 
 GGEMSVoxelizedPhantom::~GGEMSVoxelizedPhantom(void)
 {
-  GGcout("GGEMSVoxelizedPhantom", "~GGEMSVoxelizedPhantom", 3) << "Deallocation of GGEMSVoxelizedPhantom..." << GGendl;
+  GGcout("GGEMSVoxelizedPhantom", "~GGEMSVoxelizedPhantom", 3) << "GGEMSVoxelizedPhantom erasing..." << GGendl;
+
+  GGcout("GGEMSVoxelizedPhantom", "~GGEMSVoxelizedPhantom", 3) << "GGEMSVoxelizedPhantom erased!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -88,33 +92,39 @@ void GGEMSVoxelizedPhantom::Initialize(void)
 
   CheckParameters();
 
-  // Initializing voxelized solid for geometric navigation
-  if (is_dosimetry_mode_) {
-    solids_.emplace_back(new GGEMSVoxelizedSolid(voxelized_phantom_filename_, range_data_filename_, "DOSIMETRY"));
-  }
-  else {
-    solids_.emplace_back(new GGEMSVoxelizedSolid(voxelized_phantom_filename_, range_data_filename_));
-  }
-
-  // Enabling tracking if necessary
-  if (GGEMSManager::GetInstance().IsTrackingVerbose()) solids_.at(0)->EnableTracking();
-
   // Getting the current number of registered solid
   GGEMSNavigatorManager& navigator_manager = GGEMSNavigatorManager::GetInstance();
-  // Get the number of already registered buffer, we take the total number of solids (including the all current solids) minus all current solids
-  GGsize number_of_registered_solids = navigator_manager.GetNumberOfRegisteredSolids() - solids_.size();
 
-  solids_.at(0)->SetSolidID<GGEMSVoxelizedSolidData>(number_of_registered_solids);
+  // Get the number of already registered buffer
+  GGsize number_of_registered_solids = navigator_manager.GetNumberOfRegisteredSolids();
 
-  // Load voxelized phantom from MHD file and storing materials
-  solids_.at(0)->Initialize(materials_);
+  // Allocation of memory for solid, 1 solid in case of voxelized phantom
+  solids_ = new GGEMSSolid*[1];
 
-  // Perform rotation before position
-  if (is_update_rot_) solids_.at(0)->SetRotation(rotation_xyz_);
-  if (is_update_pos_) solids_.at(0)->SetPosition(position_xyz_);
+  for (GGsize j = 0; j < number_activated_devices_; ++j) {
+  // Initializing voxelized solid for geometric navigation
+    if (is_dosimetry_mode_) {
+      solids_[0] = new GGEMSVoxelizedSolid(voxelized_phantom_filename_, range_data_filename_, "DOSIMETRY");
+    }
+    else {
+      solids_[0] = new GGEMSVoxelizedSolid(voxelized_phantom_filename_, range_data_filename_);
+    }
 
-  // Store the transformation matrix in solid object
-  solids_.at(0)->GetTransformationMatrix();
+    // Enabling tracking if necessary
+    if (GGEMSManager::GetInstance().IsTrackingVerbose()) solids_[0]->EnableTracking();
+
+    solids_[0]->SetSolidID<GGEMSVoxelizedSolidData>(number_of_registered_solids, j);
+
+    // Load voxelized phantom from MHD file and storing materials
+    solids_[0]->Initialize(materials_);
+
+    // Perform rotation before position
+    if (is_update_rot_) solids_[0]->SetRotation(rotation_xyz_);
+    if (is_update_pos_) solids_[0]->SetPosition(position_xyz_);
+
+    // Store the transformation matrix in solid object
+    solids_[0]->UpdateTransformationMatrix(j);
+  }
 
   // Initialize parent class
   GGEMSNavigator::Initialize();
@@ -133,7 +143,7 @@ void GGEMSVoxelizedPhantom::SaveResults(void)
     GGcout("GGEMSVoxelizedPhantom", "SaveResults", 2) << "Saving dosimetry results in MHD format..." << GGendl;
 
     // Compute dose and save results
-    dose_calculator_->ComputeDoseAndSaveResults();
+    //dose_calculator_->ComputeDoseAndSaveResults();
   }
 }
 

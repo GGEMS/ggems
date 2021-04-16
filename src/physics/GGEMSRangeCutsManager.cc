@@ -38,7 +38,9 @@
 
 GGEMSRangeCutsManager::GGEMSRangeCutsManager(void)
 {
-  GGcout("GGEMSRangeCutsManager", "GGEMSRangeCutsManager", 3) << "Allocation of GGEMSRangeCutsManager..." << GGendl;
+  GGcout("GGEMSRangeCutsManager", "GGEMSRangeCutsManager", 3) << "GGEMSRangeCutsManager creating..." << GGendl;
+
+  GGcout("GGEMSRangeCutsManager", "GGEMSRangeCutsManager", 3) << "GGEMSRangeCutsManager created!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -47,7 +49,9 @@ GGEMSRangeCutsManager::GGEMSRangeCutsManager(void)
 
 GGEMSRangeCutsManager::~GGEMSRangeCutsManager(void)
 {
-  GGcout("GGEMSRangeCutsManager", "~GGEMSRangeCutsManager", 3) << "Deallocation of GGEMSRangeCutsManager..." << GGendl;
+  GGcout("GGEMSRangeCutsManager", "~GGEMSRangeCutsManager", 3) << "GGEMSRangeCutsManager erasing..." << GGendl;
+
+  GGcout("GGEMSRangeCutsManager", "~GGEMSRangeCutsManager", 3) << "GGEMSRangeCutsManager erased!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -63,9 +67,9 @@ void GGEMSRangeCutsManager::PrintInfos(void) const
 
   for (size_t i = 0; i < navigator_manager.GetNumberOfNavigators(); ++i) {
     // Get pointer on phantom navigator
-    std::string name_of_phantom = ((navigator_manager.GetNavigators()).at(i))->GetNavigatorName();
+    std::string name_of_phantom = ((navigator_manager.GetNavigators())[i])->GetNavigatorName();
     // Get the Range cut pointer
-    std::shared_ptr<GGEMSRangeCuts> range_cuts = ((navigator_manager.GetNavigators()).at(i))->GetMaterials().lock()->GetRangeCuts().lock();
+    GGEMSRangeCuts* range_cuts = ((navigator_manager.GetNavigators())[i])->GetMaterials()->GetRangeCuts();
 
     GGcout("GGEMSRangeCutsManager", "PrintInfos", 0) << "Range cuts for phantom navigator: " << name_of_phantom << GGendl;
     GGcout("GGEMSRangeCutsManager", "PrintInfos", 0) << "---------------------------------" << GGendl;
@@ -104,13 +108,11 @@ void GGEMSRangeCutsManager::SetLengthCut(std::string const& phantom_name, std::s
   if (phantom_name == "all") {
     // Loop over phantom
     for (size_t i = 0; i < navigator_manager.GetNumberOfNavigators(); ++i) {
-      std::shared_ptr<GGEMSMaterials> materials = ((navigator_manager.GetNavigators()).at(i))->GetMaterials().lock();
-      materials->SetDistanceCut(particle_name, value, unit);
+      ((navigator_manager.GetNavigators())[i])->GetMaterials()->SetDistanceCut(particle_name, value, unit);
     }
   }
   else {
-    std::shared_ptr<GGEMSMaterials> materials = navigator_manager.GetNavigator(phantom_name)->GetMaterials().lock();
-    materials->SetDistanceCut(particle_name, value, unit);
+    navigator_manager.GetNavigator(phantom_name)->GetMaterials()->SetDistanceCut(particle_name, value, unit);
   }
 }
 

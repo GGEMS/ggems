@@ -270,6 +270,7 @@ class GGEMS_EXPORT GGEMSDosimetryCalculator
 
   private:
     GGfloat3 dosel_sizes_; /*!< Sizes of dosel */
+    GGsize total_number_of_dosels_; /*!< Total number of dosels in image */
     std::string dosimetry_output_filename_; /*!< Output filename for dosimetry results */
     GGEMSNavigator* navigator_; /*!< Navigator pointer associated to dosimetry object */
 

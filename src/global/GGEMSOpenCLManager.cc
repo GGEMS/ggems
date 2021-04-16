@@ -925,9 +925,19 @@ void GGEMSOpenCLManager::CleanBuffer(cl::Buffer* buffer, GGsize const& size, GGs
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-bool GGEMSOpenCLManager::IsDoublePrecision(GGsize const& index) const
+bool GGEMSOpenCLManager::IsDoublePrecision(GGsize const& device_index) const
 {
-  if (device_extensions_[index].find("cl_khr_fp64") == std::string::npos) return false;
+  if (device_extensions_[device_index].find("cl_khr_fp64") == std::string::npos) return false;
+  else return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+bool GGEMSOpenCLManager::IsDoublePrecisionAtomicAddition(GGsize const& device_index) const
+{
+  if (device_extensions_[device_index].find("cl_khr_int64_base_atomics") == std::string::npos) return false;
   else return true;
 }
 

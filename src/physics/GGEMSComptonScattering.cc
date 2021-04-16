@@ -39,7 +39,7 @@
 GGEMSComptonScattering::GGEMSComptonScattering(std::string const& primary_particle, bool const& is_secondary)
 : GGEMSEMProcess()
 {
-  GGcout("GGEMSComptonScattering", "GGEMSComptonScattering", 3) << "Allocation of GGEMSComptonScattering..." << GGendl;
+  GGcout("GGEMSComptonScattering", "GGEMSComptonScattering", 3) << "GGEMSComptonScattering creating..." << GGendl;
 
   process_name_ = "Compton";
 
@@ -54,6 +54,8 @@ GGEMSComptonScattering::GGEMSComptonScattering(std::string const& primary_partic
   primary_particle_ = "gamma";
   secondary_particle_ = "e-";
   is_secondaries_ = is_secondary;
+
+  GGcout("GGEMSComptonScattering", "GGEMSComptonScattering", 3) << "GGEMSComptonScattering created!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -62,7 +64,9 @@ GGEMSComptonScattering::GGEMSComptonScattering(std::string const& primary_partic
 
 GGEMSComptonScattering::~GGEMSComptonScattering(void)
 {
-  GGcout("GGEMSComptonScattering", "~GGEMSComptonScattering", 3) << "Deallocation of GGEMSComptonScattering..." << GGendl;
+  GGcout("GGEMSComptonScattering", "~GGEMSComptonScattering", 3) << "GGEMSComptonScattering erasing..." << GGendl;
+
+  GGcout("GGEMSComptonScattering", "~GGEMSComptonScattering", 3) << "GGEMSComptonScattering erased!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

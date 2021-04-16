@@ -42,7 +42,9 @@ GGEMSCTSystem::GGEMSCTSystem(std::string const& ct_system_name)
   source_isocenter_distance_(0.0f),
   source_detector_distance_(0.0f)
 {
-  GGcout("GGEMSCTSystem", "GGEMSCTSystem", 3) << "Allocation of GGEMSCTSystem..." << GGendl;
+  GGcout("GGEMSCTSystem", "GGEMSCTSystem", 3) << "GGEMSCTSystem creating..." << GGendl;
+
+  GGcout("GGEMSCTSystem", "GGEMSCTSystem", 3) << "GGEMSCTSystem created!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -51,7 +53,9 @@ GGEMSCTSystem::GGEMSCTSystem(std::string const& ct_system_name)
 
 GGEMSCTSystem::~GGEMSCTSystem(void)
 {
-  GGcout("GGEMSCTSystem", "~GGEMSCTSystem", 3) << "Deallocation of GGEMSCTSystem..." << GGendl;
+  GGcout("GGEMSCTSystem", "~GGEMSCTSystem", 3) << "GGEMSCTSystem erasing..." << GGendl;
+
+  GGcout("GGEMSCTSystem", "~GGEMSCTSystem", 3) << "GGEMSCTSystem erased!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -160,11 +164,11 @@ void GGEMSCTSystem::InitializeCurvedGeometry(void)
 
       GGfloat3 rotation;
       rotation.x = 0.0f; rotation.y = 0.0f; rotation.z = step_angle;
-      solids_.at(global_index)->SetRotation(rotation);
+      solids_[global_index]->SetRotation(rotation);
 
       GGfloat3 position;
       position.x = global_position_x; position.y = global_position_y; position.z = global_position_z;
-      solids_.at(global_index)->SetPosition(position);
+      solids_[global_index]->SetPosition(position);
     }
   }
 }
@@ -191,11 +195,11 @@ void GGEMSCTSystem::InitializeFlatGeometry(void)
       // No rotation of module
       GGfloat3 rotation;
       rotation.x = 0.0f; rotation.y = 0.0f; rotation.z = 0.0f;
-      solids_.at(global_index)->SetRotation(rotation);
+      solids_[global_index]->SetRotation(rotation);
 
       GGfloat3 position;
       position.x = global_position_x; position.y = global_position_y; position.z = global_position_z;
-      solids_.at(global_index)->SetPosition(position);
+      solids_[global_index]->SetPosition(position);
     }
   }
 }
@@ -214,29 +218,35 @@ void GGEMSCTSystem::Initialize(void)
   // Build CT system depending on input parameters  
   // Getting the current number of registered solid
   GGEMSNavigatorManager& navigator_manager = GGEMSNavigatorManager::GetInstance();
-  GGsize number_of_registered_solids = navigator_manager.GetNumberOfRegisteredSolids() - solids_.size();
+  GGsize number_of_registered_solids = navigator_manager.GetNumberOfRegisteredSolids();
 
   // Creating all solids, solid box for CT
-  GGsize number_of_solids = static_cast<GGsize>(number_of_modules_xy_.x_ * number_of_modules_xy_.y_);
-  for (GGsize i = 0; i < number_of_solids; ++i) { // In CT system only "HISTOGRAM"
-    solids_.emplace_back(new GGEMSSolidBox(
-      number_of_detection_elements_inside_module_xyz_.x_,
-      number_of_detection_elements_inside_module_xyz_.y_,
-      number_of_detection_elements_inside_module_xyz_.z_,
-      static_cast<GGfloat>(number_of_detection_elements_inside_module_xyz_.x_) * size_of_detection_elements_xyz_.x,
-      static_cast<GGfloat>(number_of_detection_elements_inside_module_xyz_.y_) * size_of_detection_elements_xyz_.y,
-      static_cast<GGfloat>(number_of_detection_elements_inside_module_xyz_.z_) * size_of_detection_elements_xyz_.z,
-      "HISTOGRAM")
-    );
+  number_of_solids_ = static_cast<GGsize>(number_of_modules_xy_.x_ * number_of_modules_xy_.y_);
 
-    // Enabling tracking if necessary
-    if (GGEMSManager::GetInstance().IsTrackingVerbose()) solids_.at(i)->EnableTracking();
+  // Allocation of memory for solid
+  solids_ = new GGEMSSolid*[number_of_solids_];
 
-    // Set solid id
-    solids_.at(i)->SetSolidID<GGEMSSolidBoxData>(number_of_registered_solids+i);
+  for (GGsize j = 0; j < number_activated_devices_; ++j) {
+    for (GGsize i = 0; i < number_of_solids_; ++i) { // In CT system only "HISTOGRAM"
+      solids_[i] = new GGEMSSolidBox(
+        number_of_detection_elements_inside_module_xyz_.x_,
+        number_of_detection_elements_inside_module_xyz_.y_,
+        number_of_detection_elements_inside_module_xyz_.z_,
+        static_cast<GGfloat>(number_of_detection_elements_inside_module_xyz_.x_) * size_of_detection_elements_xyz_.x,
+        static_cast<GGfloat>(number_of_detection_elements_inside_module_xyz_.y_) * size_of_detection_elements_xyz_.y,
+        static_cast<GGfloat>(number_of_detection_elements_inside_module_xyz_.z_) * size_of_detection_elements_xyz_.z,
+        "HISTOGRAM"
+      );
 
-    // // Initialize kernels
-    solids_.at(i)->Initialize(std::weak_ptr<GGEMSMaterials>());
+      // Enabling tracking if necessary
+      if (GGEMSManager::GetInstance().IsTrackingVerbose()) solids_[i]->EnableTracking();
+
+      // Set solid id
+      solids_[i]->SetSolidID<GGEMSSolidBoxData>(number_of_registered_solids+i, j);
+
+      // // Initialize kernels
+      solids_[i]->Initialize(nullptr);
+    }
   }
 
   // Initialize of the geometry depending on type of CT system
@@ -249,11 +259,17 @@ void GGEMSCTSystem::Initialize(void)
 
   // Performing a global rotation when source and system rotate
   if (is_update_rot_) {
-    for (auto&& i : solids_) i->SetRotation(rotation_xyz_);
+    for (GGsize i = 0; i < number_of_solids_; ++i) {
+      solids_[i]->SetRotation(rotation_xyz_);
+    }
   }
 
   // Get the final transformation matrix
-  for (auto&& i : solids_) i->GetTransformationMatrix();
+  for (GGsize j = 0; j < number_activated_devices_; ++j) {
+    for (GGsize i = 0; i < number_of_solids_; ++i) {
+      solids_[i]->UpdateTransformationMatrix(j);
+    }
+  }
 
   // Initialize parent class
   GGEMSNavigator::Initialize();

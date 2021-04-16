@@ -92,12 +92,13 @@ class GGEMS_EXPORT GGEMSEMProcess
     inline std::string GetProcessName(void) const {return process_name_;}
 
     /*!
-      \fn void BuildCrossSectionTables(std::weak_ptr<cl::Buffer> particle_cross_sections, std::weak_ptr<cl::Buffer> material_tables)
+      \fn void BuildCrossSectionTables(cl::Buffer* particle_cross_sections, cl::Buffer* material_tables, GGsize const& thread_index)
       \param particle_cross_sections - OpenCL buffer storing all the cross section tables for each particles
       \param material_tables - material tables on OpenCL device
+      \param thread_index - index of activated device (thread index)
       \brief build cross section tables and storing them in particle_cross_sections
     */
-    virtual void BuildCrossSectionTables(std::weak_ptr<cl::Buffer> particle_cross_sections, std::weak_ptr<cl::Buffer> material_tables);
+    virtual void BuildCrossSectionTables(cl::Buffer* particle_cross_sections, cl::Buffer* material_tables, GGsize const& thread_index);
 
   protected:
     /*!

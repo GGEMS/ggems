@@ -245,8 +245,9 @@ class GGEMS_EXPORT GGEMSRangeCuts
     GGfloat distance_cut_positron_; /*!< Positron cut in length */
     EnergyCutUMap energy_cuts_positron_; /*!< List of energy cuts for Positron a material */
 
-    std::unique_ptr<GGEMSLogEnergyTable> range_table_material_; /*!< Table of dE/dX for in material */
-    std::vector<std::shared_ptr<GGEMSLogEnergyTable>> loss_table_dedx_table_elements_; /*!< Table of dE/dX for each element in materials */
+    GGEMSLogEnergyTable* range_table_material_; /*!< Table of dE/dX for material */
+    GGEMSLogEnergyTable** loss_table_dedx_table_elements_; /*!< Table of dE/dX for each element in materials */
+    GGsize number_of_tables_; /*!< Number of tables in loss_table_dedx_table_elements_ */
 };
 
 #endif // GUARD_GGEMS_PHYSICS_GGEMSRANGECUTS_HH

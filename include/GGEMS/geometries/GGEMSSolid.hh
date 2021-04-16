@@ -131,11 +131,11 @@ class GGEMS_EXPORT GGEMSSolid
     void SetSolidID(GGsize const& solid_id, GGsize const& thread_index);
 
     /*!
-      \fn void GetTransformationMatrix(GGsize const& thread_index)
+      \fn void UpdateTransformationMatrix(GGsize const& thread_index)
       \param thread_index - index of the thread (= activated device index)
-      \brief Get the transformation matrix for solid object
+      \brief Update transformation matrix for solid object
     */
-    virtual void GetTransformationMatrix(GGsize const& thread_index) = 0;
+    virtual void UpdateTransformationMatrix(GGsize const& thread_index) = 0;
 
     /*!
       \fn void Initialize(std::weak_ptr<GGEMSMaterials> materials)

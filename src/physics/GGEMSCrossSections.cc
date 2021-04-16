@@ -43,17 +43,25 @@
 
 GGEMSCrossSections::GGEMSCrossSections(void)
 {
-  GGcout("GGEMSCrossSections", "GGEMSCrossSections", 3) << "Allocation of GGEMSCrossSections..." << GGendl;
+  GGcout("GGEMSCrossSections", "GGEMSCrossSections", 3) << "GGEMSSource creating..." << GGendl;
+
   is_process_activated_.resize(NUMBER_PROCESSES);
   for (auto&& i : is_process_activated_) i = false;
 
   // Get the OpenCL manager
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+  number_activated_devices_ = opencl_manager.GetNumberOfActivatedDevice();
 
   // Allocating memory for cross section tables on host and device
-  particle_cross_sections_ = opencl_manager.Allocate(nullptr, sizeof(GGEMSParticleCrossSections), CL_MEM_READ_WRITE, "GGEMSCrossSections");
+  particle_cross_sections_ = new cl::Buffer*[number_activated_devices_];
+  for (GGsize i = 0; i < number_activated_devices_; ++i) {
+    particle_cross_sections_[i] = opencl_manager.Allocate(nullptr, sizeof(GGEMSParticleCrossSections), i, CL_MEM_READ_WRITE, "GGEMSCrossSections");
+  }
 
-  particle_cross_sections_host_.reset(new GGEMSParticleCrossSections());
+  // Useful to avoid memory transfer between host and OpenCL
+  particle_cross_sections_host_ = new GGEMSParticleCrossSections();
+
+  GGcout("GGEMSCrossSections", "GGEMSCrossSections", 3) << "GGEMSSource created!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -62,7 +70,24 @@ GGEMSCrossSections::GGEMSCrossSections(void)
 
 GGEMSCrossSections::~GGEMSCrossSections(void)
 {
-  GGcout("GGEMSCrossSections", "~GGEMSCrossSections", 3) << "Deallocation of GGEMSCrossSections..." << GGendl;
+  GGcout("GGEMSCrossSections", "~GGEMSCrossSections", 3) << "GGEMSSource erasing..." << GGendl;
+
+  if (particle_cross_sections_host_) {
+    delete particle_cross_sections_host_;
+    particle_cross_sections_host_ = nullptr;
+  }
+
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+
+  if (particle_cross_sections_) {
+    for (GGsize i = 0; i < number_activated_devices_; ++i) {
+      opencl_manager.Deallocate(particle_cross_sections_[i], sizeof(GGEMSParticleCrossSections), i);
+    }
+    delete[] particle_cross_sections_;
+    particle_cross_sections_ = nullptr;
+  }
+
+  GGcout("GGEMSCrossSections", "~GGEMSCrossSections", 3) << "GGEMSSource erased!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -125,39 +150,42 @@ void GGEMSCrossSections::Initialize(GGEMSMaterials const* materials)
   // Get the process manager
   GGEMSProcessesManager& process_manager = GGEMSProcessesManager::GetInstance();
 
-  GGEMSParticleCrossSections* particle_cross_sections_device = opencl_manager.GetDeviceBuffer<GGEMSParticleCrossSections>(particle_cross_sections_.get(), sizeof(GGEMSParticleCrossSections));
-
   // Storing information for process manager
   GGsize number_of_bins = process_manager.GetCrossSectionTableNumberOfBins();
   GGfloat min_energy = process_manager.GetCrossSectionTableMinEnergy();
   GGfloat max_energy = process_manager.GetCrossSectionTableMaxEnergy();
 
-  particle_cross_sections_device->number_of_bins_ = number_of_bins;
-  particle_cross_sections_device->min_energy_ = min_energy;
-  particle_cross_sections_device->max_energy_ = max_energy;
-  for (GGsize i = 0; i < materials->GetNumberOfMaterials(); ++i) {
-    #ifdef _WIN32
-    strcpy_s(reinterpret_cast<char*>(particle_cross_sections_device->material_names_[i]), 32, (materials->GetMaterialName(i)).c_str());
-    #else
-    strcpy(reinterpret_cast<char*>(particle_cross_sections_device->material_names_[i]), (materials->GetMaterialName(i)).c_str());
-    #endif
+  // Initialize physics on each device
+  for (GGsize j = 0; j < number_activated_devices_; ++j) {
+    GGEMSParticleCrossSections* particle_cross_sections_device = opencl_manager.GetDeviceBuffer<GGEMSParticleCrossSections>(particle_cross_sections_[j], sizeof(GGEMSParticleCrossSections), j);
+
+    particle_cross_sections_device->number_of_bins_ = number_of_bins;
+    particle_cross_sections_device->min_energy_ = min_energy;
+    particle_cross_sections_device->max_energy_ = max_energy;
+    for (GGsize i = 0; i < materials->GetNumberOfMaterials(); ++i) {
+      #ifdef _WIN32
+      strcpy_s(reinterpret_cast<char*>(particle_cross_sections_device->material_names_[i]), 32, (materials->GetMaterialName(i)).c_str());
+      #else
+      strcpy(reinterpret_cast<char*>(particle_cross_sections_device->material_names_[i]), (materials->GetMaterialName(i)).c_str());
+      #endif
+    }
+
+    // Storing information from materials
+    particle_cross_sections_device->number_of_materials_ = static_cast<GGuchar>(materials->GetNumberOfMaterials());
+
+    // Filling energy table with log scale
+    GGfloat slope = logf(max_energy/min_energy);
+    for (GGsize i = 0; i < number_of_bins; ++i) {
+      particle_cross_sections_device->energy_bins_[i] = min_energy * expf(slope * (static_cast<float>(i) / (static_cast<GGfloat>(number_of_bins)-1.0f))) * MeV;
+    }
+
+    // Release pointer
+    opencl_manager.ReleaseDeviceBuffer(particle_cross_sections_[j], particle_cross_sections_device, j);
+
+    // Loop over the activated physic processes and building tables
+    for (auto&& i : em_processes_list_)
+      i->BuildCrossSectionTables(particle_cross_sections_[j], materials->GetMaterialTables(j), j);
   }
-
-  // Storing information from materials
-  particle_cross_sections_device->number_of_materials_ = static_cast<GGuchar>(materials->GetNumberOfMaterials());
-
-  // Filling energy table with log scale
-  GGfloat slope = logf(max_energy/min_energy);
-  for (GGsize i = 0; i < number_of_bins; ++i) {
-    particle_cross_sections_device->energy_bins_[i] = min_energy * expf(slope * (static_cast<float>(i) / (static_cast<GGfloat>(number_of_bins)-1.0f))) * MeV;
-  }
-
-  // Release pointer
-  opencl_manager.ReleaseDeviceBuffer(particle_cross_sections_.get(), particle_cross_sections_device);
-
-  // Loop over the activated physic processes and building tables
-  for (auto&& i : em_processes_list_)
-    i->BuildCrossSectionTables(particle_cross_sections_, materials->GetMaterialTables());
 
   // Copy data from device to RAM memory (optimization for python users)
   LoadPhysicTablesOnHost();
@@ -174,7 +202,7 @@ void GGEMSCrossSections::LoadPhysicTablesOnHost(void)
   // Get the OpenCL manager
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
-  GGEMSParticleCrossSections* particle_cross_sections_device = opencl_manager.GetDeviceBuffer<GGEMSParticleCrossSections>(particle_cross_sections_.get(), sizeof(GGEMSParticleCrossSections));
+  GGEMSParticleCrossSections* particle_cross_sections_device = opencl_manager.GetDeviceBuffer<GGEMSParticleCrossSections>(particle_cross_sections_[0], sizeof(GGEMSParticleCrossSections), 0);
 
   particle_cross_sections_host_->number_of_bins_ = particle_cross_sections_device->number_of_bins_;
   particle_cross_sections_host_->number_of_materials_ = particle_cross_sections_device->number_of_materials_;
@@ -210,7 +238,7 @@ void GGEMSCrossSections::LoadPhysicTablesOnHost(void)
   }
 
   // Release pointer
-  opencl_manager.ReleaseDeviceBuffer(particle_cross_sections_.get(), particle_cross_sections_device);
+  opencl_manager.ReleaseDeviceBuffer(particle_cross_sections_[0], particle_cross_sections_device, 0);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

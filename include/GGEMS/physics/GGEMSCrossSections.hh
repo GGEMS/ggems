@@ -116,11 +116,12 @@ class GGEMS_EXPORT GGEMSCrossSections
     inline GGEMSEMProcessesList GetProcessesList(void) const {return em_processes_list_;}
 
     /*!
-      \fn inline cl::Buffer* GetCrossSections(void) const
+      \fn inline cl::Buffer* GetCrossSections(GGsize const& thread_index) const
+      \param thread_index - index of activated device (thread index)
       \return pointer to OpenCL buffer storing cross sections
       \brief return the pointer to OpenCL buffer storing cross sections
     */
-    inline cl::Buffer* GetCrossSections(void) const {return particle_cross_sections_.get();};
+    inline cl::Buffer* GetCrossSections(GGsize const& thread_index) const {return particle_cross_sections_[thread_index];}
 
     /*!
       \fn GGfloat GetPhotonCrossSection(std::string const& process_name, std::string const& material_name, GGfloat const& energy, std::string const& unit) const
@@ -143,8 +144,9 @@ class GGEMS_EXPORT GGEMSCrossSections
   private:
     GGEMSEMProcessesList em_processes_list_; /*!< vector of electromagnetic processes */
     std::vector<bool> is_process_activated_; /*!< Boolean checking if the process is already activated */
-    std::shared_ptr<cl::Buffer> particle_cross_sections_; /*!< Pointer storing cross sections for each particles on OpenCL device */
-    std::unique_ptr<GGEMSParticleCrossSections> particle_cross_sections_host_; /*!< Pointer storing cross sections for each particles on host (RAM memory) */
+    cl::Buffer** particle_cross_sections_; /*!< Pointer storing cross sections for each particles on OpenCL device */
+    GGEMSParticleCrossSections* particle_cross_sections_host_; /*!< Pointer storing cross sections for each particles on host (RAM memory) */
+    GGsize number_activated_devices_; /*!< Number of activated device */
 };
 
 /*!
