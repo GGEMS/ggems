@@ -94,6 +94,27 @@ GGEMSCrossSections::~GGEMSCrossSections(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+void GGEMSCrossSections::Clean(void)
+{
+  GGcout("GGEMSCrossSections", "Clean", 3) << "GGEMSCrossSections cleaning..." << GGendl;
+
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+
+  if (particle_cross_sections_) {
+    for (GGsize i = 0; i < number_activated_devices_; ++i) {
+      opencl_manager.Deallocate(particle_cross_sections_[i], sizeof(GGEMSParticleCrossSections), i);
+    }
+    delete[] particle_cross_sections_;
+    particle_cross_sections_ = nullptr;
+  }
+
+  GGcout("GGEMSCrossSections", "Clean", 3) << "GGEMSCrossSections cleaned!!!" << GGendl;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 void GGEMSCrossSections::AddProcess(std::string const& process_name, std::string const& particle_type, bool const& is_secondary)
 {
   GGcout("GGEMSCrossSections", "AddProcess", 1) << "Adding " << process_name << " scattering process..." << GGendl;
@@ -343,4 +364,13 @@ void initialize_ggems_cross_sections(GGEMSCrossSections* cross_sections, GGEMSMa
 float get_cs_cross_sections(GGEMSCrossSections* cross_sections, char const* process_name, char const* material_name, GGfloat const energy, char const* unit)
 {
   return cross_sections->GetPhotonCrossSection(process_name, material_name, energy, unit);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void clean_ggems_cross_sections(GGEMSCrossSections* cross_sections)
+{
+  cross_sections->Clean();
 }

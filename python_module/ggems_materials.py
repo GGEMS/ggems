@@ -67,6 +67,9 @@ class GGEMSMaterials(object):
         ggems_lib.get_energy_cut_ggems_materials.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_char_p, ctypes.c_float, ctypes.c_char_p]
         ggems_lib.get_energy_cut_ggems_materials.restype = ctypes.c_float
 
+        ggems_lib.clean_ggems_materials.argtypes = [ctypes.c_void_p]
+        ggems_lib.clean_ggems_materials.restype = ctypes.c_void_p
+
         ggems_lib.get_atomic_number_density_ggems_materials.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
         ggems_lib.get_atomic_number_density_ggems_materials.restype = ctypes.c_float
 
@@ -86,6 +89,9 @@ class GGEMSMaterials(object):
 
     def get_energy_cut(self, material_name, particle_name, value, unit):
         return ggems_lib.get_energy_cut_ggems_materials(self.obj, material_name.encode('ASCII'), particle_name.encode('ASCII'), value, unit.encode('ASCII'))
+
+    def clean(self):
+        ggems_lib.clean_ggems_materials(self.obj)
 
     def get_atomic_number_density(self, material_name):
         return ggems_lib.get_atomic_number_density_ggems_materials(self.obj, material_name.encode('ASCII'))

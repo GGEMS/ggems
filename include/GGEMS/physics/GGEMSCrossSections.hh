@@ -134,6 +134,12 @@ class GGEMS_EXPORT GGEMSCrossSections
     */
     GGfloat GetPhotonCrossSection(std::string const& process_name, std::string const& material_name, GGfloat const& energy, std::string const& unit) const;
 
+    /*!
+      \fn void Clean(void)
+      \brief clean all cross sections on each OpenCL device
+    */
+    void Clean(void);
+
   private:
     /*!
       \fn void LoadPhysicTablesOnHost(void)
@@ -185,5 +191,12 @@ extern "C" GGEMS_EXPORT void initialize_ggems_cross_sections(GGEMSCrossSections*
   \brief get the cross section value of process
 */
 extern "C" GGEMS_EXPORT GGfloat get_cs_cross_sections(GGEMSCrossSections* cross_sections, char const* process_name, char const* material_name, GGfloat const energy, char const* unit);
+
+/*!
+  \fn void clean_ggems_cross_sections(GGEMSCrossSections* cross_sections)
+  \param cross_sections - pointer on GGEMS cross sections
+  \brief clean all cross sections on each OpenCL device
+*/
+extern "C" GGEMS_EXPORT void clean_ggems_cross_sections(GGEMSCrossSections* cross_sections);
 
 #endif // End of GUARD_GGEMS_PHYSICS_GGEMSCROSSSECTIONS_HH
