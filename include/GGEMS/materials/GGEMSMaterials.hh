@@ -191,6 +191,12 @@ class GGEMS_EXPORT GGEMSMaterials
     */
     void Initialize(void);
 
+    /*!
+      \fn void Clean(void)
+      \brief clean all declared materials on OpenCL device
+    */
+    void Clean(void);
+
   private:
     /*!
       \fn void BuildMaterialTables(void)
@@ -263,5 +269,12 @@ extern "C" GGEMS_EXPORT GGfloat get_energy_cut_ggems_materials(GGEMSMaterials* m
   \brief Get the density of material in g.cm-3
 */
 extern "C" GGEMS_EXPORT GGfloat get_atomic_number_density_ggems_materials(GGEMSMaterials* materials, char const* material_name);
+
+/*!
+  \fn void clean_ggems_materials(GGEMSMaterials* materials)
+  \param materials - pointer on GGEMS materials
+  \brief clean all declared materials on OpenCL device
+*/
+extern "C" GGEMS_EXPORT void clean_ggems_materials(GGEMSMaterials* materials);
 
 #endif // End of GUARD_GGEMS_PHYSICS_GGEMSMATERIALS_HH

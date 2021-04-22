@@ -20,11 +20,11 @@
 from ggems_lib import *
 from ggems_opencl import GGEMSOpenCLManager
 from ggems_ram import GGEMSRAMManager
-# from ggems_materials import GGEMSMaterialsDatabaseManager, GGEMSMaterials
+from ggems_materials import GGEMSMaterialsDatabaseManager, GGEMSMaterials
 # from ggems_systems import GGEMSCTSystem
 # from ggems_phantoms import GGEMSVoxelizedPhantom, GGEMSWorld
 from ggems_sources import GGEMSXRaySource, GGEMSSourceManager
-# from ggems_processes import GGEMSProcessesManager, GGEMSRangeCutsManager, GGEMSCrossSections
+from ggems_processes import GGEMSProcessesManager, GGEMSRangeCutsManager, GGEMSCrossSections
 from ggems_volume_creator import GGEMSVolumeCreatorManager, GGEMSTube, GGEMSBox, GGEMSSphere
 # from ggems_dosimetry import GGEMSDosimetryCalculator
 from ggems_profiler import GGEMSProfilerManager
@@ -115,9 +115,9 @@ from ggems_profiler import GGEMSProfilerManager
 opencl_manager = GGEMSOpenCLManager()
 ram_manager = GGEMSRAMManager()
 source_manager = GGEMSSourceManager()
-# materials_database_manager = GGEMSMaterialsDatabaseManager()
-# processes_manager = GGEMSProcessesManager()
-# range_cuts_manager = GGEMSRangeCutsManager()
+materials_database_manager = GGEMSMaterialsDatabaseManager()
+processes_manager = GGEMSProcessesManager()
+range_cuts_manager = GGEMSRangeCutsManager()
 # ggems_manager = GGEMSManager()
 volume_creator_manager = GGEMSVolumeCreatorManager()
 profiler_manager = GGEMSProfilerManager()

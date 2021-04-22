@@ -33,6 +33,9 @@ class GGEMSCrossSections(object):
         ggems_lib.get_cs_cross_sections.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_char_p, ctypes.c_float, ctypes.c_char_p]
         ggems_lib.get_cs_cross_sections.restype = ctypes.c_float
 
+        ggems_lib.clean_ggems_cross_sections.argtypes = [ctypes.c_void_p]
+        ggems_lib.clean_ggems_cross_sections.restype = ctypes.c_void_p
+
         self.obj = ggems_lib.create_ggems_cross_sections()
 
     def add_process(self, process_name, particle_name):
@@ -40,6 +43,9 @@ class GGEMSCrossSections(object):
 
     def initialize(self, material_p):
         ggems_lib.initialize_ggems_cross_sections(self.obj, material_p.obj)
+
+    def clean(self):
+        ggems_lib.clean_ggems_cross_sections(self.obj)
 
     def get_cs(self, process_name, material_name, energy, unit):
         return ggems_lib.get_cs_cross_sections(self.obj, process_name.encode('ASCII'), material_name.encode('ASCII'), energy, unit.encode('ASCII'))

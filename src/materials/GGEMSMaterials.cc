@@ -88,6 +88,27 @@ GGEMSMaterials::~GGEMSMaterials(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+void GGEMSMaterials::Clean(void)
+{
+  GGcout("GGEMSMaterials", "Clean", 3) << "GGEMSMaterials cleaning..." << GGendl;
+
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+
+  if (material_tables_) {
+    for (GGsize i = 0; i < number_activated_devices_; ++i) {
+      opencl_manager.Deallocate(material_tables_[i], sizeof(GGEMSMaterialTables), i);
+    }
+    delete[] material_tables_;
+    material_tables_ = nullptr;
+  }
+
+  GGcout("GGEMSMaterials", "Clean", 3) << "GGEMSMaterials cleaned!!!" << GGendl;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 void GGEMSMaterials::AddMaterial(std::string const& material_name)
 {
   // Checking the number of material
@@ -449,4 +470,13 @@ GGfloat get_energy_cut_ggems_materials(GGEMSMaterials* materials, char const* ma
 GGfloat get_atomic_number_density_ggems_materials(GGEMSMaterials* materials, char const* material_name)
 {
   return materials->GetAtomicNumberDensity(material_name, 0);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void clean_ggems_materials(GGEMSMaterials* materials)
+{
+  materials->Clean();
 }
