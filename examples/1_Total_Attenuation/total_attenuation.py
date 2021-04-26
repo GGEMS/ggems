@@ -41,7 +41,7 @@ process_list = ('Compton', 'Photoelectric', 'Rayleigh')
 
 # ------------------------------------------------------------------------------
 # Level of verbosity during computation
-GGEMSVerbosity(0)
+GGEMSVerbosity(3)
 
 # ------------------------------------------------------------------------------
 # STEP 1: Choosing an OpenCL device
@@ -137,5 +137,7 @@ plt.close()
 
 # ------------------------------------------------------------------------------
 # STEP 6: Exit safely
+materials.clean()
+cross_sections.clean()
 opencl_manager.clean()
 exit()
