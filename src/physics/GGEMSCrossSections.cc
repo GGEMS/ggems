@@ -43,7 +43,7 @@
 
 GGEMSCrossSections::GGEMSCrossSections(void)
 {
-  GGcout("GGEMSCrossSections", "GGEMSCrossSections", 3) << "GGEMSSource creating..." << GGendl;
+  GGcout("GGEMSCrossSections", "GGEMSCrossSections", 3) << "GGEMSCrossSections creating..." << GGendl;
 
   is_process_activated_.resize(NUMBER_PROCESSES);
   for (auto&& i : is_process_activated_) i = false;
@@ -61,7 +61,7 @@ GGEMSCrossSections::GGEMSCrossSections(void)
   // Useful to avoid memory transfer between host and OpenCL
   particle_cross_sections_host_ = new GGEMSParticleCrossSections();
 
-  GGcout("GGEMSCrossSections", "GGEMSCrossSections", 3) << "GGEMSSource created!!!" << GGendl;
+  GGcout("GGEMSCrossSections", "GGEMSCrossSections", 3) << "GGEMSCrossSections created!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -70,7 +70,7 @@ GGEMSCrossSections::GGEMSCrossSections(void)
 
 GGEMSCrossSections::~GGEMSCrossSections(void)
 {
-  GGcout("GGEMSCrossSections", "~GGEMSCrossSections", 3) << "GGEMSSource erasing..." << GGendl;
+  GGcout("GGEMSCrossSections", "~GGEMSCrossSections", 3) << "GGEMSCrossSections erasing..." << GGendl;
 
   if (particle_cross_sections_host_) {
     delete particle_cross_sections_host_;
@@ -87,7 +87,7 @@ GGEMSCrossSections::~GGEMSCrossSections(void)
     particle_cross_sections_ = nullptr;
   }
 
-  GGcout("GGEMSCrossSections", "~GGEMSCrossSections", 3) << "GGEMSSource erased!!!" << GGendl;
+  GGcout("GGEMSCrossSections", "~GGEMSCrossSections", 3) << "GGEMSCrossSections erased!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

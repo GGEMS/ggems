@@ -40,6 +40,7 @@
 #include "GGEMS/sources/GGEMSXRaySource.hh"
 #include "GGEMS/geometries/GGEMSVolumeCreatorManager.hh"
 #include "GGEMS/geometries/GGEMSBox.hh"
+#include "GGEMS/tools/GGEMSRAMManager.hh"
 
 /*!
   \fn void PrintHelpAndQuit(void)
@@ -47,9 +48,9 @@
 */
 void PrintHelpAndQuit(void)
 {
-  std::cerr << "Usage: ct_scanner <DeviceID>" << std::endl;
+  std::cerr << "Usage: multi_platform <Device>" << std::endl;
   std::cerr << std::endl;
-  std::cerr << "<DeviceID>: OpenCL device id" << std::endl;
+  std::cerr << "<Device>: \"all\", \"cpu\", \"gpu\", \"gpu_nvidia\", \"gpu_amd\", \"gpu_intel\"" << std::endl;
   exit(EXIT_FAILURE);
 }
 
@@ -69,24 +70,30 @@ int main(int argc, char** argv)
   }
 
   // Getting parameters
-  GGsize device_id = static_cast<GGsize>(atoi(argv[1]));
+  std::string device = argv[1];
 
   // Setting verbosity
-  GGcout.SetVerbosity(1);
-  GGcerr.SetVerbosity(1);
-  GGwarn.SetVerbosity(1);
+  GGcout.SetVerbosity(3);
+  GGcerr.SetVerbosity(3);
+  GGwarn.SetVerbosity(3);
 
   // Initialization of singletons
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
   GGEMSMaterialsDatabaseManager& material_manager = GGEMSMaterialsDatabaseManager::GetInstance();
   GGEMSVolumeCreatorManager& volume_creator_manager = GGEMSVolumeCreatorManager::GetInstance();
+  GGEMSRAMManager& ram_manager = GGEMSRAMManager::GetInstance();
   GGEMSProcessesManager& processes_manager = GGEMSProcessesManager::GetInstance();
   GGEMSRangeCutsManager& range_cuts_manager = GGEMSRangeCutsManager::GetInstance();
-  GGEMSManager& ggems_manager = GGEMSManager::GetInstance();
+  // GGEMSManager& ggems_manager = GGEMSManager::GetInstance();
 
   try {
-    // Set the context id
-    opencl_manager.DeviceToActivate(device_id);
+    // Activating device
+    if (device == "gpu_nvidia") opencl_manager.DeviceToActivate("gpu", "nvidia");
+    else if (device == "gpu_amd") opencl_manager.DeviceToActivate("gpu", "amd");
+    else if (device == "gpu_intel") opencl_manager.DeviceToActivate("gpu", "intel");
+    else opencl_manager.DeviceToActivate(device);
+
+    opencl_manager.PrintActivatedDevices();
 
     // Enter material database
     material_manager.SetMaterialsDatabase("../../data/materials.txt");
@@ -118,17 +125,17 @@ int main(int argc, char** argv)
     phantom.SetRotation(0.0f, 0.0f, 0.0f, "deg");
     phantom.SetPosition(0.0f, 0.0f, 0.0f, "mm");
 
-    GGEMSCTSystem ct_detector("Stellar");
-    ct_detector.SetCTSystemType("curved");
-    ct_detector.SetNumberOfModules(1, 46);
-    ct_detector.SetNumberOfDetectionElementsInsideModule(64, 16, 1);
-    ct_detector.SetSizeOfDetectionElements(0.6f, 0.6f, 0.6f, "mm");
-    ct_detector.SetMaterialName("GOS");
-    ct_detector.SetSourceDetectorDistance(1085.6f, "mm");
-    ct_detector.SetSourceIsocenterDistance(595.0f, "mm");
-    ct_detector.SetRotation(0.0f, 0.0f, 0.0f, "deg");
-    ct_detector.SetThreshold(10.0f, "keV");
-    ct_detector.StoreOutput("data/projection.mhd");
+    // GGEMSCTSystem ct_detector("Stellar");
+    // ct_detector.SetCTSystemType("curved");
+    // ct_detector.SetNumberOfModules(1, 46);
+    // ct_detector.SetNumberOfDetectionElementsInsideModule(64, 16, 1);
+    // ct_detector.SetSizeOfDetectionElements(0.6f, 0.6f, 0.6f, "mm");
+    // ct_detector.SetMaterialName("GOS");
+    // ct_detector.SetSourceDetectorDistance(1085.6f, "mm");
+    // ct_detector.SetSourceIsocenterDistance(595.0f, "mm");
+    // ct_detector.SetRotation(0.0f, 0.0f, 0.0f, "deg");
+    // ct_detector.SetThreshold(10.0f, "keV");
+    // ct_detector.StoreOutput("data/projection.mhd");
 
     // Physics
     processes_manager.AddProcess("Compton", "gamma", "all");
@@ -146,29 +153,32 @@ int main(int argc, char** argv)
     // Source
     GGEMSXRaySource point_source("point_source");
     point_source.SetSourceParticleType("gamma");
-    point_source.SetNumberOfParticles(1000000000);
+    point_source.SetNumberOfParticles(10000);
     point_source.SetPosition(-595.0f, 0.0f, 0.0f, "mm");
     point_source.SetRotation(0.0f, 0.0f, 0.0f, "deg");
     point_source.SetBeamAperture(12.5f, "deg");
     point_source.SetFocalSpotSize(0.0f, 0.0f, 0.0f, "mm");
     point_source.SetPolyenergy("data/spectrum_120kVp_2mmAl.dat");
 
-    // GGEMS simulation
-    ggems_manager.SetOpenCLVerbose(true);
-    ggems_manager.SetNavigatorVerbose(true);
-    ggems_manager.SetSourceVerbose(true);
-    ggems_manager.SetMemoryRAMVerbose(true);
-    ggems_manager.SetProcessVerbose(true);
-    ggems_manager.SetRangeCutsVerbose(true);
-    ggems_manager.SetRandomVerbose(true);
-    ggems_manager.SetProfilingVerbose(true);
-    ggems_manager.SetTrackingVerbose(false, 0);
+    // Printing RAM status
+    ram_manager.PrintRAMStatus();
 
-    // Initializing the GGEMS simulation
-    ggems_manager.Initialize();
+    // // GGEMS simulation
+    // ggems_manager.SetOpenCLVerbose(true);
+    // ggems_manager.SetNavigatorVerbose(true);
+    // ggems_manager.SetSourceVerbose(true);
+    // ggems_manager.SetMemoryRAMVerbose(true);
+    // ggems_manager.SetProcessVerbose(true);
+    // ggems_manager.SetRangeCutsVerbose(true);
+    // ggems_manager.SetRandomVerbose(true);
+    // ggems_manager.SetProfilingVerbose(true);
+    // ggems_manager.SetTrackingVerbose(false, 0);
 
-    // Start GGEMS simulation
-    ggems_manager.Run();
+    // // Initializing the GGEMS simulation
+    // ggems_manager.Initialize();
+
+    // // Start GGEMS simulation
+    // ggems_manager.Run();
   }
   catch (std::exception& e) {
     std::cerr << e.what() << std::endl;
@@ -177,6 +187,8 @@ int main(int argc, char** argv)
     std::cerr << "Unknown exception!!!" << std::endl;
   }
 
+  // Exit safely
+  volume_creator_manager.Clean();
   opencl_manager.Clean();
   exit(EXIT_SUCCESS);
 }
