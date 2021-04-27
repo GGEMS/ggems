@@ -127,6 +127,7 @@ int main(int argc, char** argv)
     std::cerr << "Unknown exception!!!" << std::endl;
   }
 
+  // Exit safely
   opencl_manager.Clean();
   exit(EXIT_SUCCESS);
 }

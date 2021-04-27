@@ -68,9 +68,9 @@ int main(int argc, char** argv)
   }
 
   // Setting verbosity
-  GGcout.SetVerbosity(0);
-  GGcerr.SetVerbosity(0);
-  GGwarn.SetVerbosity(0);
+  GGcout.SetVerbosity(3);
+  GGcerr.SetVerbosity(3);
+  GGwarn.SetVerbosity(3);
 
   // Getting parameters
   GGsize device_id = static_cast<GGsize>(atoi(argv[1]));
@@ -137,7 +137,7 @@ int main(int argc, char** argv)
     std::cerr << "Unknown exception!!!" << std::endl;
   }
 
-  volume_creator_manager.Clean();
+  // Exit safely
   opencl_manager.Clean();
   exit(EXIT_SUCCESS);
 }

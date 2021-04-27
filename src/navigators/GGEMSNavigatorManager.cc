@@ -52,7 +52,7 @@ GGEMSNavigatorManager::GGEMSNavigatorManager(void)
 
 GGEMSNavigatorManager::~GGEMSNavigatorManager(void)
 {
-  GGcout("GGEMSNavigatorManager", "~GGEMSNavigatorManager", 3) << "Deallocation of GGEMS navigator manager..." << GGendl;
+  GGcout("GGEMSNavigatorManager", "~GGEMSNavigatorManager", 3) << "GGEMSNavigatorManager erasing..." << GGendl;
 
   if (navigators_) {
     delete[] navigators_;
@@ -65,6 +65,17 @@ GGEMSNavigatorManager::~GGEMSNavigatorManager(void)
   }
 
   GGcout("GGEMSNavigatorManager", "~GGEMSNavigatorManager", 3) << "GGEMSNavigatorManager erased!!!" << GGendl;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSNavigatorManager::Clean(void)
+{
+  GGcout("GGEMSNavigatorManager", "Clean", 3) << "GGEMSNavigatorManager cleaning..." << GGendl;
+
+  GGcout("GGEMSNavigatorManager", "Clean", 3) << "GGEMSNavigatorManager cleaned!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

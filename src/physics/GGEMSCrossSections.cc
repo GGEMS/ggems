@@ -77,16 +77,6 @@ GGEMSCrossSections::~GGEMSCrossSections(void)
     particle_cross_sections_host_ = nullptr;
   }
 
-  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
-
-  if (particle_cross_sections_) {
-    for (GGsize i = 0; i < number_activated_devices_; ++i) {
-      opencl_manager.Deallocate(particle_cross_sections_[i], sizeof(GGEMSParticleCrossSections), i);
-    }
-    delete[] particle_cross_sections_;
-    particle_cross_sections_ = nullptr;
-  }
-
   GGcout("GGEMSCrossSections", "~GGEMSCrossSections", 3) << "GGEMSCrossSections erased!!!" << GGendl;
 }
 

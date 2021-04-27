@@ -205,6 +205,12 @@ class GGEMS_EXPORT GGEMSManager
     */
     inline GGint GetParticleTrackingID(void) const {return particle_tracking_id_;};
 
+    /*!
+      \fn void Clean(void)
+      \brief clean OpenCL data
+    */
+    void Clean(void);
+
   private:
     /*!
       \fn void PrintBanner(void) const

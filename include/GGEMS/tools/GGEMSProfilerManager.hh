@@ -118,6 +118,12 @@ class GGEMS_EXPORT GGEMSProfilerManager
     */
     void Reset(void);
 
+    /*!
+      \fn void Clean(void)
+      \brief clean OpenCL data
+    */
+    void Clean(void);
+
   private:
     ProfilerUMap profilers_; /*!< Map storing all types of profiles */
 };

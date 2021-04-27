@@ -41,7 +41,7 @@ process_list = ('Compton', 'Photoelectric', 'Rayleigh')
 
 # ------------------------------------------------------------------------------
 # Level of verbosity during computation
-GGEMSVerbosity(3)
+GGEMSVerbosity(0)
 
 # ------------------------------------------------------------------------------
 # STEP 1: Choosing an OpenCL device

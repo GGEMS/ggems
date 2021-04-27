@@ -53,6 +53,7 @@ GGEMSPseudoRandomGenerator::GGEMSPseudoRandomGenerator(void)
   seed_(0)
 {
   GGcout("GGEMSPseudoRandomGenerator", "GGEMSPseudoRandomGenerator", 3) << "GGEMSPseudoRandomGenerator creating..." << GGendl;
+
   GGcout("GGEMSPseudoRandomGenerator", "GGEMSPseudoRandomGenerator", 3) << "GGEMSPseudoRandomGenerator created!!!" << GGendl;
 }
 

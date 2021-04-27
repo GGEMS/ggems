@@ -71,16 +71,6 @@ GGEMSMaterials::~GGEMSMaterials(void)
     range_cuts_ = nullptr;
   }
 
-  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
-
-  if (material_tables_) {
-    for (GGsize i = 0; i < number_activated_devices_; ++i) {
-      opencl_manager.Deallocate(material_tables_[i], sizeof(GGEMSMaterialTables), i);
-    }
-    delete[] material_tables_;
-    material_tables_ = nullptr;
-  }
-
   GGcout("GGEMSMaterials", "~GGEMSMaterials", 3) << "GGEMSMaterials erased!!!" << GGendl;
 }
 

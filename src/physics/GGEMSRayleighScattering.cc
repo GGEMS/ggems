@@ -39,7 +39,7 @@
 GGEMSRayleighScattering::GGEMSRayleighScattering(std::string const& primary_particle, bool const& is_secondary)
 : GGEMSEMProcess()
 {
-  GGcout("GGEMSRayleighScattering", "GGEMSRayleighScattering", 3) << "Allocation of GGEMSRayleighScattering..." << GGendl;
+  GGcout("GGEMSRayleighScattering", "GGEMSRayleighScattering", 3) << "GGEMSRayleighScattering creating..." << GGendl;
 
   process_name_ = "Rayleigh";
 
@@ -58,6 +58,8 @@ GGEMSRayleighScattering::GGEMSRayleighScattering(std::string const& primary_part
   process_id_ = RAYLEIGH_SCATTERING;
   primary_particle_ = "gamma";
   is_secondaries_ = false;
+
+  GGcout("GGEMSRayleighScattering", "GGEMSRayleighScattering", 3) << "GGEMSRayleighScattering created!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -66,8 +68,9 @@ GGEMSRayleighScattering::GGEMSRayleighScattering(std::string const& primary_part
 
 GGEMSRayleighScattering::~GGEMSRayleighScattering(void)
 {
-  GGcout("GGEMSRayleighScattering", "~GGEMSRayleighScattering", 3) << "Deallocation of GGEMSRayleighScattering..." << GGendl;
+  GGcout("GGEMSRayleighScattering", "GGEMSRayleighScattering", 3) << "GGEMSRayleighScattering erasing..." << GGendl;
 
+  GGcout("GGEMSRayleighScattering", "GGEMSRayleighScattering", 3) << "GGEMSRayleighScattering erased!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

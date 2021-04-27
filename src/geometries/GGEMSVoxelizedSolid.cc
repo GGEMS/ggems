@@ -41,7 +41,7 @@ GGEMSVoxelizedSolid::GGEMSVoxelizedSolid(std::string const& volume_header_filena
   volume_header_filename_(volume_header_filename),
   range_filename_(range_filename)
 {
-  GGcout("GGEMSVoxelizedSolid", "GGEMSVoxelizedSolid", 3) << "Allocation of GGEMSVoxelizedSolid..." << GGendl;
+  GGcout("GGEMSVoxelizedSolid", "GGEMSVoxelizedSolid", 3) << "GGEMSVoxelizedSolid creating..." << GGendl;
 
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
@@ -79,6 +79,8 @@ GGEMSVoxelizedSolid::GGEMSVoxelizedSolid(std::string const& volume_header_filena
       GGEMSMisc::ThrowException("GGEMSVoxelizedSolid", "GGEMSVoxelizedSolid", oss.str());
     }
   }
+
+  GGcout("GGEMSVoxelizedSolid", "GGEMSVoxelizedSolid", 3) << "GGEMSVoxelizedSolid created!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -87,7 +89,9 @@ GGEMSVoxelizedSolid::GGEMSVoxelizedSolid(std::string const& volume_header_filena
 
 GGEMSVoxelizedSolid::~GGEMSVoxelizedSolid(void)
 {
-  GGcout("GGEMSVoxelizedSolid", "~GGEMSVoxelizedSolid", 3) << "Deallocation of GGEMSVoxelizedSolid..." << GGendl;
+  GGcout("GGEMSVoxelizedSolid", "GGEMSVoxelizedSolid", 3) << "GGEMSVoxelizedSolid erasing..." << GGendl;
+
+  GGcout("GGEMSVoxelizedSolid", "GGEMSVoxelizedSolid", 3) << "GGEMSVoxelizedSolid erased!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

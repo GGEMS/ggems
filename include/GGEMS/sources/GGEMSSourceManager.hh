@@ -224,11 +224,4 @@ extern "C" GGEMS_EXPORT void initialize_source_manager(GGEMSSourceManager* sourc
 */
 extern "C" GGEMS_EXPORT void print_infos_source_manager(GGEMSSourceManager* source_manager);
 
-/*!
-  \fn void clean_source_manager(GGEMSSourceManager* source_manager)
-  \param source_manager - pointer on the singleton
-  \brief Cleaning buffer
-*/
-extern "C" GGEMS_EXPORT void clean_source_manager(GGEMSSourceManager* source_manager);
-
 #endif // End of GUARD_GGEMS_SOURCES_GGEMSSOURCEMANAGER
