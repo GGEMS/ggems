@@ -39,7 +39,7 @@
 GGEMSSolidBox::GGEMSSolidBox(GGsize const& virtual_element_number_x, GGsize const& virtual_element_number_y, GGsize const& virtual_element_number_z, GGfloat const& box_size_x, GGfloat const& box_size_y, GGfloat const& box_size_z, std::string const& data_reg_type)
 : GGEMSSolid()
 {
-  GGcout("GGEMSSolidBox", "GGEMSSolidBox", 3) << "Allocation of GGEMSSolidBox..." << GGendl;
+  GGcout("GGEMSSolidBox", "GGEMSSolidBox", 3) << "GGEMSSolidBox creating..." << GGendl;
 
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
@@ -109,6 +109,8 @@ GGEMSSolidBox::GGEMSSolidBox(GGsize const& virtual_element_number_x, GGsize cons
     //oss << "    - DOSIMETRY" << std::endl;
     GGEMSMisc::ThrowException("GGEMSSolidBox", "GGEMSSolidBox", oss.str());
   }
+
+  GGcout("GGEMSSolidBox", "GGEMSSolidBox", 3) << "GGEMSSolidBox created!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -117,7 +119,9 @@ GGEMSSolidBox::GGEMSSolidBox(GGsize const& virtual_element_number_x, GGsize cons
 
 GGEMSSolidBox::~GGEMSSolidBox(void)
 {
-  GGcout("GGEMSSolidBox", "~GGEMSSolidBox", 3) << "Deallocation of GGEMSSolidBox..." << GGendl;
+  GGcout("GGEMSSolidBox", "~GGEMSSolidBox", 3) << "GGEMSSolidBox erasing..." << GGendl;
+
+  GGcout("GGEMSSolidBox", "~GGEMSSolidBox", 3) << "GGEMSSolidBox erased!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

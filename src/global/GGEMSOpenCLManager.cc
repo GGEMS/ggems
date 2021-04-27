@@ -34,6 +34,13 @@
 #include "GGEMS/global/GGEMSOpenCLManager.hh"
 #include "GGEMS/tools/GGEMSRAMManager.hh"
 #include "GGEMS/tools/GGEMSTools.hh"
+#include "GGEMS/geometries/GGEMSVolumeCreatorManager.hh"
+#include "GGEMS/tools/GGEMSProfilerManager.hh"
+#include "GGEMS/navigators/GGEMSNavigatorManager.hh"
+#include "GGEMS/sources/GGEMSSourceManager.hh"
+#include "GGEMS/physics/GGEMSRangeCutsManager.hh"
+#include "GGEMS/global/GGEMSManager.hh"
+#include "GGEMS/physics/GGEMSProcessesManager.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -338,6 +345,7 @@ GGEMSOpenCLManager::GGEMSOpenCLManager(void)
 GGEMSOpenCLManager::~GGEMSOpenCLManager(void)
 {
   GGcout("GGEMSOpenCLManager", "~GGEMSOpenCLManager", 3) << "GGEMSOpenCLManager erasing..." << GGendl;
+
   GGcout("GGEMSOpenCLManager", "~GGEMSOpenCLManager", 3) << "GGEMSOpenCLManager erased!!!" << GGendl;
 }
 
@@ -348,6 +356,27 @@ GGEMSOpenCLManager::~GGEMSOpenCLManager(void)
 void GGEMSOpenCLManager::Clean(void)
 {
   GGcout("GGEMSOpenCLManager", "Clean", 3) << "GGEMSOpenCLManager cleaning..." << GGendl;
+
+  // Cleaning all singletons
+  GGEMSRAMManager& ram_manager = GGEMSRAMManager::GetInstance();
+  GGEMSVolumeCreatorManager& volume_creator_manager = GGEMSVolumeCreatorManager::GetInstance();
+  GGEMSProfilerManager& profiler_manager = GGEMSProfilerManager::GetInstance();
+  GGEMSNavigatorManager& navigator_manager = GGEMSNavigatorManager::GetInstance();
+  GGEMSSourceManager& source_manager = GGEMSSourceManager::GetInstance();
+  GGEMSMaterialsDatabaseManager& material_database_manager = GGEMSMaterialsDatabaseManager::GetInstance();
+  GGEMSProcessesManager& processes_manager = GGEMSProcessesManager::GetInstance();
+  GGEMSRangeCutsManager& range_cuts_manager = GGEMSRangeCutsManager::GetInstance();
+  GGEMSManager& ggems_manager = GGEMSManager::GetInstance();
+
+  ram_manager.Clean();
+  volume_creator_manager.Clean();
+  profiler_manager.Clean();
+  navigator_manager.Clean();
+  source_manager.Clean();
+  material_database_manager.Clean();
+  processes_manager.Clean();
+  range_cuts_manager.Clean();
+  ggems_manager.Clean();
 
   // Freeing platforms, and platform infos
   platform_profile_.clear();

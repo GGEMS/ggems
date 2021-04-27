@@ -170,6 +170,12 @@ class GGEMS_EXPORT GGEMSProcessesManager
     */
     inline bool IsPrintPhysicTables(void) const {return is_processes_print_tables_;};
 
+    /*!
+      \fn void Clean(void)
+      \brief clean OpenCL data if necessary
+    */
+    void Clean(void);
+
   private:
     GGsize cross_section_table_number_of_bins_; /*!< Number of bins in the cross section table */
     GGfloat cross_section_table_min_energy_; /*!< Minimum energy in the cross section table */

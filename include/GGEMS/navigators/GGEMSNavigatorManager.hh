@@ -199,6 +199,12 @@ class GGEMS_EXPORT GGEMSNavigatorManager
     */
     void WorldTracking(GGsize const& thread_index) const;
 
+    /*!
+      \fn void Clean(void)
+      \brief clean OpenCL data if necessary
+    */
+    void Clean(void);
+
   private:
     GGEMSNavigator** navigators_; /*!< Pointer on the navigators */
     GGsize number_of_navigators_; /*!< Number of navigators */

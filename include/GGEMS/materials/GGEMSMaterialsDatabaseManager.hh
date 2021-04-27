@@ -226,6 +226,12 @@ class GGEMS_EXPORT GGEMSMaterialsDatabaseManager
       return static_cast<GGfloat>(tmp_value_double);
     }
 
+    /*!
+      \fn void Clean(void)
+      \brief clean OpenCL data
+    */
+    void Clean(void);
+
   private:
     /*!
       \fn void LoadMaterialsDatabase(std::string const& filename)

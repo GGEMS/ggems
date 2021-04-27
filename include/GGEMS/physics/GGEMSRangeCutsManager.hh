@@ -111,6 +111,12 @@ class GGEMS_EXPORT GGEMSRangeCutsManager
       \brief print infos about range cut manager
     */
     void PrintInfos(void) const;
+
+    /*!
+      \fn void Clean(void)
+      \brief clean OpenCL data if necessary
+    */
+    void Clean(void);
 };
 
 /*!

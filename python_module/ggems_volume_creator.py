@@ -45,9 +45,6 @@ class GGEMSVolumeCreatorManager(object):
         ggems_lib.set_material_volume_creator_manager.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
         ggems_lib.set_material_volume_creator_manager.restype = ctypes.c_void_p
 
-        ggems_lib.clean_volume_creator_manager.argtypes = [ctypes.c_void_p]
-        ggems_lib.clean_volume_creator_manager.restype = ctypes.c_void_p
-
         ggems_lib.set_data_type_volume_creator_manager.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
         ggems_lib.set_data_type_volume_creator_manager.restype = ctypes.c_void_p
 
@@ -76,9 +73,6 @@ class GGEMSVolumeCreatorManager(object):
 
     def set_data_type(self, data_type):
         ggems_lib.set_data_type_volume_creator_manager(self.obj, data_type.encode('ASCII'))
-
-    def clean(self):
-        ggems_lib.clean_volume_creator_manager(self.obj)
 
 
 class GGEMSTube(object):

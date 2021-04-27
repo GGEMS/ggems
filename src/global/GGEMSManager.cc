@@ -67,7 +67,9 @@ GGEMSManager::GGEMSManager(void)
   is_profiling_verbose_(false),
   particle_tracking_id_(0)
 {
-  GGcout("GGEMSManager", "GGEMSManager", 3) << "Allocation of GGEMS Manager..." << GGendl;
+  GGcout("GGEMSManager", "GGEMSManager", 3) << "GGEMSManager creating..." << GGendl;
+
+  GGcout("GGEMSManager", "GGEMSManager", 3) << "GGEMSManager created!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -76,7 +78,20 @@ GGEMSManager::GGEMSManager(void)
 
 GGEMSManager::~GGEMSManager(void)
 {
-  GGcout("GGEMSManager", "~GGEMSManager", 3) << "Deallocation of GGEMS Manager..." << GGendl;
+  GGcout("GGEMSManager", "~GGEMSManager", 3) << "GGEMSManager erasing..." << GGendl;
+
+  GGcout("GGEMSManager", "~GGEMSManager", 3) << "GGEMSManager erased!!!" << GGendl;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSManager::Clean(void)
+{
+  GGcout("GGEMSManager", "Clean", 3) << "GGEMSManager cleaning..." << GGendl;
+
+  GGcout("GGEMSManager", "Clean", 3) << "GGEMSManager cleaned!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

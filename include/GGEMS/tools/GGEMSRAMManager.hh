@@ -150,6 +150,12 @@ class GGEMS_EXPORT GGEMSRAMManager
     */
     void DecrementRAMMemory(std::string const& class_name, GGsize const& index, GGsize const& size);
 
+    /*!
+      \fn void Clean(void)
+      \brief clean OpenCL data if necessary
+    */
+    void Clean(void);
+
   private:
     GGsize number_detected_devices_; /*!< Number of detected device */
     GGsize* allocated_ram_; /*!< Allocated RAM on OpenCL device */
