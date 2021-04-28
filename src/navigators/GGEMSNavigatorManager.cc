@@ -136,7 +136,7 @@ void GGEMSNavigatorManager::SaveResults(void) const
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSNavigatorManager::Initialize(void) const
+void GGEMSNavigatorManager::Initialize(bool const& is_tracking) const
 {
   GGcout("GGEMSNavigatorManager", "Initialize", 3) << "Initializing the GGEMS navigator(s)..." << GGendl;
 
@@ -148,10 +148,14 @@ void GGEMSNavigatorManager::Initialize(void) const
   }
 
   // Initialization of world
-  if (world_) world_->Initialize();
+  if (world_) {
+    if (is_tracking) world_->EnableTracking();
+    world_->Initialize();
+  }
 
   // Initialization of phantoms
   for (GGsize i = 0; i < number_of_navigators_; ++i) {
+    if (is_tracking) navigators_[i]->EnableTracking();
     navigators_[i]->Initialize();
   }
 }

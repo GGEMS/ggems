@@ -130,7 +130,7 @@ void GGEMSMHDImage::SetDimensions(GGsize3 const& dimensions)
 
 void GGEMSMHDImage::Read(std::string const& image_mhd_header_filename, cl::Buffer* solid_data, GGsize const& thread_index)
 {
-  GGcout("GGEMSMHDImage", "Read", 0) << "Reading MHD Image..." << GGendl;
+  GGcout("GGEMSMHDImage", "Read", 2) << "Reading MHD Image..." << GGendl;
 
   // Checking if file exists
   std::ifstream in_header_stream(image_mhd_header_filename, std::ios::in);

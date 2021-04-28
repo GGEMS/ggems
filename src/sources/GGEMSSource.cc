@@ -267,7 +267,7 @@ void GGEMSSource::OrganizeParticlesInBatch(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSSource::Initialize(void)
+void GGEMSSource::Initialize(bool const& is_tracking)
 {
   GGcout("GGEMSSource", "Initialize", 3) << "Initializing the a GGEMS source..." << GGendl;
 
@@ -276,5 +276,9 @@ void GGEMSSource::Initialize(void)
 
   // Organize the particles in batch
   OrganizeParticlesInBatch();
+
+  // Enable tracking
+  if (is_tracking) EnableTracking();
+
   GGcout("GGEMSSource", "Initialize", 0) << "Particles arranged in batch OK" << GGendl;
 }

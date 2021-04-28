@@ -79,10 +79,11 @@ class GGEMS_EXPORT GGEMSCTSystem : public GGEMSSystem
     GGEMSCTSystem& operator=(GGEMSCTSystem const&& ct_system_name) = delete;
 
     /*!
-      \fn void Initialize(void)
+      \fn void Initialize(void) override
+      \param is_tracking - flag activating tracking
       \brief Initialize CT system
     */
-    void Initialize(void);
+    void Initialize(void) override;
 
     /*!
       \fn void SetCTSystemType(std::string const& ct_system_type)
@@ -109,10 +110,10 @@ class GGEMS_EXPORT GGEMSCTSystem : public GGEMSSystem
 
   private:
     /*!
-      \fn void CheckParameters(void) const
+      \fn void CheckParameters(void) const override
       \return no returned value
     */
-    void CheckParameters(void) const;
+    void CheckParameters(void) const override;
 
     /*!
       \fn void InitializeCurvedGeometry(void)

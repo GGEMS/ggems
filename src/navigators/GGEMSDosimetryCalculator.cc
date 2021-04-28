@@ -27,7 +27,6 @@
   \date Wednesday January 13, 2021
 */
 
-#include "GGEMS/global/GGEMSManager.hh"
 #include "GGEMS/navigators/GGEMSDosimetryCalculator.hh"
 #include "GGEMS/navigators/GGEMSDoseParams.hh"
 #include "GGEMS/geometries/GGEMSVoxelizedSolid.hh"

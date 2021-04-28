@@ -172,7 +172,6 @@ int main(int argc, char** argv)
   }
 
   // Cleaning OpenCL manager
-  source_manager.Clean();
   opencl_manager.Clean();
   exit(EXIT_SUCCESS);
 }

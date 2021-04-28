@@ -90,7 +90,7 @@ GGuint GGEMSPseudoRandomGenerator::GenerateSeed(void) const
     std::ostringstream oss(std::ostringstream::out);
     char buffer_error[256];
     oss << "Error finding a seed: " << strerror_s(buffer_error, 256, errno) << std::endl;
-    GGEMSMisc::ThrowException("GGEMSManager", "GenerateSeed", oss.str());
+    GGEMSMisc::ThrowException("GGEMSPseudoRandomGenerator", "GenerateSeed", oss.str());
   }
   return static_cast<uint32_t>(seedWin32);
   #else
@@ -99,7 +99,7 @@ GGuint GGEMSPseudoRandomGenerator::GenerateSeed(void) const
   if (file_descriptor < 0) {
     std::ostringstream oss( std::ostringstream::out );
     oss << "Error opening the file '/dev/urandom': " << strerror(errno) << std::endl;
-    GGEMSMisc::ThrowException("GGEMSManager", "GenerateSeed", oss.str());
+    GGEMSMisc::ThrowException("GGEMSPseudoRandomGenerator", "GenerateSeed", oss.str());
   }
 
   // Buffer storing 8 characters
@@ -108,7 +108,7 @@ GGuint GGEMSPseudoRandomGenerator::GenerateSeed(void) const
   if (bytes_read == -1) {
     std::ostringstream oss( std::ostringstream::out );
     oss << "Error reading the file '/dev/urandom': " << strerror(errno) << std::endl;
-    GGEMSMisc::ThrowException("GGEMSManager", "GenerateSeed", oss.str());
+    GGEMSMisc::ThrowException("GGEMSPseudoRandomGenerator", "GenerateSeed", oss.str());
   }
   ::close(file_descriptor);
   GGuint *seedUInt = reinterpret_cast<GGuint*>(seedArray);

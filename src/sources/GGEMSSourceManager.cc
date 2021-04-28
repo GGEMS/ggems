@@ -147,7 +147,7 @@ void GGEMSSourceManager::Initialize(GGuint const& seed, bool const& is_tracking,
 
   // Initialization of sources
   for (GGsize i = 0; i < number_of_sources_; ++i) {
-    sources_[i]->Initialize();
+    sources_[i]->Initialize(is_tracking);
   }
 
   // If tracking activated, set the particle id to track
@@ -172,10 +172,10 @@ void GGEMSSourceManager::Initialize(GGuint const& seed, bool const& is_tracking,
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-bool GGEMSSourceManager::IsAlive(GGsize const& device_index) const
+bool GGEMSSourceManager::IsAlive(GGsize const& thread_index) const
 {
   // Check if all particles are DEAD in OpenCL particle buffer
-  return particles_->IsAlive(device_index);
+  return particles_->IsAlive(thread_index);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

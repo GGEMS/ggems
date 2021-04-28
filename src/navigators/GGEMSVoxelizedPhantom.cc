@@ -31,7 +31,6 @@
 #include "GGEMS/navigators/GGEMSDosimetryCalculator.hh"
 #include "GGEMS/navigators/GGEMSDoseParams.hh"
 #include "GGEMS/geometries/GGEMSVoxelizedSolid.hh"
-#include "GGEMS/global/GGEMSManager.hh"
 #include "GGEMS/io/GGEMSMHDImage.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -100,6 +99,7 @@ void GGEMSVoxelizedPhantom::Initialize(void)
 
   // Allocation of memory for solid, 1 solid in case of voxelized phantom
   solids_ = new GGEMSSolid*[1];
+  number_of_solids_ = 1;
 
   for (GGsize j = 0; j < number_activated_devices_; ++j) {
   // Initializing voxelized solid for geometric navigation
@@ -111,7 +111,7 @@ void GGEMSVoxelizedPhantom::Initialize(void)
     }
 
     // Enabling tracking if necessary
-    if (GGEMSManager::GetInstance().IsTrackingVerbose()) solids_[0]->EnableTracking();
+    if (is_tracking_) solids_[0]->EnableTracking();
 
     solids_[0]->SetSolidID<GGEMSVoxelizedSolidData>(number_of_registered_solids, j);
 

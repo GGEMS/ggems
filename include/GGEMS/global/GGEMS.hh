@@ -1,5 +1,5 @@
-#ifndef GUARD_GGEMS_GLOBAL_GGEMSMANAGER_HH
-#define GUARD_GGEMS_GLOBAL_GGEMSMANAGER_HH
+#ifndef GUARD_GGEMS_GLOBAL_GGEMS_HH
+#define GUARD_GGEMS_GLOBAL_GGEMS_HH
 
 // ************************************************************************
 // * This file is part of GGEMS.                                          *
@@ -20,7 +20,7 @@
 // ************************************************************************
 
 /*!
-  \file GGEMSManager.hh
+  \file GGEMS.hh
 
   \brief GGEMS class managing the GGEMS simulation
 
@@ -44,61 +44,49 @@
 #include "GGEMS/tools/GGEMSTypes.hh"
 
 /*!
-  \class GGEMSManager
+  \class GGEMS
   \brief GGEMS class managing the complete simulation
 */
-class GGEMS_EXPORT GGEMSManager
+class GGEMS_EXPORT GGEMS
 {
-  private:
-    /*!
-      \brief Unable the constructor for the user
-    */
-    GGEMSManager(void);
-
-    /*!
-      \brief Unable the destructor for the user
-    */
-    ~GGEMSManager(void);
-
   public:
     /*!
-      \fn static GGEMSManager& GetInstance(void)
-      \brief Create at first time the Singleton
-      \return Object of type GGEMSManager
+      \brief GGEMS constructor
     */
-    static GGEMSManager& GetInstance(void)
-    {
-      static GGEMSManager instance;
-      return instance;
-    }
+    GGEMS(void);
 
     /*!
-      \fn GGEMSManager(GGEMSManager const& ggems_manager) = delete
-      \param ggems_manager - reference on the ggems manager
+      \brief GGEMS destructor
+    */
+    ~GGEMS(void);
+
+    /*!
+      \fn GGEMS(GGEMS const& ggems) = delete
+      \param ggems - reference on the ggems
       \brief Avoid copy of the class by reference
     */
-    GGEMSManager(GGEMSManager const& ggems_manager) = delete;
+    GGEMS(GGEMS const& ggems) = delete;
 
     /*!
-      \fn GGEMSManager& operator=(GGEMSManager const& ggems_manager) = delete
-      \param ggems_manager - reference on the ggems manager
+      \fn GGEMS& operator=(GGEMS const& ggems) = delete
+      \param ggems - reference on the ggems
       \brief Avoid assignement of the class by reference
     */
-    GGEMSManager& operator=(GGEMSManager const& ggems_manager) = delete;
+    GGEMS& operator=(GGEMS const& ggems) = delete;
 
     /*!
-      \fn GGEMSManager(GGEMSManager const&& ggems_manager) = delete
-      \param ggems_manager - rvalue reference on the ggems manager
+      \fn GGEMS(GGEMS const&& ggems) = delete
+      \param ggems - rvalue reference on the ggems
       \brief Avoid copy of the class by rvalue reference
     */
-    GGEMSManager(GGEMSManager const&& ggems_manager) = delete;
+    GGEMS(GGEMS const&& ggems) = delete;
 
     /*!
-      \fn GGEMSManager& operator=(GGEMSManager const&& ggems_manager) = delete
-      \param ggems_manager - rvalue reference on the ggems manager
+      \fn GGEMS& operator=(GGEMS const&& ggems) = delete
+      \param ggems - rvalue reference on the ggems
       \brief Avoid copy of the class by rvalue reference
     */
-    GGEMSManager& operator=(GGEMSManager const&& ggems_manager) = delete;
+    GGEMS& operator=(GGEMS const&& ggems) = delete;
 
     /*!
       \fn void Initialize(GGuint const& seed = 0)
@@ -205,18 +193,19 @@ class GGEMS_EXPORT GGEMSManager
     */
     inline GGint GetParticleTrackingID(void) const {return particle_tracking_id_;};
 
-    /*!
-      \fn void Clean(void)
-      \brief clean OpenCL data
-    */
-    void Clean(void);
-
   private:
     /*!
       \fn void PrintBanner(void) const
       \brief Print GGEMS banner
     */
     void PrintBanner(void) const;
+
+    /*!
+      \fn void RunOnDevice(GGsize const& thread_index)
+      \param thread_index - index of the thread
+      \brief run the GGEMS simulation on each thread associated to a OpenCL device
+    */
+    void RunOnDevice(GGsize const& thread_index);
 
   private: // Global simulation parameters
     bool is_opencl_verbose_; /*!< Flag for OpenCL verbosity */
@@ -233,106 +222,106 @@ class GGEMS_EXPORT GGEMSManager
 };
 
 /*!
-  \fn GGEMSManager* get_instance_ggems_manager(void)
-  \return the pointer on the singleton
-  \brief Get the GGEMSManager pointer for python user.
+  \fn GGEMS* create_ggems(void)
+  \return the pointer to GGEMS
+  \brief Get the GGEMS pointer for python user.
 */
-extern "C" GGEMS_EXPORT GGEMSManager* get_instance_ggems_manager(void);
+extern "C" GGEMS_EXPORT GGEMS* create_ggems(void);
 
 /*!
-  \fn void initialize_ggems_manager(GGEMSManager* ggems_manager, GGuint const seed)
-  \param ggems_manager - pointer on the singleton
+  \fn void initialize_ggems(GGEMS* ggems, GGuint const seed)
+  \param ggems - pointer to GGEMS
   \param seed - seed of the random
   \brief Initialize GGEMS simulation
 */
-extern "C" GGEMS_EXPORT void initialize_ggems_manager(GGEMSManager* ggems_manager, GGuint const seed);
+extern "C" GGEMS_EXPORT void initialize_ggems(GGEMS* ggems, GGuint const seed);
 
 /*!
-  \fn void set_opencl_verbose_ggems_manager(GGEMSManager* ggems_manager, bool const is_opencl_verbose)
-  \param ggems_manager - pointer on the singleton
+  \fn void set_opencl_verbose_ggems(GGEMS* ggems, bool const is_opencl_verbose)
+  \param ggems - pointer to GGEMS
   \param is_opencl_verbose - flag on opencl verbose
   \brief Set the OpenCL verbosity
 */
-extern "C" GGEMS_EXPORT void set_opencl_verbose_ggems_manager(GGEMSManager* ggems_manager, bool const is_opencl_verbose);
+extern "C" GGEMS_EXPORT void set_opencl_verbose_ggems(GGEMS* ggems, bool const is_opencl_verbose);
 
 /*!
-  \fn void set_material_database_verbose_ggems_manager(GGEMSManager* ggems_manager, bool const is_material_database_verbose)
-  \param ggems_manager - pointer on the singleton
+  \fn void set_material_database_verbose_ggems(GGEMS* ggems, bool const is_material_database_verbose)
+  \param ggems - pointer to GGEMS
   \param is_material_database_verbose - flag on material database verbose
   \brief Set the material database verbosity
 */
-extern "C" GGEMS_EXPORT void set_material_database_verbose_ggems_manager(GGEMSManager* ggems_manager, bool const is_material_database_verbose);
+extern "C" GGEMS_EXPORT void set_material_database_verbose_ggems(GGEMS* ggems, bool const is_material_database_verbose);
 
 /*!
-  \fn void set_source_ggems_manager(GGEMSManager* ggems_manager, bool const is_source_verbose)
-  \param ggems_manager - pointer on the singleton
+  \fn void set_source_ggems(GGEMS* ggems, bool const is_source_verbose)
+  \param ggems - pointer to GGEMS
   \param is_source_verbose - flag on source verbose
   \brief Set the source verbosity
 */
-extern "C" GGEMS_EXPORT void set_source_ggems_manager(GGEMSManager* ggems_manager, bool const is_source_verbose);
+extern "C" GGEMS_EXPORT void set_source_ggems(GGEMS* ggems, bool const is_source_verbose);
 
 /*!
-  \fn void set_navigator_ggems_manager(GGEMSManager* ggems_manager, bool const is_navigator_verbose)
-  \param ggems_manager - pointer on the singleton
+  \fn void set_navigator_ggems(GGEMS* ggems, bool const is_navigator_verbose)
+  \param ggems - pointer to GGEMS
   \param is_navigator_verbose - flag on navigator verbose
   \brief Set the navigator verbosity
 */
-extern "C" GGEMS_EXPORT void set_navigator_ggems_manager(GGEMSManager* ggems_manager, bool const is_navigator_verbose);
+extern "C" GGEMS_EXPORT void set_navigator_ggems(GGEMS* ggems, bool const is_navigator_verbose);
 
 /*!
-  \fn void set_memory_ram_ggems_manager(GGEMSManager* ggems_manager, bool const is_memory_ram_verbose)
-  \param ggems_manager - pointer on the singleton
+  \fn void set_memory_ram_ggems(GGEMS* ggems, bool const is_memory_ram_verbose)
+  \param ggems - pointer to GGEMS
   \param is_memory_ram_verbose - flag on memory RAM verbose
   \brief Set the memory RAM verbosity
 */
-extern "C" GGEMS_EXPORT void set_memory_ram_ggems_manager(GGEMSManager* ggems_manager, bool const is_memory_ram_verbose);
+extern "C" GGEMS_EXPORT void set_memory_ram_ggems(GGEMS* ggems, bool const is_memory_ram_verbose);
 
 /*!
-  \fn void set_process_ggems_manager(GGEMSManager* ggems_manager, bool const is_process_verbose)
-  \param ggems_manager - pointer on the singleton
+  \fn void set_process_ggems(GGEMS* ggems, bool const is_process_verbose)
+  \param ggems - pointer to GGEMS
   \param is_process_verbose - flag on processes verbose
   \brief Set the processes verbosity
 */
-extern "C" GGEMS_EXPORT void set_process_ggems_manager(GGEMSManager* ggems_manager, bool const is_process_verbose);
+extern "C" GGEMS_EXPORT void set_process_ggems(GGEMS* ggems, bool const is_process_verbose);
 
 /*!
-  \fn void set_range_cuts_ggems_manager(GGEMSManager* ggems_manager, bool const is_range_cuts_verbose)
-  \param ggems_manager - pointer on the singleton
+  \fn void set_range_cuts_ggems(GGEMS* ggems, bool const is_range_cuts_verbose)
+  \param ggems - pointer to GGEMS
   \param is_range_cuts_verbose - flag on range cuts verbose
   \brief Set the range cuts verbosity
 */
-extern "C" GGEMS_EXPORT void set_range_cuts_ggems_manager(GGEMSManager* ggems_manager, bool const is_range_cuts_verbose);
+extern "C" GGEMS_EXPORT void set_range_cuts_ggems(GGEMS* ggems, bool const is_range_cuts_verbose);
 
 /*!
-  \fn void set_random_ggems_manager(GGEMSManager* ggems_manager, bool const is_random_verbose)
-  \param ggems_manager - pointer on the singleton
+  \fn void set_random_ggems(GGEMS* ggems, bool const is_random_verbose)
+  \param ggems - pointer to GGEMS
   \param is_random_verbose - flag on random verbose
   \brief Set the random verbosity
 */
-extern "C" GGEMS_EXPORT void set_random_ggems_manager(GGEMSManager* ggems_manager, bool const is_random_verbose);
+extern "C" GGEMS_EXPORT void set_random_ggems(GGEMS* ggems, bool const is_random_verbose);
 
 /*!
-  \fn void set_profiling_ggems_manager(GGEMSManager* ggems_manager, bool const is_profiling_verbose)
-  \param ggems_manager - pointer on the singleton
+  \fn void set_profiling_ggems(GGEMS* ggems, bool const is_profiling_verbose)
+  \param ggems - pointer to GGEMS
   \param is_profiling_verbose - flag on profiling verbose
   \brief Set the profiling verbosity
 */
-extern "C" GGEMS_EXPORT void set_profiling_ggems_manager(GGEMSManager* ggems_manager, bool const is_profiling_verbose);
+extern "C" GGEMS_EXPORT void set_profiling_ggems(GGEMS* ggems, bool const is_profiling_verbose);
 
 /*!
-  \fn void set_tracking_ggems_manager(GGEMSManager* ggems_manager, bool const is_tracking_verbose, GGint const particle_id_tracking)
-  \param ggems_manager - pointer on the singleton
+  \fn void set_tracking_ggems(GGEMS* ggems, bool const is_tracking_verbose, GGint const particle_id_tracking)
+  \param ggems - pointer to GGEMS
   \param is_tracking_verbose - flag on tracking verbose
   \param particle_id_tracking - particle id for tracking
   \brief Set the tracking verbosity
 */
-extern "C" GGEMS_EXPORT void set_tracking_ggems_manager(GGEMSManager* ggems_manager, bool const is_tracking_verbose, GGint const particle_id_tracking);
+extern "C" GGEMS_EXPORT void set_tracking_ggems(GGEMS* ggems, bool const is_tracking_verbose, GGint const particle_id_tracking);
 
 /*!
-  \fn void run_ggems_manager(GGEMSManager* ggems_manager)
-  \param ggems_manager - pointer on the singleton
+  \fn void run_ggems(GGEMS* ggems)
+  \param ggems - pointer to GGEMS
   \brief Run the GGEMS simulation
 */
-extern "C" GGEMS_EXPORT void run_ggems_manager(GGEMSManager* ggems_manager);
+extern "C" GGEMS_EXPORT void run_ggems(GGEMS* ggems);
 
-#endif // End of GUARD_GGEMS_GLOBAL_GGEMSMANAGER_HH
+#endif // End of GUARD_GGEMS_GLOBAL_GGEMS_HH

@@ -154,10 +154,11 @@ class GGEMS_EXPORT GGEMSSource
     virtual void CheckParameters(void) const;
 
     /*!
-      \fn void Initialize(void)
+      \fn void Initialize(const bool &is_tracking = false)
+      \param is_tracking - flag activating tracking
       \brief Initialize a GGEMS source
     */
-    virtual void Initialize(void);
+    virtual void Initialize(bool const& is_tracking = false);
 
     /*!
       \fn void GetPrimaries(GGsize const& thread_index, GGsize const& number_of particles) = 0

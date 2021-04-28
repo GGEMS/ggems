@@ -30,7 +30,6 @@
 #include "GGEMS/navigators/GGEMSCTSystem.hh"
 #include "GGEMS/geometries/GGEMSSolidBox.hh"
 #include "GGEMS/geometries/GGEMSSolidBoxData.hh"
-#include "GGEMS/global/GGEMSManager.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -239,7 +238,7 @@ void GGEMSCTSystem::Initialize(void)
       );
 
       // Enabling tracking if necessary
-      if (GGEMSManager::GetInstance().IsTrackingVerbose()) solids_[i]->EnableTracking();
+      if (is_tracking_) solids_[i]->EnableTracking();
 
       // Set solid id
       solids_[i]->SetSolidID<GGEMSSolidBoxData>(number_of_registered_solids+i, j);

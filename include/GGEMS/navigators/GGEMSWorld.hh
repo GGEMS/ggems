@@ -166,6 +166,12 @@ class GGEMS_EXPORT GGEMSWorld
     */
     void SaveResults(void) const;
 
+    /*!
+      \fn void EnableTracking(void)
+      \brief Enable tracking during simulation
+    */
+    void EnableTracking(void);
+
   private:
     /*!
       \fn void CheckParameters(void) const
@@ -211,6 +217,7 @@ class GGEMS_EXPORT GGEMSWorld
     bool is_energy_tracking_; /*!< Boolean for energy deposit */
     bool is_energy_squared_tracking_; /*!< Boolean for energy squared deposit */
     bool is_momentum_; /*!< Boolean for sum of momentum */
+    std::string tracking_kernel_option_; /*!< Preprocessor option for tracking */
     GGEMSWorldRecording world_recording_; /*!< Structure storing OpenCL pointer */
     cl::Kernel** kernel_world_tracking_; /*!< OpenCL kernel computing world tracking */
     GGsize number_activated_devices_; /*!< Number of activated device */

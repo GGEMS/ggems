@@ -45,8 +45,6 @@ class GGEMSEMProcess;
 class GGEMSMaterials;
 class GGEMSProcessesManager;
 
-typedef std::vector<std::shared_ptr<GGEMSEMProcess>> GGEMSEMProcessesList; /*!< vector of pointer storing physical processes */
-
 /*!
   \class GGEMSCrossSections
   \brief GGEMS class handling the cross sections tables
@@ -109,11 +107,18 @@ class GGEMS_EXPORT GGEMSCrossSections
     void Initialize(GGEMSMaterials const* materials);
 
     /*!
-      \fn inline GGEMSEMProcessesList GetProcessesList(void) const
+      \fn inline GGEMSEMProcess** GetEMProcessesList(void) const
       \return pointer to process list
       \brief get the pointer on activated process
     */
-    inline GGEMSEMProcessesList GetProcessesList(void) const {return em_processes_list_;}
+    inline GGEMSEMProcess** GetEMProcessesList(void) const {return em_processes_list_;}
+
+    /*!
+      \fn inline GGsize GetNumberOfActivatedEMProcesses(void) const
+      \return number of activated processes
+      \brief get the number of activated processes
+    */
+    inline GGsize GetNumberOfActivatedEMProcesses(void) const {return number_of_activated_processes_;}
 
     /*!
       \fn inline cl::Buffer* GetCrossSections(GGsize const& thread_index) const
@@ -148,7 +153,8 @@ class GGEMS_EXPORT GGEMSCrossSections
     void LoadPhysicTablesOnHost(void);
 
   private:
-    GGEMSEMProcessesList em_processes_list_; /*!< vector of electromagnetic processes */
+    GGEMSEMProcess** em_processes_list_; /*!< vector of electromagnetic processes */
+    GGsize number_of_activated_processes_; /*!< Number of activated processes */
     std::vector<bool> is_process_activated_; /*!< Boolean checking if the process is already activated */
     cl::Buffer** particle_cross_sections_; /*!< Pointer storing cross sections for each particles on OpenCL device */
     GGEMSParticleCrossSections* particle_cross_sections_host_; /*!< Pointer storing cross sections for each particles on host (RAM memory) */

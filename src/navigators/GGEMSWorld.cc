@@ -32,7 +32,6 @@
 #include "GGEMS/navigators/GGEMSWorld.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
 #include "GGEMS/sources/GGEMSSourceManager.hh"
-#include "GGEMS/global/GGEMSManager.hh"
 #include "GGEMS/io/GGEMSMHDImage.hh"
 #include "GGEMS/tools/GGEMSProfilerManager.hh"
 
@@ -59,6 +58,8 @@ GGEMSWorld::GGEMSWorld()
   is_energy_tracking_ = false;
   is_energy_squared_tracking_ = false;
   is_momentum_ = false;
+
+  tracking_kernel_option_ = "";
 
   // Get the number of activated device
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
@@ -245,6 +246,15 @@ void GGEMSWorld::SetMomentum(bool const& is_activated)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+void GGEMSWorld::EnableTracking(void)
+{
+  tracking_kernel_option_ = " -DGGEMS_TRACKING";
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 void GGEMSWorld::InitializeKernel(void)
 {
   GGcout("GGEMSWorld", "InitializeKernel", 3) << "Initializing kernel for world tracking..." << GGendl;
@@ -256,13 +266,8 @@ void GGEMSWorld::InitializeKernel(void)
   std::string openCL_kernel_path = OPENCL_KERNEL_PATH;
   std::string world_tracking_filename = openCL_kernel_path + "/WorldTracking.cl";
 
-  std::string kernel_option("");
-  if (GGEMSManager::GetInstance().IsTrackingVerbose()) {
-    kernel_option = "-DGGEMS_TRACKING";
-  }
-
   // Compiling the kernels
-  opencl_manager.CompileKernel(world_tracking_filename, "world_tracking", kernel_world_tracking_, nullptr, const_cast<char*>(kernel_option.c_str()));
+  opencl_manager.CompileKernel(world_tracking_filename, "world_tracking", kernel_world_tracking_, nullptr, const_cast<char*>(tracking_kernel_option_.c_str()));
 }
 
 ////////////////////////////////////////////////////////////////////////////////

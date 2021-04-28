@@ -31,7 +31,6 @@
 #include "GGEMS/physics/GGEMSPrimaryParticles.hh"
 #include "GGEMS/sources/GGEMSSourceManager.hh"
 #include "GGEMS/tools/GGEMSRAMManager.hh"
-//#include "GGEMS/navigators/GGEMSNavigatorManager.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -103,8 +102,6 @@ void GGEMSParticles::Initialize(void)
 
 bool GGEMSParticles::IsAlive(GGsize const& thread_index) const
 {
-  GGcout("GGEMSParticles", "AllocatePrimaryParticles", 3) << "Checking if some particles are still alive..." << GGendl;
-
   // Get the OpenCL manager
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
