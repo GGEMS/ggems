@@ -44,6 +44,7 @@ GGEMSNavigator::GGEMSNavigator(std::string const& navigator_name)
   navigator_id_(NAVIGATOR_NOT_INITIALIZED),
   is_update_pos_(false),
   is_update_rot_(false),
+  is_tracking_(false),
   output_basename_(""),
   solids_(nullptr),
   number_of_solids_(0),
@@ -162,6 +163,15 @@ void GGEMSNavigator::SetNavigatorID(GGsize const& navigator_id)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+void GGEMSNavigator::EnableTracking(void)
+{
+  is_tracking_ = true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 void GGEMSNavigator::CheckParameters(void) const
 {
   GGcout("GGEMSNavigator", "CheckParameters", 3) << "Checking the mandatory parameters..." << GGendl;
@@ -223,7 +233,7 @@ void GGEMSNavigator::ParticleSolidDistance(GGsize const& thread_index)
   GGsize device_index = opencl_manager.GetIndexOfActivatedDevice(thread_index);
   std::string device_name = opencl_manager.GetDeviceName(device_index);
   std::ostringstream oss(std::ostringstream::out);
-  oss << "GGEMSNavigator::ParticleSolidDistance in " << device_name;
+  oss << "GGEMSNavigator::ParticleSolidDistance on " << device_name;
 
   // Pointer to primary particles, and number to particles in buffer
   GGEMSSourceManager& source_manager = GGEMSSourceManager::GetInstance();
@@ -275,7 +285,7 @@ void GGEMSNavigator::ProjectToSolid(GGsize const& thread_index)
   GGsize device_index = opencl_manager.GetIndexOfActivatedDevice(thread_index);
   std::string device_name = opencl_manager.GetDeviceName(device_index);
   std::ostringstream oss(std::ostringstream::out);
-  oss << "GGEMSNavigator::ProjectToSolid in " << device_name;
+  oss << "GGEMSNavigator::ProjectToSolid on " << device_name;
 
   // Pointer to primary particles, and number to particles in buffer
   GGEMSSourceManager& source_manager = GGEMSSourceManager::GetInstance();
@@ -327,7 +337,7 @@ void GGEMSNavigator::TrackThroughSolid(GGsize const& thread_index)
   GGsize device_index = opencl_manager.GetIndexOfActivatedDevice(thread_index);
   std::string device_name = opencl_manager.GetDeviceName(device_index);
   std::ostringstream oss(std::ostringstream::out);
-  oss << "GGEMSNavigator::TrackThroughSolid in " << device_name;
+  oss << "GGEMSNavigator::TrackThroughSolid on " << device_name;
 
   // Pointer to primary particles, and number to particles in buffer
   GGEMSSourceManager& source_manager = GGEMSSourceManager::GetInstance();

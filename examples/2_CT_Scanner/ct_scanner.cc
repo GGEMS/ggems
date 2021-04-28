@@ -30,7 +30,7 @@
 
 #include <cstdlib>
 #include "GGEMS/global/GGEMSOpenCLManager.hh"
-#include "GGEMS/global/GGEMSManager.hh"
+#include "GGEMS/global/GGEMS.hh"
 #include "GGEMS/materials/GGEMSMaterialsDatabaseManager.hh"
 #include "GGEMS/navigators/GGEMSVoxelizedPhantom.hh"
 #include "GGEMS/navigators/GGEMSSystem.hh"
@@ -40,7 +40,6 @@
 #include "GGEMS/sources/GGEMSXRaySource.hh"
 #include "GGEMS/geometries/GGEMSVolumeCreatorManager.hh"
 #include "GGEMS/geometries/GGEMSBox.hh"
-#include "GGEMS/tools/GGEMSRAMManager.hh"
 
 /*!
   \fn void PrintHelpAndQuit(void)
@@ -73,18 +72,16 @@ int main(int argc, char** argv)
   std::string device = argv[1];
 
   // Setting verbosity
-  GGcout.SetVerbosity(3);
-  GGcerr.SetVerbosity(3);
-  GGwarn.SetVerbosity(3);
+  GGcout.SetVerbosity(2);
+  GGcerr.SetVerbosity(2);
+  GGwarn.SetVerbosity(2);
 
   // Initialization of singletons
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
   GGEMSMaterialsDatabaseManager& material_manager = GGEMSMaterialsDatabaseManager::GetInstance();
   GGEMSVolumeCreatorManager& volume_creator_manager = GGEMSVolumeCreatorManager::GetInstance();
-  GGEMSRAMManager& ram_manager = GGEMSRAMManager::GetInstance();
   GGEMSProcessesManager& processes_manager = GGEMSProcessesManager::GetInstance();
   GGEMSRangeCutsManager& range_cuts_manager = GGEMSRangeCutsManager::GetInstance();
-  // GGEMSManager& ggems_manager = GGEMSManager::GetInstance();
 
   try {
     // Activating device
@@ -92,8 +89,6 @@ int main(int argc, char** argv)
     else if (device == "gpu_amd") opencl_manager.DeviceToActivate("gpu", "amd");
     else if (device == "gpu_intel") opencl_manager.DeviceToActivate("gpu", "intel");
     else opencl_manager.DeviceToActivate(device);
-
-    opencl_manager.PrintActivatedDevices();
 
     // Enter material database
     material_manager.SetMaterialsDatabase("../../data/materials.txt");
@@ -160,25 +155,23 @@ int main(int argc, char** argv)
     point_source.SetFocalSpotSize(0.0f, 0.0f, 0.0f, "mm");
     point_source.SetPolyenergy("data/spectrum_120kVp_2mmAl.dat");
 
-    // Printing RAM status
-    ram_manager.PrintRAMStatus();
+    // GGEMS simulation
+    GGEMS ggems;
+    ggems.SetOpenCLVerbose(true);
+    ggems.SetNavigatorVerbose(false);
+    ggems.SetSourceVerbose(true);
+    ggems.SetMemoryRAMVerbose(true);
+    ggems.SetProcessVerbose(true);
+    ggems.SetRangeCutsVerbose(true);
+    ggems.SetRandomVerbose(true);
+    ggems.SetProfilingVerbose(true);
+    ggems.SetTrackingVerbose(false, 0);
 
-    // // GGEMS simulation
-    // ggems_manager.SetOpenCLVerbose(true);
-    // ggems_manager.SetNavigatorVerbose(true);
-    // ggems_manager.SetSourceVerbose(true);
-    // ggems_manager.SetMemoryRAMVerbose(true);
-    // ggems_manager.SetProcessVerbose(true);
-    // ggems_manager.SetRangeCutsVerbose(true);
-    // ggems_manager.SetRandomVerbose(true);
-    // ggems_manager.SetProfilingVerbose(true);
-    // ggems_manager.SetTrackingVerbose(false, 0);
+    // Initializing the GGEMS simulation
+    ggems.Initialize(777);
 
-    // // Initializing the GGEMS simulation
-    // ggems_manager.Initialize();
-
-    // // Start GGEMS simulation
-    // ggems_manager.Run();
+    // Start GGEMS simulation
+    ggems.Run();
   }
   catch (std::exception& e) {
     std::cerr << e.what() << std::endl;

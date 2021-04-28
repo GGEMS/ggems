@@ -113,10 +113,11 @@ class GGEMS_EXPORT GGEMSXRaySource : public GGEMSSource
     void SetPolyenergy(std::string const& energy_spectrum_filename);
 
     /*!
-      \fn void Initialize(void)
+      \fn void Initialize(bool const& is_tracking = false)
+      \param is_tracking - flag activating tracking
       \brief Initialize a GGEMS source
     */
-    void Initialize(void) override;
+    void Initialize(bool const& is_tracking = false) override;
 
     /*!
       \fn void PrintInfos(void) const

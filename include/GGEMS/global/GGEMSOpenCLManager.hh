@@ -298,7 +298,7 @@ class GGEMS_EXPORT GGEMSOpenCLManager
       \param flags - mode to open the buffer
       \param class_name - name of class allocating memory
       \brief Allocation of OpenCL memory
-      \return an unique pointer to an OpenCL buffer
+      \return an pointer to an OpenCL buffer
     */
     cl::Buffer* Allocate(void* host_ptr, GGsize const& size, GGsize const& thread_index, cl_mem_flags flags, std::string const& class_name = "Undefined");
 
@@ -456,7 +456,7 @@ class GGEMS_EXPORT GGEMSOpenCLManager
 template <typename T>
 T* GGEMSOpenCLManager::GetDeviceBuffer(cl::Buffer* const device_ptr, GGsize const& size, GGsize const& thread_index)
 {
-  GGcout("GGEMSOpenCLManager", "GetDeviceBuffer", 3) << "Getting mapped memory buffer on OpenCL device..." << GGendl;
+  GGcout("GGEMSOpenCLManager", "GetDeviceBuffer", 4) << "Getting mapped memory buffer on OpenCL device..." << GGendl;
 
   GGint err = 0;
   T* ptr = static_cast<T*>(queues_[thread_index]->enqueueMapBuffer(*device_ptr, CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, 0, size, nullptr, nullptr, &err));
@@ -471,7 +471,7 @@ T* GGEMSOpenCLManager::GetDeviceBuffer(cl::Buffer* const device_ptr, GGsize cons
 template <typename T>
 void GGEMSOpenCLManager::ReleaseDeviceBuffer(cl::Buffer* const device_ptr, T* host_ptr, GGsize const& thread_index)
 {
-  GGcout("GGEMSOpenCLManager", "ReleaseDeviceBuffer", 3) << "Releasing mapped memory buffer on OpenCL device..." << GGendl;
+  GGcout("GGEMSOpenCLManager", "ReleaseDeviceBuffer", 4) << "Releasing mapped memory buffer on OpenCL device..." << GGendl;
 
   // Unmap the memory
   CheckOpenCLError(queues_[thread_index]->enqueueUnmapMemObject(*device_ptr, host_ptr), "GGEMSOpenCLManager", "ReleaseDeviceBuffer");

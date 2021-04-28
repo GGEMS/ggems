@@ -39,7 +39,7 @@
 #include "GGEMS/navigators/GGEMSNavigatorManager.hh"
 #include "GGEMS/sources/GGEMSSourceManager.hh"
 #include "GGEMS/physics/GGEMSRangeCutsManager.hh"
-#include "GGEMS/global/GGEMSManager.hh"
+#include "GGEMS/global/GGEMS.hh"
 #include "GGEMS/physics/GGEMSProcessesManager.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -366,7 +366,6 @@ void GGEMSOpenCLManager::Clean(void)
   GGEMSMaterialsDatabaseManager& material_database_manager = GGEMSMaterialsDatabaseManager::GetInstance();
   GGEMSProcessesManager& processes_manager = GGEMSProcessesManager::GetInstance();
   GGEMSRangeCutsManager& range_cuts_manager = GGEMSRangeCutsManager::GetInstance();
-  GGEMSManager& ggems_manager = GGEMSManager::GetInstance();
 
   ram_manager.Clean();
   volume_creator_manager.Clean();
@@ -376,7 +375,6 @@ void GGEMSOpenCLManager::Clean(void)
   material_database_manager.Clean();
   processes_manager.Clean();
   range_cuts_manager.Clean();
-  ggems_manager.Clean();
 
   // Freeing platforms, and platform infos
   platform_profile_.clear();
@@ -703,6 +701,15 @@ void GGEMSOpenCLManager::DeviceToActivate(std::string const& device_type, std::s
   std::transform(type.begin(), type.end(), type.begin(), ::tolower);
   std::transform(vendor.begin(), vendor.end(), vendor.begin(), ::tolower);
 
+  // Checking if there is a number in type
+  bool is_index_device = false;
+  for (GGsize i = 0; i < type.size(); ++i) {
+    if (isdigit(type[i]) == true) {
+      is_index_device = true;
+      break;
+    }
+  }
+
   // Analyze all cases
   if (type == "all") { // Activating all available OpenCL devices
     for (GGsize i = 0; i < devices_.size(); ++i) DeviceToActivate(i);
@@ -719,6 +726,23 @@ void GGEMSOpenCLManager::DeviceToActivate(std::string const& device_type, std::s
         else if (device_vendor_[i].find(vendors_[vendor]) != std::string::npos) DeviceToActivate(i); // Specify a vendor
       }
     }
+  }
+  else if (is_index_device) { // Activating device using index of device
+    GGsize pos = 0;
+    GGsize index = 0;
+    std::string delimiter = ";";
+    while ((pos = type.find(delimiter)) != std::string::npos) {
+      index = static_cast<GGsize>(std::stoi(type.substr(0, pos)));
+      DeviceToActivate(index);
+      type.erase(0, pos + delimiter.length());
+    }
+    index = static_cast<GGsize>(std::stoi(type));
+    DeviceToActivate(index);
+  }
+  else {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "Unknown type of device '"<< type << "' !!!";
+    GGEMSMisc::ThrowException("GGEMSOpenCLManager", "DeviceToActivate", oss.str());
   }
 }
 

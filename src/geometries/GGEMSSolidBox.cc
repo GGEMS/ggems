@@ -43,8 +43,6 @@ GGEMSSolidBox::GGEMSSolidBox(GGsize const& virtual_element_number_x, GGsize cons
 
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
-  solid_data_ = new cl::Buffer*[number_activated_devices_];
-
   // Loop over the device
   for (GGsize d = 0; d < number_activated_devices_; ++d) {
     // Allocating memory on OpenCL device and getting pointer on it
@@ -91,7 +89,7 @@ GGEMSSolidBox::GGEMSSolidBox(GGsize const& virtual_element_number_x, GGsize cons
     for (GGsize d = 0; d < number_activated_devices_; ++d) {
       histogram_.histogram_[d] = opencl_manager.Allocate(nullptr, histogram_.number_of_elements_*sizeof(GGint), d, CL_MEM_READ_WRITE, "GGEMSSolidBox");
 
-      kernel_option_ += " -DHISTOGRAM";
+      if (d == 0) kernel_option_ += " -DHISTOGRAM";
 
       GGint* histogram_device = opencl_manager.GetDeviceBuffer<GGint>(histogram_.histogram_[d], histogram_.number_of_elements_*sizeof(GGint), d);
 

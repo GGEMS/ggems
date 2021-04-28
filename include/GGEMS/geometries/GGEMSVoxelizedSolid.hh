@@ -242,7 +242,7 @@ void GGEMSVoxelizedSolid::ConvertImageToLabel(std::string const& raw_data_filena
 
     // Checking if all voxels converted
     if (all_converted) {
-      GGcout("GGEMSVoxelizedSolid", "ConvertImageToLabel", 0) << "All your voxels are converted to label..." << GGendl;
+      GGcout("GGEMSVoxelizedSolid", "ConvertImageToLabel", 2) << "All your voxels are converted to label..." << GGendl;
     }
     else {
       GGEMSMisc::ThrowException("GGEMSVoxelizedSolid", "ConvertImageToLabel", "Errors(s) in the range data file!!!");

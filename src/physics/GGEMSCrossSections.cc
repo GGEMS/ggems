@@ -45,6 +45,9 @@ GGEMSCrossSections::GGEMSCrossSections(void)
 {
   GGcout("GGEMSCrossSections", "GGEMSCrossSections", 3) << "GGEMSCrossSections creating..." << GGendl;
 
+  em_processes_list_ = new GGEMSEMProcess*[3]; // Maximum of 3 processes
+  number_of_activated_processes_ = 0;
+
   is_process_activated_.resize(NUMBER_PROCESSES);
   for (auto&& i : is_process_activated_) i = false;
 
@@ -71,6 +74,15 @@ GGEMSCrossSections::GGEMSCrossSections(void)
 GGEMSCrossSections::~GGEMSCrossSections(void)
 {
   GGcout("GGEMSCrossSections", "~GGEMSCrossSections", 3) << "GGEMSCrossSections erasing..." << GGendl;
+
+  if (em_processes_list_) {
+    for (GGsize i = 0; i < number_of_activated_processes_; ++i) {
+      delete em_processes_list_[i];
+      em_processes_list_[i] = nullptr;
+    }
+    delete[] em_processes_list_;
+    em_processes_list_ = nullptr;
+  }
 
   if (particle_cross_sections_host_) {
     delete particle_cross_sections_host_;
@@ -111,7 +123,8 @@ void GGEMSCrossSections::AddProcess(std::string const& process_name, std::string
 
   if (process_name == "Compton") {
     if (!is_process_activated_.at(COMPTON_SCATTERING)) {
-      em_processes_list_.push_back(std::make_shared<GGEMSComptonScattering>(particle_type, is_secondary));
+      em_processes_list_[number_of_activated_processes_] = new GGEMSComptonScattering(particle_type, is_secondary);
+      number_of_activated_processes_++;
       is_process_activated_.at(COMPTON_SCATTERING) = true;
     }
     else {
@@ -120,7 +133,8 @@ void GGEMSCrossSections::AddProcess(std::string const& process_name, std::string
   }
   else if (process_name == "Photoelectric") {
     if (!is_process_activated_.at(PHOTOELECTRIC_EFFECT)) {
-      em_processes_list_.push_back(std::make_shared<GGEMSPhotoElectricEffect>(particle_type, is_secondary));
+      em_processes_list_[number_of_activated_processes_] = new GGEMSPhotoElectricEffect(particle_type, is_secondary);
+      number_of_activated_processes_++;
       is_process_activated_.at(PHOTOELECTRIC_EFFECT) = true;
     }
     else {
@@ -129,7 +143,8 @@ void GGEMSCrossSections::AddProcess(std::string const& process_name, std::string
   }
   else if (process_name == "Rayleigh") {
     if (!is_process_activated_.at(RAYLEIGH_SCATTERING)) {
-      em_processes_list_.push_back(std::make_shared<GGEMSRayleighScattering>(particle_type, is_secondary));
+      em_processes_list_[number_of_activated_processes_] = new GGEMSRayleighScattering(particle_type, is_secondary);
+      number_of_activated_processes_++;
       is_process_activated_.at(RAYLEIGH_SCATTERING) = true;
     }
     else {
@@ -194,8 +209,8 @@ void GGEMSCrossSections::Initialize(GGEMSMaterials const* materials)
     opencl_manager.ReleaseDeviceBuffer(particle_cross_sections_[j], particle_cross_sections_device, j);
 
     // Loop over the activated physic processes and building tables
-    for (auto&& i : em_processes_list_)
-      i->BuildCrossSectionTables(particle_cross_sections_[j], materials->GetMaterialTables(j), j);
+    for (GGsize i = 0; i < number_of_activated_processes_; ++i)
+      em_processes_list_[i]->BuildCrossSectionTables(particle_cross_sections_[j], materials->GetMaterialTables(j), j);
   }
 
   // Copy data from device to RAM memory (optimization for python users)

@@ -106,10 +106,11 @@ class GGEMS_EXPORT GGEMSNavigatorManager
     void StoreWorld(GGEMSWorld* world);
 
     /*!
-      \fn void Initialize(void) const
+      \fn void Initialize(bool const& is_tracking = false) const
+      \param is_tracking - flag activating tracking
       \brief Initialize a GGEMS navigators
     */
-    void Initialize(void) const;
+    void Initialize(bool const& is_tracking = false) const;
 
     /*!
       \fn void PrintInfos(void)

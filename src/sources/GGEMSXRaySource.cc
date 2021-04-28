@@ -148,7 +148,7 @@ void GGEMSXRaySource::GetPrimaries(GGsize const& thread_index, GGsize const& num
   GGsize device_index = opencl_manager.GetIndexOfActivatedDevice(thread_index);
   std::string device_name = opencl_manager.GetDeviceName(device_index);
   std::ostringstream oss(std::ostringstream::out);
-  oss << "GGEMSXRaySource::GetPrimaries in " << device_name;
+  oss << "GGEMSXRaySource::GetPrimaries on " << device_name;
 
   // Get the OpenCL buffers
   GGEMSSourceManager& source_manager = GGEMSSourceManager::GetInstance();
@@ -421,12 +421,12 @@ void GGEMSXRaySource::FillEnergy(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSXRaySource::Initialize(void)
+void GGEMSXRaySource::Initialize(bool const& is_tracking)
 {
   GGcout("GGEMSXRaySource", "Initialize", 3) << "Initializing the GGEMS X-Ray source..." << GGendl;
 
   // Initialize GGEMS source
-  GGEMSSource::Initialize();
+  GGEMSSource::Initialize(is_tracking);
 
   // Check the mandatory parameters
   CheckParameters();

@@ -17,7 +17,7 @@
 // ************************************************************************
 
 /*!
-  \file GGEMSManager.cc
+  \file GGEMS.cc
 
   \brief GGEMS class managing the GGEMS simulation
 
@@ -29,6 +29,12 @@
 */
 
 #include <fcntl.h>
+#include <thread>
+#include <mutex>
+
+namespace {
+  std::mutex mutex;
+}
 
 #ifdef _WIN32
 #ifdef _MSC_VER
@@ -40,7 +46,7 @@
 #include <unistd.h>
 #endif
 
-#include "GGEMS/global/GGEMSManager.hh"
+#include "GGEMS/global/GGEMS.hh"
 #include "GGEMS/physics/GGEMSProcessesManager.hh"
 #include "GGEMS/physics/GGEMSRangeCutsManager.hh"
 #include "GGEMS/sources/GGEMSSourceManager.hh"
@@ -54,7 +60,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSManager::GGEMSManager(void)
+GGEMS::GGEMS(void)
 : is_opencl_verbose_(false),
   is_material_database_verbose_(false),
   is_source_verbose_(false),
@@ -67,38 +73,27 @@ GGEMSManager::GGEMSManager(void)
   is_profiling_verbose_(false),
   particle_tracking_id_(0)
 {
-  GGcout("GGEMSManager", "GGEMSManager", 3) << "GGEMSManager creating..." << GGendl;
+  GGcout("GGEMS", "GGEMS", 3) << "GGEMS creating..." << GGendl;
 
-  GGcout("GGEMSManager", "GGEMSManager", 3) << "GGEMSManager created!!!" << GGendl;
+  GGcout("GGEMS", "GGEMS", 3) << "GGEMS created!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSManager::~GGEMSManager(void)
+GGEMS::~GGEMS(void)
 {
-  GGcout("GGEMSManager", "~GGEMSManager", 3) << "GGEMSManager erasing..." << GGendl;
+  GGcout("GGEMS", "~GGEMS", 3) << "GGEMS erasing..." << GGendl;
 
-  GGcout("GGEMSManager", "~GGEMSManager", 3) << "GGEMSManager erased!!!" << GGendl;
+  GGcout("GGEMS", "~GGEMS", 3) << "GGEMS erased!!!" << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSManager::Clean(void)
-{
-  GGcout("GGEMSManager", "Clean", 3) << "GGEMSManager cleaning..." << GGendl;
-
-  GGcout("GGEMSManager", "Clean", 3) << "GGEMSManager cleaned!!!" << GGendl;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void GGEMSManager::SetOpenCLVerbose(bool const& is_opencl_verbose)
+void GGEMS::SetOpenCLVerbose(bool const& is_opencl_verbose)
 {
   is_opencl_verbose_ = is_opencl_verbose;
 }
@@ -107,7 +102,7 @@ void GGEMSManager::SetOpenCLVerbose(bool const& is_opencl_verbose)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSManager::SetMaterialDatabaseVerbose(bool const& is_material_database_verbose)
+void GGEMS::SetMaterialDatabaseVerbose(bool const& is_material_database_verbose)
 {
   is_material_database_verbose_ = is_material_database_verbose;
 }
@@ -116,7 +111,7 @@ void GGEMSManager::SetMaterialDatabaseVerbose(bool const& is_material_database_v
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSManager::SetSourceVerbose(bool const& is_source_verbose)
+void GGEMS::SetSourceVerbose(bool const& is_source_verbose)
 {
   is_source_verbose_ = is_source_verbose;
 }
@@ -125,7 +120,7 @@ void GGEMSManager::SetSourceVerbose(bool const& is_source_verbose)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSManager::SetNavigatorVerbose(bool const& is_navigator_verbose)
+void GGEMS::SetNavigatorVerbose(bool const& is_navigator_verbose)
 {
   is_navigator_verbose_ = is_navigator_verbose;
 }
@@ -134,7 +129,7 @@ void GGEMSManager::SetNavigatorVerbose(bool const& is_navigator_verbose)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSManager::SetMemoryRAMVerbose(bool const& is_memory_ram_verbose)
+void GGEMS::SetMemoryRAMVerbose(bool const& is_memory_ram_verbose)
 {
   is_memory_ram_verbose_ = is_memory_ram_verbose;
 }
@@ -143,7 +138,7 @@ void GGEMSManager::SetMemoryRAMVerbose(bool const& is_memory_ram_verbose)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSManager::SetProcessVerbose(bool const& is_process_verbose)
+void GGEMS::SetProcessVerbose(bool const& is_process_verbose)
 {
   is_process_verbose_ = is_process_verbose;
 }
@@ -152,7 +147,7 @@ void GGEMSManager::SetProcessVerbose(bool const& is_process_verbose)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSManager::SetProfilingVerbose(bool const& is_profiling_verbose)
+void GGEMS::SetProfilingVerbose(bool const& is_profiling_verbose)
 {
   is_profiling_verbose_ = is_profiling_verbose;
 }
@@ -161,7 +156,7 @@ void GGEMSManager::SetProfilingVerbose(bool const& is_profiling_verbose)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSManager::SetRangeCutsVerbose(bool const& is_range_cuts_verbose)
+void GGEMS::SetRangeCutsVerbose(bool const& is_range_cuts_verbose)
 {
   is_range_cuts_verbose_ = is_range_cuts_verbose;
 }
@@ -170,7 +165,7 @@ void GGEMSManager::SetRangeCutsVerbose(bool const& is_range_cuts_verbose)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSManager::SetRandomVerbose(bool const& is_random_verbose)
+void GGEMS::SetRandomVerbose(bool const& is_random_verbose)
 {
   is_random_verbose_ = is_random_verbose;
 }
@@ -179,7 +174,7 @@ void GGEMSManager::SetRandomVerbose(bool const& is_random_verbose)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSManager::SetTrackingVerbose(bool const& is_tracking_verbose, GGint const& particle_tracking_id)
+void GGEMS::SetTrackingVerbose(bool const& is_tracking_verbose, GGint const& particle_tracking_id)
 {
   is_tracking_verbose_ = is_tracking_verbose;
   particle_tracking_id_ = particle_tracking_id;
@@ -189,9 +184,9 @@ void GGEMSManager::SetTrackingVerbose(bool const& is_tracking_verbose, GGint con
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSManager::Initialize(GGuint const& seed)
+void GGEMS::Initialize(GGuint const& seed)
 {
-  GGcout("GGEMSManager", "Initialize", 1) << "Initialization of GGEMS Manager singleton..." << GGendl;
+  GGcout("GGEMS", "Initialize", 1) << "Initialization of GGEMS Manager singleton..." << GGendl;
 
   // Getting the GGEMS singletons
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
@@ -209,21 +204,21 @@ void GGEMSManager::Initialize(GGuint const& seed)
   PrintBanner();
 
   // Checking if material manager is ready
-  if (!material_database_manager.IsReady()) GGEMSMisc::ThrowException("GGEMSManager", "Initialize", "Materials are not loaded in GGEMS!!!");
+  if (!material_database_manager.IsReady()) GGEMSMisc::ThrowException("GGEMS", "Initialize", "Materials are not loaded in GGEMS!!!");
 
   // Initialization of the source
-  source_manager.Initialize(seed);
+  source_manager.Initialize(seed, is_tracking_verbose_, particle_tracking_id_);
 
   // Initialization of the navigators (phantom + system)
-  navigator_manager.Initialize();
+  navigator_manager.Initialize(is_tracking_verbose_);
 
   // Printing infos about OpenCL
-  // if (is_opencl_verbose_) {
-  //   opencl_manager.PrintPlatformInfos();
-  //   opencl_manager.PrintDeviceInfos();
-  //   opencl_manager.PrintActivatedDevice();
-  //   opencl_manager.PrintBuildOptions();
-  // }
+  if (is_opencl_verbose_) {
+    opencl_manager.PrintPlatformInfos();
+    opencl_manager.PrintDeviceInfos();
+    opencl_manager.PrintActivatedDevices();
+    opencl_manager.PrintBuildOptions();
+  }
 
   // Printing infos about material database
   if (is_material_database_verbose_) material_database_manager.PrintAvailableMaterials();
@@ -252,7 +247,7 @@ void GGEMSManager::Initialize(GGuint const& seed)
   // Get the end time
   ChronoTime end_time = GGEMSChrono::Now();
 
-  GGcout("GGEMSManager", "Initialize", 0) << "GGEMS initialization succeeded" << GGendl;
+  GGcout("GGEMS", "Initialize", 0) << "GGEMS initialization succeeded" << GGendl;
 
   // Display the elapsed time in GGEMS
   GGEMSChrono::DisplayTime(end_time - start_time, "GGEMS initialization");
@@ -262,68 +257,107 @@ void GGEMSManager::Initialize(GGuint const& seed)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSManager::Run()
+void GGEMS::RunOnDevice(GGsize const& thread_index)
 {
-  GGcout("GGEMSManager", "Run", 0) << "GGEMS simulation started" << GGendl;
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+  GGEMSSourceManager& source_manager = GGEMSSourceManager::GetInstance();
+  GGEMSNavigatorManager& navigator_manager = GGEMSNavigatorManager::GetInstance();
 
-  // GGEMSSourceManager& source_manager = GGEMSSourceManager::GetInstance();
-  // GGEMSNavigatorManager& navigator_manager = GGEMSNavigatorManager::GetInstance();
-  // GGEMSProfilerManager& profiler_manager = GGEMSProfilerManager::GetInstance();
+  // Loop over sources
+  for (GGsize i = 0; i < source_manager.GetNumberOfSources(); ++i) {
+    GGsize device_index = opencl_manager.GetIndexOfActivatedDevice(thread_index);
 
-  // ChronoTime start_time = GGEMSChrono::Now();
+    mutex.lock();
+    GGcout("GGEMS", "RunOnDevice", 0) << "## Source " << source_manager.GetNameOfSource(i) << " on " << opencl_manager.GetDeviceName(device_index) << GGendl;
+    mutex.unlock();
 
-  // for (GGsize j = 0; j < source_manager.GetNumberOfSources(); ++j) {
-  //   GGcout("GGEMSManager", "Run", 0) << "## Source " << source_manager.GetNameOfSource(j) << GGendl;
+    // Loop over batch
+    GGsize number_of_batchs = source_manager.GetNumberOfBatchs(i, thread_index);
+    for (GGsize j = 0; j < number_of_batchs; ++j) {
+      GGsize number_of_particles = source_manager.GetNumberOfParticlesInBatch(i, thread_index, j);
 
-  //   for (GGsize i = 0; i < source_manager.GetNumberOfBatchs(j); ++i) {
-  //     GGcout("GGEMSManager", "Run", 1) << "----> Launching batch " << i+1 << "/" << source_manager.GetNumberOfBatchs(j) << GGendl;
+      mutex.lock();
+      GGcout("GGEMS", "RunOnDevice", 0) << "----> Launching batch " << j+1 << "/" << number_of_batchs << " on " << opencl_manager.GetDeviceName(device_index) << GGendl;
+      GGcout("GGEMS", "RunOnDevice", 0) << "      + Generating " << number_of_particles << " particles..." << GGendl;
+      mutex.unlock();
 
-  //     GGsize number_of_particles = source_manager.GetNumberOfParticlesInBatch(j, i);
+      // Generating particles
+      source_manager.GetPrimaries(i, thread_index, number_of_particles);
 
-  //     // Step 1: Generating primaries from source
-  //     GGcout("GGEMSManager", "Run", 2) << "      + Generating " << number_of_particles << " particles..." << GGendl;
-  //     source_manager.GetPrimaries(j, number_of_particles);
+      // Loop until ALL particles are dead
+      do {
+        // Step 2: Find closest navigator (phantom, detector) before projection and track operation
+        mutex.lock();
+        GGcout("GGEMS", "RunOnDevice", 2) << "      + Finding solid on " << opencl_manager.GetDeviceName(device_index) << "..." << GGendl;
+        mutex.unlock();
+        navigator_manager.FindSolid(thread_index);
 
-  //     // Loop until ALL particles are dead
-  //     do {
-  //       // Step 2: Find closest navigator (phantom, detector) before projection and track operation
-  //       GGcout("GGEMSManager", "Run", 2) << "      + Finding solid..." << GGendl;
-  //       navigator_manager.FindSolid();
+        // Optional step: World tracking
+        navigator_manager.WorldTracking(thread_index);
 
-  //       // Optional step: World tracking
-  //       navigator_manager.WorldTracking();
+        // Step 3: Project particles to solid
+        mutex.lock();
+        GGcout("GGEMS", "RunOnDevice", 2) << "      + Projecting particles to solid on " << opencl_manager.GetDeviceName(device_index) << "..." << GGendl;
+        mutex.unlock();
+        navigator_manager.ProjectToSolid(thread_index);
 
-  //       // Step 3: Project particles to solid
-  //       GGcout("GGEMSManager", "Run", 2) << "      + Projecting particles to solid..." << GGendl;
-  //       navigator_manager.ProjectToSolid();
+        // Step 4: Track through step, particles are tracked in selected solid
+        mutex.lock();
+        GGcout("GGEMS", "RunOnDevice", 2) << "      + Tracking particles through solid on " << opencl_manager.GetDeviceName(device_index) << "..." << GGendl;
+        mutex.unlock();
+        navigator_manager.TrackThroughSolid(thread_index);
 
-  //       // Step 4: Track through step, particles are tracked in selected solid
-  //       GGcout("GGEMSManager", "Run", 2) << "      + Tracking particles through solid..." << GGendl;
-  //       navigator_manager.TrackThroughSolid();
-
-  //     } while (source_manager.IsAlive()); // Step 5: Checking if all particles are dead, otherwize go back to step 2
-  //   }
-  // }
-
-  // // End of simulation, storing output
-  // GGcout("GGEMSManager", "Run", 2) << "Saving results..." << GGendl;
-  // navigator_manager.SaveResults();
-
-  // // Printing elapsed time in kernels
-  // if (is_profiling_verbose_) profiler_manager.PrintSummaryProfile();
-
-  // ChronoTime end_time = GGEMSChrono::Now();
-
-  // GGcout("GGEMSManager", "Run", 0) << "GGEMS simulation succeeded" << GGendl;
-
-  // GGEMSChrono::DisplayTime(end_time - start_time, "GGEMS simulation");
+      } while (source_manager.IsAlive(thread_index)); // Step 5: Checking if all particles are dead, otherwize go back to step 2
+    }
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSManager::PrintBanner(void) const
+void GGEMS::Run()
+{
+  GGcout("GGEMS", "Run", 0) << "GGEMS simulation started" << GGendl;
+
+  ChronoTime start_time = GGEMSChrono::Now();
+
+  // Creating a thread for each OpenCL device
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+  GGsize number_of_activated_devices = opencl_manager.GetNumberOfActivatedDevice();
+  std::thread* thread_device = new std::thread[number_of_activated_devices];
+
+  for (GGsize i = 0; i < number_of_activated_devices; ++i) {
+    thread_device[i] = std::thread(&GGEMS::RunOnDevice, this, i);
+  }
+
+  for (GGsize i = 0; i < number_of_activated_devices; ++i) thread_device[i].join();
+
+  // Deleting threads
+  delete[] thread_device;
+
+  // End of simulation, storing output
+  GGcout("GGEMS", "Run", 2) << "Saving results..." << GGendl;
+  // navigator_manager.SaveResults();
+
+  // Printing elapsed time in kernels
+  if (is_profiling_verbose_) {
+    GGEMSProfilerManager& profiler_manager = GGEMSProfilerManager::GetInstance();
+    profiler_manager.PrintSummaryProfile();
+  }
+
+  ChronoTime end_time = GGEMSChrono::Now();
+
+  GGcout("GGEMS", "Run", 0) << "GGEMS simulation succeeded" << GGendl;
+
+  GGEMSChrono::DisplayTime(end_time - start_time, "GGEMS simulation");
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMS::PrintBanner(void) const
 {
   std::cout << std::endl;
   std::cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << std::endl;
@@ -332,7 +366,7 @@ void GGEMSManager::PrintBanner(void) const
   std::cout << "$ | <_/\\| <_/\\| _> |     |\\__ \\   | | || | $" << std::endl;
   std::cout << "$ `____/`____/|___>|_|_|_|<___/   |__/ |_| $" << std::endl;
   std::cout << "$                                          $" << std::endl;
-  std::cout << "$ Welcome to GGEMS v1.0   https://ggems.fr $" << std::endl;
+  std::cout << "$ Welcome to GGEMS v1.1   https://ggems.fr $" << std::endl;
   std::cout << "$ Copyright (c) GGEMS Team 2021            $" << std::endl;
   std::cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << std::endl;
   std::cout << std::endl;
@@ -342,115 +376,115 @@ void GGEMSManager::PrintBanner(void) const
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSManager* get_instance_ggems_manager(void)
+GGEMS* create_ggems(void)
 {
-  return &GGEMSManager::GetInstance();
+  return new(std::nothrow) GGEMS();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void initialize_ggems_manager(GGEMSManager* ggems_manager, GGuint const seed)
+void initialize_ggems(GGEMS* ggems, GGuint const seed)
 {
-  ggems_manager->Initialize(seed);
+  ggems->Initialize(seed);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_opencl_verbose_ggems_manager(GGEMSManager* ggems_manager, bool const is_opencl_verbose)
+void set_opencl_verbose_ggems(GGEMS* ggems, bool const is_opencl_verbose)
 {
-  ggems_manager->SetOpenCLVerbose(is_opencl_verbose);
+  ggems->SetOpenCLVerbose(is_opencl_verbose);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_material_database_verbose_ggems_manager(GGEMSManager* ggems_manager, bool const is_material_database_verbose)
+void set_material_database_verbose_ggems(GGEMS* ggems, bool const is_material_database_verbose)
 {
-  ggems_manager->SetMaterialDatabaseVerbose(is_material_database_verbose);
+  ggems->SetMaterialDatabaseVerbose(is_material_database_verbose);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_source_ggems_manager(GGEMSManager* ggems_manager, bool const is_source_verbose)
+void set_source_ggems(GGEMS* ggems, bool const is_source_verbose)
 {
-  ggems_manager->SetSourceVerbose(is_source_verbose);
+  ggems->SetSourceVerbose(is_source_verbose);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_navigator_ggems_manager(GGEMSManager* ggems_manager, bool const is_navigator_verbose)
+void set_navigator_ggems(GGEMS* ggems, bool const is_navigator_verbose)
 {
-  ggems_manager->SetNavigatorVerbose(is_navigator_verbose);
+  ggems->SetNavigatorVerbose(is_navigator_verbose);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_memory_ram_ggems_manager(GGEMSManager* ggems_manager, bool const is_memory_ram_verbose)
+void set_memory_ram_ggems(GGEMS* ggems, bool const is_memory_ram_verbose)
 {
-  ggems_manager->SetMemoryRAMVerbose(is_memory_ram_verbose);
+  ggems->SetMemoryRAMVerbose(is_memory_ram_verbose);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_process_ggems_manager(GGEMSManager* ggems_manager, bool const is_process_verbose)
+void set_process_ggems(GGEMS* ggems, bool const is_process_verbose)
 {
-  ggems_manager->SetProcessVerbose(is_process_verbose);
+  ggems->SetProcessVerbose(is_process_verbose);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_range_cuts_ggems_manager(GGEMSManager* ggems_manager, bool const is_range_cuts_verbose)
+void set_range_cuts_ggems(GGEMS* ggems, bool const is_range_cuts_verbose)
 {
-  ggems_manager->SetRangeCutsVerbose(is_range_cuts_verbose);
+  ggems->SetRangeCutsVerbose(is_range_cuts_verbose);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_random_ggems_manager(GGEMSManager* ggems_manager, bool const is_random_verbose)
+void set_random_ggems(GGEMS* ggems, bool const is_random_verbose)
 {
-  ggems_manager->SetRandomVerbose(is_random_verbose);
+  ggems->SetRandomVerbose(is_random_verbose);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_profiling_ggems_manager(GGEMSManager* ggems_manager, bool const is_profiling_verbose)
+void set_profiling_ggems(GGEMS* ggems, bool const is_profiling_verbose)
 {
-  ggems_manager->SetProfilingVerbose(is_profiling_verbose);
+  ggems->SetProfilingVerbose(is_profiling_verbose);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_tracking_ggems_manager(GGEMSManager* ggems_manager, bool const is_tracking_verbose, GGint const particle_id_tracking)
+void set_tracking_ggems(GGEMS* ggems, bool const is_tracking_verbose, GGint const particle_id_tracking)
 {
-  ggems_manager->SetTrackingVerbose(is_tracking_verbose, particle_id_tracking);
+  ggems->SetTrackingVerbose(is_tracking_verbose, particle_id_tracking);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void run_ggems_manager(GGEMSManager* ggems_manager)
+void run_ggems(GGEMS* ggems)
 {
-  ggems_manager->Run();
+  ggems->Run();
 }

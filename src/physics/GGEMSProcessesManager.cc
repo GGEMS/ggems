@@ -157,8 +157,8 @@ void GGEMSProcessesManager::PrintInfos(void) const
   for (size_t i = 0; i < navigator_manager.GetNumberOfNavigators(); ++i) {
     GGEMSCrossSections* cross_sections = ((navigator_manager.GetNavigators())[i])->GetCrossSections();
     GGcout("GGEMSProcessesManager", "PrintInfos", 0) << "Activated processes in phantom: " << ((navigator_manager.GetNavigators())[i])->GetNavigatorName() << GGendl;
-    for (size_t j = 0; j < cross_sections->GetProcessesList().size(); ++j) {
-      GGcout("GGEMSProcessesManager", "PrintInfos", 0) << "    * " << cross_sections->GetProcessesList().at(j)->GetProcessName() << GGendl;
+    for (size_t j = 0; j < cross_sections->GetNumberOfActivatedEMProcesses(); ++j) {
+      GGcout("GGEMSProcessesManager", "PrintInfos", 0) << "    * " << cross_sections->GetEMProcessesList()[j]->GetProcessName() << GGendl;
     }
     GGcout("GGEMSProcessesManager", "PrintInfos", 0) << GGendl;
   }

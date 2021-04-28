@@ -87,7 +87,7 @@ class GGEMS_EXPORT GGEMSVoxelizedPhantom : public GGEMSNavigator
     void SetPhantomFile(std::string const& voxelized_phantom_filename, std::string const& range_data_filename);
 
     /*!
-      \fn void Initialize(void)
+      \fn void Initialize(void) override
       \brief Initialize the voxelized phantom
     */
     void Initialize(void) override;

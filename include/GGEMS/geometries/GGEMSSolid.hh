@@ -138,7 +138,7 @@ class GGEMS_EXPORT GGEMSSolid
     virtual void UpdateTransformationMatrix(GGsize const& thread_index) = 0;
 
     /*!
-      \fn void Initialize(std::weak_ptr<GGEMSMaterials> materials)
+      \fn void Initialize(GGEMSMaterials* materials)
       \param materials - pointer on GGEMS materials
       \brief Initialize solid for geometric navigation
     */

@@ -164,7 +164,7 @@ class GGEMS_EXPORT GGEMSMaterials
     inline cl::Buffer* GetMaterialTables(GGsize const& thread_index) const {return material_tables_[thread_index];}
 
     /*!
-      \fn inline std::shared_ptr<GGEMSRangeCuts> GetRangeCuts(void) const
+      \fn inline GGEMSRangeCuts* GetRangeCuts(void) const
       \brief get the pointer on range cuts
       \return the pointer on range cuts
     */

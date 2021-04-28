@@ -104,6 +104,9 @@ void GGEMSProfilerManager::HandleEvent(cl::Event event, std::string const& profi
 
 void GGEMSProfilerManager::PrintSummaryProfile(void) const
 {
+  // Wait 1 second before to print profile, it is a security, waiting OpenCL event is finished
+  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
   for (auto&& p: profilers_) GGEMSChrono::DisplayTime(p.second.GetSummaryTime(), p.first);
 }
 

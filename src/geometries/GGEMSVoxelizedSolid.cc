@@ -45,9 +45,6 @@ GGEMSVoxelizedSolid::GGEMSVoxelizedSolid(std::string const& volume_header_filena
 
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
-  solid_data_ = new cl::Buffer*[number_activated_devices_];
-  label_data_ = new cl::Buffer*[number_activated_devices_];
-
   // Loop over the device
   for (GGsize d = 0; d < number_activated_devices_; ++d) {
     // Allocating memory on OpenCL device

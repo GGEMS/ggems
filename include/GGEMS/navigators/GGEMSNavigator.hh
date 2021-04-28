@@ -217,6 +217,12 @@ class GGEMS_EXPORT GGEMSNavigator
     */
     void SetDosimetryCalculator(GGEMSDosimetryCalculator* dosimetry_calculator);
 
+    /*!
+      \fn void EnableTracking(void)
+      \brief Enable tracking during simulation
+    */
+    void EnableTracking(void);
+
   protected:
     /*!
       \fn void CheckParameters(void) const
@@ -234,6 +240,7 @@ class GGEMS_EXPORT GGEMSNavigator
     bool is_update_pos_; /*!< Updating navigator position */
     bool is_update_rot_; /*!< Updating navigator rotation */
     GGfloat threshold_; /*!< Threshold in energy applyied to navigator */
+    bool is_tracking_; /*!< Boolean activating tracking */
 
     // Output
     std::string output_basename_; /*!< Basename of output file */

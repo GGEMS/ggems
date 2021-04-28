@@ -182,12 +182,12 @@ class GGEMS_EXPORT GGEMSSourceManager
     }
 
     /*!
-      \fn bool IsAlive(GGsize const& device_index) const
-      \param device_index - index of activated device
+      \fn bool IsAlive(GGsize const& thread_index) const
+      \param thread_index - index of activated device (thread index)
       \return true if source is still alive, otherwize false
       \brief check if some particles are alive in OpenCL particle buffer
     */
-    bool IsAlive(GGsize const& device_index) const;
+    bool IsAlive(GGsize const& thread_index) const;
 
     /*!
       \fn void Clean(void)
