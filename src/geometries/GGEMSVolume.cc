@@ -41,8 +41,12 @@ GGEMSVolume::GGEMSVolume(void)
 {
   GGcout("GGEMSVolume", "GGEMSVolume", 3) << "GGEMSVolume creating..." << GGendl;
 
+  // Getting number of activated device. But only 1 device is used to create volume
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+  GGsize number_activated_devices = opencl_manager.GetNumberOfActivatedDevice();
+
   // Storing a kernel for 1 device
-  kernel_draw_volume_ = new cl::Kernel*[1];
+  kernel_draw_volume_ = new cl::Kernel*[number_activated_devices];
 
   GGcout("GGEMSVolume", "GGEMSVolume", 3) << "GGEMSVolume created!!!" << GGendl;
 }

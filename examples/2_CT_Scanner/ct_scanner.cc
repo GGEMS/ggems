@@ -49,7 +49,7 @@ void PrintHelpAndQuit(void)
 {
   std::cerr << "Usage: multi_platform <Device>" << std::endl;
   std::cerr << std::endl;
-  std::cerr << "<Device>: \"all\", \"cpu\", \"gpu\", \"gpu_nvidia\", \"gpu_amd\", \"gpu_intel\"" << std::endl;
+  std::cerr << "<Device>: \"all\", \"cpu\", \"gpu\", \"gpu_nvidia\", \"gpu_amd\", \"gpu_intel\", \"X;X;X\" (X: indices of device)" << std::endl;
   exit(EXIT_FAILURE);
 }
 
@@ -72,9 +72,9 @@ int main(int argc, char** argv)
   std::string device = argv[1];
 
   // Setting verbosity
-  GGcout.SetVerbosity(2);
-  GGcerr.SetVerbosity(2);
-  GGwarn.SetVerbosity(2);
+  GGcout.SetVerbosity(1);
+  GGcerr.SetVerbosity(1);
+  GGwarn.SetVerbosity(1);
 
   // Initialization of singletons
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
@@ -159,11 +159,11 @@ int main(int argc, char** argv)
     GGEMS ggems;
     ggems.SetOpenCLVerbose(true);
     ggems.SetNavigatorVerbose(false);
-    ggems.SetSourceVerbose(true);
+    ggems.SetSourceVerbose(false);
     ggems.SetMemoryRAMVerbose(true);
     ggems.SetProcessVerbose(true);
     ggems.SetRangeCutsVerbose(true);
-    ggems.SetRandomVerbose(true);
+    ggems.SetRandomVerbose(false);
     ggems.SetProfilingVerbose(true);
     ggems.SetTrackingVerbose(false, 0);
 
