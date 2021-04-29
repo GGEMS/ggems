@@ -101,6 +101,12 @@ void GGEMSBox::Draw(void)
   cl::CommandQueue* queue = opencl_manager.GetCommandQueue(0);
   cl::Event* event = opencl_manager.GetEvent(0);
 
+  // Get Device name and storing methode name + device
+  GGsize device_index = opencl_manager.GetIndexOfActivatedDevice(0);
+  std::string device_name = opencl_manager.GetDeviceName(device_index);
+  std::ostringstream oss(std::ostringstream::out);
+  oss << "GGEMSBox::Draw on " << device_name;
+
   // Get parameters from phantom creator
   GGfloat3 voxel_sizes = volume_creator_manager.GetElementsSizes();
 
@@ -137,7 +143,7 @@ void GGEMSBox::Draw(void)
 
   // GGEMS Profiling
   GGEMSProfilerManager& profiler_manager = GGEMSProfilerManager::GetInstance();
-  profiler_manager.HandleEvent(*event, "GGEMSBox::Draw");
+  profiler_manager.HandleEvent(*event, oss.str());
 
   queue->finish();
 }
