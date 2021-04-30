@@ -285,7 +285,7 @@ void GGEMS::RunOnDevice(GGsize const& thread_index)
       source_manager.GetPrimaries(i, thread_index, number_of_particles);
 
       // Loop until ALL particles are dead
-     // do {
+      do {
          // Step 2: Find closest navigator (phantom, detector) before projection and track operation
         mutex.lock();
         GGcout("GGEMS", "RunOnDevice", 2) << "      + Finding solid on " << opencl_manager.GetDeviceName(device_index) << "..." << GGendl;
@@ -306,8 +306,7 @@ void GGEMS::RunOnDevice(GGsize const& thread_index)
         GGcout("GGEMS", "RunOnDevice", 2) << "      + Tracking particles through solid on " << opencl_manager.GetDeviceName(device_index) << "..." << GGendl;
         mutex.unlock();
         navigator_manager.TrackThroughSolid(thread_index);
-
-     // } while (source_manager.IsAlive(thread_index)); // Step 5: Checking if all particles are dead, otherwize go back to step 2
+      } while (source_manager.IsAlive(thread_index)); // Step 5: Checking if all particles are dead, otherwize go back to step 2
     }
   }
 }
