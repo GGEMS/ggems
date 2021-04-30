@@ -31,6 +31,7 @@
 #include "GGEMS/physics/GGEMSPrimaryParticles.hh"
 #include "GGEMS/sources/GGEMSSourceManager.hh"
 #include "GGEMS/tools/GGEMSRAMManager.hh"
+#include "GGEMS/tools/GGEMSProfilerManager.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -38,10 +39,18 @@
 
 GGEMSParticles::GGEMSParticles(void)
 : number_of_particles_(nullptr),
-  primary_particles_(nullptr),
-  number_activated_devices_(0)
+  primary_particles_(nullptr)
 {
   GGcout("GGEMSParticles", "GGEMSParticles", 3) << "GGEMSParticles creating..." << GGendl;
+
+  // Get the OpenCL manager
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+
+  // Get number of activated device
+  number_activated_devices_ = opencl_manager.GetNumberOfActivatedDevice();
+
+  // Storing a kernel for each device
+  kernel_alive_ = new cl::Kernel*[number_activated_devices_];
 
   GGcout("GGEMSParticles", "GGEMSParticles", 3) << "GGEMSParticles created!!!" << GGendl;
 }
@@ -64,9 +73,17 @@ GGEMSParticles::~GGEMSParticles(void)
   if (primary_particles_) {
     for (GGsize i = 0; i < number_activated_devices_; ++i) {
       opencl_manager.Deallocate(primary_particles_[i], sizeof(GGEMSPrimaryParticles), i);
+      opencl_manager.Deallocate(status_[i], sizeof(GGint), i);
     }
     delete[] primary_particles_;
     primary_particles_ = nullptr;
+    delete[] status_;
+    status_ = nullptr;
+  }
+
+  if (kernel_alive_) {
+    delete[] kernel_alive_;
+    kernel_alive_ = nullptr;
   }
 
   GGcout("GGEMSParticles", "~GGEMSParticles", 3) << "GGEMSParticles erased!!!" << GGendl;
@@ -85,6 +102,25 @@ void GGEMSParticles::SetNumberOfParticles(GGsize const& thread_index, GGsize con
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+void GGEMSParticles::InitializeKernel(void)
+{
+  GGcout("GGEMSParticles", "InitializeKernel", 3) << "Initializing kernel..." << GGendl;
+
+  // Getting the path to kernel
+  std::string openCL_kernel_path = OPENCL_KERNEL_PATH;
+  std::string filename = openCL_kernel_path + "/IsAlive.cl";
+
+  // Compiling the kernel
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+
+  // Compiling kernel on each device
+  opencl_manager.CompileKernel(filename, "is_alive", kernel_alive_, nullptr, nullptr);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 void GGEMSParticles::Initialize(void)
 {
   GGcout("GGEMSParticles", "Initialize", 1) << "Initialization of GGEMSParticles..." << GGendl;
@@ -94,6 +130,9 @@ void GGEMSParticles::Initialize(void)
 
   // Allocation of the PrimaryParticle structure
   AllocatePrimaryParticles();
+
+  // Initializing kernel
+  InitializeKernel();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -102,24 +141,56 @@ void GGEMSParticles::Initialize(void)
 
 bool GGEMSParticles::IsAlive(GGsize const& thread_index) const
 {
-  // Get the OpenCL manager
+  // Get command queue and event
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+  cl::CommandQueue* queue = opencl_manager.GetCommandQueue(thread_index);
+  cl::Event* event = opencl_manager.GetEvent(thread_index);
 
-  // Get pointer on OpenCL device for particles
-  GGEMSPrimaryParticles* primary_particles_device = opencl_manager.GetDeviceBuffer<GGEMSPrimaryParticles>(primary_particles_[thread_index], sizeof(GGEMSPrimaryParticles), thread_index);
+  // Get Device name and storing methode name + device
+  GGsize device_index = opencl_manager.GetIndexOfActivatedDevice(thread_index);
+  std::string device_name = opencl_manager.GetDeviceName(device_index);
+  std::ostringstream oss(std::ostringstream::out);
+  oss << "GGEMSParticles::IsAlive on " << device_name;
 
-  // Loop over the number of particles
-  bool status = false;
-  for (GGsize i = 0; i < number_of_particles_[thread_index]; ++i) {
-    if (primary_particles_device->status_[i] == ALIVE) {
-      status = true;
-      break;
-    }
-  }
+  // Get the OpenCL buffers
+  cl::Buffer* particles = primary_particles_[thread_index];
+  cl::Buffer* status = status_[thread_index];
+
+  // Getting work group size, and work-item number
+  GGsize work_group_size = opencl_manager.GetWorkGroupSize();
+  GGsize number_of_work_items = opencl_manager.GetBestWorkItem(number_of_particles_[thread_index]);
+
+  // Parameters for work-item in kernel
+  cl::NDRange global_wi(number_of_work_items);
+  cl::NDRange local_wi(work_group_size);
+
+  // Set parameters for kernel
+  kernel_alive_[thread_index]->setArg(0, number_of_particles_[thread_index]);
+  kernel_alive_[thread_index]->setArg(1, *particles);
+  kernel_alive_[thread_index]->setArg(2, *status);
+
+  // Launching kernel
+  GGint kernel_status = queue->enqueueNDRangeKernel(*kernel_alive_[thread_index], 0, global_wi, local_wi, nullptr, event);
+  opencl_manager.CheckOpenCLError(kernel_status, "GGEMSParticles", "IsAlive");
+
+  // GGEMS Profiling
+  GGEMSProfilerManager& profiler_manager = GGEMSProfilerManager::GetInstance();
+  profiler_manager.HandleEvent(*event, oss.str());
+  queue->finish();
+
+  // Get status from OpenCL device
+  GGint* status_device = opencl_manager.GetDeviceBuffer<GGint>(status_[thread_index], sizeof(GGint), thread_index);
+
+  GGint status_from_device = status_device[0];
 
   // Release the pointer
-  opencl_manager.ReleaseDeviceBuffer(primary_particles_[thread_index], primary_particles_device, thread_index);
-  return status;
+  opencl_manager.ReleaseDeviceBuffer(status_[thread_index], status_device, thread_index);
+
+  // Cleaning buffer
+  opencl_manager.CleanBuffer(status_[thread_index], sizeof(GGint), thread_index);
+
+  if (status_from_device == static_cast<GGint>(number_of_particles_[thread_index])) return false;
+  else return true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -133,12 +204,13 @@ void GGEMSParticles::AllocatePrimaryParticles(void)
   // Get the OpenCL manager
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
-  // Get number of activated device
-  number_activated_devices_ = opencl_manager.GetNumberOfActivatedDevice();
-
   primary_particles_ = new cl::Buffer*[number_activated_devices_];
+  status_ = new cl::Buffer*[number_activated_devices_];
+
   // Loop over activated device and allocate particle buffer on each device
   for (GGsize i = 0; i < number_activated_devices_; ++i) {
     primary_particles_[i] = opencl_manager.Allocate(nullptr, sizeof(GGEMSPrimaryParticles), i, CL_MEM_READ_WRITE, "GGEMSParticles");
+    status_[i] = opencl_manager.Allocate(nullptr, sizeof(GGint), i, CL_MEM_READ_WRITE, "GGEMSParticles");
+    opencl_manager.CleanBuffer(status_[i], sizeof(GGint), i);
   }
 }

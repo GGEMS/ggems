@@ -137,10 +137,18 @@ class GGEMS_EXPORT GGEMSParticles
     */
     void AllocatePrimaryParticles(void);
 
+    /*!
+      \fn void InitializeKernel(void)
+      \brief Initialize kernel for particle in OpenCL
+    */
+    void InitializeKernel(void);
+
   private:
     GGsize* number_of_particles_; /*!< Number of activated particles in buffer */
     cl::Buffer** primary_particles_; /*!< Pointer storing info about primary particles in batch on OpenCL device */
+    cl::Buffer** status_; /*!< Buffer storing status of particle */
     GGsize number_activated_devices_; /*!< Number of activated device */
+    cl::Kernel** kernel_alive_; /*!< Kernel checking if particles are alive */
 };
 
 #endif // End of GUARD_GGEMS_PHYSICS_GGEMSPARTICLES_HH
