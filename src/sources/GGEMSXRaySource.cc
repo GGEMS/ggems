@@ -369,7 +369,9 @@ void GGEMSXRaySource::FillEnergy(void)
 
       // Compute number of energy bins
       std::string line;
-      while (std::getline(spectrum_stream, line)) ++number_of_energy_bins_;
+      if (j == 0) { // Computing number of lines only for first device
+        while (std::getline(spectrum_stream, line)) ++number_of_energy_bins_;
+      }
 
       // Returning to beginning of the file to read it again
       spectrum_stream.clear();

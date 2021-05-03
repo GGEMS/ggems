@@ -101,27 +101,27 @@ void GGEMSVoxelizedPhantom::Initialize(void)
   solids_ = new GGEMSSolid*[1];
   number_of_solids_ = 1;
 
-  for (GGsize j = 0; j < number_activated_devices_; ++j) {
+
   // Initializing voxelized solid for geometric navigation
-    if (is_dosimetry_mode_) {
-      solids_[0] = new GGEMSVoxelizedSolid(voxelized_phantom_filename_, range_data_filename_, "DOSIMETRY");
-    }
-    else {
-      solids_[0] = new GGEMSVoxelizedSolid(voxelized_phantom_filename_, range_data_filename_);
-    }
+  if (is_dosimetry_mode_) {
+    solids_[0] = new GGEMSVoxelizedSolid(voxelized_phantom_filename_, range_data_filename_, "DOSIMETRY");
+  }
+  else {
+    solids_[0] = new GGEMSVoxelizedSolid(voxelized_phantom_filename_, range_data_filename_);
+  }
 
-    // Enabling tracking if necessary
-    if (is_tracking_) solids_[0]->EnableTracking();
+  // Enabling tracking if necessary
+  if (is_tracking_) solids_[0]->EnableTracking();
 
+  // Load voxelized phantom from MHD file and storing materials
+  solids_[0]->Initialize(materials_);
+
+  // Perform rotation before position
+  if (is_update_rot_) solids_[0]->SetRotation(rotation_xyz_);
+  if (is_update_pos_) solids_[0]->SetPosition(position_xyz_);
+
+  for (GGsize j = 0; j < number_activated_devices_; ++j) {
     solids_[0]->SetSolidID<GGEMSVoxelizedSolidData>(number_of_registered_solids, j);
-
-    // Load voxelized phantom from MHD file and storing materials
-    solids_[0]->Initialize(materials_);
-
-    // Perform rotation before position
-    if (is_update_rot_) solids_[0]->SetRotation(rotation_xyz_);
-    if (is_update_pos_) solids_[0]->SetPosition(position_xyz_);
-
     // Store the transformation matrix in solid object
     solids_[0]->UpdateTransformationMatrix(j);
   }

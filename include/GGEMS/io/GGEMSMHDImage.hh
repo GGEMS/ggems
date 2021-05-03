@@ -110,10 +110,9 @@ class GGEMS_EXPORT GGEMSMHDImage
     void Write(cl::Buffer* image, GGsize const& thread_index) const;
 
     /*!
-      \fn template <typename T> void Write(T* image, GGsize const& thread_index)
+      \fn template <typename T> void Write(T* image)
       \tparam T - type of the data
       \param image - image to write on output file
-      \param thread_index - index of the thread (= activated device index)
       \brief write the raw data to file
     */
     template<typename T>

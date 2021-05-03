@@ -79,12 +79,11 @@ void GGEMSMHDImage::SetOutputFileName(std::string const& filename)
   // Checking *.mhd suffixe
   std::size_t found_mhd = filename.find(".mhd");
   if (found_mhd == std::string::npos) {
-    std::ostringstream oss(std::ostringstream::out);
-    oss << "Suffix filename is not *.mhd!!!";
-    GGEMSMisc::ThrowException("GGEMSMHDImage", "SetOutputFilename", oss.str());
+    mhd_header_file_ += filename + ".mhd";
   }
-
-  mhd_header_file_ = filename;
+  else {
+    mhd_header_file_ = filename;
+  }
 
   std::size_t found_dir = filename.find_last_of("/\\");
   if (found_dir != std::string::npos) {

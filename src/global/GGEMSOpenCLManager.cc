@@ -796,6 +796,44 @@ void GGEMSOpenCLManager::DeviceToActivate(GGsize const& device_id)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+void GGEMSOpenCLManager::DeviceLoad(std::string const& device_load)
+{
+  std::string tmp_device_load = device_load;
+  GGsize pos = 0;
+  GGfloat load = 0;
+  std::string delimiter = ";";
+  GGsize i = 0;
+  GGfloat incr_load = 0.0f;
+  while ((pos = tmp_device_load.find(delimiter)) != std::string::npos) {
+    load = std::stof(tmp_device_load.substr(0, pos));
+    device_load_.push_back(load);
+    incr_load += load;
+    tmp_device_load.erase(0, pos + delimiter.length());
+    ++i;
+  }
+  load = std::stof(tmp_device_load.substr(0, pos));
+  incr_load += load;
+  device_load_.push_back(load);
+
+  // Checking sum of load = 1;
+  if (incr_load != 1.0f) {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "Device load has to be 1.0 !!! Please change your value. Current value is " << incr_load;
+    GGEMSMisc::ThrowException("GGEMSOpenCLManager", "DeviceLoad", oss.str());
+  }
+
+  // Checking number of device load value
+  if (device_load_.size() != device_indices_.size()) {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "Mismatch between number of device load value and number of activated device!!!";
+    GGEMSMisc::ThrowException("GGEMSOpenCLManager", "DeviceLoad", oss.str());
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 GGsize GGEMSOpenCLManager::CheckKernel(std::string const& kernel_name, std::string const& compilation_options) const
 {
   GGcout("GGEMSOpenCLManager","CheckKernel", 3) << "Checking if kernel has already been compiled..." << GGendl;

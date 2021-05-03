@@ -244,6 +244,29 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     */
     void DeviceToActivate(std::string const& device_type, std::string const& device_vendor = "");
 
+
+    /*!
+      \fn void DeviceLoad(std::string const& device_load)
+      \param device_load - device load
+      \brief change the device load, by default load is the same for each device
+    */
+    void DeviceLoad(std::string const& device_load);
+
+    /*!
+      \fn GGfloat GetDeviceLoad(GGsize const& thread_index) const
+      \param thread_index - index of the thread (= activated device index)
+      \return device load
+      \brief return the device load for a device
+    */
+    inline GGfloat GetDeviceLoad(GGsize const& thread_index) const {return device_load_[thread_index];}
+
+    /*!
+      \fn GGsize GetNumberDeviceLoads(void) const
+      \return device load vector size
+      \brief return the size of device load vector
+    */
+    inline GGsize GetNumberDeviceLoads(void) const {return device_load_.size();}
+
     /*!
       \fn inline bool IsReady(void) const
       \return true is OpenCL manager is ready to use, it means a device is activated
@@ -435,6 +458,7 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     std::vector<cl_device_affinity_domain> device_partition_affinity_domain_; /*!< Partition affinity domain */
     std::vector<GGuint> device_partition_max_sub_devices_; /*!< Partition affinity domain */
     std::vector<GGsize> device_profiling_timer_resolution_; /*!< Timer resolution */
+    std::vector<GGfloat> device_load_; /*!< Load of device */
 
     // OpenCL compilation options
     std::string build_options_; /*!< list of default option to OpenCL compiler */
