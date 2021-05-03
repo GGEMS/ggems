@@ -268,7 +268,8 @@ void GGEMS::RunOnDevice(GGsize const& thread_index)
   // Loop over sources
   for (GGsize i = 0; i < source_manager.GetNumberOfSources(); ++i) {
     mutex.lock();
-    GGcout("GGEMS", "RunOnDevice", 1) << "## Source " << source_manager.GetNameOfSource(i) << " on " << opencl_manager.GetDeviceName(device_index) << ", thread " << thread_index << GGendl;
+    std::cout << "## Source " << source_manager.GetNameOfSource(i) << " on " << opencl_manager.GetDeviceName(device_index) << ", thread " << thread_index << std::endl;
+    //GGcout("GGEMS", "RunOnDevice", 1) << "## Source " << source_manager.GetNameOfSource(i) << " on " << opencl_manager.GetDeviceName(device_index) << ", thread " << thread_index << GGendl;
     mutex.unlock();
 
     // Loop over batch
@@ -330,14 +331,24 @@ void GGEMS::Run()
     thread_device[i] = std::thread(&GGEMS::RunOnDevice, this, i);
   }
 
+  // thread_device[1] = std::thread(&GGEMS::RunOnDevice, this, 1);
+  // thread_device[1].join();
+
+  // thread_device[0] = std::thread(&GGEMS::RunOnDevice, this, 0);
+  // thread_device[0].join();
+
+  // thread_device[2] = std::thread(&GGEMS::RunOnDevice, this, 2);
+  // thread_device[2].join();
+
   for (GGsize i = 0; i < number_of_activated_devices; ++i) thread_device[i].join();
 
   // Deleting threads
   delete[] thread_device;
 
   // End of simulation, storing output
-  GGcout("GGEMS", "Run", 2) << "Saving results..." << GGendl;
-  // navigator_manager.SaveResults();
+  GGcout("GGEMS", "Run", 1) << "Saving results..." << GGendl;
+  GGEMSNavigatorManager& navigator_manager = GGEMSNavigatorManager::GetInstance();
+  navigator_manager.SaveResults();
 
   // Printing elapsed time in kernels
   if (is_profiling_verbose_) {

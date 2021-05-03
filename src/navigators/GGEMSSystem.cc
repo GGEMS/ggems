@@ -149,40 +149,42 @@ void GGEMSSystem::SaveResults(void)
 {
   GGcout("GGEMSSystem", "SaveResults", 2) << "Saving results in MHD format..." << GGendl;
 
-  // GGsize3 total_dim;
-  // total_dim.x_ = number_of_modules_xy_.x_*number_of_detection_elements_inside_module_xyz_.x_;
-  // total_dim.y_ = number_of_modules_xy_.y_*number_of_detection_elements_inside_module_xyz_.y_;
-  // total_dim.z_ = number_of_detection_elements_inside_module_xyz_.z_;
+  GGsize3 total_dim;
+  total_dim.x_ = number_of_modules_xy_.x_*number_of_detection_elements_inside_module_xyz_.x_;
+  total_dim.y_ = number_of_modules_xy_.y_*number_of_detection_elements_inside_module_xyz_.y_;
+  total_dim.z_ = number_of_detection_elements_inside_module_xyz_.z_;
 
-  // GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
-  // GGint* output = new GGint[total_dim.x_*total_dim.y_*total_dim.z_];
-  // std::memset(output, 0, total_dim.x_*total_dim.y_*total_dim.z_*sizeof(GGint));
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+  GGint* output = new GGint[total_dim.x_*total_dim.y_*total_dim.z_];
+  std::memset(output, 0, total_dim.x_*total_dim.y_*total_dim.z_*sizeof(GGint));
 
-  // GGEMSMHDImage mhdImage;
-  // mhdImage.SetOutputFileName(output_basename_);
-  // mhdImage.SetDataType("MET_INT");
-  // mhdImage.SetDimensions(total_dim);
-  // mhdImage.SetElementSizes(size_of_detection_elements_xyz_);
+  GGEMSMHDImage mhdImage;
+  mhdImage.SetOutputFileName(output_basename_);
+  mhdImage.SetDataType("MET_INT");
+  mhdImage.SetDimensions(total_dim);
+  mhdImage.SetElementSizes(size_of_detection_elements_xyz_);
 
-  // // Getting all the counts from solid on OpenCL device
-  // for (GGsize jj = 0; jj < number_of_modules_xy_.y_; ++jj) {
-  //   for (GGsize ii = 0; ii < number_of_modules_xy_.x_; ++ii) {
-  //     cl::Buffer* histogram = solids_.at(ii + jj* number_of_modules_xy_.x_)->GetHistogram()->histogram_.get();
+  // Getting all the counts from solid from all OpenCL devices
+  for (GGsize i = 0; i < number_activated_devices_; ++i) {
+  for (GGsize jj = 0; jj < number_of_modules_xy_.y_; ++jj) {
+    for (GGsize ii = 0; ii < number_of_modules_xy_.x_; ++ii) {
+      cl::Buffer* histogram = solids_[ii + jj* number_of_modules_xy_.x_]->GetHistogram(i);
 
-  //     GGint* histogram_device = opencl_manager.GetDeviceBuffer<GGint>(histogram, number_of_detection_elements_inside_module_xyz_.x_*number_of_detection_elements_inside_module_xyz_.y_*sizeof(GGint));
+      GGint* histogram_device = opencl_manager.GetDeviceBuffer<GGint>(histogram, number_of_detection_elements_inside_module_xyz_.x_*number_of_detection_elements_inside_module_xyz_.y_*sizeof(GGint), i);
 
-  //     // Storing data on host
-  //     for (GGsize jjj = 0; jjj < number_of_detection_elements_inside_module_xyz_.y_; ++jjj) {
-  //       for (GGsize iii = 0; iii < number_of_detection_elements_inside_module_xyz_.x_; ++iii) {
-  //         output[(iii+ii*number_of_detection_elements_inside_module_xyz_.x_) + (jjj+jj*number_of_detection_elements_inside_module_xyz_.y_)*total_dim.x_] =
-  //           histogram_device[iii + jjj*number_of_detection_elements_inside_module_xyz_.x_];
-  //       }
-  //     }
+      // Storing data on host
+      for (GGsize jjj = 0; jjj < number_of_detection_elements_inside_module_xyz_.y_; ++jjj) {
+        for (GGsize iii = 0; iii < number_of_detection_elements_inside_module_xyz_.x_; ++iii) {
+          output[(iii+ii*number_of_detection_elements_inside_module_xyz_.x_) + (jjj+jj*number_of_detection_elements_inside_module_xyz_.y_)*total_dim.x_] +=
+            histogram_device[iii + jjj*number_of_detection_elements_inside_module_xyz_.x_];
+        }
+      }
 
-  //     opencl_manager.ReleaseDeviceBuffer(histogram, histogram_device);
-  //   }
-  // }
+      opencl_manager.ReleaseDeviceBuffer(histogram, histogram_device, i);
+    }
+  }
+  }
 
-  // mhdImage.Write<GGint>(output, total_dim.x_*total_dim.y_*total_dim.z_);
-  // delete[] output;
+  mhdImage.Write<GGint>(output);
+  delete[] output;
 }

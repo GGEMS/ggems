@@ -227,15 +227,32 @@ void GGEMSSource::OrganizeParticlesInBatch(void)
 {
   GGcout("GGEMSSource", "OrganizeParticlesInBatch", 3) << "Organizing the number of particles in batch..." << GGendl;
 
+  // Getting OpenCL singleton
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+
   // Computing number of particles to simulate for each device
   number_of_particles_by_device_ = new GGsize[number_activated_devices_];
-  for (GGsize i = 0; i < number_activated_devices_; ++i) {
-    number_of_particles_by_device_[i] = number_of_particles_ / number_activated_devices_;
-  }
+  if (opencl_manager.GetNumberDeviceLoads() == 0) {
+    for (GGsize i = 0; i < number_activated_devices_; ++i) {
+      number_of_particles_by_device_[i] = number_of_particles_ / number_activated_devices_;
+    }
 
-  // Adding the remaing particles
-  for (GGsize i = 0; i < number_of_particles_ % number_activated_devices_; ++i) {
-    number_of_particles_by_device_[i]++;
+    // Adding the remaing particles
+    for (GGsize i = 0; i < number_of_particles_ % number_activated_devices_; ++i) {
+      number_of_particles_by_device_[i]++;
+    }
+  }
+  else {
+    GGsize tmp_number_of_particles = 0;
+    for (GGsize i = 0; i < number_activated_devices_; ++i) {
+      number_of_particles_by_device_[i] = static_cast<GGsize>(static_cast<GGfloat>(number_of_particles_) * opencl_manager.GetDeviceLoad(i));
+      tmp_number_of_particles += number_of_particles_by_device_[i];
+    }
+
+    // Checking number of particle
+    if (tmp_number_of_particles != number_of_particles_) {
+      number_of_particles_by_device_[0] += static_cast<GGsize>(abs(static_cast<GGlong>(number_of_particles_ - tmp_number_of_particles)));
+    }
   }
 
   // Computing number of batch for each device

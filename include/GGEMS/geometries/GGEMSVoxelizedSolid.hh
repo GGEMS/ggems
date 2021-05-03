@@ -160,9 +160,7 @@ void GGEMSVoxelizedSolid::ConvertImageToLabel(std::string const& raw_data_filena
   // Get the OpenCL manager
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
-  // Checking if file exists
-  std::ifstream in_raw_stream(raw_data_filename, std::ios::in | std::ios::binary);
-  GGEMSFileStream::CheckInputStream(in_raw_stream, raw_data_filename);
+
 
   for (GGsize d = 0; d < number_activated_devices_; ++d) {
     // Get pointer on OpenCL device
@@ -173,6 +171,10 @@ void GGEMSVoxelizedSolid::ConvertImageToLabel(std::string const& raw_data_filena
 
     // Release the pointer
     opencl_manager.ReleaseDeviceBuffer(solid_data_[d], solid_data_device, d);
+
+    // Checking if file exists
+    std::ifstream in_raw_stream(raw_data_filename, std::ios::in | std::ios::binary);
+    GGEMSFileStream::CheckInputStream(in_raw_stream, raw_data_filename);
 
     // Reading data to a tmp buffer
     std::vector<T> tmp_raw_data;
@@ -211,8 +213,8 @@ void GGEMSVoxelizedSolid::ConvertImageToLabel(std::string const& raw_data_filena
       std::istringstream iss = GGEMSRangeReader::ReadRangeMaterial(line);
       iss >> first_label_value >> last_label_value >> material_name;
 
-      // Adding the material
-      materials->AddMaterial(material_name);
+      // Adding the material only once
+      if (d == 0) materials->AddMaterial(material_name);
 
       // Setting the label
       for (GGsize i = 0; i < number_of_voxels; ++i) {

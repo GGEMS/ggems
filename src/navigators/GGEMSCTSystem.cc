@@ -225,27 +225,22 @@ void GGEMSCTSystem::Initialize(void)
   // Allocation of memory for solid
   solids_ = new GGEMSSolid*[number_of_solids_];
 
-  for (GGsize j = 0; j < number_activated_devices_; ++j) {
-    for (GGsize i = 0; i < number_of_solids_; ++i) { // In CT system only "HISTOGRAM"
-      solids_[i] = new GGEMSSolidBox(
-        number_of_detection_elements_inside_module_xyz_.x_,
-        number_of_detection_elements_inside_module_xyz_.y_,
-        number_of_detection_elements_inside_module_xyz_.z_,
-        static_cast<GGfloat>(number_of_detection_elements_inside_module_xyz_.x_) * size_of_detection_elements_xyz_.x,
-        static_cast<GGfloat>(number_of_detection_elements_inside_module_xyz_.y_) * size_of_detection_elements_xyz_.y,
-        static_cast<GGfloat>(number_of_detection_elements_inside_module_xyz_.z_) * size_of_detection_elements_xyz_.z,
-        "HISTOGRAM"
-      );
+  for (GGsize i = 0; i < number_of_solids_; ++i) { // In CT system only "HISTOGRAM"
+    solids_[i] = new GGEMSSolidBox(
+      number_of_detection_elements_inside_module_xyz_.x_,
+      number_of_detection_elements_inside_module_xyz_.y_,
+      number_of_detection_elements_inside_module_xyz_.z_,
+      static_cast<GGfloat>(number_of_detection_elements_inside_module_xyz_.x_) * size_of_detection_elements_xyz_.x,
+      static_cast<GGfloat>(number_of_detection_elements_inside_module_xyz_.y_) * size_of_detection_elements_xyz_.y,
+      static_cast<GGfloat>(number_of_detection_elements_inside_module_xyz_.z_) * size_of_detection_elements_xyz_.z,
+      "HISTOGRAM"
+    );
 
-      // Enabling tracking if necessary
-      if (is_tracking_) solids_[i]->EnableTracking();
+    // Enabling tracking if necessary
+    if (is_tracking_) solids_[i]->EnableTracking();
 
-      // Set solid id
-      solids_[i]->SetSolidID<GGEMSSolidBoxData>(number_of_registered_solids+i, j);
-
-      // // Initialize kernels
-      solids_[i]->Initialize(nullptr);
-    }
+    // // Initialize kernels
+    solids_[i]->Initialize(nullptr);
   }
 
   // Initialize of the geometry depending on type of CT system
@@ -266,6 +261,8 @@ void GGEMSCTSystem::Initialize(void)
   // Get the final transformation matrix
   for (GGsize j = 0; j < number_activated_devices_; ++j) {
     for (GGsize i = 0; i < number_of_solids_; ++i) {
+      // Set solid id
+      solids_[i]->SetSolidID<GGEMSSolidBoxData>(number_of_registered_solids+i, j);
       solids_[i]->UpdateTransformationMatrix(j);
     }
   }
