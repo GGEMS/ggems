@@ -236,6 +236,9 @@ void GGEMSCTSystem::Initialize(void)
       "HISTOGRAM"
     );
 
+    // Enabling scatter if necessary
+    if (is_scatter_) solids_[i]->EnableScatter();
+
     // Enabling tracking if necessary
     if (is_tracking_) solids_[i]->EnableTracking();
 

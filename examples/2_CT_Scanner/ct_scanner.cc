@@ -47,10 +47,11 @@
 */
 void PrintHelpAndQuit(void)
 {
-  std::cerr << "Usage: multi_platform <Device> <Load>" << std::endl;
+  std::cerr << "Usage: multi_platform <NParticles> <Device> <Load>" << std::endl;
   std::cerr << std::endl;
+  std::cerr << "<NParticles>: number of particles" << std::endl;
   std::cerr << "<Device>: \"all\", \"cpu\", \"gpu\", \"gpu_nvidia\", \"gpu_amd\", \"gpu_intel\", \"X;X;X;...\" (X: indices of device)" << std::endl;
-  std::cerr << "<Load>: \"X;X;X;...\" (Load of device)" << std::endl;
+  std::cerr << "<Load>: \"X;X;X;...\" (X: load of device)" << std::endl;
   exit(EXIT_FAILURE);
 }
 
@@ -64,15 +65,17 @@ void PrintHelpAndQuit(void)
 int main(int argc, char** argv)
 {
   // Checking parameters
-  if (argc < 2) {
+  if (argc < 4) {
     std::cerr << "Invalid number of arguments!!!" << std::endl;
     PrintHelpAndQuit();
   }
 
   // Getting parameters
-  std::string device = argv[1];
+  GGsize number_of_particles = static_cast<GGsize>(std::atol(argv[1]));
+  std::cout << number_of_particles << std::endl;
+  std::string device = argv[2];
   std::string load("");
-  if (argc == 3) load = argv[2];
+  if (argc == 4) load = argv[3];
 
   // Setting verbosity
   GGcout.SetVerbosity(1);
@@ -137,6 +140,7 @@ int main(int argc, char** argv)
     ct_detector.SetRotation(0.0f, 0.0f, 0.0f, "deg");
     ct_detector.SetThreshold(10.0f, "keV");
     ct_detector.StoreOutput("data/projection.mhd");
+    ct_detector.SetScatter(false);
 
     // Physics
     processes_manager.AddProcess("Compton", "gamma", "all");
@@ -154,7 +158,7 @@ int main(int argc, char** argv)
     // Source
     GGEMSXRaySource point_source("point_source");
     point_source.SetSourceParticleType("gamma");
-    point_source.SetNumberOfParticles(1000000000);
+    point_source.SetNumberOfParticles(number_of_particles);
     point_source.SetPosition(-595.0f, 0.0f, 0.0f, "mm");
     point_source.SetRotation(0.0f, 0.0f, 0.0f, "deg");
     point_source.SetBeamAperture(12.5f, "deg");
@@ -165,7 +169,7 @@ int main(int argc, char** argv)
     GGEMS ggems;
     ggems.SetOpenCLVerbose(true);
     ggems.SetNavigatorVerbose(false);
-    ggems.SetSourceVerbose(false);
+    ggems.SetSourceVerbose(true);
     ggems.SetMemoryRAMVerbose(true);
     ggems.SetProcessVerbose(true);
     ggems.SetRangeCutsVerbose(true);

@@ -64,7 +64,8 @@ kernel void track_through_ggems_solid_box(
   global GGEMSMaterialTables const* materials,
   GGfloat const threshold
   #ifdef HISTOGRAM
-  ,global GGint* histogram
+  ,global GGint* histogram,
+  global GGint* scatter_histogram
   #endif
 )
 {

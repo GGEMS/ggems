@@ -41,7 +41,8 @@
 */
 typedef struct GGEMSHistogramMode_t
 {
-  cl::Buffer** histogram_; /*!< Buffer storing histogram on OpenCL device */
+  cl::Buffer** histogram_; /*!< Buffer storing histogram counting */
+  cl::Buffer** scatter_; /*!< Buffer storing scattered photon */
   GGsize number_of_elements_; /*!< Number of elements in hit buffer */
 } GGEMSHistogramMode; /*!< Using C convention name of struct to C++ (_t deletion) */
 
