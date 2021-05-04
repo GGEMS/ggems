@@ -127,6 +127,13 @@ class GGEMS_EXPORT GGEMSSystem : public GGEMSNavigator
     void SetMaterialName(std::string const& material_name);
 
     /*!
+      \fn void SetScatter(bool const& is_scatter)
+      \param is_scatter - true to store scatter image
+      \brief set to true to activate scatter registration
+    */
+    void SetScatter(bool const& is_scatter);
+
+    /*!
       \fn void SaveResults(void)
       \brief save all results from solid
     */
@@ -143,6 +150,7 @@ class GGEMS_EXPORT GGEMSSystem : public GGEMSNavigator
     GGsize2 number_of_modules_xy_; /*!< Number of the detection modules */
     GGsize3 number_of_detection_elements_inside_module_xyz_; /*!< Number of virtual elements (X,Y,Z) in a module */
     GGfloat3 size_of_detection_elements_xyz_; /*!< Size of pixel in each direction */
+    bool is_scatter_; /*!< Boolean storing scatter infos */
 };
 
 #endif // End of GUARD_GGEMS_SYSTEMS_GGEMSSYSTEM_HH

@@ -371,7 +371,10 @@ void GGEMSNavigator::TrackThroughSolid(GGsize const& thread_index)
     std::string data_reg_type = solids_[s]->GetRegisteredDataType();
 
     // Get buffers depending on mode of simulation
+    // Histogram mode (for system, CT ...)
     cl::Buffer* histogram = nullptr;
+    cl::Buffer* scatter_histogram = nullptr;
+    // Dosimetry mode (for voxelized phantom ...)
     cl::Buffer* photon_tracking_dosimetry = nullptr;
     cl::Buffer* hit_tracking_dosimetry = nullptr;
     cl::Buffer* edep_tracking_dosimetry = nullptr;
@@ -379,6 +382,7 @@ void GGEMSNavigator::TrackThroughSolid(GGsize const& thread_index)
     cl::Buffer* dosimetry_params = nullptr;
     if (data_reg_type == "HISTOGRAM") {
       histogram = solids_[s]->GetHistogram(thread_index);
+      scatter_histogram = solids_[s]->GetScatterHistogram(thread_index);
     }
     else if (data_reg_type == "DOSIMETRY") {
       dosimetry_params = dose_calculator_->GetDoseParams(thread_index);
@@ -400,6 +404,7 @@ void GGEMSNavigator::TrackThroughSolid(GGsize const& thread_index)
     kernel->setArg(7, threshold_);
     if (data_reg_type == "HISTOGRAM") {
       kernel->setArg(8, *histogram);
+      kernel->setArg(9, *scatter_histogram);
     }
     else if (data_reg_type == "DOSIMETRY") {
       kernel->setArg(8, *dosimetry_params);

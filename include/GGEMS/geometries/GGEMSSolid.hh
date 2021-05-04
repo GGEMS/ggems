@@ -145,6 +145,12 @@ class GGEMS_EXPORT GGEMSSolid
     virtual void Initialize(GGEMSMaterials* materials) = 0;
 
     /*!
+      \fn void EnableScatter(void)
+      \brief Activate scatter registration
+    */
+    virtual void EnableScatter(void) = 0;
+
+    /*!
       \fn void PrintInfos(void) const
       \brief printing infos about solid
     */
@@ -189,6 +195,14 @@ class GGEMS_EXPORT GGEMSSolid
     */
     inline cl::Buffer* GetHistogram(GGsize const& thread_index) const {return histogram_.histogram_[thread_index];}
 
+    /*!
+      \fn GGEMSHistogramMode* GetScatterHistogram(GGsize const& thread_index)
+      \param thread_index - index of activated device (thread index)
+      \return pointer on scatter histogram
+      \brief return the point on scatter histogram
+    */
+    inline cl::Buffer* GetScatterHistogram(GGsize const& thread_index) const {return histogram_.scatter_[thread_index];}
+
   protected:
     /*!
       \fn void InitializeKernel(void)
@@ -214,6 +228,7 @@ class GGEMS_EXPORT GGEMSSolid
     // Output data
     std::string data_reg_type_; /*!< Type of registering data */
     GGEMSHistogramMode histogram_; /*!< Storing histogram useful for GGEMSSystem only */
+    bool is_scatter_; /*!< boolean storing scatter in solid */
 };
 
 ////////////////////////////////////////////////////////////////////////////////

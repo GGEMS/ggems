@@ -93,6 +93,12 @@ class GGEMS_EXPORT GGEMSSolidBox : public GGEMSSolid
     void Initialize(GGEMSMaterials* materials) override;
 
     /*!
+      \fn void EnableScatter(void)
+      \brief Activate scatter registration
+    */
+    void EnableScatter(void) override;
+
+    /*!
       \fn void PrintInfos(void) const
       \brief printing infos about voxelized solid
     */

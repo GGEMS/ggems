@@ -61,6 +61,8 @@ GGEMSSolid::GGEMSSolid(void)
   kernel_project_to_solid_ = new cl::Kernel*[number_activated_devices_];
   kernel_track_through_solid_ = new cl::Kernel*[number_activated_devices_];
 
+  is_scatter_ = false;
+
   GGcout("GGEMSSolid", "GGEMSSolid", 3) << "GGEMSSolid created!!!" << GGendl;
 }
 
@@ -112,14 +114,6 @@ GGEMSSolid::~GGEMSSolid(void)
     delete[] solid_data_;
     solid_data_ = nullptr;
   }
-
-  // if (histogram_.histogram_) {
-  //   for (GGsize i = 0; i < number_activated_devices_; ++i) {
-  //     opencl_manager.Deallocate(histogram_.histogram_[i], histogram_.number_of_elements_*sizeof(GGint), i);
-  //   }
-  //   delete[] histogram_.histogram_;
-  //   histogram_.histogram_ = nullptr;
-  // }
 
   GGcout("GGEMSSolid", "~GGEMSSolid", 3) << "GGEMSSolid erased!!!" << GGendl;
 }

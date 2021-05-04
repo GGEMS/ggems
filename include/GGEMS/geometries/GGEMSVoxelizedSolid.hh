@@ -90,6 +90,12 @@ class GGEMS_EXPORT GGEMSVoxelizedSolid : public GGEMSSolid
     void Initialize(GGEMSMaterials* materials) override;
 
     /*!
+      \fn void EnableScatter(void)
+      \brief Activate scatter registration
+    */
+    void EnableScatter(void) override {;};
+
+    /*!
       \fn void PrintInfos(void) const
       \brief printing infos about voxelized solid
     */
@@ -159,8 +165,6 @@ void GGEMSVoxelizedSolid::ConvertImageToLabel(std::string const& raw_data_filena
 
   // Get the OpenCL manager
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
-
-
 
   for (GGsize d = 0; d < number_activated_devices_; ++d) {
     // Get pointer on OpenCL device

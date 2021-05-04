@@ -83,19 +83,19 @@ GGEMSSolidBox::GGEMSSolidBox(GGsize const& virtual_element_number_x, GGsize cons
   if (data_reg_type == "HISTOGRAM") {
     histogram_.number_of_elements_ = virtual_element_number_x*virtual_element_number_y*virtual_element_number_z;
 
+    // Allocating memory storing data
     histogram_.histogram_ = new cl::Buffer*[number_activated_devices_];
+    histogram_.scatter_ = new cl::Buffer*[number_activated_devices_];
 
     // Loop over number of device
     for (GGsize d = 0; d < number_activated_devices_; ++d) {
       histogram_.histogram_[d] = opencl_manager.Allocate(nullptr, histogram_.number_of_elements_*sizeof(GGint), d, CL_MEM_READ_WRITE, "GGEMSSolidBox");
+      histogram_.scatter_[d] = nullptr;
 
       if (d == 0) kernel_option_ += " -DHISTOGRAM";
 
-      GGint* histogram_device = opencl_manager.GetDeviceBuffer<GGint>(histogram_.histogram_[d], histogram_.number_of_elements_*sizeof(GGint), d);
-
-      for (GGsize i = 0; i < histogram_.number_of_elements_; ++i) histogram_device[i] = 0;
-
-      opencl_manager.ReleaseDeviceBuffer(histogram_.histogram_[d], histogram_device, d);
+      // Initialize value to 0
+      opencl_manager.CleanBuffer(histogram_.histogram_[d], histogram_.number_of_elements_*sizeof(GGint), d);
     }
   }
   else {
@@ -119,6 +119,29 @@ GGEMSSolidBox::~GGEMSSolidBox(void)
 {
   GGcout("GGEMSSolidBox", "~GGEMSSolidBox", 3) << "GGEMSSolidBox erasing..." << GGendl;
 
+  // Get the opencl manager
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+
+  if (data_reg_type_ == "HISTOGRAM") {
+    if (histogram_.histogram_) {
+      for (GGsize i = 0; i < number_activated_devices_; ++i) {
+        opencl_manager.Deallocate(histogram_.histogram_[i], histogram_.number_of_elements_*sizeof(GGint), i);
+      }
+      delete[] histogram_.histogram_;
+      histogram_.histogram_ = nullptr;
+    }
+
+    if (is_scatter_) {
+      if (histogram_.scatter_) {
+        for (GGsize i = 0; i < number_activated_devices_; ++i) {
+          opencl_manager.Deallocate(histogram_.scatter_[i], histogram_.number_of_elements_*sizeof(GGint), i);
+        }
+        delete[] histogram_.scatter_;
+        histogram_.scatter_ = nullptr;
+      }
+    }
+  }
+
   GGcout("GGEMSSolidBox", "~GGEMSSolidBox", 3) << "GGEMSSolidBox erased!!!" << GGendl;
 }
 
@@ -130,6 +153,7 @@ void GGEMSSolidBox::InitializeKernel(void)
 {
   GGcout("GGEMSSolidBox", "InitializeKernel", 3) << "Initializing kernel for solid box..." << GGendl;
 
+  // Getting the OpenCLManager singleton
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
   // Getting the path to kernel
@@ -154,6 +178,26 @@ void GGEMSSolidBox::Initialize(GGEMSMaterials*)
 
   // Initializing kernels
   InitializeKernel();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSSolidBox::EnableScatter(void)
+{
+  // Getting the OpenCLManager singleton
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+
+  is_scatter_ = true;
+
+  // Loop over number of device
+  for (GGsize d = 0; d < number_activated_devices_; ++d) {
+    histogram_.scatter_[d] = opencl_manager.Allocate(nullptr, histogram_.number_of_elements_*sizeof(GGint), d, CL_MEM_READ_WRITE, "GGEMSSolidBox");
+
+    // Initialize value to 0
+    opencl_manager.CleanBuffer(histogram_.scatter_[d], histogram_.number_of_elements_*sizeof(GGint), d);
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -268,8 +268,7 @@ void GGEMS::RunOnDevice(GGsize const& thread_index)
   // Loop over sources
   for (GGsize i = 0; i < source_manager.GetNumberOfSources(); ++i) {
     mutex.lock();
-    std::cout << "## Source " << source_manager.GetNameOfSource(i) << " on " << opencl_manager.GetDeviceName(device_index) << ", thread " << thread_index << std::endl;
-    //GGcout("GGEMS", "RunOnDevice", 1) << "## Source " << source_manager.GetNameOfSource(i) << " on " << opencl_manager.GetDeviceName(device_index) << ", thread " << thread_index << GGendl;
+    GGcout("GGEMS", "RunOnDevice", 1) << "## Source " << source_manager.GetNameOfSource(i) << " on " << opencl_manager.GetDeviceName(device_index) << ", thread " << thread_index << GGendl;
     mutex.unlock();
 
     // Loop over batch

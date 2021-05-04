@@ -51,6 +51,8 @@ GGEMSSystem::GGEMSSystem(std::string const& system_name)
   size_of_detection_elements_xyz_.y = 0.0f;
   size_of_detection_elements_xyz_.z = 0.0f;
 
+  is_scatter_ = false;
+
   GGcout("GGEMSSystem", "GGEMSSystem", 3) << "GGEMSSystem created!!!" << GGendl;
 }
 
@@ -104,6 +106,15 @@ void GGEMSSystem::SetSizeOfDetectionElements(GGfloat const& detection_element_x,
 void GGEMSSystem::SetMaterialName(std::string const& material_name)
 {
   materials_->AddMaterial(material_name);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSSystem::SetScatter(bool const& is_scatter)
+{
+  is_scatter_ = is_scatter;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
