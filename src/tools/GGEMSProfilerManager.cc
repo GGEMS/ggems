@@ -28,18 +28,10 @@
   \date Tuesday March 16, 2021
 */
 
-#include <mutex>
 #include "GGEMS/tools/GGEMSProfilerManager.hh"
 #include "GGEMS/tools/GGEMSProfiler.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
 #include "GGEMS/tools/GGEMSChrono.hh"
-
-/*!
-  \brief namespace storing mutex
-*/
-namespace {
-  std::mutex mutex;
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////

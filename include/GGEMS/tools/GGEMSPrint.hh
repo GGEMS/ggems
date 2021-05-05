@@ -34,6 +34,11 @@
 #include <iostream>
 #include <ostream>
 #include <iomanip>
+#include <mutex>
+
+namespace {
+  std::mutex mutex;
+}
 
 #include "GGEMS/global/GGEMSExport.hh"
 #include "GGEMS/tools/GGEMSTypes.hh"

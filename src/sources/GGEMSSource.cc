@@ -245,7 +245,7 @@ void GGEMSSource::OrganizeParticlesInBatch(void)
   else {
     GGsize tmp_number_of_particles = 0;
     for (GGsize i = 0; i < number_activated_devices_; ++i) {
-      number_of_particles_by_device_[i] = static_cast<GGsize>(static_cast<GGfloat>(number_of_particles_) * opencl_manager.GetDeviceLoad(i));
+      number_of_particles_by_device_[i] = static_cast<GGsize>(static_cast<GGfloat>(number_of_particles_) * opencl_manager.GetDeviceBalancing(i));
       tmp_number_of_particles += number_of_particles_by_device_[i];
     }
 
