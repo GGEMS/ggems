@@ -796,37 +796,37 @@ void GGEMSOpenCLManager::DeviceToActivate(GGsize const& device_id)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSOpenCLManager::DeviceLoad(std::string const& device_load)
+void GGEMSOpenCLManager::DeviceBalancing(std::string const& device_balancing)
 {
-  std::string tmp_device_load = device_load;
+  std::string tmp_device_load = device_balancing;
   GGsize pos = 0;
-  GGfloat load = 0;
+  GGfloat balancing = 0;
   std::string delimiter = ";";
   GGsize i = 0;
-  GGfloat incr_load = 0.0f;
+  GGfloat incr_balancing = 0.0f;
   while ((pos = tmp_device_load.find(delimiter)) != std::string::npos) {
-    load = std::stof(tmp_device_load.substr(0, pos));
-    device_load_.push_back(load);
-    incr_load += load;
+    balancing = std::stof(tmp_device_load.substr(0, pos));
+    device_balancing_.push_back(balancing);
+    incr_balancing += balancing;
     tmp_device_load.erase(0, pos + delimiter.length());
     ++i;
   }
-  load = std::stof(tmp_device_load.substr(0, pos));
-  incr_load += load;
-  device_load_.push_back(load);
+  balancing = std::stof(tmp_device_load.substr(0, pos));
+  incr_balancing += balancing;
+  device_balancing_.push_back(balancing);
 
-  // Checking sum of load = 1;
-  if (incr_load != 1.0f) {
+  // Checking sum of balancing = 1;
+  if (incr_balancing != 1.0f) {
     std::ostringstream oss(std::ostringstream::out);
-    oss << "Device load has to be 1.0 !!! Please change your value. Current value is " << incr_load;
-    GGEMSMisc::ThrowException("GGEMSOpenCLManager", "DeviceLoad", oss.str());
+    oss << "Device balancing has to be 1 !!! Please change your value. Current value is " << incr_balancing;
+    GGEMSMisc::ThrowException("GGEMSOpenCLManager", "DeviceBalancing", oss.str());
   }
 
-  // Checking number of device load value
-  if (device_load_.size() != device_indices_.size()) {
+  // Checking number of device balancing value
+  if (device_balancing_.size() != device_indices_.size()) {
     std::ostringstream oss(std::ostringstream::out);
-    oss << "Mismatch between number of device load value and number of activated device!!!";
-    GGEMSMisc::ThrowException("GGEMSOpenCLManager", "DeviceLoad", oss.str());
+    oss << "Mismatch between number of device balancing values and number of activated devices!!!";
+    GGEMSMisc::ThrowException("GGEMSOpenCLManager", "DeviceBalancing", oss.str());
   }
 }
 

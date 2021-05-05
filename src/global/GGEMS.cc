@@ -30,11 +30,6 @@
 
 #include <fcntl.h>
 #include <thread>
-#include <mutex>
-
-namespace {
-  std::mutex mutex;
-}
 
 #ifdef _WIN32
 #ifdef _MSC_VER
@@ -268,7 +263,7 @@ void GGEMS::RunOnDevice(GGsize const& thread_index)
   // Loop over sources
   for (GGsize i = 0; i < source_manager.GetNumberOfSources(); ++i) {
     mutex.lock();
-    GGcout("GGEMS", "RunOnDevice", 1) << "## Source " << source_manager.GetNameOfSource(i) << " on " << opencl_manager.GetDeviceName(device_index) << ", thread " << thread_index << GGendl;
+    std::cout << "[GGEMS GGEMS::RunOnDevice] (thread " << thread_index << ") ## Source " << source_manager.GetNameOfSource(i) << " on " << opencl_manager.GetDeviceName(device_index) << GGendl;
     mutex.unlock();
 
     // Loop over batch
@@ -276,35 +271,21 @@ void GGEMS::RunOnDevice(GGsize const& thread_index)
     for (GGsize j = 0; j < number_of_batchs; ++j) {
       GGsize number_of_particles = source_manager.GetNumberOfParticlesInBatch(i, thread_index, j);
 
-      mutex.lock();
-      GGcout("GGEMS", "RunOnDevice", 1) << "----> Launching batch " << j+1 << "/" << number_of_batchs << " on " << opencl_manager.GetDeviceName(device_index) << ", thread " << thread_index << GGendl;
-      GGcout("GGEMS", "RunOnDevice", 1) << "      + Generating " << number_of_particles << " particles..." << GGendl;
-      mutex.unlock();
-
       // Generating particles
       source_manager.GetPrimaries(i, thread_index, number_of_particles);
 
       // Loop until ALL particles are dead
       do {
          // Step 2: Find closest navigator (phantom, detector) before projection and track operation
-        mutex.lock();
-        GGcout("GGEMS", "RunOnDevice", 2) << "      + Finding solid on " << opencl_manager.GetDeviceName(device_index) << "..." << GGendl;
-        mutex.unlock();
         navigator_manager.FindSolid(thread_index);
 
         // Optional step: World tracking
         navigator_manager.WorldTracking(thread_index);
 
         // Step 3: Project particles to solid
-        mutex.lock();
-        GGcout("GGEMS", "RunOnDevice", 2) << "      + Projecting particles to solid on " << opencl_manager.GetDeviceName(device_index) << "..." << GGendl;
-        mutex.unlock();
         navigator_manager.ProjectToSolid(thread_index);
 
         // Step 4: Track through step, particles are tracked in selected solid
-        mutex.lock();
-        GGcout("GGEMS", "RunOnDevice", 2) << "      + Tracking particles through solid on " << opencl_manager.GetDeviceName(device_index) << "..." << GGendl;
-        mutex.unlock();
         navigator_manager.TrackThroughSolid(thread_index);
       } while (source_manager.IsAlive(thread_index)); // Step 5: Checking if all particles are dead, otherwize go back to step 2
     }
