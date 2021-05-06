@@ -48,20 +48,6 @@
 #endif
 
 /*!
-  \fn void PrintHelpAndQuit(void)
-  \brief Print help to terminal and quit
-*/
-// void PrintHelpAndQuit(void)
-// {
-//   std::cerr << "Usage: multi_platform <NParticles> <Device> <Load>" << std::endl;
-//   std::cerr << std::endl;
-//   std::cerr << "<NParticles>: number of particles" << std::endl;
-//   std::cerr << "<Device>: \"all\", \"cpu\", \"gpu\", \"gpu_nvidia\", \"gpu_amd\", \"gpu_intel\", \"X;X;X;...\" (X: indices of device)" << std::endl;
-//   std::cerr << "<Load>: \"X;X;X;...\" (X: load of device)" << std::endl;
-//   exit(EXIT_FAILURE);
-// }
-
-/*!
   \fn void PrintHelpAndQuit(std::string const& message, char const *p_executable)
   \param message - error message
   \param p_executable - name of the executable
@@ -258,7 +244,7 @@ int main(int argc, char** argv)
     ct_detector.SetRotation(0.0f, 0.0f, 0.0f, "deg");
     ct_detector.SetThreshold(10.0f, "keV");
     ct_detector.StoreOutput("data/projection.mhd");
-    ct_detector.SetScatter(false);
+    ct_detector.StoreScatter(true);
 
     // Physics
     processes_manager.AddProcess("Compton", "gamma", "all");
@@ -286,6 +272,7 @@ int main(int argc, char** argv)
     // GGEMS simulation
     GGEMS ggems;
     ggems.SetOpenCLVerbose(true);
+    ggems.SetMaterialDatabaseVerbose(false);
     ggems.SetNavigatorVerbose(false);
     ggems.SetSourceVerbose(true);
     ggems.SetMemoryRAMVerbose(true);

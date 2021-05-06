@@ -77,7 +77,7 @@ GGEMSMHDImage::~GGEMSMHDImage(void)
 void GGEMSMHDImage::SetOutputFileName(std::string const& filename)
 {
   // Checking *.mhd suffixe
-  std::size_t found_mhd = filename.find(".mhd");
+  GGsize found_mhd = filename.find(".mhd");
   if (found_mhd == std::string::npos) {
     mhd_header_file_ += filename + ".mhd";
   }
@@ -85,13 +85,12 @@ void GGEMSMHDImage::SetOutputFileName(std::string const& filename)
     mhd_header_file_ = filename;
   }
 
-  std::size_t found_dir = filename.find_last_of("/\\");
+  GGsize found_dir = filename.find_last_of("/\\");
   if (found_dir != std::string::npos) {
     output_dir_ = filename.substr(0, found_dir+1);
     mhd_raw_file_ = filename.substr(found_dir+1, found_mhd-found_dir-1) + ".raw";
   }
   else {
-    ;//mhd_header_file_ = filename;
     mhd_raw_file_ = filename.substr(0, found_mhd) + ".raw";
   }
 }
@@ -208,7 +207,6 @@ void GGEMSMHDImage::Read(std::string const& image_mhd_header_filename, cl::Buffe
   }
 
   // Computing bounding box borders automatically at isocenter
-
   for (GGsize i = 0; i < 3; ++i) {
     solid_data_device->obb_geometry_.border_min_xyz_.s[i] = -static_cast<GGfloat>(solid_data_device->number_of_voxels_xyz_.s[i]) * solid_data_device->voxel_sizes_xyz_.s[i] * 0.5f;
     solid_data_device->obb_geometry_.border_max_xyz_.s[i] = static_cast<GGfloat>(solid_data_device->number_of_voxels_xyz_.s[i]) * solid_data_device->voxel_sizes_xyz_.s[i] * 0.5f;

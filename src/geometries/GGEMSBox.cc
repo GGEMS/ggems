@@ -105,7 +105,7 @@ void GGEMSBox::Draw(void)
   GGsize device_index = opencl_manager.GetIndexOfActivatedDevice(0);
   std::string device_name = opencl_manager.GetDeviceName(device_index);
   std::ostringstream oss(std::ostringstream::out);
-  oss << "GGEMSBox::Draw on " << device_name;
+  oss << "GGEMSBox::Draw on " << device_name << ", index " << device_index;
 
   // Get parameters from phantom creator
   GGfloat3 voxel_sizes = volume_creator_manager.GetElementsSizes();

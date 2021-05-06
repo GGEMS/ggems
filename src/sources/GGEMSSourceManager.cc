@@ -120,9 +120,7 @@ void GGEMSSourceManager::PrintInfos(void) const
   GGcout("GGEMSSourceManager", "PrintInfos", 0) << "Number of source(s): " << number_of_sources_ << GGendl;
 
   // Printing infos about each source
-  for (GGsize i = 0; i < number_of_sources_; ++i ) {
-    sources_[i]->PrintInfos();
-  }
+  for (GGsize i = 0; i < number_of_sources_; ++i ) sources_[i]->PrintInfos();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -146,9 +144,7 @@ void GGEMSSourceManager::Initialize(GGuint const& seed, bool const& is_tracking,
   GGcout("GGEMSSourceManager", "Initialize", 0) << "Initialization of GGEMS pseudo random generator OK" << GGendl;
 
   // Initialization of sources
-  for (GGsize i = 0; i < number_of_sources_; ++i) {
-    sources_[i]->Initialize(is_tracking);
-  }
+  for (GGsize i = 0; i < number_of_sources_; ++i) sources_[i]->Initialize(is_tracking);
 
   // If tracking activated, set the particle id to track
   if (is_tracking) {

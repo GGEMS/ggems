@@ -233,7 +233,7 @@ void GGEMSNavigator::ParticleSolidDistance(GGsize const& thread_index)
   GGsize device_index = opencl_manager.GetIndexOfActivatedDevice(thread_index);
   std::string device_name = opencl_manager.GetDeviceName(device_index);
   std::ostringstream oss(std::ostringstream::out);
-  oss << "GGEMSNavigator::ParticleSolidDistance on " << device_name;
+  oss << "GGEMSNavigator::ParticleSolidDistance on " << device_name << ", index " << device_index;
 
   // Pointer to primary particles, and number to particles in buffer
   GGEMSSourceManager& source_manager = GGEMSSourceManager::GetInstance();
@@ -285,7 +285,7 @@ void GGEMSNavigator::ProjectToSolid(GGsize const& thread_index)
   GGsize device_index = opencl_manager.GetIndexOfActivatedDevice(thread_index);
   std::string device_name = opencl_manager.GetDeviceName(device_index);
   std::ostringstream oss(std::ostringstream::out);
-  oss << "GGEMSNavigator::ProjectToSolid on " << device_name;
+  oss << "GGEMSNavigator::ProjectToSolid on " << device_name << ", index " << device_index;
 
   // Pointer to primary particles, and number to particles in buffer
   GGEMSSourceManager& source_manager = GGEMSSourceManager::GetInstance();
@@ -337,7 +337,7 @@ void GGEMSNavigator::TrackThroughSolid(GGsize const& thread_index)
   GGsize device_index = opencl_manager.GetIndexOfActivatedDevice(thread_index);
   std::string device_name = opencl_manager.GetDeviceName(device_index);
   std::ostringstream oss(std::ostringstream::out);
-  oss << "GGEMSNavigator::TrackThroughSolid on " << device_name;
+  oss << "GGEMSNavigator::TrackThroughSolid on " << device_name << ", index " << device_index;
 
   // Pointer to primary particles, and number to particles in buffer
   GGEMSSourceManager& source_manager = GGEMSSourceManager::GetInstance();

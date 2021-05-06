@@ -36,6 +36,9 @@ class GGEMSOpenCLManager(object):
         ggems_lib.set_device_to_activate_opencl_manager.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_char_p]
         ggems_lib.set_device_to_activate_opencl_manager.restype = ctypes.c_void_p
 
+        ggems_lib.set_device_balancing_opencl_manager.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
+        ggems_lib.set_device_balancing_opencl_manager.restype = ctypes.c_void_p
+
         self.obj = ggems_lib.get_instance_ggems_opencl_manager()
 
     def print_infos(self):
@@ -46,6 +49,9 @@ class GGEMSOpenCLManager(object):
 
     def set_device_to_activate(self, device_type, device_vendor=''):
         ggems_lib.set_device_to_activate_opencl_manager(self.obj, device_type.encode('ASCII'), device_vendor.encode('ASCII'))
+
+    def set_device_balancing(self, device_balancing):
+        ggems_lib.set_device_balancing_opencl_manager(self.obj, device_balancing.encode('ASCII'))
 
     def clean(self):
         ggems_lib.clean_opencl_manager(self.obj)

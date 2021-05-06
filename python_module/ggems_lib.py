@@ -50,7 +50,3 @@ class GGEMSVerbosity(object):
 
         ggems_lib.set_ggems_verbose(val)
 
-
-# ------------------------------------------------------------------------------
-# Setting global verbosity to 0
-GGEMSVerbosity(3)

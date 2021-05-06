@@ -538,4 +538,12 @@ extern "C" GGEMS_EXPORT void set_device_to_activate_opencl_manager(GGEMSOpenCLMa
 */
 extern "C" GGEMS_EXPORT void clean_opencl_manager(GGEMSOpenCLManager* opencl_manager);
 
+/*!
+  \fn void set_device_balancing_opencl_manager(GGEMSOpenCLManager* opencl_manager, char const* device_balancing)
+  \param opencl_manager - pointer on the singleton
+  \param device_balancing - device balancing
+  \brief change the device balancing, by default device balancing is the same for each device
+*/
+extern "C" GGEMS_EXPORT void set_device_balancing_opencl_manager(GGEMSOpenCLManager* opencl_manager, char const* device_balancing);
+
 #endif // GUARD_GGEMS_GLOBAL_GGEMSOpenCLManager_HH

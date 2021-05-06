@@ -223,6 +223,12 @@ kernel void track_through_ggems_voxelized_solid(
 
       PhotonDiscreteProcess(primary_particle, random, materials, particle_cross_sections, material_id, global_id);
 
+      // If process is COMPTON_SCATTERING or RAYLEIGH_SCATTERING scatter order is incremented
+      if (next_discrete_process == COMPTON_SCATTERING || next_discrete_process == RAYLEIGH_SCATTERING)
+      {
+        primary_particle->scatter_[global_id] += 1;
+      }
+
       #ifdef DOSIMETRY
       edep -= primary_particle->E_[global_id];
       dose_record_standard(dose_params, edep_tracking, edep_squared_tracking, hit_tracking, edep, &local_position);
