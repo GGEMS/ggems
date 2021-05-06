@@ -21,103 +21,108 @@ from ggems_lib import *
 from ggems_opencl import GGEMSOpenCLManager
 from ggems_ram import GGEMSRAMManager
 from ggems_materials import GGEMSMaterialsDatabaseManager, GGEMSMaterials
-# from ggems_systems import GGEMSCTSystem
-# from ggems_phantoms import GGEMSVoxelizedPhantom, GGEMSWorld
+from ggems_systems import GGEMSCTSystem
+from ggems_phantoms import GGEMSVoxelizedPhantom, GGEMSWorld
 from ggems_sources import GGEMSXRaySource, GGEMSSourceManager
 from ggems_processes import GGEMSProcessesManager, GGEMSRangeCutsManager, GGEMSCrossSections
 from ggems_volume_creator import GGEMSVolumeCreatorManager, GGEMSTube, GGEMSBox, GGEMSSphere
-# from ggems_dosimetry import GGEMSDosimetryCalculator
+from ggems_dosimetry import GGEMSDosimetryCalculator
 from ggems_profiler import GGEMSProfilerManager
 
-# class GGEMSManager(object):
-#     """GGEMS class managing the simulation
-#     """
-#     def __init__(self):
-#         ggems_lib.get_instance_ggems_manager.restype = ctypes.c_void_p
+class GGEMS(object):
+    """GGEMS class managing the simulation
+    """
+    def __init__(self):
+        ggems_lib.create_ggems.restype = ctypes.c_void_p
 
-#         ggems_lib.initialize_ggems_manager.argtypes = [ctypes.c_void_p, ctypes.c_uint32]
-#         ggems_lib.initialize_ggems_manager.restype = ctypes.c_void_p
+        ggems_lib.delete_ggems.argtypes = [ctypes.c_void_p]
+        ggems_lib.delete_ggems.restype = ctypes.c_void_p
 
-#         ggems_lib.set_opencl_verbose_ggems_manager.argtypes = [ctypes.c_void_p, ctypes.c_bool]
-#         ggems_lib.set_opencl_verbose_ggems_manager.restype = ctypes.c_void_p
+        ggems_lib.initialize_ggems.argtypes = [ctypes.c_void_p, ctypes.c_uint32]
+        ggems_lib.initialize_ggems.restype = ctypes.c_void_p
 
-#         ggems_lib.set_material_database_verbose_ggems_manager.argtypes = [ctypes.c_void_p, ctypes.c_bool]
-#         ggems_lib.set_material_database_verbose_ggems_manager.restype = ctypes.c_void_p
+        ggems_lib.set_opencl_verbose_ggems.argtypes = [ctypes.c_void_p, ctypes.c_bool]
+        ggems_lib.set_opencl_verbose_ggems.restype = ctypes.c_void_p
 
-#         ggems_lib.set_source_ggems_manager.argtypes = [ctypes.c_void_p, ctypes.c_bool]
-#         ggems_lib.set_source_ggems_manager.restype = ctypes.c_void_p
+        ggems_lib.set_material_database_verbose_ggems.argtypes = [ctypes.c_void_p, ctypes.c_bool]
+        ggems_lib.set_material_database_verbose_ggems.restype = ctypes.c_void_p
 
-#         ggems_lib.set_navigator_ggems_manager.argtypes = [ctypes.c_void_p, ctypes.c_bool]
-#         ggems_lib.set_navigator_ggems_manager.restype = ctypes.c_void_p
+        ggems_lib.set_source_ggems.argtypes = [ctypes.c_void_p, ctypes.c_bool]
+        ggems_lib.set_source_ggems.restype = ctypes.c_void_p
 
-#         ggems_lib.set_memory_ram_ggems_manager.argtypes = [ctypes.c_void_p, ctypes.c_bool]
-#         ggems_lib.set_memory_ram_ggems_manager.restype = ctypes.c_void_p
+        ggems_lib.set_navigator_ggems.argtypes = [ctypes.c_void_p, ctypes.c_bool]
+        ggems_lib.set_navigator_ggems.restype = ctypes.c_void_p
 
-#         ggems_lib.set_process_ggems_manager.argtypes = [ctypes.c_void_p, ctypes.c_bool]
-#         ggems_lib.set_process_ggems_manager.restype = ctypes.c_void_p
+        ggems_lib.set_memory_ram_ggems.argtypes = [ctypes.c_void_p, ctypes.c_bool]
+        ggems_lib.set_memory_ram_ggems.restype = ctypes.c_void_p
 
-#         ggems_lib.set_range_cuts_ggems_manager.argtypes = [ctypes.c_void_p, ctypes.c_bool]
-#         ggems_lib.set_range_cuts_ggems_manager.restype = ctypes.c_void_p
+        ggems_lib.set_process_ggems.argtypes = [ctypes.c_void_p, ctypes.c_bool]
+        ggems_lib.set_process_ggems.restype = ctypes.c_void_p
 
-#         ggems_lib.set_profiling_ggems_manager.argtypes = [ctypes.c_void_p, ctypes.c_bool]
-#         ggems_lib.set_profiling_ggems_manager.restype = ctypes.c_void_p
+        ggems_lib.set_range_cuts_ggems.argtypes = [ctypes.c_void_p, ctypes.c_bool]
+        ggems_lib.set_range_cuts_ggems.restype = ctypes.c_void_p
 
-#         ggems_lib.set_random_ggems_manager.argtypes = [ctypes.c_void_p, ctypes.c_bool]
-#         ggems_lib.set_random_ggems_manager.restype = ctypes.c_void_p
+        ggems_lib.set_profiling_ggems.argtypes = [ctypes.c_void_p, ctypes.c_bool]
+        ggems_lib.set_profiling_ggems.restype = ctypes.c_void_p
 
-#         ggems_lib.set_tracking_ggems_manager.argtypes = [ctypes.c_void_p, ctypes.c_bool, ctypes.c_int]
-#         ggems_lib.set_tracking_ggems_manager.restype = ctypes.c_void_p
+        ggems_lib.set_random_ggems.argtypes = [ctypes.c_void_p, ctypes.c_bool]
+        ggems_lib.set_random_ggems.restype = ctypes.c_void_p
 
-#         ggems_lib.run_ggems_manager.argtypes = [ctypes.c_void_p]
-#         ggems_lib.run_ggems_manager.restype = ctypes.c_void_p
+        ggems_lib.set_tracking_ggems.argtypes = [ctypes.c_void_p, ctypes.c_bool, ctypes.c_int]
+        ggems_lib.set_tracking_ggems.restype = ctypes.c_void_p
 
-#         self.obj = ggems_lib.get_instance_ggems_manager()
+        ggems_lib.run_ggems.argtypes = [ctypes.c_void_p]
+        ggems_lib.run_ggems.restype = ctypes.c_void_p
 
-#     def initialize(self, seed = 0):
-#         ggems_lib.initialize_ggems_manager(self.obj, seed)
+        self.obj = ggems_lib.create_ggems()
 
-#     def run(self):
-#         ggems_lib.run_ggems_manager(self.obj)
+    def delete(self):
+        ggems_lib.delete_ggems(self.obj)
 
-#     def opencl_verbose(self, flag):
-#         ggems_lib.set_opencl_verbose_ggems_manager(self.obj, flag)
+    def initialize(self, seed = 0):
+        ggems_lib.initialize_ggems(self.obj, seed)
 
-#     def material_database_verbose(self, flag):
-#         ggems_lib.set_material_database_verbose_ggems_manager(self.obj, flag)
+    def run(self):
+        ggems_lib.run_ggems(self.obj)
 
-#     def navigator_verbose(self, flag):
-#         ggems_lib.set_navigator_ggems_manager(self.obj, flag)
+    def opencl_verbose(self, flag):
+        ggems_lib.set_opencl_verbose_ggems(self.obj, flag)
 
-#     def source_verbose(self, flag):
-#         ggems_lib.set_source_ggems_manager(self.obj, flag)
+    def material_database_verbose(self, flag):
+        ggems_lib.set_material_database_verbose_ggems(self.obj, flag)
 
-#     def memory_verbose(self, flag):
-#         ggems_lib.set_memory_ram_ggems_manager(self.obj, flag)
+    def navigator_verbose(self, flag):
+        ggems_lib.set_navigator_ggems(self.obj, flag)
 
-#     def process_verbose(self, flag):
-#         ggems_lib.set_process_ggems_manager(self.obj, flag)
+    def source_verbose(self, flag):
+        ggems_lib.set_source_ggems(self.obj, flag)
 
-#     def profiling_verbose(self, flag):
-#         ggems_lib.set_profiling_ggems_manager(self.obj, flag)
+    def memory_verbose(self, flag):
+        ggems_lib.set_memory_ram_ggems(self.obj, flag)
 
-#     def range_cuts_verbose(self, flag):
-#         ggems_lib.set_range_cuts_ggems_manager(self.obj, flag)
+    def process_verbose(self, flag):
+        ggems_lib.set_process_ggems(self.obj, flag)
 
-#     def random_verbose(self, flag):
-#         ggems_lib.set_random_ggems_manager(self.obj, flag)
+    def profiling_verbose(self, flag):
+        ggems_lib.set_profiling_ggems(self.obj, flag)
 
-#     def tracking_verbose(self, flag, particle_id):
-#         ggems_lib.set_tracking_ggems_manager(self.obj, flag, particle_id)
+    def range_cuts_verbose(self, flag):
+        ggems_lib.set_range_cuts_ggems(self.obj, flag)
+
+    def random_verbose(self, flag):
+        ggems_lib.set_random_ggems(self.obj, flag)
+
+    def tracking_verbose(self, flag, particle_id):
+        ggems_lib.set_tracking_ggems(self.obj, flag, particle_id)
 
 
 # ------------------------------------------------------------------------------
 # Calling all C++ singleton managers
-opencl_manager = GGEMSOpenCLManager()
-ram_manager = GGEMSRAMManager()
-source_manager = GGEMSSourceManager()
-materials_database_manager = GGEMSMaterialsDatabaseManager()
-processes_manager = GGEMSProcessesManager()
-range_cuts_manager = GGEMSRangeCutsManager()
-# ggems_manager = GGEMSManager()
-volume_creator_manager = GGEMSVolumeCreatorManager()
-profiler_manager = GGEMSProfilerManager()
+# opencl_manager = GGEMSOpenCLManager()
+# ram_manager = GGEMSRAMManager()
+# source_manager = GGEMSSourceManager()
+# materials_database_manager = GGEMSMaterialsDatabaseManager()
+# processes_manager = GGEMSProcessesManager()
+# range_cuts_manager = GGEMSRangeCutsManager()
+# volume_creator_manager = GGEMSVolumeCreatorManager()
+# profiler_manager = GGEMSProfilerManager()

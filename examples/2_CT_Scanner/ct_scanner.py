@@ -22,28 +22,54 @@ from ggems import *
 # ------------------------------------------------------------------------------
 # Read arguments
 parser = argparse.ArgumentParser()
-
-parser.add_argument('-d', '--device', required=False, type=int, default=0, help="OpenCL device id")
+#, choices=['all', 'cpu', 'gpu', 'gpu_nvidia', 'gpu_intel', 'gpu_amd', 'X;Y;Z...']
+parser.add_argument('-d', '--device', required=False, type=str, default='all', help="OpenCL device (all, cpu, gpu, gpu_nvidia, gpu_intel, gpu_amd, X;Y;Z...)")
+parser.add_argument('-b', '--balance', required=False, type=str, help="X;Y;Z... Balance computation for device if many devices are selected")
+parser.add_argument('-n', '--nparticles', required=False, type=int, default=1000000, help="Number of particles")
+parser.add_argument('-s', '--seed', required=False, type=int, default=777, help="Seed of pseudo generator number")
+parser.add_argument('-v', '--verbose', required=False, type=int, default=0, help="Set level of verbosity")
 
 args = parser.parse_args()
 
 # Get argument
-device_id = args.device
+device = args.device
+verbosity_level = args.verbose
+number_of_particles = args.nparticles
+device_balancing = args.balance
+seed = args.seed
 
 # ------------------------------------------------------------------------------
 # STEP 0: Level of verbosity during computation
-GGEMSVerbosity(1)
+GGEMSVerbosity(verbosity_level)
 
 # ------------------------------------------------------------------------------
-# STEP 1: Choosing an OpenCL device
-opencl_manager.set_device_index(device_id)
+# STEP 1: Calling C++ singleton
+opencl_manager = GGEMSOpenCLManager()
+materials_database_manager = GGEMSMaterialsDatabaseManager()
+processes_manager = GGEMSProcessesManager()
+range_cuts_manager = GGEMSRangeCutsManager()
+volume_creator_manager = GGEMSVolumeCreatorManager()
 
 # ------------------------------------------------------------------------------
-# STEP 2: Setting GGEMS materials
+# STEP 2: Choosing an OpenCL device
+if device == 'gpu_nvidia':
+  opencl_manager.set_device_to_activate('gpu', 'nvidia')
+elif device == 'gpu_amd':
+  opencl_manager.set_device_to_activate('gpu', 'amd')
+elif device == 'gpu_intel':
+  opencl_manager.set_device_to_activate('gpu', 'intel')
+else:
+  opencl_manager.set_device_to_activate(device)
+
+if (device_balancing):
+  opencl_manager.set_device_balancing(device_balancing)
+
+# ------------------------------------------------------------------------------
+# STEP 3: Setting GGEMS materials
 materials_database_manager.set_materials('../../data/materials.txt')
 
 # ------------------------------------------------------------------------------
-# STEP 3: Phantoms and systems
+# STEP 4: Phantoms and systems
 
 # Generating phantom
 volume_creator_manager.set_dimensions(120, 120, 120)
@@ -83,7 +109,7 @@ ct_detector.set_threshold(10.0, 'keV')
 ct_detector.save('data/projection.mhd')
 
 # ------------------------------------------------------------------------------
-# STEP 4: Physics
+# STEP 5: Physics
 processes_manager.add_process('Compton', 'gamma', 'all')
 processes_manager.add_process('Photoelectric', 'gamma', 'all')
 processes_manager.add_process('Rayleigh', 'gamma', 'all')
@@ -94,14 +120,14 @@ processes_manager.set_cross_section_table_energy_min(1.0, 'keV')
 processes_manager.set_cross_section_table_energy_max(1.0, 'MeV')
 
 # ------------------------------------------------------------------------------
-# STEP 5: Cuts, by default but are 1 um
+# STEP 7: Cuts, by default but are 1 um
 range_cuts_manager.set_cut('gamma', 0.1, 'mm', 'all')
 
 # ------------------------------------------------------------------------------
-# STEP 6: Source
+# STEP 8: Source
 point_source = GGEMSXRaySource('point_source')
 point_source.set_source_particle_type('gamma')
-point_source.set_number_of_particles(1000000000)
+point_source.set_number_of_particles(number_of_particles)
 point_source.set_position(-595.0, 0.0, 0.0, 'mm')
 point_source.set_rotation(0.0, 0.0, 0.0, 'deg')
 point_source.set_beam_aperture(12.5, 'deg')
@@ -109,25 +135,27 @@ point_source.set_focal_spot_size(0.0, 0.0, 0.0, 'mm')
 point_source.set_polyenergy('data/spectrum_120kVp_2mmAl.dat')
 
 # ------------------------------------------------------------------------------
-# STEP 7: GGEMS simulation
-ggems_manager.opencl_verbose(True)
-ggems_manager.material_database_verbose(True)
-ggems_manager.navigator_verbose(True)
-ggems_manager.source_verbose(True)
-ggems_manager.memory_verbose(True)
-ggems_manager.process_verbose(True)
-ggems_manager.range_cuts_verbose(True)
-ggems_manager.random_verbose(True)
-ggems_manager.profiling_verbose(True)
-ggems_manager.tracking_verbose(False, 0)
+# STEP 9: GGEMS simulation
+ggems = GGEMS()
+ggems.opencl_verbose(True)
+ggems.material_database_verbose(False)
+ggems.navigator_verbose(False)
+ggems.source_verbose(True)
+ggems.memory_verbose(True)
+ggems.process_verbose(True)
+ggems.range_cuts_verbose(True)
+ggems.random_verbose(True)
+ggems.profiling_verbose(True)
+ggems.tracking_verbose(False, 0)
 
 # Initializing the GGEMS simulation
-ggems_manager.initialize()
+ggems.initialize(seed)
 
 # Start GGEMS simulation
-ggems_manager.run()
+ggems.run()
 
 # ------------------------------------------------------------------------------
-# STEP 8: Exit safely
+# STEP 10: Exit safely
+ggems.delete()
 opencl_manager.clean()
 exit()

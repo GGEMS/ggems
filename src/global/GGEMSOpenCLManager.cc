@@ -358,23 +358,14 @@ void GGEMSOpenCLManager::Clean(void)
   GGcout("GGEMSOpenCLManager", "Clean", 3) << "GGEMSOpenCLManager cleaning..." << GGendl;
 
   // Cleaning all singletons
-  GGEMSRAMManager& ram_manager = GGEMSRAMManager::GetInstance();
-  GGEMSVolumeCreatorManager& volume_creator_manager = GGEMSVolumeCreatorManager::GetInstance();
-  GGEMSProfilerManager& profiler_manager = GGEMSProfilerManager::GetInstance();
-  GGEMSNavigatorManager& navigator_manager = GGEMSNavigatorManager::GetInstance();
-  GGEMSSourceManager& source_manager = GGEMSSourceManager::GetInstance();
-  GGEMSMaterialsDatabaseManager& material_database_manager = GGEMSMaterialsDatabaseManager::GetInstance();
-  GGEMSProcessesManager& processes_manager = GGEMSProcessesManager::GetInstance();
-  GGEMSRangeCutsManager& range_cuts_manager = GGEMSRangeCutsManager::GetInstance();
-
-  ram_manager.Clean();
-  volume_creator_manager.Clean();
-  profiler_manager.Clean();
-  navigator_manager.Clean();
-  source_manager.Clean();
-  material_database_manager.Clean();
-  processes_manager.Clean();
-  range_cuts_manager.Clean();
+  GGEMSRAMManager::GetInstance().Clean();
+  GGEMSVolumeCreatorManager::GetInstance().Clean();
+  GGEMSProfilerManager::GetInstance().Clean();
+  GGEMSNavigatorManager::GetInstance().Clean();
+  GGEMSSourceManager::GetInstance().Clean();
+  GGEMSMaterialsDatabaseManager::GetInstance().Clean();
+  GGEMSProcessesManager::GetInstance().Clean();
+  GGEMSRangeCutsManager::GetInstance().Clean();
 
   // Freeing platforms, and platform infos
   platform_profile_.clear();
@@ -827,6 +818,11 @@ void GGEMSOpenCLManager::DeviceBalancing(std::string const& device_balancing)
     std::ostringstream oss(std::ostringstream::out);
     oss << "Mismatch between number of device balancing values and number of activated devices!!!";
     GGEMSMisc::ThrowException("GGEMSOpenCLManager", "DeviceBalancing", oss.str());
+  }
+
+  // Printing device balancing
+  for (GGsize i = 0; i < device_balancing_.size(); ++i) {
+    GGcout("GGEMSOpenCLManager", "DeviceBalancing", 0) << "Balance on device " << GetDeviceName(device_indices_[i]) << ": " << device_balancing_[i]*100.0f << "%" << GGendl;
   }
 }
 
@@ -1484,4 +1480,13 @@ void set_device_to_activate_opencl_manager(GGEMSOpenCLManager* opencl_manager, c
 void clean_opencl_manager(GGEMSOpenCLManager* opencl_manager)
 {
   opencl_manager->Clean();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void set_device_balancing_opencl_manager(GGEMSOpenCLManager* opencl_manager, char const* device_balancing)
+{
+  opencl_manager->DeviceBalancing(device_balancing);
 }

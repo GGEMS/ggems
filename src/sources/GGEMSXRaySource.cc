@@ -148,7 +148,7 @@ void GGEMSXRaySource::GetPrimaries(GGsize const& thread_index, GGsize const& num
   GGsize device_index = opencl_manager.GetIndexOfActivatedDevice(thread_index);
   std::string device_name = opencl_manager.GetDeviceName(device_index);
   std::ostringstream oss(std::ostringstream::out);
-  oss << "GGEMSXRaySource::GetPrimaries on " << device_name;
+  oss << "GGEMSXRaySource::GetPrimaries on " << device_name << ", index " << device_index;
 
   // Get the OpenCL buffers
   GGEMSSourceManager& source_manager = GGEMSSourceManager::GetInstance();

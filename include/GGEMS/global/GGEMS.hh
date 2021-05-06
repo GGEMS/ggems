@@ -229,6 +229,13 @@ class GGEMS_EXPORT GGEMS
 extern "C" GGEMS_EXPORT GGEMS* create_ggems(void);
 
 /*!
+  \fn GGEMSBox* delete_ggems(GGEMS* ggems)
+  \param ggems - pointer on ggems
+  \brief Delete GGEMS pointer
+*/
+extern "C" GGEMS_EXPORT void delete_ggems(GGEMS* ggems);
+
+/*!
   \fn void initialize_ggems(GGEMS* ggems, GGuint const seed)
   \param ggems - pointer to GGEMS
   \param seed - seed of the random

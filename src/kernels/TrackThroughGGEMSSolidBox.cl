@@ -212,6 +212,11 @@ kernel void track_through_ggems_solid_box(
         GGint3 voxel_id = convert_int3((local_position - border_min) / element_size);
 
         atomic_add(&histogram[voxel_id.x + voxel_id.y * virtual_element_number.x], 1);
+
+        // Storing scatter
+        if (scatter_histogram) {
+          if (primary_particle->scatter_[global_id] > 0) atomic_add(&scatter_histogram[voxel_id.x + voxel_id.y * virtual_element_number.x], 1);
+        }
       }
       #endif
     }

@@ -24,22 +24,31 @@ from ggems import *
 parser = argparse.ArgumentParser()
 
 parser.add_argument('-d', '--device', required=False, type=int, default=0, help="OpenCL device id")
+parser.add_argument('-v', '--verbose', required=False, type=int, default=0, help="Set level of verbosity")
 
 args = parser.parse_args()
 
 # Get argument
 device_id = args.device
+verbosity_level = args.verbose
 
 # ------------------------------------------------------------------------------
 # STEP 0: Level of verbosity during computation
-GGEMSVerbosity(0)
+GGEMSVerbosity(verbosity_level)
 
 # ------------------------------------------------------------------------------
-# STEP 1: OpenCL Initialization
+# STEP 1: Calling C++ singleton
+opencl_manager = GGEMSOpenCLManager()
+volume_creator_manager = GGEMSVolumeCreatorManager()
+profiler_manager = GGEMSProfilerManager()
+ram_manager = GGEMSRAMManager()
+
+# ------------------------------------------------------------------------------
+# STEP 2: OpenCL Initialization
 opencl_manager.set_device_index(device_id)
 
 # ------------------------------------------------------------------------------
-# STEP 2: Initializing volume creator manager and setting the informations about the global voxelized volume
+# STEP 3: Initializing volume creator manager and setting the informations about the global voxelized volume
 volume_creator_manager.set_dimensions(450, 450, 450)
 volume_creator_manager.set_element_sizes(0.5, 0.5, 0.5, "mm")
 volume_creator_manager.set_output('data/volume.mhd')
@@ -49,7 +58,7 @@ volume_creator_manager.set_data_type('MET_INT')
 volume_creator_manager.initialize()
 
 # ------------------------------------------------------------------------------
-# STEP 3: Designing volume(s)
+# STEP 4: Designing volume(s)
 # Creating a box
 box = GGEMSBox(24.0, 36.0, 56.0, 'mm')
 box.set_position(-70.0, -30.0, 10.0, 'mm')
@@ -78,7 +87,7 @@ sphere.draw()
 sphere.delete()
 
 # ------------------------------------------------------------------------------
-# STEP 4: Saving the final volume
+# STEP 5: Saving the final volume
 volume_creator_manager.write()
 
 # Printin RAM status
@@ -88,6 +97,6 @@ ram_manager.print_infos()
 profiler_manager.print_summary_profile()
 
 # ------------------------------------------------------------------------------
-# STEP 5: Exit GGEMS safely
+# STEP 6: Exit GGEMS safely
 opencl_manager.clean()
 exit()

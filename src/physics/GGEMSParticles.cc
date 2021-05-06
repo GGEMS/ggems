@@ -43,15 +43,6 @@ GGEMSParticles::GGEMSParticles(void)
 {
   GGcout("GGEMSParticles", "GGEMSParticles", 3) << "GGEMSParticles creating..." << GGendl;
 
-  // Get the OpenCL manager
-  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
-
-  // Get number of activated device
-  number_activated_devices_ = opencl_manager.GetNumberOfActivatedDevice();
-
-  // Storing a kernel for each device
-  kernel_alive_ = new cl::Kernel*[number_activated_devices_];
-
   GGcout("GGEMSParticles", "GGEMSParticles", 3) << "GGEMSParticles created!!!" << GGendl;
 }
 
@@ -110,6 +101,10 @@ void GGEMSParticles::InitializeKernel(void)
   std::string openCL_kernel_path = OPENCL_KERNEL_PATH;
   std::string filename = openCL_kernel_path + "/IsAlive.cl";
 
+
+  // Storing a kernel for each device
+  kernel_alive_ = new cl::Kernel*[number_activated_devices_];
+
   // Compiling the kernel
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
@@ -126,7 +121,11 @@ void GGEMSParticles::Initialize(void)
   GGcout("GGEMSParticles", "Initialize", 1) << "Initialization of GGEMSParticles..." << GGendl;
 
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
-  number_of_particles_ = new GGsize[opencl_manager.GetNumberOfActivatedDevice()];
+
+  // Get number of activated device
+  number_activated_devices_ = opencl_manager.GetNumberOfActivatedDevice();
+
+  number_of_particles_ = new GGsize[number_activated_devices_];
 
   // Allocation of the PrimaryParticle structure
   AllocatePrimaryParticles();
@@ -150,7 +149,7 @@ bool GGEMSParticles::IsAlive(GGsize const& thread_index) const
   GGsize device_index = opencl_manager.GetIndexOfActivatedDevice(thread_index);
   std::string device_name = opencl_manager.GetDeviceName(device_index);
   std::ostringstream oss(std::ostringstream::out);
-  oss << "GGEMSParticles::IsAlive on " << device_name;
+  oss << "GGEMSParticles::IsAlive on " << device_name << ", index " << device_index;
 
   // Get the OpenCL buffers
   cl::Buffer* particles = primary_particles_[thread_index];

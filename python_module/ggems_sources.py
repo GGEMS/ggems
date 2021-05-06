@@ -27,9 +27,6 @@ class GGEMSSourceManager(object):
         ggems_lib.initialize_source_manager.argtypes = [ctypes.c_void_p, ctypes.c_uint]
         ggems_lib.initialize_source_manager.restype = ctypes.c_void_p
 
-        ggems_lib.clean_source_manager.argtypes = [ctypes.c_void_p]
-        ggems_lib.clean_source_manager.restype = ctypes.c_void_p
-
         ggems_lib.print_infos_source_manager.argtypes = [ctypes.c_void_p]
         ggems_lib.print_infos_source_manager.restype = ctypes.c_void_p
 

@@ -127,11 +127,11 @@ class GGEMS_EXPORT GGEMSSystem : public GGEMSNavigator
     void SetMaterialName(std::string const& material_name);
 
     /*!
-      \fn void SetScatter(bool const& is_scatter)
+      \fn void StoreScatter(bool const& is_scatter)
       \param is_scatter - true to store scatter image
       \brief set to true to activate scatter registration
     */
-    void SetScatter(bool const& is_scatter);
+    void StoreScatter(bool const& is_scatter);
 
     /*!
       \fn void SaveResults(void)

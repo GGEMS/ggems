@@ -112,7 +112,7 @@ void GGEMSSystem::SetMaterialName(std::string const& material_name)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSSystem::SetScatter(bool const& is_scatter)
+void GGEMSSystem::StoreScatter(bool const& is_scatter)
 {
   is_scatter_ = is_scatter;
 }
@@ -177,25 +177,74 @@ void GGEMSSystem::SaveResults(void)
 
   // Getting all the counts from solid from all OpenCL devices
   for (GGsize i = 0; i < number_activated_devices_; ++i) {
-  for (GGsize jj = 0; jj < number_of_modules_xy_.y_; ++jj) {
-    for (GGsize ii = 0; ii < number_of_modules_xy_.x_; ++ii) {
-      cl::Buffer* histogram = solids_[ii + jj* number_of_modules_xy_.x_]->GetHistogram(i);
+    for (GGsize jj = 0; jj < number_of_modules_xy_.y_; ++jj) {
+      for (GGsize ii = 0; ii < number_of_modules_xy_.x_; ++ii) {
+        cl::Buffer* histogram = solids_[ii + jj* number_of_modules_xy_.x_]->GetHistogram(i);
 
-      GGint* histogram_device = opencl_manager.GetDeviceBuffer<GGint>(histogram, number_of_detection_elements_inside_module_xyz_.x_*number_of_detection_elements_inside_module_xyz_.y_*sizeof(GGint), i);
+        GGint* histogram_device = opencl_manager.GetDeviceBuffer<GGint>(histogram, number_of_detection_elements_inside_module_xyz_.x_*number_of_detection_elements_inside_module_xyz_.y_*sizeof(GGint), i);
 
-      // Storing data on host
-      for (GGsize jjj = 0; jjj < number_of_detection_elements_inside_module_xyz_.y_; ++jjj) {
-        for (GGsize iii = 0; iii < number_of_detection_elements_inside_module_xyz_.x_; ++iii) {
-          output[(iii+ii*number_of_detection_elements_inside_module_xyz_.x_) + (jjj+jj*number_of_detection_elements_inside_module_xyz_.y_)*total_dim.x_] +=
-            histogram_device[iii + jjj*number_of_detection_elements_inside_module_xyz_.x_];
+        // Storing data on host
+        for (GGsize jjj = 0; jjj < number_of_detection_elements_inside_module_xyz_.y_; ++jjj) {
+          for (GGsize iii = 0; iii < number_of_detection_elements_inside_module_xyz_.x_; ++iii) {
+            output[(iii+ii*number_of_detection_elements_inside_module_xyz_.x_) + (jjj+jj*number_of_detection_elements_inside_module_xyz_.y_)*total_dim.x_] +=
+              histogram_device[iii + jjj*number_of_detection_elements_inside_module_xyz_.x_];
+          }
         }
-      }
 
-      opencl_manager.ReleaseDeviceBuffer(histogram, histogram_device, i);
+        opencl_manager.ReleaseDeviceBuffer(histogram, histogram_device, i);
+      }
     }
-  }
   }
 
   mhdImage.Write<GGint>(output);
+
+  // Cleaning output buffer
+  std::memset(output, 0, total_dim.x_*total_dim.y_*total_dim.z_*sizeof(GGint));
+
+  // If scatter output if necessary
+  if (is_scatter_) {
+    // From output file add '-scatter' extension
+    std::string scatter_output_filename = output_basename_;
+
+    // Checking if there is .mhd suffix
+    GGsize found_mhd = output_basename_.find(".mhd");
+
+    if (found_mhd == std::string::npos) { // "add '-scatter.mhd' at the end of file"
+      scatter_output_filename += "-scatter.mhd";
+    }
+    else { // If suffix found, add '-scatter' between end of filename and suffix
+      scatter_output_filename = scatter_output_filename.substr(0, found_mhd) + "-scatter.mhd";
+    }
+
+    GGEMSMHDImage mhdImageScatter;
+    mhdImageScatter.SetOutputFileName(scatter_output_filename);
+    mhdImageScatter.SetDataType("MET_INT");
+    mhdImageScatter.SetDimensions(total_dim);
+    mhdImageScatter.SetElementSizes(size_of_detection_elements_xyz_);
+
+    // Getting all the counts from solid from all OpenCL devices
+    for (GGsize i = 0; i < number_activated_devices_; ++i) {
+      for (GGsize jj = 0; jj < number_of_modules_xy_.y_; ++jj) {
+        for (GGsize ii = 0; ii < number_of_modules_xy_.x_; ++ii) {
+          cl::Buffer* scatter_histogram = solids_[ii + jj* number_of_modules_xy_.x_]->GetScatterHistogram(i);
+
+          GGint* scatter_histogram_device = opencl_manager.GetDeviceBuffer<GGint>(scatter_histogram, number_of_detection_elements_inside_module_xyz_.x_*number_of_detection_elements_inside_module_xyz_.y_*sizeof(GGint), i);
+
+          // Storing data on host
+          for (GGsize jjj = 0; jjj < number_of_detection_elements_inside_module_xyz_.y_; ++jjj) {
+            for (GGsize iii = 0; iii < number_of_detection_elements_inside_module_xyz_.x_; ++iii) {
+              output[(iii+ii*number_of_detection_elements_inside_module_xyz_.x_) + (jjj+jj*number_of_detection_elements_inside_module_xyz_.y_)*total_dim.x_] +=
+                scatter_histogram_device[iii + jjj*number_of_detection_elements_inside_module_xyz_.x_];
+            }
+          }
+
+          opencl_manager.ReleaseDeviceBuffer(scatter_histogram, scatter_histogram_device, i);
+        }
+      }
+    }
+
+    mhdImageScatter.Write<GGint>(output);
+  }
+
   delete[] output;
 }

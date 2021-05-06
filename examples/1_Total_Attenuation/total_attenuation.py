@@ -29,30 +29,38 @@ parser = argparse.ArgumentParser()
 
 parser.add_argument('-d', '--device', required=False, type=int, default=0, help="OpenCL device id")
 parser.add_argument('-m', '--material', required=True, type=str, help="Set a material name")
+parser.add_argument('-v', '--verbose', required=False, type=int, default=0, help="Set level of verbosity")
 
 args = parser.parse_args()
 
 # Get arguments
 material_name = args.material
 device_id = args.device
+verbosity_level = args.verbose
 
 # Sequence of physical effects in GGEMS for total attenuation
 process_list = ('Compton', 'Photoelectric', 'Rayleigh')
 
 # ------------------------------------------------------------------------------
-# Level of verbosity during computation
-GGEMSVerbosity(0)
+# STEP 0: Level of verbosity during computation
+GGEMSVerbosity(verbosity_level)
 
 # ------------------------------------------------------------------------------
-# STEP 1: Choosing an OpenCL device
+# STEP 1: Calling C++ singleton
+opencl_manager = GGEMSOpenCLManager()
+materials_database_manager = GGEMSMaterialsDatabaseManager()
+processes_manager = GGEMSProcessesManager()
+
+# ------------------------------------------------------------------------------
+# STEP 2: Choosing an OpenCL device
 opencl_manager.set_device_index(device_id)
 
 # ------------------------------------------------------------------------------
-# STEP 2: Setting GGEMS materials
+# STEP 3: Setting GGEMS materials
 materials_database_manager.set_materials('../../data/materials.txt')
 
 # ------------------------------------------------------------------------------
-# STEP 3: Add materials and initialize them
+# STEP 4: Add materials and initialize them
 materials = GGEMSMaterials()
 materials.add_material(material_name)
 
@@ -73,13 +81,13 @@ print('    Positron energy cut (for 1 mm distance):', positron_energy_cut, 'keV'
 print('    Atomic number density:', atomic_number_density, 'atoms.cm-3')
 
 #-------------------------------------------------------------------------------
-# STEP 4: Defining global parameters for cross-section building
+# STEP 5: Defining global parameters for cross-section building
 processes_manager.set_cross_section_table_number_of_bins(2048)
 processes_manager.set_cross_section_table_energy_min(10.0, 'keV')
 processes_manager.set_cross_section_table_energy_max(1000.0, 'keV')
 
 # ------------------------------------------------------------------------------
-# STEP 5: Add physical processes and initialize them
+# STEP 6: Add physical processes and initialize them
 cross_sections = GGEMSCrossSections()
 for process_id in process_list:
   cross_sections.add_process(process_id, 'gamma')
@@ -136,7 +144,7 @@ plt.savefig('{}_Total_Attenuation.png'.format(material_name), bbox_inches='tight
 plt.close()
 
 # ------------------------------------------------------------------------------
-# STEP 6: Exit safely
+# STEP 7: Exit safely
 materials.clean()
 cross_sections.clean()
 opencl_manager.clean()

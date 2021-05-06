@@ -40,16 +40,49 @@
 #include "GGEMS/tools/GGEMSProfilerManager.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
 
+#ifdef _WIN32
+#include "GGEMS/tools/GGEMSWinGetOpt.hh"
+#else
+#include <getopt.h>
+#endif
+
 /*!
-  \fn void PrintHelpAndQuit(void)
-  \brief Print help to terminal and quit
+  \fn void PrintHelpAndQuit(std::string const& message, char const *p_executable)
+  \param message - error message
+  \param p_executable - name of the executable
+  \brief print the help or the error of the program
 */
-void PrintHelpAndQuit(void)
+void PrintHelpAndQuit(std::string const& message, char const* exec)
 {
-  std::cerr << "Usage: generate_volume <DeviceID>" << std::endl;
-  std::cerr << std::endl;
-  std::cerr << "<DeviceID>: OpenCL device id" << std::endl;
-  exit(EXIT_FAILURE);
+  std::ostringstream oss(std::ostringstream::out);
+  oss << message << std::endl;
+  oss << std::endl;
+  oss << "-->> 3 - Generate Volume Example <<--\n" << std::endl;
+  oss << "Usage: " << exec << " [OPTIONS...]\n" << std::endl;
+  oss << "[--help]                   Print the help to the terminal" << std::endl;
+  oss << "[--verbose X]              Verbosity level" << std::endl;
+  oss << "                           (X=0, default)" << std::endl;
+  oss << std::endl;
+  oss << "Specific hardware selection:" << std::endl;
+  oss << "----------------------------" << std::endl;
+  oss << "[--device X]               Index of device type" << std::endl;
+  oss << "                           (X=0, by default)" << std::endl;
+  throw std::invalid_argument(oss.str());
+}
+
+/*!
+  \fn void ParseCommandLine(std::string const& line_option, T* p_buffer)
+  \tparam T - type of the array storing the option
+  \param line_option - string from the command line
+  \param p_buffer - buffer storing the commands
+  \brief parse the command with comma
+*/
+template<typename T>
+void ParseCommandLine(std::string const& line_option, T* p_buffer)
+{
+  std::istringstream iss(line_option);
+  T* p = &p_buffer[0];
+  while (iss >> *p++) if (iss.peek() == ',') iss.ignore();
 }
 
 /*!
@@ -61,27 +94,67 @@ void PrintHelpAndQuit(void)
 */
 int main(int argc, char** argv)
 {
-  // Checking parameters
-  if (argc != 2) {
-    std::cerr << "Invalid number of arguments!!!" << std::endl;
-    PrintHelpAndQuit();
-  }
-
-  // Setting verbosity
-  GGcout.SetVerbosity(3);
-  GGcerr.SetVerbosity(3);
-  GGwarn.SetVerbosity(3);
-
-  // Getting parameters
-  GGsize device_id = static_cast<GGsize>(atoi(argv[1]));
-
-  // Initialization of singletons
-  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
-  GGEMSVolumeCreatorManager& volume_creator_manager = GGEMSVolumeCreatorManager::GetInstance();
-  GGEMSProfilerManager& profiler_manager = GGEMSProfilerManager::GetInstance();
-  GGEMSRAMManager& ram_manager = GGEMSRAMManager::GetInstance();
-
   try {
+    // Verbosity level
+    GGint verbosity_level = 0;
+
+    // List of parameters
+    GGsize device_id = 0;
+
+    // Loop while there is an argument
+    GGint counter(0);
+    while (1) {
+      // Declaring a structure of the options
+      GGint option_index = 0;
+      static struct option sLongOptions[] = {
+        {"verbose", required_argument, 0, 'v'},
+        {"help", no_argument, 0, 'h'},
+        {"device", required_argument, 0, 'd'}
+      };
+
+      // Getting the options
+      counter = getopt_long(argc, argv, "hv:d:", sLongOptions, &option_index);
+
+      // Exit the loop if -1
+      if (counter == -1) break;
+
+      // Analyzing each option
+      switch (counter) {
+        case 0: {
+          // If this option set a flag, do nothing else now
+          if (sLongOptions[option_index].flag != 0) break;
+          break;
+        }
+        case 'v': {
+          ParseCommandLine(optarg, &verbosity_level);
+          break;
+        }
+        case 'h': {
+          PrintHelpAndQuit("Printing the help", argv[0]);
+          break;
+        }
+        case 'd': {
+          ParseCommandLine(optarg, &device_id);
+          break;
+        }
+        default: {
+          PrintHelpAndQuit("Out of switch options!!!", argv[0]);
+          break;
+        }
+      }
+    }
+
+    // Setting verbosity
+    GGcout.SetVerbosity(verbosity_level);
+    GGcerr.SetVerbosity(verbosity_level);
+    GGwarn.SetVerbosity(verbosity_level);
+
+    // Initialization of singletons
+    GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+    GGEMSVolumeCreatorManager& volume_creator_manager = GGEMSVolumeCreatorManager::GetInstance();
+    GGEMSProfilerManager& profiler_manager = GGEMSProfilerManager::GetInstance();
+    GGEMSRAMManager& ram_manager = GGEMSRAMManager::GetInstance();
+
     // Set the context id
     opencl_manager.DeviceToActivate(device_id);
 
@@ -132,12 +205,16 @@ int main(int argc, char** argv)
   }
   catch (std::exception& e) {
     std::cerr << e.what() << std::endl;
+    // Exit safely
+    GGEMSOpenCLManager::GetInstance().Clean();
   }
   catch (...) {
     std::cerr << "Unknown exception!!!" << std::endl;
+    // Exit safely
+    GGEMSOpenCLManager::GetInstance().Clean();
   }
 
   // Exit safely
-  opencl_manager.Clean();
+  GGEMSOpenCLManager::GetInstance().Clean();
   exit(EXIT_SUCCESS);
 }
