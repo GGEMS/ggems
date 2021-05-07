@@ -47,7 +47,8 @@ GGEMSDosimetryCalculator::GGEMSDosimetryCalculator(void)
   is_uncertainty_(false),
   scale_factor_(1.0f),
   is_water_reference_(FALSE),
-  minimum_density_(0.0f)
+  minimum_density_(0.0f),
+  kernel_compute_dose_(nullptr)
 {
   GGcout("GGEMSDosimetryCalculator", "GGEMSDosimetryCalculator", 3) << "GGEMSDosimetryCalculator creating..." << GGendl;
 
@@ -81,9 +82,6 @@ GGEMSDosimetryCalculator::GGEMSDosimetryCalculator(void)
   dose_recording_.edep_squared_ = new cl::Buffer*[number_activated_devices_];
   dose_recording_.hit_ = new cl::Buffer*[number_activated_devices_];
   dose_recording_.photon_tracking_ = new cl::Buffer*[number_activated_devices_];
-
-  // Storing a kernel for each device
-  kernel_compute_dose_ = new cl::Kernel*[number_activated_devices_];
 
   GGcout("GGEMSDosimetryCalculator", "GGEMSDosimetryCalculator", 3) << "GGEMSDosimetryCalculator created!!!" << GGendl;
 }
@@ -304,6 +302,9 @@ void GGEMSDosimetryCalculator::InitializeKernel(void)
   std::string openCL_kernel_path = OPENCL_KERNEL_PATH;
   std::string compute_dose_filename = openCL_kernel_path + "/ComputeDoseGGEMSVoxelizedSolid.cl";
 
+  // Storing a kernel for each device
+  kernel_compute_dose_ = new cl::Kernel*[number_activated_devices_];
+
   // Compiling the kernels
   opencl_manager.CompileKernel(compute_dose_filename, "compute_dose_ggems_voxelized_solid", kernel_compute_dose_, nullptr, nullptr);
 }
@@ -323,7 +324,7 @@ void GGEMSDosimetryCalculator::ComputeDose(GGsize const& thread_index)
   GGsize device_index = opencl_manager.GetIndexOfActivatedDevice(thread_index);
   std::string device_name = opencl_manager.GetDeviceName(device_index);
   std::ostringstream oss(std::ostringstream::out);
-  oss << "GGEMSDosimetryCalculator::ComputeDose in " << device_name;
+  oss << "GGEMSDosimetryCalculator::ComputeDose in " << device_name << ", index " << device_index;
 
   // Get pointer on OpenCL device for dose parameters
   GGEMSDoseParams* dose_params_device = opencl_manager.GetDeviceBuffer<GGEMSDoseParams>(dose_params_[thread_index], sizeof(GGEMSDoseParams), thread_index);
@@ -364,14 +365,6 @@ void GGEMSDosimetryCalculator::ComputeDose(GGsize const& thread_index)
   // GGEMS Profiling
   GGEMSProfilerManager& profiler_manager = GGEMSProfilerManager::GetInstance();
   profiler_manager.HandleEvent(*event, oss.str());
-
-  // Saving results
-  // SaveDose();
-  // if (is_photon_tracking_) SavePhotonTracking();
-  // if (is_edep_) SaveEdep();
-  // if (is_hit_tracking_) SaveHit();
-  // if (is_edep_squared_) SaveEdepSquared();
-  // if (is_uncertainty_) SaveUncertainty();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -476,40 +469,57 @@ void GGEMSDosimetryCalculator::Initialize(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+void GGEMSDosimetryCalculator::SaveResults(void) const
+{
+  SaveDose();
+  if (is_photon_tracking_) SavePhotonTracking();
+  if (is_edep_) SaveEdep();
+  if (is_hit_tracking_) SaveHit();
+  if (is_edep_squared_) SaveEdepSquared();
+  if (is_uncertainty_) SaveUncertainty();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 void GGEMSDosimetryCalculator::SavePhotonTracking(void) const
 {
   // Get the OpenCL manager
-  // GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
-  // // Get pointer on OpenCL device for dose parameters
-  // GGEMSDoseParams* dose_params_device = opencl_manager.GetDeviceBuffer<GGEMSDoseParams>(dose_params_.get(), sizeof(GGEMSDoseParams));
+  // Get pointer on OpenCL device for dose parameters, take data from first device only
+  GGEMSDoseParams* dose_params_device = opencl_manager.GetDeviceBuffer<GGEMSDoseParams>(dose_params_[0], sizeof(GGEMSDoseParams), 0);
 
-  // GGsize total_number_of_dosels = static_cast<GGsize>(dose_params_device->total_number_of_dosels_);
-  // GGint* photon_tracking = new GGint[total_number_of_dosels];
-  // std::memset(photon_tracking, 0, total_number_of_dosels*sizeof(GGint));
+  GGsize total_number_of_dosels = static_cast<GGsize>(dose_params_device->total_number_of_dosels_);
+  GGint* photon_tracking = new GGint[total_number_of_dosels];
+  std::memset(photon_tracking, 0, total_number_of_dosels*sizeof(GGint));
 
-  // GGsize3 dimensions;
-  // dimensions.x_ = static_cast<GGsize>(dose_params_device->number_of_dosels_.x);
-  // dimensions.y_ = static_cast<GGsize>(dose_params_device->number_of_dosels_.y);
-  // dimensions.z_ = static_cast<GGsize>(dose_params_device->number_of_dosels_.z);
+  GGsize3 dimensions;
+  dimensions.x_ = static_cast<GGsize>(dose_params_device->number_of_dosels_.x);
+  dimensions.y_ = static_cast<GGsize>(dose_params_device->number_of_dosels_.y);
+  dimensions.z_ = static_cast<GGsize>(dose_params_device->number_of_dosels_.z);
 
-  // GGEMSMHDImage mhdImage;
-  // mhdImage.SetOutputFileName(dosimetry_output_filename_ + "_photon_tracking.mhd");
-  // mhdImage.SetDataType("MET_INT");
-  // mhdImage.SetDimensions(dimensions);
-  // mhdImage.SetElementSizes(dose_params_device->size_of_dosels_);
+  GGEMSMHDImage mhdImage;
+  mhdImage.SetOutputFileName(dosimetry_output_filename_ + "_photon_tracking.mhd");
+  mhdImage.SetDataType("MET_INT");
+  mhdImage.SetDimensions(dimensions);
+  mhdImage.SetElementSizes(dose_params_device->size_of_dosels_);
 
-  // GGint* photon_tracking_device = opencl_manager.GetDeviceBuffer<GGint>(dose_recording_.photon_tracking_.get(), total_number_of_dosels*sizeof(GGint));
+  // Release the pointer
+  opencl_manager.ReleaseDeviceBuffer(dose_params_[0], dose_params_device, 0);
 
-  // for (GGsize i = 0; i < total_number_of_dosels; ++i) photon_tracking[i] = photon_tracking_device[i];
+  // Loop over all activated device
+  for (GGsize j = 0; j < number_activated_devices_; ++j) {
+    GGint* photon_tracking_device = opencl_manager.GetDeviceBuffer<GGint>(dose_recording_.photon_tracking_[j], total_number_of_dosels*sizeof(GGint), j);
 
-  // // Writing data
-  // mhdImage.Write<GGint>(photon_tracking, total_number_of_dosels);
-  // opencl_manager.ReleaseDeviceBuffer(dose_recording_.photon_tracking_.get(), photon_tracking_device);
-  // delete[] photon_tracking;
+    for (GGsize i = 0; i < total_number_of_dosels; ++i) photon_tracking[i] += photon_tracking_device[i];
+    opencl_manager.ReleaseDeviceBuffer(dose_recording_.photon_tracking_[j], photon_tracking_device, j);
+  }
 
-  // // Release the pointer
-  // opencl_manager.ReleaseDeviceBuffer(dose_params_.get(), dose_params_device);
+  // Writing data
+  mhdImage.Write<GGint>(photon_tracking);
+  delete[] photon_tracking;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -519,37 +529,41 @@ void GGEMSDosimetryCalculator::SavePhotonTracking(void) const
 void GGEMSDosimetryCalculator::SaveHit(void) const
 {
   // Get the OpenCL manager
-  // GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
-  // // Get pointer on OpenCL device for dose parameters
-  // GGEMSDoseParams* dose_params_device = opencl_manager.GetDeviceBuffer<GGEMSDoseParams>(dose_params_.get(), sizeof(GGEMSDoseParams));
+  // Get pointer on OpenCL device for dose parameters, take data from first device only
+  GGEMSDoseParams* dose_params_device = opencl_manager.GetDeviceBuffer<GGEMSDoseParams>(dose_params_[0], sizeof(GGEMSDoseParams), 0);
 
-  // GGsize total_number_of_dosels = static_cast<GGsize>(dose_params_device->total_number_of_dosels_);
-  // GGint* hit_tracking = new GGint[total_number_of_dosels];
-  // std::memset(hit_tracking, 0, total_number_of_dosels*sizeof(GGint));
+  GGsize total_number_of_dosels = static_cast<GGsize>(dose_params_device->total_number_of_dosels_);
+  GGint* hit_tracking = new GGint[total_number_of_dosels];
+  std::memset(hit_tracking, 0, total_number_of_dosels*sizeof(GGint));
 
-  // GGsize3 dimensions;
-  // dimensions.x_ = static_cast<GGsize>(dose_params_device->number_of_dosels_.x);
-  // dimensions.y_ = static_cast<GGsize>(dose_params_device->number_of_dosels_.y);
-  // dimensions.z_ = static_cast<GGsize>(dose_params_device->number_of_dosels_.z);
+  GGsize3 dimensions;
+  dimensions.x_ = static_cast<GGsize>(dose_params_device->number_of_dosels_.x);
+  dimensions.y_ = static_cast<GGsize>(dose_params_device->number_of_dosels_.y);
+  dimensions.z_ = static_cast<GGsize>(dose_params_device->number_of_dosels_.z);
 
-  // GGEMSMHDImage mhdImage;
-  // mhdImage.SetOutputFileName(dosimetry_output_filename_ + "_hit.mhd");
-  // mhdImage.SetDataType("MET_INT");
-  // mhdImage.SetDimensions(dimensions);
-  // mhdImage.SetElementSizes(dose_params_device->size_of_dosels_);
+  GGEMSMHDImage mhdImage;
+  mhdImage.SetOutputFileName(dosimetry_output_filename_ + "_hit.mhd");
+  mhdImage.SetDataType("MET_INT");
+  mhdImage.SetDimensions(dimensions);
+  mhdImage.SetElementSizes(dose_params_device->size_of_dosels_);
 
-  // GGint* hit_device = opencl_manager.GetDeviceBuffer<GGint>(dose_recording_.hit_.get(), total_number_of_dosels*sizeof(GGint));
+  // Release the pointer
+  opencl_manager.ReleaseDeviceBuffer(dose_params_[0], dose_params_device, 0);
 
-  // for (GGsize i = 0; i < total_number_of_dosels; ++i) hit_tracking[i] = hit_device[i];
+  // Loop over all activated device
+  for (GGsize j = 0; j < number_activated_devices_; ++j) {
+    GGint* hit_device = opencl_manager.GetDeviceBuffer<GGint>(dose_recording_.hit_[j], total_number_of_dosels*sizeof(GGint), j);
 
-  // // Writing data
-  // mhdImage.Write<GGint>(hit_tracking, total_number_of_dosels);
-  // opencl_manager.ReleaseDeviceBuffer(dose_recording_.hit_.get(), hit_device);
-  // delete[] hit_tracking;
+    for (GGsize i = 0; i < total_number_of_dosels; ++i) hit_tracking[i] = hit_device[i];
 
-  // // Release the pointer
-  // opencl_manager.ReleaseDeviceBuffer(dose_params_.get(), dose_params_device);
+    opencl_manager.ReleaseDeviceBuffer(dose_recording_.hit_[j], hit_device, j);
+  }
+
+  // Writing data
+  mhdImage.Write<GGint>(hit_tracking);
+  delete[] hit_tracking;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -559,38 +573,42 @@ void GGEMSDosimetryCalculator::SaveHit(void) const
 void GGEMSDosimetryCalculator::SaveEdep(void) const
 {
   // Get the OpenCL manager
-  // GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
-  // // Get pointer on OpenCL device for dose parameters
-  // GGEMSDoseParams* dose_params_device = opencl_manager.GetDeviceBuffer<GGEMSDoseParams>(dose_params_.get(), sizeof(GGEMSDoseParams));
+  // Get pointer on OpenCL device for dose parameters, take data from first device only
+  GGEMSDoseParams* dose_params_device = opencl_manager.GetDeviceBuffer<GGEMSDoseParams>(dose_params_[0], sizeof(GGEMSDoseParams), 0);
 
-  // GGsize total_number_of_dosels = static_cast<GGsize>(dose_params_device->total_number_of_dosels_);
-  // GGDosiType* edep_tracking = new GGDosiType[total_number_of_dosels];
-  // std::memset(edep_tracking, 0, total_number_of_dosels*sizeof(GGDosiType));
+  GGsize total_number_of_dosels = static_cast<GGsize>(dose_params_device->total_number_of_dosels_);
+  GGDosiType* edep_tracking = new GGDosiType[total_number_of_dosels];
+  std::memset(edep_tracking, 0, total_number_of_dosels*sizeof(GGDosiType));
 
-  // GGsize3 dimensions;
-  // dimensions.x_ = static_cast<GGsize>(dose_params_device->number_of_dosels_.x);
-  // dimensions.y_ = static_cast<GGsize>(dose_params_device->number_of_dosels_.y);
-  // dimensions.z_ = static_cast<GGsize>(dose_params_device->number_of_dosels_.z);
+  GGsize3 dimensions;
+  dimensions.x_ = static_cast<GGsize>(dose_params_device->number_of_dosels_.x);
+  dimensions.y_ = static_cast<GGsize>(dose_params_device->number_of_dosels_.y);
+  dimensions.z_ = static_cast<GGsize>(dose_params_device->number_of_dosels_.z);
 
-  // GGEMSMHDImage mhdImage;
-  // mhdImage.SetOutputFileName(dosimetry_output_filename_ + "_edep.mhd");
-  // if (sizeof(GGDosiType) == 4) mhdImage.SetDataType("MET_FLOAT");
-  // else if (sizeof(GGDosiType) == 8) mhdImage.SetDataType("MET_DOUBLE");
-  // mhdImage.SetDimensions(dimensions);
-  // mhdImage.SetElementSizes(dose_params_device->size_of_dosels_);
+  GGEMSMHDImage mhdImage;
+  mhdImage.SetOutputFileName(dosimetry_output_filename_ + "_edep.mhd");
+  if (sizeof(GGDosiType) == 4) mhdImage.SetDataType("MET_FLOAT");
+  else if (sizeof(GGDosiType) == 8) mhdImage.SetDataType("MET_DOUBLE");
+  mhdImage.SetDimensions(dimensions);
+  mhdImage.SetElementSizes(dose_params_device->size_of_dosels_);
 
-  // GGDosiType* edep_device = opencl_manager.GetDeviceBuffer<GGDosiType>(dose_recording_.edep_.get(), total_number_of_dosels*sizeof(GGDosiType));
+  // Release the pointer
+  opencl_manager.ReleaseDeviceBuffer(dose_params_[0], dose_params_device, 0);
 
-  // for (GGsize i = 0; i < total_number_of_dosels; ++i) edep_tracking[i] = edep_device[i];
+  // Loop over all activated device
+  for (GGsize j = 0; j < number_activated_devices_; ++j) {
+    GGDosiType* edep_device = opencl_manager.GetDeviceBuffer<GGDosiType>(dose_recording_.edep_[j], total_number_of_dosels*sizeof(GGDosiType), j);
 
-  // // Writing data
-  // mhdImage.Write<GGDosiType>(edep_tracking, total_number_of_dosels);
-  // opencl_manager.ReleaseDeviceBuffer(dose_recording_.edep_.get(), edep_device);
-  // delete[] edep_tracking;
+    for (GGsize i = 0; i < total_number_of_dosels; ++i) edep_tracking[i] = edep_device[i];
 
-  // // Release the pointer
-  // opencl_manager.ReleaseDeviceBuffer(dose_params_.get(), dose_params_device);
+    opencl_manager.ReleaseDeviceBuffer(dose_recording_.edep_[j], edep_device, j);
+  }
+
+  // Writing data
+  mhdImage.Write<GGDosiType>(edep_tracking);
+  delete[] edep_tracking;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -600,38 +618,42 @@ void GGEMSDosimetryCalculator::SaveEdep(void) const
 void GGEMSDosimetryCalculator::SaveEdepSquared(void) const
 {
   // Get the OpenCL manager
-  // GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
-  // // Get pointer on OpenCL device for dose parameters
-  // GGEMSDoseParams* dose_params_device = opencl_manager.GetDeviceBuffer<GGEMSDoseParams>(dose_params_.get(), sizeof(GGEMSDoseParams));
+  // Get pointer on OpenCL device for dose parameters, take data from first device only
+  GGEMSDoseParams* dose_params_device = opencl_manager.GetDeviceBuffer<GGEMSDoseParams>(dose_params_[0], sizeof(GGEMSDoseParams), 0);
 
-  // GGsize total_number_of_dosels = static_cast<GGsize>(dose_params_device->total_number_of_dosels_);
-  // GGDosiType* edep_squared_tracking = new GGDosiType[total_number_of_dosels];
-  // std::memset(edep_squared_tracking, 0, total_number_of_dosels*sizeof(GGDosiType));
+  GGsize total_number_of_dosels = static_cast<GGsize>(dose_params_device->total_number_of_dosels_);
+  GGDosiType* edep_squared_tracking = new GGDosiType[total_number_of_dosels];
+  std::memset(edep_squared_tracking, 0, total_number_of_dosels*sizeof(GGDosiType));
 
-  // GGsize3 dimensions;
-  // dimensions.x_ = static_cast<GGsize>(dose_params_device->number_of_dosels_.x);
-  // dimensions.y_ = static_cast<GGsize>(dose_params_device->number_of_dosels_.y);
-  // dimensions.z_ = static_cast<GGsize>(dose_params_device->number_of_dosels_.z);
+  GGsize3 dimensions;
+  dimensions.x_ = static_cast<GGsize>(dose_params_device->number_of_dosels_.x);
+  dimensions.y_ = static_cast<GGsize>(dose_params_device->number_of_dosels_.y);
+  dimensions.z_ = static_cast<GGsize>(dose_params_device->number_of_dosels_.z);
 
-  // GGEMSMHDImage mhdImage;
-  // mhdImage.SetOutputFileName(dosimetry_output_filename_ + "_edep_squared.mhd");
-  // if (sizeof(GGDosiType) == 4) mhdImage.SetDataType("MET_FLOAT");
-  // else if (sizeof(GGDosiType) == 8) mhdImage.SetDataType("MET_DOUBLE");
-  // mhdImage.SetDimensions(dimensions);
-  // mhdImage.SetElementSizes(dose_params_device->size_of_dosels_);
+  GGEMSMHDImage mhdImage;
+  mhdImage.SetOutputFileName(dosimetry_output_filename_ + "_edep_squared.mhd");
+  if (sizeof(GGDosiType) == 4) mhdImage.SetDataType("MET_FLOAT");
+  else if (sizeof(GGDosiType) == 8) mhdImage.SetDataType("MET_DOUBLE");
+  mhdImage.SetDimensions(dimensions);
+  mhdImage.SetElementSizes(dose_params_device->size_of_dosels_);
 
-  // GGDosiType* edep_squared_device = opencl_manager.GetDeviceBuffer<GGDosiType>(dose_recording_.edep_squared_.get(), total_number_of_dosels*sizeof(GGDosiType));
+  // Release the pointer
+  opencl_manager.ReleaseDeviceBuffer(dose_params_[0], dose_params_device, 0);
 
-  // for (GGsize i = 0; i < total_number_of_dosels; ++i) edep_squared_tracking[i] = edep_squared_device[i];
+  // Loop over all activated device
+  for (GGsize j = 0; j < number_activated_devices_; ++j) {
+    GGDosiType* edep_squared_device = opencl_manager.GetDeviceBuffer<GGDosiType>(dose_recording_.edep_squared_[j], total_number_of_dosels*sizeof(GGDosiType), j);
 
-  // // Writing data
-  // mhdImage.Write<GGDosiType>(edep_squared_tracking, total_number_of_dosels);
-  // opencl_manager.ReleaseDeviceBuffer(dose_recording_.edep_squared_.get(), edep_squared_device);
-  // delete[] edep_squared_tracking;
+    for (GGsize i = 0; i < total_number_of_dosels; ++i) edep_squared_tracking[i] = edep_squared_device[i];
 
-  // // Release the pointer
-  // opencl_manager.ReleaseDeviceBuffer(dose_params_.get(), dose_params_device);
+    opencl_manager.ReleaseDeviceBuffer(dose_recording_.edep_squared_[j], edep_squared_device, j);
+  }
+
+  // Writing data
+  mhdImage.Write<GGDosiType>(edep_squared_tracking);
+  delete[] edep_squared_tracking;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -641,37 +663,41 @@ void GGEMSDosimetryCalculator::SaveEdepSquared(void) const
 void GGEMSDosimetryCalculator::SaveDose(void) const
 {
   // Get the OpenCL manager
-  // GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
-  // // Get pointer on OpenCL device for dose parameters
-  // GGEMSDoseParams* dose_params_device = opencl_manager.GetDeviceBuffer<GGEMSDoseParams>(dose_params_.get(), sizeof(GGEMSDoseParams));
+  // Get pointer on OpenCL device for dose parameters, take data from first device only
+  GGEMSDoseParams* dose_params_device = opencl_manager.GetDeviceBuffer<GGEMSDoseParams>(dose_params_[0], sizeof(GGEMSDoseParams), 0);
 
-  // GGsize total_number_of_dosels = static_cast<GGsize>(dose_params_device->total_number_of_dosels_);
-  // GGfloat* dose = new GGfloat[total_number_of_dosels];
-  // std::memset(dose, 0, total_number_of_dosels*sizeof(GGfloat));
+  GGsize total_number_of_dosels = static_cast<GGsize>(dose_params_device->total_number_of_dosels_);
+  GGfloat* dose = new GGfloat[total_number_of_dosels];
+  std::memset(dose, 0, total_number_of_dosels*sizeof(GGfloat));
 
-  // GGsize3 dimensions;
-  // dimensions.x_ = static_cast<GGsize>(dose_params_device->number_of_dosels_.x);
-  // dimensions.y_ = static_cast<GGsize>(dose_params_device->number_of_dosels_.y);
-  // dimensions.z_ = static_cast<GGsize>(dose_params_device->number_of_dosels_.z);
+  GGsize3 dimensions;
+  dimensions.x_ = static_cast<GGsize>(dose_params_device->number_of_dosels_.x);
+  dimensions.y_ = static_cast<GGsize>(dose_params_device->number_of_dosels_.y);
+  dimensions.z_ = static_cast<GGsize>(dose_params_device->number_of_dosels_.z);
 
-  // GGEMSMHDImage mhdImage;
-  // mhdImage.SetOutputFileName(dosimetry_output_filename_ + "_dose.mhd");
-  // mhdImage.SetDataType("MET_FLOAT");
-  // mhdImage.SetDimensions(dimensions);
-  // mhdImage.SetElementSizes(dose_params_device->size_of_dosels_);
+  GGEMSMHDImage mhdImage;
+  mhdImage.SetOutputFileName(dosimetry_output_filename_ + "_dose.mhd");
+  mhdImage.SetDataType("MET_FLOAT");
+  mhdImage.SetDimensions(dimensions);
+  mhdImage.SetElementSizes(dose_params_device->size_of_dosels_);
 
-  // GGfloat* dose_device = opencl_manager.GetDeviceBuffer<GGfloat>(dose_recording_.dose_.get(), total_number_of_dosels*sizeof(GGfloat));
+  // Release the pointer
+  opencl_manager.ReleaseDeviceBuffer(dose_params_[0], dose_params_device, 0);
 
-  // for (GGsize i = 0; i < total_number_of_dosels; ++i) dose[i] = dose_device[i];
+  // Loop over all activated device
+  for (GGsize j = 0; j < number_activated_devices_; ++j) {
+    GGfloat* dose_device = opencl_manager.GetDeviceBuffer<GGfloat>(dose_recording_.dose_[j], total_number_of_dosels*sizeof(GGfloat), j);
 
-  // // Writing data
-  // mhdImage.Write<GGfloat>(dose, total_number_of_dosels);
-  // opencl_manager.ReleaseDeviceBuffer(dose_recording_.dose_.get(), dose_device);
-  // delete[] dose;
+    for (GGsize i = 0; i < total_number_of_dosels; ++i) dose[i] += dose_device[i];
 
-  // // Release the pointer
-  // opencl_manager.ReleaseDeviceBuffer(dose_params_.get(), dose_params_device);
+    opencl_manager.ReleaseDeviceBuffer(dose_recording_.dose_[j], dose_device, j);
+  }
+
+  // Writing data
+  mhdImage.Write<GGfloat>(dose);
+  delete[] dose;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -681,37 +707,41 @@ void GGEMSDosimetryCalculator::SaveDose(void) const
 void GGEMSDosimetryCalculator::SaveUncertainty(void) const
 {
   // Get the OpenCL manager
-  // GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
-  // // Get pointer on OpenCL device for dose parameters
-  // GGEMSDoseParams* dose_params_device = opencl_manager.GetDeviceBuffer<GGEMSDoseParams>(dose_params_.get(), sizeof(GGEMSDoseParams));
+  // Get pointer on OpenCL device for dose parameters, take data from first device only
+  GGEMSDoseParams* dose_params_device = opencl_manager.GetDeviceBuffer<GGEMSDoseParams>(dose_params_[0], sizeof(GGEMSDoseParams), 0);
 
-  // GGsize total_number_of_dosels = static_cast<GGsize>(dose_params_device->total_number_of_dosels_);
-  // GGfloat* uncertainty = new GGfloat[total_number_of_dosels];
-  // std::memset(uncertainty, 0, total_number_of_dosels*sizeof(GGfloat));
+  GGsize total_number_of_dosels = static_cast<GGsize>(dose_params_device->total_number_of_dosels_);
+  GGfloat* uncertainty = new GGfloat[total_number_of_dosels];
+  std::memset(uncertainty, 0, total_number_of_dosels*sizeof(GGfloat));
 
-  // GGsize3 dimensions;
-  // dimensions.x_ = static_cast<GGsize>(dose_params_device->number_of_dosels_.x);
-  // dimensions.y_ = static_cast<GGsize>(dose_params_device->number_of_dosels_.y);
-  // dimensions.z_ = static_cast<GGsize>(dose_params_device->number_of_dosels_.z);
+  GGsize3 dimensions;
+  dimensions.x_ = static_cast<GGsize>(dose_params_device->number_of_dosels_.x);
+  dimensions.y_ = static_cast<GGsize>(dose_params_device->number_of_dosels_.y);
+  dimensions.z_ = static_cast<GGsize>(dose_params_device->number_of_dosels_.z);
 
-  // GGEMSMHDImage mhdImage;
-  // mhdImage.SetOutputFileName(dosimetry_output_filename_ + "_uncertainty.mhd");
-  // mhdImage.SetDataType("MET_FLOAT");
-  // mhdImage.SetDimensions(dimensions);
-  // mhdImage.SetElementSizes(dose_params_device->size_of_dosels_);
+  GGEMSMHDImage mhdImage;
+  mhdImage.SetOutputFileName(dosimetry_output_filename_ + "_uncertainty.mhd");
+  mhdImage.SetDataType("MET_FLOAT");
+  mhdImage.SetDimensions(dimensions);
+  mhdImage.SetElementSizes(dose_params_device->size_of_dosels_);
 
-  // GGfloat* uncertainty_device = opencl_manager.GetDeviceBuffer<GGfloat>(dose_recording_.uncertainty_dose_.get(), total_number_of_dosels*sizeof(GGfloat));
+  // Release the pointer
+  opencl_manager.ReleaseDeviceBuffer(dose_params_[0], dose_params_device, 0);
 
-  // for (GGsize i = 0; i < total_number_of_dosels; ++i) uncertainty[i] = uncertainty_device[i];
+  // Loop over all activated device
+  for (GGsize j = 0; j < number_activated_devices_; ++j) {
+    GGfloat* uncertainty_device = opencl_manager.GetDeviceBuffer<GGfloat>(dose_recording_.uncertainty_dose_[j], total_number_of_dosels*sizeof(GGfloat), j);
 
-  // // Writing data
-  // mhdImage.Write<GGfloat>(uncertainty, total_number_of_dosels);
-  // opencl_manager.ReleaseDeviceBuffer(dose_recording_.uncertainty_dose_.get(), uncertainty_device);
-  // delete[] uncertainty;
+    for (GGsize i = 0; i < total_number_of_dosels; ++i) uncertainty[i] = uncertainty_device[i];
 
-  // // Release the pointer
-  // opencl_manager.ReleaseDeviceBuffer(dose_params_.get(), dose_params_device);
+    opencl_manager.ReleaseDeviceBuffer(dose_recording_.uncertainty_dose_[j], uncertainty_device, j);
+  }
+
+  // Writing data
+  mhdImage.Write<GGfloat>(uncertainty);
+  delete[] uncertainty;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -216,3 +216,14 @@ void GGEMSNavigatorManager::WorldTracking(GGsize const& thread_index) const
   // Checking if world exists
   if (world_) world_->Tracking(thread_index);
 }
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSNavigatorManager::ComputeDose(GGsize const& thread_index)
+{
+  for (GGsize i = 0; i < number_of_navigators_; ++i) {
+    navigators_[i]->ComputeDose(thread_index);
+  }
+}

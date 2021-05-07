@@ -201,6 +201,13 @@ class GGEMS_EXPORT GGEMSNavigatorManager
     void WorldTracking(GGsize const& thread_index) const;
 
     /*!
+      \fn void ComputeDose(GGsize const& thread_index)
+      \param thread_index - index of activated device (thread index)
+      \brief Compute dose in volume
+    */
+    void ComputeDose(GGsize const& thread_index);
+
+    /*!
       \fn void Clean(void)
       \brief clean OpenCL data if necessary
     */
