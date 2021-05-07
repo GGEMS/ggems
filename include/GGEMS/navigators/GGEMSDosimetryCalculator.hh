@@ -219,6 +219,12 @@ class GGEMS_EXPORT GGEMSDosimetryCalculator
     */
     void ComputeDose(GGsize const& thread_index);
 
+    /*!
+      \fn void SaveResults(void) const
+      \brief save results (dose images)
+    */
+    void SaveResults(void) const;
+
   private:
       /*!
         \fn void CheckParameters(void) const

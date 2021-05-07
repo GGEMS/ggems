@@ -204,6 +204,13 @@ class GGEMS_EXPORT GGEMSNavigator
     virtual void SaveResults(void) = 0;
 
     /*!
+      \fn void ComputeDose(GGsize const& thread_index)
+      \param thread_index - index of activated device (thread index)
+      \brief Compute dose in volume
+    */
+    void ComputeDose(GGsize const& thread_index);
+
+    /*!
       \fn void StoreOutput(std::string basename)
       \param basename - basename of the output file
       \brief Storing the basename and format of the output file

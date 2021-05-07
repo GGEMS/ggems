@@ -290,6 +290,9 @@ void GGEMS::RunOnDevice(GGsize const& thread_index)
       } while (source_manager.IsAlive(thread_index)); // Step 5: Checking if all particles are dead, otherwize go back to step 2
     }
   }
+
+  // Computing dose
+  navigator_manager.ComputeDose(thread_index);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -310,15 +313,6 @@ void GGEMS::Run()
   for (GGsize i = 0; i < number_of_activated_devices; ++i) {
     thread_device[i] = std::thread(&GGEMS::RunOnDevice, this, i);
   }
-
-  // thread_device[1] = std::thread(&GGEMS::RunOnDevice, this, 1);
-  // thread_device[1].join();
-
-  // thread_device[0] = std::thread(&GGEMS::RunOnDevice, this, 0);
-  // thread_device[0].join();
-
-  // thread_device[2] = std::thread(&GGEMS::RunOnDevice, this, 2);
-  // thread_device[2].join();
 
   for (GGsize i = 0; i < number_of_activated_devices; ++i) thread_device[i].join();
 

@@ -143,7 +143,7 @@ void GGEMSVoxelizedPhantom::SaveResults(void)
     GGcout("GGEMSVoxelizedPhantom", "SaveResults", 2) << "Saving dosimetry results in MHD format..." << GGendl;
 
     // Compute dose and save results
-    //dose_calculator_->ComputeDoseAndSaveResults();
+    dose_calculator_->SaveResults();
   }
 }
 

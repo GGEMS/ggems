@@ -119,7 +119,7 @@ int main(int argc, char** argv)
     GGint verbosity_level = 0;
 
     // List of parameters
-    GGsize number_of_particles = 1000;
+    GGsize number_of_particles = 1000000;
     std::string device = "all";
     std::string device_balance = "";
     GGuint seed = 777;
