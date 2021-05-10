@@ -695,7 +695,7 @@ void GGEMSOpenCLManager::DeviceToActivate(std::string const& device_type, std::s
   // Checking if there is a number in type
   bool is_index_device = false;
   for (GGsize i = 0; i < type.size(); ++i) {
-    if (isdigit(type[i]) == true) {
+    if (isdigit(type[i]) != 0) {
       is_index_device = true;
       break;
     }
