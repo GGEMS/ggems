@@ -114,15 +114,3 @@ class GGEMS(object):
 
     def tracking_verbose(self, flag, particle_id):
         ggems_lib.set_tracking_ggems(self.obj, flag, particle_id)
-
-
-# ------------------------------------------------------------------------------
-# Calling all C++ singleton managers
-# opencl_manager = GGEMSOpenCLManager()
-# ram_manager = GGEMSRAMManager()
-# source_manager = GGEMSSourceManager()
-# materials_database_manager = GGEMSMaterialsDatabaseManager()
-# processes_manager = GGEMSProcessesManager()
-# range_cuts_manager = GGEMSRangeCutsManager()
-# volume_creator_manager = GGEMSVolumeCreatorManager()
-# profiler_manager = GGEMSProfilerManager()

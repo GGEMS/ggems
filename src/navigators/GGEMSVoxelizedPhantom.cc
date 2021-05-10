@@ -101,7 +101,6 @@ void GGEMSVoxelizedPhantom::Initialize(void)
   solids_ = new GGEMSSolid*[1];
   number_of_solids_ = 1;
 
-
   // Initializing voxelized solid for geometric navigation
   if (is_dosimetry_mode_) {
     solids_[0] = new GGEMSVoxelizedSolid(voxelized_phantom_filename_, range_data_filename_, "DOSIMETRY");

@@ -59,7 +59,7 @@ kernel void project_to_ggems_voxelized_solid(
   // No solid detected, consider particle as dead
   if(primary_particle->solid_id_[global_id] == -1) primary_particle->status_[global_id] = DEAD;
 
-  // Checking if the current navigator is the selected navigator
+  // Checking if the current navigator is the selected navigatore
   if (primary_particle->solid_id_[global_id] != voxelized_solid_data->solid_id_) return;
 
   // Checking status of particle
