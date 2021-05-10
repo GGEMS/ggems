@@ -556,11 +556,11 @@ CsI: d=3.67 g/cm3; n=2;
 # STM125I_Caps    
 STM125I_Caps: d=4.54 g/cm3; n=1;
     +el: name=Titanium  ; f=1.00
-    
+
 # STM125I_Alu  
 STM125I_Alu: d=2.7 g/cm3; n=1;
     +el: name=Aluminium  ; f=1.00
-    
+
 # STM125I_GoldCore  
 STM125I_GoldCore: d=19.3 g/cm3; n=1;
     +el: name=Gold       ; f=1.00
