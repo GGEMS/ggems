@@ -39,7 +39,8 @@
 
 GGEMSParticles::GGEMSParticles(void)
 : number_of_particles_(nullptr),
-  primary_particles_(nullptr)
+  primary_particles_(nullptr),
+  kernel_alive_(nullptr)
 {
   GGcout("GGEMSParticles", "GGEMSParticles", 3) << "GGEMSParticles creating..." << GGendl;
 
