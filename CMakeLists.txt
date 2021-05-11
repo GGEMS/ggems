@@ -30,7 +30,7 @@
 
 #-------------------------------------------------------------------------------
 # Checking CMAKE version
-CMAKE_MINIMUM_REQUIRED(VERSION 3.8 FATAL_ERROR)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.13 FATAL_ERROR)
 
 #-------------------------------------------------------------------------------
 # Setting the compiler type: 'CLANG' 'GCC' or 'CL'
@@ -229,7 +229,7 @@ GENERATE_EXPORT_HEADER(ggems EXPORT_FILE_NAME ${PROJECT_SOURCE_DIR}/include/GGEM
 
 #------------------------------------------------------------------------------
 # Building examples
-IF(BUILD_EXAMPLES )
+IF(BUILD_EXAMPLES)
   ADD_SUBDIRECTORY(examples)
 ENDIF()
 

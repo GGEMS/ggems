@@ -39,4 +39,5 @@ TARGET_LINK_LIBRARIES(ct_scanner ggems)
 
 #-------------------------------------------------------------------------------
 # Copy executable to ggems bin folder
-INSTALL(TARGETS ct_scanner DESTINATION ${PROJECT_SOURCE_DIR})
+INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} DESTINATION ggems/examples)
+INSTALL(TARGETS ct_scanner DESTINATION ggems/examples/2_CT_Scanner)

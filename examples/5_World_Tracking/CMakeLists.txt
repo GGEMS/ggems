@@ -39,4 +39,5 @@ TARGET_LINK_LIBRARIES(world_tracking ggems)
 
 #-------------------------------------------------------------------------------
 # Copy executable to ggems bin folder
-INSTALL(TARGETS world_tracking DESTINATION ${PROJECT_SOURCE_DIR})
+INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} DESTINATION ggems/examples)
+INSTALL(TARGETS world_tracking DESTINATION ggems/examples/5_World_Tracking)

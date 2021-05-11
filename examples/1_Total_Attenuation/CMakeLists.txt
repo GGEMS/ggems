@@ -19,25 +19,19 @@
 #-------------------------------------------------------------------------------
 # CMakeLists.txt
 #
-# CMakeLists.txt - Compile and build the 3_Voxelized_Phantom_Generator example
+# CMakeLists.txt - Compile and build the 0_Cross_Sections example
 #
 # Authors :
 #   - Julien Bert <julien.bert@univ-brest.fr>
 #   - Didier Benoit <didier.benoit@inserm.fr>
 #
-# Generated on : 2/11/2020
+# Generated on : 6/11/2020
 #-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
 # Defining the project
-PROJECT(GenerateVolume)
-
-#-------------------------------------------------------------------------------
-# Creating the executable
-ADD_EXECUTABLE(generate_volume generate_volume.cc)
-TARGET_LINK_LIBRARIES(generate_volume ggems)
+PROJECT(TotalAttenuation)
 
 #-------------------------------------------------------------------------------
 # Copy executable to ggems bin folder
 INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} DESTINATION ggems/examples)
-INSTALL(TARGETS generate_volume DESTINATION ggems/examples/3_Voxelized_Phantom_Generator)
