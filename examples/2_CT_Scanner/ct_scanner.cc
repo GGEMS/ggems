@@ -243,7 +243,7 @@ int main(int argc, char** argv)
     ct_detector.SetSourceIsocenterDistance(595.0f, "mm");
     ct_detector.SetRotation(0.0f, 0.0f, 0.0f, "deg");
     ct_detector.SetThreshold(10.0f, "keV");
-    ct_detector.StoreOutput("data/projection.mhd");
+    ct_detector.StoreOutput("data/projection");
     ct_detector.StoreScatter(true);
 
     // Physics

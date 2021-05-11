@@ -54,6 +54,9 @@ class GGEMSCTSystem(object):
       ggems_lib.set_save_ggems_ct_system.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
       ggems_lib.set_save_ggems_ct_system.restype = ctypes.c_void_p
 
+      ggems_lib.store_scatter_ggems_ct_system.argtypes = [ctypes.c_void_p, ctypes.c_bool]
+      ggems_lib.store_scatter_ggems_ct_system.restype = ctypes.c_void_p
+
       self.obj = ggems_lib.create_ggems_ct_system(ct_system_name.encode('ASCII'))
 
   def set_number_of_modules(self, module_x, module_y):
@@ -85,3 +88,7 @@ class GGEMSCTSystem(object):
 
   def save(self, basename):
       ggems_lib.set_save_ggems_ct_system(self.obj, basename.encode('ASCII'))
+
+  def store_scatter(self, flag):
+      ggems_lib.store_scatter_ggems_ct_system(self.obj, flag)
+
