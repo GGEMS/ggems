@@ -29,7 +29,6 @@
 */
 
 #include "GGEMS/tools/GGEMSProfilerItem.hh"
-#include "GGEMS/tools/GGEMSPrint.hh"
 #include "GGEMS/global/GGEMSOpenCLManager.hh"
 
 ////////////////////////////////////////////////////////////////////////////////

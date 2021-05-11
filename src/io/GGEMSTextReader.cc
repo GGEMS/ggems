@@ -30,7 +30,6 @@
 */
 
 #include <string>
-#include <iostream>
 
 #include "GGEMS/io/GGEMSTextReader.hh"
 #include "GGEMS/tools/GGEMSSystemOfUnits.hh"

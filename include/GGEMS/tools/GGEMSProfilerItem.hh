@@ -31,7 +31,6 @@
   \date Tuesday March 16, 2021
 */
 
-#include "GGEMS/global/GGEMSExport.hh"
 #include "GGEMS/tools/GGEMSTypes.hh"
 #include "GGEMS/tools/GGEMSChrono.hh"
 

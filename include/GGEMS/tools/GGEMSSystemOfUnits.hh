@@ -192,7 +192,6 @@ __constant GGfloat permillion  = 0.000001f; /*!< Permillion value */
 #ifndef __OPENCL_C_VERSION__
 
 /*!
-  \namespace
   \brief empty namespace storing prefix unit
 */
 namespace

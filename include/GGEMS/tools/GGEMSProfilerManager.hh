@@ -36,7 +36,6 @@
 #endif
 
 #include <unordered_map>
-#include "GGEMS/global/GGEMSExport.hh"
 #include "GGEMS/tools/GGEMSProfiler.hh"
 
 typedef std::unordered_map<std::string, GGEMSProfiler> ProfilerUMap; /*!< Unordered map with key : name of profile, profile object */

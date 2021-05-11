@@ -29,8 +29,6 @@
 */
 
 #include "GGEMS/navigators/GGEMSNavigatorManager.hh"
-#include "GGEMS/navigators/GGEMSWorld.hh"
-#include "GGEMS/tools/GGEMSPrint.hh"
 #include "GGEMS/sources/GGEMSSourceManager.hh"
 #include "GGEMS/io/GGEMSMHDImage.hh"
 #include "GGEMS/tools/GGEMSProfilerManager.hh"

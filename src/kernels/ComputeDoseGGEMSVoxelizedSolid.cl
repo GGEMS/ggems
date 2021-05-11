@@ -34,7 +34,7 @@
 #include "GGEMS/geometries/GGEMSVoxelizedSolidData.hh"
 
 /*!
-  \fn kernel void compute_dose_ggems_voxelized_solid(GGsize const dosel_id_limit, global GGEMSDoseParams const* dose_params, global GGDosiType const* edep, global GGint const* hit, global GGDosiType const* edep_squared, global GGEMSVoxelizedSolidData const* voxelized_solid_data, global GGshort const* label_data, global GGEMSMaterialTables const* materials, global GGfloat* dose, global GGfloat* uncertainty, GGfloat const scale_factor, GGchar const is_water_reference, GGfloat const minimum_density)
+  \fn kernel void compute_dose_ggems_voxelized_solid(GGsize const dosel_id_limit, global GGEMSDoseParams const* dose_params, global GGDosiType const* edep, global GGint const* hit, global GGDosiType const* edep_squared, global GGEMSVoxelizedSolidData const* voxelized_solid_data, global GGuchar const* label_data, global GGEMSMaterialTables const* materials, global GGfloat* dose, global GGfloat* uncertainty, GGfloat const scale_factor, GGchar const is_water_reference, GGfloat const minimum_density)
   \param dosel_id_limit - number total of dosels
   \param dose_params - params about dosemap
   \param edep - buffer storing energy deposit

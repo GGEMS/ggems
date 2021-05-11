@@ -28,12 +28,7 @@
   \date Tuesday March 23, 2021
 */
 
-#include <sstream>
-#include <algorithm>
-
-#include "GGEMS/global/GGEMSOpenCLManager.hh"
 #include "GGEMS/tools/GGEMSRAMManager.hh"
-#include "GGEMS/tools/GGEMSTools.hh"
 #include "GGEMS/geometries/GGEMSVolumeCreatorManager.hh"
 #include "GGEMS/tools/GGEMSProfilerManager.hh"
 #include "GGEMS/navigators/GGEMSNavigatorManager.hh"

@@ -31,6 +31,13 @@
 #include "GGEMS/physics/GGEMSPrimaryParticles.hh"
 #include "GGEMS/physics/GGEMSParticleConstants.hh"
 
+/*!
+  \fn kernel void is_alive(GGsize const particle_id_limit, global GGEMSPrimaryParticles* primary_particle, global GGint* status)
+  \param particle_id_limit - particle id limit
+  \param primary_particle - pointer on primary particles
+  \param status - status of particle
+  \brief checking if particle is alive
+*/
 kernel void is_alive(
   GGsize const particle_id_limit,
   global GGEMSPrimaryParticles* primary_particle,

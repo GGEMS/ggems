@@ -80,7 +80,6 @@ class GGEMS_EXPORT GGEMSCTSystem : public GGEMSSystem
 
     /*!
       \fn void Initialize(void) override
-      \param is_tracking - flag activating tracking
       \brief Initialize CT system
     */
     void Initialize(void) override;
