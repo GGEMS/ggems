@@ -232,4 +232,12 @@ extern "C" GGEMS_EXPORT void set_threshold_ggems_ct_system(GGEMSCTSystem* ct_sys
 */
 extern "C" GGEMS_EXPORT void set_save_ggems_ct_system(GGEMSCTSystem* ct_system, char const* basename);
 
+/*!
+  \fn void store_scatter_ggems_ct_system(GGEMSCTSystem* ct_system, bool const is_scatter)
+  \param ct_system - pointer on ct system
+  \param is_scatter - flag to activate scatter registration
+  \brief Set scatter registration flag
+*/
+extern "C" GGEMS_EXPORT void store_scatter_ggems_ct_system(GGEMSCTSystem* ct_system, bool const is_scatter);
+
 #endif // End of GUARD_GGEMS_NAVIGATORS_GGEMSSYSTEM_HH

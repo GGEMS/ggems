@@ -1,0 +1,23 @@
+.wy-side-nav-search, .wy-nav-top {
+  background: #d0f0c0;
+}
+
+.wy-nav-side {
+  background: #679267;
+}
+
+.wy-nav-content {
+  max-width: 50% !important;
+}
+
+.wy-menu > .caption > span.caption-text {
+  color: #f0e68c;
+}
+
+.wy-menu-vertical a {
+  color: #000000;
+}
+
+.wy-side-nav-search > div.version {
+  color: #679267;
+}

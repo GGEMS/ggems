@@ -105,7 +105,8 @@ ct_detector.set_source_detector_distance(1085.6, 'mm')
 ct_detector.set_source_isocenter_distance(595.0, 'mm')
 ct_detector.set_rotation(0.0, 0.0, 0.0, 'deg')
 ct_detector.set_threshold(10.0, 'keV')
-ct_detector.save('data/projection.mhd')
+ct_detector.save('data/projection')
+ct_detector.store_scatter(True)
 
 # ------------------------------------------------------------------------------
 # STEP 5: Physics
