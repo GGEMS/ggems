@@ -39,4 +39,5 @@ TARGET_LINK_LIBRARIES(dosimetry_photon ggems)
 
 #-------------------------------------------------------------------------------
 # Copy executable to ggems bin folder
-INSTALL(TARGETS dosimetry_photon DESTINATION ${PROJECT_SOURCE_DIR})
+INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} DESTINATION ggems/examples)
+INSTALL(TARGETS dosimetry_photon DESTINATION ggems/examples/4_Dosimetry_Photon)

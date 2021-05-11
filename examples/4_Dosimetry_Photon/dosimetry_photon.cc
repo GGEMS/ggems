@@ -205,7 +205,7 @@ int main(int argc, char** argv)
     if (!device_balance.empty()) opencl_manager.DeviceBalancing(device_balance);
 
     // Enter material database
-    material_manager.SetMaterialsDatabase("../../data/materials.txt");
+    material_manager.SetMaterialsDatabase("data/materials.txt");
 
     // Initializing a global voxelized volume
     volume_creator_manager.SetVolumeDimensions(240, 240, 640);

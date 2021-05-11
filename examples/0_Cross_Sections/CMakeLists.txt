@@ -39,4 +39,5 @@ TARGET_LINK_LIBRARIES(cross_sections ggems)
 
 #-------------------------------------------------------------------------------
 # Copy executable to ggems bin folder
-INSTALL(TARGETS cross_sections DESTINATION ${PROJECT_SOURCE_DIR})
+INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} DESTINATION ggems/examples)
+INSTALL(TARGETS cross_sections DESTINATION ggems/examples/0_Cross_Sections)

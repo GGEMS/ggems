@@ -193,7 +193,7 @@ int main(int argc, char** argv)
     opencl_manager.DeviceToActivate(device_id);
 
     // Enter material database
-    material_manager.SetMaterialsDatabase("../../data/materials.txt");
+    material_manager.SetMaterialsDatabase("data/materials.txt");
 
     // Initializing material
     GGEMSMaterials materials;
