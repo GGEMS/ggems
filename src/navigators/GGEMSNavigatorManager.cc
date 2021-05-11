@@ -59,11 +59,6 @@ GGEMSNavigatorManager::~GGEMSNavigatorManager(void)
     navigators_ = nullptr;
   }
 
-  if (world_) {
-    delete world_;
-    world_ = nullptr;
-  }
-
   GGcout("GGEMSNavigatorManager", "~GGEMSNavigatorManager", 3) << "GGEMSNavigatorManager erased!!!" << GGendl;
 }
 
