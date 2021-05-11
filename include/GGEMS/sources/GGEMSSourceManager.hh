@@ -210,7 +210,7 @@ class GGEMS_EXPORT GGEMSSourceManager
 extern "C" GGEMS_EXPORT GGEMSSourceManager* get_instance_ggems_source_manager(void);
 
 /*!
-  \fn void initialize_source_manager(GGEMSSourceManager* source_manager, GGuint const& seed)
+  \fn void initialize_source_manager(GGEMSSourceManager* source_manager, GGuint const seed)
   \param source_manager - pointer on the singleton
   \param seed - seed of random
   \brief Initialize source

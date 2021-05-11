@@ -31,9 +31,6 @@
   \date Tuesday March 16, 2021
 */
 
-#include "GGEMS/global/GGEMSExport.hh"
-#include "GGEMS/tools/GGEMSTypes.hh"
-#include "GGEMS/tools/GGEMSChrono.hh"
 #include "GGEMS/tools/GGEMSProfilerItem.hh"
 
 /*!
@@ -63,6 +60,7 @@ class GGEMS_EXPORT GGEMSProfiler
     /*!
       \fn inline DurationNano GetSummaryTime(void) const
       \brief get elapsed time in ns in OpenCL operation
+      \return elapsed time in ns
     */
     inline DurationNano GetSummaryTime(void) const {return profiler_item_->GetElapsedTime();}
 

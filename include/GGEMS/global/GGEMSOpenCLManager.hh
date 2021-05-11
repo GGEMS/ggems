@@ -137,7 +137,7 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     void PrintActivatedDevices(void) const;
 
     /*!
-      \fn std::string GetNameOfDevice(GGsize const& device_index) const
+      \fn std::string GetDeviceName(GGsize const& device_index) const
       \param device_index - index of device
       \return name of activated device
       \brief Get the name of the activated device
@@ -246,7 +246,7 @@ class GGEMS_EXPORT GGEMSOpenCLManager
 
 
     /*!
-      \fn void DeviceLoad(std::string const& device_balancing)
+      \fn void DeviceBalancing(std::string const& device_balancing)
       \param device_balancing - device balancing
       \brief change the device balancing, by default device balancing is the same for each device
     */
@@ -288,7 +288,6 @@ class GGEMS_EXPORT GGEMSOpenCLManager
       \param custom_options - new compilation option for the kernel
       \param additional_options - additionnal compilation option
       \brief Compile the OpenCL kernel on the activated device
-      \return the pointer on the OpenCL kernel
     */
     void CompileKernel(std::string const& kernel_filename, std::string const& kernel_name, cl::Kernel** kernel_list, char* const custom_options = nullptr, char* const additional_options = nullptr);
 
@@ -524,9 +523,10 @@ extern "C" GGEMS_EXPORT void print_infos_opencl_manager(GGEMSOpenCLManager* open
 extern "C" GGEMS_EXPORT void set_device_index_ggems_opencl_manager(GGEMSOpenCLManager* opencl_manager, GGsize const device_id);
 
 /*!
-  \fn void set_device_index_ggems_opencl_manager(GGEMSOpenCLManager* opencl_manager, GGsize const device_id)
+  \fn void set_device_to_activate_opencl_manager(GGEMSOpenCLManager* opencl_manager, char const* device_type, char const* device_vendor = "")
   \param opencl_manager - pointer on the singleton
-  \param device_id - index of the device
+  \param device_type - device type (gpu, cpu)
+  \param device_vendor - device vendor (intel, amd, nvidia)
   \brief Set the device index to activate
 */
 extern "C" GGEMS_EXPORT void set_device_to_activate_opencl_manager(GGEMSOpenCLManager* opencl_manager, char const* device_type, char const* device_vendor = "");

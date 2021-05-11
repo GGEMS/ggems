@@ -36,8 +36,11 @@
 #include <iomanip>
 #include <mutex>
 
+/*!
+  \brief empty namespace storing mutex
+*/
 namespace {
-  std::mutex mutex;
+  std::mutex mutex; /*!< Mutex variable */
 }
 
 #include "GGEMS/global/GGEMSExport.hh"

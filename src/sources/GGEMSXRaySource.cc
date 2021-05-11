@@ -34,7 +34,6 @@
 #include "GGEMS/global/GGEMSConstants.hh"
 #include "GGEMS/tools/GGEMSRAMManager.hh"
 #include "GGEMS/randoms/GGEMSPseudoRandomGenerator.hh"
-#include "GGEMS/tools/GGEMSProfilerItem.hh"
 #include "GGEMS/tools/GGEMSProfilerManager.hh"
 
 ////////////////////////////////////////////////////////////////////////////////

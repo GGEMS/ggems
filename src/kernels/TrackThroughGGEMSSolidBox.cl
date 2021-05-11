@@ -42,7 +42,7 @@
 #include "GGEMS/navigators/GGEMSPhotonNavigator.hh"
 
 /*!
-  \fn kernel void track_through_ggems_solid_box(GGsize const particle_id_limit, global GGEMSPrimaryParticles* primary_particle, global GGEMSRandom* random, global GGEMSSolidBoxData const* solid_box_data, global GGuchar const* label_data, global GGEMSParticleCrossSections const* particle_cross_sections, global GGEMSMaterialTables const* materials, GGfloat const threshold, global GGint* histogram)
+  \fn kernel void track_through_ggems_solid_box(GGsize const particle_id_limit, global GGEMSPrimaryParticles* primary_particle, global GGEMSRandom* random, global GGEMSSolidBoxData const* solid_box_data, global GGuchar const* label_data, global GGEMSParticleCrossSections const* particle_cross_sections, global GGEMSMaterialTables const* materials, GGfloat const threshold, global GGint* histogram, global GGint* scatter_histogram)
   \param particle_id_limit - particle id limit
   \param primary_particle - pointer to primary particles on OpenCL memory
   \param random - pointer on random numbers
@@ -52,6 +52,7 @@
   \param materials - pointer on material in navigator
   \param threshold - energy threshold
   \param histogram - pointer to buffer storing histogram
+  \param scatter_histogram - pointer to buffer storing scatter histogram
   \brief OpenCL kernel tracking particles within voxelized solid
 */
 kernel void track_through_ggems_solid_box(
