@@ -159,6 +159,14 @@ void GGEMSTextReader::RemoveSpace(std::string& line)
   line.erase(std::remove(line.begin(), line.end(), '\t'), line.end());
   // Erasing space
   line.erase(std::remove(line.begin(), line.end(), ' '), line.end());
+  // Erasing eof
+  line.erase(std::remove(line.begin(), line.end(), '\n'), line.end());
+  // Erasing carriage return
+  line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
+  // Erasing form feed
+  line.erase(std::remove(line.begin(), line.end(), '\f'), line.end());
+  // Erasing vertical tab
+  line.erase(std::remove(line.begin(), line.end(), '\v'), line.end());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
