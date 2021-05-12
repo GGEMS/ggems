@@ -21,6 +21,7 @@ GGEMS
 * New OpenCL kernel 'is_alive' checks if particles are alive after each batch
 * Problem reading material file on Linux windows is fixed
 * C++ Singleton GGEMSManager is deleted and replaced by GGEMS class
+* A security has been added to prevent infinite loop during tracking
 
 Features
 ========

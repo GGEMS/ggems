@@ -42,7 +42,7 @@ exclude_patterns = []
 
 # Grouping the document tree into PDF files. List of tuples
 # (source start file, target name, title, author, options).
-pdf_documents = [('index', u'ggems_v1.0', u'GGEMS', u'GGEMS Collaboration'),]
+pdf_documents = [('index', u'ggems_v1.1', u'GGEMS', u'GGEMS Collaboration'),]
 pdf_version=1.0
 
 # -- Options for HTML output -------------------------------------------------
