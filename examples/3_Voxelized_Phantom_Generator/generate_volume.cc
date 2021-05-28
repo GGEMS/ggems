@@ -29,6 +29,7 @@
 */
 
 #include <cstdlib>
+#include <sstream>
 
 #include "GGEMS/global/GGEMSOpenCLManager.hh"
 
