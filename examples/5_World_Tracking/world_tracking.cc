@@ -296,7 +296,7 @@ int main(int argc, char** argv)
     GGEMS ggems;
     ggems.SetOpenCLVerbose(true);
     ggems.SetMaterialDatabaseVerbose(false);
-    ggems.SetNavigatorVerbose(false);
+    ggems.SetNavigatorVerbose(true);
     ggems.SetSourceVerbose(true);
     ggems.SetMemoryRAMVerbose(true);
     ggems.SetProcessVerbose(true);

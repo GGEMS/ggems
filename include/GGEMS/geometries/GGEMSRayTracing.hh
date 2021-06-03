@@ -103,6 +103,11 @@ inline void TransportGetSafetyInsideOBB(GGfloat3 const* position, global GGEMSOB
     obb_data->border_min_xyz_.z, obb_data->border_max_xyz_.z,
     GEOMETRY_TOLERANCE
   );
+
+  GGfloat3 new_position = LocalToGlobalPosition(&obb_data->matrix_transformation_, &local_position);
+  position->x = new_position.x;
+  position->y = new_position.y;
+  position->z = new_position.z;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

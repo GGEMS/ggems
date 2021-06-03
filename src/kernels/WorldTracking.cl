@@ -127,6 +127,7 @@ kernel void world_tracking(
     }
 
     global_index_world = index.x + index.y * dim.x + index.z * dim.x * dim.y;
+
     if (photon_tracking) atomic_add(&photon_tracking[global_index_world], 1);
 
     #ifdef DOSIMETRY_DOUBLE_PRECISION

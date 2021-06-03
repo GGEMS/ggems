@@ -29,12 +29,9 @@
 */
 
 #include "GGEMS/physics/GGEMSPrimaryParticles.hh"
-
 #include "GGEMS/geometries/GGEMSVoxelizedSolidData.hh"
 #include "GGEMS/geometries/GGEMSRayTracing.hh"
-
 #include "GGEMS/global/GGEMSConstants.hh"
-
 #include "GGEMS/maths/GGEMSMatrixOperations.hh"
 
 /*!
