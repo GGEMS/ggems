@@ -261,12 +261,15 @@ void GGEMS::RunOnDevice(GGsize const& thread_index)
 
   // Loop over sources
   for (GGsize i = 0; i < source_manager.GetNumberOfSources(); ++i) {
+    // Number of batch for a source
+    GGsize number_of_batchs = source_manager.GetNumberOfBatchs(i, thread_index);
+
     mutex.lock();
     std::cout << "[GGEMS GGEMS::RunOnDevice] (thread " << thread_index << ") ## Source " << source_manager.GetNameOfSource(i) << " on " << opencl_manager.GetDeviceName(device_index) << GGendl;
+    std::cout << "[GGEMS GGEMS::RunOnDevice] (thread " << thread_index << ") ## Number of batch(s): " << number_of_batchs << GGendl;
     mutex.unlock();
 
     // Loop over batch
-    GGsize number_of_batchs = source_manager.GetNumberOfBatchs(i, thread_index);
     for (GGsize j = 0; j < number_of_batchs; ++j) {
       GGsize number_of_particles = source_manager.GetNumberOfParticlesInBatch(i, thread_index, j);
 
