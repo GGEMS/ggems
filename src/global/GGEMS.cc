@@ -49,6 +49,7 @@
 #include "GGEMS/tools/GGEMSRAMManager.hh"
 #include "GGEMS/randoms/GGEMSPseudoRandomGenerator.hh"
 #include "GGEMS/tools/GGEMSProfilerManager.hh"
+#include "GGEMS/tools/GGEMSProgressBar.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -257,17 +258,17 @@ void GGEMS::RunOnDevice(GGsize const& thread_index)
   GGEMSSourceManager& source_manager = GGEMSSourceManager::GetInstance();
   GGEMSNavigatorManager& navigator_manager = GGEMSNavigatorManager::GetInstance();
 
+  // Printing progress bar
+  mutex.lock();
+  static GGEMSProgressBar progress_bar(source_manager.GetTotalNumberOfBatchs());
+  mutex.unlock();
+
   GGsize device_index = opencl_manager.GetIndexOfActivatedDevice(thread_index);
 
   // Loop over sources
   for (GGsize i = 0; i < source_manager.GetNumberOfSources(); ++i) {
     // Number of batch for a source
     GGsize number_of_batchs = source_manager.GetNumberOfBatchs(i, thread_index);
-
-    mutex.lock();
-    std::cout << "[GGEMS GGEMS::RunOnDevice] (thread " << thread_index << ") ## Source " << source_manager.GetNameOfSource(i) << " on " << opencl_manager.GetDeviceName(device_index) << GGendl;
-    std::cout << "[GGEMS GGEMS::RunOnDevice] (thread " << thread_index << ") ## Number of batch(s): " << number_of_batchs << GGendl;
-    mutex.unlock();
 
     // Loop over batch
     for (GGsize j = 0; j < number_of_batchs; ++j) {
@@ -293,6 +294,11 @@ void GGEMS::RunOnDevice(GGsize const& thread_index)
 
         loop_counter++;
       } while (source_manager.IsAlive(thread_index) || loop_counter == max_loop); // Step 5: Checking if all particles are dead, otherwize go back to step 2
+    
+      // Incrementing progress bar
+      mutex.lock();
+      ++progress_bar;
+      mutex.unlock();
     }
   }
 
