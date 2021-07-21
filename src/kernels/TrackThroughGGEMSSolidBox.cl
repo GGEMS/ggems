@@ -96,6 +96,11 @@ kernel void track_through_ggems_solid_box(
   GGfloat3 local_position = GlobalToLocalPosition(&solid_box_data->obb_geometry_.matrix_transformation_, &global_position);
   GGfloat3 local_direction = GlobalToLocalDirection(&solid_box_data->obb_geometry_.matrix_transformation_, &global_direction);
 
+  // Storing local direction in particles 
+  primary_particle->dx_[global_id] = local_direction.x;
+  primary_particle->dy_[global_id] = local_direction.y;
+  primary_particle->dz_[global_id] = local_direction.z;
+
   // Get borders of OBB
   GGfloat3 border_min = solid_box_data->obb_geometry_.border_min_xyz_;
   GGfloat3 border_max = solid_box_data->obb_geometry_.border_max_xyz_;
@@ -216,7 +221,7 @@ kernel void track_through_ggems_solid_box(
 
         // Storing scatter
         if (scatter_histogram) {
-          if (primary_particle->scatter_[global_id] > 0) atomic_add(&scatter_histogram[voxel_id.x + voxel_id.y * virtual_element_number.x], 1);
+          if (primary_particle->scatter_[global_id] == TRUE) atomic_add(&scatter_histogram[voxel_id.x + voxel_id.y * virtual_element_number.x], 1);
         }
       }
       #endif
