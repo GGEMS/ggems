@@ -28,8 +28,17 @@
   \date Tuesday March 16, 2021
 */
 
+#include <mutex>
+
 #include "GGEMS/tools/GGEMSPrint.hh"
 #include "GGEMS/tools/GGEMSProfiler.hh"
+
+/*!
+  \brief empty namespace storing mutex
+*/
+namespace {
+  std::mutex mutex; /*!< Mutex variable */
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////

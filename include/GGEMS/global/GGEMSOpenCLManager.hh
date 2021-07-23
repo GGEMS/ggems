@@ -244,7 +244,6 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     */
     void DeviceToActivate(std::string const& device_type, std::string const& device_vendor = "");
 
-
     /*!
       \fn void DeviceBalancing(std::string const& device_balancing)
       \param device_balancing - device balancing
@@ -353,6 +352,30 @@ class GGEMS_EXPORT GGEMSOpenCLManager
 
   private:
     /*!
+      \fn void InitOpenCL(void)
+      \brief Calling all other initialization methods for OpenCL
+    */
+    void InitOpenCL(void);
+
+    /*!
+      \fn void GetOpenCLPlatorms(void)
+      \brief Getting all available platforms
+    */
+    void GetOpenCLPlatorms(void);
+
+    /*!
+      \fn void GetOpenCLDevices(void)
+      \brief Getting all available devices
+    */
+    void GetOpenCLDevices(void);
+
+    /*!
+      \fn void DisableCudaKernelCache(void) const
+      \brief Disable kernel cache for NVIDIA platform, usefull when developing a kernel
+    */
+    void DisableCudaKernelCache(void) const;
+
+    /*!
       \fn std::string ErrorType(GGint const& error) const
       \param error - error index from OpenCL library
       \return the message error
@@ -378,9 +401,7 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     bool IsDoublePrecision(GGsize const& device_index) const;
 
   private:
-    // OpenCL platform
     std::vector<cl::Platform> platforms_; /*!< List of detected platform */
-
     std::vector<std::string> platform_profile_; /*!< OpenCL profile */
     std::vector<std::string> platform_version_; /*!< OpenCL version supported by the implementation */
     std::vector<std::string> platform_name_; /*!< Platform name */

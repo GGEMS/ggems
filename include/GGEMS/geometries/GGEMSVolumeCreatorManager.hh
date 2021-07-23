@@ -336,4 +336,11 @@ extern "C" GGEMS_EXPORT void set_material_volume_creator_manager(GGEMSVolumeCrea
 */
 extern "C" GGEMS_EXPORT void set_data_type_volume_creator_manager(GGEMSVolumeCreatorManager* volume_creator_manager, char const* data_type);
 
+/*!
+  \fn void clean_volume_creator_manager(GGEMSVolumeCreatorManager* volume_creator_manager)
+  \param source_manager - pointer on the singleton
+  \brief Clean volume creator manager singleton
+*/
+extern "C" GGEMS_EXPORT void clean_volume_creator_manager(GGEMSVolumeCreatorManager* volume_creator_manager);
+
 #endif // GUARD_GGEMS_GEOMETRIES_GGEMSVOLUMECREATORMANAGER_HH

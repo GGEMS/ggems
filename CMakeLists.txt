@@ -64,7 +64,7 @@ ENDIF()
 
 #-------------------------------------------------------------------------------
 # Name of the project and define the language
-PROJECT(GGEMS VERSION 1.0 HOMEPAGE_URL ggems.fr LANGUAGES CXX)
+PROJECT(GGEMS VERSION 1.1 HOMEPAGE_URL ggems.fr LANGUAGES CXX)
 
 #-------------------------------------------------------------------------------
 # Find the OpenCL library
@@ -98,7 +98,7 @@ ENDIF()
 #-------------------------------------------------------------------------------
 # Add an option for using cache kernel compilation on OpenCL device
 # Set to OFF to be sure your own kernel modification are re-compiled
-OPTION(OPENCL_CACHE_KERNEL_COMPILATION "Using kernel cache compilation" ON)
+OPTION(OPENCL_CACHE_KERNEL_COMPILATION "Using kernel cache compilation (NVIDIA only)" ON)
 IF(OPENCL_CACHE_KERNEL_COMPILATION)
   ADD_DEFINITIONS(-DOPENCL_CACHE_KERNEL_COMPILATION)
 ENDIF()

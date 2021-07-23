@@ -40,6 +40,14 @@
 #else
 #include <unistd.h>
 #endif
+#include <mutex>
+
+/*!
+  \brief empty namespace storing mutex
+*/
+namespace {
+  std::mutex mutex; /*!< Mutex variable */
+}
 
 #include "GGEMS/global/GGEMS.hh"
 #include "GGEMS/physics/GGEMSProcessesManager.hh"
