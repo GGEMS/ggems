@@ -98,7 +98,7 @@ GGEMSSolid::~GGEMSSolid(void)
 
   if (label_data_) {
     for (GGsize i = 0; i < number_activated_devices_; ++i) {
-      GGEMSVoxelizedSolidData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSVoxelizedSolidData>(solid_data_[i], sizeof(GGEMSVoxelizedSolidData), i);
+      GGEMSVoxelizedSolidData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSVoxelizedSolidData>(solid_data_[i], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGEMSVoxelizedSolidData), i);
       GGsize number_of_voxels = static_cast<GGsize>(solid_data_device->number_of_voxels_);
       opencl_manager.ReleaseDeviceBuffer(solid_data_[i], solid_data_device, i);
       opencl_manager.Deallocate(label_data_[i], number_of_voxels*sizeof(GGuchar), i);

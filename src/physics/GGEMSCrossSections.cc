@@ -183,7 +183,7 @@ void GGEMSCrossSections::Initialize(GGEMSMaterials const* materials)
 
   // Initialize physics on each device
   for (GGsize j = 0; j < number_activated_devices_; ++j) {
-    GGEMSParticleCrossSections* particle_cross_sections_device = opencl_manager.GetDeviceBuffer<GGEMSParticleCrossSections>(particle_cross_sections_[j], sizeof(GGEMSParticleCrossSections), j);
+    GGEMSParticleCrossSections* particle_cross_sections_device = opencl_manager.GetDeviceBuffer<GGEMSParticleCrossSections>(particle_cross_sections_[j], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGEMSParticleCrossSections), j);
 
     particle_cross_sections_device->number_of_bins_ = number_of_bins;
     particle_cross_sections_device->min_energy_ = min_energy;
@@ -228,7 +228,7 @@ void GGEMSCrossSections::LoadPhysicTablesOnHost(void)
   // Get the OpenCL manager
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
-  GGEMSParticleCrossSections* particle_cross_sections_device = opencl_manager.GetDeviceBuffer<GGEMSParticleCrossSections>(particle_cross_sections_[0], sizeof(GGEMSParticleCrossSections), 0);
+  GGEMSParticleCrossSections* particle_cross_sections_device = opencl_manager.GetDeviceBuffer<GGEMSParticleCrossSections>(particle_cross_sections_[0], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGEMSParticleCrossSections), 0);
 
   particle_cross_sections_host_->number_of_bins_ = particle_cross_sections_device->number_of_bins_;
   particle_cross_sections_host_->number_of_materials_ = particle_cross_sections_device->number_of_materials_;

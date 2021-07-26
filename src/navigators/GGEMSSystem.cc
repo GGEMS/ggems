@@ -181,7 +181,7 @@ void GGEMSSystem::SaveResults(void)
       for (GGsize ii = 0; ii < number_of_modules_xy_.x_; ++ii) {
         cl::Buffer* histogram = solids_[ii + jj* number_of_modules_xy_.x_]->GetHistogram(i);
 
-        GGint* histogram_device = opencl_manager.GetDeviceBuffer<GGint>(histogram, number_of_detection_elements_inside_module_xyz_.x_*number_of_detection_elements_inside_module_xyz_.y_*sizeof(GGint), i);
+        GGint* histogram_device = opencl_manager.GetDeviceBuffer<GGint>(histogram, CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, number_of_detection_elements_inside_module_xyz_.x_*number_of_detection_elements_inside_module_xyz_.y_*sizeof(GGint), i);
 
         // Storing data on host
         for (GGsize jjj = 0; jjj < number_of_detection_elements_inside_module_xyz_.y_; ++jjj) {
@@ -228,7 +228,7 @@ void GGEMSSystem::SaveResults(void)
         for (GGsize ii = 0; ii < number_of_modules_xy_.x_; ++ii) {
           cl::Buffer* scatter_histogram = solids_[ii + jj* number_of_modules_xy_.x_]->GetScatterHistogram(i);
 
-          GGint* scatter_histogram_device = opencl_manager.GetDeviceBuffer<GGint>(scatter_histogram, number_of_detection_elements_inside_module_xyz_.x_*number_of_detection_elements_inside_module_xyz_.y_*sizeof(GGint), i);
+          GGint* scatter_histogram_device = opencl_manager.GetDeviceBuffer<GGint>(scatter_histogram, CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, number_of_detection_elements_inside_module_xyz_.x_*number_of_detection_elements_inside_module_xyz_.y_*sizeof(GGint), i);
 
           // Storing data on host
           for (GGsize jjj = 0; jjj < number_of_detection_elements_inside_module_xyz_.y_; ++jjj) {

@@ -96,7 +96,6 @@ void GGEMSSphere::Draw(void)
 
   // Get command queue and event
   cl::CommandQueue* queue = opencl_manager.GetCommandQueue(0);
-  cl::Event* event = opencl_manager.GetEvent(0);
 
   // Get Device name and storing methode name + device
   GGsize device_index = opencl_manager.GetIndexOfActivatedDevice(0);
@@ -133,12 +132,12 @@ void GGEMSSphere::Draw(void)
   kernel_draw_volume_[0]->setArg(6, *voxelized_phantom);
 
   // Launching kernel
-  cl_int kernel_status = queue->enqueueNDRangeKernel(*kernel_draw_volume_[0], 0, global_wi, local_wi, nullptr, event);
+  cl::Event event;
+  cl_int kernel_status = queue->enqueueNDRangeKernel(*kernel_draw_volume_[0], 0, global_wi, local_wi, nullptr, &event);
   opencl_manager.CheckOpenCLError(kernel_status, "GGEMSSphere", "Draw");
 
   // GGEMS Profiling
-  GGEMSProfilerManager& profiler_manager = GGEMSProfilerManager::GetInstance();
-  profiler_manager.HandleEvent(*event, oss.str());
+  GGEMSProfilerManager::GetInstance().HandleEvent(event, oss.str());
 
   queue->finish();
 }

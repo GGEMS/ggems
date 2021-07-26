@@ -319,7 +319,6 @@ void GGEMSWorld::Tracking(GGsize const& thread_index)
   // Getting the OpenCL manager and infos for work-item launching
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
   cl::CommandQueue* queue = opencl_manager.GetCommandQueue(thread_index);
-  cl::Event* event = opencl_manager.GetEvent(thread_index);
 
   // Get Device name and storing methode name + device
   GGsize device_index = opencl_manager.GetIndexOfActivatedDevice(thread_index);
@@ -358,12 +357,12 @@ void GGEMSWorld::Tracking(GGsize const& thread_index)
   kernel_world_tracking_[thread_index]->setArg(13, sizes_.z);
 
   // Launching kernel
-  GGint kernel_status = queue->enqueueNDRangeKernel(*kernel_world_tracking_[thread_index], 0, global_wi, local_wi, nullptr, event);
+  cl::Event event;
+  GGint kernel_status = queue->enqueueNDRangeKernel(*kernel_world_tracking_[thread_index], 0, global_wi, local_wi, nullptr, &event);
   opencl_manager.CheckOpenCLError(kernel_status, "GGEMSWorld", "Tracking");
 
   // GGEMS Profiling
-  GGEMSProfilerManager& profiler_manager = GGEMSProfilerManager::GetInstance();
-  profiler_manager.HandleEvent(*event, oss.str());
+  GGEMSProfilerManager::GetInstance().HandleEvent(event, oss.str());
   queue->finish();
 }
 
@@ -400,7 +399,7 @@ void GGEMSWorld::SavePhotonTracking(void) const
 
   // Loop over all activated device
   for (GGsize j = 0; j < number_activated_devices_; ++j) {
-    GGint* photon_tracking_device = opencl_manager.GetDeviceBuffer<GGint>(world_recording_.photon_tracking_[j], total_number_of_voxels*sizeof(GGint), j);
+    GGint* photon_tracking_device = opencl_manager.GetDeviceBuffer<GGint>(world_recording_.photon_tracking_[j], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, total_number_of_voxels*sizeof(GGint), j);
 
     for (GGsize i = 0; i < total_number_of_voxels; ++i) photon_tracking[i] = photon_tracking_device[i];
 
@@ -434,7 +433,7 @@ void GGEMSWorld::SaveEnergyTracking(void) const
 
   // Loop over all activated device
   for (GGsize j = 0; j < number_activated_devices_; ++j) {
-    GGDosiType* edep_device = opencl_manager.GetDeviceBuffer<GGDosiType>(world_recording_.energy_tracking_[j], total_number_of_voxels*sizeof(GGDosiType), j);
+    GGDosiType* edep_device = opencl_manager.GetDeviceBuffer<GGDosiType>(world_recording_.energy_tracking_[j], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, total_number_of_voxels*sizeof(GGDosiType), j);
 
     for (GGsize i = 0; i < total_number_of_voxels; ++i) edep_tracking[i] = edep_device[i];
 
@@ -468,7 +467,7 @@ void GGEMSWorld::SaveEnergySquaredTracking(void) const
 
   // Loop over all activated device
   for (GGsize j = 0; j < number_activated_devices_; ++j) {
-    GGDosiType* edep_squared_device = opencl_manager.GetDeviceBuffer<GGDosiType>(world_recording_.energy_squared_tracking_[j], total_number_of_voxels*sizeof(GGDosiType), j);
+    GGDosiType* edep_squared_device = opencl_manager.GetDeviceBuffer<GGDosiType>(world_recording_.energy_squared_tracking_[j], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, total_number_of_voxels*sizeof(GGDosiType), j);
 
     for (GGsize i = 0; i < total_number_of_voxels; ++i) edep_squared_tracking[i] = edep_squared_device[i];
 
@@ -523,7 +522,7 @@ void GGEMSWorld::SaveMomentum(void) const
 
   // Loop over all activated device
   for (GGsize j = 0; j < number_activated_devices_; ++j) {
-    GGDosiType* momentum_x_device = opencl_manager.GetDeviceBuffer<GGDosiType>(world_recording_.momentum_x_[j], total_number_of_voxels*sizeof(GGDosiType), j);
+    GGDosiType* momentum_x_device = opencl_manager.GetDeviceBuffer<GGDosiType>(world_recording_.momentum_x_[j], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, total_number_of_voxels*sizeof(GGDosiType), j);
 
     for (GGsize i = 0; i < total_number_of_voxels; ++i) momentum_x[i] = momentum_x_device[i];
 
@@ -536,7 +535,7 @@ void GGEMSWorld::SaveMomentum(void) const
 
   // Loop over all activated device
   for (GGsize j = 0; j < number_activated_devices_; ++j) {
-    GGDosiType* momentum_y_device = opencl_manager.GetDeviceBuffer<GGDosiType>(world_recording_.momentum_y_[j], total_number_of_voxels*sizeof(GGDosiType), j);
+    GGDosiType* momentum_y_device = opencl_manager.GetDeviceBuffer<GGDosiType>(world_recording_.momentum_y_[j], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, total_number_of_voxels*sizeof(GGDosiType), j);
 
     for (GGsize i = 0; i < total_number_of_voxels; ++i) momentum_y[i] = momentum_y_device[i];
 
@@ -549,7 +548,7 @@ void GGEMSWorld::SaveMomentum(void) const
 
   // Loop over all activated device
   for (GGsize j = 0; j < number_activated_devices_; ++j) {
-    GGDosiType* momentum_z_device = opencl_manager.GetDeviceBuffer<GGDosiType>(world_recording_.momentum_z_[j], total_number_of_voxels*sizeof(GGDosiType), j);
+    GGDosiType* momentum_z_device = opencl_manager.GetDeviceBuffer<GGDosiType>(world_recording_.momentum_z_[j], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, total_number_of_voxels*sizeof(GGDosiType), j);
 
     for (GGsize i = 0; i < total_number_of_voxels; ++i) momentum_z[i] = momentum_z_device[i];
 

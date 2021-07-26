@@ -31,9 +31,6 @@
   \date Monday December 16, 2019
 */
 
-#define FALSE 0 /*!< False for OpenCL */
-#define TRUE 1 /*!< True for OpenCL */
-
 #ifdef __OPENCL_C_VERSION__ // On OpenCL device
 #define GGchar char /*!< define a new type for char */
 #define GGchar2 char2 /*!< define a new type for char2 */
