@@ -136,23 +136,30 @@ class GGEMS_EXPORT GGEMSSourceManager
     inline std::string GetNameOfSource(GGsize const& source_index) const {return sources_[source_index]->GetNameOfSource();}
 
     /*!
-      \fn inline GGsize GetNumberOfBatchs(GGsize const& source_index, GGsize const& device_index) const
+      \fn inline GGsize GetNumberOfBatchs(GGsize const& source_index, GGsize const& thread_index) const
       \param source_index - index of the source
-      \param device_index - index of activated device
+      \param thread_index - index of activated device (thread index)
       \return the number of batch of particle
       \brief method returning the number of particles by batch
     */
-    inline GGsize GetNumberOfBatchs(GGsize const& source_index, GGsize const& device_index) const {return sources_[source_index]->GetNumberOfBatchs(device_index);}
+    inline GGsize GetNumberOfBatchs(GGsize const& source_index, GGsize const& thread_index) const {return sources_[source_index]->GetNumberOfBatchs(thread_index);}
 
     /*!
-      \fn inline GGsize GetNumberOfParticlesInBatch(GGsize const& source_index, GGsize const& device_index, GGsize const& batch_index)
+      \fn GGsize GetTotalNumberOfBatchs(void) const
+      \return total number of batch for whole simulation
+      \brief computhe the total number of batchs
+    */
+    GGsize GetTotalNumberOfBatchs(void) const;
+
+    /*!
+      \fn inline GGsize GetNumberOfParticlesInBatch(GGsize const& source_index, GGsize const& thread_index, GGsize const& batch_index)
       \param source_index - index of the source
-      \param device_index - index of activated device
+      \param thread_index - index of activated device (thread index)
       \param batch_index - index of the source
       \return the number of particle for a specific batch
       \brief method returning the number of particles in a specific batch
     */
-    inline GGsize GetNumberOfParticlesInBatch(GGsize const& source_index, GGsize const& device_index, GGsize const& batch_index) {return sources_[source_index]->GetNumberOfParticlesInBatch(device_index, batch_index);}
+    inline GGsize GetNumberOfParticlesInBatch(GGsize const& source_index, GGsize const& thread_index, GGsize const& batch_index) {return sources_[source_index]->GetNumberOfParticlesInBatch(thread_index, batch_index);}
 
     /*!
       \fn GGEMSParticles* GetParticles(void) const

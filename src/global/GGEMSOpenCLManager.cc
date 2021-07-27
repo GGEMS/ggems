@@ -997,8 +997,6 @@ void GGEMSOpenCLManager::Deallocate(cl::Buffer* buffer, GGsize size, GGsize cons
 
 void GGEMSOpenCLManager::CleanBuffer(cl::Buffer* buffer, GGsize const& size, GGsize const& thread_index)
 {
-  GGcout("GGEMSOpenCLManager","CleanBuffer", 3) << "Cleaning OpenCL buffer..." << GGendl;
-
   GGint error = queues_[thread_index]->enqueueFillBuffer(*buffer, 0, 0, size, nullptr, nullptr);
   CheckOpenCLError(error, "GGEMSOpenCLManager", "CleanBuffer");
 }
