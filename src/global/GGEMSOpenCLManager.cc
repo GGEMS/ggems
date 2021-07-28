@@ -971,6 +971,7 @@ void GGEMSOpenCLManager::CleanBuffer(cl::Buffer* buffer, GGsize const& size, GGs
   // Handling event
   HandleEvent(event, "Cleaning buffer");
 
+
   CheckOpenCLError(error, "GGEMSOpenCLManager", "CleanBuffer");
 }
 

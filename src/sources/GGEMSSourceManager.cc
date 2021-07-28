@@ -127,6 +127,28 @@ void GGEMSSourceManager::PrintInfos(void) const
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+GGsize GGEMSSourceManager::GetTotalNumberOfBatchs(void) const
+{
+  // Getting the number of activated device
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+  GGsize number_of_activated_devices = opencl_manager.GetNumberOfActivatedDevice();
+
+  // Loop over number of sources
+  GGsize total_number_of_batchs = 0;
+  for (GGsize i = 0; i < number_of_sources_; ++i) {
+    // Loop over the number of activated devices
+    for (GGsize j = 0; j < number_of_activated_devices; ++j) {
+      total_number_of_batchs += sources_[i]->GetNumberOfBatchs(j);
+    }
+  }
+
+  return total_number_of_batchs;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 void GGEMSSourceManager::Initialize(GGuint const& seed, bool const& is_tracking, GGint const& particle_tracking_id) const
 {
   GGcout("GGEMSSourceManager", "Initialize", 3) << "Initializing the GGEMS source(s)..." << GGendl;
