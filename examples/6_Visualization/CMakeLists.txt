@@ -19,25 +19,25 @@
 #-------------------------------------------------------------------------------
 # CMakeLists.txt
 #
-# CMakeLists.txt - Compile and build 5_World_Tracking
+# CMakeLists.txt - Compile and build 6_Visualization
 #
 # Authors :
 #   - Julien Bert <julien.bert@univ-brest.fr>
 #   - Didier Benoit <didier.benoit@inserm.fr>
 #
-# Generated on : 02/03/2021
+# Generated on : 28/07/2021
 #-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
 # Defining the project
-PROJECT(WorldTracking)
+PROJECT(Visualization)
 
 #-------------------------------------------------------------------------------
 # Creating the executable
-ADD_EXECUTABLE(world_tracking world_tracking.cc)
-TARGET_LINK_LIBRARIES(world_tracking ggems)
+# ADD_EXECUTABLE(visualization visualization.cc)
+# TARGET_LINK_LIBRARIES(visualization ggems)
 
 #-------------------------------------------------------------------------------
 # Copy executable to ggems bin folder
 INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} DESTINATION ggems/examples)
-INSTALL(TARGETS world_tracking DESTINATION ggems/examples/5_World_Tracking)
+# INSTALL(TARGETS visualization DESTINATION ggems/examples/6_Visualization)
