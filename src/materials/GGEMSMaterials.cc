@@ -148,7 +148,7 @@ void GGEMSMaterials::PrintInfos(void) const
   // Loop over the device
   for (GGsize d = 0; d < number_activated_devices_; ++d) {
     // Getting the OpenCL pointer on material tables
-    GGEMSMaterialTables* material_table_device = opencl_manager.GetDeviceBuffer<GGEMSMaterialTables>(material_tables_[d], sizeof(GGEMSMaterialTables), d);
+    GGEMSMaterialTables* material_table_device = opencl_manager.GetDeviceBuffer<GGEMSMaterialTables>(material_tables_[d], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGEMSMaterialTables), d);
 
     // Get the index of device
     GGsize device_index = opencl_manager.GetIndexOfActivatedDevice(d);
@@ -223,7 +223,7 @@ void GGEMSMaterials::BuildMaterialTables(void)
     material_tables_[d] = opencl_manager.Allocate(nullptr, sizeof(GGEMSMaterialTables), d, CL_MEM_READ_WRITE, "GGEMSMaterials");
 
     // Getting the OpenCL pointer on material tables
-    GGEMSMaterialTables* material_table_device = opencl_manager.GetDeviceBuffer<GGEMSMaterialTables>(material_tables_[d], sizeof(GGEMSMaterialTables), d);
+    GGEMSMaterialTables* material_table_device = opencl_manager.GetDeviceBuffer<GGEMSMaterialTables>(material_tables_[d], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGEMSMaterialTables), d);
 
     // Get the number of activated materials
     material_table_device->number_of_materials_ = static_cast<GGuchar>(materials_.size());
@@ -310,7 +310,7 @@ GGfloat GGEMSMaterials::GetDensity(std::string const& material_name, GGsize cons
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
   // Getting the OpenCL pointer on material tables
-  GGEMSMaterialTables* material_table_device = opencl_manager.GetDeviceBuffer<GGEMSMaterialTables>(material_tables_[thread_index], sizeof(GGEMSMaterialTables), thread_index);
+  GGEMSMaterialTables* material_table_device = opencl_manager.GetDeviceBuffer<GGEMSMaterialTables>(material_tables_[thread_index], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGEMSMaterialTables), thread_index);
 
   // Get index of material
   std::vector<std::string>::const_iterator iter_mat = std::find(materials_.begin(), materials_.end(), material_name);
@@ -338,7 +338,7 @@ GGfloat GGEMSMaterials::GetAtomicNumberDensity(std::string const& material_name,
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
   // Getting the OpenCL pointer on material tables
-  GGEMSMaterialTables* material_table_device = opencl_manager.GetDeviceBuffer<GGEMSMaterialTables>(material_tables_[thread_index], sizeof(GGEMSMaterialTables), thread_index);
+  GGEMSMaterialTables* material_table_device = opencl_manager.GetDeviceBuffer<GGEMSMaterialTables>(material_tables_[thread_index], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGEMSMaterialTables), thread_index);
 
   // Get index of material
   ptrdiff_t index = GetMaterialIndex(material_name);
@@ -366,7 +366,7 @@ GGfloat GGEMSMaterials::GetEnergyCut(std::string const& material_name, std::stri
   range_cuts_->ConvertCutsFromDistanceToEnergy(this);
 
   // Getting the OpenCL pointer on material tables
-  GGEMSMaterialTables* material_table_device = opencl_manager.GetDeviceBuffer<GGEMSMaterialTables>(material_tables_[thread_index], sizeof(GGEMSMaterialTables), thread_index);
+  GGEMSMaterialTables* material_table_device = opencl_manager.GetDeviceBuffer<GGEMSMaterialTables>(material_tables_[thread_index], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGEMSMaterialTables), thread_index);
 
   // Get index of material
   ptrdiff_t index = GetMaterialIndex(material_name);

@@ -182,5 +182,5 @@ ggems.run()
 # STEP 8: Exit safely
 dosimetry.delete()
 ggems.delete()
-opencl_manager.clean()
+clean_safely()
 exit()

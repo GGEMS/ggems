@@ -28,14 +28,12 @@
   \date Tuesday March 23, 2021
 */
 
+#include <algorithm>
+#include <sstream>
+
+#include "GGEMS/tools/GGEMSTools.hh"
+#include "GGEMS/global/GGEMSOpenCLManager.hh"
 #include "GGEMS/tools/GGEMSRAMManager.hh"
-#include "GGEMS/geometries/GGEMSVolumeCreatorManager.hh"
-#include "GGEMS/tools/GGEMSProfilerManager.hh"
-#include "GGEMS/navigators/GGEMSNavigatorManager.hh"
-#include "GGEMS/sources/GGEMSSourceManager.hh"
-#include "GGEMS/physics/GGEMSRangeCutsManager.hh"
-#include "GGEMS/global/GGEMS.hh"
-#include "GGEMS/physics/GGEMSProcessesManager.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -45,54 +43,137 @@ GGEMSOpenCLManager::GGEMSOpenCLManager(void)
 {
   GGcout("GGEMSOpenCLManager", "GGEMSOpenCLManager", 3) << "GGEMSOpenCLManager creating..." << GGendl;
 
-  GGcout("GGEMSOpenCLManager", "GGEMSOpenCLManager", 1) << "Retrieving OpenCL platform(s)..." << GGendl;
-  CheckOpenCLError(cl::Platform::get(&platforms_), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+  InitOpenCL();
 
-  // Prevent cache kernel in OpenCL
+  GGcout("GGEMSOpenCLManager", "GGEMSOpenCLManager", 3) << "GGEMSOpenCLManager created!!!" << GGendl;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+GGEMSOpenCLManager::~GGEMSOpenCLManager(void)
+{
+  GGcout("GGEMSOpenCLManager", "~GGEMSOpenCLManager", 3) << "GGEMSOpenCLManager erasing..." << GGendl;
+  GGcout("GGEMSOpenCLManager", "~GGEMSOpenCLManager", 3) << "GGEMSOpenCLManager erased!!!" << GGendl;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSOpenCLManager::Clean(void)
+{
+  GGcout("GGEMSOpenCLManager", "Clean", 3) << "GGEMSOpenCLManager cleaning..." << GGendl;
+
+  // Freeing devices
+  for (cl::Device* d : devices_) {
+    delete d;
+    d = nullptr;
+  }
+
+  // Freeing activated devices
+  for (ComputingDevice& i : computing_devices_) i.Clean();
+
+  // Deleting kernel
+  for (cl::Kernel* k : kernels_) {
+    delete k;
+    k = nullptr;
+  }
+
+  GGcout("GGEMSOpenCLManager", "Clean", 3) << "GGEMSOpenCLManager cleaned!!!" << GGendl;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSOpenCLManager::InitOpenCL(void)
+{
   #ifndef OPENCL_CACHE_KERNEL_COMPILATION
+  DisableCudaKernelCache();
+  #endif
+
+  GetOpenCLPlatorms();
+  GetOpenCLDevices();
+  SetOpenCLCompilationOptions();
+
+  // Filling alias vendor
+  vendors_.insert(std::make_pair("nvidia", "NVIDIA Corporation"));
+  vendors_.insert(std::make_pair("intel", "Intel(R) Corporation"));
+  vendors_.insert(std::make_pair("amd", "Advanced Micro Devices, Inc."));
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSOpenCLManager::DisableCudaKernelCache(void) const
+{
   #ifdef _MSC_VER
   _putenv("CUDA_CACHE_DISABLE=1");
   #else
   std::string disable_cache("CUDA_CACHE_DISABLE=1");
   putenv(&disable_cache[0]);
   #endif
-  #endif
+}
 
-  // Parameters reading infos from platform and device
-  std::string info_string("");
-  cl_device_type device_type;
-  cl_device_fp_config device_fp_config;
-  cl_device_exec_capabilities device_exec_capabilities;
-  cl_device_mem_cache_type device_mem_cache_type;
-  cl_device_local_mem_type device_local_mem_type;
-  cl_device_affinity_domain device_affinity_domain;
-  GGuint info_uint = 0;
-  GGulong info_ulong = 0;
-  GGsize info_size = 0;
-  GGbool info_bool = false;
-  char char_data[1024];
-  GGsize size_data[3] = {0, 0, 0};
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
-  // Getting infos about platform
-  for (auto& p : platforms_) {
-    CheckOpenCLError(p.getInfo(CL_PLATFORM_PROFILE, &info_string), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+void GGEMSOpenCLManager::GetOpenCLPlatorms(void)
+{
+  // Getting all platforms
+  CheckOpenCLError(cl::Platform::get(&platforms_), "GGEMSOpenCLManager", "GetOpenCLPlatorms");
+
+  // String parameter storing info from platform
+  std::string info_string;
+
+  // Getting infos about platforms
+  for (cl::Platform& p : platforms_) {
+    CheckOpenCLError(p.getInfo(CL_PLATFORM_PROFILE, &info_string), "GGEMSOpenCLManager", "GetOpenCLPlatorms");
     platform_profile_.push_back(info_string);
 
-    CheckOpenCLError(p.getInfo(CL_PLATFORM_VERSION, &info_string), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(p.getInfo(CL_PLATFORM_VERSION, &info_string), "GGEMSOpenCLManager", "GetOpenCLPlatorms");
     platform_version_.push_back(info_string);
 
-    CheckOpenCLError(p.getInfo(CL_PLATFORM_NAME, &info_string), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(p.getInfo(CL_PLATFORM_NAME, &info_string), "GGEMSOpenCLManager", "GetOpenCLPlatorms");
     platform_name_.push_back(info_string); 
 
-    CheckOpenCLError(p.getInfo(CL_PLATFORM_VENDOR, &info_string), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(p.getInfo(CL_PLATFORM_VENDOR, &info_string), "GGEMSOpenCLManager", "GetOpenCLPlatorms");
     platform_vendor_.push_back(info_string);
 
-    CheckOpenCLError(p.getInfo(CL_PLATFORM_EXTENSIONS, &info_string), "GGEMSOpenCLManager", "GGEMSOpenCLManager");
+    CheckOpenCLError(p.getInfo(CL_PLATFORM_EXTENSIONS, &info_string), "GGEMSOpenCLManager", "GetOpenCLPlatorms");
     platform_extensions_.push_back(info_string);
   }
+}
 
-  // Retrieve all the available devices
-  GGcout("GGEMSOpenCLManager", "GGEMSOpenCLManager", 1) << "Retrieving OpenCL device(s)..." << GGendl;
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSOpenCLManager::PrintPlatformInfos(void) const
+{
+  for (GGsize i = 0; i < platforms_.size(); ++i) {
+    GGcout("GGEMSOpenCLManager", "PrintPlatformInfos", 0) << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintPlatformInfos", 0) << "#### PLATFORM: " << i << " ####" << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintPlatformInfos", 0) << "    + Platform: " << platform_profile_[i] << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintPlatformInfos", 0) << "    + Version: " << platform_version_[i] << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintPlatformInfos", 0) << "    + Name: " << platform_name_[i] << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintPlatformInfos", 0) << "    + Vendor: " << platform_vendor_[i] << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintPlatformInfos", 0) << "    + Extensions: " << platform_extensions_[i] << GGendl;
+  }
+  GGcout("GGEMSOpenCLManager", "PrintPlatformInfos", 0) << GGendl;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSOpenCLManager::GetOpenCLDevices(void)
+{
+  // Getting all devices from platform
   for (GGsize i = 0; i < platforms_.size(); ++i) {
     std::vector<cl::Device> all_devices;
 
@@ -100,8 +181,23 @@ GGEMSOpenCLManager::GGEMSOpenCLManager(void)
     platforms_[i].getDevices(CL_DEVICE_TYPE_ALL, &all_devices);
 
     // Storing all devices from platform
-    for (auto& d : all_devices) devices_.emplace_back(new cl::Device(d));
+    for (cl::Device& d : all_devices) devices_.emplace_back(new cl::Device(d));
   }
+
+  // Parameters reading infos from platform and device
+  std::string info_string;
+  cl_device_type device_type;
+  cl_device_fp_config device_fp_config;
+  cl_device_exec_capabilities device_exec_capabilities;
+  cl_device_mem_cache_type device_mem_cache_type;
+  cl_device_local_mem_type device_local_mem_type;
+  cl_device_affinity_domain device_affinity_domain;
+  GGuint info_uint;
+  GGulong info_ulong;
+  GGsize info_size;
+  GGbool info_bool;
+  char char_data[1024];
+  GGsize size_data[3];
 
   // Getting infos about device
   for (GGsize i = 0; i < devices_.size(); ++i) {
@@ -303,173 +399,6 @@ GGEMSOpenCLManager::GGEMSOpenCLManager(void)
 
   // Custom work group size, 64 seems a good trade-off
   work_group_size_ = 64;
-
-  // Define the compilation options by default for OpenCL
-  build_options_ = "-cl-std=CL1.2 -w -Werror -cl-fast-relaxed-math";
-
-  // Give precision for dosimetry
-  #ifdef DOSIMETRY_DOUBLE_PRECISION
-  build_options_ += " -DDOSIMETRY_DOUBLE_PRECISION";
-  #endif
-
-  // Add auxiliary function path to OpenCL options
-  #ifdef GGEMS_PATH
-  build_options_ += " -I";
-  build_options_ += GGEMS_PATH;
-  build_options_ += "/include";
-  #elif
-  GGEMSMisc::ThrowException("GGEMSOpenCLManager","GGEMSOpenCLManager", "OPENCL_KERNEL_PATH not defined or not find!!!");
-  #endif
-
-  // Filling umap of vendors
-  vendors_.insert(std::make_pair("nvidia", "NVIDIA Corporation"));
-  vendors_.insert(std::make_pair("intel", "Intel(R) Corporation"));
-  vendors_.insert(std::make_pair("amd", "Advanced Micro Devices, Inc."));
-
-  // Create buffer of kernels for all devices
-  kernels_.clear();
-  kernel_compilation_options_.clear();
-
-  GGcout("GGEMSOpenCLManager", "GGEMSOpenCLManager", 3) << "GGEMSOpenCLManager created!!!" << GGendl;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-GGEMSOpenCLManager::~GGEMSOpenCLManager(void)
-{
-  GGcout("GGEMSOpenCLManager", "~GGEMSOpenCLManager", 3) << "GGEMSOpenCLManager erasing..." << GGendl;
-
-  GGcout("GGEMSOpenCLManager", "~GGEMSOpenCLManager", 3) << "GGEMSOpenCLManager erased!!!" << GGendl;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void GGEMSOpenCLManager::Clean(void)
-{
-  GGcout("GGEMSOpenCLManager", "Clean", 3) << "GGEMSOpenCLManager cleaning..." << GGendl;
-
-  // Cleaning all singletons
-  GGEMSRAMManager::GetInstance().Clean();
-  GGEMSVolumeCreatorManager::GetInstance().Clean();
-  GGEMSProfilerManager::GetInstance().Clean();
-  GGEMSNavigatorManager::GetInstance().Clean();
-  GGEMSSourceManager::GetInstance().Clean();
-  GGEMSMaterialsDatabaseManager::GetInstance().Clean();
-  GGEMSProcessesManager::GetInstance().Clean();
-  GGEMSRangeCutsManager::GetInstance().Clean();
-
-  // Freeing platforms, and platform infos
-  platform_profile_.clear();
-  platform_version_.clear();
-  platform_name_.clear(); 
-  platform_vendor_.clear();
-  platform_extensions_.clear();
-  platforms_.clear();
-
-  // Freeing devices
-  for (auto d : devices_) delete d;
-  devices_.clear();
-  device_indices_.clear();
-  device_type_.clear();
-  device_name_.clear();
-  device_vendor_.clear();
-  device_vendor_id_.clear();
-  device_profile_.clear();
-  device_version_.clear();
-  device_driver_version_.clear();
-  device_opencl_c_version_.clear();
-  device_native_vector_width_char_.clear();
-  device_native_vector_width_short_.clear();
-  device_native_vector_width_int_.clear();
-  device_native_vector_width_long_.clear();
-  device_native_vector_width_half_.clear();
-  device_native_vector_width_float_.clear();
-  device_native_vector_width_double_.clear();
-  device_preferred_vector_width_char_.clear();
-  device_preferred_vector_width_short_.clear();
-  device_preferred_vector_width_int_.clear();
-  device_preferred_vector_width_long_.clear();
-  device_preferred_vector_width_half_.clear();
-  device_preferred_vector_width_float_.clear(); 
-  device_preferred_vector_width_double_.clear();
-  device_address_bits_.clear();
-  device_available_.clear();
-  device_compiler_available_.clear();
-  device_half_fp_config_.clear();
-  device_single_fp_config_.clear();
-  device_double_fp_config_.clear();
-  device_endian_little_.clear();
-  device_extensions_.clear();
-  device_error_correction_support_.clear();
-  device_execution_capabilities_.clear();
-  device_global_mem_cache_size_.clear();
-  device_global_mem_cache_type_.clear();
-  device_global_mem_cacheline_size_.clear();
-  device_global_mem_size_.clear();
-  device_local_mem_size_.clear();
-  device_local_mem_type_.clear(); 
-  device_host_unified_memory_.clear();
-  device_image_max_array_size_.clear();
-  device_image_max_buffer_size_.clear();
-  device_image_support_.clear();
-  device_image2D_max_width_.clear();
-  device_image2D_max_height_.clear();
-  device_image3D_max_width_.clear();
-  device_image3D_max_height_.clear();
-  device_image3D_max_depth_.clear();
-  device_max_read_image_args_.clear();
-  device_max_write_image_args_.clear();
-  device_max_clock_frequency_.clear();
-  device_max_compute_units_.clear();
-  device_max_constant_args_.clear();
-  device_max_constant_buffer_size_.clear();
-  device_max_mem_alloc_size_.clear();
-  device_max_parameter_size_.clear();
-  device_max_samplers_.clear();
-  device_max_work_group_size_.clear();
-  device_max_work_item_sizes_.clear();
-  device_mem_base_addr_align_.clear();
-  device_max_work_item_dimensions_.clear();
-  device_printf_buffer_size_.clear();
-  device_partition_affinity_domain_.clear();
-  device_partition_max_sub_devices_.clear();
-  device_profiling_timer_resolution_.clear();
-
-  // Freeing contexts, queues and events
-  for (auto c : contexts_) delete c;
-  contexts_.clear();
-  for (auto q : queues_) delete q;
-  queues_.clear();
-  for (auto e : events_) delete e;
-  events_.clear();
-
-  // Deleting kernel
-  for (auto k : kernels_) delete k;
-  kernels_.clear();
-
-  GGcout("GGEMSOpenCLManager", "Clean", 3) << "GGEMSOpenCLManager cleaned!!!" << GGendl;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void GGEMSOpenCLManager::PrintPlatformInfos(void) const
-{
-  for (GGsize i = 0; i < platforms_.size(); ++i) {
-    GGcout("GGEMSOpenCLManager", "PrintPlatformInfos", 0) << GGendl;
-    GGcout("GGEMSOpenCLManager", "PrintPlatformInfos", 0) << "#### PLATFORM: " << i << " ####" << GGendl;
-    GGcout("GGEMSOpenCLManager", "PrintPlatformInfos", 0) << "    + Platform: " << platform_profile_[i] << GGendl;
-    GGcout("GGEMSOpenCLManager", "PrintPlatformInfos", 0) << "    + Version: " << platform_version_[i] << GGendl;
-    GGcout("GGEMSOpenCLManager", "PrintPlatformInfos", 0) << "    + Name: " << platform_name_[i] << GGendl;
-    GGcout("GGEMSOpenCLManager", "PrintPlatformInfos", 0) << "    + Vendor: " << platform_vendor_[i] << GGendl;
-    GGcout("GGEMSOpenCLManager", "PrintPlatformInfos", 0) << "    + Extensions: " << platform_extensions_[i] << GGendl;
-  }
-  GGcout("GGEMSOpenCLManager", "PrintPlatformInfos", 0) << GGendl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -643,8 +572,37 @@ void GGEMSOpenCLManager::PrintDeviceInfos(void) const
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+void GGEMSOpenCLManager::SetOpenCLCompilationOptions(void)
+{
+  // Define the compilation options by default for OpenCL
+  build_options_ = "-cl-std=CL1.2 -w -Werror -cl-fast-relaxed-math";
+
+  // Give precision for dosimetry
+  #ifdef DOSIMETRY_DOUBLE_PRECISION
+  build_options_ += " -DDOSIMETRY_DOUBLE_PRECISION";
+  #endif
+
+  // Add auxiliary function path to OpenCL options
+  #ifdef GGEMS_PATH
+  build_options_ += " -I";
+  build_options_ += GGEMS_PATH;
+  build_options_ += "/include";
+  #elif
+  GGEMSMisc::ThrowException("GGEMSOpenCLManager","GGEMSOpenCLManager", "OPENCL_KERNEL_PATH not defined or not find!!!");
+  #endif
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 void GGEMSOpenCLManager::PrintBuildOptions(void) const
 {
+  #ifndef OPENCL_CACHE_KERNEL_COMPILATION
+  GGcout("GGEMSOpenCLManager", "PrintBuildOptions", 0) << "OpenCL NVIDIA kernel cache compilation: OFF" << GGendl;
+  #else
+  GGcout("GGEMSOpenCLManager", "PrintBuildOptions", 0) << "OpenCL NVIDIA kernel cache compilation: ON" << GGendl;
+  #endif
   GGcout("GGEMSOpenCLManager", "PrintBuildOptions", 0) << "OpenCL building options: " << build_options_ << GGendl;
 }
 
@@ -662,13 +620,13 @@ void GGEMSOpenCLManager::PrintActivatedDevices(void) const
   GGcout("GGEMSOpenCLManager", "PrintActivatedDevices", 0) << "------------------" << GGendl;
 
   // Loop over activated devices
-  for (GGsize i = 0; i < device_indices_.size(); ++i) {
+  for (GGsize i = 0; i < computing_devices_.size(); ++i) {
     GGcout("GGEMSOpenCLManager", "PrintActivatedDevices", 0) << GGendl;
-    GGcout("GGEMSOpenCLManager", "PrintActivatedDevices", 0) << "#### DEVICE: " << device_indices_[i] << " ####" << GGendl;
-    GGcout("GGEMSOpenCLManager", "PrintActivatedDevices", 0) << "    -> Name: " << GetDeviceName(device_indices_[i]) << " ####" << GGendl;
-    if (GetDeviceType(device_indices_[i]) == CL_DEVICE_TYPE_CPU)
+    GGcout("GGEMSOpenCLManager", "PrintActivatedDevices", 0) << "#### DEVICE: " << computing_devices_[i].index_ << " ####" << GGendl;
+    GGcout("GGEMSOpenCLManager", "PrintActivatedDevices", 0) << "    -> Name: " << GetDeviceName(computing_devices_[i].index_) << " ####" << GGendl;
+    if (GetDeviceType(computing_devices_[i].index_) == CL_DEVICE_TYPE_CPU)
       GGcout("GGEMSOpenCLManager", "PrintActivatedDevices", 0) << "    -> Type: CL_DEVICE_TYPE_CPU " << GGendl;
-    else if (GetDeviceType(device_indices_[i]) == CL_DEVICE_TYPE_GPU)
+    else if (GetDeviceType(computing_devices_[i].index_) == CL_DEVICE_TYPE_GPU)
       GGcout("GGEMSOpenCLManager", "PrintActivatedDevices", 0) << "    -> Type: CL_DEVICE_TYPE_GPU " << GGendl;
   }
 
@@ -754,12 +712,6 @@ void GGEMSOpenCLManager::DeviceToActivate(GGsize const& device_id)
     GGEMSMisc::ThrowException("GGEMSOpenCLManager", "DeviceToActivate", oss.str());
   }
 
-  // Checking if device already activated
-  if (std::find(device_indices_.begin(), device_indices_.end(), device_id) != device_indices_.end()) return;
-
-  // Storing index of activated device
-  device_indices_.push_back(device_id);
-
   // Checking double precision for dosimetry
   #ifdef DOSIMETRY_DOUBLE_PRECISION
   if (!IsDoublePrecision(device_id)) {
@@ -769,13 +721,25 @@ void GGEMSOpenCLManager::DeviceToActivate(GGsize const& device_id)
   }
   #endif
 
+  // Checking if device already activated
+  for (ComputingDevice& i : computing_devices_) {
+    if (i.index_ == device_id) {
+      GGwarn("GGEMSOpenCLManager", "DeviceToActivate", 2) << "Device already activated." << GGendl;
+      return;
+    }
+  }
+
+  // Creating computing device
+  ComputingDevice computing_device;
+  computing_device.index_ = device_id;
+  computing_device.context_ = new cl::Context(*devices_.at(device_id));
+  computing_device.queue_ = new cl::CommandQueue(*computing_device.context_, *devices_.at(device_id), CL_QUEUE_PROFILING_ENABLE);
+
+  // Storing computing device
+  computing_devices_.push_back(computing_device);
+
   // Printing name of activated device
   GGcout("GGEMSOpenCLManager", "DeviceToActivate", 2) << "Activated device: " << GetDeviceName(device_id) << GGendl;
-
-  // Creating context, command queue and event
-  contexts_.push_back(new cl::Context(*devices_.at(device_id)));
-  queues_.push_back(new cl::CommandQueue(*contexts_.back(), *devices_.at(device_id), CL_QUEUE_PROFILING_ENABLE));
-  events_.push_back(new cl::Event());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -809,7 +773,7 @@ void GGEMSOpenCLManager::DeviceBalancing(std::string const& device_balancing)
   }
 
   // Checking number of device balancing value
-  if (device_balancing_.size() != device_indices_.size()) {
+  if (device_balancing_.size() != computing_devices_.size()) {
     std::ostringstream oss(std::ostringstream::out);
     oss << "Mismatch between number of device balancing values and number of activated devices!!!";
     GGEMSMisc::ThrowException("GGEMSOpenCLManager", "DeviceBalancing", oss.str());
@@ -817,7 +781,7 @@ void GGEMSOpenCLManager::DeviceBalancing(std::string const& device_balancing)
 
   // Printing device balancing
   for (GGsize i = 0; i < device_balancing_.size(); ++i) {
-    GGcout("GGEMSOpenCLManager", "DeviceBalancing", 0) << "Balance on device " << GetDeviceName(device_indices_[i]) << ": " << device_balancing_[i]*100.0f << "%" << GGendl;
+    GGcout("GGEMSOpenCLManager", "DeviceBalancing", 0) << "Balance on device " << GetDeviceName(computing_devices_[i].index_) << ": " << device_balancing_[i]*100.0f << "%" << GGendl;
   }
 }
 
@@ -890,7 +854,7 @@ void GGEMSOpenCLManager::CompileKernel(std::string const& kernel_filename, std::
 
   // if kernel already compiled return it
   if (kernel_index != KERNEL_NOT_COMPILED) {
-    for (GGsize i = 0; i < device_indices_.size(); ++i) {
+    for (GGsize i = 0; i < computing_devices_.size(); ++i) {
       kernel_list[i] = kernels_[kernel_index+i];
     }
   }
@@ -906,15 +870,15 @@ void GGEMSOpenCLManager::CompileKernel(std::string const& kernel_filename, std::
     cl::Program::Sources program_source(1, std::make_pair(source_code.c_str(), source_code.length() + 1));
 
     // Loop over activated device
-    for (GGsize i = 0; i < device_indices_.size(); ++i) {
+    for (GGsize i = 0; i < computing_devices_.size(); ++i) {
       // Make program from source code in context
-      cl::Program program = cl::Program(*contexts_[i], program_source);
+      cl::Program program = cl::Program(*computing_devices_[i].context_, program_source);
 
       // Get device associated to context, in our case 1 context = 1 device
       std::vector<cl::Device> device;
-      CheckOpenCLError(contexts_[i]->getInfo(CL_CONTEXT_DEVICES, &device), "GGEMSOpenCLManager", "CompileKernel");
+      CheckOpenCLError(computing_devices_[i].context_->getInfo(CL_CONTEXT_DEVICES, &device), "GGEMSOpenCLManager", "CompileKernel");
 
-      GGcout("GGEMSOpenCLManager", "CompileKernel", 2) << "Compile a new kernel '" << kernel_name << "' from file: " << kernel_filename << " on device: " << GetDeviceName(device_indices_[i]) << " with options: " << kernel_compilation_option << GGendl;
+      GGcout("GGEMSOpenCLManager", "CompileKernel", 2) << "Compile a new kernel '" << kernel_name << "' from file: " << kernel_filename << " on device: " << GetDeviceName(computing_devices_[i].index_) << " with options: " << kernel_compilation_option << GGendl;
 
       // Compile source code on device
       GGint build_status = program.build(device, kernel_compilation_option);
@@ -965,7 +929,7 @@ cl::Buffer* GGEMSOpenCLManager::Allocate(void* host_ptr, GGsize const& size, GGs
   }
 
   GGint error = 0;
-  cl::Buffer* buffer = new cl::Buffer(*contexts_[thread_index], flags, size, host_ptr, &error);
+  cl::Buffer* buffer = new cl::Buffer(*computing_devices_[thread_index].context_, flags, size, host_ptr, &error);
   CheckOpenCLError(error, "GGEMSOpenCLManager", "Allocate");
 
   // Increment RAM memory
@@ -997,7 +961,17 @@ void GGEMSOpenCLManager::Deallocate(cl::Buffer* buffer, GGsize size, GGsize cons
 
 void GGEMSOpenCLManager::CleanBuffer(cl::Buffer* buffer, GGsize const& size, GGsize const& thread_index)
 {
-  GGint error = queues_[thread_index]->enqueueFillBuffer(*buffer, 0, 0, size, nullptr, nullptr);
+  GGcout("GGEMSOpenCLManager","CleanBuffer", 3) << "Cleaning OpenCL buffer..." << GGendl;
+
+  // Event parameters
+  cl::Event event;
+
+  GGint error = computing_devices_[thread_index].queue_->enqueueFillBuffer(*buffer, 0, 0, size, nullptr, &event);
+
+  // Handling event
+  HandleEvent(event, "Cleaning buffer");
+
+
   CheckOpenCLError(error, "GGEMSOpenCLManager", "CleanBuffer");
 }
 
@@ -1043,11 +1017,31 @@ GGsize GGEMSOpenCLManager::GetBestWorkItem(GGsize const& number_of_elements) con
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+void GGEMSOpenCLManager::HandleEvent(cl::Event& event, char* message)
+{
+  clRetainEvent(event());
+  event.setCallback(CL_COMPLETE, reinterpret_cast<void (CL_CALLBACK*)(cl_event, GGint, void*)>(GGEMSOpenCLManager::Callback), message);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSOpenCLManager::Callback(cl_event event, GGint event_command_exec_status, void* user_data)
+{
+  if (event_command_exec_status != CL_COMPLETE) {
+    GGcout("GGEMSOpenCLManager", "Callback", 0) << (char*)user_data << ": error during operation!!!" << GGendl;
+    clReleaseEvent(event);
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 void GGEMSOpenCLManager::CheckOpenCLError(GGint const& error, std::string const& class_name, std::string const& method_name) const
 {
-  if (error != CL_SUCCESS) {
-    GGEMSMisc::ThrowException(class_name, method_name, ErrorType(error));
-  }
+  if (error != CL_SUCCESS) GGEMSMisc::ThrowException(class_name, method_name, ErrorType(error));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1413,6 +1407,76 @@ std::string GGEMSOpenCLManager::ErrorType(GGint const& error) const
     case -1009: {
       oss << "CL_D3D11_RESOURCE_NOT_ACQUIRED_KHR:" << std::endl;
       oss << "    * If a mem_object is not acquired by OpenCL" << std::endl;
+      return oss.str();
+    }
+    case -1010: {
+      oss << "CL_INVALID_D3D9_DEVICE_NV or CL_INVALID_DX9_DEVICE_INTEL:" << std::endl;
+      oss << "    * If the Direct3D 9 device specified for interoperability is not compatible with the devices against which the context is to be created" << std::endl;
+      return oss.str();
+    }
+    case -1011: {
+      oss << "CL_INVALID_D3D9_RESOURCE_NV or CL_INVALID_DX9_RESOURCE_INTEL:" << std::endl;
+      oss << "    * If a 'mem_object' is not a Direct3D 9 resource of the required type" << std::endl;
+      return oss.str();
+    }
+    case -1012: {
+      oss << "CL_D3D9_RESOURCE_ALREADY_ACQUIRED_NV or CL_DX9_RESOURCE_ALREADY_ACQUIRED_INTEL:" << std::endl;
+      oss << "    * If any of the 'mem_objects' is currently already acquired by OpenCL" << std::endl;
+      return oss.str();
+    }
+    case -1013: {
+      oss << "CL_D3D9_RESOURCE_NOT_ACQUIRED_NV or CL_DX9_RESOURCE_NOT_ACQUIRED_INTEL:" << std::endl;
+      oss << "    * If any of the 'mem_objects' is currently not acquired by OpenCL" << std::endl;
+      return oss.str();
+    }
+    case -1092: {
+      oss << "CL_EGL_RESOURCE_NOT_ACQUIRED_KHR:" << std::endl;
+      oss << "    * If a 'mem_object' is not acquired by OpenCL" << std::endl;
+      return oss.str();
+    }
+    case -1093: {
+      oss << "CL_INVALID_EGL_OBJECT_KHR:" << std::endl;
+      oss << "    * If a 'mem_object' is not a EGL resource of the required type" << std::endl;
+      return oss.str();
+    }
+    case -1094: {
+      oss << "CL_INVALID_ACCELERATOR_INTEL:" << std::endl;
+      oss << "    * When 'arg_value' is not a valid accelerator object, and by clRetainAccelerator, clReleaseAccelerator, and clGetAcceleratorInfo when 'accelerator' is not a valid accelerator object" << std::endl;
+      return oss.str();
+    }
+    case -1095: {
+      oss << "CL_INVALID_ACCELERATOR_TYPE_INTEL:" << std::endl;
+      oss << "    * When 'arg_value' is not an accelerator object of the correct type, or when 'accelerator_type' is not a valid accelerator type" << std::endl;
+      return oss.str();
+    }
+    case -1096: {
+      oss << "CL_INVALID_ACCELERATOR_DESCRIPTOR_INTEL:" << std::endl;
+      oss << "    * When values described by 'descriptor' are not valid, or if a combination of values is not valid" << std::endl;
+      return oss.str();
+    }
+    case -1097: {
+      oss << "CL_ACCELERATOR_TYPE_NOT_SUPPORTED_INTEL:" << std::endl;
+      oss << "    * When 'accelerator_type' is a valid accelerator type, but it not supported by any device in 'context'" << std::endl;
+      return oss.str();
+    }
+    case -1098: {
+      oss << "CL_INVALID_VA_API_MEDIA_ADAPTER_INTEL:" << std::endl;
+      oss << "    * If the VA API display specified for interoperability is not compatible with the devices against which the context is to be created" << std::endl;
+      return oss.str();
+    }
+    case -1099: {
+      oss << "CL_INVALID_VA_API_MEDIA_SURFACE_INTEL:" << std::endl;
+      oss << "    * If 'surface' is not a VA API surface of the required type, by clGetMemObjectInfo when 'param_name' is CL_MEM_VA_API_MEDIA_SURFACE_INTEL when was not created from a VA API surface, and from clGetImageInfo when 'param_name' is CL_IMAGE_VA_API_PLANE_INTEL and 'image' was not created from a VA API surface" << std::endl;
+      return oss.str();
+    }
+    case -1100: {
+      oss << "CL_VA_API_MEDIA_SURFACE_ALREADY_ACQUIRED_INTEL:" << std::endl;
+      oss << "    * If any of the 'mem_objects' is already acquired by OpenCL" << std::endl;
+      return oss.str();
+    }
+    case -1101: {
+      oss << "CL_VA_API_MEDIA_SURFACE_NOT_ACQUIRED_INTEL:" << std::endl;
+      oss << "    * If any of the 'mem_objects' are not currently acquired by OpenCL" << std::endl;
       return oss.str();
     }
     case -9999: {

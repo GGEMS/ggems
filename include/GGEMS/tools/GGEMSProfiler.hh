@@ -51,11 +51,11 @@ class GGEMS_EXPORT GGEMSProfiler
     ~GGEMSProfiler(void);
 
     /*!
-      \fn void HandleEvent(cl::Event event)
+      \fn void HandleEvent(cl::Event& event)
       \param event - OpenCL event
       \brief handle an OpenCL event in profile_name type
     */
-    void HandleEvent(cl::Event event);
+    void HandleEvent(cl::Event& event);
 
     /*!
       \fn inline DurationNano GetSummaryTime(void) const
@@ -66,13 +66,13 @@ class GGEMS_EXPORT GGEMSProfiler
 
   private:
     /*!
-      \fn static void CallBackFunction(cl_event event, GGint event_command_exec_status, void* user_data)
+      \fn static void Callback(cl_event event, GGint event_command_exec_status, void* user_data)
       \param event - OpenCL event
       \param event_command_exec_status - status of OpenCL event
       \param user_data - adress of GGEMSProfiler object
       \brief call back function analyzing event
     */
-    static void CallBackFunction(cl_event event, GGint event_command_exec_status, void* user_data);
+    static void Callback(cl_event event, GGint event_command_exec_status, void* user_data);
 
     /*!
       \fn void AddProfilerItem(cl_event event)

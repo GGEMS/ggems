@@ -47,7 +47,7 @@ GGEMSSolidBox::GGEMSSolidBox(GGsize const& virtual_element_number_x, GGsize cons
   for (GGsize d = 0; d < number_activated_devices_; ++d) {
     // Allocating memory on OpenCL device and getting pointer on it
     solid_data_[d] = opencl_manager.Allocate(nullptr, sizeof(GGEMSSolidBoxData), d, CL_MEM_READ_WRITE, "GGEMSSolidBox");
-    GGEMSSolidBoxData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSSolidBoxData>(solid_data_[d], sizeof(GGEMSSolidBoxData), d);
+    GGEMSSolidBoxData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSSolidBoxData>(solid_data_[d], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGEMSSolidBoxData), d);
 
     solid_data_device->virtual_element_number_xyz_[0] = virtual_element_number_x;
     solid_data_device->virtual_element_number_xyz_[1] = virtual_element_number_y;
@@ -211,7 +211,7 @@ void GGEMSSolidBox::PrintInfos(void) const
   // Loop over the device
   for (GGsize d = 0; d < number_activated_devices_; ++d) {
     // Getting pointer on OpenCL device
-    GGEMSSolidBoxData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSSolidBoxData>(solid_data_[d], sizeof(GGEMSSolidBoxData), d);
+    GGEMSSolidBoxData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSSolidBoxData>(solid_data_[d], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGEMSSolidBoxData), d);
 
     // Get the index of device
     GGsize device_index = opencl_manager.GetIndexOfActivatedDevice(d);
@@ -251,8 +251,8 @@ void GGEMSSolidBox::UpdateTransformationMatrix(GGsize const& thread_index)
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
   // Copy information to OBB
-  GGEMSSolidBoxData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSSolidBoxData>(solid_data_[thread_index], sizeof(GGEMSSolidBoxData), thread_index);
-  GGfloat44* transformation_matrix_device = opencl_manager.GetDeviceBuffer<GGfloat44>(geometry_transformation_->GetTransformationMatrix(thread_index), sizeof(GGfloat44), thread_index);
+  GGEMSSolidBoxData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSSolidBoxData>(solid_data_[thread_index], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGEMSSolidBoxData), thread_index);
+  GGfloat44* transformation_matrix_device = opencl_manager.GetDeviceBuffer<GGfloat44>(geometry_transformation_->GetTransformationMatrix(thread_index), CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGfloat44), thread_index);
 
   for (GGint i = 0; i < 4; ++i) {
     solid_data_device->obb_geometry_.matrix_transformation_.m0_[i] = transformation_matrix_device->m0_[i];

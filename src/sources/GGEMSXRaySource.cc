@@ -56,8 +56,8 @@ GGEMSXRaySource::GGEMSXRaySource(std::string const& source_name)
   geometry_transformation_->SetAxisTransformation(
     {
       {0.0f, 0.0f, -1.0f},
-      {0.0f, 1.0f, 0.0f},
-      {1.0f, 0.0f, 0.0f}
+      {0.0f, 1.0f,  0.0f},
+      {1.0f, 0.0f,  0.0f}
     }
   );
 
@@ -141,7 +141,6 @@ void GGEMSXRaySource::GetPrimaries(GGsize const& thread_index, GGsize const& num
   // Get command queue and event
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
   cl::CommandQueue* queue = opencl_manager.GetCommandQueue(thread_index);
-  cl::Event* event = opencl_manager.GetEvent(thread_index);
 
   // Get Device name and storing methode name + device
   GGsize device_index = opencl_manager.GetIndexOfActivatedDevice(thread_index);
@@ -176,12 +175,13 @@ void GGEMSXRaySource::GetPrimaries(GGsize const& thread_index, GGsize const& num
   kernel_get_primaries_[thread_index]->setArg(9, *matrix_transformation);
 
   // Launching kernel
-  GGint kernel_status = queue->enqueueNDRangeKernel(*kernel_get_primaries_[thread_index], 0, global_wi, local_wi, nullptr, event);
+  cl::Event event;
+  GGint kernel_status = queue->enqueueNDRangeKernel(*kernel_get_primaries_[thread_index], 0, global_wi, local_wi, nullptr, &event);
   opencl_manager.CheckOpenCLError(kernel_status, "GGEMSXRaySource", "GetPrimaries");
 
   // GGEMS Profiling
   GGEMSProfilerManager& profiler_manager = GGEMSProfilerManager::GetInstance();
-  profiler_manager.HandleEvent(*event, oss.str());
+  profiler_manager.HandleEvent(event, oss.str());
   queue->finish();
 }
 
@@ -197,7 +197,7 @@ void GGEMSXRaySource::PrintInfos(void) const
   // Loop over each device
   for (GGsize j = 0; j < number_activated_devices_; ++j) {
     // Get pointer on OpenCL device
-    GGfloat44* transformation_matrix_device = opencl_manager.GetDeviceBuffer<GGfloat44>(geometry_transformation_->GetTransformationMatrix(j), sizeof(GGfloat44), j);
+    GGfloat44* transformation_matrix_device = opencl_manager.GetDeviceBuffer<GGfloat44>(geometry_transformation_->GetTransformationMatrix(j), CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGfloat44), j);
 
     // Getting index of the device
     GGsize device_index = opencl_manager.GetIndexOfActivatedDevice(j);
@@ -346,10 +346,10 @@ void GGEMSXRaySource::FillEnergy(void)
       cdf_[j] = opencl_manager.Allocate(nullptr, 2*sizeof(GGfloat), j, CL_MEM_READ_WRITE, "GGEMSXRaySource");
 
       // Get the energy pointer on OpenCL device
-      GGfloat* energy_spectrum_device = opencl_manager.GetDeviceBuffer<GGfloat>(energy_spectrum_[j], 2*sizeof(GGfloat), j);
+      GGfloat* energy_spectrum_device = opencl_manager.GetDeviceBuffer<GGfloat>(energy_spectrum_[j], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, 2*sizeof(GGfloat), j);
 
       // Get the cdf pointer on OpenCL device
-      GGfloat* cdf_device = opencl_manager.GetDeviceBuffer<GGfloat>(cdf_[j], 2*sizeof(GGfloat), j);
+      GGfloat* cdf_device = opencl_manager.GetDeviceBuffer<GGfloat>(cdf_[j], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, 2*sizeof(GGfloat), j);
 
       energy_spectrum_device[0] = monoenergy_;
       energy_spectrum_device[1] = monoenergy_;
@@ -384,10 +384,10 @@ void GGEMSXRaySource::FillEnergy(void)
       cdf_[j] = opencl_manager.Allocate(nullptr, number_of_energy_bins_*sizeof(GGfloat), j, CL_MEM_READ_WRITE, "GGEMSXRaySource");
 
       // Get the energy pointer on OpenCL device
-      GGfloat* energy_spectrum_device = opencl_manager.GetDeviceBuffer<GGfloat>(energy_spectrum_[j], number_of_energy_bins_*sizeof(GGfloat), j);
+      GGfloat* energy_spectrum_device = opencl_manager.GetDeviceBuffer<GGfloat>(energy_spectrum_[j], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, number_of_energy_bins_*sizeof(GGfloat), j);
 
       // Get the cdf pointer on OpenCL device
-      GGfloat* cdf_device = opencl_manager.GetDeviceBuffer<GGfloat>(cdf_[j], number_of_energy_bins_*sizeof(GGfloat), j);
+      GGfloat* cdf_device = opencl_manager.GetDeviceBuffer<GGfloat>(cdf_[j], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, number_of_energy_bins_*sizeof(GGfloat), j);
 
       // Read the input spectrum and computing the sum for the cdf
       GGint line_index = 0;

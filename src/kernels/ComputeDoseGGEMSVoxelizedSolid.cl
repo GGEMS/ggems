@@ -109,9 +109,9 @@ kernel void compute_dose_ggems_voxelized_solid(
   //   where Edep represents the energy deposit in one hit and N the number of energy deposits (hits)
 
   // Computing uncertainty
-  if (hit[global_id] > 1 && edep[global_id] != 0.0) {
+  if (hit[global_id] > 1 && edep[global_id] != 0.0f) {
     GGDosiType sum_edep_2 = edep[global_id] * edep[global_id];
-    uncertainty[global_id] = sqrt((hit[global_id]*edep_squared[global_id] - sum_edep_2) / ((hit[global_id]-1) * sum_edep_2));
+    uncertainty[global_id] = sqrt((hit[global_id]*edep_squared[global_id] - sum_edep_2) / ((hit[global_id]-1.0f) * sum_edep_2));
   }
   else {
     uncertainty[global_id] = 1.0f;

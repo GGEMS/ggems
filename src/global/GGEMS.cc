@@ -40,6 +40,14 @@
 #else
 #include <unistd.h>
 #endif
+#include <mutex>
+
+/*!
+  \brief empty namespace storing mutex
+*/
+namespace {
+  std::mutex mutex; /*!< Mutex variable */
+}
 
 #include "GGEMS/global/GGEMS.hh"
 #include "GGEMS/physics/GGEMSProcessesManager.hh"
@@ -280,7 +288,7 @@ void GGEMS::RunOnDevice(GGsize const& thread_index)
       // Loop until ALL particles are dead
       GGint loop_counter = 0, max_loop = 100; // Prevent infinite loop
       do {
-         // Step 2: Find closest navigator (phantom, detector) before projection and track operation
+        // Step 2: Find closest navigator (phantom, detector) before projection and track operation
         navigator_manager.FindSolid(thread_index);
 
         // Optional step: World tracking

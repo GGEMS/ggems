@@ -242,7 +242,7 @@ void GGEMSSolid::SetSolidID(GGsize const& solid_id, GGsize const& thread_index)
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
   // Get pointer on OpenCL device
-  T* solid_data_device = opencl_manager.GetDeviceBuffer<T>(solid_data_[thread_index], sizeof(T), thread_index);
+  T* solid_data_device = opencl_manager.GetDeviceBuffer<T>(solid_data_[thread_index], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(T), thread_index);
 
   solid_data_device->solid_id_ = static_cast<GGint>(solid_id);
 

@@ -232,7 +232,7 @@ void GGEMSMHDImage::WriteRaw(cl::Buffer* image, GGsize const& thread_index) cons
   std::ofstream out_raw_stream(output_dir_+mhd_raw_file_, std::ios::out | std::ios::binary);
 
   // Mapping data
-  T* data_image_device = opencl_manager.GetDeviceBuffer<T>(image, dimensions_.x_ * dimensions_.y_ * dimensions_.z_ * sizeof(T), thread_index);
+  T* data_image_device = opencl_manager.GetDeviceBuffer<T>(image, CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, dimensions_.x_ * dimensions_.y_ * dimensions_.z_ * sizeof(T), thread_index);
 
   // Writing data on file
   out_raw_stream.write(reinterpret_cast<char*>(data_image_device), static_cast<std::streamsize>(dimensions_.x_ * dimensions_.y_* dimensions_.z_ * sizeof(T)));

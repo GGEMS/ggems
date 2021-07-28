@@ -601,7 +601,7 @@ void GGEMSRangeCuts::ConvertCutsFromDistanceToEnergy(GGEMSMaterials* materials)
 
   for (GGsize j = 0; j < number_activated_devices; ++j) {
     cl::Buffer* material_table = materials->GetMaterialTables(j);
-    GGEMSMaterialTables* material_table_device = opencl_manager.GetDeviceBuffer<GGEMSMaterialTables>(material_table, sizeof(GGEMSMaterialTables), j);
+    GGEMSMaterialTables* material_table_device = opencl_manager.GetDeviceBuffer<GGEMSMaterialTables>(material_table, CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGEMSMaterialTables), j);
 
     // Loop over materials
     for (GGushort i = 0; i < material_table_device->number_of_materials_; ++i) {
