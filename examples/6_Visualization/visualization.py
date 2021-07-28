@@ -25,14 +25,24 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-v', '--verbose', required=False, type=int, default=0, help="Set level of verbosity")
 args = parser.parse_args()
 
-# Store arguments
+# Getting arguments
 verbosity_level = args.verbose
 
+# ------------------------------------------------------------------------------
+# STEP 0: Level of verbosity during computation
 GGEMSVerbosity(verbosity_level)
 
+# ------------------------------------------------------------------------------
+# STEP 1: Calling C++ singleton
+
 opencl_manager = GGEMSOpenCLManager()
+
+# ------------------------------------------------------------------------------
+# STEP 2: Choosing an OpenCL device
 opencl_manager.set_device_to_activate("all")
 opencl_manager.print_infos()
 
+# ------------------------------------------------------------------------------
+# STEP X: Exit safely
 clean_safely()
 exit()
