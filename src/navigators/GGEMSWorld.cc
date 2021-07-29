@@ -343,12 +343,27 @@ void GGEMSWorld::Tracking(GGsize const& thread_index)
   kernel_world_tracking_[thread_index]->setArg(0, number_of_particles);
   kernel_world_tracking_[thread_index]->setArg(0, number_of_particles);
   kernel_world_tracking_[thread_index]->setArg(1, *primary_particles);
-  kernel_world_tracking_[thread_index]->setArg(2, *world_recording_.photon_tracking_[thread_index]);
-  kernel_world_tracking_[thread_index]->setArg(3, *world_recording_.energy_tracking_[thread_index]);
-  kernel_world_tracking_[thread_index]->setArg(4, *world_recording_.energy_squared_tracking_[thread_index]);
-  kernel_world_tracking_[thread_index]->setArg(5, *world_recording_.momentum_x_[thread_index]);
-  kernel_world_tracking_[thread_index]->setArg(6, *world_recording_.momentum_y_[thread_index]);
-  kernel_world_tracking_[thread_index]->setArg(7, *world_recording_.momentum_z_[thread_index]);
+
+  if (!is_photon_tracking_) kernel_world_tracking_[thread_index]->setArg(2, sizeof(cl_mem), NULL);
+  else kernel_world_tracking_[thread_index]->setArg(2, *world_recording_.photon_tracking_[thread_index]);
+
+  if (!is_energy_tracking_) kernel_world_tracking_[thread_index]->setArg(3, sizeof(cl_mem), NULL);
+  else kernel_world_tracking_[thread_index]->setArg(3, *world_recording_.energy_tracking_[thread_index]);
+
+  if (!is_energy_squared_tracking_) kernel_world_tracking_[thread_index]->setArg(4, sizeof(cl_mem), NULL);
+  else kernel_world_tracking_[thread_index]->setArg(4, *world_recording_.energy_squared_tracking_[thread_index]);
+
+  if (!is_momentum_) {
+    kernel_world_tracking_[thread_index]->setArg(5, sizeof(cl_mem), NULL);
+    kernel_world_tracking_[thread_index]->setArg(6, sizeof(cl_mem), NULL);
+    kernel_world_tracking_[thread_index]->setArg(7, sizeof(cl_mem), NULL);
+  }
+  else {
+    kernel_world_tracking_[thread_index]->setArg(5, *world_recording_.momentum_x_[thread_index]);
+    kernel_world_tracking_[thread_index]->setArg(6, *world_recording_.momentum_y_[thread_index]);
+    kernel_world_tracking_[thread_index]->setArg(7, *world_recording_.momentum_z_[thread_index]);
+  }
+
   kernel_world_tracking_[thread_index]->setArg(8, dimensions_.x_);
   kernel_world_tracking_[thread_index]->setArg(9, dimensions_.y_);
   kernel_world_tracking_[thread_index]->setArg(10, dimensions_.z_);

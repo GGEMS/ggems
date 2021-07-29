@@ -31,6 +31,15 @@
   \date Monday December 16, 2019
 */
 
+#define FALSE 0 /*!< False for OpenCL */
+#define TRUE 1 /*!< True for OpenCL */
+
+#ifdef _MSC_VER
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#endif
+
 #ifdef __OPENCL_C_VERSION__ // On OpenCL device
 #define FALSE 0
 #define TRUE 1
