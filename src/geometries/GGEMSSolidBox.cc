@@ -45,6 +45,9 @@ GGEMSSolidBox::GGEMSSolidBox(GGsize const& virtual_element_number_x, GGsize cons
 
   // Loop over the device
   for (GGsize d = 0; d < number_activated_devices_; ++d) {
+    // Creating a label, but this label is not used in case of GGEMSSolidBox
+    label_data_[d] = nullptr;
+
     // Allocating memory on OpenCL device and getting pointer on it
     solid_data_[d] = opencl_manager.Allocate(nullptr, sizeof(GGEMSSolidBoxData), d, CL_MEM_READ_WRITE, "GGEMSSolidBox");
     GGEMSSolidBoxData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSSolidBoxData>(solid_data_[d], sizeof(GGEMSSolidBoxData), d);

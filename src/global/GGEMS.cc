@@ -32,9 +32,6 @@
 #include <thread>
 
 #ifdef _WIN32
-#ifdef _MSC_VER
-#define NOMINMAX
-#endif
 #include <windows.h>
 #include <wincrypt.h>
 #else
@@ -254,7 +251,6 @@ void GGEMS::Initialize(GGuint const& seed)
 
 void GGEMS::RunOnDevice(GGsize const& thread_index)
 {
-  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
   GGEMSSourceManager& source_manager = GGEMSSourceManager::GetInstance();
   GGEMSNavigatorManager& navigator_manager = GGEMSNavigatorManager::GetInstance();
 
@@ -262,8 +258,6 @@ void GGEMS::RunOnDevice(GGsize const& thread_index)
   mutex.lock();
   static GGEMSProgressBar progress_bar(source_manager.GetTotalNumberOfBatchs());
   mutex.unlock();
-
-  GGsize device_index = opencl_manager.GetIndexOfActivatedDevice(thread_index);
 
   // Loop over sources
   for (GGsize i = 0; i < source_manager.GetNumberOfSources(); ++i) {

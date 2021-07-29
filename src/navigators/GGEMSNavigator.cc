@@ -398,20 +398,27 @@ void GGEMSNavigator::TrackThroughSolid(GGsize const& thread_index)
     kernel->setArg(1, *primary_particles);
     kernel->setArg(2, *randoms);
     kernel->setArg(3, *solid_data);
-    kernel->setArg(4, *label_data); // Useful only for GGEMSVoxelizedSolid
+    if (!label_data) kernel->setArg(4, sizeof(cl_mem), NULL);
+    else kernel->setArg(4, *label_data); // Useful only for GGEMSVoxelizedSolid
     kernel->setArg(5, *cross_sections);
     kernel->setArg(6, *materials);
     kernel->setArg(7, threshold_);
     if (data_reg_type == "HISTOGRAM") {
       kernel->setArg(8, *histogram);
-      kernel->setArg(9, *scatter_histogram);
+      if (!scatter_histogram) kernel->setArg(9, sizeof(cl_mem), NULL);
+      else kernel->setArg(9, *scatter_histogram);
     }
     else if (data_reg_type == "DOSIMETRY") {
       kernel->setArg(8, *dosimetry_params);
       kernel->setArg(9, *edep_tracking_dosimetry);
-      kernel->setArg(10, *edep_squared_tracking_dosimetry);
-      kernel->setArg(11, *hit_tracking_dosimetry);
-      kernel->setArg(12, *photon_tracking_dosimetry);
+
+      if (!edep_squared_tracking_dosimetry) kernel->setArg(10, sizeof(cl_mem), NULL);
+      else kernel->setArg(10, *edep_squared_tracking_dosimetry);
+
+      if (!hit_tracking_dosimetry) kernel->setArg(11, sizeof(cl_mem), NULL);
+      else kernel->setArg(11, *hit_tracking_dosimetry);
+      if (!photon_tracking_dosimetry) kernel->setArg(12, sizeof(cl_mem), NULL);
+      else kernel->setArg(12, *photon_tracking_dosimetry);
     }
 
     // Launching kernel

@@ -38,5 +38,4 @@ __constant GGfloat EPSILON3 = 1.0e-03f; /*!< Epsilon of 0.001 */
 __constant GGfloat EPSILON6 = 1.0e-06f; /*!< Epsilon of 0.000001 */
 __constant GGfloat GEOMETRY_TOLERANCE = 5.0e-04f; /*!< Geometry tolerance, 500 nm */
 
-
 #endif // End of GUARD_GGEMS_PHYSICS_GGEMSPARTICLECONSTANTS_HH

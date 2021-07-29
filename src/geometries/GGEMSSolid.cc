@@ -54,7 +54,6 @@ GGEMSSolid::GGEMSSolid(void)
 
   solid_data_ = new cl::Buffer*[number_activated_devices_];
   label_data_ = new cl::Buffer*[number_activated_devices_];
-  for (GGsize i = 0; i < number_activated_devices_; ++i) label_data_[i] = nullptr;
 
   // Storing a kernel for each device
   kernel_particle_solid_distance_ = new cl::Kernel*[number_activated_devices_];
@@ -98,10 +97,7 @@ GGEMSSolid::~GGEMSSolid(void)
 
   if (label_data_) {
     for (GGsize i = 0; i < number_activated_devices_; ++i) {
-      GGEMSVoxelizedSolidData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSVoxelizedSolidData>(solid_data_[i], sizeof(GGEMSVoxelizedSolidData), i);
-      GGsize number_of_voxels = static_cast<GGsize>(solid_data_device->number_of_voxels_);
-      opencl_manager.ReleaseDeviceBuffer(solid_data_[i], solid_data_device, i);
-      opencl_manager.Deallocate(label_data_[i], number_of_voxels*sizeof(GGuchar), i);
+      opencl_manager.Deallocate(label_data_[i], number_of_voxels_*sizeof(GGuchar), i);
     }
     delete[] label_data_;
     label_data_ = nullptr;

@@ -67,8 +67,11 @@ ENDIF()
 PROJECT(GGEMS VERSION 1.0 HOMEPAGE_URL ggems.fr LANGUAGES CXX)
 
 #-------------------------------------------------------------------------------
-# Find the OpenCL library
+# Find the OpenCL library and for OpenCL 1.2
 FIND_PACKAGE(OpenCL REQUIRED)
+IF(${OpenCL_VERSION_STRING} VERSION_GREATER "1.2")
+  ADD_DEFINITIONS(-DCL_USE_DEPRECATED_OPENCL_1_2_APIS)
+ENDIF()
 
 #-------------------------------------------------------------------------------
 # Force the build type to Release
