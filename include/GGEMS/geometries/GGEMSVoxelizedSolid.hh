@@ -171,7 +171,7 @@ void GGEMSVoxelizedSolid::ConvertImageToLabel(std::string const& raw_data_filena
     GGEMSVoxelizedSolidData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSVoxelizedSolidData>(solid_data_[d], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGEMSVoxelizedSolidData), d);
 
     // Get information about mhd file
-    GGsize number_of_voxels = static_cast<GGsize>(solid_data_device->number_of_voxels_);
+    number_of_voxels_ = static_cast<GGsize>(solid_data_device->number_of_voxels_);
 
     // Release the pointer
     opencl_manager.ReleaseDeviceBuffer(solid_data_[d], solid_data_device, d);
@@ -182,20 +182,20 @@ void GGEMSVoxelizedSolid::ConvertImageToLabel(std::string const& raw_data_filena
 
     // Reading data to a tmp buffer
     std::vector<T> tmp_raw_data;
-    tmp_raw_data.resize(number_of_voxels);
-    in_raw_stream.read(reinterpret_cast<char*>(&tmp_raw_data[0]), static_cast<std::streamsize>(number_of_voxels * sizeof(T)));
+    tmp_raw_data.resize(number_of_voxels_);
+    in_raw_stream.read(reinterpret_cast<char*>(&tmp_raw_data[0]), static_cast<std::streamsize>(number_of_voxels_ * sizeof(T)));
 
     // Closing file
     in_raw_stream.close();
 
     // Allocating memory on OpenCL device
-    label_data_[d] = opencl_manager.Allocate(nullptr, number_of_voxels * sizeof(GGuchar), d, CL_MEM_READ_WRITE, "GGEMSVoxelizedSolid");
+    label_data_[d] = opencl_manager.Allocate(nullptr, number_of_voxels_ * sizeof(GGuchar), d, CL_MEM_READ_WRITE, "GGEMSVoxelizedSolid");
 
     // Get pointer on OpenCL device
-    GGuchar* label_data_device = opencl_manager.GetDeviceBuffer<GGuchar>(label_data_[d], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, number_of_voxels * sizeof(GGuchar), d);
+    GGuchar* label_data_device = opencl_manager.GetDeviceBuffer<GGuchar>(label_data_[d], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, number_of_voxels_ * sizeof(GGuchar), d);
 
     // Set value to max of GGuchar
-    std::fill(label_data_device, label_data_device + number_of_voxels, std::numeric_limits<GGuchar>::max());
+    std::fill(label_data_device, label_data_device + number_of_voxels_, std::numeric_limits<GGuchar>::max());
 
     // Opening range data file
     std::ifstream in_range_stream(range_data_filename, std::ios::in);
@@ -221,7 +221,7 @@ void GGEMSVoxelizedSolid::ConvertImageToLabel(std::string const& raw_data_filena
       if (d == 0) materials->AddMaterial(material_name);
 
       // Setting the label
-      for (GGsize i = 0; i < number_of_voxels; ++i) {
+      for (GGsize i = 0; i < number_of_voxels_; ++i) {
         // Getting the value of phantom
         GGfloat value = static_cast<GGfloat>(tmp_raw_data[i]);
         if (((value == first_label_value) && (value == last_label_value)) || ((value >= first_label_value) && (value < last_label_value))) {
@@ -235,7 +235,7 @@ void GGEMSVoxelizedSolid::ConvertImageToLabel(std::string const& raw_data_filena
 
     // Final loop checking if a value is still max of GGuchar
     bool all_converted = true;
-    for (GGsize i = 0; i < number_of_voxels; ++i) {
+    for (GGsize i = 0; i < number_of_voxels_; ++i) {
       if (label_data_device[i] == std::numeric_limits<GGuchar>::max()) all_converted = false;
     }
 
