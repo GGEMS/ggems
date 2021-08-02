@@ -147,5 +147,5 @@ plt.close()
 # STEP 7: Exit safely
 materials.clean()
 cross_sections.clean()
-opencl_manager.clean()
+clean_safely()
 exit()

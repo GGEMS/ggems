@@ -139,7 +139,7 @@ void GGEMSMHDImage::Read(std::string const& image_mhd_header_filename, cl::Buffe
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
   // Get pointer on OpenCL device
-  GGEMSVoxelizedSolidData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSVoxelizedSolidData>(solid_data, sizeof(GGEMSVoxelizedSolidData), thread_index);
+  GGEMSVoxelizedSolidData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSVoxelizedSolidData>(solid_data, CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGEMSVoxelizedSolidData), thread_index);
 
   // Getting output directory
   std::size_t found_dir = image_mhd_header_filename.find_last_of("/\\");

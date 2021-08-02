@@ -114,3 +114,9 @@ class GGEMS(object):
 
     def tracking_verbose(self, flag, particle_id):
         ggems_lib.set_tracking_ggems(self.obj, flag, particle_id)
+
+
+def clean_safely():
+    GGEMSOpenCLManager().clean()
+    GGEMSVolumeCreatorManager().clean();
+    GGEMSSourceManager().clean();

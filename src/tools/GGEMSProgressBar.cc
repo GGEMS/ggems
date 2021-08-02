@@ -87,13 +87,13 @@ GGEMSProgressBar& GGEMSProgressBar::operator+=(GGsize const& increment)
 
 void GGEMSProgressBar::DisplayTic(void)
 {
-  GGsize const tics_needed = static_cast<GGsize>((static_cast<GGdouble>(count_) / expected_count_) * 50.0);
+  GGsize const tics_needed = static_cast<GGsize>((static_cast<GGdouble>(count_) / static_cast<GGdouble>(expected_count_)) * 50.0);
 
   do {
     std::cout << "*" << std::flush;
   } while (++tic_ < tics_needed);
 
-  next_tic_count_ = static_cast<GGsize>((tic_ / 50.0) * expected_count_);
+  next_tic_count_ = static_cast<GGsize>((static_cast<GGdouble>(tic_) / 50.0) * static_cast<GGdouble>(expected_count_));
 
   if (count_ == expected_count_) {
     if (tic_ < 51) std::cout << "*";

@@ -49,4 +49,3 @@ class GGEMSVerbosity(object):
         ggems_lib.set_ggems_verbose.restype = ctypes.c_void_p
 
         ggems_lib.set_ggems_verbose(val)
-

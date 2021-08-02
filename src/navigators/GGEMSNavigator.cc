@@ -227,7 +227,6 @@ void GGEMSNavigator::ParticleSolidDistance(GGsize const& thread_index)
   // Getting the OpenCL manager and infos for work-item launching
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
   cl::CommandQueue* queue = opencl_manager.GetCommandQueue(thread_index);
-  cl::Event* event = opencl_manager.GetEvent(thread_index);
 
   // Get Device name and storing methode name + device
   GGsize device_index = opencl_manager.GetIndexOfActivatedDevice(thread_index);
@@ -260,13 +259,13 @@ void GGEMSNavigator::ParticleSolidDistance(GGsize const& thread_index)
     kernel->setArg(2, *solid_data);
 
     // Launching kernel
-    GGint kernel_status = queue->enqueueNDRangeKernel(*kernel, 0, global_wi, local_wi, nullptr, event);
+    cl::Event event;
+    GGint kernel_status = queue->enqueueNDRangeKernel(*kernel, 0, global_wi, local_wi, nullptr, &event);
     opencl_manager.CheckOpenCLError(kernel_status, "GGEMSNavigator", "ParticleSolidDistance");
     queue->finish();
 
     // GGEMS Profiling
-    GGEMSProfilerManager& profiler_manager = GGEMSProfilerManager::GetInstance();
-    profiler_manager.HandleEvent(*event, oss.str());
+    GGEMSProfilerManager::GetInstance().HandleEvent(event, oss.str());
   }
 }
 
@@ -279,7 +278,6 @@ void GGEMSNavigator::ProjectToSolid(GGsize const& thread_index)
   // Getting the OpenCL manager and infos for work-item launching
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
   cl::CommandQueue* queue = opencl_manager.GetCommandQueue(thread_index);
-  cl::Event* event = opencl_manager.GetEvent(thread_index);
 
   // Get Device name and storing methode name + device
   GGsize device_index = opencl_manager.GetIndexOfActivatedDevice(thread_index);
@@ -312,13 +310,13 @@ void GGEMSNavigator::ProjectToSolid(GGsize const& thread_index)
     kernel->setArg(2, *solid_data);
 
     // Launching kernel
-    GGint kernel_status = queue->enqueueNDRangeKernel(*kernel, 0, global_wi, local_wi, nullptr, event);
+    cl::Event event;
+    GGint kernel_status = queue->enqueueNDRangeKernel(*kernel, 0, global_wi, local_wi, nullptr, &event);
     opencl_manager.CheckOpenCLError(kernel_status, "GGEMSNavigator", "ProjectToSolid");
     queue->finish();
 
     // GGEMS Profiling
-    GGEMSProfilerManager& profiler_manager = GGEMSProfilerManager::GetInstance();
-    profiler_manager.HandleEvent(*event, oss.str());
+    GGEMSProfilerManager::GetInstance().HandleEvent(event, oss.str());
   }
 }
 
@@ -331,7 +329,6 @@ void GGEMSNavigator::TrackThroughSolid(GGsize const& thread_index)
   // Getting the OpenCL manager and infos for work-item launching
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
   cl::CommandQueue* queue = opencl_manager.GetCommandQueue(thread_index);
-  cl::Event* event = opencl_manager.GetEvent(thread_index);
 
   // Get Device name and storing methode name + device
   GGsize device_index = opencl_manager.GetIndexOfActivatedDevice(thread_index);
@@ -398,29 +395,36 @@ void GGEMSNavigator::TrackThroughSolid(GGsize const& thread_index)
     kernel->setArg(1, *primary_particles);
     kernel->setArg(2, *randoms);
     kernel->setArg(3, *solid_data);
-    kernel->setArg(4, *label_data); // Useful only for GGEMSVoxelizedSolid
+    if (!label_data) kernel->setArg(4, sizeof(cl_mem), NULL);
+    else kernel->setArg(4, *label_data); // Useful only for GGEMSVoxelizedSolid
     kernel->setArg(5, *cross_sections);
     kernel->setArg(6, *materials);
     kernel->setArg(7, threshold_);
     if (data_reg_type == "HISTOGRAM") {
       kernel->setArg(8, *histogram);
-      kernel->setArg(9, *scatter_histogram);
+      if (!scatter_histogram) kernel->setArg(9, sizeof(cl_mem), NULL);
+      else kernel->setArg(9, *scatter_histogram);
     }
     else if (data_reg_type == "DOSIMETRY") {
       kernel->setArg(8, *dosimetry_params);
       kernel->setArg(9, *edep_tracking_dosimetry);
-      kernel->setArg(10, *edep_squared_tracking_dosimetry);
-      kernel->setArg(11, *hit_tracking_dosimetry);
-      kernel->setArg(12, *photon_tracking_dosimetry);
+
+      if (!edep_squared_tracking_dosimetry) kernel->setArg(10, sizeof(cl_mem), NULL);
+      else kernel->setArg(10, *edep_squared_tracking_dosimetry);
+
+      if (!hit_tracking_dosimetry) kernel->setArg(11, sizeof(cl_mem), NULL);
+      else kernel->setArg(11, *hit_tracking_dosimetry);
+      if (!photon_tracking_dosimetry) kernel->setArg(12, sizeof(cl_mem), NULL);
+      else kernel->setArg(12, *photon_tracking_dosimetry);
     }
 
     // Launching kernel
-    GGint kernel_status = queue->enqueueNDRangeKernel(*kernel, 0, global_wi, local_wi, nullptr, event);
+    cl::Event event;
+    GGint kernel_status = queue->enqueueNDRangeKernel(*kernel, 0, global_wi, local_wi, nullptr, &event);
     opencl_manager.CheckOpenCLError(kernel_status, "GGEMSNavigator", "TrackThroughSolid");
 
     // GGEMS Profiling
-    GGEMSProfilerManager& profiler_manager = GGEMSProfilerManager::GetInstance();
-    profiler_manager.HandleEvent(*event, oss.str());
+    GGEMSProfilerManager::GetInstance().HandleEvent(event, oss.str());
     queue->finish();
   }
 }

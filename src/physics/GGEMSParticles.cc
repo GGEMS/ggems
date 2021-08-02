@@ -144,7 +144,6 @@ bool GGEMSParticles::IsAlive(GGsize const& thread_index) const
   // Get command queue and event
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
   cl::CommandQueue* queue = opencl_manager.GetCommandQueue(thread_index);
-  cl::Event* event = opencl_manager.GetEvent(thread_index);
 
   // Get Device name and storing methode name + device
   GGsize device_index = opencl_manager.GetIndexOfActivatedDevice(thread_index);
@@ -170,16 +169,16 @@ bool GGEMSParticles::IsAlive(GGsize const& thread_index) const
   kernel_alive_[thread_index]->setArg(2, *status);
 
   // Launching kernel
-  GGint kernel_status = queue->enqueueNDRangeKernel(*kernel_alive_[thread_index], 0, global_wi, local_wi, nullptr, event);
+  cl::Event event;
+  GGint kernel_status = queue->enqueueNDRangeKernel(*kernel_alive_[thread_index], 0, global_wi, local_wi, nullptr, &event);
   opencl_manager.CheckOpenCLError(kernel_status, "GGEMSParticles", "IsAlive");
 
   // GGEMS Profiling
-  GGEMSProfilerManager& profiler_manager = GGEMSProfilerManager::GetInstance();
-  profiler_manager.HandleEvent(*event, oss.str());
+  GGEMSProfilerManager::GetInstance().HandleEvent(event, oss.str());
   queue->finish();
 
   // Get status from OpenCL device
-  GGint* status_device = opencl_manager.GetDeviceBuffer<GGint>(status_[thread_index], sizeof(GGint), thread_index);
+  GGint* status_device = opencl_manager.GetDeviceBuffer<GGint>(status_[thread_index], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGint), thread_index);
 
   GGint status_from_device = status_device[0];
 

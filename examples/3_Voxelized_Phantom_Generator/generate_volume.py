@@ -98,5 +98,5 @@ profiler_manager.print_summary_profile()
 
 # ------------------------------------------------------------------------------
 # STEP 6: Exit GGEMS safely
-opencl_manager.clean()
+clean_safely()
 exit()

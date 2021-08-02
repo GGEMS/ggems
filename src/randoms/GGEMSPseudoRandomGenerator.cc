@@ -150,7 +150,7 @@ void GGEMSPseudoRandomGenerator::InitializeSeeds(void)
   // Loop over activated device
   for (GGsize i = 0; i < number_activated_devices_; ++i) {
     // Get the pointer on device
-    GGEMSRandom* random_device = opencl_manager.GetDeviceBuffer<GGEMSRandom>(pseudo_random_numbers_[i], sizeof(GGEMSRandom), i);
+    GGEMSRandom* random_device = opencl_manager.GetDeviceBuffer<GGEMSRandom>(pseudo_random_numbers_[i], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGEMSRandom), i);
 
     // For each particle a seed is generated
     for (GGsize i = 0; i < MAXIMUM_PARTICLES; ++i) {
@@ -203,7 +203,7 @@ void GGEMSPseudoRandomGenerator::PrintInfos(void) const
   for (GGsize i = 0; i < number_activated_devices_; ++i) {
     GGsize device_index = opencl_manager.GetIndexOfActivatedDevice(i);
 
-    GGEMSRandom* random_device = opencl_manager.GetDeviceBuffer<GGEMSRandom>(pseudo_random_numbers_[i], sizeof(GGEMSRandom), i);
+    GGEMSRandom* random_device = opencl_manager.GetDeviceBuffer<GGEMSRandom>(pseudo_random_numbers_[i], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGEMSRandom), i);
 
     GGuint state[2][5] = {
       {

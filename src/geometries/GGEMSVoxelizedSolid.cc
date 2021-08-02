@@ -137,8 +137,8 @@ void GGEMSVoxelizedSolid::UpdateTransformationMatrix(GGsize const& thread_index)
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
   // Copy information to OBB
-  GGEMSVoxelizedSolidData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSVoxelizedSolidData>(solid_data_[thread_index], sizeof(GGEMSVoxelizedSolidData), thread_index);
-  GGfloat44* transformation_matrix_device = opencl_manager.GetDeviceBuffer<GGfloat44>(geometry_transformation_->GetTransformationMatrix(thread_index), sizeof(GGfloat44), thread_index);
+  GGEMSVoxelizedSolidData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSVoxelizedSolidData>(solid_data_[thread_index], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGEMSVoxelizedSolidData), thread_index);
+  GGfloat44* transformation_matrix_device = opencl_manager.GetDeviceBuffer<GGfloat44>(geometry_transformation_->GetTransformationMatrix(thread_index), CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGfloat44), thread_index);
 
   for (GGint i = 0; i < 4; ++i) {
     solid_data_device->obb_geometry_.matrix_transformation_.m0_[i] = transformation_matrix_device->m0_[i];
@@ -161,7 +161,7 @@ GGfloat3 GGEMSVoxelizedSolid::GetVoxelSizes(GGsize const& thread_index) const
   // Get the OpenCL manager
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
-  GGEMSVoxelizedSolidData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSVoxelizedSolidData>(solid_data_[thread_index], sizeof(GGEMSVoxelizedSolidData), thread_index);
+  GGEMSVoxelizedSolidData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSVoxelizedSolidData>(solid_data_[thread_index], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGEMSVoxelizedSolidData), thread_index);
 
   GGfloat3 voxel_sizes = solid_data_device->voxel_sizes_xyz_;
 
@@ -179,7 +179,7 @@ GGEMSOBB GGEMSVoxelizedSolid::GetOBBGeometry(GGsize const& thread_index) const
   // Get the OpenCL manager
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
-  GGEMSVoxelizedSolidData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSVoxelizedSolidData>(solid_data_[thread_index], sizeof(GGEMSVoxelizedSolidData), thread_index);
+  GGEMSVoxelizedSolidData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSVoxelizedSolidData>(solid_data_[thread_index], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGEMSVoxelizedSolidData), thread_index);
 
   GGEMSOBB obb_geometry = solid_data_device->obb_geometry_;
 
@@ -200,7 +200,7 @@ void GGEMSVoxelizedSolid::PrintInfos(void) const
   // Loop over the device
   for (GGsize d = 0; d < number_activated_devices_; ++d) {
     // Get pointer on OpenCL device
-    GGEMSVoxelizedSolidData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSVoxelizedSolidData>(solid_data_[d], sizeof(GGEMSVoxelizedSolidData), d);
+    GGEMSVoxelizedSolidData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSVoxelizedSolidData>(solid_data_[d], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGEMSVoxelizedSolidData), d);
 
     // Get the index of device
     GGsize device_index = opencl_manager.GetIndexOfActivatedDevice(d);

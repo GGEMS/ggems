@@ -47,6 +47,34 @@ typedef std::unordered_map<std::string, std::string> VendorUMap; /*!< Alias to O
 #define KERNEL_NOT_COMPILED 0x100000000 /*!< value if OpenCL kernel is not compiled */
 
 /*!
+  \struct ComputingDevice_t
+  \brief Structure info about activated OpenCL computing device
+*/
+typedef struct ComputingDevice_t
+{
+  GGsize index_; /*!< Index of computing device */
+  cl::Context* context_; /*!< Context associated to computing device */
+  cl::CommandQueue* queue_; /*!< Queue associated to computing device */
+
+  /*!
+    \fn void Clean(void)
+    \brief Cleaning memory
+  */
+  void Clean(void)
+  {
+    if (context_) {
+      delete context_;
+      context_ = nullptr;
+    }
+
+    if (queue_) {
+      delete queue_;
+      queue_ = nullptr;
+    }
+  }
+} ComputingDevice; /*!< Using C convention name of struct to C++ (_t deletion) */
+
+/*!
   \class GGEMSOpenCLManager
   \brief Singleton class storing all informations about OpenCL and managing GPU/CPU devices, contexts, kernels, command queues and events. In GGEMS the strategy is 1 context = 1 device.
 */
@@ -164,15 +192,7 @@ class GGEMS_EXPORT GGEMSOpenCLManager
       \return number of activated device
       \brief get the number of activated devices
     */
-    inline GGsize GetNumberOfActivatedDevice(void) const {return device_indices_.size();}
-
-    /*!
-      \fn inline GGsize GetIndexOfActivatedDevice(GGsize const& thread_index) const
-      \param thread_index - index of the thread (= activated device index)
-      \return index of activated device
-      \brief get the index of activated device
-    */
-    inline GGsize GetIndexOfActivatedDevice(GGsize const& thread_index) const {return device_indices_[thread_index];}
+    inline GGsize GetNumberOfActivatedDevice(void) const {return computing_devices_.size();}
 
     /*!
       \fn inline GGsize GetMaxBufferAllocationSize(GGsize const& device_index) const
@@ -206,12 +226,20 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     GGsize GetBestWorkItem(GGsize const& number_of_elements) const;
 
     /*!
+      \fn inline GGsize GetIndexOfActivatedDevice(GGsize const& thread_index) const
+      \param thread_index - index of the thread (= activated device index)
+      \return index of activated device
+      \brief get the index of activated device
+    */
+    inline GGsize GetIndexOfActivatedDevice(GGsize const& thread_index) const {return computing_devices_[thread_index].index_;}
+
+    /*!
       \fn cl::Context* GetContext(GGsize const& thread_index) const
       \param thread_index - index of the thread (= activated device index)
       \return the pointer on activated context
       \brief return the activated context
     */
-    inline cl::Context* GetContext(GGsize const& thread_index) const {return contexts_[thread_index];}
+    inline cl::Context* GetContext(GGsize const& thread_index) const {return computing_devices_[thread_index].context_;}
 
     /*!
       \fn cl::CommandQueue* GetCommandQueue(GGsize const& thread_index) const
@@ -219,15 +247,7 @@ class GGEMS_EXPORT GGEMSOpenCLManager
       \return the pointer on activated command queue
       \brief Return the command queue to activated context
     */
-    inline cl::CommandQueue* GetCommandQueue(GGsize const& thread_index) const {return queues_[thread_index];}
-
-    /*!
-      \fn cl::Event* GetEvent(GGsize const& thread_index) const
-      \param thread_index - index of the thread (= activated device index)
-      \return the pointer on activated event
-      \brief return an event to activated context
-    */
-    inline cl::Event* GetEvent(GGsize const& thread_index) const {return events_[thread_index];}
+    inline cl::CommandQueue* GetCommandQueue(GGsize const& thread_index) const {return computing_devices_[thread_index].queue_;}
 
     /*!
       \fn void DeviceToActivate(GGsize const& device_id)
@@ -243,7 +263,6 @@ class GGEMS_EXPORT GGEMSOpenCLManager
       \brief activate specific device
     */
     void DeviceToActivate(std::string const& device_type, std::string const& device_vendor = "");
-
 
     /*!
       \fn void DeviceBalancing(std::string const& device_balancing)
@@ -261,18 +280,18 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     inline GGfloat GetDeviceBalancing(GGsize const& thread_index) const {return device_balancing_[thread_index];}
 
     /*!
-      \fn GGsize GetNumberDeviceLoads(void) const
+      \fn GGsize GetNumberDeviceBalancing(void) const
       \return device load vector size
-      \brief return the size of device load vector
+      \brief return the size of device balancing vector
     */
-    inline GGsize GetNumberDeviceLoads(void) const {return device_balancing_.size();}
+    inline GGsize GetNumberDeviceBalancing(void) const {return device_balancing_.size();}
 
     /*!
       \fn inline bool IsReady(void) const
       \return true is OpenCL manager is ready to use, it means a device is activated
       \brief check if an OpenCL device is activated
     */
-    inline bool IsReady(void) const {return !device_indices_.empty();}
+    inline bool IsReady(void) const {return !computing_devices_.empty();}
 
     /*!
       \fn void Clean(void)
@@ -295,12 +314,14 @@ class GGEMS_EXPORT GGEMSOpenCLManager
       \return the pointer on host memory on write/read mode
       \brief Get the device pointer on host to write on it. ReleaseDeviceBuffer must be used after this method!!!
       \param device_ptr - pointer on device memory
+      \param blocking - indicates if the map operation is blocking or non-blocking
+      \param map_flags - Is a bit-field and can be set to CL_MAP_READ and/or CL_MAP_WRITE
       \param size - size of region to map
       \param thread_index - index of the thread (= activated device index)
       \tparam T - type of the returned pointer on host memory
     */
     template <typename T>
-    T* GetDeviceBuffer(cl::Buffer* device_ptr, GGsize const& size, GGsize const& thread_index);
+    T* GetDeviceBuffer(cl::Buffer* device_ptr, GGbool const& blocking, cl_map_flags const& map_flags, GGsize const& size, GGsize const& thread_index);
 
     /*!
       \brief Get the device pointer on host to write on it. Mandatory after a GetDeviceBufferWrite ou GetDeviceBufferRead!!!
@@ -353,6 +374,36 @@ class GGEMS_EXPORT GGEMSOpenCLManager
 
   private:
     /*!
+      \fn void InitOpenCL(void)
+      \brief Calling all other initialization methods for OpenCL
+    */
+    void InitOpenCL(void);
+
+    /*!
+      \fn void GetOpenCLPlatorms(void)
+      \brief Getting all available platforms
+    */
+    void GetOpenCLPlatorms(void);
+
+    /*!
+      \fn void GetOpenCLDevices(void)
+      \brief Getting all available devices
+    */
+    void GetOpenCLDevices(void);
+
+    /*!
+      \fn void DisableCudaKernelCache(void) const
+      \brief Disable kernel cache for NVIDIA platform, usefull when developing a kernel
+    */
+    void DisableCudaKernelCache(void) const;
+
+    /*!
+      \fn void SetOpenCLCompilationOptions(void)
+      \brief Setting compilation options for OpenCL kernel
+    */
+    void SetOpenCLCompilationOptions(void);
+
+    /*!
       \fn std::string ErrorType(GGint const& error) const
       \param error - error index from OpenCL library
       \return the message error
@@ -377,22 +428,33 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     */
     bool IsDoublePrecision(GGsize const& device_index) const;
 
-  private:
-    // OpenCL platform
-    std::vector<cl::Platform> platforms_; /*!< List of detected platform */
+    /*!
+      \fn void HandleEvent(cl::Event& event, char* message)
+      \param event - OpenCL event
+      \param message - message to display checking event status
+    */
+    void HandleEvent(cl::Event& event, char* message);
 
+    /*!
+      \fn static void Callback(cl_event event, GGint event_command_exec_status, void* user_data)
+      \param event - OpenCL event
+      \param event_command_exec_status - status of OpenCL event
+      \param user_data - adress of GGEMSProfiler object
+      \brief call back function analyzing event
+    */
+    static void Callback(cl_event event, GGint event_command_exec_status, void* user_data);
+
+  private:
+    // OpenCL platforms
+    std::vector<cl::Platform> platforms_; /*!< List of detected platform */
     std::vector<std::string> platform_profile_; /*!< OpenCL profile */
     std::vector<std::string> platform_version_; /*!< OpenCL version supported by the implementation */
     std::vector<std::string> platform_name_; /*!< Platform name */
     std::vector<std::string> platform_vendor_; /*!< Vendor of the platform */
     std::vector<std::string> platform_extensions_; /*!< List of the extension names */
 
-    // OpenCL device
+    // OpenCL devices
     std::vector<cl::Device*> devices_; /*!< List of detected device */
-    std::vector<GGsize> device_indices_; /*!< Index of the activated device */
-    GGsize work_group_size_; /*!< Work group size by GGEMS, here 64 */
-    VendorUMap vendors_; /*!< UMap storing vendor name and an alias */
-
     std::vector<cl_device_type> device_type_; /*!< Type of device */
     std::vector<std::string> device_name_; /*!< Name of the device */
     std::vector<std::string> device_vendor_; /*!< Vendor of the device */
@@ -459,13 +521,15 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     std::vector<GGsize> device_profiling_timer_resolution_; /*!< Timer resolution */
     std::vector<GGfloat> device_balancing_; /*!< Device balancing */
 
+    // Custom OpenCL members
+    GGsize work_group_size_; /*!< Work group size by GGEMS, here 64 */
+    VendorUMap vendors_; /*!< Storing vendor name and an alias */
+
     // OpenCL compilation options
     std::string build_options_; /*!< list of default option to OpenCL compiler */
 
-    // OpenCL context + command queue + event
-    std::vector<cl::Context*> contexts_; /*!< OpenCL contexts */
-    std::vector<cl::CommandQueue*> queues_; /*!< OpenCL command queues */
-    std::vector<cl::Event*> events_; /*!< OpenCL events */
+    // ComputingDevice storing context, queue, and index
+    std::vector<ComputingDevice> computing_devices_; /*!< vector storing index, context and queue of an OpenCL computing device */
 
     // OpenCL kernels
     std::vector<cl::Kernel*> kernels_; /*!< List of kernels for each device */
@@ -477,13 +541,20 @@ class GGEMS_EXPORT GGEMSOpenCLManager
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
-T* GGEMSOpenCLManager::GetDeviceBuffer(cl::Buffer* const device_ptr, GGsize const& size, GGsize const& thread_index)
+T* GGEMSOpenCLManager::GetDeviceBuffer(cl::Buffer* const device_ptr, GGbool const& blocking, cl_map_flags const& map_flags, GGsize const& size, GGsize const& thread_index)
 {
   GGcout("GGEMSOpenCLManager", "GetDeviceBuffer", 4) << "Getting mapped memory buffer on OpenCL device..." << GGendl;
 
+  // Error and event parameters
   GGint err = 0;
-  T* ptr = static_cast<T*>(queues_[thread_index]->enqueueMapBuffer(*device_ptr, CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, 0, size, nullptr, nullptr, &err));
+  cl::Event event;
+
+  T* ptr = static_cast<T*>(computing_devices_[thread_index].queue_->enqueueMapBuffer(*device_ptr, blocking, map_flags, 0, size, nullptr, &event, &err));
   CheckOpenCLError(err, "GGEMSOpenCLManager", "GetDeviceBuffer");
+
+  // Checking event status
+  HandleEvent(event, "Mapping buffer");
+
   return ptr;
 }
 
@@ -496,8 +567,14 @@ void GGEMSOpenCLManager::ReleaseDeviceBuffer(cl::Buffer* const device_ptr, T* ho
 {
   GGcout("GGEMSOpenCLManager", "ReleaseDeviceBuffer", 4) << "Releasing mapped memory buffer on OpenCL device..." << GGendl;
 
+  // Event parameters
+  cl::Event event;
+
   // Unmap the memory
-  CheckOpenCLError(queues_[thread_index]->enqueueUnmapMemObject(*device_ptr, host_ptr), "GGEMSOpenCLManager", "ReleaseDeviceBuffer");
+  CheckOpenCLError(computing_devices_[thread_index].queue_->enqueueUnmapMemObject(*device_ptr, host_ptr, nullptr, &event), "GGEMSOpenCLManager", "ReleaseDeviceBuffer");
+
+  // Checking event status
+  HandleEvent(event, "Unmapping buffer");
 }
 
 /*!

@@ -232,7 +232,7 @@ void GGEMSSource::OrganizeParticlesInBatch(void)
 
   // Computing number of particles to simulate for each device
   number_of_particles_by_device_ = new GGsize[number_activated_devices_];
-  if (opencl_manager.GetNumberDeviceLoads() == 0) {
+  if (opencl_manager.GetNumberDeviceBalancing() == 0) {
     for (GGsize i = 0; i < number_activated_devices_; ++i) {
       number_of_particles_by_device_[i] = number_of_particles_ / number_activated_devices_;
     }
