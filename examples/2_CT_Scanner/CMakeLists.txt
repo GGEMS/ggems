@@ -19,7 +19,7 @@
 #-------------------------------------------------------------------------------
 # CMakeLists.txt
 #
-# CMakeLists.txt - Compile and build the 2_CT_scanner example
+# CMakeLists.txt - Compile and build 2_CT_scanner
 #
 # Authors :
 #   - Julien Bert <julien.bert@univ-brest.fr>

@@ -16,28 +16,33 @@
 # *                                                                      *
 # ************************************************************************
 
-#-------------------------------------------------------------------------------
-# CMakeLists.txt
-#
-# CMakeLists.txt - Compile and build 5_World_Tracking
-#
-# Authors :
-#   - Julien Bert <julien.bert@univ-brest.fr>
-#   - Didier Benoit <didier.benoit@inserm.fr>
-#
-# Generated on : 02/03/2021
-#-------------------------------------------------------------------------------
+import argparse
+from ggems import *
 
-#-------------------------------------------------------------------------------
-# Defining the project
-PROJECT(WorldTracking)
+# ------------------------------------------------------------------------------
+# Read arguments
+parser = argparse.ArgumentParser()
+parser.add_argument('-v', '--verbose', required=False, type=int, default=0, help="Set level of verbosity")
+args = parser.parse_args()
 
-#-------------------------------------------------------------------------------
-# Creating the executable
-ADD_EXECUTABLE(world_tracking world_tracking.cc)
-TARGET_LINK_LIBRARIES(world_tracking ggems)
+# Getting arguments
+verbosity_level = args.verbose
 
-#-------------------------------------------------------------------------------
-# Copy executable to ggems bin folder
-INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} DESTINATION ggems/examples)
-INSTALL(TARGETS world_tracking DESTINATION ggems/examples/5_World_Tracking)
+# ------------------------------------------------------------------------------
+# STEP 0: Level of verbosity during computation
+GGEMSVerbosity(verbosity_level)
+
+# ------------------------------------------------------------------------------
+# STEP 1: Calling C++ singleton
+
+opencl_manager = GGEMSOpenCLManager()
+
+# ------------------------------------------------------------------------------
+# STEP 2: Choosing an OpenCL device
+opencl_manager.set_device_to_activate("all")
+opencl_manager.print_infos()
+
+# ------------------------------------------------------------------------------
+# STEP X: Exit safely
+clean_safely()
+exit()
