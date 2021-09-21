@@ -158,6 +158,13 @@ class GGEMS_EXPORT GGEMSDosimetryCalculator
     void SetUncertainty(bool const& is_activated);
 
     /*!
+      \fn void SetTLE(bool const& is_activated)
+      \param is_activated - boolean activating TLE for navigator
+      \brief activating TLE variance redu during dosimetry mode
+    */
+    void EnableNavigatorTLE(bool const& is_activated);
+
+    /*!
       \fn void SetWaterReference(bool const& is_activated)
       \param is_activated - boolean activating water reference
       \brief activating water reference during dose computation
@@ -393,6 +400,14 @@ extern "C" GGEMS_EXPORT void dose_edep_squared_dosimetry_calculator(GGEMSDosimet
   \brief storing results about uncertainty
 */
 extern "C" GGEMS_EXPORT void dose_uncertainty_dosimetry_calculator(GGEMSDosimetryCalculator* dose_calculator, bool const is_activated);
+
+/*!
+  \fn void dose_tle_navigator(GGEMSDosimetryCalculator* dose_calculator, bool const is_activated)
+  \param dose_calculator - pointer on dose calculator
+  \param is_activated - boolean the use of tle
+  \brief activates TLE variance reduction on the navigator
+*/
+extern "C" GGEMS_EXPORT void dose_tle_navigator(GGEMSDosimetryCalculator* dose_calculator, bool const is_activated);
 
 /*!
   \fn void attach_to_navigator_dosimetry_calculator(GGEMSDosimetryCalculator* dose_calculator, char const* navigator)

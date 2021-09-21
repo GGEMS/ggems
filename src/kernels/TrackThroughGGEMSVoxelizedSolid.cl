@@ -43,6 +43,7 @@
 
 #ifdef DOSIMETRY
 #include "GGEMS/navigators/GGEMSDoseRecording.hh"
+#include "GGEMS/physics/GGEMSMuData.hh"
 #endif
 
 /*!
@@ -71,7 +72,9 @@ kernel void track_through_ggems_voxelized_solid(
   global GGDosiType* edep_tracking,
   global GGDosiType* edep_squared_tracking,
   global GGint* hit_tracking,
-  global GGint* photon_tracking
+  global GGint* photon_tracking,
+  global GGEMSMuMuEnData  *mu_d_table,
+  GGint  is_tle_
   #endif
 )
 {
@@ -215,11 +218,12 @@ kernel void track_through_ggems_voxelized_solid(
     primary_particle->py_[global_id] = local_position.y;
     primary_particle->pz_[global_id] = local_position.z;
 
+    #ifdef DOSIMETRY
+    GGfloat initial_energy = primary_particle->E_[global_id];
+    #endif
+
     // Resolve process if different of TRANSPORTATION
     if (next_discrete_process != TRANSPORTATION) {
-      #ifdef DOSIMETRY
-      GGfloat edep = primary_particle->E_[global_id];
-      #endif
 
       PhotonDiscreteProcess(primary_particle, random, materials, particle_cross_sections, material_id, global_id);
 
@@ -230,14 +234,33 @@ kernel void track_through_ggems_voxelized_solid(
       }
 
       #ifdef DOSIMETRY
-      edep -= primary_particle->E_[global_id];
-      dose_record_standard(dose_params, edep_tracking, edep_squared_tracking, hit_tracking, edep, &local_position);
+      if (!is_tle_) {
+        GGfloat edep = initial_energy - primary_particle->E_[global_id];
+        dose_record_standard(dose_params, edep_tracking, edep_squared_tracking, hit_tracking, edep, &local_position);
+      }
       #endif
 
       local_direction.x = primary_particle->dx_[global_id];
       local_direction.y = primary_particle->dy_[global_id];
       local_direction.z = primary_particle->dz_[global_id];
     }
+
+    #ifdef DOSIMETRY
+    if (is_tle_){
+      GGint E_index  = BinarySearchLeft ( initial_energy, mu_d_table->E_bins, mu_d_table->nb_bins,0,0 );
+      GGfloat mu_en = 0.0f;
+      if (E_index == 0) {
+        mu_en = mu_d_table->mu_en[ material_id*mu_d_table->nb_bins ];
+      }
+      else {
+        mu_en = LinearInterpolation( mu_d_table->E_bins[E_index-1],  mu_d_table->mu_en[material_id*mu_d_table->nb_bins + E_index-1],
+          mu_d_table->E_bins[E_index],    mu_d_table->mu_en[material_id*mu_d_table->nb_bins + E_index],
+          initial_energy);
+      }
+      GGfloat edep = initial_energy * mu_en * next_interaction_distance * 0.1;
+      dose_record_standard(dose_params, edep_tracking, edep_squared_tracking, hit_tracking, edep, &local_position);
+    }
+    #endif
 
     // Apply threshold
     if (primary_particle->E_[global_id] <= materials->photon_energy_cut_[material_id]) {
