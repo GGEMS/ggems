@@ -259,7 +259,7 @@ void GGEMSDosimetryCalculator::SetUncertainty(bool const& is_activated)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSDosimetryCalculator::EnableNavigatorTLE(bool const& is_activated)
+void GGEMSDosimetryCalculator::SetTLE(bool const& is_activated)
 {
   navigator_->EnableTLE(is_activated);
 }
@@ -853,7 +853,7 @@ void dose_uncertainty_dosimetry_calculator(GGEMSDosimetryCalculator* dose_calcul
 
 void dose_tle_navigator(GGEMSDosimetryCalculator* dose_calculator, bool const is_activated)
 {
- dose_calculator->EnableNavigatorTLE(is_activated);
+ dose_calculator->SetTLE(is_activated);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

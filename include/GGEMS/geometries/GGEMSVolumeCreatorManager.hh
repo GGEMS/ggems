@@ -278,7 +278,7 @@ template <typename T>
 void GGEMSVolumeCreatorManager::DeallocateImage(void)
 {
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
-std::cout << sizeof(T) << std::endl;
+
   if (voxelized_volume_) {
     opencl_manager.Deallocate(voxelized_volume_, number_elements_ * sizeof(T), 0);
     voxelized_volume_ = nullptr;

@@ -158,13 +158,6 @@ class GGEMS_EXPORT GGEMSDosimetryCalculator
     void SetUncertainty(bool const& is_activated);
 
     /*!
-      \fn void SetTLE(bool const& is_activated)
-      \param is_activated - boolean activating TLE for navigator
-      \brief activating TLE variance redu during dosimetry mode
-    */
-    void EnableNavigatorTLE(bool const& is_activated);
-
-    /*!
       \fn void SetWaterReference(bool const& is_activated)
       \param is_activated - boolean activating water reference
       \brief activating water reference during dose computation
@@ -178,6 +171,13 @@ class GGEMS_EXPORT GGEMSDosimetryCalculator
       \brief set minimum of density for dose computation
     */
     void SetMinimumDensity(GGfloat const& minimum_density, std::string const& unit = "g/cm3");
+
+    /*!
+      \fn void SetTLE(bool const& is_activated)
+      \param is_activated - boolean activating TLE
+      \brief activating TLE dosimetry method
+    */
+    void SetTLE(bool const& is_activated);
 
     /*!
       \fn inline cl::Buffer* GetPhotonTrackingBuffer(GGsize const& thread_index) const

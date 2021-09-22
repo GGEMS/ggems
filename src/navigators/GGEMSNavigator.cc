@@ -524,15 +524,15 @@ void GGEMSNavigator::Init_Mu_Table(void) //GGEMSMuMuEnData* mu_table_device, GGE
     mu_tables_[d] = opencl_manager.Allocate(nullptr, sizeof(GGEMSMuMuEnData), d, CL_MEM_READ_WRITE, "GGEMSNavigator");
 
     // Getting the OpenCL pointer on Mu tables
-    GGEMSMuMuEnData* mu_table_device = opencl_manager.GetDeviceBuffer<GGEMSMuMuEnData>(mu_tables_[d], sizeof(GGEMSMuMuEnData), d);
+    GGEMSMuMuEnData* mu_table_device = opencl_manager.GetDeviceBuffer<GGEMSMuMuEnData>(mu_tables_[d], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGEMSMuMuEnData), d);
 
     cl::Buffer* particle_cs = cross_sections_->GetCrossSections(d);
-    GGEMSParticleCrossSections* particle_cs_device =  opencl_manager.GetDeviceBuffer<GGEMSParticleCrossSections>(particle_cs, sizeof(GGEMSParticleCrossSections), d);
+    GGEMSParticleCrossSections* particle_cs_device =  opencl_manager.GetDeviceBuffer<GGEMSParticleCrossSections>(particle_cs, CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGEMSParticleCrossSections), d);
 
-    mu_table_device->nb_mat = particle_cs_device->number_of_materials_;
+    mu_table_device->nb_mat = static_cast<GGint>(particle_cs_device->number_of_materials_);
     mu_table_device->E_max = particle_cs_device->max_energy_;
     mu_table_device->E_min = particle_cs_device->min_energy_;
-    mu_table_device->nb_bins = particle_cs_device->number_of_bins_;
+    mu_table_device->nb_bins = static_cast<GGint>(particle_cs_device->number_of_bins_);
 
     opencl_manager.ReleaseDeviceBuffer(particle_cs, particle_cs_device, d);
 
@@ -545,7 +545,7 @@ void GGEMSNavigator::Init_Mu_Table(void) //GGEMSMuMuEnData* mu_table_device, GGE
     }
 
     cl::Buffer* materials = materials_->GetMaterialTables(d);
-    GGEMSMaterialTables* materials_device =  opencl_manager.GetDeviceBuffer<GGEMSMaterialTables>(materials, sizeof(GGEMSMaterialTables), d);
+    GGEMSMaterialTables* materials_device =  opencl_manager.GetDeviceBuffer<GGEMSMaterialTables>(materials, CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGEMSMaterialTables), d);
 
     // For each material and energy bin compute mu and muen
     GGint imat = 0;

@@ -88,6 +88,7 @@ void PrintHelpAndQuit(std::string const& message, char const* exec)
   oss << "                          (X=1000000, default)" << std::endl;
   oss << "[--seed X]                Seed of pseudo generator number" << std::endl;
   oss << "                          (X=777, default)" << std::endl;
+  oss << "[--tle]                   Activating TLE method" << std::endl;
   throw std::invalid_argument(oss.str());
 }
 
@@ -124,6 +125,7 @@ int main(int argc, char** argv)
     std::string device = "all";
     std::string device_balance = "";
     GGuint seed = 777;
+    static GGint is_tle = 0;
 
     // Loop while there is an argument
     GGint counter(0);
@@ -136,7 +138,8 @@ int main(int argc, char** argv)
         {"n-particles", required_argument, 0, 'p'},
         {"device", required_argument, 0, 'd'},
         {"balance", required_argument, 0, 'b'},
-        {"seed", required_argument, 0, 's'}
+        {"seed", required_argument, 0, 's'},
+        {"tle", no_argument, &is_tle, 1},
       };
 
       // Getting the options
@@ -241,6 +244,7 @@ int main(int argc, char** argv)
     dosimetry.SetDoselSizes(0.5f, 0.5f, 0.5f);
     dosimetry.SetWaterReference(false);
     dosimetry.SetMinimumDensity(0.1f, "g/cm3");
+    if (is_tle) dosimetry.SetTLE(true);
 
     dosimetry.SetUncertainty(true);
     dosimetry.SetPhotonTracking(true);
