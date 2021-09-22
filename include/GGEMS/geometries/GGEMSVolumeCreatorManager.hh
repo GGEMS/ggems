@@ -234,6 +234,14 @@ class GGEMS_EXPORT GGEMSVolumeCreatorManager
     template <typename T>
     void AllocateImage(void);
 
+    /*!
+      \fn template <typename T> void DeallocateImage(void)
+      \tparam T - type of data
+      \brief Deallocating buffer storing volume
+    */
+    template <typename T>
+    void DeallocateImage(void);
+
   private:
     GGfloat3 element_sizes_; /*!< Size of voxels of voxelized volume */
     GGsize3 volume_dimensions_; /*!< Dimension of volume X, Y, Z */
@@ -260,6 +268,21 @@ void GGEMSVolumeCreatorManager::AllocateImage(void)
 
   // Initialize the buffer to zero
   opencl_manager.CleanBuffer(voxelized_volume_, number_elements_ * sizeof(T), 0);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename T>
+void GGEMSVolumeCreatorManager::DeallocateImage(void)
+{
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+std::cout << sizeof(T) << std::endl;
+  if (voxelized_volume_) {
+    opencl_manager.Deallocate(voxelized_volume_, number_elements_ * sizeof(T), 0);
+    voxelized_volume_ = nullptr;
+  }
 }
 
 /*!
@@ -335,5 +358,12 @@ extern "C" GGEMS_EXPORT void set_material_volume_creator_manager(GGEMSVolumeCrea
   \brief set the type of data
 */
 extern "C" GGEMS_EXPORT void set_data_type_volume_creator_manager(GGEMSVolumeCreatorManager* volume_creator_manager, char const* data_type);
+
+/*!
+  \fn void clean_volume_creator_manager(GGEMSVolumeCreatorManager* volume_creator_manager)
+  \param source_manager - pointer on the singleton
+  \brief Clean volume creator manager singleton
+*/
+extern "C" GGEMS_EXPORT void clean_volume_creator_manager(GGEMSVolumeCreatorManager* volume_creator_manager);
 
 #endif // GUARD_GGEMS_GEOMETRIES_GGEMSVOLUMECREATORMANAGER_HH

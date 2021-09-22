@@ -75,12 +75,13 @@ void GGEMSVolumeCreatorManager::Clean(void)
 {
   GGcout("GGEMSVolumeCreatorManager", "Clean", 3) << "GGEMSVolumeCreatorManager cleaning..." << GGendl;
 
-  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
-
-  if (voxelized_volume_) {
-    opencl_manager.Deallocate(voxelized_volume_, number_elements_ * sizeof(T), 0);
-    voxelized_volume_ = nullptr;
-  }
+  if (!data_type_.compare("MET_CHAR")) DeallocateImage<char>();
+  else if (!data_type_.compare("MET_UCHAR")) DeallocateImage<unsigned char>();
+  else if (!data_type_.compare("MET_SHORT")) DeallocateImage<GGshort>();
+  else if (!data_type_.compare("MET_USHORT")) DeallocateImage<GGushort>();
+  else if (!data_type_.compare("MET_INT")) DeallocateImage<GGint>();
+  else if (!data_type_.compare("MET_UINT")) DeallocateImage<GGuint>();
+  else if (!data_type_.compare("MET_FLOAT")) DeallocateImage<GGfloat>();
 
   GGcout("GGEMSVolumeCreatorManager", "Clean", 3) << "GGEMSVolumeCreatorManager cleaned!!!" << GGendl;
 }
@@ -355,4 +356,13 @@ void set_material_volume_creator_manager(GGEMSVolumeCreatorManager* volume_creat
 void set_data_type_volume_creator_manager(GGEMSVolumeCreatorManager* volume_creator_manager, char const* data_type)
 {
   volume_creator_manager->SetDataType(data_type);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void clean_volume_creator_manager(GGEMSVolumeCreatorManager* volume_creator_manager)
+{
+  volume_creator_manager->Clean();
 }

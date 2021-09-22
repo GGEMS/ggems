@@ -176,7 +176,7 @@ void GGEMSSourceManager::Initialize(GGuint const& seed, bool const& is_tracking,
     // Loop over activated device
     for (GGsize i = 0; i < opencl_manager.GetNumberOfActivatedDevice(); ++i) {
       // Get pointer on OpenCL device for particles
-      GGEMSPrimaryParticles* primary_particles_device = opencl_manager.GetDeviceBuffer<GGEMSPrimaryParticles>(particles_->GetPrimaryParticles(i), sizeof(GGEMSPrimaryParticles), i);
+      GGEMSPrimaryParticles* primary_particles_device = opencl_manager.GetDeviceBuffer<GGEMSPrimaryParticles>(particles_->GetPrimaryParticles(i), CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGEMSPrimaryParticles), i);
 
       primary_particles_device->particle_tracking_id = particle_tracking_id;
 
@@ -221,4 +221,13 @@ void initialize_source_manager(GGEMSSourceManager* source_manager, GGuint const 
 void print_infos_source_manager(GGEMSSourceManager* source_manager)
 {
   source_manager->PrintInfos();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void clean_source_manager(GGEMSSourceManager* source_manager)
+{
+  source_manager->Clean();
 }

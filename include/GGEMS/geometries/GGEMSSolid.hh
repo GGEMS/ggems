@@ -214,6 +214,7 @@ class GGEMS_EXPORT GGEMSSolid
     // Solid data infos and label (for voxelized solid)
     cl::Buffer** solid_data_; /*!< Data about solid */
     cl::Buffer** label_data_; /*!< Pointer storing the buffer about label data, useful for voxelized solid only */
+    std::size_t number_of_voxels_; /*!< Number of voxel 1 for GGEMSSolidBox */
     GGsize number_activated_devices_; /*!< Number of activated device */
 
     // Geometric transformation applyied to solid
@@ -242,7 +243,7 @@ void GGEMSSolid::SetSolidID(GGsize const& solid_id, GGsize const& thread_index)
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
   // Get pointer on OpenCL device
-  T* solid_data_device = opencl_manager.GetDeviceBuffer<T>(solid_data_[thread_index], sizeof(T), thread_index);
+  T* solid_data_device = opencl_manager.GetDeviceBuffer<T>(solid_data_[thread_index], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(T), thread_index);
 
   solid_data_device->solid_id_ = static_cast<GGint>(solid_id);
 

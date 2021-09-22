@@ -104,6 +104,11 @@ kernel void track_through_ggems_voxelized_solid(
   GGfloat3 local_position = GlobalToLocalPosition(&voxelized_solid_data->obb_geometry_.matrix_transformation_, &global_position);
   GGfloat3 local_direction = GlobalToLocalDirection(&voxelized_solid_data->obb_geometry_.matrix_transformation_, &global_direction);
 
+  // Storing local direction in particles 
+  primary_particle->dx_[global_id] = local_direction.x;
+  primary_particle->dy_[global_id] = local_direction.y;
+  primary_particle->dz_[global_id] = local_direction.z;
+
   // Get borders of OBB
   GGfloat3 border_min = voxelized_solid_data->obb_geometry_.border_min_xyz_;
   GGfloat3 border_max = voxelized_solid_data->obb_geometry_.border_max_xyz_;
@@ -230,7 +235,7 @@ kernel void track_through_ggems_voxelized_solid(
       // If process is COMPTON_SCATTERING or RAYLEIGH_SCATTERING scatter order is incremented
       if (next_discrete_process == COMPTON_SCATTERING || next_discrete_process == RAYLEIGH_SCATTERING)
       {
-        primary_particle->scatter_[global_id] += 1;
+        primary_particle->scatter_[global_id] = TRUE;
       }
 
       #ifdef DOSIMETRY

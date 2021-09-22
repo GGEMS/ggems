@@ -71,7 +71,7 @@ void GGEMSEMProcess::BuildCrossSectionTables(cl::Buffer* particle_cross_sections
   GGcout("GGEMSEMProcess", "BuildCrossSectionTables", 3) << "Building cross section table for process " << process_name_ << " on device: " << opencl_manager.GetDeviceName(device_index) << GGendl;
 
   // Set missing information in cross section table
-  GGEMSParticleCrossSections* cross_section_device = opencl_manager.GetDeviceBuffer<GGEMSParticleCrossSections>(particle_cross_sections, sizeof(GGEMSParticleCrossSections), thread_index);
+  GGEMSParticleCrossSections* cross_section_device = opencl_manager.GetDeviceBuffer<GGEMSParticleCrossSections>(particle_cross_sections, CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGEMSParticleCrossSections), thread_index);
 
   // Store index of activated process
   cross_section_device->photon_cs_id_[cross_section_device->number_of_activated_photon_processes_] = process_id_;
@@ -80,7 +80,7 @@ void GGEMSEMProcess::BuildCrossSectionTables(cl::Buffer* particle_cross_sections
   cross_section_device->number_of_activated_photon_processes_ += 1;
 
   // Get the material tables
-  GGEMSMaterialTables* materials_device = opencl_manager.GetDeviceBuffer<GGEMSMaterialTables>(material_tables, sizeof(GGEMSMaterialTables), thread_index);
+  GGEMSMaterialTables* materials_device = opencl_manager.GetDeviceBuffer<GGEMSMaterialTables>(material_tables, CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGEMSMaterialTables), thread_index);
 
   // Compute Compton cross section par material
   GGsize number_of_bins = cross_section_device->number_of_bins_;

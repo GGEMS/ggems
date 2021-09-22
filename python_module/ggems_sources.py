@@ -30,6 +30,9 @@ class GGEMSSourceManager(object):
         ggems_lib.print_infos_source_manager.argtypes = [ctypes.c_void_p]
         ggems_lib.print_infos_source_manager.restype = ctypes.c_void_p
 
+        ggems_lib.clean_source_manager.argtypes = [ctypes.c_void_p]
+        ggems_lib.clean_source_manager.restype = ctypes.c_void_p
+
         self.obj = ggems_lib.get_instance_ggems_source_manager()
 
     def initialize(self, seed):
