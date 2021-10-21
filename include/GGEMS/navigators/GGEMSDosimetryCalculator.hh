@@ -173,6 +173,13 @@ class GGEMS_EXPORT GGEMSDosimetryCalculator
     void SetMinimumDensity(GGfloat const& minimum_density, std::string const& unit = "g/cm3");
 
     /*!
+      \fn void SetTLE(bool const& is_activated)
+      \param is_activated - boolean activating TLE
+      \brief activating TLE dosimetry method
+    */
+    void SetTLE(bool const& is_activated);
+
+    /*!
       \fn inline cl::Buffer* GetPhotonTrackingBuffer(GGsize const& thread_index) const
       \param thread_index - index of activated device (thread index)
       \return OpenCL buffer for photon tracking in dosimetry mode
@@ -393,6 +400,14 @@ extern "C" GGEMS_EXPORT void dose_edep_squared_dosimetry_calculator(GGEMSDosimet
   \brief storing results about uncertainty
 */
 extern "C" GGEMS_EXPORT void dose_uncertainty_dosimetry_calculator(GGEMSDosimetryCalculator* dose_calculator, bool const is_activated);
+
+/*!
+  \fn void dose_tle_navigator(GGEMSDosimetryCalculator* dose_calculator, bool const is_activated)
+  \param dose_calculator - pointer on dose calculator
+  \param is_activated - boolean the use of tle
+  \brief activates TLE variance reduction on the navigator
+*/
+extern "C" GGEMS_EXPORT void dose_tle_navigator(GGEMSDosimetryCalculator* dose_calculator, bool const is_activated);
 
 /*!
   \fn void attach_to_navigator_dosimetry_calculator(GGEMSDosimetryCalculator* dose_calculator, char const* navigator)
