@@ -195,11 +195,6 @@ ENDIF()
 #-------------------------------------------------------------------------------
 # Setup include directory for GGEMS
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/include)
-INCLUDE_DIRECTORIES(SYSTEM ${OpenCL_INCLUDE_DIRS})
-
-#-------------------------------------------------------------------------------
-# Add link directory for OpenCL
-LINK_DIRECTORIES(${OpenCL_LIBRARY})
 
 #-------------------------------------------------------------------------------
 # Locate source files for GGEMS
@@ -223,7 +218,7 @@ INCLUDE(GenerateExportHeader)
 #-------------------------------------------------------------------------------
 # Create shared library
 ADD_LIBRARY(ggems SHARED ${source_ggems})
-TARGET_LINK_LIBRARIES(ggems ${OpenCL_LIBRARY})
+TARGET_LINK_LIBRARIES(ggems OpenCL::OpenCL)
 SET_TARGET_PROPERTIES(ggems PROPERTIES PREFIX "lib")
 
 #-------------------------------------------------------------------------------
