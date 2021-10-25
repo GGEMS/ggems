@@ -19,6 +19,7 @@
 # Import all GGEMS C++ singletons
 from ggems_lib import *
 from ggems_opencl import GGEMSOpenCLManager
+from ggems_opengl import GGEMSOpenGLManager
 from ggems_ram import GGEMSRAMManager
 from ggems_materials import GGEMSMaterialsDatabaseManager, GGEMSMaterials
 from ggems_systems import GGEMSCTSystem
@@ -32,7 +33,8 @@ from ggems_profiler import GGEMSProfilerManager
 class GGEMS(object):
     """GGEMS class managing the simulation
     """
-    def __init__(self):
+    def __init__(self, is_visugl):
+        ggems_lib.create_ggems.argtypes = [ctypes.c_bool]
         ggems_lib.create_ggems.restype = ctypes.c_void_p
 
         ggems_lib.delete_ggems.argtypes = [ctypes.c_void_p]
@@ -74,7 +76,7 @@ class GGEMS(object):
         ggems_lib.run_ggems.argtypes = [ctypes.c_void_p]
         ggems_lib.run_ggems.restype = ctypes.c_void_p
 
-        self.obj = ggems_lib.create_ggems()
+        self.obj = ggems_lib.create_ggems(is_visugl)
 
     def delete(self):
         ggems_lib.delete_ggems(self.obj)

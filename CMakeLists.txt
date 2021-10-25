@@ -64,7 +64,7 @@ ENDIF()
 
 #-------------------------------------------------------------------------------
 # Name of the project and define the language
-PROJECT(GGEMS VERSION 1.1 HOMEPAGE_URL ggems.fr LANGUAGES CXX)
+PROJECT(GGEMS VERSION 1.2 HOMEPAGE_URL ggems.fr LANGUAGES CXX)
 
 #-------------------------------------------------------------------------------
 # Find the OpenCL library and for OpenCL 1.2
@@ -74,9 +74,23 @@ IF(${OpenCL_VERSION_STRING} VERSION_GREATER "1.2")
 ENDIF()
 
 #-------------------------------------------------------------------------------
+# Find libraries for OpenGL
+OPTION(OPENGL_VISUALIZATION "Using OpenGL for visualization" OFF)
+IF(OPENGL_VISUALIZATION)
+  ADD_DEFINITIONS(-DOPENGL_VISUALIZATION)
+  FIND_PACKAGE(GLFW3 REQUIRED)
+  FIND_PACKAGE(OpenGL REQUIRED)
+  FIND_PACKAGE(GLEW REQUIRED)
+ENDIF()
+
+#-------------------------------------------------------------------------------
 # Force the build type to Release
 SET(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build, options are: Debug Release" FORCE)
 SET_PROPERTY(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release")
+
+#-------------------------------------------------------------------------------
+# Setting the LOGO_PATH variable
+SET(LOGO_PATH ${PROJECT_SOURCE_DIR}/logo CACHE PATH "Path to the logo repository")
 
 #-------------------------------------------------------------------------------
 # Setting the OPENCL_KERNEL_PATH variable
@@ -218,7 +232,13 @@ INCLUDE(GenerateExportHeader)
 #-------------------------------------------------------------------------------
 # Create shared library
 ADD_LIBRARY(ggems SHARED ${source_ggems})
-TARGET_LINK_LIBRARIES(ggems OpenCL::OpenCL)
+TARGET_LINK_LIBRARIES(ggems ${EXTERNAL_LIBRARIES})
+IF(OPENGL_VISUALIZATION)
+  TARGET_LINK_LIBRARIES(ggems glfw3 opengl32 OpenCL::OpenCL GLEW::glew)
+ELSE()
+  TARGET_LINK_LIBRARIES(ggems OpenCL::OpenCL)
+ENDIF()
+
 SET_TARGET_PROPERTIES(ggems PROPERTIES PREFIX "lib")
 
 #-------------------------------------------------------------------------------

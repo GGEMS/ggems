@@ -623,4 +623,4 @@ extern "C" GGEMS_EXPORT void clean_opencl_manager(GGEMSOpenCLManager* opencl_man
 */
 extern "C" GGEMS_EXPORT void set_device_balancing_opencl_manager(GGEMSOpenCLManager* opencl_manager, char const* device_balancing);
 
-#endif // GUARD_GGEMS_GLOBAL_GGEMSOpenCLManager_HH
+#endif // GUARD_GGEMS_GLOBAL_GGEMSOPENCLMANAGER_HH

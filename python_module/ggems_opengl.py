@@ -16,28 +16,25 @@
 # *                                                                      *
 # ************************************************************************
 
-#-------------------------------------------------------------------------------
-# CMakeLists.txt
-#
-# CMakeLists.txt - Compile and build 6_Visualization
-#
-# Authors :
-#   - Julien Bert <julien.bert@univ-brest.fr>
-#   - Didier Benoit <didier.benoit@inserm.fr>
-#
-# Generated on : 25/10/2021
-#-------------------------------------------------------------------------------
+from ggems_lib import *
 
-#-------------------------------------------------------------------------------
-# Defining the project
-PROJECT(Visualization)
+class GGEMSOpenGLManager(object):
+    """Get the OpenGL C++ singleton and print infos or managing it
+    """
+    def __init__(self):
+        ggems_lib.get_instance_ggems_opengl_manager.restype = ctypes.c_void_p
 
-#-------------------------------------------------------------------------------
-# Creating the executable
-ADD_EXECUTABLE(visualization visualization.cc)
-TARGET_LINK_LIBRARIES(visualization ggems)
+        ggems_lib.set_msaa_ggems_opengl_manager.argtypes = [ctypes.c_void_p, ctypes.c_int]
+        ggems_lib.set_msaa_ggems_opengl_manager.restype = ctypes.c_void_p
 
-#-------------------------------------------------------------------------------
-# Copy executable to ggems bin folder
-INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} DESTINATION ggems/examples)
-INSTALL(TARGETS visualization DESTINATION ggems/examples/6_Visualization)
+        ggems_lib.set_window_dimensions_ggems_opengl_manager.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_int]
+        ggems_lib.set_window_dimensions_ggems_opengl_manager.restype = ctypes.c_void_p
+
+        self.obj = ggems_lib.get_instance_ggems_opengl_manager()
+
+    def set_window_dimensions(self, width, height):
+        ggems_lib.set_window_dimensions_ggems_opengl_manager(self.obj, width, height)
+
+    def set_msaa(self, msaa):
+        ggems_lib.set_msaa_ggems_opengl_manager(self.obj, msaa)
+

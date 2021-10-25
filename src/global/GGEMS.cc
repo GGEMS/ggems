@@ -55,12 +55,13 @@ namespace {
 #include "GGEMS/randoms/GGEMSPseudoRandomGenerator.hh"
 #include "GGEMS/tools/GGEMSProfilerManager.hh"
 #include "GGEMS/tools/GGEMSProgressBar.hh"
+#include "GGEMS/global/GGEMSOpenGLManager.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMS::GGEMS(void)
+GGEMS::GGEMS(bool const& is_visugl)
 : is_opencl_verbose_(false),
   is_material_database_verbose_(false),
   is_source_verbose_(false),
@@ -71,9 +72,12 @@ GGEMS::GGEMS(void)
   is_random_verbose_(false),
   is_tracking_verbose_(false),
   is_profiling_verbose_(false),
+  is_visugl_(is_visugl),
   particle_tracking_id_(0)
 {
   GGcout("GGEMS", "GGEMS", 3) << "GGEMS creating..." << GGendl;
+
+  if (is_visugl_) GGEMSOpenGLManager::GetInstance().Initialize();
 
   GGcout("GGEMS", "GGEMS", 3) << "GGEMS created!!!" << GGendl;
 }
@@ -363,7 +367,7 @@ void GGEMS::PrintBanner(void) const
   std::cout << "$ | <_/\\| <_/\\| _> |     |\\__ \\   | | || | $" << std::endl;
   std::cout << "$ `____/`____/|___>|_|_|_|<___/   |__/ |_| $" << std::endl;
   std::cout << "$                                          $" << std::endl;
-  std::cout << "$ Welcome to GGEMS v1.1   https://ggems.fr $" << std::endl;
+  std::cout << "$ Welcome to GGEMS v1.2   https://ggems.fr $" << std::endl;
   std::cout << "$ Copyright (c) GGEMS Team 2021            $" << std::endl;
   std::cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << std::endl;
   std::cout << std::endl;
@@ -373,9 +377,9 @@ void GGEMS::PrintBanner(void) const
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMS* create_ggems(void)
+GGEMS* create_ggems(bool const is_visugl)
 {
-  return new(std::nothrow) GGEMS();
+  return new(std::nothrow) GGEMS(is_visugl);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

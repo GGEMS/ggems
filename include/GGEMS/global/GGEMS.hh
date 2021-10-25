@@ -53,7 +53,7 @@ class GGEMS_EXPORT GGEMS
     /*!
       \brief GGEMS constructor
     */
-    GGEMS(void);
+    GGEMS(bool const& is_visugl = false);
 
     /*!
       \brief GGEMS destructor
@@ -218,15 +218,16 @@ class GGEMS_EXPORT GGEMS
     bool is_random_verbose_; /*!< Flag for random verbosity */
     bool is_tracking_verbose_; /*!< Flag for tracking verbosity */
     bool is_profiling_verbose_; /*!< Flag for kernel time verbosity */
+    bool is_visugl_; /*!< Flag for visualization verbosity using OpenGL */
     GGint particle_tracking_id_; /*!< Particle if for tracking */
 };
 
 /*!
-  \fn GGEMS* create_ggems(void)
+  \fn GGEMS* create_ggems(bool const is_visugl)
   \return the pointer to GGEMS
   \brief Get the GGEMS pointer for python user.
 */
-extern "C" GGEMS_EXPORT GGEMS* create_ggems(void);
+extern "C" GGEMS_EXPORT GGEMS* create_ggems(bool const is_visugl = false);
 
 /*!
   \fn GGEMSBox* delete_ggems(GGEMS* ggems)
