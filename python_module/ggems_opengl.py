@@ -27,6 +27,9 @@ class GGEMSOpenGLManager(object):
         ggems_lib.set_msaa_ggems_opengl_manager.argtypes = [ctypes.c_void_p, ctypes.c_int]
         ggems_lib.set_msaa_ggems_opengl_manager.restype = ctypes.c_void_p
 
+        ggems_lib.set_background_color_ggems_opengl_manager.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
+        ggems_lib.set_background_color_ggems_opengl_manager.restype = ctypes.c_void_p
+
         ggems_lib.set_window_dimensions_ggems_opengl_manager.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_int]
         ggems_lib.set_window_dimensions_ggems_opengl_manager.restype = ctypes.c_void_p
 
@@ -35,6 +38,8 @@ class GGEMSOpenGLManager(object):
     def set_window_dimensions(self, width, height):
         ggems_lib.set_window_dimensions_ggems_opengl_manager(self.obj, width, height)
 
+    def set_background_color(self, color):
+        ggems_lib.set_background_color_ggems_opengl_manager(self.obj, color.encode('ASCII'))
+
     def set_msaa(self, msaa):
         ggems_lib.set_msaa_ggems_opengl_manager(self.obj, msaa)
-

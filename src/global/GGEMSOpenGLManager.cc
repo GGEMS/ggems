@@ -24,8 +24,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 // Definition of static members
-// GGint GGEMSOpenGLManager::window_width_ = 800;
-// GGint GGEMSOpenGLManager::window_height_ = 600;
+int GGEMSOpenGLManager::window_width_ = 800;
+int GGEMSOpenGLManager::window_height_ = 600;
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -37,6 +37,29 @@ GGEMSOpenGLManager::GGEMSOpenGLManager(void)
 
   window_ = nullptr;
   msaa_ = 1;
+
+  // Initializing background color (black by default)
+  background_color_[0] = 0.0f;
+  background_color_[1] = 0.0f;
+  background_color_[2] = 0.0f;
+
+  // Initializing list of colors
+  colors_["black"]   = 0;
+  colors_["blue"]    = 1;
+  colors_["lime"]    = 2;
+  colors_["cyan"]    = 3;
+  colors_["red"]     = 4;
+  colors_["magenta"] = 5;
+  colors_["yellow"]  = 6;
+  colors_["white"]   = 7;
+  colors_["gray"]    = 8;
+  colors_["silver"]  = 9;
+  colors_["maroon"]  = 10;
+  colors_["olive"]   = 11;
+  colors_["green"]   = 12;
+  colors_["purple"]  = 13;
+  colors_["teal"]    = 14;
+  colors_["navy"]    = 15;
 
   GGcout("GGEMSOpenGLManager", "GGEMSOpenGLManager", 3) << "GGEMSOpenGLManager created!!!" << GGendl;
 }
@@ -63,7 +86,7 @@ GGEMSOpenGLManager::~GGEMSOpenGLManager(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSOpenGLManager::SetMSAA(GGint const& msaa_factor)
+void GGEMSOpenGLManager::SetMSAA(int const& msaa_factor)
 {
   msaa_ = msaa_factor;
 }
@@ -72,10 +95,30 @@ void GGEMSOpenGLManager::SetMSAA(GGint const& msaa_factor)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSOpenGLManager::SetWindowDimensions(GGint const& width, GGint const& height)
+void GGEMSOpenGLManager::SetBackgroundColor(std::string const& color)
 {
-  // window_width_ = width;
-  // window_height_ = height;
+  // Select color
+  ColorUMap::iterator it = colors_.find(color);
+  if (it != colors_.end()) {
+    for (int i = 0; i < 3; ++i) {
+      background_color_[i] = GGEMSOpenGLColor::color[it->second][i];
+    }
+  }
+  else {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "Warning!!! Color background not found in the list !!!";
+    GGEMSMisc::ThrowException("GGEMSOpenGLManager", "SetBackgroundColor", oss.str());
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSOpenGLManager::SetWindowDimensions(int const& width, int const& height)
+{
+  window_width_ = width;
+  window_height_ = height;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -151,9 +194,9 @@ void GGEMSOpenGLManager::InitGL(void)
     GGEMSMisc::ThrowException("GGEMSOpenGLManager", "InitGL", oss.str());
   }
 
-  // Setting window call back function
-  // glfwSetWindowSizeCallback(window_, Sphere::GLFWWindowSizeCallback);
-  // glfwSetKeyCallback(window_, Sphere::GLFWKeyCallback);
+  // Give callback functions to GLFW
+  glfwSetWindowSizeCallback(window_, GGEMSOpenGLManager::GLFWWindowSizeCallback);
+  glfwSetKeyCallback(window_, GGEMSOpenGLManager::GLFWKeyCallback);
   // glfwSetScrollCallback(window_, Sphere::GLFWScrollCallback);
   // glfwSetMouseButtonCallback(window_, Sphere::GLFWMouseButtonCallback);
   // glfwSetCursorPosCallback(window_, Sphere::GLFWCursorPosCallback);
@@ -165,30 +208,164 @@ void GGEMSOpenGLManager::InitGL(void)
   GGcout("GGEMSOpenGLManager", "InitGL", 1) << "    * OpenGL Version: " << glGetString(GL_VERSION) << GGendl;
   GGcout("GGEMSOpenGLManager", "InitGL", 1) << "    * GLSL Version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << GGendl;
   GGcout("GGEMSOpenGLManager", "InitGL", 1) << "    * GLFW Version: " << glfwGetVersionString() << GGendl;
- // GGcout("GGEMSOpenGLManager", "InitGL", 1) << "    * GLEW Version: " << glewGetString(GLEW_VERSION) << GGendl;
-  //GGcout("GGEMSOpenGLManager", "InitGL", 1) << "    * GLFW window dimensions: " << window_width_ << "x" << window_height_ << GGendl;
+  GGcout("GGEMSOpenGLManager", "InitGL", 1) << "    * GLEW Version: " << glewGetString(GLEW_VERSION) << GGendl;
+  GGcout("GGEMSOpenGLManager", "InitGL", 1) << "    * GLFW window dimensions: " << window_width_ << "x" << window_height_ << GGendl;
   GGcout("GGEMSOpenGLManager", "InitGL", 1) << "    * MSAA factor: " << msaa_ << GGendl;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSOpenGLManager::PrintKeys(void) const
+{
+  GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << GGendl;
+  GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << "Keys:" << GGendl;
+  GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << "    * [Esc/X]           Quit application" << GGendl;
+  GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << GGendl;
+  GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << "Mouse:" << GGendl;
+  GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << GGendl;
+
+/*
+  std::cout << std::endl;
+  std::cout << "Keys:" << std::endl;
+  std::cout << "    * [R]                          Reset view" << std::endl;
+  std::cout << "    * [P]                          Perspective projection" << std::endl;
+  std::cout << "    * [O]                          Ortho projection" << std::endl;
+  std::cout << "    * [Esc] / [X]                  Quit application" << std::endl;
+  std::cout << "    * [Space]                      Stop / Restart application" << std::endl;
+  std::cout << "    * [+/-]                        Zoom in/out" << std::endl;
+  std::cout << "    * [Up/Down]                    Translation up/dowm" << std::endl;
+  std::cout << "    * [Left/Right]                 Translation left/right" << std::endl;
+  std::cout << std::endl;
+  std::cout << "Mouse:" << std::endl;
+  std::cout << "    * [Scroll Up/Down]             Zoom in/out" << std::endl;
+  std::cout << std::endl;
+*/
+}
+
+void GGEMSOpenGLManager::Draw(void)
+{
+  glfwSwapInterval(1); // Control frame rate
+  glClearColor(background_color_[0], background_color_[1], background_color_[2], 1.0f); // Setting background colors
 
   while (!glfwWindowShouldClose(window_)) {
-    // Computing new vertices and display
-    // if (!pause_mode_) {
-    //   // Printing FPS at top of window
-    //   UpdateFPSCounter();
+    // Printing FPS at top of window
+    UpdateFPSCounter();
 
-      // Render here
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    // Render here
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-      // Rescale window
-    //   glViewport(0, 0, Sphere::window_width_, Sphere::window_height_);
-
-    //   UpdateVertices();
-    // }
+    // Rescale window
+    glViewport(0, 0, GGEMSOpenGLManager::window_width_, GGEMSOpenGLManager::window_height_);
 
     // Swap front and back buffers
     glfwSwapBuffers(window_);
     // Poll for and process events
     glfwPollEvents();
   }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSOpenGLManager::UpdateFPSCounter(void)
+{
+  static double previous_seconds = glfwGetTime();
+  static int frame_count = 0;
+  double current_seconds = glfwGetTime();
+  double elapsed_seconds = current_seconds - previous_seconds;
+
+  if (elapsed_seconds > 0.25) {
+    previous_seconds = current_seconds;
+    double fps = static_cast<double>(frame_count) / elapsed_seconds;
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "GGEMS OpenGL @ fps: " << fps;
+    glfwSetWindowTitle(window_, oss.str().c_str());
+    frame_count = 0;
+  }
+
+  frame_count++;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSOpenGLManager::GLFWKeyCallback(GLFWwindow* window, int key, int, int action, int)
+{
+  if (action != GLFW_PRESS) return;
+
+  switch (key) {
+    case GLFW_KEY_ESCAPE: {
+      glfwSetWindowShouldClose(window, true);
+      break;
+    }
+    case GLFW_KEY_X: {
+      glfwSetWindowShouldClose(window, true);
+      break;
+    }
+    // case GLFW_KEY_SPACE: {
+    //   if (action == GLFW_PRESS) {
+    //     if (pause_mode_ == 0) pause_mode_ = 1;
+    //     else pause_mode_ = 0;
+    //   }
+    //   break;
+    // }
+    // case GLFW_KEY_KP_ADD: {
+    //   zoom_ += 0.125f;
+    //   break;
+    // }
+    // case GLFW_KEY_KP_SUBTRACT: {
+    //   zoom_ -= 0.125f;
+    //   if (zoom_ < 0.0f) zoom_ = 0.0f;
+    //   break;
+    // }
+    // case GLFW_KEY_UP: {
+    //   y_translate_ += 1.0f;
+    //   break;
+    // }
+    // case GLFW_KEY_DOWN: {
+    //   y_translate_ -= 1.0f;
+    //   break;
+    // }
+    // case GLFW_KEY_LEFT: {
+    //   x_translate_ -= 1.0f;
+    //   break;
+    // }
+    // case GLFW_KEY_RIGHT: {
+    //   x_translate_ += 1.0f;
+    //   break;
+    // }
+    // case GLFW_KEY_R: {
+    //   x_translate_ = 0.0f;
+    //   y_translate_ = 0.0f;
+    //   zoom_ = 1.0f;
+    //   break;
+    // }
+    // case GLFW_KEY_P : {
+    //   is_perpective_mode_ = 1;
+    //   break;
+    // }
+    // case GLFW_KEY_O : {
+    //   is_perpective_mode_ = 0;
+    //   break;
+    // }
+    default: {
+      break;
+    }
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSOpenGLManager::GLFWWindowSizeCallback(GLFWwindow*, int width, int height)
+{
+  GGEMSOpenGLManager::window_width_ = width;
+  GGEMSOpenGLManager::window_height_ = height;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -218,7 +395,7 @@ GGEMSOpenGLManager* get_instance_ggems_opengl_manager(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_window_dimensions_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manager, GGint width, GGint height)
+void set_window_dimensions_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manager, int width, int height)
 {
   opengl_manager->SetWindowDimensions(width, height);
 }
@@ -227,7 +404,16 @@ void set_window_dimensions_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manag
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_msaa_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manager, GGint msaa_factor)
+void set_msaa_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manager, int msaa_factor)
 {
   opengl_manager->SetMSAA(msaa_factor);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void set_background_color_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manager, char const* color)
+{
+  opengl_manager->SetBackgroundColor(color);
 }

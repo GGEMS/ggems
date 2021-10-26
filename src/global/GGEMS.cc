@@ -77,8 +77,6 @@ GGEMS::GGEMS(bool const& is_visugl)
 {
   GGcout("GGEMS", "GGEMS", 3) << "GGEMS creating..." << GGendl;
 
-  if (is_visugl_) GGEMSOpenGLManager::GetInstance().Initialize();
-
   GGcout("GGEMS", "GGEMS", 3) << "GGEMS created!!!" << GGendl;
 }
 
@@ -253,6 +251,14 @@ void GGEMS::Initialize(GGuint const& seed)
 
   GGcout("GGEMS", "Initialize", 0) << "GGEMS initialization succeeded" << GGendl;
 
+  // Initializing OpenGL and create window
+  if (is_visugl_) {
+    GGEMSOpenGLManager& opengl_manager = GGEMSOpenGLManager::GetInstance();
+    opengl_manager.Initialize();
+    opengl_manager.PrintKeys();
+    opengl_manager.Draw();
+  }
+
   // Display the elapsed time in GGEMS
   GGEMSChrono::DisplayTime(end_time - start_time, "GGEMS initialization");
 }
@@ -319,6 +325,13 @@ void GGEMS::RunOnDevice(GGsize const& thread_index)
 void GGEMS::Run()
 {
   GGcout("GGEMS", "Run", 0) << "GGEMS simulation started" << GGendl;
+
+  // Checking number of source, if 0 stop run
+  GGEMSSourceManager& source_manager = GGEMSSourceManager::GetInstance();
+  if (source_manager.GetNumberOfSources() == 0) {
+    GGwarn("GGEMS", "Run", 0) << "No source defined. Run can not be executed!!!" << GGendl;
+    return;
+  }
 
   ChronoTime start_time = GGEMSChrono::Now();
 

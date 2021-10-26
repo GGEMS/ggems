@@ -80,6 +80,7 @@ IF(OPENGL_VISUALIZATION)
   ADD_DEFINITIONS(-DOPENGL_VISUALIZATION)
   FIND_PACKAGE(GLFW3 REQUIRED)
   FIND_PACKAGE(OpenGL REQUIRED)
+  SET(GLEW_USE_STATIC_LIBS TRUE) # Using GLEW in static, important for Python!!!
   FIND_PACKAGE(GLEW REQUIRED)
 ENDIF()
 
@@ -232,13 +233,11 @@ INCLUDE(GenerateExportHeader)
 #-------------------------------------------------------------------------------
 # Create shared library
 ADD_LIBRARY(ggems SHARED ${source_ggems})
-TARGET_LINK_LIBRARIES(ggems ${EXTERNAL_LIBRARIES})
 IF(OPENGL_VISUALIZATION)
-  TARGET_LINK_LIBRARIES(ggems glfw3 opengl32 OpenCL::OpenCL GLEW::glew)
+  TARGET_LINK_LIBRARIES(ggems OpenCL::OpenCL glfw3 opengl32 GLEW::glew_s)
 ELSE()
   TARGET_LINK_LIBRARIES(ggems OpenCL::OpenCL)
 ENDIF()
-
 SET_TARGET_PROPERTIES(ggems PROPERTIES PREFIX "lib")
 
 #-------------------------------------------------------------------------------
