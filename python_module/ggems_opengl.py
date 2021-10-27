@@ -33,6 +33,9 @@ class GGEMSOpenGLManager(object):
         ggems_lib.set_window_dimensions_ggems_opengl_manager.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_int]
         ggems_lib.set_window_dimensions_ggems_opengl_manager.restype = ctypes.c_void_p
 
+        ggems_lib.set_draw_axis_opengl_manager.argtypes = [ctypes.c_void_p, ctypes.c_bool]
+        ggems_lib.set_draw_axis_opengl_manager.restype = ctypes.c_void_p
+
         self.obj = ggems_lib.get_instance_ggems_opengl_manager()
 
     def set_window_dimensions(self, width, height):
@@ -40,6 +43,9 @@ class GGEMSOpenGLManager(object):
 
     def set_background_color(self, color):
         ggems_lib.set_background_color_ggems_opengl_manager(self.obj, color.encode('ASCII'))
+
+    def set_draw_axis(self, color):
+        ggems_lib.set_draw_axis_opengl_manager(self.obj, color)
 
     def set_msaa(self, msaa):
         ggems_lib.set_msaa_ggems_opengl_manager(self.obj, msaa)

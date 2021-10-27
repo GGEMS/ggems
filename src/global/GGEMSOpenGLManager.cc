@@ -37,6 +37,7 @@ GGEMSOpenGLManager::GGEMSOpenGLManager(void)
 
   window_ = nullptr;
   msaa_ = 1;
+  is_draw_axis_ = false;
 
   // Initializing background color (black by default)
   background_color_[0] = 0.0f;
@@ -125,6 +126,15 @@ void GGEMSOpenGLManager::SetWindowDimensions(int const& width, int const& height
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+void GGEMSOpenGLManager::SetDrawAxis(bool const& is_draw_axis)
+{
+  is_draw_axis_ = is_draw_axis;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 void GGEMSOpenGLManager::Initialize(void)
 {
   GGcout("GGEMSOpenGLManager", "Initialize", 3) << "Initializing the OpenGL manager..." << GGendl;
@@ -156,19 +166,16 @@ void GGEMSOpenGLManager::InitGL(void)
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-  #else
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
   #endif
-  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
+  glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
   glEnable(GL_DEPTH_TEST); // Enable depth buffering
   glDepthFunc(GL_LEQUAL); // Accept fragment if it closer to the camera than the former one or GL_LESS
   glEnable(GL_MULTISAMPLE); // Activating anti-aliasing
   glfwWindowHint(GLFW_SAMPLES, msaa_);
 
   // Creating window
-  window_ = glfwCreateWindow(1200, 800, "GGEMS OpenGL", nullptr, nullptr);
+  window_ = glfwCreateWindow(window_width_, window_height_, "GGEMS OpenGL", nullptr, nullptr);
   if (!window_) {
     std::ostringstream oss(std::ostringstream::out);
     oss << "Error creating a GLFW window!!!";
@@ -211,6 +218,35 @@ void GGEMSOpenGLManager::InitGL(void)
   GGcout("GGEMSOpenGLManager", "InitGL", 1) << "    * GLEW Version: " << glewGetString(GLEW_VERSION) << GGendl;
   GGcout("GGEMSOpenGLManager", "InitGL", 1) << "    * GLFW window dimensions: " << window_width_ << "x" << window_height_ << GGendl;
   GGcout("GGEMSOpenGLManager", "InitGL", 1) << "    * MSAA factor: " << msaa_ << GGendl;
+
+  std::string test = GetOpenGLSLVersion();
+  std::cout << test << std::endl;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+std::string GGEMSOpenGLManager::GetOpenGLSLVersion(void) const
+{
+  std::string glsl_version(reinterpret_cast<char const*>(glGetString(GL_SHADING_LANGUAGE_VERSION)));
+  std::string digits("0123456789");
+
+  std::size_t n = glsl_version.find_first_of(digits);
+  if (n != std::string::npos)
+  {
+    std::size_t m = glsl_version.find_first_not_of(digits+".", n);
+    std::string tmp = glsl_version.substr(n, m != std::string::npos ? m-n : m);
+    // Deleting '.'
+    tmp.erase(std::remove(tmp.begin(), tmp.end(), '.'), tmp.end());
+    return tmp;
+  }
+  else {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "Impossible to get GLSL version!!!";
+    GGEMSMisc::ThrowException("GGEMSOpenGLManager", "GetOpenGLSLVersion", oss.str());
+  }
+  return std::string();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -244,10 +280,87 @@ void GGEMSOpenGLManager::PrintKeys(void) const
 */
 }
 
-void GGEMSOpenGLManager::Draw(void)
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSOpenGLManager::DrawAxis(void)
+{
+  //glPushMatrix();
+  //glMatrixMode(GL_MODELVIEW);
+  // glDisable( GL_CULL_FACE );
+
+  // Draw central point in (0 0 0)
+  //glPointSize(10.0);
+  //glLineWidth(10.0f);
+  // glEnable(GL_PROGRAM_POINT_SIZE);
+  // glEnable(GL_POINT_SMOOTH);
+  // glEnable(GL_BLEND);
+
+  // glTranslatef( 0.0, 0.0, 5.0 );
+  // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  // glPointSize(10);
+  // glLineWidth(2.5); 
+  // glColor3f(1.0, 0.0, 0.0);
+
+  // glBegin(GL_LINES);
+  //glColor3f(1.0f, 0.0f, 0.0f); // Red
+  //glColor3f(1.0,0.0,0.0);
+  // glVertex3f(0.0f, 0.0f, 0.0f);
+  // glVertex3f(100.0f, 100.0f, 0.0f);
+  // glEnd();
+
+  // glDisable(GL_BLEND);
+  // glDisable(GL_POINT_SMOOTH);
+  // glDisable(GL_PROGRAM_POINT_SIZE);
+/*
+   glTranslatef( 0.0, 0.0, DIST_BALL );
+
+
+   for ( col = 0; col <= colTotal; col++ )
+   {
+ 
+      xl = -GRID_SIZE / 2 + col * sizeCell;
+      xr = xl + widthLine;
+
+      yt =  GRID_SIZE / 2;
+      yb = -GRID_SIZE / 2 - widthLine;
+
+      glBegin( GL_POLYGON );
+
+      glColor3f( 0.6f, 0.1f, 0.6f );              
+
+      glVertex3f( xr, yt, z_offset );    
+      glVertex3f( xl, yt, z_offset );       
+      glVertex3f( xl, yb, z_offset );     
+      glVertex3f( xr, yb, z_offset );  
+
+      glEnd();
+   }
+  */
+/*
+glPointSize(10.0);
+            glEnable(GL_PROGRAM_POINT_SIZE);
+            glEnable(GL_POINT_SMOOTH);
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            glBegin(GL_POINTS);
+            glEnd();
+            */
+ // glPopMatrix();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSOpenGLManager::Display(void)
 {
   glfwSwapInterval(1); // Control frame rate
   glClearColor(background_color_[0], background_color_[1], background_color_[2], 1.0f); // Setting background colors
+  // glMatrixMode(GL_PROJECTION);
+  // glLoadIdentity();
+  // glOrtho(0.0,GGEMSOpenGLManager::window_width_,GGEMSOpenGLManager::window_height_,0.0,0.0,1.0);
 
   while (!glfwWindowShouldClose(window_)) {
     // Printing FPS at top of window
@@ -255,9 +368,27 @@ void GGEMSOpenGLManager::Draw(void)
 
     // Render here
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    //glPushMatrix();
 
     // Rescale window
     glViewport(0, 0, GGEMSOpenGLManager::window_width_, GGEMSOpenGLManager::window_height_);
+
+    // glMatrixMode(GL_MODELVIEW);
+    // glLoadIdentity();
+
+    // glPointSize(10.0f);
+    // glLineWidth(2.5f);
+    // glColor3f(1.0f, 0.0f, 0.0f);
+
+    // glBegin(GL_LINES);
+    // glVertex2f(0.0f, 0.0f);
+    // glVertex2f(100.0f, 100.0f);
+    // glEnd();
+
+    if (is_draw_axis_) DrawAxis();
+
+    //glPopMatrix();
+    //glFlush();
 
     // Swap front and back buffers
     glfwSwapBuffers(window_);
@@ -416,4 +547,13 @@ void set_msaa_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manager, int msaa_
 void set_background_color_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manager, char const* color)
 {
   opengl_manager->SetBackgroundColor(color);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void set_draw_axis_opengl_manager(GGEMSOpenGLManager* opengl_manager, bool const is_draw_axis)
+{
+  opengl_manager->SetDrawAxis(is_draw_axis);
 }

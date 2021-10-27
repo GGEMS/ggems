@@ -124,14 +124,23 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     void SetBackgroundColor(std::string const& color);
 
     /*!
+      \fn void SetDrawAxis(bool const& is_draw_axis)
+      \param is_draw_axis - flag for axis drawing activation
+      \brief set flag for axis drawing
+    */
+    void SetDrawAxis(bool const& is_draw_axis);
+
+    /*!
       \fn void PrintKeys(void) const
       \brief print key help to screen
     */
     void PrintKeys(void) const;
 
-
-
-    void Draw(void);
+    /*!
+      \fn void Display(void)
+      \brief display window
+    */
+    void Display(void);
 
   private:
     /*!
@@ -141,10 +150,22 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     void InitGL(void);
 
     /*!
+      \fn std::string GetOpenGLSLVersion(void) const
+      \brief Get version of GLSL
+    */
+    std::string GetOpenGLSLVersion(void) const;
+
+    /*!
       \fn void UpdateFPSCounter(void)
       \brief Compute and display FPS in GLFW window
     */
     void UpdateFPSCounter(void);
+
+    /*!
+      \fn void DrawAxis(void)
+      \brief draw axis in GLFW window
+    */
+    void DrawAxis(void);
 
     /*!
       \fn void GLFWErrorCallback(int error_code, char const* description)
@@ -182,6 +203,7 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     int msaa_; /*!< MSAA: Multi sample anti-aliasing factor */
     ColorUMap colors_; /*!< List of colors */
     float background_color_[3]; /*!< window background color */
+    bool is_draw_axis_; /*!< Flag for axis drawing activation */
 };
 
 /*!
@@ -237,5 +259,13 @@ extern "C" GGEMS_EXPORT void set_msaa_ggems_opengl_manager(GGEMSOpenGLManager* o
   \brief Set background color in GLFW window
 */
 extern "C" GGEMS_EXPORT void set_background_color_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manager, char const* color = "");
+
+/*!
+  \fn void set_draw_axis_opengl_manager(GGEMSOpenGLManager* opengl_manager, bool const is_draw_axis)
+  \param opengl_manager - pointer on the singleton
+  \param is_draw_axis - flag on axis drawing
+  \brief activate axis drawing
+*/
+extern "C" GGEMS_EXPORT void set_draw_axis_opengl_manager(GGEMSOpenGLManager* opengl_manager, bool const is_draw_axis);
 
 #endif // GUARD_GGEMS_GLOBAL_GGEMSOPENGLMANAGER_HH

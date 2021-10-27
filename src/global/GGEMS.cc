@@ -256,7 +256,7 @@ void GGEMS::Initialize(GGuint const& seed)
     GGEMSOpenGLManager& opengl_manager = GGEMSOpenGLManager::GetInstance();
     opengl_manager.Initialize();
     opengl_manager.PrintKeys();
-    opengl_manager.Draw();
+    opengl_manager.Display();
   }
 
   // Display the elapsed time in GGEMS

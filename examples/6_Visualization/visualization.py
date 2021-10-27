@@ -48,8 +48,8 @@ materials_database_manager = GGEMSMaterialsDatabaseManager()
 # STEP 2: Params for visualization
 opengl_manager.set_window_dimensions(1200, 800)
 opengl_manager.set_msaa(8)
-opengl_manager.set_background_color('navy')
-#opengl_manager.draw_axis(false/true)
+opengl_manager.set_background_color('black')
+opengl_manager.set_draw_axis(True)
 #opengl_manager.set_particle_color('gamma','black')
 #opengl_manager.set_mode_view('perspective') #ortho
 #opengl_manager.set_max_particle(1000)
