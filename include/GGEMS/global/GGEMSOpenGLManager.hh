@@ -35,6 +35,7 @@
 
 #include "GGEMS/tools/GGEMSPrint.hh"
 #include "GGEMS/tools/GGEMSSystemOfUnits.hh"
+#include "GGEMS/maths/GGEMSMatrixTypes.hh"
 
 typedef std::unordered_map<std::string, int> ColorUMap; /*!< Unordered map with key : name of the color, index of color */
 
@@ -150,6 +151,25 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     void InitGL(void);
 
     /*!
+      \fn void InitShaders(void)
+      \brief compile shaders and store them
+    */
+    void InitShaders(void);
+
+    /*!
+      \fn void InitBuffers(void)
+      \brief init buffers for axis drawing
+    */
+    void InitBuffers(void);
+
+    /*!
+      \fn void CompileShader(GLuint const& shader) const
+      \param shader - index of shader from glCreateShader
+      \brief compiling shader
+    */
+    void CompileShader(GLuint const& shader) const;
+
+    /*!
       \fn std::string GetOpenGLSLVersion(void) const
       \brief Get version of GLSL
     */
@@ -196,7 +216,6 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     static void GLFWKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
   private:
-    // Interactive members using callback
     GLFWwindow* window_; /*!< Pointer storing GLFW window */
     static int window_width_; /*!< GLFW window width */
     static int window_height_; /*!< GLFW window height */
@@ -204,6 +223,15 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     ColorUMap colors_; /*!< List of colors */
     float background_color_[3]; /*!< window background color */
     bool is_draw_axis_; /*!< Flag for axis drawing activation */
+    GLuint program_shader_id_; /*!< program id for shader */
+
+    GLuint vao_axis_[3]; /*!< vertex array object (for axis drawing) */
+    GLuint vbo_axis_[3]; /*!< vertex buffer objec (for position and color of axis) */
+
+    // MVP matrix (projection*view*model with model = translation*rotation*scale)
+    // GGfloat44 mvp_; /*!< MVP matrix */
+    // GGfloat44 ortho_projection_; /*!< Ortho projection matrix */
+    // GGfloat44 perspective_projection_; /*!< Perspective projection matrix */
 };
 
 /*!

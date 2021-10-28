@@ -19,6 +19,11 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "GGEMS/externs/stb_image.h"
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/transform.hpp>
+#include <glm/gtx/string_cast.hpp>
+
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -62,6 +67,28 @@ GGEMSOpenGLManager::GGEMSOpenGLManager(void)
   colors_["teal"]    = 14;
   colors_["navy"]    = 15;
 
+  // Initialization of matrices
+  // mvp_ = {
+  //   {1.0f, 0.0f, 0.0f, 0.0f},
+  //   {0.0f, 1.0f, 0.0f, 0.0f},
+  //   {0.0f, 0.0f, 1.0f, 0.0f},
+  //   {0.0f, 0.0f, 0.0f, 1.0f}
+  // };
+
+  // ortho_projection_ = {
+  //   {1.0f, 0.0f, 0.0f, 0.0f},
+  //   {0.0f, 1.0f, 0.0f, 0.0f},
+  //   {0.0f, 0.0f, 1.0f, 0.0f},
+  //   {0.0f, 0.0f, 0.0f, 1.0f}
+  // };
+
+  // perspective_projection_ = {
+  //   {1.0f, 0.0f, 0.0f, 0.0f},
+  //   {0.0f, 1.0f, 0.0f, 0.0f},
+  //   {0.0f, 0.0f, 1.0f, 0.0f},
+  //   {0.0f, 0.0f, 0.0f, 1.0f}
+  // };
+
   GGcout("GGEMSOpenGLManager", "GGEMSOpenGLManager", 3) << "GGEMSOpenGLManager created!!!" << GGendl;
 }
 
@@ -76,6 +103,10 @@ GGEMSOpenGLManager::~GGEMSOpenGLManager(void)
   // Destroying GLFW window
   glfwDestroyWindow(window_); // destroying GLFW window
   window_ = nullptr;
+
+  glDeleteBuffers(1, &vao_axis_[0]);
+  glDeleteBuffers(1, &vbo_axis_[0]);
+  glDeleteProgram(program_shader_id_);
 
   // Closing GLFW
   glfwTerminate();
@@ -139,8 +170,9 @@ void GGEMSOpenGLManager::Initialize(void)
 {
   GGcout("GGEMSOpenGLManager", "Initialize", 3) << "Initializing the OpenGL manager..." << GGendl;
 
-  // Initializing GLFW, GL and GLEW
-  InitGL();
+  InitGL(); // Initializing GLFW, GL and GLEW
+  InitShaders(); // Compile and store shaders
+  InitBuffers(); // Initialization of OpenGL buffers, for axis
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -218,9 +250,120 @@ void GGEMSOpenGLManager::InitGL(void)
   GGcout("GGEMSOpenGLManager", "InitGL", 1) << "    * GLEW Version: " << glewGetString(GLEW_VERSION) << GGendl;
   GGcout("GGEMSOpenGLManager", "InitGL", 1) << "    * GLFW window dimensions: " << window_width_ << "x" << window_height_ << GGendl;
   GGcout("GGEMSOpenGLManager", "InitGL", 1) << "    * MSAA factor: " << msaa_ << GGendl;
+}
 
-  std::string test = GetOpenGLSLVersion();
-  std::cout << test << std::endl;
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSOpenGLManager::InitShaders(void)
+{
+  // Creating shaders
+  GLuint vert_shader = glCreateShader(GL_VERTEX_SHADER);
+  GLuint frag_shader = glCreateShader(GL_FRAGMENT_SHADER);
+
+  // A global vertex shader
+  std::string vertex_shader_source_str = "#version " + GetOpenGLSLVersion() + "\n"
+    "\n"
+    "layout(location = 0) in vec3 position;\n"
+    "\n"
+    "uniform mat4 mvp;\n"
+    "uniform vec3 color;\n"
+    "\n"
+    "out vec4 color_rgba;\n"
+    "\n"
+    "void main(void) {\n"
+    "  color_rgba = vec4(color, 1.0f);\n"
+    "  gl_Position = mvp * vec4(position, 1.0);\n"
+    "}\n";
+
+  // A global fragment shader
+  std::string fragment_shader_source_str = "#version " + GetOpenGLSLVersion() + "\n"
+    "\n"
+    "layout(location = 0) out vec4 out_color;\n"
+    "\n"
+    "in vec4 color_rgba;\n"
+    "\n"
+    "void main(void) {\n"
+    "  out_color = color_rgba;\n"
+    "}\n";
+
+  // Setting the source code
+  char const* vertex_shader_source = vertex_shader_source_str.c_str();
+  char const* fragment_shader_source = fragment_shader_source_str.c_str();
+  glShaderSource(vert_shader, 1, &vertex_shader_source, nullptr);
+  glShaderSource(frag_shader, 1, &fragment_shader_source, nullptr);
+
+  // Compiling shaders
+  CompileShader(vert_shader);
+  CompileShader(frag_shader);
+
+  // Deleting shaders
+  glDeleteShader(vert_shader);
+  glDeleteShader(frag_shader);
+
+  // Linking the program
+  program_shader_id_ = glCreateProgram();
+  glAttachShader(program_shader_id_, vert_shader);
+  glAttachShader(program_shader_id_, frag_shader);
+  glLinkProgram(program_shader_id_);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSOpenGLManager::InitBuffers(void)
+{
+  // Creating a vao for each axis and a vbo
+  glGenVertexArrays(3, &vao_axis_[0]);
+  glGenBuffers(3, &vbo_axis_[0]);
+
+  // An array representing 6 vertices
+  float vertex_buffer_axis[] = {
+    0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // X
+    0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, // Y
+    0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f  // Z
+  };
+
+  for (int i = 0; i < 3; ++i) {
+    glBindVertexArray(vao_axis_[i]); // Lock current vao
+
+    glBindBuffer(GL_ARRAY_BUFFER, vbo_axis_[i]); // Lock vbo for position
+
+    // Reading data
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float)*3*2, &vertex_buffer_axis[i*6], GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0); // Unlock vbo
+    glBindVertexArray(0);// Unlock current vao
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSOpenGLManager::CompileShader(GLuint const& shader) const
+{
+  GLint sucess = 0;
+  glCompileShader(shader);
+  glGetShaderiv(shader, GL_COMPILE_STATUS, &sucess);
+  if(sucess == GL_FALSE) {
+    GLint max_length = 0;
+    glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &max_length);
+
+    // The max_length includes the NULL character
+    std::vector<GLchar> error_log(max_length);
+    glGetShaderInfoLog(shader, max_length, &max_length, &error_log[0]);
+
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "Error compiling shader!!!" << std::endl;
+    for (std::size_t i = 0; i < error_log.size(); ++i) oss << error_log[i];
+
+    glDeleteShader(shader); // Don't leak the shader.
+    throw std::runtime_error(oss.str());
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -286,6 +429,47 @@ void GGEMSOpenGLManager::PrintKeys(void) const
 
 void GGEMSOpenGLManager::DrawAxis(void)
 {
+  // glm::mat4 projection_matrix = glm::ortho(-10.0f,10.0f,-20.0f,20.0f,-30.0f,30.0f);
+  //glm::mat4 projection_matrix = glm::ortho(-2.0f, 2.0f, -2.0f, 2.0f, -2.0f, 2.0f);
+  glm::mat4 mvp = glm::mat4(1.0f);
+  // ortho_projection_.m0_[0] = 2.0f / (10.0f - (-10.0f));
+  // ortho_projection_.m1_[1] = 2.0f / (20.0f - (-20.0f));
+  // ortho_projection_.m2_[2] = 2.0f / (30.0f - (-30.0f));
+  // ortho_projection_.m3_[0] = - (10.0f + (-10.0f)) / (10.0f - (-10.0f));
+  // ortho_projection_.m3_[1] = - (20.0f + (-20.0f)) / (20.0f - (-20.0f));
+  // ortho_projection_.m3_[2] = - (30.0f + (-30.0f)) / (30.0f - (-30.0f));
+
+  // Enabling shader program
+  glUseProgram(program_shader_id_);
+
+  glBindVertexArray(vao_axis_[0]);
+
+  glBindBuffer(GL_ARRAY_BUFFER, vbo_axis_[0]);
+
+  // Set color and MVP matrix to shader
+  glUniform3f(glGetUniformLocation(program_shader_id_,"color"), 1.0f, 0.0f, 0.0f);
+  glUniformMatrix4fv(glGetUniformLocation(program_shader_id_, "mvp"), 1, GL_FALSE, &mvp[0][0]);
+
+  glDrawArrays(GL_POINTS, 0, 2);
+
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+  glBindVertexArray(0);
+
+  // Disabling shader program
+  glUseProgram(0);
+
+  // std::cout << "MY 4x4 MATRIX:" << std::endl;
+  // std::cout << mvp_.m0_[0] << " " << mvp_.m0_[1] << " " << mvp_.m0_[2] << " " << mvp_.m0_[3] << std::endl;
+  // std::cout << mvp_.m1_[0] << " " << mvp_.m1_[1] << " " << mvp_.m1_[2] << " " << mvp_.m1_[3] << std::endl;
+  // std::cout << mvp_.m2_[0] << " " << mvp_.m2_[1] << " " << mvp_.m2_[2] << " " << mvp_.m2_[3] << std::endl;
+  // std::cout << mvp_.m3_[0] << " " << mvp_.m3_[1] << " " << mvp_.m3_[2] << " " << mvp_.m3_[3] << std::endl;
+
+  // glm::mat4 projection_matrix = glm::ortho(-10.0f,10.0f,-20.0f,20.0f,-30.0f,30.0f);
+
+  // std::cout << "GLM" << std::endl;
+  // std::cout << glm::to_string(projection_matrix) << std::endl;
+
   //glPushMatrix();
   //glMatrixMode(GL_MODELVIEW);
   // glDisable( GL_CULL_FACE );
