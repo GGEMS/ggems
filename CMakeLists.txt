@@ -235,6 +235,7 @@ INCLUDE(GenerateExportHeader)
 # Create shared library
 ADD_LIBRARY(ggems SHARED ${source_ggems})
 IF(OPENGL_VISUALIZATION)
+  #TARGET_LINK_LIBRARIES(ggems OpenCL::OpenCL glfw3 opengl32 GLEW::glew_s glm::glm)
   TARGET_LINK_LIBRARIES(ggems OpenCL::OpenCL glfw3 opengl32 GLEW::glew_s glm::glm)
 ELSE()
   TARGET_LINK_LIBRARIES(ggems OpenCL::OpenCL)

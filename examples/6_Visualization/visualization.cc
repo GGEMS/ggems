@@ -194,6 +194,8 @@ int main(int argc, char** argv)
     GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
     GGEMSOpenGLManager& opengl_manager = GGEMSOpenGLManager::GetInstance();
     opengl_manager.Initialize();
+    opengl_manager.SetDrawAxis(true);
+    opengl_manager.Display();
     // GGEMSMaterialsDatabaseManager& material_manager = GGEMSMaterialsDatabaseManager::GetInstance();
     // GGEMSVolumeCreatorManager& volume_creator_manager = GGEMSVolumeCreatorManager::GetInstance();
     // GGEMSProcessesManager& processes_manager = GGEMSProcessesManager::GetInstance();

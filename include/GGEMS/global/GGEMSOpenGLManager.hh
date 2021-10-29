@@ -143,6 +143,15 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     */
     void Display(void);
 
+    /*!
+      \fn void CheckOpenGLError(GLenum const& error, std::string const& class_name, std::string const& method_name) const
+      \param error - error index
+      \param class_name - name of the class
+      \param method_name - name of the method
+      \brief check the OpenGL error
+    */
+    void CheckOpenGLError(GLenum const& error, std::string const& class_name, std::string const& method_name) const;
+
   private:
     /*!
       \fn void InitGL(void)
@@ -188,6 +197,14 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     void DrawAxis(void);
 
     /*!
+      \fn std::string ErrorType(GLenum const& error) const
+      \param error - error index from OpenGL library
+      \return the message error
+      \brief get the error description
+    */
+    std::string ErrorType(GLenum const& error) const;
+
+    /*!
       \fn void GLFWErrorCallback(int error_code, char const* description)
       \param error_code - error code returned by OpenGL
       \param description - description of the error
@@ -225,8 +242,8 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     bool is_draw_axis_; /*!< Flag for axis drawing activation */
     GLuint program_shader_id_; /*!< program id for shader */
 
-    GLuint vao_axis_[3]; /*!< vertex array object (for axis drawing) */
-    GLuint vbo_axis_[3]; /*!< vertex buffer objec (for position and color of axis) */
+    GLuint vao_axis_; /*!< vertex array object (for axis drawing) */
+    GLuint vbo_axis_; /*!< vertex buffer objec (for position and color of axis) */
 
     // MVP matrix (projection*view*model with model = translation*rotation*scale)
     // GGfloat44 mvp_; /*!< MVP matrix */

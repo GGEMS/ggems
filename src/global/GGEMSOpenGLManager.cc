@@ -104,8 +104,8 @@ GGEMSOpenGLManager::~GGEMSOpenGLManager(void)
   glfwDestroyWindow(window_); // destroying GLFW window
   window_ = nullptr;
 
-  glDeleteBuffers(1, &vao_axis_[0]);
-  glDeleteBuffers(1, &vbo_axis_[0]);
+  glDeleteBuffers(1, &vao_axis_);
+  glDeleteBuffers(1, &vbo_axis_);
   glDeleteProgram(program_shader_id_);
 
   // Closing GLFW
@@ -200,6 +200,9 @@ void GGEMSOpenGLManager::InitGL(void)
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
   #endif
 
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+
   glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
   glEnable(GL_DEPTH_TEST); // Enable depth buffering
   glDepthFunc(GL_LEQUAL); // Accept fragment if it closer to the camera than the former one or GL_LESS
@@ -267,14 +270,13 @@ void GGEMSOpenGLManager::InitShaders(void)
     "\n"
     "layout(location = 0) in vec3 position;\n"
     "\n"
-    "uniform mat4 mvp;\n"
     "uniform vec3 color;\n"
     "\n"
     "out vec4 color_rgba;\n"
     "\n"
     "void main(void) {\n"
-    "  color_rgba = vec4(color, 1.0f);\n"
-    "  gl_Position = mvp * vec4(position, 1.0);\n"
+    "  color_rgba = vec4(color, 1.0);\n"
+    "  gl_Position = vec4(position, 1.0);\n"
     "}\n";
 
   // A global fragment shader
@@ -298,15 +300,15 @@ void GGEMSOpenGLManager::InitShaders(void)
   CompileShader(vert_shader);
   CompileShader(frag_shader);
 
-  // Deleting shaders
-  glDeleteShader(vert_shader);
-  glDeleteShader(frag_shader);
-
   // Linking the program
   program_shader_id_ = glCreateProgram();
   glAttachShader(program_shader_id_, vert_shader);
   glAttachShader(program_shader_id_, frag_shader);
   glLinkProgram(program_shader_id_);
+
+  // Deleting shaders
+  glDeleteShader(vert_shader);
+  glDeleteShader(frag_shader);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -315,29 +317,37 @@ void GGEMSOpenGLManager::InitShaders(void)
 
 void GGEMSOpenGLManager::InitBuffers(void)
 {
+    float vertex_buffer_axis[] = {0.0f,  0.5f,  0.0f, 0.5f, -0.5f,  0.0f, -0.5f, -0.5f,  0.0f};
   // Creating a vao for each axis and a vbo
-  glGenVertexArrays(3, &vao_axis_[0]);
-  glGenBuffers(3, &vbo_axis_[0]);
+  //CheckOpenGLError(glGetError(), "GGEMSOpenGLManager", "TOTO");
+  glGenVertexArrays(1, &vao_axis_);
+  //CheckOpenGLError(glGetError(), "GGEMSOpenGLManager", "InitBuffers");
 
-  // An array representing 6 vertices
-  float vertex_buffer_axis[] = {
-    0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // X
-    0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, // Y
-    0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f  // Z
-  };
+  // GLenum err = glGetError();
+   // std::cout << "Error mapping vbo buffer!!!: " << err << std::endl;
+   glBindVertexArray(vao_axis_); // Lock current vao
 
-  for (int i = 0; i < 3; ++i) {
-    glBindVertexArray(vao_axis_[i]); // Lock current vao
+//   // An array representing 6 vertices
 
-    glBindBuffer(GL_ARRAY_BUFFER, vbo_axis_[i]); // Lock vbo for position
+    // -0.5f, -0.5f, 0.0f, 0.0f, 0.5f, 0.0f, 0.5f, -0.5f, 0.0f};//, // X
+//     /*0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, // Y
+//     0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f  // Z
+//   };*/
 
-    // Reading data
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float)*3*2, &vertex_buffer_axis[i*6], GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+   
+//   //for (int i = 0; i < 1; ++i) {
 
-    glBindBuffer(GL_ARRAY_BUFFER, 0); // Unlock vbo
-    glBindVertexArray(0);// Unlock current vao
-  }
+
+//     glBindBuffer(GL_ARRAY_BUFFER, vbo_axis_); // Lock vbo for position
+
+//     // Reading data
+     glGenBuffers(1, &vbo_axis_);
+     glBufferData(GL_ARRAY_BUFFER, 9*sizeof(float), vertex_buffer_axis, GL_STATIC_DRAW);
+     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+     glEnableVertexAttribArray(0);
+
+     //glBindBuffer(GL_ARRAY_BUFFER, 0); // Unlock vbo
+     //glBindVertexArray(0);// Unlock current vao
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -429,35 +439,52 @@ void GGEMSOpenGLManager::PrintKeys(void) const
 
 void GGEMSOpenGLManager::DrawAxis(void)
 {
+  //glFinish();
   // glm::mat4 projection_matrix = glm::ortho(-10.0f,10.0f,-20.0f,20.0f,-30.0f,30.0f);
   //glm::mat4 projection_matrix = glm::ortho(-2.0f, 2.0f, -2.0f, 2.0f, -2.0f, 2.0f);
-  glm::mat4 mvp = glm::mat4(1.0f);
-  // ortho_projection_.m0_[0] = 2.0f / (10.0f - (-10.0f));
-  // ortho_projection_.m1_[1] = 2.0f / (20.0f - (-20.0f));
-  // ortho_projection_.m2_[2] = 2.0f / (30.0f - (-30.0f));
-  // ortho_projection_.m3_[0] = - (10.0f + (-10.0f)) / (10.0f - (-10.0f));
-  // ortho_projection_.m3_[1] = - (20.0f + (-20.0f)) / (20.0f - (-20.0f));
-  // ortho_projection_.m3_[2] = - (30.0f + (-30.0f)) / (30.0f - (-30.0f));
+  //glm::mat4 mvp = glm::mat4(1.0f);
+//   // ortho_projection_.m0_[0] = 2.0f / (10.0f - (-10.0f));
+//   // ortho_projection_.m1_[1] = 2.0f / (20.0f - (-20.0f));
+//   // ortho_projection_.m2_[2] = 2.0f / (30.0f - (-30.0f));
+//   // ortho_projection_.m3_[0] = - (10.0f + (-10.0f)) / (10.0f - (-10.0f));
+//   // ortho_projection_.m3_[1] = - (20.0f + (-20.0f)) / (20.0f - (-20.0f));
+//   // ortho_projection_.m3_[2] = - (30.0f + (-30.0f)) / (30.0f - (-30.0f));
 
-  // Enabling shader program
-  glUseProgram(program_shader_id_);
+//   // Enabling shader program
+   glUseProgram(program_shader_id_);
 
-  glBindVertexArray(vao_axis_[0]);
+   glBindVertexArray(vao_axis_);
+   //glBindBuffer(GL_ARRAY_BUFFER, vbo_axis_);
+  //  glBindBuffer(GL_ARRAY_BUFFER, vbo_axis_);
+  //  float* vbo_ptr = static_cast<float*>(glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY));
+  //  vbo_ptr[0] = 0.5f;
+  //  vbo_ptr[1] = -0.5f;
+  //  vbo_ptr[2] = 0.0f;
 
-  glBindBuffer(GL_ARRAY_BUFFER, vbo_axis_[0]);
+  //   glUnmapBuffer(GL_ARRAY_BUFFER);
+  //   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-  // Set color and MVP matrix to shader
-  glUniform3f(glGetUniformLocation(program_shader_id_,"color"), 1.0f, 0.0f, 0.0f);
-  glUniformMatrix4fv(glGetUniformLocation(program_shader_id_, "mvp"), 1, GL_FALSE, &mvp[0][0]);
+//   glBindBuffer(GL_ARRAY_BUFFER, vbo_axis_);
+//   //float* vbo_ptr = static_cast<float*>(glMapBuffer(GL_ARRAY_BUFFER, GL_READ_ONLY));
+// //   if (!vbo_ptr) {
+// //     GLenum err = glGetError();
+// //     std::cout << "Error mapping vbo buffer!!!: " << err << std::endl;
+// // }
+//   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-  glDrawArrays(GL_POINTS, 0, 2);
+//   // Set color and MVP matrix to shader
+  //glPointSize(10.0);
+   glUniform3f(glGetUniformLocation(program_shader_id_,"color"), 1.0f, 1.0f, 0.0f);
+   //glUniformMatrix4fv(glGetUniformLocation(program_shader_id_, "mvp"), 1, GL_FALSE, &mvp[0][0]);
 
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glDrawArrays(GL_TRIANGLES, 0, 3);
 
-  glBindVertexArray(0);
+  //glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-  // Disabling shader program
-  glUseProgram(0);
+  // glBindVertexArray(0);
+
+//   // Disabling shader program
+ //  glUseProgram(0);
 
   // std::cout << "MY 4x4 MATRIX:" << std::endl;
   // std::cout << mvp_.m0_[0] << " " << mvp_.m0_[1] << " " << mvp_.m0_[2] << " " << mvp_.m0_[3] << std::endl;
@@ -555,7 +582,7 @@ void GGEMSOpenGLManager::Display(void)
     //glPushMatrix();
 
     // Rescale window
-    glViewport(0, 0, GGEMSOpenGLManager::window_width_, GGEMSOpenGLManager::window_height_);
+    //glViewport(0, 0, GGEMSOpenGLManager::window_width_, GGEMSOpenGLManager::window_height_);
 
     // glMatrixMode(GL_MODELVIEW);
     // glLoadIdentity();
@@ -695,6 +722,69 @@ void GGEMSOpenGLManager::GLFWErrorCallback(int error_code, char const* descripti
   oss << description << std::endl;
   oss << "!!!!!!!!";
   GGEMSMisc::ThrowException("GGEMSOpenGLManager", "GLFWErrorCallback", oss.str());
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSOpenGLManager::CheckOpenGLError(GLenum const& error, std::string const& class_name, std::string const& method_name) const
+{
+  if (error != GL_NO_ERROR) GGEMSMisc::ThrowException(class_name, method_name, ErrorType(error));
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+std::string GGEMSOpenGLManager::ErrorType(GLenum const& error) const
+{
+  // Error description storing in a ostringstream
+  std::ostringstream oss(std::ostringstream::out);
+  oss << std::endl;
+
+  switch (error) {
+    case 1280: {
+      oss << "GL_INVALID_ENUM:" << std::endl;
+      oss << "    * if an enumeration parameter is not legal." << std::endl;
+      return oss.str();
+    }
+    case 1281: {
+      oss << "GL_INVALID_VALUE:" << std::endl;
+      oss << "    * if a value parameter is not legal." << std::endl;
+      return oss.str();
+    }
+    case 1282: {
+      oss << "GL_INVALID_OPERATION:" << std::endl;
+      oss << "    * if the state for a command is not legal for its given parameters." << std::endl;
+      return oss.str();
+    }
+    case 1283: {
+      oss << "GL_STACK_OVERFLOW:" << std::endl;
+      oss << "    * if a stack pushing operation causes a stack overflow." << std::endl;
+      return oss.str();
+    }
+    case 1284: {
+      oss << "GL_STACK_UNDERFLOW:" << std::endl;
+      oss << "    * if a stack popping operation occurs while the stack is at its lowest point." << std::endl;
+      return oss.str();
+    }
+    case 1285: {
+      oss << "GL_OUT_OF_MEMORY:" << std::endl;
+      oss << "    * if a memory allocation operation cannot allocate (enough) memory." << std::endl;
+      return oss.str();
+    }
+    case 1286: {
+      oss << "GL_INVALID_FRAMEBUFFER_OPERATION:" << std::endl;
+      oss << "    * if reading or writing to a framebuffer that is not complete." << std::endl;
+      return oss.str();
+    }
+    default: {
+      oss << "Unknown OpenGL error" << std::endl;
+      oss << "    * if an enumeration parameter is not legal." << std::endl;
+      return oss.str();
+    }
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
