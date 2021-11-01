@@ -342,6 +342,7 @@ void GGEMSOpenGLManager::InitBuffers(void)
 
 //     // Reading data
      glGenBuffers(1, &vbo_axis_);
+     glBindBuffer(GL_ARRAY_BUFFER, vbo_axis_); // Lock vbo for position
      glBufferData(GL_ARRAY_BUFFER, 9*sizeof(float), vertex_buffer_axis, GL_STATIC_DRAW);
      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
      glEnableVertexAttribArray(0);
