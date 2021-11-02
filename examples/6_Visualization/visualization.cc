@@ -31,7 +31,7 @@
 // #include <cstdlib>
 #include <sstream>
 #include "GGEMS/global/GGEMSOpenCLManager.hh"
-#include "GGEMS/global/GGEMSOpenGLManager.hh"
+#include "GGEMS/graphics/GGEMSOpenGLManager.hh"
 // #include "GGEMS/global/GGEMS.hh"
 // #include "GGEMS/materials/GGEMSMaterialsDatabaseManager.hh"
 // #include "GGEMS/navigators/GGEMSVoxelizedPhantom.hh"
@@ -66,29 +66,43 @@ void PrintHelpAndQuit(std::string const& message, char const* exec)
   oss << "[--verbose X]              Verbosity level" << std::endl;
   oss << "                           (X=0, default)" << std::endl;
   oss << std::endl;
-  // oss << "Specific hardware selection:" << std::endl;
-  // oss << "----------------------------" << std::endl;
-  // oss << "[--device X]               Device type:" << std::endl;
-  // oss << "                           (X=all, by default)" << std::endl;
-  // oss << "                               - all (all devices)" << std::endl;
-  // oss << "                               - cpu (cpu device)" << std::endl;
-  // oss << "                               - gpu (all gpu devices)" << std::endl;
-  // oss << "                               - gpu_nvidia (all gpu nvidia devices)" << std::endl;
-  // oss << "                               - gpu_intel (all gpu intel devices)" << std::endl;
-  // oss << "                               - gpu_amd (all gpu amd devices)" << std::endl;
-  // oss << "                               - X;Y;Z ... (index of device)" << std::endl;
-  // oss << "[--balance X]              Balance computation for device if many devices are selected." << std::endl;
-  // oss << "                           If 2 devices selected:" << std::endl;
-  // oss << "                               --balance 0.5;0.5 means 50% of computation on device 0, and 50% of computation on device 1" << std::endl;
-  // oss << "                               --balance 0.32;0.68 means 32% of computation on device 0, and 68% of computation on device 1" << std::endl;
-  // oss << "                           Total balance has to be equal to 1" << std::endl;
-  // oss << std::endl;
-  // oss << "Simulation parameters:" << std::endl;
-  // oss << "----------------------" << std::endl;
-  // oss << "[--n-particles X]         Number of particles" << std::endl;
-  // oss << "                          (X=1000000, default)" << std::endl;
-  // oss << "[--seed X]                Seed of pseudo generator number" << std::endl;
-  // oss << "                          (X=777, default)" << std::endl;
+  oss << "OpenGL params:" << std::endl;
+  oss << "--------------" << std::endl;
+  oss << "[--wdims X,Y]              Window dimensions" << std::endl;
+  oss << "                           (800,800, by default)" << std::endl;
+  oss << "[--msaa X]                 MSAA factor (1x, 2x, 4x or 8x)" << std::endl;
+  oss << "                           (8, by default)" << std::endl;
+  oss << "[--wcolor X]               Window color" << std::endl;
+  oss << "                           (black, by default)" << std::endl;
+  oss << "Available colors:" << std::endl;
+  oss << "                               * black" << std::endl;
+  oss << "                               * blue" << std::endl;
+  oss << "                               * lime" << std::endl;
+  oss << "                               * cyan" << std::endl;
+  oss << "                               * red" << std::endl;
+  oss << "                               * magenta" << std::endl;
+  oss << "                               * yellow" << std::endl;
+  oss << "                               * white" << std::endl;
+  oss << "                               * gray" << std::endl;
+  oss << "                               * silver" << std::endl;
+  oss << "                               * maroon" << std::endl;
+  oss << "                               * olive" << std::endl;
+  oss << "                               * green" << std::endl;
+  oss << "                               * purple" << std::endl;
+  oss << "                               * teal" << std::endl;
+  oss << "                               * navy" << std::endl;
+  oss << std::endl;
+  oss << "Specific hardware selection:" << std::endl;
+  oss << "----------------------------" << std::endl;
+  oss << "[--device X]               Device Index:" << std::endl;
+  oss << "                           (0, by default)" << std::endl;
+  oss << std::endl;
+  oss << "Simulation parameters:" << std::endl;
+  oss << "----------------------" << std::endl;
+  oss << "[--n-particles X]         Number of particles" << std::endl;
+  oss << "                          (X=1000000, default)" << std::endl;
+  oss << "[--seed X]                Seed of pseudo generator number" << std::endl;
+  oss << "                          (X=777, default)" << std::endl;
   throw std::invalid_argument(oss.str());
 }
 
@@ -118,13 +132,15 @@ int main(int argc, char** argv)
 {
   try {
     // Verbosity level
-     GGint verbosity_level = 0;
+    GGint verbosity_level = 0;
 
-    // // List of parameters
-    // GGsize number_of_particles = 1000000;
-    // std::string device = "all";
-    // std::string device_balance = "";
-    // GGuint seed = 777;
+    // List of parameters
+    GGint msaa = 8;
+    GGint window_dims[] = {800, 800};
+    std::string window_color = "black";
+    GGsize number_of_particles = 1000000;
+    GGsize device_index = 0;
+    GGuint seed = 777;
 
     // Loop while there is an argument
     GGint counter(0);
@@ -133,16 +149,17 @@ int main(int argc, char** argv)
       GGint option_index = 0;
       static struct option sLongOptions[] = {
         {"verbose", required_argument, 0, 'v'},
-        {"help", no_argument, 0, 'h'}
-    //     {"n-particles", required_argument, 0, 'p'},
-    //     {"device", required_argument, 0, 'd'},
-    //     {"balance", required_argument, 0, 'b'},
-    //     {"seed", required_argument, 0, 's'}
+        {"help", no_argument, 0, 'h'},
+        {"msaa", required_argument, 0, 'm'},
+        {"wdims", required_argument, 0, 'w'},
+        {"wcolor", required_argument, 0, 'c'},
+        {"device", required_argument, 0, 'd'},
+        {"seed", required_argument, 0, 's'},
+        {"n-particles", required_argument, 0, 'n'}
       };
 
       // Getting the options
-      counter = getopt_long(argc, argv, "hv:", sLongOptions, &option_index);
-      //counter = getopt_long(argc, argv, "hv:p:d:b:s:", sLongOptions, &option_index);
+      counter = getopt_long(argc, argv, "hv:m:w:c:d:s:n:", sLongOptions, &option_index);
 
       // Exit the loop if -1
       if (counter == -1) break;
@@ -162,22 +179,30 @@ int main(int argc, char** argv)
           PrintHelpAndQuit("Printing the help", argv[0]);
           break;
         }
-    //     case 'p': {
-    //       ParseCommandLine(optarg, &number_of_particles);
-    //       break;
-    //     }
-    //     case 'd': {
-    //       device = optarg;
-    //       break;
-    //     }
-    //     case 'b': {
-    //       device_balance = optarg;
-    //       break;
-    //     }
-    //     case 's': {
-    //       ParseCommandLine(optarg, &seed);
-    //       break;
-    //     }
+        case 'm': {
+          ParseCommandLine(optarg, &msaa);
+          break;
+        }
+        case 'w': {
+          ParseCommandLine(optarg, &window_dims[0]);
+          break;
+        }
+        case 'c': {
+          window_color = optarg;
+          break;
+        }
+        case 'd': {
+          ParseCommandLine(optarg, &device_index);
+          break;
+        }
+        case 's': {
+          ParseCommandLine(optarg, &seed);
+          break;
+        }
+        case 'n': {
+          ParseCommandLine(optarg, &number_of_particles);
+          break;
+        }
         default: {
           PrintHelpAndQuit("Out of switch options!!!", argv[0]);
           break;
@@ -193,22 +218,17 @@ int main(int argc, char** argv)
     // Initialization of singletons
     GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
     GGEMSOpenGLManager& opengl_manager = GGEMSOpenGLManager::GetInstance();
-    opengl_manager.Initialize();
+
+    // Visualization params
+    opengl_manager.SetMSAA(msaa);
     opengl_manager.SetDrawAxis(true);
+    opengl_manager.SetWindowDimensions(window_dims[0], window_dims[1]);
+    opengl_manager.SetBackgroundColor(window_color);
+    opengl_manager.Initialize();
     opengl_manager.Display();
-    // GGEMSMaterialsDatabaseManager& material_manager = GGEMSMaterialsDatabaseManager::GetInstance();
-    // GGEMSVolumeCreatorManager& volume_creator_manager = GGEMSVolumeCreatorManager::GetInstance();
-    // GGEMSProcessesManager& processes_manager = GGEMSProcessesManager::GetInstance();
-    // GGEMSRangeCutsManager& range_cuts_manager = GGEMSRangeCutsManager::GetInstance();
 
-    // // Activating device
-    // if (device == "gpu_nvidia") opencl_manager.DeviceToActivate("gpu", "nvidia");
-    // else if (device == "gpu_amd") opencl_manager.DeviceToActivate("gpu", "amd");
-    // else if (device == "gpu_intel") opencl_manager.DeviceToActivate("gpu", "intel");
-    // else opencl_manager.DeviceToActivate(device);
-
-    // // Device balancing
-    // if (!device_balance.empty()) opencl_manager.DeviceBalancing(device_balance);
+    // OpenCL params
+    opencl_manager.DeviceToActivate(device_index);
 
     // // Enter material database
     // material_manager.SetMaterialsDatabase("data/materials.txt");

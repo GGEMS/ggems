@@ -10,11 +10,14 @@
   \date Monday October 25, 2021
 */
 
+#ifdef OPENGL_VISUALIZATION
+
 #include <sstream>
 
 #include "GGEMS/tools/GGEMSTools.hh"
-#include "GGEMS/global/GGEMSOpenGLManager.hh"
+#include "GGEMS/graphics/GGEMSOpenGLManager.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
+#include "GGEMS/graphics/GGEMSOpenGLSphere.hh"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "GGEMS/externs/stb_image.h"
@@ -120,7 +123,14 @@ GGEMSOpenGLManager::~GGEMSOpenGLManager(void)
 
 void GGEMSOpenGLManager::SetMSAA(int const& msaa_factor)
 {
-  msaa_ = msaa_factor;
+  // Checking msaa factor value, should be 1, 2, 4 or 8
+  if (msaa_factor != 1 && msaa_factor != 2 && msaa_factor != 4 && msaa_factor != 8) {
+    GGwarn("GGEMSOpenGLManager", "SetMSAA", 0) << "Warning!!! MSAA factor should be 1x, 2x, 4x or 8x !!! MSAA factor set to 1x" << GGendl;
+    msaa_ = 1;
+  }
+  else {
+    msaa_ = msaa_factor;
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -138,7 +148,23 @@ void GGEMSOpenGLManager::SetBackgroundColor(std::string const& color)
   }
   else {
     std::ostringstream oss(std::ostringstream::out);
-    oss << "Warning!!! Color background not found in the list !!!";
+    oss << "Warning!!! Color background not found in the list !!!" << std::endl;
+    oss << "Available colors: " << std::endl;
+    oss << "    * black" << std::endl;
+    oss << "    * blue" << std::endl;
+    oss << "    * cyan" << std::endl;
+    oss << "    * red" << std::endl;
+    oss << "    * magenta" << std::endl;
+    oss << "    * yellow" << std::endl;
+    oss << "    * white" << std::endl;
+    oss << "    * gray" << std::endl;
+    oss << "    * silver" << std::endl;
+    oss << "    * maroon" << std::endl;
+    oss << "    * olive" << std::endl;
+    oss << "    * green" << std::endl;
+    oss << "    * purple" << std::endl;
+    oss << "    * teal" << std::endl;
+    oss << "    * navy";
     GGEMSMisc::ThrowException("GGEMSOpenGLManager", "SetBackgroundColor", oss.str());
   }
 }
@@ -172,7 +198,7 @@ void GGEMSOpenGLManager::Initialize(void)
 
   InitGL(); // Initializing GLFW, GL and GLEW
   InitShaders(); // Compile and store shaders
-  InitBuffers(); // Initialization of OpenGL buffers, for axis
+  if (is_draw_axis_) InitAxisVolume(); // Initialization of axis
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -315,17 +341,28 @@ void GGEMSOpenGLManager::InitShaders(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSOpenGLManager::InitBuffers(void)
+void GGEMSOpenGLManager::InitAxisVolume(void)
 {
-    float vertex_buffer_axis[] = {0.0f,  0.5f,  0.0f, 0.5f, -0.5f,  0.0f, -0.5f, -0.5f,  0.0f};
+  // The axis system is composed by:
+  //     * a sphere
+  //     * a tube + cone for X axis
+  //     * a tube + cone for Y axis
+  //     * a tube + cone for Z axis
+
+  // 100 mm Sphere in (0, 0, 0)
+  GGEMSOpenGLSphere Sphere(100.0f*mm); 
+  Sphere.SetColor("yellow");
+  Sphere.Build();
+
+   // float vertex_buffer_axis[] = {0.0f,  0.5f,  0.0f, 0.5f, -0.5f,  0.0f, -0.5f, -0.5f,  0.0f};
   // Creating a vao for each axis and a vbo
   //CheckOpenGLError(glGetError(), "GGEMSOpenGLManager", "TOTO");
-  glGenVertexArrays(1, &vao_axis_);
+ // glGenVertexArrays(1, &vao_axis_);
   //CheckOpenGLError(glGetError(), "GGEMSOpenGLManager", "InitBuffers");
 
   // GLenum err = glGetError();
    // std::cout << "Error mapping vbo buffer!!!: " << err << std::endl;
-   glBindVertexArray(vao_axis_); // Lock current vao
+  // glBindVertexArray(vao_axis_); // Lock current vao
 
 //   // An array representing 6 vertices
 
@@ -341,11 +378,11 @@ void GGEMSOpenGLManager::InitBuffers(void)
 //     glBindBuffer(GL_ARRAY_BUFFER, vbo_axis_); // Lock vbo for position
 
 //     // Reading data
-     glGenBuffers(1, &vbo_axis_);
-     glBindBuffer(GL_ARRAY_BUFFER, vbo_axis_); // Lock vbo for position
-     glBufferData(GL_ARRAY_BUFFER, 9*sizeof(float), vertex_buffer_axis, GL_STATIC_DRAW);
-     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-     glEnableVertexAttribArray(0);
+    //  glGenBuffers(1, &vbo_axis_);
+    //  glBindBuffer(GL_ARRAY_BUFFER, vbo_axis_); // Lock vbo for position
+    //  glBufferData(GL_ARRAY_BUFFER, 9*sizeof(float), vertex_buffer_axis, GL_STATIC_DRAW);
+    //  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+    //  glEnableVertexAttribArray(0);
 
      //glBindBuffer(GL_ARRAY_BUFFER, 0); // Unlock vbo
      //glBindVertexArray(0);// Unlock current vao
@@ -452,9 +489,9 @@ void GGEMSOpenGLManager::DrawAxis(void)
 //   // ortho_projection_.m3_[2] = - (30.0f + (-30.0f)) / (30.0f - (-30.0f));
 
 //   // Enabling shader program
-   glUseProgram(program_shader_id_);
+ //  glUseProgram(program_shader_id_);
 
-   glBindVertexArray(vao_axis_);
+ //  glBindVertexArray(vao_axis_);
    //glBindBuffer(GL_ARRAY_BUFFER, vbo_axis_);
   //  glBindBuffer(GL_ARRAY_BUFFER, vbo_axis_);
   //  float* vbo_ptr = static_cast<float*>(glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY));
@@ -475,10 +512,10 @@ void GGEMSOpenGLManager::DrawAxis(void)
 
 //   // Set color and MVP matrix to shader
   //glPointSize(10.0);
-   glUniform3f(glGetUniformLocation(program_shader_id_,"color"), 1.0f, 1.0f, 0.0f);
+  // glUniform3f(glGetUniformLocation(program_shader_id_,"color"), 1.0f, 1.0f, 0.0f);
    //glUniformMatrix4fv(glGetUniformLocation(program_shader_id_, "mvp"), 1, GL_FALSE, &mvp[0][0]);
 
-  glDrawArrays(GL_TRIANGLES, 0, 3);
+  //glDrawArrays(GL_TRIANGLES, 0, 3);
 
   //glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -597,7 +634,7 @@ void GGEMSOpenGLManager::Display(void)
     // glVertex2f(100.0f, 100.0f);
     // glEnd();
 
-    if (is_draw_axis_) DrawAxis();
+    //if (is_draw_axis_) DrawAxis();
 
     //glPopMatrix();
     //glFlush();
@@ -729,69 +766,6 @@ void GGEMSOpenGLManager::GLFWErrorCallback(int error_code, char const* descripti
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSOpenGLManager::CheckOpenGLError(GLenum const& error, std::string const& class_name, std::string const& method_name) const
-{
-  if (error != GL_NO_ERROR) GGEMSMisc::ThrowException(class_name, method_name, ErrorType(error));
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-std::string GGEMSOpenGLManager::ErrorType(GLenum const& error) const
-{
-  // Error description storing in a ostringstream
-  std::ostringstream oss(std::ostringstream::out);
-  oss << std::endl;
-
-  switch (error) {
-    case 1280: {
-      oss << "GL_INVALID_ENUM:" << std::endl;
-      oss << "    * if an enumeration parameter is not legal." << std::endl;
-      return oss.str();
-    }
-    case 1281: {
-      oss << "GL_INVALID_VALUE:" << std::endl;
-      oss << "    * if a value parameter is not legal." << std::endl;
-      return oss.str();
-    }
-    case 1282: {
-      oss << "GL_INVALID_OPERATION:" << std::endl;
-      oss << "    * if the state for a command is not legal for its given parameters." << std::endl;
-      return oss.str();
-    }
-    case 1283: {
-      oss << "GL_STACK_OVERFLOW:" << std::endl;
-      oss << "    * if a stack pushing operation causes a stack overflow." << std::endl;
-      return oss.str();
-    }
-    case 1284: {
-      oss << "GL_STACK_UNDERFLOW:" << std::endl;
-      oss << "    * if a stack popping operation occurs while the stack is at its lowest point." << std::endl;
-      return oss.str();
-    }
-    case 1285: {
-      oss << "GL_OUT_OF_MEMORY:" << std::endl;
-      oss << "    * if a memory allocation operation cannot allocate (enough) memory." << std::endl;
-      return oss.str();
-    }
-    case 1286: {
-      oss << "GL_INVALID_FRAMEBUFFER_OPERATION:" << std::endl;
-      oss << "    * if reading or writing to a framebuffer that is not complete." << std::endl;
-      return oss.str();
-    }
-    default: {
-      oss << "Unknown OpenGL error" << std::endl;
-      oss << "    * if an enumeration parameter is not legal." << std::endl;
-      return oss.str();
-    }
-  }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
 GGEMSOpenGLManager* get_instance_ggems_opengl_manager(void)
 {
   return &GGEMSOpenGLManager::GetInstance();
@@ -832,3 +806,5 @@ void set_draw_axis_opengl_manager(GGEMSOpenGLManager* opengl_manager, bool const
 {
   opengl_manager->SetDrawAxis(is_draw_axis);
 }
+
+#endif // End of OPENGL_VISUALIZATION

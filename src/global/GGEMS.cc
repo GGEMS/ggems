@@ -55,7 +55,10 @@ namespace {
 #include "GGEMS/randoms/GGEMSPseudoRandomGenerator.hh"
 #include "GGEMS/tools/GGEMSProfilerManager.hh"
 #include "GGEMS/tools/GGEMSProgressBar.hh"
-#include "GGEMS/global/GGEMSOpenGLManager.hh"
+
+#ifdef OPENGL_VISUALIZATION
+#include "GGEMS/graphics/GGEMSOpenGLManager.hh"
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -252,12 +255,14 @@ void GGEMS::Initialize(GGuint const& seed)
   GGcout("GGEMS", "Initialize", 0) << "GGEMS initialization succeeded" << GGendl;
 
   // Initializing OpenGL and create window
+  #ifdef OPENGL_VISUALIZATION
   if (is_visugl_) {
     GGEMSOpenGLManager& opengl_manager = GGEMSOpenGLManager::GetInstance();
     opengl_manager.Initialize();
     opengl_manager.PrintKeys();
     opengl_manager.Display();
   }
+  #endif
 
   // Display the elapsed time in GGEMS
   GGEMSChrono::DisplayTime(end_time - start_time, "GGEMS initialization");

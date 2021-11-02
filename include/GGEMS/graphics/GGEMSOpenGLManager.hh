@@ -1,5 +1,5 @@
-#ifndef GUARD_GGEMS_GLOBAL_GGEMSOPENGLMANAGER_HH
-#define GUARD_GGEMS_GLOBAL_GGEMSOPENGLMANAGER_HH
+#ifndef GUARD_GGEMS_GRAPHICS_GGEMSOPENGLMANAGER_HH
+#define GUARD_GGEMS_GRAPHICS_GGEMSOPENGLMANAGER_HH
 
 // ************************************************************************
 // * This file is part of GGEMS.                                          *
@@ -30,6 +30,8 @@
   \version 1.0
   \date Monday October 25, 2021
 */
+
+#ifdef OPENGL_VISUALIZATION
 
 #include <unordered_map>
 
@@ -143,15 +145,6 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     */
     void Display(void);
 
-    /*!
-      \fn void CheckOpenGLError(GLenum const& error, std::string const& class_name, std::string const& method_name) const
-      \param error - error index
-      \param class_name - name of the class
-      \param method_name - name of the method
-      \brief check the OpenGL error
-    */
-    void CheckOpenGLError(GLenum const& error, std::string const& class_name, std::string const& method_name) const;
-
   private:
     /*!
       \fn void InitGL(void)
@@ -166,10 +159,10 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     void InitShaders(void);
 
     /*!
-      \fn void InitBuffers(void)
-      \brief init buffers for axis drawing
+      \fn void InitAxisVolume(void)
+      \brief Initialization of axis
     */
-    void InitBuffers(void);
+    void InitAxisVolume(void);
 
     /*!
       \fn void CompileShader(GLuint const& shader) const
@@ -195,14 +188,6 @@ class GGEMS_EXPORT GGEMSOpenGLManager
       \brief draw axis in GLFW window
     */
     void DrawAxis(void);
-
-    /*!
-      \fn std::string ErrorType(GLenum const& error) const
-      \param error - error index from OpenGL library
-      \return the message error
-      \brief get the error description
-    */
-    std::string ErrorType(GLenum const& error) const;
 
     /*!
       \fn void GLFWErrorCallback(int error_code, char const* description)
@@ -312,5 +297,7 @@ extern "C" GGEMS_EXPORT void set_background_color_ggems_opengl_manager(GGEMSOpen
   \brief activate axis drawing
 */
 extern "C" GGEMS_EXPORT void set_draw_axis_opengl_manager(GGEMSOpenGLManager* opengl_manager, bool const is_draw_axis);
+
+#endif // End of OPENGL_VISUALIZATION
 
 #endif // GUARD_GGEMS_GLOBAL_GGEMSOPENGLMANAGER_HH
