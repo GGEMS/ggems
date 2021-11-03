@@ -39,6 +39,11 @@
 #include "GGEMS/tools/GGEMSSystemOfUnits.hh"
 #include "GGEMS/maths/GGEMSMatrixTypes.hh"
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/transform.hpp>
+#include <glm/gtx/string_cast.hpp>
+
 class GGEMSOpenGLVolume;
 class GGEMSOpenGLSphere;
 
@@ -156,14 +161,37 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     /*!
       \fn GLuint GetProgramShaderID(void) const
       \brief Getting program shader ID
+      \return the id of program shader
     */
     inline GLuint GetProgramShaderID(void) const {return program_shader_id_;}
 
     /*!
       \fn ColorUMap GetColorUMap(void) const
       \brief Getting color map
+      \return the list of colors
     */
     inline ColorUMap GetColorUMap(void) const {return colors_;}
+
+    /*!
+      \fn int GetWindowWidth(void) const
+      \brief get the window width of GLFW window
+      \return the window width of GLFW window
+    */
+    inline int GetWindowWidth(void) const {return window_width_;}
+
+    /*!
+      \fn int GetWindowHeight(void) const
+      \brief get the window height of GLFW window
+      \return the window height of GLFW window
+    */
+    inline int GetWindowHeight(void) const {return window_height_;}
+
+    /*!
+      \fn glm::mat4 GetProjection(void) const
+      \brief getting the projection matrix
+      \return the projection matrix: perspective or ortho
+    */
+    inline glm::mat4 GetProjection(void) const {return projection_;}
 
   private:
     /*!
@@ -251,6 +279,11 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     GGsize number_of_opengl_volumes_; /*!< Number of OpenGL volumes */
 
     GGEMSOpenGLSphere* sphere_test;
+
+    // OpenGL matrices
+    glm::mat4 camera_view_; /*!< Camera view */
+    glm::mat4 projection_; /*!< Projection matrix (ortho or perspective), perspective by defaut */
+    static int is_perspective_; /*!< Mode of projection */
 
     // MVP matrix (projection*view*model with model = translation*rotation*scale)
     // GGfloat44 mvp_; /*!< MVP matrix */

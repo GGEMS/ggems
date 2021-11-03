@@ -31,6 +31,8 @@
   \date Tuesday November 2, 2021
 */
 
+#ifdef OPENGL_VISUALIZATION
+
 #ifdef _MSC_VER
 #pragma warning(disable: 4251) // Deleting warning exporting STL members!!!
 #endif
@@ -128,10 +130,12 @@ class GGEMS_EXPORT GGEMSOpenGLVolume
 
     GGfloat* vertices_; /*!< Pointer storing position vertex for OpenGL volume */
     GGint number_of_vertices_; /*!< Number of vertices for OpenGL volume */
-    GGint* indices_; /*!< Indices of vertex (triangulated) */
+    GLuint* indices_; /*!< Indices of vertex (triangulated) */
     GGint number_of_indices_; /*!< Number of indices */
     GGint number_of_triangles_; /*!< Number of triangles for a volume */
     bool is_visible_; /*!< true: volume display */
 };
+
+#endif
 
 #endif // End of GUARD_GGEMS_GRAPHICS_GGEMSOPENGLVOLUME_HH

@@ -28,9 +28,16 @@
   \date Tuesday November 2, 2021
 */
 
+#ifdef OPENGL_VISUALIZATION
+
 #include "GGEMS/graphics/GGEMSOpenGLVolume.hh"
 #include "GGEMS/graphics/GGEMSOpenGLManager.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
+
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/transform.hpp>
+#include <glm/gtx/string_cast.hpp>
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -158,8 +165,14 @@ void GGEMSOpenGLVolume::SetVisible(bool const& is_visible)
 void GGEMSOpenGLVolume::Draw(void) const
 {
   if (is_visible_) {
+    // Getting OpenCL pointer
+    GGEMSOpenGLManager& opengl_manager = GGEMSOpenGLManager::GetInstance();
+
     // Get program shader from OpenGL manager
-    GLuint program_shader_id = GGEMSOpenGLManager::GetInstance().GetProgramShaderID();
+    GLuint program_shader_id = opengl_manager.GetProgramShaderID();
+
+    // Getting current size of window
+    glm::mat4 projection_matrix = opengl_manager.GetProjection();
 
     // Enabling shader program
     glUseProgram(program_shader_id);
@@ -174,8 +187,17 @@ void GGEMSOpenGLVolume::Draw(void) const
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
     glEnableVertexAttribArray(0);
 
+    glm::mat4 view_matrix = glm::lookAt(
+      glm::vec3(4,3,3), // Camera is at (4,3,3), in World Space
+      glm::vec3(0,0,0), // and looks at the origin
+      glm::vec3(0,1,0)  // Head is up (set to 0,-1,0 to look upside-down)
+    );
+
+    glm::mat4 mvp_matrix = projection_matrix*view_matrix;
+    glUniformMatrix4fv(glGetUniformLocation(program_shader_id, "mvp"), 1, GL_FALSE, &mvp_matrix[0][0]);
+
     // Draw volume using index
-    glDrawElements(GL_TRIANGLES, number_of_indices_, GL_INT, (void*)0);
+    glDrawElements(GL_TRIANGLES, number_of_indices_, GL_UNSIGNED_INT, (void*)0);
 
     glDisableVertexAttribArray(0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -186,3 +208,5 @@ void GGEMSOpenGLVolume::Draw(void) const
     glUseProgram(0);
   }
 }
+
+#endif

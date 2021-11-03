@@ -28,6 +28,8 @@
   \date Tuesday November 2, 2021
 */
 
+#ifdef OPENGL_VISUALIZATION
+
 #include "GGEMS/graphics/GGEMSOpenGLSphere.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
 #include "GGEMS/global/GGEMSConstants.hh"
@@ -55,7 +57,7 @@ GGEMSOpenGLSphere::GGEMSOpenGLSphere(GGfloat const& radius)
   // For first and last stack there is 1 triangle, 3 indices for each triangle
   number_of_triangles_ = ((number_of_stacks_*2)-2)*number_of_sectors_;
   number_of_indices_ = number_of_triangles_*3;
-  indices_ = new GGint[number_of_indices_];
+  indices_ = new GLuint[number_of_indices_];
 
   GGcout("GGEMSOpenGLSphere", "GGEMSOpenGLSphere", 3) << "GGEMSOpenGLSphere created!!!" << GGendl;
 }
@@ -160,3 +162,5 @@ void GGEMSOpenGLSphere::Build(void)
 
   glBindVertexArray(0);
 }
+
+#endif

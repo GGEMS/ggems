@@ -31,6 +31,8 @@
   \date Tuesday November 2, 2021
 */
 
+#ifdef OPENGL_VISUALIZATION
+
 #include "GGEMS/graphics/GGEMSOpenGLVolume.hh"
 
 /*!
@@ -89,5 +91,7 @@ class GGEMS_EXPORT GGEMSOpenGLSphere : public GGEMSOpenGLVolume
     GGint number_of_stacks_; /*!< Number of stacks (latitude) on sphere */
     GGint number_of_sectors_; /*!< Number of sectors (longitude) on sphere */
 };
+
+#endif
 
 #endif // End of GGEMS_GRAPHICS_GGEMSOPENGLSPHERE_HH

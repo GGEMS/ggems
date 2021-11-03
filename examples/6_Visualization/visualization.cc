@@ -222,6 +222,7 @@ int main(int argc, char** argv)
     // Visualization params
     opengl_manager.SetMSAA(msaa);
     opengl_manager.SetDrawAxis(true);
+    // opengl_manager.SetProjectionMode("perspective") // or ortho
     opengl_manager.SetWindowDimensions(window_dims[0], window_dims[1]);
     opengl_manager.SetBackgroundColor(window_color);
     opengl_manager.Initialize();

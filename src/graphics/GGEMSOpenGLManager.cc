@@ -22,11 +22,6 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "GGEMS/externs/stb_image.h"
 
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtx/transform.hpp>
-#include <glm/gtx/string_cast.hpp>
-
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -34,6 +29,7 @@
 // Definition of static members
 int GGEMSOpenGLManager::window_width_ = 800;
 int GGEMSOpenGLManager::window_height_ = 600;
+int GGEMSOpenGLManager::is_perspective_ = 1;
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -73,27 +69,8 @@ GGEMSOpenGLManager::GGEMSOpenGLManager(void)
   number_of_opengl_volumes_ = 0;
   opengl_volumes_ = nullptr;
 
-  // Initialization of matrices
-  // mvp_ = {
-  //   {1.0f, 0.0f, 0.0f, 0.0f},
-  //   {0.0f, 1.0f, 0.0f, 0.0f},
-  //   {0.0f, 0.0f, 1.0f, 0.0f},
-  //   {0.0f, 0.0f, 0.0f, 1.0f}
-  // };
-
-  // ortho_projection_ = {
-  //   {1.0f, 0.0f, 0.0f, 0.0f},
-  //   {0.0f, 1.0f, 0.0f, 0.0f},
-  //   {0.0f, 0.0f, 1.0f, 0.0f},
-  //   {0.0f, 0.0f, 0.0f, 1.0f}
-  // };
-
-  // perspective_projection_ = {
-  //   {1.0f, 0.0f, 0.0f, 0.0f},
-  //   {0.0f, 1.0f, 0.0f, 0.0f},
-  //   {0.0f, 0.0f, 1.0f, 0.0f},
-  //   {0.0f, 0.0f, 0.0f, 1.0f}
-  // };
+  camera_view_ = glm::mat4(1.0f);
+  projection_ = glm::mat4(1.0f);
 
   GGcout("GGEMSOpenGLManager", "GGEMSOpenGLManager", 3) << "GGEMSOpenGLManager created!!!" << GGendl;
 }
@@ -257,7 +234,7 @@ void GGEMSOpenGLManager::InitGL(void)
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
   #endif
 
-  glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+  glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
   glEnable(GL_DEPTH_TEST); // Enable depth buffering
   glDepthFunc(GL_LEQUAL); // Accept fragment if it closer to the camera than the former one or GL_LESS
   glEnable(GL_MULTISAMPLE); // Activating anti-aliasing
@@ -324,13 +301,14 @@ void GGEMSOpenGLManager::InitShader(void)
     "\n"
     "layout(location = 0) in vec3 position;\n"
     "\n"
+    "uniform mat4 mvp;\n"
     "uniform vec3 color;\n"
     "\n"
     "out vec4 color_rgba;\n"
     "\n"
     "void main(void) {\n"
     "  color_rgba = vec4(color, 1.0);\n"
-    "  gl_Position = vec4(position, 1.0);\n"
+    "  gl_Position = mvp * vec4(position, 1.0);\n"
     "}\n";
 
   // A global fragment shader
@@ -378,7 +356,7 @@ void GGEMSOpenGLManager::InitAxisVolume(void)
   //     * a tube + cone for Z axis
 
   // 0.6 mm Sphere in (0, 0, 0)
-  sphere_test = new GGEMSOpenGLSphere(0.6f*mm);
+  sphere_test = new GGEMSOpenGLSphere(2.0f*mm);
 
   sphere_test->SetColor("yellow");
   sphere_test->SetVisible(true);
@@ -386,8 +364,8 @@ void GGEMSOpenGLManager::InitAxisVolume(void)
 
    // float vertex_buffer_axis[] = {0.0f,  0.5f,  0.0f, 0.5f, -0.5f,  0.0f, -0.5f, -0.5f,  0.0f};
   // Creating a vao for each axis and a vbo
-  //CheckOpenGLError(glGetError(), "GGEMSOpenGLManager", "TOTO");
- // glGenVertexArrays(1, &vao_axis_);
+  // CheckOpenGLError(glGetError(), "GGEMSOpenGLManager", "TOTO");
+  // glGenVertexArrays(1, &vao_axis_);
   //CheckOpenGLError(glGetError(), "GGEMSOpenGLManager", "InitBuffers");
 
   // GLenum err = glGetError();
@@ -639,8 +617,7 @@ void GGEMSOpenGLManager::Display(void)
 {
   glfwSwapInterval(1); // Control frame rate
   glClearColor(background_color_[0], background_color_[1], background_color_[2], 1.0f); // Setting background colors
-  // glMatrixMode(GL_PROJECTION);
-  // glLoadIdentity();
+
   // glOrtho(0.0,GGEMSOpenGLManager::window_width_,GGEMSOpenGLManager::window_height_,0.0,0.0,1.0);
 
   while (!glfwWindowShouldClose(window_)) {
@@ -649,27 +626,18 @@ void GGEMSOpenGLManager::Display(void)
 
     // Render here
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    //glPushMatrix();
 
-    // Rescale window
-    //glViewport(0, 0, GGEMSOpenGLManager::window_width_, GGEMSOpenGLManager::window_height_);
+    // Rescale window and adapt projection matrix
+    glViewport(0, 0, GGEMSOpenGLManager::window_width_, GGEMSOpenGLManager::window_height_); 
 
-    // glMatrixMode(GL_MODELVIEW);
-    // glLoadIdentity();
-
-    // glPointSize(10.0f);
-    // glLineWidth(2.5f);
-    // glColor3f(1.0f, 0.0f, 0.0f);
-
-    // glBegin(GL_LINES);
-    // glVertex2f(0.0f, 0.0f);
-    // glVertex2f(100.0f, 100.0f);
-    // glEnd();
+    if (is_perspective_) {
+      projection_ = glm::perspective(glm::radians(45.0f), static_cast<float>(window_width_) / static_cast<float>(window_height_), 0.1f, 100.0f);
+    }
+    else {
+      ;
+    }
 
     if (is_draw_axis_) DrawAxis();
-
-    //glPopMatrix();
-    //glFlush();
 
     // Swap front and back buffers
     glfwSwapBuffers(window_);
