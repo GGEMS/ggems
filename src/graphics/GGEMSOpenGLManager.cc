@@ -70,6 +70,9 @@ GGEMSOpenGLManager::GGEMSOpenGLManager(void)
   colors_["teal"]    = 14;
   colors_["navy"]    = 15;
 
+  number_of_opengl_volumes_ = 0;
+  opengl_volumes_ = nullptr;
+
   // Initialization of matrices
   // mvp_ = {
   //   {1.0f, 0.0f, 0.0f, 0.0f},
@@ -107,14 +110,42 @@ GGEMSOpenGLManager::~GGEMSOpenGLManager(void)
   glfwDestroyWindow(window_); // destroying GLFW window
   window_ = nullptr;
 
-  glDeleteBuffers(1, &vao_axis_);
-  glDeleteBuffers(1, &vbo_axis_);
+ if (sphere_test) delete sphere_test;
+  //glDeleteBuffers(1, &vao_axis_);
+  //glDeleteBuffers(1, &vbo_axis_);
   glDeleteProgram(program_shader_id_);
 
   // Closing GLFW
   glfwTerminate();
 
   GGcout("GGEMSOpenGLManager", "~GGEMSOpenGLManager", 3) << "GGEMSOpenGLManager erased!!!" << GGendl;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSOpenGLManager::Store(GGEMSOpenGLVolume* opengl_volume)
+{
+  GGcout("GGEMSOpenGLManager", "Store", 3) << "Storing new OpenGL volume in GGEMS OpenGL manager..." << GGendl;
+
+  if (number_of_opengl_volumes_ == 0) {
+    opengl_volumes_ = new GGEMSOpenGLVolume*[1];
+    opengl_volumes_[0] = opengl_volume;
+  }
+  else {
+    GGEMSOpenGLVolume** tmp = new GGEMSOpenGLVolume*[number_of_opengl_volumes_+1];
+    for (GGsize i = 0; i < number_of_opengl_volumes_; ++i) {
+      tmp[i] = opengl_volumes_[i];
+    }
+
+    tmp[number_of_opengl_volumes_] = opengl_volume;
+
+    delete[] opengl_volumes_;
+    opengl_volumes_ = tmp;
+  }
+
+  number_of_opengl_volumes_++;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -197,7 +228,7 @@ void GGEMSOpenGLManager::Initialize(void)
   GGcout("GGEMSOpenGLManager", "Initialize", 3) << "Initializing the OpenGL manager..." << GGendl;
 
   InitGL(); // Initializing GLFW, GL and GLEW
-  InitShaders(); // Compile and store shaders
+  InitShader(); // Compile and store shader
   if (is_draw_axis_) InitAxisVolume(); // Initialization of axis
 }
 
@@ -225,9 +256,6 @@ void GGEMSOpenGLManager::InitGL(void)
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
   #endif
-
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
 
   glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
   glEnable(GL_DEPTH_TEST); // Enable depth buffering
@@ -285,7 +313,7 @@ void GGEMSOpenGLManager::InitGL(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSOpenGLManager::InitShaders(void)
+void GGEMSOpenGLManager::InitShader(void)
 {
   // Creating shaders
   GLuint vert_shader = glCreateShader(GL_VERTEX_SHADER);
@@ -349,10 +377,12 @@ void GGEMSOpenGLManager::InitAxisVolume(void)
   //     * a tube + cone for Y axis
   //     * a tube + cone for Z axis
 
-  // 100 mm Sphere in (0, 0, 0)
-  GGEMSOpenGLSphere Sphere(100.0f*mm); 
-  Sphere.SetColor("yellow");
-  Sphere.Build();
+  // 0.6 mm Sphere in (0, 0, 0)
+  sphere_test = new GGEMSOpenGLSphere(0.6f*mm);
+
+  sphere_test->SetColor("yellow");
+  sphere_test->SetVisible(true);
+  sphere_test->Build();
 
    // float vertex_buffer_axis[] = {0.0f,  0.5f,  0.0f, 0.5f, -0.5f,  0.0f, -0.5f, -0.5f,  0.0f};
   // Creating a vao for each axis and a vbo
@@ -477,6 +507,8 @@ void GGEMSOpenGLManager::PrintKeys(void) const
 
 void GGEMSOpenGLManager::DrawAxis(void)
 {
+  opengl_volumes_[0]->Draw();
+
   //glFinish();
   // glm::mat4 projection_matrix = glm::ortho(-10.0f,10.0f,-20.0f,20.0f,-30.0f,30.0f);
   //glm::mat4 projection_matrix = glm::ortho(-2.0f, 2.0f, -2.0f, 2.0f, -2.0f, 2.0f);
@@ -634,7 +666,7 @@ void GGEMSOpenGLManager::Display(void)
     // glVertex2f(100.0f, 100.0f);
     // glEnd();
 
-    //if (is_draw_axis_) DrawAxis();
+    if (is_draw_axis_) DrawAxis();
 
     //glPopMatrix();
     //glFlush();

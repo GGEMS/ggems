@@ -29,6 +29,7 @@
 */
 
 #include "GGEMS/graphics/GGEMSOpenGLVolume.hh"
+#include "GGEMS/graphics/GGEMSOpenGLManager.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -36,12 +37,31 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 GGEMSOpenGLVolume::GGEMSOpenGLVolume()
-: position_x_(0.0f),
-  position_y_(0.0f),
-  position_z_(0.0f),
-  color_("red")
 {
   GGcout("GGEMSOpenGLVolume", "GGEMSOpenGLVolume", 3) << "GGEMSOpenGLVolume creating..." << GGendl;
+
+  position_x_ = 0.0f;
+  position_y_ = 0.0f;
+  position_z_ = 0.0f;
+
+  color_[0] = 1.0f; // red
+  color_[1] = 0.0f;
+  color_[2] = 0.0f;
+
+  vao_ = 0;
+  vbo_[0] = 0; // Vertex
+  vbo_[1] = 0; // Indice
+
+  vertices_ = nullptr;
+  number_of_vertices_ = 0;
+  indices_ = nullptr;
+  number_of_indices_ = 0;
+  number_of_triangles_ = 0;
+
+  is_visible_ = true;
+
+  // Store the OpenGL volume
+  GGEMSOpenGLManager::GetInstance().Store(this);
 
   GGcout("GGEMSOpenGLVolume", "GGEMSOpenGLVolume", 3) << "GGEMSOpenGLVolume created!!!" << GGendl;
 }
@@ -54,10 +74,20 @@ GGEMSOpenGLVolume::~GGEMSOpenGLVolume(void)
 {
   GGcout("GGEMSOpenGLVolume", "~GGEMSOpenGLVolume", 3) << "GGEMSOpenGLVolume erasing..." << GGendl;
 
-  // Destroying vertex
+
+  // Destroying vao and vbo
+  glDeleteBuffers(1, &vao_);
+  glDeleteBuffers(2, &vbo_[0]);
+
+  // Destroying buffers
   if (vertices_) {
     delete[] vertices_;
     vertices_ = nullptr;
+  }
+
+  if (indices_) {
+    delete[] indices_;
+    indices_ = nullptr;
   }
 
   GGcout("GGEMSOpenGLVolume", "~GGEMSOpenGLVolume", 3) << "GGEMSOpenGLVolume erased!!!" << GGendl;
@@ -80,5 +110,79 @@ void GGEMSOpenGLVolume::SetPosition(GGfloat const& position_x, GGfloat const& po
 
 void GGEMSOpenGLVolume::SetColor(std::string const& color)
 {
-  color_ = color;
+  // Getting color map from GGEMSOpenGLManager
+  ColorUMap colors = GGEMSOpenGLManager::GetInstance().GetColorUMap();
+
+  // Select color
+  ColorUMap::iterator it = colors.find(color);
+  if (it != colors.end()) {
+    for (int i = 0; i < 3; ++i) {
+      color_[i] = GGEMSOpenGLColor::color[it->second][i];
+    }
+  }
+  else {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "Warning!!! Color background not found in the list !!!" << std::endl;
+    oss << "Available colors: " << std::endl;
+    oss << "    * black" << std::endl;
+    oss << "    * blue" << std::endl;
+    oss << "    * cyan" << std::endl;
+    oss << "    * red" << std::endl;
+    oss << "    * magenta" << std::endl;
+    oss << "    * yellow" << std::endl;
+    oss << "    * white" << std::endl;
+    oss << "    * gray" << std::endl;
+    oss << "    * silver" << std::endl;
+    oss << "    * maroon" << std::endl;
+    oss << "    * olive" << std::endl;
+    oss << "    * green" << std::endl;
+    oss << "    * purple" << std::endl;
+    oss << "    * teal" << std::endl;
+    oss << "    * navy";
+    GGEMSMisc::ThrowException("GGEMSOpenGLManager", "SetBackgroundColor", oss.str());
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSOpenGLVolume::SetVisible(bool const& is_visible)
+{
+  is_visible_ = is_visible;
+}
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSOpenGLVolume::Draw(void) const
+{
+  if (is_visible_) {
+    // Get program shader from OpenGL manager
+    GLuint program_shader_id = GGEMSOpenGLManager::GetInstance().GetProgramShaderID();
+
+    // Enabling shader program
+    glUseProgram(program_shader_id);
+
+    glBindVertexArray(vao_);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vbo_[0]);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo_[1]);
+
+    // Setting color
+    glUniform3f(glGetUniformLocation(program_shader_id, "color"), 1.0f, 1.0f, 0.0f);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+    glEnableVertexAttribArray(0);
+
+    // Draw volume using index
+    glDrawElements(GL_TRIANGLES, number_of_indices_, GL_INT, (void*)0);
+
+    glDisableVertexAttribArray(0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+
+    // Disable shader program
+    glUseProgram(0);
+  }
 }

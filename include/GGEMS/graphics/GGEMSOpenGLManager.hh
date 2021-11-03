@@ -39,6 +39,9 @@
 #include "GGEMS/tools/GGEMSSystemOfUnits.hh"
 #include "GGEMS/maths/GGEMSMatrixTypes.hh"
 
+class GGEMSOpenGLVolume;
+class GGEMSOpenGLSphere;
+
 typedef std::unordered_map<std::string, int> ColorUMap; /*!< Unordered map with key : name of the color, index of color */
 
 /*!
@@ -145,6 +148,23 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     */
     void Display(void);
 
+    /*!
+      \fn void Store(GGEMSOpenGLVolume* opengl_volume)
+    */
+    void Store(GGEMSOpenGLVolume* opengl_volume);
+
+    /*!
+      \fn GLuint GetProgramShaderID(void) const
+      \brief Getting program shader ID
+    */
+    inline GLuint GetProgramShaderID(void) const {return program_shader_id_;}
+
+    /*!
+      \fn ColorUMap GetColorUMap(void) const
+      \brief Getting color map
+    */
+    inline ColorUMap GetColorUMap(void) const {return colors_;}
+
   private:
     /*!
       \fn void InitGL(void)
@@ -153,10 +173,10 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     void InitGL(void);
 
     /*!
-      \fn void InitShaders(void)
-      \brief compile shaders and store them
+      \fn void InitShader(void)
+      \brief compile shader and store it
     */
-    void InitShaders(void);
+    void InitShader(void);
 
     /*!
       \fn void InitAxisVolume(void)
@@ -225,10 +245,12 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     ColorUMap colors_; /*!< List of colors */
     float background_color_[3]; /*!< window background color */
     bool is_draw_axis_; /*!< Flag for axis drawing activation */
-    GLuint program_shader_id_; /*!< program id for shader */
 
-    GLuint vao_axis_; /*!< vertex array object (for axis drawing) */
-    GLuint vbo_axis_; /*!< vertex buffer objec (for position and color of axis) */
+    GLuint program_shader_id_; /*!< program id for shader, the same for all OpenGL volume */
+    GGEMSOpenGLVolume** opengl_volumes_; /*!< OpenGL volume to display or not */
+    GGsize number_of_opengl_volumes_; /*!< Number of OpenGL volumes */
+
+    GGEMSOpenGLSphere* sphere_test;
 
     // MVP matrix (projection*view*model with model = translation*rotation*scale)
     // GGfloat44 mvp_; /*!< MVP matrix */

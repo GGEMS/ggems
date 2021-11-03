@@ -46,9 +46,16 @@ GGEMSOpenGLSphere::GGEMSOpenGLSphere(GGfloat const& radius)
   number_of_stacks_ = 10; // latitude
 
   // Allocating memory for sphere vertices
-  // Final point is taken (+1 stack and sector)
-  vertices_ = new GGfloat[(number_of_stacks_+1)*(number_of_sectors_+1)*3];
+  // extreme point postions are taken (+1 stack and sector)
   number_of_vertices_ = (number_of_stacks_+1)*(number_of_sectors_+1)*3;
+  vertices_ = new GGfloat[number_of_vertices_];
+
+  // Compute number of (triangulated) indices.
+  // In each sector/stack there are 2 triangles
+  // For first and last stack there is 1 triangle, 3 indices for each triangle
+  number_of_triangles_ = ((number_of_stacks_*2)-2)*number_of_sectors_;
+  number_of_indices_ = number_of_triangles_*3;
+  indices_ = new GGint[number_of_indices_];
 
   GGcout("GGEMSOpenGLSphere", "GGEMSOpenGLSphere", 3) << "GGEMSOpenGLSphere created!!!" << GGendl;
 }
@@ -70,7 +77,7 @@ GGEMSOpenGLSphere::~GGEMSOpenGLSphere(void)
 
 void GGEMSOpenGLSphere::Build(void)
 {
-  GGcout("GGEMSOpenGLSphere", "~GGEMSOpenGLSphere", 3) << "Building OpenGL sphere..." << GGendl;
+  GGcout("GGEMSOpenGLSphere", "Build", 3) << "Building OpenGL sphere..." << GGendl;
 
   // Compute x, y, z with
   // xy = radius * cos(stack_angle)
@@ -86,7 +93,7 @@ void GGEMSOpenGLSphere::Build(void)
   GGfloat x = 0.0f, y = 0.0f, xy = 0.0f, z = 0.0f;
   GGint index = 0;
   // Loop over the stacks
-  for (GGsize i = 0; i <= number_of_stacks_; ++i) {
+  for (GGint i = 0; i <= number_of_stacks_; ++i) {
     // Stack angle
     stack_angle = HALF_PI - i * stack_step; // from pi/2 to -pi/2
 
@@ -94,7 +101,7 @@ void GGEMSOpenGLSphere::Build(void)
     z = radius_ * std::sin(stack_angle);
 
     // Loop over the sectors
-    for (GGsize j = 0; j <= number_of_sectors_; ++j) {
+    for (GGint j = 0; j <= number_of_sectors_; ++j) {
       sector_angle = j * sector_step; // from 0 to 2pi
 
       x = xy * std::cos(sector_angle);
@@ -106,43 +113,50 @@ void GGEMSOpenGLSphere::Build(void)
     }
   }
 
-/*
-   // indices
-    //  k1--k1+1
-    //  |  / |
-    //  | /  |
-    //  k2--k2+1
-    unsigned int k1, k2;
-    for(int i = 0; i < stackCount; ++i)
-    {
-        k1 = i * (sectorCount + 1);     // beginning of current stack
-        k2 = k1 + sectorCount + 1;      // beginning of next stack
+  // There are 2 triangles in each stack/sector
+  // At top and bottom stack, there is 1 triangle per sector
+  // Indices inside stack/sector
+  //  k1--k1+1
+  //  |  / |
+  //  | /  |
+  //  k2--k2+1
+  index = 0;
+  GGint k1 = 0, k2 = 0;
+  for (GGint i = 0; i < number_of_stacks_; ++i) {
+    k1 = i * (number_of_sectors_ + 1);
+    k2 = k1 + number_of_sectors_ + 1;
+    for (GGint j = 0; j < number_of_sectors_; ++j, ++k1, ++k2) {
+      // 2 triangles per sector excluding 1st and last stacks
+      if (i != 0) { // Triangle k1, k2, k1+1
+        indices_[index++] = k1;
+        indices_[index++] = k2;
+        indices_[index++] = k1+1;
+      }
 
-        for(int j = 0; j < sectorCount; ++j, ++k1, ++k2)
-        {
-            // 2 triangles per sector excluding 1st and last stacks
-            if(i != 0)
-            {
-                addIndices(k1, k2, k1+1);   // k1---k2---k1+1
-            }
-
-            if(i != (stackCount-1))
-            {
-                addIndices(k1+1, k2, k2+1); // k1+1---k2---k2+1
-            }
-
-            // vertical lines for all stacks
-            lineIndices.push_back(k1);
-            lineIndices.push_back(k2);
-            if(i != 0)  // horizontal lines except 1st stack
-            {
-                lineIndices.push_back(k1);
-                lineIndices.push_back(k1 + 1);
-            }
-        }
+      if (i != number_of_stacks_-1) { // Triangle k1+1, k2, k2+1
+        indices_[index++] = k1+1;
+        indices_[index++] = k2;
+        indices_[index++] = k2+1;
+      }
     }
+  }
 
-    // generate interleaved vertex array as well
-    buildInterleavedVertices();
-*/
+  // Creating a VAO
+  glGenVertexArrays(1, &vao_);
+  glBindVertexArray(vao_);
+
+  // Creating 2 VBOs
+  glGenBuffers(2, vbo_);
+
+  // Vertex
+  glBindBuffer(GL_ARRAY_BUFFER, vbo_[0]);
+  glBufferData(GL_ARRAY_BUFFER, number_of_vertices_ * sizeof(GGfloat), vertices_, GL_STATIC_DRAW); // Allocating memory on OpenGL device
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+  // Indices
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo_[1]);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, number_of_indices_ * sizeof(GGint), indices_, GL_STATIC_DRAW); // Allocating memory on OpenGL device
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+  glBindVertexArray(0);
 }

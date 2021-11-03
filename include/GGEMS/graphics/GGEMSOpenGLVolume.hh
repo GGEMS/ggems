@@ -100,19 +100,38 @@ class GGEMS_EXPORT GGEMSOpenGLVolume
     void SetColor(std::string const& color);
 
     /*!
+      \fn void SetVisible(bool const& is_visible)
+      \param is_visible - flag to diplay or not volume
+    */
+    void SetVisible(bool const& is_visible);
+
+    /*!
       \fn void Build(void) = 0
       \brief method building OpenGL volume and storing VAO and VBO
     */
     virtual void Build(void) = 0;
 
+    /*!
+      \fn void Draw(void) const
+      \brief Draw volume into the screen
+    */
+    void Draw(void) const;
+
   protected:
     GGfloat position_x_; /*!< Position in X of OpenGL volume */
     GGfloat position_y_; /*!< Position in Y of OpenGL volume */
     GGfloat position_z_; /*!< Position in Z of OpenGL volume */
-    std::string color_; /*!< Color of volume */
+    float color_[3]; /*!< Color of volume */
+
+    GLuint vao_; /*!< vertex array object, 1 for each object */
+    GLuint vbo_[2]; /*!< vertex buffer object, index 0 -> vertex, index 1 -> indice */
 
     GGfloat* vertices_; /*!< Pointer storing position vertex for OpenGL volume */
-    GGsize number_of_vertices_; /*!< Number of vertices for OpenGL volume */
+    GGint number_of_vertices_; /*!< Number of vertices for OpenGL volume */
+    GGint* indices_; /*!< Indices of vertex (triangulated) */
+    GGint number_of_indices_; /*!< Number of indices */
+    GGint number_of_triangles_; /*!< Number of triangles for a volume */
+    bool is_visible_; /*!< true: volume display */
 };
 
 #endif // End of GUARD_GGEMS_GRAPHICS_GGEMSOPENGLVOLUME_HH
