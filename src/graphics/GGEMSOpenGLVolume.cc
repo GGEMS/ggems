@@ -171,8 +171,9 @@ void GGEMSOpenGLVolume::Draw(void) const
     // Get program shader from OpenGL manager
     GLuint program_shader_id = opengl_manager.GetProgramShaderID();
 
-    // Getting current size of window
+    // Getting projection and camera view matrix
     glm::mat4 projection_matrix = opengl_manager.GetProjection();
+    glm::mat4 view_matrix = opengl_manager.GetCameraView();
 
     // Enabling shader program
     glUseProgram(program_shader_id);
@@ -186,12 +187,6 @@ void GGEMSOpenGLVolume::Draw(void) const
     glUniform3f(glGetUniformLocation(program_shader_id, "color"), 1.0f, 1.0f, 0.0f);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
     glEnableVertexAttribArray(0);
-
-    glm::mat4 view_matrix = glm::lookAt(
-      glm::vec3(4,3,3), // Camera is at (4,3,3), in World Space
-      glm::vec3(0,0,0), // and looks at the origin
-      glm::vec3(0,1,0)  // Head is up (set to 0,-1,0 to look upside-down)
-    );
 
     glm::mat4 mvp_matrix = projection_matrix*view_matrix;
     glUniformMatrix4fv(glGetUniformLocation(program_shader_id, "mvp"), 1, GL_FALSE, &mvp_matrix[0][0]);

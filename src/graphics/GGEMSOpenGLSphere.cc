@@ -44,8 +44,8 @@ GGEMSOpenGLSphere::GGEMSOpenGLSphere(GGfloat const& radius)
 {
   GGcout("GGEMSOpenGLSphere", "GGEMSOpenGLSphere", 3) << "GGEMSOpenGLSphere creating..." << GGendl;
 
-  number_of_sectors_ = 24; // longitude
-  number_of_stacks_ = 10; // latitude
+  number_of_sectors_ = 128; // longitude
+  number_of_stacks_ = 64; // latitude
 
   // Allocating memory for sphere vertices
   // extreme point postions are taken (+1 stack and sector)

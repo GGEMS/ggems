@@ -135,6 +135,12 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     void SetBackgroundColor(std::string const& color);
 
     /*!
+      \fn void SetProjectionMode(std::string const& projection_mode)
+      \brief setting the projection mode: perspective or ortho
+    */
+    void SetProjectionMode(std::string const& projection_mode);
+
+    /*!
       \fn void SetDrawAxis(bool const& is_draw_axis)
       \param is_draw_axis - flag for axis drawing activation
       \brief set flag for axis drawing
@@ -193,6 +199,13 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     */
     inline glm::mat4 GetProjection(void) const {return projection_;}
 
+    /*!
+      \fn glm::mat4 GetCameraView(void) const
+      \brief getting the camera view
+      \return matrix of the camera view
+    */
+    inline glm::mat4 GetCameraView(void) const {return camera_view_;}
+
   private:
     /*!
       \fn void InitGL(void)
@@ -238,6 +251,12 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     void DrawAxis(void);
 
     /*!
+      \fn void UpdateProjectionAndView(void)
+      \brief Check and update parameters for projection matrix and camera view
+    */
+    void UpdateProjectionAndView(void);
+
+    /*!
       \fn void GLFWErrorCallback(int error_code, char const* description)
       \param error_code - error code returned by OpenGL
       \param description - description of the error
@@ -265,6 +284,15 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     */
     static void GLFWKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
+    /*!
+      \fn void GLFWScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
+      \param window - pointer to GLFW window
+      \param xoffset - offset in X
+      \param yoffset - offset in Y
+      \brief callback for mouse scroll
+    */
+    static void GLFWScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
+
   private:
     GLFWwindow* window_; /*!< Pointer storing GLFW window */
     static int window_width_; /*!< GLFW window width */
@@ -284,11 +312,7 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     glm::mat4 camera_view_; /*!< Camera view */
     glm::mat4 projection_; /*!< Projection matrix (ortho or perspective), perspective by defaut */
     static int is_perspective_; /*!< Mode of projection */
-
-    // MVP matrix (projection*view*model with model = translation*rotation*scale)
-    // GGfloat44 mvp_; /*!< MVP matrix */
-    // GGfloat44 ortho_projection_; /*!< Ortho projection matrix */
-    // GGfloat44 perspective_projection_; /*!< Perspective projection matrix */
+    static float zoom_; /*!< Value of zoom */
 };
 
 /*!

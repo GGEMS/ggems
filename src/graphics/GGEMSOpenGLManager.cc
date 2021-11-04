@@ -30,6 +30,7 @@
 int GGEMSOpenGLManager::window_width_ = 800;
 int GGEMSOpenGLManager::window_height_ = 600;
 int GGEMSOpenGLManager::is_perspective_ = 1;
+float GGEMSOpenGLManager::zoom_ = 0.0f;
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -200,6 +201,28 @@ void GGEMSOpenGLManager::SetDrawAxis(bool const& is_draw_axis)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+void GGEMSOpenGLManager::SetProjectionMode(std::string const& projection_mode)
+{
+  std::string mode = projection_mode;
+  std::transform(mode.begin(), mode.end(), mode.begin(), ::tolower);
+
+  if (mode == "perspective") {
+    is_perspective_ = 1;
+  }
+  else if (mode == "ortho") {
+    is_perspective_ = 0;
+  }
+  else {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "Available projection mode are: 'perspective' or 'ortho' only!!!";
+    GGEMSMisc::ThrowException("GGEMSOpenGLManager", "SetProjectionMode", oss.str());
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 void GGEMSOpenGLManager::Initialize(void)
 {
   GGcout("GGEMSOpenGLManager", "Initialize", 3) << "Initializing the OpenGL manager..." << GGendl;
@@ -270,7 +293,7 @@ void GGEMSOpenGLManager::InitGL(void)
   // Give callback functions to GLFW
   glfwSetWindowSizeCallback(window_, GGEMSOpenGLManager::GLFWWindowSizeCallback);
   glfwSetKeyCallback(window_, GGEMSOpenGLManager::GLFWKeyCallback);
-  // glfwSetScrollCallback(window_, Sphere::GLFWScrollCallback);
+  glfwSetScrollCallback(window_, GGEMSOpenGLManager::GLFWScrollCallback);
   // glfwSetMouseButtonCallback(window_, Sphere::GLFWMouseButtonCallback);
   // glfwSetCursorPosCallback(window_, Sphere::GLFWCursorPosCallback);
 
@@ -361,39 +384,6 @@ void GGEMSOpenGLManager::InitAxisVolume(void)
   sphere_test->SetColor("yellow");
   sphere_test->SetVisible(true);
   sphere_test->Build();
-
-   // float vertex_buffer_axis[] = {0.0f,  0.5f,  0.0f, 0.5f, -0.5f,  0.0f, -0.5f, -0.5f,  0.0f};
-  // Creating a vao for each axis and a vbo
-  // CheckOpenGLError(glGetError(), "GGEMSOpenGLManager", "TOTO");
-  // glGenVertexArrays(1, &vao_axis_);
-  //CheckOpenGLError(glGetError(), "GGEMSOpenGLManager", "InitBuffers");
-
-  // GLenum err = glGetError();
-   // std::cout << "Error mapping vbo buffer!!!: " << err << std::endl;
-  // glBindVertexArray(vao_axis_); // Lock current vao
-
-//   // An array representing 6 vertices
-
-    // -0.5f, -0.5f, 0.0f, 0.0f, 0.5f, 0.0f, 0.5f, -0.5f, 0.0f};//, // X
-//     /*0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, // Y
-//     0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f  // Z
-//   };*/
-
-   
-//   //for (int i = 0; i < 1; ++i) {
-
-
-//     glBindBuffer(GL_ARRAY_BUFFER, vbo_axis_); // Lock vbo for position
-
-//     // Reading data
-    //  glGenBuffers(1, &vbo_axis_);
-    //  glBindBuffer(GL_ARRAY_BUFFER, vbo_axis_); // Lock vbo for position
-    //  glBufferData(GL_ARRAY_BUFFER, 9*sizeof(float), vertex_buffer_axis, GL_STATIC_DRAW);
-    //  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-    //  glEnableVertexAttribArray(0);
-
-     //glBindBuffer(GL_ARRAY_BUFFER, 0); // Unlock vbo
-     //glBindVertexArray(0);// Unlock current vao
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -456,26 +446,23 @@ void GGEMSOpenGLManager::PrintKeys(void) const
 {
   GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << GGendl;
   GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << "Keys:" << GGendl;
-  GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << "    * [Esc/X]           Quit application" << GGendl;
+  GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << "    * [Esc/X]              Quit application" << GGendl;
+  GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << "    * [P]                  Perspective projection" << GGendl;
+  GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << "    * [O]                  Ortho projection" << GGendl;
+  GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << "    * [+/-]                Zoom in/out" << GGendl;
   GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << GGendl;
   GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << "Mouse:" << GGendl;
+  GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << "    * [Scroll Up/Down]     Zoom in/out" << GGendl;
   GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << GGendl;
 
 /*
   std::cout << std::endl;
   std::cout << "Keys:" << std::endl;
   std::cout << "    * [R]                          Reset view" << std::endl;
-  std::cout << "    * [P]                          Perspective projection" << std::endl;
-  std::cout << "    * [O]                          Ortho projection" << std::endl;
-  std::cout << "    * [Esc] / [X]                  Quit application" << std::endl;
   std::cout << "    * [Space]                      Stop / Restart application" << std::endl;
-  std::cout << "    * [+/-]                        Zoom in/out" << std::endl;
+  
   std::cout << "    * [Up/Down]                    Translation up/dowm" << std::endl;
   std::cout << "    * [Left/Right]                 Translation left/right" << std::endl;
-  std::cout << std::endl;
-  std::cout << "Mouse:" << std::endl;
-  std::cout << "    * [Scroll Up/Down]             Zoom in/out" << std::endl;
-  std::cout << std::endl;
 */
 }
 
@@ -486,127 +473,6 @@ void GGEMSOpenGLManager::PrintKeys(void) const
 void GGEMSOpenGLManager::DrawAxis(void)
 {
   opengl_volumes_[0]->Draw();
-
-  //glFinish();
-  // glm::mat4 projection_matrix = glm::ortho(-10.0f,10.0f,-20.0f,20.0f,-30.0f,30.0f);
-  //glm::mat4 projection_matrix = glm::ortho(-2.0f, 2.0f, -2.0f, 2.0f, -2.0f, 2.0f);
-  //glm::mat4 mvp = glm::mat4(1.0f);
-//   // ortho_projection_.m0_[0] = 2.0f / (10.0f - (-10.0f));
-//   // ortho_projection_.m1_[1] = 2.0f / (20.0f - (-20.0f));
-//   // ortho_projection_.m2_[2] = 2.0f / (30.0f - (-30.0f));
-//   // ortho_projection_.m3_[0] = - (10.0f + (-10.0f)) / (10.0f - (-10.0f));
-//   // ortho_projection_.m3_[1] = - (20.0f + (-20.0f)) / (20.0f - (-20.0f));
-//   // ortho_projection_.m3_[2] = - (30.0f + (-30.0f)) / (30.0f - (-30.0f));
-
-//   // Enabling shader program
- //  glUseProgram(program_shader_id_);
-
- //  glBindVertexArray(vao_axis_);
-   //glBindBuffer(GL_ARRAY_BUFFER, vbo_axis_);
-  //  glBindBuffer(GL_ARRAY_BUFFER, vbo_axis_);
-  //  float* vbo_ptr = static_cast<float*>(glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY));
-  //  vbo_ptr[0] = 0.5f;
-  //  vbo_ptr[1] = -0.5f;
-  //  vbo_ptr[2] = 0.0f;
-
-  //   glUnmapBuffer(GL_ARRAY_BUFFER);
-  //   glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-//   glBindBuffer(GL_ARRAY_BUFFER, vbo_axis_);
-//   //float* vbo_ptr = static_cast<float*>(glMapBuffer(GL_ARRAY_BUFFER, GL_READ_ONLY));
-// //   if (!vbo_ptr) {
-// //     GLenum err = glGetError();
-// //     std::cout << "Error mapping vbo buffer!!!: " << err << std::endl;
-// // }
-//   glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-//   // Set color and MVP matrix to shader
-  //glPointSize(10.0);
-  // glUniform3f(glGetUniformLocation(program_shader_id_,"color"), 1.0f, 1.0f, 0.0f);
-   //glUniformMatrix4fv(glGetUniformLocation(program_shader_id_, "mvp"), 1, GL_FALSE, &mvp[0][0]);
-
-  //glDrawArrays(GL_TRIANGLES, 0, 3);
-
-  //glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-  // glBindVertexArray(0);
-
-//   // Disabling shader program
- //  glUseProgram(0);
-
-  // std::cout << "MY 4x4 MATRIX:" << std::endl;
-  // std::cout << mvp_.m0_[0] << " " << mvp_.m0_[1] << " " << mvp_.m0_[2] << " " << mvp_.m0_[3] << std::endl;
-  // std::cout << mvp_.m1_[0] << " " << mvp_.m1_[1] << " " << mvp_.m1_[2] << " " << mvp_.m1_[3] << std::endl;
-  // std::cout << mvp_.m2_[0] << " " << mvp_.m2_[1] << " " << mvp_.m2_[2] << " " << mvp_.m2_[3] << std::endl;
-  // std::cout << mvp_.m3_[0] << " " << mvp_.m3_[1] << " " << mvp_.m3_[2] << " " << mvp_.m3_[3] << std::endl;
-
-  // glm::mat4 projection_matrix = glm::ortho(-10.0f,10.0f,-20.0f,20.0f,-30.0f,30.0f);
-
-  // std::cout << "GLM" << std::endl;
-  // std::cout << glm::to_string(projection_matrix) << std::endl;
-
-  //glPushMatrix();
-  //glMatrixMode(GL_MODELVIEW);
-  // glDisable( GL_CULL_FACE );
-
-  // Draw central point in (0 0 0)
-  //glPointSize(10.0);
-  //glLineWidth(10.0f);
-  // glEnable(GL_PROGRAM_POINT_SIZE);
-  // glEnable(GL_POINT_SMOOTH);
-  // glEnable(GL_BLEND);
-
-  // glTranslatef( 0.0, 0.0, 5.0 );
-  // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  // glPointSize(10);
-  // glLineWidth(2.5); 
-  // glColor3f(1.0, 0.0, 0.0);
-
-  // glBegin(GL_LINES);
-  //glColor3f(1.0f, 0.0f, 0.0f); // Red
-  //glColor3f(1.0,0.0,0.0);
-  // glVertex3f(0.0f, 0.0f, 0.0f);
-  // glVertex3f(100.0f, 100.0f, 0.0f);
-  // glEnd();
-
-  // glDisable(GL_BLEND);
-  // glDisable(GL_POINT_SMOOTH);
-  // glDisable(GL_PROGRAM_POINT_SIZE);
-/*
-   glTranslatef( 0.0, 0.0, DIST_BALL );
-
-
-   for ( col = 0; col <= colTotal; col++ )
-   {
- 
-      xl = -GRID_SIZE / 2 + col * sizeCell;
-      xr = xl + widthLine;
-
-      yt =  GRID_SIZE / 2;
-      yb = -GRID_SIZE / 2 - widthLine;
-
-      glBegin( GL_POLYGON );
-
-      glColor3f( 0.6f, 0.1f, 0.6f );              
-
-      glVertex3f( xr, yt, z_offset );    
-      glVertex3f( xl, yt, z_offset );       
-      glVertex3f( xl, yb, z_offset );     
-      glVertex3f( xr, yb, z_offset );  
-
-      glEnd();
-   }
-  */
-/*
-glPointSize(10.0);
-            glEnable(GL_PROGRAM_POINT_SIZE);
-            glEnable(GL_POINT_SMOOTH);
-            glEnable(GL_BLEND);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            glBegin(GL_POINTS);
-            glEnd();
-            */
- // glPopMatrix();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -618,7 +484,7 @@ void GGEMSOpenGLManager::Display(void)
   glfwSwapInterval(1); // Control frame rate
   glClearColor(background_color_[0], background_color_[1], background_color_[2], 1.0f); // Setting background colors
 
-  // glOrtho(0.0,GGEMSOpenGLManager::window_width_,GGEMSOpenGLManager::window_height_,0.0,0.0,1.0);
+  PrintKeys();
 
   while (!glfwWindowShouldClose(window_)) {
     // Printing FPS at top of window
@@ -626,16 +492,13 @@ void GGEMSOpenGLManager::Display(void)
 
     // Render here
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     // Rescale window and adapt projection matrix
-    glViewport(0, 0, GGEMSOpenGLManager::window_width_, GGEMSOpenGLManager::window_height_); 
+    glViewport(0, 0, window_width_, window_height_); 
 
-    if (is_perspective_) {
-      projection_ = glm::perspective(glm::radians(45.0f), static_cast<float>(window_width_) / static_cast<float>(window_height_), 0.1f, 100.0f);
-    }
-    else {
-      ;
-    }
+    // Check camera parameters (projection mode + view)
+    UpdateProjectionAndView();
 
     if (is_draw_axis_) DrawAxis();
 
@@ -673,10 +536,45 @@ void GGEMSOpenGLManager::UpdateFPSCounter(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+void GGEMSOpenGLManager::UpdateProjectionAndView(void)
+{
+  if (is_perspective_) {
+    // Computing fov depending on zoom
+    float fov = 45.0f + zoom_;
+    if (fov >= 120.0f) {
+      fov = 120.0f;
+      zoom_ = 75.0f;
+    }
+    else if (fov <= 1.0f) {
+      fov = 1.0f;
+      zoom_ = -44.0f;
+    }
+
+    projection_ = glm::perspective(glm::radians(fov), static_cast<float>(window_width_) / static_cast<float>(window_height_), 0.1f, 100.0f);
+  }
+  else {
+    float current_zoom = 1.0f + zoom_ /10.0f;
+    if (current_zoom <= 0.0f)
+    {
+      current_zoom = 0.1f;
+      zoom_ = -10.0f;
+    }
+    projection_ = glm::ortho(-10.0f/current_zoom,10.0f/current_zoom,-10.0f/current_zoom,10.0f/current_zoom,-10.0f,10.0f);
+  }
+
+  camera_view_ = glm::lookAt(
+    glm::vec3(4,3,3), // Position of the camera in world Space
+    glm::vec3(0,0,0), // Direction of camera (origin here)
+    glm::vec3(0,1,0)  // Which vector is up
+  );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 void GGEMSOpenGLManager::GLFWKeyCallback(GLFWwindow* window, int key, int, int action, int)
 {
-  if (action != GLFW_PRESS) return;
-
   switch (key) {
     case GLFW_KEY_ESCAPE: {
       glfwSetWindowShouldClose(window, true);
@@ -693,15 +591,14 @@ void GGEMSOpenGLManager::GLFWKeyCallback(GLFWwindow* window, int key, int, int a
     //   }
     //   break;
     // }
-    // case GLFW_KEY_KP_ADD: {
-    //   zoom_ += 0.125f;
-    //   break;
-    // }
-    // case GLFW_KEY_KP_SUBTRACT: {
-    //   zoom_ -= 0.125f;
-    //   if (zoom_ < 0.0f) zoom_ = 0.0f;
-    //   break;
-    // }
+    case GLFW_KEY_KP_ADD: {
+      zoom_ += 1.0f;
+      break;
+    }
+    case GLFW_KEY_KP_SUBTRACT: {
+      zoom_ -= 1.0f;
+      break;
+    }
     // case GLFW_KEY_UP: {
     //   y_translate_ += 1.0f;
     //   break;
@@ -724,14 +621,14 @@ void GGEMSOpenGLManager::GLFWKeyCallback(GLFWwindow* window, int key, int, int a
     //   zoom_ = 1.0f;
     //   break;
     // }
-    // case GLFW_KEY_P : {
-    //   is_perpective_mode_ = 1;
-    //   break;
-    // }
-    // case GLFW_KEY_O : {
-    //   is_perpective_mode_ = 0;
-    //   break;
-    // }
+    case GLFW_KEY_P : {
+      is_perspective_ = 1;
+      break;
+    }
+    case GLFW_KEY_O : {
+      is_perspective_ = 0;
+      break;
+    }
     default: {
       break;
     }
@@ -742,10 +639,19 @@ void GGEMSOpenGLManager::GLFWKeyCallback(GLFWwindow* window, int key, int, int a
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+void GGEMSOpenGLManager::GLFWScrollCallback(GLFWwindow*, double, double yoffset)
+{
+  zoom_ += static_cast<float>(yoffset);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 void GGEMSOpenGLManager::GLFWWindowSizeCallback(GLFWwindow*, int width, int height)
 {
-  GGEMSOpenGLManager::window_width_ = width;
-  GGEMSOpenGLManager::window_height_ = height;
+  window_width_ = width;
+  window_height_ = height;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
