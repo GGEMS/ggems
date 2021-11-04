@@ -310,9 +310,15 @@ class GGEMS_EXPORT GGEMSOpenGLManager
 
     // OpenGL matrices
     glm::mat4 camera_view_; /*!< Camera view */
+    static glm::vec3 camera_position_; /*!< Position of the camera */
+    static glm::vec3 camera_target_; /*!< Target of the camera */
+    static glm::vec3 camera_up_; /*!< Vector to the top */
     glm::mat4 projection_; /*!< Projection matrix (ortho or perspective), perspective by defaut */
     static int is_perspective_; /*!< Mode of projection */
     static float zoom_; /*!< Value of zoom */
+
+    // OpenGL timing
+    static double delta_time_; /*! Time between 2 frames */
 };
 
 /*!

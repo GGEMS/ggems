@@ -31,6 +31,10 @@ int GGEMSOpenGLManager::window_width_ = 800;
 int GGEMSOpenGLManager::window_height_ = 600;
 int GGEMSOpenGLManager::is_perspective_ = 1;
 float GGEMSOpenGLManager::zoom_ = 0.0f;
+glm::vec3 GGEMSOpenGLManager::camera_position_ = glm::vec3(0.0f, 0.0f, 5.0f);
+glm::vec3 GGEMSOpenGLManager::camera_target_ = glm::vec3(0.0, 0.0, -1.0f);
+glm::vec3 GGEMSOpenGLManager::camera_up_ = glm::vec3(0.0, 1.0, 0.0f);
+double GGEMSOpenGLManager::delta_time_ = 0.0f;
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -449,20 +453,19 @@ void GGEMSOpenGLManager::PrintKeys(void) const
   GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << "    * [Esc/X]              Quit application" << GGendl;
   GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << "    * [P]                  Perspective projection" << GGendl;
   GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << "    * [O]                  Ortho projection" << GGendl;
+  GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << "    * [R]                  Reset view" << GGendl;
   GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << "    * [+/-]                Zoom in/out" << GGendl;
+  GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << "    * [Up/Down]            Move forward/back" << GGendl;
+  GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << "    * [W/S]                " << GGendl;
+  GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << "    * [Left/Right]         Move left/right" << GGendl;
+  GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << "    * [A/D]                " << GGendl;
   GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << GGendl;
   GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << "Mouse:" << GGendl;
   GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << "    * [Scroll Up/Down]     Zoom in/out" << GGendl;
   GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << GGendl;
 
 /*
-  std::cout << std::endl;
-  std::cout << "Keys:" << std::endl;
-  std::cout << "    * [R]                          Reset view" << std::endl;
   std::cout << "    * [Space]                      Stop / Restart application" << std::endl;
-  
-  std::cout << "    * [Up/Down]                    Translation up/dowm" << std::endl;
-  std::cout << "    * [Left/Right]                 Translation left/right" << std::endl;
 */
 }
 
@@ -486,9 +489,15 @@ void GGEMSOpenGLManager::Display(void)
 
   PrintKeys();
 
+  double last_frame_time = 0.0;
   while (!glfwWindowShouldClose(window_)) {
     // Printing FPS at top of window
     UpdateFPSCounter();
+
+    // Computing delta time
+    double current_frame_time = glfwGetTime();
+    delta_time_ = current_frame_time - last_frame_time;
+    last_frame_time = current_frame_time;
 
     // Render here
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -563,9 +572,9 @@ void GGEMSOpenGLManager::UpdateProjectionAndView(void)
   }
 
   camera_view_ = glm::lookAt(
-    glm::vec3(4,3,3), // Position of the camera in world Space
-    glm::vec3(0,0,0), // Direction of camera (origin here)
-    glm::vec3(0,1,0)  // Which vector is up
+    camera_position_, // Position of the camera in world Space
+    camera_position_ + camera_target_, // Direction of camera (origin here)
+    camera_up_ // Which vector is up
   );
 }
 
@@ -575,6 +584,8 @@ void GGEMSOpenGLManager::UpdateProjectionAndView(void)
 
 void GGEMSOpenGLManager::GLFWKeyCallback(GLFWwindow* window, int key, int, int action, int)
 {
+  float camera_speed = 2.5f * static_cast<float>(delta_time_); // Defining a camera speed depending on the delta time
+
   switch (key) {
     case GLFW_KEY_ESCAPE: {
       glfwSetWindowShouldClose(window, true);
@@ -591,36 +602,70 @@ void GGEMSOpenGLManager::GLFWKeyCallback(GLFWwindow* window, int key, int, int a
     //   }
     //   break;
     // }
-    case GLFW_KEY_KP_ADD: {
+    case GLFW_KEY_KP_SUBTRACT: {
       zoom_ += 1.0f;
       break;
     }
-    case GLFW_KEY_KP_SUBTRACT: {
+    case GLFW_KEY_KP_ADD: {
       zoom_ -= 1.0f;
       break;
     }
-    // case GLFW_KEY_UP: {
-    //   y_translate_ += 1.0f;
-    //   break;
-    // }
-    // case GLFW_KEY_DOWN: {
-    //   y_translate_ -= 1.0f;
-    //   break;
-    // }
-    // case GLFW_KEY_LEFT: {
-    //   x_translate_ -= 1.0f;
-    //   break;
-    // }
-    // case GLFW_KEY_RIGHT: {
-    //   x_translate_ += 1.0f;
-    //   break;
-    // }
-    // case GLFW_KEY_R: {
-    //   x_translate_ = 0.0f;
-    //   y_translate_ = 0.0f;
-    //   zoom_ = 1.0f;
-    //   break;
-    // }
+    case GLFW_KEY_UP: {
+      camera_position_ += camera_speed * camera_target_;
+      break;
+    }
+    case GLFW_KEY_KP_8: {
+      camera_position_ += camera_speed * camera_target_;
+      break;
+    }
+    case GLFW_KEY_W: {
+      camera_position_ += camera_speed * camera_target_;
+      break;
+    }
+    case GLFW_KEY_DOWN: {
+      camera_position_ -= camera_speed * camera_target_;
+      break;
+    }
+    case GLFW_KEY_S: {
+      camera_position_ -= camera_speed * camera_target_;
+      break;
+    }
+    case GLFW_KEY_KP_5: {
+      camera_position_ -= camera_speed * camera_target_;
+      break;
+    }
+    case GLFW_KEY_LEFT: {
+      camera_position_ -= glm::normalize(glm::cross(camera_target_, camera_up_)) * camera_speed;
+      break;
+    }
+    case GLFW_KEY_KP_4: {
+      camera_position_ -= glm::normalize(glm::cross(camera_target_, camera_up_)) * camera_speed;
+      break;
+    }
+    case GLFW_KEY_A: {
+      camera_position_ -= glm::normalize(glm::cross(camera_target_, camera_up_)) * camera_speed;
+      break;
+    }
+    case GLFW_KEY_RIGHT: {
+      camera_position_ += glm::normalize(glm::cross(camera_target_, camera_up_)) * camera_speed;
+      break;
+    }
+    case GLFW_KEY_KP_6: {
+      camera_position_ += glm::normalize(glm::cross(camera_target_, camera_up_)) * camera_speed;
+      break;
+    }
+    case GLFW_KEY_D: {
+      camera_position_ += glm::normalize(glm::cross(camera_target_, camera_up_)) * camera_speed;
+      break;
+    }
+    case GLFW_KEY_R: {
+      camera_position_ = glm::vec3(0.0f, 0.0f, 5.0f);
+      camera_target_ = glm::vec3(0.0, 0.0, -1.0f);
+      camera_up_ = glm::vec3(0.0, 1.0, 0.0f);
+      is_perspective_ = 1;
+      zoom_ = 0.0f;
+      break;
+    }
     case GLFW_KEY_P : {
       is_perspective_ = 1;
       break;
