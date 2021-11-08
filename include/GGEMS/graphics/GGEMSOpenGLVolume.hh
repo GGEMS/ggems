@@ -86,13 +86,13 @@ class GGEMS_EXPORT GGEMSOpenGLVolume
     GGEMSOpenGLVolume& operator=(GGEMSOpenGLVolume const&& volume) = delete;
 
     /*!
-      \fn void SetPosition(GGfloat const& position_x, GGfloat const& position_y, GGfloat const& position_z)
+      \fn void SetPosition(GLfloat const& position_x, GLfloat const& position_y, GLfloat const& position_z)
       \param position_x - position in x
       \param position_y - position in y
       \param position_z - position in z
       \brief set position of sphere
     */
-    void SetPosition(GGfloat const& position_x, GGfloat const& position_y, GGfloat const& position_z);
+    void SetPosition(GLfloat const& position_x, GLfloat const& position_y, GLfloat const& position_z);
 
     /*!
       \fn void SetColor(std::string const& color)
@@ -120,19 +120,26 @@ class GGEMS_EXPORT GGEMSOpenGLVolume
     void Draw(void) const;
 
   protected:
-    GGfloat position_x_; /*!< Position in X of OpenGL volume */
-    GGfloat position_y_; /*!< Position in Y of OpenGL volume */
-    GGfloat position_z_; /*!< Position in Z of OpenGL volume */
-    float color_[3]; /*!< Color of volume */
+    GLint number_of_stacks_; /*!< Number of stacks (latitude) */
+    GLint number_of_sectors_; /*!< Number of sectors (longitude) */
+
+    GLfloat position_x_; /*!< Position in X of OpenGL volume */
+    GLfloat position_y_; /*!< Position in Y of OpenGL volume */
+    GLfloat position_z_; /*!< Position in Z of OpenGL volume */
+
+    GLfloat color_[3]; /*!< Color of volume */
 
     GLuint vao_; /*!< vertex array object, 1 for each object */
     GLuint vbo_[2]; /*!< vertex buffer object, index 0 -> vertex, index 1 -> indice */
 
-    GGfloat* vertices_; /*!< Pointer storing position vertex for OpenGL volume */
-    GGint number_of_vertices_; /*!< Number of vertices for OpenGL volume */
+    GLfloat* vertices_; /*!< Pointer storing position vertex for OpenGL volume */
+    GLint number_of_vertices_; /*!< Number of vertices for OpenGL volume */
+
     GLuint* indices_; /*!< Indices of vertex (triangulated) */
-    GGint number_of_indices_; /*!< Number of indices */
-    GGint number_of_triangles_; /*!< Number of triangles for a volume */
+    GLint number_of_indices_; /*!< Number of indices */
+
+    GLint number_of_triangles_; /*!< Number of triangles for a volume */
+
     bool is_visible_; /*!< true: volume display */
 };
 

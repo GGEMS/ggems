@@ -13,14 +13,19 @@
 #ifdef OPENGL_VISUALIZATION
 
 #include <sstream>
+#include <filesystem>
 
 #include "GGEMS/tools/GGEMSTools.hh"
 #include "GGEMS/graphics/GGEMSOpenGLManager.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
 #include "GGEMS/graphics/GGEMSOpenGLSphere.hh"
+#include "GGEMS/graphics/GGEMSOpenGLPrism.hh"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "GGEMS/externs/stb_image.h"
+
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "GGEMS/externs/stb_image_write.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -30,6 +35,7 @@
 int GGEMSOpenGLManager::window_width_ = 800;
 int GGEMSOpenGLManager::window_height_ = 600;
 bool GGEMSOpenGLManager::is_perspective_ = true;
+bool GGEMSOpenGLManager::is_wireframe_ = true;
 float GGEMSOpenGLManager::zoom_ = 0.0f;
 glm::vec3 GGEMSOpenGLManager::camera_position_ = glm::vec3(0.0f, 0.0f, 3.0f);
 glm::vec3 GGEMSOpenGLManager::camera_target_ = glm::vec3(0.0, 0.0, -1.0f);
@@ -84,6 +90,8 @@ GGEMSOpenGLManager::GGEMSOpenGLManager(void)
 
   camera_view_ = glm::mat4(1.0f);
   projection_ = glm::mat4(1.0f);
+  image_output_basename_ = "";
+  image_output_index_ = 0;
 
   GGcout("GGEMSOpenGLManager", "GGEMSOpenGLManager", 3) << "GGEMSOpenGLManager created!!!" << GGendl;
 }
@@ -100,9 +108,9 @@ GGEMSOpenGLManager::~GGEMSOpenGLManager(void)
   glfwDestroyWindow(window_); // destroying GLFW window
   window_ = nullptr;
 
- if (sphere_test) delete sphere_test;
-  //glDeleteBuffers(1, &vao_axis_);
-  //glDeleteBuffers(1, &vbo_axis_);
+  if (sphere_test) delete sphere_test;
+  if (prism_test) delete prism_test;
+
   glDeleteProgram(program_shader_id_);
 
   // Closing GLFW
@@ -394,8 +402,11 @@ void GGEMSOpenGLManager::InitAxisVolume(void)
   sphere_test = new GGEMSOpenGLSphere(2.0f*mm);
 
   sphere_test->SetColor("yellow");
-  sphere_test->SetVisible(true);
+  sphere_test->SetVisible(false);
   sphere_test->Build();
+
+  prism_test = new GGEMSOpenGLPrism(1.0f*mm, 0.5f*mm, 2.0f*mm, 36, 10);
+  prism_test->Build();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -461,6 +472,8 @@ void GGEMSOpenGLManager::PrintKeys(void) const
   GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << "    * [Esc/X]              Quit application" << GGendl;
   GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << "    * [P]                  Perspective projection" << GGendl;
   GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << "    * [O]                  Ortho projection" << GGendl;
+  GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << "    * [C]                  Wireframe view" << GGendl;
+  GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << "    * [V]                  Solid view" << GGendl;
   GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << "    * [R]                  Reset view" << GGendl;
   GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << "    * [K]                  Save current window to a PNG file" << GGendl;
   GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << "    * [+/-]                Zoom in/out" << GGendl;
@@ -506,7 +519,9 @@ void GGEMSOpenGLManager::Display(void)
 
     // Render here
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+    if (is_wireframe_) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     // Rescale window and adapt projection matrix
     glViewport(0, 0, window_width_, window_height_); 
@@ -557,11 +572,7 @@ void GGEMSOpenGLManager::UpdateProjectionAndView(void)
   if (is_perspective_) {
     // Computing fov depending on zoom
     float fov = 45.0f + zoom_;
-    if (fov >= 120.0f) {
-      fov = 120.0f;
-      zoom_ = 75.0f;
-    }
-    else if (fov <= 1.0f) {
+    if (fov <= 1.0f) {
       fov = 1.0f;
       zoom_ = -44.0f;
     }
@@ -584,27 +595,74 @@ void GGEMSOpenGLManager::UpdateProjectionAndView(void)
     camera_up_ // Which vector is up
   );
 }
+
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSOpenGLManager::SaveWindow(GLFWwindow* w) const
+void GGEMSOpenGLManager::SetImageOutput(std::string const& image_output_basename)
 {
-/*
- int width, height;
- glfwGetFramebufferSize(w, &width, &height);
- GLsizei nrChannels = 3;
- GLsizei stride = nrChannels * width;
- stride += (stride % 4) ? (4 - stride % 4) : 0;
- GLsizei bufferSize = stride * height;
- std::vector<char> buffer(bufferSize);
- glPixelStorei(GL_PACK_ALIGNMENT, 4);
- glReadBuffer(GL_FRONT);
- glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, buffer.data());
- stbi_flip_vertically_on_write(true);
- stbi_write_png(filepath, width, height, nrChannels, buffer.data(), stride);
-*/
+  // Get last "/"
+  std::size_t n = image_output_basename.find_last_of("/");
+
+  if (n != std::string::npos) { // "/" found, check if directory exists
+    std::filesystem::path path_name(image_output_basename.substr(0, n));
+
+    // Check if path exists
+    if (std::filesystem::is_directory(path_name)) { // Path exists
+      image_output_basename_ = image_output_basename;
+    }
+    else {
+      // Creating path
+      GGwarn("GGEMSOpenGLManager", "SetImageOutput", 0) << "Directory (" << image_output_basename << ") storing OpenGL scene does not exits!!!" << GGendl;
+      GGwarn("GGEMSOpenGLManager", "SetImageOutput", 0) << "This directory is now created." << GGendl;
+      std::filesystem::create_directories(path_name);
+    }
+  }
+  else { // store file basename
+    image_output_basename_ = image_output_basename;
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSOpenGLManager::SaveWindow(GLFWwindow* w)
+{
+  // Get image output index in 000 format
+  std::ostringstream index_stream(std::ostringstream::out);
+  index_stream << std::setw(3) << std::setfill('0') << image_output_index_;
+
+  // Get filename
+  std::string filename = image_output_basename_ + "_" + index_stream.str() + ".png";
+
+  // Get size of frame buffer and compute stride
+  int frame_width = 0, frame_height = 0;
+  glfwGetFramebufferSize(w, &frame_width, &frame_height);
+
+  int number_of_channels = 3;
+
+  int stride = number_of_channels * frame_width;
+  stride += (stride % 4) ? (4 - stride % 4) : 0;
+
+  int buffer_size = stride * frame_height;
+
+  // Storage mode
+  glPixelStorei(GL_PACK_ALIGNMENT, 4);
+  glReadBuffer(GL_FRONT);
+
+  // Read buffer in memory
+  char* buffer = new char[buffer_size];
+  glReadPixels(0, 0, frame_width, frame_height, GL_RGB, GL_UNSIGNED_BYTE, buffer);
+
+  // Storing buffer in png file
+  stbi_set_flip_vertically_on_load(true);
+  stbi_write_png(filename.c_str(), frame_width, frame_height, number_of_channels, buffer, stride);
+
+  image_output_index_ += 1; // For next image
   is_save_image_ = false;
+  delete[] buffer;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -692,6 +750,7 @@ void GGEMSOpenGLManager::GLFWKeyCallback(GLFWwindow* window, int key, int, int a
       camera_target_ = glm::vec3(0.0, 0.0, -1.0f);
       camera_up_ = glm::vec3(0.0, 1.0, 0.0f);
       is_perspective_ = true;
+      is_wireframe_ = true;
       zoom_ = 0.0f;
       pitch_angle_ = 0.0;
       yaw_angle_ = -90.0;
@@ -706,6 +765,14 @@ void GGEMSOpenGLManager::GLFWKeyCallback(GLFWwindow* window, int key, int, int a
     }
     case GLFW_KEY_P : {
       is_perspective_ = true;
+      break;
+    }
+    case GLFW_KEY_C : {
+      is_wireframe_ = true;
+      break;
+    }
+    case GLFW_KEY_V : {
+      is_wireframe_ = false;
       break;
     }
     case GLFW_KEY_O : {

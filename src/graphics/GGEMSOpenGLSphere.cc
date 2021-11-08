@@ -19,7 +19,7 @@
 /*!
   \file GGEMSOpenGLSphere.cc
 
-  \brief Sphere volume for for OpenGL
+  \brief Sphere volume for OpenGL
 
   \author Julien BERT <julien.bert@univ-brest.fr>
   \author Didier BENOIT <didier.benoit@inserm.fr>
@@ -38,19 +38,19 @@
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSOpenGLSphere::GGEMSOpenGLSphere(GGfloat const& radius)
+GGEMSOpenGLSphere::GGEMSOpenGLSphere(GLfloat const& radius)
 : GGEMSOpenGLVolume(),
   radius_(radius)
 {
   GGcout("GGEMSOpenGLSphere", "GGEMSOpenGLSphere", 3) << "GGEMSOpenGLSphere creating..." << GGendl;
 
-  number_of_sectors_ = 128; // longitude
-  number_of_stacks_ = 64; // latitude
+  number_of_sectors_ = 64; // value by default (longitude)
+  number_of_stacks_ = 32; // value by default (latitude)
 
   // Allocating memory for sphere vertices
   // extreme point postions are taken (+1 stack and sector)
   number_of_vertices_ = (number_of_stacks_+1)*(number_of_sectors_+1)*3;
-  vertices_ = new GGfloat[number_of_vertices_];
+  vertices_ = new GLfloat[number_of_vertices_];
 
   // Compute number of (triangulated) indices.
   // In each sector/stack there are 2 triangles
@@ -87,15 +87,15 @@ void GGEMSOpenGLSphere::Build(void)
   // y = xy * sin(sector_angle)
   // z = radius * sin(stack_angle)
 
-  GGfloat sector_step = 2.0f * PI / static_cast<GGfloat>(number_of_sectors_);
-  GGfloat sector_angle = 0.0f;
-  GGfloat stack_step = PI / static_cast<GGfloat>(number_of_stacks_);
-  GGfloat stack_angle = 0.0f;
+  GLfloat sector_step = 2.0f * PI / static_cast<GGfloat>(number_of_sectors_);
+  GLfloat sector_angle = 0.0f;
+  GLfloat stack_step = PI / static_cast<GGfloat>(number_of_stacks_);
+  GLfloat stack_angle = 0.0f;
 
-  GGfloat x = 0.0f, y = 0.0f, xy = 0.0f, z = 0.0f;
-  GGint index = 0;
+  GLfloat x = 0.0f, y = 0.0f, xy = 0.0f, z = 0.0f;
+  GLint index = 0;
   // Loop over the stacks
-  for (GGint i = 0; i <= number_of_stacks_; ++i) {
+  for (GLint i = 0; i <= number_of_stacks_; ++i) {
     // Stack angle
     stack_angle = HALF_PI - i * stack_step; // from pi/2 to -pi/2
 
@@ -123,7 +123,7 @@ void GGEMSOpenGLSphere::Build(void)
   //  | /  |
   //  k2--k2+1
   index = 0;
-  GGint k1 = 0, k2 = 0;
+  GLint k1 = 0, k2 = 0;
   for (GGint i = 0; i < number_of_stacks_; ++i) {
     k1 = i * (number_of_sectors_ + 1);
     k2 = k1 + number_of_sectors_ + 1;
@@ -152,12 +152,12 @@ void GGEMSOpenGLSphere::Build(void)
 
   // Vertex
   glBindBuffer(GL_ARRAY_BUFFER, vbo_[0]);
-  glBufferData(GL_ARRAY_BUFFER, number_of_vertices_ * sizeof(GGfloat), vertices_, GL_STATIC_DRAW); // Allocating memory on OpenGL device
+  glBufferData(GL_ARRAY_BUFFER, number_of_vertices_ * sizeof(GLfloat), vertices_, GL_STATIC_DRAW); // Allocating memory on OpenGL device
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
   // Indices
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo_[1]);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, number_of_indices_ * sizeof(GGint), indices_, GL_STATIC_DRAW); // Allocating memory on OpenGL device
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, number_of_indices_ * sizeof(GLint), indices_, GL_STATIC_DRAW); // Allocating memory on OpenGL device
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
   glBindVertexArray(0);

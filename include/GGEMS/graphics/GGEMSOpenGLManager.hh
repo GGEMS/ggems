@@ -45,6 +45,7 @@
 #include <glm/gtx/string_cast.hpp>
 
 class GGEMSOpenGLVolume;
+class GGEMSOpenGLPrism;
 class GGEMSOpenGLSphere;
 
 typedef std::unordered_map<std::string, int> ColorUMap; /*!< Unordered map with key : name of the color, index of color */
@@ -206,6 +207,13 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     */
     inline glm::mat4 GetCameraView(void) const {return camera_view_;}
 
+    /*!
+      \fn void SetImageOutput(std::string const& image_output_basename)
+      \param image_output_basename - name of basename for output
+      \brief store visu scene in a png file
+    */
+    void SetImageOutput(std::string const& image_output_basename);
+
   private:
     /*!
       \fn void InitGL(void)
@@ -257,11 +265,11 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     void UpdateProjectionAndView(void);
 
     /*
-      \fn void SaveWindow(GLFWwindow* w) const
+      \fn void SaveWindow(GLFWwindow* w)
       \param w - pointer to GLFW window
       \brief save window scene to a png file
     */
-    void SaveWindow(GLFWwindow* w) const;
+    void SaveWindow(GLFWwindow* w);
 
     /*!
       \fn void GLFWErrorCallback(int error_code, char const* description)
@@ -339,7 +347,9 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     GGEMSOpenGLVolume** opengl_volumes_; /*!< OpenGL volume to display or not */
     GGsize number_of_opengl_volumes_; /*!< Number of OpenGL volumes */
 
+
     GGEMSOpenGLSphere* sphere_test;
+    GGEMSOpenGLPrism* prism_test;
 
     // OpenGL matrices
     glm::mat4 camera_view_; /*!< Camera view */
@@ -348,8 +358,11 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     static glm::vec3 camera_up_; /*!< Vector to the top */
     glm::mat4 projection_; /*!< Projection matrix (ortho or perspective), perspective by defaut */
     static bool is_perspective_; /*!< Mode of projection */
+    static bool is_wireframe_; /*!< Line mode: wireframe or solid (if bool is false) */
     static float zoom_; /*!< Value of zoom */
     static bool is_save_image_; /*!< Save window to png image file */
+    std::string image_output_basename_; /*!< Image output basename */
+    int image_output_index_; /*!< Image output index */
 
     // OpenGL timing
     static double delta_time_; /*! Time between 2 frames */

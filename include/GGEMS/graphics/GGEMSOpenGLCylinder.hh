@@ -1,5 +1,5 @@
-#ifndef GUARD_GGEMS_GRAPHICS_GGEMSOPENGLSPHERE_HH
-#define GUARD_GGEMS_GRAPHICS_GGEMSOPENGLSPHERE_HH
+#ifndef GUARD_GGEMS_GRAPHICS_GGEMSOPENGLCYLINDER_HH
+#define GUARD_GGEMS_GRAPHICS_GGEMSOPENGLCYLINDER_HH
 
 // ************************************************************************
 // * This file is part of GGEMS.                                          *
@@ -20,15 +20,15 @@
 // ************************************************************************
 
 /*!
-  \file GGEMSOpenGLSphere.hh
+  \file GGEMSOpenGLCylinder.hh
 
-  \brief Sphere volume for OpenGL
+  \brief Cylinder volume for for OpenGL, including cone, prism etc...
 
   \author Julien BERT <julien.bert@univ-brest.fr>
   \author Didier BENOIT <didier.benoit@inserm.fr>
   \author LaTIM, INSERM - U1101, Brest, FRANCE
   \version 1.0
-  \date Tuesday November 2, 2021
+  \date Monday November 8, 2021
 */
 
 #ifdef OPENGL_VISUALIZATION
@@ -36,50 +36,49 @@
 #include "GGEMS/graphics/GGEMSOpenGLVolume.hh"
 
 /*!
-  \class GGEMSOpenGLSphere
-  \brief This class define a sphere volume for OpenGL
+  \class GGEMSOpenGLCylinder
+  \brief This class define a cylinder volume for OpenGL, including cone, prism etc...
 */
-class GGEMS_EXPORT GGEMSOpenGLSphere : public GGEMSOpenGLVolume
+class GGEMS_EXPORT GGEMSOpenGLCylinder : public GGEMSOpenGLVolume
 {
   public:
     /*!
-      \param radius - radius of sphere
-      \brief GGEMSOpenGLSphere constructor
+      \brief GGEMSOpenGLCylinder constructor
     */
-    explicit GGEMSOpenGLSphere(GLfloat const& radius);
+    explicit GGEMSOpenGLCylinder(void);
 
     /*!
-      \brief GGEMSOpenGLSphere destructor
+      \brief GGEMSOpenGLCylinder destructor
     */
-    ~GGEMSOpenGLSphere(void);
+    ~GGEMSOpenGLCylinder(void);
 
     /*!
-      \fn GGEMSOpenGLSphere(GGEMSOpenGLSphere const& sphere) = delete
-      \param sphere - reference on the OpenGL sphere volume
+      \fn GGEMSOpenGLCylinder(GGEMSOpenGLCylinder const& cylinder) = delete
+      \param cylinder - reference on the OpenGL cylinder volume
       \brief Avoid copy by reference
     */
-    GGEMSOpenGLSphere(GGEMSOpenGLSphere const& sphere) = delete;
+    GGEMSOpenGLCylinder(GGEMSOpenGLCylinder const& cylinder) = delete;
 
     /*!
-      \fn GGEMSOpenGLSphere& operator=(GGEMSOpenGLSphere const& sphere) = delete
-      \param sphere - reference on the OpenGL sphere volume
+      \fn GGEMSOpenGLCylinder& operator=(GGEMSOpenGLCylinder const& cylinder) = delete
+      \param cylinder - reference on the OpenGL cylinder volume
       \brief Avoid assignement by reference
     */
-    GGEMSOpenGLSphere& operator=(GGEMSOpenGLSphere const& sphere) = delete;
+    GGEMSOpenGLCylinder& operator=(GGEMSOpenGLCylinder const& cylinder) = delete;
 
     /*!
-      \fn GGEMSOpenGLSphere(GGEMSOpenGLSphere const&& sphere) = delete
-      \param sphere - rvalue reference on OpenGL sphere volume
+      \fn GGEMSOpenGLCylinder(GGEMSOpenGLCylinder const&& cylinder) = delete
+      \param cylinder - rvalue reference on OpenGL cylinder volume
       \brief Avoid copy by rvalue reference
     */
-    GGEMSOpenGLSphere(GGEMSOpenGLSphere const&& sphere) = delete;
+    GGEMSOpenGLCylinder(GGEMSOpenGLCylinder const&& cylinder) = delete;
 
     /*!
-      \fn GGEMSOpenGLSphere& operator=(GGEMSOpenGLSphere const&& sphere) = delete
-      \param sphere - rvalue reference on OpenGL sphere volume
+      \fn GGEMSOpenGLCylinder& operator=(GGEMSOpenGLCylinder const&& cylinder) = delete
+      \param cylinder - rvalue reference on OpenGL cylinder volume
       \brief Avoid copy by rvalue reference
     */
-    GGEMSOpenGLSphere& operator=(GGEMSOpenGLSphere const&& sphere) = delete;
+    GGEMSOpenGLCylinder& operator=(GGEMSOpenGLCylinder const&& cylinder) = delete;
 
     /*!
       \fn void Build(void)
@@ -88,9 +87,11 @@ class GGEMS_EXPORT GGEMSOpenGLSphere : public GGEMSOpenGLVolume
     void Build(void) override;
 
   private:
-    GLfloat radius_; /*!< Radius of sphere */
+    //GGfloat radius_; /*!< Radius of sphere */
+    //GGint number_of_stacks_; /*!< Number of stacks (latitude) on sphere */
+    //GGint number_of_sectors_; /*!< Number of sectors (longitude) on sphere */
 };
 
 #endif
 
-#endif // End of GGEMS_GRAPHICS_GGEMSOPENGLSPHERE_HH
+#endif // End of GUARD_GGEMS_GRAPHICS_GGEMSOPENGLCYLINDER_HH

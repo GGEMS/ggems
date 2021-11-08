@@ -71,15 +71,18 @@ void GGEMSOpenCLManager::Clean(void)
     delete d;
     d = nullptr;
   }
+  devices_.clear();
 
   // Freeing activated devices
   for (ComputingDevice& i : computing_devices_) i.Clean();
+  computing_devices_.clear();
 
   // Deleting kernel
   for (cl::Kernel* k : kernels_) {
     delete k;
     k = nullptr;
   }
+  kernels_.clear();
 
   GGcout("GGEMSOpenCLManager", "Clean", 3) << "GGEMSOpenCLManager cleaned!!!" << GGendl;
 }

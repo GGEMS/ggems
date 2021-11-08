@@ -67,6 +67,9 @@ GGEMSOpenGLVolume::GGEMSOpenGLVolume()
 
   is_visible_ = true;
 
+  number_of_stacks_ = 0;
+  number_of_sectors_ = 0;
+
   // Store the OpenGL volume
   GGEMSOpenGLManager::GetInstance().Store(this);
 
@@ -104,7 +107,7 @@ GGEMSOpenGLVolume::~GGEMSOpenGLVolume(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSOpenGLVolume::SetPosition(GGfloat const& position_x, GGfloat const& position_y, GGfloat const& position_z)
+void GGEMSOpenGLVolume::SetPosition(GLfloat const& position_x, GLfloat const& position_y, GLfloat const& position_z)
 {
   position_x_ = position_x;
   position_y_ = position_y;

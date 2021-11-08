@@ -222,12 +222,20 @@ int main(int argc, char** argv)
     // Visualization params
     opengl_manager.SetMSAA(msaa);
     opengl_manager.SetDrawAxis(true);
-    // opengl_manager.Set LIne style (wireframe or solid) // Only for solid (detector or phantom, not in opengl manager)
     opengl_manager.SetProjectionMode("perspective");
     opengl_manager.SetWindowDimensions(window_dims[0], window_dims[1]);
     opengl_manager.SetBackgroundColor(window_color);
+    opengl_manager.SetImageOutput("data/axis");
     opengl_manager.Initialize();
     opengl_manager.Display();
+
+    // Command line for solid directely
+    // XXX.SetColor("black" or ...)
+    // XXX.SetLineMode("wireframe" or "solid")
+
+    // Command for GGEMS or OpenGL
+    // XXX.SetParticleColor("gamma","red") ...
+    // XXX.SetParticles(10000) // Max: 1000000!!!
 
     // OpenCL params
     opencl_manager.DeviceToActivate(device_index);
@@ -330,5 +338,4 @@ int main(int argc, char** argv)
 
   // Exit safely
   GGEMSOpenCLManager::GetInstance().Clean();
-  exit(EXIT_SUCCESS);
 }
