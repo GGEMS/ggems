@@ -405,7 +405,7 @@ void GGEMSOpenGLManager::InitAxisVolume(void)
   sphere_test->SetVisible(false);
   sphere_test->Build();
 
-  prism_test = new GGEMSOpenGLPrism(1.0f*mm, 0.5f*mm, 2.0f*mm, 36, 10);
+  prism_test = new GGEMSOpenGLPrism(1.0f*mm, 0.5f*mm, 3.0f*mm, 3, 1);
   prism_test->Build();
 }
 

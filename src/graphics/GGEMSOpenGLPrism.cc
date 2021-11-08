@@ -50,10 +50,22 @@ GGEMSOpenGLPrism::GGEMSOpenGLPrism(GLfloat const& base_radius, GLfloat const& to
   number_of_sectors_ = sectors;
   number_of_stacks_ = stacks;
 
-  // Allocating memory for sphere vertices
+  if (number_of_stacks_ < 1) {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "Minimum number of stacks for prism is 1";
+    GGEMSMisc::ThrowException("GGEMSOpenGLPrism", "GGEMSOpenGLPrism", oss.str());
+  }
+
+  if (number_of_sectors_ < 3) {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "Minimum number of sectors for prism is 3";
+    GGEMSMisc::ThrowException("GGEMSOpenGLPrism", "GGEMSOpenGLPrism", oss.str());
+  }
+
+  // Allocating memory for prism vertices
   // extreme point postions are taken (+1 stack and sector)
-  //number_of_vertices_ = (number_of_stacks_+1)*(number_of_sectors_+1)*3;
-  //vertices_ = new GLfloat[number_of_vertices_];
+  number_of_vertices_ = 2*3*(number_of_sectors_+1) + (number_of_stacks_+1)*(number_of_sectors_+1)*3;
+  vertices_ = new GLfloat[number_of_vertices_];
 
   // Compute number of (triangulated) indices.
   // In each sector/stack there are 2 triangles
@@ -111,63 +123,74 @@ void GGEMSOpenGLPrism::Build(void)
   // We compute the vertices of a unit circle on XY plane only once
   BuildUnitCircleVertices();
 
+  // Put vertices of side cylinder to array by scaling unit circle
+  GLfloat x = 0.0f, y = 0.0f, z = 0.0f;
+  GLint added_vertices = 0;
+  GLint index = 0;
+  for (GLint i = 0; i <= number_of_stacks_; ++i) {
+    // Vertex position z
+    z = -(height_ * 0.5f) + static_cast<GLfloat>(i) / number_of_stacks_ * height_;
+    GLfloat radius = base_radius_ + static_cast<GLfloat>(i) / number_of_stacks_ * (top_radius_-base_radius_);
+
+    // Loop over sectors
+    for (GLint j = 0, k = 0; j <= number_of_sectors_; ++j, k += 3) {
+      x = unit_circle_vertices_[k]*radius;
+      y = unit_circle_vertices_[k+1]*radius;
+
+      vertices_[index++] = x;
+      vertices_[index++] = y;
+      vertices_[index++] = z;
+
+      added_vertices += 1;
+    }
+  }
+
+  // remember where the base vertices start
+  GLuint base_vertex_index = added_vertices;
+
+  // put vertices of base of cylinder
+  z = -height_ * 0.5f;
+  vertices_[index++] = 0;
+  vertices_[index++] = 0;
+  vertices_[index++] = z;
+  added_vertices += 1;
+
+  for (GLint i = 0, j = 0; i < number_of_sectors_; ++i, j += 3) {
+    x = unit_circle_vertices_[j]*base_radius_;
+    y = unit_circle_vertices_[j+1]*base_radius_;
+
+    vertices_[index++] = x;
+    vertices_[index++] = y;
+    vertices_[index++] = z;
+
+    added_vertices += 1;
+  }
+
+  // remember where the top vertices start
+  GLuint top_vertex_index = added_vertices;
+
+  // put vertices of top of cylinder
+  z = height_ * 0.5f;
+  vertices_[index++] = 0;
+  vertices_[index++] = 0;
+  vertices_[index++] = z;
+  added_vertices += 1;
+
+  for (GLint i = 0, j = 0; i < number_of_sectors_; ++i, j += 3) {
+    x = unit_circle_vertices_[j]*top_radius_;
+    y = unit_circle_vertices_[j+1]*top_radius_;
+
+    vertices_[index++] = x;
+    vertices_[index++] = y;
+    vertices_[index++] = z;
+
+    added_vertices += 1;
+  }
+
+  for (GLint i = 0; i < number_of_vertices_/3; ++i) {
+    std::cout << i << " " << vertices_[i*3+0] << " " << vertices_[i*3+1] << " " << vertices_[i*3+2] << std::endl;
+  }
 /*
-
-    float x, y, z;                                  // vertex position
-    float radius;                                   // radius for each stack
-
-    // get normals for cylinder sides
-    std::vector<float> sideNormals = getSideNormals();
-
-    // put vertices of side cylinder to array by scaling unit circle
-    for(int i = 0; i <= stackCount; ++i)
-    {
-        z = -(height * 0.5f) + (float)i / stackCount * height;      // vertex position z
-        radius = baseRadius + (float)i / stackCount * (topRadius - baseRadius);     // lerp
-        float t = 1.0f - (float)i / stackCount;   // top-to-bottom
-
-        for(int j = 0, k = 0; j <= sectorCount; ++j, k += 3)
-        {
-            x = unitCircleVertices[k];
-            y = unitCircleVertices[k+1];
-            addVertex(x * radius, y * radius, z);   // position
-        }
-    }
-
-    // remember where the base.top vertices start
-    unsigned int baseVertexIndex = (unsigned int)vertices.size() / 3;
-
-    // put vertices of base of cylinder
-    z = -height * 0.5f;
-    addVertex(0, 0, z);
-    addNormal(0, 0, -1);
-    addTexCoord(0.5f, 0.5f);
-    for(int i = 0, j = 0; i < sectorCount; ++i, j += 3)
-    {
-        x = unitCircleVertices[j];
-        y = unitCircleVertices[j+1];
-        addVertex(x * baseRadius, y * baseRadius, z);
-        addNormal(0, 0, -1);
-        addTexCoord(-x * 0.5f + 0.5f, -y * 0.5f + 0.5f);    // flip horizontal
-    }
-
-    // remember where the base vertices start
-    unsigned int topVertexIndex = (unsigned int)vertices.size() / 3;
-
-    // put vertices of top of cylinder
-    z = height * 0.5f;
-    addVertex(0, 0, z);
-    addNormal(0, 0, 1);
-    addTexCoord(0.5f, 0.5f);
-    for(int i = 0, j = 0; i < sectorCount; ++i, j += 3)
-    {
-        x = unitCircleVertices[j];
-        y = unitCircleVertices[j+1];
-        addVertex(x * topRadius, y * topRadius, z);
-        addNormal(0, 0, 1);
-        addTexCoord(x * 0.5f + 0.5f, -y * 0.5f + 0.5f);
-    }
-
     // put indices for sides
     unsigned int k1, k2;
     for(int i = 0; i < stackCount; ++i)
@@ -218,8 +241,6 @@ void GGEMSOpenGLPrism::Build(void)
             addIndices(topVertexIndex, k, topVertexIndex + 1);
     }
 
-    // generate interleaved vertex array as well
-    buildInterleavedVertices();
     */
 
 /*
