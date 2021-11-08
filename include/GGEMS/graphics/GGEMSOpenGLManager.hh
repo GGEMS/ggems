@@ -256,6 +256,13 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     */
     void UpdateProjectionAndView(void);
 
+    /*
+      \fn void SaveWindow(GLFWwindow* w) const
+      \param w - pointer to GLFW window
+      \brief save window scene to a png file
+    */
+    void SaveWindow(GLFWwindow* w) const;
+
     /*!
       \fn void GLFWErrorCallback(int error_code, char const* description)
       \param error_code - error code returned by OpenGL
@@ -293,10 +300,36 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     */
     static void GLFWScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 
+    /*!
+      \fn void GLFWMouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
+      \param window - pointer to GLFW window
+      \param button - mouse key
+      \param action - GLFW_PRESS, GLFW_RELEASE or GLFW_REPEAT
+      \param mods - bit field describing which modifier keys were held down
+      \brief callback for mouse button
+    */
+    static void GLFWMouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
+
+    /*!
+      \fn void GLFWCursorPosCallback(GLFWwindow* window, double x, double y);
+      \param window - pointer to GLFW window
+      \param xoffset - offset in X
+      \param yoffset - offset in Y
+      \brief cursor position of mouse
+    */
+    static void GLFWCursorPosCallback(GLFWwindow* window, double x, double y);
+
   private:
     GLFWwindow* window_; /*!< Pointer storing GLFW window */
     static int window_width_; /*!< GLFW window width */
     static int window_height_; /*!< GLFW window height */
+    static double x_mouse_cursor_; /*!< Mouse cursor in X */
+    static double y_mouse_cursor_; /*!< Mouse cursor in Y */
+    static float pitch_angle_; /*!< Pitch angle for mouse */
+    static float yaw_angle_; /*!< Yaw angle for mouse */
+    static bool is_first_mouse_; /*!< First use of mouse */
+    static double last_mouse_x_position_; /*!< Last position of mouse in x */
+    static double last_mouse_y_position_; /*!< Last position of mouse in y */
     int msaa_; /*!< MSAA: Multi sample anti-aliasing factor */
     ColorUMap colors_; /*!< List of colors */
     float background_color_[3]; /*!< window background color */
@@ -314,8 +347,9 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     static glm::vec3 camera_target_; /*!< Target of the camera */
     static glm::vec3 camera_up_; /*!< Vector to the top */
     glm::mat4 projection_; /*!< Projection matrix (ortho or perspective), perspective by defaut */
-    static int is_perspective_; /*!< Mode of projection */
+    static bool is_perspective_; /*!< Mode of projection */
     static float zoom_; /*!< Value of zoom */
+    static bool is_save_image_; /*!< Save window to png image file */
 
     // OpenGL timing
     static double delta_time_; /*! Time between 2 frames */

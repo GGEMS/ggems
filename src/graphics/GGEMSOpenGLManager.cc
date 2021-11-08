@@ -29,12 +29,20 @@
 // Definition of static members
 int GGEMSOpenGLManager::window_width_ = 800;
 int GGEMSOpenGLManager::window_height_ = 600;
-int GGEMSOpenGLManager::is_perspective_ = 1;
+bool GGEMSOpenGLManager::is_perspective_ = true;
 float GGEMSOpenGLManager::zoom_ = 0.0f;
-glm::vec3 GGEMSOpenGLManager::camera_position_ = glm::vec3(0.0f, 0.0f, 5.0f);
+glm::vec3 GGEMSOpenGLManager::camera_position_ = glm::vec3(0.0f, 0.0f, 3.0f);
 glm::vec3 GGEMSOpenGLManager::camera_target_ = glm::vec3(0.0, 0.0, -1.0f);
 glm::vec3 GGEMSOpenGLManager::camera_up_ = glm::vec3(0.0, 1.0, 0.0f);
 double GGEMSOpenGLManager::delta_time_ = 0.0f;
+double GGEMSOpenGLManager::x_mouse_cursor_ = 0.0;
+double GGEMSOpenGLManager::y_mouse_cursor_ = 0.0;
+float GGEMSOpenGLManager::pitch_angle_ = 0.0;
+float GGEMSOpenGLManager::yaw_angle_ = -90.0; // yaw is initialized to -90.0 degrees since a yaw of 0.0 results in a direction vector pointing to the right so we initially rotate a bit to the left
+bool GGEMSOpenGLManager::is_first_mouse_ = true;
+double GGEMSOpenGLManager::last_mouse_x_position_ = 0.0;
+double GGEMSOpenGLManager::last_mouse_y_position_ = 0.0;
+bool GGEMSOpenGLManager::is_save_image_ = false;
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -298,8 +306,8 @@ void GGEMSOpenGLManager::InitGL(void)
   glfwSetWindowSizeCallback(window_, GGEMSOpenGLManager::GLFWWindowSizeCallback);
   glfwSetKeyCallback(window_, GGEMSOpenGLManager::GLFWKeyCallback);
   glfwSetScrollCallback(window_, GGEMSOpenGLManager::GLFWScrollCallback);
-  // glfwSetMouseButtonCallback(window_, Sphere::GLFWMouseButtonCallback);
-  // glfwSetCursorPosCallback(window_, Sphere::GLFWCursorPosCallback);
+  glfwSetMouseButtonCallback(window_, GGEMSOpenGLManager::GLFWMouseButtonCallback);
+  glfwSetCursorPosCallback(window_, GGEMSOpenGLManager::GLFWCursorPosCallback);
 
   GGcout("GGEMSOpenGLManager", "InitGL", 1) << "OpenGL infos:" << GGendl;
   GGcout("GGEMSOpenGLManager", "InitGL", 1) << "-------------" << GGendl;
@@ -454,6 +462,7 @@ void GGEMSOpenGLManager::PrintKeys(void) const
   GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << "    * [P]                  Perspective projection" << GGendl;
   GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << "    * [O]                  Ortho projection" << GGendl;
   GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << "    * [R]                  Reset view" << GGendl;
+  GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << "    * [K]                  Save current window to a PNG file" << GGendl;
   GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << "    * [+/-]                Zoom in/out" << GGendl;
   GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << "    * [Up/Down]            Move forward/back" << GGendl;
   GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << "    * [W/S]                " << GGendl;
@@ -463,10 +472,6 @@ void GGEMSOpenGLManager::PrintKeys(void) const
   GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << "Mouse:" << GGendl;
   GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << "    * [Scroll Up/Down]     Zoom in/out" << GGendl;
   GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << GGendl;
-
-/*
-  std::cout << "    * [Space]                      Stop / Restart application" << std::endl;
-*/
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -510,6 +515,8 @@ void GGEMSOpenGLManager::Display(void)
     UpdateProjectionAndView();
 
     if (is_draw_axis_) DrawAxis();
+
+    if (is_save_image_) SaveWindow(window_);
 
     // Swap front and back buffers
     glfwSwapBuffers(window_);
@@ -576,6 +583,28 @@ void GGEMSOpenGLManager::UpdateProjectionAndView(void)
     camera_position_ + camera_target_, // Direction of camera (origin here)
     camera_up_ // Which vector is up
   );
+}
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSOpenGLManager::SaveWindow(GLFWwindow* w) const
+{
+/*
+ int width, height;
+ glfwGetFramebufferSize(w, &width, &height);
+ GLsizei nrChannels = 3;
+ GLsizei stride = nrChannels * width;
+ stride += (stride % 4) ? (4 - stride % 4) : 0;
+ GLsizei bufferSize = stride * height;
+ std::vector<char> buffer(bufferSize);
+ glPixelStorei(GL_PACK_ALIGNMENT, 4);
+ glReadBuffer(GL_FRONT);
+ glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, buffer.data());
+ stbi_flip_vertically_on_write(true);
+ stbi_write_png(filepath, width, height, nrChannels, buffer.data(), stride);
+*/
+  is_save_image_ = false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -662,16 +691,25 @@ void GGEMSOpenGLManager::GLFWKeyCallback(GLFWwindow* window, int key, int, int a
       camera_position_ = glm::vec3(0.0f, 0.0f, 5.0f);
       camera_target_ = glm::vec3(0.0, 0.0, -1.0f);
       camera_up_ = glm::vec3(0.0, 1.0, 0.0f);
-      is_perspective_ = 1;
+      is_perspective_ = true;
       zoom_ = 0.0f;
+      pitch_angle_ = 0.0;
+      yaw_angle_ = -90.0;
+      is_first_mouse_ = true;
+      break;
+    }
+    case GLFW_KEY_K : {
+      if (action == GLFW_PRESS) {
+        is_save_image_ = true;
+      }
       break;
     }
     case GLFW_KEY_P : {
-      is_perspective_ = 1;
+      is_perspective_ = true;
       break;
     }
     case GLFW_KEY_O : {
-      is_perspective_ = 0;
+      is_perspective_ = false;
       break;
     }
     default: {
@@ -686,7 +724,7 @@ void GGEMSOpenGLManager::GLFWKeyCallback(GLFWwindow* window, int key, int, int a
 
 void GGEMSOpenGLManager::GLFWScrollCallback(GLFWwindow*, double, double yoffset)
 {
-  zoom_ += static_cast<float>(yoffset);
+  zoom_ -= static_cast<float>(yoffset);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -697,6 +735,65 @@ void GGEMSOpenGLManager::GLFWWindowSizeCallback(GLFWwindow*, int width, int heig
 {
   window_width_ = width;
   window_height_ = height;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSOpenGLManager::GLFWMouseButtonCallback(GLFWwindow* window, int button, int action, int)
+{
+  if (button != GLFW_MOUSE_BUTTON_LEFT) return;
+
+  if (action == GLFW_PRESS) {
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwGetCursorPos(window, &x_mouse_cursor_, &y_mouse_cursor_);
+  }
+  else {
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSOpenGLManager::GLFWCursorPosCallback(GLFWwindow* window, double x, double y)
+{
+  if (glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_DISABLED) {
+
+    if (is_first_mouse_) {
+      is_first_mouse_ = false;
+      last_mouse_x_position_ = x_mouse_cursor_;
+      last_mouse_y_position_ = y_mouse_cursor_;
+    }
+
+    // Offset between cursor position and current position
+    double x_cursor_offset = x - last_mouse_x_position_;
+    double y_cursor_offset = last_mouse_y_position_ - y;
+    last_mouse_x_position_ = x;
+    last_mouse_y_position_ = y;
+
+    double mouse_sensitivity = 0.05;
+
+    x_cursor_offset *= mouse_sensitivity;
+    y_cursor_offset *= mouse_sensitivity;
+
+    yaw_angle_ += static_cast<float>(x_cursor_offset);
+    pitch_angle_ += static_cast<float>(y_cursor_offset);
+
+    if (pitch_angle_ > 89.0) pitch_angle_ = 89.0;
+    if (pitch_angle_ < -89.0) pitch_angle_ = -89.0;
+
+    glm::vec3 target;
+    target.x = cos(glm::radians(yaw_angle_)) * cos(glm::radians(pitch_angle_));
+    target.y = sin(glm::radians(pitch_angle_));
+    target.z = sin(glm::radians(yaw_angle_)) * cos(glm::radians(pitch_angle_));
+    camera_target_ = glm::normalize(target);
+  }
+  else {
+    is_first_mouse_ = true;
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
