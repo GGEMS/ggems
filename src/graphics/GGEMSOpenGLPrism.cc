@@ -68,11 +68,10 @@ GGEMSOpenGLPrism::GGEMSOpenGLPrism(GLfloat const& base_radius, GLfloat const& to
   vertices_ = new GLfloat[number_of_vertices_];
 
   // Compute number of (triangulated) indices.
-  // In each sector/stack there are 2 triangles
-  // For first and last stack there is 1 triangle, 3 indices for each triangle
-  //number_of_triangles_ = ((number_of_stacks_*2)-2)*number_of_sectors_;
-  //number_of_indices_ = number_of_triangles_*3;
-  //indices_ = new GLuint[number_of_indices_];
+  // In each sector there are 2 triangles
+  number_of_triangles_ = number_of_stacks_ * number_of_sectors_*2 + 2*number_of_sectors_;
+  number_of_indices_ = number_of_triangles_*3;
+  indices_ = new GLuint[number_of_indices_];
 
   GGcout("GGEMSOpenGLPrism", "GGEMSOpenGLPrism", 3) << "GGEMSOpenGLPrism created!!!" << GGendl;
 }
@@ -187,63 +186,53 @@ void GGEMSOpenGLPrism::Build(void)
     added_vertices += 1;
   }
 
-  for (GLint i = 0; i < number_of_vertices_/3; ++i) {
-    std::cout << i << " " << vertices_[i*3+0] << " " << vertices_[i*3+1] << " " << vertices_[i*3+2] << std::endl;
+  // Put indices for sides
+  GLuint k1 = 0, k2 = 0;
+  index = 0;
+  for (GLint i = 0; i < number_of_stacks_; ++i) {
+    k1 = i * (number_of_sectors_+1); // beginning of current stack
+    k2 = k1 + number_of_sectors_ + 1;      // beginning of next stack
+
+    for (GLint j = 0; j < number_of_sectors_; ++j, ++k1, ++k2) {
+      // first triangle
+      indices_[index++] = k1;
+      indices_[index++] = k2;
+      indices_[index++] = k1+1;
+      // second triangle
+      indices_[index++] = k2;
+      indices_[index++] = k1+1;
+      indices_[index++] = k2;
+    }
   }
-/*
-    // put indices for sides
-    unsigned int k1, k2;
-    for(int i = 0; i < stackCount; ++i)
-    {
-        k1 = i * (sectorCount + 1);     // bebinning of current stack
-        k2 = k1 + sectorCount + 1;      // beginning of next stack
 
-        for(int j = 0; j < sectorCount; ++j, ++k1, ++k2)
-        {
-            // 2 trianles per sector
-            addIndices(k1, k1 + 1, k2);
-            addIndices(k2, k1 + 1, k2 + 1);
-
-            // vertical lines for all stacks
-            lineIndices.push_back(k1);
-            lineIndices.push_back(k2);
-            // horizontal lines
-            lineIndices.push_back(k2);
-            lineIndices.push_back(k2 + 1);
-            if(i == 0)
-            {
-                lineIndices.push_back(k1);
-                lineIndices.push_back(k1 + 1);
-            }
-        }
+  // Put indices for base
+  for (GLint i = 0, k = base_vertex_index + 1; i < number_of_sectors_; ++i, ++k) {
+    if(i < (number_of_sectors_ - 1)) {
+      indices_[index++] = base_vertex_index;
+      indices_[index++] = k+1;
+      indices_[index++] = k;
     }
-
-    // remember where the base indices start
-    baseIndex = (unsigned int)indices.size();
-
-    // put indices for base
-    for(int i = 0, k = baseVertexIndex + 1; i < sectorCount; ++i, ++k)
-    {
-        if(i < (sectorCount - 1))
-            addIndices(baseVertexIndex, k + 1, k);
-        else    // last triangle
-            addIndices(baseVertexIndex, baseVertexIndex + 1, k);
+    else { // last triangle
+      indices_[index++] = base_vertex_index;
+      indices_[index++] = base_vertex_index+1;
+      indices_[index++] = k;
     }
+  }
 
-    // remember where the base indices start
-    topIndex = (unsigned int)indices.size();
-
-    for(int i = 0, k = topVertexIndex + 1; i < sectorCount; ++i, ++k)
-    {
-        if(i < (sectorCount - 1))
-            addIndices(topVertexIndex, k, k + 1);
-        else
-            addIndices(topVertexIndex, k, topVertexIndex + 1);
+  // Put indices for top
+  for (GLint i = 0, k = top_vertex_index + 1; i < number_of_sectors_; ++i, ++k) {
+    if (i < (number_of_sectors_ - 1)) {
+      indices_[index++] = top_vertex_index;
+      indices_[index++] = k;
+      indices_[index++] = k+1;
     }
+    else {
+      indices_[index++] = top_vertex_index;
+      indices_[index++] = k;
+      indices_[index++] = top_vertex_index+1;
+    }
+  }
 
-    */
-
-/*
   // Creating a VAO
   glGenVertexArrays(1, &vao_);
   glBindVertexArray(vao_);
@@ -262,7 +251,6 @@ void GGEMSOpenGLPrism::Build(void)
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
   glBindVertexArray(0);
-*/
 }
 
 #endif

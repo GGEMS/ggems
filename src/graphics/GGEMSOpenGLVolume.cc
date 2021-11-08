@@ -187,7 +187,7 @@ void GGEMSOpenGLVolume::Draw(void) const
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo_[1]);
 
     // Setting color
-    glUniform3f(glGetUniformLocation(program_shader_id, "color"), 1.0f, 1.0f, 0.0f);
+    glUniform3f(glGetUniformLocation(program_shader_id, "color"), color_[0], color_[1], color_[2]);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
     glEnableVertexAttribArray(0);
 

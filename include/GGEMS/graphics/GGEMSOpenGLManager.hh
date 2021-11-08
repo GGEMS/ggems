@@ -347,7 +347,6 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     GGEMSOpenGLVolume** opengl_volumes_; /*!< OpenGL volume to display or not */
     GGsize number_of_opengl_volumes_; /*!< Number of OpenGL volumes */
 
-
     GGEMSOpenGLSphere* sphere_test;
     GGEMSOpenGLPrism* prism_test;
 
@@ -384,9 +383,9 @@ namespace GGEMSOpenGLColor
     // silver, maroon, olive
     {0.753f, 0.753f, 0.753f}, {0.502f, 0.0f, 0.0f}, {0.502f, 0.502f, 0.0f},
     // green, purple, teal
-    {0.0f, 0.502f, 0.0f}, {0.502f, 1.0f, 0.502f}, {0.0f, 0.502f, 0.502f},
+    {0.0f, 0.502f, 0.0f}, {0.502f, 0.0f, 0.502f}, {0.0f, 0.502f, 0.502f},
     // navy
-    {0.0f, 1.0f, 0.502f}
+    {0.0f, 0.0f, 0.502f}
   };
 }
 

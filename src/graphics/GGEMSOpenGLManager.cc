@@ -400,12 +400,16 @@ void GGEMSOpenGLManager::InitAxisVolume(void)
 
   // 0.6 mm Sphere in (0, 0, 0)
   sphere_test = new GGEMSOpenGLSphere(2.0f*mm);
-
+  sphere_test->SetVisible(true);
   sphere_test->SetColor("yellow");
-  sphere_test->SetVisible(false);
   sphere_test->Build();
 
-  prism_test = new GGEMSOpenGLPrism(1.0f*mm, 0.5f*mm, 3.0f*mm, 3, 1);
+  prism_test = new GGEMSOpenGLPrism(1.0f*mm, 0.05f*mm, 3.0f*mm, 36, 12);
+  prism_test->SetVisible(true);
+  prism_test->SetColor("purple");
+  // Faire une matrix de rotation et translation pour chaque objet dans la classe
+  // prism_test->SetPosition(0.0f, 0.0f, 0.0f);
+  // prism_test->SetAngle()
   prism_test->Build();
 }
 
@@ -494,6 +498,7 @@ void GGEMSOpenGLManager::PrintKeys(void) const
 void GGEMSOpenGLManager::DrawAxis(void)
 {
   opengl_volumes_[0]->Draw();
+  opengl_volumes_[1]->Draw();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -580,13 +585,12 @@ void GGEMSOpenGLManager::UpdateProjectionAndView(void)
     projection_ = glm::perspective(glm::radians(fov), static_cast<float>(window_width_) / static_cast<float>(window_height_), 0.1f, 100.0f);
   }
   else {
-    float current_zoom = 1.0f + zoom_ /10.0f;
+    float current_zoom = 1.0f + (-zoom_) /10.0f;
     if (current_zoom <= 0.0f)
     {
       current_zoom = 0.1f;
-      zoom_ = -10.0f;
     }
-    projection_ = glm::ortho(-10.0f/current_zoom,10.0f/current_zoom,-10.0f/current_zoom,10.0f/current_zoom,-10.0f,10.0f);
+    projection_ = glm::ortho(-5.0f/current_zoom,5.0f/current_zoom,-5.0f/current_zoom,5.0f/current_zoom,-5.0f,5.0f);
   }
 
   camera_view_ = glm::lookAt(
