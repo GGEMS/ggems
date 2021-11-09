@@ -95,6 +95,27 @@ class GGEMS_EXPORT GGEMSOpenGLVolume
     void SetPosition(GLfloat const& position_x, GLfloat const& position_y, GLfloat const& position_z);
 
     /*!
+      \fn void SetXAngle(GLfloat const& angle_x)
+      \param angle_x - angle in X
+      \brief set angle of rotation in X
+    */
+    void SetXAngle(GLfloat const& angle_x);
+
+    /*!
+      \fn void SetYAngle(GLfloat const& angle_y)
+      \param angle_y - angle in Y
+      \brief set angle of rotation in Y
+    */
+    void SetYAngle(GLfloat const& angle_y);
+
+    /*!
+      \fn void SetZAngle(GLfloat const& angle_z)
+      \param angle_z - angle in Z
+      \brief set angle of rotation in Z
+    */
+    void SetZAngle(GLfloat const& angle_z);
+
+    /*!
       \fn void SetColor(std::string const& color)
       \param color - Color of OpenGL sphere
       \brief setting color of OpenGL sphere
@@ -126,6 +147,10 @@ class GGEMS_EXPORT GGEMSOpenGLVolume
     GLfloat position_x_; /*!< Position in X of OpenGL volume */
     GLfloat position_y_; /*!< Position in Y of OpenGL volume */
     GLfloat position_z_; /*!< Position in Z of OpenGL volume */
+
+    GLfloat angle_x_; /*!< Angle in X in degree */
+    GLfloat angle_y_; /*!< Angle in Y in degree */
+    GLfloat angle_z_; /*!< Angle in Z in degree */
 
     GLfloat color_[3]; /*!< Color of volume */
 

@@ -399,17 +399,18 @@ void GGEMSOpenGLManager::InitAxisVolume(void)
   //     * a tube + cone for Z axis
 
   // 0.6 mm Sphere in (0, 0, 0)
-  sphere_test = new GGEMSOpenGLSphere(2.0f*mm);
+  sphere_test = new GGEMSOpenGLSphere(0.2f*mm);
   sphere_test->SetVisible(true);
   sphere_test->SetColor("yellow");
   sphere_test->Build();
 
-  prism_test = new GGEMSOpenGLPrism(1.0f*mm, 0.05f*mm, 3.0f*mm, 36, 12);
+  prism_test = new GGEMSOpenGLPrism(1.0f*mm, 0.0001f*mm, 3.0f*mm, 36, 12);
   prism_test->SetVisible(true);
   prism_test->SetColor("purple");
-  // Faire une matrix de rotation et translation pour chaque objet dans la classe
-  // prism_test->SetPosition(0.0f, 0.0f, 0.0f);
-  // prism_test->SetAngle()
+  prism_test->SetPosition(0.0f, 0.0f, 0.0f);
+  prism_test->SetXAngle(15.0f);
+  prism_test->SetYAngle(45.0f);
+  prism_test->SetZAngle(10.0f);
   prism_test->Build();
 }
 
@@ -663,6 +664,8 @@ void GGEMSOpenGLManager::SaveWindow(GLFWwindow* w)
   // Storing buffer in png file
   stbi_set_flip_vertically_on_load(true);
   stbi_write_png(filename.c_str(), frame_width, frame_height, number_of_channels, buffer, stride);
+
+  GGcout("GGEMSOpenGLManager", "SaveWindow", 0) << "OpenGL scene saved in " << filename << GGendl;
 
   image_output_index_ += 1; // For next image
   is_save_image_ = false;

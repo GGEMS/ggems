@@ -37,7 +37,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform.hpp>
-#include <glm/gtx/string_cast.hpp>
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/quaternion.hpp>
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -50,6 +51,10 @@ GGEMSOpenGLVolume::GGEMSOpenGLVolume()
   position_x_ = 0.0f;
   position_y_ = 0.0f;
   position_z_ = 0.0f;
+
+  angle_x_ = 0.0f;
+  angle_y_ = 0.0f;
+  angle_z_ = 0.0f;
 
   color_[0] = 1.0f; // red
   color_[1] = 0.0f;
@@ -118,6 +123,33 @@ void GGEMSOpenGLVolume::SetPosition(GLfloat const& position_x, GLfloat const& po
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+void GGEMSOpenGLVolume::SetXAngle(GLfloat const& angle_x)
+{
+  angle_x_ = glm::radians(angle_x);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSOpenGLVolume::SetYAngle(GLfloat const& angle_y)
+{
+  angle_y_ = glm::radians(angle_y);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSOpenGLVolume::SetZAngle(GLfloat const& angle_z)
+{
+  angle_z_ = glm::radians(angle_z);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 void GGEMSOpenGLVolume::SetColor(std::string const& color)
 {
   // Getting color map from GGEMSOpenGLManager
@@ -178,6 +210,17 @@ void GGEMSOpenGLVolume::Draw(void) const
     glm::mat4 projection_matrix = opengl_manager.GetProjection();
     glm::mat4 view_matrix = opengl_manager.GetCameraView();
 
+    // Translation matrix
+    glm::mat4 translate_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(position_x_, position_y_, position_z_));
+
+    // Creates an identity quaternion (no rotation)
+    glm::quat quaternion;
+
+    // Conversion from Euler angles (in radians) to Quaternion
+    glm::vec3 euler_angle(angle_x_, angle_y_, angle_z_);
+    quaternion = glm::quat(euler_angle);
+    glm::mat4 rotation_matrix = glm::toMat4(quaternion);
+
     // Enabling shader program
     glUseProgram(program_shader_id);
 
@@ -191,7 +234,7 @@ void GGEMSOpenGLVolume::Draw(void) const
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
     glEnableVertexAttribArray(0);
 
-    glm::mat4 mvp_matrix = projection_matrix*view_matrix;
+    glm::mat4 mvp_matrix = projection_matrix*view_matrix*translate_matrix*rotation_matrix;
     glUniformMatrix4fv(glGetUniformLocation(program_shader_id, "mvp"), 1, GL_FALSE, &mvp_matrix[0][0]);
 
     // Draw volume using index
