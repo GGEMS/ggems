@@ -278,10 +278,14 @@ void GGEMSOpenGLManager::InitGL(void)
   #endif
 
   glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+  glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+  glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
   glEnable(GL_DEPTH_TEST); // Enable depth buffering
   glDepthFunc(GL_LEQUAL); // Accept fragment if it closer to the camera than the former one or GL_LESS
   glEnable(GL_MULTISAMPLE); // Activating anti-aliasing
   glfwWindowHint(GLFW_SAMPLES, msaa_);
+  glEnable(GL_CULL_FACE);
+  glClearDepth(1.0f); 
 
   // Creating window
   window_ = glfwCreateWindow(window_width_, window_height_, "GGEMS OpenGL", nullptr, nullptr);
