@@ -18,8 +18,8 @@
 #include "GGEMS/tools/GGEMSTools.hh"
 #include "GGEMS/graphics/GGEMSOpenGLManager.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
-#include "GGEMS/graphics/GGEMSOpenGLSphere.hh"
-#include "GGEMS/graphics/GGEMSOpenGLPrism.hh"
+#include "GGEMS/graphics/GGEMSOpenGLVolume.hh"
+#include "GGEMS/graphics/GGEMSOpenGLAxis.hh"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "GGEMS/externs/stb_image.h"
@@ -108,8 +108,10 @@ GGEMSOpenGLManager::~GGEMSOpenGLManager(void)
   glfwDestroyWindow(window_); // destroying GLFW window
   window_ = nullptr;
 
-  if (sphere_test) delete sphere_test;
-  if (prism_test) delete prism_test;
+  if (axis_) {
+    delete axis_;
+    axis_ = nullptr;
+  }
 
   glDeleteProgram(program_shader_id_);
 
@@ -249,7 +251,7 @@ void GGEMSOpenGLManager::Initialize(void)
 
   InitGL(); // Initializing GLFW, GL and GLEW
   InitShader(); // Compile and store shader
-  if (is_draw_axis_) InitAxisVolume(); // Initialization of axis
+  if (is_draw_axis_) axis_ = new GGEMSOpenGLAxis();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -394,34 +396,6 @@ void GGEMSOpenGLManager::InitShader(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSOpenGLManager::InitAxisVolume(void)
-{
-  // The axis system is composed by:
-  //     * a sphere
-  //     * a tube + cone for X axis
-  //     * a tube + cone for Y axis
-  //     * a tube + cone for Z axis
-
-  // 0.6 mm Sphere in (0, 0, 0)
-  sphere_test = new GGEMSOpenGLSphere(0.2f*mm);
-  sphere_test->SetVisible(true);
-  sphere_test->SetColor("yellow");
-  sphere_test->Build();
-
-  prism_test = new GGEMSOpenGLPrism(1.0f*mm, 0.0001f*mm, 3.0f*mm, 36, 12);
-  prism_test->SetVisible(true);
-  prism_test->SetColor("purple");
-  prism_test->SetPosition(0.0f, 0.0f, 0.0f);
-  prism_test->SetXAngle(15.0f);
-  prism_test->SetYAngle(45.0f);
-  prism_test->SetZAngle(10.0f);
-  prism_test->Build();
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
 void GGEMSOpenGLManager::CompileShader(GLuint const& shader) const
 {
   GLint sucess = 0;
@@ -500,16 +474,6 @@ void GGEMSOpenGLManager::PrintKeys(void) const
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSOpenGLManager::DrawAxis(void)
-{
-  opengl_volumes_[0]->Draw();
-  opengl_volumes_[1]->Draw();
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
 void GGEMSOpenGLManager::Display(void)
 {
   glfwSwapInterval(1); // Control frame rate
@@ -539,7 +503,7 @@ void GGEMSOpenGLManager::Display(void)
     // Check camera parameters (projection mode + view)
     UpdateProjectionAndView();
 
-    if (is_draw_axis_) DrawAxis();
+    Draw();
 
     if (is_save_image_) SaveWindow(window_);
 
@@ -547,6 +511,18 @@ void GGEMSOpenGLManager::Display(void)
     glfwSwapBuffers(window_);
     // Poll for and process events
     glfwPollEvents();
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSOpenGLManager::Draw(void) const
+{
+  // Loop over the volumes and draw them
+  for (GGint i = 0; i < number_of_opengl_volumes_; ++i) {
+    opengl_volumes_[i]->Draw();
   }
 }
 

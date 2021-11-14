@@ -45,8 +45,7 @@
 #include <glm/gtx/string_cast.hpp>
 
 class GGEMSOpenGLVolume;
-class GGEMSOpenGLPrism;
-class GGEMSOpenGLSphere;
+class GGEMSOpenGLAxis;
 
 typedef std::unordered_map<std::string, int> ColorUMap; /*!< Unordered map with key : name of the color, index of color */
 
@@ -228,12 +227,6 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     void InitShader(void);
 
     /*!
-      \fn void InitAxisVolume(void)
-      \brief Initialization of axis
-    */
-    void InitAxisVolume(void);
-
-    /*!
       \fn void CompileShader(GLuint const& shader) const
       \param shader - index of shader from glCreateShader
       \brief compiling shader
@@ -253,12 +246,6 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     void UpdateFPSCounter(void);
 
     /*!
-      \fn void DrawAxis(void)
-      \brief draw axis in GLFW window
-    */
-    void DrawAxis(void);
-
-    /*!
       \fn void UpdateProjectionAndView(void)
       \brief Check and update parameters for projection matrix and camera view
     */
@@ -270,6 +257,12 @@ class GGEMS_EXPORT GGEMSOpenGLManager
       \brief save window scene to a png file
     */
     void SaveWindow(GLFWwindow* w);
+
+    /*!
+      \fn void Draw(void) const
+      \brief Draw all volumes
+    */
+    void Draw(void) const;
 
     /*!
       \fn void GLFWErrorCallback(int error_code, char const* description)
@@ -347,9 +340,6 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     GGEMSOpenGLVolume** opengl_volumes_; /*!< OpenGL volume to display or not */
     GGsize number_of_opengl_volumes_; /*!< Number of OpenGL volumes */
 
-    GGEMSOpenGLSphere* sphere_test;
-    GGEMSOpenGLPrism* prism_test;
-
     // OpenGL matrices
     glm::mat4 camera_view_; /*!< Camera view */
     static glm::vec3 camera_position_; /*!< Position of the camera */
@@ -362,6 +352,7 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     static bool is_save_image_; /*!< Save window to png image file */
     std::string image_output_basename_; /*!< Image output basename */
     int image_output_index_; /*!< Image output index */
+    GGEMSOpenGLAxis* axis_; /*!< pointer to axis volume */
 
     // OpenGL timing
     static double delta_time_; /*! Time between 2 frames */
