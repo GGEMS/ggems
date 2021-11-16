@@ -79,14 +79,6 @@ class GGEMS_EXPORT GGEMSOpenGLAxis
       \brief Avoid copy by rvalue reference
     */
     GGEMSOpenGLAxis& operator=(GGEMSOpenGLAxis const&& axis_volume) = delete;
-
-    /*!
-      \fn void Draw(void) const
-      \brief draw axis volume
-    */
-    void Draw(void) const;
-
-  private:
 };
 
 #endif

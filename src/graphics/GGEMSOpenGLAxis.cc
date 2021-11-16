@@ -31,6 +31,9 @@
 #ifdef OPENGL_VISUALIZATION
 
 #include "GGEMS/graphics/GGEMSOpenGLAxis.hh"
+#include "GGEMS/graphics/GGEMSOpenGLSphere.hh"
+#include "GGEMS/graphics/GGEMSOpenGLPrism.hh"
+#include "GGEMS/tools/GGEMSSystemOfUnits.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -46,21 +49,59 @@ GGEMSOpenGLAxis::GGEMSOpenGLAxis(void)
   //     * a tube + cone for X axis
   //     * a tube + cone for Y axis
   //     * a tube + cone for Z axis
+  // All volume pointer are destroyed by GGEMSOpenGLManager
 
-  // 0.6 mm Sphere in (0, 0, 0)
-  // sphere_test = new GGEMSOpenGLSphere(0.2f*mm);
-  // sphere_test->SetVisible(true);
-  // sphere_test->SetColor("yellow");
-  // sphere_test->Build();
+  ////////////////////////
+  // X axis
+  GGEMSOpenGLPrism* cylinder = new GGEMSOpenGLPrism(3.5f*mm, 3.5f*mm, 100.0f*mm, 48, 24);
+  cylinder->SetVisible(true);
+  cylinder->SetColor("green");
+  cylinder->SetPosition(50.0f, 0.0f, 0.0f*mm);
+  cylinder->SetYAngle(90.0f);
+  cylinder->Build();
 
-  // prism_test = new GGEMSOpenGLPrism(1.0f*mm, 0.0001f*mm, 3.0f*mm, 36, 12);
-  // prism_test->SetVisible(true);
-  // prism_test->SetColor("purple");
-  // prism_test->SetPosition(0.0f, 0.0f, 0.0f);
-  // prism_test->SetXAngle(15.0f);
-  // prism_test->SetYAngle(45.0f);
-  // prism_test->SetZAngle(10.0f);
-  // prism_test->Build();
+  GGEMSOpenGLPrism* arrow = new GGEMSOpenGLPrism(5.0f*mm, 0.0001f*mm, 7.5f*mm, 48, 24);
+  arrow->SetVisible(true);
+  arrow->SetColor("green");
+  arrow->SetPosition(102.5f*mm, 0.0f, 0.0f*mm);
+  arrow->SetYAngle(90.0f);
+  arrow->Build();
+
+  ////////////////////////
+  // Y axis
+  cylinder = new GGEMSOpenGLPrism(3.5f*mm, 3.5f*mm, 100.0f*mm, 48, 24);
+  cylinder->SetVisible(true);
+  cylinder->SetColor("red");
+  cylinder->SetPosition(0.0f, -50.0f, 0.0f*mm);
+  cylinder->SetXAngle(90.0f);
+  cylinder->Build();
+
+  arrow = new GGEMSOpenGLPrism(5.0f*mm, 0.0001f*mm, 7.5f*mm, 48, 24);
+  arrow->SetVisible(true);
+  arrow->SetColor("red");
+  arrow->SetPosition(0.0f*mm, -102.5f*mm, 0.0f*mm);
+  arrow->SetXAngle(90.0f);
+  arrow->Build();
+
+  ////////////////////////
+  // Z axis
+  cylinder = new GGEMSOpenGLPrism(3.5f*mm, 3.5f*mm, 100.0f*mm, 48, 24);
+  cylinder->SetVisible(true);
+  cylinder->SetColor("blue");
+  cylinder->SetPosition(0.0f, 0.0f, -50.0f*mm);
+  cylinder->Build();
+
+  arrow = new GGEMSOpenGLPrism(5.0f*mm, 0.0001f*mm, 7.5f*mm, 48, 24);
+  arrow->SetVisible(true);
+  arrow->SetColor("blue");
+  arrow->SetPosition(0.0f*mm, 0.0f*mm, -102.5f*mm);
+  arrow->SetYAngle(180.0f);
+  arrow->Build();
+
+  GGEMSOpenGLSphere* sphere = new GGEMSOpenGLSphere(5.0f*mm);
+  sphere->SetVisible(true);
+  sphere->SetColor("yellow");
+  sphere->Build();
 
   GGcout("GGEMSOpenGLAxis", "GGEMSOpenGLAxis", 3) << "GGEMSOpenGLAxis created!!!" << GGendl;
 }
@@ -71,19 +112,9 @@ GGEMSOpenGLAxis::GGEMSOpenGLAxis(void)
 
 GGEMSOpenGLAxis::~GGEMSOpenGLAxis(void)
 {
-  GGcout("GGEMSOpenGLAxis", "~GGEMSOpenGLAxis", 3) << "GGEMSOpenGLPrism erasing..." << GGendl;
+  GGcout("GGEMSOpenGLAxis", "~GGEMSOpenGLAxis", 3) << "GGEMSOpenGLAxis erasing..." << GGendl;
 
-  GGcout("GGEMSOpenGLAxis", "~GGEMSOpenGLAxis", 3) << "GGEMSOpenGLPrism erased!!!" << GGendl;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void GGEMSOpenGLAxis::Draw(void) const
-{
-//   // opengl_volumes_[0]->Draw();
-//   // opengl_volumes_[1]->Draw();
+  GGcout("GGEMSOpenGLAxis", "~GGEMSOpenGLAxis", 3) << "GGEMSOpenGLAxis erased!!!" << GGendl;
 }
 
 #endif

@@ -36,7 +36,7 @@
 // #include "GGEMS/materials/GGEMSMaterialsDatabaseManager.hh"
 // #include "GGEMS/navigators/GGEMSVoxelizedPhantom.hh"
 // #include "GGEMS/navigators/GGEMSSystem.hh"
-// #include "GGEMS/navigators/GGEMSCTSystem.hh"
+#include "GGEMS/navigators/GGEMSCTSystem.hh"
 // #include "GGEMS/physics/GGEMSRangeCutsManager.hh"
 // #include "GGEMS/physics/GGEMSProcessesManager.hh"
 // #include "GGEMS/sources/GGEMSXRaySource.hh"
@@ -270,18 +270,22 @@ int main(int argc, char** argv)
     // phantom.SetRotation(0.0f, 0.0f, 0.0f, "deg");
     // phantom.SetPosition(0.0f, 0.0f, 0.0f, "mm");
 
-    // GGEMSCTSystem ct_detector("Stellar");
-    // ct_detector.SetCTSystemType("curved");
-    // ct_detector.SetNumberOfModules(1, 46);
-    // ct_detector.SetNumberOfDetectionElementsInsideModule(64, 16, 1);
-    // ct_detector.SetSizeOfDetectionElements(0.6f, 0.6f, 0.6f, "mm");
-    // ct_detector.SetMaterialName("GOS");
-    // ct_detector.SetSourceDetectorDistance(1085.6f, "mm");
-    // ct_detector.SetSourceIsocenterDistance(595.0f, "mm");
-    // ct_detector.SetRotation(0.0f, 0.0f, 0.0f, "deg");
-    // ct_detector.SetThreshold(10.0f, "keV");
-    // ct_detector.StoreOutput("data/projection");
-    // ct_detector.StoreScatter(true);
+    GGEMSCTSystem ct_detector("Stellar");
+    ct_detector.SetCTSystemType("curved");
+    //ct_detector.SetNumberOfModules(1, 46);
+    ct_detector.SetNumberOfModules(1, 1);
+    ct_detector.SetNumberOfDetectionElementsInsideModule(64, 16, 1);
+    ct_detector.SetSizeOfDetectionElements(0.6f, 0.6f, 0.6f, "mm");
+    ct_detector.SetMaterialName("GOS");
+    ct_detector.SetSourceDetectorDistance(1085.6f, "mm");
+    ct_detector.SetSourceIsocenterDistance(595.0f, "mm");
+    ct_detector.SetRotation(0.0f, 0.0f, 0.0f, "deg");
+    ct_detector.SetThreshold(10.0f, "keV");
+    ct_detector.StoreOutput("data/projection");
+    ct_detector.StoreScatter(true);
+    // ct_detector.SetVisible(true)
+    // ct_detector.SetColor("red");
+    // ct_detector.SetLineMode("wireframe" or "solid")
 
     // // Physics
     // processes_manager.AddProcess("Compton", "gamma", "all");

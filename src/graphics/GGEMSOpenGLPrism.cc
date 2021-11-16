@@ -196,12 +196,12 @@ void GGEMSOpenGLPrism::Build(void)
     for (GLint j = 0; j < number_of_sectors_; ++j, ++k1, ++k2) {
       // first triangle
       indices_[index++] = k1;
-      indices_[index++] = k2;
       indices_[index++] = k1+1;
+      indices_[index++] = k2;
       // second triangle
       indices_[index++] = k2;
       indices_[index++] = k1+1;
-      indices_[index++] = k2;
+      indices_[index++] = k2+1;
     }
   }
 

@@ -105,12 +105,18 @@ GGEMSOpenGLManager::~GGEMSOpenGLManager(void)
   GGcout("GGEMSOpenGLManager", "~GGEMSOpenGLManager", 3) << "GGEMSOpenGLManager erasing..." << GGendl;
 
   // Destroying GLFW window
-  glfwDestroyWindow(window_); // destroying GLFW window
+  glfwDestroyWindow(window_);
   window_ = nullptr;
 
   if (axis_) {
     delete axis_;
     axis_ = nullptr;
+  }
+
+  // Destroying volumes
+  if (opengl_volumes_) {
+    delete[] opengl_volumes_;
+    opengl_volumes_ = nullptr;
   }
 
   glDeleteProgram(program_shader_id_);
@@ -283,11 +289,9 @@ void GGEMSOpenGLManager::InitGL(void)
   glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
   glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
   glEnable(GL_DEPTH_TEST); // Enable depth buffering
-  glDepthFunc(GL_LEQUAL); // Accept fragment if it closer to the camera than the former one or GL_LESS
+  glDepthFunc(GL_LESS); // Accept fragment if it closer to the camera than the former one
   glEnable(GL_MULTISAMPLE); // Activating anti-aliasing
   glfwWindowHint(GLFW_SAMPLES, msaa_);
-  glEnable(GL_CULL_FACE);
-  glClearDepth(1.0f); 
 
   // Creating window
   window_ = glfwCreateWindow(window_width_, window_height_, "GGEMS OpenGL", nullptr, nullptr);
@@ -503,6 +507,7 @@ void GGEMSOpenGLManager::Display(void)
     // Check camera parameters (projection mode + view)
     UpdateProjectionAndView();
 
+    // Draw all registered volumes
     Draw();
 
     if (is_save_image_) SaveWindow(window_);
@@ -571,7 +576,7 @@ void GGEMSOpenGLManager::UpdateProjectionAndView(void)
     {
       current_zoom = 0.1f;
     }
-    projection_ = glm::ortho(-5.0f/current_zoom,5.0f/current_zoom,-5.0f/current_zoom,5.0f/current_zoom,-5.0f,5.0f);
+    projection_ = glm::ortho(-100.0f/current_zoom,100.0f/current_zoom,-100.0f/current_zoom,100.0f/current_zoom,-100.0f,100.0f);
   }
 
   camera_view_ = glm::lookAt(
