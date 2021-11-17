@@ -161,8 +161,19 @@ class GGEMS_EXPORT GGEMSOpenGLManager
 
     /*!
       \fn void Store(GGEMSOpenGLVolume* opengl_volume)
+      \param opengl_volume - pointer to opengl volume
+      \brief store opengl volume in singleton
     */
     void Store(GGEMSOpenGLVolume* opengl_volume);
+
+    /*!
+      \fn void SetWorldSize(float const& x_size, float const& y_size, float const& z_size)
+      \param x_size - size in X of world scene
+      \param y_size - size in Y of world scene
+      \param z_size - size in Z of world scene
+      \brief Set size of world scene for opengl
+    */
+    void SetWorldSize(float const& x_size, float const& y_size, float const& z_size);
 
     /*!
       \fn GLuint GetProgramShaderID(void) const
@@ -331,10 +342,15 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     static bool is_first_mouse_; /*!< First use of mouse */
     static double last_mouse_x_position_; /*!< Last position of mouse in x */
     static double last_mouse_y_position_; /*!< Last position of mouse in y */
+    static bool is_left_button_; /*!< If left button is used */
+    static bool is_middle_button_; /*!< If middle button is used */
     int msaa_; /*!< MSAA: Multi sample anti-aliasing factor */
     ColorUMap colors_; /*!< List of colors */
     float background_color_[3]; /*!< window background color */
     bool is_draw_axis_; /*!< Flag for axis drawing activation */
+    float x_world_size_; /*!< World size along x axis */
+    float y_world_size_; /*!< World size along y axis */
+    float z_world_size_; /*!< World size along z axis */
 
     GLuint program_shader_id_; /*!< program id for shader, the same for all OpenGL volume */
     GGEMSOpenGLVolume** opengl_volumes_; /*!< OpenGL volume to display or not */

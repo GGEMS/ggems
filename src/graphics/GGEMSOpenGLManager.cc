@@ -49,6 +49,8 @@ bool GGEMSOpenGLManager::is_first_mouse_ = true;
 double GGEMSOpenGLManager::last_mouse_x_position_ = 0.0;
 double GGEMSOpenGLManager::last_mouse_y_position_ = 0.0;
 bool GGEMSOpenGLManager::is_save_image_ = false;
+bool GGEMSOpenGLManager::is_left_button_ = false;
+bool GGEMSOpenGLManager::is_middle_button_ = false;
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -92,6 +94,11 @@ GGEMSOpenGLManager::GGEMSOpenGLManager(void)
   projection_ = glm::mat4(1.0f);
   image_output_basename_ = "";
   image_output_index_ = 0;
+
+  // By default, world is a square of 2 meters
+  x_world_size_ = 2.0*m;
+  y_world_size_ = 2.0*m;
+  z_world_size_ = 2.0*m;
 
   GGcout("GGEMSOpenGLManager", "GGEMSOpenGLManager", 3) << "GGEMSOpenGLManager created!!!" << GGendl;
 }
@@ -152,6 +159,17 @@ void GGEMSOpenGLManager::Store(GGEMSOpenGLVolume* opengl_volume)
   }
 
   number_of_opengl_volumes_++;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSOpenGLManager::SetWorldSize(float const& x_size, float const& y_size, float const& z_size)
+{
+  x_world_size_ = x_size;
+  y_world_size_ = y_size;
+  z_world_size_ = z_size;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -471,6 +489,8 @@ void GGEMSOpenGLManager::PrintKeys(void) const
   GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << GGendl;
   GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << "Mouse:" << GGendl;
   GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << "    * [Scroll Up/Down]     Zoom in/out" << GGendl;
+  GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << "    * [Left button]        Rotation" << GGendl;
+  GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << "    * [Middle button]      Translation" << GGendl;
   GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << GGendl;
 }
 
@@ -560,6 +580,8 @@ void GGEMSOpenGLManager::UpdateFPSCounter(void)
 
 void GGEMSOpenGLManager::UpdateProjectionAndView(void)
 {
+  std::cout << "zoom: " << zoom_ << std::endl;
+
   if (is_perspective_) {
     // Computing fov depending on zoom
     float fov = 45.0f + zoom_;
@@ -576,7 +598,12 @@ void GGEMSOpenGLManager::UpdateProjectionAndView(void)
     {
       current_zoom = 0.1f;
     }
-    projection_ = glm::ortho(-100.0f/current_zoom,100.0f/current_zoom,-100.0f/current_zoom,100.0f/current_zoom,-100.0f,100.0f);
+    //projection_ = glm::ortho(-100.0f/current_zoom,100.0f/current_zoom,-100.0f/current_zoom,100.0f/current_zoom,-100.0f,100.0f);
+    projection_ = glm::ortho(
+      (-x_world_size_/2.0f), (x_world_size_/2.0f),
+      (-y_world_size_/2.0f), (y_world_size_/2.0f),
+      (-z_world_size_/2.0f), (z_world_size_/2.0f)
+    );
   }
 
   camera_view_ = glm::lookAt(
@@ -802,7 +829,18 @@ void GGEMSOpenGLManager::GLFWWindowSizeCallback(GLFWwindow*, int width, int heig
 
 void GGEMSOpenGLManager::GLFWMouseButtonCallback(GLFWwindow* window, int button, int action, int)
 {
-  if (button != GLFW_MOUSE_BUTTON_LEFT) return;
+  if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+    is_left_button_ = true;
+    is_middle_button_ = false;
+  }
+  else if (button == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_PRESS) {
+    is_left_button_ = false;
+    is_middle_button_ = true;
+  }
+  else {
+    is_left_button_ = false;
+    is_middle_button_ = false;
+  }
 
   if (action == GLFW_PRESS) {
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -819,8 +857,7 @@ void GGEMSOpenGLManager::GLFWMouseButtonCallback(GLFWwindow* window, int button,
 
 void GGEMSOpenGLManager::GLFWCursorPosCallback(GLFWwindow* window, double x, double y)
 {
-  if (glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_DISABLED) {
-
+  if (is_left_button_) {
     if (is_first_mouse_) {
       is_first_mouse_ = false;
       last_mouse_x_position_ = x_mouse_cursor_;

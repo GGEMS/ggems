@@ -226,12 +226,12 @@ int main(int argc, char** argv)
     opengl_manager.SetWindowDimensions(window_dims[0], window_dims[1]);
     opengl_manager.SetBackgroundColor(window_color);
     opengl_manager.SetImageOutput("data/axis");
-    opengl_manager.Initialize();
-    opengl_manager.Display();
+    opengl_manager.SetWorldSize(1.0f*m,1.0f*m,1.0f*m);
 
     // Command line for solid directely
     // XXX.SetColor("black" or ...)
     // XXX.SetLineMode("wireframe" or "solid")
+    // Set size of world ...
 
     // Command for GGEMS or OpenGL
     // XXX.SetParticleColor("gamma","red") ...
@@ -270,19 +270,19 @@ int main(int argc, char** argv)
     // phantom.SetRotation(0.0f, 0.0f, 0.0f, "deg");
     // phantom.SetPosition(0.0f, 0.0f, 0.0f, "mm");
 
-    GGEMSCTSystem ct_detector("Stellar");
-    ct_detector.SetCTSystemType("curved");
-    //ct_detector.SetNumberOfModules(1, 46);
-    ct_detector.SetNumberOfModules(1, 1);
-    ct_detector.SetNumberOfDetectionElementsInsideModule(64, 16, 1);
-    ct_detector.SetSizeOfDetectionElements(0.6f, 0.6f, 0.6f, "mm");
-    ct_detector.SetMaterialName("GOS");
-    ct_detector.SetSourceDetectorDistance(1085.6f, "mm");
-    ct_detector.SetSourceIsocenterDistance(595.0f, "mm");
-    ct_detector.SetRotation(0.0f, 0.0f, 0.0f, "deg");
-    ct_detector.SetThreshold(10.0f, "keV");
-    ct_detector.StoreOutput("data/projection");
-    ct_detector.StoreScatter(true);
+    // GGEMSCTSystem ct_detector("Stellar");
+    // ct_detector.SetCTSystemType("curved");
+    // //ct_detector.SetNumberOfModules(1, 46);
+    // ct_detector.SetNumberOfModules(1, 1);
+    // ct_detector.SetNumberOfDetectionElementsInsideModule(64, 16, 1);
+    // ct_detector.SetSizeOfDetectionElements(0.6f, 0.6f, 0.6f, "mm");
+    // ct_detector.SetMaterialName("GOS");
+    // ct_detector.SetSourceDetectorDistance(1085.6f, "mm");
+    // ct_detector.SetSourceIsocenterDistance(595.0f, "mm");
+    // ct_detector.SetRotation(0.0f, 0.0f, 0.0f, "deg");
+    // ct_detector.SetThreshold(10.0f, "keV");
+    // ct_detector.StoreOutput("data/projection");
+    // ct_detector.StoreScatter(true);
     // ct_detector.SetVisible(true)
     // ct_detector.SetColor("red");
     // ct_detector.SetLineMode("wireframe" or "solid")
@@ -309,6 +309,9 @@ int main(int argc, char** argv)
     // point_source.SetBeamAperture(12.5f, "deg");
     // point_source.SetFocalSpotSize(0.0f, 0.0f, 0.0f, "mm");
     // point_source.SetPolyenergy("data/spectrum_120kVp_2mmAl.dat");
+
+    opengl_manager.Initialize();
+    opengl_manager.Display();
 
     // // GGEMS simulation
     // GGEMS ggems;
