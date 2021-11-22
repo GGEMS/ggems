@@ -135,12 +135,6 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     void SetBackgroundColor(std::string const& color);
 
     /*!
-      \fn void SetProjectionMode(std::string const& projection_mode)
-      \brief setting the projection mode: perspective or ortho
-    */
-    void SetProjectionMode(std::string const& projection_mode);
-
-    /*!
       \fn void SetDrawAxis(bool const& is_draw_axis)
       \param is_draw_axis - flag for axis drawing activation
       \brief set flag for axis drawing
@@ -247,6 +241,7 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     /*!
       \fn std::string GetOpenGLSLVersion(void) const
       \brief Get version of GLSL
+      \return GLSL version in string
     */
     std::string GetOpenGLSLVersion(void) const;
 
@@ -274,6 +269,25 @@ class GGEMS_EXPORT GGEMSOpenGLManager
       \brief Draw all volumes
     */
     void Draw(void) const;
+
+    /*!
+      \fn float GetCurrentZoom(void) const
+      \brief Computing the current zoom of OpenGL window
+      \return Current zoom in a float type
+    */
+    inline float GetCurrentZoom(void) const
+    {
+      if (zoom_ >= 0.0f) {
+        return 1.0f + zoom_ / 5.0f;
+      }
+      else {
+        float current_zoom = 0.05f * zoom_ + 1.0f;
+        if (current_zoom < 0.0f) {
+          current_zoom = 0.01f;
+        }
+        return current_zoom;
+      }
+    }
 
     /*!
       \fn void GLFWErrorCallback(int error_code, char const* description)
@@ -362,7 +376,6 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     static glm::vec3 camera_target_; /*!< Target of the camera */
     static glm::vec3 camera_up_; /*!< Vector to the top */
     glm::mat4 projection_; /*!< Projection matrix (ortho or perspective), perspective by defaut */
-    static bool is_perspective_; /*!< Mode of projection */
     static bool is_wireframe_; /*!< Line mode: wireframe or solid (if bool is false) */
     static float zoom_; /*!< Value of zoom */
     static bool is_save_image_; /*!< Save window to png image file */

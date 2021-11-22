@@ -34,7 +34,6 @@
 // Definition of static members
 int GGEMSOpenGLManager::window_width_ = 800;
 int GGEMSOpenGLManager::window_height_ = 600;
-bool GGEMSOpenGLManager::is_perspective_ = true;
 bool GGEMSOpenGLManager::is_wireframe_ = true;
 float GGEMSOpenGLManager::zoom_ = 0.0f;
 glm::vec3 GGEMSOpenGLManager::camera_position_ = glm::vec3(0.0f, 0.0f, 3.0f);
@@ -247,28 +246,6 @@ void GGEMSOpenGLManager::SetDrawAxis(bool const& is_draw_axis)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSOpenGLManager::SetProjectionMode(std::string const& projection_mode)
-{
-  std::string mode = projection_mode;
-  std::transform(mode.begin(), mode.end(), mode.begin(), ::tolower);
-
-  if (mode == "perspective") {
-    is_perspective_ = 1;
-  }
-  else if (mode == "ortho") {
-    is_perspective_ = 0;
-  }
-  else {
-    std::ostringstream oss(std::ostringstream::out);
-    oss << "Available projection mode are: 'perspective' or 'ortho' only!!!";
-    GGEMSMisc::ThrowException("GGEMSOpenGLManager", "SetProjectionMode", oss.str());
-  }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
 void GGEMSOpenGLManager::Initialize(void)
 {
   GGcout("GGEMSOpenGLManager", "Initialize", 3) << "Initializing the OpenGL manager..." << GGendl;
@@ -306,9 +283,9 @@ void GGEMSOpenGLManager::InitGL(void)
   glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
   glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
   glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-  glEnable(GL_DEPTH_TEST); // Enable depth buffering
-  glDepthFunc(GL_LESS); // Accept fragment if it closer to the camera than the former one
-  glEnable(GL_MULTISAMPLE); // Activating anti-aliasing
+  glEnable(GL_DEPTH_TEST);
+  glDepthFunc(GL_LESS);
+  glEnable(GL_MULTISAMPLE);
   glfwWindowHint(GLFW_SAMPLES, msaa_);
 
   // Creating window
@@ -475,8 +452,6 @@ void GGEMSOpenGLManager::PrintKeys(void) const
   GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << GGendl;
   GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << "Keys:" << GGendl;
   GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << "    * [Esc/X]              Quit application" << GGendl;
-  GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << "    * [P]                  Perspective projection" << GGendl;
-  GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << "    * [O]                  Ortho projection" << GGendl;
   GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << "    * [C]                  Wireframe view" << GGendl;
   GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << "    * [V]                  Solid view" << GGendl;
   GGcout("GGEMSOpenGLManager", "PrintKeys", 0) << "    * [R]                  Reset view" << GGendl;
@@ -580,31 +555,14 @@ void GGEMSOpenGLManager::UpdateFPSCounter(void)
 
 void GGEMSOpenGLManager::UpdateProjectionAndView(void)
 {
-  std::cout << "zoom: " << zoom_ << std::endl;
+  projection_ = glm::ortho(
+    (-x_world_size_/2.0f), (x_world_size_/2.0f),
+    (-y_world_size_/2.0f), (y_world_size_/2.0f),
+    (-z_world_size_/2.0f), (z_world_size_/2.0f)
+  );
 
-  if (is_perspective_) {
-    // Computing fov depending on zoom
-    float fov = 45.0f + zoom_;
-    if (fov <= 1.0f) {
-      fov = 1.0f;
-      zoom_ = -44.0f;
-    }
-
-    projection_ = glm::perspective(glm::radians(fov), static_cast<float>(window_width_) / static_cast<float>(window_height_), 0.1f, 100.0f);
-  }
-  else {
-    float current_zoom = 1.0f + (-zoom_) /10.0f;
-    if (current_zoom <= 0.0f)
-    {
-      current_zoom = 0.1f;
-    }
-    //projection_ = glm::ortho(-100.0f/current_zoom,100.0f/current_zoom,-100.0f/current_zoom,100.0f/current_zoom,-100.0f,100.0f);
-    projection_ = glm::ortho(
-      (-x_world_size_/2.0f), (x_world_size_/2.0f),
-      (-y_world_size_/2.0f), (y_world_size_/2.0f),
-      (-z_world_size_/2.0f), (z_world_size_/2.0f)
-    );
-  }
+  float current_zoom = GetCurrentZoom();
+  projection_ = glm::scale(projection_, glm::vec3(current_zoom, current_zoom, 1.0f));
 
   camera_view_ = glm::lookAt(
     camera_position_, // Position of the camera in world Space
@@ -690,7 +648,7 @@ void GGEMSOpenGLManager::SaveWindow(GLFWwindow* w)
 
 void GGEMSOpenGLManager::GLFWKeyCallback(GLFWwindow* window, int key, int, int action, int)
 {
-  float camera_speed = 2.5f * static_cast<float>(delta_time_); // Defining a camera speed depending on the delta time
+  float camera_speed = 100.0f * static_cast<float>(delta_time_); // Defining a camera speed depending on the delta time
 
   switch (key) {
     case GLFW_KEY_ESCAPE: {
@@ -709,35 +667,35 @@ void GGEMSOpenGLManager::GLFWKeyCallback(GLFWwindow* window, int key, int, int a
     //   break;
     // }
     case GLFW_KEY_KP_SUBTRACT: {
-      zoom_ += 1.0f;
-      break;
-    }
-    case GLFW_KEY_KP_ADD: {
       zoom_ -= 1.0f;
       break;
     }
+    case GLFW_KEY_KP_ADD: {
+      zoom_ += 1.0f;
+      break;
+    }
     case GLFW_KEY_UP: {
-      camera_position_ += camera_speed * camera_target_;
+      camera_position_ += glm::normalize(camera_up_) * camera_speed;
       break;
     }
     case GLFW_KEY_KP_8: {
-      camera_position_ += camera_speed * camera_target_;
+      camera_position_ += glm::normalize(camera_up_) * camera_speed;
       break;
     }
     case GLFW_KEY_W: {
-      camera_position_ += camera_speed * camera_target_;
+      camera_position_ += glm::normalize(camera_up_) * camera_speed;
       break;
     }
     case GLFW_KEY_DOWN: {
-      camera_position_ -= camera_speed * camera_target_;
+      camera_position_ -= glm::normalize(camera_up_) * camera_speed;
       break;
     }
     case GLFW_KEY_S: {
-      camera_position_ -= camera_speed * camera_target_;
+      camera_position_ -= glm::normalize(camera_up_) * camera_speed;
       break;
     }
     case GLFW_KEY_KP_5: {
-      camera_position_ -= camera_speed * camera_target_;
+      camera_position_ -= glm::normalize(camera_up_) * camera_speed;
       break;
     }
     case GLFW_KEY_LEFT: {
@@ -765,10 +723,9 @@ void GGEMSOpenGLManager::GLFWKeyCallback(GLFWwindow* window, int key, int, int a
       break;
     }
     case GLFW_KEY_R: {
-      camera_position_ = glm::vec3(0.0f, 0.0f, 5.0f);
+      camera_position_ = glm::vec3(0.0f, 0.0f, 3.0f);
       camera_target_ = glm::vec3(0.0, 0.0, -1.0f);
       camera_up_ = glm::vec3(0.0, 1.0, 0.0f);
-      is_perspective_ = true;
       is_wireframe_ = true;
       zoom_ = 0.0f;
       pitch_angle_ = 0.0;
@@ -782,20 +739,12 @@ void GGEMSOpenGLManager::GLFWKeyCallback(GLFWwindow* window, int key, int, int a
       }
       break;
     }
-    case GLFW_KEY_P : {
-      is_perspective_ = true;
-      break;
-    }
     case GLFW_KEY_C : {
       is_wireframe_ = true;
       break;
     }
     case GLFW_KEY_V : {
       is_wireframe_ = false;
-      break;
-    }
-    case GLFW_KEY_O : {
-      is_perspective_ = false;
       break;
     }
     default: {
@@ -810,7 +759,7 @@ void GGEMSOpenGLManager::GLFWKeyCallback(GLFWwindow* window, int key, int, int a
 
 void GGEMSOpenGLManager::GLFWScrollCallback(GLFWwindow*, double, double yoffset)
 {
-  zoom_ -= static_cast<float>(yoffset);
+  zoom_ += static_cast<float>(yoffset);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -886,6 +835,22 @@ void GGEMSOpenGLManager::GLFWCursorPosCallback(GLFWwindow* window, double x, dou
     target.y = sin(glm::radians(pitch_angle_));
     target.z = sin(glm::radians(yaw_angle_)) * cos(glm::radians(pitch_angle_));
     camera_target_ = glm::normalize(target);
+  }
+  else if (is_middle_button_) {
+    if (is_first_mouse_) {
+      is_first_mouse_ = false;
+      last_mouse_x_position_ = x_mouse_cursor_;
+      last_mouse_y_position_ = y_mouse_cursor_;
+    }
+
+    // Offset between cursor position and current position
+    double x_cursor_offset = x - last_mouse_x_position_;
+    double y_cursor_offset = last_mouse_y_position_ - y;
+    last_mouse_x_position_ = x;
+    last_mouse_y_position_ = y;
+
+    glm::vec3 position(0.5*x_cursor_offset, 0.5*y_cursor_offset, 0.0f);
+    camera_position_ += position;
   }
   else {
     is_first_mouse_ = true;

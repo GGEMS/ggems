@@ -33,15 +33,15 @@
 #include "GGEMS/global/GGEMSOpenCLManager.hh"
 #include "GGEMS/graphics/GGEMSOpenGLManager.hh"
 // #include "GGEMS/global/GGEMS.hh"
-// #include "GGEMS/materials/GGEMSMaterialsDatabaseManager.hh"
-// #include "GGEMS/navigators/GGEMSVoxelizedPhantom.hh"
+#include "GGEMS/materials/GGEMSMaterialsDatabaseManager.hh"
+#include "GGEMS/navigators/GGEMSVoxelizedPhantom.hh"
 // #include "GGEMS/navigators/GGEMSSystem.hh"
 #include "GGEMS/navigators/GGEMSCTSystem.hh"
 // #include "GGEMS/physics/GGEMSRangeCutsManager.hh"
 // #include "GGEMS/physics/GGEMSProcessesManager.hh"
 // #include "GGEMS/sources/GGEMSXRaySource.hh"
-// #include "GGEMS/geometries/GGEMSVolumeCreatorManager.hh"
-// #include "GGEMS/geometries/GGEMSBox.hh"
+#include "GGEMS/geometries/GGEMSVolumeCreatorManager.hh"
+#include "GGEMS/geometries/GGEMSBox.hh"
 
 #ifdef _WIN32
 #include "GGEMS/tools/GGEMSWinGetOpt.hh"
@@ -218,11 +218,12 @@ int main(int argc, char** argv)
     // Initialization of singletons
     GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
     GGEMSOpenGLManager& opengl_manager = GGEMSOpenGLManager::GetInstance();
+    GGEMSMaterialsDatabaseManager& material_manager = GGEMSMaterialsDatabaseManager::GetInstance();
+    GGEMSVolumeCreatorManager& volume_creator_manager = GGEMSVolumeCreatorManager::GetInstance();
 
     // Visualization params
     opengl_manager.SetMSAA(msaa);
     opengl_manager.SetDrawAxis(true);
-    opengl_manager.SetProjectionMode("perspective");
     opengl_manager.SetWindowDimensions(window_dims[0], window_dims[1]);
     opengl_manager.SetBackgroundColor(window_color);
     opengl_manager.SetImageOutput("data/axis");
@@ -240,29 +241,29 @@ int main(int argc, char** argv)
     // OpenCL params
     opencl_manager.DeviceToActivate(device_index);
 
-    // // Enter material database
-    // material_manager.SetMaterialsDatabase("data/materials.txt");
+    // Enter material database
+    material_manager.SetMaterialsDatabase("data/materials.txt");
 
-    // // Initializing a global voxelized volume
-    // volume_creator_manager.SetVolumeDimensions(120, 120, 120);
-    // volume_creator_manager.SetElementSizes(0.1f, 0.1f, 0.1f, "mm");
-    // volume_creator_manager.SetOutputImageFilename("data/phantom.mhd");
-    // volume_creator_manager.SetRangeToMaterialDataFilename("data/range_phantom.txt");
-    // volume_creator_manager.SetMaterial("Air");
-    // volume_creator_manager.SetDataType("MET_INT");
-    // volume_creator_manager.Initialize();
+    // Initializing a global voxelized volume
+    volume_creator_manager.SetVolumeDimensions(120, 120, 120);
+    volume_creator_manager.SetElementSizes(0.1f, 0.1f, 0.1f, "mm");
+    volume_creator_manager.SetOutputImageFilename("data/phantom.mhd");
+    volume_creator_manager.SetRangeToMaterialDataFilename("data/range_phantom.txt");
+    volume_creator_manager.SetMaterial("Air");
+    volume_creator_manager.SetDataType("MET_INT");
+    volume_creator_manager.Initialize();
 
-    // // Creating a box
-    // GGEMSBox* box_phantom = new GGEMSBox(10.0f, 10.0f, 10.0f, "mm");
-    // box_phantom->SetPosition(0.0f, 0.0f, 0.0f, "mm");
-    // box_phantom->SetLabelValue(1);
-    // box_phantom->SetMaterial("Water");
-    // box_phantom->Initialize();
-    // box_phantom->Draw();
-    // delete box_phantom;
+    // Creating a box
+    GGEMSBox* box_phantom = new GGEMSBox(10.0f, 10.0f, 10.0f, "mm");
+    box_phantom->SetPosition(0.0f, 0.0f, 0.0f, "mm");
+    box_phantom->SetLabelValue(1);
+    box_phantom->SetMaterial("Water");
+    box_phantom->Initialize();
+    box_phantom->Draw();
+    delete box_phantom;
 
-    // // Writing volume
-    // volume_creator_manager.Write();
+    // Writing volume
+    volume_creator_manager.Write();
 
     // // Phantoms and systems
     // GGEMSVoxelizedPhantom phantom("phantom");
@@ -270,22 +271,21 @@ int main(int argc, char** argv)
     // phantom.SetRotation(0.0f, 0.0f, 0.0f, "deg");
     // phantom.SetPosition(0.0f, 0.0f, 0.0f, "mm");
 
-    // GGEMSCTSystem ct_detector("Stellar");
-    // ct_detector.SetCTSystemType("curved");
+    GGEMSCTSystem ct_detector("Stellar");
+    ct_detector.SetCTSystemType("curved");
     // //ct_detector.SetNumberOfModules(1, 46);
-    // ct_detector.SetNumberOfModules(1, 1);
-    // ct_detector.SetNumberOfDetectionElementsInsideModule(64, 16, 1);
-    // ct_detector.SetSizeOfDetectionElements(0.6f, 0.6f, 0.6f, "mm");
-    // ct_detector.SetMaterialName("GOS");
-    // ct_detector.SetSourceDetectorDistance(1085.6f, "mm");
-    // ct_detector.SetSourceIsocenterDistance(595.0f, "mm");
-    // ct_detector.SetRotation(0.0f, 0.0f, 0.0f, "deg");
-    // ct_detector.SetThreshold(10.0f, "keV");
-    // ct_detector.StoreOutput("data/projection");
-    // ct_detector.StoreScatter(true);
-    // ct_detector.SetVisible(true)
+    ct_detector.SetNumberOfModules(1, 1);
+    ct_detector.SetNumberOfDetectionElementsInsideModule(64, 16, 1);
+    ct_detector.SetSizeOfDetectionElements(0.6f, 0.6f, 0.6f, "mm");
+    ct_detector.SetMaterialName("GOS");
+    ct_detector.SetSourceDetectorDistance(1085.6f, "mm");
+    ct_detector.SetSourceIsocenterDistance(595.0f, "mm");
+    ct_detector.SetRotation(0.0f, 0.0f, 0.0f, "deg");
+    ct_detector.SetThreshold(10.0f, "keV");
+    ct_detector.StoreOutput("data/projection");
+    ct_detector.StoreScatter(true);
+    // ct_detector.SetVisible(true);
     // ct_detector.SetColor("red");
-    // ct_detector.SetLineMode("wireframe" or "solid")
 
     // // Physics
     // processes_manager.AddProcess("Compton", "gamma", "all");
