@@ -89,7 +89,6 @@ GGEMSOpenGLVolume::~GGEMSOpenGLVolume(void)
 {
   GGcout("GGEMSOpenGLVolume", "~GGEMSOpenGLVolume", 3) << "GGEMSOpenGLVolume erasing..." << GGendl;
 
-
   // Destroying vao and vbo
   glDeleteBuffers(1, &vao_);
   glDeleteBuffers(2, &vbo_[0]);
@@ -193,6 +192,7 @@ void GGEMSOpenGLVolume::SetVisible(bool const& is_visible)
 {
   is_visible_ = is_visible;
 }
+
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////

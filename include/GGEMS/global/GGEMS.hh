@@ -53,7 +53,7 @@ class GGEMS_EXPORT GGEMS
     /*!
       \brief GGEMS constructor
     */
-    GGEMS(bool const& is_visugl = false);
+    GGEMS(void);
 
     /*!
       \brief GGEMS destructor
@@ -165,6 +165,13 @@ class GGEMS_EXPORT GGEMS
     void SetProfilingVerbose(bool const& is_profiling_verbose);
 
     /*!
+      \fn void SetOpenGLVisu(bool const& is_visugl)
+      \param is_visugl - flag to true for OpenGL
+      \brief set opengl flag
+    */
+    void SetOpenGLVisu(bool const& is_visugl);
+
+    /*!
       \fn bool IsProfilingVerbose(void) const
       \return state of profiling verbosity flag
       \brief get the profiling verbosity flag
@@ -223,11 +230,11 @@ class GGEMS_EXPORT GGEMS
 };
 
 /*!
-  \fn GGEMS* create_ggems(bool const is_visugl)
+  \fn GGEMS* create_ggems(void)
   \return the pointer to GGEMS
   \brief Get the GGEMS pointer for python user.
 */
-extern "C" GGEMS_EXPORT GGEMS* create_ggems(bool const is_visugl = false);
+extern "C" GGEMS_EXPORT GGEMS* create_ggems(void);
 
 /*!
   \fn GGEMSBox* delete_ggems(GGEMS* ggems)

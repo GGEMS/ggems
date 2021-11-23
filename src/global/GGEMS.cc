@@ -64,7 +64,7 @@ namespace {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMS::GGEMS(bool const& is_visugl)
+GGEMS::GGEMS(void)
 : is_opencl_verbose_(false),
   is_material_database_verbose_(false),
   is_source_verbose_(false),
@@ -75,7 +75,7 @@ GGEMS::GGEMS(bool const& is_visugl)
   is_random_verbose_(false),
   is_tracking_verbose_(false),
   is_profiling_verbose_(false),
-  is_visugl_(is_visugl),
+  is_visugl_(false),
   particle_tracking_id_(0)
 {
   GGcout("GGEMS", "GGEMS", 3) << "GGEMS creating..." << GGendl;
@@ -189,6 +189,15 @@ void GGEMS::SetTrackingVerbose(bool const& is_tracking_verbose, GGint const& par
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+void GGEMS::SetOpenGLVisu(bool const& is_visugl)
+{
+  is_visugl_ = is_visugl;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 void GGEMS::Initialize(GGuint const& seed)
 {
   GGcout("GGEMS", "Initialize", 1) << "Initialization of GGEMS Manager singleton..." << GGendl;
@@ -259,7 +268,6 @@ void GGEMS::Initialize(GGuint const& seed)
   if (is_visugl_) {
     GGEMSOpenGLManager& opengl_manager = GGEMSOpenGLManager::GetInstance();
     opengl_manager.Initialize();
-    opengl_manager.PrintKeys();
     opengl_manager.Display();
   }
   #endif
@@ -395,9 +403,9 @@ void GGEMS::PrintBanner(void) const
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMS* create_ggems(bool const is_visugl)
+GGEMS* create_ggems(void)
 {
-  return new(std::nothrow) GGEMS(is_visugl);
+  return new(std::nothrow) GGEMS;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

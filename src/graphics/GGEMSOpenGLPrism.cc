@@ -17,9 +17,9 @@
 // ************************************************************************
 
 /*!
-  \file GGEMSOpenGLSphere.cc
+  \file GGEMSOpenGLPrism.cc
 
-  \brief Sphere volume for OpenGL
+  \brief Prism volume for OpenGL
 
   \author Julien BERT <julien.bert@univ-brest.fr>
   \author Didier BENOIT <didier.benoit@inserm.fr>

@@ -46,13 +46,10 @@
 #include "GGEMS/physics/GGEMSMuData.hh"
 #include "GGEMS/physics/GGEMSMuDataConstants.hh"
 
-
 class GGEMSSolid;
 class GGEMSMaterials;
 class GGEMSCrossSections;
 class GGEMSDosimetryCalculator;
-
-
 
 /*!
   \class GGEMSNavigator
@@ -243,12 +240,25 @@ class GGEMS_EXPORT GGEMSNavigator
     */
     void EnableTLE(bool const& is_activated);
 
-
     /*!
       \fn void Init_Mu_Table(void)
       \brief Enable track length estimator (TLE) during particle navigation
     */
     void Init_Mu_Table(void);
+
+    /*!
+      \fn void SetVisible(bool const& is_visible)
+      \param is_visible - true if navigator is drawn using OpenGL
+      \brief set to true to draw navigator
+    */
+    void SetVisible(bool const& is_visible);
+
+    /*!
+      \fn void SetColor(std::string const& color)
+      \param color - color name
+      \brief set color name for opengl
+    */
+    void SetColor(std::string const& color);
 
   protected:
     /*!
@@ -284,6 +294,10 @@ class GGEMS_EXPORT GGEMSNavigator
     GGsize number_activated_devices_; /*!< Number of activated device */
 
     cl::Buffer** mu_tables_; /*!< Buffer for the Mu Table */
+
+    // OpenGL
+    bool is_visible_; /*!< flag for opengl */
+    std::string color_name_; /*!< Name of color for OpenGL volume */
 };
 
 #endif // End of GUARD_GGEMS_NAVIGATORS_GGEMSNAVIGATOR_HH
