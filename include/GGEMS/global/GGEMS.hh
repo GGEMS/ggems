@@ -165,13 +165,6 @@ class GGEMS_EXPORT GGEMS
     void SetProfilingVerbose(bool const& is_profiling_verbose);
 
     /*!
-      \fn void SetOpenGLVisu(bool const& is_visugl)
-      \param is_visugl - flag to true for OpenGL
-      \brief set opengl flag
-    */
-    void SetOpenGLVisu(bool const& is_visugl);
-
-    /*!
       \fn bool IsProfilingVerbose(void) const
       \return state of profiling verbosity flag
       \brief get the profiling verbosity flag
@@ -225,7 +218,6 @@ class GGEMS_EXPORT GGEMS
     bool is_random_verbose_; /*!< Flag for random verbosity */
     bool is_tracking_verbose_; /*!< Flag for tracking verbosity */
     bool is_profiling_verbose_; /*!< Flag for kernel time verbosity */
-    bool is_visugl_; /*!< Flag for visualization verbosity using OpenGL */
     GGint particle_tracking_id_; /*!< Particle if for tracking */
 };
 

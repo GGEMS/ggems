@@ -20,9 +20,9 @@
 // ************************************************************************
 
 /*!
-  \file GGEMSOpenGLPara.hh
+  \file GGEMSOpenGLParaGrid.hh
 
-  \brief Parallelepiped volume for OpenGL
+  \brief Parallelepiped grid volume for OpenGL
 
   \author Julien BERT <julien.bert@univ-brest.fr>
   \author Didier BENOIT <didier.benoit@inserm.fr>
@@ -36,10 +36,10 @@
 #include "GGEMS/graphics/GGEMSOpenGLVolume.hh"
 
 /*!
-  \class GGEMSOpenGLPara
+  \class GGEMSOpenGLParaGrid
   \brief This class define a parallelepiped volume for OpenGL
 */
-class GGEMS_EXPORT GGEMSOpenGLPara : public GGEMSOpenGLVolume
+class GGEMS_EXPORT GGEMSOpenGLParaGrid : public GGEMSOpenGLVolume
 {
   public:
     /*!
@@ -49,42 +49,42 @@ class GGEMS_EXPORT GGEMSOpenGLPara : public GGEMSOpenGLVolume
       \param element_size_x - element size along X
       \param element_size_y - element size along Y
       \param element_size_z - element size along Z
-      \brief GGEMSOpenGLPara constructor
+      \brief GGEMSOpenGLParaGrid constructor
     */
-    GGEMSOpenGLPara(GLint const& elements_x, GLint const& elements_y, GLint const& elements_z, GLfloat const& element_size_x, GLfloat const& element_size_y, GLfloat const& element_size_z);
+    GGEMSOpenGLParaGrid(GLint const& elements_x, GLint const& elements_y, GLint const& elements_z, GLfloat const& element_size_x, GLfloat const& element_size_y, GLfloat const& element_size_z);
 
     /*!
-      \brief GGEMSOpenGLPara destructor
+      \brief GGEMSOpenGLParaGrid destructor
     */
-    ~GGEMSOpenGLPara(void);
+    ~GGEMSOpenGLParaGrid(void);
 
     /*!
-      \fn GGEMSOpenGLPara(GGEMSOpenGLPara const& para) = delete
+      \fn GGEMSOpenGLParaGrid(GGEMSOpenGLParaGrid const& para) = delete
       \param para - reference on the OpenGL para volume
       \brief Avoid copy by reference
     */
-    GGEMSOpenGLPara(GGEMSOpenGLPara const& para) = delete;
+    GGEMSOpenGLParaGrid(GGEMSOpenGLParaGrid const& para) = delete;
 
     /*!
-      \fn GGEMSOpenGLPara& operator=(GGEMSOpenGLPara const& para) = delete
+      \fn GGEMSOpenGLParaGrid& operator=(GGEMSOpenGLParaGrid const& para) = delete
       \param para - reference on the OpenGL para volume
       \brief Avoid assignement by reference
     */
-    GGEMSOpenGLPara& operator=(GGEMSOpenGLPara const& para) = delete;
+    GGEMSOpenGLParaGrid& operator=(GGEMSOpenGLParaGrid const& para) = delete;
 
     /*!
-      \fn GGEMSOpenGLPara(GGEMSOpenGLPara const&& para) = delete
+      \fn GGEMSOpenGLParaGrid(GGEMSOpenGLParaGrid const&& para) = delete
       \param para - rvalue reference on OpenGL para volume
       \brief Avoid copy by rvalue reference
     */
-    GGEMSOpenGLPara(GGEMSOpenGLPara const&& para) = delete;
+    GGEMSOpenGLParaGrid(GGEMSOpenGLParaGrid const&& para) = delete;
 
     /*!
-      \fn GGEMSOpenGLPara& operator=(GGEMSOpenGLPara const&& para) = delete
+      \fn GGEMSOpenGLParaGrid& operator=(GGEMSOpenGLParaGrid const&& para) = delete
       \param para - rvalue reference on OpenGL para volume
       \brief Avoid copy by rvalue reference
     */
-    GGEMSOpenGLPara& operator=(GGEMSOpenGLPara const&& para) = delete;
+    GGEMSOpenGLParaGrid& operator=(GGEMSOpenGLParaGrid const&& para) = delete;
 
     /*!
       \fn void Build(void)
@@ -93,6 +93,12 @@ class GGEMS_EXPORT GGEMSOpenGLPara : public GGEMSOpenGLVolume
     void Build(void) override;
 
   private:
+    GLint elements_x_; /*!< Number of elements in X */
+    GLint elements_y_; /*!< Number of elements in Y */
+    GLint elements_z_; /*!< Number of elements in Z */
+    GLfloat element_size_x_; /*!< Size of elements in X */
+    GLfloat element_size_y_; /*!< Size of elements in Y */
+    GLfloat element_size_z_; /*!< Size of elements in Z */
 };
 
 #endif

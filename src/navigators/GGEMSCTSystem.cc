@@ -242,7 +242,7 @@ void GGEMSCTSystem::Initialize(void)
     // Enabling tracking if necessary
     if (is_tracking_) solids_[i]->EnableTracking();
 
-    // // Initialize kernels
+    // Initialize kernels
     solids_[i]->Initialize(nullptr);
   }
 

@@ -80,6 +80,7 @@ GGEMSNavigator::GGEMSNavigator(std::string const& navigator_name)
 
   is_visible_ = false;
   color_name_ = "red";
+  mu_tables_ = nullptr;
 
   GGcout("GGEMSNavigator", "GGEMSNavigator", 3) << "GGEMSNavigator created!!!" << GGendl;
 }

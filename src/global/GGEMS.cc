@@ -75,7 +75,6 @@ GGEMS::GGEMS(void)
   is_random_verbose_(false),
   is_tracking_verbose_(false),
   is_profiling_verbose_(false),
-  is_visugl_(false),
   particle_tracking_id_(0)
 {
   GGcout("GGEMS", "GGEMS", 3) << "GGEMS creating..." << GGendl;
@@ -189,15 +188,6 @@ void GGEMS::SetTrackingVerbose(bool const& is_tracking_verbose, GGint const& par
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMS::SetOpenGLVisu(bool const& is_visugl)
-{
-  is_visugl_ = is_visugl;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
 void GGEMS::Initialize(GGuint const& seed)
 {
   GGcout("GGEMS", "Initialize", 1) << "Initialization of GGEMS Manager singleton..." << GGendl;
@@ -264,13 +254,13 @@ void GGEMS::Initialize(GGuint const& seed)
   GGcout("GGEMS", "Initialize", 0) << "GGEMS initialization succeeded" << GGendl;
 
   // Initializing OpenGL and create window
-  #ifdef OPENGL_VISUALIZATION
-  if (is_visugl_) {
-    GGEMSOpenGLManager& opengl_manager = GGEMSOpenGLManager::GetInstance();
-    opengl_manager.Initialize();
-    opengl_manager.Display();
-  }
-  #endif
+  // #ifdef OPENGL_VISUALIZATION
+  // if (is_visugl_) {
+  //   GGEMSOpenGLManager& opengl_manager = GGEMSOpenGLManager::GetInstance();
+  //   //opengl_manager.Initialize();
+  //   opengl_manager.Display();
+  // }
+  // #endif
 
   // Display the elapsed time in GGEMS
   GGEMSChrono::DisplayTime(end_time - start_time, "GGEMS initialization");

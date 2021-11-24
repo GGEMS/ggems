@@ -60,7 +60,7 @@ GGEMSOpenGLManager::GGEMSOpenGLManager(void)
   GGcout("GGEMSOpenGLManager", "GGEMSOpenGLManager", 3) << "GGEMSOpenGLManager creating..." << GGendl;
 
   window_ = nullptr;
-  msaa_ = 1;
+  msaa_ = 8;
   is_draw_axis_ = false;
 
   // Initializing background color (black by default)
@@ -111,8 +111,13 @@ GGEMSOpenGLManager::~GGEMSOpenGLManager(void)
   GGcout("GGEMSOpenGLManager", "~GGEMSOpenGLManager", 3) << "GGEMSOpenGLManager erasing..." << GGendl;
 
   // Destroying GLFW window
-  glfwDestroyWindow(window_);
-  window_ = nullptr;
+  if (window_) {
+    glfwDestroyWindow(window_);
+    window_ = nullptr;
+    glDeleteProgram(program_shader_id_);
+    // Closing GLFW
+    glfwTerminate();
+  }
 
   if (axis_) {
     delete axis_;
@@ -124,11 +129,6 @@ GGEMSOpenGLManager::~GGEMSOpenGLManager(void)
     delete[] opengl_volumes_;
     opengl_volumes_ = nullptr;
   }
-
-  glDeleteProgram(program_shader_id_);
-
-  // Closing GLFW
-  glfwTerminate();
 
   GGcout("GGEMSOpenGLManager", "~GGEMSOpenGLManager", 3) << "GGEMSOpenGLManager erased!!!" << GGendl;
 }
@@ -283,8 +283,6 @@ void GGEMSOpenGLManager::InitGL(void)
   glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
   glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
   glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-  glEnable(GL_DEPTH_TEST);
-  glDepthFunc(GL_LESS);
   glEnable(GL_MULTISAMPLE);
   glfwWindowHint(GLFW_SAMPLES, msaa_);
 
@@ -492,6 +490,8 @@ void GGEMSOpenGLManager::Display(void)
 
     // Render here
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
 
     if (is_wireframe_) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
