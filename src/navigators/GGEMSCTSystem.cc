@@ -30,6 +30,7 @@
 #include "GGEMS/navigators/GGEMSCTSystem.hh"
 #include "GGEMS/geometries/GGEMSSolidBox.hh"
 #include "GGEMS/geometries/GGEMSSolidBoxData.hh"
+#include "GGEMS/graphics/GGEMSOpenGLParaGrid.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -42,6 +43,10 @@ GGEMSCTSystem::GGEMSCTSystem(std::string const& ct_system_name)
   source_detector_distance_(0.0f)
 {
   GGcout("GGEMSCTSystem", "GGEMSCTSystem", 3) << "GGEMSCTSystem creating..." << GGendl;
+
+  #ifdef OPENGL_VISUALIZATION
+  detector_grid_ = nullptr;
+  #endif
 
   GGcout("GGEMSCTSystem", "GGEMSCTSystem", 3) << "GGEMSCTSystem created!!!" << GGendl;
 }
@@ -168,6 +173,11 @@ void GGEMSCTSystem::InitializeCurvedGeometry(void)
       GGfloat3 position;
       position.x = global_position_x; position.y = global_position_y; position.z = global_position_z;
       solids_[global_index]->SetPosition(position);
+
+      #ifdef OPENGL_VISUALIZATION
+      detector_grid_[global_index]->SetPosition(global_position_x, global_position_y, global_position_z);
+      detector_grid_[global_index]->SetZAngle(step_angle);
+      #endif
     }
   }
 }
@@ -199,6 +209,10 @@ void GGEMSCTSystem::InitializeFlatGeometry(void)
       GGfloat3 position;
       position.x = global_position_x; position.y = global_position_y; position.z = global_position_z;
       solids_[global_index]->SetPosition(position);
+
+      #ifdef OPENGL_VISUALIZATION
+      detector_grid_[global_index]->SetPosition(global_position_x, global_position_y, global_position_z);
+      #endif
     }
   }
 }
@@ -225,6 +239,11 @@ void GGEMSCTSystem::Initialize(void)
   // Allocation of memory for solid
   solids_ = new GGEMSSolid*[number_of_solids_];
 
+  #ifdef OPENGL_VISUALIZATION
+  // Creating detector on OpenGL
+  detector_grid_ = new GGEMSOpenGLParaGrid*[number_of_solids_];
+  #endif
+
   for (GGsize i = 0; i < number_of_solids_; ++i) { // In CT system only "HISTOGRAM"
     solids_[i] = new GGEMSSolidBox(
       number_of_detection_elements_inside_module_xyz_.x_,
@@ -235,6 +254,19 @@ void GGEMSCTSystem::Initialize(void)
       static_cast<GGfloat>(number_of_detection_elements_inside_module_xyz_.z_) * size_of_detection_elements_xyz_.z,
       "HISTOGRAM"
     );
+
+    #ifdef OPENGL_VISUALIZATION
+    detector_grid_[i] = new GGEMSOpenGLParaGrid(
+      static_cast<GLint>(number_of_detection_elements_inside_module_xyz_.z_),
+      static_cast<GLint>(number_of_detection_elements_inside_module_xyz_.y_),
+      static_cast<GLint>(number_of_detection_elements_inside_module_xyz_.x_),
+      size_of_detection_elements_xyz_.z,
+      size_of_detection_elements_xyz_.y,
+      size_of_detection_elements_xyz_.x
+    );
+    if (is_visible_) detector_grid_[i]->SetVisible(true);
+    detector_grid_[i]->SetColor(color_name_);
+    #endif
 
     // Enabling scatter if necessary
     if (is_scatter_) solids_[i]->EnableScatter();
@@ -258,6 +290,12 @@ void GGEMSCTSystem::Initialize(void)
   if (is_update_rot_) {
     for (GGsize i = 0; i < number_of_solids_; ++i) {
       solids_[i]->SetRotation(rotation_xyz_);
+
+      #ifdef OPENGL_VISUALIZATION
+      detector_grid_[i]->SetXUpdateAngle(rotation_xyz_.s0);
+      detector_grid_[i]->SetYUpdateAngle(rotation_xyz_.s1);
+      detector_grid_[i]->SetZUpdateAngle(rotation_xyz_.s2);
+      #endif
     }
   }
 
@@ -269,6 +307,12 @@ void GGEMSCTSystem::Initialize(void)
       solids_[i]->UpdateTransformationMatrix(j);
     }
   }
+
+  #ifdef OPENGL_VISUALIZATION
+  for (GGsize i = 0; i < number_of_solids_; ++i) {
+    detector_grid_[i]->Build();
+  }
+  #endif
 
   // Initialize parent class
   GGEMSNavigator::Initialize();

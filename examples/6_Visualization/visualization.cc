@@ -227,7 +227,7 @@ int main(int argc, char** argv)
     opengl_manager.SetWindowDimensions(window_dims[0], window_dims[1]);
     opengl_manager.SetBackgroundColor(window_color);
     opengl_manager.SetImageOutput("data/axis");
-    opengl_manager.SetWorldSize(1.0f*m,1.0f*m,1.0f*m);
+    opengl_manager.SetWorldSize(2.0f*m,2.0f*m,2.0f*m);
     opengl_manager.Initialize();
     // XXX.SetParticleColor("gamma","red") ...
     // XXX.SetParticles(10000) // Max: 1000000!!!
@@ -267,8 +267,7 @@ int main(int argc, char** argv)
 
     GGEMSCTSystem ct_detector("Stellar");
     ct_detector.SetCTSystemType("curved");
-    // //ct_detector.SetNumberOfModules(1, 46);
-    ct_detector.SetNumberOfModules(1, 1);
+    ct_detector.SetNumberOfModules(1, 46);
     ct_detector.SetNumberOfDetectionElementsInsideModule(64, 16, 1);
     ct_detector.SetSizeOfDetectionElements(0.6f, 0.6f, 0.6f, "mm");
     ct_detector.SetMaterialName("GOS");
@@ -278,8 +277,8 @@ int main(int argc, char** argv)
     ct_detector.SetThreshold(10.0f, "keV");
     ct_detector.StoreOutput("data/projection");
     ct_detector.StoreScatter(true);
-    // ct_detector.SetVisible(true);
-    // ct_detector.SetColor("white");
+    ct_detector.SetVisible(true);
+    ct_detector.SetColor("white");
 
     // Physics
     processes_manager.AddProcess("Compton", "gamma", "all");

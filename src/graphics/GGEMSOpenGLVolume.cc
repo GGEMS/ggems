@@ -56,6 +56,10 @@ GGEMSOpenGLVolume::GGEMSOpenGLVolume()
   angle_y_ = 0.0f;
   angle_z_ = 0.0f;
 
+  update_angle_x_ = 0.0f;
+  update_angle_y_ = 0.0f;
+  update_angle_z_ = 0.0f;
+
   color_[0] = 1.0f; // red
   color_[1] = 0.0f;
   color_[2] = 0.0f;
@@ -124,7 +128,8 @@ void GGEMSOpenGLVolume::SetPosition(GLfloat const& position_x, GLfloat const& po
 
 void GGEMSOpenGLVolume::SetXAngle(GLfloat const& angle_x)
 {
-  angle_x_ = glm::radians(angle_x);
+  // In radians
+  angle_x_ = angle_x;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -133,7 +138,8 @@ void GGEMSOpenGLVolume::SetXAngle(GLfloat const& angle_x)
 
 void GGEMSOpenGLVolume::SetYAngle(GLfloat const& angle_y)
 {
-  angle_y_ = glm::radians(angle_y);
+  // In radians
+  angle_y_ = angle_y;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -142,7 +148,38 @@ void GGEMSOpenGLVolume::SetYAngle(GLfloat const& angle_y)
 
 void GGEMSOpenGLVolume::SetZAngle(GLfloat const& angle_z)
 {
-  angle_z_ = glm::radians(angle_z);
+  // In radians
+  angle_z_ = angle_z;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSOpenGLVolume::SetXUpdateAngle(GLfloat const& update_angle_x)
+{
+  // In radians
+  update_angle_x_ = update_angle_x;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSOpenGLVolume::SetYUpdateAngle(GLfloat const& update_angle_y)
+{
+  // In radians
+  update_angle_y_ = update_angle_y;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSOpenGLVolume::SetZUpdateAngle(GLfloat const& update_angle_z)
+{
+  // In radians
+  update_angle_z_ = update_angle_z;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -221,6 +258,11 @@ void GGEMSOpenGLVolume::Draw(void) const
     quaternion = glm::quat(euler_angle);
     glm::mat4 rotation_matrix = glm::toMat4(quaternion);
 
+    // Rotation after translation
+    glm::vec3 euler_angle_after_translation(update_angle_x_, update_angle_y_, update_angle_z_);
+    quaternion = glm::quat(euler_angle_after_translation);
+    glm::mat4 rotation_matrix_after_translation = glm::toMat4(quaternion);
+
     // Enabling shader program
     glUseProgram(program_shader_id);
 
@@ -234,7 +276,7 @@ void GGEMSOpenGLVolume::Draw(void) const
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
     glEnableVertexAttribArray(0);
 
-    glm::mat4 mvp_matrix = projection_matrix*view_matrix*translate_matrix*rotation_matrix;
+    glm::mat4 mvp_matrix = projection_matrix*view_matrix*rotation_matrix_after_translation*translate_matrix*rotation_matrix;
     glUniformMatrix4fv(glGetUniformLocation(program_shader_id, "mvp"), 1, GL_FALSE, &mvp_matrix[0][0]);
 
     // Draw volume using index

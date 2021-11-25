@@ -116,6 +116,27 @@ class GGEMS_EXPORT GGEMSOpenGLVolume
     void SetZAngle(GLfloat const& angle_z);
 
     /*!
+      \fn void SetXUpdateAngle(GLfloat const& update_angle_x)
+      \param update_angle_x - angle in X
+      \brief set angle of rotation in X (after translation)
+    */
+    void SetXUpdateAngle(GLfloat const& update_angle_x);
+
+    /*!
+      \fn void SetYUpdateAngle(GLfloat const& update_angle_y)
+      \param update_angle_y - angle in Y
+      \brief set angle of rotation in Y (after translation)
+    */
+    void SetYUpdateAngle(GLfloat const& update_angle_y);
+
+    /*!
+      \fn void SetZUpdateAngle(GLfloat const& update_angle_z)
+      \param update_angle_z - angle in Z
+      \brief set angle of rotation in Z (after translation)
+    */
+    void SetZUpdateAngle(GLfloat const& update_angle_z);
+
+    /*!
       \fn void SetColor(std::string const& color)
       \param color - Color of OpenGL sphere
       \brief setting color of OpenGL sphere
@@ -148,9 +169,13 @@ class GGEMS_EXPORT GGEMSOpenGLVolume
     GLfloat position_y_; /*!< Position in Y of OpenGL volume */
     GLfloat position_z_; /*!< Position in Z of OpenGL volume */
 
-    GLfloat angle_x_; /*!< Angle in X in degree */
-    GLfloat angle_y_; /*!< Angle in Y in degree */
-    GLfloat angle_z_; /*!< Angle in Z in degree */
+    GLfloat angle_x_; /*!< Angle of rotation around center of volume in X in radian */
+    GLfloat angle_y_; /*!< Angle of rotation around center of volume in Y in radian */
+    GLfloat angle_z_; /*!< Angle of rotation around center of volume in Z in radian */
+
+    GLfloat update_angle_x_; /*!< Angle after translation, volume rotate around isocenter */
+    GLfloat update_angle_y_; /*!< Angle after translation, volume rotate around isocenter */
+    GLfloat update_angle_z_; /*!< Angle after translation, volume rotate around isocenter */
 
     GLfloat color_[3]; /*!< Color of volume */
 

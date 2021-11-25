@@ -35,6 +35,7 @@
 #include "GGEMS/graphics/GGEMSOpenGLPrism.hh"
 #include "GGEMS/tools/GGEMSSystemOfUnits.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
+#include <glm/glm.hpp>
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -57,14 +58,14 @@ GGEMSOpenGLAxis::GGEMSOpenGLAxis(void)
   cylinder->SetVisible(true);
   cylinder->SetColor("green");
   cylinder->SetPosition(50.0f, 0.0f, 0.0f*mm);
-  cylinder->SetYAngle(90.0f);
+  cylinder->SetYAngle(glm::radians(90.0f));
   cylinder->Build();
 
   GGEMSOpenGLPrism* arrow = new GGEMSOpenGLPrism(5.0f*mm, 0.0001f*mm, 7.5f*mm, 48, 24);
   arrow->SetVisible(true);
   arrow->SetColor("green");
   arrow->SetPosition(102.5f*mm, 0.0f, 0.0f*mm);
-  arrow->SetYAngle(90.0f);
+  arrow->SetYAngle(glm::radians(90.0f));
   arrow->Build();
 
   ////////////////////////
@@ -73,14 +74,14 @@ GGEMSOpenGLAxis::GGEMSOpenGLAxis(void)
   cylinder->SetVisible(true);
   cylinder->SetColor("red");
   cylinder->SetPosition(0.0f, -50.0f, 0.0f*mm);
-  cylinder->SetXAngle(90.0f);
+  cylinder->SetXAngle(glm::radians(90.0f));
   cylinder->Build();
 
   arrow = new GGEMSOpenGLPrism(5.0f*mm, 0.0001f*mm, 7.5f*mm, 48, 24);
   arrow->SetVisible(true);
   arrow->SetColor("red");
   arrow->SetPosition(0.0f*mm, -102.5f*mm, 0.0f*mm);
-  arrow->SetXAngle(90.0f);
+  arrow->SetXAngle(glm::radians(90.0f));
   arrow->Build();
 
   ////////////////////////
@@ -95,7 +96,7 @@ GGEMSOpenGLAxis::GGEMSOpenGLAxis(void)
   arrow->SetVisible(true);
   arrow->SetColor("blue");
   arrow->SetPosition(0.0f*mm, 0.0f*mm, -102.5f*mm);
-  arrow->SetYAngle(180.0f);
+  arrow->SetYAngle(glm::radians(180.0f));
   arrow->Build();
 
   GGEMSOpenGLSphere* sphere = new GGEMSOpenGLSphere(5.0f*mm);
