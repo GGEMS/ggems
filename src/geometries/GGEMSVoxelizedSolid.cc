@@ -31,6 +31,7 @@
 #include "GGEMS/geometries/GGEMSVoxelizedSolid.hh"
 #include "GGEMS/io/GGEMSMHDImage.hh"
 #include "GGEMS/maths/GGEMSGeometryTransformation.hh"
+#include "GGEMS/graphics/GGEMSOpenGLParaGrid.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -125,6 +126,25 @@ void GGEMSVoxelizedSolid::Initialize(GGEMSMaterials* materials)
   // Initializing kernels and loading image
   InitializeKernel();
   LoadVolumeImage(materials);
+
+  // Creating volume for OpenGL
+  // Get some infos for grid
+  #ifdef OPENGL_VISUALIZATION
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+  GGEMSVoxelizedSolidData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSVoxelizedSolidData>(solid_data_[0], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGEMSVoxelizedSolidData), 0);
+
+  opengl_solid_ = new GGEMSOpenGLParaGrid(
+    solid_data_device->number_of_voxels_xyz_.x,
+    solid_data_device->number_of_voxels_xyz_.y,
+    solid_data_device->number_of_voxels_xyz_.z,
+    solid_data_device->voxel_sizes_xyz_.x,
+    solid_data_device->voxel_sizes_xyz_.y,
+    solid_data_device->voxel_sizes_xyz_.z
+  );
+
+  // Release the pointer
+  opencl_manager.ReleaseDeviceBuffer(solid_data_[0], solid_data_device, 0);
+  #endif
 }
 
 ////////////////////////////////////////////////////////////////////////////////

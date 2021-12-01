@@ -170,13 +170,6 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     void SetWorldSize(float const& x_size, float const& y_size, float const& z_size);
 
     /*!
-      \fn GLuint GetProgramShaderID(void) const
-      \brief Getting program shader ID
-      \return the id of program shader
-    */
-    inline GLuint GetProgramShaderID(void) const {return program_shader_id_;}
-
-    /*!
       \fn ColorUMap GetColorUMap(void) const
       \brief Getting color map
       \return the list of colors
@@ -224,26 +217,6 @@ class GGEMS_EXPORT GGEMSOpenGLManager
       \brief Initialization of OpenGL params, window and shaders
     */
     void InitGL(void);
-
-    /*!
-      \fn void InitShader(void)
-      \brief compile shader and store it
-    */
-    void InitShader(void);
-
-    /*!
-      \fn void CompileShader(GLuint const& shader) const
-      \param shader - index of shader from glCreateShader
-      \brief compiling shader
-    */
-    void CompileShader(GLuint const& shader) const;
-
-    /*!
-      \fn std::string GetOpenGLSLVersion(void) const
-      \brief Get version of GLSL
-      \return GLSL version in string
-    */
-    std::string GetOpenGLSLVersion(void) const;
 
     /*!
       \fn void UpdateFPSCounter(void)
@@ -366,7 +339,6 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     float y_world_size_; /*!< World size along y axis */
     float z_world_size_; /*!< World size along z axis */
 
-    GLuint program_shader_id_; /*!< program id for shader, the same for all OpenGL volume */
     GGEMSOpenGLVolume** opengl_volumes_; /*!< OpenGL volume to display or not */
     GGsize number_of_opengl_volumes_; /*!< Number of OpenGL volumes */
 

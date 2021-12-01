@@ -79,7 +79,7 @@ GGEMSNavigator::GGEMSNavigator(std::string const& navigator_name)
   number_activated_devices_ = opencl_manager.GetNumberOfActivatedDevice();
 
   is_visible_ = false;
-  color_name_ = "red";
+  color_name_ = "";
   mu_tables_ = nullptr;
 
   GGcout("GGEMSNavigator", "GGEMSNavigator", 3) << "GGEMSNavigator created!!!" << GGendl;

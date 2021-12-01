@@ -56,14 +56,14 @@ GGEMSOpenGLAxis::GGEMSOpenGLAxis(void)
   // X axis
   GGEMSOpenGLPrism* cylinder = new GGEMSOpenGLPrism(3.5f*mm, 3.5f*mm, 100.0f*mm, 48, 24);
   cylinder->SetVisible(true);
-  cylinder->SetColor("green");
+  cylinder->SetColorName("green");
   cylinder->SetPosition(50.0f, 0.0f, 0.0f*mm);
   cylinder->SetYAngle(glm::radians(90.0f));
   cylinder->Build();
 
   GGEMSOpenGLPrism* arrow = new GGEMSOpenGLPrism(5.0f*mm, 0.0001f*mm, 7.5f*mm, 48, 24);
   arrow->SetVisible(true);
-  arrow->SetColor("green");
+  arrow->SetColorName("green");
   arrow->SetPosition(102.5f*mm, 0.0f, 0.0f*mm);
   arrow->SetYAngle(glm::radians(90.0f));
   arrow->Build();
@@ -72,14 +72,14 @@ GGEMSOpenGLAxis::GGEMSOpenGLAxis(void)
   // Y axis
   cylinder = new GGEMSOpenGLPrism(3.5f*mm, 3.5f*mm, 100.0f*mm, 48, 24);
   cylinder->SetVisible(true);
-  cylinder->SetColor("red");
+  cylinder->SetColorName("red");
   cylinder->SetPosition(0.0f, -50.0f, 0.0f*mm);
   cylinder->SetXAngle(glm::radians(90.0f));
   cylinder->Build();
 
   arrow = new GGEMSOpenGLPrism(5.0f*mm, 0.0001f*mm, 7.5f*mm, 48, 24);
   arrow->SetVisible(true);
-  arrow->SetColor("red");
+  arrow->SetColorName("red");
   arrow->SetPosition(0.0f*mm, -102.5f*mm, 0.0f*mm);
   arrow->SetXAngle(glm::radians(90.0f));
   arrow->Build();
@@ -88,20 +88,20 @@ GGEMSOpenGLAxis::GGEMSOpenGLAxis(void)
   // Z axis
   cylinder = new GGEMSOpenGLPrism(3.5f*mm, 3.5f*mm, 100.0f*mm, 48, 24);
   cylinder->SetVisible(true);
-  cylinder->SetColor("blue");
+  cylinder->SetColorName("blue");
   cylinder->SetPosition(0.0f, 0.0f, -50.0f*mm);
   cylinder->Build();
 
   arrow = new GGEMSOpenGLPrism(5.0f*mm, 0.0001f*mm, 7.5f*mm, 48, 24);
   arrow->SetVisible(true);
-  arrow->SetColor("blue");
+  arrow->SetColorName("blue");
   arrow->SetPosition(0.0f*mm, 0.0f*mm, -102.5f*mm);
   arrow->SetYAngle(glm::radians(180.0f));
   arrow->Build();
 
   GGEMSOpenGLSphere* sphere = new GGEMSOpenGLSphere(5.0f*mm);
   sphere->SetVisible(true);
-  sphere->SetColor("yellow");
+  sphere->SetColorName("yellow");
   sphere->Build();
 
   GGcout("GGEMSOpenGLAxis", "GGEMSOpenGLAxis", 3) << "GGEMSOpenGLAxis created!!!" << GGendl;

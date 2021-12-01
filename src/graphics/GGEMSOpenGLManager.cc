@@ -114,7 +114,6 @@ GGEMSOpenGLManager::~GGEMSOpenGLManager(void)
   if (window_) {
     glfwDestroyWindow(window_);
     window_ = nullptr;
-    glDeleteProgram(program_shader_id_);
     // Closing GLFW
     glfwTerminate();
   }
@@ -251,7 +250,6 @@ void GGEMSOpenGLManager::Initialize(void)
   GGcout("GGEMSOpenGLManager", "Initialize", 3) << "Initializing the OpenGL manager..." << GGendl;
 
   InitGL(); // Initializing GLFW, GL and GLEW
-  InitShader(); // Compile and store shader
   if (is_draw_axis_) axis_ = new GGEMSOpenGLAxis();
 }
 
@@ -330,115 +328,6 @@ void GGEMSOpenGLManager::InitGL(void)
   GGcout("GGEMSOpenGLManager", "InitGL", 1) << "    * GLEW Version: " << glewGetString(GLEW_VERSION) << GGendl;
   GGcout("GGEMSOpenGLManager", "InitGL", 1) << "    * GLFW window dimensions: " << window_width_ << "x" << window_height_ << GGendl;
   GGcout("GGEMSOpenGLManager", "InitGL", 1) << "    * MSAA factor: " << msaa_ << GGendl;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void GGEMSOpenGLManager::InitShader(void)
-{
-  // Creating shaders
-  GLuint vert_shader = glCreateShader(GL_VERTEX_SHADER);
-  GLuint frag_shader = glCreateShader(GL_FRAGMENT_SHADER);
-
-  // A global vertex shader
-  std::string vertex_shader_source_str = "#version " + GetOpenGLSLVersion() + "\n"
-    "\n"
-    "layout(location = 0) in vec3 position;\n"
-    "\n"
-    "uniform mat4 mvp;\n"
-    "uniform vec3 color;\n"
-    "\n"
-    "out vec4 color_rgba;\n"
-    "\n"
-    "void main(void) {\n"
-    "  color_rgba = vec4(color, 1.0);\n"
-    "  gl_Position = mvp * vec4(position, 1.0);\n"
-    "}\n";
-
-  // A global fragment shader
-  std::string fragment_shader_source_str = "#version " + GetOpenGLSLVersion() + "\n"
-    "\n"
-    "layout(location = 0) out vec4 out_color;\n"
-    "\n"
-    "in vec4 color_rgba;\n"
-    "\n"
-    "void main(void) {\n"
-    "  out_color = color_rgba;\n"
-    "}\n";
-
-  // Setting the source code
-  char const* vertex_shader_source = vertex_shader_source_str.c_str();
-  char const* fragment_shader_source = fragment_shader_source_str.c_str();
-  glShaderSource(vert_shader, 1, &vertex_shader_source, nullptr);
-  glShaderSource(frag_shader, 1, &fragment_shader_source, nullptr);
-
-  // Compiling shaders
-  CompileShader(vert_shader);
-  CompileShader(frag_shader);
-
-  // Linking the program
-  program_shader_id_ = glCreateProgram();
-  glAttachShader(program_shader_id_, vert_shader);
-  glAttachShader(program_shader_id_, frag_shader);
-  glLinkProgram(program_shader_id_);
-
-  // Deleting shaders
-  glDeleteShader(vert_shader);
-  glDeleteShader(frag_shader);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-void GGEMSOpenGLManager::CompileShader(GLuint const& shader) const
-{
-  GLint sucess = 0;
-  glCompileShader(shader);
-  glGetShaderiv(shader, GL_COMPILE_STATUS, &sucess);
-  if(sucess == GL_FALSE) {
-    GLint max_length = 0;
-    glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &max_length);
-
-    // The max_length includes the NULL character
-    std::vector<GLchar> error_log(max_length);
-    glGetShaderInfoLog(shader, max_length, &max_length, &error_log[0]);
-
-    std::ostringstream oss(std::ostringstream::out);
-    oss << "Error compiling shader!!!" << std::endl;
-    for (std::size_t i = 0; i < error_log.size(); ++i) oss << error_log[i];
-
-    glDeleteShader(shader); // Don't leak the shader.
-    throw std::runtime_error(oss.str());
-  }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-std::string GGEMSOpenGLManager::GetOpenGLSLVersion(void) const
-{
-  std::string glsl_version(reinterpret_cast<char const*>(glGetString(GL_SHADING_LANGUAGE_VERSION)));
-  std::string digits("0123456789");
-
-  std::size_t n = glsl_version.find_first_of(digits);
-  if (n != std::string::npos)
-  {
-    std::size_t m = glsl_version.find_first_not_of(digits+".", n);
-    std::string tmp = glsl_version.substr(n, m != std::string::npos ? m-n : m);
-    // Deleting '.'
-    tmp.erase(std::remove(tmp.begin(), tmp.end(), '.'), tmp.end());
-    return tmp;
-  }
-  else {
-    std::ostringstream oss(std::ostringstream::out);
-    oss << "Impossible to get GLSL version!!!";
-    GGEMSMisc::ThrowException("GGEMSOpenGLManager", "GetOpenGLSLVersion", oss.str());
-  }
-  return std::string();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

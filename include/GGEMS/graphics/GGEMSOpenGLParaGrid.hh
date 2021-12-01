@@ -93,6 +93,13 @@ class GGEMS_EXPORT GGEMSOpenGLParaGrid : public GGEMSOpenGLVolume
     void Build(void) override;
 
   private:
+    /*!
+      \fn void WriteShaders(void)
+      \brief write shader source file for each volume
+    */
+    void WriteShaders(void);
+
+  private:
     GLint elements_x_; /*!< Number of elements in X */
     GLint elements_y_; /*!< Number of elements in Y */
     GLint elements_z_; /*!< Number of elements in Z */

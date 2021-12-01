@@ -31,6 +31,7 @@
 #include "GGEMS/geometries/GGEMSSolidBox.hh"
 #include "GGEMS/geometries/GGEMSSolidBoxData.hh"
 #include "GGEMS/maths/GGEMSGeometryTransformation.hh"
+#include "GGEMS/graphics/GGEMSOpenGLParaGrid.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -110,6 +111,17 @@ GGEMSSolidBox::GGEMSSolidBox(GGsize const& virtual_element_number_x, GGsize cons
     //oss << "    - DOSIMETRY" << std::endl;
     GGEMSMisc::ThrowException("GGEMSSolidBox", "GGEMSSolidBox", oss.str());
   }
+
+  #ifdef OPENGL_VISUALIZATION
+  opengl_solid_ = new GGEMSOpenGLParaGrid(
+    static_cast<GLint>(virtual_element_number_z),
+    static_cast<GLint>(virtual_element_number_y),
+    static_cast<GLint>(virtual_element_number_x),
+    box_size_z / static_cast<GLfloat>(virtual_element_number_z),
+    box_size_y / static_cast<GLfloat>(virtual_element_number_y),
+    box_size_x / static_cast<GLfloat>(virtual_element_number_x)
+  );
+  #endif
 
   GGcout("GGEMSSolidBox", "GGEMSSolidBox", 3) << "GGEMSSolidBox created!!!" << GGendl;
 }

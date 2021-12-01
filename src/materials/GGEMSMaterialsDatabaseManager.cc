@@ -44,6 +44,9 @@ GGEMSMaterialsDatabaseManager::GGEMSMaterialsDatabaseManager(void)
   // Loading GGEMS chemical elements
   LoadChemicalElements();
 
+  // Loading RGB colors
+  LoadMaterialRGBColors();
+
   GGcout("GGEMSMaterialsDatabaseManager", "GGEMSMaterialsDatabaseManager", 3) << "GGEMSMaterialsDatabaseManager created!!!" << GGendl;
 }
 
@@ -136,6 +139,20 @@ void GGEMSMaterialsDatabaseManager::LoadMaterialsDatabase(std::string const& fil
 
   // Closing file stream
   database_stream.close();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSMaterialsDatabaseManager::LoadMaterialRGBColors(void)
+{
+  GGcout("GGEMSMaterialsDatabaseManager", "LoadMaterialRGBColors", 1) << "Loading material RGB colors in GGEMS..." << GGendl;
+
+  // Name, R, G, B
+  AddMaterialRGBColor("Air", 166, 231, 255);
+  AddMaterialRGBColor("Water", 212, 241, 249);
+  AddMaterialRGBColor("GOS", 255, 255, 255);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -267,6 +284,22 @@ void GGEMSMaterialsDatabaseManager::AddChemicalElements(std::string const& eleme
 
   // No need to check if element already insert
   chemical_elements_.insert(std::make_pair(element_name, element));
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSMaterialsDatabaseManager::AddMaterialRGBColor(std::string const& material_name, GGuchar const& red, GGuchar const& green, GGuchar const& blue)
+{
+  GGcout("GGEMSMaterialsDatabaseManager", "AddMaterialRGBColor", 3) << "Adding color for " << material_name << ": " << (GGint)red << " " << (GGint)green << " " << (GGint)blue << GGendl;
+
+  GGEMSRGBColor rgb;
+  rgb.red_ = static_cast<GGfloat>(red) / 255.0f;
+  rgb.green_ = static_cast<GGfloat>(green) / 255.0f;
+  rgb.blue_ = static_cast<GGfloat>(blue) / 255.0f;
+
+  material_rgb_colors_.insert(std::make_pair(material_name, rgb));
 }
 
 ////////////////////////////////////////////////////////////////////////////////

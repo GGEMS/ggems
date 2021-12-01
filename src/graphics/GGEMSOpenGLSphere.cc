@@ -59,6 +59,12 @@ GGEMSOpenGLSphere::GGEMSOpenGLSphere(GLfloat const& radius)
   number_of_indices_ = number_of_triangles_*3;
   indices_ = new GLuint[number_of_indices_];
 
+  // Defining shaders
+  WriteShaders();
+
+  // Initializing shaders
+  InitShaders();
+
   GGcout("GGEMSOpenGLSphere", "GGEMSOpenGLSphere", 3) << "GGEMSOpenGLSphere created!!!" << GGendl;
 }
 
@@ -71,6 +77,39 @@ GGEMSOpenGLSphere::~GGEMSOpenGLSphere(void)
   GGcout("GGEMSOpenGLSphere", "~GGEMSOpenGLSphere", 3) << "GGEMSOpenGLSphere erasing..." << GGendl;
 
   GGcout("GGEMSOpenGLSphere", "~GGEMSOpenGLSphere", 3) << "GGEMSOpenGLSphere erased!!!" << GGendl;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSOpenGLSphere::WriteShaders(void)
+{
+  // A global vertex shader
+  vertex_shader_source_ = "#version " + GetOpenGLSLVersion() + "\n"
+    "\n"
+    "layout(location = 0) in vec3 position;\n"
+    "\n"
+    "uniform mat4 mvp;\n"
+    "uniform vec3 color;\n"
+    "\n"
+    "out vec4 color_rgba;\n"
+    "\n"
+    "void main(void) {\n"
+    "  color_rgba = vec4(color, 1.0);\n"
+    "  gl_Position = mvp * vec4(position, 1.0);\n"
+    "}\n";
+
+  // A global fragment shader
+  fragment_shader_source_ = "#version " + GetOpenGLSLVersion() + "\n"
+    "\n"
+    "layout(location = 0) out vec4 out_color;\n"
+    "\n"
+    "in vec4 color_rgba;\n"
+    "\n"
+    "void main(void) {\n"
+    "  out_color = color_rgba;\n"
+    "}\n";
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -153,6 +192,8 @@ void GGEMSOpenGLSphere::Build(void)
   // Vertex
   glBindBuffer(GL_ARRAY_BUFFER, vbo_[0]);
   glBufferData(GL_ARRAY_BUFFER, number_of_vertices_ * sizeof(GLfloat), vertices_, GL_STATIC_DRAW); // Allocating memory on OpenGL device
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), (void*)0);
+  glEnableVertexAttribArray(0);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
   // Indices

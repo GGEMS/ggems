@@ -116,7 +116,12 @@ void GGEMSVoxelizedPhantom::Initialize(void)
   solids_[0]->Initialize(materials_);
 
   // Perform rotation before position
-  if (is_update_rot_) solids_[0]->SetRotation(rotation_xyz_);
+  if (is_update_rot_) {
+    solids_[0]->SetRotation(rotation_xyz_);
+    solids_[0]->SetXUpdateAngleOpenGL(rotation_xyz_.x);
+    solids_[0]->SetYUpdateAngleOpenGL(rotation_xyz_.y);
+    solids_[0]->SetZUpdateAngleOpenGL(rotation_xyz_.z);
+  }
   if (is_update_pos_) solids_[0]->SetPosition(position_xyz_);
 
   for (GGsize j = 0; j < number_activated_devices_; ++j) {
@@ -124,6 +129,11 @@ void GGEMSVoxelizedPhantom::Initialize(void)
     // Store the transformation matrix in solid object
     solids_[0]->UpdateTransformationMatrix(j);
   }
+
+  #ifdef OPENGL_VISUALIZATION
+  solids_[0]->SetVisible(is_visible_);
+  solids_[0]->BuildOpenGL();
+  #endif
 
   // Initialize parent class
   GGEMSNavigator::Initialize();

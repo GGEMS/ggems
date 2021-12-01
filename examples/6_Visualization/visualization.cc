@@ -70,6 +70,7 @@ void PrintHelpAndQuit(std::string const& message, char const* exec)
   oss << "                           (800,800, by default)" << std::endl;
   oss << "[--msaa X]                 MSAA factor (1x, 2x, 4x or 8x)" << std::endl;
   oss << "                           (8, by default)" << std::endl;
+  oss << "[--axis]                   Drawing axis on screen" << std::endl;
   oss << "[--wcolor X]               Window color" << std::endl;
   oss << "                           (black, by default)" << std::endl;
   oss << "Available colors:" << std::endl;
@@ -139,6 +140,7 @@ int main(int argc, char** argv)
     GGsize number_of_particles = 1000000;
     GGsize device_index = 0;
     GGuint seed = 777;
+    static GGint is_axis = 0;
 
     // Loop while there is an argument
     GGint counter(0);
@@ -153,7 +155,8 @@ int main(int argc, char** argv)
         {"wcolor", required_argument, 0, 'c'},
         {"device", required_argument, 0, 'd'},
         {"seed", required_argument, 0, 's'},
-        {"n-particles", required_argument, 0, 'n'}
+        {"n-particles", required_argument, 0, 'n'},
+        {"axis", no_argument, &is_axis, 1},
       };
 
       // Getting the options
@@ -223,7 +226,7 @@ int main(int argc, char** argv)
 
     // Visualization params
     opengl_manager.SetMSAA(msaa);
-    opengl_manager.SetDrawAxis(true);
+    if (is_axis) opengl_manager.SetDrawAxis(true);
     opengl_manager.SetWindowDimensions(window_dims[0], window_dims[1]);
     opengl_manager.SetBackgroundColor(window_color);
     opengl_manager.SetImageOutput("data/axis");
@@ -240,7 +243,7 @@ int main(int argc, char** argv)
 
     // Initializing a global voxelized volume
     volume_creator_manager.SetVolumeDimensions(120, 120, 120);
-    volume_creator_manager.SetElementSizes(0.1f, 0.1f, 0.1f, "mm");
+    volume_creator_manager.SetElementSizes(1.0f, 1.0f, 1.0f, "mm");
     volume_creator_manager.SetOutputImageFilename("data/phantom.mhd");
     volume_creator_manager.SetRangeToMaterialDataFilename("data/range_phantom.txt");
     volume_creator_manager.SetMaterial("Air");
@@ -264,6 +267,9 @@ int main(int argc, char** argv)
     phantom.SetPhantomFile("data/phantom.mhd", "data/range_phantom.txt");
     phantom.SetRotation(0.0f, 0.0f, 0.0f, "deg");
     phantom.SetPosition(0.0f, 0.0f, 0.0f, "mm");
+    phantom.SetVisible(true);
+    // phantom.SetMaterialColor("Water", false);
+    // phantom.SetMaterialColor("Water", 0.34, 0.4, 0.2, true);
 
     GGEMSCTSystem ct_detector("Stellar");
     ct_detector.SetCTSystemType("curved");
@@ -278,7 +284,7 @@ int main(int argc, char** argv)
     ct_detector.StoreOutput("data/projection");
     ct_detector.StoreScatter(true);
     ct_detector.SetVisible(true);
-    ct_detector.SetColor("white");
+    ct_detector.SetColor("red");
 
     // Physics
     processes_manager.AddProcess("Compton", "gamma", "all");
@@ -321,7 +327,7 @@ int main(int argc, char** argv)
 
     opengl_manager.Display();
 
-    // // Start GGEMS simulation
+    // Start GGEMS simulation
     // ggems.Run();
   }
   catch (std::exception& e) {

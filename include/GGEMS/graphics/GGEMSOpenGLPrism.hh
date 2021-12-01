@@ -98,6 +98,12 @@ class GGEMS_EXPORT GGEMSOpenGLPrism : public GGEMSOpenGLVolume
     */
     void BuildUnitCircleVertices(void);
 
+    /*!
+      \fn void WriteShaders(void)
+      \brief write shader source file for each volume
+    */
+    void WriteShaders(void);
+
   private:
     GLfloat base_radius_; /*!< Radius of base circle */
     GLfloat top_radius_; /*!< Radius of base circle */

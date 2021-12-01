@@ -32,8 +32,6 @@
 
 #include "GGEMS/navigators/GGEMSSystem.hh"
 
-class GGEMSOpenGLParaGrid;
-
 /*!
   \class GGEMSCTSystem
   \brief Child GGEMS class managing CT/CBCT detector in GGEMS
@@ -132,11 +130,6 @@ class GGEMS_EXPORT GGEMSCTSystem : public GGEMSSystem
     std::string ct_system_type_; /*!< Type of CT scanner, here: flat or curved */
     GGfloat source_isocenter_distance_; /*!< Distance from source to isocenter (SID) */
     GGfloat source_detector_distance_; /*!< Distance from source to detector (SDD) */
-
-    // OpenGL volume
-    #ifdef OPENGL_VISUALIZATION
-    GGEMSOpenGLParaGrid** detector_grid_; /*!< OpenGL volume for CT detector */
-    #endif
 };
 
 /*!

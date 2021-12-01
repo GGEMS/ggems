@@ -49,14 +49,20 @@ GGEMSOpenGLParaGrid::GGEMSOpenGLParaGrid(GLint const& elements_x, GLint const& e
 {
   GGcout("GGEMSOpenGLParaGrid", "GGEMSOpenGLParaGrid", 3) << "GGEMSOpenGLParaGrid creating..." << GGendl;
 
-  // For each parallelepiped there are 8 vertices
-  number_of_vertices_ = elements_x_ * elements_y_ * elements_z_ * 8 * 3;
+  // For each parallelepiped there are 8 vertices, 3 positions for each vertex and a RGB color for each vertex
+  number_of_vertices_ = elements_x_ * elements_y_ * elements_z_ * 8 * 3 * 2;
   vertices_ = new GLfloat[number_of_vertices_];
 
   // For each parallelepiped there are 12 triangles
   number_of_triangles_ = elements_x_ * elements_y_ * elements_z_ * 12;
   number_of_indices_ = number_of_triangles_ * 3;
   indices_ = new GLuint[number_of_indices_];
+
+  // Defining shaders
+  WriteShaders();
+
+  // Initializing shaders
+  InitShaders();
 
   GGcout("GGEMSOpenGLParaGrid", "GGEMSOpenGLParaGrid", 3) << "GGEMSOpenGLParaGrid created!!!" << GGendl;
 }
@@ -76,6 +82,39 @@ GGEMSOpenGLParaGrid::~GGEMSOpenGLParaGrid(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+void GGEMSOpenGLParaGrid::WriteShaders(void)
+{
+  // A global vertex shader
+  vertex_shader_source_ = "#version " + GetOpenGLSLVersion() + "\n"
+    "\n"
+    "layout(location = 0) in vec3 position;\n"
+    "layout(location = 1) in vec3 color;\n"
+    "\n"
+    "uniform mat4 mvp;\n"
+    "\n"
+    "out vec4 color_rgba;\n"
+    "\n"
+    "void main(void) {\n"
+    "  color_rgba = vec4(color, 1.0);\n"
+    "  gl_Position = mvp * vec4(position, 1.0);\n"
+    "}\n";
+
+  // A global fragment shader
+  fragment_shader_source_ = "#version " + GetOpenGLSLVersion() + "\n"
+    "\n"
+    "layout(location = 0) out vec4 out_color;\n"
+    "\n"
+    "in vec4 color_rgba;\n"
+    "\n"
+    "void main(void) {\n"
+    "  out_color = color_rgba;\n"
+    "}\n";
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 void GGEMSOpenGLParaGrid::Build(void)
 {
   GGcout("GGEMSOpenGLParaGrid", "Build", 3) << "Building OpenGL para..." << GGendl;
@@ -88,6 +127,13 @@ void GGEMSOpenGLParaGrid::Build(void)
   GLfloat x_center = -(element_size_x_*elements_x_*0.5f) + element_size_x_*0.5f;
   GLfloat y_center = -(element_size_y_*elements_y_*0.5f) + element_size_y_*0.5f;
   GLfloat z_center = -(element_size_z_*elements_z_*0.5f) + element_size_z_*0.5f;
+
+  // float color_test[] = {
+  //   1.0f, 0.843f, 0.0f,
+  //   0.141f, 0.267f, 0.361f,
+  //   0.745f, 0.961f, 0.455f,
+  //   0.424f, 0.008f, 0.467f
+  // };
 
   // Loop over all parallelepipeds
   for (GLint k = 0; k < elements_z_; ++k) {
@@ -103,108 +149,146 @@ void GGEMSOpenGLParaGrid::Build(void)
         vertices_[index++] = x_offset - element_size_x_*0.5f;
         vertices_[index++] = y_offset - element_size_y_*0.5f;
         vertices_[index++] = z_offset - element_size_z_*0.5f;
+        // vertices_[index++] = color_test[i*3+0];
+        // vertices_[index++] = color_test[i*3+1];
+        // vertices_[index++] = color_test[i*3+2];
+        vertices_[index++] = color_[0];
+        vertices_[index++] = color_[1];
+        vertices_[index++] = color_[2];
 
         // 1
         vertices_[index++] = x_offset - element_size_x_*0.5f;
         vertices_[index++] = y_offset + element_size_y_*0.5f;
         vertices_[index++] = z_offset - element_size_z_*0.5f;
+        vertices_[index++] = color_[0];
+        vertices_[index++] = color_[1];
+        vertices_[index++] = color_[2];
 
         // 2
         vertices_[index++] = x_offset - element_size_x_*0.5f;
         vertices_[index++] = y_offset + element_size_y_*0.5f;
         vertices_[index++] = z_offset + element_size_z_*0.5f;
+        vertices_[index++] = color_[0];
+        vertices_[index++] = color_[1];
+        vertices_[index++] = color_[2];
 
         // 3
         vertices_[index++] = x_offset - element_size_x_*0.5f;
         vertices_[index++] = y_offset - element_size_y_*0.5f;
         vertices_[index++] = z_offset + element_size_z_*0.5f;
+        vertices_[index++] = color_[0];
+        vertices_[index++] = color_[1];
+        vertices_[index++] = color_[2];
 
         // 4
         vertices_[index++] = x_offset + element_size_x_*0.5f;
         vertices_[index++] = y_offset - element_size_y_*0.5f;
         vertices_[index++] = z_offset - element_size_z_*0.5f;
+        vertices_[index++] = color_[0];
+        vertices_[index++] = color_[1];
+        vertices_[index++] = color_[2];
 
         // 5
         vertices_[index++] = x_offset + element_size_x_*0.5f;
         vertices_[index++] = y_offset + element_size_y_*0.5f;
         vertices_[index++] = z_offset - element_size_z_*0.5f;
+        vertices_[index++] = color_[0];
+        vertices_[index++] = color_[1];
+        vertices_[index++] = color_[2];
 
         // 6
         vertices_[index++] = x_offset + element_size_x_*0.5f;
         vertices_[index++] = y_offset + element_size_y_*0.5f;
         vertices_[index++] = z_offset + element_size_z_*0.5f;
+        vertices_[index++] = color_[0];
+        vertices_[index++] = color_[1];
+        vertices_[index++] = color_[2];
 
         // 7
         vertices_[index++] = x_offset + element_size_x_*0.5f;
         vertices_[index++] = y_offset - element_size_y_*0.5f;
         vertices_[index++] = z_offset + element_size_z_*0.5f;
+        vertices_[index++] = color_[0];
+        vertices_[index++] = color_[1];
+        vertices_[index++] = color_[2];
       }
     }
   }
 
+  // bool act_vox_index[] = {
+  //   false, true, true, true, true, true,
+  //   true, true, true, false, false, true,
+  //   false, true, false, true, true, true,
+  //   true, true, true, true, false, true
+  // };
+
   // Storing indices
   index = 0;
   for (GLint i = 0; i < elements_x_*elements_y_*elements_z_; ++i) {
-    // Triangle 0
-    indices_[index++] = 2+i*8;
-    indices_[index++] = 3+i*8;
-    indices_[index++] = 7+i*8;
+   // if (act_vox_index[i]) {
+      // Triangle 0
+      indices_[index++] = 2+i*8;
+      indices_[index++] = 3+i*8;
+      indices_[index++] = 7+i*8;
 
-    // 1
-    indices_[index++] = 2+i*8;
-    indices_[index++] = 7+i*8;
-    indices_[index++] = 6+i*8;
+      // 1
+      indices_[index++] = 2+i*8;
+      indices_[index++] = 7+i*8;
+      indices_[index++] = 6+i*8;
 
-    // 2
-    indices_[index++] = 6+i*8;
-    indices_[index++] = 7+i*8;
-    indices_[index++] = 4+i*8;
+      // 2
+      indices_[index++] = 6+i*8;
+      indices_[index++] = 7+i*8;
+      indices_[index++] = 4+i*8;
 
-    // 3
-    indices_[index++] = 6+i*8;
-    indices_[index++] = 4+i*8;
-    indices_[index++] = 5+i*8;
+      // 3
+      indices_[index++] = 6+i*8;
+      indices_[index++] = 4+i*8;
+      indices_[index++] = 5+i*8;
 
-    // 4
-    indices_[index++] = 5+i*8;
-    indices_[index++] = 4+i*8;
-    indices_[index++] = 0+i*8;
+      // 4
+      indices_[index++] = 5+i*8;
+      indices_[index++] = 4+i*8;
+      indices_[index++] = 0+i*8;
 
-    // 5
-    indices_[index++] = 5+i*8;
-    indices_[index++] = 0+i*8;
-    indices_[index++] = 1+i*8;
+      // 5
+      indices_[index++] = 5+i*8;
+      indices_[index++] = 0+i*8;
+      indices_[index++] = 1+i*8;
 
-    // 6
-    indices_[index++] = 1+i*8;
-    indices_[index++] = 0+i*8;
-    indices_[index++] = 3+i*8;
+      // 6
+      indices_[index++] = 1+i*8;
+      indices_[index++] = 0+i*8;
+      indices_[index++] = 3+i*8;
 
-    // 7
-    indices_[index++] = 1+i*8;
-    indices_[index++] = 3+i*8;
-    indices_[index++] = 2+i*8;
+      // 7
+      indices_[index++] = 1+i*8;
+      indices_[index++] = 3+i*8;
+      indices_[index++] = 2+i*8;
 
-    // 8
-    indices_[index++] = 1+i*8;
-    indices_[index++] = 2+i*8;
-    indices_[index++] = 6+i*8;
+      // 8
+      indices_[index++] = 1+i*8;
+      indices_[index++] = 2+i*8;
+      indices_[index++] = 6+i*8;
 
-    // 9
-    indices_[index++] = 1+i*8;
-    indices_[index++] = 6+i*8;
-    indices_[index++] = 5+i*8;
+      // 9
+      indices_[index++] = 1+i*8;
+      indices_[index++] = 6+i*8;
+      indices_[index++] = 5+i*8;
 
-    // 10
-    indices_[index++] = 0+i*8;
-    indices_[index++] = 3+i*8;
-    indices_[index++] = 7+i*8;
+      // 10
+      indices_[index++] = 0+i*8;
+      indices_[index++] = 3+i*8;
+      indices_[index++] = 7+i*8;
 
-    // 11
-    indices_[index++] = 0+i*8;
-    indices_[index++] = 7+i*8;
-    indices_[index++] = 4+i*8;
+      // 11
+      indices_[index++] = 0+i*8;
+      indices_[index++] = 7+i*8;
+      indices_[index++] = 4+i*8;
+  //  }
   }
+
+  number_of_indices_ = index;
 
   // Creating a VAO
   glGenVertexArrays(1, &vao_);

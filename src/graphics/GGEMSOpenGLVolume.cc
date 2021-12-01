@@ -60,9 +60,10 @@ GGEMSOpenGLVolume::GGEMSOpenGLVolume()
   update_angle_y_ = 0.0f;
   update_angle_z_ = 0.0f;
 
-  color_[0] = 1.0f; // red
-  color_[1] = 0.0f;
-  color_[2] = 0.0f;
+  // By defaut white
+  color_[0] = 1.0f;
+  color_[1] = 1.0f;
+  color_[2] = 1.0f;
 
   vao_ = 0;
   vbo_[0] = 0; // Vertex
@@ -96,6 +97,9 @@ GGEMSOpenGLVolume::~GGEMSOpenGLVolume(void)
   // Destroying vao and vbo
   glDeleteBuffers(1, &vao_);
   glDeleteBuffers(2, &vbo_[0]);
+
+  // Destroying program shader
+  glDeleteProgram(program_shader_id_);
 
   // Destroying buffers
   if (vertices_) {
@@ -186,7 +190,7 @@ void GGEMSOpenGLVolume::SetZUpdateAngle(GLfloat const& update_angle_z)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSOpenGLVolume::SetColor(std::string const& color)
+void GGEMSOpenGLVolume::SetColorName(std::string const& color)
 {
   // Getting color map from GGEMSOpenGLManager
   ColorUMap colors = GGEMSOpenGLManager::GetInstance().GetColorUMap();
@@ -225,9 +229,103 @@ void GGEMSOpenGLVolume::SetColor(std::string const& color)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+void GGEMSOpenGLVolume::SetColorRGB(GGEMSRGBColor const& rgb)
+{
+  color_[0] = rgb.red_;
+  color_[1] = rgb.green_;
+  color_[2] = rgb.blue_;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 void GGEMSOpenGLVolume::SetVisible(bool const& is_visible)
 {
   is_visible_ = is_visible;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSOpenGLVolume::InitShaders(void)
+{
+  // Creating shaders
+  GLuint vert_shader = glCreateShader(GL_VERTEX_SHADER);
+  GLuint frag_shader = glCreateShader(GL_FRAGMENT_SHADER);
+
+  // Setting the source code
+  char const* vertex_shader_source = vertex_shader_source_.c_str();
+  char const* fragment_shader_source = fragment_shader_source_.c_str();
+  glShaderSource(vert_shader, 1, &vertex_shader_source, nullptr);
+  glShaderSource(frag_shader, 1, &fragment_shader_source, nullptr);
+
+  // Compiling shaders
+  CompileShader(vert_shader);
+  CompileShader(frag_shader);
+
+  // Linking the program
+  program_shader_id_ = glCreateProgram();
+  glAttachShader(program_shader_id_, vert_shader);
+  glAttachShader(program_shader_id_, frag_shader);
+  glLinkProgram(program_shader_id_);
+
+  // Deleting shaders
+  glDeleteShader(vert_shader);
+  glDeleteShader(frag_shader);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSOpenGLVolume::CompileShader(GLuint const& shader) const
+{
+  GLint sucess = 0;
+  glCompileShader(shader);
+  glGetShaderiv(shader, GL_COMPILE_STATUS, &sucess);
+  if(sucess == GL_FALSE) {
+    GLint max_length = 0;
+    glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &max_length);
+
+    // The max_length includes the NULL character
+    std::vector<GLchar> error_log(max_length);
+    glGetShaderInfoLog(shader, max_length, &max_length, &error_log[0]);
+
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "Error compiling shader!!!" << std::endl;
+    for (std::size_t i = 0; i < error_log.size(); ++i) oss << error_log[i];
+
+    glDeleteShader(shader); // Don't leak the shader.
+    throw std::runtime_error(oss.str());
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+std::string GGEMSOpenGLVolume::GetOpenGLSLVersion(void) const
+{
+  std::string glsl_version(reinterpret_cast<char const*>(glGetString(GL_SHADING_LANGUAGE_VERSION)));
+  std::string digits("0123456789");
+
+  std::size_t n = glsl_version.find_first_of(digits);
+  if (n != std::string::npos)
+  {
+    std::size_t m = glsl_version.find_first_not_of(digits+".", n);
+    std::string tmp = glsl_version.substr(n, m != std::string::npos ? m-n : m);
+    // Deleting '.'
+    tmp.erase(std::remove(tmp.begin(), tmp.end(), '.'), tmp.end());
+    return tmp;
+  }
+  else {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "Impossible to get GLSL version!!!";
+    GGEMSMisc::ThrowException("GGEMSOpenGLManager", "GetOpenGLSLVersion", oss.str());
+  }
+  return std::string();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -239,9 +337,6 @@ void GGEMSOpenGLVolume::Draw(void) const
   if (is_visible_) {
     // Getting OpenCL pointer
     GGEMSOpenGLManager& opengl_manager = GGEMSOpenGLManager::GetInstance();
-
-    // Get program shader from OpenGL manager
-    GLuint program_shader_id = opengl_manager.GetProgramShaderID();
 
     // Getting projection and camera view matrix
     glm::mat4 projection_matrix = opengl_manager.GetProjection();
@@ -264,7 +359,7 @@ void GGEMSOpenGLVolume::Draw(void) const
     glm::mat4 rotation_matrix_after_translation = glm::toMat4(quaternion);
 
     // Enabling shader program
-    glUseProgram(program_shader_id);
+    glUseProgram(program_shader_id_);
 
     glBindVertexArray(vao_);
 
@@ -272,12 +367,14 @@ void GGEMSOpenGLVolume::Draw(void) const
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo_[1]);
 
     // Setting color
-    glUniform3f(glGetUniformLocation(program_shader_id, "color"), color_[0], color_[1], color_[2]);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+    glUniform3f(glGetUniformLocation(program_shader_id_, "color"), color_[0], color_[1], color_[2]);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(GLfloat), (void*)0);
     glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6*sizeof(GLfloat), (void*)(3*sizeof(GLfloat)));
+    glEnableVertexAttribArray(1);
 
     glm::mat4 mvp_matrix = projection_matrix*view_matrix*rotation_matrix_after_translation*translate_matrix*rotation_matrix;
-    glUniformMatrix4fv(glGetUniformLocation(program_shader_id, "mvp"), 1, GL_FALSE, &mvp_matrix[0][0]);
+    glUniformMatrix4fv(glGetUniformLocation(program_shader_id_, "mvp"), 1, GL_FALSE, &mvp_matrix[0][0]);
 
     // Draw volume using index
     glDrawElements(GL_TRIANGLES, number_of_indices_, GL_UNSIGNED_INT, (void*)0);

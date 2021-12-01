@@ -39,6 +39,7 @@
 
 #include "GGEMS/global/GGEMSExport.hh"
 #include "GGEMS/tools/GGEMSTypes.hh"
+#include "GGEMS/materials/GGEMSMaterialsDatabaseManager.hh"
 
 /*!
   \class GGEMSOpenGLVolume
@@ -137,11 +138,18 @@ class GGEMS_EXPORT GGEMSOpenGLVolume
     void SetZUpdateAngle(GLfloat const& update_angle_z);
 
     /*!
-      \fn void SetColor(std::string const& color)
+      \fn void SetColorName(std::string const& color)
       \param color - Color of OpenGL sphere
       \brief setting color of OpenGL sphere
     */
-    void SetColor(std::string const& color);
+    void SetColorName(std::string const& color);
+
+    /*!
+      \fn void SetColorRGB(GGEMSRGBColor const& rgb)
+      \param rgb - rgb parameters
+      \brief set rgb colors
+    */
+    void SetColorRGB(GGEMSRGBColor const& rgb);
 
     /*!
       \fn void SetVisible(bool const& is_visible)
@@ -160,6 +168,34 @@ class GGEMS_EXPORT GGEMSOpenGLVolume
       \brief Draw volume into the screen
     */
     void Draw(void) const;
+
+  protected:
+    /*!
+      \fn void InitShaders(void)
+      \brief compile shader and store it
+    */
+    void InitShaders(void);
+
+    /*!
+      \fn void WriteShaders(void)
+      \brief write shader source file for each volume
+    */
+    virtual void WriteShaders(void) = 0;
+
+    /*!
+      \fn std::string GetOpenGLSLVersion(void) const
+      \brief Get version of GLSL
+      \return GLSL version in string
+    */
+    std::string GetOpenGLSLVersion(void) const;
+
+  private:
+    /*!
+      \fn void CompileShader(GLuint const& shader) const
+      \param shader - index of shader from glCreateShader
+      \brief compiling shader
+    */
+    void CompileShader(GLuint const& shader) const;
 
   protected:
     GLint number_of_stacks_; /*!< Number of stacks (latitude) */
@@ -181,6 +217,9 @@ class GGEMS_EXPORT GGEMSOpenGLVolume
 
     GLuint vao_; /*!< vertex array object, 1 for each object */
     GLuint vbo_[2]; /*!< vertex buffer object, index 0 -> vertex, index 1 -> indice */
+    GLuint program_shader_id_; /*!< program id for shader, specific to a volume */
+    std::string vertex_shader_source_; /*!< vertex shader source file */
+    std::string fragment_shader_source_; /*!< fragment shader source file */
 
     GLfloat* vertices_; /*!< Pointer storing position vertex for OpenGL volume */
     GLint number_of_vertices_; /*!< Number of vertices for OpenGL volume */
