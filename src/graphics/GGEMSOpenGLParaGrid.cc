@@ -115,6 +115,17 @@ void GGEMSOpenGLParaGrid::WriteShaders(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+GGEMSRGBColor GGEMSOpenGLParaGrid::GetRGBColor(GLint const& i, GLint const& j, GLint const& k) const
+{
+  // Getting the label
+  GGEMSRGBColor rgb;
+  return rgb;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 void GGEMSOpenGLParaGrid::Build(void)
 {
   GGcout("GGEMSOpenGLParaGrid", "Build", 3) << "Building OpenGL para..." << GGendl;
@@ -128,13 +139,6 @@ void GGEMSOpenGLParaGrid::Build(void)
   GLfloat y_center = -(element_size_y_*elements_y_*0.5f) + element_size_y_*0.5f;
   GLfloat z_center = -(element_size_z_*elements_z_*0.5f) + element_size_z_*0.5f;
 
-  // float color_test[] = {
-  //   1.0f, 0.843f, 0.0f,
-  //   0.141f, 0.267f, 0.361f,
-  //   0.745f, 0.961f, 0.455f,
-  //   0.424f, 0.008f, 0.467f
-  // };
-
   // Loop over all parallelepipeds
   for (GLint k = 0; k < elements_z_; ++k) {
     z_offset = z_center + k*element_size_z_;
@@ -145,72 +149,72 @@ void GGEMSOpenGLParaGrid::Build(void)
       for (GLint i = 0; i < elements_x_; ++i) {
         x_offset = x_center + i*element_size_x_;
 
+        // Getting color of voxel
+        GGEMSRGBColor rgb = GetRGBColor(i, j, k);
+
         // 0
         vertices_[index++] = x_offset - element_size_x_*0.5f;
         vertices_[index++] = y_offset - element_size_y_*0.5f;
         vertices_[index++] = z_offset - element_size_z_*0.5f;
-        // vertices_[index++] = color_test[i*3+0];
-        // vertices_[index++] = color_test[i*3+1];
-        // vertices_[index++] = color_test[i*3+2];
-        vertices_[index++] = color_[0];
-        vertices_[index++] = color_[1];
-        vertices_[index++] = color_[2];
+        vertices_[index++] = rgb.red_;
+        vertices_[index++] = rgb.green_;
+        vertices_[index++] = rgb.blue_;
 
         // 1
         vertices_[index++] = x_offset - element_size_x_*0.5f;
         vertices_[index++] = y_offset + element_size_y_*0.5f;
         vertices_[index++] = z_offset - element_size_z_*0.5f;
-        vertices_[index++] = color_[0];
-        vertices_[index++] = color_[1];
-        vertices_[index++] = color_[2];
+        vertices_[index++] = rgb.red_;
+        vertices_[index++] = rgb.green_;
+        vertices_[index++] = rgb.blue_;
 
         // 2
         vertices_[index++] = x_offset - element_size_x_*0.5f;
         vertices_[index++] = y_offset + element_size_y_*0.5f;
         vertices_[index++] = z_offset + element_size_z_*0.5f;
-        vertices_[index++] = color_[0];
-        vertices_[index++] = color_[1];
-        vertices_[index++] = color_[2];
+        vertices_[index++] = rgb.red_;
+        vertices_[index++] = rgb.green_;
+        vertices_[index++] = rgb.blue_;
 
         // 3
         vertices_[index++] = x_offset - element_size_x_*0.5f;
         vertices_[index++] = y_offset - element_size_y_*0.5f;
         vertices_[index++] = z_offset + element_size_z_*0.5f;
-        vertices_[index++] = color_[0];
-        vertices_[index++] = color_[1];
-        vertices_[index++] = color_[2];
+        vertices_[index++] = rgb.red_;
+        vertices_[index++] = rgb.green_;
+        vertices_[index++] = rgb.blue_;
 
         // 4
         vertices_[index++] = x_offset + element_size_x_*0.5f;
         vertices_[index++] = y_offset - element_size_y_*0.5f;
         vertices_[index++] = z_offset - element_size_z_*0.5f;
-        vertices_[index++] = color_[0];
-        vertices_[index++] = color_[1];
-        vertices_[index++] = color_[2];
+        vertices_[index++] = rgb.red_;
+        vertices_[index++] = rgb.green_;
+        vertices_[index++] = rgb.blue_;
 
         // 5
         vertices_[index++] = x_offset + element_size_x_*0.5f;
         vertices_[index++] = y_offset + element_size_y_*0.5f;
         vertices_[index++] = z_offset - element_size_z_*0.5f;
-        vertices_[index++] = color_[0];
-        vertices_[index++] = color_[1];
-        vertices_[index++] = color_[2];
+        vertices_[index++] = rgb.red_;
+        vertices_[index++] = rgb.green_;
+        vertices_[index++] = rgb.blue_;
 
         // 6
         vertices_[index++] = x_offset + element_size_x_*0.5f;
         vertices_[index++] = y_offset + element_size_y_*0.5f;
         vertices_[index++] = z_offset + element_size_z_*0.5f;
-        vertices_[index++] = color_[0];
-        vertices_[index++] = color_[1];
-        vertices_[index++] = color_[2];
+        vertices_[index++] = rgb.red_;
+        vertices_[index++] = rgb.green_;
+        vertices_[index++] = rgb.blue_;
 
         // 7
         vertices_[index++] = x_offset + element_size_x_*0.5f;
         vertices_[index++] = y_offset - element_size_y_*0.5f;
         vertices_[index++] = z_offset + element_size_z_*0.5f;
-        vertices_[index++] = color_[0];
-        vertices_[index++] = color_[1];
-        vertices_[index++] = color_[2];
+        vertices_[index++] = rgb.red_;
+        vertices_[index++] = rgb.green_;
+        vertices_[index++] = rgb.blue_;
       }
     }
   }

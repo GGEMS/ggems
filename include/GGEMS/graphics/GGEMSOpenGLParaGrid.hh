@@ -99,6 +99,16 @@ class GGEMS_EXPORT GGEMSOpenGLParaGrid : public GGEMSOpenGLVolume
     */
     void WriteShaders(void);
 
+    /*!
+      \fn GGEMSRGBColor GetRGBColor(GLint const& i, GLint const& j, GLint const& k) const
+      \param i - index of voxel
+      \param j - index of voxel
+      \param k - index of voxel
+      \return RGB color of a voxel
+      \brief Getting the RGB color of voxels
+    */
+    GGEMSRGBColor GetRGBColor(GLint const& i, GLint const& j, GLint const& k) const;
+
   private:
     GLint elements_x_; /*!< Number of elements in X */
     GLint elements_y_; /*!< Number of elements in Y */

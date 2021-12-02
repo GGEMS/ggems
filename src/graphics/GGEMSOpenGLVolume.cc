@@ -33,6 +33,7 @@
 #include "GGEMS/graphics/GGEMSOpenGLVolume.hh"
 #include "GGEMS/graphics/GGEMSOpenGLManager.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
+#include "GGEMS/materials/GGEMSMaterials.hh"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -60,10 +61,13 @@ GGEMSOpenGLVolume::GGEMSOpenGLVolume()
   update_angle_y_ = 0.0f;
   update_angle_z_ = 0.0f;
 
-  // By defaut white
-  color_[0] = 1.0f;
-  color_[1] = 1.0f;
-  color_[2] = 1.0f;
+  // By defaut, default material and white color
+  GGEMSRGBColor rgb;
+  rgb.red_ = 1.0f;
+  rgb.green_ = 1.0f;
+  rgb.blue_ = 1.0f;
+  material_rgb_.insert(std::make_pair("Default", rgb));
+  label_ =  nullptr;
 
   vao_ = 0;
   vbo_[0] = 0; // Vertex
@@ -110,6 +114,11 @@ GGEMSOpenGLVolume::~GGEMSOpenGLVolume(void)
   if (indices_) {
     delete[] indices_;
     indices_ = nullptr;
+  }
+
+  if (label_) {
+    delete[] label_;
+    label_ = nullptr;
   }
 
   GGcout("GGEMSOpenGLVolume", "~GGEMSOpenGLVolume", 3) << "GGEMSOpenGLVolume erased!!!" << GGendl;
@@ -198,9 +207,9 @@ void GGEMSOpenGLVolume::SetColorName(std::string const& color)
   // Select color
   ColorUMap::iterator it = colors.find(color);
   if (it != colors.end()) {
-    for (int i = 0; i < 3; ++i) {
-      color_[i] = GGEMSOpenGLColor::color[it->second][i];
-    }
+    material_rgb_["Default"].red_ = GGEMSOpenGLColor::color[it->second][0];
+    material_rgb_["Default"].green_ = GGEMSOpenGLColor::color[it->second][1];
+    material_rgb_["Default"].blue_ = GGEMSOpenGLColor::color[it->second][2];
   }
   else {
     std::ostringstream oss(std::ostringstream::out);
@@ -229,11 +238,47 @@ void GGEMSOpenGLVolume::SetColorName(std::string const& color)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSOpenGLVolume::SetColorRGB(GGEMSRGBColor const& rgb)
+void GGEMSOpenGLVolume::SetMaterial(std::string const& material_name)
 {
-  color_[0] = rgb.red_;
-  color_[1] = rgb.green_;
-  color_[2] = rgb.blue_;
+  // Cleaning previous color and material
+  material_rgb_.clear();
+
+  GGEMSMaterialsDatabaseManager& material_manager = GGEMSMaterialsDatabaseManager::GetInstance();
+  GGEMSRGBColor rgb = material_manager.GetMaterialRGBColor(material_name);
+  material_rgb_.insert(std::make_pair(material_name, rgb));
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSOpenGLVolume::SetMaterial(GGEMSMaterials const* materials, cl::Buffer* label, GGsize const& number_of_voxels)
+{
+  // Cleaning previous color and material
+  material_rgb_.clear();
+
+  // Getting material manager
+  GGEMSMaterialsDatabaseManager& material_manager = GGEMSMaterialsDatabaseManager::GetInstance();
+  for (GGsize i = 0; i < materials->GetNumberOfMaterials(); ++i) {
+    std::string material_name = materials->GetMaterialName(i);
+    GGEMSRGBColor rgb = material_manager.GetMaterialRGBColor(material_name);
+    material_rgb_.insert(std::make_pair(material_name, rgb));
+  }
+
+  // Storing label from OpenCL
+  label_ = new GGuchar[number_of_voxels];
+
+  // Get pointer on OpenCL device
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+  GGuchar* label_data_device = opencl_manager.GetDeviceBuffer<GGuchar>(label, CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, number_of_voxels * sizeof(GGuchar), 0);
+
+  // Copy data
+  for (GGsize i = 0; i < number_of_voxels; ++i) {
+    label_[i] = label_data_device[i];
+  }
+
+  // Release the pointer
+  opencl_manager.ReleaseDeviceBuffer(label, label_data_device, 0);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -366,8 +411,12 @@ void GGEMSOpenGLVolume::Draw(void) const
     glBindBuffer(GL_ARRAY_BUFFER, vbo_[0]);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo_[1]);
 
-    // Setting color
-    glUniform3f(glGetUniformLocation(program_shader_id_, "color"), color_[0], color_[1], color_[2]);
+    // If only 1 color read in umap directly
+    if (material_rgb_.size() == 1) {
+      GGEMSRGBColor rgb_unique = material_rgb_.begin()->second;
+      glUniform3f(glGetUniformLocation(program_shader_id_, "color"), rgb_unique.red_, rgb_unique.green_, rgb_unique.blue_);
+    }
+
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(GLfloat), (void*)0);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6*sizeof(GLfloat), (void*)(3*sizeof(GLfloat)));

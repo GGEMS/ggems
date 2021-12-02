@@ -41,6 +41,8 @@
 #include "GGEMS/tools/GGEMSTypes.hh"
 #include "GGEMS/materials/GGEMSMaterialsDatabaseManager.hh"
 
+class GGEMSMaterials;
+
 /*!
   \class GGEMSOpenGLVolume
   \brief GGEMS mother class defining volume for OpenGL
@@ -145,11 +147,20 @@ class GGEMS_EXPORT GGEMSOpenGLVolume
     void SetColorName(std::string const& color);
 
     /*!
-      \fn void SetColorRGB(GGEMSRGBColor const& rgb)
-      \param rgb - rgb parameters
-      \brief set rgb colors
+      \fn void SetMaterial(GGEMSMaterials const* materials, cl::Buffer* label, GGsize const& number_of_voxels)
+      \param materials - list of materials selected during simulation
+      \param label - label data corresponding to material
+      \param number_of_voxels - number of voxels
+      \brief Set material list and labels, to find color associated to material
     */
-    void SetColorRGB(GGEMSRGBColor const& rgb);
+    void SetMaterial(GGEMSMaterials const* materials, cl::Buffer* label, GGsize const& number_of_voxels);
+
+    /*!
+      \fn void SetMaterial(std::string const& material_name)
+      \param material_name - name of the material
+      \brief set the material name, if 1 material only in volume
+    */
+    void SetMaterial(std::string const& material_name);
 
     /*!
       \fn void SetVisible(bool const& is_visible)
@@ -213,7 +224,8 @@ class GGEMS_EXPORT GGEMSOpenGLVolume
     GLfloat update_angle_y_; /*!< Angle after translation, volume rotate around isocenter */
     GLfloat update_angle_z_; /*!< Angle after translation, volume rotate around isocenter */
 
-    GLfloat color_[3]; /*!< Color of volume */
+    MaterialRGBColorUMap material_rgb_; /*!< Color of material */
+    GGuchar* label_; /*!< Label for material */
 
     GLuint vao_; /*!< vertex array object, 1 for each object */
     GLuint vbo_[2]; /*!< vertex buffer object, index 0 -> vertex, index 1 -> indice */

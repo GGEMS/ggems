@@ -264,9 +264,7 @@ void GGEMSSolid::SetColorName(std::string const& color) const
 void GGEMSSolid::SetMaterialName(std::string const& material_name) const
 {
   #ifdef OPENGL_VISUALIZATION
-  GGEMSMaterialsDatabaseManager& material_manager = GGEMSMaterialsDatabaseManager::GetInstance();
-  GGEMSRGBColor rgb = material_manager.GetMaterialRGBColor(material_name);
   if (opengl_solid_)
-    opengl_solid_->SetColorRGB(rgb);
+    opengl_solid_->SetMaterial(material_name);
   #endif
 }

@@ -144,6 +144,9 @@ void GGEMSVoxelizedSolid::Initialize(GGEMSMaterials* materials)
 
   // Release the pointer
   opencl_manager.ReleaseDeviceBuffer(solid_data_[0], solid_data_device, 0);
+
+  // Loading labels and materials for OpenGL
+  opengl_solid_->SetMaterial(materials, label_data_[0], number_of_voxels_);
   #endif
 }
 
