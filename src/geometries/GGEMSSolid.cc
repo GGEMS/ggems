@@ -249,11 +249,11 @@ void GGEMSSolid::BuildOpenGL(void) const
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSSolid::SetColorName(std::string const& color) const
+void GGEMSSolid::SetMaterialName(std::string const& material_name) const
 {
   #ifdef OPENGL_VISUALIZATION
   if (opengl_solid_)
-    opengl_solid_->SetColorName(color);
+    opengl_solid_->SetMaterial(material_name);
   #endif
 }
 
@@ -261,10 +261,22 @@ void GGEMSSolid::SetColorName(std::string const& color) const
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSSolid::SetMaterialName(std::string const& material_name) const
+void GGEMSSolid::SetCustomMaterialColor(MaterialRGBColorUMap const& custom_material_rgb)
 {
   #ifdef OPENGL_VISUALIZATION
   if (opengl_solid_)
-    opengl_solid_->SetMaterial(material_name);
+    opengl_solid_->SetCustomMaterialColor(custom_material_rgb);
+  #endif
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSSolid::SetMaterialVisible(MaterialVisibleUMap const& material_visible)
+{
+  #ifdef OPENGL_VISUALIZATION
+  if (opengl_solid_)
+    opengl_solid_->SetMaterialVisible(material_visible);
   #endif
 }

@@ -220,7 +220,7 @@ int main(int argc, char** argv)
     GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
     GGEMSOpenGLManager& opengl_manager = GGEMSOpenGLManager::GetInstance();
     GGEMSMaterialsDatabaseManager& material_manager = GGEMSMaterialsDatabaseManager::GetInstance();
-    GGEMSVolumeCreatorManager& volume_creator_manager = GGEMSVolumeCreatorManager::GetInstance();
+    //GGEMSVolumeCreatorManager& volume_creator_manager = GGEMSVolumeCreatorManager::GetInstance();
     GGEMSProcessesManager& processes_manager = GGEMSProcessesManager::GetInstance();
     GGEMSRangeCutsManager& range_cuts_manager = GGEMSRangeCutsManager::GetInstance();
 
@@ -242,34 +242,35 @@ int main(int argc, char** argv)
     material_manager.SetMaterialsDatabase("data/materials.txt");
 
     // Initializing a global voxelized volume
-    volume_creator_manager.SetVolumeDimensions(120, 120, 120);
-    volume_creator_manager.SetElementSizes(0.1f, 0.1f, 0.1f, "mm");
-    volume_creator_manager.SetOutputImageFilename("data/phantom.mhd");
-    volume_creator_manager.SetRangeToMaterialDataFilename("data/range_phantom.txt");
-    volume_creator_manager.SetMaterial("Air");
-    volume_creator_manager.SetDataType("MET_INT");
-    volume_creator_manager.Initialize();
+    // volume_creator_manager.SetVolumeDimensions(120, 120, 120);
+    // volume_creator_manager.SetElementSizes(0.1f, 0.1f, 0.1f, "mm");
+    // volume_creator_manager.SetOutputImageFilename("data/phantom.mhd");
+    // volume_creator_manager.SetRangeToMaterialDataFilename("data/range_phantom.txt");
+    // volume_creator_manager.SetMaterial("Air");
+    // volume_creator_manager.SetDataType("MET_INT");
+    // volume_creator_manager.Initialize();
 
     // Creating a box
-    GGEMSBox* box_phantom = new GGEMSBox(10.0f, 10.0f, 10.0f, "mm");
-    box_phantom->SetPosition(0.0f, 0.0f, 0.0f, "mm");
-    box_phantom->SetLabelValue(1);
-    box_phantom->SetMaterial("Water");
-    box_phantom->Initialize();
-    box_phantom->Draw();
-    delete box_phantom;
+    // GGEMSBox* box_phantom = new GGEMSBox(10.0f, 10.0f, 10.0f, "mm");
+    // box_phantom->SetPosition(0.0f, 0.0f, 0.0f, "mm");
+    // box_phantom->SetLabelValue(1);
+    // box_phantom->SetMaterial("Water");
+    // box_phantom->Initialize();
+    // box_phantom->Draw();
+    // delete box_phantom;
 
-    // Writing volume
-    volume_creator_manager.Write();
+    // // Writing volume
+    // volume_creator_manager.Write();
 
     // Phantoms and systems
     GGEMSVoxelizedPhantom phantom("phantom");
-    phantom.SetPhantomFile("data/phantom.mhd", "data/range_phantom.txt");
+    phantom.SetPhantomFile("data/Thorax.mhd", "data/HU2mat.txt");
     phantom.SetRotation(0.0f, 0.0f, 0.0f, "deg");
     phantom.SetPosition(0.0f, 0.0f, 0.0f, "mm");
+    // Drawing phantom detector
     phantom.SetVisible(true);
-    // phantom.SetMaterialColor("Water", false);
-    // phantom.SetMaterialColor("Water", 0.34, 0.4, 0.2, true);
+    // Drawing materials
+    phantom.SetMaterialVisible("Air_0", false);
 
     GGEMSCTSystem ct_detector("Stellar");
     ct_detector.SetCTSystemType("curved");
@@ -283,8 +284,10 @@ int main(int argc, char** argv)
     ct_detector.SetThreshold(10.0f, "keV");
     ct_detector.StoreOutput("data/projection");
     ct_detector.StoreScatter(true);
+    // Drawing CT detector
     ct_detector.SetVisible(true);
-    //ct_detector.SetColor("red");
+    // Adding a custom color for GOS material
+    ct_detector.SetMaterialColor("GOS", 153, 50, 204);
 
     // Physics
     processes_manager.AddProcess("Compton", "gamma", "all");

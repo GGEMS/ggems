@@ -254,11 +254,18 @@ class GGEMS_EXPORT GGEMSSolid
     void SetVisible(bool const& is_visible);
 
     /*!
-      \fn void SetColorName(std::string const& color) const
-      \param color - Color name
-      \brief setting color for OpenGL volume
+      \fn void SetCustomMaterialColor(MaterialRGBColorUMap const& custom_material_rgb)
+      \param custom_material_rgb - rgb color associated to a material
+      \brief set a new color material
     */
-    void SetColorName(std::string const& color) const;
+    void SetCustomMaterialColor(MaterialRGBColorUMap const& custom_material_rgb);
+
+    /*!
+      \fn void SetMaterialVisible(MaterialVisibleUMap const& material_visible)
+      \param material_visible - visibility of material
+      \brief set visibility of material
+    */
+    void SetMaterialVisible(MaterialVisibleUMap const& material_visible);
 
     /*!
       \fn void SetMaterialName(std::string const& material_name) const

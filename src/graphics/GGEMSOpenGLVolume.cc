@@ -68,6 +68,8 @@ GGEMSOpenGLVolume::GGEMSOpenGLVolume()
   rgb.blue_ = 1.0f;
   material_rgb_.insert(std::make_pair("Default", rgb));
   label_ =  nullptr;
+  material_names_.clear();
+  material_visible_.clear();
 
   vao_ = 0;
   vbo_[0] = 0; // Vertex
@@ -246,6 +248,7 @@ void GGEMSOpenGLVolume::SetMaterial(std::string const& material_name)
   GGEMSMaterialsDatabaseManager& material_manager = GGEMSMaterialsDatabaseManager::GetInstance();
   GGEMSRGBColor rgb = material_manager.GetMaterialRGBColor(material_name);
   material_rgb_.insert(std::make_pair(material_name, rgb));
+  material_names_.push_back(material_name);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -263,6 +266,7 @@ void GGEMSOpenGLVolume::SetMaterial(GGEMSMaterials const* materials, cl::Buffer*
     std::string material_name = materials->GetMaterialName(i);
     GGEMSRGBColor rgb = material_manager.GetMaterialRGBColor(material_name);
     material_rgb_.insert(std::make_pair(material_name, rgb));
+    material_names_.push_back(material_name);
   }
 
   // Storing label from OpenCL
@@ -273,12 +277,37 @@ void GGEMSOpenGLVolume::SetMaterial(GGEMSMaterials const* materials, cl::Buffer*
   GGuchar* label_data_device = opencl_manager.GetDeviceBuffer<GGuchar>(label, CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, number_of_voxels * sizeof(GGuchar), 0);
 
   // Copy data
-  for (GGsize i = 0; i < number_of_voxels; ++i) {
-    label_[i] = label_data_device[i];
-  }
+  for (GGsize i = 0; i < number_of_voxels; ++i) label_[i] = label_data_device[i];
 
   // Release the pointer
   opencl_manager.ReleaseDeviceBuffer(label, label_data_device, 0);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSOpenGLVolume::SetCustomMaterialColor(MaterialRGBColorUMap const& custom_material_rgb)
+{
+  // Loop over custom material
+  for (auto&& i : custom_material_rgb) {
+    // Finding custom material color in default container
+    MaterialRGBColorUMap::iterator iter = material_rgb_.find(i.first);
+    if (iter != material_rgb_.end()) {
+      iter->second.red_ = i.second.red_;
+      iter->second.green_ = i.second.green_;
+      iter->second.blue_ = i.second.blue_;
+    }
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSOpenGLVolume::SetMaterialVisible(MaterialVisibleUMap const& material_visible)
+{
+  material_visible_ = material_visible;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

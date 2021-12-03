@@ -254,11 +254,23 @@ class GGEMS_EXPORT GGEMSNavigator
     void SetVisible(bool const& is_visible);
 
     /*!
-      \fn void SetColor(std::string const& color)
-      \param color - color name
-      \brief set color name for opengl
+      \fn void SetMaterialColor(std::string const& material_name, GGuchar const& red, GGuchar const& green, GGuchar const& blue)
+      \param material_name - material name
+      \param red - red part of RGB color
+      \param green - green part of RGB color
+      \param blue - blue part of RGB color
+      \param is_visible_material - material visible or not
+      \brief set custom color for opengl volume
     */
-    void SetColor(std::string const& color);
+    void SetMaterialColor(std::string const& material_name, GGuchar const& red, GGuchar const& green, GGuchar const& blue);
+
+    /*!
+      \fn void SetMaterialVisible(std::string const& material_name, bool const& is_material_visible)
+      \param material_name - name of material
+      \param is_material_visible - flag drawing material
+      \brief set visibility of material for OpenGL
+    */
+    void SetMaterialVisible(std::string const& material_name, bool const& is_material_visible);
 
   protected:
     /*!
@@ -297,7 +309,8 @@ class GGEMS_EXPORT GGEMSNavigator
 
     // OpenGL
     bool is_visible_; /*!< flag for opengl */
-    std::string color_name_; /*!< Name of color for OpenGL volume */
+    MaterialRGBColorUMap custom_material_rgb_; /*!< Custom color for material */
+    MaterialVisibleUMap material_visible_; /*!< list of flag to draw volume or not */
 };
 
 #endif // End of GUARD_GGEMS_NAVIGATORS_GGEMSNAVIGATOR_HH

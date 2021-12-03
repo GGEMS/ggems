@@ -239,12 +239,9 @@ void GGEMSCTSystem::Initialize(void)
       "HISTOGRAM"
     );
     solids_[i]->SetVisible(is_visible_);
-    if (!color_name_.empty()) { // Setting color
-      solids_[i]->SetColorName(color_name_);
-    }
-    else { // Setting material name, here only 1 material
-      solids_[i]->SetMaterialName(materials_->GetMaterialName(0));
-    }
+    solids_[i]->SetMaterialName(materials_->GetMaterialName(0));
+    solids_[i]->SetCustomMaterialColor(custom_material_rgb_);
+    solids_[i]->SetMaterialVisible(material_visible_);
 
     // Enabling scatter if necessary
     if (is_scatter_) solids_[i]->EnableScatter();

@@ -115,11 +115,39 @@ void GGEMSOpenGLParaGrid::WriteShaders(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSRGBColor GGEMSOpenGLParaGrid::GetRGBColor(GLint const& i, GLint const& j, GLint const& k) const
+GGEMSRGBColor GGEMSOpenGLParaGrid::GetRGBColor(GLint const& index) const
 {
-  // Getting the label
-  GGEMSRGBColor rgb;
+  // Read label and get material color
+  GGuchar index_material = 0;
+  if (material_rgb_.size() > 1) index_material = label_[index];
+
+  // Getting material name and read rgb color
+  std::string material_name = material_names_.at(index_material);
+  GGEMSRGBColor rgb = material_rgb_.at(material_name);
+
   return rgb;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+bool GGEMSOpenGLParaGrid::IsMaterialVisible(GLint const index) const
+{
+  // Read label and get material color
+  GGuchar index_material = 0;
+  if (material_rgb_.size() > 1) index_material = label_[index];
+
+  // Getting material name and read visibility
+  std::string material_name = material_names_.at(index_material);
+
+  MaterialVisibleUMap::const_iterator iter = material_visible_.find(material_name);
+  if (iter == material_visible_.end()) {
+    return true;
+  }
+  else {
+    return iter->second;
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -150,7 +178,7 @@ void GGEMSOpenGLParaGrid::Build(void)
         x_offset = x_center + i*element_size_x_;
 
         // Getting color of voxel
-        GGEMSRGBColor rgb = GetRGBColor(i, j, k);
+        GGEMSRGBColor rgb = GetRGBColor(i + j*elements_x_ + k*elements_x_*elements_y_);
 
         // 0
         vertices_[index++] = x_offset - element_size_x_*0.5f;
@@ -219,17 +247,10 @@ void GGEMSOpenGLParaGrid::Build(void)
     }
   }
 
-  // bool act_vox_index[] = {
-  //   false, true, true, true, true, true,
-  //   true, true, true, false, false, true,
-  //   false, true, false, true, true, true,
-  //   true, true, true, true, false, true
-  // };
-
   // Storing indices
   index = 0;
   for (GLint i = 0; i < elements_x_*elements_y_*elements_z_; ++i) {
-   // if (act_vox_index[i]) {
+   if (IsMaterialVisible(i)) {
       // Triangle 0
       indices_[index++] = 2+i*8;
       indices_[index++] = 3+i*8;
@@ -289,7 +310,7 @@ void GGEMSOpenGLParaGrid::Build(void)
       indices_[index++] = 0+i*8;
       indices_[index++] = 7+i*8;
       indices_[index++] = 4+i*8;
-  //  }
+    }
   }
 
   number_of_indices_ = index;

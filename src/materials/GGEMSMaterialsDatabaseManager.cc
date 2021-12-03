@@ -150,9 +150,55 @@ void GGEMSMaterialsDatabaseManager::LoadMaterialRGBColors(void)
   GGcout("GGEMSMaterialsDatabaseManager", "LoadMaterialRGBColors", 1) << "Loading material RGB colors in GGEMS..." << GGendl;
 
   // Name, R, G, B
+  AddMaterialRGBColor("Silicon", 149, 153, 165);
+  AddMaterialRGBColor("Titanium", 135, 134, 129);
+  AddMaterialRGBColor("Gold", 255, 215, 0);
+
   AddMaterialRGBColor("Air", 166, 231, 255);
   AddMaterialRGBColor("Water", 212, 241, 249);
   AddMaterialRGBColor("GOS", 255, 255, 255);
+
+  AddMaterialRGBColor("Air_0", 166, 231, 255);
+  AddMaterialRGBColor("Lung_1", 255, 182, 193);
+  AddMaterialRGBColor("Lung_2", 255, 182, 193);
+  AddMaterialRGBColor("Lung_3", 255, 182, 193);
+  AddMaterialRGBColor("Lung_4", 255, 182, 193);
+  AddMaterialRGBColor("Lung_5", 255, 182, 193);
+  AddMaterialRGBColor("Lung_6", 255, 182, 193);
+  AddMaterialRGBColor("Lung_7", 255, 182, 193);
+  AddMaterialRGBColor("Lung_8", 255, 182, 193);
+  AddMaterialRGBColor("Lung_9", 255, 182, 193);
+  AddMaterialRGBColor("AT_AG_SI1_10", 220, 220, 220);
+  AddMaterialRGBColor("AT_AG_SI2_11", 220, 220, 220);
+  AddMaterialRGBColor("AT_AG_SI3_12", 220, 220, 220);
+  AddMaterialRGBColor("AT_AG_SI4_13", 220, 220, 220);
+  AddMaterialRGBColor("AT_AG_SI5_14", 220, 220, 220);
+  AddMaterialRGBColor("SoftTissus_15", 250, 219, 216);
+  AddMaterialRGBColor("ConnectiveTissue_16", 253, 237, 236);
+  AddMaterialRGBColor("Marrow_Bone01_17", 216, 212, 194);
+  AddMaterialRGBColor("Marrow_Bone02_18", 216, 212, 194);
+  AddMaterialRGBColor("Marrow_Bone03_19", 216, 212, 194);
+  AddMaterialRGBColor("Marrow_Bone04_20", 216, 212, 194);
+  AddMaterialRGBColor("Marrow_Bone05_21", 216, 212, 194);
+  AddMaterialRGBColor("Marrow_Bone06_22", 216, 212, 194);
+  AddMaterialRGBColor("Marrow_Bone07_23", 216, 212, 194);
+  AddMaterialRGBColor("Marrow_Bone08_24", 216, 212, 194);
+  AddMaterialRGBColor("Marrow_Bone09_25", 216, 212, 194);
+  AddMaterialRGBColor("Marrow_Bone10_26", 216, 212, 194);
+  AddMaterialRGBColor("Marrow_Bone11_27", 216, 212, 194);
+  AddMaterialRGBColor("Marrow_Bone12_28", 216, 212, 194);
+  AddMaterialRGBColor("Marrow_Bone13_29", 216, 212, 194);
+  AddMaterialRGBColor("Marrow_Bone14_30", 216, 212, 194);
+  AddMaterialRGBColor("Marrow_Bone15_31", 216, 212, 194);
+  AddMaterialRGBColor("AmalgamTooth_32", 255, 215, 0);
+  AddMaterialRGBColor("AmalgamTooth_33", 255, 215, 0);
+  AddMaterialRGBColor("AmalgamTooth_34", 255, 215, 0);
+  AddMaterialRGBColor("AmalgamTooth_35", 255, 215, 0);
+  AddMaterialRGBColor("MetallImplants_36", 135, 134, 129);
+  AddMaterialRGBColor("MetallImplants_37", 135, 134, 129);
+  AddMaterialRGBColor("MetallImplants_38", 135, 134, 129);
+  AddMaterialRGBColor("MetallImplants_39", 135, 134, 129);
+  AddMaterialRGBColor("MetallImplants_40", 135, 134, 129);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

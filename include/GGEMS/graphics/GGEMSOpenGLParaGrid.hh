@@ -100,14 +100,20 @@ class GGEMS_EXPORT GGEMSOpenGLParaGrid : public GGEMSOpenGLVolume
     void WriteShaders(void);
 
     /*!
-      \fn GGEMSRGBColor GetRGBColor(GLint const& i, GLint const& j, GLint const& k) const
-      \param i - index of voxel
-      \param j - index of voxel
-      \param k - index of voxel
+      \fn GGEMSRGBColor GetRGBColor(GLint const& index) const
+      \param index - index of voxel for label
       \return RGB color of a voxel
       \brief Getting the RGB color of voxels
     */
-    GGEMSRGBColor GetRGBColor(GLint const& i, GLint const& j, GLint const& k) const;
+    GGEMSRGBColor GetRGBColor(GLint const& index) const;
+
+    /*!
+      \fn bool IsMaterialVisible(GLint const index) const
+      \param index - index of voxel for label
+      \return true if material is visible
+      \brief check if material is visible or not
+    */
+    bool IsMaterialVisible(GLint const index) const;
 
   private:
     GLint elements_x_; /*!< Number of elements in X */

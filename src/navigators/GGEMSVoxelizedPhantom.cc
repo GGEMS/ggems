@@ -114,6 +114,8 @@ void GGEMSVoxelizedPhantom::Initialize(void)
 
   // Load voxelized phantom from MHD file and storing materials
   solids_[0]->Initialize(materials_);
+  solids_[0]->SetCustomMaterialColor(custom_material_rgb_);
+  solids_[0]->SetMaterialVisible(material_visible_);
 
   // Perform rotation before position
   if (is_update_rot_) {

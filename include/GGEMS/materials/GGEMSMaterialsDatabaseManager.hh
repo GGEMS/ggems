@@ -83,6 +83,7 @@ struct GGEMS_EXPORT GGEMSRGBColor
 typedef std::unordered_map<std::string, GGEMSChemicalElement> ChemicalElementUMap; /*!< Unordered map with key : name of element, value the chemical element structure */
 typedef std::unordered_map<std::string, GGEMSSingleMaterial> MaterialUMap; /*!< Unordered map with key : name of the material, value the material */
 typedef std::unordered_map<std::string, GGEMSRGBColor> MaterialRGBColorUMap; /*!< Unordered map with key : name of the material, RGB color value */
+typedef std::unordered_map<std::string, bool> MaterialVisibleUMap; /*!< Unordered map with key : name of the material, true: visible, false: not visible */
 
 /*!
   \class GGEMSMaterialsDatabaseManager

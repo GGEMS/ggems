@@ -169,6 +169,20 @@ class GGEMS_EXPORT GGEMSOpenGLVolume
     void SetVisible(bool const& is_visible);
 
     /*!
+      \fn void SetCustomMaterialColor(MaterialRGBColorUMap const& custom_material_rgb)
+      \param custom_material_rgb - rgb color associated to a material
+      \brief set a new color material
+    */
+    void SetCustomMaterialColor(MaterialRGBColorUMap const& custom_material_rgb);
+
+    /*!
+      \fn void SetMaterialVisible(MaterialVisibleUMap const& material_visible)
+      \param material_visible - visibility of material
+      \brief set the visibility of material
+    */
+    void SetMaterialVisible(MaterialVisibleUMap const& material_visible);
+
+    /*!
       \fn void Build(void) = 0
       \brief method building OpenGL volume and storing VAO and VBO
     */
@@ -226,6 +240,8 @@ class GGEMS_EXPORT GGEMSOpenGLVolume
 
     MaterialRGBColorUMap material_rgb_; /*!< Color of material */
     GGuchar* label_; /*!< Label for material */
+    std::vector<std::string> material_names_; /*!< Name of material */
+    MaterialVisibleUMap material_visible_; /*!< Visibily of material */
 
     GLuint vao_; /*!< vertex array object, 1 for each object */
     GLuint vbo_[2]; /*!< vertex buffer object, index 0 -> vertex, index 1 -> indice */

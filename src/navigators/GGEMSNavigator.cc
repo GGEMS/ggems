@@ -79,7 +79,8 @@ GGEMSNavigator::GGEMSNavigator(std::string const& navigator_name)
   number_activated_devices_ = opencl_manager.GetNumberOfActivatedDevice();
 
   is_visible_ = false;
-  color_name_ = "";
+  custom_material_rgb_.clear();
+  material_visible_.clear();
   mu_tables_ = nullptr;
 
   GGcout("GGEMSNavigator", "GGEMSNavigator", 3) << "GGEMSNavigator created!!!" << GGendl;
@@ -208,9 +209,24 @@ void GGEMSNavigator::SetVisible(bool const& is_visible)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSNavigator::SetColor(std::string const& color)
+void GGEMSNavigator::SetMaterialColor(std::string const& material_name, GGuchar const& red, GGuchar const& green, GGuchar const& blue)
 {
-  color_name_ = color;
+  // Adding a custom color
+  GGEMSRGBColor rgb;
+  rgb.red_ = static_cast<GGfloat>(red) / 255.0f;
+  rgb.green_ = static_cast<GGfloat>(green) / 255.0f;
+  rgb.blue_ = static_cast<GGfloat>(blue) / 255.0f;
+
+  custom_material_rgb_.insert(std::make_pair(material_name, rgb));
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSNavigator::SetMaterialVisible(std::string const& material_name, bool const& is_material_visible)
+{
+  material_visible_.insert(std::make_pair(material_name, is_material_visible));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
