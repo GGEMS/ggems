@@ -108,15 +108,15 @@ void GGEMSCTSystem::CheckParameters(void) const
     GGEMSMisc::ThrowException("GGEMSCTSystem", "CheckParameters", oss.str());
   }
 
-  if (source_isocenter_distance_ == 0.0f) {
-    std::ostringstream oss(std::ostringstream::out);
-    oss << "For CT system, source isocenter distance (SID) has to be > 0.0 mm!!!";
-    GGEMSMisc::ThrowException("GGEMSCTSystem", "CheckParameters", oss.str());
-  }
-
   if (source_detector_distance_ == 0.0f) {
     std::ostringstream oss(std::ostringstream::out);
     oss << "For CT system, source detector distance (SDD) has to be > 0.0 mm!!!";
+    GGEMSMisc::ThrowException("GGEMSCTSystem", "CheckParameters", oss.str());
+  }
+
+  if (source_isocenter_distance_ > source_detector_distance_) {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "Source isocenter distance must be inferior to source detector distance!!!";
     GGEMSMisc::ThrowException("GGEMSCTSystem", "CheckParameters", oss.str());
   }
 
@@ -144,12 +144,12 @@ void GGEMSCTSystem::InitializeCurvedGeometry(void)
   GGfloat oy = 0.0f;
 
   // Center of module P (px, py) is source detector distance minus source isocenter distance plus half size of module in Z (module referential)
-  GGfloat px = source_detector_distance_ - source_isocenter_distance_ + 0.5f*static_cast<GGfloat>(number_of_detection_elements_inside_module_xyz_.z_)*size_of_detection_elements_xyz_.z;
+  GGfloat px = source_detector_distance_ - source_isocenter_distance_;
   GGfloat py = 0.0f;
 
   // Loop over each module in X and Y, and compute angle of each module in around Z
   for (GGsize j = 0; j < number_of_modules_xy_.y_; ++j) { // for Y modules
-    GGfloat step_angle = alpha * (static_cast<GGfloat>(j) + 0.5f*(1.0f-static_cast<GGfloat>(number_of_modules_xy_.y_)));
+    GGfloat step_angle = alpha * (static_cast<GGfloat>(j) + 0.5f*(1.0f - static_cast<GGfloat>(number_of_modules_xy_.y_)));
 
     // Computing the X and Y positions in global position (isocenter)
     GGfloat global_position_x = (px-ox)*std::cos(step_angle) - (py-oy)*std::sin(step_angle) + ox;
@@ -162,11 +162,15 @@ void GGEMSCTSystem::InitializeCurvedGeometry(void)
       GGsize global_index = i+j*number_of_modules_xy_.x_;
 
       GGfloat3 rotation;
-      rotation.x = 0.0f; rotation.y = 0.0f; rotation.z = step_angle;
+      rotation.x = 0.0f;
+      rotation.y = 0.0f;
+      rotation.z = step_angle;
       solids_[global_index]->SetRotation(rotation);
 
       GGfloat3 position;
-      position.x = global_position_x; position.y = global_position_y; position.z = global_position_z;
+      position.x = global_position_x + shifted_position_xyz_.x;
+      position.y = global_position_y + shifted_position_xyz_.y;
+      position.z = global_position_z + shifted_position_xyz_.z;
       solids_[global_index]->SetPosition(position);
 
       // Rotation for OpenGL volume
@@ -182,7 +186,7 @@ void GGEMSCTSystem::InitializeCurvedGeometry(void)
 void GGEMSCTSystem::InitializeFlatGeometry(void)
 {
     // Computing the X, Y and Z positions in global position (isocenter)
-  GGfloat global_position_x = source_detector_distance_ - source_isocenter_distance_ + 0.5f*static_cast<GGfloat>(number_of_detection_elements_inside_module_xyz_.z_)*size_of_detection_elements_xyz_.z;
+  GGfloat global_position_x = source_detector_distance_ - source_isocenter_distance_;
   GGfloat global_position_y = 0.0f;
   GGfloat global_position_z = 0.0f;
 
@@ -196,11 +200,15 @@ void GGEMSCTSystem::InitializeFlatGeometry(void)
 
       // No rotation of module
       GGfloat3 rotation;
-      rotation.x = 0.0f; rotation.y = 0.0f; rotation.z = 0.0f;
+      rotation.x = 0.0f;
+      rotation.y = 0.0f;
+      rotation.z = 0.0f;
       solids_[global_index]->SetRotation(rotation);
 
       GGfloat3 position;
-      position.x = global_position_x; position.y = global_position_y; position.z = global_position_z;
+      position.x = global_position_x + shifted_position_xyz_.x;
+      position.y = global_position_y + shifted_position_xyz_.y;
+      position.z = global_position_z + shifted_position_xyz_.z;
       solids_[global_index]->SetPosition(position);
     }
   }

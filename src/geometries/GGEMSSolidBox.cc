@@ -119,7 +119,8 @@ GGEMSSolidBox::GGEMSSolidBox(GGsize const& virtual_element_number_x, GGsize cons
     static_cast<GLint>(virtual_element_number_x),
     box_size_z / static_cast<GLfloat>(virtual_element_number_z),
     box_size_y / static_cast<GLfloat>(virtual_element_number_y),
-    box_size_x / static_cast<GLfloat>(virtual_element_number_x)
+    box_size_x / static_cast<GLfloat>(virtual_element_number_x),
+    false
   );
   #endif
 

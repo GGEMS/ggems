@@ -49,9 +49,10 @@ class GGEMS_EXPORT GGEMSOpenGLParaGrid : public GGEMSOpenGLVolume
       \param element_size_x - element size along X
       \param element_size_y - element size along Y
       \param element_size_z - element size along Z
+      \param is_midplanes - true if only midplanes are drawn
       \brief GGEMSOpenGLParaGrid constructor
     */
-    GGEMSOpenGLParaGrid(GLint const& elements_x, GLint const& elements_y, GLint const& elements_z, GLfloat const& element_size_x, GLfloat const& element_size_y, GLfloat const& element_size_z);
+    GGEMSOpenGLParaGrid(GLint const& elements_x, GLint const& elements_y, GLint const& elements_z, GLfloat const& element_size_x, GLfloat const& element_size_y, GLfloat const& element_size_z, bool const& is_midplanes);
 
     /*!
       \brief GGEMSOpenGLParaGrid destructor
@@ -116,12 +117,14 @@ class GGEMS_EXPORT GGEMSOpenGLParaGrid : public GGEMSOpenGLVolume
     bool IsMaterialVisible(GLint const index) const;
 
   private:
+    GLint number_of_elements_; /*!< Number of elements to draw */
     GLint elements_x_; /*!< Number of elements in X */
     GLint elements_y_; /*!< Number of elements in Y */
     GLint elements_z_; /*!< Number of elements in Z */
     GLfloat element_size_x_; /*!< Size of elements in X */
     GLfloat element_size_y_; /*!< Size of elements in Y */
     GLfloat element_size_z_; /*!< Size of elements in Z */
+    bool is_midplanes_; /*!< Flag drawing midplanes for big volume */
 };
 
 #endif

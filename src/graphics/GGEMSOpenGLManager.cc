@@ -36,14 +36,14 @@ int GGEMSOpenGLManager::window_width_ = 800;
 int GGEMSOpenGLManager::window_height_ = 600;
 bool GGEMSOpenGLManager::is_wireframe_ = true;
 float GGEMSOpenGLManager::zoom_ = 0.0f;
-glm::vec3 GGEMSOpenGLManager::camera_position_ = glm::vec3(0.0f, 0.0f, 3.0f);
-glm::vec3 GGEMSOpenGLManager::camera_target_ = glm::vec3(0.0, 0.0, -1.0f);
-glm::vec3 GGEMSOpenGLManager::camera_up_ = glm::vec3(0.0, 1.0, 0.0f);
+glm::vec3 GGEMSOpenGLManager::camera_position_ = glm::vec3(0.0f, 0.0f, -3.0f);
+glm::vec3 GGEMSOpenGLManager::camera_target_ = glm::vec3(0.0, 0.0, 1.0f);
+glm::vec3 GGEMSOpenGLManager::camera_up_ = glm::vec3(0.0, -1.0, 0.0f);
 double GGEMSOpenGLManager::delta_time_ = 0.0f;
 double GGEMSOpenGLManager::x_mouse_cursor_ = 0.0;
 double GGEMSOpenGLManager::y_mouse_cursor_ = 0.0;
 float GGEMSOpenGLManager::pitch_angle_ = 0.0;
-float GGEMSOpenGLManager::yaw_angle_ = -90.0; // yaw is initialized to -90.0 degrees since a yaw of 0.0 results in a direction vector pointing to the right so we initially rotate a bit to the left
+float GGEMSOpenGLManager::yaw_angle_ = 90.0; // yaw is initialized to -90.0 degrees since a yaw of 0.0 results in a direction vector pointing to the right so we initially rotate a bit to the left
 bool GGEMSOpenGLManager::is_first_mouse_ = true;
 double GGEMSOpenGLManager::last_mouse_x_position_ = 0.0;
 double GGEMSOpenGLManager::last_mouse_y_position_ = 0.0;
@@ -704,7 +704,7 @@ void GGEMSOpenGLManager::GLFWCursorPosCallback(GLFWwindow* window, double x, dou
 
     // Offset between cursor position and current position
     double x_cursor_offset = x - last_mouse_x_position_;
-    double y_cursor_offset = last_mouse_y_position_ - y;
+    double y_cursor_offset = y - last_mouse_y_position_;
     last_mouse_x_position_ = x;
     last_mouse_y_position_ = y;
 
@@ -734,7 +734,7 @@ void GGEMSOpenGLManager::GLFWCursorPosCallback(GLFWwindow* window, double x, dou
 
     // Offset between cursor position and current position
     double x_cursor_offset = x - last_mouse_x_position_;
-    double y_cursor_offset = last_mouse_y_position_ - y;
+    double y_cursor_offset = y - last_mouse_y_position_;
     last_mouse_x_position_ = x;
     last_mouse_y_position_ = y;
 

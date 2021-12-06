@@ -108,6 +108,16 @@ class GGEMS_EXPORT GGEMSNavigator
     void SetPosition(GGfloat const& position_x, GGfloat const& position_y, GGfloat const& position_z, std::string const& unit = "mm");
 
     /*!
+      \fn void SetShiftedPosition(GGfloat const& position_x, GGfloat const& shifted_position_y, GGfloat const& shifted_position_z, std::string const& unit = "mm")
+      \param shifted_position_x - shifted position in X
+      \param shifted_position_y - shifted position in Y
+      \param shifted_position_z - shifted position in Z
+      \param unit - unit of the distance
+      \brief set the shifted position of the global navigator in X, Y and Z
+    */
+    void SetShiftedPosition(GGfloat const& shifted_position_x, GGfloat const& shifted_position_y, GGfloat const& shifted_position_z, std::string const& unit = "mm");
+
+    /*!
       \fn void SetRotation(GGfloat const& rx, GGfloat const& ry, GGfloat const& rz, std::string const& unit)
       \param rx - Rotation around X along global axis
       \param ry - Rotation around Y along global axis
@@ -285,6 +295,8 @@ class GGEMS_EXPORT GGEMSNavigator
     // Global navigation members
     GGfloat3 position_xyz_; /*!< Position of the navigator in X, Y and Z */
     GGfloat3 rotation_xyz_; /*!< Rotation of the navigator in X, Y and Z */
+    GGfloat3 shifted_position_xyz_; /*!< Shifted position of the navigator in X, Y and Z */
+
     GGsize navigator_id_; /*!< Index of the navigator */
     bool is_update_pos_; /*!< Updating navigator position */
     bool is_update_rot_; /*!< Updating navigator rotation */

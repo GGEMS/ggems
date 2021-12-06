@@ -270,7 +270,8 @@ int main(int argc, char** argv)
     // Drawing phantom detector
     phantom.SetVisible(true);
     // Drawing materials
-    phantom.SetMaterialVisible("Air_0", false);
+    phantom.SetMaterialVisible("Air_0", true);
+    phantom.SetMaterialColor("Air_0", 255, 0, 0);
 
     GGEMSCTSystem ct_detector("Stellar");
     ct_detector.SetCTSystemType("curved");
@@ -278,9 +279,10 @@ int main(int argc, char** argv)
     ct_detector.SetNumberOfDetectionElementsInsideModule(64, 16, 1);
     ct_detector.SetSizeOfDetectionElements(0.6f, 0.6f, 0.6f, "mm");
     ct_detector.SetMaterialName("GOS");
-    ct_detector.SetSourceDetectorDistance(1085.6f, "mm");
+    ct_detector.SetSourceDetectorDistance(1085.9f, "mm"); // Center of inside detector (= SDD + 1*0.6mm half of depth)
     ct_detector.SetSourceIsocenterDistance(595.0f, "mm");
     ct_detector.SetRotation(0.0f, 0.0f, 0.0f, "deg");
+    ct_detector.SetShiftedPosition(0.0f, 0.0f, 0.0f, "mm");
     ct_detector.SetThreshold(10.0f, "keV");
     ct_detector.StoreOutput("data/projection");
     ct_detector.StoreScatter(true);

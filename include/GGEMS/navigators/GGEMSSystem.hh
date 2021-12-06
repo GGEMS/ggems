@@ -110,16 +110,6 @@ class GGEMS_EXPORT GGEMSSystem : public GGEMSNavigator
     void SetSizeOfDetectionElements(GGfloat const& size_of_detection_element_x, GGfloat const& size_of_detection_element_y, GGfloat const& size_of_detection_element_z, std::string const& unit = "mm");
 
     /*!
-      \fn void SetGlobalPosition(GGfloat const& global_position_x, GGfloat const& global_position_y, GGfloat const& global_position_z, std::string const& unit = "mm")
-      \param global_position_x - global position of the system in X (global axis)
-      \param global_position_y - global position of the system in Y (global axis)
-      \param global_position_z - global position of the system in Z (global axis)
-      \param unit - distance unit
-      \brief set the global position of the system
-    */
-    void SetGlobalPosition(GGfloat const& global_position_x, GGfloat const& global_position_y, GGfloat const& global_position_z, std::string const& unit = "mm");
-
-    /*!
       \fn void SetMaterialName(std::string const& material_name)
       \param material_name - name of the material for detection element
       \brief set the name of the material

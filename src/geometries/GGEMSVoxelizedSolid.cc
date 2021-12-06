@@ -139,7 +139,8 @@ void GGEMSVoxelizedSolid::Initialize(GGEMSMaterials* materials)
     solid_data_device->number_of_voxels_xyz_.z,
     solid_data_device->voxel_sizes_xyz_.x,
     solid_data_device->voxel_sizes_xyz_.y,
-    solid_data_device->voxel_sizes_xyz_.z
+    solid_data_device->voxel_sizes_xyz_.z,
+    true // Draw midplanes
   );
 
   // Release the pointer

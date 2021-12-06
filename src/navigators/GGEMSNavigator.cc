@@ -65,6 +65,10 @@ GGEMSNavigator::GGEMSNavigator(std::string const& navigator_name)
   rotation_xyz_.y = 0.0f;
   rotation_xyz_.z = 0.0f;
 
+  shifted_position_xyz_.x = 0.0f;
+  shifted_position_xyz_.y = 0.0f;
+  shifted_position_xyz_.z = 0.0f;
+
   // Store the phantom navigator in phantom navigator manager
   GGEMSNavigatorManager::GetInstance().Store(this);
 
@@ -142,9 +146,20 @@ void GGEMSNavigator::SetDosimetryCalculator(GGEMSDosimetryCalculator* dosimetry_
 void GGEMSNavigator::SetPosition(GGfloat const& position_x, GGfloat const& position_y, GGfloat const& position_z, std::string const& unit)
 {
   is_update_pos_ = true;
-  position_xyz_.s[0] = DistanceUnit(position_x, unit);
-  position_xyz_.s[1] = DistanceUnit(position_y, unit);
-  position_xyz_.s[2] = DistanceUnit(position_z, unit);
+  position_xyz_.x = DistanceUnit(position_x, unit);
+  position_xyz_.y = DistanceUnit(position_y, unit);
+  position_xyz_.z = DistanceUnit(position_z, unit);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSNavigator::SetShiftedPosition(GGfloat const& shifted_position_x, GGfloat const& shifted_position_y, GGfloat const& shifted_position_z, std::string const& unit)
+{
+  shifted_position_xyz_.x = DistanceUnit(shifted_position_x, unit);
+  shifted_position_xyz_.y = DistanceUnit(shifted_position_y, unit);
+  shifted_position_xyz_.z = DistanceUnit(shifted_position_z, unit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

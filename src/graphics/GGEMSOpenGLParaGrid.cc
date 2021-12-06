@@ -38,23 +38,32 @@
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSOpenGLParaGrid::GGEMSOpenGLParaGrid(GLint const& elements_x, GLint const& elements_y, GLint const& elements_z, GLfloat const& element_size_x, GLfloat const& element_size_y, GLfloat const& element_size_z)
+GGEMSOpenGLParaGrid::GGEMSOpenGLParaGrid(GLint const& elements_x, GLint const& elements_y, GLint const& elements_z, GLfloat const& element_size_x, GLfloat const& element_size_y, GLfloat const& element_size_z, bool const& is_midplanes)
 : GGEMSOpenGLVolume(),
   elements_x_(elements_x),
   elements_y_(elements_y),
   elements_z_(elements_z),
   element_size_x_(element_size_x),
   element_size_y_(element_size_y),
-  element_size_z_(element_size_z)
+  element_size_z_(element_size_z),
+  is_midplanes_(is_midplanes)
 {
   GGcout("GGEMSOpenGLParaGrid", "GGEMSOpenGLParaGrid", 3) << "GGEMSOpenGLParaGrid creating..." << GGendl;
 
+  // Number of elements to draw
+  if (is_midplanes_) {
+    number_of_elements_ = elements_x_ * elements_y_ + elements_x_ * elements_z_ + elements_y_ * elements_z_ - elements_x_ - elements_y_;
+  }
+  else {
+    number_of_elements_ = elements_x_ * elements_y_ * elements_z_;
+  }
+
   // For each parallelepiped there are 8 vertices, 3 positions for each vertex and a RGB color for each vertex
-  number_of_vertices_ = elements_x_ * elements_y_ * elements_z_ * 8 * 3 * 2;
+  number_of_vertices_ = number_of_elements_ * 8 * 3 * 2;
   vertices_ = new GLfloat[number_of_vertices_];
 
   // For each parallelepiped there are 12 triangles
-  number_of_triangles_ = elements_x_ * elements_y_ * elements_z_ * 12;
+  number_of_triangles_ = number_of_elements_ * 12;
   number_of_indices_ = number_of_triangles_ * 3;
   indices_ = new GLuint[number_of_indices_];
 
@@ -167,90 +176,175 @@ void GGEMSOpenGLParaGrid::Build(void)
   GLfloat y_center = -(element_size_y_*elements_y_*0.5f) + element_size_y_*0.5f;
   GLfloat z_center = -(element_size_z_*elements_z_*0.5f) + element_size_z_*0.5f;
 
+  // if midplanes, computing index of midplane
+  GLint x_midplane = elements_x_ / 2;
+  GLint y_midplane = elements_y_ / 2;
+  GLint z_midplane = elements_z_ / 2;
+
   // Loop over all parallelepipeds
-  for (GLint k = 0; k < elements_z_; ++k) {
-    z_offset = z_center + k*element_size_z_;
+  if (is_midplanes_) {
+    for (GLint k = 0; k < elements_z_; ++k) {
+      z_offset = z_center + k*element_size_z_;
+      for (GLint j = 0; j < elements_y_; ++j) {
+        y_offset = y_center + j*element_size_y_;
+        for (GLint i = 0; i < elements_x_; ++i) {
+          x_offset = x_center + i*element_size_x_;
 
-    for (GLint j = 0; j < elements_y_; ++j) {
-      y_offset = y_center + j*element_size_y_;
+          if (k == z_midplane || j == y_midplane || i == x_midplane) {
+            // Getting color of voxel
+            GGEMSRGBColor rgb = GetRGBColor(i + j*elements_x_ + k*elements_x_*elements_y_);
 
-      for (GLint i = 0; i < elements_x_; ++i) {
-        x_offset = x_center + i*element_size_x_;
+            // 0
+            vertices_[index++] = x_offset - element_size_x_*0.5f;
+            vertices_[index++] = y_offset - element_size_y_*0.5f;
+            vertices_[index++] = z_offset - element_size_z_*0.5f;
+            vertices_[index++] = rgb.red_;
+            vertices_[index++] = rgb.green_;
+            vertices_[index++] = rgb.blue_;
 
-        // Getting color of voxel
-        GGEMSRGBColor rgb = GetRGBColor(i + j*elements_x_ + k*elements_x_*elements_y_);
+            // 1
+            vertices_[index++] = x_offset - element_size_x_*0.5f;
+            vertices_[index++] = y_offset + element_size_y_*0.5f;
+            vertices_[index++] = z_offset - element_size_z_*0.5f;
+            vertices_[index++] = rgb.red_;
+            vertices_[index++] = rgb.green_;
+            vertices_[index++] = rgb.blue_;
 
-        // 0
-        vertices_[index++] = x_offset - element_size_x_*0.5f;
-        vertices_[index++] = y_offset - element_size_y_*0.5f;
-        vertices_[index++] = z_offset - element_size_z_*0.5f;
-        vertices_[index++] = rgb.red_;
-        vertices_[index++] = rgb.green_;
-        vertices_[index++] = rgb.blue_;
+            // 2
+            vertices_[index++] = x_offset - element_size_x_*0.5f;
+            vertices_[index++] = y_offset + element_size_y_*0.5f;
+            vertices_[index++] = z_offset + element_size_z_*0.5f;
+            vertices_[index++] = rgb.red_;
+            vertices_[index++] = rgb.green_;
+            vertices_[index++] = rgb.blue_;
 
-        // 1
-        vertices_[index++] = x_offset - element_size_x_*0.5f;
-        vertices_[index++] = y_offset + element_size_y_*0.5f;
-        vertices_[index++] = z_offset - element_size_z_*0.5f;
-        vertices_[index++] = rgb.red_;
-        vertices_[index++] = rgb.green_;
-        vertices_[index++] = rgb.blue_;
+            // 3
+            vertices_[index++] = x_offset - element_size_x_*0.5f;
+            vertices_[index++] = y_offset - element_size_y_*0.5f;
+            vertices_[index++] = z_offset + element_size_z_*0.5f;
+            vertices_[index++] = rgb.red_;
+            vertices_[index++] = rgb.green_;
+            vertices_[index++] = rgb.blue_;
 
-        // 2
-        vertices_[index++] = x_offset - element_size_x_*0.5f;
-        vertices_[index++] = y_offset + element_size_y_*0.5f;
-        vertices_[index++] = z_offset + element_size_z_*0.5f;
-        vertices_[index++] = rgb.red_;
-        vertices_[index++] = rgb.green_;
-        vertices_[index++] = rgb.blue_;
+            // 4
+            vertices_[index++] = x_offset + element_size_x_*0.5f;
+            vertices_[index++] = y_offset - element_size_y_*0.5f;
+            vertices_[index++] = z_offset - element_size_z_*0.5f;
+            vertices_[index++] = rgb.red_;
+            vertices_[index++] = rgb.green_;
+            vertices_[index++] = rgb.blue_;
 
-        // 3
-        vertices_[index++] = x_offset - element_size_x_*0.5f;
-        vertices_[index++] = y_offset - element_size_y_*0.5f;
-        vertices_[index++] = z_offset + element_size_z_*0.5f;
-        vertices_[index++] = rgb.red_;
-        vertices_[index++] = rgb.green_;
-        vertices_[index++] = rgb.blue_;
+            // 5
+            vertices_[index++] = x_offset + element_size_x_*0.5f;
+            vertices_[index++] = y_offset + element_size_y_*0.5f;
+            vertices_[index++] = z_offset - element_size_z_*0.5f;
+            vertices_[index++] = rgb.red_;
+            vertices_[index++] = rgb.green_;
+            vertices_[index++] = rgb.blue_;
 
-        // 4
-        vertices_[index++] = x_offset + element_size_x_*0.5f;
-        vertices_[index++] = y_offset - element_size_y_*0.5f;
-        vertices_[index++] = z_offset - element_size_z_*0.5f;
-        vertices_[index++] = rgb.red_;
-        vertices_[index++] = rgb.green_;
-        vertices_[index++] = rgb.blue_;
+            // 6
+            vertices_[index++] = x_offset + element_size_x_*0.5f;
+            vertices_[index++] = y_offset + element_size_y_*0.5f;
+            vertices_[index++] = z_offset + element_size_z_*0.5f;
+            vertices_[index++] = rgb.red_;
+            vertices_[index++] = rgb.green_;
+            vertices_[index++] = rgb.blue_;
 
-        // 5
-        vertices_[index++] = x_offset + element_size_x_*0.5f;
-        vertices_[index++] = y_offset + element_size_y_*0.5f;
-        vertices_[index++] = z_offset - element_size_z_*0.5f;
-        vertices_[index++] = rgb.red_;
-        vertices_[index++] = rgb.green_;
-        vertices_[index++] = rgb.blue_;
+            // 7
+            vertices_[index++] = x_offset + element_size_x_*0.5f;
+            vertices_[index++] = y_offset - element_size_y_*0.5f;
+            vertices_[index++] = z_offset + element_size_z_*0.5f;
+            vertices_[index++] = rgb.red_;
+            vertices_[index++] = rgb.green_;
+            vertices_[index++] = rgb.blue_;
+          }
+        }
+      }
+    }
+  }
+  else {
+    for (GLint k = 0; k < elements_z_; ++k) {
+      z_offset = z_center + k*element_size_z_;
+      for (GLint j = 0; j < elements_y_; ++j) {
+        y_offset = y_center + j*element_size_y_;
+        for (GLint i = 0; i < elements_x_; ++i) {
+          x_offset = x_center + i*element_size_x_;
 
-        // 6
-        vertices_[index++] = x_offset + element_size_x_*0.5f;
-        vertices_[index++] = y_offset + element_size_y_*0.5f;
-        vertices_[index++] = z_offset + element_size_z_*0.5f;
-        vertices_[index++] = rgb.red_;
-        vertices_[index++] = rgb.green_;
-        vertices_[index++] = rgb.blue_;
+          // Getting color of voxel
+          GGEMSRGBColor rgb = GetRGBColor(i + j*elements_x_ + k*elements_x_*elements_y_);
 
-        // 7
-        vertices_[index++] = x_offset + element_size_x_*0.5f;
-        vertices_[index++] = y_offset - element_size_y_*0.5f;
-        vertices_[index++] = z_offset + element_size_z_*0.5f;
-        vertices_[index++] = rgb.red_;
-        vertices_[index++] = rgb.green_;
-        vertices_[index++] = rgb.blue_;
+          // 0
+          vertices_[index++] = x_offset - element_size_x_*0.5f;
+          vertices_[index++] = y_offset - element_size_y_*0.5f;
+          vertices_[index++] = z_offset - element_size_z_*0.5f;
+          vertices_[index++] = rgb.red_;
+          vertices_[index++] = rgb.green_;
+          vertices_[index++] = rgb.blue_;
+
+          // 1
+          vertices_[index++] = x_offset - element_size_x_*0.5f;
+          vertices_[index++] = y_offset + element_size_y_*0.5f;
+          vertices_[index++] = z_offset - element_size_z_*0.5f;
+          vertices_[index++] = rgb.red_;
+          vertices_[index++] = rgb.green_;
+          vertices_[index++] = rgb.blue_;
+
+          // 2
+          vertices_[index++] = x_offset - element_size_x_*0.5f;
+          vertices_[index++] = y_offset + element_size_y_*0.5f;
+          vertices_[index++] = z_offset + element_size_z_*0.5f;
+          vertices_[index++] = rgb.red_;
+          vertices_[index++] = rgb.green_;
+          vertices_[index++] = rgb.blue_;
+
+          // 3
+          vertices_[index++] = x_offset - element_size_x_*0.5f;
+          vertices_[index++] = y_offset - element_size_y_*0.5f;
+          vertices_[index++] = z_offset + element_size_z_*0.5f;
+          vertices_[index++] = rgb.red_;
+          vertices_[index++] = rgb.green_;
+          vertices_[index++] = rgb.blue_;
+
+          // 4
+          vertices_[index++] = x_offset + element_size_x_*0.5f;
+          vertices_[index++] = y_offset - element_size_y_*0.5f;
+          vertices_[index++] = z_offset - element_size_z_*0.5f;
+          vertices_[index++] = rgb.red_;
+          vertices_[index++] = rgb.green_;
+          vertices_[index++] = rgb.blue_;
+
+          // 5
+          vertices_[index++] = x_offset + element_size_x_*0.5f;
+          vertices_[index++] = y_offset + element_size_y_*0.5f;
+          vertices_[index++] = z_offset - element_size_z_*0.5f;
+          vertices_[index++] = rgb.red_;
+          vertices_[index++] = rgb.green_;
+          vertices_[index++] = rgb.blue_;
+
+          // 6
+          vertices_[index++] = x_offset + element_size_x_*0.5f;
+          vertices_[index++] = y_offset + element_size_y_*0.5f;
+          vertices_[index++] = z_offset + element_size_z_*0.5f;
+          vertices_[index++] = rgb.red_;
+          vertices_[index++] = rgb.green_;
+          vertices_[index++] = rgb.blue_;
+
+          // 7
+          vertices_[index++] = x_offset + element_size_x_*0.5f;
+          vertices_[index++] = y_offset - element_size_y_*0.5f;
+          vertices_[index++] = z_offset + element_size_z_*0.5f;
+          vertices_[index++] = rgb.red_;
+          vertices_[index++] = rgb.green_;
+          vertices_[index++] = rgb.blue_;
+        }
       }
     }
   }
 
   // Storing indices
   index = 0;
-  for (GLint i = 0; i < elements_x_*elements_y_*elements_z_; ++i) {
-   if (IsMaterialVisible(i)) {
+  for (GLint i = 0; i < number_of_elements_; ++i) {
+    if (IsMaterialVisible(i)) {
       // Triangle 0
       indices_[index++] = 2+i*8;
       indices_[index++] = 3+i*8;
