@@ -52,7 +52,10 @@ GGEMSOpenGLParaGrid::GGEMSOpenGLParaGrid(GLint const& elements_x, GLint const& e
 
   // Number of elements to draw
   if (is_midplanes_) {
-    number_of_elements_ = elements_x_ * elements_y_ + elements_x_ * elements_z_ + elements_y_ * elements_z_ - elements_x_ - elements_y_;
+    GLint z = 0;
+    if (elements_z_ > 1) z = elements_z_ - 1;
+
+    number_of_elements_ = elements_x_ * elements_y_ + elements_x_ * elements_z_ + elements_y_ * elements_z_ - elements_x_ - elements_y_ - z;
   }
   else {
     number_of_elements_ = elements_x_ * elements_y_ * elements_z_;
@@ -170,6 +173,7 @@ void GGEMSOpenGLParaGrid::Build(void)
   // Storing vertices
   GLfloat x_offset = 0.0f, y_offset = 0.0f, z_offset = 0.0f;
   GLint index = 0;
+  GLint flag_index = 0;
 
   // Center of first parallelepiped
   GLfloat x_center = -(element_size_x_*elements_x_*0.5f) + element_size_x_*0.5f;
@@ -181,8 +185,13 @@ void GGEMSOpenGLParaGrid::Build(void)
   GLint y_midplane = elements_y_ / 2;
   GLint z_midplane = elements_z_ / 2;
 
+  // Buffer storing visible voxel
+  std::vector<bool> is_visible_voxel;
+  is_visible_voxel.resize(number_of_elements_);
+
   // Loop over all parallelepipeds
   if (is_midplanes_) {
+
     for (GLint k = 0; k < elements_z_; ++k) {
       z_offset = z_center + k*element_size_z_;
       for (GLint j = 0; j < elements_y_; ++j) {
@@ -191,8 +200,10 @@ void GGEMSOpenGLParaGrid::Build(void)
           x_offset = x_center + i*element_size_x_;
 
           if (k == z_midplane || j == y_midplane || i == x_midplane) {
+
             // Getting color of voxel
             GGEMSRGBColor rgb = GetRGBColor(i + j*elements_x_ + k*elements_x_*elements_y_);
+            is_visible_voxel[flag_index++] = IsMaterialVisible(i + j*elements_x_ + k*elements_x_*elements_y_);
 
             // 0
             vertices_[index++] = x_offset - element_size_x_*0.5f;
@@ -272,6 +283,7 @@ void GGEMSOpenGLParaGrid::Build(void)
 
           // Getting color of voxel
           GGEMSRGBColor rgb = GetRGBColor(i + j*elements_x_ + k*elements_x_*elements_y_);
+          is_visible_voxel[flag_index++] = IsMaterialVisible(i + j*elements_x_ + k*elements_x_*elements_y_);
 
           // 0
           vertices_[index++] = x_offset - element_size_x_*0.5f;
@@ -341,10 +353,9 @@ void GGEMSOpenGLParaGrid::Build(void)
     }
   }
 
-  // Storing indices
   index = 0;
   for (GLint i = 0; i < number_of_elements_; ++i) {
-    if (IsMaterialVisible(i)) {
+    if (is_visible_voxel.at(i)) {
       // Triangle 0
       indices_[index++] = 2+i*8;
       indices_[index++] = 3+i*8;

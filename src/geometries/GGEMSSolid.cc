@@ -63,7 +63,9 @@ GGEMSSolid::GGEMSSolid(void)
 
   is_scatter_ = false;
 
+  #ifdef OPENGL_VISUALIZATION
   opengl_solid_ = nullptr;
+  #endif
 
   GGcout("GGEMSSolid", "GGEMSSolid", 3) << "GGEMSSolid created!!!" << GGendl;
 }

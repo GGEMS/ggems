@@ -612,13 +612,13 @@ void GGEMSOpenGLManager::GLFWKeyCallback(GLFWwindow* window, int key, int, int a
       break;
     }
     case GLFW_KEY_R: {
-      camera_position_ = glm::vec3(0.0f, 0.0f, 3.0f);
-      camera_target_ = glm::vec3(0.0, 0.0, -1.0f);
-      camera_up_ = glm::vec3(0.0, 1.0, 0.0f);
+      camera_position_ = glm::vec3(0.0f, 0.0f, -3.0f);
+      camera_target_ = glm::vec3(0.0, 0.0, 1.0f);
+      camera_up_ = glm::vec3(0.0, -1.0, 0.0f);
       is_wireframe_ = true;
       zoom_ = 0.0f;
       pitch_angle_ = 0.0;
-      yaw_angle_ = -90.0;
+      yaw_angle_ = 90.0;
       is_first_mouse_ = true;
       break;
     }
@@ -713,7 +713,7 @@ void GGEMSOpenGLManager::GLFWCursorPosCallback(GLFWwindow* window, double x, dou
     x_cursor_offset *= mouse_sensitivity;
     y_cursor_offset *= mouse_sensitivity;
 
-    yaw_angle_ += static_cast<float>(x_cursor_offset);
+    yaw_angle_ -= static_cast<float>(x_cursor_offset);
     pitch_angle_ += static_cast<float>(y_cursor_offset);
 
     if (pitch_angle_ > 89.0) pitch_angle_ = 89.0;
@@ -733,13 +733,13 @@ void GGEMSOpenGLManager::GLFWCursorPosCallback(GLFWwindow* window, double x, dou
     }
 
     // Offset between cursor position and current position
-    double x_cursor_offset = x - last_mouse_x_position_;
-    double y_cursor_offset = y - last_mouse_y_position_;
+    double x_cursor_offset = -x + last_mouse_x_position_;
+    double y_cursor_offset = -y + last_mouse_y_position_;
     last_mouse_x_position_ = x;
     last_mouse_y_position_ = y;
 
     glm::vec3 position(0.5*x_cursor_offset, 0.5*y_cursor_offset, 0.0f);
-    camera_position_ += position;
+    camera_position_ -= position;
   }
   else {
     is_first_mouse_ = true;
