@@ -32,6 +32,7 @@
 #include "GGEMS/geometries/GGEMSSolidBoxData.hh"
 #include "GGEMS/maths/GGEMSGeometryTransformation.hh"
 #include "GGEMS/graphics/GGEMSOpenGLParaGrid.hh"
+#include "GGEMS/graphics/GGEMSOpenGLManager.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -113,15 +114,19 @@ GGEMSSolidBox::GGEMSSolidBox(GGsize const& virtual_element_number_x, GGsize cons
   }
 
   #ifdef OPENGL_VISUALIZATION
-  opengl_solid_ = new GGEMSOpenGLParaGrid(
-    static_cast<GLint>(virtual_element_number_z),
-    static_cast<GLint>(virtual_element_number_y),
-    static_cast<GLint>(virtual_element_number_x),
-    box_size_z / static_cast<GLfloat>(virtual_element_number_z),
-    box_size_y / static_cast<GLfloat>(virtual_element_number_y),
-    box_size_x / static_cast<GLfloat>(virtual_element_number_x),
-    false
-  );
+  GGEMSOpenGLManager& opengl_manager = GGEMSOpenGLManager::GetInstance();
+
+  if (opengl_manager.IsOpenGLActivated()) {
+    opengl_solid_ = new GGEMSOpenGLParaGrid(
+      static_cast<GLint>(virtual_element_number_z),
+      static_cast<GLint>(virtual_element_number_y),
+      static_cast<GLint>(virtual_element_number_x),
+      box_size_z / static_cast<GLfloat>(virtual_element_number_z),
+      box_size_y / static_cast<GLfloat>(virtual_element_number_y),
+      box_size_x / static_cast<GLfloat>(virtual_element_number_x),
+      false
+    );
+  }
   #endif
 
   GGcout("GGEMSSolidBox", "GGEMSSolidBox", 3) << "GGEMSSolidBox created!!!" << GGendl;

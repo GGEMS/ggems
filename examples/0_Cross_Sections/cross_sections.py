@@ -21,7 +21,12 @@ from ggems import *
 
 # ------------------------------------------------------------------------------
 # Read arguments
-parser = argparse.ArgumentParser()
+parser = argparse.ArgumentParser(
+  prog='cross_section.py',
+  description='-->> 0 - Cross Sections Example <<--',
+  epilog='Example, computing Compton cross section for water material at 15 keV: py cross_sections.py -m Water -p Compton -e 0.015',
+  formatter_class=argparse.ArgumentDefaultsHelpFormatter
+)
 
 parser.add_argument('-d', '--device', required=False, type=int, default=0, help="OpenCL device id")
 parser.add_argument('-m', '--material', required=True, type=str, help="Set a material name")

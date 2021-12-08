@@ -58,7 +58,7 @@ void PrintHelpAndQuit(std::string const& message, char const* exec)
   std::ostringstream oss(std::ostringstream::out);
   oss << message << std::endl;
   oss << std::endl;
-  oss << "-->> 6 - Visualization Example <<--\n" << std::endl;
+  oss << "-->> 6 - OpenGL Visualization Example <<--\n" << std::endl;
   oss << "Usage: " << exec << " [OPTIONS...]\n" << std::endl;
   oss << "[--help]                   Print the help to the terminal" << std::endl;
   oss << "[--verbose X]              Verbosity level" << std::endl;
@@ -226,14 +226,14 @@ int main(int argc, char** argv)
 
     // Visualization params
     opengl_manager.SetMSAA(msaa);
-    if (is_axis) opengl_manager.SetDrawAxis(true);
+    opengl_manager.SetDrawAxis(is_axis);
     opengl_manager.SetWindowDimensions(window_dims[0], window_dims[1]);
     opengl_manager.SetBackgroundColor(window_color);
     opengl_manager.SetImageOutput("data/axis");
-    opengl_manager.SetWorldSize(2.0f*m,2.0f*m,2.0f*m);
+    opengl_manager.SetWorldSize(2.0f, 2.0f, 2.0f, "m");
     opengl_manager.Initialize();
     // XXX.SetParticleColor("gamma","red") ...
-    // XXX.SetParticles(10000) // Max: 1000000!!!
+    // XXX.SetParticles(10000)
 
     // OpenCL params
     opencl_manager.DeviceToActivate(device_index);
@@ -243,7 +243,7 @@ int main(int argc, char** argv)
 
     // Initializing a global voxelized volume
     volume_creator_manager.SetVolumeDimensions(120, 120, 120);
-    volume_creator_manager.SetElementSizes(0.1f, 0.1f, 0.1f, "mm");
+    volume_creator_manager.SetElementSizes(1.0f, 1.0f, 1.0f, "mm");
     volume_creator_manager.SetOutputImageFilename("data/phantom.mhd");
     volume_creator_manager.SetRangeToMaterialDataFilename("data/range_phantom.txt");
     volume_creator_manager.SetMaterial("Air");
@@ -251,7 +251,7 @@ int main(int argc, char** argv)
     volume_creator_manager.Initialize();
 
     // Creating a box
-    GGEMSBox* box_phantom = new GGEMSBox(10.0f, 10.0f, 10.0f, "mm");
+    GGEMSBox* box_phantom = new GGEMSBox(80.0f, 80.0f, 80.0f, "mm");
     box_phantom->SetPosition(0.0f, 0.0f, 0.0f, "mm");
     box_phantom->SetLabelValue(1);
     box_phantom->SetMaterial("Water");

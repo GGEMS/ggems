@@ -21,7 +21,12 @@ from ggems import *
 
 # ------------------------------------------------------------------------------
 # Read arguments
-parser = argparse.ArgumentParser()
+parser = argparse.ArgumentParser(
+  prog='generate_volume.py',
+  description='-->> 3 - Generate Volume Example <<--',
+  epilog='',
+  formatter_class=argparse.ArgumentDefaultsHelpFormatter
+)
 
 parser.add_argument('-d', '--device', required=False, type=int, default=0, help="OpenCL device id")
 parser.add_argument('-v', '--verbose', required=False, type=int, default=0, help="Set level of verbosity")

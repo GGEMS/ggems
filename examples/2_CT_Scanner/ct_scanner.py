@@ -21,8 +21,14 @@ from ggems import *
 
 # ------------------------------------------------------------------------------
 # Read arguments
-parser = argparse.ArgumentParser()
-parser.add_argument('-d', '--device', required=False, type=str, default='all', help="OpenCL device (all, cpu, gpu, gpu_nvidia, gpu_intel, gpu_amd, X;Y;Z...)")
+parser = argparse.ArgumentParser(
+  prog='ct_scanner.py',
+  description='-->> 2 - CT Scanner Example <<--',
+  epilog='',
+  formatter_class=argparse.ArgumentDefaultsHelpFormatter
+)
+
+parser.add_argument('-d', '--device', required=False, type=str, default='0', help="OpenCL device (all, cpu, gpu, gpu_nvidia, gpu_intel, gpu_amd, X;Y;Z...)")
 parser.add_argument('-b', '--balance', required=False, type=str, help="X;Y;Z... Balance computation for device if many devices are selected")
 parser.add_argument('-n', '--nparticles', required=False, type=int, default=1000000, help="Number of particles")
 parser.add_argument('-s', '--seed', required=False, type=int, default=777, help="Seed of pseudo generator number")
@@ -120,11 +126,11 @@ processes_manager.set_cross_section_table_energy_min(1.0, 'keV')
 processes_manager.set_cross_section_table_energy_max(1.0, 'MeV')
 
 # ------------------------------------------------------------------------------
-# STEP 7: Cuts, by default but are 1 um
+# STEP 6: Cuts, by default but are 1 um
 range_cuts_manager.set_cut('gamma', 0.1, 'mm', 'all')
 
 # ------------------------------------------------------------------------------
-# STEP 8: Source
+# STEP 7: Source
 point_source = GGEMSXRaySource('point_source')
 point_source.set_source_particle_type('gamma')
 point_source.set_number_of_particles(number_of_particles)
@@ -135,7 +141,7 @@ point_source.set_focal_spot_size(0.0, 0.0, 0.0, 'mm')
 point_source.set_polyenergy('data/spectrum_120kVp_2mmAl.dat')
 
 # ------------------------------------------------------------------------------
-# STEP 9: GGEMS simulation
+# STEP 8: GGEMS simulation
 ggems = GGEMS()
 ggems.opencl_verbose(True)
 ggems.material_database_verbose(False)
@@ -155,7 +161,7 @@ ggems.initialize(seed)
 ggems.run()
 
 # ------------------------------------------------------------------------------
-# STEP 10: Exit safely
+# STEP 9: Exit safely
 ggems.delete()
 clean_safely()
 exit()

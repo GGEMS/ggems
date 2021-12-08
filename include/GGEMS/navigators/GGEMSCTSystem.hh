@@ -240,4 +240,32 @@ extern "C" GGEMS_EXPORT void set_save_ggems_ct_system(GGEMSCTSystem* ct_system, 
 */
 extern "C" GGEMS_EXPORT void store_scatter_ggems_ct_system(GGEMSCTSystem* ct_system, bool const is_scatter);
 
+/*!
+  \fn void set_visible_ggems_voxelized_phantom(GGEMSCTSystem* ct_system, bool const flag)
+  \param ct_system - pointer on ct scanner
+  \param flag - flag drawing ct scanner
+  \brief Set flag drawing ct scanner
+*/
+extern "C" GGEMS_EXPORT void set_visible_ggems_ct_system(GGEMSCTSystem* ct_system, bool const flag);
+
+/*!
+  \fn void set_material_visible_ggems_voxelized_phantom(GGEMSCTSystem* ct_system, char const* material_name, bool const flag)
+  \param ct_system - pointer on ct scanner
+  \param material_name - name of material to draw (or not)
+  \param flag - flag drawing ct scanner
+  \brief Set flag for each material to draw
+*/
+extern "C" GGEMS_EXPORT void set_material_visible_ggems_ct_system(GGEMSCTSystem* ct_system, char const* material_name, bool const flag);
+
+/*!
+  \fn void set_material_color_ggems_voxelized_phantom(GGEMSCTSystem* ct_system, char const* material_name, unsigned char const red, unsigned char const green, unsigned char const blue)
+  \param ct_system - pointer on ct scanner
+  \param material_name - name of material to draw (or not)
+  \param red - red value
+  \param green - green value
+  \param blue - blue value
+  \brief Set a new rgb color for a material
+*/
+extern "C" GGEMS_EXPORT void set_material_color_ggems_ct_system(GGEMSCTSystem* ct_system, char const* material_name, unsigned char const red, unsigned char const green, unsigned char const blue);
+
 #endif // End of GUARD_GGEMS_NAVIGATORS_GGEMSSYSTEM_HH

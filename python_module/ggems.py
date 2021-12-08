@@ -33,8 +33,7 @@ from ggems_profiler import GGEMSProfilerManager
 class GGEMS(object):
     """GGEMS class managing the simulation
     """
-    def __init__(self, is_visugl):
-        ggems_lib.create_ggems.argtypes = [ctypes.c_bool]
+    def __init__(self):
         ggems_lib.create_ggems.restype = ctypes.c_void_p
 
         ggems_lib.delete_ggems.argtypes = [ctypes.c_void_p]
@@ -76,7 +75,7 @@ class GGEMS(object):
         ggems_lib.run_ggems.argtypes = [ctypes.c_void_p]
         ggems_lib.run_ggems.restype = ctypes.c_void_p
 
-        self.obj = ggems_lib.create_ggems(is_visugl)
+        self.obj = ggems_lib.create_ggems()
 
     def delete(self):
         ggems_lib.delete_ggems(self.obj)

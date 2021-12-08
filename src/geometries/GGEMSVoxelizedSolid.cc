@@ -32,6 +32,7 @@
 #include "GGEMS/io/GGEMSMHDImage.hh"
 #include "GGEMS/maths/GGEMSGeometryTransformation.hh"
 #include "GGEMS/graphics/GGEMSOpenGLParaGrid.hh"
+#include "GGEMS/graphics/GGEMSOpenGLManager.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -130,24 +131,29 @@ void GGEMSVoxelizedSolid::Initialize(GGEMSMaterials* materials)
   // Creating volume for OpenGL
   // Get some infos for grid
   #ifdef OPENGL_VISUALIZATION
-  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
-  GGEMSVoxelizedSolidData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSVoxelizedSolidData>(solid_data_[0], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGEMSVoxelizedSolidData), 0);
+  GGEMSOpenGLManager& opengl_manager = GGEMSOpenGLManager::GetInstance();
 
-  opengl_solid_ = new GGEMSOpenGLParaGrid(
-    solid_data_device->number_of_voxels_xyz_.x,
-    solid_data_device->number_of_voxels_xyz_.y,
-    solid_data_device->number_of_voxels_xyz_.z,
-    solid_data_device->voxel_sizes_xyz_.x,
-    solid_data_device->voxel_sizes_xyz_.y,
-    solid_data_device->voxel_sizes_xyz_.z,
-    true // Draw midplanes
-  );
+  if (opengl_manager.IsOpenGLActivated()) {
+    GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
 
-  // Release the pointer
-  opencl_manager.ReleaseDeviceBuffer(solid_data_[0], solid_data_device, 0);
+    GGEMSVoxelizedSolidData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSVoxelizedSolidData>(solid_data_[0], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGEMSVoxelizedSolidData), 0);
 
-  // Loading labels and materials for OpenGL
-  opengl_solid_->SetMaterial(materials, label_data_[0], number_of_voxels_);
+    opengl_solid_ = new GGEMSOpenGLParaGrid(
+      solid_data_device->number_of_voxels_xyz_.x,
+      solid_data_device->number_of_voxels_xyz_.y,
+      solid_data_device->number_of_voxels_xyz_.z,
+      solid_data_device->voxel_sizes_xyz_.x,
+      solid_data_device->voxel_sizes_xyz_.y,
+      solid_data_device->voxel_sizes_xyz_.z,
+      true // Draw midplanes
+    );
+
+    // Release the pointer
+    opencl_manager.ReleaseDeviceBuffer(solid_data_[0], solid_data_device, 0);
+
+    // Loading labels and materials for OpenGL
+    opengl_solid_->SetMaterial(materials, label_data_[0], number_of_voxels_);
+  }
   #endif
 }
 

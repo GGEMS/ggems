@@ -32,6 +32,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 // Definition of static members
+bool GGEMSOpenGLManager::is_opengl_activated_ = false;
 int GGEMSOpenGLManager::window_width_ = 800;
 int GGEMSOpenGLManager::window_height_ = 600;
 bool GGEMSOpenGLManager::is_wireframe_ = true;
@@ -163,11 +164,11 @@ void GGEMSOpenGLManager::Store(GGEMSOpenGLVolume* opengl_volume)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSOpenGLManager::SetWorldSize(float const& x_size, float const& y_size, float const& z_size)
+void GGEMSOpenGLManager::SetWorldSize(float const& x_size, float const& y_size, float const& z_size, std::string const& unit)
 {
-  x_world_size_ = x_size;
-  y_world_size_ = y_size;
-  z_world_size_ = z_size;
+  x_world_size_ = DistanceUnit(x_size, unit);
+  y_world_size_ = DistanceUnit(y_size, unit);
+  z_world_size_ = DistanceUnit(z_size, unit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -251,6 +252,8 @@ void GGEMSOpenGLManager::Initialize(void)
 
   InitGL(); // Initializing GLFW, GL and GLEW
   if (is_draw_axis_) axis_ = new GGEMSOpenGLAxis();
+
+  is_opengl_activated_ = true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -583,7 +586,7 @@ void GGEMSOpenGLManager::GLFWKeyCallback(GLFWwindow* window, int key, int, int a
       camera_position_ -= glm::normalize(camera_up_) * camera_speed;
       break;
     }
-    case GLFW_KEY_KP_5: {
+    case GLFW_KEY_KP_2: {
       camera_position_ -= glm::normalize(camera_up_) * camera_speed;
       break;
     }
@@ -803,6 +806,42 @@ void set_background_color_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manage
 void set_draw_axis_opengl_manager(GGEMSOpenGLManager* opengl_manager, bool const is_draw_axis)
 {
   opengl_manager->SetDrawAxis(is_draw_axis);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void set_world_size_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manager, float const x_size, float const y_size, float const z_size, char const* unit)
+{
+  opengl_manager->SetWorldSize(x_size, y_size, z_size, unit);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void set_image_output_opengl_manager(GGEMSOpenGLManager* opengl_manager, char const* output_path)
+{
+  opengl_manager->SetImageOutput(output_path);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void initialize_opengl_manager(GGEMSOpenGLManager* opengl_manager)
+{
+  opengl_manager->Initialize();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void display_opengl_manager(GGEMSOpenGLManager* opengl_manager)
+{
+  opengl_manager->Display();
 }
 
 #endif // End of OPENGL_VISUALIZATION

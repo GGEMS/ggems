@@ -33,6 +33,18 @@ class GGEMSOpenGLManager(object):
         ggems_lib.set_window_dimensions_ggems_opengl_manager.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_int]
         ggems_lib.set_window_dimensions_ggems_opengl_manager.restype = ctypes.c_void_p
 
+        ggems_lib.set_world_size_ggems_opengl_manager.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_char_p]
+        ggems_lib.set_world_size_ggems_opengl_manager.restype = ctypes.c_void_p
+
+        ggems_lib.initialize_opengl_manager.argtypes = [ctypes.c_void_p]
+        ggems_lib.initialize_opengl_manager.restype = ctypes.c_void_p
+
+        ggems_lib.display_opengl_manager.argtypes = [ctypes.c_void_p]
+        ggems_lib.display_opengl_manager.restype = ctypes.c_void_p
+
+        ggems_lib.set_image_output_opengl_manager.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
+        ggems_lib.set_image_output_opengl_manager.restype = ctypes.c_void_p
+
         ggems_lib.set_draw_axis_opengl_manager.argtypes = [ctypes.c_void_p, ctypes.c_bool]
         ggems_lib.set_draw_axis_opengl_manager.restype = ctypes.c_void_p
 
@@ -46,6 +58,18 @@ class GGEMSOpenGLManager(object):
 
     def set_draw_axis(self, color):
         ggems_lib.set_draw_axis_opengl_manager(self.obj, color)
+
+    def set_world_size(self, width, height, depth, unit):
+        ggems_lib.set_world_size_ggems_opengl_manager(self.obj, width, height, depth, unit.encode('ASCII'))
+
+    def set_image_output(self, path):
+        ggems_lib.set_image_output_opengl_manager(self.obj, path.encode('ASCII'))
+
+    def initialize(self):
+        ggems_lib.initialize_opengl_manager(self.obj)
+
+    def display(self):
+        ggems_lib.display_opengl_manager(self.obj)
 
     def set_msaa(self, msaa):
         ggems_lib.set_msaa_ggems_opengl_manager(self.obj, msaa)

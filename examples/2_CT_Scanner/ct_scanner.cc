@@ -120,7 +120,7 @@ int main(int argc, char** argv)
 
     // List of parameters
     GGsize number_of_particles = 1000000;
-    std::string device = "all";
+    std::string device = "0";
     std::string device_balance = "";
     GGuint seed = 777;
 

@@ -30,6 +30,15 @@ class GGEMSVoxelizedPhantom(object):
         ggems_lib.set_position_ggems_voxelized_phantom.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_char_p]
         ggems_lib.set_position_ggems_voxelized_phantom.restype = ctypes.c_void_p
 
+        ggems_lib.set_material_visible_ggems_voxelized_phantom.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_bool]
+        ggems_lib.set_material_visible_ggems_voxelized_phantom.restype = ctypes.c_void_p
+
+        ggems_lib.set_material_color_ggems_voxelized_phantom.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_ubyte, ctypes.c_ubyte, ctypes.c_ubyte]
+        ggems_lib.set_material_color_ggems_voxelized_phantom.restype = ctypes.c_void_p
+
+        ggems_lib.set_visible_ggems_voxelized_phantom.argtypes = [ctypes.c_void_p, ctypes.c_bool]
+        ggems_lib.set_visible_ggems_voxelized_phantom.restype = ctypes.c_void_p
+
         ggems_lib.set_rotation_ggems_voxelized_phantom.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_char_p]
         ggems_lib.set_rotation_ggems_voxelized_phantom.restype = ctypes.c_void_p
 
@@ -37,6 +46,15 @@ class GGEMSVoxelizedPhantom(object):
 
     def set_phantom(self, phantom_filename, range_data_filename):
         ggems_lib.set_phantom_file_ggems_voxelized_phantom(self.obj, phantom_filename.encode('ASCII'), range_data_filename.encode('ASCII'))
+
+    def set_material_visible(self, material_name, flag):
+        ggems_lib.set_material_visible_ggems_voxelized_phantom(self.obj, material_name.encode('ASCII'), flag)
+
+    def set_material_color(self, material_name, red, green, blue):
+        ggems_lib.set_material_color_ggems_voxelized_phantom(self.obj, material_name.encode('ASCII'), red, green, blue)
+
+    def set_visible(self, flag):
+        ggems_lib.set_visible_ggems_voxelized_phantom(self.obj, flag)
 
     def set_position(self, pos_x, pos_y, pos_z, unit):
         ggems_lib.set_position_ggems_voxelized_phantom(self.obj, pos_x, pos_y, pos_z, unit.encode('ASCII'))

@@ -161,13 +161,14 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     void Store(GGEMSOpenGLVolume* opengl_volume);
 
     /*!
-      \fn void SetWorldSize(float const& x_size, float const& y_size, float const& z_size)
+      \fn void SetWorldSize(float const& x_size, float const& y_size, float const& z_size, std::string const& unit = "mm")
       \param x_size - size in X of world scene
       \param y_size - size in Y of world scene
       \param z_size - size in Z of world scene
+      \param unit - length unit
       \brief Set size of world scene for opengl
     */
-    void SetWorldSize(float const& x_size, float const& y_size, float const& z_size);
+    void SetWorldSize(float const& x_size, float const& y_size, float const& z_size, std::string const& unit = "mm");
 
     /*!
       \fn ColorUMap GetColorUMap(void) const
@@ -210,6 +211,13 @@ class GGEMS_EXPORT GGEMSOpenGLManager
       \brief store visu scene in a png file
     */
     void SetImageOutput(std::string const& image_output_basename);
+
+    /*!
+      \fn static bool IsOpenGLActivated(void)
+      \brief check if OpenGL is activated
+      \return true if OpenGL is activated
+    */
+    static bool IsOpenGLActivated(void) {return is_opengl_activated_;};
 
   private:
     /*!
@@ -320,6 +328,7 @@ class GGEMS_EXPORT GGEMSOpenGLManager
 
   private:
     GLFWwindow* window_; /*!< Pointer storing GLFW window */
+    static bool is_opengl_activated_; /*!< flag for OpenGL activation */
     static int window_width_; /*!< GLFW window width */
     static int window_height_; /*!< GLFW window height */
     static double x_mouse_cursor_; /*!< Mouse cursor in X */
@@ -420,6 +429,38 @@ extern "C" GGEMS_EXPORT void set_background_color_ggems_opengl_manager(GGEMSOpen
   \brief activate axis drawing
 */
 extern "C" GGEMS_EXPORT void set_draw_axis_opengl_manager(GGEMSOpenGLManager* opengl_manager, bool const is_draw_axis);
+
+/*!
+  \fn void set_world_size_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manager, float const& x_size, float const& y_size, float const& z_size, char const* unit)
+  \param opengl_manager - pointer on the singleton
+  \param x_size - x world size
+  \param y_size - y world size
+  \param z_size - z world size
+  \param unit - length unit
+  \brief set world size
+*/
+extern "C" GGEMS_EXPORT void set_world_size_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manager, float const x_size, float const y_size, float const z_size, char const* unit);
+
+/*!
+  \fn void set_image_output_opengl_manager(GGEMSOpenGLManager* opengl_manager, char const* output_path)
+  \param opengl_manager - pointer on the singleton
+  \brief Initializing GGEMS OpenGL
+*/
+extern "C" GGEMS_EXPORT void set_image_output_opengl_manager(GGEMSOpenGLManager* opengl_manager, char const* output_path);
+
+/*!
+  \fn void initialize_opengl_manager(GGEMSOpenGLManager* opengl_manager)
+  \param opengl_manager - pointer on the singleton
+  \brief Initializing GGEMS OpenGL
+*/
+extern "C" GGEMS_EXPORT void initialize_opengl_manager(GGEMSOpenGLManager* opengl_manager);
+
+/*!
+  \fn void display_opengl_manager(GGEMSOpenGLManager* opengl_manager)
+  \param opengl_manager - pointer on the singleton
+  \brief Displaying GGEMS OpenGL Window
+*/
+extern "C" GGEMS_EXPORT void display_opengl_manager(GGEMSOpenGLManager* opengl_manager);
 
 #endif // End of OPENGL_VISUALIZATION
 

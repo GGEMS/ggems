@@ -149,4 +149,32 @@ extern "C" GGEMS_EXPORT void set_position_ggems_voxelized_phantom(GGEMSVoxelized
 */
 extern "C" GGEMS_EXPORT void set_rotation_ggems_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, GGfloat const rx, GGfloat const ry, GGfloat const rz, char const* unit);
 
+/*!
+  \fn void set_visible_ggems_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, bool const flag)
+  \param voxelized_phantom - pointer on voxelized phantom
+  \param flag - flag drawing voxelized phantom
+  \brief Set flag drawing voxelized phantom
+*/
+extern "C" GGEMS_EXPORT void set_visible_ggems_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, bool const flag);
+
+/*!
+  \fn void set_material_visible_ggems_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, char const* material_name, bool const flag)
+  \param voxelized_phantom - pointer on voxelized phantom
+  \param material_name - name of material to draw (or not)
+  \param flag - flag drawing voxelized phantom
+  \brief Set flag for each material to draw
+*/
+extern "C" GGEMS_EXPORT void set_material_visible_ggems_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, char const* material_name, bool const flag);
+
+/*!
+  \fn void set_material_color_ggems_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, char const* material_name, unsigned char const red, unsigned char const green, unsigned char const blue)
+  \param voxelized_phantom - pointer on voxelized phantom
+  \param material_name - name of material to draw (or not)
+  \param red - red value
+  \param green - green value
+  \param blue - blue value
+  \brief Set a new rgb color for a material
+*/
+extern "C" GGEMS_EXPORT void set_material_color_ggems_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, char const* material_name, unsigned char const red, unsigned char const green, unsigned char const blue);
+
 #endif // End of GUARD_GGEMS_NAVIGATORS_GGEMSVOXELIZEDPHANTOM_HH
