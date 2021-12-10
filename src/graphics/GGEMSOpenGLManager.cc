@@ -32,25 +32,25 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 // Definition of static members
-bool GGEMSOpenGLManager::is_opengl_activated_ = false;
-int GGEMSOpenGLManager::window_width_ = 800;
-int GGEMSOpenGLManager::window_height_ = 600;
-bool GGEMSOpenGLManager::is_wireframe_ = true;
-float GGEMSOpenGLManager::zoom_ = 0.0f;
+GGbool GGEMSOpenGLManager::is_opengl_activated_ = false;
+GGint GGEMSOpenGLManager::window_width_ = 800;
+GGint GGEMSOpenGLManager::window_height_ = 600;
+GGbool GGEMSOpenGLManager::is_wireframe_ = true;
+GGfloat GGEMSOpenGLManager::zoom_ = 0.0f;
 glm::vec3 GGEMSOpenGLManager::camera_position_ = glm::vec3(0.0f, 0.0f, -3.0f);
 glm::vec3 GGEMSOpenGLManager::camera_target_ = glm::vec3(0.0, 0.0, 1.0f);
 glm::vec3 GGEMSOpenGLManager::camera_up_ = glm::vec3(0.0, -1.0, 0.0f);
-double GGEMSOpenGLManager::delta_time_ = 0.0f;
-double GGEMSOpenGLManager::x_mouse_cursor_ = 0.0;
-double GGEMSOpenGLManager::y_mouse_cursor_ = 0.0;
-float GGEMSOpenGLManager::pitch_angle_ = 0.0;
-float GGEMSOpenGLManager::yaw_angle_ = 90.0; // yaw is initialized to -90.0 degrees since a yaw of 0.0 results in a direction vector pointing to the right so we initially rotate a bit to the left
-bool GGEMSOpenGLManager::is_first_mouse_ = true;
-double GGEMSOpenGLManager::last_mouse_x_position_ = 0.0;
-double GGEMSOpenGLManager::last_mouse_y_position_ = 0.0;
-bool GGEMSOpenGLManager::is_save_image_ = false;
-bool GGEMSOpenGLManager::is_left_button_ = false;
-bool GGEMSOpenGLManager::is_middle_button_ = false;
+GGdouble GGEMSOpenGLManager::delta_time_ = 0.0f;
+GGdouble GGEMSOpenGLManager::x_mouse_cursor_ = 0.0;
+GGdouble GGEMSOpenGLManager::y_mouse_cursor_ = 0.0;
+GGfloat GGEMSOpenGLManager::pitch_angle_ = 0.0;
+GGfloat GGEMSOpenGLManager::yaw_angle_ = 90.0; // yaw is initialized to -90.0 degrees since a yaw of 0.0 results in a direction vector pointing to the right so we initially rotate a bit to the left
+GGbool GGEMSOpenGLManager::is_first_mouse_ = true;
+GGdouble GGEMSOpenGLManager::last_mouse_x_position_ = 0.0;
+GGdouble GGEMSOpenGLManager::last_mouse_y_position_ = 0.0;
+GGbool GGEMSOpenGLManager::is_save_image_ = false;
+GGbool GGEMSOpenGLManager::is_left_button_ = false;
+GGbool GGEMSOpenGLManager::is_middle_button_ = false;
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -86,6 +86,8 @@ GGEMSOpenGLManager::GGEMSOpenGLManager(void)
   colors_["purple"]  = 13;
   colors_["teal"]    = 14;
   colors_["navy"]    = 15;
+
+  number_of_displayed_particles_ = 4096;
 
   number_of_opengl_volumes_ = 0;
   opengl_volumes_ = nullptr;
@@ -164,7 +166,7 @@ void GGEMSOpenGLManager::Store(GGEMSOpenGLVolume* opengl_volume)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSOpenGLManager::SetWorldSize(float const& x_size, float const& y_size, float const& z_size, std::string const& unit)
+void GGEMSOpenGLManager::SetWorldSize(GGfloat const& x_size, GGfloat const& y_size, GGfloat const& z_size, std::string const& unit)
 {
   x_world_size_ = DistanceUnit(x_size, unit);
   y_world_size_ = DistanceUnit(y_size, unit);
@@ -175,7 +177,7 @@ void GGEMSOpenGLManager::SetWorldSize(float const& x_size, float const& y_size, 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSOpenGLManager::SetMSAA(int const& msaa_factor)
+void GGEMSOpenGLManager::SetMSAA(GGint const& msaa_factor)
 {
   // Checking msaa factor value, should be 1, 2, 4 or 8
   if (msaa_factor != 1 && msaa_factor != 2 && msaa_factor != 4 && msaa_factor != 8) {
@@ -196,7 +198,7 @@ void GGEMSOpenGLManager::SetBackgroundColor(std::string const& color)
   // Select color
   ColorUMap::iterator it = colors_.find(color);
   if (it != colors_.end()) {
-    for (int i = 0; i < 3; ++i) {
+    for (GGint i = 0; i < 3; ++i) {
       background_color_[i] = GGEMSOpenGLColor::color[it->second][i];
     }
   }
@@ -227,7 +229,7 @@ void GGEMSOpenGLManager::SetBackgroundColor(std::string const& color)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSOpenGLManager::SetWindowDimensions(int const& width, int const& height)
+void GGEMSOpenGLManager::SetWindowDimensions(GGint const& width, GGint const& height)
 {
   window_width_ = width;
   window_height_ = height;
@@ -237,9 +239,25 @@ void GGEMSOpenGLManager::SetWindowDimensions(int const& width, int const& height
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSOpenGLManager::SetDrawAxis(bool const& is_draw_axis)
+void GGEMSOpenGLManager::SetDrawAxis(GGbool const& is_draw_axis)
 {
   is_draw_axis_ = is_draw_axis;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSOpenGLManager::SetDisplayedParticles(GGint const& number_of_displayed_particles)
+{
+  if (number_of_displayed_particles > 4096) { // 4096 is the max number of displayed particles
+    GGwarn("GGEMSOpenGLManager", "SetDisplayedParticles", 0) << "Your number of displayed particles: " << number_of_displayed_particles
+      << " is > 4096 which is the limit. So, the number of displayed particles is set to 4096." << GGendl;
+    number_of_displayed_particles_ = 4096;
+  }
+  else {
+    number_of_displayed_particles_ = number_of_displayed_particles;
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -370,13 +388,13 @@ void GGEMSOpenGLManager::Display(void)
 
   PrintKeys();
 
-  double last_frame_time = 0.0;
+  GGdouble last_frame_time = 0.0;
   while (!glfwWindowShouldClose(window_)) {
     // Printing FPS at top of window
     UpdateFPSCounter();
 
     // Computing delta time
-    double current_frame_time = glfwGetTime();
+    GGdouble current_frame_time = glfwGetTime();
     delta_time_ = current_frame_time - last_frame_time;
     last_frame_time = current_frame_time;
 
@@ -424,14 +442,14 @@ void GGEMSOpenGLManager::Draw(void) const
 
 void GGEMSOpenGLManager::UpdateFPSCounter(void)
 {
-  static double previous_seconds = glfwGetTime();
-  static int frame_count = 0;
-  double current_seconds = glfwGetTime();
-  double elapsed_seconds = current_seconds - previous_seconds;
+  static GGdouble previous_seconds = glfwGetTime();
+  static GGint frame_count = 0;
+  GGdouble current_seconds = glfwGetTime();
+  GGdouble elapsed_seconds = current_seconds - previous_seconds;
 
   if (elapsed_seconds > 0.25) {
     previous_seconds = current_seconds;
-    double fps = static_cast<double>(frame_count) / elapsed_seconds;
+    GGdouble fps = static_cast<GGdouble>(frame_count) / elapsed_seconds;
     std::ostringstream oss(std::ostringstream::out);
     oss << "GGEMS OpenGL @ fps: " << fps;
     glfwSetWindowTitle(window_, oss.str().c_str());
@@ -453,7 +471,7 @@ void GGEMSOpenGLManager::UpdateProjectionAndView(void)
     (-z_world_size_/2.0f), (z_world_size_/2.0f)
   );
 
-  float current_zoom = GetCurrentZoom();
+  GGfloat current_zoom = GetCurrentZoom();
   projection_ = glm::scale(projection_, glm::vec3(current_zoom, current_zoom, 1.0f));
 
   camera_view_ = glm::lookAt(
@@ -505,15 +523,15 @@ void GGEMSOpenGLManager::SaveWindow(GLFWwindow* w)
   std::string filename = image_output_basename_ + "_" + index_stream.str() + ".png";
 
   // Get size of frame buffer and compute stride
-  int frame_width = 0, frame_height = 0;
+  GGint frame_width = 0, frame_height = 0;
   glfwGetFramebufferSize(w, &frame_width, &frame_height);
 
-  int number_of_channels = 3;
+  GGint number_of_channels = 3;
 
-  int stride = number_of_channels * frame_width;
+  GGint stride = number_of_channels * frame_width;
   stride += (stride % 4) ? (4 - stride % 4) : 0;
 
-  int buffer_size = stride * frame_height;
+  GGint buffer_size = stride * frame_height;
 
   // Storage mode
   glPixelStorei(GL_PACK_ALIGNMENT, 4);
@@ -538,9 +556,9 @@ void GGEMSOpenGLManager::SaveWindow(GLFWwindow* w)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSOpenGLManager::GLFWKeyCallback(GLFWwindow* window, int key, int, int action, int)
+void GGEMSOpenGLManager::GLFWKeyCallback(GLFWwindow* window, GGint key, GGint, GGint action, GGint)
 {
-  float camera_speed = 100.0f * static_cast<float>(delta_time_); // Defining a camera speed depending on the delta time
+  GGfloat camera_speed = 100.0f * static_cast<GGfloat>(delta_time_); // Defining a camera speed depending on the delta time
 
   switch (key) {
     case GLFW_KEY_ESCAPE: {
@@ -649,16 +667,16 @@ void GGEMSOpenGLManager::GLFWKeyCallback(GLFWwindow* window, int key, int, int a
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSOpenGLManager::GLFWScrollCallback(GLFWwindow*, double, double yoffset)
+void GGEMSOpenGLManager::GLFWScrollCallback(GLFWwindow*, GGdouble, GGdouble yoffset)
 {
-  zoom_ += static_cast<float>(yoffset);
+  zoom_ += static_cast<GGfloat>(yoffset);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSOpenGLManager::GLFWWindowSizeCallback(GLFWwindow*, int width, int height)
+void GGEMSOpenGLManager::GLFWWindowSizeCallback(GLFWwindow*, GGint width, GGint height)
 {
   window_width_ = width;
   window_height_ = height;
@@ -668,7 +686,7 @@ void GGEMSOpenGLManager::GLFWWindowSizeCallback(GLFWwindow*, int width, int heig
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSOpenGLManager::GLFWMouseButtonCallback(GLFWwindow* window, int button, int action, int)
+void GGEMSOpenGLManager::GLFWMouseButtonCallback(GLFWwindow* window, GGint button, GGint action, GGint)
 {
   if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
     is_left_button_ = true;
@@ -696,7 +714,7 @@ void GGEMSOpenGLManager::GLFWMouseButtonCallback(GLFWwindow* window, int button,
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSOpenGLManager::GLFWCursorPosCallback(GLFWwindow* window, double x, double y)
+void GGEMSOpenGLManager::GLFWCursorPosCallback(GLFWwindow* window, GGdouble x, GGdouble y)
 {
   if (is_left_button_) {
     if (is_first_mouse_) {
@@ -706,18 +724,18 @@ void GGEMSOpenGLManager::GLFWCursorPosCallback(GLFWwindow* window, double x, dou
     }
 
     // Offset between cursor position and current position
-    double x_cursor_offset = x - last_mouse_x_position_;
-    double y_cursor_offset = y - last_mouse_y_position_;
+    GGdouble x_cursor_offset = x - last_mouse_x_position_;
+    GGdouble y_cursor_offset = y - last_mouse_y_position_;
     last_mouse_x_position_ = x;
     last_mouse_y_position_ = y;
 
-    double mouse_sensitivity = 0.05;
+    GGdouble mouse_sensitivity = 0.05;
 
     x_cursor_offset *= mouse_sensitivity;
     y_cursor_offset *= mouse_sensitivity;
 
-    yaw_angle_ -= static_cast<float>(x_cursor_offset);
-    pitch_angle_ += static_cast<float>(y_cursor_offset);
+    yaw_angle_ -= static_cast<GGfloat>(x_cursor_offset);
+    pitch_angle_ += static_cast<GGfloat>(y_cursor_offset);
 
     if (pitch_angle_ > 89.0) pitch_angle_ = 89.0;
     if (pitch_angle_ < -89.0) pitch_angle_ = -89.0;
@@ -736,8 +754,8 @@ void GGEMSOpenGLManager::GLFWCursorPosCallback(GLFWwindow* window, double x, dou
     }
 
     // Offset between cursor position and current position
-    double x_cursor_offset = -x + last_mouse_x_position_;
-    double y_cursor_offset = -y + last_mouse_y_position_;
+    GGdouble x_cursor_offset = -x + last_mouse_x_position_;
+    GGdouble y_cursor_offset = -y + last_mouse_y_position_;
     last_mouse_x_position_ = x;
     last_mouse_y_position_ = y;
 
@@ -753,7 +771,7 @@ void GGEMSOpenGLManager::GLFWCursorPosCallback(GLFWwindow* window, double x, dou
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSOpenGLManager::GLFWErrorCallback(int error_code, char const* description)
+void GGEMSOpenGLManager::GLFWErrorCallback(GGint error_code, char const* description)
 {
   std::ostringstream oss(std::ostringstream::out);
   oss << "!!!!!!!!" << std::endl;
@@ -776,7 +794,7 @@ GGEMSOpenGLManager* get_instance_ggems_opengl_manager(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_window_dimensions_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manager, int width, int height)
+void set_window_dimensions_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manager, GGint width, GGint height)
 {
   opengl_manager->SetWindowDimensions(width, height);
 }
@@ -785,7 +803,7 @@ void set_window_dimensions_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manag
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_msaa_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manager, int msaa_factor)
+void set_msaa_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manager, GGint msaa_factor)
 {
   opengl_manager->SetMSAA(msaa_factor);
 }
@@ -803,7 +821,7 @@ void set_background_color_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manage
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_draw_axis_opengl_manager(GGEMSOpenGLManager* opengl_manager, bool const is_draw_axis)
+void set_draw_axis_opengl_manager(GGEMSOpenGLManager* opengl_manager, GGbool const is_draw_axis)
 {
   opengl_manager->SetDrawAxis(is_draw_axis);
 }
@@ -812,7 +830,7 @@ void set_draw_axis_opengl_manager(GGEMSOpenGLManager* opengl_manager, bool const
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_world_size_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manager, float const x_size, float const y_size, float const z_size, char const* unit)
+void set_world_size_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manager, GGfloat const x_size, GGfloat const y_size, GGfloat const z_size, char const* unit)
 {
   opengl_manager->SetWorldSize(x_size, y_size, z_size, unit);
 }
@@ -842,6 +860,15 @@ void initialize_opengl_manager(GGEMSOpenGLManager* opengl_manager)
 void display_opengl_manager(GGEMSOpenGLManager* opengl_manager)
 {
   opengl_manager->Display();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void set_displayed_particles_opengl_manager(GGEMSOpenGLManager* opengl_manager, GGint const number_of_displayed_particles)
+{
+  opengl_manager->SetDisplayedParticles(number_of_displayed_particles);
 }
 
 #endif // End of OPENGL_VISUALIZATION

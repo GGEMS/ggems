@@ -230,3 +230,12 @@ void set_material_color_ggems_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized
 {
   voxelized_phantom->SetMaterialColor(material_name, red, green, blue);
 }
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void set_material_color_name_ggems_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, char const* material_name, char const* color_name)
+{
+  voxelized_phantom->SetMaterialColor(material_name, color_name);
+}

@@ -57,6 +57,9 @@ class GGEMSCTSystem(object):
         ggems_lib.set_visible_ggems_ct_system.argtypes = [ctypes.c_void_p, ctypes.c_bool]
         ggems_lib.set_visible_ggems_ct_system.restype = ctypes.c_void_p
 
+        ggems_lib.set_material_color_name_ggems_ct_system.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_char_p]
+        ggems_lib.set_material_color_name_ggems_ct_system.restype = ctypes.c_void_p
+
         ggems_lib.set_threshold_ggems_ct_system.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_char_p]
         ggems_lib.set_threshold_ggems_ct_system.restype = ctypes.c_void_p
 
@@ -98,11 +101,14 @@ class GGEMSCTSystem(object):
     def set_material_visible(self, material_name, flag):
         ggems_lib.set_material_visible_ggems_ct_system(self.obj, material_name.encode('ASCII'), flag)
 
-    def set_material_color(self, material_name, red, green, blue):
-        ggems_lib.set_material_color_ggems_ct_system(self.obj, material_name.encode('ASCII'), red, green, blue)
-
     def set_visible(self, flag):
         ggems_lib.set_visible_ggems_ct_system(self.obj, flag)
+
+    def set_material_color(self, material_name, red=0, green=0, blue=0, color_name=''):
+        if color_name:
+            ggems_lib.set_material_color_name_ggems_ct_system(self.obj, material_name.encode('ASCII'), color_name.encode('ASCII'))
+        else:
+            ggems_lib.set_material_color_ggems_ct_system(self.obj, material_name.encode('ASCII'), red, green, blue)
 
     def save(self, basename):
         ggems_lib.set_save_ggems_ct_system(self.obj, basename.encode('ASCII'))

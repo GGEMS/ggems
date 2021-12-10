@@ -269,10 +269,17 @@ class GGEMS_EXPORT GGEMSNavigator
       \param red - red part of RGB color
       \param green - green part of RGB color
       \param blue - blue part of RGB color
-      \param is_visible_material - material visible or not
       \brief set custom color for opengl volume
     */
     void SetMaterialColor(std::string const& material_name, GGuchar const& red, GGuchar const& green, GGuchar const& blue);
+
+    /*!
+      \fn void SetMaterialColor(std::string const& material_name, std::string const& color_name)
+      \param material_name - material name
+      \param color_name - name of color from GGEMS color list
+      \brief set custom color for opengl volume
+    */
+    void SetMaterialColor(std::string const& material_name, std::string const& color_name);
 
     /*!
       \fn void SetMaterialVisible(std::string const& material_name, bool const& is_material_visible)

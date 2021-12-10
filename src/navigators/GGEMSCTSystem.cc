@@ -430,3 +430,12 @@ void set_material_color_ggems_ct_system(GGEMSCTSystem* ct_system, char const* ma
 {
   ct_system->SetMaterialColor(material_name, red, green, blue);
 }
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void set_material_color_name_ggems_ct_system(GGEMSCTSystem* ct_system, char const* material_name, char const* color_name)
+{
+  ct_system->SetMaterialColor(material_name, color_name);
+}

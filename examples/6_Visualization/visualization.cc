@@ -71,6 +71,8 @@ void PrintHelpAndQuit(std::string const& message, char const* exec)
   oss << "[--msaa X]                 MSAA factor (1x, 2x, 4x or 8x)" << std::endl;
   oss << "                           (8, by default)" << std::endl;
   oss << "[--axis]                   Drawing axis on screen" << std::endl;
+  oss << "[--n-particles-gl]         Number of displayed primary particles on OpenGL window" << std::endl;
+  oss << "                           (1024, by default, max: 4096)" << std::endl;
   oss << "[--wcolor X]               Window color" << std::endl;
   oss << "                           (black, by default)" << std::endl;
   oss << "Available colors:" << std::endl;
@@ -138,6 +140,7 @@ int main(int argc, char** argv)
     GGint window_dims[] = {800, 800};
     std::string window_color = "black";
     GGsize number_of_particles = 1000000;
+    GGshort number_of_displayed_particles = 1024;
     GGsize device_index = 0;
     GGuint seed = 777;
     static GGint is_axis = 0;
@@ -156,11 +159,12 @@ int main(int argc, char** argv)
         {"device", required_argument, 0, 'd'},
         {"seed", required_argument, 0, 's'},
         {"n-particles", required_argument, 0, 'n'},
+        {"n-particles-gl", required_argument, 0, 'p'},
         {"axis", no_argument, &is_axis, 1},
       };
 
       // Getting the options
-      counter = getopt_long(argc, argv, "hv:m:w:c:d:s:n:", sLongOptions, &option_index);
+      counter = getopt_long(argc, argv, "hv:m:w:c:d:s:n:p:", sLongOptions, &option_index);
 
       // Exit the loop if -1
       if (counter == -1) break;
@@ -204,6 +208,10 @@ int main(int argc, char** argv)
           ParseCommandLine(optarg, &number_of_particles);
           break;
         }
+        case 'p': {
+          ParseCommandLine(optarg, &number_of_displayed_particles);
+          break;
+        }
         default: {
           PrintHelpAndQuit("Out of switch options!!!", argv[0]);
           break;
@@ -231,9 +239,8 @@ int main(int argc, char** argv)
     opengl_manager.SetBackgroundColor(window_color);
     opengl_manager.SetImageOutput("data/axis");
     opengl_manager.SetWorldSize(2.0f, 2.0f, 2.0f, "m");
+    opengl_manager.SetDisplayedParticles(number_of_displayed_particles); // Not exceed 4096!!!
     opengl_manager.Initialize();
-    // XXX.SetParticleColor("gamma","red") ...
-    // XXX.SetParticles(10000)
 
     // OpenCL params
     opencl_manager.DeviceToActivate(device_index);
@@ -267,10 +274,9 @@ int main(int argc, char** argv)
     phantom.SetPhantomFile("data/phantom.mhd", "data/range_phantom.txt");
     phantom.SetRotation(0.0f, 0.0f, 0.0f, "deg");
     phantom.SetPosition(0.0f, 0.0f, 0.0f, "mm");
-    // Drawing phantom detector
     phantom.SetVisible(true);
-    // Drawing materials
     phantom.SetMaterialVisible("Air", false);
+    phantom.SetMaterialColor("Water", "blue"); // Uncomment for automatic color
 
     GGEMSCTSystem ct_detector("Stellar");
     ct_detector.SetCTSystemType("curved");
@@ -285,10 +291,9 @@ int main(int argc, char** argv)
     ct_detector.SetThreshold(10.0f, "keV");
     ct_detector.StoreOutput("data/projection");
     ct_detector.StoreScatter(true);
-    // Drawing CT detector
     ct_detector.SetVisible(true);
-    // Adding a custom color for GOS material
-    ct_detector.SetMaterialColor("GOS", 153, 50, 204);
+    ct_detector.SetMaterialColor("GOS", 255, 0, 0); // Custom color using RGB
+    // ct_detector.SetMaterialColor("GOS", "red"); // Using registered color
 
     // Physics
     processes_manager.AddProcess("Compton", "gamma", "all");
@@ -312,6 +317,8 @@ int main(int argc, char** argv)
     point_source.SetBeamAperture(12.5f, "deg");
     point_source.SetFocalSpotSize(0.0f, 0.0f, 0.0f, "mm");
     point_source.SetPolyenergy("data/spectrum_120kVp_2mmAl.dat");
+    //opengl_manager.SetParticleColor("gamma", 230, 230, 250);
+    //opengl_manager.SetParticleColor("gamma", red);
 
     // GGEMS simulation
     GGEMS ggems;

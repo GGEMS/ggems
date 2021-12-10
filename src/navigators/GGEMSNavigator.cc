@@ -34,10 +34,11 @@
 #include "GGEMS/randoms/GGEMSPseudoRandomGenerator.hh"
 #include "GGEMS/navigators/GGEMSDosimetryCalculator.hh"
 #include "GGEMS/tools/GGEMSProfilerManager.hh"
-
+#include "GGEMS/graphics/GGEMSOpenGLManager.hh"
 #include "GGEMS/physics/GGEMSMuData.hh"
 #include "GGEMS/physics/GGEMSMuDataConstants.hh"
 #include "GGEMS/global/GGEMSOpenCLManager.hh"
+
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -232,6 +233,26 @@ void GGEMSNavigator::SetMaterialColor(std::string const& material_name, GGuchar 
   rgb.green_ = static_cast<GGfloat>(green) / 255.0f;
   rgb.blue_ = static_cast<GGfloat>(blue) / 255.0f;
 
+  custom_material_rgb_.insert(std::make_pair(material_name, rgb));
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSNavigator::SetMaterialColor(std::string const& material_name, std::string const& color_name)
+{
+  GGEMSOpenGLManager& opengl_manager = GGEMSOpenGLManager::GetInstance();
+
+  // Getting RGB color
+  GGfloat rgb_array[] = {0.0f, 0.0f, 0.0f};
+  opengl_manager.GetRGBColor(color_name, &rgb_array[0]);
+
+  // Storing color and material
+  GGEMSRGBColor rgb;
+  rgb.red_ = rgb_array[0];
+  rgb.green_ = rgb_array[1];
+  rgb.blue_ = rgb_array[2];
   custom_material_rgb_.insert(std::make_pair(material_name, rgb));
 }
 

@@ -268,4 +268,13 @@ extern "C" GGEMS_EXPORT void set_material_visible_ggems_ct_system(GGEMSCTSystem*
 */
 extern "C" GGEMS_EXPORT void set_material_color_ggems_ct_system(GGEMSCTSystem* ct_system, char const* material_name, unsigned char const red, unsigned char const green, unsigned char const blue);
 
+/*!
+  \fn void set_material_color_name_ggems_ct_system(GGEMSCTSystem* ct_system, char const* material_name, char const* color_name)
+  \param ct_system - pointer on ct scanner
+  \param material_name - name of material to draw (or not)
+  \param color_name - color name
+  \brief Set a color for material
+*/
+extern "C" GGEMS_EXPORT void set_material_color_name_ggems_ct_system(GGEMSCTSystem* ct_system, char const* material_name, char const* color_name);
+
 #endif // End of GUARD_GGEMS_NAVIGATORS_GGEMSSYSTEM_HH

@@ -42,6 +42,9 @@ class GGEMSOpenGLManager(object):
         ggems_lib.display_opengl_manager.argtypes = [ctypes.c_void_p]
         ggems_lib.display_opengl_manager.restype = ctypes.c_void_p
 
+        ggems_lib.set_displayed_particles_opengl_manager.argtypes = [ctypes.c_void_p, ctypes.c_int]
+        ggems_lib.set_displayed_particles_opengl_manager.restype = ctypes.c_void_p
+
         ggems_lib.set_image_output_opengl_manager.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
         ggems_lib.set_image_output_opengl_manager.restype = ctypes.c_void_p
 
@@ -70,6 +73,9 @@ class GGEMSOpenGLManager(object):
 
     def display(self):
         ggems_lib.display_opengl_manager(self.obj)
+
+    def set_displayed_particles(self, particles):
+        ggems_lib.set_displayed_particles_opengl_manager(self.obj, particles)
 
     def set_msaa(self, msaa):
         ggems_lib.set_msaa_ggems_opengl_manager(self.obj, msaa)

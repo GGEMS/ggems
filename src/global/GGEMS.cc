@@ -194,6 +194,7 @@ void GGEMS::Initialize(GGuint const& seed)
 
   // Getting the GGEMS singletons
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+  GGEMSOpenGLManager& opengl_manager = GGEMSOpenGLManager::GetInstance();
   GGEMSMaterialsDatabaseManager& material_database_manager = GGEMSMaterialsDatabaseManager::GetInstance();
   GGEMSSourceManager& source_manager = GGEMSSourceManager::GetInstance();
   GGEMSNavigatorManager& navigator_manager = GGEMSNavigatorManager::GetInstance();
@@ -253,14 +254,10 @@ void GGEMS::Initialize(GGuint const& seed)
 
   GGcout("GGEMS", "Initialize", 0) << "GGEMS initialization succeeded" << GGendl;
 
-  // Initializing OpenGL and create window
-  // #ifdef OPENGL_VISUALIZATION
-  // if (is_visugl_) {
-  //   GGEMSOpenGLManager& opengl_manager = GGEMSOpenGLManager::GetInstance();
-  //   //opengl_manager.Initialize();
-  //   opengl_manager.Display();
-  // }
-  // #endif
+  // Checking if the visualization if activated. If so, send a warning error
+  if (opengl_manager.IsOpenGLActivated() && opencl_manager.GetNumberOfActivatedDevice() > 1) {
+    GGwarn("GGEMS", "Initialize", 0) << "Many OpenCL devices are activated!!! For OpenGL visualization, only particles from first device will be displayed!!!" << GGendl;
+  }
 
   // Display the elapsed time in GGEMS
   GGEMSChrono::DisplayTime(end_time - start_time, "GGEMS initialization");

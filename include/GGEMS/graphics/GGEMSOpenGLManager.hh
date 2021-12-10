@@ -47,7 +47,30 @@
 class GGEMSOpenGLVolume;
 class GGEMSOpenGLAxis;
 
-typedef std::unordered_map<std::string, int> ColorUMap; /*!< Unordered map with key : name of the color, index of color */
+typedef std::unordered_map<std::string, GGint> ColorUMap; /*!< Unordered map with key : name of the color, index of color */
+
+
+/*!
+  \namespace GGEMSOpenGLColor
+  \brief Namespace storing RGB color for OpenGL
+*/
+namespace GGEMSOpenGLColor
+{
+  __constant GGfloat color[][3] = {
+    // black, blue, lime              
+    {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f, 0.0f},
+    // cyan, red, magenta
+    {0.0f, 1.0f, 1.0f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f, 1.0f},
+    // yellow, white, gray
+    {1.0f, 1.0f, 0.0f}, {1.0f, 1.0f, 1.0f}, {0.502f, 0.502f, 0.502f},
+    // silver, maroon, olive
+    {0.753f, 0.753f, 0.753f}, {0.502f, 0.0f, 0.0f}, {0.502f, 0.502f, 0.0f},
+    // green, purple, teal
+    {0.0f, 0.502f, 0.0f}, {0.502f, 0.0f, 0.502f}, {0.0f, 0.502f, 0.502f},
+    // navy
+    {0.0f, 0.0f, 0.502f}
+  };
+}
 
 /*!
   \class GGEMSOpenGLManager
@@ -113,19 +136,19 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     void Initialize(void);
 
     /*!
-      \fn void SetMSAA(int const& msaa_factor)
+      \fn void SetMSAA(GGint const& msaa_factor)
       \param msaa_factor - MSAA factor
       \brief set msaa factor for OpenGL
     */
-    void SetMSAA(int const& msaa_factor);
+    void SetMSAA(GGint const& msaa_factor);
 
     /*!
-      \fn void SetWindowDimensions(int const& width, int const& height)
+      \fn void SetWindowDimensions(GGint const& width, GGint const& height)
       \param width - window width
       \param height - window height
       \brief set the window dimension for OpenGL
     */
-    void SetWindowDimensions(int const& width, int const& height);
+    void SetWindowDimensions(GGint const& width, GGint const& height);
 
     /*!
       \fn void SetBackgroundColor(std::string const& color)
@@ -135,11 +158,11 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     void SetBackgroundColor(std::string const& color);
 
     /*!
-      \fn void SetDrawAxis(bool const& is_draw_axis)
+      \fn void SetDrawAxis(GGbool const& is_draw_axis)
       \param is_draw_axis - flag for axis drawing activation
       \brief set flag for axis drawing
     */
-    void SetDrawAxis(bool const& is_draw_axis);
+    void SetDrawAxis(GGbool const& is_draw_axis);
 
     /*!
       \fn void PrintKeys(void) const
@@ -161,14 +184,14 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     void Store(GGEMSOpenGLVolume* opengl_volume);
 
     /*!
-      \fn void SetWorldSize(float const& x_size, float const& y_size, float const& z_size, std::string const& unit = "mm")
+      \fn void SetWorldSize(GGfloat const& x_size, GGfloat const& y_size, GGfloat const& z_size, std::string const& unit = "mm")
       \param x_size - size in X of world scene
       \param y_size - size in Y of world scene
       \param z_size - size in Z of world scene
       \param unit - length unit
       \brief Set size of world scene for opengl
     */
-    void SetWorldSize(float const& x_size, float const& y_size, float const& z_size, std::string const& unit = "mm");
+    void SetWorldSize(GGfloat const& x_size, GGfloat const& y_size, GGfloat const& z_size, std::string const& unit = "mm");
 
     /*!
       \fn ColorUMap GetColorUMap(void) const
@@ -178,18 +201,40 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     inline ColorUMap GetColorUMap(void) const {return colors_;}
 
     /*!
-      \fn int GetWindowWidth(void) const
+      \fn void GetRGBColor(std::string const& color_name, GGfloat* rgb) const
+      \param color_name - name of color
+      \param rgb - array of RGB returned by method
+      \brief RGB color a registered color
+    */
+    inline void GetRGBColor(std::string const& color_name, GGfloat* rgb) const
+    {
+      ColorUMap::const_iterator it = colors_.find(color_name);
+      if (it != colors_.end()) {
+        for (GGint i = 0; i < 3; ++i) {
+          rgb[i] = GGEMSOpenGLColor::color[it->second][i];
+        }
+      }
+      else {
+        GGwarn("GGEMSOpenGLManager", "GetRGBColor", 0) << "Color: " << color_name << " not found!!! White is set by default." << GGendl;
+        rgb[0] = 1.0f;
+        rgb[1] = 1.0f;
+        rgb[2] = 1.0f;
+      }
+    }
+
+    /*!
+      \fn GGint GetWindowWidth(void) const
       \brief get the window width of GLFW window
       \return the window width of GLFW window
     */
-    inline int GetWindowWidth(void) const {return window_width_;}
+    inline GGint GetWindowWidth(void) const {return window_width_;}
 
     /*!
-      \fn int GetWindowHeight(void) const
+      \fn GGint GetWindowHeight(void) const
       \brief get the window height of GLFW window
       \return the window height of GLFW window
     */
-    inline int GetWindowHeight(void) const {return window_height_;}
+    inline GGint GetWindowHeight(void) const {return window_height_;}
 
     /*!
       \fn glm::mat4 GetProjection(void) const
@@ -213,11 +258,18 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     void SetImageOutput(std::string const& image_output_basename);
 
     /*!
-      \fn static bool IsOpenGLActivated(void)
+      \fn static GGbool IsOpenGLActivated(void)
       \brief check if OpenGL is activated
       \return true if OpenGL is activated
     */
-    static bool IsOpenGLActivated(void) {return is_opengl_activated_;};
+    static GGbool IsOpenGLActivated(void) {return is_opengl_activated_;};
+
+    /*!
+      \fn void SetDisplayedParticles(GGint const& number_of_displayed_particles)
+      \param number_of_displayed_particles - Number of particles to display on OpenGL screen
+      \brief Set the number of particles to display on screen
+    */
+    void SetDisplayedParticles(GGint const& number_of_displayed_particles);
 
   private:
     /*!
@@ -252,17 +304,17 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     void Draw(void) const;
 
     /*!
-      \fn float GetCurrentZoom(void) const
+      \fn GGfloat GetCurrentZoom(void) const
       \brief Computing the current zoom of OpenGL window
       \return Current zoom in a float type
     */
-    inline float GetCurrentZoom(void) const
+    inline GGfloat GetCurrentZoom(void) const
     {
       if (zoom_ >= 0.0f) {
         return 1.0f + zoom_ / 5.0f;
       }
       else {
-        float current_zoom = 0.05f * zoom_ + 1.0f;
+        GGfloat current_zoom = 0.05f * zoom_ + 1.0f;
         if (current_zoom < 0.0f) {
           current_zoom = 0.01f;
         }
@@ -271,24 +323,24 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     }
 
     /*!
-      \fn void GLFWErrorCallback(int error_code, char const* description)
+      \fn void GLFWErrorCallback(GGint error_code, char const* description)
       \param error_code - error code returned by OpenGL
       \param description - description of the error
       \brief callback for errors returned by OpenGL
     */
-    static void GLFWErrorCallback(int error_code, char const* description);
+    static void GLFWErrorCallback(GGint error_code, char const* description);
 
     /*!
-      \fn void GLFWWindowSizeCallback(GLFWwindow* window, int width, int height)
+      \fn void GLFWWindowSizeCallback(GLFWwindow* window, GGint width, GGint height)
       \param window - pointer to GLFW window
       \param width - width of window
       \param height - height of window
       \brief callback for window size
     */
-    static void GLFWWindowSizeCallback(GLFWwindow* window, int width, int height);
+    static void GLFWWindowSizeCallback(GLFWwindow* window, GGint width, GGint height);
 
     /*!
-      \fn void GLFWKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+      \fn void GLFWKeyCallback(GLFWwindow* window, GGint key, GGint scancode, GGint action, GGint mods)
       \param window - pointer to GLFW window
       \param key - keyboard key that was pressed or released
       \param scancode - system-specific scancode of the key
@@ -296,57 +348,59 @@ class GGEMS_EXPORT GGEMSOpenGLManager
       \param mods - bit field describing which modifier keys were held down
       \brief callback for keyboard key
     */
-    static void GLFWKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+    static void GLFWKeyCallback(GLFWwindow* window, GGint key, GGint scancode, GGint action, GGint mods);
 
     /*!
-      \fn void GLFWScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
+      \fn void GLFWScrollCallback(GLFWwindow* window, GGdouble xoffset, GGdouble yoffset)
       \param window - pointer to GLFW window
       \param xoffset - offset in X
       \param yoffset - offset in Y
       \brief callback for mouse scroll
     */
-    static void GLFWScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
+    static void GLFWScrollCallback(GLFWwindow* window, GGdouble xoffset, GGdouble yoffset);
 
     /*!
-      \fn void GLFWMouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
+      \fn void GLFWMouseButtonCallback(GLFWwindow* window, GGint button, GGint action, GGint mods);
       \param window - pointer to GLFW window
       \param button - mouse key
       \param action - GLFW_PRESS, GLFW_RELEASE or GLFW_REPEAT
       \param mods - bit field describing which modifier keys were held down
       \brief callback for mouse button
     */
-    static void GLFWMouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
+    static void GLFWMouseButtonCallback(GLFWwindow* window, GGint button, GGint action, GGint mods);
 
     /*!
-      \fn void GLFWCursorPosCallback(GLFWwindow* window, double x, double y);
+      \fn void GLFWCursorPosCallback(GLFWwindow* window, GGdouble x, GGdouble y);
       \param window - pointer to GLFW window
       \param xoffset - offset in X
       \param yoffset - offset in Y
       \brief cursor position of mouse
     */
-    static void GLFWCursorPosCallback(GLFWwindow* window, double x, double y);
+    static void GLFWCursorPosCallback(GLFWwindow* window, GGdouble x, GGdouble y);
 
   private:
     GLFWwindow* window_; /*!< Pointer storing GLFW window */
-    static bool is_opengl_activated_; /*!< flag for OpenGL activation */
-    static int window_width_; /*!< GLFW window width */
-    static int window_height_; /*!< GLFW window height */
-    static double x_mouse_cursor_; /*!< Mouse cursor in X */
-    static double y_mouse_cursor_; /*!< Mouse cursor in Y */
-    static float pitch_angle_; /*!< Pitch angle for mouse */
-    static float yaw_angle_; /*!< Yaw angle for mouse */
-    static bool is_first_mouse_; /*!< First use of mouse */
-    static double last_mouse_x_position_; /*!< Last position of mouse in x */
-    static double last_mouse_y_position_; /*!< Last position of mouse in y */
-    static bool is_left_button_; /*!< If left button is used */
-    static bool is_middle_button_; /*!< If middle button is used */
-    int msaa_; /*!< MSAA: Multi sample anti-aliasing factor */
+    static GGbool is_opengl_activated_; /*!< flag for OpenGL activation */
+    static GGint window_width_; /*!< GLFW window width */
+    static GGint window_height_; /*!< GLFW window height */
+    static GGdouble x_mouse_cursor_; /*!< Mouse cursor in X */
+    static GGdouble y_mouse_cursor_; /*!< Mouse cursor in Y */
+    static GGfloat pitch_angle_; /*!< Pitch angle for mouse */
+    static GGfloat yaw_angle_; /*!< Yaw angle for mouse */
+    static GGbool is_first_mouse_; /*!< First use of mouse */
+    static GGdouble last_mouse_x_position_; /*!< Last position of mouse in x */
+    static GGdouble last_mouse_y_position_; /*!< Last position of mouse in y */
+    static GGbool is_left_button_; /*!< If left button is used */
+    static GGbool is_middle_button_; /*!< If middle button is used */
+    GGint msaa_; /*!< MSAA: Multi sample anti-aliasing factor */
     ColorUMap colors_; /*!< List of colors */
-    float background_color_[3]; /*!< window background color */
-    bool is_draw_axis_; /*!< Flag for axis drawing activation */
-    float x_world_size_; /*!< World size along x axis */
-    float y_world_size_; /*!< World size along y axis */
-    float z_world_size_; /*!< World size along z axis */
+    GGfloat background_color_[3]; /*!< window background color */
+    GGbool is_draw_axis_; /*!< Flag for axis drawing activation */
+    GGfloat x_world_size_; /*!< World size along x axis */
+    GGfloat y_world_size_; /*!< World size along y axis */
+    GGfloat z_world_size_; /*!< World size along z axis */
+
+    GGint number_of_displayed_particles_; /*!< Number of displayed particles */
 
     GGEMSOpenGLVolume** opengl_volumes_; /*!< OpenGL volume to display or not */
     GGsize number_of_opengl_volumes_; /*!< Number of OpenGL volumes */
@@ -357,38 +411,16 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     static glm::vec3 camera_target_; /*!< Target of the camera */
     static glm::vec3 camera_up_; /*!< Vector to the top */
     glm::mat4 projection_; /*!< Projection matrix (ortho or perspective), perspective by defaut */
-    static bool is_wireframe_; /*!< Line mode: wireframe or solid (if bool is false) */
-    static float zoom_; /*!< Value of zoom */
-    static bool is_save_image_; /*!< Save window to png image file */
+    static GGbool is_wireframe_; /*!< Line mode: wireframe or solid (if GGbool is false) */
+    static GGfloat zoom_; /*!< Value of zoom */
+    static GGbool is_save_image_; /*!< Save window to png image file */
     std::string image_output_basename_; /*!< Image output basename */
-    int image_output_index_; /*!< Image output index */
+    GGint image_output_index_; /*!< Image output index */
     GGEMSOpenGLAxis* axis_; /*!< pointer to axis volume */
 
     // OpenGL timing
-    static double delta_time_; /*! Time between 2 frames */
+    static GGdouble delta_time_; /*! Time between 2 frames */
 };
-
-/*!
-  \namespace GGEMSOpenGLColor
-  \brief Namespace storing RGB color for OpenGL
-*/
-namespace GGEMSOpenGLColor
-{
-  __constant float color[][3] = {
-    // black, blue, lime              
-    {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f, 0.0f},
-    // cyan, red, magenta
-    {0.0f, 1.0f, 1.0f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f, 1.0f},
-    // yellow, white, gray
-    {1.0f, 1.0f, 0.0f}, {1.0f, 1.0f, 1.0f}, {0.502f, 0.502f, 0.502f},
-    // silver, maroon, olive
-    {0.753f, 0.753f, 0.753f}, {0.502f, 0.0f, 0.0f}, {0.502f, 0.502f, 0.0f},
-    // green, purple, teal
-    {0.0f, 0.502f, 0.0f}, {0.502f, 0.0f, 0.502f}, {0.0f, 0.502f, 0.502f},
-    // navy
-    {0.0f, 0.0f, 0.502f}
-  };
-}
 
 /*!
   \fn GGEMSOpenGLManager* get_instance_ggems_opengl_manager(void)
@@ -398,21 +430,21 @@ namespace GGEMSOpenGLColor
 extern "C" GGEMS_EXPORT GGEMSOpenGLManager* get_instance_ggems_opengl_manager(void);
 
 /*!
-  \fn void set_window_dimensions_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manager, int width, int height)
+  \fn void set_window_dimensions_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manager, GGint width, GGint height)
   \param opengl_manager - pointer on the singleton
   \param width - glfw window width
   \param height - glfw window height
   \brief Set GLFW window dimension
 */
-extern "C" GGEMS_EXPORT void set_window_dimensions_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manager, int width, int height);
+extern "C" GGEMS_EXPORT void set_window_dimensions_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manager, GGint width, GGint height);
 
 /*!
-  \fn void set_msaa_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manager, int msaa_factor)
+  \fn void set_msaa_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manager, GGint msaa_factor)
   \param opengl_manager - pointer on the singleton
   \param msaa_factor - msaa factor
   \brief Set MSAA (multi sample anti-aliasing factor) factor
 */
-extern "C" GGEMS_EXPORT void set_msaa_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manager, int msaa_factor);
+extern "C" GGEMS_EXPORT void set_msaa_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manager, GGint msaa_factor);
 
 /*!
   \fn void set_background_color_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manager, char const* color)
@@ -423,15 +455,15 @@ extern "C" GGEMS_EXPORT void set_msaa_ggems_opengl_manager(GGEMSOpenGLManager* o
 extern "C" GGEMS_EXPORT void set_background_color_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manager, char const* color = "");
 
 /*!
-  \fn void set_draw_axis_opengl_manager(GGEMSOpenGLManager* opengl_manager, bool const is_draw_axis)
+  \fn void set_draw_axis_opengl_manager(GGEMSOpenGLManager* opengl_manager, GGbool const is_draw_axis)
   \param opengl_manager - pointer on the singleton
   \param is_draw_axis - flag on axis drawing
   \brief activate axis drawing
 */
-extern "C" GGEMS_EXPORT void set_draw_axis_opengl_manager(GGEMSOpenGLManager* opengl_manager, bool const is_draw_axis);
+extern "C" GGEMS_EXPORT void set_draw_axis_opengl_manager(GGEMSOpenGLManager* opengl_manager, GGbool const is_draw_axis);
 
 /*!
-  \fn void set_world_size_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manager, float const& x_size, float const& y_size, float const& z_size, char const* unit)
+  \fn void set_world_size_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manager, GGfloat const& x_size, GGfloat const& y_size, GGfloat const& z_size, char const* unit)
   \param opengl_manager - pointer on the singleton
   \param x_size - x world size
   \param y_size - y world size
@@ -439,7 +471,7 @@ extern "C" GGEMS_EXPORT void set_draw_axis_opengl_manager(GGEMSOpenGLManager* op
   \param unit - length unit
   \brief set world size
 */
-extern "C" GGEMS_EXPORT void set_world_size_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manager, float const x_size, float const y_size, float const z_size, char const* unit);
+extern "C" GGEMS_EXPORT void set_world_size_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manager, GGfloat const x_size, GGfloat const y_size, GGfloat const z_size, char const* unit);
 
 /*!
   \fn void set_image_output_opengl_manager(GGEMSOpenGLManager* opengl_manager, char const* output_path)
@@ -461,6 +493,14 @@ extern "C" GGEMS_EXPORT void initialize_opengl_manager(GGEMSOpenGLManager* openg
   \brief Displaying GGEMS OpenGL Window
 */
 extern "C" GGEMS_EXPORT void display_opengl_manager(GGEMSOpenGLManager* opengl_manager);
+
+/*!
+  \fn void set_displayed_particles_opengl_manager(GGEMSOpenGLManager* opengl_manager, GGint const number_of_displayed_particles)
+  \param opengl_manager - pointer on the singleton
+  \param number_of_displayed_particles - number of displayed particles
+  \brief Displaying GGEMS OpenGL Window
+*/
+extern "C" GGEMS_EXPORT void set_displayed_particles_opengl_manager(GGEMSOpenGLManager* opengl_manager, GGint const number_of_displayed_particles);
 
 #endif // End of OPENGL_VISUALIZATION
 

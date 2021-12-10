@@ -177,4 +177,13 @@ extern "C" GGEMS_EXPORT void set_material_visible_ggems_voxelized_phantom(GGEMSV
 */
 extern "C" GGEMS_EXPORT void set_material_color_ggems_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, char const* material_name, unsigned char const red, unsigned char const green, unsigned char const blue);
 
+/*!
+  \fn void set_material_color_name_ggems_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, char const* material_name, char const* color_name)
+  \param voxelized_phantom - pointer on voxelized phantom
+  \param material_name - name of material to draw (or not)
+  \param color_name - color name
+  \brief Set a color for material
+*/
+extern "C" GGEMS_EXPORT void set_material_color_name_ggems_voxelized_phantom(GGEMSVoxelizedPhantom* voxelized_phantom, char const* material_name, char const* color_name);
+
 #endif // End of GUARD_GGEMS_NAVIGATORS_GGEMSVOXELIZEDPHANTOM_HH

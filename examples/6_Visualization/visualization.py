@@ -31,6 +31,7 @@ parser.add_argument('-v', '--verbose', required=False, type=int, default=0, help
 parser.add_argument('-w', '--wdims', required=False, default=[800, 800], type=int, nargs=2, help='OpenGL window dimensions')
 parser.add_argument('-m', '--msaa', required=False, type=int, default=8, help="MSAA factor (1x, 2x, 4x or 8x)")
 parser.add_argument('-a', '--axis', required=False, action='store_true', help="Drawing axis in OpenGL window")
+parser.add_argument('-p', '--nparticlesgl', required=False, type=int, default=1024, help="Number of displayed primary particles on OpenGL window")
 parser.add_argument('-c', '--wcolor', required=False, type=str, default='black', help='Background color of OpenGL window')
 parser.add_argument('-d', '--device', required=False, type=str, default='0', help="OpenCL device running visualization")
 parser.add_argument('-n', '--nparticles', required=False, type=int, default=1000000, help="Number of particles")
@@ -43,6 +44,7 @@ verbosity_level = args.verbose
 seed = args.seed
 device = args.device
 number_of_particles = args.nparticles
+number_of_displayed_particles = args.nparticlesgl
 is_axis = args.axis
 msaa = args.msaa
 window_color = args.wcolor
@@ -69,6 +71,7 @@ opengl_manager.set_background_color(window_color)
 opengl_manager.set_draw_axis(is_axis)
 opengl_manager.set_world_size(2.0, 2.0, 2.0, 'm')
 opengl_manager.set_image_output('data/axis')
+opengl_manager.set_displayed_particles(number_of_displayed_particles) # Not exceed 4096!!!
 opengl_manager.initialize();
 
 # ------------------------------------------------------------------------------
@@ -106,8 +109,9 @@ phantom = GGEMSVoxelizedPhantom('phantom')
 phantom.set_phantom('data/phantom.mhd', 'data/range_phantom.txt')
 phantom.set_rotation(0.0, 0.0, 0.0, 'deg')
 phantom.set_position(0.0, 0.0, 0.0, 'mm')
-phantom.set_visible(True);
-phantom.set_material_visible("Air", False);
+phantom.set_visible(True)
+phantom.set_material_visible('Air', False)
+phantom.set_material_color('Water', color_name='blue') # Uncomment for automatic color
 
 ct_detector = GGEMSCTSystem('Stellar')
 ct_detector.set_ct_type('curved')
@@ -121,8 +125,9 @@ ct_detector.set_rotation(0.0, 0.0, 0.0, 'deg')
 ct_detector.set_threshold(10.0, 'keV')
 ct_detector.save('data/projection')
 ct_detector.store_scatter(True)
-ct_detector.set_visible(True);
-ct_detector.set_material_color("GOS", 153, 50, 204);
+ct_detector.set_visible(True)
+ct_detector.set_material_color("GOS", 255, 0, 0) # Custom color using RGB
+# ct_detector.set_material_color("GOS", 'red') # Using registered color
 
 # ------------------------------------------------------------------------------
 # STEP 6: Physics
