@@ -133,6 +133,27 @@ kernel void get_primaries_ggems_xray_source(
   primary_particle->next_discrete_process_[global_id] = NO_PROCESS;
   primary_particle->next_interaction_distance_[global_id] = 0.0f;
 
+  #ifdef OPENGL
+  // Storing vertex position for OpenGL
+  if (global_id < MAXIMUM_DISPLAYED_PARTICLES) {
+    // Storing OpenGL index on OpenCL private memory
+    GGint stored_particles_gl = primary_particle->stored_particles_gl_[global_id];
+
+    primary_particle->px_gl_[global_id+stored_particles_gl] = primary_particle->px_[global_id];
+    primary_particle->py_gl_[global_id+stored_particles_gl] = primary_particle->py_[global_id];
+    primary_particle->pz_gl_[global_id+stored_particles_gl] = primary_particle->pz_[global_id];
+    stored_particles_gl += 1;
+
+    primary_particle->px_gl_[global_id+stored_particles_gl] += primary_particle->dx_[global_id]*3.0f*m;
+    primary_particle->py_gl_[global_id+stored_particles_gl] += primary_particle->dy_[global_id]*3.0f*m;
+    primary_particle->pz_gl_[global_id+stored_particles_gl] += primary_particle->dz_[global_id]*3.0f*m;
+    stored_particles_gl += 1;
+
+    // Storing final index
+    primary_particle->stored_particles_gl_[global_id] = stored_particles_gl;
+  }
+  #endif
+
   #ifdef GGEMS_TRACKING
   if (global_id == primary_particle->particle_tracking_id) {
     printf("[GGEMS OpenCL kernel get_primaries_ggems_xray_source] ################################################################################\n");

@@ -165,6 +165,13 @@ class GGEMS_EXPORT GGEMSOpenCLManager
     void PrintActivatedDevices(void) const;
 
     /*!
+      \fn void AddBuildOption(std::string const& option)
+      \param option - option to add to OpenCL compiler
+      \brief add a new option to OpenCL compiler
+    */
+    void AddBuildOption(std::string const& option);
+
+    /*!
       \fn std::string GetDeviceName(GGsize const& device_index) const
       \param device_index - index of device
       \return name of activated device

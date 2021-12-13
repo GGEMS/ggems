@@ -27,11 +27,13 @@ parser = argparse.ArgumentParser(
   epilog='''''',
   formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-parser.add_argument('-v', '--verbose', required=False, type=int, default=0, help="Set level of verbosity")
+parser.add_argument('-v', '--verbose', required=False, type=int, default=0, help='Set level of verbosity')
+parser.add_argument('-e', '--nogl', required=False, action='store_false', help='Disable OpenGL')
 parser.add_argument('-w', '--wdims', required=False, default=[800, 800], type=int, nargs=2, help='OpenGL window dimensions')
-parser.add_argument('-m', '--msaa', required=False, type=int, default=8, help="MSAA factor (1x, 2x, 4x or 8x)")
-parser.add_argument('-a', '--axis', required=False, action='store_true', help="Drawing axis in OpenGL window")
-parser.add_argument('-p', '--nparticlesgl', required=False, type=int, default=1024, help="Number of displayed primary particles on OpenGL window")
+parser.add_argument('-m', '--msaa', required=False, type=int, default=8, help='MSAA factor (1x, 2x, 4x or 8x)')
+parser.add_argument('-a', '--axis', required=False, action='store_true', help='Drawing axis in OpenGL window')
+parser.add_argument('-p', '--nparticlesgl', required=False, type=int, default=256, help='Number of displayed primary particles on OpenGL window (max: 65536)')
+parser.add_argument('-b', '--drawgeom', required=False, action='store_true', help='Draw geometry only on OpenGL window')
 parser.add_argument('-c', '--wcolor', required=False, type=str, default='black', help='Background color of OpenGL window')
 parser.add_argument('-d', '--device', required=False, type=str, default='0', help="OpenCL device running visualization")
 parser.add_argument('-n', '--nparticles', required=False, type=int, default=1000000, help="Number of particles")
@@ -49,6 +51,8 @@ is_axis = args.axis
 msaa = args.msaa
 window_color = args.wcolor
 window_dims = args.wdims
+is_draw_geom = args.drawgeom
+is_gl = args.nogl
 
 # ------------------------------------------------------------------------------
 # STEP 0: Level of verbosity during computation
@@ -65,14 +69,15 @@ volume_creator_manager = GGEMSVolumeCreatorManager()
 
 # ------------------------------------------------------------------------------
 # STEP 2: Params for visualization
-opengl_manager.set_window_dimensions(window_dims[0], window_dims[1])
-opengl_manager.set_msaa(msaa)
-opengl_manager.set_background_color(window_color)
-opengl_manager.set_draw_axis(is_axis)
-opengl_manager.set_world_size(2.0, 2.0, 2.0, 'm')
-opengl_manager.set_image_output('data/axis')
-opengl_manager.set_displayed_particles(number_of_displayed_particles) # Not exceed 4096!!!
-opengl_manager.initialize();
+if is_gl:
+  opengl_manager.set_window_dimensions(window_dims[0], window_dims[1])
+  opengl_manager.set_msaa(msaa)
+  opengl_manager.set_background_color(window_color)
+  opengl_manager.set_draw_axis(is_axis)
+  opengl_manager.set_world_size(2.0, 2.0, 2.0, 'm')
+  opengl_manager.set_image_output('data/axis')
+  opengl_manager.set_displayed_particles(number_of_displayed_particles)
+  opengl_manager.initialize();
 
 # ------------------------------------------------------------------------------
 # STEP 3: Choosing an OpenCL device
@@ -152,7 +157,7 @@ point_source.set_number_of_particles(number_of_particles)
 point_source.set_position(-595.0, 0.0, 0.0, 'mm')
 point_source.set_rotation(0.0, 0.0, 0.0, 'deg')
 point_source.set_beam_aperture(12.5, 'deg')
-point_source.set_focal_spot_size(0.0, 0.0, 0.0, 'mm')
+point_source.set_focal_spot_size(0.2, 0.6, 0.0, 'mm')
 point_source.set_polyenergy('data/spectrum_120kVp_2mmAl.dat')
 
 # ------------------------------------------------------------------------------
@@ -172,10 +177,10 @@ ggems.tracking_verbose(False, 0)
 # Initializing the GGEMS simulation
 ggems.initialize(seed)
 
-# Start GGEMS simulation
-# ggems.run()
-
-opengl_manager.display()
+if is_draw_geom and is_gl: # Draw only geometry and do not run GGEMS
+  opengl_manager.display()
+else: # Running GGEMS and draw particles
+  ggems.run()
 
 # ------------------------------------------------------------------------------
 # STEP 10: Exit safely

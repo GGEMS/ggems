@@ -66,13 +66,15 @@ void PrintHelpAndQuit(std::string const& message, char const* exec)
   oss << std::endl;
   oss << "OpenGL params:" << std::endl;
   oss << "--------------" << std::endl;
+  oss << "[--no-gl]                  Disable OpenGL" << std::endl;
   oss << "[--wdims X,Y]              Window dimensions" << std::endl;
   oss << "                           (800,800, by default)" << std::endl;
   oss << "[--msaa X]                 MSAA factor (1x, 2x, 4x or 8x)" << std::endl;
   oss << "                           (8, by default)" << std::endl;
   oss << "[--axis]                   Drawing axis on screen" << std::endl;
   oss << "[--n-particles-gl]         Number of displayed primary particles on OpenGL window" << std::endl;
-  oss << "                           (1024, by default, max: 4096)" << std::endl;
+  oss << "                           (256, by default, max: 65536)" << std::endl;
+  oss << "[--draw-geom]              Draw geometry only on OpenGL window" << std::endl;
   oss << "[--wcolor X]               Window color" << std::endl;
   oss << "                           (black, by default)" << std::endl;
   oss << "Available colors:" << std::endl;
@@ -100,10 +102,10 @@ void PrintHelpAndQuit(std::string const& message, char const* exec)
   oss << std::endl;
   oss << "Simulation parameters:" << std::endl;
   oss << "----------------------" << std::endl;
-  oss << "[--n-particles X]         Number of particles" << std::endl;
-  oss << "                          (X=1000000, default)" << std::endl;
-  oss << "[--seed X]                Seed of pseudo generator number" << std::endl;
-  oss << "                          (X=777, default)" << std::endl;
+  oss << "[--n-particles X]          Number of particles" << std::endl;
+  oss << "                           (X=1000000, default)" << std::endl;
+  oss << "[--seed X]                 Seed of pseudo generator number" << std::endl;
+  oss << "                           (X=777, default)" << std::endl;
   throw std::invalid_argument(oss.str());
 }
 
@@ -140,10 +142,12 @@ int main(int argc, char** argv)
     GGint window_dims[] = {800, 800};
     std::string window_color = "black";
     GGsize number_of_particles = 1000000;
-    GGshort number_of_displayed_particles = 1024;
+    GGshort number_of_displayed_particles = 256;
     GGsize device_index = 0;
     GGuint seed = 777;
     static GGint is_axis = 0;
+    static GGint is_draw_geom = 0;
+    static GGint is_gl = 1;
 
     // Loop while there is an argument
     GGint counter(0);
@@ -161,6 +165,8 @@ int main(int argc, char** argv)
         {"n-particles", required_argument, 0, 'n'},
         {"n-particles-gl", required_argument, 0, 'p'},
         {"axis", no_argument, &is_axis, 1},
+        {"draw-geom", no_argument, &is_draw_geom, 1},
+        {"no-gl", no_argument, &is_gl, 0}
       };
 
       // Getting the options
@@ -233,14 +239,18 @@ int main(int argc, char** argv)
     GGEMSRangeCutsManager& range_cuts_manager = GGEMSRangeCutsManager::GetInstance();
 
     // Visualization params
-    opengl_manager.SetMSAA(msaa);
-    opengl_manager.SetDrawAxis(is_axis);
-    opengl_manager.SetWindowDimensions(window_dims[0], window_dims[1]);
-    opengl_manager.SetBackgroundColor(window_color);
-    opengl_manager.SetImageOutput("data/axis");
-    opengl_manager.SetWorldSize(2.0f, 2.0f, 2.0f, "m");
-    opengl_manager.SetDisplayedParticles(number_of_displayed_particles); // Not exceed 4096!!!
-    opengl_manager.Initialize();
+    if (is_gl) {
+      opengl_manager.SetMSAA(msaa);
+      opengl_manager.SetDrawAxis(is_axis);
+      opengl_manager.SetWindowDimensions(window_dims[0], window_dims[1]);
+      opengl_manager.SetBackgroundColor(window_color);
+      opengl_manager.SetImageOutput("data/axis");
+      opengl_manager.SetWorldSize(2.0f, 2.0f, 2.0f, "m");
+      opengl_manager.SetDisplayedParticles(number_of_displayed_particles);
+      //opengl_manager.SetParticleColor("gamma", 230, 230, 250);
+      //opengl_manager.SetParticleColor("gamma", red); // Using registered color
+      opengl_manager.Initialize();
+    }
 
     // OpenCL params
     opencl_manager.DeviceToActivate(device_index);
@@ -315,10 +325,8 @@ int main(int argc, char** argv)
     point_source.SetPosition(-595.0f, 0.0f, 0.0f, "mm");
     point_source.SetRotation(0.0f, 0.0f, 0.0f, "deg");
     point_source.SetBeamAperture(12.5f, "deg");
-    point_source.SetFocalSpotSize(0.0f, 0.0f, 0.0f, "mm");
+    point_source.SetFocalSpotSize(0.2f, 0.6f, 0.0f, "mm");
     point_source.SetPolyenergy("data/spectrum_120kVp_2mmAl.dat");
-    //opengl_manager.SetParticleColor("gamma", 230, 230, 250);
-    //opengl_manager.SetParticleColor("gamma", red);
 
     // GGEMS simulation
     GGEMS ggems;
@@ -331,15 +339,17 @@ int main(int argc, char** argv)
     ggems.SetRangeCutsVerbose(true);
     ggems.SetRandomVerbose(true);
     ggems.SetProfilingVerbose(true);
-    ggems.SetTrackingVerbose(false, 0);
+    ggems.SetTrackingVerbose(true, 0);
 
     // Initializing the GGEMS simulation
     ggems.Initialize(seed);
 
-    opengl_manager.Display();
-
-    // Start GGEMS simulation
-    // ggems.Run();
+    if (is_draw_geom && is_gl) { // Draw only geometry and do not run GGEMS
+      opengl_manager.Display();
+    }
+    else { // Running GGEMS and draw particles
+      ggems.Run();
+    }
   }
   catch (std::exception& e) {
     std::cerr << e.what() << std::endl;

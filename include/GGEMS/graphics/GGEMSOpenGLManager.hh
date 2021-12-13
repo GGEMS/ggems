@@ -46,9 +46,9 @@
 
 class GGEMSOpenGLVolume;
 class GGEMSOpenGLAxis;
+class GGEMSOpenGLParticles;
 
 typedef std::unordered_map<std::string, GGint> ColorUMap; /*!< Unordered map with key : name of the color, index of color */
-
 
 /*!
   \namespace GGEMSOpenGLColor
@@ -271,6 +271,20 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     */
     void SetDisplayedParticles(GGint const& number_of_displayed_particles);
 
+    /*!
+      \fn GGint GetNumberOfDisplayedParticles(void) const
+      \brief Getting the number of displayed particles
+      \return the number of displayed particles
+    */
+    inline GGint GetNumberOfDisplayedParticles(void) const {return number_of_displayed_particles_;}
+
+    /*!
+      \fn void CopyParticlePositionToOpenGL(GGsize const& source_index)
+      \param source_index - source index
+      \brief Copy particle position from OpenCL kernel to OpenGL memory
+    */
+    void CopyParticlePositionToOpenGL(GGsize const& source_index);
+
   private:
     /*!
       \fn void InitGL(void)
@@ -392,6 +406,11 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     static GGdouble last_mouse_y_position_; /*!< Last position of mouse in y */
     static GGbool is_left_button_; /*!< If left button is used */
     static GGbool is_middle_button_; /*!< If middle button is used */
+    static GGbool is_wireframe_; /*!< Line mode: wireframe or solid (if GGbool is false) */
+    static GGfloat zoom_; /*!< Value of zoom */
+    static GGbool is_save_image_; /*!< Save window to png image file */
+    std::string image_output_basename_; /*!< Image output basename */
+    GGint image_output_index_; /*!< Image output index */
     GGint msaa_; /*!< MSAA: Multi sample anti-aliasing factor */
     ColorUMap colors_; /*!< List of colors */
     GGfloat background_color_[3]; /*!< window background color */
@@ -400,26 +419,22 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     GGfloat y_world_size_; /*!< World size along y axis */
     GGfloat z_world_size_; /*!< World size along z axis */
 
-    GGint number_of_displayed_particles_; /*!< Number of displayed particles */
-
-    GGEMSOpenGLVolume** opengl_volumes_; /*!< OpenGL volume to display or not */
-    GGsize number_of_opengl_volumes_; /*!< Number of OpenGL volumes */
-
     // OpenGL matrices
     glm::mat4 camera_view_; /*!< Camera view */
     static glm::vec3 camera_position_; /*!< Position of the camera */
     static glm::vec3 camera_target_; /*!< Target of the camera */
     static glm::vec3 camera_up_; /*!< Vector to the top */
     glm::mat4 projection_; /*!< Projection matrix (ortho or perspective), perspective by defaut */
-    static GGbool is_wireframe_; /*!< Line mode: wireframe or solid (if GGbool is false) */
-    static GGfloat zoom_; /*!< Value of zoom */
-    static GGbool is_save_image_; /*!< Save window to png image file */
-    std::string image_output_basename_; /*!< Image output basename */
-    GGint image_output_index_; /*!< Image output index */
-    GGEMSOpenGLAxis* axis_; /*!< pointer to axis volume */
 
     // OpenGL timing
     static GGdouble delta_time_; /*! Time between 2 frames */
+
+    // OpenGL object to draw
+    GGEMSOpenGLVolume** opengl_volumes_; /*!< OpenGL volume to display or not */
+    GGEMSOpenGLAxis* axis_; /*!< pointer to axis volume */
+    GGEMSOpenGLParticles* particles_; /*!< pointer to particles infos for OpenGL */
+    GGsize number_of_opengl_volumes_; /*!< Number of OpenGL volumes */
+    GGint number_of_displayed_particles_; /*!< Number of displayed particles */
 };
 
 /*!

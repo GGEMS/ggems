@@ -254,9 +254,11 @@ void GGEMS::Initialize(GGuint const& seed)
 
   GGcout("GGEMS", "Initialize", 0) << "GGEMS initialization succeeded" << GGendl;
 
-  // Checking if the visualization if activated. If so, send a warning error
+  // Checking if the visualization if activated. If so, send a error message if more than 1 OpenGL are activated
   if (opengl_manager.IsOpenGLActivated() && opencl_manager.GetNumberOfActivatedDevice() > 1) {
-    GGwarn("GGEMS", "Initialize", 0) << "Many OpenCL devices are activated!!! For OpenGL visualization, only particles from first device will be displayed!!!" << GGendl;
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "Many OpenCL devices are activated!!! For OpenGL visualization, only particles from first device will be displayed. Please, select only one device.";
+    GGEMSMisc::ThrowException("GGEMS", "Initialize", oss.str());
   }
 
   // Display the elapsed time in GGEMS
@@ -271,6 +273,7 @@ void GGEMS::RunOnDevice(GGsize const& thread_index)
 {
   GGEMSSourceManager& source_manager = GGEMSSourceManager::GetInstance();
   GGEMSNavigatorManager& navigator_manager = GGEMSNavigatorManager::GetInstance();
+  GGEMSOpenGLManager& opengl_manager = GGEMSOpenGLManager::GetInstance();
 
   // Printing progress bar
   mutex.lock();
@@ -312,6 +315,11 @@ void GGEMS::RunOnDevice(GGsize const& thread_index)
       ++progress_bar;
       mutex.unlock();
     }
+
+    // If OpenGL, send particle OpenGL infos from OpenCL buffer to OpenGL for the current source
+    if (opengl_manager.IsOpenGLActivated()) { // && !opengl_manager.IsParticleBufferFull()
+      opengl_manager.CopyParticlePositionToOpenGL(i);
+    }
   }
 
   // Computing dose
@@ -348,6 +356,12 @@ void GGEMS::Run()
 
   // Deleting threads
   delete[] thread_device;
+
+  // Display OpenGL window
+  GGEMSOpenGLManager& opengl_manager = GGEMSOpenGLManager::GetInstance();
+  if (opengl_manager.IsOpenGLActivated()) {
+    opengl_manager.Display();
+  }
 
   // End of simulation, storing output
   GGcout("GGEMS", "Run", 1) << "Saving results..." << GGendl;

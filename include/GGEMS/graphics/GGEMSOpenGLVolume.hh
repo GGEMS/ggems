@@ -243,7 +243,7 @@ class GGEMS_EXPORT GGEMSOpenGLVolume
     std::vector<std::string> material_names_; /*!< Name of material */
     MaterialVisibleUMap material_visible_; /*!< Visibily of material */
 
-    GLuint vao_; /*!< vertex array object, 1 for each object */
+    GLuint vao_; /*!< vertex array object, 1 for all objects */
     GLuint vbo_[2]; /*!< vertex buffer object, index 0 -> vertex, index 1 -> indice */
     GLuint program_shader_id_; /*!< program id for shader, specific to a volume */
     std::string vertex_shader_source_; /*!< vertex shader source file */

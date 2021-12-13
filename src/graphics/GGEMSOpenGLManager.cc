@@ -20,6 +20,9 @@
 #include "GGEMS/tools/GGEMSPrint.hh"
 #include "GGEMS/graphics/GGEMSOpenGLVolume.hh"
 #include "GGEMS/graphics/GGEMSOpenGLAxis.hh"
+#include "GGEMS/physics/GGEMSParticleConstants.hh"
+#include "GGEMS/global/GGEMSOpenCLManager.hh"
+#include "GGEMS/graphics/GGEMSOpenGLParticles.hh"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "GGEMS/externs/stb_image.h"
@@ -35,7 +38,7 @@
 GGbool GGEMSOpenGLManager::is_opengl_activated_ = false;
 GGint GGEMSOpenGLManager::window_width_ = 800;
 GGint GGEMSOpenGLManager::window_height_ = 600;
-GGbool GGEMSOpenGLManager::is_wireframe_ = true;
+GGbool GGEMSOpenGLManager::is_wireframe_ = false;
 GGfloat GGEMSOpenGLManager::zoom_ = 0.0f;
 glm::vec3 GGEMSOpenGLManager::camera_position_ = glm::vec3(0.0f, 0.0f, -3.0f);
 glm::vec3 GGEMSOpenGLManager::camera_target_ = glm::vec3(0.0, 0.0, 1.0f);
@@ -87,10 +90,12 @@ GGEMSOpenGLManager::GGEMSOpenGLManager(void)
   colors_["teal"]    = 14;
   colors_["navy"]    = 15;
 
-  number_of_displayed_particles_ = 4096;
+  number_of_displayed_particles_ = 256; // By default, 256 particles are drawn
 
   number_of_opengl_volumes_ = 0;
   opengl_volumes_ = nullptr;
+  particles_ = nullptr;
+  axis_ = nullptr;
 
   camera_view_ = glm::mat4(1.0f);
   projection_ = glm::mat4(1.0f);
@@ -119,6 +124,11 @@ GGEMSOpenGLManager::~GGEMSOpenGLManager(void)
     window_ = nullptr;
     // Closing GLFW
     glfwTerminate();
+  }
+
+  if (particles_) {
+    delete particles_;
+    particles_ = nullptr;
   }
 
   if (axis_) {
@@ -250,10 +260,11 @@ void GGEMSOpenGLManager::SetDrawAxis(GGbool const& is_draw_axis)
 
 void GGEMSOpenGLManager::SetDisplayedParticles(GGint const& number_of_displayed_particles)
 {
-  if (number_of_displayed_particles > 4096) { // 4096 is the max number of displayed particles
+  if (number_of_displayed_particles > MAXIMUM_DISPLAYED_PARTICLES) {
     GGwarn("GGEMSOpenGLManager", "SetDisplayedParticles", 0) << "Your number of displayed particles: " << number_of_displayed_particles
-      << " is > 4096 which is the limit. So, the number of displayed particles is set to 4096." << GGendl;
-    number_of_displayed_particles_ = 4096;
+      << " is > MAXIMUM_DISPLAYED_PARTICLES (" << MAXIMUM_DISPLAYED_PARTICLES << "). So, the number of displayed particles is set to " <<  MAXIMUM_DISPLAYED_PARTICLES
+      << "." << GGendl;
+    number_of_displayed_particles_ = MAXIMUM_DISPLAYED_PARTICLES;
   }
   else {
     number_of_displayed_particles_ = number_of_displayed_particles;
@@ -270,6 +281,11 @@ void GGEMSOpenGLManager::Initialize(void)
 
   InitGL(); // Initializing GLFW, GL and GLEW
   if (is_draw_axis_) axis_ = new GGEMSOpenGLAxis();
+  particles_ = new GGEMSOpenGLParticles();
+
+  // Adding new option to OpenCL compiler
+  GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
+  opencl_manager.AddBuildOption("-DOPENGL");
 
   is_opengl_activated_ = true;
 }
@@ -386,6 +402,9 @@ void GGEMSOpenGLManager::Display(void)
   glfwSwapInterval(1); // Control frame rate
   glClearColor(background_color_[0], background_color_[1], background_color_[2], 1.0f); // Setting background colors
 
+  glEnable(GL_DEPTH_TEST);
+  glDepthFunc(GL_LESS);
+
   PrintKeys();
 
   GGdouble last_frame_time = 0.0;
@@ -400,8 +419,6 @@ void GGEMSOpenGLManager::Display(void)
 
     // Render here
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
 
     if (is_wireframe_) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -556,6 +573,15 @@ void GGEMSOpenGLManager::SaveWindow(GLFWwindow* w)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+void GGEMSOpenGLManager::CopyParticlePositionToOpenGL(GGsize const& source_index)
+{
+  particles_->CopyParticlePosition(source_index);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 void GGEMSOpenGLManager::GLFWKeyCallback(GLFWwindow* window, GGint key, GGint, GGint action, GGint)
 {
   GGfloat camera_speed = 100.0f * static_cast<GGfloat>(delta_time_); // Defining a camera speed depending on the delta time
@@ -569,13 +595,6 @@ void GGEMSOpenGLManager::GLFWKeyCallback(GLFWwindow* window, GGint key, GGint, G
       glfwSetWindowShouldClose(window, true);
       break;
     }
-    // case GLFW_KEY_SPACE: {
-    //   if (action == GLFW_PRESS) {
-    //     if (pause_mode_ == 0) pause_mode_ = 1;
-    //     else pause_mode_ = 0;
-    //   }
-    //   break;
-    // }
     case GLFW_KEY_KP_SUBTRACT: {
       zoom_ -= 1.0f;
       break;
@@ -636,7 +655,7 @@ void GGEMSOpenGLManager::GLFWKeyCallback(GLFWwindow* window, GGint key, GGint, G
       camera_position_ = glm::vec3(0.0f, 0.0f, -3.0f);
       camera_target_ = glm::vec3(0.0, 0.0, 1.0f);
       camera_up_ = glm::vec3(0.0, -1.0, 0.0f);
-      is_wireframe_ = true;
+      is_wireframe_ = false;
       zoom_ = 0.0f;
       pitch_angle_ = 0.0;
       yaw_angle_ = 90.0;
