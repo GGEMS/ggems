@@ -95,6 +95,7 @@ GGEMSOpenGLManager::GGEMSOpenGLManager(void)
   number_of_opengl_volumes_ = 0;
   opengl_volumes_ = nullptr;
   particles_ = nullptr;
+  number_of_displayed_sources_ = 0;
   axis_ = nullptr;
 
   camera_view_ = glm::mat4(1.0f);
@@ -127,7 +128,10 @@ GGEMSOpenGLManager::~GGEMSOpenGLManager(void)
   }
 
   if (particles_) {
-    delete particles_;
+    for (GGsize i = 0; i < number_of_displayed_sources_; ++i) {
+      delete particles_[i];
+    }
+    delete[] particles_;
     particles_ = nullptr;
   }
 
@@ -138,6 +142,9 @@ GGEMSOpenGLManager::~GGEMSOpenGLManager(void)
 
   // Destroying volumes
   if (opengl_volumes_) {
+    for (GGsize i = 0; i < number_of_opengl_volumes_; ++i) {
+      delete opengl_volumes_[i];
+    }
     delete[] opengl_volumes_;
     opengl_volumes_ = nullptr;
   }
@@ -275,13 +282,21 @@ void GGEMSOpenGLManager::SetDisplayedParticles(GGint const& number_of_displayed_
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+void GGEMSOpenGLManager::SetNumberParticles(GGsize const& source_index, GGsize const& number_of_particles)
+{
+  particles_[source_index]->SetNumberOfParticles(number_of_particles);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 void GGEMSOpenGLManager::Initialize(void)
 {
   GGcout("GGEMSOpenGLManager", "Initialize", 3) << "Initializing the OpenGL manager..." << GGendl;
 
   InitGL(); // Initializing GLFW, GL and GLEW
   if (is_draw_axis_) axis_ = new GGEMSOpenGLAxis();
-  particles_ = new GGEMSOpenGLParticles();
 
   // Adding new option to OpenCL compiler
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
@@ -367,6 +382,16 @@ void GGEMSOpenGLManager::InitGL(void)
   GGcout("GGEMSOpenGLManager", "InitGL", 1) << "    * MSAA factor: " << msaa_ << GGendl;
 }
 
+void GGEMSOpenGLManager::InitializeDisplayedParticles(GGsize const& number_of_sources)
+{
+  number_of_displayed_sources_ = number_of_sources;
+
+  particles_ = new GGEMSOpenGLParticles*[number_of_sources];
+  for (GGsize i = 0; i < number_of_sources; ++i) {
+    particles_[i] = new GGEMSOpenGLParticles;
+  }
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -448,8 +473,13 @@ void GGEMSOpenGLManager::Display(void)
 void GGEMSOpenGLManager::Draw(void) const
 {
   // Loop over the volumes and draw them
-  for (GGint i = 0; i < number_of_opengl_volumes_; ++i) {
+  for (GGsize i = 0; i < number_of_opengl_volumes_; ++i) {
     opengl_volumes_[i]->Draw();
+  }
+
+  // Drawing particles
+  for (GGsize i = 0; i < number_of_displayed_sources_; ++i) {
+    particles_[i]->Draw();
   }
 }
 
@@ -575,7 +605,7 @@ void GGEMSOpenGLManager::SaveWindow(GLFWwindow* w)
 
 void GGEMSOpenGLManager::CopyParticlePositionToOpenGL(GGsize const& source_index)
 {
-  particles_->CopyParticlePosition(source_index);
+  particles_[source_index]->CopyParticlePosition();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -798,6 +828,90 @@ void GGEMSOpenGLManager::GLFWErrorCallback(GGint error_code, char const* descrip
   oss << description << std::endl;
   oss << "!!!!!!!!";
   GGEMSMisc::ThrowException("GGEMSOpenGLManager", "GLFWErrorCallback", oss.str());
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+std::string GGEMSOpenGLManager::GetOpenGLSLVersion(void) const
+{
+  std::string glsl_version(reinterpret_cast<char const*>(glGetString(GL_SHADING_LANGUAGE_VERSION)));
+  std::string digits("0123456789");
+
+  std::size_t n = glsl_version.find_first_of(digits);
+  if (n != std::string::npos)
+  {
+    std::size_t m = glsl_version.find_first_not_of(digits+".", n);
+    std::string tmp = glsl_version.substr(n, m != std::string::npos ? m-n : m);
+    // Deleting '.'
+    tmp.erase(std::remove(tmp.begin(), tmp.end(), '.'), tmp.end());
+    return tmp;
+  }
+  else {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "Impossible to get GLSL version!!!";
+    GGEMSMisc::ThrowException("GGEMSOpenGLManager", "GetOpenGLSLVersion", oss.str());
+  }
+  return std::string();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSOpenGLManager::InitShaders(std::string const& vertex_shader_source, std::string const& fragment_shader_source, GLuint& program_id)
+{
+  // Creating shaders
+  GLuint vert_shader = glCreateShader(GL_VERTEX_SHADER);
+  GLuint frag_shader = glCreateShader(GL_FRAGMENT_SHADER);
+
+  // Setting the source code
+  char const* vertex_shader_source_cstr = vertex_shader_source.c_str();
+  char const* fragment_shader_source_cstr = fragment_shader_source.c_str();
+  glShaderSource(vert_shader, 1, &vertex_shader_source_cstr, nullptr);
+  glShaderSource(frag_shader, 1, &fragment_shader_source_cstr, nullptr);
+
+  // Compiling shaders
+  CompileShader(vert_shader);
+  CompileShader(frag_shader);
+
+  // Linking the program
+  program_id = glCreateProgram();
+  glAttachShader(program_id, vert_shader);
+  glAttachShader(program_id, frag_shader);
+  glLinkProgram(program_id);
+
+  // Deleting shaders
+  glDeleteShader(vert_shader);
+  glDeleteShader(frag_shader);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSOpenGLManager::CompileShader(GLuint const& shader) const
+{
+  GLint sucess = 0;
+  glCompileShader(shader);
+  glGetShaderiv(shader, GL_COMPILE_STATUS, &sucess);
+  if(sucess == GL_FALSE) {
+    GLint max_length = 0;
+    glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &max_length);
+
+    // The max_length includes the NULL character
+    std::vector<GLchar> error_log(max_length);
+    glGetShaderInfoLog(shader, max_length, &max_length, &error_log[0]);
+
+    std::ostringstream oss(std::ostringstream::out);
+    oss << "Error compiling shader!!!" << std::endl;
+    for (std::size_t i = 0; i < error_log.size(); ++i) oss << error_log[i];
+
+    glDeleteShader(shader); // Don't leak the shader.
+    throw std::runtime_error(oss.str());
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -102,7 +102,7 @@ class GGEMS_EXPORT GGEMSOpenGLPrism : public GGEMSOpenGLVolume
       \fn void WriteShaders(void)
       \brief write shader source file for each volume
     */
-    void WriteShaders(void);
+    void WriteShaders(void) override;
 
   private:
     GLfloat base_radius_; /*!< Radius of base circle */

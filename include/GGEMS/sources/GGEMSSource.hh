@@ -139,6 +139,13 @@ class GGEMS_EXPORT GGEMSSource
     inline GGsize GetNumberOfBatchs(GGsize const& device_index) const {return number_of_batchs_[device_index];}
 
     /*!
+      \fn inline GGsize GetNumberOfParticles(void) const
+      \return the number of simulated particles
+      \brief get the number of simulated particles
+    */
+    inline GGsize GetNumberOfParticles(void) const {return number_of_particles_;}
+
+    /*!
       \fn inline GGulong GetNumberOfParticlesInBatch(GGsize const& device_index, GGsize const& batch_index)
       \param device_index - index of activated device
       \param batch_index - index of the batch

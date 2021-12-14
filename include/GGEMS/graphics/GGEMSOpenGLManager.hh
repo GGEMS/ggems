@@ -38,6 +38,7 @@
 #include "GGEMS/tools/GGEMSPrint.hh"
 #include "GGEMS/tools/GGEMSSystemOfUnits.hh"
 #include "GGEMS/maths/GGEMSMatrixTypes.hh"
+#include "GGEMS/graphics/GGEMSOpenGLParticles.hh"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -46,7 +47,6 @@
 
 class GGEMSOpenGLVolume;
 class GGEMSOpenGLAxis;
-class GGEMSOpenGLParticles;
 
 typedef std::unordered_map<std::string, GGint> ColorUMap; /*!< Unordered map with key : name of the color, index of color */
 
@@ -272,6 +272,14 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     void SetDisplayedParticles(GGint const& number_of_displayed_particles);
 
     /*!
+      \fn void SetNumberParticles(GGsize const& source_index, GGsize const& number_of_particles)
+      \param source_index - source index
+      \param number_of_particles - number of particles to draw
+      \brief setting the number of particles
+    */
+    void SetNumberParticles(GGsize const& source_index, GGsize const& number_of_particles);
+
+    /*!
       \fn GGint GetNumberOfDisplayedParticles(void) const
       \brief Getting the number of displayed particles
       \return the number of displayed particles
@@ -284,6 +292,36 @@ class GGEMS_EXPORT GGEMSOpenGLManager
       \brief Copy particle position from OpenCL kernel to OpenGL memory
     */
     void CopyParticlePositionToOpenGL(GGsize const& source_index);
+
+    /*!
+      \fn void InitializeDisplayedParticles(GGsize const& number_of_sources)
+      \param number_of_sources - number of sources
+      \brief Initialize displayed particles buffer setting number of sources
+    */
+    void InitializeDisplayedParticles(GGsize const& number_of_sources);
+
+    /*!
+      \fn std::string GetOpenGLSLVersion(void) const
+      \brief Get version of GLSL
+      \return GLSL version in string
+    */
+    std::string GetOpenGLSLVersion(void) const;
+
+    /*!
+      \fn void InitShaders(std::string const& vertex_shader_source, std::string const& fragment_shader_source, GLuint& program_id)
+      \param vertex_shader_source - vertex shader source
+      \param fragment_shader_source - fragment shader source
+      \param program_id - reference to program id
+      \brief compile shader and store it
+    */
+    void InitShaders(std::string const& vertex_shader_source, std::string const& fragment_shader_source, GLuint& program_id);
+
+    /*!
+      \fn void CompileShader(GLuint const& shader) const
+      \param shader - index of shader from glCreateShader
+      \brief compiling shader
+    */
+    void CompileShader(GLuint const& shader) const;
 
   private:
     /*!
@@ -432,7 +470,8 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     // OpenGL object to draw
     GGEMSOpenGLVolume** opengl_volumes_; /*!< OpenGL volume to display or not */
     GGEMSOpenGLAxis* axis_; /*!< pointer to axis volume */
-    GGEMSOpenGLParticles* particles_; /*!< pointer to particles infos for OpenGL */
+    GGEMSOpenGLParticles** particles_; /*!< pointer to particles infos for OpenGL */
+    GGsize number_of_displayed_sources_; /*<! Number of displayed source */
     GGsize number_of_opengl_volumes_; /*!< Number of OpenGL volumes */
     GGint number_of_displayed_particles_; /*!< Number of displayed particles */
 };

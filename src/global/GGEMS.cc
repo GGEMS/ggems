@@ -254,11 +254,29 @@ void GGEMS::Initialize(GGuint const& seed)
 
   GGcout("GGEMS", "Initialize", 0) << "GGEMS initialization succeeded" << GGendl;
 
-  // Checking if the visualization if activated. If so, send a error message if more than 1 OpenGL are activated
-  if (opengl_manager.IsOpenGLActivated() && opencl_manager.GetNumberOfActivatedDevice() > 1) {
-    std::ostringstream oss(std::ostringstream::out);
-    oss << "Many OpenCL devices are activated!!! For OpenGL visualization, only particles from first device will be displayed. Please, select only one device.";
-    GGEMSMisc::ThrowException("GGEMS", "Initialize", oss.str());
+  // If OpenGL is activated, initialize particles setting number of sources
+  if (opengl_manager.IsOpenGLActivated()) {
+    // Send a error message if more than 1 OpenGL are activated
+    if (opencl_manager.GetNumberOfActivatedDevice() > 1) {
+      std::ostringstream oss(std::ostringstream::out);
+      oss << "Many OpenCL devices are activated!!! For OpenGL visualization, only particles from first device will be displayed. Please, select only one device.";
+      GGEMSMisc::ThrowException("GGEMS", "Initialize", oss.str());
+    }
+
+    // Initializing buffers
+    opengl_manager.InitializeDisplayedParticles(source_manager.GetNumberOfSources());
+
+    // Checking number of displayed particles compared to simulated particles
+    GLint number_of_displayed_particles = opengl_manager.GetNumberOfDisplayedParticles();
+    for (GGsize i = 0; i < source_manager.GetNumberOfSources(); ++i) {
+      GGsize number_of_particles = source_manager.GetNumberOfParticles(i);
+      if (number_of_displayed_particles > number_of_particles) {
+        opengl_manager.SetNumberParticles(i, number_of_particles);
+      }
+      else {
+        opengl_manager.SetNumberParticles(i, number_of_displayed_particles);
+      }
+    }
   }
 
   // Display the elapsed time in GGEMS
@@ -317,7 +335,7 @@ void GGEMS::RunOnDevice(GGsize const& thread_index)
     }
 
     // If OpenGL, send particle OpenGL infos from OpenCL buffer to OpenGL for the current source
-    if (opengl_manager.IsOpenGLActivated()) { // && !opengl_manager.IsParticleBufferFull()
+    if (opengl_manager.IsOpenGLActivated()) {
       opengl_manager.CopyParticlePositionToOpenGL(i);
     }
   }

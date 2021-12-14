@@ -30,6 +30,7 @@
 
 #ifdef OPENGL_VISUALIZATION
 
+#include "GGEMS/graphics/GGEMSOpenGLManager.hh"
 #include "GGEMS/graphics/GGEMSOpenGLParaGrid.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
 #include "GGEMS/global/GGEMSConstants.hh"
@@ -74,7 +75,8 @@ GGEMSOpenGLParaGrid::GGEMSOpenGLParaGrid(GLint const& elements_x, GLint const& e
   WriteShaders();
 
   // Initializing shaders
-  InitShaders();
+  GGEMSOpenGLManager& opengl_manager = GGEMSOpenGLManager::GetInstance();
+  opengl_manager.InitShaders(vertex_shader_source_, fragment_shader_source_, program_shader_id_);
 
   GGcout("GGEMSOpenGLParaGrid", "GGEMSOpenGLParaGrid", 3) << "GGEMSOpenGLParaGrid created!!!" << GGendl;
 }
@@ -96,8 +98,10 @@ GGEMSOpenGLParaGrid::~GGEMSOpenGLParaGrid(void)
 
 void GGEMSOpenGLParaGrid::WriteShaders(void)
 {
+  GGEMSOpenGLManager& opengl_manager = GGEMSOpenGLManager::GetInstance();
+
   // A global vertex shader
-  vertex_shader_source_ = "#version " + GetOpenGLSLVersion() + "\n"
+  vertex_shader_source_ = "#version " + opengl_manager.GetOpenGLSLVersion() + "\n"
     "\n"
     "layout(location = 0) in vec3 position;\n"
     "layout(location = 1) in vec3 color;\n"
@@ -112,7 +116,7 @@ void GGEMSOpenGLParaGrid::WriteShaders(void)
     "}\n";
 
   // A global fragment shader
-  fragment_shader_source_ = "#version " + GetOpenGLSLVersion() + "\n"
+  fragment_shader_source_ = "#version " + opengl_manager.GetOpenGLSLVersion() + "\n"
     "\n"
     "layout(location = 0) out vec4 out_color;\n"
     "\n"

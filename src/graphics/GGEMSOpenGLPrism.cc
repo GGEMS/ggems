@@ -33,6 +33,7 @@
 #include "GGEMS/graphics/GGEMSOpenGLPrism.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
 #include "GGEMS/global/GGEMSConstants.hh"
+#include "GGEMS/graphics/GGEMSOpenGLManager.hh"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -77,7 +78,8 @@ GGEMSOpenGLPrism::GGEMSOpenGLPrism(GLfloat const& base_radius, GLfloat const& to
   WriteShaders();
 
   // Initializing shaders
-  InitShaders();
+  GGEMSOpenGLManager& opengl_manager = GGEMSOpenGLManager::GetInstance();
+  opengl_manager.InitShaders(vertex_shader_source_, fragment_shader_source_, program_shader_id_);
 
   GGcout("GGEMSOpenGLPrism", "GGEMSOpenGLPrism", 3) << "GGEMSOpenGLPrism created!!!" << GGendl;
 }
@@ -104,8 +106,10 @@ GGEMSOpenGLPrism::~GGEMSOpenGLPrism(void)
 
 void GGEMSOpenGLPrism::WriteShaders(void)
 {
+  GGEMSOpenGLManager& opengl_manager = GGEMSOpenGLManager::GetInstance();
+
   // A global vertex shader
-  vertex_shader_source_ = "#version " + GetOpenGLSLVersion() + "\n"
+  vertex_shader_source_ = "#version " + opengl_manager.GetOpenGLSLVersion() + "\n"
     "\n"
     "layout(location = 0) in vec3 position;\n"
     "\n"
@@ -120,7 +124,7 @@ void GGEMSOpenGLPrism::WriteShaders(void)
     "}\n";
 
   // A global fragment shader
-  fragment_shader_source_ = "#version " + GetOpenGLSLVersion() + "\n"
+  fragment_shader_source_ = "#version " + opengl_manager.GetOpenGLSLVersion() + "\n"
     "\n"
     "layout(location = 0) out vec4 out_color;\n"
     "\n"

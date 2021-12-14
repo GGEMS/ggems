@@ -92,7 +92,7 @@ class GGEMS_EXPORT GGEMSOpenGLSphere : public GGEMSOpenGLVolume
       \fn void WriteShaders(void)
       \brief write shader source file for each volume
     */
-    void WriteShaders(void);
+    void WriteShaders(void) override;
 
   private:
     GLfloat radius_; /*!< Radius of sphere */

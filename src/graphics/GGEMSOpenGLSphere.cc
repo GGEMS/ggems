@@ -30,6 +30,7 @@
 
 #ifdef OPENGL_VISUALIZATION
 
+#include "GGEMS/graphics/GGEMSOpenGLManager.hh"
 #include "GGEMS/graphics/GGEMSOpenGLSphere.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
 #include "GGEMS/global/GGEMSConstants.hh"
@@ -63,7 +64,8 @@ GGEMSOpenGLSphere::GGEMSOpenGLSphere(GLfloat const& radius)
   WriteShaders();
 
   // Initializing shaders
-  InitShaders();
+  GGEMSOpenGLManager& opengl_manager = GGEMSOpenGLManager::GetInstance();
+  opengl_manager.InitShaders(vertex_shader_source_, fragment_shader_source_, program_shader_id_);
 
   GGcout("GGEMSOpenGLSphere", "GGEMSOpenGLSphere", 3) << "GGEMSOpenGLSphere created!!!" << GGendl;
 }
@@ -85,8 +87,10 @@ GGEMSOpenGLSphere::~GGEMSOpenGLSphere(void)
 
 void GGEMSOpenGLSphere::WriteShaders(void)
 {
+  GGEMSOpenGLManager& opengl_manager = GGEMSOpenGLManager::GetInstance();
+
   // A global vertex shader
-  vertex_shader_source_ = "#version " + GetOpenGLSLVersion() + "\n"
+  vertex_shader_source_ = "#version " + opengl_manager.GetOpenGLSLVersion() + "\n"
     "\n"
     "layout(location = 0) in vec3 position;\n"
     "\n"
@@ -101,7 +105,7 @@ void GGEMSOpenGLSphere::WriteShaders(void)
     "}\n";
 
   // A global fragment shader
-  fragment_shader_source_ = "#version " + GetOpenGLSLVersion() + "\n"
+  fragment_shader_source_ = "#version " + opengl_manager.GetOpenGLSLVersion() + "\n"
     "\n"
     "layout(location = 0) out vec4 out_color;\n"
     "\n"

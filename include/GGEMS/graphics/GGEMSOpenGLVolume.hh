@@ -196,31 +196,10 @@ class GGEMS_EXPORT GGEMSOpenGLVolume
 
   protected:
     /*!
-      \fn void InitShaders(void)
-      \brief compile shader and store it
-    */
-    void InitShaders(void);
-
-    /*!
       \fn void WriteShaders(void)
       \brief write shader source file for each volume
     */
     virtual void WriteShaders(void) = 0;
-
-    /*!
-      \fn std::string GetOpenGLSLVersion(void) const
-      \brief Get version of GLSL
-      \return GLSL version in string
-    */
-    std::string GetOpenGLSLVersion(void) const;
-
-  private:
-    /*!
-      \fn void CompileShader(GLuint const& shader) const
-      \param shader - index of shader from glCreateShader
-      \brief compiling shader
-    */
-    void CompileShader(GLuint const& shader) const;
 
   protected:
     GLint number_of_stacks_; /*!< Number of stacks (latitude) */

@@ -88,15 +88,50 @@ class GGEMS_EXPORT GGEMSOpenGLParticles
     GGEMSOpenGLParticles& operator=(GGEMSOpenGLParticles const&& particles) = delete;
 
     /*!
-      \fn void CopyParticlePosition(GGsize const& source_index)
-      \param source_index - source index
+      \fn void CopyParticlePosition(void)
       \brief Copy particle position from OpenCL kernel to OpenGL memory
     */
-    void CopyParticlePosition(GGsize const& source_index);
+    void CopyParticlePosition(void);
+
+    /*!
+      \fn void Draw(void) const
+      \brief Draw particles into the screen
+    */
+    void Draw(void) const;
+
+    /*!
+      \fn void SetNumberOfParticles(GGsize const& number_of_particles)
+      \param number_of_particles - number of particles to draw
+      \brief set number of particles to draw to OpenGL window
+    */
+    void SetNumberOfParticles(GGsize const& number_of_particles);
 
   private:
+    /*!
+      \fn void WriteShaders(void)
+      \brief write shader source file for each volume
+    */
+    void WriteShaders(void);
+
+    /*!
+      \fn void CreatingVBO(void)
+      \brief Creating a VBO for a source
+    */
+    void CreatingVBO(void);
+
+  private:
+    GLint number_of_vertices_; /*!< Number of vertices for OpenGL particles */
+    GLint number_of_indices_; /*!< Number of indices */
+
+    bool is_buffer_full_; /*!< flag for buffer */
+    GGint number_of_registered_particles_; /*!< Number of registered particles */
+    GGsize number_of_particles_; /*!< Number of primary particles to follow */
+
     GLuint vao_; /*!< vertex array object for all sources */
-    std::vector<GLuint> vbo_; /*!< vertex buffer object, index 0 -> source 0, index 1 -> source 1 etc... */
+    GLuint vbo_[2]; /*!< vertex buffer object, index 0 -> vertex, index 1 -> index */
+    GLuint program_shader_id_; /*!< program id for shader */
+    std::string vertex_shader_source_; /*!< vertex shader source file */
+    std::string fragment_shader_source_; /*!< fragment shader source file */
 };
 
 #endif

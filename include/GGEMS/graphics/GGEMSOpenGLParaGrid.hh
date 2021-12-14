@@ -98,7 +98,7 @@ class GGEMS_EXPORT GGEMSOpenGLParaGrid : public GGEMSOpenGLVolume
       \fn void WriteShaders(void)
       \brief write shader source file for each volume
     */
-    void WriteShaders(void);
+    void WriteShaders(void) override;
 
     /*!
       \fn GGEMSRGBColor GetRGBColor(GLint const& index) const

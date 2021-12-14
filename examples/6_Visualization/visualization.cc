@@ -328,6 +328,15 @@ int main(int argc, char** argv)
     point_source.SetFocalSpotSize(0.2f, 0.6f, 0.0f, "mm");
     point_source.SetPolyenergy("data/spectrum_120kVp_2mmAl.dat");
 
+    GGEMSXRaySource point_source2("point_source2");
+    point_source2.SetSourceParticleType("gamma");
+    point_source2.SetNumberOfParticles(number_of_particles);
+    point_source2.SetPosition(-595.0f, 0.0f, 0.0f, "mm");
+    point_source2.SetRotation(0.0f, 0.0f, 90.0f, "deg");
+    point_source2.SetBeamAperture(12.5f, "deg");
+    point_source2.SetFocalSpotSize(0.2f, 0.6f, 0.0f, "mm");
+    point_source2.SetPolyenergy("data/spectrum_120kVp_2mmAl.dat");
+
     // GGEMS simulation
     GGEMS ggems;
     ggems.SetOpenCLVerbose(true);
@@ -339,7 +348,7 @@ int main(int argc, char** argv)
     ggems.SetRangeCutsVerbose(true);
     ggems.SetRandomVerbose(true);
     ggems.SetProfilingVerbose(true);
-    ggems.SetTrackingVerbose(true, 0);
+    ggems.SetTrackingVerbose(false, 0);
 
     // Initializing the GGEMS simulation
     ggems.Initialize(seed);
