@@ -98,6 +98,11 @@ GGEMSOpenGLManager::GGEMSOpenGLManager(void)
   number_of_displayed_sources_ = 0;
   axis_ = nullptr;
 
+  // Default colors
+  gamma_color_.red_ = 0;
+  gamma_color_.green_ = 255;
+  gamma_color_.blue_ = 0;
+
   camera_view_ = glm::mat4(1.0f);
   projection_ = glm::mat4(1.0f);
   image_output_basename_ = "";
@@ -265,7 +270,7 @@ void GGEMSOpenGLManager::SetDrawAxis(GGbool const& is_draw_axis)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSOpenGLManager::SetDisplayedParticles(GGint const& number_of_displayed_particles)
+void GGEMSOpenGLManager::SetDisplayedParticles(GGuint const& number_of_displayed_particles)
 {
   if (number_of_displayed_particles > MAXIMUM_DISPLAYED_PARTICLES) {
     GGwarn("GGEMSOpenGLManager", "SetDisplayedParticles", 0) << "Your number of displayed particles: " << number_of_displayed_particles
@@ -285,6 +290,34 @@ void GGEMSOpenGLManager::SetDisplayedParticles(GGint const& number_of_displayed_
 void GGEMSOpenGLManager::SetNumberParticles(GGsize const& source_index, GGsize const& number_of_particles)
 {
   particles_[source_index]->SetNumberOfParticles(number_of_particles);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSOpenGLManager::SetParticleColor(std::string const& particle_type, GGuchar const& red, GGuchar const& green, GGuchar const& blue)
+{
+  if (particle_type == "gamma") {
+    gamma_color_.red_ = static_cast<GGfloat>(red) / 255.0f;
+    gamma_color_.green_ = static_cast<GGfloat>(green) / 255.0f;
+    gamma_color_.blue_ = static_cast<GGfloat>(blue) / 255.0f;
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSOpenGLManager::SetParticleColor(std::string const& particle_type, std::string const& color_name)
+{
+  // Getting RGB color
+  GGfloat rgb_array[] = {0.0f, 0.0f, 0.0f};
+  GetRGBColor(color_name, &rgb_array[0]);
+
+  gamma_color_.red_ = rgb_array[0];
+  gamma_color_.green_ = rgb_array[1];
+  gamma_color_.blue_ = rgb_array[2];
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -429,6 +462,8 @@ void GGEMSOpenGLManager::Display(void)
 
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LESS);
+  glEnable(GL_PRIMITIVE_RESTART);
+  glPrimitiveRestartIndex(0xFFFFFFFF);
 
   PrintKeys();
 
@@ -603,9 +638,20 @@ void GGEMSOpenGLManager::SaveWindow(GLFWwindow* w)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSOpenGLManager::CopyParticlePositionToOpenGL(GGsize const& source_index)
+void GGEMSOpenGLManager::CopyParticlePositionToOpenGL(GGsize const& source_index) const
 {
   particles_[source_index]->CopyParticlePosition();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSOpenGLManager::UploadParticleToOpenGL(void) const
+{
+  for (GGsize i = 0; i < number_of_displayed_sources_; ++i) {
+    particles_[i]->UploadParticleToOpenGL();
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -954,7 +1000,7 @@ void set_background_color_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manage
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_draw_axis_opengl_manager(GGEMSOpenGLManager* opengl_manager, GGbool const is_draw_axis)
+void set_draw_axis_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manager, GGbool const is_draw_axis)
 {
   opengl_manager->SetDrawAxis(is_draw_axis);
 }
@@ -972,7 +1018,7 @@ void set_world_size_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manager, GGf
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_image_output_opengl_manager(GGEMSOpenGLManager* opengl_manager, char const* output_path)
+void set_image_output_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manager, char const* output_path)
 {
   opengl_manager->SetImageOutput(output_path);
 }
@@ -981,7 +1027,7 @@ void set_image_output_opengl_manager(GGEMSOpenGLManager* opengl_manager, char co
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void initialize_opengl_manager(GGEMSOpenGLManager* opengl_manager)
+void initialize_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manager)
 {
   opengl_manager->Initialize();
 }
@@ -990,7 +1036,7 @@ void initialize_opengl_manager(GGEMSOpenGLManager* opengl_manager)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void display_opengl_manager(GGEMSOpenGLManager* opengl_manager)
+void display_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manager)
 {
   opengl_manager->Display();
 }
@@ -999,9 +1045,27 @@ void display_opengl_manager(GGEMSOpenGLManager* opengl_manager)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_displayed_particles_opengl_manager(GGEMSOpenGLManager* opengl_manager, GGint const number_of_displayed_particles)
+void set_displayed_particles_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manager, GGint const number_of_displayed_particles)
 {
   opengl_manager->SetDisplayedParticles(number_of_displayed_particles);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void set_particle_color_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manager, char const* particle_type, unsigned char const red, unsigned char const green, unsigned char const blue)
+{
+  opengl_manager->SetParticleColor(particle_type, red, green, blue);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void set_particle_color_name_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manager, char const* particle_type, char const* color_name)
+{
+  opengl_manager->SetParticleColor(particle_type, color_name);
 }
 
 #endif // End of OPENGL_VISUALIZATION

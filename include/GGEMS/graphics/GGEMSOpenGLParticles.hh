@@ -106,6 +106,12 @@ class GGEMS_EXPORT GGEMSOpenGLParticles
     */
     void SetNumberOfParticles(GGsize const& number_of_particles);
 
+    /*!
+      \fn void UploadParticleToOpenGL(void) const
+      \brief Upload particles infos to OpenGL buffers
+    */
+    void UploadParticleToOpenGL(void);
+
   private:
     /*!
       \fn void WriteShaders(void)
@@ -113,22 +119,21 @@ class GGEMS_EXPORT GGEMSOpenGLParticles
     */
     void WriteShaders(void);
 
-    /*!
-      \fn void CreatingVBO(void)
-      \brief Creating a VBO for a source
-    */
-    void CreatingVBO(void);
-
   private:
     GLint number_of_vertices_; /*!< Number of vertices for OpenGL particles */
     GLint number_of_indices_; /*!< Number of indices */
 
     bool is_buffer_full_; /*!< flag for buffer */
-    GGint number_of_registered_particles_; /*!< Number of registered particles */
+    GGuint number_of_registered_particles_; /*!< Number of registered particles */
     GGsize number_of_particles_; /*!< Number of primary particles to follow */
 
     GLuint vao_; /*!< vertex array object for all sources */
-    GLuint vbo_[2]; /*!< vertex buffer object, index 0 -> vertex, index 1 -> index */
+    GLuint vbo_[2]; /*!< vbo index for vertex and index */
+
+    GLfloat* vertex_; /*!< Pointer storing vertex positions */
+    GLuint* index_; /*!< Pointer storing index positions */
+    GLint index_increment_; /*< Index increment, useful to store position index */
+
     GLuint program_shader_id_; /*!< program id for shader */
     std::string vertex_shader_source_; /*!< vertex shader source file */
     std::string fragment_shader_source_; /*!< fragment shader source file */

@@ -194,13 +194,16 @@ void GGEMS::Initialize(GGuint const& seed)
 
   // Getting the GGEMS singletons
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
-  GGEMSOpenGLManager& opengl_manager = GGEMSOpenGLManager::GetInstance();
   GGEMSMaterialsDatabaseManager& material_database_manager = GGEMSMaterialsDatabaseManager::GetInstance();
   GGEMSSourceManager& source_manager = GGEMSSourceManager::GetInstance();
   GGEMSNavigatorManager& navigator_manager = GGEMSNavigatorManager::GetInstance();
   GGEMSProcessesManager& processes_manager = GGEMSProcessesManager::GetInstance();
   GGEMSRangeCutsManager& range_cuts_manager = GGEMSRangeCutsManager::GetInstance();
   GGEMSRAMManager& ram_manager = GGEMSRAMManager::GetInstance();
+
+  #ifdef OPENGL_VISUALIZATION
+  GGEMSOpenGLManager& opengl_manager = GGEMSOpenGLManager::GetInstance();
+  #endif
 
   // Get the start time
   ChronoTime start_time = GGEMSChrono::Now();
@@ -255,6 +258,7 @@ void GGEMS::Initialize(GGuint const& seed)
   GGcout("GGEMS", "Initialize", 0) << "GGEMS initialization succeeded" << GGendl;
 
   // If OpenGL is activated, initialize particles setting number of sources
+  #ifdef OPENGL_VISUALIZATION
   if (opengl_manager.IsOpenGLActivated()) {
     // Send a error message if more than 1 OpenGL are activated
     if (opencl_manager.GetNumberOfActivatedDevice() > 1) {
@@ -278,6 +282,7 @@ void GGEMS::Initialize(GGuint const& seed)
       }
     }
   }
+  #endif
 
   // Display the elapsed time in GGEMS
   GGEMSChrono::DisplayTime(end_time - start_time, "GGEMS initialization");
@@ -291,7 +296,10 @@ void GGEMS::RunOnDevice(GGsize const& thread_index)
 {
   GGEMSSourceManager& source_manager = GGEMSSourceManager::GetInstance();
   GGEMSNavigatorManager& navigator_manager = GGEMSNavigatorManager::GetInstance();
+
+  #ifdef OPENGL_VISUALIZATION
   GGEMSOpenGLManager& opengl_manager = GGEMSOpenGLManager::GetInstance();
+  #endif
 
   // Printing progress bar
   mutex.lock();
@@ -335,9 +343,11 @@ void GGEMS::RunOnDevice(GGsize const& thread_index)
     }
 
     // If OpenGL, send particle OpenGL infos from OpenCL buffer to OpenGL for the current source
+    #ifdef OPENGL_VISUALIZATION
     if (opengl_manager.IsOpenGLActivated()) {
       opengl_manager.CopyParticlePositionToOpenGL(i);
     }
+    #endif
   }
 
   // Computing dose
@@ -376,10 +386,13 @@ void GGEMS::Run()
   delete[] thread_device;
 
   // Display OpenGL window
+  #ifdef OPENGL_VISUALIZATION
   GGEMSOpenGLManager& opengl_manager = GGEMSOpenGLManager::GetInstance();
   if (opengl_manager.IsOpenGLActivated()) {
+    opengl_manager.UploadParticleToOpenGL();
     opengl_manager.Display();
   }
+  #endif
 
   // End of simulation, storing output
   GGcout("GGEMS", "Run", 1) << "Saving results..." << GGendl;

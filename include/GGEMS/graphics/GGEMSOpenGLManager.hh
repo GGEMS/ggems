@@ -31,14 +31,25 @@
   \date Monday October 25, 2021
 */
 
-#ifdef OPENGL_VISUALIZATION
-
 #include <unordered_map>
 
 #include "GGEMS/tools/GGEMSPrint.hh"
 #include "GGEMS/tools/GGEMSSystemOfUnits.hh"
 #include "GGEMS/maths/GGEMSMatrixTypes.hh"
 #include "GGEMS/graphics/GGEMSOpenGLParticles.hh"
+
+/*!
+  \struct GGEMSRGBColor
+  \brief GGEMS structure storing color
+*/
+struct GGEMS_EXPORT GGEMSRGBColor
+{
+  GGfloat red_; /*!< Red fraction */
+  GGfloat green_; /*!< Green fraction */
+  GGfloat blue_; /*!< Blue fraction */
+};
+
+#ifdef OPENGL_VISUALIZATION
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -265,11 +276,11 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     static GGbool IsOpenGLActivated(void) {return is_opengl_activated_;};
 
     /*!
-      \fn void SetDisplayedParticles(GGint const& number_of_displayed_particles)
+      \fn void SetDisplayedParticles(GGuint const& number_of_displayed_particles)
       \param number_of_displayed_particles - Number of particles to display on OpenGL screen
       \brief Set the number of particles to display on screen
     */
-    void SetDisplayedParticles(GGint const& number_of_displayed_particles);
+    void SetDisplayedParticles(GGuint const& number_of_displayed_particles);
 
     /*!
       \fn void SetNumberParticles(GGsize const& source_index, GGsize const& number_of_particles)
@@ -287,11 +298,17 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     inline GGint GetNumberOfDisplayedParticles(void) const {return number_of_displayed_particles_;}
 
     /*!
-      \fn void CopyParticlePositionToOpenGL(GGsize const& source_index)
+      \fn void CopyParticlePositionToOpenGL(GGsize const& source_index) const
       \param source_index - source index
       \brief Copy particle position from OpenCL kernel to OpenGL memory
     */
-    void CopyParticlePositionToOpenGL(GGsize const& source_index);
+    void CopyParticlePositionToOpenGL(GGsize const& source_index) const;
+
+    /*!
+      \fn void UploadParticleToOpenGL(void) const
+      \brief Upload particles infos to OpenGL buffers
+    */
+    void UploadParticleToOpenGL(void) const;
 
     /*!
       \fn void InitializeDisplayedParticles(GGsize const& number_of_sources)
@@ -322,6 +339,31 @@ class GGEMS_EXPORT GGEMSOpenGLManager
       \brief compiling shader
     */
     void CompileShader(GLuint const& shader) const;
+
+    /*!
+      \fn void SetMaterialColor(std::string const& material_name, GGuchar const& red, GGuchar const& green, GGuchar const& blue)
+      \param material_name - material name
+      \param red - red part of RGB color
+      \param green - green part of RGB color
+      \param blue - blue part of RGB color
+      \brief set custom color for opengl volume
+    */
+    void SetParticleColor(std::string const& particle_type, GGuchar const& red, GGuchar const& green, GGuchar const& blue);
+
+    /*!
+      \fn void SetParticleColor(std::string const& particle_type, std::string const& color_name)
+      \param particle_type - type of particle
+      \param color_name - name of color from GGEMS color list
+      \brief set custom color for particles
+    */
+    void SetParticleColor(std::string const& particle_type, std::string const& color_name);
+
+    /*!
+      \fn inline GGEMSRGBColor GetGammaParticleColor(void) const
+      \return RGB color for gamma particle
+      \brief Getting the RGB color for gamma particle
+    */
+    inline GGEMSRGBColor GetGammaParticleColor(void) const {return gamma_color_;}
 
   private:
     /*!
@@ -473,7 +515,8 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     GGEMSOpenGLParticles** particles_; /*!< pointer to particles infos for OpenGL */
     GGsize number_of_displayed_sources_; /*<! Number of displayed source */
     GGsize number_of_opengl_volumes_; /*!< Number of OpenGL volumes */
-    GGint number_of_displayed_particles_; /*!< Number of displayed particles */
+    GGuint number_of_displayed_particles_; /*!< Number of displayed particles */
+    GGEMSRGBColor gamma_color_; /*!< Color for gamma particle */
 };
 
 /*!
@@ -509,12 +552,12 @@ extern "C" GGEMS_EXPORT void set_msaa_ggems_opengl_manager(GGEMSOpenGLManager* o
 extern "C" GGEMS_EXPORT void set_background_color_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manager, char const* color = "");
 
 /*!
-  \fn void set_draw_axis_opengl_manager(GGEMSOpenGLManager* opengl_manager, GGbool const is_draw_axis)
+  \fn void set_draw_axis_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manager, GGbool const is_draw_axis)
   \param opengl_manager - pointer on the singleton
   \param is_draw_axis - flag on axis drawing
   \brief activate axis drawing
 */
-extern "C" GGEMS_EXPORT void set_draw_axis_opengl_manager(GGEMSOpenGLManager* opengl_manager, GGbool const is_draw_axis);
+extern "C" GGEMS_EXPORT void set_draw_axis_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manager, GGbool const is_draw_axis);
 
 /*!
   \fn void set_world_size_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manager, GGfloat const& x_size, GGfloat const& y_size, GGfloat const& z_size, char const* unit)
@@ -528,33 +571,53 @@ extern "C" GGEMS_EXPORT void set_draw_axis_opengl_manager(GGEMSOpenGLManager* op
 extern "C" GGEMS_EXPORT void set_world_size_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manager, GGfloat const x_size, GGfloat const y_size, GGfloat const z_size, char const* unit);
 
 /*!
-  \fn void set_image_output_opengl_manager(GGEMSOpenGLManager* opengl_manager, char const* output_path)
+  \fn void set_image_output_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manager, char const* output_path)
   \param opengl_manager - pointer on the singleton
   \brief Initializing GGEMS OpenGL
 */
-extern "C" GGEMS_EXPORT void set_image_output_opengl_manager(GGEMSOpenGLManager* opengl_manager, char const* output_path);
+extern "C" GGEMS_EXPORT void set_image_output_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manager, char const* output_path);
 
 /*!
-  \fn void initialize_opengl_manager(GGEMSOpenGLManager* opengl_manager)
+  \fn void initialize_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manager)
   \param opengl_manager - pointer on the singleton
   \brief Initializing GGEMS OpenGL
 */
-extern "C" GGEMS_EXPORT void initialize_opengl_manager(GGEMSOpenGLManager* opengl_manager);
+extern "C" GGEMS_EXPORT void initialize_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manager);
 
 /*!
-  \fn void display_opengl_manager(GGEMSOpenGLManager* opengl_manager)
+  \fn void display_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manager)
   \param opengl_manager - pointer on the singleton
   \brief Displaying GGEMS OpenGL Window
 */
-extern "C" GGEMS_EXPORT void display_opengl_manager(GGEMSOpenGLManager* opengl_manager);
+extern "C" GGEMS_EXPORT void display_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manager);
 
 /*!
-  \fn void set_displayed_particles_opengl_manager(GGEMSOpenGLManager* opengl_manager, GGint const number_of_displayed_particles)
+  \fn void set_displayed_particles_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manager, GGint const number_of_displayed_particles)
   \param opengl_manager - pointer on the singleton
   \param number_of_displayed_particles - number of displayed particles
   \brief Displaying GGEMS OpenGL Window
 */
-extern "C" GGEMS_EXPORT void set_displayed_particles_opengl_manager(GGEMSOpenGLManager* opengl_manager, GGint const number_of_displayed_particles);
+extern "C" GGEMS_EXPORT void set_displayed_particles_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manager, GGint const number_of_displayed_particles);
+
+/*!
+  \fn void set_particle_color_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manager, char const* particle_type, unsigned char const red, unsigned char const green, unsigned char const blue)
+  \param opengl_manager - pointer on the singleton
+  \param particle_type - type of the particle
+  \param red - red value
+  \param green - green value
+  \param blue - blue value
+  \brief Set a new rgb color for a particle
+*/
+extern "C" GGEMS_EXPORT void set_particle_color_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manager, char const* particle_type, unsigned char const red, unsigned char const green, unsigned char const blue);
+
+/*!
+  \fn void set_particle_color_name_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manager, char const* particle_type, char const* color_name)
+  \param opengl_manager - pointer on the singleton
+  \param particle_type - type of the particle
+  \param color_name - color name
+  \brief Set a color for particle
+*/
+extern "C" GGEMS_EXPORT void set_particle_color_name_ggems_opengl_manager(GGEMSOpenGLManager* opengl_manager, char const* particle_type, char const* color_name);
 
 #endif // End of OPENGL_VISUALIZATION
 

@@ -242,6 +242,7 @@ void GGEMSNavigator::SetMaterialColor(std::string const& material_name, GGuchar 
 
 void GGEMSNavigator::SetMaterialColor(std::string const& material_name, std::string const& color_name)
 {
+  #ifdef OPENGL_VISUALIZATION
   GGEMSOpenGLManager& opengl_manager = GGEMSOpenGLManager::GetInstance();
 
   // Getting RGB color
@@ -254,6 +255,7 @@ void GGEMSNavigator::SetMaterialColor(std::string const& material_name, std::str
   rgb.green_ = rgb_array[1];
   rgb.blue_ = rgb_array[2];
   custom_material_rgb_.insert(std::make_pair(material_name, rgb));
+  #endif
 }
 
 ////////////////////////////////////////////////////////////////////////////////

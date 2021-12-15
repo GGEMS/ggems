@@ -40,6 +40,7 @@
 
 #include "GGEMS/global/GGEMSConstants.hh"
 #include "GGEMS/tools/GGEMSPrint.hh"
+#include "GGEMS/graphics/GGEMSOpenGLManager.hh"
 
 __constant GGchar SOLID = 0; /*!< Solid state */
 __constant GGchar GAS = 1; /*!< Gas state */
@@ -67,17 +68,6 @@ struct GGEMS_EXPORT GGEMSSingleMaterial
   std::vector<GGfloat> mixture_f_; /*!< Fraction of element in material */
   GGfloat density_; /*!< Density of material */
   GGsize nb_elements_; /*!< Number of elements in material */
-};
-
-/*!
-  \struct GGEMSRGBColor
-  \brief GGEMS structure storing color
-*/
-struct GGEMS_EXPORT GGEMSRGBColor
-{
-  GGfloat red_; /*!< Red fraction */
-  GGfloat green_; /*!< Green fraction */
-  GGfloat blue_; /*!< Blue fraction */
 };
 
 typedef std::unordered_map<std::string, GGEMSChemicalElement> ChemicalElementUMap; /*!< Unordered map with key : name of element, value the chemical element structure */

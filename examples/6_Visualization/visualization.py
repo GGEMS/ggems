@@ -60,7 +60,6 @@ GGEMSVerbosity(verbosity_level)
 
 # ------------------------------------------------------------------------------
 # STEP 1: Calling C++ singleton
-opengl_manager = GGEMSOpenGLManager()
 opencl_manager = GGEMSOpenCLManager()
 materials_database_manager = GGEMSMaterialsDatabaseManager()
 processes_manager = GGEMSProcessesManager()
@@ -70,6 +69,7 @@ volume_creator_manager = GGEMSVolumeCreatorManager()
 # ------------------------------------------------------------------------------
 # STEP 2: Params for visualization
 if is_gl:
+  opengl_manager = GGEMSOpenGLManager()
   opengl_manager.set_window_dimensions(window_dims[0], window_dims[1])
   opengl_manager.set_msaa(msaa)
   opengl_manager.set_background_color(window_color)
@@ -77,6 +77,8 @@ if is_gl:
   opengl_manager.set_world_size(2.0, 2.0, 2.0, 'm')
   opengl_manager.set_image_output('data/axis')
   opengl_manager.set_displayed_particles(number_of_displayed_particles)
+  opengl_manager.set_particle_color('gamma', 152, 251, 152)
+  # opengl_manager.set_particle_color('gamma', color_name='red') # Using registered color
   opengl_manager.initialize();
 
 # ------------------------------------------------------------------------------
@@ -131,8 +133,8 @@ ct_detector.set_threshold(10.0, 'keV')
 ct_detector.save('data/projection')
 ct_detector.store_scatter(True)
 ct_detector.set_visible(True)
-ct_detector.set_material_color("GOS", 255, 0, 0) # Custom color using RGB
-# ct_detector.set_material_color("GOS", 'red') # Using registered color
+ct_detector.set_material_color('GOS', 255, 0, 0) # Custom color using RGB
+# ct_detector.set_material_color('GOS', color_name='red') # Using registered color
 
 # ------------------------------------------------------------------------------
 # STEP 6: Physics

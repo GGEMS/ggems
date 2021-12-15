@@ -142,7 +142,7 @@ int main(int argc, char** argv)
     GGint window_dims[] = {800, 800};
     std::string window_color = "black";
     GGsize number_of_particles = 1000000;
-    GGshort number_of_displayed_particles = 256;
+    GGuint number_of_displayed_particles = 256;
     GGsize device_index = 0;
     GGuint seed = 777;
     static GGint is_axis = 0;
@@ -232,24 +232,29 @@ int main(int argc, char** argv)
 
     // Initialization of singletons
     GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
-    GGEMSOpenGLManager& opengl_manager = GGEMSOpenGLManager::GetInstance();
     GGEMSMaterialsDatabaseManager& material_manager = GGEMSMaterialsDatabaseManager::GetInstance();
     GGEMSVolumeCreatorManager& volume_creator_manager = GGEMSVolumeCreatorManager::GetInstance();
     GGEMSProcessesManager& processes_manager = GGEMSProcessesManager::GetInstance();
     GGEMSRangeCutsManager& range_cuts_manager = GGEMSRangeCutsManager::GetInstance();
 
+    #ifdef OPENGL_VISUALIZATION
+    GGEMSOpenGLManager& opengl_manager = GGEMSOpenGLManager::GetInstance();
+    #endif
+
     // Visualization params
     if (is_gl) {
+      #ifdef OPENGL_VISUALIZATION
       opengl_manager.SetMSAA(msaa);
       opengl_manager.SetDrawAxis(is_axis);
       opengl_manager.SetWindowDimensions(window_dims[0], window_dims[1]);
       opengl_manager.SetBackgroundColor(window_color);
       opengl_manager.SetImageOutput("data/axis");
-      opengl_manager.SetWorldSize(2.0f, 2.0f, 2.0f, "m");
+      opengl_manager.SetWorldSize(3.0f, 3.0f, 3.0f, "m");
       opengl_manager.SetDisplayedParticles(number_of_displayed_particles);
-      //opengl_manager.SetParticleColor("gamma", 230, 230, 250);
-      //opengl_manager.SetParticleColor("gamma", red); // Using registered color
+      opengl_manager.SetParticleColor("gamma", 152, 251, 152);
+      // opengl_manager.SetParticleColor("gamma", "red"); // Using registered color
       opengl_manager.Initialize();
+      #endif
     }
 
     // OpenCL params
@@ -328,15 +333,6 @@ int main(int argc, char** argv)
     point_source.SetFocalSpotSize(0.2f, 0.6f, 0.0f, "mm");
     point_source.SetPolyenergy("data/spectrum_120kVp_2mmAl.dat");
 
-    GGEMSXRaySource point_source2("point_source2");
-    point_source2.SetSourceParticleType("gamma");
-    point_source2.SetNumberOfParticles(number_of_particles);
-    point_source2.SetPosition(-595.0f, 0.0f, 0.0f, "mm");
-    point_source2.SetRotation(0.0f, 0.0f, 90.0f, "deg");
-    point_source2.SetBeamAperture(12.5f, "deg");
-    point_source2.SetFocalSpotSize(0.2f, 0.6f, 0.0f, "mm");
-    point_source2.SetPolyenergy("data/spectrum_120kVp_2mmAl.dat");
-
     // GGEMS simulation
     GGEMS ggems;
     ggems.SetOpenCLVerbose(true);
@@ -354,7 +350,9 @@ int main(int argc, char** argv)
     ggems.Initialize(seed);
 
     if (is_draw_geom && is_gl) { // Draw only geometry and do not run GGEMS
+      #ifdef OPENGL_VISUALIZATION
       opengl_manager.Display();
+      #endif
     }
     else { // Running GGEMS and draw particles
       ggems.Run();

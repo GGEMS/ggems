@@ -136,6 +136,14 @@ kernel void get_primaries_ggems_xray_source(
   #ifdef OPENGL
   // Storing vertex position for OpenGL
   if (global_id < MAXIMUM_DISPLAYED_PARTICLES) {
+    primary_particle->stored_particles_gl_[global_id] = 0;
+
+    for (GGint i = 0; i < MAXIMUM_INTERACTIONS; ++i) {
+      primary_particle->px_gl_[global_id*MAXIMUM_INTERACTIONS+i] = 0.0f;
+      primary_particle->py_gl_[global_id*MAXIMUM_INTERACTIONS+i] = 0.0f;
+      primary_particle->pz_gl_[global_id*MAXIMUM_INTERACTIONS+i] = 0.0f;
+    }
+
     // Storing OpenGL index on OpenCL private memory
     GGint stored_particles_gl = primary_particle->stored_particles_gl_[global_id];
 
@@ -147,9 +155,9 @@ kernel void get_primaries_ggems_xray_source(
       primary_particle->pz_gl_[global_id*MAXIMUM_INTERACTIONS+stored_particles_gl] = primary_particle->pz_[global_id];
       stored_particles_gl += 1;
 
-      primary_particle->px_gl_[global_id*MAXIMUM_INTERACTIONS+stored_particles_gl] += primary_particle->dx_[global_id]*3.0f*m;
-      primary_particle->py_gl_[global_id*MAXIMUM_INTERACTIONS+stored_particles_gl] += primary_particle->dy_[global_id]*3.0f*m;
-      primary_particle->pz_gl_[global_id*MAXIMUM_INTERACTIONS+stored_particles_gl] += primary_particle->dz_[global_id]*3.0f*m;
+      primary_particle->px_gl_[global_id*MAXIMUM_INTERACTIONS+stored_particles_gl] += primary_particle->dx_[global_id]*2.0f*m;
+      primary_particle->py_gl_[global_id*MAXIMUM_INTERACTIONS+stored_particles_gl] += primary_particle->dy_[global_id]*2.0f*m;
+      primary_particle->pz_gl_[global_id*MAXIMUM_INTERACTIONS+stored_particles_gl] += primary_particle->dz_[global_id]*2.0f*m;
       stored_particles_gl += 1;
 
       // Storing final index
