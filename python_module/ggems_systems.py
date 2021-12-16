@@ -48,6 +48,9 @@ class GGEMSCTSystem(object):
         ggems_lib.set_rotation_ggems_ct_system.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_char_p]
         ggems_lib.set_rotation_ggems_ct_system.restype = ctypes.c_void_p
 
+        ggems_lib.set_global_system_position_ggems_ct_system.argtypes = [ctypes.c_void_p, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_char_p]
+        ggems_lib.set_global_system_position_ggems_ct_system.restype = ctypes.c_void_p
+
         ggems_lib.set_material_visible_ggems_ct_system.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_bool]
         ggems_lib.set_material_visible_ggems_ct_system.restype = ctypes.c_void_p
 
@@ -94,6 +97,9 @@ class GGEMSCTSystem(object):
 
     def set_rotation(self, rx, ry, rz, unit):
         ggems_lib.set_rotation_ggems_ct_system(self.obj, rx, ry, rz, unit.encode('ASCII'))
+
+    def set_global_system_position(self, shifted_position_x, shifted_position_y, shifted_position_z, unit):
+        ggems_lib.set_global_system_position_ggems_ct_system(self.obj, shifted_position_x, shifted_position_y, shifted_position_z, unit.encode('ASCII'))
 
     def set_threshold(self, threshold, unit):
         ggems_lib.set_threshold_ggems_ct_system(self.obj, threshold, unit.encode('ASCII'))

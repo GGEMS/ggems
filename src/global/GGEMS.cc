@@ -335,19 +335,19 @@ void GGEMS::RunOnDevice(GGsize const& thread_index)
 
         loop_counter++;
       } while (source_manager.IsAlive(thread_index) || loop_counter == max_loop); // Step 5: Checking if all particles are dead, otherwize go back to step 2
-    
+
       // Incrementing progress bar
       mutex.lock();
       ++progress_bar;
       mutex.unlock();
-    }
 
-    // If OpenGL, send particle OpenGL infos from OpenCL buffer to OpenGL for the current source
-    #ifdef OPENGL_VISUALIZATION
-    if (opengl_manager.IsOpenGLActivated()) {
-      opengl_manager.CopyParticlePositionToOpenGL(i);
+      // If OpenGL, send particle OpenGL infos from OpenCL buffer to OpenGL for the current source
+      #ifdef OPENGL_VISUALIZATION
+      if (opengl_manager.IsOpenGLActivated()) {
+        opengl_manager.CopyParticlePositionToOpenGL(i);
+      }
+      #endif
     }
-    #endif
   }
 
   // Computing dose
@@ -385,15 +385,6 @@ void GGEMS::Run()
   // Deleting threads
   delete[] thread_device;
 
-  // Display OpenGL window
-  #ifdef OPENGL_VISUALIZATION
-  GGEMSOpenGLManager& opengl_manager = GGEMSOpenGLManager::GetInstance();
-  if (opengl_manager.IsOpenGLActivated()) {
-    opengl_manager.UploadParticleToOpenGL();
-    opengl_manager.Display();
-  }
-  #endif
-
   // End of simulation, storing output
   GGcout("GGEMS", "Run", 1) << "Saving results..." << GGendl;
   GGEMSNavigatorManager& navigator_manager = GGEMSNavigatorManager::GetInstance();
@@ -410,6 +401,15 @@ void GGEMS::Run()
   GGcout("GGEMS", "Run", 0) << "GGEMS simulation succeeded" << GGendl;
 
   GGEMSChrono::DisplayTime(end_time - start_time, "GGEMS simulation");
+
+  // Display OpenGL window
+  #ifdef OPENGL_VISUALIZATION
+  GGEMSOpenGLManager& opengl_manager = GGEMSOpenGLManager::GetInstance();
+  if (opengl_manager.IsOpenGLActivated()) {
+    opengl_manager.UploadParticleToOpenGL();
+    opengl_manager.Display();
+  }
+  #endif
 }
 
 ////////////////////////////////////////////////////////////////////////////////

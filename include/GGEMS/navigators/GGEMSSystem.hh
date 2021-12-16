@@ -124,6 +124,16 @@ class GGEMS_EXPORT GGEMSSystem : public GGEMSNavigator
     void StoreScatter(bool const& is_scatter);
 
     /*!
+      \fn void SetGlobalSystemPosition(GGfloat const& global_system_position_x, GGfloat const& global_system_position_y, GGfloat const& global_system_position_position_z, std::string const& unit = "mm")
+      \param global_system_position_x - global system position in X
+      \param global_system_position_y - global system position in Y
+      \param global_system_position_z - global system position in Z
+      \param unit - unit of the distance
+      \brief set the global system position in X, Y and Z
+    */
+    void SetGlobalSystemPosition(GGfloat const& global_system_position_x, GGfloat const& global_system_position_y, GGfloat const& global_system_position_z, std::string const& unit = "mm");
+
+    /*!
       \fn void SaveResults(void)
       \brief save all results from solid
     */
@@ -141,6 +151,7 @@ class GGEMS_EXPORT GGEMSSystem : public GGEMSNavigator
     GGsize3 number_of_detection_elements_inside_module_xyz_; /*!< Number of virtual elements (X,Y,Z) in a module */
     GGfloat3 size_of_detection_elements_xyz_; /*!< Size of pixel in each direction */
     bool is_scatter_; /*!< Boolean storing scatter infos */
+    GGfloat3 global_system_position_xyz_; /*!< Global position of the system in X, Y and Z */
 };
 
 #endif // End of GUARD_GGEMS_SYSTEMS_GGEMSSYSTEM_HH

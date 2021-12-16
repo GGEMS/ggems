@@ -290,25 +290,40 @@ int main(int argc, char** argv)
     phantom.SetRotation(0.0f, 0.0f, 0.0f, "deg");
     phantom.SetPosition(0.0f, 0.0f, 0.0f, "mm");
     phantom.SetVisible(true);
-    phantom.SetMaterialVisible("Air", false);
+    phantom.SetMaterialVisible("Air", true);
     phantom.SetMaterialColor("Water", "blue"); // Uncomment for automatic color
 
-    GGEMSCTSystem ct_detector("Stellar");
-    ct_detector.SetCTSystemType("curved");
-    ct_detector.SetNumberOfModules(1, 46);
-    ct_detector.SetNumberOfDetectionElementsInsideModule(64, 16, 1);
-    ct_detector.SetSizeOfDetectionElements(0.6f, 0.6f, 0.6f, "mm");
-    ct_detector.SetMaterialName("GOS");
-    ct_detector.SetSourceDetectorDistance(1085.9f, "mm"); // Center of inside detector (= SDD + 1*0.6mm half of depth)
-    ct_detector.SetSourceIsocenterDistance(595.0f, "mm");
-    ct_detector.SetRotation(0.0f, 0.0f, 0.0f, "deg");
-    ct_detector.SetShiftedPosition(0.0f, 0.0f, 0.0f, "mm");
-    ct_detector.SetThreshold(10.0f, "keV");
-    ct_detector.StoreOutput("data/projection");
-    ct_detector.StoreScatter(true);
-    ct_detector.SetVisible(true);
-    ct_detector.SetMaterialColor("GOS", 255, 0, 0); // Custom color using RGB
-    // ct_detector.SetMaterialColor("GOS", "red"); // Using registered color
+    GGEMSCTSystem cbct_detector("custom");
+    cbct_detector.SetCTSystemType("flat");
+    cbct_detector.SetNumberOfModules(1, 1);
+    cbct_detector.SetNumberOfDetectionElementsInsideModule(400, 400, 1);
+    cbct_detector.SetSizeOfDetectionElements(1.0f, 1.0f, 10.0f, "mm");
+    cbct_detector.SetMaterialName("GOS");
+    cbct_detector.SetSourceDetectorDistance(1505.0, "mm"); // Center of inside detector, adding half of detector (= SDD surface + 10.0/2 mm half of depth)
+    cbct_detector.SetSourceIsocenterDistance(900.0f, "mm");
+    cbct_detector.SetRotation(0.0f, 0.0f, 0.0f, "deg");
+    cbct_detector.SetGlobalSystemPosition(0.0f, 0.0f, 150.0f, "mm");
+    cbct_detector.SetThreshold(10.0f, "keV");
+    cbct_detector.StoreOutput("data/projection");
+    cbct_detector.StoreScatter(true);
+    cbct_detector.SetVisible(true);
+    cbct_detector.SetMaterialColor("GOS", 255, 0, 0); // Custom color using RGB
+    // cbct_detector.SetMaterialColor("GOS", "red"); // Using registered color
+
+    GGEMSCTSystem cbct_detector2("custom2");
+    cbct_detector2.SetCTSystemType("flat");
+    cbct_detector2.SetNumberOfModules(1, 1);
+    cbct_detector2.SetNumberOfDetectionElementsInsideModule(400, 400, 1);
+    cbct_detector2.SetSizeOfDetectionElements(1.0f, 1.0f, 10.0f, "mm");
+    cbct_detector2.SetMaterialName("Silicon");
+    cbct_detector2.SetSourceDetectorDistance(1605.0, "mm"); // Center of inside detector, adding half of detector (= SDD surface + 10.0/2 mm half of depth)
+    cbct_detector2.SetSourceIsocenterDistance(1200.0f, "mm");
+    cbct_detector2.SetRotation(0.0f, 0.0f, 90.0f, "deg");
+    cbct_detector2.SetGlobalSystemPosition(0.0f, 0.0f, 0.0f, "mm");
+    cbct_detector2.SetThreshold(10.0f, "keV");
+    cbct_detector2.StoreOutput("data/projection2");
+    cbct_detector2.StoreScatter(true);
+    cbct_detector2.SetVisible(true);
 
     // Physics
     processes_manager.AddProcess("Compton", "gamma", "all");
@@ -327,11 +342,20 @@ int main(int argc, char** argv)
     GGEMSXRaySource point_source("point_source");
     point_source.SetSourceParticleType("gamma");
     point_source.SetNumberOfParticles(number_of_particles);
-    point_source.SetPosition(-595.0f, 0.0f, 0.0f, "mm");
+    point_source.SetPosition(-900.0f, 0.0f, 0.0f, "mm");
     point_source.SetRotation(0.0f, 0.0f, 0.0f, "deg");
     point_source.SetBeamAperture(12.5f, "deg");
     point_source.SetFocalSpotSize(0.2f, 0.6f, 0.0f, "mm");
     point_source.SetPolyenergy("data/spectrum_120kVp_2mmAl.dat");
+
+    GGEMSXRaySource point_source2("point_source2");
+    point_source2.SetSourceParticleType("gamma");
+    point_source2.SetNumberOfParticles(number_of_particles);
+    point_source2.SetPosition(-1200.0f, 0.0f, 0.0f, "mm");
+    point_source2.SetRotation(0.0f, 0.0f, 90.0f, "deg");
+    point_source2.SetBeamAperture(8.5f, "deg");
+    point_source2.SetFocalSpotSize(0.2f, 0.6f, 0.0f, "mm");
+    point_source2.SetPolyenergy("data/spectrum_120kVp_2mmAl.dat");
 
     // GGEMS simulation
     GGEMS ggems;

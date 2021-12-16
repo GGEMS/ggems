@@ -67,7 +67,6 @@ typedef struct GGEMSPrimaryParticles_t
   GGfloat py_gl_[MAXIMUM_DISPLAYED_PARTICLES*MAXIMUM_INTERACTIONS]; /*!< Position in Y of primary particles interactions */
   GGfloat pz_gl_[MAXIMUM_DISPLAYED_PARTICLES*MAXIMUM_INTERACTIONS]; /*!< Position in Z of primary particles interactions */
   GGint stored_particles_gl_[MAXIMUM_DISPLAYED_PARTICLES]; /*!< index to current interaction particle to store */
-
 } GGEMSPrimaryParticles; /*!< Using C convention name of struct to C++ (_t deletion) */
 
 #endif // GUARD_GGEMS_PHYSICS_GGEMSPRIMARYPARTICLESSTACK_HH

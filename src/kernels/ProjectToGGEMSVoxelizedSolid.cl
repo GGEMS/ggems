@@ -56,19 +56,37 @@ kernel void project_to_ggems_voxelized_solid(
   // No solid detected, consider particle as dead
   if(primary_particle->solid_id_[global_id] == -1) primary_particle->status_[global_id] = DEAD;
 
-  // Checking if the current navigator is the selected navigatore
-  if (primary_particle->solid_id_[global_id] != voxelized_solid_data->solid_id_) return;
-
-  // Checking status of particle
-  if (primary_particle->status_[global_id] == DEAD) return;
-
   // Checking if distance to navigator is OUT_OF_WORLD after computation distance
   // If yes, the particle is OUT_OF_WORLD and DEAD, so no tracking
   if (primary_particle->particle_solid_distance_[global_id] == OUT_OF_WORLD) {
     primary_particle->solid_id_[global_id] = -1; // -1 is out_of_world, using for debugging
     primary_particle->status_[global_id] = DEAD;
+
+    #ifdef OPENGL
+    if (global_id < MAXIMUM_DISPLAYED_PARTICLES) {
+      // Storing OpenGL index on OpenCL private memory
+      GGint stored_particles_gl = primary_particle->stored_particles_gl_[global_id];
+
+      // Checking if buffer is full
+      if (stored_particles_gl != MAXIMUM_INTERACTIONS) {
+        primary_particle->px_gl_[global_id*MAXIMUM_INTERACTIONS+stored_particles_gl] = primary_particle->px_[global_id] + primary_particle->dx_[global_id]*100.0*m;
+        primary_particle->py_gl_[global_id*MAXIMUM_INTERACTIONS+stored_particles_gl] = primary_particle->py_[global_id] + primary_particle->dy_[global_id]*100.0*m;
+        primary_particle->pz_gl_[global_id*MAXIMUM_INTERACTIONS+stored_particles_gl] = primary_particle->pz_[global_id] + primary_particle->dz_[global_id]*100.0*m;
+
+        // Storing final index
+        primary_particle->stored_particles_gl_[global_id] += 1;
+      }
+    }
+    #endif
+
     return;
   }
+
+  // Checking if the current navigator is the selected navigator
+  if (primary_particle->solid_id_[global_id] != voxelized_solid_data->solid_id_) return;
+
+  // Checking status of particle
+  if (primary_particle->status_[global_id] == DEAD) return;
 
   // Position of particle
   GGfloat3 position = {

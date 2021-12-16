@@ -100,7 +100,7 @@ GGEMSOpenGLAxis::GGEMSOpenGLAxis(void)
 
   GGEMSOpenGLSphere* sphere = new GGEMSOpenGLSphere(5.0f*mm);
   sphere->SetVisible(true);
-  sphere->SetColorName("yellow");
+  sphere->SetColorName("cyan");
   sphere->Build();
 
   GGcout("GGEMSOpenGLAxis", "GGEMSOpenGLAxis", 3) << "GGEMSOpenGLAxis created!!!" << GGendl;

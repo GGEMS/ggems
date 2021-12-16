@@ -53,6 +53,10 @@ GGEMSSystem::GGEMSSystem(std::string const& system_name)
 
   is_scatter_ = false;
 
+  global_system_position_xyz_.x = 0.0f;
+  global_system_position_xyz_.y = 0.0f;
+  global_system_position_xyz_.z = 0.0f;
+
   GGcout("GGEMSSystem", "GGEMSSystem", 3) << "GGEMSSystem created!!!" << GGendl;
 }
 
@@ -106,6 +110,17 @@ void GGEMSSystem::SetSizeOfDetectionElements(GGfloat const& detection_element_x,
 void GGEMSSystem::SetMaterialName(std::string const& material_name)
 {
   materials_->AddMaterial(material_name);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void GGEMSSystem::SetGlobalSystemPosition(GGfloat const& global_system_position_x, GGfloat const& global_system_position_y, GGfloat const& global_system_position_z, std::string const& unit)
+{
+  global_system_position_xyz_.x = DistanceUnit(global_system_position_x, unit);
+  global_system_position_xyz_.y = DistanceUnit(global_system_position_y, unit);
+  global_system_position_xyz_.z = DistanceUnit(global_system_position_z, unit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

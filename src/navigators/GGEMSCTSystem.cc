@@ -168,9 +168,9 @@ void GGEMSCTSystem::InitializeCurvedGeometry(void)
       solids_[global_index]->SetRotation(rotation);
 
       GGfloat3 position;
-      position.x = global_position_x + shifted_position_xyz_.x;
-      position.y = global_position_y + shifted_position_xyz_.y;
-      position.z = global_position_z + shifted_position_xyz_.z;
+      position.x = global_position_x + global_system_position_xyz_.x;
+      position.y = global_position_y + global_system_position_xyz_.y;
+      position.z = global_position_z + global_system_position_xyz_.z;
       solids_[global_index]->SetPosition(position);
 
       // Rotation for OpenGL volume
@@ -206,9 +206,9 @@ void GGEMSCTSystem::InitializeFlatGeometry(void)
       solids_[global_index]->SetRotation(rotation);
 
       GGfloat3 position;
-      position.x = global_position_x + shifted_position_xyz_.x;
-      position.y = global_position_y + shifted_position_xyz_.y;
-      position.z = global_position_z + shifted_position_xyz_.z;
+      position.x = global_position_x + global_system_position_xyz_.x;
+      position.y = global_position_y + global_system_position_xyz_.y;
+      position.z = global_position_z + global_system_position_xyz_.z;
       solids_[global_index]->SetPosition(position);
     }
   }
@@ -438,4 +438,13 @@ void set_material_color_ggems_ct_system(GGEMSCTSystem* ct_system, char const* ma
 void set_material_color_name_ggems_ct_system(GGEMSCTSystem* ct_system, char const* material_name, char const* color_name)
 {
   ct_system->SetMaterialColor(material_name, color_name);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void set_global_system_position_ggems_ct_system(GGEMSCTSystem* ct_system, GGfloat const global_system_position_x, GGfloat const global_system_position_y, GGfloat const global_system_position_z, char const* unit)
+{
+  ct_system->SetGlobalSystemPosition(global_system_position_x, global_system_position_y, global_system_position_z, unit);
 }

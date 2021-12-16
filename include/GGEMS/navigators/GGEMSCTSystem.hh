@@ -277,4 +277,15 @@ extern "C" GGEMS_EXPORT void set_material_color_ggems_ct_system(GGEMSCTSystem* c
 */
 extern "C" GGEMS_EXPORT void set_material_color_name_ggems_ct_system(GGEMSCTSystem* ct_system, char const* material_name, char const* color_name);
 
+/*!
+  \fn void set_global_system_position_ggems_ct_system(GGEMSCTSystem* ct_system, GGfloat const shifted_position_x, GGfloat const shifted_position_y, GGfloat const shifted_position_z, char const* unit)
+  \param ct_system - pointer on ct system
+  \param shifted_position_x - shifted position in X
+  \param shifted_position_y - shifted position in Y
+  \param shifted_position_z - shifted position in Z
+  \param unit - unit of the angle
+  \brief Set the global system position in X, Y, Z
+*/
+extern "C" GGEMS_EXPORT void set_global_system_position_ggems_ct_system(GGEMSCTSystem* ct_system, GGfloat const global_system_position_x, GGfloat const global_system_position_y, GGfloat const global_system_position_z, char const* unit);
+
 #endif // End of GUARD_GGEMS_NAVIGATORS_GGEMSSYSTEM_HH

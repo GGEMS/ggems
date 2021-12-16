@@ -276,7 +276,7 @@ void GGEMSOpenGLParticles::Draw(void) const
   glUniformMatrix4fv(glGetUniformLocation(program_shader_id_, "mvp"), 1, GL_FALSE, &mvp_matrix[0][0]);
 
   // Setting point size
-  glPointSize(4.0f);
+  glPointSize(8.0f);
 
   // Interaction points, always in yellow
   glUniform3f(glGetUniformLocation(program_shader_id_, "color"), 1.0f, 1.0f, 0.0f);

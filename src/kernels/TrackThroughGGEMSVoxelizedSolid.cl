@@ -248,6 +248,26 @@ kernel void track_through_ggems_voxelized_solid(
       local_direction.x = primary_particle->dx_[global_id];
       local_direction.y = primary_particle->dy_[global_id];
       local_direction.z = primary_particle->dz_[global_id];
+
+      #ifdef OPENGL
+      if (global_id < MAXIMUM_DISPLAYED_PARTICLES) {
+        // Storing OpenGL index on OpenCL private memory
+        GGint stored_particles_gl = primary_particle->stored_particles_gl_[global_id];
+
+        // Checking if buffer is full
+        if (stored_particles_gl != MAXIMUM_INTERACTIONS) {
+          // Getting global position
+          global_position = LocalToGlobalPosition(&voxelized_solid_data->obb_geometry_.matrix_transformation_, &local_position);
+
+          primary_particle->px_gl_[global_id*MAXIMUM_INTERACTIONS+stored_particles_gl] = global_position.x;
+          primary_particle->py_gl_[global_id*MAXIMUM_INTERACTIONS+stored_particles_gl] = global_position.y;
+          primary_particle->pz_gl_[global_id*MAXIMUM_INTERACTIONS+stored_particles_gl] = global_position.z;
+
+          // Storing final index
+          primary_particle->stored_particles_gl_[global_id] += 1;
+        }
+      }
+      #endif
     }
 
     #ifdef DOSIMETRY

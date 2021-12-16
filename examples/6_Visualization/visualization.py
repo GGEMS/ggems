@@ -120,21 +120,37 @@ phantom.set_visible(True)
 phantom.set_material_visible('Air', False)
 phantom.set_material_color('Water', color_name='blue') # Uncomment for automatic color
 
-ct_detector = GGEMSCTSystem('Stellar')
-ct_detector.set_ct_type('curved')
-ct_detector.set_number_of_modules(1, 46)
-ct_detector.set_number_of_detection_elements(64, 16, 1)
-ct_detector.set_size_of_detection_elements(0.6, 0.6, 0.6, 'mm')
-ct_detector.set_material('GOS')
-ct_detector.set_source_detector_distance(1085.6, 'mm') 
-ct_detector.set_source_isocenter_distance(595.0, 'mm')
-ct_detector.set_rotation(0.0, 0.0, 0.0, 'deg')
-ct_detector.set_threshold(10.0, 'keV')
-ct_detector.save('data/projection')
-ct_detector.store_scatter(True)
-ct_detector.set_visible(True)
-ct_detector.set_material_color('GOS', 255, 0, 0) # Custom color using RGB
+cbct_detector = GGEMSCTSystem('custom')
+cbct_detector.set_ct_type('flat')
+cbct_detector.set_number_of_modules(1, 1)
+cbct_detector.set_number_of_detection_elements(400, 400, 1)
+cbct_detector.set_size_of_detection_elements(1.0, 1.0, 1.0, 'mm')
+cbct_detector.set_material('GOS')
+cbct_detector.set_source_detector_distance(1500.5, 'mm') # Center of inside detector, adding half of detector (= SDD surface + 10.0/2 mm half of depth)
+cbct_detector.set_source_isocenter_distance(900.0, 'mm')
+cbct_detector.set_rotation(0.0, 0.0, 0.0, 'deg')
+cbct_detector.set_global_system_position(0.0, 0.0, 0.0, 'mm');
+cbct_detector.set_threshold(10.0, 'keV')
+cbct_detector.save('data/projection')
+cbct_detector.store_scatter(True)
+cbct_detector.set_visible(True)
+cbct_detector.set_material_color('GOS', 255, 0, 0) # Custom color using RGB
 # ct_detector.set_material_color('GOS', color_name='red') # Using registered color
+
+cbct_detector2 = GGEMSCTSystem('custom2')
+cbct_detector2.set_ct_type('flat')
+cbct_detector2.set_number_of_modules(1, 1)
+cbct_detector2.set_number_of_detection_elements(400, 400, 1)
+cbct_detector2.set_size_of_detection_elements(1.0, 1.0, 1.0, 'mm')
+cbct_detector2.set_material('GOS')
+cbct_detector2.set_source_detector_distance(1600.5, 'mm') # Center of inside detector, adding half of detector (= SDD surface + 10.0/2 mm half of depth)
+cbct_detector2.set_source_isocenter_distance(1200.0, 'mm')
+cbct_detector2.set_rotation(0.0, 0.0, 90.0, 'deg')
+cbct_detector2.set_global_system_position(0.0, 0.0, 0.0, 'mm');
+cbct_detector2.set_threshold(10.0, 'keV')
+cbct_detector2.save('data/projection2')
+cbct_detector2.store_scatter(True)
+cbct_detector2.set_visible(True)
 
 # ------------------------------------------------------------------------------
 # STEP 6: Physics
@@ -156,11 +172,20 @@ range_cuts_manager.set_cut('gamma', 0.1, 'mm', 'all')
 point_source = GGEMSXRaySource('point_source')
 point_source.set_source_particle_type('gamma')
 point_source.set_number_of_particles(number_of_particles)
-point_source.set_position(-595.0, 0.0, 0.0, 'mm')
+point_source.set_position(-900.0, 0.0, 0.0, 'mm')
 point_source.set_rotation(0.0, 0.0, 0.0, 'deg')
 point_source.set_beam_aperture(12.5, 'deg')
 point_source.set_focal_spot_size(0.2, 0.6, 0.0, 'mm')
 point_source.set_polyenergy('data/spectrum_120kVp_2mmAl.dat')
+
+point_source2 = GGEMSXRaySource('point_source2')
+point_source2.set_source_particle_type('gamma')
+point_source2.set_number_of_particles(number_of_particles)
+point_source2.set_position(-1200.0, 0.0, 0.0, 'mm')
+point_source2.set_rotation(0.0, 0.0, 90.0, 'deg')
+point_source2.set_beam_aperture(8.5, 'deg')
+point_source2.set_focal_spot_size(0.2, 0.6, 0.0, 'mm')
+point_source2.set_polyenergy('data/spectrum_120kVp_2mmAl.dat')
 
 # ------------------------------------------------------------------------------
 # STEP 9: GGEMS simulation

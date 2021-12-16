@@ -145,24 +145,24 @@ kernel void get_primaries_ggems_xray_source(
     }
 
     // Storing OpenGL index on OpenCL private memory
-    GGint stored_particles_gl = primary_particle->stored_particles_gl_[global_id];
+    //GGint stored_particles_gl = primary_particle->stored_particles_gl_[global_id];
 
     // Checking if buffer is full
-    if (stored_particles_gl != MAXIMUM_INTERACTIONS) {
+   // if (stored_particles_gl != MAXIMUM_INTERACTIONS) {
 
-      primary_particle->px_gl_[global_id*MAXIMUM_INTERACTIONS+stored_particles_gl] = primary_particle->px_[global_id];
-      primary_particle->py_gl_[global_id*MAXIMUM_INTERACTIONS+stored_particles_gl] = primary_particle->py_[global_id];
-      primary_particle->pz_gl_[global_id*MAXIMUM_INTERACTIONS+stored_particles_gl] = primary_particle->pz_[global_id];
-      stored_particles_gl += 1;
+      primary_particle->px_gl_[global_id*MAXIMUM_INTERACTIONS] = primary_particle->px_[global_id];
+      primary_particle->py_gl_[global_id*MAXIMUM_INTERACTIONS] = primary_particle->py_[global_id];
+      primary_particle->pz_gl_[global_id*MAXIMUM_INTERACTIONS] = primary_particle->pz_[global_id];
+      //stored_particles_gl += 1;
 
-      primary_particle->px_gl_[global_id*MAXIMUM_INTERACTIONS+stored_particles_gl] += primary_particle->dx_[global_id]*2.0f*m;
-      primary_particle->py_gl_[global_id*MAXIMUM_INTERACTIONS+stored_particles_gl] += primary_particle->dy_[global_id]*2.0f*m;
-      primary_particle->pz_gl_[global_id*MAXIMUM_INTERACTIONS+stored_particles_gl] += primary_particle->dz_[global_id]*2.0f*m;
-      stored_particles_gl += 1;
+      // primary_particle->px_gl_[global_id*MAXIMUM_INTERACTIONS+stored_particles_gl] += primary_particle->dx_[global_id]*2.0f*m;
+      // primary_particle->py_gl_[global_id*MAXIMUM_INTERACTIONS+stored_particles_gl] += primary_particle->dy_[global_id]*2.0f*m;
+      // primary_particle->pz_gl_[global_id*MAXIMUM_INTERACTIONS+stored_particles_gl] += primary_particle->dz_[global_id]*2.0f*m;
+      // stored_particles_gl += 1;
 
       // Storing final index
-      primary_particle->stored_particles_gl_[global_id] = stored_particles_gl;
-    }
+      primary_particle->stored_particles_gl_[global_id] = 1;
+    //}
   }
   #endif
 
