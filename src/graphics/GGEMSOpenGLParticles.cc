@@ -52,7 +52,7 @@ GGEMSOpenGLParticles::GGEMSOpenGLParticles(void)
   vbo_[0] = 0;
   vbo_[1] = 0;
 
-  vertex_ = new GLfloat[3*number_of_vertices_];
+  vertex_ = new GLfloat[3UL*number_of_vertices_];
   index_ = new GLuint[number_of_indices_];
   index_increment_ = 0;
 
@@ -174,7 +174,6 @@ void GGEMSOpenGLParticles::CopyParticlePosition(void)
   if (number_of_registered_particles_ == MAXIMUM_DISPLAYED_PARTICLES) return;
 
   // Getting singletons
-  GGEMSOpenGLManager& opengl_manager = GGEMSOpenGLManager::GetInstance();
   GGEMSOpenCLManager& opencl_manager = GGEMSOpenCLManager::GetInstance();
   GGEMSSourceManager& source_manager = GGEMSSourceManager::GetInstance();
 
@@ -185,15 +184,15 @@ void GGEMSOpenGLParticles::CopyParticlePosition(void)
   // Loop over particles
   for (GGsize i = 0; i < number_of_particles_; ++i) {
     // Getting number of interactions for each primary particles
-    GGint stored_interactions = primary_particles_device->stored_particles_gl_[i];
+    GGsize stored_interactions = static_cast<GGsize>(primary_particles_device->stored_particles_gl_[i]);
 
     // Loop over interactions
-    for (GGint j = 0; j < stored_interactions; ++j) {
+    for (GGsize j = 0; j < stored_interactions; ++j) {
       vertex_[j*3+0+number_of_registered_particles_*MAXIMUM_INTERACTIONS*3] = primary_particles_device->px_gl_[j+i*MAXIMUM_INTERACTIONS];
       vertex_[j*3+1+number_of_registered_particles_*MAXIMUM_INTERACTIONS*3] = primary_particles_device->py_gl_[j+i*MAXIMUM_INTERACTIONS];
       vertex_[j*3+2+number_of_registered_particles_*MAXIMUM_INTERACTIONS*3] = primary_particles_device->pz_gl_[j+i*MAXIMUM_INTERACTIONS];
 
-      index_[index_increment_++] = j+number_of_registered_particles_*MAXIMUM_INTERACTIONS;
+      index_[index_increment_++] = static_cast<GLuint>(j+number_of_registered_particles_*MAXIMUM_INTERACTIONS);
     }
 
     index_[index_increment_++] = 0xFFFFFFFF; // End of line
@@ -269,7 +268,8 @@ void GGEMSOpenGLParticles::Draw(void) const
   glBindBuffer(GL_ARRAY_BUFFER, vbo_[0]);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo_[1]);
 
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(GLfloat), (void*)0);
+  GLintptr offset_pointer = 0 * sizeof(GLfloat);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(GLfloat), reinterpret_cast<GLvoid*>(offset_pointer));
   glEnableVertexAttribArray(0);
 
   glm::mat4 mvp_matrix = projection_matrix*view_matrix;
@@ -279,11 +279,12 @@ void GGEMSOpenGLParticles::Draw(void) const
   glPointSize(8.0f);
 
   // Interaction points, always in yellow
+  GLintptr index_pointer = 0 * sizeof(GLfloat);
   glUniform3f(glGetUniformLocation(program_shader_id_, "color"), 1.0f, 1.0f, 0.0f);
-  glDrawElements(GL_POINTS, index_increment_, GL_UNSIGNED_INT, (void*)0);
+  glDrawElements(GL_POINTS, static_cast<GLsizei>(index_increment_), GL_UNSIGNED_INT, reinterpret_cast<GLvoid*>(index_pointer));
 
   glUniform3f(glGetUniformLocation(program_shader_id_, "color"), gamma_color.red_, gamma_color.green_, gamma_color.blue_);
-  glDrawElements(GL_LINE_STRIP, index_increment_, GL_UNSIGNED_INT, (void*)0);
+  glDrawElements(GL_LINE_STRIP, static_cast<GLsizei>(index_increment_), GL_UNSIGNED_INT, reinterpret_cast<GLvoid*>(index_pointer));
 
   glDisableVertexAttribArray(0);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);

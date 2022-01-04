@@ -138,16 +138,16 @@ void GGEMSOpenGLSphere::Build(void)
   GLfloat x = 0.0f, y = 0.0f, xy = 0.0f, z = 0.0f;
   GLint index = 0;
   // Loop over the stacks
-  for (GLint i = 0; i <= number_of_stacks_; ++i) {
+  for (GGsize i = 0; i <= number_of_stacks_; ++i) {
     // Stack angle
-    stack_angle = HALF_PI - i * stack_step; // from pi/2 to -pi/2
+    stack_angle = HALF_PI - static_cast<GLfloat>(i) * stack_step; // from pi/2 to -pi/2
 
     xy = radius_ * std::cos(stack_angle);
     z = radius_ * std::sin(stack_angle);
 
     // Loop over the sectors
-    for (GGint j = 0; j <= number_of_sectors_; ++j) {
-      sector_angle = j * sector_step; // from 0 to 2pi
+    for (GGsize j = 0; j <= number_of_sectors_; ++j) {
+      sector_angle = static_cast<GLfloat>(j) * sector_step; // from 0 to 2pi
 
       x = xy * std::cos(sector_angle);
       y = xy * std::sin(sector_angle);
@@ -166,22 +166,22 @@ void GGEMSOpenGLSphere::Build(void)
   //  | /  |
   //  k2--k2+1
   index = 0;
-  GLint k1 = 0, k2 = 0;
-  for (GGint i = 0; i < number_of_stacks_; ++i) {
+  GGsize k1 = 0, k2 = 0;
+  for (GGsize i = 0; i < number_of_stacks_; ++i) {
     k1 = i * (number_of_sectors_ + 1);
     k2 = k1 + number_of_sectors_ + 1;
-    for (GGint j = 0; j < number_of_sectors_; ++j, ++k1, ++k2) {
+    for (GGsize j = 0; j < number_of_sectors_; ++j, ++k1, ++k2) {
       // 2 triangles per sector excluding 1st and last stacks
       if (i != 0) { // Triangle k1, k2, k1+1
-        indices_[index++] = k1;
-        indices_[index++] = k2;
-        indices_[index++] = k1+1;
+        indices_[index++] = static_cast<GLuint>(k1);
+        indices_[index++] = static_cast<GLuint>(k2);
+        indices_[index++] = static_cast<GLuint>(k1+1);
       }
 
       if (i != number_of_stacks_-1) { // Triangle k1+1, k2, k2+1
-        indices_[index++] = k1+1;
-        indices_[index++] = k2;
-        indices_[index++] = k2+1;
+        indices_[index++] = static_cast<GLuint>(k1+1);
+        indices_[index++] = static_cast<GLuint>(k2);
+        indices_[index++] = static_cast<GLuint>(k2+1);
       }
     }
   }
@@ -196,7 +196,8 @@ void GGEMSOpenGLSphere::Build(void)
   // Vertex
   glBindBuffer(GL_ARRAY_BUFFER, vbo_[0]);
   glBufferData(GL_ARRAY_BUFFER, number_of_vertices_ * sizeof(GLfloat), vertices_, GL_STATIC_DRAW); // Allocating memory on OpenGL device
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), (void*)0);
+  GLintptr offset_pointer = 0 * sizeof(GLfloat);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), reinterpret_cast<GLvoid*>(offset_pointer));
   glEnableVertexAttribArray(0);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 

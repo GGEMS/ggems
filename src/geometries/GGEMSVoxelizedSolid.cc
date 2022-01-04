@@ -139,9 +139,9 @@ void GGEMSVoxelizedSolid::Initialize(GGEMSMaterials* materials)
     GGEMSVoxelizedSolidData* solid_data_device = opencl_manager.GetDeviceBuffer<GGEMSVoxelizedSolidData>(solid_data_[0], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGEMSVoxelizedSolidData), 0);
 
     opengl_solid_ = new GGEMSOpenGLParaGrid(
-      solid_data_device->number_of_voxels_xyz_.x,
-      solid_data_device->number_of_voxels_xyz_.y,
-      solid_data_device->number_of_voxels_xyz_.z,
+      static_cast<GGsize>(solid_data_device->number_of_voxels_xyz_.x),
+      static_cast<GGsize>(solid_data_device->number_of_voxels_xyz_.y),
+      static_cast<GGsize>(solid_data_device->number_of_voxels_xyz_.z),
       solid_data_device->voxel_sizes_xyz_.x,
       solid_data_device->voxel_sizes_xyz_.y,
       solid_data_device->voxel_sizes_xyz_.z,

@@ -39,7 +39,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSOpenGLPrism::GGEMSOpenGLPrism(GLfloat const& base_radius, GLfloat const& top_radius, GLfloat const& height, GLint const& sectors, GLint const& stacks)
+GGEMSOpenGLPrism::GGEMSOpenGLPrism(GLfloat const& base_radius, GLfloat const& top_radius, GLfloat const& height, GGsize const& sectors, GGsize const& stacks)
 : GGEMSOpenGLVolume()
 {
   GGcout("GGEMSOpenGLPrism", "GGEMSOpenGLPrism", 3) << "GGEMSOpenGLPrism creating..." << GGendl;
@@ -146,8 +146,8 @@ void GGEMSOpenGLPrism::BuildUnitCircleVertices(void)
 
   unit_circle_vertices_ = new GLfloat[(number_of_sectors_+1)*3];
 
-  for (GLint i = 0; i <= number_of_sectors_; ++i) {
-    sector_angle = i * sector_step;
+  for (GGsize i = 0; i <= number_of_sectors_; ++i) {
+    sector_angle = static_cast<GLfloat>(i) * sector_step;
     unit_circle_vertices_[i*3+0] = std::cos(sector_angle); // x
     unit_circle_vertices_[i*3+1] = std::sin(sector_angle); // y
     unit_circle_vertices_[i*3+2] = 0.0f; // z
@@ -167,15 +167,15 @@ void GGEMSOpenGLPrism::Build(void)
 
   // Put vertices of side cylinder to array by scaling unit circle
   GLfloat x = 0.0f, y = 0.0f, z = 0.0f;
-  GLint added_vertices = 0;
-  GLint index = 0;
-  for (GLint i = 0; i <= number_of_stacks_; ++i) {
+  GGsize added_vertices = 0;
+  GGsize index = 0;
+  for (GGsize i = 0; i <= number_of_stacks_; ++i) {
     // Vertex position z
-    z = -(height_ * 0.5f) + static_cast<GLfloat>(i) / number_of_stacks_ * height_;
-    GLfloat radius = base_radius_ + static_cast<GLfloat>(i) / number_of_stacks_ * (top_radius_-base_radius_);
+    z = -(height_ * 0.5f) + static_cast<GLfloat>(i) / static_cast<GLfloat>(number_of_stacks_) * height_;
+    GLfloat radius = base_radius_ + static_cast<GLfloat>(i) / static_cast<GLfloat>(number_of_stacks_) * (top_radius_-base_radius_);
 
     // Loop over sectors
-    for (GLint j = 0, k = 0; j <= number_of_sectors_; ++j, k += 3) {
+    for (GGsize j = 0, k = 0; j <= number_of_sectors_; ++j, k += 3) {
       x = unit_circle_vertices_[k]*radius;
       y = unit_circle_vertices_[k+1]*radius;
 
@@ -188,7 +188,7 @@ void GGEMSOpenGLPrism::Build(void)
   }
 
   // remember where the base vertices start
-  GLuint base_vertex_index = added_vertices;
+  GGsize base_vertex_index = added_vertices;
 
   // put vertices of base of cylinder
   z = -height_ * 0.5f;
@@ -197,7 +197,7 @@ void GGEMSOpenGLPrism::Build(void)
   vertices_[index++] = z;
   added_vertices += 1;
 
-  for (GLint i = 0, j = 0; i < number_of_sectors_; ++i, j += 3) {
+  for (GGsize i = 0, j = 0; i < number_of_sectors_; ++i, j += 3) {
     x = unit_circle_vertices_[j]*base_radius_;
     y = unit_circle_vertices_[j+1]*base_radius_;
 
@@ -209,7 +209,7 @@ void GGEMSOpenGLPrism::Build(void)
   }
 
   // remember where the top vertices start
-  GLuint top_vertex_index = added_vertices;
+  GGsize top_vertex_index = added_vertices;
 
   // put vertices of top of cylinder
   z = height_ * 0.5f;
@@ -218,7 +218,7 @@ void GGEMSOpenGLPrism::Build(void)
   vertices_[index++] = z;
   added_vertices += 1;
 
-  for (GLint i = 0, j = 0; i < number_of_sectors_; ++i, j += 3) {
+  for (GGsize i = 0, j = 0; i < number_of_sectors_; ++i, j += 3) {
     x = unit_circle_vertices_[j]*top_radius_;
     y = unit_circle_vertices_[j+1]*top_radius_;
 
@@ -230,49 +230,49 @@ void GGEMSOpenGLPrism::Build(void)
   }
 
   // Put indices for sides
-  GLuint k1 = 0, k2 = 0;
+  GGsize k1 = 0, k2 = 0;
   index = 0;
-  for (GLint i = 0; i < number_of_stacks_; ++i) {
+  for (GGsize i = 0; i < number_of_stacks_; ++i) {
     k1 = i * (number_of_sectors_+1); // beginning of current stack
-    k2 = k1 + number_of_sectors_ + 1;      // beginning of next stack
+    k2 = k1 + number_of_sectors_ + 1; // beginning of next stack
 
-    for (GLint j = 0; j < number_of_sectors_; ++j, ++k1, ++k2) {
+    for (GGsize j = 0; j < number_of_sectors_; ++j, ++k1, ++k2) {
       // first triangle
-      indices_[index++] = k1;
-      indices_[index++] = k1+1;
-      indices_[index++] = k2;
+      indices_[index++] = static_cast<GLuint>(k1);
+      indices_[index++] = static_cast<GLuint>(k1+1);
+      indices_[index++] = static_cast<GLuint>(k2);
       // second triangle
-      indices_[index++] = k2;
-      indices_[index++] = k1+1;
-      indices_[index++] = k2+1;
+      indices_[index++] = static_cast<GLuint>(k2);
+      indices_[index++] = static_cast<GLuint>(k1+1);
+      indices_[index++] = static_cast<GLuint>(k2+1);
     }
   }
 
   // Put indices for base
-  for (GLint i = 0, k = base_vertex_index + 1; i < number_of_sectors_; ++i, ++k) {
+  for (GGsize i = 0, k = base_vertex_index + 1; i < number_of_sectors_; ++i, ++k) {
     if(i < (number_of_sectors_ - 1)) {
-      indices_[index++] = base_vertex_index;
-      indices_[index++] = k+1;
-      indices_[index++] = k;
+      indices_[index++] = static_cast<GLuint>(base_vertex_index);
+      indices_[index++] = static_cast<GLuint>(k+1);
+      indices_[index++] = static_cast<GLuint>(k);
     }
     else { // last triangle
-      indices_[index++] = base_vertex_index;
-      indices_[index++] = base_vertex_index+1;
-      indices_[index++] = k;
+      indices_[index++] = static_cast<GLuint>(base_vertex_index);
+      indices_[index++] = static_cast<GLuint>(base_vertex_index+1);
+      indices_[index++] = static_cast<GLuint>(k);
     }
   }
 
   // Put indices for top
-  for (GLint i = 0, k = top_vertex_index + 1; i < number_of_sectors_; ++i, ++k) {
+  for (GGsize i = 0, k = top_vertex_index + 1; i < number_of_sectors_; ++i, ++k) {
     if (i < (number_of_sectors_ - 1)) {
-      indices_[index++] = top_vertex_index;
-      indices_[index++] = k;
-      indices_[index++] = k+1;
+      indices_[index++] = static_cast<GLuint>(top_vertex_index);
+      indices_[index++] = static_cast<GLuint>(k);
+      indices_[index++] = static_cast<GLuint>(k+1);
     }
     else {
-      indices_[index++] = top_vertex_index;
-      indices_[index++] = k;
-      indices_[index++] = top_vertex_index+1;
+      indices_[index++] = static_cast<GLuint>(top_vertex_index);
+      indices_[index++] = static_cast<GLuint>(k);
+      indices_[index++] = static_cast<GLuint>(top_vertex_index+1);
     }
   }
 
@@ -286,7 +286,8 @@ void GGEMSOpenGLPrism::Build(void)
   // Vertex
   glBindBuffer(GL_ARRAY_BUFFER, vbo_[0]);
   glBufferData(GL_ARRAY_BUFFER, number_of_vertices_ * sizeof(GLfloat), vertices_, GL_STATIC_DRAW); // Allocating memory on OpenGL device
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), (void*)0);
+  GLintptr offset_pointer = 0 * sizeof(GLfloat);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), reinterpret_cast<GLvoid*>(offset_pointer));
   glEnableVertexAttribArray(0);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 

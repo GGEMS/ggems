@@ -120,11 +120,10 @@ class GGEMS_EXPORT GGEMSOpenGLParticles
     void WriteShaders(void);
 
   private:
-    GLint number_of_vertices_; /*!< Number of vertices for OpenGL particles */
-    GLint number_of_indices_; /*!< Number of indices */
+    GGsize number_of_vertices_; /*!< Number of vertices for OpenGL particles */
+    GGsize number_of_indices_; /*!< Number of indices */
 
-    bool is_buffer_full_; /*!< flag for buffer */
-    GGuint number_of_registered_particles_; /*!< Number of registered particles */
+    GGsize number_of_registered_particles_; /*!< Number of registered particles */
     GGsize number_of_particles_; /*!< Number of primary particles to follow */
 
     GLuint vao_; /*!< vertex array object for all sources */
@@ -132,7 +131,7 @@ class GGEMS_EXPORT GGEMSOpenGLParticles
 
     GLfloat* vertex_; /*!< Pointer storing vertex positions */
     GLuint* index_; /*!< Pointer storing index positions */
-    GLint index_increment_; /*< Index increment, useful to store position index */
+    GGsize index_increment_; /*< Index increment, useful to store position index */
 
     GLuint program_shader_id_; /*!< program id for shader */
     std::string vertex_shader_source_; /*!< vertex shader source file */

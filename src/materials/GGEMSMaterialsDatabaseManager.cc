@@ -338,7 +338,10 @@ void GGEMSMaterialsDatabaseManager::AddChemicalElements(std::string const& eleme
 
 void GGEMSMaterialsDatabaseManager::AddMaterialRGBColor(std::string const& material_name, GGuchar const& red, GGuchar const& green, GGuchar const& blue)
 {
-  GGcout("GGEMSMaterialsDatabaseManager", "AddMaterialRGBColor", 3) << "Adding color for " << material_name << ": " << (GGint)red << " " << (GGint)green << " " << (GGint)blue << GGendl;
+  GGcout("GGEMSMaterialsDatabaseManager", "AddMaterialRGBColor", 3) << "Adding color for " << material_name << ": "
+    << static_cast<GGint>(red) << " "
+    << static_cast<GGint>(green) << " "
+    << static_cast<GGint>(blue) << GGendl;
 
   GGEMSRGBColor rgb;
   rgb.red_ = static_cast<GGfloat>(red) / 255.0f;

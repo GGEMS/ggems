@@ -39,7 +39,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSOpenGLParaGrid::GGEMSOpenGLParaGrid(GLint const& elements_x, GLint const& elements_y, GLint const& elements_z, GLfloat const& element_size_x, GLfloat const& element_size_y, GLfloat const& element_size_z, bool const& is_midplanes)
+GGEMSOpenGLParaGrid::GGEMSOpenGLParaGrid(GGsize const& elements_x, GGsize const& elements_y, GGsize const& elements_z, GLfloat const& element_size_x, GLfloat const& element_size_y, GLfloat const& element_size_z, bool const& is_midplanes)
 : GGEMSOpenGLVolume(),
   elements_x_(elements_x),
   elements_y_(elements_y),
@@ -53,7 +53,7 @@ GGEMSOpenGLParaGrid::GGEMSOpenGLParaGrid(GLint const& elements_x, GLint const& e
 
   // Number of elements to draw
   if (is_midplanes_) {
-    GLint z = 0;
+    GGsize z = 0;
     if (elements_z_ > 1) z = elements_z_ - 1;
 
     number_of_elements_ = elements_x_ * elements_y_ + elements_x_ * elements_z_ + elements_y_ * elements_z_ - elements_x_ - elements_y_ - z;
@@ -63,12 +63,12 @@ GGEMSOpenGLParaGrid::GGEMSOpenGLParaGrid(GLint const& elements_x, GLint const& e
   }
 
   // For each parallelepiped there are 8 vertices, 3 positions for each vertex and a RGB color for each vertex
-  number_of_vertices_ = number_of_elements_ * 8 * 3 * 2;
+  number_of_vertices_ = number_of_elements_ * 8UL * 3UL * 2UL;
   vertices_ = new GLfloat[number_of_vertices_];
 
   // For each parallelepiped there are 12 triangles
-  number_of_triangles_ = number_of_elements_ * 12;
-  number_of_indices_ = number_of_triangles_ * 3;
+  number_of_triangles_ = number_of_elements_ * 12UL;
+  number_of_indices_ = number_of_triangles_ * 3UL;
   indices_ = new GLuint[number_of_indices_];
 
   // Defining shaders
@@ -131,7 +131,7 @@ void GGEMSOpenGLParaGrid::WriteShaders(void)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-GGEMSRGBColor GGEMSOpenGLParaGrid::GetRGBColor(GLint const& index) const
+GGEMSRGBColor GGEMSOpenGLParaGrid::GetRGBColor(GGsize const& index) const
 {
   // Read label and get material color
   GGuchar index_material = 0;
@@ -148,7 +148,7 @@ GGEMSRGBColor GGEMSOpenGLParaGrid::GetRGBColor(GLint const& index) const
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-bool GGEMSOpenGLParaGrid::IsMaterialVisible(GLint const index) const
+bool GGEMSOpenGLParaGrid::IsMaterialVisible(GGsize const index) const
 {
   // Read label and get material color
   GGuchar index_material = 0;
@@ -176,18 +176,18 @@ void GGEMSOpenGLParaGrid::Build(void)
 
   // Storing vertices
   GLfloat x_offset = 0.0f, y_offset = 0.0f, z_offset = 0.0f;
-  GLint index = 0;
-  GLint flag_index = 0;
+  GGsize index = 0;
+  GGsize flag_index = 0;
 
   // Center of first parallelepiped
-  GLfloat x_center = -(element_size_x_*elements_x_*0.5f) + element_size_x_*0.5f;
-  GLfloat y_center = -(element_size_y_*elements_y_*0.5f) + element_size_y_*0.5f;
-  GLfloat z_center = -(element_size_z_*elements_z_*0.5f) + element_size_z_*0.5f;
+  GLfloat x_center = -(element_size_x_*static_cast<GLfloat>(elements_x_)*0.5f) + element_size_x_*0.5f;
+  GLfloat y_center = -(element_size_y_*static_cast<GLfloat>(elements_y_)*0.5f) + element_size_y_*0.5f;
+  GLfloat z_center = -(element_size_z_*static_cast<GLfloat>(elements_z_)*0.5f) + element_size_z_*0.5f;
 
   // if midplanes, computing index of midplane
-  GLint x_midplane = elements_x_ / 2;
-  GLint y_midplane = elements_y_ / 2;
-  GLint z_midplane = elements_z_ / 2;
+  GGsize x_midplane = elements_x_ / 2UL;
+  GGsize y_midplane = elements_y_ / 2UL;
+  GGsize z_midplane = elements_z_ / 2UL;
 
   // Buffer storing visible voxel
   std::vector<bool> is_visible_voxel;
@@ -196,12 +196,12 @@ void GGEMSOpenGLParaGrid::Build(void)
   // Loop over all parallelepipeds
   if (is_midplanes_) {
 
-    for (GLint k = 0; k < elements_z_; ++k) {
-      z_offset = z_center + k*element_size_z_;
-      for (GLint j = 0; j < elements_y_; ++j) {
-        y_offset = y_center + j*element_size_y_;
-        for (GLint i = 0; i < elements_x_; ++i) {
-          x_offset = x_center + i*element_size_x_;
+    for (GGsize k = 0; k < elements_z_; ++k) {
+      z_offset = z_center + static_cast<GLfloat>(k)*element_size_z_;
+      for (GGsize j = 0; j < elements_y_; ++j) {
+        y_offset = y_center + static_cast<GLfloat>(j)*element_size_y_;
+        for (GGsize i = 0; i < elements_x_; ++i) {
+          x_offset = x_center + static_cast<GLfloat>(i)*element_size_x_;
 
           if (k == z_midplane || j == y_midplane || i == x_midplane) {
 
@@ -278,12 +278,12 @@ void GGEMSOpenGLParaGrid::Build(void)
     }
   }
   else {
-    for (GLint k = 0; k < elements_z_; ++k) {
-      z_offset = z_center + k*element_size_z_;
-      for (GLint j = 0; j < elements_y_; ++j) {
-        y_offset = y_center + j*element_size_y_;
-        for (GLint i = 0; i < elements_x_; ++i) {
-          x_offset = x_center + i*element_size_x_;
+    for (GGsize k = 0; k < elements_z_; ++k) {
+      z_offset = z_center + static_cast<GLfloat>(k)*element_size_z_;
+      for (GGsize j = 0; j < elements_y_; ++j) {
+        y_offset = y_center + static_cast<GLfloat>(j)*element_size_y_;
+        for (GGsize i = 0; i < elements_x_; ++i) {
+          x_offset = x_center + static_cast<GLfloat>(i)*element_size_x_;
 
           // Getting color of voxel
           GGEMSRGBColor rgb = GetRGBColor(i + j*elements_x_ + k*elements_x_*elements_y_);
@@ -358,67 +358,67 @@ void GGEMSOpenGLParaGrid::Build(void)
   }
 
   index = 0;
-  for (GLint i = 0; i < number_of_elements_; ++i) {
+  for (GGsize i = 0; i < number_of_elements_; ++i) {
     if (is_visible_voxel.at(i)) {
       // Triangle 0
-      indices_[index++] = 2+i*8;
-      indices_[index++] = 3+i*8;
-      indices_[index++] = 7+i*8;
+      indices_[index++] = 2+static_cast<GLuint>(i)*8;
+      indices_[index++] = 3+static_cast<GLuint>(i)*8;
+      indices_[index++] = 7+static_cast<GLuint>(i)*8;
 
       // 1
-      indices_[index++] = 2+i*8;
-      indices_[index++] = 7+i*8;
-      indices_[index++] = 6+i*8;
+      indices_[index++] = 2+static_cast<GLuint>(i)*8;
+      indices_[index++] = 7+static_cast<GLuint>(i)*8;
+      indices_[index++] = 6+static_cast<GLuint>(i)*8;
 
       // 2
-      indices_[index++] = 6+i*8;
-      indices_[index++] = 7+i*8;
-      indices_[index++] = 4+i*8;
+      indices_[index++] = 6+static_cast<GLuint>(i)*8;
+      indices_[index++] = 7+static_cast<GLuint>(i)*8;
+      indices_[index++] = 4+static_cast<GLuint>(i)*8;
 
       // 3
-      indices_[index++] = 6+i*8;
-      indices_[index++] = 4+i*8;
-      indices_[index++] = 5+i*8;
+      indices_[index++] = 6+static_cast<GLuint>(i)*8;
+      indices_[index++] = 4+static_cast<GLuint>(i)*8;
+      indices_[index++] = 5+static_cast<GLuint>(i)*8;
 
       // 4
-      indices_[index++] = 5+i*8;
-      indices_[index++] = 4+i*8;
-      indices_[index++] = 0+i*8;
+      indices_[index++] = 5+static_cast<GLuint>(i)*8;
+      indices_[index++] = 4+static_cast<GLuint>(i)*8;
+      indices_[index++] = 0+static_cast<GLuint>(i)*8;
 
       // 5
-      indices_[index++] = 5+i*8;
-      indices_[index++] = 0+i*8;
-      indices_[index++] = 1+i*8;
+      indices_[index++] = 5+static_cast<GLuint>(i)*8;
+      indices_[index++] = 0+static_cast<GLuint>(i)*8;
+      indices_[index++] = 1+static_cast<GLuint>(i)*8;
 
       // 6
-      indices_[index++] = 1+i*8;
-      indices_[index++] = 0+i*8;
-      indices_[index++] = 3+i*8;
+      indices_[index++] = 1+static_cast<GLuint>(i)*8;
+      indices_[index++] = 0+static_cast<GLuint>(i)*8;
+      indices_[index++] = 3+static_cast<GLuint>(i)*8;
 
       // 7
-      indices_[index++] = 1+i*8;
-      indices_[index++] = 3+i*8;
-      indices_[index++] = 2+i*8;
+      indices_[index++] = 1+static_cast<GLuint>(i)*8;
+      indices_[index++] = 3+static_cast<GLuint>(i)*8;
+      indices_[index++] = 2+static_cast<GLuint>(i)*8;
 
       // 8
-      indices_[index++] = 1+i*8;
-      indices_[index++] = 2+i*8;
-      indices_[index++] = 6+i*8;
+      indices_[index++] = 1+static_cast<GLuint>(i)*8;
+      indices_[index++] = 2+static_cast<GLuint>(i)*8;
+      indices_[index++] = 6+static_cast<GLuint>(i)*8;
 
       // 9
-      indices_[index++] = 1+i*8;
-      indices_[index++] = 6+i*8;
-      indices_[index++] = 5+i*8;
+      indices_[index++] = 1+static_cast<GLuint>(i)*8;
+      indices_[index++] = 6+static_cast<GLuint>(i)*8;
+      indices_[index++] = 5+static_cast<GLuint>(i)*8;
 
       // 10
-      indices_[index++] = 0+i*8;
-      indices_[index++] = 3+i*8;
-      indices_[index++] = 7+i*8;
+      indices_[index++] = 0+static_cast<GLuint>(i)*8;
+      indices_[index++] = 3+static_cast<GLuint>(i)*8;
+      indices_[index++] = 7+static_cast<GLuint>(i)*8;
 
       // 11
-      indices_[index++] = 0+i*8;
-      indices_[index++] = 7+i*8;
-      indices_[index++] = 4+i*8;
+      indices_[index++] = 0+static_cast<GLuint>(i)*8;
+      indices_[index++] = 7+static_cast<GLuint>(i)*8;
+      indices_[index++] = 4+static_cast<GLuint>(i)*8;
     }
   }
 

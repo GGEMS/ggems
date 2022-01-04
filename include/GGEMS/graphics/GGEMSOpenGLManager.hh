@@ -291,11 +291,11 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     void SetNumberParticles(GGsize const& source_index, GGsize const& number_of_particles);
 
     /*!
-      \fn GGint GetNumberOfDisplayedParticles(void) const
+      \fn GGuint GetNumberOfDisplayedParticles(void) const
       \brief Getting the number of displayed particles
       \return the number of displayed particles
     */
-    inline GGint GetNumberOfDisplayedParticles(void) const {return number_of_displayed_particles_;}
+    inline GGuint GetNumberOfDisplayedParticles(void) const {return number_of_displayed_particles_;}
 
     /*!
       \fn void CopyParticlePositionToOpenGL(GGsize const& source_index) const

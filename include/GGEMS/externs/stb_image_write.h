@@ -153,6 +153,15 @@ LICENSE
 
 #include <stdlib.h>
 
+#ifdef __GNUC__
+#pragma GCC diagnostic ignored "-Wconversion"
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+#endif
+
+#ifdef __clang__
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
+#endif
+
 // if STB_IMAGE_WRITE_STATIC causes problems, try defining STBIWDEF to 'inline' or 'static inline'
 #ifndef STBIWDEF
 #ifdef STB_IMAGE_WRITE_STATIC

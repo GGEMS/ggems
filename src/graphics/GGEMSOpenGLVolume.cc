@@ -363,16 +363,20 @@ void GGEMSOpenGLVolume::Draw(void) const
       glUniform3f(glGetUniformLocation(program_shader_id_, "color"), rgb_unique.red_, rgb_unique.green_, rgb_unique.blue_);
     }
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(GLfloat), (void*)0);
+    GLintptr vertex_position_offset = 0 * sizeof(GLfloat);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(GLfloat), reinterpret_cast<GLvoid*>(vertex_position_offset));
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6*sizeof(GLfloat), (void*)(3*sizeof(GLfloat)));
+
+    GLintptr vertex_color_offset = 3 * sizeof(GLfloat);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6*sizeof(GLfloat), reinterpret_cast<GLvoid*>(vertex_color_offset));
     glEnableVertexAttribArray(1);
 
     glm::mat4 mvp_matrix = projection_matrix*view_matrix*rotation_matrix_after_translation*translate_matrix*rotation_matrix;
     glUniformMatrix4fv(glGetUniformLocation(program_shader_id_, "mvp"), 1, GL_FALSE, &mvp_matrix[0][0]);
 
     // Draw volume using index
-    glDrawElements(GL_TRIANGLES, number_of_indices_, GL_UNSIGNED_INT, (void*)0);
+    GLintptr index_pointer = 0 * sizeof(GLfloat);
+    glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(number_of_indices_), GL_UNSIGNED_INT, reinterpret_cast<GLvoid*>(index_pointer));
 
     glDisableVertexAttribArray(0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);

@@ -271,7 +271,7 @@ void GGEMS::Initialize(GGuint const& seed)
     opengl_manager.InitializeDisplayedParticles(source_manager.GetNumberOfSources());
 
     // Checking number of displayed particles compared to simulated particles
-    GLint number_of_displayed_particles = opengl_manager.GetNumberOfDisplayedParticles();
+    std::size_t number_of_displayed_particles = static_cast<std::size_t>(opengl_manager.GetNumberOfDisplayedParticles());
     for (GGsize i = 0; i < source_manager.GetNumberOfSources(); ++i) {
       GGsize number_of_particles = source_manager.GetNumberOfParticles(i);
       if (number_of_displayed_particles > number_of_particles) {

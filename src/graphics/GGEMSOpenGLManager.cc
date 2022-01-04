@@ -309,7 +309,7 @@ void GGEMSOpenGLManager::SetParticleColor(std::string const& particle_type, GGuc
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSOpenGLManager::SetParticleColor(std::string const& particle_type, std::string const& color_name)
+void GGEMSOpenGLManager::SetParticleColor(std::string const&, std::string const& color_name)
 {
   // Getting RGB color
   GGfloat rgb_array[] = {0.0f, 0.0f, 0.0f};
@@ -570,7 +570,7 @@ void GGEMSOpenGLManager::UpdateProjectionAndView(void)
 void GGEMSOpenGLManager::SetImageOutput(std::string const& image_output_basename)
 {
   // Get last "/"
-  std::size_t n = image_output_basename.find_last_of("/");
+  GGsize n = image_output_basename.find_last_of("/");
 
   if (n != std::string::npos) { // "/" found, check if directory exists
     std::filesystem::path path_name(image_output_basename.substr(0, n));
@@ -809,7 +809,7 @@ void GGEMSOpenGLManager::GLFWMouseButtonCallback(GLFWwindow* window, GGint butto
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSOpenGLManager::GLFWCursorPosCallback(GLFWwindow* window, GGdouble x, GGdouble y)
+void GGEMSOpenGLManager::GLFWCursorPosCallback(GLFWwindow*, GGdouble x, GGdouble y)
 {
   if (is_left_button_) {
     if (is_first_mouse_) {
@@ -886,10 +886,10 @@ std::string GGEMSOpenGLManager::GetOpenGLSLVersion(void) const
   std::string glsl_version(reinterpret_cast<char const*>(glGetString(GL_SHADING_LANGUAGE_VERSION)));
   std::string digits("0123456789");
 
-  std::size_t n = glsl_version.find_first_of(digits);
+  GGsize n = glsl_version.find_first_of(digits);
   if (n != std::string::npos)
   {
-    std::size_t m = glsl_version.find_first_not_of(digits+".", n);
+    GGsize m = glsl_version.find_first_not_of(digits+".", n);
     std::string tmp = glsl_version.substr(n, m != std::string::npos ? m-n : m);
     // Deleting '.'
     tmp.erase(std::remove(tmp.begin(), tmp.end(), '.'), tmp.end());
@@ -953,7 +953,7 @@ void GGEMSOpenGLManager::CompileShader(GLuint const& shader) const
 
     std::ostringstream oss(std::ostringstream::out);
     oss << "Error compiling shader!!!" << std::endl;
-    for (std::size_t i = 0; i < error_log.size(); ++i) oss << error_log[i];
+    for (GGsize i = 0; i < error_log.size(); ++i) oss << error_log[i];
 
     glDeleteShader(shader); // Don't leak the shader.
     throw std::runtime_error(oss.str());

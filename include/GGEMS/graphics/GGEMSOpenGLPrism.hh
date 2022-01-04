@@ -50,7 +50,7 @@ class GGEMS_EXPORT GGEMSOpenGLPrism : public GGEMSOpenGLVolume
       \param stacks - number of stacks
       \brief GGEMSOpenGLPrism constructor
     */
-    GGEMSOpenGLPrism(GLfloat const& base_radius, GLfloat const& top_radius, GLfloat const& height, GLint const& sectors, GLint const& stacks);
+    GGEMSOpenGLPrism(GLfloat const& base_radius, GLfloat const& top_radius, GLfloat const& height, GGsize const& sectors, GGsize const& stacks);
 
     /*!
       \brief GGEMSOpenGLPrism destructor

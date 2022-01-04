@@ -981,8 +981,8 @@ void GGEMSOpenCLManager::CleanBuffer(cl::Buffer* buffer, GGsize const& size, GGs
   GGint error = computing_devices_[thread_index].queue_->enqueueFillBuffer(*buffer, 0, 0, size, nullptr, &event);
 
   // Handling event
-  HandleEvent(event, "Cleaning buffer");
-
+  char message[] = "Cleaning buffer";
+  HandleEvent(event, message);
 
   CheckOpenCLError(error, "GGEMSOpenCLManager", "CleanBuffer");
 }
@@ -1042,7 +1042,7 @@ void GGEMSOpenCLManager::HandleEvent(cl::Event& event, char* message)
 void GGEMSOpenCLManager::Callback(cl_event event, GGint event_command_exec_status, void* user_data)
 {
   if (event_command_exec_status != CL_COMPLETE) {
-    GGcout("GGEMSOpenCLManager", "Callback", 0) << (char*)user_data << ": error during operation!!!" << GGendl;
+    GGcout("GGEMSOpenCLManager", "Callback", 0) << static_cast<char*>(user_data) << ": error during operation!!!" << GGendl;
     clReleaseEvent(event);
   }
 }

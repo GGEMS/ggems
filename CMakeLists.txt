@@ -67,7 +67,13 @@ ENDIF()
 PROJECT(GGEMS VERSION 1.2 HOMEPAGE_URL ggems.fr LANGUAGES CXX)
 
 #-------------------------------------------------------------------------------
+# Give cmake-config directory to cmake
+LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake-config")
+
+#-------------------------------------------------------------------------------
 # Find the OpenCL library and for OpenCL 1.2
+FIND_PACKAGE(CUDA REQUIRED)
+SET(OpenCL_ROOT "${CUDA_TOOLKIT_ROOT_DIR}")
 FIND_PACKAGE(OpenCL REQUIRED)
 IF(${OpenCL_VERSION_STRING} VERSION_GREATER "1.2")
   ADD_DEFINITIONS(-DCL_USE_DEPRECATED_OPENCL_1_2_APIS)
@@ -82,7 +88,7 @@ IF(OPENGL_VISUALIZATION)
   FIND_PACKAGE(OpenGL REQUIRED)
   SET(GLEW_USE_STATIC_LIBS TRUE) # Using GLEW in static, important for Python!!!
   FIND_PACKAGE(GLEW REQUIRED)
-  FIND_PACKAGE(GLM)
+  FIND_PACKAGE(glm)
 ENDIF()
 
 #-------------------------------------------------------------------------------
@@ -161,14 +167,6 @@ IF(WIN32)
     SET(CXX_FLAGS_RELEASE /Ox ${CXX_FLAGS})
     SET(CXX_FLAGS_DEBUG /Od /DEBUG /Zi ${CXX_FLAGS})
 
-    ELSEIF(COMPILER STREQUAL "GCC")
-    STRING(REPLACE "-O3" "" CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
-    STRING(REPLACE "-DNDEBUG" "" CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
-
-    SET(CXX_FLAGS -std=c++17 -std=gnu++17 -Wextra -Wall -pedantic -m64 -Wconversion -Wold-style-cast -pedantic-errors)
-    SET(CXX_FLAGS_RELEASE -O3 ${CXX_FLAGS})
-    SET(CXX_FLAGS_DEBUG -O0 -g3 ${CXX_FLAGS})
-
   # Otherwize error
   ELSE()
     MESSAGE(FATAL_ERROR "Only 'CL' and 'CLANG' are available for Windows")
@@ -191,7 +189,7 @@ ELSE()
 
   # Checking compiler for LLVM/CLANG
   IF(COMPILER STREQUAL "CLANG")
-    SET(CXX_FLAGS -std=c++17 -std=gnu++17 -Wall -Werror -Wextra -pedantic -m64 -Wconversion -Wold-style-cast -pedantic-errors)
+    SET(CXX_FLAGS -std=c++17 -std=gnu++17 -Wall -Wextra -pedantic -m64 -Wconversion -Wold-style-cast -pedantic-errors)
 
   # Checking compiler for GNU/GCC
   ELSEIF(COMPILER STREQUAL "GCC")
@@ -236,7 +234,7 @@ INCLUDE(GenerateExportHeader)
 # Create shared library
 ADD_LIBRARY(ggems SHARED ${source_ggems})
 IF(OPENGL_VISUALIZATION)
-  TARGET_LINK_LIBRARIES(ggems OpenCL::OpenCL glfw3 opengl32 GLEW::glew_s glm::glm)
+  TARGET_LINK_LIBRARIES(ggems OpenCL::OpenCL glfw OpenGL::OpenGL OpenGL::GLU GLEW::glew_s glm::glm)
 ELSE()
   TARGET_LINK_LIBRARIES(ggems OpenCL::OpenCL)
 ENDIF()

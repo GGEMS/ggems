@@ -602,10 +602,10 @@ void GGEMSNavigator::Init_Mu_Table(void) //GGEMSMuMuEnData* mu_table_device, GGE
     opencl_manager.ReleaseDeviceBuffer(particle_cs, particle_cs_device, d);
 
     // Fill energy table with log scale
-    GGfloat slope = log(mu_table_device->E_max / mu_table_device->E_min);
+    GGfloat slope = logf(mu_table_device->E_max / mu_table_device->E_min);
     GGint i = 0;
     while (i < mu_table_device->nb_bins) {
-      mu_table_device->E_bins[i] = mu_table_device->E_min * exp(slope * ((GGfloat)i / ((GGfloat)mu_table_device->nb_bins-1)))*MeV;
+      mu_table_device->E_bins[i] = mu_table_device->E_min * expf(slope * (static_cast<GGfloat>(i) / (static_cast<GGfloat>(mu_table_device->nb_bins)-1.0f)))*MeV;
       ++i;
     }
 
@@ -615,7 +615,7 @@ void GGEMSNavigator::Init_Mu_Table(void) //GGEMSMuMuEnData* mu_table_device, GGE
     // For each material and energy bin compute mu and muen
     GGint imat = 0;
     GGint abs_index, E_index, mu_index_E;
-    GGint iZ, Z;
+    std::size_t iZ, Z;
     GGfloat energy, mu_over_rho, mu_en_over_rho, frac;
     while (imat < mu_table_device->nb_mat) {
       // for each energy bin
@@ -630,10 +630,10 @@ void GGEMSNavigator::Init_Mu_Table(void) //GGEMSMuMuEnData* mu_table_device, GGE
         // For each element of the material
         mu_over_rho = 0.0f; mu_en_over_rho = 0.0f;
         iZ=0;
-        while (iZ < materials_device->number_of_chemical_elements_[ imat ]) {
+        while (iZ < materials_device->number_of_chemical_elements_[imat]) {
           // Get Z and mass fraction
-          Z = materials_device->atomic_number_Z_[materials_device->index_of_chemical_elements_[ imat ] + iZ];
-          frac = materials_device->mass_fraction_[materials_device->index_of_chemical_elements_[ imat ] + iZ];
+          Z = materials_device->atomic_number_Z_[materials_device->index_of_chemical_elements_[imat] + iZ];
+          frac = materials_device->mass_fraction_[materials_device->index_of_chemical_elements_[imat] + iZ];
 
           // Get energy index
           mu_index_E = GGEMSMuDataConstants::kMuIndexEnergy[Z];

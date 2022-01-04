@@ -245,7 +245,7 @@ int main(int argc, char** argv)
     if (is_gl) {
       #ifdef OPENGL_VISUALIZATION
       opengl_manager.SetMSAA(msaa);
-      opengl_manager.SetDrawAxis(is_axis);
+      opengl_manager.SetDrawAxis(static_cast<GGbool>(is_axis));
       opengl_manager.SetWindowDimensions(window_dims[0], window_dims[1]);
       opengl_manager.SetBackgroundColor(window_color);
       opengl_manager.SetImageOutput("data/axis");
@@ -302,7 +302,7 @@ int main(int argc, char** argv)
     cbct_detector.SetSourceDetectorDistance(1505.0, "mm"); // Center of inside detector, adding half of detector (= SDD surface + 10.0/2 mm half of depth)
     cbct_detector.SetSourceIsocenterDistance(900.0f, "mm");
     cbct_detector.SetRotation(0.0f, 0.0f, 0.0f, "deg");
-    cbct_detector.SetGlobalSystemPosition(0.0f, 0.0f, 150.0f, "mm");
+    cbct_detector.SetGlobalSystemPosition(0.0f, 0.0f, 0.0f, "mm");
     cbct_detector.SetThreshold(10.0f, "keV");
     cbct_detector.StoreOutput("data/projection");
     cbct_detector.StoreScatter(true);

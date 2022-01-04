@@ -202,8 +202,8 @@ class GGEMS_EXPORT GGEMSOpenGLVolume
     virtual void WriteShaders(void) = 0;
 
   protected:
-    GLint number_of_stacks_; /*!< Number of stacks (latitude) */
-    GLint number_of_sectors_; /*!< Number of sectors (longitude) */
+    GGsize number_of_stacks_; /*!< Number of stacks (latitude) */
+    GGsize number_of_sectors_; /*!< Number of sectors (longitude) */
 
     GLfloat position_x_; /*!< Position in X of OpenGL volume */
     GLfloat position_y_; /*!< Position in Y of OpenGL volume */
@@ -229,12 +229,12 @@ class GGEMS_EXPORT GGEMSOpenGLVolume
     std::string fragment_shader_source_; /*!< fragment shader source file */
 
     GLfloat* vertices_; /*!< Pointer storing position vertex for OpenGL volume */
-    GLint number_of_vertices_; /*!< Number of vertices for OpenGL volume */
+    GGsize number_of_vertices_; /*!< Number of vertices for OpenGL volume */
 
     GLuint* indices_; /*!< Indices of vertex (triangulated) */
-    GLint number_of_indices_; /*!< Number of indices */
+    GGsize number_of_indices_; /*!< Number of indices */
 
-    GLint number_of_triangles_; /*!< Number of triangles for a volume */
+    GGsize number_of_triangles_; /*!< Number of triangles for a volume */
 
     bool is_visible_; /*!< true: volume display */
 };

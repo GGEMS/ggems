@@ -560,7 +560,8 @@ T* GGEMSOpenCLManager::GetDeviceBuffer(cl::Buffer* const device_ptr, GGbool cons
   CheckOpenCLError(err, "GGEMSOpenCLManager", "GetDeviceBuffer");
 
   // Checking event status
-  HandleEvent(event, "Mapping buffer");
+  char message[] = "Mapping buffer";
+  HandleEvent(event, message);
 
   return ptr;
 }
@@ -581,7 +582,8 @@ void GGEMSOpenCLManager::ReleaseDeviceBuffer(cl::Buffer* const device_ptr, T* ho
   CheckOpenCLError(computing_devices_[thread_index].queue_->enqueueUnmapMemObject(*device_ptr, host_ptr, nullptr, &event), "GGEMSOpenCLManager", "ReleaseDeviceBuffer");
 
   // Checking event status
-  HandleEvent(event, "Unmapping buffer");
+  char message[] = "Unmapping buffer";
+  HandleEvent(event, message);
 }
 
 /*!
