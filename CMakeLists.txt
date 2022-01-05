@@ -33,7 +33,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.13 FATAL_ERROR)
 
 #-------------------------------------------------------------------------------
-# Setting the compiler type: 'CLANG' 'GCC' or 'CL'
+# Setting the compiler type: 'CLANG', 'GCC', 'CL' (visual c++), or 'INTEL'
 # Visual Studio: CL (Only on Windows) and by default on Windows
 # CC=cl
 # CXX=cl
@@ -44,9 +44,9 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.13 FATAL_ERROR)
 # CC=clang
 # CXX=clang++
 IF(WIN32)
-  SET(COMPILER CL CACHE INTERNAL "Compiler name: CLANG, CL, GCC")
+  SET(COMPILER CL CACHE INTERNAL "Compiler name: CLANG, CL, INTEL")
 ELSE()
-  SET(COMPILER GCC CACHE INTERNAL "Compiler name: CLANG, GCC")
+  SET(COMPILER GCC CACHE INTERNAL "Compiler name: CLANG, GCC, INTEL")
 ENDIF()
 
 IF(COMPILER STREQUAL "CLANG")
@@ -58,6 +58,9 @@ ELSEIF(COMPILER STREQUAL "CL")
 ELSEIF(COMPILER STREQUAL "GCC")
   SET(ENV{CC} "gcc")
   SET(ENV{CXX} "g++")
+ELSEIF(COMPILER STREQUAL "INTEL")
+  SET(ENV{CC} "icx")
+  SET(ENV{CXX} "icx")
 ELSE()
   MESSAGE(FATAL_ERROR "Compiler name unknown!!! Options are CLANG, GCC or CL")
 ENDIF()
@@ -107,10 +110,6 @@ SET(OPENCL_KERNEL_PATH ${PROJECT_SOURCE_DIR}/src/kernels CACHE PATH "Path to the
 #-------------------------------------------------------------------------------
 # Setting the GGEMSHOME_PATH variable
 SET(GGEMS_PATH ${PROJECT_SOURCE_DIR} CACHE PATH "Path to the GGEMS project repository")
-
-#-------------------------------------------------------------------------------
-# Setting the PYTHON_MODULE_PATH variable
-SET(PYTHON_MODULE_PATH ${PROJECT_SOURCE_DIR}/python_module CACHE PATH "Path to the python module repository")
 
 #-------------------------------------------------------------------------------
 # Setting the maximum particles in OpenCL buffer
@@ -165,6 +164,16 @@ IF(WIN32)
 
     SET(CXX_FLAGS /MP /EHsc /nologo /W3 /std:c++17)
     SET(CXX_FLAGS_RELEASE /Ox ${CXX_FLAGS})
+    SET(CXX_FLAGS_DEBUG /Od /DEBUG /Zi ${CXX_FLAGS})
+
+  # Checking compiler for Intel OneAPI
+  ELSEIF(COMPILER STREQUAL "INTEL")
+    STRING(REPLACE "/W3" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
+    STRING(REPLACE "/O2" "" CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
+    STRING(REPLACE "/D NDEBUG" "" CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
+
+    SET(CXX_FLAGS /EHsc /O3 /std:c++latest /W3)
+    SET(CXX_FLAGS_RELEASE /O3 ${CXX_FLAGS})
     SET(CXX_FLAGS_DEBUG /Od /DEBUG /Zi ${CXX_FLAGS})
 
   # Otherwize error
@@ -234,7 +243,7 @@ INCLUDE(GenerateExportHeader)
 # Create shared library
 ADD_LIBRARY(ggems SHARED ${source_ggems})
 IF(OPENGL_VISUALIZATION)
-  TARGET_LINK_LIBRARIES(ggems OpenCL::OpenCL glfw OpenGL::OpenGL OpenGL::GLU GLEW::glew_s glm::glm)
+  TARGET_LINK_LIBRARIES(ggems OpenCL::OpenCL ${GLFW3_LIBRARY} OpenGL::GL OpenGL::GLU GLEW::glew_s glm::glm)
 ELSE()
   TARGET_LINK_LIBRARIES(ggems OpenCL::OpenCL)
 ENDIF()
