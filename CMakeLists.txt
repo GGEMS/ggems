@@ -46,7 +46,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.13 FATAL_ERROR)
 IF(WIN32)
   SET(COMPILER CL CACHE INTERNAL "Compiler name: CLANG, CL, INTEL")
 ELSE()
-  SET(COMPILER GCC CACHE INTERNAL "Compiler name: CLANG, GCC")
+  SET(COMPILER INTEL CACHE INTERNAL "Compiler name: CLANG, GCC")
 ENDIF()
 
 IF(COMPILER STREQUAL "CLANG")
@@ -60,7 +60,7 @@ ELSEIF(COMPILER STREQUAL "GCC")
   SET(ENV{CXX} "g++")
 ELSEIF(COMPILER STREQUAL "INTEL")
   SET(ENV{CC} "icx")
-  SET(ENV{CXX} "icx")
+  SET(ENV{CXX} "icpx")
 ELSE()
   MESSAGE(FATAL_ERROR "Compiler name unknown!!! Options are CLANG, GCC or CL")
 ENDIF()
@@ -203,6 +203,9 @@ ELSE()
   # Checking compiler for GNU/GCC
   ELSEIF(COMPILER STREQUAL "GCC")
     SET(CXX_FLAGS -std=c++17 -std=gnu++17 -Wall -pedantic -m64 -Wconversion -Wold-style-cast -pedantic-errors)
+
+  ELSEIF(COMPILER STREQUAL "INTEL")
+    SET(CXX_FLAGS -std=c++17 -std=gnu++17 -Wall -Wextra -pedantic -m64 -Wconversion -Wold-style-cast -pedantic-errors)
 
   # Otherwize error
   ELSE()
