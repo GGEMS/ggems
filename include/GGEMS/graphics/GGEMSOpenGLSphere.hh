@@ -51,7 +51,7 @@ class GGEMS_EXPORT GGEMSOpenGLSphere : public GGEMSOpenGLVolume
     /*!
       \brief GGEMSOpenGLSphere destructor
     */
-    ~GGEMSOpenGLSphere(void);
+    ~GGEMSOpenGLSphere(void) override;
 
     /*!
       \fn GGEMSOpenGLSphere(GGEMSOpenGLSphere const& sphere) = delete

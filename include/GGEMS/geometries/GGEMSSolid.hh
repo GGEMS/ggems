@@ -98,7 +98,7 @@ class GGEMS_EXPORT GGEMSSolid
       \brief get the informations about the solid geometry
       \return header data OpenCL pointer about solid
     */
-    inline cl::Buffer* GetSolidData(GGsize const& thread_index) const {return solid_data_[thread_index];};
+    inline cl::Buffer* GetSolidData(GGsize const& thread_index) const {return solid_data_[thread_index];}
 
     /*!
       \fn inline cl::Buffer* GetLabelData(GGsize const& thread_index) const
@@ -106,7 +106,7 @@ class GGEMS_EXPORT GGEMSSolid
       \brief get buffer to label buffer
       \return data on label infos
     */
-    inline cl::Buffer* GetLabelData(GGsize const& thread_index) const {return label_data_[thread_index];};
+    inline cl::Buffer* GetLabelData(GGsize const& thread_index) const {return label_data_[thread_index];}
 
     /*!
       \fn void SetRotation(GGfloat3 const& rotation_xyz)
@@ -204,7 +204,7 @@ class GGEMS_EXPORT GGEMSSolid
       \return the type of registered data
       \brief get the type of registered data
     */
-    inline std::string GetRegisteredDataType(void) const {return data_reg_type_;};
+    inline std::string GetRegisteredDataType(void) const {return data_reg_type_;}
 
     /*!
       \fn cl::Kernel* GetKernelParticleSolidDistance(GGsize const& thread_index) const

@@ -194,7 +194,7 @@ inline void AtomicAddDouble(volatile global GGDosiType* address, GGdouble val)
 #ifdef OPENGL_VISUALIZATION
 #define GLFW_INCLUDE_NONE
 #ifdef _WIN32
-#include <windows.h>
+#include <Windows.h>
 #endif
 #include <GLFW/glfw3.h>
 #define GLEW_STATIC

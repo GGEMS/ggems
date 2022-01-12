@@ -168,7 +168,7 @@ class GGEMS_EXPORT GGEMSProcessesManager
       \return true if physics tables is printed
       \brief check boolean value for physic tables printing
     */
-    inline bool IsPrintPhysicTables(void) const {return is_processes_print_tables_;};
+    inline bool IsPrintPhysicTables(void) const {return is_processes_print_tables_;}
 
     /*!
       \fn void Clean(void)

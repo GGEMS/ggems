@@ -47,62 +47,64 @@
 #include <getopt.h>
 #endif
 
-/*!
-  \fn void PrintHelpAndQuit(std::string const& message, char const *p_executable)
-  \param message - error message
-  \param p_executable - name of the executable
-  \brief print the help or the error of the program
-*/
-void PrintHelpAndQuit(std::string const& message, char const* exec)
-{
-  std::ostringstream oss(std::ostringstream::out);
-  oss << message << std::endl;
-  oss << std::endl;
-  oss << "-->> 2 - CT Scanner Example <<--\n" << std::endl;
-  oss << "Usage: " << exec << " [OPTIONS...]\n" << std::endl;
-  oss << "[--help]                   Print the help to the terminal" << std::endl;
-  oss << "[--verbose X]              Verbosity level" << std::endl;
-  oss << "                           (X=0, default)" << std::endl;
-  oss << std::endl;
-  oss << "Specific hardware selection:" << std::endl;
-  oss << "----------------------------" << std::endl;
-  oss << "[--device X]               Device type:" << std::endl;
-  oss << "                           (X=all, by default)" << std::endl;
-  oss << "                               - all (all devices)" << std::endl;
-  oss << "                               - cpu (cpu device)" << std::endl;
-  oss << "                               - gpu (all gpu devices)" << std::endl;
-  oss << "                               - gpu_nvidia (all gpu nvidia devices)" << std::endl;
-  oss << "                               - gpu_intel (all gpu intel devices)" << std::endl;
-  oss << "                               - gpu_amd (all gpu amd devices)" << std::endl;
-  oss << "                               - X;Y;Z ... (index of device)" << std::endl;
-  oss << "[--balance X]              Balance computation for device if many devices are selected." << std::endl;
-  oss << "                           If 2 devices selected:" << std::endl;
-  oss << "                               --balance 0.5;0.5 means 50% of computation on device 0, and 50% of computation on device 1" << std::endl;
-  oss << "                               --balance 0.32;0.68 means 32% of computation on device 0, and 68% of computation on device 1" << std::endl;
-  oss << "                           Total balance has to be equal to 1" << std::endl;
-  oss << std::endl;
-  oss << "Simulation parameters:" << std::endl;
-  oss << "----------------------" << std::endl;
-  oss << "[--n-particles X]         Number of particles" << std::endl;
-  oss << "                          (X=1000000, default)" << std::endl;
-  oss << "[--seed X]                Seed of pseudo generator number" << std::endl;
-  oss << "                          (X=777, default)" << std::endl;
-  throw std::invalid_argument(oss.str());
-}
+namespace {
+  /*!
+    \fn void PrintHelpAndQuit(std::string const& message, char const *exec)
+    \param message - error message
+    \param exec - name of the executable
+    \brief print the help or the error of the program
+  */
+  [[noreturn]] void PrintHelpAndQuit(std::string const& message, char const* exec)
+  {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << message << std::endl;
+    oss << std::endl;
+    oss << "-->> 2 - CT Scanner Example <<--\n" << std::endl;
+    oss << "Usage: " << exec << " [OPTIONS...]\n" << std::endl;
+    oss << "[--help]                   Print the help to the terminal" << std::endl;
+    oss << "[--verbose X]              Verbosity level" << std::endl;
+    oss << "                           (X=0, default)" << std::endl;
+    oss << std::endl;
+    oss << "Specific hardware selection:" << std::endl;
+    oss << "----------------------------" << std::endl;
+    oss << "[--device X]               Device type:" << std::endl;
+    oss << "                           (X=all, by default)" << std::endl;
+    oss << "                               - all (all devices)" << std::endl;
+    oss << "                               - cpu (cpu device)" << std::endl;
+    oss << "                               - gpu (all gpu devices)" << std::endl;
+    oss << "                               - gpu_nvidia (all gpu nvidia devices)" << std::endl;
+    oss << "                               - gpu_intel (all gpu intel devices)" << std::endl;
+    oss << "                               - gpu_amd (all gpu amd devices)" << std::endl;
+    oss << "                               - X;Y;Z ... (index of device)" << std::endl;
+    oss << "[--balance X]              Balance computation for device if many devices are selected." << std::endl;
+    oss << "                           If 2 devices selected:" << std::endl;
+    oss << "                               --balance 0.5;0.5 means 50% of computation on device 0, and 50% of computation on device 1" << std::endl;
+    oss << "                               --balance 0.32;0.68 means 32% of computation on device 0, and 68% of computation on device 1" << std::endl;
+    oss << "                           Total balance has to be equal to 1" << std::endl;
+    oss << std::endl;
+    oss << "Simulation parameters:" << std::endl;
+    oss << "----------------------" << std::endl;
+    oss << "[--n-particles X]         Number of particles" << std::endl;
+    oss << "                          (X=1000000, default)" << std::endl;
+    oss << "[--seed X]                Seed of pseudo generator number" << std::endl;
+    oss << "                          (X=777, default)" << std::endl;
+    throw std::invalid_argument(oss.str());
+  }
 
-/*!
-  \fn void ParseCommandLine(std::string const& line_option, T* p_buffer)
-  \tparam T - type of the array storing the option
-  \param line_option - string from the command line
-  \param p_buffer - buffer storing the commands
-  \brief parse the command with comma
-*/
-template<typename T>
-void ParseCommandLine(std::string const& line_option, T* p_buffer)
-{
-  std::istringstream iss(line_option);
-  T* p = &p_buffer[0];
-  while (iss >> *p++) if (iss.peek() == ',') iss.ignore();
+  /*!
+    \fn void ParseCommandLine(std::string const& line_option, T* p_buffer)
+    \tparam T - type of the array storing the option
+    \param line_option - string from the command line
+    \param p_buffer - buffer storing the commands
+    \brief parse the command with comma
+  */
+  template<typename T>
+  void ParseCommandLine(std::string const& line_option, T* p_buffer)
+  {
+    std::istringstream iss(line_option);
+    T* p = &p_buffer[0];
+    while (iss >> *p++) if (iss.peek() == ',') iss.ignore();
+  }
 }
 
 /*!
@@ -130,12 +132,12 @@ int main(int argc, char** argv)
       // Declaring a structure of the options
       GGint option_index = 0;
       static struct option sLongOptions[] = {
-        {"verbose", required_argument, 0, 'v'},
-        {"help", no_argument, 0, 'h'},
-        {"n-particles", required_argument, 0, 'p'},
-        {"device", required_argument, 0, 'd'},
-        {"balance", required_argument, 0, 'b'},
-        {"seed", required_argument, 0, 's'}
+        {"verbose", required_argument, nullptr, 'v'},
+        {"help", no_argument, nullptr, 'h'},
+        {"n-particles", required_argument, nullptr, 'p'},
+        {"device", required_argument, nullptr, 'd'},
+        {"balance", required_argument, nullptr, 'b'},
+        {"seed", required_argument, nullptr, 's'}
       };
 
       // Getting the options
@@ -148,7 +150,7 @@ int main(int argc, char** argv)
       switch (counter) {
         case 0: {
           // If this option set a flag, do nothing else now
-          if (sLongOptions[option_index].flag != 0) break;
+          if (sLongOptions[option_index].flag != nullptr) break;
           break;
         }
         case 'v': {
@@ -157,7 +159,6 @@ int main(int argc, char** argv)
         }
         case 'h': {
           PrintHelpAndQuit("Printing the help", argv[0]);
-          break;
         }
         case 'p': {
           ParseCommandLine(optarg, &number_of_particles);
@@ -177,7 +178,6 @@ int main(int argc, char** argv)
         }
         default: {
           PrintHelpAndQuit("Out of switch options!!!", argv[0]);
-          break;
         }
       }
     }

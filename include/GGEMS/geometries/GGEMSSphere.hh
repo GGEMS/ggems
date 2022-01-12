@@ -50,7 +50,7 @@ class GGEMS_EXPORT GGEMSSphere : public GGEMSVolume
     /*!
       \brief GGEMSSphere destructor
     */
-    ~GGEMSSphere(void);
+    ~GGEMSSphere(void) override;
 
     /*!
       \fn GGEMSSphere(GGEMSSphere const& sphere) = delete

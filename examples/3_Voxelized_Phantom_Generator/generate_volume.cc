@@ -47,43 +47,45 @@
 #include <getopt.h>
 #endif
 
-/*!
-  \fn void PrintHelpAndQuit(std::string const& message, char const *p_executable)
-  \param message - error message
-  \param p_executable - name of the executable
-  \brief print the help or the error of the program
-*/
-void PrintHelpAndQuit(std::string const& message, char const* exec)
-{
-  std::ostringstream oss(std::ostringstream::out);
-  oss << message << std::endl;
-  oss << std::endl;
-  oss << "-->> 3 - Generate Volume Example <<--\n" << std::endl;
-  oss << "Usage: " << exec << " [OPTIONS...]\n" << std::endl;
-  oss << "[--help]                   Print the help to the terminal" << std::endl;
-  oss << "[--verbose X]              Verbosity level" << std::endl;
-  oss << "                           (X=0, default)" << std::endl;
-  oss << std::endl;
-  oss << "Specific hardware selection:" << std::endl;
-  oss << "----------------------------" << std::endl;
-  oss << "[--device X]               Index of device type" << std::endl;
-  oss << "                           (X=0, by default)" << std::endl;
-  throw std::invalid_argument(oss.str());
-}
+namespace {
+  /*!
+    \fn void PrintHelpAndQuit(std::string const& message, char const *exec)
+    \param message - error message
+    \param exec - name of the executable
+    \brief print the help or the error of the program
+  */
+  [[noreturn]] void PrintHelpAndQuit(std::string const& message, char const* exec)
+  {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << message << std::endl;
+    oss << std::endl;
+    oss << "-->> 3 - Generate Volume Example <<--\n" << std::endl;
+    oss << "Usage: " << exec << " [OPTIONS...]\n" << std::endl;
+    oss << "[--help]                   Print the help to the terminal" << std::endl;
+    oss << "[--verbose X]              Verbosity level" << std::endl;
+    oss << "                           (X=0, default)" << std::endl;
+    oss << std::endl;
+    oss << "Specific hardware selection:" << std::endl;
+    oss << "----------------------------" << std::endl;
+    oss << "[--device X]               Index of device type" << std::endl;
+    oss << "                           (X=0, by default)" << std::endl;
+    throw std::invalid_argument(oss.str());
+  }
 
-/*!
-  \fn void ParseCommandLine(std::string const& line_option, T* p_buffer)
-  \tparam T - type of the array storing the option
-  \param line_option - string from the command line
-  \param p_buffer - buffer storing the commands
-  \brief parse the command with comma
-*/
-template<typename T>
-void ParseCommandLine(std::string const& line_option, T* p_buffer)
-{
-  std::istringstream iss(line_option);
-  T* p = &p_buffer[0];
-  while (iss >> *p++) if (iss.peek() == ',') iss.ignore();
+  /*!
+    \fn void ParseCommandLine(std::string const& line_option, T* p_buffer)
+    \tparam T - type of the array storing the option
+    \param line_option - string from the command line
+    \param p_buffer - buffer storing the commands
+    \brief parse the command with comma
+  */
+  template<typename T>
+  void ParseCommandLine(std::string const& line_option, T* p_buffer)
+  {
+    std::istringstream iss(line_option);
+    T* p = &p_buffer[0];
+    while (iss >> *p++) if (iss.peek() == ',') iss.ignore();
+  }
 }
 
 /*!
@@ -108,9 +110,9 @@ int main(int argc, char** argv)
       // Declaring a structure of the options
       GGint option_index = 0;
       static struct option sLongOptions[] = {
-        {"verbose", required_argument, 0, 'v'},
-        {"help", no_argument, 0, 'h'},
-        {"device", required_argument, 0, 'd'}
+        {"verbose", required_argument, nullptr, 'v'},
+        {"help", no_argument, nullptr, 'h'},
+        {"device", required_argument, nullptr, 'd'}
       };
 
       // Getting the options
@@ -123,7 +125,7 @@ int main(int argc, char** argv)
       switch (counter) {
         case 0: {
           // If this option set a flag, do nothing else now
-          if (sLongOptions[option_index].flag != 0) break;
+          if (sLongOptions[option_index].flag != nullptr) break;
           break;
         }
         case 'v': {
@@ -132,7 +134,6 @@ int main(int argc, char** argv)
         }
         case 'h': {
           PrintHelpAndQuit("Printing the help", argv[0]);
-          break;
         }
         case 'd': {
           ParseCommandLine(optarg, &device_id);
@@ -140,7 +141,6 @@ int main(int argc, char** argv)
         }
         default: {
           PrintHelpAndQuit("Out of switch options!!!", argv[0]);
-          break;
         }
       }
     }

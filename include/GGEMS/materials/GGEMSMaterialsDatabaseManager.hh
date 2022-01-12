@@ -180,7 +180,7 @@ class GGEMS_EXPORT GGEMSMaterialsDatabaseManager
       }
 
       return iter->second;
-    };
+    }
 
     /*!
       \fn inline GGEMSChemicalElement GetChemicalElement(std::string const& chemical_element_name) const
@@ -200,11 +200,11 @@ class GGEMS_EXPORT GGEMSMaterialsDatabaseManager
       }
 
       return iter->second;
-    };
+    }
 
     /*!
-      \fn inline GGEMSChemicalElement GetChemicalElement(std::string const& chemical_element_name) const
-      \param chemical_element_name - name of the chemical element
+      \fn inline GGEMSChemicalElement GetChemicalElement(std::string const& material_name) const
+      \param material_name - name of the chemical element
       \return the structure to a chemical element
       \brief get the chemical element
     */
@@ -223,7 +223,7 @@ class GGEMS_EXPORT GGEMSMaterialsDatabaseManager
       }
 
       return iter->second;
-    };
+    }
 
     /*!
       \fn GGfloat GetRadiationLength(std::string const& material) const
@@ -249,7 +249,7 @@ class GGEMS_EXPORT GGEMSMaterialsDatabaseManager
       GGEMSChemicalElement const& chemical_element = GetChemicalElement(single_material.chemical_element_name_[index]);
 
       // return the atomic number density, the number could be higher than float!!! Double is used
-      GGdouble tmp_value_double = static_cast<GGdouble>(AVOGADRO) / chemical_element.molar_mass_M_ * single_material.density_ * single_material.mixture_f_[index];
+      GGdouble tmp_value_double = static_cast<GGdouble>(AVOGADRO) / static_cast<GGdouble>(chemical_element.molar_mass_M_) * static_cast<GGdouble>(single_material.density_) * static_cast<GGdouble>(single_material.mixture_f_[index]);
       return static_cast<GGfloat>(tmp_value_double);
     }
 

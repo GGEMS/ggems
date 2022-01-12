@@ -57,7 +57,7 @@ class GGEMS_EXPORT GGEMSOpenGLParaGrid : public GGEMSOpenGLVolume
     /*!
       \brief GGEMSOpenGLParaGrid destructor
     */
-    ~GGEMSOpenGLParaGrid(void);
+    ~GGEMSOpenGLParaGrid(void) override;
 
     /*!
       \fn GGEMSOpenGLParaGrid(GGEMSOpenGLParaGrid const& para) = delete

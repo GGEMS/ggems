@@ -131,7 +131,7 @@ class GGEMS_EXPORT GGEMSOpenGLParticles
 
     GLfloat* vertex_; /*!< Pointer storing vertex positions */
     GLuint* index_; /*!< Pointer storing index positions */
-    GGsize index_increment_; /*< Index increment, useful to store position index */
+    GGsize index_increment_; /*!< Index increment, useful to store position index */
 
     GLuint program_shader_id_; /*!< program id for shader */
     std::string vertex_shader_source_; /*!< vertex shader source file */

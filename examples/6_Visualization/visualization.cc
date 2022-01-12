@@ -47,81 +47,83 @@
 #include <getopt.h>
 #endif
 
-/*!
-  \fn void PrintHelpAndQuit(std::string const& message, char const *p_executable)
-  \param message - error message
-  \param p_executable - name of the executable
-  \brief print the help or the error of the program
-*/
-void PrintHelpAndQuit(std::string const& message, char const* exec)
-{
-  std::ostringstream oss(std::ostringstream::out);
-  oss << message << std::endl;
-  oss << std::endl;
-  oss << "-->> 6 - OpenGL Visualization Example <<--\n" << std::endl;
-  oss << "Usage: " << exec << " [OPTIONS...]\n" << std::endl;
-  oss << "[--help]                   Print the help to the terminal" << std::endl;
-  oss << "[--verbose X]              Verbosity level" << std::endl;
-  oss << "                           (X=0, default)" << std::endl;
-  oss << std::endl;
-  oss << "OpenGL params:" << std::endl;
-  oss << "--------------" << std::endl;
-  oss << "[--no-gl]                  Disable OpenGL" << std::endl;
-  oss << "[--wdims X,Y]              Window dimensions" << std::endl;
-  oss << "                           (800,800, by default)" << std::endl;
-  oss << "[--msaa X]                 MSAA factor (1x, 2x, 4x or 8x)" << std::endl;
-  oss << "                           (8, by default)" << std::endl;
-  oss << "[--axis]                   Drawing axis on screen" << std::endl;
-  oss << "[--n-particles-gl]         Number of displayed primary particles on OpenGL window" << std::endl;
-  oss << "                           (256, by default, max: 65536)" << std::endl;
-  oss << "[--draw-geom]              Draw geometry only on OpenGL window" << std::endl;
-  oss << "[--wcolor X]               Window color" << std::endl;
-  oss << "                           (black, by default)" << std::endl;
-  oss << "Available colors:" << std::endl;
-  oss << "                               * black" << std::endl;
-  oss << "                               * blue" << std::endl;
-  oss << "                               * lime" << std::endl;
-  oss << "                               * cyan" << std::endl;
-  oss << "                               * red" << std::endl;
-  oss << "                               * magenta" << std::endl;
-  oss << "                               * yellow" << std::endl;
-  oss << "                               * white" << std::endl;
-  oss << "                               * gray" << std::endl;
-  oss << "                               * silver" << std::endl;
-  oss << "                               * maroon" << std::endl;
-  oss << "                               * olive" << std::endl;
-  oss << "                               * green" << std::endl;
-  oss << "                               * purple" << std::endl;
-  oss << "                               * teal" << std::endl;
-  oss << "                               * navy" << std::endl;
-  oss << std::endl;
-  oss << "Specific hardware selection:" << std::endl;
-  oss << "----------------------------" << std::endl;
-  oss << "[--device X]               Device Index:" << std::endl;
-  oss << "                           (0, by default)" << std::endl;
-  oss << std::endl;
-  oss << "Simulation parameters:" << std::endl;
-  oss << "----------------------" << std::endl;
-  oss << "[--n-particles X]          Number of particles" << std::endl;
-  oss << "                           (X=1000000, default)" << std::endl;
-  oss << "[--seed X]                 Seed of pseudo generator number" << std::endl;
-  oss << "                           (X=777, default)" << std::endl;
-  throw std::invalid_argument(oss.str());
-}
+namespace {
+  /*!
+    \fn void PrintHelpAndQuit(std::string const& message, char const *exec)
+    \param message - error message
+    \param exec - name of the executable
+    \brief print the help or the error of the program
+  */
+  [[noreturn]] void PrintHelpAndQuit(std::string const& message, char const* exec)
+  {
+    std::ostringstream oss(std::ostringstream::out);
+    oss << message << std::endl;
+    oss << std::endl;
+    oss << "-->> 6 - OpenGL Visualization Example <<--\n" << std::endl;
+    oss << "Usage: " << exec << " [OPTIONS...]\n" << std::endl;
+    oss << "[--help]                   Print the help to the terminal" << std::endl;
+    oss << "[--verbose X]              Verbosity level" << std::endl;
+    oss << "                           (X=0, default)" << std::endl;
+    oss << std::endl;
+    oss << "OpenGL params:" << std::endl;
+    oss << "--------------" << std::endl;
+    oss << "[--no-gl]                  Disable OpenGL" << std::endl;
+    oss << "[--wdims X,Y]              Window dimensions" << std::endl;
+    oss << "                           (800,800, by default)" << std::endl;
+    oss << "[--msaa X]                 MSAA factor (1x, 2x, 4x or 8x)" << std::endl;
+    oss << "                           (8, by default)" << std::endl;
+    oss << "[--axis]                   Drawing axis on screen" << std::endl;
+    oss << "[--n-particles-gl]         Number of displayed primary particles on OpenGL window" << std::endl;
+    oss << "                           (256, by default, max: 65536)" << std::endl;
+    oss << "[--draw-geom]              Draw geometry only on OpenGL window" << std::endl;
+    oss << "[--wcolor X]               Window color" << std::endl;
+    oss << "                           (black, by default)" << std::endl;
+    oss << "Available colors:" << std::endl;
+    oss << "                               * black" << std::endl;
+    oss << "                               * blue" << std::endl;
+    oss << "                               * lime" << std::endl;
+    oss << "                               * cyan" << std::endl;
+    oss << "                               * red" << std::endl;
+    oss << "                               * magenta" << std::endl;
+    oss << "                               * yellow" << std::endl;
+    oss << "                               * white" << std::endl;
+    oss << "                               * gray" << std::endl;
+    oss << "                               * silver" << std::endl;
+    oss << "                               * maroon" << std::endl;
+    oss << "                               * olive" << std::endl;
+    oss << "                               * green" << std::endl;
+    oss << "                               * purple" << std::endl;
+    oss << "                               * teal" << std::endl;
+    oss << "                               * navy" << std::endl;
+    oss << std::endl;
+    oss << "Specific hardware selection:" << std::endl;
+    oss << "----------------------------" << std::endl;
+    oss << "[--device X]               Device Index:" << std::endl;
+    oss << "                           (0, by default)" << std::endl;
+    oss << std::endl;
+    oss << "Simulation parameters:" << std::endl;
+    oss << "----------------------" << std::endl;
+    oss << "[--n-particles X]          Number of particles" << std::endl;
+    oss << "                           (X=1000000, default)" << std::endl;
+    oss << "[--seed X]                 Seed of pseudo generator number" << std::endl;
+    oss << "                           (X=777, default)" << std::endl;
+    throw std::invalid_argument(oss.str());
+  }
 
-/*!
-  \fn void ParseCommandLine(std::string const& line_option, T* p_buffer)
-  \tparam T - type of the array storing the option
-  \param line_option - string from the command line
-  \param p_buffer - buffer storing the commands
-  \brief parse the command with comma
-*/
-template<typename T>
-void ParseCommandLine(std::string const& line_option, T* p_buffer)
-{
-  std::istringstream iss(line_option);
-  T* p = &p_buffer[0];
-  while (iss >> *p++) if (iss.peek() == ',') iss.ignore();
+  /*!
+    \fn void ParseCommandLine(std::string const& line_option, T* p_buffer)
+    \tparam T - type of the array storing the option
+    \param line_option - string from the command line
+    \param p_buffer - buffer storing the commands
+    \brief parse the command with comma
+  */
+  template<typename T>
+  void ParseCommandLine(std::string const& line_option, T* p_buffer)
+  {
+    std::istringstream iss(line_option);
+    T* p = &p_buffer[0];
+    while (iss >> *p++) if (iss.peek() == ',') iss.ignore();
+  }
 }
 
 /*!
@@ -155,15 +157,15 @@ int main(int argc, char** argv)
       // Declaring a structure of the options
       GGint option_index = 0;
       static struct option sLongOptions[] = {
-        {"verbose", required_argument, 0, 'v'},
-        {"help", no_argument, 0, 'h'},
-        {"msaa", required_argument, 0, 'm'},
-        {"wdims", required_argument, 0, 'w'},
-        {"wcolor", required_argument, 0, 'c'},
-        {"device", required_argument, 0, 'd'},
-        {"seed", required_argument, 0, 's'},
-        {"n-particles", required_argument, 0, 'n'},
-        {"n-particles-gl", required_argument, 0, 'p'},
+        {"verbose", required_argument, nullptr, 'v'},
+        {"help", no_argument, nullptr, 'h'},
+        {"msaa", required_argument, nullptr, 'm'},
+        {"wdims", required_argument, nullptr, 'w'},
+        {"wcolor", required_argument, nullptr, 'c'},
+        {"device", required_argument, nullptr, 'd'},
+        {"seed", required_argument, nullptr, 's'},
+        {"n-particles", required_argument, nullptr, 'n'},
+        {"n-particles-gl", required_argument, nullptr, 'p'},
         {"axis", no_argument, &is_axis, 1},
         {"draw-geom", no_argument, &is_draw_geom, 1},
         {"no-gl", no_argument, &is_gl, 0}
@@ -179,7 +181,7 @@ int main(int argc, char** argv)
       switch (counter) {
         case 0: {
           // If this option set a flag, do nothing else now
-          if (sLongOptions[option_index].flag != 0) break;
+          if (sLongOptions[option_index].flag != nullptr) break;
           break;
         }
         case 'v': {
@@ -188,7 +190,6 @@ int main(int argc, char** argv)
         }
         case 'h': {
           PrintHelpAndQuit("Printing the help", argv[0]);
-          break;
         }
         case 'm': {
           ParseCommandLine(optarg, &msaa);
@@ -220,7 +221,6 @@ int main(int argc, char** argv)
         }
         default: {
           PrintHelpAndQuit("Out of switch options!!!", argv[0]);
-          break;
         }
       }
     }

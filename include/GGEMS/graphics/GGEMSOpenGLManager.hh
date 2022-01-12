@@ -273,7 +273,7 @@ class GGEMS_EXPORT GGEMSOpenGLManager
       \brief check if OpenGL is activated
       \return true if OpenGL is activated
     */
-    static GGbool IsOpenGLActivated(void) {return is_opengl_activated_;};
+    static GGbool IsOpenGLActivated(void) {return is_opengl_activated_;}
 
     /*!
       \fn void SetDisplayedParticles(GGuint const& number_of_displayed_particles)
@@ -341,8 +341,8 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     void CompileShader(GLuint const& shader) const;
 
     /*!
-      \fn void SetMaterialColor(std::string const& material_name, GGuchar const& red, GGuchar const& green, GGuchar const& blue)
-      \param material_name - material name
+      \fn void SetMaterialColor(std::string const& particle_type, GGuchar const& red, GGuchar const& green, GGuchar const& blue)
+      \param particle_type - material name
       \param red - red part of RGB color
       \param green - green part of RGB color
       \param blue - blue part of RGB color
@@ -466,8 +466,8 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     /*!
       \fn void GLFWCursorPosCallback(GLFWwindow* window, GGdouble x, GGdouble y);
       \param window - pointer to GLFW window
-      \param xoffset - offset in X
-      \param yoffset - offset in Y
+      \param x - offset in X
+      \param y - offset in Y
       \brief cursor position of mouse
     */
     static void GLFWCursorPosCallback(GLFWwindow* window, GGdouble x, GGdouble y);
@@ -513,7 +513,7 @@ class GGEMS_EXPORT GGEMSOpenGLManager
     GGEMSOpenGLVolume** opengl_volumes_; /*!< OpenGL volume to display or not */
     GGEMSOpenGLAxis* axis_; /*!< pointer to axis volume */
     GGEMSOpenGLParticles** particles_; /*!< pointer to particles infos for OpenGL */
-    GGsize number_of_displayed_sources_; /*<! Number of displayed source */
+    GGsize number_of_displayed_sources_; /*!< Number of displayed source */
     GGsize number_of_opengl_volumes_; /*!< Number of OpenGL volumes */
     GGuint number_of_displayed_particles_; /*!< Number of displayed particles */
     GGEMSRGBColor gamma_color_; /*!< Color for gamma particle */

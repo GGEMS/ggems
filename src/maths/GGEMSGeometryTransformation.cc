@@ -281,13 +281,13 @@ void GGEMSGeometryTransformation::SetRotation(GGfloat3 const& rxyz)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void GGEMSGeometryTransformation::SetAxisTransformation(GGfloat3 const& m0, GGfloat3 const& m1, GGfloat3 const& m2)
+void GGEMSGeometryTransformation::SetAxisTransformation(GGfloat3 const& raw0, GGfloat3 const& raw1, GGfloat3 const& raw2)
 {
   SetAxisTransformation(
     {
-      {m0.s0, m0.s1, m0.s2},
-      {m1.s0, m1.s1, m1.s1},
-      {m2.s0, m2.s1, m2.s2}
+      {raw0.s0, raw0.s1, raw0.s2},
+      {raw1.s0, raw1.s1, raw1.s1},
+      {raw2.s0, raw2.s1, raw2.s2}
     }
   );
 }

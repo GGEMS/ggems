@@ -146,7 +146,7 @@ static int parse_long_options(char * const *nargv, const char *options, const st
 
   optind++;
 
-  if ((has_equal = strchr(current_argv, '=')) != NULL) {
+  if ((has_equal = strchr(current_argv, '=')) != nullptr) {
     /* argument found (--option=arg) */
     current_argv_len = static_cast<size_t>(has_equal - current_argv);
     has_equal++;
@@ -184,7 +184,7 @@ static int parse_long_options(char * const *nargv, const char *options, const st
       if (PRINT_ERROR)
         warnx(noarg, (int)current_argv_len, current_argv);
       // XXX: GNU sets optopt to val regardless of flag
-      if (long_options[match].flag == NULL)
+      if (long_options[match].flag == nullptr)
         optopt = long_options[match].val;
       else
         optopt = 0;
@@ -198,12 +198,12 @@ static int parse_long_options(char * const *nargv, const char *options, const st
         optarg = nargv[optind++];
       }
     }
-    if ((long_options[match].has_arg == required_argument) && (optarg == NULL)) {
+    if ((long_options[match].has_arg == required_argument) && (optarg == nullptr)) {
       // Missing argument; leading ':' indicates no error should be generated.
       if (PRINT_ERROR)
         warnx(recargstring, current_argv);
       // XXX: GNU sets optopt to val regardless of flag
-      if (long_options[match].flag == NULL)
+      if (long_options[match].flag == nullptr)
         optopt = long_options[match].val;
       else
         optopt = 0;
@@ -240,7 +240,7 @@ getopt_internal(int nargc, char * const *nargv, const char *options, const struc
   int optchar = 0, short_too;
   static int posixly_correct = -1;
 
-  if (options == NULL) return (-1);
+  if (options == nullptr) return (-1);
 
   /*
   * Disable GNU extensions if POSIXLY_CORRECT is set or options
@@ -269,7 +269,7 @@ getopt_internal(int nargc, char * const *nargv, const char *options, const struc
   if (optind == 0)
     optind = optreset = 1;
 
- optarg = NULL;
+ optarg = nullptr;
  if (optreset)
     nonopt_start = nonopt_end = -1;
 start:
@@ -289,7 +289,7 @@ start:
       nonopt_start = nonopt_end = -1;
       return (-1);
     }
-    if (*(place = nargv[optind]) != '-' || (place[1] == '\0' && strchr(options, '-') == NULL)) {
+    if (*(place = nargv[optind]) != '-' || (place[1] == '\0' && strchr(options, '-') == nullptr)) {
       place = const_cast<char*>(EMSG);		/* found non-option */
       if (flags & FLAG_ALLARGS) {
         // GNU extension: return non-option as argument to option 1
@@ -335,11 +335,11 @@ start:
    *  2) the arg is not just "-"
    *  3) either the arg starts with -- we are getopt_long_only()
    */
-  if (long_options != NULL && place != nargv[optind] && (*place == '-' || (flags & FLAG_LONGONLY))) {
+  if (long_options != nullptr && place != nargv[optind] && (*place == '-' || (flags & FLAG_LONGONLY))) {
     short_too = 0;
     if (*place == '-')
       place++;		/* --foo long option */
-    else if (*place != ':' && strchr(options, *place) != NULL)
+    else if (*place != ':' && strchr(options, *place) != nullptr)
       short_too = 1;		/* could be short option too */
 
     optchar = parse_long_options(nargv, options, long_options, idx, short_too);
@@ -351,7 +351,7 @@ start:
 
  char const *oli = strchr(options, optchar);
 
-  if ((optchar = static_cast<int>(*place++)) == static_cast<int>(':') || (optchar == static_cast<int>('-') && *place != '\0') || oli == NULL) {
+  if ((optchar = static_cast<int>(*place++)) == static_cast<int>(':') || (optchar == static_cast<int>('-') && *place != '\0') || oli == nullptr) {
     /*
      * If the user specified "-" and  '-' isn't listed in
      * options, return -1 (non-option) as per POSIX.
@@ -366,7 +366,7 @@ start:
     optopt = optchar;
     return (BADCH);
   }
-  if (long_options != NULL && optchar == 'W' && oli[1] == ';') {
+  if (long_options != nullptr && optchar == 'W' && oli[1] == ';') {
     /* -W long-option */
     if (*place) /* no space */
       /* NOTHING */;
@@ -386,7 +386,7 @@ start:
     if (!*place)
       ++optind;
   } else { /* takes (optional) argument */
-    optarg = NULL;
+    optarg = nullptr;
     if (*place) /* no white space */
       optarg = place;
     else if (oli[1] != ':') {	/* arg not optional */
@@ -422,7 +422,7 @@ int getopt(int nargc, char * const *nargv, const char *options)
   * before dropping privileges it makes sense to keep things
   * as simple (and bug-free) as possible.
   */
-  return (getopt_internal(nargc, nargv, options, NULL, NULL, 0));
+  return (getopt_internal(nargc, nargv, options, nullptr, nullptr, 0));
 }
 #endif /* REPLACE_GETOPT */
 

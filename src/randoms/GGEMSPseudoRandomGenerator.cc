@@ -86,7 +86,7 @@ GGuint GGEMSPseudoRandomGenerator::GenerateSeed(void) const
 {
   #ifdef _WIN32
   HCRYPTPROV seedWin32;
-  if (CryptAcquireContext(&seedWin32, NULL, NULL, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT ) == FALSE) {
+  if (CryptAcquireContext(&seedWin32, nullptr, nullptr, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT ) == FALSE) {
     std::ostringstream oss(std::ostringstream::out);
     char buffer_error[256];
     oss << "Error finding a seed: " << strerror_s(buffer_error, 256, errno) << std::endl;
@@ -153,12 +153,12 @@ void GGEMSPseudoRandomGenerator::InitializeSeeds(void)
     GGEMSRandom* random_device = opencl_manager.GetDeviceBuffer<GGEMSRandom>(pseudo_random_numbers_[i], CL_TRUE, CL_MAP_WRITE | CL_MAP_READ, sizeof(GGEMSRandom), i);
 
     // For each particle a seed is generated
-    for (GGsize i = 0; i < MAXIMUM_PARTICLES; ++i) {
-      random_device->prng_state_1_[i] = static_cast<GGuint>(mt_gen());
-      random_device->prng_state_2_[i] = static_cast<GGuint>(mt_gen());
-      random_device->prng_state_3_[i] = static_cast<GGuint>(mt_gen());
-      random_device->prng_state_4_[i] = static_cast<GGuint>(mt_gen());
-      random_device->prng_state_5_[i] = 0;
+    for (GGsize j = 0; j < MAXIMUM_PARTICLES; ++j) {
+      random_device->prng_state_1_[j] = static_cast<GGuint>(mt_gen());
+      random_device->prng_state_2_[j] = static_cast<GGuint>(mt_gen());
+      random_device->prng_state_3_[j] = static_cast<GGuint>(mt_gen());
+      random_device->prng_state_4_[j] = static_cast<GGuint>(mt_gen());
+      random_device->prng_state_5_[j] = 0;
     }
 
     // Release the pointer, mandatory step!!!

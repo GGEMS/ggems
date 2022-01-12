@@ -900,7 +900,6 @@ std::string GGEMSOpenGLManager::GetOpenGLSLVersion(void) const
     oss << "Impossible to get GLSL version!!!";
     GGEMSMisc::ThrowException("GGEMSOpenGLManager", "GetOpenGLSLVersion", oss.str());
   }
-  return std::string();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

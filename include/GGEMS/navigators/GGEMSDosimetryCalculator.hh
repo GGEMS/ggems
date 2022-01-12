@@ -235,7 +235,7 @@ class GGEMS_EXPORT GGEMSDosimetryCalculator
   private:
       /*!
         \fn void CheckParameters(void) const
-        \return no returned value
+        \brief checking parameters
       */
     void CheckParameters(void) const;
 

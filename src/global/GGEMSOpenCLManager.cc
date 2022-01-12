@@ -668,7 +668,15 @@ void GGEMSOpenCLManager::DeviceToActivate(std::string const& device_type, std::s
 
   // Analyze all cases
   if (type == "all") { // Activating all available OpenCL devices
-    for (GGsize i = 0; i < devices_.size(); ++i) DeviceToActivate(i);
+    for (GGsize i = 0; i < devices_.size(); ++i) {
+      // Checking type of device, if different of GPU or CPU, the device will be ignored
+      if (GetDeviceType(i) != CL_DEVICE_TYPE_CPU && GetDeviceType(i) != CL_DEVICE_TYPE_GPU) {
+        GGwarn("GGEMSOpenCLManager", "DeviceToActivate", 0) << "One of your device(s) is not GPU or CPU and will be ignored" << GGendl;
+      }
+      else {
+        DeviceToActivate(i);
+      }
+    }
   }
   else if (type == "cpu") { // Activating all CPU devices
     for (GGsize i = 0; i < devices_.size(); ++i) {
@@ -792,8 +800,8 @@ void GGEMSOpenCLManager::DeviceBalancing(std::string const& device_balancing)
   }
 
   // Printing device balancing
-  for (GGsize i = 0; i < device_balancing_.size(); ++i) {
-    GGcout("GGEMSOpenCLManager", "DeviceBalancing", 0) << "Balance on device " << GetDeviceName(computing_devices_[i].index_) << ": " << device_balancing_[i]*100.0f << "%" << GGendl;
+  for (GGsize j = 0; j < device_balancing_.size(); ++j) {
+    GGcout("GGEMSOpenCLManager", "DeviceBalancing", 0) << "Balance on device " << GetDeviceName(computing_devices_[j].index_) << ": " << device_balancing_[j]*100.0f << "%" << GGendl;
   }
 }
 
@@ -1022,7 +1030,6 @@ GGsize GGEMSOpenCLManager::GetBestWorkItem(GGsize const& number_of_elements) con
   else {
     return number_of_elements + (work_group_size_ - number_of_elements%work_group_size_);
   }
-  return 0;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

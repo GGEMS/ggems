@@ -55,7 +55,7 @@ class GGEMS_EXPORT GGEMSOpenGLPrism : public GGEMSOpenGLVolume
     /*!
       \brief GGEMSOpenGLPrism destructor
     */
-    ~GGEMSOpenGLPrism(void);
+    ~GGEMSOpenGLPrism(void) override;
 
     /*!
       \fn GGEMSOpenGLPrism(GGEMSOpenGLPrism const& prism) = delete

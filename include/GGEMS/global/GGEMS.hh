@@ -169,7 +169,7 @@ class GGEMS_EXPORT GGEMS
       \return state of profiling verbosity flag
       \brief get the profiling verbosity flag
     */
-    inline bool IsProfilingVerbose(void) const {return is_profiling_verbose_;};
+    inline bool IsProfilingVerbose(void) const {return is_profiling_verbose_;}
 
     /*!
       \fn void SetTrackingVerbose(bool const& is_tracking_verbose, GGint const& particle_tracking_id)
@@ -184,14 +184,14 @@ class GGEMS_EXPORT GGEMS
       \return state of tracking verbosity flag
       \brief get the tracking verbosity flag
     */
-    inline bool IsTrackingVerbose(void) const {return is_tracking_verbose_;};
+    inline bool IsTrackingVerbose(void) const {return is_tracking_verbose_;}
 
     /*!
       \fn GGint GetParticleTrackingID(void) const
       \return id of the particle to track
       \brief get the id of the particle to track
     */
-    inline GGint GetParticleTrackingID(void) const {return particle_tracking_id_;};
+    inline GGint GetParticleTrackingID(void) const {return particle_tracking_id_;}
 
   private:
     /*!

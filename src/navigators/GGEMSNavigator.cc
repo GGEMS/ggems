@@ -335,12 +335,12 @@ void GGEMSNavigator::ParticleSolidDistance(GGsize const& thread_index)
   cl::NDRange local_wi(work_group_size);
 
   // Loop over all the solids
-  for (GGsize s = 0; s < number_of_solids_; ++s) {
+  for (GGsize i = 0; i < number_of_solids_; ++i) {
     // Getting solid data infos
-    cl::Buffer* solid_data = solids_[s]->GetSolidData(thread_index);
+    cl::Buffer* solid_data = solids_[i]->GetSolidData(thread_index);
 
     // Getting kernel, and setting parameters
-    cl::Kernel* kernel = solids_[s]->GetKernelParticleSolidDistance(thread_index);
+    cl::Kernel* kernel = solids_[i]->GetKernelParticleSolidDistance(thread_index);
     kernel->setArg(0, number_of_particles);
     kernel->setArg(1, *primary_particles);
     kernel->setArg(2, *solid_data);
@@ -386,12 +386,12 @@ void GGEMSNavigator::ProjectToSolid(GGsize const& thread_index)
   cl::NDRange local_wi(work_group_size);
 
   // Loop over all the solids
-  for (GGsize s = 0; s < number_of_solids_; ++s) {
+  for (GGsize i = 0; i < number_of_solids_; ++i) {
     // Getting solid data infos
-    cl::Buffer* solid_data = solids_[s]->GetSolidData(thread_index);
+    cl::Buffer* solid_data = solids_[i]->GetSolidData(thread_index);
 
     // Getting kernel, and setting parameters
-    cl::Kernel* kernel = solids_[s]->GetKernelProjectToSolid(thread_index);
+    cl::Kernel* kernel = solids_[i]->GetKernelProjectToSolid(thread_index);
     kernel->setArg(0, number_of_particles);
     kernel->setArg(1, *primary_particles);
     kernel->setArg(2, *solid_data);
@@ -446,13 +446,13 @@ void GGEMSNavigator::TrackThroughSolid(GGsize const& thread_index)
   cl::NDRange local_wi(work_group_size);
 
   // Loop over all the solids
-  for (GGsize s = 0; s < number_of_solids_; ++s) {
+  for (GGsize i = 0; i < number_of_solids_; ++i) {
     // Getting solid  and label (for GGEMSVoxelizedSolid) data infos
-    cl::Buffer* solid_data = solids_[s]->GetSolidData(thread_index);
-    cl::Buffer* label_data = solids_[s]->GetLabelData(thread_index);
+    cl::Buffer* solid_data = solids_[i]->GetSolidData(thread_index);
+    cl::Buffer* label_data = solids_[i]->GetLabelData(thread_index);
 
     // Get type of registered data and OpenCL buffer to data
-    std::string data_reg_type = solids_[s]->GetRegisteredDataType();
+    std::string data_reg_type = solids_[i]->GetRegisteredDataType();
 
     // Get buffers depending on mode of simulation
     // Histogram mode (for system, CT ...)
@@ -467,8 +467,8 @@ void GGEMSNavigator::TrackThroughSolid(GGsize const& thread_index)
     cl::Buffer* mu_table_d = nullptr;
 
     if (data_reg_type == "HISTOGRAM") {
-      histogram = solids_[s]->GetHistogram(thread_index);
-      scatter_histogram = solids_[s]->GetScatterHistogram(thread_index);
+      histogram = solids_[i]->GetHistogram(thread_index);
+      scatter_histogram = solids_[i]->GetScatterHistogram(thread_index);
     }
     else if (data_reg_type == "DOSIMETRY") {
       dosimetry_params = dose_calculator_->GetDoseParams(thread_index);
@@ -482,33 +482,33 @@ void GGEMSNavigator::TrackThroughSolid(GGsize const& thread_index)
     }
 
     // Getting kernel, and setting parameters
-    cl::Kernel* kernel = solids_[s]->GetKernelTrackThroughSolid(thread_index);
+    cl::Kernel* kernel = solids_[i]->GetKernelTrackThroughSolid(thread_index);
     kernel->setArg(0, number_of_particles);
     kernel->setArg(1, *primary_particles);
     kernel->setArg(2, *randoms);
     kernel->setArg(3, *solid_data);
-    if (!label_data) kernel->setArg(4, sizeof(cl_mem), NULL);
+    if (!label_data) kernel->setArg(4, sizeof(cl_mem), nullptr);
     else kernel->setArg(4, *label_data); // Useful only for GGEMSVoxelizedSolid
     kernel->setArg(5, *cross_sections);
     kernel->setArg(6, *materials);
     kernel->setArg(7, threshold_);
     if (data_reg_type == "HISTOGRAM") {
       kernel->setArg(8, *histogram);
-      if (!scatter_histogram) kernel->setArg(9, sizeof(cl_mem), NULL);
+      if (!scatter_histogram) kernel->setArg(9, sizeof(cl_mem), nullptr);
       else kernel->setArg(9, *scatter_histogram);
     }
     else if (data_reg_type == "DOSIMETRY") {
       kernel->setArg(8, *dosimetry_params);
       kernel->setArg(9, *edep_tracking_dosimetry);
 
-      if (!edep_squared_tracking_dosimetry) kernel->setArg(10, sizeof(cl_mem), NULL);
+      if (!edep_squared_tracking_dosimetry) kernel->setArg(10, sizeof(cl_mem), nullptr);
       else kernel->setArg(10, *edep_squared_tracking_dosimetry);
 
-      if (!hit_tracking_dosimetry) kernel->setArg(11, sizeof(cl_mem), NULL);
+      if (!hit_tracking_dosimetry) kernel->setArg(11, sizeof(cl_mem), nullptr);
       else kernel->setArg(11, *hit_tracking_dosimetry);
-      if (!photon_tracking_dosimetry) kernel->setArg(12, sizeof(cl_mem), NULL);
+      if (!photon_tracking_dosimetry) kernel->setArg(12, sizeof(cl_mem), nullptr);
       else kernel->setArg(12, *photon_tracking_dosimetry);
-      if (!mu_table_d) kernel->setArg(13, sizeof(cl_mem), NULL);
+      if (!mu_table_d) kernel->setArg(13, sizeof(cl_mem), nullptr);
       else kernel->setArg(13, *mu_table_d);
       kernel->setArg(14, is_tle_);
     }

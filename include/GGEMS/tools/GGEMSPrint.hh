@@ -42,7 +42,7 @@
 #ifdef _MSC_VER
 #define NOMINMAX
 #endif
-#include <windows.h>
+#include <Windows.h>
 #endif
 
 /*!
@@ -124,11 +124,6 @@ class GGEMS_EXPORT GGEMSStream
       \param color - define a color on the screen
     */
     GGEMSStream(std::ostream& stream, GGEMSConsoleColor const& color);
-
-    /*!
-      \brief GGStream destructor
-    */
-    ~GGEMSStream(){};
 
   public:
     /*!

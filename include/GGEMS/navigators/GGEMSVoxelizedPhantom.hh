@@ -48,7 +48,7 @@ class GGEMS_EXPORT GGEMSVoxelizedPhantom : public GGEMSNavigator
     /*!
       \brief GGEMSVoxelizedPhantom destructor
     */
-    ~GGEMSVoxelizedPhantom(void);
+    ~GGEMSVoxelizedPhantom(void) override;
 
     /*!
       \fn GGEMSVoxelizedPhantom(GGEMSVoxelizedPhantom const& voxelized_phantom) = delete
@@ -100,8 +100,8 @@ class GGEMS_EXPORT GGEMSVoxelizedPhantom : public GGEMSNavigator
 
   private:
     /*!
-      \fn void CheckParameters(void) const
-      \return no returned value
+      \fn void CheckParameters(void) const override
+      \brief checking parameters
     */
     void CheckParameters(void) const override;
 

@@ -55,7 +55,7 @@ class GGEMS_EXPORT GGEMSSolidBox : public GGEMSSolid
     /*!
       \brief GGEMSSolidBox destructor
     */
-    ~GGEMSSolidBox(void);
+    ~GGEMSSolidBox(void) override;
 
     /*!
       \fn GGEMSSolidBox(GGEMSSolidBox const& solid_box) = delete

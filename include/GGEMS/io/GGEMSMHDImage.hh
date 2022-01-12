@@ -144,21 +144,21 @@ class GGEMS_EXPORT GGEMSMHDImage
       \brief get the mhd data type
       \return the type of data for mhd file
     */
-    inline std::string GetDataMHDType(void) const {return mhd_data_type_;};
+    inline std::string GetDataMHDType(void) const {return mhd_data_type_;}
 
     /*!
       \fn std::string GetRawMDHfilename(void) const
       \brief get the filename of raw data
       \return the name of raw file
     */
-    inline std::string GetRawMDHfilename(void) const {return mhd_raw_file_;};
+    inline std::string GetRawMDHfilename(void) const {return mhd_raw_file_;}
 
     /*!
       \fn std::string GetOutputDirectory(void) const
       \brief get the output directory
       \return the name of output directory
     */
-    inline std::string GetOutputDirectory(void) const {return output_dir_;};
+    inline std::string GetOutputDirectory(void) const {return output_dir_;}
 
   private:
     /*!

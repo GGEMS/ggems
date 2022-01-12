@@ -197,7 +197,6 @@ class GGEMS_EXPORT GGEMSNavigator
 
     /*!
       \fn void Initialize(void)
-      \return no returned value
     */
     virtual void Initialize(void);
 
@@ -282,7 +281,6 @@ class GGEMS_EXPORT GGEMSNavigator
   protected:
     /*!
       \fn void CheckParameters(void) const
-      \return no returned value
     */
     virtual void CheckParameters(void) const;
 

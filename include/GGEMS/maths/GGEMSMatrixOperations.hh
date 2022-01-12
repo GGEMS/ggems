@@ -146,39 +146,39 @@ inline GGfloat3 GGfloat33TransposeMultGGfloat3(global GGfloat44 const* matrix, G
 ////////////////////////////////////////////////////////////////////////////////
 
 /*!
-  \fn inline GGfloat44 GGfloat44MultGGfloat44(GGfloat44 const* A, GGfloat44 const* B)
-  \param A - first matrix
-  \param B - second matrix
+  \fn inline GGfloat44 GGfloat44MultGGfloat44(GGfloat44 const* mat1, GGfloat44 const* mat2)
+  \param mat1 - first matrix
+  \param mat2 - second matrix
   \brief Perform the matrix (4x4) multiplication
   \return New matrix AxB
 */
-inline GGfloat44 GGfloat44MultGGfloat44(GGfloat44 const* A, GGfloat44 const* B)
+inline GGfloat44 GGfloat44MultGGfloat44(GGfloat44 const* mat1, GGfloat44 const* mat2)
 {
   GGfloat44 tmp;
 
   // Row 1
-  tmp.m0_[0] = A->m0_[0]*B->m0_[0] + A->m0_[1]*B->m1_[0] + A->m0_[2]*B->m2_[0] + A->m0_[3]*B->m3_[0];
-  tmp.m0_[1] = A->m0_[0]*B->m0_[1] + A->m0_[1]*B->m1_[1] + A->m0_[2]*B->m2_[1] + A->m0_[3]*B->m3_[1];
-  tmp.m0_[2] = A->m0_[0]*B->m0_[2] + A->m0_[1]*B->m1_[2] + A->m0_[2]*B->m2_[2] + A->m0_[3]*B->m3_[2];
-  tmp.m0_[3] = A->m0_[0]*B->m0_[3] + A->m0_[1]*B->m1_[3] + A->m0_[2]*B->m2_[3] + A->m0_[3]*B->m3_[3];
+  tmp.m0_[0] = mat1->m0_[0]*mat2->m0_[0] + mat1->m0_[1]*mat2->m1_[0] + mat1->m0_[2]*mat2->m2_[0] + mat1->m0_[3]*mat2->m3_[0];
+  tmp.m0_[1] = mat1->m0_[0]*mat2->m0_[1] + mat1->m0_[1]*mat2->m1_[1] + mat1->m0_[2]*mat2->m2_[1] + mat1->m0_[3]*mat2->m3_[1];
+  tmp.m0_[2] = mat1->m0_[0]*mat2->m0_[2] + mat1->m0_[1]*mat2->m1_[2] + mat1->m0_[2]*mat2->m2_[2] + mat1->m0_[3]*mat2->m3_[2];
+  tmp.m0_[3] = mat1->m0_[0]*mat2->m0_[3] + mat1->m0_[1]*mat2->m1_[3] + mat1->m0_[2]*mat2->m2_[3] + mat1->m0_[3]*mat2->m3_[3];
 
   // Row 2
-  tmp.m1_[0] = A->m1_[0]*B->m0_[0] + A->m1_[1]*B->m1_[0] + A->m1_[2]*B->m2_[0] + A->m1_[3]*B->m3_[0];
-  tmp.m1_[1] = A->m1_[0]*B->m0_[1] + A->m1_[1]*B->m1_[1] + A->m1_[2]*B->m2_[1] + A->m1_[3]*B->m3_[1];
-  tmp.m1_[2] = A->m1_[0]*B->m0_[2] + A->m1_[1]*B->m1_[2] + A->m1_[2]*B->m2_[2] + A->m1_[3]*B->m3_[2];
-  tmp.m1_[3] = A->m1_[0]*B->m0_[3] + A->m1_[1]*B->m1_[3] + A->m1_[2]*B->m2_[3] + A->m1_[3]*B->m3_[3];
+  tmp.m1_[0] = mat1->m1_[0]*mat2->m0_[0] + mat1->m1_[1]*mat2->m1_[0] + mat1->m1_[2]*mat2->m2_[0] + mat1->m1_[3]*mat2->m3_[0];
+  tmp.m1_[1] = mat1->m1_[0]*mat2->m0_[1] + mat1->m1_[1]*mat2->m1_[1] + mat1->m1_[2]*mat2->m2_[1] + mat1->m1_[3]*mat2->m3_[1];
+  tmp.m1_[2] = mat1->m1_[0]*mat2->m0_[2] + mat1->m1_[1]*mat2->m1_[2] + mat1->m1_[2]*mat2->m2_[2] + mat1->m1_[3]*mat2->m3_[2];
+  tmp.m1_[3] = mat1->m1_[0]*mat2->m0_[3] + mat1->m1_[1]*mat2->m1_[3] + mat1->m1_[2]*mat2->m2_[3] + mat1->m1_[3]*mat2->m3_[3];
 
   // Row 3
-  tmp.m2_[0] = A->m2_[0]*B->m0_[0] + A->m2_[1]*B->m1_[0] + A->m2_[2]*B->m2_[0] + A->m2_[3]*B->m3_[0];
-  tmp.m2_[1] = A->m2_[0]*B->m0_[1] + A->m2_[1]*B->m1_[1] + A->m2_[2]*B->m2_[1] + A->m2_[3]*B->m3_[1];
-  tmp.m2_[2] = A->m2_[0]*B->m0_[2] + A->m2_[1]*B->m1_[2] + A->m2_[2]*B->m2_[2] + A->m2_[3]*B->m3_[2];
-  tmp.m2_[3] = A->m2_[0]*B->m0_[3] + A->m2_[1]*B->m1_[3] + A->m2_[2]*B->m2_[3] + A->m2_[3]*B->m3_[3];
+  tmp.m2_[0] = mat1->m2_[0]*mat2->m0_[0] + mat1->m2_[1]*mat2->m1_[0] + mat1->m2_[2]*mat2->m2_[0] + mat1->m2_[3]*mat2->m3_[0];
+  tmp.m2_[1] = mat1->m2_[0]*mat2->m0_[1] + mat1->m2_[1]*mat2->m1_[1] + mat1->m2_[2]*mat2->m2_[1] + mat1->m2_[3]*mat2->m3_[1];
+  tmp.m2_[2] = mat1->m2_[0]*mat2->m0_[2] + mat1->m2_[1]*mat2->m1_[2] + mat1->m2_[2]*mat2->m2_[2] + mat1->m2_[3]*mat2->m3_[2];
+  tmp.m2_[3] = mat1->m2_[0]*mat2->m0_[3] + mat1->m2_[1]*mat2->m1_[3] + mat1->m2_[2]*mat2->m2_[3] + mat1->m2_[3]*mat2->m3_[3];
 
   // Row 4
-  tmp.m3_[0] = A->m3_[0]*B->m0_[0] + A->m3_[1]*B->m1_[0] + A->m3_[2]*B->m2_[0] + A->m3_[3]*B->m3_[0];
-  tmp.m3_[1] = A->m3_[0]*B->m0_[1] + A->m3_[1]*B->m1_[1] + A->m3_[2]*B->m2_[1] + A->m3_[3]*B->m3_[1];
-  tmp.m3_[2] = A->m3_[0]*B->m0_[2] + A->m3_[1]*B->m1_[2] + A->m3_[2]*B->m2_[2] + A->m3_[3]*B->m3_[2];
-  tmp.m3_[3] = A->m3_[0]*B->m0_[3] + A->m3_[1]*B->m1_[3] + A->m3_[2]*B->m2_[3] + A->m3_[3]*B->m3_[3];
+  tmp.m3_[0] = mat1->m3_[0]*mat2->m0_[0] + mat1->m3_[1]*mat2->m1_[0] + mat1->m3_[2]*mat2->m2_[0] + mat1->m3_[3]*mat2->m3_[0];
+  tmp.m3_[1] = mat1->m3_[0]*mat2->m0_[1] + mat1->m3_[1]*mat2->m1_[1] + mat1->m3_[2]*mat2->m2_[1] + mat1->m3_[3]*mat2->m3_[1];
+  tmp.m3_[2] = mat1->m3_[0]*mat2->m0_[2] + mat1->m3_[1]*mat2->m1_[2] + mat1->m3_[2]*mat2->m2_[2] + mat1->m3_[3]*mat2->m3_[2];
+  tmp.m3_[3] = mat1->m3_[0]*mat2->m0_[3] + mat1->m3_[1]*mat2->m1_[3] + mat1->m3_[2]*mat2->m2_[3] + mat1->m3_[3]*mat2->m3_[3];
 
   return tmp;
 }

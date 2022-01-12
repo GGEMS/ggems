@@ -188,7 +188,7 @@ void GGEMSMHDImage::Read(std::string const& image_mhd_header_filename, cl::Buffe
     GGEMSMisc::ThrowException("GGEMSMHDImage", "Read", oss.str());
   }
 
-  if (solid_data_device->voxel_sizes_xyz_.x == 0.0 || solid_data_device->voxel_sizes_xyz_.y == 0.0 || solid_data_device->voxel_sizes_xyz_.z == 0.0) {
+  if (solid_data_device->voxel_sizes_xyz_.x == 0.0f || solid_data_device->voxel_sizes_xyz_.y == 0.0f || solid_data_device->voxel_sizes_xyz_.z == 0.0f) {
     std::ostringstream oss(std::ostringstream::out);
     oss << "Voxel size invalid for the key 'ElementSpacing'!!! The values have to be > 0";
     GGEMSMisc::ThrowException("GGEMSMHDImage", "Read", oss.str());

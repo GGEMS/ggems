@@ -52,7 +52,7 @@ class GGEMS_EXPORT GGEMSVoxelizedSolid : public GGEMSSolid
     /*!
       \brief GGEMSVoxelizedSolid destructor
     */
-    ~GGEMSVoxelizedSolid(void);
+    ~GGEMSVoxelizedSolid(void) override;
 
     /*!
       \fn GGEMSVoxelizedSolid(GGEMSVoxelizedSolid const& voxelized_solid) = delete
@@ -93,7 +93,7 @@ class GGEMS_EXPORT GGEMSVoxelizedSolid : public GGEMSSolid
       \fn void EnableScatter(void)
       \brief Activate scatter registration
     */
-    void EnableScatter(void) override {;};
+    void EnableScatter(void) override {}
 
     /*!
       \fn void PrintInfos(void) const

@@ -353,15 +353,15 @@ void GGEMSDosimetryCalculator::ComputeDose(GGsize const& thread_index)
   kernel_compute_dose_[thread_index]->setArg(0, number_of_dosels);
   kernel_compute_dose_[thread_index]->setArg(1, *dose_params_[thread_index]);
   kernel_compute_dose_[thread_index]->setArg(2, *dose_recording_.edep_[thread_index]);
-  if (!dose_recording_.hit_[thread_index]) kernel_compute_dose_[thread_index]->setArg(3, sizeof(cl_mem), NULL);
+  if (!dose_recording_.hit_[thread_index]) kernel_compute_dose_[thread_index]->setArg(3, sizeof(cl_mem), nullptr);
   else kernel_compute_dose_[thread_index]->setArg(3, *dose_recording_.hit_[thread_index]);
-  if (!dose_recording_.edep_squared_[thread_index]) kernel_compute_dose_[thread_index]->setArg(4, sizeof(cl_mem), NULL);
+  if (!dose_recording_.edep_squared_[thread_index]) kernel_compute_dose_[thread_index]->setArg(4, sizeof(cl_mem), nullptr);
   else kernel_compute_dose_[thread_index]->setArg(4, *dose_recording_.edep_squared_[thread_index]);
   kernel_compute_dose_[thread_index]->setArg(5, *navigator_->GetSolids(0)->GetSolidData(thread_index)); // 1 solid in voxelized phantom
   kernel_compute_dose_[thread_index]->setArg(6, *navigator_->GetSolids(0)->GetLabelData(thread_index));
   kernel_compute_dose_[thread_index]->setArg(7, *navigator_->GetMaterials()->GetMaterialTables(thread_index));
   kernel_compute_dose_[thread_index]->setArg(8, *dose_recording_.dose_[thread_index]);
-  if (!dose_recording_.uncertainty_dose_[thread_index]) kernel_compute_dose_[thread_index]->setArg(9, sizeof(cl_mem), NULL);
+  if (!dose_recording_.uncertainty_dose_[thread_index]) kernel_compute_dose_[thread_index]->setArg(9, sizeof(cl_mem), nullptr);
   else kernel_compute_dose_[thread_index]->setArg(9, *dose_recording_.uncertainty_dose_[thread_index]);
   kernel_compute_dose_[thread_index]->setArg(10, scale_factor_);
   kernel_compute_dose_[thread_index]->setArg(11, is_water_reference_);
